@@ -49,7 +49,7 @@ extern void new_object_header_files ();
 extern char *next_symbol_text ();
 extern int hashname ();
 extern void patch_block_stabs ();	/* AIX xcoffread.c */
-#define patch_block_stabs abort		/* FIXME scaffolding */
+extern struct type *builtin_type ();	/* AIX xcoffread.c */
 
 
 static void cleanup_undefined_types ();
@@ -118,6 +118,7 @@ dbx_lookup_type (typenums)
      int typenums[2];
 {
   register int filenum = typenums[0], index = typenums[1];
+  unsigned old_len;
 
   if (filenum < 0 || filenum >= n_this_object_header_files)
     error ("Invalid symbol data: type number (%d,%d) out of range at symtab pos %d.",
@@ -127,14 +128,21 @@ dbx_lookup_type (typenums)
     {
       /* Type is defined outside of header files.
 	 Find it in this object file's type vector.  */
-      while (index >= type_vector_length)
+      if (index >= type_vector_length)
 	{
-	  type_vector_length *= 2;
+	  old_len = type_vector_length;
+	  if (old_len == 0) {
+	    type_vector_length = INITIAL_TYPE_VECTOR_LENGTH;
+	    type_vector = (struct type **)
+	      malloc (type_vector_length * sizeof (struct type *));
+	  }
+	  while (index >= type_vector_length)
+	    type_vector_length *= 2;
 	  type_vector = (struct type **)
 	    xrealloc (type_vector,
 		      (type_vector_length * sizeof (struct type *)));
-	  bzero (&type_vector[type_vector_length / 2],
-		 type_vector_length * sizeof (struct type *) / 2);
+	  bzero (&type_vector[old_len],
+		 (type_vector_length - old_len) * sizeof (struct type *));
 	}
       return &type_vector[index];
     }
@@ -181,7 +189,6 @@ dbx_create_type ()
 /* Make sure there is a type allocated for type numbers TYPENUMS
    and return the type object.
    This can create an empty (zeroed) type object.
-OBSOLETE -- call dbx_create_type instead -- FIXME:
    TYPENUMS may be (-1, -1) to return a new type object that is not
    put into the type vector, and so may not be referred to by number. */
 
@@ -192,14 +199,13 @@ dbx_alloc_type (typenums)
   register struct type **type_addr;
   register struct type *type;
 
-  if (typenums[1] != -1)
+  if (typenums[0] != -1)
     {
       type_addr = dbx_lookup_type (typenums);
       type = *type_addr;
     }
   else
     {
-      abort();		/* FIXME -- Must give a real type number now */
       type_addr = 0;
       type = 0;
     }
@@ -244,6 +250,26 @@ add_symbol_to_list (symbol, listhead)
     }
 
   (*listhead)->symbol[(*listhead)->nsyms++] = symbol;
+}
+
+/* Find a symbol on a pending list.  */
+struct symbol *
+find_symbol_in_list (list, name, length)
+     struct pending *list;
+     char *name;
+     int length;
+{
+  int j;
+
+  while (list) {
+    for (j = list->nsyms; --j >= 0; ) {
+      char *pp = SYMBOL_NAME (list->symbol[j]);
+      if (*pp == *name && strncmp (pp, name, length) == 0 && pp[length] == '\0')
+	return list->symbol[j];
+    }
+    list = list->next;
+  }
+  return NULL;
 }
 
 /* At end of reading syms, or in case of quit,
@@ -309,13 +335,13 @@ finish_block (symbol, listhead, old_blocks, start, end)
 
   /* Count the length of the list of symbols.  */
 
-  for (next = *listhead, i = 0; next; i += next->nsyms, next = next->next)
+  for (next = *listhead, i = 0;
+       next;
+       i += next->nsyms, next = next->next)
     /*EMPTY*/;
 
   block = (struct block *) obstack_alloc (symbol_obstack,
-					  (sizeof (struct block)
-					   + ((i - 1)
-					      * sizeof (struct symbol *))));
+	  (sizeof (struct block) + ((i - 1) * sizeof (struct symbol *))));
 
   /* Copy the symbols into the block.  */
 
@@ -496,6 +522,42 @@ start_subfile (name, dirname)
   subfile->line_vector = 0;
 }
 
+/* Handle the N_BINCL and N_EINCL symbol types
+   that act like N_SOL for switching source files
+   (different subfiles, as we call them) within one object file,
+   but using a stack rather than in an arbitrary order.  */
+
+void
+push_subfile ()
+{
+  register struct subfile_stack *tem
+    = (struct subfile_stack *) xmalloc (sizeof (struct subfile_stack));
+
+  tem->next = subfile_stack;
+  subfile_stack = tem;
+  if (current_subfile == 0 || current_subfile->name == 0)
+    abort ();
+  tem->name = current_subfile->name;
+  tem->prev_index = header_file_prev_index;
+}
+
+char *
+pop_subfile ()
+{
+  register char *name;
+  register struct subfile_stack *link = subfile_stack;
+
+  if (link == 0)
+    abort ();
+
+  name = link->name;
+  subfile_stack = link->next;
+  header_file_prev_index = link->prev_index;
+  free (link);
+
+  return name;
+}
+
 /* Manage the vector of line numbers for each subfile.  */
 
 void
@@ -561,18 +623,19 @@ start_symtab (name, dirname, start_addr)
   file_stabs = 0;		/* AIX COFF */
   within_function = 0;
 
-  /* Context stack is initially empty, with room for 10 levels.  */
-  context_stack_size = INITIAL_CONTEXT_STACK_SIZE;
-  context_stack = (struct context_stack *)
-    xmalloc (context_stack_size * sizeof (struct context_stack));
+  /* Context stack is initially empty.  Allocate first one with room for
+     10 levels; reuse it forever afterward.  */
+  if (context_stack == 0) {
+    context_stack_size = INITIAL_CONTEXT_STACK_SIZE;
+    context_stack = (struct context_stack *)
+      xmalloc (context_stack_size * sizeof (struct context_stack));
+  }
   context_stack_depth = 0;
 
   new_object_header_files ();
 
-  type_vector_length = INITIAL_TYPE_VECTOR_LENGTH;
-  type_vector = (struct type **)
-    xmalloc (type_vector_length * sizeof (struct type *));
-  bzero (type_vector, type_vector_length * sizeof (struct type *));
+  type_vector_length = 0;
+  type_vector = (struct type **) 0;
 
   /* Initialize the list of sub source files with one entry
      for this file (the top-level source file).  */
@@ -590,15 +653,15 @@ start_symtab (name, dirname, start_addr)
    END_ADDR is the address of the end of the file's text.  */
 
 struct symtab *
-end_symtab (end_addr, sort_pending, sort_linevec)
+end_symtab (end_addr, sort_pending, sort_linevec, objfile)
      CORE_ADDR end_addr;
      int sort_pending;
      int sort_linevec;
+     struct objfile *objfile;
 {
   register struct symtab *symtab;
   register struct blockvector *blockvector;
   register struct subfile *subfile;
-  register struct linetable *lv;
   struct subfile *nextsub;
 
   /* Finish the lexical context of the last function in the file;
@@ -612,13 +675,18 @@ end_symtab (end_addr, sort_pending, sort_linevec)
       /* Make a block for the local symbols within.  */
       finish_block (cstk->name, &local_symbols, cstk->old_blocks,
 		    cstk->start_addr, end_addr);
+
+      /* Debug:  if context stack still has something in it, we are in
+	 trouble.  */
+      if (context_stack_depth > 0)
+	abort ();
     }
 
   /* It is unfortunate that in aixcoff, pending blocks might not be ordered
      in this stage. Especially, blocks for static functions will show up at
      the end.  We need to sort them, so tools like `find_pc_function' and
      `find_pc_block' can work reliably. */
-  if (sort_pending) {
+  if (sort_pending && pending_blocks) {
     /* FIXME!  Remove this horrid bubble sort and use qsort!!! */
     int swapped;
     do {
@@ -660,53 +728,103 @@ end_symtab (end_addr, sort_pending, sort_linevec)
     global_stabs = 0;
   }
 
-  /* Define the STATIC_BLOCK and GLOBAL_BLOCK, and build the blockvector.  */
-  finish_block (0, &file_symbols, 0, last_source_start_addr, end_addr);
-  finish_block (0, &global_symbols, 0, last_source_start_addr, end_addr);
-  blockvector = make_blockvector ();
+  if (pending_blocks == 0
+   && file_symbols == 0
+   && global_symbols == 0) {
+    /* Ignore symtabs that have no functions with real debugging info */
+    blockvector = NULL;
+  } else {
+    /* Define the STATIC_BLOCK and GLOBAL_BLOCK, and build the blockvector.  */
+    finish_block (0, &file_symbols, 0, last_source_start_addr, end_addr);
+    finish_block (0, &global_symbols, 0, last_source_start_addr, end_addr);
+    blockvector = make_blockvector ();
+  }
 
   /* Now create the symtab objects proper, one for each subfile.  */
   /* (The main file is the last one on the chain.)  */
 
   for (subfile = subfiles; subfile; subfile = nextsub)
     {
-      if (subfile->line_vector) {
-	/* First, shrink the linetable to make more memory.  */
-	subfile->line_vector = (struct linetable *)
-	  xrealloc (subfile->line_vector, (sizeof (struct linetable)
-	    + subfile->line_vector->nitems * sizeof (struct linetable_entry)));
+      /* If we have blocks of symbols, make a symtab.
+	 Otherwise, just ignore this file and any line number info in it.  */
+      symtab = 0;
+      if (blockvector) {
+	if (subfile->line_vector) {
+	  /* First, shrink the linetable to make more memory.  */
+	  subfile->line_vector = (struct linetable *)
+	    xrealloc (subfile->line_vector, (sizeof (struct linetable)
+	     + subfile->line_vector->nitems * sizeof (struct linetable_entry)));
 
-	if (sort_linevec)
-	  qsort (subfile->line_vector->item, subfile->line_vector->nitems,
-		 sizeof (struct linetable_entry), compare_line_numbers);
+	  if (sort_linevec)
+	    qsort (subfile->line_vector->item, subfile->line_vector->nitems,
+		   sizeof (struct linetable_entry), compare_line_numbers);
+	}
+
+	/* Now, allocate a symbol table.  */
+	symtab = allocate_symtab (subfile->name, objfile);
+
+	/* Fill in its components.  */
+	symtab->blockvector = blockvector;
+	symtab->linetable = subfile->line_vector;
+	symtab->dirname = subfile->dirname;
+	symtab->free_code = free_linetable;
+	symtab->free_ptr = 0;
+
+	/* Link the new symtab into the list of such.  */
+	symtab->next = symtab_list;
+	symtab_list = symtab;
+      } else {
+	/* No blocks for this file.  Delete any line number info we have
+	   for it.  */
+ 	if (subfile->line_vector)
+	  free (subfile->line_vector);
       }
-
-      /* Now, allocate a symbol table.  */
-      symtab = allocate_symtab (subfile->name);
-
-      /* Fill in its components.  */
-      symtab->blockvector = blockvector;
-      symtab->linetable = subfile->line_vector;
-      symtab->dirname = subfile->dirname;
-      symtab->free_code = free_linetable;
-      symtab->free_ptr = 0;
-
-      /* Link the new symtab into the list of such.  */
-      symtab->next = symtab_list;
-      symtab_list = symtab;
 
       nextsub = subfile->next;
       free (subfile);
     }
 
-  free ((char *) type_vector);
+  if (type_vector)
+    free ((char *) type_vector);
   type_vector = 0;
-  type_vector_length = -1;
+  type_vector_length = 0;
 
   last_source_file = 0;
   current_subfile = 0;
 
   return symtab;
+}
+
+
+/* Push a context block.  Args are an identifying nesting level (checkable
+   when you pop it), and the starting PC address of this context.  */
+
+struct context_stack *
+push_context (desc, valu)
+     int desc;
+     CORE_ADDR valu;
+{
+  register struct context_stack *new;
+
+  if (context_stack_depth == context_stack_size)
+    {
+      context_stack_size *= 2;
+      context_stack = (struct context_stack *)
+	xrealloc (context_stack,
+		  (context_stack_size
+		   * sizeof (struct context_stack)));
+    }
+
+  new = &context_stack[context_stack_depth++];
+  new->depth = desc;
+  new->locals = local_symbols;
+  new->old_blocks = pending_blocks;
+  new->start_addr = valu;
+  new->name = 0;
+
+  local_symbols = 0;
+
+  return new;
 }
 
 /* Initialize anything that needs initializing when starting to read
@@ -1245,7 +1363,7 @@ define_symbol (valu, string, desc, type)
    scope?  */
 /* Add a type to the list of undefined types to be checked through
    once this file has been read in.  */
-static void
+void
 add_undefined_type (type)
      struct type *type;
 {
@@ -1375,10 +1493,27 @@ read_type (pp)
     {
       read_type_number (pp, typenums);
       
-      /* Detect random reference to type not yet defined.
-	 Allocate a type object but leave it zeroed.  */
+      /* Type is not being defined here.  Either it already exists,
+	 or this is a forward reference to it.  dbx_alloc_type handles
+	 both cases.  */
       if (**pp != '=')
 	return dbx_alloc_type (typenums);
+
+      /* Type is being defined here.  */
+#if 0 /* Callers aren't prepared for a NULL result!  FIXME -- metin!  */
+      {
+	struct type *tt;
+
+	/* if such a type already exists, this is an unnecessary duplication
+	   of the stab string, which is common in (RS/6000) xlc generated
+	   objects.  In that case, simply return NULL and let the caller take
+	   care of it. */
+
+	tt = *dbx_lookup_type (typenums);
+	if (tt && tt->length && tt->code)
+	  return NULL;
+      }
+#endif
 
       *pp += 2;
     }
@@ -1389,7 +1524,7 @@ read_type (pp)
       typenums[0] = typenums[1] = -1;
       *pp += 1;
     }
-      
+
   switch ((*pp)[-1])
     {
     case 'x':
@@ -1521,6 +1656,9 @@ read_type (pp)
       (*pp)--;
       read_type_number (pp, xtypenums);
       type = *dbx_lookup_type (xtypenums);
+      /* fall through */
+
+    after_digits:
       if (type == 0)
 	type = builtin_type_void;
       if (typenums[0] != -1)
@@ -1529,6 +1667,15 @@ read_type (pp)
 
     case '*':
       type1 = read_type (pp);
+/* FIXME -- we should be doing smash_to_XXX types here.  */
+#if 0
+    /* postponed type decoration should be allowed. */
+    if (typenums[1] > 0 && typenums[1] < type_vector_length &&
+    	(type = type_vector[typenums[1]])) {
+      smash_to_pointer_type (type, type1);
+      break;
+    }
+#endif
       type = lookup_pointer_type (type1);
       if (typenums[0] != -1)
 	*dbx_lookup_type (typenums) = type;
@@ -2687,6 +2834,7 @@ read_range_type (pp, typenums)
 
   else if (n2 == 0 && n3 == -1)
     {
+      /* FIXME -- this confuses host and target type sizes.  */
       if (sizeof (int) == sizeof (long))
 	return builtin_type_unsigned_int;
       else
@@ -2699,7 +2847,7 @@ read_range_type (pp, typenums)
     return builtin_type_char;
 
   /* Assumptions made here: Subrange of self is equivalent to subrange
-     of int.  */
+     of int.  FIXME:  Host and target type-sizes assumed the same.  */
   else if (n2 == 0
 	   && (self_subrange ||
 	       *dbx_lookup_type (rangenums) == builtin_type_int))
@@ -2841,6 +2989,7 @@ read_args (pp, end)
      char **pp;
      int end;
 {
+  /* FIXME!  Remove this arbitrary limit!  */
   struct type *types[1024], **rval; /* allow for fns of 1023 parameters */
   int n = 0;
 

@@ -34,6 +34,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #endif
 
 extern void add_symbol_to_list ();
+struct symbol *find_symbol_in_list ();
+extern void read_type_number ();
 extern struct type *read_type ();
 extern struct type *read_range_type ();
 extern struct type *read_enum_type ();
@@ -44,12 +46,19 @@ extern struct type **dbx_lookup_type ();
 extern long read_number ();
 extern void finish_block ();
 extern struct blockvector *make_blockvector ();
+extern void add_undefined_type ();
 extern void really_free_pendings ();
 extern void start_subfile ();
+extern void push_subfile ();
+extern char *pop_subfile ();
 extern struct symtab *end_symtab ();
 extern void scan_file_globals ();
 extern void buildsym_new_init ();
 extern void buildsym_init ();
+extern struct context_stack *push_context ();
+extern void record_line ();
+extern void start_symtab ();
+extern struct symbol *define_symbol ();
 
 /* Convert stab register number (from `r' declaration) to a gdb REGNUM.  */
 
@@ -161,12 +170,12 @@ EXTERN int common_block_i;
 
 struct context_stack
 {
-  struct pending *locals;
-  struct pending_block *old_blocks;
-  struct symbol *name;
-  CORE_ADDR start_addr;
+  struct pending *locals;	/* Outer locals at the time we entered */
+  struct pending_block *old_blocks; /* Pointer into blocklist as of entry */
+  struct symbol *name;		/* Name of function, if any, defining context*/
+  CORE_ADDR start_addr;		/* PC where this context starts */
   CORE_ADDR end_addr;		/* Temp slot for exception handling. */
-  int depth;
+  int depth;			/* For error-checking matching push/pop */
 };
 
 EXTERN struct context_stack *context_stack;
@@ -177,6 +186,13 @@ EXTERN int context_stack_depth;
 /* Currently allocated size of context stack.  */
 
 EXTERN int context_stack_size;
+
+/* Macro "function" for popping contexts from the stack.  Pushing is done
+   by a real function, push_context.  This returns a pointer to a struct
+   context_stack.  */
+
+#define	pop_context()	\
+      (&context_stack[--context_stack_depth]);
 
 /* Nonzero if within a function (so symbols should be local,
    if nothing says specifically).  */
@@ -262,3 +278,19 @@ EXTERN int *this_object_header_files;
 EXTERN int n_this_object_header_files;
 
 EXTERN int n_allocated_this_object_header_files;
+
+/* When a header file is getting special overriding definitions
+   for one source file, record here the header_files index
+   of its normal definition vector.
+   At other times, this is -1.  */
+
+EXTERN int header_file_prev_index;
+
+struct subfile_stack
+{
+  struct subfile_stack *next;
+  char *name;
+  int prev_index;
+};
+
+EXTERN struct subfile_stack *subfile_stack;

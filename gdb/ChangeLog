@@ -1,3 +1,77 @@
+Sat Nov  9 00:40:32 1991  John Gilmore  (gnu at cygnus.com)
+
+	Add tracking of object files (that contain symbols) to gdb.
+	This includes a "struct objfile" that owns symtabs and psymtabs
+	that were read in from that binary file.
+
+	* symfile.h:  Add struct objfile.  Add pointer to the objfile
+	into the struct sym_fns.
+	Replace global `symfile' and `symfile_mtime' with
+	`symfile_objfile'.  Add global object_files chain.
+
+	* symfile.c:  Move param.h above symtab.h.
+	(sort_misc_function_vector):  Add.
+	(syms_from_objfile):  Was syms_from_bfd.
+	(symfile_open):  Now returns objfile.
+	(allocate_objfile):  New.
+	(free_objfile):  New, replacing free_all_.*symtabs.
+	(symfile_init):  Takes objfile arg, puts it in sym_fns result.
+	(reread_symbols):  Searches whole chain of objfiles.
+	(allocate_symtab):  Takes objfile as new parameter, chains them.
+	Handle INIT_EXTRA_SYMTAB_INFO.
+	(free_all_psymtabs, free_all_symtabs):  Move here from symmisc.c.
+
+	* dbxread.c:  Make more errors into complaints.
+	(push_subfile, pop_subfile):  Move to buildsym.c.
+	(dbx_symfile_read, dbx_symfile_init, fill_symbuf, read_dbx_symtab,
+	start_psymtab, psymtab_to_symtab_1, read_ofile_symtab,
+	dbx_psymtab_to_symtab, ):  Use bfd ops, don't use file descriptor.
+	Pass objfile.  Change callers.
+	(fill_symbuf, SWAP_SYMBOL):  Take bfd as arg.
+	(read_dbx_symtab):  Just wipe out new symbols, not all, on error.
+	(end_psymtab):  Blow away psymtab if empty.
+	(process_symbol_pair):  Swallow into read_ofile_symtab.
+	(process_one_symbol):  Use push_context and pop_context.
+	(virtual_context):  Delete #if 0'd obsolete stuff.
+
+	* buildsym.c (end_symtab):  Pass objfile.
+	(dbx_lookup_type):  Handle null typevector.
+	(dbx_alloc_type):  Check file number, not sym number, for -1.
+	(find_symbol_in_list):  Add for xcoffread.
+	(start_symtab):  Default typevector is empty.  Keep reusing same
+	context_stack.
+	(end_symtab):  Take objfile argument and pass it to
+	allocate_symtab.  Don't make a symtab if no blocks or symbols.
+	Handle empty typevector.
+	(push_context):  New function for context stack nesting.
+	(read_type):  Mark FIXME where we need to reintroduce type smashing.
+
+	* buildsym.h (pop_context):  Macro, paired with push_context.
+	(subfile_stack):  Move here from dbxread.c.
+
+	* coffread.c (end_symtab, read_coff_symtab):  Take and use objfile arg.
+	(read_coff_symtab):  Cleanup by freeing objfile, not all symtabs.
+
+	* mipsread.c (read_mips_symtab, parse_partial_symbols, parse_fdr,
+	new_psymtab, new_symtab):  Take and use objfile arg.
+
+	* dwarfread.c (scan_compilation_units, start_psymtab,
+	process_dies, end_symtab, dwarf_build_psymtabs,
+	read_lexical_block_scope, read_func_scope, read_file_scope):  Take
+	and use objfile argument.
+	(psymtab_to_symtab_1, read_ofile_symtab):  Don't take or use file
+	descriptor.  Use BFD internal functions instead.
+	(end_symtab):  Call global allocate_symtab.
+
+	* elfread.c:  Minor changes to accommodate objfiles.
+	* symtab.h:  partial_symbol_table has no symfile_name member now.
+	(fn_fieldlists voffset):  avoid non-int bitfield.
+	(struct symtab):  Add objfile * and objfile_chain * of symtabs.
+	(struct partial_symtab):  Add objfile * and objfile_chain * of
+	psymtabs.  Remove symfile_name.
+
+	* symfile.h, symfile.c, symtab.h:  Lint
+
 Fri Nov  8 23:38:48 1991  John Gilmore  (gnu at cygnus.com)
 
 	* command.c:  Include param.h.

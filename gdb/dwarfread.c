@@ -308,10 +308,11 @@ EXFUN (scan_partial_symbols, (char *thisdie AND char *enddie));
 static void
 EXFUN (scan_compilation_units,
        (char *filename AND CORE_ADDR addr AND char *thisdie AND char *enddie
-	AND unsigned int dbfoff AND unsigned int lnoffset));
+	AND unsigned int dbfoff AND unsigned int lnoffset
+        AND struct objfile *objfile));
 
 static struct partial_symtab *
-EXFUN(start_psymtab, (char *symfile_name AND CORE_ADDR addr
+EXFUN(start_psymtab, (struct objfile *objfile AND CORE_ADDR addr
 		      AND char *filename AND CORE_ADDR textlow
 		      AND CORE_ADDR texthigh AND int dbfoff
 		      AND int curoff AND int culength AND int lnfoff
@@ -339,17 +340,14 @@ static void
 EXFUN(dwarf_psymtab_to_symtab, (struct partial_symtab *pst));
 
 static void
-EXFUN(psymtab_to_symtab_1, (struct partial_symtab *pst AND int desc ));
+EXFUN(psymtab_to_symtab_1, (struct partial_symtab *pst));
 
 static struct symtab *
-EXFUN(read_ofile_symtab, (struct partial_symtab *pst AND int desc));
+EXFUN(read_ofile_symtab, (struct partial_symtab *pst));
 
 static void
-EXFUN(process_dies, (char *thisdie AND char *enddie));
-
-static void
-EXFUN(read_lexical_block_scope,
-      (struct dieinfo *dip AND char *thisdie AND char *enddie));
+EXFUN(process_dies,
+     (char *thisdie AND char *enddie AND struct objfile *objfile));
 
 static void
 EXFUN(read_structure_scope,
@@ -380,18 +378,11 @@ static struct type *
 EXFUN(enum_type, (struct dieinfo *dip));
 
 static void
-EXFUN(read_func_scope,
-      (struct dieinfo *dip AND char *thisdie AND char *enddie));
-
-static void
-EXFUN(read_file_scope,
-      (struct dieinfo *dip AND char *thisdie AND char *enddie));
-
-static void
 EXFUN(start_symtab, (void));
 
 static void
-EXFUN(end_symtab, (char *filename AND long language));
+EXFUN(end_symtab,
+      (char *filename AND long language AND struct objfile *objfile));
 
 static int
 EXFUN(scopecount, (struct scopenode *node));
@@ -474,7 +465,8 @@ SYNOPSIS
 
 	void dwarf_build_psymtabs (int desc, char *filename, CORE_ADDR addr,
 	     int mainline, unsigned int dbfoff, unsigned int dbsize,
-	     unsigned int lnoffset, unsigned int lnsize)
+	     unsigned int lnoffset, unsigned int lnsize,
+	     struct objfile *objfile)
 
 DESCRIPTION
 
@@ -497,7 +489,8 @@ RETURNS
 
 void
 DEFUN(dwarf_build_psymtabs,
-      (desc, filename, addr, mainline, dbfoff, dbsize, lnoffset, lnsize),
+      (desc, filename, addr, mainline, dbfoff, dbsize, lnoffset, lnsize,
+	objfile),
       int desc AND
       char *filename AND
       CORE_ADDR addr AND
@@ -505,7 +498,8 @@ DEFUN(dwarf_build_psymtabs,
       unsigned int dbfoff AND
       unsigned int dbsize AND
       unsigned int lnoffset AND
-      unsigned int lnsize)
+      unsigned int lnsize AND
+      struct objfile *objfile)
 {
   struct cleanup *back_to;
   
@@ -536,7 +530,7 @@ DEFUN(dwarf_build_psymtabs,
      unit to locate the full DWARF information later. */
   
   scan_compilation_units (filename, addr, dbbase, dbbase + dbsize,
-			  dbfoff, lnoffset);
+			  dbfoff, lnoffset, objfile);
   
   /* Go over the miscellaneous functions and install them in the miscellaneous
      function vector. */
@@ -691,13 +685,14 @@ DESCRIPTION
  */
 
 static void
-DEFUN(read_lexical_block_scope, (dip, thisdie, enddie),
+DEFUN(read_lexical_block_scope, (dip, thisdie, enddie, objfile),
      struct dieinfo *dip AND
      char *thisdie AND
-     char *enddie)
+     char *enddie AND
+     struct objfile *objfile)
 {
   openscope (NULL, dip -> at_low_pc, dip -> at_high_pc);
-  process_dies (thisdie + dip -> dielength, enddie);
+  process_dies (thisdie + dip -> dielength, enddie, objfile);
   closescope ();
 }
 
@@ -1369,11 +1364,6 @@ LOCAL FUNCTION
 
 	read_func_scope -- process all dies within a function scope
 
-SYNOPSIS
-
-	static void read_func_scope (struct dieinfo dip, char *thisdie,
-	    char *enddie)
-
 DESCRIPTION
 
 	Process all dies within a given function scope.  We are passed
@@ -1390,10 +1380,11 @@ DESCRIPTION
  */
 
 static void
-DEFUN(read_func_scope, (dip, thisdie, enddie),
+DEFUN(read_func_scope, (dip, thisdie, enddie, objfile),
      struct dieinfo *dip AND
      char *thisdie AND
-     char *enddie)
+     char *enddie AND
+     struct objfile *objfile)
 {
   struct symbol *sym;
   
@@ -1409,7 +1400,7 @@ DEFUN(read_func_scope, (dip, thisdie, enddie),
     }
   sym = new_symbol (dip);
   openscope (sym, dip -> at_low_pc, dip -> at_high_pc);
-  process_dies (thisdie + dip -> dielength, enddie);
+  process_dies (thisdie + dip -> dielength, enddie, objfile);
   closescope ();
 }
 
@@ -1418,11 +1409,6 @@ DEFUN(read_func_scope, (dip, thisdie, enddie),
 LOCAL FUNCTION
 
 	read_file_scope -- process all dies within a file scope
-
-SYNOPSIS
-
-	static void read_file_scope (struct dieinfo *dip, char *thisdie
-		char *enddie)
 
 DESCRIPTION
 
@@ -1441,10 +1427,11 @@ DESCRIPTION
  */
 
 static void
-DEFUN(read_file_scope, (dip, thisdie, enddie),
+DEFUN(read_file_scope, (dip, thisdie, enddie, objfile),
      struct dieinfo *dip AND
      char *thisdie AND
-     char *enddie)
+     char *enddie AND
+     struct objfile *objfile)
 {
   struct cleanup *back_to;
   
@@ -1460,9 +1447,9 @@ DEFUN(read_file_scope, (dip, thisdie, enddie),
   start_symtab ();
   openscope (NULL, dip -> at_low_pc, dip -> at_high_pc);
   decode_line_numbers (lnbase);
-  process_dies (thisdie + dip -> dielength, enddie);
+  process_dies (thisdie + dip -> dielength, enddie, objfile);
   closescope ();
-  end_symtab (dip -> at_name, dip -> at_language);
+  end_symtab (dip -> at_name, dip -> at_language, objfile);
   do_cleanups (back_to);
   utypes = NULL;
   numutypes = 0;
@@ -1516,7 +1503,8 @@ DESCRIPTION
  */
 
 static void
-DEFUN(process_dies, (thisdie, enddie), char *thisdie AND char *enddie)
+DEFUN(process_dies, (thisdie, enddie, objfile),
+      char *thisdie AND char *enddie AND struct objfile *objfile)
 {
   char *nextdie;
   struct dieinfo di;
@@ -1546,17 +1534,17 @@ DEFUN(process_dies, (thisdie, enddie), char *thisdie AND char *enddie)
 	  switch (di.dietag)
 	    {
 	    case TAG_compile_unit:
-	      read_file_scope (&di, thisdie, nextdie);
+	      read_file_scope (&di, thisdie, nextdie, objfile);
 	      break;
 	    case TAG_global_subroutine:
 	    case TAG_subroutine:
 	      if (!di.at_is_external_p)
 		{
-		  read_func_scope (&di, thisdie, nextdie);
+		  read_func_scope (&di, thisdie, nextdie, objfile);
 		}
 	      break;
 	    case TAG_lexical_block:
-	      read_lexical_block_scope (&di, thisdie, nextdie);
+	      read_lexical_block_scope (&di, thisdie, nextdie, objfile);
 	      break;
 	    case TAG_structure_type:
 	    case TAG_union_type:
@@ -1599,7 +1587,8 @@ DESCRIPTION
  */
 
 static void
-DEFUN(end_symtab, (filename, language), char *filename AND long language)
+DEFUN(end_symtab, (filename, language, objfile),
+     char *filename AND long language AND struct objfile *objfile)
 {
   struct symtab *symtab;
   struct blockvector *blockvector;
@@ -1621,15 +1610,14 @@ DEFUN(end_symtab, (filename, language), char *filename AND long language)
   
   /* Now create the symtab object for this source file.  */
   
-  symtab = (struct symtab *) xmalloc (sizeof (struct symtab));
-  (void) memset (symtab, 0, sizeof (struct symtab));
+  symtab = allocate_symtab (savestring (filename, strlen (filename)),
+			    objfile);
   
   symtab -> free_ptr = 0;
   
   /* Fill in its components.  */
   symtab -> blockvector = blockvector;
   symtab -> free_code = free_linetable;
-  symtab -> filename = savestring (filename, strlen (filename));
   
   /* Save the line number information. */
   
@@ -1640,8 +1628,6 @@ DEFUN(end_symtab, (filename, language), char *filename AND long language)
       nbytes += (line_vector_index - 1) * sizeof (struct linetable_entry);
     }
   symtab -> linetable = (struct linetable *) xrealloc (line_vector, nbytes);
-  symtab -> nlines = 0;
-  symtab -> line_charpos = 0;
   
   /* FIXME:  The following may need to be expanded for other languages */
   switch (language)
@@ -2269,29 +2255,21 @@ LOCAL FUNCTION
 
 SYNOPSIS
 
-	static struct symtab *read_ofile_symtab (struct partial_symtab *pst,
-		int desc)
+	static struct symtab *read_ofile_symtab (struct partial_symtab *pst)
 
 DESCRIPTION
 
-	DESC is the file descriptor for the file, positioned at the
-	beginning of the symtab
-	SYM_SIZE is the size of the symbol section to read
-	TEXT_OFFSET is the beginning of the text segment we are reading
-	symbols for
-	TEXT_SIZE is the size of the text segment read in.
-	OFFSET is a relocation offset which gets added to each symbol
-
+	OFFSET is a relocation offset which gets added to each symbol (FIXME).
  */
 
 static struct symtab *
-DEFUN(read_ofile_symtab, (pst, desc),
-      struct partial_symtab *pst AND
-      int desc)
+DEFUN(read_ofile_symtab, (pst),
+      struct partial_symtab *pst)
 {
   struct cleanup *back_to;
   long lnsize;
   int foffset;
+  bfd *abfd = pst->objfile->obfd;
   
   /* Allocate a buffer for the entire chunk of DIE's for this compilation
      unit, seek to the location in the file, and read in all the DIE's. */
@@ -2300,8 +2278,8 @@ DEFUN(read_ofile_symtab, (pst, desc),
   dbbase = xmalloc (DBLENGTH(pst));
   dbroff = DBROFF(pst);
   foffset = DBFOFF(pst) + dbroff;
-  if ((lseek (desc, foffset, 0) != foffset) ||
-      (read (desc, dbbase, DBLENGTH(pst)) != DBLENGTH(pst)))
+  if (bfd_seek (abfd, foffset, 0) ||
+      (bfd_read (dbbase, DBLENGTH(pst), 1, abfd) != DBLENGTH(pst)))
     {
       free (dbbase);
       error ("can't read DWARF data");
@@ -2317,14 +2295,14 @@ DEFUN(read_ofile_symtab, (pst, desc),
   lnbase = NULL;
   if (LNFOFF (pst))
     {
-      if ((lseek (desc, LNFOFF (pst), 0) != LNFOFF (pst)) ||
-	  (read (desc, &lnsize, sizeof(long)) != sizeof(long)))
+      if (bfd_seek (abfd, LNFOFF (pst), 0) ||
+	  (bfd_read (&lnsize, sizeof(long), 1, abfd) != sizeof(long)))
 	{
 	  error ("can't read DWARF line number table size");
 	}
       lnbase = xmalloc (lnsize);
-      if ((lseek (desc, LNFOFF (pst), 0) != LNFOFF (pst)) ||
-	  (read (desc, lnbase, lnsize) != lnsize))
+      if (bfd_seek (abfd, LNFOFF (pst), 0) ||
+	  (bfd_read (lnbase, lnsize, 1, abfd) != lnsize))
 	{
 	  free (lnbase);
 	  error ("can't read DWARF line numbers");
@@ -2332,7 +2310,7 @@ DEFUN(read_ofile_symtab, (pst, desc),
       make_cleanup (free, lnbase);
     }
 
-  process_dies (dbbase, dbbase + DBLENGTH(pst));
+  process_dies (dbbase, dbbase + DBLENGTH(pst), pst->objfile);
   do_cleanups (back_to);
   return (symtab_list);
 }
@@ -2345,7 +2323,7 @@ LOCAL FUNCTION
 
 SYNOPSIS
 
-	static void psymtab_to_symtab_1 (struct partial_symtab *pst, int desc)
+	static void psymtab_to_symtab_1 (struct partial_symtab *pst)
 
 DESCRIPTION
 
@@ -2356,9 +2334,8 @@ DESCRIPTION
 
 static void
 DEFUN(psymtab_to_symtab_1,
-      (pst, desc),
-      struct partial_symtab *pst AND
-      int desc)
+      (pst),
+      struct partial_symtab *pst)
 {
   int i;
   
@@ -2388,13 +2365,13 @@ DEFUN(psymtab_to_symtab_1,
 	    wrap_here ("");		/* Flush output */
 	    fflush (stdout);
 	  }
-	psymtab_to_symtab_1 (pst -> dependencies[i], desc);
+	psymtab_to_symtab_1 (pst -> dependencies[i]);
       }
   
   if (DBLENGTH(pst))		/* Otherwise it's a dummy */
     {
       /* Init stuff necessary for reading in symbols */
-      pst -> symtab = read_ofile_symtab (pst, desc);
+      pst -> symtab = read_ofile_symtab (pst);
       if (info_verbose)
 	{
 	  printf_filtered ("%d DIE's, sorting...", diecount);
@@ -2451,30 +2428,7 @@ DEFUN(dwarf_psymtab_to_symtab, (pst), struct partial_symtab *pst)
 	  fflush (stdout);
 	}
       
-      /* Open symbol file.  Symbol_file_command guarantees that the symbol
-	 file name will be absolute, so there is no need for openp.  */
-      desc = open (pst -> symfile_name, O_RDONLY, 0);
-      
-      if (desc < 0)
-	{
-	  perror_with_name (pst -> symfile_name);
-	}
-      
-      sym_bfd = bfd_fdopenr (pst -> symfile_name, NULL, desc);
-      if (!sym_bfd)
-	{
-	  (void) close (desc);
-	  error ("Could not open `%s' to read symbols: %s",
-		 pst -> symfile_name, bfd_errmsg (bfd_error));
-	}
-      old_chain = make_cleanup (bfd_close, sym_bfd);
-      if (!bfd_check_format (sym_bfd, bfd_object))
-	{
-	  error ("\"%s\": can't read symbols: %s.",
-		 pst -> symfile_name, bfd_errmsg (bfd_error));
-	}
-      
-      psymtab_to_symtab_1 (pst, desc);
+      psymtab_to_symtab_1 (pst);
       
 #if 0 /* FIXME:  Check to see what dbxread is doing here and see if
 	 we need to do an equivalent or is this something peculiar to
@@ -2560,9 +2514,9 @@ DESCRIPTION
 
 static struct partial_symtab *
 DEFUN(start_psymtab,
-      (symfile_name, addr, filename, textlow, texthigh, dbfoff, curoff,
+      (objfile, addr, filename, textlow, texthigh, dbfoff, curoff,
        culength, lnfoff, global_syms, static_syms),
-      char *symfile_name AND
+      struct objfile *objfile AND
       CORE_ADDR addr AND
       char *filename AND
       CORE_ADDR textlow AND
@@ -2580,7 +2534,7 @@ DEFUN(start_psymtab,
       obstack_alloc (psymbol_obstack, sizeof (struct partial_symtab));
   (void) memset (result, 0, sizeof (struct partial_symtab));
   result -> addr = addr;
-  result -> symfile_name =  create_name (symfile_name, psymbol_obstack);
+  result -> objfile = objfile;
   result -> filename = create_name (filename, psymbol_obstack);
   result -> textlow = textlow;
   result -> texthigh = texthigh;
@@ -2799,13 +2753,14 @@ RETURNS
 
 static void
 DEFUN(scan_compilation_units,
-      (filename, addr, thisdie, enddie, dbfoff, lnoffset),
+      (filename, addr, thisdie, enddie, dbfoff, lnoffset, objfile),
       char *filename AND
       CORE_ADDR addr AND
       char *thisdie AND
       char *enddie AND
       unsigned int dbfoff AND
-      unsigned int lnoffset)
+      unsigned int lnoffset AND
+      struct objfile *objfile)
 {
   char *nextdie;
   struct dieinfo di;
@@ -2839,7 +2794,7 @@ DEFUN(scan_compilation_units,
 	  curoff = thisdie - dbbase;
 	  culength = nextdie - thisdie;
 	  curlnoffset = di.at_stmt_list_p ? lnoffset + di.at_stmt_list : 0;
-	  pst = start_psymtab (filename, addr, di.at_name,
+	  pst = start_psymtab (objfile, addr, di.at_name,
 				     di.at_low_pc, di.at_high_pc,
 				     dbfoff, curoff, culength, curlnoffset,
 				     global_psymbols.next,

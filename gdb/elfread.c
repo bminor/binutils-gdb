@@ -48,7 +48,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symtab.h"
 #include "ansidecl.h"
 
-extern int EXFUN(strcmp, (CONST char *a, CONST char *b));
+extern int EXFUN (strcmp, (CONST char *a, CONST char *b));
+extern int EXFUN (dwarf_build_psymtabs,
+     (int desc, char *filename, CORE_ADDR addr, int mainline,
+      unsigned int dbfoff, unsigned int dbsize, unsigned int lnoffset,
+      unsigned int lnsize, struct objfile *objfile));
+
 #define STREQ(a,b) (strcmp((a),(b))==0)
 
 struct elfinfo {
@@ -127,7 +132,7 @@ DEFUN(elf_symfile_read, (sf, addr, mainline),
       CORE_ADDR addr AND
       int mainline)
 {
-  bfd *abfd = sf -> sym_bfd;
+  bfd *abfd = sf->objfile->obfd;
   struct elfinfo ei;
 
   bfd_map_over_sections (abfd, elf_locate_sections, &ei);
@@ -138,7 +143,7 @@ DEFUN(elf_symfile_read, (sf, addr, mainline),
 			    bfd_get_filename (abfd),
 			    addr, mainline,
 			    ei.dboffset, ei.dbsize,
-			    ei.lnoffset, ei.lnsize);
+			    ei.lnoffset, ei.lnsize, sf->objfile);
     }
   if (!partial_symtab_list)
     {

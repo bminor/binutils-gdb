@@ -50,7 +50,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sym.h>
 #endif /* not CMUCS */
 
-#include "ecoff.h"
+#include "coff-mips.h"
 
 struct coff_exec {
 	struct external_filehdr f;
@@ -63,9 +63,7 @@ struct coff_exec {
 
    For mipsread this structure contains the index of the FDR that this psymtab
    represents and a pointer to the symbol table header HDRR from the symbol
-   file that the psymtab was created from.
-
-   Note: This code is currently untested.  -fnf */
+   file that the psymtab was created from.  */
 
 #define FDR_IDX(p) (((struct symloc *)((p)->read_symtab_private))->fdr_idx)
 #define CUR_HDR(p) (((struct symloc *)((p)->read_symtab_private))->cur_hdr)
@@ -229,7 +227,6 @@ void
 mipscoff_symfile_init (sf)
      struct sym_fns *sf;
 {
-  bfd *abfd = sf->sym_bfd;
   sf->sym_private = NULL;
 }
 
@@ -240,7 +237,7 @@ mipscoff_symfile_read(sf, addr, mainline)
      int mainline;
 {
   struct coff_symfile_info *info = (struct coff_symfile_info *)sf->sym_private;
-  bfd *abfd = sf->sym_bfd;
+  bfd *abfd = sf->objfile->obfd;
   char *name = bfd_get_filename (abfd);
   int desc;
   register int val;
@@ -265,7 +262,7 @@ mipscoff_symfile_read(sf, addr, mainline)
   /* Now that the executable file is positioned at symbol table,
      process it and define symbols accordingly.  */
 
-  read_mips_symtab(abfd, desc);
+  read_mips_symtab(sf->objfile, desc);
 
   /* Go over the misc symbol bunches and install them in vector.  */
 
@@ -547,15 +544,15 @@ fdr_name(name)
    FIXME:  INCREMENTAL is currently always zero, though it should not be. */
 
 static
-read_mips_symtab (abfd, desc)
-	bfd *abfd;
+read_mips_symtab (objfile, desc)
+	struct objfile *objfile;
 	int desc;
 {
 	CORE_ADDR end_of_text_seg;
 
-	read_the_mips_symtab(abfd, desc, &end_of_text_seg);
+	read_the_mips_symtab(objfile->obfd, desc, &end_of_text_seg);
 
-	parse_partial_symbols(end_of_text_seg);
+	parse_partial_symbols(end_of_text_seg, objfile);
 
 	/*
 	 * Check to make sure file was compiled with -g.
@@ -565,7 +562,7 @@ read_mips_symtab (abfd, desc)
 		if (max_gdbinfo == 0)
 			printf (
 "\n%s not compiled with -g, debugging support is limited.\n",
-				bfd_get_filename (abfd));
+				objfile->name);
 		printf(
 "You should compile with -g2 or -g3 for best debugging support.\n");
 		fflush(stdout);
@@ -1554,8 +1551,9 @@ parse_one_file(fh, f_idx, bound)
    the symtab we are reading.  */
 
 static
-parse_partial_symbols(end_of_text_seg)
+parse_partial_symbols(end_of_text_seg, objfile)
 	int end_of_text_seg;
+	struct objfile *objfile;
 {
 	int             f_idx, s_idx, h_max, stat_idx;
 	HDRR		*hdr;
@@ -1585,14 +1583,14 @@ parse_partial_symbols(end_of_text_seg)
 	fdr_to_pst = (struct pst_map *)xzalloc((hdr->ifdMax+1) * sizeof *fdr_to_pst);
 	fdr_to_pst++;
 	{
-		struct partial_symtab * pst = new_psymtab("");
+		struct partial_symtab * pst = new_psymtab("", objfile);
 		fdr_to_pst[-1].pst = pst;
 		FDR_IDX(pst) = -1;
 	}
 
 	/* Now scan the FDRs, mostly for dependencies */
 	for (f_idx = 0; f_idx < hdr->ifdMax; f_idx++)
-		(void) parse_fdr(f_idx, 1);
+		(void) parse_fdr(f_idx, 1, objfile);
 
 	/* Take a good guess at how many symbols we might ever need */
 	h_max = hdr->iextMax;
@@ -1804,8 +1802,10 @@ parse_partial_symbols(end_of_text_seg)
    of recursion we are called (to pretty up debug traces) */
 
 static struct partial_symtab *
-parse_fdr(f_idx, lev)
+parse_fdr(f_idx, lev, objfile)
 	int f_idx;
+	int lev;
+	struct objfile *objfile;
 {
 	register FDR *fh;
 	register struct partial_symtab *pst;
@@ -1822,7 +1822,7 @@ parse_fdr(f_idx, lev)
 		max_glevel = fh->glevel;
 
 	/* Make a new partial_symtab */
-	pst = new_psymtab(fh->rss);
+	pst = new_psymtab(fh->rss, objfile);
 	if (fh->cpd == 0){
 		pst->textlow = 0;
 		pst->texthigh = 0;
@@ -1859,7 +1859,7 @@ parse_fdr(f_idx, lev)
 	for (s_idx = s_id0; s_idx < fh->crfd; s_idx++) {
 		RFDT *rh = (RFDT *) (fh->rfdBase) + s_idx;
 
-		pst->dependencies[s_idx-s_id0] = parse_fdr(*rh, lev+1);
+		pst->dependencies[s_idx-s_id0] = parse_fdr(*rh, lev+1, objfile);
 	}
 
 	return pst;
@@ -1897,11 +1897,12 @@ psymtab_to_symtab_1(pst, filename)
 	f_max = pst->n_global_syms + pst->n_static_syms;
 	if (FDR_IDX(pst) == -1) {
 		fh = 0;
-		st = new_symtab( "unknown", f_max, 0);
+		st = new_symtab ("unknown", f_max, 0, pst->objfile);
 	} else {
 		fh = (FDR *) (cur_hdr->cbFdOffset) + FDR_IDX(pst);
 		f_max += fh->csym + fh->cpd;
-		st = new_symtab(pst->filename, 2 * f_max, 2 * fh->cline);
+		st = new_symtab (pst->filename, 2 * f_max, 2 * fh->cline,
+				 pst->objfile);
 	}
 
 	/* Read in all partial symbtabs on which this one is dependent.
@@ -2356,10 +2357,10 @@ reorder_psymtabs()
 
 static
 struct symtab *
-new_symtab(name, maxsyms, maxlines)
+new_symtab(name, maxsyms, maxlines, objfile)
 	char *name;
 {
-	struct symtab *s = allocate_symtab (name);
+	struct symtab *s = allocate_symtab (name, objfile);
 
 	LINETABLE(s) = new_linetable(maxlines);
 
@@ -2382,8 +2383,9 @@ new_symtab(name, maxsyms, maxlines)
 /* Allocate a new partial_symtab NAME */
 
 static struct partial_symtab *
-new_psymtab(name)
+new_psymtab(name, objfile)
 	char *name;
+	struct objfile *objfile;
 {
 	struct partial_symtab *pst;
 
@@ -2396,6 +2398,11 @@ new_psymtab(name)
 	else
 		pst->filename = name;
 
+	/* Chain it to its object file */
+	pst->objfile = objfile;
+	pst->objfile_chain = sym_objfile->psymtabs;
+	sym_objfile->psymtabs = pst;
+	
 	pst->next = partial_symtab_list;
 	partial_symtab_list = pst;
 

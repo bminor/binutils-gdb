@@ -233,10 +233,6 @@ struct type
       /* The list of methods.  */
       struct fn_field
 	{
-#if 0
-	  /* The overloaded name */
-	  char *name;
-#endif
 	  /* The return value of the method */
 	  struct type *type;
 	  /* The argument list */
@@ -251,7 +247,7 @@ struct type
 	  unsigned int is_volatile : 1;
 	  /* Index into that baseclass's virtual function table,
 	     minus 2; else if static: VOFFSET_STATIC; else: 0.  */
-	  unsigned long voffset : 30;
+	  unsigned voffset : 30;
 #	  define VOFFSET_STATIC 1
 	} *fn_fields;
 
@@ -543,6 +539,11 @@ struct symtab
        0 if not yet known.  */
     char *fullname;
 
+    /* Object file from which this symbol information was read.  */
+    struct objfile *objfile;
+    /* Chain of all symtabs owned by that objfile.  */
+    struct symtab *objfile_chain;
+
     /* Anything extra for this symtab.  This is for target machines
        with special debugging info of some sort (which cannot just
        be represented in a normal symtab).  */
@@ -568,8 +569,11 @@ struct partial_symtab
   /* Name of the source file which this partial_symtab defines */
   char *filename;
 
-  /* Name of the symbol file from which symbols should be read.  */
-  char *symfile_name;
+  /* Information about the object file from which symbols should be read.  */
+  struct objfile *objfile;
+  /* Chain of psymtabs owned by this objfile */
+  struct partial_symtab *objfile_chain;
+
   /* Address relative to which the symbols in this file are.  Need to
      relocate by this amount when reading in symbols from the symbol
      file.  */
@@ -634,15 +638,12 @@ struct symtab *current_source_symtab;
 
 int current_source_line;
 
-#define BLOCKLIST(symtab) (symtab)->blockvector
 #define BLOCKVECTOR(symtab) (symtab)->blockvector
 
 #define LINETABLE(symtab) (symtab)->linetable
 
 /* Macros normally used to access components of symbol table structures.  */
 
-#define BLOCKLIST_NBLOCKS(blocklist) (blocklist)->nblocks
-#define BLOCKLIST_BLOCK(blocklist,n) (blocklist)->block[n]
 #define BLOCKVECTOR_NBLOCKS(blocklist) (blocklist)->nblocks
 #define BLOCKVECTOR_BLOCK(blocklist,n) (blocklist)->block[n]
 
@@ -783,7 +784,6 @@ extern struct type *lookup_enum ();
 extern struct type *lookup_struct_elt_type ();
 extern struct type *lookup_pointer_type ();
 extern struct type *lookup_function_type ();
-extern struct type *lookup_basetype_type ();
 extern struct type *create_array_type ();
 extern struct symbol *block_function ();
 extern struct symbol *find_pc_function ();
@@ -802,7 +802,6 @@ extern int contained_in();
 extern struct type *lookup_reference_type ();
 extern struct type *lookup_member_type ();
 extern struct type *lookup_method_type ();
-extern struct type *lookup_class ();
 extern void smash_to_method_type ();
 void smash_to_member_type (
 #ifdef __STDC__
@@ -812,9 +811,6 @@ void smash_to_member_type (
 extern struct type *allocate_stub_method ();
 /* end of C++ stuff.  */
 
-extern void free_all_symtabs ();
-extern void free_all_psymtabs ();
-extern void free_inclink_symtabs ();
 extern void reread_symbols ();
 
 extern struct type *builtin_type_void;

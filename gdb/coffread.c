@@ -57,8 +57,6 @@ static void enter_linenos ();
 static void read_one_sym ();
 
 extern int fclose ();
-extern void free_all_symtabs ();
-extern void free_all_psymtabs ();
 
 /* To be an sdb debug type, type must have at least a basic or primary
    derived type.  Using this rather than checking against T_NULL is
@@ -517,7 +515,8 @@ complete_symtab (name, start_addr, size)
    struct symtab for that file and put it in the list of all such. */
 
 static void
-end_symtab ()
+end_symtab (objfile)
+     struct objfile *objfile;
 {
   register struct symtab *symtab;
   register struct context_stack *cstk;
@@ -555,7 +554,7 @@ end_symtab ()
   blockvector = make_blockvector ();
 
   /* Now create the symtab object for this source file.  */
-  symtab = allocate_symtab (last_source_file);
+  symtab = allocate_symtab (last_source_file, objfile);
 
   /* Fill in its components.  */
   symtab->blockvector = blockvector;
@@ -734,7 +733,7 @@ coff_symfile_read (sf, addr, mainline)
      int mainline;
 {
   struct coff_symfile_info *info = (struct coff_symfile_info *)sf->sym_private;
-  bfd *abfd = sf->sym_bfd;
+  bfd *abfd = sf->objfile->obfd;
   coff_data_type *cdata = coff_data (abfd);
   char *name = bfd_get_filename (abfd);
   int desc;
@@ -785,12 +784,7 @@ coff_symfile_read (sf, addr, mainline)
 
   val = init_stringtab (desc, stringtab_offset);
   if (val < 0)
-    {
-      free_all_symtabs ();		/* FIXME blows whole symtab */
-      printf ("\"%s\": can't get string table", name);
-      fflush (stdout);
-      return;
-    }
+    error ("\"%s\": can't get string table", name);
   make_cleanup (free_stringtab, 0);
 
   /* Position to read the symbol table.  Do not read it all at once. */
@@ -804,7 +798,7 @@ coff_symfile_read (sf, addr, mainline)
   /* Now that the executable file is positioned at symbol table,
      process it and define symbols accordingly.  */
 
-  read_coff_symtab (desc, num_symbols);
+  read_coff_symtab (desc, num_symbols, sf->objfile);
 
   patch_opaque_types ();
 
@@ -824,8 +818,7 @@ coff_symfile_read (sf, addr, mainline)
 static void
 coff_new_init ()
 {
-  /* There seems to be nothing to do except free_all_symtabs and set
-     symfile to zero, which is done by our caller.  */
+	/* Nothin' to do */
 }
 
 /* Simplified internal version of coff symbol table information */
@@ -846,9 +839,10 @@ struct coff_symbol {
    We read them one at a time using read_one_sym ().  */
 
 static void
-read_coff_symtab (desc, nsyms)
+read_coff_symtab (desc, nsyms, objfile)
      int desc;
      int nsyms;
+     struct objfile *objfile;
 {
   int newfd;			/* Avoid multiple closes on same desc */
   FILE *stream; 
@@ -881,8 +875,10 @@ read_coff_symtab (desc, nsyms)
     fatal ("Too many open files");
   stream = fdopen (newfd, "r");
 
-  old_chain = make_cleanup (free_all_symtabs, 0);
+  /* These cleanups will be discarded below if we succeed.  */
+  old_chain = make_cleanup (free_objfile, objfile);
   make_cleanup (fclose, stream);
+
   nlist_stream_global = stream;
   nlist_nsyms_global = nsyms;
   last_source_file = 0;
@@ -913,7 +909,7 @@ read_coff_symtab (desc, nsyms)
       if (cs->c_symnum == next_file_symnum && cs->c_sclass != C_FILE)
 	{
 	  if (last_source_file)
-	    end_symtab ();
+	    end_symtab (objfile);
 
 	  start_symtab ();
 	  complete_symtab ("_globals_", 0, first_object_file_end);
@@ -966,7 +962,7 @@ read_coff_symtab (desc, nsyms)
 	     */
 	    if (last_source_file)
 	      {
-		end_symtab ();
+		end_symtab (objfile);
 		start_symtab ();
 	      }
 	    in_source_file = 1;
@@ -1153,7 +1149,7 @@ read_coff_symtab (desc, nsyms)
     }
 
   if (last_source_file)
-    end_symtab ();
+    end_symtab (objfile);
   fclose (stream);
   discard_cleanups (old_chain);
 }
