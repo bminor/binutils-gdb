@@ -1392,36 +1392,21 @@ i386_register_to_value (struct frame_info *frame, int regnum,
 
   if (i386_fp_regnum_p (regnum))
     {
-      char from[I386_MAX_REGISTER_SIZE];
-
-      /* We only support floating-point values.  */
-      if (TYPE_CODE (type) != TYPE_CODE_FLT)
-	{
-	  warning ("Cannot convert floating-point register value "
-		   "to non-floating-point type.");
-	  return;
-	}
-
-      /* Convert to TYPE.  This should be a no-op if TYPE is
-	 equivalent to the extended floating-point format used by the
-	 FPU.  */
-      frame_read_register (frame, regnum, from);
-      convert_typed_floating (from, builtin_type_i387_ext, to, type);
+      i387_register_to_value (frame, regnum, type, to);
+      return;
     }
-  else
-    {
-      gdb_assert (TYPE_LENGTH (type) == 8);
 
-      /* Read the first part.  */
-      gdb_assert (register_size (current_gdbarch, regnum) == 4);
-      frame_read_register (frame, regnum, (char *) to + 0);
+  gdb_assert (TYPE_LENGTH (type) == 8);
 
-      /* Read the second part.  */
-      regnum = i386_next_regnum (regnum);
-      gdb_assert (regnum != -1);
-      gdb_assert (register_size (current_gdbarch, regnum));
-      frame_read_register (frame, regnum, (char *) to + 4);
-    }
+  /* Read the first part.  */
+  gdb_assert (register_size (current_gdbarch, regnum) == 4);
+  frame_read_register (frame, regnum, (char *) to + 0);
+
+  /* Read the second part.  */
+  regnum = i386_next_regnum (regnum);
+  gdb_assert (regnum != -1);
+  gdb_assert (register_size (current_gdbarch, regnum));
+  frame_read_register (frame, regnum, (char *) to + 4);
 }
 
 /* Write the contents FROM of a value of type TYPE into register
@@ -1433,36 +1418,21 @@ i386_value_to_register (struct frame_info *frame, int regnum,
 {
   if (i386_fp_regnum_p (regnum))
     {
-      char to[I386_MAX_REGISTER_SIZE];
-
-      /* We only support floating-point values.  */
-      if (TYPE_CODE (type) != TYPE_CODE_FLT)
-	{
-	  warning ("Cannot convert non-floating-point type "
-		   "to floating-point register value.");
-	  return;
-	}
-
-      /* Convert from TYPE.  This should be a no-op if TYPE is
-	 equivalent to the extended floating-point format used by the
-	 FPU.  */
-      convert_typed_floating (from, type, to, builtin_type_i387_ext);
-      put_frame_register (frame, regnum, to);
+      i387_value_to_register (frame, regnum, type, from);
+      return;
     }
-  else
-    {
-      gdb_assert (TYPE_LENGTH (type) == 8);
 
-      /* Write the first part.  */
-      gdb_assert (register_size (current_gdbarch, regnum) == 4);
-      put_frame_register (frame, regnum, (const char *) from + 0);
+  gdb_assert (TYPE_LENGTH (type) == 8);
 
-      /* Write the second part.  */
-      regnum = i386_next_regnum (regnum);
-      gdb_assert (regnum != -1);
-      gdb_assert (register_size (current_gdbarch, regnum) == 4);
-      put_frame_register (frame, regnum, (const char *) from + 4);
-   }
+  /* Write the first part.  */
+  gdb_assert (register_size (current_gdbarch, regnum) == 4);
+  put_frame_register (frame, regnum, (const char *) from + 0);
+
+  /* Write the second part.  */
+  regnum = i386_next_regnum (regnum);
+  gdb_assert (regnum != -1);
+  gdb_assert (register_size (current_gdbarch, regnum) == 4);
+  put_frame_register (frame, regnum, (const char *) from + 4);
 }
 
 

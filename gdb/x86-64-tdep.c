@@ -208,6 +208,15 @@ x86_64_dwarf_reg_to_regnum (int reg)
 
   return regnum;
 }
+
+/* Return nonzero if a value of type TYPE stored in register REGNUM
+   needs any special handling.  */
+
+static int
+x86_64_convert_register_p (int regnum, struct type *type)
+{
+  return i386_fp_regnum_p (regnum);
+}
 
 
 /* The returning of values is done according to the special algorithm.
@@ -1177,6 +1186,10 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* Call dummy code.  */
   set_gdbarch_push_dummy_call (gdbarch, x86_64_push_dummy_call);
+
+  set_gdbarch_convert_register_p (gdbarch, x86_64_convert_register_p);
+  set_gdbarch_register_to_value (gdbarch, i387_register_to_value);
+  set_gdbarch_value_to_register (gdbarch, i387_value_to_register);
 
   set_gdbarch_extract_return_value (gdbarch, x86_64_extract_return_value);
   set_gdbarch_store_return_value (gdbarch, x86_64_store_return_value);

@@ -1,3 +1,15 @@
+2003-06-15  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-tdep.c (i386_register_to_value, i386_value_to_register):
+	Move floating-point code to new function in i387-tdep.c.
+	* i387-tdep.c (i387_register_to_value, i387_value_to_register):
+	New functions containing code moved here from i386-tdep.c.
+	* i387-tdep.h: Add opaque declaration for `struct type'.
+	(i387_register_to_value, i387_value_to_register): New prototypes.
+	* x86-64-tdep.c (x86_64_convert_register_p): New function.
+	(x86_64_init_abi): Set convert_register_p, register_to_value and
+	value_to_register here.
+	
 2003-06-14  Andrew Cagney  <cagney@redhat.com>
 
 	* mips-tdep.c (mips_register_to_value): Make static.

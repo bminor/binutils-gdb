@@ -282,6 +282,58 @@ i387_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
   fprintf_filtered (file, "Opcode:              %s\n",
 		    local_hex_string_custom (fop ? (fop | 0xd800) : 0, "04"));
 }
+
+
+/* Read a value of type TYPE from register REGNUM in frame FRAME, and
+   return its contents in TO.  */
+
+void
+i387_register_to_value (struct frame_info *frame, int regnum,
+			struct type *type, void *to)
+{
+  char from[I386_MAX_REGISTER_SIZE];
+
+  gdb_assert (i386_fp_regnum_p (regnum));
+
+  /* We only support floating-point values.  */
+  if (TYPE_CODE (type) != TYPE_CODE_FLT)
+    {
+      warning ("Cannot convert floating-point register value "
+	       "to non-floating-point type.");
+      return;
+    }
+
+  /* Convert to TYPE.  This should be a no-op if TYPE is equivalent to
+     the extended floating-point format used by the FPU.  */
+  frame_read_register (frame, regnum, from);
+  convert_typed_floating (from, builtin_type_i387_ext, to, type);
+}
+
+/* Write the contents FROM of a value of type TYPE into register
+   REGNUM in frame FRAME.  */
+
+void
+i387_value_to_register (struct frame_info *frame, int regnum,
+			struct type *type, const void *from)
+{
+  char to[I386_MAX_REGISTER_SIZE];
+
+  gdb_assert (i386_fp_regnum_p (regnum));
+
+  /* We only support floating-point values.  */
+  if (TYPE_CODE (type) != TYPE_CODE_FLT)
+    {
+      warning ("Cannot convert non-floating-point type "
+	       "to floating-point register value.");
+      return;
+    }
+
+  /* Convert from TYPE.  This should be a no-op if TYPE is equivalent
+     to the extended floating-point format used by the FPU.  */
+  convert_typed_floating (from, type, to, builtin_type_i387_ext);
+  put_frame_register (frame, regnum, to);
+}
+
 
 /* FIXME: kettenis/2000-05-21: Right now more than a few i386 targets
    define their own routines to manage the floating-point registers in
