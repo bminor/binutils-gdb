@@ -118,7 +118,7 @@ pke0_issue(SIM_DESC sd)
 void 
 pke1_issue(SIM_DESC sd) 
 {
-  pke_issue(sd, & pke0_device);
+  pke_issue(sd, & pke1_device);
 }
 
 
@@ -487,8 +487,9 @@ pke_io_write_buffer(device *me_,
       memcpy((void*) fqw->data, me->fifo_qw_in_progress, sizeof(quadword));
       ASSERT(sizeof(unsigned_4) == 4);
       PKE_MEM_READ(me, (me->pke_number == 0 ? DMA_D0_MADR : DMA_D1_MADR),
-		   & fqw->source_address,
+		   & fqw->source_address, /* target endian */
 		   4);
+      fqw->source_address = T2H_4(fqw->source_address);
       PKE_MEM_READ(me, (me->pke_number == 0 ? DMA_D0_PKTFLAG : DMA_D1_PKTFLAG),
 		   & dma_tag_present,
 		   4);
@@ -1371,6 +1372,10 @@ pke_code_mpg(struct pke_device* me, unsigned_4 pkecode)
   int num = BIT_MASK_GET(pkecode, PKE_OPCODE_NUM_B, PKE_OPCODE_NUM_E);
   int imm = BIT_MASK_GET(pkecode, PKE_OPCODE_IMM_B, PKE_OPCODE_IMM_E);
 
+  /* assert 64-bit alignment of MPG operand */
+  if(me->qw_pc != 3 && me->qw_pc != 1)
+    return pke_code_error(me, pkecode);
+
   /* map zero to max+1 */
   if(num==0) num=0x100;
   
@@ -1380,6 +1385,12 @@ pke_code_mpg(struct pke_device* me, unsigned_4 pkecode)
     {
       /* perform implied FLUSHE */
       if(pke_check_stall(me, chk_vu))
+	{
+	  /* VU busy */
+	  PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_STALL);
+	  /* retry this instruction next clock */
+	}
+      else
 	{
 	  /* VU idle */
 	  int i;
@@ -1395,8 +1406,9 @@ pke_code_mpg(struct pke_device* me, unsigned_4 pkecode)
 	    {
 	      address_word vu_addr_base, vu_addr;
 	      address_word vutrack_addr_base, vutrack_addr;
-	      unsigned_4 vu_opcode[2];
+	      unsigned_4 vu_lower_opcode, vu_upper_opcode;
 	      unsigned_4* operand;
+	      unsigned_4 source_addr;
 	      struct fifo_quadword* fq;
 	      int next_num;
 
@@ -1408,29 +1420,36 @@ pke_code_mpg(struct pke_device* me, unsigned_4 pkecode)
 	      /* VU*_MEM0 : instruction memory */
 	      vu_addr_base = (me->pke_number == 0) ?
 		VU0_MEM0_WINDOW_START : VU0_MEM0_WINDOW_START;
-	      vu_addr = vu_addr_base + (imm + i) *2;
+	      vu_addr = vu_addr_base + (imm + i) * 8;
 
 	      /* XXX: overflow check! */
 	      
 	      /* VU*_MEM0_TRACK : source-addr tracking table */
 	      vutrack_addr_base = (me->pke_number == 0) ?
 		VU0_MEM0_SRCADDR_START : VU1_MEM0_SRCADDR_START;
-	      vutrack_addr = vu_addr_base + imm + i;
+	      vutrack_addr = vu_addr_base + (imm + i) * 4;
 
-	      /* Fetch operand words */
-	      fq = pke_pc_fifo(me, num*2 + i, & operand);
-	      vu_opcode[0] = *operand;
-	      vu_opcode[1] = *pke_pc_operand(me, num*2 + i + 1);
+	      /* Fetch operand words; assume they are already little-endian for VU imem */
+	      fq = pke_pc_fifo(me, i*2 + 1, & operand);
+	      vu_lower_opcode = *operand;
+	      vu_upper_opcode = *pke_pc_operand(me, i*2 + 2);
 	      
 	      /* write data into VU memory */
-	      ASSERT(sizeof(vu_opcode) == 8);
+	      /* upper (vector) opcode comes in first word */
+	      ASSERT(sizeof(unsigned_4) == 4);
 	      PKE_MEM_WRITE(me, vu_addr,
-			    vu_opcode,
-			    8);
+			    & vu_upper_opcode,
+			    4);
+	      /* lower (scalar) opcode comes in next word */
+	      PKE_MEM_WRITE(me, vu_addr + 4,
+			    & vu_lower_opcode,
+			    4);
 	      
-	      /* write srcaddr into VU srcaddr tracking table */
+	      /* write tracking address in target byte-order */
+	      source_addr = H2T_4(fq->source_address);
+	      ASSERT(sizeof(unsigned_4) == 4);
 	      PKE_MEM_WRITE(me, vutrack_addr,
-			    & fq->source_address,
+			    & source_addr,
 			    4);
 	    } /* VU xfer loop */
 
@@ -1440,12 +1459,6 @@ pke_code_mpg(struct pke_device* me, unsigned_4 pkecode)
 	  /* done */
 	  PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_IDLE);
 	  pke_pc_advance(me, 1 + num*2);
-	}
-      else
-	{
-	  /* VU busy */
-	  PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_STALL);
-	  /* retry this instruction next clock */
 	}
     } /* if FIFO full enough */
   else
@@ -1463,12 +1476,15 @@ pke_code_direct(struct pke_device* me, unsigned_4 pkecode)
   /* check that FIFO has a few more words for DIRECT operand */
   unsigned_4* last_direct_word;
   int imm = BIT_MASK_GET(pkecode, PKE_OPCODE_IMM_B, PKE_OPCODE_IMM_E);
-  int num = BIT_MASK_GET(pkecode, PKE_OPCODE_NUM_B, PKE_OPCODE_NUM_E);
   
+  /* assert 128-bit alignment of DIRECT operand */
+  if(me->qw_pc != 3)
+    return pke_code_error(me, pkecode);
+
   /* map zero to max+1 */
   if(imm==0) imm=0x10000;
   
-  last_direct_word = pke_pc_operand(me, imm*4); /* num: number of 128-bit words */
+  last_direct_word = pke_pc_operand(me, imm*4); /* imm: number of 128-bit words */
   if(last_direct_word != NULL)
     {
       /* VU idle */
@@ -1481,7 +1497,7 @@ pke_code_direct(struct pke_device* me, unsigned_4 pkecode)
       /* transfer GPUIF quadwords, one word per iteration */
       for(i=0; i<imm*4; i++)
 	{
-	  unsigned_4* operand = pke_pc_operand(me, num);
+	  unsigned_4* operand = pke_pc_operand(me, 1+i);
 	  
 	  /* collect word into quadword */
 	  fifo_data[i % 4] = *operand;
@@ -1530,7 +1546,7 @@ pke_code_unpack(struct pke_device* me, unsigned_4 pkecode)
   short cl = PKE_REG_MASK_GET(me, CYCLE, CL); /* cycle controls */
   short wl = PKE_REG_MASK_GET(me, CYCLE, WL);
   int r = BIT_MASK_GET(imm, 15, 15); /* indicator bits in imm value */
-  int sx = BIT_MASK_GET(imm, 14, 14);
+  int usn = BIT_MASK_GET(imm, 14, 14);
 
   int n, num_operands;
   unsigned_4* last_operand_word = NULL;
@@ -1619,6 +1635,10 @@ pke_code_unpack(struct pke_device* me, unsigned_4 pkecode)
 	  PKE_MEM_READ(me, vu_addr,
 		       vu_old_data,
 		       16);
+
+	  /* yank memory out of little-endian order */
+	  for(i=0; i<4; i++)
+	    vu_old_data[i] = LE2H_4(vu_old_data[i]);
 	  
 	  /* For cyclic unpack, next operand quadword may come from instruction stream
 	     or be zero. */
@@ -1667,10 +1687,10 @@ pke_code_unpack(struct pke_device* me, unsigned_4 pkecode)
 		  operand = pke_pc_operand_bits(me, bitoffset, unitbits, & source_addr);
 
 		  /* selectively sign-extend; not for V4_5 1-bit value */
-		  if(sx && unitbits > 1)
-		    unpacked_data[i] = SEXT32(operand, unitbits-1);
-		  else
+		  if(usn || unitbits == 1)
 		    unpacked_data[i] = operand;
+		  else
+		    unpacked_data[i] = SEXT32(operand, unitbits-1);
 		}
 
 	      /* consumed a vector from the PKE instruction stream */
@@ -1752,13 +1772,18 @@ pke_code_unpack(struct pke_device* me, unsigned_4 pkecode)
 	      ;
 	    }
 
+	  /* yank memory into little-endian order */
+	  for(i=0; i<4; i++)
+	    vu_new_data[i] = H2LE_4(vu_new_data[i]);
+	  
 	  /* write replacement word */
 	  ASSERT(sizeof(vu_new_data) == 16);
 	  PKE_MEM_WRITE(me, vu_addr,
 			vu_new_data,
 			16);
 
-	  /* write tracking address */
+	  /* write tracking address in target byte-order */
+	  source_addr = H2T_4(source_addr);
 	  ASSERT(sizeof(unsigned_4) == 4);
 	  PKE_MEM_WRITE(me, vutrack_addr,
 			& source_addr,
