@@ -3,6 +3,8 @@
 	* dwarf2.c (concat_filename): Use bfd_malloc() and strdup()
 	instead of concat().
 	(decode_line_info): Only free filename if it is not NULL.
+	(add_line_info): Make a copy of the filename when storing it into
+	the info structure.
 
 2003-03-31  Andreas Schwab  <schwab@suse.de>
 	    Daniel Jacobowitz  <drow@mvista.com>

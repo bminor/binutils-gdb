@@ -901,10 +901,19 @@ add_line_info (table, address, filename, line, column, end_sequence)
 
   /* Set member data of 'info'.  */
   info->address = address;
-  info->filename = filename;
   info->line = line;
   info->column = column;
   info->end_sequence = end_sequence;
+
+  amt = strlen (filename);
+  if (amt)
+    {
+      info->filename = bfd_alloc (table->abfd, amt + 1);
+      if (info->filename)
+	strcpy (info->filename, filename);
+    }
+  else
+    info->filename = NULL;
 }
 
 /* Extract a fully qualified filename from a line info table.
