@@ -1,5 +1,6 @@
 Wed Aug 30 22:05:17 1995  Jeff Law  (law@snake.cs.utah.edu)
 
+	* Makefile.in (run): Link in math library too.
 	* gencode.c (gensim): abort if an unknown opcode is encountered.
 start-sanitize-sh3e
 	* interp.c (FPSCR, FPUL): Define.
