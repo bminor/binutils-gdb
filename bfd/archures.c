@@ -102,16 +102,33 @@ DESCRIPTION
 .{* Nonzero if MACH has the v9 instruction set.  *}
 .#define bfd_mach_sparc_v9_p(mach) \
 .  ((mach) >= bfd_mach_sparc_v8plus && (mach) <= bfd_mach_sparc_v9a)
-.  bfd_arch_mips,      {* MIPS Rxxxx *}
+. {* start-sanitize-tx19 *}
+.#define bfd_mach_mips1900		1900
+. {* end-sanitize-tx19 *}
 .#define bfd_mach_mips3000		3000
-.#define bfd_mach_mips6000		6000
+.#define bfd_mach_mips3900		3900
 .#define bfd_mach_mips4000		4000
-.#define bfd_mach_mips8000		8000
-.#define bfd_mach_mips16		  16
+.#define bfd_mach_mips4010		4010
+.#define bfd_mach_mips4100		4100
+.#define bfd_mach_mips4300		4300
+.#define bfd_mach_mips4400		4400
+.#define bfd_mach_mips4600		4600
+.#define bfd_mach_mips4650		4650
+. {* start-sanitize-tx49 *}
+.#define bfd_mach_mips4900		4900
+. {* end-sanitize-tx49 *}
+.#define bfd_mach_mips5000		5000
 . {* start-sanitize-vr5400 *}
-.#define bfd_mach_vr5400		5400
-.#define bfd_mach_vr5000		5000
+.#define bfd_mach_mips5400		5400
 . {* end-sanitize-vr5400 *}
+. {* start-sanitize-r5900 *}
+.#define bfd_mach_mips5900		5900
+. {* end-sanitize-r5900 *}
+.#define bfd_mach_mips6000		6000
+.#define bfd_mach_mips8000		8000
+.#define bfd_mach_mips10000		10000
+.#define bfd_mach_mips16		16
+.  bfd_arch_mips,      {* MIPS Rxxxx *}
 .  bfd_arch_i386,      {* Intel 386 *}
 .#define bfd_mach_i386_i386 0
 .#define bfd_mach_i386_i8086 1

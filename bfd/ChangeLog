@@ -1,3 +1,10 @@
+Tue Jan 27 21:45:15 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* archures.c (bfd_mach_mips*): Add definitions for various MIPS
+	processors.
+	* cpu-mips.c (arch_info_struct): Add mips variants.
+	* bfd-in2.h: Rebuilt.
+
 Tue Jan 27 15:06:04 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* coff-arm.c (coff_arm_relocate_section): Fix for PR14752 by
