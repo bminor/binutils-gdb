@@ -177,8 +177,13 @@ static void open_trace PARAMS((SIM_DESC sd));
 
 static DECLARE_OPTION_HANDLER (mips_option_handler);
 
-#define OPTION_DINERO_TRACE  200
-#define OPTION_DINERO_FILE   201
+enum {
+  OPTION_DINERO_TRACE	= OPTION_START,
+  OPTION_DINERO_FILE
+/* start-sanitize-sky */
+  ,OPTION_FLOAT_TYPE
+/* end-sanitize-sky */
+};
 
 static SIM_RC
 mips_option_handler (sd, cpu, opt, arg, is_command)
@@ -212,7 +217,7 @@ mips_option_handler (sd, cpu, opt, arg, is_command)
 	    STATE &= ~simTRACE;
 	  else
 	    {
-	      fprintf (stderr, "Unreconized dinero-trace option `%s'\n", arg);
+	      fprintf (stderr, "Unrecognized dinero-trace option `%s'\n", arg);
 	      return SIM_RC_FAIL;
 	    }
 	}
@@ -243,6 +248,20 @@ Re-compile simulator with \"-DTRACE\" to enable this option.\n");
 #endif /* TRACE */
       return SIM_RC_OK;
 
+/* start-sanitize-sky */
+    case OPTION_FLOAT_TYPE:
+      /* Use host (fast) or target (accurate) floating point implementation. */
+      if (arg && strcmp (arg, "host") == 0)
+	STATE_FP_TYPE_OPT (sd) &= ~STATE_FP_TYPE_OPT_TARGET;
+      else if (arg && strcmp (arg, "target") == 0)
+	STATE_FP_TYPE_OPT (sd) |= STATE_FP_TYPE_OPT_TARGET;
+      else
+	{
+	  fprintf (stderr, "Unrecognized float-type option `%s'\n", arg);
+	  return SIM_RC_FAIL;
+	}
+      return SIM_RC_OK;
+/* end-sanitize-sky */
     }
 
   return SIM_RC_OK;
@@ -256,6 +275,11 @@ static const OPTION mips_options[] =
   { {"dinero-file", required_argument, NULL, OPTION_DINERO_FILE},
       '\0', "FILE", "Write dinero trace to FILE",
       mips_option_handler },
+/* start-sanitize-sky */
+  { {"float-type", required_argument, NULL, OPTION_FLOAT_TYPE},
+      '\0', "host|target", "Use host (fast) or target (accurate) floating point",
+      mips_option_handler },
+/* end-sanitize-sky */
   { {NULL, no_argument, NULL, 0}, '\0', NULL, NULL, NULL }
 };
 
