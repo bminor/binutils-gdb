@@ -1,3 +1,7 @@
+1999-08-09  Mark Elbrecht  <snowball3@bigfoot.com>
+
+	* scripttempl/i386go32.sc: Handle g++ exception sections.
+
 1999-08-09  Ian Lance Taylor  <ian@zembu.com>
 
 	From Wally Iimura <iimura@microunity.com>:

@@ -32,6 +32,13 @@ SECTIONS
     *(.dtor)
     djgpp_last_dtor = . ;}
     *(.data)
+
+    ${RELOCATING+*(.gcc_exc*)}
+    ${RELOCATING+___EH_FRAME_BEGIN__ = . ;}
+    ${RELOCATING+*(.eh_fram*)}
+    ${RELOCATING+___EH_FRAME_END__ = . ;}
+    ${RELOCATING+LONG(0);}
+
     ${RELOCATING+*(.gnu.linkonce.d*)}
     ${RELOCATING+edata  =  . ; _edata = .};
     ${RELOCATING+. = ALIGN(${SEGMENT_SIZE});}
