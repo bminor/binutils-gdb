@@ -1,3 +1,8 @@
+Tue Jan 20 21:35:13 1998  Michael Meissner  <meissner@cygnus.com>
+
+	* sim-utils.c (sim_state_alloc): #if 0 variable that is only used
+	in code also #if 0'ed.
+
 Mon Jan 19 22:26:29 1998  Doug Evans  <devans@seba>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.
