@@ -217,7 +217,7 @@ s_stab_generic (what, stab_secname, stabstr_secname)
 	input_line_pointer++;
       else
 	{
-	  as_warn (_(".stabs: Missing comma"));
+	  as_warn (_(".stab%c: missing comma"), what);
 	  ignore_rest_of_line ();
 	  return;
 	}
@@ -225,7 +225,7 @@ s_stab_generic (what, stab_secname, stabstr_secname)
 
   if (get_absolute_expression_and_terminator (&longint) != ',')
     {
-      as_warn (_(".stab%c: Missing comma"), what);
+      as_warn (_(".stab%c: missing comma"), what);
       ignore_rest_of_line ();
       return;
     }
@@ -233,7 +233,7 @@ s_stab_generic (what, stab_secname, stabstr_secname)
 
   if (get_absolute_expression_and_terminator (&longint) != ',')
     {
-      as_warn (_(".stab%c: Missing comma"), what);
+      as_warn (_(".stab%c: missing comma"), what);
       ignore_rest_of_line ();
       return;
     }
@@ -244,7 +244,7 @@ s_stab_generic (what, stab_secname, stabstr_secname)
     {
       if (*input_line_pointer != ',')
 	{
-	  as_warn (_(".stab%c: Missing comma"), what);
+	  as_warn (_(".stab%c: missing comma"), what);
 	  ignore_rest_of_line ();
 	  return;
 	}
@@ -469,7 +469,7 @@ s_desc (ignore)
   if (*input_line_pointer != ',')
     {
       *p = 0;
-      as_bad (_("Expected comma after name \"%s\""), name);
+      as_bad (_("expected comma after \"%s\""), name);
       *p = c;
       ignore_rest_of_line ();
     }

@@ -146,7 +146,7 @@ input_file_open (filename, pre)
     }
   if (f_in == (FILE *) 0)
     {
-      as_bad (_("Can't open %s for reading."), file_name);
+      as_bad (_("can't open %s for reading"), file_name);
       as_perror ("%s", file_name);
       return;
     }

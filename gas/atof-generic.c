@@ -434,7 +434,7 @@ atof_generic (address_of_string_pointer,
 		   * We have a GROSS internal error.
 		   * This should never happen.
 		   */
-		  as_fatal (_("failed sanity check."));
+		  as_fatal (_("failed sanity check"));
 		}
 	    }
 	  else

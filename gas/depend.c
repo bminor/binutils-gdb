@@ -197,7 +197,7 @@ print_dependencies ()
   f = fopen (dep_file, FOPEN_WT);
   if (f == NULL)
     {
-      as_warn (_("Can't open `%s' for writing"), dep_file);
+      as_warn (_("can't open `%s' for writing"), dep_file);
       return;
     }
 
@@ -209,5 +209,5 @@ print_dependencies ()
   putc ('\n', f);
 
   if (fclose (f))
-    as_warn (_("Can't close `%s'"), dep_file);
+    as_warn (_("can't close `%s'"), dep_file);
 }

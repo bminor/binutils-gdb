@@ -1234,7 +1234,7 @@ write_contents (abfd, sec, xxx)
 		    (stdoutput, sec, buf, (file_ptr) offset,
 		     (bfd_size_type) n_per_buf * fill_size);
 		  if (x != true)
-		    as_fatal (_("Cannot write to output file."));
+		    as_fatal (_("cannot write to output file"));
 		  offset += n_per_buf * fill_size;
 		}
 	    }
@@ -1483,14 +1483,14 @@ write_object_file ()
     if (flag_always_generate_output)
       {
 	if (n_warns || n_errs)
-	  as_warn (_("%d error%s, %d warning%s, generating bad object file.\n"),
+	  as_warn (_("%d error%s, %d warning%s, generating bad object file"),
 		   n_errs, n_errs == 1 ? "" : "s",
 		   n_warns, n_warns == 1 ? "" : "s");
       }
     else
       {
 	if (n_errs)
-	  as_fatal (_("%d error%s, %d warning%s, no object file generated.\n"),
+	  as_fatal (_("%d error%s, %d warning%s, no object file generated"),
 		    n_errs, n_errs == 1 ? "" : "s",
 		    n_warns, n_warns == 1 ? "" : "s");
       }
@@ -1950,7 +1950,7 @@ write_object_file ()
 	      /* They only differ if `name' is a fb or dollar local
 		 label name.  */
 	      if (name2 != name && ! S_IS_DEFINED (symp))
-		as_bad (_("local label %s is not defined"), name2);
+		as_bad (_("local label `%s' is not defined"), name2);
 	    }
 
 	  /* Do it again, because adjust_reloc_syms might introduce
@@ -2013,7 +2013,7 @@ write_object_file ()
 	  /* Make sure we really got a value for the symbol.  */
 	  if (! symbol_resolved_p (symp))
 	    {
-	      as_bad (_("can't resolve value for symbol \"%s\""),
+	      as_bad (_("can't resolve value for symbol `%s'"),
 		      S_GET_NAME (symp));
 	      symbol_mark_resolved (symp);
 	    }
@@ -2440,7 +2440,7 @@ relax_segment (segment_frag_root, segment)
 			 cannot have fewer than 0 chars.  That is, we can't
 			 .org backwards.  */
 		      as_bad_where (fragP->fr_file, fragP->fr_line,
-				    _("attempt to .org backwards ignored"));
+				    _("attempt to .org backwards"));
 
 		      /* We've issued an error message.  Change the
                          frag to avoid cascading errors.  */
@@ -2649,7 +2649,7 @@ fixup_segment (fixP, this_segment_type)
 	      else
 	      bad_sub_reloc:
 		as_bad_where (fixP->fx_file, fixP->fx_line,
-			      _("Negative of non-absolute symbol %s"),
+			      _("negative of non-absolute symbol `%s'"),
 			      S_GET_NAME (sub_symbolP));
 	    }
 	  else if (S_GET_SEGMENT (sub_symbolP) == add_symbol_segment
@@ -2663,7 +2663,7 @@ fixup_segment (fixP, this_segment_type)
 		 as the target of a call instruction.  */
 	      if (fixP->fx_tcbit)
 		as_bad_where (fixP->fx_file, fixP->fx_line,
-			      _("callj to difference of 2 symbols"));
+			      _("callj to difference of two symbols"));
 #endif /* TC_I960  */
 	      add_number += (S_GET_VALUE (add_symbolP)
 			     - S_GET_VALUE (sub_symbolP));
@@ -2743,7 +2743,7 @@ fixup_segment (fixP, this_segment_type)
 		  char buf[50];
 		  sprint_value (buf, fragP->fr_address + where);
 		  as_bad_where (fixP->fx_file, fixP->fx_line,
-				_("Subtraction of two symbols in different sections \"%s\" {%s section} - \"%s\" {%s section} at file address %s."),
+				_("subtraction of two symbols in different sections `%s' {%s section} - `%s' {%s section} at file address %s"),
 				S_GET_NAME (add_symbolP),
 				segment_name (S_GET_SEGMENT (add_symbolP)),
 				S_GET_NAME (sub_symbolP),
@@ -2897,7 +2897,7 @@ fixup_segment (fixP, this_segment_type)
 		  else
 		    sprintf (buf2, "%ld", (long) add_number);
 		  as_bad_where (fixP->fx_file, fixP->fx_line,
-				_("Value of %s too large for field of %d bytes at %s"),
+				_("value of %s too large for field of %d bytes at %s"),
 				buf2, size, buf);
 		} /* Generic error checking.  */
 	    }
@@ -2909,7 +2909,7 @@ fixup_segment (fixP, this_segment_type)
 	      && size == 2
 	      && add_number > 0x7fff)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
-			  _("Signed .word overflow; switch may be too large; %ld at 0x%lx"),
+			  _("signed .word overflow; switch may be too large; %ld at 0x%lx"),
 			  (long) add_number,
 			  (unsigned long) (fragP->fr_address + where));
 #endif

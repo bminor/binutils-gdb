@@ -81,9 +81,9 @@ make_expr_symbol (expressionP)
          generic_floating_point_number or generic_bignum, and we are
          going to lose it if we haven't already.  */
       if (expressionP->X_add_number > 0)
-	as_bad (_("bignum invalid; zero assumed"));
+	as_bad (_("bignum invalid"));
       else
-	as_bad (_("floating point number invalid; zero assumed"));
+	as_bad (_("floating point number invalid"));
       zero.X_op = O_constant;
       zero.X_add_number = 0;
       zero.X_unsigned = 0;
@@ -243,11 +243,12 @@ floating_constant (expressionP)
     {
       if (error_code == ERROR_EXPONENT_OVERFLOW)
 	{
-	  as_bad (_("bad floating-point constant: exponent overflow, probably assembling junk"));
+	  as_bad (_("bad floating-point constant: exponent overflow"));
 	}
       else
 	{
-	  as_bad (_("bad floating-point constant: unknown error code=%d."), error_code);
+	  as_bad (_("bad floating-point constant: unknown error code=%d"),
+		  error_code);
 	}
     }
   expressionP->X_op = O_big;
@@ -427,7 +428,7 @@ integer_constant (radix, expressionP)
 
 	  /* Check for 8 digit per word max.  */
 	  if (ndigit > 8)
-	    as_bad (_("A bignum with underscores may not have more than 8 hex digits in any word."));
+	    as_bad (_("a bignum with underscores may not have more than 8 hex digits in any word"));
 
 	  /* Add this chunk to the bignum.
 	     Shift things down 2 little digits.  */
@@ -450,7 +451,7 @@ integer_constant (radix, expressionP)
       assert (num_little_digits >= 4);
 
       if (num_little_digits != 8)
-	as_bad (_("A bignum with underscores must have exactly 4 words."));
+	as_bad (_("a bignum with underscores must have exactly 4 words"));
 
       /* We might have some leading zeros.  These can be trimmed to give
 	 us a change to fit this constant into a small number.  */
@@ -573,7 +574,7 @@ integer_constant (radix, expressionP)
 	      /* Either not seen or not defined.  */
 	      /* @@ Should print out the original string instead of
 		 the parsed number.  */
-	      as_bad (_("backw. ref to unknown label \"%d:\", 0 assumed."),
+	      as_bad (_("backward ref to unknown label \"%d:\""),
 		      (int) number);
 	      expressionP->X_op = O_constant;
 	    }
@@ -696,7 +697,7 @@ mri_char_constant (expressionP)
 
   if (i < 0)
     {
-      as_bad (_("Character constant too large"));
+      as_bad (_("character constant too large"));
       i = 0;
     }
 
@@ -1010,7 +1011,7 @@ operand (expressionP)
 #ifdef RELAX_PAREN_GROUPING
 	  if (c != '(')
 #endif
-	    as_bad (_("Missing '%c' assumed"), c == '(' ? ')' : ']');
+	    as_bad (_("missing '%c'"), c == '(' ? ')' : ']');
 	}
       else
 	input_line_pointer++;
@@ -1312,7 +1313,7 @@ operand (expressionP)
 	  if (expressionP->X_op == O_absent)
 	    {
 	      ++input_line_pointer;
-	      as_bad (_("Bad expression"));
+	      as_bad (_("bad expression"));
 	      expressionP->X_op = O_constant;
 	      expressionP->X_add_number = 0;
 	    }

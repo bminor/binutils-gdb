@@ -587,7 +587,7 @@ the GNU General Public License.  This program has absolutely no warranty.\n"));
 
 	    if (optarg == NULL)
 	      {
-		as_warn (_("No file name following -t option\n"));
+		as_warn (_("no file name following -t option"));
 		break;
 	      }
 
@@ -602,11 +602,8 @@ the GNU General Public License.  This program has absolutely no warranty.\n"));
 	       internal table.  */
 	    itbl_files->name = xstrdup (optarg);
 	    if (itbl_parse (itbl_files->name) != 0)
-	      {
-		fprintf (stderr, _("Failed to read instruction table %s\n"),
-			 itbl_files->name);
-		exit (EXIT_SUCCESS);
-	      }
+	      as_fatal (_("failed to read instruction table %s\n"),
+			itbl_files->name);
 	  }
 	  break;
 

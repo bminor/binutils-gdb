@@ -374,7 +374,7 @@ subseg_new (segname, subseg)
     return new_seg;
   }
 #else
-  as_bad (_("Attempt to switch to nonexistent segment \"%s\""), segname);
+  as_bad (_("attempt to switch to nonexistent segment \"%s\""), segname);
   return now_seg;
 #endif
 }

@@ -148,7 +148,7 @@ gas_cgen_save_fixups (int i)
 {
       if (i < 0 || i >= MAX_SAVED_FIXUP_CHAINS)
       {
-          as_fatal("Index into stored_fixups[] out of bounds.");
+          as_fatal("index into stored_fixups[] out of bounds");
           return;
       }
       stored_fixups[i].num_fixups_in_chain = num_fixups;
@@ -162,7 +162,7 @@ gas_cgen_restore_fixups (int i)
 {
       if (i < 0 || i >= MAX_SAVED_FIXUP_CHAINS)
       {
-          as_fatal("Index into stored_fixups[] out of bounds.");
+          as_fatal("index into stored_fixups[] out of bounds");
           return;
       }
       num_fixups = stored_fixups[i].num_fixups_in_chain;
@@ -179,7 +179,7 @@ gas_cgen_swap_fixups (int i)
 
      if (i < 0 || i >= MAX_SAVED_FIXUP_CHAINS)
      {
-         as_fatal("Index into stored_fixups[] out of bounds.");
+         as_fatal("index into stored_fixups[] out of bounds");
          return;
      }
 

@@ -1295,7 +1295,7 @@ listing_title (depth)
 	}
       else if (*input_line_pointer == '\n')
 	{
-	  as_bad (_("New line in title"));
+	  as_bad (_("new line in title"));
 	  demand_empty_rest_of_line ();
 	  return;
 	}

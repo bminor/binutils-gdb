@@ -566,7 +566,7 @@ do_scrub_chars (get, tostart, tolen)
 	  ch = GET ();
 	  if (ch == EOF)
 	    {
-	      as_warn (_("end of file in string: inserted '\"'"));
+	      as_warn (_("end of file in string; inserted '\"'"));
 	      state = old_state;
 	      UNGET ('\n');
 	      PUT ('"');
@@ -632,7 +632,7 @@ do_scrub_chars (get, tostart, tolen)
 	      break;
 #if defined(IGNORE_NONSTANDARD_ESCAPES) | defined(ONLY_STANDARD_ESCAPES)
 	    default:
-	      as_warn (_("Unknown escape '\\%c' in string: Ignored"), ch);
+	      as_warn (_("unknown escape '\\%c' in string; ignored"), ch);
 	      break;
 #else  /* ONLY_STANDARD_ESCAPES */
 	    default:
@@ -641,7 +641,7 @@ do_scrub_chars (get, tostart, tolen)
 #endif /* ONLY_STANDARD_ESCAPES */
 
 	    case EOF:
-	      as_warn (_("End of file in string: '\"' inserted"));
+	      as_warn (_("end of file in string; '\"' inserted"));
 	      PUT ('"');
 	      continue;
 	    }
@@ -1004,7 +1004,7 @@ do_scrub_chars (get, tostart, tolen)
 	  if ((ch = GET ()) != '\'')
 	    {
 #ifdef REQUIRE_CHAR_CLOSE_QUOTE
-	      as_warn (_("Missing close quote: (assumed)"));
+	      as_warn (_("missing close quote; (assumed)"));
 #else
 	      if (ch != EOF)
 		UNGET (ch);
@@ -1136,7 +1136,7 @@ do_scrub_chars (get, tostart, tolen)
 		  while (ch != EOF && !IS_NEWLINE (ch))
 		    ch = GET ();
 		  if (ch == EOF)
-		    as_warn (_("EOF in Comment: Newline inserted"));
+		    as_warn (_("end of file in comment; newline inserted"));
 		  state = 0;
 		  PUT ('\n');
 		  break;

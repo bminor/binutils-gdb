@@ -341,13 +341,13 @@ dwarf2_directive_file (dummy)
 
   if (num < 1)
     {
-      as_bad (_("File number less than one"));
+      as_bad (_("file number less than one"));
       return;
     }
 
   if (num < files_in_use && files[num].filename != 0)
     {
-      as_bad (_("File number %ld already allocated"), (long) num);
+      as_bad (_("file number %ld already allocated"), (long) num);
       return;
     }
 
@@ -383,12 +383,12 @@ dwarf2_directive_loc (dummy)
 
   if (filenum < 1)
     {
-      as_bad (_("File number less than one"));
+      as_bad (_("file number less than one"));
       return;
     }
   if (filenum >= (int) files_in_use || files[filenum].filename == 0)
     {
-      as_bad (_("Unassigned file number %ld"), (long) filenum);
+      as_bad (_("unassigned file number %ld"), (long) filenum);
       return;
     }
 
@@ -933,7 +933,7 @@ out_file_list ()
     {
       if (files[i].filename == NULL)
 	{
-	  as_bad (_("Unassigned file number %u"), i);
+	  as_bad (_("unassigned file number %ld"), (long) i);
 	  continue;
 	}
 

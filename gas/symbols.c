@@ -359,7 +359,7 @@ colon (sym_name)		/* Just seen "x:" - rattle symbols & frags.  */
 		  || locsym->lsy_section != now_seg
 		  || locsym->lsy_value != frag_now_fix ()))
 	    {
-	      as_bad (_("Symbol %s already defined."), sym_name);
+	      as_bad (_("symbol `%s' is already defined"), sym_name);
 	      return symbolP;
 	    }
 
@@ -444,7 +444,7 @@ colon (sym_name)		/* Just seen "x:" - rattle symbols & frags.  */
 			    S_GET_OTHER (symbolP),
 			    S_GET_DESC (symbolP));
 #endif
-		  as_bad (_("Symbol \"%s\" is already defined as \"%s\"/%s%ld."),
+		  as_bad (_("symbol `%s' is already defined as \"%s\"/%s%ld"),
 			    sym_name,
 			    segment_name (S_GET_SEGMENT (symbolP)),
 			    od_buf,
@@ -458,7 +458,7 @@ colon (sym_name)		/* Just seen "x:" - rattle symbols & frags.  */
 	  if (!(frag_now == symbolP->sy_frag
 		&& S_GET_VALUE (symbolP) == frag_now_fix ()
 		&& S_GET_SEGMENT (symbolP) == now_seg))
-	    as_bad (_("Symbol %s already defined."), sym_name);
+	    as_bad (_("symbol `%s' is already defined"), sym_name);
 	}
 
     }
@@ -521,14 +521,14 @@ symbol_table_insert (symbolP)
       error_string = hash_jam (local_hash, S_GET_NAME (symbolP),
 			       (PTR) symbolP);
       if (error_string != NULL)
-	as_fatal (_("Inserting \"%s\" into symbol table failed: %s"),
+	as_fatal (_("inserting \"%s\" into symbol table failed: %s"),
 		  S_GET_NAME (symbolP), error_string);
       return;
     }
 
   if ((error_string = hash_jam (sy_hash, S_GET_NAME (symbolP), (PTR) symbolP)))
     {
-      as_fatal (_("Inserting \"%s\" into symbol table failed: %s"),
+      as_fatal (_("inserting \"%s\" into symbol table failed: %s"),
 		S_GET_NAME (symbolP), error_string);
     }				/* on error  */
 }
@@ -873,7 +873,7 @@ resolve_symbol_value (symp)
   if (symp->sy_resolving)
     {
       if (finalize_syms)
-	as_bad (_("Symbol definition loop encountered at %s"),
+	as_bad (_("symbol definition loop encountered at `%s'"),
 		S_GET_NAME (symp));
       final_val = 0;
       resolved = 1;
@@ -1052,11 +1052,11 @@ resolve_symbol_value (symp)
 		{
 		  if (seg_left == undefined_section)
 		    as_bad_where (file, line,
-				  _("undefined symbol %s in operation"),
+				  _("undefined symbol `%s' in operation"),
 				  S_GET_NAME (symp->sy_value.X_add_symbol));
 		  if (seg_right == undefined_section)
 		    as_bad_where (file, line,
-				  _("undefined symbol %s in operation"),
+				  _("undefined symbol `%s' in operation"),
 				  S_GET_NAME (symp->sy_value.X_op_symbol));
 		  if (seg_left != undefined_section
 		      && seg_right != undefined_section)
@@ -1066,16 +1066,16 @@ resolve_symbol_value (symp)
 	      else
 		{
 		  if (seg_left == undefined_section)
-		    as_bad (_("undefined symbol %s in operation setting %s"),
+		    as_bad (_("undefined symbol `%s' in operation setting `%s'"),
 			    S_GET_NAME (symp->sy_value.X_add_symbol),
 			    S_GET_NAME (symp));
 		  if (seg_right == undefined_section)
-		    as_bad (_("undefined symbol %s in operation setting %s"),
+		    as_bad (_("undefined symbol `%s' in operation setting `%s'"),
 			    S_GET_NAME (symp->sy_value.X_op_symbol),
 			    S_GET_NAME (symp));
 		  if (seg_left != undefined_section
 		      && seg_right != undefined_section)
-		    as_bad (_("invalid section for operation setting %s"),
+		    as_bad (_("invalid section for operation setting `%s'"),
 			    S_GET_NAME (symp));
 		}
 	    }
@@ -1093,7 +1093,7 @@ resolve_symbol_value (symp)
 		  if (expr_symbol_where (symp, &file, &line))
 		    as_bad_where (file, line, _("division by zero"));
 		  else
-		    as_bad (_("division by zero when setting %s"),
+		    as_bad (_("division by zero when setting `%s'"),
 			    S_GET_NAME (symp));
 		}
 
@@ -1165,7 +1165,7 @@ exit_dont_set_value:
 	symp->sy_resolved = 1;
       else if (S_GET_SEGMENT (symp) != expr_section)
 	{
-	  as_bad (_("can't resolve value for symbol \"%s\""),
+	  as_bad (_("can't resolve value for symbol `%s'"),
 		  S_GET_NAME (symp));
 	  symp->sy_resolved = 1;
 	}
@@ -1596,7 +1596,7 @@ S_GET_VALUE (s)
       if (! s->sy_resolved
 	  || s->sy_value.X_op != O_symbol
 	  || (S_IS_DEFINED (s) && ! S_IS_COMMON (s)))
-	as_bad (_("Attempt to get value of unresolved symbol %s"),
+	as_bad (_("attempt to get value of unresolved symbol `%s'"),
 		S_GET_NAME (s));
       recur = NULL;
     }
@@ -1832,7 +1832,7 @@ S_SET_EXTERNAL (s)
       /* Do not reassign section symbols.  */
       as_where (& file, & line);
       as_warn_where (file, line,
-		     _("Section symbols are already global"));
+		     _("section symbols are already global"));
       return;
     }
   s->bsym->flags |= BSF_GLOBAL;

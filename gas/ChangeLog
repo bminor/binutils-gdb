@@ -1,3 +1,40 @@
+2001-08-01  Alan Modra  <amodra@bigpond.net.au>
+
+	* read.c: Standardize error/warning messages - don't capitalise, no
+	final period or newline, don't say "ignored" or "zero assumed" for
+	as_bad messages.  In some cases, change the wording to that used
+	elsewhere for similar messages.
+	* app.c: Likewise.
+	* as.c: Likewise.
+	* atof-generic.c: Likewise.
+	* cgen.c: Likewise.
+	* cond.c: Likewise.
+	* depend.c: Likewise.
+	* dwarf2dbg.c: Likewise.
+	* ecoff.c: Likewise.
+	* expr.c: Likewise.
+	* frags.c: Likewise.
+	* input-file.c: Likewise.
+	* input-scrub.c: Likewise.
+	* listing.c: Likewise.
+	* output-file.c: Likewise.
+	* stabs.c: Likewise.
+	* subsegs.c: Likewise.
+	* symbols.c: Likewise.
+	* write.c: Likewise.
+	* ecoff.c (ecoff_directive_end): Test for missing name by
+	comparing input line pointers rather than reading string.
+	(ecoff_directive_ent): Likewise.
+	* read.c (s_set): Likewise.
+	(s_align): Report a warning rather than an error for
+	alignment too large.
+	(s_comm): Check for missing symbol name.
+	(s_lcomm_internal): Likewise.
+	(s_lsym): Likewise.
+	(s_globl): Use is_end_of_line instead of looking for '\n'.
+	(s_lcomm_internal): Likewise.
+	(ignore_rest_of_line): Report a warning rather than an error.
+
 2001-07-31  Geoffrey Keating  <geoffk@redhat.com>
 
 	* config/tc-ppc.c (ppc_elf_validate_fix): It's OK to have

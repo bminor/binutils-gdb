@@ -45,11 +45,11 @@ output_file_create (name)
      char *name;
 {
   if (name[0] == '-' && name[1] == '\0')
-    as_fatal (_("Can't open a bfd on stdout %s "), name);
+    as_fatal (_("can't open a bfd on stdout %s"), name);
 
   else if (!(stdoutput = bfd_openw (name, TARGET_FORMAT)))
     {
-      as_perror (_("FATAL: Can't create %s"), name);
+      as_perror (_("FATAL: can't create %s"), name);
       exit (EXIT_FAILURE);
     }
 
@@ -70,14 +70,14 @@ output_file_close (filename)
   if (bfd_close (stdoutput) == 0)
     {
       bfd_perror (filename);
-      as_perror (_("FATAL: Can't close %s\n"), filename);
+      as_perror (_("FATAL: can't close %s\n"), filename);
       exit (EXIT_FAILURE);
     }
 #else
   /* Close the bfd without getting bfd to write out anything by itself.  */
   if (bfd_close_all_done (stdoutput) == 0)
     {
-      as_perror (_("FATAL: Can't close %s\n"), filename);
+      as_perror (_("FATAL: can't close %s\n"), filename);
       exit (EXIT_FAILURE);
     }
 #endif
@@ -118,7 +118,7 @@ output_file_create (name)
 
   if (stdoutput == NULL)
     {
-      as_perror (_("FATAL: Can't create %s"), name);
+      as_perror (_("FATAL: can't create %s"), name);
       exit (EXIT_FAILURE);
     }
 }
@@ -129,7 +129,7 @@ output_file_close (filename)
 {
   if (EOF == fclose (stdoutput))
     {
-      as_perror (_("FATAL: Can't close %s"), filename);
+      as_perror (_("FATAL: can't close %s"), filename);
       exit (EXIT_FAILURE);
     }
 
@@ -151,7 +151,7 @@ output_file_append (where, length, filename)
 	/* if ( EOF == (putc( *where, stdoutput )) ) */
 	{
 	  as_perror (_("Failed to emit an object byte"), filename);
-	  as_fatal (_("Can't continue"));
+	  as_fatal (_("can't continue"));
 	}
     }
 }
