@@ -334,7 +334,7 @@ Tue Feb 27 16:56:13 2001  David Taylor  <taylor@redhat.com>
 	* minsyms.c (lookup_minimal_symbol_by_pc_section): Don't skip
 	symbols whose SYMBOL_BFD_SECTION is NULL.
 
-2000-02-10  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
+2001-02-10  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 
 	Get rid of AIX specific PC_LOAD_SEGMENT, replace with PC_SOLIB.
 	* xcoffsolib.c (xcoff_solib_address):  Renamed from
@@ -348,12 +348,12 @@ Tue Feb 27 16:56:13 2001  David Taylor  <taylor@redhat.com>
 	* stack.c (print_frame):  Remove PC_LOAD_SEGMENT code, no longer
 	needed.
 
-2000-02-10  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
+2001-02-10  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 
 	* mipsread.c (read_alphacoff_dynamic_symtab):  Replace alloca calls
 	with xmalloc calls and cleanups.
 
-2000-02-10  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
+2001-02-10  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 
 	* rs6000-nat.c (child_xfer_memory):  Add missing parameter
 	'struct mem_attrib *' required by 2001-01-23 change.
@@ -749,7 +749,7 @@ Tue Jan 30 15:14:26 2001  Andrew Cagney  <cagney@skil>
 	* symtab.c (block_lookup_symbol): Use 'namespace' parameter in
 	symbol comparisons in binary search.
 
-2000-01-27  Christopher Faylor  <cgf@cygnus.com>
+2001-01-27  Christopher Faylor  <cgf@cygnus.com>
 
 	* win32-nat.c (child_xfer_memory): Add missing argument required by
 	2001-01-23 change.
