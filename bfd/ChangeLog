@@ -1,3 +1,18 @@
+Tue Aug 31 12:50:19 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* nlmcode.h (nlm_object_p): Set HAS_SYMS if there are external
+	references.
+	(nlm_swap_auxiliary_headers_{in,out}): The copyright length is
+	only one byte.
+	(nlm_get_symtab_upper_bound): Include debugging symbols in symbol
+	count.
+	(nlm_slurp_symbol_table): Make symlength unsigned.  Read debugging
+	symbols as BFD local symbols.
+	(nlm_write_object_contents): Don't bother writing out exported
+	symbols more than once; they now appear in the symbol table more
+	than once (with and without a prefix) if necessary.  Set offset
+	values to be non-zero as NLMLINK does.
+
 Tue Aug 31 12:07:43 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* libhppa.h: Restore #undefs of e_fsel and other e_* symbols.
