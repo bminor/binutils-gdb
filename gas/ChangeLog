@@ -1,3 +1,15 @@
+2003-02-21  Bob Wilson  <bob.wilson@acm.org>
+
+	* doc/as.texinfo: Define new COFF-ELF variable to conditionalize text
+	relevant to both COFF and ELF.  Fix obvious typos and texinfo bugs.
+	Capitalize section headings consistently.  Format index entries more
+	consistently.  Unconditionalize text about whether text and data
+	sections are alterable.  Use @ifnottex for alternatives to @tex output
+	so that HTML works.  Clean up COFF vs. ELF descriptions of .section,
+	.size and .type directives.  Be more polite about bad bug reports.
+	Move FDL into a separate file.
+	* doc/fdl.texi: New file.
+
 2003-02-21  Richard Sandiford  <rsandifo@redhat.com>
 
 	* config/tc-mips.c (prev_reloc_op_frag): New variable.
