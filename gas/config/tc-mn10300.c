@@ -659,7 +659,7 @@ md_convert_frag (abfd, sec, fragP)
       fragP->fr_literal[offset] = opcode;
 
       /* Create a fixup for the reversed conditional branch.  */
-      sprintf (buf, ".%s_%d", FAKE_LABEL_NAME, label_count++);
+      sprintf (buf, ".%s_%ld", FAKE_LABEL_NAME, label_count++);
       fix_new (fragP, fragP->fr_fix + 1, 1,
 	       symbol_new (buf, sec, 0, fragP->fr_next),
 	       fragP->fr_offset + 1, 1, BFD_RELOC_8_PCREL);
@@ -716,7 +716,7 @@ md_convert_frag (abfd, sec, fragP)
       fragP->fr_literal[offset] = opcode;
 
       /* Create a fixup for the reversed conditional branch.  */
-      sprintf (buf, ".%s_%d", FAKE_LABEL_NAME, label_count++);
+      sprintf (buf, ".%s_%ld", FAKE_LABEL_NAME, label_count++);
       fix_new (fragP, fragP->fr_fix + 1, 1,
 	       symbol_new (buf, sec, 0, fragP->fr_next),
 	       fragP->fr_offset + 1, 1, BFD_RELOC_8_PCREL);
@@ -762,7 +762,7 @@ md_convert_frag (abfd, sec, fragP)
       fragP->fr_literal[offset + 1] = opcode;
 
       /* Create a fixup for the reversed conditional branch.  */
-      sprintf (buf, ".%s_%d", FAKE_LABEL_NAME, label_count++);
+      sprintf (buf, ".%s_%ld", FAKE_LABEL_NAME, label_count++);
       fix_new (fragP, fragP->fr_fix + 2, 1,
 	       symbol_new (buf, sec, 0, fragP->fr_next),
 	       fragP->fr_offset + 2, 1, BFD_RELOC_8_PCREL);
@@ -798,7 +798,7 @@ md_convert_frag (abfd, sec, fragP)
       fragP->fr_literal[offset + 1] = opcode;
 
       /* Create a fixup for the reversed conditional branch.  */
-      sprintf (buf, ".%s_%d", FAKE_LABEL_NAME, label_count++);
+      sprintf (buf, ".%s_%ld", FAKE_LABEL_NAME, label_count++);
       fix_new (fragP, fragP->fr_fix + 2, 1,
 	       symbol_new (buf, sec, 0, fragP->fr_next),
 	       fragP->fr_offset + 2, 1, BFD_RELOC_8_PCREL);
@@ -1841,7 +1841,7 @@ tc_gen_reloc (seg, fixp)
 	  return NULL;
 	}
 
-      reloc->sym_ptr_ptr = &bfd_abs_symbol;
+      reloc->sym_ptr_ptr = (asymbol **) &bfd_abs_symbol;
       reloc->addend = (S_GET_VALUE (fixp->fx_addsy)
 		       - S_GET_VALUE (fixp->fx_subsy) + fixp->fx_offset);
     }
@@ -1896,6 +1896,7 @@ md_estimate_size_before_relax (fragp, seg)
       else
 	return 2;
     }
+  abort ();
 }
 
 long

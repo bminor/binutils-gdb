@@ -1,3 +1,10 @@
+Thu Jul 27 11:25:01 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* config/tc-mn10300.c (md_convert_frag): Fix printfs.
+	(tc_gen_reloc): Add cast when assigning bfd_abs_symbol to
+ 	sym_ptr_ptr
+	(md_estimate_size_before_relax): Don't fall off end of function.
+
 2000-07-27  Kazu Hirata  <kazu@hxi.com>
 
 	* config/tc-avr.c: Fix formatting.
