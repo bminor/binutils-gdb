@@ -199,6 +199,7 @@ main (argc, argv)
   command_line.interpreter = NULL;
   command_line.rpath = NULL;
   command_line.warn_mismatch = true;
+  command_line.check_section_addresses = true;
 
   link_info.callbacks = &link_callbacks;
   link_info.relocateable = false;
@@ -245,9 +246,6 @@ main (argc, argv)
       if (link_info.shared)
 	einfo (_("%P%F: -r and -shared may not be used together\n"));
     }
-
-  if (command_line.gc_sections && config.dynamic_link)
-    einfo("%P%F: --gc-sections may only be performed for static links\n");
 
   /* Treat ld -r -s as ld -r -S -x (i.e., strip all local symbols).  I
      don't see how else this can be handled, since in this case we

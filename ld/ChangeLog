@@ -1,3 +1,20 @@
+1999-02-11  Nick Clifton  <nickc@cygnus.com>
+
+	* ldlang.c (lang_check_section_addresses): New function: Check
+	addresses assigned to section for overlaps.
+	(lang_process): Call lang_check_section_addresses if suitable.
+
+	* ld.h: Add new boolean field to args_type structure:
+	'check_section_addresses'.
+
+	* ldmain.c: Initialise check_section_addresses field to true.
+
+	* lexsup.c: Add new command line options '--no-check-sections' and
+	'--check-sections'.
+
+	* ld.texinfo: Document new command line options '--check-sections'
+	and '--no-check-sections'.
+
 1999-02-08  Nick Clifton  <nickc@cygnus.com>
 
 	* configure.tgt: Add support for StrongARM target.

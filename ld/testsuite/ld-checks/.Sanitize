@@ -23,21 +23,9 @@ Do-first:
 
 Things-to-keep:
 
-ChangeLog
-config
-lib
-ld-bootstrap
-ld-cdtest
-ld-elfvers
-ld-empic
-ld-scripts
-ld-selective
-ld-sh
-ld-shared
-ld-srec
-ld-undefined
-ld-versados
-ld-checks
+asm.s
+script
+checks.exp
 
 Things-to-lose:
 

@@ -101,7 +101,8 @@ int parsing_defsym = 0;
 #define OPTION_VERBOSE			(OPTION_UR + 1)
 #define OPTION_VERSION			(OPTION_VERBOSE + 1)
 #define OPTION_VERSION_SCRIPT		(OPTION_VERSION + 1)
-#define OPTION_WARN_COMMON		(OPTION_VERSION_SCRIPT + 1)
+#define OPTION_VERSION_EXPORTS_SECTION	(OPTION_VERSION_SCRIPT + 1)
+#define OPTION_WARN_COMMON		(OPTION_VERSION_EXPORTS_SECTION + 1)
 #define OPTION_WARN_CONSTRUCTORS	(OPTION_WARN_COMMON + 1)
 #define OPTION_WARN_MULTIPLE_GP		(OPTION_WARN_CONSTRUCTORS + 1)
 #define OPTION_WARN_ONCE		(OPTION_WARN_MULTIPLE_GP + 1)
@@ -113,6 +114,8 @@ int parsing_defsym = 0;
 #define OPTION_FORCE_EXE_SUFFIX		(OPTION_WRAP + 1)
 #define OPTION_GC_SECTIONS		(OPTION_FORCE_EXE_SUFFIX + 1)
 #define OPTION_NO_GC_SECTIONS		(OPTION_GC_SECTIONS + 1)
+#define OPTION_CHECK_SECTIONS		(OPTION_NO_GC_SECTIONS + 1)
+#define OPTION_NO_CHECK_SECTIONS	(OPTION_CHECK_SECTIONS + 1)
 
 /* The long options.  This structure is used for both the option
    parsing and the help text.  */
@@ -158,6 +161,10 @@ static const struct ld_option ld_options[] =
       'e', N_("ADDRESS"), N_("Set start address"), TWO_DASHES },
   { {"export-dynamic", no_argument, NULL, OPTION_EXPORT_DYNAMIC},
       'E', NULL, N_("Export all dynamic symbols"), TWO_DASHES },
+  { {"EB", no_argument, NULL, OPTION_EB},
+      '\0', NULL, N_("Link big-endian objects"), ONE_DASH },
+  { {"EL", no_argument, NULL, OPTION_EL},
+      '\0', NULL, N_("Link little-endian objects"), ONE_DASH },
   { {"auxiliary", required_argument, NULL, 'f'},
       'f', N_("SHLIB"), N_("Auxiliary filter for shared object symbol table"),
       TWO_DASHES },
@@ -165,12 +172,6 @@ static const struct ld_option ld_options[] =
       'F', N_("SHLIB"), N_("Filter for shared object symbol table"), TWO_DASHES },
   { {NULL, no_argument, NULL, '\0'},
       'g', NULL, N_("Ignored"), ONE_DASH },
-  { {"gc-sections", no_argument, NULL, OPTION_GC_SECTIONS},
-      '\0', NULL, N_("Remove unused sections on certain targets"),
-      TWO_DASHES },
-  { {"no-gc-sections", no_argument, NULL, OPTION_NO_GC_SECTIONS},
-      '\0', NULL, N_("(Don't) Remove unused sections on certain targets"),
-      TWO_DASHES },
   { {"gpsize", required_argument, NULL, 'G'},
       'G', N_("SIZE"), N_("Small data size (if no size, same as --shared)"),
       TWO_DASHES },
@@ -192,7 +193,9 @@ static const struct ld_option ld_options[] =
   { {"output", required_argument, NULL, 'o'},
       'o', N_("FILE"), N_("Set output file name"), TWO_DASHES },
   { {NULL, required_argument, NULL, '\0'},
-      'O', NULL, N_("Ignored"), ONE_DASH },
+      'O', NULL, N_("Optimize output file"), ONE_DASH },
+  { {"Qy", no_argument, NULL, OPTION_IGNORE},
+      '\0', NULL, N_("Ignored for SVR4 compatibility"), ONE_DASH },
   { {"relocateable", no_argument, NULL, 'r'},
       'r', NULL, N_("Generate relocateable output"), TWO_DASHES },
   { {NULL, no_argument, NULL, '\0'},
@@ -210,6 +213,8 @@ static const struct ld_option ld_options[] =
       'T', N_("FILE"), N_("Read linker script"), TWO_DASHES },
   { {"undefined", required_argument, NULL, 'u'},
       'u', N_("SYMBOL"), N_("Start with undefined reference to SYMBOL"), TWO_DASHES },
+  { {"Ur", no_argument, NULL, OPTION_UR},
+      '\0', NULL, N_("Build global constructor/destructor tables"), ONE_DASH },
   { {"version", no_argument, NULL, OPTION_VERSION},
       'v', NULL, N_("Print version information"), TWO_DASHES },
   { {NULL, no_argument, NULL, '\0'},
@@ -246,20 +251,27 @@ static const struct ld_option ld_options[] =
       '\0', NULL, NULL, ONE_DASH },
   { {"Bsymbolic", no_argument, NULL, OPTION_SYMBOLIC},
       '\0', NULL, N_("Bind global references locally"), ONE_DASH },
+  { {"check-sections", no_argument, NULL, OPTION_CHECK_SECTIONS},
+      '\0', NULL, N_("Check section addresses for overlaps (default)"), TWO_DASHES },
+  { {"no-check-sections", no_argument, NULL, OPTION_NO_CHECK_SECTIONS},
+      '\0', NULL, N_("Do not check section addresses for overlaps"),
+      TWO_DASHES },
   { {"cref", no_argument, NULL, OPTION_CREF},
       '\0', NULL, N_("Output cross reference table"), TWO_DASHES },
   { {"defsym", required_argument, NULL, OPTION_DEFSYM},
       '\0', N_("SYMBOL=EXPRESSION"), N_("Define a symbol"), TWO_DASHES },
   { {"dynamic-linker", required_argument, NULL, OPTION_DYNAMIC_LINKER},
       '\0', N_("PROGRAM"), N_("Set the dynamic linker to use"), TWO_DASHES },
-  { {"EB", no_argument, NULL, OPTION_EB},
-      '\0', NULL, N_("Link big-endian objects"), ONE_DASH },
-  { {"EL", no_argument, NULL, OPTION_EL},
-      '\0', NULL, N_("Link little-endian objects"), ONE_DASH },
   { {"embedded-relocs", no_argument, NULL, OPTION_EMBEDDED_RELOCS},
       '\0', NULL, N_("Generate embedded relocs"), TWO_DASHES},
   { {"force-exe-suffix", no_argument, NULL, OPTION_FORCE_EXE_SUFFIX},
       '\0', NULL, N_("Force generation of file with .exe suffix"), TWO_DASHES},
+  { {"gc-sections", no_argument, NULL, OPTION_GC_SECTIONS},
+      '\0', NULL, N_("Remove unused sections (on some targets)"),
+      TWO_DASHES },
+  { {"no-gc-sections", no_argument, NULL, OPTION_NO_GC_SECTIONS},
+      '\0', NULL, N_("Don't remove unused sections (default)"),
+      TWO_DASHES },
   { {"help", no_argument, NULL, OPTION_HELP},
       '\0', NULL, N_("Print option help"), TWO_DASHES },
   { {"Map", required_argument, NULL, OPTION_MAP},
@@ -278,8 +290,6 @@ static const struct ld_option ld_options[] =
       '\0', N_("TARGET"), N_("Specify target of output file"), TWO_DASHES },
   { {"qmagic", no_argument, NULL, OPTION_IGNORE},
       '\0', NULL, N_("Ignored for Linux compatibility"), ONE_DASH },
-  { {"Qy", no_argument, NULL, OPTION_IGNORE},
-      '\0', NULL, N_("Ignored for SVR4 compatibility"), ONE_DASH },
   { {"relax", no_argument, NULL, OPTION_RELAX},
       '\0', NULL, N_("Relax branches on certain targets"), TWO_DASHES },
   { {"retain-symbols-file", required_argument, NULL,
@@ -313,14 +323,16 @@ static const struct ld_option ld_options[] =
       '\0', N_("ADDRESS"), N_("Set address of .data section"), ONE_DASH },
   { {"Ttext", required_argument, NULL, OPTION_TTEXT},
       '\0', N_("ADDRESS"), N_("Set address of .text section"), ONE_DASH },
-  { {"Ur", no_argument, NULL, OPTION_UR},
-      '\0', NULL, N_("Build global constructor/destructor tables"), ONE_DASH },
   { {"verbose", no_argument, NULL, OPTION_VERBOSE},
       '\0', NULL, N_("Output lots of information during link"), TWO_DASHES },
   { {"dll-verbose", no_argument, NULL, OPTION_VERBOSE}, /* Linux.  */
       '\0', NULL, NULL, NO_HELP },
   { {"version-script", required_argument, NULL, OPTION_VERSION_SCRIPT },
       '\0', N_("FILE"), N_("Read version information script"), TWO_DASHES },
+  { {"version-exports-section", required_argument, NULL,
+     OPTION_VERSION_EXPORTS_SECTION },
+    '\0', N_("SYMBOL"), N_("Take export symbols list from .exports, using SYMBOL as the version."),
+    TWO_DASHES },
   { {"warn-common", no_argument, NULL, OPTION_WARN_COMMON},
       '\0', NULL, N_("Warn about duplicate common symbols"), TWO_DASHES },
   { {"warn-constructors", no_argument, NULL, OPTION_WARN_CONSTRUCTORS},
@@ -636,6 +648,9 @@ parse_args (argc, argv)
 	     something, or can we create a new option to do that
 	     (with a syntax similar to -defsym)?
 	     getopt can't handle two args to an option without kludges.  */
+
+	  /* Enable optimizations of output files.  */
+	  link_info.optimize = strtoul (optarg, NULL, 0) ? true : false;
 	  break;
 	case 'o':
 	  lang_add_output (optarg, 0); 
@@ -677,14 +692,36 @@ parse_args (argc, argv)
 	    command_line.rpath = buystring (optarg);
 	  else
 	    {
+	      size_t rpath_len = strlen (command_line.rpath);
+	      size_t optarg_len = strlen (optarg);
 	      char *buf;
+	      char *cp = command_line.rpath;
 
-	      buf = xmalloc (strlen (command_line.rpath)
-			     + strlen (optarg)
-			     + 2);
-	      sprintf (buf, "%s:%s", command_line.rpath, optarg);
-	      free (command_line.rpath);
-	      command_line.rpath = buf;
+	      /* First see whether OPTARG is already in the path.  */
+	      do
+		{
+		  size_t idx = 0;
+		  while (optarg[idx] != '\0' && optarg[idx] == cp[idx])
+		    ++idx;
+		  if (optarg[idx] == '\0'
+		      && (cp[idx] == '\0' || cp[idx] == ':'))
+		    /* We found it.  */
+		    break;
+
+		  /* Not yet found.  */
+		  cp = strchr (cp, ':');
+		  if (cp != NULL)
+		    ++cp;
+		}
+	      while (cp != NULL);
+
+	      if (cp == NULL)
+		{
+		  buf = xmalloc (rpath_len + optarg_len + 2);
+		  sprintf (buf, "%s:%s", command_line.rpath, optarg);
+		  free (command_line.rpath);
+		  command_line.rpath = buf;
+		}
 	    }
 	  break;
 	case OPTION_RPATH_LINK:
@@ -812,6 +849,12 @@ the GNU General Public License.  This program has absolutely no warranty.\n"));
 	    yyparse ();
 	  }
 	  break;
+	case OPTION_VERSION_EXPORTS_SECTION:
+	  /* This option records a version symbol to be applied to the
+	     symbols listed for export to be found in the object files
+	     .exports sections.  */
+	  command_line.version_exports_section = optarg;
+	  break;
 	case OPTION_WARN_COMMON:
 	  config.warn_common = true;
 	  break;
@@ -858,6 +901,12 @@ the GNU General Public License.  This program has absolutely no warranty.\n"));
 	case OPTION_SPLIT_BY_FILE:
 	  config.split_by_file = true;
 	  break; 
+	case OPTION_CHECK_SECTIONS:
+	  command_line.check_section_addresses = true;
+	  break;
+	case OPTION_NO_CHECK_SECTIONS:
+	  command_line.check_section_addresses = false;
+	  break;
 	case '(':
 	  if (ingroup)
 	    {

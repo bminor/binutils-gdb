@@ -1,3 +1,23 @@
+1999-02-11  Nick Clifton  <nickc@cygnus.com>
+
+	* ld-checks: New directory:  Tests for the linker's
+	--check-sections option.
+	* ld-checks/checks.exp: New file.
+	* ld-checks/script: Bogus linker script.
+	* ld-checks/asm.s: Simple test assembler file.
+
+Tue Feb  2 19:15:02 1999  Catherine Moore  <clm@cygnus.com>
+
+        * ld-selective/selective.exp:  Disable test for unsupported
+        targets.  Change tests to check for absence of symbols instead
+        of address zero.
+
+Mon Jan 18 03:44:52 1999  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/default.exp (get_link_files): Quote target_triplet and CC
+	when invoking shell.
+	(get_target_emul): Likewise.
+
 1999-01-03  Ken Raeburn  <raeburn@cygnus.com>
 
 	* config/default.exp (get_link_files, get_target_emul): New procs;
