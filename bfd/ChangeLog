@@ -1,3 +1,7 @@
+2004-08-17  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.h (elf_gc_sweep): Keep non-alloc, non-load sections.
+
 2004-08-17  Nick Clifton  <nickc@redhat.com>
 
 	* (is_arm_mapping_symbol_name): New function - return true

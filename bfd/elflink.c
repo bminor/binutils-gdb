@@ -8504,9 +8504,9 @@ elf_gc_sweep (struct bfd_link_info *info, gc_sweep_hook_fn gc_sweep_hook)
 
       for (o = sub->sections; o != NULL; o = o->next)
 	{
-	  /* Keep special sections.  Keep .debug sections.  */
-	  if ((o->flags & SEC_LINKER_CREATED)
-	      || (o->flags & SEC_DEBUGGING))
+	  /* Keep debug and special sections.  */
+	  if ((o->flags & (SEC_DEBUGGING | SEC_LINKER_CREATED)) != 0
+	      || (o->flags & (SEC_ALLOC | SEC_LOAD)) == 0)
 	    o->gc_mark = 1;
 
 	  if (o->gc_mark)
