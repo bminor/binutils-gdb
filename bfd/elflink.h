@@ -802,6 +802,10 @@ elf_link_add_object_symbols (abfd, info)
 	      h->type = ELF_ST_TYPE (sym.st_info);
 	    }
 
+	  if (sym.st_other != 0
+	      && (definition || h->other == 0))
+	    h->other = sym.st_other;
+
 	  /* Set a flag in the hash table entry indicating the type of
 	     reference or definition we just found.  Keep a count of
 	     the number of dynamic symbols we find.  A dynamic symbol
@@ -2576,7 +2580,7 @@ elf_link_output_extsym (h, data)
 
   sym.st_value = 0;
   sym.st_size = h->size;
-  sym.st_other = 0;
+  sym.st_other = h->other;
   if (h->root.type == bfd_link_hash_undefweak
       || h->root.type == bfd_link_hash_defweak)
     sym.st_info = ELF_ST_INFO (STB_WEAK, h->type);

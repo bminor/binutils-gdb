@@ -1,3 +1,23 @@
+Tue Nov 26 11:07:31 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf-bfd.h (struct elf_link_hash_entry): Add other field.
+	* elf.c (_bfd_elf_link_hash_newfunc): Initialize other field.
+	(swap_out_syms): Set st_other from existing st_other field.
+	* elflink.h (elf_link_add_object_symbols): Store st_other in hash
+	table other field.
+	(elf_link_output_extsym): Set the other field from the global hash
+	table entry.
+	* elf32-mips.c (enum reloc_type): Add R_MIPS16_26.
+	(elf_mips16_jump_howto): New static variable.
+	(mips16_jump_reloc): New static function.
+	(bfd_elf32_bfd_reloc_type_lookup): Handle BFD_RELOC_MIPS16_JMP.
+	(mips_info_to_howto_rel): Handle R_MIPS16_26.
+	(mips_elf_relocate_section): Handle R_MIPS16_26.  Handle R_MIPS_26
+	to a mips16 symbol.
+	* reloc.c (BFD_RELOC_MIPS16_JMP): Add to list of relocs.
+	* bfd-in2.h, libbfd.h: Rebuild.
+	* cpu-mips.c (arch_info_struct): Add mips:16 entry.
+
 Mon Nov 25 11:23:32 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.host: Use long long for mips-sgi-irix6*.
