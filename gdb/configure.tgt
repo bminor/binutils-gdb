@@ -262,7 +262,7 @@ sparc86x-*-*)		gdb_target=sparclite ;;
 #sparc64-*-solaris2*)	gdb_target=sp64sol2 ;;
 sparc64-*-*)		gdb_target=sp64 ;;
 
-tahoe-*-*)		gdb_target=tahoe ;;
+# OBSOLETE tahoe-*-*)		gdb_target=tahoe ;;
 
 tic80-*-*)		gdb_target=tic80
 			configdirs="${configdirs} gdbserver" ;;

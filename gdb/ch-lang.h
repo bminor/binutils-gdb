@@ -18,9 +18,8 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#ifdef __STDC__			/* Forward decls for prototypes */
+/* Forward decls for prototypes */
 struct value;
-#endif
 
 extern int
 chill_parse PARAMS ((void));	/* Defined in ch-exp.y */

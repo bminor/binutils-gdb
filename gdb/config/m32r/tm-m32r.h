@@ -89,12 +89,10 @@
 /* mvs_check  SAVED_PC_AFTER_CALL */
 #define SAVED_PC_AFTER_CALL(fi) read_register (RP_REGNUM)
 
-#ifdef __STDC__
 struct frame_info;
 struct frame_saved_regs;
 struct type;
 struct value;
-#endif
 
 /* Define other aspects of the stack frame. 
    We keep the offsets of all saved registers, 'cause we need 'em a lot!

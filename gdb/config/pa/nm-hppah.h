@@ -279,9 +279,7 @@ extern int hppa_resume_execd_vforking_child_to_get_parent_vfork PARAMS ((void));
 
 #ifdef HAVE_HPUX_THREAD_SUPPORT
 
-#ifdef __STDC__
 struct objfile;
-#endif
 
 void hpux_thread_new_objfile PARAMS ((struct objfile * objfile));
 #define target_new_objfile(OBJFILE) hpux_thread_new_objfile (OBJFILE)

@@ -507,10 +507,7 @@ extern CORE_ADDR frame_locals_address ();
 /* Provide our own get_saved_register.  HAVE_REGISTER_WINDOWS is insufficient
    because registers get renumbered on the a29k without getting saved.  */
 
-#ifdef __STDC__
-enum lval_type;
 struct frame_info;
-#endif
 void a29k_get_saved_register PARAMS ((char *raw_buffer, int *optimized, CORE_ADDR * addrp, struct frame_info * frame, int regnum, enum lval_type * lvalp));
 #define GET_SAVED_REGISTER(raw_buffer, optimized, addrp, frame, regnum, lval) \
       a29k_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)

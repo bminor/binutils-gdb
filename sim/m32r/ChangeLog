@@ -1,3 +1,7 @@
+1999-08-28  Doug Evans  <devans@casey.cygnus.com>
+
+	* sem.c: Rebuild
+
 1999-08-09  Doug Evans  <devans@casey.cygnus.com>
 
 	* cpu.h,decode.c,decode.h,model.c,sem-switch.c,sem.c: Rebuild.

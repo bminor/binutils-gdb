@@ -32,7 +32,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define min(a,b) ((a) < (b) ? (a) : (b))
 
 const char *mode_names[] = {
-  "VM",
+  "VOID",
   "BI",
   "QI",
   "HI",

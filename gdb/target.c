@@ -1885,9 +1885,9 @@ normal_pid_to_str (pid)
   static char buf[30];
 
   if (STREQ (current_target.to_shortname, "remote"))
-    sprintf (buf, "thread %d\0", pid);
+    sprintf (buf, "thread %d", pid);
   else
-    sprintf (buf, "process %d\0", pid);
+    sprintf (buf, "process %d", pid);
 
   return buf;
 }
@@ -2086,9 +2086,9 @@ debug_to_fetch_registers (regno)
   fprintf_unfiltered (gdb_stdlog, "target_fetch_registers (%s)",
 		      regno != -1 ? REGISTER_NAME (regno) : "-1");
   if (regno != -1)
-    fprintf_unfiltered (gdb_stdlog, " = 0x%x %d",
+    fprintf_unfiltered (gdb_stdlog, " = 0x%lx %ld",
 			(unsigned long) read_register (regno),
-			read_register (regno));
+			(unsigned long) read_register (regno));
   fprintf_unfiltered (gdb_stdlog, "\n");
 }
 
@@ -2099,7 +2099,7 @@ debug_to_store_registers (regno)
   debug_target.to_store_registers (regno);
 
   if (regno >= 0 && regno < NUM_REGS)
-    fprintf_unfiltered (gdb_stdlog, "target_store_registers (%s) = 0x%x %d\n",
+    fprintf_unfiltered (gdb_stdlog, "target_store_registers (%s) = 0x%lx %ld\n",
 			REGISTER_NAME (regno),
 			(unsigned long) read_register (regno),
 			(unsigned long) read_register (regno));
@@ -2171,8 +2171,9 @@ debug_to_insert_breakpoint (addr, save)
   retval = debug_target.to_insert_breakpoint (addr, save);
 
   fprintf_unfiltered (gdb_stdlog,
-		      "target_insert_breakpoint (0x%x, xxx) = %d\n",
-		      (unsigned long) addr, retval);
+		      "target_insert_breakpoint (0x%lx, xxx) = %ld\n",
+		      (unsigned long) addr,
+		      (unsigned long) retval);
   return retval;
 }
 
@@ -2186,8 +2187,9 @@ debug_to_remove_breakpoint (addr, save)
   retval = debug_target.to_remove_breakpoint (addr, save);
 
   fprintf_unfiltered (gdb_stdlog,
-		      "target_remove_breakpoint (0x%x, xxx) = %d\n",
-		      (unsigned long) addr, retval);
+		      "target_remove_breakpoint (0x%lx, xxx) = %ld\n",
+		      (unsigned long) addr,
+		      (unsigned long) retval);
   return retval;
 }
 

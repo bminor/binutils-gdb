@@ -199,7 +199,7 @@ static int hex (char);
 static char *mem2hex (char *, char *, int);
 static char *hex2mem (char *, char *, int);
 static int hexToInt (char **, int *);
-static void getpacket (char *);
+static unsigned char *getpacket (unsigned char *);
 static void putpacket (char *);
 static void handle_buserror (void);
 static int computeSignal (int exceptionVector);
@@ -382,28 +382,32 @@ hexToInt (char **ptr, int *intValue)
 
 /* scan for the sequence $<data>#<checksum>     */
 
-static
-void
-getpacket (char *buffer)
+char *
+getpacket (buffer)
+     char *buffer;
 {
   unsigned char checksum;
   unsigned char xmitcsum;
-  int i;
   int count;
   char ch;
-  do
+
+  while (1)
     {
       /* wait around for the start character, ignore all other characters */
-      while ((ch = getDebugChar ()) != '$');
+      while ((ch = getDebugChar ()) != '$')
+	;
+
+retry:
       checksum = 0;
       xmitcsum = -1;
-
       count = 0;
 
       /* now, read until a # or end of buffer is found */
       while (count < BUFMAX)
 	{
 	  ch = getDebugChar ();
+          if (ch == '$')
+            goto retry;
 	  if (ch == '#')
 	    break;
 	  checksum = checksum + ch;
@@ -414,28 +418,32 @@ getpacket (char *buffer)
 
       if (ch == '#')
 	{
-	  xmitcsum = hex (getDebugChar ()) << 4;
-	  xmitcsum += hex (getDebugChar ());
+ 	  ch = getDebugChar ();
+ 	  xmitcsum = hex (ch) << 4;
+ 	  ch = getDebugChar ();
+ 	  xmitcsum += hex (ch);
+
 	  if (checksum != xmitcsum)
-	    putDebugChar ('-');	/* failed checksum */
+	    {
+	      putDebugChar ('-');	/* failed checksum */
+	    }
 	  else
 	    {
 	      putDebugChar ('+');	/* successful transfer */
+
 	      /* if a sequence char is present, reply the sequence ID */
 	      if (buffer[2] == ':')
 		{
 		  putDebugChar (buffer[0]);
 		  putDebugChar (buffer[1]);
-		  /* remove sequence chars from buffer */
-		  count = strlen (buffer);
-		  for (i = 3; i <= count; i++)
-		    buffer[i - 3] = buffer[i];
+
+ 		  return &buffer[3];
 		}
+
+	      return &buffer[0];
 	    }
 	}
     }
-  while (checksum != xmitcsum);
-
 }
 
 
@@ -492,7 +500,6 @@ putpacket (register char *buffer)
       putDebugChar (lowhex(checksum));
     }
   while  (getDebugChar() != '+');
-
 }
 
 
@@ -648,7 +655,7 @@ When in the monitor mode we talk a human on the serial line rather than gdb.
 void
 gdb_handle_exception (int exceptionVector)
 {
-  int sigval;
+  int sigval, stepping;
   int addr, length;
   char *ptr;
 
@@ -677,12 +684,14 @@ gdb_handle_exception (int exceptionVector)
    */
   undoSStep ();
 
+  stepping = 0;
+
   while (1)
     {
       remcomOutBuffer[0] = 0;
-      getpacket (remcomInBuffer);
+      ptr = getpacket (remcomInBuffer);
 
-      switch (remcomInBuffer[0])
+      switch (*ptr++)
 	{
 	case '?':
 	  remcomOutBuffer[0] = 'S';
@@ -697,7 +706,7 @@ gdb_handle_exception (int exceptionVector)
 	  mem2hex ((char *) registers, remcomOutBuffer, NUMREGBYTES);
 	  break;
 	case 'G':		/* set the value of the CPU registers - return OK */
-	  hex2mem (&remcomInBuffer[1], (char *) registers, NUMREGBYTES);
+	  hex2mem (&ptr, (char *) registers, NUMREGBYTES);
 	  strcpy (remcomOutBuffer, "OK");
 	  break;
 
@@ -707,7 +716,6 @@ gdb_handle_exception (int exceptionVector)
 	    {
 	      dofault = 0;
 	      /* TRY, TO READ %x,%x.  IF SUCCEED, SET PTR = 0 */
-	      ptr = &remcomInBuffer[1];
 	      if (hexToInt (&ptr, &addr))
 		if (*(ptr++) == ',')
 		  if (hexToInt (&ptr, &length))
@@ -732,7 +740,6 @@ gdb_handle_exception (int exceptionVector)
 	      dofault = 0;
 
 	      /* TRY, TO READ '%x,%x:'.  IF SUCCEED, SET PTR = 0 */
-	      ptr = &remcomInBuffer[1];
 	      if (hexToInt (&ptr, &addr))
 		if (*(ptr++) == ',')
 		  if (hexToInt (&ptr, &length))
@@ -754,15 +761,15 @@ gdb_handle_exception (int exceptionVector)
 
 	  /* cAA..AA    Continue at address AA..AA(optional) */
 	  /* sAA..AA   Step one instruction from AA..AA(optional) */
-	case 'c':
 	case 's':
+	  stepping = 1;
+	case 'c':
 	  {
 	    /* tRY, to read optional parameter, pc unchanged if no parm */
-	    ptr = &remcomInBuffer[1];
 	    if (hexToInt (&ptr, &addr))
 	      registers[PC] = addr;
 
-	    if (remcomInBuffer[0] == 's')
+	    if (stepping)
 	      doSStep ();
 	  }
 	  return;

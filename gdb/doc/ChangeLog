@@ -1,3 +1,22 @@
+1999-08-30  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdb.texinfo: Create a new "Configurations" chapter with
+ 	platform-specific info, inline remote.texi and move sections of it
+ 	into the new chapter, move bits about info proc, heuristic search,
+	and register stack into the new chapter.
+	* remote.texi: Remove, now part of gdb.texinfo.
+	* Makefile.in (SFILES_INCLUDED): Remove ref to remote.texi.
+
+1999-08-27  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+	* gdbint.texinfo (GDB_TARGET_IS_SUN3, GDB_TARGET_IS_SUN386,
+	GDB_TARGET_IS_MACH386): These kludges have gone away.
+
+Wed Aug 25 10:47:03 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Mention
+ 	TDEPLIBS.
+
 1999-08-20  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* gdb.texinfo: Remove remaining "HPPA" conditionals, rewrite

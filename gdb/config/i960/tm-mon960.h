@@ -26,9 +26,7 @@
 #include "i960/tm-i960.h"
 
 /* forward declarations */
-#ifdef __STDC__
 struct frame_info;
-#endif
 
 /* redefined from tm-i960.h */
 /* Number of machine registers */

@@ -24,9 +24,6 @@
 #include "target.h"
 #include "inferior.h"
 #include "call-cmds.h"
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 
 #include "getopt.h"
 
@@ -714,85 +711,4 @@ For more information, type \"help\" from within GDB, or consult the\n\
 GDB manual (available as on-line info or a printed manual).\n\
 Report bugs to \"bug-gdb@prep.ai.mit.edu\".\
 ", stream);
-}
-
-
-/* All TUI I/O sent to the *_filtered and *_unfiltered functions
-   eventually ends up here.  The fputs_unfiltered_hook is primarily
-   used by GUIs to collect all output and send it to the GUI, instead
-   of the controlling terminal.  Only output to gdb_stdout and
-   gdb_stderr are sent to the hook.  Everything else is sent on to
-   fputs to allow file I/O to be handled appropriately.  */
-
-/* FIXME: Should be broken up and moved to a TUI specific file. */
-
-void
-tui_file_fputs (linebuffer, file)
-     const char *linebuffer;
-     GDB_FILE *file;
-{
-  struct tui_stream *stream = gdb_file_data (file);
-#if defined(TUI)
-  extern int tui_owns_terminal;
-#endif
-  /* If anything (GUI, TUI) wants to capture GDB output, this is
-   * the place... the way to do it is to set up 
-   * fputs_unfiltered_hook.
-   * Our TUI ("gdb -tui") used to hook output, but in the
-   * new (XDB style) scheme, we do not do that anymore... - RT
-   */
-  if (fputs_unfiltered_hook
-      && (file == gdb_stdout
-	  || file == gdb_stderr))
-    fputs_unfiltered_hook (linebuffer, file);
-  else
-    {
-#if defined(TUI)
-      if (tui_version && tui_owns_terminal)
-	{
-	  /* If we get here somehow while updating the TUI (from
-	   * within a tuiDo(), then we need to temporarily 
-	   * set up the terminal for GDB output. This probably just
-	   * happens on error output.
-	   */
-
-	  if (stream->ts_streamtype == astring)
-	    {
-	      gdb_file_adjust_strbuf (strlen (linebuffer), stream);
-	      strcat (stream->ts_strbuf, linebuffer);
-	    }
-	  else
-	    {
-	      tuiTermUnsetup (0, (tui_version) ? cmdWin->detail.commandInfo.curch : 0);
-	      fputs (linebuffer, stream->ts_filestream);
-	      tuiTermSetup (0);
-	      if (linebuffer[strlen (linebuffer) - 1] == '\n')
-		tuiClearCommandCharCount ();
-	      else
-		tuiIncrCommandCharCountBy (strlen (linebuffer));
-	    }
-	}
-      else
-	{
-	  /* The normal case - just do a fputs() */
-	  if (stream->ts_streamtype == astring)
-	    {
-	      gdb_file_adjust_strbuf (strlen (linebuffer), stream);
-	      strcat (stream->ts_strbuf, linebuffer);
-	    }
-	  else
-	    fputs (linebuffer, stream->ts_filestream);
-	}
-
-
-#else
-      if (stream->ts_streamtype == astring)
-	{
-	  gdb_file_adjust_strbuf (strlen (linebuffer), file);
-	  strcat (stream->ts_strbuf, linebuffer);
-	}
-      else
-	fputs (linebuffer, stream->ts_filestream);
-#endif
-    }
 }

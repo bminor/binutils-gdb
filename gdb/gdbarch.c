@@ -18,7 +18,19 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-/* *INDENT-OFF* */ /* typedef (f)();'' confuses indent */
+/* *INDENT-OFF* */ /* ``typedef (f)();'' confuses indent */
+
+/* This file was created with the aid of ``gdbarch.sh''.
+
+   The bourn shell script ``gdbarch.sh'' creates the files
+   ``new-gdbarch.c'' and ``new-gdbarch.h and then compares them
+   against the existing ``gdbarch.[hc]''.  Any differences found
+   being reported.
+
+   If editing this file, please also run gdbarch.sh and merge any
+   changes into that script. Conversely, when makeing sweeping changes
+   to this file, modifying gdbarch.sh and using its output may prove
+   easier. */
 
 
 #include "defs.h"
@@ -45,6 +57,14 @@
 #endif
 #include "symcat.h"
 
+
+/* Static function declarations */
+
+static void verify_gdbarch (struct gdbarch *gdbarch);
+static void init_gdbarch_data (struct gdbarch *);
+static void init_gdbarch_swap (struct gdbarch *);
+static void swapout_gdbarch_swap (struct gdbarch *);
+static void swapin_gdbarch_swap (struct gdbarch *);
 
 /* Convenience macro for allocting typesafe memory. */
 
@@ -289,9 +309,8 @@ struct gdbarch *current_gdbarch = &default_gdbarch;
    ``struct gdbarch_info''. */
 
 struct gdbarch *
-gdbarch_alloc (info, tdep)
-     const struct gdbarch_info *info;
-     struct gdbarch_tdep *tdep;
+gdbarch_alloc (const struct gdbarch_info *info,
+               struct gdbarch_tdep *tdep)
 {
   struct gdbarch *gdbarch = XMALLOC (struct gdbarch);
   memset (gdbarch, 0, sizeof (*gdbarch));
@@ -328,10 +347,8 @@ gdbarch_alloc (info, tdep)
 
 /* Ensure that all values in a GDBARCH are reasonable. */
 
-static void verify_gdbarch PARAMS ((struct gdbarch *gdbarch));
 static void
-verify_gdbarch (gdbarch)
-     struct gdbarch *gdbarch;
+verify_gdbarch (struct gdbarch *gdbarch)
 {
   /* Only perform sanity checks on a multi-arch target. */
   if (GDB_MULTI_ARCH <= 0)
@@ -573,7 +590,7 @@ verify_gdbarch (gdbarch)
 /* Print out the details of the current architecture. */
 
 void
-gdbarch_dump ()
+gdbarch_dump (void)
 {
   if (TARGET_ARCHITECTURE != NULL)
     fprintf_unfiltered (gdb_stdlog,
@@ -875,8 +892,7 @@ gdbarch_dump ()
 }
 
 struct gdbarch_tdep *
-gdbarch_tdep (gdbarch)
-    struct gdbarch *gdbarch;
+gdbarch_tdep (struct gdbarch *gdbarch)
 {
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
@@ -886,8 +902,7 @@ gdbarch_tdep (gdbarch)
 
 
 const struct bfd_arch_info *
-gdbarch_bfd_arch_info (gdbarch)
-    struct gdbarch *gdbarch;
+gdbarch_bfd_arch_info (struct gdbarch *gdbarch)
 {
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
@@ -896,8 +911,7 @@ gdbarch_bfd_arch_info (gdbarch)
 }
 
 int
-gdbarch_byte_order (gdbarch)
-    struct gdbarch *gdbarch;
+gdbarch_byte_order (struct gdbarch *gdbarch)
 {
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
@@ -906,8 +920,7 @@ gdbarch_byte_order (gdbarch)
 }
 
 int
-gdbarch_ptr_bit (gdbarch)
-    struct gdbarch *gdbarch;
+gdbarch_ptr_bit (struct gdbarch *gdbarch)
 {
   if (gdbarch->ptr_bit == 0)
     internal_error ("gdbarch: gdbarch_ptr_bit invalid");
@@ -918,16 +931,14 @@ gdbarch_ptr_bit (gdbarch)
 }
 
 void
-set_gdbarch_ptr_bit (gdbarch, ptr_bit)
-    struct gdbarch *gdbarch;
-    int ptr_bit;
+set_gdbarch_ptr_bit (struct gdbarch *gdbarch,
+                     int ptr_bit)
 {
   gdbarch->ptr_bit = ptr_bit;
 }
 
 int
-gdbarch_short_bit (gdbarch)
-    struct gdbarch *gdbarch;
+gdbarch_short_bit (struct gdbarch *gdbarch)
 {
   if (gdbarch->short_bit == 0)
     internal_error ("gdbarch: gdbarch_short_bit invalid");
@@ -938,16 +949,14 @@ gdbarch_short_bit (gdbarch)
 }
 
 void
-set_gdbarch_short_bit (gdbarch, short_bit)
-    struct gdbarch *gdbarch;
-    int short_bit;
+set_gdbarch_short_bit (struct gdbarch *gdbarch,
+                       int short_bit)
 {
   gdbarch->short_bit = short_bit;
 }
 
 int
-gdbarch_int_bit (gdbarch)
-    struct gdbarch *gdbarch;
+gdbarch_int_bit (struct gdbarch *gdbarch)
 {
   if (gdbarch->int_bit == 0)
     internal_error ("gdbarch: gdbarch_int_bit invalid");
@@ -958,16 +967,14 @@ gdbarch_int_bit (gdbarch)
 }
 
 void
-set_gdbarch_int_bit (gdbarch, int_bit)
-    struct gdbarch *gdbarch;
-    int int_bit;
+set_gdbarch_int_bit (struct gdbarch *gdbarch,
+                     int int_bit)
 {
   gdbarch->int_bit = int_bit;
 }
 
 int
-gdbarch_long_bit (gdbarch)
-    struct gdbarch *gdbarch;
+gdbarch_long_bit (struct gdbarch *gdbarch)
 {
   if (gdbarch->long_bit == 0)
     internal_error ("gdbarch: gdbarch_long_bit invalid");
@@ -978,16 +985,14 @@ gdbarch_long_bit (gdbarch)
 }
 
 void
-set_gdbarch_long_bit (gdbarch, long_bit)
-    struct gdbarch *gdbarch;
-    int long_bit;
+set_gdbarch_long_bit (struct gdbarch *gdbarch,
+                      int long_bit)
 {
   gdbarch->long_bit = long_bit;
 }
 
 int
-gdbarch_long_long_bit (gdbarch)
-    struct gdbarch *gdbarch;
+gdbarch_long_long_bit (struct gdbarch *gdbarch)
 {
   if (gdbarch->long_long_bit == 0)
     internal_error ("gdbarch: gdbarch_long_long_bit invalid");
@@ -998,16 +1003,14 @@ gdbarch_long_long_bit (gdbarch)
 }
 
 void
-set_gdbarch_long_long_bit (gdbarch, long_long_bit)
-    struct gdbarch *gdbarch;
-    int long_long_bit;
+set_gdbarch_long_long_bit (struct gdbarch *gdbarch,
+                           int long_long_bit)
 {
   gdbarch->long_long_bit = long_long_bit;
 }
 
 int
-gdbarch_float_bit (gdbarch)
-    struct gdbarch *gdbarch;
+gdbarch_float_bit (struct gdbarch *gdbarch)
 {
   if (gdbarch->float_bit == 0)
     internal_error ("gdbarch: gdbarch_float_bit invalid");
@@ -1018,16 +1021,14 @@ gdbarch_float_bit (gdbarch)
 }
 
 void
-set_gdbarch_float_bit (gdbarch, float_bit)
-    struct gdbarch *gdbarch;
-    int float_bit;
+set_gdbarch_float_bit (struct gdbarch *gdbarch,
+                       int float_bit)
 {
   gdbarch->float_bit = float_bit;
 }
 
 int
-gdbarch_double_bit (gdbarch)
-    struct gdbarch *gdbarch;
+gdbarch_double_bit (struct gdbarch *gdbarch)
 {
   if (gdbarch->double_bit == 0)
     internal_error ("gdbarch: gdbarch_double_bit invalid");
@@ -1038,16 +1039,14 @@ gdbarch_double_bit (gdbarch)
 }
 
 void
-set_gdbarch_double_bit (gdbarch, double_bit)
-    struct gdbarch *gdbarch;
-    int double_bit;
+set_gdbarch_double_bit (struct gdbarch *gdbarch,
+                        int double_bit)
 {
   gdbarch->double_bit = double_bit;
 }
 
 int
-gdbarch_long_double_bit (gdbarch)
-    struct gdbarch *gdbarch;
+gdbarch_long_double_bit (struct gdbarch *gdbarch)
 {
   if (gdbarch->long_double_bit == 0)
     internal_error ("gdbarch: gdbarch_long_double_bit invalid");
@@ -1058,9 +1057,8 @@ gdbarch_long_double_bit (gdbarch)
 }
 
 void
-set_gdbarch_long_double_bit (gdbarch, long_double_bit)
-    struct gdbarch *gdbarch;
-    int long_double_bit;
+set_gdbarch_long_double_bit (struct gdbarch *gdbarch,
+                             int long_double_bit)
 {
   gdbarch->long_double_bit = long_double_bit;
 }
@@ -1077,9 +1075,8 @@ gdbarch_read_pc (struct gdbarch *gdbarch, int pid)
 }
 
 void
-set_gdbarch_read_pc (gdbarch, read_pc)
-    struct gdbarch *gdbarch;
-    gdbarch_read_pc_ftype read_pc;
+set_gdbarch_read_pc (struct gdbarch *gdbarch,
+                     gdbarch_read_pc_ftype read_pc)
 {
   gdbarch->read_pc = read_pc;
 }
@@ -1096,9 +1093,8 @@ gdbarch_write_pc (struct gdbarch *gdbarch, CORE_ADDR val, int pid)
 }
 
 void
-set_gdbarch_write_pc (gdbarch, write_pc)
-    struct gdbarch *gdbarch;
-    gdbarch_write_pc_ftype write_pc;
+set_gdbarch_write_pc (struct gdbarch *gdbarch,
+                      gdbarch_write_pc_ftype write_pc)
 {
   gdbarch->write_pc = write_pc;
 }
@@ -1115,9 +1111,8 @@ gdbarch_read_fp (struct gdbarch *gdbarch)
 }
 
 void
-set_gdbarch_read_fp (gdbarch, read_fp)
-    struct gdbarch *gdbarch;
-    gdbarch_read_fp_ftype read_fp;
+set_gdbarch_read_fp (struct gdbarch *gdbarch,
+                     gdbarch_read_fp_ftype read_fp)
 {
   gdbarch->read_fp = read_fp;
 }
@@ -1134,9 +1129,8 @@ gdbarch_write_fp (struct gdbarch *gdbarch, CORE_ADDR val)
 }
 
 void
-set_gdbarch_write_fp (gdbarch, write_fp)
-    struct gdbarch *gdbarch;
-    gdbarch_write_fp_ftype write_fp;
+set_gdbarch_write_fp (struct gdbarch *gdbarch,
+                      gdbarch_write_fp_ftype write_fp)
 {
   gdbarch->write_fp = write_fp;
 }
@@ -1153,9 +1147,8 @@ gdbarch_read_sp (struct gdbarch *gdbarch)
 }
 
 void
-set_gdbarch_read_sp (gdbarch, read_sp)
-    struct gdbarch *gdbarch;
-    gdbarch_read_sp_ftype read_sp;
+set_gdbarch_read_sp (struct gdbarch *gdbarch,
+                     gdbarch_read_sp_ftype read_sp)
 {
   gdbarch->read_sp = read_sp;
 }
@@ -1172,16 +1165,14 @@ gdbarch_write_sp (struct gdbarch *gdbarch, CORE_ADDR val)
 }
 
 void
-set_gdbarch_write_sp (gdbarch, write_sp)
-    struct gdbarch *gdbarch;
-    gdbarch_write_sp_ftype write_sp;
+set_gdbarch_write_sp (struct gdbarch *gdbarch,
+                      gdbarch_write_sp_ftype write_sp)
 {
   gdbarch->write_sp = write_sp;
 }
 
 int
-gdbarch_num_regs (gdbarch)
-    struct gdbarch *gdbarch;
+gdbarch_num_regs (struct gdbarch *gdbarch)
 {
   if (gdbarch->num_regs == -1)
     internal_error ("gdbarch: gdbarch_num_regs invalid");
@@ -1192,16 +1183,14 @@ gdbarch_num_regs (gdbarch)
 }
 
 void
-set_gdbarch_num_regs (gdbarch, num_regs)
-    struct gdbarch *gdbarch;
-    int num_regs;
+set_gdbarch_num_regs (struct gdbarch *gdbarch,
+                      int num_regs)
 {
   gdbarch->num_regs = num_regs;
 }
 
 int
-gdbarch_sp_regnum (gdbarch)
-    struct gdbarch *gdbarch;
+gdbarch_sp_regnum (struct gdbarch *gdbarch)
 {
   if (gdbarch->sp_regnum == -1)
     internal_error ("gdbarch: gdbarch_sp_regnum invalid");
@@ -1212,16 +1201,14 @@ gdbarch_sp_regnum (gdbarch)
 }
 
 void
-set_gdbarch_sp_regnum (gdbarch, sp_regnum)
-    struct gdbarch *gdbarch;
-    int sp_regnum;
+set_gdbarch_sp_regnum (struct gdbarch *gdbarch,
+                       int sp_regnum)
 {
   gdbarch->sp_regnum = sp_regnum;
 }
 
 int
-gdbarch_fp_regnum (gdbarch)
-    struct gdbarch *gdbarch;
+gdbarch_fp_regnum (struct gdbarch *gdbarch)
 {
   if (gdbarch->fp_regnum == -1)
     internal_error ("gdbarch: gdbarch_fp_regnum invalid");
@@ -1232,16 +1219,14 @@ gdbarch_fp_regnum (gdbarch)
 }
 
 void
-set_gdbarch_fp_regnum (gdbarch, fp_regnum)
-    struct gdbarch *gdbarch;
-    int fp_regnum;
+set_gdbarch_fp_regnum (struct gdbarch *gdbarch,
+                       int fp_regnum)
 {
   gdbarch->fp_regnum = fp_regnum;
 }
 
 int
-gdbarch_pc_regnum (gdbarch)
-    struct gdbarch *gdbarch;
+gdbarch_pc_regnum (struct gdbarch *gdbarch)
 {
   if (gdbarch->pc_regnum == -1)
     internal_error ("gdbarch: gdbarch_pc_regnum invalid");
@@ -1252,9 +1237,8 @@ gdbarch_pc_regnum (gdbarch)
 }
 
 void
-set_gdbarch_pc_regnum (gdbarch, pc_regnum)
-    struct gdbarch *gdbarch;
-    int pc_regnum;
+set_gdbarch_pc_regnum (struct gdbarch *gdbarch,
+                       int pc_regnum)
 {
   gdbarch->pc_regnum = pc_regnum;
 }
@@ -1271,16 +1255,14 @@ gdbarch_register_name (struct gdbarch *gdbarch, int regnr)
 }
 
 void
-set_gdbarch_register_name (gdbarch, register_name)
-    struct gdbarch *gdbarch;
-    gdbarch_register_name_ftype register_name;
+set_gdbarch_register_name (struct gdbarch *gdbarch,
+                           gdbarch_register_name_ftype register_name)
 {
   gdbarch->register_name = register_name;
 }
 
 int
-gdbarch_register_size (gdbarch)
-    struct gdbarch *gdbarch;
+gdbarch_register_size (struct gdbarch *gdbarch)
 {
   if (gdbarch->register_size == -1)
     internal_error ("gdbarch: gdbarch_register_size invalid");
@@ -1291,16 +1273,14 @@ gdbarch_register_size (gdbarch)
 }
 
 void
-set_gdbarch_register_size (gdbarch, register_size)
-    struct gdbarch *gdbarch;
-    int register_size;
+set_gdbarch_register_size (struct gdbarch *gdbarch,
+                           int register_size)
 {
   gdbarch->register_size = register_size;
 }
 
 int
-gdbarch_register_bytes (gdbarch)
-    struct gdbarch *gdbarch;
+gdbarch_register_bytes (struct gdbarch *gdbarch)
 {
   if (gdbarch->register_bytes == -1)
     internal_error ("gdbarch: gdbarch_register_bytes invalid");
@@ -1311,9 +1291,8 @@ gdbarch_register_bytes (gdbarch)
 }
 
 void
-set_gdbarch_register_bytes (gdbarch, register_bytes)
-    struct gdbarch *gdbarch;
-    int register_bytes;
+set_gdbarch_register_bytes (struct gdbarch *gdbarch,
+                            int register_bytes)
 {
   gdbarch->register_bytes = register_bytes;
 }
@@ -1330,9 +1309,8 @@ gdbarch_register_byte (struct gdbarch *gdbarch, int reg_nr)
 }
 
 void
-set_gdbarch_register_byte (gdbarch, register_byte)
-    struct gdbarch *gdbarch;
-    gdbarch_register_byte_ftype register_byte;
+set_gdbarch_register_byte (struct gdbarch *gdbarch,
+                           gdbarch_register_byte_ftype register_byte)
 {
   gdbarch->register_byte = register_byte;
 }
@@ -1349,16 +1327,14 @@ gdbarch_register_raw_size (struct gdbarch *gdbarch, int reg_nr)
 }
 
 void
-set_gdbarch_register_raw_size (gdbarch, register_raw_size)
-    struct gdbarch *gdbarch;
-    gdbarch_register_raw_size_ftype register_raw_size;
+set_gdbarch_register_raw_size (struct gdbarch *gdbarch,
+                               gdbarch_register_raw_size_ftype register_raw_size)
 {
   gdbarch->register_raw_size = register_raw_size;
 }
 
 int
-gdbarch_max_register_raw_size (gdbarch)
-    struct gdbarch *gdbarch;
+gdbarch_max_register_raw_size (struct gdbarch *gdbarch)
 {
   if (gdbarch->max_register_raw_size == -1)
     internal_error ("gdbarch: gdbarch_max_register_raw_size invalid");
@@ -1369,9 +1345,8 @@ gdbarch_max_register_raw_size (gdbarch)
 }
 
 void
-set_gdbarch_max_register_raw_size (gdbarch, max_register_raw_size)
-    struct gdbarch *gdbarch;
-    int max_register_raw_size;
+set_gdbarch_max_register_raw_size (struct gdbarch *gdbarch,
+                                   int max_register_raw_size)
 {
   gdbarch->max_register_raw_size = max_register_raw_size;
 }
@@ -1388,16 +1363,14 @@ gdbarch_register_virtual_size (struct gdbarch *gdbarch, int reg_nr)
 }
 
 void
-set_gdbarch_register_virtual_size (gdbarch, register_virtual_size)
-    struct gdbarch *gdbarch;
-    gdbarch_register_virtual_size_ftype register_virtual_size;
+set_gdbarch_register_virtual_size (struct gdbarch *gdbarch,
+                                   gdbarch_register_virtual_size_ftype register_virtual_size)
 {
   gdbarch->register_virtual_size = register_virtual_size;
 }
 
 int
-gdbarch_max_register_virtual_size (gdbarch)
-    struct gdbarch *gdbarch;
+gdbarch_max_register_virtual_size (struct gdbarch *gdbarch)
 {
   if (gdbarch->max_register_virtual_size == -1)
     internal_error ("gdbarch: gdbarch_max_register_virtual_size invalid");
@@ -1408,9 +1381,8 @@ gdbarch_max_register_virtual_size (gdbarch)
 }
 
 void
-set_gdbarch_max_register_virtual_size (gdbarch, max_register_virtual_size)
-    struct gdbarch *gdbarch;
-    int max_register_virtual_size;
+set_gdbarch_max_register_virtual_size (struct gdbarch *gdbarch,
+                                       int max_register_virtual_size)
 {
   gdbarch->max_register_virtual_size = max_register_virtual_size;
 }
@@ -1427,16 +1399,14 @@ gdbarch_register_virtual_type (struct gdbarch *gdbarch, int reg_nr)
 }
 
 void
-set_gdbarch_register_virtual_type (gdbarch, register_virtual_type)
-    struct gdbarch *gdbarch;
-    gdbarch_register_virtual_type_ftype register_virtual_type;
+set_gdbarch_register_virtual_type (struct gdbarch *gdbarch,
+                                   gdbarch_register_virtual_type_ftype register_virtual_type)
 {
   gdbarch->register_virtual_type = register_virtual_type;
 }
 
 int
-gdbarch_use_generic_dummy_frames (gdbarch)
-    struct gdbarch *gdbarch;
+gdbarch_use_generic_dummy_frames (struct gdbarch *gdbarch)
 {
   if (gdbarch->use_generic_dummy_frames == -1)
     internal_error ("gdbarch: gdbarch_use_generic_dummy_frames invalid");
@@ -1447,16 +1417,14 @@ gdbarch_use_generic_dummy_frames (gdbarch)
 }
 
 void
-set_gdbarch_use_generic_dummy_frames (gdbarch, use_generic_dummy_frames)
-    struct gdbarch *gdbarch;
-    int use_generic_dummy_frames;
+set_gdbarch_use_generic_dummy_frames (struct gdbarch *gdbarch,
+                                      int use_generic_dummy_frames)
 {
   gdbarch->use_generic_dummy_frames = use_generic_dummy_frames;
 }
 
 int
-gdbarch_call_dummy_location (gdbarch)
-    struct gdbarch *gdbarch;
+gdbarch_call_dummy_location (struct gdbarch *gdbarch)
 {
   if (gdbarch->call_dummy_location == 0)
     internal_error ("gdbarch: gdbarch_call_dummy_location invalid");
@@ -1467,9 +1435,8 @@ gdbarch_call_dummy_location (gdbarch)
 }
 
 void
-set_gdbarch_call_dummy_location (gdbarch, call_dummy_location)
-    struct gdbarch *gdbarch;
-    int call_dummy_location;
+set_gdbarch_call_dummy_location (struct gdbarch *gdbarch,
+                                 int call_dummy_location)
 {
   gdbarch->call_dummy_location = call_dummy_location;
 }
@@ -1486,16 +1453,14 @@ gdbarch_call_dummy_address (struct gdbarch *gdbarch)
 }
 
 void
-set_gdbarch_call_dummy_address (gdbarch, call_dummy_address)
-    struct gdbarch *gdbarch;
-    gdbarch_call_dummy_address_ftype call_dummy_address;
+set_gdbarch_call_dummy_address (struct gdbarch *gdbarch,
+                                gdbarch_call_dummy_address_ftype call_dummy_address)
 {
   gdbarch->call_dummy_address = call_dummy_address;
 }
 
 CORE_ADDR
-gdbarch_call_dummy_start_offset (gdbarch)
-    struct gdbarch *gdbarch;
+gdbarch_call_dummy_start_offset (struct gdbarch *gdbarch)
 {
   if (gdbarch->call_dummy_start_offset == -1)
     internal_error ("gdbarch: gdbarch_call_dummy_start_offset invalid");
@@ -1506,16 +1471,14 @@ gdbarch_call_dummy_start_offset (gdbarch)
 }
 
 void
-set_gdbarch_call_dummy_start_offset (gdbarch, call_dummy_start_offset)
-    struct gdbarch *gdbarch;
-    CORE_ADDR call_dummy_start_offset;
+set_gdbarch_call_dummy_start_offset (struct gdbarch *gdbarch,
+                                     CORE_ADDR call_dummy_start_offset)
 {
   gdbarch->call_dummy_start_offset = call_dummy_start_offset;
 }
 
 CORE_ADDR
-gdbarch_call_dummy_breakpoint_offset (gdbarch)
-    struct gdbarch *gdbarch;
+gdbarch_call_dummy_breakpoint_offset (struct gdbarch *gdbarch)
 {
   if (gdbarch->call_dummy_breakpoint_offset == -1)
     internal_error ("gdbarch: gdbarch_call_dummy_breakpoint_offset invalid");
@@ -1526,16 +1489,14 @@ gdbarch_call_dummy_breakpoint_offset (gdbarch)
 }
 
 void
-set_gdbarch_call_dummy_breakpoint_offset (gdbarch, call_dummy_breakpoint_offset)
-    struct gdbarch *gdbarch;
-    CORE_ADDR call_dummy_breakpoint_offset;
+set_gdbarch_call_dummy_breakpoint_offset (struct gdbarch *gdbarch,
+                                          CORE_ADDR call_dummy_breakpoint_offset)
 {
   gdbarch->call_dummy_breakpoint_offset = call_dummy_breakpoint_offset;
 }
 
 int
-gdbarch_call_dummy_breakpoint_offset_p (gdbarch)
-    struct gdbarch *gdbarch;
+gdbarch_call_dummy_breakpoint_offset_p (struct gdbarch *gdbarch)
 {
   if (gdbarch->call_dummy_breakpoint_offset_p == -1)
     internal_error ("gdbarch: gdbarch_call_dummy_breakpoint_offset_p invalid");
@@ -1546,16 +1507,14 @@ gdbarch_call_dummy_breakpoint_offset_p (gdbarch)
 }
 
 void
-set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, call_dummy_breakpoint_offset_p)
-    struct gdbarch *gdbarch;
-    int call_dummy_breakpoint_offset_p;
+set_gdbarch_call_dummy_breakpoint_offset_p (struct gdbarch *gdbarch,
+                                            int call_dummy_breakpoint_offset_p)
 {
   gdbarch->call_dummy_breakpoint_offset_p = call_dummy_breakpoint_offset_p;
 }
 
 int
-gdbarch_call_dummy_length (gdbarch)
-    struct gdbarch *gdbarch;
+gdbarch_call_dummy_length (struct gdbarch *gdbarch)
 {
   if (gdbarch->call_dummy_length == -1)
     internal_error ("gdbarch: gdbarch_call_dummy_length invalid");
@@ -1566,9 +1525,8 @@ gdbarch_call_dummy_length (gdbarch)
 }
 
 void
-set_gdbarch_call_dummy_length (gdbarch, call_dummy_length)
-    struct gdbarch *gdbarch;
-    int call_dummy_length;
+set_gdbarch_call_dummy_length (struct gdbarch *gdbarch,
+                               int call_dummy_length)
 {
   gdbarch->call_dummy_length = call_dummy_length;
 }
@@ -1585,16 +1543,14 @@ gdbarch_pc_in_call_dummy (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR sp, C
 }
 
 void
-set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy)
-    struct gdbarch *gdbarch;
-    gdbarch_pc_in_call_dummy_ftype pc_in_call_dummy;
+set_gdbarch_pc_in_call_dummy (struct gdbarch *gdbarch,
+                              gdbarch_pc_in_call_dummy_ftype pc_in_call_dummy)
 {
   gdbarch->pc_in_call_dummy = pc_in_call_dummy;
 }
 
 int
-gdbarch_call_dummy_p (gdbarch)
-    struct gdbarch *gdbarch;
+gdbarch_call_dummy_p (struct gdbarch *gdbarch)
 {
   if (gdbarch->call_dummy_p == -1)
     internal_error ("gdbarch: gdbarch_call_dummy_p invalid");
@@ -1605,16 +1561,14 @@ gdbarch_call_dummy_p (gdbarch)
 }
 
 void
-set_gdbarch_call_dummy_p (gdbarch, call_dummy_p)
-    struct gdbarch *gdbarch;
-    int call_dummy_p;
+set_gdbarch_call_dummy_p (struct gdbarch *gdbarch,
+                          int call_dummy_p)
 {
   gdbarch->call_dummy_p = call_dummy_p;
 }
 
 LONGEST *
-gdbarch_call_dummy_words (gdbarch)
-    struct gdbarch *gdbarch;
+gdbarch_call_dummy_words (struct gdbarch *gdbarch)
 {
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
@@ -1623,16 +1577,14 @@ gdbarch_call_dummy_words (gdbarch)
 }
 
 void
-set_gdbarch_call_dummy_words (gdbarch, call_dummy_words)
-    struct gdbarch *gdbarch;
-    LONGEST * call_dummy_words;
+set_gdbarch_call_dummy_words (struct gdbarch *gdbarch,
+                              LONGEST * call_dummy_words)
 {
   gdbarch->call_dummy_words = call_dummy_words;
 }
 
 int
-gdbarch_sizeof_call_dummy_words (gdbarch)
-    struct gdbarch *gdbarch;
+gdbarch_sizeof_call_dummy_words (struct gdbarch *gdbarch)
 {
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
@@ -1641,16 +1593,14 @@ gdbarch_sizeof_call_dummy_words (gdbarch)
 }
 
 void
-set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof_call_dummy_words)
-    struct gdbarch *gdbarch;
-    int sizeof_call_dummy_words;
+set_gdbarch_sizeof_call_dummy_words (struct gdbarch *gdbarch,
+                                     int sizeof_call_dummy_words)
 {
   gdbarch->sizeof_call_dummy_words = sizeof_call_dummy_words;
 }
 
 int
-gdbarch_call_dummy_stack_adjust_p (gdbarch)
-    struct gdbarch *gdbarch;
+gdbarch_call_dummy_stack_adjust_p (struct gdbarch *gdbarch)
 {
   if (gdbarch->call_dummy_stack_adjust_p == -1)
     internal_error ("gdbarch: gdbarch_call_dummy_stack_adjust_p invalid");
@@ -1661,16 +1611,14 @@ gdbarch_call_dummy_stack_adjust_p (gdbarch)
 }
 
 void
-set_gdbarch_call_dummy_stack_adjust_p (gdbarch, call_dummy_stack_adjust_p)
-    struct gdbarch *gdbarch;
-    int call_dummy_stack_adjust_p;
+set_gdbarch_call_dummy_stack_adjust_p (struct gdbarch *gdbarch,
+                                       int call_dummy_stack_adjust_p)
 {
   gdbarch->call_dummy_stack_adjust_p = call_dummy_stack_adjust_p;
 }
 
 int
-gdbarch_call_dummy_stack_adjust (gdbarch)
-    struct gdbarch *gdbarch;
+gdbarch_call_dummy_stack_adjust (struct gdbarch *gdbarch)
 {
   if (gdbarch->call_dummy_stack_adjust_p && gdbarch->call_dummy_stack_adjust == 0)
     internal_error ("gdbarch: gdbarch_call_dummy_stack_adjust invalid");
@@ -1681,9 +1629,8 @@ gdbarch_call_dummy_stack_adjust (gdbarch)
 }
 
 void
-set_gdbarch_call_dummy_stack_adjust (gdbarch, call_dummy_stack_adjust)
-    struct gdbarch *gdbarch;
-    int call_dummy_stack_adjust;
+set_gdbarch_call_dummy_stack_adjust (struct gdbarch *gdbarch,
+                                     int call_dummy_stack_adjust)
 {
   gdbarch->call_dummy_stack_adjust = call_dummy_stack_adjust;
 }
@@ -1700,16 +1647,14 @@ gdbarch_fix_call_dummy (struct gdbarch *gdbarch, char *dummy, CORE_ADDR pc, CORE
 }
 
 void
-set_gdbarch_fix_call_dummy (gdbarch, fix_call_dummy)
-    struct gdbarch *gdbarch;
-    gdbarch_fix_call_dummy_ftype fix_call_dummy;
+set_gdbarch_fix_call_dummy (struct gdbarch *gdbarch,
+                            gdbarch_fix_call_dummy_ftype fix_call_dummy)
 {
   gdbarch->fix_call_dummy = fix_call_dummy;
 }
 
 int
-gdbarch_believe_pcc_promotion (gdbarch)
-    struct gdbarch *gdbarch;
+gdbarch_believe_pcc_promotion (struct gdbarch *gdbarch)
 {
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
@@ -1718,16 +1663,14 @@ gdbarch_believe_pcc_promotion (gdbarch)
 }
 
 void
-set_gdbarch_believe_pcc_promotion (gdbarch, believe_pcc_promotion)
-    struct gdbarch *gdbarch;
-    int believe_pcc_promotion;
+set_gdbarch_believe_pcc_promotion (struct gdbarch *gdbarch,
+                                   int believe_pcc_promotion)
 {
   gdbarch->believe_pcc_promotion = believe_pcc_promotion;
 }
 
 int
-gdbarch_believe_pcc_promotion_type (gdbarch)
-    struct gdbarch *gdbarch;
+gdbarch_believe_pcc_promotion_type (struct gdbarch *gdbarch)
 {
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
@@ -1736,9 +1679,8 @@ gdbarch_believe_pcc_promotion_type (gdbarch)
 }
 
 void
-set_gdbarch_believe_pcc_promotion_type (gdbarch, believe_pcc_promotion_type)
-    struct gdbarch *gdbarch;
-    int believe_pcc_promotion_type;
+set_gdbarch_believe_pcc_promotion_type (struct gdbarch *gdbarch,
+                                        int believe_pcc_promotion_type)
 {
   gdbarch->believe_pcc_promotion_type = believe_pcc_promotion_type;
 }
@@ -1755,9 +1697,8 @@ gdbarch_get_saved_register (struct gdbarch *gdbarch, char *raw_buffer, int *opti
 }
 
 void
-set_gdbarch_get_saved_register (gdbarch, get_saved_register)
-    struct gdbarch *gdbarch;
-    gdbarch_get_saved_register_ftype get_saved_register;
+set_gdbarch_get_saved_register (struct gdbarch *gdbarch,
+                                gdbarch_get_saved_register_ftype get_saved_register)
 {
   gdbarch->get_saved_register = get_saved_register;
 }
@@ -1774,9 +1715,8 @@ gdbarch_register_convertible (struct gdbarch *gdbarch, int nr)
 }
 
 void
-set_gdbarch_register_convertible (gdbarch, register_convertible)
-    struct gdbarch *gdbarch;
-    gdbarch_register_convertible_ftype register_convertible;
+set_gdbarch_register_convertible (struct gdbarch *gdbarch,
+                                  gdbarch_register_convertible_ftype register_convertible)
 {
   gdbarch->register_convertible = register_convertible;
 }
@@ -1793,9 +1733,8 @@ gdbarch_register_convert_to_virtual (struct gdbarch *gdbarch, int regnum, struct
 }
 
 void
-set_gdbarch_register_convert_to_virtual (gdbarch, register_convert_to_virtual)
-    struct gdbarch *gdbarch;
-    gdbarch_register_convert_to_virtual_ftype register_convert_to_virtual;
+set_gdbarch_register_convert_to_virtual (struct gdbarch *gdbarch,
+                                         gdbarch_register_convert_to_virtual_ftype register_convert_to_virtual)
 {
   gdbarch->register_convert_to_virtual = register_convert_to_virtual;
 }
@@ -1812,9 +1751,8 @@ gdbarch_register_convert_to_raw (struct gdbarch *gdbarch, struct type *type, int
 }
 
 void
-set_gdbarch_register_convert_to_raw (gdbarch, register_convert_to_raw)
-    struct gdbarch *gdbarch;
-    gdbarch_register_convert_to_raw_ftype register_convert_to_raw;
+set_gdbarch_register_convert_to_raw (struct gdbarch *gdbarch,
+                                     gdbarch_register_convert_to_raw_ftype register_convert_to_raw)
 {
   gdbarch->register_convert_to_raw = register_convert_to_raw;
 }
@@ -1831,9 +1769,8 @@ gdbarch_extract_return_value (struct gdbarch *gdbarch, struct type *type, char *
 }
 
 void
-set_gdbarch_extract_return_value (gdbarch, extract_return_value)
-    struct gdbarch *gdbarch;
-    gdbarch_extract_return_value_ftype extract_return_value;
+set_gdbarch_extract_return_value (struct gdbarch *gdbarch,
+                                  gdbarch_extract_return_value_ftype extract_return_value)
 {
   gdbarch->extract_return_value = extract_return_value;
 }
@@ -1850,9 +1787,8 @@ gdbarch_push_arguments (struct gdbarch *gdbarch, int nargs, struct value **args,
 }
 
 void
-set_gdbarch_push_arguments (gdbarch, push_arguments)
-    struct gdbarch *gdbarch;
-    gdbarch_push_arguments_ftype push_arguments;
+set_gdbarch_push_arguments (struct gdbarch *gdbarch,
+                            gdbarch_push_arguments_ftype push_arguments)
 {
   gdbarch->push_arguments = push_arguments;
 }
@@ -1869,9 +1805,8 @@ gdbarch_push_dummy_frame (struct gdbarch *gdbarch)
 }
 
 void
-set_gdbarch_push_dummy_frame (gdbarch, push_dummy_frame)
-    struct gdbarch *gdbarch;
-    gdbarch_push_dummy_frame_ftype push_dummy_frame;
+set_gdbarch_push_dummy_frame (struct gdbarch *gdbarch,
+                              gdbarch_push_dummy_frame_ftype push_dummy_frame)
 {
   gdbarch->push_dummy_frame = push_dummy_frame;
 }
@@ -1888,9 +1823,8 @@ gdbarch_push_return_address (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR sp
 }
 
 void
-set_gdbarch_push_return_address (gdbarch, push_return_address)
-    struct gdbarch *gdbarch;
-    gdbarch_push_return_address_ftype push_return_address;
+set_gdbarch_push_return_address (struct gdbarch *gdbarch,
+                                 gdbarch_push_return_address_ftype push_return_address)
 {
   gdbarch->push_return_address = push_return_address;
 }
@@ -1907,9 +1841,8 @@ gdbarch_pop_frame (struct gdbarch *gdbarch)
 }
 
 void
-set_gdbarch_pop_frame (gdbarch, pop_frame)
-    struct gdbarch *gdbarch;
-    gdbarch_pop_frame_ftype pop_frame;
+set_gdbarch_pop_frame (struct gdbarch *gdbarch,
+                       gdbarch_pop_frame_ftype pop_frame)
 {
   gdbarch->pop_frame = pop_frame;
 }
@@ -1926,9 +1859,8 @@ gdbarch_d10v_make_daddr (struct gdbarch *gdbarch, CORE_ADDR x)
 }
 
 void
-set_gdbarch_d10v_make_daddr (gdbarch, d10v_make_daddr)
-    struct gdbarch *gdbarch;
-    gdbarch_d10v_make_daddr_ftype d10v_make_daddr;
+set_gdbarch_d10v_make_daddr (struct gdbarch *gdbarch,
+                             gdbarch_d10v_make_daddr_ftype d10v_make_daddr)
 {
   gdbarch->d10v_make_daddr = d10v_make_daddr;
 }
@@ -1945,9 +1877,8 @@ gdbarch_d10v_make_iaddr (struct gdbarch *gdbarch, CORE_ADDR x)
 }
 
 void
-set_gdbarch_d10v_make_iaddr (gdbarch, d10v_make_iaddr)
-    struct gdbarch *gdbarch;
-    gdbarch_d10v_make_iaddr_ftype d10v_make_iaddr;
+set_gdbarch_d10v_make_iaddr (struct gdbarch *gdbarch,
+                             gdbarch_d10v_make_iaddr_ftype d10v_make_iaddr)
 {
   gdbarch->d10v_make_iaddr = d10v_make_iaddr;
 }
@@ -1964,9 +1895,8 @@ gdbarch_d10v_daddr_p (struct gdbarch *gdbarch, CORE_ADDR x)
 }
 
 void
-set_gdbarch_d10v_daddr_p (gdbarch, d10v_daddr_p)
-    struct gdbarch *gdbarch;
-    gdbarch_d10v_daddr_p_ftype d10v_daddr_p;
+set_gdbarch_d10v_daddr_p (struct gdbarch *gdbarch,
+                          gdbarch_d10v_daddr_p_ftype d10v_daddr_p)
 {
   gdbarch->d10v_daddr_p = d10v_daddr_p;
 }
@@ -1983,9 +1913,8 @@ gdbarch_d10v_iaddr_p (struct gdbarch *gdbarch, CORE_ADDR x)
 }
 
 void
-set_gdbarch_d10v_iaddr_p (gdbarch, d10v_iaddr_p)
-    struct gdbarch *gdbarch;
-    gdbarch_d10v_iaddr_p_ftype d10v_iaddr_p;
+set_gdbarch_d10v_iaddr_p (struct gdbarch *gdbarch,
+                          gdbarch_d10v_iaddr_p_ftype d10v_iaddr_p)
 {
   gdbarch->d10v_iaddr_p = d10v_iaddr_p;
 }
@@ -2002,9 +1931,8 @@ gdbarch_d10v_convert_daddr_to_raw (struct gdbarch *gdbarch, CORE_ADDR x)
 }
 
 void
-set_gdbarch_d10v_convert_daddr_to_raw (gdbarch, d10v_convert_daddr_to_raw)
-    struct gdbarch *gdbarch;
-    gdbarch_d10v_convert_daddr_to_raw_ftype d10v_convert_daddr_to_raw;
+set_gdbarch_d10v_convert_daddr_to_raw (struct gdbarch *gdbarch,
+                                       gdbarch_d10v_convert_daddr_to_raw_ftype d10v_convert_daddr_to_raw)
 {
   gdbarch->d10v_convert_daddr_to_raw = d10v_convert_daddr_to_raw;
 }
@@ -2021,9 +1949,8 @@ gdbarch_d10v_convert_iaddr_to_raw (struct gdbarch *gdbarch, CORE_ADDR x)
 }
 
 void
-set_gdbarch_d10v_convert_iaddr_to_raw (gdbarch, d10v_convert_iaddr_to_raw)
-    struct gdbarch *gdbarch;
-    gdbarch_d10v_convert_iaddr_to_raw_ftype d10v_convert_iaddr_to_raw;
+set_gdbarch_d10v_convert_iaddr_to_raw (struct gdbarch *gdbarch,
+                                       gdbarch_d10v_convert_iaddr_to_raw_ftype d10v_convert_iaddr_to_raw)
 {
   gdbarch->d10v_convert_iaddr_to_raw = d10v_convert_iaddr_to_raw;
 }
@@ -2040,9 +1967,8 @@ gdbarch_store_struct_return (struct gdbarch *gdbarch, CORE_ADDR addr, CORE_ADDR 
 }
 
 void
-set_gdbarch_store_struct_return (gdbarch, store_struct_return)
-    struct gdbarch *gdbarch;
-    gdbarch_store_struct_return_ftype store_struct_return;
+set_gdbarch_store_struct_return (struct gdbarch *gdbarch,
+                                 gdbarch_store_struct_return_ftype store_struct_return)
 {
   gdbarch->store_struct_return = store_struct_return;
 }
@@ -2059,9 +1985,8 @@ gdbarch_store_return_value (struct gdbarch *gdbarch, struct type *type, char *va
 }
 
 void
-set_gdbarch_store_return_value (gdbarch, store_return_value)
-    struct gdbarch *gdbarch;
-    gdbarch_store_return_value_ftype store_return_value;
+set_gdbarch_store_return_value (struct gdbarch *gdbarch,
+                                gdbarch_store_return_value_ftype store_return_value)
 {
   gdbarch->store_return_value = store_return_value;
 }
@@ -2078,9 +2003,8 @@ gdbarch_extract_struct_value_address (struct gdbarch *gdbarch, char *regbuf)
 }
 
 void
-set_gdbarch_extract_struct_value_address (gdbarch, extract_struct_value_address)
-    struct gdbarch *gdbarch;
-    gdbarch_extract_struct_value_address_ftype extract_struct_value_address;
+set_gdbarch_extract_struct_value_address (struct gdbarch *gdbarch,
+                                          gdbarch_extract_struct_value_address_ftype extract_struct_value_address)
 {
   gdbarch->extract_struct_value_address = extract_struct_value_address;
 }
@@ -2097,9 +2021,8 @@ gdbarch_use_struct_convention (struct gdbarch *gdbarch, int gcc_p, struct type *
 }
 
 void
-set_gdbarch_use_struct_convention (gdbarch, use_struct_convention)
-    struct gdbarch *gdbarch;
-    gdbarch_use_struct_convention_ftype use_struct_convention;
+set_gdbarch_use_struct_convention (struct gdbarch *gdbarch,
+                                   gdbarch_use_struct_convention_ftype use_struct_convention)
 {
   gdbarch->use_struct_convention = use_struct_convention;
 }
@@ -2116,9 +2039,8 @@ gdbarch_frame_init_saved_regs (struct gdbarch *gdbarch, struct frame_info *frame
 }
 
 void
-set_gdbarch_frame_init_saved_regs (gdbarch, frame_init_saved_regs)
-    struct gdbarch *gdbarch;
-    gdbarch_frame_init_saved_regs_ftype frame_init_saved_regs;
+set_gdbarch_frame_init_saved_regs (struct gdbarch *gdbarch,
+                                   gdbarch_frame_init_saved_regs_ftype frame_init_saved_regs)
 {
   gdbarch->frame_init_saved_regs = frame_init_saved_regs;
 }
@@ -2135,9 +2057,8 @@ gdbarch_init_extra_frame_info (struct gdbarch *gdbarch, int fromleaf, struct fra
 }
 
 void
-set_gdbarch_init_extra_frame_info (gdbarch, init_extra_frame_info)
-    struct gdbarch *gdbarch;
-    gdbarch_init_extra_frame_info_ftype init_extra_frame_info;
+set_gdbarch_init_extra_frame_info (struct gdbarch *gdbarch,
+                                   gdbarch_init_extra_frame_info_ftype init_extra_frame_info)
 {
   gdbarch->init_extra_frame_info = init_extra_frame_info;
 }
@@ -2154,9 +2075,8 @@ gdbarch_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR ip)
 }
 
 void
-set_gdbarch_skip_prologue (gdbarch, skip_prologue)
-    struct gdbarch *gdbarch;
-    gdbarch_skip_prologue_ftype skip_prologue;
+set_gdbarch_skip_prologue (struct gdbarch *gdbarch,
+                           gdbarch_skip_prologue_ftype skip_prologue)
 {
   gdbarch->skip_prologue = skip_prologue;
 }
@@ -2173,9 +2093,8 @@ gdbarch_inner_than (struct gdbarch *gdbarch, CORE_ADDR lhs, CORE_ADDR rhs)
 }
 
 void
-set_gdbarch_inner_than (gdbarch, inner_than)
-    struct gdbarch *gdbarch;
-    gdbarch_inner_than_ftype inner_than;
+set_gdbarch_inner_than (struct gdbarch *gdbarch,
+                        gdbarch_inner_than_ftype inner_than)
 {
   gdbarch->inner_than = inner_than;
 }
@@ -2192,16 +2111,14 @@ gdbarch_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenp
 }
 
 void
-set_gdbarch_breakpoint_from_pc (gdbarch, breakpoint_from_pc)
-    struct gdbarch *gdbarch;
-    gdbarch_breakpoint_from_pc_ftype breakpoint_from_pc;
+set_gdbarch_breakpoint_from_pc (struct gdbarch *gdbarch,
+                                gdbarch_breakpoint_from_pc_ftype breakpoint_from_pc)
 {
   gdbarch->breakpoint_from_pc = breakpoint_from_pc;
 }
 
 CORE_ADDR
-gdbarch_decr_pc_after_break (gdbarch)
-    struct gdbarch *gdbarch;
+gdbarch_decr_pc_after_break (struct gdbarch *gdbarch)
 {
   if (gdbarch->decr_pc_after_break == -1)
     internal_error ("gdbarch: gdbarch_decr_pc_after_break invalid");
@@ -2212,16 +2129,14 @@ gdbarch_decr_pc_after_break (gdbarch)
 }
 
 void
-set_gdbarch_decr_pc_after_break (gdbarch, decr_pc_after_break)
-    struct gdbarch *gdbarch;
-    CORE_ADDR decr_pc_after_break;
+set_gdbarch_decr_pc_after_break (struct gdbarch *gdbarch,
+                                 CORE_ADDR decr_pc_after_break)
 {
   gdbarch->decr_pc_after_break = decr_pc_after_break;
 }
 
 CORE_ADDR
-gdbarch_function_start_offset (gdbarch)
-    struct gdbarch *gdbarch;
+gdbarch_function_start_offset (struct gdbarch *gdbarch)
 {
   if (gdbarch->function_start_offset == -1)
     internal_error ("gdbarch: gdbarch_function_start_offset invalid");
@@ -2232,9 +2147,8 @@ gdbarch_function_start_offset (gdbarch)
 }
 
 void
-set_gdbarch_function_start_offset (gdbarch, function_start_offset)
-    struct gdbarch *gdbarch;
-    CORE_ADDR function_start_offset;
+set_gdbarch_function_start_offset (struct gdbarch *gdbarch,
+                                   CORE_ADDR function_start_offset)
 {
   gdbarch->function_start_offset = function_start_offset;
 }
@@ -2251,16 +2165,14 @@ gdbarch_remote_translate_xfer_address (struct gdbarch *gdbarch, CORE_ADDR gdb_ad
 }
 
 void
-set_gdbarch_remote_translate_xfer_address (gdbarch, remote_translate_xfer_address)
-    struct gdbarch *gdbarch;
-    gdbarch_remote_translate_xfer_address_ftype remote_translate_xfer_address;
+set_gdbarch_remote_translate_xfer_address (struct gdbarch *gdbarch,
+                                           gdbarch_remote_translate_xfer_address_ftype remote_translate_xfer_address)
 {
   gdbarch->remote_translate_xfer_address = remote_translate_xfer_address;
 }
 
 CORE_ADDR
-gdbarch_frame_args_skip (gdbarch)
-    struct gdbarch *gdbarch;
+gdbarch_frame_args_skip (struct gdbarch *gdbarch)
 {
   if (gdbarch->frame_args_skip == -1)
     internal_error ("gdbarch: gdbarch_frame_args_skip invalid");
@@ -2271,9 +2183,8 @@ gdbarch_frame_args_skip (gdbarch)
 }
 
 void
-set_gdbarch_frame_args_skip (gdbarch, frame_args_skip)
-    struct gdbarch *gdbarch;
-    CORE_ADDR frame_args_skip;
+set_gdbarch_frame_args_skip (struct gdbarch *gdbarch,
+                             CORE_ADDR frame_args_skip)
 {
   gdbarch->frame_args_skip = frame_args_skip;
 }
@@ -2290,9 +2201,8 @@ gdbarch_frameless_function_invocation (struct gdbarch *gdbarch, struct frame_inf
 }
 
 void
-set_gdbarch_frameless_function_invocation (gdbarch, frameless_function_invocation)
-    struct gdbarch *gdbarch;
-    gdbarch_frameless_function_invocation_ftype frameless_function_invocation;
+set_gdbarch_frameless_function_invocation (struct gdbarch *gdbarch,
+                                           gdbarch_frameless_function_invocation_ftype frameless_function_invocation)
 {
   gdbarch->frameless_function_invocation = frameless_function_invocation;
 }
@@ -2309,9 +2219,8 @@ gdbarch_frame_chain (struct gdbarch *gdbarch, struct frame_info *frame)
 }
 
 void
-set_gdbarch_frame_chain (gdbarch, frame_chain)
-    struct gdbarch *gdbarch;
-    gdbarch_frame_chain_ftype frame_chain;
+set_gdbarch_frame_chain (struct gdbarch *gdbarch,
+                         gdbarch_frame_chain_ftype frame_chain)
 {
   gdbarch->frame_chain = frame_chain;
 }
@@ -2328,9 +2237,8 @@ gdbarch_frame_chain_valid (struct gdbarch *gdbarch, CORE_ADDR chain, struct fram
 }
 
 void
-set_gdbarch_frame_chain_valid (gdbarch, frame_chain_valid)
-    struct gdbarch *gdbarch;
-    gdbarch_frame_chain_valid_ftype frame_chain_valid;
+set_gdbarch_frame_chain_valid (struct gdbarch *gdbarch,
+                               gdbarch_frame_chain_valid_ftype frame_chain_valid)
 {
   gdbarch->frame_chain_valid = frame_chain_valid;
 }
@@ -2347,9 +2255,8 @@ gdbarch_frame_saved_pc (struct gdbarch *gdbarch, struct frame_info *fi)
 }
 
 void
-set_gdbarch_frame_saved_pc (gdbarch, frame_saved_pc)
-    struct gdbarch *gdbarch;
-    gdbarch_frame_saved_pc_ftype frame_saved_pc;
+set_gdbarch_frame_saved_pc (struct gdbarch *gdbarch,
+                            gdbarch_frame_saved_pc_ftype frame_saved_pc)
 {
   gdbarch->frame_saved_pc = frame_saved_pc;
 }
@@ -2366,9 +2273,8 @@ gdbarch_frame_args_address (struct gdbarch *gdbarch, struct frame_info *fi)
 }
 
 void
-set_gdbarch_frame_args_address (gdbarch, frame_args_address)
-    struct gdbarch *gdbarch;
-    gdbarch_frame_args_address_ftype frame_args_address;
+set_gdbarch_frame_args_address (struct gdbarch *gdbarch,
+                                gdbarch_frame_args_address_ftype frame_args_address)
 {
   gdbarch->frame_args_address = frame_args_address;
 }
@@ -2385,9 +2291,8 @@ gdbarch_frame_locals_address (struct gdbarch *gdbarch, struct frame_info *fi)
 }
 
 void
-set_gdbarch_frame_locals_address (gdbarch, frame_locals_address)
-    struct gdbarch *gdbarch;
-    gdbarch_frame_locals_address_ftype frame_locals_address;
+set_gdbarch_frame_locals_address (struct gdbarch *gdbarch,
+                                  gdbarch_frame_locals_address_ftype frame_locals_address)
 {
   gdbarch->frame_locals_address = frame_locals_address;
 }
@@ -2404,9 +2309,8 @@ gdbarch_saved_pc_after_call (struct gdbarch *gdbarch, struct frame_info *frame)
 }
 
 void
-set_gdbarch_saved_pc_after_call (gdbarch, saved_pc_after_call)
-    struct gdbarch *gdbarch;
-    gdbarch_saved_pc_after_call_ftype saved_pc_after_call;
+set_gdbarch_saved_pc_after_call (struct gdbarch *gdbarch,
+                                 gdbarch_saved_pc_after_call_ftype saved_pc_after_call)
 {
   gdbarch->saved_pc_after_call = saved_pc_after_call;
 }
@@ -2423,9 +2327,8 @@ gdbarch_frame_num_args (struct gdbarch *gdbarch, struct frame_info *frame)
 }
 
 void
-set_gdbarch_frame_num_args (gdbarch, frame_num_args)
-    struct gdbarch *gdbarch;
-    gdbarch_frame_num_args_ftype frame_num_args;
+set_gdbarch_frame_num_args (struct gdbarch *gdbarch,
+                            gdbarch_frame_num_args_ftype frame_num_args)
 {
   gdbarch->frame_num_args = frame_num_args;
 }
@@ -2458,8 +2361,7 @@ struct gdbarch_data_registrary gdbarch_data_registrary =
 };
 
 struct gdbarch_data *
-register_gdbarch_data (init)
-     gdbarch_data_ftype *init;
+register_gdbarch_data (gdbarch_data_ftype *init)
 {
   struct gdbarch_data_registration **curr;
   for (curr = &gdbarch_data_registrary.registrations;
@@ -2476,10 +2378,8 @@ register_gdbarch_data (init)
 
 /* Walk through all the registered users initializing each in turn. */
 
-static void init_gdbarch_data PARAMS ((struct gdbarch *));
 static void
-init_gdbarch_data (gdbarch)
-     struct gdbarch *gdbarch;
+init_gdbarch_data (struct gdbarch *gdbarch)
 {
   struct gdbarch_data_registration *rego;
   gdbarch->nr_data = gdbarch_data_registrary.nr + 1;
@@ -2537,10 +2437,9 @@ struct gdbarch_swap_registrary gdbarch_swap_registrary =
 };
 
 void
-register_gdbarch_swap (data, sizeof_data, init)
-     void *data;
-     unsigned long sizeof_data;
-     gdbarch_swap_ftype *init;
+register_gdbarch_swap (void *data,
+		       unsigned long sizeof_data,
+		       gdbarch_swap_ftype *init)
 {
   struct gdbarch_swap_registration **rego;
   for (rego = &gdbarch_swap_registrary.registrations;
@@ -2554,10 +2453,8 @@ register_gdbarch_swap (data, sizeof_data, init)
 }
 
 
-static void init_gdbarch_swap PARAMS ((struct gdbarch *));
 static void
-init_gdbarch_swap (gdbarch)
-     struct gdbarch *gdbarch;
+init_gdbarch_swap (struct gdbarch *gdbarch)
 {
   struct gdbarch_swap_registration *rego;
   struct gdbarch_swap **curr = &gdbarch->swap;
@@ -2579,10 +2476,8 @@ init_gdbarch_swap (gdbarch)
     }
 }
 
-static void swapout_gdbarch_swap PARAMS ((struct gdbarch *));
 static void
-swapout_gdbarch_swap (gdbarch)
-     struct gdbarch *gdbarch;
+swapout_gdbarch_swap (struct gdbarch *gdbarch)
 {
   struct gdbarch_swap *curr;
   for (curr = gdbarch->swap;
@@ -2591,10 +2486,8 @@ swapout_gdbarch_swap (gdbarch)
     memcpy (curr->swap, curr->source->data, curr->source->sizeof_data);
 }
 
-static void swapin_gdbarch_swap PARAMS ((struct gdbarch *));
 static void
-swapin_gdbarch_swap (gdbarch)
-     struct gdbarch *gdbarch;
+swapin_gdbarch_swap (struct gdbarch *gdbarch)
 {
   struct gdbarch_swap *curr;
   for (curr = gdbarch->swap;
@@ -2617,9 +2510,8 @@ struct gdbarch_init_registration
 static struct gdbarch_init_registration *gdbarch_init_registrary = NULL;
 
 void
-register_gdbarch_init (bfd_architecture, init)
-     enum bfd_architecture bfd_architecture;
-     gdbarch_init_ftype *init;
+register_gdbarch_init (enum bfd_architecture bfd_architecture,
+                       gdbarch_init_ftype *init)
 {
   struct gdbarch_init_registration **curr;
   const struct bfd_arch_info *bfd_arch_info;
@@ -2657,9 +2549,8 @@ register_gdbarch_init (bfd_architecture, init)
    BFD_ARCH_INFO and BYTE_ORDER. */
 
 struct gdbarch_list *
-gdbarch_list_lookup_by_info (arches, info)
-     struct gdbarch_list *arches;
-     const struct gdbarch_info *info;
+gdbarch_list_lookup_by_info (struct gdbarch_list *arches,
+                             const struct gdbarch_info *info)
 {
   for (; arches != NULL; arches = arches->next)
     {
@@ -2677,8 +2568,7 @@ gdbarch_list_lookup_by_info (arches, info)
    failed. */
 
 int
-gdbarch_update (info)
-     struct gdbarch_info info;
+gdbarch_update (struct gdbarch_info info)
 {
   struct gdbarch *new_gdbarch;
   struct gdbarch_list **list;
@@ -2855,11 +2745,8 @@ int target_byte_order_auto = 1;
 static struct cmd_list_element *endianlist = NULL;
 
 /* Called by ``show endian''.  */
-static void show_endian PARAMS ((char *, int));
 static void
-show_endian (args, from_tty)
-     char *args;
-     int from_tty;
+show_endian (char *args, int from_tty)
 {
   char *msg =
     (TARGET_BYTE_ORDER_AUTO
@@ -2869,22 +2756,16 @@ show_endian (args, from_tty)
 }
 
 /* Called if the user enters ``set endian'' without an argument.  */
-static void set_endian PARAMS ((char *, int));
 static void
-set_endian (args, from_tty)
-     char *args;
-     int from_tty;
+set_endian (char *args, int from_tty)
 {
   printf_unfiltered ("\"set endian\" must be followed by \"auto\", \"big\" or \"little\".\n");
   show_endian (args, from_tty);
 }
 
 /* Called by ``set endian big''.  */
-static void set_endian_big PARAMS ((char *, int));
 static void
-set_endian_big (args, from_tty)
-     char *args;
-     int from_tty;
+set_endian_big (char *args, int from_tty)
 {
   if (TARGET_BYTE_ORDER_SELECTABLE_P)
     {
@@ -2906,11 +2787,8 @@ set_endian_big (args, from_tty)
 }
 
 /* Called by ``set endian little''.  */
-static void set_endian_little PARAMS ((char *, int));
 static void
-set_endian_little (args, from_tty)
-     char *args;
-     int from_tty;
+set_endian_little (char *args, int from_tty)
 {
   if (TARGET_BYTE_ORDER_SELECTABLE_P)
     {
@@ -2932,11 +2810,8 @@ set_endian_little (args, from_tty)
 }
 
 /* Called by ``set endian auto''.  */
-static void set_endian_auto PARAMS ((char *, int));
 static void
-set_endian_auto (args, from_tty)
-     char *args;
-     int from_tty;
+set_endian_auto (char *args, int from_tty)
 {
   if (TARGET_BYTE_ORDER_SELECTABLE_P)
     {
@@ -2950,10 +2825,8 @@ set_endian_auto (args, from_tty)
 }
 
 /* Set the endianness from a BFD.  */
-static void set_endian_from_file PARAMS ((bfd *));
 static void
-set_endian_from_file (abfd)
-     bfd *abfd;
+set_endian_from_file (bfd *abfd)
 {
   if (TARGET_BYTE_ORDER_SELECTABLE_P)
     {
@@ -2985,17 +2858,30 @@ set_endian_from_file (abfd)
 
 /* Functions to manipulate the architecture of the target */
 
+enum set_arch { set_arch_auto, set_arch_manual };
+
 int target_architecture_auto = 1;
 extern const struct bfd_arch_info bfd_default_arch_struct;
 const struct bfd_arch_info *target_architecture = &bfd_default_arch_struct;
-int (*target_architecture_hook) PARAMS ((const struct bfd_arch_info *ap));
+int (*target_architecture_hook) (const struct bfd_arch_info *ap);
+
+static void show_endian (char *, int);
+static void set_endian (char *, int);
+static void set_endian_big (char *, int);
+static void set_endian_little (char *, int);
+static void set_endian_auto (char *, int);
+static void set_endian_from_file (bfd *);
+static int arch_ok (const struct bfd_arch_info *arch);
+static void set_arch (const struct bfd_arch_info *arch, enum set_arch type);
+static void show_architecture (char *, int);
+static void set_architecture (char *, int);
+static void info_architecture (char *, int);
+static void set_architecture_from_file (bfd *);
 
 /* Do the real work of changing the current architecture */
 
-static int arch_ok PARAMS ((const struct bfd_arch_info *arch));
 static int
-arch_ok (arch)
-     const struct bfd_arch_info *arch;
+arch_ok (const struct bfd_arch_info *arch)
 {
   /* Should be performing the more basic check that the binary is
      compatible with GDB. */
@@ -3004,13 +2890,9 @@ arch_ok (arch)
 	  || target_architecture_hook (arch));
 }
 
-enum set_arch { set_arch_auto, set_arch_manual };
-
-static void set_arch PARAMS ((const struct bfd_arch_info *arch, enum set_arch type));
 static void
-set_arch (arch, type)
-     const struct bfd_arch_info *arch;
-     enum set_arch type;
+set_arch (const struct bfd_arch_info *arch,
+          enum set_arch type)
 {
   switch (type)
     {
@@ -3038,11 +2920,8 @@ set_arch (arch, type)
 }
 
 /* Called if the user enters ``show architecture'' without an argument. */
-static void show_architecture PARAMS ((char *, int));
 static void
-show_architecture (args, from_tty)
-     char *args;
-     int from_tty;
+show_architecture (char *args, int from_tty)
 {
   const char *arch;
   arch = TARGET_ARCHITECTURE->printable_name;
@@ -3054,11 +2933,8 @@ show_architecture (args, from_tty)
 
 /* Called if the user enters ``set architecture'' with or without an
    argument. */
-static void set_architecture PARAMS ((char *, int));
 static void
-set_architecture (args, from_tty)
-     char *args;
-     int from_tty;
+set_architecture (char *args, int from_tty)
 {
   if (args == NULL)
     {
@@ -3095,11 +2971,8 @@ set_architecture (args, from_tty)
 }
 
 /* Called if the user enters ``info architecture'' without an argument. */
-static void info_architecture PARAMS ((char *, int));
 static void
-info_architecture (args, from_tty)
-     char *args;
-     int from_tty;
+info_architecture (char *args, int from_tty)
 {
   enum bfd_architecture a;
   if (GDB_MULTI_ARCH)
@@ -3163,10 +3036,8 @@ set_architecture_from_arch_mach (arch, mach)
 }
 
 /* Set the architecture from a BFD */
-static void set_architecture_from_file PARAMS ((bfd *));
 static void
-set_architecture_from_file (abfd)
-     bfd *abfd;
+set_architecture_from_file (bfd *abfd)
 {
   const struct bfd_arch_info *wanted = bfd_get_arch_info (abfd);
   if (target_architecture_auto)
@@ -3202,7 +3073,7 @@ generic_register_convertible_not (num)
 /* Disassembler */
 
 /* Pointer to the target-dependent disassembly function.  */
-int (*tm_print_insn) PARAMS ((bfd_vma, disassemble_info *));
+int (*tm_print_insn) (bfd_vma, disassemble_info *);
 disassemble_info tm_print_insn_info;
 
 
@@ -3234,7 +3105,7 @@ int sizeof_call_dummy_words = sizeof (call_dummy_words);
 #endif
 
 
-extern void _initialize_gdbarch PARAMS ((void));
+extern void _initialize_gdbarch (void);
 void
 _initialize_gdbarch ()
 {

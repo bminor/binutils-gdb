@@ -45,9 +45,6 @@
 #include <sys/ioctl.h>
 
 #include <sys/ttrace.h>
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 #include <sys/mman.h>
 
 #ifndef NO_PTRACE_H
@@ -5216,7 +5213,7 @@ child_pid_to_exec_file (tid)
      hack that DDE uses, of pawing through the process' data
      segment to find the pathname.
    */
-  top_of_stack = 0x7b03a000;
+  top_of_stack = (TARGET_PTR_BIT == 64 ? 0x800003ffff7f0000 : 0x7b03a000);
   name_index = 0;
   done = 0;
 

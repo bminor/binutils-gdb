@@ -3,6 +3,12 @@
 
 *** Changes since GDB-4.18:
 
+* New features
+
+On SVR4 native platforms (such as Solaris), if you attach to a process
+without first loading a symbol file, GDB will now attempt to locate and
+load symbols from the running process's executable file.
+
 * New targets
 
 Motorola MCore					mcore-*-*
@@ -15,6 +21,7 @@ TI TMS320C80					tic80-*-*
 Altos 3068					m68*-altos-*
 Convex						c1-*-*, c2-*-*
 Pyramid						pyramid-*-*
+Tahoe						tahoe-*-*
 
 * Remote targets can connect to a sub-program
 

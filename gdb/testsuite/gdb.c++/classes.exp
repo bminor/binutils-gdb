@@ -844,7 +844,7 @@ gdb_expect {
 
 # ptype on the object
 # g++ is putting out the wrong debug info.  This works with aCC
-if {!$hp_aCC_compiler} {setup_xfail "hppa*-*-*"}
+if {!$hp_aCC_compiler} {setup_xfail "*-*-*"}
 send_gdb "ptype obj_with_enum\n"   
 gdb_expect {   
    -re "type = class ClassWithEnum \\{\r\n\[ \t\]*public:\r\n\[ \t\]*(enum |)ClassWithEnum::PrivEnum priv_enum;\r\n\[ \t\]*int x;\r\n\\}\r\n$gdb_prompt $" { pass "ptype obj_with_enum" }
@@ -853,7 +853,7 @@ gdb_expect {
 }
 
 # g++ is putting out the wrong debug info.  This works with aCC
-if {!$hp_aCC_compiler} {setup_xfail "hppa*-*-*"}
+if {!$hp_aCC_compiler} {setup_xfail "*-*-*"}
 send_gdb "print (ClassWithEnum::PrivEnum) 42\n"   
 gdb_expect {   
    -re "\\$\[0-9\]* = yellow.*$gdb_prompt $" { pass "print (ClassWithEnum::PrivEnum) 42" }

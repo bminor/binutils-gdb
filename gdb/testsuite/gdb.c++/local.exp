@@ -116,11 +116,6 @@ gdb_expect {
     timeout             { fail "(timeout) ptype InnerLocal" }
 }
 
-
-if {$gcc_compiled} then {
-setup_xfail "*-*-*"
-}
-
 send_gdb "ptype NestedInnerLocal\n"
 gdb_expect {
     -re "type = class InnerLocal::NestedInnerLocal \{\r\n\[\t \]*public:\r\n\[\t \]*int nil;\r\n\r\n\[\t \]*.int nil_foo\\(int\\);\r\n\[\t \]*\}\[\t \]*\\(Local at.*local\\.cc:44\\).*$gdb_prompt $" { pass "ptype NestedInnerLocal" }
@@ -135,7 +130,7 @@ gdb_expect {
 # gdb incorrectly interprets the NestedInnerLocal in
 # InnerLocal::NestedInnerLocal as field name instead of a type name;
 # See CLLbs14784.
-setup_xfail hppa*-*-* CLLbs14784
+setup_xfail *-*-* CLLbs14784
 send_gdb "ptype InnerLocal::NestedInnerLocal\n"
 gdb_expect {
     -re "type = class InnerLocal::NestedInnerLocal \{\r\n\[\t \]*public:\r\n\[\t \]*int nil;\r\n\r\n\[\t \]*.int nil_foo\\(int\\);\r\n\[\t \]*\}\[\t \]*\\(Local at.*local\\.cc:44\\).*$gdb_prompt $" { pass "ptype InnerLocal::NestedInnerLocal" }

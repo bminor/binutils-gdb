@@ -35,10 +35,6 @@
 #include "objfiles.h"
 #include "value.h"
 
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-
 extern void _initialize_maint_cmds PARAMS ((void));
 
 static void maintenance_command PARAMS ((char *, int));

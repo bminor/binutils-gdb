@@ -33,6 +33,7 @@
 #include "dis-asm.h"
 #include "symfile.h"
 #include "objfiles.h"
+#include "language.h"
 
 struct frame_extra_info
   {

@@ -22,9 +22,8 @@
 #define SCM_CODE(x) SCM_CAR(SCM_CLOSCAR (x))
 #define SCM_MAKINUM(x) (((x)<<2)+2L)
 
-#ifdef __STDC__			/* Forward decls for prototypes */
+/* Forward decls for prototypes */
 struct value;
-#endif
 
 extern int scm_value_print PARAMS ((struct value *, GDB_FILE *,
 				    int, enum val_prettyprint));

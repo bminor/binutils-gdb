@@ -58,9 +58,6 @@
 #include "symfile.h"
 #include "objfiles.h"
 
-/* To support asking "What CPU is this?" */
-#include <unistd.h>
-
 /* To support detection of the pseudo-initial frame
    that threads have. */
 #define THREAD_INITIAL_FRAME_SYMBOL  "__pthread_exit"
@@ -159,7 +156,7 @@ hppa_use_struct_convention (gcc_p, type)
      int gcc_p;
      struct type *type;
 {
-  return (TYPE_LENGTH (type) > 8);
+  return (TYPE_LENGTH (type) > 2 * REGISTER_SIZE);
 }
 
 
@@ -458,8 +455,8 @@ read_unwind_info (objfile)
 
   if (elf_unwind_sec)
     {
-      elf_unwind_size = bfd_section_size (objfile->obfd, elf_unwind_sec);	/* purecov: deadcode */
-      elf_unwind_entries = elf_unwind_size / UNWIND_ENTRY_SIZE;		/* purecov: deadcode */
+      elf_unwind_size = bfd_section_size (objfile->obfd, elf_unwind_sec);
+      elf_unwind_entries = elf_unwind_size / UNWIND_ENTRY_SIZE;
     }
   else
     {
@@ -576,7 +573,7 @@ find_unwind_entry (pc)
       {
 	read_unwind_info (objfile);
 	if (objfile->obj_private == NULL)
-	  error ("Internal error reading unwind information.");		/* purecov: deadcode */
+	  error ("Internal error reading unwind information.");
 	ui = ((obj_private_data_t *) (objfile->obj_private))->unwind_info;
       }
 
@@ -652,7 +649,9 @@ pc_in_interrupt_handler (pc)
 }
 
 /* Called when no unwind descriptor was found for PC.  Returns 1 if it
-   appears that PC is in a linker stub.  */
+   appears that PC is in a linker stub.
+
+   ?!? Need to handle stubs which appear in PA64 code.  */
 
 static int
 pc_in_linker_stub (pc)
@@ -865,6 +864,27 @@ hppa_frame_saved_pc (frame)
   if (pc_in_interrupt_handler (pc))
     return read_memory_integer (frame->frame + PC_REGNUM * 4,
 				TARGET_PTR_BIT / 8) & ~0x3;
+
+  if ((frame->pc >= frame->frame
+       && frame->pc <= (frame->frame
+                        /* A call dummy is sized in words, but it is
+                           actually a series of instructions.  Account
+                           for that scaling factor.  */
+                        + ((REGISTER_SIZE / INSTRUCTION_SIZE)
+                           * CALL_DUMMY_LENGTH)
+                        /* Similarly we have to account for 64bit
+                           wide register saves.  */
+                        + (32 * REGISTER_SIZE)
+                        /* We always consider FP regs 8 bytes long.  */
+                        + (NUM_REGS - FP0_REGNUM) * 8
+                        /* Similarly we have to account for 64bit
+                           wide register saves.  */
+                        + (6 * REGISTER_SIZE))))
+    {
+      return read_memory_integer ((frame->frame
+				   + (TARGET_PTR_BIT == 64 ? -16 : -20)),
+				  TARGET_PTR_BIT / 8) & ~0x3;
+    }
 
 #ifdef FRAME_SAVED_PC_IN_SIGTRAMP
   /* Deal with signal handler caller frames too.  */
@@ -1890,7 +1910,7 @@ find_stub_with_shl_get (function, handle)
 
   target_read_memory (value_return_addr, (char *) &stub_addr, sizeof (stub_addr));
   if (stub_addr <= 0)
-    error ("call to __d_shl_get failed, error code is %d", err_value);	/* purecov: deadcode */
+    error ("call to __d_shl_get failed, error code is %d", err_value);
 
   return (stub_addr);
 }
@@ -2820,6 +2840,10 @@ in_solib_call_trampoline (pc, name)
   if (pc == dyncall || pc == sr4export)
     return 1;
 
+  minsym = lookup_minimal_symbol_by_pc (pc);
+  if (minsym && strcmp (SYMBOL_NAME (minsym), ".stub") == 0)
+    return 1;
+
   /* Get the unwind descriptor corresponding to PC, return zero
      if no unwind was found.  */
   u = find_unwind_entry (pc);
@@ -2865,12 +2889,12 @@ in_solib_call_trampoline (pc, name)
 	}
 
       /* Should never happen.  */
-      warning ("Unable to find branch in parameter relocation stub.\n");	/* purecov: deadcode */
-      return 0;			/* purecov: deadcode */
+      warning ("Unable to find branch in parameter relocation stub.\n");
+      return 0;
     }
 
   /* Unknown stub type.  For now, just return zero.  */
-  return 0;			/* purecov: deadcode */
+  return 0;
 }
 
 /* Return one if PC is in the return path of a trampoline, else return zero.
@@ -2927,12 +2951,12 @@ in_solib_return_trampoline (pc, name)
 	}
 
       /* Should never happen.  */
-      warning ("Unable to find branch in parameter relocation stub.\n");	/* purecov: deadcode */
-      return 0;			/* purecov: deadcode */
+      warning ("Unable to find branch in parameter relocation stub.\n");
+      return 0;
     }
 
   /* Unknown stub type.  For now, just return zero.  */
-  return 0;			/* purecov: deadcode */
+  return 0;
 
 }
 
@@ -3246,6 +3270,10 @@ prologue_inst_adjust_sp (inst)
   if ((inst & 0xffe00000) == 0x6fc00000)
     return extract_14 (inst);
 
+  /* std,ma X,D(sp) */
+  if ((inst & 0xffe00008) == 0x73c00008)
+    return (inst & 0x1 ? -1 << 16 : 0) | (((inst >> 4) & 0x3ff) << 3);
+
   /* addil high21,%r1; ldo low11,(%r1),%r30)
      save high bits in save_high21 for later use.  */
   if ((inst & 0xffe00000) == 0x28200000)
@@ -3461,9 +3489,10 @@ restart:
       if (inst == 0x6bc23fd9 || inst == 0x0fc212c1)
 	save_rp = 0;
 
-      /* This is the only way we save SP into the stack.  At this time
+      /* These are the only ways we save SP into the stack.  At this time
          the HP compilers never bother to save SP into the stack.  */
-      if ((inst & 0xffffc000) == 0x6fc10000)
+      if ((inst & 0xffffc000) == 0x6fc10000
+	  || (inst & 0xffffc00c) == 0x73c10008)
 	save_sp = 0;
 
       /* Account for general and floating-point register saves.  */
@@ -3788,17 +3817,22 @@ hppa_frame_find_saved_regs (frame_info, frame_saved_regs)
       /* Note the interesting effects of this instruction.  */
       stack_remaining -= prologue_inst_adjust_sp (inst);
 
-      /* There is only one instruction used for saving RP into the stack.  */
-      if (inst == 0x6bc23fd9)
+      /* There are limited ways to store the return pointer into the
+	 stack.  */
+      if (inst == 0x6bc23fd9 || inst == 0x0fc212c1)
 	{
 	  save_rp = 0;
 	  frame_saved_regs->regs[RP_REGNUM] = frame_info->frame - 20;
 	}
 
-      /* Just note that we found the save of SP into the stack.  The
-         value for frame_saved_regs was computed above.  */
-      if ((inst & 0xffffc000) == 0x6fc10000)
-	save_sp = 0;
+      /* Note if we saved SP into the stack.  This also happens to indicate
+	 the location of the saved frame pointer.  */
+      if ((inst & 0xffffc000) == 0x6fc10000
+          || (inst & 0xffffc00c) == 0x73c10008)
+	{
+	  frame_saved_regs->regs[FP_REGNUM] = frame_info->frame;
+	  save_sp = 0;
+	}
 
       /* Account for general and floating-point register saves.  */
       reg = inst_saves_gr (inst);
@@ -3811,16 +3845,28 @@ hppa_frame_find_saved_regs (frame_info, frame_saved_regs)
 	  if ((inst >> 26) == 0x1b
 	      && extract_14 (inst) >= 0)
 	    frame_saved_regs->regs[reg] = frame_info->frame;
+	  /* A std has explicit post_modify forms.  */
+	  else if ((inst & 0xfc00000c0) == 0x70000008)
+	    frame_saved_regs->regs[reg] = frame_info->frame;
 	  else
 	    {
+	      CORE_ADDR offset;
+
+	      if ((inst >> 26) == 0x1c)
+		offset = (inst & 0x1 ? -1 << 16 : 0) | (((inst >> 4) & 0x3ff) << 3);
+	      else if ((inst >> 26) == 0x03)
+		offset = low_sign_extend (inst & 0x1f, 5);
+	      else
+		offset = extract_14 (inst);
+
 	      /* Handle code with and without frame pointers.  */
 	      if (u->Save_SP)
 		frame_saved_regs->regs[reg]
-		  = frame_info->frame + extract_14 (inst);
+		  = frame_info->frame + offset;
 	      else
 		frame_saved_regs->regs[reg]
-		  = frame_info->frame + (u->Total_frame_size << 3)
-		  + extract_14 (inst);
+		  = (frame_info->frame + (u->Total_frame_size << 3)
+		     + offset);
 	    }
 	}
 
@@ -4219,8 +4265,8 @@ child_enable_exception_callback (kind, enable)
 	}
       else
 	{
-	  warning ("Internal error: Invalid inferior pid?  Cannot intercept exception events.");	/* purecov: deadcode */
-	  return (struct symtab_and_line *) -1;		/* purecov: deadcode */
+	  warning ("Internal error: Invalid inferior pid?  Cannot intercept exception events.");
+	  return (struct symtab_and_line *) -1;
 	}
     }
 
@@ -4242,8 +4288,8 @@ child_enable_exception_callback (kind, enable)
 	  return (struct symtab_and_line *) -1;
 	}
       break;
-    default:			/* purecov: deadcode */
-      error ("Request to enable unknown or unsupported exception event.");	/* purecov: deadcode */
+    default:
+      error ("Request to enable unknown or unsupported exception event.");
     }
 
   /* Copy break address into new sal struct, malloc'ing if needed. */

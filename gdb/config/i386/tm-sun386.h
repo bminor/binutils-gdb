@@ -26,7 +26,6 @@
 #ifndef sun386
 #define sun386
 #endif
-#define GDB_TARGET_IS_SUN386 1
 #define SUNOS4
 #define USE_MACHINE_REG_H
 

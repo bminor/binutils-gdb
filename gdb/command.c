@@ -22,9 +22,6 @@
 #include "value.h"
 #include <ctype.h>
 #include "gdb_string.h"
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 
 #ifdef HAVE_WAIT_H
 #include <wait.h>

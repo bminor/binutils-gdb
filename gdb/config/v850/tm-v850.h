@@ -92,12 +92,10 @@ extern char **v850_register_names;
 
 #define SAVED_PC_AFTER_CALL(fi) read_register (RP_REGNUM)
 
-#ifdef __STDC__
 struct frame_info;
 struct frame_saved_regs;
 struct type;
 struct value;
-#endif
 
 #define EXTRA_FRAME_INFO struct frame_saved_regs fsr;
 

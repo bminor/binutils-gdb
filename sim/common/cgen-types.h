@@ -48,7 +48,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* Common mode types.  */
 /* ??? Target specific modes.  */
 typedef enum mode_type {
-  MODE_VM, MODE_BI,
+  MODE_VOID, MODE_BI,
   MODE_QI, MODE_HI, MODE_SI, MODE_DI,
   MODE_UQI, MODE_UHI, MODE_USI, MODE_UDI,
   MODE_SF, MODE_DF, MODE_XF, MODE_TF,

@@ -1,3 +1,13 @@
+1999-08-30  Doug Evans  <devans@casey.cygnus.com>
+
+	* sim/arm/thumb/allthumb.exp: New driver for thumb testcases.
+	* sim/arm/allinsn.exp: New driver for arm testcases.
+
+	* lib/sim-defs.exp (run_sim_test): Rename all_machs arg to
+	requested_machs, now is list of machs to run tests for.
+	Delete locals AS,ASFLAGS,LD,LDFLAGS.  Use target_assemble
+	and target_link instead.
+
 1999-07-16  Ben Elliston  <bje@cygnus.com>
 
 	* sim/arm/misaligned1.ms: New test case.

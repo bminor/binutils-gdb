@@ -83,7 +83,7 @@ TEXINDEX = texindex
 DVIPS = dvips
 
 # Main GDB manual's source files
-SFILES_INCLUDED = gdb-cfg.texi $(srcdir)/remote.texi
+SFILES_INCLUDED = gdb-cfg.texi
 
 SFILES_LOCAL = $(srcdir)/gdb.texinfo GDBvn.texi $(SFILES_INCLUDED)
 

@@ -28,7 +28,6 @@
 #if (!defined(__GO32__) && !defined(_WIN32)) || defined(__CYGWIN32__)
 #define HAVE_SOCKETS
 #include <sys/time.h>
-#include <unistd.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>

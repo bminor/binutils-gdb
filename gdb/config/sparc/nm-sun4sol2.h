@@ -32,9 +32,7 @@
 
 #ifdef HAVE_THREAD_DB_LIB
 
-#ifdef __STDC__
 struct objfile;
-#endif
 
 #define target_new_objfile(OBJFILE) sol_thread_new_objfile (OBJFILE)
 

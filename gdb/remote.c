@@ -196,9 +196,7 @@ void remote_console_output PARAMS ((char *));
 
 static void check_binary_download PARAMS ((CORE_ADDR addr));
 
-#if __STDC__
 struct packet_config;
-#endif
 
 static void show_packet_config_cmd PARAMS ((struct packet_config * config));
 

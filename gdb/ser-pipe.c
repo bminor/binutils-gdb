@@ -29,9 +29,6 @@
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <fcntl.h>
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 
 #include "signals.h"
 #include "gdb_string.h"

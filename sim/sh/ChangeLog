@@ -1,3 +1,11 @@
+Wed Aug 25 07:55:23 1999  Brendan Kehoe  <brendan@cygnus.com>
+
+	* gencode.c (fcnvds <DR_N>,FPUL): Rewrite to use a local anonymous
+	union type, instead of casting to an int* then a float*.
+	(fcnvsd FPUL,<DR_N>): Likewise.
+	(flds <FREG_N>,FPUL): Likewise.
+	(fsts FPUL,<FREG_N>): Likewise.
+
 1999-05-08  Felix Lee  <flee@cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

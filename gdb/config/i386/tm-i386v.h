@@ -153,10 +153,9 @@
 #undef  FRAME_NUM_ARGS
 #define FRAME_NUM_ARGS(fi) (-1)
 
-#ifdef __STDC__			/* Forward decl's for prototypes */
+/* Forward decl's for prototypes */
 struct frame_info;
 struct frame_saved_regs;
-#endif
 
 extern int
 i386_frame_num_args PARAMS ((struct frame_info *));

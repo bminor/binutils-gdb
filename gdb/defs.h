@@ -34,6 +34,10 @@
 #  include <sys/types.h>   /* for size_t */
 #endif
 
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
 /* Just in case they're not defined in stdio.h. */
 
 #ifndef SEEK_SET
@@ -71,6 +75,36 @@ extern char *strsignal PARAMS ((int));
    bfd_vma.  */
 
 typedef bfd_vma CORE_ADDR;
+
+/* This is to make sure that LONGEST is at least as big as CORE_ADDR.  */
+
+#ifndef LONGEST
+
+#ifdef BFD64
+
+#define LONGEST BFD_HOST_64_BIT
+#define ULONGEST BFD_HOST_U_64_BIT
+
+#else /* No BFD64 */
+
+#  ifdef CC_HAS_LONG_LONG
+#    define LONGEST long long
+#    define ULONGEST unsigned long long
+#  else
+/* BFD_HOST_64_BIT is defined for some hosts that don't have long long
+   (e.g. i386-windows) so try it.  */
+#    ifdef BFD_HOST_64_BIT
+#      define LONGEST BFD_HOST_64_BIT
+#      define ULONGEST BFD_HOST_U_64_BIT
+#    else
+#      define LONGEST long
+#      define ULONGEST unsigned long
+#    endif
+#  endif
+
+#endif /* No BFD64 */
+
+#endif /* ! LONGEST */
 
 extern int core_addr_lessthan PARAMS ((CORE_ADDR lhs, CORE_ADDR rhs));
 extern int core_addr_greaterthan PARAMS ((CORE_ADDR lhs, CORE_ADDR rhs));
@@ -231,10 +265,8 @@ struct cleanup
 
 /* Needed for various prototypes */
 
-#ifdef __STDC__
 struct symtab;
 struct breakpoint;
-#endif
 
 /* From blockframe.c */
 
@@ -339,23 +371,6 @@ extern void begin_line PARAMS ((void));
 extern void wrap_here PARAMS ((char *));
 
 extern void reinitialize_more_filter PARAMS ((void));
-
-/* new */
-enum streamtype
-{
-  afile,
-  astring
-};
-
-/* new */
-struct tui_stream
-{
-  int *ts_magic;
-  enum streamtype ts_streamtype;
-  FILE *ts_filestream;
-  char *ts_strbuf;
-  int ts_buflen;
-};
 
 struct gdb_file;
 typedef struct gdb_file GDB_FILE; /* deprecated */
@@ -504,15 +519,18 @@ extern void fputstrn_unfiltered PARAMS ((const char *str, int n, int quotr, GDB_
 
 extern void gdb_print_address PARAMS ((void *, GDB_FILE *));
 
-typedef bfd_vma t_addr;
+/* Convert a CORE_ADDR into a HEX string.  paddr() is like %08lx.
+   paddr_nz() is like %lx.  paddr_u() is like %lu. paddr_width() is
+   for ``%*''. */
+extern int strlen_paddr ();
+extern char* paddr (CORE_ADDR addr);
+extern char* paddr_nz (CORE_ADDR addr);
+extern char* paddr_u (CORE_ADDR addr);
+extern char* paddr_d (LONGEST addr);
+
 typedef bfd_vma t_reg;
-extern char* paddr PARAMS ((t_addr addr));
-
-extern char* preg PARAMS ((t_reg reg));
-
-extern char* paddr_nz PARAMS ((t_addr addr));
-
-extern char* preg_nz PARAMS ((t_reg reg));
+extern char* preg (t_reg reg);
+extern char* preg_nz (t_reg reg);
 
 extern void fprintf_symbol_filtered PARAMS ((GDB_FILE *, char *,
 					     enum language, int));
@@ -569,6 +587,12 @@ extern void directory_command PARAMS ((char *, int));
 extern void init_source_path PARAMS ((void));
 
 extern char *symtab_to_filename PARAMS ((struct symtab *));
+
+/* From exec.c */
+
+extern void exec_set_section_offsets (bfd_signed_vma text_off,
+				      bfd_signed_vma data_off,
+				      bfd_signed_vma bss_off);
 
 /* From findvar.c */
 
@@ -762,36 +786,6 @@ enum val_prettyprint
 #if !defined (LONG_MAX)
 #define	LONG_MAX ((long)(ULONG_MAX >> 1))	/* 0x7FFFFFFF for 32-bits */
 #endif
-
-#ifndef LONGEST
-
-#ifdef BFD64
-
-/* This is to make sure that LONGEST is at least as big as CORE_ADDR.  */
-
-#define LONGEST BFD_HOST_64_BIT
-#define ULONGEST BFD_HOST_U_64_BIT
-
-#else /* No BFD64 */
-
-#  ifdef CC_HAS_LONG_LONG
-#    define LONGEST long long
-#    define ULONGEST unsigned long long
-#  else
-/* BFD_HOST_64_BIT is defined for some hosts that don't have long long
-   (e.g. i386-windows) so try it.  */
-#    ifdef BFD_HOST_64_BIT
-#      define LONGEST BFD_HOST_64_BIT
-#      define ULONGEST BFD_HOST_U_64_BIT
-#    else
-#      define LONGEST long
-#      define ULONGEST unsigned long
-#    endif
-#  endif
-
-#endif /* No BFD64 */
-
-#endif /* ! LONGEST */
 
 /* Convert a LONGEST to an int.  This is used in contexts (e.g. number of
    arguments to a function, number in a value history, register number, etc.)
@@ -1145,10 +1139,8 @@ extern CORE_ADDR push_word PARAMS ((CORE_ADDR, ULONGEST));
 extern int watchdog;
 
 /* Hooks for alternate command interfaces.  */
-#ifdef __STDC__
 struct target_waitstatus;
 struct cmd_list_element;
-#endif
 
 /* Should the asynchronous variant of the interpreter (using the
    event-loop) be enabled? */
@@ -1255,6 +1247,12 @@ extern int use_windows;
 #endif
 #ifndef STDERR_FILENO
 #define STDERR_FILENO  2
+#endif
+
+/* If this definition isn't overridden by the header files, assume
+   that isatty and fileno exist on this system.  */
+#ifndef ISATTY
+#define ISATTY(FP)	(isatty (fileno (FP)))
 #endif
 
 #endif /* #ifndef DEFS_H */

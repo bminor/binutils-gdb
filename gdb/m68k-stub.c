@@ -523,57 +523,73 @@ char ch;
 }
 
 
-/* scan for the sequence $<data>#<checksum>     */
-void getpacket(buffer)
-char * buffer;
+unsigned char *
+getpacket (unsigned char *buffer)
 {
   unsigned char checksum;
   unsigned char xmitcsum;
-  int  i;
-  int  count;
+  int count;
   char ch;
-  
-  do {
-    /* wait around for the start character, ignore all other characters */
-    while ((ch = (getDebugChar() & 0x7f)) != '$'); 
-    checksum = 0;
-    xmitcsum = -1;
-    
-    count = 0;
-    
-    /* now, read until a # or end of buffer is found */
-    while (count < BUFMAX) {
-      ch = getDebugChar() & 0x7f;
-      if (ch == '#') break;
-      checksum = checksum + ch;
-      buffer[count] = ch;
-      count = count + 1;
-      }
-    buffer[count] = 0;
 
-    if (ch == '#') {
-      xmitcsum = hex(getDebugChar() & 0x7f) << 4;
-      xmitcsum += hex(getDebugChar() & 0x7f);
-      if ((remote_debug ) && (checksum != xmitcsum)) {
-        fprintf (stderr,"bad checksum.  My count = 0x%x, sent=0x%x. buf=%s\n",
-						     checksum,xmitcsum,buffer);
-      }
-      
-      if (checksum != xmitcsum) putDebugChar('-');  /* failed checksum */ 
-      else {
-	 putDebugChar('+');  /* successful transfer */
-	 /* if a sequence char is present, reply the sequence ID */
-	 if (buffer[2] == ':') {
-	    putDebugChar( buffer[0] );
-	    putDebugChar( buffer[1] );
-	    /* remove sequence chars from buffer */
-	    count = strlen(buffer);
-	    for (i=3; i <= count; i++) buffer[i-3] = buffer[i];
-	 } 
-      } 
-    } 
-  } while (checksum != xmitcsum);
-  
+  while (1)
+    {
+      /* wait around for the start character, ignore all other characters */
+      while ((ch = getDebugChar ()) != '$')
+	;
+
+retry:
+      checksum = 0;
+      xmitcsum = -1;
+      count = 0;
+
+      /* now, read until a # or end of buffer is found */
+      while (count < BUFMAX)
+	{
+	  ch = getDebugChar ();
+	  if (ch == '$')
+            goto retry;
+	  if (ch == '#')
+	    break;
+	  checksum = checksum + ch;
+	  buffer[count] = ch;
+	  count = count + 1;
+	}
+      buffer[count] = 0;
+
+      if (ch == '#')
+	{
+	  ch = getDebugChar ();
+	  xmitcsum = hex (ch) << 4;
+	  ch = getDebugChar ();
+	  xmitcsum += hex (ch);
+
+	  if (checksum != xmitcsum)
+	    {
+	      if (remote_debug)
+		{
+		  fprintf (stderr,
+		      "bad checksum.  My count = 0x%x, sent=0x%x. buf=%s\n",
+			   checksum, xmitcsum, buffer);
+		}
+	      putDebugChar ('-');	/* failed checksum */
+	    }
+	  else
+	    {
+	      putDebugChar ('+');	/* successful transfer */
+
+	      /* if a sequence char is present, reply the sequence ID */
+	      if (buffer[2] == ':')
+		{
+		  putDebugChar (buffer[0]);
+		  putDebugChar (buffer[1]);
+
+		  return &buffer[3];
+		}
+
+	      return &buffer[0];
+	    }
+	}
+    }
 }
 
 /* send the packet in buffer. */
@@ -738,7 +754,7 @@ int hexToInt(char **ptr, int *intValue)
  */
 void handle_exception(int exceptionVector)
 {
-  int    sigval;
+  int    sigval, stepping;
   int    addr, length;
   char * ptr;
   int    newPC;
@@ -758,11 +774,13 @@ void handle_exception(int exceptionVector)
 
   putpacket(remcomOutBuffer); 
 
+  stepping = 0;
+
   while (1==1) { 
     error = 0;
     remcomOutBuffer[0] = 0;
-    getpacket(remcomInBuffer);
-    switch (remcomInBuffer[0]) {
+    ptr = getpacket(remcomInBuffer);
+    switch (*ptr++) {
       case '?' :   remcomOutBuffer[0] = 'S';
                    remcomOutBuffer[1] =  hexchars[sigval >> 4];
                    remcomOutBuffer[2] =  hexchars[sigval % 16];
@@ -774,7 +792,7 @@ void handle_exception(int exceptionVector)
                 mem2hex((char*) registers, remcomOutBuffer, NUMREGBYTES);
                 break;
       case 'G' : /* set the value of the CPU registers - return OK */
-                hex2mem(&remcomInBuffer[1], (char*) registers, NUMREGBYTES);
+                hex2mem(&ptr, (char*) registers, NUMREGBYTES);
                 strcpy(remcomOutBuffer,"OK");
                 break;
       
@@ -785,7 +803,6 @@ void handle_exception(int exceptionVector)
                     exceptionHandler(2,handle_buserror); 
 
 		    /* TRY TO READ %x,%x.  IF SUCCEED, SET PTR = 0 */
-                    ptr = &remcomInBuffer[1];
                     if (hexToInt(&ptr,&addr))
                         if (*(ptr++) == ',')
                             if (hexToInt(&ptr,&length)) 
@@ -797,14 +814,12 @@ void handle_exception(int exceptionVector)
                     if (ptr)
                     {
 		      strcpy(remcomOutBuffer,"E01");
-		      debug_error("malformed read memory command: %s",remcomInBuffer);
-                  }     
-                } 
-		else {
+                    }     
+                } else {
 		  exceptionHandler(2,_catchException);   
 		  strcpy(remcomOutBuffer,"E03");
 		  debug_error("bus error");
-		  }     
+		}     
                 
 		/* restore handler for bus error */
 		exceptionHandler(2,_catchException);   
@@ -816,7 +831,6 @@ void handle_exception(int exceptionVector)
 		    exceptionHandler(2,handle_buserror); 
                     
 		    /* TRY TO READ '%x,%x:'.  IF SUCCEED, SET PTR = 0 */
-                    ptr = &remcomInBuffer[1];
                     if (hexToInt(&ptr,&addr))
                         if (*(ptr++) == ',')
                             if (hexToInt(&ptr,&length))
@@ -829,14 +843,12 @@ void handle_exception(int exceptionVector)
                     if (ptr)
                     {
 		      strcpy(remcomOutBuffer,"E02");
-		      debug_error("malformed write memory command: %s",remcomInBuffer);
-		      }     
-                } 
-		else {
+		    }     
+                } else {
 		  exceptionHandler(2,_catchException);   
 		  strcpy(remcomOutBuffer,"E03");
 		  debug_error("bus error");
-		  }     
+		}     
 
                 /* restore handler for bus error */
                 exceptionHandler(2,_catchException);   
@@ -844,10 +856,10 @@ void handle_exception(int exceptionVector)
      
      /* cAA..AA    Continue at address AA..AA(optional) */
      /* sAA..AA   Step one instruction from AA..AA(optional) */
-     case 'c' : 
      case 's' : 
+	 stepping = 1;
+     case 'c' : 
           /* try to read optional parameter, pc unchanged if no parm */
-         ptr = &remcomInBuffer[1];
          if (hexToInt(&ptr,&addr))
              registers[ PC ] = addr;
              
@@ -857,7 +869,7 @@ void handle_exception(int exceptionVector)
           registers[ PS ] &= 0x7fff;
           
           /* set the trace bit if we're stepping */
-          if (remcomInBuffer[0] == 's') registers[ PS ] |= 0x8000;
+          if (stepping) registers[ PS ] |= 0x8000;
           
           /*
            * look for newPC in the linked list of exception frames.

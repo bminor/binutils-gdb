@@ -75,7 +75,6 @@ static struct partial_symtab *hpread_end_psymtab
 
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
 /* check for the existance of a file, given its full pathname */
 int

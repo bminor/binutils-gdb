@@ -1418,11 +1418,6 @@ partial-stab.h is used to mangle multiple-symbol-table files from
 HPPA's.  This should all be ripped out, and a scheme like elfread.c
 used.
 
-@item GDB_TARGET_IS_MACH386
-@item GDB_TARGET_IS_SUN3
-@item GDB_TARGET_IS_SUN386
-Kludges that should go away.
-
 @item GET_LONGJMP_TARGET
 For most machines, this is a target-dependent parameter.  On the
 DECstation and the Iris, this is a native-dependent parameter, since
@@ -1749,10 +1744,13 @@ The following files define a target to GDB:
 @item gdb/config/@var{arch}/@var{ttt}.mt
 Contains a Makefile fragment specific to this target.  Specifies what
 object files are needed for target @var{ttt}, by defining
-@samp{TDEPFILES=@dots{}}.  Also specifies the header file which
-describes @var{ttt}, by defining @samp{TM_FILE= tm-@var{ttt}.h}.  You
-can also define @samp{TM_CFLAGS}, @samp{TM_CLIBS}, @samp{TM_CDEPS}, but
-these are now deprecated and may go away in future versions of GDB.
+@samp{TDEPFILES=@dots{}} and @samp{TDEPLIBS=@dots{}}.  Also specifies
+the header file which describes @var{ttt}, by defining @samp{TM_FILE=
+tm-@var{ttt}.h}.
+
+You can also define @samp{TM_CFLAGS}, @samp{TM_CLIBS}, @samp{TM_CDEPS},
+but these are now deprecated, replaced by autoconf, and may go away in
+future versions of GDB.
 
 @item gdb/config/@var{arch}/tm-@var{ttt}.h
 (@file{tm.h} is a link to this file, created by configure).  Contains

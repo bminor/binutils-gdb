@@ -37,12 +37,11 @@
 #define IMEM_START	0x00000000	/* was 0x10000000 */
 #define STACK_START	0x20007ffe
 
-#ifdef __STDC__			/* Forward decls for prototypes */
+/* Forward decls for prototypes */
 struct frame_info;
 struct frame_saved_regs;
 struct type;
 struct value;
-#endif
 
 /* Advance PC across any function entry prologue instructions
    to reach some "real" code.  */

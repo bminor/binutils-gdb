@@ -138,12 +138,11 @@ extern void fr30_pop_frame PARAMS ((void));
    Can return -1, meaning no way to tell.  */
 #define FRAME_NUM_ARGS(fi) (-1)
 
-#ifdef __STDC__			/* Forward decls for prototypes */
+/* Forward decls for prototypes */
 struct frame_info;
 struct frame_saved_regs;
 struct type;
 struct value;
-#endif
 
 #define EXTRA_FRAME_INFO \
   struct frame_saved_regs fsr;  \

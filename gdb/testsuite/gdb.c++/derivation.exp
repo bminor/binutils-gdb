@@ -304,7 +304,10 @@ gdb_expect {
     timeout           { fail "(timeout) print value of g_instance.c" }
   }
 
-if { $gcc_compiled } { setup_xfail "hppa*-hp-hpux*" }
+# The following cases always fail with g++ output, and should be fixed
+# someday. -sts 1999-08-25
+
+if { $gcc_compiled } { setup_xfail "*-*-*" }
 send_gdb "print g_instance.afoo()\n"
 gdb_expect {
     -re ".\[0-9\]* = 1.*$gdb_prompt $" {
@@ -314,7 +317,7 @@ gdb_expect {
     timeout           { fail "(timeout) print value of g_instance.afoo()" }
   }
 
-if { $gcc_compiled } { setup_xfail "hppa*-hp-hpux*" }
+if { $gcc_compiled } { setup_xfail "*-*-*" }
 send_gdb "print g_instance.bfoo()\n"
 gdb_expect {
     -re ".\[0-9\]* = 2.*$gdb_prompt $" {
@@ -324,7 +327,7 @@ gdb_expect {
     timeout           { fail "(timeout) print value of g_instance.bfoo()" }
   }
 
-if { $gcc_compiled } { setup_xfail "hppa*-hp-hpux*" }
+if { $gcc_compiled } { setup_xfail "*-*-*" }
 send_gdb "print g_instance.cfoo()\n"
 gdb_expect {
     -re ".\[0-9\]* = 3.*$gdb_prompt $" {

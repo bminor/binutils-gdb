@@ -1,3 +1,8 @@
+1999-08-28  Doug Evans  <devans@casey.cygnus.com>
+
+	* cgen-types.h (mode_type,MODE_VOID): Renamed from MODE_VM.
+	* cgen-utils.c (mode_names): Update.
+
 1999-08-20  Doug Evans  <devans@casey.cygnus.com>
 
 	* genmloop.sh: New args -parallel-generic-write, -parallel-only.

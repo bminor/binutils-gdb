@@ -36,9 +36,7 @@
    control to the inferior which you don't want showing up in your
    control variables.  */
 
-#ifdef __STDC__
 struct inferior_status;
-#endif
 
 extern struct inferior_status *save_inferior_status PARAMS ((int));
 

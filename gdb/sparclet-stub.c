@@ -452,67 +452,68 @@ hex(ch)
 
 /* scan for the sequence $<data>#<checksum>     */
 
-static void
-getpacket(buffer)
-     char *buffer;
+unsigned char *
+getpacket (buffer)
+     unsigned char *buffer;
 {
   unsigned char checksum;
   unsigned char xmitcsum;
-  int i;
   int count;
-  unsigned char ch;
+  char ch;
 
-  do
+  while (1)
     {
       /* wait around for the start character, ignore all other characters */
-      while ((ch = (getDebugChar() & 0x7f)) != '$') 
+      while ((ch = getDebugChar ()) != '$')
 	;
 
+retry:
       checksum = 0;
       xmitcsum = -1;
-
       count = 0;
 
       /* now, read until a # or end of buffer is found */
       while (count < BUFMAX)
 	{
-	  ch = getDebugChar() & 0x7f;
+	  ch = getDebugChar ();
+	  if (ch == '$')
+	    goto retry;
 	  if (ch == '#')
 	    break;
 	  checksum = checksum + ch;
 	  buffer[count] = ch;
 	  count = count + 1;
 	}
-
-      if (count >= BUFMAX)
-	continue;
-
       buffer[count] = 0;
 
       if (ch == '#')
 	{
-	  xmitcsum = hex(ch = getDebugChar() & 0x7f) << 4;
-	  xmitcsum |= hex(ch = getDebugChar() & 0x7f);
+	  ch = getDebugChar ();
+	  xmitcsum = hex (ch) << 4;
+	  ch = getDebugChar ();
+	  xmitcsum += hex (ch);
 
 	  if (checksum != xmitcsum)
-	    putDebugChar('-');	/* failed checksum */
+	    {
+	      putDebugChar ('-');	/* failed checksum */
+	    }
 	  else
 	    {
-	      putDebugChar('+'); /* successful transfer */
+	      putDebugChar ('+');	/* successful transfer */
+
 	      /* if a sequence char is present, reply the sequence ID */
 	      if (buffer[2] == ':')
 		{
-		  putDebugChar(buffer[0]);
-		  putDebugChar(buffer[1]);
-		  /* remove sequence chars from buffer */
-		  count = strlen(buffer);
-		  for (i=3; i <= count; i++)
-		    buffer[i-3] = buffer[i];
+		  putDebugChar (buffer[0]);
+		  putDebugChar (buffer[1]);
+
+		  return &buffer[3];
 		}
+
+	      return &buffer[0];
 	    }
 	}
     }
-  while (checksum != xmitcsum);
 }
 
 /* send the packet in buffer.  */
@@ -544,7 +545,7 @@ putpacket(buffer)
       putDebugChar(hexchars[checksum & 0xf]);
 
     }
-  while ((getDebugChar() & 0x7f) != '+');
+  while (getDebugChar() != '+');
 }
 
 static char remcomInBuffer[BUFMAX];
@@ -880,8 +881,8 @@ handle_exception (registers)
     {
       remcomOutBuffer[0] = 0;
 
-      getpacket(remcomInBuffer);
-      switch (remcomInBuffer[0])
+      ptr = getpacket(remcomInBuffer);
+      switch (*ptr++)
 	{
 	case '?':
 	  remcomOutBuffer[0] = 'S';
@@ -928,9 +929,7 @@ handle_exception (registers)
 
 	    psr = registers[PSR];
 
-	    ptr = &remcomInBuffer[1];
-
-	    if (remcomInBuffer[0] == 'P')	/* do a single register */
+	    if (ptr[-1] == 'P')	/* do a single register */
 	      {
 		int regno;
  
@@ -981,8 +980,6 @@ handle_exception (registers)
 	case 'm':	  /* mAA..AA,LLLL  Read LLLL bytes at address AA..AA */
 	  /* Try to read %x,%x.  */
 
-	  ptr = &remcomInBuffer[1];
-
 	  if (hexToInt(&ptr, &addr)
 	      && *ptr++ == ','
 	      && hexToInt(&ptr, &length))
@@ -998,8 +995,6 @@ handle_exception (registers)
 
 	case 'M': /* MAA..AA,LLLL: Write LLLL bytes at address AA.AA return OK */
 	  /* Try to read '%x,%x:'.  */
-
-	  ptr = &remcomInBuffer[1];
 
 	  if (hexToInt(&ptr, &addr)
 	      && *ptr++ == ','
@@ -1018,7 +1013,6 @@ handle_exception (registers)
 	case 'c':    /* cAA..AA    Continue at address AA..AA(optional) */
 	  /* try to read optional parameter, pc unchanged if no parm */
 
-	  ptr = &remcomInBuffer[1];
 	  if (hexToInt(&ptr, &addr))
 	    {
 	      registers[PC] = addr;
@@ -1054,7 +1048,6 @@ Disabled until we can unscrew this properly
 	    int baudrate;
 	    extern void set_timer_3();
 
-	    ptr = &remcomInBuffer[1];
 	    if (!hexToInt(&ptr, &baudrate))
 	      {
 		strcpy(remcomOutBuffer,"B01");

@@ -18,10 +18,9 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#ifdef __STDC__			/* Forward decls for prototypes */
+/* Forward decls for prototypes */
 struct type;
 struct value;
-#endif
 
 #define TARGET_BYTE_ORDER_SELECTABLE
 
@@ -105,6 +104,8 @@ extern breakpoint_from_pc_fn arm_breakpoint_from_pc;
  * floating point processor (if any)
  * No need to define if there is nothing to do.
  */
+extern void arm_float_info (void);
+
 #define FLOAT_INFO { arm_float_info (); }
 
 /* Say how long (ordinary) registers are.  This is a piece of bogosity
@@ -213,6 +214,8 @@ extern char **arm_register_names;
 /* Convert data from raw format for register REGNUM in buffer FROM
    to virtual format with type TYPE in buffer TO.  */
 
+void convert_from_extended (void *ptr, /*double*/void *dbl);
+
 #define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,TYPE,FROM,TO) \
 { \
   double val; \
@@ -222,6 +225,8 @@ extern char **arm_register_names;
 
 /* Convert data from virtual format with type TYPE in buffer FROM
    to raw format for register REGNUM in buffer TO.  */
+
+extern void convert_to_extended (void *ptr, /*double*/void *dbl);
 
 #define REGISTER_CONVERT_TO_RAW(TYPE,REGNUM,FROM,TO)	\
 { \
@@ -332,6 +337,7 @@ extern int arm_frame_chain_valid PARAMS ((CORE_ADDR, struct frame_info *));
 	 stmdb sp!, {}
 	 sub sp, ip, #4. */
 
+extern int arm_frameless_function_invocation (struct frame_info *fi);
 #define FRAMELESS_FUNCTION_INVOCATION(FI) \
 (arm_frameless_function_invocation (FI))
      
@@ -361,8 +367,8 @@ extern CORE_ADDR arm_frame_saved_pc PARAMS ((struct frame_info *));
 
 struct frame_saved_regs;
 struct frame_info;
-void frame_find_saved_regs PARAMS ((struct frame_info * fi,
-				    struct frame_saved_regs * fsr));
+void arm_frame_find_saved_regs (struct frame_info * fi,
+				struct frame_saved_regs * fsr);
 
 #define FRAME_FIND_SAVED_REGS(frame_info, frame_saved_regs) \
  arm_frame_find_saved_regs (frame_info, &(frame_saved_regs));

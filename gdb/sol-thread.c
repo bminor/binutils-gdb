@@ -54,7 +54,6 @@
 #include "target.h"
 #include "inferior.h"
 #include <fcntl.h>
-#include <unistd.h>
 #include <sys/stat.h>
 #include <dlfcn.h>
 #include "gdbcmd.h"

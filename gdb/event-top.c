@@ -26,6 +26,9 @@
 #include <signal.h>
 #include "event-loop.h"
 
+/* For dont_repeat() */
+#include "gdbcmd.h"
+
 /* readline include files */
 #include <readline/readline.h>
 #include <readline/history.h>
@@ -60,17 +63,10 @@ void handle_stop_sig PARAMS ((int));
 
 /* Functions to be invoked by the event loop in response to
    signals. */
-void async_request_quit PARAMS ((gdb_client_data));
 static void async_do_nothing PARAMS ((gdb_client_data));
 static void async_disconnect PARAMS ((gdb_client_data));
 static void async_float_handler PARAMS ((gdb_client_data));
 static void async_stop_sig PARAMS ((gdb_client_data));
-
-/* If this definition isn't overridden by the header files, assume
-   that isatty and fileno exist on this system.  */
-#ifndef ISATTY
-#define ISATTY(FP)	(isatty (fileno (FP)))
-#endif
 
 /* Readline offers an alternate interface, via callback
    functions. These are all included in the file callback.c in the
@@ -113,6 +109,10 @@ char *new_async_prompt;
    annotation_level is 2. */
 char *async_annotation_suffix;
 
+/* This is used to display the notification of the completion of an
+   asynchronous execution command. */
+int exec_done_display_p = 0;
+
 /* This is the file descriptor for the input stream that GDB uses to
    read commands from. */
 int input_fd;
@@ -140,8 +140,6 @@ PTR sigwinch_token;
 #ifdef STOP_SIGNAL
 PTR sigtstp_token;
 #endif
-
-void mark_async_signal_handler_wrapper PARAMS ((void *));
 
 /* Structure to save a partially entered command.  This is used when
    the user types '\' at the end of a command line. This is necessary

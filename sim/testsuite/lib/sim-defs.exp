@@ -143,8 +143,12 @@ proc sim_run { prog sim_opts prog_opts redir options } {
 # Run testcase NAME.
 # NAME is either a fully specified file name, or just the file name in which
 # case $srcdir/$subdir will be prepended.
-# ALL_MACHS is a list of machs to use if "mach: all" is specified in the file.
-# The file can contain options in the form "# option(mach list): value"
+# REQUESTED_MACHS is a list of machines to run the testcase on.  If NAME isn't
+# for the specified machine(s), it is ignored.
+# Typically REQUESTED_MACHS contains just one element, it is up to the caller
+# to iterate over the desired machine variants.
+#
+# The file can contain options in the form "# option(mach list): value".
 # Possibilities:
 # mach: [all | machine names]
 # as[(mach-list)]: <assembler options>
@@ -156,9 +160,9 @@ proc sim_run { prog sim_opts prog_opts redir options } {
 # "fail" if xerror.
 # The parens in "optname()" are optional if the specification is for all machs.
 
-proc run_sim_test { name all_machs } {
+proc run_sim_test { name requested_machs } {
     global subdir srcdir
-    global AS ASFLAGS LD LDFLAGS SIMFLAGS
+    global SIMFLAGS
     global opts
 
     if [string match "*/*" $name] {
@@ -210,14 +214,24 @@ proc run_sim_test { name all_machs } {
     # Change \n sequences to newline chars.
     regsub -all "\\\\n" $opts(output) "\n" opts(output)
 
-    foreach mach $opts(mach) {
-	verbose "Testing $name on $mach."
+    set testcase_machs $opts(mach)
+    if { "$testcase_machs" == "all" } {
+	set testcase_machs $requested_machs
+    }
+
+    foreach mach $testcase_machs {
+	if { [lsearch $requested_machs $mach] < 0 } {
+	    verbose -log "Skipping $mach version of $name, not requested."
+	    continue
+	}
+
+	verbose -log "Testing $name on machine $mach."
 
 	if ![info exists opts(as,$mach)] {
 	    set opts(as,$mach) $opts(as)
 	}
-	send_log "$AS $ASFLAGS $opts(as,$mach) -I$srcdir/$subdir -o ${name}.o $sourcefile\n"
-	catch "exec $AS $ASFLAGS $opts(as,$mach) -I$srcdir/$subdir -o ${name}.o $sourcefile" comp_output
+
+	set comp_output [target_assemble $sourcefile ${name}.o "$opts(as,$mach) -I$srcdir/$subdir"]
 
 	if ![string match "" $comp_output] {
 	    verbose -log "$comp_output" 3
@@ -228,8 +242,8 @@ proc run_sim_test { name all_machs } {
 	if ![info exists opts(ld,$mach)] {
 	    set opts(ld,$mach) $opts(ld)
 	}
-	send_log "$LD $LDFLAGS $opts(ld,$mach) -o ${name}.x ${name}.o\n"
-	catch "exec $LD $LDFLAGS $opts(ld,$mach) -o ${name}.x ${name}.o" comp_output
+
+	set comp_output [target_link ${name}.o ${name}.x "$opts(ld,$mach)"]
 
 	if ![string match "" $comp_output] {
 	    verbose -log "$comp_output" 3

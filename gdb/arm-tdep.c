@@ -833,18 +833,23 @@ arm_init_extra_frame_info (fromleaf, fi)
     {
       arm_scan_prologue (fi);
 
-      if (!fi->next)		/* this is the innermost frame? */
+      if (!fi->next)
+	/* this is the innermost frame? */
 	fi->frame = read_register (fi->framereg);
-      else			 	/* not the innermost frame */
+      else
+	/* not the innermost frame */
 	/* If we have an FP,  the callee saved it. */
 	if (fi->framereg == FP_REGNUM || fi->framereg == THUMB_FP_REGNUM)
-	  if (fi->next->fsr.regs[fi->framereg] != 0)
-	    fi->frame = read_memory_integer (fi->next->fsr.regs[fi->framereg],
-					     4);
-          else if (fromleaf) /* If we were called by a frameless fn.
-				 then our frame is still in the frame pointer
-				 register on the board... */
-	    fi->frame = read_fp ();
+	  {
+	    if (fi->next->fsr.regs[fi->framereg] != 0)
+	      fi->frame =
+		read_memory_integer (fi->next->fsr.regs[fi->framereg], 4);
+	    else if (fromleaf)
+	      /* If we were called by a frameless fn.  then our frame
+		 is still in the frame pointer register on the
+		 board... */
+	      fi->frame = read_fp ();
+	  }
 
       /* Calculate actual addresses of saved registers using offsets determined
          by arm_scan_prologue.  */
@@ -1246,17 +1251,17 @@ arm_othernames ()
 void
 convert_from_extended (ptr, dbl)
      void *ptr;
-     double *dbl;
+     void *dbl;
 {
-  *dbl = *(double *) ptr;
+  *(double *) dbl = *(double *) ptr;
 }
 
 void
 convert_to_extended (dbl, ptr)
      void *ptr;
-     double *dbl;
+     void *dbl;
 {
-  *(double *) ptr = *dbl;
+  *(double *) ptr = *(double *) dbl;
 }
 
 static int

@@ -125,6 +125,7 @@ READLINE_SRC = $(srcdir)/$(READLINE_DIR)
 READLINE_CFLAGS = -I$(READLINE_SRC)/..
 
 WARN_CFLAGS = @WARN_CFLAGS@
+WERROR_CFLAGS = @WERROR_CFLAGS@
 
 # Where is the INTL library?  Typically in ../intl.
 INTL_DIR = ../intl
@@ -183,10 +184,12 @@ CFLAGS = -g
 CXXFLAGS = -g -O
 
 # INTERNAL_CFLAGS is the aggregate of all other *CFLAGS macros.
-INTERNAL_CFLAGS = $(CFLAGS) $(GLOBAL_CFLAGS) $(PROFILE_CFLAGS) \
+INTERNAL_WARN_CFLAGS = \
+	$(CFLAGS) $(GLOBAL_CFLAGS) $(PROFILE_CFLAGS) \
 	$(GDB_CFLAGS) $(OPCODES_CFLAGS) $(READLINE_CFLAGS) \
 	$(BFD_CFLAGS) $(MMALLOC_CFLAGS) $(INCLUDE_CFLAGS) \
 	$(INTL_CFLAGS) $(TUI_CFLAGS) $(ENABLE_CFLAGS) $(WARN_CFLAGS)
+INTERNAL_CFLAGS = $(INTERNAL_WARN_CFLAGS) $(WERROR_CFLAGS)
 
 # LDFLAGS is specifically reserved for setting from the command line
 # when running make.
@@ -224,7 +227,7 @@ CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE) \
 ADD_FILES = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(REGEX1) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 
-VERSION = 19990823
+VERSION = 19990830
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -510,6 +513,7 @@ COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o stack.o thread.o \
 	gdbarch.o gdbtypes.o copying.o $(DEPFILES) \
 	mem-break.o target.o parse.o language.o $(YYOBJ) buildsym.o \
 	kod.o kod-cisco.o \
+	gdb-events.o \
 	exec.o bcache.o objfiles.o minsyms.o maint.o demangle.o \
 	dbxread.o coffread.o elfread.o \
 	dwarfread.o dwarf2read.o mipsread.o stabsread.o corefile.o \
@@ -521,9 +525,7 @@ COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o stack.o thread.o \
 	c-valprint.o cp-valprint.o ch-valprint.o f-valprint.o m2-valprint.o \
 	nlmread.o serial.o mdebugread.o os9kread.o top.o utils.o
 
-OBS = $(COMMON_OBS) $(ANNOTATE_OBS) main.o
-
-LIBGDB_OBS = 
+OBS = $(COMMON_OBS) $(ANNOTATE_OBS)
 
 TSOBS = inflow.o
 
@@ -645,28 +647,22 @@ init.c: $(OBS) $(TSOBS)
 .PRECIOUS: init.c
 
 # Removing the old gdb first works better if it is running, at least on SunOS.
-gdb$(EXEEXT): $(OBS) $(BUILD_TUI) $(TSOBS) $(ADD_DEPS) $(CDEPS) init.o
+gdb$(EXEEXT): main.o libgdb.a $(ADD_DEPS) $(CDEPS) $(TDEPLIBS)
 	rm -f gdb$(EXEEXT)
-	$(HLDENV) $(CC_LD) $(INTERNAL_LDFLAGS) $(WIN32LDAPP) -o gdb$(EXEEXT) \
-	  init.o $(OBS) $(TSOBS) $(TUI_LIBRARY) $(ADD_FILES) $(CLIBS) $(LOADLIBES)
+	$(HLDENV) $(CC_LD) $(INTERNAL_LDFLAGS) $(WIN32LDAPP) -o gdb$(EXEEXT) main.o libgdb.a $(TDEPLIBS) $(TUI_LIBRARY) $(CLIBS) $(LOADLIBES)
 
 nlm:	force
 	rootme=`pwd`; export rootme; $(MAKE) $(TARGET_FLAGS_TO_PASS) DO=all DODIRS=nlm subdir_do
 
-libgdb:	libgdb-files $(LIBGDB_OBS)
-
-# libproc is not listed here because all-libproc is a dependency of all-gui,
-# not all-gdb, and thus might be built after us.
-LIBGDBDEPS=$(COMMON_OBS) $(LIBGDB_OBS) $(TSOBS) $(ADD_DEPS) $(CDEPS) init.o
-# libproc needs to be before libiberty for alloca.
-LIBGDBFILES=$(COMMON_OBS) $(LIBGDB_OBS) $(TSOBS) ../libproc/libproc.a \
-  $(ADD_DEPS) $(CDEPS) init.o
-
-libgdb-files: $(LIBGDBDEPS) Makefile.in
-	-rm -f libgdb-files
-	for i in $(LIBGDBFILES); do\
-		echo $$i >> libgdb-files;\
-	done
+# Create a library of the gdb object files and build GDB by linking
+# against that.
+#
+# init.o is very important.  It pulls in the rest of GDB.
+LIBGDB_OBS= $(OBS) $(TSOBS) $(ADD_FILES) init.o
+libgdb.a: $(LIBGDB_OBS)
+	-rm -f libgdb.a
+	$(AR) q libgdb.a $(LIBGDB_OBS)
+	$(RANLIB) libgdb.a
 
 saber_gdb: $(SFILES) $(DEPFILES) copying.c version.c
 	#setopt load_flags $(CFLAGS) $(BFD_CFLAGS) -DHOST_SYS=SUN4_SYS
@@ -756,7 +752,7 @@ clean mostlyclean:
 	@$(MAKE) $(FLAGS_TO_PASS) DO=clean "DODIRS=$(SUBDIRS)" subdir_do 
 	rm -f *.o *.a $(ADD_FILES) *~ init.c-tmp
 	rm -f init.c version.c
-	rm -f gdb$(EXEEXT) core make.log libgdb-files
+	rm -f gdb$(EXEEXT) core make.log
 	rm -f gdb[0-9]$(EXEEXT)
 
 # This used to depend on c-exp.tab.c m2-exp.tab.c TAGS
@@ -1009,7 +1005,8 @@ blockframe.o: blockframe.c $(defs_h) $(gdbcore_h) $(inferior_h) \
 	objfiles.h symfile.h target.h
 
 breakpoint.o: breakpoint.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
-	$(inferior_h) language.h target.h gdbthread.h gdb_string.h
+	$(inferior_h) language.h target.h gdbthread.h gdb_string.h \
+	gdb-events.h
 
 buildsym.o: buildsym.c $(bfd_h) buildsym.h complaints.h $(defs_h) \
 	objfiles.h symfile.h $(symtab_h) gdb_string.h
@@ -1122,7 +1119,7 @@ eval.o: eval.c $(bfd_h) $(defs_h) $(expression_h) $(frame_h) \
 event-loop.o: event-loop.c $(defs_h) $(top_h) $(event_loop_h)
 
 event-top.o: event-top.c top.h $(readline_headers) \
-      $(defs_h) $(inferior_h) $(event_loop_h) terminal.h
+      $(defs_h) $(inferior_h) $(event_loop_h) terminal.h $(gdbcmd_h)
 
 exec.o: exec.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) $(inferior_h) \
 	target.h language.h gdb_string.h
@@ -1136,9 +1133,12 @@ findvar.o: findvar.c $(defs_h) $(gdbcore_h) $(inferior_h) target.h \
 fork-child.o: fork-child.c $(wait_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) target.h terminal.h gdbthread.h gdb_string.h
 
+# Due to several ``enum enabled'' declaration clashes it is difficult
+# to fix breakpoint.c's compiler warnings.
 tracepoint.o: tracepoint.c $(defs_h) $(symtab_h) $(frame_h) $(tracepoint_h) \
 	$(gdbtypes_h) $(expression_h) $(gdbcmd_h) $(value_h) target.h \
 	language.h gdb_string.h $(readline_headers)
+	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) $<
 
 gdbarch.o: gdbarch.c $(defs_h) $(bfd_h) $(gdbcmd_h)
 
@@ -1575,8 +1575,8 @@ symtab.o: symtab.c call-cmds.h $(defs_h) $(expression_h) $(frame_h) \
 	gnu-regex.h symfile.h $(symtab_h) target.h $(value_h) \
 	gdb_string.h
 
-tahoe-tdep.o: tahoe-tdep.c $(OP_INCLUDE)/tahoe.h $(defs_h) \
-	$(symtab_h)
+# OBSOLETE tahoe-tdep.o: tahoe-tdep.c $(OP_INCLUDE)/tahoe.h $(defs_h) \
+# OBSOLETE	$(symtab_h)
 
 tic80-tdep.o: tic80-tdep.c $(defs_h)
 
@@ -1601,7 +1601,7 @@ umax-xdep.o: umax-xdep.c $(defs_h) $(gdbcore_h) $(inferior_h)
 
 utils.o: utils.c $(bfd_h) $(defs_h) $(expression_h) $(gdbcmd_h) \
 	language.h signals.h target.h terminal.h $(readline_headers) \
-	gdb_string.h
+	gdb_string.h $(event_loop_h)
 
 valarith.o: valarith.c $(bfd_h) $(defs_h) $(expression_h) \
 	$(gdbtypes_h) language.h $(symtab_h) target.h $(value_h) \
@@ -1662,6 +1662,8 @@ f-exp.tab.o: f-exp.tab.c f-lang.h $(defs_h) $(expression_h) \
 m2-exp.tab.o: m2-exp.tab.c $(defs_h) $(expression_h) $(gdbtypes_h) \
 	language.h m2-lang.h parser-defs.h $(symtab_h) $(value_h) \
 	$(bfd_h) objfiles.h symfile.h
+
+gdb-events.o: gdb-events.c gdb-events.h $(defs_h) $(gdbcmd_h)
 
 
 ### end of the gdb Makefile.in.

@@ -24,9 +24,7 @@
 
 #define GDB_TARGET_IS_SPARC64
 
-#ifdef __STDC__
 struct value;
-#endif
 
 /* Eeeew. Ok, we have to assume (for now) that the processor really is
    in sparc64 mode. While this is the same instruction sequence as

@@ -30,9 +30,6 @@
 #include "gdbthread.h"
 
 #include <signal.h>
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 
 /* This just gets used as a default if we can't find SHELL */
 #ifndef SHELL_FILE

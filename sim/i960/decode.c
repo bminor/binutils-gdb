@@ -1846,7 +1846,7 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
       FLD (in_src1) = f_src1;
       FLD (in_src2) = f_src2;
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_1) = ((FLD (f_srcdst)) + (1));
     }
 #endif
 #undef FLD
@@ -1879,7 +1879,7 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     {
       FLD (in_src2) = f_src2;
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_1) = ((FLD (f_srcdst)) + (1));
     }
 #endif
 #undef FLD
@@ -1912,7 +1912,7 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     {
       FLD (in_src1) = f_src1;
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_1) = ((FLD (f_srcdst)) + (1));
     }
 #endif
 #undef FLD
@@ -1944,7 +1944,7 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   if (PROFILE_MODEL_P (current_cpu))
     {
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_1) = ((FLD (f_srcdst)) + (1));
     }
 #endif
 #undef FLD
@@ -1973,10 +1973,10 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   /* Record the fields for profiling.  */
   if (PROFILE_MODEL_P (current_cpu))
     {
-      FLD (in_h_gr_add__VM_index_of_src1_1) = ((FLD (f_src1)) + (1));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_src1_1) = ((FLD (f_src1)) + (1));
       FLD (in_src1) = f_src1;
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_1) = ((FLD (f_srcdst)) + (1));
     }
 #endif
 #undef FLD
@@ -2005,7 +2005,7 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   if (PROFILE_MODEL_P (current_cpu))
     {
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_1) = ((FLD (f_srcdst)) + (1));
     }
 #endif
 #undef FLD
@@ -2034,12 +2034,12 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   /* Record the fields for profiling.  */
   if (PROFILE_MODEL_P (current_cpu))
     {
-      FLD (in_h_gr_add__VM_index_of_src1_1) = ((FLD (f_src1)) + (1));
-      FLD (in_h_gr_add__VM_index_of_src1_2) = ((FLD (f_src1)) + (2));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_src1_1) = ((FLD (f_src1)) + (1));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_src1_2) = ((FLD (f_src1)) + (2));
       FLD (in_src1) = f_src1;
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
-      FLD (out_h_gr_add__VM_index_of_dst_2) = ((FLD (f_srcdst)) + (2));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_2) = ((FLD (f_srcdst)) + (2));
     }
 #endif
 #undef FLD
@@ -2068,8 +2068,8 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   if (PROFILE_MODEL_P (current_cpu))
     {
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
-      FLD (out_h_gr_add__VM_index_of_dst_2) = ((FLD (f_srcdst)) + (2));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_2) = ((FLD (f_srcdst)) + (2));
     }
 #endif
 #undef FLD
@@ -2098,14 +2098,14 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   /* Record the fields for profiling.  */
   if (PROFILE_MODEL_P (current_cpu))
     {
-      FLD (in_h_gr_add__VM_index_of_src1_1) = ((FLD (f_src1)) + (1));
-      FLD (in_h_gr_add__VM_index_of_src1_2) = ((FLD (f_src1)) + (2));
-      FLD (in_h_gr_add__VM_index_of_src1_3) = ((FLD (f_src1)) + (3));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_src1_1) = ((FLD (f_src1)) + (1));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_src1_2) = ((FLD (f_src1)) + (2));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_src1_3) = ((FLD (f_src1)) + (3));
       FLD (in_src1) = f_src1;
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
-      FLD (out_h_gr_add__VM_index_of_dst_2) = ((FLD (f_srcdst)) + (2));
-      FLD (out_h_gr_add__VM_index_of_dst_3) = ((FLD (f_srcdst)) + (3));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_2) = ((FLD (f_srcdst)) + (2));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_3) = ((FLD (f_srcdst)) + (3));
     }
 #endif
 #undef FLD
@@ -2134,9 +2134,9 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   if (PROFILE_MODEL_P (current_cpu))
     {
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
-      FLD (out_h_gr_add__VM_index_of_dst_2) = ((FLD (f_srcdst)) + (2));
-      FLD (out_h_gr_add__VM_index_of_dst_3) = ((FLD (f_srcdst)) + (3));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_2) = ((FLD (f_srcdst)) + (2));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_3) = ((FLD (f_srcdst)) + (3));
     }
 #endif
 #undef FLD
@@ -2719,7 +2719,7 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   if (PROFILE_MODEL_P (current_cpu))
     {
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_1) = ((FLD (f_srcdst)) + (1));
     }
 #endif
 #undef FLD
@@ -2752,7 +2752,7 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     {
       FLD (in_abase) = f_abase;
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_1) = ((FLD (f_srcdst)) + (1));
     }
 #endif
 #undef FLD
@@ -2782,7 +2782,7 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     {
       FLD (in_abase) = f_abase;
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_1) = ((FLD (f_srcdst)) + (1));
     }
 #endif
 #undef FLD
@@ -2819,7 +2819,7 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
       FLD (in_abase) = f_abase;
       FLD (in_index) = f_index;
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_1) = ((FLD (f_srcdst)) + (1));
     }
 #endif
 #undef FLD
@@ -2851,7 +2851,7 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   if (PROFILE_MODEL_P (current_cpu))
     {
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_1) = ((FLD (f_srcdst)) + (1));
     }
 #endif
 #undef FLD
@@ -2887,7 +2887,7 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     {
       FLD (in_abase) = f_abase;
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_1) = ((FLD (f_srcdst)) + (1));
     }
 #endif
 #undef FLD
@@ -2926,7 +2926,7 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     {
       FLD (in_index) = f_index;
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_1) = ((FLD (f_srcdst)) + (1));
     }
 #endif
 #undef FLD
@@ -2969,7 +2969,7 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
       FLD (in_abase) = f_abase;
       FLD (in_index) = f_index;
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_1) = ((FLD (f_srcdst)) + (1));
     }
 #endif
 #undef FLD
@@ -2998,8 +2998,8 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   if (PROFILE_MODEL_P (current_cpu))
     {
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
-      FLD (out_h_gr_add__VM_index_of_dst_2) = ((FLD (f_srcdst)) + (2));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_2) = ((FLD (f_srcdst)) + (2));
     }
 #endif
 #undef FLD
@@ -3032,8 +3032,8 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     {
       FLD (in_abase) = f_abase;
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
-      FLD (out_h_gr_add__VM_index_of_dst_2) = ((FLD (f_srcdst)) + (2));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_2) = ((FLD (f_srcdst)) + (2));
     }
 #endif
 #undef FLD
@@ -3063,8 +3063,8 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     {
       FLD (in_abase) = f_abase;
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
-      FLD (out_h_gr_add__VM_index_of_dst_2) = ((FLD (f_srcdst)) + (2));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_2) = ((FLD (f_srcdst)) + (2));
     }
 #endif
 #undef FLD
@@ -3101,8 +3101,8 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
       FLD (in_abase) = f_abase;
       FLD (in_index) = f_index;
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
-      FLD (out_h_gr_add__VM_index_of_dst_2) = ((FLD (f_srcdst)) + (2));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_2) = ((FLD (f_srcdst)) + (2));
     }
 #endif
 #undef FLD
@@ -3134,8 +3134,8 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   if (PROFILE_MODEL_P (current_cpu))
     {
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
-      FLD (out_h_gr_add__VM_index_of_dst_2) = ((FLD (f_srcdst)) + (2));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_2) = ((FLD (f_srcdst)) + (2));
     }
 #endif
 #undef FLD
@@ -3171,8 +3171,8 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     {
       FLD (in_abase) = f_abase;
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
-      FLD (out_h_gr_add__VM_index_of_dst_2) = ((FLD (f_srcdst)) + (2));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_2) = ((FLD (f_srcdst)) + (2));
     }
 #endif
 #undef FLD
@@ -3211,8 +3211,8 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     {
       FLD (in_index) = f_index;
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
-      FLD (out_h_gr_add__VM_index_of_dst_2) = ((FLD (f_srcdst)) + (2));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_2) = ((FLD (f_srcdst)) + (2));
     }
 #endif
 #undef FLD
@@ -3255,8 +3255,8 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
       FLD (in_abase) = f_abase;
       FLD (in_index) = f_index;
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
-      FLD (out_h_gr_add__VM_index_of_dst_2) = ((FLD (f_srcdst)) + (2));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_2) = ((FLD (f_srcdst)) + (2));
     }
 #endif
 #undef FLD
@@ -3285,9 +3285,9 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   if (PROFILE_MODEL_P (current_cpu))
     {
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
-      FLD (out_h_gr_add__VM_index_of_dst_2) = ((FLD (f_srcdst)) + (2));
-      FLD (out_h_gr_add__VM_index_of_dst_3) = ((FLD (f_srcdst)) + (3));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_2) = ((FLD (f_srcdst)) + (2));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_3) = ((FLD (f_srcdst)) + (3));
     }
 #endif
 #undef FLD
@@ -3320,9 +3320,9 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     {
       FLD (in_abase) = f_abase;
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
-      FLD (out_h_gr_add__VM_index_of_dst_2) = ((FLD (f_srcdst)) + (2));
-      FLD (out_h_gr_add__VM_index_of_dst_3) = ((FLD (f_srcdst)) + (3));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_2) = ((FLD (f_srcdst)) + (2));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_3) = ((FLD (f_srcdst)) + (3));
     }
 #endif
 #undef FLD
@@ -3352,9 +3352,9 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     {
       FLD (in_abase) = f_abase;
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
-      FLD (out_h_gr_add__VM_index_of_dst_2) = ((FLD (f_srcdst)) + (2));
-      FLD (out_h_gr_add__VM_index_of_dst_3) = ((FLD (f_srcdst)) + (3));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_2) = ((FLD (f_srcdst)) + (2));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_3) = ((FLD (f_srcdst)) + (3));
     }
 #endif
 #undef FLD
@@ -3391,9 +3391,9 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
       FLD (in_abase) = f_abase;
       FLD (in_index) = f_index;
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
-      FLD (out_h_gr_add__VM_index_of_dst_2) = ((FLD (f_srcdst)) + (2));
-      FLD (out_h_gr_add__VM_index_of_dst_3) = ((FLD (f_srcdst)) + (3));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_2) = ((FLD (f_srcdst)) + (2));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_3) = ((FLD (f_srcdst)) + (3));
     }
 #endif
 #undef FLD
@@ -3425,9 +3425,9 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   if (PROFILE_MODEL_P (current_cpu))
     {
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
-      FLD (out_h_gr_add__VM_index_of_dst_2) = ((FLD (f_srcdst)) + (2));
-      FLD (out_h_gr_add__VM_index_of_dst_3) = ((FLD (f_srcdst)) + (3));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_2) = ((FLD (f_srcdst)) + (2));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_3) = ((FLD (f_srcdst)) + (3));
     }
 #endif
 #undef FLD
@@ -3463,9 +3463,9 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     {
       FLD (in_abase) = f_abase;
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
-      FLD (out_h_gr_add__VM_index_of_dst_2) = ((FLD (f_srcdst)) + (2));
-      FLD (out_h_gr_add__VM_index_of_dst_3) = ((FLD (f_srcdst)) + (3));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_2) = ((FLD (f_srcdst)) + (2));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_3) = ((FLD (f_srcdst)) + (3));
     }
 #endif
 #undef FLD
@@ -3504,9 +3504,9 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
     {
       FLD (in_index) = f_index;
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
-      FLD (out_h_gr_add__VM_index_of_dst_2) = ((FLD (f_srcdst)) + (2));
-      FLD (out_h_gr_add__VM_index_of_dst_3) = ((FLD (f_srcdst)) + (3));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_2) = ((FLD (f_srcdst)) + (2));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_3) = ((FLD (f_srcdst)) + (3));
     }
 #endif
 #undef FLD
@@ -3549,9 +3549,9 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
       FLD (in_abase) = f_abase;
       FLD (in_index) = f_index;
       FLD (out_dst) = f_srcdst;
-      FLD (out_h_gr_add__VM_index_of_dst_1) = ((FLD (f_srcdst)) + (1));
-      FLD (out_h_gr_add__VM_index_of_dst_2) = ((FLD (f_srcdst)) + (2));
-      FLD (out_h_gr_add__VM_index_of_dst_3) = ((FLD (f_srcdst)) + (3));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_1) = ((FLD (f_srcdst)) + (1));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_2) = ((FLD (f_srcdst)) + (2));
+      FLD (out_h_gr_add__DFLT_index_of__DFLT_dst_3) = ((FLD (f_srcdst)) + (3));
     }
 #endif
 #undef FLD
@@ -3842,7 +3842,7 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   /* Record the fields for profiling.  */
   if (PROFILE_MODEL_P (current_cpu))
     {
-      FLD (in_h_gr_add__VM_index_of_st_src_1) = ((FLD (f_srcdst)) + (1));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_st_src_1) = ((FLD (f_srcdst)) + (1));
       FLD (in_st_src) = f_srcdst;
     }
 #endif
@@ -3875,7 +3875,7 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   if (PROFILE_MODEL_P (current_cpu))
     {
       FLD (in_abase) = f_abase;
-      FLD (in_h_gr_add__VM_index_of_st_src_1) = ((FLD (f_srcdst)) + (1));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_st_src_1) = ((FLD (f_srcdst)) + (1));
       FLD (in_st_src) = f_srcdst;
     }
 #endif
@@ -3905,7 +3905,7 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   if (PROFILE_MODEL_P (current_cpu))
     {
       FLD (in_abase) = f_abase;
-      FLD (in_h_gr_add__VM_index_of_st_src_1) = ((FLD (f_srcdst)) + (1));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_st_src_1) = ((FLD (f_srcdst)) + (1));
       FLD (in_st_src) = f_srcdst;
     }
 #endif
@@ -3941,7 +3941,7 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   if (PROFILE_MODEL_P (current_cpu))
     {
       FLD (in_abase) = f_abase;
-      FLD (in_h_gr_add__VM_index_of_st_src_1) = ((FLD (f_srcdst)) + (1));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_st_src_1) = ((FLD (f_srcdst)) + (1));
       FLD (in_index) = f_index;
       FLD (in_st_src) = f_srcdst;
     }
@@ -3974,7 +3974,7 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   /* Record the fields for profiling.  */
   if (PROFILE_MODEL_P (current_cpu))
     {
-      FLD (in_h_gr_add__VM_index_of_st_src_1) = ((FLD (f_srcdst)) + (1));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_st_src_1) = ((FLD (f_srcdst)) + (1));
       FLD (in_st_src) = f_srcdst;
     }
 #endif
@@ -4010,7 +4010,7 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   if (PROFILE_MODEL_P (current_cpu))
     {
       FLD (in_abase) = f_abase;
-      FLD (in_h_gr_add__VM_index_of_st_src_1) = ((FLD (f_srcdst)) + (1));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_st_src_1) = ((FLD (f_srcdst)) + (1));
       FLD (in_st_src) = f_srcdst;
     }
 #endif
@@ -4048,7 +4048,7 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   /* Record the fields for profiling.  */
   if (PROFILE_MODEL_P (current_cpu))
     {
-      FLD (in_h_gr_add__VM_index_of_st_src_1) = ((FLD (f_srcdst)) + (1));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_st_src_1) = ((FLD (f_srcdst)) + (1));
       FLD (in_index) = f_index;
       FLD (in_st_src) = f_srcdst;
     }
@@ -4091,7 +4091,7 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   if (PROFILE_MODEL_P (current_cpu))
     {
       FLD (in_abase) = f_abase;
-      FLD (in_h_gr_add__VM_index_of_st_src_1) = ((FLD (f_srcdst)) + (1));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_st_src_1) = ((FLD (f_srcdst)) + (1));
       FLD (in_index) = f_index;
       FLD (in_st_src) = f_srcdst;
     }
@@ -4121,8 +4121,8 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   /* Record the fields for profiling.  */
   if (PROFILE_MODEL_P (current_cpu))
     {
-      FLD (in_h_gr_add__VM_index_of_st_src_1) = ((FLD (f_srcdst)) + (1));
-      FLD (in_h_gr_add__VM_index_of_st_src_2) = ((FLD (f_srcdst)) + (2));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_st_src_1) = ((FLD (f_srcdst)) + (1));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_st_src_2) = ((FLD (f_srcdst)) + (2));
       FLD (in_st_src) = f_srcdst;
     }
 #endif
@@ -4155,8 +4155,8 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   if (PROFILE_MODEL_P (current_cpu))
     {
       FLD (in_abase) = f_abase;
-      FLD (in_h_gr_add__VM_index_of_st_src_1) = ((FLD (f_srcdst)) + (1));
-      FLD (in_h_gr_add__VM_index_of_st_src_2) = ((FLD (f_srcdst)) + (2));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_st_src_1) = ((FLD (f_srcdst)) + (1));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_st_src_2) = ((FLD (f_srcdst)) + (2));
       FLD (in_st_src) = f_srcdst;
     }
 #endif
@@ -4186,8 +4186,8 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   if (PROFILE_MODEL_P (current_cpu))
     {
       FLD (in_abase) = f_abase;
-      FLD (in_h_gr_add__VM_index_of_st_src_1) = ((FLD (f_srcdst)) + (1));
-      FLD (in_h_gr_add__VM_index_of_st_src_2) = ((FLD (f_srcdst)) + (2));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_st_src_1) = ((FLD (f_srcdst)) + (1));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_st_src_2) = ((FLD (f_srcdst)) + (2));
       FLD (in_st_src) = f_srcdst;
     }
 #endif
@@ -4223,8 +4223,8 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   if (PROFILE_MODEL_P (current_cpu))
     {
       FLD (in_abase) = f_abase;
-      FLD (in_h_gr_add__VM_index_of_st_src_1) = ((FLD (f_srcdst)) + (1));
-      FLD (in_h_gr_add__VM_index_of_st_src_2) = ((FLD (f_srcdst)) + (2));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_st_src_1) = ((FLD (f_srcdst)) + (1));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_st_src_2) = ((FLD (f_srcdst)) + (2));
       FLD (in_index) = f_index;
       FLD (in_st_src) = f_srcdst;
     }
@@ -4257,8 +4257,8 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   /* Record the fields for profiling.  */
   if (PROFILE_MODEL_P (current_cpu))
     {
-      FLD (in_h_gr_add__VM_index_of_st_src_1) = ((FLD (f_srcdst)) + (1));
-      FLD (in_h_gr_add__VM_index_of_st_src_2) = ((FLD (f_srcdst)) + (2));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_st_src_1) = ((FLD (f_srcdst)) + (1));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_st_src_2) = ((FLD (f_srcdst)) + (2));
       FLD (in_st_src) = f_srcdst;
     }
 #endif
@@ -4294,8 +4294,8 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   if (PROFILE_MODEL_P (current_cpu))
     {
       FLD (in_abase) = f_abase;
-      FLD (in_h_gr_add__VM_index_of_st_src_1) = ((FLD (f_srcdst)) + (1));
-      FLD (in_h_gr_add__VM_index_of_st_src_2) = ((FLD (f_srcdst)) + (2));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_st_src_1) = ((FLD (f_srcdst)) + (1));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_st_src_2) = ((FLD (f_srcdst)) + (2));
       FLD (in_st_src) = f_srcdst;
     }
 #endif
@@ -4333,8 +4333,8 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   /* Record the fields for profiling.  */
   if (PROFILE_MODEL_P (current_cpu))
     {
-      FLD (in_h_gr_add__VM_index_of_st_src_1) = ((FLD (f_srcdst)) + (1));
-      FLD (in_h_gr_add__VM_index_of_st_src_2) = ((FLD (f_srcdst)) + (2));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_st_src_1) = ((FLD (f_srcdst)) + (1));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_st_src_2) = ((FLD (f_srcdst)) + (2));
       FLD (in_index) = f_index;
       FLD (in_st_src) = f_srcdst;
     }
@@ -4377,8 +4377,8 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   if (PROFILE_MODEL_P (current_cpu))
     {
       FLD (in_abase) = f_abase;
-      FLD (in_h_gr_add__VM_index_of_st_src_1) = ((FLD (f_srcdst)) + (1));
-      FLD (in_h_gr_add__VM_index_of_st_src_2) = ((FLD (f_srcdst)) + (2));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_st_src_1) = ((FLD (f_srcdst)) + (1));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_st_src_2) = ((FLD (f_srcdst)) + (2));
       FLD (in_index) = f_index;
       FLD (in_st_src) = f_srcdst;
     }
@@ -4408,9 +4408,9 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   /* Record the fields for profiling.  */
   if (PROFILE_MODEL_P (current_cpu))
     {
-      FLD (in_h_gr_add__VM_index_of_st_src_1) = ((FLD (f_srcdst)) + (1));
-      FLD (in_h_gr_add__VM_index_of_st_src_2) = ((FLD (f_srcdst)) + (2));
-      FLD (in_h_gr_add__VM_index_of_st_src_3) = ((FLD (f_srcdst)) + (3));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_st_src_1) = ((FLD (f_srcdst)) + (1));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_st_src_2) = ((FLD (f_srcdst)) + (2));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_st_src_3) = ((FLD (f_srcdst)) + (3));
       FLD (in_st_src) = f_srcdst;
     }
 #endif
@@ -4443,9 +4443,9 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   if (PROFILE_MODEL_P (current_cpu))
     {
       FLD (in_abase) = f_abase;
-      FLD (in_h_gr_add__VM_index_of_st_src_1) = ((FLD (f_srcdst)) + (1));
-      FLD (in_h_gr_add__VM_index_of_st_src_2) = ((FLD (f_srcdst)) + (2));
-      FLD (in_h_gr_add__VM_index_of_st_src_3) = ((FLD (f_srcdst)) + (3));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_st_src_1) = ((FLD (f_srcdst)) + (1));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_st_src_2) = ((FLD (f_srcdst)) + (2));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_st_src_3) = ((FLD (f_srcdst)) + (3));
       FLD (in_st_src) = f_srcdst;
     }
 #endif
@@ -4475,9 +4475,9 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   if (PROFILE_MODEL_P (current_cpu))
     {
       FLD (in_abase) = f_abase;
-      FLD (in_h_gr_add__VM_index_of_st_src_1) = ((FLD (f_srcdst)) + (1));
-      FLD (in_h_gr_add__VM_index_of_st_src_2) = ((FLD (f_srcdst)) + (2));
-      FLD (in_h_gr_add__VM_index_of_st_src_3) = ((FLD (f_srcdst)) + (3));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_st_src_1) = ((FLD (f_srcdst)) + (1));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_st_src_2) = ((FLD (f_srcdst)) + (2));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_st_src_3) = ((FLD (f_srcdst)) + (3));
       FLD (in_st_src) = f_srcdst;
     }
 #endif
@@ -4513,9 +4513,9 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   if (PROFILE_MODEL_P (current_cpu))
     {
       FLD (in_abase) = f_abase;
-      FLD (in_h_gr_add__VM_index_of_st_src_1) = ((FLD (f_srcdst)) + (1));
-      FLD (in_h_gr_add__VM_index_of_st_src_2) = ((FLD (f_srcdst)) + (2));
-      FLD (in_h_gr_add__VM_index_of_st_src_3) = ((FLD (f_srcdst)) + (3));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_st_src_1) = ((FLD (f_srcdst)) + (1));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_st_src_2) = ((FLD (f_srcdst)) + (2));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_st_src_3) = ((FLD (f_srcdst)) + (3));
       FLD (in_index) = f_index;
       FLD (in_st_src) = f_srcdst;
     }
@@ -4548,9 +4548,9 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   /* Record the fields for profiling.  */
   if (PROFILE_MODEL_P (current_cpu))
     {
-      FLD (in_h_gr_add__VM_index_of_st_src_1) = ((FLD (f_srcdst)) + (1));
-      FLD (in_h_gr_add__VM_index_of_st_src_2) = ((FLD (f_srcdst)) + (2));
-      FLD (in_h_gr_add__VM_index_of_st_src_3) = ((FLD (f_srcdst)) + (3));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_st_src_1) = ((FLD (f_srcdst)) + (1));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_st_src_2) = ((FLD (f_srcdst)) + (2));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_st_src_3) = ((FLD (f_srcdst)) + (3));
       FLD (in_st_src) = f_srcdst;
     }
 #endif
@@ -4586,9 +4586,9 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   if (PROFILE_MODEL_P (current_cpu))
     {
       FLD (in_abase) = f_abase;
-      FLD (in_h_gr_add__VM_index_of_st_src_1) = ((FLD (f_srcdst)) + (1));
-      FLD (in_h_gr_add__VM_index_of_st_src_2) = ((FLD (f_srcdst)) + (2));
-      FLD (in_h_gr_add__VM_index_of_st_src_3) = ((FLD (f_srcdst)) + (3));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_st_src_1) = ((FLD (f_srcdst)) + (1));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_st_src_2) = ((FLD (f_srcdst)) + (2));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_st_src_3) = ((FLD (f_srcdst)) + (3));
       FLD (in_st_src) = f_srcdst;
     }
 #endif
@@ -4626,9 +4626,9 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   /* Record the fields for profiling.  */
   if (PROFILE_MODEL_P (current_cpu))
     {
-      FLD (in_h_gr_add__VM_index_of_st_src_1) = ((FLD (f_srcdst)) + (1));
-      FLD (in_h_gr_add__VM_index_of_st_src_2) = ((FLD (f_srcdst)) + (2));
-      FLD (in_h_gr_add__VM_index_of_st_src_3) = ((FLD (f_srcdst)) + (3));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_st_src_1) = ((FLD (f_srcdst)) + (1));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_st_src_2) = ((FLD (f_srcdst)) + (2));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_st_src_3) = ((FLD (f_srcdst)) + (3));
       FLD (in_index) = f_index;
       FLD (in_st_src) = f_srcdst;
     }
@@ -4671,9 +4671,9 @@ i960base_decode (SIM_CPU *current_cpu, IADDR pc,
   if (PROFILE_MODEL_P (current_cpu))
     {
       FLD (in_abase) = f_abase;
-      FLD (in_h_gr_add__VM_index_of_st_src_1) = ((FLD (f_srcdst)) + (1));
-      FLD (in_h_gr_add__VM_index_of_st_src_2) = ((FLD (f_srcdst)) + (2));
-      FLD (in_h_gr_add__VM_index_of_st_src_3) = ((FLD (f_srcdst)) + (3));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_st_src_1) = ((FLD (f_srcdst)) + (1));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_st_src_2) = ((FLD (f_srcdst)) + (2));
+      FLD (in_h_gr_add__DFLT_index_of__DFLT_st_src_3) = ((FLD (f_srcdst)) + (3));
       FLD (in_index) = f_index;
       FLD (in_st_src) = f_srcdst;
     }

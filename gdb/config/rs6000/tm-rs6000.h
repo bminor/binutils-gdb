@@ -20,11 +20,10 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#ifdef __STDC__			/* Forward decls for prototypes */
+/* Forward decls for prototypes */
 struct frame_info;
 struct type;
 struct value;
-#endif
 
 /* Minimum possible text address in AIX */
 
@@ -520,10 +519,9 @@ CORE_ADDR (*find_toc_address_hook) PARAMS ((CORE_ADDR));
    for a given object file.
    It is used under native AIX configurations for determining the
    TOC address when calling functions in the inferior.  */
-#ifdef __STDC__
-     struct objfile;
-#endif
-     extern CORE_ADDR get_toc_offset PARAMS ((struct objfile *));
+
+struct objfile;
+extern CORE_ADDR get_toc_offset PARAMS ((struct objfile *));
 
 /* Usually a function pointer's representation is simply the address
    of the function. On the RS/6000 however, a function pointer is

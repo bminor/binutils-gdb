@@ -40,6 +40,8 @@
 #include "symfile.h"
 #include "objfiles.h"
 
+#include "gdb-events.h"
+
 /* Prototypes for local functions. */
 
 static void
@@ -3347,6 +3349,9 @@ create_solib_event_breakpoint (address)
   b->type = bp_shlib_event;
 }
 
+/* Disable any breakpoints that are on code in shared libraries.  Only
+   apply to enabled breakpoints, disabled ones can just stay disabled.  */
+
 void
 disable_breakpoints_in_shlibs (silent)
      int silent;
@@ -3360,8 +3365,7 @@ disable_breakpoints_in_shlibs (silent)
 #if defined (PC_SOLIB)
     if (((b->type == bp_breakpoint) ||
 	 (b->type == bp_hardware_breakpoint)) &&
-	(b->enable != shlib_disabled) &&
-	(b->enable != call_disabled) &&
+	b->enable == enabled &&
 	!b->duplicate &&
 	PC_SOLIB (b->address))
       {
@@ -3736,6 +3740,7 @@ mention (b)
      delete_breakpoint_hook and so on.  */
   if (create_breakpoint_hook)
     create_breakpoint_hook (b);
+  breakpoint_create_event (b->number);
 
   switch (b->type)
     {
@@ -5850,6 +5855,7 @@ delete_breakpoint (bpt)
 
   if (delete_breakpoint_hook)
     delete_breakpoint_hook (bpt);
+  breakpoint_delete_event (bpt->number);
 
   if (bpt->inserted)
     remove_breakpoint (bpt, mark_uninserted);
@@ -6381,6 +6387,7 @@ disable_breakpoint (bpt)
 
   if (modify_breakpoint_hook)
     modify_breakpoint_hook (bpt);
+  breakpoint_modify_event (bpt->number);
 }
 
 /* ARGSUSED */
@@ -6513,6 +6520,7 @@ have been allocated for other watchpoints.\n", bpt->number);
     }
   if (modify_breakpoint_hook)
     modify_breakpoint_hook (bpt);
+  breakpoint_modify_event (bpt->number);
 }
 
 void

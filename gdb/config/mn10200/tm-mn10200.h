@@ -92,12 +92,10 @@
 #define SAVED_PC_AFTER_CALL(frame) \
   (read_memory_integer (read_register (SP_REGNUM), REGISTER_SIZE) & 0xffffff)
 
-#ifdef __STDC__
 struct frame_info;
 struct frame_saved_regs;
 struct type;
 struct value;
-#endif
 
 #define EXTRA_FRAME_INFO struct frame_saved_regs fsr; int status; int stack_size;
 

@@ -559,9 +559,10 @@ gdb_expect {
 if [istarget "hppa*-*-hpux*"] then {
   send_gdb "bt\n"
   gdb_expect {
-      -re "#0\[ \t\]*marker2.*:4\[49\]\r\n#1.*_sr4export.*$gdb_prompt $"\
+      -re "#0\[ \t\]*0x\[0-9\]* in marker2.*:4\[49\]\r\n#1.*_sr4export.*$gdb_prompt $"\
             {pass "backtrace while in called function"}
-      -re "#0\[ \t\]*marker2.*:4\[49\]\r\n#1.*function called from gdb.*$gdb_prompt $"\
+      -re "#0\[ \t\]*0x\[0-9\]* in marker2.*:4\[49\]\r\n#1.*function called from gdb.*$gdb_prompt $"\
+
             {pass "backtrace while in called function"}
     -re "$gdb_prompt $"\
             {fail "backtrace while in called function"}
@@ -572,6 +573,8 @@ if [istarget "hppa*-*-hpux*"] then {
       -re "Run till exit from .*marker2.* at .*4\[49\]\r\n.* in _sr4export.*$gdb_prompt $"\
             {pass "finish from called function"}
       -re "Run till exit from .*marker2.* at .*4\[49\]\r\n.*function called from gdb.*$gdb_prompt $"\
+            {pass "finish from called function"}
+      -re "Run till exit from .*marker2.* at .*4\[49\]\r\n.*Value returned.*$gdb_prompt $"\
             {pass "finish from called function"}
     -re "$gdb_prompt $"\
             {fail "finish from called function"}

@@ -24,13 +24,11 @@
 
 /* Forward declarations of some types we use in prototypes */
 
-#ifdef __STDC__
 struct frame_info;
 struct frame_saved_regs;
 struct value;
 struct type;
 struct inferior_status;
-#endif
 
 /* Target system byte order. */
 

@@ -22,13 +22,12 @@
 #ifndef TM_TIC80_H
 #define TM_TIC80_H
 
-#ifdef __STDC__			/* Forward declare structs used in prototypes */
+/* Forward declare structs used in prototypes */
 struct frame_info;
 struct type;
 struct value;
 struct symbol;
 struct frame_saved_regs;
-#endif
 
 #define TARGET_BYTE_ORDER LITTLE_ENDIAN
 

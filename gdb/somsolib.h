@@ -21,11 +21,10 @@
    Written by the Center for Software Science at the Univerity of Utah
    and by Cygnus Support.  */
 
-#ifdef __STDC__			/* Forward decl's for prototypes */
+/* Forward decl's for prototypes */
 struct target_ops;
 struct objfile;
 struct section_offsets;
-#endif
 
 /* Called to add symbols from a shared library to gdb's symbol table. */
 

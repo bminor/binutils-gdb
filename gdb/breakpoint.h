@@ -24,6 +24,8 @@
 #include "frame.h"
 #include "value.h"
 
+#include "gdb-events.h"
+
 /* This is the maximum number of bytes a breakpoint instruction can take.
    Feel free to increase it.  It's just used in a few places to size
    arrays that should be independent of the target architecture.  */
@@ -461,9 +463,8 @@ enum inf_context
 
 /* Prototypes for breakpoint-related functions.  */
 
-#ifdef __STDC__			/* Forward declarations for prototypes */
+/* Forward declarations for prototypes */
 struct frame_info;
-#endif
 
 extern int breakpoint_here_p PARAMS ((CORE_ADDR));
 

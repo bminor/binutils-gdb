@@ -130,7 +130,22 @@ gdb_test "c" ".*Breakpoint 4.*" "watch off"
 
 # Now the printf tests
 #
-gdb_test "fin" ".*Run till exit.*Value returned is.*= 10.*" "finish"
+# The "finish" command may leave us mid-line in the caller on some
+# targets, including but not limited to the m68k, i386 & PA.  So we
+# have to arrange to step until we hit the line with the call to
+# "do_vars".
+send_gdb "finish\n"
+gdb_expect {
+    -re ".*do_loops();.*$gdb_prompt $" {
+	send_gdb "step\n"
+	exp_continue
+    }
+    -re ".*do_vars.*$gdb_prompt $" {
+	pass "finish"
+    }
+    default { fail "finish" ; gdb_suppress_tests; }
+}
+
 gdb_test "s" ".*do_vars.*.*27.*"
 gdb_test "tb 37" ".*Breakpoint 5 a.*"
 gdb_test "c" ".*do_vars.*37.*37.*"
@@ -165,7 +180,9 @@ gdb_test "p/0 j" ".*Item count other than 1 is meaningless.*" "p/0 j"
 gdb_test "p/s sum" ".*Format letter.*is meaningless.*" " no s"
 gdb_test "p/i sum" ".*Format letter.*is meaningless.*.*" "no i"
 gdb_test "p/a &sum" ".*= $hex.*<sum>.*"
-gdb_test "p/a main+1000" ".*= $hex.*<.*>.*"
+# If the constant below is larger than the length of main, then
+# this test will (incorrectly) fail.  So use a small number.
+gdb_test "p/a main+4" ".*= $hex.*<.*>.*"
 gdb_test "p/a \$pc" ".*= $hex.*<do_vars+.*>.*"
 gdb_test "p/a &&j" ".*A parse error.*"
 

@@ -1136,6 +1136,10 @@ void init_execution_control_state (struct execution_control_state * ecs);
 
 void handle_inferior_event (struct execution_control_state * ecs);
 
+static void check_sigtramp2 (struct execution_control_state *ecs);
+static void stop_stepping (struct execution_control_state *ecs);
+static void prepare_to_wait (struct execution_control_state *ecs);
+
 /* Wait for control to return from inferior to debugger.
    If inferior gets a signal, we may decide to start it up again
    instead of returning.  That is why there is a loop in this function.
@@ -1337,7 +1341,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 	else
 	  target_resume (-1, 0, TARGET_SIGNAL_0);
 	ecs->infwait_state = infwait_normal_state;
-	goto wfi_continue;
+	prepare_to_wait (ecs);
+	return;
 
       case infwait_nullified_state:
 	break;
@@ -1388,7 +1393,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 	   make progress.  */
 
 	target_resume (-1, 0, TARGET_SIGNAL_0);
-	goto wfi_continue;
+	prepare_to_wait (ecs);
+	return;
 #endif
       }
 
@@ -1423,11 +1429,13 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  }
 #endif
 	resume (0, TARGET_SIGNAL_0);
-	goto wfi_continue;
+	prepare_to_wait (ecs);
+	return;
 
       case TARGET_WAITKIND_SPURIOUS:
 	resume (0, TARGET_SIGNAL_0);
-	goto wfi_continue;
+	prepare_to_wait (ecs);
+	return;
 
       case TARGET_WAITKIND_EXITED:
 	target_terminal_ours ();	/* Must do this before mourn anyway */
@@ -1447,7 +1455,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 	target_mourn_inferior ();
 	singlestep_breakpoints_inserted_p = 0;	/*SOFTWARE_SINGLE_STEP_P */
 	stop_print_frame = 0;
-	goto stop_stepping;
+	stop_stepping (ecs);
+	return;
 
       case TARGET_WAITKIND_SIGNALLED:
 	stop_print_frame = 0;
@@ -1475,7 +1484,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 	printf_filtered ("The program no longer exists.\n");
 	gdb_flush (gdb_stdout);
 	singlestep_breakpoints_inserted_p = 0;	/*SOFTWARE_SINGLE_STEP_P */
-	goto stop_stepping;
+	stop_stepping (ecs);
+	return;
 
 	/* The following are the only cases in which we keep going;
 	   the above cases end in a continue or goto. */
@@ -1492,7 +1502,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 	    pending_follow.fork_event.saw_parent_fork = 1;
 	    pending_follow.fork_event.parent_pid = ecs->pid;
 	    pending_follow.fork_event.child_pid = ecs->ws.value.related_pid;
-	    goto wfi_continue;
+	    prepare_to_wait (ecs);
+	    return;
 	  }
 	else
 	  {
@@ -1552,7 +1563,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 	    if (follow_vfork_when_exec)
 	      {
 		target_resume (ecs->pid, 0, TARGET_SIGNAL_0);
-		goto wfi_continue;
+		prepare_to_wait (ecs);
+		return;
 	      }
 	  }
 
@@ -1580,7 +1592,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 	    if (pending_follow.kind == TARGET_WAITKIND_VFORKED)
 	      ENSURE_VFORKING_PARENT_REMAINS_STOPPED (pending_follow.fork_event.parent_pid);
 	    target_resume (ecs->pid, 0, TARGET_SIGNAL_0);
-	    goto wfi_continue;
+	    prepare_to_wait (ecs);
+	    return;
 	  }
 	inferior_ignoring_leading_exec_events =
 	  target_reported_exec_events_per_exec_call () - 1;
@@ -1615,7 +1628,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 	    if (RESUME_EXECD_VFORKING_CHILD_TO_GET_PARENT_VFORK ())
 	      target_resume (ecs->pid, 1, TARGET_SIGNAL_0);
 	    /* We expect the parent vfork event to be available now. */
-	    goto wfi_continue;
+	    prepare_to_wait (ecs);
+	    return;
 	  }
 
 	/* This causes the eventpoints and symbol table to be reset.  Must
@@ -1661,7 +1675,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 	    TARGET_DISABLE_HW_WATCHPOINTS (inferior_pid);
 	  }
 	resume (0, TARGET_SIGNAL_0);
-	goto wfi_continue;
+	prepare_to_wait (ecs);
+	return;
 
 	/* Before examining the threads further, step this thread to
 	   get it entirely out of the syscall.  (We get notice of the
@@ -1686,7 +1701,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 	    ecs->enable_hw_watchpoints_after_wait =
 	      (number_of_threads_in_syscalls == 0);
 	  }
-	goto wfi_continue;
+	prepare_to_wait (ecs);
+	return;
 
       case TARGET_WAITKIND_STOPPED:
 	stop_signal = ecs->ws.value.sig;
@@ -1703,7 +1719,8 @@ handle_inferior_event (struct execution_control_state *ecs)
     if (ecs->new_thread_event)
       {
 	target_resume (-1, 0, TARGET_SIGNAL_0);
-	goto wfi_continue;
+	prepare_to_wait (ecs);
+	return;
       }
 
     stop_pc = read_pc_pid (ecs->pid);
@@ -1750,7 +1767,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 		    ecs->waiton_pid = ecs->pid;
 		    ecs->wp = &(ecs->ws);
 		    ecs->infwait_state = infwait_thread_hop_state;
-		    goto wfi_continue;
+		    prepare_to_wait (ecs);
+		    return;
 		  }
 
 		/* We need to restart all the threads now,
@@ -1761,7 +1779,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 		  target_resume (ecs->pid, 0, TARGET_SIGNAL_0);
 		else
 		  target_resume (-1, 0, TARGET_SIGNAL_0);
-		goto wfi_continue;
+		prepare_to_wait (ecs);
+		return;
 	      }
 	    else
 	      {
@@ -1827,7 +1846,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 	      stop_signal = TARGET_SIGNAL_0;
 
 	    target_resume (ecs->pid, 0, stop_signal);
-	    goto wfi_continue;
+	    prepare_to_wait (ecs);
+	    return;
 	  }
 
 	/* It's a SIGTRAP or a signal we're interested in.  Switch threads,
@@ -1893,7 +1913,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 	ecs->infwait_state = infwait_nullified_state;
 	ecs->waiton_pid = ecs->pid;
 	ecs->wp = &(ecs->tmpstatus);
-	goto wfi_continue;
+	prepare_to_wait (ecs);
+	return;
       }
 
     /* It may not be necessary to disable the watchpoint to stop over
@@ -1902,7 +1923,8 @@ handle_inferior_event (struct execution_control_state *ecs)
     if (HAVE_STEPPABLE_WATCHPOINT && STOPPED_BY_WATCHPOINT (ecs->ws))
       {
 	resume (1, 0);
-	goto wfi_continue;
+	prepare_to_wait (ecs);
+	return;
       }
 
     /* It is far more common to need to disable a watchpoint to step
@@ -1936,7 +1958,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 	ecs->waiton_pid = ecs->pid;
 	ecs->wp = &(ecs->ws);
 	ecs->infwait_state = infwait_nonstep_watch_state;
-	goto wfi_continue;
+	prepare_to_wait (ecs);
+	return;
       }
 
     /* It may be possible to simply continue after a watchpoint.  */
@@ -1985,10 +2008,14 @@ handle_inferior_event (struct execution_control_state *ecs)
 	if (stop_signal == TARGET_SIGNAL_TRAP && stop_after_trap)
 	  {
 	    stop_print_frame = 0;
-	    goto wfi_break;
+	    stop_stepping (ecs);
+	    return;
 	  }
 	if (stop_soon_quietly)
-	  goto wfi_break;
+	  {
+	    stop_stepping (ecs);
+	    return;
+	  }
 
 	/* Don't even think about breakpoints
 	   if just proceeded over a breakpoint.
@@ -2130,7 +2157,10 @@ handle_inferior_event (struct execution_control_state *ecs)
 	    gdb_flush (gdb_stdout);
 	  }
 	if (signal_stop[stop_signal])
-	  goto wfi_break;
+	  {
+	    stop_stepping (ecs);
+	    return;
+	  }
 	/* If not going to stop, give terminal back
 	   if we took it away.  */
 	else if (printed)
@@ -2172,7 +2202,7 @@ handle_inferior_event (struct execution_control_state *ecs)
            this probably breaks that.  As with anything else, it's up to
            the HP-UX maintainer to furnish a fix that doesn't break other
            platforms.  --JimB, 20 May 1999 */
-	goto check_sigtramp2;
+	check_sigtramp2 (ecs);
       }
 
     /* Handle cases caused by hitting a breakpoint.  */
@@ -2267,7 +2297,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 	     through_sigtramp_breakpoint via the cleanup chain, so
 	     no need to worry about it here.  */
 
-	  goto stop_stepping;
+	  stop_stepping (ecs);
+	  return;
 
 	case BPSTAT_WHAT_STOP_SILENT:
 	  stop_print_frame = 0;
@@ -2276,7 +2307,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 	     through_sigtramp_breakpoint via the cleanup chain, so
 	     no need to worry about it here.  */
 
-	  goto stop_stepping;
+	  stop_stepping (ecs);
+	  return;
 
 	case BPSTAT_WHAT_STEP_RESUME:
 	  /* This proably demands a more elegant solution, but, yeah
@@ -2349,7 +2381,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 	    if (stop_on_solib_events)
 	      {
 		stop_print_frame = 0;
-		goto stop_stepping;
+		stop_stepping (ecs);
+		return;
 	      }
 
 	    /* If we stopped due to an explicit catchpoint, then the
@@ -2429,7 +2462,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 	stop_bpstat = bpstat_copy (ecs->stepping_through_solib_catchpoints);
 	bpstat_clear (&ecs->stepping_through_solib_catchpoints);
 	stop_print_frame = 1;
-	goto stop_stepping;
+	stop_stepping (ecs);
+	return;
       }
 
     if (!CALL_DUMMY_BREAKPOINT_OFFSET_P)
@@ -2452,23 +2486,30 @@ handle_inferior_event (struct execution_control_state *ecs)
 #ifdef HP_OS_BUG
 	    trap_expected_after_continue = 1;
 #endif
-	    goto wfi_break;
+	    stop_stepping (ecs);
+	    return;
 	  }
       }
 
     if (step_resume_breakpoint)
-      /* Having a step-resume breakpoint overrides anything
-         else having to do with stepping commands until
-         that breakpoint is reached.  */
-      /* I'm not sure whether this needs to be check_sigtramp2 or
-         whether it could/should be keep_going.  */
-      goto check_sigtramp2;
-
+      {
+	/* Having a step-resume breakpoint overrides anything
+	   else having to do with stepping commands until
+	   that breakpoint is reached.  */
+	/* I'm not sure whether this needs to be check_sigtramp2 or
+	   whether it could/should be keep_going.  */
+	check_sigtramp2 (ecs);
+	goto keep_going;
+      }
+    
     if (step_range_end == 0)
-      /* Likewise if we aren't even stepping.  */
-      /* I'm not sure whether this needs to be check_sigtramp2 or
-         whether it could/should be keep_going.  */
-      goto check_sigtramp2;
+      {
+	/* Likewise if we aren't even stepping.  */
+	/* I'm not sure whether this needs to be check_sigtramp2 or
+	   whether it could/should be keep_going.  */
+	check_sigtramp2 (ecs);
+	goto keep_going;
+      }
 
     /* If stepping through a line, keep going if still within it.
 
@@ -2480,7 +2521,8 @@ handle_inferior_event (struct execution_control_state *ecs)
       {
 	/* We might be doing a BPSTAT_WHAT_SINGLE and getting a signal.
 	   So definately need to check for sigtramp here.  */
-	goto check_sigtramp2;
+	check_sigtramp2 (ecs);
+	goto keep_going;
       }
 
     /* We stepped out of the stepping range.  */
@@ -2595,7 +2637,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 	       supposed to be stepping at the assembly language level
 	       ("stepi").  Just stop.  */
 	    stop_step = 1;
-	    goto wfi_break;
+	    stop_stepping (ecs);
+	    return;
 	  }
 
 	if (step_over_calls > 0 || IGNORE_HELPER_CALL (stop_pc))
@@ -2706,7 +2749,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  {
 	    /* We are already there: stop now.  */
 	    stop_step = 1;
-	    goto wfi_break;
+	    stop_stepping (ecs);
+	    return;
 	  }
 	else
 	  /* Put the step-breakpoint there and go until there. */
@@ -2740,7 +2784,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 	/* It is stepi or nexti.  We always want to stop stepping after
 	   one instruction.  */
 	stop_step = 1;
-	goto wfi_break;
+	stop_stepping (ecs);
+	return;
       }
 
     /* If we're in the return path from a shared library trampoline,
@@ -2783,7 +2828,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 	   when we do "s" in a function with no line numbers,
 	   or can this happen as a result of a return or longjmp?).  */
 	stop_step = 1;
-	goto wfi_break;
+	stop_stepping (ecs);
+	return;
       }
 
     if ((stop_pc == ecs->sal.pc)
@@ -2794,7 +2840,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 	   That is said to make things like for (;;) statements work
 	   better.  */
 	stop_step = 1;
-	goto wfi_break;
+	stop_stepping (ecs);
+	return;
       }
 
     /* We aren't done stepping.
@@ -2812,7 +2859,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 	   in which after skipping the prologue we better stop even though
 	   we will be in mid-line.  */
 	stop_step = 1;
-	goto wfi_break;
+	stop_stepping (ecs);
+	return;
       }
     step_range_start = ecs->sal.pc;
     step_range_end = ecs->sal.end;
@@ -2828,42 +2876,6 @@ handle_inferior_event (struct execution_control_state *ecs)
       if (!(INNER_THAN (current_frame, step_frame_address)))
 	step_frame_address = current_frame;
     }
-
-
-    goto keep_going;
-
-  check_sigtramp2:
-    if (trap_expected
-	&& IN_SIGTRAMP (stop_pc, ecs->stop_func_name)
-	&& !IN_SIGTRAMP (prev_pc, prev_func_name)
-	&& INNER_THAN (read_sp (), step_sp))
-      {
-	/* What has happened here is that we have just stepped the inferior
-	   with a signal (because it is a signal which shouldn't make
-	   us stop), thus stepping into sigtramp.
-
-	   So we need to set a step_resume_break_address breakpoint
-	   and continue until we hit it, and then step.  FIXME: This should
-	   be more enduring than a step_resume breakpoint; we should know
-	   that we will later need to keep going rather than re-hitting
-	   the breakpoint here (see testsuite/gdb.t06/signals.exp where
-	   it says "exceedingly difficult").  */
-	struct symtab_and_line sr_sal;
-
-	INIT_SAL (&sr_sal);	/* initialize to zeroes */
-	sr_sal.pc = prev_pc;
-	sr_sal.section = find_pc_overlay (sr_sal.pc);
-	/* We perhaps could set the frame if we kept track of what
-	   the frame corresponding to prev_pc was.  But we don't,
-	   so don't.  */
-	through_sigtramp_breakpoint =
-	  set_momentary_breakpoint (sr_sal, NULL, bp_through_sigtramp);
-	if (breakpoints_inserted)
-	  insert_breakpoints ();
-
-	ecs->remove_breakpoints_on_following_step = 1;
-	ecs->another_trap = 1;
-      }
 
   keep_going:
     /* Come to this label when you need to resume the inferior.
@@ -2932,7 +2944,10 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  {
 	    breakpoints_failed = insert_breakpoints ();
 	    if (breakpoints_failed)
-	      goto wfi_break;
+	      {
+		stop_stepping (ecs);
+		return;
+	      }
 	    breakpoints_inserted = 1;
 	  }
 
@@ -2971,40 +2986,73 @@ handle_inferior_event (struct execution_control_state *ecs)
 	resume (currently_stepping (ecs), stop_signal);
       }
 
-    /* Former continues in the main loop goto here.  */
-  wfi_continue:
-    /* This used to be at the top of the loop.  */
-    if (ecs->infwait_state == infwait_normal_state)
-      {
-	overlay_cache_invalid = 1;
-
-	/* We have to invalidate the registers BEFORE calling
-	   target_wait because they can be loaded from the target
-	   while in target_wait.  This makes remote debugging a bit
-	   more efficient for those targets that provide critical
-	   registers as part of their normal status mechanism. */
-
-	registers_changed ();
-	ecs->waiton_pid = -1;
-	ecs->wp = &(ecs->ws);
-      }
-    /* This is the old end of the while loop.  Let everybody know
-       we want to wait for the inferior some more and get called
-       again soon.  */
-    ecs->wait_some_more = 1;
+    prepare_to_wait (ecs);
     return;
-  }
 
-  /* Former breaks in the main loop goto here.  */
-wfi_break:
+  } /* extra brace, to preserve old indentation */
 
-stop_stepping:
+  stop_stepping (ecs);
+}
+
+/* Are we in the middle of stepping?  */
+
+static int
+currently_stepping (struct execution_control_state *ecs)
+{
+  return ((through_sigtramp_breakpoint == NULL
+	   && !ecs->handling_longjmp
+	   && ((step_range_end && step_resume_breakpoint == NULL)
+	       || trap_expected))
+	  || ecs->stepping_through_solib_after_catch
+	  || bpstat_should_step ());
+}
+
+static void
+check_sigtramp2 (struct execution_control_state *ecs)
+{
+  if (trap_expected
+      && IN_SIGTRAMP (stop_pc, ecs->stop_func_name)
+      && !IN_SIGTRAMP (prev_pc, prev_func_name)
+      && INNER_THAN (read_sp (), step_sp))
+    {
+      /* What has happened here is that we have just stepped the
+	 inferior with a signal (because it is a signal which
+	 shouldn't make us stop), thus stepping into sigtramp.
+
+	 So we need to set a step_resume_break_address breakpoint and
+	 continue until we hit it, and then step.  FIXME: This should
+	 be more enduring than a step_resume breakpoint; we should
+	 know that we will later need to keep going rather than
+	 re-hitting the breakpoint here (see the testsuite,
+	 gdb.base/signals.exp where it says "exceedingly difficult").  */
+
+      struct symtab_and_line sr_sal;
+
+      INIT_SAL (&sr_sal);	/* initialize to zeroes */
+      sr_sal.pc = prev_pc;
+      sr_sal.section = find_pc_overlay (sr_sal.pc);
+      /* We perhaps could set the frame if we kept track of what the
+	 frame corresponding to prev_pc was.  But we don't, so don't.  */
+      through_sigtramp_breakpoint =
+	set_momentary_breakpoint (sr_sal, NULL, bp_through_sigtramp);
+      if (breakpoints_inserted)
+	insert_breakpoints ();
+
+      ecs->remove_breakpoints_on_following_step = 1;
+      ecs->another_trap = 1;
+    }
+}
+
+static void
+stop_stepping (struct execution_control_state *ecs)
+{
   if (target_has_execution)
     {
       /* Are we stopping for a vfork event?  We only stop when we see
          the child's event.  However, we may not yet have seen the
-         parent's event.  And, inferior_pid is still set to the parent's
-         pid, until we resume again and follow either the parent or child.
+         parent's event.  And, inferior_pid is still set to the
+         parent's pid, until we resume again and follow either the
+         parent or child.
 
          To ensure that we can really touch inferior_pid (aka, the
          parent process) -- which calls to functions like read_pc
@@ -3031,21 +3079,36 @@ stop_stepping:
       prev_func_start = ecs->stop_func_start;
       prev_func_name = ecs->stop_func_name;
     }
+
   /* Let callers know we don't want to wait for the inferior anymore.  */
   ecs->wait_some_more = 0;
 }
 
-/* Are we in the middle of stepping?  */
+/* This function normally comes after a resume, before
+   handle_inferior_event exits.  It takes care of any last bits of
+   housekeeping, and sets the all-important wait_some_more flag.  */
 
-static int
-currently_stepping (struct execution_control_state *ecs)
+static void
+prepare_to_wait (struct execution_control_state *ecs)
 {
-  return ((through_sigtramp_breakpoint == NULL
-	   && !ecs->handling_longjmp
-	   && ((step_range_end && step_resume_breakpoint == NULL)
-	       || trap_expected))
-	  || ecs->stepping_through_solib_after_catch
-	  || bpstat_should_step ());
+  if (ecs->infwait_state == infwait_normal_state)
+    {
+      overlay_cache_invalid = 1;
+
+      /* We have to invalidate the registers BEFORE calling
+	 target_wait because they can be loaded from the target while
+	 in target_wait.  This makes remote debugging a bit more
+	 efficient for those targets that provide critical registers
+	 as part of their normal status mechanism. */
+
+      registers_changed ();
+      ecs->waiton_pid = -1;
+      ecs->wp = &(ecs->ws);
+    }
+  /* This is the old end of the while loop.  Let everybody know we
+     want to wait for the inferior some more and get called again
+     soon.  */
+  ecs->wait_some_more = 1;
 }
 
 /* This function returns TRUE if ep is an internal breakpoint
@@ -3099,6 +3162,11 @@ complete_execution (void)
       sync_execution = 0;
       cleanup_sigint_signal_handler ();
       display_gdb_prompt (0);
+    }
+  else
+    {
+      if (exec_done_display_p)
+	printf_unfiltered ("completed.\n");
     }
 }
 

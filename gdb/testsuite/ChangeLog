@@ -1,4 +1,43 @@
+1999-08-25  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdb.base/ending-run.exp: Add Solaris case for what happens when
+ 	stepping out of main.
+
+	* gdb.c++/derivation.exp: XFAIL inf fn calls for all configs, if
+	G++ used.
+
+	* gdb.c++/local.exp: Expect ptype NestedInnerLocal to succeed
+ 	always, expect ptype InnerLocal::NestedInnerLocal to fail always.
+
+	* gdb.c++/ovldbreak.exp: Update match string in test that
+	includes a warning of multiple breakpoints.
+
+1999-08-24  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdb.base/display.exp: Improve precision of step-after-finish
+	added yesterday.
+
+	* gdb.base/signals.exp: Add extra wildcard to "handle all print"
+ 	test.
+
+	* gdb.c++/classes.exp: XFAIL HP-compiler-only tests for all
+	configs when using G++, not just hppa*.
+
+1999-08-24  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* gdb.base/async.c: New file.
+	* gdb.base/async.exp: New file.
+
+Tue Aug 24 03:24:53 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* gdb.base/break.exp: Tweak PA specific tests to properly handle
+	PA64.
+
 Mon Aug 23 10:25:20 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* gdb.base/display.exp: "finish" can leave us mid-line on many
+	targets, deal with it.  Add a small constant to main, instead of
+	1000 since main+1000 may not be a valid address in the target.
 
 	* gdb.base/dollar.exp: Do not run for PA processors in wide mode
 	on hpux11.

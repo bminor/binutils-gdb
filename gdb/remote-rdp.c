@@ -47,11 +47,11 @@
 #include "symfile.h"
 #include "remote-utils.h"
 #include "gdb_string.h"
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 #include "gdbcore.h"
 
+#ifdef HAVE_TIME_H
+#include <time.h>
+#endif
 
 extern struct target_ops remote_rdp_ops;
 static serial_t io;

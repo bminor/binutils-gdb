@@ -21,9 +21,7 @@
 #include "defs.h"
 #include <ctype.h>
 #include "gdb_string.h"
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
+#include "event-loop.h"
 
 #ifdef HAVE_CURSES_H
 #include <curses.h>
@@ -73,12 +71,6 @@ set_width_command PARAMS ((char *, int, struct cmd_list_element *));
 
 static void
 set_width PARAMS ((void));
-
-/* If this definition isn't overridden by the header files, assume
-   that isatty and fileno exist on this system.  */
-#ifndef ISATTY
-#define ISATTY(FP)	(isatty (fileno (FP)))
-#endif
 
 #ifndef GDB_FILE_ISATTY
 #define GDB_FILE_ISATTY(GDB_FILE_PTR)   (gdb_file_isatty(GDB_FILE_PTR))
@@ -1670,6 +1662,23 @@ stdio_fileopen (file)
 /* A ``struct gdb_file'' that is compatible with all the legacy
    code. */
 
+/* new */
+enum streamtype
+{
+  afile,
+  astring
+};
+
+/* new */
+struct tui_stream
+{
+  int *ts_magic;
+  enum streamtype ts_streamtype;
+  FILE *ts_filestream;
+  char *ts_strbuf;
+  int ts_buflen;
+};
+
 static gdb_file_flush_ftype tui_file_flush;
 extern gdb_file_fputs_ftype tui_file_fputs;
 static gdb_file_isatty_ftype tui_file_isatty;
@@ -1756,6 +1765,86 @@ tui_file_put (file, dest)
   if (stream->ts_streamtype == astring)
     {
       fputs_unfiltered (stream->ts_strbuf, dest);
+    }
+}
+
+/* All TUI I/O sent to the *_filtered and *_unfiltered functions
+   eventually ends up here.  The fputs_unfiltered_hook is primarily
+   used by GUIs to collect all output and send it to the GUI, instead
+   of the controlling terminal.  Only output to gdb_stdout and
+   gdb_stderr are sent to the hook.  Everything else is sent on to
+   fputs to allow file I/O to be handled appropriately.  */
+
+/* FIXME: Should be broken up and moved to a TUI specific file. */
+
+void
+tui_file_fputs (linebuffer, file)
+     const char *linebuffer;
+     GDB_FILE *file;
+{
+  struct tui_stream *stream = gdb_file_data (file);
+#if defined(TUI)
+  extern int tui_owns_terminal;
+#endif
+  /* If anything (GUI, TUI) wants to capture GDB output, this is
+   * the place... the way to do it is to set up 
+   * fputs_unfiltered_hook.
+   * Our TUI ("gdb -tui") used to hook output, but in the
+   * new (XDB style) scheme, we do not do that anymore... - RT
+   */
+  if (fputs_unfiltered_hook
+      && (file == gdb_stdout
+	  || file == gdb_stderr))
+    fputs_unfiltered_hook (linebuffer, file);
+  else
+    {
+#if defined(TUI)
+      if (tui_version && tui_owns_terminal)
+	{
+	  /* If we get here somehow while updating the TUI (from
+	   * within a tuiDo(), then we need to temporarily 
+	   * set up the terminal for GDB output. This probably just
+	   * happens on error output.
+	   */
+
+	  if (stream->ts_streamtype == astring)
+	    {
+	      gdb_file_adjust_strbuf (strlen (linebuffer), stream);
+	      strcat (stream->ts_strbuf, linebuffer);
+	    }
+	  else
+	    {
+	      tuiTermUnsetup (0, (tui_version) ? cmdWin->detail.commandInfo.curch : 0);
+	      fputs (linebuffer, stream->ts_filestream);
+	      tuiTermSetup (0);
+	      if (linebuffer[strlen (linebuffer) - 1] == '\n')
+		tuiClearCommandCharCount ();
+	      else
+		tuiIncrCommandCharCountBy (strlen (linebuffer));
+	    }
+	}
+      else
+	{
+	  /* The normal case - just do a fputs() */
+	  if (stream->ts_streamtype == astring)
+	    {
+	      gdb_file_adjust_strbuf (strlen (linebuffer), stream);
+	      strcat (stream->ts_strbuf, linebuffer);
+	    }
+	  else
+	    fputs (linebuffer, stream->ts_filestream);
+	}
+
+
+#else
+      if (stream->ts_streamtype == astring)
+	{
+	  gdb_file_adjust_strbuf (strlen (linebuffer), file);
+	  strcat (stream->ts_strbuf, linebuffer);
+	}
+      else
+	fputs (linebuffer, stream->ts_filestream);
+#endif
     }
 }
 
@@ -3111,14 +3200,14 @@ get_cell ()
 
  */
 
-static int thirty_two = 32;	/* eliminate warning from compiler on 32-bit systems */
+/* eliminate warning from compiler on 32-bit systems */
+static int thirty_two = 32;
 
 char *
-paddr (addr)
-     t_addr addr;
+paddr (CORE_ADDR addr)
 {
   char *paddr_str = get_cell ();
-  switch (sizeof (t_addr))
+  switch (TARGET_PTR_BIT / 8)
     {
     case 8:
       sprintf (paddr_str, "%08lx%08lx",
@@ -3133,6 +3222,86 @@ paddr (addr)
     default:
       sprintf (paddr_str, "%lx", (unsigned long) addr);
     }
+  return paddr_str;
+}
+
+char *
+paddr_nz (CORE_ADDR addr)
+{
+  char *paddr_str = get_cell ();
+  switch (TARGET_PTR_BIT / 8)
+    {
+    case 8:
+      {
+	unsigned long high = (unsigned long) (addr >> thirty_two);
+	if (high == 0)
+	  sprintf (paddr_str, "%lx", (unsigned long) (addr & 0xffffffff));
+	else
+	  sprintf (paddr_str, "%lx%08lx",
+		   high, (unsigned long) (addr & 0xffffffff));
+	break;
+      }
+    case 4:
+      sprintf (paddr_str, "%lx", (unsigned long) addr);
+      break;
+    case 2:
+      sprintf (paddr_str, "%x", (unsigned short) (addr & 0xffff));
+      break;
+    default:
+      sprintf (paddr_str, "%lx", (unsigned long) addr);
+    }
+  return paddr_str;
+}
+
+static void
+decimal2str (char *paddr_str, char *sign, ULONGEST addr)
+{
+  /* steal code from valprint.c:print_decimal().  Should this worry
+     about the real size of addr as the above does? */
+  unsigned long temp[3];
+  int i = 0;
+  do
+    {
+      temp[i] = addr % (1000 * 1000 * 1000);
+      addr /= (1000 * 1000 * 1000);
+      i++;
+    }
+  while (addr != 0 && i < (sizeof (temp) / sizeof (temp[0])));
+  switch (i)
+    {
+    case 1:
+      sprintf (paddr_str, "%s%lu",
+	       sign, temp[0]);
+      break;
+    case 2:
+      sprintf (paddr_str, "%s%lu%09lu",
+	       sign, temp[1], temp[0]);
+      break;
+    case 3:
+      sprintf (paddr_str, "%s%lu%09lu%09lu",
+	       sign, temp[2], temp[1], temp[0]);
+      break;
+    default:
+      abort ();
+    }
+}
+
+char *
+paddr_u (CORE_ADDR addr)
+{
+  char *paddr_str = get_cell ();
+  decimal2str (paddr_str, "", addr);
+  return paddr_str;
+}
+
+char *
+paddr_d (LONGEST addr)
+{
+  char *paddr_str = get_cell ();
+  if (addr < 0)
+    decimal2str (paddr_str, "-", -addr);
+  else
+    decimal2str (paddr_str, "", addr);
   return paddr_str;
 }
 
@@ -3157,35 +3326,6 @@ preg (reg)
       sprintf (preg_str, "%lx", (unsigned long) reg);
     }
   return preg_str;
-}
-
-char *
-paddr_nz (addr)
-     t_addr addr;
-{
-  char *paddr_str = get_cell ();
-  switch (sizeof (t_addr))
-    {
-    case 8:
-      {
-	unsigned long high = (unsigned long) (addr >> thirty_two);
-	if (high == 0)
-	  sprintf (paddr_str, "%lx", (unsigned long) (addr & 0xffffffff));
-	else
-	  sprintf (paddr_str, "%lx%08lx",
-		   high, (unsigned long) (addr & 0xffffffff));
-	break;
-      }
-    case 4:
-      sprintf (paddr_str, "%lx", (unsigned long) addr);
-      break;
-    case 2:
-      sprintf (paddr_str, "%x", (unsigned short) (addr & 0xffff));
-      break;
-    default:
-      sprintf (paddr_str, "%lx", (unsigned long) addr);
-    }
-  return paddr_str;
 }
 
 char *

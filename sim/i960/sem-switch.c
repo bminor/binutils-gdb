@@ -2292,7 +2292,7 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   {
     SI opval = TRUNCDISI (SRLDI (tmp_temp, 32));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
 }
 
@@ -2322,7 +2322,7 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   {
     SI opval = TRUNCDISI (SRLDI (tmp_temp, 32));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
 }
 
@@ -2352,7 +2352,7 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   {
     SI opval = TRUNCDISI (SRLDI (tmp_temp, 32));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
 }
 
@@ -2382,7 +2382,7 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   {
     SI opval = TRUNCDISI (SRLDI (tmp_temp, 32));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
 }
 
@@ -2450,7 +2450,7 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   {
     SI opval = CPU (h_gr[((FLD (f_src1)) + (1))]);
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
 }
 
@@ -2478,7 +2478,7 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   {
     SI opval = 0;
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
 }
 
@@ -2508,12 +2508,12 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   {
     SI opval = CPU (h_gr[((FLD (f_src1)) + (1))]);
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
   {
     SI opval = CPU (h_gr[((FLD (f_src1)) + (2))]);
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-2", 'x', opval);
   }
 }
 
@@ -2541,12 +2541,12 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   {
     SI opval = 0;
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
   {
     SI opval = 0;
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-2", 'x', opval);
   }
 }
 
@@ -2576,17 +2576,17 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   {
     SI opval = CPU (h_gr[((FLD (f_src1)) + (1))]);
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
   {
     SI opval = CPU (h_gr[((FLD (f_src1)) + (2))]);
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-2", 'x', opval);
   }
   {
     SI opval = CPU (h_gr[((FLD (f_src1)) + (3))]);
     CPU (h_gr[((FLD (f_srcdst)) + (3))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-3", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-3", 'x', opval);
   }
 }
 
@@ -2614,17 +2614,17 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   {
     SI opval = 0;
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
   {
     SI opval = 0;
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-2", 'x', opval);
   }
   {
     SI opval = 0;
     CPU (h_gr[((FLD (f_srcdst)) + (3))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-3", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-3", 'x', opval);
   }
 }
 
@@ -3604,7 +3604,7 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
 }
 
@@ -3634,7 +3634,7 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
 }
 
@@ -3664,7 +3664,7 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
 }
 
@@ -3694,7 +3694,7 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
 }
 
@@ -3724,7 +3724,7 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
 }
 
@@ -3754,7 +3754,7 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
 }
 
@@ -3784,7 +3784,7 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
 }
 
@@ -3814,7 +3814,7 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
 }
 
@@ -3844,12 +3844,12 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 8));
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-2", 'x', opval);
   }
 }
 
@@ -3879,12 +3879,12 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 8));
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-2", 'x', opval);
   }
 }
 
@@ -3914,12 +3914,12 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 8));
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-2", 'x', opval);
   }
 }
 
@@ -3949,12 +3949,12 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 8));
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-2", 'x', opval);
   }
 }
 
@@ -3984,12 +3984,12 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 8));
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-2", 'x', opval);
   }
 }
 
@@ -4019,12 +4019,12 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 8));
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-2", 'x', opval);
   }
 }
 
@@ -4054,12 +4054,12 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 8));
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-2", 'x', opval);
   }
 }
 
@@ -4089,12 +4089,12 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 8));
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-2", 'x', opval);
   }
 }
 
@@ -4124,17 +4124,17 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 8));
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-2", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 12));
     CPU (h_gr[((FLD (f_srcdst)) + (3))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-3", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-3", 'x', opval);
   }
 }
 
@@ -4164,17 +4164,17 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 8));
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-2", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 12));
     CPU (h_gr[((FLD (f_srcdst)) + (3))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-3", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-3", 'x', opval);
   }
 }
 
@@ -4204,17 +4204,17 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 8));
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-2", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 12));
     CPU (h_gr[((FLD (f_srcdst)) + (3))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-3", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-3", 'x', opval);
   }
 }
 
@@ -4244,17 +4244,17 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 8));
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-2", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 12));
     CPU (h_gr[((FLD (f_srcdst)) + (3))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-3", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-3", 'x', opval);
   }
 }
 
@@ -4284,17 +4284,17 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 8));
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-2", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 12));
     CPU (h_gr[((FLD (f_srcdst)) + (3))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-3", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-3", 'x', opval);
   }
 }
 
@@ -4324,17 +4324,17 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 8));
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-2", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 12));
     CPU (h_gr[((FLD (f_srcdst)) + (3))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-3", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-3", 'x', opval);
   }
 }
 
@@ -4364,17 +4364,17 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 8));
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-2", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 12));
     CPU (h_gr[((FLD (f_srcdst)) + (3))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-3", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-3", 'x', opval);
   }
 }
 
@@ -4404,17 +4404,17 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 8));
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-2", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 12));
     CPU (h_gr[((FLD (f_srcdst)) + (3))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-3", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-3", 'x', opval);
   }
 }
 

@@ -24,12 +24,10 @@
 #ifndef TM_MIPS_H
 #define TM_MIPS_H 1
 
-#ifdef __STDC__
 struct frame_info;
 struct symbol;
 struct type;
 struct value;
-#endif
 
 #include <bfd.h>
 #include "coff/sym.h"		/* Needed for PDR below.  */

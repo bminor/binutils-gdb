@@ -50,9 +50,7 @@
     xcoff_relocate_core (c);
 
 extern void xcoff_relocate_symtab PARAMS ((unsigned int));
-#ifdef __STDC__
 struct target_ops;
-#endif
 extern void xcoff_relocate_core PARAMS ((struct target_ops *));
 
 /* Return sizeof user struct to callers in less machine dependent routines */

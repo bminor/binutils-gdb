@@ -228,7 +228,7 @@ extern void start_event_loop PARAMS ((void));
 extern void delete_file_handler PARAMS ((int));
 extern void add_file_handler PARAMS ((int, void (*) (void), gdb_client_data));
 extern void mark_async_signal_handler PARAMS ((async_signal_handler *));
-extern async_signal_handler *
+extern async_signal_handler * 
   create_async_signal_handler PARAMS ((handler_func *, gdb_client_data));
 extern void delete_async_signal_handler PARAMS ((async_signal_handler ** async_handler_ptr));
 
@@ -246,13 +246,16 @@ extern void pop_prompt PARAMS ((void));
 extern void push_prompt PARAMS ((char *, char *, char *));
 extern void gdb_readline2 PARAMS ((void));
 
-/* Exported variables from event-top.c.
+/* Exported variables and functions from event-top.c.
    FIXME: these should really go into top.h. */
 
 extern int async_command_editing_p;
+extern int exec_done_display_p;
 extern char *async_annotation_suffix;
 extern char *new_async_prompt;
 extern struct prompts the_prompts;
 extern void (*call_readline) PARAMS ((void));
 extern void (*input_handler) PARAMS ((char *));
 extern int input_fd;
+void mark_async_signal_handler_wrapper (void *);
+void async_request_quit (gdb_client_data);

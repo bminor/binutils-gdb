@@ -1,4 +1,235 @@
+1999-08-30  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* infrun.c (prepare_to_wait): New function, broken out from the
+ 	wfi_continue label in handle_inferior_event.
+	(handle_inferior_event): Change more gotos into function calls.
+
+1999-08-30  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* tracepoint.c: -Wall warning cleanup. 
+	(parse_and_eval_memrange): remove (unused).
+	(output_command, args_info, locals_info, registers_info): add decls.
+	(getpkt, putpkt, remote_console_output): add decls.
+	(isalnum, isspace): cast arg to avoid warning.
+	(printf, fprintf, sprintf): use [fs]printf_vma for printing addrs.
+	
+Mon Aug 30 21:47:58 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* d10v-tdep.c: #include "language.h".
+
+Mon Aug 30 20:38:57 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.in (AC_CHECK_HEADERS): Check for <time.h>.
+	* configure, acconfig.in: Re-generate.
+
+	* remote-rdp.c: #include <time.h>
+
+	* config/arm/tm-arm.h (arm_float_info): Add declaration.
+
+	* arm-tdep.c (convert_from_extended, convert_to_extended): Change
+ 	double ptr arg to void ptr arg.
+
+	* config/arm/tm-arm.h (arm_frameless_function_invocation): Add
+ 	declaration.
+	(arm_frame_find_saved_regs): Rename frame_find_saved_regs.
+	(convert_from_extended, convert_to_extended): Add declaration.
+
+Mon Aug 30 19:05:32 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.in (WERR_CFLAGS): Separate the -Werror flag.
+	* configure: Re-generate.
+
+	* Makefile.in (INTERNAL_CFLAGS): Re-define using
+ 	INTERNAL_WARN_CFLAGS.
+	(INTERNAL_WARN_CFLAGS): Define.  Leave off WERR_CFLAGS.
+	(tracepoint.o): Add explicit rule.
+	(WERR_CFLAGS): Add definition.
+
+Mon Aug 30 17:52:17 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* utils.c: #include "event-loop.h" for declaration of
+ 	async_request_quit.
+	* Makefile.in (utils.o): Add dependency on event-loop.h.
+
+	* event-top.c (mark_async_signal_handler_wrapper,
+ 	async_request_quit): Move declaration from here.
+	* event-loop.h: To here.
+	
+	* defs.h: Add declaration of exec.c:exec_set_section_offsets.
+
+	* event-top.c: #include "gdbcmd.h" which includes "command.h" and
+ 	hence expose declaration of function dont_repeat.
+
+	* top.c (ISATTY), tracepoint.c (ISATTY), utils.c (ISATTY),
+ 	event-top.c (ISATTY): Move definitions from here.
+	* defs.h (ISATTY): To here. #include <unistd.h>.
+
+	* sol-thread.c, solib.c, source.c, sparcl-tdep.c, tracepoint.c,
+ 	utils.c, win32-nat.c, wince.c, top.c, symfile.c, ser-unix.c,
+ 	ser-tcp.c, procfs.c, maint.c, infttrace.c, hppa-tdep.c,
+ 	ser-pipe.c, remote-rdp.c, main.c, inftarg.c, inflow.c,
+ 	hpux-thread.c, hp-psymtab-read.c, go32-nat.c, fork-child.c,
+ 	corelow.c, command.c: Do not #include <unistd.h>, moved to defs.h.
+
+Mon Aug 30 15:14:43 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* defs.h (struct tui_stream, enum streamtype): Move from here.
+	* utils.c: To here.
+
+	* main.c (tui_file_fputs): Move from here.
+	* utils.c: To here.
+
+Sun Aug 29 10:03:32 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdb-events.h, gdb-events.c, gdb-events.sh: New files.
+
+1999-08-27  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* solib.c (open_symbol_file_object): new function.
+	Called when attaching to a new process, if there is no loaded
+	symbol file.  Attempts to locate the executable file for the
+	attached process and load symbols from it.
+	(solib_add): Call open_symbol_file_object if attaching to a
+	new process and no open symbol file.	
+
+1999-08-27  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+	* config/i386/tm-sun386.h (GDB_TARGET_IS_SUN386): Definition
+	removed--no longer checked anywhere in gdb.
+
+1999-08-27  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* infrun.c (stop_stepping): New function, broken out from
+	stop_stepping label in handle_inferior_event.
+	(handle_inferior_event): Change gotos into function calls.
+
+Fri Aug 27 20:13:22 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* defs.h (LONGEST): Move definition to earlier in file - to just
+ 	after BFD.
+	(paddr_u, paddr_d): Declare.
+	* utils.c (decimal2str): New function.
+	(paddr_u, paddr_d): Define.
+
+	* remote.c (remote_cisco_section_offsets,
+ 	compare_sections_command): Fix XprintfX arguments.  Use paddr...
+	(putpkt_binary): Fix XprintfX arguments.
+
+Tue Aug 24 21:30:36 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+        * arm-tdep.c (arm_init_extra_frame_info): Add braces.  Recommended
+        by gcc -Wparentheses.
+
+1999-08-26  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* infrun.c (check_sigtramp2): New function, broken out from
+	check_sigtramp2 label in handle_inferior_event.
+	(handle_inferior_event): Change gotos into function calls.
+
+	Declare Tahoe configuration obsolete.
+	* configure.host, configure.tgt: Comment out Tahoe configs.
+	* Makefile.in: Comment out Tahoe-related action.
+	* tahoe-tdep.c, config/tahoe/*: Comment out.
+	* NEWS: Mention obsolete status.
+
+1999-08-26  J.T. Conklin  <jtc@redback.com>
+
+	* i386-stub.c, m32r-stub.c, m68k-stub.c, sh-stub.c, sh-stub.c,
+	sparc-stub, sparcl-stub.c sparclet-stub.c (getpacket): If '$',
+	the packet start character is received in the 'middle' of a 
+	packet, assume that packet end character has been lost and
+	start a new packet.
+
+	* i386-stub.c, m32r-stub.c, m68k-stub.c, sh-stub.c, sparc-stub.c,
+ 	sparcl-stub.c sparclet-stub.c (getpacket): Changed to return ptr
+ 	to first character of input buffer.  Removed & 0x7f masks.
+	(handle_exception): Don't access remcomInBuffer directly.
+
+1999-08-25  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* breakpoint.c (disable_breakpoints_in_shlibs): Only disable
+	enabled breakpoints.
+
+Tue Aug 24 14:59:23 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* tracepoint.c, remote.c, pa64solib.h, value.h, somsolib.h,
+ 	solib.h, scm-lang.h, language.h, inferior.h, defs.h, coff-solib.h,
+ 	ch-lang.h, breakpoint.h, annotate.h: Remove #if __STDC__ wrapping
+ 	struct declarations.
+
+	* config/sparc/nm-sun4sol2.h, config/mn10300/tm-mn10300.h,
+ 	config/mn10200/tm-mn10200.h, config/i386/tm-i386.h,
+ 	config/i386/tm-i386v.h, config/i386/nm-i386sol2.h,
+ 	config/pa/nm-hppah.h, config/rs6000/nm-rs6000.h,
+ 	config/sparc/tm-sp64.h, config/v850/tm-v850.h,
+ 	config/tic80/tm-tic80.h, config/sparc/tm-sparc.h,
+ 	config/sh/tm-sh.h, config/rs6000/tm-rs6000.h, config/pa/tm-hppa.h,
+ 	config/mips/tm-mips.h, config/m68k/tm-m68k.h,
+ 	config/m32r/tm-m32r.h, config/i960/tm-mon960.h,
+ 	config/fr30/tm-fr30.h, config/h8300/tm-h8300.h,
+ 	config/arm/tm-arm.h, config/alpha/tm-alpha.h,
+ 	config/a29k/tm-a29k.h: Ditto.
+
+Wed Aug 25 10:45:33 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* Makefile.in (gdb$(EXEEXT)): Add dependency on TDEPLIBS.
+
+	* config/arm/arm.mt (TDEPLIBS): Define.  Move libangsd.a to here.
+	(TDEPFILES): From here.
+
+1999-08-24  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* top.c (init_main): Add new set/show command exec-done-display,
+ 	default value is off.
+	* event-loop.h: Export exec_done_display_p.
+	* event-top.c: New variable exec_done_display_p.
+	* infrun.c (complete_execution): Print completion message if
+ 	corresponding flag is set.
+
+	* top.c (DEFAULT_PROMPT): Add space after "(gdb)" at end of prompt.
+
+	From: J.T. Conklin  <jtc@redback.com> 
+	* top.c (DEFAULT_PROMPT): Set to "(gdb)" if not already defined.
+	(init_main): Always use DEFAULT_PROMPT.
+
+Tue Aug 24 03:23:31 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* hppa-tdep.c: Remove useless "purecov: deadcode" comments.
+	(hppa_use_struct_convention): Update for PA64.
+	(hppa_frame_saved_pc): Properly extract the saved PC in a call
+	dummy frame.
+	(in_solib_call_trampoline): Return nonzero if we are in a function
+	called ".stub".
+	(prologue_inst_adjust_sp): Handle std,ma.
+	(skip_prologue_hard_way): Handle more PA2.0/PA64 insns.
+	(hppa_frame_find_saved_regs): Similarly.  Handle indirect save of
+	%r3 into the stack.
+
+	* config/pa/tm-hppa64.h (CALL_DUMMY_BREAKPOINT_OFFSET_P): Define.
+	(CALL_DUMMY_BREAKPOINT_OFFSET): Define.
+
+Tue Aug 24 14:59:23 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* Makefile.in (gdb$(EXEEXT)): Add dependency on main.o that was
+ 	lost when libgdb.a was added.
+
+Tue Aug 24 14:26:34 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbarch.c, gdbarch.h: Convert to pure ISO-C.
+	
+	* gdbarch.sh: New file.
+	* gdbarch.c, gdbarch.h: Add note describing gdbarch.sh
+
+Mon Aug 23 19:36:17 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* Makefile.in (libgdb.a): New target.
+	(gdb$(EXEEXT)): Add dependency on libgdb.a.
+	(libgdb-files, LIBGDB_OBS, libgdb, LIBGDBDEPS, LIBGDBFILES): Delete.
+
 Mon Aug 23 10:16:32 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* infttrate.c (child_pid_to_exec_file): Find the correct base
+	of the stack for PA64.
 
 	* pa64solib.c: Fix some minor whitespace problems.
 	(bfd_lookup_symbol): New function.
@@ -43,6 +274,7 @@ Fri Aug 20 10:53:38 1999  Jeffrey A Law  (law@cygnus.com)
 	* breakpoint.h (target_hw_bp_type): new enum.
 	* breakpoint.c (insert_breakpoints): use enum instead of consts.
 	(remove_breakpoint): use enum instead of consts.
+	(throughout): use "warning" instead of "fprintf(stderr, ..."
 	[Also clean up a bunch of excessively long lines.]
 	
 1999-08-19  J.T. Conklin  <jtc@redback.com>
@@ -537,8 +769,8 @@ Sun Aug  8 12:06:47 1999  Fred Fish  <fnf@cygnus.com>
 1999-08-08  James Ingham  <jingham@leda.cygnus.com>
 
 	* remote.c (remote_insert_breakpoint): Fix typo in Z packet support. 
-        Also move Z packet support OUTSIDE of REMOTE_BREAKPOINT ifdef,
-        since this is not set for all targets that support the Z packet.
+	Also move Z packet support OUTSIDE of REMOTE_BREAKPOINT ifdef,
+	since this is not set for all targets that support the Z packet.
 
 Fri Aug  6 17:17:28 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
@@ -624,7 +856,7 @@ Fri Aug  6 19:26:03 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 	(arm_othernames): Use the set_disassembly_flavor.
 	(_initialize_arm_tdep): Setup the disassembly flavor commands, and 
 	initialize the flavor.
-        (arm_frameless_function_invocation): Adjust for
+	(arm_frameless_function_invocation): Adjust for
 	frameless functions that have 1 or 2 instructions that mimic the
 	standard APCS form.
 	(arm_scan_prologue): Be more careful about scanning the function
@@ -886,7 +1118,7 @@ Wed Aug  4 10:42:58 1999  Fred Fish  <fnf@cygnus.com>
 
 1999-07-28  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
-        From Eli Zaretskii  <eliz@is.elta.co.il>:
+	From Eli Zaretskii  <eliz@is.elta.co.il>:
 	* top.c (gdb_init) [__MSDOS__]: Arrange for GDB to return to the
 	original directory before exiting.
 	(cd_command) [_WIN32 || __MSDOS__]: Canonicalize the new directory
@@ -916,8 +1148,8 @@ Mon Jul 26 17:13:39 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 	
 1999-07-24  Fred Fish  <fnf@cygnus.com>
 
-        * symfile.c (default_symfile_offsets): Clear section_offsets
-        before filling it in.
+	* symfile.c (default_symfile_offsets): Clear section_offsets
+	before filling it in.
 
 1999-07-16  Keith Seitz  <keiths@cygnus.com>
 
@@ -1016,10 +1248,10 @@ Mon Jul 12 11:15:09 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 1999-07-12  Keith Seitz  <keiths@cygnus.com>
 
-        * rdi-share/unixcomm.c (Unix_ResetSerial): Remove CYGWIN32
+	* rdi-share/unixcomm.c (Unix_ResetSerial): Remove CYGWIN32
 	conditional.  It's no longer needed.
-        (SERPORT1, SERPORT2): Linux serial ports are "/dev/ttyX", not
-        "/dev/cuaX" (X=0,1,2,3,...).
+	(SERPORT1, SERPORT2): Linux serial ports are "/dev/ttyX", not
+	"/dev/cuaX" (X=0,1,2,3,...).
 
 Mon Jul 12 02:02:00 1999  Andrew Cagney  <cagney@amy.cygnus.com>
 
@@ -1684,7 +1916,7 @@ Thu Jun 10 20:04:02 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 	(mcore_push_arguments): Fix compiler warning.
 
 1999-06-09  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
-   
+
         * rs6000-tdep.c (skip_prologue): Don't mistake a branch for a     
         subroutine call.        
 

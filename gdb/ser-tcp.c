@@ -26,9 +26,6 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <sys/socket.h>
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 
 #ifndef __CYGWIN32__
 #include <netinet/tcp.h>

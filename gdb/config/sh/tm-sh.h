@@ -20,12 +20,10 @@
 
 /* Contributed by Steve Chamberlain sac@cygnus.com */
 
-#ifdef __STDC__
 struct frame_info;
 struct frame_saved_regs;
 struct value;
 struct type;
-#endif
 
 #define GDB_TARGET_IS_SH
 

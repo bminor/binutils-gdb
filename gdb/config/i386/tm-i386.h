@@ -21,11 +21,10 @@
 #ifndef TM_I386_H
 #define TM_I386_H 1
 
-#ifdef __STDC__			/* Forward decl's for prototypes */
+/* Forward decl's for prototypes */
 struct frame_info;
 struct frame_saved_regs;
 struct type;
-#endif
 
 #define TARGET_BYTE_ORDER LITTLE_ENDIAN
 

@@ -238,10 +238,8 @@ struct internalvar
 #include "gdbtypes.h"
 #include "expression.h"
 
-#ifdef __STDC__
 struct frame_info;
 struct fn_field;
-#endif
 
 extern void
 print_address_demangle PARAMS ((CORE_ADDR, GDB_FILE *, int));

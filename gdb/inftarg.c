@@ -42,9 +42,6 @@
 
 /* "wait.h" fills in the gaps left by <wait.h> */
 #include "wait.h"
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 
 extern struct symtab_and_line *
   child_enable_exception_callback PARAMS ((enum exception_event_kind, int));

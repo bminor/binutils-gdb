@@ -31,7 +31,6 @@
 #include "gdb_string.h"
 #include <sys/param.h>
 #include <fcntl.h>
-#include <unistd.h>
 
 #ifndef SVR4_SHARED_LIBS
  /* SunOS shared libs need the nlist structure.  */
@@ -888,6 +887,70 @@ first_link_map_member ()
   return (lm);
 }
 
+#ifdef SVR4_SHARED_LIBS
+/*
+
+  LOCAL FUNCTION
+
+  open_exec_file_object
+
+  SYNOPSIS
+
+  void open_symbol_file_object (int from_tty)
+
+  DESCRIPTION
+
+  If no open symbol file, attempt to locate and open the main symbol
+  file.  On SVR4 systems, this is the first link map entry.  If its
+  name is here, we can open it.  Useful when attaching to a process
+  without first loading its symbol file.
+
+ */
+
+int
+open_symbol_file_object (arg)
+     PTR arg;
+{
+  int from_tty = (int) arg;	/* sneak past catch_errors */
+  struct link_map *lm, lmcopy;
+  char *filename;
+  int errcode;
+
+  if (symfile_objfile)
+    if (!query ("Attempt to reload symbols from process? "))
+      return 0;
+
+  if ((debug_base = locate_base ()) == 0)
+    return 0;	/* failed somehow... */
+
+  /* First link map member should be the executable.  */
+  if ((lm = first_link_map_member ()) == NULL)
+    return 0;	/* failed somehow... */
+
+  /* Read from target memory to GDB.  */
+  read_memory ((CORE_ADDR) lm, (void *) &lmcopy, sizeof (lmcopy));
+
+  if (lmcopy.l_name == 0)
+    return 0;	/* no filename.  */
+
+  /* Now fetch the filename from target memory.  */
+  target_read_string ((CORE_ADDR) lmcopy.l_name, &filename, 
+		      MAX_PATH_SIZE - 1, &errcode);
+  if (errcode)
+    {
+      warning ("failed to read exec filename from attached file: %s",
+	       safe_strerror (errcode));
+      return 0;
+    }
+
+  make_cleanup ((make_cleanup_func) free, (void *) filename);
+  /* Have a pathname: read the symbol file.  */
+  symbol_file_command (filename, from_tty);
+
+  return 1;
+}
+#endif /* SVR4_SHARED_LIBS */
+
 /*
 
    LOCAL FUNCTION
@@ -1098,6 +1161,18 @@ solib_add (arg_string, from_tty, target)
   char *re_err;
   int count;
   int old;
+
+#ifdef SVR4_SHARED_LIBS
+  /* If we are attaching to a running process for which we 
+     have not opened a symbol file, we may be able to get its 
+     symbols now!  */
+  if (attach_flag &&
+      symfile_objfile == NULL)
+    catch_errors (open_symbol_file_object, (PTR) from_tty, 
+		  "Error reading attached process's symbol file.\n",
+		  RETURN_MASK_ALL);
+
+#endif SVR4_SHARED_LIBS
 
   if ((re_err = re_comp (arg_string ? arg_string : ".")) != NULL)
     {

@@ -141,6 +141,10 @@ gdb_expect {
 	    -re ".*in.*start.*$gdb_prompt $" { 
 		pass "step out of main"
 	    }
+	    -re ".*in .nope ().*$gdb_prompt $" {
+		# This is what happens on Solaris currently -sts 1999-08-25
+		pass "step out of main on Solaris"
+	    }
 	    -re ".*in.*\\\$START\\\$.*from.*dld.sl.*$gdb_prompt $" { 
 		pass "step out of main"
 	    }

@@ -44,9 +44,7 @@ extern void annotate_breakpoints_table_end PARAMS ((void));
 
 extern void annotate_frames_invalid PARAMS ((void));
 
-#ifdef __STDC__
 struct type;
-#endif
 
 extern void annotate_field_begin PARAMS ((struct type *));
 extern void annotate_field_name_end PARAMS ((void));

@@ -26,9 +26,7 @@
 #include "i960/tm-i960.h"
 
 /* forward declarations */
-#ifdef __STDC__
 struct frame_info;
-#endif
 
 /* Override the standard gdb prompt when compiled for this target.  */
 

@@ -26,12 +26,10 @@
 #include "coff/sym.h"		/* Needed for PDR below.  */
 #include "coff/symconst.h"
 
-#ifdef __STDC__
 struct frame_info;
 struct type;
 struct value;
 struct symbol;
-#endif
 
 #if !defined (TARGET_BYTE_ORDER)
 #define TARGET_BYTE_ORDER LITTLE_ENDIAN

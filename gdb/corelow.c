@@ -24,7 +24,6 @@
 #include <errno.h>
 #include <signal.h>
 #include <fcntl.h>
-#include <unistd.h>
 #include "frame.h"		/* required by inferior.h */
 #include "inferior.h"
 #include "symtab.h"

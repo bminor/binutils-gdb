@@ -43,9 +43,6 @@
 #undef savestring
 
 #include <sys/types.h>
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 
 #include "event-loop.h"
 #include "gdb_string.h"
@@ -152,10 +149,10 @@ static void disconnect PARAMS ((int));
 
 static void source_cleanup PARAMS ((FILE *));
 
-/* If this definition isn't overridden by the header files, assume
-   that isatty and fileno exist on this system.  */
-#ifndef ISATTY
-#define ISATTY(FP)	(isatty (fileno (FP)))
+/* Default command line prompt.  This is overriden in some configs. */
+
+#ifndef DEFAULT_PROMPT
+#define DEFAULT_PROMPT	"(gdb) "
 #endif
 
 /* Initialization file name for gdb.  This is overridden in some configs.  */
@@ -3804,11 +3801,7 @@ init_main ()
      we initialize the prompts differently. */
   if (!async_p)
     {
-#ifdef DEFAULT_PROMPT
       gdb_prompt_string = savestring (DEFAULT_PROMPT, strlen (DEFAULT_PROMPT));
-#else
-      gdb_prompt_string = savestring ("(gdb) ", 6);
-#endif
     }
   else
     {
@@ -3816,11 +3809,7 @@ init_main ()
          whatever the DEFAULT_PROMPT is. */
       the_prompts.top = 0;
       PREFIX (0) = "";
-#ifdef DEFAULT_PROMPT
       PROMPT (0) = savestring (DEFAULT_PROMPT, strlen (DEFAULT_PROMPT));
-#else
-      PROMPT (0) = savestring ("(gdb) ", 6);
-#endif
       SUFFIX (0) = "";
       /* Set things up for annotation_level > 1, if the user ever decides
          to use it. */
@@ -4101,5 +4090,13 @@ from the target.", &setlist),
 		       &setlist);
       add_show_from_set (c, &showlist);
       c->function.sfunc = set_async_annotation_level;
+    }
+  if (async_p)
+    {
+      add_show_from_set
+	(add_set_cmd ("exec-done-display", class_support, var_boolean, (char *) &exec_done_display_p,
+		      "Set notification of completion for asynchronous execution commands.\n\
+Use \"on\" to enable the notification, and \"off\" to disable it.", &setlist),
+	 &showlist);
     }
 }

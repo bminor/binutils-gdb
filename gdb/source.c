@@ -31,9 +31,6 @@
 #include "gdb_string.h"
 #include "gdb_stat.h"
 #include <fcntl.h>
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 #include "gdbcore.h"
 #include "gnu-regex.h"
 #include "symfile.h"

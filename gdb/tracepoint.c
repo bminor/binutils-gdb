@@ -21,7 +21,6 @@
 #include "defs.h"
 #include "symtab.h"
 #include "frame.h"
-#include "tracepoint.h"
 #include "gdbtypes.h"
 #include "expression.h"
 #include "gdbcmd.h"
@@ -29,6 +28,8 @@
 #include "target.h"
 #include "language.h"
 #include "gdb_string.h"
+#include "inferior.h"
+#include "tracepoint.h"
 
 #include "ax.h"
 #include "ax-gdb.h"
@@ -61,6 +62,15 @@ extern char *(*readline_hook) PARAMS ((char *));
 extern void (*readline_end_hook) PARAMS ((void));
 extern void x_command PARAMS ((char *, int));
 extern int addressprint;	/* Print machine addresses? */
+
+/* GDB commands implemented in other modules:
+ */  
+
+extern void output_command PARAMS ((char *, int));
+extern void registers_info PARAMS ((char *, int));
+extern void args_info      PARAMS ((char *, int));
+extern void locals_info    PARAMS ((char *, int));
+
 
 /* If this definition isn't overridden by the header files, assume
    that isatty and fileno exist on this system.  */
@@ -140,12 +150,11 @@ static void trace_dump_command PARAMS ((char *, int));
 /* support routines */
 static void trace_mention PARAMS ((struct tracepoint *));
 
-#if __STDC__
 struct collection_list;
-#endif
 static void add_aexpr PARAMS ((struct collection_list *, struct agent_expr *));
 static unsigned char *mem2hex (unsigned char *, unsigned char *, int);
-static void add_register PARAMS ((struct collection_list * collection, unsigned long regno));
+static void add_register PARAMS ((struct collection_list * collection, 
+				  unsigned int regno));
 static void free_actions_list PARAMS ((char **actions_list));
 static void free_actions_list_cleanup_wrapper PARAMS ((void *));
 
@@ -183,6 +192,13 @@ trace_error (buf)
       error ("Target returns error code '%s'.", buf);
     }
 }
+
+/* Entry points into remote.c (FIXME: move this interface down to tgt vector)
+ */
+
+extern int  putpkt PARAMS ((char *));
+extern void getpkt PARAMS ((char *, int));
+extern void remote_console_output PARAMS ((char *));
 
 /* Utility: wait for reply from stub, while accepting "O" packets */
 static char *
@@ -532,12 +548,12 @@ tracepoints_info (tpnum_exp, from_tty)
  */
 enum tracepoint_opcode
 {
-  enable,
-  disable,
-  delete
+  enable_op,
+  disable_op,
+  delete_op
 };
 
-/* This function implements enable, disable and delete. */
+/* This function implements enable, disable and delete commands. */
 static void
 tracepoint_operation (t, from_tty, opcode)
      struct tracepoint *t;
@@ -548,17 +564,17 @@ tracepoint_operation (t, from_tty, opcode)
 
   switch (opcode)
     {
-    case enable:
+    case enable_op:
       t->enabled = enabled;
       if (modify_tracepoint_hook)
 	modify_tracepoint_hook (t);
       break;
-    case disable:
+    case disable_op:
       t->enabled = disabled;
       if (modify_tracepoint_hook)
 	modify_tracepoint_hook (t);
       break;
-    case delete:
+    case delete_op:
       if (tracepoint_chain == t)
 	tracepoint_chain = t->next;
 
@@ -605,7 +621,7 @@ get_tracepoint_by_number (arg)
       /* Make a copy of the name, so we can null-terminate it
          to pass to lookup_internalvar().  */
       end = *arg + 1;
-      while (isalnum (*end) || *end == '_')
+      while (isalnum ((int) *end) || *end == '_')
 	end++;
       copy = (char *) alloca (end - *arg);
       strncpy (copy, *arg + 1, (end - *arg - 1));
@@ -622,7 +638,7 @@ get_tracepoint_by_number (arg)
     {
       tpnum = strtol (*arg, arg, 0);
       if (tpnum == 0)		/* possible strtol failure */
-	while (**arg && !isspace (**arg))
+	while (**arg && !isspace ((int) **arg))
 	  (*arg)++;		/* advance to next white space, if any */
     }
   ALL_TRACEPOINTS (t)
@@ -642,8 +658,6 @@ map_args_over_tracepoints (args, from_tty, opcode)
      enum tracepoint_opcode opcode;
 {
   struct tracepoint *t, *tmp;
-  int tpnum;
-  char *cp;
 
   if (args == 0 || *args == 0)	/* do them all */
     ALL_TRACEPOINTS_SAFE (t, tmp)
@@ -667,7 +681,7 @@ enable_trace_command (args, from_tty)
      int from_tty;
 {
   dont_repeat ();
-  map_args_over_tracepoints (args, from_tty, enable);
+  map_args_over_tracepoints (args, from_tty, enable_op);
 }
 
 /* The 'disable trace' command enables tracepoints.  Not supported by all targets.  */
@@ -677,7 +691,7 @@ disable_trace_command (args, from_tty)
      int from_tty;
 {
   dont_repeat ();
-  map_args_over_tracepoints (args, from_tty, disable);
+  map_args_over_tracepoints (args, from_tty, disable_op);
 }
 
 /* Remove a tracepoint (or all if no argument) */
@@ -693,7 +707,7 @@ delete_trace_command (args, from_tty)
 	if (!query ("Delete all tracepoints? "))
 	  return;
 
-  map_args_over_tracepoints (args, from_tty, delete);
+  map_args_over_tracepoints (args, from_tty, delete_op);
 }
 
 /* Set passcount for tracepoint.
@@ -708,14 +722,14 @@ trace_pass_command (args, from_tty)
      int from_tty;
 {
   struct tracepoint *t1 = (struct tracepoint *) -1, *t2;
-  unsigned long count;
+  unsigned int count;
 
   if (args == 0 || *args == 0)
     error ("PASS command requires an argument (count + optional TP num)");
 
   count = strtoul (args, &args, 10);	/* count comes first, then TP num */
 
-  while (*args && isspace (*args))
+  while (*args && isspace ((int) *args))
     args++;
 
   if (*args && strncasecmp (args, "all", 3) == 0)
@@ -745,11 +759,6 @@ trace_pass_command (args, from_tty)
 
 /* Prototypes for action-parsing utility commands  */
 static void read_actions PARAMS ((struct tracepoint *));
-static char *parse_and_eval_memrange PARAMS ((char *,
-					      CORE_ADDR,
-					      long *,
-					      bfd_signed_vma *,
-					      long *));
 
 /* The three functions:
    collect_pseudocommand, 
@@ -791,7 +800,6 @@ trace_actions_command (args, from_tty)
      int from_tty;
 {
   struct tracepoint *t;
-  char *actions;
   char tmpbuf[128];
   char *end_msg = "End with a line saying just \"end\".";
 
@@ -926,11 +934,10 @@ validate_actionline (line, t)
 {
   struct cmd_list_element *c;
   struct expression *exp = NULL;
-  value_ptr temp, temp2;
   struct cleanup *old_chain = NULL;
   char *p;
 
-  for (p = *line; isspace (*p);)
+  for (p = *line; isspace ((int) *p);)
     p++;
 
   /* symbol lookup etc. */
@@ -955,14 +962,11 @@ validate_actionline (line, t)
       do
 	{			/* repeat over a comma-separated list */
 	  QUIT;			/* allow user to bail out with ^C */
-	  while (isspace (*p))
+	  while (isspace ((int) *p))
 	    p++;
 
 	  if (*p == '$')	/* look for special pseudo-symbols */
 	    {
-	      long typecode, size;
-	      bfd_signed_vma offset;
-
 	      if ((0 == strncasecmp ("reg", p + 1, 3)) ||
 		  (0 == strncasecmp ("arg", p + 1, 3)) ||
 		  (0 == strncasecmp ("loc", p + 1, 3)))
@@ -980,7 +984,7 @@ validate_actionline (line, t)
 	    {
 	      if (SYMBOL_CLASS (exp->elts[2].symbol) == LOC_CONST)
 		{
-		  warning ("%s is constant (value %d): will not be collected.",
+		  warning ("constant %s (value %ld) will not be collected.",
 			   SYMBOL_NAME (exp->elts[2].symbol),
 			   SYMBOL_VALUE (exp->elts[2].symbol));
 		  return BADLINE;
@@ -1022,14 +1026,14 @@ validate_actionline (line, t)
     {
       char *steparg;		/* in case warning is necessary */
 
-      while (isspace (*p))
+      while (isspace ((int) *p))
 	p++;
       steparg = p;
 
       if (*p == '\0' ||
 	  (t->step_count = strtol (p, &p, 0)) == 0)
 	{
-	  warning ("bad step-count: command ignored.", *line);
+	  warning ("'%s': bad step-count; command ignored.", *line);
 	  return BADLINE;
 	}
       return STEPPING;
@@ -1062,7 +1066,7 @@ free_actions (t)
 
 struct memrange
 {
-  int type;			/* 0 for absolute memory range, else basereg number */
+  int type;		/* 0 for absolute memory range, else basereg number */
   bfd_signed_vma start;
   bfd_signed_vma end;
 };
@@ -1148,7 +1152,7 @@ memrange_sortmerge (memranges)
 static void
 add_register (collection, regno)
      struct collection_list *collection;
-     unsigned long regno;
+     unsigned int regno;
 {
   if (info_verbose)
     printf_filtered ("collect register %d\n", regno);
@@ -1167,7 +1171,12 @@ add_memrange (memranges, type, base, len)
      unsigned long len;
 {
   if (info_verbose)
-    printf_filtered ("(%d,0x%x,%d)\n", type, base, len);
+    {
+      printf_filtered ("(%d,", type);
+      printf_vma (base);
+      printf_filtered (",%ld)\n", len);
+    }
+
   /* type: 0 == memory, n == basereg */
   memranges->list[memranges->next_memrange].type = type;
   /* base: addr if memory, offset if reg relative. */
@@ -1195,7 +1204,7 @@ collect_symbol (collect, sym, frame_regno, frame_offset)
      long frame_offset;
 {
   unsigned long len;
-  unsigned long reg;
+  unsigned int reg;
   bfd_signed_vma offset;
 
   len = TYPE_LENGTH (check_typedef (SYMBOL_TYPE (sym)));
@@ -1206,14 +1215,19 @@ collect_symbol (collect, sym, frame_regno, frame_offset)
 		       SYMBOL_NAME (sym), SYMBOL_CLASS (sym));
       break;
     case LOC_CONST:
-      printf_filtered ("%s is constant, value is %d: will not be collected.\n",
+      printf_filtered ("constant %s (value %ld) will not be collected.\n",
 		       SYMBOL_NAME (sym), SYMBOL_VALUE (sym));
       break;
     case LOC_STATIC:
       offset = SYMBOL_VALUE_ADDRESS (sym);
       if (info_verbose)
-	printf_filtered ("LOC_STATIC %s: collect %d bytes at 0x%08x\n",
-			 SYMBOL_NAME (sym), len, offset);
+	{
+	  char tmp[40];
+
+	  sprintf_vma (tmp, offset);
+	  printf_filtered ("LOC_STATIC %s: collect %ld bytes at %s.\n",
+			   SYMBOL_NAME (sym), len, tmp /* address */);
+	}
       add_memrange (collect, -1, offset, len);	/* 0 == memory */
       break;
     case LOC_REGISTER:
@@ -1238,9 +1252,10 @@ collect_symbol (collect, sym, frame_regno, frame_offset)
       offset = frame_offset + SYMBOL_VALUE (sym);
       if (info_verbose)
 	{
-	  printf_filtered ("LOC_LOCAL %s: Collect %d bytes at offset",
+	  printf_filtered ("LOC_LOCAL %s: Collect %ld bytes at offset ",
 			   SYMBOL_NAME (sym), len);
-	  printf_filtered (" %d from frame ptr reg %d\n", offset, reg);
+	  printf_vma (offset);
+	  printf_filtered (" from frame ptr reg %d\n", reg);
 	}
       add_memrange (collect, reg, offset, len);
       break;
@@ -1249,9 +1264,10 @@ collect_symbol (collect, sym, frame_regno, frame_offset)
       offset = 0;
       if (info_verbose)
 	{
-	  printf_filtered ("LOC_REGPARM_ADDR %s: Collect %d bytes at offset",
+	  printf_filtered ("LOC_REGPARM_ADDR %s: Collect %ld bytes at offset ",
 			   SYMBOL_NAME (sym), len);
-	  printf_filtered (" %d from reg %d\n", offset, reg);
+	  printf_vma (offset);
+	  printf_filtered (" from reg %d\n", reg);
 	}
       add_memrange (collect, reg, offset, len);
       break;
@@ -1261,9 +1277,10 @@ collect_symbol (collect, sym, frame_regno, frame_offset)
       offset = frame_offset + SYMBOL_VALUE (sym);
       if (info_verbose)
 	{
-	  printf_filtered ("LOC_LOCAL %s: Collect %d bytes at offset",
+	  printf_filtered ("LOC_LOCAL %s: Collect %ld bytes at offset ",
 			   SYMBOL_NAME (sym), len);
-	  printf_filtered (" %d from frame ptr reg %d\n", offset, reg);
+	  printf_vma (offset);
+	  printf_filtered (" from frame ptr reg %d\n", reg);
 	}
       add_memrange (collect, reg, offset, len);
       break;
@@ -1273,8 +1290,10 @@ collect_symbol (collect, sym, frame_regno, frame_offset)
       offset = SYMBOL_VALUE (sym);
       if (info_verbose)
 	{
-	  printf_filtered ("LOC_BASEREG %s: collect %d bytes at offset %d from basereg %d\n",
-			   SYMBOL_NAME (sym), len, offset, reg);
+	  printf_filtered ("LOC_BASEREG %s: collect %ld bytes at offset ",
+			   SYMBOL_NAME (sym), len);
+	  printf_vma (offset);
+	  printf_filtered (" from basereg %d\n", reg);
 	}
       add_memrange (collect, reg, offset, len);
       break;
@@ -1311,6 +1330,9 @@ add_local_symbols (collect, pc, frame_regno, frame_offset, type)
 	  sym = BLOCK_SYM (block, i);
 	  switch (SYMBOL_CLASS (sym))
 	    {
+	    default:
+	      warning ("don't know how to trace local symbol %s", 
+		       SYMBOL_NAME (sym));
 	    case LOC_LOCAL:
 	    case LOC_STATIC:
 	    case LOC_REGISTER:
@@ -1367,6 +1389,7 @@ stringify_collection_list (list, string)
      char *string;
 {
   char temp_buf[2048];
+  char tmp2[40];
   int count;
   int ndx = 0;
   char *(*str_list)[];
@@ -1403,11 +1426,14 @@ stringify_collection_list (list, string)
   for (i = 0, count = 0, end = temp_buf; i < list->next_memrange; i++)
     {
       QUIT;			/* allow user to bail out with ^C */
+      sprintf_vma (tmp2, list->list[i].start);
       if (info_verbose)
-	printf_filtered ("(%d, 0x%x, %d)\n",
-			 list->list[i].type,
-			 list->list[i].start,
-			 list->list[i].end - list->list[i].start);
+	{
+	  printf_filtered ("(%d, %s, %ld)\n", 
+			   list->list[i].type, 
+			   tmp2, 
+			   (long) (list->list[i].end - list->list[i].start));
+	}
       if (count + 27 > MAX_AGENT_EXPR_LEN)
 	{
 	  (*str_list)[ndx] = savestring (temp_buf, count);
@@ -1415,12 +1441,14 @@ stringify_collection_list (list, string)
 	  count = 0;
 	  end = temp_buf;
 	}
-      sprintf (end, "M%X,%X,%X",
+
+      sprintf (end, "M%X,%s,%lX", 
 	       list->list[i].type,
-	       list->list[i].start,
-	       list->list[i].end - list->list[i].start);
+	       tmp2,
+	       (long) (list->list[i].end - list->list[i].start));
+
       count += strlen (end);
-      end += strlen (end);
+      end += count;
     }
 
   for (i = 0; i < list->next_aexpr_elt; i++)
@@ -1489,8 +1517,7 @@ encode_actions (t, tdp_actions, stepping_actions)
   char *action_exp;
   struct expression *exp = NULL;
   struct action_line *action;
-  bfd_signed_vma offset;
-  long i;
+  int i;
   value_ptr tempval;
   struct collection_list *collect;
   struct cmd_list_element *cmd;
@@ -1511,7 +1538,7 @@ encode_actions (t, tdp_actions, stepping_actions)
     {
       QUIT;			/* allow user to bail out with ^C */
       action_exp = action->action;
-      while (isspace (*action_exp))
+      while (isspace ((int) *action_exp))
 	action_exp++;
 
       if (*action_exp == '#')	/* comment line */
@@ -1526,7 +1553,7 @@ encode_actions (t, tdp_actions, stepping_actions)
 	  do
 	    {			/* repeat over a comma-separated list */
 	      QUIT;		/* allow user to bail out with ^C */
-	      while (isspace (*action_exp))
+	      while (isspace ((int) *action_exp))
 		action_exp++;
 
 	      if (0 == strncasecmp ("$reg", action_exp, 4))
@@ -1691,7 +1718,7 @@ remote_set_transparent_ranges (void)
   strcpy (target_buf, "QTro");
   for (s = exec_bfd->sections; s; s = s->next)
     {
-      char tmp[40];
+      char tmp1[40], tmp2[40];
 
       if ((s->flags & SEC_LOAD) == 0 ||
       /* (s->flags & SEC_CODE)     == 0 || */
@@ -1701,8 +1728,10 @@ remote_set_transparent_ranges (void)
       anysecs = 1;
       lma = s->lma;
       size = bfd_get_section_size_before_reloc (s);
-      sprintf (tmp, ":%x,%x", lma, lma + size);
-      strcat (target_buf, tmp);
+      sprintf_vma (tmp1, lma);
+      sprintf_vma (tmp2, lma + size);
+      sprintf (target_buf + strlen (target_buf), 
+	       ":%s,%s", tmp1, tmp2);
     }
   if (anysecs)
     {
@@ -1741,11 +1770,10 @@ trace_start_command (args, from_tty)
 
       ALL_TRACEPOINTS (t)
       {
-	int ss_count;		/* if actions include singlestepping */
-	int disable_mask;	/* ??? */
-	int enable_mask;	/* ??? */
+	char tmp[40];
 
-	sprintf (buf, "QTDP:%x:%x:%c:%x:%x", t->number, t->address,
+	sprintf_vma (tmp, t->address);
+	sprintf (buf, "QTDP:%x:%s:%c:%x:%x", t->number, tmp, /* address */
 		 t->enabled == enabled ? 'E' : 'D',
 		 t->step_count, t->pass_count);
 
@@ -1770,8 +1798,8 @@ trace_start_command (args, from_tty)
 		for (ndx = 0; tdp_actions[ndx]; ndx++)
 		  {
 		    QUIT;	/* allow user to bail out with ^C */
-		    sprintf (buf, "QTDP:-%x:%x:%s%c",
-			     t->number, t->address,
+		    sprintf (buf, "QTDP:-%x:%s:%s%c",
+			     t->number, tmp, /* address */
 			     tdp_actions[ndx],
 			     ((tdp_actions[ndx + 1] || stepping_actions)
 			      ? '-' : 0));
@@ -1786,8 +1814,8 @@ trace_start_command (args, from_tty)
 		for (ndx = 0; stepping_actions[ndx]; ndx++)
 		  {
 		    QUIT;	/* allow user to bail out with ^C */
-		    sprintf (buf, "QTDP:-%x:%x:%s%s%s",
-			     t->number, t->address,
+		    sprintf (buf, "QTDP:-%x:%s:%s%s%s",
+			     t->number, tmp, /* address */
 			     ((ndx == 0) ? "S" : ""),
 			     stepping_actions[ndx],
 			     (stepping_actions[ndx + 1] ? "-" : ""));
@@ -1994,7 +2022,6 @@ trace_find_command (args, from_tty)
 {				/* STUB_COMM PART_IMPLEMENTED */
   /* this should only be called with a numeric argument */
   int frameno = -1;
-  char *tmp;
 
   if (target_is_remote ())
     {
@@ -2064,7 +2091,7 @@ trace_find_pc_command (args, from_tty)
      int from_tty;
 {				/* STUB_COMM PART_IMPLEMENTED */
   CORE_ADDR pc;
-  char *tmp;
+  char tmp[40];
 
   if (target_is_remote ())
     {
@@ -2073,7 +2100,8 @@ trace_find_pc_command (args, from_tty)
       else
 	pc = parse_and_eval_address (args);
 
-      sprintf (target_buf, "QTFrame:pc:%x", pc);
+      sprintf_vma (tmp, pc);
+      sprintf (target_buf, "QTFrame:pc:%s", tmp);
       finish_tfind_command (target_buf, from_tty);
     }
   else
@@ -2087,7 +2115,6 @@ trace_find_tracepoint_command (args, from_tty)
      int from_tty;
 {				/* STUB_COMM PART_IMPLEMENTED */
   int tdp;
-  char buf[40], *tmp;
 
   if (target_is_remote ())
     {
@@ -2122,8 +2149,8 @@ trace_find_line_command (args, from_tty)
   static CORE_ADDR start_pc, end_pc;
   struct symtabs_and_lines sals;
   struct symtab_and_line sal;
-  char *tmp;
   struct cleanup *old_chain;
+  char   startpc_str[40], endpc_str[40];
 
   if (target_is_remote ())
     {
@@ -2190,10 +2217,12 @@ trace_find_line_command (args, from_tty)
 	error ("Line number %d is out of range for \"%s\".\n",
 	       sal.line, sal.symtab->filename);
 
+      sprintf_vma (startpc_str, start_pc);
+      sprintf_vma (endpc_str, end_pc - 1);
       if (args && *args)	/* find within range of stated line */
-	sprintf (target_buf, "QTFrame:range:%x:%x", start_pc, end_pc - 1);
+	sprintf (target_buf, "QTFrame:range:%s:%s", startpc_str, endpc_str);
       else			/* find OUTSIDE OF range of CURRENT line */
-	sprintf (target_buf, "QTFrame:outside:%x:%x", start_pc, end_pc - 1);
+	sprintf (target_buf, "QTFrame:outside:%s:%s", startpc_str, endpc_str);
       finish_tfind_command (target_buf, from_tty);
       do_cleanups (old_chain);
     }
@@ -2206,14 +2235,15 @@ static void
 trace_find_range_command (args, from_tty)
      char *args;
      int from_tty;
-{				/* STUB_COMM PART_IMPLEMENTED */
+{
   static CORE_ADDR start, stop;
+  char start_str[40], stop_str[40];
   char *tmp;
 
   if (target_is_remote ())
     {
       if (args == 0 || *args == 0)
-	{			/* XXX FIXME: what should default behavior be? */
+	{		/* XXX FIXME: what should default behavior be? */
 	  printf_filtered ("Usage: tfind range <startaddr>,<endaddr>\n");
 	  return;
 	}
@@ -2221,7 +2251,7 @@ trace_find_range_command (args, from_tty)
       if (0 != (tmp = strchr (args, ',')))
 	{
 	  *tmp++ = '\0';	/* terminate start address */
-	  while (isspace (*tmp))
+	  while (isspace ((int) *tmp))
 	    tmp++;
 	  start = parse_and_eval_address (args);
 	  stop = parse_and_eval_address (tmp);
@@ -2232,7 +2262,9 @@ trace_find_range_command (args, from_tty)
 	  stop = start + 1;	/* ??? */
 	}
 
-      sprintf (target_buf, "QTFrame:range:%x:%x", start, stop);
+      sprintf_vma (start_str, start);
+      sprintf_vma (stop_str, stop);
+      sprintf (target_buf, "QTFrame:range:%s:%s", start_str, stop_str);
       finish_tfind_command (target_buf, from_tty);
     }
   else
@@ -2244,14 +2276,15 @@ static void
 trace_find_outside_command (args, from_tty)
      char *args;
      int from_tty;
-{				/* STUB_COMM PART_IMPLEMENTED */
+{
   CORE_ADDR start, stop;
+  char start_str[40], stop_str[40];
   char *tmp;
 
   if (target_is_remote ())
     {
       if (args == 0 || *args == 0)
-	{			/* XXX FIXME: what should default behavior be? */
+	{		/* XXX FIXME: what should default behavior be? */
 	  printf_filtered ("Usage: tfind outside <startaddr>,<endaddr>\n");
 	  return;
 	}
@@ -2259,7 +2292,7 @@ trace_find_outside_command (args, from_tty)
       if (0 != (tmp = strchr (args, ',')))
 	{
 	  *tmp++ = '\0';	/* terminate start address */
-	  while (isspace (*tmp))
+	  while (isspace ((int) *tmp))
 	    tmp++;
 	  start = parse_and_eval_address (args);
 	  stop = parse_and_eval_address (tmp);
@@ -2270,7 +2303,9 @@ trace_find_outside_command (args, from_tty)
 	  stop = start + 1;	/* ??? */
 	}
 
-      sprintf (target_buf, "QTFrame:outside:%x:%x", start, stop);
+      sprintf_vma (start_str, start);
+      sprintf_vma (stop_str, stop);
+      sprintf (target_buf, "QTFrame:outside:%s:%s", start_str, stop_str);
       finish_tfind_command (target_buf, from_tty);
     }
   else
@@ -2288,6 +2323,7 @@ tracepoint_save_command (args, from_tty)
   FILE *fp;
   char *i1 = "    ", *i2 = "      ";
   char *indent, *actionline;
+  char tmp[40];
 
   if (args == 0 || *args == 0)
     error ("Argument required (file name in which to save tracepoints");
@@ -2306,7 +2342,10 @@ tracepoint_save_command (args, from_tty)
     if (tp->addr_string)
       fprintf (fp, "trace %s\n", tp->addr_string);
     else
-      fprintf (fp, "trace *0x%x\n", tp->address);
+      {
+	sprintf_vma (tmp, tp->address);
+	fprintf (fp, "trace *0x%s\n", tmp);
+      }
 
     if (tp->pass_count)
       fprintf (fp, "  passcount %d\n", tp->pass_count);
@@ -2321,7 +2360,7 @@ tracepoint_save_command (args, from_tty)
 
 	    QUIT;		/* allow user to bail out with ^C */
 	    actionline = line->action;
-	    while (isspace (*actionline))
+	    while (isspace ((int) *actionline))
 	      actionline++;
 
 	    fprintf (fp, "%s%s\n", indent, actionline);
@@ -2350,7 +2389,6 @@ scope_info (args, from_tty)
      char *args;
      int from_tty;
 {
-  struct symtab_and_line sal;
   struct symtabs_and_lines sals;
   struct symbol *sym;
   struct minimal_symbol *msym;
@@ -2394,7 +2432,7 @@ scope_info (args, from_tty)
 	      count--;		/* don't count this one */
 	      continue;
 	    case LOC_CONST:
-	      printf_filtered ("a constant with value %d (0x%x)",
+	      printf_filtered ("a constant with value %ld (0x%lx)",
 			       SYMBOL_VALUE (sym), SYMBOL_VALUE (sym));
 	      break;
 	    case LOC_CONST_BYTES:
@@ -2446,12 +2484,12 @@ scope_info (args, from_tty)
 				     gdb_stdout);
 	      break;
 	    case LOC_BASEREG:
-	      printf_filtered ("a variable at offset %d from register $%s",
+	      printf_filtered ("a variable at offset %ld from register $%s",
 			       SYMBOL_VALUE (sym),
 			       REGISTER_NAME (SYMBOL_BASEREG (sym)));
 	      break;
 	    case LOC_BASEREG_ARG:
-	      printf_filtered ("an argument at offset %d from register $%s",
+	      printf_filtered ("an argument at offset %ld from register $%s",
 			       SYMBOL_VALUE (sym),
 			       REGISTER_NAME (SYMBOL_BASEREG (sym)));
 	      break;
@@ -2542,7 +2580,7 @@ trace_dump_command (args, from_tty)
 
       QUIT;			/* allow user to bail out with ^C */
       action_exp = action->action;
-      while (isspace (*action_exp))
+      while (isspace ((int) *action_exp))
 	action_exp++;
 
       /* The collection actions to be done while stepping are
@@ -2573,7 +2611,7 @@ trace_dump_command (args, from_tty)
 		  QUIT;		/* allow user to bail out with ^C */
 		  if (*action_exp == ',')
 		    action_exp++;
-		  while (isspace (*action_exp))
+		  while (isspace ((int) *action_exp))
 		    action_exp++;
 
 		  next_comma = strchr (action_exp, ',');

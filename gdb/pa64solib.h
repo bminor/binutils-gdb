@@ -19,11 +19,9 @@
    Boston, MA 02111-1307, USA.  */
 
 /* Forward decl's for prototypes */
-#ifdef __STDC__
 struct target_ops;
 struct objfile;
 struct section_offsets;
-#endif
 
 /* Called to add symbols from a shared library to gdb's symbol table.  */
 

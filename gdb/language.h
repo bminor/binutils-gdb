@@ -23,12 +23,11 @@
 #if !defined (LANGUAGE_H)
 #define LANGUAGE_H 1
 
-#ifdef __STDC__			/* Forward decls for prototypes */
+/* Forward decls for prototypes */
 struct value;
 struct objfile;
 struct expression;
 /* enum exp_opcode;     ANSI's `wisdom' didn't include forward enum decls. */
-#endif
 
 /* This used to be included to configure GDB for one or more specific
    languages.  Now it is shortcutted to configure for all of them.  FIXME.  */

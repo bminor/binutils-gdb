@@ -2671,13 +2671,21 @@ SEM_FN_NAME (m32rbf,init_idesc_table) (SIM_CPU *current_cpu)
 {
   IDESC *idesc_table = CPU_IDESC (current_cpu);
   const struct sem_fn_desc *sf;
+  int mach_num = MACH_NUM (CPU_MACH (current_cpu));
 
   for (sf = &sem_fns[0]; sf->fn != 0; ++sf)
     {
+      int valid_p = CGEN_INSN_MACH_HAS_P (idesc_table[sf->index].idata, mach_num);
 #if FAST_P
-      idesc_table[sf->index].sem_fast = sf->fn;
+      if (valid_p)
+	idesc_table[sf->index].sem_fast = sf->fn;
+      else
+	idesc_table[sf->index].sem_fast = SEM_FN_NAME (m32rbf,x_invalid);
 #else
-      idesc_table[sf->index].sem_full = sf->fn;
+      if (valid_p)
+	idesc_table[sf->index].sem_full = sf->fn;
+      else
+	idesc_table[sf->index].sem_full = SEM_FN_NAME (m32rbf,x_invalid);
 #endif
     }
 }

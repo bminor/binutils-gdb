@@ -34,7 +34,7 @@ if ![ istarget "*-*-hpux*" ] then {
 
 # When we are in "wide" mode we do not necessary have $$dyncall as a symbol
 # name, which makes all these tests useless
-if ![ istarget "hppa*w-*-hpux11*" ] then {
+if [ istarget "hppa*w-*-hpux11*" ] then {
  return
 }
 

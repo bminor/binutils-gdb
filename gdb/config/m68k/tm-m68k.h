@@ -43,10 +43,8 @@ extern CORE_ADDR m68k_skip_prologue PARAMS ((CORE_ADDR ip));
    the new frame is not set up until the new function executes
    some instructions.  */
 
-#ifdef __STDC__
 struct frame_info;
 struct frame_saved_regs;
-#endif
 
 extern CORE_ADDR m68k_saved_pc_after_call PARAMS ((struct frame_info *));
 extern void m68k_find_saved_regs PARAMS ((struct frame_info *, struct frame_saved_regs *));

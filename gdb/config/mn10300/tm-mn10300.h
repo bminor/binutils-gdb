@@ -70,11 +70,9 @@ extern CORE_ADDR mn10300_saved_pc_after_call PARAMS ((struct frame_info * frame)
 #define SAVED_PC_AFTER_CALL(frame) \
   mn10300_saved_pc_after_call (frame)
 
-#ifdef __STDC__
 struct frame_info;
 struct type;
 struct value;
-#endif
 
 extern void mn10300_init_extra_frame_info PARAMS ((struct frame_info *));
 #define INIT_EXTRA_FRAME_INFO(fromleaf, fi) mn10300_init_extra_frame_info (fi)

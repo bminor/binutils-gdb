@@ -40,7 +40,6 @@
 #include "target.h"
 #include "inferior.h"
 #include <fcntl.h>
-#include <unistd.h>
 #include <sys/stat.h>
 #include "gdbcore.h"
 

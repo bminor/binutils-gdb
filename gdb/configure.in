@@ -83,7 +83,8 @@ AC_CHECK_HEADERS(ctype.h curses.h endian.h link.h \
 	memory.h objlist.h ptrace.h sgtty.h stddef.h stdlib.h \
 	string.h sys/procfs.h sys/ptrace.h sys/reg.h \
 	term.h termio.h termios.h unistd.h wait.h sys/wait.h \
-	wchar.h wctype.h asm/debugreg.h sys/debugreg.h sys/select.h)
+	wchar.h wctype.h asm/debugreg.h sys/debugreg.h sys/select.h \
+	time.h)
 AC_HEADER_STAT
 
 AC_C_CONST
@@ -400,13 +401,21 @@ case "${enableval}" in
   *)    build_warnings=`echo "${enableval}" | sed -e "s/,/ /g"`;;
 esac],[build_warnings=""])dnl
 
+WARN_CFLAGS=""
+WERROR_CFLAGS=""
 if test "x${build_warnings}" != x -a "x$GCC" = xyes
 then
-   WARN_CFLAGS="${build_warnings}"
-else
-   WARN_CFLAGS=""
+  # Separate out the -Werror flag as some files just cannot be
+  # compiled with it enabled.
+  for w in ${build_warnings}; do
+    case $w in
+    -Werr*) WERROR_CFLAGS=-Werror ;;
+    *) WARN_CFLAGS="${WARN_CFLAGS} $w"
+    esac
+  done
 fi
 AC_SUBST(WARN_CFLAGS)
+AC_SUBST(WERROR_CFLAGS)
 
 MMALLOC_CFLAGS=
 MMALLOC=

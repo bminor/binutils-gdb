@@ -18,9 +18,8 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#ifdef __STDC__			/* Forward decl's for prototypes */
+/* Forward decl's for prototypes */
 struct target_ops;
-#endif
 
 /* Called when we free all symtabs, to free the shared library information
    as well. */

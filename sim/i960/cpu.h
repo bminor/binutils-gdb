@@ -104,7 +104,7 @@ union sem_fields {
     UINT f_src2;
     UINT f_srcdst;
     unsigned char out_dst;
-    unsigned char out_h_gr_add__VM_index_of_dst_1;
+    unsigned char out_h_gr_add__DFLT_index_of__DFLT_dst_1;
   } sfmt_emul3;
   struct { /*  */
     SI* i_dst;
@@ -113,7 +113,7 @@ union sem_fields {
     UINT f_srcdst;
     unsigned char in_src1;
     unsigned char out_dst;
-    unsigned char out_h_gr_add__VM_index_of_dst_1;
+    unsigned char out_h_gr_add__DFLT_index_of__DFLT_dst_1;
   } sfmt_emul2;
   struct { /*  */
     SI* i_dst;
@@ -122,7 +122,7 @@ union sem_fields {
     UINT f_srcdst;
     unsigned char in_src2;
     unsigned char out_dst;
-    unsigned char out_h_gr_add__VM_index_of_dst_1;
+    unsigned char out_h_gr_add__DFLT_index_of__DFLT_dst_1;
   } sfmt_emul1;
   struct { /*  */
     SI* i_dst;
@@ -132,7 +132,7 @@ union sem_fields {
     unsigned char in_src1;
     unsigned char in_src2;
     unsigned char out_dst;
-    unsigned char out_h_gr_add__VM_index_of_dst_1;
+    unsigned char out_h_gr_add__DFLT_index_of__DFLT_dst_1;
   } sfmt_emul;
   struct { /*  */
     SI* i_abase;
@@ -140,9 +140,9 @@ union sem_fields {
     UINT f_offset;
     UINT f_srcdst;
     unsigned char in_abase;
-    unsigned char in_h_gr_add__VM_index_of_st_src_1;
-    unsigned char in_h_gr_add__VM_index_of_st_src_2;
-    unsigned char in_h_gr_add__VM_index_of_st_src_3;
+    unsigned char in_h_gr_add__DFLT_index_of__DFLT_st_src_1;
+    unsigned char in_h_gr_add__DFLT_index_of__DFLT_st_src_2;
+    unsigned char in_h_gr_add__DFLT_index_of__DFLT_st_src_3;
     unsigned char in_st_src;
   } sfmt_stq_indirect_offset;
   struct { /*  */
@@ -152,9 +152,9 @@ union sem_fields {
     UINT f_srcdst;
     unsigned char in_abase;
     unsigned char out_dst;
-    unsigned char out_h_gr_add__VM_index_of_dst_1;
-    unsigned char out_h_gr_add__VM_index_of_dst_2;
-    unsigned char out_h_gr_add__VM_index_of_dst_3;
+    unsigned char out_h_gr_add__DFLT_index_of__DFLT_dst_1;
+    unsigned char out_h_gr_add__DFLT_index_of__DFLT_dst_2;
+    unsigned char out_h_gr_add__DFLT_index_of__DFLT_dst_3;
   } sfmt_ldq_indirect_offset;
   struct { /*  */
     SI* i_abase;
@@ -164,9 +164,9 @@ union sem_fields {
     UINT f_scale;
     UINT f_srcdst;
     unsigned char in_abase;
-    unsigned char in_h_gr_add__VM_index_of_st_src_1;
-    unsigned char in_h_gr_add__VM_index_of_st_src_2;
-    unsigned char in_h_gr_add__VM_index_of_st_src_3;
+    unsigned char in_h_gr_add__DFLT_index_of__DFLT_st_src_1;
+    unsigned char in_h_gr_add__DFLT_index_of__DFLT_st_src_2;
+    unsigned char in_h_gr_add__DFLT_index_of__DFLT_st_src_3;
     unsigned char in_index;
     unsigned char in_st_src;
   } sfmt_stq_indirect_index_disp;
@@ -180,23 +180,23 @@ union sem_fields {
     unsigned char in_abase;
     unsigned char in_index;
     unsigned char out_dst;
-    unsigned char out_h_gr_add__VM_index_of_dst_1;
-    unsigned char out_h_gr_add__VM_index_of_dst_2;
-    unsigned char out_h_gr_add__VM_index_of_dst_3;
+    unsigned char out_h_gr_add__DFLT_index_of__DFLT_dst_1;
+    unsigned char out_h_gr_add__DFLT_index_of__DFLT_dst_2;
+    unsigned char out_h_gr_add__DFLT_index_of__DFLT_dst_3;
   } sfmt_ldq_indirect_index_disp;
   struct { /*  */
     SI* i_dst;
     SI* i_src1;
     UINT f_src1;
     UINT f_srcdst;
-    unsigned char in_h_gr_add__VM_index_of_src1_1;
-    unsigned char in_h_gr_add__VM_index_of_src1_2;
-    unsigned char in_h_gr_add__VM_index_of_src1_3;
+    unsigned char in_h_gr_add__DFLT_index_of__DFLT_src1_1;
+    unsigned char in_h_gr_add__DFLT_index_of__DFLT_src1_2;
+    unsigned char in_h_gr_add__DFLT_index_of__DFLT_src1_3;
     unsigned char in_src1;
     unsigned char out_dst;
-    unsigned char out_h_gr_add__VM_index_of_dst_1;
-    unsigned char out_h_gr_add__VM_index_of_dst_2;
-    unsigned char out_h_gr_add__VM_index_of_dst_3;
+    unsigned char out_h_gr_add__DFLT_index_of__DFLT_dst_1;
+    unsigned char out_h_gr_add__DFLT_index_of__DFLT_dst_2;
+    unsigned char out_h_gr_add__DFLT_index_of__DFLT_dst_3;
   } sfmt_movq;
   struct { /*  */
     UINT f_optdisp;

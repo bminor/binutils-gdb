@@ -2147,7 +2147,7 @@ SEM_FN_NAME (i960base,emul) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   {
     SI opval = TRUNCDISI (SRLDI (tmp_temp, 32));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
 }
 
@@ -2179,7 +2179,7 @@ SEM_FN_NAME (i960base,emul1) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   {
     SI opval = TRUNCDISI (SRLDI (tmp_temp, 32));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
 }
 
@@ -2211,7 +2211,7 @@ SEM_FN_NAME (i960base,emul2) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   {
     SI opval = TRUNCDISI (SRLDI (tmp_temp, 32));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
 }
 
@@ -2243,7 +2243,7 @@ SEM_FN_NAME (i960base,emul3) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   {
     SI opval = TRUNCDISI (SRLDI (tmp_temp, 32));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
 }
 
@@ -2317,7 +2317,7 @@ SEM_FN_NAME (i960base,movl) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   {
     SI opval = CPU (h_gr[((FLD (f_src1)) + (1))]);
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
 }
 
@@ -2347,7 +2347,7 @@ SEM_FN_NAME (i960base,movl1) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   {
     SI opval = 0;
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
 }
 
@@ -2379,12 +2379,12 @@ SEM_FN_NAME (i960base,movt) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   {
     SI opval = CPU (h_gr[((FLD (f_src1)) + (1))]);
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
   {
     SI opval = CPU (h_gr[((FLD (f_src1)) + (2))]);
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-2", 'x', opval);
   }
 }
 
@@ -2414,12 +2414,12 @@ SEM_FN_NAME (i960base,movt1) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   {
     SI opval = 0;
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
   {
     SI opval = 0;
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-2", 'x', opval);
   }
 }
 
@@ -2451,17 +2451,17 @@ SEM_FN_NAME (i960base,movq) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   {
     SI opval = CPU (h_gr[((FLD (f_src1)) + (1))]);
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
   {
     SI opval = CPU (h_gr[((FLD (f_src1)) + (2))]);
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-2", 'x', opval);
   }
   {
     SI opval = CPU (h_gr[((FLD (f_src1)) + (3))]);
     CPU (h_gr[((FLD (f_srcdst)) + (3))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-3", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-3", 'x', opval);
   }
 }
 
@@ -2491,17 +2491,17 @@ SEM_FN_NAME (i960base,movq1) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   {
     SI opval = 0;
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
   {
     SI opval = 0;
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-2", 'x', opval);
   }
   {
     SI opval = 0;
     CPU (h_gr[((FLD (f_srcdst)) + (3))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-3", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-3", 'x', opval);
   }
 }
 
@@ -3583,7 +3583,7 @@ SEM_FN_NAME (i960base,ldl_offset) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
 }
 
@@ -3615,7 +3615,7 @@ SEM_FN_NAME (i960base,ldl_indirect_offset) (SIM_CPU *current_cpu, SEM_ARG sem_ar
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
 }
 
@@ -3647,7 +3647,7 @@ SEM_FN_NAME (i960base,ldl_indirect) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
 }
 
@@ -3679,7 +3679,7 @@ SEM_FN_NAME (i960base,ldl_indirect_index) (SIM_CPU *current_cpu, SEM_ARG sem_arg
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
 }
 
@@ -3711,7 +3711,7 @@ SEM_FN_NAME (i960base,ldl_disp) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
 }
 
@@ -3743,7 +3743,7 @@ SEM_FN_NAME (i960base,ldl_indirect_disp) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
 }
 
@@ -3775,7 +3775,7 @@ SEM_FN_NAME (i960base,ldl_index_disp) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
 }
 
@@ -3807,7 +3807,7 @@ SEM_FN_NAME (i960base,ldl_indirect_index_disp) (SIM_CPU *current_cpu, SEM_ARG se
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
 }
 
@@ -3839,12 +3839,12 @@ SEM_FN_NAME (i960base,ldt_offset) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 8));
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-2", 'x', opval);
   }
 }
 
@@ -3876,12 +3876,12 @@ SEM_FN_NAME (i960base,ldt_indirect_offset) (SIM_CPU *current_cpu, SEM_ARG sem_ar
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 8));
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-2", 'x', opval);
   }
 }
 
@@ -3913,12 +3913,12 @@ SEM_FN_NAME (i960base,ldt_indirect) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 8));
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-2", 'x', opval);
   }
 }
 
@@ -3950,12 +3950,12 @@ SEM_FN_NAME (i960base,ldt_indirect_index) (SIM_CPU *current_cpu, SEM_ARG sem_arg
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 8));
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-2", 'x', opval);
   }
 }
 
@@ -3987,12 +3987,12 @@ SEM_FN_NAME (i960base,ldt_disp) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 8));
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-2", 'x', opval);
   }
 }
 
@@ -4024,12 +4024,12 @@ SEM_FN_NAME (i960base,ldt_indirect_disp) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 8));
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-2", 'x', opval);
   }
 }
 
@@ -4061,12 +4061,12 @@ SEM_FN_NAME (i960base,ldt_index_disp) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 8));
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-2", 'x', opval);
   }
 }
 
@@ -4098,12 +4098,12 @@ SEM_FN_NAME (i960base,ldt_indirect_index_disp) (SIM_CPU *current_cpu, SEM_ARG se
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 8));
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-2", 'x', opval);
   }
 }
 
@@ -4135,17 +4135,17 @@ SEM_FN_NAME (i960base,ldq_offset) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 8));
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-2", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 12));
     CPU (h_gr[((FLD (f_srcdst)) + (3))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-3", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-3", 'x', opval);
   }
 }
 
@@ -4177,17 +4177,17 @@ SEM_FN_NAME (i960base,ldq_indirect_offset) (SIM_CPU *current_cpu, SEM_ARG sem_ar
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 8));
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-2", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 12));
     CPU (h_gr[((FLD (f_srcdst)) + (3))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-3", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-3", 'x', opval);
   }
 }
 
@@ -4219,17 +4219,17 @@ SEM_FN_NAME (i960base,ldq_indirect) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 8));
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-2", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 12));
     CPU (h_gr[((FLD (f_srcdst)) + (3))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-3", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-3", 'x', opval);
   }
 }
 
@@ -4261,17 +4261,17 @@ SEM_FN_NAME (i960base,ldq_indirect_index) (SIM_CPU *current_cpu, SEM_ARG sem_arg
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 8));
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-2", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 12));
     CPU (h_gr[((FLD (f_srcdst)) + (3))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-3", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-3", 'x', opval);
   }
 }
 
@@ -4303,17 +4303,17 @@ SEM_FN_NAME (i960base,ldq_disp) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 8));
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-2", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 12));
     CPU (h_gr[((FLD (f_srcdst)) + (3))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-3", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-3", 'x', opval);
   }
 }
 
@@ -4345,17 +4345,17 @@ SEM_FN_NAME (i960base,ldq_indirect_disp) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 8));
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-2", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 12));
     CPU (h_gr[((FLD (f_srcdst)) + (3))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-3", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-3", 'x', opval);
   }
 }
 
@@ -4387,17 +4387,17 @@ SEM_FN_NAME (i960base,ldq_index_disp) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 8));
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-2", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 12));
     CPU (h_gr[((FLD (f_srcdst)) + (3))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-3", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-3", 'x', opval);
   }
 }
 
@@ -4429,17 +4429,17 @@ SEM_FN_NAME (i960base,ldq_indirect_index_disp) (SIM_CPU *current_cpu, SEM_ARG se
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 4));
     CPU (h_gr[((FLD (f_srcdst)) + (1))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-1", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-1", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 8));
     CPU (h_gr[((FLD (f_srcdst)) + (2))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-2", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-2", 'x', opval);
   }
   {
     SI opval = GETMEMSI (current_cpu, pc, ADDSI (tmp_temp, 12));
     CPU (h_gr[((FLD (f_srcdst)) + (3))]) = opval;
-    TRACE_RESULT (current_cpu, abuf, "gr-add:-VM-index-of-dst-3", 'x', opval);
+    TRACE_RESULT (current_cpu, abuf, "gr-add--DFLT-index-of--DFLT-dst-3", 'x', opval);
   }
 }
 
@@ -7893,13 +7893,21 @@ SEM_FN_NAME (i960base,init_idesc_table) (SIM_CPU *current_cpu)
 {
   IDESC *idesc_table = CPU_IDESC (current_cpu);
   const struct sem_fn_desc *sf;
+  int mach_num = MACH_NUM (CPU_MACH (current_cpu));
 
   for (sf = &sem_fns[0]; sf->fn != 0; ++sf)
     {
+      int valid_p = CGEN_INSN_MACH_HAS_P (idesc_table[sf->index].idata, mach_num);
 #if FAST_P
-      idesc_table[sf->index].sem_fast = sf->fn;
+      if (valid_p)
+	idesc_table[sf->index].sem_fast = sf->fn;
+      else
+	idesc_table[sf->index].sem_fast = SEM_FN_NAME (i960base,x_invalid);
 #else
-      idesc_table[sf->index].sem_full = sf->fn;
+      if (valid_p)
+	idesc_table[sf->index].sem_full = sf->fn;
+      else
+	idesc_table[sf->index].sem_full = SEM_FN_NAME (i960base,x_invalid);
 #endif
     }
 }

@@ -250,9 +250,13 @@ op tab[] =
     "  saved_state.asregs.exception = SIGILL;",
     "else",
     "{",
-    "  char buf[4];",
-    "  *(float *)buf = DR(n);",
-    "  FPUL = *(int *)buf;",
+    "  union",
+    "  {",
+    "    int i;",
+    "    float f;",
+    "  } u;",
+    "  u.f = DR(n);",
+    "  FPUL = u.i;",
     "}",
   },
 
@@ -262,9 +266,13 @@ op tab[] =
     "  saved_state.asregs.exception = SIGILL;",
     "else",
     "{",
-    "  char buf[4];",
-    "  *(int *)buf = FPUL;",
-    "  SET_DR(n, *(float *)buf);",
+    "  union",
+    "  {",
+    "    int i;",
+    "    float f;",
+    "  } u;",
+    "  u.i = FPUL;",
+    "  SET_DR(n, u.f);",
     "}",
   },
 
@@ -295,9 +303,13 @@ op tab[] =
 
   /* sh3e */
   { "", "", "flds <FREG_N>,FPUL", "1111nnnn00011101",
-    "char buf[4];",
-    "*(float *)buf = FR(n);",
-    "FPUL = *(int *)buf;",
+    "  union",
+    "  {",
+    "    int i;",
+    "    float f;",
+    "  } u;",
+    "  u.f = FR(n);",
+    "  FPUL = u.i;",
   },
 
   /* sh3e */
@@ -464,9 +476,13 @@ op tab[] =
 
   /* sh3e */
   { "", "", "fsts FPUL,<FREG_N>", "1111nnnn00001101",
-    "char buf[4];",
-    "*(int *)buf = FPUL;",
-    "SET_FR (n, *(float *)buf);",
+    "  union",
+    "  {",
+    "    int i;",
+    "    float f;",
+    "  } u;",
+    "  u.i = FPUL;",
+    "  SET_FR (n, u.f);",
   },
 
   { "", "n", "jmp @<REG_N>", "0100nnnn00101011",

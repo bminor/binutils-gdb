@@ -46,7 +46,6 @@
 #include "gdb_string.h"
 #include <stropts.h>
 #include <poll.h>
-#include <unistd.h>
 #include "gdb_stat.h"
 
 #include "inferior.h"
