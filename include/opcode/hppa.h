@@ -310,7 +310,7 @@ static const struct pa_opcode pa_opcodes[] =
 
 /* System Control Instructions */
 
-{ "break",      0x00000000, 0xfc001fe0, "V,A"},
+{ "break",      0x00000000, 0xfc001fe0, "r,A"},
 { "rfi",        0x00000c00, 0xffffffff, ""},
 { "rfir",       0x00000ca0, 0xffffffff, ""},
 { "ssm",        0x00000d60, 0xffe0ffe0, "R,t"},
