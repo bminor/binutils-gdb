@@ -1,5 +1,22 @@
 1998-11-18  Doug Evans  <devans@casey.cygnus.com>
 
+	* Make-common.in (cgen-utils.o): Depend on cgen-engine.h.
+	(CGEN_ARCH_SCM): New variable.
+	* cgen-engine.h (EXTRACT_[ML]SB0_{INT,UINT}): New macros.
+	(EXTRACT_INT,EXTRACT_UINT): New macros.
+	(SEM_SEM_ARG): New macro.
+	(SEM_NEXT_VPC): New arg `pc'.
+	* cgen-sim.h (EXTRACT_SIGNED,EXTRACT_UNSIGNED): Delete.
+	(sim_disassemble_insn): Update prototype.
+	* cgen-trace.c (current_insn,insn_fields): New static locals.
+	(trace_insn): Set them.
+	* cgen-utils.scm: #include cgen-engine.h.
+	(sim_disassemble_insn): New arg insn_fields.
+	Handle variable length insns.
+	* genmloop.sh: Only emit pbb decls if -pbb.
+	(${cpu}_scache_lookup): New arg `vpc'.
+	(scache support): Fetch pc before entering loop.
+
 	* gennltvals.sh: Add fr30 support.
 	* nltvals.def: Rebuild.
 

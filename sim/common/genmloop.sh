@@ -209,12 +209,15 @@ echo "   (which doesn't necessarily have that file name).  */"
 echo ""
 echo "extern ENGINE_FN ${cpu}_engine_run_full;"
 echo "extern ENGINE_FN ${cpu}_engine_run_fast;"
-echo ""
-echo "extern SEM_PC ${cpu}_pbb_begin (SIM_CPU *, int);"
-echo "extern SEM_PC ${cpu}_pbb_chain (SIM_CPU *, SEM_ARG);"
-echo "extern SEM_PC ${cpu}_pbb_cti_chain (SIM_CPU *, SEM_ARG, SEM_PC *, PCADDR);"
-echo "extern void ${cpu}_pbb_before (SIM_CPU *, SCACHE *);"
-echo "extern void ${cpu}_pbb_after (SIM_CPU *, SCACHE *);"
+
+if [ x$pbb = xyes ] ; then
+	echo ""
+	echo "extern SEM_PC ${cpu}_pbb_begin (SIM_CPU *, int);"
+	echo "extern SEM_PC ${cpu}_pbb_chain (SIM_CPU *, SEM_ARG);"
+	echo "extern SEM_PC ${cpu}_pbb_cti_chain (SIM_CPU *, SEM_ARG, SEM_PC *, PCADDR);"
+	echo "extern void ${cpu}_pbb_before (SIM_CPU *, SCACHE *);"
+	echo "extern void ${cpu}_pbb_after (SIM_CPU *, SCACHE *);"
+fi
 
 ##########################################################################
 
@@ -349,16 +352,15 @@ if [ x$scache = xyes ] ; then
     cat << EOF
 
 static INLINE SCACHE *
-${cpu}_scache_lookup (SIM_CPU *current_cpu, SCACHE *scache,
+${cpu}_scache_lookup (SIM_CPU *current_cpu, PCADDR vpc, SCACHE *scache,
                      unsigned int hash_mask, int FAST_P)
 {
   /* First step: look up current insn in hash table.  */
-  PCADDR pc = PC;
-  SCACHE *sc = scache + SCACHE_HASH_PC (pc, hash_mask);
+  SCACHE *sc = scache + SCACHE_HASH_PC (vpc, hash_mask);
 
   /* If the entry isn't the one we want (cache miss),
      fetch and decode the instruction.  */
-  if (sc->argbuf.addr != pc)
+  if (sc->argbuf.addr != vpc)
     {
       insn_t insn;
 
@@ -378,8 +380,10 @@ cat << EOF
       PROFILE_COUNT_SCACHE_HIT (current_cpu);
       /* Make core access statistics come out right.
 	 The size is a guess, but it's currently not used either.  */
-      PROFILE_COUNT_CORE (current_cpu, pc, 2, exec_map);
+      PROFILE_COUNT_CORE (current_cpu, vpc, 2, exec_map);
     }
+
+  return sc;
 }
 
 #define FAST_P 0
@@ -390,6 +394,7 @@ ${cpu}_engine_run_full (SIM_CPU *current_cpu)
   SIM_DESC current_state = CPU_STATE (current_cpu);
   SCACHE *scache = CPU_SCACHE_CACHE (current_cpu);
   unsigned int hash_mask = CPU_SCACHE_HASH_MASK (current_cpu);
+  SEM_PC vpc;
 
 EOF
 
@@ -425,12 +430,13 @@ fi
 
 cat << EOF
 
+  vpc = GET_H_PC ();
+
   do
     {
-      PCADDR new_pc;
       SCACHE *sc;
 
-      sc = ${cpu}_scache_lookup (current_cpu, scache, hash_mask, FAST_P);
+      sc = ${cpu}_scache_lookup (current_cpu, vpc, scache, hash_mask, FAST_P);
 
 /* begin full-exec-scache */
 EOF
@@ -440,7 +446,7 @@ ${SHELL} $infile full-exec-scache
 cat << EOF
 /* end full-exec-scache */
 
-      CPU (h_pc) = new_pc;
+      SET_H_PC (vpc);
 
       ++ CPU_INSN_COUNT (current_cpu);
     }
@@ -467,6 +473,7 @@ ${cpu}_engine_run_fast (SIM_CPU *current_cpu)
   SIM_DESC current_state = CPU_STATE (current_cpu);
   SCACHE *scache = CPU_SCACHE_CACHE (current_cpu);
   unsigned int hash_mask = CPU_SCACHE_HASH_MASK (current_cpu);
+  SEM_PC vpc;
 
 EOF
 
@@ -514,12 +521,13 @@ cat << EOF
   }
 #endif
 
+  vpc = GET_H_PC ();
+
   do
     {
-      PCADDR new_pc;
       SCACHE *sc;
 
-      sc = ${cpu}_scache_lookup (current_cpu, scache, hash_mask, FAST_P);
+      sc = ${cpu}_scache_lookup (current_cpu, vpc, scache, hash_mask, FAST_P);
 
 /* begin fast-exec-scache */
 EOF
@@ -529,7 +537,7 @@ ${SHELL} $infile fast-exec-scache
 cat << EOF
 /* end fast-exec-scache */
 
-      CPU (h_pc) = new_pc;
+      SET_H_PC (vpc);
 
       ++ CPU_INSN_COUNT (current_cpu);
     }
