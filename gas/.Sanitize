@@ -39,7 +39,6 @@ Things-to-keep:
 CONTRIBUTORS
 COPYING
 ChangeLog
-ChangeLog.v9
 Makefile.in
 NEWS
 NOTES
@@ -107,31 +106,6 @@ xmalloc.c
 Things-to-lose:
 
 Do-last:
-
-if ( echo $* | grep keep-v9 > /dev/null ) ; then
-	if [ -n "${verbose}" ] ; then
-		echo Keeping `pwd`/ChangeLog.v9.
-		echo Keeping v9 code in `pwd`/configure.in.
-	fi
-else
-	if [ -n "${verbose}" ] ; then
-		echo Removing `pwd`/ChangeLog.v9
-	fi
-	if [ -n "${safe}" ] ; then
-		mv ChangeLog.v9 .Recover
-	else
-		rm ChangeLog.v9
-	fi
-	if [ -n "${verbose}" ] ; then
-		echo Cleaning v9 code from `pwd`/configure.in.
-	fi
-	grep -v v9 < configure.in > new
-	if [ -n "${safe}" ]; then
-		mv configure.in .Recover
-	fi
-	mv -f new configure.in
-fi
-
 
 #
 # End of file.

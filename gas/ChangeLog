@@ -1839,6 +1839,8 @@ Tue Jan 11 21:52:36 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 Tue Jan 11 17:01:06 1994  Doug Evans  (dje@canuck.cygnus.com)
 
+	* config/tc-sparc.c (sparc_ip): Truncate args to %hi/%lo to 32 bits.
+
 	* expr.c (integer_constant): Fix computation of too_many_digits.
 	Variable digit_2 renamed to start.  Fix check for whether number
 	will fit in 32 bits.
@@ -2666,6 +2668,8 @@ Wed Nov  3 12:16:27 1993  Ken Raeburn  (raeburn@rover.cygnus.com)
 
 Tue Nov  2 18:04:11 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* config/tc-sparc.c (sparc_ip): Add default case to reloc switch.
+
 	* read.c (s_lcomm): Put small objects in .sbss for MIPS ELF as
 	well as MIPS ECOFF.
 	(get_stab_string_offset): Remove unused variable aligned.
@@ -3012,12 +3016,16 @@ Tue Oct 26 10:24:31 1993  Ken Raeburn  (raeburn@cygnus.com)
 	* config/tc-hppa.c (tc_gen_reloc): ELF32_HPPA_R_ADDEND ->
 	HPPA_R_ADDEND.
 
+Mon Oct 25 14:06:17 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/tc-sparc.c (sparc_ip): Fix up membar argument handling.
+
 Mon Oct 25 11:17:58 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
 
 	* config/tc-sh.c (build_Mbytes): Write the relocs to the correct
 	address. (md_assemble): Make error handling a bit more graceful.
 	(md_apply_fix):  Don't warn on non aligned displacement.
-	
+
 	* config/tc-z8k.c (get_specific, built_bytes):  Understand all the
 	aspects of lda.
 
@@ -3163,6 +3171,12 @@ Thu Oct 21 15:44:55 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/tc-sparc.c (md_parse_option): Accept and ignore -sparc
 	option, which is used by the SunOS make default .s.o rule.
+
+Wed Oct 20 12:26:33 1993  Ken Raeburn  (raeburn@rover.cygnus.com)
+
+	* config/tc-sparc.c (sparc_ip, label "immediate"): Convert relocs
+	operating on upper 32 bits of immediate constants to lower-half
+	relocs with adjusted constants.
 
 Tue Oct 19 18:13:26 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
@@ -3769,6 +3783,9 @@ Tue Sep  7 10:22:52 1993  Stan Shebs  (shebs@rtl.cygnus.com)
 
 Fri Sep  3 16:44:03 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
+	* config/obj-elf.h (elf_symbol): No longer special-cased on
+	sparcv9, since elf_symbol_type is now independent of size.
+
 	* config/obj-elf.h (elf_symbol): Fixed name of elf_symbol_type.
 
 	* config/tc-hppa.h (struct default_subspace_dict, struct
@@ -4100,6 +4117,10 @@ Fri Aug  6 10:57:59 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 Thu Aug  5 13:08:56 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
+	* config/tc-sparc.c (md_apply_fix, case BFD_RELOC_64): Fill in
+	bytes with real values, not zeros.
+	(md_pseudo_table): Call cons for .uaxword.
+
 	* config/obj-elf.c (obj_pseudo_table): Handle ".8byte".
 
 	* read.c (emit_expr): Use BFD_RELOC_64 for 8-byte expressions.
@@ -4140,6 +4161,12 @@ Mon Aug  2 17:35:48 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* app.c (do_scrub_next_char): Reset state to 0 after .appline if
 	file name is not seen.
+
+Mon Aug  2 11:51:41 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* config/tc-sparc.c (md_apply_fix, case BFD_RELOC_64): New case,
+	parallel to BFD_RELOC_32.
+	(tc_gen_reloc): Accept BFD_RELOC_64.
 
 Thu Jul 29 22:21:28 1993  Ian Lance Taylor  (ian@cygnus.com)
 
@@ -4532,6 +4559,8 @@ Wed Jul 14 15:09:32 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 Wed Jul 14 09:35:23 1993  Doug Evans  (dje@canuck.cygnus.com)
 
+	* configure.in: Make sparc64-*-aout* use bfd gas.
+
 	* configure.in: Recognize h8300h.
 
 Tue Jul 13 12:09:44 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
@@ -4605,6 +4634,15 @@ Wed Jul  7 10:21:24 1993  Ian Lance Taylor  (ian@cygnus.com)
 	(various): use valueT rather than long.
 
 Wed Jul  7 08:33:30 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* config/tc-sparc.h (ENV64): Define for v9.
+
+	* config/tc-sparc.c (s_xword): For numbers, call big_cons.
+	(sparc_ip, md_apply_fix, tc_gen_reloc): Handle some sparc64
+	relocation types.
+	(md_number_to_chars): Handle 8-byte value.
+
+	* config/obj-elf.h (elf_symbol): For v9, use 64-bit symbol type.
 
 	* as.h (valueT): Typedef moved here.
 	* struc-symbol.h (valueT): ...from here.
@@ -4692,6 +4730,15 @@ Wed Jun 30 11:12:02 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 Wed Jun 30 06:21:27 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
+	* config/tc-sparc.c (md_begin): If sparcv9 is defined, reset
+	current_architecture to v9 automatically.
+
+	* config/tc-sparc.h (TARGET_FORMAT): Use elf64-sparc for v9.
+
+	* config/tc-sparc64.h, config/tc-sparc64.c: New files.
+	* configure.in: Use sparc64 cpu files for v9, and default to elf
+	format.
+
 	* write.c (relax_and_size_seg): Always fully process a section.
 	Section size is last frag's (vm)address plus its size.  If no
 	relocations are present, force SEC_RELOC flag clear.
@@ -4715,6 +4762,12 @@ Fri Jun 25 14:42:53 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 	* Makefile.in (all, dvi, info, install-info, clean-info): do not
 	  echo recursion lines.
 	  (install-info, clean-info): collapse into the dvi and info rule.
+
+Fri Jun 25 10:47:24 1993  Doug Evans  (dje@canuck.cygnus.com)
+
+	* config/tc-sparc.c (sparc_ip): Remove support for %d/%q fp regs.
+	All fp regs are now specified as %f.
+	(priv_reg_table): fpq -> fq.
 
 Fri Jun 25 03:43:06 1993  Ken Raeburn  (raeburn@poseidon.cygnus.com)
 
@@ -4853,6 +4906,11 @@ Mon Jun  7 13:33:19 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 	don't exist or duplicate other inclusions.
 
 	* config/tc-vax.h (NO_RELOC): Define.
+
+Mon Jun  7 09:55:03 1993  Doug Evans  (dje@canuck.cygnus.com)
+
+	* config/tc-sparc.c (sparc_ip): Fix parsing of asi number.
+	Fix error message.
 
 Sat Jun  5 19:32:52 1993  Torbjorn Granlund  (tege@nada.kth.se)
 
@@ -5622,6 +5680,12 @@ Mon Mar 22 23:59:13 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* Makefile.in: add installcheck target
 
+Mon Mar 22 16:25:57 1993  Jim Wilson  (wilson@sphagnum.cygnus.com)
+
+	* config/tc-sparc.c (sparc_ip): Add support for membar mask names.
+	Add missing colons in prefetch error messages.  Add support for
+	ASI names.
+
 Mon Mar 22 10:19:00 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* config/tc-mips.c (macro): Use $AT for any floating point load.
@@ -5819,7 +5883,16 @@ Tue Mar  2 00:50:43 1993  John Gilmore  (gnu@cygnus.com)
 
 	* CONTRIBUTORS:  Update Gilmore entry.
 
+Mon Mar  1 12:03:16 1993  Jim Wilson  (wilson@sphagnum.cygnus.com)
+
+	* config/tc-sparc.c (sparc_ip):  Correctly assemble prefetch
+	instructions.  Accept integer prefetch function numbers.
+
 Wed Feb 24 14:58:19 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* config/tc-sparc.c (s_xword): Now call big_cons, so large
+	constants are accepted, but symbolic values are not.  GCC will not
+	generate the latter currently.
 
 	* frags.c (frag_init): New function.
 	(zero_address_frag, bss_address_frag): Now initialized at run
@@ -6068,6 +6141,11 @@ Wed Jan 20 17:11:53 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 	offset field is set.
 
 Fri Jan  8 05:44:49 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* config/tc-sparc.c (sparc_ip): For %uhi and %ulo, if not
+	ENV64, emit no reloc.
+	(md_pseudo_table): For ".xword", call s_xword.
+	(s_xword): New function.
 
 	* config/tc-sparc.c (architecture_requested, warn_on_bump,
 	md_relax_table): Use default zero initialization.
