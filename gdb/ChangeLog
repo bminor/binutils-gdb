@@ -1,3 +1,8 @@
+Sun Oct 31 19:45:06 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* paread.c (pa_symtab_read): Also filter out local symbols
+	starting with "L$".
+
 Sun Oct 31 09:28:46 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* symfile.h (sym_fns), symfile.c (find_sym_fns), xcoffread.c,
