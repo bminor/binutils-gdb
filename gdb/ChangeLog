@@ -1,3 +1,38 @@
+2002-09-13  Fernando Nasser  <fnasser@redhat.com>
+
+	* source.c: Make global variables current_source_symtab and
+	current_source_line static.
+	(list_command): Moved to cli/cli-cmds.c.
+	(ambiguous_line_spec): Moved to cli/cli-cmds.c.
+	(get_first_line_listed): New accessor function.
+	(get_lines_to_list): New accessor function.
+	(get_current_source_symtab_and_line): New function. Retrieves the
+	position in the source code that we consider current.
+	(get_current_or_default_source_symtab_and_line): New function.
+	Like the above but attempts to determine a default position if one
+	is not currently defined.
+	(set_current_source_symtab_and_line): New function. Sets the source
+	code position considered current and returns the previously set one.
+	(clear_current_source_symtab_and_line): Reset stored information about
+	a current source line.
+	(_initialize_source): Remove registration for the "list" command and
+	its alias.
+	* source.h: Add declarations for the new functions above.
+	* symtab.h: Remove declarations for the global variables mentioned
+	above.
+	* breakpoint.c (parse_breakpoint_sals): Use accessor functions to
+	obtain current source line.
+	* linespec.c (decode_line_1): Ditto.
+	* macroscope.c (default_macro_scope): Ditto.
+	* scm-lang.c (scm_unpac): Ditto.
+	* stack.c (print_frame_info_base): Ditto.
+	* symfile.c (clear_symtab_users): Ditto.
+	* symtab.c (decode_line_spec): Ditto.
+	* cli/cli-cmds.c (list_command): Moved here from source.c.
+	(ambiguous_line_spec): Moved here from source.c.
+	(_init_cli_cmds): Add definition for "list" and its alias.
+	* Makefile.in: Update dependencies.
+
 2002-09-20  Corinna Vinschen  <vinschen@redhat.com>
 
 	* h8300-tdep.c (h8300_examine_prologue): Match saved regs location

@@ -23,6 +23,7 @@
 
 #include "macroscope.h"
 #include "symtab.h"
+#include "source.h"
 #include "target.h"
 #include "frame.h"
 #include "inferior.h"
@@ -84,11 +85,14 @@ default_macro_scope (void)
          evaluator to evaluate their numeric arguments.  If the
          current language is C, then that may call this function to
          choose a scope for macro expansion.  If you don't have any
-         symbol files loaded, then select_source_symtab will raise an
+         symbol files loaded, then get_current_or_default would raise an
          error.  But `set width' shouldn't raise an error just because
          it can't decide which scope to macro-expand its argument in.  */
-      sal.symtab = current_source_symtab;
-      sal.line = current_source_line;
+      struct symtab_and_line cursal = 
+      			get_current_source_symtab_and_line ();
+      
+      sal.symtab = cursal.symtab;
+      sal.line = cursal.line;
     }
 
   return sal_macro_scope (sal);

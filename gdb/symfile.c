@@ -31,6 +31,7 @@
 #include "value.h"
 #include "symfile.h"
 #include "objfiles.h"
+#include "source.h"
 #include "gdbcmd.h"
 #include "breakpoint.h"
 #include "language.h"
@@ -2103,8 +2104,7 @@ clear_symtab_users (void)
   clear_internalvars ();
   breakpoint_re_set ();
   set_default_breakpoint (0, 0, 0, 0);
-  current_source_symtab = 0;
-  current_source_line = 0;
+  clear_current_source_symtab_and_line ();
   clear_pc_function_cache ();
   if (target_new_objfile_hook)
     target_new_objfile_hook (NULL);

@@ -1035,14 +1035,6 @@ struct partial_symtab
 
 /* External variables and functions for the objects described above. */
 
-/* This symtab variable specifies the current file for printing source lines */
-
-extern struct symtab *current_source_symtab;
-
-/* This is the next line to print for listing source lines.  */
-
-extern int current_source_line;
-
 /* See the comment in symfile.c about how current_objfile is used. */
 
 extern struct objfile *current_objfile;

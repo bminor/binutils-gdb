@@ -41,6 +41,7 @@
 #include "annotate.h"
 #include "symfile.h"
 #include "objfiles.h"
+#include "source.h"
 #include "linespec.h"
 #include "completer.h"
 #include "gdb.h"
@@ -4618,8 +4619,12 @@ parse_breakpoint_sals (char **address,
          current_source_symtab (which is decode_line_1's default).  This
          should produce the results we want almost all of the time while
          leaving default_breakpoint_* alone.  */
+	 
+      struct symtab_and_line cursal = 
+      			get_current_or_default_source_symtab_and_line ();
+			
       if (default_breakpoint_valid
-	  && (!current_source_symtab
+	  && (!cursal.symtab
 	      || (strchr ("+-", (*address)[0]) != NULL)))
 	*sals = decode_line_1 (address, 1, default_breakpoint_symtab,
 			       default_breakpoint_line, addr_string);

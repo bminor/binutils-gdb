@@ -26,6 +26,7 @@
 #include "command.h"
 #include "symfile.h"
 #include "objfiles.h"
+#include "source.h"
 #include "demangle.h"
 #include "value.h"
 #include "completer.h"
@@ -545,8 +546,14 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
 
   if (default_symtab == 0)
     {
-      default_symtab = current_source_symtab;
-      default_line = current_source_line;
+      /* Use whatever we have for the default source line.  We don't use
+         get_current_or_default_symtab_and_line as it can recurse and call
+	 us back! */
+      struct symtab_and_line cursal = 
+      			get_current_source_symtab_and_line ();
+      
+      default_symtab = cursal.symtab;
+      default_line = cursal.line;
     }
 
   /* See if arg is *PC */
@@ -1020,13 +1027,16 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
       /* This is where we need to make sure that we have good defaults.
          We must guarantee that this section of code is never executed
          when we are called with just a function name, since
-         select_source_symtab calls us with such an argument  */
+	 get_current_or_default_source_symtab_and_line uses
+         select_source_symtab that calls us with such an argument  */
 
       if (s == 0 && default_symtab == 0)
 	{
-	  select_source_symtab (0);
-	  default_symtab = current_source_symtab;
-	  default_line = current_source_line;
+          struct symtab_and_line cursal =
+		  get_current_or_default_source_symtab_and_line ();
+      
+          default_symtab = cursal.symtab;
+          default_line = cursal.line;
 	}
 
       if (**argptr == '+')

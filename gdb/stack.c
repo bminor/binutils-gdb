@@ -33,6 +33,7 @@
 #include "gdbcmd.h"
 #include "gdbcore.h"
 #include "target.h"
+#include "source.h"
 #include "breakpoint.h"
 #include "demangle.h"
 #include "inferior.h"
@@ -108,7 +109,6 @@ struct frame_info *parse_frame_specification (char *);
 static void frame_info (char *, int);
 
 extern int addressprint;	/* Print addresses, or stay symbolic only? */
-extern int lines_to_list;	/* # of lines "list" command shows by default */
 
 /* The "selected" stack frame is used by default for local and arg access.
    May be zero, for no selected frame.  */
@@ -398,14 +398,13 @@ print_frame_info_base (struct frame_info *fi, int level, int source, int args)
     print_frame (fi, level, source, args, sal);
 
   source_print = (source == SRC_LINE || source == SRC_AND_LOC);
+
   if (sal.symtab)
-    {
-      current_source_symtab = sal.symtab;
-      current_source_line = sal.line;
-    }
+    set_current_source_symtab_and_line (&sal);
 
   if (source_print && sal.symtab)
     {
+      struct symtab_and_line cursal;
       int done = 0;
       int mid_statement = (source == SRC_LINE) && (fi->pc != sal.pc);
 
@@ -435,7 +434,9 @@ print_frame_info_base (struct frame_info *fi, int level, int source, int args)
 	      print_source_lines (sal.symtab, sal.line, sal.line + 1, 0);
 	    }
 	}
-      current_source_line = max (sal.line - lines_to_list / 2, 1);
+      cursal = get_current_or_default_source_symtab_and_line ();
+      cursal.line = max (sal.line - get_lines_to_list () / 2, 1);
+      set_current_source_symtab_and_line (&cursal);
     }
 
   if (source != 0)

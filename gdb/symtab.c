@@ -38,6 +38,7 @@
 #include "demangle.h"
 #include "inferior.h"
 #include "linespec.h"
+#include "source.h"
 #include "filenames.h"		/* for FILENAME_CMP */
 
 #include "gdb_obstack.h"
@@ -3967,11 +3968,19 @@ struct symtabs_and_lines
 decode_line_spec (char *string, int funfirstline)
 {
   struct symtabs_and_lines sals;
+  struct symtab_and_line cursal;
+  
   if (string == 0)
     error ("Empty line specification.");
+    
+  /* We use whatever is set as the current source line. We do not try
+     and get a default  or it will recursively call us! */  
+  cursal = get_current_source_symtab_and_line ();
+  
   sals = decode_line_1 (&string, funfirstline,
-			current_source_symtab, current_source_line,
+			cursal.symtab, cursal.line,
 			(char ***) NULL);
+
   if (*string)
     error ("Junk at end of line specification: %s", string);
   return sals;
