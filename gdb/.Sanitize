@@ -279,7 +279,6 @@ z8k-tdep.c
 
 Things-to-lose:
 
-.Sanitize
 deblib
 energize
 energize-patches

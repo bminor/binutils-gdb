@@ -45,7 +45,6 @@ stabs.texinfo
 
 Things-to-lose:
 
-.Sanitize
 a4rc.sed
 config
 cyglogo.eps
