@@ -1,3 +1,8 @@
+2001-10-03  Jim Blandy  <jimb@redhat.com>
+
+	* genscripts.sh: Include a comment at the top of each generated
+	script, explaining its purpose.
+
 2001-10-03  Vassili Karpov  <malc@pulsesoft.com>
 
 	* emultempl/elf32.em (parse_args): Handle -z nocopyreloc.

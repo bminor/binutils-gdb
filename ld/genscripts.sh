@@ -110,34 +110,39 @@ DATA_ALIGNMENT_u="${DATA_ALIGNMENT_u-${DATA_ALIGNMENT_r}}"
 LD_FLAG=r
 DATA_ALIGNMENT=${DATA_ALIGNMENT_r}
 DEFAULT_DATA_ALIGNMENT="ALIGN(${SEGMENT_SIZE})"
-( . ${srcdir}/emulparams/${EMULATION_NAME}.sh
+( echo "/* Script for ld -r: link without relocation */"
+  . ${srcdir}/emulparams/${EMULATION_NAME}.sh
   . ${srcdir}/scripttempl/${SCRIPT_NAME}.sc
 ) | sed -e '/^ *$/d;s/[ 	]*$//' > ldscripts/${EMULATION_NAME}.xr
 
 LD_FLAG=u
 DATA_ALIGNMENT=${DATA_ALIGNMENT_u}
 CONSTRUCTING=" "
-( . ${srcdir}/emulparams/${EMULATION_NAME}.sh
+( echo "/* Script for ld -Ur: link w/out relocation, do create constructors */"
+  . ${srcdir}/emulparams/${EMULATION_NAME}.sh
   . ${srcdir}/scripttempl/${SCRIPT_NAME}.sc
 ) | sed -e '/^ *$/d;s/[ 	]*$//' > ldscripts/${EMULATION_NAME}.xu
 
 LD_FLAG=
 DATA_ALIGNMENT=${DATA_ALIGNMENT_}
 RELOCATING=" "
-( . ${srcdir}/emulparams/${EMULATION_NAME}.sh
+( echo "/* Default linker script, for normal executables */"
+  . ${srcdir}/emulparams/${EMULATION_NAME}.sh
   . ${srcdir}/scripttempl/${SCRIPT_NAME}.sc
 ) | sed -e '/^ *$/d;s/[ 	]*$//' > ldscripts/${EMULATION_NAME}.x
 
 LD_FLAG=n
 DATA_ALIGNMENT=${DATA_ALIGNMENT_n}
 TEXT_START_ADDR=${NONPAGED_TEXT_START_ADDR-${TEXT_START_ADDR}}
-( . ${srcdir}/emulparams/${EMULATION_NAME}.sh
+( echo "/* Script for -n: mix text and data on same page */"
+  . ${srcdir}/emulparams/${EMULATION_NAME}.sh
   . ${srcdir}/scripttempl/${SCRIPT_NAME}.sc
 ) | sed -e '/^ *$/d;s/[ 	]*$//' > ldscripts/${EMULATION_NAME}.xn
 
 LD_FLAG=N
 DATA_ALIGNMENT=${DATA_ALIGNMENT_N}
-( . ${srcdir}/emulparams/${EMULATION_NAME}.sh
+( echo "/* Script for -N: mix text and data on same page; don't align data */"
+  . ${srcdir}/emulparams/${EMULATION_NAME}.sh
   . ${srcdir}/scripttempl/${SCRIPT_NAME}.sc
 ) | sed -e '/^ *$/d;s/[ 	]*$//' > ldscripts/${EMULATION_NAME}.xbn
 
@@ -145,7 +150,8 @@ if test -n "$GENERATE_COMBRELOC_SCRIPT"; then
   DATA_ALIGNMENT=${DATA_ALIGNMENT_c-${DATA_ALIGNMENT_}}
   LD_FLAG=c
   COMBRELOC=ldscripts/${EMULATION_NAME}.xc.tmp
-  ( . ${srcdir}/emulparams/${EMULATION_NAME}.sh
+  ( echo "'/* Script for -z combreloc: combine and sort reloc sections */"
+    . ${srcdir}/emulparams/${EMULATION_NAME}.sh
     . ${srcdir}/scripttempl/${SCRIPT_NAME}.sc
   ) | sed -e '/^ *$/d;s/[ 	]*$//' > ldscripts/${EMULATION_NAME}.xc
   rm -f ${COMBRELOC}
@@ -157,14 +163,17 @@ if test -n "$GENERATE_SHLIB_SCRIPT"; then
   DATA_ALIGNMENT=${DATA_ALIGNMENT_s-${DATA_ALIGNMENT_}}
   CREATE_SHLIB=" "
   # Note that TEXT_START_ADDR is set to NONPAGED_TEXT_START_ADDR.
-  ( . ${srcdir}/emulparams/${EMULATION_NAME}.sh
+  (
+    echo "/* Script for ld --shared: link shared library */"
+    . ${srcdir}/emulparams/${EMULATION_NAME}.sh
     . ${srcdir}/scripttempl/${SCRIPT_NAME}.sc
   ) | sed -e '/^ *$/d;s/[ 	]*$//' > ldscripts/${EMULATION_NAME}.xs
   if test -n "$GENERATE_COMBRELOC_SCRIPT"; then
     LD_FLAG=cshared
     DATA_ALIGNMENT=${DATA_ALIGNMENT_sc-${DATA_ALIGNMENT}}
     COMBRELOC=ldscripts/${EMULATION_NAME}.xc.tmp
-    ( . ${srcdir}/emulparams/${EMULATION_NAME}.sh
+    ( echo "/* Script for --shared -z combreloc: shared library, combine & sort relocs */"
+      . ${srcdir}/emulparams/${EMULATION_NAME}.sh
       . ${srcdir}/scripttempl/${SCRIPT_NAME}.sc
     ) | sed -e '/^ *$/d;s/[ 	]*$//' > ldscripts/${EMULATION_NAME}.xsc
     rm -f ${COMBRELOC}
