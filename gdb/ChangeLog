@@ -1,3 +1,8 @@
+2001-03-21  Kevin Buettner  <kevinb@redhat.com>
+
+	* ia64-tdep.c (fetch_instruction): Warn about slot numbers greater
+	than two instead of generating an error.
+	
 2001-03-21  Jim Blandy  <jimb@redhat.com>
 
 	* cp-valprint.c: Reformat to bring into line with GNU coding

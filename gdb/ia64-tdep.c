@@ -492,8 +492,25 @@ fetch_instruction (CORE_ADDR addr, instruction_type *it, long long *instr)
   long long template;
   int val;
 
+  /* Warn about slot numbers greater than 2.  We used to generate
+     an error here on the assumption that the user entered an invalid
+     address.  But, sometimes GDB itself requests an invalid address.
+     This can (easily) happen when execution stops in a function for
+     which there are no symbols.  The prologue scanner will attempt to
+     find the beginning of the function - if the nearest symbol
+     happens to not be aligned on a bundle boundary (16 bytes), the
+     resulting starting address will cause GDB to think that the slot
+     number is too large.
+
+     So we warn about it and set the slot number to zero.  It is
+     not necessarily a fatal condition, particularly if debugging
+     at the assembly language level.  */
   if (slotnum > 2)
-    error("Can't fetch instructions for slot numbers greater than 2.");
+    {
+      warning ("Can't fetch instructions for slot numbers greater than 2.\n"
+	       "Using slot 0 instead");
+      slotnum = 0;
+    }
 
   addr &= ~0x0f;
 
