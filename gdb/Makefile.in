@@ -179,6 +179,14 @@ LINTFLAGS= -I${BFD_DIR}
 RUNTEST=runtest
 RUNTESTFLAGS=
 
+# This is ser-unix.o for any system which supports a v7/BSD/SYSV/POSIX
+# interface to the serial port.  Hopefully if get ported to OS/2, VMS,
+# etc., then there will be (as part of the C library or perhaps as
+# part of libiberty) a POSIX interface.  But at least for now the
+# host-dependent makefile fragment might need to use something else
+# besides ser-unix.o
+SER_HARDWIRE=ser-unix.o
+
 # Host and target-dependent makefile fragments come in here.
 ####
 # End of host and target-dependent makefile fragments
@@ -296,7 +304,7 @@ SFILES = ${srcdir}/blockframe.c ${srcdir}/breakpoint.c ${srcdir}/buildsym.c \
   ${srcdir}/target.c ${srcdir}/typeprint.c ${srcdir}/utils.c \
   ${srcdir}/valarith.c \
   ${srcdir}/valops.c ${srcdir}/valprint.c ${srcdir}/values.c \
-  ${srcdir}/serial.c ${srcdir}/ser-go32.c ${srcdir}/ser-unix.c
+  ${srcdir}/serial.c ${srcdir}/ser-unix.c
 
 # Files that are not source code, but need to go into gdb-$(VERSION).tar.Z.
 NONSRC = ${srcdir}/Makefile.in ${srcdir}/depend ${srcdir}/alldeps.mak \
@@ -342,7 +350,7 @@ HFILES = ${srcdir}/breakpoint.h ${srcdir}/buildsym.h ${srcdir}/call-cmds.h \
 	${srcdir}/config/sparc/xm-sparc.h \
 	${srcdir}/config/xm-sysv4.h ${srcdir}/config/vax/xm-vax.h \
 	${srcdir}/config/nm-trash.h ${srcdir}/29k-share/udi/udiids.h \
-	${srcdir}/29k-share/udi/udiphcfg.h ${srcdir}/29k-share/udi/udiphsun.h \
+	${srcdir}/29k-share/udi/udiphcfg.h ${srcdir}/29k-share/udi/udiphunix.h \
 	${srcdir}/29k-share/udi/udiproc.h ${srcdir}/29k-share/udi/udipt29k.h \
 	${srcdir}/29k-share/udi/udiptcfg.h ${srcdir}/29k-share/udi/udisoc.h \
 	${srcdir}/29k-share/udi_soc ${srcdir}/nindy-share/b.out.h \
@@ -367,7 +375,13 @@ TESTS = testbpt.c testfun.c testrec.c testreg.c testregs.c
 # gdb-xxx.tar.Z:
 TARDIRS = doc sparclite # tests
 
-DEPFILES = ${TDEPFILES} ${XDEPFILES} ${NATDEPFILES}
+# {X,T,NAT}DEPFILES are something of a pain in that it's hard to
+# default their values the way we do for SER_HARDWIRE; in the future
+# maybe much of the stuff now in {X,T,NAT}DEPFILES will go into other
+# variables analogous to SER_HARDWIRE which get defaulted in this
+# Makefile.in
+
+DEPFILES = ${TDEPFILES} ${XDEPFILES} ${SER_HARDWIRE} ${NATDEPFILES}
 
 SOURCES = $(SFILES) $(ALLDEPFILES) $(YYFILES)
 TAGFILES = $(SOURCES) ${HFILES} ${ALLPARAM} ${POSSLIBS} 
@@ -386,7 +400,7 @@ OBS = version.o main.o blockframe.o breakpoint.o findvar.o stack.o source.o \
     stabsread.o core.o c-lang.o ch-lang.o m2-lang.o complaints.o \
     typeprint.o c-typeprint.o ch-typeprint.o m2-typeprint.o \
     c-valprint.o cp-valprint.o ch-valprint.o m2-valprint.o \
-    serial.o ser-hardwire.o
+    serial.o
 
 RAPP_OBS = rgdb.o rudp.o rserial.o serial.o udp.o $(XDEPFILES)
 
@@ -487,13 +501,15 @@ rapp: $(RAPP_OBS)
 # "make" variable definitions for all ALLDEPFILES, ALLPARAM, and ALLCONFIG,
 # all cadged from the current contents of the config subtree.
 
+# using sort and uniq is not a violation of the GNU coding standards
+# because this rule is not part of building and installing GDB.
 alldeps.mak: force
 	rm -f alldeps.mak alldeps*.tmp allparam*.tmp allconfig*.tmp
 	for i in `(cd ${srcdir}; find config -name '*.m[ht]' -print)` ; do \
 	  echo $$i >>allconfig.tmp; \
 	  awk <${srcdir}/$$i ' \
 	    $$1 == "TDEPFILES=" || $$1 == "XDEPFILES=" \
-	      || $$1 == "NATDEPFILES=" { \
+	      || $$1 == "NATDEPFILES=" || $$1 == "SER_HARDWIRE=" { \
 	      for (i = 2; i <= NF; i++) \
 	        print $$i >> "alldeps.tmp" ; \
             } \
