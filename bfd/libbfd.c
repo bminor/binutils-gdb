@@ -215,8 +215,8 @@ boolean
 DEFUN(bfd_add_to_string_table,(table, new_string, table_length, free_ptr),
       char **table AND
       char *new_string AND
-      char **free_ptr AND
-      unsigned int *table_length)
+      unsigned int *table_length AND
+      char **free_ptr)
 {
   size_t string_length = strlen (new_string) + 1; /* include null here */
   char *base = *table;
@@ -339,7 +339,7 @@ DEFUN(_do_getb64,(addr),
 }
 
 bfd_64_type
-DEFUN(do_getl64,(addr),
+DEFUN(_do_getl64,(addr),
       register bfd_byte *addr)
 {
   bfd_64_type low, high;
