@@ -3545,9 +3545,10 @@ GNU C stabs define @emph{all} types, file or procedure scope, as
 @code{N_LSYM}.  Sun doc talks about using @code{N_GSYM} too.
 
 @item
-Sun C stabs use type number pairs in the format (@var{a},@var{b}) where
-@var{a} is a number starting with 1 and incremented for each sub-source
-file in the compilation.  @var{b} is a number starting with 1 and
+Sun C stabs use type number pairs in the format
+(@var{file-number},@var{type-number}) where @var{file-number} is a
+number starting with 1 and incremented for each sub-source file in the
+compilation.  @var{type-number} is a number starting with 1 and
 incremented for each new type defined in the compilation.  GNU C stabs
 use the type number alone, with no source file number.
 @end itemize
@@ -3565,11 +3566,7 @@ section.  The byte order of the stabs binary data matches the byte order
 of the ELF file itself, as determined from the @code{EI_DATA} field in
 the @code{e_ident} member of the ELF header.
 
-@c Is "source file" the right term for this concept?  We don't mean that
-@c there is a separate one for include files (but "object file" or
-@c "object module" isn't quite right either; the output from ld -r is a
-@c single object file but contains many source files).
-The first stab in the @code{.stab} section for each source file is
+The first stab in the @code{.stab} section for each compilation unit is
 synthetic, generated entirely by the assembler, with no corresponding
 @code{.stab} directive as input to the assembler.  This stab contains
 the following fields:
@@ -3603,18 +3600,30 @@ section, and the @code{.stabstr} section has its ELF section
 header @code{sh_type} member set to @code{SHT_STRTAB} to mark it as a
 string table.
 
-Because the linker does not process the @code{.stab} section in any
-special way, none of the addresses in the @code{n_value} field of the
-stabs are relocated by the linker.  Instead they are relative to the
-source file (or some entity smaller than a source file, like a
-function).  To find the address of each section corresponding to a given
-source file, the (compiler? assembler?) puts out symbols giving the
-address of each section for a given source file.  Since these are normal
-ELF symbols, the linker can relocate them correctly.  They are
-named @code{Bbss.bss} for the bss section, @code{Ddata.data} for
-the data section, and @code{Drodata.rodata} for the rodata section.  I
-haven't yet figured out how the debugger gets the address for the text
-section.
+It should not be necessary for the linker to process the @code{.stab}
+section in any special way, so (except for Solaris 2.2 and earlier, see
+below) none of the addresses in the @code{n_value} field of the stabs
+are relocated by the linker.  Instead they are relative to the source
+file (or some entity smaller than a source file, like a function).  To
+find the address of each section corresponding to a given source file,
+the (compiler? assembler?) puts out symbols giving the address of each
+section for a given source file.  Since these are ELF (not stab)
+symbols, the linker can relocate them correctly.  They are named
+@code{Bbss.bss} for the bss section, @code{Ddata.data} for the data
+section, and @code{Drodata.rodata} for the rodata section.  For the text
+section, there is no such symbol.  The linker provided with Solaris 2.2
+and earlier relocates stabs using relocation information from a
+@code{.rela.stabs} section, which means that the value of an
+@code{N_FUN} stab in an executable is the actual address.  For Solaris
+2.3 and later, the value of the @code{N_FUN} stab is zero and the
+address of the function can be obtained from the ELF (non-stab) symbols.
+Sun, in reference to bug 1142109, has verified that this is intentional.
+Because looking things up in the ELF symbols is slow and GDB currently
+only has code to do this for functions (which is enough for Solaris
+since read-only variables go in the @code{.rodata} section), it would
+probably be better to use a @code{Ttext.text} symbol for stabs-in-elf on
+non-Solaris machines, and make the address in the N_FUN relative to the
+@code{Ttext.text} symbol.
 
 @node Symbol Types Index
 @unnumbered Symbol Types Index

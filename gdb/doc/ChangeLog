@@ -1,3 +1,7 @@
+Tue Sep  7 13:45:02 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabs.texinfo (Stabs In ELF): Talk about N_FUN value.
+
 Mon Sep  6 19:23:18 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* stabs.texinfo (Local Variable Parameters): Talk about nameless
