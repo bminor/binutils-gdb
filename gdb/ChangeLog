@@ -1,5 +1,8 @@
 Tue Jan 14 12:28:52 1992  Stu Grossman  (grossman at cygnus.com)
 
+	* infrun.c (wait_for_inferior!!!!):  Prevent gdb from hanging when
+	nexting over recursive function calls.
+
 	* target.c (target_read_string):  Create this routine to read null
 	terminated strings from the target.  It deals with running off the
 	end of memory elegantly as well.  solib.c (find_solib):  Use
