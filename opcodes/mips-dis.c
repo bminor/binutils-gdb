@@ -256,13 +256,13 @@ print_insn_arg (d, l, pc, info)
       break;
 
     case 'E':
-      (*info->fprintf_func) (info->stream, "%s",
-			     reg_names[(l >> OP_SH_RT) & OP_MASK_RT]);
+      (*info->fprintf_func) (info->stream, "$%d",
+			     (l >> OP_SH_RT) & OP_MASK_RT);
       break;
 
     case 'G':
-      (*info->fprintf_func) (info->stream, "%s",
-			     reg_names[(l >> OP_SH_RD) & OP_MASK_RD]);
+      (*info->fprintf_func) (info->stream, "$%d",
+			     (l >> OP_SH_RD) & OP_MASK_RD);
       break;
 
     case 'N':
@@ -395,17 +395,19 @@ mips_isa_type (mach, isa, cputype)
     }
 }
 
-/* Figure out ISA from disassemble_info data */
+/* Check if the object uses NewABI conventions.  */
 
 static int
-get_mips_isa (info)
-     struct disassemble_info *info;
+is_newabi(header)
+     Elf_Internal_Ehdr *header;
 {
-  int isa;
-  int cpu;
+  if ((header->e_flags
+       & (E_MIPS_ABI_EABI32 | E_MIPS_ABI_EABI64 | EF_MIPS_ABI2)) != 0
+      || (header->e_ident[EI_CLASS] == ELFCLASS64
+	  && (header->e_flags & E_MIPS_ABI_O64) == 0))
+    return 1;
 
-  mips_isa_type (info->mach, &isa, &cpu);
-  return isa;
+  return 0;
 }
 
 /* Print the mips instruction at address MEMADDR in debugged memory,
@@ -522,14 +524,16 @@ _print_insn_mips (memaddr, info, endianness)
 #endif
 
   /* Use mips64_reg_names for new ABI.  */
-  if (info->flavour == bfd_target_elf_flavour
-      && info->symbols != NULL
-      && (((get_mips_isa(info) | INSN_ISA_MASK) & ISA_MIPS2) != 0)
-      && ((elf_elfheader (bfd_asymbol_bfd(*(info->symbols)))->e_flags
-	   & EF_MIPS_ABI2) != 0))
-    reg_names = mips64_reg_names;
-  else
-    reg_names = mips32_reg_names;
+  reg_names = mips32_reg_names;
+
+  if (info->flavour == bfd_target_elf_flavour && info->symbols != NULL)
+    {
+      Elf_Internal_Ehdr *header;
+
+      header = elf_elfheader(bfd_asymbol_bfd(*(info->symbols)));
+      if (is_newabi(header))
+	reg_names = mips64_reg_names;
+    }
 
   status = (*info->read_memory_func) (memaddr, buffer, INSNLEN, info);
   if (status == 0)
