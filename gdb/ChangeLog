@@ -1,5 +1,9 @@
 2003-10-29  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/i386/fbsd.mt (TDEPFILES): Add corelow.o.
+	* config/i386/fbsd.mh (NATDEPFILES): Remove corelow.o and
+	core-regset.o.
+
 	* fbsd-proc.c (fbsd_make_corefile_notes): Remove unecessary casts.
 
 	* corelow.c: Include "arch-utils.h", "regset.h" and
