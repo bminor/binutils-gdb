@@ -1,3 +1,8 @@
+2000-11-13  H.J. Lu  <hjl@gnu.org>
+
+	* elflink.h (elf_link_add_object_symbols): Also add indirect
+	symbols for common symbols with the default version.
+
 2000-11-09  Philip Blundell  <pb@futuretv.com>
 
 	* section.c (STD_SECTION): Set gc_mark flag.

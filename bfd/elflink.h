@@ -1715,7 +1715,7 @@ elf_link_add_object_symbols (abfd, info)
              name to the fully decorated name.  This will cause
              external references which do not specify a version to be
              bound to this version of the symbol.  */
-	  if (definition)
+	  if (definition || h->root.type == bfd_link_hash_common)
 	    {
 	      char *p;
 
