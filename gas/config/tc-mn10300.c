@@ -434,7 +434,6 @@ md_assemble (str)
     {
       const char *errmsg = NULL;
       int op_idx;
-      int parens = 0;
       char *hold;
 
       fc = 0;
@@ -467,16 +466,19 @@ md_assemble (str)
 	  hold = input_line_pointer;
 	  input_line_pointer = str;
 
-#if 1
-	  if (*str == '(')
-            {
-	      str++;
+	  if (operand->flags & MN10300_OPERAND_PAREN)
+	    {
+	      if (*input_line_pointer != ')' && *input_line_pointer != '(')
+		{
+		  input_line_pointer = hold;
+		  str = hold;
+		  goto error;
+		}
 	      input_line_pointer++;
-	      parens++;
+	      goto keep_going;
 	    }
-#endif
 	  /* See if we can match the operands.  */
-	  if (operand->flags & MN10300_OPERAND_DREG)
+	  else if (operand->flags & MN10300_OPERAND_DREG)
 	    {
 	      if (!data_register_name (&ex))
 		{
@@ -557,6 +559,12 @@ md_assemble (str)
 	      str = hold;
 	      goto error;
 	    }
+	  else if (*str == ')' || *str == '(')
+	    {
+	      input_line_pointer = hold;
+	      str = hold;
+	      goto error;
+	    }
 	  else
 	    {
 	      expression (&ex);
@@ -626,19 +634,11 @@ keep_going:
 	  while (*str == ' ' || *str == ',' || *str == '[' || *str == ']')
 	    ++str;
 
-	  if (*str == ')')
-	    {
-	      str++;
-	      parens--;
-	    }
 	}
-      if (parens == 0 && *str != ',')
+
+      /* Make sure we used all the operands!  */
+      if (*str != ',')
 	match = 1;
-      else
-	{
-	  input_line_pointer = hold;
-	  str = hold;
-	}
 
     error:
       if (match == 0)
