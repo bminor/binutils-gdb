@@ -163,7 +163,8 @@ _bfd_ecoff_new_section_hook (abfd, section)
     section->flags |= SEC_DATA | SEC_LOAD | SEC_ALLOC;
   else if (strcmp (section->name, _RDATA) == 0
 	   || strcmp (section->name, _LIT8) == 0
-	   || strcmp (section->name, _LIT4) == 0)
+	   || strcmp (section->name, _LIT4) == 0
+	   || strcmp (section->name, _RCONST) == 0)
     section->flags |= SEC_DATA | SEC_LOAD | SEC_ALLOC | SEC_READONLY;
   else if (strcmp (section->name, _BSS) == 0
 	   || strcmp (section->name, _SBSS) == 0)
@@ -335,6 +336,8 @@ ecoff_sec_to_styp_flags (name, flags)
       styp = STYP_COMMENT;
       flags &=~ SEC_NEVER_LOAD;
     }
+  else if (strcmp (name, _RCONST) == 0)
+    styp = STYP_RCONST;
   else if (flags & SEC_CODE) 
     styp = STYP_TEXT;
   else if (flags & SEC_DATA) 
@@ -391,14 +394,16 @@ _bfd_ecoff_styp_to_sec_flags (abfd, hdr, name)
 	   || (styp_flags & STYP_SDATA)
 	   || styp_flags == STYP_PDATA
 	   || styp_flags == STYP_XDATA
-	   || (styp_flags & STYP_GOT))
+	   || (styp_flags & STYP_GOT)
+	   || styp_flags == STYP_RCONST)
     {
       if (sec_flags & SEC_NEVER_LOAD)
 	sec_flags |= SEC_DATA | SEC_COFF_SHARED_LIBRARY;
       else
 	sec_flags |= SEC_DATA | SEC_LOAD | SEC_ALLOC;
       if ((styp_flags & STYP_RDATA)
-	  || styp_flags == STYP_PDATA)
+	  || styp_flags == STYP_PDATA
+	  || styp_flags == STYP_RCONST)
 	sec_flags |= SEC_READONLY;
     }
   else if ((styp_flags & STYP_BSS)
@@ -827,6 +832,10 @@ ecoff_set_symbol_info (abfd, ecoff_sym, asym, ext, weak)
       break;
     case scFini:
       asym->section = bfd_make_section_old_way (abfd, ".fini");
+      asym->value -= asym->section->vma;
+      break;
+    case scRConst:
+      asym->section = bfd_make_section_old_way (abfd, ".rconst");
       asym->value -= asym->section->vma;
       break;
     default:
@@ -1743,6 +1752,7 @@ ecoff_slurp_reloc_table (abfd, section, symbols)
 	    case RELOC_SECTION_PDATA: sec_name = ".pdata"; break;
 	    case RELOC_SECTION_FINI:  sec_name = ".fini"; break;
 	    case RELOC_SECTION_LITA:  sec_name = ".lita";  break;
+	    case RELOC_SECTION_RCONST: sec_name = ".rconst"; break;
 	    default: abort ();
 	    }
 
@@ -2128,11 +2138,12 @@ ecoff_compute_section_file_positions (abfd)
 	 the data.  */
       if ((abfd->flags & EXEC_P) != 0
 	  && (abfd->flags & D_PAGED) != 0
-	  && first_data != false
+	  && ! first_data
 	  && (current->flags & SEC_CODE) == 0
 	  && (! ecoff_backend (abfd)->rdata_in_text
 	      || strcmp (current->name, _RDATA) != 0)
-	  && strcmp (current->name, _PDATA) != 0)
+	  && strcmp (current->name, _PDATA) != 0
+	  && strcmp (current->name, _RCONST) != 0)
 	{
 	  sofar = (sofar + round - 1) &~ (round - 1);
 	  first_data = false;
@@ -2573,7 +2584,8 @@ _bfd_ecoff_write_object_contents (abfd)
 	  || (section.s_flags & STYP_DYNSYM) != 0
 	  || (section.s_flags & STYP_HASH) != 0
 	  || (section.s_flags & STYP_ECOFF_INIT) != 0
-	  || (section.s_flags & STYP_ECOFF_FINI) != 0)
+	  || (section.s_flags & STYP_ECOFF_FINI) != 0
+	  || section.s_flags == STYP_RCONST)
 	{
 	  text_size += bfd_get_section_size_before_reloc (current);
 	  if (! set_text_start || text_start > vma)
@@ -2810,6 +2822,8 @@ _bfd_ecoff_write_object_contents (abfd)
 		    in.r_symndx = RELOC_SECTION_LITA;
 		  else if (strcmp (name, "*ABS*") == 0)
 		    in.r_symndx = RELOC_SECTION_ABS;
+		  else if (strcmp (name, ".rconst") == 0)
+		    in.r_symndx = RELOC_SECTION_RCONST;
 		  else
 		    abort ();
 		  in.r_extern = 0;
@@ -3005,7 +3019,7 @@ _bfd_ecoff_slurp_armap (abfd)
 
   /* Read in the armap.  */
   ardata = bfd_ardata (abfd);
-  mapdata = _bfd_read_ar_hdr (abfd);
+  mapdata = (struct areltdata *) _bfd_read_ar_hdr (abfd);
   if (mapdata == (struct areltdata *) NULL)
     return false;
   parsed_size = mapdata->parsed_size;
@@ -3687,6 +3701,7 @@ ecoff_link_check_archive_element (abfd, info, pneeded)
 	case scSCommon:
 	case scInit:
 	case scFini:
+	case scRConst:
 	  def = true;
 	  break;
 	default:
@@ -3946,6 +3961,10 @@ ecoff_link_add_externals (abfd, info, external_ext, ssext)
 	  break;
 	case scFini:
 	  section = bfd_make_section_old_way (abfd, ".fini");
+	  value -= section->vma;
+	  break;
+	case scRConst:
+	  section = bfd_make_section_old_way (abfd, ".rconst");
 	  value -= section->vma;
 	  break;
 	}
@@ -4377,6 +4396,8 @@ ecoff_link_write_external (h, data)
 	    h->esym.asym.sc = scPData;
 	  else if (strcmp (name, _XDATA) == 0)
 	    h->esym.asym.sc = scXData;
+	  else if (strcmp (name, _RCONST) == 0)
+	    h->esym.asym.sc = scRConst;
 	  else
 	    h->esym.asym.sc = scAbs;
 	}
@@ -4585,11 +4606,18 @@ ecoff_reloc_link_order (output_bfd, info, output_section, link_order)
      asection *output_section;
      struct bfd_link_order *link_order;
 {
+  enum bfd_link_order_type type;
+  asection *section;
+  bfd_vma addend;
   arelent rel;
   struct internal_reloc in;
   bfd_size_type external_reloc_size;
   bfd_byte *rbuf;
   boolean ok;
+
+  type = link_order->type;
+  section = NULL;
+  addend = link_order->u.reloc.p->addend;
 
   /* We set up an arelent to pass to the backend adjust_reloc_out
      routine.  */
@@ -4602,21 +4630,44 @@ ecoff_reloc_link_order (output_bfd, info, output_section, link_order)
       return false;
     }
 
-  if (link_order->type == bfd_section_reloc_link_order)
-    rel.sym_ptr_ptr = link_order->u.reloc.p->u.section->symbol_ptr_ptr;
+  if (type == bfd_section_reloc_link_order)
+    {
+      section = link_order->u.reloc.p->u.section;
+      rel.sym_ptr_ptr = section->symbol_ptr_ptr;
+    }
   else
     {
-      /* We can't set up a reloc against a symbol correctly, because
-	 we have no asymbol structure.  Currently no adjust_reloc_out
-	 routine cases.  */
-      rel.sym_ptr_ptr = (asymbol **) NULL;
+      struct bfd_link_hash_entry *h;
+
+      /* Treat a reloc against a defined symbol as though it were
+         actually against the section.  */
+      h = bfd_link_hash_lookup (info->hash, link_order->u.reloc.p->u.name,
+				false, false, false);
+      if (h != NULL
+	  && (h->type == bfd_link_hash_defined
+	      || h->type == bfd_link_hash_defweak))
+	{
+	  type = bfd_section_reloc_link_order;
+	  section = h->u.def.section->output_section;
+	  /* It seems that we ought to add the symbol value to the
+             addend here, but in practice it has already been added
+             because it was passed to constructor_callback.  */
+	  addend += section->vma + h->u.def.section->output_offset;
+	}
+      else
+	{
+	  /* We can't set up a reloc against a symbol correctly,
+	     because we have no asymbol structure.  Currently no
+	     adjust_reloc_out routine cares.  */
+	  rel.sym_ptr_ptr = (asymbol **) NULL;
+	}
     }
 
   /* All ECOFF relocs are in-place.  Put the addend into the object
      file.  */
 
   BFD_ASSERT (rel.howto->partial_inplace);
-  if (link_order->u.reloc.p->addend != 0)
+  if (addend != 0)
     {
       bfd_size_type size;
       bfd_reloc_status_type rstat;
@@ -4630,8 +4681,7 @@ ecoff_reloc_link_order (output_bfd, info, output_section, link_order)
 	  bfd_set_error (bfd_error_no_memory);
 	  return false;
 	}
-      rstat = _bfd_relocate_contents (rel.howto, output_bfd,
-				      link_order->u.reloc.p->addend, buf);
+      rstat = _bfd_relocate_contents (rel.howto, output_bfd, addend, buf);
       switch (rstat)
 	{
 	case bfd_reloc_ok:
@@ -4643,11 +4693,10 @@ ecoff_reloc_link_order (output_bfd, info, output_section, link_order)
 	  if (! ((*info->callbacks->reloc_overflow)
 		 (info,
 		  (link_order->type == bfd_section_reloc_link_order
-		   ? bfd_section_name (output_bfd,
-				       link_order->u.reloc.p->u.section)
+		   ? bfd_section_name (output_bfd, section)
 		   : link_order->u.reloc.p->u.name),
-		  rel.howto->name, link_order->u.reloc.p->addend,
-		  (bfd *) NULL, (asection *) NULL, (bfd_vma) 0)))
+		  rel.howto->name, addend, (bfd *) NULL,
+		  (asection *) NULL, (bfd_vma) 0)))
 	    {
 	      free (buf);
 	      return false;
@@ -4668,7 +4717,7 @@ ecoff_reloc_link_order (output_bfd, info, output_section, link_order)
 		+ bfd_get_section_vma (output_bfd, output_section));
   in.r_type = rel.howto->type;
 
-  if (link_order->type == bfd_symbol_reloc_link_order)
+  if (type == bfd_symbol_reloc_link_order)
     {
       struct ecoff_link_hash_entry *h;
 
@@ -4692,8 +4741,7 @@ ecoff_reloc_link_order (output_bfd, info, output_section, link_order)
     {
       CONST char *name;
 
-      name = bfd_get_section_name (output_bfd,
-				   link_order->u.reloc.p->u.section);
+      name = bfd_get_section_name (output_bfd, section);
       if (strcmp (name, ".text") == 0)
 	in.r_symndx = RELOC_SECTION_TEXT;
       else if (strcmp (name, ".rdata") == 0)
@@ -4722,6 +4770,8 @@ ecoff_reloc_link_order (output_bfd, info, output_section, link_order)
 	in.r_symndx = RELOC_SECTION_LITA;
       else if (strcmp (name, "*ABS*") == 0)
 	in.r_symndx = RELOC_SECTION_ABS;
+      else if (strcmp (name, ".rconst") == 0)
+	in.r_symndx = RELOC_SECTION_RCONST;
       else
 	abort ();
       in.r_extern = 0;

@@ -1309,6 +1309,8 @@ alpha_convert_external_reloc (output_bfd, info, input_bfd, ext_rel, h)
 	case 'r':
 	  if (strcmp (name, ".rdata") == 0)
 	    r_symndx = RELOC_SECTION_RDATA;
+	  else if (strcmp (name, ".rconst") == 0)
+	    r_symndx = RELOC_SECTION_RCONST;
 	  break;
 	case 's':
 	  if (strcmp (name, ".sdata") == 0)
@@ -1421,6 +1423,8 @@ alpha_relocate_section (output_bfd, info, input_bfd, input_section,
       symndx_to_section[RELOC_SECTION_LITA] =
 	bfd_get_section_by_name (input_bfd, ".lita");
       symndx_to_section[RELOC_SECTION_ABS] = bfd_abs_section_ptr;
+      symndx_to_section[RELOC_SECTION_RCONST] =
+	bfd_get_section_by_name (input_bfd, ".rconst");
 
       ecoff_data (input_bfd)->symndx_to_section = symndx_to_section;
     }
@@ -1976,7 +1980,7 @@ static const struct ecoff_backend_data alpha_ecoff_backend_data =
     alpha_ecoff_bad_format_hook, _bfd_ecoff_set_arch_mach_hook,
     alpha_ecoff_mkobject_hook, _bfd_ecoff_styp_to_sec_flags,
     _bfd_ecoff_set_alignment_hook, _bfd_ecoff_slurp_symbol_table,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
   },
   /* Supported architecture.  */
   bfd_arch_alpha,
@@ -2052,6 +2056,10 @@ static const struct ecoff_backend_data alpha_ecoff_backend_data =
 /* So is getting relocated section contents.  */
 #define _bfd_ecoff_bfd_get_relocated_section_contents \
   alpha_ecoff_get_relocated_section_contents
+
+/* Handling file windows is generic.  */
+#define _bfd_ecoff_get_section_contents_in_window \
+  _bfd_generic_get_section_contents_in_window
 
 /* Relaxing sections is generic.  */
 #define _bfd_ecoff_bfd_relax_section bfd_generic_relax_section

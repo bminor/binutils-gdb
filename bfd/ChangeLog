@@ -1,5 +1,21 @@
 Wed Nov 22 12:02:09 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ecoff.c (_bfd_ecoff_new_section_hook): Handle .rconst section.
+	(ecoff_sec_to_styp_flags): Likewise.
+	(_bfd_ecoff_styp_to_sec_flags): Handle STYP_RCONST.
+	(ecoff_set_symbol_info): Handle scRConst.
+	(ecoff_slurp_reloc_table): Handle RELOC_SECTION_RCONST.
+	(ecoff_compute_section_file_positions): Handle .rconst section.
+	(_bfd_ecoff_write_object_contents): Likewise.
+	(ecoff_link_check_archive_element): Handle scRConst.
+	(ecoff_link_add_externals): Likewise.
+	(ecoff_link_write_external): Handle .rconst section.
+	(ecoff_reloc_link_order): Likewise.
+	* ecofflink.c (bfd_ecoff_debug_accumulate): Handle scRConst.
+	* coff-alpha.c (alpha_convert_external_reloc): Handle .rconst
+	section.
+	(alpha_relocate_section): Handle RELOC_SECTION_RCONST.
+
 	* sunos.c (sunos_scan_dynamic_symbol): Only set written if the
 	DEF_DYNAMIC flag is set.
 
