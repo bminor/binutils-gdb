@@ -23,23 +23,16 @@
 
 
 void print_idecode_issue_function_header
-(lf *file,
- const char *processor,
- function_decl_type decl_type,
- int nr_prefetched_words);
+  (lf *file,
+   const char *processor,
+   function_decl_type decl_type, int nr_prefetched_words);
 
-void print_idecode_globals
-(lf *file);
+void print_idecode_globals (lf *file);
 
 void print_idecode_lookups
-(lf *file,
- gen_entry *table,
- cache_entry *cache_rules);
+  (lf *file, gen_entry *table, cache_entry *cache_rules);
 
-void print_idecode_body
-(lf *file,
- gen_entry *table,
- const char *result);
+void print_idecode_body (lf *file, gen_entry *table, const char *result);
 
 
 
@@ -49,6 +42,4 @@ void print_idecode_body
    hardware isn't disabled */
 
 extern void print_idecode_validate
-(lf *file,
- insn_entry *instruction,
- insn_opcodes *opcode_paths);
+  (lf *file, insn_entry * instruction, insn_opcodes *opcode_paths);

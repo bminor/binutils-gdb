@@ -39,45 +39,44 @@
 
 
 static const name_map decode_type_map[] = {
-  { "normal", normal_decode_rule },
-  { "boolean", boolean_rule },
-  { NULL, normal_decode_rule },
+  {"normal", normal_decode_rule},
+  {"boolean", boolean_rule},
+  {NULL, normal_decode_rule},
 };
 
 static const name_map decode_gen_map[] = {
-  { "array", array_gen },
-  { "switch", switch_gen },
-  { "padded-switch", padded_switch_gen },
-  { "goto-switch", goto_switch_gen },
-  { NULL, -1 },
+  {"array", array_gen},
+  {"switch", switch_gen},
+  {"padded-switch", padded_switch_gen},
+  {"goto-switch", goto_switch_gen},
+  {NULL, -1},
 };
 
 static const name_map decode_reserved_map[] = {
-  { "zero-reserved", 1 },
-  { NULL, 0 },
+  {"zero-reserved", 1},
+  {NULL, 0},
 };
 
 static const name_map decode_duplicates_map[] = {
-  { "duplicate", 1 },
-  { NULL, 0 },
+  {"duplicate", 1},
+  {NULL, 0},
 };
 
 static const name_map decode_combine_map[] = {
-  { "combine", 1 },
-  { NULL, 0 },
+  {"combine", 1},
+  {NULL, 0},
 };
 
 static const name_map decode_search_map[] = {
-  { "constants", decode_find_constants },
-  { "mixed", decode_find_mixed },
-  { "strings", decode_find_strings },
-  { NULL, decode_find_mixed },
+  {"constants", decode_find_constants},
+  {"mixed", decode_find_mixed},
+  {"strings", decode_find_strings},
+  {NULL, decode_find_mixed},
 };
 
 
 static void
-set_bits (int bit[max_insn_bit_size],
-	  unsigned64 value)
+set_bits (int bit[max_insn_bit_size], unsigned64 value)
 {
   int bit_nr;
   for (bit_nr = 0; bit_nr < max_insn_bit_size; bit_nr++)
@@ -90,7 +89,7 @@ set_bits (int bit[max_insn_bit_size],
 }
 
 decode_table *
-load_decode_table(char *file_name)
+load_decode_table (char *file_name)
 {
   table *file = table_open (file_name);
   table_entry *entry;
@@ -107,20 +106,22 @@ load_decode_table(char *file_name)
       /* the options field */
       new_rule->type = name2i (decode_options, decode_type_map);
       if (options.decode.overriding_gen != NULL)
-	new_rule->gen = name2i (options.decode.overriding_gen, decode_gen_map);
+	new_rule->gen =
+	  name2i (options.decode.overriding_gen, decode_gen_map);
       else
 	new_rule->gen = name2i (decode_options, decode_gen_map);
-      if (new_rule->gen == padded_switch_gen
-	  && options.decode.switch_as_goto)
+      if (new_rule->gen == padded_switch_gen && options.decode.switch_as_goto)
 	new_rule->gen = goto_switch_gen;
       if (options.decode.zero_reserved)
 	new_rule->with_zero_reserved = 1;
       else
-	new_rule->with_zero_reserved = name2i (decode_options, decode_reserved_map);
+	new_rule->with_zero_reserved =
+	  name2i (decode_options, decode_reserved_map);
       if (options.decode.duplicate)
 	new_rule->with_duplicates = 1;
       else
-	new_rule->with_duplicates = name2i (decode_options, decode_duplicates_map);
+	new_rule->with_duplicates =
+	  name2i (decode_options, decode_duplicates_map);
       if (options.decode.combine)
 	new_rule->with_combine = 1;
       else
@@ -169,7 +170,9 @@ load_decode_table(char *file_name)
 	  && strlen (entry->field[decode_force_first_field]) > 0)
 	{
 	  new_rule->force_first = target_a2i (options.hi_bit_nr,
-					      entry->field[decode_force_first_field]);
+					      entry->
+					      field
+					      [decode_force_first_field]);
 	  if (new_rule->force_first < new_rule->first
 	      || new_rule->force_first > new_rule->last + 1)
 	    error (new_rule->line, "Force first out of range\n");
@@ -180,7 +183,8 @@ load_decode_table(char *file_name)
 	  && strlen (entry->field[decode_force_last_field]) > 0)
 	{
 	  new_rule->force_last = target_a2i (options.hi_bit_nr,
-					     entry->field[decode_force_last_field]);
+					     entry->
+					     field[decode_force_last_field]);
 	  if (new_rule->force_last > new_rule->last
 	      || new_rule->force_last < new_rule->first - 1)
 	    error (new_rule->line, "Force-last out of range\n");
@@ -217,7 +221,7 @@ load_decode_table(char *file_name)
 	    {
 	      (*last) = ZALLOC (decode_path_list);
 	      /* extra root/zero entry */
-	      (*last)->path = ZALLOC (decode_path); 
+	      (*last)->path = ZALLOC (decode_path);
 	      do
 		{
 		  decode_path *entry = ZALLOC (decode_path);
@@ -244,22 +248,32 @@ load_decode_table(char *file_name)
 	    decode_cond *cond = ZALLOC (decode_cond);
 	    decode_cond **last;
 	    if (entry->nr_fields > field_nr + decode_cond_mask_field)
-	      set_bits (cond->mask, a2i (entry->field[field_nr + decode_cond_mask_field]));
+	      set_bits (cond->mask,
+			a2i (entry->
+			     field[field_nr + decode_cond_mask_field]));
 	    if (entry->nr_fields > field_nr + decode_cond_value_field)
-              {
-	      if (entry->field[field_nr + decode_cond_value_field][0] == '!')
-		{
-		  cond->is_equal = 0;
-		  set_bits (cond->value, a2i (entry->field[field_nr + decode_cond_value_field] + 1));
-		}
-	      else
-		{
-		  cond->is_equal = 1;
-		  set_bits (cond->value, a2i (entry->field[field_nr + decode_cond_value_field]));
-		}
-              }
+	      {
+		if (entry->field[field_nr + decode_cond_value_field][0] ==
+		    '!')
+		  {
+		    cond->is_equal = 0;
+		    set_bits (cond->value,
+			      a2i (entry->
+				   field[field_nr + decode_cond_value_field] +
+				   1));
+		  }
+		else
+		  {
+		    cond->is_equal = 1;
+		    set_bits (cond->value,
+			      a2i (entry->
+				   field[field_nr +
+					 decode_cond_value_field]));
+		  }
+	      }
 	    if (entry->nr_fields > field_nr + decode_cond_word_nr_field)
-	      cond->word_nr = a2i (entry->field[field_nr + decode_cond_word_nr_field]);
+	      cond->word_nr =
+		a2i (entry->field[field_nr + decode_cond_word_nr_field]);
 	    field_nr += nr_decode_cond_fields;
 	    /* insert it */
 	    last = &new_rule->conditions;
@@ -274,7 +288,7 @@ load_decode_table(char *file_name)
   return table;
 }
 
-  
+
 int
 decode_table_max_word_nr (decode_table *entry)
 {
@@ -297,10 +311,7 @@ decode_table_max_word_nr (decode_table *entry)
 
 
 static void
-dump_decode_cond (lf *file,
-		  char *prefix,
-		  decode_cond *cond,
-		  char *suffix)
+dump_decode_cond (lf *file, char *prefix, decode_cond *cond, char *suffix)
 {
   lf_printf (file, "%s(decode_cond *) 0x%lx", prefix, (long) cond);
   if (cond != NULL)
@@ -318,10 +329,7 @@ dump_decode_cond (lf *file,
 
 
 static void
-dump_decode_conds (lf *file,
-		   char *prefix,
-		   decode_cond *cond,
-		   char *suffix)
+dump_decode_conds (lf *file, char *prefix, decode_cond *cond, char *suffix)
 {
   lf_printf (file, "%s(decode_cond *) 0x%lx", prefix, (long) cond);
   while (cond != NULL)
@@ -334,23 +342,21 @@ dump_decode_conds (lf *file,
 
 
 void
-dump_decode_rule (lf *file,
-		  char *prefix,
-		  decode_table *rule,
-		  char *suffix)
+dump_decode_rule (lf *file, char *prefix, decode_table *rule, char *suffix)
 {
   lf_printf (file, "%s(decode_table *) 0x%lx", prefix, (long) rule);
   if (rule != NULL)
     {
       lf_indent (file, +1);
       dump_line_ref (file, "\n(line ", rule->line, ")");
-      lf_printf (file, "\n(type %s)", i2name(rule->type, decode_type_map));
-      lf_printf (file, "\n(gen %s)", i2name(rule->gen, decode_gen_map));
+      lf_printf (file, "\n(type %s)", i2name (rule->type, decode_type_map));
+      lf_printf (file, "\n(gen %s)", i2name (rule->gen, decode_gen_map));
       lf_printf (file, "\n(first %d)", rule->first);
       lf_printf (file, "\n(last %d)", rule->last);
       lf_printf (file, "\n(force_first %d)", rule->force_first);
       lf_printf (file, "\n(force_last %d)", rule->force_last);
-      dump_filter (file, "\n(constant_field_names \"", rule->constant_field_names, "\")");
+      dump_filter (file, "\n(constant_field_names \"",
+		   rule->constant_field_names, "\")");
       lf_printf (file, "\n(constant 0x%x)", rule->constant);
       lf_printf (file, "\n(word_nr %d)", rule->word_nr);
       lf_printf (file, "\n(with_zero_reserved %d)", rule->with_zero_reserved);
@@ -369,10 +375,7 @@ dump_decode_rule (lf *file,
 #ifdef MAIN
 
 static void
-dump_decode_rules (lf *file,
-		   char *prefix,
-		   decode_table *rule,
-		   char *suffix)
+dump_decode_rules (lf *file, char *prefix, decode_table *rule, char *suffix)
 {
   lf_printf (file, "%s", prefix);
   while (rule != NULL)
@@ -388,7 +391,7 @@ dump_decode_rules (lf *file,
 igen_options options;
 
 int
-main(int argc, char **argv)
+main (int argc, char **argv)
 {
   lf *l;
   decode_table *rules;

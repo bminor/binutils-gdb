@@ -22,11 +22,6 @@
    Boston, MA 02111-1307, USA.  */
 
 
-extern void gen_support_h
-(lf *file,
- insn_table *table);
+extern void gen_support_h (lf *file, insn_table *table);
 
-extern void gen_support_c
-(lf *file,
- insn_table *table);
-
+extern void gen_support_c (lf *file, insn_table *table);

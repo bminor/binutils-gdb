@@ -24,7 +24,8 @@
 
 /* code-generation options: */
 
-typedef enum {
+typedef enum
+{
 
   /* Transfer control to an instructions semantic code using the the
      standard call/return mechanism */
@@ -37,18 +38,22 @@ typedef enum {
 
   generate_jumps,
 
-} igen_code;
+}
+igen_code;
 
-typedef enum {
+typedef enum
+{
   nia_is_cia_plus_one,
   nia_is_void,
   nia_is_invalid,
-} igen_nia;
+}
+igen_nia;
 
 
 
 typedef struct _igen_gen_options igen_gen_options;
-struct _igen_gen_options {
+struct _igen_gen_options
+{
   int direct_access;
   int semantic_icache;
   int insn_in_icache;
@@ -87,7 +92,8 @@ struct _igen_gen_options {
 
 
 typedef struct _igen_trace_options igen_trace_options;
-struct _igen_trace_options {
+struct _igen_trace_options
+{
   int rule_selection;
   int rule_rejection;
   int insn_insertion;
@@ -96,16 +102,21 @@ struct _igen_trace_options {
   int combine;
 };
 
-typedef struct _igen_name {
+typedef struct _igen_name
+{
   char *u;
   char *l;
-} igen_name;
-typedef struct _igen_module {
+}
+igen_name;
+typedef struct _igen_module
+{
   igen_name prefix;
   igen_name suffix;
-} igen_module;
+}
+igen_module;
 
-typedef struct _igen_module_options {
+typedef struct _igen_module_options
+{
   igen_module global;
   igen_module engine;
   igen_module icache;
@@ -113,10 +124,12 @@ typedef struct _igen_module_options {
   igen_module itable;
   igen_module semantics;
   igen_module support;
-} igen_module_options;
+}
+igen_module_options;
 
-typedef struct _igen_decode_options igen_decode_options ;
-struct _igen_decode_options {
+typedef struct _igen_decode_options igen_decode_options;
+struct _igen_decode_options
+{
 
   /* Combine tables?  Should the generator make a second pass through
      each generated table looking for any sub-entries that contain the
@@ -143,7 +156,8 @@ struct _igen_decode_options {
 
 
 typedef struct _igen_warn_options igen_warn_options;
-struct _igen_warn_options {
+struct _igen_warn_options
+{
 
   /* Issue warning about discarded instructions */
   int discard;
@@ -159,7 +173,8 @@ struct _igen_warn_options {
 
 
 typedef struct _igen_options igen_options;
-struct _igen_options {
+struct _igen_options
+{
 
   /* What does the instruction look like - bit ordering, size, widths or
      offesets */
@@ -201,7 +216,7 @@ struct _igen_options {
 
 extern igen_options options;
 
-/* default options - hopefully backward compatible */ \
+/* default options - hopefully backward compatible */
 #define INIT_OPTIONS() \
 do { \
   memset (&options, 0, sizeof options); \

@@ -133,22 +133,27 @@
 	*/
 
 
-typedef enum {
+typedef enum
+{
   normal_decode_rule,
   boolean_rule,
-} decode_special_type;
+}
+decode_special_type;
 
 
-typedef enum {
+typedef enum
+{
   invalid_gen,
   array_gen,
   switch_gen,
   padded_switch_gen,
   goto_switch_gen,
-} decode_gen_type;
+}
+decode_gen_type;
 
 
-enum {
+enum
+{
   decode_cond_mask_field,
   decode_cond_value_field,
   decode_cond_word_nr_field,
@@ -156,20 +161,23 @@ enum {
 };
 
 typedef struct _decode_path decode_path;
-struct _decode_path {
+struct _decode_path
+{
   int opcode_nr;
   decode_path *parent;
 };
 
 typedef struct _decode_path_list decode_path_list;
-struct _decode_path_list {
+struct _decode_path_list
+{
   decode_path *path;
   decode_path_list *next;
 };
 
 
 typedef struct _decode_cond decode_cond;
-struct _decode_cond {
+struct _decode_cond
+{
   int word_nr;
   int mask[max_insn_bit_size];
   int value[max_insn_bit_size];
@@ -177,13 +185,16 @@ struct _decode_cond {
   decode_cond *next;
 };
 
-typedef enum {
+typedef enum
+{
   decode_find_mixed,
   decode_find_constants,
   decode_find_strings,
-} decode_search_type;
+}
+decode_search_type;
 
-enum {
+enum
+{
   decode_options_field,
   decode_first_field,
   decode_last_field,
@@ -200,7 +211,8 @@ enum {
 
 
 typedef struct _decode_table decode_table;
-struct _decode_table {
+struct _decode_table
+{
   line_ref *line;
   decode_special_type type;
   decode_gen_type gen;
@@ -226,14 +238,9 @@ struct _decode_table {
 };
 
 
-extern decode_table *load_decode_table
-(char *file_name);
+extern decode_table *load_decode_table (char *file_name);
 
-extern int decode_table_max_word_nr
-(decode_table *rule);
+extern int decode_table_max_word_nr (decode_table *rule);
 
 extern void dump_decode_rule
-(lf *file,
- char *prefix,
- decode_table *rule,
- char *suffix);
+  (lf *file, char *prefix, decode_table *rule, char *suffix);

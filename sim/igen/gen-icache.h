@@ -25,45 +25,45 @@
 /* Output code to manipulate the instruction cache: either create it
    or reference it */
 
-typedef enum {
+typedef enum
+{
   declare_variables,
   define_variables,
   undef_variables,
-} icache_decl_type;
+}
+icache_decl_type;
 
-typedef enum {
+typedef enum
+{
   do_not_use_icache = 0,
   get_values_from_icache = 0x1,
   put_values_in_icache = 0x2,
   both_values_and_icache = 0x3,
-} icache_body_type;
+}
+icache_body_type;
 
 extern void print_icache_body
-(lf *file,
- insn_entry *instruction,
- opcode_bits *expanded_bits,
- cache_entry *cache_rules,
- icache_decl_type what_to_declare,
- icache_body_type what_to_do,
- int nr_prefetched_words);
+  (lf *file,
+   insn_entry * instruction,
+   opcode_bits *expanded_bits,
+   cache_entry *cache_rules,
+   icache_decl_type what_to_declare,
+   icache_body_type what_to_do, int nr_prefetched_words);
 
 
 /* Output an instruction cache decode function */
 
 extern void print_icache_declaration
-(lf *file,
- insn_entry *insn,
- opcode_bits *expanded_bits,
- insn_opcodes *opcodes,
- int nr_prefetched_words);
- 
+  (lf *file,
+   insn_entry * insn,
+   opcode_bits *expanded_bits,
+   insn_opcodes *opcodes, int nr_prefetched_words);
+
 extern void print_icache_definition
-(lf *file,
- insn_entry *insn,
- opcode_bits *expanded_bits,
- insn_opcodes *opcodes,
- cache_entry *cache_rules,
- int nr_prefetched_words);
+  (lf *file,
+   insn_entry * insn,
+   opcode_bits *expanded_bits,
+   insn_opcodes *opcodes, cache_entry *cache_rules, int nr_prefetched_words);
 
 
 /* Output an instruction cache support function */
@@ -75,9 +75,7 @@ extern function_entry_handler print_icache_internal_function_definition;
 /* Output the instruction cache table data structure */
 
 extern void print_icache_struct
-(lf *file,
- insn_table *instructions,
- cache_entry *cache_rules);
+  (lf *file, insn_table *instructions, cache_entry *cache_rules);
 
 
 /* Output a single instructions decoder */

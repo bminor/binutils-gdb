@@ -64,14 +64,17 @@
 
 typedef struct _table table;
 
-typedef enum {
+typedef enum
+{
   table_colon_entry,
   table_code_entry,
-} table_entry_type;
+}
+table_entry_type;
 
 
 typedef struct _table_entry table_entry;
-struct _table_entry {
+struct _table_entry
+{
   table *file;
   line_ref *line;
   table_entry_type type;
@@ -82,7 +85,8 @@ struct _table_entry {
 /* List of directories to search when opening a pushed file.  Current
    directory is always searched first */
 typedef struct _table_include table_include;
-struct _table_include {
+struct _table_include
+{
   char *dir;
   table_include *next;
 };
@@ -91,68 +95,47 @@ struct _table_include {
 /* Open/read a table file.  Since the file is read once during open
    (and then closed immediatly) there is no close method. */
 
-extern table *table_open
-(const char *file_name);
+extern table *table_open (const char *file_name);
 
-extern table_entry *table_read
-(table *file);
+extern table_entry *table_read (table *file);
 
 
 /* Push the the state of the current file and open FILE_NAME.  When
    the end of FILE_NAME is reached, return to the pushed file */
 
 extern void table_push
-(table *file,
- line_ref *line,
- table_include *search,
- const char *file_name);
+  (table *file, line_ref *line, table_include *search, const char *file_name);
 
 
 /* Expand the specified field_nr using the internal expansion table.
    A field is only expanded when explicitly specified.  */
 
-extern void table_expand_field
-(table_entry *entry,
- int field_nr);
+extern void table_expand_field (table_entry *entry, int field_nr);
 
 
 /* Given a code entry, write the code to FILE.  Since any
    leading/trailing braces were striped as part of the read, they are
    not written. */
 
-extern void table_print_code
-(lf *file,
- table_entry *entry);
+extern void table_print_code (lf *file, table_entry *entry);
 
 
 /* Debugging */
 
 extern void dump_line_ref
-(lf *file,
- char *prefix,
- const line_ref *line,
- char *suffix);
+  (lf *file, char *prefix, const line_ref *line, char *suffix);
 
 extern void dump_table_entry
-(lf *file,
- char *prefix,
- const table_entry *entry,
- char *suffix);
+  (lf *file, char *prefix, const table_entry *entry, char *suffix);
 
 
 
 /* Utilities for skipping around text */
 
-extern char *skip_digits
-(char *chp);
+extern char *skip_digits (char *chp);
 
-extern char *skip_spaces
-(char *chp);
+extern char *skip_spaces (char *chp);
 
-extern char *skip_to_separator
-(char *chp,
- char *separators);
+extern char *skip_to_separator (char *chp, char *separators);
 
-extern char *back_spaces
-(char *start,
- char *chp);
+extern char *back_spaces (char *start, char *chp);

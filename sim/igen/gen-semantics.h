@@ -73,35 +73,29 @@
 
 
 extern void print_semantic_declaration
-(lf *file,
- insn_entry *insn,
- opcode_bits *bits,
- insn_opcodes *opcodes,
- int nr_prefetched_words);
+  (lf *file,
+   insn_entry * insn,
+   opcode_bits *bits, insn_opcodes *opcodes, int nr_prefetched_words);
 
 extern void print_semantic_definition
-(lf *file,
- insn_entry *insn,
- opcode_bits *bits,
- insn_opcodes *opcodes,
- cache_entry *cache_rules,
- int nr_prefetched_words);
+  (lf *file,
+   insn_entry * insn,
+   opcode_bits *bits,
+   insn_opcodes *opcodes, cache_entry *cache_rules, int nr_prefetched_words);
 
 
-typedef enum {
+typedef enum
+{
   invalid_illegal,
   invalid_fp_unavailable,
   invalid_wrong_slot,
-} invalid_type;
+}
+invalid_type;
 
 extern void print_idecode_invalid
-(lf *file,
- const char *result,
- invalid_type type);
+  (lf *file, const char *result, invalid_type type);
 
 extern void print_semantic_body
-(lf *file,
- insn_entry *instruction,
- opcode_bits *expanded_bits,
- insn_opcodes *opcodes);
-
+  (lf *file,
+   insn_entry * instruction,
+   opcode_bits *expanded_bits, insn_opcodes *opcodes);

@@ -37,7 +37,8 @@
 #endif
 
 
-enum {
+enum
+{
   ca_type,
   ca_field_name,
   ca_derived_name,
@@ -47,10 +48,10 @@ enum {
 };
 
 static const name_map cache_type_map[] = {
-  { "cache", cache_value },
-  { "compute", compute_value },
-  { "scratch", scratch_value },
-  { NULL, 0 },
+  {"cache", cache_value},
+  {"compute", compute_value},
+  {"scratch", scratch_value},
+  {NULL, 0},
 };
 
 
@@ -67,8 +68,7 @@ load_cache_table (char *file_name)
       new_rule->line = entry->line;
       new_rule->entry_type = name2i (entry->field[ca_type], cache_type_map);
       new_rule->name = entry->field[ca_derived_name];
-      filter_parse (&new_rule->original_fields,
-		    entry->field[ca_field_name]);
+      filter_parse (&new_rule->original_fields, entry->field[ca_field_name]);
       new_rule->type = entry->field[ca_type_def];
       /* expression is the concatenation of the remaining fields */
       if (entry->nr_fields > ca_expression)
@@ -101,7 +101,7 @@ load_cache_table (char *file_name)
 igen_options options;
 
 int
-main(int argc, char **argv)
+main (int argc, char **argv)
 {
   cache_entry *rules = NULL;
   lf *l;

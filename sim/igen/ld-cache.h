@@ -65,5 +65,4 @@
    new name had better be the same. */
 
 
-extern cache_entry *load_cache_table
-(char *file_name);
+extern cache_entry *load_cache_table (char *file_name);

@@ -28,7 +28,8 @@
 #include "config.h"
 
 
-enum {
+enum
+{
   default_insn_bit_size = 32,
   max_insn_bit_size = 64,
 };
@@ -42,7 +43,7 @@ enum {
 typedef long long signed64;
 typedef unsigned long long unsigned64;
 
-#else	/* _WIN32 */
+#else /* _WIN32 */
 
 typedef __int64 signed64;
 typedef unsigned __int64 unsigned64;
@@ -77,16 +78,14 @@ typedef unsigned __int64 unsigned64;
 #include "filter_host.h"
 
 typedef struct _line_ref line_ref;
-struct _line_ref {
+struct _line_ref
+{
   const char *file_name;
   int line_nr;
 };
 
 /* Error appends a new line, warning and notify do not */
-typedef void error_func
-(const line_ref *line,
- char *msg,
- ...);
+typedef void error_func (const line_ref *line, char *msg, ...);
 
 extern error_func error;
 extern error_func warning;
@@ -118,19 +117,13 @@ do { \
 #define STRNDUP(STRING,LEN) (strncpy (zalloc ((LEN) + 1), (STRING), (LEN)))
 #endif
 
-extern void *zalloc
-(long size);
+extern void *zalloc (long size);
 
-extern unsigned target_a2i
-(int ms_bit_nr,
- const char *a);
+extern unsigned target_a2i (int ms_bit_nr, const char *a);
 
-extern unsigned i2target
-(int ms_bit_nr,
- unsigned bit);
+extern unsigned i2target (int ms_bit_nr, unsigned bit);
 
-extern unsigned long long a2i
-(const char *a);
+extern unsigned long long a2i (const char *a);
 
 
 /* Try looking for name in the map table (returning the corresponding
@@ -139,15 +132,13 @@ extern unsigned long long a2i
    If the the sentinal (NAME == NULL) its value if >= zero is returned
    as the default. */
 
-typedef struct _name_map {
+typedef struct _name_map
+{
   const char *name;
   int i;
-} name_map;
+}
+name_map;
 
-extern int name2i
-(const char *name,
- const name_map *map);
+extern int name2i (const char *name, const name_map * map);
 
-extern const char *i2name
-(const int i,
- const name_map *map);
+extern const char *i2name (const int i, const name_map * map);

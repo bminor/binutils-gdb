@@ -22,19 +22,10 @@
    Boston, MA 02111-1307, USA.  */
 
 extern void gen_engine_h
-(lf *file,
- gen_table *gen,
- insn_table *isa,
- cache_entry *cache_rules);
+  (lf *file, gen_table *gen, insn_table *isa, cache_entry *cache_rules);
 
 extern void gen_engine_c
-(lf *file,
- gen_table *gen,
- insn_table *isa,
- cache_entry *cache_rules);
+  (lf *file, gen_table *gen, insn_table *isa, cache_entry *cache_rules);
 
 extern void print_engine_run_function_header
-(lf *file,
- char *processor,
- function_decl_type decl_type);
-
+  (lf *file, char *processor, function_decl_type decl_type);

@@ -25,6 +25,5 @@
 #define _FILTER_HOST_H
 
 /* Remove directory part from filename */
-extern const char *
-filter_filename(const char *filename);
+extern const char *filter_filename (const char *filename);
 #endif
