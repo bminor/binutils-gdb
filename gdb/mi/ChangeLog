@@ -1,3 +1,7 @@
+2001-03-28  Andrew Cagney  <ac131313@redhat.com>
+
+	* mi-main.c (mi_cmd_data_read_memory): Use xcalloc.
+
 2001-03-26  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* gdbmi.texinfo: Update copyright.  Change Permissions to GFDL.

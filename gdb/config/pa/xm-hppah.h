@@ -30,10 +30,3 @@
 #define USG
 
 #define HAVE_TERMIOS
-
-/* HP defines malloc and realloc as returning void *, even for non-ANSI
-   compilations (such as with the native compiler). */
-
-#define MALLOC_INCOMPATIBLE
-
-extern void *malloc (size_t);

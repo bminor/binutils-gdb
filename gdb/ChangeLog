@@ -1,5 +1,11 @@
 2001-03-28  Andrew Cagney  <ac131313@redhat.com>
 
+	* config/pa/xm-hppah.h (malloc): Really delete declaration
+	(MALLOC_INCOMPATIBLE): Really delete macro.
+	* cli/cli-cmds.c (apropos_command): Use xcalloc.
+
+2001-03-28  Andrew Cagney  <ac131313@redhat.com>
+
 	* configure.in (build_warnings): Add -Wuninitialized.
 	* configure: Regenerate.
 

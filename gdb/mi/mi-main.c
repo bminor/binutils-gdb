@@ -859,7 +859,7 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
 
   /* create a buffer and read it in. */
   total_bytes = word_size * nr_rows * nr_cols;
-  mbuf = calloc (total_bytes, 1);
+  mbuf = xcalloc (total_bytes, 1);
   make_cleanup (xfree, mbuf);
   if (mbuf == NULL)
     {

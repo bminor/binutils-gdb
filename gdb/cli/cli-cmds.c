@@ -542,7 +542,7 @@ apropos_command (char *searchstr, int from_tty)
   regex_t pattern;
   char *pattern_fastmap;
   char errorbuffer[512];
-  pattern_fastmap=calloc(256,sizeof(char));
+  pattern_fastmap = xcalloc (256, sizeof (char));
   if (searchstr == NULL)
       error("REGEXP string is empty");
 
