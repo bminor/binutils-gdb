@@ -33,29 +33,40 @@ const char *md_shortopts = "";
 const char EXP_CHARS[] = "eE";
 const char FLT_CHARS[] = "dD";
 
-/* local functions */
-static int reg_name_search PARAMS ((char *name));
-static void register_name PARAMS ((expressionS *expressionP));
-static int postfix PARAMS ((char *p));
-static bfd_reloc_code_real_type get_reloc PARAMS ((struct d10v_operand *op));
-static int get_operands PARAMS ((expressionS exp[]));
-static unsigned long build_insn PARAMS ((struct d10v_opcode *opcode, expressionS *opers));
-static void write_long PARAMS ((struct d10v_opcode *opcode, unsigned long insn));
-static void write_1_short PARAMS ((struct d10v_opcode *opcode, unsigned long insn));
-static int write_2_short PARAMS ((struct d10v_opcode *opcode1, unsigned long insn1, 
-				  struct d10v_opcode *opcode2, unsigned long insn2, int exec_type));
-static unsigned long do_assemble PARAMS ((char *str, struct d10v_opcode **opcode));
 
 /* fixups */
 #define MAX_INSN_FIXUPS (5)
 struct d10v_fixup
 {
   expressionS exp;
-  int opindex;
   bfd_reloc_code_real_type reloc;
 };
-struct d10v_fixup fixups[MAX_INSN_FIXUPS];
-static int fc;
+
+typedef struct _fixups
+{
+  int fc;
+  struct d10v_fixup fix[MAX_INSN_FIXUPS];
+  struct _fixups *next;
+} Fixups;
+
+static Fixups FixUps[2];
+static Fixups *fixups;
+
+/* local functions */
+static int reg_name_search PARAMS ((char *name));
+static int register_name PARAMS ((expressionS *expressionP));
+static int postfix PARAMS ((char *p));
+static bfd_reloc_code_real_type get_reloc PARAMS ((struct d10v_operand *op));
+static int get_operands PARAMS ((expressionS exp[]));
+static unsigned long build_insn PARAMS ((struct d10v_opcode *opcode, expressionS *opers));
+static void write_long PARAMS ((struct d10v_opcode *opcode, unsigned long insn, Fixups *fx));
+static void write_1_short PARAMS ((struct d10v_opcode *opcode, unsigned long insn, Fixups *fx));
+static int write_2_short PARAMS ((struct d10v_opcode *opcode1, unsigned long insn1, 
+				  struct d10v_opcode *opcode2, unsigned long insn2, int exec_type, Fixups *fx));
+static unsigned long do_assemble PARAMS ((char *str, struct d10v_opcode **opcode));
+static unsigned long d10v_insert_operand PARAMS (( unsigned long insn, int op_type,
+						   offsetT value, int left));
+
 
 struct option md_longopts[] = {
   {NULL, no_argument, NULL, 0}
@@ -65,70 +76,11 @@ size_t md_longopts_size = sizeof(md_longopts);
 /* The target specific pseudo-ops which we support.  */
 const pseudo_typeS md_pseudo_table[] =
 {
-  /*
-  { "byte",     ppc_byte,       0 },
-  { "long",     ppc_elf_cons,   4 },
-  { "word",     ppc_elf_cons,   2 },
-  { "short",    ppc_elf_cons,   2 },
-  { "rdata",    ppc_elf_rdata,  0 },
-  { "rodata",   ppc_elf_rdata,  0 },
-  { "lcomm",    ppc_elf_lcomm,  0 },
-  */
   { NULL,       NULL,           0 }
 };
 
 /* Opcode hash table.  */
 static struct hash_control *d10v_hash;
-
-/* Structure to hold information about predefined registers.  */
-struct pd_reg
-{
-  char *name;
-  int value;
-};
-
-
-/* an expressionS only has one register type, so we fake it */
-/* by setting high bits to indicate type */
-#define REGISTER_MASK		0xFF
-
-/*   The table is sorted. Suitable for searching by a binary search. */
-static const struct pd_reg pre_defined_registers[] =
-{
-  { "a0", OPERAND_ACC+0 },
-  { "a1", OPERAND_ACC+1 },
-  { "bpc", OPERAND_CONTROL+3 },
-  { "bpsw", OPERAND_CONTROL+1 },
-  { "c", OPERAND_FLAG+3 },
-  { "f0", OPERAND_FLAG+0 },
-  { "f1", OPERAND_FLAG+1 },
-  { "iba", OPERAND_CONTROL+14 },
-  { "mod_e", OPERAND_CONTROL+11 },
-  { "mod_s", OPERAND_CONTROL+10 },
-  { "pc", OPERAND_CONTROL+2 },
-  { "psw", OPERAND_CONTROL+0 },
-  { "r0", 0 },
-  { "r1", 1 },
-  { "r10", 10 },
-  { "r11", 11 },
-  { "r12", 12 },
-  { "r13", 13 },
-  { "r14", 14 },
-  { "r15", 15 },
-  { "r2", 2 },
-  { "r3", 3 },
-  { "r4", 4 },
-  { "r5", 5 },
-  { "r6", 6 },
-  { "r7", 7 },
-  { "r8", 8 },
-  { "r9", 9 },
-  { "rpt_c", OPERAND_CONTROL+7 },
-  { "rpt_e", OPERAND_CONTROL+9 },
-  { "rpt_s", OPERAND_CONTROL+8 },
-  { "sp", 15 },
-};
-#define REG_NAME_CNT	(sizeof(pre_defined_registers) / sizeof(struct pd_reg))
 
 /* reg_name_search does a binary search of the pre_defined_registers
    array to see if "name" is a valid regiter name.  Returns the register
@@ -142,7 +94,7 @@ reg_name_search (name)
   int cmp;
 
   low = 0;
-  high = REG_NAME_CNT - 1;
+  high = reg_name_cnt() - 1;
 
   do
     {
@@ -159,30 +111,37 @@ reg_name_search (name)
   return -1;
 }
 
+/* register_name() checks the string at input_line_pointer
+   to see if it is a valid register name */
 
-/* register_name check to see if an expression is a valid
-   register name.  If it is, it marks the expression type 
-   as O_register. */
-
-static void
+static int
 register_name (expressionP)
      expressionS *expressionP;
 {
   int reg_number;
-  char *name;
+  char c, *p = input_line_pointer;
+  
+  while (*p && *p!='\n' && *p!='\r' && *p !=',' && *p!=' ' && *p!=')')
+    p++;
 
-  if (expressionP->X_op == O_symbol) 
+  c = *p;
+  if (c)
+    *p++ = 0;
+
+  /* look to see if it's in the register table */
+  reg_number = reg_name_search (input_line_pointer);
+  if (reg_number >= 0) 
     {
-      name = (char *)S_GET_NAME (expressionP->X_add_symbol);
-      reg_number = reg_name_search (name);
-
-      /* look to see if it's in the register table */
-      if (reg_number >= 0) 
-	{
-	  expressionP->X_op = O_register;
-	  expressionP->X_add_number = reg_number;
-	}
+      expressionP->X_op = O_register;
+      /* temporarily store a pointer to the string here */
+      expressionP->X_op_symbol = (struct symbol *)input_line_pointer;
+      expressionP->X_add_number = reg_number;
+      input_line_pointer = p;
+      return 1;
     }
+  if (c)
+    *(p-1) = c;
+  return 0;
 }
 
 void
@@ -223,7 +182,7 @@ md_convert_frag (abfd, sec, fragP)
   asection *sec;
   fragS *fragP;
 {
-  /* printf ("call to md_convert_frag \n"); */
+  printf ("call to md_convert_frag \n");
   abort ();
 }
 
@@ -235,6 +194,7 @@ md_section_align (seg, addr)
   int align = bfd_get_section_alignment (stdoutput, seg);
   return ((addr + (1 << align) - 1) & (-1 << align));
 }
+
 
 void
 md_begin ()
@@ -256,6 +216,10 @@ md_begin ()
 	  hash_insert (d10v_hash, opcode->name, (char *) opcode);
 	}
     }
+
+  fixups = &FixUps[0];
+  FixUps[0].next = &FixUps[1];
+  FixUps[1].next = &FixUps[0];
 }
 
 
@@ -299,8 +263,8 @@ get_reloc (op)
       
   if (op->flags & OPERAND_ADDR) 
     {
-      if (bits == 8) 
-	  return (BFD_RELOC_D10V_10_PCREL_R);
+      if (bits == 8)
+	return (BFD_RELOC_D10V_10_PCREL_R);
       else
 	  return (BFD_RELOC_D10V_18_PCREL);
     }
@@ -357,10 +321,14 @@ get_operands (exp)
 	}
 
       input_line_pointer = p;
-      /* create an expression */
-      expression (&exp[numops]);
+
+
       /* check to see if it might be a register name */
-      register_name (&exp[numops]);
+      if (!register_name (&exp[numops]))
+	{
+	  /* parse as an expression */
+	  expression (&exp[numops]);
+	}
 
       if (exp[numops].X_op == O_illegal) 
 	as_bad ("illegal operand");
@@ -388,14 +356,18 @@ get_operands (exp)
 }
 
 static unsigned long
-d10v_insert_operand (insn, op_type, value) 
+d10v_insert_operand (insn, op_type, value, left) 
      unsigned long insn;
      int op_type;
      offsetT value;
+     int left;
 {
   int shift, bits;
 
   shift = d10v_operands[op_type].shift;
+  if (left)
+    shift += 15;
+
   bits = d10v_operands[op_type].bits;
   /* truncate to the proper number of bits */
   /* FIXME: overflow checking here? */
@@ -443,14 +415,14 @@ build_insn (opcode, opers)
 	  printf("\n");
 	  */
 
-	  if (fc >= MAX_INSN_FIXUPS)
+	  if (fixups->fc >= MAX_INSN_FIXUPS)
 	    as_fatal ("too many fixups");
-	  fixups[fc].exp = opers[i];
+	  fixups->fix[fixups->fc].exp = opers[i];
 
 	  /* put the operand number here for now.  We can look up
 	     the reloc type and/or fixup the instruction in md_apply_fix() */
-	  fixups[fc].reloc = opcode->operands[i];
-	  fc++;
+	  fixups->fix[fixups->fc].reloc = opcode->operands[i];
+	  (fixups->fc)++;
 	}
 
       /* truncate to the proper number of bits */
@@ -463,84 +435,92 @@ build_insn (opcode, opers)
 
 /* write out a long form instruction */
 static void
-write_long (opcode, insn) 
+write_long (opcode, insn, fx) 
      struct d10v_opcode *opcode;
      unsigned long insn;
+     Fixups *fx;
 {
   int i;
   char *f = frag_more(4);
 
   insn |= FM11;
-  /*  printf("INSN: %08x\n",insn); */
+  /* printf("INSN: %08x\n",insn); */
   number_to_chars_bigendian (f, insn, 4);
 
-  for (i=0; i<fc; i++) 
+  for (i=0; i < fx->fc; i++) 
     {
-      if (get_reloc((struct d10v_operand *)&d10v_operands[fixups[i].reloc])) 
+      if (get_reloc((struct d10v_operand *)&d10v_operands[fx->fix[i].reloc]))
 	{ 
 	  /*
 	  printf("fix_new_exp: where:%x size:4\n    ",f - frag_now->fr_literal);
-	  print_expr_1(stdout,&fixups[i].exp);
+	  print_expr_1(stdout,&(fx->fix[i].exp));
 	  printf("\n");
 	  */
-	  
+
 	  fix_new_exp (frag_now,
 		       f - frag_now->fr_literal, 
 		       4,
-		       &fixups[i].exp,
+		       &(fx->fix[i].exp),
 		       1,
-		       fixups[i].reloc);
+		       fx->fix[i].reloc);
 	}
     }
+  fx->fc = 0;
 }
+
 
 /* write out a short form instruction by itself */
 static void
-write_1_short (opcode, insn) 
+write_1_short (opcode, insn, fx) 
      struct d10v_opcode *opcode;
      unsigned long insn;
+     Fixups *fx;
 {
   char *f = frag_more(4);
   int i;
 
   insn |= FM00 | (NOP << 15);
-  /*  printf("INSN: %08x\n",insn); */
+  /*  printf("INSN: %08x\n",insn);  */
   number_to_chars_bigendian (f, insn, 4);
-  for (i=0; i<fc; i++) 
+  for (i=0; i < fx->fc; i++) 
     {
-      if (get_reloc((struct d10v_operand *)&d10v_operands[fixups[i].reloc])) 
+      if (get_reloc((struct d10v_operand *)&d10v_operands[fx->fix[i].reloc])) 
 	{ 
 	  /*
 	  printf("fix_new_exp: where:%x size:4\n    ",f - frag_now->fr_literal);
-	  print_expr_1(stdout,&fixups[i].exp);
+	  print_expr_1(stdout,&(fx->fix[i].exp));
 	  printf("\n");
 	  */
 
 	  fix_new_exp (frag_now,
 		       f - frag_now->fr_literal, 
 		       4,
-		       &fixups[i].exp,
+		       &(fx->fix[i].exp),
 		       1,
-		       fixups[i].reloc);
+		       fx->fix[i].reloc);
 	}
     }
+  fx->fc = 0;
 }
 
 /* write out a short form instruction if possible */
 /* return number of instructions not written out */
 static int
-write_2_short (opcode1, insn1, opcode2, insn2, exec_type) 
+write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx) 
      struct d10v_opcode *opcode1, *opcode2;
      unsigned long insn1, insn2;
      int exec_type;
+     Fixups *fx;
 {
   unsigned long insn;
+  char *f;
+  int i,j;
 
   if(opcode1->exec_type == BRANCH_LINK)
     {
       /* subroutines must be called from 32-bit boundaries */
       /* so the return address will be correct */
-      write_1_short (opcode1, insn1);
+      write_1_short (opcode1, insn1, fx->next);
       return (1);
     }
 
@@ -549,18 +529,22 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type)
     case 0:
       if (opcode1->unit == IU) 
 	{
+	  /* reverse sequential */
 	  insn = FM10 | (insn2 << 15) | insn1;
 	}
       else
 	{
-	  insn = FM01 | (insn1 << 15) | insn2;  
+	  insn = FM01 | (insn1 << 15) | insn2;
+	  fx = fx->next;  
 	}
       break;
     case 1:	/* parallel */
 	  insn = FM00 | (insn1 << 15) | insn2;  
+	  fx = fx->next;
       break;
     case 2:	/* sequential */
 	  insn = FM01 | (insn1 << 15) | insn2;  
+	  fx = fx->next;
       break;
     case 3:	/* reverse sequential */
 	  insn = FM10 | (insn1 << 15) | insn2;  
@@ -570,7 +554,37 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type)
     }
 
   /*  printf("INSN: %08x\n",insn); */
-  number_to_chars_bigendian (frag_more(4), insn, 4);
+  f = frag_more(4);
+  number_to_chars_bigendian (f, insn, 4);
+
+for (j=0; j<2; j++) 
+  {
+    bfd_reloc_code_real_type reloc;
+    for (i=0; i < fx->fc; i++) 
+      {
+	reloc = get_reloc((struct d10v_operand *)&d10v_operands[fx->fix[i].reloc]);
+	if (reloc)
+	  {
+	    if ( (reloc == BFD_RELOC_D10V_10_PCREL_R) && (j == 0) )
+	      fx->fix[i].reloc |= 1024;
+	    
+	    /*
+	    printf("fix_new_exp: where:%x reloc:%d\n    ",f - frag_now->fr_literal,fx->fix[i].reloc);
+	    print_expr_1(stdout,&(fx->fix[i].exp));
+	    printf("\n");
+	    */
+	    fix_new_exp (frag_now,
+			 f - frag_now->fr_literal, 
+			 4,
+			 &(fx->fix[i].exp),
+			 1,
+			 fx->fix[i].reloc);
+	  }
+      }
+    fx->fc = 0;
+    fx = fx->next;
+  }
+
   return (0);
 }
 
@@ -583,6 +597,8 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type)
 
 static unsigned long prev_insn;
 static struct d10v_opcode *prev_opcode = 0;
+static subsegT prev_subseg;
+static segT prev_seg;
 
 void
 md_assemble (str)
@@ -594,8 +610,7 @@ md_assemble (str)
   char *str2;
 
   /*  printf("md_assemble: str=%s\n",str); */
-  fc = 0;
-  
+
   /* look for the special multiple instruction seperators */
   str2 = strstr (str, "||");
   if (str2) 
@@ -622,10 +637,11 @@ md_assemble (str)
       /* if two instructions are present and we already have one saved
 	 then first write it out */
       if (prev_opcode) 
-	write_1_short (prev_opcode, prev_insn);
+	  write_1_short (prev_opcode, prev_insn, fixups->next);
       
       /* assemble first instruction and save it */
       prev_insn = do_assemble (str, &prev_opcode);
+      fixups = fixups->next;
       str = str2 + 2;
     }
 
@@ -638,15 +654,15 @@ md_assemble (str)
 	as_fatal("Unable to mix instructions as specified");
       if (prev_opcode) 
 	{
-	  write_1_short (prev_opcode, prev_insn);
+	  write_1_short (prev_opcode, prev_insn, fixups->next);
 	  prev_opcode = NULL;
 	}
-      write_long (opcode, insn);
+      write_long (opcode, insn, fixups);
       prev_opcode = NULL;
       return;
     }
   
-  if (prev_opcode && (write_2_short (prev_opcode, prev_insn, opcode, insn, t) == 0)) 
+  if (prev_opcode && (write_2_short (prev_opcode, prev_insn, opcode, insn, t, fixups) == 0)) 
     {
       /* no instructions saved */
       prev_opcode = NULL;
@@ -658,6 +674,9 @@ md_assemble (str)
       /* save off last instruction so it may be packed on next pass */
       prev_opcode = opcode;
       prev_insn = insn;
+      prev_seg = now_seg;
+      prev_subseg = now_subseg;
+      fixups = fixups->next;
     }
 }
 
@@ -675,7 +694,7 @@ do_assemble (str, opcode)
   expressionS myops[6];
   unsigned long insn;
 
-  /*  printf("do_assemble: str=%s\n",str);*/
+  /* printf("do_assemble: str=%s\n",str); */
 
   /* Drop leading whitespace */
   while (*str == ' ')
@@ -780,7 +799,9 @@ do_assemble (str, opcode)
 	  if (!(d10v_operands[(*opcode)->operands[i]].flags & OPERAND_REG)) 
 	    {
 	      myops[i].X_op = O_symbol;
+	      myops[i].X_add_symbol = symbol_find_or_make ((char *)myops[i].X_op_symbol);
 	      myops[i].X_add_number = 0;
+	      myops[i].X_op_symbol = NULL;
 	      /* FIXME create a fixup */
 	    }
 	}
@@ -849,6 +870,7 @@ md_apply_fix3 (fixp, valuep, seg)
   char *where;
   unsigned long insn;
   int op_type;
+  int left=0;
 
   if (fixp->fx_addsy == (symbolS *) NULL)
     {
@@ -873,20 +895,25 @@ md_apply_fix3 (fixp, valuep, seg)
 	}
     }
   
-  /*   printf("md_apply_fix: value=0x%x  type=%d\n",  value, fixp->fx_r_type); */
+  /* printf("md_apply_fix: value=0x%x  type=%d\n",  value, fixp->fx_r_type);  */
 
   op_type = fixp->fx_r_type;
-  fixp->fx_r_type = get_reloc((struct d10v_operand *)&d10v_operands[op_type]); 
-
-  /*  printf("reloc=%d\n",fixp->fx_r_type); */
+  if (op_type & 1024)
+    {
+      op_type -= 1024;
+      fixp->fx_r_type = BFD_RELOC_D10V_10_PCREL_L;
+      left = 1;
+    }
+  else
+    fixp->fx_r_type = get_reloc((struct d10v_operand *)&d10v_operands[op_type]); 
 
   /* Fetch the instruction, insert the fully resolved operand
      value, and stuff the instruction back again.  */
   where = fixp->fx_frag->fr_literal + fixp->fx_where;
   insn = bfd_getb32 ((unsigned char *) where);
-  /* printf("   insn=%x  value=%x\n",insn,value); */
+  /* printf("   insn=%x  value=%x\n",insn,value);  */
 
-  insn = d10v_insert_operand (insn, op_type, (offsetT) value);
+  insn = d10v_insert_operand (insn, op_type, (offsetT) value, left);
   
   /* printf("   new insn=%x\n",insn); */
   
@@ -899,29 +926,24 @@ md_apply_fix3 (fixp, valuep, seg)
   return 1;
 }
 
-/* This is called after the assembler has finished parsing the input 
-   file.  Because the D10V assembler sometimes saves short instructions
-   to see if it can package them with the next instruction, there may
+
+/* d10v_cleanup() is called after the assembler has finished parsing the input 
+   file or after a label is defined.  Because the D10V assembler sometimes saves short 
+   instructions to see if it can package them with the next instruction, there may
    be a short instruction that still needs written.  */
-
-int md_after_pass()
-{
-  if (prev_opcode) 
-    {
-      write_1_short (prev_opcode, prev_insn);
-      prev_opcode = NULL;
-    }
-}
-
-
-/* there is a label to be defined.  Any saved instruction must
-   be written out. */
 int
-start_label()
+d10v_cleanup()
 {
+  segT seg;
+  subsegT subseg;
+
   if (prev_opcode) 
     {
-      write_1_short (prev_opcode, prev_insn);
+      seg = now_seg;
+      subseg = now_subseg;
+      subseg_set (prev_seg, prev_subseg);
+      write_1_short (prev_opcode, prev_insn, fixups);
+      subseg_set (seg, subseg);
       prev_opcode = NULL;
     }
   return 1;

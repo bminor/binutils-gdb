@@ -46,12 +46,10 @@
 /* We don't need to handle .word strangely.  */
 #define WORKING_DOT_WORD
 
-
 #define md_number_to_chars           number_to_chars_bigendian
 
-#define md_after_pass_hook	     md_after_pass
-
-extern int start_label PARAMS ((void));
-#define TC_START_LABEL(ch, ptr)  (ch == ':' && start_label())
+int d10v_cleanup PARAMS ((void));
+#define md_after_pass_hook()	     d10v_cleanup()
+#define TC_START_LABEL(ch, ptr)  (ch == ':' && d10v_cleanup())
 
 

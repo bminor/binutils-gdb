@@ -1,3 +1,13 @@
+start-sanitize-d10v
+Mon Jul 22 11:32:36 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* config/tc-d10v.c: Many changes to get relocs working.
+ 	(register_name): No longer creates a symbol for register names.
+ 	(pre_defined_registers): moved to opcodes/d10v-opc.c.
+	(d10v_insert_operand): Now works correctly for either container.
+	* config/tc-d10v.h (d10v_cleanup): Declare. 
+	
+end-sanitize-d10v	
 Mon Jul 22 14:01:33 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-mips.c (tc_gen_reloc): BFD_RELOC_PCREL_HI16_S and
