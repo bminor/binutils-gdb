@@ -35,7 +35,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "ada-lang.h"
 
 #include <ctype.h>
-#include <string.h>
+#include "gdb_string.h"
 #include <errno.h>
 
 static int print_record_field_types (struct type *, struct type *,
