@@ -1,3 +1,8 @@
+Tue Oct 10 08:49:00 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* complete.c (filename_completion_function): Enable for
+	win32 when not MSC.
+
 Sun Oct  8 04:17:19 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* configure.in:  Handle powerpc-ibm-aix* like rs6000-ibm-aix*.
