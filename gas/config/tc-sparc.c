@@ -615,7 +615,7 @@ sparc_md_end ()
   /* ??? We could delete this test, I think.  */
   if (current_architecture != initial_architecture)
     {
-#ifdef BFD64
+#ifdef SPARC_ARCH64
       if (current_architecture < v9)
 	abort ();
       else if (current_architecture == v9)
