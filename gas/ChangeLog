@@ -1,5 +1,8 @@
 2000-06-18  Nick Clifton  <nickc@redhat.com>
 
+	* symbols.c (resolve_symbol_value): Use bfd_octets_per_byte
+	instead of OCTETS_PER_BYTE.
+
 	* config/tc-v850.c: Fix compile time warnings.
 	* config/tc-ppc.c: Fix compile time warnings.
 

@@ -862,10 +862,10 @@ resolve_symbol_value (symp, finalize)
       struct local_symbol *locsym = (struct local_symbol *) symp;
 
       if (local_symbol_resolved_p (locsym))
-	return locsym->lsy_offset / OCTETS_PER_BYTE;
+	return locsym->lsy_offset / bfd_octets_per_byte (stdoutput);
 
       final_val = (local_symbol_get_frag (locsym)->fr_address
-		   + locsym->lsy_offset) / OCTETS_PER_BYTE;
+		   + locsym->lsy_offset) / bfd_octets_per_byte (stdoutput);
 
       if (finalize)
 	{
