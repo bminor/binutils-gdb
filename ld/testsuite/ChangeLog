@@ -1,3 +1,15 @@
+2003-08-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-d10v/reloc-001.d: Adjust for objdump -d change.
+	* ld-d10v/reloc-002.d: Likewise.
+	* ld-d10v/reloc-005.d: Likewise.
+	* ld-d10v/reloc-006.d: Likewise.
+	* ld-d10v/reloc-009.d: Likewise.
+	* ld-d10v/reloc-010.d: Likewise.
+	* ld-d10v/reloc-013.d: Likewise.
+	* ld-d10v/reloc-014.d: Likewise.
+	* ld-xstormy16/pcrel.d: Likewise.
+
 2003-07-29  Jakub Jelinek  <jakub@redhat.com>
 
 	* ld-elfvsb/elf-offset.ld: Add .rel.toc, .rela.toc and .toc

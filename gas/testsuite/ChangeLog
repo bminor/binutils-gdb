@@ -1,3 +1,27 @@
+2003-08-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/d10v/address-001.d: Adjust for objdump -d change.
+	* gas/d10v/control-001.d: Likewise.
+	* gas/d10v/error-001.d: Likewise.
+	* gas/d10v/immediate-001.d: Likewise.
+	* gas/d10v/immediate-002.d: Likewise.
+	* gas/d10v/immediate-003.d: Likewise.
+	* gas/d10v/immediate-006.d: Likewise.
+	* gas/d10v/immediate-007.d: Likewise.
+	* gas/d10v/instruction_packing-001.d: Likewise.
+	* gas/d10v/instruction_packing-002.d: Likewise.
+	* gas/d10v/instruction_packing-003.d: Likewise.
+	* gas/d10v/instruction_packing-004.d: Likewise.
+	* gas/d10v/instruction_packing-006.d: Likewise.
+	* gas/d10v/instruction_packing-007.d: Likewise.
+	* gas/d10v/instruction_packing-008.d: Likewise.
+	* gas/d10v/instruction_packing-009.d: Likewise.
+	* gas/d10v/instruction_packing-010.d: Likewise.
+	* gas/d10v/instruction_packing.d: Likewise.
+	* gas/d10v/label-001.d: Likewise.
+	* gas/d10v/warning-014.d: Likewise.
+	* gas/m88k/init.d: Likewise.
+
 2003-08-01  Jason Eckhardt  <jle@rice.edu>
 
 	* gas/i860/README.i860: New file.

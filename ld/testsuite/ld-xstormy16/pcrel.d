@@ -1,7 +1,6 @@
 
 .*:     file format elf32-xstormy16
 
-Disassembly of section .data:
 Disassembly of section .text:
 
 00008000 <_start>:
