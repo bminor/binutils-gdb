@@ -123,7 +123,9 @@ extern int elf32_sparc_force_relocation PARAMS ((struct fix *));
 /* Keep relocations against global symbols.  Don't turn them into
    relocations against sections.  This is required for the dynamic
    linker to operate properly.  When generating PIC, we need to keep
-   any non PC relative reloc.  */
+   any non PC relative reloc.  The PIC part of this test must be
+   parallel to the code in tc_gen_reloc which converts relocations to
+   GOT relocations.  */
 #define tc_fix_adjustable(FIX)						\
   (! S_IS_EXTERNAL ((FIX)->fx_addsy)					\
    && ! S_IS_WEAK ((FIX)->fx_addsy)					\

@@ -3144,6 +3144,8 @@ tc_gen_reloc (section, fixp)
 #define GOT_NAME "__GLOBAL_OFFSET_TABLE_"
 #endif
 
+  /* This code must be parallel to the OBJ_ELF tc_fix_adjustable.  */
+
   if (sparc_pic_code)
     {
       switch (code)
