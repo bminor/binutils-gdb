@@ -1,3 +1,9 @@
+2002-12-17  Richard Earnshaw  <rearnsha@arm.com>
+
+	* armnbsd-tdep.c (ARM_NBSD_JB_PC): Renamed from JB_PC.
+	All uses changed
+	(ARM_NBSD_JB_ELELMENT_SIZE): Similarly.
+
 2002-12-17  David Carlton  <carlton@math.stanford.edu>
 
 	* symtab.c (lookup_partial_symbol): Don't search past the end of
