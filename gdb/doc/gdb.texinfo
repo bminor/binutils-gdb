@@ -47,8 +47,9 @@ original English.
 @center Richard M. Stallman
 @center (Revised by Cygnus Support)
 @page
-@hfill Cygnus Support---Document $ $Header$ $
-@hfill @TeXinfo \texinfoversion
+@hfill Cygnus Support
+@par@hskip -@parfillskip@hfill $Revision$
+@par@hskip -@parfillskip@hfill @TeX{}info @texinfoversion
 @vskip 0pt plus 1filll
 Copyright @copyright{} 1988, 1989, 1990 Free Software Foundation, Inc.
 
@@ -118,6 +119,7 @@ Fortran compiler is written.
 * Sequences::  Canned command sequences for repeated use.
 * Emacs::      Using GDB through GNU Emacs.
 * Remote::     Remote kernel debugging across a serial line.
+* GDB Bugs::   How to report bugs (if you want to get them fixed).
 * Commands::   Index of GDB commands.
 * Concepts::   Index of GDB concepts.
 @end menu
@@ -459,7 +461,7 @@ instance, when debugging GDB with GDB, it is useful to change the prompt
 in one of the GDBs so that you tell which one you are talking to.
 
 @table @code
-@item set prompt @samp{newprompt}
+@item set prompt @var{newprompt}
 @kindex set prompt
 Directs GDB to use @samp{newprompt} as its prompt string henceforth.
 @kindex show prompt
@@ -469,19 +471,20 @@ Prints the line: Gdb's prompt is: @samp{your-prompt}
 
 @cindex exiting GDB
 @kindex quit
-To exit GDB, use the @samp{quit} command (abbreviated @samp{q}).
-@kbd{Ctrl-c} will not exit from GDB, but rather will terminate the action
+To exit GDB, use the @samp{quit} command (abbreviated @samp{q}), or type
+an end-of-file character (usually @ctrl{d}).  An interrupt (often
+@ctrl{c}) will not exit from GDB, but rather will terminate the action
 of any GDB command that is in progress and return to GDB command level.
-It is safe to type @kbd{Ctrl-c} at any time because GDB does not allow
-it to take effect until a time when it is safe.
+It is safe to type the interrupt character at any time because GDB does
+not allow it to take effect until a time when it is safe.
 
 @cindex readline
 @cindex command line editing
 @cindex history substitution
 GDB now reads its input commands via the @code{readline} interface. 
-This GNU utility provides consistant behaviour for programs which
-need to provide a command line interface to the user.  From the point 
-of view of the user, the new gains are @samp{emacs}-style or @samp{vi}-style
+This GNU library provides consistant behaviour for programs which
+provide a command line interface to the user.  From the point 
+of view of the user, the advantages are @samp{emacs}-style or @samp{vi}-style
 inline editing of commands, @samp{csh}-like history substitution,
 and a storage and recall of command history across debugging sessions.
 
@@ -497,15 +500,6 @@ Enable command line editing (enabled by default).
 @item set editing off
 Disable command line editing.
 
-@kindex set editing-mode 
-@item set editing-mode @samp{vi}
-Use @samp{vi}-style editing, rather than @samp{emacs}-style.
-@item set editing-mode @samp{emacs}
-Return to use of @samp{emacs}-style.
-
-Users who wish to temporarily to @samp{vi}-style, can use the commands
-@kbd{Control-meta-J} or @kbd{ESC-Control-J}.
-
 @kindex info editing
 @item info editing
 Display the current settings relating to command line editing, and also
@@ -518,7 +512,7 @@ Print ten commands centered on command number @var{n}.
 Print ten commands just after the commands last printed.
 
 @kindex set history file
-@item set history file @samp{filename}
+@item set history file @var{filename}
 Set the name of the GDB command history file to @samp{filename}.  This is
 the file from which GDB will read an initial command history
 list or to which it will write this list when it exits.  This list is
@@ -530,11 +524,11 @@ value of the environmental variable @code{GDBHISTFILE}, or to
 @kindex set history write
 @item set history write
 @itemx set history write on
-Enable the writing of the command history to the command history file
-named above.  This is enabled by default.
+Make GDB record command history in a file, whose name may be specified with the
+@samp{set history file} command.  By default, this option is disabled.
 
 @item set history write off
-Disable the writing of the command history to the command history file. 
+Make GDB stop recording command history in a file.
 
 @kindex set history size
 @item set history size @var{size}
@@ -545,12 +539,6 @@ This defaults to the value of the environmental variable
 
 @cindex history expansion
 
-Because of the additional meaning of @code{!} to GDB (as the
-logical not operator in C), history expansion is off by default.  If you
-decide to enable history expansion with the @samp{set history expansion
-on} command, you will need to follow @samp{!} with a space or a tab to
-prevent it from being expanded.
-
 The commands to control history expansion are:
 
 @table @code
@@ -558,28 +546,41 @@ The commands to control history expansion are:
 @kindex set history expansion
 @item set history expansion on
 @itemx set history expansion
-Enable history expansion.
+Enable history expansion.  History expansion is off by default.
 
 @item set history expansion off
-Disable history expansion.  History expansion is off by default.
+Disable history expansion.
 
 @end table
 
+Because of the additional meaning of `@code{!}' to GDB (as the logical
+not operator in C), history expansion is off by default.  If you decide
+to enable history expansion with the @samp{set history expansion on}
+command, you will need to follow @samp{!} (when it is part of an
+expression) with a space or a tab to prevent it from being expanded.
+
+
 The @code{readline} code comes with more complete documentation of
 editing and history expansion features.  Users unfamiliar with @samp{emacs}
-or @samp{vi} may wish to read it.  It is available as appendix A and
-appendix B of this documentation.
+or @samp{vi} may wish to read it. @xref{Command Line Editing}.
 
 Occasionally it is useful to execute a shell command from within GDB.
 This can be done with the @samp{shell} command.
 
 @table @code
-@item shell @var{shell command string}
+@item shell @var{command string}
 @kindex shell
 @cindex shell escape
-Directs GDB to invoke an inferior shell to execute @var{shell command string}.
+Directs GDB to invoke an inferior shell to execute @var{command string}.
 The environment variable @code{SHELL} is used if it exists, otherwise GDB
 uses @samp{/bin/sh}.
+
+@item make @var{target}
+@kindex make
+@cindex calling make
+Causes GDB to execute an inferior @code{make} program with the specified
+arguments.  This is equivalent to @samp{shell make @var{target}}.
+@end table
 
 @cindex screen size
 @cindex pauses in output
@@ -587,8 +588,9 @@ Certain commands to GDB may produce large amounts of information output
 to the screen.  To help you read all of it, GDB pauses and asks you for
 input at the end of each page of output.  Type @key{RET} when you want
 to continue the output.  Normally GDB knows the size of the screen from
-on the termcap data base together with the value of the @code{TERM}
-environment variable; if this is not correct, you can override it with
+the termcap data base together with the value of the @code{TERM}
+environment variable and the @code{stty rows} and @code{stty cols}
+settings. If this is not correct, you can override it with
 the @samp{set screen-height} and @samp{set screen-width} commands:
 
 @table @code
@@ -604,19 +606,10 @@ no matter how long the output is.  This is useful if output is to a file
 or to an editor buffer.
 @end table
 
-
-Also, GDB may at times produce more information about its own workings
-than is of interest to the user.  Some of these informational messages
-can be turned on and off with the @samp{set verbose} command:
-
-@table @code
-@kindex set verbose
-@item set verbose off
-Disables GDB's output of certain informational messages.
-
-@item set verbose on
-Re-enables GDB's output of certain informational messages.
-@end table
+By default, GDB is silent about its inner workings.  If you are running
+on a slow machine, you may want to use the @samp{set verbose} command.
+It will make GDB tell you when it does a lengthy internal operation, so
+you won't think it has crashed.
 
 Currently, the messages controlled by @samp{set verbose} are those which
 announce that the symbol table for a source file is being read
@@ -628,6 +621,40 @@ announce that the symbol table for a source file is being read
 @ignore
 see @samp{symbol-file} in @ref{File Commands}).
 @end ignore
+
+@table @code
+@kindex set verbose
+@item set verbose on
+Enables GDB's output of certain informational messages.
+
+@item set verbose off
+Disables GDB's output of certain informational messages.
+
+@end table
+
+By default, GDB asks what sometimes seem to be a lot of stupid
+questions.  For example, if you try to run a program which is already
+running:
+@example
+
+(gdb) run
+The program being debugged has been started already.
+Start it from the beginning? (y or n) 
+@end example
+
+If you're willing to unflinchingly face the consequences of your own
+commands, you can disable this ``feature'':
+
+@table @code
+@kindex set stupidity
+@cindex flinching
+@cindex verifying commands with serious side effects
+@item set stupidity off
+Disables stupid questions.
+
+@item set stupidity on
+Enables stupid questions (the default).
+
 
 @node Files, Compilation, User Interface, Top
 @chapter Specifying GDB's Files
@@ -676,44 +703,49 @@ files you want to use.  In these situations the GDB commands to specify new
 files are useful.
 
 @table @code
+@item file @var{filename}
+@kindex file
+Use @var{file} as the program to be debugged.  It is read for its
+symbols, for getting the contents of pure memory, and it is the program
+executed when you use the @samp{run} command.  If you do not specify a
+directory and the file is not found in GDB's working directory, GDB will
+use the environment variable @code{PATH} as a list of directories to
+search, just as the shell does when looking for a program to run.
+
+@samp{file} with no argument makes both executable file and symbol
+table become unspecified.
+
 @item exec-file @var{filename}
 @kindex exec-file
-Specify that the program to be run is found in @var{filename}.  If you
-do not specify a directory and the file is not found in GDB's working
-directory, GDB will use the environment variable @code{PATH} as a list
-of directories to search, just as the shell does when looking for a
-program to run.
+Specify that the program to be run (but not the symbol table) is found
+in @var{filename}.  GDB will search the environment variable @code{PATH}
+if necessary to locate the program.
 
 @item symbol-file @var{filename}
 @kindex symbol-file
-Read symbol table information from file @var{filename}.  @code{PATH}
-is searched when necessary.  Most of the time you will use both the
-@samp{exec-file} and @samp{symbol-file} commands on the same file.
+Read symbol table information from file @var{filename}.  @code{PATH} is
+searched when necessary.  Use the @samp{file} command to get both symbol
+table and program to run from the same file.
 
 @samp{symbol-file} with no argument clears out GDB's symbol table.
 
-The @samp{symbol-file} command does not actually read the symbol table in
-full right away.  Instead, it scans the symbol table quickly to find
-which source files and which symbols are present.  The details are read
-later, one source file at a time, when they are needed.
+On some systems, the @samp{symbol-file} command does not actually read
+the symbol table in full right away.  Instead, it scans the symbol table
+quickly to find which source files and which symbols are present.  The
+details are read later, one source file at a time, when they are needed.
 
 The purpose of this two-stage reading strategy is to make GDB start up
-faster.  For the most part, it is invisible except for occasional
-messages telling you that the symbol table details for a particular
-source file are being read.  (The @samp{set verbose} command controls
-whether these messages are printed; @pxref{User Interface}).
-
-However, you will sometimes see in backtraces lines for functions in
-source files whose data has not been read in; these lines omit some of
-the information, such as argument values, which cannot be printed
-without full details of the symbol table.
+faster.  For the most part, it is invisible except for occasional pauses
+while the symbol table details for a particular source file are being
+read.  (The @samp{set verbose} command can turn these pauses into
+messages if desired. @xref{User Interface}).
 
 When the symbol table is stored in COFF format, @samp{symbol-file} does
 read the symbol table data in full right away.  We haven't bothered to
-implement the two-stage strategy for COFF.
+implement the two-stage strategy for COFF yet.
 
-@item core-file @var{filename}
-@kindex core-file
+@item core @var{filename}
+@kindex core
 Specify the whereabouts of a core dump file to be used as the
 ``contents of memory''.  Note that the core dump contains only the
 writable parts of memory; the read-only parts must come from the
@@ -729,7 +761,9 @@ program is running.  To do this, use the @samp{kill} command
 (@pxref{Kill Process}).
 
 @item add-file @var{filename} @var{address}
+@itemx load @var{filename} @var{address}
 @kindex add-file
+@kindex load
 @cindex dynamic linking
 The @samp{add-file} command reads additional symbol table information
 from the file @var{filename}.  You would use this when that file has
@@ -737,17 +771,24 @@ been dynamically loaded into the program that is running.  @var{address}
 should be the memory address at which the file has been loaded; GDB cannot
 figure this out for itself.
 
+When debugging with some targets (@pxref{Targets}), this command will
+also cause the file to be dynamically loaded into the target system.
+@comment FIXME: "some" is obnoxious.  Currently this is only VxWorks.
+@comment       ---pesch 18dec1990
+
 The symbol table of the file @var{filename} is added to the symbol table
 originally read with the @samp{symbol-file} command.  You can use the
 @samp{add-file} command any number of times; the new symbol data thus
 read keeps adding to the old.  The @samp{symbol-file} command forgets
-all the symbol data GDB has read; that is the only time symbol data is
-forgotten in GDB.
+all the symbol data GDB has read.
 
 @item info files
 @kindex info files
 Print the names of the executable and core dump files currently in
-use by GDB, and the file from which symbols were loaded.
+use by GDB, and the file from which symbols were loaded, as well as the
+stack of current targets (@pxref{Targets}).
+
+@end table
 
 While all three file-specifying commands allow both absolute and relative
 file names as arguments, GDB always converts the file name to an absolute
@@ -763,26 +804,32 @@ symbol table data being discarded inside GDB.
 @kindex share
 @cindex shared libraries
 
-GDB can now support Sun's shared library format.  Symbols from a shared
+GDB supports the SunOS shared library format.  Symbols from a shared
 library cannot be referenced before the shared library has been linked
 with the program.  (That is to say, after one types @samp{run} and 
-the function @code{main()} has been entered.)
+the function @code{main()} has been entered; or when examining core
+files.)  Once the shared library has been linked in, you can use the
+following commands:
 
-@item sharedlibrary @samp{regex}
-@itemx share @samp{regex}
+@table @code
+@item sharedlibrary @var{regex}
+@itemx share @var{regex}
 Load shared object library symbols for files matching a UNIX regular
 expresssion.
 
-@item sharedlibrary
-@itemx share
+@item share
+@itemx sharedlibrary
 Load symbols for all shared libraries.
 
+@item info share
+@itemx info sharedlibrary
 @kindex info sharedlibrary
+@kindex info share
 Print the names of the shared libraries which are currently loaded.
 @end table
 
 
-@node Compilation, Running, Files, Top
+@node Compilation, Targets, Files, Top
 @chapter Compiling Your Program for Debugging
 
 In order to debug a program effectively, you need to ask for debugging
@@ -802,8 +849,14 @@ possible to debug optimized code.  We recommend that you @emph{always} use
 @samp{-g} whenever you compile a program.  You may think the program is
 correct, but there's no sense in pushing your luck.
 
-GDB no longer supports the debugging information produced by giving the
-GNU C compiler the @samp{-gg} option, so do not use this option.
+Some things do not work as well with @samp{-g -O} as with just
+@samp{-g}, particularly on machines with instruction scheduling.  If in
+doubt, recompile with @samp{-g} alone, and if this fixes the problem,
+please report it as a bug (including a test case---@pxref{GDB Bugs}).
+
+Older versions of the GNU C compiler, GCC, permitted a variant option
+@samp{-gg} for debugging information.  GDB no longer supports this format;
+if your GNU C compiler has this option, do not use it.
 
 @ignore
 @comment As far as I know, there are no cases in which GDB will
@@ -821,15 +874,62 @@ option or use shorter file names.  Alternatively, use a version of GNU
 @code{ar} dated more recently than August 1989.
 @end ignore
 
-@node Running, Stopping, Compilation, Top
+@node     Targets,    Running, Compilation, Top
+@chapter Specifying a Debugging Target 
+@cindex debugging target
+@kindex target
+Often, you will be able to run GDB in the same host environment as the
+program you are debugging; in that case, the debugging target is
+specified as a side effect of the @samp{file} or @samp{core} commands.
+When you need more flexibility---for example, running GDB on a
+physically separate host, controlling standalone systems over a
+serial port, or realtime systems over a TCP/IP connection---you can use
+the @samp{target} command.
+
+@table @code
+@item target @var{type} @var{parameters}
+Connects the GDB host environment to a target machine or process.  A
+target is typically a protocol for talking to debugging facilities.  You
+use the argument @var{type} to specify the type or protocol of the
+target machine; for example, @samp{target child} for Unix child processes, or
+@samp{target vxworks} for a TCP/IP link to a VxWorks system.  
+
+Further @var{parameters} are interpreted by the target protocol, but
+typically include things like device names or host names to connect
+with, process numbers, and baud rates.  Executing 
+@example
+   target @var{type}
+@end example
+
+@noindent{}(without any parameters) will issue a message about what
+parameters are required for that target type.
+
+@end table
+
+Targets are managed as a stack, so that you may (for example) specify
+a core file as a target without abandoning a running program; when
+you're done with the core file, you can return to the previous target
+using @samp{detach}.  The related command @samp{attach} provides you
+with an alternative way of stacking a new target. @xref{Attach}.
+
+@table @code
+@item info targets
+Displays the names of all targets available.
+@end table
+
+To display the targets currently stacked, use the @samp{info files}
+command (@pxref{File Commands}).
+
+@node Running, Stopping, Targets, Top
 @chapter Running Your Program Under GDB
 
 @cindex running
 @kindex run
-To start your program under GDB, use the @samp{run} command.  The program
-must already have been specified using the @samp{exec-file} command or with
-an argument to GDB (@pxref{Files}); what @samp{run} does is create an
-inferior process, load the program into it, and set it in motion.
+To start your program under GDB, use the @samp{run} command.  Except on
+VxWorks, the program must already have been specified using the
+@samp{file} or @samp{exec-file} command, or with an argument to GDB
+(@pxref{Files}); what @samp{run} does is create an inferior process,
+load the program into it, and set it in motion.
 
 The execution of a program is affected by certain information it
 receives from its superior.  GDB provides ways to specify this
@@ -854,14 +954,17 @@ The program inherits its working directory from GDB.  You can set GDB's
 working directory with the @samp{cd} command in GDB.
 @end table
 
-After the @samp{run} command, the debugger does nothing but wait for your
-program to stop.  @xref{Stopping}.
+When you issue the @samp{run} command, your program begins to execute
+immediately.  @xref{Stopping}, for discussion of how to arrange for your
+program to stop.
 
 Note that once your program has been started by the @samp{run} command,
 you may evaluate expressions that involve calls to functions in the
-inferior.  @xref{Expressions}.  If you wish to evaluate a function
-simply for its side affects, you may use the @samp{set} command.
-@xref{Assignment}.
+inferior, using the @samp{print} or @samp{call} commands.  @xref{Data}.
+
+If your program's timestamp has changed since the last time GDB read its
+symbols, GDB will discard its symbol table and re-read it from your
+program.  In this process, it tries to retain your current breakpoints.
 
 @menu
 * Arguments::          Specifying the arguments for your program.
@@ -923,7 +1026,7 @@ only, not for GDB itself.  @var{value} may be any string; the values of
 environment variables are just strings, and any interpretation is
 supplied by your program itself.  The @var{value} parameter is optional;
 if it is eliminated, the variable is set to a null value.  This command
-can be abbreviated as short as @samp{set e}.
+can be abbreviated as @samp{set e}.
 
 For example, this command:
 
@@ -1017,13 +1120,23 @@ for GDB still comes from your terminal.
 @kindex attach
 @cindex attach
 
-Some operating systems allow GDB to debug an already-running process
-that was started outside of GDB.  To do this, you use the @samp{attach}
-command instead of the @samp{run} command.
+@table @code
+@item attach @var{process--id}
+@itemx attach @var{device}
+This command attaches to another target, of the same type as your last
+@samp{target} command (@samp{info files} will show your target stack).
+The command may take as argument a process ID or a device file.
 
-The @samp{attach} command requires one argument, which is the process-id
-of the process you want to debug.  (The usual way to find out the
-process-id of the process is with the @code{ps} utility.)
+You specify a process ID to debug an already-running process that was
+started outside of GDB.  (The usual way to find out the process-id of
+the process is with the @code{ps} utility, or with the @code{jobs -l}
+shell command.)  In this case, you must have permission to send the
+process a signal, and it must have the same effective user ID as the
+debugger.
+@end table
+
+When using @samp{attach}, you should first use the @samp{file} command
+to specify the program running in the process and load its symbol table.
 
 The first thing GDB does after arranging to debug the process is to stop
 it.  You can examine and modify an attached process with all the GDB
@@ -1040,8 +1153,10 @@ that process and GDB become completely independent once more, and you
 are ready to @samp{attach} another process or start one with @samp{run}.
 
 If you exit GDB or use the @samp{run} command while you have an attached
-process, you kill that process.  You will be asked for confirmation if you
-try to do either of these things.
+process, you kill that process.  By default, you will be asked for
+confirmation if you try to do either of these things; you can control
+whether or not this happens by using the @samp{set stupidity} command
+(@pxref{User Interface}).
 
 The @samp{attach} command is also used to debug a remote machine via a
 serial connection.  @xref{Remote}, for more info.
@@ -1054,22 +1169,24 @@ serial connection.  @xref{Remote}, for more info.
 @kindex kill
 Kill the child process in which the program being debugged is running
 under GDB.
+@end table
 
 This command is useful if you wish to debug a core dump instead.  GDB
 ignores any core dump file if it is actually running the program, so the
 @samp{kill} command is the only sure way to make sure the core dump file
 is used once again.
 
-It is also useful if you wish to run the program outside the debugger
-for once and then go back to debugging it.
+On some operating systems, you can't execute your program in another
+process while it is active inside GDB.  The @samp{kill} command is also
+useful in this situation, if you wish to run the program outside the
+debugger.
 
 The @samp{kill} command is also useful if you wish to recompile and
 relink the program, since on many systems it is impossible to modify an
-executable file which is running in a process.  But, in this case, it is
-just as good to exit GDB, since you will need to read a new symbol table
-after the program is recompiled if you wish to debug the new version,
-and restarting GDB is the easiest way to do that.
-@end table
+executable file which is running in a process.  In this case, when you
+next type @samp{run}, GDB will notice that the file has changed, and
+will re-read the symbol table (while trying to preserve your current
+breakpoint settings).
 
 @node Stopping, Stack, Running, Top
 @chapter Stopping and Continuing
@@ -1190,8 +1307,10 @@ breakpoint you want to change.  Each breakpoint may be @dfn{enabled} or
 @dfn{disabled}; if disabled, it has no effect on the program until you
 enable it again.
 
+@table @code
 @kindex info break
 @kindex $_
+@item info break
 The command @samp{info break} prints a list of all breakpoints set and not
 deleted, showing their numbers, where in the program they are, and any
 special features in use for them.  Disabled breakpoints are included in the
@@ -1200,17 +1319,21 @@ as argument lists only that breakpoint.  The convenience variable @code{$_}
 and the default examining-address for the @samp{x} command are set to the
 address of the last breakpoint listed (@pxref{Memory}).
 
-@cindex watchpoints
-A @dfn{watchpoint} is a special breakpoint that  stops your program 
-when the value of an expression
-changes.  Aside from the different syntax in setting a watchpoint,
-it behaves exactly like any other breakpoint and is enabled, disabled,
-and deleted exactly like any other breakpoint.
-
-@table @code
 @kindex info watch
 @item info watch
 This command prints a list of watchpoints. 
+
+@cindex watchpoints
+A @dfn{watchpoint} is a special breakpoint that stops your program when
+the value of an expression changes.  You can use a watchpoint to stop
+execution whenever the value of an expression changes, without having to
+predict a particular place in the inferior process where this may
+happen.  Aside from the different syntax in setting a watchpoint, it is
+managed exactly like any other breakpoint and is enabled, disabled, and
+deleted exactly like any other breakpoint.
+
+
+
 @end table
 
 @menu
@@ -1301,7 +1424,7 @@ breakpoints set with the @samp{break} command.  They can be deleted,
 disabled, made conditional, etc., in the standard ways.
 
 @kindex watch 
-@item watch @samp{expr}
+@item watch @var{expr}
 Set a watchpoint for an expression.
 @end table
 
@@ -1380,8 +1503,7 @@ Enabled for deletion.  The breakpoint will stop the program, but
 immediately after it does so it will be deleted permanently.
 @end itemize
 
-You change the state of enablement of a breakpoint with the following
-commands:
+You can use the following commands to enable or disable a breakpoint:
 
 @table @code
 @item disable breakpoints @var{bnums}@dots{}
@@ -1414,10 +1536,11 @@ the breakpoints will be deleted the next time it stops the program
 state before that time comes).
 @end table
 
-Aside from the automatic disablement or deletion of a breakpoint when it
-stops the program, which happens only in certain states, the state of
-enablement of a breakpoint changes only when one of the commands above
-is used.
+Save for a breakpoint set with @samp{tbreak} (@pxref{Set Breaks},
+breakpoints that you set are enabled or disabled only when you use one
+of the commands above.  (The command @samp{until} can set and delete a
+breakpoint on its own, but it will not change the state of your
+breakpoints).
 
 @node Conditions, Break Commands, Disabling, Breakpoints
 @subsection Break Conditions
@@ -1474,7 +1597,9 @@ is reached.
 @item ignore @var{bnum} @var{count}
 @kindex ignore
 Set the ignore count of breakpoint number @var{bnum} to @var{count}.
-The next @var{count} times the breakpoint is reached, it will not stop.
+The next @var{count} times the breakpoint is reached, your program's
+execution will not stop; other than to decrement the ignore count, GDB
+takes no action.
 
 To make the breakpoint stop the next time it is reached, specify
 a count of zero.
@@ -1518,7 +1643,7 @@ no commands.
 With no arguments, @samp{commands} refers to the last breakpoint set.
 @end table
 
-It is possible for breakpoint commands to start the program up again.
+You can use breakpoint commands to start the program up again.
 Simply use the @samp{cont} command, or @samp{step}, or any other command
 to resume execution.  However, any remaining breakpoint commands are
 ignored.  When the program stops again, GDB will act according to the
@@ -1596,8 +1721,8 @@ nontrivial conditions for performing the side effects, the operators
 
 Under some operating systems, breakpoints cannot be used in a program if
 any other process is running that program.  Attempting to run or
-continue the program with a breakpoint in this case will cause GDB to
-stop it.
+continue a program with a breakpoint in this case will cause GDB to
+stop that program.
 
 When this happens, you have three ways to proceed:
 
@@ -1728,9 +1853,10 @@ argument.
 
 @item until @var{location}
 Continue running the program until either the specified location is
-reached, or the current (innermost) stack frame returns.  This form of
-the command uses breakpoints, and hence is quicker than @samp{until}
-without an argument.
+reached, or the current (innermost) stack frame returns.  @var{location}
+is any of the forms of argument acceptable to @samp{break} (@pxref{Set
+Breaks}).  This form of the command uses breakpoints, and hence is
+quicker than @samp{until} without an argument.
 
 @item stepi
 @itemx si
@@ -1893,16 +2019,12 @@ fully read, the backtrace shows the source file name and line number, as
 well as the arguments to the function.  (The program counter value is
 omitted if it is at the beginning of the code for that line number.)
 
-If the source file's symbol data has not been fully read, just scanned,
-this extra information is replaced with an ellipsis.  You can force the
-symbol data for that frame's source file to be read by selecting the
-frame.  (@xref{Selection}).
-
 Here is an example of a backtrace.  It was made with the command
 @samp{bt 3}, so it shows the innermost three frames.
 
 @example
-#0  rtx_equal_p (x=(rtx) 0x8e58c, y=(rtx) 0x1086c4) (/gp/rms/cc/rtlanal.c line 337)
+#0  rtx_equal_p (x=(rtx) 0x8e58c, y=(rtx) 0x1086c4) \
+(/gp/rms/cc/rtlanal.c line 337)
 #1  0x246b0 in expand_call (...) (...)
 #2  0x21cfc in expand_expr (...) (...)
 (More stack frames follow...)
@@ -2004,7 +2126,6 @@ Print the arguments of the selected frame, each on a separate line.
 Print the local variables of the selected frame, each on a separate
 line.  These are all variables declared static or automatic within all
 program blocks that execution in this frame is currently inside of.
-@end table
 
 @item info catch
 @kindex info catch
@@ -2039,7 +2160,7 @@ place.  If you set a breakpoint in an exception handler instead of at
 the point of the raise, you will likely not easily have the
 information needed to know from where the exception was raised.
 
-By using a conditional breakpoint (xref{conditions}), you can cause
+By using a conditional breakpoint (@xref{Conditions}), you can cause
 the debugger to stop only when a specific exception is raised.
 Multiple conditional breakpoints can be used to stop the program when
 any of a number of exceptions are raised.
@@ -2267,11 +2388,11 @@ Reset the source path to empty again.  This requires confirmation.
 Print the source path: show which directories it contains.
 @end table
 
-Because the @samp{directory} command adds to the front of the source path,
-it can affect files that GDB has already found.  If the source
-path contains directories that you do not want, and these directories
-contain misleading files with names matching your source files, the
-way to correct the situation is as follows:
+Because the @samp{directory} command, when used with arguments, adds to
+the front of the source path, it can affect files that GDB has already
+found.  If the source path contains directories that you do not want,
+and these directories contain misleading files with names matching your
+source files, the way to correct the situation is as follows:
 
 @enumerate
 @item
@@ -2291,7 +2412,8 @@ in one command.
 @kindex print
 The usual way to examine data in your program is with the @samp{print}
 command (abbreviated @samp{p}).  It evaluates and prints the value of any
-valid expression of the language the program is written in (for now, C).
+valid expression of the language the program is written in (for now, C
+or C++).
 You type
 
 @example
@@ -2299,8 +2421,9 @@ print @var{exp}
 @end example
 
 @noindent
-where @var{exp} is any valid expression, and the value of @var{exp}
-is printed in a format appropriate to its data type.
+where @var{exp} is any valid expression (in the source language), and
+the value of @var{exp} is printed in a format appropriate to its data
+type.
 
 A more low-level way of examining data is with the @samp{x} command.
 It examines data in memory at a specified address and prints it in a
@@ -2462,7 +2585,7 @@ Return to compressed format for arrays.
 
 @item set vtblprint 
 @itemx set vtblprint on 
-@kindex set vtbprint
+@kindex set vtblprint
 
 Pretty print C++ virtual function tables.  The default is off.
 
@@ -2479,9 +2602,6 @@ The default is on.
 Do not print addresses.
 
 GDB will pretty print C++ virtual function tables.  The default is off.
-
-@item set vtblprint off
-Do not pretty print C++ virtual function tables.
 
 @item set prettyprint on
 @kindex set prettyprint
@@ -2520,7 +2640,7 @@ For example, given the declarations
 @example
 typedef enum @{Tree, Bug@} Species;
 typedef enum @{Big_tree, Acorn, Seedling@} Tree_forms;
-typedef enum @{Caterpiller, Cocoon, Butterfly@} Bug_forms;
+typedef enum @{Caterpillar, Cocoon, Butterfly@} Bug_forms;
 
 struct thing @{
   Species it;
@@ -2579,8 +2699,8 @@ Print as integer in unsigned decimal.
 Print as integer in octal.
 
 @item a
-Print as an address, both absolute in hex and then relative
-to a symbol defined as an address below it.
+Print as an address, both absolute in hex and as an offset from the
+nearest preceding symbol.
 
 @item c
 Regard as an integer and print it as a character constant.
@@ -2776,11 +2896,14 @@ showing item numbers, expressions and their current values.
 
 If the expression refers to local variables, then it does not make sense
 outside the lexical context for which it was set up.  Such an expression
-is printed only when execution is inside that lexical context.  For
-example, if you give the command @samp{display name} while inside a
-function with an argument @code{name}, then this argument will be
-displayed whenever the program stops inside that function, but not when
-it stops elsewhere (since this argument doesn't exist elsewhere).
+is disabled when execution enters a context where one of its variables
+is not defined.  For example, if you give the command 
+@samp{display name} while inside a function with an argument
+@code{name}, then this argument will be displayed while the program
+continues to stop inside that function.  When it stops elsewhere---where
+there is no variable @samp{name}---display is disabled.  The next time
+your program stops where @samp{name} is meaningful, you can enable the
+display expression once again.
 
 @table @code
 @item display @var{exp}
@@ -3044,11 +3167,11 @@ not allowed when other stack frames are selected.
 @node Symbols, Altering, Data, Top
 @chapter Examining the Symbol Table
 
-The commands described in this section allow you to make inquiries for
-information about the symbols (names of variables, functions and types)
-defined in your program.  This information is found by GDB in the symbol
-table loaded by the @samp{symbol-file} command; it is inherent in the text
-of your program and does not change as the program executes.
+The commands described in this section allow you to inquire about the
+symbols (names of variables, functions and types) defined in your
+program.  This information is found by GDB in the symbol table loaded by
+the @samp{symbol-file} command; it is inherent in the text of your
+program and does not change as the program executes.
 
 @table @code
 @item info address @var{symbol}
@@ -3137,7 +3260,7 @@ file @var{filename}.
 @node Altering, Sequences, Symbols, Top
 @chapter Altering Execution
 
-Once you think you have find an error in the program, you might want to
+Once you think you have found an error in the program, you might want to
 find out for certain whether correcting the apparent error would lead to
 correct results in the rest of the run.  You can find the answer by
 experiment, using the GDB features for altering execution of the
@@ -3191,6 +3314,8 @@ GDB allows more implicit conversions in assignments than C does; you can
 freely store an integer value into a pointer variable or vice versa, and
 any structure can be converted to any other structure that is the same
 length or shorter.
+@comment FIXME: how do structs align/pad in these conversions? 
+@comment        /pesch@cygnus.com 18dec1990
 
 To store values into arbitrary places in memory, use the @samp{@{@dots{}@}}
 construct to generate a value of specified type at a specified address
@@ -3406,11 +3531,11 @@ using C escape sequences, such as @samp{\n} to print a newline.  @b{No
 newline will be printed unless you specify one.} In addition to the
 standard C escape sequences a backslash followed by a space stands for a
 space.  This is useful for outputting a string with spaces at the
-beginning or the end, since leading and trailing spaces are trimmed from
-all arguments.  Thus, to print @w{`` and foo = ''}, use the command
-@w{``echo \ and foo = \ ''}.
-@comment AAARGGG!  How am I supposed to do @samp{ and foo = } and not
-@comment have the spaces be invisible in TeX?
+beginning or the end, since leading and trailing spaces are otherwise
+trimmed from all arguments.  Thus, to print @samp{@ and foo =@ }, use the
+command @samp{echo \@ and foo = \@ }.
+@comment FIXME: verify hard copy actually issues enspaces for '@ '!  Will this
+@comment        confuse texinfo?
 
 A backslash at the end of @var{text} can be used, as in C, to continue
 the command onto subsequent lines.  For example,
@@ -3574,6 +3699,8 @@ All the facilities of Emacs's Shell mode are available for this purpose.
 GDB displays source code through Emacs.  Each time GDB displays a
 stack frame, Emacs automatically finds the source file for that frame
 and puts an arrow (@samp{=>}) at the left margin of the current line.
+Emacs uses a separate buffer for source display, and splits the window
+to show both your GDB session and the source.
 
 Explicit GDB @samp{list} or search commands still produce output as
 usual, but you probably will have no reason to use them.
@@ -3655,7 +3782,7 @@ more information.
 For details of the communication protocol, see the comments in the GDB
 source file @file{remote.c}.
 
-@node Remote Commands,, Remote, Remote
+@node Remote Commands, GDB Bugs, Remote, Remote
 @section Commands for Remote Debugging
 
 To start remote debugging, first run GDB and specify as an executable file
@@ -3677,6 +3804,228 @@ step and continue the remote program.
 
 To resume the remote program and stop debugging it, use the @samp{detach}
 command.
+
+@node GDB Bugs, , Remote Commands, Top
+@comment  node-name,  next,  previous,  up
+@chapter Reporting Bugs in GDB
+@cindex Bugs in GDB
+@cindex Reporting Bugs in GDB
+
+Your bug reports play an essential role in making GDB reliable.
+
+Reporting a bug may help you by bringing a solution to your problem, or it
+may not.  But in any case the important function of a bug report is to help
+the entire community by making the next version of GDB work better.  Bug
+reports are your contribution to the maintenance of GDB.
+
+In order for a bug report to serve its purpose, you must include the
+information that makes for fixing the bug.
+
+@menu
+* Criteria:  Bug Criteria.   Have you really found a bug?
+* Reporting: Bug Reporting.  How to report a bug effectively.
+* Known: Trouble.            Known problems.
+* Help: Service.             Where to ask for help.
+@end menu
+
+@node Bug Criteria, Bug Reporting, Bugs, Bugs
+@section Have You Found a Bug?
+@cindex Bug Criteria
+
+If you are not sure whether you have found a bug, here are some guidelines:
+
+@itemize @bullet
+@item
+@cindex Fatal Signal
+@cindex Core Dump
+If the debugger gets a fatal signal, for any input whatever, that is a
+GDB bug.  Reliable debuggers never crash.
+
+@item
+@cindex error on Valid Input
+If GDB produces an error message for valid input, that is a bug.
+
+@item
+@cindex Invalid Input
+If GDB does not produce an error message for invalid input,
+that is a bug.  However, you should note that your idea of
+``invalid input'' might be my idea of ``an extension'' or ``support
+for traditional practice''.
+
+@item
+If you are an experienced user of debugging tools, your suggestions
+for improvement of GDB are welcome in any case.
+@end itemize
+
+@node Bug Reporting,, Bug Criteria, Bugs
+@section How to Report Bugs
+@cindex Bug Reports
+@cindex Compiler Bugs, Reporting
+
+Send bug reports for GDB to one of these addresses:
+
+@example
+bug-gdb@@prep.ai.mit.edu
+@{ucbvax|mit-eddie|uunet@}!prep.ai.mit.edu!bug-gdb
+@end example
+
+@strong{Do not send bug reports to @samp{info-gdb}, or to any
+newsgroups.} Most users of GDB do not want to receive bug reports.
+Those that do, have asked to be on @samp{bug-gcc}.
+
+The mailing list @samp{bug-gcc} has a newsgroup which serves as a
+repeater.  The mailing list and the newsgroup carry exactly the same
+messages.  Often people think of posting bug reports to the newsgroup
+instead of mailing them.  This appears to work, but it has one problem
+which can be crucial: a newsgroup posting does not contain a mail path
+back to the sender.  Thus, if I need to ask for more information, I
+may be unable to reach you.  For this reason, it is better to send bug
+reports to the mailing list.
+
+As a last resort, send bug reports on paper to:
+
+@example
+GNU Debugger Bugs
+545 Tech Sq
+Cambridge, MA 02139
+@end example
+
+The fundamental principle of reporting bugs usefully is this:
+@strong{report all the facts}.  If you are not sure whether to state a
+fact or leave it out, state it!
+
+Often people omit facts because they think they know what causes the
+problem and they conclude that some details don't matter.  Thus, you might
+assume that the name of the variable you use in an example does not matter.
+Well, probably it doesn't, but one cannot be sure.  Perhaps the bug is a
+stray memory reference which happens to fetch from the location where that
+name is stored in memory; perhaps, if the name were different, the contents
+of that location would fool the debugger into doing the right thing despite
+the bug.  Play it safe and give a specific, complete example.  That is the
+easiest thing for you to do, and the most helpful.
+
+Keep in mind that the purpose of a bug report is to enable me to fix
+the bug if it is not known.  It isn't very important what happens if
+the bug is already known.  Therefore, always write your bug reports on
+the assumption that the bug is not known.
+
+Sometimes people give a few sketchy facts and ask, ``Does this ring a
+bell?''  Those bug reports are useless, and I urge everyone to
+@emph{refuse to respond to them} except to chide the sender to report
+bugs properly.
+
+To enable me to fix the bug, you should include all these things:
+
+@itemize @bullet
+@item
+The version of GDB.  GDB announces it on startup.
+
+Without this, I won't know whether there is any point in looking for
+the bug in the current version of GDB.
+
+@item
+
+A complete input file, and all necessary source files, that will
+reproduce the bug.  Run your source files through the C
+preprocessor by doing @samp{gcc -E @var{sourcefile} > @var{outfile}},
+then include the contents of @var{outfile} in the bug report.  (Any
+@samp{-I}, @samp{-D} or @samp{-U} options that you used in actual
+compilation should also be used when doing this.)
+
+A single statement is not enough of an example.  In order to compile
+it, it must be embedded in a function definition; and the bug might
+depend on the details of how this is done.
+
+Without a real example I can compile, all I can do about your bug
+report is wish you luck.  It would be futile to try to guess how to
+provoke the bug. 
+
+@item
+The command arguments you gave GCC or G++ to compile that example and
+observe the bug.  For example, did you use @samp{-O}?  To guarantee
+you won't omit something important, list them all.
+
+If I were to try to guess the arguments, I would probably guess wrong
+and then I would not encounter the bug.
+
+@item
+The type of machine you are using, and the operating system name and
+version number.
+
+@item
+A description of what behavior you observe that you believe is
+incorrect.  For example, ``It gets a fatal signal,'' or, ``There is an
+incorrect assembler instruction in the output.''
+
+Of course, if the bug is that GDB gets a fatal signal, then I
+will certainly notice it.  But if the bug is incorrect output, I might
+not notice unless it is glaringly wrong.
+
+Even if the problem you experience is a fatal signal, you should still
+say so explicitly.  Suppose something strange is going on, such as,
+your copy of GDB is out of synch, or you have encountered a
+bug in the C library on your system.  (This has happened!)  Your copy
+might crash and mine would not.  If you @i{told} me to expect a crash,
+then when mine fails to crash, I would know that the bug was not
+happening for me.  If you had not told me to expect a crash, then I
+would not be able to draw any conclusion from my observations.
+
+@item
+If you wish to suggest changes to the GDB source, send me context
+diffs.  If you even discuss something in the GDB source, refer to
+it by context, not by line number.
+
+The line numbers in my development sources don't match those in your
+sources.  Your line numbers would convey no useful information to me.
+
+@end itemize
+
+Here are some things that are not necessary:
+
+@itemize @bullet
+@item
+A description of the envelope of the bug.
+
+Often people who encounter a bug spend a lot of time investigating
+which changes to the input file will make the bug go away and which
+changes will not affect it.
+
+This is often time consuming and not very useful, because the way I
+will find the bug is by running a single example under the debugger
+with breakpoints, not by pure deduction from a series of examples.
+I recommend that you save your time for something else.
+
+Of course, if you can find a simpler example to report @emph{instead}
+of the original one, that is a convenience for me.  Errors in the
+output will be easier to spot, running under the debugger will take
+less time, etc. 
+
+However, simplification is not vital; if you don't want to do this,
+report the bug anyway and send me the entire test case you used.
+
+@item
+A patch for the bug.
+
+A patch for the bug does help me if it is a good one.  But don't omit
+the necessary information, such as the test case, on the assumption that
+a patch is all I need.  I might see problems with your patch and decide
+to fix the problem another way, or I might not understand it at all.
+
+Sometimes with a program as complicated as GDB it is very hard to
+construct an example that will make the program follow a certain path
+through the code.  If you don't send me the example, I won't be able
+to construct one, so I won't be able to verify that the bug is fixed.
+
+And if I can't understand what bug you are trying to fix, or why your
+patch should be an improvement, I won't install it.  A test case will
+help me to understand.
+
+@item
+A guess about what the bug is or what it depends on.
+
+Such guesses are usually wrong.  Even I can't guess right about such
+things without first using the debugger to find the facts.
+@end itemize
 
 @include readline/inc-readline.texinfo
 @include readline/inc-history.texinfo
