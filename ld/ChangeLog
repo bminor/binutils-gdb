@@ -1,5 +1,8 @@
 1999-07-12  Andreas Schwab  <schwab@suse.de>
 
+	* emultempl/linux.em (ld_${EMULATION_NAME}_emulation): Fill in
+	structure initializations.
+
 	* emultempl/elf32.em (ld_${EMULATION_NAME}_emulation): Add missing
 	comma in initializer.
 
