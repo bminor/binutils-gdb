@@ -1,5 +1,9 @@
 Thu Jun 16 12:22:01 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* ldexp.c (exp_print_tree): Don't crash if etree_rel section has
+	no owner--it might be bfd_abs_section.  From Eric Youngdale
+	<ericy@cais.cais.com>.
+
 	* scripttempl/aout.sc: Let sections align to their natural
 	boundaries.
 
