@@ -1,11 +1,15 @@
+Tue Apr  7 15:13:58 1998  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdbtk.tcl: Remove, no longer used.
+
 Tue Apr  7 12:49:45 1998  Keith Seitz  <keiths@onions.cygnus.com>
 
 	* gdbtk.c (gdb_cmd): NEVER call the busy, update, and idle hooks.
 
 Tue Mar 31 15:42:06 1998  Keith Seitz  <keiths@onions.cygnus.com>
 
-	* gdbtk.c (gdb_loadfile): Don't use the return result from sprintf, which
-	returns a char * under SunOS4.
+	* gdbtk.c (gdb_loadfile): Don't use the return result from
+ 	sprintf, which returns a char * under SunOS4.
 
 Tue Mar 31 17:18:43 1998  Ian Lance Taylor  <ian@cygnus.com>
 
