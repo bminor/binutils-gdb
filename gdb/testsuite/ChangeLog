@@ -1,5 +1,13 @@
 2004-01-01  Michael Chastain  <mec.gnu@mindspring.com>
 
+	* gdb.cp/overload.exp: Rewrite.  Clean up patterns to match
+	current versions of gcc, including gcc abi 2.  Remove gratuitous
+	restart of test program.  Use gdb_test_multiple and gdb_test for
+	all tests.  Add patterns to xfail missing "const" in "const char *"
+	and kfail PR gdb/1155.
+
+2004-01-01  Michael Chastain  <mec.gnu@mindspring.com>
+
 	* gdb.cp/derivation.exp: Rewrite.  Clean up patterns to match
 	current versions of gcc, including gcc abi 2.  Remove gratuitous
 	restart of test program.  Use gdb_test_multiple and gdb_test for
