@@ -1,3 +1,8 @@
+2001-03-17  Andrew Cagney  <ac131313@redhat.com>
+
+	* p-exp.y (parse_number): Avoid shift overflow when ``long''.
+	Code copied from c-exp.y.
+
 2001-03-18  Kevin Buettner  <kevinb@redhat.com>
 
 	* acconfig.h (HAVE_STRUCT_LINK_MAP_WITH_L_MEMBERS)

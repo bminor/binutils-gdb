@@ -858,14 +858,13 @@ parse_number (p, len, parsed_float, putithere)
     }
   else
     {
-      high_bit = (((ULONGEST)1)
-		  << (TARGET_LONG_LONG_BIT - 32 - 1)
-		  << 16
-		  << 16);
-      if (high_bit == 0)
+      int shift;
+      if (sizeof (ULONGEST) * HOST_CHAR_BIT < TARGET_LONG_LONG_BIT)
 	/* A long long does not fit in a LONGEST.  */
-	high_bit =
-	  (ULONGEST)1 << (sizeof (LONGEST) * HOST_CHAR_BIT - 1);
+	shift = (sizeof (ULONGEST) * HOST_CHAR_BIT - 1);
+      else
+	shift = (TARGET_LONG_LONG_BIT - 1);
+      high_bit = (ULONGEST) 1 << shift;
       unsigned_type = builtin_type_unsigned_long_long;
       signed_type = builtin_type_long_long;
     }
