@@ -391,22 +391,40 @@ gdb_expect {
 
 # Now some tests to see if we can list overloaded functions properly:
 
-send_gdb "set listsize 1\n"
-gdb_expect -re ".*$gdb_prompt $"
+gdb_test "set listsize 1" "" ""
+# send_gdb "set listsize 1\n"
+# gdb_expect -re ".*$gdb_prompt $"
 
-gdb_test "list foo::overloadfnarg(void)"\
-   ".*int foo::overloadfnarg.*\\(void\\).*" \
-   "print overloaded function with no args"
+#
+# Decide whether to use "()" or "(void)"
+#
+
+send_gdb "info func overloadfnarg\n" 
+gdb_expect {
+    -re ".*overloadfnarg\\(void\\).*$gdb_prompt $" {
+	gdb_test "list foo::overloadfnarg(void)"\
+		".*int foo::overloadfnarg.*\\(void\\).*" \
+		"list overloaded function with no args"
+    }
+    -re ".*overloadfnarg\\(\\).*$gdb_prompt $" {
+	gdb_test "list foo::overloadfnarg()"\
+		".*int foo::overloadfnarg.*\\(void\\).*" \
+		"list overloaded function with no args"
+    }
+    -re ".*$gdb_prompt $" {
+	fail "list overloaded function with no args (no matching symbol)"
+    }
+}
 
 gdb_test "list foo::overloadfnarg(int)"\
     "int foo::overloadfnarg.*\\(int arg\\).*" \
-   "print overloaded function with int arg"
+   "list overloaded function with int arg"
 
 gdb_test "list foo::overloadfnarg(int, int (*)(int))" \
    "int foo::overloadfnarg.*\\(int arg, int \\(\\*foo\\) \\(int\\)\\).*" \
-   "print overloaded function with function ptr args"
+   "list overloaded function with function ptr args"
 
 # This one crashes GDB.  Don't know why yet.
 gdb_test "list \"foo::overloadfnarg(int, int (*)(int))\"" \
    "int foo::overloadfnarg.*\\(int arg, int \\(\\*foo\\) \\(int\\)\\).*" \
-   "print overloaded function with function ptr args - quotes around argument"
+   "list overloaded function with function ptr args - quotes around argument"

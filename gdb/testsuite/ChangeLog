@@ -1,3 +1,11 @@
+2001-10-31  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.c++/overload.exp: Select overloadfnarg(void) or overloadfnarg(),
+	depending on what the symbol table contains.
+	* gdb.c++/derivation.exp: Accept both "foo(void)" and "foo()" in
+	the output of the ptype command.  Similarly, accept both "const &"
+	and "const&".
+
 2001-10-31  Corinna Vinschen  <vinschen@redhat.com>
 
 	* gdb.base/miscexprs.c (main): Add usage of preprocessor

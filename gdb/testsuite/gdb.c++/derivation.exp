@@ -90,8 +90,8 @@ gdb_expect {
 
 send_gdb "ptype a_instance\n"
 gdb_expect {
-    -re "type = class A \{\r\n\[\t \]*public:\r\n\[\t \]*int a;\r\n\[\t \]*int aa;\[\r\n\t ]+A & operator=\\(A const &\\);\[\r\n\t ]+A\\(A const &\\);\[\r\n\t ]+A\\(void\\);\r\n\[\t \]*int afoo\\(void\\);\r\n\[\t \]*int foo\\(void\\);\r\n\}.*$gdb_prompt $"  { pass "ptype a_instance (with synth ops)" }
-    -re "type = class A \{\r\n\[\t \]*public:\r\n\[\t \]*int a;\r\n\[\t \]*int aa;\[\r\n\t \]+A\\(void\\);\r\n\[\t \]*int afoo\\(void\\);\r\n\[\t \]*int foo\\(void\\);\r\n\}.*$gdb_prompt $"  { pass "ptype a_instance (no synth ops)" }
+    -re "type = class A \{\r\n\[\t \]*public:\r\n\[\t \]*int a;\r\n\[\t \]*int aa;\[\r\n\t ]+A & operator=\\(A const ?&\\);\[\r\n\t ]+A\\(A const ?&\\);\[\r\n\t ]+A\\(void\\);\r\n\[\t \]*int afoo\\((void|)\\);\r\n\[\t \]*int foo\\((void|)\\);\r\n\}.*$gdb_prompt $"  { pass "ptype a_instance (with synth ops)" }
+    -re "type = class A \{\r\n\[\t \]*public:\r\n\[\t \]*int a;\r\n\[\t \]*int aa;\[\r\n\t \]+A\\(void\\);\r\n\[\t \]*int afoo\\((void|)\\);\r\n\[\t \]*int foo\\((void|)\\);\r\n\}.*$gdb_prompt $"  { pass "ptype a_instance (no synth ops)" }
     -re ".*$gdb_prompt $"   {  fail "ptype a_instance" }
     timeout             { fail "(timeout) ptype a_instance" }
 }
@@ -112,15 +112,15 @@ gdb_expect {
   if {$gcc_compiled} then {
       send_gdb "ptype d_instance\n"
       gdb_expect {
-	  -re "type = class D : private A, public B, (protected|private) C \{\r\n\[\t \]*public:\r\n\[\t \]*int d;\r\n\[\t \]*int dd;\[\r\n\t ]+D & operator=\\(D const &\\);\[\r\n\t ]+D\\(D const &\\);\[\r\n\t \]+D\\(void\\);\r\n\[\t \]*int dfoo\\(void\\);\r\n\[\t \]*int foo\\(void\\);\r\n\}.*$gdb_prompt $"  { pass "ptype d_instance" }
-          -re "type = class D : private A, public B, private C \{\r\n\[\t \]*public:\r\n\[\t \]*int d;\r\n\[\t \]*int dd;\[\r\n\t \]+D\\(void\\);\r\n\[\t \]*int dfoo\\(void\\);\r\n\[\t \]*int foo\\(void\\);\r\n\}.*$gdb_prompt $"  { pass "ptype d_instance" }
+	  -re "type = class D : private A, public B, (protected|private) C \{\r\n\[\t \]*public:\r\n\[\t \]*int d;\r\n\[\t \]*int dd;\[\r\n\t ]+D & operator=\\(D const ?&\\);\[\r\n\t ]+D\\(D const ?&\\);\[\r\n\t \]+D\\(void\\);\r\n\[\t \]*int dfoo\\((void|)\\);\r\n\[\t \]*int foo\\((void|)\\);\r\n\}.*$gdb_prompt $"  { pass "ptype d_instance" }
+          -re "type = class D : private A, public B, private C \{\r\n\[\t \]*public:\r\n\[\t \]*int d;\r\n\[\t \]*int dd;\[\r\n\t \]+D\\(void\\);\r\n\[\t \]*int dfoo\\((void|)\\);\r\n\[\t \]*int foo\\((void|)\\);\r\n\}.*$gdb_prompt $"  { pass "ptype d_instance" }
 	  -re ".*$gdb_prompt $"   {  fail "ptype d_instance" }
 	  timeout             { fail "(timeout) ptype d_instance" }
       }
   } else {
       send_gdb "ptype d_instance\n"
       gdb_expect {
-	  -re "type = class D : private A, public B, protected C \{\r\n\[\t \]*public:\r\n\[\t \]*int d;\r\n\[\t \]*int dd;\[\r\n\t \]+D\\(void\\);\r\n\[\t \]*int dfoo\\(void\\);\r\n\[\t \]*int foo\\(void\\);\r\n\}.*$gdb_prompt $"  { pass "ptype d_instance" }
+	  -re "type = class D : private A, public B, protected C \{\r\n\[\t \]*public:\r\n\[\t \]*int d;\r\n\[\t \]*int dd;\[\r\n\t \]+D\\(void\\);\r\n\[\t \]*int dfoo\\((void|)\\);\r\n\[\t \]*int foo\\((void|)\\);\r\n\}.*$gdb_prompt $"  { pass "ptype d_instance" }
 	  -re ".*$gdb_prompt $"   {  fail "ptype d_instance" }
 	  timeout             { fail "(timeout) ptype d_instance" }
       }
@@ -142,15 +142,15 @@ gdb_expect {
   if {$gcc_compiled} {
       send_gdb "ptype e_instance\n"
       gdb_expect {
-	  -re "type = class E : public A, private B, (protected|private) C \{\r\n\[\t \]*public:\r\n\[\t \]*int e;\r\n\[\t \]*int ee;\[\r\n\t ]+E & operator=\\(E const &\\);\[\r\n\t ]+E\\(E const &\\);\[\r\n\t \]+E\\(void\\);\r\n\[\t \]*int efoo\\(void\\);\r\n\[\t \]*int foo\\(void\\);\r\n\}.*$gdb_prompt $"  { pass "ptype e_instance" }
-          -re "type = class E : public A, private B, private C \{\r\n\[\t \]*public:\r\n\[\t \]*int e;\r\n\[\t \]*int ee;\[\r\n\t \]+E\\(void\\);\r\n\[\t \]*int efoo\\(void\\);\r\n\[\t \]*int foo\\(void\\);\r\n\}.*$gdb_prompt $"  { pass "ptype e_instance" }
+	  -re "type = class E : public A, private B, (protected|private) C \{\r\n\[\t \]*public:\r\n\[\t \]*int e;\r\n\[\t \]*int ee;\[\r\n\t ]+E & operator=\\(E const ?&\\);\[\r\n\t ]+E\\(E const ?&\\);\[\r\n\t \]+E\\(void\\);\r\n\[\t \]*int efoo\\((void|)\\);\r\n\[\t \]*int foo\\((void|)\\);\r\n\}.*$gdb_prompt $"  { pass "ptype e_instance" }
+          -re "type = class E : public A, private B, private C \{\r\n\[\t \]*public:\r\n\[\t \]*int e;\r\n\[\t \]*int ee;\[\r\n\t \]+E\\(void\\);\r\n\[\t \]*int efoo\\((void|)\\);\r\n\[\t \]*int foo\\((void|)\\);\r\n\}.*$gdb_prompt $"  { pass "ptype e_instance" }
 	  -re ".*$gdb_prompt $"   {  fail "ptype e_instance" }
 	  timeout             { fail "(timeout) ptype e_instance" }
       }
   } else {
       send_gdb "ptype e_instance\n"
       gdb_expect {
-	  -re "type = class E : public A, private B, protected C \{\r\n\[\t \]*public:\r\n\[\t \]*int e;\r\n\[\t \]*int ee;\[\r\n\t \]+E\\(void\\);\r\n\[\t \]*int efoo\\(void\\);\r\n\[\t \]*int foo\\(void\\);\r\n\}.*$gdb_prompt $"  { pass "ptype e_instance" }
+	  -re "type = class E : public A, private B, protected C \{\r\n\[\t \]*public:\r\n\[\t \]*int e;\r\n\[\t \]*int ee;\[\r\n\t \]+E\\(void\\);\r\n\[\t \]*int efoo\\((void|)\\);\r\n\[\t \]*int foo\\((void|)\\);\r\n\}.*$gdb_prompt $"  { pass "ptype e_instance" }
 	  -re ".*$gdb_prompt $"   {  fail "ptype e_instance" }
 	  timeout             { fail "(timeout) ptype e_instance" }
       }
@@ -171,8 +171,8 @@ gdb_expect {
 
 send_gdb "ptype f_instance\n"
 gdb_expect {
-    -re "type = class F : private A, public B, private C \{\r\n\[\t \]*public:\r\n\[\t \]*int f;\r\n\[\t \]*int ff;\[\r\n\t ]+F & operator=\\(F const &\\);\[\r\n\t ]+F\\(F const &\\);\[\r\n\t \]+F\\(void\\);\r\n\[\t \]*int ffoo\\(void\\);\r\n\[\t \]*int foo\\(void\\);\r\n\}.*$gdb_prompt $"  { pass "ptype f_instance" }
-    -re "type = class F : private A, public B, private C \{\r\n\[\t \]*public:\r\n\[\t \]*int f;\r\n\[\t \]*int ff;\[\r\n\t \]+F\\(void\\);\r\n\[\t \]*int ffoo\\(void\\);\r\n\[\t \]*int foo\\(void\\);\r\n\}.*$gdb_prompt $"  { pass "ptype f_instance" }
+    -re "type = class F : private A, public B, private C \{\r\n\[\t \]*public:\r\n\[\t \]*int f;\r\n\[\t \]*int ff;\[\r\n\t ]+F & operator=\\(F const ?&\\);\[\r\n\t ]+F\\(F const ?&\\);\[\r\n\t \]+F\\(void\\);\r\n\[\t \]*int ffoo\\((void|)\\);\r\n\[\t \]*int foo\\((void|)\\);\r\n\}.*$gdb_prompt $"  { pass "ptype f_instance" }
+    -re "type = class F : private A, public B, private C \{\r\n\[\t \]*public:\r\n\[\t \]*int f;\r\n\[\t \]*int ff;\[\r\n\t \]+F\\(void\\);\r\n\[\t \]*int ffoo\\((void|)\\);\r\n\[\t \]*int foo\\((void|)\\);\r\n\}.*$gdb_prompt $"  { pass "ptype f_instance" }
     -re ".*$gdb_prompt $"   {  fail "ptype f_instance" }
     timeout             { fail "(timeout) ptype f_instance" }
 }
