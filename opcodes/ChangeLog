@@ -1,3 +1,8 @@
+2000-12-03  Chris Demetriou   cgd@sibyte.com
+
+        * mips-opc.c (mips_builtin_opcodes): Use the WR_HILO, RD_HILO,
+        MOD_HILO, and MOD_LO macros.
+
 2000-12-03  Ed Satterthwaite  ehs@sibyte.com  and
             Chris Demetriou   cgd@sibyte.com
 
