@@ -636,7 +636,7 @@ elf_hppa_fake_sections (abfd, hdr, sec)
 
   if (strcmp (name, ".PARISC.unwind") == 0)
     {
-      section *sec;
+      asection *sec;
       hdr->sh_type = SHT_LOPROC + 1;
       /* ?!? How are unwinds supposed to work for symbols in arbitrary
 	 sections?  Or what if we have multiple .text sections in a single
