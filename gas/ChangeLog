@@ -1,3 +1,11 @@
+1998-12-08  Andrew MacLeod  <amacleod@cygnus.com>
+
+	* config/tc-ppc.c (ppc_vbyte): Prototype and new function for 
+	AIX .vbyte unaligned data support.
+	(md_pseudo_table): Add 'vbyte' to list of valid pseudos.
+	(ppc_elf_validate_fix): Add eh_frame to list of ELF relocatable 
+	sections.
+
 1998-12-07  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-d30v.c (md_assemble, do_assemble): Improve erroneous
