@@ -669,21 +669,21 @@ mips_fetch_instruction (CORE_ADDR addr)
 
 
 /* These the fields of 32 bit mips instructions */
-#define mips32_op(x) (x >> 25)
-#define itype_op(x) (x >> 25)
-#define itype_rs(x) ((x >> 21)& 0x1f)
+#define mips32_op(x) (x >> 26)
+#define itype_op(x) (x >> 26)
+#define itype_rs(x) ((x >> 21) & 0x1f)
 #define itype_rt(x) ((x >> 16) & 0x1f)
-#define itype_immediate(x) ( x & 0xffff)
+#define itype_immediate(x) (x & 0xffff)
 
-#define jtype_op(x) (x >> 25)
-#define jtype_target(x) ( x & 0x03fffff)
+#define jtype_op(x) (x >> 26)
+#define jtype_target(x) (x & 0x03ffffff)
 
-#define rtype_op(x) (x >>25)
-#define rtype_rs(x) ((x>>21) & 0x1f)
-#define rtype_rt(x) ((x>>16)  & 0x1f)
-#define rtype_rd(x) ((x>>11) & 0x1f)
-#define rtype_shamt(x) ((x>>6) & 0x1f)
-#define rtype_funct(x) (x & 0x3f )
+#define rtype_op(x) (x >> 26)
+#define rtype_rs(x) ((x >> 21) & 0x1f)
+#define rtype_rt(x) ((x >> 16) & 0x1f)
+#define rtype_rd(x) ((x >> 11) & 0x1f)
+#define rtype_shamt(x) ((x >> 6) & 0x1f)
+#define rtype_funct(x) (x & 0x3f)
 
 static CORE_ADDR
 mips32_relative_offset (unsigned long inst)
@@ -706,24 +706,38 @@ mips32_next_pc (CORE_ADDR pc)
   unsigned long inst;
   int op;
   inst = mips_fetch_instruction (pc);
-  if ((inst & 0xe0000000) != 0)	/* Not a special, junp or branch instruction */
+  if ((inst & 0xe0000000) != 0)	/* Not a special, jump or branch instruction */
     {
-      if ((inst >> 27) == 5)	/* BEQL BNEZ BLEZL BGTZE , bits 0101xx */
+      if (itype_op (inst) >> 2 == 5)
+				/* BEQL, BNEL, BLEZL, BGTZL: bits 0101xx */
 	{
-	  op = ((inst >> 25) & 0x03);
+	  op = (itype_op (inst) & 0x03);
 	  switch (op)
 	    {
-	    case 0:
-	      goto equal_branch;	/* BEQL   */
-	    case 1:
-	      goto neq_branch;	/* BNEZ   */
-	    case 2:
-	      goto less_branch;	/* BLEZ   */
-	    case 3:
-	      goto greater_branch;	/* BGTZ */
+	    case 0:		/* BEQL */
+	      goto equal_branch;
+	    case 1:		/* BNEL */
+	      goto neq_branch;
+	    case 2:		/* BLEZL */
+	      goto less_branch;
+	    case 3:		/* BGTZ */
+	      goto greater_branch;
 	    default:
 	      pc += 4;
 	    }
+	}
+      else if (itype_op (inst) == 17 && itype_rs (inst) == 8)
+				/* BC1F, BC1FL, BC1T, BC1TL: 010001 01000 */
+	{
+	  int tf = itype_rt (inst) & 0x01;
+	  int cnum = itype_rt (inst) >> 2;
+	  int fcrcs = read_signed_register (FCRCS_REGNUM);
+	  int cond = ((fcrcs >> 24) & 0x0e) | ((fcrcs >> 23) & 0x01);
+
+	  if (((cond >> cnum) & 0x01) == tf)
+	    pc += mips32_relative_offset (inst) + 4;
+	  else
+	    pc += 8;
 	}
       else
 	pc += 4;		/* Not a branch, next instruction is easy */
@@ -732,7 +746,7 @@ mips32_next_pc (CORE_ADDR pc)
     {				/* This gets way messy */
 
       /* Further subdivide into SPECIAL, REGIMM and other */
-      switch (op = ((inst >> 26) & 0x07))	/* extract bits 28,27,26 */
+      switch (op = itype_op (inst) & 0x07)	/* extract bits 28,27,26 */
 	{
 	case 0:		/* SPECIAL */
 	  op = rtype_funct (inst);
@@ -747,15 +761,15 @@ mips32_next_pc (CORE_ADDR pc)
 	      pc += 4;
 	    }
 
-	  break;		/* end special */
+	  break;	/* end SPECIAL */
 	case 1:		/* REGIMM */
 	  {
-	    op = jtype_op (inst);	/* branch condition */
-	    switch (jtype_op (inst))
+	    op = itype_rt (inst);	/* branch condition */
+	    switch (op)
 	      {
 	      case 0:		/* BLTZ */
-	      case 2:		/* BLTXL */
-	      case 16:		/* BLTZALL */
+	      case 2:		/* BLTZL */
+	      case 16:		/* BLTZAL */
 	      case 18:		/* BLTZALL */
 	      less_branch:
 		if (read_signed_register (itype_rs (inst)) < 0)
@@ -763,7 +777,7 @@ mips32_next_pc (CORE_ADDR pc)
 		else
 		  pc += 8;	/* after the delay slot */
 		break;
-	      case 1:		/* GEZ */
+	      case 1:		/* BGEZ */
 	      case 3:		/* BGEZL */
 	      case 17:		/* BGEZAL */
 	      case 19:		/* BGEZALL */
@@ -773,19 +787,19 @@ mips32_next_pc (CORE_ADDR pc)
 		else
 		  pc += 8;	/* after the delay slot */
 		break;
-		/* All of the other intructions in the REGIMM catagory */
+		/* All of the other instructions in the REGIMM category */
 	      default:
 		pc += 4;
 	      }
 	  }
-	  break;		/* end REGIMM */
+	  break;	/* end REGIMM */
 	case 2:		/* J */
 	case 3:		/* JAL */
 	  {
 	    unsigned long reg;
 	    reg = jtype_target (inst) << 2;
+	    /* Upper four bits get never changed... */
 	    pc = reg + ((pc + 4) & 0xf0000000);
-	    /* Whats this mysterious 0xf000000 adjustment ??? */
 	  }
 	  break;
 	  /* FIXME case JALX : */
@@ -796,7 +810,7 @@ mips32_next_pc (CORE_ADDR pc)
 	    /* Add 1 to indicate 16 bit mode - Invert ISA mode */
 	  }
 	  break;		/* The new PC will be alternate mode */
-	case 4:		/* BEQ , BEQL */
+	case 4:		/* BEQ, BEQL */
 	equal_branch:
 	  if (read_signed_register (itype_rs (inst)) ==
 	      read_signed_register (itype_rt (inst)))
@@ -804,15 +818,15 @@ mips32_next_pc (CORE_ADDR pc)
 	  else
 	    pc += 8;
 	  break;
-	case 5:		/* BNE , BNEL */
+	case 5:		/* BNE, BNEL */
 	neq_branch:
 	  if (read_signed_register (itype_rs (inst)) !=
-	      read_signed_register (itype_rs (inst)))
+	      read_signed_register (itype_rt (inst)))
 	    pc += mips32_relative_offset (inst) + 4;
 	  else
 	    pc += 8;
 	  break;
-	case 6:		/* BLEZ , BLEZL */
+	case 6:		/* BLEZ, BLEZL */
 	less_zero_branch:
 	  if (read_signed_register (itype_rs (inst) <= 0))
 	    pc += mips32_relative_offset (inst) + 4;
@@ -820,14 +834,13 @@ mips32_next_pc (CORE_ADDR pc)
 	    pc += 8;
 	  break;
 	case 7:
-	greater_branch:	/* BGTZ BGTZL */
+	default:
+	greater_branch:	/* BGTZ, BGTZL */
 	  if (read_signed_register (itype_rs (inst) > 0))
 	    pc += mips32_relative_offset (inst) + 4;
 	  else
 	    pc += 8;
 	  break;
-	default:
-	  pc += 8;
 	}			/* switch */
     }				/* else */
   return pc;

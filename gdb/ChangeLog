@@ -1,3 +1,22 @@
+2001-07-04  Daniel Jacobowitz  <drow@mvista.com>
+	* mips-tdep.c (mips32_op): Correct offset.
+	(itype_op): Likewise.
+	(itype_rs): Fix formatting.
+	(itype_immediate): Fix formatting.
+	(jtype_op): Correct offset.
+	(jtype_target): Fix formatting.
+	(rtype_op): Correct offset.
+	(rtype_rs): Fix formatting.
+	(rtype_rt): Likewise.
+	(rtype_rd): Likewise.
+	(rtype_shamt): Likewise.
+	(rtype_funct): Likewise.
+
+	(mips32_next_pc):  Fix formatting and comments.  Recognize
+	coprocessor 1 branches.  Check the correct field for BLT family
+	branches.  Use itype_rt instead of itype_rs for the second register
+	of a BNE or BNEL branch.  Move (unreachable) default case.
+
 2001-07-04  Andrew Cagney  <ac131313@redhat.com>
 
 	* ui-out.h (struct ui_out_impl): Add field is_mi_like_p.
