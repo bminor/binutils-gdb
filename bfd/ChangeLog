@@ -1,3 +1,12 @@
+Wed Jul  6 00:48:57 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* coff-alpha.c (alpha_ecoff_mkobject_hook):  New hook to
+	additionally copy object type information from the alpha file
+	header to the BFD flags.
+	(alpha_ecoff_backend_data):  Use it.
+	(ecoffalpha_little_vec):  Add DYNAMIC to object_flags.
+	* aout64.c:  Fix typo in conditional QMAGIC definition.
+
 Wed Jul  6 00:13:17 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* hppabsd-core.c (hppabsd_core_core_file_p): Sanity check the
