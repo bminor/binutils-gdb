@@ -62,6 +62,7 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  *
 #define RD_HI	INSN_READ_HI
 #define RD_LO	INSN_READ_LO
 
+
 #define I1	INSN_ISA1
 #define I2	INSN_ISA2
 #define I3	INSN_ISA3
@@ -70,7 +71,6 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  *
 #define L1	INSN_4010
 #define V1      INSN_4100
 #define T3      INSN_3900
-
 /* start-sanitize-r5900 */
 #define T5	INSN_5900
 /* end-sanitize-r5900 */
@@ -590,7 +590,7 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 /* nop is at the start of the table.  */
 {"nor",     "d,v,t",	0x00000027, 0xfc0007ff,	WR_d|RD_s|RD_t,	I1	},
 {"nor",     "t,r,I",	0,    (int) M_NOR_I,	INSN_MACRO	},
-{"not",     "d,v",	0x00000027, 0xfc0007ff,	WR_d|RD_s|RD_t,	I1	},/*nor d,s,0*/
+{"not",     "d,v",	0x00000027, 0xfc1f07ff,	WR_d|RD_s|RD_t,	I1	},/*nor d,s,0*/
 {"or",      "d,v,t",	0x00000025, 0xfc0007ff,	WR_d|RD_s|RD_t,	I1	},
 {"or",      "t,r,I",	0,    (int) M_OR_I,	INSN_MACRO	},
 {"ori",     "t,r,i",	0x34000000, 0xfc000000,	WR_t|RD_s,	I1	},

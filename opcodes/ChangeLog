@@ -1,3 +1,8 @@
+Mon Oct 27 22:34:03 1997  Ken Raeburn  <raeburn@cygnus.com>
+
+	* mips-opc.c: Fix bug in mask for "not" pseudo-instruction.
+	(WR_HILO, RD_HILO, MOD_HILO): New macros.
+
 Thu Oct 23 14:57:58 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* v850-dis.c (disassemble): Replace // with /* ... */
