@@ -113,6 +113,7 @@ AC_SUBST(HDEFINES)
 AC_PROG_INSTALL
 
 BFD_HOST_64BIT_LONG=0
+BFD_HOST_LONG_LONG=0
 BFD_HOST_64_BIT_DEFINED=0
 BFD_HOST_64_BIT=
 BFD_HOST_U_64_BIT=
@@ -123,7 +124,19 @@ elif test "x${HOST_64BIT_TYPE}" != "x"; then
   BFD_HOST_64_BIT=${HOST_64BIT_TYPE}
   BFD_HOST_U_64_BIT=${HOST_U_64BIT_TYPE}
 fi
+
+AC_MSG_CHECKING([for long long])
+AC_CACHE_VAL(bfd_cv_has_long_long,
+[AC_TRY_COMPILE(,
+[unsigned long long ll = 18446744073709551615ULL;],
+bfd_cv_has_long_long=yes, bfd_cv_has_long_long=no)])
+AC_MSG_RESULT($bfd_cv_has_long_long)
+if test $bfd_cv_has_long_long = yes; then
+  BFD_HOST_LONG_LONG=1
+fi
+
 AC_SUBST(BFD_HOST_64BIT_LONG)
+AC_SUBST(BFD_HOST_LONG_LONG)
 AC_SUBST(BFD_HOST_64_BIT_DEFINED)
 AC_SUBST(BFD_HOST_64_BIT)
 AC_SUBST(BFD_HOST_U_64_BIT)

@@ -58,6 +58,7 @@ extern "C" {
 #define BFD_DEFAULT_TARGET_SIZE @bfd_default_target_size@
 
 #define BFD_HOST_64BIT_LONG @BFD_HOST_64BIT_LONG@
+#define BFD_HOST_LONG_LONG @BFD_HOST_LONG_LONG@
 #if @BFD_HOST_64_BIT_DEFINED@
 #define BFD_HOST_64_BIT @BFD_HOST_64_BIT@
 #define BFD_HOST_U_64_BIT @BFD_HOST_U_64_BIT@
@@ -103,21 +104,19 @@ typedef int bfd_boolean;
 
 /* Support for different sizes of target format ints and addresses.
    If the type `long' is at least 64 bits, BFD_HOST_64BIT_LONG will be
-   set to 1 above.  Otherwise, if gcc is being used, this code will
-   use gcc's "long long" type.  Otherwise, BFD_HOST_64_BIT must be
-   defined above.  */
+   set to 1 above.  Otherwise, if the host compiler used during
+   configuration supports long long, this code will use it.
+   Otherwise, BFD_HOST_64_BIT must be defined above.  */
 
 #ifndef BFD_HOST_64_BIT
 # if BFD_HOST_64BIT_LONG
 #  define BFD_HOST_64_BIT long
 #  define BFD_HOST_U_64_BIT unsigned long
 # else
-#  ifdef __GNUC__
-#   if __GNUC__ >= 2
+#  if BFD_HOST_LONG_LONG
 #    define BFD_HOST_64_BIT long long
 #    define BFD_HOST_U_64_BIT unsigned long long
-#   endif /* __GNUC__ >= 2 */
-#  endif /* ! defined (__GNUC__) */
+#  endif /* ! BFD_HOST_LONG_LONG */
 # endif /* ! BFD_HOST_64BIT_LONG */
 #endif /* ! defined (BFD_HOST_64_BIT) */
 
@@ -2324,6 +2323,7 @@ to compensate for the borrow when the low bits are added.  */
   BFD_RELOC_MIPS_RELGOT,
   BFD_RELOC_MIPS_JALR,
 
+
 /* Fujitsu Frv Relocations.  */
   BFD_RELOC_FRV_LABEL16,
   BFD_RELOC_FRV_LABEL24,
@@ -2334,6 +2334,7 @@ to compensate for the borrow when the low bits are added.  */
   BFD_RELOC_FRV_GPREL32,
   BFD_RELOC_FRV_GPRELHI,
   BFD_RELOC_FRV_GPRELLO,
+
 
 /* This is a 24bit GOT-relative reloc for the mn10300.  */
   BFD_RELOC_MN10300_GOTOFF24,
