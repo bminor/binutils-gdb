@@ -300,7 +300,7 @@ const struct powerpc_operand powerpc_operands[] =
 
   /* The L field in a D or X form instruction.  */
 #define L FXM4 + 1
-  { 1, 21, 0, 0, PPC_OPERAND_OPTIONAL },
+  { 1, 21, 0, 0, 0 },
 
   /* The LEV field in a POWER SC form instruction.  */
 #define LEV L + 1
