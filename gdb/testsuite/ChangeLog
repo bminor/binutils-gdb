@@ -1,5 +1,11 @@
 2000-11-03  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
+	* config/monitor.exp (gdb_target_cmd): Abstracts some of the
+	code from gdb_target_monitor, so it can be used independantly
+	for gdbserver.  Also comment out an unnecessary PUTS.
+	
+2000-11-03  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
 	* gdb.base/a2-run.exp: Use gdb_skip_stdio_test.
 	* gdb.base/corefile.exp: Expect the message "Program is being
 	debugged already" when we send the "corefile" command, since
