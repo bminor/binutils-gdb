@@ -233,19 +233,19 @@ translate_addresses (abfd)
 /* Process a file.  */
 
 static void
-process_file (filename, target)
-     const char *filename;
+process_file (file_name, target)
+     const char *file_name;
      const char *target;
 {
   bfd *abfd;
   char **matching;
 
-  abfd = bfd_openr (filename, target);
+  abfd = bfd_openr (file_name, target);
   if (abfd == NULL)
-    bfd_fatal (filename);
+    bfd_fatal (file_name);
 
   if (bfd_check_format (abfd, bfd_archive))
-    fatal (_("%s: can not get addresses from archive"), filename);
+    fatal (_("%s: can not get addresses from archive"), file_name);
 
   if (! bfd_check_format_matches (abfd, bfd_object, &matching))
     {
@@ -278,7 +278,7 @@ main (argc, argv)
      int argc;
      char **argv;
 {
-  const char *filename;
+  const char *file_name;
   char *target;
   int c;
 
@@ -297,7 +297,7 @@ main (argc, argv)
   bfd_init ();
   set_default_bfd_target ();
 
-  filename = NULL;
+  file_name = NULL;
   target = NULL;
   while ((c = getopt_long (argc, argv, "b:Ce:sfHhVv", long_options, (int *) 0))
 	 != EOF)
@@ -324,7 +324,7 @@ main (argc, argv)
 	    }
 	  break;
 	case 'e':
-	  filename = optarg;
+	  file_name = optarg;
 	  break;
 	case 's':
 	  base_names = true;
@@ -346,13 +346,13 @@ main (argc, argv)
 	}
     }
 
-  if (filename == NULL)
-    filename = "a.out";
+  if (file_name == NULL)
+    file_name = "a.out";
 
   addr = argv + optind;
   naddr = argc - optind;
 
-  process_file (filename, target);
+  process_file (file_name, target);
 
   return 0;
 }
