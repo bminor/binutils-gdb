@@ -1,5 +1,7 @@
 2003-05-17  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/i386/x86-64linux.mt (GDB_MULTI_ARCH): Add back definition.
+
 	Revise the x86_64 (sub)taget.
 	* x86-64-tdep.c, x86-64-linux-tdep.c, x86-64-linux-nat.c,
 	config/i386/tm-x86-64linux.h, config/i386/nm-x86-64linux.h,
