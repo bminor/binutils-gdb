@@ -83,6 +83,11 @@ const struct v850_operand v850_operands[] = {
 /* The IMM16 field (unsigned0 in a format 6 insn. */
 #define I16U	(EP+1)
   { 16, 16, 0, 0, 0}, 
+
+/* The R2 field as a system register.  */
+#define SR2	(I16U+1)
+  { 5, 11, 0, 0, V850_OPERAND_SRG },
+
 } ; 
 
 
@@ -234,7 +239,7 @@ const struct v850_opcode v850_opcodes[] = {
 { "halt",	two(0x07e0,0x0120),	two(0xffff,0xffff),	{0}, 4 },
 { "reti",	two(0x07e0,0x0140),	two(0xffff,0xffff),	{0}, 4 },
 { "trap",	two(0x07e0,0x0100),	two(0xffe0,0xffff),	{I5U}, 4 },
-{ "ldsr",	two(0x07e0,0x0020),	two(0x07e0,0xffff),	{R2,SR1}, 4 },
+{ "ldsr",	two(0x07e0,0x0020),	two(0x07e0,0xffff),	{R1,SR2}, 4 },
 { "stsr",	two(0x07e0,0x0040),	two(0x07e0,0xffff),	{SR1,R2}, 4 },
 { "nop",	one(0x00),		one(0xffff),		{0}, 2 },
 { 0, 0, 0, {0}, 0 },

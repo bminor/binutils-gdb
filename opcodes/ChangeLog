@@ -1,6 +1,9 @@
 start-sanitize-v850
 Thu Aug 29 11:10:46 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* v850-opc.c (v850_operands): Define SR2 operand.
+	(v850_opcodes): "ldsr" uses R1,SR2.
+
 	* v850-opc.c (v850_opcodes): Fix opcode specs for
 	sld.w, sst.b, sst.h, sst.w, and nop.
 
