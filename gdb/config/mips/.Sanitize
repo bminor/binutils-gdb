@@ -29,7 +29,7 @@ else
 	fi
 fi
 
-tx49_files="tm-tx49.h tm-tx49l.h tx49.mt tx49l.mt"
+tx49_files="tm-tx49.h tm-tx49el.h tx49.mt tx49el.mt"
 
 if ( echo $* | grep keep\-tx49 > /dev/null ) ; then
 	keep_these_too="${tx49_files} ${keep_these_too}"
@@ -72,7 +72,6 @@ irix5.mh
 irix5.mt
 littlemips.mh
 littlemips.mt
-mipsel64.mt
 mipsm3.mh
 mipsm3.mt
 mipsv4.mh
