@@ -104,53 +104,53 @@ ALL_EMULATIONS = \
 	eaixrs6.o \
 	ealpha.o \
 	earcelf.o \
-	earmelf.o \
-	earmelf_oabi.o \
-	earmelf_linux.o \
-	earmelf_linux26.o \
+	earm_epoc_pe.o \
 	earmaoutb.o \
 	earmaoutl.o \
 	earmcoff.o \
+	earmelf.o \
+	earmelf_linux.o \
+	earmelf_linux26.o \
+	earmelf_oabi.o \
 	earmnbsd.o \
 	earmpe.o \
-	earm_epoc_pe.o \
 	eavr1200.o \
 	eavr23xx.o \
-	eavr44x4.o \
 	eavr4433.o \
+	eavr44x4.o \
 	eavr85xx.o \
-	eavrmega603.o \
 	eavrmega103.o \
 	eavrmega161.o \
+	eavrmega603.o \
 	ecoff_sparc.o \
 	ed10velf.o \
-	ed30velf.o \
 	ed30v_e.o \
 	ed30v_o.o \
+	ed30velf.o \
 	edelta68.o \
 	eebmon29k.o \
-	eelf32_sparc.o \
 	eelf32_i960.o \
+	eelf32_sparc.o \
 	eelf32b4300.o \
 	eelf32bmip.o \
-	eelf32ebmip.o \
-	eelf32elmip.o \
 	eelf32bmipn32.o \
 	eelf32btsmip.o \
+	eelf32ebmip.o \
+	eelf32elmip.o \
+	eelf32fr30.o \
 	eelf32i370.o \
 	eelf32l4300.o \
 	eelf32lmip.o \
 	eelf32lppc.o \
 	eelf32lppcsim.o \
+	eelf32mcore.o \
 	eelf32ppc.o \
-	eelf32ppcsim.o \
 	eelf32ppclinux.o \
+	eelf32ppcsim.o \
 	eelf_i386.o \
 	eelf_i386_be.o \
 	egld960.o \
 	egld960coff.o \
-	eelf32fr30.o \
-	eelf32mcore.o \
 	eh8300.o \
 	eh8300h.o \
 	eh8300s.o \
@@ -161,6 +161,8 @@ ALL_EMULATIONS = \
 	eh8500s.o \
 	ehp300bsd.o \
 	ehp3hpux.o \
+	ehppaelf.o \
+	ehppalinux.o \
 	ei386aout.o \
 	ei386beos.o \
 	ei386bsd.o \
@@ -199,10 +201,10 @@ ALL_EMULATIONS = \
 	emipslnews.o \
 	emipspe.o \
 	enews.o \
-	epjelf.o \
-	epjlelf.o \
 	ens32knbsd.o \
 	epc532macha.o \
+	epjelf.o \
+	epjlelf.o \
 	eppcmacos.o \
 	eppcnw.o \
 	eppcpe.o \
@@ -210,8 +212,8 @@ ALL_EMULATIONS = \
 	esa29200.o \
 	esh.o \
 	eshelf.o \
-	eshlelf.o \
 	eshl.o \
+	eshlelf.o \
 	eshpe.o \
 	esparcaout.o \
 	esparclinux.o \
@@ -231,20 +233,16 @@ ALL_EMULATIONS = \
 	ez8001.o \
 	ez8002.o
 
-# The following object file has been removed from ALL_EMULATIONS
-# because the BFD support is currently broken.
-#	ehppaelf.o 
-
 ALL_64_EMULATIONS = \
 	eelf64_ia64.o \
 	eelf64_sparc.o \
 	eelf64alpha.o \
-	eelf64hppa.o \
-	eelf64bmip.o
+	eelf64bmip.o \
+	eelf64hppa.o
 
 ALL_EMUL_EXTRA_OFILES = \
-	pe-dll.o \
-	deffilep.o
+	deffilep.o \
+	pe-dll.o
 
 CFILES = ldctor.c ldemul.c ldexp.c ldfile.c ldlang.c \
 	ldmain.c ldmisc.c ldver.c ldwrite.c lexsup.c \
@@ -521,6 +519,9 @@ ehp3hpux.c: $(srcdir)/emulparams/hp3hpux.sh \
 ehppaelf.c: $(srcdir)/emulparams/hppaelf.sh \
   $(srcdir)/emultempl/hppaelf.em $(srcdir)/scripttempl/hppaelf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} hppaelf "$(tdir_hppaelf)"
+ehppalinux.c: $(srcdir)/emulparams/hppalinux.sh \
+  $(srcdir)/emultempl/hppaelf.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} hppalinux "$(tdir_hppalinux)"
 ei386aout.c: $(srcdir)/emulparams/i386aout.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} i386aout "$(tdir_i386aout)"

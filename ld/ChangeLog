@@ -1,3 +1,49 @@
+2000-07-09  Alan Modra  <alan@linuxcare.com.au>
+
+	Changes to create multiple linker stubs, positioned immediately
+	before the section where they are required.
+	* emultempl/hppaelf.em: Include elf32-hppa.h.
+	(stub_sec, file_chain): Delete.
+	(hppaelf_create_output_section_statements): Don't make a stub
+	section here.
+	(hook_stub_info): New struct.
+	(hook_in_stub): New function.
+	(hppaelf_add_stub_section): New function.
+	(hppaelf_finish): Do nothing for relocateable links.  Modify the
+	call to elf32_hppa_size_stubs.  Move code for updating section
+	layout from here...
+	(hppaelf_layaout_sections_again): ..to here, a new function.
+
+	* emultempl/hppaelf.em (hppaelf_delete_padding_statements): Fix
+	broken list handling.  Pass in a pointer to the list.
+	(hppaelf_finish): Update call to hppaelf_delete_padding_statements
+	for above changes.
+	(hppaelf_before_parse): Prototype.
+	(hppaelf_set_output_arch): Prototype.
+	(hppaelf_create_output_section_statements): Prototype.
+	(hppaelf_delete_padding_statements): Prototype.
+	(hppaelf_finish): Prototype.
+
+	Merge from elf32.em
+	* emultempl/hppaelf.em: Include ctype.h.
+	(struct orphan_save): New.
+	(gld${EMULATION_NAME}_place_orphan): New.
+	(output_rel_find): New.
+	(hppaelf_get_script): Update from elf32.em.
+	(ld_hppaelf_emulation): Rename to ld_${EMULATION_NAME}_emulation.
+	Change emulation_name field to "${EMULATION_NAME}".  Add
+	gld${EMULATION_NAME}_place_orphan. 
+
+	* Makefile.am (ALL_EMULATIONS): Reinstate ehppaelf.o,  add
+	ehppalinux.o, sort it.  Regenerate dependencies.
+	(ehppalinux.c): Depend on hppaelf.em
+	* Makefile.in: Regenerate.
+
+	* configure.tgt: targ_emul=hppalinux for hppa*linux
+
+	* emulparams/hppalinux.sh: New.
+	* emulparams/hppaelf.sh (TARGET_PAGE_SIZE): Write in hex.
+
 2000-07-08  Alan Modra  <alan@linuxcare.com.au>
 
 	* lexsup.c (parse_args): Copy section name.

@@ -208,6 +208,7 @@ m68*-*-netbsd*)		targ_emul=m68knbsd ;;
 m68*-*-psos*)		targ_emul=m68kpsos ;;
 m68*-*-rtems*)		targ_emul=m68kcoff ;;
 hppa*64*-*)		targ_emul=elf64hppa ;;
+hppa*-*-linux-gnu*)	targ_emul=hppalinux ;;
 hppa*-*-*elf*)		targ_emul=hppaelf ;;
 hppa*-*-linux-gnu*)	targ_emul=hppaelf ;;
 hppa*-*-lites*)		targ_emul=hppaelf ;;
