@@ -1,3 +1,8 @@
+2000-06-15  Kazu Hirata  <kazu@hxi.com>
+
+	* compile.c (decode): Distinguish inc/dec.[wl] and adds/subs
+	correctly.
+
 2000-06-20  Frank Ch. Eigler  <fche@redhat.com>
 
 	* compile.c: Don't include "wait.h".

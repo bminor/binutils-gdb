@@ -219,7 +219,10 @@ decode (addr, data, dst)
 
 	      if (looking_for & DBIT)
 		{
-		  if ((looking_for & 5) != (thisnib & 5))
+		  /* Exclude adds/subs by looking at bit 0 and 2, and
+                     make sure the operand size, either w or l,
+                     matches by looking at bit 1.  */
+		  if ((looking_for & 7) != (thisnib & 7))
 		    goto fail;
 
 		  abs = (thisnib & 0x8) ? 2 : 1;
@@ -292,6 +295,8 @@ decode (addr, data, dst)
 		    case 0:
 		      abs = 1;
 		      break;
+		    default:
+		      goto fail;
 		    }
 		}
 	      else if (looking_for & L_8)
