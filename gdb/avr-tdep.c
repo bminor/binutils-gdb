@@ -524,7 +524,6 @@ avr_scan_prologue (struct frame_info *fi)
 		{
 		  fi->frame = locals;
 
-		  /* TRoth: Does -1 mean we're in main? */
 		  fi->extra_info->is_main = 1;
 		  return;
 		}
@@ -755,11 +754,8 @@ avr_init_extra_frame_info (int fromleaf, struct frame_info *fi)
     {
       /* We need to setup fi->frame here because run_stack_dummy gets it wrong
          by assuming it's always FP.  */
-      /* FIXME: cagney/2002-09-13: This is wrong.  The third parameter
-         to deprecated_read_register_dummy() is REGNUM and not a frame
-         address.  */
       fi->frame = deprecated_read_register_dummy (fi->pc, fi->frame,
-						  fi->frame);
+						  AVR_PC_REGNUM);
     }
   else if (!fi->next)		/* this is the innermost frame? */
     fi->frame = read_register (fi->extra_info->framereg);
@@ -961,10 +957,10 @@ avr_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 {
   unsigned char buf[2];
   int wordsize = 2;
+#if 0
   struct minimal_symbol *msymbol;
   CORE_ADDR mon_brk;
-
-  fprintf_unfiltered (gdb_stderr, "avr_push_return_address() was called\n");
+#endif
 
   buf[0] = 0;
   buf[1] = 0;
@@ -1243,7 +1239,7 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_extract_return_value (gdbarch, avr_extract_return_value);
   set_gdbarch_push_arguments (gdbarch, avr_push_arguments);
   set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
-/*    set_gdbarch_push_return_address (gdbarch, avr_push_return_address); */
+  set_gdbarch_push_return_address (gdbarch, avr_push_return_address);
   set_gdbarch_pop_frame (gdbarch, avr_pop_frame);
 
   set_gdbarch_deprecated_store_return_value (gdbarch, avr_store_return_value);
