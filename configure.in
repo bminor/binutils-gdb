@@ -171,10 +171,14 @@ if [ x${enable_shared} = xyes ]; then
     i[345]86-*-*)	waugh=config/mh-x86pic ;;
     *-*-*)		waugh=config/mh-${host_cpu}pic ;;
   esac
-  if [ -n "${host_makefile_frag}" ] && [ -f ${srcdir}/${waugh} ]; then
-    cat ${srcdir}/${host_makefile_frag} > mh-frag
-    cat ${srcdir}/${waugh} >> mh-frag
-    host_makefile_frag=mh-frag
+  if [ -f ${srcdir}/${waugh} ]; then
+    if [ -n "${host_makefile_frag}" ] ; then
+      cat ${srcdir}/${host_makefile_frag} > mh-frag
+      cat ${srcdir}/${waugh} >> mh-frag
+      host_makefile_frag=mh-frag
+    fi
+  else
+    host_makefile_frag=${waugh}
   fi
 fi
 
