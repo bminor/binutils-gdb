@@ -1,3 +1,7 @@
+2002-12-16  Chris Demetriou  <cgd@broadcom.com>
+
+        * tconfig.in: Include "gdb/callback.h" and "gdb/remote-sim.h".
+
 2002-07-30  Chris Demetriou  <cgd@broadcom.com>
 
 	* mips.igen (do_load_double, do_store_double): New functions.
