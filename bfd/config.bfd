@@ -809,6 +809,7 @@ case "${targ}" in
 
   powerpc-*-aix5*)
     targ_defvec=rs6000coff_vec
+#ifdef BFD64
     targ_selvecs="aix5coff64_vec"
     want64=true
     ;;
@@ -817,6 +818,7 @@ case "${targ}" in
     targ_selvecs="rs6000coff_vec"
     want64=true
     ;;
+#endif
 
   powerpc-*-aix* | powerpc-*-beos* | rs6000-*-*)
     targ_defvec=rs6000coff_vec

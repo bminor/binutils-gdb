@@ -727,7 +727,9 @@ static const bfd_target * const _bfd_target_vector[] = {
 	   it wasn't omitted by mistake.  */
 	&a29kcoff_big_vec,
 	&a_out_adobe_vec,
+#ifdef BFD64
 	&aix5coff64_vec,
+#endif
 	&aout0_big_vec,
 #if 0
 	/* We have no way of distinguishing these from other a.out variants */
