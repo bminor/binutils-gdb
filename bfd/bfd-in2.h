@@ -385,11 +385,6 @@ CAT(NAME,_bfd_make_debug_symbol)
 
 /* User program access to BFD facilities */
 
-extern CONST short _bfd_host_big_endian;
-#define HOST_BYTE_ORDER_BIG_P	(*(char *)&_bfd_host_big_endian)
-
-/* The bfd itself */
-
 /* Cast from const char * to char * so that caller can assign to
    a char * without a warning.  */
 #define bfd_get_filename(abfd) ((char *) (abfd)->filename)
@@ -400,9 +395,6 @@ extern CONST short _bfd_host_big_endian;
 #define bfd_applicable_section_flags(abfd) ((abfd)->xvec->section_flags)
 #define bfd_my_archive(abfd) ((abfd)->my_archive)
 #define bfd_has_map(abfd) ((abfd)->has_armap)
-#define bfd_header_twiddle_required(abfd) \
-        ((((abfd)->xvec->header_byteorder_big_p)		\
-	  != (boolean)HOST_BYTE_ORDER_BIG_P) ? true:false)
 
 #define bfd_valid_reloc_types(abfd) ((abfd)->xvec->valid_reloc_types)
 #define bfd_usrdata(abfd) ((abfd)->usrdata)
@@ -411,14 +403,8 @@ extern CONST short _bfd_host_big_endian;
 #define bfd_get_symcount(abfd) ((abfd)->symcount)
 #define bfd_get_outsymbols(abfd) ((abfd)->outsymbols)
 #define bfd_count_sections(abfd) ((abfd)->section_count)
-#define bfd_get_architecture(abfd) ((abfd)->obj_arch)
-#define bfd_get_machine(abfd) ((abfd)->obj_machine)
 
 #define bfd_get_symbol_leading_char(abfd) ((abfd)->xvec->symbol_leading_char)
-
-#define BYTE_SIZE 1
-#define SHORT_SIZE 2
-#define LONG_SIZE 4
 
 /* And more from the source.  */
 void 
@@ -549,38 +535,31 @@ typedef struct sec
          /* Tells the OS to allocate space for this section when loaded.
            This would clear for a section containing debug information
            only. */
-
 #define SEC_ALLOC      0x001
           
          /* Tells the OS to load the section from the file when loading.
            This would be clear for a .bss section */
-
 #define SEC_LOAD       0x002
 
          /* The section contains data still to be relocated, so there will
            be some relocation information too. */
-
 #define SEC_RELOC      0x004
 
-         /* Obsolete ? */
-
+#if 0    /* Obsolete ? */
 #define SEC_BALIGN     0x008
+#endif
 
          /* A signal to the OS that the section contains read only
           data. */
-
 #define SEC_READONLY   0x010
 
          /* The section contains code only. */
-
 #define SEC_CODE       0x020
 
          /* The section contains data only. */
-
-#define SEC_DATA        0x040
+#define SEC_DATA       0x040
 
          /* The section will reside in ROM. */
-
 #define SEC_ROM        0x080
 
          /* The section contains constructor information. This section
@@ -593,12 +572,10 @@ typedef struct sec
            sections called <<__CTOR_LIST__>> and relocte the data
            contained within - exactly the operations it would peform on
            standard data. */
-
 #define SEC_CONSTRUCTOR 0x100
 
          /* The section is a constuctor, and should be placed at the
-          end of the . */
-
+          end of the text, data, or bss section(?). */
 #define SEC_CONSTRUCTOR_TEXT 0x1100
 #define SEC_CONSTRUCTOR_DATA 0x2100
 #define SEC_CONSTRUCTOR_BSS  0x3100
@@ -606,40 +583,42 @@ typedef struct sec
          /* The section has contents - a data section could be
            <<SEC_ALLOC>> | <<SEC_HAS_CONTENTS>>, a debug section could be
            <<SEC_HAS_CONTENTS>> */
-
 #define SEC_HAS_CONTENTS 0x200
 
          /* An instruction to the linker not to output sections
           containing this flag even if they have information which
           would normally be written. */
-
 #define SEC_NEVER_LOAD 0x400
 
          /* The section is a shared library section.  The linker must leave
            these completely alone, as the vma and size are used when
            the executable is loaded. */
-
 #define SEC_SHARED_LIBRARY 0x800
 
          /* The section is a common section (symbols may be defined
            multiple times, the value of a symbol is the amount of
            space it requires, and the largest symbol value is the one
-           used).  Most targets have exactly one of these (.bss), but
-           ECOFF has two. */
-
+           used).  Most targets have exactly one of these (which we
+	    translate to bfd_com_section), but ECOFF has two. */
 #define SEC_IS_COMMON 0x8000
 
+	 /*  End of section flags.  */
+
         /*  The virtual memory address of the section - where it will be
-           at run time - the symbols are relocated against this */
+           at run time.  The symbols are relocated against this.  The
+	    user_set_vma flag is maintained by bfd; if it's not set, the
+	    backend can assign addresses (for example, in <<a.out>>, where
+	    the default address for <<.data>> is dependent on the specific
+	    target and various flags).  */
 
    bfd_vma vma;
+   boolean user_set_vma;
 
         /*  The load address of the section - where it would be in a
-           rom image, really only used for writing section header information */
+           rom image, really only used for writing section header
+	    information. */
 
    bfd_vma lma;
-
-   boolean user_set_vma;
 
          /* The size of the section in bytes, as it will be output.
            contains a value even if the section has no contents (eg, the
@@ -742,6 +721,9 @@ typedef struct sec
 } asection ;
 
 
+     /* These sections are global, and are managed by BFD.  The application
+       and target back end are not permitted to change the values in
+	these sections.  */
 #define BFD_ABS_SECTION_NAME "*ABS*"
 #define BFD_UND_SECTION_NAME "*UND*"
 #define BFD_COM_SECTION_NAME "*COM*"
