@@ -642,6 +642,9 @@ maintenance_show_cmd (char *args, int from_tty)
 /* Profiling support.  */
 
 static int maintenance_profile_p;
+
+#if defined (HAVE_MONSTARTUP) && defined (HAVE__MCLEANUP)
+
 static int profiling_state;
 
 static void
@@ -685,6 +688,13 @@ maintenance_set_profile_cmd (char *args, int from_tty, struct cmd_list_element *
       _mcleanup ();
     }
 }
+#else
+static void
+maintenance_set_profile_cmd (char *args, int from_tty, struct cmd_list_element *c)
+{
+  warning ("Profiling support is not available on this system.");
+}
+#endif
 
 void
 _initialize_maint_cmds (void)

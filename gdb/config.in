@@ -188,6 +188,9 @@
 /* Define if you have the __argz_stringify function.  */
 #undef HAVE___ARGZ_STRINGIFY
 
+/* Define if you have the _mcleanup function.  */
+#undef HAVE__MCLEANUP
+
 /* Define if you have the canonicalize_file_name function.  */
 #undef HAVE_CANONICALIZE_FILE_NAME
 
@@ -199,6 +202,9 @@
 
 /* Define if you have the getpagesize function.  */
 #undef HAVE_GETPAGESIZE
+
+/* Define if you have the monstartup function.  */
+#undef HAVE_MONSTARTUP
 
 /* Define if you have the munmap function.  */
 #undef HAVE_MUNMAP

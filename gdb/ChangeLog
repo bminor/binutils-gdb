@@ -1,3 +1,11 @@
+2003-01-27  Daniel Jacobowitz  <drow@mvista.com>
+
+	* configure.in: Check that -pg works if using --enable-profiling.
+	Check for monstartup and _mcleanup regardless of --enable-profiling.
+	* maint.c: Check for monstartup and _mcleanup before using them.
+	* config.in: Regenerated.
+	* configure: Regenerated.
+
 2003-01-23  Jim Blandy  <jimb@redhat.com>
 
 	* symfile.c (syms_from_objfile): Don't print the "(no debugging

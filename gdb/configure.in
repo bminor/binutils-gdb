@@ -203,16 +203,22 @@ AC_ARG_ENABLE(profiling,
   esac],
  [enable_profiling=no])
 
+AC_CHECK_FUNCS(monstartup _mcleanup)
 if test "$enable_profiling" = yes ; then
+  if test $ac_cv_func_monstartup = no || test $ac_cv_func__mcleanup = no; then
+    AC_MSG_ERROR(--enable-profiling requires monstartup and _mcleanup)
+  fi
   PROFILE_CFLAGS=-pg
   OLD_CFLAGS="$CFLAGS"
   CFLAGS="$CFLAGS $PROFILE_CFLAGS"
 
-  AC_CHECK_FUNC(monstartup, [],
-    AC_MSG_ERROR(monstartup necessary to use --enable-profiling.))
+  AC_CACHE_CHECK([whether $CC supports -pg], ac_cv_cc_supports_pg,
+    [AC_TRY_COMPILE([], [int x;], ac_cv_cc_supports_pg=yes,
+     ac_cv_cc_supports_pg=no)])
 
-  AC_CHECK_FUNC(_mcleanup, [],
-    AC_MSG_ERROR(_mcleanup necessary to use --enable-profiling.))
+  if test $ac_cv_cc_supports_pg = no; then
+    AC_MSG_ERROR(--enable-profiling requires a compiler which supports -pg)
+  fi
 
   CFLAGS="$OLD_CFLAGS"
 fi
