@@ -1,3 +1,7 @@
+2004-03-29  GDB Administrator  <gdbadmin@sourceware.org>
+
+	* version.in: Bump to version 6.0.91.
+
 2004-03-28  Andrew Cagney  <cagney@redhat.com>
 
 	* PROBLEMS (Stack backtraces): Rewrite.  Remove reference to
