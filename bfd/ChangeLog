@@ -1,3 +1,7 @@
+Tue Jul 20 08:21:15 1993  Fred Fish  (fnf@deneb.cygnus.com)
+
+	* bfd-in.h:  Apply some of the changes that were made to bfd-in2.h.
+
 Mon Jul 19 20:46:18 1993  Fred Fish  (fnf@deneb.cygnus.com)
 
 	* configure.in (*-*-netware, i[34]86-*-netware):  New configs.
