@@ -1,5 +1,10 @@
 2001-11-02  Andrew Cagney  <ac131313@redhat.com>
 
+	* utils.c (internal_verror): Restore calls to abort().
+	Fix PR gdb/219.
+
+2001-11-02  Andrew Cagney  <ac131313@redhat.com>
+
 	* README: Mention problem with alpha-dec-osf5.1.
 
 2001-11-02  Michael Chastain  <mec@shout.net>
