@@ -177,6 +177,7 @@ DEFUN (core_init, (a_out_name), const char *a_out_name)
       break;
 
     default:
+      break;
     }
 
   if (function_mapping_file)

@@ -1,3 +1,7 @@
+Fri Feb  6 02:00:19 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* core.c (core_init): Adding missing "break".
+
 Thu Feb  5 12:49:37 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure, Makefile.in, aclocal.m4: Rebuild with new libtool.
