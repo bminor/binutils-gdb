@@ -21,7 +21,7 @@ Section Headers:
  +\[10\] \.tbss +NOBITS +0+107f8 0+7f8 0+38 0+ WAT +0 +0 +8
  +\[11\] \.dynamic +DYNAMIC +0+107f8 0+7f8 0+150 10 +WA +3 +0 +8
  +\[12\] \.got +PROGBITS +0+10948 0+948 0+60 08 +WA +0 +0 +8
- +\[13\] \.sbss +PROGBITS +0+109a8 0+9a8 0+ 0+ +W +0 +0 +1
+ +\[13\] \.sbss +NOBITS +0+109a8 0+9a8 0+ 0+ +W +0 +0 +1
  +\[14\] \.plt +NOBITS +0+109a8 0+9a8 0+30 18 +WA +0 +0 +8
  +\[15\] \.bss +NOBITS +0+109d8 0+9a8 0+ 0+ +WA +0 +0 +1
  +\[16\] \.shstrtab +STRTAB +0+ 0+9a8 0+82 0+ +0 +0 +1

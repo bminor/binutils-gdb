@@ -1,3 +1,10 @@
+2003-07-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-powerpc/tlsexe.r: .sbss is NOBITS, not PROGBITS.
+	* ld-powerpc/tlsexetoc.r: Likewise.
+	* ld-powerpc/tlsso.r: Likewise.
+	* ld-powerpc/tlstocso.r: Likewise.
+
 2003-07-23  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* ld-srec/srec.exp: For m6811/m6812 use --defsym to define _.z soft
