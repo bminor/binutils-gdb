@@ -92,3 +92,11 @@ extern  void  procfs_note      (char *, char *, int);
 #define PROCFS_NOTE(X) procfs_note      (X,       __FILE__, __LINE__)
 #define PROC_PRETTYFPRINT_STATUS(X,Y,Z,T) \
      proc_prettyfprint_status (X, Y, Z, T)
+
+/* Define the type (and more importantly the width) of the control
+   word used to write to the /proc/PID/ctl file. */
+#if defined (PROC_CTL_WORD_TYPE)
+typedef PROC_CTL_WORD_TYPE procfs_ctl_t;
+#else
+typedef long procfs_ctl_t;
+#endif

@@ -1,5 +1,52 @@
 2001-03-26  Kevin Buettner  <kevinb@redhat.com>
 
+	* proc-utils.h (procfs_ctl_t): New typedef.
+	* proc-api.c (write_with_trace): Change type of ``opcode'' from
+	long to procfs_ctl_t.  Don't assume that the target has defined
+	BREAKPOINT.  Handle case in which PCRESET is the same as PCUNSET.
+	* proc-events.c (sys/syscall.h, sys/fault.h): Include conditionally.
+	* procfs.c (sys/fault.h, sys/syscall.h): Include conditionally.
+	(gdb_sigset_t, gdb_sigaction_t, gdb_siginfo_t, gdb_premptysysset)
+	(gdb_praddsysset, gdb_prdelsysset, gdb_pr_issyssetmember):
+	Conditionally define as appropriate for AIX/non-AIX systems.  Use
+	these defines/typedefs as appropriate elsewhere in file.
+	(struct procinfo): Change type of saved_sigset and saved_sighold
+	from sigset_t to gdb_sigset_t.  Make saved_exitset and
+	saved_entryset pointer variables.  Add two new fields, num_syscalls
+	and syscall_names.
+	(DYNAMIC_SYSCALLS): Define when HAVE_PRSYSENT_T is defined.
+	(sysset_t_size, sysset_t_alloc): New functions.
+	(load_syscalls, free_syscalls, find_syscall): New functions for
+	platforms which define DYNAMIC_SYSCALLS.
+	(create_procinfo): Call load_syscalls.
+	(destroy_one_procinfo): Call free_syscalls.
+	(GDBRESET): Don't define twice.
+	(proc_modify_flag): Change type of operation code array `arg'
+	from long to procfs_ctl_t.
+	(proc_stop_process, proc_wait_for_stop, proc_run_process)
+	(proc_set_traced_signals, proc_set_traced_faults)
+	(proc_set_traced_sysentry, proc_set_traced_sysexit)
+	(proc_set_held_signals, proc_clear_current_fault)
+	(proc_set_current_signal, proc_clear_current_signal, proc_set_gregs)
+	(proc_set_fpregs, proc_kill, proc_set_watchpoint): Likewise for `cmd'.
+	(proc_set_traced_sysentry): Dynamically allocate variable sized
+	struct gdb_proc_ctl_pcsentry.  Also, free it at function exit.
+	(proc_set_traced_sysexit): Dynamically allocate variable
+	sized struct gdb_proc_ctl_pcsexit.  Also, free it at
+	function exit.
+	(proc_get_traced_sysentry, proc_get_traced_sysexit): Add new code
+	for reading the sysset_t struct on AIX5.
+	(procfs_debug_inferior): Don't assume that SYS_exit will be
+	defined.  Add new code for finding certain syscalls on AIX5.
+	(syscall_is_lwp_exit, syscall_is_exit, syscall_is_exec)
+	(syscall_is_lwp_create): New functions.
+	(procfs_wait): Restructured code which checks for certain
+	system calls to use the new syscall_is_... functions.
+	(procfs_notice_signals): Account for the fact that saved_entryset
+	and saved_exitset in struct procinfo are now pointers.
+
+2001-03-26  Kevin Buettner  <kevinb@redhat.com>
+
 	* symtab.c (find_pc_sect_line): Revise method used for finding
 	the ending pc.
 

@@ -446,12 +446,12 @@ write_with_trace (int fd, void *varg, size_t len, char *file, int line)
 {
   int  i;
   int ret;
-  long *arg = (long *) varg;
+  procfs_ctl_t *arg = (procfs_ctl_t *) varg;
 
   prepare_to_trace ();
   if (procfs_trace)
     {
-      long opcode = arg[0];
+      procfs_ctl_t opcode = arg[0];
       for (i = 0; rw_table[i].name != NULL; i++)
 	if (rw_table[i].value == opcode)
 	  break;
@@ -475,7 +475,9 @@ write_with_trace (int fd, void *varg, size_t len, char *file, int line)
       case PCUNSET:
 #endif
 #ifdef PCRESET
+#if PCRESET != PCUNSET
       case PCRESET:
+#endif
 #endif
 	fprintf (procfs_file ? procfs_file : stdout, 
 		 "write (PCRESET, %s) %s\n", 
@@ -551,6 +553,7 @@ write_with_trace (int fd, void *varg, size_t len, char *file, int line)
 	break;
       default:
 	{
+#ifdef BREAKPOINT
 	  static unsigned char break_insn[] = BREAKPOINT;
 
 	  if (len == sizeof (break_insn) &&
@@ -558,7 +561,9 @@ write_with_trace (int fd, void *varg, size_t len, char *file, int line)
 	    fprintf (procfs_file ? procfs_file : stdout, 
 		     "write (<breakpoint at 0x%08lx>) \n", 
 		     (unsigned long) lseek_offset);
-	  else if (rw_table[i].name)
+	  else 
+#endif
+	  if (rw_table[i].name)
 	    fprintf (procfs_file ? procfs_file : stdout, 
 		     "write (%s) %s\n", 
 		     rw_table[i].name, 
