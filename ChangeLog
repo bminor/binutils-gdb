@@ -1,3 +1,22 @@
+Wed Oct  1 13:11:27 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure: Handle autoconf style directory options: --bindir,
+	--datadir, --includedir, --infodir, --libdir, --libexecdir,
+	--mandir, --oldincludedir, --sbindir, --sharedstatedir,
+	--sysconfdir.
+	* Makefile.in (sbindir, libexecdir, sysconfdir): New variables.
+	(sharedstatedir, localstatedir, oldincludedir): New variables.
+	(BASE_FLAGS_TO_PASS): Pass down bindir, datadir, includedir,
+	infodir, libdir, libexecdir, localstatedir, mandir, oldincludedir,
+	sbindir, sharedstatedir, and sysconfdir.
+
+start-sanitize-d30v	
+Wed Sep 24 18:06:27 1997  Stu Grossman  <grossman@babylon-5.cygnus.com>
+
+	* configure.in (d30v):  Remove tcl, tk, expect, gdb, itcl, tix, db,
+ 	sn, and gnuserv from noconfigdirs.
+
+end-sanitize-d30v	
 Wed Sep 24 15:18:32 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ltmain.sh: Tweak shell pattern to avoid bug in NetBSD /bin/sh.
@@ -1898,12 +1917,6 @@ Fri Oct 27 09:32:30 1995  Stu Grossman  (grossman@cygnus.com)
 	null) if toplevel/config/mh-{host} doesn't define it.  Fixes a
 	problem with autoconf trying to configure on a host without GCC.
 
-start-sanitize-gm
-Fri Oct 27 09:32:25 1995  Stu Grossman  (grossman@cygnus.com)
-
-	* config.sub:  Add `magic' as an OS target for General Magic.
-
-end-sanitize-gm
 Thu Oct 26 22:35:01 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-configure: Set host alias from choice of host compiler,
