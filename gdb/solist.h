@@ -52,7 +52,9 @@ struct so_list
 
     /* The following fields of the structure are built from
        information gathered from the shared object file itself, and
-       are initialized when we actually add it to our symbol tables.  */
+       are set when we actually add it to our symbol tables.
+
+       current_sos must initialize these fields to 0.  */
 
     bfd *abfd;
     char symbols_loaded;	/* flag: symbols read in yet? */
