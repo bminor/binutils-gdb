@@ -1,3 +1,8 @@
+2001-02-19  Jonathan Larmour  <jlarmour@redhat.com>
+
+	* arm-tdep.c (check_prologue_cache): Fix off by 1 error.
+	(save_prologue_cache): Ditto.
+
 2001-02-19  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	From: innadadadavida@yahoo.com:

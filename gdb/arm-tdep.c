@@ -635,7 +635,7 @@ check_prologue_cache (struct frame_info *fi)
       fi->framereg = prologue_cache.framereg;
       fi->framesize = prologue_cache.framesize;
       fi->frameoffset = prologue_cache.frameoffset;
-      for (i = 0; i <= NUM_REGS; i++)
+      for (i = 0; i < NUM_REGS; i++)
 	fi->fsr.regs[i] = prologue_cache.fsr.regs[i];
       return 1;
     }
@@ -656,7 +656,7 @@ save_prologue_cache (struct frame_info *fi)
   prologue_cache.framesize = fi->framesize;
   prologue_cache.frameoffset = fi->frameoffset;
 
-  for (i = 0; i <= NUM_REGS; i++)
+  for (i = 0; i < NUM_REGS; i++)
     prologue_cache.fsr.regs[i] = fi->fsr.regs[i];
 }
 
