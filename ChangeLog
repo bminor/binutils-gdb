@@ -1,3 +1,8 @@
+Thu Nov 30 16:57:33 1995  Per Bothner  <bothner@wombat.gnu.ai.mit.edu>
+
+	* config.guess:  Recognize Pentium under SCO.
+	From Robert Lipe <robertl@arnet.com>.
+
 Wed Nov 29 13:49:08 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* configure.in (noconfigdirs): Disable target-libio on v810-*-*.
