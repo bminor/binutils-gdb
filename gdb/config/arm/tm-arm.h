@@ -35,6 +35,4 @@
 #define CALL_DUMMY_BREAKPOINT_OFFSET arm_call_dummy_breakpoint_offset()
 extern int arm_call_dummy_breakpoint_offset (void);
 
-#define COERCE_FLOAT_TO_DOUBLE(formal, actual) (standard_coerce_float_to_double (formal, actual))
-
 #endif /* TM_ARM_H */

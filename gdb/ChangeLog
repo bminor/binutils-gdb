@@ -1,5 +1,10 @@
 2002-02-18  Richard Earnshaw  <rearnsha@arm.com>
 
+	* arm-tdep.c (arm_gdbarch_init): Initialize coerce_float_to_double.
+	* config/arm/tm-arm.h (COERCE_FLOAT_TO_DOUBLE): Delete.
+
+2002-02-18  Richard Earnshaw  <rearnsha@arm.com>
+
 	* gdbarch.sh (GET_LONGJMP_TARGET): Add rule.
 	* gdbarch.c gdbarch.h: Regenerate.
 	* breakpoint.c (create_longjmp_breakpoint): Always compile this

@@ -2521,7 +2521,7 @@ process_note_abi_tag_sections (bfd *abfd, asection *sect, void *obj)
 	{
 	  int os_number = bfd_h_get_32 (abfd, note + 16);
 
-	  /* The case numbers are from abi-tags in glibc */
+	  /* The case numbers are from abi-tags in glibc.  */
 	  switch (os_number)
 	    {
 	    case 0 :
@@ -2579,7 +2579,7 @@ process_note_abi_tag_sections (bfd *abfd, asection *sect, void *obj)
 
 /* Return one of the ELFOSABI_ constants for BFDs representing ELF
    executables.  If it's not an ELF executable or if the OS/ABI couldn't
-   be determined, simply return -1. */
+   be determined, simply return -1.  */
 
 static int
 get_elfosabi (bfd *abfd)
@@ -2595,7 +2595,7 @@ get_elfosabi (bfd *abfd)
      have to check the note sections too.
 
      GNU/ARM tools set the EI_OSABI field to ELFOSABI_ARM, so handle that
-     as well.*/
+     as well.  */
   if (elfosabi == 0 || elfosabi == ELFOSABI_ARM)
     {
       bfd_map_over_sections (abfd,
@@ -2694,7 +2694,7 @@ arm_gdbarch_register_os_abi (enum arm_abi abi,
    during this debugging session.
 
    Called e.g. at program startup, when reading a core file, and when reading
-   a binary file. */
+   a binary file.  */
 
 static struct gdbarch *
 arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
@@ -2734,7 +2734,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	}
     }
 
-  /* Find a candidate among extant architectures. */
+  /* Find a candidate among extant architectures.  */
   for (arches = gdbarch_list_lookup_by_info (arches, &info);
        arches != NULL;
        arches = gdbarch_list_lookup_by_info (arches->next, &info))
@@ -2814,6 +2814,8 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_get_saved_register (gdbarch, generic_get_saved_register);
   set_gdbarch_push_arguments (gdbarch, arm_push_arguments);
+  set_gdbarch_coerce_float_to_double (gdbarch,
+				      standard_coerce_float_to_double);
 
   /* Frame handling.  */
   set_gdbarch_frame_chain_valid (gdbarch, arm_frame_chain_valid);
