@@ -139,7 +139,8 @@ gld${EMULATION_NAME}_open_dynamic_archive (arch, search, entry)
 
 EOF
 if [ "x${host}" = "x${target}" ] ; then
-  if [ "x${DEFAULT_EMULATION}" = "x${EMULATION_NAME}" ] ; then
+  case " ${EMULATION_LIBPATH} " in
+  *" ${EMULATION_NAME} "*)
 cat >>e${EMULATION_NAME}.c <<EOF
 
 /* For a native linker, check the file /etc/ld.so.conf for directories
@@ -224,7 +225,8 @@ gld${EMULATION_NAME}_check_ld_so_conf (name, force)
 }
 
 EOF
-  fi
+  ;;
+  esac
 fi
 cat >>e${EMULATION_NAME}.c <<EOF
 
@@ -309,13 +311,15 @@ gld${EMULATION_NAME}_after_open ()
 	    }
 EOF
 if [ "x${host}" = "x${target}" ] ; then
-  if [ "x${DEFAULT_EMULATION}" = "x${EMULATION_NAME}" ] ; then
+  case " ${EMULATION_LIBPATH} " in
+  *" ${EMULATION_NAME} "*)
 cat >>e${EMULATION_NAME}.c <<EOF
 	  lib_path = (const char *) getenv ("LD_LIBRARY_PATH");
 	  if (gld${EMULATION_NAME}_search_needed (lib_path, l->name, force))
 	    break;
 EOF
-  fi
+  ;;
+  esac
 fi
 cat >>e${EMULATION_NAME}.c <<EOF
 	  len = strlen (l->name);
@@ -335,12 +339,14 @@ cat >>e${EMULATION_NAME}.c <<EOF
 	    break;
 EOF
 if [ "x${host}" = "x${target}" ] ; then
-  if [ "x${DEFAULT_EMULATION}" = "x${EMULATION_NAME}" ] ; then
+  case " ${EMULATION_LIBPATH} " in
+  *" ${EMULATION_NAME} "*)
 cat >>e${EMULATION_NAME}.c <<EOF
 	  if (gld${EMULATION_NAME}_check_ld_so_conf (l->name, force))
 	    break;
 EOF
-  fi
+  ;;
+  esac
 fi
 cat >>e${EMULATION_NAME}.c <<EOF
 	}

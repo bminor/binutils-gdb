@@ -100,7 +100,8 @@ gld${EMULATION_NAME}_set_symbols ()
 {
 EOF
 if [ "x${host}" = "x${target}" ] ; then
-  if [ "x${DEFAULT_EMULATION}" = "x${EMULATION_NAME}" ] ; then
+  case " ${EMULATION_LIBPATH} " in
+  *" ${EMULATION_NAME} "*)
 cat >>e${EMULATION_NAME}.c <<EOF
   const char *env;
 
@@ -125,7 +126,8 @@ cat >>e${EMULATION_NAME}.c <<EOF
 	}
     }
 EOF
-  fi
+  ;;
+  esac
 fi
 cat >>e${EMULATION_NAME}.c <<EOF
 }
@@ -464,7 +466,8 @@ gld${EMULATION_NAME}_after_open ()
 	}
 EOF
 if [ "x${host}" = "x${target}" ] ; then
-  if [ "x${DEFAULT_EMULATION}" = "x${EMULATION_NAME}" ] ; then
+  case " ${EMULATION_LIBPATH} " in
+  *" ${EMULATION_NAME} "*)
 cat >>e${EMULATION_NAME}.c <<EOF
       {
 	const char *lib_path;
@@ -474,7 +477,8 @@ cat >>e${EMULATION_NAME}.c <<EOF
 	  continue;
       }
 EOF
-  fi
+  ;;
+  esac
 fi
 cat >>e${EMULATION_NAME}.c <<EOF
       if (command_line.rpath != NULL)
