@@ -20,15 +20,24 @@
 
 #include <signal.h>
 #include "sysdep.h"
-#include <sys/times.h>
-#include <sys/param.h>
+//#include <sys/times.h>
+//#include <sys/param.h>				 
 #include "bfd.h"
 #include "remote-sim.h"
-#include "../../newlib/libc/sys/sh/sys/syscall.h"
+#include <sys/syscall.h>
+
+#ifndef SIGBUS
+#define SIGBUS SIGSEGV
+#endif
+#ifndef SIGQUIT
+#define SIGQUIT SIGTERM
+#endif
+
 #define O_RECOMPILE 85
 #define DEFINE_TABLE
-/*#define ACE_FAST*/
 #define DISASSEMBLER_TABLE
+
+
 
 #define SBIT(x) ((x)&sbit)
 #define R0 	saved_state.asregs.regs[0]
@@ -142,7 +151,7 @@ typedef union
 
   }
   asregs;
-  int asints[28];
+  int asints[28];																     
 
 } saved_state_type;
 saved_state_type saved_state;
@@ -305,7 +314,7 @@ int empty[16];
 #define TL(x)  if ((x) == prevlock) stalls++;
 #define TB(x,y)  if ((x) == prevlock || (y)==prevlock) stalls++;
 
-#ifdef __GO32__
+#if defined(__GO32__) || defined(WIN32)
 int sim_memory_size = 19;
 #else
 int sim_memory_size = 24;
@@ -467,7 +476,7 @@ trap (i, regs, memory, maskl, maskw, little_endian)
 	switch (regs[4])
 	  {
 
-#ifndef __GO32__
+#if !defined(__GO32__) && !defined(WIN32)
 
 	  case SYS_fork:
 	    regs[0] = fork ();
@@ -758,8 +767,11 @@ macw (regs, memory, n, m)
     }
   else
     {
+      long mach;
       /* Add to MACH the sign extended product, and carry from low sum.  */
-      MACH += (-(prod < 0)) + ((unsigned long) sum < prod);
+      mach = MACH + (-(prod < 0)) + ((unsigned long) sum < prod);
+      /* Sign extend at 10:th bit in MACH.  */
+      MACH = (mach & 0x1ff) | -(mach & 0x200);
     }
   MACL = sum;
 }
@@ -796,7 +808,7 @@ sim_size (power)
 }
 
 
-extern int target_byte_order;
+int target_byte_order;
 
 static void
 set_static_little_endian(x)
@@ -885,7 +897,7 @@ sim_resume (step, siggnal)
   register int prevlock;
   register int thislock;
   register unsigned int doprofile;
-#ifdef __GO32__
+#if defined(__GO32__) || defined(WIN32)
   register int pollcount = 0;
 #endif
   register int little_endian = target_byte_order == 1234;
@@ -961,6 +973,17 @@ sim_resume (step, siggnal)
 	  }
 	}
 #endif
+#if defined (WIN32)
+      pollcount++;
+      if (pollcount > 1000)
+	{
+	  pollcount = 0;
+	  if (win32pollquit())
+	    {
+	      control_c();
+	    }
+	}
+#endif
 
 #ifndef ACE_FAST
       prevlock = thislock;
@@ -989,8 +1012,7 @@ sim_resume (step, siggnal)
   while (!saved_state.asregs.exception);
 
   if (saved_state.asregs.exception == SIGILL
-      || saved_state.asregs.exception == SIGBUS
-      || (saved_state.asregs.exception == SIGTRAP && !step))
+      || saved_state.asregs.exception == SIGBUS)
     {
       pc -= 2;
     }
@@ -1163,3 +1185,4 @@ sim_kill ()
 {
   /* nothing to do */
 }
+

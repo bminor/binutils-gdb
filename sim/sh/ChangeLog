@@ -1,3 +1,13 @@
+Wed Jun 21 15:03:49 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	*  interp.c: (SIGBUS, SIGTERM): Define if not.
+	(sim_memory_size): default to 2^19 on PCs.
+	(sim_resume): Poll for quits on win32.
+
+Wed May 24 16:22:48 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
+
+	* gencode.c (op_tab): Add SH3 support.
+
 Wed May 24 14:07:11 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	* gencode.c (tab): Add bsrf and braf.

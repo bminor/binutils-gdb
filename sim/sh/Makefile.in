@@ -68,7 +68,8 @@ XL=-lX11
 X=
 XL=
 INCDIR = $(srcdir)/../../include 
-CSEARCH = -I. -I$(srcdir)  -I../../include  -I../../bfd -I$(INCDIR) -I$(srcdir)/../../bfd -I$(srcdir)/../../gdb
+CSEARCH = -I. -I$(srcdir)  -I../../include  \
+  -I../../bfd -I$(INCDIR) -I$(srcdir)/../../bfd -I$(srcdir)/../../gdb -I$(srcdir)/../../newlib/libc/sys/sh
 DEP = mkdep
 
 #### host, target, and site specific Makefile frags come in here.
@@ -95,7 +96,7 @@ table.c:gencode
 #	indent table.c
 
 gencode:gencode.c
-	$(CC_FOR_BUILD) -o gencode $<
+	$(CC_FOR_BUILD) -o gencode $(srcdir)/gencode.c
 
 
 #### host and target dependent Makefile fragments come in here.
