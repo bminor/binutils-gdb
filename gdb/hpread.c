@@ -220,6 +220,8 @@ static unsigned long hpread_get_line (sltpointer, struct objfile *);
 
 static CORE_ADDR hpread_get_location (sltpointer, struct objfile *);
 
+int hpread_has_name (enum dntt_entry_type kind);
+
 static void hpread_psymtab_to_symtab_1 (struct partial_symtab *);
 
 void hpread_psymtab_to_symtab (struct partial_symtab *);
@@ -596,11 +598,11 @@ pst_syms_struct;
 
 static pst_syms_struct *pst_syms_array = 0;
 
-static pst_syms_count = 0;
-static pst_syms_size = 0;
+static int pst_syms_count = 0;
+static int pst_syms_size = 0;
 
 /* used by the TELL_OBJFILE macro */
-static boolean told_objfile = 0;
+static int told_objfile = 0;
 
 /* Set up psymtab symbol index stuff */
 static void

@@ -1,5 +1,18 @@
 2002-12-02  J. Brobecker  <brobecker@gnat.com>
 
+	* somsolib.c (dld_cache): Replace boolean by int for field is_valid.
+	Fixes a build failure on HP/UX.
+
+	* hpread.c (told_objfile): Replace boolean type by int. Fixes a build
+	failure on HP/UX. 
+	(hpread_has_name): Advance declaration to avoid a compilation warning.
+	(pst_syms_count): Add missing variable type. By change, the compiler
+	was defaulting to int, which seems a good choice. Fixes a compilation
+	warning.
+	(pst_syms_size): Likewise.
+ 
+2002-12-02  J. Brobecker  <brobecker@gnat.com>
+
 	* hppa-tdep.c: Add #include "osabi.h" (for hppa_gdbarch_init).
 	(hppa_gdbarch_init): Detect osabi from objfile. Will be needed
 	later to set the proper gdbarch methods depending on the osabi.
