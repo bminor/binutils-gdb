@@ -3547,6 +3547,7 @@ elf64_alpha_calc_got_offsets_for_symbol (h, arg)
      struct alpha_elf_link_hash_entry *h;
      PTR arg ATTRIBUTE_UNUSED;
 {
+  bfd_boolean result = TRUE;
   struct alpha_elf_got_entry *gotent;
 
   if (h->root.root.type == bfd_link_hash_warning)
@@ -3555,14 +3556,23 @@ elf64_alpha_calc_got_offsets_for_symbol (h, arg)
   for (gotent = h->got_entries; gotent; gotent = gotent->next)
     if (gotent->use_count > 0)
       {
-	bfd_size_type *plge
-	  = &alpha_elf_tdata (gotent->gotobj)->got->_raw_size;
+	struct alpha_elf_obj_tdata *td;
+	bfd_size_type *plge;
 
+	td = alpha_elf_tdata (gotent->gotobj);
+	if (td == NULL)
+	  {
+	    _bfd_error_handler (_("Symbol %s has no GOT subsection for offset 0x%x"),
+				h->root.root.root.string, gotent->got_offset);
+	    result = FALSE;
+	    continue;
+	  }
+	plge = &td->got->_raw_size;
 	gotent->got_offset = *plge;
 	*plge += alpha_got_entry_size (gotent->reloc_type);
       }
 
-  return TRUE;
+  return result;
 }
 
 static void

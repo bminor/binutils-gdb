@@ -1,3 +1,9 @@
+2004-02-09  Christian Vogel <vogelchr@vogel.cx>
+	    Nick Clifton  <nickc@redhat.com>
+
+	* elf64-alpha.c (elf64_alpha_calc_got_offsets_for_symbol): Catch
+	GOT entries with no associated GOT subsection.
+
 2004-02-09  Richard Sandiford  <rsandifo@redhat.com>
 
 	* bfd-elf.h (elf_backend_name_local_section_symbols): New hook.
