@@ -279,8 +279,29 @@ prim_record_minimal_symbol (name, address, ms_type, objfile)
      enum minimal_symbol_type ms_type;
      struct objfile *objfile;
 {
+  int section;
+
+  switch (ms_type)
+    {
+    case mst_text:
+    case mst_file_text:
+    case mst_solib_trampoline:
+      section = SECT_OFF_TEXT;
+      break;
+    case mst_data:
+    case mst_file_data:
+      section = SECT_OFF_DATA;
+      break;
+    case mst_bss:
+    case mst_file_bss:
+      section = SECT_OFF_BSS;
+      break;
+    default:
+      section = -1;
+    }
+
   prim_record_minimal_symbol_and_info (name, address, ms_type,
-				       NULL, -1, objfile);
+				       NULL, section, objfile);
 }
 
 void
@@ -328,26 +349,7 @@ prim_record_minimal_symbol_and_info (name, address, ms_type, info, section,
   SYMBOL_NAME (msymbol) = (char *) name;
   SYMBOL_INIT_LANGUAGE_SPECIFIC (msymbol, language_unknown);
   SYMBOL_VALUE_ADDRESS (msymbol) = address;
-  if (section == -1)
-    switch (ms_type)
-      {
-      case mst_text:
-      case mst_file_text:
-	SYMBOL_SECTION (msymbol) = SECT_OFF_TEXT;
-	break;
-      case mst_data:
-      case mst_file_data:
-	SYMBOL_SECTION (msymbol) = SECT_OFF_DATA;
-	break;
-      case mst_bss:
-      case mst_file_bss:
-	SYMBOL_SECTION (msymbol) = SECT_OFF_BSS;
-	break;
-      default:
-	SYMBOL_SECTION (msymbol) = -1;
-      }
-  else
-    SYMBOL_SECTION (msymbol) = section;
+  SYMBOL_SECTION (msymbol) = section;
 
   MSYMBOL_TYPE (msymbol) = ms_type;
   /* FIXME:  This info, if it remains, needs its own field.  */
