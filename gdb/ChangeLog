@@ -1,3 +1,24 @@
+2001-06-12  Michael Snyder  <msnyder@redhat.com>
+
+	* lin-lwp.c: Prevent thread starvation by using a monte carlo 
+	method to choose which of several event threads to handle next.
+
+	(stop_wait_callback): Defer pushback of breakpoint events until
+	later; add SIGTRAP events to the queue of unhandled events.
+	Keep calling waitpid until SIGSTOP retrieved.  If more than one
+	non-SIGSTOP event is retrieved, push them back onto the process
+	queue using kill.
+	(count_events_callback, select_singlestep_lwp_callback, 
+	select_event_lwp_callback, cancel_breakpoints_callback, 
+	select_event_lwp): New functions.  Implement monte carlo method 
+	for selecting which of several SIGTRAP threads to handle next.  
+	Push back the breakpoint event for all threads other than the 
+	selected one.
+	(lin_lwp_wait): Call select_event_lwp to decide which of several
+	sigtrapped lwps to handle next.
+	(resume_callback): Disable code that attempts to handle
+	step_resume breakpoints.  Let core gdb handle this.
+	
 2001-07-06  Jim Blandy  <jimb@redhat.com>
 
 	* gdbtypes.h (builtin_type_void_func_ptr): New builtin type.
