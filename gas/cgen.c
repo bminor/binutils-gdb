@@ -1,5 +1,5 @@
 /* GAS interface for targets using CGEN: Cpu tools GENerator.
-   Copyright (C) 1996, 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
 
 This file is part of GAS, the GNU Assembler.
 
@@ -26,6 +26,7 @@ Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "as.h"
 #include "subsegs.h"
 #include "cgen.h"
+#include "dwarf2dbg.h"
 
 /* Opcode table descriptor, must be set by md_begin.  */
 
@@ -444,6 +445,9 @@ gas_cgen_finish_insn (insn, buf, length, relax_p, result)
 #else
   memcpy (f, buf, byte_len);
 #endif
+
+  /* Emit DWARF2 debugging information.  */
+  dwarf2_emit_insn (byte_len);
 
   /* Create any fixups.  */
   for (i = 0; i < num_fixups; ++i)
