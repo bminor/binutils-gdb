@@ -3280,11 +3280,11 @@ _bfd_mips_elf_print_private_bfd_data (abfd, ptr)
   else if ((elf_elfheader (abfd)->e_flags & EF_MIPS_ARCH) == E_MIPS_ARCH_4)
     fprintf (file, _(" [mips4]"));
   else if ((elf_elfheader (abfd)->e_flags & EF_MIPS_ARCH) == E_MIPS_ARCH_5)
-    fprintf (file, _ (" [mips5]"));
+    fprintf (file, _(" [mips5]"));
   else if ((elf_elfheader (abfd)->e_flags & EF_MIPS_ARCH) == E_MIPS_ARCH_32)
-    fprintf (file, _ (" [mips32]"));
+    fprintf (file, _(" [mips32]"));
   else if ((elf_elfheader (abfd)->e_flags & EF_MIPS_ARCH) == E_MIPS_ARCH_64)
-    fprintf (file, _ (" [mips64]"));
+    fprintf (file, _(" [mips64]"));
   else
     fprintf (file, _(" [unknown ISA]"));
 

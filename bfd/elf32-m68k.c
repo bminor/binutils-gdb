@@ -407,10 +407,10 @@ elf32_m68k_print_private_bfd_data (abfd, ptr)
   /* Ignore init flag - it may not be set, despite the flags field containing valid data.  */
 
   /* xgettext:c-format */
-  fprintf (file, _ ("private flags = %lx:"), elf_elfheader (abfd)->e_flags);
+  fprintf (file, _("private flags = %lx:"), elf_elfheader (abfd)->e_flags);
 
   if (elf_elfheader (abfd)->e_flags & EF_CPU32)
-    fprintf (file, _ (" [cpu32]"));
+    fprintf (file, _(" [cpu32]"));
 
   fputc ('\n', file);
 

@@ -479,19 +479,19 @@ elf32_d10v_relocate_section (output_bfd, info, input_bfd, input_section,
 	      break;
 
 	    case bfd_reloc_outofrange:
-	      msg = _ ("internal error: out of range error");
+	      msg = _("internal error: out of range error");
 	      goto common_error;
 
 	    case bfd_reloc_notsupported:
-	      msg = _ ("internal error: unsupported relocation error");
+	      msg = _("internal error: unsupported relocation error");
 	      goto common_error;
 
 	    case bfd_reloc_dangerous:
-	      msg = _ ("internal error: dangerous error");
+	      msg = _("internal error: dangerous error");
 	      goto common_error;
 
 	    default:
-	      msg = _ ("internal error: unknown error");
+	      msg = _("internal error: unknown error");
 	      /* fall through */
 
 	    common_error:

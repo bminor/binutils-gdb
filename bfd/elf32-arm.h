@@ -2325,12 +2325,12 @@ ERROR: %s uses FPA instructions, whereas %s uses VFP instructions"),
 	      || (in_flags & EF_ARM_VFP_FLOAT) == 0)
 	    {
 	      if (in_flags & EF_ARM_SOFT_FLOAT)
-		_bfd_error_handler (_ ("\
+		_bfd_error_handler (_("\
 ERROR: %s uses software FP, whereas %s uses hardware FP"),
 				    bfd_archive_filename (ibfd),
 				    bfd_get_filename (obfd));
 	      else
-		_bfd_error_handler (_ ("\
+		_bfd_error_handler (_("\
 ERROR: %s uses hardware FP, whereas %s uses software FP"),
 				    bfd_archive_filename (ibfd),
 				    bfd_get_filename (obfd));

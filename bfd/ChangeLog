@@ -1,3 +1,10 @@
+2002-02-08  Chris Demetriou  <cgd@broadcom.com>
+
+	* elf32-arm.h: Fix formatting of _("...").
+	* elf32-d10v.c: Likewise.
+	* elf32-m68k.c: Likewise.
+	* elf32-mips.c: Likewise.
+
 2002-02-08  Ivan Guzvinec <ivang@opencores.org>
 
 	* coff-or32.c: Fix compile time warning messages.
