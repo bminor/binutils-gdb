@@ -1,5 +1,5 @@
 /* Parameters for execution on a z8000 series machine.
-   Copyright 1992 Free Software Foundation, Inc.
+   Copyright 1992,1993 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -148,26 +148,23 @@ extern CORE_ADDR mz8k_skip_prologue PARAMS ((CORE_ADDR ip));
    to be actual register numbers as far as the user is concerned
    but do serve to get the desired values when passed to read_register.  */
 
-#define CCR_REGNUM 16		/* Contains processor status */
-#define PC_REGNUM 17		/* Contains program counter */
-#define CYCLES_REGNUM 18
-#define INSTS_REGNUM 19
-#define TIME_REGNUM 20
-#define FP_REGNUM 21		/* Contains fp, whatever memory model */
-#define SP_REGNUM 22		/* Conatins sp, whatever memory model */
-
-
-
-
+#define CCR_REGNUM 	16	/* Contains processor status */
+#define PC_REGNUM 	17	/* Contains program counter */
+#define CYCLES_REGNUM 	18
+#define INSTS_REGNUM 	19
+#define TIME_REGNUM 	20
+#define FP_REGNUM 	21	/* Contains fp, whatever memory model */
+#define SP_REGNUM 	22	/* Conatins sp, whatever memory model */
 
 
 
 #define PTR_SIZE (BIG ? 4: 2)
 #define PTR_MASK (BIG ? 0xff00ffff : 0x0000ffff)
+
 /* Store the address of the place in which to copy the structure the
    subroutine will return.  This is called from call_function. */
 
-#define STORE_STRUCT_RETURN(ADDR, SP) store_struct_return(ADDR,SP)
+#define STORE_STRUCT_RETURN(ADDR, SP) abort();
 
 /* Extract from an array REGBUF containing the (raw) register state
    a function return value of type TYPE, and copy that, in virtual format,
@@ -176,13 +173,12 @@ extern CORE_ADDR mz8k_skip_prologue PARAMS ((CORE_ADDR ip));
 
 
 #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
- extract_return_value(TYPE,REGBUF,VALBUF)
+  bcopy(REGBUF + REGISTER_BYTE(2), VALBUF, TYPE_LENGTH(TYPE));
 
 /* Write into appropriate registers a function return value
-   of type TYPE, given in virtual format.  Assumes floats are passed
-   in d0/d1.  */
+   of type TYPE, given in virtual format. */
 
-#define STORE_RETURN_VALUE(TYPE,VALBUF) store_return_value(TYPE,VALBUF);
+#define STORE_RETURN_VALUE(TYPE,VALBUF) abort();
 
 /* Extract from an array REGBUF containing the (raw) register state
    the address in which a function should return its structure value,
@@ -195,10 +191,13 @@ extern CORE_ADDR mz8k_skip_prologue PARAMS ((CORE_ADDR ip));
 
 /* FRAME_CHAIN takes a frame's nominal address and produces the frame's
    chain-pointer.
-   In the case of the 68000, the frame's nominal address
-   is the address of a 4-byte word containing the calling frame's address.  */
+   In the case of the Z8000, the frame's nominal address
+   is the address of a ptr sized byte word containing the calling
+   frame's address.  */
 
-#define FRAME_CHAIN(thisframe)  frame_chain(thisframe)
+#define FRAME_CHAIN(thisframe) frame_chain(thisframe);
+
+
 
 /* Define other aspects of the stack frame.  */
 
@@ -302,8 +301,6 @@ int z8001_mode;
 
 #define NO_STD_REGS
 
-
-
 #define	PRINT_REGISTER_HOOK(regno) print_register_hook(regno)
 
 
@@ -312,4 +309,6 @@ int z8001_mode;
 
 #define NAMES_HAVE_UNDERSCORE
 
-#define ADDITIONAL_OPTIONS {"z8001",no_argument,&z8001_mode, 1},
+
+#define INIT_EXTRA_SYMTAB_INFO \
+  z8k_set_pointer_size(objfile->obfd->arch_info->bits_per_address);

@@ -1,5 +1,5 @@
 /* Target-machine dependent code for Zilog Z8000, for GDB.
-   Copyright (C) 1992 Free Software Foundation, Inc.
+   Copyright (C) 1992,1993 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -17,18 +17,17 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* 
+/*
  Contributed by Steve Chamberlain
-                sac@cygnus.com 
+                sac@cygnus.com
  */
-
 
 #include "defs.h"
 #include "frame.h"
 #include "obstack.h"
 #include "symtab.h"
+#include "gdbcmd.h"
 #include "gdbtypes.h"
-
 
 /* Return the saved PC from this frame.
 
@@ -37,9 +36,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 CORE_ADDR
 frame_saved_pc (frame)
-FRAME frame;
+     FRAME frame;
 {
-  return ( read_memory_pointer(frame->frame+(BIG ? 4 : 2)));
+  return (read_memory_pointer (frame->frame + (BIG ? 4 : 2)));
 }
 
 #define IS_PUSHL(x) (BIG ? ((x & 0xfff0) == 0x91e0):((x & 0xfff0) == 0x91F0))
@@ -51,128 +50,129 @@ FRAME frame;
 #define IS_SUB_SP(x) ((x & 0xffff) == 0x020f)
 #define IS_PUSH_FP(x) (BIG ? (x == 0x93ea) : (x == 0x93fa))
 
-
-/* work out how much local space is on the stack and 
+/* work out how much local space is on the stack and
    return the pc pointing to the first push */
 
-static
-CORE_ADDR 
-skip_adjust(pc, size)
-CORE_ADDR pc;
-int *size;
+static CORE_ADDR
+skip_adjust (pc, size)
+     CORE_ADDR pc;
+     int *size;
 {
   *size = 0;
 
-  if (IS_PUSH_FP(read_memory_short(pc))
-      && IS_MOV_SP_FP(read_memory_short(pc+2)))
-  {
-    /* This is a function with an explict frame pointer */
-    pc += 4;
-    *size += 2;			/* remember the frame pointer */
-  }
+  if (IS_PUSH_FP (read_memory_short (pc))
+      && IS_MOV_SP_FP (read_memory_short (pc + 2)))
+    {
+      /* This is a function with an explict frame pointer */
+      pc += 4;
+      *size += 2;		/* remember the frame pointer */
+    }
 
   /* remember any stack adjustment */
-  if (IS_SUB_SP(read_memory_short(pc)))
-  {
-    *size += read_memory_short(pc+2);
-    pc += 4;
-  }
+  if (IS_SUB_SP (read_memory_short (pc)))
+    {
+      *size += read_memory_short (pc + 2);
+      pc += 4;
+    }
   return pc;
 }
 
-
 int
-examine_frame(pc, regs, sp)
-CORE_ADDR pc;
-struct frame_saved_regs *regs;
-CORE_ADDR sp;
+examine_frame (pc, regs, sp)
+     CORE_ADDR pc;
+     struct frame_saved_regs *regs;
+     CORE_ADDR sp;
 {
- int w = read_memory_short(pc);
- int offset = 0;
- int regno;
+  int w = read_memory_short (pc);
+  int offset = 0;
+  int regno;
 
+  for (regno = 0; regno < NUM_REGS; regno++)
+   regs->regs[regno] = 0;
 
-
- for (regno = 0; regno < NUM_REGS; regno++)
-  regs->regs[regno] = 0;
-
-  while  (IS_PUSHW(w) || IS_PUSHL(w)) 
+  while (IS_PUSHW (w) || IS_PUSHL (w))
   {
     /* work out which register is being pushed to where */
-    if (IS_PUSHL(w)) 
+    if (IS_PUSHL (w))
     {
       regs->regs[w & 0xf] = offset;
-      regs->regs[(w & 0xf) + 1] = offset +2;
+      regs->regs[(w & 0xf) + 1] = offset + 2;
       offset += 4;
     }
-    else {
+    else
+    {
       regs->regs[w & 0xf] = offset;
       offset += 2;
     }
     pc += 2;
-    w = read_memory_short(pc);
+    w = read_memory_short (pc);
   }
 
- if (IS_MOVE_FP(w)) 
- {
-   /* We know the fp */
+  if (IS_MOVE_FP (w))
+  {
+    /* We know the fp */
 
- }
- else if (IS_SUB_SP(w))
- {
-   /* Subtracting a value from the sp, so were in a function
-      which needs stack space for locals, but has no fp.  We fake up
-      the values as if we had an fp */
-   regs->regs[FP_REGNUM] = sp;
- }
- else
- {
-   /* This one didn't have an fp, we'll fake it up */
-   regs->regs[SP_REGNUM] = sp;
- }
- /* stack pointer contains address of next frame */
-/*  regs->regs[fp_regnum()] = fp;*/
+  }
+  else if (IS_SUB_SP (w))
+  {
+    /* Subtracting a value from the sp, so were in a function
+       which needs stack space for locals, but has no fp.  We fake up
+       the values as if we had an fp */
+    regs->regs[FP_REGNUM] = sp;
+  }
+  else
+  {
+    /* This one didn't have an fp, we'll fake it up */
+    regs->regs[SP_REGNUM] = sp;
+  }
+  /* stack pointer contains address of next frame */
+  /*  regs->regs[fp_regnum()] = fp;*/
   regs->regs[SP_REGNUM] = sp;
   return pc;
 }
 
-CORE_ADDR z8k_skip_prologue(start_pc)
-CORE_ADDR start_pc;
+CORE_ADDR 
+z8k_skip_prologue (start_pc)
+     CORE_ADDR start_pc;
 {
   struct frame_saved_regs dummy;
-  return examine_frame(start_pc, &dummy, 0);
+
+  return examine_frame (start_pc, &dummy, 0);
 }
 
-CORE_ADDR addr_bits_remove(x)
-CORE_ADDR x;
+CORE_ADDR 
+addr_bits_remove (x)
+     CORE_ADDR x;
 {
   return x & PTR_MASK;
 }
 
-read_memory_pointer(x)
-CORE_ADDR x;
+read_memory_pointer (x)
+     CORE_ADDR x;
 {
 
-return read_memory_integer(ADDR_BITS_REMOVE(x), BIG ? 4 : 2);
+  return read_memory_integer (ADDR_BITS_REMOVE (x), BIG ? 4 : 2);
 }
 
 FRAME_ADDR
 frame_chain (thisframe)
      FRAME thisframe;
 {
-  if (thisframe->prev == 0) 
-  {
-    /* This is the top of the stack, let's get the sp for real */
-  }
+  if (thisframe->prev == 0)
+    {
+      /* This is the top of the stack, let's get the sp for real */
+    }
   if (!inside_entry_file ((thisframe)->pc))
-  {
-return     read_memory_pointer ((thisframe)->frame);
-  }
-
+    {
+      return read_memory_pointer ((thisframe)->frame);
+    }
   return 0;
 }
 
-init_frame_pc() { abort(); }
+init_frame_pc ()
+{
+  abort ();
+}
 
 /* Put here the code to store, into a struct frame_saved_regs,
    the addresses of the saved registers of frame described by FRAME_INFO.
@@ -180,78 +180,69 @@ init_frame_pc() { abort(); }
    ways in the stack frame.  sp is even more special:
    the address we return for it IS the sp for the next frame.  */
 
-void get_frame_saved_regs(frame_info, frame_saved_regs) 
+void 
+get_frame_saved_regs (frame_info, frame_saved_regs)
      struct frame_info *frame_info;
      struct frame_saved_regs *frame_saved_regs;
 
 {
-CORE_ADDR pc;
-int w;
-bzero(frame_saved_regs, sizeof(*frame_saved_regs));
-pc = get_pc_function_start(frame_info->pc);
+  CORE_ADDR pc;
+  int w;
+
+  bzero (frame_saved_regs, sizeof (*frame_saved_regs));
+  pc = get_pc_function_start (frame_info->pc);
 
 /* wander down the instruction stream */
-examine_frame(pc, frame_saved_regs, frame_info->frame);
+  examine_frame (pc, frame_saved_regs, frame_info->frame);
 
 }
 
-
-extract_return_value(valtype, regbuf, valbuf)
-struct type *valtype;
-char regbuf[REGISTER_BYTES];
-char *valbuf;
-{ 
-  bcopy(regbuf + REGISTER_BYTE(2), valbuf, TYPE_LENGTH(valtype));
+void 
+z8k_push_dummy_frame ()
+{
+  abort ();
 }
-void z8k_push_dummy_frame() { abort(); }
 
-int print_insn(memaddr, stream)
-CORE_ADDR memaddr;
-FILE *stream;
+int 
+print_insn (memaddr, stream)
+     CORE_ADDR memaddr;
+     FILE *stream;
 {
   char temp[20];
+
   read_memory (memaddr, temp, 20);
-  if (BIG) {
-    return print_insn_z8001(memaddr, temp, stream);
-  }
-  else {
-    return print_insn_z8002(memaddr, temp, stream);
-  }
+  if (BIG)
+    {
+      return print_insn_z8001 (memaddr, temp, stream);
+    }
+  else
+    {
+      return print_insn_z8002 (memaddr, temp, stream);
+    }
 }
-
-void
-store_return_value()
-{
-abort();
-}
-void
-store_struct_return() { abort(); }
-
-
 
 /* Fetch the instruction at ADDR, returning 0 if ADDR is beyond LIM or
    is not the address of a valid instruction, the address of the next
    instruction beyond ADDR otherwise.  *PWORD1 receives the first word
    of the instruction.*/
 
-
 CORE_ADDR
-NEXT_PROLOGUE_INSN(addr, lim, pword1)
-CORE_ADDR addr;
-CORE_ADDR lim;
-short *pword1;
+NEXT_PROLOGUE_INSN (addr, lim, pword1)
+     CORE_ADDR addr;
+     CORE_ADDR lim;
+     short *pword1;
 {
-  if (addr < lim+8)   
-  {
-    read_memory (addr, pword1, sizeof(*pword1));
-    SWAP_TARGET_AND_HOST (pword1, sizeof (short));
-    return addr + 2;
-  }
+  if (addr < lim + 8)
+    {
+      read_memory (addr, pword1, sizeof (*pword1));
+      SWAP_TARGET_AND_HOST (pword1, sizeof (short));
+
+      return addr + 2;
+    }
 
   return 0;
 
 }
-
 
 /* Put here the code to store, into a struct frame_saved_regs,
    the addresses of the saved registers of frame described by FRAME_INFO.
@@ -271,108 +262,180 @@ frame_find_saved_regs (fip, fsrp)
   CORE_ADDR pc;
   CORE_ADDR adr;
   int i;
-  
+
   memset (fsrp, 0, sizeof *fsrp);
 
-  pc = skip_adjust(get_pc_function_start (fip->pc), &locals);
+  pc = skip_adjust (get_pc_function_start (fip->pc), &locals);
 
- {
-   adr = fip->frame - locals;
-   for (i = 0; i < 8; i++) 
-   {
-     int word = read_memory_short(pc);
-     pc += 2 ;
-     if (IS_PUSHL(word)) {
-       fsrp->regs[word & 0xf] = adr;
-       fsrp->regs[(word & 0xf) + 1] = adr - 2;
-       adr -= 4;
-     }
-     else if (IS_PUSHW(word)) {
-       fsrp->regs[word & 0xf] = adr;
-       adr -= 2;
-     }
-     else
-      break;
-   }
+  {
+    adr = fip->frame - locals;
+    for (i = 0; i < 8; i++)
+      {
+	int word = read_memory_short (pc);
 
- }
-  
+	pc += 2;
+	if (IS_PUSHL (word))
+	  {
+	    fsrp->regs[word & 0xf] = adr;
+	    fsrp->regs[(word & 0xf) + 1] = adr - 2;
+	    adr -= 4;
+	  }
+	else if (IS_PUSHW (word))
+	  {
+	    fsrp->regs[word & 0xf] = adr;
+	    adr -= 2;
+	  }
+	else
+	  break;
+      }
+
+  }
+
   fsrp->regs[PC_REGNUM] = fip->frame + 4;
   fsrp->regs[FP_REGNUM] = fip->frame;
 
 }
 
 void
-addr_bits_set() { abort(); }
+addr_bits_set ()
+{
+  abort ();
+}
 
 int
-saved_pc_after_call() 
-{ 
-  return addr_bits_remove(read_memory_integer(read_register(SP_REGNUM), PTR_SIZE));
+saved_pc_after_call ()
+{
+  return addr_bits_remove (read_memory_integer (read_register (SP_REGNUM), PTR_SIZE));
 }
 
 void
-print_register_hook(regno)
-int regno;
+print_register_hook (regno)
+     int regno;
 {
 
-  if ((regno & 1)==0 && regno < 16) 
-  {
-    unsigned    short l[2];
-    read_relative_register_raw_bytes(regno, (char *)(l+0));
-    read_relative_register_raw_bytes(regno+1, (char *)(l+1));
-    printf("\t");
-    printf("%04x%04x", l[0],l[1]);
-  }
+  if ((regno & 1) == 0 && regno < 16)
+    {
+      unsigned short l[2];
 
-  if ((regno & 3)== 0 && regno < 16)
-  {
-    unsigned    short l[4];
-    read_relative_register_raw_bytes(regno, l+0);
-    read_relative_register_raw_bytes(regno+1, l+1);
-    read_relative_register_raw_bytes(regno+2, l+2);
-    read_relative_register_raw_bytes(regno+3, l+3);
-
-    printf("\t");
-    printf("%04x%04x%04x%04x", l[0],l[1],l[2],l[3]);
-  }
-  if (regno == 15) 
-  {
-    unsigned    short  rval;
-    int i;
-    read_relative_register_raw_bytes(regno, (char *)(&rval));
-
-    printf("\n");
-    for (i = 0; i < 10; i+=2)   {
-      printf("(sp+%d=%04x)",i, read_memory_short(rval+i));
+      read_relative_register_raw_bytes (regno, (char *) (l + 0));
+      read_relative_register_raw_bytes (regno + 1, (char *) (l + 1));
+      printf ("\t");
+      printf ("%04x%04x", l[0], l[1]);
     }
-  }
-  
-}
 
+  if ((regno & 3) == 0 && regno < 16)
+    {
+      unsigned short l[4];
+
+      read_relative_register_raw_bytes (regno, l + 0);
+      read_relative_register_raw_bytes (regno + 1, l + 1);
+      read_relative_register_raw_bytes (regno + 2, l + 2);
+      read_relative_register_raw_bytes (regno + 3, l + 3);
+
+      printf ("\t");
+      printf ("%04x%04x%04x%04x", l[0], l[1], l[2], l[3]);
+    }
+  if (regno == 15)
+    {
+      unsigned short rval;
+      int i;
+
+      read_relative_register_raw_bytes (regno, (char *) (&rval));
+
+      printf ("\n");
+      for (i = 0; i < 10; i += 2)
+	{
+	  printf ("(sp+%d=%04x)", i, read_memory_short (rval + i));
+	}
+    }
+
+}
 
 void
-register_convert_to_virtual(regnum, from, to) 
-unsigned char *from;
-unsigned char *to;
+register_convert_to_virtual (regnum, from, to)
+     unsigned char *from;
+     unsigned char *to;
 {
-    to[0] = from[0];
-    to[1] = from[1];
-    to[2] = from[2];
-    to[3] = from[3];
+  to[0] = from[0];
+  to[1] = from[1];
+  to[2] = from[2];
+  to[3] = from[3];
 }
 
 void
-register_convert_to_raw(regnum, to, from) 
-char *to;
-char *from;
+register_convert_to_raw (regnum, to, from)
+     char *to;
+     char *from;
 {
-    to[0] = from[0];
-    to[1] = from[1];
-    to[2] = from[2];
-    to[3] = from[3];
+  to[0] = from[0];
+  to[1] = from[1];
+  to[2] = from[2];
+  to[3] = from[3];
 }
 
+void 
+z8k_pop_frame ()
+{
+}
 
+struct cmd_list_element *setmemorylist;
 
-void z8k_pop_frame() {  }
+void 
+z8k_set_pointer_size (newsize)
+     int newsize;
+{
+  static int oldsize = 0;
+
+  if (oldsize != newsize)
+    {
+      printf ("pointer size set to %d bits\n", newsize);
+      oldsize = newsize;
+      if (newsize == 32)
+	{
+	  BIG = 1;
+	}
+      else
+	{
+	  BIG = 0;
+	}
+      _initialize_gdbtypes ();
+    }
+}
+
+static void
+segmented_command (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  z8k_set_pointer_size (16);
+}
+
+static void
+unsegmented_command (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  z8k_set_pointer_size (16);
+
+}
+
+static void
+set_memory (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  printf ("\"set memory\" must be followed by the name of a memory subcommand.\n");
+  help_list (setmemorylist, "set memory ", -1, stdout);
+}
+
+_initialize_z8ktdep ()
+{
+  add_prefix_cmd ("memory", no_class, set_memory,
+		  "set the memory model", &setmemorylist, "set memory ", 0,
+		  &setlist);
+  add_cmd ("segmented", class_support, segmented_command,
+	   "Set segmented memory model.", &setmemorylist);
+  add_cmd ("unsegmented", class_support, unsegmented_command,
+	   "Set unsegmented memory model.", &setmemorylist);
+
+}

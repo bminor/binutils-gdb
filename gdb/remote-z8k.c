@@ -35,14 +35,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "../sim/z8k/sim.h"
 
 /* External data declarations */
-extern int stop_soon_quietly;           /* for wait_for_inferior */
+extern int stop_soon_quietly;	/* for wait_for_inferior */
 
 /* Forward data declarations */
-extern struct target_ops sim_ops;		/* Forward declaration */
+extern struct target_ops sim_ops;	/* Forward declaration */
 
-void sim_store_register();
-void sim_set_oc();
-
+void sim_store_register ();
+void sim_set_oc ();
 
 int
 sim_write_inferior_memory (memaddr, myaddr, len)
@@ -50,93 +49,91 @@ sim_write_inferior_memory (memaddr, myaddr, len)
      unsigned char *myaddr;
      int len;
 {
-  sim_write(memaddr, myaddr, len);
+  sim_write (memaddr, myaddr, len);
   return 1;
 }
 
 static void
-store_register(regno)
-int regno;
+store_register (regno)
+     int regno;
 {
-  if (regno  == -1) 
-  {
-    for (regno = 0; regno < 16; regno++)
+  if (regno == -1)
     {
-      store_register(regno);
+      for (regno = 0; regno < 16; regno++)
+	{
+	  store_register (regno);
+	}
     }
-  }
-  else 
-  {
-    sim_store_register(regno,read_register(regno));
-  }
+  else
+    {
+      sim_store_register (regno, read_register (regno));
+    }
 }
-
-
 
 void
-sim_kill(arg,from_tty)
-char	*arg;
-int	from_tty;
+sim_kill (arg, from_tty)
+     char *arg;
+     int from_tty;
 {
 
 }
 
-
-
 /*
- * Download a file specified in 'args', to the sim. 
+ * Download a file specified in 'args', to the sim.
  */
 static void
-sim_load(args,fromtty)
-char	*args;
-int	fromtty;
+sim_load (args, fromtty)
+     char *args;
+     int fromtty;
 {
-  bfd	*abfd;
+  bfd *abfd;
   asection *s;
 
-  inferior_pid = 0;  
-  abfd = bfd_openr(args,"coff-z8k");
+  inferior_pid = 0;
+  abfd = bfd_openr (args, "coff-z8k");
 
-  if (!abfd) 
-  {
-    printf_filtered("Unable to open file %s\n", args);
-    return;
-  }
+  if (!abfd)
+    {
+      printf_filtered ("Unable to open file %s\n", args);
+      return;
+    }
 
-  if (bfd_check_format(abfd, bfd_object) ==0) 
-  {
-    printf_filtered("File is not an object file\n");
-    return ;
-  }
+  if (bfd_check_format (abfd, bfd_object) == 0)
+    {
+      printf_filtered ("File is not an object file\n");
+      return;
+    }
 
   s = abfd->sections;
-  while (s != (asection *)NULL) 
-  {
-    if (s->flags & SEC_LOAD) 
+  while (s != (asection *) NULL)
     {
-      int i;
-      int delta = 4096;
-      char *buffer = xmalloc(delta);
-      printf_filtered("%s\t: 0x%4x .. 0x%4x  ",
-		      s->name, s->vma, s->vma + s->_raw_size);
-      for (i = 0; i < s->_raw_size; i+= delta) 
-      {
-	int sub_delta = delta;
-	if (sub_delta > s->_raw_size - i)
-	 sub_delta = s->_raw_size - i ;
+      if (s->flags & SEC_LOAD)
+	{
+	  int i;
+	  int delta = 4096;
+	  char *buffer = xmalloc (delta);
 
-	bfd_get_section_contents(abfd, s, buffer, i, sub_delta);
-	sim_write_inferior_memory(s->vma + i, buffer, sub_delta);
-	printf_filtered("*");
-	fflush(stdout);
-      }
-      printf_filtered(  "\n");      
-      free(buffer);
+	  printf_filtered ("%s\t: 0x%4x .. 0x%4x  ",
+			   s->name, s->vma, s->vma + s->_raw_size);
+	  for (i = 0; i < s->_raw_size; i += delta)
+	    {
+	      int sub_delta = delta;
+
+	      if (sub_delta > s->_raw_size - i)
+		sub_delta = s->_raw_size - i;
+
+	      bfd_get_section_contents (abfd, s, buffer, i, sub_delta);
+	      sim_write_inferior_memory (s->vma + i, buffer, sub_delta);
+	      printf_filtered ("*");
+	      fflush (stdout);
+	    }
+	  printf_filtered ("\n");
+	  free (buffer);
+	}
+      s = s->next;
     }
-    s = s->next;
-  }
 
-  sim_set_pc(abfd->start_address);
+  sim_set_pc (abfd->start_address);
 }
 
 /* This is called not only when we first attach, but also when the
@@ -150,39 +147,37 @@ sim_create_inferior (execfile, args, env)
   int entry_pt;
 
   if (args && *args)
-   error ("Can't pass arguments to remote sim process.");
+    error ("Can't pass arguments to remote sim process.");
 
   if (execfile == 0 || exec_bfd == 0)
-   error ("No exec file specified");
+    error ("No exec file specified");
 
   entry_pt = (int) bfd_get_start_address (exec_bfd);
 
-  sim_kill(NULL,NULL);	 
-  sim_clear_breakpoints();
+  sim_kill (NULL, NULL);
+  sim_clear_breakpoints ();
   init_wait_for_inferior ();
   insert_breakpoints ();
-  proceed(entry_pt, -1, 0);
+  proceed (entry_pt, -1, 0);
 }
-
-
 
 static void
 sim_open (name, from_tty)
      char *name;
      int from_tty;
 {
-  if(name == 0) 
-  {
-    name = "";
-  }
+  if (name == 0)
+    {
+      name = "";
+    }
 
   /* Clear any break points */
-  sim_clear_breakpoints();
+  sim_clear_breakpoints ();
 
   push_target (&sim_ops);
-  target_fetch_registers(-1);
+  target_fetch_registers (-1);
 
-  printf_filtered("Connected to the Z8000 Simulator.\n");
+  printf_filtered ("Connected to the Z8000 Simulator.\n");
 }
 
 /* Close out all files and local state before this target loses control. */
@@ -191,26 +186,25 @@ static void
 sim_close (quitting)
      int quitting;
 {
-  sim_clear_breakpoints();
+  sim_clear_breakpoints ();
 }
 
 /* Terminate the open connection to the remote debugger.
    Use this when you want to detach and do something else
    with your gdb.  */
 static void
-sim_detach (args,from_tty)
+sim_detach (args, from_tty)
      char *args;
      int from_tty;
 {
-  sim_clear_breakpoints();
- 
-  pop_target();			/* calls sim_close to do the real work */
-  if (from_tty)
-   printf_filtered ("Ending remote %s debugging\n", target_shortname);
-}
- 
-/* Tell the remote machine to resume.  */
+  sim_clear_breakpoints ();
 
+  pop_target ();		/* calls sim_close to do the real work */
+  if (from_tty)
+    printf_filtered ("Ending remote %s debugging\n", target_shortname);
+}
+
+/* Tell the remote machine to resume.  */
 
 /* Wait until the remote machine stops, then return,
    storing status in STATUS just as `wait' would.  */
@@ -219,10 +213,9 @@ int
 sim_wait (status)
      WAITTYPE *status;
 {
-  *status = sim_stop_signal();
+  *status = sim_stop_signal ();
   return 0;
 }
-
 
 /* Get ready to modify the registers array.  On machines which store
    individual registers, this doesn't need to do anything.  On machines
@@ -236,21 +229,22 @@ sim_prepare_to_store ()
   /* Do nothing, since we can store individual regs */
 }
 
-
 static void
-fetch_register(regno)
-int regno;
+fetch_register (regno)
+     int regno;
 {
-  if (regno  == -1) 
-  {
-    for (regno = 0; regno < 16; regno++)
-     fetch_register(regno);
-  }
-  else {
-    char buf[MAX_REGISTER_RAW_SIZE];
-    sim_fetch_register(regno, buf);
-    supply_register(regno, buf);
-  }
+  if (regno == -1)
+    {
+      for (regno = 0; regno < 16; regno++)
+	fetch_register (regno);
+    }
+  else
+    {
+      char buf[MAX_REGISTER_RAW_SIZE];
+
+      sim_fetch_register (regno, buf);
+      supply_register (regno, buf);
+    }
 }
 
 /* Write a word WORD into remote address ADDR.
@@ -265,33 +259,34 @@ sim_store_word (addr, word)
 }
 
 int
-sim_xfer_inferior_memory(memaddr, myaddr, len, write, target)
+sim_xfer_inferior_memory (memaddr, myaddr, len, write, target)
      CORE_ADDR memaddr;
      char *myaddr;
      int len;
      int write;
-     struct target_ops *target;			/* ignored */
+     struct target_ops *target;	/* ignored */
 {
   if (write)
-  {
-    sim_write(memaddr, myaddr, len);
+    {
+      sim_write (memaddr, myaddr, len);
 
-  }
-  else 
-  {
-    sim_read(memaddr, myaddr, len);
-  } 
-    return len;
+    }
+  else
+    {
+      sim_read (memaddr, myaddr, len);
+    }
+  return len;
 }
 
 void
 sim_files_info ()
 {
   char *file = "nothing";
-  if (exec_bfd)
-   file = bfd_get_filename(exec_bfd);
 
-  printf_filtered("\tAttached to %s running on the z8k simulator\n",file);
+  if (exec_bfd)
+    file = bfd_get_filename (exec_bfd);
+
+  printf_filtered ("\tAttached to %s running on the z8k simulator\n", file);
 }
 
 /* This routine is run as a hook, just before the main command loop is
@@ -305,53 +300,48 @@ sim_before_main_loop ()
   push_target (&sim_ops);
 }
 
-
 /* Clear the sims notion of what the break points are */
 static void
-sim_mourn() 
-{ 
-  sim_clear_breakpoints();
+sim_mourn ()
+{
+  sim_clear_breakpoints ();
   generic_mourn_inferior ();
 }
 
-static void rem_resume(a,b)
-int a;
-int b;
+static void 
+rem_resume (a, b)
+     int a;
+     int b;
 {
-  sim_resume(a,b);
+  sim_resume (a, b);
 }
 
 /* Define the target subroutine names */
 
-struct target_ops sim_ops = 
+struct target_ops sim_ops =
 {
   "sim", "Remote SIM monitor",
   "Use the Z8000 simulator",
-  sim_open, sim_close, 
-  0, sim_detach, rem_resume, sim_wait, /* attach */
+  sim_open, sim_close,
+  0, sim_detach, rem_resume, sim_wait,	/* attach */
   fetch_register, store_register,
   sim_prepare_to_store,
-  sim_xfer_inferior_memory, 
+  sim_xfer_inferior_memory,
   sim_files_info,
-  0, 0, /* Breakpoints */
+  0, 0,				/* Breakpoints */
   0, 0, 0, 0, 0,		/* Terminal handling */
   sim_kill,			/* FIXME, kill */
-  sim_load, 
+  sim_load,
   0,				/* lookup_symbol */
-  sim_create_inferior,		/* create_inferior */ 
+  sim_create_inferior,		/* create_inferior */
   sim_mourn,			/* mourn_inferior FIXME */
   0,				/* can_run */
   0,				/* notice_signals */
   process_stratum, 0,		/* next */
   1, 1, 1, 1, 1,		/* all mem, mem, stack, regs, exec */
-  0,0,				/* Section pointers */
+  0, 0,				/* Section pointers */
   OPS_MAGIC,			/* Always the last thing */
 };
-
-
-
-
-
 
 /***********************************************************************/
 
@@ -359,8 +349,8 @@ void
 _initialize_remote_sim ()
 {
   extern int sim_z8001_mode;
+
   sim_z8001_mode = z8001_mode;
   add_target (&sim_ops);
+
 }
-
-
