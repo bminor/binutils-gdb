@@ -292,28 +292,6 @@ CHILL_FOR_TARGET = ` \
   fi`
 CHILL_LIB = -lchill
 
-NLMCONV_FOR_TARGET = ` \
-  if [ -f $${rootme}/../binutils/nlmconv ] ; then \
-    echo $${rootme}/../binutils/nlmconv; \
-  else \
-    if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
-      echo $(NLMCONV); \
-    else \
-      t='$(program_transform_name)'; echo nlmconv | sed -e '' $$t; \
-    fi; \
-  fi`
-
-LD_FOR_TARGET = ` \
-  if [ -f $${rootme}/../ld/ld.new ] ; then \
-    echo $${rootme}/../ld/ld.new; \
-  else \
-    if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
-      echo $(LD); \
-    else \
-      t='$(program_transform_name)'; echo ld | sed -e '' $$t; \
-    fi; \
-  fi`
-
 # The use of $$(x_FOR_TARGET) reduces the command line length by not
 # duplicating the lengthy definition.
 TARGET_FLAGS_TO_PASS = \
@@ -334,9 +312,7 @@ TARGET_FLAGS_TO_PASS = \
 	"INSTALL=$(INSTALL)" \
 	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
 	"INSTALL_DATA=$(INSTALL_DATA)" \
-	"LD_FOR_TARGET=$(LD_FOR_TARGET)" \
 	"MAKEINFO=$(MAKEINFO)" \
-	"NLMCONV_FOR_TARGET=$(NLMCONV_FOR_TARGET)" \
 	"RUNTEST=$(RUNTEST)" \
 	"RUNTESTFLAGS=$(RUNTESTFLAGS)"
 
@@ -537,7 +513,7 @@ install-only:
 	fi ; \
 	$(INSTALL_PROGRAM) gdb $(bindir)/$$transformed_name ; \
 	$(INSTALL_DATA) $(srcdir)/gdb.1 $(man1dir)/$$transformed_name.1
-	if [ -n $(ENABLE_GDBTK) ] ; then \
+	if [ x"$(ENABLE_GDBTK)" != x ] ; then \
 		$(INSTALL_DATA) $(srcdir)/gdbtk.tcl $(libdir)/gdbtk.tcl ; \
 	fi
 	@$(MAKE) DO=install "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS) subdir_do 

@@ -73,17 +73,6 @@ NLMCONV_FOR_TARGET = ` \
     fi; \
   fi`
 
-LD_FOR_TARGET = ` \
-  if [ -f ../../ld/ld.new ] ; then \
-    echo ../../ld/ld.new; \
-  else \
-    if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
-      echo $(LD); \
-    else \
-      t='$(program_transform_name)'; echo ld | sed -e '' $$t; \
-    fi; \
-  fi`
-
 AR = ar
 AR_FLAGS = qv
 RANLIB = ranlib
@@ -193,7 +182,7 @@ gdbserve.nlm:	gdbserve.O $(srcdir)/gdbserve.def
 	${NLMCONV_FOR_TARGET} -T $(srcdir)/gdbserve.def
 
 gdbserve.O: prelude.o gdbserve.o $(TDEPFILES)
-	${LD_FOR_TARGET} $(LDFLAGS) -r -o gdbserve.O prelude.o gdbserve.o ${TDEPFILES}
+	${CC_FOR_TARGET} $(LDFLAGS) -r -o gdbserve.O prelude.o gdbserve.o ${TDEPFILES}
 
 config.status:
 	@echo "You must configure gdbserver.  Look at the README file for details."

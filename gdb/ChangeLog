@@ -1,3 +1,16 @@
+Fri Nov 18 10:38:12 1994  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* Makefile.in (LD_FOR_TARGET, NLMCONV_FOR_TARGET): Removed.
+
+	* nlm/Makefile.in (gdbserve.O): Link with ${CC_FOR_TARGET}.
+	  (LD_FOR_TARGET): Removed.
+
+Thu Nov 17 22:09:50 1994  Rob Savoye  <rob@darkstar.cygnus.com>
+
+	* monitor.[ch], w89k-rom.c, op50n-rom.c, idp-rom.c: Add support
+	for two variables used to control the load protocol and conversion
+	type.
+
 Thu Nov 17 17:51:12 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	Support for different MIPS IDT processor models.
