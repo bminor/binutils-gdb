@@ -1,5 +1,10 @@
 2003-08-08  J. Brobecker  <brobecker@gnat.com>
 
+	* NEWS (Multi-arched targets): Document that all hppa-hpux targets
+	are now multiarched.
+
+2003-08-08  J. Brobecker  <brobecker@gnat.com>
+
 	* config/pa/tm-hppa64.h: Remove lots of macros that are no
 	longer necessary now that hppa64 is partially multiarch'ed.
 
