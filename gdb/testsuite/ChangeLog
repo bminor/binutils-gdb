@@ -1,3 +1,8 @@
+Sun Feb 19 13:10:06 1995  Jim Kingdon  <kingdon@rtl.cygnus.com>
+
+	* gdb.base/{a1-selftest.exp,corefile.exp}: Do not give a warning
+	if not native, it is not an abnormal condition.
+
 Thu Feb 16 15:56:56 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* lib/gdb.exp: Just use "file exists", rather than undocumented

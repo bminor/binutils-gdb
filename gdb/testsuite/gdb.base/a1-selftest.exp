@@ -28,7 +28,6 @@ set bug_id 0
 
 # are we on a target board
 if ![isnative] then {
-    warning "These test cases can't run on a target system."
     continue
 }
 if [istarget "m68k*-*-hpux*"] then {
