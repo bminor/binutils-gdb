@@ -1,3 +1,7 @@
+Thu May 22 18:51:32 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* config/proelf.exp: New entry.
+
 Wed May 21 21:23:16 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 	* lib/gdb.exp: Remove spurious .* patterns at the beginning
