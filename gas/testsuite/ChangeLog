@@ -1,3 +1,7 @@
+Fri Aug 18 11:09:38 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gasp/mri/*.out: Use ;, not !, for the comment character.
+
 Wed Aug 16 12:24:12 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/mri/mri.exp: Change hppa*-*-* expected failures to only
