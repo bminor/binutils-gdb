@@ -286,9 +286,9 @@ mips)
 
 c1 | c2)	gdb_target=convex ;;
 
-sparc)
+sparc*)
 	case "${target_vendor}" in
-	sun)
+	sun | fujitsu)
 		case "${target_os}" in
 		sunos3)		gdb_target=sun4os3 ;;
 		sunos4)		gdb_target=sun4os4 ;;
