@@ -56,7 +56,7 @@ Tue May 23 17:44:18 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 2000-05-17  Michael Snyder  <msnyder@seadog.cygnus.com>
 
 	* config/sparc/tm-sun4sol2.h: Turn on multi-arch.
-	sparc-tdep.c (gdb_print_insn_sparc): Remove temporary multi-arch hack.
+	* sparc-tdep.c (gdb_print_insn_sparc): Remove temp. multi-arch hack.
 
 2000-05-17  Andrew Cagney  <cagney@sourceware.cygnus.com>
 

@@ -2010,10 +2010,6 @@ gdb_print_insn_sparc (memaddr, info)
 {
   /* It's necessary to override mach again because print_insn messes it up. */
   info->mach = TARGET_ARCHITECTURE->mach;
-#if 1
-  /* Selects sparc/sparclite/sparclet/sparc64 */
-  tm_print_insn_info.mach = gdbarch_tdep (current_gdbarch) -> print_insn_mach;
-#endif
   return print_insn_sparc (memaddr, info);
 }
 
