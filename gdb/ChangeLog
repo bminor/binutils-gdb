@@ -1,3 +1,26 @@
+Thu Oct  1 14:36:42 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
+
+	Sun3 native support.
+
+	* config/sun3os3.mh, config/sun3os4.mh (NAT_FILE, NATDEPFILES):
+	  new macros for native support.
+	  (XDEPFILES): moved infptrace.o and inftarg.o to NATDEPFILES,
+	  removed sun3-xdep.o.
+	* xm-sun3.h (ATTACH_DETACH, FETCH_INFERIOR_REGISTERS): moved to
+	  nm-sun3.h.
+	* sun3-xdep.c: removed.  All code is now in sun3-nat.c.
+	* sun3-nat.c, nm-sun3.h: new files for native support.
+
+Thu Oct  1 10:30:54 1992  Fred Fish  (fnf@cygnus.com)
+
+	* dwarfread.c (dbsize):  New variable to hold size of dwarf info.
+	* dwarfread.c (dwarf_build_psymtabs):  Rename dbsize parameter to 
+	dbfsize and use it to initialize new local file scope dbsize.
+	* dwarfread.c (read_ofile_symtab):  Initialize dbsize and use it.
+	* dwarfread.c (basicdieinfo):  Use dbsize to check for oversize
+	DIEs as well as the current check for undersize DIEs.  This helps
+	to gracefully detect and reject corrupted DIE information.
+
 Thu Oct  1 01:57:56 1992  John Gilmore  (gnu@cygnus.com)
 
 	Add `command hooks' and a hook for inferior program stopping.

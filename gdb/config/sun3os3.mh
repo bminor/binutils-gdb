@@ -1,3 +1,5 @@
 # Host: Sun 3, running SunOS 3
-XDEPFILES= infptrace.o inftarg.o fork-child.o sun3-xdep.o
+XDEPFILES= fork-child.o
 XM_FILE= xm-sun3.h
+NAT_FILE= nm-sun3.h
+NATDEPFILES= inftarg.o infptrace.o inftarg.o corelow.o sun3-nat.o

@@ -27,14 +27,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define NEW_SUN_CORE
 
-/* Do implement the attach and detach commands.  */
-
-#define ATTACH_DETACH
-
-/* Override copies of {fetch,store}_inferior_registers in infptrace.c.  */
-
-#define FETCH_INFERIOR_REGISTERS
-
 /* We have to grab the regs since we store all regs at once.  */
 
 #define CHILD_PREPARE_TO_STORE() \
