@@ -1548,5 +1548,5 @@ sparc_print_register_hook (regno)
 void
 _initialize_sparc_tdep ()
 {
-  tm_print_insn = print_insn_sparc;
+  tm_print_insn = TM_PRINT_INSN; /* Selects sparc/sparclite */
 }

@@ -100,8 +100,10 @@ dnl See if thread_db library is around for Solaris thread debugging.  Note that
 dnl we must explicitly test for version 1 of the library because version 0
 dnl (present on Solaris 2.4 or earlier) doesn't have the same API.
 
-case ${build}:${host}:${target} in
-*-*-solaris2*:*-*-solaris2*:*-*-solaris2*)
+dnl Note that we only want this if we are both native (host == target), and
+dnl not doing a canadian cross build (build == host).
+
+if test ${build} = ${host} -a ${host} = ${target} ; then
 	AC_MSG_CHECKING(for Solaris thread debugging library)
 	if test -f /usr/lib/libthread_db.so.1 ; then
 		AC_MSG_RESULT(yes)
@@ -113,7 +115,7 @@ case ${build}:${host}:${target} in
 	fi
 	AC_SUBST(THREAD_DB_OBS)
 	AC_SUBST(CONFIG_LDFLAGS)
-esac
+fi
 
 dnl Handle optional features that can be enabled.
 ENABLE_CFLAGS=

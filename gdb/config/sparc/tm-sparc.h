@@ -110,7 +110,7 @@ extern CORE_ADDR sparc_pc_adjust PARAMS ((CORE_ADDR));
 
 #define STACK_ALIGN(ADDR) (((ADDR)+7)&-8)
 
-/* Sequence of bytes for breakpoint instruction.  */
+/* Sequence of bytes for breakpoint instruction (ta 1). */
 
 #define BREAKPOINT {0x91, 0xd0, 0x20, 0x01}
 
@@ -641,3 +641,7 @@ extern int deferred_stores;
    passed as doubles and then converted in the callee. */
 
 #define COERCE_FLOAT_TO_DOUBLE 1
+
+/* Select the sparc disassembler */
+
+#define TM_PRINT_INSN print_insn_sparc
