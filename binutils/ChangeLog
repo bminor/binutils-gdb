@@ -1,7 +1,3 @@
-2003-06-27  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
-
-	* binutils-all/readelf.ss-tmips: Adjust symbol indices.
-
 2003-06-26  Roland McGrath  <roland@redhat.com>
 
 	* readelf.c (loadaddr): Variable removed.
