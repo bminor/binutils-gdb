@@ -1211,7 +1211,7 @@ cris_register_offset (int regno)
    of data in register regno.  */
 
 static struct type *
-cris_register_virtual_type (int regno)
+cris_register_type (struct gdbarch *gdbarch, int regno)
 {
   if (regno == SP_REGNUM || regno == PC_REGNUM
       || (regno > P8_REGNUM && regno < USP_REGNUM))
@@ -3862,7 +3862,7 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* The length of the registers in the program's representation.  */
   set_gdbarch_deprecated_register_virtual_size (gdbarch, cris_register_size);
   
-  set_gdbarch_deprecated_register_virtual_type (gdbarch, cris_register_virtual_type);
+  set_gdbarch_register_type (gdbarch, cris_register_type);
   
   /* Dummy frame functions.  */
   set_gdbarch_push_dummy_code (gdbarch, cris_push_dummy_code);

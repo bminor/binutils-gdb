@@ -1,5 +1,9 @@
 2004-08-02  Andrew Cagney  <cagney@gnu.org>
 
+	* cris-tdep.c (cris_register_type): Replace
+	cris_register_virtual_type.
+	(cris_gdbarch_init): Update, set register_type.
+
 	* gdbarch.sh (deprecated_frameless_function_invocation): Delete.
 	* gdbarch.h, gdbarch.c: Re-generate.
 	* arm-tdep.c 	(arm_frameless_function_invocation): Delete.
