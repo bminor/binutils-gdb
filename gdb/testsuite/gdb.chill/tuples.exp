@@ -122,6 +122,45 @@ proc do_tests {} {
     send "set var w:=\[\]\n" ; expect -re "$prompt $"
     gdb_test "print w" " = \\\[\\\]" \
 	"print bitstring after assignment of \[\]"
+
+#   These tests are from Cygnus PR chill/8643:
+    runto tuples.ch:40
+    send "set var vs1 := \[ \"foo\", 41, \[ b \] \]\n" ; expect -re "$prompt $"
+    gdb_test_exact "print vs1" { = [.str: "foo", .i: 41, .ps: [b]]} \
+	"print vs1 after tuple assign 1"
+    send "set var vs1 := \[ \"bar\", 42, m_ps\[ a \] \]\n"
+    expect -re "$prompt $"
+    gdb_test_exact "print vs1" { = [.str: "bar", .i: 42, .ps: [a]]} \
+	"print vs1 after tuple assign 2"
+
+    send "set var \$i := m_s1\[\"foo\", 42, \[a \]\]\n"
+    expect -re "$prompt $"
+    gdb_test_exact {print $i} { = [.str: "foo", .i: 42, .ps: [a]]} \
+	"print \$i after tuple assign 1"
+    send "set var \$i := m_s1\[\"foo\", 44, m_ps\[a \]\]\n"
+    expect -re "$prompt $"
+    gdb_test_exact {print $i} { = [.str: "foo", .i: 44, .ps: [a]]} \
+	"print \$i after tuple assign 2"
+
+    send "set var vs2 := \[ 10, \[ \"foo\" , 42, \[ b \] \] \]\n"
+    expect -re "$prompt $"
+    gdb_test_exact "print vs2" \
+	{ = [.i: 10, .s: [.str: "foo", .i: 42, .ps: [b]]]} \
+	"print vs2 after tuple assign 1"
+    send "set var vs2 := \[ 10+3, m_s1\[ \"foo\" , 42, m_ps\[ b \] \] \]\n"
+    expect -re "$prompt $"
+    gdb_test_exact "print vs2" \
+	{ = [.i: 13, .s: [.str: "foo", .i: 42, .ps: [b]]]} \
+	"print vs2 after tuple assign 1"
+
+    send "set var vs3 := \[ 33, \[ -1, -2, -3 \] \]\n" ; expect -re "$prompt $"
+    gdb_test_exact "print vs3" {[.i: 33, .a: [(1): -1, (2): -2, (3): -3]]} \
+	"print vs3 after tuple assign"
+    send "set var \$k := m_s3\[ 33, m_arr\[ 4, 3, 2 \] \]\n"
+    expect -re "$prompt $"
+    gdb_test_exact {print $k} { = [.i: 33, .a: [(1): 4, (2): 3, (3): 2]]} \
+	"print \$k after tuple assign"
+
 }
 
 do_tests
