@@ -2021,7 +2021,10 @@ read_func_scope (struct die_info *die, struct objfile *objfile,
   local_symbols = new->locals;
   param_symbols = new->params;
 
-  list_in_scope = &file_symbols;
+  /* If we've finished processing a top-level function, subsequent
+     symbols go in the file symbol list.  */
+  if (outermost_context_p ())
+    list_in_scope = &file_symbols;
 }
 
 /* Process all the DIES contained within a lexical block scope.  Start
