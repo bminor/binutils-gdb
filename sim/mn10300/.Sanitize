@@ -15,7 +15,7 @@
 
 Do-first:
 
-am30_files="dv-mn103cpu.c dv-mn103int.c dv-mn103tim.c dv-mn103ser.c"
+am30_files="dv-mn103cpu.c dv-mn103int.c dv-mn103tim.c dv-mn103ser.c dv-mn103iop.c"
 if ( echo $* | grep keep\-am30 > /dev/null ) ; then
         keep_these_too="${am30_files} ${keep_these_too}"
 else
