@@ -1,3 +1,7 @@
+2004-04-03  Andrew Cagney  <cagney@redhat.com>
+
+	* PROBLEMS: Mention that GDB doesn't build on HP/UX 11.00.
+
 2004-04-02  Joel Brobecker  <brobecker@gnat.com>
 
 	Committed by Andrew Cagney <cagney@redhat.com>

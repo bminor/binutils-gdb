@@ -4,6 +4,14 @@
 		See also: http://www.gnu.org/software/gdb/bugs/
 
 
+*** Build problems
+
+build/1458: comple failed on hpux11
+
+GDB 6.1 is known to have build problems on HP/UX 11.00 using the
+vendor supplied compilers (GDB does build on HP/UX 11.11, and using
+GCC).
+
 *** Misc
 
 gdb/1560: Control-C does not always interrupt GDB.
