@@ -1,3 +1,8 @@
+Wed Dec 30 17:23:14 1998  Mark Alexander  <marka@cygnus.com>
+
+	* value.c (value_virtual_fn_field): Handle the situation where
+	vtbl is a pointer to a structure instead of a pointer to an array.
+
 Mon Dec 28 17:43:36 1998  David Taylor  <taylor@texas.cygnus.com>
 
 	The following changes were made by Jim Blandy <jimb@cygnus.com>,
