@@ -54,6 +54,7 @@ ppc_register_u_addr (int ustart, int regnum)
   return (ustart + 4 * regmap[regnum]);
 }
 
+void
 supply_gregset (gregset_t * gregsetp)
 {
   int regi;
@@ -66,6 +67,7 @@ supply_gregset (gregset_t * gregsetp)
     supply_register (regi, (char *) (regp + regmap[regi]));
 }
 
+void
 supply_fpregset (fpregset_t * fpregsetp)
 {
   int regi;

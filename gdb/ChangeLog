@@ -1,3 +1,22 @@
+2000-02-22  Kevin Buettner  <kevinb@redhat.com>
+
+	* ppc-linux-nat.c (supply_gregset, supply_fpregset): Add return
+	type.
+	* ppc-linux-tdep.c (ppc_linux_at_sigtramp_return_path): Add
+	forward declaration.
+
+	* ppc-linux-tdep.c (ppc_linux_frame_saved_pc): Handle case
+	where the next frame is a signal handler caller.
+
+	* config/powerpc/tm-linux.h (PUSH_ARGUMENTS): Remove extraneous
+	undef.
+	(tm-linux.h): Include.
+	(tm-sysv4.h): Don't include (directly).  config/tm-linux.h will
+	include this file for us.
+	(REALTIME_LO, REALTIME_HI): Don't define.  These are defined by
+	config/tm-linux.h for us.
+	(SOFUN_ADDRESS_MAYBE_MISSING): Define.
+
 2000-02-21  Kevin Buettner  <kevinb@redhat.com>
 
 	* Makefile.in (ppc-linux-nat.c, ppc-linux-tdep.c): New files.

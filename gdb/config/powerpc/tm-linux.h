@@ -21,8 +21,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define TM_LINUX_H
 
 #include "powerpc/tm-ppc-eabi.h"
-
-#undef PUSH_ARGUMENTS
+/* Avoid warning from redefinition in tm-sysv4.h (included from tm-linux.h) */
+#undef SKIP_TRAMPOLINE_CODE
+#include "tm-linux.h"
 
 /* We can single step on linux */
 #undef  SOFTWARE_SINGLE_STEP
@@ -43,12 +44,6 @@ extern int at_subroutine_call_instruction_target();
 
 /* Offset to saved PC in sigcontext, from <linux/signal.h>.  */
 #define SIGCONTEXT_PC_OFFSET 184
-
-/* Avoid warning from redefinition in tm-sysv4.h */
-#undef SKIP_TRAMPOLINE_CODE
-
-/* We need this file for the SOLIB_TRAMPOLINE stuff. */
-#include "tm-sysv4.h"
 
 extern CORE_ADDR ppc_linux_skip_trampoline_code (CORE_ADDR pc);
 #undef SKIP_TRAMPOLINE_CODE
@@ -98,16 +93,8 @@ CORE_ADDR ppc_sysv_abi_push_arguments PARAMS ((int, struct value **, CORE_ADDR, 
 #define PROLOGUE_FIRSTLINE_OVERLAP
 #endif
 
-/* Some versions of Linux have real-time signal support in the C library, and
-   some don't.  We have to include this file to find out.  */
-#include <signal.h>
-
-#ifdef __SIGRTMIN
-#define REALTIME_LO __SIGRTMIN
-#define REALTIME_HI (__SIGRTMAX + 1)
-#else
-#define REALTIME_LO 32
-#define REALTIME_HI 64
-#endif
+/* N_FUN symbols in shared libaries have 0 for their values and need
+   to be relocated. */
+#define SOFUN_ADDRESS_MAYBE_MISSING
 
 #endif  /* #ifndef TM_LINUX_H */
