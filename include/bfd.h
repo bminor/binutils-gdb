@@ -180,11 +180,14 @@ typedef struct lineno_cache_entry {
 
 typedef struct sec *sec_ptr;
 
+#define bfd_get_section_name(bfd, ptr) ((ptr)->name + 0)
+#define bfd_get_section_vma(bfd, ptr) ((ptr)->vma + 0)
+#define bfd_get_section_alignment(bfd, ptr) ((ptr)->alignment_power + 0)
 #define bfd_section_name(bfd, ptr) ((ptr)->name)
 #define bfd_section_size(bfd, ptr) (bfd_get_section_size_before_reloc(ptr))
 #define bfd_section_vma(bfd, ptr) ((ptr)->vma)
 #define bfd_section_alignment(bfd, ptr) ((ptr)->alignment_power)
-#define bfd_get_section_flags(bfd, ptr) ((ptr)->flags)
+#define bfd_get_section_flags(bfd, ptr) ((ptr)->flags + 0)
 #define bfd_get_section_userdata(bfd, ptr) ((ptr)->userdata)
 
 #define bfd_set_section_vma(bfd, ptr, val) (((ptr)->vma = (val)), true)
@@ -203,7 +206,7 @@ typedef enum bfd_error {
 	      symbol_not_found, file_not_recognized,
 	      file_ambiguously_recognized, no_contents,
 	      bfd_error_nonrepresentable_section,
-	      no_debug_section,
+	      no_debug_section, bad_value,
 	      invalid_error_code} bfd_ec;
 
 extern bfd_ec bfd_error;
@@ -226,7 +229,7 @@ typedef struct bfd_error_vector {
   
 } bfd_error_vector_type;
 
-PROTO (char *, bfd_errmsg, (bfd_ec error_tag));
+PROTO (CONST char *, bfd_errmsg, (bfd_ec error_tag));
 PROTO (void, bfd_perror, (CONST char *message));
 
 
@@ -330,18 +333,7 @@ extern CONST short _bfd_host_big_endian;
 #define SHORT_SIZE 2
 #define LONG_SIZE 4
 
-
-
-/* ANd more from the source */
-
-
-
-
-
-
-
-
- 
+/* And more from the source.  */
 void EXFUN(bfd_init, (void));
 bfd *EXFUN(bfd_openr, (CONST char *filename, CONST char*target));
 bfd *EXFUN(bfd_fdopenr, (CONST char *filename, CONST char *target, int fd));
@@ -677,9 +669,6 @@ typedef struct bfd_arch_info
   boolean EXFUN((*scan),(CONST struct bfd_arch_info *,CONST char *));
   unsigned int EXFUN((*disassemble),(bfd_vma addr, CONST char *data,
 				     PTR stream));
-  CONST struct reloc_howto_struct *EXFUN((*reloc_type_lookup),
-    (CONST struct bfd_arch_info *,
-    bfd_reloc_code_type  code));
 
   struct bfd_arch_info *next;
 
@@ -874,11 +863,53 @@ typedef enum bfd_reloc_code_real
           moment probably a 32 bit wide abs address, but the cpu can
           choose. */
 
-  BFD_RELOC_CTOR
+  BFD_RELOC_CTOR,
+
+        /* 32 bits wide, simple reloc */
+  BFD_RELOC_32,
+	 /* 32 bits, PC-relative */
+  BFD_RELOC_32_PCREL,
+
+	 /* High 22 bits of 32-bit value; simple reloc.  */
+  BFD_RELOC_HI22,
+	 /* Low 10 bits.  */
+  BFD_RELOC_LO10,
+
+	 /* Reloc types used for i960/b.out.  */
+  BFD_RELOC_24_PCREL,
+  BFD_RELOC_I960_CALLJ,
+
+  BFD_RELOC_16_PCREL,
+	 /* 32-bit pc-relative, shifted right 2 bits (i.e., 30-bit
+	   word displacement, e.g. for SPARC) */
+  BFD_RELOC_32_PCREL_S2,
+
+   /* now for the sparc/elf codes */
+  BFD_RELOC_NONE,		 /* actually used */
+  BFD_RELOC_SPARC_WDISP22,
+  BFD_RELOC_SPARC22,
+  BFD_RELOC_SPARC13,
+  BFD_RELOC_SPARC_BASE13,
+  BFD_RELOC_SPARC_GOT10,
+  BFD_RELOC_SPARC_GOT13,
+  BFD_RELOC_SPARC_GOT22,
+  BFD_RELOC_SPARC_PC10,
+  BFD_RELOC_SPARC_PC22,
+  BFD_RELOC_SPARC_WPLT30,
+  BFD_RELOC_SPARC_COPY,
+  BFD_RELOC_SPARC_GLOB_DAT,
+  BFD_RELOC_SPARC_JMP_SLOT,
+  BFD_RELOC_SPARC_RELATIVE,
+  BFD_RELOC_SPARC_UA32,
+
+   /* this one is a.out specific? */
+  BFD_RELOC_SPARC_BASE22,
+
+   /* this must be the highest numeric value */
+  BFD_RELOC_UNUSED
  } bfd_reloc_code_real_type;
 CONST struct reloc_howto_struct *
-EXFUN(bfd_reloc_type_lookup
-    , (CONST bfd_arch_info_type *arch, bfd_reloc_code_type code));
+EXFUN(bfd_reloc_type_lookup , (bfd *abfd, bfd_reloc_code_type code));
 typedef struct symbol_cache_entry 
 {
 	 /* A pointer to the BFD which owns the symbol. This information
@@ -991,6 +1022,8 @@ boolean EXFUN(bfd_set_symtab , (bfd *, asymbol **, unsigned int ));
 void EXFUN(bfd_print_symbol_vandf, (PTR file, asymbol *symbol));
 #define bfd_make_empty_symbol(abfd) \
      BFD_SEND (abfd, _bfd_make_empty_symbol, (abfd))
+#define bfd_make_debug_symbol(abfd,ptr,size) \
+        BFD_SEND (abfd, _bfd_make_debug_symbol, (abfd, ptr, size))
 int EXFUN(bfd_decode_symclass, (asymbol *symbol));
 struct _bfd 
 {
@@ -1123,6 +1156,7 @@ struct _bfd
      /* Where all the allocated stuff under this BFD goes */
     struct obstack memory;
 
+     /* Is this really needed in addition to usrdata?  */
     asymbol **ld_symbols;
 };
 
@@ -1145,6 +1179,7 @@ long EXFUN(bfd_get_mtime, (bfd *));
 #define bfd_find_nearest_line(abfd, sec, syms, off, file, func, line) \
      BFD_SEND (abfd, _bfd_find_nearest_line,  (abfd, sec, syms, off, file, func, line))
 
+        /* Do these three do anything useful at all, for any back end?  */
 #define bfd_debug_info_start(abfd) \
         BFD_SEND (abfd, _bfd_debug_info_start, (abfd))
 
@@ -1153,6 +1188,7 @@ long EXFUN(bfd_get_mtime, (bfd *));
 
 #define bfd_debug_info_accumulate(abfd, section) \
         BFD_SEND (abfd, _bfd_debug_info_accumulate, (abfd, section))
+
 
 #define bfd_stat_arch_elt(abfd, stat) \
         BFD_SEND (abfd, _bfd_stat_arch_elt,(abfd, stat))
@@ -1345,6 +1381,17 @@ typedef struct bfd_target
       	PTR	in,
 	PTR	out));
 
+  /* See documentation on reloc types.  */
+ SDEF (CONST struct reloc_howto_struct *,
+       reloc_type_lookup,
+       (bfd *abfd, bfd_reloc_code_type code));
+
+  /* Complete and utter crock, currently used for the assembler
+    when creating COFF files.  */
+ SDEF (asymbol *, _bfd_make_debug_symbol, (
+       bfd *abfd,
+       void *ptr,
+       unsigned long size));
 } bfd_target;
 bfd_target *EXFUN(bfd_find_target, (CONST char *, bfd *));
 CONST char **EXFUN(bfd_target_list, (void));
