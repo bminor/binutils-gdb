@@ -1,3 +1,7 @@
+2005-03-25  Anthony Green  <green@redhat.com>
+
+	* tree.c (parse_reg_property): Fix memset usage.
+
 2005-03-23  Mark Kettenis  <kettenis@gnu.org>
 
 	* configure: Regenerate.

@@ -1,3 +1,10 @@
+2005-03-25  Anthony Green  <green@redhat.com>
+
+	* remote.c (remote_store_registers): Fix memset usage.
+	* std-regs.c (value_of_builtin_frame_reg): Ditto.
+	(value_of_builtin_frame_fp_reg): Ditto.
+	(value_of_builtin_frame_reg): Ditto.
+
 2005-03-25  Mark Mitchell  <mark@codesourcery.com>
 
 	* ser-base.c (ser_unix_write): Rename to ...
