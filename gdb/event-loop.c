@@ -494,51 +494,52 @@ create_file_handler (int fd, int mask, handler_func * proc, gdb_client_data clie
       file_ptr->ready_mask = 0;
       file_ptr->next_file = gdb_notifier.first_file_handler;
       gdb_notifier.first_file_handler = file_ptr;
+
+      if (use_poll)
+	{
+#ifdef HAVE_POLL
+	  gdb_notifier.num_fds++;
+	  if (gdb_notifier.poll_fds)
+	    gdb_notifier.poll_fds =
+	      (struct pollfd *) xrealloc (gdb_notifier.poll_fds,
+					  (gdb_notifier.num_fds
+					   * sizeof (struct pollfd)));
+	  else
+	    gdb_notifier.poll_fds =
+	      (struct pollfd *) xmalloc (sizeof (struct pollfd));
+	  (gdb_notifier.poll_fds + gdb_notifier.num_fds - 1)->fd = fd;
+	  (gdb_notifier.poll_fds + gdb_notifier.num_fds - 1)->events = mask;
+	  (gdb_notifier.poll_fds + gdb_notifier.num_fds - 1)->revents = 0;
+#else
+	  internal_error (__FILE__, __LINE__,
+			  "use_poll without HAVE_POLL");
+#endif /* HAVE_POLL */
+	}
+      else
+	{
+	  if (mask & GDB_READABLE)
+	    FD_SET (fd, &gdb_notifier.check_masks[0]);
+	  else
+	    FD_CLR (fd, &gdb_notifier.check_masks[0]);
+
+	  if (mask & GDB_WRITABLE)
+	    FD_SET (fd, &gdb_notifier.check_masks[1]);
+	  else
+	    FD_CLR (fd, &gdb_notifier.check_masks[1]);
+
+	  if (mask & GDB_EXCEPTION)
+	    FD_SET (fd, &gdb_notifier.check_masks[2]);
+	  else
+	    FD_CLR (fd, &gdb_notifier.check_masks[2]);
+
+	  if (gdb_notifier.num_fds <= fd)
+	    gdb_notifier.num_fds = fd + 1;
+	}
     }
+
   file_ptr->proc = proc;
   file_ptr->client_data = client_data;
   file_ptr->mask = mask;
-
-  if (use_poll)
-    {
-#ifdef HAVE_POLL
-      gdb_notifier.num_fds++;
-      if (gdb_notifier.poll_fds)
-	gdb_notifier.poll_fds =
-	  (struct pollfd *) xrealloc (gdb_notifier.poll_fds,
-				      (gdb_notifier.num_fds
-				       * sizeof (struct pollfd)));
-      else
-	gdb_notifier.poll_fds =
-	  (struct pollfd *) xmalloc (sizeof (struct pollfd));
-      (gdb_notifier.poll_fds + gdb_notifier.num_fds - 1)->fd = fd;
-      (gdb_notifier.poll_fds + gdb_notifier.num_fds - 1)->events = mask;
-      (gdb_notifier.poll_fds + gdb_notifier.num_fds - 1)->revents = 0;
-#else
-      internal_error (__FILE__, __LINE__,
-		      "use_poll without HAVE_POLL");
-#endif /* HAVE_POLL */
-    }
-  else
-    {
-      if (mask & GDB_READABLE)
-	FD_SET (fd, &gdb_notifier.check_masks[0]);
-      else
-	FD_CLR (fd, &gdb_notifier.check_masks[0]);
-
-      if (mask & GDB_WRITABLE)
-	FD_SET (fd, &gdb_notifier.check_masks[1]);
-      else
-	FD_CLR (fd, &gdb_notifier.check_masks[1]);
-
-      if (mask & GDB_EXCEPTION)
-	FD_SET (fd, &gdb_notifier.check_masks[2]);
-      else
-	FD_CLR (fd, &gdb_notifier.check_masks[2]);
-
-      if (gdb_notifier.num_fds <= fd)
-	gdb_notifier.num_fds = fd + 1;
-    }
 }
 
 /* Remove the file descriptor FD from the list of monitored fd's: 
