@@ -30,7 +30,6 @@ typedef char * VoidStar ;
 #endif
 
 typedef unsigned long ARMword ; /* must be 32 bits wide */
-
 typedef struct ARMul_State ARMul_State ;
 
 typedef unsigned ARMul_CPInits(ARMul_State *state) ;

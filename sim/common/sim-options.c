@@ -111,6 +111,8 @@ typedef enum {
 #ifdef SIM_H8300 /* FIXME: Should be movable to h8300 dir.  */
   OPTION_H8300,
 #endif
+  OPTION_LOAD_LMA,
+  OPTION_LOAD_VMA,
 } STANDARD_OPTIONS;
 
 static const OPTION standard_options[] =
@@ -181,6 +183,19 @@ static const OPTION standard_options[] =
   { {"target", required_argument, NULL, OPTION_TARGET},
       '\0', "BFDNAME", "Specify the object-code format for the object files",
       standard_option_handler },
+
+#ifdef SIM_HANDLES_LMA
+  { {"load-lma", no_argument, NULL, OPTION_LOAD_LMA},
+      '\0', NULL,
+#if SIM_HANDLES_LMA
+    "Use VMA or LMA addresses when loading image (default LMA)",
+#else
+    "Use VMA or LMA addresses when loading image (default VMA)",
+#endif
+      standard_option_handler, "load-{lma,vma}" },
+  { {"load-vma", no_argument, NULL, OPTION_LOAD_VMA},
+      '\0', NULL, "", standard_option_handler,  "" },
+#endif
 
   { {NULL, no_argument, NULL, 0}, '\0', NULL, NULL, NULL }
 };
@@ -394,6 +409,18 @@ standard_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
 	break;
       }
 
+    case OPTION_LOAD_LMA:
+      {
+	STATE_LOAD_AT_LMA_P (sd) = 1;
+	break;
+      }
+
+    case OPTION_LOAD_VMA:
+      {
+	STATE_LOAD_AT_LMA_P (sd) = 0;
+	break;
+      }
+
     case OPTION_HELP:
       sim_print_help (sd, is_command);
       if (STATE_OPEN_KIND (sd) == SIM_OPEN_STANDALONE)
@@ -413,6 +440,9 @@ standard_install (SIM_DESC sd)
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
   if (sim_add_option_table (sd, NULL, standard_options) != SIM_RC_OK)
     return SIM_RC_FAIL;
+#ifdef SIM_HANDLES_LMA
+  STATE_LOAD_AT_LMA_P (sd) = SIM_HANDLES_LMA;
+#endif
   return SIM_RC_OK;
 }
 

@@ -1273,9 +1273,13 @@ parse_escape (string_ptr)
    be call for printing things which are independent of the language
    of the program being debugged. */
 
-void
-gdb_printchar (c, stream, quoter)
-     register int c;
+static void printchar PARAMS ((int c, void (*do_fputs) (const char *, GDB_FILE*), void (*do_fprintf) (GDB_FILE*, const char *, ...), GDB_FILE *stream, int quoter));
+
+static void
+printchar (c, do_fputs, do_fprintf, stream, quoter)
+     int c;
+     void (*do_fputs) PARAMS ((const char *, GDB_FILE*));
+     void (*do_fprintf) PARAMS ((GDB_FILE*, const char *, ...));
      GDB_FILE *stream;
      int quoter;
 {
@@ -1289,38 +1293,76 @@ gdb_printchar (c, stream, quoter)
       switch (c)
 	{
 	case '\n':
-	  fputs_filtered ("\\n", stream);
+	  do_fputs ("\\n", stream);
 	  break;
 	case '\b':
-	  fputs_filtered ("\\b", stream);
+	  do_fputs ("\\b", stream);
 	  break;
 	case '\t':
-	  fputs_filtered ("\\t", stream);
+	  do_fputs ("\\t", stream);
 	  break;
 	case '\f':
-	  fputs_filtered ("\\f", stream);
+	  do_fputs ("\\f", stream);
 	  break;
 	case '\r':
-	  fputs_filtered ("\\r", stream);
+	  do_fputs ("\\r", stream);
 	  break;
 	case '\033':
-	  fputs_filtered ("\\e", stream);
+	  do_fputs ("\\e", stream);
 	  break;
 	case '\007':
-	  fputs_filtered ("\\a", stream);
+	  do_fputs ("\\a", stream);
 	  break;
 	default:
-	  fprintf_filtered (stream, "\\%.3o", (unsigned int) c);
+	  do_fprintf (stream, "\\%.3o", (unsigned int) c);
 	  break;
 	}
     }
   else
     {
       if (c == '\\' || c == quoter)
-	fputs_filtered ("\\", stream);
-      fprintf_filtered (stream, "%c", c);
+	do_fputs ("\\", stream);
+      do_fprintf (stream, "%c", c);
     }
 }
+
+/* Print the character C on STREAM as part of the contents of a
+   literal string whose delimiter is QUOTER.  Note that these routines
+   should only be call for printing things which are independent of
+   the language of the program being debugged. */
+
+void
+fputstr_filtered (str, quoter, stream)
+     const char *str;
+     int quoter;
+     GDB_FILE *stream;
+{
+  while (*str)
+    printchar (*str++, fputs_filtered, fprintf_filtered, stream, quoter);
+}
+
+void
+fputstr_unfiltered (str, quoter, stream)
+     const char *str;
+     int quoter;
+     GDB_FILE *stream;
+{
+  while (*str)
+    printchar (*str++, fputs_unfiltered, fprintf_unfiltered, stream, quoter);
+}
+
+void
+fputstrn_unfiltered (str, n, quoter, stream)
+     const char *str;
+     int n;
+     int quoter;
+     GDB_FILE *stream;
+{
+  int i;
+  for (i = 0; i < n; i++)
+    printchar (str[i], fputs_unfiltered, fprintf_unfiltered, stream, quoter);
+}
+
 
 
 /* Number of lines per page or UINT_MAX if paging is disabled.  */

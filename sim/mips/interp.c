@@ -257,6 +257,8 @@ static const OPTION mips_options[] =
            "|" BOARD_JMR3904_PAL
 #define BOARD_JMR3904_DEBUG "jmr3904debug"
            "|" BOARD_JMR3904_DEBUG
+#define BOARD_BSP "bsp"
+           "|" BOARD_BSP
 
     , "Customize simulation for a particular board.", mips_option_handler },
 
@@ -352,12 +354,40 @@ sim_open (kind, cb, abfd, argv)
       
       device_init(sd);
     }
-  
+  else if (board != NULL
+	   && (strcmp(board, BOARD_BSP) == 0))
+    {
+      int i;
+
+      STATE_ENVIRONMENT (sd) = OPERATING_ENVIRONMENT;
+
+      /* ROM: 0x9FC0_0000 - 0x9FFF_FFFF and 0xBFC0_0000 - 0xBFFF_FFFF */
+      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx,0x%0x",
+		       0x9FC00000, 
+		       4 * 1024 * 1024, /* 4 MB */
+		       0xBFC00000);
+
+      /* SRAM: 0x8000_0000 - 0x803F_FFFF and 0xA000_0000 - 0xA03F_FFFF */
+      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx,0x%0x",
+		       0x80000000, 
+		       4 * 1024 * 1024, /* 4 MB */
+		       0xA0000000);
+
+      /* DRAM: 0x8800_0000 - 0x89FF_FFFF and 0xA800_0000 - 0xA9FF_FFFF */
+      for (i=0; i<8; i++) /* 32 MB total */
+	{
+	  unsigned size = 4 * 1024 * 1024;  /* 4 MB */
+	  sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx,0x%0x",
+			   0x88000000 + (i * size), 
+			   size, 
+			   0xA8000000 + (i * size));
+	}
+    }
 #if (WITH_HW)
-  if (board != NULL
-      && (strcmp(board, BOARD_JMR3904) == 0 ||
-	  strcmp(board, BOARD_JMR3904_PAL) == 0 ||
-	  strcmp(board, BOARD_JMR3904_DEBUG) == 0))
+  else if (board != NULL
+	   && (strcmp(board, BOARD_JMR3904) == 0 ||
+	       strcmp(board, BOARD_JMR3904_PAL) == 0 ||
+	       strcmp(board, BOARD_JMR3904_DEBUG) == 0))
     {
       /* match VIRTUAL memory layout of JMR-TX3904 board */
       int i;
@@ -973,6 +1003,8 @@ sim_monitor (SIM_DESC sd,
     case 11: /* char inbyte(void) */
       {
         char tmp;
+	/* ensure that all output has gone... */
+	sim_io_flush_stdout (sd);
         if (sim_io_read_stdin (sd, &tmp, sizeof(char)) != sizeof(char))
 	  {
 	    sim_io_error(sd,"Invalid return from character read");

@@ -240,6 +240,8 @@ serial_open (name)
     ops = serial_interface_lookup ("tcp");
   else if (strncmp (name, "lpt", 3) == 0)
     ops = serial_interface_lookup ("parallel");
+  else if (strncmp (name, "|", 1) == 0)
+    ops = serial_interface_lookup ("pipe");
   else
     ops = serial_interface_lookup ("hardwire");
 

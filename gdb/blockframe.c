@@ -656,7 +656,7 @@ blockvector_for_pc_sect (pc, section, pindex, symtab)
   while (bot >= 0)
     {
       b = BLOCKVECTOR_BLOCK (bl, bot);
-      if (BLOCK_END (b) >= pc)
+      if (BLOCK_END (b) > pc)
 	{
 	  if (pindex)
 	    *pindex = bot;

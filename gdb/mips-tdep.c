@@ -253,6 +253,66 @@ mips_print_extra_frame_info (fi)
 		     fi->extra_info->proc_desc->pdr.frameoffset);
 }
 
+/* Convert between RAW and VIRTUAL registers.  The RAW register size
+   defines the remote-gdb packet. */
+
+static int mips64_transfers_32bit_regs_p = 0;
+
+int
+mips_register_raw_size (reg_nr)
+     int reg_nr;
+{
+  if (mips64_transfers_32bit_regs_p)
+    return REGISTER_VIRTUAL_SIZE (reg_nr);
+  else
+    return MIPS_REGSIZE;
+}
+
+int
+mips_register_convertible (reg_nr)
+     int reg_nr;
+{
+  if (mips64_transfers_32bit_regs_p)
+    return 0;
+  else
+    return (REGISTER_RAW_SIZE (reg_nr) > REGISTER_VIRTUAL_SIZE (reg_nr));
+}
+
+void
+mips_register_convert_to_virtual (n, virtual_type, raw_buf, virt_buf)
+     int n;
+     struct type *virtual_type;
+     char *raw_buf;
+     char *virt_buf;
+{
+  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+    memcpy (virt_buf,
+	    raw_buf + (REGISTER_RAW_SIZE (n) - TYPE_LENGTH (virtual_type)),
+	    TYPE_LENGTH (virtual_type));
+  else
+    memcpy (virt_buf,
+	    raw_buf,
+	    TYPE_LENGTH (virtual_type));
+}
+
+void
+mips_register_convert_to_raw (virtual_type, n, virt_buf, raw_buf)
+     struct type *virtual_type;
+     int n;
+     char *virt_buf;
+     char *raw_buf;
+{
+  memset (raw_buf, 0, REGISTER_RAW_SIZE (n));
+  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+    memcpy (raw_buf + (REGISTER_RAW_SIZE (n) - TYPE_LENGTH (virtual_type)),
+	    virt_buf,
+	    TYPE_LENGTH (virtual_type));
+  else
+    memcpy (raw_buf,
+	    virt_buf,
+	    TYPE_LENGTH (virtual_type));
+}
+
 /* Should the upper word of 64-bit addresses be zeroed? */
 static int mask_address_p = 1;
 
@@ -2423,14 +2483,18 @@ do_gp_register_row (regnum)
       if (read_relative_register_raw_bytes (regnum, raw_buffer))
 	error ("can't read register %d (%s)", regnum, REGISTER_NAME (regnum));
       /* pad small registers */
-      for (byte = 0; byte < (MIPS_REGSIZE - REGISTER_RAW_SIZE (regnum)); byte++)
+      for (byte = 0; byte < (MIPS_REGSIZE - REGISTER_VIRTUAL_SIZE (regnum)); byte++)
 	printf_filtered ("  ");
       /* Now print the register value in hex, endian order. */
       if (TARGET_BYTE_ORDER == BIG_ENDIAN)
-	for (byte = 0; byte < REGISTER_RAW_SIZE (regnum); byte++)
+	for (byte = REGISTER_RAW_SIZE (regnum) - REGISTER_VIRTUAL_SIZE (regnum);
+	     byte < REGISTER_RAW_SIZE (regnum);
+	     byte++)
 	  printf_filtered ("%02x", (unsigned char) raw_buffer[byte]);
       else
-	for (byte = REGISTER_RAW_SIZE (regnum) - 1; byte >= 0; byte--)
+	for (byte = REGISTER_VIRTUAL_SIZE (regnum) - 1;
+	     byte >= 0;
+	     byte--)
 	  printf_filtered ("%02x", (unsigned char) raw_buffer[byte]);
       printf_filtered (" ");
       col++;
@@ -3571,4 +3635,17 @@ search.  The only need to set it is when debugging a stripped executable.",
 Use \"on\" to enable the masking, and \"off\" to disable it.\n\
 Without an argument, zeroing of upper address bits is enabled.", &setlist),
      &showlist);
+
+  /* Allow the user to control the size of 32 bit registers within the
+     raw remote packet.  */
+  add_show_from_set (add_set_cmd ("remote-mips64-transfers-32bit-regs",
+				  class_obscure,
+				  var_boolean,
+				  (char *)&mips64_transfers_32bit_regs_p, "\
+Set compatibility with MIPS targets that transfers 32 and 64 bit quantities.\n\
+Use \"on\" to enable backward compatibility with older MIPS 64 GDB+target\n\
+that would transfer 32 bits for some registers (e.g. SR, FSR) and\n\
+64 bits for others.  Use \"off\" to disable compatibility mode",
+				  &setlist),
+		     &showlist);
 }

@@ -224,7 +224,7 @@ CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE) \
 ADD_FILES = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(REGEX1) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 
-VERSION = 19990707
+VERSION = 19990712
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -242,7 +242,7 @@ RUNTESTFLAGS=
 # part of libiberty) a POSIX interface.  But at least for now the
 # host-dependent makefile fragment might need to use something else
 # besides ser-unix.o
-SER_HARDWIRE = ser-unix.o
+SER_HARDWIRE = ser-unix.o ser-pipe.o
 
 # The `remote' debugging target is supported for most architectures,
 # but not all (e.g. 960)
@@ -967,7 +967,8 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	remote-st.c remote-utils.c dcache.c \
 	remote-udi.c remote-vx.c remote-vx29k.c \
 	rs6000-nat.c rs6000-tdep.c \
-	ser-go32.c ser-ocd.c ser-tcp.c sh-tdep.c solib.c sparc-nat.c \
+	ser-go32.c ser-pipe.c ser-ocd.c ser-tcp.c \
+	sh-tdep.c solib.c sparc-nat.c \
 	sparc-tdep.c sparcl-tdep.c sun3-nat.c sun386-nat.c \
 	symm-tdep.c symm-nat.c \
 	tahoe-tdep.c ultra3-nat.c ultra3-xdep.c umax-xdep.c \
@@ -1491,6 +1492,8 @@ ser-go32.o: ser-go32.c $(defs_h) serial.h
 ser-mac.o: ser-mac.c $(defs_h) serial.h signals.h
 
 ser-ocd.o: ser-ocd.c $(defs_h) serial.h signals.h gdb_string.h
+
+ser-pipe.o: ser-pipe.c $(defs_h) serial.h signals.h gdb_string.h
 
 ser-tcp.o: ser-tcp.c $(defs_h) serial.h signals.h gdb_string.h
 

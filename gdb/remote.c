@@ -3294,8 +3294,7 @@ print_packet (buf)
      char *buf;
 {
   puts_filtered ("\"");
-  while (*buf)
-    gdb_printchar (*buf++, gdb_stdout, '"');
+  fputstr_filtered (buf, '"', gdb_stdout);
   puts_filtered ("\"");
 }
 
@@ -3352,7 +3351,9 @@ putpkt_binary (buf, cnt)
       if (remote_debug)
 	{
 	  *p = '\0';
-	  fprintf_unfiltered (gdb_stdlog, "Sending packet: %s...", buf2);
+	  fprintf_unfiltered (gdb_stdlog, "Sending packet: ");
+	  fputstrn_unfiltered (buf2, p - buf2, 0, gdb_stdlog);
+	  fprintf_unfiltered (gdb_stdlog, "...", buf2);
 	  gdb_flush (gdb_stdlog);
 	}
       if (SERIAL_WRITE (remote_desc, buf2, p - buf2))
@@ -3618,7 +3619,11 @@ getpkt (buf, forever)
       if (val == 1)
 	{
 	  if (remote_debug)
-	    fprintf_unfiltered (gdb_stdlog, "Packet received: %s\n", buf);
+	    {
+	      fprintf_unfiltered (gdb_stdlog, "Packet received: ");
+	      fputstr_unfiltered (buf, 0, gdb_stdlog);
+	      fprintf_unfiltered (gdb_stdlog, "\n");
+	    }
 	  SERIAL_WRITE (remote_desc, "+", 1);
 	  return;
 	}

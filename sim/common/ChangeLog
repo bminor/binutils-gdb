@@ -1,3 +1,26 @@
+Sun Jul 11 23:47:20 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-resume.c (sim_resume): Ensure that the siggnal [sic] is only
+ 	passed in when sim_resume is first entered - don't re-pass it
+ 	after a restart.
+	
+Sun Jul 11 23:34:44 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-options.c (standard_option_handler): Add OPTION_LOAD_VMA and
+ 	OPTION_LOAD_LMA but only when is defined.
+	(standard_options): When SIM_HANDLES_LMA is defined include
+ 	options --load-lma and --load-vma.
+	(standard_install): Initialize STATE_LOAD_AT_LMA_P.
+
+	* sim-base.h (STATE_LOAD_AT_LMA_P): Define.
+	(struct sim_state_base): Add load_at_lma_p.
+	* sim-hload.c (sim_load): Replace SIM_HANDLES_LMA with
+ 	STATE_LOAD_AT_LMA_P.
+
+Sun Jul 11 12:03:36 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* nrun.c (main): Re-format loop gnu style.
+
 Wed Jul  7 19:56:03 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* dv-sockser.c (connected_p): Initialize addrlen.

@@ -45,20 +45,14 @@ sim_load (sd, prog_name, prog_bfd, from_tty)
      incorrectly write the program sections at LMA interpreted as a
      virtual address.  This is still accommodated for backward
      compatibility reasons. */
-  /* FIXME: The following simulators use this file as of 980313:
-     m32r, mips, v850 [grep for sim-hload in all Makefile.in's].
-     Each of these should be properly using lma.  When this is confirmed,
-     SIM_HANDLES_LMA can go away.  */
-#ifndef SIM_HANDLES_LMA
-#define SIM_HANDLES_LMA 0
-#endif
 
   result_bfd = sim_load_file (sd, STATE_MY_NAME (sd),
 			      STATE_CALLBACK (sd),
 			      prog_name,
 			      STATE_PROG_BFD (sd),
 			      STATE_OPEN_KIND (sd) == SIM_OPEN_DEBUG,
-			      SIM_HANDLES_LMA, sim_write);
+			      STATE_LOAD_AT_LMA_P (sd),
+			      sim_write);
   if (result_bfd == NULL)
     {
       bfd_close (STATE_PROG_BFD (sd));

@@ -70,6 +70,11 @@ sim_resume (SIM_DESC sd,
       if (next_cpu_nr >= nr_cpus)
 	next_cpu_nr = 0;
 
+      /* Only deliver the siggnal ]sic] the first time through - don't
+         re-deliver any siggnal during a restart. */
+      if (jmpval == sim_engine_restart_jmpval)
+	siggnal = 0;
+
 #ifdef SIM_CPU_EXCEPTION_RESUME
       {
 	sim_cpu* cpu = STATE_CPU (sd, next_cpu_nr);

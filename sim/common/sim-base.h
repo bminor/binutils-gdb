@@ -237,6 +237,11 @@ typedef struct {
 #endif
 
 
+  /* Should image loads be performed using the LMA or VMA?  Older
+     simulators use the VMA while newer simulators prefer the LMA. */
+  int load_at_lma_p;
+#define STATE_LOAD_AT_LMA_P(SD) ((SD)->base.load_at_lma_p)
+
   /* Marker for those wanting to do sanity checks.
      This should remain the last member of this struct to help catch
      miscompilation errors.  */

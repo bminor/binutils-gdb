@@ -1,3 +1,11 @@
+1999-07-08  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdb.base/callfwmall.c, gdb.base/callfwmall.exp: Renamed from
+	callfuncs2.c and callfuncs2.exp.
+
+	* gdb.base/list.exp: Remove mistaken xfails.
+	* gdb.base/list0.h: Add optional prototypes.
+
 Wed Jul  7 00:27:35 1999  Andrew Cagney  <cagney@amy.cygnus.com>
 
         * gdb.base/setvar.exp: Increase the time-out on tests indirectly

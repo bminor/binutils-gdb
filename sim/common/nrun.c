@@ -137,41 +137,44 @@ main (int argc, char **argv)
 	     ((reason == sim_stopped) && 
 	      (STATE_ENVIRONMENT (sd) == OPERATING_ENVIRONMENT)));
     }
-  else do
+  else 
     {
+      do
+	{
 #if defined (HAVE_SIGACTION) && defined (SA_RESTART)
-      struct sigaction sa, osa;
-      sa.sa_handler = cntrl_c;
-      sigemptyset (&sa.sa_mask);
-      sa.sa_flags = 0;
-      sigaction (SIGINT, &sa, &osa);
-      prev_sigint = osa.sa_handler;
+	  struct sigaction sa, osa;
+	  sa.sa_handler = cntrl_c;
+	  sigemptyset (&sa.sa_mask);
+	  sa.sa_flags = 0;
+	  sigaction (SIGINT, &sa, &osa);
+	  prev_sigint = osa.sa_handler;
 #else
-      prev_sigint = signal (SIGINT, cntrl_c);
+	  prev_sigint = signal (SIGINT, cntrl_c);
 #endif
-      sim_resume (sd, 0, sigrc);
-      signal (SIGINT, prev_sigint);
-      sim_stop_reason (sd, &reason, &sigrc);
-
-      if ((reason == sim_stopped) &&
-	  (sigrc == sim_signal_to_host (sd, SIM_SIGINT)))
-	break; /* exit on control-C */
-
-      /* remain on signals in oe mode */
-    } while ((reason == sim_stopped) &&
-	     (STATE_ENVIRONMENT (sd) == OPERATING_ENVIRONMENT));
-
+	  sim_resume (sd, 0, sigrc);
+	  signal (SIGINT, prev_sigint);
+	  sim_stop_reason (sd, &reason, &sigrc);
+	  
+	  if ((reason == sim_stopped) &&
+	      (sigrc == sim_signal_to_host (sd, SIM_SIGINT)))
+	    break; /* exit on control-C */
+	  
+	  /* remain on signals in oe mode */
+	} while ((reason == sim_stopped) &&
+		 (STATE_ENVIRONMENT (sd) == OPERATING_ENVIRONMENT));
+      
+    }
   /* Print any stats the simulator collected.  */
   sim_info (sd, 0);
-
+  
   /* Shutdown the simulator.  */
   sim_close (sd, 0);
-
+  
   /* If reason is sim_exited, then sigrc holds the exit code which we want
      to return.  If reason is sim_stopped or sim_signalled, then sigrc holds
      the signal that the simulator received; we want to return that to
      indicate failure.  */
-
+  
 #ifdef SIM_H8300 /* FIXME: Ugh.  grep for SLEEP in compile.c  */
   if (sigrc == SIGILL)
     abort ();

@@ -52,7 +52,6 @@ arc-*-*)		gdb_target=arc ;;
 
 arm-*-* | thumb-*-* | strongarm-*-*)
 			gdb_target=arm ;;
-
 # OBSOLETE c1-*-*)		gdb_target=convex ;;
 # OBSOLETE c2-*-*)		gdb_target=convex ;;
 

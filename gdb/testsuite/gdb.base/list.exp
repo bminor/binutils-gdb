@@ -104,9 +104,7 @@ proc test_listsize {} {
     # Ensure we can limit printouts to one line
 
     if [set_listsize 1] {
-        if {!$hp_cc_compiler && !$hp_aCC_compiler} { setup_xfail "*-*-*" }
 	gdb_test "list 1" "1\[ \t\]+#include \"list0.h\"" "list line 1 with listsize 1"
-        if {!$hp_cc_compiler && !$hp_aCC_compiler} { setup_xfail "*-*-*" }
 	gdb_test "list 2" "2\[ \t\]+" "list line 2 with listsize 1"
     }    
 
@@ -123,10 +121,8 @@ proc test_listsize {} {
     if [ set_listsize 3 ] {
 	setup_xfail "*-*-*"
 	gdb_test "list 1" "1\[ \t\]+#include \"list0.h\"2\[ \t\]+" "list line 1 with listsize 3"
-        if {!$hp_cc_compiler && !$hp_aCC_compiler} { setup_xfail "*-*-*" }
 	gdb_test "list 2" "1\[ \t\]+#include \"list0.h\".*3\[ \t\]+int main \[)(\]+" "list line 2 with listsize 3"
 	
-        if {!$hp_cc_compiler && !$hp_aCC_compiler} { setup_xfail "*-*-*" }
 	gdb_test "list 3" "2\[ \t\]+\r\n3\[ \t\]+int main \[(\]+\[)\]+\r\n4\[ \t\]+\{" "list line 3 with listsize 3"
     }
 

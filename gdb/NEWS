@@ -3,6 +3,16 @@
 
 *** Changes since GDB-4.18:
 
+* Remote targets can connect to a sub-program
+
+A popen(3) style serial-device has been added.  This device starts a
+sub-process (such as a stand-alone simulator) and then communicates
+with that.  The sub-program to run is specified using the syntax
+``|<program> <args>'' vis:
+
+	(gdb) set remotedebug 1
+	(gdb) target extended-remote |mn10300-elf-sim program-args
+
 * New targets
 
 TI TMS320C80					tic80-*-*
@@ -12,6 +22,15 @@ TI TMS320C80					tic80-*-*
 Altos 3068					m68*-altos-*
 Convex						c1-*-*, c2-*-*
 Pyramid						pyramid-*-*
+
+* MIPS 64 remote protocol
+
+A long standing bug in the mips64 remote protocol where by GDB
+expected certain 32 bit registers (ex SR) to be transfered as 32
+instead of 64 bits has been fixed.
+
+The command ``set remote-mips64-transfers-32bit-regs on'' has been
+added to provide backward compatibility with older versions of GDB.
 
 *** Changes in GDB-4.18:
 

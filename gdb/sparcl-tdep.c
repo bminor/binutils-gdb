@@ -1,5 +1,5 @@
 /* Target dependent code for the Fujitsu SPARClite for GDB, the GNU debugger.
-   Copyright 1994, 1995, 1996  Free Software Foundation, Inc.
+   Copyright 1994, 1995, 1996, 1999  Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -34,8 +34,7 @@
 #include <netdb.h>
 #endif
 
-extern struct target_ops sparclite_ops;		/* Forward decl */
-extern struct target_ops remote_ops;
+static struct target_ops sparclite_ops;
 
 static char *remote_target_name = NULL;
 static serial_t remote_desc = NULL;
@@ -893,78 +892,21 @@ sparclite_download (filename, from_tty)
 	      sparclite_serial_start);
 }
 
-/* Define the target subroutine names */
-
-static struct target_ops sparclite_ops;
+/* Set up the sparclite target vector.  */
 
 static void
 init_sparclite_ops (void)
 {
   sparclite_ops.to_shortname = "sparclite";
-  sparclite_ops.to_longname = "SPARClite remote target";
-  sparclite_ops.to_doc = "Use a remote SPARClite target board via a serial line; using a gdb-specific protocol.\n\
-Specify the serial device it is connected to (e.g. /dev/ttya).";
+  sparclite_ops.to_longname = "SPARClite download target";
+  sparclite_ops.to_doc = "Download to a remote SPARClite target board via serial of UDP.\n\
+Specify the device it is connected to (e.g. /dev/ttya).";
   sparclite_ops.to_open = sparclite_open;
   sparclite_ops.to_close = sparclite_close;
-  sparclite_ops.to_attach = 0;
-  sparclite_ops.to_post_attach = NULL;
-  sparclite_ops.to_require_attach = NULL;
-  sparclite_ops.to_detach = 0;
-  sparclite_ops.to_require_detach = NULL;
-  sparclite_ops.to_resume = 0;
-  sparclite_ops.to_wait = 0;
-  sparclite_ops.to_post_wait = NULL;
-  sparclite_ops.to_fetch_registers = 0;
-  sparclite_ops.to_store_registers = 0;
-  sparclite_ops.to_prepare_to_store = 0;
-  sparclite_ops.to_xfer_memory = 0;
-  sparclite_ops.to_files_info = 0;
-  sparclite_ops.to_insert_breakpoint = 0;
-  sparclite_ops.to_remove_breakpoint = 0;
-  sparclite_ops.to_terminal_init = 0;
-  sparclite_ops.to_terminal_inferior = 0;
-  sparclite_ops.to_terminal_ours_for_output = 0;
-  sparclite_ops.to_terminal_ours = 0;
-  sparclite_ops.to_terminal_info = 0;
-  sparclite_ops.to_kill = 0;
   sparclite_ops.to_load = sparclite_download;
-  sparclite_ops.to_lookup_symbol = 0;
-  sparclite_ops.to_create_inferior = 0;
-  sparclite_ops.to_post_startup_inferior = NULL;
-  sparclite_ops.to_acknowledge_created_inferior = NULL;
-  sparclite_ops.to_clone_and_follow_inferior = NULL;
-  sparclite_ops.to_post_follow_inferior_by_clone = NULL;
-  sparclite_ops.to_insert_fork_catchpoint = NULL;
-  sparclite_ops.to_remove_fork_catchpoint = NULL;
-  sparclite_ops.to_insert_vfork_catchpoint = NULL;
-  sparclite_ops.to_remove_vfork_catchpoint = NULL;
-  sparclite_ops.to_has_forked = NULL;
-  sparclite_ops.to_has_vforked = NULL;
-  sparclite_ops.to_can_follow_vfork_prior_to_exec = NULL;
-  sparclite_ops.to_post_follow_vfork = NULL;
-  sparclite_ops.to_insert_exec_catchpoint = NULL;
-  sparclite_ops.to_remove_exec_catchpoint = NULL;
-  sparclite_ops.to_has_execd = NULL;
-  sparclite_ops.to_reported_exec_events_per_exec_call = NULL;
-  sparclite_ops.to_has_exited = NULL;
-  sparclite_ops.to_mourn_inferior = 0;
-  sparclite_ops.to_can_run = 0;
-  sparclite_ops.to_notice_signals = 0;
-  sparclite_ops.to_thread_alive = 0;
-  sparclite_ops.to_stop = 0;
-  sparclite_ops.to_pid_to_exec_file = NULL;
-  sparclite_ops.to_core_file_to_sym_file = NULL;
   sparclite_ops.to_stratum = download_stratum;
-  sparclite_ops.DONT_USE = 0;
-  sparclite_ops.to_has_all_memory = 0;
-  sparclite_ops.to_has_memory = 0;
-  sparclite_ops.to_has_stack = 0;
-  sparclite_ops.to_has_registers = 0;
-  sparclite_ops.to_has_execution = 0;
-  sparclite_ops.to_sections = 0;
-  sparclite_ops.to_sections_end = 0;
   sparclite_ops.to_magic = OPS_MAGIC;
-}				/* init_sparclite_ops */
+}
 
 void
 _initialize_sparcl_tdep ()

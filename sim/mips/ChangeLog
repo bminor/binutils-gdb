@@ -1,3 +1,17 @@
+Mon Jul 12 00:02:27 1999  Andrew Cagney  <cagney@amy.cygnus.com>
+
+	* interp.c (sim_monitor): Flush output before reading input.
+
+Sun Jul 11 19:28:11 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* tconfig.in (SIM_HANDLES_LMA): Always define.
+
+Thu Jul  8 16:06:59 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	From Mark Salter <msalter@cygnus.com>:
+	* interp.c (BOARD_BSP): Define.  Add to list of possible boards.
+	(sim_open): Add setup for BSP board.
+
 Wed Jul  7 12:45:58 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* mips.igen (MULT, MULTU): Add syntax for two operand version.

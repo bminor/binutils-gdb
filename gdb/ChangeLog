@@ -1,3 +1,55 @@
+Mon Jul 12 11:15:09 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* config/mips/tm-mips.h (REGISTER_CONVERT_TO_RAW,
+ 	REGISTER_CONVERT_TO_VIRTUAL, REGISTER_CONVERTIBLE): Define.
+	(REGISTER_RAW_SIZE): Re-define as mips_register_convert_to_raw.
+	* mips-tdep.c (mips_register_convert_to_raw,
+ 	mips_register_convert_to_virtual, ): New functions.
+	(mips_register_raw_size, mips_register_convertible): New
+ 	functions.  Handle bug introduced by ``Wed Apr 1 23:13:23 1998
+ 	Andrew Cagney <cagney@b1.cygnus.com>'' where remote mips64 target
+ 	transfers SR as 64 bits yet GDB expected only 32 bits.
+	(mips64_transfers_32bit_regs): New static variable.
+	(_initialize_mips_tdep): Add obscure command ``set
+ 	remote-mips64-transfers-32bit-regs'' that provides backward
+ 	compatibility.
+	(do_gp_register_row): Extract register values from raw buffer.
+
+	* NEWS: Document protocol change.
+
+Mon Jul 12 02:02:00 1999  Andrew Cagney  <cagney@amy.cygnus.com>
+
+	* defs.h, utils.c (fputstrn_filtered, fputstrn_unfiltered,
+ 	fputstrnn_unfiltered): New functions.
+	(gdb_printchar): Delete.
+
+	* remote.c (print_packet): Replace gdb_printchar with
+ 	fputstrn_filtered.
+	(getpkt): Use fputstrn_unfiltered to dump packet received.
+	(putpkt_binary): Use fputstrnn_unfiltered to dump packet sent.
+
+1999-07-09  Keith Seitz  <keiths@cygnus.com>
+
+	* blockframe.c (blockvector_for_pc_sect): When looking for a block,
+	we want the one whose end is greater than our PC, not greater or equal.
+
+1999-07-08  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* sparcl-tdep.c (init_sparclite_ops): Fix doc strings, remove
+	useless inits.
+	(sparclite_ops): Remove redundant decl.
+
+Thu Jul  8 16:48:40 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* ser-pipe.c (pipe_open): Bi-directional popen found on both
+ 	NetBSD and OpenBSD.
+	* ser-pipe.c: New file.  Implement popen() style serial interface.
+	* NEWS: Mention.
+	* Makefile.in (ALLDEPFILES): Add ser-pipe.c.
+	(ser-pipe.o): Add new target.  Specify dependencies.
+	(SER_HARDWIRE): Add ser-pipe.o.
+	* serial.c (serial_open): Recognize a serial pipe ``|''.
+
 1999-07-07  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* All C files except *-stub.c and *-share/*: Indent to GNU

@@ -500,7 +500,11 @@ extern void print_spaces_filtered PARAMS ((int, GDB_FILE *));
 
 extern char *n_spaces PARAMS ((int));
 
-extern void gdb_printchar PARAMS ((int, GDB_FILE *, int));
+extern void fputstr_filtered PARAMS ((const char *str, int quotr, GDB_FILE *stream));
+
+extern void fputstr_unfiltered PARAMS ((const char *str, int quotr, GDB_FILE *stream));
+
+extern void fputstrn_unfiltered PARAMS ((const char *str, int n, int quotr, GDB_FILE *stream));
 
 extern void gdb_print_address PARAMS ((void *, GDB_FILE *));
 

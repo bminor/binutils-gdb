@@ -464,6 +464,7 @@ ARMword ARMul_Emulate26(register ARMul_State *state)
     if (temp) { /* if the condition codes don't match, stop here */
 mainswitch:
 
+      
        switch ((int)BITS(20,27)) {
 
 /***************************************************************************\
@@ -877,6 +878,7 @@ mainswitch:
              break ;
 
           case 0x10 : /* TST reg and MRS CPSR and SWP word */
+	 
 #ifdef MODET
              if (BITS(4,11) == 0xB) {
                /* STRH register offset, no write-back, down, pre indexed */

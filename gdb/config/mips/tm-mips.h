@@ -236,10 +236,31 @@ extern void mips_do_registers_info PARAMS ((int, int));
 
 #define REGISTER_BYTE(N) ((N) * MIPS_REGSIZE)
 
-/* Number of bytes of storage in the actual machine representation
-   for register N. */
+/* Number of bytes of storage in the actual machine representation for
+   register N.  NOTE: This indirectly defines the register size
+   transfered by the GDB protocol. */
 
-#define REGISTER_RAW_SIZE(N) REGISTER_VIRTUAL_SIZE(N)
+extern int mips_register_raw_size PARAMS ((int reg_nr));
+#define REGISTER_RAW_SIZE(N) (mips_register_raw_size ((N)))
+
+
+/* Covert between the RAW and VIRTUAL registers.
+
+   Some MIPS (SR, FSR, FIR) have a `raw' size of MIPS_REGSIZE but are
+   really 32 bit registers.  This is a legacy of the 64 bit MIPS GDB
+   protocol which transfers 64 bits for 32 bit registers. */
+
+extern int mips_register_convertible PARAMS ((int reg_nr));
+#define REGISTER_CONVERTIBLE(N) (mips_register_convertible ((N)))
+     
+
+void mips_register_convert_to_virtual PARAMS ((int reg_nr, struct type *virtual_type, char *raw_buf, char *virt_buf));
+#define REGISTER_CONVERT_TO_VIRTUAL(N,VIRTUAL_TYPE,RAW_BUF,VIRT_BUF) \
+  mips_register_convert_to_virtual (N,VIRTUAL_TYPE,RAW_BUF,VIRT_BUF)
+
+void mips_register_convert_to_raw PARAMS ((struct type *virtual_type, int reg_nr, char *virt_buf, char *raw_buf));
+#define REGISTER_CONVERT_TO_RAW(VIRTUAL_TYPE,N,VIRT_BUF,RAW_BUF) \
+  mips_register_convert_to_raw (VIRTUAL_TYPE,N,VIRT_BUF,RAW_BUF)
 
 /* Number of bytes of storage in the program's representation
    for register N. */
