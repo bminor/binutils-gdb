@@ -5110,13 +5110,13 @@ pa_parse_space_stmt (space_name, create_flag)
   private = FALSE;
   if (strcasecmp (space_name, "$TEXT$") == 0)
     {
-      seg = text_section;
-      sort = 8;
+      seg = pa_def_spaces[0].segment;
+      sort = pa_def_spaces[0].sort;
     }
-  else
+  else if (strcasecmp (space_name, "$PRIVATE$") == 0)
     {
-      seg = data_section;
-      sort = 16;
+      seg = pa_def_spaces[1].segment;
+      sort = pa_def_spaces[1].sort;
     }
 
   if (!is_end_of_statement ())
