@@ -1,3 +1,11 @@
+start-sanitize-r5900
+Fri Mar 20 09:01:31 1998  Jeffrey A Law  (law@cygnus.com)
+
+        * mips-dis.c: Change '%' to '#' to avoid conflict with vr5400
+        support.
+        * vu0.h: Likewise.
+
+end-sanitize-r5900
 Thu Mar 19 15:46:53 1998  Nick Clifton  <nickc@cygnus.com>
 
 	These patches are courtesy of Jonathan Walton and Tony Thompson
