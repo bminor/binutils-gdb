@@ -1,5 +1,25 @@
 Fri Mar 18 20:09:16 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
+	* write.c (symbol_table_frozen): New variable, to be set after
+	bfd_set_symtab is called.
+	(dump_section_relocs): Note whether a symbol is a section symbol
+	or not.
+	(adjust_reloc_syms): For now, always supply an absolute symbol for
+	fixups without symbols but not yet `done'.  Use section_symbol to
+	get the symbol, instead of going directly for abs_symbol.
+	(write_relocs) [DEBUG4]: Abort if any symbol referred to by a
+	reloc is not a section symbol and is not in the symbol table.
+	(set_symtab): New function, broken out from write_object_file.
+	Counts symbol table instead of relying on an earlier count.
+	(write_object_file): Call set_symtab, but do it after potentially
+	invoking the *_frob_file macros.  Don't bother counting symbols.
+	Call symbol_remove, instead of expanding it in place.  Moved the
+	conditionalized `object_file_size' declaration down to
+	conditionalized block where it's used.  When using the absolute
+	symbol for a fixup without a symbol, set sy_used_in_reloc.
+	(write_object_file) [BFD_ASSEMBLER]: Call section_symbol to get
+	the correct symbol for the absolute section.
+
 	* subsegs.c (section_symbol): Use symbol_new instead of
 	symbol_make, since we may want it to go into the symbol table.
 	Make the new symbol have internal linkage.  If

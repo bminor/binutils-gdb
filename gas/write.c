@@ -43,6 +43,8 @@ extern CONST int md_short_jump_size;
 extern CONST int md_long_jump_size;
 #endif
 
+int symbol_table_frozen;
+
 #ifndef BFD_ASSEMBLER
 
 #ifndef MANY_SEGMENTS
@@ -55,7 +57,7 @@ struct frag *data_last_frag;	/* Last frag in segment. */
 static struct frag *bss_last_frag;	/* Last frag in segment. */
 #endif
 
-#if ! defined (BFD_ASSEMBLER) && ! defined (BFD)
+#ifndef BFD
 static object_headers headers;
 static char *the_object_file;
 #endif
@@ -504,9 +506,19 @@ dump_section_relocs (abfd, sec, stream_)
     {
       symbolS *s = fixp->fx_addsy;
       if (s)
-	fprintf (stream, "  %08x: %s(%s+%x)+%x\n", fixp,
-		 S_GET_NAME (s), s->bsym->section->name,
-		 S_GET_VALUE (s), fixp->fx_offset);
+	{
+	  fprintf (stream, "  %08x: %s(%s", fixp, S_GET_NAME (s),
+		   s->bsym->section->name);
+	  if (s->bsym->flags & BSF_SECTION_SYM)
+	    {
+	      fprintf (stream, " section sym");
+	      if (S_GET_VALUE (s))
+		fprintf (stream, "+%x", S_GET_VALUE (s));
+	    }
+	  else
+	    fprintf (stream, "+%x", S_GET_VALUE (s));
+	  fprintf (stream, ")+%x\n", fixp->fx_offset);
+	}
       else
 	fprintf (stream, "  %08x: type %d no sym\n", fixp, fixp->fx_r_type);
       fixp = fixp->fx_next;
@@ -593,7 +605,7 @@ adjust_reloc_syms (abfd, sec, xxx)
 	fixp->fx_addsy = section_symbol (symsec);
 	fixp->fx_addsy->sy_used_in_reloc = 1;
       }
-#ifdef RELOC_REQUIRES_SYMBOL
+#if 1/*def RELOC_REQUIRES_SYMBOL*/
     else
       {
 	/* There was no symbol required by this relocation.  However,
@@ -601,8 +613,8 @@ adjust_reloc_syms (abfd, sec, xxx)
 	   (At least, the COFF support doesn't.)  So for now we fake up
 	   a local symbol in the absolute section.  */
 
-	abs_symbol.sy_used_in_reloc = 1;
-	fixp->fx_addsy = &abs_symbol;
+	fixp->fx_addsy = section_symbol (absolute_section);
+	fixp->fx_addsy->sy_used_in_reloc = 1;
       }
 #endif
 
@@ -734,6 +746,24 @@ write_relocs (abfd, sec, xxx)
   n = i;
 #endif
 
+#ifdef DEBUG4
+  {
+    int i, j, nsyms;
+    asymbol **sympp;
+    sympp = bfd_get_outsymbols (stdoutput);
+    nsyms = bfd_get_symcount (stdoutput);
+    for (i = 0; i < n; i++)
+      if (((*relocs[i]->sym_ptr_ptr)->flags & BSF_SECTION_SYM) == 0)
+	{
+	  for (j = 0; j < nsyms; j++)
+	    if (sympp[j] == *relocs[i]->sym_ptr_ptr)
+	      break;
+	  if (j == nsyms)
+	    abort ();
+	}
+  }
+#endif
+
   if (n)
     bfd_set_reloc (stdoutput, sec, relocs, n);
   else
@@ -788,7 +818,12 @@ write_contents (abfd, sec, xxx)
 	  x = bfd_set_section_contents (stdoutput, sec,
 					f->fr_literal, (file_ptr) offset,
 					(bfd_size_type) f->fr_fix);
-	  assert (x == true);
+	  if (x == false)
+	    {
+	      bfd_perror (stdoutput->filename);
+	      as_perror ("FATAL: Can't write %s", stdoutput->filename);
+	      exit (42);
+	    }
 	  offset += f->fr_fix;
 	}
       fill_literal = f->fr_literal + f->fr_fix;
@@ -801,7 +836,12 @@ write_contents (abfd, sec, xxx)
 	    x = bfd_set_section_contents (stdoutput, sec,
 					  fill_literal, (file_ptr) offset,
 					  (bfd_size_type) fill_size);
-	    assert (x == true);
+	    if (x == false)
+	      {
+		bfd_perror (stdoutput->filename);
+		as_perror ("FATAL: Can't write %s", stdoutput->filename);
+		exit (42);
+	      }
 	    offset += fill_size;
 	  }
     }
@@ -932,15 +972,48 @@ relax_and_size_all_segments ()
 
 #if defined (BFD_ASSEMBLER) || !defined (BFD)
 
+static void
+set_symtab ()
+{
+  int nsyms;
+  asymbol **asympp;
+  symbolS *symp;
+  boolean result;
+  extern PTR bfd_alloc PARAMS ((bfd *, size_t));
+
+  /* Count symbols.  We can't rely on a count made by the loop in
+     write_object_file, because *_frob_file may add a new symbol or
+     two.  */
+  nsyms = 0;
+  for (symp = symbol_rootP; symp; symp = symbol_next (symp))
+    nsyms++;
+
+  if (nsyms)
+    {
+      int i;
+
+      asympp = (asymbol **) bfd_alloc (stdoutput,
+				       nsyms * sizeof (asymbol *));
+      symp = symbol_rootP;
+      for (i = 0; i < nsyms; i++, symp = symbol_next (symp))
+	{
+	  asympp[i] = symp->bsym;
+	  symp->written = 1;
+	}
+    }
+  else
+    asympp = 0;
+  result = bfd_set_symtab (stdoutput, asympp, nsyms);
+  assert (result == true);
+  symbol_table_frozen = 1;
+}
+
 void 
 write_object_file ()
 {
   struct frchain *frchainP;	/* Track along all frchains. */
 #if ! defined (BFD_ASSEMBLER) || ! defined (WORKING_DOT_WORD)
   fragS *fragP;			/* Track along all frags. */
-#endif
-#if !defined (BFD_ASSEMBLER) && !defined (OBJ_VMS)
-  long object_file_size;
 #endif
 
   /* Do we really want to write it?  */
@@ -967,12 +1040,9 @@ write_object_file ()
   }
 
 #ifdef	OBJ_VMS
-  /*
-   *	Under VMS we try to be compatible with VAX-11 "C".  Thus, we
-   *	call a routine to check for the definition of the procedure
-   *	"_main", and if so -- fix it up so that it can be program
-   *	entry point.
-   */
+  /* Under VMS we try to be compatible with VAX-11 "C".  Thus, we call
+     a routine to check for the definition of the procedure "_main",
+     and if so -- fix it up so that it can be program entry point. */
   VMS_Check_For_Main ();
 #endif /* VMS */
 
@@ -1204,6 +1274,7 @@ write_object_file ()
 #ifndef BFD_ASSEMBLER
 #ifndef	OBJ_VMS
   {				/* not vms */
+    long object_file_size;
     /*
      * Scan every FixS performing fixups. We had to wait until now to do
      * this because md_convert_frag() may have made some fixSs.
@@ -1318,8 +1389,6 @@ write_object_file ()
   /* Set up symbol table, and write it out.  */
   if (symbol_rootP)
     {
-      unsigned int i = 0;
-      unsigned int n;
       symbolS *symp;
 
       for (symp = symbol_rootP; symp; symp = symbol_next (symp))
@@ -1368,35 +1437,18 @@ write_object_file ()
 	     but we keep such symbols if they are used in relocs.  */
 	  if ((! EMIT_SECTION_SYMBOLS
 	       && (symp->bsym->flags & BSF_SECTION_SYM) != 0)
-	      || ((S_IS_LOCAL (symp) || punt)
+	      /* Note that S_IS_EXTERN and S_IS_LOCAL are not always
+		 opposites.  Sometimes the former checks flags and the
+		 latter examines the name...  */
+	      || (!S_IS_EXTERN (symp)
+		  && (S_IS_LOCAL (symp) || punt)
 		  && ! symp->sy_used_in_reloc))
 	    {
-	      symbolS *prev, *next;
+	      symbol_remove (symp, &symbol_rootP, &symbol_lastP);
+	      /* After symbol_remove, symbol_next(symp) still returns
+		 the one that came after it in the chain.  So we don't
+		 need to do any extra cleanup work here.  */
 
-	      prev = symbol_previous (symp);
-	      next = symbol_next (symp);
-#ifdef DEBUG_SYMS
-	      verify_symbol_chain_2 (symp);
-#endif
-	      if (prev)
-		{
-		  symbol_next (prev) = next;
-		  symp = prev;
-		}
-	      else if (symp == symbol_rootP)
-		symbol_rootP = next;
-	      else
-		abort ();
-	      if (next)
-		symbol_previous (next) = prev;
-	      else
-		symbol_lastP = prev;
-#ifdef DEBUG_SYMS
-	      if (prev)
-		verify_symbol_chain_2 (prev);
-	      else if (next)
-		verify_symbol_chain_2 (next);
-#endif
 	      continue;
 	    }
 
@@ -1411,43 +1463,24 @@ write_object_file ()
 	  /* Set the value into the BFD symbol.  Up til now the value
 	     has only been kept in the gas symbolS struct.  */
 	  symp->bsym->value = S_GET_VALUE (symp);
-
-	  i++;
-	}
-      n = i;
-      if (n)
-	{
-	  asymbol **asympp;
-	  boolean result;
-	  extern PTR bfd_alloc PARAMS ((bfd *, size_t));
-
-	  asympp = (asymbol **) bfd_alloc (stdoutput,
-					   n * sizeof (asymbol *));
-	  symp = symbol_rootP;
-	  for (i = 0; i < n; i++, symp = symbol_next (symp))
-	    {
-	      asympp[i] = symp->bsym;
-	      symp->written = 1;
-	    }
-	  result = bfd_set_symtab (stdoutput, asympp, n);
-	  assert (result == true);
 	}
     }
 
+  /* If *_frob_file changes the symbol value at this point, it is
+     responsible for moving the changed value into symp->bsym->value
+     as well.  Hopefully all symbol value changing can be done in
+     *_frob_symbol.  */
 #ifdef tc_frob_file
   tc_frob_file ();
 #endif
-
 #ifdef obj_frob_file
-  /* If obj_frob_file changes the symbol value at this point, it is
-     responsible for moving the changed value into symp->bsym->value
-     as well.  Hopefully all symbol value changing can be done in
-     {obj,tc}_frob_symbol.  */
   obj_frob_file ();
 #endif
 
   /* Now that all the sizes are known, and contents correct, we can
-     start writing the file.  */
+     start writing to the file.  */
+  set_symtab ();
+
   bfd_map_over_sections (stdoutput, write_relocs, (char *) 0);
 
   bfd_map_over_sections (stdoutput, write_contents, (char *) 0);
@@ -2067,7 +2100,12 @@ fixup_segment (fixP, this_segment_type)
 	  add_number -= md_pcrel_from (fixP);
 	  if (add_symbolP == 0)
 	    {
+#ifndef BFD_ASSEMBLER
 	      fixP->fx_addsy = &abs_symbol;
+#else
+	      fixP->fx_addsy = section_symbol (absolute_section);
+#endif
+	      fixP->fx_addsy->sy_used_in_reloc = 1;
 	      ++seg_reloc_count;
 	    }
 	}
