@@ -8,7 +8,20 @@
 Alpha FreeBSD					alpha*-*-freebsd*
 x86 FreeBSD 3.x and 4.x				i[3456]86*-freebsd[34]*
 
-FreeBSD versions before 2.2 are no longer supported.
+* New targets
+
+* OBSOLETE configurations
+
+x86 FreeBSD before 2.2				i[3456]86*-freebsd{1,2.[01]}*, 
+
+* Deleted configurations
+
+* Other news:
+
+* All MIPS configurations are multi-arched.
+
+Multi-arch support is enabled for all MIPS configurations.
+
 
 *** Changes in GDB 5.0:
 

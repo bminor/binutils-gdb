@@ -35,21 +35,5 @@
 #define OP_LDFPR 065		/* ldc1 */
 #define OP_LDGPR 067		/* ld */
 
-#if defined(MIPS_EABI) && (MIPS_EABI != 0)
-/* Define sizes for 64-bit data types, allow specific targets to override
-   these values.  Doing so may violate the strict EABI, but it's necessary
-   for some MIPS III and MIPS IV machines that want 64bit longs, but 32bit
-   pointers.  */
-#ifndef TARGET_LONG_BIT
-#define TARGET_LONG_BIT      64
-#endif
-#ifndef TARGET_LONG_LONG_BIT
-#define TARGET_LONG_LONG_BIT 64
-#endif
-#ifndef TARGET_PTR_BIT
-#define TARGET_PTR_BIT       64
-#endif
-#endif /* MIPS_EABI */
-
 /* Get the basic MIPS definitions.  */
 #include "tm-mips.h"

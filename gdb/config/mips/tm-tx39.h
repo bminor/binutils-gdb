@@ -17,9 +17,6 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#define GDB_MULTI_ARCH 1
-#define MIPS_EABI 1
-
 #include "mips/tm-bigmips.h"
 
 #undef  MIPS_REGISTER_NAMES

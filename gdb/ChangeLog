@@ -1,12 +1,33 @@
+Thu Jun  8 15:26:44 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* config/mips/tm-mips.h (GDB_MULTI_ARCH): Define as 1.
+	(CALL_DUMMY, TARGET_BYTE_ORDER_SELECTABLE_P,
+ 	COERCE_FLOAT_TO_DOUBLE): Delete.
+	* config/mips/tm-vr5000el.h, config/mips/tm-vr5000.h,
+ 	config/mips/tm-vr4xxxel.h, config/mips/tm-vr4xxx.h,
+ 	config/mips/tm-vr4100.h, config/mips/tm-tx39l.h
+ 	config/mips/tm-tx39.h, config/mips/tm-irix5.h: Delete
+ 	GDB_MULTI_ARCH.
+
+	* config/mips/tm-mips64.h (TARGET_LONG_BIT, TARGET_LONG_LONG_BIT,
+ 	TARGET_PTR_BIT): Delete definitions.
+	* config/mips/tm-vr5000el.h, config/mips/tm-vr5000.h,
+ 	config/mips/tm-tx39l.h, config/mips/tm-vr4100.h,
+ 	config/mips/tm-tx39.h: Delete definition of MIPS_EABI.
+	* mips-tdep.c (mips_gdbarch_init): Use the ISA to determine the
+ 	ABI.  If all else fails, assume O32.
+
+	* TODO, NEWS: Update.  Mention MIPS is multi-arch.
+
 Thu Jun  8 14:23:12 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* config/mips/tm-vr4xxxel.h, config/mips/tm-vr4xxx.h,
  	config/mips/tm-vr4100.h, config/mips/tm-tx39l.h,
  	config/mips/tm-tx39.h: Delete definition of
- 	MIPS_DEFAULT_FPU. Enable multi-arch.
+ 	MIPS_DEFAULT_FPU_TYPE. Enable multi-arch.
 	* mips-tdep.c: (mips_gdbarch_init): The bfd_mach_mips3900 has no
- 	FPU.
-	
+ 	FPU.  bfd_mach_mips4650 FPU is single precision.
+
 	* config/mips/tm-mips.h (MIPS_FPU_SINGLE_REGSIZE): 
 	(MIPS_FPU_DOUBLE_REGSIZE): Move from here.
 	* mips-tdep.c: To here.  Change to an enum.

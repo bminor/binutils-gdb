@@ -330,6 +330,10 @@ See also ``Fix implementation of  ``target xxx''.'' below.
 
 --
 
+IRIX 3.x support is probably broken.
+
+--
+
 			New Features and Fixes
 			======================
 
@@ -968,6 +972,12 @@ Select the initial multi-arch ISA / ABI based on --target or similar.
 At present the default is based on what ever is first in the BFD
 archures table.  It should be determined based on the ``--target=...''
 name.
+
+--
+
+Make MIPS pure multi-arch.
+
+It is only at the multi-arch enabled stage.
 
 --
 

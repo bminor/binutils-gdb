@@ -1,5 +1,8 @@
 /* Target-dependent code for the MIPS architecture, for GDB, the GNU Debugger.
-   Copyright 1988-1999, Free Software Foundation, Inc.
+
+   Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
+   1997, 1998, 1999, 2000, Free Software Foundation, Inc.
+
    Contributed by Alessandro Forin(af@cs.cmu.edu) at CMU
    and by Per Bothner(bothner@cs.wisc.edu) at U.Wisconsin.
 
@@ -3868,10 +3871,28 @@ mips_gdbarch_init (info, arches)
       mips_abi = MIPS_ABI_UNKNOWN;
       break;
     }
+  /* Try the architecture for any hint of the corect ABI */
+  if (mips_abi == MIPS_ABI_UNKNOWN
+      && info.bfd_arch_info != NULL
+      && info.bfd_arch_info->arch == bfd_arch_mips)
+    {
+      switch (info.bfd_arch_info->mach)
+	{
+	case bfd_mach_mips3900:
+	  mips_abi = MIPS_ABI_EABI32;
+	  break;
+	case bfd_mach_mips4100:
+	case bfd_mach_mips5000:
+	  mips_abi = MIPS_ABI_EABI64;
+	  break;
+	}
+    }
 #ifdef MIPS_DEFAULT_ABI
   if (mips_abi == MIPS_ABI_UNKNOWN)
     mips_abi = MIPS_DEFAULT_ABI;
 #endif
+  if (mips_abi == MIPS_ABI_UNKNOWN)
+    mips_abi = MIPS_ABI_O32;
 
   /* try to find a pre-existing architecture */
   for (arches = gdbarch_list_lookup_by_info (arches, &info);
@@ -4042,6 +4063,9 @@ mips_gdbarch_init (info, arches)
       case bfd_mach_mips4100:
       case bfd_mach_mips4111:
 	tdep->mips_fpu_type = MIPS_FPU_NONE;
+	break;
+      case bfd_mach_mips4650:
+	tdep->mips_fpu_type = MIPS_FPU_SINGLE;
 	break;
       default:
 	tdep->mips_fpu_type = MIPS_FPU_DOUBLE;

@@ -24,6 +24,8 @@
 #ifndef TM_MIPS_H
 #define TM_MIPS_H 1
 
+#define GDB_MULTI_ARCH 1
+
 struct frame_info;
 struct symbol;
 struct type;
@@ -407,10 +409,6 @@ extern void mips_push_dummy_frame (void);
 #define POP_FRAME		mips_pop_frame()
 extern void mips_pop_frame (void);
 
-#if !GDB_MULTI_ARCH
-#define CALL_DUMMY { 0 }
-#endif
-
 #define CALL_DUMMY_START_OFFSET (0)
 
 #define CALL_DUMMY_BREAKPOINT_OFFSET (0)
@@ -486,22 +484,6 @@ extern struct frame_info *setup_arbitrary_frame (int, CORE_ADDR *);
 /* Convert a ecoff register number to a gdb REGNUM */
 
 #define ECOFF_REG_TO_REGNUM(num) ((num) < 32 ? (num) : (num)+FP0_REGNUM-32)
-
-#if !GDB_MULTI_ARCH
-/* If the current gcc for for this target does not produce correct debugging
-   information for float parameters, both prototyped and unprototyped, then
-   define this macro.  This forces gdb to  always assume that floats are
-   passed as doubles and then converted in the callee.
-
-   For the mips chip, it appears that the debug info marks the parameters as
-   floats regardless of whether the function is prototyped, but the actual
-   values are passed as doubles for the non-prototyped case and floats for
-   the prototyped case.  Thus we choose to make the non-prototyped case work
-   for C and break the prototyped case, since the non-prototyped case is
-   probably much more common.  (FIXME). */
-
-#define COERCE_FLOAT_TO_DOUBLE(formal, actual) (current_language -> la_language == language_c)
-#endif
 
 /* Select the default mips disassembler */
 
@@ -579,9 +561,3 @@ extern void mips_set_processor_type_command (char *, int);
 /* MIPS sign extends addresses */
 #define POINTER_TO_ADDRESS(TYPE,BUF) (signed_pointer_to_address (TYPE, BUF))
 #define ADDRESS_TO_POINTER(TYPE,BUF,ADDR) (address_to_signed_pointer (TYPE, BUF, ADDR))
-
-
-/* MIPS is always bi-endian */
-#if !GDB_MULTI_ARCH
-#define TARGET_BYTE_ORDER_SELECTABLE_P 1
-#endif

@@ -17,7 +17,4 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#define MIPS_EABI 1
-#define TARGET_PTR_BIT 64
-
 #include "mips/tm-bigmips64.h"
