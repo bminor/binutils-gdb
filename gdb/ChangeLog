@@ -1,3 +1,8 @@
+2003-07-22  Andrew Cagney  <cagney@redhat.com>
+
+	* configure.in (build_warnings): Add -Wformat-nonliteral.
+	* configure: Re-generate.
+
 2003-07-22  Elena Zannoni  <ezannoni@redhat.com>
 	
 	dwarf2loc.c (locexpr_describe_location): Fix typo.

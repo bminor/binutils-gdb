@@ -5009,8 +5009,9 @@ that use register windows.
 @item -Wtrigraphs
 
 @item -Wformat
+@itemx -Wformat-nonliteral
 Since @value{GDBN} uses the @code{format printf} attribute on all
-@code{printf} like functions this checks not just @code{printf} calls
+@code{printf} like functions these check not just @code{printf} calls
 but also calls to functions such as @code{fprintf_unfiltered}.
 
 @item -Wparentheses

@@ -1,3 +1,8 @@
+2003-07-22  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Coding): Add -Wformat-nonliteral to -Werror
+	list.
+
 2003-06-28  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.texinfo (Logging output): New chapter.
