@@ -1,6 +1,6 @@
 2002-07-20  Alan Modra  <amodra@bigpond.net.au>
 
-	* budemang.c: Include string.h.
+	* budemang.c: Include config.h and string.h/strings.h.
 
 2002-07-18 Denis Chertykov  <denisc@overta.ru>
 	   Frank Ch. Eigler  <fche@redhat.com>
