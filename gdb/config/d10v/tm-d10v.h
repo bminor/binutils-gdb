@@ -60,7 +60,7 @@ extern CORE_ADDR d10v_skip_prologue ();
 
 /* If your kernel resets the pc after the trap happens you may need to
    define this before including this file.  */
-#define DECR_PC_AFTER_BREAK 0
+#define DECR_PC_AFTER_BREAK 4
 
 #define REGISTER_NAMES \
 { "r0", "r1", "r2", "r3", "r4", "r5",  "r6", "r7", \

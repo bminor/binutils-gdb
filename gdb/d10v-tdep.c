@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "gdbtypes.h"
 #include "gdbcmd.h"
 #include "gdbcore.h"
+#include "gdb_string.h"
 #include "value.h"
 #include "inferior.h"
 #include "dis-asm.h"  
@@ -35,27 +36,26 @@ void
 d10v_pop_frame ()
 {
   struct frame_info *frame = get_current_frame ();
-  CORE_ADDR fp, r13;
+  int fp, r13;
   int regnum;
   struct frame_saved_regs fsr;
   char raw_buffer[8];
 
-  fp = FRAME_FP (frame);
-  /* printf("pop_frame 0x%x\n",fp); */
+  fp = (int)FRAME_FP (frame);
 
   /* fill out fsr with the address of where each */
   /* register was stored in the frame */
   get_frame_saved_regs (frame, &fsr);
   
   /* r13 contains the old PC.  save it. */
-  r13 = read_register (13);
+  r13 = (int)read_register (13);
 
   /* now update the current registers with the old values */
   for (regnum = A0_REGNUM; regnum < A0_REGNUM+2 ; regnum++)
     {
       if (fsr.regs[regnum])
 	{
-	  read_memory (fsr.regs[regnum] & 0xFFFF, raw_buffer, 8);
+	  read_memory (fsr.regs[regnum], raw_buffer, 8);
 	  write_register_bytes (REGISTER_BYTE (regnum), raw_buffer, 8);
 	}
     }
@@ -63,17 +63,16 @@ d10v_pop_frame ()
     {
       if (fsr.regs[regnum])
 	{
-	  write_register (regnum, read_memory_integer (fsr.regs[regnum] & 0xFFFF, 2));
+	  write_register (regnum, read_memory_unsigned_integer (fsr.regs[regnum], 2));
 	}
     }
   if (fsr.regs[PSW_REGNUM])
     {
-      write_register (PSW_REGNUM, read_memory_integer (fsr.regs[PSW_REGNUM] & 0xFFFF, 2));
+      write_register (PSW_REGNUM, read_memory_unsigned_integer (fsr.regs[PSW_REGNUM], 2));
     }
 
   /* PC is set to r13 */
-  write_register (PC_REGNUM, r13);
-  /* printf("setting stack to %x\n",fp - frame->size); */
+  write_register (PC_REGNUM, (LONGEST)r13);
   write_register (SP_REGNUM, fp - frame->size);
   flush_cached_frames ();
 }
@@ -110,7 +109,6 @@ check_prologue (op)
  if ((op & 0x7E3F) == 0x3A1E)
    return 1;
 
-
   return 0;
 }
 
@@ -126,7 +124,7 @@ d10v_skip_prologue (pc)
 
   while (1)
     {
-      op = read_memory_integer (pc, 4);
+      op = (unsigned long)read_memory_integer (pc, 4);
       if ((op & 0xC0000000) == 0xC0000000)
 	{
 	  /* long instruction */
@@ -151,20 +149,15 @@ d10v_skip_prologue (pc)
 /* Given a GDB frame, determine the address of the calling function's frame.
    This will be used to create a new GDB frame struct, and then
    INIT_EXTRA_FRAME_INFO and INIT_FRAME_PC will be called for the new frame.
-
-   For us, the frame address is its stack pointer value, so we look up
-   the function prologue to determine the caller's sp value, and return it.  */
+*/
 
 CORE_ADDR
 d10v_frame_chain (frame)
      struct frame_info *frame;
 {
   struct frame_saved_regs fsr;
-  /* printf("frame_chain %x\n",frame->frame); */
   d10v_frame_find_saved_regs (frame, &fsr);
-  /* printf("pc=%x\n",fsr.regs[PC_REGNUM]);
-  printf("fp=%x (%x)\n",fsr.regs[FP_REGNUM],read_memory_integer(fsr.regs[FP_REGNUM],2) & 0xffff); */
-  return read_memory_integer(fsr.regs[FP_REGNUM],2) & 0xffff;
+  return read_memory_unsigned_integer(fsr.regs[FP_REGNUM],2);
 }  
 
 static int next_addr;
@@ -257,7 +250,7 @@ d10v_frame_find_saved_regs (fi, fsr)
 
   while (1)
     {
-      op = read_memory_integer (pc, 4);
+      op = (unsigned long)read_memory_integer (pc, 4);
       if ((op & 0xC0000000) == 0xC0000000)
 	{
 	  /* long instruction */
@@ -297,14 +290,17 @@ d10v_frame_find_saved_regs (fi, fsr)
     }
   
   fi->size = -next_addr;
-  fi->return_pc = read_register (13);
 
   for (i=0; i<NUM_REGS; i++)
     if (fsr->regs[i])
       {
 	fsr->regs[i] = fp - (next_addr - fsr->regs[i]); 
-	/* printf("register %d = *(%x) = %x\n",i,fsr->regs[i],read_memory_integer((fsr->regs[i]) & 0xffff, 2)); */
       }
+
+  if (fsr->regs[13])
+    fi->return_pc = (read_memory_unsigned_integer(fsr->regs[13],2)-1) << 2;
+  else
+    fi->return_pc = (read_register(13) - 1)  << 2;
 }
 
 void
@@ -313,11 +309,11 @@ d10v_init_extra_frame_info (fromleaf, fi)
      struct frame_info *fi;
 {
   struct frame_saved_regs dummy;
-  /* printf("extra init %x  next=%x  pc=%x\n",fi->frame,fi->next,fi->pc); */
 
-  /*   fi->pc = fi->next->return_pc; */
+  if (fi->next && (fi->pc == 0))
+    fi->pc = fi->next->return_pc; 
+
   d10v_frame_find_saved_regs (fi, &dummy); 
-  /* printf("           %x  next=%x  pc=%x\n",fi->frame,fi->next,fi->pc); */
 }
 
 static void
@@ -353,12 +349,11 @@ show_regs (args, from_tty)
   read_register_gen (A0_REGNUM, (char *)&num1);
   read_register_gen (A0_REGNUM+1, (char *)&num2);
   printf_filtered ("A0-A1  %010llx %010llx\n",num1, num2);
-}              
+}
 
 void
 _initialize_d10v_tdep ()
 {
-  struct cmd_list_element *c;
   tm_print_insn = print_insn_d10v;
   add_com ("regs", class_vars, show_regs, "Print all registers");
 } 

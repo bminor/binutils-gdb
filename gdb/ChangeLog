@@ -1,4 +1,8 @@
 start-sanitize-d10v
+Thu Sep 19 16:19:01 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* d10v-tdep.c:  Stack chain should work now. 
+
 Tue Sep 17 18:46:57 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* d10v-tdep.c, config/d10v/tm-d10v.h: Snapshot. 
