@@ -1,3 +1,58 @@
+Tue May  2 16:36:07 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* configure.in (hppa*-*-lites*): Handle like hppa*-*-*elf*.
+
+Mon Apr 24 19:21:02 1995  Michael Meissner  <meissner@cygnus.com>
+
+	* ldwrite.c (ldwrite): Before doing anything, reset the error
+	code.  If bfd_final_link returns an error, but the error code is
+	unset, don't issue an extra message.  Assume a correct error
+	message was already set.
+
+Fri Apr 14 16:31:24 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* Makefile.in (ALL_EMULATIONS): Added em68kelf.o.
+	(em68kelf.o): New target.
+	* config/m68k-elf.mt, emulparams/m68kelf.sh: New files.
+	* configure.in: Use them for m68*-*-elf.
+
+Tue Apr 11 12:02:03 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	Merge in support for Mac MPW as a host.
+	(Old change descriptions retained for informational value.)
+
+	* mpw-config.in (i386-unknown-aout): Change to i386-unknown-go32.
+	(i386-unknown-coff): Remove.
+	(sh-hitachi-hms): New target.
+	(emulation_ofiles): Set correctly for each target.
+	(version, TDEFINES): Add to makefile fragment.
+	* mpw-make.in (BISON): Use byacc instead of bison.
+	(em_*.c): Replace with e*.c everywhere.
+	(ldgram.h): Separate action from ldgram.c generation.
+	(LD_PROG): Depend on Version.r.
+	(Version.r): generate from version info.
+	* mpw-emipsidt.c: New file, modified for MPW from emipsidt.c.
+
+	* mpw-config.in (m68k-apple-macos, ppc-apple-macos,
+        i386-unknown-aout, i386-unknown-coff): New targets.
+	(m68k-aout, m68k-coff): Remove targets.
+	(mk.tmp): Add definition of EMUL.
+
+	* mpw-config.in (emulname): Set based on target.
+	(ldemul-list.h): Construct.
+	* mpw-make.in (install-only): New target.
+	(install): Depend on install-only.
+
+	* mpw-make.in (bindir): Fix pathname.
+	(install): Move here from mpw-build.in.
+
+	* mpw-config.in: New file, MPW configuration fragment.
+	* mpw-make.in: New file, MPW makefile fragment.
+	(This file is semi-automatically generated from Makefile.in.)
+	* ldfile.c (slash): If MPW, set to `:'.
+	* ldlex.l (TRUE_FALSE_ALREADY_DEFINED): If MPW, set this to
+	prevent redefinition errors.
+
 start-sanitize-arc
 Thu Apr  6 20:38:36 1995  Doug Evans  <dje@chestnut.cygnus.com>
 

@@ -74,6 +74,7 @@ case "${targ}" in
   i[345]86-*-bsd386)	ld_target=i386-bsd ;;
   i[345]86-*-bsdi*)	ld_target=i386-bsd ;;
   i[345]86-*-aout)	ld_target=i386-aout ;;
+  i[345]86-*-linuxaout*) ld_target=i386-laout ;;
   i[345]86-*-linux*)	ld_target=i386-linux ;;
   i[345]86-*-sysv4*)	ld_target=i386-elf ;;
   i[345]86-*-unixware)	ld_target=i386-elf ;;
@@ -82,6 +83,7 @@ case "${targ}" in
   i[345]86-*-elf*)	ld_target=i386-elf ;;
   i[345]86-*-sysv*)	ld_target=i386-coff ;;
   i[345]86-*-mach*)	ld_target=i386-mach ;;
+  i[345]86-*-gnuelf*)	ld_target=i386-gelf ;;
   i[345]86-*-gnu*)	ld_target=i386-gnu ;;
   m8*-*-*)		ld_target=m88k-bcs ;;
   a29k-*-udi)		ld_target=sa29200 ;;
@@ -99,6 +101,7 @@ case "${targ}" in
   m68k-hp-bsd*)		ld_target=hp300bsd ;;
   m68*-*-aout)		ld_target=m68k ;;
   m68*-*-coff)		ld_target=m68k-coff ;;
+  m68*-*-elf)		ld_target=m68k-elf ;;
   m68*-*-hpux*)		ld_target=hp300hpux ;;
   m68*-*-lynxos*)	ld_target=m68k-lynx ;;
   m68*-*-netbsd*)	ld_target=m68k-nbsd ;;
@@ -106,6 +109,7 @@ case "${targ}" in
     echo '***' "Unknown m68k target vendor for ld:" ${target_vendor} 1>&2
 			exit 1 ;;
   hppa*-*-*elf*)	ld_target=hppaelf ;;
+  hppa*-*-lites*)	ld_target=hppaelf ;;
   vax-dec-ultrix* | vax-dec-bsd*) ld_target=vax ;;
   mips*-dec-ultrix*)	ld_target=mips-lit ;;
   mips*-sgi-irix5*)	ld_target=mipsb-elf32 ;;

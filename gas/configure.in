@@ -79,6 +79,7 @@ case ${generic_target} in
   arm-*-riscix*)	obj_format=aout ;;
 
   hppa-*-*elf*)		obj_format=elf emulation=hppa ;;
+  hppa-*-lites*)	obj_format=elf emulation=hppa ;;
   hppa-*-osf*)		obj_format=som emulation=hppa ;;
   hppa-*-hpux*)		obj_format=som emulation=hppa ;;
   hppa-*-bsd*)		obj_format=som emulation=hppa ;;
