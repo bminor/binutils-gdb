@@ -253,9 +253,23 @@ lookup_minimal_symbol_by_pc (pc)
 		 objfile's minimal symbol table.  See if it is the best one
 		 overall. */
 
-	      if ((best_symbol == NULL) ||
-		  (SYMBOL_VALUE_ADDRESS (best_symbol) < 
-		   SYMBOL_VALUE_ADDRESS (&msymbol[hi])))
+	      /* Skip any absolute symbols.  This is apparently what adb
+		 and dbx do, and is needed for the CM-5.  There are two
+		 known possible problems: (1) on ELF, apparently end, edata,
+		 etc. are absolute.  Not sure ignoring them here is a big
+		 deal, but if we want to use them, the fix would go in
+		 elfread.c.  (2) I think shared library entry points on the
+		 NeXT are absolute.  If we want special handling for this
+		 it probably should be triggered by a special
+		 mst_abs_or_lib or some such.  */
+	      while (hi >= 0
+		     && msymbol[hi].type == mst_abs)
+		--hi;
+
+	      if (hi >= 0
+		  && ((best_symbol == NULL) ||
+		      (SYMBOL_VALUE_ADDRESS (best_symbol) < 
+		       SYMBOL_VALUE_ADDRESS (&msymbol[hi]))))
 		{
 		  best_symbol = &msymbol[hi];
 		}

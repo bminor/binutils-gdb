@@ -1,5 +1,7 @@
 Mon Oct  4 11:02:11 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* minsyms.c (lookup_minimal_symbol_by_pc): Don't use mst_abs symbols.
+
 	* dbxread.c (process_one_symbol): Make n_opt_found static.
 
 	* Rename i386lynx-tdep.c to i386ly-tdep.c for 14 character file names.
