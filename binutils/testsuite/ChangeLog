@@ -1,3 +1,40 @@
+Mon Mar 20 11:31:05 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* lib/utils-lib.exp (default_binutils_run): Quote any dollar signs
+	in progargs before passing it to exec.
+
+Fri Mar 17 16:39:31 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* config/hppa.sed: Sed script to transform bintest.s into proper
+	PA assembly code.
+	* binutils-all/nm.exp: Enable these tests on the PA.
+	* binutils-all/objcopy.exp: Enable these tests on the PA.  Expect
+	simple copy to fail.
+	* binutils-all/objdump.exp: Enable these tests on the PA.  Handle
+	"CODE" as a section name.
+	* binutils-all/size.exp: Enable these tests on the PA.
+	* lib/utils-lib.exp (default_binutils_assemble): For "hppa*-*-*",
+	run the assembly through a sed script before passing it to the
+	assembler.
+
+Wed Mar 15 16:47:13 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* binutils-all/objdump.exp: Force section sizes to be interpreted
+	in hex.  Change objdump -h failure mode to always use the same
+	string.
+
+Thu Jan  5 13:01:43 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* binutils-all/nm.exp: Just check for irix4*, rather than
+	irix\[0-4\]*, to avoid DejaGnu bug.
+
+Thu Dec 15 19:35:31 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* binutils-all/objcopy.exp: Expect simple-objcopy test to fail
+	for various other targets for which gas doesn't use bfd: sh-hms,
+	m68k-hpux, m68k-sunos, m68k-coff, i386-linux, a29k-udi, a29k-coff,
+	i960-vxworks5.1, i960-coff, h8300-hms, h8300-coff.
+
 Wed Dec 14 15:54:46 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* binutils-all/size.exp: Skip tests requiring bintest.o on hppa,
