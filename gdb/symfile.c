@@ -872,7 +872,7 @@ symbol_file_add_with_addrs_or_offsets (char *name, int from_tty,
        */
       if (from_tty || info_verbose)
 	{
-	  printf_filtered ("Mapped symbols for %s...", name);
+	  printf_unfiltered ("Mapped symbols for %s...", name);
 	  wrap_here ("");
 	  gdb_flush (gdb_stdout);
 	}
@@ -890,7 +890,7 @@ symbol_file_add_with_addrs_or_offsets (char *name, int from_tty,
 	    pre_add_symbol_hook (name);
 	  else
 	    {
-	      printf_filtered ("Reading symbols from %s...", name);
+	      printf_unfiltered ("Reading symbols from %s...", name);
 	      wrap_here ("");
 	      gdb_flush (gdb_stdout);
 	    }
@@ -908,7 +908,7 @@ symbol_file_add_with_addrs_or_offsets (char *name, int from_tty,
     {
       if (from_tty || info_verbose)
 	{
-	  printf_filtered ("expanding to full symbols...");
+	  printf_unfiltered ("expanding to full symbols...");
 	  wrap_here ("");
 	  gdb_flush (gdb_stdout);
 	}
@@ -947,7 +947,7 @@ symbol_file_add_with_addrs_or_offsets (char *name, int from_tty,
   if (!have_partial_symbols () && !have_full_symbols ())
     {
       wrap_here ("");
-      printf_filtered ("(no debugging symbols found)...");
+      printf_unfiltered ("(no debugging symbols found)...");
       wrap_here ("");
     }
 
@@ -957,7 +957,7 @@ symbol_file_add_with_addrs_or_offsets (char *name, int from_tty,
 	post_add_symbol_hook ();
       else
 	{
-	  printf_filtered ("done.\n");
+	  printf_unfiltered ("done.\n");
 	}
     }
 
@@ -1797,7 +1797,7 @@ add_symbol_file_command (char *args, int from_tty)
      statements because local_hex_string returns a local static
      string. */
  
-  printf_filtered ("add symbol table from file \"%s\" at\n", filename);
+  printf_unfiltered ("add symbol table from file \"%s\" at\n", filename);
   section_addrs = alloc_section_addr_info (section_index);
   make_cleanup (xfree, section_addrs);
   for (i = 0; i < section_index; i++)
@@ -1812,7 +1812,7 @@ add_symbol_file_command (char *args, int from_tty)
          entered on the command line. */
       section_addrs->other[sec_num].name = sec;
       section_addrs->other[sec_num].addr = addr;
-      printf_filtered ("\t%s_addr = %s\n",
+      printf_unfiltered ("\t%s_addr = %s\n",
 		       sec, 
 		       local_hex_string ((unsigned long)addr));
       sec_num++;
@@ -1877,7 +1877,7 @@ reread_symbols (void)
 	  if (res != 0)
 	    {
 	      /* FIXME, should use print_sys_errmsg but it's not filtered. */
-	      printf_filtered ("`%s' has disappeared; keeping its symbols.\n",
+	      printf_unfiltered ("`%s' has disappeared; keeping its symbols.\n",
 			       objfile->name);
 	      continue;
 	    }
@@ -1889,7 +1889,7 @@ reread_symbols (void)
 	      int num_offsets;
 	      char *obfd_filename;
 
-	      printf_filtered ("`%s' has changed; re-reading symbols.\n",
+	      printf_unfiltered ("`%s' has changed; re-reading symbols.\n",
 			       objfile->name);
 
 	      /* There are various functions like symbol_file_add,
@@ -2022,7 +2022,7 @@ reread_symbols (void)
 	      if (!have_partial_symbols () && !have_full_symbols ())
 		{
 		  wrap_here ("");
-		  printf_filtered ("(no debugging symbols found)\n");
+		  printf_unfiltered ("(no debugging symbols found)\n");
 		  wrap_here ("");
 		}
 	      objfile->flags |= OBJF_SYMS;
@@ -3190,7 +3190,7 @@ the 'overlay manual' command.");
                                  sec2->the_bfd_section))
 	{
 	  if (info_verbose)
-	    printf_filtered ("Note: section %s unmapped by overlap\n",
+	    printf_unfiltered ("Note: section %s unmapped by overlap\n",
 			     bfd_section_name (objfile->obfd,
 					       sec2->the_bfd_section));
 	  sec2->ovly_mapped = 0;	/* sec2 overlaps sec: unmap sec2 */
@@ -3240,7 +3240,7 @@ overlay_auto_command (char *args, int from_tty)
   overlay_debugging = ovly_auto;
   enable_overlay_breakpoints ();
   if (info_verbose)
-    printf_filtered ("Automatic overlay debugging enabled.");
+    printf_unfiltered ("Automatic overlay debugging enabled.");
 }
 
 /* Function: overlay_manual_command
@@ -3253,7 +3253,7 @@ overlay_manual_command (char *args, int from_tty)
   overlay_debugging = ovly_on;
   disable_overlay_breakpoints ();
   if (info_verbose)
-    printf_filtered ("Overlay debugging enabled.");
+    printf_unfiltered ("Overlay debugging enabled.");
 }
 
 /* Function: overlay_off_command
@@ -3266,7 +3266,7 @@ overlay_off_command (char *args, int from_tty)
   overlay_debugging = ovly_off;
   disable_overlay_breakpoints ();
   if (info_verbose)
-    printf_filtered ("Overlay debugging disabled.");
+    printf_unfiltered ("Overlay debugging disabled.");
 }
 
 static void

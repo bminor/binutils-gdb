@@ -1,3 +1,13 @@
+2003-10-28  Jeff Johnston  <jjohnstn@redhat.com>
+ 
+	* symfile.c (symbol_file_add_with_addrs_or_offsets): Switch to use
+	printf_unfiltered instead of printf_filtered for output messages.
+	(add_symbol_file_command): Ditto.
+	(reread_symbols): Ditto.
+	(overlay_auto_command): Ditto.
+	(overlay_manual_command): Ditto.
+	(overlay_off_command): Ditto.
+
 2003-10-27  Mark Kettenis  <kettenis@gnu.org>
 
 	* arch-utils.c (deprecated_select_gdbarch_hack): New function.
