@@ -1,3 +1,13 @@
+Tue Feb  1 19:28:12 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* gasp.c (malloc): Don't declare, since host.h or system header
+	files may declare it differently.
+
+	* config/atof-ieee.c (int_to_gen): Now static.
+
+	* config/ho-i386aix.h: Include sys/types.h and stdlib.h, not
+	ho-sysv.h.  Based loosely on a patch from Minh Tran-Le.
+
 Tue Feb  1 10:50:17 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
 	* gasp.c: Include host.h.
