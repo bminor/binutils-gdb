@@ -421,7 +421,8 @@ DEFUN(bfd_swap_reloc_in,(abfd, reloc_src, reloc_dst),
 #endif
 
 #ifdef SWAP_IN_RELOC_OFFSET
-  reloc_dst->r_offset = SWAP_IN_RELOC_OFFSET(abfd, reloc_src->r_offset);
+  reloc_dst->r_offset = SWAP_IN_RELOC_OFFSET(abfd,
+					     (bfd_byte *) reloc_src->r_offset);
 #endif
 }
 
@@ -3168,42 +3169,24 @@ DEFUN(coff_slurp_reloc_table,(abfd, asect, symbols),
       bfd_swap_reloc_in(abfd, src, &dst);
 
 
+#ifdef RELOC_PROCESSING
+      RELOC_PROCESSING(cache_ptr, &dst, symbols, abfd, asect);
+#else
+
+      cache_ptr->address = dst.r_vaddr;
+
       if (dst.r_symndx != -1) 
       {
-	cache_ptr->sym_ptr_ptr = symbols + obj_convert(abfd)[dst.r_symndx];
+	  cache_ptr->sym_ptr_ptr = symbols + obj_convert(abfd)[dst.r_symndx];
+	  ptr = *(cache_ptr->sym_ptr_ptr);
       }
       else 
       {
-	cache_ptr->sym_ptr_ptr = 0;
-	ptr = 0;
-	goto puke_logic;
+	  cache_ptr->sym_ptr_ptr = 0;
+	  ptr = 0;
 	      
       }
-	    
-#ifdef A29K
-      /* AMD has two relocation entries for the 'consth' instruction.
-       * The first is R_IHIHALF (part 1), the second is R_IHCONST
-       * (part 2).  The second entry's r_symndx does not contain
-       * an index to a symbol but rather a value (apparently).
-       * Also, see the ifdef below for saving the r_symndx value in addend.
-       */
-      if (dst.r_type == R_IHCONST)  {
-	  ptr = NULL;
-	} 
-      else
-#endif
-	     ptr = *(cache_ptr->sym_ptr_ptr);
-	    cache_ptr->address = dst.r_vaddr;
-	    /*
-	      The symbols definitions that we have read in have been
-	      relocated as if their sections started at 0. But the offsets
-	      refering to the symbols in the raw data have not been
-	      modified, so we have to have a negative addend to compensate.
-	      
-	      Note that symbols which used to be common must be left alone */
 
-    puke_logic:
-      cache_ptr->address = dst.r_vaddr;
       /*
 	The symbols definitions that we have read in have been
 	relocated as if their sections started at 0. But the offsets
@@ -3220,7 +3203,9 @@ DEFUN(coff_slurp_reloc_table,(abfd, asect, symbols),
 
       /* Fill in the cache_ptr->howto field from dst.r_type */
       RTYPE2HOWTO(cache_ptr, dst);
-    }
+#endif
+
+  }
 
   asect->relocation = reloc_cache;
   return true;
