@@ -1,3 +1,8 @@
+2001-12-18  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* configure.host: Correctly match all NetBSD/mips
+	hosts.
+
 2001-12-18  matthew green  <mrg@eterna.com.au>
 
 	* config.bfd (m68*-*-netbsdelf*): New target.
