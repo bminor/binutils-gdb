@@ -1,3 +1,22 @@
+Tue Apr 26 15:04:26 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* elf32-hppa.c (hppa_elf_reloc): Adjust the addend of relocations
+	against section symbols to avoid losing during ld -r.
+
+Tue Apr 26 12:16:41 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* elfcode.h (shstrtab_length_fixed): Remove useless static
+	variable.
+	(struct elf_sect_data): Remove unused structure.
+	(elf_object_p): Free memory if error occurs.  Check return value
+	of bfd_default_set_arch_mach.  If elf_get_str_section fails,
+	preserve error code rather than setting wrong_format.
+	(null_shdr): Remove static variable.
+	(assign_section_numbers): Remove shstrtab_length_fixed assignment.
+	Allocate first section header on BFD obstack rather than using
+	null_shdr.
+	(bfd_prpsinfo): Remove unused local variable newsect.
+
 Mon Apr 25 15:31:04 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* elfcode.h (write_relocs): Undo patch of Apr 10; breaks Solaris.
