@@ -1,3 +1,7 @@
+Fri Jul  9 14:11:17 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.t17/interrupt.exp: Don't send \n after ^C.
+
 Fri Jul  9 09:47:02 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* gdb.t00/help.exp:  Increase expect input buffer size.
