@@ -2790,7 +2790,6 @@ DEFUN (elf_slurp_reloca_table, (abfd, asect, symbols),
   native_relocs = (Elf_External_Rela *)
     bfd_alloc (abfd, asect->reloc_count * sizeof (Elf_External_Rela));
   if (!native_relocs)
-  if (!reloc_cache)
     {
       bfd_set_error (bfd_error_no_memory);
       return false;

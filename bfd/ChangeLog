@@ -1,5 +1,10 @@
 Fri Feb 25 16:35:57 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* format.c (bfd_check_format_matches): Initialize matching_vector
+	to keep gcc -Wall quiet.
+
+	* elfcode.h (elf_slurp_reloca_table): Fix typo.
+
 	* som.c (som_get_symtab_upper_bound): Use "sizeof (asymbol *)"
 	not "sizeof (som_symbol_type *)".
 
