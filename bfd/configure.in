@@ -111,6 +111,12 @@ sony)	bfd_target=news ;;
 intel)	bfd_target=${target_cpu}-coff ;;	
 cbm)	bfd_target=${target_cpu}-elf ;;
 
+ibm)	my_host=rs6000
+	case "${target_cpu}" in
+	rs6000)	bfd_target=rs6000 ;;
+	esac
+	;;
+
 amd)
 	case "${target_os}"  in
 		ebmon) bfd_target=a29k-coff ;;

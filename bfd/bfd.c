@@ -162,6 +162,7 @@ $};
 #include "sysdep.h"
 #include "libbfd.h"
 
+#undef strerror
 extern char *strerror();
 
 
@@ -196,6 +197,7 @@ char *bfd_errmsgs[] = { "No error",
                         "File format is ambiguous",
                         "Section has no contents",
                         "Nonrepresentable section on output",
+			"Symbol needs debug section which does not exist",
                         "#<Invalid error code>"
                        };
 
@@ -417,6 +419,27 @@ bfd_get_mtime (abfd)
 
 #define bfd_set_arch_mach(abfd, arch, mach)\
         BFD_SEND ( abfd, _bfd_set_arch_mach, (abfd, arch, mach))
+
+#define bfd_coff_swap_reloc_out(abfd, i, o) \
+        BFD_SEND (abfd, _bfd_coff_swap_reloc_out, (abfd, i, o))
+
+#define bfd_coff_swap_lineno_out(abfd, i, o) \
+        BFD_SEND (abfd, _bfd_coff_swap_lineno_out, (abfd, i, o))
+
+#define bfd_coff_swap_aux_out(abfd, i, t,c,o) \
+        BFD_SEND (abfd, _bfd_coff_swap_aux_out, (abfd, i,t,c, o))
+
+#define bfd_coff_swap_sym_out(abfd, i,o) \
+        BFD_SEND (abfd, _bfd_coff_swap_sym_out, (abfd, i, o))
+
+#define bfd_coff_swap_scnhdr_out(abfd, i,o) \
+        BFD_SEND (abfd, _bfd_coff_swap_scnhdr_out, (abfd, i, o))
+
+#define bfd_coff_swap_filehdr_out(abfd, i,o) \
+        BFD_SEND (abfd, _bfd_coff_swap_filehdr_out, (abfd, i, o))
+
+#define bfd_coff_swap_aouthdr_out(abfd, i,o) \
+        BFD_SEND (abfd, _bfd_coff_swap_aouthdr_out, (abfd, i, o))
 
 *-
 

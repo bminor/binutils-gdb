@@ -700,7 +700,10 @@ bfd *abfd)
 	asection *section ;
 	arelent_chain *reloc = (arelent_chain *)bfd_alloc(abfd, sizeof(arelent_chain));
 	strcpy(copy, cache_ptr->symbol.name);
-	section = bfd_make_section(abfd,copy);
+	section = bfd_get_section_by_name (abfd, copy);
+	if (!section)
+	  section = bfd_make_section(abfd,copy);
+
 	switch ( (cache_ptr->type  & N_TYPE) ) {
 	case N_SETA:
 	  section->flags = SEC_CONSTRUCTOR;
@@ -1700,9 +1703,9 @@ DEFUN(NAME(aout,find_nearest_line),(abfd,
 }
 
 int 
-DEFUN(NAME(aout,sizeof_headers),(ignore_abfd, execable),
-      bfd *ignore_abfd AND
+DEFUN(NAME(aout,sizeof_headers),(abfd, execable),
+      bfd *abfd AND
       boolean execable)
 {
-  return EXEC_BYTES_SIZE;
+  return adata(abfd)->exec_bytes_size;
 }

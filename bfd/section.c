@@ -34,20 +34,19 @@ the list.
 * section prototypes::
 @end menu
 
-@node Section Input, Section Output,,Sections
-@comment  node-name,  next,  previous,  up
+@node Section Input, Section Output, Sections, Sections
 @subsection Section Input
 When a BFD is opened for reading, the section structures are created
-and attatched to the BFD.
+and attached to the BFD.
 
 Each section has a name which describes the section in the outside
 world - for example, @code{a.out} would contain at least three
 sections, called @code{.text}, @code{.data} and @code{.bss}. 
 
 Sometimes a BFD will contain more than the 'natural' number of
-sections. A back end may attatch other sections containing constructor
+sections. A back end may attach other sections containing constructor
 data, or an application may add a section (using bfd_make_section) to
-the sections attatched to an already open BFD. For example, the linker
+the sections attached to an already open BFD. For example, the linker
 creates a supernumary section @code{COMMON} for each input file's BFD
 to hold information about common storage.
 
@@ -60,17 +59,17 @@ file doesn't contain raw data in sections, but data and relocation
 expressions intermixed, so the data area has to be parsed to get out
 the data and relocations.
 
-@node Section Output,typedef asection,Section Input,Sections
+@node Section Output, typedef asection, Section Input, Sections
 @subsection Section Output
 To write a new object style BFD, the various sections to be written
-have to be created. They are attatched to the BFD in the same way as
+have to be created. They are attached to the BFD in the same way as
 input sections, data is written to the sections using
 @code{bfd_set_section_contents}. 
 
 The linker uses the fields @code{output_section} and
 @code{output_offset} to create an output file.
 
-The data to be written comes from input sections attatched to the
+The data to be written comes from input sections attached to the
 output sections.  The output section structure can be considered a
 filter for the input section, the output section determines the vma of
 the output data and the name, but the input section determines the
@@ -97,13 +96,13 @@ subsections, "A" at offset 0x0 (ie at vma 0x100) and "B" at offset
 */
 
 
-#include "sysdep.h"
 #include "bfd.h"
+#include "sysdep.h"
 #include "libbfd.h"
 
 
 /*doc*
-@node typedef asection,section prototypes,Section Output,Sections
+@node typedef asection, section prototypes, Section Output, Sections
 @subsection typedef asection
 */
 
@@ -171,7 +170,7 @@ The section contains constructor information. This section type is
 used by the linker to create lists of constructors and destructors
 used by @code{g++}. When a back end sees a symbol which should be used
 in a constructor list, it creates a new section for the type of name
-(eg @code{__CTOR_LIST__}), attatches the symbol to it and builds a
+(eg @code{__CTOR_LIST__}), attaches the symbol to it and builds a
 relocation. To build the lists of constructors, all the linker has to
 to is catenate all the sections called @code{__CTOR_LIST__} and
 relocte the data contained within - exactly the operations it would
@@ -297,7 +296,7 @@ $} asection ;
 */
 
 /*doc*
-@node section prototypes,Section,typedef section,Sections
+@node section prototypes,  , typedef asection, Sections
 @subsection section prototypes
 
 */
@@ -322,10 +321,10 @@ DEFUN(bfd_get_section_by_name,(abfd, name),
 
 
 /*proto* bfd_make_section
-This function creates a new empty section called @var{name} and attatches it
+This function creates a new empty section called @var{name} and attaches it
 to the end of the chain of sections for the BFD supplied. An attempt to
-create a section with a name which is already in use, returns the old
-section by that name instead.
+create a section with a name which is already in use, returns NULL without
+changing the section chain.
 
 Possible errors are:
 @table @code
@@ -355,7 +354,7 @@ DEFUN(bfd_make_section,(abfd, name),
   }
 
   while (sect) {
-    if (!strcmp(sect->name, name)) return sect;
+    if (!strcmp(sect->name, name)) return NULL;
     prev = &sect->next;
     sect = sect->next;
   }
@@ -418,7 +417,7 @@ DEFUN(bfd_set_section_flags,(abfd, section, flags),
 
 
 /*proto* bfd_map_over_sections
-Calls the provided function @var{func} for each section attatched to
+Calls the provided function @var{func} for each section attached to
 the BFD @var{abfd}, passing @var{obj} as an argument. The function
 will be called as if by 
 

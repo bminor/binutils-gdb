@@ -43,12 +43,13 @@ CFLAGS = -g $(HDEFINES) $(TDEFINES) $(CSEARCH) $(CSWITCHES) # -DINTEL960VERSION
 BFD_LIBS = libbfd.o opncls.o bfd.o archive.o targets.o cache.o \
 	archures.o core.o section.o format.o syms.o reloc.o init.o
 
-BFD_MACHINES=cpu-h8300.o cpu-i960.o  cpu-sparc.o cpu-m68k.o cpu-m88k.o \
-	cpu-vax.o cpu-mips.o cpu-a29k.o cpu-i386.o
+BFD_MACHINES = cpu-h8300.o cpu-i960.o cpu-sparc.o cpu-m68k.o cpu-m88k.o \
+	cpu-vax.o cpu-mips.o cpu-a29k.o cpu-i386.o cpu-rs6000.o
 
 BFD_BACKENDS = oasys.o ieee.o srec.o \
 	aout64.o aout32.o demo64.o sunos.o newsos3.o i386aout.o bout.o \
-	icoff.o amdcoff.o m68kcoff.o i386coff.o m88k-bcs.o ecoff.o elf.o
+	icoff.o amdcoff.o m68kcoff.o i386coff.o m88k-bcs.o ecoff.o elf.o \
+	rs6000coff.o
 
 
 OPTIONAL_BACKENDS = trad-core.o
@@ -58,11 +59,11 @@ BFD_H=$(INCDIR)/bfd.h
 # C source files that correspond to .o's.
 CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c archures.c \
 	 i386coff.c aout64.c aout32.c sunos.c demo64.c icoff.c srec.c \
-	 oasys.c ieee.c m68kcoff.c amdcoff.c \
+	 oasys.c ieee.c m68kcoff.c amdcoff.c rs6000coff.c \
 	 format.c section.c core.c syms.c reloc.c init.c \
 	 m88k-bcs.c ecoff.c trad-core.c newsos3.c i386aout.c bout.c elf.c \
 	cpu-h8300.c cpu-i960.c cpu-sparc.c cpu-m68k.c cpu-m88k.c \
- 	cpu-vax.c cpu-mips.c cpu-a29k.c cpu-i386.o
+ 	cpu-vax.c cpu-mips.c cpu-a29k.c cpu-i386.c cpu-rs6000.c 
 
 STAGESTUFF = $(TARGETLIB) $(OFILES)
 
@@ -124,6 +125,9 @@ $(BFD_LIBS):  libbfd.h $(BFD_H) $(RECONFIG)
 $(BFD_MACHINES):  libbfd.h $(BFD_H) $(RECONFIG)
 $(BFD_BACKENDS):  libbfd.h $(BFD_H) $(RECONFIG)
 $(OPTIONAL_BACKENDS):  libbfd.h $(BFD_H) $(RECONFIG)
+
+# Get around a Sun Make bug in SunOS 4.1.1 with VPATH
+cpu-i386.o:cpu-i386.c
 
 saber:
 	#suppress 65 on bfd_map_over_sections 
@@ -262,6 +266,8 @@ m68kcoff.o : m68kcoff.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
   $(INCDIR)/m68kcoff.h $(INCDIR)/internalcoff.h libcoff.h coffcode.h 
 amdcoff.o : amdcoff.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
   $(INCDIR)/amdcoff.h $(INCDIR)/internalcoff.h libcoff.h coffcode.h 
+rs6000coff.o: rs6000coff.c  $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
+  $(INCDIR)/rs6000coff.h $(INCDIR)/internalcoff.h libcoff.h coffcode.h 
 format.o : format.c $(INCDIR)/bfd.h \
   $(INCDIR)/obstack.h libbfd.h 
 section.o : section.c $(INCDIR)/bfd.h \

@@ -204,7 +204,8 @@ typedef enum bfd_error {
 	      no_more_archived_files, malformed_archive,
 	      symbol_not_found, file_not_recognized,
 	      file_ambiguously_recognized, no_contents,
-		bfd_error_nonrepresentable_section,
+	      bfd_error_nonrepresentable_section,
+	      no_debug_section,
 	      invalid_error_code} bfd_ec;
 
 extern bfd_ec bfd_error;
@@ -220,10 +221,10 @@ PROTO (void, bfd_perror, (CONST char *message));
 
 typedef enum bfd_print_symbol
 { 
-  bfd_print_symbol_name_enum,
-  bfd_print_symbol_type_enum,
-  bfd_print_symbol_all_enum
-} bfd_print_symbol_enum_type;
+  bfd_print_symbol_name,
+  bfd_print_symbol_more,
+  bfd_print_symbol_all
+} bfd_print_symbol_type;
     
 
 
@@ -269,7 +270,14 @@ CAT(NAME,_bfd_debug_info_start),\
 CAT(NAME,_bfd_debug_info_end),\
 CAT(NAME,_bfd_debug_info_accumulate)
 
-#define COFF_SWAP_TABLE coff_swap_aux_in, coff_swap_sym_in, coff_swap_lineno_in,
+#define COFF_SWAP_TABLE \
+ coff_swap_aux_in, coff_swap_sym_in, coff_swap_lineno_in, \
+ coff_swap_aux_out, coff_swap_sym_out, \
+ coff_swap_lineno_out, coff_swap_reloc_out, \
+ coff_swap_filehdr_out, coff_swap_aouthdr_out, \
+ coff_swap_scnhdr_out
+
+
 
 /* User program access to BFD facilities */
 

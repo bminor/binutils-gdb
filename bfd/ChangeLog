@@ -1,3 +1,31 @@
+Thu Oct 24 22:40:07 1991  John Gilmore  (gnu at cygnus.com)
+
+	RS/6000 support, by Metin G. Ozisik, Mimi Phûông-Thåo Võ, and
+	John Gilmore.
+
+	* Makefile.in:  Add cpu-rs6000.c and rs6000coff.c.
+	* configure.in:  Add rs6000 case.
+	* targets.c:  Add rs6000 vector.
+	* archures.c:  Add rs6000, fix comment on romp.
+	* bfd-in.h (enum bfd_error):  Add no_debug_section error.
+	* libcoff-in.h (struct coff_tdata):  Remove unused string_table.
+	* bfd.c (bfd_errmsgs):  Add no_debug_section error message.
+	* section.c (bfd_make_section):  Return NULL on attempt to create
+	a section twice.
+	* coffcode.h (bfd_swap_reloc_in):  Handle r_type and r_size.
+	(bfd_swap_aouthdr_in):  Handle lots more members.
+	(make_a_section_from_file):  If section has already been seen,
+	just return false rather than overwriting it.
+	(coff_real_object_p):  Understand incoming magic numbers.
+	(coff_set_flags):  Understand outgoing magic numbers.
+	(coff_compute_section_file_positions):  outgoing aouthdr magic #.
+	(build_debug_section):  Add fn for reading debug string section.
+	(get_normalized_symtab):  Handle symbol names in debug string section.
+	Remove unused obj_string_table.
+	(coff_slurp_symbol_table):  Handle rs6000-specific storage classes.
+	* aoutx.h (translate_from_native_sym_flags, N_SET*):  Check for
+	existing section before making one.
+
 Thu Oct 24 02:03:24 1991  Fred Fish  (fnf at cygnus.com)
 
 	* elf.c: Add partial support for ELF format corefiles. Still needs
