@@ -1,8 +1,16 @@
-2001-09-24  Christian Groessler <cpg@aladdin.de>
+2001-10-09  Bruno Haible  <haible@clisp.cons.org>
 
-	* z8k-dis.c (unparse_intstr): Fixed formatting. Change
-	disassembly of indirect register memory accesses to be same
-	format the assembler accepts.
+	* cgen-asm.in (*_cgen_build_insn_regex): Generate a case sensitive
+	regular expression.  Fix some formatting problems.
+	* fr30-asm.c: Regenerate.
+	* openrisc-asm.c: Regenerate.
+	* m32r-asm.c: Regenerate.
+
+2001-10-09  Christian Groessler <cpg@aladdin.de>
+
+	* z8k-dis.c (unparse_instr): Fixed formatting. Change disassembly
+	of indirect register memory accesses to be same format the
+	assembler accepts.
 
 2001-10-09  Nick Clifton  <nickc@cambridge.redhat.com>
 
