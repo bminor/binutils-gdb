@@ -1,5 +1,8 @@
 2001-05-10  Michael Snyder  <msnyder@redhat.com>
 
+	* remote.c (remote_open_1): Call no_shared_libraries, so that
+	symbols for shared libraries can be reloaded per session.
+	(remote_async_open_1): Ditto.
 	* remote.c (bin2hex, hex2bin): New functions.  Factor out these
 	two conversions which are coded for repeatedly in this module.
 	(remote_threads_extra_info, remote_wait, remote_async_wait, 

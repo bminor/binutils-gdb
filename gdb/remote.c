@@ -2135,6 +2135,11 @@ serial device is attached to the remote system\n\
      someday have a notion of debugging several processes.  */
 
   inferior_ptid = pid_to_ptid (MAGIC_NULL_PID);
+#ifdef SOLIB_CREATE_INFERIOR_HOOK
+  /* First delete any symbols previously loaded from shared libraries. */
+  no_shared_libraries (NULL, 0);
+#endif
+
   /* Start the remote connection; if error (0), discard this target.
      In particular, if the user quits, be sure to discard it
      (we'd be in an inconsistent state otherwise).  */
@@ -2153,12 +2158,14 @@ serial device is attached to the remote system\n\
       putpkt ("!");
       getpkt (buf, PBUFSIZ, 0);
     }
+#ifdef SOLIB_CREATE_INFERIOR_HOOK
   /* FIXME: need a master target_open vector from which all 
      remote_opens can be called, so that stuff like this can 
      go there.  Failing that, the following code must be copied
      to the open function for any remote target that wants to 
      support svr4 shared libraries.  */
-#ifdef SOLIB_CREATE_INFERIOR_HOOK
+
+  /* Set up to detect and load shared libraries. */
   if (exec_bfd) 	/* No use without an exec file. */
     SOLIB_CREATE_INFERIOR_HOOK (PIDGET (inferior_ptid));
 #endif
@@ -2235,6 +2242,11 @@ serial device is attached to the remote system\n\
      implemented. */
   wait_forever_enabled_p = 0;
 
+#ifdef SOLIB_CREATE_INFERIOR_HOOK
+  /* First delete any symbols previously loaded from shared libraries. */
+  no_shared_libraries (NULL, 0);
+#endif
+
   /* Start the remote connection; if error (0), discard this target.
      In particular, if the user quits, be sure to discard it
      (we'd be in an inconsistent state otherwise).  */
@@ -2256,12 +2268,14 @@ serial device is attached to the remote system\n\
       putpkt ("!");
       getpkt (buf, PBUFSIZ, 0);
     }
+#ifdef SOLIB_CREATE_INFERIOR_HOOK
   /* FIXME: need a master target_open vector from which all 
      remote_opens can be called, so that stuff like this can 
      go there.  Failing that, the following code must be copied
      to the open function for any remote target that wants to 
      support svr4 shared libraries.  */
-#ifdef SOLIB_CREATE_INFERIOR_HOOK
+
+  /* Set up to detect and load shared libraries. */
   if (exec_bfd) 	/* No use without an exec file. */
     SOLIB_CREATE_INFERIOR_HOOK (PIDGET (inferior_ptid));
 #endif
