@@ -1,3 +1,9 @@
+2004-11-10  Jon Beniston <jon@beniston.com>
+
+	Committed by Andrew Cagney  <cagney@gnu.org>.
+        * gdb.texinfo (Remote Serial Protocol): Further describe 
+        binary transfer escaping mechanism .
+
 2004-11-08  Randolph Chung  <tausq@debian.org>
 
 	* gdb.texinfo (inferior_debugging info): Document "set debug infrun"

@@ -20593,7 +20593,8 @@ Reserved for future use.
 
 @var{addr} is address, @var{length} is number of bytes, @var{XX@dots{}}
 is binary data.  The characters @code{$}, @code{#}, and @code{0x7d} are
-escaped using @code{0x7d}.
+escaped using @code{0x7d}, and then XORed with @code{0x20}.
+For example, @code{0x7d} would be transmitted as @code{0x7d 0x5d}.
 
 Reply:
 @table @samp
