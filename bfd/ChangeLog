@@ -1,5 +1,8 @@
 Mon Feb 28 15:41:01 1994  Kung Hsu  (kung@mexican.cygnus.com)
 
+	* config.bfd : Add i386-os9k.
+	* config/i386-os9k.mt : Newly add os9k target makefile.
+
 	* i386os9k.c : new file to handle os9k format bfd.
 	* Makefile.in : Handle new file i386os9k.c
 	* bfd-in2.h : Add bfd_target_os9k_flavour.
