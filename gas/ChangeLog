@@ -1,3 +1,15 @@
+Thu Apr  7 14:28:30 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/tc-mips.c (macro): Pass NULL for expression argument to
+	macro_build for nori case.
+	(SWITCH_TABLE): Define.
+	(mips_force_relocation): Force a relocation for a switch table
+	entry.
+	(md_apply_fix): Write switch table entry value into file.
+	(tc_gen_reloc): Use BFD_RELOC_GPREL32 for a switch table entry,
+	and set the addend to the difference between the reloc address and
+	the subtrahend.
+
 Thu Apr  7 10:38:18 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* config/tc-hppa.h (elf_tc_symbol): Delete.  No longer used.

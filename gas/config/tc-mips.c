@@ -1789,7 +1789,7 @@ macro (ip)
 	    {
 	      macro_build ((char *) NULL, &icnt, &imm_expr, "ori", "t,r,i",
 			   treg, sreg, (int) BFD_RELOC_LO16);
-	      macro_build ((char *) NULL, &icnt, &imm_expr, "nor", "d,v,t",
+	      macro_build ((char *) NULL, &icnt, NULL, "nor", "d,v,t",
 			   treg, treg, 0);
 	    }
 	  return;
@@ -5063,15 +5063,29 @@ cons_fix_new_mips (frag, where, nbytes, exp)
 	       nbytes == 2 ? BFD_RELOC_16 : BFD_RELOC_32);
 }
 
+/* When generating embedded PIC code we need to use a special
+   relocation to represent the difference of two symbols in the .text
+   section (switch tables use a difference of this sort).  See
+   include/coff/mips.h for details.  This macro checks whether this
+   fixup requires the special reloc.  */
+#define SWITCH_TABLE(fixp) \
+  ((fixp)->fx_r_type == BFD_RELOC_32 \
+   && (fixp)->fx_addsy != NULL \
+   && (fixp)->fx_subsy != NULL \
+   && S_GET_SEGMENT ((fixp)->fx_addsy) == text_section \
+   && S_GET_SEGMENT ((fixp)->fx_subsy) == text_section)
+
 /* When generating embedded PIC code we must keep all PC relative
-   relocations, in case the linker has to relax a call.  */
+   relocations, in case the linker has to relax a call.  We also need
+   to keep relocations for switch table entries.  */
 
 /*ARGSUSED*/
 int
 mips_force_relocation (fixp)
      fixS *fixp;
 {
-  return fixp->fx_pcrel && mips_pic == EMBEDDED_PIC;
+  return (mips_pic == EMBEDDED_PIC
+	  && (fixp->fx_pcrel || SWITCH_TABLE (fixp)));
 }
 
 /* Apply a fixup to the object file.  */
@@ -5108,8 +5122,11 @@ md_apply_fix (fixP, valueP)
     case BFD_RELOC_32:
       /* If we are deleting this reloc entry, we must fill in the
 	 value now.  This can happen if we have a .word which is not
-	 resolved when it appears but is later defined.  */
-      if (fixP->fx_done)
+	 resolved when it appears but is later defined.  We also need
+	 to fill in the value if this is an embedded PIC switch table
+	 entry.  */
+      if (fixP->fx_done
+	  || (mips_pic == EMBEDDED_PIC && SWITCH_TABLE (fixP)))
 	md_number_to_chars (fixP->fx_frag->fr_literal + fixP->fx_where,
 			    value, 4);
       break;
@@ -5936,7 +5953,20 @@ tc_gen_reloc (section, fixp)
 
   reloc->sym_ptr_ptr = &fixp->fx_addsy->bsym;
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
-  if (fixp->fx_pcrel == 0)
+
+  if (mips_pic == EMBEDDED_PIC
+      && SWITCH_TABLE (fixp))
+    {
+      /* For a switch table entry we use a special reloc.  The addend
+	 is actually the difference between the reloc address and the
+	 subtrahend.  */
+      reloc->addend = reloc->address - S_GET_VALUE (fixp->fx_subsy);
+#ifndef OBJ_ECOFF
+ #error Double check fx_r_type here
+#endif
+      fixp->fx_r_type = BFD_RELOC_GPREL32;
+    }
+  else if (fixp->fx_pcrel == 0)
     reloc->addend = fixp->fx_addnumber;
   else
     {
