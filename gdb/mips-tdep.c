@@ -1371,9 +1371,20 @@ mips_find_saved_regs (struct frame_info *fci)
      were saved.  */
   reg_position = fci->frame + PROC_FREG_OFFSET (proc_desc);
 
-  /* The freg_offset points to where the first *double* register
-     is saved.  So skip to the high-order word. */
-  if (!GDB_TARGET_IS_MIPS64)
+  /* Apparently, the freg_offset gives the offset to the first 64 bit
+     saved.
+
+     When the ABI specifies 64 bit saved registers, the FREG_OFFSET
+     designates the first saved 64 bit register.
+
+     When the ABI specifies 32 bit saved registers, the ``64 bit saved
+     DOUBLE'' consists of two adjacent 32 bit registers, Hence
+     FREG_OFFSET, designates the address of the lower register of the
+     register pair.  Adjust the offset so that it designates the upper
+     register of the pair -- i.e., the address of the first saved 32
+     bit register.  */
+
+  if (MIPS_SAVED_REGSIZE == 4)
     reg_position += MIPS_SAVED_REGSIZE;
 
   /* Fill in the offsets for the float registers which float_mask says
@@ -4525,7 +4536,7 @@ mips_gdbarch_init (struct gdbarch_info info,
       tdep->mips_last_arg_regnum = A0_REGNUM + 8 - 1;
       tdep->mips_last_fp_arg_regnum = FPA0_REGNUM + 8 - 1;
       tdep->mips_regs_have_home_p = 0;
-      tdep->gdb_target_is_mips64 = 0;
+      tdep->gdb_target_is_mips64 = 1;
       tdep->default_mask_address_p = 0;
       set_gdbarch_long_bit (gdbarch, 32);
       set_gdbarch_ptr_bit (gdbarch, 32);
