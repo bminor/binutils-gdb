@@ -1,8 +1,9 @@
 			 GDB SNAPSHOT SYSTEM
 			    (general info)
-			    Updated 5/3/93
+			    Updated 5/6/93
 
 WHAT ARE GDB SNAPSHOTS
+----------------------
 
 Snapshots are an "image" of the main GDB development tree, captured at a
 particular random instant in time.  When you use the snapshots, you should
@@ -65,6 +66,7 @@ This has several advantages, and several disadvantages.
 
 
 HOW TO GET THE SNAPSHOTS
+------------------------
 
 The current plan is to provide a full snapshot once weekly, and incremental
 diffs on a daily basis.  Each daily diff will be relative to the source
@@ -103,6 +105,7 @@ of a perception of instability or lack of quality control.
 
 
 GDB TEST SUITE
+--------------
 
 A test suite is distributed as an integral part of the snapshots.  However,
 to use it you will need to get a copy of the dejagnu testing framework.
@@ -119,6 +122,7 @@ do exist for a feature are not exhaustive.  New tests are welcomed.
 
 
 HOW TO SUBMIT CHANGES
+---------------------
 
 Patches should be sent to gdb-patches@cygnus.com.  Questions about the
 snapshots themselves, problems accessing the snapshots, etc can also be sent
@@ -150,7 +154,9 @@ Here are some simple guidelines for submitting patches:
 	like.  The emacs command ^X4A will create a ChangeLog entry header
 	for you.
 
+
 BISON and BYACC
+---------------
 
 GDB's language parsers are all portable, and can be compiled with bison,
 byacc, traditional Unix yacc, or other compatible parser generators.
@@ -172,6 +178,17 @@ have byacc installed, include:
 	and install byacc.
 
     o	Specify BISON=yacc on the make command line to override the default.
+
+
+UNIX MAKE and GNU MAKE
+----------------------
+
+When you build gdb in the same directory as the source, you should be able
+to use any available "make" that has traditional UNIX make functionality.
+If you build gdb in a separate directory tree from the source, using the
+configure "--subdir" option, then only GNU make is fully supported, although
+other makes with complete VPATH support should work (SunOS make for example).
+
 
 
 Thanks for your help and support.

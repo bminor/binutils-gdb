@@ -1,3 +1,7 @@
+Thu May  6 08:51:35 1993  Fred Fish  (fnf@cygnus.com)
+
+	* snapshots.readme:  Add notes for UNIX make and GNU make.
+
 Mon May  3 17:06:45 1993  Fred Fish  (fnf@cygnus.com)
 
 	* snapshots.readme:  Clarify bison/byacc/yacc notes.
