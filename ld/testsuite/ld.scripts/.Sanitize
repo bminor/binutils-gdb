@@ -26,6 +26,9 @@ Things-to-keep:
 defined.exp
 defined.s
 defined.t
+script.exp
+script.s
+script.t
 
 Things-to-lose:
 

@@ -1,3 +1,14 @@
+Wed Sep 28 12:18:54 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* config/default.exp: Set variables as and nm.  Create tmpdir if
+	it does not already exist.
+	* ld.bootstrap/bootstrap.exp: Don't create tmpdir here.
+	* ld.cdtest/cdtest.exp: Likewise.
+	* ld.scripts/defined.exp: Likewise.  Also, don't set as and nm
+	here.  Change perror for no variables found to fail.
+	* ld.scripts/script.exp: New test.
+	* ld.scripts/script.t, ld.scripts/script.s: New files.
+
 Tue Sep 27 14:59:51 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* ld.scripts: New directory.

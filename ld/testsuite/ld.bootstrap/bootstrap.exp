@@ -28,8 +28,6 @@ if ![isnative] {return}
 # we need the object files.
 if {$ld != "$objdir/ld.new"} {return}
 
-if ![file isdirectory tmpdir] {catch "exec mkdir tmpdir" status}
-
 # Bootstrap ld.  First link the object files together using -r, in
 # order to test -r.  Then link the result into an executable, ld1, to
 # really test -r.  Use ld1 to link a fresh ld, ld2.  Use ld2 to link a
