@@ -1577,7 +1577,6 @@ do_relocs_for (abfd, h, file_cursor)
 		 internal fix list.  */
 	      while (fix_ptr)
 		{
-		  symbolS *symbol_ptr;
 		  struct internal_reloc intr;
 
 		  /* Only output some of the relocations */
@@ -1588,7 +1587,7 @@ do_relocs_for (abfd, h, file_cursor)
 
 #else
 		      symbolS *dot;
-		      symbol_ptr = fix_ptr->fx_addsy;
+		      symbolS *symbol_ptr = fix_ptr->fx_addsy;
 
 		      intr.r_type = TC_COFF_FIX2RTYPE (fix_ptr);
 		      intr.r_vaddr =

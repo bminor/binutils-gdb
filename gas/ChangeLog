@@ -1,3 +1,25 @@
+Wed Jan 18 12:16:07 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* expr.c (operand): Parenthesize && within ||.
+	* listing.c (listing_newline): Likewise.
+	(list_symbol_table): Use %lu to print sizeof.
+	* symbols.c: Comment out unused function indent.
+	(print_symbol_value_1): Cast pointer to unsigned long for printf.
+	* config/obj-coff.c (do_relocs_for): Only declare symbol_ptr if it
+	will be used.
+	* config/tc-h8300.c (md_begin): Remove unused variable reg.
+	(get_operand): Declare type of parameter direction.  Remove unused
+	variable size.
+	(get_specific): Fix comment to avoid nested comments.
+	(check_operand): Cast X_add_number to unsigned long for printf.
+	(build_bytes): Remove unused local variables output_ptr, part, and
+	high.
+	(build_bytes): Cast X_add_number to unsigned long for printf.
+	(clever_message): Remove unused variable scan.
+	(md_assemble): Remove unused variable i.
+	(tc_coff_sizemachdep): Remove unused function.
+	* tc-h8300.h (tc_reloc_mangle): Declare.
+
 Tue Jan 17 10:58:06 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* config/tc-mips.c (mips_4650): New static variable.
