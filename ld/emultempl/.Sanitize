@@ -15,12 +15,6 @@
 
 Do-first:
 
-armelf_files="armelf.em"
-if ( echo $* | grep keep\-armelf > /dev/null ) ; then
-        keep_these_too="${armelf_files} ${keep_these_too}"
-else
-        lose_these_too="${armelf_files} ${lose_these_too}"
-fi
 
 beos_files="beos.em"
 if ( echo $* | grep keep\-beos > /dev/null ) ; then
@@ -41,6 +35,7 @@ Things-to-keep:
 README
 aix.em
 armcoff.em
+armelf.em
 elf32.em
 generic.em
 gld960.em
