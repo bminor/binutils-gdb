@@ -1,5 +1,6 @@
 /* read.c - read a source file -
-   Copyright (C) 1986, 1987, 1990, 1991 Free Software Foundation, Inc.
+
+   Copyright (C) 1986, 1987, 1990, 1991, 1992 Free Software Foundation, Inc.
    
    This file is part of GAS, the GNU Assembler.
    
@@ -119,7 +120,7 @@ struct broken_word *broken_words;
 int new_broken_words = 0;
 #endif
 
-#ifdef __STDC__
+#if __STDC__ == 1
 
 static char *demand_copy_string(int *lenP);
 int is_it_end_of_statement(void);
@@ -139,7 +140,7 @@ static void grow_bignum();
 static void pobegin();
 void stringer();
 
-#endif /* __STDC__ */
+#endif /* not __STDC__ */
 
 extern int listing;
 

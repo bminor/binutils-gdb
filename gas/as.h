@@ -1,5 +1,5 @@
 /* as.h - global header file
-   Copyright (C) 1987, 1990, 1991 Free Software Foundation, Inc.
+   Copyright (C) 1987, 1990, 1991, 1992 Free Software Foundation, Inc.
    
    This file is part of GAS, the GNU Assembler.
    
@@ -22,7 +22,7 @@
 #include "host.h"
 #include "flonum.h"
 
-#ifndef __STDC__
+#if __STDC__ != 1
 #define	volatile	/**/
 #ifndef const
 #define	const		/**/
@@ -66,8 +66,8 @@
 #include <stdio.h>
 #include <assert.h>
 #include "listing.h"
-#define obstack_chunk_alloc	xmalloc
-#define obstack_chunk_free	xfree
+#define obstack_chunk_alloc xmalloc
+#define obstack_chunk_free xfree
 
 #define xfree free
 
@@ -288,7 +288,7 @@ typedef struct {
 	int		poc_val;	/* Value to pass to handler */
 } pseudo_typeS;
 
-#if defined(__STDC__) & !defined(NO_STDARG)
+#if (__STDC__ == 1) & !defined(NO_STDARG)
 
 int had_errors(void);
 int had_warnings(void);
@@ -308,7 +308,7 @@ void as_warn();
 
 #endif /* __STDC__ & !NO_STDARG */
 
-#ifdef __STDC__
+#if __STDC__ == 1
 
 char *app_push(void);
 char *atof_ieee(char *str, int what_kind, LITTLENUM_TYPE *words);
@@ -345,7 +345,7 @@ void subseg_change(segT seg, int subseg);
 void subseg_new(segT seg, subsegT subseg);
 void subsegs_begin(void);
 
-#else /* __STDC__ */
+#else /* not __STDC__ */
 
 char *app_push();
 char *atof_ieee();
@@ -382,7 +382,7 @@ void subseg_change();
 void subseg_new();
 void subsegs_begin();
 
-#endif /* __STDC__ */
+#endif /* not __STDC__ */
 
 /* this one starts the chain of target dependant headers */
 #include "targ-env.h"

@@ -24,7 +24,8 @@
 
 #define __ (42)			/* blatently illegal digit value */
 /* exceeds any normal radix */
-#if !defined(__STDC__) && !defined(const)
+
+#if (__STDC__ != 1) && !defined(const)
 #define const /* empty */
 #endif
 const char

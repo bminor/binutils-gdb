@@ -1,4 +1,4 @@
-#if defined(__STDC__) || defined(const)
+#if (__STDC__ == 1) || defined(const)
 const
 #endif
 

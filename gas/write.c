@@ -1,6 +1,6 @@
-
 /* write.c - emit .o file
-   Copyright (C) 1986, 1987, 1990, 1991 Free Software Foundation, Inc.
+
+   Copyright (C) 1986, 1987, 1990, 1991, 1992 Free Software Foundation, Inc.
    
    This file is part of GAS, the GNU Assembler.
    
@@ -55,7 +55,7 @@ int magic_number_for_object_file = DEFAULT_MAGIC_NUMBER_FOR_OBJECT_FILE;
 /* static long		length; JF unused */	/* String length, including trailing '\0'. */
 
 
-#ifdef __STDC__
+#if __STDC__ == 1
 
 static int is_dnrange(struct frag *f1, struct frag *f2);
 static long fixup_segment(fixS *fixP, segT this_segment_type);
@@ -69,7 +69,7 @@ static long fixup_segment();
 static relax_addressT relax_align();
 void relax_segment();
 
-#endif /* __STDC__ */
+#endif /* not __STDC__ */
 
 /*
  *			fix_new()

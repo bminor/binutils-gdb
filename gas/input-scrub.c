@@ -1,5 +1,5 @@
 /* input_scrub.c - Break up input buffers into whole numbers of lines.
-   Copyright (C) 1987, 1990, 1991 Free Software Foundation, Inc.
+   Copyright (C) 1987, 1990, 1991, 1992 Free Software Foundation, Inc.
    
    This file is part of GAS, the GNU Assembler.
    
@@ -105,11 +105,11 @@ struct input_save {
 	char *saved_position;	/* Caller's saved position in buf */
 };
 
-#ifdef __STDC__
+#if __STDC__ == 1
 static void as_1_char(unsigned int c, FILE *stream);
 #else /* __STDC__ */
 static void as_1_char();
-#endif /* __STDC__ */
+#endif /* not __STDC__ */
 
 /* Push the state of input reading and scrubbing so that we can #include.
    The return value is a 'void *' (fudged for old compilers) to a save

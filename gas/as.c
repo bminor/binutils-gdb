@@ -1,5 +1,5 @@
 /* as.c - GAS main program.
-   Copyright (C) 1987, 1990, 1991 Free Software Foundation, Inc.
+   Copyright (C) 1987, 1990, 1991, 1992 Free Software Foundation, Inc.
    
    This file is part of GAS, the GNU Assembler.
    
@@ -44,7 +44,7 @@
 
 #include "as.h"
 #include "subsegs.h"
-#ifdef __STDC__
+#if __STDC__ == 1
 
 /* This prototype for got_sig() is ansi.  If you want
    anything else, then your compiler is lying to you when
@@ -68,7 +68,7 @@ static SIGTY got_sig();
 static char *stralloc();	/* Make a (safe) copy of a string. */
 static void perform_an_assembly_pass();
 
-#endif /* __STDC__ */
+#endif /* not __STDC__ */
 
 #ifdef DONTDEF
 static char * gdb_symbol_file_name;
@@ -306,7 +306,7 @@ char **argv;
 	md_end();			/* MACHINE.c */
 	
 #ifndef NO_LISTING
-	listing_print();
+	listing_print("");
 #endif
 	
 #ifndef	VMS
@@ -336,10 +336,10 @@ int argc;
 char **argv;
 {
 	int saw_a_file = 0;
-	unsigned int i;
 	need_pass_2		= 0;
 	
 #ifdef MANY_SEGMENTS
+	unsigned int i;
 	
 	for (i= SEG_E0; i < SEG_UNKNOWN; i++) 
 	    {

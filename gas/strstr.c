@@ -20,7 +20,7 @@
 
 /* If your compiler is really ansi, then you don't need this. */
 
-#ifndef __STDC__
+#if __STDC__ != 1
 
 #define SIZET int
 
@@ -50,6 +50,6 @@ char *wanted;
 	return(scan);
 } /* strstr() */
 
-#endif /* __STDC__ */
+#endif /* not __STDC__ */
 
 /* end of strstr.c */

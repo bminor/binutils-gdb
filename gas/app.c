@@ -1,4 +1,4 @@
-/* Copyright (C) 1987, 1990, 1991 Free Software Foundation, Inc.
+/* Copyright (C) 1987, 1990, 1991, 1992 Free Software Foundation, Inc.
    
    Modified by Allen Wirfs-Brock, Instantiations Inc 2/90
    */
@@ -30,7 +30,7 @@
 #include <stdio.h>
 #include "as.h"		/* For BAD_CASE() only */
 
-#if !defined(__STDC__) && !defined(const)
+#if (__STDC__ != 1) && !defined(const)
 #define const /* Nothing */
 #endif
 

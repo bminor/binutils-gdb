@@ -1,5 +1,5 @@
 /* bignum.h-arbitrary precision integers
-   Copyright (C) 1987 Free Software Foundation, Inc.
+   Copyright (C) 1987, 1992 Free Software Foundation, Inc.
    
    This file is part of GAS, the GNU Assembler.
    
@@ -41,7 +41,7 @@
 typedef unsigned short LITTLENUM_TYPE;
 
 /* JF truncated this to get around a problem with GCC */
-#define	LOG_TO_BASE_2_OF_10		(3.3219280948873623478703194294893901758651 )
+#define	LOG_TO_BASE_2_OF_10 (3.3219280948873623478703194294893901758651)
 /* WARNING: I haven't checked that the trailing digits are correct! */
 
 /* end of bignum.h */

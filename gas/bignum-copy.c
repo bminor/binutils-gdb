@@ -15,7 +15,7 @@
    
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+   the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
 #include "as.h"
 
@@ -37,39 +37,41 @@
 
 /* void */
 int
-    bignum_copy (in, in_length, out, out_length)
-register LITTLENUM_TYPE *	in;
-register int		in_length; /* in sizeof(littlenum)s */
-register LITTLENUM_TYPE *	out;
-register int		out_length; /* in sizeof(littlenum)s */
+    bignum_copy(in, in_length, out, out_length)
+register LITTLENUM_TYPE *in;
+register int in_length; /* in sizeof(littlenum)s */
+register LITTLENUM_TYPE *out;
+register int out_length; /* in sizeof(littlenum)s */
 {
-	register int	significant_littlenums_dropped;
+	int significant_littlenums_dropped;
 	
-	if (out_length < in_length)
-	    {
-		    register LITTLENUM_TYPE *	p; /* -> most significant (non-zero) input littlenum. */
-		    
-		    bcopy ((char *)in, (char *)out, out_length << LITTLENUM_SHIFT);
-		    for (p = in + in_length - 1;   p >= in;   -- p)
-			{
-				if (* p) break;
-			}
-		    significant_littlenums_dropped = p - in - in_length + 1;
-		    if (significant_littlenums_dropped < 0)
-			{
-				significant_littlenums_dropped = 0;
-			}
-	    }
-	else
-	    {
-		    bcopy ((char *)in, (char *)out, in_length << LITTLENUM_SHIFT);
-		    if (out_length > in_length)
-			{
-				bzero ((char *)(out + out_length), (out_length - in_length) << LITTLENUM_SHIFT);
-			}
-		    significant_littlenums_dropped = 0;
-	    }
-	return (significant_littlenums_dropped);
-}
+	if (out_length < in_length) {
+		LITTLENUM_TYPE *p; /* -> most significant (non-zero) input
+				      littlenum. */ 
+		
+		bcopy((char *) in, (char *) out,
+		      out_length << LITTLENUM_SHIFT); 
+		for (p = in + in_length - 1; p >= in; --p) {
+			if (* p) break;
+		}
+		significant_littlenums_dropped = p - in - in_length + 1;
+		
+		if (significant_littlenums_dropped < 0) {
+			significant_littlenums_dropped = 0;
+		}
+	} else {
+		bcopy((char *) in, (char *) out,
+		      in_length << LITTLENUM_SHIFT);
+
+		if (out_length > in_length) {
+			bzero((char *) (out + out_length),
+			      (out_length - in_length) << LITTLENUM_SHIFT);
+		}
+
+		significant_littlenums_dropped = 0;
+	}
+	
+	return(significant_littlenums_dropped);
+} /* bignum_copy() */
 
 /* end of bignum-copy.c */

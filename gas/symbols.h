@@ -1,5 +1,6 @@
 /* symbols.h -
-   Copyright (C) 1987, 1990 Free Software Foundation, Inc.
+
+   Copyright (C) 1987, 1990, 1992 Free Software Foundation, Inc.
    
    This file is part of GAS, the GNU Assembler.
    
@@ -36,7 +37,7 @@ extern symbolS*		dot_text_symbol;
 extern symbolS*		dot_data_symbol;
 extern symbolS*		dot_bss_symbol;
 
-#ifdef __STDC__
+#if __STDC__ == 1
 
 char *decode_local_label_name(char *s);
 char *local_label_name(int n, int augend);
@@ -51,7 +52,7 @@ void symbol_begin(void);
 void symbol_table_insert(symbolS *symbolP);
 void verify_symbol_chain(symbolS *rootP, symbolS *lastP);
 
-#else
+#else /* not __STDC__ */
 
 char *decode_local_label_name();
 char *local_label_name();
@@ -66,7 +67,7 @@ void symbol_begin();
 void symbol_table_insert();
 void verify_symbol_chain();
 
-#endif /* __STDC__ */
+#endif /* not __STDC__ */
 
 
 /*

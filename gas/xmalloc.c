@@ -42,7 +42,7 @@
   */
 #include <stdio.h>
 
-#ifdef __STDC__
+#if __STDC__ == 1
 #include <stdlib.h>
 #else
 #ifdef USG
@@ -50,7 +50,7 @@
 #else
 char *	malloc();
 #endif /* USG */
-#endif /* __STDC__ */
+#endif /* not __STDC__ */
 
 #define error as_fatal
 

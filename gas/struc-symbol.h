@@ -1,5 +1,5 @@
 /* struct_symbol.h - Internal symbol structure
-   Copyright (C) 1987 Free Software Foundation, Inc.
+   Copyright (C) 1987, 1992 Free Software Foundation, Inc.
    
    This file is part of GAS, the GNU Assembler.
    
@@ -71,21 +71,21 @@ extern const short seg_N_TYPE[]; /* subseg.c */
 #define	N_REGISTER	30	/* Fake N_TYPE value for SEG_REGISTER */
 
 #ifdef SYMBOLS_NEED_BACKPOINTERS
-#ifdef __STDC__
+#if __STDC__ == 1
 
 void symbol_clear_list_pointers(symbolS *symbolP);
 void symbol_insert(symbolS *addme, symbolS *target, symbolS **rootP, symbolS **lastP);
 void symbol_remove(symbolS *symbolP, symbolS **rootP, symbolS **lastP);
 void verify_symbol_chain(symbolS *rootP, symbolS *lastP);
 
-#else /* __STDC__ */
+#else /* not __STDC__ */
 
 void symbol_clear_list_pointers();
 void symbol_insert();
 void symbol_remove();
 void verify_symbol_chain();
 
-#endif /* __STDC__ */
+#endif /* not __STDC__ */
 
 #define symbol_previous(s) ((s)->sy_previous)
 
@@ -95,11 +95,11 @@ void verify_symbol_chain();
 
 #endif /* SYMBOLS_NEED_BACKPOINTERS */
 
-#ifdef __STDC__
+#if __STDC__ == 1
 void symbol_append(symbolS *addme, symbolS *target, symbolS **rootP, symbolS **lastP);
-#else /* __STDC__ */
+#else /* not __STDC__ */
 void symbol_append();
-#endif /* __STDC__ */
+#endif /* not __STDC__ */
 
 #define symbol_next(s)	((s)->sy_next)
 

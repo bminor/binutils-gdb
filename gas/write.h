@@ -1,8 +1,6 @@
-/* write.h -> write.c */
+/* write.h
 
-/*   MODIFIED BY CHRIS BENENATI, FOR INTEL CORPORATION, 4/89	*/
-/* write.h -> write.c
-   Copyright (C) 1987 Free Software Foundation, Inc.
+   Copyright (C) 1987, 1992 Free Software Foundation, Inc.
    
    This file is part of GAS, the GNU Assembler.
    
@@ -95,7 +93,7 @@ COMMON fixS **seg_fix_rootP, **seg_fix_tailP;	/* -> one of above. */
 extern long string_byte_count;
 extern int section_alignment[];
 
-#ifdef __STDC__
+#if __STDC__ == 1
 
 bit_fixS *bit_fix_new(char size, char offset, long base_type, long base_adj, long min, long max, long add);
 void append(char **charPP, char *fromP, unsigned long length);
@@ -111,7 +109,7 @@ fixS *fix_new(fragS *frag,
 	      int pcrel,
 	      enum reloc_type r_type);
 
-#else
+#else /* not __STDC__ */
 
 bit_fixS *bit_fix_new();
 fixS *fix_new();
@@ -119,7 +117,7 @@ void append();
 void record_alignment();
 void write_object_file();
 
-#endif /* __STDC__ */
+#endif /* not __STDC__ */
 
 /*
  * Local Variables:
