@@ -1,3 +1,9 @@
+2002-08-26  Alan Modra  <amodra@bigpond.net.au>
+
+	* binutils-all/objcopy.exp (strip_test): Adjust for "no symbols" on
+	stdout.
+	(strip_executable): Likewise.
+
 2002-08-13  Alan Modra  <amodra@bigpond.net.au>
 
 	* binutils-all/objdump.exp (cpus_expected): Add fr500, ip2022,
