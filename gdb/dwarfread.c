@@ -92,6 +92,12 @@ typedef unsigned int DIE_REF;	/* Reference to a DIE */
 #define CFRONT_PRODUCER "CFRONT "	/* A wild a** guess... */
 #endif
 
+/* start-sanitize-chill */
+#ifndef CHILL_PRODUCER
+#define CHILL_PRODUCER "GNU Chill "
+#endif
+/* end-sanitize-chill */
+
 #define STREQ(a,b)		(strcmp(a,b)==0)
 #define STREQN(a,b,n)		(strncmp(a,b,n)==0)
 
@@ -1678,6 +1684,9 @@ handle_producer (producer)
 
   processing_gcc_compilation =
     STREQN (producer, GPLUS_PRODUCER, strlen (GPLUS_PRODUCER))
+      /* start-sanitize-chill */
+      || STREQN (producer, CHILL_PRODUCER, strlen (CHILL_PRODUCER))
+      /* end-sanitize-chill */
       || STREQN (producer, GCC_PRODUCER, strlen (GCC_PRODUCER));
 
   /* Select a demangling style if we can identify the producer and if

@@ -1,3 +1,12 @@
+	**** start-sanitize-chill ****
+Tue Dec  1 17:07:31 1992  Fred Fish  (fnf@cygnus.com)
+
+	* dwarfread.c (CHILL_PRODUCER):  Add producer string for
+	GNU chill.
+	* dwarfread.c (handle_producer):  Test CHILL_PRODUCER as well
+	as GCC_PRODUCER and GPLUS_PRODUCER.
+	**** end-sanitize-chill ****
+
 Mon Nov 30 18:46:58 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* remote-udi.c (udi_wait):  Don't stop if TIP says that remote is
