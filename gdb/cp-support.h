@@ -108,3 +108,5 @@ extern void cp_check_possible_namespace_symbols (const char *name);
 extern struct symbol *cp_lookup_possible_namespace_symbol (const char *name);
 
 extern int cp_is_anonymous (const char *namespace_name, int namespace_len);
+
+extern char *cp_func_name (const char *full_name);

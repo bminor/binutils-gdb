@@ -664,6 +664,32 @@ cp_is_anonymous (const char *namespace_name, int namespace_len)
     return (location - namespace_name) < namespace_len;
 }
 
+/* If FULL_NAME is the demangled name of a C++ function (including an
+   arg list, possibly including namespace/class qualifications),
+   return a new string containing only the function name (without the
+   arg list/class qualifications).  Otherwise, return NULL.  Caller is
+   responsible for freeing the memory in question.  */
+
+char *
+cp_func_name (const char *full_name)
+{
+  const char *previous_component = full_name;
+  const char *next_component;
+
+  if (!full_name)
+    return NULL;
+
+  for (next_component = cp_find_first_component (previous_component);
+       *next_component == ':';
+       next_component = cp_find_first_component (previous_component))
+    {
+      /* Skip '::'.  */
+      previous_component = next_component + 2;
+    }
+
+  return remove_params (previous_component);
+}
+
 void
 _initialize_cp_support (void)
 {

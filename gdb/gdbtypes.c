@@ -2570,7 +2570,7 @@ rank_one_type (struct type *parm, struct type *arg)
 		  if (TYPE_NOSIGN (arg))	/* plain char -> plain char */
 		    return 0;
 		  else
-		    return INTEGER_COERCION_BADNESS;	/* signed/unsigned char -> plain char */
+		    return INTEGER_CONVERSION_BADNESS;	/* signed/unsigned char -> plain char */
 		}
 	      else if (TYPE_UNSIGNED (parm))
 		{
@@ -2581,12 +2581,12 @@ rank_one_type (struct type *parm, struct type *arg)
 		      else if (!strcmp_iw (TYPE_NAME (arg), "int") && !strcmp_iw (TYPE_NAME (parm), "long"))
 			return INTEGER_PROMOTION_BADNESS;	/* unsigned int -> unsigned long */
 		      else
-			return INTEGER_COERCION_BADNESS;	/* unsigned long -> unsigned int */
+			return INTEGER_CONVERSION_BADNESS;	/* unsigned long -> unsigned int */
 		    }
 		  else
 		    {
 		      if (!strcmp_iw (TYPE_NAME (arg), "long") && !strcmp_iw (TYPE_NAME (parm), "int"))
-			return INTEGER_COERCION_BADNESS;	/* signed long -> unsigned int */
+			return INTEGER_CONVERSION_BADNESS;	/* signed long -> unsigned int */
 		      else
 			return INTEGER_CONVERSION_BADNESS;	/* signed int/long -> unsigned int/long */
 		    }
@@ -2598,15 +2598,15 @@ rank_one_type (struct type *parm, struct type *arg)
 		  else if (!strcmp_iw (TYPE_NAME (arg), "int") && !strcmp_iw (TYPE_NAME (parm), "long"))
 		    return INTEGER_PROMOTION_BADNESS;
 		  else
-		    return INTEGER_COERCION_BADNESS;
+		    return INTEGER_CONVERSION_BADNESS;
 		}
 	      else
-		return INTEGER_COERCION_BADNESS;
+		return INTEGER_CONVERSION_BADNESS;
 	    }
 	  else if (TYPE_LENGTH (arg) < TYPE_LENGTH (parm))
 	    return INTEGER_PROMOTION_BADNESS;
 	  else
-	    return INTEGER_COERCION_BADNESS;
+	    return INTEGER_CONVERSION_BADNESS;
 	case TYPE_CODE_ENUM:
 	case TYPE_CODE_CHAR:
 	case TYPE_CODE_RANGE:
@@ -2628,7 +2628,7 @@ rank_one_type (struct type *parm, struct type *arg)
 	case TYPE_CODE_RANGE:
 	case TYPE_CODE_BOOL:
 	case TYPE_CODE_ENUM:
-	  return INTEGER_COERCION_BADNESS;
+	  return INTEGER_CONVERSION_BADNESS;
 	case TYPE_CODE_FLT:
 	  return INT_FLOAT_CONVERSION_BADNESS;
 	default:
@@ -2641,12 +2641,12 @@ rank_one_type (struct type *parm, struct type *arg)
 	case TYPE_CODE_RANGE:
 	case TYPE_CODE_BOOL:
 	case TYPE_CODE_ENUM:
-	  return INTEGER_COERCION_BADNESS;
+	  return INTEGER_CONVERSION_BADNESS;
 	case TYPE_CODE_FLT:
 	  return INT_FLOAT_CONVERSION_BADNESS;
 	case TYPE_CODE_INT:
 	  if (TYPE_LENGTH (arg) > TYPE_LENGTH (parm))
-	    return INTEGER_COERCION_BADNESS;
+	    return INTEGER_CONVERSION_BADNESS;
 	  else if (TYPE_LENGTH (arg) < TYPE_LENGTH (parm))
 	    return INTEGER_PROMOTION_BADNESS;
 	  /* >>> !! else fall through !! <<< */
@@ -2658,7 +2658,7 @@ rank_one_type (struct type *parm, struct type *arg)
 	      if (TYPE_NOSIGN (arg))
 		return 0;
 	      else
-		return INTEGER_COERCION_BADNESS;
+		return INTEGER_CONVERSION_BADNESS;
 	    }
 	  else if (TYPE_UNSIGNED (parm))
 	    {
@@ -2670,7 +2670,7 @@ rank_one_type (struct type *parm, struct type *arg)
 	  else if (!TYPE_NOSIGN (arg) && !TYPE_UNSIGNED (arg))
 	    return 0;
 	  else
-	    return INTEGER_COERCION_BADNESS;
+	    return INTEGER_CONVERSION_BADNESS;
 	default:
 	  return INCOMPATIBLE_TYPE_BADNESS;
 	}
@@ -2683,7 +2683,7 @@ rank_one_type (struct type *parm, struct type *arg)
 	case TYPE_CODE_RANGE:
 	case TYPE_CODE_BOOL:
 	case TYPE_CODE_ENUM:
-	  return INTEGER_COERCION_BADNESS;
+	  return INTEGER_CONVERSION_BADNESS;
 	case TYPE_CODE_FLT:
 	  return INT_FLOAT_CONVERSION_BADNESS;
 	default:

@@ -167,6 +167,15 @@ static void symtab_symbol_info (char *, namespace_enum, int);
 static void overload_list_add_symbol (struct symbol *sym,
 				      const char *oload_name);
 
+static void make_symbol_overload_list_using (const char *func_name,
+					     const char *namespace_name,
+					     int namespace_len,
+					     const struct block *block);
+
+static void make_symbol_overload_list_qualified (const char *func_name);
+
+static void read_in_psymtabs (const char *oload_name);
+
 void _initialize_symtab (void);
 
 /* */
@@ -1293,7 +1302,7 @@ lookup_symbol_namespace (const char *namespace_name,
   else
     {
       char *concatenated_name
-	= xmalloc (namespace_len + 2 + strlen (name) + 1);
+	= alloca (namespace_len + 2 + strlen (name) + 1);
       strncpy (concatenated_name, namespace_name, namespace_len);
       strcpy (concatenated_name + namespace_len, "::");
       strcpy (concatenated_name + namespace_len + 2, name);
@@ -1302,7 +1311,6 @@ lookup_symbol_namespace (const char *namespace_name,
 				    cp_is_anonymous (namespace_name,
 						     namespace_len));
 
-      xfree (concatenated_name);
       return sym;
     }
 }
@@ -3959,88 +3967,137 @@ overload_list_add_symbol (struct symbol *sym, const char *oload_name)
    used in finding all overloaded instances of a function name.  This
    has been modified from make_symbol_completion_list.  */
 
+/* FIXME: carlton/2003-01-30: Should BLOCK be here?  Maybe it's better
+   to use get_selected_block (0).  */
+
 struct symbol **
 make_symbol_overload_list (const char *func_name,
 			   const char *namespace_name,
 			   int namespace_len, const struct block *block)
 {
-  register struct symbol *sym;
-  register struct symtab *s;
-  register struct partial_symtab *ps;
-  register struct objfile *objfile;
-  register struct block *b, *surrounding_static_block = 0;
-  struct dict_iterator iter;
-  /* The name we are completing on. */
-  const char *oload_name = func_name;
+  struct cleanup *old_cleanups;
 
   sym_return_val_size = 100;
   sym_return_val_index = 0;
-  sym_return_val =
-    (struct symbol **) xmalloc ((sym_return_val_size + 1) *
-				sizeof (struct symbol *));
+  sym_return_val = xmalloc ((sym_return_val_size + 1) *
+			    sizeof (struct symbol *));
   sym_return_val[0] = NULL;
 
+  old_cleanups = make_cleanup (xfree, sym_return_val);
+
+  make_symbol_overload_list_using (func_name, namespace_name,
+				   namespace_len, block);
+
+  discard_cleanups (old_cleanups);
+
+  return sym_return_val;
+}
+
+/* This applies the using directives to add namespaces to search in,
+   and then searches for overloads in all of those namespaces.  It
+   adds the symbols found to sym_return_val.  Arguments are as in
+   make_symbol_overload_list.  */
+
+static void
+make_symbol_overload_list_using (const char *func_name,
+				 const char *namespace_name,
+				 int namespace_len,
+				 const struct block *block)
+{
+  struct block_using_iterator iter;
+  const struct using_direct *current;
+
+  /* First, go through the using directives.  If any of them apply,
+     look in the appropriate namespaces for new functions to match
+     on.  */
+
+  for (current = block_using_iterator_first (block, &iter);
+       current != NULL;
+       current = block_using_iterator_next (&iter))
+    {
+      if (namespace_len == current->outer_length
+	  && strncmp (namespace_name, current->name, namespace_len) == 0)
+	{
+	  make_symbol_overload_list_using (func_name,
+					   current->name,
+					   current->inner_length,
+					   block);
+	}
+    }
+
+  /* Now, add names for this namespace.  */
+  
+  if (namespace_len == 0)
+    {
+      make_symbol_overload_list_qualified (func_name);
+    }
+  else
+    {
+      char *concatenated_name
+	= alloca (namespace_len + 2 + strlen (func_name) + 1);
+      strncpy (concatenated_name, namespace_name, namespace_len);
+      strcpy (concatenated_name + namespace_len, "::");
+      strcpy (concatenated_name + namespace_len + 2, func_name);
+      make_symbol_overload_list_qualified (concatenated_name);
+    }
+}
+
+/* This does the bulk of the work of finding overloaded symbols.
+   FUNC_NAME is the name of the overloaded function we're looking for
+   (possibly including namespace info); NEW_LIST is 1 if we should
+   allocate a new list of overloads and 0 if we should continue using
+   the same old list.  */
+
+static void
+make_symbol_overload_list_qualified (const char *func_name)
+{
+  struct symbol *sym;
+  struct symtab *s;
+  struct objfile *objfile;
+  const struct block *b, *surrounding_static_block = 0;
+  struct dict_iterator iter;
+  const struct dictionary *dict;
+
   /* Look through the partial symtabs for all symbols which begin
-     by matching OLOAD_NAME.  Make sure we read that symbol table in. */
+     by matching FUNC_NAME.  Make sure we read that symbol table in. */
 
-  ALL_PSYMTABS (objfile, ps)
-  {
-    struct partial_symbol **psym;
-
-    /* If the psymtab's been read in we'll get it when we search
-       through the blockvector.  */
-    if (ps->readin)
-      continue;
-
-    for (psym = objfile->global_psymbols.list + ps->globals_offset;
-	 psym < (objfile->global_psymbols.list + ps->globals_offset
-		 + ps->n_global_syms); psym++)
-      {
-	/* If interrupted, then quit. */
-	QUIT;
-	/* This will cause the symbol table to be read if it has not yet been */
-	s = PSYMTAB_TO_SYMTAB (ps);
-      }
-
-    for (psym = objfile->static_psymbols.list + ps->statics_offset;
-	 psym < (objfile->static_psymbols.list + ps->statics_offset
-		 + ps->n_static_syms); psym++)
-      {
-	QUIT;
-	/* This will cause the symbol table to be read if it has not yet been */
-	s = PSYMTAB_TO_SYMTAB (ps);
-      }
-  }
+  read_in_psymtabs (func_name);
 
   /* Search upwards from currently selected frame (so that we can
      complete on local vars.  */
 
   for (b = get_selected_block (0); b != NULL; b = BLOCK_SUPERBLOCK (b))
     {
-      if (!BLOCK_SUPERBLOCK (b))
+      dict = BLOCK_DICT (b);
+
+      for (sym = dict_iter_name_first (dict, func_name, &iter);
+	   sym;
+	   sym = dict_iter_name_next (func_name, &iter))
 	{
-	  surrounding_static_block = b;	/* For elimination of dups */
+	  overload_list_add_symbol (sym, func_name);
 	}
-
-      /* Also catch fields of types defined in this places which match our
-         text string.  Only complete on types visible from current context. */
-
-      ALL_BLOCK_SYMBOLS (b, iter, sym)
-      {
-	overload_list_add_symbol (sym, oload_name);
-      }
     }
+
+  surrounding_static_block = block_static_block (get_selected_block (0));
 
   /* Go through the symtabs and check the externs and statics for
      symbols which match.  */
+
+  /* FIXME: carlton/2003-01-30: Why are we checking all the statics?
+     Also, this shouldn't check all the globals if there's an
+     anonymous namespace involved somewhere.  */
 
   ALL_SYMTABS (objfile, s)
   {
     QUIT;
     b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), GLOBAL_BLOCK);
-    ALL_BLOCK_SYMBOLS (b, iter, sym)
+    dict = BLOCK_DICT (b);
+
+    for (sym = dict_iter_name_first (dict, func_name, &iter);
+	 sym;
+	 sym = dict_iter_name_next (func_name, &iter))
     {
-      overload_list_add_symbol (sym, oload_name);
+      overload_list_add_symbol (sym, func_name);
     }
   }
 
@@ -4051,13 +4108,36 @@ make_symbol_overload_list (const char *func_name,
     /* Don't do this block twice.  */
     if (b == surrounding_static_block)
       continue;
-    ALL_BLOCK_SYMBOLS (b, iter, sym)
+    dict = BLOCK_DICT (b);
+
+    for (sym = dict_iter_name_first (dict, func_name, &iter);
+	 sym;
+	 sym = dict_iter_name_next (func_name, &iter))
     {
-      overload_list_add_symbol (sym, oload_name);
+      overload_list_add_symbol (sym, func_name);
     }
   }
+}
 
-  return (sym_return_val);
+/* Look through the partial symtabs for all symbols which begin
+   by matching FUNC_NAME.  Make sure we read that symbol table in. */
+
+/* FIXME: carlton/2003-01-30.  Lies, all lies.  The function does
+   nothing of the kind: it just reads in every single partial symtab.
+   (It used to do it in a particularly amusing way, but I've fixed
+   that.)  */
+
+static void
+read_in_psymtabs (const char *func_name)
+{
+  struct partial_symtab *ps;
+  struct objfile *objfile;
+
+  ALL_PSYMTABS (objfile, ps)
+  {
+    if (!ps->readin)
+      psymtab_to_symtab (ps);
+  }
 }
 
 /* End of overload resolution functions */

@@ -300,12 +300,6 @@ struct objfile
        null symbol.  The array itself, as well as all the data that it points
        to, should be allocated on the symbol_obstack for this file. */
 
-    /* NOTE: carlton/2003-01-27: For a newly-created objfile, msymbols
-       is set to NULL, rather than a one-element array ending in a
-       null symbol.  ALL_MSYMBOLS already guarded against that case,
-       so that seems to be a valid possibility; it can be useful if
-       you like to create artificial objfiles.  */
-
     struct minimal_symbol *msymbols;
     int minimal_symbol_count;
 
@@ -511,6 +505,8 @@ extern struct objfile *allocate_objfile (bfd *, int);
 
 extern int build_objfile_section_table (struct objfile *);
 
+extern void terminate_minimal_symbol_table (struct objfile *objfile);
+
 extern void objfile_to_front (struct objfile *);
 
 extern void unlink_objfile (struct objfile *);
@@ -570,10 +566,6 @@ extern int is_in_import_list (char *, struct objfile *);
 
 /* Traverse all minimal symbols in one objfile.  */
 
-/* NOTE: carlton/2003-01-27: Don't call this macro unless
-   objfile->msymbols is non-NULL.  See NOTE above in the declaration
-   of 'struct objfile'.  */
-
 #define	ALL_OBJFILE_MSYMBOLS(objfile, m) \
     for ((m) = (objfile) -> msymbols; SYMBOL_NAME(m) != NULL; (m)++)
 
@@ -593,8 +585,7 @@ extern int is_in_import_list (char *, struct objfile *);
 
 #define	ALL_MSYMBOLS(objfile, m) \
   ALL_OBJFILES (objfile)	 \
-    if ((objfile)->msymbols)	 \
-      ALL_OBJFILE_MSYMBOLS (objfile, m)
+    ALL_OBJFILE_MSYMBOLS (objfile, m)
 
 #define ALL_OBJFILE_OSECTIONS(objfile, osect)	\
   for (osect = objfile->sections; osect < objfile->sections_end; osect++)

@@ -1,3 +1,53 @@
+2003-01-31  David Carlton  <carlton@math.stanford.edu>
+
+	From Jim Blandy  <jimb@redhat.com>:
+	
+	Use a single, consistent representation for an empty minimal
+	symbol table in an objfile.
+	* objfiles.c (terminate_minimal_symbol_table): New function.
+	(allocate_objfile): Call it.
+	* objfiles.h (terminate_minimal_symbol_table): New declaration.
+	(ALL_MSYMBOLS): No need to test whether (objfile)->msymbols is
+	non-NULL. 
+	* minsyms.c (lookup_minimal_symbol_by_pc_section): To see whether
+	objfile has minimal symbols, compare minimal_symbol_count to zero,
+	instead of comparing msymbols with NULL.
+	* objfiles.c (have_minimal_symbols): Same.
+	* solib-sunos.c (solib_add_common_symbols): Call
+	terminate_minimal_symbol_table.
+	* symfile.c (reread_symbols): Same.
+
+	* objfiles.h: Revert patch from 2003-01-27, to be replaced by
+	similar patch from Jim Blandy.
+	* objfiles.c (objfile_relocate): Ditto.
+	* i386-linux-tdep.c (find_minsym_and_objfile): Ditto.
+	* arm-linux-tdep.c (find_minsym_and_objfile): Ditto.
+	* gdbtypes.h: Delete INTEGER_COERCION_BADNESS,
+	FLOAT_COERCION_BADNESS.
+	* gdbtypes.c (rank_one_type): Replace all uses of
+	INTEGER_COERCION_BADNESS by INTEGER_CONVERSION_BADNESS.
+	* valops.c (find_overload_match): Call cp_func_name.
+	* cp-support.h: Declare cp_func_name.
+	* cp-support.c (cp_func_name): New function.
+
+2003-01-30  David Carlton  <carlton@math.stanford.edu>
+
+	* valops.c (find_overload_match): Move code into
+	find_oload_champ_namespace.
+	(find_oload_champ_namespace): New function, which immediately gets
+	eviscerated and turned into a call to
+	find_oload_champ_namespace_loop.
+	(find_oload_champ_namespace_loop): New function.
+	* symtab.c (make_symbol_overload_list): Move entire body into
+	make_symbol_overload_list_qualified.
+	(make_symbol_overload_list_qualified): New.
+	(read_in_psymtabs): New.
+	(make_symbol_overload_list_qualified): Rewrite.
+	(make_symbol_overload_list_using): New.
+	(lookup_symbol_namespace): Use alloca, not xmalloc.
+	(make_symbol_overload_list): Put some memory management stuff back
+	in.
+
 2003-01-28  David Carlton  <carlton@math.stanford.edu>
 
 	* valops.c (find_overload_match): Calculate func_name via
