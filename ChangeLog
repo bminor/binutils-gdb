@@ -1,3 +1,7 @@
+Tue Jun 28 13:43:25 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* config.guess: Recognize Mach.
+
 Mon Jun 27 16:41:14 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* configure: Check ${exec_prefixoption}, not ${exec_prefix}, to
