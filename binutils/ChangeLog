@@ -1,3 +1,7 @@
+Thu Aug 27 12:58:09 1992  Brendan Kehoe  (brendan@cygnus.com)
+
+	* configure.in: add we32k
+
 Mon Aug 24 14:53:42 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* ar.c (map_over_members): if the element of the archive has a
