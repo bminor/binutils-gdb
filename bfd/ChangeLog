@@ -1,3 +1,9 @@
+Tue Mar 17 10:45:12 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* aout-target.h: change ar_max_namelen to 15 (the right value)
+	* coff-a29k, coffcode.h: more hangovers from the bfd_abs_section
+	change
+
 Mon Mar 16 14:57:22 1992  Steve Chamberlain  (sac@rtl.cygnus.com)
 
 	* archive.c (bfd_generic_archive_p): check for bout archives too.

@@ -248,7 +248,7 @@ static void DEFUN(reloc_processing,(relent,reloc, symbols, abfd, section) ,
     if (reloc->r_type == R_IHCONST) 
     {		
 	relent->addend = reloc->r_symndx;		
-	relent->sym_ptr_ptr= 0;
+	relent->sym_ptr_ptr= bfd_abs_section.symbol_ptr_ptr;
     }
     else 
     {
