@@ -1106,7 +1106,7 @@ read_encoded_value (struct comp_unit *unit, unsigned char encoding,
       internal_error (__FILE__, __LINE__, "Invalid or unsupported encoding");
     }
 
-  if ((encoding & 0x0f) == 0x00)
+  if ((encoding & 0x07) == 0x00)
     encoding |= encoding_for_size (ptr_len);
 
   switch (encoding & 0x0f)
