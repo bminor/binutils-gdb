@@ -1059,7 +1059,7 @@ void::function::do_st:int Source, unsigned32 base, unsigned32 *rBase, int m , in
 	                          "0x%lx: st.d with odd source register %d",
 	                          cia.ip, Source);
 	      addr = base + (S ? (offset << 3) : offset);
-	      val = (V4_H8 (GPR(Source + 1)) | V4_L8 (GPR(Source)));
+	      val = U8_4 (GPR(Source + 1), GPR(Source));
 	      STORE (addr, 8, val);
 	    }
 	    break;

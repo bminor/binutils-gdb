@@ -1,3 +1,22 @@
+Wed Aug 27 15:13:04 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-bits.h (LSBIT8, LSBIT16, LSBIT32, LSBIT64, LSBIT, MSBIT8,
+ 	MSBIT16, MSBIT32, MSBIT64, MSBIT): New macros - single bit as
+ 	offset from MSB/LSB.
+
+	* sim-endian.h (A1_8, A2_8, A4_8, A1_4, A2_4, A1_2): New macro,
+ 	access address of sub word quantity of a hosts 16, 32, 64 bit word
+ 	type.
+	(V1_2, V1_4, V2_4, V1_8, V2_8, V4_8): Ditto for values.
+	(U8_1, U8_2, U8_4, U4_1, U4_2, U2_1): Ditto for set of values.
+	(V2_H1, V2_L1, V4_H2, V4_L2, V8_L4, V8_H4): Given N byte argument,
+ 	return N*2 byte value with argument in Hi/Lo word.  Renamed from
+ 	V1_H2, V1_L2, V2_H4, V2_L4, V4_H8, V4_L8.
+ 	
+	* sim-alu.h (ALU32_HAD_OVERFLOW): Use 64 bit mask not 32bit.
+	(ALU16_HAD_CARRY, ALU32_HAD_CARRY, ALU16_HAD_OVERFLOW): Use MSBIT
+ 	so that bit offset is explicit.
+
 Wed Aug 27 11:55:35 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-utils.c (sim_analyze_program): Add prog_name argument.
