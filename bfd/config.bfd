@@ -209,8 +209,8 @@ case "${targ}" in
 
   cris-*-*)
     targ_defvec=cris_aout_vec
-    targ_selvecs="bfd_elf32_cris_vec ieee_vec"
-    targ_underscore=yes
+    targ_selvecs="bfd_elf32_us_cris_vec bfd_elf32_cris_vec ieee_vec"
+    targ_underscore=yes # Note: not true for bfd_elf32_cris_vec.
     ;;
 
   d10v-*-*)

@@ -494,6 +494,7 @@ do
     bfd_elf64_bigmips_vec) 	tb="$tb elf64-mips.lo elf64.lo elf32-mips.lo elf32.lo $elf ecofflink.lo"
 				target64=true ;;
     bfd_elf32_cris_vec)		tb="$tb elf32-cris.lo elf32.lo $elf" ;;
+    bfd_elf32_us_cris_vec)	tb="$tb elf32-cris.lo elf32.lo $elf" ;;
     bfd_elf32_d10v_vec)		tb="$tb elf32-d10v.lo elf32.lo $elf" ;;
     bfd_elf32_d30v_vec)		tb="$tb elf32-d30v.lo elf32.lo $elf" ;;
     bfd_elf32_fr30_vec)		tb="$tb elf32-fr30.lo elf32.lo $elf" ;;

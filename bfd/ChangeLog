@@ -1,3 +1,26 @@
+2000-09-27  Hans-Peter Nilsson  <hp@axis.com>
+
+	Define two bfd_targets for absence and presence of leading
+	underscore on symbols.  Make sure to only link same kind.
+	* elf32-cris.c (cris_elf_object_p,
+	cris_elf_final_write_processing, cris_elf_print_private_bfd_data,
+	cris_elf_merge_private_bfd_data): New.
+	(elf_backend_object_p, elf_backend_final_write_processing,
+	bfd_elf32_bfd_print_private_bfd_data,
+	bfd_elf32_bfd_merge_private_bfd_data): Define.
+	<Target vector definition>: Include elf32-target.h twice with
+	different macro settings:
+	(TARGET_LITTLE_SYM): First as bfd_elf32_cris_vec, then as
+	bfd_elf32_us_cris_vec.
+	(TARGET_LITTLE_NAME): First as "elf32-cris", then "elf32-us-cris".
+	(elf_symbol_leading_char): First as 0, then '_'.
+	(INCLUDED_TARGET_FILE): Define for second include of elf32-target.h.
+	* config.bfd (cris-*-*): Add bfd_elf32_us_cris_vec to targ_selvecs.
+	* configure.in (bfd_elf32_cris_vec, cris_aout_vec): New vector.
+	* configure: Regenerate.
+	* targets.c: Declare bfd_elf32_us_cris_vec.
+	* po/bfd.pot: Regenerate.
+
 2000-09-29  Momchil Velikov  <velco@fadata.bg>
 
 	* elf32-arm.h (arm_add_to_rel): Correctly adjust the addend for

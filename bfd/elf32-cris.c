@@ -48,6 +48,14 @@ static asection * cris_elf_gc_mark_hook
   PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Rela *,
 	   struct elf_link_hash_entry *, Elf_Internal_Sym *));
 
+static boolean cris_elf_object_p PARAMS ((bfd *));
+
+static void cris_elf_final_write_processing PARAMS ((bfd *, boolean));
+
+static boolean cris_elf_print_private_bfd_data PARAMS ((bfd *, PTR));
+
+static boolean cris_elf_merge_private_bfd_data PARAMS ((bfd *, bfd *));
+
 static reloc_howto_type cris_elf_howto_table [] =
 {
   /* This reloc does nothing.  */
@@ -565,6 +573,96 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
  
   return true;
 }
+
+/* Reject a file depending on underscores on symbols.  */
+
+static boolean
+cris_elf_object_p (abfd)
+     bfd *abfd;
+{
+  if ((elf_elfheader (abfd)->e_flags & EF_CRIS_UNDERSCORE))
+    return (bfd_get_symbol_leading_char (abfd) == '_');
+  else
+    return (bfd_get_symbol_leading_char (abfd) == 0);
+}
+
+/* Mark presence or absence of leading underscore.  */
+
+static void
+cris_elf_final_write_processing (abfd, linker)
+     bfd *abfd;
+     boolean linker ATTRIBUTE_UNUSED;
+{
+  if (bfd_get_symbol_leading_char (abfd) == '_')
+    elf_elfheader (abfd)->e_flags |= EF_CRIS_UNDERSCORE;
+  else
+    elf_elfheader (abfd)->e_flags &= ~EF_CRIS_UNDERSCORE;
+}
+
+/* Display the flags field.  */
+
+static boolean
+cris_elf_print_private_bfd_data (abfd, ptr)
+     bfd *abfd;
+     PTR ptr;
+{
+  FILE *file = (FILE *) ptr;
+
+  BFD_ASSERT (abfd != NULL && ptr != NULL)
+
+  _bfd_elf_print_private_bfd_data (abfd, ptr);
+
+  fprintf (file, _("private flags = %lx:"), elf_elfheader (abfd)->e_flags);
+
+  if (elf_elfheader (abfd)->e_flags & EF_CRIS_UNDERSCORE)
+    fprintf (file, _(" [symbols have a _ prefix]"));
+
+  fputc ('\n', file);
+  return true;
+}
+
+/* Don't mix files with and without a leading underscore.  */
+
+static boolean
+cris_elf_merge_private_bfd_data (ibfd, obfd)
+     bfd *ibfd;
+     bfd *obfd;
+{
+  flagword old_flags, new_flags;
+
+  if (_bfd_generic_verify_endian_match (ibfd, obfd) == false)
+    return false;
+
+  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
+      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
+    return true;
+
+  if (! elf_flags_init (obfd))
+    {
+      /* This happens when ld starts out with a 'blank' output file.  */
+      elf_flags_init (obfd) = true;
+
+      /* Set flags according to current bfd_target.  */
+      cris_elf_final_write_processing (obfd, false);
+    }
+
+  old_flags = elf_elfheader (obfd)->e_flags;
+  new_flags = elf_elfheader (ibfd)->e_flags;
+
+  /* Is this good or bad?  We'll follow with other excluding flags.  */
+  if ((old_flags & EF_CRIS_UNDERSCORE) != (new_flags & EF_CRIS_UNDERSCORE))
+    {
+      (*_bfd_error_handler)
+	((new_flags & EF_CRIS_UNDERSCORE)
+	 ? _("%s: uses _-prefixed symbols, but writing file with non-prefixed symbols")
+	 : _("%s: uses non-prefixed symbols, but writing file with _-prefixed symbols"),
+	 bfd_get_filename (ibfd));
+      bfd_set_error (bfd_error_bad_value);
+      return false;
+    }
+
+  return true;
+}
 
 #define ELF_ARCH		bfd_arch_cris
 #define ELF_MACHINE_CODE	EM_CRIS
@@ -572,14 +670,7 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
 
 #define TARGET_LITTLE_SYM	bfd_elf32_cris_vec
 #define TARGET_LITTLE_NAME	"elf32-cris"
-
-/* For the time being, we have a leading underscore.  Perhaps change to 0
-   later, when
-   1) a.out isn't as dominating, and we can forget about multiformat links
-      and old assembly code.
-   2) there's an official solution to the symbol vs. register duality
-      problem; perhaps a % register prefix, optionally enforced.  */
-#define elf_symbol_leading_char '_'
+#define elf_symbol_leading_char 0
 
 #define elf_info_to_howto_rel			NULL
 #define elf_info_to_howto			cris_info_to_howto_rela
@@ -590,6 +681,14 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
 
 #define elf_backend_can_gc_sections		1
 
+#define elf_backend_object_p			cris_elf_object_p
+#define elf_backend_final_write_processing \
+	cris_elf_final_write_processing
+#define bfd_elf32_bfd_print_private_bfd_data \
+	cris_elf_print_private_bfd_data
+#define bfd_elf32_bfd_merge_private_bfd_data \
+	cris_elf_merge_private_bfd_data
+
 #define bfd_elf32_bfd_reloc_type_lookup		cris_reloc_type_lookup
 
 /* Later, we my want to optimize RELA entries into REL entries for dynamic
@@ -597,5 +696,17 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
    take the easy route.  */
 #define elf_backend_may_use_rel_p 0
 #define elf_backend_may_use_rela_p 1
+
+#include "elf32-target.h"
+
+#define INCLUDED_TARGET_FILE
+
+#undef TARGET_LITTLE_SYM
+#undef TARGET_LITTLE_NAME
+#undef elf_symbol_leading_char
+
+#define TARGET_LITTLE_SYM bfd_elf32_us_cris_vec
+#define TARGET_LITTLE_NAME "elf32-us-cris"
+#define elf_symbol_leading_char '_'
 
 #include "elf32-target.h"
