@@ -1,3 +1,8 @@
+Mon Jan 18 08:38:05 1999  Mark Alexander  <marka@cygnus.com>
+
+	* values.c (value_virtual_fn_field): Clear the pointed-to
+	offset when casting to the base class.
+
 Mon Jan 18 10:30:51 1999  David Taylor  <taylor@texas.cygnus.com>
 
 	* remote-udi.c (init_udi_ops): change non-existant udi_run_ops to

@@ -1025,7 +1025,9 @@ value_virtual_fn_field (arg1p, f, j, type, offset)
       /* Now context is a pointer to the basetype containing the vtbl.  */
       if (TYPE_TARGET_TYPE (context) != type1)
         {
-          arg1 = value_ind (value_cast (context, value_addr (arg1)));
+	  value_ptr tmp = value_cast (context, value_addr (arg1));
+	  VALUE_POINTED_TO_OFFSET (tmp) = 0;
+          arg1 = value_ind (tmp);
           type1 = check_typedef (VALUE_TYPE (arg1));
         }
 
