@@ -1,3 +1,9 @@
+2003-01-04  Mark Kettenis  <kettenis@gnu.org>
+
+	* configure.in: Remove code dealing with shared libraries.
+	* Makefile.in: Remove HLDFLAGS and HLDENV.
+	* configure: Regenerated.
+
 2003-01-04  Andrew Cagney  <ac131313@redhat.com>
 
 	* frame.c (deprecated_frame_xmalloc): New function.

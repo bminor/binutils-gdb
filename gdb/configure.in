@@ -1143,67 +1143,6 @@ AC_SUBST(CONFIG_CLEAN)
 AC_SUBST(CONFIG_INSTALL)
 AC_SUBST(CONFIG_UNINSTALL)
 
-# Begin stuff to support --enable-shared
-AC_ARG_ENABLE(shared,
-[  --enable-shared         Use shared libraries],
-[case "${enableval}" in
-  yes) shared=true ;;
-  no)  shared=false ;;
-  *) shared=true ;;
-esac])dnl
-
-HLDFLAGS=
-HLDENV=
-# If we have shared libraries, try to set rpath reasonably.
-if test "${shared}" = "true"; then
-  case "${host}" in
-  *-*-hpux*)
-    HLDFLAGS='-Wl,+s,+b,$(libdir)'
-    ;;
-  *-*-irix5* | *-*-irix6*)
-    HLDFLAGS='-Wl,-rpath,$(libdir)'
-    ;;
-  *-*-linux*aout*)
-    ;;
-  *-*-linux* | *-pc-linux-gnu*)
-    HLDFLAGS='-Wl,-rpath,$(libdir)'
-    ;;
-  *-*-solaris*)
-    HLDFLAGS='-R $(libdir)'
-    ;;
-  *-*-sysv4*)
-    HLDENV='if test -z "$${LD_RUN_PATH}"; then LD_RUN_PATH=$(libdir); else LD_RUN_PATH=$${LD_RUN_PATH}:$(libdir); fi; export LD_RUN_PATH;'
-    ;;
-  esac
-fi
-
-# On SunOS, if the linker supports the -rpath option, use it to
-# prevent ../bfd and ../opcodes from being included in the run time
-# search path.
-case "${host}" in
-  *-*-sunos*)
-    echo 'main () { }' > conftest.c
-    ${CC} -o conftest -Wl,-rpath= conftest.c >/dev/null 2>conftest.t
-    if grep 'unrecognized' conftest.t >/dev/null 2>&1; then
-      :
-    elif grep 'No such file' conftest.t >/dev/null 2>&1; then
-      :
-    elif grep 'do not mix' conftest.t >/dev/null 2>&1; then
-      :
-    elif grep 'some text already loaded' conftest.t >/dev/null 2>&1; then
-      :
-    elif test "${shared}" = "true"; then
-      HLDFLAGS='-Wl,-rpath=$(libdir)'
-    else
-      HLDFLAGS='-Wl,-rpath='
-    fi
-    rm -f conftest.t conftest.c conftest
-    ;;
-esac
-AC_SUBST(HLDFLAGS)
-AC_SUBST(HLDENV)
-# End stuff to support --enable-shared
-
 # target_subdir is used by the testsuite to find the target libraries.
 target_subdir=
 if test "${host}" != "${target}"; then

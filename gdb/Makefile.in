@@ -1,5 +1,5 @@
 # Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-# 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+# 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
 # This file is part of GDB.
 
@@ -345,8 +345,7 @@ LDFLAGS = @LDFLAGS@
 # Profiling options need to go here to work.
 # I think it's perfectly reasonable for a user to set -pg in CFLAGS
 # and have it work; that's why CFLAGS is here.
-INTERNAL_LDFLAGS = $(CFLAGS) $(GLOBAL_CFLAGS) $(PROFILE_CFLAGS) $(MH_LDFLAGS) $(LDFLAGS) $(CONFIG_LDFLAGS) @HLDFLAGS@
-HLDENV = @HLDENV@
+INTERNAL_LDFLAGS = $(CFLAGS) $(GLOBAL_CFLAGS) $(PROFILE_CFLAGS) $(MH_LDFLAGS) $(LDFLAGS) $(CONFIG_LDFLAGS)
 
 # If your system is missing alloca(), or, more likely, it's there but
 # it doesn't work, then refer to libiberty.
@@ -987,7 +986,7 @@ init.o: init.c $(defs_h) $(call_cmds_h)
 # Removing the old gdb first works better if it is running, at least on SunOS.
 gdb$(EXEEXT): gdb.o main.o libgdb.a $(CONFIG_OBS) $(ADD_DEPS) $(CDEPS) $(TDEPLIBS)
 	rm -f gdb$(EXEEXT)
-	$(HLDENV) $(CC_LD) $(INTERNAL_LDFLAGS) $(WIN32LDAPP) \
+	$(CC_LD) $(INTERNAL_LDFLAGS) $(WIN32LDAPP) \
 		-o gdb$(EXEEXT) gdb.o main.o $(CONFIG_OBS) libgdb.a \
 		$(TDEPLIBS) $(TUI_LIBRARY) $(CLIBS) $(LOADLIBES)
 
@@ -2388,7 +2387,7 @@ clean-gdbtk:
 insight$(EXEEXT): gdbtk-main.o main.o libgdb.a $(CONFIG_OBS) $(ADD_DEPS) \
 		$(CDEPS) $(TDEPLIBS)
 	rm -f insight$(EXEEXT)
-	$(HLDENV) $(CC_LD) $(INTERNAL_LDFLAGS) $(WIN32LDAPP) \
+	$(CC_LD) $(INTERNAL_LDFLAGS) $(WIN32LDAPP) \
 		-o insight$(EXEEXT) gdbtk-main.o main.o $(CONFIG_OBS) libgdb.a \
 		$(TDEPLIBS) $(TUI_LIBRARY) $(CLIBS) $(LOADLIBES)
 
