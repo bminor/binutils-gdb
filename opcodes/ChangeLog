@@ -1,3 +1,7 @@
+2003-07-30  Jason Eckhardt  <jle@rice.edu>
+
+        * i860-dis.c: Convert to ISO C90.  Remove superflous prototypes.
+
 2003-07-30  Nick Clifton  <nickc@redhat.com>
 
 	* po/ro.po: Updated Romanian translation.
