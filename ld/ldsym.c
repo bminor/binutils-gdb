@@ -219,7 +219,7 @@ lang_input_statement_type *f;
   else 
       {
 	asection *s;
-	if (option_longmap) {
+	if (true || option_longmap) {
 	  for (s = f->the_bfd->sections;
 	       s != (asection *)NULL;
 	       s = s->next) {
@@ -259,49 +259,51 @@ ldsym_print_symbol_table ()
 	if (sp->flags & SYM_INDIRECT) {
 	  fprintf(stdout,"indirect %s to %s\n",
 		  sp->name, (((ldsym_type *)(sp->sdefs_chain))->name));
-      }
-    else {
-	if (sp->sdefs_chain) 
-	  {
-	    asymbol *defsym = *(sp->sdefs_chain);
-	    asection *defsec = bfd_get_section(defsym);
-	    print_address(defsym->value);
-	    if (defsec)
-	      {
-		printf("  %-10s",
-			bfd_section_name(output_bfd,
-					 defsec));
-		print_space();
-		print_address(defsym->value+defsec->vma);
-
-	      }
-	    else 
-	      {
-		printf("         .......");
-	      }
-
-	  }	
-
-
-	if (sp->scoms_chain) {
-	  printf("common               ");
-	  print_address((*(sp->scoms_chain))->value);
-	  printf(" %s ",sp->name);
-	}
-	else if (sp->sdefs_chain) {
-	  printf(" %s ",sp->name);
 	}
 	else {
-	  printf("undefined                     ");
-	  printf("%s ",sp->name);
+	  if (sp->sdefs_chain) 
+	    {
+	      asymbol *defsym = *(sp->sdefs_chain);
+	      asection *defsec = bfd_get_section(defsym);
+	      print_address(defsym->value);
+	      if (defsec)
+		{
+		  printf("  %-10s",
+			 bfd_section_name(output_bfd,
+					  defsec));
+		  print_space();
+		  print_address(defsym->value+defsec->vma);
 
+		}
+	      else 
+		{
+		  printf("         .......");
+		}
+
+	    }	
+
+
+	  if (sp->scoms_chain) {
+	    printf("common               ");
+	    print_address((*(sp->scoms_chain))->value);
+	    printf(" %s ",sp->name);
+	  }
+	  else if (sp->sdefs_chain) {
+	    printf(" %s ",sp->name);
+	  }
+	  else {
+	    printf("undefined                     ");
+	    printf("%s ",sp->name);
+
+	  }
 	}
-      }
 	print_nl();
 
       }
   }
-  lang_for_each_file(list_file_locals);
+  if (option_longmap) {
+    lang_for_each_file(list_file_locals);
+  }
 }
 
 extern lang_output_section_statement_type *create_object_symbols;
