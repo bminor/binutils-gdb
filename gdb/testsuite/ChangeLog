@@ -1,3 +1,9 @@
+2004-03-03  Paul Gilliam  <pgilliam@us.ibm.com>
+
+        * lib/compiler.c: Add test for IBM's xlc compiler.
+        * lib/compiler.cc: Likewise.
+
+
 2004-02-24  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/fixed_points.exp: Create compilation object directory

@@ -52,3 +52,9 @@ set compiler_info [join {hpcc __HP_cc} -]
 #if defined (__HP_aCC)
 set compiler_info [join {hpacc __HP_aCC} -]
 #endif
+
+#if defined (__xlc__)
+/* IBM'x xlc compiler. NOTE:  __xlc__ expands to a double quoted string of four
+   numbers seperated by '.'s: currently "7.0.0.0" */
+regsub -all {\.} [join {xlc __xlc__} -] - compiler_info
+#endif
