@@ -1,5 +1,12 @@
 Thu Feb 24 18:49:37 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
+	* gdb.t06/break.exp (test_next_with_recursion): Remove xfail for
+	next over recursive call.  Revise the tests from that point on
+	(which had been skipped) to match GDB's actual (correct) output.
+
+	* gdb.t07/watchpoint.exp (test_stepping): Remove xfail for bug
+	with next over a breakpoint whose condition is false.
+
 	* gdb.t00/help.exp: Comment out "help set print" tests just like
 	(and for same reason as) "help set" test.
 
