@@ -1,3 +1,35 @@
+2003-02-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (TLS_GD_LD): Don't define..
+	(TLS_GD): ..define this instead and update all uses.
+	(TLS_TPRELGD): Define.
+	(ppc64_elf_link_hash_table_create): Tweak initialization of
+	init_refcount and init_offset.
+	(ppc64_elf_check_relocs): Add one extra element to t_symndx array.
+	Mark second slot of GD or LD toc entries.
+	(get_tls_type): Return an int.  Distinguish toc GD and LD entries
+	from other tls types.
+	(ppc64_elf_tls_setup): New function, split out from..
+	(ppc64_elf_tls_optimize): ..here.  Don't optimize when symbols are
+	defined in a dynamic object.  Fix LD optimization.  Don't set TLS_TPREL
+	on GD->IE optimization, use TLS_TPRELGD instead.  Use get_tls_type
+	return value to properly decide whether toc GD and LD entries can
+	optimize away __tls_get_addr call.  Check next reloc after DTPMOD64
+	to determine GD or LD rather than looking at TLS_LD flag.  Don't
+	attempt to adjust got entry tls_type here..
+	(allocate_dynrelocs): ..instead, adjust got entry tls_type here, and
+	look for possible merges.
+	(ppc64_elf_size_dynamic_sections): Adjust local got entries for
+	optimization.
+	(ppc64_elf_size_stubs): Tweak __tls_get_addr fudge.
+	(ppc64_elf_relocate_section): Rename some vars to better reflect usage.
+	Make use of return value from get_tls_type to properly detect GD and
+	LD optimizations.  Split tlsld/gd hi/ha from lo/ds case.  Don't
+	handle tls_get_addr removal when looking at REL24 relocs, do it when
+	looking at the previous reloc.  Check reloc after DTPMOD64 to determine
+	GD or LD.
+	* elf64-ppc.h (ppc64_elf_tls_setup): Declare.
+
 2003-02-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-hppa.c (group_sections): Don't share a stub section if
