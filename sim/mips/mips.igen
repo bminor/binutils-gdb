@@ -15,17 +15,17 @@
 :option:16:insn-bit-size:16
 :option:16:hi-bit-nr:15
 :option:16:insn-specifying-widths:true
-:option:16:gen-delayed-branch:true
+:option:16:gen-delayed-branch:false
 
 // IGEN config - mipsI..
 :option:32:insn-bit-size:32
 :option:32:hi-bit-nr:31
 :option:32:insn-specifying-widths:true
-:option:32:gen-delayed-branch:true
+:option:32:gen-delayed-branch:false
 
 
 // Generate separate simulators for each target
-:option::multi-sim:true
+// :option::multi-sim:true
 
 
 // Models known by this simulator
@@ -190,7 +190,7 @@
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
   if (GPR[RS] == GPR[RT])
-    DSPC = (PC + offset);
+    DELAY_SLOT (PC + offset);
 }
 
 
@@ -209,9 +209,9 @@
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
   if (GPR[RS] == GPR[RT])
-    DSPC = (PC + offset);
+    DELAY_SLOT (PC + offset);
   else
-    NULLIFY_NIA ();
+    NULLIFY_NEXT_INSTRUCTION ();
 }
 
 
@@ -231,7 +231,7 @@
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
   if (GPR[RS] >= 0)
-    DSPC = (PC + offset);
+    DELAY_SLOT (PC + offset);
 }
 
 
@@ -252,7 +252,7 @@
   address_word offset = EXTEND16 (OFFSET) << 2;
   RA = (CIA + 8);
   if (GPR[RS] >= 0)
-    DSPC = (PC + offset);
+    DELAY_SLOT (PC + offset);
 }
 
 
@@ -274,9 +274,9 @@
   /* NOTE: The branch occurs AFTER the next instruction has been
      executed */
   if (GPR[RS] >= 0)
-    DSPC = (PC + offset);
+    DELAY_SLOT (PC + offset);
   else
-    NULLIFY_NIA ();
+    NULLIFY_NEXT_INSTRUCTION ();
 }
 
 
@@ -295,9 +295,9 @@
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
   if (GPR[RS] >= 0)
-    DSPC = (PC + offset);
+    DELAY_SLOT (PC + offset);
   else
-    NULLIFY_NIA ();
+    NULLIFY_NEXT_INSTRUCTION ();
 }
 
 
@@ -317,7 +317,7 @@
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
   if (GPR[RS] > 0)
-    DSPC = (PC + offset);
+    DELAY_SLOT (PC + offset);
 }
 
 
@@ -338,9 +338,9 @@
   /* NOTE: The branch occurs AFTER the next instruction has been
      executed */
   if (GPR[RS] > 0)
-    DSPC = (PC + offset);
+    DELAY_SLOT (PC + offset);
   else
-    NULLIFY_NIA ();
+    NULLIFY_NEXT_INSTRUCTION ();
 }
 
 
@@ -362,7 +362,7 @@
   /* NOTE: The branch occurs AFTER the next instruction has been
      executed */
   if (GPR[RS] <= 0)
-    DSPC = (PC + offset);
+    DELAY_SLOT (PC + offset);
 }
 
 
@@ -381,9 +381,9 @@
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
   if (GPR[RS] <= 0)
-    DSPC = (PC + offset);
+    DELAY_SLOT (PC + offset);
   else
-    NULLIFY_NIA ();
+    NULLIFY_NEXT_INSTRUCTION ();
 }
 
 
@@ -403,7 +403,7 @@
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
   if (GPR[RS] < 0)
-    DSPC = (PC + offset);
+    DELAY_SLOT (PC + offset);
 }
 
 
@@ -426,7 +426,7 @@
   /* NOTE: The branch occurs AFTER the next instruction has been
      executed */
   if (GPR[RS] < 0)
-    DSPC = (PC + offset);
+    DELAY_SLOT (PC + offset);
 }
 
 
@@ -446,9 +446,9 @@
   address_word offset = EXTEND16 (OFFSET) << 2;
   RA = (CIA + 8);
   if (GPR[RS] < 0)
-    DSPC = (PC + offset);
+    DELAY_SLOT (PC + offset);
   else
-    NULLIFY_NIA ();
+    NULLIFY_NEXT_INSTRUCTION ();
 }
 
 
@@ -469,9 +469,9 @@
   /* NOTE: The branch occurs AFTER the next instruction has been
      executed */
   if (GPR[RS] < 0)
-    DSPC = (PC + offset);
+    DELAY_SLOT (PC + offset);
   else
-    NULLIFY_NIA ();
+    NULLIFY_NEXT_INSTRUCTION ();
 }
 
 
@@ -491,7 +491,7 @@
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
   if (GPR[RS] != GPR[RT])
-    DSPC = (PC + offset);
+    DELAY_SLOT (PC + offset);
 }
 
 
@@ -510,9 +510,9 @@
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
   if (GPR[RS] != GPR[RT])
-    DSPC = (PC + offset);
+    DELAY_SLOT (PC + offset);
   else
-    NULLIFY_NIA ();
+    NULLIFY_NEXT_INSTRUCTION ();
 }
 
 
@@ -1048,10 +1048,10 @@
 *tx19:
 // end-sanitize-tx19
 {
-  /* NOTE: The region used is that of the delay slot and NOT the
+  /* NOTE: The region used is that of the delay slot NIA and NOT the
      current instruction */
-  address_word region = cia.dp & MASK (63, 28);
-  DSPC = region | (INSTR_INDEX << 2);
+  address_word region = (NIA & MASK (63, 28));
+  DELAY_SLOT (region | (INSTR_INDEX << 2));
 }
 
 
@@ -1071,9 +1071,9 @@
 {
   /* NOTE: The region used is that of the delay slot and NOT the
      current instruction */
-  address_word region = cia.dp & MASK (63, 28);
+  address_word region = (NIA & MASK (63, 28));
   GPR[31] = CIA + 8;
-  DSPC = region | (INSTR_INDEX << 2);
+  DELAY_SLOT (region | (INSTR_INDEX << 2));
 }
 
 
@@ -1094,7 +1094,7 @@
 {
   address_word temp = GPR[RS];
   GPR[RD] = CIA + 8;
-  DSPC = temp;
+  DELAY_SLOT (temp);
 }
 
 
@@ -1112,7 +1112,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  DSPC = GPR[RS];
+  DELAY_SLOT (GPR[RS]);
 }
 
 
@@ -1135,8 +1135,8 @@
   int destreg = ((instruction >> 16) & 0x0000001F);
   signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
-    uword64 vaddr = ((uword64)op1 + offset);
-    uword64 paddr;
+    address_word vaddr = ((uword64)op1 + offset);
+    address_word paddr;
     int uncached;
     {
       if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
@@ -1177,8 +1177,8 @@
   int destreg = ((instruction >> 16) & 0x0000001F);
   signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
-    unsigned64 vaddr = ((unsigned64)op1 + offset);
-    unsigned64 paddr;
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
     int uncached;
     {
       if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
@@ -1217,8 +1217,8 @@
   int destreg = ((instruction >> 16) & 0x0000001F);
   signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
-    unsigned64 vaddr = ((unsigned64)op1 + offset);
-    unsigned64 paddr;
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
     int uncached;
     if ((vaddr & 7) != 0)
       SignalExceptionAddressLoad();
@@ -1254,8 +1254,8 @@
   int destreg = ((instruction >> 16) & 0x0000001F);
   signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
-    unsigned64 vaddr = ((unsigned64)op1 + offset);
-    unsigned64 paddr;
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
     int uncached;
     if ((vaddr & 7) != 0)
       SignalExceptionAddressLoad();
@@ -1290,8 +1290,8 @@
   int destreg = ((instruction >> 16) & 0x0000001F);
   signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
-    unsigned64 vaddr = ((unsigned64)op1 + offset);
-    unsigned64 paddr;
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
     int uncached;
     {
       if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
@@ -1331,8 +1331,8 @@
   int destreg = ((instruction >> 16) & 0x0000001F);
   signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
-    unsigned64 vaddr = ((unsigned64)op1 + offset);
-    unsigned64 paddr;
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
     int uncached;
     {
       if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
@@ -1381,8 +1381,8 @@
   int destreg = ((instruction >> 16) & 0x0000001F);
   signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
-    unsigned64 vaddr = ((unsigned64)op1 + offset);
-    unsigned64 paddr;
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
     int uncached;
     if ((vaddr & 1) != 0)
       SignalExceptionAddressLoad();
@@ -1426,8 +1426,8 @@
   int destreg = ((instruction >> 16) & 0x0000001F);
   signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
-    unsigned64 vaddr = ((unsigned64)op1 + offset);
-    unsigned64 paddr;
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
     int uncached;
     if ((vaddr & 1) != 0)
       SignalExceptionAddressLoad();
@@ -1470,8 +1470,8 @@
   int destreg = ((instruction >> 16) & 0x0000001F);
   signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
-    unsigned64 vaddr = ((unsigned64)op1 + offset);
-    unsigned64 paddr;
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
     int uncached;
     if ((vaddr & 3) != 0)
       SignalExceptionAddressLoad();
@@ -1514,8 +1514,8 @@
   int destreg = ((instruction >> 16) & 0x0000001F);
   signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
-    unsigned64 vaddr = ((unsigned64)op1 + offset);
-    unsigned64 paddr;
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
     int uncached;
     if ((vaddr & 7) != 0)
       SignalExceptionAddressLoad();
@@ -1571,8 +1571,8 @@
   int destreg = ((instruction >> 16) & 0x0000001F);
   signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
-    unsigned64 vaddr = ((unsigned64)op1 + offset);
-    unsigned64 paddr;
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
     int uncached;
     if ((vaddr & 3) != 0)
       SignalExceptionAddressLoad();
@@ -1616,8 +1616,8 @@
   int destreg = ((instruction >> 16) & 0x0000001F);
   signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
-    unsigned64 vaddr = ((unsigned64)op1 + offset);
-    unsigned64 paddr;
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
     int uncached;
     if ((vaddr & 3) != 0)
       SignalExceptionAddressLoad();
@@ -1661,8 +1661,8 @@
   int destreg = ((instruction >> 16) & 0x0000001F);
   signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
-    unsigned64 vaddr = ((unsigned64)op1 + offset);
-    unsigned64 paddr;
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
     int uncached;
     {
       if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
@@ -1708,8 +1708,8 @@
   int destreg = ((instruction >> 16) & 0x0000001F);
   signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
-    unsigned64 vaddr = ((unsigned64)op1 + offset);
-    unsigned64 paddr;
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
     int uncached;
     {
       if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
@@ -1760,8 +1760,8 @@
   int destreg = ((instruction >> 16) & 0x0000001F);
   signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
-    unsigned64 vaddr = ((unsigned64)op1 + offset);
-    unsigned64 paddr;
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
     int uncached;
     if ((vaddr & 3) != 0)
       SignalExceptionAddressLoad();
@@ -2001,8 +2001,8 @@
   int hint = ((instruction >> 16) & 0x0000001F);
   signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
-    unsigned64 vaddr = ((unsigned64)op1 + offset);
-    unsigned64 paddr;
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
     int uncached;
     {
       if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
@@ -2030,8 +2030,8 @@
   signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
   signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
-    unsigned64 vaddr = ((unsigned64)op1 + offset);
-    unsigned64 paddr;
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
     int uncached;
     {
       if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
@@ -2073,8 +2073,8 @@
   signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
   signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
-    unsigned64 vaddr = ((unsigned64)op1 + offset);
-    unsigned64 paddr;
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
     int uncached;
     if ((vaddr & 3) != 0)
       SignalExceptionAddressStore();
@@ -2117,8 +2117,8 @@
   signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
   signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
-    unsigned64 vaddr = ((unsigned64)op1 + offset);
-    unsigned64 paddr;
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
     int uncached;
     if ((vaddr & 7) != 0)
       SignalExceptionAddressStore();
@@ -2157,8 +2157,8 @@
   signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
   signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
-    unsigned64 vaddr = ((unsigned64)op1 + offset);
-    unsigned64 paddr;
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
     int uncached;
     if ((vaddr & 7) != 0)
       SignalExceptionAddressStore();
@@ -2196,8 +2196,8 @@
   int destreg = ((instruction >> 16) & 0x0000001F);
   signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
-    unsigned64 vaddr = ((unsigned64)op1 + offset);
-    unsigned64 paddr;
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
     int uncached;
     if ((vaddr & 7) != 0)
       SignalExceptionAddressStore();
@@ -2234,8 +2234,8 @@
   signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
   signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
-    unsigned64 vaddr = ((unsigned64)op1 + offset);
-    unsigned64 paddr;
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
     int uncached;
     {
       if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
@@ -2275,8 +2275,8 @@
   signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
   signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
-    unsigned64 vaddr = ((unsigned64)op1 + offset);
-    unsigned64 paddr;
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
     int uncached;
     {
       if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
@@ -2318,8 +2318,8 @@
   signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
   signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
-    unsigned64 vaddr = ((unsigned64)op1 + offset);
-    unsigned64 paddr;
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
     int uncached;
     if ((vaddr & 1) != 0)
       SignalExceptionAddressStore();
@@ -2594,8 +2594,8 @@
   signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
   signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
-    unsigned64 vaddr = ((unsigned64)op1 + offset);
-    unsigned64 paddr;
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
     int uncached;
     if ((vaddr & 3) != 0)
       SignalExceptionAddressStore();
@@ -2638,8 +2638,8 @@
   int destreg = ((instruction >> 16) & 0x0000001F);
   signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
-    unsigned64 vaddr = ((unsigned64)op1 + offset);
-    unsigned64 paddr;
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
     int uncached;
     if ((vaddr & 3) != 0)
       SignalExceptionAddressStore();
@@ -2682,8 +2682,8 @@
   signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
   signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
-    unsigned64 vaddr = ((unsigned64)op1 + offset);
-    unsigned64 paddr;
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
     int uncached;
     {
       if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
@@ -2728,8 +2728,8 @@
   signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
   signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
-    unsigned64 vaddr = ((unsigned64)op1 + offset);
-    unsigned64 paddr;
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
     int uncached;
     {
       if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
@@ -3194,10 +3194,10 @@
       int condition = (PREVCOC1() == boolean);
       /* NOTE: The branch occurs AFTER the next instruction has been executed */
       if (condition) {
-	DSPC = (PC + offset);
+	DELAY_SLOT (PC + offset);
       }
       else if (likely) {
-	NULLIFY_NIA ();
+	NULLIFY_NEXT_INSTRUCTION ();
       }
     }
   }
@@ -3604,8 +3604,8 @@
   signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
   signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
-    unsigned64 vaddr = ((unsigned64)op1 + op2);
-    unsigned64 paddr;
+    address_word vaddr = ((unsigned64)op1 + op2);
+    address_word paddr;
     int uncached;
     if ((vaddr & 7) != 0)
       SignalExceptionAddressLoad();
@@ -3639,8 +3639,8 @@
   signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
   signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
-   unsigned64 vaddr = ((unsigned64)op1 + op2);
-   unsigned64 paddr;
+   address_word vaddr = ((unsigned64)op1 + op2);
+   address_word paddr;
    int uncached;
    if ((vaddr & 3) != 0)
     SignalExceptionAddressLoad();
@@ -4003,8 +4003,8 @@
   signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
   signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
-    unsigned64 vaddr = ((unsigned64)op1 + (unsigned64)op2);
-    unsigned64 paddr;
+    address_word vaddr = ((unsigned64)op1 + (unsigned64)op2);
+    address_word paddr;
     int uncached;
     if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
       Prefetch(uncached,paddr,vaddr,isDATA,fs);
@@ -4110,8 +4110,8 @@
   signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
   signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
-    unsigned64 vaddr = ((unsigned64)op1 + op2);
-    unsigned64 paddr;
+    address_word vaddr = ((unsigned64)op1 + op2);
+    address_word paddr;
     int uncached;
     if ((vaddr & 7) != 0)
       SignalExceptionAddressStore();
@@ -4200,8 +4200,8 @@
   signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
   signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
-   unsigned64 vaddr = ((unsigned64)op1 + op2);
-   unsigned64 paddr;
+   address_word vaddr = ((unsigned64)op1 + op2);
+   address_word paddr;
    int uncached;
    if ((vaddr & 3) != 0)
     SignalExceptionAddressStore();
@@ -4344,8 +4344,8 @@
   int hint = ((instruction >> 16) & 0x0000001F);
   signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
-    unsigned64 vaddr = (op1 + offset);
-    unsigned64 paddr;
+    address_word vaddr = (op1 + offset);
+    address_word paddr;
     int uncached;
     if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
       CacheOp(hint,vaddr,paddr,instruction);
@@ -4460,6 +4460,11 @@
 // to http://www.sgi.com/MIPS/arch/MIPS16/mips16.pdf.
 
 
+// FIXME: Instead of having the code for mips16 instructions here.
+// these instructions should instead call the corresponding 32bit
+// instruction (or a function implementing that instructions code).
+
+
 // Load and Store Instructions
 
 
@@ -4488,8 +4493,8 @@
   if (have_extendval)
     SignalException (ReservedInstruction, instruction);
   {
-    unsigned64 vaddr = ((unsigned64)op1 + offset);
-    unsigned64 paddr;
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
     int uncached;
     {
       if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
@@ -4536,8 +4541,8 @@
   if (have_extendval)
     SignalException (ReservedInstruction, instruction);
   {
-    unsigned64 vaddr = ((unsigned64)op1 + offset);
-    unsigned64 paddr;
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
     int uncached;
     {
       if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
@@ -4585,8 +4590,8 @@
   if (have_extendval)
     SignalException (ReservedInstruction, instruction);
   {
-    unsigned64 vaddr = ((unsigned64)op1 + offset);
-    unsigned64 paddr;
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
     int uncached;
     if ((vaddr & 1) != 0)
       SignalExceptionAddressLoad();
@@ -4637,8 +4642,8 @@
   if (have_extendval)
     SignalException (ReservedInstruction, instruction);
   {
-    unsigned64 vaddr = ((unsigned64)op1 + offset);
-    unsigned64 paddr;
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
     int uncached;
     if ((vaddr & 1) != 0)
       SignalExceptionAddressLoad();
@@ -4689,8 +4694,8 @@
   if (have_extendval)
     SignalException (ReservedInstruction, instruction);
   {
-    unsigned64 vaddr = ((unsigned64)op1 + offset);
-    unsigned64 paddr;
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
     int uncached;
     if ((vaddr & 3) != 0)
       SignalExceptionAddressLoad();
@@ -4738,8 +4743,8 @@
   if (have_extendval)
     SignalException (ReservedInstruction, instruction);
   {
-    unsigned64 vaddr = ((unsigned64)op1 + offset);
-    unsigned64 paddr;
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
     int uncached;
     if ((vaddr & 3) != 0)
       SignalExceptionAddressLoad();
@@ -4788,8 +4793,8 @@
   if (have_extendval)
     SignalException (ReservedInstruction, instruction);
   {
-    unsigned64 vaddr = ((unsigned64)op1 + offset);
-    unsigned64 paddr;
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
     int uncached;
     if ((vaddr & 3) != 0)
       SignalExceptionAddressLoad();
@@ -4840,8 +4845,8 @@
   if (have_extendval)
     SignalException (ReservedInstruction, instruction);
   {
-    unsigned64 vaddr = ((unsigned64)op1 + offset);
-    unsigned64 paddr;
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
     int uncached;
     if ((vaddr & 3) != 0)
       SignalExceptionAddressLoad();
@@ -4892,8 +4897,8 @@
   if (have_extendval)
     SignalException (ReservedInstruction, instruction);
   {
-    unsigned64 vaddr = ((unsigned64)op1 + offset);
-    unsigned64 paddr;
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
     int uncached;
     if ((vaddr & 7) != 0)
       SignalExceptionAddressLoad();
@@ -4939,8 +4944,8 @@
   if (have_extendval)
     SignalException (ReservedInstruction, instruction);
   {
-    unsigned64 vaddr = ((unsigned64)op1 + offset);
-    unsigned64 paddr;
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
     int uncached;
     if ((vaddr & 7) != 0)
       SignalExceptionAddressLoad();
@@ -4987,8 +4992,8 @@
   if (have_extendval)
     SignalException (ReservedInstruction, instruction);
   {
-    unsigned64 vaddr = ((unsigned64)op1 + offset);
-    unsigned64 paddr;
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
     int uncached;
     if ((vaddr & 7) != 0)
       SignalExceptionAddressLoad();
@@ -5037,8 +5042,8 @@
   if (have_extendval)
     SignalException (ReservedInstruction, instruction);
   {
-    unsigned64 vaddr = ((unsigned64)op1 + offset);
-    unsigned64 paddr;
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
     int uncached;
     {
       if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
@@ -5089,8 +5094,8 @@
   if (have_extendval)
     SignalException (ReservedInstruction, instruction);
   {
-    unsigned64 vaddr = ((unsigned64)op1 + offset);
-    unsigned64 paddr;
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
     int uncached;
     if ((vaddr & 1) != 0)
       SignalExceptionAddressStore();
@@ -5144,8 +5149,8 @@
   if (have_extendval)
     SignalException (ReservedInstruction, instruction);
   {
-    unsigned64 vaddr = ((unsigned64)op1 + offset);
-    unsigned64 paddr;
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
     int uncached;
     if ((vaddr & 3) != 0)
       SignalExceptionAddressStore();
@@ -5194,8 +5199,8 @@
   if (have_extendval)
     SignalException (ReservedInstruction, instruction);
   {
-    unsigned64 vaddr = ((unsigned64)op1 + offset);
-    unsigned64 paddr;
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
     int uncached;
     if ((vaddr & 3) != 0)
       SignalExceptionAddressStore();
@@ -5242,8 +5247,8 @@
   if (have_extendval)
     SignalException (ReservedInstruction, instruction);
   {
-    unsigned64 vaddr = ((unsigned64)op1 + offset);
-    unsigned64 paddr;
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
     int uncached;
     if ((vaddr & 3) != 0)
       SignalExceptionAddressStore();
@@ -5294,8 +5299,8 @@
   if (have_extendval)
     SignalException (ReservedInstruction, instruction);
   {
-    unsigned64 vaddr = ((unsigned64)op1 + offset);
-    unsigned64 paddr;
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
     int uncached;
     if ((vaddr & 7) != 0)
       SignalExceptionAddressStore();
@@ -5340,8 +5345,8 @@
   if (have_extendval)
     SignalException (ReservedInstruction, instruction);
   {
-    unsigned64 vaddr = ((unsigned64)op1 + offset);
-    unsigned64 paddr;
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
     int uncached;
     if ((vaddr & 7) != 0)
       SignalExceptionAddressStore();
@@ -5384,8 +5389,8 @@
   if (have_extendval)
     SignalException (ReservedInstruction, instruction);
   {
-    unsigned64 vaddr = ((unsigned64)op1 + offset);
-    unsigned64 paddr;
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
     int uncached;
     if ((vaddr & 7) != 0)
       SignalExceptionAddressStore();
@@ -6827,7 +6832,7 @@
   unsigned32 instruction = instruction_0;
   unsigned_word op1 = (instruction >> 0) & 0x7ff;
   {
-    unsigned64 paddr;
+    address_word paddr;
     int uncached;
     if (AddressTranslation (PC &~ (unsigned64) 1, isINSTRUCTION, isLOAD, &paddr, &uncached, isTARGET, isREAL))
       {
@@ -6857,7 +6862,7 @@
        so we just truncate it to 32 bits here.  */
     op1 = VL4_8(op1);
     /* NOTE: The jump occurs AFTER the next instruction has been executed */
-    DSPC = op1;
+    DELAY_SLOT op1;
     JALDELAYSLOT();
   }
 }
@@ -6878,7 +6883,7 @@
        so we just truncate it to 32 bits here.  */
     op1 = VL4_8(op1);
     /* NOTE: The jump occurs AFTER the next instruction has been executed */
-    DSPC = op1;
+    DELAY_SLOT op1;
     DELAYSLOT();
   }
 }
@@ -6897,7 +6902,7 @@
        so we just truncate it to 32 bits here.  */
     op1 = VL4_8(op1);
     /* NOTE: The jump occurs AFTER the next instruction has been executed */
-    DSPC = op1;
+    DELAY_SLOT op1;
     DELAYSLOT();
   }
 }
@@ -6920,7 +6925,7 @@
        so we just truncate it to 32 bits here.  */
     op1 = VL4_8(op1);
     /* NOTE: The jump occurs AFTER the next instruction has been executed */
-    DSPC = op1;
+    DELAY_SLOT op1;
     DELAYSLOT();
   }
 }
@@ -7207,7 +7212,7 @@
        so we just truncate it to 32 bits here.  */
     op1 = VL4_8(op1);
     /* NOTE: The jump occurs AFTER the next instruction has been executed */
-    DSPC = op1;
+    DELAY_SLOT op1;
     /* JALDELAYSLOT(); FIXME */
   }
 }
@@ -7222,8 +7227,8 @@
   int destreg = ((instruction >> 16) & 0x0000001F);
   signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
-    unsigned64 vaddr = ((unsigned64)op1 + offset);
-    unsigned64 paddr;
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
     int uncached;
     if ((vaddr & 15) != 0)
       SignalExceptionAddressLoad();
@@ -9581,8 +9586,8 @@
   signed_word rt_reg = GPR[RT];
   signed_word rt_reg1 = GPR1[RT];
   {
-    unsigned64 vaddr = ((unsigned64)op1 + offset);
-    unsigned64 paddr;
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
     int uncached;
     if ((vaddr & 15) != 0)
       SignalExceptionAddressStore();
