@@ -1,3 +1,32 @@
+Fri Sep 17 17:52:24 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	Finish up support for i386-sysv4 (without shared libraries):
+	* ld.h (flag_is_weak): Define.
+	* ldlang.c (print_symbol): Mention whether symbol is weak.
+	(print_input_section): Print weak symbols as globals.
+	* ldmain.c (refize): Do not zero out BSF_WEAK flag.
+	(enter_global_ref): Do not warn if a weak symbol redefines a
+	global symbol.  Do not let a weak symbol redefine a common symbol.
+	(enter_file_symbols): Treat weak symbols as global symbols.
+	(subfile_wanted_p): Do not pull in an object file from a archive
+	just to resolve an undefined weak symbol.
+	* ldmisc.c (vfinfo): Don't needlessly malloc space after a fatal
+	error; the error might be that malloc has run out of space.
+	* ldsym.c (write_file_locals): Treat weak symbols as global.
+	* configure.in (i[34]86-*-sysv4*, i[34]86-*-elf*): New targets;
+	use i386-elf.
+	* config/i386v4.mh: New file; set NATIVE_LIB_DIRS to /usr/ccs/lib.
+	* config/i386-elf.mt: New file; set EMUL to elf_i386.
+	* emulparams/elf_i386.sh: New file.
+	* scripttempl/elf.sc: Use ${NOP} as filler (defaults to 0).
+	* Makefile.in (NATIVE_LIB_DIRS): Define to be empty.
+	(ALL_EMULATIONS): Add em_elf_i386.o.
+	(GENSCRIPTS): Pass NATIVE_LIB_DIRS as sixth argument.
+	(em_elf_i386.c): New target, like other em_*.c targets.
+	($(LD_PROG)): Pass $(CFLAGS) to $(CC).
+	* genscripts.sh: Accept NATIVE_LIB_DIRS as sixth argument.  If
+	nonempty, and configured for native, add it to LIB_PATH.
+
 Fri Sep 17 13:07:39 1993  Stan Shebs  (shebs@rtl.cygnus.com)
 
 	* scripttempl/{h8300.sc,h8500.sc,i386coff.sc,m68kcoff.sc,sh.sc}:

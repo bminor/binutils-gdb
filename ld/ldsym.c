@@ -474,14 +474,15 @@ write_file_locals (output_buffer)
 
 	if (p->section == 0)
 	  p->section = &bfd_abs_section;
-	if (flag_is_global (p->flags))
+	if (flag_is_global (p->flags)
+	    || flag_is_weak (p->flags))
 	  {
-	    /* We are only interested in outputting
-	   globals at this stage in special circumstances */
+	    /* If this symbol is marked as occurring now, rather than
+	       at the end, output it now.  This is used for COFF C_EXT
+	       FCN symbols.  FIXME: There must be a better way.  */
 	    if (bfd_asymbol_bfd (p) == entry->the_bfd
 		&& flag_is_not_at_end (p->flags))
 	      {
-		/* And this is one of them */
 		*(output_buffer++) = p;
 		p->flags |= BSF_KEEP;
 	      }
