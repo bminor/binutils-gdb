@@ -239,9 +239,9 @@ and called functions.
 machine-independent part of @value{GDBN}, except that it is used when
 setting up a new frame from scratch, as follows:
 
-@example
-      create_new_frame (read_register (FP_REGNUM), read_pc ()));
-@end example
+@smallexample
+create_new_frame (read_register (FP_REGNUM), read_pc ()));
+@end smallexample
 
 @cindex frame pointer register
 Other than that, all the meaning imparted to @code{FP_REGNUM} is
@@ -453,7 +453,7 @@ Insert or remove a hardware watchpoint starting at @var{addr}, for
 possible values of the enumerated data type @code{target_hw_bp_type},
 defined by @file{breakpoint.h} as follows:
 
-@example
+@smallexample
  enum target_hw_bp_type
    @{
      hw_write   = 0, /* Common (write) HW watchpoint */
@@ -461,7 +461,7 @@ defined by @file{breakpoint.h} as follows:
      hw_access  = 2, /* Access (read or write) HW watchpoint */
      hw_execute = 3  /* Execute HW breakpoint */
    @};
-@end example
+@end smallexample
 
 @noindent
 These two macros should return 0 for success, non-zero for failure.
@@ -863,7 +863,7 @@ maximum of five levels.
 
 The overall structure of the table output code is something like this:
 
-@example
+@smallexample
   ui_out_table_begin
     ui_out_table_header
     @dots{}
@@ -874,7 +874,7 @@ The overall structure of the table output code is something like this:
       ui_out_tuple_end
       @dots{}
   ui_out_table_end
-@end example
+@end smallexample
 
 Here is the description of table-, tuple- and list-related @code{ui_out}
 functions:
@@ -1139,7 +1139,7 @@ produce a table.
 
 The original code was:
 
-@example
+@smallexample
  if (!found_a_breakpoint++)
    @{
      annotate_breakpoints_headers ();
@@ -1162,11 +1162,11 @@ The original code was:
 
      annotate_breakpoints_table ();
    @}
-@end example
+@end smallexample
 
 Here's the new version:
 
-@example
+@smallexample
   nr_printable_breakpoints = @dots{};
 
   if (addressprint)
@@ -1203,13 +1203,13 @@ Here's the new version:
   ui_out_table_body (uiout);
   if (nr_printable_breakpoints > 0)
     annotate_breakpoints_table ();
-@end example
+@end smallexample
 
 This example, from the @code{print_one_breakpoint} function, shows how
 to produce the actual data for the table whose structure was defined
 in the above example.  The original code was:
 
-@example
+@smallexample
    annotate_record ();
    annotate_field (0);
    printf_filtered ("%-3d ", b->number);
@@ -1224,11 +1224,11 @@ in the above example.  The original code was:
    annotate_field (3);
    printf_filtered ("%-3c ", bpenables[(int)b->enable]);
    @dots{}
-@end example
+@end smallexample
 
 This is the new version:
 
-@example
+@smallexample
    annotate_record ();
    ui_out_tuple_begin (uiout, "bkpt");
    annotate_field (0);
@@ -1244,44 +1244,44 @@ This is the new version:
    annotate_field (3);
    ui_out_field_fmt (uiout, "enabled", "%c", bpenables[(int)b->enable]);
    @dots{}
-@end example
+@end smallexample
 
 This example, also from @code{print_one_breakpoint}, shows how to
 produce a complicated output field using the @code{print_expression}
 functions which requires a stream to be passed.  It also shows how to
 automate stream destruction with cleanups.  The original code was:
 
-@example
+@smallexample
     annotate_field (5);
     print_expression (b->exp, gdb_stdout);
-@end example
+@end smallexample
 
 The new version is:
 
-@example
+@smallexample
   struct ui_stream *stb = ui_out_stream_new (uiout);
   struct cleanup *old_chain = make_cleanup_ui_out_stream_delete (stb);
   ...
   annotate_field (5);
   print_expression (b->exp, stb->stream);
   ui_out_field_stream (uiout, "what", local_stream);
-@end example
+@end smallexample
 
 This example, also from @code{print_one_breakpoint}, shows how to use
 @code{ui_out_text} and @code{ui_out_field_string}.  The original code
 was:
 
-@example
+@smallexample
   annotate_field (5);
   if (b->dll_pathname == NULL)
     printf_filtered ("<any library> ");
   else
     printf_filtered ("library \"%s\" ", b->dll_pathname);
-@end example
+@end smallexample
 
 It became:
 
-@example
+@smallexample
   annotate_field (5);
   if (b->dll_pathname == NULL)
     @{
@@ -1294,21 +1294,21 @@ It became:
       ui_out_field_string (uiout, "what", b->dll_pathname);
       ui_out_text (uiout, "\" ");
     @}
-@end example
+@end smallexample
 
 The following example from @code{print_one_breakpoint} shows how to
 use @code{ui_out_field_int} and @code{ui_out_spaces}.  The original
 code was:
 
-@example
+@smallexample
   annotate_field (5);
   if (b->forked_inferior_pid != 0)
     printf_filtered ("process %d ", b->forked_inferior_pid);
-@end example
+@end smallexample
 
 It became:
 
-@example
+@smallexample
   annotate_field (5);
   if (b->forked_inferior_pid != 0)
     @{
@@ -1316,20 +1316,20 @@ It became:
       ui_out_field_int (uiout, "what", b->forked_inferior_pid);
       ui_out_spaces (uiout, 1);
     @}
-@end example
+@end smallexample
 
 Here's an example of using @code{ui_out_field_string}.  The original
 code was:
 
-@example
+@smallexample
   annotate_field (5);
   if (b->exec_pathname != NULL)
     printf_filtered ("program \"%s\" ", b->exec_pathname);
-@end example
+@end smallexample
 
 It became:
 
-@example
+@smallexample
   annotate_field (5);
   if (b->exec_pathname != NULL)
     @{
@@ -1337,22 +1337,22 @@ It became:
       ui_out_field_string (uiout, "what", b->exec_pathname);
       ui_out_text (uiout, "\" ");
     @}
-@end example
+@end smallexample
 
 Finally, here's an example of printing an address.  The original code:
 
-@example
+@smallexample
   annotate_field (4);
   printf_filtered ("%s ",
         local_hex_string_custom ((unsigned long) b->address, "08l"));
-@end example
+@end smallexample
 
 It became:
 
-@example
+@smallexample
   annotate_field (4);
   ui_out_field_core_addr (uiout, "Address", b->address);
-@end example
+@end smallexample
 
 
 @section Console Printing
@@ -1904,7 +1904,7 @@ parsers that define a bunch of global names, the following lines
 @strong{must} be included at the top of the YACC parser, to prevent the
 various parsers from defining the same global names:
 
-@example
+@smallexample
 #define yyparse         @var{lang}_parse
 #define yylex           @var{lang}_lex
 #define yyerror         @var{lang}_error
@@ -1921,7 +1921,7 @@ various parsers from defining the same global names:
 #define yyexca          @var{lang}_exca
 #define yyerrflag       @var{lang}_errflag
 #define yynerrs         @var{lang}_nerrs
-@end example
+@end smallexample
 
 At the bottom of your parser, define a @code{struct language_defn} and
 initialize it with the right values for your language.  Define an
@@ -4185,7 +4185,7 @@ Cleanups are implemented as a chain.  The handle returned by
 later cleanups appended to the chain (but not yet discarded or
 performed).  E.g.:
 
-@example
+@smallexample
 make_cleanup (a, 0); 
 @{
   struct cleanup *old = make_cleanup (b, 0); 
@@ -4193,7 +4193,7 @@ make_cleanup (a, 0);
   ...
   do_cleanups (old);
 @}
-@end example
+@end smallexample
 
 @noindent
 will call @code{c()} and @code{b()} but will not call @code{a()}.  The
@@ -4212,13 +4212,13 @@ code-segment avoids a memory leak problem (even when @code{error} is
 called and a forced stack unwind occurs) by ensuring that the
 @code{xfree} will always be called:
 
-@example
+@smallexample
 struct cleanup *old = make_cleanup (null_cleanup, 0);
 data = xmalloc (sizeof blah);
 make_cleanup (xfree, data);
 ... blah blah ...
 do_cleanups (old);
-@end example
+@end smallexample
 
 The second style is try/except.  Before it exits, your code-block calls
 @code{discard_cleanups} with the old cleanup chain and thus ensures that
@@ -4226,13 +4226,13 @@ any created cleanups are not performed.  For instance, the following
 code segment, ensures that the file will be closed but only if there is
 an error:
 
-@example
+@smallexample
 FILE *file = fopen ("afile", "r");
 struct cleanup *old = make_cleanup (close_file, file);
 ... blah blah ...
 discard_cleanups (old);
 return file;
-@end example
+@end smallexample
 
 Some functions, e.g. @code{fputs_filtered()} or @code{error()}, specify
 that they ``should not be called when cleanups are not in place''.  This
@@ -4389,7 +4389,7 @@ strictly.
 A function declaration should not have its name in column zero.  A
 function definition should have its name in column zero.
 
-@example
+@smallexample
 /* Declaration */
 static void foo (void);
 /* Definition */
@@ -4397,7 +4397,7 @@ void
 foo (void)
 @{
 @}
-@end example
+@end smallexample
 
 @emph{Pragmatics: This simplifies scripting.  Function definitions can
 be found using @samp{^function-name}.}
@@ -4415,17 +4415,17 @@ for @code{diff} and @code{patch} utilities.
 
 Pointers are declared using the traditional K&R C style:
 
-@example
+@smallexample
 void *foo;
-@end example
+@end smallexample
 
 @noindent
 and not:
 
-@example
+@smallexample
 void * foo;
 void* foo;
-@end example
+@end smallexample
 
 @subsection Comments
 
@@ -4435,13 +4435,13 @@ The standard GNU requirements on comments must be followed strictly.
 Block comments must appear in the following form, with no @code{/*}- or
 @code{*/}-only lines, and no leading @code{*}:
 
-@example
+@smallexample
 /* Wait for control to return from inferior to debugger.  If inferior
    gets a signal, we may decide to start it up again instead of
    returning.  That is why there is a loop in this function.  When
    this function actually returns it means the inferior should be left
    stopped and @value{GDBN} should read more commands.  */
-@end example
+@end smallexample
 
 (Note that this format is encouraged by Emacs; tabbing for a multi-line
 comment works correctly, and @kbd{M-q} fills the block consistently.)
@@ -4558,12 +4558,12 @@ a header file should explicitly include the header declaring any
 
 All include files should be wrapped in:
 
-@example
+@smallexample
 #ifndef INCLUDE_FILE_NAME_H
 #define INCLUDE_FILE_NAME_H
 header body
 #endif
-@end example
+@end smallexample
 
 
 @subsection Clean Design and Portable Implementation
@@ -4723,16 +4723,16 @@ vendors, and operating systems near the bottom of the file.  Also, add
 @code{@var{arch}-@var{xvend}-@var{xos}}.  You can test your changes by
 running
 
-@example
+@smallexample
 ./config.sub @var{xyz}
-@end example
+@end smallexample
 
 @noindent
 and
 
-@example
+@smallexample
 ./config.sub @code{@var{arch}-@var{xvend}-@var{xos}}
-@end example
+@end smallexample
 
 @noindent
 which should both respond with @code{@var{arch}-@var{xvend}-@var{xos}}
@@ -4769,9 +4769,9 @@ configuration.
 From the top level directory (containing @file{gdb}, @file{bfd},
 @file{libiberty}, and so on):
 
-@example
+@smallexample
 make -f Makefile.in gdb.tar.gz
-@end example
+@end smallexample
 
 @noindent
 This will properly configure, clean, rebuild any files that are
@@ -4903,19 +4903,19 @@ release from the head of the release branch).
 
 Releases 5.0 and 5.1 used branch and release tags of the form:
 
-@example
+@smallexample
 gdb_N_M-YYYY-MM-DD-branchpoint
 gdb_N_M-YYYY-MM-DD-branch
 gdb_M_N-YYYY-MM-DD-release
-@end example
+@end smallexample
 
 Release 5.2 is trialing the branch and release tags:
 
-@example
+@smallexample
 gdb_N_M-YYYY-MM-DD-branchpoint
 gdb_N_M-branch
 gdb_M_N-YYYY-MM-DD-release
-@end example
+@end smallexample
 
 @emph{Pragmatics: The branchpoint and release tags need to identify when
 a branch and release are made.  The branch tag, denoting the head of the
@@ -5022,9 +5022,9 @@ start enjoying all the fun
 @end itemize
 
 As an aside, the branch tag name is probably regrettable vis:
-@example
+@smallexample
 gdb_N_M-YYYY-MM-DD-@{branch,branchpoint@}
-@end example
+@end smallexample
 
 @subheading Refresh any imported files.
 
@@ -5062,7 +5062,7 @@ There shouldn't be any regressions.
 
 I think something like the below was used:
 
-@example
+@smallexample
 $  d=`date -u +%Y-%m-%d`
 $  echo $d
 2002-01-24
@@ -5071,7 +5071,7 @@ gdb_5_1-$d-branchpoint insight+dejagnu
 $  cvs -f -d /cvs/src rtag -b -r gdb_V_V-$d-branchpoint \
 gdb_5_1-$d-branch insight+dejagnu
 $
-@end example
+@end smallexample
 
 @itemize @bullet
 @item
@@ -5099,7 +5099,7 @@ releases.  With a beta many of the steps can be skipped.
 
 @subheading Establish a few defaults.
 
-@example
+@smallexample
 $  b=gdb_5_1-2001-07-29-branch
 $  v=5.1.1
 $  t=/sourceware/snapshot-tmp/gdbadmin-tmp
@@ -5111,7 +5111,7 @@ $  pwd
 $  which autoconf
 /home/gdbadmin/bin/autoconf
 $
-@end example
+@end smallexample
 
 NB: Check the autoconf version carefully.  You want to be using the
 version taken from the binutils snapshot directory.  It is most likely
@@ -5120,13 +5120,13 @@ correct.
 
 @subheading Check out the relevant modules:
 
-@example
+@smallexample
 $  for m in gdb insight dejagnu
 do
 ( mkdir -p $m && cd $m && cvs -q -f -d /cvs/src co -P -r $b $m )
 done
 $
-@end example
+@end smallexample
 
 NB: The reading of @file{.cvsrc} is disabled (@file{-f}) so that there
 isn't any confusion between what is written here and what your local CVS
@@ -5141,7 +5141,7 @@ releases should probably mention any significant bugs that were fixed.
 
 Don't forget to update the ChangeLog.
 
-@example
+@smallexample
 $  emacs gdb/src/gdb/NEWS
 ...
 c-x 4 a
@@ -5149,13 +5149,13 @@ c-x 4 a
 c-x c-s c-x c-c
 $  cp gdb/src/gdb/NEWS insight/src/gdb/NEWS 
 $  cp gdb/src/gdb/ChangeLog insight/src/gdb/ChangeLog 
-@end example
+@end smallexample
 
 @subsubheading @file{gdb/README}
 
 You'll need to update: the version, the update date, and who did it.
 
-@example
+@smallexample
 $  emacs gdb/src/gdb/README
 ...
 c-x 4 a
@@ -5163,7 +5163,7 @@ c-x 4 a
 c-x c-s c-x c-c
 $  cp gdb/src/gdb/README insight/src/gdb/README 
 $  cp gdb/src/gdb/ChangeLog insight/src/gdb/ChangeLog 
-@end example
+@end smallexample
 
 @emph{Maintainer note: Hopefully the README file was reviewed before the
 initial branch was cut so just a simple substitute is needed to get it
@@ -5175,7 +5175,7 @@ pursuing.}
 
 @subsubheading @file{gdb/version.in}
 
-@example
+@smallexample
 $  echo $v > gdb/src/gdb/version.in
 $  emacs gdb/src/gdb/version.in
 ...
@@ -5184,7 +5184,7 @@ c-x 4 a
 c-x c-s c-x c-c
 $  cp gdb/src/gdb/version.in insight/src/gdb/version.in 
 $  cp gdb/src/gdb/ChangeLog insight/src/gdb/ChangeLog 
-@end example
+@end smallexample
 
 @subsubheading @file{dejagnu/src/dejagnu/configure.in}
 
@@ -5200,12 +5200,12 @@ Add a ChangeLog.
 
 This is identical to the process used when creating the daily snapshot.
 
-@example
+@smallexample
 $  for m in gdb insight dejagnu
 do
 ( cd $m/src && gmake -f Makefile.in $m.tar.bz2 )
 done
-@end example
+@end smallexample
 
 @subheading Check the source files
 
@@ -5213,7 +5213,7 @@ You're looking for files that have mysteriously disappeared as the
 @kbd{distclean} has the habit of deleting files it shouldn't.  Watch out
 for the @file{version.in} update @kbd{cronjob}.
 
-@example
+@smallexample
 $  ( cd gdb/src && cvs -f -q -n update )
 M djunpack.bat
 ? proto-toplev
@@ -5231,7 +5231,7 @@ M gdb/version.in
 ? gdb/doc/gdbint.info-4
 ? gdb/doc/gdbint.info-5
 $
-@end example
+@end smallexample
 
 @emph{Don't worry about the @file{gdb.info-??} or
 @file{gdb/p-exp.tab.c}.  They were generated (and yes @file{gdb.info-1}
@@ -5240,11 +5240,11 @@ didn't get supressed).  Fixing it would be nice though.}
 
 @subheading Re-pack the release with @code{gzip}
 
-@example
+@smallexample
 $  cp */*/*.bz2 .
 $  bunzip2 -k -v *.bz2
 $  gzip -9 -v *.tar
-@end example
+@end smallexample
 
 NB: A pipe such as @kbd{bunzip2 < xxx.bz2 | gzip -9 > xxx.gz} shouldn't
 be used since, in that mode, gzip doesn't know the file name information
@@ -5276,9 +5276,9 @@ This is where, unfortunately, the notes just get vague.
 
 @subheading Install on sware
 
-@example
+@smallexample
 $  cp *.bz2 *.gz ~ftp/pub/gdb/releases
-@end example
+@end smallexample
 
 @subheading Create and update the web pages.
 
@@ -5319,13 +5319,13 @@ docs from the @file{.tar.bz2}.  The best way is to look in the output
 from one of the nightly cronjobs and then just edit accordingly.
 Something like:
 
-@example
+@smallexample
 $  ~/ss/update-web-docs \
  ~ftp/pub/gdb/releases/gdb-5.1.1.tar.bz2 \
  $PWD/www \
  /www/sourceware/htdocs/gdb/5.1.1/onlinedocs \
  gdb
-@end example
+@end smallexample
 
 @subheading Something about @file{ANNOUNCEMENT}
 
@@ -5365,13 +5365,13 @@ In particular you'll need to commit the changes to:
 
 Something like:
 
-@example
+@smallexample
 $  d=`date -u +%Y-%m-%d`
 $  echo $d
 2002-01-24
 $  ( cd insight/src/gdb && cvs -f -q update )
 $  ( cd insight/src && cvs -f -q tag gdb_5_1_1-$d-release )
-@end example
+@end smallexample
 
 Insight is used since that contains more of the release than GDB (yes
 dejagnu doesn't get tagged but I think we can live with that.).
@@ -5421,7 +5421,7 @@ the testsuite is running, you'll get mentions of which test file is in use,
 and a mention of any unexpected passes or fails.  When the testsuite is
 finished, you'll get a summary that looks like this:
 
-@example
+@smallexample
                 === gdb Summary ===
 
 # of expected passes            6016
@@ -5430,7 +5430,7 @@ finished, you'll get a summary that looks like this:
 # of expected failures          183
 # of unresolved testcases       3
 # of untested testcases         5
-@end example
+@end smallexample
 
 The ideal test run consists of expected passes only; however, reality
 conspires to keep us from this ideal.  Unexpected failures indicate

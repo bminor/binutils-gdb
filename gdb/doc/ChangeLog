@@ -1,5 +1,10 @@
 2002-03-18  Andrew Cagney  <ac131313@redhat.com>
 
+	* gdb.texinfo: Change all examples to @smallexample.
+	* gdbint.texinfo: Ditto.
+	
+2002-03-18  Andrew Cagney  <ac131313@redhat.com>
+
 	* gdbint.texinfo (Releasing GDB): Add section ``Versions and
 	Branches''.
 
