@@ -1,3 +1,8 @@
+Fri Sep 26 17:32:22 1997  Jason Molenda  (crash@pern.cygnus.com)
+
+	* command.c (add_cmd, add_show_from_set): Insert new commands in
+	alphabetical order.
+
 Fri Sep 26 12:22:00 1997  Mark Alexander  <marka@cygnus.com>
 
 	* config/mips-tm-mips.h (mips_extra_func_info): New frame_adjust

@@ -61,7 +61,10 @@ print_doc_line PARAMS ((GDB_FILE *, char *));
    It should start with ? for a command that is an abbreviation
    or with * for a command that most users don't need to know about.
 
-   Add this command to command list *LIST.  */
+   Add this command to command list *LIST.  
+
+   Returns a pointer to the added command (not necessarily the head 
+   of *LIST). */
 
 struct cmd_list_element *
 add_cmd (name, class, fun, doc, list)
@@ -73,9 +76,26 @@ add_cmd (name, class, fun, doc, list)
 {
   register struct cmd_list_element *c
     = (struct cmd_list_element *) xmalloc (sizeof (struct cmd_list_element));
+  struct cmd_list_element *p;
 
   delete_cmd (name, list);
-  c->next = *list;
+
+  if (*list == NULL || STRCMP ((*list)->name, name) >= 0)
+    {
+      c->next = *list;
+      *list = c;
+    }
+  else
+    {
+      p = *list;
+      while (p->next && STRCMP (p->next->name, name) <= 0)
+        {
+          p = p->next;
+        }
+      c->next = p->next;
+      p->next = c;
+    }
+
   c->name = name;
   c->class = class;
   c->function.cfunc = fun;
@@ -93,7 +113,7 @@ add_cmd (name, class, fun, doc, list)
   c->user_commands = NULL;
   c->hookee = NULL;
   c->cmd_pointer = NULL;
-  *list = c;
+
   return c;
 }
 
@@ -268,7 +288,8 @@ add_set_enum_cmd (name, class, enumlist, var, doc, list)
 }
 
 /* Where SETCMD has already been added, add the corresponding show
-   command to LIST and return a pointer to it.  */
+   command to LIST and return a pointer to the added command (not 
+   necessarily the head of LIST).  */
 struct cmd_list_element *
 add_show_from_set (setcmd, list)
      struct cmd_list_element *setcmd;
@@ -276,6 +297,7 @@ add_show_from_set (setcmd, list)
 {
   struct cmd_list_element *showcmd =
     (struct cmd_list_element *) xmalloc (sizeof (struct cmd_list_element));
+  struct cmd_list_element *p;
 
   memcpy (showcmd, setcmd, sizeof (struct cmd_list_element));
   delete_cmd (showcmd->name, list);
@@ -288,8 +310,22 @@ add_show_from_set (setcmd, list)
   else
     fprintf_unfiltered (gdb_stderr, "GDB internal error: Bad docstring for set command\n");
   
-  showcmd->next = *list;
-  *list = showcmd;
+    if (*list == NULL || STRCMP ((*list)->name, showcmd->name) >= 0)
+    {
+      showcmd->next = *list;
+      *list = showcmd;
+    }
+  else
+    {
+      p = *list;
+      while (p->next && STRCMP (p->next->name, showcmd->name) <= 0)
+        {
+          p = p->next;
+        }
+      showcmd->next = p->next;
+      p->next = showcmd;
+    }
+
   return showcmd;
 }
 
@@ -649,7 +685,7 @@ lookup_cmd_1 (text, clist, result_list, ignore_help_classes)
 	}
       else if (c == (struct cmd_list_element *) -1)
 	{
-	  /* We've gotten this far properley, but the next step
+	  /* We've gotten this far properly, but the next step
 	     is ambiguous.  We need to set the result list to the best
 	     we've found (if an inferior hasn't already set it).  */
 	  if (result_list != NULL)
@@ -739,7 +775,7 @@ lookup_cmd (line, list, cmdtype, allow_unknown, ignore_help_classes)
 
 	      q = (char *) alloca (p - *line + 1);
 	      strncpy (q, *line, p - *line);
-	      q[p-*line] = '\0';
+	      q[p - *line] = '\0';
 	      undef_cmd_error (cmdtype, q);
 	    }
 	}
