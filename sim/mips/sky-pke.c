@@ -639,7 +639,7 @@ pke_pc_fifo(struct pke_device* me, int operand_num, unsigned_4** operand)
 {
   int num = operand_num;
   int new_qw_pc, new_fifo_pc;
-  struct fifo_quadword* operand_fifo;
+  struct fifo_quadword* operand_fifo = NULL;
 
   ASSERT(num > 0);
 
