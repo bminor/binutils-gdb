@@ -377,11 +377,10 @@ Defining your own directives}.
 @node Variables
 @section Preprocessor variables
 
-You can use variables in @sc{gasp} to represent the results of
-expressions, strings, or registers.  
+You can use variables in @sc{gasp} to represent strings, registers, or
+the results of expressions.
 
-There are two kinds of preprocessor variable: 
-
+You must distinguish two kinds of variables: 
 @c FIXME!  Is this crud true about conditional comparisons vs variables?
 @enumerate
 @item
@@ -402,9 +401,9 @@ while loops; @sc{gasp} only evaluates these variables when writing
 assembly output.
 
 @item
-Variables defined as macro arguments, or with @code{.ASSIGNC} or
-@code{.ASSIGNA}.  To evaluate this kind of variable, write @samp{\&} before
-the variable name; for example,
+Variables for use during preprocessing.  These are defined as macro
+arguments, or with @code{.ASSIGNC} or @code{.ASSIGNA}.  To evaluate this
+kind of variable, write @samp{\&} before the variable name; for example,
 
 @cartouche
 @example
@@ -944,8 +943,9 @@ field of @sc{gasp} statements):
 
 @ftable @code
 @item .LEN("@var{str}")
-The length of string @code{"@var{str}"}, as an absolute expression.  For
-example, @samp{.RES.B .LEN("sample")} reserves six bytes of memory.
+Calculate the length of string @code{"@var{str}"}, as an absolute
+expression.  For example, @samp{.RES.B .LEN("sample")} reserves six
+bytes of memory.
 
 @item .INSTR("@var{string}", "@var{seg}", @var{ix})
 Search for the first occurrence of @var{seg} after position @var{ix} of
