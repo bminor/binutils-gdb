@@ -35,6 +35,7 @@ demangle.h
 dis-asm.h
 elf
 floatformat.h
+fnmatch.h
 fopen-bin.h
 fopen-same.h
 fopen-vms.h
