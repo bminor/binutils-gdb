@@ -1,3 +1,12 @@
+Thu Aug 15 13:11:13 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-make.sed: Update editing of include pathnames to be
+	more general.
+
+Thu Aug 15 16:28:41 1996  James G. Smith  <jsmith@cygnus.co.uk>
+
+	* arm-opc.h: Added "bx" instruction definition.
+
 Wed Aug 14 17:00:04 1996  Richard Henderson  <rth@tamu.edu>
 
 	* alpha-opc.c (EV4EXTHWINDEX): Field width should be 8 not 5.
