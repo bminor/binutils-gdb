@@ -24,7 +24,7 @@ if { ([istarget "*-*-elf*"]
       return
     }
   
-    if {[istarget "hppa*-*-*"]} then {
+    if {[istarget "hppa*64*-*-*"]} then {
       return
     }
   

@@ -1304,7 +1304,7 @@ operand (expressionP)
 	{
 	  /* Let the target try to parse it.  Success is indicated by changing
 	     the X_op field to something other than O_absent and pointing
-	     input_line_pointer passed the expression.  If it can't parse the
+	     input_line_pointer past the expression.  If it can't parse the
 	     expression, X_op and input_line_pointer should be unchanged.  */
 	  expressionP->X_op = O_absent;
 	  --input_line_pointer;

@@ -1,5 +1,8 @@
 2000-09-05  Alan Modra  <alan@linuxcare.com.au>
 
+	* expr.c (operand): Fix a comment typo.
+	* write.c (write_relocs): Fix a signed/unsigned warning.
+
 	* config/tc-hppa.c (fudge_reg_expressions): New
 	(hppa_force_reg_syms_absolute): New.
 	(pa_equ): Allow reg_section expressions.

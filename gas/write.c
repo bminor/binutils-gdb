@@ -899,7 +899,7 @@ write_relocs (abfd, sec, xxx)
      PTR xxx ATTRIBUTE_UNUSED;
 {
   segment_info_type *seginfo = seg_info (sec);
-  int i;
+  unsigned int i;
   unsigned int n;
   arelent **relocs;
   fixS *fixp;
