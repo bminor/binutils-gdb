@@ -1,9 +1,6 @@
 srcname="GDB"
 srctrigger=main.c
-
-if [ -z "${template}" ] ; then
-	make -f Makefile.dist Makefile.in
-fi
+Makefile=Makefile.conf
 
 # per-host:
 
@@ -12,11 +9,8 @@ if [ ! -f xconfig/${host} ]; then
 	exit 1
 fi
 
-hostfile=`awk '
-  $1 == "XM_FILE=" { print $2 }' <xconfig/$host`
-if [ "${targetfile}" = "/" ] ; then
-	targetfile=/dev/null
-fi
+#  We really shouldn't depend on there being a space after XM_FILE= ...
+hostfile=`awk '$1 == "XM_FILE=" { print $2 }' <xconfig/$host`
 
 # per-target:
 
@@ -30,22 +24,37 @@ if [ -z "${removing}" ] ; then
 		print substr($0,6)}'
 fi
 
-targetfile=`awk '
-  $1 == "TM_FILE=" { print $2 }' <tconfig/$target`
-if [ "${hostfile}" = "/" ] ; then
-	hostfile=/dev/null
-fi
-
-if [ ! -d readline ]; then
-      mkdir readline
-      # This could be a symlink, but getting the name right (because
-      # srcdir can be either relative or absolute) would be hairy.
-      cp ${srcdir}/readline/Makefile readline
-fi
+#  We really shouldn't depend on there being a space after TM_FILE= ...
+targetfile=`awk '$1 == "TM_FILE=" { print $2 }' <tconfig/$target`
 
 host_makefile_frag=xconfig/${host}
 target_makefile_frag=tconfig/${target}
 
-files="${hostfile} ${targetfile}"
-links="xm.h tm.h"
+# If hostfile (XM_FILE) and/or targetfile (TM_FILE) is not set in the
+# ?config/* file, we don't make the corresponding links.
+files=
+links=
+if [ "${hostfile}" != "" ]; then
+	files="${files} ${hostfile}"
+	links="${links} xm.h"
+fi
+if [ "${targetfile}" != "" ]; then
+	files="${files} ${targetfile}"
+	links="${links} tm.h"
+fi
 
+# post-target:
+
+case ${srcdir} in
+  .)
+    ;;
+  *)
+    grep -s "source ${srcdir}/.gdbinit" .gdbinit 2>/dev/null || \
+      echo "source ${srcdir}/.gdbinit" >> .gdbinit
+esac
+
+rm -f Makefile
+if [ ! -f depend ]; then
+  make -f Makefile.conf depend
+fi
+make -f Makefile.conf Makefile

@@ -2,19 +2,22 @@
 
 # This file is part of GDB.
 
-# GDB is free software; you can redistribute it and/or modify
+# This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 1, or (at your option)
-# any later version.
-
-# GDB is distributed in the hope that it will be useful,
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-
+# 
 # You should have received a copy of the GNU General Public License
-# along with GDB; see the file COPYING.  If not, write to
-# the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+# Host and target-dependent makefile fragments come in here.
+####
 
 # Destination directory of the software tree build
 destdir = /usr/local
@@ -36,7 +39,9 @@ bindir=$(destdir)/bin
 #CC=gcc -traditional
 GCC=gcc
 
-VPATH=$(srcdir)
+# Directory containing source files.  Don't clean up the spacing,
+# this exact string is matched for by the "configure" script.
+srcdir = .
 
 # It is also possible that you will need to add -I/usr/include/sys to the
 # CFLAGS section if your system doesn't have fcntl.h in /usr/include (which 
@@ -241,8 +246,8 @@ TESTS = testbpt.c testfun.c testrec.c testreg.c testregs.c
 # tdesc-lib cannot be named simply tdesc, because if it were, GNU make
 # would try to make it from tdesc.c.
 # tdesc-lib removed from the list due to Motorola copyrights...gnu@cygnus.com
-OTHERS = Makefile Makefile.dist depend alldeps.mak Makefile.sdir \
-	 createtags munch config.gdb config.status \
+OTHERS = Makefile Makefile.in depend alldeps.mak Makefile.conf \
+	 createtags munch configure configure.in config.status \
 	 ChangeLog ChangeLog-3.x \
 	 README TODO TAGS WHATS.NEW Projects \
 	 .gdbinit COPYING expread.tab.c \
@@ -334,15 +339,14 @@ rapp: $(RAPP_OBS)
 	${CC-LD} $(LDFLAGS) -o $@ rapp_init.c $(RAPP_OBS)
 	
 # Support for building Makefile out of configured pieces, automatically
-# generated dependencies, etc.
-Makefiles= Makefile.sdir $(M_MAKEFILE) \
-	${srcdir}/alldeps.mak ${srcdir}/Makefile.dist
-
-MAKE_MAKEFILE= echo "M_MAKEFILE=$(M_MAKEFILE)" | \
-	cat - ${Makefiles} ${srcdir}/depend > Makefile
+# generated dependencies, etc.  Makefile.conf is built by configure,
+# and includes the body of Makefile.in as well as configuration
+# settings.  We add alldeps.mak and depend to get Makefile.
+Makefiles= Makefile.conf ${srcdir}/alldeps.mak
 
 Makefile: $(Makefiles)
-	$(MAKE_MAKEFILE)
+	  cat ${Makefiles} depend > Makefile
+	
 
 alldeps.mak: ${srcdir}/tconfig ${srcdir}/xconfig
 	rm -f alldeps.mak alldeps.tmp allparam.tmp allconfig.tmp
@@ -395,7 +399,7 @@ alldeps.mak: ${srcdir}/tconfig ${srcdir}/xconfig
 # The sed script makes everything which depends on {x,t}m.h depend on
 # config.status as well, in case someone reconfigures gdb out from
 # under an already compiled gdb.
-depend: $(SOURCES) Makefile.dist
+depend: $(SOURCES) Makefile.in
 	@echo Ignore errors about non-existent system-supplied include files
 	@echo for systems other than the one you are using.
 	@echo "If xm.h and tm.h don't exist, the error messages saying so"
@@ -444,7 +448,7 @@ TAGS: ${TAGFILES}
 	$(srcdir)/createtags $(TM_FILE) ${XM_FILE} $(DEPFILES) ${TAGFILES}
 tags: TAGS
 
-# FIXME: Get alldeps.mak up to date, config.gdb none, THEN make gdb.tar.Z!
+# FIXME: Get alldeps.mak up to date, ./configure none, THEN make gdb.tar.Z!
 gdb.tar.Z: ${TARFILES} ${TARDIRS}
 	rm -f gdb.tar; rm -rf $(DIST)
 	mkdir $(DIST)
@@ -506,7 +510,7 @@ gdb.dvi : gdb-all.texinfo rdl-apps.texinfo
 copying.c : COPYING copying.awk
 	awk -f copying.awk < COPYING > copying.c
 
-version.c : Makefile.dist
+version.c : Makefile.in
 	echo 'char *version = "$(VERSION)";' >version.c
 
 ${srcdir}/expread.tab.c : $(srcdir)/expread.y
