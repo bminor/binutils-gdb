@@ -1,3 +1,9 @@
+Mon Oct 14 13:37:50 1991  Roland H. Pesch  (pesch at cygnus.com)
+
+	* doc/gdb.texinfo: Catch up to changes recorded here in ChangeLog
+	(nodes Continuing and Stepping; Memory; Targets) clarifications
+	due to Larry Breed
+
 Fri Oct 11 23:27:06 1991  John Gilmore  (gnu at cygnus.com)
 
 	* tm-{irix3,mips,nindy960,pn,symmetry,vx960}.h:  Move
