@@ -1,3 +1,8 @@
+2005-04-01  Jan Beulich  <jbeulich@novell.com>
+
+	* i386-dis.c (INVLPG_Fixup): Decode rdtscp; change code to allow for
+	easier future additions.
+
 2005-03-31  Jerome Guitton  <guitton@gnat.com>
 
 	* configure.in: Check for basename.

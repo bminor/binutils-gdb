@@ -4394,16 +4394,23 @@ PNI_Fixup (int extrachar ATTRIBUTE_UNUSED, int sizeflag)
 static void
 INVLPG_Fixup (int bytemode, int sizeflag)
 {
-  if (*codep == 0xf8)
-    {
-      char *p = obuf + strlen (obuf);
+  const char *alt;
 
-      /* Override "invlpg".  */
-      strcpy (p - 6, "swapgs");
-      codep++;
+  switch (*codep)
+    {
+    case 0xf8:
+      alt = "swapgs";
+      break;
+    case 0xf9:
+      alt = "rdtscp";
+      break;
+    default:
+      OP_E (bytemode, sizeflag);
+      return;
     }
-  else
-    OP_E (bytemode, sizeflag);
+  /* Override "invlpg".  */
+  strcpy (obuf + strlen (obuf) - 6, alt);
+  codep++;
 }
 
 static void
