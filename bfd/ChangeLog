@@ -1,7 +1,8 @@
 2004-05-13  Paul Brook  <paul@codesourcery.com>
 
 	* elf-eh-frame.c (_bfd_elf_discard_section_eh_frame): Handle
-	dwarf3 format CIE entries.
+	dwarf3 format CIE entries.  Remove comment about the size of the
+	ra_column field.  It is now correctly deduced.
 
 2004-05-13  Joel Sherrill <joel@oarcorp.com>
 

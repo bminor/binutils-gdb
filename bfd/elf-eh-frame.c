@@ -429,11 +429,6 @@ _bfd_elf_discard_section_eh_frame
 	    }
 	  read_uleb128 (cie.code_align, buf);
 	  read_sleb128 (cie.data_align, buf);
-	  /* Note - in DWARF2 the return address column is an unsigned byte.
-	     In DWARF3 it is a ULEB128.  We are following DWARF3.  For most
-	     ports this will not matter as the value will be less than 128.
-	     For the others (eg FRV, SH, MMIX, IA64) they need a fixed GCC
-	     which conforms to the DWARF3 standard.  */
 	  if (cie.version == 1)
 	    cie.ra_column = *buf++;
 	  else
