@@ -1,4 +1,4 @@
-2003-10-24  Andrew Cagney  <cagney@redhat.com>
+2003-10-27  Andrew Cagney  <cagney@redhat.com>
 
 	* osabi.c (gdbarch_init_osabi): Use info.bfd_arch_info instead of
 	arch_info.  Use warning instead of fprintf_filtered.  Do not use
