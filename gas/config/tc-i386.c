@@ -1291,6 +1291,14 @@ md_assemble (line)
 	temp_op = i.op[xchg2];
 	i.op[xchg2] = i.op[xchg1];
 	i.op[xchg1] = temp_op;
+
+	if (i.mem_operands == 2)
+	  {
+	    const seg_entry *temp_seg;
+	    temp_seg = i.seg[0];
+	    i.seg[0] = i.seg[1];
+	    i.seg[1] = temp_seg;
+	  }
       }
     overlap0 = 0;
     overlap1 = 0;
@@ -2841,6 +2849,7 @@ i386_operand_modifier (op_string, got_a_float)
 
   else if (!strncasecmp (*op_string, "SHORT", 5))
     {
+      i.suffix = WORD_MNEM_SUFFIX;
       *op_string += 5;
       return SHORT;
     }
@@ -2874,10 +2883,10 @@ build_displacement_string (initial_disp, op_string)
 
   temp_string[0] = '\0';
   tc = end_of_operand_string = strchr (op_string, '[');
-  if ( initial_disp && !end_of_operand_string)
+  if (initial_disp && !end_of_operand_string)
     {
       strcpy (temp_string, op_string);
-      return (temp_string);
+      return temp_string;
     }
 
   /* Build the whole displacement string */
@@ -3066,11 +3075,10 @@ i386_intel_memory_operand (operand_string)
       return 0;
     }
 
-  /* Look for displacement preceding open bracket */
+  /* First check for a segment override.  */
   if (*op_string != '[')
     {
       char *end_seg;
-      char *temp_string;
 
       end_seg = strchr (op_string, ':');
       if (end_seg)
@@ -3079,12 +3087,24 @@ i386_intel_memory_operand (operand_string)
 	    return 0;
 	  op_string = end_seg + 1;
 	}
+    }
+
+  /* Look for displacement preceding open bracket */
+  if (*op_string != '[')
+    {
+      char *temp_string;
+
+      if (i.disp_operands)
+	return 0;
 
       temp_string = build_displacement_string (true, op_string);
 
-      if (i.disp_operands == 0 &&
-	  !i386_displacement (temp_string, temp_string + strlen (temp_string)))
-	return 0;
+      if (!i386_displacement (temp_string, temp_string + strlen (temp_string)))
+	{
+	  free (temp_string);
+	  return 0;
+	}
+      free (temp_string);
 
       end_of_operand_string = strchr (op_string, '[');
       if (!end_of_operand_string)
@@ -3142,14 +3162,23 @@ i386_intel_memory_operand (operand_string)
 	  else if (is_digit_char (*op_string)
 		   || *op_string == '+' || *op_string == '-')
 	    {
+	      char *temp_str;
+
+	      if (i.disp_operands != 0)
+		return 0;
+
 	      temp_string = build_displacement_string (false, op_string);
 
-	      if (*temp_string == '+')
-		++temp_string;
+	      temp_str = temp_string;
+	      if (*temp_str == '+')
+		++temp_str;
 
-	      if (i.disp_operands == 0 &&
-		  !i386_displacement (temp_string, temp_string + strlen (temp_string)))
-		return 0;
+	      if (!i386_displacement (temp_str, temp_str + strlen (temp_str)))
+		{
+		  free (temp_string);
+		  return 0;
+		}
+	      free (temp_string);
 
 	      ++op_string;
 	      end_of_operand_string = op_string;
