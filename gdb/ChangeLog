@@ -1,3 +1,8 @@
+2003-06-14  Daniel Jacobowitz  <drow@mvista.com>
+
+	* sparc-nat.c (fetch_inferior_registers): Correct
+	a reference to "registers".
+
 2003-06-14  Jeroen Dekkers  <jeroen@dekkers.cx>
 
 	* Makefile.in (exc_request_U_h): Define

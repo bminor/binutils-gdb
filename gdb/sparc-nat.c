@@ -108,7 +108,7 @@ fetch_inferior_registers (int regno)
 	= inferior_registers.r_pc;
       *(int *) &deprecated_registers[REGISTER_BYTE (NPC_REGNUM)]
 	= inferior_registers.r_npc;
-      *(int *) &registers[REGISTER_BYTE (Y_REGNUM)] = inferior_registers.r_y;
+      *(int *) &deprecated_registers[REGISTER_BYTE (Y_REGNUM)] = inferior_registers.r_y;
 
       for (i = G0_REGNUM; i <= O7_REGNUM; i++)
 	deprecated_register_valid[i] = 1;
