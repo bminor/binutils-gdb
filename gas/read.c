@@ -825,7 +825,7 @@ read_a_source_file (name)
 		    }
 		  else
 		    {
-		      int inquote = 0;
+		      int inquote = 0, inescape = 0;
 
 		      /* WARNING: c has char, which may be end-of-line. */
 		      /* Also: input_line_pointer->`\0` where c was. */
@@ -839,6 +839,14 @@ read_a_source_file (name)
 			{
 			  if (flag_m68k_mri && *input_line_pointer == '\'')
 			    inquote = ! inquote;
+#ifdef QUOTES_IN_INSN
+			  if (inescape)
+			    inescape = 0;
+			  else if (*input_line_pointer == '"')
+			    inquote = ! inquote;
+			  else if (*input_line_pointer == '\\')
+			    inescape = 1;
+#endif
 			  input_line_pointer++;
 			}
 
@@ -4405,7 +4413,7 @@ s_leb128 (sign)
 /*
  *			stringer()
  *
- * We read 0 or more ',' seperated, double-quoted strings.
+ * We read 0 or more ',' separated, double-quoted strings.
  *
  * Caller should have checked need_pass_2 is FALSE because we don't check it.
  */
