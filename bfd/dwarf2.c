@@ -801,10 +801,9 @@ add_line_info (struct line_info_table *table,
   info->column = column;
   info->end_sequence = end_sequence;
 
-  amt = strlen (filename);
-  if (amt)
+  if (filename && filename[0])
     {
-      info->filename = bfd_alloc (table->abfd, amt + 1);
+      info->filename = bfd_alloc (table->abfd, strlen (filename) + 1);
       if (info->filename)
 	strcpy (info->filename, filename);
     }
