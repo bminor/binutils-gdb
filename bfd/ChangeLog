@@ -1,3 +1,10 @@
+Tue Dec 16 08:09:56 1997  Gavin Koch  <gavin@cygnus.com>
+
+	* elf.c (_bfd_elf_find_nearest_line): Call
+	_bfd_dwarf2_find_nearest_line first.
+	* elf32-mips.c (_bfd_mips_elf_find_nearest_line): Same.
+	* dwarf2.c: New file; implement _bfd_dwarf2_find_nearest_line.	
+
 Mon Dec 15 16:08:52 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* elf32-m32r.c (m32r_elf_merge_private_bfd_data): Allow M32R
