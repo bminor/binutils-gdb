@@ -30,10 +30,10 @@ SECTION
 	each one points to the next in the list.
 
 @menu
-* Section Input::
-* Section Output::
-* typedef asection::
-* section prototypes::
+@* Section Input::
+@* Section Output::
+@* typedef asection::
+@* section prototypes::
 @end menu
 
 @node Section Input, Section Output, Sections, Sections

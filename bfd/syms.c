@@ -46,10 +46,10 @@ SECTION
 	like the linker to output a symbol as read, since the 'behind
 	the sceens' information will be still available. 
 @menu
-* Reading Symbols::
-* Writing Symbols::
-* typedef asymbol::
-* symbol handling functions::
+@* Reading Symbols::
+@* Writing Symbols::
+@* typedef asymbol::
+@* symbol handling functions::
 @end menu
 
 @node Reading Symbols, Writing Symbols, Symbols, Symbols
