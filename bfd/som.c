@@ -1619,6 +1619,8 @@ som_write_headers (abfd)
   return true;
 }
 
+/* Compute and return the checksum for a SOM file header.  */
+
 static unsigned long
 som_compute_checksum (abfd)
      bfd *abfd;
@@ -1741,7 +1743,7 @@ som_build_and_write_symbol_table (abfd)
 	
       /* Now handle the symbol's scope.  Exported data which is not
 	 in the common section has scope SS_UNIVERSAL.  Note scope
-	 of common symbols was handled earlier */
+	 of common symbols was handled earlier!  */
       if (bfd_syms[i]->flags & BSF_EXPORT
 	  && bfd_syms[i]->section != &bfd_com_section)
 	som_symtab[i].symbol_scope = SS_UNIVERSAL;
@@ -1787,15 +1789,38 @@ som_build_and_write_symbol_table (abfd)
   return true; 
 }
 
-boolean
+/* Write an object in SOM format.  */  
+
+static boolean
 som_write_object_contents (abfd)
      bfd *abfd;
 {
-  fprintf (stderr, "som_write_object_contents unimplemented\n");
-  fflush (stderr);
-  abort ();
-  return (false);
+  if (abfd->output_has_begun == false)
+    {
+      /* Set up fixed parts of the file, space, and subspace headers.
+	 Notify the world that output has begun.  */
+      som_prep_headers (abfd);
+      abfd->output_has_begun = true;
+#if 0
+      /* Not in Cygnus sources yet.  */
+      /* Start writing the object file.  This include all the string
+	 tables, fixup streams, and other portions of the object file.  */
+      som_begin_writing (abfd);
+#endif
+    }
+
+  /* Now that the symbol table information is complete, build and
+     write the symbol table.  */
+  if (som_build_and_write_symbol_table (abfd) == false)
+    return false;
+
+  /* Compute the checksum for the file header just before writing
+     the header to disk.  */
+  obj_som_file_hdr (abfd)->checksum = som_compute_checksum (abfd);
+  return (som_write_headers (abfd));
 }
+
+
 /* Read and save the string table associated with the given BFD.  */
 
 static boolean
@@ -2195,10 +2220,41 @@ som_set_section_contents (abfd, section, location, offset, count)
      file_ptr offset;
      bfd_size_type count;
 {
-  fprintf (stderr, "som_set_section_contents unimplimented\n");
-  fflush (stderr);
-  abort ();
-  return false;
+  if (abfd->output_has_begun == false)
+    {
+      /* Set up fixed parts of the file, space, and subspace headers.
+	 Notify the world that output has begun.  */
+      som_prep_headers (abfd);
+      abfd->output_has_begun = true;
+#if 0
+      /* Not in Cygnus sources yet.  */
+      /* Start writing the object file.  This include all the string
+	 tables, fixup streams, and other portions of the object file.  */
+      som_begin_writing (abfd);
+#endif
+    }
+
+  /* Only write subspaces which have "real" contents (eg. the contents
+     are not generated at run time by the OS).  */
+  if (som_section_data (section)->is_subspace != 1
+      || ((section->flags & (SEC_LOAD | SEC_DEBUGGING)) == 0))
+    return true;
+
+  /* Seek to the proper offset within the object file and write the
+     data.  */
+  offset += som_section_data (section)->subspace_dict.file_loc_init_value; 
+  if (bfd_seek (abfd, offset, SEEK_SET) == -1)
+    {
+      bfd_error = system_call_error;
+      return false;
+    }
+
+  if (bfd_write ((PTR) location, 1, count, abfd) != count)
+    {
+      bfd_error = system_call_error;
+      return false;
+    }
+  return true;
 }
 
 static boolean

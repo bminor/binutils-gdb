@@ -1,5 +1,8 @@
 Fri Nov 12 15:29:36 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* som.c (som_write_object_contents): Do not abort.  Flesh out.
+	(som_set_section_contents): Do not abort.  Flesh out.
+
 	* som.c (som_write_headers): New function.
 	(som_prep_headers): New function.
 	(som_build_and_write_symbol_table): New function.
