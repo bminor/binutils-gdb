@@ -126,6 +126,7 @@ ALL_EMULATIONS = \
 	eelf32lmip.o \
 	eelf32lppc.o \
 	eelf32ppc.o \
+	eelf32ppclinux.o \
 	eelf_i386.o \
 	eelf_i386_be.o \
 	egld960.o \
@@ -368,6 +369,9 @@ eelf32lsmip.c: $(srcdir)/emulparams/elf32lsmip.sh \
 eelf32ppc.c: $(srcdir)/emulparams/elf32ppc.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elfppc.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32ppc "$(tdir_elf32ppc)"
+eelf32ppclinux.c: $(srcdir)/emulparams/elf32ppclinux.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elfppc.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32ppclinux "$(tdir_elf32ppclinux)"
 eelf64alpha.c: $(srcdir)/emulparams/elf64alpha.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf64alpha "$(tdir_elf64alpha)"
