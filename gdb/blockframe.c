@@ -394,7 +394,7 @@ get_prev_frame (struct frame_info *next_frame)
 		   sizeof (struct frame_info));
 
   /* Zero all fields by default.  */
-  memset (prev, 0, sizeof (struct frame_info);
+  memset (prev, 0, sizeof (struct frame_info));
 
   if (next_frame)
     next_frame->prev = prev;

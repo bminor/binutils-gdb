@@ -1,3 +1,12 @@
+2000-12-11  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* sh-tdep.c (sh_extract_struct_value_address): Protoize.
+
+2000-12-11  Michael Snyder  <msnyder@mvstp600e.cygnus.com>
+
+	* blockframe.c (get_prev_frame): Add missing paren omitted in 
+	last check-in.
+
 2000-12-11  Fernando Nasser  <fnasser@redhat.com>
 
         * Makefile.in (SUBDIR_GDBTK_OBS, SUBDIR_GDBTK_SRCS,
