@@ -1,3 +1,36 @@
+Tue Dec  8 10:50:46 1998  David Taylor  <taylor@texas.cygnus.com>
+
+	The following changes were made by
+	Elena Zannoni <ezannoni@kwikemart.cygnus.com>,
+	David Taylor <taylor@texas.cygnus.com>, and
+	Edith Epstein <eepstein@sophia.cygnus.com> as part of a project to
+	merge in changes by HP; HP did not create ChangeLog entries.
+
+	* dis-buf.c (generic_strcat_address): new function.
+
+	* hppa-dis.c: Changes to improve hppa disassembly.
+	  Changed formatting in : reg_names, fp_reg_names,control_reg, 
+	  New variables : sign_extension_names, deposit_names, conversion_names
+	    float_test_names, compare_cond_names_double, add_cond_names_double,
+	    logical_cond_names_double, unit_cond_names_double, 
+	    branch_push_pop_names, saturation_names, shift_names, mix_names,
+	  New Macros :   GET_COMPL_O, GET_PUSH_POP,MERGED_REG 
+	  Move some definitions to libhppa.h: GET_FIELD, GET_BIT
+	  (fput_const): renamed as fput_hex_const
+	  (print_insn_hppa):
+	   - use the macros fputs_filtered and
+	     fput_decimal_const whenever possible; calls to sign_extend require
+	     2 params -- add a missing second param of 0.
+	   - Some new code ifdefed for LOCAL_ONLY, all related to figuring out
+	     architecture version number of current machine. HP folks are
+	     trying to handle situation where the target program was compiled
+	     for PA 1.x (32-bit), but is running on a PA 2.0 machine and 
+	     visa versa.
+	   - added new cases : 'g', 'B', 'm'
+	   - added cases specifically for PA 2.0
+	   - changed the following cases : '"', 'n', 'N', 'p', 'Z', 
+	   - calls to fput_const become calls to fput_hex_const
+
 1998-12-07  James E Wilson  <wilson@wilson-pc.cygnus.com>
 
 	* Makefile.am (CFILES): Add i960c-asm, i960c-dis.c, i960c-opc.c.

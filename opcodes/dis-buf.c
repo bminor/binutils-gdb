@@ -1,5 +1,5 @@
 /* Disassemble from a buffer, for GNU.
-   Copyright (C) 1993, 1994 Free Software Foundation, Inc.
+   Copyright (C) 1993, 1994, 1998 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -13,11 +13,12 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
+#include "sysdep.h"
 #include "dis-asm.h"
-#include <string.h>
 #include <errno.h>
+#include "opintl.h"
 
 /* Get LENGTH bytes from info's buffer, at target address memaddr.
    Transfer them to myaddr.  */
@@ -46,12 +47,12 @@ perror_memory (status, memaddr, info)
 {
   if (status != EIO)
     /* Can't happen.  */
-    (*info->fprintf_func) (info->stream, "Unknown error %d\n", status);
+    info->fprintf_func (info->stream, _("Unknown error %d\n"), status);
   else
     /* Actually, address between memaddr and memaddr + len was
        out of bounds.  */
-    (*info->fprintf_func) (info->stream,
-			   "Address 0x%x is out of bounds.\n", memaddr);
+    info->fprintf_func (info->stream,
+			_("Address 0x%x is out of bounds.\n"), memaddr);
 }
 
 /* This could be in a separate file, to save miniscule amounts of space
@@ -67,4 +68,37 @@ generic_print_address (addr, info)
      struct disassemble_info *info;
 {
   (*info->fprintf_func) (info->stream, "0x%x", addr);
+}
+
+/* Just concatenate the address as hex.  This is included for
+   completeness even though both GDB and objdump provide their own (to
+   print symbolic addresses).  */
+
+void
+generic_strcat_address (addr, buf, len)
+     bfd_vma addr;
+     char *buf;
+     int len;
+{
+  if (buf != (char *)NULL && len > 0)
+  {
+    char tmpBuf[30];
+
+    sprintf(tmpBuf, "0x%x", addr);
+    if ((strlen(buf) + strlen(tmpBuf)) <= len)
+      strcat(buf, tmpBuf);
+    else
+      strncat(buf, tmpBuf, (len - strlen(buf)));
+  }
+  return;
+}
+
+/* Just return the given address.  */
+
+int
+generic_symbol_at_address (addr, info)
+     bfd_vma addr;
+     struct disassemble_info * info;
+{
+  return 1;
 }
