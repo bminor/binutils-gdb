@@ -1,4 +1,6 @@
-/* Rudimentary ECOFF support on MIPS machines.  */
+/* Rudimentary ECOFF support on MIPS machines. 
+   This lacks symbol information, normally provided on MIPS Unix systems
+   in the files <sym.h> and <symconst.h>.  */
 
 /********************** FILE HEADER **********************/
 

@@ -1,40 +1,41 @@
-/* bfd.h -- The only header file required by users of the bfd library 
-
-This file is generated from various .c files, if you change it, your
-bits may be lost.
-
-All the prototypes and definitions following the comment " THE
-FOLLOWING IS EXTRACTED FROM THE SOURCE" is extracted from the source.
-If you change it someone oneday will extract from the source again,
-and your changes will be lost. To save yourself from this bind, change
-the definitions in the source in the bfd directory. Type make docs and
-then make headers in that directory, and magically this file will
-change to reflect your changes.
-
-If you don't have the tools to perform the extraction then you are
-safe from someone on your system trampling over your header files.
-You should still maintain the equivalence between the source and this
-file though; every change you make to the .c file should be reflected
-here.
-*/
-
-/* Copyright (C) 1990, 1991 Free Software Foundation, Inc.
+/* A -*- C -*- header file for the bfd library
+   Copyright 1990, 1991 Free Software Foundation, Inc.
+   Contributed by Cygnus Support.
 
 This file is part of BFD, the Binary File Diddler.
 
-BFD is free software; you can redistribute it and/or modify
+This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
-any later version.
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-BFD is distributed in the hope that it will be useful,
+This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with BFD; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
+/* bfd.h -- The only header file required by users of the bfd library 
+
+This file is generated from various .c files, if you change it, your
+bits may be lost.
+
+All the prototypes and definitions following the comment "THE FOLLOWING
+IS EXTRACTED FROM THE SOURCE" are extracted from the source files for
+BFD.  If you change it, someone oneday will extract it from the source
+again, and your changes will be lost.  To save yourself from this bind,
+change the definitions in the source in the bfd directory.  Type "make
+docs" and then "make headers" in that directory, and magically this file
+will change to reflect your changes.
+
+If you don't have the tools to perform the extraction, then you are
+safe from someone on your system trampling over your header files.
+You should still maintain the equivalence between the source and this
+file though; every change you make to the .c file should be reflected
+here.  */
 
 #ifndef __BFD_H_SEEN__
 #define __BFD_H_SEEN__

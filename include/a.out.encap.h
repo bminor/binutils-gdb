@@ -1,24 +1,24 @@
-/* This file is obsolete.  It needs to be converted to just define a bunch
-   of stuff that BFD can use to do coff-encapsulated files.  --gnu@cygnus.com */
-
 /* Another try at encapsulating bsd object files in coff.
-   Copyright (C) 1988, 1989, Free Software Foundation, Inc.
+   Copyright (C) 1988, 1989, 1991 Free Software Foundation, Inc.
    Written by Pace Willisson 12/9/88
 
-   This file is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 1, or (at your option)
-   any later version.
+   This file is obsolete.  It needs to be converted to just define a bunch
+   of stuff that BFD can use to do coff-encapsulated files.  --gnu@cygnus.com
 
-   This file is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-   You should have received a copy of the GNU General Public License
-   along with this file; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
-   
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
 /*
  * This time, we will only use the coff headers to tell the kernel
  * how to exec the file.  Therefore, the only fields that need to 
