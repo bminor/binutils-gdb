@@ -1,3 +1,9 @@
+Mon Apr 19 23:03:08 1993  Stu Grossman  (grossman@cygnus.com)
+
+	* bfd.c:  Add sgi_core_data to tdata union.
+	* coff-mips.c:  Add Irix 4.x core file support.
+	* hosts/irix4.h:  #define HOST_IRIX4.
+
 Mon Apr 19 18:52:52 1993  Ken Raeburn  (raeburn@deneb.cygnus.com)
 
 	* aoutx.h (translate_from_native_sym_flags): Check that the

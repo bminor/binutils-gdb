@@ -8,6 +8,8 @@
 #include <sys/stat.h>
 #include <malloc.h>
 
+#define HOST_IRIX4
+
 #if 0
 #include <ctype.h>
 #include <sys/file.h>
