@@ -42,6 +42,7 @@ ho-ansi.h
 ho-decstatn.h
 ho-generic.h
 ho-go32.h
+ho-hppabsd.h
 ho-hpux.h
 ho-i386.h
 ho-i386aix.h
