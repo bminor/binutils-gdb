@@ -248,7 +248,7 @@ profile_option_handler (SIM_DESC sd,
 			char *arg,
 			int is_command)
 {
-  int cpu_nr,prof_nr;
+  int cpu_nr;
 
   /* FIXME: Need to handle `cpu' arg.  */
 

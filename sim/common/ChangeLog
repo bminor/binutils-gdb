@@ -1,3 +1,7 @@
+2000-12-03  Ben Elliston  <bje@redhat.com>
+
+	* sim-profile.c (profile_option_handler): Remove unused prof_nr.
+
 2000-11-26  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* hw-events.c (delete_hw_event_data): Remove the scheduled events.
