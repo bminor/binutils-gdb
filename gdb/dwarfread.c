@@ -495,7 +495,7 @@ dwarf_psymtab_to_symtab PARAMS ((struct partial_symtab *));
 static void
 psymtab_to_symtab_1 PARAMS ((struct partial_symtab *));
 
-static struct symtab *
+static void
 read_ofile_symtab PARAMS ((struct partial_symtab *));
 
 static void
@@ -2300,19 +2300,18 @@ LOCAL FUNCTION
 
 SYNOPSIS
 
-	static struct symtab *read_ofile_symtab (struct partial_symtab *pst)
+	static void read_ofile_symtab (struct partial_symtab *pst)
 
 DESCRIPTION
 
 	When expanding a partial symbol table entry to a full symbol table
 	entry, this is the function that gets called to read in the symbols
-	for the compilation unit.
-
-	Returns a pointer to the newly constructed symtab (which is now
-	the new first one on the objfile's symtab list).
+	for the compilation unit.  A pointer to the newly constructed symtab,
+	which is now the new first one on the objfile's symtab list, is
+	stashed in the partial symbol table entry.
  */
 
-static struct symtab *
+static void
 read_ofile_symtab (pst)
      struct partial_symtab *pst;
 {
@@ -2372,7 +2371,7 @@ read_ofile_symtab (pst)
   process_dies (dbbase, dbbase + dbsize, pst -> objfile);
   do_cleanups (back_to);
   current_objfile = NULL;
-  return (pst -> objfile -> symtabs);
+  pst -> symtab = pst -> objfile -> symtabs;
 }
 
 /*
@@ -2432,7 +2431,7 @@ psymtab_to_symtab_1 (pst)
 	    {
 	      buildsym_init ();
 	      old_chain = make_cleanup (really_free_pendings, 0);
-	      pst -> symtab = read_ofile_symtab (pst);
+	      read_ofile_symtab (pst);
 	      if (info_verbose)
 		{
 		  printf_filtered ("%d DIE's, sorting...", diecount);
