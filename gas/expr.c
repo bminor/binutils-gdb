@@ -365,9 +365,6 @@ operand (expressionP)
 
   /* digits, assume it is a bignum. */
 
-
-
-
   SKIP_WHITESPACE ();		/* leading whitespace is part of operand. */
   c = *input_line_pointer++;	/* input_line_pointer->past char in c. */
 
@@ -458,7 +455,7 @@ operand (expressionP)
 	case 'f':
 #ifdef LOCAL_LABELS_FB
 	  /* if it says '0f' and the line ends or it doesn't look like
-	 a floating point #, its a local label ref.  dtrt */
+	     a floating point #, its a local label ref.  dtrt */
 	  /* likewise for the b's.  xoxorich. */
 	  if (c == 'f'
 	      && (!*input_line_pointer ||
@@ -508,11 +505,9 @@ operand (expressionP)
 
 
     case '\'':
-      /*
-     * Warning: to conform to other people's assemblers NO ESCAPEMENT is permitted
-     * for a single quote. The next character, parity errors and all, is taken
-     * as the value of the operand. VERY KINKY.
-     */
+      /* Warning: to conform to other people's assemblers NO ESCAPEMENT is
+	 permitted for a single quote. The next character, parity errors and
+	 all, is taken as the value of the operand. VERY KINKY.  */
       expressionP->X_add_number = *input_line_pointer++;
       expressionP->X_seg = SEG_ABSOLUTE;
       break;
@@ -530,10 +525,8 @@ operand (expressionP)
 	    if (c == '-')
 	      {
 		expressionP->X_add_number = -expressionP->X_add_number;
-		/*
-	   * Notice: '-' may  overflow: no warning is given. This is compatible
-	   * with other people's assemblers. Sigh.
-	   */
+		/* Notice: '-' may overflow: no warning is given. This is
+		   compatible with other people's assemblers. Sigh.  */
 	      }
 	    else
 	      {
@@ -606,16 +599,15 @@ operand (expressionP)
       if (is_name_beginner (c))	/* here if did not begin with a digit */
 	{
 	  /*
-       * Identifier begins here.
-       * This is kludged for speed, so code is repeated.
-       */
+	   * Identifier begins here.
+	   * This is kludged for speed, so code is repeated.
+	   */
 	isname:
 	  name = --input_line_pointer;
 	  c = get_symbol_end ();
 	  symbolP = symbol_find_or_make (name);
-	  /*
-       * If we have an absolute symbol or a reg, then we know its value now.
-       */
+	  /* If we have an absolute symbol or a reg, then we know its value
+	     now.  */
 	  expressionP->X_seg = S_GET_SEGMENT (symbolP);
 	  switch (expressionP->X_seg)
 	    {
@@ -1153,12 +1145,5 @@ get_single_number ()
   return exp.X_add_number;
 
 }
-
-/*
- * Local Variables:
- * comment-column: 0
- * fill-column: 131
- * End:
- */
 
 /* end of expr.c */
