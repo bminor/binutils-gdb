@@ -141,7 +141,8 @@ libbfd.h: $(srcdir)/../libbfd-in.h	\
 	$(MKDOC) -i < $(srcdir)/../archures.c >>libbfd.h
 
 libcoff.h: $(srcdir)/../libcoff-in.h	\
-	$(srcdir)/../coffcode.h
+	$(srcdir)/../coffcode.h \
+	$(srcdir)/chew
 	cat $(srcdir)/../libcoff-in.h >libcoff.h
 	$(MKDOC) -i < $(srcdir)/../coffcode.h >>libcoff.h
 
@@ -156,7 +157,8 @@ bfd.h: $(srcdir)/../bfd-in.h 		\
 	$(srcdir)/../archive.c		\
 	$(srcdir)/../core.c		\
 	$(srcdir)/../targets.c		\
-	$(srcdir)/../format.c		
+	$(srcdir)/../format.c		\
+	$(srcdir)/chew
 	cat $(srcdir)/../bfd-in.h >bfd.h
 	$(MKDOC) -g<$(srcdir)/../init.c >>bfd.h
 	$(MKDOC) -g<$(srcdir)/../opncls.c >>bfd.h

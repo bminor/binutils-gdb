@@ -1,4 +1,4 @@
-\input texinfo
+\input fsf-texi.tex
 @setfilename bfd.info
 @c $Id$
 @synindex fn cp
