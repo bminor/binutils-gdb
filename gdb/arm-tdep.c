@@ -118,24 +118,6 @@ struct frame_extra_info
 #define MAKE_THUMB_ADDR(addr)	((addr) | 1)
 #define UNMAKE_THUMB_ADDR(addr) ((addr) & ~1)
 
-#define SWAP_TARGET_AND_HOST(buffer,len) 				\
-  do									\
-    {									\
-      if (TARGET_BYTE_ORDER != HOST_BYTE_ORDER)				\
-	{								\
-	  char tmp;							\
-	  char *p = (char *)(buffer);					\
-	  char *q = ((char *)(buffer)) + len - 1;		   	\
-	  for (; p < q; p++, q--)				 	\
-	    {								\
-	      tmp = *q;							\
-	      *q = *p;							\
-	      *p = tmp;							\
-	    }								\
-	}								\
-    }									\
-  while (0)
-
 /* Will a function return an aggregate type in memory or in a
    register?  Return 0 if an aggregate type can be returned in a
    register, 1 if it must be returned in memory.  */
@@ -1310,7 +1292,6 @@ arm_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
     {
       int len;
       char *val;
-      double dbl_arg;
       CORE_ADDR regval;
       enum type_code typecode;
       struct type *arg_type, *target_type;
@@ -1330,22 +1311,11 @@ arm_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
          calling the function.  */
       if (TYPE_CODE_FLT == typecode && REGISTER_SIZE == len)
 	{
-	  float f;
-	  double d;
-	  char * bufo = (char *) &d;
-	  char * bufd = (char *) &dbl_arg;
-
-	  len = sizeof (double);
-	  f = *(float *) val;
-	  SWAP_TARGET_AND_HOST (&f, sizeof (float));  /* adjust endianess */
-	  d = f;
-	  /* We must revert the longwords so they get loaded into the
-	     the right registers. */
-	  memcpy (bufd, bufo + len / 2, len / 2);
-	  SWAP_TARGET_AND_HOST (bufd, len / 2);  /* adjust endianess */
-	  memcpy (bufd + len / 2, bufo, len / 2);
-	  SWAP_TARGET_AND_HOST (bufd + len / 2, len / 2); /* adjust endianess */
-	  val = (char *) &dbl_arg;
+	  DOUBLEST dblval;
+	  dblval = extract_floating (val, len);
+	  len = TARGET_DOUBLE_BIT / TARGET_CHAR_BIT;
+	  val = alloca (len);
+	  store_floating (val, len, dblval);
 	}
 #if 1
       /* I don't know why this code was disable. The only logical use
@@ -1466,43 +1436,34 @@ arm_float_info (void)
   print_fpu_flags (status);
 }
 
-#if 0
-/* FIXME:  The generated assembler works but sucks.  Instead of using
-   r0, r1 it pushes them on the stack, then loads them into r3, r4 and
-   uses those registers.  I must be missing something.  ScottB  */
+/* NOTE: cagney/2001-08-20: Both convert_from_extended() and
+   convert_to_extended() use floatformat_arm_ext_littlebyte_bigword.
+   It is thought that this is is the floating-point register format on
+   little-endian systems.  */
 
-void
-convert_from_extended (void *ptr, void *dbl)
-{
-  __asm__ ("
-	   ldfe f0,[%0]
-	   stfd f0,[%1] "
-:				/* no output */
-:	   "r" (ptr), "r" (dbl));
-}
-
-void
-convert_to_extended (void *dbl, void *ptr)
-{
-  __asm__ ("
-	   ldfd f0,[%0]
-	   stfe f0,[%1] "
-:				/* no output */
-:	   "r" (dbl), "r" (ptr));
-}
-#else
 static void
 convert_from_extended (void *ptr, void *dbl)
 {
-  *(double *) dbl = *(double *) ptr;
+  DOUBLEST d;
+  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+    floatformat_to_doublest (&floatformat_arm_ext_big, ptr, &d);
+  else
+    floatformat_to_doublest (&floatformat_arm_ext_littlebyte_bigword,
+			     ptr, &d);
+  floatformat_from_doublest (TARGET_DOUBLE_FORMAT, &d, dbl);
 }
 
 void
 convert_to_extended (void *dbl, void *ptr)
 {
-  *(double *) ptr = *(double *) dbl;
+  DOUBLEST d;
+  floatformat_to_doublest (TARGET_DOUBLE_FORMAT, ptr, &d);
+  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+    floatformat_from_doublest (&floatformat_arm_ext_big, &d, dbl);
+  else
+    floatformat_from_doublest (&floatformat_arm_ext_littlebyte_bigword,
+			       &d, dbl);
 }
-#endif
 
 /* Nonzero if register N requires conversion from raw format to
    virtual format.  */

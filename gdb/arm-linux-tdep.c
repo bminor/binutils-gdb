@@ -160,7 +160,6 @@ arm_linux_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
     {
       int len;
       char *val;
-      double dbl_arg;
       CORE_ADDR regval;
       enum type_code typecode;
       struct type *arg_type, *target_type;
@@ -180,14 +179,11 @@ arm_linux_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
          calling the function.  */
       if (TYPE_CODE_FLT == typecode && REGISTER_SIZE == len)
 	{
-	  /* Float argument in buffer is in host format.  Read it and 
-	     convert to DOUBLEST, and store it in target double.  */
 	  DOUBLEST dblval;
-	  
+	  dblval = extract_floating (val, len);
 	  len = TARGET_DOUBLE_BIT / TARGET_CHAR_BIT;
-	  floatformat_to_doublest (HOST_FLOAT_FORMAT, val, &dblval);
-	  store_floating (&dbl_arg, len, dblval);
-	  val = (char *) &dbl_arg;
+	  val = alloca (len);
+	  store_floating (val, len, dblval);
 	}
 
       /* If the argument is a pointer to a function, and it is a Thumb

@@ -1,3 +1,17 @@
+2001-07-24  Andrew Cagney  <ac131313@redhat.com>
+
+	* arm-tdep.c (convert_from_extended, convert_to_extended): Delete
+	assembler version of function.
+	(convert_from_extended, convert_to_extended): Rewrite. Use
+	floatformat_to_doublest, floatformat_from_doublest,
+	floatformat_arm_ext_big, floatformat_arm_ext_littlebyte_bigword.
+	(arm_push_arguments): Use extract_floating and store_floating to
+	perform floating point conversions.
+	(SWAP_TARGET_AND_HOST): Delete macro.
+	* arm-linux-tdep.c (arm_linux_push_arguments): Use
+	extract_floating and store_floating to perform floating point
+	conversions.
+
 2001-08-20  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbtypes.h (struct type): Clarify meaning of field ``length''.
