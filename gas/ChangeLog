@@ -1,3 +1,25 @@
+Wed Mar 11 23:32:42 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* configure.in: vxworks68 gets te-sun3.h.
+
+	* expr.c: remove limitation that local_labels_dollar or
+	  local_labels_fb must be < 10.
+
+	* symbols.c: remove local_labels_dollar, replace with a function
+	  interface for a sparse array.  All users adjusted.
+
+Fri Mar  6 21:57:18 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* Makefile.in: added check target.
+
+Tue Mar  3 15:45:56 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
+
+	* Makefile.in: added tooldir and program_prefix.
+
+Sun Mar  1 04:43:19 1992  Michael Tiemann  (tiemann@cygnus.com)
+
+	* write.{c,h} (fix_new): Make these declarations consistent.
+
 Sat Feb 29 13:59:10 1992  Michael Tiemann  (tiemann@cygnus.com)
 
 	* Makefile.in (strerror.o): Add rule so that broken Sun make can
@@ -9,6 +31,12 @@ Wed Feb 26 19:26:28 1992  Steve Chamberlain  (sac at thepub.cygnus.com)
 
 	* expr.c (operand): if can't work out what sort of operand it is,
 	then look through FLT_CHARS for a hint.
+
+Wed Feb 26 18:04:40 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* Makefile.in, configure.in: removed traces of namesubdir,
+	  -subdirs, $(subdir), $(unsubdir), some rcs triggers.  Forced
+	  copyrights to '92, changed some from Cygnus to FSF.
 
 Tue Feb 25 14:17:15 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
 

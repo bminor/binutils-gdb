@@ -19,6 +19,9 @@
 #   the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #
 
+# This file was written, and is maintained by K. Richard Pixley
+# <rich@cygnus.com>.
+
 # This file is a shell script that supplies the information necessary
 # to tailor a template configure script into the configure script
 # appropriate for this directory.  For more information, check any
@@ -76,6 +79,7 @@ aix*)
 	case "${target_cpu}" in
 	i386)	obj_format=coff
 		target_cpu=i386aix
+		emulation=i386aix
 		;;
 	esac
 	;;
@@ -86,13 +90,13 @@ bsd* | sunos*) obj_format=aout ;;
 
 ebmon-old)
 	obj_format=coff
-	need_bfd="$(unsubdir)/../bfd$(subdir)/libbfd.a"
+	need_bfd="./../bfd/libbfd.a"
 	target_cpu=ebmon29k
 	;;
 
 ebmon)
 	obj_format=coffbfd
-	need_bfd="$(unsubdir)/../bfd$(subdir)/libbfd.a"
+	need_bfd="./../bfd/libbfd.a"
 	target_cpu=ebmon29k
 	;;
 
@@ -100,7 +104,7 @@ generic) obj_format=generic ;;
 
 hms)
 	obj_format=coffbfd
-	need_bfd="$(unsubdir)/../bfd$(subdir)/libbfd.a"
+	need_bfd="./../bfd/libbfd.a"
 	;;
 
 sysv32)
@@ -121,6 +125,10 @@ coff* | sysv*)
 vxworks)
 	case ${target_cpu} in
 	i960) obj_format=bout ;;
+	m68k)
+		obj_format=aout
+		emulation=sun3
+		;;
 	*) obj_format=aout ;;
 	esac
 	;;
