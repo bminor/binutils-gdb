@@ -1,5 +1,5 @@
 /* tc-m68k.c -- Assemble for the m68k family
-   Copyright (C) 1987, 91, 92, 93, 94, 95, 96, 97, 98, 99, 2000
+   Copyright (C) 1987, 91, 92, 93, 94, 95, 96, 97, 98, 99, 2000, 2001
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -229,7 +229,7 @@ struct m68k_it
 #define arch_coldfire_p(x)	(((x) & mcf) != 0)
 
 /* Macros for determining if cpu supports a specific addressing mode */
-#define HAVE_LONG_BRANCH(x)	((x) & (m68020|m68030|m68040|m68060|cpu32))
+#define HAVE_LONG_BRANCH(x)     ((x) & (m68020|m68030|m68040|m68060|cpu32|mcf5407))
 
 static struct m68k_it the_ins;	/* the instruction being assembled */
 
@@ -351,56 +351,59 @@ static void md_convert_frag_1 PARAMS ((fragS *));
 
 static int current_architecture;
 
-struct m68k_cpu {
-  unsigned long arch;
-  const char *name;
-  int alias;
-};
+struct m68k_cpu
+  {
+    unsigned long arch;
+    const char *name;
+    int alias;
+  };
 
-static const struct m68k_cpu archs[] = {
-  { m68000, "68000", 0 },
-  { m68010, "68010", 0 },
-  { m68020, "68020", 0 },
-  { m68030, "68030", 0 },
-  { m68040, "68040", 0 },
-  { m68060, "68060", 0 },
-  { cpu32,  "cpu32", 0 },
-  { m68881, "68881", 0 },
-  { m68851, "68851", 0 },
-  { mcf5200, "5200", 0 },
-  { mcf5206e, "5206e", 0 },
-  { mcf5307, "5307", 0},
-  /* Aliases (effectively, so far as gas is concerned) for the above
-     cpus.  */
-  { m68020, "68k", 1 },
-  { m68000, "68008", 1 },
-  { m68000, "68302", 1 },
-  { m68000, "68306", 1 },
-  { m68000, "68307", 1 },
-  { m68000, "68322", 1 },
-  { m68000, "68356", 1 },
-  { m68000, "68ec000", 1 },
-  { m68000, "68hc000", 1 },
-  { m68000, "68hc001", 1 },
-  { m68020, "68ec020", 1 },
-  { m68030, "68ec030", 1 },
-  { m68040, "68ec040", 1 },
-  { m68060, "68ec060", 1 },
-  { cpu32,  "68330", 1 },
-  { cpu32,  "68331", 1 },
-  { cpu32,  "68332", 1 },
-  { cpu32,  "68333", 1 },
-  { cpu32,  "68334", 1 },
-  { cpu32,  "68336", 1 },
-  { cpu32,  "68340", 1 },
-  { cpu32,  "68341", 1 },
-  { cpu32,  "68349", 1 },
-  { cpu32,  "68360", 1 },
-  { m68881, "68882", 1 },
-  { mcf5200, "5202", 1 },
-  { mcf5200, "5204", 1 },
-  { mcf5200, "5206", 1 },
-};
+static const struct m68k_cpu archs[] =
+  {
+    { m68000, "68000", 0 },
+    { m68010, "68010", 0 },
+    { m68020, "68020", 0 },
+    { m68030, "68030", 0 },
+    { m68040, "68040", 0 },
+    { m68060, "68060", 0 },
+    { cpu32,  "cpu32", 0 },
+    { m68881, "68881", 0 },
+    { m68851, "68851", 0 },
+    { mcf5200, "5200", 0 },
+    { mcf5206e, "5206e", 0 },
+    { mcf5307, "5307", 0},
+    { mcf5407, "5407", 0},
+    /* Aliases (effectively, so far as gas is concerned) for the above
+       cpus.  */
+    { m68020, "68k", 1 },
+    { m68000, "68008", 1 },
+    { m68000, "68302", 1 },
+    { m68000, "68306", 1 },
+    { m68000, "68307", 1 },
+    { m68000, "68322", 1 },
+    { m68000, "68356", 1 },
+    { m68000, "68ec000", 1 },
+    { m68000, "68hc000", 1 },
+    { m68000, "68hc001", 1 },
+    { m68020, "68ec020", 1 },
+    { m68030, "68ec030", 1 },
+    { m68040, "68ec040", 1 },
+    { m68060, "68ec060", 1 },
+    { cpu32,  "68330", 1 },
+    { cpu32,  "68331", 1 },
+    { cpu32,  "68332", 1 },
+    { cpu32,  "68333", 1 },
+    { cpu32,  "68334", 1 },
+    { cpu32,  "68336", 1 },
+    { cpu32,  "68340", 1 },
+    { cpu32,  "68341", 1 },
+    { cpu32,  "68349", 1 },
+    { cpu32,  "68360", 1 },
+    { m68881, "68882", 1 },
+    { mcf5200, "5202", 1 },
+    { mcf5200, "5204", 1 },
+    { mcf5200, "5206", 1 },
+  };
 
 static const int n_archs = sizeof (archs) / sizeof (archs[0]);
 
@@ -3965,6 +3968,7 @@ select_control_regs ()
     case mcf5200:
     case mcf5206e:
     case mcf5307:
+    case mcf5407:
       control_regs = mcf_control_regs;
       break;
     default:

@@ -1,3 +1,9 @@
+2001-03-06  Igor Shevlyakov  <igor@windriver.com>
+
+	* config/tc-m68k.c : Add 5407 to archs[] table.
+	(HAVE_LONG_BRANCH): Add mcf5407.
+	(select_control_regs): Recognize 5407.
+
 2001-03-02  Dave Brolley  <brolley@redhat.com>
 
 	* config/tc-m32r.c (expand_debug_syms): Call frag_align_code rather than
