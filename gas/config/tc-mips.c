@@ -1988,7 +1988,6 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
          PC relative relocs.  */
       prev_insn = *ip;
       prev_insn_reloc_type = reloc_type;
-      prev_insn_valid = 1;
     }
 
   /* We just output an insn, so the next one doesn't have a label.  */
