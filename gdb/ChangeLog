@@ -1,8 +1,14 @@
+Tue Jun 29 11:02:58 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* infrun.c (wait_for_inferior): Use find_pc_line not find_pc_symtab
+	to check whether there is line number information.
+
 Tue Jun 29 08:29:17 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* remote-udi.c: Fix docstring so that it compiles.
 
-	* remote-mips.c, remote-nindy.c: move bfd.h before symfile.h (for file_ptr decl)
+	* remote-mips.c, remote-nindy.c: move bfd.h before symfile.h
+	(for file_ptr).
 
 Tue Jun 29 09:11:27 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
@@ -11,7 +17,7 @@ Tue Jun 29 09:11:27 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* c-typeprint.c (c_type_print_base): Don't error() on invalid type.
 
-	* symtab.h (struct symtab, line_charpos): Fix comment.
+	* symtab.h: Add comments about line numbers.
 	* source.c (identify_source_line): Fix off by one bug with line.
 
 Mon Jun 28 10:09:08 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
