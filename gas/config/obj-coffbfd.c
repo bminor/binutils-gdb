@@ -1961,6 +1961,7 @@ DEFUN (change_to_section, (name, len, exp),
  *                                               'n' for noload
  *                                               'o' for over
  *                                               'w' for data
+ *						 'd' (apparently m88k for data)
  *                                               'x' for text
  * But if the argument is not a quoted string, treat it as a
  * subsegment number.
@@ -2015,6 +2016,7 @@ DEFUN_VOID (obj_coff_section)
 		case 'l': flags |= STYP_LIB;    break;
 		case 'n': flags |= STYP_NOLOAD; break;
 		case 'o': flags |= STYP_OVER;   break;
+		case 'd':
 		case 'w': flags |= STYP_DATA;   break;
 		case 'x': flags |= STYP_TEXT;   break;
 		default:

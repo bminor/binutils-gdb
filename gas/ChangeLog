@@ -1,3 +1,16 @@
+Wed Sep  1 12:19:07 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
+
+	* config/obj-coffbfd.c (obj_coff_section): add 'd' as an alias for
+	  section type of data.  'd' seems to be used for m88k.
+
+Wed Aug 25 22:33:22 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/tc-mips.c (mips_align, s_stringer, s_cons, s_float_cons,
+	s_mips_space): Set insn_label to NULL to avoid changing it at the
+	next .align statement.
+	(append_insn): Don't swap jal with instruction that sets the
+	register that jal sets.
+
 Wed Aug 25 16:15:57 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 	* configure.in: recognize m88110.
