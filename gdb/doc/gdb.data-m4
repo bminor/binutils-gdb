@@ -1,6 +1,6 @@
 _dnl__ Copyright (c) 1988 1989 1990 1991 Free Software Foundation, Inc.
 _dnl__ This file is part of the source for the GDB manual.
-_dnl__ $Id$
+@c M4 FRAGMENT: $Id$
 @node Data, Symbols, Source, Top
 @chapter Examining Data
 
@@ -429,7 +429,7 @@ is a common name for the program counter; @pxref{Registers}).
 Remove item numbers @var{dnums} from the list of expressions to display.
 
 @code{undisplay} will not repeat if you press @key{RET} after using it.
-(Otherwise you would just get the error @samp{No display number dots{}}.)
+(Otherwise you would just get the error @samp{No display number @dots{}}.)
 
 @item disable display @var{dnums}@dots{}
 @kindex disable display
