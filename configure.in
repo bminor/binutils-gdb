@@ -428,7 +428,7 @@ case "${target}" in
     ;;
 # start-sanitize-d30v
   d30v-*-*)
-    noconfigdirs="$noconfigdirs tcl tk expect gcc gdb newlib ld target-librx target-libg++ target-libstdc++ target-libio target-libgloss"
+    noconfigdirs="$noconfigdirs tcl tk expect gcc gdb newlib target-librx target-libg++ target-libstdc++ target-libio target-libgloss"
     ;;
 # end-sanitize-d30v
   h8300*-*-* | \
