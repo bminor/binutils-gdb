@@ -170,6 +170,9 @@ static fragS *ppc_toc_frag;
    segment.  NULL if there are no subsegments after the TOC.  */
 static fragS *ppc_after_toc_frag;
 
+/* The current static block.  */
+static symbolS *ppc_current_block;
+
 /* The COFF debugging section; set by md_begin.  This is not the
    .debug section, but is instead the secret BFD section which will
    cause BFD to set the section number of a symbol to N_DEBUG.  */
@@ -180,89 +183,104 @@ static bfd_size_type ppc_debug_name_section_size;
 
 #endif /* OBJ_COFF */
 
-/* This function is called when an option is found that is not
-   recognized by the driver code.  It should return 1 if the option is
-   recognized here, 0 otherwise.  */
+#ifdef OBJ_ELF
+CONST char *md_shortopts = "um:VQ:";
+#else
+CONST char *md_shortopts = "um:";
+#endif
+struct option md_longopts[] = {
+  {NULL, no_argument, NULL, 0}
+};
+size_t md_longopts_size = sizeof(md_longopts);
 
 int
-md_parse_option (arg_ptr, argc_ptr, argv_ptr)
-     char **arg_ptr;
-     int *argc_ptr;
-     char ***argv_ptr;
+md_parse_option (c, arg)
+     int c;
+     char *arg;
 {
-  /* -u means that any undefined symbols should be treated as
-     external, which is the default for gas anyhow.  */
-  if (strcmp (*arg_ptr, "u") == 0)
+  switch (c)
     {
-      **arg_ptr = '\0';
-      return 1;
-    }
+    case 'u':
+      /* -u means that any undefined symbols should be treated as
+	 external, which is the default for gas anyhow.  */
+      break;
 
-  /* -mpwrx mean to assemble for the IBM POWER/2 (RIOS2).  */
-  if (strcmp (*arg_ptr, "mpwrx") == 0)
-    {
-      ppc_cpu = PPC_OPCODE_POWER | PPC_OPCODE_POWER2;
-      **arg_ptr = '\0';
-      return 1;
-    }
-
-  /* -mpwr means to assemble for the IBM POWER (RIOS1).  */
-  if (strcmp (*arg_ptr, "mpwr") == 0)
-    {
-      ppc_cpu = PPC_OPCODE_POWER;
-      **arg_ptr = '\0';
-      return 1;
-    }
-
-  /* -m601 means to assemble for the Motorola PowerPC 601.  FIXME: We
-     ignore the option for now, but we should really use it to permit
-     instructions defined on the 601 that are not part of the standard
-     PowerPC architecture (mostly holdovers from the POWER).  */
-  if (strcmp (*arg_ptr, "m601") == 0)
-    {
-      ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_601;
-      **arg_ptr = '\0';
-      return 1;
-    }
-
-  /* -mppc means to assemble for the Motorola PowerPC 603/604.  */
-  if (strcmp (*arg_ptr, "mppc") == 0)
-    {
-      ppc_cpu = PPC_OPCODE_PPC;
-      **arg_ptr = '\0';
-      return 1;
-    }
-
-  /* -many means to assemble for any architecture (PWR/PWRX/PPC).  */
-  if (strcmp (*arg_ptr, "many") == 0)
-    {
-      ppc_cpu = PPC_OPCODE_POWER | PPC_OPCODE_POWER2 | PPC_OPCODE_PPC;
-      **arg_ptr = '\0';
-      return 1;
-    }
+    case 'm':
+      /* -mpwrx and -mpwr2 mean to assemble for the IBM POWER/2
+         (RIOS2).  */
+      if (strcmp (arg, "pwrx") == 0 || strcmp (arg, "pwr2") == 0)
+	ppc_cpu = PPC_OPCODE_POWER | PPC_OPCODE_POWER2;
+      /* -mpwr means to assemble for the IBM POWER (RIOS1).  */
+      else if (strcmp (arg, "pwr") == 0)
+	ppc_cpu = PPC_OPCODE_POWER;
+      /* -m601 means to assemble for the Motorola PowerPC 601.  FIXME: We
+	 ignore the option for now, but we should really use it to permit
+	 instructions defined on the 601 that are not part of the standard
+	 PowerPC architecture (mostly holdovers from the POWER).  */
+      else if (strcmp (arg, "601") == 0)
+	ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_601;
+      /* -mppc, -mppc32, -m603, and -m604 mean to assemble for the
+         Motorola PowerPC 603/604.  */
+      else if (strcmp (arg, "ppc") == 0
+	       || strcmp (arg, "ppc32") == 0
+	       || strcmp (arg, "603") == 0
+	       || strcmp (arg, "604") == 0)
+	ppc_cpu = PPC_OPCODE_PPC;
+      /* -mppc64 and -m620 mean to assemble for the 64-bit PowerPC
+         620.  */
+      else if (strcmp (arg, "ppc64") == 0 || strcmp (arg, "620") == 0)
+	{
+	  ppc_cpu = PPC_OPCODE_PPC;
+	  ppc_size = PPC_OPCODE_64;
+	}
+      /* -many means to assemble for any architecture (PWR/PWRX/PPC).  */
+      else if (strcmp (arg, "any") == 0)
+	ppc_cpu = PPC_OPCODE_POWER | PPC_OPCODE_POWER2 | PPC_OPCODE_PPC;
+      else
+	{
+	  as_bad ("invalid architecture -m%s", arg);
+	  return 0;
+	}
+      break;
 
 #ifdef OBJ_ELF
-  /* -V: SVR4 argument to print version ID.  */
-  if (strcmp (*arg_ptr, "V") == 0)
-    {
+      /* -V: SVR4 argument to print version ID.  */
+    case 'V':
       print_version_id ();
-      **arg_ptr = '\0';
-      return 1;
-    }
+      break;
 
-  /* -Qy, -Qn: SVR4 arguments controlling whether a .comment section
-     should be emitted or not.  FIXME: Not implemented.  */
-  if (strcmp (*arg_ptr, "Qy") == 0
-      || strcmp (*arg_ptr, "Qn") == 0)
-    {
-      **arg_ptr = '\0';
-      return 1;
-    }
+      /* -Qy, -Qn: SVR4 arguments controlling whether a .comment section
+	 should be emitted or not.  FIXME: Not implemented.  */
+    case 'Q':
+      break;
 #endif
 
-  return 0;
+    default:
+      return 0;
+    }
+
+  return 1;
 }
 
+void
+md_show_usage (stream)
+     FILE *stream;
+{
+  fprintf(stream, "\
+PowerPC options:\n\
+-u			ignored\n\
+-mpwrx			generate code for IBM POWER/2 (RIOS2)\n\
+-mpwr			generate code for IBM POWER (RIOS1)\n\
+-m601			generate code for Motorola PowerPC 601\n\
+-mppc			generate code for Motorola PowerPC 603/604\n\
+-many			generate code for any architecture (PWR/PWRX/PPC)\n");
+#ifdef OBJ_ELF
+  fprintf(stream, "\
+-V			print assembler version number\n\
+-Qy, -Qn		ignored\n");
+#endif
+}
+
 /* Set ppc_cpu if it is not already set.  */
 
 static void
@@ -326,7 +344,18 @@ md_begin ()
 
 	  retval = hash_insert (ppc_hash, op->name, (PTR) op);
 	  if (retval != (const char *) NULL)
-	    abort ();
+	    {
+	      /* When using -many, the comparison instructions are a
+		 harmless special case.  */
+	      if (ppc_cpu != (PPC_OPCODE_POWER
+			      | PPC_OPCODE_POWER2
+			      | PPC_OPCODE_PPC)
+		  || (strcmp (op->name, "cmpli") != 0
+		      && strcmp (op->name, "cmpi") != 0
+		      && strcmp (op->name, "cmp") != 0
+		      && strcmp (op->name, "cmpl") != 0))
+		abort ();
+	    }
 	}
     }
 
@@ -377,14 +406,13 @@ ppc_insert_operand (insn, operand, val, file, line)
       long min, max;
       offsetT test;
 
-      if (operand->signedp)
+      if ((operand->flags & PPC_OPERAND_SIGNED) != 0)
 	{
-	  /* This should be
-	       max = (1 << (operand->bits - 1)) - 1;
-	     Unfortunately, IBM has decided that all positive values
-	     are permitted even for a signed field, so we lose some
-	     bounds checking.  */
-	  max = (1 << operand->bits) - 1;
+	  if ((operand->flags & PPC_OPERAND_SIGNOPT) != 0
+	      && ppc_size == PPC_OPCODE_32)
+	    max = (1 << operand->bits) - 1;
+	  else
+	    max = (1 << (operand->bits - 1)) - 1;
 	  min = - (1 << (operand->bits - 1));
 	}
       else
@@ -1107,6 +1135,7 @@ ppc_stabx (ignore)
   char *name;
   int len;
   symbolS *sym;
+  expressionS exp;
 
   name = demand_copy_C_string (&len);
 
@@ -1118,7 +1147,40 @@ ppc_stabx (ignore)
   ++input_line_pointer;
 
   sym = symbol_make (name);
-  pseudo_set (sym);
+
+  (void) expression (&exp);
+
+  switch (exp.X_op)
+    {
+    case O_illegal:
+    case O_absent:
+    case O_big:
+      as_bad ("illegal .stabx expression; zero assumed");
+      exp.X_add_number = 0;
+      /* Fall through.  */
+    case O_constant:
+      S_SET_VALUE (sym, (valueT) exp.X_add_number);
+      sym->sy_frag = &zero_address_frag;
+      break;
+
+    case O_symbol:
+      if (S_GET_SEGMENT (exp.X_add_symbol) == undefined_section)
+	sym->sy_value = exp;
+      else
+	{
+	  S_SET_VALUE (sym,
+		       exp.X_add_number + S_GET_VALUE (exp.X_add_symbol));
+	  sym->sy_frag = exp.X_add_symbol->sy_frag;
+	}
+      break;
+
+    default:
+      /* The value is some complex expression.  This will probably
+         fail at some later point, but this is probably the right
+         thing to do here.  */
+      sym->sy_value = exp;
+      break;
+    }
 
   S_SET_SEGMENT (sym, ppc_coff_debug_section);
   sym->bsym->flags |= BSF_DEBUGGING;
@@ -1142,7 +1204,21 @@ ppc_stabx (ignore)
   S_SET_DATA_TYPE (sym, get_absolute_expression ());
 
   sym->sy_tc.output = 1;
-  ppc_frob_label (sym);
+
+  if (S_GET_STORAGE_CLASS (sym) == C_STSYM)
+    sym->sy_tc.within = ppc_current_block;
+
+  if (exp.X_op != O_symbol
+      || ! S_IS_EXTERNAL (exp.X_add_symbol)
+      || S_GET_SEGMENT (exp.X_add_symbol) != bss_section)
+    ppc_frob_label (sym);
+  else
+    {
+      symbol_remove (sym, &symbol_rootP, &symbol_lastP);
+      symbol_append (sym, exp.X_add_symbol, &symbol_rootP, &symbol_lastP);
+      if (ppc_current_csect->sy_tc.within == exp.X_add_symbol)
+	ppc_current_csect->sy_tc.within = sym;
+    }
 
   if (strlen (name) > SYMNMLEN)
     {
@@ -1254,7 +1330,6 @@ ppc_bf (ignore)
      int ignore;
 {
   symbolS *sym;
-  unsigned int base;
 
   sym = symbol_make (".bf");
   S_SET_SEGMENT (sym, text_section);
@@ -1262,9 +1337,7 @@ ppc_bf (ignore)
   S_SET_VALUE (sym, frag_now_fix ());
   S_SET_STORAGE_CLASS (sym, C_FCN);
 
-  base = get_absolute_expression ();
-  if (base > coff_line_base)
-    coff_line_base = base;
+  coff_line_base = get_absolute_expression ();
 
   S_SET_NUMBER_AUXILIARY (sym, 1);
   SA_SET_SYM_LNNO (sym, coff_line_base);
@@ -1360,6 +1433,9 @@ ppc_bs (ignore)
   symbolS *csect;
   symbolS *sym;
 
+  if (ppc_current_block != NULL)
+    as_bad ("nested .bs blocks");
+
   name = input_line_pointer;
   endc = get_symbol_end ();
 
@@ -1377,6 +1453,8 @@ ppc_bs (ignore)
 
   ppc_frob_label (sym);
 
+  ppc_current_block = sym;
+
   demand_empty_rest_of_line ();
 }
 
@@ -1388,6 +1466,9 @@ ppc_es (ignore)
 {
   symbolS *sym;
 
+  if (ppc_current_block == NULL)
+    as_bad (".es without preceding .bs");
+
   sym = symbol_make (".es");
   S_SET_SEGMENT (sym, now_seg);
   S_SET_STORAGE_CLASS (sym, C_ESTAT);
@@ -1395,6 +1476,8 @@ ppc_es (ignore)
   sym->sy_tc.output = 1;
 
   ppc_frob_label (sym);
+
+  ppc_current_block = NULL;
 
   demand_empty_rest_of_line ();
 }
@@ -1574,6 +1657,10 @@ ppc_tc (ignore)
 	 || *input_line_pointer == '}')
     ++input_line_pointer;
 
+  /* Align to a four byte boundary.  */
+  frag_align (2, 0);
+  record_alignment (now_seg, 2);
+
 #endif /* ! defined (OBJ_COFF) */
 
   if (*input_line_pointer != ',')
@@ -1689,7 +1776,7 @@ ppc_symbol_new_hook (sym)
 	sym->sy_tc.class = XMC_TI;
       else if (strcmp (s, "TB]") == 0)
 	sym->sy_tc.class = XMC_TB;
-      else if (strcmp (s, "TC0]") == 0)
+      else if (strcmp (s, "TC0]") == 0 || strcm (s, "T0]") == 0)
 	sym->sy_tc.class = XMC_TC0;
       break;
     case 'U':
@@ -1943,6 +2030,17 @@ ppc_frob_symbol (sym)
 		   (valueT) coffsymbol (sym->sy_tc.within->bsym)->native);
       coffsymbol (sym->bsym)->native->fix_value = 1;
     }
+  else if (S_GET_STORAGE_CLASS (sym) == C_STSYM)
+    {
+      symbolS *block;
+      symbolS *csect;
+
+      /* The value is the offset from the enclosing csect.  */
+      block = sym->sy_tc.within;
+      csect = block->sy_tc.within;
+      resolve_symbol_value (csect);
+      S_SET_VALUE (sym, S_GET_VALUE (sym) - S_GET_VALUE (csect));
+    }
 
   return 0;
 }
@@ -2134,9 +2232,7 @@ md_pcrel_from (fixp)
 /* This is called to see whether a fixup should be adjusted to use a
    section symbol.  We take the opportunity to change a fixup against
    a symbol in the TOC subsegment into a reloc against the
-   corresponding .tc symbol.  Note that this is called before the
-   symbol values are finalized, but after the frag addresses are set,
-   so we must add the frag address to the symbol values.  */
+   corresponding .tc symbol.  */
 
 int
 ppc_fix_adjustable (fix)
@@ -2144,7 +2240,8 @@ ppc_fix_adjustable (fix)
 {
   valueT val;
 
-  val = S_GET_VALUE (fix->fx_addsy) + fix->fx_addsy->sy_frag->fr_address;
+  resolve_symbol_value (fix->fx_addsy);
+  val = S_GET_VALUE (fix->fx_addsy);
   if (ppc_toc_csect != (symbolS *) NULL
       && fix->fx_addsy != (symbolS *) NULL
       && fix->fx_addsy != ppc_toc_csect
@@ -2163,7 +2260,8 @@ ppc_fix_adjustable (fix)
 	    continue;
 	  if (sy->sy_tc.class != XMC_TC)
 	    break;
-	  if (val == S_GET_VALUE (sy) + sy->sy_frag->fr_address)
+	  resolve_symbol_value (sy);
+	  if (val == S_GET_VALUE (sy))
 	    {
 	      fix->fx_addsy = sy;
 	      fix->fx_addnumber = val - ppc_toc_frag->fr_address;
@@ -2202,8 +2300,7 @@ ppc_fix_adjustable (fix)
 	    csect = csect->sy_tc.next;
 
 	  fix->fx_offset += (S_GET_VALUE (fix->fx_addsy)
-			     + (fix->fx_addsy->sy_frag->fr_address
-				- csect->sy_frag->fr_address));
+			     - csect->sy_frag->fr_address);
 	  fix->fx_addsy = csect;
 	}
     }
@@ -2214,7 +2311,9 @@ ppc_fix_adjustable (fix)
       && S_GET_SEGMENT (fix->fx_addsy) == bss_section
       && ! S_IS_EXTERNAL (fix->fx_addsy))
     {
-      fix->fx_offset += S_GET_VALUE (fix->fx_addsy);
+      resolve_symbol_value (fix->fx_addsy->sy_frag->fr_symbol);
+      fix->fx_offset += (S_GET_VALUE (fix->fx_addsy)
+			 - S_GET_VALUE (fix->fx_addsy->sy_frag->fr_symbol));
       fix->fx_addsy = fix->fx_addsy->sy_frag->fr_symbol;
     }
 
@@ -2296,6 +2395,29 @@ md_apply_fix (fixp, valuep)
       opindex = (int) fixp->fx_r_type - (int) BFD_RELOC_UNUSED;
 
       operand = &powerpc_operands[opindex];
+
+#ifdef OBJ_COFF
+      /* It appears that an instruction like
+	     l 9,LC..1(30)
+	 when LC..1 is not a TOC symbol does not generate a reloc.  It
+	 uses the offset of LC..1 within its csect.  However, .long
+	 LC..1 will generate a reloc.  I can't find any documentation
+	 on how these cases are to be distinguished, so this is a wild
+	 guess.  These cases are generated by gcc -mminimal-toc.  */
+      if ((operand->flags & PPC_OPERAND_PARENS) != 0
+	  && operand->bits == 16
+	  && operand->shift == 0
+	  && operand->insert == NULL
+	  && fixp->fx_addsy != NULL
+	  && fixp->fx_addsy->sy_tc.subseg != 0
+	  && fixp->fx_addsy->sy_tc.class != XMC_TC
+	  && fixp->fx_addsy->sy_tc.class != XMC_TC0
+	  && S_GET_SEGMENT (fixp->fx_addsy) != bss_section)
+	{
+	  value = fixp->fx_offset;
+	  fixp->fx_done = 1;
+	}
+#endif
 
       /* Fetch the instruction, insert the fully resolved operand
 	 value, and stuff the instruction back again.  */
@@ -2411,12 +2533,6 @@ tc_gen_reloc (seg, fixp)
       return NULL;
     }
   reloc->addend = fixp->fx_addnumber;
-
-#ifdef OBJ_ELF
-  /* Don't ask.  I hate this stuff.  */
-  if (reloc->howto->pc_relative)
-    reloc->addend -= reloc->address;
-#endif
 
   return reloc;
 }

@@ -1,3 +1,10 @@
+Wed Jan 25 15:32:09 1995  David Edelsohn  <edelsohn@mhpcc.edu>
+
+	* config/tc-ppc.c (md_parse_option): Accept mpwr2 as a synonym for
+	mpwrx; mppc32, m603, and m604 as synonyms for mppc; and mppc64 and
+	m620 for PowerPC64 mode.
+	(ppc_symbol_new_hook): Add T0 as synonym for TC0 suffix.
+
 Tue Jan 24 16:44:23 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* config/tc-vax.c (vip): Introduce new ptr-to-const local variable
