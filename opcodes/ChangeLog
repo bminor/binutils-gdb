@@ -5,7 +5,8 @@ Fri Jan 17 16:19:15 1997  J.T. Conklin  <jtc@beauty.cygnus.com>
 	
 Thu Jan 17 16:19:00 1997  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
-        * m68k-opc.c (m68k_opcodes): Delete duplicate entry for "cmpil".
+	* m68k-opc.c (m68k_opcodes): Delete duplicate entry for "cmpil".
+	fix operand mask in the "moveml" entries for the coldfire.
 
 start-sanitize-tic80
 Thu Jan 16 20:54:40 1997  Fred Fish  <fnf@cygnus.com>
