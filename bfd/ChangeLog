@@ -1,3 +1,8 @@
+Tue Jan 27 15:06:04 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* coff-arm.c (coff_arm_relocate_section): Fix for PR14752 by
+	preserving the contents of t2a3_b_insn.
+
 Tue Jan 27 12:47:27 1998  Robert Lipe  <robertl@dgii.com>
 
 	* config.bfd (i[3456]86-sco3.2v5*) ELF now the default. 
