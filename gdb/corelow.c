@@ -90,7 +90,7 @@ add_to_thread_list (abfd, asect, reg_sect_arg)
      PTR reg_sect_arg;
 {
   int thread_id;
-  asection *reg_sect = reg_sect_arg;
+  asection *reg_sect = (asection *) reg_sect_arg;
 
   if (strncmp (bfd_section_name (abfd, asect), ".reg/", 5) != 0)
     return;

@@ -1,5 +1,8 @@
 Sat Oct 16 20:47:30 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* corelow.c (add_to_thread_list): Need a cast to go from PTR to
+	asection *.
+
 	* infrun.c: Add comment about signals.
 
 	* fork-child.c (fork_inferior): Remove CREATE_INFERIOR_HOOK again.
