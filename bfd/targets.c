@@ -283,6 +283,7 @@ The general target vector.
 .#define BFD_JUMP_TABLE_ARCHIVE(NAME)\
 .CAT(NAME,_slurp_armap),\
 .CAT(NAME,_slurp_extended_name_table),\
+.CAT(NAME,_construct_extended_name_table),\
 .CAT(NAME,_truncate_arname),\
 .CAT(NAME,_write_armap),\
 .CAT(NAME,_openr_next_archived_file),\
@@ -290,6 +291,8 @@ The general target vector.
 .CAT(NAME,_update_armap_timestamp)
 .  boolean  (*_bfd_slurp_armap) PARAMS ((bfd *));
 .  boolean  (*_bfd_slurp_extended_name_table) PARAMS ((bfd *));
+.  boolean  (*_bfd_construct_extended_name_table)
+.             PARAMS ((bfd *, char **, bfd_size_type *, const char **));
 .  void     (*_bfd_truncate_arname) PARAMS ((bfd *, CONST char *, char *));
 .  boolean  (*write_armap) PARAMS ((bfd *arch, 
 .                              unsigned int elength,

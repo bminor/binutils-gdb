@@ -1,5 +1,31 @@
 Fri Oct 21 17:13:07 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
+	* targets.c (BFD_JUMP_TABLE_ARCHIVE): Add case for
+	_construct_extended_name_table.
+	(bfd_target): Add _bfd_construct_extended_name_table.
+	* archive.c (_bfd_archive_bsd_construct_extended_name_table): New
+	function.
+	(_bfd_archive_coff_construct_extended_name_table): New function.
+	(_bfd_construct_extended_name_table): Renamed by adding a leading
+	underscore, and made externally visible.  Added trailing_slash
+	argument, and used it instead of elf_style.  Changed type of
+	tablen to bfd_size_type *.
+	(_bfd_write_archive_contents): Use BFD_SEND to call
+	construct_extended_name_table.  Use the returned name.
+	* libbfd-in.h (_bfd_construct_extended_name_table): Declare.
+	(_bfd_noarchive_construct_extended_name_table): Define.
+	(_bfd_archive_bsd_construct_extended_name_table): Declare.
+	(_bfd_archive_coff_construct_extended_name_table): Declare.
+	* bfd-in2.h: Rebuild.
+	* libbfd.h: Rebuild.
+	* som.c (som_construct_extended_name_table): New static function.
+	* aout-target.h (MY_construct_extended_name_table): Define.
+	* coff-rs6000.c (rs6000coff_construct_extended_name_table):
+	Define.
+	* ieee.c (ieee_construct_extended_name_table): Define.
+	* libecoff.h (_bfd_ecoff_construct_extended_name_table): Define.
+	* oasys.c (oasys_construct_extended_name_table): Define.
+
 	Fix the ELF linker to not require an interpreter if no dynamic
 	objects were seen, even when linking PIC code.
 	* libelf.h (ELF_LINK_HASH_NEEDS_PLT): Define.
