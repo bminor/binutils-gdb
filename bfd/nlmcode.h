@@ -981,7 +981,7 @@ nlm_get_symbol_info (ignore_abfd, symbol, ret)
 
 void
 nlm_print_symbol (abfd, afile, symbol, how)
-     bfd *abfd ATTRIBUTE_UNUSED;
+     bfd *abfd;
      PTR afile;
      asymbol *symbol;
      bfd_print_symbol_type how;
@@ -996,7 +996,7 @@ nlm_print_symbol (abfd, afile, symbol, how)
 	fprintf (file, "%s", symbol->name);
       break;
     case bfd_print_symbol_all:
-      bfd_print_symbol_vandf ((PTR) file, symbol);
+      bfd_print_symbol_vandf (abfd, (PTR) file, symbol);
       fprintf (file, " %-5s", symbol->section->name);
       if (symbol->name)
 	fprintf (file, " %s", symbol->name);

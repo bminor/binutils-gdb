@@ -1,3 +1,27 @@
+2001-08-23  H.J. Lu  <hjl@gnu.org>
+
+	* syms.c (bfd_print_symbol_vandf): Add abfd to arg.
+	* bfd-in2.h (bfd_print_symbol_vandf): Regenerated.
+
+	* aoutx.h (NAME(aout,print_symbol)): Pass abfd to
+	bfd_print_symbol_vandf.
+	* coffgen.c (coff_print_symbol): Likewise.
+	* elf.c (bfd_elf_print_symbol): Likewise.
+	* ieee.c (ieee_print_symbol): Likewise.
+	* nlmcode.h (nlm_print_symbol): Likewise.
+	* oasys.c (oasys_print_symbol): Likewise.
+	* pdp11.c (NAME(aout,print_symbol)): Likewise.
+	* som.c (som_print_symbol): Likewise.
+	* srec.c (srec_print_symbol): Likewise.
+	* tekhex.c (tekhex_print_symbol): Likewise.
+	* versados.c (versados_print_symbol): Likewise.
+	* vms.c (vms_print_symbol): Likewise.
+
+	* elf.c (_bfd_elf_print_private_bfd_data): Replace fprintf_vma
+	with bfd_fprintf_vma.
+	(bfd_elf_print_symbol): Likewise.
+	* syms.c (bfd_print_symbol_vandf): Likewise.
+
 2001-08-23  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* aoutf1.h (sunos_write_object_contents): Silence compile time

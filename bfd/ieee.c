@@ -1745,8 +1745,8 @@ ieee_get_symbol_info (ignore_abfd, symbol, ret)
 }
 
 static void
-ieee_print_symbol (ignore_abfd, afile, symbol, how)
-     bfd *ignore_abfd ATTRIBUTE_UNUSED;
+ieee_print_symbol (abfd, afile, symbol, how)
+     bfd *abfd;
      PTR afile;
      asymbol *symbol;
      bfd_print_symbol_type how;
@@ -1777,7 +1777,7 @@ ieee_print_symbol (ignore_abfd, afile, symbol, how)
 	  }
 	else
 	  {
-	    bfd_print_symbol_vandf ((PTR) file, symbol);
+	    bfd_print_symbol_vandf (abfd, (PTR) file, symbol);
 
 	    fprintf (file, " %-5s %04x %02x %s",
 		     section_name,

@@ -1170,7 +1170,7 @@ _bfd_vms_make_empty_symbol (abfd)
 
 static void
 vms_print_symbol (abfd, file, symbol, how)
-     bfd *abfd ATTRIBUTE_UNUSED;
+     bfd *abfd;
      PTR file;
      asymbol *symbol;
      bfd_print_symbol_type how;
@@ -1190,7 +1190,7 @@ vms_print_symbol (abfd, file, symbol, how)
 	{
 	  CONST char *section_name = symbol->section->name;
 
-	  bfd_print_symbol_vandf((PTR)file,symbol);
+	  bfd_print_symbol_vandf (abfd, (PTR)file, symbol);
 
 	  fprintf ((FILE *)file," %-8s %s", section_name, symbol->name);
         }

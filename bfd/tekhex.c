@@ -957,8 +957,8 @@ tekhex_get_symbol_info (ignore_abfd, symbol, ret)
 }
 
 static void
-tekhex_print_symbol (ignore_abfd, filep, symbol, how)
-     bfd *ignore_abfd ATTRIBUTE_UNUSED;
+tekhex_print_symbol (abfd, filep, symbol, how)
+     bfd *abfd;
      PTR filep;
      asymbol *symbol;
      bfd_print_symbol_type how;
@@ -977,7 +977,7 @@ tekhex_print_symbol (ignore_abfd, filep, symbol, how)
       {
 	CONST char *section_name = symbol->section->name;
 
-	bfd_print_symbol_vandf ((PTR) file, symbol);
+	bfd_print_symbol_vandf (abfd, (PTR) file, symbol);
 
 	fprintf (file, " %-5s %s",
 		 section_name,

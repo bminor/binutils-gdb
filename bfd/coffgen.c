@@ -2151,7 +2151,7 @@ coff_print_symbol (abfd, filep, symbol, how)
 	}
       else
 	{
-	  bfd_print_symbol_vandf ((PTR) file, symbol);
+	  bfd_print_symbol_vandf (abfd, (PTR) file, symbol);
 	  fprintf (file, " %-5s %s %s %s",
 		   symbol->section->name,
 		   coffsymbol (symbol)->native ? "n" : "g",

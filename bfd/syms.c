@@ -433,14 +433,15 @@ FUNCTION
 	bfd_print_symbol_vandf
 
 SYNOPSIS
-	void bfd_print_symbol_vandf(PTR file, asymbol *symbol);
+	void bfd_print_symbol_vandf(bfd *abfd, PTR file, asymbol *symbol);
 
 DESCRIPTION
 	Print the value and flags of the @var{symbol} supplied to the
 	stream @var{file}.
 */
 void
-bfd_print_symbol_vandf (arg, symbol)
+bfd_print_symbol_vandf (abfd, arg, symbol)
+     bfd *abfd;
      PTR arg;
      asymbol *symbol;
 {
@@ -448,11 +449,12 @@ bfd_print_symbol_vandf (arg, symbol)
   flagword type = symbol->flags;
   if (symbol->section != (asection *) NULL)
     {
-      fprintf_vma (file, symbol->value + symbol->section->vma);
+      bfd_fprintf_vma (abfd, file,
+		       symbol->value + symbol->section->vma);
     }
   else
     {
-      fprintf_vma (file, symbol->value);
+      bfd_fprintf_vma (abfd, file, symbol->value);
     }
 
   /* This presumes that a symbol can not be both BSF_DEBUGGING and

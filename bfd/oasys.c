@@ -517,8 +517,8 @@ oasys_get_symbol_info (ignore_abfd, symbol, ret)
 }
 
 static void
-oasys_print_symbol (ignore_abfd, afile, symbol, how)
-     bfd *ignore_abfd ATTRIBUTE_UNUSED;
+oasys_print_symbol (abfd, afile, symbol, how)
+     bfd *abfd;
      PTR afile;
      asymbol *symbol;
      bfd_print_symbol_type how;
@@ -536,7 +536,7 @@ oasys_print_symbol (ignore_abfd, afile, symbol, how)
 	CONST char *section_name = symbol->section == (asection *) NULL ?
 	(CONST char *) "*abs" : symbol->section->name;
 
-	bfd_print_symbol_vandf ((PTR) file, symbol);
+	bfd_print_symbol_vandf (abfd, (PTR) file, symbol);
 
 	fprintf (file, " %-5s %s",
 		 section_name,

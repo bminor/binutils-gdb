@@ -612,16 +612,16 @@ _bfd_elf_print_private_bfd_data (abfd, farg)
 	    default: sprintf (buf, "0x%lx", p->p_type); s = buf; break;
 	    }
 	  fprintf (f, "%8s off    0x", s);
-	  fprintf_vma (f, p->p_offset);
+	  bfd_fprintf_vma (abfd, f, p->p_offset);
 	  fprintf (f, " vaddr 0x");
-	  fprintf_vma (f, p->p_vaddr);
+	  bfd_fprintf_vma (abfd, f, p->p_vaddr);
 	  fprintf (f, " paddr 0x");
-	  fprintf_vma (f, p->p_paddr);
+	  bfd_fprintf_vma (abfd, f, p->p_paddr);
 	  fprintf (f, " align 2**%u\n", bfd_log2 (p->p_align));
 	  fprintf (f, "         filesz 0x");
-	  fprintf_vma (f, p->p_filesz);
+	  bfd_fprintf_vma (abfd, f, p->p_filesz);
 	  fprintf (f, " memsz 0x");
-	  fprintf_vma (f, p->p_memsz);
+	  bfd_fprintf_vma (abfd, f, p->p_memsz);
 	  fprintf (f, " flags %c%c%c",
 		   (p->p_flags & PF_R) != 0 ? 'r' : '-',
 		   (p->p_flags & PF_W) != 0 ? 'w' : '-',
@@ -830,7 +830,7 @@ bfd_elf_print_symbol (abfd, filep, symbol, how)
       break;
     case bfd_print_symbol_more:
       fprintf (file, "elf ");
-      fprintf_vma (file, symbol->value);
+      bfd_fprintf_vma (abfd, file, symbol->value);
       fprintf (file, " %lx", (long) symbol->flags);
       break;
     case bfd_print_symbol_all:
@@ -849,7 +849,7 @@ bfd_elf_print_symbol (abfd, filep, symbol, how)
 	if (name == NULL)
 	  {
 	    name = symbol->name;
-	    bfd_print_symbol_vandf ((PTR) file, symbol);
+	    bfd_print_symbol_vandf (abfd, (PTR) file, symbol);
 	  }
 
 	fprintf (file, " %s\t", section_name);
@@ -857,10 +857,10 @@ bfd_elf_print_symbol (abfd, filep, symbol, how)
 	   we've already printed the size; now print the alignment.
 	   For other symbols, we have no specified alignment, and
 	   we've printed the address; now print the size.  */
-	fprintf_vma (file,
-		     (bfd_is_com_section (symbol->section)
-		      ? ((elf_symbol_type *) symbol)->internal_elf_sym.st_value
-		      : ((elf_symbol_type *) symbol)->internal_elf_sym.st_size));
+	bfd_fprintf_vma (abfd, file,
+			 (bfd_is_com_section (symbol->section)
+			  ? ((elf_symbol_type *) symbol)->internal_elf_sym.st_value
+			  : ((elf_symbol_type *) symbol)->internal_elf_sym.st_size));
 
 	/* If we have version information, print it.  */
 	if (elf_tdata (abfd)->dynversym_section != 0

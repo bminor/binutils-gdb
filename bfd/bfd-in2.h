@@ -2945,7 +2945,7 @@ boolean
 bfd_set_symtab PARAMS ((bfd *abfd, asymbol **location, unsigned int count));
 
 void
-bfd_print_symbol_vandf PARAMS ((PTR file, asymbol *symbol));
+bfd_print_symbol_vandf PARAMS ((bfd *abfd, PTR file, asymbol *symbol));
 
 #define bfd_make_empty_symbol(abfd) \
      BFD_SEND (abfd, _bfd_make_empty_symbol, (abfd))

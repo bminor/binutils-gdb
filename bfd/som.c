@@ -4499,8 +4499,8 @@ som_make_empty_symbol (abfd)
 /* Print symbol information.  */
 
 static void
-som_print_symbol (ignore_abfd, afile, symbol, how)
-     bfd *ignore_abfd ATTRIBUTE_UNUSED;
+som_print_symbol (abfd, afile, symbol, how)
+     bfd *abfd;
      PTR afile;
      asymbol *symbol;
      bfd_print_symbol_type how;
@@ -4520,7 +4520,7 @@ som_print_symbol (ignore_abfd, afile, symbol, how)
       {
 	CONST char *section_name;
 	section_name = symbol->section ? symbol->section->name : "(*none*)";
-	bfd_print_symbol_vandf ((PTR) file, symbol);
+	bfd_print_symbol_vandf (abfd, (PTR) file, symbol);
 	fprintf (file, " %s\t%s", section_name, symbol->name);
 	break;
       }
