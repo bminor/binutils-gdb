@@ -1,5 +1,8 @@
 2004-01-07  Andrew Cagney  <cagney@redhat.com>
 
+	* mips-tdep.c (mips_gdbarch_init): Set elf_flags to the previous
+	architecture's elf flags (when available).
+
 	* mips-tdep.c (mips_gdbarch_init): Move code determining the MIPS
 	FPU to the start, check the MIPS FPU when looking for an old
 	architecture.

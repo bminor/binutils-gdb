@@ -5688,6 +5688,8 @@ mips_gdbarch_init (struct gdbarch_info info,
   /* First of all, extract the elf_flags, if available.  */
   if (info.abfd && bfd_get_flavour (info.abfd) == bfd_target_elf_flavour)
     elf_flags = elf_elfheader (info.abfd)->e_flags;
+  else if (arches != NULL)
+    elf_flags = gdbarch_tdep (arches->gdbarch)->elf_flags;
   else
     elf_flags = 0;
   if (gdbarch_debug)
