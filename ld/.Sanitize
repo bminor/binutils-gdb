@@ -45,25 +45,13 @@ ldwarn.h
 ldindr.c
 ldindr.h
 ldfile.h
-ldgld.c
 ldgld.sc
-ldgld68k.c
 ldgld68k.sc
-ldgld68kUr.sc
-ldgld68kr.sc
-ldm88k.c
 ldm88k.sc
-ldm88kUr.sc
-ldm88kr.sc
 ldgld960.c
 ldgld960.sc
-ldgldUr.sc
-ldglda29k.c
 ldglda29k.sc
-ldglda29kUr.sc
-ldglda29kr.sc
 ldgld68k.sc
-ldgldr.sc
 ldgram.y
 ldlang.c
 ldlang.h
@@ -71,7 +59,6 @@ ldlex.h
 ldlex.l
 ldlnk960.c
 ldlnk960.sc
-ldlnk960r.sc
 ldm88k.c
 ldmain.c
 ldmain.h
@@ -79,6 +66,7 @@ ldmisc.c
 ldmisc.h
 ldsym.c
 ldsym.h
+ldtemplate
 ldvanilla.c
 ldver.c
 ldver.h
@@ -86,6 +74,7 @@ ldwarn.h
 ldwrite.c
 ldwrite.h
 mkscript.c
+news.sc
 
 Do-last:
 
@@ -94,7 +83,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.12  1991/09/24 02:30:20  rich
+# Revision 1.13  1991/09/27 20:19:25  bothner
+# Update for deleted (and some added) files.
+#
+# Revision 1.12  1991/09/24  02:30:20  rich
 # ldgram.h is not cvs'd source.
 #
 # Revision 1.11  1991/09/23  20:59:12  steve
