@@ -1,3 +1,8 @@
+2000-03-09  Andreas Jaeger  <aj@suse.de>
+
+	* Makefile.am (check-DEJAGNU): Also unset LANG.
+	* Makefile.in: Rebuild.
+
 2000-03-06  Ian Lance Taylor  <ian@zembu.com>
 
 	* ldfile.c (ldfile_try_open_bfd): Don't crash if we see an empty

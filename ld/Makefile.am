@@ -664,7 +664,7 @@ TESTBFDLIB = @TESTBFDLIB@
 check-DEJAGNU: site.exp
 	srcroot=`cd $(srcdir) && pwd`; export srcroot; \
 	r=`pwd`; export r; \
-	LC_COLLATE=; LC_ALL=; export LC_COLLATE LC_ALL; \
+	LC_COLLATE=; LC_ALL=; LANG=; export LC_COLLATE LC_ALL LANG; \
 	EXPECT=$(EXPECT); export EXPECT; \
 	if [ -f $(top_builddir)/../expect/expect ]; then \
 	  TCL_LIBRARY=`cd $(top_srcdir)/../tcl/library && pwd`; \
