@@ -1,3 +1,10 @@
+start-sanitize-m32rx
+Thu Jan 29 13:36:29 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* config/tc-m32r.c (allow_m32rx): Must compile with K&R C.
+	(m32rx support): only include #ifdef HAVE_CPU_M32RX.
+
+end-sanitize-m32rx
 Thu Jan 29 14:42:44 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.am (CONFIG_OBJS): New variable, containing part of old
