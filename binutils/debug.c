@@ -2158,6 +2158,7 @@ debug_get_real_type (handle, type)
 	return debug_get_real_type (handle, *type->u.kindirect->slot);
       return type;
     case DEBUG_KIND_NAMED:
+    case DEBUG_KIND_TAGGED:
       return debug_get_real_type (handle, type->u.knamed->type);
     }
   /*NOTREACHED*/
@@ -2193,6 +2194,37 @@ debug_get_type_name (handle, type)
       || type->kind == DEBUG_KIND_TAGGED)
     return type->u.knamed->name->name;
   return NULL;
+}
+
+/* Get the size of a type.  */
+
+bfd_vma
+debug_get_type_size (handle, type)
+     PTR handle;
+     debug_type type;
+{
+  if (type == NULL)
+    return 0;
+
+  /* We don't call debug_get_real_type, because somebody might have
+     called debug_record_type_size on a named or indirect type.  */
+
+  if (type->size != 0)
+    return type->size;
+
+  switch (type->kind)
+    {
+    default:
+      return 0;
+    case DEBUG_KIND_INDIRECT:
+      if (*type->u.kindirect->slot != NULL)
+	return debug_get_type_size (handle, *type->u.kindirect->slot);
+      return 0;
+    case DEBUG_KIND_NAMED:
+    case DEBUG_KIND_TAGGED:
+      return debug_get_type_size (handle, type->u.knamed->type);
+    }
+  /*NOTREACHED*/
 }
 
 /* Get the return type of a function or method type.  */
@@ -2301,6 +2333,70 @@ debug_get_field_type (handle, field)
   if (field == NULL)
     return NULL;
   return field->type;
+}
+
+/* Get the name of a field.  */
+
+/*ARGSUSED*/
+const char *
+debug_get_field_name (handle, field)
+     PTR handle;
+     debug_field field;
+{
+  if (field == NULL)
+    return NULL;
+  return field->name;
+}
+
+/* Get the bit position of a field.  */
+
+/*ARGSUSED*/
+bfd_vma
+debug_get_field_bitpos (handle, field)
+     PTR handle;
+     debug_field field;
+{
+  if (field == NULL || field->static_member)
+    return (bfd_vma) -1;
+  return field->u.f.bitpos;
+}
+
+/* Get the bit size of a field.  */
+
+/*ARGSUSED*/
+bfd_vma
+debug_get_field_bitsize (handle, field)
+     PTR handle;
+     debug_field field;
+{
+  if (field == NULL || field->static_member)
+    return (bfd_vma) -1;
+  return field->u.f.bitsize;
+}
+
+/* Get the visibility of a field.  */
+
+/*ARGSUSED*/
+enum debug_visibility
+debug_get_field_visibility (handle, field)
+     PTR handle;
+     debug_field field;
+{
+  if (field == NULL)
+    return DEBUG_VISIBILITY_IGNORE;
+  return field->visibility;
+}
+
+/* Get the physical name of a field.  */
+
+const char *
+debug_get_field_physname (handle, field)
+     PTR handle;
+     debug_field field;
+{
+  if (field == NULL || ! field->static_member)
+    return NULL;
+  return field->u.s.physname;
 }
 
 /* Write out the debugging information.  This is given a handle to
@@ -2456,8 +2552,13 @@ debug_write_type (info, fns, fhandle, type, name)
       if (type->kind == DEBUG_KIND_NAMED)
 	return (*fns->typedef_type) (fhandle, type->u.knamed->name->name);
       else
-	return (*fns->tag_type) (fhandle, type->u.knamed->name->name, 0,
-				 type->u.knamed->type->kind);
+	{
+	  struct debug_type *real;
+
+	  real = debug_get_real_type ((PTR) info, type);
+	  return (*fns->tag_type) (fhandle, type->u.knamed->name->name, 0,
+				   real->kind);
+	}
     }
 
   /* Mark the name after we have already looked for a known name, so
@@ -2485,7 +2586,7 @@ debug_write_type (info, fns, fhandle, type, name)
       if (*type->u.kindirect->slot == DEBUG_TYPE_NULL)
 	return (*fns->empty_type) (fhandle);
       return debug_write_type (info, fns, fhandle, *type->u.kindirect->slot,
-			       (struct debug_name *) NULL);
+			       name);
     case DEBUG_KIND_VOID:
       return (*fns->void_type) (fhandle);
     case DEBUG_KIND_INT:

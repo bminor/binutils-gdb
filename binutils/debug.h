@@ -645,9 +645,9 @@ extern debug_type debug_make_undefined_tagged_type
 
 /* Make a base class for an object.  The second argument is the base
    class type.  The third argument is the bit position of this base
-   class in the object (always 0 unless doing multiple inheritance).
-   The fourth argument is whether this is a virtual class.  The fifth
-   argument is the visibility of the base class.  */
+   class in the object.  The fourth argument is whether this is a
+   virtual class.  The fifth argument is the visibility of the base
+   class.  */
 
 extern debug_baseclass debug_make_baseclass
   PARAMS ((PTR, debug_type, bfd_vma, boolean, enum debug_visibility));
@@ -687,9 +687,7 @@ extern debug_method debug_make_method
    a const function.  The sixth argument is whether this is a volatile
    function.  The seventh argument is the offset in the virtual
    function table, if any.  The eighth argument is the virtual
-   function context.  FIXME: Are the const and volatile arguments
-   necessary?  Could we just use debug_make_const_type?  The handling
-   of the second argument is biased toward the way that stabs works.  */
+   function context.  */
 
 extern debug_method_variant debug_make_method_variant
   PARAMS ((PTR, const char *, debug_type, enum debug_visibility, boolean,
@@ -733,6 +731,10 @@ extern enum debug_type_kind debug_get_type_kind PARAMS ((PTR, debug_type));
 
 extern const char *debug_get_type_name PARAMS ((PTR, debug_type));
 
+/* Get the size of a type.  */
+
+extern bfd_vma debug_get_type_size PARAMS ((PTR, debug_type));
+
 /* Get the return type of a function or method type.  */
 
 extern debug_type debug_get_return_type PARAMS ((PTR, debug_type));
@@ -761,6 +763,30 @@ extern const debug_field *debug_get_fields PARAMS ((PTR, debug_type));
 /* Get the type of a field.  */
 
 extern debug_type debug_get_field_type PARAMS ((PTR, debug_field));
+
+/* Get the name of a field.  */
+
+extern const char *debug_get_field_name PARAMS ((PTR, debug_field));
+
+/* Get the bit position of a field within the containing structure.
+   If the field is a static member, this will return (bfd_vma) -1.  */
+
+extern bfd_vma debug_get_field_bitpos PARAMS ((PTR, debug_field));
+
+/* Get the bit size of a field.  If the field is a static member, this
+   will return (bfd_vma) -1.  */
+
+extern bfd_vma debug_get_field_bitsize PARAMS ((PTR, debug_field));
+
+/* Get the visibility of a field.  */
+
+extern enum debug_visibility debug_get_field_visibility
+  PARAMS ((PTR, debug_field));
+
+/* Get the physical name of a field, if it is a static member.  If the
+   field is not a static member, this will return NULL.  */
+
+extern const char *debug_get_field_physname PARAMS ((PTR, debug_field));
 
 /* Write out the recorded debugging information.  This takes a set of
    function pointers which are called to do the actual writing.  The
