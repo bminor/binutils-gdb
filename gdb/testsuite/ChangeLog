@@ -1,3 +1,8 @@
+Fri Apr 16 09:33:46 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* config/unix-gdb.exp:  Add back missing return 0 which mysteriously
+	disappeared.
+
 Thu Apr 15 02:28:24 1993  John Gilmore  (gnu@cacophony.cygnus.com)
 
 	* gdb.t31/Makefile.in:  Avoid $< in explicit rule.
