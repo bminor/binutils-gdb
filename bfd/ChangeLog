@@ -1,3 +1,9 @@
+Tue Dec  3 10:53:30 1991  Steve Chamberlain  (sac at rtl.cygnus.com)
+
+	* srec.c: Rewrote to fix many bugs; now gets the record type
+	right, doesn't choke on input, sets the start address in an S9 and
+	fills in the filename on an S0.
+
 Sat Nov 30 21:19:15 1991  Steve Chamberlain  (sac at rtl.cygnus.com)
 
 	* cpu-h8300.c: Add support for MEMIND addressing mode
