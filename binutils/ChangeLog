@@ -1,3 +1,17 @@
+2005-01-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	BZ 615
+	* readelf.c (process_debug_info): New.
+	(debug_info): Add num_loc_offsets, loc_offsets and
+	last_loc_offset_p.
+	(get_debug_info): Use process_debug_info.
+	(display_debug_loc): Properly handle location list. Warn if bad
+	location lists are encoutnered.
+	(read_and_process_attr_value): New.
+	(read_and_display_attr_value): Use "%lx" for DW_FORM_data4.
+	(display_debug_info): Use process_debug_info.
+	(process_object): Also free loc_offsets in debug_information.
+
 2004-12-31  Alan Modra  <amodra@bigpond.net.au>
 
 	* objdump.c (remove_useless_symbols): Discard section symbols.
@@ -6,6 +20,25 @@
 
 	* readelf.c (read_leb128): Support 64bit host.
 
+2004-12-23  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/616
+	* readelf.c (debug_info): Add 'cu_offset' field.
+	(get+pointer_size_of_comp_unit): Rename to
+	'get_pointer_size_and_offset_of_comp_unit'.  Add code to return
+	the offset of the comp_unit if requested.
+	(get_debug_info): Record comp_unit offsets as well.
+	(display_debug_lines): Call get_pointer_size_of_comp_unit.
+	(decode_location_expression): Add an extra parameter - the offset
+	of the current comp-unit.  Use this when decoding the DW_OP_call2
+	and DW_OP_call4 operators.
+	(display_debug_loc): Call get_pointer_size_of_comp_unit, pass the
+	comp_unit offset on the decode_location_expression.
+	(read_and_display_attr_value): Pass the	comp_unit offset on the
+	decode_location_expression.
+	(display_debug_frames): Pass 0 as the comp_unit offset to
+	decode_location_expression.
+	
 2004-12-22  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (last_pointer_size, warned_about_missing_comp_units):
