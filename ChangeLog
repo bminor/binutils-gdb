@@ -1,3 +1,10 @@
+Thu Feb  1 11:10:16 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-configure (extralibs_name, rez_name): Set correctly
+	for MWC68K compiler.
+
+	* mpw-README: Add more info on the necessary build tools.
+
 Thu Feb  1 10:22:38 1996  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	* configure.in, config.sub: Recognize cygwin32.
