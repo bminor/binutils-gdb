@@ -1,3 +1,8 @@
+1999-09-12  Ian Lance Taylor  <ian@zembu.com>
+
+	* cofflink.c (coff_link_add_symbols): Look for special MSVC string
+	constant symbols, and avoid multiple definition errors on them.
+
 1999-09-12  Donn Terry  <donn@interix.com>
 
 	* libbfd.c (bfd_log2): Rewrite to avoid infinite loop if most

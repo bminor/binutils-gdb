@@ -422,6 +422,46 @@ coff_link_add_symbols (abfd, info)
 		}
 	    }
 
+	  /* The Microsoft Visual C compiler does string pooling by
+	     hashing the constants to an internal symbol name, and
+	     relying on the the linker comdat support to discard
+	     duplicate names.  However, if one string is a literal and
+	     one is a data initializer, one will end up in the .data
+	     section and one will end up in the .rdata section.  The
+	     Microsoft linker will combine them into the .data
+	     section, which seems to be wrong since it might cause the
+	     literal to change.
+
+	     As long as there are no external references to the
+	     symbols, which there shouldn't be, we can treat the .data
+	     and .rdata instances as separate symbols.  The comdat
+	     code in the linker will do the appropriate merging.  Here
+	     we avoid getting a multiple definition error for one of
+	     these special symbols.
+
+	     FIXME: I don't think this will work in the case where
+	     there are two object files which use the constants as a
+	     literal and two object files which use it as a data
+	     initializer.  One or the other of the second object files
+	     is going to wind up with an inappropriate reference.  */
+	  if (obj_pe (abfd)
+	      && (classification == COFF_SYMBOL_GLOBAL
+		  || classification == COFF_SYMBOL_PE_SECTION)
+	      && section->comdat != NULL
+	      && strncmp (name, "??_", 3) == 0
+	      && strcmp (name, section->comdat->name) == 0)
+	    {
+	      if (*sym_hash == NULL)
+		*sym_hash = coff_link_hash_lookup (coff_hash_table (info),
+						   name, false, copy, false);
+	      if (*sym_hash != NULL
+		  && (*sym_hash)->root.type == bfd_link_hash_defined
+		  && (*sym_hash)->root.u.def.section->comdat != NULL
+		  && strcmp ((*sym_hash)->root.u.def.section->comdat->name,
+			     section->comdat->name) == 0)
+		addit = false;
+	    }
+
 	  if (addit)
 	    {
 	      if (! (bfd_coff_link_add_one_symbol
