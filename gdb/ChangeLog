@@ -1,3 +1,14 @@
+Thu Jan 21 17:25:46 1999  Mark Alexander  <marka@cygnus.com>
+
+	* mon960-rom.c (_initialize_mon960): Call init_mon960_cmds
+	to fill in mon960_cmds structure properly.
+
+Wed Jan 20 17:53:22 1999  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* remote-sds.c (sds_ops): Define only once.
+	(init_sds_ops, sds_command, _initialize_remote_sds): Declare.
+	(init_sds_ops): Init only non-zero fields.
+
 Wed Jan 20 15:45:15 1999  Mark Alexander  <marka@cygnus.com>
 
 	* h8300-tdep.c (original_register_names, h8300h_register_names,
@@ -19,7 +30,6 @@ Wed Jan 20 15:45:15 1999  Mark Alexander  <marka@cygnus.com>
 	remote-udi.c rom68k-rom.c sh3-rom.c sparcl-tdep.c sparclet-rom.c 
 	v850ice.c win32-nat.c: cosmetic changes to conform to coding
 	standards. 
-
 
 1999-01-19  Jim Blandy  <jimb@zwingli.cygnus.com>
 
