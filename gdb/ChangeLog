@@ -1,3 +1,12 @@
+Tue Oct 10 13:18:50 1995  Fred Fish  <fnf@cygnus.com>
+
+	* configure.in:  Add AC_PROG_YACC
+	* configure:  Regenerate
+	* Makefile.in (BISON):  Remove macro definition.
+	(YACC):  Set from autoconfig.
+	(FLAGS_TO_PASS):  Remove BISON.
+	(TARGET_FLAGS_TO_PASS):  Remove BISON.
+	
 Tue Oct 10 12:25:11 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* win32-nat.c (child_create_inferior): Pass argv correctly.
