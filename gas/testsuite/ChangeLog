@@ -1,8 +1,23 @@
+Wed Oct 20 07:25:48 1993  Ken Raeburn  (raeburn@rover.cygnus.com)
+
+	* Makefile.in (OBJDUMP_FOR_TARGET): Define similar to
+	AS_FOR_TARGET.
+	(check): Don't pass ASFLAGS variable.
+	(site.exp): Put ASFLAGS, OBJDUMP, OBJDUMPFLAGS into site.exp.
+
+	From Jeff Law:
+
+	* lib/gas-defs.exp (objdump_start, objdump_finish): New functions
+	so that tests can parse the output of objdump looking for errors
+	in relocation entires, file headers and the like.
+
 Thu Sep 23 16:20:34 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* gas/ieee.fp/x930509a.exp: Currently expected to fail always.
 	* gas/all/gas.exp (p1480.s, x930509.s): Ditto.  Break up gas_test
 	call so it no longer performs multiple tests.
+	* gas/m68k/all.exp (t2.s): Don't bother with listings.
+	(p2410.s): Don't pass unwanted arguments to gas_test_error.
 
 Wed Aug 25 16:50:08 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
