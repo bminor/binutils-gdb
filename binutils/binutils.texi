@@ -1276,6 +1276,7 @@ archives, @samp{strip -v} lists all members of the archive.
 
 @smallexample
 c++filt [ -_ | --strip-underscores ]
+	[ -n | --no-strip-underscores ]
         [ -s @var{format} | --format=@var{format} ]
         [ --help ]  [ --version ]  [ @var{symbol}@dots{} ]
 @end smallexample
@@ -1308,7 +1309,12 @@ standard output.  All results are printed on the standard output.
 @itemx --strip-underscores
 On some systems, both the C and C++ compilers put an underscore in front
 of every name.  For example, the C name @code{foo} gets the low-level
-name @code{_foo}.  This option removes the initial underscore.
+name @code{_foo}.  This option removes the initial underscore.  Whether
+@code{c++filt} removes the underscore by default is target dependent.
+
+@item -n
+@itemx --no-strip-underscores
+Do not remove the initial underscore.
 
 @item -s @var{format}
 @itemx --format=@var{format}

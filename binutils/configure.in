@@ -76,6 +76,13 @@ if [ "x${build_srconv}" = "xtrue" ]; then
     echo 'BUILD_SRCONV = $(SRCONV_PROG)' >> Makefile.2
 fi
 
+if [ "x`$srcdir/../bfd/config.bfd $target _`" = "xyes" ]; then
+    underscore=1
+else
+    underscore=0
+fi
+echo "UNDERSCORE = ${underscore}" >> Makefile.2
+
 cat Makefile.tmp >> Makefile.2
 rm -f Makefile.tmp
 mv Makefile.2 Makefile

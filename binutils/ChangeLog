@@ -1,3 +1,17 @@
+Thu Jun 16 17:25:20 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* configure.in: Set UNDERSCORE in Makefile based on result of
+	invoking config.bfd with a second argument of ``_''.
+	* Makefile.in (underscore.c): Depend upon Makefile.  Don't try to
+	run $(CC) and $(NM), just use $(UNDERSCORE).  Create via temporary
+	file.
+	(demangle.o): Remove target.
+	($(NM_PROG)): Don't depend upon demangle.o, and	don't link against
+	demangle.o.  It's in libiberty anyhow.
+	(cplus-dem.o): Don't depend upon demangle.o.
+	* binutils.texi: Mention -n and --no-strip-underscores arguments
+	to c++filt.
+
 Wed Jun 15 12:10:31 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* nm.c (long_options): Add --no-demangle to turn off --demangle,
@@ -1964,5 +1978,8 @@ Fri May  3 22:21:44 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
 
 Local Variables:
+mode: indented-text
+left-margin: 8
+fill-column: 74
 version-control: never
 End:
