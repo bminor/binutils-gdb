@@ -1,3 +1,7 @@
+Fri Jun  3 10:59:18 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* objdump.c (display_target_list): Remove unused local ok.
+
 Thu May 26 18:05:52 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* config/mh-alphaosf (CFLAGS): Don't specify both -g and -O;

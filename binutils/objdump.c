@@ -24,6 +24,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <stdio.h>
 #include <ctype.h>
 #include "dis-asm.h"
+#include "libiberty.h"
 
 /* Internal headers for the ELF .stab-dump code - sorry.  */
 #define	BYTES_IN_WORD	32
@@ -441,24 +442,6 @@ objdump_print_address (vma, info)
   fprintf (info->stream, ">");
 }
 
-#ifdef ARCH_all
-#define ARCH_a29k
-#define ARCH_alpha
-#define ARCH_h8300
-#define ARCH_h8500
-#define ARCH_hppa
-#define ARCH_i386
-#define ARCH_i960
-#define ARCH_m68k
-#define ARCH_m88k
-#define ARCH_mips
-#define ARCH_powerpc
-#define ARCH_rs6000
-#define ARCH_sh
-#define ARCH_sparc
-#define ARCH_z8k
-#endif
-
 void
 disassemble_data (abfd)
      bfd *abfd;
@@ -513,106 +496,14 @@ disassemble_data (abfd)
     }
   else
     {
-      enum bfd_architecture a = bfd_get_arch (abfd);
-      switch (a)
+      disassemble = disassembler (abfd);
+      if (!disassemble)
 	{
-	  /* If you add a case to this table, also add it to the
-	     ARCH_all definition right above this function.  */
-#ifdef ARCH_a29k
-	case bfd_arch_a29k:
-	  /* As far as I know we only handle big-endian 29k objects.  */
-	  disassemble = print_insn_big_a29k;
-	  break;
-#endif
-#ifdef ARCH_alpha
-	case bfd_arch_alpha:
-	  disassemble = print_insn_alpha;
-	  break;
-#endif
-#ifdef ARCH_h8300
-	case bfd_arch_h8300:
-	  if (bfd_get_mach(abfd) == bfd_mach_h8300h)
-	   disassemble = print_insn_h8300h;
-	  else 
-	   disassemble = print_insn_h8300;
-	  break;
-#endif
-#ifdef ARCH_h8500
-	case bfd_arch_h8500:
-	  disassemble = print_insn_h8500;
-	  break;
-#endif
-#ifdef ARCH_hppa
-	case bfd_arch_hppa:
-	  disassemble = print_insn_hppa;
-	  break;
-#endif
-#ifdef ARCH_i386
-	case bfd_arch_i386:
-	  disassemble = print_insn_i386;
-	  break;
-#endif
-#ifdef ARCH_i960
-	case bfd_arch_i960:
-	  disassemble = print_insn_i960;
-	  break;
-#endif
-#ifdef ARCH_m68k
-	case bfd_arch_m68k:
-	  disassemble = print_insn_m68k;
-	  break;
-#endif
-#ifdef ARCH_m88k
-	case bfd_arch_m88k:
-	  disassemble = print_insn_m88k;
-	  break;
-#endif
-#ifdef ARCH_mips
-	case bfd_arch_mips:
-	  if (abfd->xvec->byteorder_big_p)
-	    disassemble = print_insn_big_mips;
-	  else
-	    disassemble = print_insn_little_mips;
-	  break;
-#endif
-#ifdef ARCH_powerpc
-	case bfd_arch_powerpc:
-	  if (abfd->xvec->byteorder_big_p)
-	    disassemble = print_insn_big_powerpc;
-	  else
-	    disassemble = print_insn_little_powerpc;
-	  break;
-#endif
-#ifdef ARCH_rs6000
-	case bfd_arch_rs6000:
-	  disassemble = print_insn_rs6000;
-	  break;
-#endif
-#ifdef ARCH_sh
-	case bfd_arch_sh:
-	  disassemble = print_insn_sh;
-	  break;
-#endif
-#ifdef ARCH_sparc
-	case bfd_arch_sparc:
-	  disassemble = print_insn_sparc;
-	  break;
-#endif
-#ifdef ARCH_z8k
-        case bfd_arch_z8k:
-	  if (bfd_get_mach(abfd) == bfd_mach_z8001)
-	   disassemble = print_insn_z8001;
-	  else 
-	   disassemble = print_insn_z8002;
-	  break;
-#endif
-	default:
 	  fprintf (stderr, "%s: Can't disassemble for architecture %s\n",
 		   program_name,
-		   bfd_printable_arch_mach (a, 0));
+		   bfd_printable_arch_mach (bfd_get_arch (abfd), 0));
 	  exit (1);
 	}
-
     }
 
   for (section = abfd->sections;
@@ -886,8 +777,10 @@ print_section_stabs (abfd, stabsect_name, strsect_name)
 	 again (makes consistent formatting for tools like awk). */
       if (stab_name[stabp->n_type])
 	printf ("%-6s", stab_name[stabp->n_type]);
+      else if (stabp->n_type == N_UNDF)
+	printf ("HdrSym");
       else
-	printf ("%-6d", i);
+	printf ("%-6d", stabp->n_type);
       printf (" %-6d %-6d ", stabp->n_other, stabp->n_desc);
       printf_vma (stabp->n_value);
       printf (" %-6lu", stabp->n_strx);
@@ -1339,22 +1232,27 @@ display_target_list ()
   dummy_name = tmpnam ((char *) NULL);
   for (t = 0; bfd_target_vector[t]; t++)
     {
-      int a;
       bfd_target *p = bfd_target_vector[t];
       bfd *abfd = bfd_openw (dummy_name, p->name);
+      int a;
 
-      /* It *is* possible that bfd_openw might fail; avoid the
-	 tragic consequences that would otherwise ensue. */
-      if (abfd == NULL)
-	{
-	  bfd_nonfatal (dummy_name);
-	  unlink (dummy_name);
-	  return;
-	}
-      bfd_set_format (abfd, bfd_object);
       printf ("%s\n (header %s, data %s)\n", p->name,
 	      p->header_byteorder_big_p ? "big endian" : "little endian",
 	      p->byteorder_big_p ? "big endian" : "little endian");
+
+      if (abfd == NULL)
+	{
+	  bfd_nonfatal (dummy_name);
+	  continue;
+	}
+
+      if (! bfd_set_format (abfd, bfd_object))
+	{
+	  if (bfd_get_error () != bfd_error_invalid_operation)
+	    bfd_nonfatal (p->name);
+	  continue;
+	}
+
       for (a = (int) bfd_arch_obscure + 1; a < (int) bfd_arch_last; a++)
 	if (bfd_set_arch_mach (abfd, (enum bfd_architecture) a, 0))
 	  printf ("  %s\n",
@@ -1379,7 +1277,7 @@ display_info_table (first, last)
 
   /* Print heading of target names.  */
   printf ("\n%*s", (int) LONGEST_ARCH, " ");
-  for (t = first; t++ < last && bfd_target_vector[t];)
+  for (t = first; t < last && bfd_target_vector[t]; t++)
     printf ("%s ", bfd_target_vector[t]->name);
   putchar ('\n');
 
@@ -1389,20 +1287,35 @@ display_info_table (first, last)
       {
 	printf ("%*s ", (int) LONGEST_ARCH - 1,
 		bfd_printable_arch_mach (a, 0));
-	for (t = first; t++ < last && bfd_target_vector[t];)
+	for (t = first; t < last && bfd_target_vector[t]; t++)
 	  {
 	    bfd_target *p = bfd_target_vector[t];
+	    boolean ok = true;
 	    bfd *abfd = bfd_openw (dummy_name, p->name);
 
-	    /* Just in case the open failed somehow. */
 	    if (abfd == NULL)
 	      {
-		bfd_nonfatal (dummy_name);
-		unlink (dummy_name);
-		return;
+		bfd_nonfatal (p->name);
+		ok = false;
 	      }
-	    bfd_set_format (abfd, bfd_object);
-	    if (bfd_set_arch_mach (abfd, a, 0))
+
+	    if (ok)
+	      {
+		if (! bfd_set_format (abfd, bfd_object))
+		  {
+		    if (bfd_get_error () != bfd_error_invalid_operation)
+		      bfd_nonfatal (p->name);
+		    ok = false;
+		  }
+	      }
+
+	    if (ok)
+	      {
+		if (! bfd_set_arch_mach (abfd, a, 0))
+		  ok = false;
+	      }
+
+	    if (ok)
 	      printf ("%s ", p->name);
 	    else
 	      {
@@ -1435,15 +1348,23 @@ display_target_tables ()
   if (columns == 0)
     columns = 80;
 
-  for (t = 0; bfd_target_vector[t];)
+  t = 0;
+  while (bfd_target_vector[t] != NULL)
     {
       int oldt = t, wid;
 
-      for (wid = LONGEST_ARCH; bfd_target_vector[t] && wid < columns; t++)
-	wid += strlen (bfd_target_vector[t]->name) + 1;
-      t--;
-      if (oldt == t)
-	break;
+      wid = LONGEST_ARCH + strlen (bfd_target_vector[t]->name) + 1;
+      ++t;
+      while (wid < columns && bfd_target_vector[t] != NULL)
+	{
+	  int newwid;
+
+	  newwid = wid + strlen (bfd_target_vector[t]->name) + 1;
+	  if (newwid >= columns)
+	    break;
+	  wid = newwid;
+	  ++t;
+	}
       display_info_table (oldt, t);
     }
 }
