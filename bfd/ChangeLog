@@ -1,5 +1,9 @@
 2003-10-29  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf64-ppc.c (elf_backend_grok_prstatus): Define.
+	(elf_backend_grok_psinfo): Define.
+	(ppc64_elf_grok_prstatus, ppc64_elf_grok_psinfo): New functions.
+
 	* elf.c (_bfd_elfcore_make_pseudosection): Allow multiple
 	sections with the same name.
 	(elfcore_grok_lwpstatus): Likewise.

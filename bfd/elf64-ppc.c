@@ -2,6 +2,7 @@
    Copyright 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
    Written by Linus Nordberg, Swox AB <info@swox.com>,
    based on elf32-ppc.c by Ian Lance Taylor.
+   Largely rewritten by Alan Modra <amodra@bigpond.net.au>
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -77,6 +78,8 @@ static bfd_reloc_status_type ppc64_elf_unhandled_reloc
 #define bfd_elf64_bfd_link_hash_table_free    ppc64_elf_link_hash_table_free
 
 #define elf_backend_object_p		      ppc64_elf_object_p
+#define elf_backend_grok_prstatus	      ppc64_elf_grok_prstatus
+#define elf_backend_grok_psinfo		      ppc64_elf_grok_psinfo
 #define elf_backend_create_dynamic_sections   ppc64_elf_create_dynamic_sections
 #define elf_backend_copy_indirect_symbol      ppc64_elf_copy_indirect_symbol
 #define elf_backend_check_relocs	      ppc64_elf_check_relocs
@@ -2369,6 +2372,45 @@ ppc64_elf_object_p (bfd *abfd)
 	  BFD_ASSERT (abfd->arch_info->bits_per_word == 64);
 	}
     }
+  return TRUE;
+}
+
+/* Support for core dump NOTE sections.  */
+
+static bfd_boolean
+ppc64_elf_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
+{
+  size_t offset, raw_size;
+
+  if (note->descsz != 504)
+    return FALSE;
+
+  /* pr_cursig */
+  elf_tdata (abfd)->core_signal = bfd_get_16 (abfd, note->descdata + 12);
+
+  /* pr_pid */
+  elf_tdata (abfd)->core_pid = bfd_get_32 (abfd, note->descdata + 32);
+
+  /* pr_reg */
+  offset = 112;
+  raw_size = 384;
+
+  /* Make a ".reg/999" section.  */
+  return _bfd_elfcore_make_pseudosection (abfd, ".reg",
+					  raw_size, note->descpos + offset);
+}
+
+static bfd_boolean
+ppc64_elf_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
+{
+  if (note->descsz != 136)
+    return FALSE;
+
+  elf_tdata (abfd)->core_program
+    = _bfd_elfcore_strndup (abfd, note->descdata + 40, 16);
+  elf_tdata (abfd)->core_command
+    = _bfd_elfcore_strndup (abfd, note->descdata + 56, 80);
+
   return TRUE;
 }
 
@@ -5012,7 +5054,7 @@ ppc64_elf_edit_opd (bfd *obfd, struct bfd_link_info *info)
 
 	      r_symndx = ELF64_R_SYM (rel->r_info);
 	      if (!get_sym_h (&h, &sym, &sym_sec, NULL, &local_syms,
-			      r_symndx, ibfd))	
+			      r_symndx, ibfd))
 		goto error_ret;
 
 	      if (rel->r_offset == offset)
@@ -5088,7 +5130,7 @@ ppc64_elf_edit_opd (bfd *obfd, struct bfd_link_info *info)
 			    {
 			      p->count -= 1;
 			      if (p->count == 0)
-				*pp = p->next;	
+				*pp = p->next;
 			      break;
 			    }
 			  pp = &p->next;
