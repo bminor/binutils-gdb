@@ -6,5 +6,5 @@ SECTIONS
      label = .;
      LONG (ADDR (.other))
    }
-   .other : {}
+   .other 0x2000 : {}
 }
