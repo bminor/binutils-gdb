@@ -2025,6 +2025,8 @@ _bfd_coff_link_input_bfd (finfo, input_bfd)
 	  bfd_vma offset;
 	  bfd_byte *eline;
 	  bfd_byte *elineend;
+	  bfd_byte *oeline;
+	  boolean skipping;
 
 	  /* FIXME: If SEC_HAS_CONTENTS is not for the section, then
 	     build_link_order in ldwrite.c will not have created a
@@ -2046,7 +2048,9 @@ _bfd_coff_link_input_bfd (finfo, input_bfd)
 
 	  offset = o->output_section->vma + o->output_offset - o->vma;
 	  eline = finfo->linenos;
+	  oeline = finfo->linenos;
 	  elineend = eline + linesz * o->lineno_count;
+	  skipping = false;
 	  for (; eline < elineend; eline += linesz)
 	    {
 	      struct internal_lineno iline;
@@ -2066,11 +2070,13 @@ _bfd_coff_link_input_bfd (finfo, input_bfd)
 		  if (indx < 0)
 		    {
 		      /* These line numbers are attached to a symbol
-			 which we are stripping.  We should really
-			 just discard the line numbers, but that would
-			 be a pain because we have already counted
-			 them.  */
-		      indx = 0;
+			 which we are stripping.  We must discard the
+			 line numbers because reading them back with
+			 no associated symbol (or associating them all
+			 with symbol #0) will fail.  We can't regain
+			 the space in the output file, but at least
+			 they're dense.  */
+		      skipping = true;
 		    }
 		  else
 		    {
@@ -2109,23 +2115,32 @@ _bfd_coff_link_input_bfd (finfo, input_bfd)
 						 is.n_type, is.n_sclass, 0,
 						 is.n_numaux, auxptr);
 			}
+
+			skipping = false;
 		    }
 
 		  iline.l_addr.l_symndx = indx;
 		}
 
-	      bfd_coff_swap_lineno_out (output_bfd, (PTR) &iline, (PTR) eline);
+	      if (!skipping)
+	        {
+		  bfd_coff_swap_lineno_out (output_bfd, (PTR) &iline,
+					    (PTR) oeline);
+		  oeline += linesz;
+		}
 	    }
 
 	  if (bfd_seek (output_bfd,
 			(o->output_section->line_filepos
 			 + o->output_section->lineno_count * linesz),
 			SEEK_SET) != 0
-	      || bfd_write (finfo->linenos, linesz, o->lineno_count,
-			    output_bfd) != linesz * o->lineno_count)
+	      || (bfd_write (finfo->linenos, 1, oeline - finfo->linenos,
+			     output_bfd)
+		  != (bfd_size_type) (oeline - finfo->linenos)))
 	    return false;
 
-	  o->output_section->lineno_count += o->lineno_count;
+	  o->output_section->lineno_count +=
+	    (oeline - finfo->linenos) / linesz;
 	}
     }
 

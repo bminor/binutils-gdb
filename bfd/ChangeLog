@@ -5,6 +5,9 @@
 
 1999-09-11  Donn Terry  <donn@interix.com>
 
+	* cofflink.c (_bfd_coff_link_input_bfd): If a symbol is stripped,
+	don't write out the associated line numbers.
+
 	* cofflink.c (_bfd_coff_write_global_sym): Handle section symbol
 	aux entries.
 
