@@ -1,5 +1,8 @@
 2003-11-20  Andrew Cagney  <cagney@redhat.com>
 
+	* gdb.base/structs.exp: Handle and recover from internal errors.
+	Replace "foo${n}" with "foo<n>" in test messages.
+
 	* gdb.base/structs.exp: Update copyright.  Rewrite.
 	* gdb.base/structs.c: Update copyright.  Rewrite.
 

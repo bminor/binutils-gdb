@@ -321,10 +321,21 @@ proc test_struct_returns { n } {
 		-re "L[expr ${n} + 1] *= fun[expr ${n} + 1].*${gdb_prompt} $" {
 		    pass "${test}"
 		}
+		-re "A problem internal to GDB has been detected" {
+		    fail "${test} (GDB internal error 2)"
+		    gdb_internal_error_resync
+		}
+		-re "${gdb_prompt} $" {
+		    fail "${test} (wrong line info)"
+		}
 		timeout {
 		    fail "${test} (timeout 2)"
 		}
 	    }
+	}
+	-re "A problem internal to GDB has been detected" {
+	    fail "${test} (GDB internal error 1)"
+	    gdb_internal_error_resync
 	}
 	-re "${gdb_prompt} $" {
 	    fail "${test} (no query)"
@@ -364,6 +375,10 @@ proc test_struct_returns { n } {
 		fail "${test}"
 	    }
 	}
+	-re "A problem internal to GDB has been detected" {
+	    fail "${test} (GDB internal error)"
+	    gdb_internal_error_resync
+	}
 	-re "${gdb_prompt} $" {
 	    # Garbage returned, garbage printed
 	    fail "${test}"
@@ -395,7 +410,7 @@ proc test_struct_returns { n } {
     # Finish the function, set 'finish_value_unknown" to non-empty if the
     # return-value was not found.
     send_gdb "finish\n"
-    set test "finish foo${n}; ${tests}"
+    set test "finish foo<n>; ${tests}"
     set finish_value_unknown 0
     gdb_expect {
 	-re "Value returned is .*${gdb_prompt} $" {
@@ -405,6 +420,10 @@ proc test_struct_returns { n } {
 	    # Expected bad value.  For the moment this is ok.
 	    set finish_value_unknown 1
 	    pass "${test}"
+	}
+	-re "A problem internal to GDB has been detected" {
+	    fail "${test} (GDB internal error)"
+	    gdb_internal_error_resync
 	}
 	-re ".*${gdb_prompt} $" {
 	    # Garbage returned
@@ -419,7 +438,7 @@ proc test_struct_returns { n } {
     # "p/c".  If no return value was found, the 'Z' from the previous
     # check that the variable was cleared, is printed.
     send_gdb "p/c\n"
-    set test "value foo${n} finished; ${tests}"
+    set test "value foo<n> finished; ${tests}"
     setup_kfails structs-*tld* i686-*-* gdb/1447
     gdb_expect {
 	-re "[foo ${n}]\[\r\n\]+${gdb_prompt} $" {
@@ -440,6 +459,10 @@ proc test_struct_returns { n } {
 		# know the location of the return-value.
 		fail "${test}"
 	    }
+	}
+	-re "A problem internal to GDB has been detected" {
+	    fail "${test} (GDB internal error)"
+	    gdb_internal_error_resync
 	}
 	-re ".*${gdb_prompt} $" {
 	    # Garbage returned
