@@ -8643,8 +8643,7 @@ ppc64_elf_size_stubs (bfd *output_bfd,
 			  && code_sec->output_section != NULL
 			  && (htab->stub_group[code_sec->id].toc_off
 			      != htab->stub_group[section->id].toc_off)
-			  && code_sec->has_gp_reloc
-			  && section->has_gp_reloc)
+			  && code_sec->has_gp_reloc)
 			stub_type = ppc_stub_long_branch_r2off;
 		    }
 

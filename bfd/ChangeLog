@@ -1,3 +1,8 @@
+2005-01-06  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (ppc64_elf_size_stubs): When determining need for
+	toc adjusting stub, do not test source section flags.
+
 2005-01-05  Eric Botcazou  <ebotcazou@libertysurf.fr>
 
 	* elf64-sparc.c (sparc64_elf_relocate_section): Ignore overflows
