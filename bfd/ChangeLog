@@ -5,6 +5,10 @@ Thu Apr 16 13:49:00 1998  Richard Henderson  <rth@cygnus.com>
 
 Thu Apr 16 11:43:33 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* archive.c (bfd_generic_archive_p): If a slurp subroutine returns
+ 	an error other than bfd_error_system_call, set the error to
+ 	bfd_error_wrong_format.
+
 	* targets.c (bfd_target_vector) [SELECT_VECS not defined]: Add
 	bfd_elf32_powerpcle_vec.
 
