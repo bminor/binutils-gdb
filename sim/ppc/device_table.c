@@ -30,6 +30,7 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <stdarg.h>
+#include <ctype.h>
 
 #include "device_table.h"
 
@@ -668,7 +669,10 @@ static device_callbacks const halt_callbacks = {
 /* Register init device: register
 
    Properties attached to the register device specify the name/value
-   initialization pair for cpu registers. */
+   initialization pair for cpu registers.
+
+   FIXME: A specific processor can be initialized by creating a
+   property with a name like `0.pc'. */
 
 static void
 register_init(device *me,
@@ -677,8 +681,17 @@ register_init(device *me,
 {
   psim *system = (psim*)data;
   unsigned32 value = device_find_integer_property(me, name);
-  DTRACE(register, ("%s=0x%lx\n", name, (unsigned long)value));
-  psim_write_register(system, -1, /* all processors */
+  int processor;
+  if (isdigit(name[0]) && name[1] == '.') {
+    processor = atol(name);
+    name += 2;
+    DTRACE(register, ("%ld.%s=0x%lx\n", (long)name, processor, (unsigned long)value));
+  }    
+  else {
+    processor = -1;
+    DTRACE(register, ("%s=0x%lx\n", name, (unsigned long)value));
+  }
+  psim_write_register(system, processor, /* all processors */
 		      &value,
 		      name,
 		      cooked_transfer);
@@ -1221,8 +1234,8 @@ htab_decode_hash_table(device *parent,
     error("devices/%s - htaborg 0x%x not aligned to htabmask 0x%x\n",
 	  device_name(parent), *htaborg, *htabmask);
   }
-  DTRACE(htab, ("htab - htaborg=0x%x htabmask=0x%x\n",
-		*htaborg, *htabmask));
+  DTRACE(htab, ("htab - htaborg=0x%lx htabmask=0x%lx\n",
+		(unsigned long)*htaborg, (unsigned long)*htabmask));
 }
 
 
@@ -1246,34 +1259,38 @@ htab_map_page(device *me,
     unsigned32 pteg = (htaborg | (hash & htabmask));
     int pti;
     for (pti = 0; pti < 8; pti++, pteg += 8) {
-      unsigned32 pte0;
+      unsigned32 current_target_pte0;
+      unsigned32 current_pte0;
       if (device_dma_read_buffer(device_parent(me),
-				 &pte0,
+				 &current_target_pte0,
 				 0, /*space*/
 				 pteg,
-				 sizeof(pte0)) != 4)
+				 sizeof(current_target_pte0)) != 4)
 	error("htab_init_callback() failed to read a pte at 0x%x\n",
 	      pteg);
-      if (!MASKED32(pte0, 0, 0)) {
+      current_pte0 = T2H_4(current_target_pte0);
+      if (!MASKED32(current_pte0, 0, 0)) {
 	/* empty pte fill it */
 	unsigned32 pte0 = (MASK32(0, 0)
 			   | INSERTED32(EXTRACTED32(vsid, 0, 23), 1, 24)
 			   | INSERTED32(h, 25, 25)
 			   | INSERTED32(EXTRACTED32(page, 0, 5), 26, 31));
+	unsigned32 target_pte0 = H2T_4(pte0);
 	unsigned32 pte1 = (INSERTED32(EXTRACTED32(ra, 0, 19), 0, 19)
 			   | INSERTED32(wimg, 25, 28)
 			   | INSERTED32(pp, 30, 31));
+	unsigned32 target_pte1 = H2T_4(pte1);
 	if (device_dma_write_buffer(device_parent(me),
-				    &pte0,
+				    &target_pte0,
 				    0, /*space*/
 				    pteg,
-				    sizeof(pte0),
+				    sizeof(target_pte0),
 				    1/*ro?*/) != 4
 	    || device_dma_write_buffer(device_parent(me),
-				       &pte1,
+				       &target_pte1,
 				       0, /*space*/
 				       pteg + 4,
-				       sizeof(pte1),
+				       sizeof(target_pte1),
 				       1/*ro?*/) != 4)
 	  error("htab_init_callback() failed to write a pte a 0x%x\n",
 		pteg);
@@ -1459,9 +1476,13 @@ htab_map_binary(device *me,
 			     (sizes.text_bound - sizes.text_base));
 
   DTRACE(htab, ("text map - base=0x%lx bound=0x%lx ra=0x%lx\n",
-		sizes.text_base, sizes.text_bound, sizes.text_ra));
+		(unsigned long)sizes.text_base,
+		(unsigned long)sizes.text_bound,
+		(unsigned long)sizes.text_ra));
   DTRACE(htab, ("data map - base=0x%lx bound=0x%lx ra=0x%lx\n",
-		sizes.data_base, sizes.data_bound, sizes.data_ra));
+		(unsigned long)sizes.data_base,
+		(unsigned long)sizes.data_bound,
+		(unsigned long)sizes.data_ra));
 
   /* set up virtual memory maps for each of the regions */
   htab_map_region(me, sizes.text_ra, sizes.text_base,
@@ -1500,15 +1521,22 @@ htab_init_callback(device *me,
     /* handle a normal mapping definition */
     if (scand_uw_uw_u_u_u(device_name(me), &pte_ra, &pte_va, &pte_nr_bytes,
 			  &pte_wimg, &pte_pp) == 5) {
-      DTRACE(htab, ("pte - ra=0x%x, wimg=%d, pp=%d, va=0x%x, nr_bytes=%d\n",
-		    pte_ra, pte_wimg, pte_pp, pte_va, pte_nr_bytes));
+      DTRACE(htab, ("pte - ra=0x%lx, wimg=%ld, pp=%ld, va=0x%lx, nr_bytes=%ld\n",
+		    (unsigned long)pte_ra,
+		    (long)pte_wimg,
+		    (long)pte_pp,
+		    (unsigned long)pte_va,
+		    (long)pte_nr_bytes));
       htab_map_region(me, pte_ra, pte_va, pte_nr_bytes, pte_wimg, pte_pp,
 		      htaborg, htabmask);
     }
     else if (scand_uw_u_u_c(device_name(me), &pte_ra, &pte_wimg, &pte_pp,
 			    file_name, sizeof(file_name)) == 4) {
-      DTRACE(htab, ("pte - ra=0x%x, wimg=%d, pp=%d, binary=%s\n",
-		    pte_ra, pte_wimg, pte_pp, file_name));
+      DTRACE(htab, ("pte - ra=0x%lx, wimg=%ld, pp=%ld, binary=%s\n",
+		    (unsigned long)pte_ra,
+		    (unsigned long)pte_wimg,
+		    (long)pte_pp,
+		    file_name));
       htab_map_binary(me, pte_ra, pte_wimg, pte_pp, file_name,
 		      htaborg, htabmask);
     }

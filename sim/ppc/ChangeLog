@@ -1,3 +1,114 @@
+Mon Jan  8 12:17:22 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* device_table.c (register_init): Make format type correct.
+
+Wed Jan  3 19:21:46 1996  Andrew Cagney  <cagney@highland.com.au>
+
+	* emul_bugapi.c (emul_bugapi_create): Add nodes to init the
+ 	system-call trap to the emul instruction call instruction (Along
+ 	with an rfi and infinate loop).
+
+	* emul_bugapi.c (emul_bugapi_instruction_call): Expand to include
+ 	a few real PPC bug calls.  Test with simple hello world.
+
+Tue Jan  2 20:51:19 1996  Andrew Cagney - aka Noid  <cagney@highland.com.au>
+
+	* device.h, device.c (device_child, device_sibling): New
+        functions.  Return corresponding device value.
+
+	* emul_chirp.c (chirp_emul_child, chirp_emul_peer,
+        chirp_emul_parent): New functions - emulate corresponding OpenBoot
+        interfaces.
+
+	* device_table.c (register_init): Extend properties attached to
+        register init node to allow a specific processor's register to be
+        specified.
+
+	* emul_chirp.c (emul_chirp_create): Init SMP correctly - the
+        initial PC for all processors is an infinate loop but then, for
+        processor zero, is quickly changed to be the correct code starting
+        address.
+
+	* emul_chirp.c (emul_chirp_create): Add fake bootpath
+        et.al. properties to tree.
+
+	* emul_chirp.c (chirp_emul_getproplen): New function.  Emulate the
+        getproplen OpenBoot call.
+
+	* emul_chirp.c (emul_chirp_instruction_call): Document other
+        possible chirp emulation internal states.
+
+	* emul_chirp.c (emul_chirp_instruction_call): Trace failed lookups
+ 	as well as successful ones.
+	
+	* emul_chirp.c (emul_chirp_open): New function - handle open
+        client call.
+
+	* Makefile.in (maintainer-clean): Proper rule that eliminates more
+        junk.
+
+Tue Dec 19 13:00:11 1995  Andrew Cagney  <cagney@highland.com.au>
+
+	* emul_chirp.c (chirp_emul_exit): Full out call.
+
+	* device_table.c (htab_map_page): Wasn't handling byte swap when
+	creating entries in the hash table.
+
+	* device.c (device_tree_find_node): Allow primative wild-card match
+ 	of device names with the path.
+
+	FIXME: As mentioned earlier, the device stuff needs work to bring
+ 	it into line with OpenBoot.  Part of this work is rewriting the
+	find_node function so that it behaves as specified in p1275.
+
+Mon Dec 18 19:58:56 1995  Andrew Cagney  <cagney@highland.com.au>
+
+	* emul_chrp.c (chirp_emul_write, chirp_emul_finddevice): add
+ 	better tracing.
+
+	* emul_chrp.c: Change return type of emul functions to int.  Emul
+ 	functions either return -1 or zero so unsigned was a bit
+ 	dangerous.
+	
+	* inline.h (*), igen.c, dgen.c, *: Update INLINE macros so that
+        they are paramaterised with the type of the function.  Gets around
+        the problem of `static' needing to come first with `attribute'
+        comming last.  Format declarations and definitions so that emacs
+	doesn't get confused.
+
+Fri Dec 15 17:06:44 1995  Andrew Cagney  <cagney@highland.com.au>
+
+	* std-config.h (PSIM_INLINE): Add missing inline configuration
+ 	control for the main loop.
+
+	* mon.c (mon_print_info): If monitoring disabled still print out
+ 	the number seconds used.
+
+	* psim.c (run_until_stop): Don't monitor the cache misses when
+ 	monitoring is disabled.
+
+	* configure.in (sim_mon, sim_monitor): Correct typo - sim_mon ->
+ 	sim_monitor for shell variable (or should that have been the other
+ 	way around?).
+
+	* vm.c (vm_synchronize_context): Fix wrong test for unsuported
+ 	change in endian-mode.
+	
+	* std-config.h (WITH_REGPARM), inline.h (IDECODE_INLINE,
+	SEMANTICS_INLINE): Add -DWITH_REGPARM=<n> option.  Enables the
+	__attribute__((__regparm(WITH_REGPARM))) for some functions.
+	configure with --enable-sim-cflags="-DWITH_REGPARAM=3" (say).
+	Unfortunatly it tickles a bug (gcc?) and can't be used.
+
+Mon Dec 18 13:36:06 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* device.c (device_tree_add_device): Make trace fprintf arguments
+	type correct.
+	* device_table.c (htab_decode_hash_table): Ditto.
+	(htab_map_binary): Ditto.
+	(htab_init_callback): Ditto.
+	* vm.c (om_virtual_to_real): Ditto.
+
 Sat Dec 16 09:54:18 1995  Michael Meissner  <meissner@wogglebug.tiac.net>
 
 	* emul_netbsd.c (emul_netbsd_create): Deal with new BFD that

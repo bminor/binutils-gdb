@@ -67,7 +67,8 @@ struct _device {
 };
 
 
-device INLINE_DEVICE *
+INLINE_DEVICE\
+(device *)
 device_create(const char *name,
 	      device *parent)
 {
@@ -90,7 +91,8 @@ device_create(const char *name,
   return NULL;
 }
 
-device INLINE_DEVICE *
+INLINE_DEVICE\
+(device *)
 device_create_from(const char *name,
 		   void *data,
 		   const device_callbacks *callbacks,
@@ -105,25 +107,43 @@ device_create_from(const char *name,
 }
 
 
-device INLINE_DEVICE *
+INLINE_DEVICE\
+(device *)
 device_parent(device *me)
 {
   return me->parent;
 }
 
-const char INLINE_DEVICE *
+INLINE_DEVICE\
+(device *)
+device_sibling(device *me)
+{
+  return me->sibling;
+}
+
+INLINE_DEVICE\
+(device *)
+device_child(device *me)
+{
+  return me->children;
+}
+
+INLINE_DEVICE\
+(const char *)
 device_name(device *me)
 {
   return me->name;
 }
 
-void INLINE_DEVICE *
+INLINE_DEVICE\
+(void *)
 device_data(device *me)
 {
   return me->data;
 }
 
-void INLINE_DEVICE
+INLINE_DEVICE\
+(void)
 device_traverse_properties(device *me,
 			   device_traverse_property_function *traverse,
 			   void *data)
@@ -135,14 +155,16 @@ device_traverse_properties(device *me,
   }
 }
 
-void INLINE_DEVICE
+INLINE_DEVICE\
+(void)
 device_init(device *me,
 	    psim *system)
 {
   me->callback->init(me, system);
 }
 
-void INLINE_DEVICE
+INLINE_DEVICE\
+(void)
 device_attach_address(device *me,
 		      const char *name,
 		      attach_type attach,
@@ -156,7 +178,8 @@ device_attach_address(device *me,
 				addr, nr_bytes, access, who);
 }
 
-void INLINE_DEVICE
+INLINE_DEVICE\
+(void)
 device_detach_address(device *me,
 		      const char *name,
 		      attach_type attach,
@@ -170,7 +193,8 @@ device_detach_address(device *me,
 				addr, nr_bytes, access, who);
 }
 
-unsigned INLINE_DEVICE
+INLINE_DEVICE\
+(unsigned)
 device_io_read_buffer(device *me,
 		      void *dest,
 		      int space,
@@ -184,7 +208,8 @@ device_io_read_buffer(device *me,
 				       processor, cia);
 }
 
-unsigned INLINE_DEVICE
+INLINE_DEVICE\
+(unsigned)
 device_io_write_buffer(device *me,
 		       const void *source,
 		       int space,
@@ -198,7 +223,8 @@ device_io_write_buffer(device *me,
 				       processor, cia);
 }
 
-unsigned INLINE_DEVICE
+INLINE_DEVICE\
+(unsigned)
 device_dma_read_buffer(device *me,
 		       void *dest,
 		       int space,
@@ -209,7 +235,8 @@ device_dma_read_buffer(device *me,
 				       addr, nr_bytes);
 }
 
-unsigned INLINE_DEVICE
+INLINE_DEVICE\
+(unsigned)
 device_dma_write_buffer(device *me,
 			const void *source,
 			int space,
@@ -222,7 +249,8 @@ device_dma_write_buffer(device *me,
 					violate_read_only_section);
 }
 
-void INLINE_DEVICE
+INLINE_DEVICE\
+(void)
 device_attach_interrupt(device *me,
 			device *who,
 			int interrupt_line,
@@ -231,7 +259,8 @@ device_attach_interrupt(device *me,
   me->callback->attach_interrupt(me, who, interrupt_line, name);
 }
 
-void INLINE_DEVICE
+INLINE_DEVICE\
+(void)
 device_detach_interrupt(device *me,
 			device *who,
 			int interrupt_line,
@@ -240,7 +269,8 @@ device_detach_interrupt(device *me,
   me->callback->detach_interrupt(me, who, interrupt_line, name);
 }
 
-void INLINE_DEVICE
+INLINE_DEVICE\
+(void)
 device_interrupt(device *me,
 		 device *who,
 		 int interrupt_line,
@@ -252,7 +282,8 @@ device_interrupt(device *me,
 			   processor, cia);
 }
 
-void INLINE_DEVICE
+INLINE_DEVICE\
+(void)
 device_interrupt_ack(device *me,
 		     int interrupt_line,
 		     int interrupt_status)
@@ -260,7 +291,8 @@ device_interrupt_ack(device *me,
   me->callback->interrupt_ack(me, interrupt_line, interrupt_status);
 }
 
-void EXTERN_DEVICE
+EXTERN_DEVICE\
+(void)
 device_ioctl(device *me,
 	     psim *system,
 	     cpu *processor,
@@ -276,7 +308,8 @@ device_ioctl(device *me,
 
 /* Manipulate properties attached to devices */
 
-device_property STATIC_INLINE_DEVICE *
+STATIC_INLINE_DEVICE\
+(device_property *)
 device_add_property(device *me,
 		    const char *property,
 		    device_property_type type,
@@ -311,7 +344,8 @@ device_add_property(device *me,
   return new_value;
 }
 
-void INLINE_DEVICE
+INLINE_DEVICE\
+(void)
 device_add_array_property(device *me,
 			  const char *property,
 			  const void *array,
@@ -324,7 +358,8 @@ device_add_array_property(device *me,
 		      array_property, array, sizeof_array);
 }
 
-void INLINE_DEVICE
+INLINE_DEVICE\
+(void)
 device_add_integer_property(device *me,
 			    const char *property,
 			    signed32 integer)
@@ -337,7 +372,8 @@ device_add_integer_property(device *me,
 		      &integer, sizeof(integer));
 }
 
-void INLINE_DEVICE
+INLINE_DEVICE\
+(void)
 device_add_boolean_property(device *me,
 			    const char *property,
 			    int boolean)
@@ -350,7 +386,8 @@ device_add_boolean_property(device *me,
 		      &new_boolean, sizeof(new_boolean));
 }
 
-void INLINE_DEVICE
+INLINE_DEVICE\
+(void)
 device_add_null_property(device *me,
 			 const char *property)
 {
@@ -361,7 +398,8 @@ device_add_null_property(device *me,
 		      NULL, 0);
 }
 
-void INLINE_DEVICE
+INLINE_DEVICE\
+(void)
 device_add_string_property(device *me,
 			   const char *property,
 			   const char *string)
@@ -374,7 +412,8 @@ device_add_string_property(device *me,
 		      string, strlen(string) + 1);
 }
 
-const device_property INLINE_DEVICE *
+INLINE_DEVICE\
+(const device_property *)
 device_find_property(device *me,
 		     const char *property)
 {
@@ -389,7 +428,8 @@ device_find_property(device *me,
   return (device_property*)0;
 }
 
-const char INLINE_DEVICE *
+INLINE_DEVICE\
+(const char *)
 device_find_next_property(device *me,
 			  const char *property)
 {
@@ -413,7 +453,8 @@ device_find_next_property(device *me,
   return NULL;
 }
 
-const device_property INLINE_DEVICE *
+INLINE_DEVICE\
+(const device_property *)
 device_find_array_property(device *me,
 			   const char *property)
 {
@@ -429,7 +470,8 @@ device_find_array_property(device *me,
   return node;
 }
 
-signed_word INLINE_DEVICE
+INLINE_DEVICE\
+(signed_word)
 device_find_integer_property(device *me,
 			     const char *property)
 {
@@ -449,7 +491,8 @@ device_find_integer_property(device *me,
   return integer;
 }
 
-int INLINE_DEVICE
+INLINE_DEVICE\
+(int)
 device_find_boolean_property(device *me,
 			     const char *property)
 {
@@ -468,7 +511,8 @@ device_find_boolean_property(device *me,
   return boolean;
 }
 
-const char INLINE_DEVICE *
+INLINE_DEVICE\
+(const char *)
 device_find_string_property(device *me,
 			    const char *property)
 {
@@ -490,7 +534,8 @@ device_find_string_property(device *me,
 
 /* determine the full name of the device.  If buf is specified it is
    stored in there.  Failing that, a safe area of memory is allocated */
-const char STATIC_INLINE_DEVICE *
+STATIC_INLINE_DEVICE\
+(const char *)
 device_tree_full_name(device *leaf,
 		      char *buf,
 		      unsigned sizeof_buf)
@@ -530,7 +575,8 @@ typedef enum {
   device_tree_abort = 3,
 } device_tree_action;
 
-device STATIC_INLINE_DEVICE *
+STATIC_INLINE_DEVICE\
+(device *)
 device_tree_find_node(device *root,
 		      const char *path,
 		      const char *full_path,
@@ -605,7 +651,9 @@ device_tree_find_node(device *root,
 	 child != NULL;
 	 child = child->sibling) {
       if (strncmp(name, child->name, strlen_name) == 0
-	  && strlen(child->name) == strlen_name) {
+	  && strlen(child->name) >= strlen_name
+	  && (child->name[strlen_name] == '\0'
+	      || child->name[strlen_name] == '@')) {
 	if (*path == '\0')
 	  return child;
 	else
@@ -634,7 +682,8 @@ device_tree_find_node(device *root,
 
 /* grow the device tree */
 
-device INLINE_DEVICE *
+INLINE_DEVICE\
+(device *)
 device_tree_add_device(device *root,
 		       const char *prefix,
 		       device *new_sub_tree)
@@ -662,7 +711,8 @@ device_tree_add_device(device *root,
   return new_sub_tree;
 }
 
-device INLINE_DEVICE *
+INLINE_DEVICE\
+(device *)
 device_tree_find_device(device *root,
 			const char *path)
 {
@@ -680,7 +730,8 @@ device_tree_find_device(device *root,
 
 /* init all the devices */
 
-void STATIC_INLINE_DEVICE
+STATIC_INLINE_DEVICE\
+(void)
 device_tree_init_device(device *root,
 			void *data)
 {
@@ -693,7 +744,8 @@ device_tree_init_device(device *root,
 }
 
 
-void INLINE_DEVICE
+INLINE_DEVICE\
+(void)
 device_tree_init(device *root,
 		 psim *system)
 {
@@ -707,7 +759,8 @@ device_tree_init(device *root,
 
 /* traverse a device tree applying prefix/postfix functions to it */
 
-void INLINE_DEVICE
+INLINE_DEVICE\
+(void)
 device_tree_traverse(device *root,
 		     device_tree_traverse_function *prefix,
 		     device_tree_traverse_function *postfix,
@@ -726,7 +779,8 @@ device_tree_traverse(device *root,
 
 /* dump out a device node and addresses */
 
-void INLINE_DEVICE
+INLINE_DEVICE\
+(void)
 device_tree_dump(device *device,
 		 void *ignore_data_argument)
 {
@@ -742,7 +796,8 @@ device_tree_dump(device *device,
 
 /* lookup/create a device various formats */
 
-void STATIC_INLINE_DEVICE
+STATIC_INLINE_DEVICE\
+(void)
 u_strcat(char *buf,
 	 unsigned_word uw)
 {
@@ -759,7 +814,8 @@ u_strcat(char *buf,
   }
 }
 
-void STATIC_INLINE_DEVICE
+STATIC_INLINE_DEVICE\
+(void)
 c_strcat(char *buf,
 	const char *c)
 {
@@ -772,7 +828,8 @@ c_strcat(char *buf,
   *end = '\0';
 }
 
-device INLINE_DEVICE *
+INLINE_DEVICE\
+(device *)
 device_tree_add_found(device *root,
 		      const char *prefix,
 		      const char *name)
@@ -781,8 +838,8 @@ device_tree_add_found(device *root,
   device *new_device;
   device *new_node;
   TRACE(trace_device_tree,
-	("device_tree_add_found(root=0x%lx, prefix=%s, name=%x)\n",
-	 (long)root, prefix, name));
+	("device_tree_add_found(root=0x%lx, prefix=%s, name=%lx)\n",
+	 (unsigned long)root, prefix, (unsigned long)name));
   parent = device_tree_find_node(root, prefix, prefix,
 				 device_tree_abort);
   new_device = device_tree_find_device(parent, name);
@@ -796,7 +853,8 @@ device_tree_add_found(device *root,
   }
 }
 
-device INLINE_DEVICE *
+INLINE_DEVICE\
+(device *)
 device_tree_add_found_c(device *root,
 			const char *prefix,
 			const char *name,
@@ -811,7 +869,8 @@ device_tree_add_found_c(device *root,
   return device_tree_add_found(root, prefix, buf);
 }
 
-device INLINE_DEVICE *
+INLINE_DEVICE\
+(device *)
 device_tree_add_found_c_uw(device *root,
 			   const char *prefix,
 			   const char *name,
@@ -829,7 +888,8 @@ device_tree_add_found_c_uw(device *root,
   return device_tree_add_found(root, prefix, buf);
 }
 
-device INLINE_DEVICE *
+INLINE_DEVICE\
+(device *)
 device_tree_add_found_uw_u(device *root,
 			   const char *prefix,
 			   const char *name,
@@ -847,7 +907,8 @@ device_tree_add_found_uw_u(device *root,
   return device_tree_add_found(root, prefix, buf);
 }
 
-device INLINE_DEVICE *
+INLINE_DEVICE\
+(device *)
 device_tree_add_found_uw_u_u(device *root,
 			     const char *prefix,
 			     const char *name,
@@ -868,7 +929,8 @@ device_tree_add_found_uw_u_u(device *root,
   return device_tree_add_found(root, prefix, buf);
 }
 
-device INLINE_DEVICE *
+INLINE_DEVICE\
+(device *)
 device_tree_add_found_uw_u_u_c(device *root,
 			       const char *prefix,
 			       const char *name,
@@ -892,7 +954,8 @@ device_tree_add_found_uw_u_u_c(device *root,
   return device_tree_add_found(root, prefix, buf);
 }
 
-device INLINE_DEVICE *
+INLINE_DEVICE\
+(device *)
 device_tree_add_found_uw_uw_u_u_c(device *root,
 				  const char *prefix,
 				  const char *name,
@@ -919,7 +982,8 @@ device_tree_add_found_uw_uw_u_u_c(device *root,
   return device_tree_add_found(root, prefix, buf);
 }
 
-device INLINE_DEVICE *
+INLINE_DEVICE\
+(device *)
 device_tree_add_found_uw_uw_u_u_u(device *root,
 				  const char *prefix,
 				  const char *name,
@@ -1007,7 +1071,8 @@ do { \
   START = END + 1; \
 } while (0)
 
-int INLINE_DEVICE
+INLINE_DEVICE\
+(int)
 scand_c(const char *name,
 	char *c1,
 	unsigned c1size)
@@ -1017,7 +1082,8 @@ scand_c(const char *name,
   SCAN_END;
 }
 
-int INLINE_DEVICE
+INLINE_DEVICE\
+(int)
 scand_c_uw_u(const char *name,
 	     char *c1,
 	     unsigned c1size,
@@ -1031,7 +1097,8 @@ scand_c_uw_u(const char *name,
   SCAN_END;
 }
 
-int INLINE_DEVICE
+INLINE_DEVICE\
+(int)
 scand_uw(const char *name,
 	 unsigned_word *uw1)
 {
@@ -1040,7 +1107,8 @@ scand_uw(const char *name,
   SCAN_END;
 }
 
-int INLINE_DEVICE
+INLINE_DEVICE\
+(int)
 scand_uw_c(const char *name,
 	   unsigned_word *uw1,
 	   char *c2,
@@ -1052,7 +1120,8 @@ scand_uw_c(const char *name,
   SCAN_END;
 }
 
-int INLINE_DEVICE
+INLINE_DEVICE\
+(int)
 scand_uw_u(const char *name,
 	   unsigned_word *uw1,
 	   unsigned *u2)
@@ -1063,7 +1132,8 @@ scand_uw_u(const char *name,
   SCAN_END;
 }
 
-int INLINE_DEVICE
+INLINE_DEVICE\
+(int)
 scand_uw_u_u(const char *name,
 	     unsigned_word *uw1,
 	     unsigned *u2,
@@ -1076,7 +1146,8 @@ scand_uw_u_u(const char *name,
   SCAN_END;
 }
 
-int INLINE_DEVICE
+INLINE_DEVICE\
+(int)
 scand_uw_u_u_c(const char *name,
 	       unsigned_word *uw1,
 	       unsigned *u2,
@@ -1092,7 +1163,8 @@ scand_uw_u_u_c(const char *name,
   SCAN_END;
 }
 
-int INLINE_DEVICE
+INLINE_DEVICE\
+(int)
 scand_uw_uw(const char *name,
 	    unsigned_word *uw1,
 	    unsigned_word *uw2)
@@ -1103,7 +1175,8 @@ scand_uw_uw(const char *name,
   SCAN_END;
 }
 
-int INLINE_DEVICE
+INLINE_DEVICE\
+(int)
 scand_uw_uw_u(const char *name,
 	      unsigned_word *uw1,
 	      unsigned_word *uw2,
@@ -1116,7 +1189,8 @@ scand_uw_uw_u(const char *name,
   SCAN_END;
 }
 
-int INLINE_DEVICE
+INLINE_DEVICE\
+(int)
 scand_uw_uw_u_u_c(const char *name,
 		  unsigned_word *uw1,
 		  unsigned_word *uw2,
@@ -1134,7 +1208,8 @@ scand_uw_uw_u_u_c(const char *name,
   SCAN_END;
 }
 
-int INLINE_DEVICE
+INLINE_DEVICE\
+(int)
 scand_uw_uw_u_u_u(const char *name,
 		  unsigned_word *uw1,
 		  unsigned_word *uw2,

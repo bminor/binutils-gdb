@@ -39,50 +39,56 @@
    All the devices in this model live in a tree. The following allow
    the location/manipulation of this tree */
 
-device INLINE_DEVICE *device_parent
+INLINE_DEVICE(device *) device_parent
 (device *me);
 
-const char INLINE_DEVICE *device_name
+INLINE_DEVICE(device *) device_sibling
 (device *me);
 
-void INLINE_DEVICE *device_data
+INLINE_DEVICE(device *) device_child
+(device *me);
+
+INLINE_DEVICE(const char *) device_name
+(device *me);
+
+INLINE_DEVICE(void *) device_data
 (device *me);
 
 
 /* Grow the device tree adding either a specific device or
    alternativly a device found in the device table */
 
-device INLINE_DEVICE *device_tree_add_device
+INLINE_DEVICE(device *)device_tree_add_device
 (device *root,
  const char *prefix,
  device *new_sub_tree);
 
-device INLINE_DEVICE *device_tree_add_found
+INLINE_DEVICE(device *) device_tree_add_found
 (device *root,
  const char *prefix,
  const char *name);
 
-device INLINE_DEVICE *device_tree_add_found_c
+INLINE_DEVICE(device *) device_tree_add_found_c
 (device *root,
  const char *prefix,
  const char *name,
  const char *c1);
 
-device INLINE_DEVICE *device_tree_add_found_c_uw
+INLINE_DEVICE(device *) device_tree_add_found_c_uw
 (device *root,
  const char *prefix,
  const char *name,
  const char *c1,
  unsigned_word uw2);
 
-device INLINE_DEVICE *device_tree_add_found_uw_u
+INLINE_DEVICE(device *) device_tree_add_found_uw_u
 (device *root,
  const char *prefix,
  const char *name,
  unsigned_word uw1,
  unsigned u2);
 
-device INLINE_DEVICE *device_tree_add_found_uw_u_u
+INLINE_DEVICE(device *) device_tree_add_found_uw_u_u
 (device *root,
  const char *prefix,
  const char *name,
@@ -90,7 +96,7 @@ device INLINE_DEVICE *device_tree_add_found_uw_u_u
  unsigned u2,
  unsigned u3);
 
-device INLINE_DEVICE *device_tree_add_found_uw_u_u_c
+INLINE_DEVICE(device *) device_tree_add_found_uw_u_u_c
 (device *root,
  const char *prefix,
  const char *name,
@@ -99,7 +105,7 @@ device INLINE_DEVICE *device_tree_add_found_uw_u_u_c
  unsigned u3,
  const char *c4);
 
-device INLINE_DEVICE *device_tree_add_found_uw_uw_u_u_c
+INLINE_DEVICE(device *) device_tree_add_found_uw_uw_u_u_c
 (device *root,
  const char *prefix,
  const char *name,
@@ -109,7 +115,7 @@ device INLINE_DEVICE *device_tree_add_found_uw_uw_u_u_c
  unsigned u4,
  const char *c5);
 
-device INLINE_DEVICE *device_tree_add_found_uw_uw_u_u_u
+INLINE_DEVICE(device *) device_tree_add_found_uw_uw_u_u_u
 (device *root,
  const char *prefix,
  const char *name,
@@ -123,7 +129,7 @@ device INLINE_DEVICE *device_tree_add_found_uw_uw_u_u_u
 /* Query the device tree, null is returned if the specified device is
    not found */
 
-device INLINE_DEVICE *device_tree_find_device
+INLINE_DEVICE(device *) device_tree_find_device
 (device *root,
  const char *path);
 
@@ -135,7 +141,7 @@ typedef void (device_tree_traverse_function)
      (device *device,
       void *data);
 
-void INLINE_DEVICE device_tree_traverse
+INLINE_DEVICE(void) device_tree_traverse
 (device *root,
  device_tree_traverse_function *prefix,
  device_tree_traverse_function *postfix,
@@ -145,7 +151,7 @@ void INLINE_DEVICE device_tree_traverse
 /* dump a node, this can be passed to the device_tree_traverse()
    function to dump out the entire device tree */
 
-void INLINE_DEVICE device_tree_dump
+INLINE_DEVICE(void) device_tree_dump
 (device *device,
  void *ignore_data_argument);
 
@@ -181,7 +187,7 @@ struct _device_property {
 
 /* Basic operations used by software */
 
-const char INLINE_DEVICE *device_find_next_property
+INLINE_DEVICE(const char *) device_find_next_property
 (device *me,
  const char *previous);
 
@@ -189,27 +195,27 @@ const char INLINE_DEVICE *device_find_next_property
    No such external function, all properties, when added are explictly
    typed */
 
-void INLINE_DEVICE device_add_array_property
+INLINE_DEVICE(void) device_add_array_property
 (device *me,
  const char *property,
  const void *array,
  int sizeof_array);
 
-void INLINE_DEVICE device_add_integer_property
+INLINE_DEVICE(void) device_add_integer_property
 (device *me,
  const char *property,
  signed_word integer);
 
-void INLINE_DEVICE device_add_boolean_property
+INLINE_DEVICE(void) device_add_boolean_property
 (device *me,
  const char *property,
  int bool);
 
-void INLINE_DEVICE device_add_null_property
+INLINE_DEVICE(void) device_add_null_property
 (device *me,
  const char *property);
 
-void INLINE_DEVICE device_add_string_property
+INLINE_DEVICE(void) device_add_string_property
 (device *me,
  const char *property,
  const char *string);
@@ -218,7 +224,7 @@ void INLINE_DEVICE device_add_string_property
 /* Locate a property returning its description.  Return NULL if the
    named property is not found */
 
-const device_property INLINE_DEVICE *device_find_property
+INLINE_DEVICE(const device_property *) device_find_property
 (device *me,
  const char *property);
 
@@ -230,7 +236,7 @@ typedef void (device_traverse_property_function)
       const char *name,
       void *data);
 
-void INLINE_DEVICE device_traverse_properties
+INLINE_DEVICE(void) device_traverse_properties
 (device *me,
  device_traverse_property_function *traverse,
  void *data);
@@ -239,19 +245,19 @@ void INLINE_DEVICE device_traverse_properties
 /* Similar to above except that the property *must* be in the device
    tree and *must* be of the specified type. */
 
-const device_property INLINE_DEVICE *device_find_array_property
+INLINE_DEVICE(const device_property *) device_find_array_property
 (device *me,
  const char *property);
 
-signed_word INLINE_DEVICE device_find_integer_property
+INLINE_DEVICE(signed_word) device_find_integer_property
 (device *me,
  const char *property);
 
-const char INLINE_DEVICE *device_find_string_property
+INLINE_DEVICE(const char *) device_find_string_property
 (device *me,
  const char *property);
 
-int INLINE_DEVICE device_find_boolean_property
+INLINE_DEVICE(int) device_find_boolean_property
 (device *me,
  const char *property);
 
@@ -302,26 +308,26 @@ typedef enum _attach_type {
 
    */
 
-device INLINE_DEVICE *device_create
+INLINE_DEVICE(device *) device_create
 (const char *name,
  device *parent);
 
 /* some external functions want to create things */
 typedef struct _device_callbacks device_callbacks;
 
-device INLINE_DEVICE *device_create_from
+INLINE_DEVICE(device *) device_create_from
 (const char *name,
  void *data,
  const device_callbacks *callbacks,
  device *parent);
 
-void INLINE_DEVICE device_init
+INLINE_DEVICE(void) device_init
 (device *me,
  psim *system);
 
 /* initialize the entire tree */
 
-void INLINE_DEVICE device_tree_init
+INLINE_DEVICE(void) device_tree_init
 (device *root,
  psim *system);
 
@@ -403,7 +409,7 @@ void INLINE_DEVICE device_tree_init
 
    */
 
-void INLINE_DEVICE device_attach_address
+INLINE_DEVICE(void) device_attach_address
 (device *me,
  const char *name,
  attach_type attach,
@@ -413,7 +419,7 @@ void INLINE_DEVICE device_attach_address
  access_type access,
  device *who); /*callback/default*/
 
-void INLINE_DEVICE device_detach_address
+INLINE_DEVICE(void) device_detach_address
 (device *me,
  const char *name,
  attach_type attach,
@@ -423,7 +429,7 @@ void INLINE_DEVICE device_detach_address
  access_type access,
  device *who); /*callback/default*/
 
-unsigned INLINE_DEVICE device_io_read_buffer
+INLINE_DEVICE(unsigned) device_io_read_buffer
 (device *me,
  void *dest,
  int space,
@@ -432,7 +438,7 @@ unsigned INLINE_DEVICE device_io_read_buffer
  cpu *processor,
  unsigned_word cia);
 
-unsigned INLINE_DEVICE device_io_write_buffer
+INLINE_DEVICE(unsigned) device_io_write_buffer
 (device *me,
  const void *source,
  int space,
@@ -441,14 +447,14 @@ unsigned INLINE_DEVICE device_io_write_buffer
  cpu *processor,
  unsigned_word cia);
 
-unsigned INLINE_DEVICE device_dma_read_buffer
+INLINE_DEVICE(unsigned) device_dma_read_buffer
 (device *me,
  void *dest,
  int space,
  unsigned_word addr,
  unsigned nr_bytes);
 
-unsigned INLINE_DEVICE device_dma_write_buffer
+INLINE_DEVICE(unsigned) device_dma_write_buffer
 (device *me,
  const void *source,
  int space,
@@ -476,19 +482,19 @@ unsigned INLINE_DEVICE device_dma_write_buffer
 
    */
 
-void INLINE_DEVICE device_attach_interrupt
+INLINE_DEVICE(void) device_attach_interrupt
 (device *me,
  device *who,
  int interrupt_line,
  const char *name);
 
-void INLINE_DEVICE device_detach_interrupt
+INLINE_DEVICE(void) device_detach_interrupt
 (device *me,
  device *who,
  int interrupt_line,
  const char *name);
 
-void INLINE_DEVICE device_interrupt
+INLINE_DEVICE(void) device_interrupt
 (device *me,
  device *who,
  int interrupt_line,
@@ -496,7 +502,7 @@ void INLINE_DEVICE device_interrupt
  cpu *processor,
  unsigned_word cia);
 
-void INLINE_DEVICE device_interrupt_ack
+INLINE_DEVICE(void) device_interrupt_ack
 (device *me,
  int interrupt_line,
  int interrupt_status);
@@ -507,7 +513,8 @@ void INLINE_DEVICE device_interrupt_ack
    Very simply, a catch all for any thing that turns up that until now
    either hasn't been thought of or doesn't justify an extra function. */
 
-void EXTERN_DEVICE device_ioctl
+EXTERN_DEVICE\
+(void) device_ioctl
 (device *me,
  psim *system,
  cpu *processor,
@@ -526,32 +533,32 @@ void EXTERN_DEVICE device_ioctl
    level software interface to the devices */
 
 #if 0
-device_instance INLINE_DEVICE *device_instance_open
+INLINE_DEVICE(device_instance *)device_instance_open
 (device *me,
  const char *device_specifier);
 
-void INLINE_DEVICE device_instance_close
+INLINE_DEVICE(void) device_instance_close
 (device_instance *instance);
 
-int INLINE_DEVICE device_instance_read
+INLINE_DEVICE(int) device_instance_read
 (device_instance *instance,
  void *addr,
  unsigned_word len);
 
-int INLINE_DEVICE device_instance_write
+INLINE_DEVICE(int) device_instance_write
 (device_instance *instance,
  const void *addr,
  unsigned_word len);
 
-int INLINE_DEVICE device_instance_seek
+INLINE_DEVICE(int) device_instance_seek
 (device_instance *instance,
  unsigned_word pos_hi,
  unsigned_word pos_lo);
 
-device INLINE_DEVICE *device_instance_device
+INLINE_DEVICE(device *) device_instance_device
 (device_instance *instance);
 
-const char INLINE_DEVICE *device_instance_name
+INLINE_DEVICE(const char *) device_instance_name
 (device_instance *instance);
 #endif
 
@@ -560,56 +567,46 @@ const char INLINE_DEVICE *device_instance_name
 
 /* Device dregs... */
 
-/* Parse a device name */
-
-void INLINE_DEVICE device_tree_parse_name
-(const char *name,
- const char **driver_name,
- const char **unit_address,
- const char **device_arguments,
- const char **end);
-
-
 /* Parse a device name, various formats:
 
    uw: unsigned_word
    u: unsigned
    c: string */
 
-int INLINE_DEVICE scand_c
+INLINE_DEVICE(int) scand_c
 (const char *name,
  char *c1,
  unsigned c1size);
 
-int INLINE_DEVICE scand_c_uw_u
+INLINE_DEVICE(int) scand_c_uw_u
 (const char *name,
  char *c1,
  unsigned c1size,
  unsigned_word *uw2,
  unsigned *u3);
  
-int INLINE_DEVICE scand_uw
+INLINE_DEVICE(int) scand_uw
 (const char *name,
  unsigned_word *uw1);
  
-int INLINE_DEVICE scand_uw_c
+INLINE_DEVICE(int) scand_uw_c
 (const char *name,
  unsigned_word *uw1,
  char *c2,
  unsigned c2size);
  
-int INLINE_DEVICE scand_uw_u
+INLINE_DEVICE(int) scand_uw_u
 (const char *name,
  unsigned_word *uw1,
  unsigned *u2);
  
-int INLINE_DEVICE scand_uw_u_u
+INLINE_DEVICE(int) scand_uw_u_u
 (const char *name,
  unsigned_word *uw1,
  unsigned *u2,
  unsigned *u3);
  
-int INLINE_DEVICE scand_uw_u_u_c
+INLINE_DEVICE(int) scand_uw_u_u_c
 (const char *name,
  unsigned_word *uw1,
  unsigned *u2,
@@ -617,18 +614,18 @@ int INLINE_DEVICE scand_uw_u_u_c
  char *c4,
  unsigned c4size);
  
-int INLINE_DEVICE scand_uw_uw
+INLINE_DEVICE(int) scand_uw_uw
 (const char *name,
  unsigned_word *uw1,
  unsigned_word *uw2);
 
-int INLINE_DEVICE scand_uw_uw_u
+INLINE_DEVICE(int) scand_uw_uw_u
 (const char *name,
  unsigned_word *uw1,
  unsigned_word *uw2,
  unsigned *u3);
  
-int INLINE_DEVICE scand_uw_uw_u_u_c
+INLINE_DEVICE(int) scand_uw_uw_u_u_c
 (const char *name,
  unsigned_word *uw1,
  unsigned_word *uw2,
@@ -637,7 +634,7 @@ int INLINE_DEVICE scand_uw_uw_u_u_c
  char *c5,
  unsigned c5size);
  
-int INLINE_DEVICE scand_uw_uw_u_u_u
+INLINE_DEVICE(int) scand_uw_uw_u_u_u
 (const char *name,
  unsigned_word *uw1,
  unsigned_word *uw2,
