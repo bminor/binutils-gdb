@@ -2,6 +2,9 @@
 
 Changes in 2.10:
 
+Support for the ARM msr instruction was changed to only allow an immediate
+operand when altering the flags field.
+
 Support for ATMEL AVR.
 
 Support for IBM 370 ELF.  Somewhat experimental.
