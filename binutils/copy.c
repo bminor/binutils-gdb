@@ -292,48 +292,56 @@ loser:
     exit(1);
 }				/* setup_sections() */
 
+/*
+Copy all the section related data from an input section
+to an output section
+
+If stripping then don't copy any relocation info
+*/
 static void
 copy_sections(ibfd, isection, obfd)
     bfd            *ibfd;
     sec_ptr         isection;
     bfd            *obfd;
 {
-    static unsigned char *memhunk = NULL;
-    arelent       **relpp;
-    int             relcount;
-    sec_ptr         osection;
-    unsigned long   size;
-    osection = bfd_get_section_by_name(obfd,
-				       bfd_section_name(ibfd, isection));
 
-    size = bfd_section_size(ibfd, isection);
+  arelent       **relpp;
+  int             relcount;
+  sec_ptr         osection;
+  unsigned long   size;
+  osection = bfd_get_section_by_name(obfd,
+				     bfd_section_name(ibfd, isection));
 
-    if (size == 0)
-	return;
+  size = bfd_section_size(ibfd, isection);
 
-    if (strip == false && get_reloc_upper_bound(ibfd, isection) != 0) {
-	relpp = (arelent **) xmalloc(get_reloc_upper_bound(ibfd, isection));
+  if (size == 0)
+    return;
 
-	relcount = bfd_canonicalize_reloc(ibfd, isection, relpp, sympp);
-
-	bfd_set_reloc(obfd, osection, relpp, relcount);
+  if (strip == true || get_reloc_upper_bound(ibfd, isection) == 0) 
+    {
+      bfd_set_reloc(obfd, osection, (arelent **)NULL, 0);
+    } 
+  else 
+    {
+      relpp = (arelent **) xmalloc(get_reloc_upper_bound(ibfd, isection));
+      relcount = bfd_canonicalize_reloc(ibfd, isection, relpp, sympp);
+      bfd_set_reloc(obfd, osection, relpp, relcount);
     }
-    else {
-	bfd_set_reloc(obfd, osection, (arelent **)NULL, 0);
-      }
-      
 
-    if (bfd_get_section_flags(ibfd, isection) & SEC_HAS_CONTENTS) {
-	memhunk = (unsigned char *) xmalloc(size);
-	/* now we have enough memory, just do it: */
-	if (!bfd_get_section_contents(ibfd, isection, memhunk, 0, size))
-	    bfd_fatal(bfd_get_filename(ibfd));
 
-	if (!bfd_set_section_contents(obfd, osection, memhunk, 0, size))
-	    bfd_fatal(bfd_get_filename(obfd));
-    }				/* only if the section has contents. */
+  if (bfd_get_section_flags(ibfd, isection) & SEC_HAS_CONTENTS) 
+    {
+      unsigned char *memhunk = (unsigned char *) xmalloc(size);
 
-    free(memhunk);
+      if (!bfd_get_section_contents(ibfd, isection, memhunk, 0, size))
+	bfd_fatal(bfd_get_filename(ibfd));
+
+      if (!bfd_set_section_contents(obfd, osection, memhunk, 0, size))
+	bfd_fatal(bfd_get_filename(obfd));
+      free(memhunk);
+    }
+
+
 }
 int
 main(argc, argv)
