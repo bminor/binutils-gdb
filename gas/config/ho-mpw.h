@@ -59,6 +59,8 @@ FILE *mpw_fopen();
 #define fseek mpw_fseek
 #define abort mpw_abort
 
+#define TRUE_FALSE_ALREADY_DEFINED
+
 /* <cr> is an end-of-line marker. */
 
 #define CR_EOL
@@ -71,5 +73,9 @@ FILE *mpw_fopen();
    starts up. */
 
 #define HOST_SPECIAL_INIT(argc,argv)  mpw_special_init ((argv)[0]);
+
+#define WANT_FOPEN_BIN
+
+#define HAVE_ERRNO_H
 
 /* end of ho-mpw.h */

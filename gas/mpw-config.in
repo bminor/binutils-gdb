@@ -1,7 +1,5 @@
 # Configuration fragment for GAS.
 
-forward-include {srcdir}config:ho-mpw.h host.h 
-
 Set target_arch `echo {target_canonical} | sed -e 's/-.*-.*//'`
 
 # (should canonicalize arch name) */

@@ -73,21 +73,15 @@ as.new \Option-f\Option-f {OBJECTS} {TARG_OBJECTS} {CLIBS}
 
 "{o}"config.h \Option-f "{o}"config-stamp
 
-"{o}"config-stamp \Option-f Makefile
+"{o}"config-stamp \Option-f Makefile "{s}"config:ho-mpw.h
 	Delete -i -y "{o}"config.new "{o}"config-stamp
-	echo '#ifndef GAS_VERSION'			       > "{o}"config.new
-	echo '#define TARGET_CPU       "{target_cpu}"'        >> "{o}"config.new
-	echo '#define TARGET_ALIAS     "{target_alias}"'      >> "{o}"config.new
-	echo '#define TARGET_CANONICAL "{target_canonical}"'  >> "{o}"config.new
-	echo '#define GAS_VERSION      "{VERSION}"'           >> "{o}"config.new
-#	if [ "$(defs)" != "" ]; then \
-#	  for d in .. $(defs) ; do \
-#	    if [ "$$d" != ".." ]; then \
-#	      echo "#define $$d"			      >> "{o}"config.new ; \
-#	    else true; fi; \
-#	  done ; \
-#	else true; fi
-	echo '#endif /* GAS_VERSION */'			      >> "{o}"config.new
+	Echo '#ifndef GAS_VERSION'			      > "{o}"config.new
+	Echo '#define GAS_VERSION      "{VERSION}"'          >> "{o}"config.new
+	Echo '#define TARGET_CPU       "{target_cpu}"'       >> "{o}"config.new
+	Echo '#define TARGET_ALIAS     "{target_alias}"'     >> "{o}"config.new
+	Echo '#define TARGET_CANONICAL "{target_canonical}"' >> "{o}"config.new
+	Catenate "{s}"config:ho-mpw.h                        >> "{o}"config.new
+	Echo '#endif /* GAS_VERSION */'			     >> "{o}"config.new
 	MoveIfChange "{o}"config.new "{o}"config.h
 	Echo ' ' >"{o}"config-stamp
 
