@@ -1,3 +1,10 @@
+2005-02-22  Alan Modra  <amodra@bigpond.net.au>
+
+	* basic_blocks.c: Warning fixes.
+	* gmon_io.c: Likewise.
+	* hist.c: Likewise.
+	* hist.h: Likewise.
+
 2005-01-31  Andrew Cagney  <cagney@gnu.org>
 
 	* configure: Regenerate to track ../gettext.m4.

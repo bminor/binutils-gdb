@@ -1,6 +1,6 @@
 /* hist.c  -  Histogram related operations.
 
-   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -44,7 +44,7 @@ extern void flat_blurb (FILE * fp);
 bfd_vma s_lowpc;		/* Lowest address in .text.  */
 bfd_vma s_highpc = 0;		/* Highest address in .text.  */
 bfd_vma lowpc, highpc;		/* Same, but expressed in UNITs.  */
-int hist_num_bins = 0;		/* Number of histogram samples.  */
+unsigned int hist_num_bins = 0;	/* Number of histogram samples.  */
 int *hist_sample = 0;		/* Histogram samples (shorts in the file!).  */
 double hist_scale;
 char hist_dimension[16] = "seconds";
@@ -83,7 +83,7 @@ void
 hist_read_rec (FILE * ifp, const char *filename)
 {
   bfd_vma n_lowpc, n_highpc;
-  int i, ncnt, profrate;
+  unsigned int i, ncnt, profrate;
   UNIT count;
 
   if (gmon_io_read_vma (ifp, &n_lowpc)
@@ -111,16 +111,16 @@ hist_read_rec (FILE * ifp, const char *filename)
     }
 
   DBG (SAMPLEDEBUG,
-       printf ("[hist_read_rec] n_lowpc 0x%lx n_highpc 0x%lx ncnt %d\n",
+       printf ("[hist_read_rec] n_lowpc 0x%lx n_highpc 0x%lx ncnt %u\n",
 	       (unsigned long) n_lowpc, (unsigned long) n_highpc, ncnt);
-       printf ("[hist_read_rec] s_lowpc 0x%lx s_highpc 0x%lx nsamples %d\n",
+       printf ("[hist_read_rec] s_lowpc 0x%lx s_highpc 0x%lx nsamples %u\n",
 	       (unsigned long) s_lowpc, (unsigned long) s_highpc,
 	       hist_num_bins);
        printf ("[hist_read_rec]   lowpc 0x%lx   highpc 0x%lx\n",
 	       (unsigned long) lowpc, (unsigned long) highpc));
 
   if (n_lowpc != s_lowpc || n_highpc != s_highpc
-      || ncnt != hist_num_bins || hz != profrate)
+      || ncnt != hist_num_bins || hz != (int) profrate)
     {
       fprintf (stderr, _("%s: `%s' is incompatible with first gmon file\n"),
 	       whoami, filename);
@@ -138,7 +138,7 @@ hist_read_rec (FILE * ifp, const char *filename)
       if (fread (&count[0], sizeof (count), 1, ifp) != 1)
 	{
 	  fprintf (stderr,
-		  _("%s: %s: unexpected EOF after reading %d of %d samples\n"),
+		  _("%s: %s: unexpected EOF after reading %u of %u samples\n"),
 		   whoami, filename, i, hist_num_bins);
 	  done (1);
 	}
@@ -158,7 +158,7 @@ void
 hist_write_hist (FILE * ofp, const char *filename)
 {
   UNIT count;
-  int i;
+  unsigned int i;
 
   /* Write header.  */
 
@@ -263,8 +263,8 @@ hist_assign_samples ()
   bfd_vma bin_low_pc, bin_high_pc;
   bfd_vma sym_low_pc, sym_high_pc;
   bfd_vma overlap, addr;
-  int bin_count, i;
-  unsigned int j;
+  unsigned int bin_count;
+  unsigned int i, j;
   double time, credit;
 
   /* Read samples and assign to symbols.  */
@@ -285,7 +285,7 @@ hist_assign_samples ()
 
       DBG (SAMPLEDEBUG,
 	   printf (
-      "[assign_samples] bin_low_pc=0x%lx, bin_high_pc=0x%lx, bin_count=%d\n",
+      "[assign_samples] bin_low_pc=0x%lx, bin_high_pc=0x%lx, bin_count=%u\n",
 		    (unsigned long) (sizeof (UNIT) * bin_low_pc),
 		    (unsigned long) (sizeof (UNIT) * bin_high_pc),
 		    bin_count));

@@ -1,6 +1,6 @@
 /* gmon_io.c - Input and output from/to gmon.out files.
 
-   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -378,15 +378,16 @@ gmon_out_read (const char *filename)
       {
 	bfd_vma low_pc;
 	bfd_vma high_pc;
-	int ncnt;
+	unsigned int ncnt;
       };
-      int i, samp_bytes, header_size = 0;
+      unsigned int i;
+      int samp_bytes, header_size = 0;
       unsigned long count;
       bfd_vma from_pc, self_pc;
       static struct hdr h;
       UNIT raw_bin_count;
       struct hdr tmp;
-      int version;
+      unsigned int version;
 
       /* Information from a gmon.out file is in two parts: an array of
 	 sampling hits within pc ranges, and the arcs.  */
@@ -419,7 +420,7 @@ gmon_out_read (const char *filename)
 
       if (version == GMONVERSION)
 	{
-	  int profrate;
+	  unsigned int profrate;
 
 	  /* 4.4BSD format header.  */
           if (gmon_io_read_32 (ifp, &profrate))
@@ -427,7 +428,7 @@ gmon_out_read (const char *filename)
 
 	  if (!s_highpc)
 	    hz = profrate;
-	  else if (hz != profrate)
+	  else if (hz != (int) profrate)
 	    {
 	      fprintf (stderr,
 		       _("%s: profiling rate incompatible with first gmon file\n"),
@@ -630,7 +631,7 @@ gmon_out_write (const char *filename)
   else if (file_format == FF_BSD || file_format == FF_BSD44)
     {
       UNIT raw_bin_count;
-      int i, hdrsize;
+      unsigned int i, hdrsize;
       unsigned padsize;
       char pad[3*4];
       Arc *arc;

@@ -1,6 +1,6 @@
 /* hist.h
 
-   Copyright 2000, 2001 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2004, 2005 Free Software Foundation, Inc.
 
 This file is part of GNU Binutils.
 
@@ -24,7 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 extern bfd_vma s_lowpc;		/* Lowpc from the profile file.  */
 extern bfd_vma s_highpc;	/* Highpc from the profile file.  */
 extern bfd_vma lowpc, highpc;	/* Range profiled, in UNIT's.  */
-extern int hist_num_bins;	/* Number of histogram bins.  */
+extern unsigned int hist_num_bins; /* Number of histogram bins.  */
 extern int *hist_sample;	/* Code histogram.  */
 
 /* Scale factor converting samples to pc values:
