@@ -6,6 +6,7 @@ Fri Sep  8 12:18:53 1995  Ian Lance Taylor  <ian@cygnus.com>
 	Call AC_CHECK_HEADERS for stdlib.h and time.h.  Touch stamp.h if
 	creating config.h.
 	* configure: Rebuild.
+	* config.in: New file, created by autoheader.
 	* Makefile.in (AR): Define as @AR@.
 	(CC): New variable, defined as @CC@.
 	(CFLAGS): Define as @CFLAGS@.
