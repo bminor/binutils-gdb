@@ -1,3 +1,10 @@
+Fri Jan 28 09:12:56 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* ldlex.l: Add rule to catch invalid input characters instead of
+	printing them.  Include "ldmain.h" for program_name decl.
+	(lex_warn_invalid): New function.
+	* Makefile.in: Add dependency.
+
 Fri Jan 28 12:58:45 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* Makefile.in (check): Don't bother running any tests of

@@ -753,6 +753,6 @@ ldgram.o : ldgram.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/bfdlink.h ld.h ldexp.h ldver.h ldlang.h ldemul.h \
   ldfile.h ldmisc.h ldmain.h mri.h ldlex.h
 ldlex.o : ldlex.c ../bfd/bfd.h $(INCDIR)/obstack.h \
-  ld.h ldgram.h ldmisc.h ldexp.h ldlang.h ldfile.h ldlex.h
+  ld.h ldgram.h ldmisc.h ldexp.h ldlang.h ldfile.h ldlex.h ldmain.h
 
 # IF YOU PUT ANYTHING HERE IT WILL GO AWAY

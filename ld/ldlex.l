@@ -1,6 +1,6 @@
 %{
 
-/* Copyright (C) 1991, 1993 Free Software Foundation, Inc.
+/* Copyright (C) 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
 
 This file is part of GLD, the Gnu Linker.
 
@@ -41,6 +41,7 @@ This was written by steve chamberlain
 #include "ldlang.h"
 #include "ldfile.h"
 #include "ldlex.h"
+#include "ldmain.h"
 
 int ldgram_in_defsym;
 
@@ -62,13 +63,14 @@ static YY_BUFFER_STATE yy_create_string_buffer PARAMS ((const char *string,
 							int size));
 static void yy_input PARAMS ((char *, int *result, int max_size));
 static void comment PARAMS ((void));
+static void lex_warn_invalid PARAMS ((char *where, char *what));
 
 /* STATES 
 	COMMAND	 	on command line
-	COMMENT		in a C comment
-	EXPRESSION	definiatelyt in an expression
-	SCRIPT		definately in a script
-	SOMEWHERE	either EXPRESSION or SCRIPT
+	EXPRESSION	definitely in an expression
+	SCRIPT		definitely in a script
+	BOTH		either EXPRESSION or SCRIPT
+	DEFSYMEXP	in an argument to -defsym
         MRI             in an MRI script
 */
 #define RTOKEN(x)  {  yylval.token = x; return x; }
@@ -91,7 +93,6 @@ NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
 %s COMMAND
 %s SCRIPT
 %s EXPRESSION
-%s COMMENT
 %s BOTH
 %s DEFSYMEXP
 %s MRI
@@ -449,6 +450,10 @@ NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
 
   return END;
 }
+
+<COMMAND>.		lex_warn_invalid(" on command line", yytext);
+<SCRIPT,MRI>.		lex_warn_invalid(" in script", yytext);
+<EXPRESSION,DEFSYMEXP,BOTH>.	lex_warn_invalid(" in expression", yytext);
     
 %%
 
@@ -627,4 +632,13 @@ comment ()
       break;
     }
   }
+}
+
+static void
+lex_warn_invalid (where, what)
+     char *where, *what;
+{
+  fprintf(stderr,
+	  "%s: ignoring invalid character `%s'%s\n",
+	  program_name, what, where);
 }
