@@ -1968,6 +1968,7 @@ Display function names as well as file and line number information.
 @item -s
 @itemx --basenames
 Display only the base of each file name.
+@end table
 
 @node nlmconv
 @chapter nlmconv
