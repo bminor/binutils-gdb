@@ -2271,7 +2271,7 @@ coff_add_missing_symbols (abfd)
       coff_symbol_type *csym = coff_symbol_from (abfd, sympp[i]);
       CONST char *name;
 
-      if (csym->native->u.syment.n_sclass == C_FILE)
+      if (csym->native && csym->native->u.syment.n_sclass == C_FILE)
 	{
 	  need_file = 0;
 	  continue;
@@ -3312,7 +3312,7 @@ DEFUN(coff_slurp_symbol_table,(abfd),
 
 	fprintf(stderr,"Unrecognized storage class %d\n",
 				src->u.syment.n_sclass);
-	abort();
+/*	abort();*/
 	dst->symbol.flags = BSF_DEBUGGING;
 	dst->symbol.value = (src->u.syment.n_value);
 	break;
