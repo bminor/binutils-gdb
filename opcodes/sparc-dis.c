@@ -699,7 +699,8 @@ print_insn_sparc (memaddr, info)
 /* Given BFD mach number, return a mask of SPARC_OPCODE_ARCH_FOO values.  */
 
 static int
-compute_arch_mask (unsigned long mach)
+compute_arch_mask (mach)
+     unsigned long mach;
 {
   switch (mach)
     {

@@ -1,3 +1,7 @@
+Wed Apr 17 14:20:22 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* saprc-dis.c (compute_arch_mask): Replace ANSI style def with K&R.
+
 Thu Apr 11 17:30:02 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* sparc-opc.c: Set F_FBR on floating point branch instructions.
