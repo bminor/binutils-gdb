@@ -132,7 +132,7 @@ static void cvt_frag_to_fill PARAMS ((object_headers *, segT, fragS *));
 static void remove_subsegs PARAMS ((frchainS *, int, fragS **, fragS **));
 static void relax_and_size_all_segments PARAMS ((void));
 #endif
-#if defined (BFD_ASSEMBLER) && defined (OBJ_COFF) && !defined (TE_PE)
+#if defined (BFD_ASSEMBLER) && defined (OBJ_COFF) && defined (TE_GO32)
 static void set_segment_vma PARAMS ((bfd *, asection *, PTR));
 #endif
 
@@ -1351,7 +1351,7 @@ set_symtab ()
 }
 #endif
 
-#if defined (BFD_ASSEMBLER) && defined (OBJ_COFF) && !defined (TE_PE)
+#if defined (BFD_ASSEMBLER) && defined (OBJ_COFF) && defined (TE_GO32)
 static void
 set_segment_vma (abfd, sec, xxx)
      bfd *abfd;
@@ -1497,10 +1497,11 @@ write_object_file ()
   relax_and_size_all_segments ();
 #endif /* BFD_ASSEMBLER */
 
-#if defined (BFD_ASSEMBLER) && defined (OBJ_COFF) && !defined (TE_PE)
+#if defined (BFD_ASSEMBLER) && defined (OBJ_COFF) && defined (TE_GO32)
   /* Now that the segments have their final sizes, run through the
-     sections and set their vma and lma. The !BFD_ASSEMBLER case takes
-     care of this in write_object_file in config/obj-coff.c.  */
+     sections and set their vma and lma. !BFD gas sets them, and BFD gas
+     should too. Currently, only DJGPP uses this code, but other
+     COFF targets may need to execute this too.  */
   bfd_map_over_sections (stdoutput, set_segment_vma, (char *) 0);
 #endif
 

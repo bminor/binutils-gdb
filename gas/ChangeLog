@@ -6,7 +6,7 @@ Thu Jun 29 21:30:00 2000  Hans-Peter Nilsson  <hp@axis.com>
 2000-06-29 Mark Elbrecht <snowball3@bigfoot.com>
 
 	* write.c (set_segment_vma): New: Set vma and lma for a segment.
-	(write_object_file) [BFD_ASSEMBLER && OBJ_COFF && !TE_PE]: Use it.
+	(write_object_file) [BFD_ASSEMBLER && OBJ_COFF && TE_GO32]: Use it.
 
 2000-06-27  Aldy Hernandez  <aldyh@redhat.com>
 
