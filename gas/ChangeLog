@@ -5,6 +5,11 @@
 
 1999-09-11  Donn Terry  <donn@interix.com>
 
+	* config/obj-coff.c (obj_coff_endef): Don't merge labels, or
+	symbols which do not have a constant value, or tags with
+	non-tags.  Remove the symbol from the list before adding it at the
+	end.
+
 	* config/obj-coff.c (obj_coff_endef) [BFD_ASSEMBLER]: Handle .ef
 	C_FCN symbol differently if TE_PE.
 	(obj_coff_line) [BFD_ASSEMBLER]: Always use the line number which

@@ -727,7 +727,10 @@ obj_coff_endef (ignore)
 
   /* Now that we have built a debug symbol, try to find if we should
      merge with an existing symbol or not.  If a symbol is C_EFCN or
-     SEG_ABSOLUTE or untagged SEG_DEBUG it never merges. */
+     absolute_section or untagged SEG_DEBUG it never merges.  We also
+     don't merge labels, which are in a different namespace, nor
+     symbols which have not yet been defined since they are typically
+     unique, nor do we merge tags with non-tags.  */
 
   /* Two cases for functions.  Either debug followed by definition or
      definition followed by debug.  For definition first, we will
@@ -742,16 +745,24 @@ obj_coff_endef (ignore)
      time. */
 
   if (S_GET_STORAGE_CLASS (def_symbol_in_progress) == C_EFCN
+      || S_GET_STORAGE_CLASS (def_symbol_in_progress) == C_LABEL
       || (!strcmp (bfd_get_section_name (stdoutput,
 					 S_GET_SEGMENT (def_symbol_in_progress)),
 		   "*DEBUG*")
 	  && !SF_GET_TAG (def_symbol_in_progress))
       || S_GET_SEGMENT (def_symbol_in_progress) == absolute_section
-      || (symbolP = symbol_find_base (S_GET_NAME (def_symbol_in_progress), DO_NOT_STRIP)) == NULL)
+      || ! symbol_constant_p (def_symbol_in_progress)
+      || (symbolP = symbol_find_base (S_GET_NAME (def_symbol_in_progress),
+                                      DO_NOT_STRIP)) == NULL
+      || SF_GET_TAG (def_symbol_in_progress) != SF_GET_TAG (symbolP))
     {
+      /* If it already is at the end of the symbol list, do nothing */
       if (def_symbol_in_progress != symbol_lastP)
-	symbol_append (def_symbol_in_progress, symbol_lastP, &symbol_rootP,
-		       &symbol_lastP);
+        {
+	  symbol_remove (def_symbol_in_progress, &symbol_rootP, &symbol_lastP);
+	  symbol_append (def_symbol_in_progress, symbol_lastP, &symbol_rootP,
+			 &symbol_lastP);
+        }
     }
   else
     {
