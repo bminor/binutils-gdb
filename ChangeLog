@@ -1,3 +1,8 @@
+start-sanitize-d30v
+Fri Feb 21 17:56:25 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* configure.in (noconfigdirs): Enable ld for d30v.
+end-sanitize-d30v
 start-sanitize-tic80
 Fri Feb 21 20:58:51 1997  Michael Meissner  <meissner@cygnus.com>
 
@@ -27,9 +32,10 @@ Wed Feb 12 12:54:18 1997  Jim Wilson  <wilson@cygnus.com>
 	* Makefile.in (EXTRA_GCC_FLAGS): Add LIBGCC2_DEBUG_CFLAGS.
 
 start-sanitize-r5900
-        Fri Feb  7 16:39:29 1997  Gavin Koch  <gavin@cygnus.com>
-        
-        * config.sub, configure.in: add r5900
+Fri Feb  7 16:39:29 1997  Gavin Koch  <gavin@cygnus.com>
+
+	* config.sub, configure.in: add r5900
+
 end-sanitize-r5900        
 Sat Feb  8 20:36:49 1997  Michael Meissner  <meissner@cygnus.com>
 
@@ -136,11 +142,11 @@ Sat Nov 23 19:26:22 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 start-sanitize-v850
 Sat Nov 23 14:23:01 1996  Gavin Koch  <gavin@cygnus.com>
-        
+
 	* gcc/depragmaize.c: Handle MSDOS's (non-unix) text files.
 
 Sat Nov 23 10:23:01 1996  Gavin Koch  <gavin@cygnus.com>
-        
+
 	* config.sub: Handle v850-unknown.
 
 end-sanitize-v850
