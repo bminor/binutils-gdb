@@ -1,3 +1,10 @@
+Tue Feb 14 16:58:07 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* expression.h: Move declaration of evaluate_subexp_with_coercion
+	from here...
+	* value.h: ...to here.
+	* expression.h: Don't include value.h
+
 Tue Feb 14 11:46:07 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* expression.h: Move include of value.h until after declaration of
