@@ -1,5 +1,14 @@
 2002-09-04  Keith Seitz  <keiths@redhat.com>
 
+	* lib/mi-support.exp (mi_run_to_main): Allow anything to precede
+	regexp for stopping at main. Could have multiple event notifications.
+	Don't assume that main was declared with no parameters.
+	(mi_step_next_helper): New procedure to do step/next.
+	(mi_next): Use mi_step_next_helper.
+	(mi_step): Ditto.
+
+2002-09-04  Keith Seitz  <keiths@redhat.com>
+
 	* lib/gdb.exp (gdb_compile_pthreads): Fix "build_bin" typo.
 	Use integer comparison instead of string comparison for testing
 	whether binary was built.
