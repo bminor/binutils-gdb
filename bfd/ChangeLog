@@ -1,3 +1,11 @@
+Sun Oct  4 20:38:29 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* cpu-hppa.c (bfd_hppa20_arch): Define.  Link it into the bfd_hppa_arch
+	structure.
+	* som.c (CPU_PA_RISC2_0): Define.
+	(_PA_RISC2_0_ID): Likewise.
+	(som_finish_writing): Use CPU_PA_RISC2_0 for the system_id as needed.
+
 Sun Oct  4 21:19:09 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf32-i386.c (elf_i386_info_to_howto_rel): Handle vtable relocs

@@ -30,13 +30,10 @@
 #include "libbfd.h"
 #include "som.h"
 
-#include <stdio.h>
-#include <sys/types.h>
 #include <sys/param.h>
 #include <signal.h>
 #include <machine/reg.h>
 #include <sys/file.h>
-#include <errno.h>
 #include <ctype.h>
 
 /* Magic not defined in standard HP-UX header files until 8.0 */
@@ -49,6 +46,10 @@
 #define CPU_PA_RISC1_1 0x210
 #endif /* CPU_PA_RISC1_1 */
 
+#ifndef CPU_PA_RISC2_0
+#define CPU_PA_RISC2_0 0x214
+#endif /* CPU_PA_RISC2_0 */
+
 #ifndef _PA_RISC1_0_ID
 #define _PA_RISC1_0_ID CPU_PA_RISC1_0
 #endif /* _PA_RISC1_0_ID */
@@ -56,6 +57,10 @@
 #ifndef _PA_RISC1_1_ID
 #define _PA_RISC1_1_ID CPU_PA_RISC1_1
 #endif /* _PA_RISC1_1_ID */
+
+#ifndef _PA_RISC2_0_ID
+#define _PA_RISC2_0_ID CPU_PA_RISC2_0
+#endif /* _PA_RISC2_0_ID */
 
 #ifndef _PA_RISC_MAXID
 #define _PA_RISC_MAXID	0x2FF
@@ -3649,6 +3654,8 @@ som_finish_writing (abfd)
      BFD private data happens *after* section contents are set.  */
   if (abfd->flags & (EXEC_P | DYNAMIC))
     obj_som_file_hdr(abfd)->system_id = obj_som_exec_data (abfd)->system_id;
+  else if (bfd_get_mach (abfd) == pa20)
+    obj_som_file_hdr(abfd)->system_id = CPU_PA_RISC2_0;
   else if (bfd_get_mach (abfd) == pa11)
     obj_som_file_hdr(abfd)->system_id = CPU_PA_RISC1_1;
   else
@@ -5974,6 +5981,8 @@ som_bfd_link_split_section (abfd, sec)
 #define som_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
 #define som_bfd_link_add_symbols _bfd_generic_link_add_symbols
 #define som_bfd_final_link _bfd_generic_final_link
+
+#define som_bfd_gc_sections		bfd_generic_gc_sections
 
 
 const bfd_target som_vec =
