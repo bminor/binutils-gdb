@@ -1040,10 +1040,20 @@ define_icon (struct res_id id, const struct res_res_info *resinfo,
       cg->height = icondirs[i].height;
       cg->colors = icondirs[i].colorcount;
 
-      cg->planes = 1;
-      cg->bits = 0;
-      while ((1 << cg->bits) < cg->colors)
-	++cg->bits;
+      if (icondirs[i].u.icon.planes)
+	cg->planes = icondirs[i].u.icon.planes;
+      else
+	cg->planes = 1;
+
+      if (icondirs[i].u.icon.bits)
+	cg->bits = icondirs[i].u.icon.bits;
+      else
+	{
+	  cg->bits = 0;
+
+	  while ((1L << cg->bits) < cg->colors)
+	    ++cg->bits;
+	}
 
       cg->bytes = icondirs[i].bytes;
       cg->index = first_icon + i + 1;

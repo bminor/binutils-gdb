@@ -1,3 +1,8 @@
+2003-10-01  Martin Fuchs  <martin-fuchs@gmx.net>
+
+	* resrc.c (define_icon): Fix storage of color attributes 'planes' and
+	'bit count' in icon groups.
+
 2003-09-30  Chris Demetriou  <cgd@broadcom.com>
 
 	* NEWS: Add an indication of the cutoff for 2.14.
