@@ -1031,16 +1031,6 @@ use_transform (void)
 
 
 static bfd_boolean
-use_longcalls (void)
-{
-  /* After md_end, you should be checking frag by frag, rather
-     than state directives.  */
-  assert (!past_xtensa_end);
-  return directive_state[directive_longcalls] && use_transform ();
-}
-
-
-static bfd_boolean
 do_align_targets (void)
 {
   /* After md_end, you should be checking frag by frag, rather
@@ -3312,22 +3302,28 @@ xg_symbolic_immeds_fit (const TInsn *insn,
 	  break;
 
 	case O_symbol:
-	  /* We only allow symbols for pc-relative stuff.
+	  /* We only allow symbols for PC-relative references.
 	     If pc_frag == 0, then we don't have frag locations yet.  */
-	  if (pc_frag == 0)
+	  if (pc_frag == 0
+	      || xtensa_operand_is_PCrelative (isa, insn->opcode, i) == 0)
 	    return FALSE;
 
-	  /* If it is PC-relative and the symbol is not in the same 
-	     segment as the PC.... */
-	  if (xtensa_operand_is_PCrelative (isa, insn->opcode, i) == 0
-	      || S_GET_SEGMENT (expr->X_add_symbol) != pc_seg)
-	    return FALSE;
-
-	  /* If it is a weak symbol, then assume it won't reach.  This will
-	     only affect calls when longcalls are enabled, because if
-	     longcalls are disabled, then the call is marked as a specific
-	     opcode.  */
+	  /* If it is a weak symbol, then assume it won't reach.  */
 	  if (S_IS_WEAK (expr->X_add_symbol))
+	    return FALSE;
+
+	  if (is_direct_call_opcode (insn->opcode)
+	      && ! pc_frag->tc_frag_data.use_longcalls)
+	    {
+	      /* If callee is undefined or in a different segment, be
+		 optimistic and assume it will be in range.  */
+	      if (S_GET_SEGMENT (expr->X_add_symbol) != pc_seg)
+		return TRUE;
+	    }
+
+	  /* Only references within a segment can be known to fit in the
+	     operands at assembly time.  */
+	  if (S_GET_SEGMENT (expr->X_add_symbol) != pc_seg)
 	    return FALSE;
 
 	  symbolP = expr->X_add_symbol;
@@ -3645,7 +3641,7 @@ xg_assembly_relax (IStack *istack,
     }
   current_insn = *insn;
 
-  /* Walk through all of the single instruction expansions. */
+  /* Walk through all of the single instruction expansions.  */
   while (xg_is_single_relaxable_insn (&current_insn))
     {
       int error_val = xg_expand_narrow (&single_target, &current_insn);
@@ -3943,15 +3939,16 @@ xg_simplify_insn (TInsn *old_insn, TInsn *new_insn)
 
 /* xg_expand_assembly_insn: (1) Simplify the instruction, i.e., l32i ->
    l32i.n. (2) Check the number of operands.  (3) Place the instruction
-   tokens into the stack or if we can relax it at assembly time, place
-   multiple instructions/literals onto the stack.  Return FALSE if no
-   error.  */
+   tokens into the stack or relax it and place multiple
+   instructions/literals onto the stack.  Return FALSE if no error.  */
 
 static bfd_boolean
 xg_expand_assembly_insn (IStack *istack, TInsn *orig_insn)
 {
   int noperands;
   TInsn new_insn;
+  bfd_boolean do_expand;
+
   memset (&new_insn, 0, sizeof (TInsn));
 
   /* Narrow it if we can.  xg_simplify_insn now does all the
@@ -3977,50 +3974,37 @@ xg_expand_assembly_insn (IStack *istack, TInsn *orig_insn)
 
   /* If there are not enough operands, we will assert above.  If there
      are too many, just cut out the extras here.  */
-
   orig_insn->ntok = noperands;
-
-  /* Cases:
-
-     Instructions with all constant immeds:
-     Assemble them and relax the instruction if possible.
-     Give error if not possible; no fixup needed.
-
-     Instructions with symbolic immeds:
-     Assemble them with a Fix up (that may cause instruction expansion).
-     Also close out the fragment if the fixup may cause instruction expansion.
-
-     There are some other special cases where we need alignment.
-     1) before certain instructions with required alignment (OPCODE_ALIGN)
-     2) before labels that have jumps (LABEL_ALIGN)
-     3) after call instructions (RETURN_ALIGN)
-        Multiple of these may be possible on the same fragment.
-	If so, make sure to satisfy the required alignment.
-	Then try to get the desired alignment.  */
 
   if (tinsn_has_invalid_symbolic_operands (orig_insn))
     return TRUE;
 
-  if (orig_insn->is_specific_opcode || !use_transform ())
-    {
-      istack_push (istack, orig_insn);
-      return FALSE;
-    }
+  /* If the instruction will definitely need to be relaxed, it is better
+     to expand it now for better scheduling.  Decide whether to expand
+     now....  */
+  do_expand = (!orig_insn->is_specific_opcode && use_transform ());
+
+  /* Calls should be expanded to longcalls only in the backend relaxation
+     so that the assembly scheduler will keep the L32R/CALLX instructions
+     adjacent.  */
+  if (is_direct_call_opcode (orig_insn->opcode))
+    do_expand = FALSE;
 
   if (tinsn_has_symbolic_operands (orig_insn))
     {
-      if (tinsn_has_complex_operands (orig_insn))
-	xg_assembly_relax (istack, orig_insn, 0, 0, 0, 0, 0);
-      else
-	istack_push (istack, orig_insn);
+      /* The values of symbolic operands are not known yet, so only expand
+	 now if an operand is "complex" (e.g., difference of symbols) and
+	 will have to be stored as a literal regardless of the value.  */
+      if (!tinsn_has_complex_operands (orig_insn))
+	do_expand = FALSE;
     }
+  else if (xg_immeds_fit (orig_insn))
+    do_expand = FALSE;
+
+  if (do_expand)
+    xg_assembly_relax (istack, orig_insn, 0, 0, 0, 0, 0);
   else
-    {
-      if (xg_immeds_fit (orig_insn))
-	istack_push (istack, orig_insn);
-      else
-	xg_assembly_relax (istack, orig_insn, 0, 0, 0, 0, 0);
-    }
+    istack_push (istack, orig_insn);
 
   return FALSE;
 }
@@ -4789,6 +4773,8 @@ xtensa_set_frag_assembly_state (fragS *fragP)
      "use_schedule" here.  */
   if (!directive_state[directive_transform])
     fragP->tc_frag_data.is_no_transform = TRUE;
+  if (directive_state[directive_longcalls])
+    fragP->tc_frag_data.use_longcalls = TRUE;
   fragP->tc_frag_data.use_absolute_literals =
     directive_state[directive_absolute_literals];
   fragP->tc_frag_data.is_assembly_state_set = TRUE;
@@ -4847,6 +4833,8 @@ xtensa_find_unmarked_state_frags (void)
 			last_fragP->tc_frag_data.is_no_density;
 		      fragP->tc_frag_data.is_no_transform =
 			last_fragP->tc_frag_data.is_no_transform;
+		      fragP->tc_frag_data.use_longcalls =
+			last_fragP->tc_frag_data.use_longcalls;
 		      fragP->tc_frag_data.use_absolute_literals =
 			last_fragP->tc_frag_data.use_absolute_literals;
 		    }
@@ -5299,11 +5287,6 @@ md_assemble (char *str)
       error_reset_cur_vinsn ();
       return;
     }
-
-  /* Special case: The call instructions should be marked "specific opcode"
-     to keep them from expanding.  */
-  if (!use_longcalls () && is_direct_call_opcode (orig_insn.opcode))
-    orig_insn.is_specific_opcode = TRUE;
 
   /* Parse the arguments.  */
   if (parse_arguments (&orig_insn, num_args, arg_strings))
@@ -6760,6 +6743,8 @@ xg_assemble_vliw_tokens (vliw_insn *vinsn)
       && (! frag_now->tc_frag_data.is_insn
  	  || (vinsn_has_specific_opcodes (vinsn) && use_transform ())
  	  || !use_transform () != frag_now->tc_frag_data.is_no_transform
+ 	  || (directive_state[directive_longcalls]
+	      != frag_now->tc_frag_data.use_longcalls)
  	  || (directive_state[directive_absolute_literals]
 	      != frag_now->tc_frag_data.use_absolute_literals)))
     {
@@ -6877,9 +6862,9 @@ xg_assemble_vliw_tokens (vliw_insn *vinsn)
     {
       TInsn *tinsn = &vinsn->slots[slot];
       frag_now->tc_frag_data.slot_subtypes[slot] = tinsn->subtype;
-      frag_now->tc_frag_data.slot_symbols[slot] =  tinsn->symbol;
-      frag_now->tc_frag_data.slot_sub_symbols[slot] =  tinsn->sub_symbol;
-      frag_now->tc_frag_data.slot_offsets[slot] =  tinsn->offset;
+      frag_now->tc_frag_data.slot_symbols[slot] = tinsn->symbol;
+      frag_now->tc_frag_data.slot_sub_symbols[slot] = tinsn->sub_symbol;
+      frag_now->tc_frag_data.slot_offsets[slot] = tinsn->offset;
       frag_now->tc_frag_data.literal_frags[slot] = tinsn->literal_frag;
       if (tinsn->literal_space != 0)
 	xg_assemble_literal_space (tinsn->literal_space, slot);
@@ -9371,7 +9356,7 @@ convert_frag_immed (segT segP,
       xtensa_insnbuf_to_chars (isa, orig_vinsn.insnbuf, fr_opcode, 0);
       fragP->fr_var = 0;
     }
-  else if (!orig_tinsn.is_specific_opcode)
+  else
     {
       /* Here is the fun stuff:  Get the immediate field from this
 	 instruction.  If it fits, we're done.  If not, find the next

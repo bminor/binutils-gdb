@@ -195,6 +195,7 @@ struct xtensa_frag_type
   unsigned int is_assembly_state_set : 1;
   unsigned int is_no_density : 1;
   unsigned int is_no_transform : 1;
+  unsigned int use_longcalls : 1;
   unsigned int use_absolute_literals : 1;
 
   /* Inhibits relaxation of machine-dependent alignment frags the
