@@ -1,3 +1,8 @@
+2004-04-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* section.c (bfd_sections_find_if): New.
+	* bfd-in2.h: Regenerated.
+
 2004-04-30  Alan Modra  <amodra@bigpond.net.au>
 
 	* section.c (bfd_make_section_anyway): Add all sections to hash tab.

@@ -1096,6 +1096,41 @@ bfd_map_over_sections (bfd *abfd,
 
 /*
 FUNCTION
+	bfd_sections_find_if
+
+SYNOPSIS
+	asection *bfd_sections_find_if
+	  (bfd *abfd,
+	   bfd_boolean (*func) (bfd *abfd, asection *sect, void *obj),
+	   void *obj);
+
+DESCRIPTION
+	Call the provided function @var{func} for each section
+	attached to the BFD @var{abfd}, passing @var{obj} as an
+	argument. The function will be called as if by
+
+|	func (abfd, the_section, obj);
+
+	It returns the first section for which @var{func} returns true.
+
+*/
+
+asection *
+bfd_sections_find_if (bfd *abfd,
+		      bfd_boolean (*operation) (bfd *, asection *, void *),
+		      void *user_storage)
+{
+  asection *sect;
+
+  for (sect = abfd->sections; sect != NULL; sect = sect->next)
+    if ((*operation) (abfd, sect, user_storage))
+      break;
+
+  return sect;
+}
+
+/*
+FUNCTION
 	bfd_set_section_size
 
 SYNOPSIS
