@@ -1,3 +1,8 @@
+1999-11-12  Nick Clifton  <nickc@cygnus.com>
+
+	* macro.c (buffer_and_nest): Do not check beyond the end of the
+	buffer. 
+
 1999-11-11  Nick Clifton  <nickc@cygnus.com>
 
 	* macro.c (buffer_and_nest): Look for seperator after TO and
