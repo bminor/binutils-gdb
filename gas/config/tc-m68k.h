@@ -1,6 +1,7 @@
 /* This file is tc-m68k.h
 
-   Copyright (C) 1987-1992 Free Software Foundation, Inc.
+   Copyright (C) 1987, 89, 90, 91, 92, 93, 94, 95, 1996
+   Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -16,12 +17,26 @@
 
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+   the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define TC_M68K 1
 
+#define TARGET_BYTES_BIG_ENDIAN 1
+
 #ifdef OBJ_AOUT
+#ifdef TE_SUN3
 #define TARGET_FORMAT "a.out-sunos-big"
+#else
+#ifdef TE_NetBSD
+#define TARGET_FORMAT "a.out-m68k-netbsd"
+#else
+#define TARGET_FORMAT "a.out-zero-big"
+#endif
+#endif
+#endif
+
+#ifdef OBJ_ELF
+#define TARGET_FORMAT "elf32-m68k"
 #endif
 
 #ifdef TE_APOLLO
@@ -33,16 +48,21 @@
 #ifdef TE_LYNX
 #define TARGET_FORMAT		"coff-m68k-lynx"
 #endif
+#ifdef TE_AUX
+#define TARGET_FORMAT		"coff-m68k-aux"
+#endif
 
 #ifndef COFF_MAGIC
 #define COFF_MAGIC MC68MAGIC
 #endif
-#define BFD_ARCH bfd_arch_m68k
+#define BFD_ARCH bfd_arch_m68k /* for non-BFD_ASSEMBLER */
+#define TARGET_ARCH bfd_arch_m68k /* BFD_ASSEMBLER */
 #define COFF_FLAGS F_AR32W
 #define TC_COUNT_RELOC(x) ((x)->fx_addsy||(x)->fx_subsy)
 
 #define TC_COFF_FIX2RTYPE(fixP) tc_coff_fix2rtype(fixP)
 #define TC_COFF_SIZEMACHDEP(frag) tc_coff_sizemachdep(frag)
+extern int tc_coff_sizemachdep PARAMS ((struct frag *));
 #ifdef TE_SUN3
 /* This variable contains the value to write out at the beginning of
    the a.out file.  The 2<<16 means that this is a 68020 file instead
@@ -77,7 +97,7 @@ extern int m68k_aout_machtype;
 #endif
 
 #if !defined (REGISTER_PREFIX_OPTIONAL)
-#ifdef M68KCOFF
+#if defined (M68KCOFF) || defined (OBJ_ELF)
 #define LOCAL_LABEL(name) (name[0] == '.' \
 			   && (name[1] == 'L' || name[1] == '.'))
 #define FAKE_LABEL_NAME ".L0\001"
@@ -92,11 +112,36 @@ extern int m68k_aout_machtype;
    can't be used as the initial character.  If that's not true, more
    work will be needed to fix this up.  */
 #define LEX_PCT 1
+/* On the Delta, dots are not required before pseudo-ops.  */
+#define NO_PSEUDO_DOT
 #endif
 
 #ifdef BFD_ASSEMBLER
+
 #define tc_frob_symbol(sym,punt) \
     if (S_GET_SEGMENT (sym) == reg_section) punt = 1
+
+#define NO_RELOC BFD_RELOC_NONE
+
+#ifdef OBJ_ELF
+
+/* This expression evaluates to false if the relocation is for a local object
+   for which we still want to do the relocation at runtime.  True if we
+   are willing to perform this relocation while building the .o file.  */
+
+#define TC_RELOC_RTSYM_LOC_FIXUP(FIX)			\
+	((FIX)->fx_r_type != BFD_RELOC_8_PLT_PCREL	\
+	 && (FIX)->fx_r_type != BFD_RELOC_16_PLT_PCREL	\
+	 && (FIX)->fx_r_type != BFD_RELOC_32_PLT_PCREL	\
+	 && (FIX)->fx_r_type != BFD_RELOC_8_GOT_PCREL	\
+	 && (FIX)->fx_r_type != BFD_RELOC_16_GOT_PCREL	\
+	 && (FIX)->fx_r_type != BFD_RELOC_32_GOT_PCREL)
+
+#define tc_fix_adjustable(X) tc_m68k_fix_adjustable(X)
+#endif
+
+#else
+#define NO_RELOC 0
 #endif
 
 #define DIFF_EXPR_OK
@@ -106,5 +151,13 @@ extern void m68k_init_after_args PARAMS ((void));
 
 extern int m68k_parse_long_option PARAMS ((char *));
 #define md_parse_long_option m68k_parse_long_option
+
+#define md_operand(x)
+
+#define TARGET_WORD_SIZE 32
+#define TARGET_ARCH bfd_arch_m68k
+
+extern struct relax_type md_relax_table[];
+#define TC_GENERIC_RELAX_TABLE md_relax_table
 
 /* end of tc-m68k.h */

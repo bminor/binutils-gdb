@@ -19,7 +19,6 @@
    02111-1307, USA.  */
 
 #include <ctype.h>
-#define  NO_RELOC 0
 #include "as.h"
 #include "obstack.h"
 #include "subsegs.h"
@@ -62,7 +61,8 @@ const int md_reloc_size = 8;	/* Size of relocation record */
 
 /* Are we trying to generate PIC code?  If so, absolute references
    ought to be made into linkage table references or pc-relative
-   references.  */
+   references.  Not implemented.  For ELF there are other means 
+   to denote pic relocations.  */
 int flag_want_pic;
 
 static int flag_short_refs;	/* -l option */
@@ -199,6 +199,11 @@ struct m68k_it
 	 significance of some values (in the branch instruction, for
 	 example).  */
       int pcrel_fix;
+#ifdef OBJ_ELF
+      /* Whether this expression needs special pic relocation, and if
+	 so, which.  */
+      enum pic_relocation pic_reloc;
+#endif
     }
   reloc[5];			/* Five is enough??? */
 };
@@ -252,6 +257,9 @@ add_fix (width, exp, pc_rel, pc_fix)
   the_ins.reloc[the_ins.nrel].exp = exp->exp;
   the_ins.reloc[the_ins.nrel].wid = width;
   the_ins.reloc[the_ins.nrel].pcrel_fix = pc_fix;
+#ifdef OBJ_ELF
+  the_ins.reloc[the_ins.nrel].pic_reloc = exp->pic_reloc;
+#endif
   the_ins.reloc[the_ins.nrel++].pcrel = pc_rel;
 }
 
@@ -428,7 +436,7 @@ const pseudo_typeS md_pseudo_table[] =
   {"even", s_even, 0},
   {"skip", s_space, 0},
   {"proc", s_proc, 0},
-#ifdef TE_SUN3
+#if defined (TE_SUN3) || defined (OBJ_ELF)
   {"align", s_align_bytes, 0},
 #endif
 #ifdef OBJ_ELF
@@ -500,7 +508,11 @@ CONST pseudo_typeS mote_pseudo_table[] =
   {"dsb", s_space, 1},
 
   {"xdef", s_globl, 0},
+#ifdef OBJ_ELF
+  {"align", s_align_bytes, 0},
+#else
   {"align", s_align_ptwo, 0},
+#endif
 #ifdef M68KCOFF
   {"sect", obj_coff_section, 0},
   {"section", obj_coff_section, 0},
@@ -585,6 +597,145 @@ tc_coff_fix2rtype (fixP)
 
 #endif
 
+#ifdef OBJ_ELF
+
+/* Compute the relocation code for a fixup of SIZE bytes, using pc
+   relative relocation if PCREL is non-zero.  PIC says whether a special
+   pic relocation was requested.  */
+
+static bfd_reloc_code_real_type get_reloc_code
+  PARAMS ((int, int, enum pic_relocation));
+
+static bfd_reloc_code_real_type
+get_reloc_code (size, pcrel, pic)
+     int size;
+     int pcrel;
+     enum pic_relocation pic;
+{
+  switch (pic)
+    {
+    case pic_got_pcrel:
+      switch (size)
+	{
+	case 1:
+	  return BFD_RELOC_8_GOT_PCREL;
+	case 2:
+	  return BFD_RELOC_16_GOT_PCREL;
+	case 4:
+	  return BFD_RELOC_32_GOT_PCREL;
+	}
+      break;
+
+    case pic_got_off:
+      switch (size)
+	{
+	case 1:
+	  return BFD_RELOC_8_GOTOFF;
+	case 2:
+	  return BFD_RELOC_16_GOTOFF;
+	case 4:
+	  return BFD_RELOC_32_GOTOFF;
+	}
+      break;
+
+    case pic_plt_pcrel:
+      switch (size)
+	{
+	case 1:
+	  return BFD_RELOC_8_PLT_PCREL;
+	case 2:
+	  return BFD_RELOC_16_PLT_PCREL;
+	case 4:
+	  return BFD_RELOC_32_PLT_PCREL;
+	}
+      break;
+
+    case pic_plt_off:
+      switch (size)
+	{
+	case 1:
+	  return BFD_RELOC_8_PLTOFF;
+	case 2:
+	  return BFD_RELOC_16_PLTOFF;
+	case 4:
+	  return BFD_RELOC_32_PLTOFF;
+	}
+      break;
+
+    case pic_none:
+      if (pcrel)
+	{
+	  switch (size)
+	    {
+	    case 1:
+	      return BFD_RELOC_8_PCREL;
+	    case 2:
+	      return BFD_RELOC_16_PCREL;
+	    case 4:
+	      return BFD_RELOC_32_PCREL;
+	    }
+	}
+      else
+	{
+	  switch (size)
+	    {
+	    case 1:
+	      return BFD_RELOC_8;
+	    case 2:
+	      return BFD_RELOC_16;
+	    case 4:
+	      return BFD_RELOC_32;
+	    }
+	}
+    }
+
+  as_bad ("Can not do %d byte %s%srelocation", size,
+	  pcrel ? "pc-relative " : "",
+	  pic == pic_none ? "" : "pic ");
+  return BFD_RELOC_NONE;
+}
+
+/* Here we decide which fixups can be adjusted to make them relative
+   to the beginning of the section instead of the symbol.  Basically
+   we need to make sure that the dynamic relocations are done
+   correctly, so in some cases we force the original symbol to be
+   used.  */
+int
+tc_m68k_fix_adjustable (fixP)
+     fixS *fixP;
+{
+  /* Prevent all adjustments to global symbols. */
+  if (S_IS_EXTERNAL (fixP->fx_addsy))
+    return 0;
+
+  /* adjust_reloc_syms doesn't know about the GOT */
+  switch (fixP->fx_r_type)
+    {
+    case BFD_RELOC_8_GOT_PCREL:
+    case BFD_RELOC_16_GOT_PCREL:
+    case BFD_RELOC_32_GOT_PCREL:
+    case BFD_RELOC_8_GOTOFF:
+    case BFD_RELOC_16_GOTOFF:
+    case BFD_RELOC_32_GOTOFF:
+    case BFD_RELOC_8_PLT_PCREL:
+    case BFD_RELOC_16_PLT_PCREL:
+    case BFD_RELOC_32_PLT_PCREL:
+    case BFD_RELOC_8_PLTOFF:
+    case BFD_RELOC_16_PLTOFF:
+    case BFD_RELOC_32_PLTOFF:
+      return 0;
+
+    default:
+      return 1;
+    }
+}
+
+#else /* !OBJ_ELF */
+
+#define get_reloc_code(SIZE,PCREL,OTHER) NO_RELOC
+
+#endif /* OBJ_ELF */
+
 #ifdef BFD_ASSEMBLER
 
 arelent *
@@ -598,28 +749,50 @@ tc_gen_reloc (section, fixp)
   if (fixp->fx_tcbit)
     abort ();
 
-#define F(SZ,PCREL)		(((SZ) << 1) + (PCREL))
-  switch (F (fixp->fx_size, fixp->fx_pcrel))
+  if (fixp->fx_r_type != BFD_RELOC_NONE)
+    code = fixp->fx_r_type;
+  else
     {
+#define F(SZ,PCREL)		(((SZ) << 1) + (PCREL))
+      switch (F (fixp->fx_size, fixp->fx_pcrel))
+	{
 #define MAP(SZ,PCREL,TYPE)	case F(SZ,PCREL): code = (TYPE); break
-      MAP (1, 0, BFD_RELOC_8);
-      MAP (2, 0, BFD_RELOC_16);
-      MAP (4, 0, BFD_RELOC_32);
-      MAP (1, 1, BFD_RELOC_8_PCREL);
-      MAP (2, 1, BFD_RELOC_16_PCREL);
-      MAP (4, 1, BFD_RELOC_32_PCREL);
-    default:
-      abort ();
+	  MAP (1, 0, BFD_RELOC_8);
+	  MAP (2, 0, BFD_RELOC_16);
+	  MAP (4, 0, BFD_RELOC_32);
+	  MAP (1, 1, BFD_RELOC_8_PCREL);
+	  MAP (2, 1, BFD_RELOC_16_PCREL);
+	  MAP (4, 1, BFD_RELOC_32_PCREL);
+	default:
+	  abort ();
+	}
     }
+#undef F
+#undef MAP
 
   reloc = (arelent *) bfd_alloc_by_size_t (stdoutput, sizeof (arelent));
   assert (reloc != 0);
   reloc->sym_ptr_ptr = &fixp->fx_addsy->bsym;
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
+#ifndef OBJ_ELF
   if (fixp->fx_pcrel)
     reloc->addend = fixp->fx_addnumber;
   else
     reloc->addend = 0;
+#else
+  if (!fixp->fx_pcrel)
+    reloc->addend = fixp->fx_addnumber;
+  else if ((fixp->fx_addsy->bsym->flags & BSF_SECTION_SYM) != 0)
+    reloc->addend = (section->vma
+		     + (fixp->fx_pcrel_adjust == 64
+			? -1 : fixp->fx_pcrel_adjust)
+		     + fixp->fx_addnumber
+		     + md_pcrel_from (fixp));
+  else
+    reloc->addend = (fixp->fx_offset
+		     + (fixp->fx_pcrel_adjust == 64
+			? -1 : fixp->fx_pcrel_adjust));
+#endif
 
   reloc->howto = bfd_reloc_type_lookup (stdoutput, code);
   assert (reloc->howto != 0);
@@ -1575,16 +1748,24 @@ m68k_ip (instring)
 		    {
 		      if (opP->reg == PC)
 			{
-#if 0
-			  addword (0x0170);
-			  add_fix ('l', &opP->disp, 1, 2);
-			  addword (0), addword (0);
-#else
-			  add_frag (adds (&opP->disp),
-				    offs (&opP->disp),
-				    TAB (PCLEA, SZ_UNDEF));
+			  if (opP->disp.size == SIZE_LONG
+#ifdef OBJ_ELF
+			      /* If the displacement needs pic
+				 relocation it cannot be relaxed.  */
+			      || opP->disp.pic_reloc != pic_none
 #endif
-			  break;
+			      )
+			    {
+			      addword (0x0170);
+			      add_fix ('l', &opP->disp, 1, 2);
+			    }
+			  else
+			    {
+			      add_frag (adds (&opP->disp),
+					offs (&opP->disp),
+					TAB (PCLEA, SZ_UNDEF));
+			      break;
+			    }
 			}
 		      else
 			{
@@ -1730,7 +1911,13 @@ m68k_ip (instring)
 		      else if (siz1 == SIZE_UNSPEC
 			       && opP->reg == PC
 			       && isvar (&opP->disp)
-			       && subs (&opP->disp) == NULL)
+			       && subs (&opP->disp) == NULL
+#ifdef OBJ_ELF
+			       /* If the displacement needs pic
+				  relocation it cannot be relaxed.  */
+			       && opP->disp.pic_reloc == pic_none
+#endif
+			       )
 			{
  			  nextword += baseo & 0xff;
  			  addword (nextword);
@@ -1866,6 +2053,11 @@ m68k_ip (instring)
 		  if (isvar (&opP->disp)
 		      && !subs (&opP->disp)
 		      && adds (&opP->disp)
+#ifdef OBJ_ELF
+		      /* If the displacement needs pic relocation it
+			 cannot be relaxed.  */
+		      && opP->disp.pic_reloc == pic_none
+#endif
 		      && S_GET_SEGMENT (adds (&opP->disp)) == now_seg
 		      && cpu_of_arch (current_architecture) >= m68020
 		      && !flag_long_jumps
@@ -2004,6 +2196,13 @@ m68k_ip (instring)
 	    case 'g':
 	      if (subs (&opP->disp))	/* We can't relax it */
 		goto long_branch;
+
+#ifdef OBJ_ELF
+	      /* If the displacement needs pic relocation it cannot be
+		 relaxed.  */
+	      if (opP->disp.pic_reloc != pic_none)
+		goto long_branch;
+#endif
 
 	      /* This could either be a symbol, or an absolute
 		 address.  No matter, the frag hacking will finger it
@@ -2938,7 +3137,8 @@ md_assemble (str)
 			      n,
 			      &the_ins.reloc[m].exp,
 			      the_ins.reloc[m].pcrel,
-			      NO_RELOC);
+			      get_reloc_code (n, the_ins.reloc[m].pcrel,
+					      the_ins.reloc[m].pic_reloc));
 	  fixP->fx_pcrel_adjust = the_ins.reloc[m].pcrel_fix;
 	}
       return;
@@ -2982,7 +3182,8 @@ md_assemble (str)
 			      wid,
 			      &the_ins.reloc[m].exp,
 			      the_ins.reloc[m].pcrel,
-			      NO_RELOC);
+			      get_reloc_code (wid, the_ins.reloc[m].pcrel,
+					      the_ins.reloc[m].pic_reloc));
 	  fixP->fx_pcrel_adjust = the_ins.reloc[m].pcrel_fix;
 	}
       (void) frag_var (rs_machine_dependent, 10, 0,
@@ -3018,7 +3219,8 @@ md_assemble (str)
 			  wid,
 			  &the_ins.reloc[m].exp,
 			  the_ins.reloc[m].pcrel,
-			  NO_RELOC);
+			  get_reloc_code (wid, the_ins.reloc[m].pcrel,
+					  the_ins.reloc[m].pic_reloc));
       fixP->fx_pcrel_adjust = the_ins.reloc[m].pcrel_fix;
     }
 }
@@ -3185,6 +3387,12 @@ md_begin ()
 #endif
 
   init_regtable ();
+
+#ifdef OBJ_ELF
+  record_alignment (text_section, 2);
+  record_alignment (data_section, 2);
+  record_alignment (bss_section, 2);
+#endif
 }
 
 void
@@ -3370,6 +3578,15 @@ md_apply_fix_2 (fixP, val)
     val |= ~(addressT)0x7fffffff;
   else
     val &= 0x7fffffff;
+
+#ifdef OBJ_ELF
+  if (fixP->fx_addsy)
+    {
+      memset (buf, 0, fixP->fx_size);
+      fixP->fx_addnumber = val;	/* Remember value for emit_reloc */
+      return;
+    }
+#endif
 
   switch (fixP->fx_size)
     {
@@ -5974,8 +6191,14 @@ md_parse_option (c, arg)
       flag_reg_prefix_optional = 1;
       break;
 
-    case 'Q':
+      /* -V: SVR4 argument to print version ID.  */
     case 'V':
+      print_version_id ();
+      break;
+
+      /* -Qy, -Qn: SVR4 arguments controlling whether a .comment section
+	 should be emitted or not.  FIXME: Not implemented.  */
+    case 'Q':
       break;
 
     default:

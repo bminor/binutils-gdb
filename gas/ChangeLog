@@ -1,3 +1,31 @@
+Mon Feb 12 15:16:29 1996  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	Support for OBJ_ELF on m68k, mostly inside #ifdef OBJ_ELF:
+	* config/m68k-parse.h (enum pic_relocation): Define.
+	(struct m68k_exp): Add pic_reloc field.
+	* config/tc-m68k.h (TC_RELOC_RTSYM_LOC_FIXUP): Define.
+	(tc_fix_adjustable): Define to call tc_m68k_fix_adjustable.
+	(NO_RELOC): Define to BFD_RELOC_NONE if BFD_ASSEMBLER, to zero
+	otherwise.
+	* config/tc-m68k.c: Delete definition of NO_RELOC.
+ 	(struct m68k_it): Add pic_reloc field.
+	(add_fix): Copy over pic_reloc field.
+	(md_pseudo_table): Interpret .align parameter as byte count.
+	(mote_pseudo_table): Likewise.
+	(tc_m68k_fix_adjustable): New function.
+	(get_reloc_code): New function.
+	(md_assemble): Use it as last argument to fix_new_exp.
+	(md_apply_fix_2): For a relocation against a symbol don't put the
+	addend into the data.
+	(tc_gen_reloc): Different addend computation for OBJ_ELF.
+	(m68k_ip): Don't relax an operand that requires pic relocation.
+	(md_begin): Align .text, .data and .bss on 4 byte boundary by
+	default.
+	* write.c (fixup_segment): Don't add symbol value to addend if
+ 	TC_M68K and OBJ_ELF.
+	* config/m68k-parse.y (yylex): Handle @PLTPC, etc.
+	(motorola_operand): Add rule for `(zapc, EXPR)'.
+
 Mon Feb 12 10:07:33 1996  David Mosberger-Tang  <davidm@azstarnet.com>
 
 	* ecoff.c (ecoff_directive_weakext): Fixed so that whitespace
