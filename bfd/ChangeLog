@@ -1,3 +1,10 @@
+Wed Oct 12 16:46:43 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* opncls.c (bfd_realloc): Deleted, since it's broken and fixing it
+	would make it slow.  Besides, it isn't used much.
+	* elfcode.h (elf_map_symbols): Always allocate new storage for the
+	symbol table.
+
 Wed Oct 12 11:54:37 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* rs6000-core.c (rs6000coff_core_file_matches_executable_p): Make

@@ -1554,11 +1554,15 @@ elf_map_symbols (abfd)
 
   if (num_sections)
     {
+#if 0 /* @@ I just deleted bfd_realloc, because it's broken and too hard to
+	 fix.  I'm leaving this code here as a reminder to look at this more
+	 carefully later and see if we can avoid wasting memory.  */
       if (syms)
 	syms = (asymbol **) bfd_realloc (abfd, syms,
 					 ((symcount + num_sections + 1)
 					  * sizeof (asymbol *)));
       else
+#endif
 	syms = (asymbol **) bfd_alloc (abfd,
 				   (num_sections + 1) * sizeof (asymbol *));
       if (!syms)
