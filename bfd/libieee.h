@@ -3,11 +3,12 @@ typedef struct {
   char letter;
 } ieee_symbol_index_type;
 
-typedef struct ieee_symbol {
+typedef struct ieee_symbol 
+{
   asymbol symbol;
   struct ieee_symbol *next;
 
-unsigned int index;
+  unsigned int index;
 } ieee_symbol_type;
 
 
@@ -86,8 +87,8 @@ typedef struct {
   unsigned  int element_index ;
   unsigned int element_count;
 } ieee_ar_data_type;
-#define ieee_data(abfd) ((ieee_data_type *)((abfd)->tdata))
-#define ieee_ar_data(abfd) ((ieee_ar_data_type *)((abfd)->arelt_data))
 
+#define ieee_data(abfd) ((ieee_data_type *)(abfd)->tdata)
+#define ieee_ar_data(abfd) ((ieee_ar_data_type *)(abfd)->arelt_data)
 
 #define ptr(abfd) (ieee_data(abfd)->input_p)

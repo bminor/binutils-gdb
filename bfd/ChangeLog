@@ -1,3 +1,20 @@
+Tue May 28 17:21:43 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	* Merge in changes from gdb-3.95 release.
+	Makefile.in:  Allow hmake and tmake files to add OFILES.
+	aoutf1.h:  
+	bfd.c:  support specific targets as well as searching.  When
+	searching, take default target in preference to others.
+	bfd.doc:  typos
+	ieee.c, oasys.c:  Avoid using the "tdata" macros left of assignment.
+	liba.out.h:  Don't hard-code file offsets; use N_ macros for them.
+	libbfd.h:  Support specific targets as well as searching.
+	opncls.c:  Support specific targets as well as searching.
+	targets.c:  Search is short-circuited if default target matches.
+	liboasys.c, libieee.c:  Undo bothner changes that make macros
+	work to the left of assignment, but which depend on the
+	representations of different pointer types being the same.
+
 Fri May 24 18:56:52 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
 
 	* i386coff.c: created.
