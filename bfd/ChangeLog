@@ -1,3 +1,14 @@
+2003-06-17  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (struct ppc_link_hash_table): Reinstate top_index.
+	Restore previous input_list type.
+	(ppc64_elf_link_hash_table_create): Undo last change.
+	(ppc64_elf_setup_section_lists): Reinstate code setting up input lists
+	per output section, but don't bother with bfd_abs_section marker.
+	(ppc64_elf_next_input_section): Adjust for multiple input section
+	lists.
+	(group_sections): Likewise.
+
 2003-06-17  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf64-ppc.c (ppc64_elf_relocation_section): Ensure
