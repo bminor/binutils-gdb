@@ -28,13 +28,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #ifndef NAME
 #if ARCH_SIZE==64
 #define NAME(x,y) CAT3(x,64_,y)
+#define ElfNAME(X)	CAT(Elf64_,X)
+#define elfNAME(X)	CAT(elf64_,X)
 #else /* ARCH_SIZE==32 */
 #define NAME(x,y) CAT3(x,32_,y)
+#define ElfNAME(X)	CAT(Elf32_,X)
+#define elfNAME(X)	CAT(elf32_,X)
 #endif
 #endif
-
-#define ElfNAME(X)	NAME(Elf,X)
-#define elfNAME(X)	NAME(elf,X)
 
 typedef struct
 {
@@ -119,6 +120,7 @@ extern boolean bfd_elf32_find_nearest_line PARAMS ((bfd *, asection *,
 						    unsigned int *));
 extern int bfd_elf32_sizeof_headers PARAMS ((bfd *, boolean));
 extern unsigned long elf_hash PARAMS ((CONST unsigned char *));
+extern boolean bfd_elf32_new_section_hook PARAMS ((bfd *, asection *));
 
 /* If the target doesn't have reloc handling written yet:  */
 extern void bfd_elf32_no_info_to_howto PARAMS ((bfd *, arelent *,
