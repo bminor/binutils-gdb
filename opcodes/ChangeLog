@@ -1,3 +1,11 @@
+start-sanitize-d10v
+Tue Nov  5 10:30:51 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* d10v-opc.c (d10v_opcodes): Declare the trap instruction
+ 	sequential so the assembler never parallelizes it with
+	other instructions.
+
+end-sanitize-d10v
 Mon Nov  4 12:50:40 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* mn10300-opc.c (mn10300_operands): Add DN01 and AN01 for
