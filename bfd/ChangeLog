@@ -1,3 +1,14 @@
+Thu Feb 13 17:22:44 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
+
+	* coffcode.h (get_normalized_symtab): fixed bug where symbols
+	with more than one auxent can cause nasty core dumps. 
+
+	* coffcode.h, libcoff.c: added new fielded to coff_symbol_struct
+	"done_lineno" so that a symbol which appears twice in the symbol
+	table only gets it's linenumbers relocated once. Modifed
+	(coff_write_native_symbol) and (coff_make_empty_symbol) to make
+	use of it.
+
 Tue Feb  4 15:39:55 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
 
 	* aoutx.h: (translate_from_native_sym_flags): fix constructor

@@ -607,6 +607,7 @@ DEFUN(coff_swap_aux_in,(abfd, ext1, type, class, in1),
       in->x_scn.x_nlinno = GET_SCN_NLINNO(abfd, ext);
       break;
     }
+
   default:
     in->x_sym.x_tagndx.l = bfd_h_get_32(abfd, (bfd_byte *) ext->x_sym.x_tagndx);
 #ifndef NO_TVNDX
@@ -2310,10 +2311,12 @@ DEFUN(coff_write_object_contents,(abfd),
     same but is not a reasonable time. -- gnu@cygnus.com
     */
   /*
-    Well, I like it, so I'm conditionally compiling it in.
-    steve@cygnus.com
+    Well, I like it, and now we have *customers* who have requested it,
+    so I'm conditionally compiling it in.
+
+    sac@cygnus.com
     */
-#ifdef COFF_TIMESTAMP
+#ifndef NOCOFF_TIMESTAMP
   internal_f.f_timdat = time(0);
 #else
   internal_f.f_timdat = 0;
@@ -2339,12 +2342,12 @@ DEFUN(coff_write_object_contents,(abfd),
    internal_f.f_flags |= F_LSYMS;
   if (abfd->flags & EXEC_P)
    internal_f.f_flags |= F_EXEC;
-#if M88
-  internal_f.f_flags |= F_AR32W;
-#else
+
   if (!abfd->xvec->byteorder_big_p)
    internal_f.f_flags |= F_AR32WR;
-#endif
+  else 
+  internal_f.f_flags |= F_AR32W;
+
   /*
     FIXME, should do something about the other byte orders and
     architectures.
@@ -2659,6 +2662,7 @@ bfd            *abfd)
 {
   combined_entry_type          *internal;
   combined_entry_type          *internal_ptr;
+  combined_entry_type          *symbol_ptr;
   combined_entry_type         *internal_end;
   SYMENT *raw;
   SYMENT *raw_src;
@@ -2703,24 +2707,28 @@ bfd            *abfd)
     coff_swap_sym_in(abfd, (char *)raw_src, (char *)&internal_ptr->u.syment);
     internal_ptr->fix_tag = 0;
     internal_ptr->fix_end = 0;
+    symbol_ptr = internal_ptr;
+    
+    for (i = 0;
+	 i < symbol_ptr->u.syment.n_numaux;
+	 i++) 
+    {
+      internal_ptr++;
+      raw_src++;
+      
+      internal_ptr->fix_tag = 0;
+      internal_ptr->fix_end = 0;
 
-    for (i = internal_ptr->u.syment.n_numaux;
-	 i;
-	 --i, raw_src++, internal_ptr++) {
+      coff_swap_aux_in(abfd, (char *)(raw_src),
+		       symbol_ptr->u.syment.n_type,
+		       symbol_ptr->u.syment.n_sclass,
+		       internal_ptr->u.auxent);
 
-      (internal_ptr+1)->fix_tag = 0;
-      (internal_ptr+1)->fix_end = 0;
-
-      coff_swap_aux_in(abfd, (char *)(raw_src +1),
-		       internal_ptr->u.syment.n_type,
-		       internal_ptr->u.syment.n_sclass,
-		       &(internal_ptr+1)->u.auxent);
-
-      coff_pointerize_aux(abfd,
+     coff_pointerize_aux(abfd,
 			  internal,
-			  internal_ptr->u.syment.n_type,
-			  internal_ptr->u.syment.n_sclass,
-			  internal_ptr +1);
+			  symbol_ptr->u.syment.n_type,
+			  symbol_ptr->u.syment.n_sclass,
+			  internal_ptr);
     }
   }
 
@@ -3638,11 +3646,10 @@ DEFUN(jmp1,(input_section, symbols, r, shrink),
 }
 
 static boolean 
-DEFUN(bfd_coff_relax_section,(abfd, i, symbols, seclet),
+DEFUN(bfd_coff_relax_section,(abfd, i, symbols),
       bfd *abfd AND
       asection *i AND
-      asymbol **symbols AND
-      bfd_seclet_type *seclet)
+      asymbol **symbols)
 {
   
   /* Get enough memory to hold the stuff */
