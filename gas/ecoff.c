@@ -975,7 +975,7 @@ static const efdr_t init_file =
     0,			/* rfdBase:	index into the file indirect table */
     0,			/* crfd:	count file indirect entries */
     langC,		/* lang:	language for this file */
-    0,			/* fMerge:	whether this file can be merged */
+    1,			/* fMerge:	whether this file can be merged */
     0,			/* fReadin:	true if read in (not just created) */
 #ifdef TARGET_BYTES_BIG_ENDIAN
     1,			/* fBigendian:	if 1, compiled on big endian machine */
@@ -1024,6 +1024,7 @@ typedef struct lineno_list {
 } lineno_list_t;
 
 static lineno_list_t *first_lineno;
+static lineno_list_t *last_lineno;
 static lineno_list_t **last_lineno_ptr = &first_lineno;
 
 /* Sometimes there will be some .loc statements before a .ent.  We
@@ -2181,7 +2182,10 @@ add_procedure (func)
 	l->proc = new_proc_ptr;
       *last_lineno_ptr = noproc_lineno;
       while (*last_lineno_ptr != NULL)
-	last_lineno_ptr = &(*last_lineno_ptr)->next;
+	{
+	  last_lineno = *last_lineno_ptr;
+	  last_lineno_ptr = &last_lineno->next;
+	}
       noproc_lineno = (lineno_list_t *) NULL;
     }
 }
@@ -2242,26 +2246,27 @@ add_file (file_name, indx, fake)
 
   first_ch = *file_name;
 
-  /* ??? This is ifdefed out, because it results in incorrect line number
-     debugging info when multiple .file pseudo-ops are merged into one file
-     descriptor.  See for instance ecoff_build_lineno, which will
-     end up setting all file->fdr.* fields multiple times, resulting in
-     incorrect debug info.  In order to make this work right, all line number
-     and symbol info for the same source file has to be adjacent in the object
-     file, so that a single file descriptor can be used to point to them.
-     This would require maintaining file specific lists of line numbers and
-     symbols for each file, so that they can be merged together (or output
-     together) when two .file pseudo-ops are merged into one file
-     descriptor.  */
+  /* FIXME: We can't safely merge files which have line number
+     information (fMerge will be zero in this case).  Otherwise, we
+     get incorrect line number debugging info.  See for instance
+     ecoff_build_lineno, which will end up setting all file->fdr.*
+     fields multiple times, resulting in incorrect debug info.  In
+     order to make this work right, all line number and symbol info
+     for the same source file has to be adjacent in the object file,
+     so that a single file descriptor can be used to point to them.
+     This would require maintaining file specific lists of line
+     numbers and symbols for each file, so that they can be merged
+     together (or output together) when two .file pseudo-ops are
+     merged into one file descriptor.  */
 
-#if 0
   /* See if the file has already been created.  */
   for (fil_ptr = first_file;
        fil_ptr != (efdr_t *) NULL;
        fil_ptr = fil_ptr->next_file)
     {
       if (first_ch == fil_ptr->name[0]
-	  && strcmp (file_name, fil_ptr->name) == 0)
+	  && strcmp (file_name, fil_ptr->name) == 0
+	  && fil_ptr->fdr.fMerge)
 	{
 	  cur_file_ptr = fil_ptr;
 	  if (! fake)
@@ -2269,9 +2274,6 @@ add_file (file_name, indx, fake)
 	  break;
 	}
     }
-#else
-  fil_ptr = (efdr_t *) NULL;
-#endif
 
   /* If this is a new file, create it. */
   if (fil_ptr == (efdr_t *) NULL)
@@ -2339,6 +2341,18 @@ add_file (file_name, indx, fake)
 	}
 #endif
     }
+}
+
+/* This function is called when the assembler notices a preprocessor
+   directive switching to a new file.  This will not happen in
+   compiler output, only in hand coded assembler.  */
+
+void
+ecoff_new_file (name)
+     const char *name;
+{
+  add_file (name, 0, 0);
+  generate_asm_lineno = 1;
 }
 
 #ifdef ECOFF_DEBUG
@@ -2882,8 +2896,10 @@ ecoff_directive_endef (ignore)
 
 	  coff_type.num_sizes = i + 1;
 	  for (i--; i >= 0; i--)
-	    coff_type.sizes[i] = (coff_type.sizes[i + 1]
-				  / coff_type.dimensions[i + 1]);
+	    coff_type.sizes[i] = (coff_type.dimensions[i + 1] == 0
+				  ? 0
+				  : (coff_type.sizes[i + 1]
+				     / coff_type.dimensions[i + 1]));
 	}
     }
   else if (coff_symbol_typ == st_Member
@@ -3328,6 +3344,9 @@ ecoff_directive_loc (ignore)
   list->paddr = frag_now_fix ();
   list->lineno = lineno;
 
+  /* We don't want to merge files which have line numbers.  */
+  cur_file_ptr->fdr.fMerge = 0;
+
   /* A .loc directive will sometimes appear before a .ent directive,
      which means that cur_proc_ptr will be NULL here.  Arrange to
      patch this up.  */
@@ -3342,8 +3361,27 @@ ecoff_directive_loc (ignore)
     }
   else
     {
+      last_lineno = list;
       *last_lineno_ptr = list;
       last_lineno_ptr = &list->next;
+    }
+}
+
+/* The MIPS assembler sometimes inserts nop instructions in the
+   instruction stream.  When this happens, we must patch up the .loc
+   information so that it points to the instruction after the nop.  */
+
+void
+ecoff_fix_loc (old_frag, old_frag_offset)
+     fragS *old_frag;
+     unsigned long old_frag_offset;
+{
+  if (last_lineno != NULL
+      && last_lineno->frag == old_frag
+      && last_lineno->paddr == old_frag_offset)
+    {
+      last_lineno->frag = frag_now;
+      last_lineno->paddr = frag_now_fix ();
     }
 }
 
@@ -3382,7 +3420,7 @@ ecoff_directive_weakext (ignore)
 
   SKIP_WHITESPACE ();
 
-  if (c == ',')
+  if (*input_line_pointer == ',')
     {
       if (S_IS_DEFINED (symbolP))
 	{
@@ -3456,6 +3494,7 @@ ecoff_stab (sec, what, string, type, other, desc)
   efdr_t *save_file_ptr = cur_file_ptr;
   symbolS *sym;
   symint_t value;
+  bfd_vma addend;
   st_t st;
   sc_t sc;
   symint_t indx;
@@ -3522,6 +3561,7 @@ ecoff_stab (sec, what, string, type, other, desc)
       *input_line_pointer = name_end;
 
       value = 0;
+      addend = 0;
       st = st_Label;
       sc = sc_Text;
       indx = desc;
@@ -3541,6 +3581,7 @@ ecoff_stab (sec, what, string, type, other, desc)
 	  sc = sc_Nil;
 	  sym = (symbolS *) NULL;
 	  value = get_absolute_expression ();
+	  addend = 0;
 	}
       else if (! is_name_beginner ((unsigned char) *input_line_pointer))
 	{
@@ -3549,25 +3590,30 @@ ecoff_stab (sec, what, string, type, other, desc)
 	}
       else
 	{
-	  char *name;
-	  char name_end;
 	  expressionS exp;
 
 	  sc = sc_Nil;
 	  st = st_Nil;
-	  value = 0;
 
-	  if (string == NULL)
+	  expression (&exp);
+	  if (exp.X_op == O_constant)
 	    {
-	      name = input_line_pointer;
-	      name_end = get_symbol_end ();
-	      sym = symbol_find_or_make (name);
-	      *input_line_pointer = name_end;
+	      sym = NULL;
+	      value = exp.X_add_number;
+	      addend = 0;
+	    }
+	  else if (exp.X_op == O_symbol)
+	    {
+	      sym = exp.X_add_symbol;
+	      value = 0;
+	      addend = exp.X_add_number;
 	    }
 	  else
 	    {
-	      sym = symbol_find_or_make (string);
-	      expression (&sym->sy_value);
+	      as_bad (".stabs expression too complex");
+	      sym = NULL;
+	      value = 0;
+	      addend = 0;
 	    }
 	}
 
@@ -3580,7 +3626,7 @@ ecoff_stab (sec, what, string, type, other, desc)
   if (sym != (symbolS *) NULL)
     hold = sym->ecoff_symbol;
 
-  (void) add_ecoff_symbol (string, st, sc, sym, (bfd_vma) 0, value, indx);
+  (void) add_ecoff_symbol (string, st, sc, sym, addend, value, indx);
 
   if (sym != (symbolS *) NULL)
     sym->ecoff_symbol = hold;
@@ -5321,6 +5367,9 @@ ecoff_generate_asm_lineno (filename, lineno)
   list->paddr = frag_now_fix ();
   list->lineno = lineno;
 
+  /* We don't want to merge files which have line numbers.  */
+  cur_file_ptr->fdr.fMerge = 0;
+
   /* A .loc directive will sometimes appear before a .ent directive,
      which means that cur_proc_ptr will be NULL here.  Arrange to
      patch this up.  */
@@ -5335,6 +5384,7 @@ ecoff_generate_asm_lineno (filename, lineno)
     }
   else
     {
+      last_lineno = list;
       *last_lineno_ptr = list;
       last_lineno_ptr = &list->next;
     }

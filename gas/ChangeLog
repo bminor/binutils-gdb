@@ -1,3 +1,15 @@
+Thu Sep  5 13:40:29 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ecoff.c (ecoff_new_file): New function.
+	* ecoff.h (ecoff_new_file): Declare.
+	* config/obj-ecoff.h (obj_app_file): Define.
+
+Thu Sep  5 13:39:25 1996  Richard Henderson  <rth@tamu.edu>
+
+	* config/tc-alpha.c (load_expression): Bias the .lit8 section
+	symbol by 32k so that our 16-bit signed offset can address the
+	entire chunk.  Reported by <matt@lkg.dec.com>.
+
 Wed Sep  4 10:23:20 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-mips.c (load_register): Remove unused variable tmp.
