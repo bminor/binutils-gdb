@@ -1,3 +1,28 @@
+Fri Apr  3 11:30:20 1992  Fred Fish  (fnf@cygnus.com)
+
+	* m68k.h (one, two):  Cast macro args to unsigned to suppress
+	complaints from compiler and lint about integer overflow during
+	shift.
+
+Sun Mar 29 12:22:08 1992  John Gilmore  (gnu at cygnus.com)
+
+	* sparc.h (OP):  Avoid signed overflow when shifting to high order bit.
+
+Fri Mar  6 00:22:38 1992  John Gilmore  (gnu at cygnus.com)
+
+	* mips.h:  Make bitfield layout depend on the HOST compiler,
+	not on the TARGET system.
+
+Fri Feb 21 01:29:51 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* i386.h: added inb, inw, outb, outw opcodes, added att syntax for
+	  scmp, slod, smov, ssca, ssto.  Curtesy Minh Tran-Le
+	  <TRANLE@INTELLICORP.COM>.
+
+Thu Jan 30 07:31:44 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
+
+	* h8300.h: turned op_type enum into #define list
+
 Thu Jan 30 01:07:24 1992  John Gilmore  (gnu at cygnus.com)
 
 	* sparc.h:  Remove "cypress" architecture.  Remove "fitox" and
