@@ -116,37 +116,5 @@ modelx.o: modelx.c $(M32RXF_INCLUDE_DEPS)
 m32r-clean:
 	rm -f mloop.c eng.h stamp-mloop
 	rm -f mloopx.c engx.h stamp-xmloop
-# start-sanitize-cygnus
-	rm -f stamp-arch stamp-cpu stamp-xcpu
-# end-sanitize-cygnus
 	rm -f tmp-*
 
-# start-sanitize-cygnus
-# cgen support, enable with --enable-cgen-maint
-CGEN_MAINT = ; @true
-# The following line is commented in or out depending upon --enable-cgen-maint.
-@CGEN_MAINT@CGEN_MAINT =
-
-stamp-arch: $(CGEN_READ_SCM) $(CGEN_ARCH_SCM) $(srccgen)/m32r.cpu
-	$(MAKE) cgen-arch $(CGEN_FLAGS_TO_PASS) mach=all \
-	  FLAGS="with-scache with-profile=fn"
-	touch stamp-arch
-arch.h arch.c cpuall.h: $(CGEN_MAINT) stamp-arch
-	@true
-
-stamp-cpu: $(CGEN_READ_SCM) $(CGEN_CPU_SCM) $(CGEN_DECODE_SCM) $(srccgen)/m32r.cpu
-	$(MAKE) cgen-cpu-decode $(CGEN_FLAGS_TO_PASS) \
-	  cpu=m32rbf mach=m32r SUFFIX= \
-	  FLAGS="with-scache with-profile=fn" \
-	  EXTRAFILES="$(CGEN_CPU_SEM) $(CGEN_CPU_SEMSW)"
-	touch stamp-cpu
-cpu.h sem.c sem-switch.c model.c decode.c decode.h: $(CGEN_MAINT) stamp-cpu
-	@true
-
-stamp-xcpu: $(CGEN_READ_SCM) $(CGEN_CPU_SCM) $(CGEN_DECODE_SCM) $(srccgen)/m32r.cpu
-	$(MAKE) cgen-cpu-decode $(CGEN_FLAGS_TO_PASS) \
-	  cpu=m32rxf mach=m32rx SUFFIX=x FLAGS="with-scache with-profile=fn" EXTRAFILES="$(CGEN_CPU_SEMSW)"
-	touch stamp-xcpu
-cpux.h semx-switch.c modelx.c decodex.c decodex.h: $(CGEN_MAINT) stamp-xcpu
-	@true
-# end-sanitize-cygnus

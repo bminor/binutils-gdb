@@ -1,3 +1,33 @@
+1999-12-07  Dave Brolley  <brolley@cygnus.com>
+
+	* cgen-par.h (CGEN_FN_MEM_QI_WRITE): New enumerator.
+	(CGEN_FN_MEM_HI_WRITE): New enumerator.
+	(CGEN_FN_MEM_SI_WRITE): New enumerator.
+	(CGEN_FN_MEM_DI_WRITE): New enumerator.
+	(CGEN_FN_MEM_DF_WRITE): New enumerator.
+	(CGEN_FN_MEM_XI_WRITE): New enumerator.
+	(fn_mem_qi_write): New union members.
+	(fn_mem_hi_write): New union members.
+	(fn_mem_si_write): New union members.
+	(fn_mem_di_write): New union members.
+	(fn_mem_df_write): New union members.
+	(fn_mem_xi_write): New union members.
+	(sim_queue_fn_mem_qi_write): New function.
+	(sim_queue_fn_mem_hi_write): New function.
+	(sim_queue_fn_mem_si_write): New function.
+	(sim_queue_fn_mem_di_write): New function.
+	(sim_queue_fn_mem_df_write): New function.
+	(sim_queue_fn_mem_xi_write): New function.
+	* cgen-par.c (sim_queue_fn_mem_qi_write): New function.
+	(sim_queue_fn_mem_hi_write): New function.
+	(sim_queue_fn_mem_si_write): New function.
+	(sim_queue_fn_mem_di_write): New function.
+	(sim_queue_fn_mem_df_write): New function.
+	(sim_queue_fn_mem_xi_write): New function.
+	(cgen_write_queue_element_execute): Handle CGEN_FN_MEM_QI_WRITE,
+	CGEN_FN_MEM_HI_WRITE, CGEN_FN_MEM_SI_WRITE, CGEN_FN_MEM_DI_WRITE,
+	CGEN_FN_MEM_DF_WRITE, CGEN_FN_MEM_XI_WRITE.
+
 1999-12-01  Dave Brolley  <brolley@cygnus.com>
 
 	* cgen-accfp.c (subsf): Check status code.

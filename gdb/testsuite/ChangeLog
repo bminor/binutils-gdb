@@ -1,3 +1,11 @@
+1999-12-06  Jim Blandy  <jimb@cygnus.com>
+
+	* gdb.base/default.exp: Expect the new 'info float' command on
+	all i386 platforms.
+
+	* gdb.threads/linux-dp.exp: Expand our ability to recognize
+	LinuxThreads libraries that don't support debugging.
+
 Sat Dec  4 15:21:18 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdb.base/remote.c: Fill the buffer with truely random data.

@@ -373,6 +373,62 @@ core_detach (args, from_tty)
     printf_filtered ("No core file now.\n");
 }
 
+
+/* Try to retrieve registers from a section in core_bfd, and supply
+   them to core_vec->core_read_registers, as the register set numbered
+   WHICH.
+
+   If inferior_pid is zero, do the single-threaded thing: look for a
+   section named NAME.  If inferior_pid is non-zero, do the
+   multi-threaded thing: look for a section named "NAME/PID", where
+   PID is the shortest ASCII decimal representation of inferior_pid.
+
+   HUMAN_NAME is a human-readable name for the kind of registers the
+   NAME section contains, for use in error messages.
+
+   If REQUIRED is non-zero, print an error if the core file doesn't
+   have a section by the appropriate name.  Otherwise, just do nothing.  */
+
+static void
+get_core_register_section (char *name,
+			   int which,
+			   char *human_name,
+			   int required)
+{
+  char section_name[100];
+  sec_ptr section;
+  bfd_size_type size;
+  char *contents;
+
+  if (inferior_pid)
+    sprintf (section_name, "%s/%d", name, inferior_pid);
+  else
+    strcpy (section_name, name);
+
+  section = bfd_get_section_by_name (core_bfd, section_name);
+  if (! section)
+    {
+      if (required)
+	warning ("Couldn't find %s registers in core file.\n", human_name);
+      return;
+    }
+
+  size = bfd_section_size (core_bfd, section);
+  contents = alloca (size);
+  if (! bfd_get_section_contents (core_bfd, section, contents,
+				  (file_ptr) 0, size))
+    {
+      warning ("Couldn't read %s registers from `%s' section in core file.\n",
+	       human_name, name);
+      return;
+    }
+
+  core_vec->core_read_registers (contents, size, which, 
+				 ((CORE_ADDR)
+				  bfd_section_vma (core_bfd, section)));
+}
+
+
 /* Get the registers out of a core file.  This is the machine-
    independent part.  Fetch_core_registers is the machine-dependent
    part, typically implemented in the xm-file for each architecture.  */
@@ -384,67 +440,20 @@ static void
 get_core_registers (regno)
      int regno;
 {
-  sec_ptr reg_sec;
-  unsigned size;
-  char *the_regs;
-  char secname[30];
+  int status;
 
-  if (core_vec == NULL)
+  if (core_vec == NULL
+      || core_vec->core_read_registers == NULL)
     {
       fprintf_filtered (gdb_stderr,
 		     "Can't fetch registers from this type of core file\n");
       return;
     }
 
-  /* Thread support.  If inferior_pid is non-zero, then we have found a core
-     file with threads (or multiple processes).  In that case, we need to
-     use the appropriate register section, else we just use `.reg'. */
+  get_core_register_section (".reg", 0, "general-purpose", 1);
+  get_core_register_section (".reg2", 2, "floating-point", 0);
+  get_core_register_section (".reg-xfp", 3, "extended floating-point", 0);
 
-  /* XXX - same thing needs to be done for floating-point (.reg2) sections. */
-
-  if (inferior_pid)
-    sprintf (secname, ".reg/%d", inferior_pid);
-  else
-    strcpy (secname, ".reg");
-
-  reg_sec = bfd_get_section_by_name (core_bfd, secname);
-  if (!reg_sec)
-    goto cant;
-  size = bfd_section_size (core_bfd, reg_sec);
-  the_regs = alloca (size);
-  if (bfd_get_section_contents (core_bfd, reg_sec, the_regs, (file_ptr) 0, size) &&
-      core_vec->core_read_registers != NULL)
-    {
-      (core_vec->core_read_registers (the_regs, size, 0,
-				(unsigned) bfd_section_vma (abfd, reg_sec)));
-    }
-  else
-    {
-    cant:
-      fprintf_filtered (gdb_stderr,
-			"Couldn't fetch registers from core file: %s\n",
-			bfd_errmsg (bfd_get_error ()));
-    }
-
-  /* Now do it again for the float registers, if they exist.  */
-  reg_sec = bfd_get_section_by_name (core_bfd, ".reg2");
-  if (reg_sec)
-    {
-      size = bfd_section_size (core_bfd, reg_sec);
-      the_regs = alloca (size);
-      if (bfd_get_section_contents (core_bfd, reg_sec, the_regs, (file_ptr) 0, size) &&
-	  core_vec->core_read_registers != NULL)
-	{
-	  (core_vec->core_read_registers (the_regs, size, 2,
-			       (unsigned) bfd_section_vma (abfd, reg_sec)));
-	}
-      else
-	{
-	  fprintf_filtered (gdb_stderr,
-		       "Couldn't fetch register set 2 from core file: %s\n",
-			    bfd_errmsg (bfd_get_error ()));
-	}
-    }
   registers_fetched ();
 }
 

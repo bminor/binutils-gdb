@@ -93,21 +93,10 @@ Fri Apr 16 16:47:43 1999  Doug Evans  <devans@charmed.cygnus.com>
 
 	* cpu.c,cpu.h: Rebuild.
 
-start-sanitize-cygnus
-1999-02-12  Doug Evans  <devans@casey.cygnus.com>
-
-	* Makefile.in (stamp-arch,stamp-cpu,stamp-xcpu): CGEN_MAIN_SCM
-	renamed to CGEN_READ_SCM.
-
-end-sanitize-cygnus
 1999-02-09  Doug Evans  <devans@casey.cygnus.com>
 
 	* Makefile.in (SIM_EXTRA_DEPS): Add m32r-desc.h, delete cpu-opc.h.
 	(stamp-xmloop): s/-parallel/-parallel-write/.
-start-sanitize-cygnus
-	(stamp-arch,stamp-cpu): Update FLAGS variable, option syntax changed.
-	(stamp-xcpu): Update FLAGS variable, option syntax changed.
-end-sanitize-cygnus
 	* configure.in (sim_link_files,sim_link_links): Delete.
 	* configure: Rebuild.
 	* decode.c,decode.h,model.c,sem-switch.c,sem.c: Rebuild.
@@ -135,9 +124,6 @@ Thu Feb  4 16:04:26 1999  Doug Evans  <devans@canuck.cygnus.com>
 
 1999-01-14  Doug Evans  <devans@casey.cygnus.com>
 
-start-sanitize-cygnus
-	* Makefile.in (stamp-arch): Pass FLAGS to cgen.
-end-sanitize-cygnus
 	* arch.c,arch.h,cpuall.h: Regenerate.
 	* cpu.c,cpu.h,decode.c,decode.h,model.c,sem-switch.c,sem.c: Regenerate.
 	* traps.c (sim_engine_invalid_insn): PCADDR->IADDR.
@@ -164,9 +150,6 @@ end-sanitize-cygnus
 	(M32RBF_INCLUDE_DEPS): Use CGEN_MAIN_CPU_DEPS.
 	(m32r.o,mloop.o,cpu.o,decode.o,sem.o,model.o): Simplify dependencies.
 	(m32rx.o,mloopx.o,cpux.o,decodex.o,semx.o,modelx.o): Ditto.
-start-sanitize-cygnus
-	(stamp-arch): Pass mach=all to cgen-arch.
-end-sanitize-cygnus
 	* cpu.c,cpu.h,decode.c,model.c,sem-switch.c,sem.c: Regenerate.
 	* m32r-sim.h (m32rbf_h_cr_[gs]et_handler): Declare.
 	([GS]ET_H_CR): Define.
@@ -230,19 +213,10 @@ end-sanitize-cygnus
 
 	* Makefile.in (M32R_OBJS): Delete extract.o.
 	(extract.o): Delete.
-start-sanitize-cygnus
-	(stamp-arch): Depend on $(CGEN_ARCH_SCM).
-	(stamp-cpu): Don't build extract.c.
-end-sanitize-cygnus
 	* cpu.c,cpu.h,decode.c,decode.h,sem-switch.c,sem.c: Rebuild.
 	* mloop.in (extract16): Update type of `insn' arg.
 	Delete call to d->extract.
 	(extract32): Ditto.
-start-sanitize-cygnus
-	* Makefile.in (M32RX_OBJS): Delete extractx.o.
-	(extractx.o): Delete.
-	(stamp-xcpu): Don't build extractx.c.
-end-sanitize-cygnus
 	* cpux.c,cpux.h,decodex.c,decodex.h,semx-switch.c: Rebuild.
 	* mloopx.in (extractx16): Update type of `insn' arg.
 	Delete call to d->extract.  Delete arg pbb_p.  All callers updated.
@@ -282,14 +256,6 @@ Fri Oct 16 09:15:29 1998  Doug Evans  <devans@charmed.cygnus.com>
 
 	* sim-if.c (sim_do_command): Handle "sim info reg {bbpsw,bbpc}".
 
-start-sanitize-cygnus
-Wed Oct 14 14:49:50 1998  Doug Evans  <devans@canuck.cygnus.com>
-
-	* Makefile.in (mloop.o): Don't depend on stamp-cpu, depend on
-	explicit files.
-	(mloopx.o): Ditto for stamp-xcpu.
-
-end-sanitize-cygnus
 Fri Oct  9 16:11:58 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	Add pseudo-basic-block execution support.
@@ -297,9 +263,6 @@ Fri Oct  9 16:11:58 1998  Doug Evans  <devans@seba.cygnus.com>
 	(SIM_EXTRA_DEPS): Add include/opcode/cgen.h.
 	(INCLUDE_DEPS): Delete cpu-sim.h, include/opcode/cgen.h.
 	(mloop.c): Build pseudo-basic-block version.  Depend on stamp-cpu.
-start-sanitize-cygnus
-	(stamp-decode): Delete, build decode files with other cpu files.
-end-sanitize-cygnus
 	* arch.c,arch.h,cpuall.h: Regenerate.
 	* cpu.c,cpu.h,decode.c,decode.h,extract.c,model.c: Regenerate.
 	* sem-switch.c,sem.c: Regenerate.
@@ -330,14 +293,8 @@ end-sanitize-cygnus
 	* configure: Regenerate.
 	* Makefile.in (M32RX_OBJS): Delete semx.o, add extract.o.
 	(mloopx.c): Build pseudo-basic-block version.
-start-sanitize-cygnus
-	Depend on stamp-xcpu.
-end-sanitize-cygnus
 	(semx.o): Delete.
 	(extractx.o): Add.
-start-sanitize-cygnus
-	(stamp-xdecode): Delete, build decode files with other cpu files.
-end-sanitize-cygnus
 	* cpux.c,cpux.h,decodex.c,decodex.h,modelx.c: Regenerate.
 	* readx.c: Delete.
 	* semx.c: Delete.
@@ -390,9 +347,6 @@ Mon Aug  3 12:59:17 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	Rename cpu m32r to m32rb to distinguish from architecture name.
 	* Makefile.in (mloop.c): cpu m32r renamed to m32rb.
-start-sanitize-cygnus
-	(stamp-cpu): Ditto.
-end-sanitize-cygnus
 	* sim-main.h (WANT_CPU_M32RB): Renamed from WANT_CPU_M32R.
 	* tconfig.in (WANT_CPU_M32RB): Ditto.
 	* m32r.c (WANT_CPU_M32RB): Ditto.
@@ -457,14 +411,6 @@ Sat Jun 13 07:49:23 1998  Doug Evans  <devans@fallis.cygnus.com>
 	* mloopx.in: Call cycle init/update fns.
 	* modelx.c: Regenerate.
 
-start-sanitize-cygnus
-Thu Jun 11 23:39:53 1998  Doug Evans  <devans@seba.cygnus.com>
-
-	* Makefile.in (stamp-{arch,cpu,decode}): Pass CGEN_FLAGS_TO_PASS
-	to recursive makes.
-	(stamp-{xcpu,xdecode}): Ditto.
-
-end-sanitize-cygnus
 Wed Jun 10 17:39:29 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* traps.c: New file.  Trap support moved here from sim-if.c.
@@ -545,9 +491,6 @@ Wed May  6 14:51:39 1998  Doug Evans  <devans@seba.cygnus.com>
 	* readx.c: Regenerate.  Redo computed goto label handling.
 	* semx.c: Regenerate.  Call PROFILE_COUNT_INSN.  Finish profiling
 	support.
-start-sanitize-cygnus
-	* Makefile.in (stamp-xcpu): Turn on profiling support.
-end-sanitize-cygnus
 
 	* m32r.c (m32r_fetch_register): Change result type and args to
 	conform to sim_fetch_register interface.
@@ -571,15 +514,6 @@ end-sanitize-cygnus
 	* sim-main.h (sim_cia): Change to USI.
 	(sim_cpu): Move m32r_misc_profile before machine generated part.
 
-start-sanitize-cygnus
-Fri May  1 18:25:41 1998  Doug Evans  <devans@seba.cygnus.com>
-
-	* Makefile.in: Replace @MAINT@ with $(CGEN_MAINT).
-	(CGEN_MAINT): New variable.
-	* configure.in: Add support for --enable-cgen-maint.
-	* configure: Regenerate.
-
-end-sanitize-cygnus
 Tue Apr 28 18:33:31 1998  Geoffrey Noer  <noer@cygnus.com>
 
         * configure: Regenerated to track ../common/aclocal.m4 changes.
@@ -830,9 +764,6 @@ Mon Jan 19 14:13:40 1998  Doug Evans  <devans@seba.cygnus.com>
 	* Makefile.in: Update.
 	* sem-ops.h: Deleted.
 	* mem-ops.h: Deleted.
-start-sanitize-cygnus
-	Add cgen support for generating files.
-end-sanitize-cygnus
 	(arch): Renamed from CPU.
 	* cpu.h: New file.
 	* decode.c: Redone.

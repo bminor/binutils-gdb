@@ -612,6 +612,91 @@ store_inferior_registers (regno)
 
 
 
+/* Interpreting register set info found in core files.  */
+
+/* Provide registers to GDB from a core file.
+
+   (We can't use the generic version of this function in
+   core-regset.c, because Linux has *three* different kinds of
+   register set notes.  core-regset.c would have to call
+   supply_xfpregset, which most platforms don't have.)
+
+   CORE_REG_SECT points to an array of bytes, which are the contents
+   of a `note' from a core file which BFD thinks might contain
+   register contents.  CORE_REG_SIZE is its size.
+
+   WHICH says which register set corelow suspects this is:
+   0 --- the general register set, in gregset format
+   2 --- the floating-point register set, in fpregset format
+   3 --- the extended floating-point register set, in struct
+         user_xfpregs_struct format
+
+   DUMMY isn't used on Linux.  */
+static void
+i386_linux_fetch_core_registers (char *core_reg_sect,
+				 unsigned core_reg_size,
+				 int which,
+				 CORE_ADDR dummy)
+{
+  gregset_t gregset;
+  fpregset_t fpregset;
+
+  switch (which)
+    {
+    case 0:
+      if (core_reg_size != sizeof (gregset))
+	warning ("wrong size gregset struct in core file");
+      else
+	{
+	  memcpy (&gregset, core_reg_sect, sizeof (gregset));
+	  supply_gregset (&gregset);
+	}
+      break;
+
+    case 2:
+      if (core_reg_size != sizeof (fpregset))
+	warning ("wrong size fpregset struct in core file");
+      else
+	{
+	  memcpy (&fpregset, core_reg_sect, sizeof (fpregset));
+	  supply_fpregset (&fpregset);
+	}
+      break;
+
+#ifdef HAVE_PTRACE_GETXFPREGS
+      {
+	struct user_xfpregs_struct xfpregset;
+      case 3:
+	if (core_reg_size != sizeof (struct user_xfpregs_struct))
+	  warning ("wrong size user_xfpregs_struct in core file");
+	else
+	  {
+	    memcpy (&xfpregset, core_reg_sect, sizeof (xfpregset));
+	    supply_xfpregset (&xfpregset);
+	  }
+	break;
+      }
+#endif
+
+    default:
+      /* We've covered all the kinds of registers we know about here,
+         so this must be something we wouldn't know what to do with
+         anyway.  Just ignore it.  */
+      break;
+    }
+}
+
+
+static struct core_fns i386_linux_nat_core_fns =
+{
+  bfd_target_elf_flavour,		/* core_flavour */
+  default_check_format,			/* check_format */
+  default_core_sniffer,			/* core_sniffer */
+  i386_linux_fetch_core_registers,	/* core_read_registers */
+  NULL					/* next */
+};
+
+
 /* Calling functions in shared libraries.  */
 
 /* Find the minimal symbol named NAME, and return both the minsym
@@ -699,4 +784,14 @@ i386_linux_skip_solib_resolver (CORE_ADDR pc)
     return result;
 
   return 0;
+}
+
+
+
+/* Module initialization.  */
+
+void
+_initialize_i386_linux_nat ()
+{
+  add_core_fns (&i386_linux_nat_core_fns);
 }

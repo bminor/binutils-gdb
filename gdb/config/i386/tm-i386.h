@@ -259,6 +259,13 @@ extern void double_to_i387 (char *, char *);
   double_to_i387((char *)&val, (TO));				\
 }
 
+/* Print out the i387 floating point state.  */
+#ifdef HAVE_I387_REGS
+extern void i387_float_info (void);
+#define FLOAT_INFO { i387_float_info (); }
+#endif
+
+
 /* Store the address of the place in which to copy the structure the
    subroutine will return.  This is called from call_function. */
 

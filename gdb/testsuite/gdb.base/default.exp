@@ -304,8 +304,8 @@ if [istarget "arm-*-*"] then {
     gdb_test "info float" "Software FPU type.*mask:.*flags:.*" "info float"
 } elseif [istarget "strongarm-*-*"] then {
     gdb_test "info float" "Software FPU type.*mask:.*flags:.*" "info float"
-} elseif [istarget "i\[3456\]86-*-linux-gnu"] then {
-    gdb_test "info float" "No registers."
+} elseif [istarget "i\[3456\]86-*-*"] then {
+    gdb_test "info float" "R7:.*Status Word:.*Opcode:.*" "info float"
 } else {
     gdb_test "info float" "No floating point info available for this processor." "info float"
 }

@@ -163,15 +163,21 @@ struct core_fns
 
        CORE_REG_SIZE is the size of that area.
 
-       WHICH says which set of registers we are handling (0 = int, 2 = float on
-       machines where they are discontiguous).
+       WHICH says which set of registers we are handling:
+         0 --- integer registers
+         2 --- floating-point registers, on machines where they are
+               discontiguous
+         3 --- extended floating-point registers, on machines where
+               these are present in yet a third area.  (GNU/Linux uses
+               this to get at the SSE registers.)
 
        REG_ADDR is the offset from u.u_ar0 to the register values relative to
        core_reg_sect.  This is used with old-fashioned core files to locate the
        registers in a large upage-plus-stack ".reg" section.  Original upage
        address X is at location core_reg_sect+x+reg_addr. */
 
-    void (*core_read_registers) PARAMS ((char *core_reg_sect, unsigned core_reg_size,
+    void (*core_read_registers) PARAMS ((char *core_reg_sect,
+					 unsigned core_reg_size,
 					 int which, CORE_ADDR reg_addr));
 
     /* Finds the next struct core_fns.  They are allocated and initialized

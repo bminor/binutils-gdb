@@ -29,6 +29,8 @@ enum cgen_write_queue_kind {
   CGEN_FN_XI_WRITE, CGEN_FN_PC_WRITE,
   CGEN_MEM_QI_WRITE, CGEN_MEM_HI_WRITE, CGEN_MEM_SI_WRITE, CGEN_MEM_DI_WRITE,
   CGEN_MEM_DF_WRITE, CGEN_MEM_XI_WRITE,
+  CGEN_FN_MEM_QI_WRITE, CGEN_FN_MEM_HI_WRITE, CGEN_FN_MEM_SI_WRITE,
+  CGEN_FN_MEM_DI_WRITE, CGEN_FN_MEM_DF_WRITE, CGEN_FN_MEM_XI_WRITE,
   CGEN_NUM_WRITE_KINDS
 };
 
@@ -103,12 +105,42 @@ typedef struct {
     } mem_di_write;
     struct {
       SI   address;
-      DI   value;
+      DF   value;
     } mem_df_write;
     struct {
       SI   address;
       SI   value[4];
     } mem_xi_write;
+    struct {
+      SI   address;
+      QI   value;
+      void (*function)(SIM_CPU *, IADDR, SI, QI);
+    } fn_mem_qi_write;
+    struct {
+      SI   address;
+      HI   value;
+      void (*function)(SIM_CPU *, IADDR, SI, HI);
+    } fn_mem_hi_write;
+    struct {
+      SI   address;
+      SI   value;
+      void (*function)(SIM_CPU *, IADDR, SI, SI);
+    } fn_mem_si_write;
+    struct {
+      SI   address;
+      DI   value;
+      void (*function)(SIM_CPU *, IADDR, SI, DI);
+    } fn_mem_di_write;
+    struct {
+      SI   address;
+      DF   value;
+      void (*function)(SIM_CPU *, IADDR, SI, DF);
+    } fn_mem_df_write;
+    struct {
+      SI   address;
+      SI   value[4];
+      void (*function)(SIM_CPU *, IADDR, SI, SI *);
+    } fn_mem_xi_write;
   } kinds;
 } CGEN_WRITE_QUEUE_ELEMENT;
 
@@ -161,5 +193,12 @@ extern void sim_queue_mem_si_write (SIM_CPU *, SI, SI);
 extern void sim_queue_mem_di_write (SIM_CPU *, SI, DI);
 extern void sim_queue_mem_df_write (SIM_CPU *, SI, DF);
 extern void sim_queue_mem_xi_write (SIM_CPU *, SI, SI *);
+
+extern void sim_queue_fn_mem_qi_write (SIM_CPU *, void (*)(SIM_CPU *, IADDR, SI, QI), SI, QI);
+extern void sim_queue_fn_mem_hi_write (SIM_CPU *, void (*)(SIM_CPU *, IADDR, SI, HI), SI, HI);
+extern void sim_queue_fn_mem_si_write (SIM_CPU *, void (*)(SIM_CPU *, IADDR, SI, SI), SI, SI);
+extern void sim_queue_fn_mem_di_write (SIM_CPU *, void (*)(SIM_CPU *, IADDR, SI, DI), SI, DI);
+extern void sim_queue_fn_mem_df_write (SIM_CPU *, void (*)(SIM_CPU *, IADDR, SI, DF), SI, DF);
+extern void sim_queue_fn_mem_xi_write (SIM_CPU *, void (*)(SIM_CPU *, IADDR, SI, SI *), SI, SI *);
 
 #endif /* CGEN_PAR_H */

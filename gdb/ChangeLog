@@ -1,3 +1,31 @@
+1999-12-07  Jim Blandy  <jimb@cygnus.com>
+
+	Add support for SSE registers in core files.
+	* corelow.c (get_core_register_section): New function.
+	(get_core_registers): Fetch the new ".reg-xfp" sections,
+	in addition to the traditional ".reg" and ".reg2" sections.
+	Check for per-thread variants of all three.  Use
+	get_core_register_section, instead of writing it out over and over
+	again.
+	* i386-linux-nat.c (i386_linux_fetch_core_registers): New function.
+	(i386_linux_nat_core_fns): New core_fns structure.  We do our own
+	core handling now, instead of using the generic code in core-regset.c.
+	(_initialize_i386_linux_nat): New function, needed to register
+	i386_linux_nat_core_fns.
+	* config/i386/linux.mh (NATDEPFILES): Remove core-regset.o;
+	i386-linux-nat.c has its own sniffer now.
+	* gdbcore.h: (struct core_fns): Doc fix.
+
+	* i386v-nat.c (i386_float_info): Definition is #if 0'd; delete it
+	altogether.  This should use the function i387-tdep.c.
+
+	Patch from Mark Kettenis  <kettenis@gnu.org>:
+
+	* config/i386/tm-i386.h (FLOAT_INFO): New define.
+	* i387-tdep.c (print_i387_value, print_i387_ext,
+	print_i387_status_word, print_i387_control_word, i387_float_info):
+	New functions, used to implement generic `info float' command.
+
 1999-12-06  Christopher Faylor  <cgf@cygnus.com>
 
 	* dcache.c (set_dcache_state): New function.
@@ -54,6 +82,23 @@ Fri Dec  3 17:38:06 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 Thu Dec  2 17:14:53 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* ser-pipe.c: Include <string.h> for memset().
+
+1999-12-01  Jim Blandy  <jimb@cygnus.com>
+
+	* gdbtypes.c (builtin_type_v4si, builtin_type_v8qi,
+	builtin_type_v4hi, builtin_type_v2si): New SIMD types.
+	(build_gdbtypes): Initialize them.
+	(_initialize_gdbtypes): Gdbarch_swap them.
+	* gdbtypes.h (builtin_type_v4si, builtin_type_v8qi,
+	builtin_type_v4hi, builtin_type_v2si): Declare them. 
+
+	* findvar.c (read_register_bytes, write_register_bytes): Correctly
+	determine how the region the caller is writing overlaps with each
+	register's bytes.
+
+	* value.h (struct value): Doc fixes.
+
+	* valops.c (value_assign): Clarify error message.
 
 1999-12-01  Christopher Faylor  <cgf@cygnus.com>
 
@@ -187,7 +232,7 @@ Mon Nov 29 11:28:21 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* stabsread.c: Revert 1999-11-09 Jim Blandy
  	<jimb@zwingli.cygnus.com> and 1999-11-08 Jim Blandy
- 	<jimb@zenia.red-bean.com>.  Broken on non-Linux targets.
+ 	<jimb@cygnus.com>.  Broken on non-Linux targets.
 
 1999-11-26  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
@@ -231,7 +276,7 @@ Wed Nov 17 17:01:06 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* Makefile.in (i386-tdep.o): Update list of dependencies.
 
-1999-11-22  Jim Blandy  <jimb@zenia.red-bean.com>
+1999-11-22  Jim Blandy  <jimb@cygnus.com>
 
 	* config/i386/tm-i386v.h (NUM_REGS, REGISTER_NAMES,
 	REGISTER_BYTES, REGISTER_BYTE, REGISTER_RAW_SIZE,
@@ -272,7 +317,7 @@ Mon Nov 22 12:02:47 1999  Andrew Cagney  <cagney@b1.cygnus.com>
  	arguments.
 	(print_percentage): Make function void.
 
-1999-11-21  Jim Blandy  <jimb@zenia.red-bean.com>
+1999-11-21  Jim Blandy  <jimb@cygnus.com>
 
 	Make the bcache hash table grow.
 	* bcache.h (BCACHE_NUM_BUCKETS): Delete definition.
@@ -292,7 +337,7 @@ Mon Nov 22 12:02:47 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 	freeing the bcache's obstack directly.
 	* symfile.c (reread_symbols): Same.
 
-1999-11-20  Jim Blandy  <jimb@zenia.red-bean.com>
+1999-11-20  Jim Blandy  <jimb@cygnus.com>
 
 	* bcache.c, bcache.h: Rewritten.  New version imposes less memory
 	overhead, and has a more effective hash function, so it's probably
@@ -526,7 +571,7 @@ Tue Nov  9 15:33:43 1999  Andrew Cagney  <cagney@b1.cygnus.com>
  	statement.
 	(info_cb): Use paddr when printing addresses.
 
-1999-11-08  Jim Blandy  <jimb@zenia.red-bean.com>
+1999-11-08  Jim Blandy  <jimb@cygnus.com>
 
 	* defs.h (ULONGEST_MAX, LONGEST_MAX): New definitions.
 	* stabsread.c (read_huge_number): Parse and return LONGEST values.
@@ -951,7 +996,7 @@ Thu Nov  4 17:36:27 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* infcmd.c: Fix typo.
 
-1999-10-28  Jim Blandy  <jimb@zenia.red-bean.com>
+1999-10-28  Jim Blandy  <jimb@cygnus.com>
 
 	* gdbtypes.c (init_simd_type): The upper bound to
 	create_range_type is inclusive, not exclusive.
@@ -1096,12 +1141,12 @@ Sat Oct 23 16:39:34 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 	to avoid compiler warnings.
 	(catch_fork_command_1): Ditto.
 
-1999-10-20  Jim Blandy  <jimb@cris.red-bean.com>
+1999-10-20  Jim Blandy  <jimb@cygnus.com>
 
 	* Makefile.in (dwarf2read.o): Note that this depends on bfd/elf-bfd.h.
 	(elf_bfd_h): New variable.
 
-1999-10-19  Jim Blandy  <jimb@zenia.red-bean.com>
+1999-10-19  Jim Blandy  <jimb@cygnus.com>
 
 	* config/i386/tm-i386.h (REGISTER_NAMES): Change names of FPU
 	instruction and operand pointer registers to improve consistency,
@@ -1133,7 +1178,7 @@ Mon Oct 18 17:32:51 1999  Andrew Cagney  <cagney@b1.cygnus.com>
  	chunk/block write a run-time option. Check for quit_flag.
 	Use target_write_memory_partial for downloads.
 
-1999-10-18  Jim Blandy  <jimb@zenia.red-bean.com>
+1999-10-18  Jim Blandy  <jimb@cygnus.com>
 
 	Change Linux x86 register support to use the new tm-i386.h layout.
 	* config/i386/tm-linux.h (HAVE_I387_REGS): #define this, so we get
@@ -1247,7 +1292,7 @@ Sun Oct 17 13:58:56 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 	(generic_load): Don't cast the result of bfd_get_section_name.
   	Replace ``sect'' with ``sect_name'', use consistently.
 
-1999-10-15  Jim Blandy  <jimb@zenia.red-bean.com>
+1999-10-15  Jim Blandy  <jimb@cygnus.com>
 
 	Add beginnings of support for SIMD register types.
 	* gdbtypes.c (init_simd_type): New function for building
@@ -1268,7 +1313,7 @@ Fri Oct 15 17:46:39 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 	(_initialize_dcache): Fix description of ``set remotecache''.
   	Cache is OFF by default.
 
-1999-10-13  Jim Blandy  <jimb@zenia.red-bean.com>
+1999-10-13  Jim Blandy  <jimb@cygnus.com>
 
 	* valops.c (value_push): Don't forget to initialize container_len.
 
@@ -1331,7 +1376,7 @@ Tue Oct 12 12:19:07 1999  David Taylor  <taylor@texas.cygnus.com>
 	* config/pa/tm-hppa.h (SYMBOLS_CAN_START_WITH_DOLLAR): It's not
 	enough to #define this; you have to give it a non-zero value.
 
-1999-10-11  Jim Blandy  <jimb@zenia.red-bean.com>
+1999-10-11  Jim Blandy  <jimb@cygnus.com>
 
 	Fix from Jim Kingdon <kingdon@redhat.com>, with tweaks to make it
 	gdbarch- and bigendian-friendly:
@@ -1958,7 +2003,7 @@ Tue Sep 28 11:08:34 1999  Jeffrey A Law  (law@cygnus.com)
  	remote.c, top.c, tracepoint.c, utils.c (async_p): Change var name
  	to event_loop_p.
 	
-1999-09-28  Jim Blandy  <jimb@cris.red-bean.com>
+1999-09-28  Jim Blandy  <jimb@cygnus.com>
 
 	* hppa-tdep.c (skip_prologue_hard_way): Recognize ldo insns
 	which generate pointers into the argument list.
@@ -2278,7 +2323,7 @@ Fri Sep 17 19:28:17 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 	* breakpoints.c (delete_command): Move declaration from here.
 	* breakpoints.h (delete_command): To here.
 	
-1999-09-18  Jim Blandy  <jimb@cris.red-bean.com>
+1999-09-18  Jim Blandy  <jimb@cygnus.com>
 
 	* hppa-tdep.c (in_solib_call_trampoline): If we can't recognize
 	the instruction we're at, we're not in a stub.
@@ -2331,7 +2376,7 @@ Sat Sep 18 07:13:03 1999  Jeffrey A Law  (law@cygnus.com)
 	(inferior_event_handler): New function. Smarter inferior event
  	handling.
 
-1999-09-18  Jim Blandy  <jimb@cris.red-bean.com>
+1999-09-18  Jim Blandy  <jimb@cygnus.com>
 
 	* pa64solib.c (pa64_solib_create_inferior_hook): Remove code which
 	tries to set __d_pid; it's not relevant to PA64 shared libraries.
@@ -2358,7 +2403,7 @@ Sat Sep 18 07:13:03 1999  Jeffrey A Law  (law@cygnus.com)
 	* breakpoint.c (permanent_breakpoint_here_p): Delete.
   	Accidentally left over from previous changes.
 
-1999-09-17  Jim Blandy  <jimb@cris.red-bean.com>
+1999-09-17  Jim Blandy  <jimb@cygnus.com>
 
 	* config/pa/tm-hppa64.h (ARGS_GROW_DOWNWARD): Deleted.  There are
 	many more differences between the 32- and 64-bit ABI's than the
@@ -2484,11 +2529,11 @@ Thu Sep 16 09:04:53 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 	* remote-d10v.c: Remove.
 	* config/d10v/d10v.mt (TDEPFILES): Remove remote-d10v.o.
 
-1999-09-15  Jim Blandy  <jimb@cris.red-bean.com>
+1999-09-15  Jim Blandy  <jimb@cygnus.com>
 
 	* breakpoint.c (remove_breakpoint): Return zero, not nothing.
 
-1999-09-14  Jim Blandy  <jimb@cris.red-bean.com>
+1999-09-14  Jim Blandy  <jimb@cygnus.com>
 
 	* hppa-tdep.c (frame_chain): If the unwind info says we've saved
 	r3, don't trust it.  Call get_frame_saved_regs and see if we can
@@ -2509,7 +2554,7 @@ Tue Sep 14 14:34:28 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 	* remote-st.c (connect_command), remote-os9k.c (connect_command):
  	Fix.  Call FD_SET et.al. with FD instead of serial_t.
 
-1999-09-14  Jim Blandy  <jimb@cris.red-bean.com>
+1999-09-14  Jim Blandy  <jimb@cygnus.com>
 
 	* hppa-tdep.c (hppa_frame_find_saved_regs): The two possible
 	instructions for saving the return pointer (32- and 64-bit) save
@@ -2716,7 +2761,7 @@ Mon Sep 13 18:54:05 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 	
 Mon Sep 13 17:51:28 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
-	From 1999-09-12 Jim Blandy <jimb@cris.red-bean.com>:
+	From 1999-09-12 Jim Blandy <jimb@cygnus.com>:
 	* gdbarch.sh (generating setters): Use sed to generate the proper
 	indentation, not tr; tr's behavior is notoriously unportable.
 
@@ -4236,11 +4281,11 @@ Wed Aug  4 10:42:58 1999  Fred Fish  <fnf@cygnus.com>
 	to a CORE_ADDR look like an subtraction expression.
 	(add_symbol_file_command): Ditto.
 
-1999-07-30  Jim Blandy  <jimb@cris.red-bean.com>
+1999-07-30  Jim Blandy  <jimb@cygnus.com>
 
 	* hppa-tdep.c (pa_print_registers): Frob register output some more.
 
-1999-07-29  Jim Blandy  <jimb@cris.red-bean.com>
+1999-07-29  Jim Blandy  <jimb@cygnus.com>
 
 	* config/pa/nm-hppah.h (PTRACE_ARG3_TYPE): After more
 	consideration, make this a CORE_ADDR, like WDB did. 
@@ -4280,7 +4325,7 @@ Wed Aug  4 10:42:58 1999  Fred Fish  <fnf@cygnus.com>
 	* hppah-nat.c (child_xfer_memory): Correctly compute mask to round
 	address to an int boundary.
 
-1999-07-29  Jim Blandy  <jimb@savonarola.red-bean.com>
+1999-07-29  Jim Blandy  <jimb@cygnus.com>
 
 	Change from Ian Lance Taylor <ian@zembu.com>.  The
 	i386_linux_sigtramp* functions should be moved to
@@ -4303,7 +4348,7 @@ Wed Aug  4 10:42:58 1999  Fred Fish  <fnf@cygnus.com>
 	(i386_linux_sigtramp_saved_pc): Likewise.
 	(i386_linux_sigtramp_saved_sp): Likewise.
 
-1999-07-28  Jim Blandy  <jimb@savonarola.red-bean.com>
+1999-07-28  Jim Blandy  <jimb@cygnus.com>
 
 	* infrun.c (handle_inferior_event): Don't try to use the code for
 	stepping over a function call to also handle stepping out of a
@@ -4318,7 +4363,7 @@ Wed Aug  4 10:42:58 1999  Fred Fish  <fnf@cygnus.com>
  	from readline the same way as a multiline command. This avoids
  	missing detecting when the user presses just 'enter'.
 
-1999-07-28  Jim Blandy  <jimb@savonarola.red-bean.com>
+1999-07-28  Jim Blandy  <jimb@cygnus.com>
 
 	Provide more sanity checking:
 	* infrun.c (handle_inferior_event): Before assigning a new
@@ -4365,7 +4410,7 @@ Mon Jul 26 17:13:39 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* remote.c (_initialize_remote): "remotebreak" should be a var_boolean.
 
-1999-07-15  Jim Blandy  <jimb@cris.red-bean.com>
+1999-07-15  Jim Blandy  <jimb@cygnus.com>
 	
 	Make the output from "info registers" fit withinin 80 columns.
 	* hppa-tdep.c (pa_print_registers): Make it easy to change row and
