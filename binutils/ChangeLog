@@ -1,3 +1,8 @@
+2004-06-24  Ben Elliston  <bje@au.ibm.com>
+
+	* readelf.c (get_segment_type): Display "GNU_STACK", not just
+	"STACK", when a PT_GNU_STACK segment is encountered.
+
 2004-06-24  Alan Modra  <amodra@bigpond.net.au>
 
 	* objcopy.c (copy_section): Don't set _cooked_size.
