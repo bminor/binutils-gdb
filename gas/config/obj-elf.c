@@ -757,6 +757,18 @@ obj_elf_parse_section_letters (str, len)
 	case 'S':
 	  attr |= SHF_STRINGS;
 	  break;
+	/* Compatibility.  */
+	case 'm':
+	  if (*(str - 1) == 'a')
+	    {
+	      attr |= SHF_MERGE;
+	      if (len > 1 && str[1] == 's')
+		{
+		  attr |= SHF_STRINGS;
+		  str++, len--;
+		}
+	      break;
+	    }
 	default:
 	  {
 	    char *bad_msg = _("Unrecognized .section attribute: want a,w,x,M,S");

@@ -1,3 +1,8 @@
+2001-09-30  H.J. Lu  <hjl@gnu.org>
+
+	* config/obj-elf.c (obj_elf_parse_section_letters): Accept "am"
+	and "ams" for compatibility.
+
 2001-09-30  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* config/tc-sh.c (md_pcrel_from_section): Transformed from
