@@ -1,5 +1,11 @@
 Fri Aug 20 12:18:05 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* config.bfd (mips-*-elfl*, mips-*-elf*): New targets, using
+	mipslelf and mipsbelf respectively.
+	* config/mipslelf.mt, config/mipsbelf.mt: New files.
+	* elf32-mips.c: Added some reloc information.
+	* configure.in: Fixed error message.
+
 	* ecoff.c (ECOFF_LONG_SIZE): Removed.  Just use constants.
 
 Thu Aug 19 09:45:51 1993  David J. Mackenzie  (djm@thepub.cygnus.com)

@@ -57,7 +57,7 @@ do
 	if [ ! -f ${srcdir}/config/${bfd_target}.mt ] ; then
 	    echo '***' No file ${srcdir}/config/${bfd_target}.mt 1>&2
 	    echo '***' BFD does not support target ${bfd_target} 1>&2
-	    echo '***' Look in bfd/configure.in for supported targets 1>&2
+	    echo '***' Look in bfd/config.bfd for supported targets 1>&2
 	    exit 1
 	fi
 
