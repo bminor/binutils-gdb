@@ -1,3 +1,7 @@
+2004-05-17  Andrew Cagney  <cagney@redhat.com>
+
+	* NEWS: Mention signal fixes.
+
 2004-05-17  Randolph Chung  <tausq@debian.org>
 
 	* hppa-tdep.c (hppa_stub_frame_unwind_cache): For HPUX stub unwinding,
