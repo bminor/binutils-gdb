@@ -1,3 +1,8 @@
+2003-06-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-ppc.c (ppc_elf_suffix): Don't remove symbols other than
+	".TOC." from PPC64_TOC relocs.
+
 2003-06-17  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-ppc.c (md_apply_fix3): Allow BRTAKEN, BRNTAKEN relocs.

@@ -1613,11 +1613,11 @@ ppc_elf_suffix (str_p, exp_p)
 	*str_p = str;
 
 	if (reloc == (int) BFD_RELOC_PPC64_TOC
-	    && exp_p->X_op == O_symbol)
+	    && exp_p->X_op == O_symbol
+	    && strcmp (S_GET_NAME (exp_p->X_add_symbol), ".TOC.") == 0)
 	  {
-	    /* This reloc type ignores the symbol.  Change the symbol
-	       so that the dummy .TOC. symbol can be omitted from the
-	       object file.  */
+	    /* Change the symbol so that the dummy .TOC. symbol can be
+	       omitted from the object file.  */
 	    exp_p->X_add_symbol = &abs_symbol;
 	  }
 
