@@ -1524,9 +1524,9 @@ extern char *elfcore_write_note
 extern char *elfcore_write_prpsinfo 
   PARAMS ((bfd *, char *, int *, char *, char *));
 extern char *elfcore_write_prstatus 
-  PARAMS ((bfd *, char *, int *, pid_t, int, void *));
+  PARAMS ((bfd *, char *, int *, long, int, void *));
 extern char * elfcore_write_pstatus 
-  PARAMS ((bfd *, char *, int *, pid_t, int, void *));
+  PARAMS ((bfd *, char *, int *, long, int, void *));
 extern char *elfcore_write_prfpreg 
   PARAMS ((bfd *, char *, int *, void *, int));
 extern char *elfcore_write_prxfpreg 

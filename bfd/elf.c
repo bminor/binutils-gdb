@@ -6562,7 +6562,7 @@ elfcore_write_prstatus (abfd, buf, bufsiz, pid, cursig, gregs)
      bfd *abfd;
      char *buf;
      int *bufsiz;
-     pid_t pid;
+     long pid;
      int cursig;
      void *gregs;
 {
@@ -6584,7 +6584,7 @@ elfcore_write_pstatus (abfd, buf, bufsiz, pid, cursig, gregs)
      bfd *abfd;
      char *buf;
      int *bufsiz;
-     pid_t pid;
+     long pid;
      int cursig;
      void *gregs;
 {
