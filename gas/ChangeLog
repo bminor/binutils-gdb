@@ -1,3 +1,8 @@
+2001-03-15  DJ Delorie  <dj@redhat.com>
+
+	* stabs.c (s_stab_generic): Don't corrupt the notes obstack by
+	blindly freeing string if it isn't at the top of the obstack.
+
 2001-03-13  Alan Modra  <alan@linuxcare.com.au>
 
 	* config/tc-i386.c (RELOC_ENUM): Define.  Use throughout file.
