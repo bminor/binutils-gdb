@@ -1,3 +1,8 @@
+2002-02-01  Ben Elliston  <bje@redhat.com>
+
+	* config.guess: Import from master sources, rev 1.229.
+	* config.sub: Import from master sources, rev 1.240.
+
 2002-01-17  H.J. Lu  (hjl@gnu.org)
 
 	* support/config.guess: Import from master sources, rev 1.225.
