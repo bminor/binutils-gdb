@@ -1083,6 +1083,9 @@ ppc_linux_init_abi (struct gdbarch_info info,
       set_gdbarch_in_solib_call_trampoline
         (gdbarch, ppc64_in_solib_call_trampoline);
       set_gdbarch_skip_trampoline_code (gdbarch, ppc64_skip_trampoline_code);
+
+      /* PPC64 malloc's entry-point is called ".malloc".  */
+      set_gdbarch_name_of_malloc (gdbarch, ".malloc");
     }
 }
 
