@@ -163,8 +163,7 @@ mips64*vr5000*el-*-elf*)	gdb_target=vr5000el ;;
 mips64*vr5000*-*-elf*)	gdb_target=vr5000
 		configdirs="${configdirs} gdbserver" ;;
 # start-sanitize-r5900
-mips64*vr5900*el-*-elf*)	gdb_target=vr5000el ;;
-mips64*vr5900*-*-elf*)	gdb_target=vr5000 ;;
+mips64*r5900*-*-elf*)	gdb_target=vr5000el ;;
 # end-sanitize-r5900
 # start-sanitize-tx19
 mips-tx19*el-* | mips*tx19*el-*-*)
