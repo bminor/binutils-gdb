@@ -38,6 +38,13 @@ Fri Jun 26 12:03:20 1998  Klaus Kaempf  <kkaempf@progis.de>
 	(disassembler): Add case for ARCH_vax.
 	* makefile.vms: Support compilation on vms/vax.
 
+start-sanitize-sky
+Wed Jun 24 17:14:01 1998  Ian Carmichael  <iancarm@cygnus.com>
+
+	* dvp-opc.c (DVP_OPERAND_RELOC_11_S4): Temporarily back out 
+	the DVP_OPERAND_RELOC_11_S4 relocation.
+
+end-sanitize-sky
 start-sanitize-am33
 Wed Jun 24 09:53:06 1998  Jeffrey A Law  (law@cygnus.com)
 
@@ -71,6 +78,14 @@ Tue Jun 23 10:59:26 1998  Jeffrey A Law  (law@cygnus.com)
 	instructions.  Support (sp) addressing mode by expanding it into
 	(0,sp).
 
+start-sanitize-sky
+Mon Jun 22 15:48:29 1998  Ian Carmichael  <iancarm@cygnus.com>
+
+	* dvp-opc.c (LIMM11, LUIMM15): New symbol types 
+	DVP_OPERAND_RELOC_U15_S3 and DVP_OPERAND_RELOC_11_S4 to allow labels to 
+	be used as immediate values.
+
+end-sanitize-sky
 start-sanitize-am33
 Mon Jun 22 13:36:27 1998  Jeffrey A Law  (law@cygnus.com)
 
