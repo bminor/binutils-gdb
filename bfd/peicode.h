@@ -783,7 +783,7 @@ static void add_data_entry (abfd, aout, idx, name, base)
   if (sec != NULL)
     {
       aout->DataDirectory[idx].VirtualAddress = sec->vma - base;
-      aout->DataDirectory[idx].Size = sec->_cooked_size;
+      aout->DataDirectory[idx].Size = pei_section_data (abfd, sec)->virt_size;
       sec->flags |= SEC_DATA;
     }
 }
@@ -1065,7 +1065,6 @@ coff_swap_scnhdr_out (abfd, in, out)
     else if (strcmp (scnhdr_int->s_name, ".rdata") == 0
 	     || strcmp (scnhdr_int->s_name, ".edata") == 0)
       flags =  IMAGE_SCN_MEM_READ | SEC_DATA;     
-    /* ppc-nt additions */
     else if (strcmp (scnhdr_int->s_name, ".pdata") == 0)
       flags = IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN_ALIGN_4BYTES |
 			  IMAGE_SCN_MEM_READ ;
@@ -1077,9 +1076,8 @@ coff_swap_scnhdr_out (abfd, in, out)
     else if (strcmp (scnhdr_int->s_name, ".ydata") == 0)
       flags =  IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN_ALIGN_8BYTES |
 	       IMAGE_SCN_MEM_READ | IMAGE_SCN_MEM_WRITE ;
-    else if (strcmp (scnhdr_int->s_name, ".drectve") == 0)
+    else if (strncmp (scnhdr_int->s_name, ".drectve", strlen(".drectve")) == 0)
       flags =  IMAGE_SCN_LNK_INFO | IMAGE_SCN_LNK_REMOVE ;
-    /* end of ppc-nt additions */
 #ifdef POWERPC_LE_PE
     else if (strncmp (scnhdr_int->s_name, ".stabstr", strlen(".stabstr")) == 0)
       {
