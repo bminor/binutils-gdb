@@ -1,3 +1,10 @@
+Mon Jan 17 22:00:15 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* xcoffread.c (read_xcoff_symtab, case C_FILE): Accept the name
+	from either the symbol name or the auxent.
+	* coffread.c, symfile.h (coff_getfilename): Renamed from getfilename,
+	no longer static.
+
 Mon Jan 17 13:35:01 1994  Fred Fish  (fnf@cygnus.com)
 
 	* Makefile.in (ALLPARAM):  Change irix5.h to nm-irix5.h.

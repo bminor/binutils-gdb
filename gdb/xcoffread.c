@@ -1381,15 +1381,23 @@ function_entry_point:
       cur_src_end_addr = file_end_addr;
       end_symtab (file_end_addr, 1, 0, objfile, textsec->target_index);
       end_stabs ();
+
+      /* XCOFF, according to the AIX 3.2 documentation, puts the filename
+	 in cs->c_name.  But xlc 1.3.0.2 has decided to do things the
+	 standard COFF way and put it in the auxent.  We use the auxent if
+	 there is one, otherwise use the name.  Simple enough.  */
+      if (cs->c_naux > 0)
+	filestring = coff_getfilename (&main_aux);
+      else
+	filestring = cs->c_name;
+
       start_stabs ();
-      start_symtab (cs->c_name, (char *)NULL, (CORE_ADDR)0);
+      start_symtab (filestring, (char *)NULL, (CORE_ADDR)0);
       last_csect_name = 0;
 
       /* reset file start and end addresses. A compilation unit with no text
          (only data) should have zero file boundaries. */
       file_start_addr = file_end_addr = 0;
-
-      filestring = cs->c_name;
       break;
 
 

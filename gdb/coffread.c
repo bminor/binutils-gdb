@@ -76,13 +76,10 @@ struct coff_symfile_info {
 static CORE_ADDR cur_src_start_addr;
 static CORE_ADDR cur_src_end_addr;
 
-/* Core address of the end of the first object file.  */
-static CORE_ADDR first_object_file_end;
-
 /* The addresses of the symbol table stream and number of symbols
    of the object file we are reading (as copied into core).  */
 
-static FILE *nlist_stream_global;
+static GDB_FILE *nlist_stream_global;
 static int nlist_nsyms_global;
 
 /* Vector of line number information.  */
@@ -225,9 +222,6 @@ static int
 init_lineno PARAMS ((int, long, int));
 
 static char *
-getfilename PARAMS ((union internal_auxent *));
-
-static char *
 getsymname PARAMS ((struct internal_syment *));
 
 static void
@@ -258,8 +252,8 @@ coff_symfile_read PARAMS ((struct objfile *, struct section_offsets *, int));
 static void
 coff_symfile_finish PARAMS ((struct objfile *));
 
-static void
-record_minimal_symbol PARAMS ((char *, CORE_ADDR, enum minimal_symbol_type));
+static void record_minimal_symbol
+  PARAMS ((char *, CORE_ADDR, enum minimal_symbol_type, struct objfile *));
 
 static void
 coff_end_symtab PARAMS ((struct objfile *));
@@ -484,15 +478,17 @@ coff_end_symtab (objfile)
 }
 
 static void
-record_minimal_symbol (name, address, type)
+record_minimal_symbol (name, address, type, objfile)
      char *name;
      CORE_ADDR address;
      enum minimal_symbol_type type;
+     struct objfile *objfile;
 {
   /* We don't want TDESC entry points in the minimal symbol table */
   if (name[0] == '@') return;
 
-  prim_record_minimal_symbol (savestring (name, strlen (name)), address, type);
+  prim_record_minimal_symbol (savestring (name, strlen (name)), address, type,
+			      objfile);
 }
 
 /* coff_symfile_init ()
@@ -610,7 +606,7 @@ coff_symfile_read (objfile, section_offsets, mainline)
   symfile_bfd = abfd;			/* Kludge for swap routines */
 
 /* WARNING WILL ROBINSON!  ACCESSING BFD-PRIVATE DATA HERE!  FIXME!  */
-   desc = fileno ((FILE *)(abfd->iostream));	/* File descriptor */
+   desc = fileno ((GDB_FILE *)(abfd->iostream));	/* File descriptor */
    num_symbols = bfd_get_symcount (abfd);	/* How many syms */
    symtab_offset = cdata->sym_filepos;		/* Symbol table file offset */
    stringtab_offset = symtab_offset +		/* String table file offset */
@@ -682,7 +678,7 @@ coff_symfile_read (objfile, section_offsets, mainline)
     {
       /* FIXME: dubious.  Why can't we use something normal like
 	 bfd_get_section_contents?  */
-      fseek ((FILE *) abfd->iostream, abfd->where, 0);
+      fseek ((GDB_FILE *) abfd->iostream, abfd->where, 0);
 
       stabsize = bfd_section_size (abfd, info->stabsect);
       stabstrsize = bfd_section_size (abfd, info->stabstrsect);
@@ -730,7 +726,7 @@ read_coff_symtab (symtab_offset, nsyms, objfile)
      int nsyms;
      struct objfile *objfile;
 {
-  FILE *stream; 
+  GDB_FILE *stream; 
   register struct context_stack *new;
   struct coff_symbol coff_symbol;
   register struct coff_symbol *cs = &coff_symbol;
@@ -743,7 +739,6 @@ read_coff_symtab (symtab_offset, nsyms, objfile)
   
   /* A .file is open.  */
   int in_source_file = 0;
-  int num_object_files = 0;
   int next_file_symnum = -1;
 
   /* Name of the current file.  */
@@ -814,7 +809,7 @@ read_coff_symtab (symtab_offset, nsyms, objfile)
 	    coff_end_symtab (objfile);
 
 	  coff_start_symtab ();
-	  complete_symtab ("_globals_", 0, first_object_file_end);
+	  complete_symtab ("_globals_", 0, 0);
 	  /* done with all files, everything from here on out is globals */
 	}
 
@@ -827,7 +822,7 @@ read_coff_symtab (symtab_offset, nsyms, objfile)
       if (ISFCN (cs->c_type) && cs->c_sclass != C_TPDEF)
 	{
 	  /* Record all functions -- external and static -- in minsyms. */
-	  record_minimal_symbol (cs->c_name, cs->c_value, mst_text);
+	  record_minimal_symbol (cs->c_name, cs->c_value, mst_text, objfile);
 
 	  fcn_line_ptr = main_aux.x_sym.x_fcnary.x_fcn.x_lnnoptr;
 	  fcn_start_addr = cs->c_value;
@@ -856,7 +851,7 @@ read_coff_symtab (symtab_offset, nsyms, objfile)
 	     */
 	    next_file_symnum = cs->c_value;
 	    if (cs->c_naux > 0)
-	      filestring = getfilename (&main_aux);
+	      filestring = coff_getfilename (&main_aux);
 	    else
 	      filestring = "";
 
@@ -877,11 +872,6 @@ read_coff_symtab (symtab_offset, nsyms, objfile)
 		    if (STREQ (cs->c_name, ".text")) {
 			    /* FIXME:  don't wire in ".text" as section name
 				       or symbol name! */
-			    if (++num_object_files == 1) {
-				    /* last address of startup file */
-				    first_object_file_end = cs->c_value +
-					    main_aux.x_scn.x_scnlen;
-			    }
 			    /* Check for in_source_file deals with case of
 			       a file with debugging symbols
 			       followed by a later file with no symbols.  */
@@ -922,11 +912,11 @@ read_coff_symtab (symtab_offset, nsyms, objfile)
 		But why are absolute syms recorded as functions, anyway?  */
 		    if (cs->c_secnum <= text_bfd_scnum+1) {/* text or abs */
 			    record_minimal_symbol (cs->c_name, cs->c_value,
-						   mst_text);
+						   mst_text, objfile);
 			    break;
 		    } else {
 			    record_minimal_symbol (cs->c_name, cs->c_value,
-						   mst_data);
+						   mst_data, objfile);
 			    break;
 		    }
 	    }
@@ -1214,7 +1204,7 @@ getsymname (symbol_entry)
    is only good for temporary use.  */
 
 static char *
-getfilename (aux_entry)
+coff_getfilename (aux_entry)
     union internal_auxent *aux_entry;
 {
   static char buffer[BUFSIZ];
