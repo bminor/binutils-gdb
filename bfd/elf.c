@@ -6835,7 +6835,8 @@ elfcore_grok_netbsd_procinfo (bfd *abfd, Elf_Internal_Note *note)
   elf_tdata (abfd)->core_command
     = _bfd_elfcore_strndup (abfd, note->descdata + 0x7c, 31);
 
-  return TRUE;
+  return elfcore_make_note_pseudosection (abfd, ".note.netbsdcore.procinfo",
+					  note);
 }
 
 static bfd_boolean

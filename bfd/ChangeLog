@@ -1,3 +1,8 @@
+2003-11-27  Mark Kettenis  <kettenis@gnu.org>
+
+	* elf.c (elfcore_grok_netbsd_procinfo): Make a pseudosection out
+	of the note.
+
 2003-11-26  Daniel Jacobowitz  <drow@mvista.com>
             Richard Sandiford  <rsandifo@redhat.com>
 
