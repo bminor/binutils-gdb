@@ -1,3 +1,8 @@
+Wed Jul  3 16:03:47 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* sparc-dis.c (print_insn_sparclite):  New routine to print
+	sparclite instructions.
+
 Wed Jul  3 14:21:18 1996  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* m68k-opc.c (m68k_opcodes): Add coldfire support.
