@@ -51,6 +51,7 @@ gdb.c++
 gdb.chill
 gdb.disasm
 gdb.fortran
+gdb.hp
 gdb.stabs
 gdb.threads
 gdb.trace
