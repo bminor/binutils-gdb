@@ -27,31 +27,44 @@ Boston, MA 02111-1307, USA.  */
     instruction's name rather than the args.  This would make gas faster, pinsn
     slower, but would mess up some macros a bit.  xoxorich. */
 
-#define sparc_architecture	bfd_sparc_architecture
-#define architecture_pname	bfd_sparc_architecture_pname
-#define sparc_opcode		bfd_sparc_opcode
-#define sparc_opcodes		bfd_sparc_opcodes
+/* List of instruction sets variations.
+   These values are such that each element is either a superset of a
+   preceding one or they conflict in which case SPARC_OPCODE_CONFLICT_P
+   returns non-zero.
+   The values are indices into `sparc_opcode_archs' defined in sparc-opc.c.
+   Don't change this without updating sparc-opc.c.  */
 
-/*
- * Structure of an opcode table entry.
- * This enumerator must parallel the architecture_pname array
- * in opcodes/sparc-opc.c.
- */
-enum sparc_architecture {
-	v6 = 0,
-	v7,
-	v8,
-	sparclite,
-	v9,
-	v9a /* v9 with ultrasparc additions */
+enum sparc_opcode_arch_val {
+  SPARC_OPCODE_ARCH_V6 = 0,
+  SPARC_OPCODE_ARCH_V7,
+  SPARC_OPCODE_ARCH_V8,
+  SPARC_OPCODE_ARCH_SPARCLITE,
+  /* v9 variants must appear last */
+  SPARC_OPCODE_ARCH_V9,
+  SPARC_OPCODE_ARCH_V9A, /* v9 with ultrasparc additions */
+  SPARC_OPCODE_ARCH_BAD /* error return from sparc_opcode_lookup_arch */
 };
 
-extern const char *architecture_pname[];
+/* The highest architecture in the table.  */
+#define SPARC_OPCODE_ARCH_MAX (SPARC_OPCODE_ARCH_BAD - 1)
 
-/* Sparclite and v9 are both supersets of v8; we can't bump between them.  */
+/* Table of cpu variants.  */
 
-#define ARCHITECTURES_CONFLICT_P(ARCH1, ARCH2) \
-((ARCH1) == sparclite && ((ARCH2) == v9 || (ARCH2) == v9a))
+struct sparc_opcode_arch {
+  const char *name;
+  int conflicts;
+};
+
+extern const struct sparc_opcode_arch sparc_opcode_archs[];
+
+extern enum sparc_opcode_arch_val sparc_opcode_lookup_arch ();
+
+/* Non-zero if ARCH1 conflicts with ARCH2.  */
+
+#define SPARC_OPCODE_CONFLICT_P(ARCH1, ARCH2) \
+((1 << (ARCH1)) & sparc_opcode_archs[ARCH2].conflicts)
+
+/* Structure of an opcode table entry.  */
 
 struct sparc_opcode {
 	const char *name;
@@ -60,7 +73,7 @@ struct sparc_opcode {
 	const char *args;
  /* This was called "delayed" in versions before the flags. */
 	char flags;
-	enum sparc_architecture architecture;
+	enum sparc_opcode_arch_val architecture;
 };
 
 #define	F_DELAYED	1	/* Delayed branch */
@@ -175,9 +188,7 @@ The following chars are unused: (note: ,[] are used as punctuation)
 #define	RS2_G0	RS2(~0)
 
 extern struct sparc_opcode sparc_opcodes[];
-extern const int bfd_sparc_num_opcodes;
-
-#define NUMOPCODES bfd_sparc_num_opcodes
+extern const int sparc_num_opcodes;
 
 int sparc_encode_asi ();
 char *sparc_decode_asi ();
