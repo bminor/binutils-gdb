@@ -120,6 +120,10 @@ typedef struct txvu_operand {
    Parse and print routines are ignored for FAKE operands.  */
 #define TXVU_OPERAND_FAKE 0x80
 
+  /*
+  This operand can be either an asterisk or an expression...TODO */
+#define TXVU_OPERAND_DMA_COUNT 0x100
+
 /* Modifier values.  */
 
 /* A dot is required before a suffix.  e.g. .le  */
@@ -303,6 +307,7 @@ extern /*const*/ txvu_opcode dma_opcodes[];
 extern const int dma_opcodes_count;
 const txvu_opcode *dma_opcode_lookup_asm PARAMS ((const char *));
 const txvu_opcode *dma_opcode_lookup_dis PARAMS ((unsigned int));
+int txvu_dma_operand_count PARAMS((int));
 
 /* GPUIF support.  */
 
