@@ -308,6 +308,13 @@ serial_t remote_desc = NULL;
 #define	PBUFSIZ	(REGISTER_BYTES * 2 + 32)
 #endif
 
+/* This variable sets the number of bytes to be written to the target
+   in a single packet.  Normally PBUFSIZ is satisfactory, but some
+   targets need smaller values (perhaps because the receiving end
+   is slow).  */
+
+static int remote_write_size = PBUFSIZ;
+
 /* Should we try the 'P' request?  If this is set to one when the stub
    doesn't support 'P', the only consequence is some unnecessary traffic.  */
 static int stub_supports_P = 1;
@@ -1071,7 +1078,8 @@ remote_write_bytes (memaddr, myaddr, len)
   while (done < len)
     {
       int todo = len - done;
-      int cando = PBUFSIZ /2 - 32; /* number of bytes that will fit. */
+      int cando = min(remote_write_size, PBUFSIZ) / 2 - 32; /* num bytes that will fit */
+
       if (todo > cando)
 	todo = cando;
 
@@ -1684,19 +1692,33 @@ extended_remote_create_inferior (exec_file, args, env)
 }
 
 
+/* On some machines, e.g. 68k, we may use a different breakpoint instruction
+   than other targets; in those use REMOTE_BREAKPOINT instead of just
+   BREAKPOINT.  Also, bi-endian targets may define LITTLE_REMOTE_BREAKPOINT
+   and BIG_REMOTE_BREAKPOINT.  If none of these are defined, we just call
+   the standard routines that are in mem-break.c.  */
+
+/* FIXME, these ought to be done in a more dynamic fashion.  For instance,
+   the choice of breakpoint instruction affects target program design and
+   vice versa, and by making it user-tweakable, the special code here
+   goes away and we need fewer special GDB configurations.  */
+
+#if defined (LITTLE_REMOTE_BREAKPOINT) && defined (BIG_REMOTE_BREAKPOINT) && !defined(REMOTE_BREAKPOINT)
+#define REMOTE_BREAKPOINT
+#endif
+
 #ifdef REMOTE_BREAKPOINT
 
-/* On some machines, e.g. 68k, we may use a different breakpoint instruction
-   than other targets.  */
-static unsigned char break_insn[] = REMOTE_BREAKPOINT;
+/* If the target isn't bi-endian, just pretend it is.  */
+#if !defined (LITTLE_REMOTE_BREAKPOINT) && !defined (BIG_REMOTE_BREAKPOINT)
+#define LITTLE_REMOTE_BREAKPOINT REMOTE_BREAKPOINT
+#define BIG_REMOTE_BREAKPOINT REMOTE_BREAKPOINT
+#endif
 
-#else /* No REMOTE_BREAKPOINT.  */
+static unsigned char big_break_insn[] = BIG_REMOTE_BREAKPOINT;
+static unsigned char little_break_insn[] = LITTLE_REMOTE_BREAKPOINT;
 
-/* Same old breakpoint instruction.  This code does nothing different
-   than mem-break.c.  */
-static unsigned char break_insn[] = BREAKPOINT;
-
-#endif /* No REMOTE_BREAKPOINT.  */
+#endif /* REMOTE_BREAKPOINT */
 
 /* Insert a breakpoint on targets that don't have any better breakpoint
    support.  We read the contents of the target location and stash it,
@@ -1711,14 +1733,25 @@ remote_insert_breakpoint (addr, contents_cache)
      CORE_ADDR addr;
      char *contents_cache;
 {
+#ifdef REMOTE_BREAKPOINT
   int val;
 
-  val = target_read_memory (addr, contents_cache, sizeof break_insn);
+  val = target_read_memory (addr, contents_cache, sizeof big_break_insn);
 
   if (val == 0)
-    val = target_write_memory (addr, (char *)break_insn, sizeof break_insn);
+    {
+      if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+	val = target_write_memory (addr, (char *) big_break_insn,
+				   sizeof big_break_insn);
+      else
+	val = target_write_memory (addr, (char *) little_break_insn,
+				   sizeof little_break_insn);
+    }
 
   return val;
+#else
+  return memory_insert_breakpoint (addr, contents_cache);
+#endif /* REMOTE_BREAKPOINT */
 }
 
 static int
@@ -1726,7 +1759,11 @@ remote_remove_breakpoint (addr, contents_cache)
      CORE_ADDR addr;
      char *contents_cache;
 {
-  return target_write_memory (addr, contents_cache, sizeof break_insn);
+#ifdef REMOTE_BREAKPOINT
+  return target_write_memory (addr, contents_cache, sizeof big_break_insn);
+#else
+  return memory_remove_breakpoint (addr, contents_cache);
+#endif /* REMOTE_BREAKPOINT */
 }
 
 /* Define the target subroutine names */
@@ -1835,5 +1872,10 @@ _initialize_remote ()
   add_show_from_set (add_set_cmd ("remotebreak", no_class,
 				  var_integer, (char *)&remote_break,
 				  "Set whether to send break if interrupted.\n", &setlist),
+		     &showlist);
+
+  add_show_from_set (add_set_cmd ("remotewritesize", no_class,
+				  var_integer, (char *)&remote_write_size,
+				  "Set the maximum number of bytes in each memory write packet.\n", &setlist),
 		     &showlist);
 }

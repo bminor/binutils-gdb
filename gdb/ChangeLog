@@ -1,5 +1,14 @@
 Sun Apr 28 15:08:05 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
+	Support for bi-endian remote breakpoints.
+	* remote.c (big_break_insn, little_break_insn): New globals.
+	(break_insn): Remove.
+	(remote_insert_breakpoint, remote_remove_breakpoint): Use own
+	code if REMOTE_BREAKPOINT defined, otherwise call memory
+	breakpoint functions.
+	* config/sh/tm-sh.h (REMOTE_BREAKPOINT): Remove.
+	(BIG_REMOTE_BREAKPOINT, LITTLE_REMOTE_BREAKPOINT): Define.
+
 	* mon960-rom.c (mon960_cmds): Remove forward decl.
 	(mon960_load): Use current_monitor instead of mon960_cmds.
 	(mon960_regnames): Remove backslashes from line ends.

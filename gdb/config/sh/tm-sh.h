@@ -60,7 +60,9 @@ extern CORE_ADDR sh_skip_prologue ();
 
 #define BREAKPOINT {0xc3, 0xc3}  /* 0xc3c3 is trapa #c3, and it works in big 
 				    and little endian modes  */
-#define REMOTE_BREAKPOINT { 0xc3, 0x20}
+
+#define BIG_REMOTE_BREAKPOINT    { 0xc3, 0x20 }
+#define LITTLE_REMOTE_BREAKPOINT { 0x20, 0xc3 }
 
 /* If your kernel resets the pc after the trap happens you may need to
    define this before including this file.  */
