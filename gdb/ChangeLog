@@ -1,3 +1,7 @@
+Mon Aug 30 17:51:32 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
+
+	* configure.in: recognize m88110 as an m88k.
+
 Mon Aug 30 16:07:59 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* valops.c (call_function_by_hand): If we discard cleanups, call
