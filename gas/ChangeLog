@@ -1,5 +1,9 @@
 Mon Dec 28 10:32:05 1992  Ken Raeburn  (raeburn@cygnus.com)
 
+	* app.c (app_push): Use memcpy, not bcopy.
+	(do_scrub_next_char): For \", return " not '.
+	(symbol_chars): Now const.
+
 	* expr.c (operand): If not LOCAL_LABELS_FB, don't look for "0f"
 	and "0b".  If LOCAL_LABELS_DOLLAR, check for "0$".
 

@@ -36,7 +36,7 @@
 #endif
 
 static char lex[256];
-static char symbol_chars[] =
+static const char symbol_chars[] =
 "$._ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
 #define LEX_IS_SYMBOL_COMPONENT		1
@@ -181,7 +181,7 @@ app_push ()
   saved->state = state;
   saved->old_state = old_state;
   saved->out_string = out_string;
-  bcopy (saved->out_buf, out_buf, sizeof (out_buf));
+  memcpy (out_buf, saved->out_buf, sizeof (out_buf));
   saved->add_newlines = add_newlines;
   saved->scrub_string = scrub_string;
   saved->scrub_last_string = scrub_last_string;
@@ -210,6 +210,8 @@ app_pop (arg)
   free (arg);
 }				/* app_pop() */
 
+/* @@ This assumes that \n &c are the same on host and target.  This is not
+   necessarily true.  */
 int 
 process_escape (ch)
      char ch;
@@ -229,7 +231,7 @@ process_escape (ch)
     case '\'':
       return '\'';
     case '"':
-      return '\'';
+      return '\"';
     default:
       return ch;
     }
@@ -341,9 +343,8 @@ do_scrub_next_char (get, unget)
       ch = (*get) ();
       switch (ch)
 	{
-	  /* This is neet.  Turn "string
-			   more string" into "string\n  more string"
-			   */
+	  /* Handle strings broken across lines, by turning '\n' into
+	     '\\' and 'n'.  */
 	case '\n':
 	  (*unget) ('n');
 	  add_newlines++;
@@ -429,9 +430,9 @@ recycle:
 #endif
 
       /* If we're in state 2, we've seen a non-white
-		   character followed by whitespace.  If the next
-		   character is ':', this is whitespace after a label
-		   name which we can ignore.  */
+	 character followed by whitespace.  If the next
+	 character is ':', this is whitespace after a label
+	 name which we can ignore.  */
       if (state == 2 && lex[ch] == LEX_IS_COLON)
 	{
 	  state = 0;
