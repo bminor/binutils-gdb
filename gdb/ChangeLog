@@ -1,3 +1,8 @@
+2003-11-05  Mark Kettenis  <kettenis@gnu.org>
+
+	* amd64fbsd-tdep.c (amd64fbsd_sc_reg_offset): Adjust offset of
+	%rsp, %rip and %eflags to match ABI-change.
+
 2003-11-05  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* ia64-tdep.c (struct gdbarch_tdep): Remove os_ident field.
