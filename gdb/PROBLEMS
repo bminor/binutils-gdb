@@ -1,3 +1,9 @@
+
+		Known problems in GDB 5.1
+
+See also the bug database http://www.gnu.org/software/gdb/bugs/
+
+
 hppa2.0-hp-hpux10.20
 
 Due to a problem (conflicting types) with libiberty/regex.c, GDB 5.1

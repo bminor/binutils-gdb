@@ -1,6 +1,6 @@
 2001-12-07  Andrew Cagney  <ac131313@redhat.com>
 
-	* PROBLEMS: New file.
+	* PROBLEMS: New file.  Add title.
 	* README: Move known problems to PROBLEMS file.
 
 2001-12-06  Elena Zannoni  <ezannoni@redhat.com>
