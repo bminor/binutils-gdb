@@ -1503,14 +1503,15 @@ match_integer_literal ()
 static int
 match_bitstring_literal ()
 {
-  char *tokptr = lexptr;
-  int mask;
+  register char *tokptr = lexptr;
   int bitoffset = 0;
   int bitcount = 0;
-  int base;
+  int bits_per_char;
   int digit;
   
   tempbufindex = 0;
+  CHECKBUF (1);
+  tempbuf[0] = 0;
 
   /* Look for the required explicit base specifier. */
   
@@ -1518,21 +1519,21 @@ match_bitstring_literal ()
     {
     case 'b':
     case 'B':
-      base = 2;
+      bits_per_char = 1;
       break;
     case 'o':
     case 'O':
-      base = 8;
+      bits_per_char = 3;
       break;
     case 'h':
     case 'H':
-      base = 16;
+      bits_per_char = 4;
       break;
     default:
       return (0);
       break;
     }
-  
+
   /* Ensure that the character after the explicit base is a single quote. */
   
   if (*tokptr++ != '\'')
@@ -1562,29 +1563,33 @@ match_bitstring_literal ()
 	    return (0);
 	    break;
 	}
-      if (digit >= base)
+      if (digit >= 1 << bits_per_char)
 	{
 	  /* Found something not in domain for current base. */
 	  return (0);
 	}
       else
 	{
-	  /* Extract bits from digit, starting with the msbit appropriate for
-	     the current base, and packing them into the bitstring byte,
-	     starting at the lsbit. */
-	  for (mask = (base >> 1); mask > 0; mask >>= 1)
+	  /* Extract bits from digit, packing them into the bitstring byte. */
+	  int k = TARGET_BYTE_ORDER == BIG_ENDIAN ? bits_per_char - 1 : 0;
+	  for (; TARGET_BYTE_ORDER == BIG_ENDIAN ? k >= 0 : k < bits_per_char;
+	       TARGET_BYTE_ORDER == BIG_ENDIAN ? k-- : k++)
 	    {
 	      bitcount++;
-	      CHECKBUF (1);
-	      if (digit & mask)
+	      if (digit & (1 << k))
 		{
-		  tempbuf[tempbufindex] |= (1 << bitoffset);
+		  tempbuf[tempbufindex] |=
+		    (TARGET_BYTE_ORDER == BIG_ENDIAN)
+		      ? (1 << (HOST_CHAR_BIT - 1 - bitoffset))
+			: (1 << bitoffset);
 		}
 	      bitoffset++;
 	      if (bitoffset == HOST_CHAR_BIT)
 		{
 		  bitoffset = 0;
 		  tempbufindex++;
+		  CHECKBUF(1);
+		  tempbuf[tempbufindex] = 0;
 		}
 	    }
 	}

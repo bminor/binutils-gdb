@@ -479,7 +479,7 @@ create_set_type (result_type, domain_type)
       high_bound = TYPE_HIGH_BOUND (domain_type);
       bit_length = high_bound - low_bound + 1;
       TYPE_LENGTH (result_type)
-	= ((bit_length + TARGET_INT_BIT - 1) / TARGET_INT_BIT)
+	= ((bit_length + TARGET_CHAR_BIT - 1) / TARGET_CHAR_BIT)
 	  * TARGET_CHAR_BIT;
     }
   TYPE_FIELD_TYPE (result_type, 0) = domain_type;

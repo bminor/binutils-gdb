@@ -30,6 +30,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "language.h"
 
 #include <errno.h>
+#include <string.h>
 
 /* Local functions.  */
 
@@ -463,7 +464,7 @@ Can't handle bitfield which doesn't fit in a single register.");
 					+ MAX_REGISTER_RAW_SIZE);
 
 	int regno;
-	FRAME frame;
+	struct frame_info *frame;
 
 	/* Figure out which frame this is in currently.  */
 	for (frame = get_current_frame ();
@@ -578,15 +579,15 @@ value_of_variable (var, b)
      struct block *b;
 {
   value_ptr val;
-  FRAME fr;
+  struct frame_info *frame;
 
   if (b == NULL)
     /* Use selected frame.  */
-    fr = NULL;
+    frame = NULL;
   else
     {
-      fr = block_innermost_frame (b);
-      if (fr == NULL && symbol_read_needs_frame (var))
+      frame = block_innermost_frame (b);
+      if (frame == NULL && symbol_read_needs_frame (var))
 	{
 	  if (BLOCK_FUNCTION (b) != NULL
 	      && SYMBOL_NAME (BLOCK_FUNCTION (b)) != NULL)
@@ -596,7 +597,7 @@ value_of_variable (var, b)
 	    error ("No frame is currently executing in specified block");
 	}
     }
-  val = read_var_value (var, fr);
+  val = read_var_value (var, frame);
   if (val == 0)
     error ("Address of symbol \"%s\" is unknown.", SYMBOL_SOURCE_NAME (var));
   return val;
@@ -1296,6 +1297,21 @@ value_string (ptr, len)
   val = value_at_lazy (stringtype, addr);
   return (val);
 }
+
+value_ptr
+value_bitstring (ptr, len)
+     char *ptr;
+     int len;
+{
+  value_ptr val;
+  struct type *domain_type = create_range_type (NULL, builtin_type_int,
+						0, len - 1);
+  struct type *type = create_set_type ((struct type*) NULL, domain_type);
+  TYPE_CODE (type) = TYPE_CODE_BITSTRING;
+  val = allocate_value (type);
+  memcpy (VALUE_CONTENTS_RAW (val), ptr, TYPE_LENGTH (type) / TARGET_CHAR_BIT);
+  return val;
+}
 
 /* See if we can pass arguments in T2 to a function which takes arguments
    of types T1.  Both t1 and t2 are NULL-terminated vectors.  If some
@@ -1406,6 +1422,17 @@ search_struct_field (name, arg1, offset, type, looking_for_baseclass)
 	    if (v == 0)
 	      error("there is no field named %s", name);
 	    return v;
+	  }
+	if (t_field_name && t_field_name[0] == '\0'
+	    && TYPE_CODE (TYPE_FIELD_TYPE (type, i)) == TYPE_CODE_UNION)
+	  {
+	    /* Look for a match through the fields of an anonymous union.  */
+	    value_ptr v;
+	    v = search_struct_field (name, arg1, offset,
+				     TYPE_FIELD_TYPE (type, i),
+				     looking_for_baseclass);
+	    if (v)
+	      return v;
 	  }
       }
 
@@ -1661,7 +1688,15 @@ destructor_name_p (name, type)
   if (name[0] == '~')
     {
       char *dname = type_name_no_tag (type);
-      if (!STREQ (dname, name+1))
+      char *cp = strchr (dname, '<');
+      int len;
+
+      /* Do not compare the template part for template classes.  */
+      if (cp == NULL)
+	len = strlen (dname);
+      else
+	len = cp - dname;
+      if (strlen (name + 1) != len || !STREQN (dname, name + 1, len))
 	error ("name of destructor must equal name of class");
       else
 	return 1;
@@ -1886,11 +1921,11 @@ value_struct_elt_for_reference (domain, offset, curtype, name, intype)
 /* C++: return the value of the class instance variable, if one exists.
    Flag COMPLAIN signals an error if the request is made in an
    inappropriate context.  */
+
 value_ptr
 value_of_this (complain)
      int complain;
 {
-  extern FRAME selected_frame;
   struct symbol *func, *sym;
   struct block *b;
   int i;

@@ -346,7 +346,12 @@ evaluate_subexp (expect_type, exp, pos, noside)
       return value_string (&exp->elts[pc + 2].string, tem);
 
     case OP_BITSTRING:
-      error ("support for OP_BITSTRING unimplemented");
+      tem = longest_to_int (exp->elts[pc + 1].longconst);
+      (*pos)
+	+= 3 + BYTES_TO_EXP_ELEM ((tem + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT);
+      if (noside == EVAL_SKIP)
+	goto nosideret;
+      return value_bitstring (&exp->elts[pc + 2].string, tem);
       break;
 
     case OP_ARRAY:

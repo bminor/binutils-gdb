@@ -1,3 +1,16 @@
+Mon Jan 23 13:11:46 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	Add support for Chill bitstring literals (e.h. H'FF00').
+	* ch-exp.y (match_bitstring_literal):  Fix for proper endianness.
+	* expprint.c (print_subexp):  Don't call error on OP_BITSTRING,
+	just print B'<unimlemented>'.
+	* gdbtypes.c (create_set_type):  Fix bug in length calculation.
+	* valops.c, value.h (value_bitstring):  New function.
+	* eval.c (evaluate_subexp):  Implement support for OP_BITSTRING.
+
+	* ch-typeprint.c (chill_type_print_base): For TYPE_CODE_FUNC,
+	check that return type is non-void, and print in proper Chill syntax.
+
 Mon Jan 23 12:20:34 1995  Rob Savoye  <rob@darkstar.cygnus.com>
 
 	* Makefile.in: Remove references to remote-mon.c.

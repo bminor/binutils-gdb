@@ -1,5 +1,5 @@
 /* Definitions for values of C expressions, for GDB.
-   Copyright 1986, 1987, 1989, 1992, 1993, 1994 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -281,6 +281,7 @@ extern value_ptr value_mark PARAMS ((void));
 extern void value_free_to_mark PARAMS ((value_ptr mark));
 
 extern value_ptr value_string PARAMS ((char *ptr, int len));
+extern value_ptr value_bitstring PARAMS ((char *ptr, int len));
 
 extern value_ptr value_array PARAMS ((int lowbound, int highbound,
 				      value_ptr *elemvec));
@@ -484,7 +485,7 @@ extern value_ptr value_arg_coerce PARAMS ((value_ptr));
 extern int check_field PARAMS ((value_ptr, const char *));
 
 extern void
-c_typedef_print PARAMS ((struct type *type, struct symbol *new, GDB_FILE *stream));
+c_typedef_print PARAMS ((struct type *type, struct symbol *news, GDB_FILE *stream));
 
 extern char *
 internalvar_name PARAMS ((struct internalvar *var));

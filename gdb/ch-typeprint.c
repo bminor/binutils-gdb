@@ -166,7 +166,12 @@ chill_type_print_base (type, stream, show, level)
 	break;
       case TYPE_CODE_FUNC:
 	fprintf_filtered (stream, "PROC (?)");
-        chill_type_print_base (TYPE_TARGET_TYPE (type), stream, show, level);
+	if (TYPE_CODE (TYPE_TARGET_TYPE (type)) != TYPE_CODE_VOID)
+	  {
+	    fputs_filtered (" RETURNS (", stream);
+	    chill_type_print_base (TYPE_TARGET_TYPE (type), stream, show, level);
+	    fputs_filtered (")", stream);
+	  }
 	break;
 
       case TYPE_CODE_STRUCT:
