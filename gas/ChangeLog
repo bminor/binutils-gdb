@@ -1,3 +1,9 @@
+2001-02-26  Mark Elbrecht  <snowball3@bigfoot.com>
+
+	* config/obj-coff.c [BFD_ASSEMBLER] (obj_coff_section): Set
+	SEC_NEVER_LOAD when the 'n' flag is used.
+	Add SEC_NEVER_LOAD to matchflags.
+
 2001-02-24  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* symbols.c (decode_local_label_name): Initialize message_format
