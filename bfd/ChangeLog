@@ -20,6 +20,56 @@ Wed Dec  1 14:15:10 1993  Ken Raeburn  (raeburn@cygnus.com)
 
 Wed Dec  1 14:39:05 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* nlm32-alpha.c: New file; preliminary Alpha NetWare support.
+	* config.bfd (alpha-*-netware*): New target; use alpha-nlm.
+	* config/alpha-nlm.mt: New file.
+	* configure.in (nlm32_alpha_vec): New vector; use nlm32-alpha.o,
+	nlm32.o, and nlm.o.
+	* Makefile.in (BFD32_BACKENDS): Added nlm32-alpha.o.
+	(CFILES): Added nlm32-alpha.c.
+	Rebuilt dependencies.
+	* targets.c (nlm32_alpha_vec): Declare.
+
+	* libnlm.h (struct nlm_backend_data): New fields
+	optional_prefix_size, nlm_backend_object_p, nlm_write_prefix,
+	nlm_set_public_section, nlm_get_public_offset.  Removed unused
+	nlm_write_reloc field.  Changed nlm_write_import to remove
+	unnecessary symbol argument.  Renamed nlm_write_externals to
+	nlm_write_external, and changed cound argument from bfd_vma to
+	bfd_size_type.
+	(nlm_optional_prefix_size, nlm_backend_object_p_func,
+	nlm_write_prefix_func, nlm_set_public_section_func,
+	nlm_get_public_offset_func): New accessor macros.
+	(nlm_write_reloc_func): Removed.
+	(nlm_write_external_func): Adjusted for field renaming.
+	* nlm32-i386.c (nlm_i386_write_import): Renamed from
+	nlm_i386_write_reloc.  Removed old nlm_i386_write_import which
+	just called old nlm_i386_write_reloc.
+	(nlm_i386_write_external): Renamed from nlm_i386_write_externals.
+	Declared.  Changed second argument from bfd_vma to bfd_size_type.
+	(nlm32_i386_backend): Adjusted for changes to fields and names.
+	* nlm32-sparc.c (nlm_sparc_mangle_relocs): Removed unused,
+	ifdeffed out code.
+	(nlm_sparc_write_import): Removed second argument.
+	(nlm_sparc_write_external): Renamed from
+	nlm_sparc_write_externals.  Changed second argument from bfd_vma
+	to bfd_size_type.
+	(nlm32_sparc_backend): Adjusted for changes to fields and names.
+	* nlmcode.h: Removed some unused code.
+	(nlm_object_p): Don't destroy tdata pointer.  Call
+	backend_object_p function if it exists.
+	(nlm_slurp_symbol_table): Removed unused variable rcount.  Call
+	set_public_section_func if it exists instead of checking
+	NLM_HIBIT.
+	(nlm_compute_section_file_positions): Account for
+	optional_prefix_size.
+	(nlm_write_object_contents): Account for optional_prefix_size.
+	Removed useless variable write_reloc_func.  Changed declaration
+	and call of write_import_func.  Call write_prefix_func if it
+	exists.  Removed unused variables len and temp.  Call
+	get_public_offset_func if it exists rather than setting NLM_HIBIT.
+	* nlmswap.h: Declare functions.
+
 	* bfd-in.h (uint64_typeLOW, uint64_typeHIGH): Fully parenthesize
 	for clarity.
 	(fprintf_vma, sprintf_vma): Use %lx, not %x.
