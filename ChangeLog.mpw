@@ -1,3 +1,19 @@
+Tue Mar 14 12:55:50 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-README: Filled in more details about how to install,
+	use, and rebuild.
+	* mpw-configure: Added copyright.
+	(target_cpu, target_vendor, target_os): Move after reading
+	of mpw-config.in, paste into generated Makefiles.
+	(TDEFINES): Remove.
+	* mpw-config.in: Check for presence of required build tools.
+	(target_libs): Add newlib.
+	(target_tools): Add examples.
+	(Read Me): Generate as "Read Me for MPW" instead.
+	* mpw-build.in: Base sub-builds on all-foo instead of do-foo.
+	(all-byacc, do-byacc, all-flex, do-flex, do-newlib): New actions.
+	(do-gas, do-gcc, do-gdb, do-ld): Build Version.r first.
+
 Thu Jan  5 12:48:50 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-configure: Use tr-7to8 instead of mpw-7to8.
