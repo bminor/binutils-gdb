@@ -23,6 +23,21 @@ The command "set prompt-escape-char" has been deleted.  This command,
 and its very obscure effet on GDB's prompt, was never documented,
 tested, nor mentioned in the NEWS file.
 
+* OBSOLETE configurations and files
+
+Configurations that have been declared obsolete in this release have
+been commented out.  Unless there is activity to revive these
+configurations, the next release of GDB will have their sources
+permanently REMOVED.
+
+Sun 3, running SunOS 3				m68*-*-sunos3*
+Sun 3, running SunOS 4				m68*-*-sunos4*
+Sun 2, running SunOS 3				m68000-*-sunos3*
+Sun 2, running SunOS 4				m68000-*-sunos4*
+Motorola 680x0 running LynxOS			m68*-*-lynxos*
+AT&T 3b1/Unix pc				m68*-att-*
+Bull DPX2 (68k, System V release 3)		m68*-bull-sysv*
+
 * REMOVED configurations and files
 
 SGI Irix-4.x				mips-sgi-irix4	or iris4

@@ -1,3 +1,54 @@
+2003-12-01  Andrew Cagney  <cagney@redhat.com>
+
+	Obsolete old m68k systems.
+	* configure.host: Mark m68*-sun-*, m68*-sun-sunos4*,
+	m68*-sun-sunos3*, m68*-motorola-*, m68*-*-sysv4*, m68*-*-lynxos*,
+	m68*-bull*-sysv*, m68*-att-*, m680[01]0-sun-sunos4*, and
+	m680[01]0-sun-sunos3* as obsolete.
+	* configure.tgt: Mark m68*-*-lynxos*, m68*-*-sunos3*,
+	m68*-*-sunos4*, m68*-*-sysv4*, m68000-*-sunos3*, m68000-*-sunos4*,
+	m68*-bull-sysv*, m68*-att-*, and m68*-motorola-*, as obsolete.
+	* config/m68k/sun3os4.mh: Mark file obsolete.
+	* config/m68k/xm-sun3os4.h: Mark file obsolete.
+	* config/m68k/sun3os3.mh: Mark file obsolete.
+	* config/m68k/nm-sun3.h: Mark file obsolete.
+	* config/m68k/xm-sun3.h: Mark file obsolete.
+	* config/m68k/sun2os4.mh: Mark file obsolete.
+	* config/m68k/sun2os3.mh: Mark file obsolete.
+	* config/m68k/nm-sun2.h: Mark file obsolete.
+	* config/m68k/xm-sun2.h: Mark file obsolete.
+	* config/m68k/m68kv4.mh: Mark file obsolete.
+	* config/m68k/nm-sysv4.h: Mark file obsolete.
+	* config/m68k/xm-m68kv4.h: Mark file obsolete.
+	* config/m68k/m68klynx.mh: Mark file obsolete.
+	* config/m68k/nm-m68klynx.h: Mark file obsolete.
+	* config/m68k/dpx2.mh: Mark file obsolete.
+	* config/m68k/xm-dpx2.h: Mark file obsolete.
+	* config/m68k/nm-dpx2.h: Mark file obsolete.
+	* config/m68k/delta68.mh: Mark file obsolete.
+	* config/m68k/xm-delta68.h: Mark file obsolete.
+	* config/m68k/nm-delta68.h: Mark file obsolete.
+	* config/m68k/3b1.mh: Mark file obsolete.
+	* config/m68k/xm-3b1.h: Mark file obsolete.
+	* config/m68k/sun3os4.mt: Mark file obsolete.
+	* config/m68k/tm-sun3os4.h: Mark file obsolete.
+	* config/m68k/sun3os3.mt: Mark file obsolete.
+	* config/m68k/tm-sun3.h: Mark file obsolete.
+	* config/m68k/sun2os4.mt: Mark file obsolete.
+	* config/m68k/tm-sun2os4.h: Mark file obsolete.
+	* config/m68k/sun2os3.mt: Mark file obsolete.
+	* config/m68k/tm-sun2.h: Mark file obsolete.
+	* config/m68k/m68kv4.mt: Mark file obsolete.
+	* config/m68k/tm-m68kv4.h: Mark file obsolete.
+	* config/m68k/m68klynx.mt: Mark file obsolete.
+	* config/m68k/tm-m68klynx.h: Mark file obsolete.
+	* config/m68k/dpx2.mt: Mark file obsolete.
+	* config/m68k/tm-dpx2.h: Mark file obsolete.
+	* config/m68k/delta68.mt: Mark file obsolete.
+	* config/m68k/tm-delta68.h: Mark file obsolete.
+	* config/m68k/3b1.mt: Mark file obsolete.
+	* config/m68k/tm-3b1.h: Mark file obsolete.
+
 2003-11-29  Mark Kettenis  <kettenis@gnu.org>
 
 	* x86-64-tdep.c (MAX_CLASSES): Remove macro.
