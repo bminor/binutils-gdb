@@ -1,3 +1,8 @@
+2002-07-19  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* ld-mmix/sec-1.d: Adjust for changes in padding.
+	* ld-mmix/sec-3.d: Ditto.
+
 2002-07-15  H.J. Lu <hjl@gnu.org>
 
 	* ld-elfvers/vers.exp: Add vers21.
