@@ -590,7 +590,7 @@ open_procinfo_files (pi, which)
  * Function: create_procinfo
  *
  * Allocate a data structure and link it into the procinfo list.
- * (First tries to find a pre-existing one (FIXME: why???)
+ * (First tries to find a pre-existing one (FIXME: why?)
  *
  * Return: pointer to new procinfo struct.
  */
@@ -3483,6 +3483,19 @@ do_detach (signo)
  * is resumed.
  */
 
+/* These could go in a header file, but the many and various
+   definitions of gregset_t would make it tricky and ugly.  Several
+   different native operating systems (notably Solaris and Linux) have
+   various different definitions for gregset_t and fpregset_t.  We
+   have been kludging around this problem for a while, it would be
+   nice if someday we came up with a prettier way of handling it
+   (FIXME).  */
+
+extern void fill_gregset (gdb_gregset_t *, int);
+extern void fill_fpregset (gdb_fpregset_t *, int);
+extern void supply_gregset (gdb_gregset_t *);
+extern void supply_fpregset (gdb_fpregset_t *);
+
 static void
 procfs_fetch_registers (regno)
      int regno;
@@ -3750,7 +3763,7 @@ wait_again:
 			 return a "success" exit code.  Bogus: what if
 			 it returns something else?  */
 		      wstat = 0;
-		      retval = inferior_pid;  /* ??? */
+		      retval = inferior_pid;  /* ? ? ? */
 		    }
 		  else
 		    {
@@ -3781,7 +3794,7 @@ wait_again:
 		      {
 			printf_filtered ("%ld syscall arguments:\n", nsysargs);
 			for (i = 0; i < nsysargs; i++)
-			  printf_filtered ("#%ld: 0x%08x\n", 
+			  printf_filtered ("#%ld: 0x%08lx\n", 
 					   i, sysargs[i]);
 		      }
 
@@ -3895,7 +3908,7 @@ wait_again:
 		      {
 			printf_filtered ("%ld syscall arguments:\n", nsysargs);
 			for (i = 0; i < nsysargs; i++)
-			  printf_filtered ("#%ld: 0x%08x\n", 
+			  printf_filtered ("#%ld: 0x%08lx\n", 
 					   i, sysargs[i]);
 		      }
 		  }
@@ -5192,27 +5205,6 @@ proc_untrace_sysexit_cmd (args, from_tty)
 }
 
 
-int
-mapping_test (fd, core_addr)
-     int fd;
-     CORE_ADDR core_addr;
-{
-  printf ("File descriptor %d, base address 0x%08x\n", fd, core_addr);
-  if (fd > 0)
-    close (fd);
-  return 0;
-}
-
-void
-test_mapping_cmd (args, from_tty)
-     char *args;
-     int from_tty;
-{
-  int ret;
-  ret = proc_iterate_over_mappings (mapping_test);
-  printf ("iterate_over_mappings returned %d.\n", ret);
-}
-
 void
 _initialize_procfs ()
 {
@@ -5229,9 +5221,6 @@ Default is the process being debugged.");
 	   "Cancel a trace of entries into the syscall.");
   add_com ("proc-untrace-exit", no_class, proc_untrace_sysexit_cmd, 
 	   "Cancel a trace of exits from the syscall.");
-
-  add_com ("test-mapping", no_class, test_mapping_cmd, 
-	   "test iterate-over-mappings");
 }
 
 /* =================== END, GDB  "MODULE" =================== */

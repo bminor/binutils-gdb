@@ -9,6 +9,11 @@ Thu Apr 27 10:06:42 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	* proc-api.c (write_with_trace): Change 'arg' from long to int.
 	Treat 'off_t' and 'size_t' as unsigned long in printfs.
 	(lseek_with_trace): Treat 'off_t' as unsigned long in printf.
+	* procfs.c (comments): Eliminate "???" in comments, which GCC
+	wants to interpret as a trigraph.  (fill_gregset, supply_gregset,
+	fill_fpregset, supply_fpregset): declare.
+	(procfs_wait): Sysargs is a long, change printf format to match.
+	(test-mapping, mapping_test, test_mapping_cmd) Remove (test only).
 
 2000-04-26  Kevin Buettner  <kevinb@redhat.com>
 
