@@ -1,5 +1,6 @@
 /* tc-m68k.c -- Assemble for the m68k family
-   Copyright (C) 1987, 91, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
+   Copyright (C) 1987, 91, 92, 93, 94, 95, 96, 1997
+   Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -94,6 +95,10 @@ static int m68k_quick = 1;
    or outer displacement, the assembler assumes that the size should
    be 32 bits.  */
 static int m68k_rel32 = 1;
+
+/* The default width to use for an index register when using a base
+   displacement.  */
+static enum m68k_size m68k_index_width_default = SIZE_LONG;
 
 /* Its an arbitrary name:  This means I don't approve of it */
 /* See flames below */
@@ -1046,6 +1051,96 @@ m68k_ip (instring)
 		    }
 		  break;
 
+		case '<':
+		  switch (opP->mode)
+		    {
+		    case DREG:
+		    case AREG:
+		    case FPREG:
+		    case CONTROL:
+		    case IMMED:
+		    case ADEC:
+		    case REGLST:
+		      losing++;
+		      break;
+		    default:
+		      break;
+		    }
+		  break;
+
+		case '>':
+		  switch (opP->mode)
+		    {
+		    case DREG:
+		    case AREG:
+		    case FPREG:
+		    case CONTROL:
+		    case IMMED:
+		    case AINC:
+		    case REGLST:
+		      losing++;
+		      break;
+		    case ABSL:
+		      break;
+		    default:
+		      if (opP->reg == PC
+			  || opP->reg == ZPC)
+			losing++;
+		      break;
+		    }
+		  break;
+
+		case 'm':
+		  switch (opP->mode)
+		    {
+		    case DREG:
+		    case AREG:
+		    case AINDR:
+		    case AINC:
+		    case ADEC:
+		      break;
+		    default:
+		      losing++;
+		    }
+                  break;
+
+		case 'n':
+		  switch (opP->mode)
+		    {
+		    case DISP:
+		      break;
+		    default:
+		      losing++;
+		    }
+                  break;
+
+		case 'o':
+		  switch (opP->mode)
+		    {
+		    case BASE:
+		    case ABSL:
+		    case IMMED:
+		      break;
+		    default:
+		      losing++;
+		    }
+                  break;
+
+		case 'p':
+		  switch (opP->mode)
+		    {
+		    case DREG:
+		    case AREG:
+		    case AINDR:
+		    case AINC:
+		    case ADEC:
+		    case DISP:
+		      break;
+		    default:
+		      losing++;
+		    }
+                  break;
+
 		case '#':
 		  if (opP->mode != IMMED)
 		    losing++;
@@ -1639,6 +1734,12 @@ m68k_ip (instring)
 	case '?':
 	case '/':
 	case '`':
+	case '<':
+	case '>':
+	case 'm':
+	case 'n':
+	case 'o':
+	case 'p':
 #ifndef NO_68851
 	case '|':
 #endif
@@ -1890,8 +1991,9 @@ m68k_ip (instring)
 		{
 		  nextword |= (opP->index.reg - DATA) << 12;
 
-		  if (opP->index.size == SIZE_UNSPEC
-		      || opP->index.size == SIZE_LONG)
+		  if (opP->index.size == SIZE_LONG
+		      || (opP->index.size == SIZE_UNSPEC
+			  && m68k_index_width_default == SIZE_LONG))
 		    nextword |= 0x800;
 
 		  if ((opP->index.scale != 1 
@@ -3501,6 +3603,39 @@ md_begin ()
 #endif
 }
 
+static void
+select_control_regs ()
+{
+  /* Note which set of "movec" control registers is available.  */
+  switch (cpu_of_arch (current_architecture))
+    {
+    case m68000:
+      control_regs = m68000_control_regs;
+      break;
+    case m68010:
+      control_regs = m68010_control_regs;
+      break;
+    case m68020:
+    case m68030:
+      control_regs = m68020_control_regs;
+      break;
+    case m68040:
+      control_regs = m68040_control_regs;
+      break;
+    case m68060:
+      control_regs = m68060_control_regs;
+      break;
+    case cpu32:
+      control_regs = cpu32_control_regs;
+      break;
+    case mcf5200:
+      control_regs = mcf5200_control_regs;
+      break;
+    default:
+      abort ();
+    }
+}
+
 void
 m68k_init_after_args ()
 {
@@ -3565,33 +3700,7 @@ m68k_init_after_args ()
 #endif
 
   /* Note which set of "movec" control registers is available.  */
-  switch (cpu_of_arch (current_architecture))
-    {
-    case m68000:
-      control_regs = m68000_control_regs;
-      break;
-    case m68010:
-      control_regs = m68010_control_regs;
-      break;
-    case m68020:
-    case m68030:
-      control_regs = m68020_control_regs;
-      break;
-    case m68040:
-      control_regs = m68040_control_regs;
-      break;
-    case m68060:
-      control_regs = m68060_control_regs;
-      break;
-    case cpu32:
-      control_regs = cpu32_control_regs;
-      break;
-    case mcf5200:
-      control_regs = mcf5200_control_regs;
-      break;
-    default:
-      abort ();
-    }
+  select_control_regs ();
 
   if (cpu_of_arch (current_architecture) < m68020)
     md_relax_table[TAB (PCINDEX, BYTE)].rlx_more = 0;
@@ -4640,6 +4749,9 @@ mri_chip ()
 	current_architecture |= m68851;
       *input_line_pointer = c;
     }
+
+  /* Update info about available control registers.  */
+  select_control_regs ();
 }
 
 /* The MRI CHIP pseudo-op.  */
@@ -6250,6 +6362,10 @@ struct option md_longopts[] = {
      OPTION_REGISTER_PREFIX_OPTIONAL},
 #define OPTION_BITWISE_OR (OPTION_MD_BASE + 2)
   {"bitwise-or", no_argument, NULL, OPTION_BITWISE_OR},
+#define OPTION_BASE_SIZE_DEFAULT_16 (OPTION_MD_BASE + 3)
+  {"base-size-default-16", no_argument, NULL, OPTION_BASE_SIZE_DEFAULT_16},
+#define OPTION_BASE_SIZE_DEFAULT_32 (OPTION_MD_BASE + 4)
+  {"base-size-default-32", no_argument, NULL, OPTION_BASE_SIZE_DEFAULT_32},
   {NULL, no_argument, NULL, 0}
 };
 size_t md_longopts_size = sizeof(md_longopts);
@@ -6382,6 +6498,14 @@ md_parse_option (c, arg)
       }
       break;
 
+    case OPTION_BASE_SIZE_DEFAULT_16:
+      m68k_index_width_default = SIZE_WORD;
+      break;
+
+    case OPTION_BASE_SIZE_DEFAULT_32:
+      m68k_index_width_default = SIZE_LONG;
+      break;
+
     default:
       return 0;
     }
@@ -6412,6 +6536,9 @@ md_show_usage (stream)
 --register-prefix-optional\n\
 			recognize register names without prefix character\n\
 --bitwise-or		do not treat `|' as a comment character\n");
+  fprintf (stream, "\
+--base-size-default-16	base reg without size is 16 bits\n\
+--base-size-default-32	base reg without size is 32 bits (default)\n");
 }
 
 #ifdef TEST2

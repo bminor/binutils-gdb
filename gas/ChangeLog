@@ -1,5 +1,16 @@
 Thu Jan  2 13:37:29 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	Based on patch from Ronald F. Guilmette <rfg@monkeys.com>:
+	* config/tc-m68k.c (m68k_index_width_default): New static
+	variable.
+	(m68k_ip): Use m68k_index_width_default to set the size of a base
+	register whose size was not given.
+	(md_longopts): Add --base-size-default-16 and
+	--base-size-default-32.
+	(md_parse_option): Handle new options.
+	(md_show_usage): Mention new options.
+	* doc/c-m68k.texi (M68K-Opts): Document new options.
+
 	* doc/c-mips.texi: Mention ISA level 4, and the -mips16 option.
 
 	* configure.in: Recognize mips-*-linux* target.

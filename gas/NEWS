@@ -8,6 +8,8 @@ Motorola ColdFire 5200 support added (configure for m68k and use -m5200).
 
 Alpha/VMS support added.
 
+m68k options --base-size-default-16 and --base-size-default-32 added.
+
 Changes in 2.7:
 
 The PowerPC assembler now allows the use of symbolic register names (r0, etc.)
