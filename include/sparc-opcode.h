@@ -206,7 +206,7 @@ The following chars are unused: (note: ,[] are used as punctuation)
 #define FCC(x)	(((x)&0x3)<<11) /* v9 */
 #define FBFCC(x)	(((x)&0x3)<<19)	/* v9 */
 
-static const struct sparc_opcode sparc_opcodes[] = {
+static struct sparc_opcode sparc_opcodes[] = {
 
 { "ld",	F3(3, 0x00, 0), F3(~3, ~0x00, ~0),		"[1+2],d", 0, v6 },
 { "ld",	F3(3, 0x00, 0), F3(~3, ~0x00, ~0)|RS2_G0,	"[1],d", 0, v6 }, /* ld [rs1+%g0],d */

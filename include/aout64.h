@@ -321,6 +321,13 @@ enum reloc_type
   RELOC_GLOB_DAT,
   RELOC_JMP_SLOT,
   RELOC_RELATIVE,
+
+  RELOC_11,	
+  RELOC_WDISP2_14,
+  RELOC_WDISP19,
+  RELOC_HHI22,			/* data[0:21] = (addend + sv) >> 42     */
+  RELOC_HLO10,			/* data[0:9] = (addend + sv) >> 32      */
+  
   /* 29K relocation types */
   RELOC_JUMPTARG,
   RELOC_CONST,
@@ -331,8 +338,6 @@ enum reloc_type
   RELOC_64,			/* data[0:63] = addend + sv 		*/
   RELOC_DISP64,			/* data[0:63] = addend - pc + sv 	*/
   RELOC_WDISP21,		/* data[0:20] = (addend + sv - pc)>>2 	*/
-  RELOC_HHI22,			/* data[0:21] = (addend + sv) >> 42     */
-  RELOC_HLO10,			/* data[0:9] = (addend + sv) >> 32      */
   RELOC_DISP21,			/* data[0:20] = addend - pc + sv        */
   RELOC_DISP14,			/* data[0:13] = addend - pc + sv 	*/
   /* Q .
