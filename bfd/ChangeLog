@@ -1,3 +1,10 @@
+2002-11-07  Hans-Peter Nilsson  <hp@axis.com>
+
+	* elf32-cris.c (cris_elf_relocate_section) <case R_CRIS_16_GOT,
+	case R_CRIS_32_GOT>: Correct test for filling in constant .got
+	contents, enabling for a non-DSO, for symbols defined in the
+	program with --export-dynamic.
+
 2002-11-07  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c: Comment typo fixes.
