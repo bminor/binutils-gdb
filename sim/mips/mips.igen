@@ -43,13 +43,14 @@
 // start-sanitize-tx19
 :model:::tx19:tx19:
 // end-sanitize-tx19
+:model:::vr4100:mips4100:
 // start-sanitize-vr4320
 :model:::vr4320:mips4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 :model:::vr5400:mips5400:
 :model:::mdmx:mdmx:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 :model:::vr5000:mips5000:
 
 
@@ -96,8 +97,27 @@
   return CIA + 8;
 }
 
+// start-sanitize-branchbug4011
+:function:::void:check_4011_branch_bug:
+{
+  if (BRANCHBUG4011_OPTION == 2 && BRANCHBUG4011_LAST_TARGET == CIA)
+    sim_engine_abort (SD, CPU, CIA, "4011 BRANCH BUG: %s at 0x%08lx was target of branch at 0x%08lx\n",
+		      itable[MY_INDEX].name,
+		      (long) CIA,
+		      (long) BRANCHBUG4011_LAST_CIA);
+}
 
+:function:::void:mark_4011_branch_bug:address_word target
+{
+  if (BRANCHBUG4011_OPTION)
+    {
+      BRANCHBUG4011_OPTION = 2;
+      BRANCHBUG4011_LAST_TARGET = target;
+      BRANCHBUG4011_LAST_CIA = CIA;
+    }
+}
 
+// end-sanitize-branchbug4011
 // Helper:
 // 
 // Check that an access to a HI/LO register meets timing requirements
@@ -129,9 +149,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 {
   signed64 time = sim_events_time (SD);
   int ok = check_mf_cycles (SD_, history, time, "MT");
@@ -162,9 +182,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 *r3900:
 // start-sanitize-tx19
 *tx19:
@@ -218,9 +238,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 {
   signed64 time = sim_events_time (SD);
   int ok = (check_mf_cycles (SD_, hi, time, "OP")
@@ -259,9 +279,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 *r3900:
 // start-sanitize-tx19
 *tx19:
@@ -315,9 +335,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -344,9 +364,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -380,9 +400,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -410,9 +430,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -440,9 +460,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -463,9 +483,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -488,9 +508,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -500,8 +520,12 @@
 // end-sanitize-tx19
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
+  check_branch_bug ();
   if ((signed_word) GPR[RS] == (signed_word) GPR[RT])
-    DELAY_SLOT (NIA + offset);
+    {
+      mark_branch_bug (NIA+offset);
+      DELAY_SLOT (NIA + offset);
+    }
 }
 
 
@@ -515,9 +539,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -527,8 +551,12 @@
 // end-sanitize-tx19
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
+  check_branch_bug ();
   if ((signed_word) GPR[RS] == (signed_word) GPR[RT])
-    DELAY_SLOT (NIA + offset);
+    {
+      mark_branch_bug (NIA+offset);
+      DELAY_SLOT (NIA + offset);
+    }
   else
     NULLIFY_NEXT_INSTRUCTION ();
 }
@@ -542,9 +570,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -554,8 +582,12 @@
 // end-sanitize-tx19
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
+  check_branch_bug ();
   if ((signed_word) GPR[RS] >= 0)
-    DELAY_SLOT (NIA + offset);
+    {
+      mark_branch_bug (NIA+offset);
+      DELAY_SLOT (NIA + offset);
+    }
 }
 
 
@@ -567,9 +599,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -579,9 +611,13 @@
 // end-sanitize-tx19
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
+  check_branch_bug ();
   RA = (CIA + 8);
   if ((signed_word) GPR[RS] >= 0)
-    DELAY_SLOT (NIA + offset);
+    {
+      mark_branch_bug (NIA+offset);
+      DELAY_SLOT (NIA + offset);
+    }
 }
 
 
@@ -595,9 +631,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -607,11 +643,15 @@
 // end-sanitize-tx19
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
+  check_branch_bug ();
   RA = (CIA + 8);
   /* NOTE: The branch occurs AFTER the next instruction has been
      executed */
   if ((signed_word) GPR[RS] >= 0)
-    DELAY_SLOT (NIA + offset);
+    {
+      mark_branch_bug (NIA+offset);
+      DELAY_SLOT (NIA + offset);
+    }
   else
     NULLIFY_NEXT_INSTRUCTION ();
 }
@@ -627,9 +667,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -639,8 +679,12 @@
 // end-sanitize-tx19
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
+  check_branch_bug ();
   if ((signed_word) GPR[RS] >= 0)
-    DELAY_SLOT (NIA + offset);
+    {
+      mark_branch_bug (NIA+offset);
+      DELAY_SLOT (NIA + offset);
+    }
   else
     NULLIFY_NEXT_INSTRUCTION ();
 }
@@ -654,9 +698,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -666,8 +710,12 @@
 // end-sanitize-tx19
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
+  check_branch_bug ();
   if ((signed_word) GPR[RS] > 0)
-    DELAY_SLOT (NIA + offset);
+    {
+      mark_branch_bug (NIA+offset);
+      DELAY_SLOT (NIA + offset);
+    }
 }
 
 
@@ -681,9 +729,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -693,10 +741,14 @@
 // end-sanitize-tx19
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
+  check_branch_bug ();
   /* NOTE: The branch occurs AFTER the next instruction has been
      executed */
   if ((signed_word) GPR[RS] > 0)
-    DELAY_SLOT (NIA + offset);
+    {
+      mark_branch_bug (NIA+offset);
+      DELAY_SLOT (NIA + offset);
+    }
   else
     NULLIFY_NEXT_INSTRUCTION ();
 }
@@ -710,9 +762,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -722,10 +774,14 @@
 // end-sanitize-tx19
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
+  check_branch_bug ();
   /* NOTE: The branch occurs AFTER the next instruction has been
      executed */
   if ((signed_word) GPR[RS] <= 0)
-    DELAY_SLOT (NIA + offset);
+    {
+      mark_branch_bug (NIA+offset);
+      DELAY_SLOT (NIA + offset);
+    }
 }
 
 
@@ -739,9 +795,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -751,8 +807,12 @@
 // end-sanitize-tx19
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
+  check_branch_bug ();
   if ((signed_word) GPR[RS] <= 0)
-    DELAY_SLOT (NIA + offset);
+    {
+      mark_branch_bug (NIA+offset);
+      DELAY_SLOT (NIA + offset);
+    }
   else
     NULLIFY_NEXT_INSTRUCTION ();
 }
@@ -766,9 +826,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -778,8 +838,12 @@
 // end-sanitize-tx19
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
+  check_branch_bug ();
   if ((signed_word) GPR[RS] < 0)
-    DELAY_SLOT (NIA + offset);
+    {
+      mark_branch_bug (NIA+offset);
+      DELAY_SLOT (NIA + offset);
+    }
 }
 
 
@@ -791,9 +855,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -803,11 +867,15 @@
 // end-sanitize-tx19
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
+  check_branch_bug ();
   RA = (CIA + 8);
   /* NOTE: The branch occurs AFTER the next instruction has been
      executed */
   if ((signed_word) GPR[RS] < 0)
-    DELAY_SLOT (NIA + offset);
+    {
+      mark_branch_bug (NIA+offset);
+      DELAY_SLOT (NIA + offset);
+    }
 }
 
 
@@ -821,9 +889,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -833,9 +901,13 @@
 // end-sanitize-tx19
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
+  check_branch_bug ();
   RA = (CIA + 8);
   if ((signed_word) GPR[RS] < 0)
-    DELAY_SLOT (NIA + offset);
+    {
+      mark_branch_bug (NIA+offset);
+      DELAY_SLOT (NIA + offset);
+    }
   else
     NULLIFY_NEXT_INSTRUCTION ();
 }
@@ -851,9 +923,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -863,10 +935,14 @@
 // end-sanitize-tx19
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
+  check_branch_bug ();
   /* NOTE: The branch occurs AFTER the next instruction has been
      executed */
   if ((signed_word) GPR[RS] < 0)
-    DELAY_SLOT (NIA + offset);
+    {
+      mark_branch_bug (NIA+offset);
+      DELAY_SLOT (NIA + offset);
+    }
   else
     NULLIFY_NEXT_INSTRUCTION ();
 }
@@ -880,9 +956,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -892,8 +968,12 @@
 // end-sanitize-tx19
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
+  check_branch_bug ();
   if ((signed_word) GPR[RS] != (signed_word) GPR[RT])
-    DELAY_SLOT (NIA + offset);
+    {
+      mark_branch_bug (NIA+offset);
+      DELAY_SLOT (NIA + offset);
+    }
 }
 
 
@@ -907,9 +987,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -919,8 +999,12 @@
 // end-sanitize-tx19
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
+  check_branch_bug ();
   if ((signed_word) GPR[RS] != (signed_word) GPR[RT])
-    DELAY_SLOT (NIA + offset);
+    {
+      mark_branch_bug (NIA+offset);
+      DELAY_SLOT (NIA + offset);
+    }
   else
     NULLIFY_NEXT_INSTRUCTION ();
 }
@@ -934,9 +1018,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -991,9 +1075,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1021,9 +1105,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1057,9 +1141,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1087,9 +1171,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1136,9 +1220,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1180,9 +1264,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
@@ -1225,9 +1309,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1269,9 +1353,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1367,9 +1451,9 @@
 "dmult r<RS>, r<RT>":RD == 0
 "dmult r<RD>, r<RS>, r<RT>"
 *vr5000:
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 {
   do_dmult (SD_, RS, RT, RD);
 }
@@ -1398,9 +1482,9 @@
 "dmultu r<RD>, r<RS>, r<RT>":RD == 0
 "dmultu r<RS>, r<RT>"
 *vr5000:
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 {
   do_dmultu (SD_, RS, RT, RD);
 }
@@ -1415,9 +1499,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1438,9 +1522,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1462,9 +1546,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1486,9 +1570,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1509,9 +1593,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1540,9 +1624,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1562,9 +1646,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1585,9 +1669,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1608,9 +1692,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1631,9 +1715,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1666,9 +1750,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1687,9 +1771,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1712,9 +1796,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1739,9 +1823,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1763,9 +1847,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1807,9 +1891,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1829,9 +1913,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1852,9 +1936,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1875,9 +1959,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 *r3900:
 // start-sanitize-tx19
 *tx19:
@@ -1897,9 +1981,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1919,9 +2003,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1940,9 +2024,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1962,9 +2046,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1986,9 +2070,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2036,9 +2120,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2078,9 +2162,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2102,9 +2186,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2124,9 +2208,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2203,9 +2287,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2256,9 +2340,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2279,9 +2363,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2308,9 +2392,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2339,9 +2423,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2362,9 +2446,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2382,9 +2466,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2402,9 +2486,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2426,9 +2510,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2471,9 +2555,9 @@
 000000,5.RS,5.RT,5.RD,00000011000:SPECIAL:32::MULT
 "mult r<RD>, r<RS>, r<RT>"
 *vr5000:
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2513,9 +2597,9 @@
 000000,5.RS,5.RT,5.RD,00000011001:SPECIAL:32::MULTU
 "multu r<RD>, r<RS>, r<RT>"
 *vr5000:
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2542,9 +2626,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2571,9 +2655,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2601,9 +2685,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2622,9 +2706,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2673,9 +2757,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2697,9 +2781,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2747,9 +2831,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2793,9 +2877,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2816,9 +2900,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
@@ -2835,9 +2919,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2857,9 +2941,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2878,9 +2962,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2908,9 +2992,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2939,9 +3023,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2968,9 +3052,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2997,9 +3081,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3026,9 +3110,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3056,9 +3140,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3086,9 +3170,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3118,9 +3202,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3149,9 +3233,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3180,9 +3264,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3202,9 +3286,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3237,9 +3321,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3263,9 +3347,9 @@
 *vr4320:
 // end-sanitize-vr4320
 *vr5000:
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3281,9 +3365,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 *r3900:
 // start-sanitize-tx19
 *tx19:
@@ -3347,9 +3431,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3390,9 +3474,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3415,9 +3499,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3437,9 +3521,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3461,9 +3545,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3485,9 +3569,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3509,9 +3593,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3533,9 +3617,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3557,9 +3641,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3581,9 +3665,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3605,9 +3689,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3629,9 +3713,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3653,9 +3737,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3677,9 +3761,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3701,9 +3785,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3725,9 +3809,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3754,9 +3838,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3783,9 +3867,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3875,9 +3959,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 *r3900:
 // start-sanitize-tx19
 *tx19:
@@ -3904,9 +3988,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 *r3900:
 // start-sanitize-tx19
 *tx19:
@@ -3939,11 +4023,13 @@
 *r5900:
 // end-sanitize-r5900
 {
+  check_branch_bug ();
   TRACE_BRANCH_INPUT (PREVCOC1());
   if (PREVCOC1() == TF)
     {
       address_word dest = NIA + (EXTEND16 (OFFSET) << 2);
       TRACE_BRANCH_RESULT (dest);
+      mark_branch_bug (dest);
       DELAY_SLOT (dest);
     }
   else if (ND)
@@ -3965,17 +4051,20 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 *r3900:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
 {
+  check_branch_bug ();
   if (GETFCC(CC) == TF)
     {
-      DELAY_SLOT (NIA + (EXTEND16 (OFFSET) << 2));
+      address_word dest = NIA + (EXTEND16 (OFFSET) << 2);
+      mark_branch_bug (dest);
+      DELAY_SLOT (dest);
     }
   else if (ND)
     {
@@ -4030,7 +4119,7 @@
 
 010001,10,3.FMT,5.FT,5.FS,3.0,00,11,4.COND:COP1:32::C.cond.fmt
 *mipsI,mipsII,mipsIII:
-"c.%s<COND>.%s<FMT> f<FS>, f<FT>":
+"c.%s<COND>.%s<FMT> f<FS>, f<FT>"
 {
   do_c_cond_fmt (SD_, FMT, FT, FS, 0, COND, instruction_0);
 }
@@ -4043,9 +4132,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 *r3900:
 // start-sanitize-tx19
 *tx19:
@@ -4063,9 +4152,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -4095,9 +4184,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -4152,9 +4241,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 *r3900:
 // start-sanitize-tx19
 *tx19:
@@ -4209,9 +4298,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 *r3900:
 // start-sanitize-tx19
 *tx19:
@@ -4238,9 +4327,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 *r3900:
 // start-sanitize-tx19
 *tx19:
@@ -4269,9 +4358,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 *r3900:
 // start-sanitize-tx19
 *tx19:
@@ -4297,9 +4386,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 *r3900:
 // start-sanitize-tx19
 *tx19:
@@ -4325,9 +4414,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 *r3900:
 // start-sanitize-tx19
 *tx19:
@@ -4380,9 +4469,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -4418,9 +4507,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -4451,9 +4540,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -4484,9 +4573,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 *r3900:
 // start-sanitize-tx19
 *tx19:
@@ -4503,9 +4592,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 {
   COP_LD (1, FD, do_load (SD_, AccessLength_DOUBLEWORD, GPR[BASE], GPR[INDEX]));
 }
@@ -4519,9 +4608,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -4541,9 +4630,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 {
   COP_LW (1, FD, do_load (SD_, AccessLength_WORD, GPR[BASE], GPR[INDEX]));
 }
@@ -4560,9 +4649,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 {
   unsigned32 instruction = instruction_0;
   int destreg = ((instruction >> 6) & 0x0000001F);
@@ -4582,9 +4671,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 {
   unsigned32 instruction = instruction_0;
   int destreg = ((instruction >> 6) & 0x0000001F);
@@ -4622,9 +4711,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 *r3900:
 // start-sanitize-tx19
 *tx19:
@@ -4645,9 +4734,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 *r3900:
 // start-sanitize-tx19
 *tx19:
@@ -4671,9 +4760,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -4691,9 +4780,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -4715,9 +4804,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -4746,9 +4835,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -4771,9 +4860,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -4797,9 +4886,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -4825,9 +4914,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 *r3900:
 // start-sanitize-tx19
 *tx19:
@@ -4854,9 +4943,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 *r3900:
 // start-sanitize-tx19
 *tx19:
@@ -4883,9 +4972,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 {
   unsigned32 instruction = instruction_0;
   int destreg = ((instruction >> 6) & 0x0000001F);
@@ -4906,9 +4995,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 {
   unsigned32 instruction = instruction_0;
   int destreg = ((instruction >> 6) & 0x0000001F);
@@ -4929,9 +5018,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 {
   unsigned32 instruction = instruction_0;
   int destreg = ((instruction >> 6) & 0x0000001F);
@@ -4952,9 +5041,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 {
   unsigned32 instruction = instruction_0;
   int destreg = ((instruction >> 6) & 0x0000001F);
@@ -4974,9 +5063,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 {
   unsigned32 instruction = instruction_0;
   int fs = ((instruction >> 11) & 0x0000001F);
@@ -4998,9 +5087,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 {
   unsigned32 instruction = instruction_0;
   int destreg = ((instruction >> 6) & 0x0000001F);
@@ -5023,9 +5112,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -5056,9 +5145,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -5087,9 +5176,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 {
   unsigned32 instruction = instruction_0;
   int destreg = ((instruction >> 6) & 0x0000001F);
@@ -5113,9 +5202,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 *r3900:
 // start-sanitize-tx19
 *tx19:
@@ -5132,9 +5221,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 {
   do_store (SD_, AccessLength_DOUBLEWORD, GPR[BASE], GPR[INDEX], COP_SD (1, FS));
 }
@@ -5149,9 +5238,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 *r3900:
 // start-sanitize-tx19
 *tx19:
@@ -5177,9 +5266,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 *r3900:
 // start-sanitize-tx19
 *tx19:
@@ -5207,9 +5296,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -5255,9 +5344,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 {
   unsigned32 instruction = instruction_0;
   int fs = ((instruction >> 11) & 0x0000001F);
@@ -5297,9 +5386,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -5330,9 +5419,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -5368,9 +5457,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 
 
 010000,01000,00010,16.OFFSET:COP0:32::BC0FL
@@ -5380,9 +5469,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 
 
 010000,01000,00001,16.OFFSET:COP0:32::BC0T
@@ -5398,9 +5487,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 
 
 101111,5.BASE,5.OP,16.OFFSET:NORMAL:32::CACHE
@@ -5410,9 +5499,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 *r3900:
 // start-sanitize-tx19
 *tx19:
@@ -5439,9 +5528,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 
 
 010000,10000,000000000000000,111000:COP0:32::EI
@@ -5451,9 +5540,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 
 
 010000,10000,000000000000000,011000:COP0:32::ERET
@@ -5464,9 +5553,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -5494,9 +5583,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -5517,9 +5606,9 @@
 *vr4320:
 // end-sanitize-vr4320
 *vr5000:
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -5539,9 +5628,9 @@
 *vr4320:
 // end-sanitize-vr4320
 *vr5000:
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -5573,9 +5662,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 
 
 010000,10000,000000000000000,000001:COP0:32::TLBR
@@ -5585,9 +5674,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 
 
 010000,10000,000000000000000,000010:COP0:32::TLBWI
@@ -5597,9 +5686,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 
 
 010000,10000,000000000000000,000110:COP0:32::TLBWR
@@ -5609,23 +5698,20 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 
 
 :include:::m16.igen
-// start-sanitize-vr4320
-:include::vr4320:vr4320.igen
-// end-sanitize-vr4320
-// start-sanitize-vr5400
-:include::vr5400:vr5400.igen
+// start-sanitize-cygnus
 :include:64,f::mdmx.igen
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-r5900
 :include::r5900:r5900.igen
 // end-sanitize-r5900
 :include:::tx.igen
+:include:::vr.igen
 
 // start-sanitize-cygnus-never
 
@@ -5680,48 +5766,6 @@
 //   unsigned32 instruction = instruction_0;
 //   {
 //     SignalException(DebugBreakPoint,instruction);
-//   }
-// }
-
-// end-sanitize-cygnus-never
-// start-sanitize-cygnus-never
-
-// // FIXME FIXME FIXME This apparently belongs to the vr4100 which
-// // isn't yet reconized by this simulator.
-// 000000,5.RS,5.RT,0000000000101000:SPECIAL:32::MADD16
-// *vr4100:
-// {
-//   unsigned32 instruction = instruction_0;
-//   signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
-//   signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
-//   {
-//     CHECKHILO("Multiply-Add");
-//     {
-//       unsigned64 temp = (op1 * op2);
-//       temp += (SET64HI(VL4_8(HI)) | VL4_8(LO));
-//       LO = SIGNEXTEND((unsigned64)VL4_8(temp),32);
-//       HI = SIGNEXTEND((unsigned64)VH4_8(temp),32);
-//     }
-//   }
-// }
-
-// end-sanitize-cygnus-never
-// start-sanitize-cygnus-never
-
-// // FIXME FIXME FIXME This apparently belongs to the vr4100 which
-// // isn't yet reconized by this simulator.
-// 000000,5.RS,5.RT,0000000000101001:SPECIAL:64::DMADD16
-// *vr4100:
-// {
-//   unsigned32 instruction = instruction_0;
-//   signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
-//   signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
-//   {
-//     CHECKHILO("Multiply-Add");
-//     {
-//       unsigned64 temp = (op1 * op2);
-//       LO = LO + temp;
-//     }
 //   }
 // }
 

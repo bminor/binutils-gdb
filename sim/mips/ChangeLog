@@ -1,3 +1,15 @@
+Mon Nov 23 13:23:40 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.in: Configure mips-lsi-elf nee mips*lsi* as a
+ 	mipsIII/mips16 igen simulator.  Fix sim_gen VS sim_igen typos.
+	* configure: Re-generate.
+
+	* m16.igen (BREAK): Define breakpoint instruction.
+	(JALX32): Mark instruction as mips16 and not r3900.
+	* mips.igen (C.cond.fmt): Fix typo in instruction format.
+
+	* sim-main.h (PENDING_FILL): Wrap C statements in do/while.
+
 start-sanitize-r5900
 Mon Nov 16 11:44:24 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 

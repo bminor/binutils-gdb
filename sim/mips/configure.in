@@ -197,10 +197,14 @@ case "${target}" in
   mips16*-*-*)		sim_default_gen=M16
 			sim_igen_filter="32,64,f"
 			sim_m16_filter="16"
-			sim_use_igen=NO
+			sim_use_gen=NO
 			;;
-  mips-lsi-*)	        echo "NOTE: mips-lsi-elf still uses gencode"
-                        sim_use_gen=NO
+  mips*lsi*)	        sim_default_gen=M16
+			sim_use_gen=M16
+			sim_igen_machine="-M mipsIII,mips16"
+			sim_m16_machine="-M mips16,mipsIII"
+			sim_igen_filter="32,f"
+			sim_m16_filter="16"
                         ;;
          
   mips*-*-*)		sim_default_gen=IGEN
@@ -227,7 +231,7 @@ AC_ARG_ENABLE(sim-igen,
   *)   AC_MSG_ERROR("Unknown value $enableval passed to --enable-sim-igen"); sim_gen="";;
 esac
 if test x"$silent" != x"yes" && test x"$sim_gen" != x""; then
-  echo "Setting sim_igen = $sim_gen" 6>&1
+  echo "Setting sim_gen = $sim_gen" 6>&1
 fi],[sim_gen="${sim_use_gen}"])dnl
 AC_SUBST(sim_gen)
 

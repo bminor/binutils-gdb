@@ -495,7 +495,7 @@ memset (&(CPU)->pending, 0, sizeof ((CPU)->pending))
 
 /* For backward compatibility */
 #define PENDING_FILL(R,VAL) 						\
-{									\
+do {									\
   if ((R) >= FGRIDX && (R) < FGRIDX + NR_FGR)				\
     {									\
       PENDING_SCHED(FGR[(R) - FGRIDX], VAL, 1, -1);			\
@@ -503,7 +503,7 @@ memset (&(CPU)->pending, 0, sizeof ((CPU)->pending))
     }									\
   else									\
     PENDING_SCHED(GPR[(R)], VAL, 1, -1);				\
-}
+} while (0)
 
 
 
