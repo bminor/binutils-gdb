@@ -1,3 +1,14 @@
+Tue Jan 27 05:32:05 1998  Richard Henderson  <rth@cygnus.com>
+
+	* as.c (parse_args): Add --keep-locals alias for -L.
+	Add --strip-local-absolute.
+	(show_usage): Update.
+	* as.h (flag_strip_local_absolute): New flag.
+	* symbols.c (S_IS_LOCAL): Use it.
+	* config/obj-aout.h (S_IS_LOCAL): Likewise.
+	* config/obj-bout.h (S_IS_LOCAL): Likewise.
+	* config/obj-coff.h (S_IS_LOCAL): Likewise.
+
 start-sanitize-sky
 Mon Jan 26 16:29:49 1998  Doug Evans  <devans@seba.cygnus.com>
 

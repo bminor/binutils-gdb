@@ -200,8 +200,8 @@ Here is a brief summary of how to invoke @code{@value{AS}}.  For details,
 @smallexample
 @value{AS} [ -a[cdhlns][=file] ] [ -D ]  [ --defsym @var{sym}=@var{val} ]
  [ -f ] [ --gstabs ] [ --help ] [ -I @var{dir} ] [ -J ] [ -K ] [ -L ]
- [ -o @var{objfile} ] [ -R ] [ --statistics ] [ -v ] [ -version ]
- [ --version ] [ -W ] [ -w ] [ -x ] [ -Z ]
+ [ --keep-locals ] [ -o @var{objfile} ] [ -R ] [ --statistics ] [ -v ]
+ [ -version ] [ --version ] [ -W ] [ -w ] [ -x ] [ -Z ]
 @ifset A29K
 @c am29k has no machine-dependent assembler options
 @end ifset
@@ -219,7 +219,11 @@ Here is a brief summary of how to invoke @code{@value{AS}}.  For details,
 @ifset D10V
  [ -O ]
 @end ifset
-
+@c start-sanitize-d30v
+@ifset D30V
+ [ -O | -n | -N ]
+@end ifset
+@c end-sanitize-d30v
 @ifset H8
 @c Hitachi family chips have no machine-dependent assembler options
 @end ifset
@@ -244,7 +248,7 @@ Here is a brief summary of how to invoke @code{@value{AS}}.  For details,
 @ifset M32R
  [ --m32rx ]
 @end ifset
-@c start-sanitize-m32rx
+@c end-sanitize-m32rx
 @ifset M680X0
  [ -l ] [ -m68000 | -m68010 | -m68020 | ... ]
 @end ifset
@@ -326,7 +330,10 @@ Issue warnings when difference tables altered for long displacements.
 @end ifset
 
 @item -L
-Keep (in the symbol table) local symbols, starting with @samp{L}.
+@itemx --keep-locals
+Keep (in the symbol table) local symbols.  On traditional a.out systems
+these start with @samp{L}, but different systems have different local
+label prefixes.
 
 @item -o @var{objfile}
 Name the object-file output from @code{@value{AS}} @var{objfile}.
@@ -337,6 +344,9 @@ Fold the data section into the text section.
 @item --statistics
 Print the maximum space (in bytes) and total time (in seconds) used by
 assembly.
+
+@item --strip-local-absolute
+Remove local absolute symbols from the outgoing symbol table.
 
 @item -v
 @itemx -version
@@ -409,6 +419,27 @@ a D10V processor.
 Optimize output by parallelizing instructions.
 @end table
 @end ifset
+
+@c start-sanitize-d30v
+@ifset D30V
+The following options are available when @value{AS} is configured for a D30V
+processor.
+@table @code
+@cindex D30V optimization
+@cindex optimization, D30V
+@item -O
+Optimize output by parallelizing instructions.
+
+@cindex D30V nops
+@item -n
+Warn when nops are generated.
+
+@cindex D30V nops after 32-bit multiply
+@item -N
+Warn when a nop after a 32-bit multiply instruction is generated.
+@end table
+@end ifset
+@c end-sanitize-d30v
 
 @ifset I960
 The following options are available when @value{AS} is configured for the
@@ -4670,6 +4701,11 @@ subject, see the hardware manufacturer's manual.
 @ifset D10V
 * D10V-Dependent::              D10V Dependent Features
 @end ifset
+@c start-sanitize-d30v
+@ifset D30V
+* D30V-Dependent::              D30V Dependent Features
+@end ifset
+@c end-sanitize-d30v
 @ifset H8/300
 * H8/300-Dependent::            Hitachi H8/300 Dependent Features
 @end ifset
@@ -4829,6 +4865,12 @@ family.
 @ifset D10V
 @include c-d10v.texi
 @end ifset
+
+@c start-sanitize-d30v
+@ifset D30V
+@include c-d30v.texi
+@end ifset
+@c end-sanitize-d30v
 
 @ifset H8/300
 @include c-h8300.texi

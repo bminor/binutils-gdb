@@ -1,5 +1,6 @@
 /* obj-aout.h, a.out object file format for gas, the assembler.
-   Copyright (C) 1989, 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright (C) 1989, 90, 91, 92, 93, 94, 95, 1996
+   Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -89,7 +90,11 @@ extern void obj_aout_frob_file PARAMS ((void));
 #define S_IS_EXTERNAL(s)	((s)->sy_symbol.n_type & N_EXT)
 
 /* True if symbol has been defined, ie is in N_{TEXT,DATA,BSS,ABS} or N_EXT */
-#define S_IS_DEFINED(s)		((S_GET_TYPE(s) != N_UNDF) || (S_GET_OTHER(s) != 0) || (S_GET_DESC(s) != 0))
+#define S_IS_DEFINED(s) \
+  (S_GET_TYPE (s) != N_UNDF || S_GET_DESC (s) != 0)
+
+#define S_IS_COMMON(s) \
+  (S_GET_TYPE (s) == N_UNDF && S_GET_VALUE (s) != 0)
 
 #define S_IS_REGISTER(s)	((s)->sy_symbol.n_type == N_REGISTER)
 
@@ -97,11 +102,14 @@ extern void obj_aout_frob_file PARAMS ((void));
 #define S_IS_DEBUG(s)		((s)->sy_symbol.n_type & N_STAB)
 /* True if a symbol is local symbol name */
 #define S_IS_LOCAL(s) 					\
-  (S_GET_NAME (s) 					\
-   && !S_IS_DEBUG (s) 					\
-   && (strchr (S_GET_NAME (s), '\001') != NULL		\
-       || strchr (S_GET_NAME (s), '\002') != NULL	\
-       || (S_LOCAL_NAME(s) && !flag_keep_locals)))
+  ((S_GET_NAME (s) 					\
+    && !S_IS_DEBUG (s) 					\
+    && (strchr (S_GET_NAME (s), '\001') != NULL		\
+        || strchr (S_GET_NAME (s), '\002') != NULL	\
+        || (S_LOCAL_NAME(s) && !flag_keep_locals)))	\
+   || (flag_strip_local_absolute			\
+       && ! S_IS_EXTERNAL(s)				\
+       && S_GET_SEGMENT == absolute_section))
 /* True if a symbol is not defined in this file */
 #define S_IS_EXTERN(s)		((s)->sy_symbol.n_type & N_EXT)
 /* True if the symbol has been generated because of a .stabd directive */

@@ -78,7 +78,9 @@ segT reg_section, expr_section;
 segT text_section, data_section, bss_section;
 #endif
 
-int chunksize = 5000;
+/* The default obstack chunk size.  If we set this to zero, the
+   obstack code will use whatever will fit in a 4096 byte block.  */
+int chunksize = 0;
 
 /* To monitor memory allocation more effectively, make this non-zero.
    Then the chunk sizes for gas and bfd will be reduced.  */
@@ -135,6 +137,7 @@ Options:\n\
   d	omit debugging directives\n\
   h	include high-level source\n\
   l	include assembly\n\
+  m     include macro expansions\n\
   n	omit forms processing\n\
   s	include symbols\n\
   =file set listing file name (must be last sub-option)\n");
@@ -147,7 +150,7 @@ Options:\n\
 -I DIR			add DIR to search list for .include directives\n\
 -J			don't warn about signed overflow\n\
 -K			warn when differences altered for long displacements\n\
--L			keep local symbols (starting with `L')\n");
+-L,--keep-locals	keep local symbols (e.g. starting with `L')\n");
   fprintf (stream, "\
 -M,--mri		assemble in MRI compatibility mode\n\
 --MD FILE		write dependency information in FILE (default none)\n\
@@ -155,6 +158,7 @@ Options:\n\
 -o OBJFILE		name the object-file output OBJFILE (default a.out)\n\
 -R			fold data section into text section\n\
 --statistics		print various measured statistics from execution\n\
+--strip-local-absolute	strip local absolute symbols\n\
 --version		print assembler version number and exit\n\
 -W			suppress warnings\n\
 --itbl INSTTBL		extend instruction set to include instructions\n\
@@ -305,6 +309,7 @@ parse_args (pargc, pargv)
   static const struct option std_longopts[] = {
 #define OPTION_HELP (OPTION_STD_BASE)
     {"help", no_argument, NULL, OPTION_HELP},
+    {"keep-locals", no_argument, NULL, 'L'},
     {"mri", no_argument, NULL, 'M'},
 #define OPTION_NOCPP (OPTION_STD_BASE + 1)
     {"nocpp", no_argument, NULL, OPTION_NOCPP},
@@ -331,7 +336,9 @@ parse_args (pargc, pargv)
 #define OPTION_DEPFILE (OPTION_STD_BASE + 9)
     {"MD", required_argument, NULL, OPTION_DEPFILE},
 #define OPTION_GSTABS (OPTION_STD_BASE + 10)
-    {"gstabs", no_argument, NULL, OPTION_GSTABS}
+    {"gstabs", no_argument, NULL, OPTION_GSTABS},
+#define OPTION_STRIP_LOCAL_ABSOLUTE (OPTION_STD_BASE + 11)
+    {"strip-local-absolute", no_argument, NULL, OPTION_STRIP_LOCAL_ABSOLUTE}
   };
 
   /* Construct the option lists from the standard list and the
@@ -410,6 +417,10 @@ parse_args (pargc, pargv)
 
 	case OPTION_STATISTICS:
 	  flag_print_statistics = 1;
+	  break;
+
+	case OPTION_STRIP_LOCAL_ABSOLUTE:
+	  flag_strip_local_absolute = 1;
 	  break;
 
 	case OPTION_VERSION:
@@ -555,6 +566,9 @@ the GNU General Public License.  This program has absolutely no warranty.\n");
 		      break;
 		    case 'l':
 		      listing |= LISTING_LISTING;
+		      break;
+		    case 'm':
+		      listing |= LISTING_MACEXP;
 		      break;
 		    case 'n':
 		      listing |= LISTING_NOFORM;
@@ -732,6 +746,14 @@ main (argc, argv)
     keep_it = 1;
   else
     keep_it = 0;
+
+#if defined (BFD_ASSEMBLER) || !defined (BFD)
+  /* This used to be done at the start of write_object_file in
+     write.c, but that caused problems when doing listings when
+     keep_it was zero.  This could probably be moved above md_end, but
+     I didn't want to risk the change.  */
+  subsegs_finish ();
+#endif
 
   if (keep_it)
     write_object_file ();

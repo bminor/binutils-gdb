@@ -724,8 +724,8 @@ resolve_symbol_value (symp, finalize)
 		{
 		  symp->sy_value.X_op = O_symbol;
 		  S_SET_SEGMENT (symp, S_GET_SEGMENT (add_symbol));
+		  symp->sy_value.X_add_number = final_val;
 		}
-	      symp->sy_value.X_add_number = final_val;
 	      final_val = 0;
 	      resolved = add_symbol->sy_resolved;
 	      goto exit_dont_set_value;
@@ -887,12 +887,12 @@ resolve_symbol_value (symp, finalize)
 	    case O_bit_and:		left &= right; break;
 	    case O_add:			left += right; break;
 	    case O_subtract:		left -= right; break;
-	    case O_eq:		left = left == right ? ~ (offsetT) 0 : 0;
-	    case O_ne:		left = left != right ? ~ (offsetT) 0 : 0;
-	    case O_lt:		left = left <  right ? ~ (offsetT) 0 : 0;
-	    case O_le:		left = left <= right ? ~ (offsetT) 0 : 0;
-	    case O_ge:		left = left >= right ? ~ (offsetT) 0 : 0;
-	    case O_gt:		left = left >  right ? ~ (offsetT) 0 : 0;
+	    case O_eq:	left = left == right ? ~ (offsetT) 0 : 0; break;
+	    case O_ne:	left = left != right ? ~ (offsetT) 0 : 0; break;
+	    case O_lt:	left = left <  right ? ~ (offsetT) 0 : 0; break;
+	    case O_le:	left = left <= right ? ~ (offsetT) 0 : 0; break;
+	    case O_ge:	left = left >= right ? ~ (offsetT) 0 : 0; break;
+	    case O_gt:	left = left >  right ? ~ (offsetT) 0 : 0; break;
 	    case O_logical_and:	left = left && right; break;
 	    case O_logical_or:	left = left || right; break;
 	    default:		abort ();
@@ -1364,7 +1364,7 @@ S_IS_EXTERNAL (s)
   flagword flags = s->bsym->flags;
 
   /* sanity check */
-  if (flags & BSF_LOCAL && flags & BSF_GLOBAL)
+  if ((flags & BSF_LOCAL) && (flags & BSF_GLOBAL))
     abort ();
 
   return (flags & BSF_GLOBAL) != 0;
@@ -1408,10 +1408,15 @@ S_IS_LOCAL (s)
   const char *name;
 
   /* sanity check */
-  if (flags & BSF_LOCAL && flags & BSF_GLOBAL)
+  if ((flags & BSF_LOCAL) && (flags & BSF_GLOBAL))
     abort ();
 
   if (bfd_get_section (s->bsym) == reg_section)
+    return 1;
+
+  if (flag_strip_local_absolute
+      && (flags & BSF_GLOBAL) == 0
+      && bfd_get_section (s->bsym) == absolute_section)
     return 1;
 
   name = S_GET_NAME (s);
@@ -1459,7 +1464,17 @@ S_SET_SEGMENT (s, seg)
      symbolS *s;
      segT seg;
 {
-  s->bsym->section = seg;
+  /* Don't reassign section symbols.  The direct reason is to prevent seg
+     faults assigning back to const global symbols such as *ABS*, but it
+     shouldn't happen anyway.  */
+
+  if (s->bsym->flags & BSF_SECTION_SYM)
+    {
+      if (s->bsym->section != seg)
+	abort();
+    }
+  else
+    s->bsym->section = seg;
 }
 
 void

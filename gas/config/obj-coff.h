@@ -111,7 +111,10 @@
 
 #ifdef TC_SH
 #include "coff/sh.h"
-#define TARGET_FORMAT (shl ? "coff-shl" : "coff-sh")
+#define TARGET_FORMAT					\
+  (shl							\
+   ? (sh_small ? "coff-shl-small" : "coff-shl")		\
+   : (sh_small ? "coff-sh-small" : "coff-sh"))
 #endif
 
 #ifdef TC_M88K
@@ -451,7 +454,10 @@ typedef struct
   ((s)->sy_symbol.ost_entry.n_scnum == C_REGISTER_SECTION \
    || (S_LOCAL_NAME(s) && ! flag_keep_locals && ! S_IS_DEBUG (s)) \
    || strchr (S_GET_NAME (s), '\001') != NULL \
-   || strchr (S_GET_NAME (s), '\002') != NULL)
+   || strchr (S_GET_NAME (s), '\002') != NULL \
+   || (flag_strip_local_absolute \
+       && !S_IS_EXTERNAL(s) \
+       && (s)->sy_symbol.ost_entry.n_scnum == C_ABS_SECTION))
 /* True if a symbol is not defined in this file */
 #define S_IS_EXTERN(s)		((s)->sy_symbol.ost_entry.n_scnum == 0 \
 				 && S_GET_VALUE (s) == 0)
