@@ -1,3 +1,22 @@
+2003-05-03  Andrew Cagney  <cagney@redhat.com>
+
+	* disasm.h (print_insn): Declare.
+	* disasm.c (init_gdb_disassemble_info): New function.
+	(gdb_disassembly): Call init_gdb_disassemble_info.
+	(gdb_print_insn): New function.
+	* v850-tdep.c (v850_scan_prologue): Call gdb_print_insn, instead
+	of TARGET_PRINT_INSN.  Send debug info to "gdb_stdlog".
+	* mcore-tdep.c: Include "disasm.h"
+	(mcore_dump_insn): Call gdb_print_insn, instead of TARGET_PRINT_INSN.
+	* d10v-tdep.c: Include "disasm.h".
+	(display_trace): Call gdb_print_insn, instead of print_insn.
+	(print_insn): Delete function.
+	* printcmd.c: Include "disasm.h".
+	(print_insn): Delete function.
+	(print_formatted): Call gdb_print_insn, instead of print_insn.
+	* Makefile.in (printcmd.o): Update dependencies.
+	(mcore-tdep.o, d10v-tdep.o): Ditto.
+	
 2003-05-02  Andrew Cagney  <cagney@redhat.com>
 
 	* std-regs.c (value_of_builtin_frame_pc_reg): Delete #ifdef

@@ -43,6 +43,7 @@
 #include "floatformat.h"
 #include "gdb/sim-d10v.h"
 #include "sim-regno.h"
+#include "disasm.h"
 
 #include "gdb_assert.h"
 
@@ -1361,8 +1362,7 @@ display_trace (int low, int high)
 	  printf_filtered (":");
 	  printf_filtered ("\t");
 	  wrap_here ("    ");
-	  next_address += TARGET_PRINT_INSN (next_address,
-					     &deprecated_tm_print_insn_info);
+	  next_address += gdb_print_insn (next_address, gdb_stdout);
 	  printf_filtered ("\n");
 	  gdb_flush (gdb_stdout);
 	}

@@ -1,3 +1,8 @@
+2003-05-03  Andrew Cagney  <cagney@redhat.com>
+
+	* tuiDisassem.c (tui_disassemble): Call gdb_print_insn, instead of
+	TARGET_PRINT_INSN.  Do not initialize a disassemble_info object.
+
 2003-04-30  Andrew Cagney  <cagney@redhat.com>
 
 	* tuiDisassem.c (tui_disassemble): Use

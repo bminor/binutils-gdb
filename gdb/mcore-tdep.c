@@ -28,6 +28,7 @@
 #include "inferior.h"
 #include "arch-utils.h"
 #include "gdb_string.h"
+#include "disasm.h"
 
 /* Functions declared and used only in this file */
 
@@ -163,7 +164,7 @@ mcore_dump_insn (char *commnt, CORE_ADDR pc, int insn)
     {
       printf_filtered ("MCORE:  %s %08x %08x ",
 		       commnt, (unsigned int) pc, (unsigned int) insn);
-      TARGET_PRINT_INSN (pc, &deprecated_tm_print_insn_info);
+      gdb_print_insn (pc, gdb_stdout);
       printf_filtered ("\n");
     }
 }

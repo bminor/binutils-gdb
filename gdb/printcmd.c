@@ -42,6 +42,7 @@
 #include "ui-out.h"
 #include "gdb_assert.h"
 #include "block.h"
+#include "disasm.h"
 
 extern int asm_demangle;	/* Whether to demangle syms in asm printouts */
 extern int addressprint;	/* Whether to print hex addresses in HLL " */
@@ -174,8 +175,6 @@ static void do_examine (struct format_data, CORE_ADDR addr,
 static void print_formatted (struct value *, int, int, struct ui_file *);
 
 static struct format_data decode_format (char **, int, int);
-
-static int print_insn (CORE_ADDR, struct ui_file *);
 
 static void sym_info (char *, int);
 
@@ -310,7 +309,7 @@ print_formatted (struct value *val, register int format, int size,
       /* We often wrap here if there are long symbolic names.  */
       wrap_here ("    ");
       next_address = VALUE_ADDRESS (val)
-	+ print_insn (VALUE_ADDRESS (val), stream);
+	+ gdb_print_insn (VALUE_ADDRESS (val), stream);
       next_section = VALUE_BFD_SECTION (val);
       break;
 
@@ -2239,31 +2238,6 @@ printf_command (char *arg, int from_tty)
   }
   do_cleanups (old_cleanups);
 }
-
-/* Print the instruction at address MEMADDR in debugged memory,
-   on STREAM.  Returns length of the instruction, in bytes.  */
-
-/* FIXME: cagney/2003-04-28: Should instead be using the generic
-   disassembler but first need to clean that up and stop it trying to
-   access the exec file.  */
-
-static int
-print_insn (CORE_ADDR memaddr, struct ui_file *stream)
-{
-  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
-    deprecated_tm_print_insn_info.endian = BFD_ENDIAN_BIG;
-  else
-    deprecated_tm_print_insn_info.endian = BFD_ENDIAN_LITTLE;
-
-  if (TARGET_ARCHITECTURE != NULL)
-    deprecated_tm_print_insn_info.mach = TARGET_ARCHITECTURE->mach;
-  /* else: should set .mach=0 but some disassemblers don't grok this */
-
-  deprecated_tm_print_insn_info.stream = stream;
-
-  return TARGET_PRINT_INSN (memaddr, &deprecated_tm_print_insn_info);
-}
-
 
 void
 _initialize_printcmd (void)

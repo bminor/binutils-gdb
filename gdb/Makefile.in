@@ -1640,7 +1640,7 @@ d10v-tdep.o: d10v-tdep.c $(defs_h) $(frame_h) $(frame_unwind_h) \
 	$(gdb_string_h) $(value_h) $(inferior_h) $(dis_asm_h) $(symfile_h) \
 	$(objfiles_h) $(language_h) $(arch_utils_h) $(regcache_h) \
 	$(remote_h) $(floatformat_h) $(gdb_sim_d10v_h) $(sim_regno_h) \
-	$(gdb_assert_h)
+	$(gdb_assert_h) $(disasm_h)
 dbug-rom.o: dbug-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
 	$(serial_h) $(regcache_h) $(m68k_tdep_h)
 dbxread.o: dbxread.c $(defs_h) $(gdb_string_h) $(gdb_obstack_h) \
@@ -1945,7 +1945,7 @@ mcore-rom.o: mcore-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
 	$(gdb_string_h) $(regcache_h) $(serial_h)
 mcore-tdep.o: mcore-tdep.c $(defs_h) $(frame_h) $(symtab_h) $(value_h) \
 	$(gdbcmd_h) $(regcache_h) $(symfile_h) $(gdbcore_h) $(inferior_h) \
-	$(arch_utils_h) $(gdb_string_h)
+	$(arch_utils_h) $(gdb_string_h) $(disasm_h)
 mdebugread.o: mdebugread.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(gdbcore_h) \
 	$(symfile_h) $(objfiles_h) $(gdb_obstack_h) $(buildsym_h) \
 	$(stabsread_h) $(complaints_h) $(demangle_h) $(gdb_assert_h) \
@@ -2061,7 +2061,7 @@ printcmd.o: printcmd.c $(defs_h) $(gdb_string_h) $(frame_h) $(symtab_h) \
 	$(gdbtypes_h) $(value_h) $(language_h) $(expression_h) $(gdbcore_h) \
 	$(gdbcmd_h) $(target_h) $(breakpoint_h) $(demangle_h) $(valprint_h) \
 	$(annotate_h) $(symfile_h) $(objfiles_h) $(completer_h) $(ui_out_h) \
-	$(gdb_assert_h) $(block_h)
+	$(gdb_assert_h) $(block_h) $(disasm_h)
 proc-api.o: proc-api.c $(defs_h) $(gdbcmd_h) $(completer_h) $(gdb_wait_h) \
 	$(proc_utils_h)
 proc-events.o: proc-events.c $(defs_h)

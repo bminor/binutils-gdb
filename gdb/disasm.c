@@ -307,22 +307,14 @@ do_assembly_only (struct ui_out *uiout, disassemble_info * di,
   do_cleanups (ui_out_chain);
 }
 
-void
-gdb_disassembly (struct ui_out *uiout,
-		char *file_string,
-		int line_num,
-		int mixed_source_and_assembly,
-		int how_many, CORE_ADDR low, CORE_ADDR high)
-{
-  struct ui_stream *stb = ui_out_stream_new (uiout);
-  struct cleanup *cleanups = make_cleanup_ui_out_stream_delete (stb);
-  disassemble_info di;
-  /* To collect the instruction outputted from opcodes. */
-  struct symtab *symtab = NULL;
-  struct linetable_entry *le = NULL;
-  int nlines = -1;
+/* Initialize the disassemble info struct ready for the specified
+   stream.  */
 
-  INIT_DISASSEMBLE_INFO_NO_ARCH (di, stb->stream,
+static disassemble_info
+gdb_disassemble_info (struct gdbarch *gdbarch, struct ui_file *file)
+{
+  disassemble_info di;
+  INIT_DISASSEMBLE_INFO_NO_ARCH (di, file,
 				 (fprintf_ftype) fprintf_unfiltered);
   di.flavour = bfd_target_unknown_flavour;
   di.memory_error_func = dis_asm_memory_error;
@@ -336,8 +328,25 @@ gdb_disassembly (struct ui_out *uiout,
      Further, it has been supperseeded by trust-read-only-sections
      (although that should be superseeded by target_trust..._p()).  */
   di.read_memory_func = dis_asm_read_memory;
-  di.mach = gdbarch_bfd_arch_info (current_gdbarch)->mach;
-  di.endian = gdbarch_byte_order (current_gdbarch);
+  di.mach = gdbarch_bfd_arch_info (gdbarch)->mach;
+  di.endian = gdbarch_byte_order (gdbarch);
+  return di;
+}
+
+void
+gdb_disassembly (struct ui_out *uiout,
+		char *file_string,
+		int line_num,
+		int mixed_source_and_assembly,
+		int how_many, CORE_ADDR low, CORE_ADDR high)
+{
+  struct ui_stream *stb = ui_out_stream_new (uiout);
+  struct cleanup *cleanups = make_cleanup_ui_out_stream_delete (stb);
+  disassemble_info di = gdb_disassemble_info (current_gdbarch, stb->stream);
+  /* To collect the instruction outputted from opcodes. */
+  struct symtab *symtab = NULL;
+  struct linetable_entry *le = NULL;
+  int nlines = -1;
 
   /* Assume symtab is valid for whole PC range */
   symtab = find_pc_symtab (low);
@@ -361,6 +370,16 @@ gdb_disassembly (struct ui_out *uiout,
   gdb_flush (gdb_stdout);
 }
 
+/* Print the instruction at address MEMADDR in debugged memory,
+   on STREAM.  Returns length of the instruction, in bytes.  */
+
+int
+gdb_print_insn (CORE_ADDR memaddr, struct ui_file *stream)
+{
+  disassemble_info di = gdb_disassemble_info (current_gdbarch, stream);
+  return TARGET_PRINT_INSN (memaddr, &di);
+}
+
 
 /* FIXME: cagney/2003-04-28: This global deprecated_tm_print_insn_info
    is going away.  */
@@ -371,6 +390,7 @@ extern void _initialize_disasm (void);
 void
 _initialize_disasm (void)
 {
+  
   INIT_DISASSEMBLE_INFO_NO_ARCH (deprecated_tm_print_insn_info, gdb_stdout,
 				 (fprintf_ftype)fprintf_filtered);
   deprecated_tm_print_insn_info.flavour = bfd_target_unknown_flavour;
