@@ -1163,6 +1163,7 @@ static void
 DEFUN(dwarf_read_array_type, (dip), struct dieinfo *dip)
 {
   struct type *type;
+  struct type *utype;
   char *sub;
   char *subend;
   short temp;
@@ -1180,14 +1181,26 @@ DEFUN(dwarf_read_array_type, (dip), struct dieinfo *dip)
       type = decode_subscr_data (sub, subend);
       if (type == NULL)
 	{
-	  type = alloc_utype (dip -> dieref, NULL);
-	  TYPE_CODE (type) = TYPE_CODE_ARRAY;
-	  TYPE_TARGET_TYPE (type) = builtin_type_int;
-	  TYPE_LENGTH (type) = 1 * TYPE_LENGTH (TYPE_TARGET_TYPE (type));
+	  if ((utype = lookup_utype (dip -> dieref)) == NULL)
+	    {
+	      utype = alloc_utype (dip -> dieref, NULL);
+	    }
+	  TYPE_CODE (utype) = TYPE_CODE_ARRAY;
+	  TYPE_TARGET_TYPE (utype) = builtin_type_int;
+	  TYPE_LENGTH (utype) = 1 * TYPE_LENGTH (TYPE_TARGET_TYPE (utype));
 	}
       else
 	{
-	  type = alloc_utype (dip -> dieref, type);
+	  if ((utype = lookup_utype (dip -> dieref)) == NULL)
+	    {
+	      (void) alloc_utype (dip -> dieref, type);
+	    }
+	  else
+	    {
+	      TYPE_CODE (utype) = TYPE_CODE_ARRAY;
+	      TYPE_LENGTH (utype) = TYPE_LENGTH (type);
+	      TYPE_TARGET_TYPE (utype) = TYPE_TARGET_TYPE (type);
+	    }
 	}
     }
 }
@@ -1225,11 +1238,32 @@ DEFUN(read_subroutine_type, (dip, thisdie, enddie),
      char *thisdie AND
      char *enddie)
 {
-  struct type *type;
+  struct type *type;		/* Type that this function returns */
+  struct type *ftype;		/* Function that returns above type */
   
+  /* Decode the type that this subroutine returns */
+
   type = decode_die_type (dip);
-  type = lookup_function_type (type);
-  type = alloc_utype (dip -> dieref, type);
+
+  /* Check to see if we already have a partially constructed user
+     defined type for this DIE, from a forward reference. */
+
+  if ((ftype = lookup_utype (dip -> dieref)) == NULL)
+    {
+      /* This is the first reference to one of these types.  Make
+	 a new one and place it in the user defined types. */
+      ftype = lookup_function_type (type);
+      (void) alloc_utype (dip -> dieref, ftype);
+    }
+  else
+    {
+      /* We have an existing partially constructed type, so bash it
+	 into the correct type. */
+      TYPE_TARGET_TYPE (ftype) = type;
+      TYPE_FUNCTION_TYPE (type) = ftype;
+      TYPE_LENGTH (ftype) = 1;
+      TYPE_CODE (ftype) = TYPE_CODE_FUNC;
+    }
 }
 
 /*

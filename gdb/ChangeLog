@@ -1,3 +1,9 @@
+Mon Feb 17 07:13:27 1992  Fred Fish  (fnf at cygnus.com)
+
+	* dwarfread.c (dwarf_read_array_type, read_subroutine_type):
+	When creating a new user defined type, check to see if a partial
+	type already exists, and if so, bash it to fit.
+
 Thu Feb 13 17:14:28 1992  Fred Fish  (fnf at cygnus.com)
 
 	* elfread.c (elf_symtab_read):  Fix code to correctly track
