@@ -280,6 +280,10 @@ CODE_FRAGMENT
 .	{* Symbol is from dynamic linking information.  *}
 .#define BSF_DYNAMIC	   0x8000
 .
+.       {* The symbol denotes a data object.  Used in ELF, and perhaps
+.          others someday.  *}
+.#define BSF_OBJECT	   0x10000
+.
 .  flagword flags;
 .
 .	{* A pointer to the section to which this symbol is
@@ -417,7 +421,8 @@ bfd_print_symbol_vandf (arg, symbol)
     }
 
   /* This presumes that a symbol can not be both BSF_DEBUGGING and
-     BSF_DYNAMIC, nor both BSF_FUNCTION and BSF_FILE.  */
+     BSF_DYNAMIC, nor more than one of BSF_FUNCTION, BSF_FILE, and
+     BSF_OBJECT.  */
   fprintf (file, " %c%c%c%c%c%c%c",
 	   ((type & BSF_LOCAL)
 	    ? (type & BSF_GLOBAL) ? '!' : 'l'
@@ -427,7 +432,11 @@ bfd_print_symbol_vandf (arg, symbol)
 	   (type & BSF_WARNING) ? 'W' : ' ',
 	   (type & BSF_INDIRECT) ? 'I' : ' ',
 	   (type & BSF_DEBUGGING) ? 'd' : (type & BSF_DYNAMIC) ? 'D' : ' ',
-	   (type & BSF_FUNCTION) ? 'F' : (type & BSF_FILE) ? 'f' : ' ');
+	   ((type & BSF_FUNCTION)
+	    ? 'F'
+	    : ((type & BSF_FILE)
+	       ? 'f'
+	       : ((type & BSF_OBJECT) ? 'O' : ' '))));
 }
 
 

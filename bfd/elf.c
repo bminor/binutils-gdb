@@ -2837,6 +2837,7 @@ swap_out_syms (abfd, sttp)
 	bfd_vma value = syms[idx]->value;
 	elf_symbol_type *type_ptr;
 	flagword flags = syms[idx]->flags;
+	int type;
 
 	if (flags & BSF_SECTION_SYM)
 	  /* Section symbols have no names.  */
@@ -2931,15 +2932,20 @@ swap_out_syms (abfd, sttp)
 	    sym.st_shndx = shndx;
 	  }
 
+	if ((flags & BSF_FUNCTION) != 0)
+	  type = STT_FUNC;
+	else if ((flags & BSF_OBJECT) != 0)
+	  type = STT_OBJECT;
+	else
+	  type = STT_NOTYPE;
+
 	if (bfd_is_com_section (syms[idx]->section))
-	  sym.st_info = ELF_ST_INFO (STB_GLOBAL, STT_OBJECT);
+	  sym.st_info = ELF_ST_INFO (STB_GLOBAL, type);
 	else if (bfd_is_und_section (syms[idx]->section))
 	  sym.st_info = ELF_ST_INFO (((flags & BSF_WEAK)
 				      ? STB_WEAK
 				      : STB_GLOBAL),
-				     ((flags & BSF_FUNCTION)
-				      ? STT_FUNC
-				      : STT_NOTYPE));
+				     type);
 	else if (flags & BSF_SECTION_SYM)
 	  sym.st_info = ELF_ST_INFO (STB_LOCAL, STT_SECTION);
 	else if (flags & BSF_FILE)
@@ -2947,7 +2953,6 @@ swap_out_syms (abfd, sttp)
 	else
 	  {
 	    int bind = STB_LOCAL;
-	    int type = STT_OBJECT;
 
 	    if (flags & BSF_LOCAL)
 	      bind = STB_LOCAL;
@@ -2955,9 +2960,6 @@ swap_out_syms (abfd, sttp)
 	      bind = STB_WEAK;
 	    else if (flags & BSF_GLOBAL)
 	      bind = STB_GLOBAL;
-
-	    if (flags & BSF_FUNCTION)
-	      type = STT_FUNC;
 
 	    sym.st_info = ELF_ST_INFO (bind, type);
 	  }

@@ -7,6 +7,15 @@ Mon Jan 29 14:27:24 1996  Kim Knuttila  <krk@cygnus.com>
 
 Mon Jan 29 13:06:28 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	Based on patches from Ronald F. Guilmette <rfg@monkeys.com>:
+	* syms.c (BSF_OBJECT): Define.
+	(bfd_print_symbol_vandf): Print 'O' for BSF_OBJECT.
+	* bfd-in2.h: Rebuild.
+	* elfcode.h (elf_slurp_symbol_table): Set BSF_OBJECT for an
+	STT_OBJECT symbol.
+	* elf.c (swap_out_syms): Only set type to STT_OBJECT if BSF_OBJECT
+	is set.
+
 	* elf32-i386.c (elf_i386_relocate_section): If -Bsymbolic, when
 	copying relocs into a shared object, treat a defined global symbol
 	as a local symbol.
