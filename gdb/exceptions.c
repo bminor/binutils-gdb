@@ -73,8 +73,6 @@ struct catcher
   volatile struct exception *exception;
   /* Saved/current state.  */
   int mask;
-  char *saved_error_pre_print;
-  char *saved_quit_pre_print;
   struct ui_out *saved_uiout;
   struct cleanup *saved_cleanup_chain;
   /* Back link.  */
@@ -86,7 +84,6 @@ static struct catcher *current_catcher;
 
 static SIGJMP_BUF *
 catcher_init (struct ui_out *func_uiout,
-	      char *errstring,
 	      volatile struct exception *exception,
 	      return_mask mask)
 {
@@ -99,14 +96,6 @@ catcher_init (struct ui_out *func_uiout,
   new_catcher->exception = exception;
 
   new_catcher->mask = mask;
-
-  /* Override error/quit messages during FUNC. */
-  new_catcher->saved_error_pre_print = error_pre_print;
-  new_catcher->saved_quit_pre_print = quit_pre_print;
-  if (mask & RETURN_MASK_ERROR)
-    error_pre_print = errstring;
-  if (mask & RETURN_MASK_QUIT)
-    quit_pre_print = errstring;
 
   /* Override the global ``struct ui_out'' builder.  */
   new_catcher->saved_uiout = uiout;
@@ -136,9 +125,6 @@ catcher_pop (void)
   restore_cleanups (old_catcher->saved_cleanup_chain);
 
   uiout = old_catcher->saved_uiout;
-
-  quit_pre_print = old_catcher->saved_quit_pre_print;
-  error_pre_print = old_catcher->saved_error_pre_print;
 
   xfree (old_catcher);
 }
@@ -458,7 +444,7 @@ catch_exception (struct ui_out *uiout,
 {
   volatile struct exception exception;
   SIGJMP_BUF *catch;
-  catch = catcher_init (uiout, NULL, &exception, mask);
+  catch = catcher_init (uiout, &exception, mask);
   for (SIGSETJMP ((*catch));
        catcher_state_machine (CATCH_ITER);)
     (*func) (uiout, func_args);
@@ -474,7 +460,7 @@ catch_exceptions_with_msg (struct ui_out *uiout,
 {
   volatile struct exception exception;
   volatile int val = 0;
-  SIGJMP_BUF *catch = catcher_init (uiout, NULL, &exception, mask);
+  SIGJMP_BUF *catch = catcher_init (uiout, &exception, mask);
   for (SIGSETJMP ((*catch)); catcher_state_machine (CATCH_ITER);)
     val = (*func) (uiout, func_args);
   print_any_exception (gdb_stderr, NULL, exception);
@@ -503,7 +489,7 @@ catch_errors (catch_errors_ftype *func, void *func_args, char *errstring,
 {
   volatile int val = 0;
   volatile struct exception exception;
-  SIGJMP_BUF *catch = catcher_init (uiout, errstring, &exception, mask);
+  SIGJMP_BUF *catch = catcher_init (uiout, &exception, mask);
   /* This illustrates how it is possible to nest the mechanism and
      hence catch "break".  Of course this doesn't address the need to
      also catch "return".  */
@@ -520,7 +506,7 @@ catch_command_errors (catch_command_errors_ftype * command,
 		      char *arg, int from_tty, return_mask mask)
 {
   volatile struct exception e;
-  SIGJMP_BUF *catch = catcher_init (uiout, NULL, &e, mask);
+  SIGJMP_BUF *catch = catcher_init (uiout, &e, mask);
   for (SIGSETJMP ((*catch)); catcher_state_machine (CATCH_ITER);)
     command (arg, from_tty);
   print_any_exception (gdb_stderr, NULL, e);
