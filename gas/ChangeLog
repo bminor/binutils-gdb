@@ -1,3 +1,13 @@
+Wed Jun 19 11:31:50 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-alpha.c (alpha_force_relocation): Add
+	BFD_RELOC_12_PCREL to switch.
+
+Tue Jun 18 20:29:57 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* config/tc-i386.h (LOCAL_LABEL,FAKE_LABEL_NAME): Use defaults for
+	TE_PE (Lfoo, not .Lfoo).
+
 Tue Jun 18 17:13:33 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* read.c (s_fill): Don't warn about a zero repeat count.

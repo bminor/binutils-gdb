@@ -18,7 +18,7 @@
 
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+   the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /*
  * Mach Operating System
@@ -59,6 +59,13 @@
 #include "as.h"
 #include "alpha-opcode.h"
 #include "subsegs.h"
+
+/* The OSF/1 V2.0 Alpha compiler can't compile this file with inline
+   functions.  */
+#ifndef __GNUC__
+#undef inline
+#define inline
+#endif
 
 /* @@ Will a simple 0x8000 work here?  If not, why not?  */
 #define GP_ADJUSTMENT	(0x8000 - 0x10)
@@ -164,7 +171,6 @@ const pseudo_typeS md_pseudo_table[] =
   {"set", s_alpha_set, 0},
   {"reguse", s_ignore, 0},
   {"livereg", s_ignore, 0},
-  {"extern", s_ignore, 0},	/*??*/
   {"base", s_base, 0},		/*??*/
   {"option", s_ignore, 0},
   {"prologue", s_ignore, 0},
@@ -806,6 +812,7 @@ alpha_force_relocation (f)
     case BFD_RELOC_23_PCREL_S2:
     case BFD_RELOC_14:
     case BFD_RELOC_26:
+    case BFD_RELOC_12_PCREL:
       return 0;
     default:
       abort ();
@@ -2168,7 +2175,23 @@ alpha_ip (str, insns)
 
   if (do_add64)
     {
-      emit_add64 (add64_in, add64_out, add64_addend);
+      /* If opcode represents an addq instruction, and the addend we
+         are using fits in a 16 bit range, we can change the addq
+         directly into an lda rather than emitting an lda followed by
+         an addq.  */
+      if (OPCODE (opcode) == 0x10
+	  && OP_FCN (opcode) == 0x20	/* addq */
+	  && add64_in == ZERO
+	  && add64_out == AT
+	  && in_range_signed (add64_addend, 16))
+	{
+	  opcode = (0x20000000	/* lda */
+		    | (((opcode >> SC) & 0x1f) << SA)
+		    | (((opcode >> SA) & 0x1f) << SB)
+		    | (add64_addend & 0xffff));
+	}
+      else
+	emit_add64 (add64_in, add64_out, add64_addend);
     }
 
   insns[0].opcode = opcode;
@@ -2264,7 +2287,7 @@ md_bignum_to_chars (buf, bignum, nchars)
     }
 }
 
-CONST char *md_shortopts = "Fm:";
+CONST char *md_shortopts = "Fm:g";
 struct option md_longopts[] = {
 #define OPTION_32ADDR (OPTION_MD_BASE)
   {"32addr", no_argument, NULL, OPTION_32ADDR},
@@ -2285,6 +2308,12 @@ md_parse_option (c, arg)
 
     case OPTION_32ADDR:
       addr32 = 1;
+      break;
+
+    case 'g':
+      /* Ignore `-g' so gcc can provide this option to the Digital
+	 UNIX assembler, which otherwise would throw away info that
+	 mips-tfile needs.  */
       break;
 
     default:
@@ -2441,9 +2470,16 @@ alpha_align (n, fill, label)
   if (fill == 0
       && (now_seg == text_section
 	  || !strcmp (now_seg->name, ".init")
-	  || !strcmp (now_seg->name, ".fini")))
+	  || !strcmp (now_seg->name, ".fini"))
+      && n > 2)
     {
       static const unsigned char nop_pattern[] = { 0x1f, 0x04, 0xff, 0x47 };
+      /* First, make sure we're on a four-byte boundary, in case
+	 someone has been putting .byte values into the text section.
+	 The DEC assembler silently fills with unaligned no-op
+	 instructions.  This will zero-fill, then nop-fill with proper
+	 alignment.  */
+      frag_align (2, fill);
       frag_align_pattern (n, nop_pattern, sizeof (nop_pattern));
     }
   else
