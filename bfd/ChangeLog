@@ -1,3 +1,8 @@
+Fri Mar 18 20:35:24 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* aoutx.h (reloc_type_lookup): Handle BFD_RELOC_CTOR on a 64-bit
+	machine.  Handle BFD_RELOC_SPARC13 and BFD_RELOC_SPARC_BASE13.
+
 Thu Mar 17 18:26:46 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* bfd-in.h (BFD_VERSION): Use @VERSION@.
