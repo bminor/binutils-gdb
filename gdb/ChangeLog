@@ -1,3 +1,9 @@
+Sat Oct  2 15:50:41 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* TODO: Don't suggest doing fast watchpoints by stepping a line
+	at a time.  That would be really hairy and still not fast enough.
+	Do suggest debug registers and page table diddling.
+
 Fri Oct  1 14:54:46 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* printcmd.c (do_examine): Make meaning of 'h', 'w', and 'g' not

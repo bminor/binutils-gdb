@@ -22,9 +22,9 @@ Breakpoints should not be inserted and deleted all the time.  Only the
 one(s) there should be removed when we have to step over one.  Support
 breakpoints that don't have to be removed to step over them.
 
-Speed up watchpoints by not single-stepping them, but do something
-faster like single-line execution.  Speed them up tremendously on
-machines that have watchpoint registers.
+Speed up watchpoints by using debug registers, page table diddling (on
+SunOS4, can call mprotect() in the inferior; on other machines can do
+something simpler), etc.
 
 Update gdbint.texinfo to include doc on the directory structure and 
 the various tricks of building gdb.
