@@ -1,5 +1,7 @@
 Tue Aug 22 02:00:47 1995  Jeff Law  (law@snake.cs.utah.edu)
 
+	* tm-hppa.h (EXTRACT_RETURN_VALUE): Fix for FP values.
+
 	* tm-hppa.h (STORE_RETURN_VALUE): Fix to work with -msoft-float
 	calling conventions too.  Use the TYPE of the return value, not
 	its length to determine if it should also be copied into the
