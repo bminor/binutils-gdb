@@ -1,3 +1,37 @@
+2002-07-31  Adam Nemet  <anemet@lnxw.com>
+
+	* elf32-arm.h (ARM_PLT_ENTRY_SIZE): Rename PLT_ENTRY_SIZE.
+	(THUMB_PLT_ENTRY_SIZE): New macro.
+	(PLT_ENTRY_SIZE): Return the appropriate *_PLT_ENTRY_SIZE.
+	(elf32_arm_plt0_entry): Rename PLT_ENTRY_SIZE to
+	ARM_PLT_ENTRY_SIZE.
+	(elf32_arm_plt_entry): Likewise.
+	(elf_backend_plt_header_size): Likewise.
+	(elf32_thumb_plt0_entry): New global.
+	(elf32_arm_finish_dynamic_sections): Use it.  Put Thumb entries
+	into .plt.thumb.
+	(elf32_thumb_plt_entry): New global.
+	(elf32_arm_finish_dynamic_symbol): Use it.  Use .thumb.plt for
+	Thumb entries.  Set the bottom bit of the corresponding GOT entry
+	for a Thumb PLT entry.
+	(struct elf32_arm_plt_entry_info): New structure.
+	(struct elf32_arm_link_hash_entry, plt_info): New member of this
+	type.
+	(elf32_arm_link_hash_newfunc): Initialize new member.
+	(elf32_arm_final_link_relocate, R_ARM_THM_PC22 case): Handle
+	relocations against the PLT.
+	(elf32_arm_check_relocs, case R_ARM_PLT32 case): Set
+	first_rel_type if this is the first time we encounter the symbol.
+	(elf32_arm_check_relocs, case R_ARM_THM_PC22 case): New case.
+	Determine if relocation needs a PLT entry.  Set first_rel_type if
+	this is the first time we encounter the symbol
+	(elf32_arm_adjust_dynamic_symbol): Create PLT entries for Thumb
+	functions as well.
+	(elf32_arm_size_dynamic_sections): Handle .plt.thumb like .plt.
+	(elf32_arm_create_dynamic_sections): New function.  Create the
+	.plt.thumb section.
+	(elf_backend_create_dynamic_sections): Call it.
+
 2002-07-31  Nick Clifton  <nickc@redhat.com>
 
 	* bfd.c (bfd_alt_mach_code): Rename parameter 'index' to

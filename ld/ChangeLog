@@ -1,3 +1,10 @@
+2002-07-31  Adam Nemet  <anemet@lnxw.com>
+
+	* emulparams/armelf.sh (OTHER_PLT_SECTIONS): New variable.  Set it
+	to .plt.thumb.
+	* scripttempl/elf.sc: Comment it.  Use the same way as ${PLT} is
+	used.
+
 2002-07-31  Nick Clifton  <nickc@redhat.com>
 
 	* NEWS: Retroactively add entry for Lars Brinkhoff's contribution
