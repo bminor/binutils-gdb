@@ -24,6 +24,9 @@
 #include "subsegs.h"     
 #include "opcode/v850.h"
 
+/* sign-extend a 16-bit number */
+#define SEXT16(x)	((((x) & 0xffff) ^ (~ 0x7fff)) + 0x8000)
+
 /* Temporarily holds the reloc in a cons expression.  */
 static bfd_reloc_code_real_type hold_cons_reloc;
 
@@ -40,7 +43,7 @@ struct reg_name
 const char comment_chars[] = "#";
 
 /* Characters which start a comment at the beginning of a line.  */
-const char line_comment_chars[] = ";#-";
+const char line_comment_chars[] = ";#";
 
 /* Characters which may be used to separate multiple commands on a 
    single line.  */
@@ -85,7 +88,7 @@ v850_section (int arg)
   char * ptr;
   
   for (ptr = input_line_pointer; * ptr != '\n' && * ptr != 0; ptr ++)
-    if (* ptr == ',')
+    if (* ptr == ',' && ptr[1] == '.')
       break;
 
   saved_c = * ptr;
@@ -824,22 +827,14 @@ md_assemble (str)
 		    case BFD_RELOC_LO16:
 		      {
 			/* Truncate, then sign extend the value.  */
-		        int temp = ex.X_add_number & 0xffff;
-
-			/* XXX Assumes 32bit ints! */
-		        temp = (temp << 16) >> 16;
-			ex.X_add_number = temp;
+			ex.X_add_number = SEXT16 (ex.X_add_number);
 			break;
 		      }
 
 		    case BFD_RELOC_HI16:
 		      {
 			/* Truncate, then sign extend the value.  */
-		        int temp = (ex.X_add_number >> 16) & 0xffff;
-
-			/* XXX Assumes 32bit ints! */
-		        temp = (temp << 16) >> 16;
-			ex.X_add_number = temp;
+			ex.X_add_number = SEXT16 (ex.X_add_number >> 16);
 			break;
 		      }
 
@@ -850,9 +845,7 @@ md_assemble (str)
 
 			temp += (ex.X_add_number >> 15) & 1;
 
-			/* XXX Assumes 32bit ints! */
-		        temp = (temp << 16) >> 16;
-			ex.X_add_number = temp;
+			ex.X_add_number = SEXT16 (temp);
 			break;
 		      }
 
