@@ -1,5 +1,11 @@
 2000-12-20  Fernando Nasser  <fnasser@redhat.com>
 
+	* configure.in: Rename CONFIG_LOBS to CONFIG_LIB_OBS.
+	* Makefile.in: Ditto.
+	* configure: Regenerate.
+
+2000-12-20  Fernando Nasser  <fnasser@redhat.com>
+
 	* command.h: Register date when it was deprecated.
 	* call-cmds.h: Ditto.
 

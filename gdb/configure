@@ -2814,7 +2814,7 @@ fi
 
 
 CONFIG_OBS=
-CONFIG_LOBS=
+CONFIG_LIB_OBS=
 CONFIG_DEPS=
 CONFIG_SRCS=
 CONFIG_INITS=
@@ -5552,7 +5552,7 @@ echo "configure:5548: checking for HPUX/OSF thread support" >&5
 #define HAVE_HPUX_THREAD_SUPPORT 1
 EOF
 
-            CONFIG_LOBS="${CONFIG_LOBS} hpux-thread.o"
+            CONFIG_LIB_OBS="${CONFIG_LIB_OBS} hpux-thread.o"
             CONFIG_SRCS="${CONFIG_SRCS} hpux-thread.c"
          else
             echo "$ac_t""no (suppressed because you are not using GCC)" 1>&6
@@ -5570,7 +5570,7 @@ echo "configure:5567: checking for Solaris thread debugging library" >&5
 #define HAVE_THREAD_DB_LIB 1
 EOF
 
-         CONFIG_LOBS="${CONFIG_LOBS} sol-thread.o"
+         CONFIG_LIB_OBS="${CONFIG_LIB_OBS} sol-thread.o"
          CONFIG_SRCS="${CONFIG_SRCS} sol-thread.c"
          echo $ac_n "checking for dlopen in -ldl""... $ac_c" 1>&6
 echo "configure:5577: checking for dlopen in -ldl" >&5
@@ -5833,7 +5833,7 @@ fi
 
 
 if test "${enable_netrom}" = "yes"; then
-	CONFIG_LOBS="${CONFIG_LOBS} remote-nrom.o" 
+	CONFIG_LIB_OBS="${CONFIG_LIB_OBS} remote-nrom.o" 
         CONFIG_SRCS="${CONFIG_SRCS} remote-nrom.c"
 fi
 
@@ -8174,7 +8174,7 @@ s%@IGNORE_SIM@%$IGNORE_SIM%g
 s%@IGNORE_SIM_OBS@%$IGNORE_SIM_OBS%g
 s%@ENABLE_CFLAGS@%$ENABLE_CFLAGS%g
 s%@CONFIG_OBS@%$CONFIG_OBS%g
-s%@CONFIG_LOBS@%$CONFIG_LOBS%g
+s%@CONFIG_LIB_OBS@%$CONFIG_LIB_OBS%g
 s%@CONFIG_DEPS@%$CONFIG_DEPS%g
 s%@CONFIG_SRCS@%$CONFIG_SRCS%g
 s%@CONFIG_INITS@%$CONFIG_INITS%g
