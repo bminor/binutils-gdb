@@ -266,6 +266,7 @@ BFD32_BACKENDS = \
 	m68klynx.lo \
 	m68knetbsd.lo \
 	m88kmach3.lo \
+	mach-o.lo \
 	mipsbsd.lo \
 	newsos3.lo \
 	nlm.lo \
@@ -277,6 +278,7 @@ BFD32_BACKENDS = \
 	oasys.lo \
 	pc532-mach.lo \
 	pdp11.lo \
+	pef.lo \
 	pe-arm.lo \
 	pei-arm.lo \
 	pe-i386.lo \
@@ -306,7 +308,8 @@ BFD32_BACKENDS = \
 	vms-hdr.lo \
 	vms-misc.lo \
 	vms-tir.lo \
-	xcofflink.lo
+	xcofflink.lo \
+	xsym.lo
 
 BFD32_BACKENDS_CFILES = \
 	aout-adobe.c \
@@ -420,6 +423,7 @@ BFD32_BACKENDS_CFILES = \
 	m68klynx.c \
 	m68knetbsd.c \
 	m88kmach3.c \
+	mach-o.c \
 	mipsbsd.c \
 	newsos3.c \
 	nlm.c \
@@ -431,6 +435,7 @@ BFD32_BACKENDS_CFILES = \
 	oasys.c \
 	pc532-mach.c \
 	pdp11.c \
+	pef.c \
 	pe-arm.c \
 	pei-arm.c \
 	pe-i386.c \
@@ -459,7 +464,8 @@ BFD32_BACKENDS_CFILES = \
 	vms-hdr.c \
 	vms-misc.c \
 	vms-tir.c \
-	xcofflink.c
+	xcofflink.c \
+	xsym.c
 
 # The .o files needed by all of the 64 bit vectors that are configured into
 # target_vector in targets.c if configured with --enable-targets=all
@@ -563,9 +569,10 @@ SOURCE_HFILES = \
 	elf64-hppa.h elfcode.h elfcore.h elflink.h \
 	freebsd.h genlink.h go32stub.h \
 	libaout.h libbfd.h libcoff.h libecoff.h libhppa.h libieee.h \
-	libnlm.h liboasys.h libpei.h libxcoff.h \
+	libnlm.h liboasys.h libpei.h libxcoff.h mach-o.h \
 	netbsd.h nlm-target.h nlmcode.h nlmswap.h ns32k.h \
-	peicode.h som.h version.h vms.h xcoff-target.h
+	pef.h pef-traceback.h peicode.h som.h version.h \
+	vms.h xcoff-target.h xsym.h
 
 ## ... and all .h files which are in the build tree.
 BUILD_HFILES = \
@@ -1327,6 +1334,8 @@ m68knetbsd.lo: m68knetbsd.c netbsd.h $(INCDIR)/filenames.h \
 m88kmach3.lo: m88kmach3.c $(INCDIR)/filenames.h libaout.h \
   $(INCDIR)/bfdlink.h aout-target.h $(INCDIR)/aout/aout64.h \
   $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
+mach-o.lo: mach-o.c mach-o.h $(INCDIR)/filenames.h \
+  $(INCDIR)/libiberty.h mach-o-target.c
 mipsbsd.lo: mipsbsd.c $(INCDIR)/filenames.h libaout.h \
   $(INCDIR)/bfdlink.h aout-target.h $(INCDIR)/aout/aout64.h \
   $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
@@ -1358,6 +1367,8 @@ pc532-mach.lo: pc532-mach.c $(INCDIR)/filenames.h libaout.h \
 pdp11.lo: pdp11.c $(INCDIR)/filenames.h libaout.h $(INCDIR)/bfdlink.h \
   aout-target.h $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
   $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h $(INCDIR)/safe-ctype.h
+pef.lo: pef.c pef.h pef-traceback.h $(INCDIR)/filenames.h \
+  $(INCDIR)/libiberty.h
 pe-arm.lo: pe-arm.c $(INCDIR)/filenames.h coff-arm.c \
   $(INCDIR)/coff/arm.h $(INCDIR)/coff/external.h $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/pe.h libcoff.h $(INCDIR)/bfdlink.h coffcode.h \
@@ -1450,6 +1461,7 @@ vms-tir.lo: vms-tir.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
 xcofflink.lo: xcofflink.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/xcoff.h libcoff.h \
   libxcoff.h
+xsym.lo: xsym.c xsym.h $(INCDIR)/filenames.h
 aix5ppc-core.lo: aix5ppc-core.c
 aout64.lo: aout64.c aoutx.h $(INCDIR)/filenames.h $(INCDIR)/safe-ctype.h \
   $(INCDIR)/bfdlink.h libaout.h $(INCDIR)/aout/aout64.h \

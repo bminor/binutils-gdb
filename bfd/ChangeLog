@@ -1,3 +1,33 @@
+2002-11-06  Klee Dienes  <kdienes@apple.com>
+
+	* Makefile.am (BFD32_BACKENDS): Add mach-o.lo, pef.lo, and 
+	xsym.lo.
+	(BFD32_BACKENDS_CFILES): Add mach-o.c, pef.c, and xsym.c.
+	(SOURCE_HFILES): Add mach-o.h, pef.h, pef-traceback.h, xsym.h
+	* archures.c (enum bfd_architecture): Add bfd_arch_m98k.
+	* bfd.c (struct bfd): Add private data for mach-o, pef, and sym.
+	* targets.c (enum bfd_flavour): Add flavours for mach-o, pef, and
+	sym.
+        (_bfd_target_vector): Add target vectors for mach-o, pef, and sym.
+	* Makefile.in: Regenerate.
+	* doc/Makefile.in: Regenerate.
+        * bfd-in2.h: Regenerate.
+	* xsym.c: New file.  Contains support for the Apple/Metrowerks
+	xSYM debugging format.
+	* xsym.h: New file.
+	* pef.c: New file.  Contains support for the Apple Code Fragment
+	Manager Preferred Executable Format
+	* pef.h: New file.
+	* pef-traceback.h: New file.  Contains support for parsing PowerPC
+	traceback tables as used by PEF executables (and perhaps other
+	systems as well).
+        * mach-o.c: New file.  Contains support for the Mach-O object file
+	format.
+	* mach-o.h: New file.
+	* mach-o-target.c: New file.  Declares the mach-o targets
+	themselves.  Included three times by mach-o.c; each time with a
+	different set of macros set.
+	
 2002-11-06  Graeme Peterson  <gp@qnx.com>
 
 	* Makefile.am: Remove entries for elf32-qnx.[ch].

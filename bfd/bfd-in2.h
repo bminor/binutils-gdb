@@ -1551,6 +1551,7 @@ enum bfd_architecture
   bfd_arch_alliant,   /* Alliant */
   bfd_arch_convex,    /* Convex */
   bfd_arch_m88k,      /* Motorola 88xxx */
+  bfd_arch_m98k,      /* Motorola 98xxx */
   bfd_arch_pyramid,   /* Pyramid Technology */
   bfd_arch_h8300,     /* Hitachi H8/300 */
 #define bfd_mach_h8300   1
@@ -3533,6 +3534,11 @@ struct _bfd
       struct cisco_core_struct *cisco_core_data;
       struct versados_data_struct *versados_data;
       struct netbsd_core_struct *netbsd_core_data;
+      struct mach_o_data_struct *mach_o_data;
+      struct mach_o_fat_data_struct *mach_o_fat_data;
+      struct bfd_pef_data_struct *pef_data;
+      struct bfd_pef_xlib_data_struct *pef_xlib_data;
+      struct bfd_sym_data_struct *sym_data;
       PTR any;
     }
   tdata;
@@ -3795,7 +3801,11 @@ enum bfd_flavour
   bfd_target_msdos_flavour,
   bfd_target_ovax_flavour,
   bfd_target_evax_flavour,
-  bfd_target_mmo_flavour
+  bfd_target_mmo_flavour,
+  bfd_target_mach_o_flavour,
+  bfd_target_pef_flavour,
+  bfd_target_pef_xlib_flavour,
+  bfd_target_sym_flavour
 };
 
 enum bfd_endian { BFD_ENDIAN_BIG, BFD_ENDIAN_LITTLE, BFD_ENDIAN_UNKNOWN };

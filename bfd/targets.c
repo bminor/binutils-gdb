@@ -4,21 +4,21 @@
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
-This file is part of BFD, the Binary File Descriptor library.
+   This file is part of BFD, the Binary File Descriptor library.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -155,7 +155,11 @@ DESCRIPTION
 .  bfd_target_msdos_flavour,
 .  bfd_target_ovax_flavour,
 .  bfd_target_evax_flavour,
-.  bfd_target_mmo_flavour
+.  bfd_target_mmo_flavour,
+.  bfd_target_mach_o_flavour,
+.  bfd_target_pef_flavour,
+.  bfd_target_pef_xlib_flavour,
+.  bfd_target_sym_flavour
 .};
 .
 .enum bfd_endian { BFD_ENDIAN_BIG, BFD_ENDIAN_LITTLE, BFD_ENDIAN_UNKNOWN };
@@ -645,6 +649,9 @@ extern const bfd_target m68knetbsd_vec;
 extern const bfd_target m68ksysvcoff_vec;
 extern const bfd_target m88kbcs_vec;
 extern const bfd_target m88kmach3_vec;
+extern const bfd_target mach_o_be_vec;
+extern const bfd_target mach_o_le_vec;
+extern const bfd_target mach_o_fat_vec;
 extern const bfd_target mcore_pe_big_vec;
 extern const bfd_target mcore_pe_little_vec;
 extern const bfd_target mcore_pei_big_vec;
@@ -661,6 +668,8 @@ extern const bfd_target or32coff_big_vec;
 extern const bfd_target pc532machaout_vec;
 extern const bfd_target pc532netbsd_vec;
 extern const bfd_target pdp11_aout_vec;
+extern const bfd_target pef_vec;
+extern const bfd_target pef_xlib_vec;
 extern const bfd_target pmac_xcoff_vec;
 extern const bfd_target ppcboot_vec;
 extern const bfd_target riscix_vec;
@@ -680,6 +689,7 @@ extern const bfd_target sparclynx_aout_vec;
 extern const bfd_target sparclynx_coff_vec;
 extern const bfd_target sparcnetbsd_vec;
 extern const bfd_target sunos_big_vec;
+extern const bfd_target sym_vec;
 extern const bfd_target tic30_aout_vec;
 extern const bfd_target tic30_coff_vec;
 extern const bfd_target tic4x_coff0_beh_vec;
@@ -957,6 +967,9 @@ static const bfd_target * const _bfd_target_vector[] = {
 	&m68ksysvcoff_vec,
 	&m88kbcs_vec,
 	&m88kmach3_vec,
+	&mach_o_be_vec,
+	&mach_o_le_vec,
+	&mach_o_fat_vec,
 	&mcore_pe_big_vec,
 	&mcore_pe_little_vec,
 	&mcore_pei_big_vec,
@@ -984,6 +997,8 @@ static const bfd_target * const _bfd_target_vector[] = {
 	&pc532machaout_vec,
 	&pc532netbsd_vec,
 	&pdp11_aout_vec,
+	&pef_vec,
+	&pef_xlib_vec,
 #if 0
 	/* This has the same magic number as RS/6000.  */
 	&pmac_xcoff_vec,
@@ -1013,6 +1028,7 @@ static const bfd_target * const _bfd_target_vector[] = {
 	&sparclynx_coff_vec,
 	&sparcnetbsd_vec,
 	&sunos_big_vec,
+	&sym_vec,
 	&tic30_aout_vec,
 	&tic30_coff_vec,
 	&tic54x_coff0_beh_vec,
