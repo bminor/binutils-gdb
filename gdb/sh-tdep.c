@@ -212,8 +212,8 @@ sh_sh3_dsp_register_name (int reg_nr)
     "y0", "y1", "", "", "", "", "", "mod",
     "ssr", "spc",
     "rs", "re", "", "", "", "", "", "",
-    "r0b", "r1b", "r2b", "r3b", "r4b", "r5b", "r6b", "r7b"
-      "", "", "", "", "", "", "", "",
+    "r0b", "r1b", "r2b", "r3b", "r4b", "r5b", "r6b", "r7b",
+    "", "", "", "", "", "", "", "",
   };
   if (reg_nr < 0)
     return NULL;
@@ -300,8 +300,8 @@ sh_sh4al_dsp_register_name (int reg_nr)
     "y0", "y1", "", "", "", "", "", "mod",
     "ssr", "spc",
     "rs", "re", "", "", "", "", "", "",
-    "r0b", "r1b", "r2b", "r3b", "r4b", "r5b", "r6b", "r7b"
-      "", "", "", "", "", "", "", "",
+    "r0b", "r1b", "r2b", "r3b", "r4b", "r5b", "r6b", "r7b",
+    "", "", "", "", "", "", "", "",
   };
   if (reg_nr < 0)
     return NULL;

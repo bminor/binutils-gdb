@@ -1,3 +1,9 @@
+2004-02-11  Corinna Vinschen  <vinschen@redhat.com>
+
+	* sh-tdep.c (sh_sh3_dsp_register_name): Fix formatting. Add missing
+	comma.
+	(sh_sh4al_dsp_register_name): Ditto.
+
 2004-02-10  Andrew Cagney  <cagney@redhat.com>
 
 	* mips-tdep.c (mips_gdbarch_init): Delete deprecated frame code.
