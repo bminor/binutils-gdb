@@ -27,8 +27,13 @@ static char udr_c_AMD[]="@(#)udr.c	2.3, AMD";
 ********************************************************************** HISTORY
 */
 #include <stdio.h>
-#include <sys/fcntl.h>
 #include <sys/types.h>
+
+/* This used to say sys/fcntl.h, but the only systems I know of that
+   require that are old (pre-4.3, at least) BSD systems, which we
+   probably don't need to worry about.  */
+#include <fcntl.h>
+
 #include <sys/socket.h>
 #include "udiproc.h"
 #include "udisoc.h"

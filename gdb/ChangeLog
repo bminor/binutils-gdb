@@ -1,5 +1,8 @@
 Mon Aug  9 09:53:45 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* 29k-share/udi/udr.c: Include fcntl.h not sys/fcntl.h.  Also put
+	sys/types.h near the top (just on general principles).
+
 	* environ.c (set_in_environ): Remove G960BASE and G960BIN; they are
 	no longer used.
 
