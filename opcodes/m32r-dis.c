@@ -86,7 +86,7 @@ print_hash (od, dis_info, value, attrs, pc, length)
      bfd_vma pc;
      int length;
 {
-  disassemble_info *info = dis_info;
+  disassemble_info *info = (disassemble_info *) dis_info;
   (*info->fprintf_func) (info->stream, "#");
 }
 

@@ -1,3 +1,7 @@
+1999-01-06  Doug Evans  <devans@casey.cygnus.com>
+
+	* m32r-dis.c: Regenerate.
+
 start-sanitize-r5900
 1999-01-06  Frank Ch. Eigler  <fche@cygnus.com>
 
