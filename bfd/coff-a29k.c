@@ -31,8 +31,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "libcoff.h"
 
 #define INSERT_HWORD(WORD,HWORD)	\
-	(((WORD) & 0xff00ff00) | (((HWORD) & 0xff00) << 8) | ((HWORD)& 0xff))
-#define EXTRACT_HWORD(WORD) 	(((WORD) & 0x00ff0000) >> 8) | ((WORD) & 0xff)
+    (((WORD) & 0xff00ff00) | (((HWORD) & 0xff00) << 8) | ((HWORD)& 0xff))
+#define EXTRACT_HWORD(WORD) \
+    (((WORD) & 0x00ff0000) >> 8) | ((WORD)& 0xff)
+#define SIGN_EXTEND_HWORD(HWORD) \
+    ((HWORD) & 0x8000 ? (HWORD)|0xffff0000 : (HWORD))
 
 /* Provided the symbol, returns the value reffed */
 static  long
@@ -55,121 +58,134 @@ asymbol *symbol;
   return(relocation);
 }
 
+/* this function is in charge of performing all the 29k relocations */
+
 static bfd_reloc_status_type
-a29k_reloc(abfd, reloc_entry, symbol_in, data, input_section)
-bfd *abfd;
-arelent *reloc_entry;
-asymbol *symbol_in;
-unsigned char *data;
-asection *input_section;
+DEFUN(a29k_reloc,(abfd, reloc_entry, symbol_in, data, input_section),
+      bfd *abfd AND
+      arelent *reloc_entry AND
+      asymbol *symbol_in AND
+      unsigned char *data AND
+      asection *input_section)
 {
-    static unsigned long part1_consth_active=0;
+    /* the consth relocation comes in two parts, we have to remember
+       the state between calls, in these variables */
+    static boolean part1_consth_active = false;
     static unsigned long part1_consth_value;
-    unsigned long insn, value, sym_value; 
+
+    unsigned long insn;
+    unsigned long sym_value;
+    unsigned long unsigned_value;
     unsigned short r_type;
-    /*  	bfd_reloc_status_type result;*/
-    /*  	coff_symbol_type *cs = coffsymbol(symbol_in);*/
+    long signed_value;
+
 	
     r_type = reloc_entry->howto->type;
 
     /* FIXME: Do we need to check for partial linking here */
-    if (symbol_in && (symbol_in->flags & BSF_UNDEFINED)) {
+    if (symbol_in && (symbol_in->flags & BSF_UNDEFINED)) 
+    {
 	/* Keep the state machine happy in case we're called again */
-	if (r_type == R_IHIHALF) {
-	    part1_consth_active = 1;
+	if (r_type == R_IHIHALF) 
+	{
+	    part1_consth_active = true;
 	    part1_consth_value  = 0;
 	}
 	return(bfd_reloc_undefined);
     }
 
-    if ((part1_consth_active) && (r_type != R_IHCONST)) {
+    if ((part1_consth_active) && (r_type != R_IHCONST)) 
+    {
 	fprintf(stderr,"Relocation problem : ");
 	fprintf(stderr,"Missing IHCONST in module %s\n",abfd->filename);
-	part1_consth_active = 0;
+	part1_consth_active = false;
 	return(bfd_reloc_dangerous);
     }
 
     insn = bfd_get_32(abfd, data + reloc_entry->address); 
     sym_value = get_symbol_value(symbol_in);
 
-    switch (r_type) {
-       case R_IREL: 	
-	/* We don't want to use the value already in the offset..
-	   The field isn't big enought to hold the full range of values.
-	   Will the break anything ? Steve@cygnus */
-	value = 0;		/*EXTRACT_HWORD(insn) << 2;*/
-	value +=  sym_value + reloc_entry->addend;
-	if (0 && value <= 0x3ffff) { /* Absolute jmp/call */
-	    insn |= 0x01000000;	/* Make it absolute */
+    switch (r_type) 
+    {
+      case R_IREL: 	
+	/* Take the value in the field and sign extend it */
+	signed_value = EXTRACT_HWORD(insn) << 2;
+	signed_value = SIGN_EXTEND_HWORD(signed_value);
+	signed_value +=  sym_value + reloc_entry->addend;
+	if ((signed_value&~0x3ffff) == 0) 
+	{			/* Absolute jmp/call */
+	    insn |= (1<<24);	/* Make it absolute */
 	    /* FIXME: Should we change r_type to R_IABS */
-	} else {	
+	    signed_value /= 2;
+	} 
+	else 
+	{
 	    /* Relative jmp/call, so subtract from the value the
 	       address of the place we're coming from */
-	    value -= reloc_entry->address + 
+	    signed_value -= reloc_entry->address + 
 	     input_section->output_section->vma + 
 	      input_section->output_offset;
-	    if (value > 0x3ffff) {
-		fprintf(stderr,"Relocation problem : ");
-		fprintf(stderr,"Jmp/call too far; to %s from %s\n",
-			symbol_in->name,abfd->filename); 
-		return(bfd_reloc_outofrange);
-	    }
+	    if (signed_value>0x1ffff || signed_value<-0x20000) 
+	     return(bfd_reloc_outofrange);
+
+	    signed_value /= 2;
 	}
-	value >>= 2;
-	insn = INSERT_HWORD(insn,value);
+	insn = INSERT_HWORD(insn, signed_value);
 	break;
-       case R_ILOHALF: 
-	value = EXTRACT_HWORD(insn);
-	value +=  sym_value + reloc_entry->addend;
-	insn = INSERT_HWORD(insn,value);
+      case R_ILOHALF: 
+	unsigned_value = EXTRACT_HWORD(insn);
+	unsigned_value +=  sym_value + reloc_entry->addend;
+	insn = INSERT_HWORD(insn, unsigned_value);
 	break;
-       case R_IHIHALF:		/* consth, part 1 */
-	/* Just get the symbol value that is referenced */
-	part1_consth_active = 1;
+      case R_IHIHALF:
+	/* consth, part 1 
+	  Just get the symbol value that is referenced */
+	part1_consth_active = true;
 	part1_consth_value = sym_value + reloc_entry->addend;
-	return(bfd_reloc_ok);	/* Don't modify insn until R_IHCONST */
+	/* Don't modify insn until R_IHCONST */
+	return(bfd_reloc_ok);
 	break;
-       case R_IHCONST:		/* consth, part 2 */
-	/* Now relocate the reference */
-	if (!part1_consth_active) {
+      case R_IHCONST:	
+	/* consth, part 2 
+	   Now relocate the reference */
+	if (part1_consth_active == false) {
 	    fprintf(stderr,"Relocation problem : ");
 	    fprintf(stderr,"IHIHALF missing in module %s\n",
 		    abfd->filename); 
-	    part1_consth_active = 0;
 	    return(bfd_reloc_dangerous);
 	}
 	/* sym_ptr_ptr = r_symndx, in coff_slurp_reloc_table() */
-	value = 0;/*EXTRACT_HWORD(insn) << 16;*/
-	value += (unsigned int)reloc_entry->addend; /* r_symndx */
-	value += part1_consth_value;
-	value >>= 16;
-	insn = INSERT_HWORD(insn,value);
-	part1_consth_active = 0;
+	unsigned_value = 0;	/*EXTRACT_HWORD(insn) << 16;*/
+	unsigned_value += reloc_entry->addend; /* r_symndx */
+	unsigned_value += part1_consth_value;
+	unsigned_value = unsigned_value >> 16;
+	insn = INSERT_HWORD(insn, unsigned_value);
+	part1_consth_active = false;
 	break;
-       case R_BYTE:
-	value = (insn >> 24) + sym_value + reloc_entry->addend;	
-	if (value & 0xffffff00) {
+      case R_BYTE:
+	unsigned_value = (insn >> 24) + sym_value + reloc_entry->addend;	
+	if (unsigned_value & 0xffffff00) {
 	    fprintf(stderr,"Relocation problem : ");
 	    fprintf(stderr,"byte value too large in module %s\n",
 		    abfd->filename); 
 	    return(bfd_reloc_overflow);
 	}
-	insn = (insn & 0x00ffffff) | (value << 24);
+	insn = (insn & 0x00ffffff) | (unsigned_value << 24);
 	break;
-       case R_HWORD:
-	value = (insn >> 16) + sym_value + reloc_entry->addend;	
-	if (value & 0xffff0000) {
+      case R_HWORD:
+	unsigned_value = (insn >> 16) + sym_value + reloc_entry->addend;	
+	if (unsigned_value & 0xffff0000) {
 	    fprintf(stderr,"Relocation problem : ");
 	    fprintf(stderr,"hword value too large in module %s\n",
 		    abfd->filename); 
 	    return(bfd_reloc_overflow);
 	}
-	insn = (insn & 0x0000ffff) | (value<<16); 
+	insn = (insn & 0x0000ffff) | (unsigned_value<<16); 
 	break;
-       case R_WORD:
+      case R_WORD:
 	insn += sym_value + reloc_entry->addend;  
 	break;
-       default:
+      default:
 	fprintf(stderr,"Relocation problem : ");
 	fprintf(stderr,"Unrecognized reloc type %d, in module %s\n",
 		r_type,abfd->filename); 
@@ -218,34 +234,49 @@ static reloc_howto_type howto_table[] =
 
 bfd_target a29kcoff_big_vec =
 {
-  "coff-a29k-big",		/* name */
-  bfd_target_coff_flavour,
-  true,				/* data byte order is big */
-  true,				/* header byte order is big */
+    "coff-a29k-big",		/* name */
+    bfd_target_coff_flavour,
+    true,			/* data byte order is big */
+    true,			/* header byte order is big */
 
-  (HAS_RELOC | EXEC_P |		/* object flags */
-   HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT),
+    (HAS_RELOC | EXEC_P |	/* object flags */
+     HAS_LINENO | HAS_DEBUG |
+     HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT),
 
-  (SEC_HAS_CONTENTS | SEC_ALLOC /* section flags */
-	| SEC_LOAD | SEC_RELOC  
-	| SEC_READONLY ),
-  '/',				/* ar_pad_char */
-  15,				/* ar_max_namelen */
+    (SEC_HAS_CONTENTS | SEC_ALLOC /* section flags */
+     | SEC_LOAD | SEC_RELOC  
+     | SEC_READONLY ),
+    '/',			/* ar_pad_char */
+    15,				/* ar_max_namelen */
+    2,				/* minimum section alignment */
+    /* data */
+    _do_getb64, _do_putb64, _do_getb32,
+    _do_putb32, _do_getb16, _do_putb16,
+    /* hdrs */
+    _do_getb64, _do_putb64, _do_getb32,
+    _do_putb32, _do_getb16, _do_putb16,
 
-     2,				/* minimum section alignment */
-_do_getb64, _do_putb64,  _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* data */
-_do_getb64, _do_putb64,  _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* hdrs */
+  {
+	    
+      _bfd_dummy_target,
+      coff_object_p,
+      bfd_generic_archive_p,
+      _bfd_dummy_target
+   },
+  {
+      bfd_false,
+      coff_mkobject,
+      _bfd_generic_mkarchive,
+      bfd_false
+   },
+  {
+      bfd_false,
+      coff_write_object_contents,
+      _bfd_write_archive_contents,
+      bfd_false
+   },
 
-
-  {_bfd_dummy_target, coff_object_p, /* bfd_check_format */
-     bfd_generic_archive_p, _bfd_dummy_target},
-  {bfd_false, coff_mkobject, _bfd_generic_mkarchive, /* bfd_set_format */
-     bfd_false},
-  {bfd_false, coff_write_object_contents,	/* bfd_write_contents */
-     _bfd_write_archive_contents, bfd_false},
-
-     JUMP_TABLE(coff),
-     COFF_SWAP_TABLE
-  };
+    JUMP_TABLE(coff),
+    COFF_SWAP_TABLE
+ };
 
