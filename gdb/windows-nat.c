@@ -1374,6 +1374,83 @@ has_detach_ability (void)
   return 0;
 }
 
+/* Try to set or remove a user privilege to the current process.  Return -1
+   if that fails, the previous setting of that privilege otherwise.
+
+   This code is copied from the Cygwin source code and rearranged to allow
+   dynamically loading of the needed symbols from advapi32 which is only
+   available on NT/2K/XP. */
+static int
+set_process_privilege (const char *privilege, BOOL enable)
+{
+  static HMODULE advapi32 = NULL;
+  static BOOL WINAPI (*OpenProcessToken)(HANDLE, DWORD, PHANDLE);
+  static BOOL WINAPI (*LookupPrivilegeValue)(LPCSTR, LPCSTR, PLUID);
+  static BOOL WINAPI (*AdjustTokenPrivileges)(HANDLE, BOOL, PTOKEN_PRIVILEGES,
+					      DWORD, PTOKEN_PRIVILEGES, PDWORD);
+
+  HANDLE token_hdl = NULL;
+  LUID restore_priv;
+  TOKEN_PRIVILEGES new_priv, orig_priv;
+  int ret = -1;
+  DWORD size;
+
+  if (GetVersion () >= 0x80000000)  /* No security availbale on 9x/Me */
+    return 0;
+
+  if (!advapi32)
+    {
+      if (!(advapi32 = LoadLibrary ("advapi32.dll")))
+	goto out;
+      if (!OpenProcessToken)
+	OpenProcessToken = GetProcAddress (advapi32, "OpenProcessToken");
+      if (!LookupPrivilegeValue)
+	LookupPrivilegeValue = GetProcAddress (advapi32,
+					       "LookupPrivilegeValueA");
+      if (!AdjustTokenPrivileges)
+	AdjustTokenPrivileges = GetProcAddress (advapi32,
+						"AdjustTokenPrivileges");
+      if (!OpenProcessToken || !LookupPrivilegeValue || !AdjustTokenPrivileges)
+        {
+	  advapi32 = NULL;
+	  goto out;
+	}
+    }
+  
+  if (!OpenProcessToken (GetCurrentProcess (),
+			 TOKEN_QUERY | TOKEN_ADJUST_PRIVILEGES,
+			 &token_hdl))
+    goto out;
+
+  if (!LookupPrivilegeValue (NULL, privilege, &restore_priv))
+    goto out;
+
+  new_priv.PrivilegeCount = 1;
+  new_priv.Privileges[0].Luid = restore_priv;
+  new_priv.Privileges[0].Attributes = enable ? SE_PRIVILEGE_ENABLED : 0;
+
+  if (!AdjustTokenPrivileges (token_hdl, FALSE, &new_priv,
+                              sizeof orig_priv, &orig_priv, &size))
+    goto out;
+#if 0
+  /* Disabled, otherwise every `attach' in an unprivileged user session
+     would raise the "Failed to get SE_DEBUG_NAME privilege" warning in
+     child_attach(). */
+  /* AdjustTokenPrivileges returns TRUE even if the privilege could not
+     be enabled. GetLastError () returns an correct error code, though. */
+  if (enable && GetLastError () == ERROR_NOT_ALL_ASSIGNED)
+    goto out;
+#endif
+
+  ret = orig_priv.Privileges[0].Attributes == SE_PRIVILEGE_ENABLED ? 1 : 0;
+
+out:
+  if (token_hdl)
+    CloseHandle (token_hdl);
+
+  return ret;
+}
+
 /* Attach to process PID, then initialize for debugging it.  */
 static void
 child_attach (char *args, int from_tty)
@@ -1383,6 +1460,12 @@ child_attach (char *args, int from_tty)
 
   if (!args)
     error_no_arg ("process-id to attach");
+
+  if (set_process_privilege (SE_DEBUG_NAME, TRUE) < 0)
+    {
+      printf_unfiltered ("Warning: Failed to get SE_DEBUG_NAME privilege\n");
+      printf_unfiltered ("This can cause attach to fail on Windows NT/2K/XP\n");
+    }
 
   pid = strtoul (args, 0, 0);
   ok = DebugActiveProcess (pid);
