@@ -212,7 +212,7 @@ powerpc-ibm-aix* | rs6000-ibm-aix*)
 	fi
 	;;
 powerpc-*-eabiaix*)
-	multidirs="soft-float relocatable little-endian call-sysv little-endian/call-sysv relocatable/little-endian relocatable/call-sysv relocatable/little-endian/call-sysv soft-float/relocatable soft-float/little-endian soft-float/call-sysv soft-float/little-endian/call-sysv soft-float/relocatable/little-endian soft-float/relocatable/call-sysv soft-float/relocatable/little-endian/call-sysv"
+	multidirs="soft-float relocatable little sysv little/sysv relocatable/little relocatable/sysv relocatable/little/sysv soft-float/relocatable soft-float/little soft-float/sysv soft-float/little/sysv soft-float/relocatable/little soft-float/relocatable/sysv soft-float/relocatable/little/sysv"
 	if [ x$enable_biendian = xno ]
 	then
 	  old_multidirs="${multidirs}"
@@ -259,7 +259,7 @@ powerpc-*-eabiaix*)
 	fi
 	;;
 powerpc-*-eabi* | powerpc-*-elf* | powerpc-*-sysv4*)
-	multidirs="soft-float relocatable little-endian call-aix little-endian/call-aix relocatable/little-endian relocatable/call-aix relocatable/little-endian/call-aix soft-float/relocatable soft-float/little-endian soft-float/call-aix soft-float/little-endian/call-aix soft-float/relocatable/little-endian soft-float/relocatable/call-aix soft-float/relocatable/little-endian/call-aix call-aixdesc soft-float/call-aixdesc"
+	multidirs="soft-float relocatable little aix little/aix relocatable/little relocatable/aix relocatable/little/aix soft-float/relocatable soft-float/little soft-float/aix soft-float/little/aix soft-float/relocatable/little soft-float/relocatable/aix soft-float/relocatable/little/aix aixdesc soft-float/aixdesc"
 	if [ x$enable_biendian = xno ]
 	then
 	  old_multidirs="${multidirs}"
@@ -306,7 +306,7 @@ powerpc-*-eabi* | powerpc-*-elf* | powerpc-*-sysv4*)
 	fi
 	;;
 powerpcle-*-eabi* | powerpcle-*-elf* | powerpcle-*-sysv4*)
-	multidirs="soft-float relocatable big-endian call-aix big-endian/call-aix relocatable/big-endian relocatable/call-aix relocatable/big-endian/call-aix soft-float/relocatable soft-float/big-endian soft-float/call-aix soft-float/big-endian/call-aix soft-float/relocatable/big-endian soft-float/relocatable/call-aix soft-float/relocatable/big-endian/call-aix"
+	multidirs="soft-float relocatable big aix big/aix relocatable/big relocatable/aix relocatable/big/aix soft-float/relocatable soft-float/big soft-float/aix soft-float/big/aix soft-float/relocatable/big soft-float/relocatable/aix soft-float/relocatable/big/aix"
 	if [ x$enable_biendian = xno ]
 	then
 	  old_multidirs="${multidirs}"
