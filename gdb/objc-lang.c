@@ -1,6 +1,6 @@
 /* Objective-C language support routines for GDB, the GNU debugger.
 
-   Copyright 2002, 2003, 2004 Free Software Foundation, Inc.
+   Copyright 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
    Contributed by Apple Computer, Inc.
    Written by Michael Snyder.
@@ -335,7 +335,7 @@ objc_printchar (int c, struct ui_file *stream)
    FORCE_ELLIPSES.  */
 
 static void
-objc_printstr (struct ui_file *stream, char *string, 
+objc_printstr (struct ui_file *stream, const bfd_byte *string, 
 	       unsigned int length, int width, int force_ellipses)
 {
   unsigned int i;

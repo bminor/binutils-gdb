@@ -1,7 +1,7 @@
 /* Scheme/Guile language support routines for GDB, the GNU debugger.
 
-   Copyright 1995, 1996, 1998, 2000, 2001, 2002, 2003, 2004 Free Software
-   Foundation, Inc.
+   Copyright 1995, 1996, 1998, 2000, 2001, 2002, 2003, 2004, 2005 Free
+   Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -40,9 +40,6 @@ static struct value *evaluate_subexp_scm (struct type *, struct expression *,
 				      int *, enum noside);
 static struct value *scm_lookup_name (char *);
 static int in_eval_c (void);
-static void scm_printstr (struct ui_file * stream, char *string,
-			  unsigned int length, int width,
-			  int force_ellipses);
 
 struct type *builtin_type_scm;
 
@@ -53,8 +50,8 @@ scm_printchar (int c, struct ui_file *stream)
 }
 
 static void
-scm_printstr (struct ui_file *stream, char *string, unsigned int length,
-	      int width, int force_ellipses)
+scm_printstr (struct ui_file *stream, const bfd_byte *string,
+	      unsigned int length, int width, int force_ellipses)
 {
   fprintf_filtered (stream, "\"%s\"", string);
 }

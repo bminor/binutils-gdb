@@ -1,6 +1,7 @@
 /* Modula 2 language support routines for GDB, the GNU debugger.
-   Copyright 1992, 1993, 1994, 1995, 1996, 1998, 2000, 2002, 2003, 2004
-   Free Software Foundation, Inc.
+
+   Copyright 1992, 1993, 1994, 1995, 1996, 1998, 2000, 2002, 2003,
+   2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -31,9 +32,6 @@
 
 extern void _initialize_m2_language (void);
 static struct type *m2_create_fundamental_type (struct objfile *, int);
-static void m2_printstr (struct ui_file * stream, char *string,
-			 unsigned int length, int width,
-			 int force_ellipses);
 static void m2_printchar (int, struct ui_file *);
 static void m2_emit_char (int, struct ui_file *, int);
 
@@ -109,8 +107,8 @@ m2_printchar (int c, struct ui_file *stream)
    be replaced with a true Modula version. */
 
 static void
-m2_printstr (struct ui_file *stream, char *string, unsigned int length,
-	     int width, int force_ellipses)
+m2_printstr (struct ui_file *stream, const bfd_byte *string,
+	     unsigned int length, int width, int force_ellipses)
 {
   unsigned int i;
   unsigned int things_printed = 0;

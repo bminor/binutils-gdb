@@ -1,7 +1,7 @@
 /* Multiple source language support for GDB.
 
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+   2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
    Contributed by the Department of Computer Science at the State University
    of New York at Buffalo.
@@ -85,10 +85,6 @@ static void set_type_range_case (void);
 static void unk_lang_emit_char (int c, struct ui_file *stream, int quoter);
 
 static void unk_lang_printchar (int c, struct ui_file *stream);
-
-static void unk_lang_printstr (struct ui_file * stream, char *string,
-			       unsigned int length, int width,
-			       int force_ellipses);
 
 static struct type *unk_lang_create_fundamental_type (struct objfile *, int);
 
@@ -1098,8 +1094,8 @@ unk_lang_printchar (int c, struct ui_file *stream)
 }
 
 static void
-unk_lang_printstr (struct ui_file *stream, char *string, unsigned int length,
-		   int width, int force_ellipses)
+unk_lang_printstr (struct ui_file *stream, const bfd_byte *string,
+		   unsigned int length, int width, int force_ellipses)
 {
   error ("internal error - unimplemented function unk_lang_printstr called.");
 }

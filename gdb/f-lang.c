@@ -1,6 +1,8 @@
 /* Fortran language support routines for GDB, the GNU debugger.
-   Copyright 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2001, 2002, 2003, 2004
-   Free Software Foundation, Inc.
+
+   Copyright 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2001, 2002,
+   2003, 2004, 2005 Free Software Foundation, Inc.
+
    Contributed by Motorola.  Adapted from the C parser by Farooq Butt
    (fmbutt@engage.sps.mot.com).
 
@@ -87,9 +89,6 @@ static void patch_common_entries (SAVED_F77_COMMON_PTR, CORE_ADDR, int);
 #endif
 
 static struct type *f_create_fundamental_type (struct objfile *, int);
-static void f_printstr (struct ui_file * stream, char *string,
-			unsigned int length, int width,
-			int force_ellipses);
 static void f_printchar (int c, struct ui_file * stream);
 static void f_emit_char (int c, struct ui_file * stream, int quoter);
 
@@ -161,8 +160,8 @@ f_printchar (int c, struct ui_file *stream)
    be replaced with a true F77 version. */
 
 static void
-f_printstr (struct ui_file *stream, char *string, unsigned int length,
-	    int width, int force_ellipses)
+f_printstr (struct ui_file *stream, const bfd_byte *string,
+	    unsigned int length, int width, int force_ellipses)
 {
   unsigned int i;
   unsigned int things_printed = 0;

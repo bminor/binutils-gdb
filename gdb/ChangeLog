@@ -1,5 +1,19 @@
 2005-01-28  Andrew Cagney  <cagney@gnu.org>
 
+	* language.h (struct language_defn): Make la_printstr's buffer
+	parameter a const bfd_byte.
+	* p-lang.h (pascal_printstr): Update function to match.
+	* ada-valprint.c (ada_printstr): Update function to match.
+	* scm-lang.c (scm_printstr): Update function to match.
+	* p-lang.c (pascal_printstr): Update function to match.
+	* ada-lang.h (ada_printstr): Update function to match.
+	* m2-lang.c (m2_printstr): Update function to match.
+	* objc-lang.c (objc_printstr): Update function to match.
+	* c-lang.h (c_printstr): Update function to match.
+	* f-lang.c (f_printstr): Update function to match.
+	* c-lang.c (c_printstr): Update function to match.
+	* language.c (unk_lang_printstr): Update function to match.
+
 	* valprint.c (val_print_type_code_int): Make buffer a const bfd_byte.
 	* valprint.h (val_print_type_code_int): Ditto.
 

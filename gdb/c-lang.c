@@ -1,6 +1,7 @@
 /* C language support routines for GDB, the GNU debugger.
-   Copyright 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2002, 2003, 2004
-   Free Software Foundation, Inc.
+
+   Copyright 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2002,
+   2003, 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -85,8 +86,8 @@ c_printchar (int c, struct ui_file *stream)
    printing LENGTH characters, or if FORCE_ELLIPSES.  */
 
 void
-c_printstr (struct ui_file *stream, char *string, unsigned int length,
-	    int width, int force_ellipses)
+c_printstr (struct ui_file *stream, const bfd_byte *string,
+	    unsigned int length, int width, int force_ellipses)
 {
   unsigned int i;
   unsigned int things_printed = 0;

@@ -50,7 +50,7 @@ extern int c_value_print (struct value *, struct ui_file *, int,
 
 extern void c_printchar (int, struct ui_file *);
 
-extern void c_printstr (struct ui_file * stream, char *string,
+extern void c_printstr (struct ui_file * stream, const bfd_byte *string,
 			unsigned int length, int width,
 			int force_ellipses);
 

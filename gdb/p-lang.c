@@ -1,5 +1,7 @@
 /* Pascal language support routines for GDB, the GNU debugger.
-   Copyright 2000, 2002, 2003, 2004 Free Software Foundation, Inc.
+
+   Copyright 2000, 2002, 2003, 2004, 2005 Free Software Foundation,
+   Inc.
 
    This file is part of GDB.
 
@@ -155,8 +157,8 @@ pascal_printchar (int c, struct ui_file *stream)
    had to stop before printing LENGTH characters, or if FORCE_ELLIPSES.  */
 
 void
-pascal_printstr (struct ui_file *stream, char *string, unsigned int length,
-		 int width, int force_ellipses)
+pascal_printstr (struct ui_file *stream, const bfd_byte *string,
+		 unsigned int length, int width, int force_ellipses)
 {
   unsigned int i;
   unsigned int things_printed = 0;

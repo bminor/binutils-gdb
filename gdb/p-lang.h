@@ -43,7 +43,8 @@ extern int
 
 extern void pascal_printchar (int, struct ui_file *);
 
-extern void pascal_printstr (struct ui_file *, char *, unsigned int, int, int);
+extern void pascal_printstr (struct ui_file *, const bfd_byte *,
+			     unsigned int, int, int);
 
 extern struct type *pascal_create_fundamental_type (struct objfile *, int);
 

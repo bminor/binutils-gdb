@@ -204,7 +204,8 @@ extern void ada_emit_char (int, struct ui_file *, int, int);
 
 extern void ada_printchar (int, struct ui_file *);
 
-extern void ada_printstr (struct ui_file *, char *, unsigned int, int, int);
+extern void ada_printstr (struct ui_file *, const bfd_byte *,
+			  unsigned int, int, int);
 
 extern void ada_convert_actuals (struct value *, int, struct value **,
                                  CORE_ADDR *);

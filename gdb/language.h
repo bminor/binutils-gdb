@@ -193,7 +193,7 @@ struct language_defn
 
     void (*la_printchar) (int ch, struct ui_file * stream);
 
-    void (*la_printstr) (struct ui_file * stream, char *string,
+    void (*la_printstr) (struct ui_file * stream, const bfd_byte *string,
 			 unsigned int length, int width,
 			 int force_ellipses);
 

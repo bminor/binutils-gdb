@@ -528,8 +528,8 @@ printstr (struct ui_file *stream, const bfd_byte *string,
 }
 
 void
-ada_printstr (struct ui_file *stream, char *string, unsigned int length,
-	      int width, int force_ellipses)
+ada_printstr (struct ui_file *stream, const bfd_byte *string,
+	      unsigned int length, int width, int force_ellipses)
 {
   printstr (stream, string, length, force_ellipses, width);
 }
