@@ -714,6 +714,15 @@ coff_tic80_relocate_section (output_bfd, info, input_bfd,
   return TRUE;
 }
 
+/* Clear the r_reserved field in relocs.  */
+#define SWAP_OUT_RELOC_EXTRA(abfd,src,dst) \
+  do \
+    { \
+      dst->r_reserved[0] = 0; \
+      dst->r_reserved[1] = 0; \
+    } \
+  while (0)
+
 #define TIC80COFF 1		/* Customize coffcode.h */
 #undef C_AUTOARG		/* Clashes with TIc80's C_UEXT */
 #undef C_LASTENT		/* Clashes with TIc80's C_STATLAB */

@@ -1,3 +1,8 @@
+2005-02-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* coff-tic54x.c (SWAP_OUT_RELOC_EXTRA): Defined.
+	* coff-tic80.c (SWAP_OUT_RELOC_EXTRA): Likewise.
+
 2005-02-23  Nick Clifton  <nickc@redhat.com>
 
 	* elfxx-mips.c (mips_elf_create_dynamic_relocation): Initialise

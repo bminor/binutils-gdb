@@ -328,6 +328,15 @@ ticoff_bfd_is_local_label_name (abfd, name)
 
 #define coff_bfd_is_local_label_name ticoff_bfd_is_local_label_name
 
+/* Clear the r_reserved field in relocs.  */
+#define SWAP_OUT_RELOC_EXTRA(abfd,src,dst) \
+  do \
+    { \
+      dst->r_reserved[0] = 0; \
+      dst->r_reserved[1] = 0; \
+    } \
+  while (0)
+
 /* Customize coffcode.h; the default coff_ functions are set up to use COFF2;
    coff_bad_format_hook uses BADMAG, so set that for COFF2.  The COFF1
    and COFF0 vectors use custom _bad_format_hook procs instead of setting
