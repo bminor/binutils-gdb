@@ -1,4 +1,15 @@
+Tue Oct 29 16:40:22 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* objdump.c (objdump_print_value): Don't print the empty string
+	for zero.
+
 Mon Oct 28 16:58:14 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* stabs.c (struct stab_handle): Add function_end field.
+	(start_stab): Initialize function_end.
+	(finish_stab): Pass info->function_end to debug_end_function.
+	(parse_stab): If info->function_end is set, use it as the address
+	which ends a function.
 
 	* ieee.c (ieee_array_type): Remember the correct size.
 
