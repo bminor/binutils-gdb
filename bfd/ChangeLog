@@ -1,5 +1,10 @@
 2003-05-15  H.J. Lu <hongjiu.lu@intel.com>
 
+	* elflink.c (_bfd_elf_fix_symbol_flags): Also hide protected
+	symbol.
+
+2003-05-15  H.J. Lu <hongjiu.lu@intel.com>
+
 	* elflink.h (elf_link_check_versioned_symbol): Also allow
 	the base version.
 
