@@ -450,7 +450,19 @@ typedef struct instruction {
    the normal instruction space. */
 #define MASK_ISA (0x000000FF) /* Start by leaving 8bits for the ISA ID */
 /* The other bits are allocated downwards, to avoid renumbering if we
-   have to extend the bits allocated to the pure ISA number. */
+   have to extend the bits allocated to the pure ISA number.
+
+   These architecture bits come in two flavors: 
+     ISA dependent - marking insns that should be included in the opcode 
+     set if that architecture is requested on the gencode command line 
+     AND the ISA of the insn is <= requested ISA; 
+   
+     ISA independent - marking insn that should be included in the opcode
+     set if that architecture is requested 
+     OR the ISA of the insn is <= requested ISA. 
+
+   Independent bits are listed in MASK_ISA_INDEP, the rest are dependent.
+ */
 #define ARCH_VR4100       ((unsigned)1 << 31) /* NEC VR4100 extension instructions */
 /* start-sanitize-r5900 */
 #define ARCH_R5900        ((unsigned)1 << 30) /* Toshiba r5900 extension instructions */
@@ -463,7 +475,7 @@ typedef struct instruction {
                          /* end-sanitize-r5900 */                      \
                          | 0)
 
-
+#define MASK_ISA_DEP ~(MASK_ISA_INDEP | MASK_ISA)
 
 
 /* Very short names for use in the table below to keep it neet. */
@@ -1842,10 +1854,10 @@ process_instructions(doarch,features)
       valid, then if the instruction matches any of the
       architecture specific flags. NOTE: We allow a selected ISA of
       zero to be used to match all standard instructions. */
-   if (((MIPS_DECODE[loop].isa & doarch & MASK_ISA_INDEP)
-        || (((MIPS_DECODE[loop].isa & MASK_ISA) <= doisa) 
-            && (((MIPS_DECODE[loop].isa & ~MASK_ISA) == 0) 
-                || ((MIPS_DECODE[loop].isa & ~MASK_ISA) & doarch) != 0)))
+   unsigned int isa = MIPS_DECODE[loop].isa;
+   if (((isa & doarch & MASK_ISA_INDEP)
+        || (((isa & MASK_ISA) <= doisa) 
+            && (((isa & MASK_ISA_DEP) == 0) || ((isa & MASK_ISA_DEP) & doarch) != 0)))
        && (!(MIPS_DECODE[loop].flags & FP) || ((MIPS_DECODE[loop].flags & FP) && dofp))) {
      unsigned int onemask;
      unsigned int zeromask;
