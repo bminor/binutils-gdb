@@ -348,7 +348,7 @@ will use a free license if you insist, but they will not propose the
 option; it is up to you to raise the issue and say firmly that this is
 what you want.  If the publisher you are dealing with refuses, please
 try other publishers.  If you're not sure whether a proposed license
-is free, write to @email{icensing@@gnu.org}.
+is free, write to @email{licensing@@gnu.org}.
 
 You can encourage commercial publishers to sell more free, copylefted
 manuals and tutorials by buying them, and particularly by buying
