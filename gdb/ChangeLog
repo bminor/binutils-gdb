@@ -1,5 +1,9 @@
 2004-03-05  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386bsd-tdep.c (_initialize_i386bsd_tdep): Register
+	i386bsd_core_osabi_sniffer for bfd_arch_i386 instead of
+	bfd_arch_unknown.  Adjust comment.
+
 	* i386-nat.c: Fix typo in comment.  Re-introduce paranoiac.
 	* i386obsd-tdep.c: Correct spelling in comment.
 	* i386nbsd-tdep.c: Correct spelling in comment.
