@@ -52,7 +52,7 @@ new options as you see fit so long as you list them here.
 
 Defined options:
 
-keep-cvs	avoids removing CVS.adm directories.  This option is
+keep-cvs	avoids removing CVS directories.  This option is
 		actually recognized and handled by the Sanitize shell
 		script.
 
@@ -62,12 +62,10 @@ keep-life	avoids removing the life stuff.
 keep-cri	avoids removing the cray research inc changes to emacs.
 keep-chill	avoids removing CHILL support.
 keep-gm		avoids removing GM-specific stuff.
+keep-inet	avoids removing I*Net stuff.
 
 lose-gdbtk	removes gdbtk stuff.  This is really only needed for
 		FSF GDB releases.
-lose-inet	Lose I*Net stuff.  This is currently only used in
-		send-pr; useful if you really don't want the
-		location-independence code
 
 for-intel	builds a distribution in the style that Intel likes.
 for-fsf		builds a distribution in the style that the FSF likes.
