@@ -8,11 +8,6 @@
 	the reloc might have been adjusted to be against the section
 	symbol.
 
-	* ld-cris/warn3.d: Only run this version of the test for cris-aout
-	targets.
-	* ld-cris/warn4.d: Only run this version of the test for cris-elf
-	targets.
-
 2005-02-22  Eric Christopher  <echristo@redhat.com>
 
 	* ld-mips-elf/reloc-merge-lo16.d: Correct symbol
