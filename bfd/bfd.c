@@ -1270,7 +1270,7 @@ bfd_sprintf_vma (abfd, buf, value)
      bfd_vma value;
 {
   if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
-    return bfd_elf_sprintf_vma (abfd, buf, value);
+    bfd_elf_sprintf_vma (abfd, buf, value);
   sprintf_vma (buf, value);
 }
 
@@ -1281,6 +1281,6 @@ bfd_fprintf_vma (abfd, stream, value)
      bfd_vma value;
 {
   if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
-    return bfd_elf_fprintf_vma (abfd, stream, value);
+    bfd_elf_fprintf_vma (abfd, stream, value);
   fprintf_vma ((FILE *) stream, value);
 }
