@@ -1,3 +1,10 @@
+2001-04-19  Andreas Jaeger  <aj@suse.de>
+
+	* elf64-x86-64.c (elf64_x86_64_plt0_entry): Fix instructions.
+	(elf64_x86_64_plt_entry): Likewise.
+	(elf64_x86_64_finish_dynamic_sections): Fix PLT0 generation.
+	(elf64_x86_64_finish_dynamic_symbol): Fix PLT generation.
+
 2001-03-31  Philip Blundell  <philb@gnu.org>
 
 	From 2001-03-26  H.J. Lu  <hjl@gnu.org>
