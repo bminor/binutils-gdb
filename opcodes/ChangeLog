@@ -1,3 +1,8 @@
+Tue Feb  8 16:55:27 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ppc-opc.c (powerpc_opcodes): The POWER uses bdn[l][a] where the
+	PowerPC uses bdnz[l][a].
+
 Tue Feb  8 00:32:28 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* dis-buf.c, i386-dis.c:  Include sysdep.h.
@@ -659,5 +664,7 @@ Mon Aug 31 13:47:35 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 	* z8k-dis.c: knows how to disassemble z8k stuff
 	* z8k-opc.h: new file full of z8000 opcodes
 
-
-
+
+Local Variables:
+version-control: never
+End:
