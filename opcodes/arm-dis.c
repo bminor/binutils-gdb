@@ -31,47 +31,49 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "elf/internal.h"
 #include "elf/arm.h"
 
-static char *arm_conditional[] =
+static char * arm_conditional[] =
 {"eq", "ne", "cs", "cc", "mi", "pl", "vs", "vc",
  "hi", "ls", "ge", "lt", "gt", "le", "", "nv"};
 
-static char *arm_regnames_raw[] =
+static char * arm_regnames_raw[] =
 {"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15"};
 
-static char *arm_regnames_standard[] =
+static char * arm_regnames_standard[] =
 {"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
  "r8", "r9", "r10", "r11", "r12", "sp", "lr", "pc"};
 
-static char *arm_regnames_apcs[] =
+static char * arm_regnames_apcs[] =
 {"a1", "a2", "a3", "a4", "v1", "v2", "v3", "v4",
  "v5", "v6", "sl", "fp", "ip", "sp", "lr", "pc"};
 
 /* Choose which register name set to use.  */
-static char **arm_regnames = arm_regnames_standard;
+static char ** arm_regnames = arm_regnames_standard;
 
-static char *arm_fp_const[] =
+static char * arm_fp_const[] =
 {"0.0", "1.0", "2.0", "3.0", "4.0", "5.0", "0.5", "10.0"};
 
-static char *arm_shift[] = 
+static char * arm_shift[] = 
 {"lsl", "lsr", "asr", "ror"};
 
-static int print_insn_arm PARAMS ((bfd_vma, struct disassemble_info *,
-				   long));
+static int print_insn_arm
+  PARAMS ((bfd_vma, struct disassemble_info *, long));
 
 static void
 arm_decode_shift (given, func, stream)
      long given;
      fprintf_ftype func;
-     void *stream;
+     void * stream;
 {
   func (stream, "%s", arm_regnames[given & 0xf]);
+  
   if ((given & 0xff0) != 0)
     {
       if ((given & 0x10) == 0)
 	{
 	  int amount = (given & 0xf80) >> 7;
 	  int shift = (given & 0x60) >> 5;
+	  
 	  if (amount == 0)
 	    {
 	      if (shift == 3)
@@ -79,8 +81,10 @@ arm_decode_shift (given, func, stream)
 		  func (stream, ", rrx");
 		  return;
 		}
+	      
 	      amount = 32;
 	    }
+	  
 	  func (stream, ", %s #%d", arm_shift[shift], amount);
 	}
       else
@@ -94,9 +98,9 @@ arm_decode_shift (given, func, stream)
 
 static int
 print_insn_arm (pc, info, given)
-     bfd_vma         pc;
-     struct disassemble_info *info;
-     long given;
+     bfd_vma                   pc;
+     struct disassemble_info * info;
+     long                      given;
 {
   struct arm_opcode *  insn;
   void *               stream = info->stream;
@@ -478,6 +482,12 @@ print_insn_arm (pc, info, given)
 				  reg = given >> bitstart;
 				  reg &= (2 << (bitend - bitstart)) - 1;
 				  func (stream, "0x%08x", reg);
+				  
+				  /* Some SWI instructions have special meanings.  */
+				  if ((given & 0x0fffffff) == 0x0FF00000)
+				    func (stream, "\t; IMB");
+				  else if ((given & 0x0fffffff) == 0x0FF00001)
+				    func (stream, "\t; IMBRange");
 				}
 				break;
 			      case 'f':
@@ -537,19 +547,19 @@ print_insn_arm (pc, info, given)
 
 static int
 print_insn_thumb (pc, info, given)
-     bfd_vma         pc;
-     struct disassemble_info *info;
-     long given;
+     bfd_vma                   pc;
+     struct disassemble_info * info;
+     long                      given;
 {
-  struct thumb_opcode *insn;
-  void *stream = info->stream;
-  fprintf_ftype func = info->fprintf_func;
+  struct thumb_opcode * insn;
+  void *                stream = info->stream;
+  fprintf_ftype         func = info->fprintf_func;
 
   for (insn = thumb_opcodes; insn->assembler; insn++)
     {
       if ((given & insn->mask) == insn->value)
         {
-          char *c = insn->assembler;
+          char * c = insn->assembler;
 
           /* Special processing for Thumb 2 instruction BL sequence: */
           if (!*c) /* check for empty (not NULL) assembler string */
@@ -569,12 +579,14 @@ print_insn_thumb (pc, info, given)
 	  	      
               given &= 0xffff;
               func (stream, "%04x\t", given);
+	      
               for (; *c; c++)
                 {
                   if (*c == '%')
                     {
                       int domaskpc = 0;
                       int domasklr = 0;
+		      
                       switch (*++c)
                         {
                         case '%':
@@ -594,6 +606,7 @@ print_insn_thumb (pc, info, given)
                         case 'D':
                           {
                             long reg;
+			    
                             reg = given & 0x7;
                             if (given & (1 << 7))
                              reg += 8;
@@ -618,6 +631,7 @@ print_insn_thumb (pc, info, given)
                           {
                             int started = 0;
                             int reg;
+			    
                             func (stream, "{");
                             /* It would be nice if we could spot
                                ranges, and generate the rS-rE format: */
@@ -655,6 +669,7 @@ print_insn_thumb (pc, info, given)
                           {
                             int bitstart = *c++ - '0';
                             int bitend = 0;
+			    
                             while (*c >= '0' && *c <= '9')
                               bitstart = (bitstart * 10) + *c++ - '0';
 
@@ -663,6 +678,7 @@ print_insn_thumb (pc, info, given)
                               case '-':
                                 {
                                   long reg;
+				  
                                   c++;
                                   while (*c >= '0' && *c <= '9')
                                     bitend = (bitend * 10) + *c++ - '0';
@@ -712,7 +728,7 @@ print_insn_thumb (pc, info, given)
                                       break;
 
                                     default:
-                                      abort();
+                                      abort ();
                                     }
                                 }
                                 break;
@@ -732,7 +748,7 @@ print_insn_thumb (pc, info, given)
                                 break;
 
                               default:
-                                 abort();
+                                 abort ();
                               }
                           }
                           break;
@@ -797,13 +813,13 @@ parse_disassembler_options (options)
 int
 print_insn_big_arm (pc, info)
      bfd_vma pc;
-     struct disassemble_info *info;
+     struct disassemble_info * info;
 {
   unsigned char      b[4];
   long               given;
   int                status;
-  coff_symbol_type   *cs;
-  elf_symbol_type    *es;
+  coff_symbol_type * cs;
+  elf_symbol_type *  es;
   int                is_thumb;
   
   if (info->disassembler_options)
@@ -817,23 +833,22 @@ print_insn_big_arm (pc, info)
   is_thumb = false;
   if (info->symbols != NULL)
     {
-    if (bfd_asymbol_flavour (*info->symbols) == bfd_target_coff_flavour)
-     {
-       cs = coffsymbol (*info->symbols);
-       is_thumb = (cs->native->u.syment.n_sclass == C_THUMBEXT
-                   || cs->native->u.syment.n_sclass == C_THUMBSTAT
-                   || cs->native->u.syment.n_sclass == C_THUMBLABEL
-                   || cs->native->u.syment.n_sclass == C_THUMBEXTFUNC
-                   || cs->native->u.syment.n_sclass == C_THUMBSTATFUNC);
-  
-     }
-    else if (bfd_asymbol_flavour (*info->symbols) == bfd_target_elf_flavour)
-     {
-       es = *(elf_symbol_type **)(info->symbols);
-       is_thumb = ELF_ST_TYPE (es->internal_elf_sym.st_info) ==
-	 STT_ARM_TFUNC;
-      }
-   }
+      if (bfd_asymbol_flavour (*info->symbols) == bfd_target_coff_flavour)
+	{
+	  cs = coffsymbol (*info->symbols);
+	  is_thumb = (   cs->native->u.syment.n_sclass == C_THUMBEXT
+		      || cs->native->u.syment.n_sclass == C_THUMBSTAT
+		      || cs->native->u.syment.n_sclass == C_THUMBLABEL
+		      || cs->native->u.syment.n_sclass == C_THUMBEXTFUNC
+		      || cs->native->u.syment.n_sclass == C_THUMBSTATFUNC);
+	}
+      else if (bfd_asymbol_flavour (*info->symbols) == bfd_target_elf_flavour)
+	{
+	  es = *(elf_symbol_type **)(info->symbols);
+	  is_thumb = ELF_ST_TYPE (es->internal_elf_sym.st_info) ==
+	    STT_ARM_TFUNC;
+	}
+    }
 
   info->bytes_per_chunk = 4;
   info->display_endian = BFD_ENDIAN_BIG;
@@ -863,23 +878,15 @@ print_insn_big_arm (pc, info)
 	  given |= (b[0] << 24) | (b[1] << 16);
 	}
       else
-	{
-	  given = (b[0] << 8) | b[1] | (b[2] << 24) | (b[3] << 16);
-	}
+	given = (b[0] << 8) | b[1] | (b[2] << 24) | (b[3] << 16);
     }
   else
-    {
-      given = (b[0] << 24) | (b[1] << 16) | (b[2] << 8) | (b[3]);
-    }
+    given = (b[0] << 24) | (b[1] << 16) | (b[2] << 8) | (b[3]);
 
   if (is_thumb)
-    {
-      status = print_insn_thumb (pc, info, given);
-    }
+    status = print_insn_thumb (pc, info, given);
   else
-    {
-      status = print_insn_arm (pc, info, given);
-    }
+    status = print_insn_arm (pc, info, given);
 
   return status;
 }
@@ -892,8 +899,8 @@ print_insn_little_arm (pc, info)
   unsigned char      b[4];
   long               given;
   int                status;
-  coff_symbol_type   *cs;
-  elf_symbol_type    *es;
+  coff_symbol_type * cs;
+  elf_symbol_type *  es;
   int                is_thumb;
 
   if (info->disassembler_options)
@@ -905,26 +912,26 @@ print_insn_little_arm (pc, info)
     }
   
   is_thumb = false;
+  
   if (info->symbols != NULL)
     {
-    if (bfd_asymbol_flavour (*info->symbols) == bfd_target_coff_flavour)
-     {
-       cs = coffsymbol (*info->symbols);
-       is_thumb = (cs->native->u.syment.n_sclass == C_THUMBEXT
-                   || cs->native->u.syment.n_sclass == C_THUMBSTAT
-                   || cs->native->u.syment.n_sclass == C_THUMBLABEL
-                   || cs->native->u.syment.n_sclass == C_THUMBEXTFUNC
-                   || cs->native->u.syment.n_sclass == C_THUMBSTATFUNC);
+      if (bfd_asymbol_flavour (*info->symbols) == bfd_target_coff_flavour)
+	{
+	  cs = coffsymbol (*info->symbols);
+	  is_thumb = (   cs->native->u.syment.n_sclass == C_THUMBEXT
+		      || cs->native->u.syment.n_sclass == C_THUMBSTAT
+		      || cs->native->u.syment.n_sclass == C_THUMBLABEL
+		      || cs->native->u.syment.n_sclass == C_THUMBEXTFUNC
+		      || cs->native->u.syment.n_sclass == C_THUMBSTATFUNC);
+	}
+      else if (bfd_asymbol_flavour (*info->symbols) == bfd_target_elf_flavour)
+	{
+	  es = *(elf_symbol_type **)(info->symbols);
+	  is_thumb = ELF_ST_TYPE (es->internal_elf_sym.st_info) ==
+	    STT_ARM_TFUNC;
+	}
+    }
   
-     }
-    else if (bfd_asymbol_flavour (*info->symbols) == bfd_target_elf_flavour)
-     {
-       es = *(elf_symbol_type **)(info->symbols);
-       is_thumb = ELF_ST_TYPE (es->internal_elf_sym.st_info) ==
-	 STT_ARM_TFUNC;
-      }
-   }
-
   info->bytes_per_chunk = 4;
   info->display_endian = BFD_ENDIAN_LITTLE;
 
@@ -945,13 +952,9 @@ print_insn_little_arm (pc, info)
   given = (b[0]) | (b[1] << 8) | (b[2] << 16) | (b[3] << 24);
 
   if (is_thumb)
-    {
-      status = print_insn_thumb (pc, info, given);
-    }
+    status = print_insn_thumb (pc, info, given);
   else
-    {
-      status = print_insn_arm (pc, info, given);
-    }
+    status = print_insn_arm (pc, info, given);
 
   return status;
 }

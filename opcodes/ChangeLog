@@ -1,3 +1,8 @@
+1999-06-16  Nick Clifton  <nickc@cygnus.com>
+
+	* arm-dis.c (print_insn_arm): Add detection of IMB and IMBRange
+	SWIs. 
+
 1999-06-14  Nick Clifton  <nickc@cygnus.com> & Drew Mosley <dmoseley@cygnus.com>
 
 	* arm-dis.c (arm_regnames): Turn into a pointer to a register
