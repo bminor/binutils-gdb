@@ -1,6 +1,12 @@
+Mon Mar 24 19:43:16 1997  Geoffrey Noer  <noer@cygnus.com>
+
+	* symtab.c (find_pc_symtab): change to support the case
+	where the objfile is reordered and contains both coff and
+	stabs debugging info (continue on if a psymtab isn't found).
+
 Sun Mar 23 16:19:20 1997  Mark Alexander  <marka@cygnus.com>
 
-Fixes from Peter Schauer:
+	Fixes from Peter Schauer:
 	* config/mips/tm-mips.h (REGISTER_CONVERT_TO_TYPE,
 	REGISTER_CONVERT_FROM_TYPE): Swap words if target, not host,
 	is big-endian and if registers are 32 bits.
