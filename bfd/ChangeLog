@@ -1,5 +1,8 @@
 Wed Feb  9 12:55:02 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* coff-alpha.c (alpha_relocate_section): Accept a LITERAL
+	reloc on an "ldl" instruction too.
+
 	* archive.c (bfd_ar_hdr_from_filesystem): Cast status elements
 	when passing them to sprintf.  Use %ld instead of %d.
 
