@@ -445,6 +445,7 @@ enum print_what
    allocate memory using this method.  */
 
 extern void *frame_obstack_zalloc (unsigned long size);
+#define FRAME_OBSTACK_ZALLOC(TYPE) ((TYPE *) frame_obstack_zalloc (sizeof (TYPE)))
 
 /* If FRAME_CHAIN_VALID returns zero it means that the given frame
    is the outermost one and has no caller.  */

@@ -39,10 +39,6 @@
 #include "command.h"
 #include "gdbcmd.h"
 
-/* Flag to indicate whether backtraces should stop at main.  */
-
-static int backtrace_below_main;
-
 /* Prototypes for exported functions. */
 
 void _initialize_blockframe (void);
@@ -697,53 +693,9 @@ frame_chain_valid (CORE_ADDR fp, struct frame_info *fi)
   if (inside_entry_file (frame_pc_unwind (fi)))
       return 0;
 
-  /* If we want backtraces to stop at main, and we're inside main, then it
-     isn't valid.  */
-  if (!backtrace_below_main && inside_main_func (get_frame_pc (fi)))
-    return 0;
-
   /* If the architecture has a custom FRAME_CHAIN_VALID, call it now.  */
   if (FRAME_CHAIN_VALID_P ())
     return FRAME_CHAIN_VALID (fp, fi);
 
   return 1;
-}
-
-void
-do_flush_frames_sfunc (char *args, int from_tty, struct cmd_list_element *c)
-{
-  int saved_level;
-  struct frame_info *cur_frame;
-
-  if (! target_has_stack)
-    return;
-
-  saved_level = frame_relative_level (get_selected_frame ());
-
-  flush_cached_frames ();
-
-  cur_frame = find_relative_frame (get_current_frame (), &saved_level);
-  select_frame (cur_frame);
-
-  /* If we were below main and backtrace-below-main was turned off,
-     SAVED_LEVEL will be non-zero.  CUR_FRAME will point to main.
-     Accept this but print the new frame.  */
-  if (saved_level != 0)
-    print_stack_frame (get_selected_frame (), -1, 0);
-}
-
-void
-_initialize_blockframe (void)
-{
-  add_setshow_boolean_cmd ("backtrace-below-main", class_obscure,
-			   &backtrace_below_main,
- "Set whether backtraces should continue past \"main\".\n"
- "Normally the caller of \"main\" is not of interest, so GDB will terminate\n"
- "the backtrace at \"main\".  Set this variable if you need to see the rest\n"
- "of the stack trace.",
- "Show whether backtraces should continue past \"main\".\n"
- "Normally the caller of \"main\" is not of interest, so GDB will terminate\n"
- "the backtrace at \"main\".  Set this variable if you need to see the rest\n"
- "of the stack trace.",
-			   do_flush_frames_sfunc, NULL, &setlist, &showlist);
 }

@@ -1690,7 +1690,7 @@ fork-child.o: fork-child.c $(defs_h) $(gdb_string_h) $(frame_h) \
 frame.o: frame.c $(defs_h) $(frame_h) $(target_h) $(value_h) $(inferior_h) \
 	$(regcache_h) $(gdb_assert_h) $(gdb_string_h) $(builtin_regs_h) \
 	$(gdb_obstack_h) $(dummy_frame_h) $(gdbcore_h) $(annotate_h) \
-	$(language_h) $(frame_unwind_h)
+	$(language_h) $(frame_unwind_h) $(command_h) $(gdbcmd_h)
 frame-unwind.o: frame-unwind.c $(defs_h) $(frame_h) $(frame_unwind_h) \
 	$(gdb_assert_h) $(dummy_frame_h) $(legacy_frame_h)
 frv-tdep.o: frv-tdep.c $(defs_h) $(inferior_h) $(symfile_h) $(gdbcore_h) \

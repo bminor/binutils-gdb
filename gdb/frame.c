@@ -35,6 +35,12 @@
 #include "annotate.h"
 #include "language.h"
 #include "frame-unwind.h"
+#include "command.h"
+#include "gdbcmd.h"
+
+/* Flag to indicate whether backtraces should stop at main.  */
+
+static int backtrace_below_main;
 
 /* Return a frame uniq ID that can be used to, later, re-find the
    frame.  */
@@ -843,6 +849,29 @@ deprecated_generic_get_saved_register (char *raw_buffer, int *optimized,
     deprecated_read_register_gen (regnum, raw_buffer);
 }
 
+/* Determine the frame's type based on its PC.  */
+
+static enum frame_type
+frame_type_from_pc (CORE_ADDR pc)
+{
+  /* FIXME: cagney/2002-11-24: Can't yet directly call
+     pc_in_dummy_frame() as some architectures don't set
+     PC_IN_CALL_DUMMY() to generic_pc_in_call_dummy() (remember the
+     latter is implemented by simply calling pc_in_dummy_frame).  */
+  if (DEPRECATED_USE_GENERIC_DUMMY_FRAMES
+      && DEPRECATED_PC_IN_CALL_DUMMY (pc, 0, 0))
+    return DUMMY_FRAME;
+  else
+    {
+      char *name;
+      find_pc_partial_function (pc, &name, NULL, NULL);
+      if (PC_IN_SIGTRAMP (pc, name))
+	return SIGTRAMP_FRAME;
+      else
+	return NORMAL_FRAME;
+    }
+}
+
 /* Create an arbitrary (i.e. address specified by user) or innermost frame.
    Always returns a non-NULL value.  */
 
@@ -850,36 +879,12 @@ struct frame_info *
 create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
 {
   struct frame_info *fi;
-  enum frame_type type;
 
   fi = frame_obstack_zalloc (sizeof (struct frame_info));
 
   fi->frame = addr;
   fi->pc = pc;
-  /* NOTE: cagney/2002-11-18: The code segments, found in
-     create_new_frame and get_prev_frame(), that initializes the
-     frames type is subtly different.  The latter only updates ->type
-     when it encounters a SIGTRAMP_FRAME or DUMMY_FRAME.  This stops
-     get_prev_frame() overriding the frame's type when the INIT code
-     has previously set it.  This is really somewhat bogus.  The
-     initialization, as seen in create_new_frame(), should occur
-     before the INIT function has been called.  */
-  if (DEPRECATED_USE_GENERIC_DUMMY_FRAMES
-      && (DEPRECATED_PC_IN_CALL_DUMMY_P ()
-	  ? DEPRECATED_PC_IN_CALL_DUMMY (pc, 0, 0)
-	  : pc_in_dummy_frame (pc)))
-    /* NOTE: cagney/2002-11-11: Does this even occure?  */
-    type = DUMMY_FRAME;
-  else
-    {
-      char *name;
-      find_pc_partial_function (pc, &name, NULL, NULL);
-      if (PC_IN_SIGTRAMP (fi->pc, name))
-	type = SIGTRAMP_FRAME;
-      else
-	type = NORMAL_FRAME;
-    }
-  fi->type = type;
+  fi->type = frame_type_from_pc (pc);
 
   if (INIT_EXTRA_FRAME_INFO_P ())
     INIT_EXTRA_FRAME_INFO (0, fi);
@@ -927,43 +932,19 @@ reinit_frame_cache (void)
     }
 }
 
-/* Return a structure containing various interesting information
-   about the frame that called NEXT_FRAME.  Returns NULL
-   if there is no such frame.  */
+/* Create the previous frame using the deprecated methods
+   INIT_EXTRA_INFO, INIT_FRAME_PC and INIT_FRAME_PC_FIRST.  */
 
-struct frame_info *
-get_prev_frame (struct frame_info *next_frame)
+static struct frame_info *
+legacy_get_prev_frame (struct frame_info *next_frame)
 {
   CORE_ADDR address = 0;
   struct frame_info *prev;
   int fromleaf;
 
-  /* Return the inner-most frame, when the caller passes in NULL.  */
-  /* NOTE: cagney/2002-11-09: Not sure how this would happen.  The
-     caller should have previously obtained a valid frame using
-     get_selected_frame() and then called this code - only possibility
-     I can think of is code behaving badly.  */
-  if (next_frame == NULL)
-    {
-      /* NOTE: cagney/2002-11-09: There was a code segment here that
-	 would error out when CURRENT_FRAME was NULL.  The comment
-	 that went with it made the claim ...
-
-	 ``This screws value_of_variable, which just wants a nice
-	 clean NULL return from block_innermost_frame if there are no
-	 frames.  I don't think I've ever seen this message happen
-	 otherwise.  And returning NULL here is a perfectly legitimate
-	 thing to do.''
-
-         Per the above, this code shouldn't even be called with a NULL
-         NEXT_FRAME.  */
-      return current_frame;
-    }
-
-  /* Only try to do the unwind once.  */
-  if (next_frame->prev_p)
-    return next_frame->prev;
-  next_frame->prev_p = 1;
+  /* This code only works on normal frames.  A sentinel frame, where
+     the level is -1, should never reach this code.  */
+  gdb_assert (next_frame->level >= 0);
 
   /* On some machines it is possible to call a function without
      setting up a stack frame for it.  On these machines, we
@@ -974,7 +955,7 @@ get_prev_frame (struct frame_info *next_frame)
   /* Still don't want to worry about this except on the innermost
      frame.  This macro will set FROMLEAF if NEXT_FRAME is a frameless
      function invocation.  */
-  if (next_frame->next == NULL)
+  if (next_frame->level == 0)
     /* FIXME: 2002-11-09: Frameless functions can occure anywhere in
        the frame chain, not just the inner most frame!  The generic,
        per-architecture, frame code should handle this and the below
@@ -1164,6 +1145,162 @@ get_prev_frame (struct frame_info *next_frame)
     }
 
   return prev;
+}
+
+/* Return a structure containing various interesting information
+   about the frame that called NEXT_FRAME.  Returns NULL
+   if there is no such frame.  */
+
+struct frame_info *
+get_prev_frame (struct frame_info *next_frame)
+{
+  struct frame_info *prev_frame;
+
+  /* Return the inner-most frame, when the caller passes in NULL.  */
+  /* NOTE: cagney/2002-11-09: Not sure how this would happen.  The
+     caller should have previously obtained a valid frame using
+     get_selected_frame() and then called this code - only possibility
+     I can think of is code behaving badly.
+
+     NOTE: cagney/2003-01-10: Talk about code behaving badly.  Check
+     block_innermost_frame().  It does the sequence: frame = NULL;
+     while (1) { frame = get_prev_frame (frame); .... }.  Ulgh!  Why
+     it couldn't be written better, I don't know.
+
+     NOTE: cagney/2003-01-11: I suspect what is happening is
+     block_innermost_frame() is, when the target has no state
+     (registers, memory, ...), still calling this function.  The
+     assumption being that this function will return NULL indicating
+     that a frame isn't possible, rather than checking that the target
+     has state and then calling get_current_frame() and
+     get_prev_frame().  This is a guess mind.  */
+  if (next_frame == NULL)
+    {
+      /* NOTE: cagney/2002-11-09: There was a code segment here that
+	 would error out when CURRENT_FRAME was NULL.  The comment
+	 that went with it made the claim ...
+
+	 ``This screws value_of_variable, which just wants a nice
+	 clean NULL return from block_innermost_frame if there are no
+	 frames.  I don't think I've ever seen this message happen
+	 otherwise.  And returning NULL here is a perfectly legitimate
+	 thing to do.''
+
+         Per the above, this code shouldn't even be called with a NULL
+         NEXT_FRAME.  */
+      return current_frame;
+    }
+
+  /* There is always a frame.  If this assertion fails, suspect that
+     something should be calling get_selected_frame() or
+     get_current_frame().  */
+  gdb_assert (next_frame != NULL);
+
+  if (next_frame->level >= 0
+      && !backtrace_below_main
+      && inside_main_func (get_frame_pc (next_frame)))
+    /* Don't unwind past main(), bug always unwind the sentinel frame.
+       Note, this is done _before_ the frame has been marked as
+       previously unwound.  That way if the user later decides to
+       allow unwinds past main(), that just happens.  */
+    return NULL;
+
+  /* Only try to do the unwind once.  */
+  if (next_frame->prev_p)
+    return next_frame->prev;
+  next_frame->prev_p = 1;
+
+  /* If we're inside the entry file, it isn't valid.  */
+  /* NOTE: drow/2002-12-25: should there be a way to disable this
+     check?  It assumes a single small entry file, and the way some
+     debug readers (e.g.  dbxread) figure out which object is the
+     entry file is somewhat hokey.  */
+  /* NOTE: cagney/2003-01-10: If there is a way of disabling this test
+     then it should probably be moved to before the ->prev_p test,
+     above.  */
+  if (inside_entry_file (get_frame_pc (next_frame)))
+      return NULL;
+
+  /* If any of the old frame initialization methods are around, use
+     the legacy get_prev_frame method.  Just don't try to unwind a
+     sentinel frame using that method - it doesn't work.  All sentinal
+     frames use the new unwind code.  */
+  if ((DEPRECATED_INIT_FRAME_PC_P ()
+       || DEPRECATED_INIT_FRAME_PC_FIRST_P ()
+       || INIT_EXTRA_FRAME_INFO_P ())
+      && next_frame->level >= 0)
+    return legacy_get_prev_frame (next_frame);
+
+  /* Allocate the new frame but do not wire it in to the frame chain.
+     Some (bad) code in INIT_FRAME_EXTRA_INFO tries to look along
+     frame->next to pull some fancy tricks (of course such code is, by
+     definition, recursive).  Try to prevent it.
+
+     There is no reason to worry about memory leaks, should the
+     remainder of the function fail.  The allocated memory will be
+     quickly reclaimed when the frame cache is flushed, and the `we've
+     been here before' check above will stop repeated memory
+     allocation calls.  */
+  prev_frame = FRAME_OBSTACK_ZALLOC (struct frame_info);
+  prev_frame->level = next_frame->level + 1;
+
+  /* Try to unwind the PC.  If that doesn't work, assume we've reached
+     the oldest frame and simply return.  Is there a better sentinal
+     value?  The unwound PC value is then used to initialize the new
+     previous frame's type.
+
+     Note that the pc-unwind is intentionally performed before the
+     frame chain.  This is ok since, for old targets, both
+     frame_pc_unwind (nee, FRAME_SAVED_PC) and FRAME_CHAIN()) assume
+     NEXT_FRAME's data structures have already been initialized (using
+     INIT_EXTRA_FRAME_INFO) and hence the call order doesn't matter.
+
+     By unwinding the PC first, it becomes possible to, in the case of
+     a dummy frame, avoid also unwinding the frame ID.  This is
+     because (well ignoring the PPC) a dummy frame can be located
+     using NEXT_FRAME's frame ID.  */
+
+  prev_frame->pc = frame_pc_unwind (next_frame);
+  if (prev_frame->pc == 0)
+    /* The allocated PREV_FRAME will be reclaimed when the frame
+       obstack is next purged.  */
+    return NULL;
+  prev_frame->type = frame_type_from_pc (prev_frame->pc);
+
+  /* Set the unwind functions based on that identified PC.  */
+  prev_frame->unwind = frame_unwind_find_by_pc (current_gdbarch,
+						prev_frame->pc);
+
+  /* FIXME: cagney/2003-01-13: A dummy frame doesn't need to unwind
+     the frame ID because the frame ID comes from the previous frame.
+     The other frames do though.  True?  */
+  {
+    /* FIXME: cagney/2002-12-18: Instead of this hack, should just
+       save the frame ID directly.  */
+    struct frame_id id = frame_id_unwind (next_frame);
+    if (!frame_id_p (id))
+      return NULL;
+    prev_frame->frame = id.base;
+  }
+
+  /* Link it in.  */
+  next_frame->prev = prev_frame;
+  prev_frame->next = next_frame;
+
+  /* FIXME: cagney/2002-01-19: This call will go away.  Instead of
+     initializing extra info, all frames will use the frame_cache
+     (passed to the unwind functions) to store additional frame info.
+     Unfortunatly legacy targets can't use legacy_get_prev_frame() to
+     unwind the sentinel frame and, consequently, are forced to take
+     this code path and rely on the below call to INIT_EXTR_FRAME_INFO
+     to initialize the inner-most frame.  */
+  if (INIT_EXTRA_FRAME_INFO_P ())
+    {
+      gdb_assert (prev_frame->level == 0);
+      INIT_EXTRA_FRAME_INFO (0, prev_frame);
+    }
+
+  return prev_frame;
 }
 
 CORE_ADDR
@@ -1360,4 +1497,21 @@ void
 _initialize_frame (void)
 {
   obstack_init (&frame_cache_obstack);
+
+  /* FIXME: cagney/2003-01-19: This command needs a rename.  Suggest
+     `set backtrace {past,beyond,...}-main'.  Also suggest adding `set
+     backtrace ...-start' to control backtraces past start.  The
+     problem with `below' is that it stops the `up' command.  */
+
+  add_setshow_boolean_cmd ("backtrace-below-main", class_obscure,
+			   &backtrace_below_main, "\
+Set whether backtraces should continue past \"main\".\n\
+Normally the caller of \"main\" is not of interest, so GDB will terminate\n\
+the backtrace at \"main\".  Set this variable if you need to see the rest\n\
+of the stack trace.", "\
+Show whether backtraces should continue past \"main\".\n\
+Normally the caller of \"main\" is not of interest, so GDB will terminate\n\
+the backtrace at \"main\".  Set this variable if you need to see the rest\n\
+of the stack trace.",
+			   NULL, NULL, &setlist, &showlist);
 }

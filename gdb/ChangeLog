@@ -1,3 +1,20 @@
+2003-01-21  Andrew Cagney  <ac131313@redhat.com>
+
+	* frame.h (FRAME_OBSTACK_ZALLOC): Define.
+	* blockframe.c (backtrace_below_main): Move to "frame.c".
+	(frame_chain_valid): Delete check for backtrace_below_main.
+	(_initialize_blockframe): Delete initialization, move ``set
+	backtrace-below-main'' command to "frame.c".
+	(do_flush_frames_sfunc): Delete function.
+	* frame.c: Include "command.h" and "gdbcmd.h".
+	(frame_type_from_pc): New function.
+	(create_new_frame): Use frame_type_from_pc.
+	(legacy_get_prev_frame): New function.
+	(get_prev_frame): Rewrite.  When an old style frame, call
+	legacy_get_prev_frame.  Otherwize, unwind the PC first.
+	(_initialize_frame): Add ``set backtrace-below-main'' command.
+	* Makefile.in (frame.o): Update dependencies.
+
 2003-01-19  Andrew Cagney  <ac131313@redhat.com>
 
 	* config/pa/tm-hppa.h (DEPRECATED_DO_REGISTERS_INFO): Rename
