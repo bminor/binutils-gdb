@@ -90,37 +90,6 @@ struct fde_array
   int array_size;
 };
 
-struct context_reg
-{
-  union
-  {
-    unsigned int reg;
-    long offset;
-    CORE_ADDR addr;
-  }
-  loc;
-  enum
-  {
-    REG_CTX_UNSAVED,
-    REG_CTX_SAVED_OFFSET,
-    REG_CTX_SAVED_REG,
-    REG_CTX_SAVED_ADDR,
-    REG_CTX_VALUE,
-  }
-  how;
-};
-
-/* This is the register and unwind state for a particular frame.  */
-struct context
-{
-  struct context_reg *reg;
-
-  CORE_ADDR cfa;
-  CORE_ADDR ra;
-  void *lsda;
-  int args_size;
-};
-
 struct frame_state_reg
 {
   union
@@ -208,30 +177,27 @@ static struct fde_unit *fde_unit_alloc (void);
 static struct cie_unit *cie_unit_alloc (void);
 static void fde_chunks_need_space ();
 
-static struct context *context_alloc ();
-static struct frame_state *frame_state_alloc ();
 static void unwind_tmp_obstack_init ();
 static void unwind_tmp_obstack_free ();
-static void context_cpy (struct context *dst, struct context *src);
 
-static unsigned int read_1u (bfd * abfd, char **p);
-static int read_1s (bfd * abfd, char **p);
-static unsigned int read_2u (bfd * abfd, char **p);
-static int read_2s (bfd * abfd, char **p);
-static unsigned int read_4u (bfd * abfd, char **p);
-static int read_4s (bfd * abfd, char **p);
-static ULONGEST read_8u (bfd * abfd, char **p);
-static LONGEST read_8s (bfd * abfd, char **p);
+static unsigned int read_1u (bfd *abfd, char **p);
+static int read_1s (bfd *abfd, char **p);
+static unsigned int read_2u (bfd *abfd, char **p);
+static int read_2s (bfd *abfd, char **p);
+static unsigned int read_4u (bfd *abfd, char **p);
+static int read_4s (bfd *abfd, char **p);
+static ULONGEST read_8u (bfd *abfd, char **p);
+static LONGEST read_8s (bfd *abfd, char **p);
 
-static ULONGEST read_uleb128 (bfd * abfd, char **p);
-static LONGEST read_sleb128 (bfd * abfd, char **p);
-static CORE_ADDR read_pointer (bfd * abfd, char **p);
-static CORE_ADDR read_encoded_pointer (bfd * abfd, char **p,
+static ULONGEST read_uleb128 (bfd *abfd, char **p);
+static LONGEST read_sleb128 (bfd *abfd, char **p);
+static CORE_ADDR read_pointer (bfd *abfd, char **p);
+static CORE_ADDR read_encoded_pointer (bfd *abfd, char **p,
 				       unsigned char encoding);
 static enum ptr_encoding pointer_encoding (unsigned char encoding);
 
-static LONGEST read_initial_length (bfd * abfd, char *buf, int *bytes_read);
-static ULONGEST read_length (bfd * abfd, char *buf, int *bytes_read,
+static LONGEST read_initial_length (bfd *abfd, char *buf, int *bytes_read);
+static ULONGEST read_length (bfd *abfd, char *buf, int *bytes_read,
 			     int dwarf64);
 
 static int is_cie (ULONGEST cie_id, int dwarf64);
@@ -286,7 +252,7 @@ fde_chunks_need_space (void)
 }
 
 /* Alocate a new `struct context' on temporary obstack.  */
-static struct context *
+struct context *
 context_alloc (void)
 {
   struct context *context;
@@ -303,7 +269,7 @@ context_alloc (void)
 }
 
 /* Alocate a new `struct frame_state' on temporary obstack.  */
-static struct frame_state *
+struct frame_state *
 frame_state_alloc (void)
 {
   struct frame_state *fs;
@@ -332,32 +298,23 @@ unwind_tmp_obstack_free (void)
   unwind_tmp_obstack_init ();
 }
 
-static void
+void
 context_cpy (struct context *dst, struct context *src)
 {
   int regs_size = sizeof (struct context_reg) * NUM_REGS;
   struct context_reg *dreg;
 
-  /* Structure dst contains a pointer to an array of
-   * registers of a given frame as well as src does. This
-   * array was already allocated before dst was passed to
-   * context_cpy but the pointer to it was overriden by
-   * '*dst = *src' and the array was lost. This led to the
-   * situation, that we've had a copy of src placed in dst,
-   * but both of them pointed to the same regs array and
-   * thus we've sometimes blindly rewritten it.  Now we save
-   * the pointer before copying src to dst, return it back
-   * after that and copy the registers into their new place
-   * finally.   ---   mludvig@suse.cz  */
+  /* Since `struct context' contains a pointer to an array with
+     register values, make sure we end up with a copy of that array,
+     and not with a copy of the pointer to that array.  */
   dreg = dst->reg;
   *dst = *src;
   dst->reg = dreg;
-
   memcpy (dst->reg, src->reg, regs_size);
 }
 
 static unsigned int
-read_1u (bfd * abfd, char **p)
+read_1u (bfd *abfd, char **p)
 {
   unsigned ret;
 
@@ -367,7 +324,7 @@ read_1u (bfd * abfd, char **p)
 }
 
 static int
-read_1s (bfd * abfd, char **p)
+read_1s (bfd *abfd, char **p)
 {
   int ret;
 
@@ -377,7 +334,7 @@ read_1s (bfd * abfd, char **p)
 }
 
 static unsigned int
-read_2u (bfd * abfd, char **p)
+read_2u (bfd *abfd, char **p)
 {
   unsigned ret;
 
@@ -387,7 +344,7 @@ read_2u (bfd * abfd, char **p)
 }
 
 static int
-read_2s (bfd * abfd, char **p)
+read_2s (bfd *abfd, char **p)
 {
   int ret;
 
@@ -397,7 +354,7 @@ read_2s (bfd * abfd, char **p)
 }
 
 static unsigned int
-read_4u (bfd * abfd, char **p)
+read_4u (bfd *abfd, char **p)
 {
   unsigned int ret;
 
@@ -407,7 +364,7 @@ read_4u (bfd * abfd, char **p)
 }
 
 static int
-read_4s (bfd * abfd, char **p)
+read_4s (bfd *abfd, char **p)
 {
   int ret;
 
@@ -417,7 +374,7 @@ read_4s (bfd * abfd, char **p)
 }
 
 static ULONGEST
-read_8u (bfd * abfd, char **p)
+read_8u (bfd *abfd, char **p)
 {
   ULONGEST ret;
 
@@ -427,7 +384,7 @@ read_8u (bfd * abfd, char **p)
 }
 
 static LONGEST
-read_8s (bfd * abfd, char **p)
+read_8s (bfd *abfd, char **p)
 {
   LONGEST ret;
 
@@ -437,7 +394,7 @@ read_8s (bfd * abfd, char **p)
 }
 
 static ULONGEST
-read_uleb128 (bfd * abfd, char **p)
+read_uleb128 (bfd *abfd, char **p)
 {
   ULONGEST ret;
   int i, shift;
@@ -461,7 +418,7 @@ read_uleb128 (bfd * abfd, char **p)
 }
 
 static LONGEST
-read_sleb128 (bfd * abfd, char **p)
+read_sleb128 (bfd *abfd, char **p)
 {
   LONGEST ret;
   int i, shift, size, num_read;
@@ -491,7 +448,7 @@ read_sleb128 (bfd * abfd, char **p)
 }
 
 static CORE_ADDR
-read_pointer (bfd * abfd, char **p)
+read_pointer (bfd *abfd, char **p)
 {
   switch (TARGET_ADDR_BIT / TARGET_CHAR_BIT)
     {
@@ -504,11 +461,11 @@ read_pointer (bfd * abfd, char **p)
     }
 }
 
-/* This functions only reads appropriate amount of data from *p 
- * and returns the resulting value. Calling function must handle
- * different encoding possibilities itself!  */
+/* Read the appropriate amount of data from *P and return the
+   resulting value based on ENCODING, which the calling function must
+   provide.  */
 static CORE_ADDR
-read_encoded_pointer (bfd * abfd, char **p, unsigned char encoding)
+read_encoded_pointer (bfd *abfd, char **p, unsigned char encoding)
 {
   CORE_ADDR ret;
 
@@ -553,10 +510,10 @@ read_encoded_pointer (bfd * abfd, char **p, unsigned char encoding)
   return ret;
 }
 
-/* Variable 'encoding' carries 3 different flags:
- * - encoding & 0x0f : size of the address (handled in read_encoded_pointer())
- * - encoding & 0x70 : type (absolute, relative, ...)
- * - encoding & 0x80 : indirect flag (DW_EH_PE_indirect == 0x80).  */
+/* The variable 'encoding' carries three different flags:
+   - encoding & 0x0f : size of the address (handled in read_encoded_pointer())
+   - encoding & 0x70 : type (absolute, relative, ...)
+   - encoding & 0x80 : indirect flag (DW_EH_PE_indirect == 0x80).  */
 enum ptr_encoding
 pointer_encoding (unsigned char encoding)
 {
@@ -581,7 +538,7 @@ pointer_encoding (unsigned char encoding)
 }
 
 static LONGEST
-read_initial_length (bfd * abfd, char *buf, int *bytes_read)
+read_initial_length (bfd *abfd, char *buf, int *bytes_read)
 {
   LONGEST ret = 0;
 
@@ -601,7 +558,7 @@ read_initial_length (bfd * abfd, char *buf, int *bytes_read)
 }
 
 static ULONGEST
-read_length (bfd * abfd, char *buf, int *bytes_read, int dwarf64)
+read_length (bfd *abfd, char *buf, int *bytes_read, int dwarf64)
 {
   if (dwarf64)
     {
@@ -848,13 +805,13 @@ frame_state_for (struct context *context, struct frame_state *fs)
   gdb_assert (fde->cie_ptr != NULL);
 
   cie = fde->cie_ptr;
-  
+
   fs->code_align = cie->code_align;
   fs->data_align = cie->data_align;
   fs->retaddr_column = cie->ra;
   fs->addr_encoding = cie->addr_encoding;
   fs->objfile = cie->objfile;
-  
+
   execute_cfa_program (cie->objfile, cie->data,
 		       cie->data + cie->data_length, context, fs);
   execute_cfa_program (cie->objfile, fde->data,
@@ -867,14 +824,14 @@ get_reg (char *reg, struct context *context, int regnum)
   switch (context->reg[regnum].how)
     {
     case REG_CTX_UNSAVED:
-      read_register_gen (regnum, reg);
+      deprecated_read_register_gen (regnum, reg);
       break;
     case REG_CTX_SAVED_OFFSET:
       target_read_memory (context->cfa + context->reg[regnum].loc.offset,
 			  reg, REGISTER_RAW_SIZE (regnum));
       break;
     case REG_CTX_SAVED_REG:
-      read_register_gen (context->reg[regnum].loc.reg, reg);
+      deprecated_read_register_gen (context->reg[regnum].loc.reg, reg);
       break;
     case REG_CTX_SAVED_ADDR:
       target_read_memory (context->reg[regnum].loc.addr,
@@ -1128,7 +1085,7 @@ execute_stack_op (struct objfile *objfile,
 	    case DW_OP_deref_size:
 	      {
 		int len = *op_ptr++;
-		if (len != 1 && len != 2 && len != 4 && len !=8)
+		if (len != 1 && len != 2 && len != 4 && len != 8)
 		  internal_error (__FILE__, __LINE__,
 				  "execute_stack_op error");
 		result = read_memory_unsigned_integer (result, len);
@@ -1731,7 +1688,7 @@ cfi_write_fp (CORE_ADDR val)
   if (fs->cfa_how == CFA_REG_OFFSET)
     {
       val -= fs->cfa_offset;
-      write_register_gen (fs->cfa_reg, (char *) &val);
+      deprecated_write_register_gen (fs->cfa_reg, (char *) &val);
     }
   else
     warning ("Can't write fp.");
@@ -1862,7 +1819,7 @@ cfi_get_saved_register (char *raw_buffer,
 
   if (!frame->next)
     {
-      read_register_gen (regnum, raw_buffer);
+      deprecated_read_register_gen (regnum, raw_buffer);
       if (lval != NULL)
 	*lval = lval_register;
       if (addrp != NULL)
@@ -1874,7 +1831,7 @@ cfi_get_saved_register (char *raw_buffer,
       switch (UNWIND_CONTEXT (frame)->reg[regnum].how)
 	{
 	case REG_CTX_UNSAVED:
-	  read_register_gen (regnum, raw_buffer);
+	  deprecated_read_register_gen (regnum, raw_buffer);
 	  if (lval != NULL)
 	    *lval = not_lval;
 	  if (optimized != NULL)
@@ -1892,8 +1849,8 @@ cfi_get_saved_register (char *raw_buffer,
 	      UNWIND_CONTEXT (frame)->reg[regnum].loc.offset;
 	  break;
 	case REG_CTX_SAVED_REG:
-	  read_register_gen (UNWIND_CONTEXT (frame)->reg[regnum].loc.reg,
-			     raw_buffer);
+	  deprecated_read_register_gen (UNWIND_CONTEXT (frame)->reg[regnum].loc.reg,
+					raw_buffer);
 	  if (lval != NULL)
 	    *lval = lval_register;
 	  if (addrp != NULL)

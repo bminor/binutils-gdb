@@ -157,10 +157,6 @@ typedef bfd_vma CORE_ADDR;
 #define STREQ(a,b) (*(a) == *(b) ? !strcmp ((a), (b)) : 0)
 #define STREQN(a,b,c) (*(a) == *(b) ? !strncmp ((a), (b), (c)) : 0)
 
-/* The character GNU C++ uses to build identifiers that must be unique from
-   the program's identifiers (such as $this and $$vptr).  */
-#define CPLUS_MARKER '$'	/* May be overridden to '.' for SysV */
-
 /* Check if a character is one of the commonly used C++ marker characters.  */
 extern int is_cplus_marker (int);
 
@@ -209,6 +205,7 @@ enum language
     language_auto,		/* Placeholder for automatic setting */
     language_c,			/* C */
     language_cplus,		/* C++ */
+    language_objc,		/* Objective-C */
     language_java,		/* Java */
     /* OBSOLETE language_chill,	*/	/* Chill */
     language_fortran,		/* Fortran */
@@ -445,6 +442,8 @@ extern int putchar_unfiltered (int c);
 extern void puts_filtered (const char *);
 
 extern void puts_unfiltered (const char *);
+
+extern void puts_filtered_tabular (char *string, int width, int right);
 
 extern void puts_debug (char *prefix, char *string, char *suffix);
 

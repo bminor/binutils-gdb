@@ -63,7 +63,9 @@ _bfd_new_bfd ()
   nbfd->direction = no_direction;
   nbfd->iostream = NULL;
   nbfd->where = 0;
-  if (!bfd_hash_table_init (&nbfd->section_htab, bfd_section_hash_newfunc))
+  if (!bfd_hash_table_init_n (&nbfd->section_htab,
+			      bfd_section_hash_newfunc,
+			      251))
     {
       free (nbfd);
       return NULL;
@@ -124,7 +126,7 @@ FUNCTION
 	bfd_openr
 
 SYNOPSIS
-        bfd *bfd_openr(const char *filename, const char *target);
+	bfd *bfd_openr(const char *filename, const char *target);
 
 DESCRIPTION
 	Open the file @var{filename} (using <<fopen>>) with the target
@@ -134,7 +136,8 @@ DESCRIPTION
 	that function.
 
 	If <<NULL>> is returned then an error has occured.   Possible errors
-	are <<bfd_error_no_memory>>, <<bfd_error_invalid_target>> or <<system_call>> error.
+	are <<bfd_error_no_memory>>, <<bfd_error_invalid_target>> or
+	<<system_call>> error.
 */
 
 bfd *
@@ -179,28 +182,28 @@ bfd_openr (filename, target)
        the file descriptor too, even though we didn't open it.  */
 /*
 FUNCTION
-         bfd_fdopenr
+	bfd_fdopenr
 
 SYNOPSIS
-         bfd *bfd_fdopenr(const char *filename, const char *target, int fd);
+	bfd *bfd_fdopenr(const char *filename, const char *target, int fd);
 
 DESCRIPTION
-         <<bfd_fdopenr>> is to <<bfd_fopenr>> much like <<fdopen>> is to <<fopen>>.
-	 It opens a BFD on a file already described by the @var{fd}
-	 supplied.
+	<<bfd_fdopenr>> is to <<bfd_fopenr>> much like <<fdopen>> is to
+	<<fopen>>.  It opens a BFD on a file already described by the
+	@var{fd} supplied.
 
-	 When the file is later <<bfd_close>>d, the file descriptor will be closed.
+	When the file is later <<bfd_close>>d, the file descriptor will
+	be closed.  If the caller desires that this file descriptor be
+	cached by BFD (opened as needed, closed as needed to free
+	descriptors for other opens), with the supplied @var{fd} used as
+	an initial file descriptor (but subject to closure at any time),
+	call bfd_set_cacheable(bfd, 1) on the returned BFD.  The default
+	is to assume no cacheing; the file descriptor will remain open
+	until <<bfd_close>>, and will not be affected by BFD operations
+	on other files.
 
-	 If the caller desires that this file descriptor be cached by BFD
-	 (opened as needed, closed as needed to free descriptors for
-	 other opens), with the supplied @var{fd} used as an initial
-	 file descriptor (but subject to closure at any time), call
-	 bfd_set_cacheable(bfd, 1) on the returned BFD.  The default is to
-	 assume no cacheing; the file descriptor will remain open until
-	 <<bfd_close>>, and will not be affected by BFD operations on other
-	 files.
-
-         Possible errors are <<bfd_error_no_memory>>, <<bfd_error_invalid_target>> and <<bfd_error_system_call>>.
+	Possible errors are <<bfd_error_no_memory>>,
+	<<bfd_error_invalid_target>> and <<bfd_error_system_call>>.
 */
 
 bfd *
@@ -389,10 +392,10 @@ SYNOPSIS
 
 DESCRIPTION
 
-	Close a BFD. If the BFD was open for writing,
-	then pending operations are completed and the file written out
-	and closed. If the created file is executable, then
-	<<chmod>> is called to mark it as such.
+	Close a BFD. If the BFD was open for writing, then pending
+	operations are completed and the file written out and closed.
+	If the created file is executable, then <<chmod>> is called
+	to mark it as such.
 
 	All memory attached to the BFD is released.
 
@@ -431,7 +434,7 @@ bfd_close (abfd)
 
       if (stat (abfd->filename, &buf) == 0)
 	{
- 	  unsigned int mask = umask (0);
+	  unsigned int mask = umask (0);
 
 	  umask (mask);
 	  chmod (abfd->filename,
@@ -453,10 +456,10 @@ SYNOPSIS
 	boolean bfd_close_all_done(bfd *);
 
 DESCRIPTION
-	Close a BFD.  Differs from <<bfd_close>>
-	since it does not complete any pending operations.  This
-	routine would be used if the application had just used BFD for
-	swapping and didn't want to use any of the writing code.
+	Close a BFD.  Differs from <<bfd_close>> since it does not
+	complete any pending operations.  This routine would be used
+	if the application had just used BFD for swapping and didn't
+	want to use any of the writing code.
 
 	If the created file is executable, then <<chmod>> is called
 	to mark it as such.
@@ -507,10 +510,9 @@ SYNOPSIS
 	bfd *bfd_create(const char *filename, bfd *templ);
 
 DESCRIPTION
-	Create a new BFD in the manner of
-	<<bfd_openw>>, but without opening a file. The new BFD
-	takes the target from the target used by @var{template}. The
-	format is always set to <<bfd_object>>.
+	Create a new BFD in the manner of <<bfd_openw>>, but without
+	opening a file. The new BFD takes the target from the target
+	used by @var{template}. The format is always set to <<bfd_object>>.
 */
 
 bfd *

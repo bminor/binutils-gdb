@@ -2858,7 +2858,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_push_return_address (gdbarch, arm_push_return_address);
 #endif
 
-  set_gdbarch_get_saved_register (gdbarch, generic_get_saved_register);
+  set_gdbarch_get_saved_register (gdbarch, deprecated_generic_get_saved_register);
   set_gdbarch_push_arguments (gdbarch, arm_push_arguments);
   set_gdbarch_coerce_float_to_double (gdbarch,
 				      standard_coerce_float_to_double);

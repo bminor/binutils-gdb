@@ -559,6 +559,8 @@ extern const bfd_target bfd_elf32_powerpcqnx_vec;
 extern const bfd_target bfd_elf32_s390_vec;
 extern const bfd_target bfd_elf32_sh64_vec;
 extern const bfd_target bfd_elf32_sh64l_vec;
+extern const bfd_target bfd_elf32_sh64lin_vec;
+extern const bfd_target bfd_elf32_sh64blin_vec;
 extern const bfd_target bfd_elf32_sh64lnbsd_vec;
 extern const bfd_target bfd_elf32_sh64nbsd_vec;
 extern const bfd_target bfd_elf32_sh_vec;
@@ -595,6 +597,8 @@ extern const bfd_target bfd_elf64_powerpcle_vec;
 extern const bfd_target bfd_elf64_s390_vec;
 extern const bfd_target bfd_elf64_sh64_vec;
 extern const bfd_target bfd_elf64_sh64l_vec;
+extern const bfd_target bfd_elf64_sh64lin_vec;
+extern const bfd_target bfd_elf64_sh64blin_vec;
 extern const bfd_target bfd_elf64_sh64lnbsd_vec;
 extern const bfd_target bfd_elf64_sh64nbsd_vec;
 extern const bfd_target bfd_elf64_sparc_vec;
@@ -789,6 +793,7 @@ static const bfd_target * const _bfd_target_vector[] = {
 	&bfd_elf32_bigarc_vec,
 	&bfd_elf32_bigarm_oabi_vec,
 	&bfd_elf32_bigarm_vec,
+	&bfd_elf32_bigarmqnx_vec,
 	&bfd_elf32_bigmips_vec,
 	&bfd_elf32_cris_vec,
 	&bfd_elf32_d10v_vec,
@@ -815,6 +820,7 @@ static const bfd_target * const _bfd_target_vector[] = {
 	&bfd_elf32_littlearc_vec,
 	&bfd_elf32_littlearm_oabi_vec,
 	&bfd_elf32_littlearm_vec,
+	&bfd_elf32_littlearmqnx_vec,
 	&bfd_elf32_littlemips_vec,
 	&bfd_elf32_m32r_vec,
 	&bfd_elf32_m68hc11_vec,
@@ -845,12 +851,16 @@ static const bfd_target * const _bfd_target_vector[] = {
         &bfd_elf32_shl_vec,
         &bfd_elf32_shlin_vec,
 	&bfd_elf32_shlnbsd_vec,
+	&bfd_elf32_shlqnx_vec,
 	&bfd_elf32_shnbsd_vec,
+	&bfd_elf32_shqnx_vec,
 #ifdef BFD64
 	&bfd_elf32_sh64_vec,
 	&bfd_elf32_sh64l_vec,
 	&bfd_elf32_sh64lnbsd_vec,
 	&bfd_elf32_sh64nbsd_vec,
+	&bfd_elf32_sh64lin_vec,
+	&bfd_elf32_sh64blin_vec,
 #endif
 	&bfd_elf32_sparc_vec,
 	&bfd_elf32_tradbigmips_vec,
@@ -881,6 +891,8 @@ static const bfd_target * const _bfd_target_vector[] = {
 	&bfd_elf64_sh64l_vec,
 	&bfd_elf64_sh64lnbsd_vec,
 	&bfd_elf64_sh64nbsd_vec,
+	&bfd_elf64_sh64lin_vec,
+	&bfd_elf64_sh64blin_vec,
 #if 0
 	&bfd_elf64_sparc_vec,
 #endif
@@ -1098,6 +1110,17 @@ const bfd_target *bfd_default_vector[] = {
 	NULL
 };
 
+/* bfd_associated_vector[] contains the associated target vectors used
+   to reduce the ambiguity in bfd_check_format_matches.  */
+
+static const bfd_target *_bfd_associated_vector[] = {
+#ifdef ASSOCIATED_VECS
+	ASSOCIATED_VECS,
+#endif
+	NULL
+};
+const bfd_target * const *bfd_associated_vector = _bfd_associated_vector;
+
 /* When there is an ambiguous match, bfd_check_format_matches puts the
    names of the matching targets in an array.  This variable is the maximum
    number of entries that the array could possibly need.  */
@@ -1269,14 +1292,17 @@ bfd_target_list ()
     vec_length++;
 
   amt = (vec_length + 1) * sizeof (char **);
-  name_ptr = name_list = (const char **) bfd_zmalloc (amt);
+  name_ptr = name_list = (const char **) bfd_malloc (amt);
 
   if (name_list == NULL)
     return NULL;
 
   for (target = &bfd_target_vector[0]; *target != NULL; target++)
-    *(name_ptr++) = (*target)->name;
+    if (target == &bfd_target_vector[0]
+	|| *target != bfd_target_vector[0])
+      *name_ptr++ = (*target)->name;
 
+  *name_ptr = NULL;
   return name_list;
 }
 

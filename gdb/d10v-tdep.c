@@ -977,7 +977,7 @@ show_regs (char *args, int from_tty)
       char num[MAX_REGISTER_RAW_SIZE];
       int i;
       printf_filtered ("  ");
-      read_register_gen (a, (char *) &num);
+      deprecated_read_register_gen (a, (char *) &num);
       for (i = 0; i < MAX_REGISTER_RAW_SIZE; i++)
 	{
 	  printf_filtered ("%02x", (num[i] & 0xff));

@@ -231,13 +231,6 @@ a command like `return' or `jump' to continue execution.");
 #define HAVE_STEPPABLE_WATCHPOINT 1
 #endif
 
-#ifndef HAVE_NONSTEPPABLE_WATCHPOINT
-#define HAVE_NONSTEPPABLE_WATCHPOINT 0
-#else
-#undef  HAVE_NONSTEPPABLE_WATCHPOINT
-#define HAVE_NONSTEPPABLE_WATCHPOINT 1
-#endif
-
 #ifndef HAVE_CONTINUABLE_WATCHPOINT
 #define HAVE_CONTINUABLE_WATCHPOINT 0
 #else
@@ -2610,7 +2603,7 @@ process_event_stop_test:
 	  /* Set up a step-resume breakpoint at the address
 	     indicated by SKIP_SOLIB_RESOLVER.  */
 	  struct symtab_and_line sr_sal;
-	  INIT_SAL (&sr_sal);
+	  init_sal (&sr_sal);
 	  sr_sal.pc = pc_after_resolver;
 
 	  check_for_old_step_resume_breakpoint ();
@@ -2663,7 +2656,7 @@ process_event_stop_test:
 	       breakpoint even though the signal happened.  */
 	    struct symtab_and_line sr_sal;
 
-	    INIT_SAL (&sr_sal);
+	    init_sal (&sr_sal);
 	    sr_sal.symtab = NULL;
 	    sr_sal.line = 0;
 	    sr_sal.pc = prev_pc;
@@ -2776,7 +2769,7 @@ process_event_stop_test:
 	      struct symtab_and_line xxx;
 	      /* Why isn't this s_a_l called "sr_sal", like all of the
 	         other s_a_l's where this code is duplicated?  */
-	      INIT_SAL (&xxx);	/* initialize to zeroes */
+	      init_sal (&xxx);	/* initialize to zeroes */
 	      xxx.pc = tmp;
 	      xxx.section = find_pc_overlay (xxx.pc);
 	      check_for_old_step_resume_breakpoint ();
@@ -2851,7 +2844,7 @@ process_event_stop_test:
 	  /* And put the step-breakpoint there and go until there. */
 	  struct symtab_and_line sr_sal;
 
-	  INIT_SAL (&sr_sal);	/* initialize to zeroes */
+	  init_sal (&sr_sal);	/* initialize to zeroes */
 	  sr_sal.pc = tmp;
 	  sr_sal.section = find_pc_overlay (sr_sal.pc);
 	  /* Do not specify what the fp should be when we stop
@@ -2967,7 +2960,7 @@ check_sigtramp2 (struct execution_control_state *ecs)
 
       struct symtab_and_line sr_sal;
 
-      INIT_SAL (&sr_sal);	/* initialize to zeroes */
+      init_sal (&sr_sal);	/* initialize to zeroes */
       sr_sal.pc = prev_pc;
       sr_sal.section = find_pc_overlay (sr_sal.pc);
       /* We perhaps could set the frame if we kept track of what the
@@ -3023,7 +3016,7 @@ step_into_function (struct execution_control_state *ecs)
   else
     {
       /* Put the step-breakpoint there and go until there.  */
-      INIT_SAL (&sr_sal);	/* initialize to zeroes */
+      init_sal (&sr_sal);	/* initialize to zeroes */
       sr_sal.pc = ecs->stop_func_start;
       sr_sal.section = find_pc_overlay (ecs->stop_func_start);
       /* Do not specify what the fp should be when we stop since on
@@ -3058,7 +3051,7 @@ step_over_function (struct execution_control_state *ecs)
 {
   struct symtab_and_line sr_sal;
 
-  INIT_SAL (&sr_sal);		/* initialize to zeros */
+  init_sal (&sr_sal);		/* initialize to zeros */
   sr_sal.pc = ADDR_BITS_REMOVE (SAVED_PC_AFTER_CALL (get_current_frame ()));
   sr_sal.section = find_pc_overlay (sr_sal.pc);
 

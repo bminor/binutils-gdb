@@ -31,11 +31,7 @@
 #include "value.h"
 #include "completer.h"
 #include "cp-abi.h"
-
-/* Prototype for one function in parser-defs.h,
-   instead of including that entire file. */
-
-extern char *find_template_name_end (char *);
+#include "parser-defs.h"
 
 /* We share this one with symtab.c, but it is not exported widely. */
 
@@ -371,8 +367,8 @@ decode_line_2 (struct symbol *sym_arr[], int nelts, int funfirstline,
   printf_unfiltered ("[0] cancel\n[1] all\n");
   while (i < nelts)
     {
-      INIT_SAL (&return_values.sals[i]);	/* initialize to zeroes */
-      INIT_SAL (&values.sals[i]);
+      init_sal (&return_values.sals[i]);	/* initialize to zeroes */
+      init_sal (&values.sals[i]);
       if (sym_arr[i] && SYMBOL_CLASS (sym_arr[i]) == LOC_BLOCK)
 	{
 	  values.sals[i] = find_function_start_sal (sym_arr[i], funfirstline);
@@ -540,7 +536,7 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
   char *saved_arg = *argptr;
   extern char *gdb_completer_quote_characters;
 
-  INIT_SAL (&val);		/* initialize to zeroes */
+  init_sal (&val);		/* initialize to zeroes */
 
   /* Defaults have defaults.  */
 

@@ -21,11 +21,6 @@
 
 #include "mips/tm-bigmips.h"
 
-/* SGI's assembler doesn't grok dollar signs in identifiers.
-   So we use dots instead.  This item must be coordinated with G++. */
-#undef CPLUS_MARKER
-#define CPLUS_MARKER '.'
-
 /* Redefine register numbers for SGI. */
 
 #undef NUM_REGS

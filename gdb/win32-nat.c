@@ -383,7 +383,7 @@ static void
 do_child_store_inferior_registers (int r)
 {
   if (r >= 0)
-    read_register_gen (r, ((char *) &current_thread->context) + mappings[r]);
+    deprecated_read_register_gen (r, ((char *) &current_thread->context) + mappings[r]);
   else
     {
       for (r = 0; r < NUM_REGS; r++)

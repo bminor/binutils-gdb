@@ -407,9 +407,6 @@
    For backwards compatibility, we still support this usage.  */
 #ifndef USE_REL
 #define USE_REL 0
-#else
-#undef USE_REL
-#define USE_REL 1
 #endif
 
 /* Use these in new code.  */

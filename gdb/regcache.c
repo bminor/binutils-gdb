@@ -26,6 +26,7 @@
 #include "gdbarch.h"
 #include "gdbcmd.h"
 #include "regcache.h"
+#include "reggroups.h"
 #include "gdb_assert.h"
 #include "gdb_string.h"
 #include "gdbcmd.h"		/* For maintenanceprintlist.  */
@@ -604,7 +605,7 @@ read_register_bytes (int in_start, char *in_buf, int in_len)
 
       if (REGISTER_NAME (regnum) != NULL && *REGISTER_NAME (regnum) != '\0')
 	/* Force the cache to fetch the entire register.  */
-	read_register_gen (regnum, reg_buf);
+	deprecated_read_register_gen (regnum, reg_buf);
       else
 	/* Legacy note: even though this register is ``invalid'' we
            still need to return something.  It would appear that some
@@ -748,7 +749,7 @@ regcache_raw_write_unsigned (struct regcache *regcache, int regnum,
 }
 
 void
-read_register_gen (int regnum, char *buf)
+deprecated_read_register_gen (int regnum, char *buf)
 {
   gdb_assert (current_regcache != NULL);
   gdb_assert (current_regcache->descr->gdbarch == current_gdbarch);
@@ -894,7 +895,7 @@ regcache_raw_write (struct regcache *regcache, int regnum, const void *buf)
 }
 
 void
-write_register_gen (int regnum, char *buf)
+deprecated_write_register_gen (int regnum, char *buf)
 {
   gdb_assert (current_regcache != NULL);
   gdb_assert (current_regcache->descr->gdbarch == current_gdbarch);
@@ -947,7 +948,7 @@ write_register_bytes (int myregstart, char *myaddr, int inlen)
 
       /* Is this register completely within the range the user is writing?  */
       else if (myregstart <= regstart && regend <= myregend)
-	write_register_gen (regnum, myaddr + (regstart - myregstart));
+	deprecated_write_register_gen (regnum, myaddr + (regstart - myregstart));
 
       /* The register partially overlaps the range being written.  */
       else
@@ -960,7 +961,7 @@ write_register_bytes (int myregstart, char *myaddr, int inlen)
 
 	  /* We may be doing a partial update of an invalid register.
 	     Update it from the target before scribbling on it.  */
-	  read_register_gen (regnum, regbuf);
+	  deprecated_read_register_gen (regnum, regbuf);
 
 	  memcpy (registers + overlapstart,
 		  myaddr + (overlapstart - myregstart),
@@ -1147,7 +1148,7 @@ ULONGEST
 read_register (int regnum)
 {
   char *buf = alloca (REGISTER_RAW_SIZE (regnum));
-  read_register_gen (regnum, buf);
+  deprecated_read_register_gen (regnum, buf);
   return (extract_unsigned_integer (buf, REGISTER_RAW_SIZE (regnum)));
 }
 
@@ -1178,7 +1179,7 @@ LONGEST
 read_signed_register (int regnum)
 {
   void *buf = alloca (REGISTER_RAW_SIZE (regnum));
-  read_register_gen (regnum, buf);
+  deprecated_read_register_gen (regnum, buf);
   return (extract_signed_integer (buf, REGISTER_RAW_SIZE (regnum)));
 }
 
@@ -1212,7 +1213,7 @@ write_register (int regnum, LONGEST val)
   size = REGISTER_RAW_SIZE (regnum);
   buf = alloca (size);
   store_signed_integer (buf, size, (LONGEST) val);
-  write_register_gen (regnum, buf);
+  deprecated_write_register_gen (regnum, buf);
 }
 
 void
@@ -1479,7 +1480,7 @@ dump_endian_bytes (struct ui_file *file, enum bfd_endian endian,
 
 enum regcache_dump_what
 {
-  regcache_dump_none, regcache_dump_raw, regcache_dump_cooked
+  regcache_dump_none, regcache_dump_raw, regcache_dump_cooked, regcache_dump_groups
 };
 
 static void
@@ -1487,6 +1488,8 @@ regcache_dump (struct regcache *regcache, struct ui_file *file,
 	       enum regcache_dump_what what_to_dump)
 {
   struct cleanup *cleanups = make_cleanup (null_cleanup, NULL);
+  struct gdbarch *gdbarch = regcache->descr->gdbarch;
+  struct reggroup *const *groups = reggroups (gdbarch);
   int regnum;
   int footnote_nr = 0;
   int footnote_register_size = 0;
@@ -1593,27 +1596,32 @@ regcache_dump (struct regcache *regcache, struct ui_file *file,
 	}
 
       /* Type.  */
-      if (regnum < 0)
-	fprintf_unfiltered (file, " %-20s", "Type");
-      else
-	{
-	  static const char blt[] = "builtin_type";
-	  const char *t = TYPE_NAME (register_type (regcache->descr->gdbarch,
-						    regnum));
-	  if (t == NULL)
-	    {
-	      char *n;
-	      if (!footnote_register_type_name_null)
-		footnote_register_type_name_null = ++footnote_nr;
-	      xasprintf (&n, "*%d", footnote_register_type_name_null);
-	      make_cleanup (xfree, n);
-	      t = n;
-	    }
-	  /* Chop a leading builtin_type.  */
-	  if (strncmp (t, blt, strlen (blt)) == 0)
-	    t += strlen (blt);
-	  fprintf_unfiltered (file, " %-20s", t);
-	}
+      {
+	const char *t;
+	if (regnum < 0)
+	  t = "Type";
+	else
+	  {
+	    static const char blt[] = "builtin_type";
+	    t = TYPE_NAME (register_type (regcache->descr->gdbarch, regnum));
+	    if (t == NULL)
+	      {
+		char *n;
+		if (!footnote_register_type_name_null)
+		  footnote_register_type_name_null = ++footnote_nr;
+		xasprintf (&n, "*%d", footnote_register_type_name_null);
+		make_cleanup (xfree, n);
+		t = n;
+	      }
+	    /* Chop a leading builtin_type.  */
+	    if (strncmp (t, blt, strlen (blt)) == 0)
+	      t += strlen (blt);
+	  }
+	fprintf_unfiltered (file, " %-15s", t);
+      }
+
+      /* Leading space always present.  */
+      fprintf_unfiltered (file, " ");
 
       /* Value, raw.  */
       if (what_to_dump == regcache_dump_raw)
@@ -1644,6 +1652,26 @@ regcache_dump (struct regcache *regcache, struct ui_file *file,
 	      fprintf_unfiltered (file, "0x");
 	      dump_endian_bytes (file, TARGET_BYTE_ORDER, buf,
 				 REGISTER_VIRTUAL_SIZE (regnum));
+	    }
+	}
+
+      /* Group members.  */
+      if (what_to_dump == regcache_dump_groups)
+	{
+	  if (regnum < 0)
+	    fprintf_unfiltered (file, "Groups");
+	  else
+	    {
+	      int i;
+	      const char *sep = "";
+	      for (i = 0; groups[i] != NULL; i++)
+		{
+		  if (gdbarch_register_reggroup_p (gdbarch, regnum, groups[i]))
+		    {
+		      fprintf_unfiltered (file, "%s%s", sep, reggroup_name (groups[i]));
+		      sep = ",";
+		    }
+		}
 	    }
 	}
 
@@ -1696,6 +1724,12 @@ maintenance_print_cooked_registers (char *args, int from_tty)
   regcache_print (args, regcache_dump_cooked);
 }
 
+static void
+maintenance_print_register_groups (char *args, int from_tty)
+{
+  regcache_print (args, regcache_dump_groups);
+}
+
 void
 _initialize_regcache (void)
 {
@@ -1726,6 +1760,11 @@ Takes an optional file parameter.",
   add_cmd ("cooked-registers", class_maintenance,
 	   maintenance_print_cooked_registers,
 	   "Print the internal register configuration including cooked values.\
+Takes an optional file parameter.",
+	   &maintenanceprintlist);
+  add_cmd ("register-groups", class_maintenance,
+	   maintenance_print_register_groups,
+	   "Print the internal register configuration including each register's group.\
 Takes an optional file parameter.",
 	   &maintenanceprintlist);
 

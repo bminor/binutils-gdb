@@ -647,13 +647,14 @@ static const bfd_byte plt_full_entry[PLT_FULL_ENTRY_SIZE] =
    not support brl, and so it gets emulated by the kernel.  */
 #undef USE_BRL
 
+#ifdef USE_BRL
 static const bfd_byte oor_brl[16] =
 {
   0x05, 0x00, 0x00, 0x00, 0x01, 0x00,  /*  [MLX]        nop.m 0            */
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /*               brl.sptk.few tgt;; */
   0x00, 0x00, 0x00, 0xc0
 };
-
+#else
 static const bfd_byte oor_ip[48] =
 {
   0x04, 0x00, 0x00, 0x00, 0x01, 0x00,  /*  [MLX]        nop.m 0            */
@@ -666,6 +667,7 @@ static const bfd_byte oor_ip[48] =
   0x60, 0x80, 0x04, 0x80, 0x03, 0x00,  /*               mov b6=r16         */
   0x60, 0x00, 0x80, 0x00               /*               br b6;;            */
 };
+#endif
 
 /* These functions do relaxation for IA-64 ELF.
 
@@ -1282,6 +1284,7 @@ elfNN_ia64_aix_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
 	{
 	  struct elf_backend_data *bed;
 	  struct elfNN_ia64_link_hash_table *ia64_info;
+	  struct bfd_link_hash_entry *bh = NULL;
 
 	  bed = get_elf_backend_data (abfd);
 	  ia64_info = elfNN_ia64_hash_table (info);
@@ -1290,9 +1293,10 @@ elfNN_ia64_aix_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
 		(info, abfd, *namep, BSF_GLOBAL,
 		 bfd_get_section_by_name (abfd, ".bss"),
 		 bed->got_symbol_offset, (const char *) NULL, false,
-		 bed->collect, (struct bfd_link_hash_entry **) &h)))
+		 bed->collect, &bh)))
 	    return false;
 
+	  h = (struct elf_link_hash_entry *) bh;
 	  h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
 	  h->type = STT_OBJECT;
 

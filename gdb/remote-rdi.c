@@ -598,7 +598,7 @@ arm_rdi_store_registers (int regno)
     }
   else
     {
-      read_register_gen (regno, (char *) rawreg);
+      deprecated_read_register_gen (regno, (char *) rawreg);
       /* RDI manipulates data in host byte order, so convert now. */
       store_unsigned_integer (rawerreg, 4, rawreg[0]);
 

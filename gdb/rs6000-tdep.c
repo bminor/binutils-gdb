@@ -2014,7 +2014,7 @@ e500_store_return_value (struct type *type, char *valbuf)
 
       memcpy (reg_val_buf, valbuf + copied, reg_size);
       copied += reg_size;
-      write_register_gen (regnum, reg_val_buf);
+      deprecated_write_register_gen (regnum, reg_val_buf);
       i++;
     }
 }

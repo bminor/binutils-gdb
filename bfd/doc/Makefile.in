@@ -119,7 +119,6 @@ bfd_default_target_size = @bfd_default_target_size@
 bfd_libs = @bfd_libs@
 bfd_machines = @bfd_machines@
 bfd_version = @bfd_version@
-bfd_version_date = @bfd_version_date@
 bfd_version_string = @bfd_version_string@
 bfdincludedir = @bfdincludedir@
 bfdlibdir = @bfdlibdir@
@@ -216,6 +215,8 @@ BFD_H_DEP = \
 	$(srcdir)/../corefile.c		\
 	$(srcdir)/../targets.c		\
 	$(srcdir)/../format.c		\
+	$(srcdir)/../linker.c		\
+	$(srcdir)/../simple.c		\
 	$(srcdir)/header.sed		\
 	$(srcdir)/proto.str		\
 	$(srcdir)/../version.h		\
@@ -244,7 +245,7 @@ DIST_COMMON =  ChangeLog Makefile.am Makefile.in
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = gtar
+TAR = tar
 GZIP_ENV = --best
 all: all-redirect
 .SUFFIXES:

@@ -1671,6 +1671,7 @@ ip2k_elf_gc_sweep_hook (abfd, info, sec, relocs)
 
 #define ELF_ARCH	 bfd_arch_ip2k
 #define ELF_MACHINE_CODE EM_IP2K
+#define ELF_MACHINE_ALT1 EM_IP2K_OLD
 #define ELF_MAXPAGESIZE  1 /* No pages on the IP2K */
 
 #define elf_info_to_howto_rel			NULL
@@ -1689,4 +1690,3 @@ ip2k_elf_gc_sweep_hook (abfd, info, sec, relocs)
 
 
 #include "elf32-target.h"
-
