@@ -1,3 +1,8 @@
+Tue Jan 10 11:42:13 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* gas/hppa/unsorted/unsorted.exp (align4.s): Fix glitch in
+	regexp to avoid losing without a controlling tty.
+
 Fri Dec 30 18:08:20 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* gas/i386/pushw.l: Fixed whitespace to match current listing
