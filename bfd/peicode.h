@@ -275,7 +275,8 @@ coff_swap_scnhdr_in (abfd, ext, in)
 #ifndef COFF_NO_HACK_SCNHDR_SIZE
   /* If this section holds uninitialized data, use the virtual size
      (stored in s_paddr) instead of the physical size.  */
-  if ((scnhdr_int->s_flags & IMAGE_SCN_CNT_UNINITIALIZED_DATA) != 0)
+  if ((scnhdr_int->s_flags & IMAGE_SCN_CNT_UNINITIALIZED_DATA) != 0
+      && (scnhdr_int->s_paddr > 0))
     {
       scnhdr_int->s_size = scnhdr_int->s_paddr;
       /* This code used to set scnhdr_int->s_paddr to 0.  However,

@@ -1,3 +1,10 @@
+2001-07-05  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* peicode.h (coff_swap_scnhdr_in): For sections containing
+	uninitialised data, only set their size to s_paddr if this does
+	not reset their size to zero.  MS's latest compilers will set
+	s_paddr to zero.
+
 2001-07-04  H.J. Lu  <hjl@gnu.org>
 
 	* bfd/elf32-mips.c (_bfd_mips_elf_final_write_processing):
