@@ -589,7 +589,8 @@ struct bfd_elf_section_data
   Elf_Internal_Rela *relocs;
   /* Used by the backend linker when generating a shared library to
      record the dynamic symbol index for a section symbol
-     corresponding to this section.  */
+     corresponding to this section.  A value of 0 means that there is
+     no dynamic symbol for this section.  */
   long dynindx;
   /* A pointer used for .stab linking optimizations.  */
   PTR stab_info;
