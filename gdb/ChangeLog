@@ -1,3 +1,15 @@
+Mon Feb 10 18:35:55 1997  Mark Alexander  <marka@cygnus.com>
+
+	* mips-tdep.c (non_heuristic_proc_desc): New function.
+	(find_proc_desc): Move non-heuristic proc search code into separate
+	function.
+	(gdb_print_insn_mips): Use non-heuristic method to find procedure
+	descriptor, to avoid prologue examination when disassembling.
+	* remote-mips.c: Add support for new "lsi" target (LSI MiniRISC
+	aka MicroMeteor board).
+	(mips_exit_debug): Prevent protocol reinitialization if an error
+	occurs while exiting debug mode.
+
 Mon Feb 10 16:11:57 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* mn10200-tdep.c: Remove lots of debugging printfs, update/improve

@@ -81,6 +81,8 @@ static void pmon_open PARAMS ((char *name, int from_tty));
 
 static void ddb_open PARAMS ((char *name, int from_tty));
 
+static void lsi_open PARAMS ((char *name, int from_tty));
+
 static void mips_close PARAMS ((int quitting));
 
 static void mips_detach PARAMS ((char *args, int from_tty));
@@ -293,8 +295,9 @@ enum mips_monitor_type {
   /* IDT/SIM monitor being used: */
   MON_IDT,
   /* PMON monitor being used: */
-  MON_PMON,   /* 3.0.83 [COGENT,EB,FP,NET] Algorithmics Ltd. Nov  9 1995 17:19:50 */
+  MON_PMON, /* 3.0.83 [COGENT,EB,FP,NET] Algorithmics Ltd. Nov  9 1995 17:19:50 */
   MON_DDB,  /* 2.7.473 [DDBVR4300,EL,FP,NET] Risq Modular Systems,  Thu Jun 6 09:28:40 PDT 1996 */
+  MON_LSI,  /* 4.2.5 [EB], LSI LOGIC Corp. Wed Dec  6 07:57:45 1995 */
   /* Last and unused value, for sizing vectors, etc. */
   MON_LAST
 };
@@ -320,6 +323,9 @@ static struct target_ops *current_ops;
 
 /* Set to 1 while the connection is being initialized.  */
 static int mips_initializing;
+
+/* Set to 1 while the connection is being brought down.  */
+static int mips_exiting;
 
 /* The next sequence number to send.  */
 static unsigned int mips_send_seq;
@@ -633,7 +639,8 @@ mips_readchar (timeout)
      more than 64 characters long, which ours never are.  */
   if ((ch == SERIAL_TIMEOUT || ch == '@')
       && state == mips_monitor_prompt_len
-      && ! mips_initializing)
+      && ! mips_initializing
+      && ! mips_exiting)
     {
       if (remote_debug > 0)
 	/* Don't use _filtered; we can't deal with a QUIT out of
@@ -1235,6 +1242,13 @@ mips_initialize_cleanups (arg)
 }
 
 static void
+mips_exit_cleanups (arg)
+     PTR arg;
+{
+  mips_exiting = 0;
+}
+
+static void
 mips_send_command (cmd, prompt)
      const char *cmd;
      int prompt;
@@ -1254,7 +1268,7 @@ mips_enter_debug ()
   mips_send_seq = 0;
   mips_receive_seq = 0;
 
-  if (mips_monitor == MON_PMON || mips_monitor == MON_DDB)
+  if (mips_monitor != MON_IDT)
     mips_send_command ("debug\r", 0);
   else /* assume IDT monitor by default */
     mips_send_command ("db tty0\r", 0);
@@ -1265,7 +1279,7 @@ mips_enter_debug ()
      mips_receive_header will eat up a reasonable number of characters
      whilst looking for the SYN, however this avoids the "garbage"
      being displayed to the user. */
-  if (mips_monitor == MON_PMON || mips_monitor == MON_DDB)
+  if (mips_monitor != MON_IDT)
     mips_expect ("\r");
   
   {
@@ -1280,11 +1294,14 @@ static int
 mips_exit_debug ()
 {
   int err;
+  struct cleanup *old_cleanups = make_cleanup (mips_exit_cleanups, NULL);
 
-  if (mips_monitor == MON_DDB)
+  mips_exiting = 1;
+
+  if (mips_monitor != MON_IDT)
     {
-      /* The Ddb version of PMON exits immediately, so we do not get
-         a reply to this command: */
+      /* The DDB (NEC) and MiniRISC (LSI) versions of PMON exit immediately,
+         so we do not get a reply to this command: */
       mips_request ('x', (unsigned int) 0, (unsigned int) 0, NULL,
 		mips_receive_wait, NULL);
       mips_need_reply = 0;
@@ -1295,7 +1312,7 @@ mips_exit_debug ()
     mips_request ('x', (unsigned int) 0, (unsigned int) 0, &err,
                   mips_receive_wait, NULL);
 
-  if (mips_monitor == MON_PMON && !mips_expect ("Exiting remote debug mode"))
+  if (mips_monitor == MON_IDT && !mips_expect ("Exiting remote debug mode"))
     return -1;
     
   if (mips_monitor == MON_DDB)
@@ -1309,6 +1326,8 @@ mips_exit_debug ()
 
   if (!mips_expect (mips_monitor_prompt))
     return -1;
+
+  do_cleanups (old_cleanups);
 
   return 0;
 }
@@ -1341,7 +1360,7 @@ mips_initialize ()
 
   /* Force the system into the monitor.  After this we *should* be at
      the mips_monitor_prompt.  */
-  if (mips_monitor == MON_PMON || mips_monitor == MON_DDB)
+  if (mips_monitor != MON_IDT)
     j = 0; /* start by checking if we are already at the prompt */
   else
     j = 1; /* start by sending a break */
@@ -1361,7 +1380,7 @@ mips_initialize ()
 	  break;
 	case 3:			/* Then, try escaping from download */
 	  {
-            if (mips_monitor == MON_PMON || mips_monitor == MON_DDB)
+            if (mips_monitor != MON_IDT)
               {
                 char tbuff[7];
 
@@ -1410,7 +1429,7 @@ mips_initialize ()
 	break;
     }
 
-  if (mips_monitor == MON_PMON || mips_monitor == MON_DDB)
+  if (mips_monitor != MON_IDT)
     {
       /* Ensure the correct target state: */
       mips_send_command ("set regsize 64\r", -1);
@@ -1425,10 +1444,10 @@ mips_initialize ()
   mips_enter_debug ();
 
   /* Clear all breakpoints: */
-  if (common_breakpoint ('b', -1, 0, NULL))
-   monitor_supports_breakpoints = 0;
+  if (mips_monitor == MON_IDT && common_breakpoint ('b', -1, 0, NULL) == 0)
+    monitor_supports_breakpoints = 1;
   else
-   monitor_supports_breakpoints = 1;
+    monitor_supports_breakpoints = 0;
 
   do_cleanups (old_cleanups);
 
@@ -1595,6 +1614,16 @@ ddb_open (name, from_tty)
      "TARGET_MONITOR_PROMPT": */
   mips_monitor_prompt = "NEC010>";
   mips_monitor = MON_DDB;
+  common_open (&ddb_ops, name, from_tty);
+}
+
+static void
+lsi_open (name, from_tty)
+     char *name;
+     int from_tty;
+{
+  mips_monitor_prompt = "PMON> ";
+  mips_monitor = MON_LSI;
   common_open (&ddb_ops, name, from_tty);
 }
 
@@ -2462,7 +2491,9 @@ remote_mips_stopped_by_watchpoint ()
 
    Where <CMD> is one of: `B' to set, or `b' to clear a breakpoint.  <ADDR> is
    the address of the breakpoint.  <MASK> is a don't care mask for addresses.
-   <FLAGS> is any combination of `r', `w', or `f' for read/write/or fetch.  */
+   <FLAGS> is any combination of `r', `w', or `f' for read/write/or fetch.
+
+   Return 0 if successful; otherwise 1.  */
 
 static int
 common_breakpoint (cmd, addr, mask, flags)
@@ -2971,11 +3002,19 @@ pmon_end_download (final, bintotal)
   /* Wait for the stuff that PMON prints after the load has completed.
      The timeout value for use in the tftp case (15 seconds) was picked
      arbitrarily but might be too small for really large downloads. FIXME. */
-  mips_expect_timeout ("Entry Address  = ", tftp_in_use ? 15 : 2);
+  if (mips_monitor == MON_LSI)
+    {
+      pmon_check_ack ("termination");
+      mips_expect_timeout ("Entry address is ", tftp_in_use ? 15 : 2);
+    }
+  else
+    mips_expect_timeout ("Entry Address  = ", tftp_in_use ? 15 : 2);
+
   sprintf (hexnumber,"%x",final);
   mips_expect (hexnumber);
   mips_expect ("\r\n");
-  pmon_check_ack ("termination");
+  if (mips_monitor != MON_LSI)
+    pmon_check_ack ("termination");
   mips_expect ("\r\ntotal = 0x");
   sprintf (hexnumber,"%x",bintotal);
   mips_expect (hexnumber);
@@ -3145,7 +3184,7 @@ mips_load (file, from_tty)
   if (mips_exit_debug ())
     error ("mips_load:  Couldn't get into monitor mode.");
 
-  if (mips_monitor == MON_PMON || mips_monitor == MON_DDB)
+  if (mips_monitor != MON_IDT)
    pmon_load_fast (file);
   else
    mips_load_srec (file);
@@ -3324,6 +3363,58 @@ of the TFTP temporary file, if it differs from the filename seen by the board",
   NULL,				/* sections_end */
   OPS_MAGIC			/* to_magic */
 };
+/* Another alternative target vector for LSI Logic MiniRISC boards.
+   This is a PMON system, but with some other operational differences.  */
+struct target_ops lsi_ops =
+{
+  "lsi",			/* to_shortname */
+  "Remote MIPS debugging over serial line",	/* to_longname */
+  "\
+Debug a board using the PMON MIPS remote debugging protocol over a serial\n\
+line. The first argument is the device it is connected to or, if it contains\n\
+a colon, HOST:PORT to access a board over a network.  The optional second\n\
+parameter is the temporary file in the form HOST:FILENAME to be used for\n\
+TFTP downloads to the board.  The optional third parameter is the local\n\
+of the TFTP temporary file, if it differs from the filename seen by the board",
+				/* to_doc */
+  lsi_open,			/* to_open */
+  mips_close,			/* to_close */
+  NULL,				/* to_attach */
+  mips_detach,			/* to_detach */
+  mips_resume,			/* to_resume */
+  pmon_wait,			/* to_wait */
+  mips_fetch_registers,		/* to_fetch_registers */
+  mips_store_registers,		/* to_store_registers */
+  mips_prepare_to_store,	/* to_prepare_to_store */
+  mips_xfer_memory,		/* to_xfer_memory */
+  mips_files_info,		/* to_files_info */
+  mips_insert_breakpoint,	/* to_insert_breakpoint */
+  mips_remove_breakpoint,	/* to_remove_breakpoint */
+  NULL,				/* to_terminal_init */
+  NULL,				/* to_terminal_inferior */
+  NULL,				/* to_terminal_ours_for_output */
+  NULL,				/* to_terminal_ours */
+  NULL,				/* to_terminal_info */
+  mips_kill,			/* to_kill */
+  mips_load,			/* to_load */
+  NULL,				/* to_lookup_symbol */
+  mips_create_inferior,		/* to_create_inferior */
+  mips_mourn_inferior,		/* to_mourn_inferior */
+  NULL,				/* to_can_run */
+  NULL,				/* to_notice_signals */
+  0,				/* to_thread_alive */
+  0,				/* to_stop */
+  process_stratum,		/* to_stratum */
+  NULL,				/* to_next */
+  1,				/* to_has_all_memory */
+  1,				/* to_has_memory */
+  1,				/* to_has_stack */
+  1,				/* to_has_registers */
+  1,				/* to_has_execution */
+  NULL,				/* sections */
+  NULL,				/* sections_end */
+  OPS_MAGIC			/* to_magic */
+};
 
 void
 _initialize_remote_mips ()
@@ -3331,6 +3422,7 @@ _initialize_remote_mips ()
   add_target (&mips_ops);
   add_target (&pmon_ops);
   add_target (&ddb_ops);
+  add_target (&lsi_ops);
 
   add_show_from_set (
     add_set_cmd ("timeout", no_class, var_zinteger,
