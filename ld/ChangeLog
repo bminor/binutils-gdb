@@ -1,3 +1,7 @@
+2000-04-14  Matthew Green  <mrg@cygnus.com>
+	
+	* configure.tgt: Add NetBSD/sparc ELF, and NetBSD/sparc64 support.
+
 2000-06-07  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
 
 	* emultempl/mipsecoff.em (gld{EMULATION_NAME}_after_open): Require all
