@@ -2397,7 +2397,7 @@ EOF
       i386-*-sco3.2*)       fmt=coff ;;
       i386-*-vsta)          fmt=aout ;;
       i386-*-msdosdjgpp* | i386-*-go32* | i386-go32-rtems*)
-			    fmt=coff em=go32
+			    fmt=coff em=go32 bfd_gas=yes
 			    cat >> confdefs.h <<\EOF
 #define STRICTCOFF 1
 EOF
