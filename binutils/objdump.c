@@ -1873,63 +1873,39 @@ disassemble_data (bfd *abfd)
   free (sorted_syms);
 }
 
-/* Read ABFD's stabs section STABSECT_NAME into `stabs'
-   and string table section STRSECT_NAME into `strtab'.
-   If the section exists and was read, allocate the space and return TRUE.
-   Otherwise return FALSE.  */
+/* Read ABFD's stabs section STABSECT_NAME, and return a pointer to
+   it.  Return NULL on failure.   */
 
-static bfd_boolean
-read_section_stabs (bfd *abfd, const char *stabsect_name,
-		    const char *strsect_name)
+static char *
+read_section_stabs (bfd *abfd, const char *sect_name, bfd_size_type *size_ptr)
 {
-  asection *stabsect, *stabstrsect;
+  asection *stabsect;
+  bfd_size_type size;
+  char *contents;
 
-  stabsect = bfd_get_section_by_name (abfd, stabsect_name);
+  stabsect = bfd_get_section_by_name (abfd, sect_name);
   if (stabsect == NULL)
     {
-      printf (_("No %s section present\n\n"), stabsect_name);
+      printf (_("No %s section present\n\n"), sect_name);
       return FALSE;
     }
 
-  stabstrsect = bfd_get_section_by_name (abfd, strsect_name);
-  if (stabstrsect == NULL)
-    {
-      non_fatal (_("%s has no %s section"),
-		 bfd_get_filename (abfd), strsect_name);
-      exit_status = 1;
-      return FALSE;
-    }
+  size = bfd_section_size (abfd, stabsect);
+  contents  = xmalloc (size);
 
-  stab_size    = bfd_section_size (abfd, stabsect);
-  stabstr_size = bfd_section_size (abfd, stabstrsect);
-
-  stabs  = xmalloc (stab_size);
-  strtab = xmalloc (stabstr_size);
-
-  if (! bfd_get_section_contents (abfd, stabsect, stabs, 0, stab_size))
+  if (! bfd_get_section_contents (abfd, stabsect, contents, 0, size))
     {
       non_fatal (_("Reading %s section of %s failed: %s"),
-		 stabsect_name, bfd_get_filename (abfd),
+		 sect_name, bfd_get_filename (abfd),
 		 bfd_errmsg (bfd_get_error ()));
-      free (stabs);
-      free (strtab);
+      free (contents);
       exit_status = 1;
-      return FALSE;
+      return NULL;
     }
 
-  if (! bfd_get_section_contents (abfd, stabstrsect, (void *) strtab, 0,
-				  stabstr_size))
-    {
-      non_fatal (_("Reading %s section of %s failed: %s\n"),
-		 strsect_name, bfd_get_filename (abfd),
-		 bfd_errmsg (bfd_get_error ()));
-      free (stabs);
-      free (strtab);
-      exit_status = 1;
-      return FALSE;
-    }
+  *size_ptr = size;
 
-  return TRUE;
+  return contents;
 }
 
 /* Stabs entries use a 12 byte format:
@@ -1951,11 +1927,11 @@ read_section_stabs (bfd *abfd, const char *stabsect_name,
    using string table section STRSECT_NAME (in `strtab').  */
 
 static void
-print_section_stabs (bfd *abfd, const char *stabsect_name)
+print_section_stabs (bfd *abfd, const char *stabsect_name, unsigned *string_offset_ptr)
 {
   int i;
   unsigned file_string_table_offset = 0;
-  unsigned next_file_string_table_offset = 0;
+  unsigned next_file_string_table_offset = *string_offset_ptr;
   bfd_byte *stabp, *stabs_end;
 
   stabp = stabs;
@@ -2015,12 +1991,14 @@ print_section_stabs (bfd *abfd, const char *stabsect_name)
 	}
     }
   printf ("\n\n");
+  *string_offset_ptr = next_file_string_table_offset;
 }
 
 typedef struct
 {
   const char * section_name;
   const char * string_section_name;
+  unsigned string_offset;
 }
 stab_section_names;
 
@@ -2031,7 +2009,7 @@ find_stabs_section (bfd *abfd, asection *section, void *names)
   stab_section_names * sought = (stab_section_names *) names;
 
   /* Check for section names for which stabsect_name is a prefix, to
-     handle .stab0, etc.  */
+     handle .stab.N, etc.  */
   len = strlen (sought->section_name);
 
   /* If the prefix matches, and the files section name ends with a
@@ -2039,13 +2017,17 @@ find_stabs_section (bfd *abfd, asection *section, void *names)
      match or a section followed by a number.  */
   if (strncmp (sought->section_name, section->name, len) == 0
       && (section->name[len] == 0
-	  || ISDIGIT (section->name[len])))
+	  || (section->name[len] == '.' && ISDIGIT (section->name[len + 1]))))
     {
-      if (read_section_stabs (abfd, section->name, sought->string_section_name))
+      if (strtab == NULL)
+	strtab = read_section_stabs (abfd, sought->string_section_name,
+				     &stabstr_size);
+      
+      if (strtab)
 	{
-	  print_section_stabs (abfd, section->name);
-	  free (stabs);
-	  free (strtab);
+	  stabs = read_section_stabs (abfd, section->name, &stab_size);
+	  if (stabs)
+	    print_section_stabs (abfd, section->name, &sought->string_offset);
 	}
     }
 }
@@ -2057,8 +2039,12 @@ dump_stabs_section (bfd *abfd, char *stabsect_name, char *strsect_name)
 
   s.section_name = stabsect_name;
   s.string_section_name = strsect_name;
-  
+  s.string_offset = 0;
+
   bfd_map_over_sections (abfd, find_stabs_section, & s);
+
+  free (strtab);
+  strtab = NULL;
 }
 
 /* Dump the any sections containing stabs debugging information.  */

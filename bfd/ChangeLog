@@ -1,5 +1,14 @@
 2003-10-07  Nathan Sidwell  <nathan@codesourcery.com>
 
+	* libbfd-in.h (_bfd_link_section_stabs): Add string offset
+	parameter.
+	* cofflink.c (coff_link_add_symbols): Deal with split stab
+	sections.
+	* elflink.h (elf_link_add_object_symbols): Deal with split stab
+	sections.
+	* stabs.c (_bfd_link_section_stabs): Add string offset parameter.
+	* libbfd.h: Regenerated.
+
 	* coffcode.h (coff_set_alignment_hook): With PE_COFF reloc
 	overflow, set reloc start position to after the count
 	reloc. Subtract one from num relocs. Give error on 0xffff relocs

@@ -570,19 +570,24 @@ coff_link_add_symbols (bfd *abfd,
       && info->hash->creator->flavour == bfd_get_flavour (abfd)
       && (info->strip != strip_all && info->strip != strip_debugger))
     {
-      asection *stab, *stabstr;
+      asection *stabstr;
 
-      stab = bfd_get_section_by_name (abfd, ".stab");
-      if (stab != NULL)
+      stabstr = bfd_get_section_by_name (abfd, ".stabstr");
+
+      if (stabstr != NULL)
 	{
-	  stabstr = bfd_get_section_by_name (abfd, ".stabstr");
-
-	  if (stabstr != NULL)
+	  bfd_size_type string_offset = 0;
+	  asection *stab;
+	  
+	  for (stab = abfd->sections; stab; stab = stab->next)
+	    if (strncmp (".stab", stab->name, 5) == 0
+		&& (!stab->name[5]
+		    || (stab->name[5] == '.' && isdigit (stab->name[6]))))
 	    {
 	      struct coff_link_hash_table *table;
-	      struct coff_section_tdata *secdata;
-
-	      secdata = coff_section_data (abfd, stab);
+	      struct coff_section_tdata *secdata
+		= coff_section_data (abfd, stab);
+	      
 	      if (secdata == NULL)
 		{
 		  amt = sizeof (struct coff_section_tdata);
@@ -596,7 +601,8 @@ coff_link_add_symbols (bfd *abfd,
 
 	      if (! _bfd_link_section_stabs (abfd, &table->stab_info,
 					     stab, stabstr,
-					     &secdata->stab_info))
+					     &secdata->stab_info,
+					     &string_offset))
 		goto error_return;
 	    }
 	}

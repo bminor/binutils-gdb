@@ -495,7 +495,7 @@ extern bfd_reloc_status_type _bfd_relocate_contents
 /* Link stabs in sections in the first pass.  */
 
 extern bfd_boolean _bfd_link_section_stabs
-  (bfd *, void **, asection *, asection *, void **);
+  (bfd *, void **, asection *, asection *, void **, bfd_size_type *);
 
 /* Eliminate stabs for discarded functions and symbols.  */
 extern bfd_boolean _bfd_discard_section_stabs

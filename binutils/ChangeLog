@@ -1,3 +1,13 @@
+2003-10-07  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* objdump.c (read_section_stabs): Just read one section, return
+	pointer to it. Add size parameter.
+	(print_section_stabs): Add string offset parameter. Adjust.
+	(struct stab_section_names): Add string offset member.
+	(find_stabs_sections): Correct check for split section suffix,
+	adjust read_section_stabs and print_section_stabs calls.
+	(dump_stabs_section): Clear string_offset, free string table.
+
 2003-10-01  Martin Fuchs  <martin-fuchs@gmx.net>
 
 	* resrc.c (define_icon): Fix storage of color attributes 'planes' and

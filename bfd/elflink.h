@@ -20,6 +20,8 @@
 
 /* ELF linker code.  */
 
+#include "safe-ctype.h"
+
 static bfd_boolean elf_link_add_object_symbols (bfd *, struct bfd_link_info *);
 static bfd_boolean elf_link_add_archive_symbols (bfd *,
 						 struct bfd_link_info *);
@@ -1607,27 +1609,32 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
       && is_elf_hash_table (info)
       && (info->strip != strip_all && info->strip != strip_debugger))
     {
-      asection *stab, *stabstr;
-
-      stab = bfd_get_section_by_name (abfd, ".stab");
-      if (stab != NULL
-	  && (stab->flags & SEC_MERGE) == 0
-	  && !bfd_is_abs_section (stab->output_section))
+      asection *stabstr;
+      
+      stabstr = bfd_get_section_by_name (abfd, ".stabstr");
+      if (stabstr != NULL)
 	{
-	  stabstr = bfd_get_section_by_name (abfd, ".stabstr");
+	  bfd_size_type string_offset = 0;
+	  asection *stab;
 
-	  if (stabstr != NULL)
-	    {
-	      struct bfd_elf_section_data *secdata;
-
-	      secdata = elf_section_data (stab);
-	      if (! _bfd_link_section_stabs (abfd,
-					     & hash_table->stab_info,
-					     stab, stabstr,
-					     &secdata->sec_info))
-		goto error_return;
-	      if (secdata->sec_info)
-		stab->sec_info_type = ELF_INFO_TYPE_STABS;
+	  for (stab = abfd->sections; stab; stab = stab->next)
+	    if (strncmp (".stab", stab->name, 5) == 0
+		&& (!stab->name[5] ||
+		    (stab->name[5] == '.' && ISDIGIT (stab->name[6])))
+		&& (stab->flags & SEC_MERGE) == 0
+		&& !bfd_is_abs_section (stab->output_section))
+	      {
+		struct bfd_elf_section_data *secdata;
+		
+		secdata = elf_section_data (stab);
+		if (! _bfd_link_section_stabs (abfd,
+					       & hash_table->stab_info,
+					       stab, stabstr,
+					       &secdata->sec_info,
+					       &string_offset))
+		  goto error_return;
+		if (secdata->sec_info)
+		  stab->sec_info_type = ELF_INFO_TYPE_STABS;
 	    }
 	}
     }

@@ -1,3 +1,10 @@
+2003-10-07  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* ldwrite.c (unsplittable_name): New.
+	(clone_section): Strip existing numeric suffix. Only truncate names
+	for coff targets.
+	(split_sections): Use unsplittable_name.
+
 2003-10-06  Nick Clifton  <nickc@redhat.com>
 
 	* lexsup.c (parse_args): Report unresolved symbols in shared

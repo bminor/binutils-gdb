@@ -23,6 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "sysdep.h"
 #include "bfdlink.h"
 #include "libiberty.h"
+#include "safe-ctype.h"
 
 #include "ld.h"
 #include "ldexp.h"
@@ -285,6 +286,25 @@ build_link_order (lang_statement_union_type *statement)
     }
 }
 
+/* Return true if NAME is the name of an unsplittable section. These
+   are the stabs strings, dwarf strings.  */
+
+static bfd_boolean
+unsplittable_name (const char *name)
+{
+  if (strncmp (name, ".stab", 5) == 0)
+    {
+      /* There are several stab like string sections. We pattern match on
+	 ".stab...str"  */
+      unsigned len = strlen (name);
+      if (strcmp (&name[len-3], "str") == 0)
+	return TRUE;
+    }
+  else if (strcmp (name, "$GDB_STRINGS$") == 0)
+    return TRUE;
+  return FALSE;
+}
+
 /* Wander around the input sections, make sure that
    we'll never try and create an output section with more relocs
    than will fit.. Do this by always assuming the worst case, and
@@ -293,16 +313,41 @@ build_link_order (lang_statement_union_type *statement)
 static asection *
 clone_section (bfd *abfd, asection *s, const char *name, int *count)
 {
-  char templ[6];
+  char *tname;
   char *sname;
+  unsigned int len;	
   asection *n;
   struct bfd_link_hash_entry *h;
 
-  /* Invent a section name from the first five chars of the base
-     section name and a digit suffix.  */
-  strncpy (templ, name, sizeof (templ) - 1);
-  templ[sizeof (templ) - 1] = '\0';
-  if ((sname = bfd_get_unique_section_name (abfd, templ, count)) == NULL
+  /* Invent a section name from the section name and a dotted numeric
+     suffix.   */
+  len = strlen (name);
+  tname = xmalloc (len + 1);
+  memcpy (tname, name, len + 1);
+  /* Remove a dotted number suffix, from a previous split link. */
+  while (len && ISDIGIT (tname[len-1]))
+    len--;
+  if (len > 1 && tname[len-1] == '.')
+    /* It was a dotted number. */
+    tname[len-1] = 0;
+
+  /* We want to use the whole of the original section name for the
+     split name, but coff can be restricted to 8 character names.  */
+  if (bfd_family_coff (abfd) && strlen (tname) > 5)
+    {
+      /* Some section names cannot be truncated, as the name is
+	 used to locate some other section.  */
+      if (strncmp (name, ".stab", 5) == 0
+	  || strcmp (name, "$GDB_SYMBOLS$") == 0)
+	{
+	  einfo (_ ("%F%P: cannot create split section name for %s\n"), name);
+	  /* Silence gcc warnings.  einfo exits, so we never reach here.  */
+	  return NULL;
+	}
+      tname[5] = 0;
+    }
+  
+  if ((sname = bfd_get_unique_section_name (abfd, tname, count)) == NULL
       || (n = bfd_make_section_anyway (abfd, sname)) == NULL
       || (h = bfd_link_hash_lookup (link_info.hash,
 				    sname, TRUE, TRUE, FALSE)) == NULL)
@@ -311,7 +356,8 @@ clone_section (bfd *abfd, asection *s, const char *name, int *count)
       /* Silence gcc warnings.  einfo exits, so we never reach here.  */
       return NULL;
     }
-
+  free (tname);
+  
   /* Set up section symbol.  */
   h->type = bfd_link_hash_defined;
   h->u.def.value = 0;
@@ -436,7 +482,8 @@ split_sections (bfd *abfd, struct bfd_link_info *info)
 	  if (l != NULL
 	      && (thisrelocs + relocs >= config.split_by_reloc
 		  || thislines + lines >= config.split_by_reloc
-		  || thissize + sec_size >= config.split_by_file))
+		  || (thissize + sec_size >= config.split_by_file))
+	      && !unsplittable_name (cursor->name))
 	    {
 	      /* Create a new section and put this link order and the
 		 following link orders into it.  */
