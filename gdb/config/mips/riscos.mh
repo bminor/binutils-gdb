@@ -1,0 +1,3 @@
+NATDEPFILES= infptrace.o inftarg.o fork-child.o coredep.o corelow.o mips-nat.o
+NM_FILE= nm-riscos.h
+XM_FILE= xm-riscos.h
