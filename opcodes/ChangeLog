@@ -1,3 +1,8 @@
+2004-11-22  Ravi Ramaseshan  <ravi.ramaseshan@codito.com>
+
+	* opcode/arc-opc.c (insert_base): Modify ls_operand[LS_OFFSET] to
+	reflect the change to the short immediate syntax.
+
 2004-11-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* or32-opc.c (debug): Warning fix.

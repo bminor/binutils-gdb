@@ -1,3 +1,8 @@
+2004-11-22  Ravi Ramaseshan  <ravi.ramaseshan@codito.com>
+
+	* gas/arc/ld.s: Add check of load of a long immediate.
+	* gas/arc/ld.d: Add expected disassembly.
+	
 2004-11-22  Hans-Peter Nilsson  <hp@axis.com>
 
 	* gas/all/gas.exp: Run dg-runtest for all err-*.s and warn-*.s.

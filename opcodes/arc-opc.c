@@ -938,6 +938,7 @@ insert_base (insn, operand, mods, reg, value, errmsg)
       shimm_p = 1;
       shimm = value;
       ls_operand[LS_BASE] = OP_SHIMM;
+      ls_operand[LS_OFFSET] = OP_SHIMM;
     }
   else
     {
