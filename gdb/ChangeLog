@@ -1,3 +1,9 @@
+2002-04-21  David S. Miller  <davem@redhat.com>
+
+	* remote-vxsparc.c (vx_read_register): Fix typo, we want
+	REGISTER_RAW_SIZE of SP_REGNUM not CORE_ADDR.
+	(vx_write_register): Likewise.
+
 2002-04-23  J. Brobecker  <brobecker@gnat.com>
 
 	* source.c (is_regular_file): New function.

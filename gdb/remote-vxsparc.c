@@ -102,7 +102,7 @@ vx_read_register (int regno)
      (FRAME_FIND_SAVED_REGS, in particular, depends on this).  */
 
   sp = extract_address (&registers[REGISTER_BYTE (SP_REGNUM)],
-			REGISTER_RAW_SIZE (CORE_ADDR));
+			REGISTER_RAW_SIZE (SP_REGNUM));
   write_memory (sp, &registers[REGISTER_BYTE (L0_REGNUM)],
 		16 * REGISTER_RAW_SIZE (L0_REGNUM));
 
@@ -173,7 +173,7 @@ vx_write_register (int regno)
       if (regno < 0 || (L0_REGNUM <= regno && regno <= I7_REGNUM))
 	{
 	  sp = extract_address (&registers[REGISTER_BYTE (SP_REGNUM)],
-				REGISTER_RAW_SIZE (CORE_ADDR));
+				REGISTER_RAW_SIZE (SP_REGNUM));
 	  write_memory (sp, &registers[REGISTER_BYTE (L0_REGNUM)],
 			16 * REGISTER_RAW_SIZE (L0_REGNUM));
 	}
