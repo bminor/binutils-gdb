@@ -1,3 +1,11 @@
+2001-11-26  Fernando Nasser  <fnasser@redhat.com>
+
+	From 2001-11-12 Jackie Smith Cashion  <jsmith@redhat.com>:
+	* gdb.base/callfuncs.c (t_structs_a): Do not return a pointer
+	to a local (non-static) variable. Copy tstruct.a to a static buffer
+	and return a pointer to that buffer.
+	* gdb.base/callfwmall.c (t_structs_a): Ditto.
+
 2001-11-24  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.asm/configure.in: Fix recognition of ix86 target.
