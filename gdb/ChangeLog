@@ -1,3 +1,7 @@
+2001-06-25  Kevin Buettner  <kevinb@redhat.com>
+
+	* MAINTAINERS (paper trail): Update.
+
 2001-06-25  Michael Snyder  <msnyder@redhat.com>
 
 	* infrun.c: Eliminate the "thread_step_needed" state variable, 
