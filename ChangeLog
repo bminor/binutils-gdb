@@ -1,3 +1,10 @@
+Wed Dec 18 22:46:39 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-build.in: Build ld before gcc, use NewFolderRecursive.
+	* mpw-config.in: Test for NewFolderRecursive.
+	* mpw-install: Use symbolic name for startup filename.
+	* mpw-README: Add various additional details.
+
 Wed Dec 18 13:11:46 1996  Jim Wilson  <wilson@cygnus.com>
 
 	* configure.in (mips*-sgi-irix6*): Remove binutils from noconfigdirs.
