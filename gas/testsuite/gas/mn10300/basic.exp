@@ -117,13 +117,16 @@ proc do_bit {} {
 	    -re "^ +\[0-9\]+ 0007 FCEF0001\[^\n\]*\n"	{ set x [expr $x+1] }
 	    -re "^ +4 +FFFF\[^\n\]*\n"			{ set x [expr $x+1] }
 	    -re "^ +\[0-9\]+ 000d FAF90840\[^\n\]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 0011\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0011 FE020001\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +6 +FFFF40\[^\n\]*\n"		{ set x [expr $x+1] }
 	    -re "^ +\[0-9\]+ 0018 F086\[^\n\]*\n"	{ set x [expr $x+1] }
 	    -re "^ +\[0-9\]+ 001a FAF10840\[^\n\]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 001e\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 001e FE000001\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +9 +FFFF40\[^\n\]*\n"		{ set x [expr $x+1] }
 	    -re "^ +\[0-9\]+ 0025 F096\[^\n\]*\n"	{ set x [expr $x+1] }
 	    -re "^ +\[0-9\]+ 0027 FAF50840\[^\n\]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 002b\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 002b FE010001\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +13 +FFFF40\[^\n\]*\n"		{ set x [expr $x+1] }
 	    -re "\[^\n\]*\n"				{ }
 	    timeout				{ perror "timeout\n"; break }
 	    eof					{ break }
@@ -135,7 +138,7 @@ proc do_bit {} {
     gas_finish
 
     # Did we find what we were looking for?  If not, flunk it.
-    if [expr $x==12] then { pass $testname } else { fail $testname }
+    if [expr $x==15] then { pass $testname } else { fail $testname }
 }
 
 proc do_cmp {} {
@@ -677,7 +680,8 @@ proc do_other {} {
 	    -re "^ +\[0-9\]+ 0013\[^\n\]*\n"	{ set x [expr $x+1] }
 	    -re "^ +\[0-9\]+ 001a F0F2\[^\n\]*\n"	{ set x [expr $x+1] }
 	    -re "^ +\[0-9\]+ 001c FAFF0100\[^\n\]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 0020\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0020 FCFF0001\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +13 +FFFF\[^\n\]*\n"			{ set x [expr $x+1] }
 	    -re "^ +\[0-9\]+ 0026 DF0F07\[^\n\]*\n"	{ set x [expr $x+1] }
 	    -re "^ +\[0-9\]+ 0029 DE0905\[^\n\]*\n"	{ set x [expr $x+1] }
 	    -re "^ +\[0-9\]+ 002c F0FC\[^\n\]*\n"	{ set x [expr $x+1] }
@@ -696,7 +700,7 @@ proc do_other {} {
     gas_finish
 
     # Did we find what we were looking for?  If not, flunk it.
-    if [expr $x==20] then { pass $testname } else { fail $testname }
+    if [expr $x==21] then { pass $testname } else { fail $testname }
 }
 
 proc do_shift {} {
