@@ -1,8 +1,9 @@
 Sat May 13 13:55:04 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* dwarfread.c (struct dwfinfo), dbxread.c (struct symloc),
-	mdebugread.c (struct symloc), hpread.c (struct symloc): Fix error
-	in 20 Apr 1995 cleanup of comments.
+	mdebugread.c (struct symloc), hpread.c (struct symloc),
+	xcoffread.c (struct symloc): Fix inaccurate comment introduced
+	20 Apr 1995.
 
 Sat May 13 13:34:18 1995  Jim Kingdon  <kingdon@deneb.cygnus.com>
 

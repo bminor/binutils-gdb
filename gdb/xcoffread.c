@@ -95,9 +95,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* This is output from LD.  */
 #define N_SETV	0x1C		/* Pointer to set vector in data area.  */
 
-/* Each partial symbol table entry contains a pointer to private data for the
-   sym_read function to use when expanding a partial symbol table entry
-   to a full symbol table entry.  */
+/* We put a pointer to this structure in the read_symtab_private field
+   of the psymtab.  */
 
 struct symloc {
 
