@@ -55,7 +55,7 @@ print_insn_txvu (pc, info)
 
   /* FIXME: This will need revisiting.  */
   print_insn (pc, info, upper, 0);
-  (*func) (stream, " || ");
+  (*func) (stream, " | ");
   print_insn (pc, info, lower, 1);
 
   return 8;
