@@ -654,6 +654,7 @@ command_h = command.h
 complaints_h = complaints.h
 completer_h = completer.h
 cp_abi_h = cp-abi.h
+cp_names_h = cp-names.h
 cp_support_h = cp-support.h $(symtab_h)
 dcache_h = dcache.h
 defs_h = defs.h $(config_h) $(ansidecl_h) $(gdb_locale_h) $(gdb_signals_h) \
@@ -1437,17 +1438,18 @@ c-exp.tab.c: c-exp.y
 	  < c-exp.tmp > c-exp.new
 	-rm c-exp.tmp
 	mv c-exp.new ./c-exp.tab.c
-.PRECIOUS: cp-names.tab.c
-cp-names.tab.o: cp-names.tab.c $(safe_ctype_h) \
+
+cp-names.tab.o: cp-names.tab.c $(safe_ctype_h) $(cp_names_h) \
 	$(srcdir)/../libiberty/cp-demangle.c
 
-cp-names-main.tab.o: cp-names.tab.c $(safe_ctype_h) \
+cp-names-main.tab.o: cp-names.tab.c $(safe_ctype_h) $(cp_names_h) \
 	$(srcdir)/../libiberty/cp-demangle.c
 	$(CC) -c $(INTERNAL_CFLAGS) -DTEST_CPNAMES \
 		-o cp-names-main.tab.o cp-names.tab.c
 test-cpnames: cp-names-main.tab.o
 	$(CC) -o test-cpnames cp-names-main.tab.o -liberty
 
+.PRECIOUS: cp-names.tab.c
 cp-names.tab.c: cp-names.y
 	$(SHELL) $(YLWRAP) "$(YACC)" \
 	    $(srcdir)/cp-names.y  y.tab.c cp-names.tmp -- $(YFLAGS) 
@@ -1461,6 +1463,7 @@ cp-names.tab.c: cp-names.y
 	  < cp-names.tmp > cp-names.new
 	-rm cp-names.tmp
 	mv cp-names.new ./cp-names.tab.c
+
 .PRECIOUS: f-exp.tab.c
 f-exp.tab.o: f-exp.tab.c $(defs_h) $(gdb_string_h) $(expression_h) \
 	$(value_h) $(parser_defs_h) $(language_h) $(f_lang_h) $(bfd_h) \

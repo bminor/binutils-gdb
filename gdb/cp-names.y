@@ -1,7 +1,9 @@
-/* YACC parser for C expressions, for GDB.
-   Copyright 1986, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   1998, 1999, 2000, 2003
+/* YACC parser for C++ names, for GDB.
+
+   Copyright 2003
    Free Software Foundation, Inc.
+
+   Parts of the lexer are based on c-exp.y from GDB.
 
 This file is part of GDB.
 
@@ -19,16 +21,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-/* Parse a C expression from text in a string,
-   and return the result as a  struct expression  pointer.
-   That structure contains arithmetic operations in reverse polish,
-   with constants represented by operations that are followed by special data.
-   See expression.h for the details of the format.
-   What is important here is that it can be built up sequentially
-   during the process of parsing; the lower levels of the tree always
-   come first in the result.
-
-   Note that malloc's and realloc's in this file are transformed to
+/* Note that malloc's and realloc's in this file are transformed to
    xmalloc and xrealloc respectively by the same sed command in the
    makefile that remaps any other malloc/realloc inserted by the parser
    generator.  Doing this with #defines and trying to control the interaction
@@ -48,7 +41,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* #define CP_DEMANGLE_DEBUG */
 #include "../libiberty/cp-demangle.c"
 
-static char *lexptr, *prev_lexptr;
+#include "cp-names.h"
+
+static const char *lexptr, *prev_lexptr;
 
 static struct d_comp *d_qualify (struct d_comp *, int, int);
 
@@ -59,7 +54,7 @@ static struct d_comp *d_op_from_string (const char *opname);
 static struct d_comp *d_unary (const char *opname, struct d_comp *);
 static struct d_comp *d_binary (const char *opname, struct d_comp *, struct d_comp *);
 
-static char *symbol_end (char *lexptr);
+static const char *symbol_end (const char *lexptr);
 
 /* Global state, ew.  */
 struct d_info *di;
@@ -194,7 +189,7 @@ void yyerror (char *);
 
 %{
 /* YYSTYPE gets defined by %union */
-static int parse_number (char *, int, int, YYSTYPE *);
+static int parse_number (const char *, int, int, YYSTYPE *);
 %}
 
 %type <comp> exp exp1 type start start_opt operator colon_name
@@ -1264,11 +1259,7 @@ host_charset (void)
 /*** Needs some error checking for the float case ***/
 
 static int
-parse_number (p, len, parsed_float, putithere)
-     char *p;
-     int len;
-     int parsed_float;
-     YYSTYPE *putithere;
+parse_number (const char *p, int len, int parsed_float, YYSTYPE *putithere)
 {
   int unsigned_p = 0;
 
@@ -1439,7 +1430,7 @@ c_parse_backslash (int host_char, int *target_char)
    after the zeros.  A value of 0 does not mean end of string.  */
 
 static int
-parse_escape (char **string_ptr)
+parse_escape (const char **string_ptr)
 {
   int target_char;
   int c = *(*string_ptr)++;
@@ -1457,7 +1448,7 @@ parse_escape (char **string_ptr)
 	{
 	  /* Remember where this escape sequence started, for reporting
 	     errors.  */
-	  char *sequence_start_pos = *string_ptr - 1;
+	  const char *sequence_start_pos = *string_ptr - 1;
 
 	  c = *(*string_ptr)++;
 
@@ -1566,8 +1557,7 @@ yylex (void)
 {
   int c;
   int namelen;
-  char *tokstart;
-  char *tokptr;
+  const char *tokstart, *tokptr;
   int tempbufindex;
   static char *tempbuf;
   static int tempbufsize;
@@ -1677,7 +1667,7 @@ yylex (void)
       {
 	/* It's a number.  */
 	int got_dot = 0, got_e = 0, toktype;
-	char *p = tokstart;
+	const char *p = tokstart;
 	int hex = 0;
 
 	if (c == '-')
@@ -1812,7 +1802,7 @@ yylex (void)
       tempbufindex = 0;
 
       do {
-        char *char_start_pos = tokptr;
+        const char *char_start_pos = tokptr;
 
 	/* Grow the static temp buffer if necessary, including allocating
 	   the first one on demand. */
@@ -1929,7 +1919,7 @@ yylex (void)
     case 6:
       if (strncmp (tokstart, "global constructors keyed to ", 29) == 0)
 	{
-	  char *p;
+	  const char *p;
 	  lexptr = tokstart + 29;
 	  yylval.typed_val_int.val = GLOBAL_CONSTRUCTORS;
 	  /* Find the end of the symbol.  */
@@ -1940,7 +1930,7 @@ yylex (void)
 	}
       if (strncmp (tokstart, "global destructors keyed to ", 28) == 0)
 	{
-	  char *p;
+	  const char *p;
 	  lexptr = tokstart + 28;
 	  yylval.typed_val_int.val = GLOBAL_DESTRUCTORS;
 	  /* Find the end of the symbol.  */
@@ -2017,6 +2007,77 @@ yyerror (msg)
   error ("A %s in expression, near `%s'.\n", (msg ? msg : "error"), lexptr);
 }
 
+static const char *
+symbol_end (const char *lexptr)
+{
+  const char *p = lexptr;
+
+  while (*p && (ISALNUM (*p) || *p == '_' || *p == '$' || *p == '.'))
+    p++;
+
+  return p;
+}
+
+static char *
+cp_comp_to_string (struct d_comp *result, int estimated_len)
+{
+  char *str, *prefix = NULL, *buf;
+  int err = 0;
+
+  if (result->type == GLOBAL_DESTRUCTORS)
+    {
+      result = d_left (result);
+      prefix = "global destructors keyed to ";
+    }
+  else if (result->type == GLOBAL_CONSTRUCTORS)
+    {
+      result = d_left (result);
+      prefix = "global constructors keyed to ";
+    }
+
+  str = d_print (DMGL_PARAMS | DMGL_ANSI, result, estimated_len, &err);
+  if (str == NULL)
+    return NULL;
+
+  if (prefix == NULL)
+    return str;
+
+  buf = malloc (strlen (str) + strlen (prefix) + 1);
+  strcpy (buf, prefix);
+  strcat (buf, str);
+  free (str);
+  return (buf);
+}
+
+/* Return the canonicalized form of STRING, or NULL if STRING can not be
+   parsed.  */
+
+char *
+cp_canonicalize_string (const char *string)
+{
+  struct d_info myinfo;
+  int len = strlen (string);
+  char *ret;
+
+  len = len + len / 8;
+
+  lexptr = string;
+  d_init_info (NULL, DMGL_PARAMS | DMGL_ANSI, len, &myinfo);
+  myinfo.comps = malloc (myinfo.num_comps * sizeof (struct d_comp));
+  myinfo.subs = NULL;
+  di = &myinfo;
+  if (yyparse () || result == NULL)
+    return NULL;
+
+  ret = cp_comp_to_string (result, len);
+
+  free (myinfo.comps);
+  if (myinfo.subs)
+    free (myinfo.subs);
+
+  return ret;
+}
+
 #ifdef TEST_CPNAMES
 
 static void
@@ -2045,21 +2106,10 @@ cp_print (struct d_comp *result, int len)
   free (str);
 }
 
-static char *
-symbol_end (char *lexptr)
-{
-  char *p = lexptr;
-
-  while (*p && (ISALNUM (*p) || *p == '_' || *p == '$' || *p == '.'))
-    p++;
-
-  return p;
-}
-
 static char
 trim_chars (char *lexptr, char **extra_chars)
 {
-  char *p = symbol_end (lexptr);
+  char *p = (char *) symbol_end (lexptr);
   char c = 0;
 
   if (*p)

@@ -1,5 +1,21 @@
 2003-12-24  Daniel Jacobowitz  <drow@mvista.com>
 
+	* Makefile.in (cp_names_h): New variable.
+	(cp-names.tab.o, cp-names-main.tab.o): Depend on cp-names.h.
+	* cp-names.h: New file.
+	* cp-names.y: Include "cp-names.h".
+	(lexptr, prev_lexptr): Make const.
+	(symbol_end): Make argument and return type const.  Move outside
+	of TEST_CPNAMES.
+	(parse_number): Make argument const.  Use an ISO C declaration.
+	(parse_escape): Make argument const.
+	(yylex): Make some pointers const.
+	(cp_comp_to_string, cp_canonicalize_string): New functions.
+	(trim_chars): Cast symbol_end's return value to non-const in
+	this case.
+
+2003-12-24  Daniel Jacobowitz  <drow@mvista.com>
+
 	* cp-names.y (LONGEST, ULONGEST, DOUBLEST): Remove.
 	(d_qualify): Take an int argument.  Update for new INT_LLONG
 	handling.
