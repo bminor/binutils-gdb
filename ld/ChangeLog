@@ -1,3 +1,11 @@
+Fri Jul  2 17:13:35 1993  Doug Evans  (dje@canuck.cygnus.com)
+
+	* scripttempl/h8300.sc: Add .tors section for constructor/destructors.
+
+Thu Jul  1 16:38:45 1993  Doug Evans  (dje@canuck.cygnus.com)
+
+	* config/coff-h8300.mt: EMUL=h8300hms -> h8300.
+
 Wed Jun 30 15:45:55 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 	* Makefile.in (.y.c): skip default .y.c rules. gnu make can now
