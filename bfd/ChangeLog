@@ -1,3 +1,8 @@
+Sat Nov  9 13:45:01 1991  Fred Fish  (fnf at cygnus.com)
+
+	* elf.c (elf_object_p):  Don't try to create a bfd section for
+	the first ELF section header.  It is just a placeholder.
+
 Sat Nov  9 03:04:26 1991  John Gilmore  (gnu at cygnus.com)
 
 	* coff-rs6000.c, config/mh-rs6000:  Make it work on archive and

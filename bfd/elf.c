@@ -412,9 +412,10 @@ wrong:
     }
   
   /* Once all of the section headers have been read and converted, we
-     can start processing them. */
+     can start processing them.  Note that the first section header is
+     a dummy placeholder entry, so we ignore it. */
 
-  for (shindex = 0; shindex < i_ehdr.e_shnum; shindex++)
+  for (shindex = 1; shindex < i_ehdr.e_shnum; shindex++)
     {
       bfd_section_from_shdr (abfd, i_shdr + shindex, shstrtab);
     }
@@ -701,7 +702,7 @@ DEFUN (elf_sizeof_headers, (abfd, reloc),
 #define elf_openr_next_archived_file	bfd_generic_openr_next_archived_file
 #define elf_generic_stat_arch_elt	bfd_generic_stat_arch_elt
 #define	elf_write_armap			(PROTO (boolean, (*),		\
-     (bfd *arch, unsigned int elength, struct orl *map, int orl_count,	\
+     (bfd *arch, unsigned int elength, struct orl *map, unsigned int orl_count,	\
       int stridx))) bfd_false
 
 /* Ordinary section reading and writing */
