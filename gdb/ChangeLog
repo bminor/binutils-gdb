@@ -1,3 +1,12 @@
+2004-08-16  Mark Kettenis  <kettenis@gnu.org>
+
+	* inferior.h (PTRACE_ARG3_TYPE): Define as PTRACE_TYPE_ARG3
+	instead of `int' if not already defined.
+	(call_ptrace): Revert change that replaced PTRACE_ARG3_TYPE with
+	PTRACE_TYPE_ARG3.
+	* infptrace.c (call_ptrace): Revert change that replaced
+	PTRACE_ARG3_TYPE with PTRACE_TYPE_ARG3.
+
 2004-08-15  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/i386/nm-linux64.h (PTRACE_ARG3_TYPE, PTRACE_XFER_TYPE):

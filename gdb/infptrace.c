@@ -107,7 +107,7 @@ void _initialize_infptrace (void);
    It exists so that all calls to ptrace are isolated in this 
    machine-dependent file. */
 int
-call_ptrace (int request, int pid, PTRACE_TYPE_ARG3 addr, int data)
+call_ptrace (int request, int pid, PTRACE_ARG3_TYPE addr, int data)
 {
   int pt_status = 0;
 
