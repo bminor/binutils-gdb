@@ -1,3 +1,14 @@
+start-sanitize-sky
+Wed Feb 25 00:27:44 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* dvp-dis.c (print_insn): Handle word number.
+	Handle mips address vs vu address.
+	* dvp-opc.c (vif_operands): Use DVP_OPERAND_VU_ADDRESS.
+	(dma_operands): Use DVP_OPERAND_MIPS_ADDRESS.
+	({insert,extract}_dma_addr): Fix word ofset.
+	({insert,print}_gif_regs): Fix encode/decode.
+
+end-sanitize-sky
 Tue Feb 24 10:46:44 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* arm-dis.c (print_insn_{big,little}_arm): info->symbol changed
