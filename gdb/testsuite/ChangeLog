@@ -1,3 +1,10 @@
+Tue Jan 23 15:41:57 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* gdb.base/corefile.exp: Recognize "not found" as failure
+	when trying to determine if a core file was generated.
+	If no core file was generate the first time, try again without
+	the ulimit -c to work around braindamaged shells.
+
 Mon Jan 15 09:33:00 1996  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.stabs/configure.in (alpha-*-*,mips-*-*): Replace
