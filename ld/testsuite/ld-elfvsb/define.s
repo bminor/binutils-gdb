@@ -1,10 +1,10 @@
 	.data
 	.globl protected
-	.type protected,@object
+	.type protected,"object"
 protected:
 	.globl hidden
-	.type hidden,@object
+	.type hidden,"object"
 hidden:
 	.globl internal
-	.type internal,@object
+	.type internal,"object"
 internal:
