@@ -1,3 +1,7 @@
+2003-09-03  Andreas Schwab  <schwab@suse.de>
+
+	* Makefile.in (FLAGS_TO_PASS): Pass down $(bindir) and $(mandir).
+
 2003-08-29  Dave Brolley  <brolley@redhat.com>
 
 	* MAINTAINERS: Add myself as maintainer of the FRV port.
