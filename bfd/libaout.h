@@ -48,20 +48,73 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define BYTES_IN_WORD 4
 #endif
 
-#define	adata(bfd)		((struct aoutdata *) ((bfd)->tdata))
-#define exec_hdr(bfd)		(adata(bfd)->hdr)
-#define obj_textsec(bfd)	(adata(bfd)->textsec)
-#define obj_datasec(bfd)	(adata(bfd)->datasec)
-#define obj_bsssec(bfd)		(adata(bfd)->bsssec)
-#define	obj_sym_filepos(bfd)	(adata(bfd)->sym_filepos)
-#define	obj_str_filepos(bfd)	(adata(bfd)->str_filepos)
-
-#define	obj_reloc_entry_size(bfd) (adata(bfd)->reloc_entry_size)
-
 /* Declare these types at file level, since they are used in parameter
    lists, which have wierd scope.  */
 struct external_exec;
 struct internal_exec;
+
+/* This is the layout in memory of a "struct exec" while we process it.
+   All 'lengths' are given as a number of bytes.
+   All 'alignments' are for relinkable files only;  an alignment of
+	'n' indicates the corresponding segment must begin at an
+	address that is a multiple of (2**n).  */
+
+struct internal_exec
+{
+    long a_info;		/* Magic number and flags, packed */
+    bfd_vma a_text;		/* length of text, in bytes  */
+    bfd_vma a_data;		/* length of data, in bytes  */
+    bfd_vma a_bss;		/* length of uninitialized data area in mem */
+    bfd_vma a_syms;		/* length of symbol table data in file */
+    bfd_vma a_entry;		/* start address */
+    bfd_vma a_trsize;		/* length of text's relocation info, in bytes */
+    bfd_vma a_drsize;		/* length of data's relocation info, in bytes */
+    /* Added for i960 */
+    bfd_vma a_tload;		/* Text runtime load address */
+    bfd_vma a_dload;		/* Data runtime load address */
+    unsigned char a_talign;	/* Alignment of text segment */
+    unsigned char a_dalign;	/* Alignment of data segment */
+    unsigned char a_balign;	/* Alignment of bss segment */
+};
+
+/* Magic number is written 
+< MSB        >
+3130292827262524232221201918171615141312111009080706050403020100
+< FLAGS      >< MACHINE TYPE ><  MAGIC NUMBER		       >
+*/
+enum machine_type {
+  M_UNKNOWN = 0,
+  M_68010 = 1,
+  M_68020 = 2,
+  M_SPARC = 3,
+  /* skip a bunch so we dont run into any of suns numbers */
+  M_386 = 100,
+  M_29K = 101,
+  M_HP200 = 200,	/* HP 200 (68010) BSD binary */
+  M_HP300 = (300 % 256), /* HP 300 (68020+68881) BSD binary */
+  M_HPUX = (0x20c % 256),/* HP 200/300 HPUX binary */
+};
+
+#define N_DYNAMIC(exec) ((exec).a_info & 0x8000000)
+
+#define N_MAGIC(exec) ((exec).a_info & 0xffff)
+#define N_MACHTYPE(exec) ((enum machine_type)(((exec).a_info >> 16) & 0xff))
+#define N_FLAGS(exec) (((exec).a_info >> 24) & 0xff)
+#define N_SET_INFO(exec, magic, type, flags) \
+((exec).a_info = ((magic) & 0xffff) \
+ | (((int)(type) & 0xff) << 16) \
+ | (((flags) & 0xff) << 24))
+
+#define N_SET_MAGIC(exec, magic) \
+((exec).a_info = (((exec).a_info & 0xffff0000) | ((magic) & 0xffff)))
+
+#define N_SET_MACHTYPE(exec, machtype) \
+((exec).a_info = \
+ ((exec).a_info&0xff00ffff) | ((((int)(machtype))&0xff) << 16))
+
+#define N_SET_FLAGS(exec, flags) \
+((exec).a_info = \
+ ((exec).a_info&0x00ffffff) | (((flags) & 0xff) << 24))
 
 typedef struct aout_symbol {
   asymbol symbol;
@@ -70,10 +123,13 @@ typedef struct aout_symbol {
   unsigned char type;
 } aout_symbol_type;
 
-struct aoutdata {
-  struct internal_exec *hdr;               /* exec file header */
-  aout_symbol_type *symbols;		/* symtab for input bfd */
+/* The `tdata' struct for all a.out-like object file formats.
+   Various things depend on this struct being around any time an a.out
+   file is being handled.  An example is dbxread.c in GDB.  */
 
+struct aoutdata {
+  struct internal_exec *hdr;		/* exec file header */
+  aout_symbol_type *symbols;		/* symtab for input bfd */
   
   /* For ease, we do this */
   asection *textsec;
@@ -85,29 +141,42 @@ struct aoutdata {
   file_ptr sym_filepos;
   file_ptr str_filepos;
 
-  /* Size of a relocation entry */
+  /* Size of a relocation entry in external form */
   unsigned reloc_entry_size;
+
+  /* Size of a symbol table entry in external form */
+  unsigned symbol_entry_size;
+
+  /* Page size - needed for alignment of demand paged files. */
+  unsigned long page_size;
+
+  /* Segment size - needed for alignment of demand paged files. */
+  unsigned long segment_size;
+
+  unsigned exec_bytes_size;
 };
 
-
-#define obj_outsymbols(bfd) ((PTR)(((struct aoutdata *) ((bfd)->tdata))->outsymbols))
-
+#define	adata(bfd)		((struct aoutdata *) ((bfd)->tdata))
+#define	exec_hdr(bfd)		(adata(bfd)->hdr)
+#define	obj_aout_symbols(bfd)	(adata(bfd)->symbols)
+#define	obj_textsec(bfd)	(adata(bfd)->textsec)
+#define	obj_datasec(bfd)	(adata(bfd)->datasec)
+#define	obj_bsssec(bfd)		(adata(bfd)->bsssec)
+#define	obj_sym_filepos(bfd)	(adata(bfd)->sym_filepos)
+#define	obj_str_filepos(bfd)	(adata(bfd)->str_filepos)
+#define	obj_reloc_entry_size(bfd) (adata(bfd)->reloc_entry_size)
+#define	obj_symbol_entry_size(bfd) (adata(bfd)->symbol_entry_size)
 
 /* We take the address of the first element of an asymbol to ensure that the
- * macro is only ever applied to an asymbol */
+   macro is only ever applied to an asymbol */
 #define aout_symbol(asymbol) ((aout_symbol_type *)(&(asymbol)->the_bfd))
-
-/*#define obj_symbols(bfd) ((((struct aoutdata *) ((bfd)->tdata))->symbols))*/
-#define obj_aout_symbols(bfd) ((((struct aoutdata *) (bfd)->tdata))->symbols)
-#define obj_arch_flags(bfd) ((((struct aoutdata *) (bfd)->tdata))->arch_flags)
-
-#define get_tdata(x)  ((struct aoutdata *)((x)->tdata))
 
 /* Prototype declarations for functions defined in aoutx.h  */
 
 PROTO (boolean, NAME(aout,squirt_out_relocs),(bfd *abfd, asection *section));
 
 PROTO (bfd_target *, NAME(aout,some_aout_object_p), (bfd *abfd,
+					  struct internal_exec *execp,
 					  bfd_target *(*callback)()));
 PROTO (boolean,	NAME(aout,mkobject), (bfd *abfd));
 PROTO (enum machine_type, NAME(aout,machine_type), (enum bfd_architecture arch,
@@ -157,6 +226,7 @@ PROTO (void,	NAME(aout,swap_exec_header_out),(bfd *abfd, struct internal_exec *e
 
 /* Calculate the file positions of the parts of a newly read aout header */
 #define WORK_OUT_FILE_POSITIONS(abfd, execp)				\
+  /* The virtual memory addresses of the sections */			\
   obj_datasec (abfd)->vma = N_DATADDR(*execp);			 	\
   obj_bsssec (abfd)->vma = N_BSSADDR(*execp);				\
   obj_textsec (abfd)->vma = N_TXTADDR(*execp);				\
@@ -176,13 +246,13 @@ PROTO (void,	NAME(aout,swap_exec_header_out),(bfd *abfd, struct internal_exec *e
 
 #define WRITE_HEADERS(abfd, execp)					      \
       {									      \
-        if ((obj_textsec(abfd)->vma & 0xff )== EXEC_BYTES_SIZE)  \
-		abfd->flags |= D_PAGED; 		\
-	else						\
-		abfd->flags &= ~D_PAGED;		\
 	if (abfd->flags & D_PAGED) 					      \
 	    {								      \
-	      execp->a_text = obj_textsec (abfd)->size + EXEC_BYTES_SIZE;     \
+	      execp->a_text = obj_textsec (abfd)->size;			      \
+	      /* Kludge to distinguish old- and new-style ZMAGIC.	      \
+	         The latter includes the exec header in the text size. */     \
+	      if (obj_textsec(abfd)->filepos == EXEC_BYTES_SIZE)	      \
+		execp->a_text += EXEC_BYTES_SIZE;			      \
 	      N_SET_MAGIC (*execp, ZMAGIC);				      \
 	    } 								      \
 	else 								      \
@@ -195,8 +265,8 @@ PROTO (void,	NAME(aout,swap_exec_header_out),(bfd *abfd, struct internal_exec *e
 	    }								      \
 	if (abfd->flags & D_PAGED) 					      \
 	    {								      \
-	      data_pad = ((obj_datasec(abfd)->size + PAGE_SIZE -1)	      \
-			  & (- PAGE_SIZE)) - obj_datasec(abfd)->size;	      \
+	      data_pad = ALIGN(obj_datasec(abfd)->size, PAGE_SIZE)	      \
+		  - obj_datasec(abfd)->size;				      \
 	  								      \
 	      if (data_pad > obj_bsssec(abfd)->size)			      \
 		execp->a_bss = 0;					      \
@@ -210,7 +280,7 @@ PROTO (void,	NAME(aout,swap_exec_header_out),(bfd *abfd, struct internal_exec *e
 	      execp->a_bss = obj_bsssec (abfd)->size;			      \
 	    }								      \
     									      \
-	execp->a_syms = bfd_get_symcount (abfd) * EXTERNAL_LIST_SIZE;	      \
+	execp->a_syms = bfd_get_symcount (abfd) * EXTERNAL_NLIST_SIZE;	      \
 	execp->a_entry = bfd_get_start_address (abfd);			      \
     									      \
 	execp->a_trsize = ((obj_textsec (abfd)->reloc_count) *		      \
