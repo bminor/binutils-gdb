@@ -100,8 +100,8 @@ struct target_so_ops
        the run time loader */
     int (*in_dynsym_resolve_code) (CORE_ADDR pc);
 
-    /* Extra hook for finding and opening a solib.  Convenience function
-       for remote debuggers finding host libs */
+    /* Extra hook for finding and opening a solib.  
+       Convenience function for remote debuggers finding host libs.  */
     int (*find_and_open_solib) (char *soname,
         unsigned o_flags, char **temp_pathname);
     
