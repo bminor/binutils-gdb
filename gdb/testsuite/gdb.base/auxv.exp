@@ -80,15 +80,15 @@ proc fetch_auxv {test} {
 	-re "info auxv\[\r\n\]+" {
 	    exp_continue
 	}
-	-re "The program has no auxiliary information now.*$" {
+	-ex "The program has no auxiliary information now" {
 	    set bad 1
 	    exp_continue
 	}
-	-re "Auxiliary vector is empty.*$" {
+	-ex "Auxiliary vector is empty" {
 	    set bad 1
 	    exp_continue
 	}
-	-re "No auxiliary vector found.*$" {
+	-ex "No auxiliary vector found" {
 	    set bad 1
 	    exp_continue
 	}
@@ -102,13 +102,15 @@ proc fetch_auxv {test} {
 	    lappend auxv_lines $expect_out(0,string)
 	    exp_continue
 	}
-	-re "^\[^\r\n\]+\[\r\n\]+" {
-	    warning "Unrecognized output: $expect_out(0,string)"
-	    set bad 1
-	    exp_continue
-	}
 	-re ".*$gdb_prompt $" {
 	    incr bad
+	}
+	-re "^\[^\r\n\]+\[\r\n\]+" {
+	    if {!$bad} {
+		warning "Unrecognized output: $expect_out(0,string)"
+		set bad 1
+	    }
+	    exp_continue
 	}
     }] != 0} {
 	return {}
