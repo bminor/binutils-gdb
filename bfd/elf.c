@@ -2560,9 +2560,7 @@ assign_file_positions_for_segments (abfd)
       p->p_type = m->p_type;
 
       if (m->p_flags_valid)
-	p->p_flags = m->p_flags;
-      else
-	p->p_flags = 0;
+	p->p_flags |= m->p_flags;
 
       if (p->p_type == PT_LOAD
 	  && m->count > 0
