@@ -53,6 +53,18 @@ static char *find_toplevel_char (char *s, char c);
 static struct symtabs_and_lines decode_line_2 (struct symbol *[],
 					       int, int, char ***);
 
+static struct
+symtabs_and_lines symbol_found (int funfirstline,
+				char ***canonical,
+				char *copy,
+				struct symbol *sym,
+				struct symtab *s,
+				struct symtab *sym_symtab);
+
+static struct
+symtabs_and_lines minsym_found (int funfirstline,
+				struct minimal_symbol *msymbol);
+
 /* Helper functions. */
 
 /* Issue a helpful hint on using the command completion feature on
@@ -910,16 +922,9 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
 	  /* Look up entire name */
 	  sym = lookup_symbol (copy, 0, VAR_NAMESPACE, 0, &sym_symtab);
 	  s = (struct symtab *) 0;
-	  /* Prepare to jump: restore the " if (condition)" so outer layers see it */
-	  /* Symbol was found --> jump to normal symbol processing.
-	     Code following "symbol_found" expects "copy" to have the
-	     symbol name, "sym" to have the symbol pointer, "s" to be
-	     a specified file's symtab, and sym_symtab to be the symbol's
-	     symtab. */
-	  /* By jumping there we avoid falling through the FILE:LINE and
-	     FILE:FUNC processing stuff below */
 	  if (sym)
-	    goto symbol_found;
+	    return symbol_found (funfirstline, canonical, copy, sym,
+				 NULL, sym_symtab);
 
 	  /* Couldn't find any interpretation as classes/namespaces, so give up */
 	  /* The quotes are important if copy is empty.  */
@@ -985,12 +990,9 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
       sym = lookup_symbol (copy, 0, VAR_NAMESPACE, 0, &sym_symtab);
       if (sym)
 	{
-	  /* Yes, we have a symbol; jump to symbol processing */
-	  /* Code after symbol_found expects S, SYM_SYMTAB, SYM, 
-	     and COPY to be set correctly */
 	  *argptr = (*p == '\'') ? p + 1 : p;
-	  s = (struct symtab *) 0;
-	  goto symbol_found;
+	  return symbol_found (funfirstline, canonical, copy, sym,
+			       NULL, sym_symtab);
 	}
       /* Otherwise fall out from here and go to file/line spec
          processing, etc. */
@@ -1151,19 +1153,16 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
 	  sym = lookup_symbol (copy, 0, VAR_NAMESPACE, 0, &sym_symtab);
 	  s = (struct symtab *) 0;
 	  need_canonical = 1;
-	  /* Symbol was found --> jump to normal symbol processing.
-	     Code following "symbol_found" expects "copy" to have the
-	     symbol name, "sym" to have the symbol pointer, "s" to be
-	     a specified file's symtab, and sym_symtab to be the symbol's
-	     symtab. */
+	  /* Symbol was found --> jump to normal symbol processing.  */
 	  if (sym)
-	    goto symbol_found;
+	    return symbol_found (funfirstline, canonical, copy, sym,
+				 NULL, sym_symtab);
 
 	  /* If symbol was not found, look in minimal symbol tables */
 	  msymbol = lookup_minimal_symbol (copy, NULL, NULL);
 	  /* Min symbol was found --> jump to minsym processing. */
 	  if (msymbol)
-	    goto minimal_symbol_found;
+	    return minsym_found (funfirstline, msymbol);
 
 	  /* Not a user variable or function -- must be convenience variable */
 	  need_canonical = (s == 0) ? 1 : 0;
@@ -1196,79 +1195,13 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
 			: get_selected_block (0)),
 		       VAR_NAMESPACE, 0, &sym_symtab);
 
-symbol_found:			/* We also jump here from inside the C++ class/namespace 
-				   code on finding a symbol of the form "A::B::C" */
-
   if (sym != NULL)
-    {
-      if (SYMBOL_CLASS (sym) == LOC_BLOCK)
-	{
-	  /* Arg is the name of a function */
-	  values.sals = (struct symtab_and_line *)
-	    xmalloc (sizeof (struct symtab_and_line));
-	  values.sals[0] = find_function_start_sal (sym, funfirstline);
-	  values.nelts = 1;
-
-	  /* Don't use the SYMBOL_LINE; if used at all it points to
-	     the line containing the parameters or thereabouts, not
-	     the first line of code.  */
-
-	  /* We might need a canonical line spec if it is a static
-	     function.  */
-	  if (s == 0)
-	    {
-	      struct blockvector *bv = BLOCKVECTOR (sym_symtab);
-	      struct block *b = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-	      if (lookup_block_symbol (b, copy, NULL, VAR_NAMESPACE) != NULL)
-		build_canonical_line_spec (values.sals, copy, canonical);
-	    }
-	  return values;
-	}
-      else
-	{
-	  if (funfirstline)
-	    error ("\"%s\" is not a function", copy);
-	  else if (SYMBOL_LINE (sym) != 0)
-	    {
-	      /* We know its line number.  */
-	      values.sals = (struct symtab_and_line *)
-		xmalloc (sizeof (struct symtab_and_line));
-	      values.nelts = 1;
-	      memset (&values.sals[0], 0, sizeof (values.sals[0]));
-	      values.sals[0].symtab = sym_symtab;
-	      values.sals[0].line = SYMBOL_LINE (sym);
-	      return values;
-	    }
-	  else
-	    /* This can happen if it is compiled with a compiler which doesn't
-	       put out line numbers for variables.  */
-	    /* FIXME: Shouldn't we just set .line and .symtab to zero
-	       and return?  For example, "info line foo" could print
-	       the address.  */
-	    error ("Line number not known for symbol \"%s\"", copy);
-	}
-    }
+    return symbol_found (funfirstline, canonical, copy, sym, s, sym_symtab);
 
   msymbol = lookup_minimal_symbol (copy, NULL, NULL);
 
-minimal_symbol_found:		/* We also jump here from the case for variables
-				   that begin with '$' */
-
   if (msymbol != NULL)
-    {
-      values.sals = (struct symtab_and_line *)
-	xmalloc (sizeof (struct symtab_and_line));
-      values.sals[0] = find_pc_sect_line (SYMBOL_VALUE_ADDRESS (msymbol),
-					  (struct sec *) 0, 0);
-      values.sals[0].section = SYMBOL_BFD_SECTION (msymbol);
-      if (funfirstline)
-	{
-	  values.sals[0].pc += FUNCTION_START_OFFSET;
-	  values.sals[0].pc = SKIP_PROLOGUE (values.sals[0].pc);
-	}
-      values.nelts = 1;
-      return values;
-    }
+    return minsym_found (funfirstline, msymbol);
 
   if (!have_full_symbols () &&
       !have_partial_symbols () && !have_minimal_symbols ())
@@ -1276,4 +1209,90 @@ minimal_symbol_found:		/* We also jump here from the case for variables
 
   error ("Function \"%s\" not defined.", copy);
   return values;		/* for lint */
+}
+
+
+
+
+/* Now come some functions that are called from multiple places within
+   decode_line_1.  */
+
+/* We've found a symbol SYM to associate with our linespec; build a
+   corresponding struct symtabs_and_lines.  */
+
+static struct symtabs_and_lines
+symbol_found (int funfirstline, char ***canonical, char *copy,
+	      struct symbol *sym, struct symtab *s,
+	      struct symtab *sym_symtab)
+{
+  struct symtabs_and_lines values;
+  
+  if (SYMBOL_CLASS (sym) == LOC_BLOCK)
+    {
+      /* Arg is the name of a function */
+      values.sals = (struct symtab_and_line *)
+	xmalloc (sizeof (struct symtab_and_line));
+      values.sals[0] = find_function_start_sal (sym, funfirstline);
+      values.nelts = 1;
+
+      /* Don't use the SYMBOL_LINE; if used at all it points to
+	 the line containing the parameters or thereabouts, not
+	 the first line of code.  */
+
+      /* We might need a canonical line spec if it is a static
+	 function.  */
+      if (s == 0)
+	{
+	  struct blockvector *bv = BLOCKVECTOR (sym_symtab);
+	  struct block *b = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
+	  if (lookup_block_symbol (b, copy, NULL, VAR_NAMESPACE) != NULL)
+	    build_canonical_line_spec (values.sals, copy, canonical);
+	}
+      return values;
+    }
+  else
+    {
+      if (funfirstline)
+	error ("\"%s\" is not a function", copy);
+      else if (SYMBOL_LINE (sym) != 0)
+	{
+	  /* We know its line number.  */
+	  values.sals = (struct symtab_and_line *)
+	    xmalloc (sizeof (struct symtab_and_line));
+	  values.nelts = 1;
+	  memset (&values.sals[0], 0, sizeof (values.sals[0]));
+	  values.sals[0].symtab = sym_symtab;
+	  values.sals[0].line = SYMBOL_LINE (sym);
+	  return values;
+	}
+      else
+	/* This can happen if it is compiled with a compiler which doesn't
+	   put out line numbers for variables.  */
+	/* FIXME: Shouldn't we just set .line and .symtab to zero
+	   and return?  For example, "info line foo" could print
+	   the address.  */
+	error ("Line number not known for symbol \"%s\"", copy);
+    }
+}
+
+/* We've found a minimal symbol MSYMBOL to associate with our
+   linespec; build a corresponding struct symtabs_and_lines.  */
+
+static struct symtabs_and_lines
+minsym_found (int funfirstline, struct minimal_symbol *msymbol)
+{
+  struct symtabs_and_lines values;
+
+  values.sals = (struct symtab_and_line *)
+    xmalloc (sizeof (struct symtab_and_line));
+  values.sals[0] = find_pc_sect_line (SYMBOL_VALUE_ADDRESS (msymbol),
+				      (struct sec *) 0, 0);
+  values.sals[0].section = SYMBOL_BFD_SECTION (msymbol);
+  if (funfirstline)
+    {
+      values.sals[0].pc += FUNCTION_START_OFFSET;
+      values.sals[0].pc = SKIP_PROLOGUE (values.sals[0].pc);
+    }
+  values.nelts = 1;
+  return values;
 }
