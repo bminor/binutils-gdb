@@ -1,3 +1,13 @@
+Tue Jun  2 17:20:52 1992  Michael Tiemann  (tiemann@cygnus.com)
+
+	* Makefile.in (all-binutils): ar needs flex, so depend on all-flex.
+
+Sun May 31 15:04:08 1992  Mark Eichin  (eichin at cygnus.com)
+
+	* config.sub: changed [^-]+ to [^-][^-]* so that it works under
+	Sun sed. (BSD 4.3 sed doesn't handle [^-]+ either.)
+	* configure.in: added solaris* host_makefile_frag hook.
+
 Sun May 31 01:10:34 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* config.sub: changed recognition of m68000 so that various

@@ -24,6 +24,7 @@ prefix = /usr/local
 exec_prefix = $(prefix)
 bindir = $(exec_prefix)/bin
 libdir = $(exec_prefix)/lib
+tooldir = $(libdir)
 
 datadir = $(prefix)/lib
 mandir = $(prefix)/man
@@ -55,6 +56,10 @@ BISON = `if [ -d $${rootme}/bison ] ; \
 	then echo $${rootme}/bison/bison -L $${rootme}/bison/ -y ; \
 	else echo bison -y ; fi`
 
+LEX = `if [ -d $${rootme}/flex ] ; \
+	then echo $${rootme}/flex/flex -S$${rootme}/flex/flex.skel ; \
+	else echo flex ; fi`
+
 MAKEINFO = `if [ -d $${rootme}/texinfo/C ] ; \
 	then echo $${rootme}/texinfo/C/makeinfo ; \
 	else echo makeinfo ; fi`
@@ -72,28 +77,44 @@ INSTALL_TARGET = install.all
 #### host and target specific makefile fragments come in here.
 ###
 
+FLAGS_TO_PASS = \
+	"prefix=$(prefix)" \
+	"exec_prefix=$(exec_prefix)" \
+	"tooldir=$(tooldir)" \
+	"AR=$(AR)" \
+	"AR_FLAGS=$(AR_FLAGS)" \
+	"CC=$(CC)" \
+	"CFLAGS=$(CFLAGS)" \
+	"RANLIB=$(RANLIB)" \
+	"LOADLIBES=$(LOADLIBES)" \
+	"LDFLAGS=$(LDFLAGS)" \
+	"BISON=$(BISON)" \
+	"LEX=$(LEX)" \
+	"MAKEINFO=$(MAKEINFO)" \
+	"INSTALL=$(INSTALL)" \
+	"INSTALL_DATA=$(INSTALL_DATA)" \
+	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)"
+
 .PHONY: all info install-info clean-info
 .NOEXPORT:
 
 all:	$(ALL)
 
-info:	cfg-paper.info configure.info
+info:	cfg-paper.info configure.info standards.info
 	@rootme=`pwd` ; export rootme ; $(MAKE) subdir_do DO=info "DODIRS=$(SUBDIRS)" "MAKEINFO=$(MAKEINFO)"
 
-check:; @rootme=`pwd` ; export rootme ; $(MAKE) subdir_do DO=check \
+# Note libg++ has to be handled specially (we can't compile it with CC=cc).
+check:
+	@rootme=`pwd` ; export rootme ; $(MAKE) subdir_do DO=check \
 	"DODIRS=`echo $(SUBDIRS) | sed -e \"s/libg\+\+//\"" \
 	"MAKEINFO=$(MAKEINFO)"
-	@if [ -d libg++ ] ; then \
-		rootme=`pwd` ; export rootme ; \
-		(cd libg++ ; \
-		 $(MAKE) check "CC=$${rootme}/gcc/gcc \
-		 -B$${rootme}/gcc/") ; \
-	fi
-		
+	@rootme=`pwd` ; export rootme ; $(MAKE) subdir_do DO=check \
+	"DODIRS=libg++" "CC=${GXX}" "XTRAFLAGS=${XTRAFLAGS}" \
+	"MAKEINFO=$(MAKEINFO)"
 
 clean-info:
 	@$(MAKE) subdir_do DO=clean-info "DODIRS=$(SUBDIRS)"
-	rm -f cfg-paper.info* configure.info*
+	rm -f *.info*
 
 cfg-paper.info: cfg-paper.texi
 	rootme=`pwd` ; export rootme ; $(MAKEINFO) -o cfg-paper.info $(srcdir)/cfg-paper.texi
@@ -101,11 +122,15 @@ cfg-paper.info: cfg-paper.texi
 configure.info: configure.texi
 	rootme=`pwd` ; export rootme ; $(MAKEINFO) -o configure.info $(srcdir)/configure.texi
 
+standards.info: standards.texi
+	rootme=`pwd` ; export rootme ; $(MAKEINFO) -o standards.info $(srcdir)/standards.texi
+
 install-info: install-info-dirs force
 	[ -d $(infodir) ] || mkdir $(infodir)
 	@$(MAKE) subdir_do DO=install-info "DODIRS=$(SUBDIRS)"
 	$(INSTALL_DATA) cfg-paper.info $(infodir)/cfg-paper.info
 	$(INSTALL_DATA) configure.info $(infodir)/configure.info
+	$(INSTALL_DATA) standards.info $(infodir)/standards.info
 	@$(MAKE) dir.info install-dir.info
 
 install-dir.info:
@@ -115,7 +140,7 @@ all.normal: all-autoconf all-libiberty all-mmalloc all-texinfo \
 	all-bison all-byacc all-flex all-bfd all-ld all-gas all-gcc \
 	all-binutils all-libg++ all-readline all-gdb \
 	all-make all-rcs all-cvs all-diff all-grep \
-	all-patch all-emacs all-ispell all-fileutils \
+	all-patch all-emacs all-ispell \
 	all-newlib all-gprof all-send_pr
 
 all.cross: all-libiberty all-mmalloc all-gas all-bison all-ld \
@@ -127,7 +152,7 @@ clean: clean-autoconf clean-libiberty clean-mmalloc clean-texinfo \
 	clean-bison clean-byacc clean-ld clean-gas \
 	clean-gcc clean-libgcc clean-readline clean-glob clean-gdb \
 	clean-make clean-diff clean-grep clean-rcs \
-	clean-cvs clean-patch clean-emacs clean-ispell clean-fileutils \
+	clean-cvs clean-patch clean-emacs clean-ispell \
 	clean-libg++ clean-gprof clean-send_pr
 	-rm -rf *.a TEMP errs core *.o *~ \#* TAGS *.E
 
@@ -144,7 +169,7 @@ install.all: install-dirs install-autoconf install-libiberty \
 	install-gas install-gcc install-gprof install-libgcc \
 	install-readline install-glob install-gdb install-make \
 	install-cvs install-patch install-emacs install-ispell \
-	install-fileutils install-libg++ install-newlib \
+	install-libg++ install-newlib \
 	install-send_pr
 
 install.cross: install-dirs install-libiberty install-mmalloc \
@@ -157,18 +182,7 @@ all-autoconf: force
 	@if [ -d ./autoconf ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./autoconf; \
-		$(MAKE) \
-			"against=$(against)" \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			all) ; \
+		$(MAKE) $(FLAGS_TO_PASS) all) ; \
 	else \
 		true ; \
 	fi
@@ -177,18 +191,7 @@ clean-autoconf: force
 	@if [ -d ./autoconf ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./autoconf; \
-		$(MAKE) \
-			"against=$(against)" \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			clean) ; \
+		$(MAKE) $(FLAGS_TO_PASS) clean) ; \
 	else \
 		true ; \
 	fi
@@ -197,18 +200,7 @@ install-autoconf: force
 	@if [ -d ./autoconf ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./autoconf; \
-		$(MAKE) \
-			"against=$(against)" \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			install) ; \
+		$(MAKE) $(FLAGS_TO_PASS) install) ; \
 	else \
 		true ; \
 	fi
@@ -218,17 +210,7 @@ all-libiberty: force
 	@if [ -d ./libiberty ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./libiberty; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			all) ; \
+		$(MAKE) $(FLAGS_TO_PASS) all) ; \
 	else \
 		true ; \
 	fi
@@ -237,17 +219,7 @@ clean-libiberty: force
 	@if [ -d ./libiberty ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./libiberty; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			clean) ; \
+		$(MAKE) $(FLAGS_TO_PASS) clean) ; \
 	else \
 		true ; \
 	fi
@@ -256,17 +228,7 @@ install-libiberty: force
 	@if [ -d ./libiberty ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./libiberty; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			install) ; \
+		$(MAKE) $(FLAGS_TO_PASS) install) ; \
 	else \
 		true ; \
 	fi
@@ -276,17 +238,7 @@ all-mmalloc: force
 	@if [ -d ./mmalloc ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./mmalloc; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			all) ; \
+		$(MAKE) $(FLAGS_TO_PASS) all) ; \
 	else \
 		true ; \
 	fi
@@ -295,17 +247,7 @@ clean-mmalloc: force
 	@if [ -d ./mmalloc ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./mmalloc; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			clean) ; \
+		$(MAKE) $(FLAGS_TO_PASS) clean) ; \
 	else \
 		true ; \
 	fi
@@ -314,17 +256,7 @@ install-mmalloc: force
 	@if [ -d ./mmalloc ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./mmalloc; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			install) ; \
+		$(MAKE) $(FLAGS_TO_PASS) install) ; \
 	else \
 		true ; \
 	fi
@@ -335,17 +267,7 @@ all-texinfo: all-libiberty
 		rootme=`pwd` ; export rootme ; \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./texinfo; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			all) ; \
+		$(MAKE) $(FLAGS_TO_PASS) all) ; \
 	else \
 		true ; \
 	fi
@@ -354,17 +276,7 @@ clean-texinfo: force
 	@if [ -d ./texinfo ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./texinfo; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			clean) ; \
+		$(MAKE) $(FLAGS_TO_PASS) clean) ; \
 	else \
 		true ; \
 	fi
@@ -373,17 +285,7 @@ install-texinfo: force
 	@if [ -d ./texinfo ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./texinfo; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			install) ; \
+		$(MAKE) $(FLAGS_TO_PASS) install) ; \
 	else \
 		true ; \
 	fi
@@ -393,17 +295,7 @@ all-bfd: force
 	@if [ -d ./bfd ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./bfd; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			all) ; \
+		$(MAKE) $(FLAGS_TO_PASS) all) ; \
 	else \
 		true ; \
 	fi
@@ -412,17 +304,7 @@ clean-bfd: force
 	@if [ -d ./bfd ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./bfd; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			clean) ; \
+		$(MAKE) $(FLAGS_TO_PASS) clean) ; \
 	else \
 		true ; \
 	fi
@@ -431,36 +313,17 @@ install-bfd: force
 	@if [ -d ./bfd ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./bfd; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			install) ; \
+		$(MAKE) $(FLAGS_TO_PASS) install) ; \
 	else \
 		true ; \
 	fi
 
 ### binutils
-all-binutils: all-libiberty all-bfd
+all-binutils: all-libiberty all-bfd all-flex
 	@if [ -d ./binutils ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./binutils; \
-		$(MAKE) "AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			all) ; \
+		$(MAKE) $(FLAGS_TO_PASS) all) ; \
 	else \
 		true ; \
 	fi
@@ -469,17 +332,7 @@ clean-binutils: force
 	@if [ -d ./binutils ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./binutils; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			clean) ; \
+		$(MAKE) $(FLAGS_TO_PASS) clean) ; \
 	else \
 		true ; \
 	fi
@@ -488,17 +341,7 @@ install-binutils: force
 	@if [ -d ./binutils ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./binutils; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			install) ; \
+		$(MAKE) $(FLAGS_TO_PASS) install) ; \
 	else \
 		true ; \
 	fi
@@ -508,17 +351,7 @@ all-newlib: force
 	@if [ -d ./newlib ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./newlib; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			all) ; \
+		$(MAKE) $(FLAGS_TO_PASS) all) ; \
 	else \
 		true ; \
 	fi
@@ -527,17 +360,7 @@ clean-newlib: force
 	@if [ -d ./newlib ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./newlib; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			clean) ; \
+		$(MAKE) $(FLAGS_TO_PASS) clean) ; \
 	else \
 		true ; \
 	fi
@@ -546,17 +369,7 @@ install-newlib: force
 	@if [ -d ./newlib ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./newlib; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			install) ; \
+		$(MAKE) $(FLAGS_TO_PASS) install) ; \
 	else \
 		true ; \
 	fi
@@ -565,17 +378,7 @@ install-newlib: force
 all-gprof: all-libiberty all-bfd
 	@if [ -d ./gprof ] ; then \
 		(cd ./gprof; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			all) ; \
+		$(MAKE) $(FLAGS_TO_PASS) all) ; \
 	else \
 		true ; \
 	fi
@@ -583,17 +386,7 @@ all-gprof: all-libiberty all-bfd
 clean-gprof: force
 	@if [ -d $(unsubdir)/gprof ] ; then \
 		(cd $(unsubdir)/gprof$(subdir); \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			clean) ; \
+		$(MAKE) $(FLAGS_TO_PASS) clean) ; \
 	else \
 		true ; \
 	fi
@@ -601,17 +394,7 @@ clean-gprof: force
 install-gprof: force
 	@if [ -d $(unsubdir)/gprof ] ; then \
 		(cd $(unsubdir)/gprof$(subdir); \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			install) ; \
+		$(MAKE) $(FLAGS_TO_PASS) install) ; \
 	else \
 		true ; \
 	fi
@@ -621,17 +404,7 @@ all-byacc: force
 	@if [ -d ./byacc ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./byacc; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			all) ; \
+		$(MAKE) $(FLAGS_TO_PASS) all) ; \
 	else \
 		true ; \
 	fi
@@ -640,17 +413,7 @@ clean-byacc: force
 	@if [ -d ./byacc ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./byacc; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			clean) ; \
+		$(MAKE) $(FLAGS_TO_PASS) clean) ; \
 	else \
 		true ; \
 	fi
@@ -659,17 +422,7 @@ install-byacc: force
 	@if [ -d ./byacc ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./byacc; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			install) ; \
+		$(MAKE) $(FLAGS_TO_PASS) install) ; \
 	else \
 		true ; \
 	fi
@@ -679,19 +432,7 @@ all-bison: all-libiberty
 	@if [ -d ./bison ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./bison; \
-		$(MAKE) \
-			"prefix=$(prefix)" \
-			"datadir=$(datadir)" \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			all) ; \
+		$(MAKE) $(FLAGS_TO_PASS) all) ; \
 	else \
 		true ; \
 	fi
@@ -700,19 +441,7 @@ clean-bison: force
 	@if [ -d ./bison ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./bison; \
-		$(MAKE) \
-			"prefix=$(prefix)" \
-			"datadir=$(datadir)" \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			clean) ; \
+		$(MAKE) $(FLAGS_TO_PASS) clean) ; \
 	else \
 		true ; \
 	fi
@@ -721,39 +450,17 @@ install-bison: force
 	@if [ -d ./bison ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./bison; \
-		$(MAKE) \
-			"prefix=$(prefix)" \
-			"datadir=$(datadir)" \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			install) ; \
+		$(MAKE) $(FLAGS_TO_PASS) install) ; \
 	else \
 		true ; \
 	fi
 
 ### flex
-all-flex: force
+all-flex: all-libiberty
 	@if [ -d ./flex ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./flex; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			all) ; \
+		$(MAKE) $(FLAGS_TO_PASS) all) ; \
 	else \
 		true ; \
 	fi
@@ -762,17 +469,7 @@ clean-flex: force
 	@if [ -d ./flex ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./flex; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			clean) ; \
+		$(MAKE) $(FLAGS_TO_PASS) clean) ; \
 	else \
 		true ; \
 	fi
@@ -781,17 +478,7 @@ install-flex: force
 	@if [ -d ./flex ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./flex; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			install) ; \
+		$(MAKE) $(FLAGS_TO_PASS) install) ; \
 	else \
 		true ; \
 	fi
@@ -800,17 +487,7 @@ all-gcc: all-libiberty all-bison
 	@if [ -d ./gcc ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./gcc; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			all) ; \
+		$(MAKE) $(FLAGS_TO_PASS) all) ; \
 	else \
 		true ; \
 	fi
@@ -819,17 +496,7 @@ clean-gcc: force
 	@if [ -d ./gcc ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./gcc; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			clean) ; \
+		$(MAKE) $(FLAGS_TO_PASS) clean) ; \
 	else \
 		true ; \
 	fi
@@ -838,17 +505,7 @@ install-gcc: force
 	@if [ -d ./gcc ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./gcc; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			install) ; \
+		$(MAKE) $(FLAGS_TO_PASS) install) ; \
 	else \
 		true ; \
 	fi
@@ -858,17 +515,7 @@ all-readline: force
 	@if [ -d ./readline ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./readline; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			all) ; \
+		$(MAKE) $(FLAGS_TO_PASS) all) ; \
 	else \
 		true ; \
 	fi
@@ -877,17 +524,7 @@ clean-readline: force
 	@if [ -d ./readline ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./readline; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			clean) ; \
+		$(MAKE) $(FLAGS_TO_PASS) clean) ; \
 	else \
 		true ; \
 	fi
@@ -896,17 +533,7 @@ install-readline: force
 	@if [ -d ./readline ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./readline; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			install) ; \
+		$(MAKE) $(FLAGS_TO_PASS) install) ; \
 	else \
 		true ; \
 	fi
@@ -916,17 +543,7 @@ all-glob: force
 	@if [ -d ./glob ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./glob; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			all) ; \
+		$(MAKE) $(FLAGS_TO_PASS) all) ; \
 	else \
 		true ; \
 	fi
@@ -935,17 +552,7 @@ clean-glob: force
 	@if [ -d ./glob ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./glob; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			clean) ; \
+		$(MAKE) $(FLAGS_TO_PASS) clean) ; \
 	else \
 		true ; \
 	fi
@@ -954,17 +561,7 @@ install-glob: force
 	@if [ -d ./glob ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./glob; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			install) ; \
+		$(MAKE) $(FLAGS_TO_PASS) install) ; \
 	else \
 		true ; \
 	fi
@@ -974,17 +571,7 @@ all-gas: all-libiberty all-bfd
 	@if [ -d ./gas ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./gas; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			all) ; \
+		$(MAKE) $(FLAGS_TO_PASS) all) ; \
 	else \
 		true ; \
 	fi
@@ -993,17 +580,7 @@ clean-gas: force
 	@if [ -d ./gas ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./gas; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			clean) ; \
+		$(MAKE) $(FLAGS_TO_PASS) clean) ; \
 	else \
 		true ; \
 	fi
@@ -1012,37 +589,17 @@ install-gas: force
 	@if [ -d ./gas ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./gas; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			install) ; \
+		$(MAKE) $(FLAGS_TO_PASS) install) ; \
 	else \
 		true ; \
 	fi
 
 ### ld
-all-ld: all-libiberty all-bfd all-bison
+all-ld: all-libiberty all-bfd all-bison all-flex
 	@if [ -d ./ld ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./ld; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			all) ; \
+		$(MAKE) $(FLAGS_TO_PASS) all) ; \
 	else \
 		true ; \
 	fi
@@ -1051,17 +608,7 @@ clean-ld: force
 	@if [ -d ./ld ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./ld; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			clean) ; \
+		$(MAKE) $(FLAGS_TO_PASS) clean) ; \
 	else \
 		true ; \
 	fi
@@ -1070,17 +617,7 @@ install-ld: force
 	@if [ -d ./ld ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./ld; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			install) ; \
+		$(MAKE) $(FLAGS_TO_PASS) install) ; \
 	else \
 		true ; \
 	fi
@@ -1090,17 +627,7 @@ all-libgcc1: all-gas all-binutils
 	@if [ -d ./libgcc ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./libgcc; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			libgcc1.a) ; \
+		$(MAKE) $(FLAGS_TO_PASS) libgcc1.a) ; \
 	else \
 		true ; \
 	fi
@@ -1109,17 +636,7 @@ clean-libgcc1: force
 	@if [ -d ./libgcc ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./libgcc; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			clean-libgcc1) ; \
+		$(MAKE) $(FLAGS_TO_PASS) clean-libgcc1) ; \
 	else \
 		true ; \
 	fi
@@ -1132,17 +649,7 @@ all-libgcc: all-gas all-gcc all-binutils
 	@if [ -d ./libgcc ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./libgcc; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			all) ; \
+		$(MAKE) $(FLAGS_TO_PASS) all) ; \
 	else \
 		true ; \
 	fi
@@ -1151,17 +658,7 @@ clean-libgcc: force
 	@if [ -d ./libgcc ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./libgcc; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			clean) ; \
+		$(MAKE) $(FLAGS_TO_PASS) clean) ; \
 	else \
 		true ; \
 	fi
@@ -1170,17 +667,7 @@ install-libgcc: force
 	@if [ -d ./libgcc ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./libgcc; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			install) ; \
+		$(MAKE) $(FLAGS_TO_PASS) install) ; \
 	else \
 		true ; \
 	fi
@@ -1190,17 +677,7 @@ all-gdb: all-bfd all-libiberty all-mmalloc all-readline all-glob all-bison
 	@if [ -d ./gdb ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./gdb; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			all) ; \
+		$(MAKE) $(FLAGS_TO_PASS) all) ; \
 	else \
 		true ; \
 	fi
@@ -1209,17 +686,7 @@ clean-gdb: force
 	@if [ -d ./gdb ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./gdb; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			clean) ; \
+		$(MAKE) $(FLAGS_TO_PASS) clean) ; \
 	else \
 		true ; \
 	fi
@@ -1228,17 +695,7 @@ install-gdb: force
 	@if [ -d ./gdb ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./gdb; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			install) ; \
+		$(MAKE) $(FLAGS_TO_PASS) install) ; \
 	else \
 		true ; \
 	fi
@@ -1248,17 +705,7 @@ all-make: all-libiberty
 	@if [ -d ./make ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./make; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			all) ; \
+		$(MAKE) $(FLAGS_TO_PASS) all) ; \
 	else \
 		true ; \
 	fi
@@ -1267,17 +714,7 @@ clean-make: force
 	@if [ -d ./make ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./make; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			clean) ; \
+		$(MAKE) $(FLAGS_TO_PASS) clean) ; \
 	else \
 		true ; \
 	fi
@@ -1286,17 +723,7 @@ install-make: force
 	@if [ -d ./make ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./make; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			install) ; \
+		$(MAKE) $(FLAGS_TO_PASS) install) ; \
 	else \
 		true ; \
 	fi
@@ -1306,17 +733,7 @@ all-diff: force
 	@if [ -d ./diff ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./diff; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			all) ; \
+		$(MAKE) $(FLAGS_TO_PASS) all) ; \
 	else \
 		true ; \
 	fi
@@ -1325,17 +742,7 @@ clean-diff: force
 	@if [ -d ./diff ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./diff; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			clean) ; \
+		$(MAKE) $(FLAGS_TO_PASS) clean) ; \
 	else \
 		true ; \
 	fi
@@ -1344,17 +751,7 @@ install-diff: force
 	@if [ -d ./diff ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./diff/; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			install) ; \
+		$(MAKE) $(FLAGS_TO_PASS) install) ; \
 	else \
 		true ; \
 	fi
@@ -1364,17 +761,7 @@ all-grep: force
 	@if [ -d ./grep ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./grep; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			all) ; \
+		$(MAKE) $(FLAGS_TO_PASS) all) ; \
 	else \
 		true ; \
 	fi
@@ -1383,17 +770,7 @@ clean-grep: force
 	@if [ -d ./grep ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./grep; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			clean) ; \
+		$(MAKE) $(FLAGS_TO_PASS) clean) ; \
 	else \
 		true ; \
 	fi
@@ -1402,17 +779,7 @@ install-grep: force
 	@if [ -d ./grep ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./grep; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			install) ; \
+		$(MAKE) $(FLAGS_TO_PASS) install) ; \
 	else \
 		true ; \
 	fi
@@ -1422,17 +789,7 @@ all-rcs: force
 	@if [ -d ./rcs ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./rcs; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			all) ; \
+		$(MAKE) $(FLAGS_TO_PASS) all) ; \
 	else \
 		true ; \
 	fi
@@ -1441,17 +798,7 @@ clean-rcs: force
 	@if [ -d ./rcs ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./rcs; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			clean) ; \
+		$(MAKE) $(FLAGS_TO_PASS) clean) ; \
 	else \
 		true ; \
 	fi
@@ -1460,17 +807,7 @@ install-rcs: force
 	@if [ -d ./rcs ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./rcs; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			install) ; \
+		$(MAKE) $(FLAGS_TO_PASS) install) ; \
 	else \
 		true ; \
 	fi
@@ -1480,17 +817,7 @@ all-cvs: force
 	@if [ -d ./cvs ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./cvs; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			all) ; \
+		$(MAKE) $(FLAGS_TO_PASS) all) ; \
 	else \
 		true ; \
 	fi
@@ -1499,17 +826,7 @@ clean-cvs: force
 	@if [ -d ./cvs ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./cvs; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			clean) ; \
+		$(MAKE) $(FLAGS_TO_PASS) clean) ; \
 	else \
 		true ; \
 	fi
@@ -1518,17 +835,7 @@ install-cvs: force
 	@if [ -d ./cvs ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./cvs; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			install) ; \
+		$(MAKE) $(FLAGS_TO_PASS) install) ; \
 	else \
 		true ; \
 	fi
@@ -1538,17 +845,7 @@ all-patch: force
 	@if [ -d ./patch ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./patch; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			all) ; \
+		$(MAKE) $(FLAGS_TO_PASS) all) ; \
 	else \
 		true ; \
 	fi
@@ -1557,17 +854,7 @@ clean-patch: force
 	@if [ -d ./patch ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./patch; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			clean) ; \
+		$(MAKE) $(FLAGS_TO_PASS) clean) ; \
 	else \
 		true ; \
 	fi
@@ -1576,19 +863,9 @@ install-patch: force
 	@if [ -d ./patch ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./patch; \
-		$(MAKE) \
+		$(MAKE) $(FLAGS_TO_PASS) \
 			bindir=$(bindir) \
-			man1dir=$(man1dir) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			install) ; \
+			man1dir=$(man1dir) install) ; \
 	else \
 		true ; \
 	fi
@@ -1598,17 +875,7 @@ all-emacs: force
 	@if [ -d ./emacs ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./emacs; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			all) ; \
+		$(MAKE) $(FLAGS_TO_PASS) all) ; \
 	else \
 		true ; \
 	fi
@@ -1617,17 +884,7 @@ clean-emacs: force
 	@if [ -d ./emacs ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./emacs; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			clean) ; \
+		$(MAKE) $(FLAGS_TO_PASS) clean) ; \
 	else \
 		true ; \
 	fi
@@ -1636,17 +893,7 @@ install-emacs: force
 	@if [ -d ./emacs ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./emacs; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			install) ; \
+		$(MAKE) $(FLAGS_TO_PASS) install) ; \
 	else \
 		true ; \
 	fi
@@ -1656,17 +903,7 @@ all-ispell: all-emacs
 	@if [ -d ./ispell ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./ispell; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			all) ; \
+		$(MAKE) $(FLAGS_TO_PASS) all) ; \
 	else \
 		true ; \
 	fi
@@ -1675,17 +912,7 @@ clean-ispell: force
 	@if [ -d ./ispell ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./ispell; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			clean) ; \
+		$(MAKE) $(FLAGS_TO_PASS) clean) ; \
 	else \
 		true ; \
 	fi
@@ -1694,84 +921,7 @@ install-ispell: force
 	@if [ -d ./ispell ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./ispell; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			install) ; \
-	else \
-		true ; \
-	fi
-
-### fileutils
-all-fileutils: force
-	@if [ -d ./fileutils ] ; then \
-		rootme=`pwd` ; export rootme ; \
-		(cd ./fileutils; \
-		$(MAKE) \
-			"prefix=$(prefix)" \
-			"datadir=$(datadir)" \
-			"mandir=$(mandir)" \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			all) ; \
-	else \
-		true ; \
-	fi
-
-clean-fileutils: force
-	@if [ -d ./fileutils ] ; then \
-		rootme=`pwd` ; export rootme ; \
-		(cd ./fileutils; \
-		$(MAKE) \
-			"prefix=$(prefix)" \
-			"datadir=$(datadir)" \
-			"mandir=$(mandir)" \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			clean) ; \
-	else \
-		true ; \
-	fi
-
-install-fileutils: force
-	@if [ -d ./fileutils ] ; then \
-		rootme=`pwd` ; export rootme ; \
-		(cd ./fileutils; \
-		$(MAKE) \
-			"prefix=$(prefix)" \
-			"datadir=$(datadir)" \
-			"mandir=$(mandir)" \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			install) ; \
+		$(MAKE) $(FLAGS_TO_PASS) install) ; \
 	else \
 		true ; \
 	fi
@@ -1781,20 +931,7 @@ all-send_pr: force
 	@if [ -d ./send_pr ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./send_pr; \
-		$(MAKE) \
-			"prefix=$(prefix)" \
-			"datadir=$(datadir)" \
-			"mandir=$(mandir)" \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			all) ; \
+		$(MAKE) $(FLAGS_TO_PASS) all) ; \
 	else \
 		true ; \
 	fi
@@ -1803,20 +940,7 @@ clean-send_pr: force
 	@if [ -d ./send_pr ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./send_pr; \
-		$(MAKE) \
-			"prefix=$(prefix)" \
-			"datadir=$(datadir)" \
-			"mandir=$(mandir)" \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			clean) ; \
+		$(MAKE) $(FLAGS_TO_PASS) clean) ; \
 	else \
 		true ; \
 	fi
@@ -1825,20 +949,7 @@ install-send_pr: force
 	@if [ -d ./send_pr ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./send_pr; \
-		$(MAKE) \
-			"prefix=$(prefix)" \
-			"datadir=$(datadir)" \
-			"mandir=$(mandir)" \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			install) ; \
+		$(MAKE) $(FLAGS_TO_PASS) install) ; \
 	else \
 		true ; \
 	fi
@@ -1857,9 +968,6 @@ all-libg++: all-gas all-ld all-gcc
 		rootme=`pwd` ; export rootme ; \
 		(cd ./libg++; \
 		$(MAKE) \
-			"prefix=$(prefix)" \
-			"datadir=$(datadir)" \
-			"mandir=$(mandir)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=${GXX}" \
@@ -1880,9 +988,6 @@ clean-libg++: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./libg++; \
 		$(MAKE) \
-			"prefix=$(prefix)" \
-			"datadir=$(datadir)" \
-			"mandir=$(mandir)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
@@ -1902,9 +1007,6 @@ install-libg++: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./libg++; \
 		$(MAKE) \
-			"prefix=$(prefix)" \
-			"datadir=$(datadir)" \
-			"mandir=$(mandir)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
@@ -1914,6 +1016,9 @@ install-libg++: force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
+			"INSTALL=$(INSTALL)" \
+			"INSTALL_DATA=$(INSTALL_DATA)" \
+			"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
 			install) ; \
 	else \
 		true ; \
@@ -1923,91 +1028,22 @@ install-libg++: force
 # this is a bad hack.
 all.xclib:	all.normal
 	if [ -d clib ] ; then \
-		(cd clib ; $(MAKE)) ; \
+		(cd clib ; $(MAKE) $(FLAGS_TO_PASS)) ; \
 	fi
 
 subdir_do:
 	@for i in $(DODIRS); do \
 		if [ -f ./$$i/localenv ] ; then \
 			if (rootme=`pwd` ; export rootme ; cd ./$$i; \
-				$(MAKE) \
-					"BISON=$(BISON)" \
-					"MAKEINFO=$(MAKEINFO)" \
-					$(DO)) ; then true ; \
+				$(MAKE) $(FLAGS_TO_PASS) $(DO)) ; then true ; \
 				else exit 1 ; fi ; \
 		else if [ -d ./$$i ] ; then \
 			if (rootme=`pwd` ; export rootme ; cd ./$$i; \
-				$(MAKE) \
-					"AR=$(AR)" \
-					"AR_FLAGS=$(AR_FLAGS)" \
-					"CC=$(CC)" \
-					"CFLAGS=$(CFLAGS)" \
-					"RANLIB=$(RANLIB)" \
-					"LOADLIBES=$(LOADLIBES)" \
-					"LDFLAGS=$(LDFLAGS)" \
-					"BISON=$(BISON)" \
-					"MAKEINFO=$(MAKEINFO)" \
-					$(DO)) ; then true ; \
+				$(MAKE) $(FLAGS_TO_PASS) $(DO)) ; then true ; \
 			else exit 1 ; fi ; \
 		else true ; fi ; \
 	fi ; \
 	done
-
-#bootstrap:
-#	$(MAKE) all info
-#	$(MAKE) stage1
-#	$(MAKE) pass "stagepass=stage1"
-#	$(MAKE) stage2
-#	$(MAKE) pass "stagepass=stage2"
-#	$(MAKE) comparison
-#
-#bootstrap2:
-#	$(MAKE) pass "stagepass=stage1"
-#	$(MAKE) stage2
-#	$(MAKE) pass "stagepass=stage2"
-#	$(MAKE) comparison
-#
-#bootstrap3:
-#	$(MAKE) pass "stagepass=stage2"
-#	$(MAKE) comparison
-#
-#pass:
-#	cp $(srcdir)/gcc/gstdarg.h ./gas/stdarg.h
-#	$(MAKE) subdir_do "DO=all info" "DODIRS=$(SUBDIRS)" \
-#		"CC=`pwd`/gcc/$(stagepass)/gcc \
-#		-O $(GCCVERBOSE) -I`pwd`/gcc/include \
-#		-B`pwd`/gcc/$(stagepass)/ \
-#		-B`pwd`/gas/$(stagepass)/ \
-#		-B`pwd`/ld/$(stagepass)/" \
-#		"AR=`pwd`/binutils/$(stagepass)/ar" \
-#		"LD=`pwd`/gcc/$(stagepass)/gcc $(GCCVERBOSE)" \
-#		"RANLIB=`pwd`/binutils/$(stagepass)/ranlib" \
-#		"LOADLIBES=`pwd`/libgcc/$(stagepass)/libgcc.a /lib/libc.a" \
-#		"LDFLAGS=-nostdlib /lib/crt0.o \
-#		-L`pwd`/libgcc/$(stagepass)/ \
-#		-B`pwd`/ld/$(stagepass)/"
-#
-#
-#stage1:
-#	$(MAKE) subdir_do DO=stage1 "DODIRS=$(SUBDIRS)"
-#
-#stage2:
-#	$(MAKE) subdir_do DO=stage2 "DODIRS=$(SUBDIRS)"
-#
-#stage3:
-#	$(MAKE) subdir_do DO=stage3 "DODIRS=$(SUBDIRS)"
-#
-#stage4:
-#	$(MAKE) subdir_do DO=stage4 "DODIRS=$(SUBDIRS)"
-#
-#against=stage2
-#
-#comparison:; $(MAKE) subdir_do DO=comparison against=$(against) "DODIRS=$(SUBDIRS)"
-#
-#de-stage1:; $(MAKE) subdir_do DO=de-stage1 "DODIRS=$(SUBDIRS)"
-#de-stage2:; $(MAKE) subdir_do DO=de-stage2 "DODIRS=$(SUBDIRS)"
-#de-stage3:; $(MAKE) subdir_do DO=de-stage3 "DODIRS=$(SUBDIRS)"
-#de-stage4:; $(MAKE) subdir_do DO=de-stage4 "DODIRS=$(SUBDIRS)"
 
 # The "else true" stuff is for Ultrix; the shell returns the exit code
 # of the "if" command, if no commands are run in the "then" or "else" part,
