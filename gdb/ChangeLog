@@ -1,3 +1,9 @@
+Wed Feb  2 14:35:41 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* xcoffread.c (read_xcoff_symtab): Change CSECT_LEN to use
+	x_scnlen.l rather than x_scnlen to match corresponding change in
+	coff/internal.h.
+
 Wed Feb  2 11:16:45 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdbtypes.h, ch-typeprint.c, ch-valprint.c:

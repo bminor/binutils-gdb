@@ -1137,7 +1137,7 @@ read_xcoff_symtab (objfile, nsyms)
 	/* dealing with a symbol with a csect entry. */
 
 #   define	CSECT(PP)	((PP)->x_csect)
-#   define	CSECT_LEN(PP)	(CSECT(PP).x_scnlen)
+#   define	CSECT_LEN(PP)	(CSECT(PP).x_scnlen.l)
 #   define	CSECT_ALIGN(PP)	(SMTYP_ALIGN(CSECT(PP).x_smtyp))
 #   define	CSECT_SMTYP(PP)	(SMTYP_SMTYP(CSECT(PP).x_smtyp))
 #   define	CSECT_SCLAS(PP)	(CSECT(PP).x_smclas)
