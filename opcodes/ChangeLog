@@ -1,3 +1,7 @@
+2002-09-02  Nick Clifton  <nickc@redhat.com>
+
+	* v850-opc.c: Remove redundant references to V850EA architecture.
+
 2002-09-02  Alan Modra  <amodra@bigpond.net.au>
 
 	* arc-opc.c: Include bfd.h.
