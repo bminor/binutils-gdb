@@ -153,6 +153,10 @@ arc-tdep.c
 arm-convert.s
 arm-tdep.c
 arm-xdep.c
+ax-gdb.c
+ax-gdb.h
+ax-general.c
+ax.h
 bcache.c
 bcache.h
 blockframe.c
