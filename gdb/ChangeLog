@@ -1,3 +1,10 @@
+Tue Mar 28 18:19:50 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	From 2000-03-20 Jonathan Larmour <jlarmour@redhat.co.uk>:
+        * ser-unix.c (do_unix_readchar): Reorganise to be more robust,
+        particularly ensuring it can't return SERIAL_TIMEOUT when told
+        not to time out.
+
 2000-03-24  Daniel Berlin  <dan@cgsoftware.com>
 
 	* gdbtypes.c (_initialize_gdbtypes): Add "set debug overload",
