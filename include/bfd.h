@@ -45,7 +45,7 @@ here.  */
 #include "ansidecl.h"
 #include "obstack.h"
 
-#define BFD_VERSION "2.0"
+#define BFD_VERSION "2.1"
 
 /* forward declaration */
 typedef struct _bfd bfd;
