@@ -34,12 +34,6 @@
    register state.  */
 #define ALPHA_REGISTER_BYTES (ALPHA_NUM_REGS * 8)
 
-/* Largest value REGISTER_RAW_SIZE can have.  */
-#define ALPHA_MAX_REGISTER_RAW_SIZE 8
-
-/* Largest value REGISTER_VIRTUAL_SIZE can have.  */
-#define ALPHA_MAX_REGISTER_VIRTUAL_SIZE 8
-
 /* Register numbers of various important registers.  Note that most of
    these values are "real" register numbers, and correspond to the
    general registers of the machine, and DEPRECATED_FP_REGNUM is a

@@ -1,5 +1,19 @@
 2003-06-01  Richard Henderson  <rth@redhat.com>
 
+        * alpha-nat.c (fetch_osf_core_registers): Use ALPHA_REGISTER_SIZE
+        instead of ALPHA_MAX_REGISTER_RAW_SIZE.
+        (supply_gregset): Likewise.
+        * alpha-tdep.c (alpha_store_return_value): Likewise.
+        (alpha_get_longjmp_target): Likewise.
+        (alpha_register_name): Constify array.
+        (alpha_gdbarch_init): Remove deprecated_fp_regnum,
+        deprecated_register_size, deprecated_register_bytes,
+        deprecated_max_register_raw_size, deprecated_max_register_virtual_size.
+        * alpha-tdep.h (ALPHA_MAX_REGISTER_RAW_SIZE): Remove.
+        (ALPHA_MAX_REGISTER_VIRTUAL_SIZE): Remove.
+
+2003-06-01  Richard Henderson  <rth@redhat.com>
+
 	* alpha-tdep.c (alpha_push_dummy_call): Store sp.  Tidy copies
 	from arg_reg_buffer to regcache to avoid double conversion.
 

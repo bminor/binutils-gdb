@@ -94,8 +94,7 @@ fetch_osf_core_registers (char *core_reg_sect, unsigned core_reg_size,
     EF_PC, -1
 #endif
   };
-  static char zerobuf[ALPHA_MAX_REGISTER_RAW_SIZE] =
-  {0};
+  static char zerobuf[ALPHA_REGISTER_SIZE] = {0};
 
   for (regno = 0; regno < NUM_REGS; regno++)
     {
@@ -202,8 +201,7 @@ supply_gregset (gdb_gregset_t *gregsetp)
 {
   register int regi;
   register long *regp = ALPHA_REGSET_BASE (gregsetp);
-  static char zerobuf[ALPHA_MAX_REGISTER_RAW_SIZE] =
-  {0};
+  static char zerobuf[ALPHA_REGISTER_SIZE] = {0};
 
   for (regi = 0; regi < 31; regi++)
     supply_register (regi, (char *) (regp + regi));

@@ -47,7 +47,7 @@
 static const char *
 alpha_register_name (int regno)
 {
-  static char *register_names[] =
+  static const char * const register_names[] =
   {
     "v0",   "t0",   "t1",   "t2",   "t3",   "t4",   "t5",   "t6",
     "t7",   "s0",   "s1",   "s2",   "s3",   "s4",   "s5",   "fp",
@@ -61,10 +61,10 @@ alpha_register_name (int regno)
   };
 
   if (regno < 0)
-    return (NULL);
+    return NULL;
   if (regno >= (sizeof(register_names) / sizeof(*register_names)))
-    return (NULL);
-  return (register_names[regno]);
+    return NULL;
+  return register_names[regno];
 }
 
 static int
@@ -348,14 +348,14 @@ alpha_extract_return_value (struct type *valtype,
 static void
 alpha_store_return_value (struct type *valtype, char *valbuf)
 {
-  char raw_buffer[ALPHA_MAX_REGISTER_RAW_SIZE];
+  char raw_buffer[ALPHA_REGISTER_SIZE];
   int regnum = ALPHA_V0_REGNUM;
   int length = TYPE_LENGTH (valtype);
 
   if (TYPE_CODE (valtype) == TYPE_CODE_FLT)
     {
       regnum = FP0_REGNUM;
-      length = REGISTER_RAW_SIZE (regnum);
+      length = ALPHA_REGISTER_SIZE;
       alpha_register_convert_to_raw (valtype, regnum, valbuf, raw_buffer);
     }
   else
@@ -510,7 +510,7 @@ alpha_get_longjmp_target (CORE_ADDR *pc)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   CORE_ADDR jb_addr;
-  char raw_buffer[ALPHA_MAX_REGISTER_RAW_SIZE];
+  char raw_buffer[ALPHA_REGISTER_SIZE];
 
   jb_addr = read_register (ALPHA_A0_REGNUM);
 
@@ -1243,19 +1243,13 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Register info */
   set_gdbarch_num_regs (gdbarch, ALPHA_NUM_REGS);
   set_gdbarch_sp_regnum (gdbarch, ALPHA_SP_REGNUM);
-  set_gdbarch_deprecated_fp_regnum (gdbarch, ALPHA_FP_REGNUM);
   set_gdbarch_pc_regnum (gdbarch, ALPHA_PC_REGNUM);
   set_gdbarch_fp0_regnum (gdbarch, ALPHA_FP0_REGNUM);
 
   set_gdbarch_register_name (gdbarch, alpha_register_name);
-  set_gdbarch_deprecated_register_size (gdbarch, ALPHA_REGISTER_SIZE);
-  set_gdbarch_deprecated_register_bytes (gdbarch, ALPHA_REGISTER_BYTES);
   set_gdbarch_register_byte (gdbarch, alpha_register_byte);
   set_gdbarch_register_raw_size (gdbarch, alpha_register_raw_size);
-  set_gdbarch_deprecated_max_register_raw_size (gdbarch, ALPHA_MAX_REGISTER_RAW_SIZE);
   set_gdbarch_register_virtual_size (gdbarch, alpha_register_virtual_size);
-  set_gdbarch_deprecated_max_register_virtual_size (gdbarch,
-                                         ALPHA_MAX_REGISTER_VIRTUAL_SIZE);
   set_gdbarch_register_virtual_type (gdbarch, alpha_register_virtual_type);
 
   set_gdbarch_cannot_fetch_register (gdbarch, alpha_cannot_fetch_register);
