@@ -10149,13 +10149,6 @@ mips_force_relocation (fixp)
 	  || fixp->fx_r_type == BFD_RELOC_LO16))
     return 1;
 
-  if (HAVE_NEWABI
-      && S_GET_SEGMENT (fixp->fx_addsy) == bfd_abs_section_ptr
-      && (fixp->fx_r_type == BFD_RELOC_MIPS_SUB
-	  || fixp->fx_r_type == BFD_RELOC_HI16_S
-	  || fixp->fx_r_type == BFD_RELOC_LO16))
-    return 1;
-
   return (mips_pic == EMBEDDED_PIC
 	  && (fixp->fx_pcrel
 	      || SWITCH_TABLE (fixp)
