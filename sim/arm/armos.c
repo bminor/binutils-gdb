@@ -553,6 +553,13 @@ ARMul_OSHandleSWI (ARMul_State * state, ARMword number)
 	  /* R0 is a reason code.  */
 	  switch (state->Reg[0])
 	    {
+	    case -1:
+	      /* This can happen when a SWI is interrupted (eg receiving a
+		 ctrl-C whilst processing SWIRead()).  The SWI will complete
+		 returning -1 in r0 to the caller.  If GDB is then used to
+		 resume the system call the reason code will now be -1.  */
+	      return FALSE;
+	  
 	      /* Unimplemented reason codes.  */
 	    case AngelSWI_Reason_ReadC:
 	    case AngelSWI_Reason_IsTTY:
@@ -685,6 +692,13 @@ ARMul_OSHandleSWI (ARMul_State * state, ARMword number)
       /* These are used by the FPE code.  */
       break;
       
+    case -1:
+      /* This can happen when a SWI is interrupted (eg receiving a
+	 ctrl-C whilst processing SWIRead()).  The SWI will complete
+	 returning -1 in r0 to the caller.  If GDB is then used to
+	 resume the system call the reason code will now be -1.  */
+      return FALSE;
+	  
     case 0x180001: /* RedBoot's Syscall SWI in ARM mode.  */
       if (swi_mask & SWI_MASK_REDBOOT)
 	{
