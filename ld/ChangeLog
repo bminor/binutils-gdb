@@ -1,3 +1,7 @@
+Fri Aug  5 20:55:55 1994  Jason Molenda (crash@phydeaux.cygnus.com)
+
+	* configure.in: add i960-nindy-coff support.
+
 Thu Aug  4 14:45:50 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* ldlex.l (yy_create_string_buffer): Handle change to internal
