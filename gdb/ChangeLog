@@ -1,3 +1,8 @@
+2003-09-13  Andrew Cagney  <cagney@redhat.com>
+
+	* linux-nat.h (struct target_waitstatus): Declare opaque.
+	* dwarf2-frame.h (struct frame_info): Declare opaque.
+
 2003-09-13  Christopher Faylor  <cgf@redhat.com>
 
 	* win32-nat.c: Just rely on CONTEXT_EXTENDED_REGISTER being defined for

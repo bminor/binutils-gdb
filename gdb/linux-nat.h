@@ -60,6 +60,7 @@ struct lwp_info
    system".  */
 struct mem_attrib;
 struct target_ops;
+struct target_waitstatus;
 
 extern int linux_proc_xfer_memory (CORE_ADDR addr, char *myaddr, int len,
 				   int write, struct mem_attrib *attrib,
