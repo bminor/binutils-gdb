@@ -1,5 +1,7 @@
 Thu Jul 14 13:21:06 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
+	* config/atof-ns32k.c: Deleted.
+
 	* config/obj-aout.c (obj_aout_frob_symbol): Use
 	bfd_ind_section_ptr and bfd_und_section_ptr.
 
