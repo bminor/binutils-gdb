@@ -15,19 +15,24 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   along with GAS; see the file COPYING.  If not, write to the Free
+   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA.  */
 
-extern char *input_line_pointer;/* -> char we are parsing now.  */
+extern char *input_line_pointer;	/* -> char we are parsing now.  */
 
-#define PERMIT_WHITESPACE	/* Define to make whitespace be allowed in */
-/* many syntactically unnecessary places.  */
-/* Normally undefined. For compatibility */
-/* with ancient GNU cc.  */
+/* Define to make whitespace be allowed in many syntactically
+   unnecessary places.  Normally undefined.  For compatibility with
+   ancient GNU cc.  */
 /* #undef PERMIT_WHITESPACE */
+#define PERMIT_WHITESPACE
 
 #ifdef PERMIT_WHITESPACE
-#define SKIP_WHITESPACE() {if (* input_line_pointer == ' ') ++ input_line_pointer;}
+#define SKIP_WHITESPACE()			\
+  {						\
+    if (* input_line_pointer == ' ')		\
+      ++ input_line_pointer;			\
+  }
 #else
 #define SKIP_WHITESPACE() know(*input_line_pointer != ' ' )
 #endif
@@ -46,7 +51,7 @@ extern char *input_line_pointer;/* -> char we are parsing now.  */
 #ifndef is_a_char
 #define CHAR_MASK	(0xff)
 #define NOT_A_CHAR	(CHAR_MASK+1)
-#define is_a_char(c)	(((unsigned)(c)) <= CHAR_MASK)
+#define is_a_char(c)	(((unsigned) (c)) <= CHAR_MASK)
 #endif /* is_a_char() */
 
 extern char lex_type[];
@@ -79,8 +84,7 @@ extern symbolS *mri_common_symbol;
 extern int outputting_stabs_line_debug;
 
 /* Possible arguments to .linkonce.  */
-enum linkonce_type
-{
+enum linkonce_type {
   LINKONCE_UNSET = 0,
   LINKONCE_DISCARD,
   LINKONCE_ONE_ONLY,

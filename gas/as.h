@@ -183,9 +183,9 @@ extern char **environ;
 /* Make Saber happier on obstack.h.  */
 #ifdef SABER
 #undef  __PTR_TO_INT
-#define __PTR_TO_INT(P) ((int)(P))
+#define __PTR_TO_INT(P) ((int) (P))
 #undef  __INT_TO_PTR
-#define __INT_TO_PTR(P) ((char *)(P))
+#define __INT_TO_PTR(P) ((char *) (P))
 #endif
 
 #ifndef __LINE__

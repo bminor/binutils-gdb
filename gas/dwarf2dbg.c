@@ -34,7 +34,7 @@
 #include <limits.h>
 #else
 #ifndef INT_MAX
-#define INT_MAX (int) (((unsigned)(-1)) >> 1)
+#define INT_MAX (int) (((unsigned) (-1)) >> 1)
 #endif
 #endif
 
@@ -93,25 +93,21 @@
 /* The maximum address skip amount that can be encoded with a special op.  */
 #define MAX_SPECIAL_ADDR_DELTA		SPECIAL_ADDR(255)
 
-
-struct line_entry
-{
+struct line_entry {
   struct line_entry *next;
   fragS *frag;
   addressT frag_ofs;
   struct dwarf2_line_info loc;
 };
 
-struct line_subseg
-{
+struct line_subseg {
   struct line_subseg *next;
   subsegT subseg;
   struct line_entry *head;
   struct line_entry **ptail;
 };
 
-struct line_seg
-{
+struct line_seg {
   struct line_seg *next;
   segT seg;
   struct line_subseg *head;
@@ -122,8 +118,7 @@ struct line_seg
 /* Collects data for all line table entries during assembly.  */
 static struct line_seg *all_segs;
 
-struct file_entry
-{
+struct file_entry {
   char *filename;
   unsigned int dir;
 };
@@ -194,7 +189,7 @@ get_line_subseg (seg, subseg)
   if (seg == last_seg && subseg == last_subseg)
     return last_line_subseg;
 
-  for (s = all_segs; s ; s = s->next)  
+  for (s = all_segs; s; s = s->next)
     if (s->seg == seg)
       goto found_seg;
 
@@ -208,7 +203,7 @@ get_line_subseg (seg, subseg)
   for (pss = &s->head; (ss = *pss) != NULL ; pss = &ss->next)
     {
       if (ss->subseg == subseg)
-        goto found_subseg;
+	goto found_subseg;
       if (ss->subseg > subseg)
 	break;
     }
@@ -283,7 +278,7 @@ dwarf2_emit_insn (size)
   if (debug_type != DEBUG_DWARF2 && ! loc_directive_seen)
     return;
   loc_directive_seen = false;
-     
+
   dwarf2_where (&loc);
   dwarf2_gen_line_info (frag_now_fix () - size, &loc);
 }
@@ -309,10 +304,10 @@ get_filenum (filename)
     {
       files_allocated = i + 32;
       files = (struct file_entry *)
-	xrealloc (files, (i + 32) * sizeof(struct file_entry));
+	xrealloc (files, (i + 32) * sizeof (struct file_entry));
     }
 
-  files[i].filename = xstrdup(filename);
+  files[i].filename = xstrdup (filename);
   files[i].dir = 0;
   files_in_use = i + 1;
   last_used = i;
@@ -357,7 +352,7 @@ dwarf2_directive_file (dummy)
 	xrealloc (user_filenum, (num + 16) * sizeof (unsigned int));
 
       /* Zero the new memory.  */
-      memset (user_filenum + old, 0, (num + 16 - old) * sizeof(unsigned int));
+      memset (user_filenum + old, 0, (num + 16 - old) * sizeof (unsigned int));
     }
 
   user_filenum[num] = get_filenum (filename);
@@ -400,7 +395,6 @@ dwarf2_directive_loc (dummy)
     listing_source_line (line);
 #endif
 }
-
 
 static struct frag *
 first_frag_for_seg (seg)
@@ -408,7 +402,7 @@ first_frag_for_seg (seg)
 {
   frchainS *f, *first = NULL;
 
-  for (f = frchain_root; f ; f = f->frch_next)
+  for (f = frchain_root; f; f = f->frch_next)
     if (f->frch_seg == seg
 	&& (! first || first->frch_subseg > f->frch_subseg))
       first = f;
@@ -422,7 +416,7 @@ last_frag_for_seg (seg)
 {
   frchainS *f, *last = NULL;
 
-  for (f = frchain_root; f ; f = f->frch_next)
+  for (f = frchain_root; f; f = f->frch_next)
     if (f->frch_seg == seg
 	&& (! last || last->frch_subseg < f->frch_subseg))
       last= f;
@@ -518,7 +512,7 @@ get_frag_fix (frag)
   /* If a fragment is the last in the chain, special measures must be
      taken to find its size before relaxation, since it may be pending
      on some subsegment chain.  */
-  for (fr = frchain_root; fr ; fr = fr->frch_next)
+  for (fr = frchain_root; fr; fr = fr->frch_next)
     if (fr->frch_last == frag)
       {
 	return ((char *) obstack_next_free (&fr->frch_obstack)
@@ -567,7 +561,7 @@ size_inc_line_addr (line_delta, addr_delta)
   int len = 0;
 
   /* Scale the address delta by the minimum instruction length.  */
-#if DWARF2_LINE_MIN_INSN_LENGTH > 1  
+#if DWARF2_LINE_MIN_INSN_LENGTH > 1
   assert (addr_delta % DWARF2_LINE_MIN_INSN_LENGTH == 0);
   addr_delta /= DWARF2_LINE_MIN_INSN_LENGTH;
 #endif
@@ -633,7 +627,7 @@ emit_inc_line_addr (line_delta, addr_delta, p, len)
   int need_copy = 0;
   char *end = p + len;
 
-#if DWARF2_LINE_MIN_INSN_LENGTH > 1  
+#if DWARF2_LINE_MIN_INSN_LENGTH > 1
   /* Scale the address delta by the minimum instruction length.  */
   assert (addr_delta % DWARF2_LINE_MIN_INSN_LENGTH == 0);
   addr_delta /= DWARF2_LINE_MIN_INSN_LENGTH;
@@ -789,7 +783,7 @@ dwarf2dbg_relax_frag (frag)
 
   old_size = frag->fr_subtype;
   new_size = dwarf2dbg_estimate_size_before_relax (frag);
-  
+
   return new_size - old_size;
 }
 
@@ -810,7 +804,7 @@ dwarf2dbg_convert_frag (frag)
      course, have allocated enough memory earlier.  */
   assert (frag->fr_var >= (int) frag->fr_subtype);
 
-  emit_inc_line_addr (frag->fr_offset, addr_diff, 
+  emit_inc_line_addr (frag->fr_offset, addr_diff,
 		      frag->fr_literal + frag->fr_fix, frag->fr_subtype);
 
   frag->fr_fix += frag->fr_subtype;
@@ -906,7 +900,7 @@ process_entries (seg, e)
   if (frag == last_frag)
     out_inc_line_addr (INT_MAX, last_frag_ofs - frag_ofs);
   else
-    relax_inc_line_addr (INT_MAX, seg, last_frag, last_frag_ofs, 
+    relax_inc_line_addr (INT_MAX, seg, last_frag, last_frag_ofs,
 			 frag, frag_ofs);
 }
 
@@ -995,7 +989,7 @@ out_debug_line (line_seg)
   set_symbol_value_now (prologue_end);
 
   /* For each section, emit a statement program.  */
-  for (s = all_segs; s ; s = s->next)
+  for (s = all_segs; s; s = s->next)
     process_entries (s->seg, s->head->head);
 
   set_symbol_value_now (line_end);
@@ -1016,15 +1010,15 @@ out_debug_aranges (aranges_seg, info_seg)
 
   size = 4 + 2 + 4 + 1 + 1;
 
-  skip = 2*addr_size - (size & (2*addr_size - 1));
-  if (skip == 2*addr_size)
+  skip = 2 * addr_size - (size & (2 * addr_size - 1));
+  if (skip == 2 * addr_size)
     skip = 0;
   size += skip;
 
-  for (s = all_segs; s ; s = s->next)
-    size += 2*addr_size;
+  for (s = all_segs; s; s = s->next)
+    size += 2 * addr_size;
 
-  size += 2*addr_size;
+  size += 2 * addr_size;
 
   subseg_set (aranges_seg, 0);
 
@@ -1048,9 +1042,9 @@ out_debug_aranges (aranges_seg, info_seg)
 
   /* Align the header.  */
   if (skip)
-    frag_align (ffs (2*addr_size) - 1, 0, 0);
+    frag_align (ffs (2 * addr_size) - 1, 0, 0);
 
-  for (s = all_segs; s ; s = s->next)
+  for (s = all_segs; s; s = s->next)
     {
       fragS *frag;
       symbolS *beg, *end;
@@ -1122,7 +1116,7 @@ out_debug_info (info_seg, abbrev_seg, line_seg)
 
   subseg_set (info_seg, 0);
 
-  info_start = symbol_new_now();
+  info_start = symbol_new_now ();
   info_end = symbol_make (fake_label_name);
 
   /* Compilation Unit length.  */
@@ -1214,7 +1208,7 @@ dwarf2_finish ()
 #endif
 
   /* For each subsection, chain the debug entries together.  */
-  for (s = all_segs; s ; s = s->next)
+  for (s = all_segs; s; s = s->next)
     {
       struct line_subseg *ss = s->head;
       struct line_entry **ptail = ss->ptail;
@@ -1246,7 +1240,7 @@ dwarf2_finish ()
       bfd_set_section_flags (stdoutput, aranges_seg, SEC_READONLY);
 #endif
 
-      record_alignment (aranges_seg, ffs (2*sizeof_address) - 1);
+      record_alignment (aranges_seg, ffs (2 * sizeof_address) - 1);
 
       out_debug_aranges (aranges_seg, info_seg);
       out_debug_abbrev (abbrev_seg);

@@ -102,8 +102,7 @@ static line_numberT physical_input_line;
 static int logical_input_line;
 
 /* Struct used to save the state of the input handler during include files */
-struct input_save
-{
+struct input_save {
   char *              buffer_start;
   char *              partial_where;
   int                 partial_size;

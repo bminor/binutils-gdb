@@ -1,3 +1,11 @@
+2000-12-13  Kazu Hirata  <kazu@hxi.com>
+
+	* as.h: Fix formatting.
+	* cgen.h: Likewise.
+	* dwarf2dbg.c: Likewise.
+	* input-scrub.c: Likewise.
+	* read.h: Likewise.
+
 2000-12-13  Mark Elbrecht  <snowball3@bigfoot.com>
 
 	* configure.in (i386-*-msdosdjgpp): Set bfd_gas to yes.

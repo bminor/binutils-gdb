@@ -31,8 +31,7 @@ extern CGEN_CPU_DESC gas_cgen_cpu_desc;
 #endif
 
 /* Struct defining result of gas_cgen_finish_insn.  */
-typedef struct
-{
+typedef struct {
   /* frag containing the insn */
   fragS * frag;
   /* Address of insn in frag.  */
