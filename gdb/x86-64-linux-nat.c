@@ -25,6 +25,7 @@
 #include "inferior.h"
 #include "gdbcore.h"
 #include "regcache.h"
+#include "linux-nat.h"
 
 #include "gdb_assert.h"
 #include "gdb_string.h"
@@ -347,3 +348,9 @@ ps_get_thread_area (const struct ps_prochandle *ph,
   return PS_ERR;               /* ptrace failed.  */
 }
 
+void
+child_post_startup_inferior (ptid_t ptid)
+{
+  i386_cleanup_dregs ();
+  linux_child_post_startup_inferior (ptid);
+}
