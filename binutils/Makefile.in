@@ -25,12 +25,12 @@ prefix = @prefix@
 
 program_transform_name = @program_transform_name@
 exec_prefix = @exec_prefix@
-bindir = $(exec_prefix)/bin
-libdir = $(exec_prefix)/lib
+bindir = @bindir@
+libdir = @libdir@
 tooldir = $(exec_prefix)/$(target_alias)
 
-datadir = $(prefix)/lib
-mandir = $(prefix)/man
+datadir = @datadir@
+mandir = @mandir@
 man1dir = $(mandir)/man1
 man2dir = $(mandir)/man2
 man3dir = $(mandir)/man3
@@ -40,15 +40,14 @@ man6dir = $(mandir)/man6
 man7dir = $(mandir)/man7
 man8dir = $(mandir)/man8
 man9dir = $(mandir)/man9
-infodir = $(prefix)/info
-includedir = $(prefix)/include
-docdir = $(datadir)/doc
+infodir = @infodir@
+includedir = @includedir@
 
 SHELL = /bin/sh
 
 INSTALL = `cd $(srcdir)/..;pwd`/install.sh -c
-INSTALL_PROGRAM = $(INSTALL)
-INSTALL_DATA = $(INSTALL) -m 644
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA = @INSTALL_DATA@
 INSTALL_XFORM = $(INSTALL) -t='$(program_transform_name)'
 INSTALL_XFORM1 = $(INSTALL_XFORM) -b=.1 -m 644
 
@@ -58,6 +57,7 @@ CC = @CC@
 CFLAGS = @CFLAGS@
 LDFLAGS = @LDFLAGS@
 HLDFLAGS = @HLDFLAGS@
+HLDENV = @HLDENV@
 RPATH_ENVVAR = @RPATH_ENVVAR@
 MAKEINFO = makeinfo
 TEXI2DVI = texi2dvi
@@ -76,15 +76,13 @@ LEX_OPTIONS = -I -Cem
 LEX = `if [ -f ../flex/flex ] ; then echo ../flex/flex ; else echo flex ; fi`
 
 # Distribution version
-VERSION=cygnus-2.6
+VERSION=cygnus-2.7.1
 # Distribution name
 DIST_NAME=binutils-${VERSION}
 
 # Where to find texinfo.tex to format docn with TeX
 TEXIDIR = $(srcdir)/../texinfo
 
-#CC=gcc -Wall
-CC=cc
 # these two are almost the same program
 AR_PROG=ar
 RANLIB_PROG=ranlib
@@ -116,7 +114,8 @@ STAGESTUFF = $(PROGS) *.o
 # Files that can be generated, but should be in the distribution.
 # Don't build $(DEMANGLER_PROG).1, since its name may vary with the
 # configuration.
-DISTSTUFF=arparse.c arparse.h arlex.c nlmheader.c sysinfo.c sysinfo.h syslex.c
+DISTSTUFF=arparse.c arparse.h arlex.c nlmheader.c sysinfo.c sysinfo.h \
+	syslex.c deflex.c
 
 # Stuff that goes in tooldir/ if appropriate
 TOOL_PROGS = nm.new strip.new ar ranlib $(DLLTOOL_PROG)
@@ -247,25 +246,25 @@ info: binutils.info
 dvi: binutils.dvi
 
 $(SIZE_PROG): $(ADDL_DEPS) size.o
-	$(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $(SIZE_PROG) size.o $(ADDL_LIBS) $(EXTRALIBS)
+	$(HLDENV) $(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $(SIZE_PROG) size.o $(ADDL_LIBS) $(EXTRALIBS)
 
 $(OBJCOPY_PROG): $(ADDL_DEPS) objcopy.o not-strip.o $(WRITE_DEBUG_OBJS)
-	$(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $(OBJCOPY_PROG) objcopy.o not-strip.o $(WRITE_DEBUG_OBJS) $(ADDL_LIBS) $(EXTRALIBS)
+	$(HLDENV) $(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $(OBJCOPY_PROG) objcopy.o not-strip.o $(WRITE_DEBUG_OBJS) $(ADDL_LIBS) $(EXTRALIBS)
 
 $(STRINGS_PROG): $(ADDL_DEPS) strings.o
-	$(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $(STRINGS_PROG) strings.o $(ADDL_LIBS) $(EXTRALIBS)
+	$(HLDENV) $(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $(STRINGS_PROG) strings.o $(ADDL_LIBS) $(EXTRALIBS)
 
 $(STRIP_PROG): $(ADDL_DEPS) objcopy.o is-strip.o $(WRITE_DEBUG_OBJS)
-	$(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $(STRIP_PROG) objcopy.o is-strip.o $(WRITE_DEBUG_OBJS) $(ADDL_LIBS) $(EXTRALIBS)
+	$(HLDENV) $(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $(STRIP_PROG) objcopy.o is-strip.o $(WRITE_DEBUG_OBJS) $(ADDL_LIBS) $(EXTRALIBS)
 
 $(NM_PROG): $(ADDL_DEPS) nm.o
-	$(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $(NM_PROG) nm.o $(ADDL_LIBS) $(EXTRALIBS)
+	$(HLDENV) $(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $(NM_PROG) nm.o $(ADDL_LIBS) $(EXTRALIBS)
 
 #libbfd is searched twice here ($(BFDLIB) and $(ADDL_LIBS)) because when a
 #shared libbfd is built with --enable-commonbfdlib, all of libopcodes is
 #available in libbfd.so and we don't want to link anything from libopcodes.a
 $(OBJDUMP_PROG): $(ADDL_DEPS) objdump.o prdbg.o $(DEBUG_OBJS) $(OPCODES_DEP)
-	$(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $(OBJDUMP_PROG) objdump.o prdbg.o $(DEBUG_OBJS) $(BFDLIB) $(OPCODES) $(ADDL_LIBS) $(EXTRALIBS)
+	$(HLDENV) $(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $(OBJDUMP_PROG) objdump.o prdbg.o $(DEBUG_OBJS) $(BFDLIB) $(OPCODES) $(ADDL_LIBS) $(EXTRALIBS)
 
 underscore.c: stamp-under ; @true
 
@@ -282,7 +281,7 @@ cplus-dem.o: $(BASEDIR)/libiberty/cplus-dem.c $(INCDIR)/getopt.h
 	$(CC) -c -DMAIN -DVERSION='"$(VERSION)"' $(ALL_CFLAGS) $(BASEDIR)/libiberty/cplus-dem.c
 
 $(DEMANGLER_PROG): cplus-dem.o $(LIBIBERTY) underscore.o $(DEMANGLER_PROG).1
-	$(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $(DEMANGLER_PROG) cplus-dem.o $(LIBIBERTY) $(EXTRALIBS) underscore.o
+	$(HLDENV) $(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $(DEMANGLER_PROG) cplus-dem.o $(LIBIBERTY) $(EXTRALIBS) underscore.o
 
 arparse.c: arparse.y
 	$(BISON) $(BISONFLAGS)  $(srcdir)/arparse.y
@@ -298,10 +297,10 @@ arlex.c: arlex.l
 	mv lex.yy.c arlex.c
 
 $(AR_PROG): $(ADDL_DEPS) ar.o arparse.o arlex.o not-ranlib.o arsup.o
-	$(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $(AR_PROG) ar.o arparse.o arlex.o arsup.o not-ranlib.o $(ADDL_LIBS) $(EXTRALIBS)
+	$(HLDENV) $(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $(AR_PROG) ar.o arparse.o arlex.o arsup.o not-ranlib.o $(ADDL_LIBS) $(EXTRALIBS)
 
 $(RANLIB_PROG): $(ADDL_DEPS) ar.o is-ranlib.o arparse.o arlex.o arsup.o
-	$(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $(RANLIB_PROG) ar.o arparse.o arlex.o arsup.o is-ranlib.o $(ADDL_LIBS) $(EXTRALIBS)
+	$(HLDENV) $(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $(RANLIB_PROG) ar.o arparse.o arlex.o arsup.o is-ranlib.o $(ADDL_LIBS) $(EXTRALIBS)
 
 # This rule creates a single binary that switches between ar and ranlib
 # by looking at argv[0].  Use this kludge to save some disk space.
@@ -311,14 +310,14 @@ $(RANLIB_PROG): $(ADDL_DEPS) ar.o is-ranlib.o arparse.o arlex.o arsup.o
 # Alternatively, you can install ranlib.sh as ranlib.
 
 ar_with_ranlib: $(ADDL_DEPS) ar.o maybe-ranlib.o
-	$(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $(AR_PROG) ar.o maybe-ranlib.o $(ADDL_LIBS) $(EXTRALIBS)
+	$(HLDENV) $(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $(AR_PROG) ar.o maybe-ranlib.o $(ADDL_LIBS) $(EXTRALIBS)
 	-rm -f $(RANLIB_PROG)
 	-ln $(AR_PROG) $(RANLIB_PROG)
 
 # objcopy and strip in one binary that uses argv[0] to decide its action.
 
 objcopy_with_strip: $(ADDL_DEPS) objcopy.o maybe-strip.o
-	$(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $(OBJCOPY_PROG) objcopy.o maybe-strip.o $(ADDL_LIBS) $(EXTRALIBS)
+	$(HLDENV) $(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $(OBJCOPY_PROG) objcopy.o maybe-strip.o $(ADDL_LIBS) $(EXTRALIBS)
 	-rm -f $(STRIP_PROG)
 	-ln $(OBJCOPY_PROG) $(STRIP_PROG)
 
@@ -364,10 +363,10 @@ sysinfo.o: sysinfo.c
 	fi
 
 srconv: srconv.o coffgrok.o $(ADDL_DEPS)
-	$(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $@ srconv.o coffgrok.o $(ADDL_LIBS) $(EXTRALIBS)
+	$(HLDENV) $(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $@ srconv.o coffgrok.o $(ADDL_LIBS) $(EXTRALIBS)
 
 dlltool: dlltool.o defparse.o deflex.o cplus-dem.o $(ADDL_DEPS)
-	$(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $@ dlltool.o defparse.o deflex.o $(ADDL_LIBS) $(EXTRALIBS)
+	$(HLDENV) $(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $@ dlltool.o defparse.o deflex.o $(ADDL_LIBS) $(EXTRALIBS)
 
 defparse.c:defparse.y
 	$(BISON)  $(BISONFLAGS)  $(srcdir)/defparse.y
@@ -384,10 +383,10 @@ dlltool.o:dlltool.c
 	$(CC) -c @DLLTOOL_DEFS@ $(ALL_CFLAGS) $(srcdir)/dlltool.c
 
 coffdump: coffdump.o coffgrok.o $(ADDL_DEPS)
-	$(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $@  coffdump.o coffgrok.o $(ADDL_LIBS) $(EXTRALIBS)
+	$(HLDENV) $(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $@  coffdump.o coffgrok.o $(ADDL_LIBS) $(EXTRALIBS)
 
 sysdump: sysdump.o $(ADDL_DEPS)
-	$(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $@ sysdump.o $(ADDL_LIBS) $(EXTRALIBS)
+	$(HLDENV) $(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $@ sysdump.o $(ADDL_LIBS) $(EXTRALIBS)
 
 # Depend upon sysinfo.c to avoid building both nlmheader.c and sysinfo.c
 # simultaneously.
@@ -403,7 +402,7 @@ nlmconv.o: nlmconv.c $(INCDIR)/coff/sym.h $(INCDIR)/coff/ecoff.h
 	$(CC) -c -DLD_NAME="\"$${ldname}\"" @NLMCONV_DEFS@ $(ALL_CFLAGS) $(srcdir)/nlmconv.c
 
 $(NLMCONV_PROG): nlmconv.o nlmheader.o $(ADDL_DEPS)
-	$(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $@ nlmconv.o nlmheader.o $(ADDL_LIBS) $(EXTRALIBS)
+	$(HLDENV) $(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $@ nlmconv.o nlmheader.o $(ADDL_LIBS) $(EXTRALIBS)
 
 # Targets to rebuild dependencies in this Makefile.
 # Have to get rid of .dep1 here so that "$?" later includes all of $(CFILES).
@@ -422,6 +421,7 @@ $(NLMCONV_PROG): nlmconv.o nlmheader.o $(ADDL_DEPS)
 dep.sed: dep-in.sed config.status
 	sed <$(srcdir)/dep-in.sed >dep.sed	\
 		-e 's!@INCDIR@!$(INCDIR)!'	\
+		-e 's!@BFDDIR@!$(BFDDIR)!'	\
 		-e 's!@SRCDIR@!$(srcdir)!'
 
 dep: .dep
@@ -546,18 +546,17 @@ install: all
 	if [ x$(DEMANGLER_PROG) != x ]; then \
 	  $(INSTALL_XFORM1) $(DEMANGLER_PROG).1 $(man1dir)/$(DEMANGLER_PROG).1; \
 	fi
-	-if [ -d $(tooldir) ]; then \
-	  if [ -d $(tooldir)/bin ]; then true; else mkdir $(tooldir)/bin; fi; \
-	  for i in $(TOOL_PROGS) ; do \
-	    if [ -f $$i ]; then \
-	      j=`echo $$i | sed -e 's/.new//'`; \
-	      rm -f $(tooldir)/bin/$$j; \
-	      k=`echo $$j | sed '$(program_transform_name)'`; \
-	      ln $(bindir)/$$k $(tooldir)/bin/$$j >/dev/null 2>/dev/null \
+	test -d $(tooldir) || mkdir $(tooldir)
+	test -d $(tooldir)/bin || mkdir $(tooldir)/bin
+	for i in $(TOOL_PROGS) ; do \
+	  if [ -f $$i ]; then \
+	    j=`echo $$i | sed -e 's/.new//'`; \
+	    rm -f $(tooldir)/bin/$$j; \
+	    k=`echo $$j | sed '$(program_transform_name)'`; \
+	    ln $(bindir)/$$k $(tooldir)/bin/$$j >/dev/null 2>/dev/null \
 		|| $(INSTALL_PROGRAM) $$i $(tooldir)/bin/$$j; \
-	    fi; \
-	  done; \
-	 else true; fi
+	  fi; \
+	done
 
 # This little path search is required because in the FSF net releases,
 # the info files are included in the source tree, and that may not be
@@ -653,7 +652,7 @@ config.status: configure $(srcdir)/../bfd/configure.host $(srcdir)/../bfd/config
 ar.o: ar.c ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/obstack.h \
   $(INCDIR)/libiberty.h $(INCDIR)/progress.h bucomm.h \
   config.h $(INCDIR)/fopen-same.h $(INCDIR)/aout/ar.h \
-  ../bfd/libbfd.h arsup.h
+  $(BFDDIR)/libbfd.h arsup.h
 arsup.o: arsup.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/obstack.h arsup.h $(INCDIR)/libiberty.h bucomm.h \
   config.h $(INCDIR)/fopen-same.h
@@ -663,7 +662,7 @@ bucomm.o: bucomm.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
 coffdump.o: coffdump.c coffgrok.h bucomm.h config.h \
   $(INCDIR)/fopen-same.h
 coffgrok.o: coffgrok.c bucomm.h config.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/coff/internal.h ../bfd/libcoff.h $(INCDIR)/bfdlink.h \
+  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
   coffgrok.h
 debug.o: debug.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/obstack.h bucomm.h config.h $(INCDIR)/fopen-same.h \
@@ -683,8 +682,9 @@ maybe-ranlib.o: maybe-ranlib.c
 maybe-strip.o: maybe-strip.c
 nlmconv.o: nlmconv.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/obstack.h $(INCDIR)/libiberty.h bucomm.h \
-  config.h $(INCDIR)/fopen-same.h ../bfd/libnlm.h $(INCDIR)/nlm/common.h \
-  $(INCDIR)/nlm/internal.h $(INCDIR)/nlm/external.h nlmconv.h
+  config.h $(INCDIR)/fopen-same.h $(BFDDIR)/libnlm.h \
+  $(INCDIR)/nlm/common.h $(INCDIR)/nlm/internal.h $(INCDIR)/nlm/external.h \
+  nlmconv.h
 nm.o: nm.c ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/obstack.h \
   $(INCDIR)/progress.h bucomm.h config.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/getopt.h $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def \
@@ -705,7 +705,7 @@ prdbg.o: prdbg.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
 rdcoff.o: rdcoff.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/obstack.h $(INCDIR)/coff/internal.h bucomm.h \
   config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
-  $(INCDIR)/demangle.h debug.h budbg.h ../bfd/libcoff.h \
+  $(INCDIR)/demangle.h debug.h budbg.h $(BFDDIR)/libcoff.h \
   $(INCDIR)/bfdlink.h
 rddbg.o: rddbg.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/obstack.h bucomm.h config.h $(INCDIR)/fopen-same.h \
@@ -714,7 +714,7 @@ size.o: size.c ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/obstack.h \
   $(INCDIR)/getopt.h bucomm.h config.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/libiberty.h
 srconv.o: srconv.c bucomm.h config.h $(INCDIR)/fopen-same.h \
-  sysroff.h coffgrok.h $(INCDIR)/coff/internal.h ../bfd/libcoff.h \
+  sysroff.h coffgrok.h $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h \
   $(INCDIR)/bfdlink.h sysroff.c
 stabs.o: stabs.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/obstack.h bucomm.h config.h $(INCDIR)/fopen-same.h \
@@ -727,7 +727,8 @@ strings.o: strings.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
 sysdump.o: sysdump.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/obstack.h bucomm.h config.h $(INCDIR)/fopen-same.h \
   sysroff.h sysroff.c
-version.o: version.c
+version.o: version.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/obstack.h bucomm.h config.h $(INCDIR)/fopen-same.h
 wrstabs.o: wrstabs.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/obstack.h bucomm.h config.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/libiberty.h debug.h budbg.h $(INCDIR)/aout/aout64.h \

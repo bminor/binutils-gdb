@@ -1,3 +1,41 @@
+Tue Oct  1 15:00:59 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* version.c (print_version): New function.
+	* bucomm.h (print_version): Declare.
+	* ar.c (program_version): Don't declare.
+	(do_show_version): Remove.
+	(usage): Add help parameter.  Print bug report address.
+	(main): Set is_ranlib at start.  Check for --help and --version.
+	Call print_version, not do_show_version.
+	* nlmconv.c (program_version): Don't declare.
+	(main): Call print_version.
+	(show_usage): Print bug report address.
+	* nm.c (program_version, print_version): Don't declare.
+	(usage): Print bug report address.
+	(main): Call print_version.
+	* objcopy.c (program_version): Don't declare.
+	(copy_usage): Print bug report address.
+	(strip_usage): Likewise.
+	(strip_main): Call print_version.
+	(copy_main): Likewise.
+	* objdump.c (program_version): Don't declare.
+	(usage): Print bug report address.
+	(main): Call print_version.
+	* size.c (program_version): Don't declare.
+	(usage): Print bug report address.
+	(main): Call print_version.
+	* strings.c (program_version): Don't declare.
+	(main): Call print_version.
+	(usage): Print bug report address.
+	* Makefile.in: Update dependencies.
+
+Thu Sep 19 14:53:15 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ieee.c: Revert Monday's reflocalp patch, and apply this patch
+	instead:
+ 	(write_ieee_debugging_info): Write a dummy type at the end of the
+	global type block.
+
 Mon Sep 16 15:30:54 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ieee.c (struct ieee_write_type): Add reflocalp field.

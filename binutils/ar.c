@@ -1,5 +1,5 @@
 /* ar.c - Archive modify and extract.
-   Copyright 1991, 92, 93, 94 Free Software Foundation, Inc.
+   Copyright 1991, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
 
 This file is part of GNU Binutils.
 
@@ -15,7 +15,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /*
    Bugs: should use getopt the way tar does (complete w/optional -) and
@@ -25,34 +25,29 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    more consistant.
 */
 #include "bfd.h"
-#include "sysdep.h"
 #include "libiberty.h"
 #include "progress.h"
 #include "bucomm.h"
 #include "aout/ar.h"
 #include "libbfd.h"
 #include "arsup.h"
-#include <stdio.h>
-#ifdef POSIX_UTIME
+#include <sys/stat.h>
+
+#ifdef HAVE_GOOD_UTIME_H
 #include <utime.h>
-#else /* ! POSIX_UTIME */
-#ifdef	USE_UTIME
-#include <time.h>
-#else /* ! USE_UTIME */
+#else /* ! HAVE_GOOD_UTIME_H */
+#ifdef HAVE_UTIMES
 #include <sys/time.h>
-#endif /* ! USE_UTIME */
-#endif /* ! POSIX_UTIME */
-#include <errno.h>
-#ifndef errno
-extern int errno;
-#endif
-#define BUFSIZE 8192
+#endif /* HAVE_UTIMES */
+#endif /* ! HAVE_GOOD_UTIME_H */
 
 #ifdef __GO32___
 #define EXT_NAME_LEN 3		/* bufflen of addition to name if it's MS-DOS */
 #else
 #define EXT_NAME_LEN 6		/* ditto for *NIX */
 #endif
+
+#define BUFSIZE 8192
 
 /* Kludge declaration from BFD!  This is ugly!  FIXME!  XXX */
 
@@ -76,15 +71,17 @@ print_contents PARAMS ((bfd * member));
 static void
 delete_members PARAMS ((bfd *, char **files_to_delete));
 
+#if 0
 static void
 do_quick_append PARAMS ((const char *archive_filename,
 			 char **files_to_append));
+#endif
 
 static void
 move_members PARAMS ((bfd *, char **files_to_move));
 
 static void
-replace_members PARAMS ((bfd *, char **files_to_replace));
+replace_members PARAMS ((bfd *, char **files_to_replace, boolean quick));
 
 static void
 print_descr PARAMS ((bfd * abfd));
@@ -210,28 +207,28 @@ map_over_members (arch, function, files, count)
 
 boolean operation_alters_arch = false;
 
-extern char *program_version;
-
 void
-do_show_version ()
+usage (help)
+     int help;
 {
-  printf ("GNU %s version %s\n", program_name, program_version);
-  xexit (0);
-}
+  FILE *s;
 
-void
-usage ()
-{
-  if (is_ranlib == 0)
-    fprintf (stderr, "\
+  s = help ? stdout : stderr;
+  if (! is_ranlib)
+    fprintf (s, "\
 Usage: %s [-]{dmpqrtx}[abcilosuvV] [member-name] archive-file file...\n\
        %s -M [<mri-script]\n",
 	     program_name, program_name);
   else
-    fprintf (stderr, "\
+    fprintf (s, "\
 Usage: %s [-vV] archive\n", program_name);
+
   list_supported_targets (program_name, stderr);
-  xexit (1);
+
+  if (help)
+    fprintf (s, "Report bugs to bug-gnu-utils@prep.ai.mit.edu\n");
+
+  xexit (help ? 0 : 1);
 }
 
 /* Normalize a file name specified on the command line into a file
@@ -303,11 +300,39 @@ main (argc, argv)
   int arg_index;
   char **files;
   char *inarch_filename;
-  char *temp;
   int show_version;
 
   program_name = argv[0];
   xmalloc_set_program_name (program_name);
+
+  if (is_ranlib < 0)
+    {
+      char *temp;
+
+      temp = strrchr (program_name, '/');
+      if (temp == NULL)
+	temp = program_name;
+      else
+	++temp;
+      if (strlen (temp) >= 6
+	  && strcmp (temp + strlen (temp) - 6, "ranlib") == 0)
+	is_ranlib = 1;
+      else
+	is_ranlib = 0;
+    }
+
+  if (argc > 1 && argv[1][0] == '-')
+    {
+      if (strcmp (argv[1], "--help") == 0)
+	usage (1);
+      else if (strcmp (argv[1], "--version") == 0)
+	{
+	  if (is_ranlib)
+	    print_version ("ranlib");
+	  else
+	    print_version ("ar");
+	}
+    }
 
   START_PROGRESS (program_name, 0);
 
@@ -316,22 +341,16 @@ main (argc, argv)
 
   xatexit (remove_output);
 
-  temp = strrchr (program_name, '/');
-  if (temp == (char *) NULL)
-    temp = program_name;	/* shouldn't happen, but... */
-  else
-    ++temp;
-  if (is_ranlib > 0 || (is_ranlib < 0 && strcmp (temp, "ranlib") == 0))
+  if (is_ranlib)
     {
       boolean touch = false;
 
-      is_ranlib = 1;
-      if (argc < 2)
+      if (argc < 2 || strcmp (argv[1], "--help") == 0)
 	usage ();
       if (strcmp (argv[1], "-V") == 0
 	  || strcmp (argv[1], "-v") == 0
 	  || strncmp (argv[1], "--v", 3) == 0)
-	do_show_version ();
+	print_version ("ranlib");
       arg_index = 1;
       if (strcmp (argv[1], "-t") == 0)
 	{
@@ -348,8 +367,6 @@ main (argc, argv)
 	}
       xexit (0);
     }
-  else
-    is_ranlib = 0;
 
   if (argc == 2 && strcmp (argv[1], "-M") == 0)
     {
@@ -448,7 +465,7 @@ main (argc, argv)
     }
 
   if (show_version)
-    do_show_version ();
+    print_version ("ar");
 
   if (argc < 3)
     usage ();
@@ -488,6 +505,11 @@ main (argc, argv)
 
       files = arg_index < argc ? argv + arg_index : NULL;
 
+#if 0
+      /* We don't use do_quick_append any more.  Too many systems
+         expect ar to always rebuild the symbol table even when q is
+         used.  */
+
       /* We can't do a quick append if we need to construct an
 	 extended name table, because do_quick_append won't be able to
 	 rebuild the name table.  Unfortunately, at this point we
@@ -514,8 +536,10 @@ main (argc, argv)
 	  do_quick_append (inarch_filename, files);
 	  xexit (0);
 	}
+#endif
 
-      arch = open_inarch (inarch_filename);
+      arch = open_inarch (inarch_filename,
+			  files == NULL ? (char *) NULL : files[0]);
 
       switch (operation)
 	{
@@ -542,8 +566,9 @@ main (argc, argv)
 	  break;
 
 	case replace:
+	case quick_append:
 	  if (files != NULL || write_armap > 0)
-	    replace_members (arch, files);
+	    replace_members (arch, files, operation == quick_append);
 	  break;
 
 	  /* Shouldn't happen! */
@@ -561,18 +586,24 @@ main (argc, argv)
 }
 
 bfd *
-open_inarch (archive_filename)
+open_inarch (archive_filename, file)
      const char *archive_filename;
+     const char *file;
 {
+  const char *target;
   bfd **last_one;
   bfd *next_one;
   struct stat sbuf;
   bfd *arch;
+  char **matching;
 
   bfd_set_error (bfd_error_no_error);
 
+  target = NULL;
+
   if (stat (archive_filename, &sbuf) != 0)
     {
+      bfd *obj;
 
 #ifndef __GO32__
 
@@ -592,20 +623,42 @@ open_inarch (archive_filename)
 	  return NULL;
 	}
 
-      /* This routine is one way to forcibly create the archive. */
+      /* Try to figure out the target to use for the archive from the
+         first object on the list.  */
+      obj = bfd_openr (file, NULL);
+      if (obj != NULL)
+	{
+	  if (bfd_check_format (obj, bfd_object))
+	    target = bfd_get_target (obj);
+	  (void) bfd_close (obj);
+	}
 
-      do_quick_append (archive_filename, 0);
+      /* Create an empty archive.  */
+      arch = bfd_openw (archive_filename, target);
+      if (arch == NULL
+	  || ! bfd_set_format (arch, bfd_archive)
+	  || ! bfd_close (arch))
+	bfd_fatal (archive_filename);
     }
 
-  arch = bfd_openr (archive_filename, NULL);
+  arch = bfd_openr (archive_filename, target);
   if (arch == NULL)
     {
     bloser:
       bfd_fatal (archive_filename);
     }
 
-  if (bfd_check_format (arch, bfd_archive) != true)
-    fatal ("%s is not an archive", archive_filename);
+  if (! bfd_check_format_matches (arch, bfd_archive, &matching))
+    {
+      bfd_nonfatal (archive_filename);
+      if (bfd_get_error () == bfd_error_file_ambiguously_recognized)
+	{
+	  list_matching_formats (matching);
+	  free (matching);
+	}
+      xexit (1);
+    }
+
   last_one = &(arch->next);
   /* Read all the contents right away, regardless.  */
   for (next_one = bfd_openr_next_archived_file (arch, NULL);
@@ -742,29 +795,34 @@ extract_file (abfd)
 
   if (preserve_dates)
     {
-#ifdef POSIX_UTIME
+#ifdef HAVE_GOOD_UTIME_H
       struct utimbuf tb;
       tb.actime = buf.st_mtime;
       tb.modtime = buf.st_mtime;
       utime (bfd_get_filename (abfd), &tb);	/* FIXME check result */
-#else /* ! POSIX_UTIME */
-#ifdef USE_UTIME
+#else /* ! HAVE_GOOD_UTIME_H */
+#ifndef HAVE_UTIMES
       long tb[2];
       tb[0] = buf.st_mtime;
       tb[1] = buf.st_mtime;
       utime (bfd_get_filename (abfd), tb);	/* FIXME check result */
-#else /* ! USE_UTIME */
+#else /* HAVE_UTIMES */
       struct timeval tv[2];
       tv[0].tv_sec = buf.st_mtime;
       tv[0].tv_usec = 0;
       tv[1].tv_sec = buf.st_mtime;
       tv[1].tv_usec = 0;
       utimes (bfd_get_filename (abfd), tv);	/* FIXME check result */
-#endif /* ! USE_UTIME */
-#endif /* ! POSIX_UTIME */
+#endif /* HAVE_UTIMES */
+#endif /* ! HAVE_GOOD_UTIME_H */
     }
 free (cbuf);
 }
+
+#if 0
+
+/* We don't use this anymore.  Too many systems expect ar to rebuild
+   the symbol table even when q is used.  */
 
 /* Just do it quickly; don't worry about dups, armap, or anything like that */
 
@@ -873,6 +931,7 @@ do_quick_append (archive_filename, files_to_append)
   free (buf);
 }
 
+#endif /* 0 */
 
 static void
 write_archive (iarch)
@@ -1063,10 +1122,12 @@ move_members (arch, files_to_move)
 /* Ought to default to replacing in place, but this is existing practice!  */
 
 static void
-replace_members (arch, files_to_move)
+replace_members (arch, files_to_move, quick)
      bfd *arch;
      char **files_to_move;
+     boolean quick;
 {
+  boolean changed = false;
   bfd **after_bfd;		/* New entries go after this one */
   bfd *current;
   bfd **current_ptr;
@@ -1074,63 +1135,62 @@ replace_members (arch, files_to_move)
 
   while (files_to_move && *files_to_move)
     {
-      current_ptr = &arch->next;
-      while (*current_ptr)
+      if (! quick)
 	{
-	  current = *current_ptr;
-
-	  if (!strcmp (normalize (*files_to_move, arch),
-		       normalize (current->filename, arch)))
+	  current_ptr = &arch->next;
+	  while (*current_ptr)
 	    {
-	      if (newer_only)
-		{
-		  struct stat fsbuf, asbuf;
+	      current = *current_ptr;
 
-		  if (current->arelt_data == NULL)
+	      /* For compatibility with existing ar programs, we
+		 permit the same file to be added multiple times.  */
+	      if (strcmp (normalize (*files_to_move, arch),
+			  normalize (current->filename, arch)) == 0
+		  && current->arelt_data != NULL)
+		{
+		  if (newer_only)
 		    {
-		      /* This can only happen if you specify a file on the
-			 command line more than once. */
-		      fprintf (stderr,
-			       "%s: duplicate file specified: %s -- skipping\n",
-			       program_name, *files_to_move);
-		      goto next_file;
+		      struct stat fsbuf, asbuf;
+
+		      if (stat (*files_to_move, &fsbuf) != 0)
+			{
+			  if (errno != ENOENT)
+			    bfd_fatal (*files_to_move);
+			  goto next_file;
+			}
+		      if (bfd_stat_arch_elt (current, &asbuf) != 0)
+			fatal ("internal stat error on %s", current->filename);
+
+		      if (fsbuf.st_mtime <= asbuf.st_mtime)
+			goto next_file;
 		    }
 
-		  if (stat (*files_to_move, &fsbuf) != 0)
+		  /* snip out this entry from the chain */
+		  *current_ptr = current->next;
+
+		  after_bfd = get_pos_bfd (&arch->next, pos_end);
+		  temp = *after_bfd;
+		  *after_bfd = bfd_openr (*files_to_move, NULL);
+		  if (*after_bfd == (bfd *) NULL)
 		    {
-		      if (errno != ENOENT)
-			bfd_fatal (*files_to_move);
-		      goto next_file;
+		      bfd_fatal (*files_to_move);
 		    }
-		  if (bfd_stat_arch_elt (current, &asbuf) != 0)
-		    fatal ("internal stat error on %s", current->filename);
+		  (*after_bfd)->next = temp;
 
-		  if (fsbuf.st_mtime <= asbuf.st_mtime)
-		    goto next_file;
+		  if (verbose)
+		    {
+		      printf ("r - %s\n", *files_to_move);
+		    }
+
+		  changed = true;
+
+		  goto next_file;
 		}
-
-	      /* snip out this entry from the chain */
-	      *current_ptr = current->next;
-
-	      after_bfd = get_pos_bfd (&arch->next, pos_end);
-	      temp = *after_bfd;
-	      *after_bfd = bfd_openr (*files_to_move, NULL);
-	      if (*after_bfd == (bfd *) NULL)
-		{
-		  bfd_fatal (*files_to_move);
-		}
-	      (*after_bfd)->next = temp;
-
-	      if (verbose)
-		{
-		  printf ("r - %s\n", *files_to_move);
-		}
-	      goto next_file;
+	      current_ptr = &(current->next);
 	    }
-	  current_ptr = &(current->next);
 	}
 
-      /* It isn't in there, so add to end */
+      /* Add to the end of the archive.  */
 
       after_bfd = get_pos_bfd (&arch->next, pos_end);
       temp = *after_bfd;
@@ -1146,12 +1206,15 @@ replace_members (arch, files_to_move)
 
       (*after_bfd)->next = temp;
 
+      changed = true;
+
     next_file:;
 
       files_to_move++;
     }
 
-  write_archive (arch);
+  if (changed)
+    write_archive (arch);
 }
 
 static void
@@ -1161,7 +1224,7 @@ ranlib_only (archname)
   bfd *arch;
 
   write_armap = 1;
-  arch = open_inarch (archname);
+  arch = open_inarch (archname, (char *) NULL);
   if (arch == NULL)
     xexit (1);
   write_archive (arch);
@@ -1179,6 +1242,7 @@ ranlib_touch (archname)
 #else
   int f;
   bfd *arch;
+  char **matching;
 
   f = open (archname, O_RDWR, 0);
   if (f < 0)
@@ -1188,9 +1252,18 @@ ranlib_touch (archname)
     }
 
   arch = bfd_fdopenr (archname, (const char *) NULL, f);
-  if (arch == NULL
-      || ! bfd_check_format (arch, bfd_archive))
+  if (arch == NULL)
     bfd_fatal (archname);
+  if (! bfd_check_format_matches (arch, bfd_archive, &matching))
+    {
+      bfd_nonfatal (archname);
+      if (bfd_get_error () == bfd_error_file_ambiguously_recognized)
+	{
+	  list_matching_formats (matching);
+	  free (matching);
+	}
+      xexit (1);
+    }
 
   if (! bfd_has_map (arch))
     fatal ("%s: no archive map to update", archname);

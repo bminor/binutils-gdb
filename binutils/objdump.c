@@ -44,8 +44,6 @@ extern int fprintf PARAMS ((FILE *, const char *, ...));
 
 static char *default_target = NULL;	/* default at runtime */
 
-extern char *program_version;
-
 static int show_version = 0;		/* show the version number */
 static int dump_section_contents;	/* -s */
 static int dump_section_headers;	/* -h */
@@ -154,6 +152,8 @@ Usage: %s [-ahifdDprRtTxsSlw] [-b bfdname] [-m machine] [-j section-name]\n\
        [--show-raw-insn] [-EB|-EL] [--endian={big|little}] objfile...\n\
 at least one option besides -l (--line-numbers) must be given\n");
   list_supported_targets (program_name, stream);
+  if (status == 0)
+    fprintf (stream, "Report bugs to bug-gnu-utils@prep.ai.mit.edu\n");
   exit (status);
 }
 
@@ -974,6 +974,7 @@ disassemble_data (abfd)
       exit (1);
     }
 
+  disasm_info.flavour = bfd_get_flavour (abfd);
   disasm_info.arch = bfd_get_arch (abfd);
   disasm_info.mach = bfd_get_mach (abfd);
   if (bfd_big_endian (abfd))
@@ -1879,10 +1880,6 @@ dump_reloc_set (abfd, sec, relpp, relcount)
 /* The length of the longest architecture name + 1.  */
 #define LONGEST_ARCH sizeof("rs6000:6000")
 
-#ifndef L_tmpnam
-#define L_tmpnam 25
-#endif
-
 static const char *
 endian_string (endian)
      enum bfd_endian endian;
@@ -1901,13 +1898,11 @@ endian_string (endian)
 static void
 display_target_list ()
 {
-  extern char *tmpnam ();
   extern bfd_target *bfd_target_vector[];
-  char tmparg[L_tmpnam];
   char *dummy_name;
   int t;
 
-  dummy_name = tmpnam (tmparg);
+  dummy_name = choose_temp_base ();
   for (t = 0; bfd_target_vector[t]; t++)
     {
       bfd_target *p = bfd_target_vector[t];
@@ -1937,6 +1932,7 @@ display_target_list ()
 		  bfd_printable_arch_mach ((enum bfd_architecture) a, 0));
     }
   unlink (dummy_name);
+  free (dummy_name);
 }
 
 /* Print a table showing which architectures are supported for entries
@@ -1949,8 +1945,6 @@ display_info_table (first, last)
      int last;
 {
   extern bfd_target *bfd_target_vector[];
-  extern char *tmpnam ();
-  char tmparg[L_tmpnam];
   int t, a;
   char *dummy_name;
 
@@ -1960,7 +1954,7 @@ display_info_table (first, last)
     printf ("%s ", bfd_target_vector[t]->name);
   putchar ('\n');
 
-  dummy_name = tmpnam (tmparg);
+  dummy_name = choose_temp_base ();
   for (a = (int) bfd_arch_obscure + 1; a < (int) bfd_arch_last; a++)
     if (strcmp (bfd_printable_arch_mach (a, 0), "UNKNOWN!") != 0)
       {
@@ -2007,6 +2001,7 @@ display_info_table (first, last)
 	putchar ('\n');
       }
   unlink (dummy_name);
+  free (dummy_name);
 }
 
 /* Print tables of all the target-architecture combinations that
@@ -2185,10 +2180,7 @@ main (argc, argv)
     }
 
   if (show_version)
-    {
-      printf ("GNU %s version %s\n", program_name, program_version);
-      exit (0);
-    }
+    print_version ("objdump");
 
   if (seenflag == false)
     usage (stderr, 1);
