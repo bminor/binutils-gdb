@@ -236,11 +236,11 @@ Mon Aug 18 11:14:15 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* configure.tgt: Add support for v850e target.
 
-start-sanitize-v850eq
+start-sanitize-v850e
 Mon Aug 18 11:14:15 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* configure.tgt: Add support for v850eq target.
-end-sanitize-v850eq
+end-sanitize-v850e
 
 Sun Aug 17 20:31:57 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
 

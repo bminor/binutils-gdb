@@ -74,12 +74,6 @@ else
 	fi
 fi
 
-if ( echo $* | grep keep\-v850 > /dev/null ) ; then
-	keep_these_too="v850-tdep.c v850ice.c ${keep_these_too}"
-else
-	lose_these_too="v850-tdep.c v850ice.c ${lose_these_too}"
-fi
-
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -410,6 +404,8 @@ ultra3-nat.c
 ultra3-xdep.c
 umax-xdep.c
 utils.c
+v850-tdep.c
+v850ice.c
 valarith.c
 valops.c
 valprint.c
@@ -432,8 +428,8 @@ z8k-tdep.c
 
 Things-to-lose:
 
-ser-go32-para.c
 HOW_TO_RELEASE
+ser-go32-para.c
 
 Do-last:
 
@@ -485,33 +481,6 @@ else
 			fi
 			cp $i new
 			sed '/start\-sanitize\-gm/,/end-\sanitize\-gm/d' < $i > new
-			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-				if [ -n "${verbose}" ] ; then
-					echo Caching $i in .Recover...
-				fi
-				mv $i .Recover
-			fi
-			mv new $i
-		fi
-	done
-fi
-
-if ( echo $* | grep keep\-v850eq > /dev/null ) ; then
-	for i in * ; do
-		if test ! -d $i && (grep sanitize-v850eq $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Keeping v850eq stuff in $i
-			fi
-		fi
-	done
-else
-	for i in * ; do
-		if test ! -d $i && (grep sanitize-v850eq $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Removing traces of \"v850eq\" from $i...
-			fi
-			cp $i new
-			sed '/start\-sanitize\-v850eq/,/end-\sanitize\-v850eq/d' < $i > new
 			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
 				if [ -n "${verbose}" ] ; then
 					echo Caching $i in .Recover...
