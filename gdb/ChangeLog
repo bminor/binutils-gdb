@@ -1,5 +1,10 @@
 2000-04-03  Eli Zaretskii  <eliz@is.elta.co.il>
 
+	* symfile.c (map_overlay_command, unmap_overlay_command): Fix
+	error message: there's no "overlay on" command.
+
+2000-04-03  Eli Zaretskii  <eliz@is.elta.co.il>
+
 	* Makefile.in (copying.c): Depend on copying.txt, not COPYING.
 	(copying.txt): New target, a link to COPYING.
 

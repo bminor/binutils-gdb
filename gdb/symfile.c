@@ -2968,7 +2968,9 @@ map_overlay_command (args, from_tty)
   asection *bfdsec;
 
   if (!overlay_debugging)
-    error ("Overlay debugging not enabled.  Use the 'OVERLAY ON' command.");
+    error ("\
+Overlay debugging not enabled.  Use either the 'overlay auto' or\n\
+the 'overlay manual' command.");
 
   if (args == 0 || *args == 0)
     error ("Argument required: name of an overlay section");
@@ -3018,7 +3020,9 @@ unmap_overlay_command (args, from_tty)
   struct obj_section *sec;
 
   if (!overlay_debugging)
-    error ("Overlay debugging not enabled.  Use the 'OVERLAY ON' command.");
+    error ("\
+Overlay debugging not enabled.  Use either the 'overlay auto' or\n\
+the 'overlay manual' command.");
 
   if (args == 0 || *args == 0)
     error ("Argument required: name of an overlay section");
