@@ -1,3 +1,8 @@
+Thu Oct 28 19:43:16 1993  Stan Shebs  (shebs@rtl.cygnus.com)
+
+	* ar.c (main): Always create the archive when quick appending,
+	even if no input files have been given.
+
 Wed Oct 27 12:03:06 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* nlmconv.c (main): Set sharedDebugRecordOffset and
