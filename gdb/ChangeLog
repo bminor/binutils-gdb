@@ -1,5 +1,16 @@
 2004-06-14  Andrew Cagney  <cagney@gnu.org>
 
+	* MAINTAINERS: Merge with mainline.  List Michael Chastain as the
+	lead testsuite maintainer.  List JoelBrobecker as an AIX
+	maintainer.  List global maintainers under tracing bytecode stuff.
+	Add Ulrich Weigand, Nathan Williams, Bryce McKinlay, Randolph
+	Chung, and Brian Ford to write after approval.  Update email
+	and/or status of of J.T. Conklin, Elena Zannoni, Mark Salter,
+	Fernando Nasser, Joel Brobecker, Andrew Cagney, Ben Elliston,
+	Chris Faylor, and David Carlton.
+
+2004-06-14  Andrew Cagney  <cagney@gnu.org>
+
 	* NEWS: Describe the problems fixed by the location-expression,
 	and DW_EH_PE_funcrel changes.  Mention pending breakpoints (based
 	on earlier posts from Jeff Johnston and Eli Zaretskii).
