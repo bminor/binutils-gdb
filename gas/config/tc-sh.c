@@ -1426,8 +1426,6 @@ get_operand (char **ptr, sh_operand_info *op)
 
   if (src[0] == '#')
     {
-      if (! ISDIGIT (src[1]))
-	as_bad (_("syntax error in #Imm"));
       src++;
       *ptr = parse_exp (src, op);
       op->type = A_IMM;
@@ -4193,10 +4191,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
     rel->addend = 0;
 
   rel->howto = bfd_reloc_type_lookup (stdoutput, r_type);
-#ifdef OBJ_ELF
-  if (rel->howto->type == R_SH_IND12W)
-      rel->addend += fixp->fx_offset - 4;
-#endif
+
   if (rel->howto == NULL)
     {
       as_bad_where (fixp->fx_file, fixp->fx_line,
@@ -4206,6 +4201,10 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
       rel->howto = bfd_reloc_type_lookup (stdoutput, BFD_RELOC_32);
       assert (rel->howto != NULL);
     }
+#ifdef OBJ_ELF
+  else if (rel->howto->type == R_SH_IND12W)
+    rel->addend += fixp->fx_offset - 4;
+#endif
 
   return rel;
 }
