@@ -572,9 +572,6 @@ elf32_sparc_adjust_dynamic_symbol (info, h)
 
   /* Make sure we know what is going on here.  */
   BFD_ASSERT (dynobj != NULL
-	      && h->root.type == bfd_link_hash_defined
-	      && (bfd_get_flavour (h->root.u.def.section->owner)
-		  == bfd_target_elf_flavour)
 	      && ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT)
 		  || ((h->elf_link_hash_flags
 		       & ELF_LINK_HASH_DEF_DYNAMIC) != 0
@@ -582,6 +579,9 @@ elf32_sparc_adjust_dynamic_symbol (info, h)
 			  & ELF_LINK_HASH_REF_REGULAR) != 0
 		      && (h->elf_link_hash_flags
 			  & ELF_LINK_HASH_DEF_REGULAR) == 0
+		      && h->root.type == bfd_link_hash_defined
+		      && (bfd_get_flavour (h->root.u.def.section->owner)
+			  == bfd_target_elf_flavour)
 		      && (elf_elfheader (h->root.u.def.section->owner)->e_type
 			  == ET_DYN)
 		      && h->root.u.def.section->output_section == NULL)));

@@ -608,9 +608,6 @@ elf_i386_adjust_dynamic_symbol (info, h)
 
   /* Make sure we know what is going on here.  */
   BFD_ASSERT (dynobj != NULL
-	      && h->root.type == bfd_link_hash_defined
-	      && (bfd_get_flavour (h->root.u.def.section->owner)
-		  == bfd_target_elf_flavour)
 	      && ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT)
 		  || ((h->elf_link_hash_flags
 		       & ELF_LINK_HASH_DEF_DYNAMIC) != 0
@@ -620,6 +617,9 @@ elf_i386_adjust_dynamic_symbol (info, h)
 			  & ELF_LINK_HASH_DEF_REGULAR) == 0
 		      && (elf_elfheader (h->root.u.def.section->owner)->e_type
 			  == ET_DYN)
+		      && h->root.type == bfd_link_hash_defined
+		      && (bfd_get_flavour (h->root.u.def.section->owner)
+			  == bfd_target_elf_flavour)
 		      && h->root.u.def.section->output_section == NULL)));
 
   /* If this is a function, put it in the procedure linkage table.  We
