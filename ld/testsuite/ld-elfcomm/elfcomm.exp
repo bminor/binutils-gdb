@@ -40,7 +40,7 @@ proc dump_common1 { testname } {
     send_log "readelf -s tmpdir/common1.o | grep foo\n"
     catch "exec readelf -s tmpdir/common1.o | grep foo" exec_output
     if { ![regexp "(\[ 	\]*)(\[0-9\]+):(\[ 	\]*)(\[0\]*)80(\[ 	\]+)4(\[ 	\]+)OBJECT(\[ 	\]+)GLOBAL(\[ 	\]+)DEFAULT(\[ 	\]+)COM(\[ 	\]+)foo2" $exec_output]
- 	 || ![regexp "(\[ 	\]*)(\[0-9\]+):(\[ 	\]*)(\[0\]*)1(\[ 	\]+)21(\[ 	\]+)OBJECT(\[ 	\]+)GLOBAL(\[ 	\]+)DEFAULT(\[ 	\]+)(\[0-9\]+)(\[ 	\]+)foo1" $exec_output] } {
+ 	 || ![regexp "(\[ 	\]*)(\[0-9\]+):(\[ 	\]*)(\[0-9\]+)(\[ 	\]+)21(\[ 	\]+)OBJECT(\[ 	\]+)GLOBAL(\[ 	\]+)DEFAULT(\[ 	\]+)(\[0-9\]+)(\[ 	\]+)foo1" $exec_output] } {
 	send_log "$exec_output\n"
 	verbose $exec_output
 	fail $testname
@@ -65,7 +65,7 @@ if { [ld_simple_link $ld tmpdir/common1.o "-r tmpdir/common1a.o tmpdir/common1b.
     return
 }
 
-if { ![regexp "Warning: alignment 1 of symbol \`foo1\' in tmpdir/common1b.o is smaller than 64 in tmpdir/common1a.o" $link_output]
+if { ![regexp "Warning: alignment (\[0-9\]+) of symbol \`foo1\' in tmpdir/common1b.o is smaller than 64 in tmpdir/common1a.o" $link_output]
      || ![regexp "Warning: size of symbol \`foo1\' changed from 2 in tmpdir/common1a.o to 21 in tmpdir/common1b.o" $link_output] } {
     fail "$test1 (warning 1)"
 } else {
@@ -81,7 +81,7 @@ if { [ld_simple_link $ld tmpdir/common1.o "-r tmpdir/common1b.o tmpdir/common1a.
     return
 }
 
-if { ![regexp "Warning: alignment 1 of symbol \`foo1\' in tmpdir/common1b.o is smaller than 64 in tmpdir/common1a.o" $link_output] } {
+if { ![regexp "Warning: alignment (\[0-9\]+) of symbol \`foo1\' in tmpdir/common1b.o is smaller than 64 in tmpdir/common1a.o" $link_output] } {
     fail "$test1 (warning 2)"
 } else {
     pass "$test1 (warning 2)"

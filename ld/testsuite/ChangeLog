@@ -1,3 +1,7 @@
+2003-04-22  H.J. Lu <hjl@gnu.org>
+
+	* ld-elfcomm/elfcomm.exp: Support 64bit targets.
+
 2003-04-21  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* ld-m68hc11/far-hc11.s: New file.
