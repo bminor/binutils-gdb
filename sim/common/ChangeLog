@@ -1,3 +1,10 @@
+002-06-09  Aldy Hernandez  <aldyh@redhat.com>
+
+        * sim-fpu.c (unpack_fpu): Initialize exponent for
+        sim_fpu_class_zero.
+        (i2fpu): Same.
+        (sim_fpu_sqrt): Same.
+
 2002-06-08  Andrew Cagney  <cagney@redhat.com>
 
 	* gentmap.c (gen_targ_map_c): Generate "gdb/callback.h".
