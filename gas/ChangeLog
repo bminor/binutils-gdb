@@ -1,3 +1,12 @@
+start-sanitize-d30v
+Wed Jan 14 18:04:20 1998  Michael Meissner  <meissner@cygnus.com>
+
+	Based on a patch from Jim Wilson
+	* config/tc-d30v.c (do_assemble): Remove non-ansi default case.
+	(tc_gen_reloc): Handle cross section PC relative relocs
+	correctly.
+
+end-sanitize-d30v
 Wed Jan 14 15:02:19 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* config/tc-mips.c (mips_ip): Don't test pinfo flags if INSN_MACRO.
