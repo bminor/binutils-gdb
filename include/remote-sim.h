@@ -20,6 +20,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #if !defined (REMOTE_SIM_H)
 #define REMOTE_SIM_H 1
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* This file is used when building stand-alone simulators, so isolate this
    file from gdb.  */
 
@@ -293,5 +297,9 @@ void sim_set_profile_size PARAMS ((int n));
    multi-cpu simulators. */
 
 void sim_kill PARAMS ((SIM_DESC sd));
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* !defined (REMOTE_SIM_H) */

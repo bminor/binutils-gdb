@@ -1,3 +1,10 @@
+Fri Nov  7 10:34:09 1997  Rob Savoye  <rob@darkstar.cygnus.com>
+
+	* include/libiberty.h: Add extern "C" { so it can be used with C++
+	progrms.
+	* include/remote-sim.h:  Add extern "C" { so it can be used with C++
+	programs.
+
 start-sanitize-tx19
 Wed Nov  5 11:14:44 1997  Gavin Koch  <gavin@cygnus.com>
 
