@@ -1,5 +1,14 @@
 2004-04-01  Joel Brobecker  <brobecker@gnat.com>
 
+	* lib/ada.exp: Add copyright notice.
+	* bar.ads: Likewise.
+	* bar.adb: Likewise.
+	* null_record.adb: Likewise.
+	* null_record.exp: Likewise.
+	* gnat_ada.gpr.in: Likewise. Fix typo in a comment, clarify another.
+
+2004-04-01  Joel Brobecker  <brobecker@gnat.com>
+
 	* configure.in: Generate gdb.ada/Makefile and gdb.ada/gnat_ada.gpr.
 	* configure: Regenerate.
 
