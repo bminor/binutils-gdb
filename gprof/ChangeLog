@@ -1,5 +1,7 @@
 2004-03-19  Alan Modra  <amodra@bigpond.net.au>
 
+	* po/sv.po: Updated.
+
 	* Makefile.am: Run "make dep-am".
 	* Makefile.in: Regenerate.
 	* gconfig.in: Regenerate.
