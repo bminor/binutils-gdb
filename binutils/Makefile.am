@@ -44,7 +44,7 @@ NLMCONV_PROG=nlmconv
 DLLTOOL_PROG=dlltool
 WINDRES_PROG=windres
 
-SRCONV_PROG=srconv sysdump coffdump 
+SRCONV_PROG=srconv$(EXEEXT) sysdump$(EXEEXT) coffdump$(EXEEXT) 
 
 man_MANS = ar.1 nm.1 objdump.1 ranlib.1 size.1 strings.1 strip.1 objcopy.1 \
 	addr2line.1 nlmconv.1 $(DEMANGLER_PROG).1
