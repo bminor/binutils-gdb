@@ -158,9 +158,9 @@ asymbol **bp;
   asymbol *b = *bp;
   int diff;
 
-  if ( a->name== (char *)NULL || (a->flags &( BSF_DEBUGGING| BSF_UNDEFINED) )) 
+  if ( a->name== (char *)NULL || (a->flags &( BSF_DEBUGGING) ))
     a->the_bfd = 0;
-  if  ( b->name== (char *)NULL || (b->flags &( BSF_DEBUGGING|BSF_UNDEFINED))) 
+  if  ( b->name== (char *)NULL || (b->flags &( BSF_DEBUGGING)))
     b->the_bfd =0;
 
   diff = a->the_bfd - b->the_bfd;
@@ -336,9 +336,12 @@ bfd *abfd;
 
   for (section = abfd->sections;
        section != (asection *)NULL;
-       section =  section->next) {
+       section =  section->next) 
+  {
 
-    if (only == (char *)NULL || strcmp(only,section->name) == 0){
+    if ((section->flags & SEC_LOAD)  
+	&&(only == (char *)NULL ||strcmp(only,section->name) == 0))
+    {
       printf("Disassembly of section %s:\n", section->name);
 
       if (bfd_get_section_size_before_reloc(section) == 0) continue;
@@ -346,9 +349,9 @@ bfd *abfd;
       data = (bfd_byte *)malloc(bfd_get_section_size_before_reloc(section));
 
       if (data == (bfd_byte *)NULL) {
-	fprintf (stderr, "%s: memory exhausted.\n", program_name);
-	exit (1);
-      }
+	  fprintf (stderr, "%s: memory exhausted.\n", program_name);
+	  exit (1);
+	}
       datasize = bfd_get_section_size_before_reloc(section);
 
 
@@ -356,43 +359,43 @@ bfd *abfd;
 
       i = 0;
       while (i <bfd_get_section_size_before_reloc(section)) {
-	if (data[i] ==0 && data[i+1] == 0 && data[i+2] == 0 &&
-	    data[i+3] == 0) {
-	  if (done_dot == false) {
-	    printf("...\n");
-	    done_dot=true;
-	  }
-	  i+=4;
-	}
-	else {
-	  done_dot = false;
-	  if (with_line_numbers) {
-	    static prevline;
-	    CONST char *filename;
-	    CONST char *functionname;
-	    unsigned int line;
-	    bfd_find_nearest_line(abfd,
-				  section,
-				  syms,
-				  section->vma + i,
-				  &filename,
-				  &functionname,
-				  &line);
-
-	    if (filename && functionname && line && line != prevline) {
-	      printf("%s:%u\n", filename, line);
-	      prevline = line;
+	  if (data[i] ==0 && data[i+1] == 0 && data[i+2] == 0 &&
+	      data[i+3] == 0) {
+	      if (done_dot == false) {
+		  printf("...\n");
+		  done_dot=true;
+		}
+	      i+=4;
 	    }
-	  }
-	  print_address(section->vma + i, stdout);
-	  printf(" ");
+	  else {
+	      done_dot = false;
+	      if (with_line_numbers) {
+		  static prevline;
+		  CONST char *filename;
+		  CONST char *functionname;
+		  unsigned int line;
+		  bfd_find_nearest_line(abfd,
+					section,
+					syms,
+					section->vma + i,
+					&filename,
+					&functionname,
+					&line);
 
-	  i +=   print(section->vma + i, 
-		       data + i,
-		       stdout);
-	  putchar ('\n')  ;  
+		  if (filename && functionname && line && line != prevline) {
+		      printf("%s:%u\n", filename, line);
+		      prevline = line;
+		    }
+		}
+	      print_address(section->vma + i, stdout);
+	      printf(" ");
+
+	      i +=   print(section->vma + i, 
+			   data + i,
+			   stdout);
+	      putchar ('\n')  ;  
+	    }
 	}
-      }
 
 
 
