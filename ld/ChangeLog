@@ -1,3 +1,11 @@
+2004-05-26  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.c (lang_add_section): Set SEC_EXCLUDE for SEC_GROUP
+	sections when doing a final link.  Clear SEC_EXCLUDE when doing
+	a relocable link, except for SEC_DEBUGGING sections.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Use the
+	same condition here to drop SEC_EXCLUDE orphan sections.
+
 2004-05-25  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlang.c (lang_process): Call bfd_merge_sections later, and

@@ -1,3 +1,8 @@
+2004-05-26  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf.c (_bfd_elf_make_section_from_shdr): Don't set SEC_EXCLUDE
+	for SHT_GROUP sections.
+
 2004-05-25  Alan Modra  <amodra@bigpond.net.au>
 
 	* elflink.c (elf_link_add_object_symbols): Don't set up merge
