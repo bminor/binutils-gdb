@@ -59,6 +59,7 @@ typedef struct disassemble_info {
      The top 16 bits are reserved for public use (and are documented here).
      The bottom 16 bits are for the internal use of the disassembler.  */
   unsigned long flags;
+#define INSN_HAS_RELOC	0x80000000
   PTR private_data;
 
   /* Function used to get bytes to disassemble.  MEMADDR is the
