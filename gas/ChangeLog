@@ -1,3 +1,13 @@
+2001-07-25  Dave Brolley  <brolley@redhat.com>
+
+	* app.c (LEX_IS_PARALLEL_SEPARATOR): New macro.
+	(IS_PARALLEL_SEPARATOR): New macro.
+	(do_scrub_begin): Set up characters in tc_parallel_separator_chars
+	as LEX_IS_PARALLEL_SEPARATOR, if it is defined.
+	(do_scrub_chars): Handle LEX_PARALLEL_SEPARATOR chars like
+	LEX_LINE_SEPARATOR except that we go to state 1 (as if the label has
+	been seen).
+
 2001-07-24  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am (DEP_FLAGS): Define, add -DOBJ_MAYBE_ELF.

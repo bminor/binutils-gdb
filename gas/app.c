@@ -78,9 +78,11 @@ static const char symbol_chars[] =
 #ifdef DOUBLEBAR_PARALLEL
 #define LEX_IS_DOUBLEBAR_1ST		13
 #endif
+#define LEX_IS_PARALLEL_SEPARATOR	14
 #define IS_SYMBOL_COMPONENT(c)		(lex[c] == LEX_IS_SYMBOL_COMPONENT)
 #define IS_WHITESPACE(c)		(lex[c] == LEX_IS_WHITESPACE)
 #define IS_LINE_SEPARATOR(c)		(lex[c] == LEX_IS_LINE_SEPARATOR)
+#define IS_PARALLEL_SEPARATOR(c)	(lex[c] == LEX_IS_PARALLEL_SEPARATOR)
 #define IS_COMMENT(c)			(lex[c] == LEX_IS_COMMENT_START)
 #define IS_LINE_COMMENT(c)		(lex[c] == LEX_IS_LINE_COMMENT_START)
 #define	IS_NEWLINE(c)			(lex[c] == LEX_IS_NEWLINE)
@@ -163,6 +165,15 @@ do_scrub_begin (m68k_mri)
     {
       lex[(unsigned char) *p] = LEX_IS_LINE_SEPARATOR;
     }				/* declare line separators */
+
+#ifdef tc_parallel_separator_chars
+  /* This macro permits the processor to specify all characters which
+     separate parallel insns on the same line.  */
+  for (p = tc_parallel_separator_chars; *p; p++)
+    {
+      lex[(unsigned char) *p] = LEX_IS_PARALLEL_SEPARATOR;
+    }				/* declare parallel separators */
+#endif
 
   /* Only allow slash-star comments if slash is not in use.
      FIXME: This isn't right.  We should always permit them.  */
@@ -796,7 +807,8 @@ do_scrub_chars (get, tostart, tolen)
 #endif
 	  if (IS_COMMENT (ch)
 	      || ch == '/'
-	      || IS_LINE_SEPARATOR (ch))
+	      || IS_LINE_SEPARATOR (ch)
+	      || IS_PARALLEL_SEPARATOR (ch))
 	    {
 	      if (scrub_m68k_mri)
 		{
@@ -1036,6 +1048,11 @@ do_scrub_chars (get, tostart, tolen)
 
 	case LEX_IS_LINE_SEPARATOR:
 	  state = 0;
+	  PUT (ch);
+	  break;
+
+	case LEX_IS_PARALLEL_SEPARATOR:
+	  state = 1;
 	  PUT (ch);
 	  break;
 
