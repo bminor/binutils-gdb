@@ -18,7 +18,8 @@ SIM_SKY_OBJS = \
 	sky-libvpe.o \
 	sky-pke.o \
 	sky-vu0.o \
-	sky-vu1.o
+	sky-vu1.o \
+	sky-gdb.o
 # end-sanitize-sky
 
 SIM_IGEN_OBJ = \
@@ -72,7 +73,7 @@ SIM_EXTRA_CFLAGS = \
 	-I$(srcdir)/../../newlib/libc/sys/idt \
 	$(SIM_@sim_gen@_CFLAGS)
 
-SIM_EXTRA_CLEAN = clean-igen clean-m16 clean-extra
+SIM_EXTRA_CLEAN = clean-extra
 
 SIM_EXTRA_ALL = $(SIM_@sim_gen@_ALL)
 
@@ -141,18 +142,21 @@ BUILT_SRC_FROM_IGEN = \
 	model.c \
 	support.h \
 	support.c \
-	itable.h \
-	itable.c \
 	engine.h \
 	engine.c \
-	irun.c
+	irun.c \
+
+# NB:	Since these can be built by either tmp-igen or tmp-m16
+#	they are explicitly marked as being dependant on the
+#	dependant on the selected generator.
+BUILT_SRC_FROM_GEN = \
+	itable.h \
+	itable.c \
+
+$(BUILT_SRC_FROM_GEN): $(SIM_@sim_gen@_ALL)
+
 
 $(BUILT_SRC_FROM_IGEN): tmp-igen
-
-.PHONY: clean-igen
-clean-igen:
-	rm -f $(BUILT_SRC_FROM_IGEN)
-	rm -f tmp-igen
 
 tmp-igen: $(IGEN_INSN) $(IGEN_DC) ../igen/igen $(IGEN_INCLUDE)
 	cd ../igen && $(MAKE)
@@ -233,16 +237,8 @@ BUILT_SRC_FROM_M16 = \
 	m32_model.c \
 	m32_support.h \
 	m32_support.c \
-	\
-	itable.h \
-	itable.c \
 
 $(BUILT_SRC_FROM_M16): tmp-m16
-
-.PHONY: clean-m16
-clean-m16:
-	rm -f $(BUILT_SRC_FROM_M16)
-	rm -f tmp-m16
 
 tmp-m16: $(IGEN_INSN) $(IGEN_DC) ../igen/igen $(IGEN_INCLUDE)
 	cd ../igen && $(MAKE)
@@ -336,3 +332,8 @@ tmp-m16: $(IGEN_INSN) $(IGEN_DC) ../igen/igen $(IGEN_INCLUDE)
 
 clean-extra:
 	rm -f gencode oengine.c tmp.igen
+	rm -f $(BUILT_SRC_FROM_GEN)
+	rm -f $(BUILT_SRC_FROM_IGEN)
+	rm -f $(BUILT_SRC_FROM_M16)
+	rm -f tmp-igen
+	rm -f tmp-m16
