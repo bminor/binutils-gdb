@@ -24,7 +24,7 @@ Wed Sep 18 09:13:25 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 	field.
 	(init_text_p,text{,_start,_end}): New static variables for
 	printing line number and function name.
-	(sim_bfd): New external that run.c sets.
+	(exec_bfd): New external that run.c sets.
 	(trace_input_func): Print line number and function name if
 	available and if desired.
 	(OP_4E09): Don't print out DBT message.

@@ -49,7 +49,7 @@ static int init_text_p = 0;
 static asection *text;
 static bfd_vma text_start;
 static bfd_vma text_end;
-extern bfd *sim_bfd;
+extern bfd *exec_bfd;
 
 #ifndef SIZE_INSTRUCTION
 #define SIZE_INSTRUCTION 8
@@ -113,12 +113,12 @@ trace_input_func (name, in1, in2, in3)
       if (!init_text_p)
 	{
 	  init_text_p = 1;
-	  for (s = sim_bfd->sections; s; s = s->next)
-	    if (strcmp (bfd_get_section_name (sim_bfd, s), ".text") == 0)
+	  for (s = exec_bfd->sections; s; s = s->next)
+	    if (strcmp (bfd_get_section_name (exec_bfd, s), ".text") == 0)
 	      {
 		text = s;
-		text_start = bfd_get_section_vma (sim_bfd, s);
-		text_end = text_start + bfd_section_size (sim_bfd, s);
+		text_start = bfd_get_section_vma (exec_bfd, s);
+		text_end = text_start + bfd_section_size (exec_bfd, s);
 		break;
 	      }
 	}
@@ -129,7 +129,7 @@ trace_input_func (name, in1, in2, in3)
 	  filename = (const char *)0;
 	  functionname = (const char *)0;
 	  linenumber = 0;
-	  if (bfd_find_nearest_line (sim_bfd, text, (struct symbol_cache_entry **)0, byte_pc - text_start,
+	  if (bfd_find_nearest_line (exec_bfd, text, (struct symbol_cache_entry **)0, byte_pc - text_start,
 				     &filename, &functionname, &linenumber))
 	    {
 	      p = buf;
