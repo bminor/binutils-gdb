@@ -16,7 +16,7 @@ dnl In default case we need to link with some file so use common.inc.
 archinc=common.inc
 case ${target} in
 d10v-*-*) archinc=d10v.inc ;;
-i[3456]86*) archinc=i386.inc ;;
+i[[3456]]86*) archinc=i386.inc ;;
 m32r*-*) archinc=m32r.inc ;;
 esac
 AC_LINK_FILES($archinc,arch.inc)
