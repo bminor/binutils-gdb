@@ -45,6 +45,9 @@ host_libs="intl mmalloc libiberty opcodes bfd readline gash db tcl tk tclX itcl 
 # start-sanitize-ide
 host_libs="${host_libs} libide libidetcl"
 # end-sanitize-ide
+# start-sanitize-cygnus
+host_libs="${host_libs} flexlm"
+# end-sanitize-cygnus
 
 if [ "${enable_gdbgui}" = "yes" ] ; then
 	host_libs="${host_libs} libgui"
@@ -523,12 +526,18 @@ case "${host}" in
 # start-sanitize-ide
     noconfigdirs="$noconfigdirs libide libidetcl vmake jstools"
 # end-sanitize-ide
+# start-sanitize-cygnus
+    noconfigdirs="$noconfigdirs flexlm"
+# end-sanitize-cygnus
     ;;
   i[3456]86-*-go32* | i[3456]86-*-msdosdjgpp*)
     noconfigdirs="tcl tk expect dejagnu make texinfo bison patch flex byacc send-pr uudecode dejagnu diff guile perl apache inet itcl tix db snavigator gnuserv gettext"
 # start-sanitize-ide
     noconfigdirs="$noconfigdirs libide libidetcl vmake jstools"
 # end-sanitize-ide
+# start-sanitize-cygnus
+    noconfigdirs="$noconfigdirs flexlm"
+# end-sanitize-cygnus
 	;;
   i[3456]86-*-mingw32*)
     # noconfigdirs="tcl tk expect dejagnu make texinfo bison patch flex byacc send-pr uudecode dejagnu diff guile perl apache inet itcl tix db snavigator gnuserv"
@@ -551,6 +560,9 @@ case "${host}" in
 # start-sanitize-ide
      noconfigdirs="$noconfigdirs libide libidetcl vmake jstools"
 # end-sanitize-ide
+# start-sanitize-cygnus
+     noconfigdirs="$noconfigdirs flexlm"
+# end-sanitize-cygnus
     ;;
 esac
 
@@ -639,6 +651,9 @@ case "${target}" in
     case "${host}" in
       i[3456]86-*-mingw32) ;; # keep gdb tcl tk expect etc.
       *) noconfigdirs="$noconfigdirs gdb tcl tk expect itcl tix db snavigator gnuserv"
+# start-sanitize-cygnus
+         noconfigdirs="$noconfigdirs flexlm"
+# end-sanitize-cygnus
          ;;
     esac
     ;;    
@@ -655,6 +670,9 @@ case "${target}" in
 # start-sanitize-ide
          noconfigdirs="$noconfigdirs libide libidetcl vmake jstools"
 # end-sanitize-ide
+# start-sanitize-cygnus
+	 noconfigdirs="$noconfigdirs flexlm"
+# end-sanitize-cygnus
          ;;
     esac
     ;;    
@@ -702,6 +720,9 @@ case "${target}" in
 # start-sanitize-ide
     noconfigdirs="$noconfigdirs libide libidetcl vmake jstools"
 # end-sanitize-ide
+# start-sanitize-cygnus
+    noconfigdirs="$noconfigdirs flexlm"
+# end-sanitize-cygnus 
     # always build newlib.
     skipdirs=`echo " ${skipdirs} " | sed -e 's/ target-newlib / /'`
     ;;
@@ -711,6 +732,9 @@ case "${target}" in
 # start-sanitize-ide
     noconfigdirs="$noconfigdirs libide libidetcl vmake jstools"
 # end-sanitize-ide
+# start-sanitize-cygnus
+    noconfigdirs="$noconfigdirs flexlm"
+# end-sanitize-cygnus
     ;;
   rs6000-*-lynxos*)
     # The CVS server code doesn't work on the RS/6000
