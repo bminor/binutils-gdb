@@ -14,6 +14,7 @@ revised and enabled.
 
 Alpha FreeBSD					alpha*-*-freebsd*
 x86 FreeBSD 3.x and 4.x				i[3456]86*-freebsd[34]*
+MIPS Linux					mips*-*-linux*
 
 * New targets
 

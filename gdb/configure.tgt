@@ -211,6 +211,7 @@ mips*-sgi-irix5*)	gdb_target=irix5 ;;
 mips*-sgi-irix6*)	gdb_target=irix6 ;;
 mips*-sgi-*)		gdb_target=irix3 ;;
 mips*-sony-*)		gdb_target=bigmips ;;
+mips*-*-linux*)		gdb_target=linux ;;
 mips*-*-mach3*)		gdb_target=mipsm3 ;;
 mips*-*-sysv4*)		gdb_target=mipsv4 ;;
 mips*-*-sysv*)		gdb_target=bigmips ;;

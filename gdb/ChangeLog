@@ -1,3 +1,16 @@
+2001-07-10  Daniel Jacobowitz  <drow@mvista.com>
+
+	* mips-linux-tdep.c: New file.
+	* mips-linux-nat.c: New file.
+	* config/mips/linux.mh: New file.
+	* config/mips/linux.mt: New file.
+	* config/mips/xm-linux.h: New file.
+	* config/mips/nm-linux.h: New file.
+	* config/mips/tm-linux.h: New file.
+	* configure.host: Recognize mips*-*-linux*.
+	* configure.tgt: Likewise.
+	* NEWS: Mention mips*-*-linux* port.
+
 2001-07-09  Andrew Cagney  <ac131313@redhat.com>
 
 	* serial.h (struct serial): Rename `struct _serial_t'.
