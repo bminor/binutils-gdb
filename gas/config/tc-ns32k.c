@@ -890,13 +890,15 @@ evaluate_expr (resultP, ptr)
    opcode.
    Be carefull not to put to objects in the same iif-slot.  */
 
-static void encode_operand PARAMS ((int argc, char **argv, char *operandsP, char *, char, char));
+static void encode_operand
+  PARAMS ((int, char **, const char *, const char *, char, char));
+
 static void
 encode_operand (argc, argv, operandsP, suffixP, im_size, opcode_bit_ptr)
      int argc;
      char **argv;
-     char *operandsP;
-     char *suffixP;
+     const char *operandsP;
+     const char *suffixP;
      char im_size ATTRIBUTE_UNUSED;
      char opcode_bit_ptr;
 {
@@ -1077,13 +1079,15 @@ encode_operand (argc, argv, operandsP, suffixP, im_size, opcode_bit_ptr)
    Return-value = recursive_level.  */
 /* Build iif of one assembly text line.  */
 
-static int parse PARAMS ((char *, int));
+static int parse PARAMS ((const char *, int));
+
 static int
 parse (line, recursive_level)
-     char *line;
+     const char *line;
      int recursive_level;
 {
-  char *lineptr, c, suffix_separator;
+  const char *lineptr;
+  char c, suffix_separator;
   int i;
   unsigned int argc;
   int arg_type;
@@ -1097,12 +1101,12 @@ parse (line, recursive_level)
 	continue;
 
       c = *lineptr;
-      *lineptr = '\0';
+      *(char *) lineptr = '\0';
 
       if (!(desc = (struct ns32k_opcode *) hash_find (inst_hash_handle, line)))
 	as_fatal (_("No such opcode"));
 
-      *lineptr = c;
+      *(char *) lineptr = c;
     }
   else
     {
@@ -1637,7 +1641,9 @@ md_begin ()
   const struct ns32k_opcode *ptr;
   const char *stat;
   inst_hash_handle = hash_new ();
+  const struct ns32k_opcode *endop;
 
+  endop = ns32k_opcodes + sizeof (ns32k_opcodes) / sizeof (ns32k_opcodes[0]);
   for (ptr = ns32k_opcodes; ptr < endop; ptr++)
     {
       if ((stat = hash_insert (inst_hash_handle, ptr->name, (char *) ptr)))
