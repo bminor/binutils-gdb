@@ -872,6 +872,9 @@ struct symtabs_and_lines decode_line_spec ();
 struct symtabs_and_lines decode_line_spec_1 ();
 struct symtabs_and_lines decode_line_1 ();
 
+/* Symmisc.c */
+void free_symtab ();
+
 /* Symbol-reading stuff in symfile.c and solib.c.  */
 struct symtab *psymtab_to_symtab ();
 void clear_solib ();
