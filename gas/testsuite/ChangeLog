@@ -1,3 +1,8 @@
+2003-10-16  Ian Lance Taylor  <ian@wasabisystems.com>
+
+	* gas/arm/iwmmxt.d: Add -miwmmxt to #objdump line, to get the
+	right disassembly.
+
 2003-10-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/alpha/elf-reloc-8.d: Updated.
