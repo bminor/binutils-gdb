@@ -1,5 +1,9 @@
 2002-07-18  Jim Blandy  <jimb@redhat.com>
 
+	* gdb.base/ending-run.exp: Don't expect to see the program end in
+	some orderly fashion when we're running on a real stand-alone
+	board.
+
 	* gdb.base/interrupt.exp: Correct logic for skipping tests on
 	targets that don't support interrupts.
 
