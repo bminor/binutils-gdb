@@ -102,7 +102,8 @@ fixS *fixP;	/* Fixup chain for this segment. */
 relax_addressT segment_address_in_file;
 {
 	for (; fixP; fixP = fixP->fx_next) {
-		if (fixP->fx_addsy != NULL) {
+		if (fixP->fx_addsy != NULL
+		    || fixP->fx_r_type != NO_RELOC) {
 			tc_bout_fix_to_chars(*where, fixP, segment_address_in_file);
 			*where += sizeof(struct relocation_info);
 		} /* if there's a symbol */

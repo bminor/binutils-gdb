@@ -34,12 +34,12 @@
 #endif
 
 #ifndef MANY_SEGMENTS
-static struct frag *text_frag_root;
-static struct frag *data_frag_root;
-static struct frag *bss_frag_root;
+struct frag *text_frag_root;
+struct frag *data_frag_root;
+struct frag *bss_frag_root;
 
-static struct frag *text_last_frag;	/* Last frag in segment. */
-static struct frag *data_last_frag;	/* Last frag in segment. */
+struct frag *text_last_frag;	/* Last frag in segment. */
+struct frag *data_last_frag;	/* Last frag in segment. */
 static struct frag *bss_last_frag;	/* Last frag in segment. */
 #endif
 
@@ -53,24 +53,10 @@ char *next_object_file_charP;	/* Tracks object file bytes. */
 
 int magic_number_for_object_file = DEFAULT_MAGIC_NUMBER_FOR_OBJECT_FILE;
 
-/* static long		length; JF unused */	/* String length, including trailing '\0'. */
-
-
-#if __STDC__ == 1
-
-static int is_dnrange(struct frag *f1, struct frag *f2);
-static long fixup_segment(fixS *fixP, segT this_segment_type);
-static relax_addressT relax_align(relax_addressT address, long alignment);
-void relax_segment(struct frag *segment_frag_root, segT segment_type);
-
-#else
-
-static int is_dnrange();
-static long fixup_segment();
-static relax_addressT relax_align();
-void relax_segment();
-
-#endif /* not __STDC__ */
+static int is_dnrange PARAMS ((struct frag *f1, struct frag *f2));
+static long fixup_segment PARAMS ((fixS *fixP, segT this_segment_type));
+static relax_addressT relax_align PARAMS ((relax_addressT addr, long align));
+void relax_segment PARAMS ((struct frag *seg_frag_root, segT seg_type));
 
 /*
  *			fix_new()
@@ -111,7 +97,7 @@ int 	r_type;	/* Relocation type */
 	   comparing to older versions of gas that have relocs
 	   reverse sorted, it is convenient to have this compile
 	   time option.  xoxorich. */
-	
+
 #ifdef REVERSE_SORT_RELOCS
 	
 	fixP->fx_next = *seg_fix_rootP;
@@ -160,10 +146,6 @@ void write_object_file()
 	register fragS *		fragP;	/* Track along all frags. */
 	register struct frchain *	next_frchainP;
 	register fragS * *		prev_fragPP;
-	/*  register char *		name; */
-	/*  symbolS *symbolP; */
-	/*  register symbolS **		symbolPP; */
-	/* register fixS *		fixP; JF unused */
 	unsigned int data_siz;
 	
 	long object_file_size;
@@ -178,10 +160,11 @@ void write_object_file()
 	VMS_Check_For_Main();
 #endif /* VMS */
 	/*
-	 * After every sub-segment, we fake an ".align ...". This conforms to BSD4.2
-	 * brane-damage. We then fake ".fill 0" because that is the kind of frag
-	 * that requires least thought. ".align" frags like to have a following
-	 * frag since that makes calculating their intended length trivial.
+	 * After every sub-segment, we fake an ".align ...". This conforms to
+	 * BSD4.2 brane-damage. We then fake ".fill 0" because that is the
+	 * kind of frag that requires least thought. ".align" frags like to
+	 * have a following frag since that makes calculating their intended
+	 * length trivial.
 	 */
 #define SUB_SEGMENT_ALIGN (2)
 	for (frchainP = frchain_root; frchainP; frchainP = frchainP->frch_next) {
@@ -213,7 +196,8 @@ void write_object_file()
 	/*
 	 * From now on, we don't care about sub-segments.
 	 * Build one frag chain for each segment. Linked thru fr_next.
-	 * We know that there is at least 1 text frchain & at least 1 data frchain.
+	 * We know that there is at least 1 text frchain & at least 1 data
+	 * frchain.
 	 */
 
 	remove_subsegs(frchain_root, SEG_TEXT, &text_frag_root, &text_last_frag);
@@ -304,6 +288,7 @@ void write_object_file()
 	bss_address_frag.fr_address = (H_GET_TEXT_SIZE(&headers) + 
 				       H_GET_DATA_SIZE(&headers));
 
+
 	/* Slide all the frags */
 	if (bss_frag_root) 
 	{
@@ -316,7 +301,10 @@ void write_object_file()
 	}
 
 #endif	
-	H_SET_BSS_SIZE(&headers,local_bss_counter + bss_last_frag ?  bss_last_frag->fr_address: 0);
+if(bss_last_frag) {
+local_bss_counter += bss_last_frag->fr_address - bss_frag_root->fr_address;
+}
+	H_SET_BSS_SIZE(&headers,local_bss_counter );
 	
 	/*
 	 *
@@ -362,6 +350,9 @@ void write_object_file()
 		switch (fragP->fr_type) {
 		case rs_align:
 		case rs_org:
+#ifdef HANDLE_ALIGN
+			HANDLE_ALIGN (fragP);
+#endif
 			fragP->fr_type = rs_fill;
 			know(fragP->fr_var == 1);
 			know(fragP->fr_next != NULL);
@@ -522,12 +513,16 @@ void write_object_file()
 		 * Scan every FixS performing fixups. We had to wait until now to do
 		 * this because md_convert_frag() may have made some fixSs.
 		 */
-		
-		H_SET_RELOCATION_SIZE(&headers,
-				      md_reloc_size * fixup_segment(text_fix_root, SEG_TEXT),
-				      md_reloc_size * fixup_segment(data_fix_root, SEG_DATA));
-		
-		
+		int trsize, drsize;
+
+		subseg_change (SEG_TEXT, 0);
+		trsize = md_reloc_size * fixup_segment (text_fix_root,
+							SEG_TEXT);
+		subseg_change (SEG_DATA, 0);
+		drsize = md_reloc_size * fixup_segment (data_fix_root,
+							SEG_DATA);
+		H_SET_RELOCATION_SIZE (&headers, trsize, drsize);
+
 		/* FIXME move this stuff into the pre-write-hook */
 		H_SET_MAGIC_NUMBER(&headers, magic_number_for_object_file);
 		H_SET_ENTRY_POINT(&headers, 0);
@@ -660,16 +655,15 @@ segT		segment; /* SEG_DATA or SEG_TEXT */
 {
 	register struct frag *	fragP;
 	register relax_addressT	address;
-	/* register relax_addressT	old_address; JF unused */
-	/* register relax_addressT	new_address; JF unused */
 #ifndef MANY_SEGMENTS	
-	know(segment == SEG_DATA || segment == SEG_TEXT || segment == SEG_BSS) ;
+	know(segment == SEG_DATA || segment == SEG_TEXT || segment == SEG_BSS);
 #endif
 	/* In case md_estimate_size_before_relax() wants to make fixSs. */
 	subseg_change(segment, 0);
 	
 	/*
-	 * For each frag in segment: count and store  (a 1st guess of) fr_address.
+	 * For each frag in segment: count and store  (a 1st guess of)
+	 * fr_address.
 	 */
 	address = 0;
 	for (fragP = segment_frag_root; fragP; fragP = fragP->fr_next) {
@@ -687,7 +681,8 @@ segT		segment; /* SEG_DATA or SEG_TEXT */
 			
 		case rs_org:
 			/*
-			 * Assume .org is nugatory. It will grow with 1st relax.
+			 * Assume .org is nugatory. It will grow with 1st
+			 * relax.
 			 */
 			break;
 			
@@ -804,7 +799,7 @@ segT		segment; /* SEG_DATA or SEG_TEXT */
 					if (symbolP) {
 #ifdef MANY_SEGMENTS
 #else
-						know((S_GET_SEGMENT(symbolP) == SEG_ABSOLUTE) || (S_GET_SEGMENT(symbolP) == SEG_DATA) || (S_GET_SEGMENT(symbolP) == SEG_TEXT));
+						know((S_GET_SEGMENT(symbolP) == SEG_ABSOLUTE) || (S_GET_SEGMENT(symbolP) == SEG_DATA) || (S_GET_SEGMENT(symbolP) == SEG_TEXT) || S_GET_SEGMENT(symbolP) == SEG_BSS);
 						know(symbolP->sy_frag);
 						know(!(S_GET_SEGMENT(symbolP) == SEG_ABSOLUTE) || (symbolP->sy_frag == &zero_address_frag));
 #endif
@@ -833,7 +828,7 @@ segT		segment; /* SEG_DATA or SEG_TEXT */
 					
 					if (symbolP) {
 #ifndef MANY_SEGMENTS
-						know((S_GET_SEGMENT(symbolP) == SEG_ABSOLUTE) || (S_GET_SEGMENT(symbolP) == SEG_DATA) || (S_GET_SEGMENT(symbolP) == SEG_TEXT));
+						know((S_GET_SEGMENT(symbolP) == SEG_ABSOLUTE) || (S_GET_SEGMENT(symbolP) == SEG_DATA)|| (S_GET_SEGMENT(symbolP) == SEG_BSS) || (S_GET_SEGMENT(symbolP) == SEG_TEXT));
 #endif
 						know(symbolP->sy_frag);
 						know(!(S_GET_SEGMENT(symbolP) == SEG_ABSOLUTE) || symbolP->sy_frag==&zero_address_frag );
@@ -953,16 +948,21 @@ segT		segment; /* SEG_DATA or SEG_TEXT */
  */
 
 /* How many addresses does the .align take? */
-static relax_addressT relax_align(address, alignment)
-register relax_addressT address; /* Address now. */
-register long alignment; /* Alignment (binary). */
+static relax_addressT
+relax_align(address, alignment)
+     register relax_addressT address; /* Address now. */
+     register long alignment; /* Alignment (binary). */
 {
-	relax_addressT	mask;
-	relax_addressT	new_address;
-	
-	mask = ~ ( (~0) << alignment );
-	new_address = (address + mask) & (~ mask);
-	return (new_address - address);
+  relax_addressT mask;
+  relax_addressT new_address;
+
+  mask = ~ ( (~0) << alignment );
+  new_address = (address + mask) & (~ mask);
+  if (linkrelax)
+    /* We must provide lots of padding, so the linker can discard it
+       when needed.  The linker will not add extra space, ever.  */
+    new_address += (1 << alignment);
+  return (new_address - address);
 } /* relax_align() */
 
 /* fixup_segment()
@@ -976,9 +976,10 @@ register long alignment; /* Alignment (binary). */
    handle the remaining fixS's that we couldn't completely handle here.
    These will be output later by emit_relocations().  */
 
-static long fixup_segment(fixP, this_segment_type)
-register fixS *	fixP;
-segT		this_segment_type; /* N_TYPE bits for segment. */
+static long
+fixup_segment(fixP, this_segment_type)
+     register fixS *fixP;
+     segT this_segment_type; /* N_TYPE bits for segment. */
 {
 	register long seg_reloc_count;
 	register symbolS *add_symbolP;
@@ -993,7 +994,15 @@ segT		this_segment_type; /* N_TYPE bits for segment. */
 	
 	/* FIXME: remove this line */ /*	fixS *orig = fixP; */
 	seg_reloc_count = 0;
-	
+#ifdef TC_I960
+	/* If the linker is doing the relaxing, we must not do any fixups */
+	if (linkrelax) {
+	  for ( ; fixP ; fixP = fixP->fx_next) {
+	    seg_reloc_count++;
+	  }
+	}
+	else
+#endif
 	for ( ;  fixP;  fixP = fixP->fx_next) {
 		fragP       = fixP->fx_frag;
 		know(fragP);

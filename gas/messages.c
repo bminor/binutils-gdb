@@ -92,7 +92,7 @@
   
   */
 
-static int warning_count = 0; /* Count of number of warnings issued */
+static int warning_count; /* Count of number of warnings issued */
 
 int had_warnings() {
 	return(warning_count);
@@ -101,7 +101,7 @@ int had_warnings() {
 /* Nonzero if we've hit a 'bad error', and should not write an obj file,
    and exit with a nonzero error code */
 
-static int error_count = 0;
+static int error_count;
 
 int had_errors() {
 	return(error_count);
@@ -177,7 +177,7 @@ char *Format;
 /*
  *			a s _ w a r n ()
  *
- * Send to stderr a string (with bell) (JF: Bell is obnoxious!) as a warning, and locate warning
+ * Send to stderr a string as a warning, and locate warning
  * in input file(s).
  * Please only use this for when we have some recovery action.
  * Please explain in string (which may have '\n's) what recovery was done.

@@ -1,3 +1,32 @@
+Wed Aug 19 09:25:09 1992  Ken Raeburn  (raeburn@cygnus.com)
+
+	* as.h (enum _relax_state): Start off at one, not zero, to better
+	catch uninitialized-variable errors.
+	(linkrelax): Declare new variable.
+
+	* messages.c (warning_count, error_count): Default initializer is
+	sufficient.
+
+	* write.c: Merged some declarations, using PARMS macro.
+	(text_frag_root, data_frag_root, bss_frag_root, text_last_frag,
+	data_last_frag): No longer static.
+	(write_object_file, case rs_align or rs_org): If HANDLE_ALIGN is
+	defined, call it.  Change segments before calling fixup_segment.
+	(relax_align): If linkrelax, provide extra padding.
+
+	* obj-bout.c (obj_emit_relocations): Emit alignment relocs despite
+	their not having symbols associated.
+
+	* tc-i960.c (norelax, instrument_branches): Default initializer is
+	sufficient.
+	(linkrelax): Delete variable definition.
+	(mem_fmt): Call fix_new with NO_RELOC.
+	(tc_bout_fix_to_chars): Handle alignment relocs.
+	(i960_handle_align): New function.
+	* tc-i960.h (linkrelax): Delete declaration.
+	(HANDLE_ALIGN): New macro; calls i960_handle_align.
+	(NEED_FX_R_TYPE, NO_RELOC): New macros.
+
 Tue Aug 18 14:59:21 1992  Ken Raeburn  (raeburn@cygnus.com)
 
 	* config/sparc.mt: New file.  Grab sparc opcode table from bfd

@@ -126,8 +126,8 @@ static int targ_has_iclass();/* Target chip supports instruction set? */
 /* static void	unlink_sym(); */	/* Remove a symbol from the symbol list */
 
 /* See md_parse_option() for meanings of these options */
-static char norelax = 0;		/* True if -norelax switch seen */
-static char instrument_branches = 0;	/* True if -b switch seen */
+static char norelax;		/* True if -norelax switch seen */
+static char instrument_branches; /* True if -b switch seen */
 
 /* Characters that always start a comment.
  * If the pre-processor is disabled, these aren't very useful.
@@ -186,19 +186,17 @@ const relax_typeS
 #define S_LEAFPROC	1
 #define S_SYSPROC	2
 
-const pseudo_typeS
-    md_pseudo_table[] = {
-	    
-	    { "bss",	s_lcomm,	1 },
-	    { "extended",	float_cons,	't' },
-	    { "leafproc",	parse_po,	S_LEAFPROC },
-	    { "sysproc",	parse_po,	S_SYSPROC },
-	    
-	    { "word",	cons,		4 },
-	    { "quad",	big_cons,	16 },
-	    
-	    { 0,		0,		0 }
-    };
+const pseudo_typeS md_pseudo_table[] = {
+  { "bss",	s_lcomm,	1 },
+  { "extended",	float_cons,	't' },
+  { "leafproc",	parse_po,	S_LEAFPROC },
+  { "sysproc",	parse_po,	S_SYSPROC },
+
+  { "word",	cons,		4 },
+  { "quad",	big_cons,	16 },
+
+  { 0,		0,		0 }
+};
 
 /* Macros to extract info from an 'expressionS' structure 'e' */
 #define adds(e)	e.X_add_symbol
@@ -479,7 +477,7 @@ char *textP;	/* Source text of instruction */
 			 *			replaced by decimal numbers
 			 */
 	int n_ops;	/* Number of instruction operands */
-	
+	int callx;
 	struct i960_opcode *oP;
 	/* Pointer to instruction description */
 	int branch_predict;
@@ -509,6 +507,8 @@ char *textP;	/* Source text of instruction */
 			return;
 		}
 	}
+
+
 	
 	/* Check for branch-prediction suffix on opcode mnemonic, strip it off */
 	n = strlen(args[0]) - 1;
@@ -556,6 +556,15 @@ char *textP;	/* Source text of instruction */
 			reg_fmt(args, oP);
 			break;
 		case MEM1:
+			if (args[0][0] == 'c' && args[0][1] == 'a') 
+			{
+			  if (branch_predict)
+			  {
+			    as_warn(bp_error_msg);
+			  }
+			  mem_fmt(args, oP, 1);
+			  break;
+			}
 		case MEM2:
 		case MEM4:
 		case MEM8:
@@ -564,7 +573,7 @@ char *textP;	/* Source text of instruction */
 			if (branch_predict){
 				as_warn(bp_error_msg);
 			}
-			mem_fmt(args, oP);
+			mem_fmt(args, oP, 0);
 			break;
 		case CALLJ:
 			if (branch_predict){
@@ -833,8 +842,10 @@ char ***vecP;
 		NULL, 0
 	    };
 	struct tabentry *tp;
-	
-	if (!strcmp(*argP,"norelax")){
+	if (!strcmp(*argP,"linkrelax")){
+        	linkrelax = 1;
+		flagseen ['L'] = 1;
+	} else if (!strcmp(*argP,"norelax")){
 		norelax = 1;
 		
 	} else if (**argP == 'b'){
@@ -1062,7 +1073,7 @@ void
 			       0,
 			       0,
 			       0);
-		fixP->fx_im_disp = 2;		/* 32-bit displacement fix */
+		fixP->fx_im_disp = 2; /* 32-bit displacement fix */
 	}
 }
 
@@ -1459,9 +1470,10 @@ char *args[];	/* Output arg: pointers to opcode and operands placed
  * mem_fmt:	generate a MEMA- or MEMB-format instruction
  *
  **************************************************************************** */
-static void mem_fmt(args, oP)
+static void mem_fmt(args, oP, callx)
 char *args[];	/* args[0]->opcode mnemonic, args[1-3]->operands */
 struct i960_opcode *oP; /* Pointer to description of instruction */
+int callx; /* Is this a callx opcode */
 {
 	int i;			/* Loop counter */
 	struct regop regop;	/* Description of register operand */
@@ -1546,8 +1558,9 @@ struct i960_opcode *oP; /* Pointer to description of instruction */
 			       subs(expr),
 			       offs(expr),
 			       0,
-			       0);
-		fixP->fx_im_disp = 2;		/* 32-bit displacement fix */
+			       NO_RELOC);
+		fixP->fx_im_disp = 2; /* 32-bit displacement fix */
+		fixP->fx_bsr = callx; /*SAC LD RELAX HACK */ /* Mark reloc as being in i stream */
 		break;
 		
 	default:
@@ -2245,7 +2258,7 @@ fixS *fixP;		/* Relocation that can be done at assembly time */
 	if (!fixP->fx_callj) {
 		return;
 	} /* This wasn't a callj instruction in the first place */
-	
+
 	where = fixP->fx_frag->fr_literal + fixP->fx_where;
 	
 	if (TC_S_IS_SYSPROC(fixP->fx_addsy)) {
@@ -2552,17 +2565,42 @@ relax_addressT segment_address_in_file;
 	
 	/* JF this is for paranoia */
 	memset((char *)&ri, '\0', sizeof(ri));
-	
-	know((symbolP = fixP->fx_addsy) != 0);
-	
+	symbolP = fixP->fx_addsy;
+	know(symbolP != 0 || fixP->fx_r_type != NO_RELOC);
+	ri.r_bsr = fixP->fx_bsr; /*SAC LD RELAX HACK */	
 	/* These two 'cuz of NS32K */
 	ri.r_callj = fixP->fx_callj;
-	
-	ri.r_length = nbytes_r_length[fixP->fx_size];
+	if(fixP->fx_bit_fixP) {
+	  ri.r_length = 1;
+	}
+	else {
+	  ri.r_length = nbytes_r_length[fixP->fx_size];
+	}
 	ri.r_pcrel = fixP->fx_pcrel;
 	ri.r_address = fixP->fx_frag->fr_address + fixP->fx_where - segment_address_in_file;
 	
-	if (!S_IS_DEFINED(symbolP)) {
+	if (fixP->fx_r_type != NO_RELOC)
+	  {
+	    switch (fixP->fx_r_type)
+	      {
+	      case rs_align:
+		ri.r_index = -2;
+		ri.r_pcrel = 1;
+		ri.r_length = fixP->fx_size - 1;
+		break;
+	      case rs_org:
+		ri.r_index = -2;
+		ri.r_pcrel = 0;
+		break;
+	      case rs_fill:
+		ri.r_index = -1;
+		break;
+	      default:
+		abort ();
+	      }
+	    ri.r_extern = 0;
+	  }
+	else if (linkrelax || !S_IS_DEFINED(symbolP)) {
 		ri.r_extern = 1;
 		ri.r_index = symbolP->sy_number;
 	} else {
@@ -2748,6 +2786,32 @@ symbolS *symbolP;
 	
 	return;
 } /* tc_coff_symbol_emit_hook() */
+
+void
+i960_handle_align (fragp)
+     fragS *fragp;
+{
+  fixS *fixp;
+  segT old_seg = now_seg, this_seg;
+  int old_subseg = now_subseg;
+  int pad_size;
+  extern struct frag *text_last_frag, *data_last_frag;
+
+  if (!linkrelax)
+    return;
+
+  /* The text section "ends" with another alignment reloc, to which we
+     aren't adding padding.  */
+  if (fragp->fr_next == text_last_frag
+      || fragp->fr_next == data_last_frag)
+    {
+      return;
+    }
+
+  /* alignment directive */
+  fixp = fix_new (fragp, fragp->fr_fix, fragp->fr_offset, 0, 0, 0, 0,
+		  (int) fragp->fr_type);
+}
 
 /*
  * Local Variables:

@@ -197,9 +197,9 @@ extern int section_alignment[];
 /* relax() */
 
 typedef enum _relax_state {
-	rs_fill, /* Variable chars to be repeated fr_offset times. Fr_symbol
-		    unused. Used with fr_offset == 0 for a constant length
-		    frag. */
+	rs_fill = 1, /* Variable chars to be repeated fr_offset times.
+			Fr_symbol unused. Used with fr_offset == 0 for a
+			constant length frag. */
 	
 	rs_align, /* Align: Fr_offset: power of 2. 1 variable char: fill
 		     character. */
@@ -281,13 +281,14 @@ COMMON fragS  bss_address_frag;	/* For local common (N_BSS segment) fixups. */
 
 /* main program "as.c" (command arguments etc) */
 
-COMMON char
-    flagseen[128];			/* ['x'] TRUE if "-x" seen. */
+COMMON char flagseen[128];	/* ['x'] TRUE if "-x" seen. */
 
-COMMON char *
-    out_file_name;			/* name of emitted object file */
+COMMON char * out_file_name;	/* name of emitted object file */
 
-COMMON int	need_pass_2;	/* TRUE if we need a second pass. */
+COMMON int need_pass_2;		/* TRUE if we need a second pass. */
+
+COMMON int linkrelax;		/* TRUE if we should do no relaxing, and
+				   leave lots of padding.  */
 
 typedef struct {
 	char *	poc_name;	/* assembler mnemonic, lower case, no '.' */
