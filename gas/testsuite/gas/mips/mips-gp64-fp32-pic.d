@@ -145,3 +145,6 @@ Disassembly of section .text:
  21c:	0081082b 	sltu	at,a0,at
  220:	14200001 	bnez	at,228 <[^>]*>
  224:	00000000 	nop
+
+0+0228 <[^>]*>:
+	...

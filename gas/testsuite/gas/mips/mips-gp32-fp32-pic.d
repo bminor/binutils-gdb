@@ -112,3 +112,6 @@ Disassembly of section .text:
  198:	24a40064 	addiu	a0,a1,100
  19c:	0004202b 	sltu	a0,zero,a0
  1a0:	00a02025 	move	a0,a1
+
+0+01a4 <[^>]*>:
+	...

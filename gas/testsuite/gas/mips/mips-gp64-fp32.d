@@ -92,3 +92,6 @@ Disassembly of section .text:
  148:	00010c78 	dsll	at,at,0x11
  14c:	0081082b 	sltu	at,a0,at
  150:	14200000 	bnez	at,154 <[^>]*>
+
+0+0154 <[^>]*>:
+	...

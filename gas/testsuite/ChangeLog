@@ -1,3 +1,40 @@
+2001-08-04  H.J. Lu  <hjl@gnu.org>
+	    Chris G. Demetriou <cgd@broadcom.com>
+
+	* gas/mips/e32-rel4.s: Removed.
+
+	* gas/mips/e32-rel4.d: Use elf-rel4.s.
+
+	* gas/mips/mips.exp: Use the same rel4 test for litte endian.
+
+	* gas/mips/mips-abi32-pic.d: Add lines for objdump.
+	* gas/mips/mips-abi32.d: Likewise.
+	* gas/mips/mips-gp32-fp32-pic.d: Likewise.
+	* gas/mips/mips-gp32-fp32.d: Likewise.
+	* gas/mips/mips-gp32-fp64-pic.d: Likewise.
+	* gas/mips/mips-gp32-fp64.d: Likewise.
+	* gas/mips/mips-gp64-fp32-pic.d: Likewise.
+	* gas/mips/mips-gp64-fp32.d: Likewise.
+	* gas/mips/mips-gp64-fp64-pic.d: Likewise.
+	* gas/mips/mips-gp64-fp64.d: Likewise.
+
+	* gas/mips/mips-abi32-pic.s: Add space for objdump.
+	* gas/mips/mips-abi32.s: Likewise.
+	* gas/mips/mips-gp32-fp32-pic.s: Likewise.
+	* gas/mips/mips-gp32-fp32.s: Likewise.
+	* gas/mips/mips-gp32-fp64-pic.s: Likewise.
+	* gas/mips/mips-gp32-fp64.s: Likewise.
+	* gas/mips/mips-gp64-fp32-pic.s: Likewise.
+	* gas/mips/mips-gp64-fp32.s: Likewise.
+	* gas/mips/mips-gp64-fp64-pic.s: Likewise.
+	* gas/mips/mips-gp64-fp64.s: Likewise.
+
+	* gas/mips/mips-abi32-pic.s: Add the missing .end.
+	* gas/mips/mips-gp32-fp32-pic.s: Likewise.
+	* gas/mips/mips-gp32-fp64-pic.s: Likewise.
+	* gas/mips/mips-gp64-fp32-pic.s: Likewise.
+	* gas/mips/mips-gp64-fp64-pic.s: Likewise.
+
 2001-08-03  Richard Sandiford  <rsandifo@redhat.com>
 	
 	* gas/mips/elf-rel4.s, gas/mips/elf-rel4.d: New test.

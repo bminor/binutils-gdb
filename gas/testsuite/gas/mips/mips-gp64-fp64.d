@@ -93,3 +93,6 @@ Disassembly of section .text:
  14c:	0081082b 	sltu	at,a0,at
  150:	14200001 	bnez	at,158 <[^>]*>
  154:	46231040 	add.d	\$f1,\$f2,\$f3
+
+0+0158 <[^>]*>:
+	...

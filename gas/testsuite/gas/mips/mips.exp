@@ -151,10 +151,10 @@ if { [istarget mips*-*-*] } then {
 	run_dump_test "elf${el}-rel"
 	if [istarget mips64*-*-*] { 
 	    run_dump_test "elf${el}-rel2"
-	    run_dump_test "elf${el}-rel4"
+	    run_dump_test "elf-rel4"
 	} {
 	    run_dump_test "e32${el}-rel2"
-	    run_dump_test "e32${el}-rel4"
+	    run_dump_test "e32-rel4"
 	}
 	run_dump_test "elf${el}-rel3"
 	run_dump_test "${tmips}${el}empic"

@@ -72,3 +72,6 @@ Disassembly of section .text:
   f8:	0004202b 	sltu	a0,zero,a0
   fc:	00a02025 	move	a0,a1
  100:	46231040 	add.d	\$f1,\$f2,\$f3
+
+0+0104 <[^>]*>:
+	...

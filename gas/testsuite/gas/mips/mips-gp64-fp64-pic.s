@@ -159,4 +159,8 @@ func:
 
 	add.d	$f1, $f2, $f3	# 0228 add.d	$f1,$f2,$f3
 
+	.end	func
 end:
+
+# Force at least 8 (non-delay-slot) zero bytes, to make 'objdump' print ...
+	.space	8

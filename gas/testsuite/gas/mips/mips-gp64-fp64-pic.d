@@ -146,3 +146,6 @@ Disassembly of section .text:
  220:	14200002 	bnez	at,22c <[^>]*>
  224:	00000000 	nop
  228:	46231040 	add.d	\$f1,\$f2,\$f3
+
+0+022c <[^>]*>:
+	...

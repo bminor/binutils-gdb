@@ -73,3 +73,6 @@ Disassembly of section .text:
   fc:	24a40064 	addiu	a0,a1,100
  100:	0004202b 	sltu	a0,zero,a0
  104:	00a02025 	move	a0,a1
+
+0+0108 <[^>]*>:
+	...

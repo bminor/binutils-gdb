@@ -112,3 +112,6 @@ Disassembly of section .text:
  198:	0004202b 	sltu	a0,zero,a0
  19c:	00a02025 	move	a0,a1
  1a0:	46231040 	add.d	\$f1,\$f2,\$f3
+
+0+01a4 <[^>]*>:
+	...
