@@ -168,31 +168,6 @@ frameless_look_for_prologue (struct frame_info *frame)
     return 0;
 }
 
-/* return the address of the PC for the given FRAME, ie the current PC value
-   if FRAME is the innermost frame, or the address adjusted to point to the
-   call instruction if not.  */
-
-CORE_ADDR
-frame_address_in_block (struct frame_info *frame)
-{
-  CORE_ADDR pc = get_frame_pc (frame);
-
-  /* If we are not in the innermost frame, and we are not interrupted
-     by a signal, frame->pc points to the instruction following the
-     call. As a consequence, we need to get the address of the previous
-     instruction. Unfortunately, this is not straightforward to do, so
-     we just use the address minus one, which is a good enough
-     approximation.  */
-  /* FIXME: cagney/2002-11-10: Should this instead test for
-     NORMAL_FRAME?  A dummy frame (in fact all the abnormal frames)
-     save the PC value in the block.  */
-  if (get_next_frame (frame) != 0
-      && get_frame_type (get_next_frame (frame)) != SIGTRAMP_FRAME)
-    --pc;
-
-  return pc;
-}
-
 /* Return the innermost lexical block in execution
    in a specified stack frame.  The frame address is assumed valid.
 
@@ -212,7 +187,7 @@ frame_address_in_block (struct frame_info *frame)
 struct block *
 get_frame_block (struct frame_info *frame, CORE_ADDR *addr_in_block)
 {
-  const CORE_ADDR pc = frame_address_in_block (frame);
+  const CORE_ADDR pc = get_frame_address_in_block (frame);
 
   if (addr_in_block)
     *addr_in_block = pc;
@@ -512,7 +487,7 @@ block_innermost_frame (struct block *block)
       frame = get_prev_frame (frame);
       if (frame == NULL)
 	return NULL;
-      calling_pc = frame_address_in_block (frame);
+      calling_pc = get_frame_address_in_block (frame);
       if (calling_pc >= start && calling_pc < end)
 	return frame;
     }

@@ -1,5 +1,11 @@
 2003-07-11  Andrew Cagney  <cagney@redhat.com>
 
+	* frame.h (frame_address_in_block): Delete declaration.
+	* blockframe.c (frame_address_in_block): Delete function.
+	(get_frame_block): Use get_frame_address_in_block.
+	(block_innermost_frame): Ditto.
+	* stack.c (print_frame, backtrace_command_1): Ditto.
+
 	* frame.h (get_frame_address_in_block): Declare.
 	(frame_unwind_address_in_block): Declare.
 	* frame.c (frame_unwind_address_in_block): New function.

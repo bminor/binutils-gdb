@@ -542,10 +542,6 @@ extern struct block *get_selected_block (CORE_ADDR *addr_in_block);
 
 extern struct symbol *get_frame_function (struct frame_info *);
 
-/* DEPRECATED: Replaced by tye pair get_frame_address_in_block and
-   frame_unwind_address_in_block.  */
-extern CORE_ADDR frame_address_in_block (struct frame_info *);
-
 extern CORE_ADDR get_pc_function_start (CORE_ADDR);
 
 extern int frameless_look_for_prologue (struct frame_info *);
