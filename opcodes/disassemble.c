@@ -1,5 +1,5 @@
 /* Select disassembly routine for specified architecture.
-   Copyright (C) 1994, 1995 Free Software Foundation, Inc.
+   Copyright (C) 1994, 1995, 1996, 1997 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -21,9 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifdef ARCH_all
 #define ARCH_a29k
 #define ARCH_alpha
-/* start-sanitize-arc */
 #define ARCH_arc
-/* end-sanitize-arc */
 #define ARCH_arm
 #define ARCH_d10v
 /* start-sanitize-d30v */
@@ -34,6 +32,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define ARCH_hppa
 #define ARCH_i386
 #define ARCH_i960
+#define ARCH_m32r
 #define ARCH_m68k
 #define ARCH_m88k
 #define ARCH_mips
@@ -47,9 +46,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* start-sanitize-tic80 */
 #define ARCH_tic80
 /* end-sanitize-tic80 */
-/* start-sanitize-v850 */
 #define ARCH_v850
-/* end-sanitize-v850 */
 #define ARCH_w65
 #define ARCH_z8k
 #endif
@@ -76,7 +73,6 @@ disassembler (abfd)
       disassemble = print_insn_alpha;
       break;
 #endif
-/* start-sanitize-arc */
 #ifdef ARCH_arc
     case bfd_arch_arc:
       {
@@ -85,7 +81,6 @@ disassembler (abfd)
 	break;
       }
 #endif
-/* end-sanitize-arc */
 #ifdef ARCH_arm
     case bfd_arch_arm:
       if (bfd_big_endian (abfd))
@@ -134,6 +129,11 @@ disassembler (abfd)
 #ifdef ARCH_i960
     case bfd_arch_i960:
       disassemble = print_insn_i960;
+      break;
+#endif
+#ifdef ARCH_m32r
+    case bfd_arch_m32r:
+      disassemble = print_insn_m32r;
       break;
 #endif
 #ifdef ARCH_m68k
@@ -202,13 +202,11 @@ disassembler (abfd)
       break;
 #endif
 /* end-sanitize-tic80 */
-/* start-sanitize-v850 */
 #ifdef ARCH_v850
     case bfd_arch_v850:
       disassemble = print_insn_v850;
       break;
 #endif
-/* end-sanitize-v850 */
 #ifdef ARCH_w65
     case bfd_arch_w65:
       disassemble = print_insn_w65;
@@ -226,4 +224,35 @@ disassembler (abfd)
       return 0;
     }
   return disassemble;
+}
+
+/* Notify the disassembler of the address associated with the
+   instruction being decoded: */
+
+void
+disasm_symaddr (sym, info)
+     asymbol *sym;
+     disassemble_info *info;
+{
+#ifdef ARCH_arm
+  /* decide if symbol is thumb or not */
+  if (info->flavour == bfd_target_coff_flavour)
+    {
+/* This is not ideal including these here, since we may not be
+   building a COFF targetted world at all... so coffsymbol() may not
+   be available. (TO BE SORTED OUT) */
+#include "coff/internal.h"
+#include "libcoff.h"
+      coff_symbol_type *cs = coffsymbol (sym);
+      if (   cs->native->u.syment.n_sclass == C_THUMBEXT
+          || cs->native->u.syment.n_sclass == C_THUMBSTAT
+          || cs->native->u.syment.n_sclass == C_THUMBLABEL
+          || cs->native->u.syment.n_sclass == C_THUMBEXTFUNC
+          || cs->native->u.syment.n_sclass == C_THUMBSTATFUNC)
+       info->flags |= 0x1;
+      else
+       info->flags &= ~0x1;
+    }
+#endif
+  /* Do nothing for other architectures at the moment */
 }

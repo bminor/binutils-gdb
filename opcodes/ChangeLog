@@ -1,6 +1,12 @@
 Tue Dec  2 09:54:27 1997  Nick Clifton  <nickc@cygnus.com>
 
+	* arm-dis.c: Add support for disassembling Thumb opcodes.
+	(print_insn_thumb): New function.
+
+	* disassemble.c (disasm_symaddr): New function.
+
 	* arm-opc.h: Display nop pseudo ops alongside equivalent disassembly.
+	(thumb_opcodes): Table of Thumb opcodes.
 
 Mon Dec  1 12:25:57 1997  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
