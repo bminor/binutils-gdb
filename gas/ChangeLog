@@ -1,3 +1,28 @@
+1999-05-17  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* config/tc-i386.c (tc_gen_reloc): Remove F and MAP macros.
+
+	* write.c (write_print_statistics): Output to file, not stderr.
+
+	* expr.c (generic_bignum_to_int32,64): Prototype.
+
+	* read.c (s_lcomm_internal, sizeof_sleb128, sizeof_uleb128,
+	output_sleb128, output_uleb128, output_big_sleb128,
+	output_big_uleb128, output_big_leb128): Prototype.
+	(output_big_sleb128, output_big_uleb128): Make inline.
+	(output_big_leb128): Remove inline
+
+	From Maciej W. Rozycki <macro@ds2.pg.gda.pl>
+	* config/tc-i386.c (md_apply_fix3): Convert BFD_RELOC_16 with
+	fx_pcrel set to BFD_RELOC_16_PCREL.  Similarly for BFD_RELOC_8.
+	Handle BFD_RELOC_16_PCREL and BFD_RELOC_8_PCREL.  Return changed
+	value for correct overflow check in write.c:fixup_segment.
+	* write.c (fixup_segment): Move bitfield overflow checks to after
+	the md_apply_fix call.
+	* config/obj-coff.c (fixup_segment): Likewise.
+	* doc/internals.texi (CPU backend): Mention md_apply_fix modifying
+	valueT *val argument.
+
 Fri May 14 10:52:13 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
 
 	* config/atof-ieee.c (gen_to_words): Correctly round a
