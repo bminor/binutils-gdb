@@ -1,3 +1,10 @@
+2003-07-30  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf.c: Convert to C90, remove unnecessary prototypes and casts.
+	Replace PTR with void *.  Formatting.
+	(_bfd_elf_assign_file_position_for_section): Remove INLINE.
+	(make_mapping): Likewise.
+
 2003-07-29  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (func_desc_adjust): Give linker created function
