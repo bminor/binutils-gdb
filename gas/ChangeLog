@@ -1,5 +1,13 @@
 Sun Oct 31 00:36:40 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* config/obj-som.h (obj_set_symbol_type): Define a hook so GAS
+	can properly set all the SOM symbol types.
+	* config/tc-hppa.c (pa_symbol_type): New enum to represent the 
+	symbol types which can be set from an IMPORT/EXPORT statement.
+	(pa_export_args): Set the pa_symbol_type type based on arguments.
+	If defined, call obj_set_symbol_type to pass this information on
+	to the BFD backend.
+
 	* read.c (get_stab_string_offset): Set SEC_DEBUGGING for any 
 	stab section we make.
 	(s_stab_generic): Likewise.

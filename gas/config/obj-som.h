@@ -61,6 +61,9 @@ extern void obj_som_init_stab_section PARAMS ((segT));
 #define obj_set_section_attributes  bfd_som_set_section_attributes
 #define obj_set_subsection_attributes bfd_som_set_subsection_attributes
 
+/* Likewise for symbol types.  */
+#define obj_set_symbol_type bfd_som_set_symbol_type
+
 /* Stabs go in a separate sections.  GDB expects to find them in sections
    with the names $GDB_SYMBOLS$ and $GDB_STRINGS$ rather than .stab and
    .stabstr.  */

@@ -183,6 +183,22 @@ typedef enum
   }
 fp_operand_format;
 
+/* This fully describes the symbol types which may be attached to
+   an EXPORT or IMPORT directive.  Only SOM uses this formation
+   (ELF has no need for it).  */
+typedef enum
+{
+  SYMBOL_TYPE_UNKNOWN,
+  SYMBOL_TYPE_ABSOLUTE,
+  SYMBOL_TYPE_CODE,
+  SYMBOL_TYPE_DATA,
+  SYMBOL_TYPE_ENTRY,
+  SYMBOL_TYPE_MILLICODE,
+  SYMBOL_TYPE_PLABEL,
+  SYMBOL_TYPE_PRI_PROG,
+  SYMBOL_TYPE_SEC_PROG,
+} pa_symbol_type;
+
 /* This structure contains information needed to assemble 
    individual instructions.  */
 struct pa_it
@@ -4785,6 +4801,7 @@ pa_export_args (symbolP)
 {
   char *name, c, *p;
   unsigned int temp, arg_reloc;
+  pa_symbol_type type = SYMBOL_TYPE_UNKNOWN;
   obj_symbol_type *symbol = (obj_symbol_type *) symbolP->bsym;
 
   if (strncasecmp (input_line_pointer, "absolute", 8) == 0)
@@ -4792,42 +4809,57 @@ pa_export_args (symbolP)
       input_line_pointer += 8;
       symbolP->bsym->flags &= ~BSF_FUNCTION;
       S_SET_SEGMENT (symbolP, &bfd_abs_section);
+      type = SYMBOL_TYPE_ABSOLUTE;
     }
   else if (strncasecmp (input_line_pointer, "code", 4) == 0)
     {
       input_line_pointer += 4;
       symbolP->bsym->flags &= ~BSF_FUNCTION;
+      type = SYMBOL_TYPE_CODE;
     }
   else if (strncasecmp (input_line_pointer, "data", 4) == 0)
     {
       input_line_pointer += 4;
       symbolP->bsym->flags &= ~BSF_FUNCTION;
+      type = SYMBOL_TYPE_DATA;
     }
   else if ((strncasecmp (input_line_pointer, "entry", 5) == 0))
     {
       input_line_pointer += 5;
       symbolP->bsym->flags |= BSF_FUNCTION;
+      type = SYMBOL_TYPE_ENTRY;
     }
   else if (strncasecmp (input_line_pointer, "millicode", 9) == 0)
     {
       input_line_pointer += 9;
       symbolP->bsym->flags |= BSF_FUNCTION;
+      type = SYMBOL_TYPE_MILLICODE;
     }
   else if (strncasecmp (input_line_pointer, "plabel", 6) == 0)
     {
       input_line_pointer += 6;
       symbolP->bsym->flags &= ~BSF_FUNCTION;
+      type = SYMBOL_TYPE_PLABEL;
     }
   else if (strncasecmp (input_line_pointer, "pri_prog", 8) == 0)
     {
       input_line_pointer += 8;
       symbolP->bsym->flags |= BSF_FUNCTION;
+      type = SYMBOL_TYPE_PRI_PROG;
     }
   else if (strncasecmp (input_line_pointer, "sec_prog", 8) == 0)
     {
       input_line_pointer += 8;
       symbolP->bsym->flags |= BSF_FUNCTION;
+      type = SYMBOL_TYPE_SEC_PROG;
     }
+
+  /* SOM requires much more information about symbol types
+     than BFD understands.  This is how we get this information
+     to the SOM BFD backend.  */
+#ifdef obj_set_symbol_type
+  obj_set_symbol_type (symbolP->bsym, (int) type);
+#endif
 
   /* Now that the type of the exported symbol has been handled,
      handle any argument relocation information.  */
