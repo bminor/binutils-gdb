@@ -796,6 +796,11 @@ EOF
                 echo site_makefile_frag = ${invsubdir}${site_makefile_frag} >>${Makefile}
             fi 
 
+	    # make sure that some sort of reasonable default exists for these 
+	    # two variables
+	    CXX=${CXX-"g++ -O"}
+	    CC=${CC-cc}
+
             # reset prefix, exec_prefix, srcdir, SUBDIRS, NONSUBDIRS,
             # remove any form feeds.
             if [ -z "${subdirs}" ]; then
@@ -808,6 +813,24 @@ EOF
             fi
             sed -e "s:^prefix[ 	]*=.*$:prefix = ${prefix}:" \
                     -e "s:^exec_prefix[ 	]*=.*$:exec_prefix = ${exec_prefix}:" \
+		    -e "/^CC[ 	]*=/{
+			b chkcc
+			:contcc
+			N
+			:chkcc
+			s/\\\\$//
+			t contcc
+			s/^CC[ 	]*=.*$/CC = ${CC}/
+			}" \
+		    -e "/^CXX[ 	]*=/{
+			b chkcxx
+			:contcxx
+			N
+			:chkcxx
+			s/\\\\$//
+			t contcxx
+			s/^CXX[ 	]*=.*$/CXX = ${CXX}/
+			}" \
                     -e "s:^srcdir[ 	]*=.*$:srcdir = ${makesrcdir}:" \
                     -e "s///" \
                     -e "s:^program_prefix[ 	]*=.*$:program_prefix = ${program_prefix}:" \
