@@ -551,7 +551,14 @@ target_to_host_open (target_val)
   return host_val;
 }
 
-/* Cover functions to the vfprintf callbacks.  */
+/* Cover functions to the vfprintf callbacks.
+
+   ??? If one thinks of the callbacks as a subsystem onto itself [or part of
+   a larger "remote target subsystem"] with a well defined interface, then
+   one would think that the subsystem would provide these.  However, until
+   one is allowed to create such a subsystem (with its own source tree
+   independent of any particular user), such a critter can't exist.  Thus
+   these functions are here for the time being.  */
 
 void
 sim_cb_printf (host_callback *p, const char *fmt, ...)
