@@ -23,12 +23,33 @@
 #include "gdbcore.h"
 #include "regcache.h"
 
+#include "gdb_assert.h"
 #include <sys/ptrace.h>
 #include <sys/user.h>
 #include <sys/procfs.h>
 
 #ifdef HAVE_SYS_REG_H
 #include <sys/reg.h>
+#endif
+
+#ifdef HAVE_SYS_DEBUGREG_H
+#include <sys/debugreg.h>
+#endif
+
+#ifndef DR_FIRSTADDR
+#define DR_FIRSTADDR 0
+#endif
+
+#ifndef DR_LASTADDR
+#define DR_LASTADDR 3
+#endif
+
+#ifndef DR_STATUS
+#define DR_STATUS 6
+#endif
+
+#ifndef DR_CONTROL
+#define DR_CONTROL 7
 #endif
 
 /* Prototypes for supply_gregset etc.  */
@@ -108,6 +129,26 @@ int have_ptrace_getfpxregs =
   0
 #endif
 ;
+
+
+/* Support for the user struct.  */
+
+/* Return the address of register REGNUM.  BLOCKEND is the value of
+   u.u_ar0, which should point to the registers.  */
+
+CORE_ADDR
+register_u_addr (CORE_ADDR blockend, int regnum)
+{
+  return (blockend + 4 * regmap[regnum]);
+}
+
+/* Return the size of the user struct.  */
+
+int
+kernel_u_size (void)
+{
+  return (sizeof (struct user));
+}
 
 
 /* Fetching registers directly from the U area, one at a time.  */
@@ -657,6 +698,72 @@ store_inferior_registers (int regno)
 
   internal_error (__FILE__, __LINE__,
 		  "Got request to store bad register number %d.", regno);
+}
+
+
+static long
+i386_linux_dr_get (int regnum)
+{
+  int tid;
+  long value;
+
+  /* FIXME: kettenis/2001-01-29: It's not clear what we should do with
+     multi-threaded processes here.  For now, pretend there is just
+     one thread.  */
+  tid = PIDGET (inferior_pid);
+
+  errno = 0;
+  value = ptrace (PT_READ_U, tid,
+		  offsetof (struct user, u_debugreg[regnum]), 0);
+  if (errno != 0)
+    perror_with_name ("Couldn't read debug register");
+
+  return value;
+}
+
+static void
+i386_linux_dr_set (int regnum, long value)
+{
+  int tid;
+
+  /* FIXME: kettenis/2001-01-29: It's not clear what we should do with
+     multi-threaded processes here.  For now, pretend there is just
+     one thread.  */
+  tid = PIDGET (inferior_pid);
+
+  errno = 0;
+  ptrace (PT_WRITE_U, tid,
+	  offsetof (struct user, u_debugreg[regnum]), value);
+  if (errno != 0)
+    perror_with_name ("Couldn't write debug register");
+}
+
+void
+i386_linux_dr_set_control (long control)
+{
+  i386_linux_dr_set (DR_CONTROL, control);
+}
+
+void
+i386_linux_dr_set_addr (int regnum, CORE_ADDR addr)
+{
+  gdb_assert (regnum >= 0 && regnum <= DR_LASTADDR - DR_FIRSTADDR);
+
+  i386_linux_dr_set (DR_FIRSTADDR + regnum, addr);
+}
+
+void
+i386_linux_dr_reset_addr (int regnum)
+{
+  gdb_assert (regnum >= 0 && regnum <= DR_LASTADDR - DR_FIRSTADDR);
+
+  i386_linux_dr_set (DR_FIRSTADDR + regnum, 0L);
+}
+
+long
+i386_linux_dr_get_status (void)
+{
+  return i386_linux_dr_get (DR_STATUS);
 }
 
 

@@ -1,6 +1,6 @@
 /* Native support for Linux/x86.
    Copyright 1986, 1987, 1989, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000
+   1999, 2000, 2001
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -23,52 +23,56 @@
 #ifndef NM_LINUX_H
 #define NM_LINUX_H
 
-#include "i386/nm-i386v.h"
+/* GNU/Linux supports the i386 hardware debugging registers.  */
+#define I386_USE_GENERIC_WATCHPOINTS
+
+#include "i386/nm-i386.h"
 #include "nm-linux.h"
 
-/* Return sizeof user struct to callers in less machine dependent routines */
+/* Return sizeof user struct to callers in less machine dependent
+   routines.  */
 
-#define KERNEL_U_SIZE kernel_u_size()
 extern int kernel_u_size (void);
+#define KERNEL_U_SIZE kernel_u_size()
 
 #define U_REGS_OFFSET 0
 
-/* GNU/Linux supports the 386 hardware debugging registers.  */
+extern CORE_ADDR register_u_addr (CORE_ADDR blockend, int regnum);
+#define REGISTER_U_ADDR(addr, blockend, regnum) \
+  (addr) = register_u_addr (blockend, regnum)
 
-#define TARGET_HAS_HARDWARE_WATCHPOINTS
+/* Provide access to the i386 hardware debugging registers.  */
 
-#define TARGET_CAN_USE_HARDWARE_WATCHPOINT(type, cnt, ot) 1
+extern void i386_linux_dr_set_control (long control);
+#define I386_DR_LOW_SET_CONTROL(control) \
+  i386_linux_dr_set_control (control)
 
-/* After a watchpoint trap, the PC points to the instruction after
-   the one that caused the trap.  Therefore we don't need to step over it.
-   But we do need to reset the status register to avoid another trap.  */
-#define HAVE_CONTINUABLE_WATCHPOINT
+extern void i386_linux_dr_set_addr (int regnum, CORE_ADDR addr);
+#define I386_DR_LOW_SET_ADDR(regnum, addr) \
+  i386_linux_dr_set_addr (regnum, addr)
 
-#define STOPPED_BY_WATCHPOINT(W)  \
-  i386_stopped_by_watchpoint (inferior_pid)
+extern void i386_linux_dr_reset_addr (int regnum);
+#define I386_DR_LOW_RESET_ADDR(regnum) \
+  i386_linux_dr_reset_addr (regnum)
 
-/* Use these macros for watchpoint insertion/removal.  */
+extern long i386_linux_dr_get_status (void);
+#define I386_DR_LOW_GET_STATUS() \
+  i386_linux_dr_get_status ()
 
-#define target_insert_watchpoint(addr, len, type)  \
-  i386_insert_watchpoint (inferior_pid, addr, len, type)
-
-#define target_remove_watchpoint(addr, len, type)  \
-  i386_remove_watchpoint (inferior_pid, addr, len)
-
-/* We define this if link.h is available, because with ELF we use SVR4 style
-   shared libraries. */
+/* We define this if link.h is available, because with ELF we use SVR4
+   style shared libraries.  */
 
 #ifdef HAVE_LINK_H
 #define SVR4_SHARED_LIBS
-#include "solib.h"		/* Support for shared libraries. */
+#include "solib.h"		/* Support for shared libraries.  */
 #endif
 
 /* Override copies of {fetch,store}_inferior_registers in `infptrace.c'.  */
 #define FETCH_INFERIOR_REGISTERS
 
-/* Nevertheless, define CANNOT_{FETCH,STORE}_REGISTER, because we might fall
-   back on the code `infptrace.c' (well a copy of that code in
-   `i386-linux-nat.c' for now) and we can access only the
+/* Nevertheless, define CANNOT_{FETCH,STORE}_REGISTER, because we
+   might fall back on the code `infptrace.c' (well a copy of that code
+   in `i386-linux-nat.c' for now) and we can access only the
    general-purpose registers in that way.  */
 extern int cannot_fetch_register (int regno);
 extern int cannot_store_register (int regno);
@@ -77,10 +81,6 @@ extern int cannot_store_register (int regno);
 
 /* Override child_resume in `infptrace.c'.  */
 #define CHILD_RESUME
-
-extern CORE_ADDR i386_stopped_by_watchpoint (int);
-extern int i386_insert_watchpoint (int pid, CORE_ADDR addr, int len, int rw);
-extern int i386_remove_watchpoint (int pid, CORE_ADDR addr, int len);
 
 /* FIXME: kettenis/2000-09-03: This should be moved to ../nm-linux.h
    once we have converted all Linux targets to use the new threads

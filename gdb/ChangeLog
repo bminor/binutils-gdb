@@ -1,3 +1,33 @@
+2001-03-21  Mark Kettenis  <kettenis@gnu.org>
+
+	Make Linux use the new unified support for hardware breakpoints
+	and watchpoints on x86 targets.
+	* i386-linux-nat.c: Doc fixes.  Include "gdb_assert.h".
+	[HAVE_SYS_DEBUGREG_H]: Include <sys/debugreg.h>.
+	(DR_FIRSTADDR, DR_LASTADDR, DR_STATUS, DR_CONTROL): Define to
+	appropriate value if not already defined.
+	(register_u_addr): New function.
+	(kernel_u_size): New function.
+	(i386_linux_dr_get, i386_linux_dr_set): New functions.
+	(i386_linux_dr_set_control, i386_linux_dr_set_addr,
+	i386_linux_reset_addr, i386_linux_dr_get_status): New functions.
+	* config/i386/nm-linux.h: Don't include "nm-i386v.h".
+	(I386_USE_GENERIC_WATCHPOINTS): Define and include "nm-i386.h".
+	(TARGET_HAS_HARDWARE_WATCHPOINTS,
+	TARGET_CAN_USE_HARDWARE_WATCHPOINTS, HAVE_CONTINUABLE_WATCHPOINT,
+	STOPPED_BY_WATCHPOINT, target_insert_watchpoint,
+	target_remove_watchpoint): Remove macros.
+	(i386_stopped_by_watchpoint, i386_insert_watchpoint,
+	i386_remove_watchpoint): Remove prototypes.
+	(register_u_addr): New prototype.
+	(REGISTER_U_ADDR): Define in terms of register_u_addr.
+	(i386_linux_dr_set_control, i386_linux_dr_set_addr,
+	i386_linux_reset_addr, i386_linux_dr_get_status): New prototypes.
+	(I386_DR_LOW_SET_CONTROL, I386_DR_LOW_SET_ADDR,
+	I386_DR_LOW_RESET_ADDR, I386_DR_LOW_GET_STATUS): New macros.
+	* config/i386/linux.mh (NATDEPFILES): Replace i386v-nat.o with
+	i386-nat.o.
+
 2001-03-21  Jim Blandy  <jimb@redhat.com>
 
 	* linespec.c (find_methods): Whitespace differences aren't
