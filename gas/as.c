@@ -43,6 +43,10 @@
 #include "output-file.h"
 #include "sb.h"
 #include "macro.h"
+#ifndef HAVE_ITBL_CPU
+#define itbl_parse(itbl_file) 1
+#define itbl_init()
+#endif
 
 #ifdef HAVE_SBRK
 #ifdef NEED_DECLARATION_SBRK
@@ -50,6 +54,9 @@ extern PTR sbrk ();
 #endif
 #endif
 
+static void show_usage PARAMS ((FILE *));
+static void parse_args PARAMS ((int *, char ***));
+static void dump_statistics PARAMS ((void));
 static void perform_an_assembly_pass PARAMS ((int argc, char **argv));
 static int macro_expr PARAMS ((const char *, int, sb *, int *));
 
@@ -110,7 +117,7 @@ print_version_id ()
   fprintf (stderr, "\n");
 }
 
-void
+static void
 show_usage (stream)
      FILE *stream;
 {
@@ -120,6 +127,7 @@ show_usage (stream)
 Options:\n\
 -a[sub-option...]	turn on listings\n\
   Sub-options [default hls]:\n\
+  c	omit false conditionals\n\
   d	omit debugging directives\n\
   h	include high-level source\n\
   l	include assembly\n\
@@ -159,9 +167,12 @@ Options:\n\
 
 extern struct emulation mipsbelf, mipslelf, mipself;
 extern struct emulation mipsbecoff, mipslecoff, mipsecoff;
+extern struct emulation i386coff, i386elf;
 
 static struct emulation *const emulations[] = { EMULATIONS };
 static const int n_emulations = sizeof (emulations) / sizeof (emulations[0]);
+
+static void select_emulation_mode PARAMS ((int, char **));
 
 static void
 select_emulation_mode (argc, argv)
@@ -249,7 +260,7 @@ common_emul_init ()
  * md_parse_option definitions in config/tc-*.c
  */
 
-void
+static void
 parse_args (pargc, pargv)
      int *pargc;
      char ***pargv;
@@ -394,7 +405,7 @@ parse_args (pargc, pargv)
 	case OPTION_VERSION:
 	  /* This output is intended to follow the GNU standards document.  */
 	  printf ("GNU assembler %s\n", GAS_VERSION);
-	  printf ("Copyright 1996 Free Software Foundation, Inc.\n");
+	  printf ("Copyright 1997 Free Software Foundation, Inc.\n");
 	  printf ("\
 This program is free software; you may redistribute it under the terms of\n\
 the GNU General Public License.  This program has absolutely no warranty.\n");
@@ -509,6 +520,9 @@ the GNU General Public License.  This program has absolutely no warranty.\n");
 		{
 		  switch (*optarg)
 		    {
+		    case 'c':
+		      listing |= LISTING_NOCOND;
+		      break;
 		    case 'd':
 		      listing |= LISTING_NODEBUG;
 		      break;
@@ -576,7 +590,6 @@ the GNU General Public License.  This program has absolutely no warranty.\n");
   *pargv = new_argv;
 }
 
-static void dump_statistics ();
 static long start_time;
 
 int 
@@ -683,6 +696,8 @@ main (argc, argv)
   PROGRESS (1);
 
   perform_an_assembly_pass (argc, argv);	/* Assemble it. */
+
+  cond_finish_check (-1);
 
 #ifdef md_end
   md_end ();
