@@ -36,8 +36,3 @@
 #define USG
 
 #define HAVE_TERMIO
-
-/* This is the amount to subtract from u.u_ar0
-   to get the offset in the core file of the register values.  */
-
-#define KERNEL_U_ADDR 0xe0000000

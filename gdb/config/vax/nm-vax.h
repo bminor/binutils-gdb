@@ -20,6 +20,10 @@
 
 #define AP_REGNUM 12	/* XXXJRT */
 
+/* This is the amount to subtract from u.u_ar0
+   to get the offset in the core file of the register values.  */
+#define KERNEL_U_ADDR (0x80000000 - (UPAGES * NBPG))
+
 #define REGISTER_U_ADDR(addr, blockend, regno)		\
 { addr = blockend - 0110 + regno * 4;			\
   if (regno == PC_REGNUM) addr = blockend - 8;		\
