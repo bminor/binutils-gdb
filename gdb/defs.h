@@ -40,6 +40,11 @@
 #include <unistd.h>
 #endif
 
+/* First include ansidecl.h so we can use the various macro definitions
+   here and in all subsequent file inclusions.  */
+
+#include "ansidecl.h"
+
 #include "gdb_locale.h"
 
 /* For ``enum target_signal''.  */
@@ -53,11 +58,6 @@
 #ifndef SEEK_CUR
 #define SEEK_CUR 1
 #endif
-
-/* First include ansidecl.h so we can use the various macro definitions
-   here and in all subsequent file inclusions.  */
-
-#include "ansidecl.h"
 
 #include <stdarg.h>		/* For va_list.  */
 
