@@ -1,3 +1,13 @@
+Mon Jun 24 22:50:35 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* som.c (som_write_fixups): Fix typo in R_END_TRY for exception
+	handling code > 1k away.
+
+Mon Jun 24 18:41:06 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* elflink.h (elf_create_pointer_linker_section): If DEBUG is
+	defined, output whenever the symbol is updated.
+
 Mon Jun 24 17:58:12 1996  Jouke Numan  <jnuman@bazis.nl>
 
 	* elf.c (elf_fake_sections): Don't set sh_addr of a non SEC_ALLOC
