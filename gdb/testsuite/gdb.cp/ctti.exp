@@ -76,21 +76,17 @@ if ![runto_main] then {
     continue
 }
 
-# TODO: this needs more work before actually deploying it.
-# So bail out here.
-
-if { [ test_compiler_info gcc-*] } then { continue }
-
-gdb_test "next" "$decimal.*i = 2;" "next 1"
-gdb_test "next" "$decimal.*f = 4.5;" "next 2"
-gdb_test "next" "$decimal.*c = add\\(c, c\\);" "next 3"
-gdb_test "next" "$decimal.*i = add\\(i, i\\);" "next 4"
-gdb_test "next" "$decimal.*f = add\\(f, f\\);" "next 5"
-gdb_test "next" "$decimal.*add1\\(\\);" "next 6"
+gdb_breakpoint [gdb_get_line_number "marker add1"]
+gdb_continue_to_breakpoint "marker add1"
 
 gdb_test "print c" "\\$\[0-9\]+ = -62 .*"
 gdb_test "print f" "\\$\[0-9\]+ = 9"
 gdb_test "print i" "\\$\[0-9\]+ = 4"
+
+# TODO: this needs more work before actually deploying it.
+# So bail out here.
+
+if { [ test_compiler_info gcc-*] } then { continue }
 
 gdb_test_multiple "print add<int>(2,2)" "print add<int>(2,2)" {
     -re "\\$\[0-9\]+ = 4\r\n$gdb_prompt $" {

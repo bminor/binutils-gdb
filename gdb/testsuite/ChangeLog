@@ -1,5 +1,11 @@
 2004-01-07  Michael Chastain  <mec.gnu@mindspring.com>
 
+	* gdb.cp/cttiadd.c: Add a marker for gdb_get_line_number.
+	* gdb.cp/ctti.exp: Use the marker instead of "next".
+	With gcc, run further before bailing.
+
+2004-01-07  Michael Chastain  <mec.gnu@mindspring.com>
+
 	* gdb.cp/cttiadd.cc: Add copyright notice.
 	* gdb.cp/cttiadd1.cc: Likewise.
 	* gdb.cp/cttiadd2.cc: Likewise.
