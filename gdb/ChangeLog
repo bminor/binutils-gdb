@@ -1,3 +1,11 @@
+Thu Apr 15 12:38:39 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* source.c (select_source_symtab): Clean up comment.  Also, if
+	we have a current_source_symtab, and s is NULL, return without
+	doing anything.
+	xcoffread.c (xcoff_symfile_read): Don't call select_source_symtab.
+	breakpoint.c (breakpoint_re_set): Don't call select_source_symtab.
+
 Thu Apr 15 02:37:48 1993  John Gilmore  (gnu@cacophony.cygnus.com)
 
 	* dbxread.c (unknown_symchar_complaint):  Add new complaint.

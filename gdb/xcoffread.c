@@ -2311,9 +2311,6 @@ xcoff_symfile_read (objfile, section_offset, mainline)
      minimal symbols for this objfile. */
 
   install_minimal_symbols (objfile);
-
-  /* Make a default for file to list.  */
-  select_source_symtab (0);
 }
 
 /* XCOFF-specific parsing routine for section offsets.  */
