@@ -1,3 +1,7 @@
+Fri Aug 26 11:19:08 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* configure.in: Recognize --without-newlib.
+
 Wed Aug 24 12:36:50 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* configure.in: Change i[34]86 to i[345]86.

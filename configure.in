@@ -173,7 +173,10 @@ case ${with_x} in
     	;;
 esac
 
-
+# Recognize --without-newlib.
+if [ x${with_newlib} = xno ]; then
+  configdirs=`echo " ${configdirs} " | sed -e 's/ newlib / /'`
+fi
 
 # Some tools are only suitable for building in a "native" situation.
 # Those are added when we have a host==target configuration.  For cross
@@ -222,9 +225,6 @@ case "${host}" in
     noconfigdirs="tcl expect deja-gnu make texinfo bison patch flex byacc send-pr gprof uudecode dejagnu diff"
     ;;
 esac
-
-
-
 
 
 case "${target}" in
@@ -337,9 +337,11 @@ case "${target}" in
      ;;    
 esac
 
+# Remove the entries in $noconfigdirs from $configdirs.  If we have the
+# source for them, add them to $notsupp.
 notsupp=""
 for dir in . $noconfigdirs ; do
-  if [ $dir != . ] && echo "# ${configdirs} #" | grep "${dir} " >/dev/null 2>&1 ; then
+  if [ $dir != . ]  && echo " ${configdirs} " | grep " ${dir} " >/dev/null 2>&1; then
     configdirs=`echo " ${configdirs} " | sed -e "s/ ${dir} / /"`
     if [ -r $srcdir/$dir/configure ] || [ -r $srcdir/$dir/configure.in ]; then
       notsupp="$notsupp $dir"
@@ -359,7 +361,7 @@ if [ -n "${notsupp}" ] && [ -z "${norecursion}" ]; then
   # pretend that all is well.)
   if [ -n "$appdirs" ]; then
     for dir in $appdirs ; do
-      if [ -r $dir/Makefile.in ] && echo "# ${configdirs} #" | grep "${dir} " >/dev/null 2>&1 ; then
+      if [ -r $dir/Makefile.in ] && echo " ${configdirs} " | grep " ${dir} " >/dev/null 2>&1 ; then
 	appdirs=""
 	break
       fi
