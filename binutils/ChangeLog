@@ -1,3 +1,10 @@
+2003-01-02  Ben Elliston  <bje@redhat.com>
+
+	* readelf.c (guess_is_rela): Handle EM_IQ2000.
+	(get_machine_name): Likewise.
+	(dump_relocations): Likewise.
+	* NEWS: Mention IQ2000 support.
+
 2003-01-02  Richard Sandiford  <rsandifo@redhat.com>
 
 	* readelf.c (get_machine_flags): Handle E_MIPS_ARCH_32R2.

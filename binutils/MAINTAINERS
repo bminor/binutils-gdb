@@ -65,6 +65,7 @@ responsibility among the other maintainers.
   HPPA elf64	   Jeff Law <law@redhat.com> [Basic maintainance only]
   HPPA		   Dave Anglin <dave.anglin@nrc.ca>
   IA64		   Jim Wilson <wilson@redhat.com>
+  IQ2000	   Stan Cox <scox@redhat.com>
   i860		   Jason Eckhardt <jle@redhat.com>
   ix86		   Alan Modra <amodra@bigpond.net.au>
   ix86 PE	   Christopher Faylor <cgf@redhat.com>

@@ -86,6 +86,7 @@
 #include "elf/vax.h"
 #include "elf/x86-64.h"
 #include "elf/xstormy16.h"
+#include "elf/iq2000.h"
 
 #include "bucomm.h"
 #include "getopt.h"
@@ -763,6 +764,7 @@ guess_is_rela (e_machine)
     case EM_VAX:
     case EM_IP2K:
     case EM_IP2K_OLD:
+    case EM_IQ2000:
       return TRUE;
 
     case EM_MMA:
@@ -1245,6 +1247,10 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 	case EM_IP2K_OLD:
 	  rtype = elf_ip2k_reloc_type (type);
 	  break;
+
+	case EM_IQ2000:
+	  rtype = elf_iq2000_reloc_type (type);
+	  break;
 	}
 
       if (rtype == NULL)
@@ -1704,7 +1710,7 @@ get_machine_name (e_machine)
     case EM_ZSP:		return "LSI Logic's 16-bit DSP processor";
     case EM_MMIX:		return "Donald Knuth's educational 64-bit processor";
     case EM_HUANY:		return "Harvard Universitys's machine-independent object format";
-    case EM_PRISM:		return "SiTera Prism";
+    case EM_PRISM:		return "Vitesse Prism";
     case EM_X86_64:		return "Advanced Micro Devices X86-64";
     case EM_S390_OLD:
     case EM_S390:		return "IBM S/390";
@@ -1714,6 +1720,7 @@ get_machine_name (e_machine)
     case EM_DLX:		return "OpenDLX";
     case EM_IP2K_OLD:
     case EM_IP2K:		return "Ubicom IP2xxx 8-bit microcontrollers";
+    case EM_IQ2000:       	return "Vitesse IQ2000";
     default:
       sprintf (buff, _("<unknown>: %x"), e_machine);
       return buff;
