@@ -1,5 +1,7 @@
 2002-11-08  Alan Modra  <amodra@bigpond.net.au>
 
+	* targets.c (_bfd_target_vector): Disable pef_vec and pef_xlib_vec.
+
 	* dwarf2.c: Revert last change.
 
 2002-11-07  Michal Ludvig  <mludvig@suse.cz>
