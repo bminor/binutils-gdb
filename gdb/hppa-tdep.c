@@ -31,6 +31,7 @@
 #include "regcache.h"
 #include "completer.h"
 #include "language.h"
+#include "osabi.h"
 
 /* For argument passing to the inferior */
 #include "symtab.h"
@@ -4895,6 +4896,20 @@ static struct gdbarch *
 hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch *gdbarch;
+  enum gdb_osabi osabi = GDB_OSABI_UNKNOWN;
+  
+  /* Try to determine the ABI of the object we are loading.  */
+
+  if (info.abfd != NULL)
+    {
+      osabi = gdbarch_lookup_osabi (info.abfd);
+      if (osabi == GDB_OSABI_UNKNOWN)
+	{
+	  /* If it's a SOM file, assume it's HP/UX SOM.  */
+	  if (bfd_get_flavour (info.abfd) == bfd_target_som_flavour)
+	    osabi = GDB_OSABI_HPUX_SOM;
+	}
+    }
 
   /* find a candidate among the list of pre-declared architectures.  */
   arches = gdbarch_list_lookup_by_info (arches, &info);

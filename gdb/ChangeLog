@@ -1,5 +1,12 @@
 2002-12-02  J. Brobecker  <brobecker@gnat.com>
 
+	* hppa-tdep.c: Add #include "osabi.h" (for hppa_gdbarch_init).
+	(hppa_gdbarch_init): Detect osabi from objfile. Will be needed
+	later to set the proper gdbarch methods depending on the osabi.
+	* Makefile.in (hppa-tdep.o): Add dependency on osabi.h.
+
+2002-12-02  J. Brobecker  <brobecker@gnat.com>
+
 	* osabi.h (gdb_osabi): Add two new enum values for HPUX ELF and SOM.
 	* osabi.c (gdb_osabi_name): Add strings images for the two new
 	enum values.
