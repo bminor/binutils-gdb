@@ -1,3 +1,12 @@
+2005-02-08  Mark Mitchell  <mark@codesourcery.com>
+
+	* scripttempl/armbpabi.sc (VERSION): Make special section symbols
+	local. 
+	(Image$$ER_RO$$Base): Define whenever RELOCATING.
+	(Image$$ER_RO$$Limit): Likewise.
+	(SHT$$INIT_ARRAY$$Base): Likewise.
+	(SHT$$INIT_ARRAY$$Limit): Likeise.
+
 2005-02-10  Ben Elliston  <bje@au.ibm.com>
 
 	* emultempl/beos.em: Remove #if 0 and #if 1 blocks.

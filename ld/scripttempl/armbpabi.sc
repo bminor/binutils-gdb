@@ -134,15 +134,37 @@ ${RELOCATING- /* For some reason, the Solaris linker makes bad executables
   at non-zero addresses.  Could be a Solaris ld bug, could be a GNU ld
   bug.  But for now assigning the zero vmas works.  */}
 
+/* ARM's proprietary toolchain generate these symbols to match the start 
+   and end of particular sections of the image.  SymbianOS uses these
+   symbols.  We provide them for compatibility with ARM's toolchains.  
+   These symbols should be bound locally; each shared object may define 
+   its own version of these symbols.  */ 
+	
+VERSION
+{ 
+  { 
+    local: 
+      Image\$\$ER_RO\$\$Base;
+      Image\$\$ER_RO\$\$Limit;
+      SHT\$\$INIT_ARRAY\$\$Base;
+      SHT\$\$INIT_ARRAY\$\$Limit;
+      .ARM.exidx\$\$Base;	
+      .ARM.exidx\$\$Limit;
+  };
+}
+
 SECTIONS
 {
   /* Read-only sections, merged into text segment: */
   ${CREATE_SHLIB-${CREATE_PIE-${RELOCATING+PROVIDE (__executable_start = ${TEXT_START_ADDR});}}}
-  /* SymbianOS uses this symbol.  */
-  ${CREATE_SHLIB-${CREATE_PIE-${RELOCATING+PROVIDE (Image\$\$ER_RO\$\$Base = ${TEXT_START_ADDR});}}} 
+
   ${CREATE_SHLIB-${CREATE_PIE-${RELOCATING+ . = ${TEXT_BASE_ADDRESS};}}}
   ${CREATE_SHLIB+${RELOCATING+. = ${SHLIB_BASE_ADDRESS};}}
   ${CREATE_PIE+${RELOCATING+. = ${SHLIB_BASE_ADDRESS};}}
+
+  /* Define Image\$\$ER_RO\$\$Base.  */
+  ${RELOCATING+PROVIDE (Image\$\$ER_RO\$\$Base = .);}
+
   ${INITIAL_READONLY_SECTIONS}
 
 EOF
@@ -174,8 +196,10 @@ cat <<EOF
   ${RELOCATING+PROVIDE (__etext = .);}
   ${RELOCATING+PROVIDE (_etext = .);}
   ${RELOCATING+PROVIDE (etext = .);}
-  /* SymbianOS uses this symbol.  */
+
+  /* Define Image\$\$ER_RO\$\$Limit.  */
   ${RELOCATING+PROVIDE (Image\$\$ER_RO\$\$Limit = .);}
+
   ${WRITABLE_RODATA-${RODATA}}
   .rodata1      ${RELOCATING-0} : { *(.rodata1) }
   ${CREATE_SHLIB-${SDATA2}}
@@ -196,10 +220,10 @@ cat <<EOF
 
   ${RELOCATING+${CREATE_SHLIB-PROVIDE (__init_array_start = .);}}
   /* SymbianOS uses this symbol.  */
-  ${RELOCATING+${CREATE_SHLIB-PROVIDE (SHT\$\$INIT_ARRAY\$\$Base = .);}}
+  ${RELOCATING+PROVIDE (SHT\$\$INIT_ARRAY\$\$Base = .);}
   .init_array   ${RELOCATING-0} : { *(.init_array) }
   /* SymbianOS uses this symbol.  */
-  ${RELOCATING+${CREATE_SHLIB-PROVIDE (SHT\$\$INIT_ARRAY\$\$Limit = .);}}
+  ${RELOCATING+PROVIDE (SHT\$\$INIT_ARRAY\$\$Limit = .);}
   ${RELOCATING+${CREATE_SHLIB-PROVIDE (__init_array_end = .);}}
 
   ${RELOCATING+${CREATE_SHLIB-PROVIDE (__fini_array_start = .);}}
