@@ -1,3 +1,8 @@
+Thu May  1 02:28:21 1997  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* printcmd.c (disassemble_command):  Adjust low function bound
+	by FUNCTION_START_OFFSET.
+
 start-sanitize-tic80
 Wed Apr 30 15:23:02 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
