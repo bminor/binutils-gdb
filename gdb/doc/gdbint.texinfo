@@ -79,7 +79,6 @@ as the mechanisms that adapt @value{GDBN} to specific hosts and targets.
 * Requirements::
 * Overall Structure::
 * Algorithms::
-* Errors and Warnings::
 * User Interface::
 * libgdb::
 * Symbol Handling::
@@ -695,32 +694,6 @@ always sets watchpoints to be locally enabled, since global
 watchpoints might interfere with the underlying OS and are probably
 unavailable in many platforms.
 @end enumerate
-
-@node Errors and Warnings
-@chapter Errors and Warnings
-@cindex errors
-@cindex warnings
-
-
-On encountering a problem, in addition to notifying the user,
-@value{GDBN} can either abandon the operation or take evasive action
-and then continue.  
-
-
-
-An operation is aborted by calling an error function:
-
-@emph{prototype of simple error goes here}
-
-
-
-
-@section Internal or External
-@cindex internal error
-@cindex external error
-
-@section Complaints
-
 
 @node User Interface
 
