@@ -1941,8 +1941,10 @@ e500_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
       && reg_nr < tdep->ppc_ev0_regnum + ppc_num_gprs)
     e500_move_ev_register (regcache_raw_read, regcache, reg_nr, buffer);
   else
-    /* We should only be called on pseudo-registers.  */
-    gdb_assert (0);
+    internal_error (__FILE__, __LINE__,
+                    "e500_pseudo_register_read: "
+                    "called on unexpected register '%s' (%d)",
+                    gdbarch_register_name (gdbarch, reg_nr), reg_nr);
 }
 
 static void
@@ -1960,8 +1962,10 @@ e500_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
                            regcache_raw_write,
                            regcache, reg_nr, (void *) buffer);
   else
-    /* We should only be called on pseudo-registers.  */
-    gdb_assert (0);
+    internal_error (__FILE__, __LINE__,
+                    "e500_pseudo_register_read: "
+                    "called on unexpected register '%s' (%d)",
+                    gdbarch_register_name (gdbarch, reg_nr), reg_nr);
 }
 
 /* The E500 needs a custom reggroup function: it has anonymous raw
@@ -2095,7 +2099,9 @@ rs6000_store_return_value (struct type *type,
           && TYPE_VECTOR (type))
         regnum = tdep->ppc_vr0_regnum + 2;
       else
-        gdb_assert (0);
+        internal_error (__FILE__, __LINE__,
+                        "rs6000_store_return_value: "
+                        "unexpected array return type");
     }
   else
     /* Everything else is returned in GPR3 and up.  */

@@ -399,7 +399,9 @@ fetch_register (int tid, int regno)
       regcache_raw_supply (current_regcache, regno, buf + padding);
     }
   else 
-    gdb_assert (0);
+    internal_error (__FILE__, __LINE__,
+                    "fetch_register: unexpected byte order: %d",
+                    gdbarch_byte_order (current_gdbarch));
 }
 
 static void
