@@ -1,3 +1,8 @@
+Thu Dec 20 11:37:50 2001  Jeffrey A Law  (law@redhat.com)
+
+	* cli/cli-decode.c (add_cmd): Initialize pre_show_hook in
+	the new command.
+
 2001-12-20  Andrew Cagney  <ac131313@redhat.com>
 
 	* remote.c (struct packet_reg): Add field in_g_packet.

@@ -90,6 +90,7 @@ add_cmd (char *name, enum command_class class, void (*fun) (char *, int),
   c->doc = doc;
   c->flags = 0;
   c->replacement = NULL;
+  c->pre_show_hook = NULL;
   c->hook_pre  = NULL;
   c->hook_post = NULL;
   c->hook_in = 0;
