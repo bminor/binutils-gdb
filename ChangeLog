@@ -1,7 +1,12 @@
+Wed Jun  3 14:51:42 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config.sub: Accept m68060 and m5200 as CPU names.
+
 Mon Jun  1 17:25:16 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure: Use && rather than using -a in test, because odd
 	strings can confuse test.
+	* configure.in: Likewise.
 
 Thu May 28 19:31:13 1998  Ian Lance Taylor  <ian@cygnus.com>
 
