@@ -21,7 +21,11 @@
 #include <stdio.h>
 #include <ctype.h>
 #include "as.h"
-#include "subsegs.h"     
+#include "subsegs.h"
+/* Needed by opcode/txvu.h.  */
+#include "dis-asm.h"
+#include "opcode/txvu.h"
+#include "elf/txvu.h"
 
 const char comment_chars[] = ";";
 const char line_comment_chars[] = "#";
@@ -80,12 +84,335 @@ md_begin ()
   subseg = now_subseg;
 
   subseg_set (seg, subseg);
+
+  /* Initialize the opcode tables.
+     This involves computing the hash chains.  */
+  txvu_opcode_init_tables (0);
 }
+
+/* We need to keep a list of fixups.  We can't simply generate them as
+   we go, because that would require us to first create the frag, and
+   that would screw up references to ``.''.  */
+
+struct txvu_fixup
+{
+  /* index into `txvu_operands' */
+  int opindex;
+  expressionS exp;
+};
+
+#define MAX_FIXUPS 5
+
+static void assemble_insn PARAMS ((char *, int));
 
 void
 md_assemble (str)
      char *str;
 {
+  char *p = strchr (str, '|');
+
+  if (p == NULL)
+    {
+      as_bad ("lower slot missing in `%s'", str);
+      return;
+    }
+
+  *p = 0;
+  assemble_insn (str, 0);
+  *p = '|';
+  assemble_insn (p + 1, 1);
+}
+
+/* Assemble one instruction.
+   LOWER_P is non-zero if assembling in the lower insn slot.  */
+
+static void
+assemble_insn (str, lower_p)
+     char *str;
+     int lower_p;
+{
+  const struct txvu_opcode *opcode;
+  char *start;
+  TXVU_INSN insn_buf[2];
+  TXVU_INSN insn;
+
+  /* Skip leading white space.  */
+  while (isspace (*str))
+    str++;
+
+  /* The instructions are stored in lists hashed by the first letter (though
+     we needn't care how they're hashed).  Get the first in the list.  */
+
+  if (lower_p)
+    opcode = txvu_lower_opcode_lookup_asm (str);
+  else
+    opcode = txvu_upper_opcode_lookup_asm (str);
+
+  /* Keep looking until we find a match.  */
+
+  start = str;
+  for ( ; opcode != NULL; opcode = TXVU_OPCODE_NEXT_ASM (opcode))
+    {
+      int past_opcode_p, fc, num_suffixes, num_operands;
+      const unsigned char *syn;
+      struct txvu_fixup fixups[MAX_FIXUPS];
+
+      /* Ensure the mnemonic part matches.  */
+      for (str = start, syn = opcode->mnemonic; *syn != '\0'; ++str, ++syn)
+	if (tolower (*str) != tolower (*syn))
+	  break;
+      if (*syn != '\0')
+	continue;
+      if (isalpha (*str))
+	continue;
+
+      /* Scan the syntax string.  If it doesn't match, try the next one.  */
+
+      txvu_opcode_init_parse ();
+      insn = opcode->value;
+      fc = 0;
+      past_opcode_p = 0;
+      num_suffixes = 0;
+      num_operands = 0;
+
+      /* We don't check for (*str != '\0') here because we want to parse
+	 any trailing fake arguments in the syntax string.  */
+      for (/*str = start, */ syn = opcode->syntax; *syn != '\0'; )
+	{
+	  int mods,index;
+	  const struct txvu_operand *operand;
+	  const char *errmsg;
+
+	  /* Non operand chars must match exactly.  */
+	  if (*syn < 128)
+	    {
+	      if (*str == *syn)
+		{
+		  if (*syn == ' ')
+		    past_opcode_p = 1;
+		  ++syn;
+		  ++str;
+		}
+	      else
+		break;
+	      continue;
+	    }
+
+	  /* We have a suffix or an operand.  Pick out any modifiers.  */
+	  mods = 0;
+	  index = TXVU_OPERAND_INDEX (*syn);
+	  while (TXVU_MOD_P (txvu_operands[index].flags))
+	    {
+	      mods |= txvu_operands[index].flags & TXVU_MOD_BITS;
+	      ++syn;
+	      index = TXVU_OPERAND_INDEX (*syn);
+	    }
+	  operand = txvu_operands + index;
+
+	  if (operand->flags & TXVU_OPERAND_FAKE)
+	    {
+	      if (operand->insert)
+		{
+		  insn = (*operand->insert) (insn, operand, mods, 0, &errmsg);
+		  /* If we get an error, go on to try the next insn.  */
+		  if (errmsg)
+		    break;
+		}
+	      ++syn;
+	    }
+	  /* Are we finished with suffixes?  */
+	  else if (!past_opcode_p)
+	    {
+	      int found;
+	      char c;
+	      char *s,*t;
+	      long suf_value;
+
+	      if (!(operand->flags & TXVU_OPERAND_SUFFIX))
+		as_fatal ("bad opcode table, missing suffix flag");
+
+	      /* If we're at a space in the input string, we want to skip the
+		 remaining suffixes.  There may be some fake ones though, so
+		 just go on to try the next one.  */
+	      if (*str == ' ')
+		{
+		  ++syn;
+		  continue;
+		}
+
+	      s = str;
+
+	      /* Pick the suffix out and parse it.  */
+	      for (t = *s == '.' ? s + 1 : s; *t && isalpha (*t); ++t)
+		continue;
+	      c = *t;
+	      *t = '\0';
+	      suf_value = (*operand->parse) (&s, &errmsg);
+	      *t = c;
+	      if (errmsg)
+		{
+		  /* This can happen in "blle foo" and we're currently using
+		     the template "b%q%.n %j".  The "bl" insn occurs later in
+		     the table so "lle" isn't an illegal suffix.  */
+		  break;
+		}
+	      /* Insert the suffix's value into the insn.  */
+	      if (operand->insert)
+		insn = (*operand->insert) (insn, operand,
+					   mods, suf_value, NULL);
+	      else
+		insn |= suf_value << operand->shift;
+
+	      str = t;
+	      ++syn;
+	    }
+	  else
+	    /* This is an operand, either a register or an expression of
+	       some kind.  */
+	    {
+	      char c;
+	      char *hold;
+	      long value = 0;
+	      expressionS exp;
+
+	      if (operand->flags & TXVU_OPERAND_SUFFIX)
+		as_fatal ("bad opcode table, suffix wrong");
+
+	      /* If this is not the first, there must be a comma.  */
+	      if (num_operands > 0)
+		{
+		  if (*str != ',')
+		    break;
+		  ++str;
+		}
+
+	      /* Is there anything left to parse?
+		 We don't check for this at the top because we want to parse
+		 any trailing fake arguments in the syntax string.  */
+	      if (*str == '\0')
+		break;
+
+	      /* Parse the operand.  */
+	      if (operand->parse)
+		{
+		  value = (*operand->parse) (&str, &errmsg);
+		}
+	      else
+		{
+		  hold = input_line_pointer;
+		  input_line_pointer = str;
+		  expression (&exp);
+		  str = input_line_pointer;
+		  input_line_pointer = hold;
+
+		  if (exp.X_op == O_illegal)
+		    as_bad ("illegal operand");
+		  else if (exp.X_op == O_absent)
+		    as_bad ("missing operand");
+		  else if (exp.X_op == O_constant)
+		    {
+		      value = exp.X_add_number;
+		    }
+		  else if (exp.X_op == O_register)
+		    {
+		      as_fatal ("got O_register");
+		    }
+		  else
+		    {
+		      /* We need to generate a fixup for this expression.  */
+		      if (fc >= MAX_FIXUPS)
+			as_fatal ("too many fixups");
+		      fixups[fc].exp = exp;
+		      fixups[fc].opindex = index;
+		      ++fc;
+		      value = 0;
+		    }
+		}
+
+	      /* Insert the register or expression into the instruction.  */
+	      if (operand->insert)
+		{
+		  const char *errmsg = NULL;
+		  insn = (*operand->insert) (insn, operand, mods,
+					     value, &errmsg);
+#if 0
+		  if (errmsg != (const char *) NULL)
+		    as_warn (errmsg);
+#endif
+		  /* FIXME: We want to try shimm insns for limm ones.  But if
+		     the constant won't fit, we must go on to try the next
+		     possibility.  Where do we issue warnings for constants
+		     that are too big then?  At present, we'll flag the insn
+		     as unrecognizable!  Maybe have the "bad instruction"
+		     error message include our `errmsg'?  */
+		  if (errmsg != (const char *) NULL)
+		    break;
+		}
+	      else
+		insn |= (value & ((1 << operand->bits) - 1)) << operand->shift;
+
+	      ++syn;
+	      ++num_operands;
+	    }
+	}
+
+      /* If we're at the end of the syntax string, we're done.  */
+      /* FIXME: try to move this to a separate function.  */
+      if (*syn == '\0')
+	{
+	  int i;
+	  char *f;
+
+	  /* For the moment we assume a valid `str' can only contain blanks
+	     now.  IE: We needn't try again with a longer version of the
+	     insn and it is assumed that longer versions of insns appear
+	     before shorter ones (eg: lsr r2,r3,1 vs lsr r2,r3).  */
+
+	  while (isspace (*str))
+	    ++str;
+
+	  if (*str != '\0')
+	    as_bad ("junk at end of line: `%s'", str);
+
+	  /* Write out the instruction.
+	     It is important to fetch enough space in one call to `frag_more'.
+	     We use (f - frag_now->fr_literal) to compute where we are and we
+	     don't want frag_now to change between calls.  */
+	  f = frag_more (4);
+	  md_number_to_chars (f, insn, 4);
+
+	  /* Create any fixups.  */
+	  for (i = 0; i < fc; ++i)
+	    {
+	      int op_type, reloc_type;
+	      const struct txvu_operand *operand;
+
+	      /* Create a fixup for this operand.
+		 At this point we do not use a bfd_reloc_code_real_type for
+		 operands residing in the insn, but instead just use the
+		 operand index.  This lets us easily handle fixups for any
+		 operand type, although that is admittedly not a very exciting
+		 feature.  We pick a BFD reloc type in md_apply_fix.  */
+
+	      op_type = fixups[i].opindex;
+	      reloc_type = op_type + (int) BFD_RELOC_UNUSED;
+	      operand = &txvu_operands[op_type];
+	      fix_new_exp (frag_now,
+			   ((f - frag_now->fr_literal)
+			    + (operand->flags & TXVU_OPERAND_LIMM ? 4 : 0)), 4,
+			   &fixups[i].exp,
+			   (operand->flags & TXVU_OPERAND_RELATIVE_BRANCH) != 0,
+			   (bfd_reloc_code_real_type) reloc_type);
+	    }
+
+	  /* All done.  */
+	  return;
+	}
+
+      /* Try the next entry.  */
+    }
+
+  as_bad ("bad instruction `%s'", start);
 }
 
 void 
