@@ -44,6 +44,7 @@ bcs88kcoff.h
 bfd.h
 bout.h
 convx-opcode.h
+dwarf.h
 ecoff.h
 elf-common.h
 elf-external.h
@@ -102,7 +103,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.17  1991/10/16 01:08:08  gnu
+# Revision 1.18  1991/10/24 18:12:14  fnf
+# Add "dwarf.h".
+#
+# Revision 1.17  1991/10/16  01:08:08  gnu
 # Remove include files to bfd/hosts.
 #
 # Revision 1.16  1991/10/05  06:18:24  gnu
