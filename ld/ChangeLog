@@ -1,5 +1,11 @@
 2004-02-09  Daniel Jacobowitz  <drow@mvista.com>
 
+	* emulparams/armelf.sh, emulparams/armelf_linux.sh: Move
+	.note.gnu.arm.ident to after allocated sections.  Mark its
+	address as 0.
+
+2004-02-09  Daniel Jacobowitz  <drow@mvista.com>
+
 	* emulparams/armelf_linux.sh (COMMONPAGESIZE): Set to 4KB.
 	* emulparams/elf32bmip.sh (COMMONPAGESIZE): Likewise.
 	* emulparams/elf32bmipn32.sh (COMMONPAGESIZE): Likewise.
