@@ -40,7 +40,11 @@
 #define	OEA_START_ADDRESS 4096
 #endif
 
-enum { clayton_memory_size = 0x100000 };
+#ifndef OEA_MEMORY_SIZE
+#define OEA_MEMORY_SIZE 0x100000
+#endif
+
+enum { clayton_memory_size = OEA_MEMORY_SIZE };
 
 /* insert the address into the device_nodes sorted list of addresses */
 INLINE_DEVICE_TREE void
