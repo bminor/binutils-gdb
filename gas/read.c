@@ -47,6 +47,7 @@ the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307
 #include "libiberty.h"
 #include "obstack.h"
 #include "listing.h"
+#include "ecoff.h"
 
 #ifndef TC_START_LABEL
 #define TC_START_LABEL(x,y) (x==':')
@@ -206,7 +207,6 @@ static void do_align PARAMS ((int, char *, int));
 static int hex_float PARAMS ((int, char *));
 static void do_org PARAMS ((segT, expressionS *, int));
 char *demand_copy_string PARAMS ((int *lenP));
-int is_it_end_of_statement PARAMS ((void));
 static segT get_segmented_expression PARAMS ((expressionS *expP));
 static segT get_known_segmented_expression PARAMS ((expressionS * expP));
 static void pobegin PARAMS ((void));
@@ -1597,7 +1597,8 @@ s_fill (ignore)
     }
   else if (temp_repeat <= 0)
     {
-      as_warn ("Repeat < 0, .fill ignored");
+      if (temp_repeat < 0)
+	as_warn ("Repeat < 0, .fill ignored");
       temp_size = 0;
     }
 
@@ -1841,6 +1842,11 @@ s_lcomm (needs_align)
        else
 	 align = 0;
 
+#ifdef OBJ_EVAX
+       /* FIXME: This needs to be done in a more general fashion.  */
+       align = 3;
+#endif
+
        record_alignment(bss_seg, align);
      }
 
@@ -1877,7 +1883,7 @@ s_lcomm (needs_align)
   else
     {
       /* Assume some objects may require alignment on some systems.  */
-#ifdef TC_ALPHA
+#if defined (TC_ALPHA) && ! defined (VMS)
       if (temp > 1)
 	{
 	  align = ffs (temp) - 1;
@@ -2041,6 +2047,7 @@ s_macro (ignore)
   sb s;
   sb label;
   const char *err;
+  const char *name;
 
   as_where (&file, &line);
 
@@ -2052,7 +2059,7 @@ s_macro (ignore)
   if (line_label != NULL)
     sb_add_string (&label, S_GET_NAME (line_label));
 
-  err = define_macro (0, &s, &label, get_line_sb);
+  err = define_macro (0, &s, &label, get_line_sb, &name);
   if (err != NULL)
     as_bad_where (file, line, "%s", err);
   else
@@ -2063,6 +2070,18 @@ s_macro (ignore)
 	  S_SET_VALUE (line_label, 0);
 	  line_label->sy_frag = &zero_address_frag;
 	}
+
+      if (((flag_m68k_mri
+#ifdef NO_PSEUDO_DOT
+	    || 1
+#endif
+	    )
+	   && hash_find (po_hash, name) != NULL)
+	  || (! flag_m68k_mri
+	      && *name == '.'
+	      && hash_find (po_hash, name + 1) != NULL))
+	as_warn ("attempt to redefine pseudo-op `%s' ignored",
+		 name);
     }
 
   sb_kill (&s);
@@ -2511,6 +2530,43 @@ s_space (mult)
   if (flag_mri)
     stop = mri_comment_field (&stopc);
 
+  /* In m68k MRI mode, we need to align to a word boundary, unless
+     this is ds.b.  */
+  if (flag_m68k_mri && mult > 1)
+    {
+      if (now_seg == absolute_section)
+	{
+	  abs_section_offset += abs_section_offset & 1;
+	  if (line_label != NULL)
+	    S_SET_VALUE (line_label, abs_section_offset);
+	}
+      else if (mri_common_symbol != NULL)
+	{
+	  valueT val;
+
+	  val = S_GET_VALUE (mri_common_symbol);
+	  if ((val & 1) != 0)
+	    {
+	      S_SET_VALUE (mri_common_symbol, val + 1);
+	      if (line_label != NULL)
+		{
+		  know (line_label->sy_value.X_op == O_symbol);
+		  know (line_label->sy_value.X_add_symbol == mri_common_symbol);
+		  line_label->sy_value.X_add_number += 1;
+		}
+	    }
+	}
+      else
+	{
+	  do_align (1, (char *) NULL, 0);
+	  if (line_label != NULL)
+	    {
+	      line_label->sy_frag = frag_now;
+	      S_SET_VALUE (line_label, frag_now_fix ());
+	    }
+	}
+    }
+
   expression (&exp);
 
   SKIP_WHITESPACE ();
@@ -2932,6 +2988,10 @@ cons_worker (nbytes, rva)
       return;
     }
 
+#ifdef md_cons_align
+  md_cons_align (nbytes);
+#endif
+
   c = 0;
   do
     {
@@ -3129,7 +3189,8 @@ emit_expr (exp, nbytes)
       use = get & unmask;
       if ((get & mask) != 0 && (get & mask) != mask)
 	{		/* Leading bits contain both 0s & 1s. */
-	  as_warn ("Value 0x%lx truncated to 0x%lx.", get, use);
+	  as_warn ("Value 0x%lx truncated to 0x%lx.",
+		   (unsigned long) get, (unsigned long) use);
 	}
       /* put bytes in right order. */
       md_number_to_chars (p, use, (int) nbytes);
@@ -3203,11 +3264,31 @@ emit_expr (exp, nbytes)
 #ifdef TC_CONS_FIX_NEW
       TC_CONS_FIX_NEW (frag_now, p - frag_now->fr_literal, nbytes, exp);
 #else
-      fix_new_exp (frag_now, p - frag_now->fr_literal, (int) nbytes, exp, 0,
-		   /* @@ Should look at CPU word size.  */
-		   nbytes == 2 ? BFD_RELOC_16
-		      : nbytes == 8 ? BFD_RELOC_64
-		      : BFD_RELOC_32);
+      {
+	bfd_reloc_code_real_type r;
+
+	switch (nbytes)
+	  {
+	  case 1:
+	    r = BFD_RELOC_8;
+	    break;
+	  case 2:
+	    r = BFD_RELOC_16;
+	    break;
+	  case 4:
+	    r = BFD_RELOC_32;
+	    break;
+	  case 8:
+	    r = BFD_RELOC_64;
+	    break;
+	  default:
+	    as_bad ("unsupported BFD relocation size %u", nbytes);
+	    r = BFD_RELOC_32;
+	    break;
+	  }
+	fix_new_exp (frag_now, p - frag_now->fr_literal, (int) nbytes, exp,
+		     0, r);
+      }
 #endif
 #else
 #ifdef TC_CONS_FIX_NEW
@@ -3588,6 +3669,10 @@ float_cons (float_type)
       return;
     }
 
+#ifdef md_flush_pending_output
+  md_flush_pending_output ();
+#endif
+
   do
     {
       /* input_line_pointer->1st char of a flonum (we hope!). */
@@ -3755,6 +3840,11 @@ next_char_of_string ()
       c = NOT_A_CHAR;
       break;
 
+    case '\n':
+      as_warn ("Unterminated string: Newline inserted.");
+      bump_line_counters ();
+      break;
+
 #ifndef NO_STRING_ESCAPES
     case '\\':
       switch (c = *input_line_pointer++)
@@ -3836,6 +3926,7 @@ next_char_of_string ()
 	  /* To be compatible with BSD 4.2 as: give the luser a linefeed!! */
 	  as_warn ("Unterminated string: Newline inserted.");
 	  c = '\n';
+	  bump_line_counters ();
 	  break;
 
 	default:

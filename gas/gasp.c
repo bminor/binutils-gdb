@@ -2638,7 +2638,7 @@ do_macro (idx, in)
   const char *err;
   int line = linecount ();
 
-  err = define_macro (idx, in, &label, get_line);
+  err = define_macro (idx, in, &label, get_line, (const char **) NULL);
   if (err != NULL)
     ERROR ((stderr, "macro at line %d: %s\n", line - 1, err));
 }

@@ -5,6 +5,13 @@ Tue Oct  1 16:16:01 1996  Joel Sherrill  <joel@oarcorp.com>
 
 Tue Oct  1 12:37:48 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* read.c (s_macro): Warn if a macro has the same name as a
+	pseudo-op.
+	(s_space): In m68k MRI mode, align to a word boundary.
+	* macro.c (define_macro): Add namep parameter.  Change all
+	callers.
+	* macro.h (define_macro): Update declaration.
+
 	* as.c (show_usage): Print bug report address.
 	(parse_args): Change version printing to match current GNU
 	standards.
