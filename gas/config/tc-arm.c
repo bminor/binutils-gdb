@@ -635,7 +635,7 @@ static CONST struct asm_opcode insns[] =
 #define PRE_INDEX	0x01000000
 #define INDEX_UP	0x00800000
 #define WRITE_BACK	0x00200000
-#define MULTI_SET_PSR	0x00400000
+#define LDM_TYPE_2_OR_3	0x00400000
 
 #define LITERAL_MASK	0xf000f000
 #define COND_MASK	0xf0000000
@@ -3167,7 +3167,7 @@ do_ldmstm (str, flags)
   if (*str == '^')
     {
       str++;
-      flags |= MULTI_SET_PSR;
+      flags |= LDM_TYPE_2_OR_3;
     }
 
   inst.instruction |= flags | range;
