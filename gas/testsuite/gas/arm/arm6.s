@@ -2,7 +2,6 @@
 .align 0
 	
 	mrs	r8, cpsr
-	mrseq	r9, cpsr_all
 	mrs	r2, spsr
 
 	msr	cpsr, r1

@@ -1,3 +1,8 @@
+2000-06-14  Nick Clifton  <nickc@cygnus.com>
+
+	* gas/arm/arm6.s: Remove 'mrs r9, cpsr_all' since the cpsr_all
+	flag is no longer legal syntax.
+
 2000-06-09  Nick Clifton  <nickc@cygnus.com>
 
 	* gas/macros/macros.exp: Run new test: strings.
