@@ -186,7 +186,7 @@ funcvec_hash_table_init (table, abfd, newfunc)
 }
 
 /* Create the derived linker hash table.  We use a derived hash table
-   basically to hold "static" information during an h8/300 coff link
+   basically to hold "static" information during an H8/300 coff link
    without using static variables.  */
 
 static struct bfd_link_hash_table *

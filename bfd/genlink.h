@@ -54,13 +54,13 @@ struct generic_link_hash_table
   struct bfd_link_hash_table root;
 };
 
-/* Look up an entry in an generic link hash table.  */
+/* Look up an entry in a generic link hash table.  */
 
 #define _bfd_generic_link_hash_lookup(table, string, create, copy, follow) \
   ((struct generic_link_hash_entry *) \
    bfd_link_hash_lookup (&(table)->root, (string), (create), (copy), (follow)))
 
-/* Traverse an generic link hash table.  */
+/* Traverse a generic link hash table.  */
 
 #define _bfd_generic_link_hash_traverse(table, func, info)		\
   (bfd_link_hash_traverse						\

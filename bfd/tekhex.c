@@ -471,7 +471,7 @@ first_phase (abfd, type, src)
     }
 }
 
-/* Pass over an tekhex, calling one of the above functions on each
+/* Pass over a tekhex, calling one of the above functions on each
    record.  */
 
 static void

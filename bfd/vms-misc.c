@@ -605,8 +605,8 @@ add_new_contents (abfd, section)
   return newptr;
 }
 
-/* Save section data & offset to an vms_section structure
-   vms_section_table[] holds the vms_section chain  */
+/* Save section data & offset to a vms_section structure
+   vms_section_table[] holds the vms_section chain.  */
 
 bfd_boolean
 _bfd_save_vms_section (abfd, section, data, offset, count)

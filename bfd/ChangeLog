@@ -1,3 +1,15 @@
+2002-12-20  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* coff-h8300.c: Fix comment typos.
+	* coffcode.h: Likewise.
+	* cpu-cris.c: Likewise.
+	* elf32-vax.c: Likewise.
+	* genlink.h: Likewise.
+	* linker.c: Likewise.
+	* som.c: Likewise.
+	* tekhex.c: Likewise.
+	* vms-misc.c: Likewise.
+
 2002-12-20  DJ Delorie  <dj@redhat.com>
 
 	* reloc.c: Add BFD_RELOC_XSTORMY16_12.

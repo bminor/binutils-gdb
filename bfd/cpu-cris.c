@@ -43,7 +43,7 @@ bfd_cris_arch =
   bfd_default_compatible,	/* A default function for testing
 				   "machine" compatibility of two
 				   bfd_arch_info_type.  */
-  bfd_default_scan,		/* Check if an bfd_arch_info_type is a
+  bfd_default_scan,		/* Check if a bfd_arch_info_type is a
 				   match.  */
   NULL				/* Pointer to next bfd_arch_info_type in
 				   the same family.  */

@@ -3095,7 +3095,7 @@ coff_compute_section_file_positions (abfd)
 #ifdef RS6000COFF_C
 	  /* AIX loader checks the text section alignment of (vma - filepos)
 	     So even though the filepos may be aligned wrt the o_algntext, for
-	     AIX executables, this check fails. This shows up when an native
+	     AIX executables, this check fails. This shows up when a native
 	     AIX executable is stripped with gnu strip because the default vma
 	     of native is 0x10000150 but default for gnu is 0x10000140.  Gnu
 	     stripped gnu excutable passes this check because the filepos is

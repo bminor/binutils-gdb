@@ -783,7 +783,7 @@ elf_vax_check_relocs (abfd, info, sec, relocs)
 		 PC relative relocations we have entered for this symbol,
 		 so that we can discard them again if the symbol is later
 		 defined by a regular object.  Note that this function is
-		 only called if we are using an vaxelf linker hash table,
+		 only called if we are using a vaxelf linker hash table,
 		 which means that h is really a pointer to an
 		 elf_vax_link_hash_entry.  */
 	      if ((ELF32_R_TYPE (rel->r_info) == R_VAX_PC8

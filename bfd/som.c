@@ -5303,7 +5303,7 @@ bfd_som_attach_aux_hdr (abfd, type, string)
   return TRUE;
 }
 
-/* Attach an compilation unit header to the BFD backend so that it may be
+/* Attach a compilation unit header to the BFD backend so that it may be
    written into the object file.  */
 
 bfd_boolean
