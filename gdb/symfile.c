@@ -475,13 +475,16 @@ psymtab_to_symtab (pst)
    FROM_TTY says how verbose to be.  MAINLINE specifies whether this
    is the main symbol file, or whether it's an extra symbol file such
    as dynamically loaded code.  If !mainline, ADDR is the address
-   where the text segment was loaded.  */
+   where the text segment was loaded.  If VERBO, the caller has printed
+   a verbose message about the symbol reading (and complaints can be
+   more terse about it).  */
 
 void
-syms_from_objfile (objfile, addr, mainline)
+syms_from_objfile (objfile, addr, mainline, verbo)
      struct objfile *objfile;
      CORE_ADDR addr;
      int mainline;
+     int verbo;
 {
   asection *text_sect;
   struct sym_fns *sf;
@@ -531,7 +534,10 @@ syms_from_objfile (objfile, addr, mainline)
       addr = bfd_section_vma (sym_bfd, text_sect);
     }
 
-  clear_complaints();	/* Allow complaints to appear for this new file. */
+  /* Allow complaints to appear for this new file, and record how
+     verbose to be. */
+
+  clear_complaints(1, verbo);
 
   (*sf->sym_read) (sf, addr, mainline);
 
@@ -550,6 +556,9 @@ syms_from_objfile (objfile, addr, mainline)
 
   /* If we have wiped out any old symbol tables, clean up.  */
   clear_symtab_users_once ();
+
+  /* We're done reading the symbol file; finish off complaints.  */
+  clear_complaints(0, verbo);
 }
 
 
@@ -600,7 +609,7 @@ symbol_file_add (name, from_tty, addr, mainline)
       fflush (stdout);
     }
 
-  syms_from_objfile (objfile, addr, mainline);
+  syms_from_objfile (objfile, addr, mainline, from_tty);
 
   if (from_tty)
     {
@@ -916,6 +925,15 @@ fill_in_vptr_fieldno (type)
 
 static unsigned stop_whining = 0;
 
+/* Should each complaint be self explanatory, or should we assume that
+   a series of complaints is being produced? 
+   case 0:  self explanatory message.
+   case 1:  First message of a series that must start off with explanation.
+   case 2:  Subsequent message, when user already knows we are reading
+            symbols and we can just state our piece.  */
+
+static int complaint_series = 0;
+
 /* Print a complaint about the input symbols, and link the complaint block
    into a chain for later handling.  */
 
@@ -932,25 +950,60 @@ complain (complaint, val)
   if (complaint->counter > stop_whining)
     return;
   wrap_here ("");
-  if (!info_verbose) {
+
+  switch (complaint_series + (info_verbose << 1)) {
+
+  /* Isolated messages, must be self-explanatory.  */
+  case 0:
+    puts_filtered ("During symbol reading, ");
+    wrap_here("");
+    printf_filtered (complaint->message, val);
+    puts_filtered (".\n");
+    break;
+
+  /* First of a series, without `set verbose'.  */
+  case 1:
     puts_filtered ("During symbol reading...");
+    printf_filtered (complaint->message, val);
+    puts_filtered ("...");
+    wrap_here("");
+    complaint_series++;
+    break;
+
+  /* Subsequent messages of a series, or messages under `set verbose'.
+     (We'll already have produced a "Reading in symbols for XXX..." message
+      and will clean up at the end with a newline.)  */
+  default:
+    printf_filtered (complaint->message, val);
+    puts_filtered ("...");
+    wrap_here("");
   }
-  printf_filtered (complaint->message, val);
-  puts_filtered ("...");
-  wrap_here("");
-  if (!info_verbose)
-    puts_filtered ("\n");
 }
 
-/* Clear out all complaint counters that have ever been incremented.  */
+/* Clear out all complaint counters that have ever been incremented.
+   If sym_reading is 1, be less verbose about successive complaints,
+   since the messages are appearing all together during a command that
+   reads symbols (rather than scattered around as psymtabs get fleshed
+   out into symtabs at random times).  If noisy is 1, we are in a
+   noisy symbol reading command, and our caller will print enough
+   context for the user to figure it out.  */
 
 void
-clear_complaints ()
+clear_complaints (sym_reading, noisy)
+     int sym_reading;
+     int noisy;
 {
   struct complaint *p;
 
   for (p = complaint_root->next; p != complaint_root; p = p->next)
     p->counter = 0;
+
+  if (!sym_reading && !noisy && complaint_series > 1) {
+    /* Terminate previous series, since caller won't.  */
+    puts_filtered ("\n");
+  }
+
+  complaint_series = sym_reading? 1 + noisy: 0;
 }
 
 enum language
@@ -1268,7 +1321,7 @@ The second argument provides the starting address of the file's text.");
 for access from GDB.");
 
   add_show_from_set
-    (add_set_cmd ("complaints", class_support, var_uinteger,
+    (add_set_cmd ("complaints", class_support, var_zinteger,
 		  (char *)&stop_whining,
 	  "Set max number of complaints about incorrect symbols.",
 		  &setlist),

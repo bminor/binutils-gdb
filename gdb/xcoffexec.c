@@ -299,7 +299,7 @@ map_vmap (bfd *bf, bfd *arch)
   if (exec_bfd && !obj) {
     name = savestring (bfd_get_filename (bf), strlen (bfd_get_filename (bf)));
     obj = allocate_objfile (bf, name);
-    syms_from_objfile (obj, 0, 0);
+    syms_from_objfile (obj, 0, 0, 0);
   }
 
   /* find the end of the list, and append. */

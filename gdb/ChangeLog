@@ -1,10 +1,22 @@
 Tue Dec  3 17:24:57 1991  John Gilmore  (gnu at cygnus.com)
 
+	* Makefile.in:  VERSION 4.2.96.
+
+	* main.c (initialize_main):  Revise command descriptions.
+	* command.c (show_user):  `info user' -> `show user'.	
+	* symtab.c (_initialize_symtab):  Typo in `info types' desc.
+
 	* coffread.c (coff_symfile_read):  Avoid select_source_symtab,
-	since it is not needed and can cause errors when examining ".o"
-	files.
+	since it is not needed and can cause errors when examining ".o"s.
+	(read_coff_symtab, decode_base_type):  Use complain, not printf.
+	Print symbol name, not its number.
+	Remove "#if defined(clipper) #define BELIEVE_PCC_PROMOTION", which
+	someday should go in a clipper target config file.
 
 	* symfile.c (compact_misc_function_vector):  Handle empty vector.
+	(complain, clear_complaints, syms_from_objfile):  Fix complaint
+	formatting.
+	* xcoffexec.c:  Change syms_from_objfile caller.
 
 	* sparc-xdep.c:  Force tm-file as tm-sparc.h, to make it compile
 	when configured for cross debugging.  FIXME, this needs a more

@@ -17,7 +17,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <stdio.h>
 #include "defs.h"
-#include "command.h"
+#include "gdbcmd.h"
 #include "symtab.h"
 #include "value.h"
 #include <ctype.h>
@@ -1152,7 +1152,7 @@ make_command (arg, from_tty)
 }
 
 static void
-user_info_1 (c, stream)
+show_user_1 (c, stream)
      struct cmd_list_element *c;
      FILE *stream;
 {
@@ -1172,7 +1172,7 @@ user_info_1 (c, stream)
 
 /* ARGSUSED */
 static void
-user_info (args, from_tty)
+show_user (args, from_tty)
      char *args;
      int from_tty;
 {
@@ -1184,14 +1184,14 @@ user_info (args, from_tty)
       c = lookup_cmd (&args, cmdlist, "", 0, 1);
       if (c->class != class_user)
 	error ("Not a user command.");
-      user_info_1 (c, stdout);
+      show_user_1 (c, stdout);
     }
   else
     {
       for (c = cmdlist; c; c = c->next)
 	{
 	  if (c->class == class_user)
-	    user_info_1 (c, stdout);
+	    show_user_1 (c, stdout);
 	}
     }
 }
@@ -1206,7 +1206,8 @@ With no arguments, run an inferior shell.");
   add_com ("make", class_support, make_command,
 	   "Run the ``make'' program using the rest of the line as arguments.");
 
-  add_info ("user", user_info, "Show definitions of user defined commands.\n\
+  add_cmd ("user", no_class, show_user, 
+	   "Show definitions of user defined commands.\n\
 Argument is the name of the user defined command.\n\
-With no argument, show definitions of all user defined commands.");
+With no argument, show definitions of all user defined commands.", &showlist);
 }
