@@ -208,9 +208,9 @@ struct h8_opcode
 { O(code,SW), 0, 2, name, {OR16, E, 0}, {op1, op2, op3+1, OR16, E, 0, 0, 0, 0}, 0, 0, 0, 0}, \
 { O(code,SL), 0, 2, name, {OR32, E, 0}, {op1, op2, op3+3, OR32|B30, E, 0, 0, 0, 0}, 0, 0, 0, 0} \
 /* start-sanitize-h8s */\
-,{ O(code,SB), 1, 2, name, {SHIFT_IMM, RD8,  E}, {op1, op2, op3+4, RD8,  E, 0, 0, 0, 0}, 0, 0, 0, 0}, \
-{ O(code,SW), 0, 2, name, {SHIFT_IMM, RD16, E}, {op1, op2, op3+5, RD16, E, 0, 0, 0, 0}, 0, 0, 0, 0}, \
-{ O(code,SL), 0, 2, name, {SHIFT_IMM, RD32, E}, {op1, op2, op3+7, RD32|B30, E, 0, 0, 0, 0}, 0, 0, 0, 0} \
+,{ O(code,SB), 1, 2, name, {SHIFT_IMM, RS8,  E}, {op1, op2, op3+4, RS8,  E, 0, 0, 0, 0}, 0, 0, 0, 0}, \
+{ O(code,SW), 0, 2, name, {SHIFT_IMM, RS16, E}, {op1, op2, op3+5, RS16, E, 0, 0, 0, 0}, 0, 0, 0, 0}, \
+{ O(code,SL), 0, 2, name, {SHIFT_IMM, RS32, E}, {op1, op2, op3+7, RS32|B30, E, 0, 0, 0, 0}, 0, 0, 0, 0} \
 /* end-sanitize-h8s */ \
 
 

@@ -1,3 +1,14 @@
+start-sanitize-h8s 
+Tue Jul  2 13:20:19 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* h8300.h (UNOP3): Mark the register operand in this insn
+	as a source operand, not a destination operand.
+
+end-sanitize-h8s
+Fri Jun 21 13:52:17 1996  Richard Henderson  <rth@tamu.edu>
+
+	* alpha.h: New file.
+
 Thu Jun 20 15:02:57 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* rs6k.h: Remove obsolete file.
