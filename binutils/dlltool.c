@@ -391,7 +391,7 @@ static const char *mname = "ppc";
 #endif
 
 #ifdef DLLTOOL_MCORE
-static const char * mname = "mcore";
+static const char * mname = "mcore-le";
 #endif
 
 #ifdef DLLTOOL_MCORE_ELF
@@ -553,7 +553,7 @@ mtable[] =
   ,
   {
 #define MMCORE_BE 5
-    "mcore", ".byte", ".short", ".long", ".asciz", "//",
+    "mcore-be", ".byte", ".short", ".long", ".asciz", "//",
     "jmpi\t1\n\tnop\n\t.long",
     ".global", ".space", ".align\t2",".align\t4", "",
     "pe-mcore-big", bfd_arch_mcore,
@@ -571,7 +571,7 @@ mtable[] =
   ,
   {
 #define MMCORE_ELF 7
-    "mcore-elf", ".byte", ".short", ".long", ".asciz", "//",
+    "mcore-elf-be", ".byte", ".short", ".long", ".asciz", "//",
     "jmpi\t1\n\tnop\n\t.long",
     ".global", ".space", ".align\t2",".align\t4", "",
     "elf32-mcore-big", bfd_arch_mcore,
@@ -3093,7 +3093,7 @@ usage (file, status)
   fprintf (file, _("Usage %s <options> <object-files>\n"), program_name);
   /* xgetext:c-format */
   fprintf (file, _("   -m --machine <machine>    Create as DLL for <machine>.  [default: %s]\n"), mname);
-  fprintf (file, _("        possible <machine>: arm[_interwork], i386, mcore[-elf][-le], ppc, thumb\n"));
+  fprintf (file, _("        possible <machine>: arm[_interwork], i386, mcore[-elf]{-le|-be}, ppc, thumb\n"));
   fprintf (file, _("   -e --output-exp <outname> Generate an export file.\n"));
   fprintf (file, _("   -l --output-lib <outname> Generate an interface library.\n"));
   fprintf (file, _("   -a --add-indirect         Add dll indirects to export file.\n"));

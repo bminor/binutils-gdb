@@ -2,6 +2,8 @@
 
 	* dlltool.c (flush_page): Clip short values to prevent warnings
 	from the assembler.
+	Change default mcore machine name to 'mcore-le' and rename
+	big-endian version to 'mcore-be'. 
 
 1999-10-27  Fred Fish  <fnf@cygnus.com>
 
