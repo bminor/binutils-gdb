@@ -19,7 +19,7 @@ c++filt\(em\&demangle C++ symbols
 .RB "[\|" "\-s {gnu,lucid,arm} " | " \-\-format={gnu,lucid,arm}" "\|]"
 .RB "[\|" \-\-help "\|]"
 .RB "[\|" \-\-version "\|]"
-.RB "[\|" arg "...\|]"
+.RB "[\|" symbol "...\|]"
 .SH DESCRIPTION
 The C++ language provides function overloading, which means that you can
 write many functions with the same name (providing each takes parameters
@@ -37,24 +37,18 @@ dollars, or periods) seen in the input is a potential label.  If the
 label decodes into a C++ name, the C++ name replaces the low-level
 name in the output.
 .PP
-A typical use of 
-.B c++filt
-is to pipe the output of 
-.B nm
-through it, using 
-.B c++filt
-as a filter:
-.br
-.RS
-.B nm \fIobjfile\fB | c++filt
-.RE
-.PP
-You can also use
+You can use
 .B c++filt
 to decipher individual symbols by specifying these symbols on the
 command line.
 .PP
-All results are printed on the standard output.
+If no
+.B symbol
+arguments are given,
+.B c++filt
+reads symbol names from the standard input and writes the demangled
+names to the standard output.  All results are printed on the standard
+output.
 .SH OPTIONS
 .TP
 .B \-_
