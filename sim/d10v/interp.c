@@ -1,5 +1,6 @@
 #include <signal.h>
 #include "sysdep.h"
+#include "bfd.h"
 #include "callback.h"
 #include "remote-sim.h"
 
@@ -11,6 +12,9 @@
 
 enum _leftright { LEFT_FIRST, RIGHT_FIRST };
 
+static char *myname;
+static SIM_OPEN_KIND sim_kind;
+static bfd_vma start_address;
 int d10v_debug;
 host_callback *d10v_callback;
 unsigned long ins_type_counters[ (int)INS_MAX ];
@@ -18,6 +22,9 @@ unsigned long ins_type_counters[ (int)INS_MAX ];
 uint16 OP[4];
 
 static int init_text_p = 0;
+/* non-zero if we opened prog_bfd */
+static int prog_bfd_was_opened_p;
+bfd *prog_bfd;
 asection *text;
 bfd_vma text_start;
 bfd_vma text_end;
@@ -31,21 +38,8 @@ static void do_parallel PARAMS ((uint16 ins1, uint16 ins2));
 static char *add_commas PARAMS ((char *buf, int sizeof_buf, unsigned long value));
 extern void sim_size PARAMS ((int power));
 static void init_system PARAMS ((void));
-extern int sim_write PARAMS ((SIM_ADDR addr, unsigned char *buffer, int size));
-extern void sim_open PARAMS ((char *args));
-extern void sim_close PARAMS ((int quitting));
 extern void sim_set_profile PARAMS ((int n));
 extern void sim_set_profile_size PARAMS ((int n));
-extern void sim_resume PARAMS ((int step, int siggnal));
-extern void sim_info PARAMS ((int verbose));
-extern void sim_create_inferior PARAMS ((SIM_ADDR start_address, char **argv, char **env));
-extern void sim_kill PARAMS ((void));
-extern void sim_set_callbacks PARAMS ((host_callback *p));
-extern void sim_stop_reason PARAMS ((enum sim_stop *reason, int *sigrc));
-extern void sim_fetch_register PARAMS ((int rn, unsigned char *memory));
-extern void sim_store_register PARAMS ((int rn, unsigned char *memory));
-extern int sim_read PARAMS ((SIM_ADDR addr, unsigned char *buffer, int size));
-extern void sim_do_command PARAMS ((char *cmd));
 
 #ifndef INLINE
 #if defined(__GNUC__) && defined(__OPTIMIZE__)
@@ -124,12 +118,12 @@ decode_pc ()
   if (!init_text_p)
     {
       init_text_p = 1;
-      for (s = exec_bfd->sections; s; s = s->next)
-	if (strcmp (bfd_get_section_name (exec_bfd, s), ".text") == 0)
+      for (s = prog_bfd->sections; s; s = s->next)
+	if (strcmp (bfd_get_section_name (prog_bfd, s), ".text") == 0)
 	  {
 	    text = s;
-	    text_start = bfd_get_section_vma (exec_bfd, s);
-	    text_end = text_start + bfd_section_size (exec_bfd, s);
+	    text_start = bfd_get_section_vma (prog_bfd, s);
+	    text_end = text_start + bfd_section_size (prog_bfd, s);
 	    break;
 	  }
     }
@@ -370,29 +364,30 @@ xfer_mem (addr, buffer, size, write)
   /* to access data, we use the following mapping */
   /* 0x01000000 - 0x0103ffff : instruction memory */
   /* 0x02000000 - 0x0200ffff : data memory        */
-  /* 0x03000000 - 0x03ffffff : unified memory     */
+  /* 0x00000000 - 0x00ffffff : unified memory     */
 
-  if ( (addr & 0x03000000) == 0x03000000)
+  if ( (addr & 0x03000000) == 0)
     {
       /* UNIFIED MEMORY */
       int segment;
-      addr &= ~0x03000000;
       segment = addr >> UMEM_SIZE;
       addr &= 0x1ffff;
       if (!State.umem[segment])
-	State.umem[segment] = (uint8 *)calloc(1,1<<UMEM_SIZE);
+	{
+#ifdef DEBUG
+	  (*d10v_callback->printf_filtered) (d10v_callback,"Allocating %s bytes unified memory to region %d\n",
+					     add_commas (buffer, sizeof (buffer), (1UL<<IMEM_SIZE)), segment);
+#endif
+	  State.umem[segment] = (uint8 *)calloc(1,1<<UMEM_SIZE);
+	}
       if (!State.umem[segment])
 	{
 	  (*d10v_callback->printf_filtered) (d10v_callback, "Memory allocation failed.\n");
 	  exit(1);
 	}
-#ifdef DEBUG
-      (*d10v_callback->printf_filtered) (d10v_callback,"Allocated %s bytes unified memory to region %d\n",
-		add_commas (buffer, sizeof (buffer), (1UL<<IMEM_SIZE)), segment);
-#endif
       /* FIXME:  need to check size and read/write multiple segments if necessary */
       if (write)
-	memcpy (State.umem[segment]+addr, buffer, size); 
+	memcpy (State.umem[segment]+addr, buffer, size) ; 
       else
 	memcpy (buffer, State.umem[segment]+addr, size); 
     }
@@ -429,7 +424,7 @@ xfer_mem (addr, buffer, size, write)
       (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: address 0x%x is not in valid range\n",addr);
       (*d10v_callback->printf_filtered) (d10v_callback, "Instruction addresses start at 0x01000000\n");
       (*d10v_callback->printf_filtered) (d10v_callback, "Data addresses start at 0x02000000\n");
-      (*d10v_callback->printf_filtered) (d10v_callback, "Unified addresses start at 0x03000000\n");
+      (*d10v_callback->printf_filtered) (d10v_callback, "Unified addresses start at 0x00000000\n");
       exit(1);
     }
   else
@@ -440,7 +435,8 @@ xfer_mem (addr, buffer, size, write)
 
 
 int
-sim_write (addr, buffer, size)
+sim_write (sd, addr, buffer, size)
+     SIM_DESC sd;
      SIM_ADDR addr;
      unsigned char *buffer;
      int size;
@@ -449,7 +445,8 @@ sim_write (addr, buffer, size)
 }
 
 int
-sim_read (addr, buffer, size)
+sim_read (sd, addr, buffer, size)
+     SIM_DESC sd;
      SIM_ADDR addr;
      unsigned char *buffer;
      int size;
@@ -458,22 +455,31 @@ sim_read (addr, buffer, size)
 }
 
 
-void
-sim_open (args)
-     char *args;
+SIM_DESC
+sim_open (kind, argv)
+     SIM_OPEN_KIND kind;
+     char **argv;
 {
   struct simops *s;
   struct hash_entry *h;
   static int init_p = 0;
+  char **p;
 
-  if (args != NULL)
+  sim_kind = kind;
+  myname = argv[0];
+
+  for (p = argv + 1; *p; ++p)
     {
+      /* Ignore endian specification.  */
+      if (strcmp (*p, "-E") == 0)
+	++p;
+      else
 #ifdef DEBUG
-      if (strcmp (args, "-t") == 0)
+      if (strcmp (*p, "-t") == 0)
 	d10v_debug = DEBUG;
       else
 #endif
-	(*d10v_callback->printf_filtered) (d10v_callback, "ERROR: unsupported option(s): %s\n",args);
+	(*d10v_callback->printf_filtered) (d10v_callback, "ERROR: unsupported option(s): %s\n",*p);
     }
   
   /* put all the opcodes in the hash table */
@@ -489,7 +495,10 @@ sim_open (args)
 
 	  if (h->ops)
 	    {
-	      h->next = calloc(1,sizeof(struct hash_entry));
+	      h->next = (struct hash_entry *) calloc(1,sizeof(struct hash_entry));
+	      if (!h->next)
+		perror ("malloc failure");
+
 	      h = h->next;
 	    }
 	  h->ops = s;
@@ -498,14 +507,19 @@ sim_open (args)
 	  h->size = s->is_long;
 	}
     }
+
+  /* Fudge our descriptor.  */
+  return (SIM_DESC) 1;
 }
 
 
 void
-sim_close (quitting)
+sim_close (sd, quitting)
+     SIM_DESC sd;
      int quitting;
 {
-  /* nothing to do */
+  if (prog_bfd != NULL && prog_bfd_was_opened_p)
+    bfd_close (prog_bfd);
 }
 
 void
@@ -534,8 +548,12 @@ dmem_addr( addr )
   if (addr > 0xbfff)
     {
       if ( (addr & 0xfff0) != 0xff00)
-	(*d10v_callback->printf_filtered) (d10v_callback, "Data address 0x%lx is in I/O space, pc = 0x%lx.\n",
-					   (long)addr, (long)decode_pc ());
+	{
+	  (*d10v_callback->printf_filtered) (d10v_callback, "Data address 0x%lx is in I/O space, pc = 0x%lx.\n",
+					     (long)addr, (long)decode_pc ());
+	  State.exception = SIGBUS;
+	}
+
       return State.dmem + addr;
     }
   
@@ -554,7 +572,7 @@ dmem_addr( addr )
 	{
 	  (*d10v_callback->printf_filtered) (d10v_callback, "ERROR:  unified memory region %d unmapped, pc = 0x%lx\n",
 					     seg, (long)decode_pc ());
-	  exit(1);
+	  State.exception = SIGBUS;
 	}
       return State.umem[seg] + (DMAP & 7) * 0x4000;
     }
@@ -581,7 +599,7 @@ pc_addr()
     {
       (*d10v_callback->printf_filtered) (d10v_callback, "ERROR:  unified memory region %d unmapped, pc = 0x%lx\n",
 					 imap & 0xff, (long)PC);
-      State.exception = SIGILL;
+      State.exception = SIGBUS;
       return 0;
     }
 
@@ -600,7 +618,8 @@ sim_ctrl_c()
 
 /* Run (or resume) the program.  */
 void
-sim_resume (step, siggnal)
+sim_resume (sd, step, siggnal)
+     SIM_DESC sd;
      int step, siggnal;
 {
   void (*prev) ();
@@ -655,17 +674,19 @@ sim_resume (step, siggnal)
 }
 
 int
-sim_trace ()
+sim_trace (sd)
+     SIM_DESC sd;
 {
 #ifdef DEBUG
   d10v_debug = DEBUG;
 #endif
-  sim_resume (0, 0);
+  sim_resume (sd, 0, 0);
   return 1;
 }
 
 void
-sim_info (verbose)
+sim_info (sd, verbose)
+     SIM_DESC sd;
      int verbose;
 {
   char buf1[40];
@@ -768,9 +789,9 @@ sim_info (verbose)
 				     size, add_commas (buf1, sizeof (buf1), total));
 }
 
-void
-sim_create_inferior (start_address, argv, env)
-     SIM_ADDR start_address;
+SIM_RC
+sim_create_inferior (sd, argv, env)
+     SIM_DESC sd;
      char **argv;
      char **env;
 {
@@ -791,24 +812,29 @@ sim_create_inferior (start_address, argv, env)
   SET_IMAP0(0x1000);
   SET_IMAP1(0x1000);
   SET_DMAP(0);
+
+  return SIM_RC_OK;
 }
 
 
 void
-sim_kill ()
+sim_kill (sd)
+     SIM_DESC sd;
 {
   /* nothing to do */
 }
 
 void
-sim_set_callbacks(p)
+sim_set_callbacks (sd, p)
+     SIM_DESC sd;
      host_callback *p;
 {
   d10v_callback = p;
 }
 
 void
-sim_stop_reason (reason, sigrc)
+sim_stop_reason (sd, reason, sigrc)
+     SIM_DESC sd;
      enum sim_stop *reason;
      int *sigrc;
 {
@@ -834,7 +860,8 @@ sim_stop_reason (reason, sigrc)
 }
 
 void
-sim_fetch_register (rn, memory)
+sim_fetch_register (sd, rn, memory)
+     SIM_DESC sd;
      int rn;
      unsigned char *memory;
 {
@@ -854,7 +881,8 @@ sim_fetch_register (rn, memory)
 }
  
 void
-sim_store_register (rn, memory)
+sim_store_register (sd, rn, memory)
+     SIM_DESC sd;
      int rn;
      unsigned char *memory;
 {
@@ -875,17 +903,29 @@ sim_store_register (rn, memory)
 
 
 void
-sim_do_command (cmd)
+sim_do_command (sd, cmd)
+     SIM_DESC sd;
      char *cmd;
 { 
   (*d10v_callback->printf_filtered) (d10v_callback, "sim_do_command: %s\n",cmd);
 }
 
-int
-sim_load (prog, from_tty)
+SIM_RC
+sim_load (sd, prog, abfd, from_tty)
+     SIM_DESC sd;
      char *prog;
+     bfd *abfd;
      int from_tty;
 {
-  /* Return nonzero so GDB will handle it.  */
-  return 1;
+  extern bfd *sim_load_file (); /* ??? Don't know where this should live.  */
+
+  if (prog_bfd != NULL && prog_bfd_was_opened_p)
+    bfd_close (prog_bfd);
+  prog_bfd = sim_load_file (sd, myname, d10v_callback, prog, abfd,
+			    sim_kind == SIM_OPEN_DEBUG);
+  if (prog_bfd == NULL)
+    return SIM_RC_FAIL;
+  start_address = bfd_get_start_address (prog_bfd);
+  prog_bfd_was_opened_p = abfd == NULL;
+  return SIM_RC_OK;
 } 

@@ -1,3 +1,18 @@
+Thu Apr 17 02:42:00 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* Makefile.in (SIM_OBJS): Add sim-load.o.
+	* d10v_sim.h (exec_bfd): Rename to prog_bfd.
+	* interp.c: #include bfd.h.
+	(myname, sim_kind, start_address): New static locals.
+	(prog_bfd_was_opened_p, prog_bfd): New static locals.
+	(decode_pc): Update to use prog_bfd.
+	(sim_open): Set sim_kind, myname.  Ignore -E arg.
+	(sim_close): Close prog_bfd if simulator opened it.
+	(sim_create_inferior): Return SIM_RC.  Delete arg start_address.
+	(sim_load): Return SIM_RC.  New arg abfd.  Set start address from bfd.
+	Call sim_load_file to load file into simulator.
+	* simops.c (trace_input_func): exec_bfd renamed to prog_bfd.
+
 Wed Apr 16 16:12:03 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* simops.c (OP_5F00): Only provide system calls SYS_execv,
