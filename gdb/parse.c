@@ -59,9 +59,6 @@ free_funcalls PARAMS ((void));
 static void
 prefixify_expression PARAMS ((struct expression *));
 
-static int
-length_of_subexp PARAMS ((struct expression *, int));
-
 static void
 prefixify_subexp PARAMS ((struct expression *, struct expression *, int, int));
 
@@ -525,7 +522,7 @@ prefixify_expression (expr)
 /* Return the number of exp_elements in the subexpression of EXPR
    whose last exp_element is at index ENDPOS - 1 in EXPR.  */
 
-static int
+int
 length_of_subexp (expr, endpos)
      register struct expression *expr;
      register int endpos;

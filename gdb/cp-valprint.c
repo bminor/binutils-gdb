@@ -35,7 +35,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 int vtblprint;			/* Controls printing of vtbl's */
 int objectprint;		/* Controls looking up an object's derived type
 				   using what we find in its vtables.  */
-static int static_field_print;	/* Controls printing of static fields. */
+int static_field_print;	/* Controls printing of static fields. */
 
 static struct obstack dont_print_vb_obstack;
 static struct obstack dont_print_statmem_obstack;

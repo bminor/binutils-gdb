@@ -143,7 +143,7 @@ add_class_symbol (type, addr)
     obstack_alloc (&dynamics_objfile->symbol_obstack, sizeof (struct symbol));
   memset (sym, 0, sizeof (struct symbol));
   SYMBOL_LANGUAGE (sym) = language_java;
-  SYMBOL_NAME (sym) = TYPE_NAME (type);
+  SYMBOL_NAME (sym) = TYPE_TAG_NAME (type);
   SYMBOL_CLASS (sym) = LOC_TYPEDEF;
   /*  SYMBOL_VALUE (sym) = valu;*/
   SYMBOL_TYPE (sym) = type;
@@ -177,7 +177,7 @@ java_lookup_class (name)
   type = alloc_type (objfile);
   TYPE_CODE (type) = TYPE_CODE_STRUCT;
   INIT_CPLUS_SPECIFIC (type);
-  TYPE_NAME (type) = obsavestring (name, strlen(name), &objfile->type_obstack);
+  TYPE_TAG_NAME (type) = obsavestring (name, strlen(name), &objfile->type_obstack);
   TYPE_FLAGS (type) |= TYPE_FLAG_STUB;
   TYPE ? = addr;
   return type;
@@ -213,7 +213,22 @@ value_ptr
 java_class_from_object (obj_val)
      value_ptr obj_val;
 {
-  value_ptr dtable_val = value_struct_elt (&obj_val, NULL, "dtable", NULL, "structure");
+  /* This is all rather inefficient, since the offsets of dtable and
+     class are fixed.  FIXME */
+  value_ptr dtable_val;
+
+  if (TYPE_CODE (VALUE_TYPE (obj_val)) == TYPE_CODE_PTR
+      && TYPE_LENGTH (TYPE_TARGET_TYPE (VALUE_TYPE (obj_val))) == 0)
+    {
+      struct symbol *sym;
+      sym = lookup_symbol ("Hjava_lang_Object", NULL, STRUCT_NAMESPACE,
+			   (int *) 0, (struct symtab **) NULL);
+      if (sym != NULL)
+	obj_val = value_at (VALUE_TYPE (sym),
+			    value_as_pointer (obj_val), NULL);
+    }
+
+  dtable_val = value_struct_elt (&obj_val, NULL, "dtable", NULL, "structure");
   return value_struct_elt (&dtable_val, NULL, "class", NULL, "structure");
 }
 
@@ -303,7 +318,7 @@ type_from_class (clas)
     }
 
   ALLOCATE_CPLUS_STRUCT_TYPE (type);
-  TYPE_NAME (type) = name;
+  TYPE_TAG_NAME (type) = name;
 
   add_class_symtab_symbol (add_class_symbol (type, addr));
   return java_link_class_type (type, clas);
@@ -318,7 +333,7 @@ java_link_class_type (type, clas)
 {
   value_ptr temp;
   char *unqualified_name;
-  char *name = TYPE_NAME (type);
+  char *name = TYPE_TAG_NAME (type);
   int ninterfaces, nfields, nmethods;
   int type_is_object = 0;
   struct fn_field *fn_fields;
@@ -385,15 +400,22 @@ java_link_class_type (type, clas)
     }
 
 
-  temp = clas;
-  temp = value_struct_elt (&temp, NULL, "bfsize", NULL, "structure");
-  TYPE_LENGTH (type) = value_as_long (temp);
+  if (name[0] == '[' && tsuper != NULL)
+    {
+      TYPE_LENGTH (type) = TYPE_LENGTH (tsuper) + 4;  /* size with "length" */
+    }
+  else
+    {
+      temp = clas;
+      temp = value_struct_elt (&temp, NULL, "bfsize", NULL, "structure");
+      TYPE_LENGTH (type) = value_as_long (temp);
+    }
 
   fields = NULL;
   nfields--;  /* First set up dummy "class" field. */
   SET_FIELD_PHYSADDR (TYPE_FIELD (type, nfields),
 		      VALUE_ADDRESS (clas) + VALUE_OFFSET (clas));
-  TYPE_FIELD_NAME (type, nfields) = "super";
+  TYPE_FIELD_NAME (type, nfields) = "class";
   TYPE_FIELD_TYPE (type, nfields) = VALUE_TYPE (clas);
   SET_TYPE_FIELD_PRIVATE (type, nfields);
   
@@ -556,7 +578,7 @@ is_object_type (type)
 	return 0;
       while (TYPE_N_BASECLASSES (ttype) > 0)
 	ttype = TYPE_BASECLASS (ttype, 0);
-      name = TYPE_NAME (ttype);
+      name = TYPE_TAG_NAME (ttype);
       if (name != NULL && strcmp (name, "java.lang.Object") == 0)
 	return 1;
       name = TYPE_NFIELDS (ttype) > 0 ? TYPE_FIELD_NAME (ttype, 0) : (char*)0;
@@ -674,6 +696,69 @@ java_value_string (ptr, len)
   error ("not implemented - java_value_string"); /* FIXME */
 }
 
+/* Print the character C on STREAM as part of the contents of a literal
+   string whose delimiter is QUOTER.  Note that that format for printing
+   characters and strings is language specific. */
+
+void
+java_emit_char (c, stream, quoter)
+     register int c;
+     GDB_FILE *stream;
+     int quoter;
+{
+  if (PRINT_LITERAL_FORM (c))
+    {
+      if (c == '\\' || c == quoter)
+	{
+	  fputs_filtered ("\\", stream);
+	}
+      fprintf_filtered (stream, "%c", c);
+    }
+  else
+    {
+      switch (c)
+	{
+	case '\n':
+	  fputs_filtered ("\\n", stream);
+	  break;
+	case '\b':
+	  fputs_filtered ("\\b", stream);
+	  break;
+	case '\t':
+	  fputs_filtered ("\\t", stream);
+	  break;
+	case '\f':
+	  fputs_filtered ("\\f", stream);
+	  break;
+	case '\r':
+	  fputs_filtered ("\\r", stream);
+	  break;
+	case '\033':
+	  fputs_filtered ("\\e", stream);
+	  break;
+	case '\007':
+	  fputs_filtered ("\\a", stream);
+	  break;
+	default:
+	  if (c < 256)
+	    fprintf_filtered (stream, "\\%.3o", (unsigned int) c);
+	  else
+	    fprintf_filtered (stream, "\\u%.4x", (unsigned int) c);
+	  break;
+	}
+    }
+}
+
+void
+java_printchar (c, stream)
+     int c;
+     GDB_FILE *stream;
+{
+  fputs_filtered ("'", stream);
+  java_emit_char (c, stream, '\'');
+  fputs_filtered ("'", stream);
+}
+
 static value_ptr
 evaluate_subexp_java (expect_type, exp, pos, noside)
      struct type *expect_type;
@@ -683,8 +768,10 @@ evaluate_subexp_java (expect_type, exp, pos, noside)
 {
   int pc = *pos;
   int i;
+  char *name;
   enum exp_opcode op = exp->elts[*pos].opcode;
-  value_ptr arg1;
+  value_ptr arg1, arg2;
+  struct type *type;
   switch (op)
     {
     case UNOP_IND:
@@ -700,6 +787,70 @@ evaluate_subexp_java (expect_type, exp, pos, noside)
       if (noside == EVAL_SKIP)
 	goto nosideret;
       return value_ind (arg1);
+
+    case BINOP_SUBSCRIPT:
+      (*pos)++;
+      arg1 = evaluate_subexp_with_coercion (exp, pos, noside);
+      arg2 = evaluate_subexp_with_coercion (exp, pos, noside);
+      if (noside == EVAL_SKIP)
+	goto nosideret;
+      /* If the user attempts to subscript something that is not an
+	 array or pointer type (like a plain int variable for example),
+	 then report this as an error. */
+      
+      COERCE_REF (arg1);
+      type = check_typedef (VALUE_TYPE (arg1));
+      name = TYPE_NAME (type);
+      if (TYPE_CODE (type) == TYPE_CODE_PTR)
+	{
+	  type = check_typedef (TYPE_TARGET_TYPE (type));
+	  if (TYPE_CODE (type) == TYPE_CODE_STRUCT
+	      && TYPE_TAG_NAME (type) != NULL 
+	      && TYPE_TAG_NAME (type)[0] == '[')
+	    {
+	      CORE_ADDR address;
+	      long length, index;
+	      struct type *el_type;
+	      char buf4[4];
+
+	      value_ptr clas = java_class_from_object(arg1);
+	      value_ptr temp = clas;
+	      /* Get CLASS_ELEMENT_TYPE of the array type. */
+	      temp = value_struct_elt (&temp, NULL, "methods",
+				       NULL, "structure"); 
+	      VALUE_TYPE (temp) = VALUE_TYPE (clas);
+	      el_type = type_from_class (temp);
+	      if (TYPE_CODE (el_type) == TYPE_CODE_STRUCT)
+		el_type = lookup_pointer_type (el_type);
+
+	      if (noside == EVAL_AVOID_SIDE_EFFECTS)
+		return value_zero (el_type, VALUE_LVAL (arg1));
+	      address = value_as_pointer (arg1);
+	      address += JAVA_OBJECT_SIZE;
+	      read_memory (address, buf4, 4);
+	      length = (long) extract_signed_integer (buf4, 4);
+	      index = (long) value_as_long (arg2);
+	      if (index >= length || index < 0)
+		error ("array index (%ld) out of bounds (length: %ld)",
+		       index, length);
+	      address = (address + 4) + index * TYPE_LENGTH (el_type);
+	      return value_at (el_type, address, NULL);
+	    }
+	}
+      else if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
+	{
+	  if (noside == EVAL_AVOID_SIDE_EFFECTS)
+	    return value_zero (TYPE_TARGET_TYPE (type), VALUE_LVAL (arg1));
+	  else
+	    return value_subscript (arg1, arg2);
+	}
+      if (name == NULL)
+	name == TYPE_TAG_NAME (type);
+      if (name)
+	error ("cannot subscript something of type `%s'", name);
+      else
+	error ("cannot subscript requested type");
+
     case OP_STRING:
       (*pos)++;
       i = longest_to_int (exp->elts[pc + 1].longconst);
@@ -707,9 +858,10 @@ evaluate_subexp_java (expect_type, exp, pos, noside)
       if (noside == EVAL_SKIP)
 	goto nosideret;
       return java_value_string (&exp->elts[pc + 2].string, i);
+
     case STRUCTOP_STRUCT:
       arg1 = evaluate_subexp_standard (expect_type, exp, pos, noside);
-      /* Convert object field (such as .class) to reference. */
+      /* Convert object field (such as TYPE.class) to reference. */
       if (TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_STRUCT)
 	arg1 = value_addr (arg1);
       return arg1;
@@ -791,7 +943,7 @@ const struct language_defn java_language_defn = {
   java_parse,
   java_error,
   evaluate_subexp_java,
-  c_printchar,			/* Print a character constant */
+  java_printchar,		/* Print a character constant */
   c_printstr,			/* Function to print string constant */
   java_create_fundamental_type,	/* Create fundamental type in this language */
   java_print_type,		/* Print a type using appropriate syntax */
@@ -802,14 +954,14 @@ const struct language_defn java_language_defn = {
   {"%ld",    "",    "d",  ""},	/* Decimal format info */
   {"0x%lx",  "0x",  "x",  ""},	/* Hex format info */
   java_op_print_tab,		/* expression operators for printing */
-  1,				/* c-style arrays */
+  0,				/* not c-style arrays */
   0,				/* String lower bound */
   &builtin_type_char,		/* Type of string elements */ 
   LANG_MAGIC
 };
 
 void
-_initialize_jave_language ()
+_initialize_java_language ()
 {
 
   java_int_type    = init_type (TYPE_CODE_INT,  4, 0, "int", NULL);

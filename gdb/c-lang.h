@@ -59,6 +59,8 @@ c_type_print_varspec_prefix PARAMS ((struct type *, GDB_FILE *, int, int));
 
 extern int vtblprint;		/* Controls printing of vtbl's */
 
+extern int static_field_print;
+
 extern void
 cp_print_class_member PARAMS ((char *, struct type *, GDB_FILE *, char *));
 

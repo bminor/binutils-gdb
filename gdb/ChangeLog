@@ -1,3 +1,22 @@
+Fri Oct  3 15:49:18 1997  Per Bothner  <bothner@cygnus.com>
+
+	* c-lang.h, cp-valprint.c (static_field_print):  Make non-static.
+	* parse.c, parser-defs.h (length_of_subexp):  Make non-static.
+	* jv-exp.y (FieldAccess):  Handle dollar-VARIABLE as primary.
+	(ArrayAccess):  Likewise.  Also remove warnings.
+	(CastExpression):  Implement (typename) UnaryExpression.
+	(push_qualified_expression_name):  Fix small bug.
+	* jv-lang.c:  Use TYPE_TAG_NAME, not TYPE_NAME for class names.
+ 	(_initialize_jave_language):  Fix typo (jave -> java).
+	(java_language):  Java does *not* have C-style arrays.
+	(java_class_from_object):  Make more general (and complicated).
+	(java_link_class_type):  Fix typo "super" -> "class".  Handle arrays.
+	(java_emit_char, java_printchar):  New function.
+	(evaluate_subexp_java case BINOP_SUBSCRIPT):  Handle Java arrays.
+	* jv-valprint.c (java_value_print):  Implement printing of Java arrays.
+	(java_print_value_fields):  New function.
+	(java_val_print):  Better printing of TYPE_CODE_CHAR, TYPE_CODE_STRUCT.
+
 Fri Oct  3 09:52:26 1997  Mark Alexander  <marka@cygnus.com>
 
 	* config/mips/tm-mips.h (MAKE_MSYMBOL_SPECIAL): Force MIPS16

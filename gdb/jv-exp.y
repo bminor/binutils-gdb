@@ -210,7 +210,7 @@ StringLiteral:
 		}
 ;
 
-Literal	:
+Literal:
 	INTEGER_LITERAL
 		{ write_exp_elt_opcode (OP_LONG);
 		  write_exp_elt_type ($1.type);
@@ -426,6 +426,8 @@ Dims_opt:
 FieldAccess:
 	Primary '.' SimpleName
 		{ push_fieldnames ($3); }
+|	VARIABLE '.' SimpleName
+		{ push_fieldnames ($3); }
 /*|	SUPER '.' SimpleName { FIXME } */
 ;
 
@@ -442,10 +444,10 @@ ArrayAccess:
 	Name '[' Expression ']'
 		/* FIXME - This is nasty - need to shuffle expr stack. */
 		{ error ("`Name[Expr]' not implemented yet - try `(Name)[Expr]'"); }
+|	VARIABLE '[' Expression ']'
+		{ write_exp_elt_opcode (BINOP_SUBSCRIPT); }
 |	PrimaryNoNewArray '[' Expression ']'
-		{ 
-		warning("array subscripts not implemented for Java");
-		write_exp_elt_opcode (BINOP_SUBSCRIPT); }
+		{ write_exp_elt_opcode (BINOP_SUBSCRIPT); }
 ;
 
 PostfixExpression:
@@ -503,7 +505,27 @@ CastExpression:
 		{ write_exp_elt_opcode (UNOP_CAST);
 		  write_exp_elt_type (java_array_type ($2, $3));
 		  write_exp_elt_opcode (UNOP_CAST); }
-|	'(' Expression ')' UnaryExpressionNotPlusMinus /* FIXME */
+|	'(' Expression ')' UnaryExpressionNotPlusMinus
+		{
+		  int exp_size = expout_ptr;
+		  int last_exp_size = length_of_subexp(expout, expout_ptr);
+		  struct type *type;
+		  int i;
+		  int base = expout_ptr - last_exp_size - 3;
+		  if (base < 0 || expout->elts[base+2].opcode != OP_TYPE)
+		    error ("invalid cast expression");
+		  type = expout->elts[base+1].type;
+		  /* Remove the 'Expression' and slide the
+		     UnaryExpressionNotPlusMinus down to replace it. */
+		  for (i = 0;  i < last_exp_size;  i++)
+		    expout->elts[base + i] = expout->elts[base + i + 3];
+		  expout_ptr -= 3;
+		  if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
+		    type = lookup_pointer_type (type);
+		  write_exp_elt_opcode (UNOP_CAST);
+		  write_exp_elt_type (type);
+		  write_exp_elt_opcode (UNOP_CAST);
+		}
 |	'(' Name Dims ')' UnaryExpressionNotPlusMinus
 		{ write_exp_elt_opcode (UNOP_CAST);
 		  write_exp_elt_type (java_array_type (java_type_from_name ($2), $3));
@@ -1277,6 +1299,7 @@ push_qualified_expression_name (name, dot_index)
 	  dot_index++;  /* Skip '.' */
 	  name.ptr += dot_index;
 	  name.length -= dot_index;
+	  dot_index = 0;
 	  while (dot_index < name.length && name.ptr[dot_index] != '.') 
 	    dot_index++;
 	  token.ptr = name.ptr;
