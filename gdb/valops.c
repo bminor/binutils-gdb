@@ -63,7 +63,6 @@ static struct value *search_struct_method (char *, struct value **,
 				       int, int *, struct type *);
 
 static int find_oload_champ_namespace (struct type **arg_types, int nargs,
-				       const struct block *current_block,
 				       const char *func_name,
 				       const char *qualified_name,
 				       struct symbol ***oload_syms,
@@ -71,7 +70,6 @@ static int find_oload_champ_namespace (struct type **arg_types, int nargs,
 
 static
 int find_oload_champ_namespace_loop (struct type **arg_types, int nargs,
-				     const struct block *current_block,
 				     const char *func_name,
 				     const char *qualified_name,
 				     int namespace_len,
@@ -103,17 +101,13 @@ static struct value *value_struct_elt_for_reference (struct type *domain,
 						     struct type *curtype,
 						     const char *name,
 						     struct type *intype,
-						     const struct block *
-						     block,
 						     enum noside noside);
 
 static struct value *value_namespace_elt (const struct type *curtype,
-					  const struct block *block,
 					  const char *name,
 					  enum noside noside);
 
 static struct value *value_maybe_namespace_elt (const struct type *curtype,
-						const struct block *block,
 						const char *name,
 						enum noside noside);
 
@@ -1933,7 +1927,6 @@ value_find_oload_method_list (struct value **argp, char *method, int offset,
 int
 find_overload_match (struct type **arg_types, int nargs, char *name, int method,
 		     int lax, struct value **objp, struct symbol *fsym,
-		     const struct block *current_block,
 		     struct value **valp, struct symbol **symp, int *staticp)
 {
   struct value *obj = (objp ? *objp : NULL);
@@ -2003,7 +1996,6 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
       make_cleanup (xfree, oload_champ_bv);
 
       oload_champ = find_oload_champ_namespace (arg_types, nargs,
-						current_block,
 						func_name,
 						qualified_name,
 						&oload_syms,
@@ -2104,7 +2096,6 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
 
 static int
 find_oload_champ_namespace (struct type **arg_types, int nargs,
-			    const struct block *current_block,
 			    const char *func_name,
 			    const char *qualified_name,
 			    struct symbol ***oload_syms,
@@ -2113,7 +2104,7 @@ find_oload_champ_namespace (struct type **arg_types, int nargs,
   int oload_champ;
 
   find_oload_champ_namespace_loop (arg_types, nargs,
-				   current_block, func_name,
+				   func_name,
 				   qualified_name, 0,
 				   oload_syms, oload_champ_bv,
 				   &oload_champ);
@@ -2135,7 +2126,6 @@ find_oload_champ_namespace (struct type **arg_types, int nargs,
 
 static int
 find_oload_champ_namespace_loop (struct type **arg_types, int nargs,
-				 const struct block *current_block,
 				 const char *func_name,
 				 const char *qualified_name,
 				 int namespace_len,
@@ -2171,7 +2161,7 @@ find_oload_champ_namespace_loop (struct type **arg_types, int nargs,
     {
       searched_deeper = 1;
 
-      if (find_oload_champ_namespace_loop (arg_types, nargs, current_block,
+      if (find_oload_champ_namespace_loop (arg_types, nargs,
 					   func_name, qualified_name,
 					   next_namespace_len,
 					   oload_syms, oload_champ_bv,
@@ -2195,8 +2185,7 @@ find_oload_champ_namespace_loop (struct type **arg_types, int nargs,
   strncpy (new_namespace, qualified_name, namespace_len);
   new_namespace[namespace_len] = '\0';
   new_oload_syms = make_symbol_overload_list (func_name,
-					      new_namespace,
-					      current_block);
+					      new_namespace);
   while (new_oload_syms[num_fns])
     ++num_fns;
 
@@ -2465,14 +2454,13 @@ check_field (struct value *arg1, const char *name)
 }
 
 /* C++: Given an aggregate type CURTYPE, and a member name NAME,
-   return the appropriate member.  BLOCK is the current block; it is
-   used if TYPE is a namespace.  This function is used to resolve user
-   expressions of the form "DOMAIN::NAME".  For more details on what
-   happens, see the comment before value_struct_elt_for_reference.  */
+   return the appropriate member.  This function is used to resolve
+   user expressions of the form "DOMAIN::NAME".  For more details on
+   what happens, see the comment before
+   value_struct_elt_for_reference.  */
 
 struct value *
 value_aggregate_elt (struct type *curtype,
-		     const struct block *block,
 		     const char *name,
 		     enum noside noside)
 {
@@ -2481,9 +2469,9 @@ value_aggregate_elt (struct type *curtype,
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_UNION:
       return value_struct_elt_for_reference (curtype, 0, curtype, name, NULL,
-					     block, noside);
+					     noside);
     case TYPE_CODE_NAMESPACE:
-      return value_namespace_elt (curtype, block, name, noside);
+      return value_namespace_elt (curtype, name, noside);
     default:
       error ("Internal error: non-aggregate type to value_aggregate_elt");
     }
@@ -2500,7 +2488,6 @@ static struct value *
 value_struct_elt_for_reference (struct type *domain, int offset,
 				struct type *curtype, const char *name,
 				struct type *intype,
-				const struct block *block,
 				enum noside noside)
 {
   struct type *t = curtype;
@@ -2621,7 +2608,6 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 					  TYPE_BASECLASS (t, i),
 					  name,
 					  intype,
-					  block,
 					  noside);
       if (v)
 	return v;
@@ -2630,20 +2616,18 @@ value_struct_elt_for_reference (struct type *domain, int offset,
   /* As a last chance, look it up using lookup_symbol_namespace: this
      works for types.  */
 
-  return value_maybe_namespace_elt (curtype, block, name, noside);
+  return value_maybe_namespace_elt (curtype, name, noside);
 }
 
 /* C++: Return the member NAME of the namespace given by the type
-   CURTYPE.  Look this up within BLOCK: in particular, apply the using
-   directives from within BLOCK.  */
+   CURTYPE.  */
 
 static struct value *
 value_namespace_elt (const struct type *curtype,
-		     const struct block *block,
 		     const char *name,
 		     enum noside noside)
 {
-  struct value *retval = value_maybe_namespace_elt (curtype, block, name,
+  struct value *retval = value_maybe_namespace_elt (curtype, name,
 						    noside);
 
   if (retval == NULL)
@@ -2658,7 +2642,6 @@ value_namespace_elt (const struct type *curtype,
 
 static struct value *
 value_maybe_namespace_elt (const struct type *curtype,
-			   const struct block *block,
 			   const char *name,
 			   enum noside noside)
 {
@@ -2666,7 +2649,8 @@ value_maybe_namespace_elt (const struct type *curtype,
   const struct symbol *sym;
 
   sym = cp_lookup_symbol_namespace (namespace_name, name, NULL,
-				    block, VAR_DOMAIN, NULL);
+				    get_selected_block (0), VAR_DOMAIN,
+				    NULL);
 
   if (sym == NULL)
     return NULL;
@@ -2674,7 +2658,7 @@ value_maybe_namespace_elt (const struct type *curtype,
 	   && (SYMBOL_CLASS (sym) == LOC_TYPEDEF))
     return allocate_value (SYMBOL_TYPE (sym));
   else
-    return value_of_variable (sym, block);
+    return value_of_variable (sym, get_selected_block (0));
 }
 
 /* Given a pointer value V, find the real (RTTI) type

@@ -54,8 +54,7 @@ static void overload_list_add_symbol (struct symbol *sym,
 				      const char *oload_name);
 
 static void make_symbol_overload_list_using (const char *func_name,
-					     const char *namespace,
-					     const struct block *block);
+					     const char *namespace);
 
 static void make_symbol_overload_list_qualified (const char *func_name);
 
@@ -525,13 +524,9 @@ overload_list_add_symbol (struct symbol *sym, const char *oload_name)
    used in finding all overloaded instances of a function name.  This
    has been modified from make_symbol_completion_list.  */
 
-/* FIXME: carlton/2003-01-30: Should BLOCK be here?  Maybe it's better
-   to use get_selected_block (0).  */
-
 struct symbol **
 make_symbol_overload_list (const char *func_name,
-			   const char *namespace,
-			   const struct block *block)
+			   const char *namespace)
 {
   struct cleanup *old_cleanups;
 
@@ -543,8 +538,7 @@ make_symbol_overload_list (const char *func_name,
 
   old_cleanups = make_cleanup (xfree, sym_return_val);
 
-  make_symbol_overload_list_using (func_name, namespace,
-				   block);
+  make_symbol_overload_list_using (func_name, namespace);
 
   discard_cleanups (old_cleanups);
 
@@ -558,8 +552,7 @@ make_symbol_overload_list (const char *func_name,
 
 static void
 make_symbol_overload_list_using (const char *func_name,
-				 const char *namespace,
-				 const struct block *block)
+				 const char *namespace)
 {
   const struct using_direct *current;
 
@@ -567,15 +560,14 @@ make_symbol_overload_list_using (const char *func_name,
      look in the appropriate namespaces for new functions to match
      on.  */
 
-  for (current = block_using (block);
+  for (current = block_using (get_selected_block (0));
        current != NULL;
        current = current->next)
     {
       if (strcmp (namespace, current->outer) == 0)
 	{
 	  make_symbol_overload_list_using (func_name,
-					   current->inner,
-					   block);
+					   current->inner);
 	}
     }
 

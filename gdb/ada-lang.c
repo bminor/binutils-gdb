@@ -1974,9 +1974,6 @@ ada_resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
       break;
 
     case OP_FUNCALL:
-      /* FIXME: carlton/2002-01-20: I don't understand this well
-	 enough to know if it should be changed after I added the
-	 current block to an OP_FUNCALL.  */
       nargs = longest_to_int (exp->elts[pc + 1].longconst) + 1;
       /* FIXME:  OP_UNRESOLVED_VALUE should be defined in expression.h */
       /*      if (exp->elts[pc+3].opcode == OP_UNRESOLVED_VALUE)        
@@ -2793,11 +2790,10 @@ replace_operator_with_call (struct expression **expp, int pc, int nargs,
 
   newexp->elts[pc].opcode = newexp->elts[pc + 2].opcode = OP_FUNCALL;
   newexp->elts[pc + 1].longconst = (LONGEST) nargs;
-  newexp->elts[pc + 2].block = block;
 
-  newexp->elts[pc + 4].opcode = newexp->elts[pc + 6].opcode = OP_VAR_VALUE;
-  newexp->elts[pc + 5].block = block;
-  newexp->elts[pc + 6].symbol = sym;
+  newexp->elts[pc + 3].opcode = newexp->elts[pc + 6].opcode = OP_VAR_VALUE;
+  newexp->elts[pc + 4].block = block;
+  newexp->elts[pc + 5].symbol = sym;
 
   *expp = newexp;
   xfree (exp);
@@ -6998,7 +6994,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       return value_array (tem2, tem3, argvec);
 
     case OP_FUNCALL:
-      (*pos) += 3;
+      (*pos) += 2;
 
       /* Allocate arg vector, including space for the function to be
          called in argvec[0] and a terminating NULL */

@@ -803,7 +803,7 @@ length_of_subexp (struct expression *expr, int endpos)
       /* C++  */
     case OP_SCOPE:
       oplen = longest_to_int (expr->elts[endpos - 2].longconst);
-      oplen = 6 + BYTES_TO_EXP_ELEM (oplen + 1);
+      oplen = 5 + BYTES_TO_EXP_ELEM (oplen + 1);
       break;
 
     case OP_LONG:
@@ -826,10 +826,6 @@ length_of_subexp (struct expression *expr, int endpos)
       break;
 
     case OP_FUNCALL:
-      oplen = 4;
-      args = 1 + longest_to_int (expr->elts[endpos - 3].longconst);
-      break;
-
     case OP_F77_UNDETERMINED_ARGLIST:
       oplen = 3;
       args = 1 + longest_to_int (expr->elts[endpos - 2].longconst);
@@ -952,7 +948,7 @@ prefixify_subexp (struct expression *inexpr,
       /* C++  */
     case OP_SCOPE:
       oplen = longest_to_int (inexpr->elts[inend - 2].longconst);
-      oplen = 6 + BYTES_TO_EXP_ELEM (oplen + 1);
+      oplen = 5 + BYTES_TO_EXP_ELEM (oplen + 1);
       break;
 
     case OP_LONG:
@@ -975,10 +971,6 @@ prefixify_subexp (struct expression *inexpr,
       break;
 
     case OP_FUNCALL:
-      oplen = 4;
-      args = 1 + longest_to_int (inexpr->elts[inend - 3].longconst);
-      break;
-
     case OP_F77_UNDETERMINED_ARGLIST:
       oplen = 3;
       args = 1 + longest_to_int (inexpr->elts[inend - 2].longconst);

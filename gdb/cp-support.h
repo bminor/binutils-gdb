@@ -64,8 +64,7 @@ extern char *cp_func_name (const char *full_name);
 extern char *remove_params (const char *demangled_name);
 
 extern struct symbol **make_symbol_overload_list (const char *,
-						  const char *,
-						  const struct block *);
+						  const char *);
 
 /* Functions/variables from cp-namespace.c.  */
 

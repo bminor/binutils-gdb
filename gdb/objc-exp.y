@@ -398,7 +398,6 @@ exp	:	exp '('
 		arglist ')'	%prec ARROW
 			{ write_exp_elt_opcode (OP_FUNCALL);
 			  write_exp_elt_longcst ((LONGEST) end_arglist ());
-			  write_exp_elt_block (expression_context_block);
 			  write_exp_elt_opcode (OP_FUNCALL); }
 	;
 
@@ -669,7 +668,6 @@ qualified_name:	typebase COLONCOLON name
 
 			  write_exp_elt_opcode (OP_SCOPE);
 			  write_exp_elt_type (type);
-			  write_exp_elt_block (NULL);
 			  write_exp_string ($3);
 			  write_exp_elt_opcode (OP_SCOPE);
 			}
@@ -693,7 +691,6 @@ qualified_name:	typebase COLONCOLON name
 			  tmp_token.ptr[tmp_token.length] = 0;
 			  write_exp_elt_opcode (OP_SCOPE);
 			  write_exp_elt_type (type);
-			  write_exp_elt_block (NULL);
 			  write_exp_string (tmp_token);
 			  write_exp_elt_opcode (OP_SCOPE);
 			}

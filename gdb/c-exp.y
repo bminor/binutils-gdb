@@ -333,7 +333,6 @@ exp	:	exp '('
 		arglist ')'	%prec ARROW
 			{ write_exp_elt_opcode (OP_FUNCALL);
 			  write_exp_elt_longcst ((LONGEST) end_arglist ());
-			  write_exp_elt_block (expression_context_block);
 			  write_exp_elt_opcode (OP_FUNCALL); }
 	;
 
@@ -603,9 +602,6 @@ qualified_name:	typebase COLONCOLON name
 
 			  write_exp_elt_opcode (OP_SCOPE);
 			  write_exp_elt_type (type);
-			  /* If it's a namespace, we need to know the
-			     block.  */
-			  write_exp_elt_block (expression_context_block);
 			  write_exp_string ($3);
 			  write_exp_elt_opcode (OP_SCOPE);
 			}
@@ -629,7 +625,6 @@ qualified_name:	typebase COLONCOLON name
 			  destructor_name_p (tmp_token.ptr, type);
 			  write_exp_elt_opcode (OP_SCOPE);
 			  write_exp_elt_type (type);
-			  write_exp_elt_block (expression_context_block);
 			  write_exp_string (tmp_token);
 			  write_exp_elt_opcode (OP_SCOPE);
 			}
@@ -898,6 +893,24 @@ typebase  /* Implements (approximately): (type-qualifier)* type-specifier */
 			{ $$ = follow_types ($1); }
 	| qualified_type
 	;
+
+/* FIXME: carlton/2003-09-19: This leads to lots of reduce-reduce
+   conflicts, because the parser doesn't know whether or not to use
+   qualified_name or qualified_type.  There's no good way to fix this
+   with the grammar as it stands; as far as I can tell, some of the
+   problems arise from ambiguities that GDB introduces ('start' can be
+   either an expression or a type), but some of it is inherent to the
+   nature of C++ (you want to treat the input "(FOO)" fairly
+   differently depending on whether FOO is an expression or a type,
+   and if FOO is a complex expression, this can be hard to determine
+   at the right time.
+
+   Perhaps we could fix this by making the lexer smarter.  (Some of
+   this functionality used to be in the lexer, but in a way that
+   worked even less well than the current solution.)  Ideally, the
+   code in question could be shared by the lexer and by decode_line_1.
+   I'm not holding my breath waiting for somebody to get around to
+   cleaning this up, however...  */
 
 qualified_type: typebase COLONCOLON name
 		{

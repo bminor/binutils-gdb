@@ -331,7 +331,6 @@ exp	:	exp '('
 		arglist ')'	%prec ARROW
 			{ write_exp_elt_opcode (OP_FUNCALL);
 			  write_exp_elt_longcst ((LONGEST) end_arglist ());
-			  write_exp_elt_block (expression_context_block);
 			  write_exp_elt_opcode (OP_FUNCALL); 
 			  pop_current_type (); }
 	;
@@ -594,7 +593,6 @@ qualified_name:	typebase COLONCOLON name
 
 			  write_exp_elt_opcode (OP_SCOPE);
 			  write_exp_elt_type (type);
-			  write_exp_elt_block (NULL);
 			  write_exp_string ($3);
 			  write_exp_elt_opcode (OP_SCOPE);
 			}

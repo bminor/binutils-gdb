@@ -82,9 +82,9 @@ print_subexp (struct expression *exp, int *pos,
       assoc = 0;
       fputs_filtered (type_name_no_tag (exp->elts[pc + 1].type), stream);
       fputs_filtered ("::", stream);
-      nargs = longest_to_int (exp->elts[pc + 3].longconst);
-      (*pos) += 5 + BYTES_TO_EXP_ELEM (nargs + 1);
-      fputs_filtered (&exp->elts[pc + 4].string, stream);
+      nargs = longest_to_int (exp->elts[pc + 2].longconst);
+      (*pos) += 4 + BYTES_TO_EXP_ELEM (nargs + 1);
+      fputs_filtered (&exp->elts[pc + 3].string, stream);
       return;
 
     case OP_LONG:
@@ -147,7 +147,7 @@ print_subexp (struct expression *exp, int *pos,
       return;
 
     case OP_FUNCALL:
-      (*pos) += 3;
+      (*pos) += 2;
       nargs = longest_to_int (exp->elts[pc + 1].longconst);
       print_subexp (exp, pos, stream, PREC_SUFFIX);
       fputs_filtered (" (", stream);
@@ -919,7 +919,7 @@ dump_subexp (struct expression *exp, struct ui_file *stream, int elt)
 	nargs = longest_to_int (exp->elts[elt].longconst);
 
 	fprintf_filtered (stream, "Number of args: %d", nargs);
-	elt += 3;
+	elt += 2;
 
 	for (i = 1; i <= nargs + 1; i++)
 	  elt = dump_subexp (exp, stream, elt);
@@ -981,11 +981,11 @@ dump_subexp (struct expression *exp, struct ui_file *stream, int elt)
 	type_print (exp->elts[elt].type, NULL, stream, 0);
 	fprintf_filtered (stream, ") ");
 
-	len = longest_to_int (exp->elts[elt + 2].longconst);
-	elem_name = &exp->elts[elt + 3].string;
+	len = longest_to_int (exp->elts[elt + 1].longconst);
+	elem_name = &exp->elts[elt + 2].string;
 
 	fprintf_filtered (stream, "Field name: `%.*s'", len, elem_name);
-	elt += 5 + BYTES_TO_EXP_ELEM (len + 1);
+	elt += 4 + BYTES_TO_EXP_ELEM (len + 1);
       }
       break;
     default:

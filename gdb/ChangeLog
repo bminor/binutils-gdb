@@ -1,3 +1,32 @@
+2003-09-19  David Carlton  <carlton@kealia.com>
+
+	* expression.h (enum exp_opcode): Revert to mainline's OP_FUNCALL,
+	OP_SCOPE.
+	* ada-exp.y, m2-exp.y, objc-exp.y, p-exp.y: Ditto.
+	* jv-exp.y (push_qualified_expression_name): Ditto.
+	* ada-lang.c (ada_resolve_subexp, replace_operator_with_call)
+	(ada_evaluate_subexp): Ditto.
+	* eval.c (evaluate_subexp_standard): Ditto.
+	* expprint.c (print_subexp, dump_subexp): Ditto.
+	* parse.c (length_of_subexp, prefixify_subexp): Ditto.
+	* c-exp.y: Ditto, and add comment.
+	* cp-support.c (make_symbol_overload_list): Delete 'block'
+	argument; change calls to make_symbol_overload_list_using
+	appropriately.
+	(make_symbol_overload_list_using): Delete 'block' argument;
+	replace it by get_selected_block (0).
+	* cp-support.h: Delete 'block' argument from
+	make_symbol_overload_list.
+	* valops.c (find_overload_match): Delete 'block' argument, and
+	update calls using it.
+	(find_oload_champ_namespace, find_oload_champ_namespace_loop)
+	(value_aggregate_elt, value_struct_elt_for_reference)
+	(value_namespace_elt): Ditto.
+	(value_maybe_namespace_elt): Delete 'block' argument, and use
+	get_selected_block (0) instead.
+	* value.h: Delete 'block' argument from value_struct_elt,
+	value_find_oload.
+
 2003-09-17  David Carlton  <carlton@kealia.com>
 
 	* Merge with mainline; tag is carlton_dictionary-20030917-merge.
