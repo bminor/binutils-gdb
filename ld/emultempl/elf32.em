@@ -1008,6 +1008,7 @@ gld${EMULATION_NAME}_place_orphan (file, s)
   static struct orphan_save hold_bss;
   static struct orphan_save hold_rel;
   static struct orphan_save hold_interp;
+  static int count = 1;
   struct orphan_save *place;
   lang_statement_list_type *old = NULL;
   lang_statement_list_type add;
@@ -1092,7 +1093,9 @@ gld${EMULATION_NAME}_place_orphan (file, s)
      loadable or allocateable characteristics.  */
   outsecname = secname;
   if (bfd_get_section_by_name (output_bfd, outsecname) != NULL)
-    outsecname = bfd_get_unique_section_name (output_bfd, outsecname, NULL);
+    outsecname = bfd_get_unique_section_name (output_bfd,
+					      outsecname,
+					      &count);
 
   if (place != NULL)
     {
@@ -1154,7 +1157,9 @@ gld${EMULATION_NAME}_place_orphan (file, s)
       stat_ptr = old;
 
       snew = os->bfd_section;
-      if (place->os->bfd_section != NULL || place->section != NULL)
+      if (place->section != NULL
+	  || (place->os->bfd_section != NULL
+	      && place->os->bfd_section != snew))
 	{
 	  /* Shuffle the section to make the output file look neater.  */
 	  if (place->section == NULL)
