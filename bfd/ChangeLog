@@ -1,5 +1,12 @@
 2000-12-18  Nick Clifton  <nickc@redhat.com>
 
+	* coff-arm.c (EXTRA_S_FLAGS): Only define if not already
+	defined.
+	* epoc-pe-arm.c (EXTRA_S_FLAGS): Define.
+	* epoc-pei-arm.c (EXTRA_S_FLAGS): Define.
+
+2000-12-18  Nick Clifton  <nickc@redhat.com>
+
 	* vms-misc.c (_bfd_vms_get_record): Add default case to
 	file_format switch.
 

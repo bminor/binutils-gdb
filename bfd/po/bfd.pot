@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2000-12-12 12:37-0800\n"
+"POT-Creation-Date: 2000-12-18 10:57-0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -162,7 +162,7 @@ msgstr ""
 msgid "Please report this bug.\n"
 msgstr ""
 
-#: binary.c:298
+#: binary.c:303
 #, c-format
 msgid "Warning: Writing section `%s' to huge (ie negative) file offset 0x%lx."
 msgstr ""
@@ -1488,159 +1488,159 @@ msgstr ""
 msgid "%s: string not null terminated in ILF object file."
 msgstr ""
 
-#: peigen.c:982
+#: peigen.c:993
 #, c-format
 msgid "%s: line number overflow: 0x%lx > 0xffff"
 msgstr ""
 
-#: peigen.c:1000
+#: peigen.c:1011
 #, c-format
 msgid "%s: reloc overflow 1: 0x%lx > 0xffff"
 msgstr ""
 
-#: peigen.c:1014
+#: peigen.c:1024
 msgid "Export Directory [.edata (or where ever we found it)]"
 msgstr ""
 
-#: peigen.c:1015
+#: peigen.c:1025
 msgid "Import Directory [parts of .idata]"
 msgstr ""
 
-#: peigen.c:1016
+#: peigen.c:1026
 msgid "Resource Directory [.rsrc]"
 msgstr ""
 
-#: peigen.c:1017
+#: peigen.c:1027
 msgid "Exception Directory [.pdata]"
 msgstr ""
 
-#: peigen.c:1018
+#: peigen.c:1028
 msgid "Security Directory"
 msgstr ""
 
-#: peigen.c:1019
+#: peigen.c:1029
 msgid "Base Relocation Directory [.reloc]"
 msgstr ""
 
-#: peigen.c:1020
+#: peigen.c:1030
 msgid "Debug Directory"
 msgstr ""
 
-#: peigen.c:1021
+#: peigen.c:1031
 msgid "Description Directory"
 msgstr ""
 
-#: peigen.c:1022
+#: peigen.c:1032
 msgid "Special Directory"
 msgstr ""
 
-#: peigen.c:1023
+#: peigen.c:1033
 msgid "Thread Storage Directory [.tls]"
 msgstr ""
 
-#: peigen.c:1024
+#: peigen.c:1034
 msgid "Load Configuration Directory"
 msgstr ""
 
-#: peigen.c:1025
+#: peigen.c:1035
 msgid "Bound Import Directory"
 msgstr ""
 
-#: peigen.c:1026
+#: peigen.c:1036
 msgid "Import Address Table Directory"
 msgstr ""
 
-#: peigen.c:1027
+#: peigen.c:1037
 msgid "Delay Import Directory"
 msgstr ""
 
-#: peigen.c:1028 peigen.c:1029
+#: peigen.c:1038 peigen.c:1039
 msgid "Reserved"
 msgstr ""
 
-#: peigen.c:1093
+#: peigen.c:1103
 msgid ""
 "\n"
 "There is an import table, but the section containing it could not be found\n"
 msgstr ""
 
-#: peigen.c:1098
+#: peigen.c:1108
 #, c-format
 msgid ""
 "\n"
 "There is an import table in %s at 0x%lx\n"
 msgstr ""
 
-#: peigen.c:1137
+#: peigen.c:1147
 #, c-format
 msgid ""
 "\n"
 "Function descriptor located at the start address: %04lx\n"
 msgstr ""
 
-#: peigen.c:1140
+#: peigen.c:1150
 #, c-format
 msgid "\tcode-base %08lx toc (loadable/actual) %08lx/%08lx\n"
 msgstr ""
 
-#: peigen.c:1146
+#: peigen.c:1156
 msgid ""
 "\n"
 "No reldata section! Function descriptor not decoded.\n"
 msgstr ""
 
-#: peigen.c:1151
+#: peigen.c:1161
 #, c-format
 msgid ""
 "\n"
 "The Import Tables (interpreted %s section contents)\n"
 msgstr ""
 
-#: peigen.c:1154
+#: peigen.c:1164
 msgid " vma:            Hint    Time      Forward  DLL       First\n"
 msgstr ""
 
-#: peigen.c:1156
+#: peigen.c:1166
 msgid "                 Table   Stamp     Chain    Name      Thunk\n"
 msgstr ""
 
-#: peigen.c:1206
+#: peigen.c:1216
 #, c-format
 msgid ""
 "\n"
 "\tDLL Name: %s\n"
 msgstr ""
 
-#: peigen.c:1210 peigen.c:1273
+#: peigen.c:1220 peigen.c:1283
 msgid "\tvma:  Hint/Ord Member-Name\n"
 msgstr ""
 
-#: peigen.c:1272
+#: peigen.c:1282
 msgid "\tThe Import Address Table (difference found)\n"
 msgstr ""
 
-#: peigen.c:1279
+#: peigen.c:1289
 msgid "\t>>> Ran out of IAT members!\n"
 msgstr ""
 
-#: peigen.c:1298
+#: peigen.c:1308
 msgid "\tThe Import Address Table is identical\n"
 msgstr ""
 
-#: peigen.c:1372
+#: peigen.c:1381
 msgid ""
 "\n"
 "There is an export table, but the section containing it could not be found\n"
 msgstr ""
 
-#: peigen.c:1377
+#: peigen.c:1386
 #, c-format
 msgid ""
 "\n"
 "There is an export table in %s at 0x%lx\n"
 msgstr ""
 
-#: peigen.c:1408
+#: peigen.c:1417
 #, c-format
 msgid ""
 "\n"
@@ -1648,131 +1648,131 @@ msgid ""
 "\n"
 msgstr ""
 
-#: peigen.c:1412
+#: peigen.c:1421
 #, c-format
 msgid "Export Flags \t\t\t%lx\n"
 msgstr ""
 
-#: peigen.c:1415
+#: peigen.c:1424
 #, c-format
 msgid "Time/Date stamp \t\t%lx\n"
 msgstr ""
 
-#: peigen.c:1418
+#: peigen.c:1427
 #, c-format
 msgid "Major/Minor \t\t\t%d/%d\n"
 msgstr ""
 
-#: peigen.c:1421
+#: peigen.c:1430
 msgid "Name \t\t\t\t"
 msgstr ""
 
-#: peigen.c:1427
+#: peigen.c:1436
 #, c-format
 msgid "Ordinal Base \t\t\t%ld\n"
 msgstr ""
 
-#: peigen.c:1430
+#: peigen.c:1439
 msgid "Number in:\n"
 msgstr ""
 
-#: peigen.c:1433
+#: peigen.c:1442
 #, c-format
 msgid "\tExport Address Table \t\t%08lx\n"
 msgstr ""
 
-#: peigen.c:1437
+#: peigen.c:1446
 #, c-format
 msgid "\t[Name Pointer/Ordinal] Table\t%08lx\n"
 msgstr ""
 
-#: peigen.c:1440
+#: peigen.c:1449
 msgid "Table Addresses\n"
 msgstr ""
 
-#: peigen.c:1443
+#: peigen.c:1452
 msgid "\tExport Address Table \t\t"
 msgstr ""
 
-#: peigen.c:1448
+#: peigen.c:1457
 msgid "\tName Pointer Table \t\t"
 msgstr ""
 
-#: peigen.c:1453
+#: peigen.c:1462
 msgid "\tOrdinal Table \t\t\t"
 msgstr ""
 
-#: peigen.c:1469
+#: peigen.c:1476
 #, c-format
 msgid ""
 "\n"
 "Export Address Table -- Ordinal Base %ld\n"
 msgstr ""
 
-#: peigen.c:1488
+#: peigen.c:1495
 msgid "Forwarder RVA"
 msgstr ""
 
-#: peigen.c:1499
+#: peigen.c:1506
 msgid "Export RVA"
 msgstr ""
 
-#: peigen.c:1506
+#: peigen.c:1513
 msgid ""
 "\n"
 "[Ordinal/Name Pointer] Table\n"
 msgstr ""
 
-#: peigen.c:1560
+#: peigen.c:1568
 #, c-format
 msgid "Warning, .pdata section size (%ld) is not a multiple of %d\n"
 msgstr ""
 
-#: peigen.c:1564
+#: peigen.c:1572
 msgid ""
 "\n"
 "The Function Table (interpreted .pdata section contents)\n"
 msgstr ""
 
-#: peigen.c:1567
+#: peigen.c:1575
 msgid " vma:\t\t\tBegin Address    End Address      Unwind Info\n"
 msgstr ""
 
-#: peigen.c:1570
+#: peigen.c:1578
 msgid " vma:\t\tBegin    End      EH       EH       PrologEnd  Exception\n"
 msgstr ""
 
-#: peigen.c:1572
+#: peigen.c:1580
 msgid "     \t\tAddress  Address  Handler  Data     Address    Mask\n"
 msgstr ""
 
-#: peigen.c:1645
+#: peigen.c:1652
 msgid " Register save millicode"
 msgstr ""
 
-#: peigen.c:1648
+#: peigen.c:1655
 msgid " Register restore millicode"
 msgstr ""
 
-#: peigen.c:1651
+#: peigen.c:1658
 msgid " Glue code sequence"
 msgstr ""
 
-#: peigen.c:1703
+#: peigen.c:1709
 msgid ""
 "\n"
 "\n"
 "PE File Base Relocations (interpreted .reloc section contents)\n"
 msgstr ""
 
-#: peigen.c:1738
+#: peigen.c:1744
 #, c-format
 msgid ""
 "\n"
 "Virtual Address: %08lx Chunk size %ld (0x%lx) Number of fixups %ld\n"
 msgstr ""
 
-#: peigen.c:1751
+#: peigen.c:1757
 #, c-format
 msgid "\treloc %4d offset %4x [%4lx] %s"
 msgstr ""
@@ -1780,7 +1780,7 @@ msgstr ""
 #. The MS dumpbin program reportedly ands with 0xff0f before
 #. printing the characteristics field.  Not sure why.  No reason to
 #. emulate it here.
-#: peigen.c:1790
+#: peigen.c:1796
 #, c-format
 msgid ""
 "\n"
@@ -1860,7 +1860,7 @@ msgstr ""
 msgid "Partition[%d] length = 0x%.8lx (%ld)\n"
 msgstr ""
 
-#: som.c:5370
+#: som.c:5365
 msgid "som_sizeof_headers unimplemented"
 msgstr ""
 
@@ -1897,29 +1897,29 @@ msgstr ""
 msgid "Object module NOT error-free !\n"
 msgstr ""
 
-#: vms-misc.c:544
+#: vms-misc.c:545
 #, c-format
 msgid "Stack overflow (%d) in _bfd_vms_push"
 msgstr ""
 
-#: vms-misc.c:563
+#: vms-misc.c:564
 msgid "Stack underflow in _bfd_vms_pop"
 msgstr ""
 
-#: vms-misc.c:934
+#: vms-misc.c:935
 msgid "_bfd_vms_output_counted called with zero bytes"
 msgstr ""
 
-#: vms-misc.c:939
+#: vms-misc.c:940
 msgid "_bfd_vms_output_counted called with too many bytes"
 msgstr ""
 
-#: vms-misc.c:1072
+#: vms-misc.c:1073
 #, c-format
 msgid "Symbol %s replaced by %s\n"
 msgstr ""
 
-#: vms-misc.c:1136
+#: vms-misc.c:1137
 #, c-format
 msgid "failed to enter %s"
 msgstr ""

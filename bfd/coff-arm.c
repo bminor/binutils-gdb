@@ -2536,10 +2536,12 @@ coff_arm_final_link_postscript (abfd, pfinfo)
 #define TARGET_UNDERSCORE 0
 #endif
 
+#ifndef EXTRA_S_FLAGS
 #ifdef COFF_WITH_PE
 #define EXTRA_S_FLAGS (SEC_LINK_ONCE | SEC_LINK_DUPLICATES)
 #else
 #define EXTRA_S_FLAGS 0
+#endif
 #endif
 
 /* Forward declaration for use initialising alternative_target field.  */
