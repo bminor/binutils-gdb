@@ -27,6 +27,9 @@
 #ifdef _MSC_VER
 #define strncasecmp strnicmp
 #define WIN32_LEAN_AND_MEAN
+#endif
+
+#ifdef _WIN32
 #include <windows.h>
 #endif
 
@@ -110,7 +113,7 @@ static struct sw
   {0x17, 0xdc000},
   0};
 
-#ifndef __GO32__
+#ifdef _MSC_VER
 /* Get the base of the data segment.  This is needed to calculate the offset
    between data segment addresses and the base of linear memory, which is where
    device registers reside.  Note that this is really only necessary for
@@ -137,9 +140,9 @@ get_ds_base (void)
 
   return dsbase;
 }
-#else /* !__GO32__ */
+#else /* !_MSC_VER */
 #define get_ds_base() 0
-#endif /* __GO32__ */ 
+#endif /* _MSC_VER */ 
 
 static int
 e7000pc_init ()

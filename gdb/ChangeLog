@@ -1,3 +1,8 @@
+Thu Sep 18 15:07:46 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* ser-e7kpc.c (get_ds_base): Only use under Windows.
+	(windows.h): Include when any _WIN32 host.
+
 Wed Sep 24 18:12:47 1997  Stu Grossman  <grossman@babylon-5.cygnus.com>
 
 	* The following block of changes add support for debugging assembly
