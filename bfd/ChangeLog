@@ -1,3 +1,9 @@
+2002-01-31  David O'Brien  <obrien@FreeBSD>
+
+	* configure.in: Recognize the differences in core files from FreeBSD
+	4.{0,1} and later versions of 4.x.  This treats 4.2+ the same as
+	5-CURRENT.
+
 2001-11-18  Andrew Cagney  <ac131313@redhat.com>
 
 	* po/Make-in (distclean): Don't delete SRC-POTFILES.in or
