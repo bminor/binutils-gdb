@@ -1,3 +1,9 @@
+2004-01-09  Elena Zannoni  <ezannoni@redhat.com>
+
+	* dwarf2read.c (read_array_type): Discard FORTRAN_HACK macro and
+	ifdeffed code.
+        Update copyright year.
+	
 2004-01-08  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* config/pa/tm-hppa.h: Update extern declarations for

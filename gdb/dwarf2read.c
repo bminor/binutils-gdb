@@ -1,5 +1,6 @@
 /* DWARF 2 debugging format support for GDB.
-   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
+   2004
    Free Software Foundation, Inc.
 
    Adapted by Gary Funck (gary@intrepid.com), Intrepid Technology,
@@ -3088,12 +3089,7 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
 		{
 		  dwarf2_non_const_array_bound_ignored_complaint
 		    (dwarf_form_name (attr->form));
-#ifdef FORTRAN_HACK
-		  die->type = lookup_pointer_type (element_type);
-		  return;
-#else
 		  low = 0;
-#endif
 		}
 	    }
 	  attr = dwarf_attr (child_die, DW_AT_upper_bound);
@@ -3130,12 +3126,7 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
 		{
 		  dwarf2_non_const_array_bound_ignored_complaint
 		    (dwarf_form_name (attr->form));
-#ifdef FORTRAN_HACK
-		  die->type = lookup_pointer_type (element_type);
-		  return;
-#else
 		  high = 1;
-#endif
 		}
 	    }
 
