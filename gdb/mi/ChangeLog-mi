@@ -17,8 +17,6 @@
 
 2000-03-06  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
-	* mi-cmds.h: 
-
 	* gdbmi.texinfo: Update data-disassemble documentation.
 
 2000-03-01  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
