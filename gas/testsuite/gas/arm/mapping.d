@@ -1,4 +1,4 @@
-#objdump: --syms
+#objdump: --syms --special-syms
 #name: ARM Mapping Symbols
 
 # Test the generation of ARM ELF Mapping Symbols

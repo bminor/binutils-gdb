@@ -1,3 +1,7 @@
+2004-10-14  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/mapping.d: Pass --special-syms to objdump.
+
 2004-10-08  Daniel Jacobowitz  <dan@debian.org>
 
 	* gas/i386/i386.exp: Don't run divide test for targets where '/'
