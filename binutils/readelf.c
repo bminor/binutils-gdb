@@ -67,6 +67,7 @@
 #include "elf/ia64.h"
 #include "elf/m32r.h"
 #include "elf/m68k.h"
+#include "elf/m68hc11.h"
 #include "elf/mcore.h"
 #include "elf/mips.h"
 #include "elf/mmix.h"
@@ -974,6 +975,11 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 	case EM_486:
 	  rtype = elf_i386_reloc_type (type);
 	  break;
+
+        case EM_68HC11:
+        case EM_68HC12:
+          rtype = elf_m68hc11_reloc_type (type);
+          break;
 
 	case EM_68K:
 	  rtype = elf_m68k_reloc_type (type);
