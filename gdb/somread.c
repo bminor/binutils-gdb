@@ -35,22 +35,10 @@
 #include "som.h"
 #include "libhppa.h"
 
-/* Various things we might complain about... */
+#include "solib-som.h"
 
+/* Prototypes for local functions.  */
 static int init_import_symbols (struct objfile *objfile);
-
-static void som_symfile_init (struct objfile *);
-
-static void som_new_init (struct objfile *);
-
-static void som_symfile_read (struct objfile *, int);
-
-static void som_symfile_finish (struct objfile *);
-
-static void som_symtab_read (bfd *, struct objfile *,
-			     struct section_offsets *);
-
-static void som_symfile_offsets (struct objfile *, struct section_addr_info *);
 
 /* FIXME: These should really be in a common header somewhere */
 

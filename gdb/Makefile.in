@@ -2515,7 +2515,8 @@ sol-thread.o: sol-thread.c $(defs_h) $(gdbthread_h) $(target_h) \
 	$(symfile_h) $(gdb_string_h) $(gregset_h)
 somread.o: somread.c $(defs_h) $(bfd_h) $(symtab_h) $(symfile_h) \
 	$(objfiles_h) $(buildsym_h) $(stabsread_h) $(gdb_stabs_h) \
-	$(complaints_h) $(gdb_string_h) $(demangle_h) $(som_h) $(libhppa_h)
+	$(complaints_h) $(gdb_string_h) $(demangle_h) $(som_h) $(libhppa_h) \
+	$(solib_som_h)
 solib-som.o: solib-som.c $(defs_h) $(som_h) $(symtab_h) $(bfd_h) $(symfile_h) \
 	$(objfiles_h) $(gdbcore_h) $(target_h) $(inferior_h) $(hppa_tdep_h) \
 	$(solist_h)

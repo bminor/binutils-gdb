@@ -1,3 +1,11 @@
+2004-12-18  Mark Kettenis  <kettenis@gnu.org>
+
+	* somread.c: Include "solib-som.h".
+	(som_symfile_init, som_new_init, som_symfile_read,
+	som_symfile_finish, som_symtab_read, som_symfile_offsets): Remove
+	redudant prototypes.
+	* Makefile.in (somread.o): Update dependencies.
+
 2004-12-17  Jim Blandy  <jimb@redhat.com>
 
 	* remote.c (fetch_register_using_p): Indentation cleanup.
