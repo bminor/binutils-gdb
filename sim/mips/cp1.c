@@ -73,7 +73,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
         i = 63bits = integer
  */
 
-/* Explicit QNaN values used when value required:  */
+/* Explicit QNaN values.  */
 #define FPQNaN_SINGLE   (0x7FBFFFFF)
 #define FPQNaN_WORD     (0x7FFFFFFF)
 #define FPQNaN_DOUBLE   (UNSIGNED64 (0x7FF7FFFFFFFFFFFF))
@@ -93,7 +93,7 @@ value_fpr (sim_cpu *cpu,
   uword64 value = 0;
   int err = 0;
 
-  /* Treat unused register values, as fixed-point 64bit values:  */
+  /* Treat unused register values, as fixed-point 64bit values.  */
   if ((fmt == fmt_uninterpreted) || (fmt == fmt_unknown))
     {
 #if 1
@@ -105,7 +105,7 @@ value_fpr (sim_cpu *cpu,
 #endif
     }
 
-  /* For values not yet accessed, set to the desired format:  */
+  /* For values not yet accessed, set to the desired format.  */
   if (FPR_STATE[fpr] == fmt_uninterpreted)
     {
       FPR_STATE[fpr] = fmt;
@@ -168,7 +168,7 @@ value_fpr (sim_cpu *cpu,
 	case fmt_long:
 	  if ((fpr & 1) == 0)
 	    {
-	      /* Even registers numbers only.  */
+	      /* Even register numbers only.  */
 #ifdef DEBUG
 	      printf ("DBG: ValueFPR: FGR[%d] = %s, FGR[%d] = %s\n",
 		      fpr + 1, pr_uword64 ((uword64) FGR[fpr+1]),
@@ -299,7 +299,7 @@ store_fpr (sim_cpu *cpu,
 }
 
 
-/* CP1 control/status registers */
+/* CP1 control/status register access functions.  */
 
 void
 test_fcsr (sim_cpu *cpu,
@@ -324,22 +324,22 @@ value_fcr(sim_cpu *cpu,
 
   switch (fcr)
     {
-    case 0:  /* FP Implementation and Revision Register */
+    case 0:  /* FP Implementation and Revision Register.  */
       value = FCR0;
       break;
-    case 25:  /* FP Condition Codes Register */
+    case 25:  /* FP Condition Codes Register (derived from FCSR).  */
       value = (FCR31 & fcsr_FCC_mask) >> fcsr_FCC_shift;
-      value = (value & 0x1) | (value >> 1);   /* close FCC gap */
+      value = (value & 0x1) | (value >> 1);   /* Close FCC gap.  */
       break;
-    case 26:  /* FP Exceptions Register */
+    case 26:  /* FP Exceptions Register (derived from FCSR).  */
       value = FCR31 & (fcsr_CAUSE_mask | fcsr_FLAGS_mask);
       break;
-    case 28:  /* FP Enables Register */
+    case 28:  /* FP Enables Register (derived from FCSR).  */
       value = FCR31 & (fcsr_ENABLES_mask | fcsr_RM_mask);
-      if (FCR31 & fcsr_FS)
-	value |= 0x4;                        /* nonstandard FS bit */
+      if ((FCR31 & fcsr_FS) != 0)
+	value |= fenr_FS;
       break;
-    case 31:  /* FP Control/Status Register */
+    case 31:  /* FP Control/Status Register (FCSR).  */
       value = FCR31 & ~fcsr_ZERO_mask;
       break;
     }
@@ -358,18 +358,18 @@ store_fcr(sim_cpu *cpu,
   v = VL4_8(value);
   switch (fcr)
     {
-    case 25:  /* FP Condition Codes Register */
-      v = (v << 1) | (v & 0x1);             /* adjust for FCC gap */
+    case 25:  /* FP Condition Codes Register (stored into FCSR).  */
+      v = (v << 1) | (v & 0x1);             /* Adjust for FCC gap.  */
       FCR31 &= ~fcsr_FCC_mask;
       FCR31 |= ((v << fcsr_FCC_shift) & fcsr_FCC_mask);
       break;
-    case 26:  /* FP Exceptions Register */
+    case 26:  /* FP Exceptions Register (stored into FCSR).  */
       FCR31 &= ~(fcsr_CAUSE_mask | fcsr_FLAGS_mask);
       FCR31 |= (v & (fcsr_CAUSE_mask | fcsr_FLAGS_mask));
       test_fcsr(cpu, cia);
       break;
-    case 28:  /* FP Enables Register */
-      if (v & 0x4)                         /* nonstandard FS bit */
+    case 28:  /* FP Enables Register (stored into FCSR).  */
+      if ((v & fenr_FS) != 0)
 	v |= fcsr_FS;
       else
 	v &= ~fcsr_FS;
@@ -377,7 +377,7 @@ store_fcr(sim_cpu *cpu,
       FCR31 |= (v & (fcsr_FS | fcsr_ENABLES_mask | fcsr_RM_mask));
       test_fcsr(cpu, cia);
       break;
-    case 31:  /* FP Control/Status Register */
+    case 31:  /* FP Control/Status Register (FCSR).  */
       FCR31 = v & ~fcsr_ZERO_mask;
       test_fcsr(cpu, cia);
       break;
@@ -414,7 +414,7 @@ update_fcsr (sim_cpu *cpu,
       if (status & sim_fpu_status_inexact)
 	cause |= (1 << IR);
 #if 0 /* Not yet.  */
-      /* Implicit clearing of other bits by unimplemented done by callers. */
+      /* Implicit clearing of other bits by unimplemented done by callers.  */
       if (status & sim_fpu_status_unimplemented)
 	cause |= (1 << UO);
 #endif
@@ -436,22 +436,22 @@ rounding_mode(int rm)
     case FP_RM_NEAREST:
       /* Round result to nearest representable value. When two
 	 representable values are equally near, round to the value
-	 that has a least significant bit of zero (i.e. is even). */
+	 that has a least significant bit of zero (i.e. is even).  */
       round = sim_fpu_round_near;
       break;
     case FP_RM_TOZERO:
       /* Round result to the value closest to, and not greater in
-	 magnitude than, the result. */
+	 magnitude than, the result.  */
       round = sim_fpu_round_zero;
       break;
     case FP_RM_TOPINF:
       /* Round result to the value closest to, and not less than,
-	 the result. */
+	 the result.  */
       round = sim_fpu_round_up;
       break;
     case FP_RM_TOMINF:
       /* Round result to the value closest to, and not greater than,
-	 the result. */
+	 the result.  */
       round = sim_fpu_round_down;
       break;
     default:
@@ -460,6 +460,23 @@ rounding_mode(int rm)
       abort ();
     }
   return round;
+}
+
+/* When the FS bit is set, MIPS processors return zero for
+   denormalized results and optionally replace denormalized inputs
+   with zero.  When FS is clear, some implementation trap on input
+   and/or output, while other perform the operation in hardware.  */
+static sim_fpu_denorm
+denorm_mode(sim_cpu *cpu)
+{
+  sim_fpu_denorm denorm;
+
+  /* XXX: FIXME: Eventually should be CPU model dependent.  */
+  if (GETFS())
+    denorm = sim_fpu_denorm_zero;
+  else
+    denorm = 0;
+  return denorm;
 }
 
 
@@ -536,7 +553,9 @@ fp_cmp(sim_cpu *cpu,
 {
   sim_fpu_status status = 0;
 
-  /* The format type should already have been checked: */
+  /* The format type should already have been checked.  The FCSR is
+     updated before the condition codes so that any exceptions will
+     be signalled before the condition codes are changed.  */
   switch (fmt)
     {
     case fmt_single:
@@ -566,6 +585,9 @@ fp_unary(sim_cpu *cpu,
 {
   sim_fpu wop;
   sim_fpu ans;
+  sim_fpu_round round = rounding_mode (GETRM());
+  sim_fpu_denorm denorm = denorm_mode (cpu);
+  sim_fpu_status status = 0;
   unsigned64 result = 0;
 
   /* The format type has already been checked: */
@@ -575,7 +597,8 @@ fp_unary(sim_cpu *cpu,
       {
 	unsigned32 res;
 	sim_fpu_32to (&wop, op);
-	(*sim_fpu_op) (&ans, &wop);
+	status |= (*sim_fpu_op) (&ans, &wop);
+	status |= sim_fpu_round_32 (&ans, round, denorm);
 	sim_fpu_to32 (&res, &ans);
 	result = res;
 	break;
@@ -584,7 +607,8 @@ fp_unary(sim_cpu *cpu,
       {
 	unsigned64 res;
 	sim_fpu_64to (&wop, op);
-	(*sim_fpu_op) (&ans, &wop);
+	status |= (*sim_fpu_op) (&ans, &wop);
+	status |= sim_fpu_round_64 (&ans, round, denorm);
 	sim_fpu_to64 (&res, &ans);
 	result = res;
 	break;
@@ -594,6 +618,7 @@ fp_unary(sim_cpu *cpu,
       abort ();
     }
 
+  update_fcsr (cpu, cia, status);
   return result;
 }
 
@@ -608,6 +633,9 @@ fp_binary(sim_cpu *cpu,
   sim_fpu wop1;
   sim_fpu wop2;
   sim_fpu ans;
+  sim_fpu_round round = rounding_mode (GETRM());
+  sim_fpu_denorm denorm = denorm_mode (cpu);
+  sim_fpu_status status = 0;
   unsigned64 result = 0;
 
   /* The format type has already been checked: */
@@ -618,7 +646,8 @@ fp_binary(sim_cpu *cpu,
 	unsigned32 res;
 	sim_fpu_32to (&wop1, op1);
 	sim_fpu_32to (&wop2, op2);
-	(*sim_fpu_op) (&ans, &wop1, &wop2);
+	status |= (*sim_fpu_op) (&ans, &wop1, &wop2);
+	status |= sim_fpu_round_32 (&ans, round, denorm);
 	sim_fpu_to32 (&res, &ans);
 	result = res;
 	break;
@@ -628,7 +657,8 @@ fp_binary(sim_cpu *cpu,
 	unsigned64 res;
 	sim_fpu_64to (&wop1, op1);
 	sim_fpu_64to (&wop2, op2);
-	(*sim_fpu_op) (&ans, &wop1, &wop2);
+	status |= (*sim_fpu_op) (&ans, &wop1, &wop2);
+	status |= sim_fpu_round_64 (&ans, round, denorm);
 	sim_fpu_to64 (&res, &ans);
 	result = res;
 	break;
@@ -638,6 +668,7 @@ fp_binary(sim_cpu *cpu,
       abort ();
     }
 
+  update_fcsr (cpu, cia, status);
   return result;
 }
 
@@ -731,8 +762,10 @@ convert (sim_cpu *cpu,
 {
   sim_fpu wop;
   sim_fpu_round round = rounding_mode (rm);
+  sim_fpu_denorm denorm = denorm_mode (cpu);
   unsigned32 result32;
   unsigned64 result64;
+  sim_fpu_status status = 0;
 
   /* Convert the input to sim_fpu internal format */
   switch (from)
@@ -744,13 +777,13 @@ convert (sim_cpu *cpu,
       sim_fpu_32to (&wop, op);
       break;
     case fmt_word:
-      sim_fpu_i32to (&wop, op, round);
+      status = sim_fpu_i32to (&wop, op, round);
       break;
     case fmt_long:
-      sim_fpu_i64to (&wop, op, round);
+      status = sim_fpu_i64to (&wop, op, round);
       break;
     default:
-      fprintf (stderr, "Bad switch\n");
+      sim_io_eprintf (SD, "Bad switch\n");
       abort ();
     }
 
@@ -763,33 +796,35 @@ convert (sim_cpu *cpu,
   switch (to)
     {
     case fmt_single:
-      sim_fpu_round_32 (&wop, round, 0);
+      status |= sim_fpu_round_32 (&wop, round, denorm);
+      /* For a NaN, normalize mantissa bits (cvt.s.d can't preserve them) */
+      if (sim_fpu_is_qnan (&wop))
+	wop = sim_fpu_qnan;
       sim_fpu_to32 (&result32, &wop);
       result64 = result32;
       break;
     case fmt_double:
-      sim_fpu_round_64 (&wop, round, 0);
+      status |= sim_fpu_round_64 (&wop, round, denorm);
+      /* For a NaN, normalize mantissa bits (make cvt.d.s consistent) */
+      if (sim_fpu_is_qnan (&wop))
+	wop = sim_fpu_qnan;
       sim_fpu_to64 (&result64, &wop);
       break;
     case fmt_word:
-      sim_fpu_to32i (&result32, &wop, round);
+      status |= sim_fpu_to32i (&result32, &wop, round);
       result64 = result32;
       break;
     case fmt_long:
-      sim_fpu_to64i (&result64, &wop, round);
+      status |= sim_fpu_to64i (&result64, &wop, round);
       break;
     default:
       result64 = 0;
-      fprintf (stderr, "Bad switch\n");
+      sim_io_eprintf (SD, "Bad switch\n");
       abort ();
     }
 
-#ifdef DEBUG
-  printf ("DBG: Convert: returning 0x%s (to format = %s)\n",
-	  pr_addr (result64), fpu_format_name (to));
-#endif /* DEBUG */
-
-  return (result64);
+  update_fcsr (cpu, cia, status);
+  return result64;
 }
 
 static const char *

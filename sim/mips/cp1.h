@@ -40,6 +40,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define fcsr_RM_mask       (0x00000003)
 #define fcsr_RM_shift      (0)
 
+#define fenr_FS            (0x00000004)
 
 /* Macros to update and retrieve the FCSR condition-code bits.  This
    is complicated by the fact that there is a hole in the index range

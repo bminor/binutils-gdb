@@ -1,4 +1,18 @@
 2002-06-07  Chris Demetriou  <cgd@broadcom.com>
+            Ed Satterthwaite  <ehs@broadcom.com>
+
+	* cp1.c: Fix more comment spelling and formatting.
+	(value_fcr, store_fcr): Use fenr_FS rather than hard-coding value.
+	(denorm_mode): New function.
+	(fpu_unary, fpu_binary): Round results after operation, collect
+	status from rounding operations, and update the FCSR.
+	(convert): Collect status from integer conversions and rounding
+	operations, and update the FCSR.  Adjust NaN values that result
+	from conversions.  Convert to use sim_io_eprintf rather than
+	fprintf, and remove some debugging code.
+	* cp1.h (fenr_FS): New define.
+
+2002-06-07  Chris Demetriou  <cgd@broadcom.com>
 
 	* cp1.c (convert): Remove unusable debugging code, and move MIPS
 	rounding mode to sim FP rounding mode flag conversion code into...
