@@ -1,5 +1,9 @@
 2003-12-17  Jeff Johnston  <jjohnstn@redhat.com>
 
+	* symtab.c (decode_line_spec): Change call to decode_line_1.
+
+2003-12-17  Jeff Johnston  <jjohnstn@redhat.com>
+
 	* linespec.h (decode_line_1): Add new not_found_ptr parameter.
 	* linespec.c (decode_line_1): Add new parameter.  Pass on
 	new parameter to decode_variable and symtab_from_filename
