@@ -190,13 +190,21 @@ main (int argc, char *argv[])
 	      break;
 	    case 'C':
 	      convert_ascii_to_int (own_buf + 1, &sig, 1);
-	      myresume (0, sig);
+	      if (target_signal_to_host_p (sig))
+		signal = target_signal_to_host (sig);
+	      else
+		signal = 0;
+	      myresume (0, signal);
 	      signal = mywait (&status);
 	      prepare_resume_reply (own_buf, status, signal);
 	      break;
 	    case 'S':
 	      convert_ascii_to_int (own_buf + 1, &sig, 1);
-	      myresume (1, sig);
+	      if (target_signal_to_host_p (sig))
+		signal = target_signal_to_host (sig);
+	      else
+		signal = 0;
+	      myresume (1, signal);
 	      signal = mywait (&status);
 	      prepare_resume_reply (own_buf, status, signal);
 	      break;

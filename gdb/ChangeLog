@@ -1,5 +1,14 @@
 2002-03-27  Daniel Jacobowitz  <drow@mvista.com>
 
+	* gdbserver/server.c (main): Call target_signal_to_host_p
+	and target_signal_to_host on signals received from the remote.
+	* gdbserver/remote-utils.c (prepare_resume_reply): Call
+	target_signal_from_host on signals sent to the remote.
+	* gdbserver/server.h: Add prototypes.  Include "gdb/signals.h".
+	* gdbserver/Makefile.in: Add signals.o.  Add -I${INCLUDE_DIR}.
+
+2002-03-27  Daniel Jacobowitz  <drow@mvista.com>
+
 	* signals/signals.c: Include "server.h" in gdbserver build.
 	(target_signal_from_name): Don't use STREQ.
 	(_initialize_signals): Likewise.  Don't include function in

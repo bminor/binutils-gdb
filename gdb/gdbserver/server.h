@@ -34,6 +34,7 @@
 typedef long long CORE_ADDR;
 
 #include "regcache.h"
+#include "gdb/signals.h"
 
 #include <setjmp.h>
 
@@ -84,6 +85,10 @@ void decode_m_packet (char *from, CORE_ADDR * mem_addr_ptr,
 void decode_M_packet (char *from, CORE_ADDR * mem_addr_ptr,
 		      unsigned int *len_ptr, char *to);
 
+/* Functions from ``signals.c''.  */
+enum target_signal target_signal_from_host (int hostsig);
+int target_signal_to_host_p (enum target_signal oursig);
+int target_signal_to_host (enum target_signal oursig);
 
 /* Functions from utils.c */
 

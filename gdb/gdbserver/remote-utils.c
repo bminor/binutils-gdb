@@ -463,17 +463,15 @@ outreg (int regno, char *buf)
 void
 prepare_resume_reply (char *buf, char status, unsigned char signo)
 {
-  int nib;
+  int nib, sig;
 
   *buf++ = status;
 
-  /* FIXME!  Should be converting this signal number (numbered
-     according to the signal numbering of the system we are running on)
-     to the signal numbers used by the gdb protocol (see enum target_signal
-     in gdb/target.h).  */
-  nib = ((signo & 0xf0) >> 4);
+  sig = (int)target_signal_from_host (signo);
+
+  nib = ((sig & 0xf0) >> 4);
   *buf++ = tohex (nib);
-  nib = signo & 0x0f;
+  nib = sig & 0x0f;
   *buf++ = tohex (nib);
 
   if (status == 'T')
