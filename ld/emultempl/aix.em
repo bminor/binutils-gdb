@@ -57,6 +57,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 static void gld${EMULATION_NAME}_before_parse PARAMS ((void));
 static int gld${EMULATION_NAME}_parse_args PARAMS ((int, char **));
 static void gld${EMULATION_NAME}_after_open PARAMS ((void));
+static char * choose_target PARAMS ((int, char **));
 static void gld${EMULATION_NAME}_before_allocation PARAMS ((void));
 static void gld${EMULATION_NAME}_read_file PARAMS ((const char *, boolean));
 static void gld${EMULATION_NAME}_free PARAMS ((PTR));
@@ -113,6 +114,15 @@ static struct export_symbol_list *export_symbols;
 
 /* Maintains the 32 or 64 bit mode state of import file */
 static unsigned int symbol_mode = 0x04;
+
+/* Which symbol modes are valid */
+static unsigned int symbol_mode_mask = 0x0d;
+
+/* Whether this is a 64 bit link */
+static int is_64bit = 0;
+
+/* Which syscalls from import file are valid */
+static unsigned int syscall_mask = 0x77;
 
 /* This routine is called before anything else is done.  */
 
@@ -174,15 +184,12 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
     OPTION_PD,
     OPTION_PT,
     OPTION_STRCMPCT,
-    OPTION_UNIX
+    OPTION_UNIX,
+    OPTION_32,
+    OPTION_64,
   };
 
   /*
-    b64 is an empty option.  The native linker uses -b64 for xcoff64 support
-    Our linker uses -m aixppc64 for xcoff64 support. The choice for the
-    correct emulation is done in collect2.c via the environmental varible
-    LDEMULATION.
-
     binitfini has special handling in the linker backend.  The native linker
     uses the arguemnts to generate a table of init and fini functions for
     the executable.  The important use for this option is to support aix 4.2+
@@ -268,7 +275,8 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
     {"bso", no_argument, NULL, OPTION_AUTOIMP},
     {"bstrcmpct", no_argument, NULL, OPTION_STRCMPCT},
     {"btextro", no_argument, &textro, 1},
-    {"b64", no_argument, NULL, 0},
+    {"b32", no_argument, NULL, OPTION_32},
+    {"b64", no_argument, NULL, OPTION_64},
     {"static", no_argument, NULL, OPTION_NOAUTOIMP},
     {"unix", no_argument, NULL, OPTION_UNIX},
     {NULL, no_argument, NULL, 0}
@@ -530,6 +538,19 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
     case OPTION_UNIX:
       unix_ld = true;
       break;
+
+    case OPTION_32:
+      is_64bit = 0;
+      syscall_mask = 0x77;
+      symbol_mode_mask = 0x0d;
+      break;
+
+    case OPTION_64:
+      is_64bit = 1;
+      syscall_mask = 0xcc;
+      symbol_mode_mask = 0x0e;
+      break;
+
     }
 
   return 1;
@@ -807,6 +828,42 @@ gld${EMULATION_NAME}_before_allocation ()
     }
 }
 
+static char *
+choose_target (argc, argv)
+     int argc;
+     char **argv;
+{
+  int i, j, jmax;
+  static char *from_outside;
+  static char *from_inside;
+  static char *argv_to_target[][2] = 
+    { 
+      NULL,   "aixcoff-rs6000",
+      "-b32", "aixcoff-rs6000",
+      "-b64", "aixcoff64-rs6000",
+    };
+
+  jmax = 3;
+
+  from_outside = getenv (TARGET_ENVIRON);
+  if (from_outside != (char *)NULL)
+    return from_outside;
+
+  /* Set to default. */
+  from_inside = argv_to_target[0][1];
+  for (i = 1; i < argc; i++)
+    {
+      for (j = 1; j < jmax; j++) 
+	{
+	  if (0 == strcmp (argv[i], argv_to_target[j][0]))
+	    from_inside = argv_to_target[j][1];
+	}
+    }
+  
+  return from_inside;
+}
+
+
 static int change_symbol_mode (char *input)
 {
   /*
@@ -875,7 +932,7 @@ static int is_syscall(char *input, unsigned int *flag)
     }
 
     if (0 == strcmp(input, string)) {
-      if (1 << bit & ${SYSCALL_MASK}) {
+      if (1 << bit & syscall_mask) {
 	*flag = s[bit].flag;
 	return 1;
       } else {
@@ -1035,7 +1092,7 @@ gld${EMULATION_NAME}_read_file (filename, import)
 	  continue;
 	}
 
-      if (symbol_mode & ${SYMBOL_MODE_MASK})
+      if (symbol_mode & symbol_mode_mask)
 	{
 	  /* This is a symbol to be imported or exported.  */
 	  symname = s;
@@ -1278,7 +1335,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   gld${EMULATION_NAME}_after_open,
   after_allocation_default,
   set_output_arch_default,
-  ldemul_default_target,
+  choose_target,
   gld${EMULATION_NAME}_before_allocation,
   gld${EMULATION_NAME}_get_script,
   "${EMULATION_NAME}",

@@ -1,3 +1,18 @@
+2001-12-02  Tom Rix  <trix@redhat.com>
+ 
+	* configure.tgt : Remove eaixppc64 emulations.
+	* Makefile.in : Remove eaixppc64.c 
+	* ldemul.c (ldemul_choose_target): New parameters argc, argv.
+	(ldemul_default_target): Same.
+	* emultempl/gld960.em (gld960_choose_target):  Same.
+	* emultempl/gld960c.em (gld960_choose_target):  Same.	
+	* scripttempl/aix.sc: Remove OUTPUT_FORMAT. 
+	* emultempl/aix.em (is_syscall): syscall_mask now a variable.
+	* emultempl/aix.em (gld*_read_file): symbol_mode_mask now a variable.
+	* emultempl/aix.em (gld*_parse_args): Handle -b32 -b64 emulation.
+	* emultempl/aix.em (choose_target): New function.  Handle emulation of 
+	-b32 and -b64.
+
 2001-11-27  H.J. Lu <hjl@gnu.org>
 
 	* emulparams/elf_i386.sh (NO_SMALL_DATA): Set to yes.

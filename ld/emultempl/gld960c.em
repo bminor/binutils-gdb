@@ -43,7 +43,7 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 
 static void gld960_before_parse PARAMS ((void));
 static void gld960_set_output_arch PARAMS ((void));
-static char *gld960_choose_target PARAMS ((void));
+static char *gld960_choose_target PARAMS ((int, char **));
 static char *gld960_get_script PARAMS ((int *));
 
 #ifdef GNU960
@@ -105,7 +105,9 @@ gld960_set_output_arch()
 }
 
 static char *
-gld960_choose_target()
+gld960_choose_target (argc, argv)
+     int argc ATTRIBUTE_UNUSED;
+     char **argv ATTRIBUTE_UNUSED;
 {
 #ifdef GNU960
 

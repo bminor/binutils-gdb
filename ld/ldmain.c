@@ -267,7 +267,7 @@ main (argc, argv)
 
   emulation = get_emulation (argc, argv);
   ldemul_choose_mode (emulation);
-  default_target = ldemul_choose_target ();
+  default_target = ldemul_choose_target (argc, argv);
   lang_init ();
   ldemul_before_parse ();
   lang_has_input_file = false;
