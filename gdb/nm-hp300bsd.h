@@ -1,5 +1,5 @@
 /* Parameters for Hewlett-Packard 9000/300 native support under bsd.
-   Copyright 1986, 1987, 1989, 1991, 1992  Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993  Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -41,3 +41,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
     addr = (int) &((struct user *)0)->u_pcb.pcb_fpregs.fpf_fpiar;	\
 }
 
+/* We can attach to processes using ptrace.  */
+
+#define	ATTACH_DETACH
+#define	PTRACE_ATTACH	10
+#define	PTRACE_DETACH	11
+
+/* The third argument of ptrace is declared as this type.  */
+
+#define	PTRACE_ARG3_TYPE	caddr_t
