@@ -1465,10 +1465,16 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
      struct section_offsets *section_offsets;
      struct objfile *objfile;
 {
+#ifdef SUN_FIXED_LBRAC_BUG
+  /* If SUN_FIXED_LBRAC_BUG is defined, then it tells us whether we need
+     to correct the address of N_LBRAC's.  If it is not defined, then
+     we never need to correct the addresses.  */
+
   /* This records the last pc address we've seen.  We depend on there being
      an SLINE or FUN or SO before the first LBRAC, since the variable does
      not get reset in between reads of different symbol files.  */
   static CORE_ADDR last_pc_address;
+#endif
 
   register struct context_stack *new;
   /* This remembers the address of the start of a function.  It is used
@@ -1503,14 +1509,11 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 
   if (last_source_file == NULL && type != (unsigned char)N_SO)
     {
-      /* Currently this ignores N_ENTRY on Gould machines, N_NSYM on machines
-	 where that code is defined.  */
-      if (IGNORE_SYMBOL (type))
-	return;
-
-      /* FIXME, this should not be an error, since it precludes extending
-         the symbol table information in this way...  */
-      error ("Invalid symbol data: does not start by identifying a source file.");
+      /* Ignore any symbols which appear before an N_SO symbol.  Currently
+	 no one puts symbols there, but we should deal gracefully with the
+	 case.  A complain()t might be in order (if !IGNORE_SYMBOL (type)),
+	 but this should not be an error ().  */
+      return;
     }
 
   switch (type)
@@ -1544,7 +1547,9 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 	  break;
 	}
 
+#ifdef SUN_FIXED_LBRAC_BUG
       last_pc_address = valu;	/* Save for SunOS bug circumcision */
+#endif
 
       if (block_address_function_relative)
 	/* On Solaris 2.0 compilers, the block addresses and N_SLINE's
@@ -1587,11 +1592,13 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 	valu += last_source_start_addr;
 #endif
 
+#ifdef SUN_FIXED_LBRAC_BUG
       if (!SUN_FIXED_LBRAC_BUG && valu < last_pc_address) {
 	/* Patch current LBRAC pc value to match last handy pc value */
  	complain (&lbrac_complaint);
 	valu = last_pc_address;
       }
+#endif
       new = push_context (desc, valu);
       break;
 
@@ -1679,7 +1686,9 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 
       n_opt_found = 0;
 
+#ifdef SUN_FIXED_LBRAC_BUG
       last_pc_address = valu;	/* Save for SunOS bug circumcision */
+#endif
 
 #ifdef PCC_SOL_BROKEN
       /* pcc bug, occasionally puts out SO for SOL.  */
@@ -1738,14 +1747,20 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 	 Enter it in the line list for this symbol table.  */
       /* Relocate for dynamic loading and for ELF acc fn-relative syms.  */
       valu += function_start_offset;
+#ifdef SUN_FIXED_LBRAC_BUG
       last_pc_address = valu;	/* Save for SunOS bug circumcision */
+#endif
       record_line (current_subfile, desc, valu);
       break;
 
     case N_BCOMM:
       if (common_block)
-	error ("Invalid symbol data: common within common at symtab pos %d",
-	       symnum);
+	{
+	  static struct complaint msg = {
+	    "Invalid symbol data: common within common at symtab pos %d",
+	    0, 0};
+	  complain (&msg, symnum);
+	}
       common_block = local_symbols;
       common_block_i = local_symbols ? local_symbols->nsyms : 0;
       break;
