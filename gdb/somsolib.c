@@ -1463,17 +1463,17 @@ som_sharedlibrary_info_command (char *ignore, int from_tty)
       if (so_list->objfile == NULL)
 	printf_unfiltered ("  (symbols not loaded)");
       printf_unfiltered ("\n");
-      printf_unfiltered ("    %-12s", local_hex_string_custom (flags, "08l"));
+      printf_unfiltered ("    %-12s", hex_string_custom (flags, 8));
       printf_unfiltered ("%-12s",
-	     local_hex_string_custom (so_list->som_solib.text_addr, "08l"));
+			 hex_string_custom (so_list->som_solib.text_addr, 8));
       printf_unfiltered ("%-12s",
-	      local_hex_string_custom (so_list->som_solib.text_end, "08l"));
+			 hex_string_custom (so_list->som_solib.text_end, 8));
       printf_unfiltered ("%-12s",
-	    local_hex_string_custom (so_list->som_solib.data_start, "08l"));
+			 hex_string_custom (so_list->som_solib.data_start, 8));
       printf_unfiltered ("%-12s",
-	      local_hex_string_custom (so_list->som_solib.data_end, "08l"));
+			 hex_string_custom (so_list->som_solib.data_end, 8));
       printf_unfiltered ("%-12s\n",
-	     local_hex_string_custom (so_list->som_solib.got_value, "08l"));
+			 hex_string_custom (so_list->som_solib.got_value, 8));
       so_list = so_list->next;
     }
 }

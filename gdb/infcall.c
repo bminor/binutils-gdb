@@ -746,7 +746,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 	  {
 	    /* Can't use a cleanup here.  It is discarded, instead use
                an alloca.  */
-	    char *tmp = xstrprintf ("at %s", local_hex_string (funaddr));
+	    char *tmp = xstrprintf ("at %s", hex_string (funaddr));
 	    char *a = alloca (strlen (tmp) + 1);
 	    strcpy (a, tmp);
 	    xfree (tmp);

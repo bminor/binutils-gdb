@@ -480,10 +480,6 @@ const struct language_defn f_language_defn =
   basic_lookup_transparent_type,/* lookup_transparent_type */
   NULL,				/* Language specific symbol demangler */
   NULL,				/* Language specific class_name_from_physname */
-  {"", "", "", ""},		/* Binary format info */
-  {"0%o", "0", "o", ""},	/* Octal format info */
-  {"%d", "", "d", ""},		/* Decimal format info */
-  {"0x%x", "0x", "x", ""},	/* Hex format info */
   f_op_print_tab,		/* expression operators for printing */
   0,				/* arrays are first-class (not c-style) */
   1,				/* String lower bound */

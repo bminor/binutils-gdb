@@ -1317,7 +1317,7 @@ program_info (char *args, int from_tty)
 
   target_files_info ();
   printf_filtered ("Program stopped at %s.\n",
-		   local_hex_string ((unsigned long) stop_pc));
+		   hex_string ((unsigned long) stop_pc));
   if (stop_step)
     printf_filtered ("It stopped after being stepped.\n");
   else if (num != 0)

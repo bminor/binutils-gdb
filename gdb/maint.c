@@ -308,7 +308,7 @@ maint_print_section_info (const char *name, flagword flags,
   printf_filtered ("    0x%s", paddr (addr));
   printf_filtered ("->0x%s", paddr (endaddr));
   printf_filtered (" at %s",
-		   local_hex_string_custom ((unsigned long) filepos, "08l"));
+		   hex_string_custom ((unsigned long) filepos, 8));
   printf_filtered (": %s", name);
   print_bfd_flags (flags);
   printf_filtered ("\n");

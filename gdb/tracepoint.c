@@ -494,11 +494,10 @@ tracepoints_info (char *tpnum_exp, int from_tty)
 	  char *tmp;
 
 	  if (TARGET_ADDR_BIT <= 32)
-	    tmp = local_hex_string_custom (t->address
-					   & (CORE_ADDR) 0xffffffff, 
-					   "08l");
+	    tmp = hex_string_custom (t->address & (CORE_ADDR) 0xffffffff, 
+				     8);
 	  else
-	    tmp = local_hex_string_custom (t->address, "016l");
+	    tmp = hex_string_custom (t->address, 16);
 
 	  printf_filtered ("%s ", tmp);
 	}

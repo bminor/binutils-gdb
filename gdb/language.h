@@ -117,37 +117,6 @@ extern enum case_sensitivity
   }
 case_sensitivity;
 
-/* Information for doing language dependent formatting of printed values. */
-
-struct language_format_info
-  {
-    /* The format that can be passed directly to standard C printf functions
-       to generate a completely formatted value in the format appropriate for
-       the language. */
-
-    char *la_format;
-
-    /* The prefix to be used when directly printing a value, or constructing
-       a standard C printf format.  This generally is everything up to the
-       conversion specification (the part introduced by the '%' character
-       and terminated by the conversion specifier character). */
-
-    char *la_format_prefix;
-
-    /* The conversion specifier.  This is generally everything after the
-       field width and precision, typically only a single character such
-       as 'o' for octal format or 'x' for hexadecimal format. */
-
-    char *la_format_specifier;
-
-    /* The suffix to be used when directly printing a value, or constructing
-       a standard C printf format.  This generally is everything after the
-       conversion specification (the part introduced by the '%' character
-       and terminated by the conversion specifier character). */
-
-    char *la_format_suffix;	/* Suffix for custom format string */
-  };
-
 /* Per architecture (OS/ABI) language information.  */
 
 struct language_arch_info
@@ -284,22 +253,6 @@ struct language_defn
     /* Return class name of a mangled method name or NULL.  */
     char *(*la_class_name_from_physname) (const char *physname);
 
-    /* Base 2 (binary) formats. */
-
-    struct language_format_info la_binary_format;
-
-    /* Base 8 (octal) formats. */
-
-    struct language_format_info la_octal_format;
-
-    /* Base 10 (decimal) formats */
-
-    struct language_format_info la_decimal_format;
-
-    /* Base 16 (hexadecimal) formats */
-
-    struct language_format_info la_hex_format;
-
     /* Table for printing expressions */
 
     const struct op_print *la_op_print_tab;
@@ -402,47 +355,6 @@ extern enum language set_language (enum language);
 #define LA_VALUE_PRINT(val,stream,fmt,pretty) \
   (current_language->la_value_print(val,stream,fmt,pretty))
 
-/* Return a format string for printf that will print a number in one of
-   the local (language-specific) formats.  Result is static and is
-   overwritten by the next call.  Takes printf options like "08" or "l"
-   (to produce e.g. %08x or %lx).  */
-
-#define local_binary_format() \
-  (current_language->la_binary_format.la_format)
-#define local_binary_format_prefix() \
-  (current_language->la_binary_format.la_format_prefix)
-#define local_binary_format_specifier() \
-  (current_language->la_binary_format.la_format_specifier)
-#define local_binary_format_suffix() \
-  (current_language->la_binary_format.la_format_suffix)
-
-#define local_octal_format() \
-  (current_language->la_octal_format.la_format)
-#define local_octal_format_prefix() \
-  (current_language->la_octal_format.la_format_prefix)
-#define local_octal_format_specifier() \
-  (current_language->la_octal_format.la_format_specifier)
-#define local_octal_format_suffix() \
-  (current_language->la_octal_format.la_format_suffix)
-
-#define local_decimal_format() \
-  (current_language->la_decimal_format.la_format)
-#define local_decimal_format_prefix() \
-  (current_language->la_decimal_format.la_format_prefix)
-#define local_decimal_format_specifier() \
-  (current_language->la_decimal_format.la_format_specifier)
-#define local_decimal_format_suffix() \
-  (current_language->la_decimal_format.la_format_suffix)
-
-#define local_hex_format() \
-  (current_language->la_hex_format.la_format)
-#define local_hex_format_prefix() \
-  (current_language->la_hex_format.la_format_prefix)
-#define local_hex_format_specifier() \
-  (current_language->la_hex_format.la_format_specifier)
-#define local_hex_format_suffix() \
-  (current_language->la_hex_format.la_format_suffix)
-
 #define LA_PRINT_CHAR(ch, stream) \
   (current_language->la_printchar(ch, stream))
 #define LA_PRINT_STRING(stream, string, length, width, force_ellipses) \
@@ -461,17 +373,6 @@ extern enum language set_language (enum language);
    && ((c) < 0x7F || (c) >= 0xA0)	\
    && (!sevenbit_strings || (c) < 0x80))
 
-/* Return a format string for printf that will print a number in one of
-   the local (language-specific) formats.  Result is static and is
-   overwritten by the next call.  Takes printf options like "08" or "l"
-   (to produce e.g. %08x or %lx).  */
-
-extern char *local_decimal_format_custom (char *);	/* language.c */
-
-extern char *local_octal_format_custom (char *);	/* language.c */
-
-extern char *local_hex_format_custom (char *);	/* language.c */
-
 #if 0
 /* FIXME: cagney/2000-03-04: This function does not appear to be used.
    It can be deleted once 5.0 has been released. */
@@ -481,13 +382,11 @@ extern char *local_hex_format_custom (char *);	/* language.c */
 extern char *longest_raw_hex_string (LONGEST);
 #endif
 
-/* Return a string that contains a number formatted in one of the local
-   (language-specific) formats.  Result is static and is overwritten by
-   the next call.  Takes printf options like "08l" or "l".  */
+/* Return a string that contains a number formatted as a hex string */
 
-extern char *local_hex_string (LONGEST);	/* language.c */
+extern char *hex_string (LONGEST);	        /* language.c */
 
-extern char *local_hex_string_custom (LONGEST, char *);	/* language.c */
+extern char *hex_string_custom (LONGEST, int);	/* language.c */
 
 /* Type predicates */
 

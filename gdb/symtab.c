@@ -3136,12 +3136,12 @@ print_msymbol_info (struct minimal_symbol *msymbol)
   char *tmp;
 
   if (TARGET_ADDR_BIT <= 32)
-    tmp = local_hex_string_custom (SYMBOL_VALUE_ADDRESS (msymbol)
-				   & (CORE_ADDR) 0xffffffff,
-				   "08l");
+    tmp = hex_string_custom (SYMBOL_VALUE_ADDRESS (msymbol)
+			     & (CORE_ADDR) 0xffffffff,
+			     8);
   else
-    tmp = local_hex_string_custom (SYMBOL_VALUE_ADDRESS (msymbol),
-				   "016l");
+    tmp = hex_string_custom (SYMBOL_VALUE_ADDRESS (msymbol),
+			     16);
   printf_filtered ("%s  %s\n",
 		   tmp, SYMBOL_PRINT_NAME (msymbol));
 }

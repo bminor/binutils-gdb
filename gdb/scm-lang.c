@@ -266,10 +266,6 @@ const struct language_defn scm_language_defn =
   basic_lookup_transparent_type,/* lookup_transparent_type */
   NULL,				/* Language specific symbol demangler */
   NULL,				/* Language specific class_name_from_physname */
-  {"", "", "", ""},		/* Binary format info */
-  {"#o%lo", "#o", "o", ""},	/* Octal format info */
-  {"%ld", "", "d", ""},		/* Decimal format info */
-  {"#x%lX", "#X", "X", ""},	/* Hex format info */
   NULL,				/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */

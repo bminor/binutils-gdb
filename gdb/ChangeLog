@@ -1,3 +1,117 @@
+2004-09-11  Paul N. Hilfinger  <hilfinger@gnat.com>
+
+        * language.c (local_hex_format_custom): Remove.
+	(local_hex_string): Rename to hex_string, use C format, and move to
+	utils.c
+	(local_hex_string_custom): Rename to hex_string_custom and change
+	interface.  Now uses C format.  Move to utils.c
+	(local_octal_format_custom): Remove.
+	(local_decimal_format_custom): Remove.
+	(unknown_language_defn): Remove language-specific number 
+	formatting entries.
+	(auto_language_defn): Ditto.
+	(local_language_defn): Ditto.
+	* language.h (struct language_format_info): Delete declaration.
+	(struct language_defn): Remove language_format_info fields
+	la_binary_format, la_octal_format, la_decimal_format, la_hex_format.
+	(local_binary_format): Remove macro.
+	(local_binary_format_prefix): Remove macro.
+	(local_binary_format_specifier): Remove macro.
+	(local_binary_format_suffix): Remove macro.
+	(local_octal_format): Remove macro.
+	(local_octal_format_prefix): Remove macro.
+	(local_octal_format_specifier): Remove macro.
+	(local_octal_format_suffix): Remove macro.
+	(local_decimal_format): Remove macro.
+	(local_decimal_format_prefix): Remove macro.
+	(local_decimal_format_specifier): Remove macro.
+	(local_decimal_format_suffix): Remove macro.
+	(local_hex_format): Remove macro.
+	(local_hex_format_prefix): Remove macro.
+	(local_hex_format_specifier): Remove macro.
+	(local_hex_format_suffix): Remove macro.
+	(local_decimal_format_custom): Remove.
+	(local_octal_format_custom): Remove.
+	(local_hex_format_custom): Remove.
+	(local_hex_string): Rename to hex_string and move to defs.h.
+	(local_hex_string_custom): Rename to hex_string_custom, change
+	interface, and move to defs.h.
+	* utils.c: (int_string): New function.
+	(hex_string): New function (from language.c).
+	(hex_string_custom): New function (from language.c).
+	(octal2str): New function.
+	(decimal2str): Add width parameter.
+	(paddr_u): Use new decimal2str interface.
+	(paddr_d): Ditto.
+	* defs.h (hex_string): Declare.
+	(hex_string_custom): Declare.
+	(int_string): Declare.
+	* printcmd.c (print_scalar_formatted): Remove localized binary
+	formatting.
+	* valprint.c (print_longest): Use int_string.
+	(print_floating): Use C hex format.
+	(print_hex_chars): Ditto.
+	(print_binary_chars): Remove language-specific formatting.
+	(print_octal_chars): Use C octal format.
+	(print_decimal_chars): Delocalize format.
+	(print_decimal): Remove.
+	* ada-lang.c (ada_language_defn): Remove language-specific number 
+	formatting entries.
+	* p-lang.c (pascal_language_defn): Ditto.
+	* c-lang.c (c_language_defn): Ditto.
+	(cplus_language_defn): Ditto.
+	(asm_language_defn): Ditto.
+	(minimal_language_defn): Ditto.
+	* f-lang.c (f_language_defn): Ditto.
+	* jv-lang.c (java_language_defn): Ditto.
+	* m2-lang.c (m2_language_defn): Ditto.
+	* scm-lang.c (scm_language_defn): Ditto.
+	* objc-lang.c (objc_language_defn): Ditto.
+	* memattr.c (mem_info_command): Use renamed hex_string_custom with
+	new interface.
+	* pa64solib.c (pa64_sharedlibrary_info_command): Ditto.
+	* ui-out.c (ui_out_field_core_addr): Ditto.
+	* breakpoint.c (breakpoint_adjustment_warning): Ditto.
+	* exec.c (print_section_info): Ditto.
+	* i387-tdep.c (print_i387_status_word): Ditto.
+	(print_i387_control_word): Ditto.
+	(i387_print_float_info): Ditto.
+	* maint.c (maint_print_section_info): Ditto.
+	* solib.c (info_sharedlibrary_command): Ditto.
+	* somsolib.c (som_sharedlibrary_info_command): Ditto.
+	* symtab.c (print_msymbol_info): Ditto.
+	* tracepoint.c (tracepoints_info): Ditto.
+	* solib-frv.c (lm_base): Ditto.
+	(frv_current_sos): Ditto.
+	(enable_break2): Ditto.
+	(enable_break): Ditto.
+	* dbxread.c (read_dbx_symtab): Use renamed hex_string.
+	(process_one_symbol): Ditto.
+	* infcmd.c (program_info): Ditto.
+	* mdebugread.c (parse_partial_symbols): Ditto.
+	* symfile.c (add_symbol_file_command): Ditto.
+	* cli/cli-cmds.c (edit_command): Ditto.
+	(list_command): Ditto.
+	* infcall.c (call_function_by_hand): Ditto.
+	* remote-vx.c (vx_run_files_info): Ditto.
+	(vx_wait): Ditto.
+	(vx_attach): Ditto.
+	(vx_detach): Ditto.
+	(vx_kill): Ditto.
+	* aix-thread.c (pdc_symbol_addrs): Ditto.
+	(pdc_read_regs): Ditto.
+	(pdc_write_regs): Ditto.
+	(pdc_read_data): Ditto.
+	(pdc_write_data): Ditto.
+	* d10v-tdep.c (display_trace): Ditto.
+	* rs6000-nat.c (find_toc_address): Ditto.
+	* aix-thread.c: Don't include language.h.
+	* buildsym.c: Ditto.
+	* dbxread.c: Ditto.
+	* mdebugread.c: Ditto.
+	* rs6000-nat.c: Ditto.
+	* buildsym.c (make_blockvector): Use renamed hex_string.
+	
 2004-09-10  Jason Molenda  (jmolenda@apple.com)
 
         * cli/cli-script.c (read_next_line): Accept zero or more whitespace

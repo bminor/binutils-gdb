@@ -566,7 +566,7 @@ vx_run_files_info (void)
 {
   printf_unfiltered ("\tRunning %s VxWorks process %s",
 		     vx_running ? "child" : "attached",
-		     local_hex_string (PIDGET (inferior_ptid)));
+		     hex_string (PIDGET (inferior_ptid)));
   if (vx_running)
     printf_unfiltered (", function `%s'", vx_running);
   printf_unfiltered (".\n");
@@ -972,7 +972,7 @@ vx_wait (ptid_t ptid_to_wait_for, struct target_waitstatus *status)
       else if (pid != PIDGET (inferior_ptid))
 	internal_error (__FILE__, __LINE__,
 			"Bad pid for debugged task: %s\n",
-			local_hex_string ((unsigned long) pid));
+			hex_string ((unsigned long) pid));
     }
   while (pid == 0);
 
@@ -1183,7 +1183,7 @@ vx_attach (char *args, int from_tty)
 
   if (from_tty)
     printf_unfiltered ("Attaching pid %s.\n",
-		       local_hex_string ((unsigned long) pid));
+		       hex_string ((unsigned long) pid));
 
   memset ((char *) &ptrace_in, '\0', sizeof (ptrace_in));
   memset ((char *) &ptrace_out, '\0', sizeof (ptrace_out));
@@ -1230,7 +1230,7 @@ vx_detach (char *args, int from_tty)
 
   if (from_tty)
     printf_unfiltered ("Detaching pid %s.\n",
-		       local_hex_string (
+		       hex_string (
 		         (unsigned long) PIDGET (inferior_ptid)));
 
   if (args)			/* FIXME, should be possible to leave suspended */
@@ -1262,7 +1262,8 @@ vx_kill (void)
   Ptrace_return ptrace_out;
   int status;
 
-  printf_unfiltered ("Killing pid %s.\n", local_hex_string ((unsigned long) PIDGET (inferior_ptid)));
+  printf_unfiltered ("Killing pid %s.\n", 
+		     hex_string ((unsigned long) PIDGET (inferior_ptid)));
 
   memset ((char *) &ptrace_in, '\0', sizeof (ptrace_in));
   memset ((char *) &ptrace_out, '\0', sizeof (ptrace_out));

@@ -600,7 +600,7 @@ edit_command (char *arg, int from_tty)
           if (sal.symtab == 0)
 	    /* FIXME-32x64--assumes sal.pc fits in long.  */
 	    error ("No source file for address %s.",
-		   local_hex_string((unsigned long) sal.pc));
+		   hex_string ((unsigned long) sal.pc));
           sym = find_pc_function (sal.pc);
           if (sym)
 	    {
@@ -767,7 +767,7 @@ list_command (char *arg, int from_tty)
       if (sal.symtab == 0)
 	/* FIXME-32x64--assumes sal.pc fits in long.  */
 	error ("No source file for address %s.",
-	       local_hex_string ((unsigned long) sal.pc));
+	       hex_string ((unsigned long) sal.pc));
       sym = find_pc_function (sal.pc);
       if (sym)
 	{

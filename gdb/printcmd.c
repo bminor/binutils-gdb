@@ -499,9 +499,7 @@ print_scalar_formatted (void *valaddr, struct type *type, int format, int size,
 	    if (*cp == '\0')
 	      cp--;
 	  }
-	strcpy (buf, local_binary_format_prefix ());
-	strcat (buf, cp);
-	strcat (buf, local_binary_format_suffix ());
+	strcpy (buf, cp);
 	fputs_filtered (buf, stream);
       }
       break;

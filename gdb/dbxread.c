@@ -54,7 +54,6 @@
 #include "stabsread.h"
 #include "gdb-stabs.h"
 #include "demangle.h"
-#include "language.h"		/* Needed for local_hex_string */
 #include "complaints.h"
 #include "cp-abi.h"
 #include "gdb_assert.h"
@@ -2097,7 +2096,7 @@ read_dbx_symtab (struct objfile *objfile)
 	  default:
 	  /* If we haven't found it yet, ignore it.  It's probably some
 	     new type we don't know about yet.  */
-	  unknown_symtype_complaint (local_hex_string (nlist.n_type));
+	  unknown_symtype_complaint (hex_string (nlist.n_type));
 	  continue;
 	}
     }
@@ -3038,7 +3037,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
     case N_NBBSS:
     case N_NBSTS:
     case N_NBLCS:
-      unknown_symtype_complaint (local_hex_string (type));
+      unknown_symtype_complaint (hex_string (type));
       /* FALLTHROUGH */
 
       /* The following symbol types don't need the address field relocated,

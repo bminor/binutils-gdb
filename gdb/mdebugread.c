@@ -88,7 +88,6 @@ typedef struct mips_extra_func_info
 #include "aout/stab_gnu.h"	/* STABS information */
 
 #include "expression.h"
-#include "language.h"		/* For local_hex_string() */
 
 extern void _initialize_mdebugread (void);
 
@@ -3266,7 +3265,7 @@ parse_partial_symbols (struct objfile *objfile)
 		    /* If we haven't found it yet, ignore it.  It's probably some
 		       new type we don't know about yet.  */
 		    complaint (&symfile_complaints, "unknown symbol type %s",
-			       local_hex_string (type_code)); /*CUR_SYMBOL_TYPE*/
+			       hex_string (type_code)); /*CUR_SYMBOL_TYPE*/
 		    continue;
 		  }
 		if (stabstring

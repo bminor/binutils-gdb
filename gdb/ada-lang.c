@@ -10184,11 +10184,6 @@ const struct language_defn ada_language_defn = {
   basic_lookup_transparent_type,        /* lookup_transparent_type */
   ada_la_decode,                /* Language specific symbol demangler */
   NULL,                         /* Language specific class_name_from_physname */
-  {"", "", "", ""},             /* Binary format info */
-  /* Copied from c-lang.c.  */
-  {"0%lo", "0", "o", ""},       /* Octal format info */
-  {"%ld", "", "d", ""},         /* Decimal format info */
-  {"0x%lx", "0x", "x", ""},     /* Hex format info */
   ada_op_print_tab,             /* expression operators for printing */
   0,                            /* c-style arrays */
   1,                            /* String lower bound */

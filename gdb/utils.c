@@ -2636,7 +2636,7 @@ paddr_nz (CORE_ADDR addr)
 }
 
 static void
-decimal2str (char *paddr_str, char *sign, ULONGEST addr)
+decimal2str (char *paddr_str, char *sign, ULONGEST addr, int width)
 {
   /* steal code from valprint.c:print_decimal().  Should this worry
      about the real size of addr as the above does? */
@@ -2647,18 +2647,60 @@ decimal2str (char *paddr_str, char *sign, ULONGEST addr)
       temp[i] = addr % (1000 * 1000 * 1000);
       addr /= (1000 * 1000 * 1000);
       i++;
+      width -= 9;
     }
   while (addr != 0 && i < (sizeof (temp) / sizeof (temp[0])));
+  width += 9;
+  if (width < 0)
+    width = 0;
   switch (i)
     {
     case 1:
-      sprintf (paddr_str, "%s%lu", sign, temp[0]);
+      sprintf (paddr_str, "%s%0*lu", sign, width, temp[0]);
       break;
     case 2:
-      sprintf (paddr_str, "%s%lu%09lu", sign, temp[1], temp[0]);
+      sprintf (paddr_str, "%s%0*lu%09lu", sign, width, temp[1], temp[0]);
       break;
     case 3:
-      sprintf (paddr_str, "%s%lu%09lu%09lu", sign, temp[2], temp[1], temp[0]);
+      sprintf (paddr_str, "%s%0*lu%09lu%09lu", sign, width,
+	       temp[2], temp[1], temp[0]);
+      break;
+    default:
+      internal_error (__FILE__, __LINE__,
+		      "failed internal consistency check");
+    }
+}
+
+static void
+octal2str (char *paddr_str, ULONGEST addr, int width)
+{
+  unsigned long temp[3];
+  int i = 0;
+  do
+    {
+      temp[i] = addr % (0100000 * 0100000);
+      addr /= (0100000 * 0100000);
+      i++;
+      width -= 10;
+    }
+  while (addr != 0 && i < (sizeof (temp) / sizeof (temp[0])));
+  width += 10;
+  if (width < 0)
+    width = 0;
+  switch (i)
+    {
+    case 1:
+      if (temp[0] == 0)
+	sprintf (paddr_str, "%*o", width, 0);
+      else
+	sprintf (paddr_str, "0%0*lo", width, temp[0]);
+      break;
+    case 2:
+      sprintf (paddr_str, "0%0*lo%010lo", width, temp[1], temp[0]);
+      break;
+    case 3:
+      sprintf (paddr_str, "0%0*lo%010lo%010lo", width,
+	       temp[2], temp[1], temp[0]);
       break;
     default:
       internal_error (__FILE__, __LINE__,
@@ -2670,7 +2712,7 @@ char *
 paddr_u (CORE_ADDR addr)
 {
   char *paddr_str = get_cell ();
-  decimal2str (paddr_str, "", addr);
+  decimal2str (paddr_str, "", addr, 0);
   return paddr_str;
 }
 
@@ -2679,9 +2721,9 @@ paddr_d (LONGEST addr)
 {
   char *paddr_str = get_cell ();
   if (addr < 0)
-    decimal2str (paddr_str, "-", -addr);
+    decimal2str (paddr_str, "-", -addr, 0);
   else
-    decimal2str (paddr_str, "", addr);
+    decimal2str (paddr_str, "", addr, 0);
   return paddr_str;
 }
 
@@ -2746,6 +2788,54 @@ phex_nz (ULONGEST l, int sizeof_l)
   return str;
 }
 
+
+/* Convert VAL to a numeral in the given radix.  For
+ * radix 10, IS_SIGNED may be true, indicating a signed quantity;
+ * otherwise VAL is interpreted as unsigned.  If WIDTH is supplied, 
+ * it is the minimum width (0-padded if needed).  USE_C_FORMAT means
+ * to use C format in all cases.  If it is false, then 'x' 
+ * and 'o' formats do not include a prefix (0x or leading 0). */
+
+char *
+int_string (LONGEST val, int radix, int is_signed, int width, 
+	    int use_c_format)
+{
+  switch (radix) 
+    {
+    case 16:
+      {
+	char *result;
+	if (width == 0)
+	  result = hex_string (val);
+	else
+	  result = hex_string_custom (val, width);
+	if (! use_c_format)
+	  result += 2;
+	return result;
+      }
+    case 10:
+      {
+	char *result = get_cell ();
+	if (is_signed && val < 0)
+	  decimal2str (result, "-", -val, width);
+	else
+	  decimal2str (result, "", val, width);
+	return result;
+      }
+    case 8:
+      {
+	char *result = get_cell ();
+	octal2str (result, val, width);
+	if (use_c_format || val == 0)
+	  return result;
+	else
+	  return result + 1;
+      }
+    default:
+      internal_error (__FILE__, __LINE__,
+		      "failed internal consistency check");
+    }
+}	
 
 /* Convert a CORE_ADDR into a string.  */
 const char *

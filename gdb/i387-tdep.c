@@ -121,7 +121,7 @@ static void
 print_i387_status_word (unsigned int status, struct ui_file *file)
 {
   fprintf_filtered (file, "Status Word:         %s",
-		   local_hex_string_custom (status, "04"));
+		    hex_string_custom (status, 4));
   fputs_filtered ("  ", file);
   fprintf_filtered (file, " %s", (status & 0x0001) ? "IE" : "  ");
   fprintf_filtered (file, " %s", (status & 0x0002) ? "DE" : "  ");
@@ -151,7 +151,7 @@ static void
 print_i387_control_word (unsigned int control, struct ui_file *file)
 {
   fprintf_filtered (file, "Control Word:        %s",
-		   local_hex_string_custom (control, "04"));
+		    hex_string_custom (control, 4));
   fputs_filtered ("  ", file);
   fprintf_filtered (file, " %s", (control & 0x0001) ? "IM" : "  ");
   fprintf_filtered (file, " %s", (control & 0x0002) ? "DM" : "  ");
@@ -276,15 +276,15 @@ i387_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
   print_i387_status_word (fstat, file);
   print_i387_control_word (fctrl, file);
   fprintf_filtered (file, "Tag Word:            %s\n",
-		    local_hex_string_custom (ftag, "04"));
+		    hex_string_custom (ftag, 4));
   fprintf_filtered (file, "Instruction Pointer: %s:",
-		    local_hex_string_custom (fiseg, "02"));
-  fprintf_filtered (file, "%s\n", local_hex_string_custom (fioff, "08"));
+		    hex_string_custom (fiseg, 2));
+  fprintf_filtered (file, "%s\n", hex_string_custom (fioff, 8));
   fprintf_filtered (file, "Operand Pointer:     %s:",
-		    local_hex_string_custom (foseg, "02"));
-  fprintf_filtered (file, "%s\n", local_hex_string_custom (fooff, "08"));
+		    hex_string_custom (foseg, 2));
+  fprintf_filtered (file, "%s\n", hex_string_custom (fooff, 8));
   fprintf_filtered (file, "Opcode:              %s\n",
-		    local_hex_string_custom (fop ? (fop | 0xd800) : 0, "04"));
+		    hex_string_custom (fop ? (fop | 0xd800) : 0, 4));
 
 #undef I387_ST0_REGNUM
 }

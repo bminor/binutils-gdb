@@ -1742,7 +1742,7 @@ add_symbol_file_command (char *args, int from_tty)
   /* Print the prompt for the query below. And save the arguments into
      a sect_addr_info structure to be passed around to other
      functions.  We have to split this up into separate print
-     statements because local_hex_string returns a local static
+     statements because hex_string returns a local static
      string. */
 
   printf_unfiltered ("add symbol table from file \"%s\" at\n", filename);
@@ -1761,8 +1761,7 @@ add_symbol_file_command (char *args, int from_tty)
       section_addrs->other[sec_num].name = sec;
       section_addrs->other[sec_num].addr = addr;
       printf_unfiltered ("\t%s_addr = %s\n",
-		       sec,
-		       local_hex_string ((unsigned long)addr));
+		       sec, hex_string ((unsigned long)addr));
       sec_num++;
 
       /* The object's sections are initialized when a

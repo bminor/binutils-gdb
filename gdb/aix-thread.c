@@ -48,7 +48,6 @@
 #include "inferior.h"
 #include "regcache.h"
 #include "gdbcmd.h"
-#include "language.h"		/* for local_hex_string() */
 #include "ppc-tdep.h"
 #include "gdb_string.h"
 
@@ -314,7 +313,7 @@ pdc_symbol_addrs (pthdb_user_t user, pthdb_symbol_t *symbols, int count)
 	}
       if (debug_aix_thread)
 	fprintf_unfiltered (gdb_stdlog, "  symbols[%d].addr = %s\n",
-			    i, local_hex_string (symbols[i].addr));
+			    i, hex_string (symbols[i].addr));
     }
   if (debug_aix_thread)
     fprintf_unfiltered (gdb_stdlog, " returning PDC_SUCCESS\n");
@@ -347,7 +346,7 @@ pdc_read_regs (pthdb_user_t user,
   
   if (debug_aix_thread)
     fprintf_unfiltered (gdb_stdlog, "pdc_read_regs tid=%d flags=%s\n",
-                        (int) tid, local_hex_string (flags));
+                        (int) tid, hex_string (flags));
 
   /* General-purpose registers.  */
   if (flags & PTHDB_FLAG_GPRS)
@@ -413,7 +412,7 @@ pdc_write_regs (pthdb_user_t user,
 
   if (debug_aix_thread)
     fprintf_unfiltered (gdb_stdlog, "pdc_write_regs tid=%d flags=%s\n",
-                        (int) tid, local_hex_string (flags));
+                        (int) tid, hex_string (flags));
 
   /* General-purpose registers.  */
   if (flags & PTHDB_FLAG_GPRS)
@@ -458,7 +457,7 @@ pdc_read_data (pthdb_user_t user, void *buf,
   if (debug_aix_thread)
     fprintf_unfiltered (gdb_stdlog,
       "pdc_read_data (user = %ld, buf = 0x%lx, addr = %s, len = %ld)\n",
-      user, (long) buf, local_hex_string (addr), len);
+      user, (long) buf, hex_string (addr), len);
 
   status = target_read_memory (addr, buf, len);
   ret = status == 0 ? PDC_SUCCESS : PDC_FAILURE;
@@ -480,7 +479,7 @@ pdc_write_data (pthdb_user_t user, void *buf,
   if (debug_aix_thread)
     fprintf_unfiltered (gdb_stdlog,
       "pdc_write_data (user = %ld, buf = 0x%lx, addr = %s, len = %ld)\n",
-      user, (long) buf, local_hex_string (addr), len);
+      user, (long) buf, hex_string (addr), len);
 
   status = target_write_memory (addr, buf, len);
   ret = status == 0 ? PDC_SUCCESS : PDC_FAILURE;

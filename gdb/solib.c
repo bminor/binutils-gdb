@@ -645,18 +645,11 @@ info_sharedlibrary_command (char *ignore, int from_tty)
   struct so_list *so = NULL;	/* link map state variable */
   int header_done = 0;
   int addr_width;
-  char *addr_fmt;
 
   if (TARGET_PTR_BIT == 32)
-    {
-      addr_width = 8 + 4;
-      addr_fmt = "08l";
-    }
+    addr_width = 8 + 4;
   else if (TARGET_PTR_BIT == 64)
-    {
-      addr_width = 16 + 4;
-      addr_fmt = "016l";
-    }
+    addr_width = 16 + 4;
   else
     {
       internal_error (__FILE__, __LINE__,
@@ -680,15 +673,15 @@ info_sharedlibrary_command (char *ignore, int from_tty)
 
 	  printf_unfiltered ("%-*s", addr_width,
 			     so->textsection != NULL 
-			       ? local_hex_string_custom (
+			       ? hex_string_custom (
 			           (LONGEST) so->textsection->addr,
-	                           addr_fmt)
+	                           addr_width - 4)
 			       : "");
 	  printf_unfiltered ("%-*s", addr_width,
 			     so->textsection != NULL 
-			       ? local_hex_string_custom (
+			       ? hex_string_custom (
 			           (LONGEST) so->textsection->endaddr,
-	                           addr_fmt)
+	                           addr_width - 4)
 			       : "");
 	  printf_unfiltered ("%-12s", so->symbols_loaded ? "Yes" : "No");
 	  printf_unfiltered ("%s\n", so->so_name);

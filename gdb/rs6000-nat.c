@@ -33,7 +33,6 @@
 #include "gdb-stabs.h"
 #include "regcache.h"
 #include "arch-utils.h"
-#include "language.h"		/* for local_hex_string().  */
 #include "ppc-tdep.h"
 #include "exec.h"
 
@@ -1229,7 +1228,7 @@ find_toc_address (CORE_ADDR pc)
 					      : vp->objfile);
 	}
     }
-  error ("Unable to find TOC entry for pc %s\n", local_hex_string (pc));
+  error ("Unable to find TOC entry for pc %s\n", hex_string (pc));
 }
 
 /* Register that we are able to handle rs6000 core file formats. */

@@ -515,6 +515,7 @@ extern char *paddr_d (LONGEST addr);
 
 extern char *phex (ULONGEST l, int sizeof_l);
 extern char *phex_nz (ULONGEST l, int sizeof_l);
+extern char *int_string (LONGEST, int, int, int, int);
 
 /* Like paddr() only print/scan raw CORE_ADDR.  The output from
    core_addr_to_string() can be passed direct to

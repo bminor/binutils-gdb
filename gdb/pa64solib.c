@@ -796,23 +796,18 @@ pa64_sharedlibrary_info_command (char *ignore, int from_tty)
       if (so_list->loaded == 0)
 	printf_unfiltered ("  (shared library unloaded)");
       printf_unfiltered ("  %-18s",
-	local_hex_string_custom (so_list->pa64_solib_desc.linkage_ptr,
-				 "016l"));
+	hex_string_custom (so_list->pa64_solib_desc.linkage_ptr, 16));
       printf_unfiltered ("\n");
       printf_unfiltered ("%-18s",
-	local_hex_string_custom (so_list->pa64_solib_desc.text_base,
-				 "016l"));
+	hex_string_custom (so_list->pa64_solib_desc.text_base, 16));
       printf_unfiltered (" %-18s",
-	local_hex_string_custom ((so_list->pa64_solib_desc.text_base
-				  + so_list->pa64_solib_desc.text_size),
-				 "016l"));
+	hex_string_custom ((so_list->pa64_solib_desc.text_base
+			    + so_list->pa64_solib_desc.text_size), 16));
       printf_unfiltered (" %-18s",
-	local_hex_string_custom (so_list->pa64_solib_desc.data_base,
-				 "016l"));
+	hex_string_custom (so_list->pa64_solib_desc.data_base, 16));
       printf_unfiltered (" %-18s\n",
-	local_hex_string_custom ((so_list->pa64_solib_desc.data_base
-				  + so_list->pa64_solib_desc.data_size),
-				 "016l"));
+	hex_string_custom ((so_list->pa64_solib_desc.data_base
+			    + so_list->pa64_solib_desc.data_size), 16));
       so_list = so_list->next;
     }
 }

@@ -583,124 +583,41 @@ binop_result_type (struct value *v1, struct value *v2)
 /* This page contains functions that return format strings for
    printf for printing out numbers in different formats */
 
-/* Returns the appropriate printf format for hexadecimal
-   numbers. */
-char *
-local_hex_format_custom (char *pre)
-{
-  static char form[50];
+#define MAX_NUM_STRING_LEN 50
 
-  strcpy (form, local_hex_format_prefix ());
-  strcat (form, "%");
-  strcat (form, pre);
-  strcat (form, local_hex_format_specifier ());
-  strcat (form, local_hex_format_suffix ());
-  return form;
+/* Converts a LONGEST to a C-format hexadecimal literal and stores it in
+   a static string.  Returns a pointer to this string. */
+char *
+hex_string (LONGEST num)
+{
+  static char result[MAX_NUM_STRING_LEN];
+  sprintf (result, "0x%s", phex_nz (num, sizeof (num)));
+  return result;
 }
 
-/* Converts a LONGEST to custom hexadecimal and stores it in a static
-   string.  Returns a pointer to this string. */
-char *
-local_hex_string (LONGEST num)
-{
-  return local_hex_string_custom (num, "l");
-}
-
-/* Converts a LONGEST number to custom hexadecimal and stores it in a static
-   string.  Returns a pointer to this string. Note that the width parameter
-   should end with "l", e.g. "08l" as with calls to local_hex_string_custom */
+/* Converts a LONGEST number to a C-format hexadecimal literal and stores 
+   it in a static string.  Returns a pointer to this string that is 
+   valid until the next call.  The number is padded on the left with 
+   0s to at least WIDTH characters. */
 
 char *
-local_hex_string_custom (LONGEST num, char *width)
+hex_string_custom (LONGEST num, int width)
 {
-#define RESULT_BUF_LEN 50
-  static char res2[RESULT_BUF_LEN];
-  char format[RESULT_BUF_LEN];
-  int field_width;
-  int num_len;
-  int num_pad_chars;
-  char *pad_char;		/* string with one character */
-  int pad_on_left;
-  char *parse_ptr;
-  char temp_nbr_buf[RESULT_BUF_LEN];
+  static char result[MAX_NUM_STRING_LEN];
+  char *result_end = result + MAX_NUM_STRING_LEN - 1;
+  const char* hex = phex_nz (num, sizeof (num));
+  int hex_len = strlen (hex);
 
-  /* Use phex_nz to print the number into a string, then
-     build the result string from local_hex_format_prefix, padding and 
-     the hex representation as indicated by "width".  */
-  strcpy (temp_nbr_buf, phex_nz (num, sizeof (num)));
-  /* parse width */
-  parse_ptr = width;
-  pad_on_left = 1;
-  pad_char = " ";
-  if (*parse_ptr == '-')
-    {
-      parse_ptr++;
-      pad_on_left = 0;
-    }
-  if (*parse_ptr == '0')
-    {
-      parse_ptr++;
-      if (pad_on_left)
-	pad_char = "0";		/* If padding is on the right, it is blank */
-    }
-  field_width = atoi (parse_ptr);
-  num_len = strlen (temp_nbr_buf);
-  num_pad_chars = field_width - strlen (temp_nbr_buf);	/* possibly negative */
-
-  if (strlen (local_hex_format_prefix ()) + num_len + num_pad_chars
-      >= RESULT_BUF_LEN)		/* paranoia */
+  if (hex_len > width)
+    width = hex_len;
+  if (width + 2 >= MAX_NUM_STRING_LEN)
     internal_error (__FILE__, __LINE__,
-		    "local_hex_string_custom: insufficient space to store result");
+		    "hex_string_custom: insufficient space to store result");
 
-  strcpy (res2, local_hex_format_prefix ());
-  if (pad_on_left)
-    {
-      while (num_pad_chars > 0)
-	{
-	  strcat (res2, pad_char);
-	  num_pad_chars--;
-	}
-    }
-  strcat (res2, temp_nbr_buf);
-  if (!pad_on_left)
-    {
-      while (num_pad_chars > 0)
-	{
-	  strcat (res2, pad_char);
-	  num_pad_chars--;
-	}
-    }
-  return res2;
-
-}				/* local_hex_string_custom */
-
-/* Returns the appropriate printf format for octal
-   numbers. */
-char *
-local_octal_format_custom (char *pre)
-{
-  static char form[50];
-
-  strcpy (form, local_octal_format_prefix ());
-  strcat (form, "%");
-  strcat (form, pre);
-  strcat (form, local_octal_format_specifier ());
-  strcat (form, local_octal_format_suffix ());
-  return form;
-}
-
-/* Returns the appropriate printf format for decimal numbers. */
-char *
-local_decimal_format_custom (char *pre)
-{
-  static char form[50];
-
-  strcpy (form, local_decimal_format_prefix ());
-  strcat (form, "%");
-  strcat (form, pre);
-  strcat (form, local_decimal_format_specifier ());
-  strcat (form, local_decimal_format_suffix ());
-  return form;
+  strcpy (result_end - width - 2, "0x");
+  memset (result_end - width, '0', width);
+  strcpy (result_end - hex_len, hex);
+  return result_end - width - 2;
 }
 
 #if 0
@@ -1313,10 +1230,6 @@ const struct language_defn unknown_language_defn =
   basic_lookup_transparent_type,/* lookup_transparent_type */
   unk_lang_demangle,		/* Language specific symbol demangler */
   unk_lang_class_name,		/* Language specific class_name_from_physname */
-  {"", "", "", ""},		/* Binary format info */
-  {"0%lo", "0", "o", ""},	/* Octal format info */
-  {"%ld", "", "d", ""},		/* Decimal format info */
-  {"0x%lx", "0x", "x", ""},	/* Hex format info */
   unk_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */
@@ -1353,10 +1266,6 @@ const struct language_defn auto_language_defn =
   basic_lookup_transparent_type,/* lookup_transparent_type */
   unk_lang_demangle,		/* Language specific symbol demangler */
   unk_lang_class_name,		/* Language specific class_name_from_physname */
-  {"", "", "", ""},		/* Binary format info */
-  {"0%lo", "0", "o", ""},	/* Octal format info */
-  {"%ld", "", "d", ""},		/* Decimal format info */
-  {"0x%lx", "0x", "x", ""},	/* Hex format info */
   unk_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */
@@ -1392,10 +1301,6 @@ const struct language_defn local_language_defn =
   basic_lookup_transparent_type,/* lookup_transparent_type */
   unk_lang_demangle,		/* Language specific symbol demangler */
   unk_lang_class_name,		/* Language specific class_name_from_physname */
-  {"", "", "", ""},		/* Binary format info */
-  {"0%lo", "0", "o", ""},	/* Octal format info */
-  {"%ld", "", "d", ""},		/* Decimal format info */
-  {"0x%lx", "0x", "x", ""},	/* Hex format info */
   unk_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */

@@ -677,10 +677,6 @@ const struct language_defn objc_language_defn = {
   basic_lookup_transparent_type,/* lookup_transparent_type */
   objc_demangle,		/* Language specific symbol demangler */
   NULL,				/* Language specific class_name_from_physname */
-  {"",     "",    "",  ""},	/* Binary format info */
-  {"0%lo",  "0",   "o", ""},	/* Octal format info */
-  {"%ld",   "",    "d", ""},	/* Decimal format info */
-  {"0x%lx", "0x",  "x", ""},	/* Hex format info */
   objc_op_print_tab,		/* Expression operators for printing */
   1,				/* C-style arrays */
   0,				/* String lower bound */

@@ -3925,8 +3925,8 @@ breakpoint_adjustment_warning (CORE_ADDR from_addr, CORE_ADDR to_addr,
   char astr1[40];
   char astr2[40];
 
-  strcpy (astr1, local_hex_string_custom ((unsigned long) from_addr, "08l"));
-  strcpy (astr2, local_hex_string_custom ((unsigned long) to_addr, "08l"));
+  strcpy (astr1, hex_string_custom ((unsigned long) from_addr, 8));
+  strcpy (astr2, hex_string_custom ((unsigned long) to_addr, 8));
   if (have_bnum)
     warning ("Breakpoint %d address previously adjusted from %s to %s.",
              bnum, astr1, astr2);

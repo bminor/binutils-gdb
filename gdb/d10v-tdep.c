@@ -1313,7 +1313,7 @@ display_trace (int low, int high)
 		  if (!suppress)
 		    /* FIXME-32x64--assumes sal.pc fits in long.  */
 		    printf_filtered ("No source file for address %s.\n",
-				 local_hex_string ((unsigned long) sal.pc));
+				     hex_string ((unsigned long) sal.pc));
 		  suppress = 1;
 		}
 	    }
