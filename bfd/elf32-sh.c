@@ -57,7 +57,7 @@ static bfd_byte *sh_elf_get_relocated_section_contents
   (bfd *, struct bfd_link_info *, struct bfd_link_order *, bfd_byte *,
    bfd_boolean, asymbol **);
 static void sh_elf_copy_indirect_symbol
-  (struct elf_backend_data *, struct elf_link_hash_entry *,
+  (const struct elf_backend_data *, struct elf_link_hash_entry *,
    struct elf_link_hash_entry *);
 static int sh_elf_optimized_tls_reloc
   (struct bfd_link_info *, int, int);
@@ -3692,7 +3692,7 @@ sh_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
   struct elf_sh_link_hash_table *htab;
   flagword flags, pltflags;
   register asection *s;
-  struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   int ptralign = 0;
 
   switch (bed->s->arch_size)
@@ -6011,7 +6011,7 @@ sh_elf_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info,
 /* Copy the extra info we tack onto an elf_link_hash_entry.  */
 
 static void
-sh_elf_copy_indirect_symbol (struct elf_backend_data *bed,
+sh_elf_copy_indirect_symbol (const struct elf_backend_data *bed,
 			     struct elf_link_hash_entry *dir,
 			     struct elf_link_hash_entry *ind)
 {

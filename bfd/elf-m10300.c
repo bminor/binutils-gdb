@@ -562,7 +562,7 @@ _bfd_mn10300_elf_create_got_section (abfd, info)
   flagword   pltflags;
   asection * s;
   struct elf_link_hash_entry * h;
-  struct elf_backend_data *    bed = get_elf_backend_data (abfd);
+  const struct elf_backend_data * bed = get_elf_backend_data (abfd);
   int ptralign;
 
   /* This function may be called more than once.  */
@@ -4049,7 +4049,7 @@ _bfd_mn10300_elf_create_dynamic_sections (abfd, info)
 {
   flagword   flags;
   asection * s;
-  struct elf_backend_data * bed = get_elf_backend_data (abfd);
+  const struct elf_backend_data * bed = get_elf_backend_data (abfd);
   int ptralign = 0;
 
   switch (bed->s->arch_size)

@@ -1,5 +1,35 @@
 2003-08-07  Alan Modra  <amodra@bigpond.net.au>
 
+	* elfxx-target.h: Remove PTR cast.
+	* targets.c (bfd_target): Make backend_data const void *.
+	* elf-bfd.h: Constify all occurrences of struct elf_backend_data.
+	* elf-m10300.c: Likewise.
+	* elf.c: Likewise.
+	* elf32-hppa.c: Likewise.
+	* elf32-i386.c: Likewise.
+	* elf32-m68hc1x.c: Likewise.
+	* elf32-ppc.c: Likewise.
+	* elf32-s390.c: Likewise.
+	* elf32-sh.c: Likewise.
+	* elf32-sh64.c: Likewise.
+	* elf32-sparc.c: Likewise.
+	* elf32-xtensa.c: Likewise.
+	* elf64-mips.c: Likewise.
+	* elf64-ppc.c: Likewise.
+	* elf64-s390.c: Likewise.
+	* elf64-sh64.c: Likewise.
+	* elf64-sparc.c: Likewise.
+	* elf64-x86-64.c: Likewise.
+	* elfcode.h: Likewise.
+	* elfcore.h: Likewise.
+	* elflink.c: Likewise.
+	* elflink.h: Likewise.
+	* elfxx-ia64.c: Likewise.
+	* elfxx-mips.c: Likewise.
+	* elfxx-mips.h: Likewise.
+	* elf.c (prep_headers): Remove useless check for null backend_data.
+	* bfd-in2.h: Regenerate.
+
 	* elf-bfd.h: Remove PARAMS macro.  Replace PTR with void *.
 	(NAME): Use ## rather than CONCAT4 macro.
 	* elfcode.h: Remove one remaining PARAMS macro.

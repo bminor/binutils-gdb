@@ -800,7 +800,7 @@ struct elf_backend_data
      newly created and plt/got refcounts and dynamic indices should not
      be copied.  */
   void (*elf_backend_copy_indirect_symbol)
-    (struct elf_backend_data *, struct elf_link_hash_entry *,
+    (const struct elf_backend_data *, struct elf_link_hash_entry *,
      struct elf_link_hash_entry *);
 
   /* Modify any information related to dynamic linking such that the
@@ -1029,7 +1029,7 @@ struct bfd_elf_section_data
    && sec->sec_info_type != ELF_INFO_TYPE_JUST_SYMS)
 
 #define get_elf_backend_data(abfd) \
-  ((struct elf_backend_data *) (abfd)->xvec->backend_data)
+  ((const struct elf_backend_data *) (abfd)->xvec->backend_data)
 
 /* This struct is used to pass information to routines called via
    elf_link_hash_traverse which must return failure.  */
@@ -1319,7 +1319,7 @@ extern struct bfd_hash_entry *_bfd_elf_link_hash_newfunc
 extern struct bfd_link_hash_table *_bfd_elf_link_hash_table_create
   (bfd *);
 extern void _bfd_elf_link_hash_copy_indirect
-  (struct elf_backend_data *, struct elf_link_hash_entry *,
+  (const struct elf_backend_data *, struct elf_link_hash_entry *,
    struct elf_link_hash_entry *);
 extern void _bfd_elf_link_hash_hide_symbol
   (struct bfd_link_info *, struct elf_link_hash_entry *, bfd_boolean);

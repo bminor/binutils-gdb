@@ -3277,9 +3277,10 @@ ppc64_elf_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
 /* Copy the extra info we tack onto an elf_link_hash_entry.  */
 
 static void
-ppc64_elf_copy_indirect_symbol (struct elf_backend_data *bed ATTRIBUTE_UNUSED,
-				struct elf_link_hash_entry *dir,
-				struct elf_link_hash_entry *ind)
+ppc64_elf_copy_indirect_symbol
+  (const struct elf_backend_data *bed ATTRIBUTE_UNUSED,
+   struct elf_link_hash_entry *dir,
+   struct elf_link_hash_entry *ind)
 {
   struct ppc_link_hash_entry *edir, *eind;
   flagword mask;

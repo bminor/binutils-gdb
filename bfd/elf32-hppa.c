@@ -990,7 +990,7 @@ elf32_hppa_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 /* Copy the extra info we tack onto an elf_link_hash_entry.  */
 
 static void
-elf32_hppa_copy_indirect_symbol (struct elf_backend_data *bed,
+elf32_hppa_copy_indirect_symbol (const struct elf_backend_data *bed,
 				 struct elf_link_hash_entry *dir,
 				 struct elf_link_hash_entry *ind)
 {

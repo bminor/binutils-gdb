@@ -68,7 +68,7 @@ static bfd_boolean create_got_section
 static bfd_boolean elf32_sparc_create_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 static void elf32_sparc_copy_indirect_symbol
-  PARAMS ((struct elf_backend_data *, struct elf_link_hash_entry *,
+  PARAMS ((const struct elf_backend_data *, struct elf_link_hash_entry *,
 	  struct elf_link_hash_entry *));
 static int elf32_sparc_tls_transition
   PARAMS ((struct bfd_link_info *, bfd *, int, int));
@@ -750,7 +750,7 @@ elf32_sparc_create_dynamic_sections (dynobj, info)
 
 static void
 elf32_sparc_copy_indirect_symbol (bed, dir, ind)
-     struct elf_backend_data *bed;
+     const struct elf_backend_data *bed;
      struct elf_link_hash_entry *dir, *ind;
 {
   struct elf32_sparc_link_hash_entry *edir, *eind;

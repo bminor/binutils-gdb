@@ -285,7 +285,7 @@ ppc_elf_link_hash_table_create (bfd *abfd)
 /* Copy the extra info we tack onto an elf_link_hash_entry.  */
 
 static void
-ppc_elf_copy_indirect_symbol (struct elf_backend_data *bed,
+ppc_elf_copy_indirect_symbol (const struct elf_backend_data *bed,
 			      struct elf_link_hash_entry *dir,
 			      struct elf_link_hash_entry *ind)
 {
@@ -2581,11 +2581,12 @@ elf_finish_pointer_linker_section (bfd *output_bfd,
 	      asection *srel = lsect->rel_section;
 	      Elf_Internal_Rela outrel[MAX_INT_RELS_PER_EXT_REL];
 	      bfd_byte *erel;
-	      struct elf_backend_data *bed = get_elf_backend_data (output_bfd);
+	      const struct elf_backend_data *bed;
 	      unsigned int i;
 
 	      BFD_ASSERT (srel != NULL);
 
+	      bed = get_elf_backend_data (output_bfd);
 	      for (i = 0; i < bed->s->int_rels_per_ext_rel; i++)
 		{
 		  outrel[i].r_offset = (lsect->section->output_section->vma

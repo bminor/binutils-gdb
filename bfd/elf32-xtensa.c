@@ -48,7 +48,7 @@ static bfd_boolean elf_xtensa_check_relocs
 static void elf_xtensa_hide_symbol
   PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *, bfd_boolean));
 static void elf_xtensa_copy_indirect_symbol
-  PARAMS ((struct elf_backend_data *, struct elf_link_hash_entry *,
+  PARAMS ((const struct elf_backend_data *, struct elf_link_hash_entry *,
 	   struct elf_link_hash_entry *));
 static asection *elf_xtensa_gc_mark_hook
   PARAMS ((asection *, struct bfd_link_info *, Elf_Internal_Rela *,
@@ -799,7 +799,7 @@ elf_xtensa_hide_symbol (info, h, force_local)
 
 static void
 elf_xtensa_copy_indirect_symbol (bed, dir, ind)
-     struct elf_backend_data *bed;
+     const struct elf_backend_data *bed;
      struct elf_link_hash_entry *dir, *ind;
 {
   _bfd_elf_link_hash_copy_indirect (bed, dir, ind);

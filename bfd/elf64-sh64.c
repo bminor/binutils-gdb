@@ -2917,7 +2917,7 @@ sh64_elf64_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
 	{
 	  /* No previous datalabel symbol.  Make one.  */
 	  struct bfd_link_hash_entry *bh = NULL;
-	  struct elf_backend_data *bed = get_elf_backend_data (abfd);
+	  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
 
 	  if (! _bfd_generic_link_add_one_symbol (info, abfd, dl_name,
 						  flags, *secp, *valp,
@@ -3238,7 +3238,7 @@ sh64_elf64_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 {
   flagword flags, pltflags;
   register asection *s;
-  struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   int ptralign = 0;
 
   switch (bed->s->arch_size)

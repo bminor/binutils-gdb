@@ -211,7 +211,7 @@ static struct bfd_hash_entry *elfNN_ia64_new_elf_hash_entry
   PARAMS ((struct bfd_hash_entry *entry, struct bfd_hash_table *table,
 	   const char *string));
 static void elfNN_ia64_hash_copy_indirect
-  PARAMS ((struct elf_backend_data *, struct elf_link_hash_entry *,
+  PARAMS ((const struct elf_backend_data *, struct elf_link_hash_entry *,
 	   struct elf_link_hash_entry *));
 static void elfNN_ia64_hash_hide_symbol
   PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *, bfd_boolean));
@@ -1589,7 +1589,7 @@ elfNN_ia64_new_elf_hash_entry (entry, table, string)
 
 static void
 elfNN_ia64_hash_copy_indirect (bed, xdir, xind)
-     struct elf_backend_data *bed ATTRIBUTE_UNUSED;
+     const struct elf_backend_data *bed ATTRIBUTE_UNUSED;
      struct elf_link_hash_entry *xdir, *xind;
 {
   struct elfNN_ia64_link_hash_entry *dir, *ind;

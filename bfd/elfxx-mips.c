@@ -4985,7 +4985,7 @@ _bfd_mips_elf_check_relocs (abfd, info, sec, relocs)
   const Elf_Internal_Rela *rel_end;
   asection *sgot;
   asection *sreloc;
-  struct elf_backend_data *bed;
+  const struct elf_backend_data *bed;
 
   if (info->relocatable)
     return TRUE;
@@ -6171,7 +6171,7 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   const Elf_Internal_Rela *relend;
   bfd_vma addend = 0;
   bfd_boolean use_saved_addend_p = FALSE;
-  struct elf_backend_data *bed;
+  const struct elf_backend_data *bed;
 
   bed = get_elf_backend_data (output_bfd);
   relend = relocs + input_section->reloc_count * bed->s->int_rels_per_ext_rel;
@@ -7626,7 +7626,7 @@ _bfd_mips_elf_gc_sweep_hook (abfd, info, sec, relocs)
 
 void
 _bfd_mips_elf_copy_indirect_symbol (bed, dir, ind)
-     struct elf_backend_data *bed;
+     const struct elf_backend_data *bed;
      struct elf_link_hash_entry *dir, *ind;
 {
   struct mips_elf_link_hash_entry *dirmips, *indmips;

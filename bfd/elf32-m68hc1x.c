@@ -1119,7 +1119,7 @@ elf32_m68hc11_relocate_section (output_bfd, info, input_bfd, input_section,
   Elf_Internal_Rela *rel, *relend;
   const char *name;
   struct m68hc11_page_info *pinfo;
-  struct elf_backend_data * const ebd = get_elf_backend_data (input_bfd);
+  const struct elf_backend_data * const ebd = get_elf_backend_data (input_bfd);
 
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (input_bfd);

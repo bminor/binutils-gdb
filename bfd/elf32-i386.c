@@ -711,7 +711,7 @@ elf_i386_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
 /* Copy the extra info we tack onto an elf_link_hash_entry.  */
 
 static void
-elf_i386_copy_indirect_symbol (struct elf_backend_data *bed,
+elf_i386_copy_indirect_symbol (const struct elf_backend_data *bed,
 			       struct elf_link_hash_entry *dir,
 			       struct elf_link_hash_entry *ind)
 {
