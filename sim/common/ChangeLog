@@ -1,3 +1,11 @@
+Tue Apr 28 18:28:58 1998  Geoffrey Noer  <noer@cygnus.com>
+
+        * common/aclocal.m4: call AM_EXEEXT in SIM_AC_COMMON, define
+        AM_CYGWIN32 and AM_EXEEXT.
+        * common/Make-common.in: set EXEEXT, add missing EXEEXTs
+        to run and install-common rules.
+        * common/configure: regenerate
+
 Sat Apr 25 17:45:01 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-types.h (cell_word): New type.

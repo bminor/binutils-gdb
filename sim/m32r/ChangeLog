@@ -1,3 +1,7 @@
+Tue Apr 28 18:33:31 1998  Geoffrey Noer  <noer@cygnus.com>
+
+        * configure: Regenerated to track ../common/aclocal.m4 changes.
+
 Tue Apr 28 18:05:53 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* model.c: Rebuilt.
