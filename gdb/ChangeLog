@@ -1,3 +1,11 @@
+2003-01-07  David Carlton  <carlton@math.stanford.edu>
+
+	* dwarf2read.c (add_partial_structure): New function.
+	(scan_partial_symbols): Call add_partial_structure.  New variable
+	info_ptr_updated.
+	* symtab.h (struct general_symbol_info): Make demangled_names
+	const char *.
+
 2003-01-06  David Carlton  <carlton@math.stanford.edu>
 
 	* config/djgpp/fnchange.lst: Mention

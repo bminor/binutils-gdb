@@ -90,12 +90,12 @@ struct general_symbol_info
     struct cplus_specific	/* For C++ */
       /*  and Java */
     {
-      char *demangled_name;
+      const char *demangled_name;
     }
     cplus_specific;
     struct objc_specific
     {
-      char *demangled_name;
+      const char *demangled_name;
     }
     objc_specific;
 #if 0

@@ -647,6 +647,12 @@ static char *add_partial_namespace (struct partial_die_info *pdi,
 				    const struct comp_unit_head *cu_header,
 				    const char *namespace);
 
+static char *add_partial_structure (struct partial_die_info *struct_pdi,
+				    char *info_ptr,
+				    struct objfile *objfile,
+				    const struct comp_unit_head *cu_header,
+				    const char *namespace);
+
 static char *add_partial_enumeration (struct partial_die_info *enum_pdi,
 				      char *info_ptr,
 				      struct objfile *objfile,
@@ -1304,6 +1310,10 @@ scan_partial_symbols (char *info_ptr, struct objfile *objfile,
 
   while (1)
     {
+      /* This flag tells whether or not info_ptr has gotten updated
+	 inside the loop.  */
+      int info_ptr_updated = 0;
+
       info_ptr = read_partial_die (&pdi, abfd, info_ptr, cu_header);
 
       /* Anonymous namespaces have no name but have interesting
@@ -1334,12 +1344,20 @@ scan_partial_symbols (char *info_ptr, struct objfile *objfile,
 	      break;
 	    case DW_TAG_variable:
 	    case DW_TAG_typedef:
+	      if (!pdi.is_declaration)
+		{
+		  add_partial_symbol (&pdi, objfile, cu_header, namespace);
+		}
+	      break;
 	    case DW_TAG_class_type:
 	    case DW_TAG_structure_type:
 	    case DW_TAG_union_type:
 	      if (!pdi.is_declaration)
 		{
-		  add_partial_symbol (&pdi, objfile, cu_header, namespace);
+		  info_ptr = add_partial_structure (&pdi, info_ptr,
+						    objfile, cu_header,
+						    namespace);
+		  info_ptr_updated = 1;
 		}
 	      break;
 	    case DW_TAG_enumeration_type:
@@ -1348,6 +1366,7 @@ scan_partial_symbols (char *info_ptr, struct objfile *objfile,
 		  info_ptr = add_partial_enumeration (&pdi, info_ptr,
 						      objfile, cu_header,
 						      namespace);
+		  info_ptr_updated = 1;
 		}
 	      break;
 	    case DW_TAG_base_type:
@@ -1364,6 +1383,8 @@ scan_partial_symbols (char *info_ptr, struct objfile *objfile,
 	      info_ptr = add_partial_namespace (&pdi, info_ptr, objfile,
 						lowpc, highpc, cu_header,
 						namespace);
+	      info_ptr_updated = 1;
+	      break;
 	    default:
 	      break;
 	    }
@@ -1375,11 +1396,13 @@ scan_partial_symbols (char *info_ptr, struct objfile *objfile,
       /* If the die has a sibling, skip to the sibling, unless another
 	 function has already updated info_ptr for us.  */
 
-      if (pdi.tag != DW_TAG_enumeration_type
-	  && pdi.tag != DW_TAG_namespace)
-	{
+      /* NOTE: carlton/2003-01-07: This is a bit hackish, but whether
+	 or not we want to update this depends on enough stuff (not
+	 only pdi.tag but also whether or not pdi.name is NULL) that
+	 this seems like the easiest way to handle the issue.  */
+
+      if (!info_ptr_updated)
 	  info_ptr = locate_pdi_sibling (&pdi, info_ptr, abfd, cu_header);
-	}
     }
 
   return info_ptr;
@@ -1580,6 +1603,22 @@ add_partial_namespace (struct partial_die_info *pdi, char *info_ptr,
 				     cu_header, full_name);
 
   return info_ptr;
+}
+
+/* Read a partial die corresponding to a non-enumeration compound data
+   structure type.  */
+
+static char *
+add_partial_structure (struct partial_die_info *struct_pdi, char *info_ptr,
+		       struct objfile *objfile,
+		       const struct comp_unit_head *cu_header,
+		       const char *namespace)
+{
+  bfd *abfd = objfile->obfd;
+
+  add_partial_symbol (struct_pdi, objfile, cu_header, namespace);
+
+  return locate_pdi_sibling (struct_pdi, info_ptr, abfd, cu_header);
 }
 
 /* Read a partial die corresponding to an enumeration type.  */
