@@ -1,3 +1,12 @@
+Wed Oct 19 14:09:16 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* Makefile.in (check): Add a dummy else clause to the if
+	statement.
+
+	* objcopy.c (copy_object): Revert yesterday's change.
+	* binutils.texi, objcopy.1: Remove special mention of --set-start
+	and `binary' output format.
+
 Tue Oct 18 11:12:01 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* objcopy.c (copy_object): If the output file format is `binary',

@@ -205,7 +205,7 @@ check: site.exp
 	EXPECT=${EXPECT} ; export EXPECT ; \
 	if [ -f $$r/../expect/expect ] ; then  \
 	   TCL_LIBRARY=$${srcroot}/../tcl/library ; \
-	   export TCL_LIBRARY ; fi ; \
+	   export TCL_LIBRARY ; else true; fi ; \
 	$(RUNTEST) --tool binutils --srcdir $(srcdir)/testsuite \
 	  $(RUNTESTFLAGS)
 
