@@ -303,7 +303,14 @@ static const struct alpha_opcode alpha_opcodes[] =
 { "bis",        0x44001400, 0, "1,b,3" },
 { "bis",        0x44000400, 0, "r,2" },		/* macro: or ra,rb,ra */
 { "bis",        0x44001400, 0, "r,b" },		/* macro: or ra,#,ra  */
+#if 0 /* The `b' handling doesn't seem to handle big constants right
+	 now, and even if it did, this pattern would imply that the
+	 constant should be produced and *then* moved into the
+	 destination register, which is silly.  Since the native
+	 assembler doesn't support this instruction, don't even bother
+	 trying to fix it.  Just punt.  */
 { "movi",	0x47E01400, 0, "b,3"},		/* movi lit,rc == bis r31,lit,rc */
+#endif
 { "xor",        0x44000800, 0, "1,2,3" },
 { "xor",        0x44001800, 0, "1,b,3" },
 { "xor",        0x44000800, 0, "r,2" },		/* macro: ra,rb,ra */
@@ -757,6 +764,8 @@ static const struct alpha_opcode alpha_opcodes[] =
 { "bpt",        0x00000080, 0, "" },
 { "chmk",       0x00000083, 0, "" },
 { "imb",        0x00000086, 0, "" },
+{ "halt",	0x00000000, 0, "" },
+{ "draina",	0x00000002, 0, "" },
 
 { "draint",     0x60000000, 0, "" },		/* 6o+5a+5b+16d */
 { "trapb",      0x60000000, 0, "" },		/* 6o+5a+5b+16d */
