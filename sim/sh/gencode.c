@@ -1,4 +1,5 @@
-/* Simulator/Opcode generator for the Hitachi Super-H architecture.
+/* Simulator/Opcode generator for the Renesas
+   (formerly Hitachi) / SuperH Inc. Super-H architecture.
 
    Written by Steve Chamberlain of Cygnus Support.
    sac@cygnus.com
@@ -151,6 +152,11 @@ op tab[] =
     "SET_SR_T (0);",
   },
 
+  /* sh4a */
+  { "", "", "clrdmxy", "0000000010001000",
+    "saved_state.asregs.cregs.named.sr &= ~(SR_MASK_DMX | SR_MASK_DMY);"
+  },
+
   { "", "0", "cmp/eq #<imm>,R0", "10001000i8*1....",
     "SET_SR_T (R0 == SEXT (i));",
   },
@@ -195,7 +201,7 @@ op tab[] =
     "SET_SR_T (0);",
   },
 
-  { "", "nm", "div1 <REG_M>,<REG_N>", "0011nnnnmmmm0100", /* ? MVS */
+  { "", "nm", "div1 <REG_M>,<REG_N>", "0011nnnnmmmm0100",
     "div1 (R, m, n/*, T*/);",
   },
 
@@ -285,10 +291,19 @@ op tab[] =
   },
 
   /* sh4 */
-  { "", "", "fipr <FV_M>,<FV_N>", "1111nnmm11101101",
-    "/* FIXME: not implemented */",
-    "RAISE_EXCEPTION (SIGILL);",
-    "/* FIXME: check for DP and (n & 1) == 0? */",
+  { "", "", "fipr <FV_M>,<FV_N>", "1111vvVV11101101",
+    "if (FPSCR_PR)", 
+    "  RAISE_EXCEPTION (SIGILL);",
+    "else",
+    "{",
+    "  double fsum = 0;",
+    "  /* FIXME: check for nans and infinities.  */",
+    "  fsum += FR (v1+0) * FR (v2+0);",
+    "  fsum += FR (v1+1) * FR (v2+1);",
+    "  fsum += FR (v1+2) * FR (v2+2);",
+    "  fsum += FR (v1+3) * FR (v2+3);",
+    "  SET_FR (v1+3, fsum);",
+    "}",
   },
 
   /* sh2e */
@@ -440,6 +455,11 @@ op tab[] =
     "FP_UNARY(n, -);",
   },
 
+  /* sh4a */
+  { "", "", "fpchg", "1111011111111101",
+    "SET_FPSCR (GET_FPSCR() ^ FPSCR_MASK_PR);",
+  },
+
   /* sh4 */
   { "", "", "frchg", "1111101111111101",
     "if (FPSCR_PR)",
@@ -498,6 +518,17 @@ op tab[] =
     "  FPUL = (int)FR(n);",
   },
 
+  /* sh4 */
+  { "", "", "ftrv <FV_N>", "1111vv0111111101",
+    "if (FPSCR_PR)",
+    "  RAISE_EXCEPTION (SIGILL);",
+    "else",
+    "{", 
+    "  /* FIXME not implemented.  */",
+    "  printf (\"ftrv xmtrx, FV%d\\n\", v1);",
+    "}", 
+  },
+
   /* sh2e */
   { "", "", "fsts FPUL,<FREG_N>", "1111nnnn00001101",
     "  union",
@@ -535,12 +566,18 @@ op tab[] =
   { "", "n", "ldc <REG_N>,MOD", "0100nnnn01011110",
     "SET_MOD (R[n]);",
   },
-#if 0
   { "", "n", "ldc <REG_N>,DBR", "0100nnnn11111010",
-    "DBR = R[n];",
-    "/* FIXME: user mode */",
+    "if (SR_MD)",
+    "  DBR = R[n]; /* priv mode */",
+    "else",
+    "  RAISE_EXCEPTION (SIGILL); /* user mode */",
   },
-#endif
+  { "", "n", "ldc <REG_N>,SGR", "0100nnnn00111010",
+    "if (SR_MD)",
+    "  SGR = R[n]; /* priv mode */",
+    "else",
+    "  RAISE_EXCEPTION (SIGILL); /* user mode */",
+  },
   { "n", "n", "ldc.l @<REG_N>+,<CREG_M>", "0100nnnnmmmm0111",
     "MA (1);",
     "CREG (m) = RLAT (R[n]);",
@@ -558,14 +595,26 @@ op tab[] =
     "SET_MOD (RLAT (R[n]));",
     "R[n] += 4;",
   },
-#if 0
   { "n", "n", "ldc.l @<REG_N>+,DBR", "0100nnnn11110110",
-    "MA (1);",
-    "DBR = RLAT (R[n]);",
-    "R[n] += 4;",
-    "/* FIXME: user mode */",
+    "if (SR_MD)",
+    "{ /* priv mode */",
+    "  MA (1);",
+    "  DBR = RLAT (R[n]);",
+    "  R[n] += 4;",
+    "}",
+    "else",
+    "  RAISE_EXCEPTION (SIGILL); /* user mode */",
   },
-#endif
+  { "n", "n", "ldc.l @<REG_N>+,SGR", "0100nnnn00110110",
+    "if (SR_MD)",
+    "{ /* priv mode */",
+    "  MA (1);",
+    "  SGR = RLAT (R[n]);",
+    "  R[n] += 4;",
+    "}",
+    "else",
+    "  RAISE_EXCEPTION (SIGILL); /* user mode */",
+  },
 
   /* sh-dsp */
   { "", "", "ldre @(<disp>,PC)", "10001110i8p1....",
@@ -573,6 +622,20 @@ op tab[] =
   },
   { "", "", "ldrs @(<disp>,PC)", "10001100i8p1....",
     "RS = SEXT (i) * 2 + 4 + PH2T (PC);",
+  },
+
+  /* sh4a */
+  { "", "n", "ldrc <REG_N>", "0100nnnn00110100",
+    "SET_RC (R[n]);",
+    "loop = get_loop_bounds_ext (RS, RE, memory, mem_end, maskw, endianw);",
+    "CHECK_INSN_PTR (insn_ptr);",
+    "RE |= 1;",
+  },
+  { "", "", "ldrc #<imm>", "10001010i8*1....",
+    "SET_RC (i);",
+    "loop = get_loop_bounds_ext (RS, RE, memory, mem_end, maskw, endianw);",
+    "CHECK_INSN_PTR (insn_ptr);",
+    "RE |= 1;",
   },
 
   { "", "n", "lds <REG_N>,<SREG_M>", "0100nnnnssss1010",
@@ -777,14 +840,49 @@ op tab[] =
     "WLAT (R[n], R[0]);",
   },
 
+  { "n", "0", "movco.l R0, @<REG_N>", "0000nnnn01110011", 
+    "/* LDST -> T */",
+    "SET_SR_T (LDST);",
+    "/* if (T) R0 -> (Rn) */",
+    "if (T)",
+    "  WLAT (R[n], R[0]);",
+    "/* 0 -> LDST */",
+    "SET_LDST (0);",
+  },
+
+  { "0", "n", "movli.l @<REG_N>, R0", "0000nnnn01100011", 
+    "/* 1 -> LDST */",
+    "SET_LDST (1);",
+    "/* (Rn) -> R0 */",
+    "R[0] = RLAT (R[n]);",
+    "/* if (interrupt/exception) 0 -> LDST */",
+    "/* (we don't simulate asynchronous interrupts/exceptions) */",
+  },
+
   { "n", "", "movt <REG_N>", "0000nnnn00101001",
     "R[n] = T;",
   },
 
-  { "", "mn", "mul.l <REG_M>,<REG_N>", "0000nnnnmmmm0111",
-    "MACL = ((int)R[n]) * ((int)R[m]);",
+  { "0", "n", "movua.l @<REG_N>,R0", "0100nnnn10101001",
+    "int regn = R[n];",
+    "MA (1);",
+    "R[0] = (RBAT (regn) << 24) + (RBAT (regn + 1) << 16) + ",
+    "  (RBAT (regn + 2) << 8) + RBAT (regn + 3);",
+    "L (n);",
   },
-#if 0
+  { "0n", "n", "movua.l @<REG_N>+,R0", "0100nnnn11101001",
+    "int regn = R[n];",
+    "MA (1);",
+    "R[0] = (RBAT (regn) << 24) + (RBAT (regn + 1) << 16) + ",
+    "  (RBAT (regn + 2) << 8) + RBAT (regn + 3);",
+    "R[n] += 4;",
+    "L (n);",
+  },
+  { "", "mn", "mul.l <REG_M>,<REG_N>", "0000nnnnmmmm0111",
+    "MACL = ((int) R[n]) * ((int) R[m]);",
+  },
+#if 0  /* FIXME: The above cast to int is not really portable.
+	  It should be replaced by a SEXT32 macro.  */
   { "", "nm", "mul.l <REG_M>,<REG_N>", "0000nnnnmmmm0111",
     "MACL = R[n] * R[m];",
   },
@@ -820,6 +918,12 @@ op tab[] =
     "R[n] = ~R[m];",
   },
 
+  /* sh4a */
+  { "", "n", "icbi @<REG_N>", "0000nnnn11100011",
+    "/* Except for the effect on the cache - which is not simulated -",
+    "   this is like a nop.  */",
+  },
+
   { "", "n", "ocbi @<REG_N>", "0000nnnn10010011",
     "RSBAT (R[n]); /* Take exceptions like byte load, otherwise noop.  */",
     "/* FIXME: Cache not implemented */",
@@ -848,6 +952,18 @@ op tab[] =
 
   { "", "n", "pref @<REG_N>", "0000nnnn10000011",
     "/* Except for the effect on the cache - which is not simulated -",
+    "   this is like a nop.  */",
+  },
+
+  /* sh4a */
+  { "", "n", "prefi @<REG_N>", "0000nnnn11010011",
+    "/* Except for the effect on the cache - which is not simulated -",
+    "   this is like a nop.  */",
+  },
+
+  /* sh4a */
+  { "", "", "synco", "0000000010101011", 
+    "/* Except for the effect on the pipeline - which is not simulated -", 
     "   this is like a nop.  */",
   },
 
@@ -896,6 +1012,18 @@ op tab[] =
     "SET_NIP (PT2H (PR));",
     "cycles += 2;",
     "Delay_Slot (PC + 2);",
+  },
+
+  /* sh4a */
+  { "", "", "setdmx", "0000000010011000",
+    "saved_state.asregs.cregs.named.sr |=  SR_MASK_DMX;"
+    "saved_state.asregs.cregs.named.sr &= ~SR_MASK_DMY;"
+  },
+
+  /* sh4a */
+  { "", "", "setdmy", "0000000011001000",
+    "saved_state.asregs.cregs.named.sr |=  SR_MASK_DMY;"
+    "saved_state.asregs.cregs.named.sr &= ~SR_MASK_DMX;"
   },
 
   /* sh-dsp */
@@ -980,31 +1108,43 @@ op tab[] =
     "R[n] = CREG (m);",
   },
 
-#if 0
   { "n", "", "stc SGR,<REG_N>", "0000nnnn00111010",
-    "R[n] = SGR;",
+    "if (SR_MD)",
+    "  R[n] = SGR; /* priv mode */",
+    "else",
+    "  RAISE_EXCEPTION (SIGILL); /* user mode */",
   },
   { "n", "", "stc DBR,<REG_N>", "0000nnnn11111010",
-    "R[n] = DBR;",
+    "if (SR_MD)",
+    "  R[n] = DBR; /* priv mode */",
+    "else",
+    "  RAISE_EXCEPTION (SIGILL); /* user mode */",
   },
-#endif
   { "n", "n", "stc.l <CREG_M>,@-<REG_N>", "0100nnnnmmmm0011",
     "MA (1);",
     "R[n] -= 4;",
     "WLAT (R[n], CREG (m));",
   },
-#if 0
   { "n", "n", "stc.l SGR,@-<REG_N>", "0100nnnn00110010",
-    "MA (1);",
-    "R[n] -= 4;",
-    "WLAT (R[n], SGR);",
+    "if (SR_MD)",
+    "{ /* priv mode */",
+    "  MA (1);",
+    "  R[n] -= 4;",
+    "  WLAT (R[n], SGR);",
+    "}",
+    "else",
+    "  RAISE_EXCEPTION (SIGILL); /* user mode */",
   },
   { "n", "n", "stc.l DBR,@-<REG_N>", "0100nnnn11110010",
-    "MA (1);",
-    "R[n] -= 4;",
-    "WLAT (R[n], DBR);",
+    "if (SR_MD)",
+    "{ /* priv mode */",
+    "  MA (1);",
+    "  R[n] -= 4;",
+    "  WLAT (R[n], DBR);",
+    "}",
+    "else",
+    "  RAISE_EXCEPTION (SIGILL); /* user mode */",
   },
-#endif
 
   { "n", "", "sts <SREG_M>,<REG_N>", "0000nnnnssss1010",
     "R[n] = SREG (m);",
@@ -1258,54 +1398,116 @@ op movsxy_tab[] =
     "WLAT (R[n], SEXT (DSP_R (m)));",
     "R[n] += R[8];",
   },
-  { "", "n", "movx.w @<REG_x>,<DSP_XX>",   "111100xxXX000100",
+  { "", "n", "movx.w @<REG_xy>,<DSP_XY>",   "111100xyXY0001??",
     "DSP_R (m) = RSWAT (R[n]) << 16;",
-    "iword &= 0xfd53; goto top;",
+    "if (iword & 3)",
+    "  {",
+    "    iword &= 0xfd53; goto top;",
+    "  }",
   },
-  { "n", "n", "movx.w @<REG_x>+,<DSP_XX>", "111100xxXX001000",
+  { "", "n", "movx.l @<REG_xy>,<DSP_XY>",   "111100xyXY010100",
+    "DSP_R (m) = RLAT (R[n]);",
+  },
+  { "n", "n", "movx.w @<REG_xy>+,<DSP_XY>", "111100xyXY0010??",
     "DSP_R (m) = RSWAT (R[n]) << 16;",
     "R[n] += ((R[n] & 0xffff) == MOD_ME) ? MOD_DELTA : 2;",
-    "iword &= 0xfd53; goto top;",
+    "if (iword & 3)",
+    "  {",
+    "    iword &= 0xfd53; goto top;",
+    "  }",
   },
-  { "n", "n8","movx.w @<REG_x>+REG_8,<DSP_XX>", "111100xxXX001100",
+  { "n", "n", "movx.l @<REG_xy>+,<DSP_XY>", "111100xyXY011000",
+    "DSP_R (m) = RLAT (R[n]);",
+    "R[n] += ((R[n] & 0xffff) == MOD_ME) ? MOD_DELTA : 4;",
+  },
+  { "n", "n8","movx.w @<REG_xy>+REG_8,<DSP_XY>", "111100xyXY0011??",
     "DSP_R (m) = RSWAT (R[n]) << 16;",
     "R[n] += ((R[n] & 0xffff) == MOD_ME) ? MOD_DELTA : R[8];",
-    "iword &= 0xfd53; goto top;",
+    "if (iword & 3)",
+    "  {",
+    "    iword &= 0xfd53; goto top;",
+    "  }",
   },
-  { "", "n", "movx.w <DSP_Aa>,@<REG_x>",   "111100xxaa100100",
+  { "n", "n8","movx.l @<REG_xy>+REG_8,<DSP_XY>", "111100xyXY011100",
+    "DSP_R (m) = RLAT (R[n]);",
+    "R[n] += ((R[n] & 0xffff) == MOD_ME) ? MOD_DELTA : R[8];",
+  },
+  { "", "n", "movx.w <DSP_Ax>,@<REG_xy>",   "111100xyax1001??",
     "WWAT (R[n], DSP_R (m) >> 16);",
-    "iword &= 0xfd53; goto top;",
+    "if (iword & 3)",
+    "  {",
+    "    iword &= 0xfd53; goto top;",
+    "  }",
   },
-  { "n", "n", "movx.w <DSP_Aa>,@<REG_x>+", "111100xxaa101000",
+  { "", "n", "movx.l <DSP_Ax>,@<REG_xy>",   "111100xyax110100",
+    "WLAT (R[n], DSP_R (m));",
+  },
+  { "n", "n", "movx.w <DSP_Ax>,@<REG_xy>+", "111100xyax1010??",
     "WWAT (R[n], DSP_R (m) >> 16);",
     "R[n] += ((R[n] & 0xffff) == MOD_ME) ? MOD_DELTA : 2;",
-    "iword &= 0xfd53; goto top;",
+    "if (iword & 3)",
+    "  {",
+    "    iword &= 0xfd53; goto top;",
+    "  }",
   },
-  { "n", "n8","movx.w <DSP_Aa>,@<REG_x>+REG_8","111100xxaa101100",
+  { "n", "n", "movx.l <DSP_Ax>,@<REG_xy>+", "111100xyax111000",
+    "WLAT (R[n], DSP_R (m));",
+    "R[n] += ((R[n] & 0xffff) == MOD_ME) ? MOD_DELTA : 4;",
+  },
+  { "n", "n8","movx.w <DSP_Ax>,@<REG_xy>+REG_8","111100xyax1011??",
     "WWAT (R[n], DSP_R (m) >> 16);",
     "R[n] += ((R[n] & 0xffff) == MOD_ME) ? MOD_DELTA : R[8];",
-    "iword &= 0xfd53; goto top;",
+    "if (iword & 3)",
+    "  {",
+    "    iword &= 0xfd53; goto top;",
+    "  }",
   },
-  { "", "n", "movy.w @<REG_y>,<DSP_YY>",   "111100yyYY000001",
+  { "n", "n8","movx.l <DSP_Ax>,@<REG_xy>+REG_8","111100xyax111100",
+    "WLAT (R[n], DSP_R (m));",
+    "R[n] += ((R[n] & 0xffff) == MOD_ME) ? MOD_DELTA : R[8];",
+  },
+  { "", "n", "movy.w @<REG_yx>,<DSP_YX>",   "111100yxYX000001",
     "DSP_R (m) = RSWAT (R[n]) << 16;",
   },
-  { "n", "n", "movy.w @<REG_y>+,<DSP_YY>", "111100yyYY000010",
+  { "n", "n", "movy.w @<REG_yx>+,<DSP_YX>", "111100yxYX000010",
     "DSP_R (m) = RSWAT (R[n]) << 16;",
     "R[n] += ((R[n] | ~0xffff) == MOD_ME) ? MOD_DELTA : 2;",
   },
-  { "n", "n9","movy.w @<REG_y>+REG_9,<DSP_YY>", "111100yyYY000011",
+  { "n", "n9","movy.w @<REG_yx>+REG_9,<DSP_YX>", "111100yxYX000011",
     "DSP_R (m) = RSWAT (R[n]) << 16;",
     "R[n] += ((R[n] | ~0xffff) == MOD_ME) ? MOD_DELTA : R[9];",
   },
-  { "", "n", "movy.w <DSP_Aa>,@<REG_y>",   "111100yyAA010001",
+  { "", "n", "movy.w <DSP_Ay>,@<REG_yx>",   "111100yxAY010001",
     "WWAT (R[n], DSP_R (m) >> 16);",
   },
-  { "n", "n", "movy.w <DSP_Aa>,@<REG_y>+", "111100yyAA010010",
+  { "n", "n", "movy.w <DSP_Ay>,@<REG_yx>+", "111100yxAY010010",
     "WWAT (R[n], DSP_R (m) >> 16);",
     "R[n] += ((R[n] | ~0xffff) == MOD_ME) ? MOD_DELTA : 2;",
   },
-  { "n", "n9", "movy.w <DSP_Aa>,@<REG_y>+REG_9", "111100yyAA010011",
+  { "n", "n9", "movy.w <DSP_Ay>,@<REG_yx>+REG_9", "111100yxAY010011",
     "WWAT (R[n], DSP_R (m) >> 16);",
+    "R[n] += ((R[n] | ~0xffff) == MOD_ME) ? MOD_DELTA : R[9];",
+  },
+  { "", "n", "movy.l @<REG_yx>,<DSP_YX>",   "111100yxYX100001",
+    "DSP_R (m) = RLAT (R[n]);",
+  },
+  { "n", "n", "movy.l @<REG_yx>+,<DSP_YX>", "111100yxYX100010",
+    "DSP_R (m) = RLAT (R[n]);",
+    "R[n] += ((R[n] | ~0xffff) == MOD_ME) ? MOD_DELTA : 4;",
+  },
+  { "n", "n9","movy.l @<REG_yx>+REG_9,<DSP_YX>", "111100yxYX100011",
+    "DSP_R (m) = RLAT (R[n]);",
+    "R[n] += ((R[n] | ~0xffff) == MOD_ME) ? MOD_DELTA : R[9];",
+  },
+  { "", "n", "movy.l <DSP_Ay>,@<REG_yx>",   "111100yxAY110001",
+    "WLAT (R[n], DSP_R (m));",
+  },
+  { "n", "n", "movy.l <DSP_Ay>,@<REG_yx>+", "111100yxAY110010",
+    "WLAT (R[n], DSP_R (m));",
+    "R[n] += ((R[n] | ~0xffff) == MOD_ME) ? MOD_DELTA : 4;",
+  },
+  { "n", "n9", "movy.l <DSP_Ay>,@<REG_yx>+REG_9", "111100yxAY110011",
+    "WLAT (R[n], DSP_R (m));",
     "R[n] += ((R[n] | ~0xffff) == MOD_ME) ? MOD_DELTA : R[9];",
   },
   { "", "", "nopx nopy", "1111000000000000",
@@ -1462,7 +1664,7 @@ op ppi_tab[] =
     "DSR |= carry;\n",
     "goto assign_z;\n",
   },
-  { "","", "pcmp Sx,Sy",	"10000100xxyy....",
+  { "","", "pcmp Sx,Sy",	"10000100xxyyzzzz",
     "int Sx = DSP_R (x);",
     "int Sx_grd = GET_DSP_GRD (x);",
     "int Sy = DSP_R (y);",
@@ -1478,6 +1680,24 @@ op ppi_tab[] =
   { "","", "pwsb Sx,Sy,Dz",	"10100100xxyyzzzz",
   },
   { "","", "pwad Sx,Sy,Dz",	"10110100xxyyzzzz",
+  },
+  { "","", "(if cc) pabs Sx,Dz",	"100010ccxx01zzzz",
+    "/* FIXME: duplicate code pabs.  */",
+    "res = DSP_R (x);",
+    "res_grd = GET_DSP_GRD (x);",
+    "if (res >= 0)",
+    "  carry = 0;",
+    "else",
+    "  {",
+    "    res = -res;",
+    "    carry = (res != 0); /* The manual has a bug here.  */", 
+    "    res_grd = -res_grd - carry;", 
+    "  }",
+    "COMPUTE_OVERFLOW;",
+    "/* ??? The re-computing of overflow after",
+    "   saturation processing is specific to pabs.  */",
+    "overflow = res_grd != SIGN32 (res) ? DSR_MASK_V : 0;",
+    "ADD_SUB_GE;",
   },
   { "","", "pabs Sx,Dz",	"10001000xx..zzzz",
     "res = DSP_R (x);",
@@ -1496,6 +1716,18 @@ op ppi_tab[] =
     "overflow = res_grd != SIGN32 (res) ? DSR_MASK_V : 0;",
     "ADD_SUB_GE;",
   },
+
+  { "","", "(if cc) prnd Sx,Dz",	"100110ccxx01zzzz",
+    "/* FIXME: duplicate code prnd.  */",
+    "int Sx = DSP_R (x);",
+    "int Sx_grd = GET_DSP_GRD (x);",
+    "",
+    "res = (Sx + 0x8000) & 0xffff0000;",
+    "carry = (unsigned) res < (unsigned) Sx;",
+    "res_grd = Sx_grd + carry;",
+    "COMPUTE_OVERFLOW;",
+    "ADD_SUB_GE;",
+  },
   { "","", "prnd Sx,Dz",	"10011000xx..zzzz",
     "int Sx = DSP_R (x);",
     "int Sx_grd = GET_DSP_GRD (x);",
@@ -1505,6 +1737,31 @@ op ppi_tab[] =
     "res_grd = Sx_grd + carry;",
     "COMPUTE_OVERFLOW;",
     "ADD_SUB_GE;",
+  },
+
+  { "","", "(if cc) pabs Sy,Dz",	"101010cc01yyzzzz",
+    "/* FIXME: duplicate code pabs.  */",
+    "res = DSP_R (y);",
+    "res_grd = 0;",
+    "overflow = 0;",
+    "greater_equal = DSR_MASK_G;",
+    "if (res >= 0)",
+    "  carry = 0;",
+    "else",
+    "  {",
+    "    res = -res;",
+    "    carry = 1;",
+    "    if (res < 0)",
+    "      {",
+    "        if (S)",
+    "          res = 0x7fffffff;",
+    "        else",
+    "          {",
+    "            overflow = DSR_MASK_V;",
+    "            greater_equal = 0;",
+    "          }",
+    "      }",
+    "  }",
   },
   { "","", "pabs Sy,Dz",	"10101000..yyzzzz",
     "res = DSP_R (y);",
@@ -1528,6 +1785,17 @@ op ppi_tab[] =
     "          }",
     "      }",
     "  }",
+  },
+  { "","", "(if cc) prnd Sy,Dz",	"101110cc01yyzzzz",
+    "/* FIXME: duplicate code prnd.  */",
+    "int Sy = DSP_R (y);",
+    "int Sy_grd = SIGN32 (Sy);",
+    "",
+    "res = (Sy + 0x8000) & 0xffff0000;",
+    "carry = (unsigned) res < (unsigned) Sy;",
+    "res_grd = Sy_grd + carry;",
+    "COMPUTE_OVERFLOW;",
+    "ADD_SUB_GE;",
   },
   { "","", "prnd Sy,Dz",	"10111000..yyzzzz",
     "int Sy = DSP_R (y);",
@@ -1606,6 +1874,18 @@ op ppi_tab[] =
     "res = Sx - Sy;",
     "carry = (unsigned) res > (unsigned) Sx;",
     "res_grd = Sx_grd - Sy_grd - carry;",
+    "COMPUTE_OVERFLOW;",
+    "ADD_SUB_GE;",
+  },
+  { "","", "(if cc) psub Sy,Sx,Dz",	"100001ccxxyyzzzz",
+    "int Sx = DSP_R (x);",
+    "int Sx_grd = GET_DSP_GRD (x);",
+    "int Sy = DSP_R (y);",
+    "int Sy_grd = SIGN32 (Sy);",
+    "",
+    "res = Sy - Sx;",
+    "carry = (unsigned) res > (unsigned) Sy;",
+    "res_grd = Sy_grd - Sx_grd - carry;",
     "COMPUTE_OVERFLOW;",
     "ADD_SUB_GE;",
   },
@@ -1697,6 +1977,21 @@ op ppi_tab[] =
     "carry = 0;",
     "overflow = 0;",
     "greater_equal = 1;",
+  },
+  { "","", "pclr Du pmuls Se,Sf,Dg",	"0100eeff0001gguu",
+    "/* Do multiply.  */",
+    "res = (DSP_R (e) >> 16) * (DSP_R (f) >> 16) * 2;",
+    "if (res == 0x80000000)",
+    "  res = 0x7fffffff;",
+    "DSP_R (g) = res;",
+    "DSP_GRD (g) = SIGN32 (res);",
+    "/* FIXME: update DSR based on results of multiply!  */",
+    "",
+    "/* Do clr.  */",
+    "z = u;",
+    "res = 0;",
+    "res_grd = 0;",
+    "goto assign_z;",
   },
   { "","", "(if cc) pdmsb Sx,Dz",	"100111ccxx..zzzz",
     "unsigned Sx = DSP_R (x);",
@@ -1813,6 +2108,27 @@ op ppi_tab[] =
     "  MACL = DSP_R (z) = res;",
     "return;",
   },
+  /* sh4a */
+  { "","", "(if cc) pswap Sx,Dz",	"100111ccxx01zzzz",
+    "int Sx = DSP_R (x);",
+    "",
+    "res = ((Sx & 0xffff) * 65536) + ((Sx >> 16) & 0xffff);",
+    "res_grd = GET_DSP_GRD (x);",
+    "carry = 0;",
+    "overflow = 0;",
+    "greater_equal = res & 0x80000000 ? 0 : DSR_MASK_G;",
+  },
+  /* sh4a */
+  { "","", "(if cc) pswap Sy,Dz",	"101111cc01yyzzzz",
+    "int Sy = DSP_R (y);",
+    "",
+    "res = ((Sy & 0xffff) * 65536) + ((Sy >> 16) & 0xffff);",
+    "res_grd = SIGN32 (Sy);",
+    "carry = 0;",
+    "overflow = 0;",
+    "greater_equal = res & 0x80000000 ? 0 : DSR_MASK_G;",
+  },
+
   {0, 0}
 };
 
@@ -1976,25 +2292,31 @@ expand_opcode (val, i, s)
 	  exit (1);
 	case '0':
 	case '1':
-	    /* Consume an arbitrary number of ones and zeros.  */
-	    do {
-	      j = (j << 1) + (s[m++] - '0');
-	    } while (s[m] == '0' || s[m] == '1');
-	    expand_opcode ((val << m) | j, i, s + m);
-	    break;
-
+	  /* Consume an arbitrary number of ones and zeros.  */
+	  do {
+	    j = (j << 1) + (s[m++] - '0');
+	  } while (s[m] == '0' || s[m] == '1');
+	  expand_opcode ((val << m) | j, i, s + m);
+	  break;
 	case 'N':	/* NN -- four-way fork */
 	  for (j = 0; j < 4; j++)
 	    expand_opcode ((val << 2) | j, i, s + 2);
 	  break;
-	case 'x':	/* xx -- 2-way fork */
-	  /* Cross-breeding with movy moved to separate function.  */
-	  for (j = 0; j < 4; j += 2)
+	case 'x':	/* xx or xy -- two-way or four-way fork */
+	  for (j = 0; j < 4; j += (s[1] == 'x' ? 2 : 1))
 	    expand_opcode ((val << 2) | j, i, s + 2);
 	  break;
-	case 'y':	/* yy -- two-way fork */
-	  for (j = 0; j < 2; j++)
+	case 'y':	/* yy or yx -- two-way or four-way fork */
+	  for (j = 0; j < (s[1] == 'x' ? 4 : 2); j++)
 	    expand_opcode ((val << 2) | j, i, s + 2);
+	  break;
+	case '?':	/* Seven-way "wildcard" fork for movxy */
+	  expand_opcode ((val << 2), i, s + 2);
+	  for (j = 1; j < 4; j++)
+	    {
+	      expand_opcode ((val << 2) | j, i, s + 2);
+	      expand_opcode ((val << 2) | (j + 16), i, s + 2);
+	    }
 	  break;
 	case 'i':	/* eg. "i8*1" */
 	case '.':	/* "...." is a wildcard */
@@ -2033,16 +2355,40 @@ expand_opcode (val, i, s)
 	    expand_opcode ((val << 4) | j, i, s + 4);
 	  break;
 	case 'X':
+	  /* XX/XY -- 2/4 way fork.  */
+	  for (j = 0; j < 4; j += (s[1] == 'X' ? 2 : 1))
+	    expand_opcode ((val << 2) | j, i, s + 2);
+	  break;
 	case 'a':
-	  /* XX, aa -- two-way fork */
-	  for (j = 0; j < 4; j += 2)
+	  /* aa/ax -- 2/4 way fork.  */
+	  for (j = 0; j < 4; j += (s[1] == 'a' ? 2 : 1))
 	    expand_opcode ((val << 2) | j, i, s + 2);
 	  break;
 	case 'Y':
-	case 'A':
-	  /* YY, AA -- two-way fork */
-	  for (j = 0; j < 2; j++)
+	  /* YY/YX -- 2/4 way fork.  */
+	  for (j = 0; j < (s[1] == 'Y' ? 2 : 4); j += 1)
 	    expand_opcode ((val << 2) | j, i, s + 2);
+	  break;
+	case 'A':
+	  /* AA/AY: 2/4 way fork.  */
+	  for (j = 0; j < (s[1] == 'A' ? 2 : 4); j += 1)
+	    expand_opcode ((val << 2) | j, i, s + 2);
+	  break;
+	case 'v':
+	  /* vv(VV) -- 4(16) way fork.  */
+	  /* Vector register fv0/4/8/12.  */
+	  if (s[2] == 'V')
+	    {
+	      /* 2 vector registers.  */
+	      for (j = 0; j < 15; j++)
+		expand_opcode ((val << 4) | j, i, s + 4);
+	    }
+	  else
+	    {
+	      /* 1 vector register.  */
+	      for (j = 0; j < 4; j += 1)
+		expand_opcode ((val << 2) | j, i, s + 2);
+	    }
 	  break;
 	}
     }
@@ -2113,24 +2459,6 @@ expand_ppi_movxy ()
   int i;
 
   for (i = 0xf000; i < 0xf400; i++)
-    if ((i & 3) == 0 && (i & 12) != 0 && table[i] != 0)
-      {
-	/* A movx insn, which needs to be filled out with the 
-	   corresponding movy insns.  This used to be done in
-	   expand_opcode.  */
-	int m, mv;
-
-	for (m = 0; m < 32; m++)
-	  {
-	    /* Ignore illegal nopy */
-	    if ((m & 7) == 0 && m != 0)
-	      continue;
-	    mv = m & 3 | (m & 4) << 2 | (m & 8) << 3 | (m & 16) << 4;
-	    table [i | mv] = table [i];
-	  }
-      }
-
-  for (i = 0xf000; i < 0xf400; i++)
     if (table[i])
       table[i + 0x800] = table[0xf800];
 }
@@ -2161,6 +2489,18 @@ gensim_caselist (p)
 		       *s);
 	      exit (1);
 	      break;
+	    case '?':
+	      /* Wildcard expansion, nothing to do here.  */
+	      s += 2;
+	      break;
+	    case 'v':
+	      printf ("      int v1 = ((iword >> 10) & 3) * 4;\n");
+	      s += 2;
+	      break;
+	    case 'V':
+	      printf ("      int v2 = ((iword >> 8)  & 3) * 4;\n");
+	      s += 2;
+	      break;
 	    case '0':
 	    case '1':
 	      s += 2;
@@ -2179,12 +2519,26 @@ gensim_caselist (p)
 	      s += 2;
 	      break;
 	    case 'x':
-	      printf ("      int n = ((iword >> 9) & 1) + 4;\n");
+	      if (s[1] == 'y')	/* xy */
+		{
+		  printf ("      int n = (iword & 3) ? \n");
+		  printf ("              ((iword >> 9) & 1) + 4 : \n");
+		  printf ("              REG_xy ((iword >> 8) & 3);\n");
+		}
+	      else
+		printf ("      int n = ((iword >> 9) & 1) + 4;\n");
 	      needn = 1;
 	      s += 2;
 	      break;
 	    case 'y':
-	      printf ("      int n = ((iword >> 8) & 1) + 6;\n");
+	      if (s[1] == 'x')	/* yx */
+		{
+		  printf ("      int n = (iword & 0xc) ? \n");
+		  printf ("              ((iword >> 8) & 1) + 6 : \n");
+		  printf ("              REG_yx ((iword >> 8) & 3);\n");
+		}
+	      else
+		printf ("      int n = ((iword >> 8) & 1) + 6;\n");
 	      needn = 1;
 	      s += 2;
 	      break;
@@ -2197,19 +2551,47 @@ gensim_caselist (p)
 	      s += 4;
 	      break;
 	    case 'X':
-	      printf ("      int m = ((iword >> 7) & 1) + 8;\n");
+	      if (s[1] == 'Y')	/* XY */
+		{
+		  printf ("      int m = (iword & 3) ? \n");
+		  printf ("              ((iword >> 7) & 1) + 8 : \n");
+		  printf ("              DSP_xy ((iword >> 6) & 3);\n");
+		}
+	      else
+		printf ("      int m = ((iword >> 7) & 1) + 8;\n");
 	      s += 2;
 	      break;
 	    case 'a':
-	      printf ("      int m = 7 - ((iword >> 6) & 2);\n");
+	      if (s[1] == 'x')	/* ax */
+		{
+		  printf ("      int m = (iword & 3) ? \n");
+		  printf ("              7 - ((iword >> 6) & 2) : \n");
+		  printf ("              DSP_ax ((iword >> 6) & 3);\n");
+		}
+	      else
+		printf ("      int m = 7 - ((iword >> 6) & 2);\n");
 	      s += 2;
 	      break;
 	    case 'Y':
-	      printf ("      int m = ((iword >> 6) & 1) + 10;\n");
+	      if (s[1] == 'X')	/* YX */
+		{
+		  printf ("      int m = (iword & 0xc) ? \n");
+		  printf ("              ((iword >> 6) & 1) + 10 : \n");
+		  printf ("              DSP_yx ((iword >> 6) & 3);\n");
+		}
+	      else
+		printf ("      int m = ((iword >> 6) & 1) + 10;\n");
 	      s += 2;
 	      break;
 	    case 'A':
-	      printf ("      int m = 7 - ((iword >> 5) & 2);\n");
+	      if (s[1] == 'Y')	/* AY */
+		{
+		  printf ("      int m = (iword & 0xc) ? \n");
+		  printf ("              7 - ((iword >> 5) & 2) : \n");
+		  printf ("              DSP_ay ((iword >> 6) & 3);\n");
+		}
+	      else
+		printf ("      int m = 7 - ((iword >> 5) & 2);\n");
 	      s += 2;
 	      break;
 
@@ -2303,6 +2685,18 @@ static void
 gensim ()
 {
   printf ("{\n");
+  printf ("/* REG_xy = [r4, r5, r0, r1].  */\n");
+  printf ("#define REG_xy(R) ((R)==0 ? 4 : (R)==2 ? 5 : (R)==1 ?  0 :  1)\n");
+  printf ("/* REG_yx = [r6, r7, r2, r3].  */\n");
+  printf ("#define REG_yx(R) ((R)==0 ? 6 : (R)==1 ? 7 : (R)==2 ?  2 :  3)\n");
+  printf ("/* DSP_ax = [a0, a1, x0, x1].  */\n");
+  printf ("#define DSP_ax(R) ((R)==0 ? 7 : (R)==2 ? 5 : (R)==1 ?  8 :  9)\n");
+  printf ("/* DSP_ay = [a0, a1, y0, y1].  */\n");
+  printf ("#define DSP_ay(R) ((R)==0 ? 7 : (R)==1 ? 5 : (R)==2 ? 10 : 11)\n");
+  printf ("/* DSP_xy = [x0, x1, y0, y1].  */\n");
+  printf ("#define DSP_xy(R) ((R)==0 ? 8 : (R)==2 ? 9 : (R)==1 ? 10 : 11)\n");
+  printf ("/* DSP_yx = [y0, y1, x0, x1].  */\n");
+  printf ("#define DSP_yx(R) ((R)==0 ? 10 : (R)==1 ? 11 : (R)==2 ? 8 : 9)\n");
   printf ("  switch (jump_table[iword]) {\n");
 
   gensim_caselist (tab);
@@ -2341,7 +2735,8 @@ gendefines ()
 static int ppi_index;
 
 /* Take a ppi code, expand all varying fields in it and fill all the
-   right entries in 'table' with the opcode index.  */
+   right entries in 'table' with the opcode index.  
+   NOTE: tail recursion optimization removed for simplicity.  */
 
 static void
 expand_ppi_code (val, i, s)
@@ -2351,46 +2746,40 @@ expand_ppi_code (val, i, s)
 {
   int j;
 
-  for (;;)
+  switch (s[0])
     {
-      switch (s[0])
-	{
-	default:
-	  fprintf (stderr, "gencode/expand_ppi_code: Illegal char '%c'\n",
-		   s[0]);
-	  exit (2);
-	  break;
-	/* The last eight bits are disregarded for the switch table.  */
-	case 'm':
-	case 'x':
-	case '.':
-	  table[val] = i;
-	  return;
-	case '0':
-	  val += val;
-	  s++;
-	  break;
-	case '1':
-	  val += val + 1;
-	  s++;
-	  break;
-	case 'i':
-	case 'e': case 'f':
-	  val += val;
-	  s++;
-	  expand_ppi_code (val, i, s);
-	  val++;
-	  break;
-	case 'c':
-	  val <<= 2;
-	  s += 2;
-	  val++;
-	  expand_ppi_code (val, ppi_index++, s);
-	  val++;
-	  expand_ppi_code (val, i, s);
-	  val++;
-	  break;
-	}
+    default:
+      fprintf (stderr, "gencode/expand_ppi_code: Illegal char '%c'\n", s[0]);
+      exit (2);
+      break;
+    case 'g':
+    case 'z':
+      /* The last four bits are disregarded for the switch table.  */
+      table[val] = i;
+      return;
+    case 'm':
+      /* Four-bit expansion.  */
+      for (j = 0; j < 16; j++)
+	expand_ppi_code ((val << 4) + j, i, s + 4);
+      break;
+    case '.':
+    case '0':
+      expand_ppi_code ((val << 1), i, s + 1);
+      break;
+    case '1':
+      expand_ppi_code ((val << 1) + 1, i, s + 1);
+      break;
+    case 'i':
+    case 'e': case 'f':
+    case 'x': case 'y':
+      expand_ppi_code ((val << 1), i, s + 1);
+      expand_ppi_code ((val << 1) + 1, i, s + 1);
+      break;
+    case 'c':
+      expand_ppi_code ((val << 2) + 1, ppi_index++, s + 2);
+      expand_ppi_code ((val << 2) + 2, i, s + 2);
+      expand_ppi_code ((val << 2) + 3, i, s + 2);
+      break;
     }
 }
 
@@ -2442,18 +2831,24 @@ ppi_gensim ()
   printf ("ppi_insn (iword)\n");
   printf ("     int iword;\n");
   printf ("{\n");
+  printf ("  /* 'ee' = [x0, x1, y0, a1] */\n");
   printf ("  static char e_tab[] = { 8,  9, 10,  5};\n");
+  printf ("  /* 'ff' = [y0, y1, x0, a1] */\n");
   printf ("  static char f_tab[] = {10, 11,  8,  5};\n");
+  printf ("  /* 'xx' = [x0, x1, a0, a1]  */\n");
   printf ("  static char x_tab[] = { 8,  9,  7,  5};\n");
+  printf ("  /* 'yy' = [y0, y1, m0, m1]  */\n");
   printf ("  static char y_tab[] = {10, 11, 12, 14};\n");
+  printf ("  /* 'gg' = [m0, m1, a0, a1]  */\n");
   printf ("  static char g_tab[] = {12, 14,  7,  5};\n");
+  printf ("  /* 'uu' = [x0, y0, a0, a1]  */\n");
   printf ("  static char u_tab[] = { 8, 10,  7,  5};\n");
   printf ("\n");
   printf ("  int z;\n");
   printf ("  int res, res_grd;\n");
   printf ("  int carry, overflow, greater_equal;\n");
   printf ("\n");
-  printf ("  switch (ppi_table[iword >> 8]) {\n");
+  printf ("  switch (ppi_table[iword >> 4]) {\n");
 
   for (; p->name; p++)
     {
@@ -2614,7 +3009,7 @@ main (ac, av)
 
 	  memset (table, 0, sizeof table);
 	  ppi_filltable ();
-	  dumptable ("ppi_table", 1 << 8, 0);
+	  dumptable ("ppi_table", 1 << 12, 0);
 	}
       else if (strcmp (av[1], "-x") == 0)
 	{

@@ -1,4 +1,4 @@
-/* Simulator for the Hitachi SH architecture.
+/* Simulator for the Renesas (formerly Hitachi) / SuperH Inc. SH architecture.
 
    Written by Steve Chamberlain of Cygnus Support.
    sac@cygnus.com
@@ -120,6 +120,9 @@ typedef union
 	    int re;
 	    /* sh3 */
 	    int bank[8];
+	    int dbr;		/* debug base register */
+	    int sgr;		/* saved gr15 */
+	    int ldst;		/* load/store flag (boolean) */
 	  } named;
 	int i[16];
       } cregs;
@@ -167,10 +170,8 @@ static int target_dsp;
 static int host_little_endian;
 static char **prog_argv;
 
-#if 1
 static int maskw = 0;
 static int maskl = 0;
-#endif
 
 static SIM_OPEN_KIND sim_kind;
 static char *myname;
@@ -189,8 +190,10 @@ static char *myname;
 #define CREG(n)	(saved_state.asregs.cregs.i[(n)])
 #define GBR 	saved_state.asregs.cregs.named.gbr
 #define VBR 	saved_state.asregs.cregs.named.vbr
+#define DBR 	saved_state.asregs.cregs.named.dbr
 #define SSR	saved_state.asregs.cregs.named.ssr
 #define SPC	saved_state.asregs.cregs.named.spc
+#define SGR 	saved_state.asregs.cregs.named.sgr
 #define SREG(n)	(saved_state.asregs.sregs.i[(n)])
 #define MACH 	saved_state.asregs.sregs.named.mach
 #define MACL 	saved_state.asregs.sregs.named.macl
@@ -228,6 +231,7 @@ static char *myname;
 #define Q 	((saved_state.asregs.cregs.named.sr & SR_MASK_Q) != 0)
 #define S 	((saved_state.asregs.cregs.named.sr & SR_MASK_S) != 0)
 #define T 	((saved_state.asregs.cregs.named.sr & SR_MASK_T) != 0)
+#define LDST	((saved_state.asregs.cregs.named.ldst) != 0)
 
 #define SR_BL ((saved_state.asregs.cregs.named.sr & SR_MASK_BL) != 0)
 #define SR_RB ((saved_state.asregs.cregs.named.sr & SR_MASK_RB) != 0)
@@ -249,6 +253,7 @@ do { \
 #define SET_SR_Q(EXP) SET_SR_BIT ((EXP), SR_MASK_Q)
 #define SET_SR_S(EXP) SET_SR_BIT ((EXP), SR_MASK_S)
 #define SET_SR_T(EXP) SET_SR_BIT ((EXP), SR_MASK_T)
+#define SET_LDST(EXP) (saved_state.asregs.cregs.named.ldst = ((EXP) != 0))
 
 /* stc currently relies on being able to read SR without modifications.  */
 #define GET_SR() (saved_state.asregs.cregs.named.sr - 0)
@@ -1411,6 +1416,32 @@ macl (regs, memory, n, m)
   MACH = mach;
 }
 
+
+/* GET_LOOP_BOUNDS {EXTENDED}
+   These two functions compute the actual starting and ending point
+   of the repeat loop, based on the RS and RE registers (repeat start, 
+   repeat stop).  The extended version is called for LDRC, and the
+   regular version is called for SETRC.  The difference is that for
+   LDRC, the loop start and end instructions are literally the ones
+   pointed to by RS and RE -- for SETRC, they're not (see docs).  */
+
+static struct loop_bounds
+get_loop_bounds_ext (rs, re, memory, mem_end, maskw, endianw)
+     int rs, re;
+     unsigned char *memory, *mem_end;
+     int maskw, endianw;
+{
+  struct loop_bounds loop;
+
+  /* FIXME: should I verify RS < RE?  */
+  loop.start = PT2H (RS);	/* FIXME not using the params?  */
+  loop.end   = PT2H (RE & ~1);	/* Ignore bit 0 of RE.  */
+  SKIP_INSN (loop.end);
+  if (loop.end >= mem_end)
+    loop.end = PT2H (0);
+  return loop;
+}
+
 float
 fsca_s (int in, double (*f) (double))
 {
@@ -1541,7 +1572,9 @@ init_dsp (abfd)
   int was_dsp = target_dsp;
   unsigned long mach = bfd_get_mach (abfd);
 
-  if (mach == bfd_mach_sh_dsp || mach == bfd_mach_sh3_dsp)
+  if (mach == bfd_mach_sh_dsp  || 
+      mach == bfd_mach_sh4al_dsp ||
+      mach == bfd_mach_sh3_dsp)
     {
       int ram_area_size, xram_start, yram_start;
       int new_select;
@@ -1556,7 +1589,7 @@ init_dsp (abfd)
 	  xram_start = 0x0800f000;
 	  ram_area_size = 0x1000;
 	}
-      if (mach == bfd_mach_sh3_dsp)
+      if (mach == bfd_mach_sh3_dsp || mach == bfd_mach_sh4al_dsp)
 	{
 	  /* SH7612:
 	     8KB each for X & Y memory;
@@ -1740,7 +1773,11 @@ sim_resume (sd, step, siggnal)
   memory = saved_state.asregs.memory;
   mem_end = memory + saved_state.asregs.msize;
 
-  loop = get_loop_bounds (RS, RE, memory, mem_end, maskw, endianw);
+  if (RE & 1)
+    loop = get_loop_bounds_ext (RS, RE, memory, mem_end, maskw, endianw);
+  else
+    loop = get_loop_bounds     (RS, RE, memory, mem_end, maskw, endianw);
+
   insn_ptr = PT2H (saved_state.asregs.pc);
   CHECK_INSN_PTR (insn_ptr);
 
