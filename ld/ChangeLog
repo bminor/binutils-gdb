@@ -7,7 +7,7 @@ Mon Aug 31 01:06:00 1998  Catherine Moore  <clm@cygnus.com>
         * Makefile.am:  Change armelf.sc to elf.sc
         * Makefile.in:  Regenerate.
 
-Mon Aug 32 11:12:04 1998  Catherine Moore  <clm@cygnus.com>
+Mon Aug 31 11:12:04 1998  Catherine Moore  <clm@cygnus.com>
    
         * emulparams/armelf.sh:  Change SCRIPT_NAME to
         elf.  Change TEXT_START_ADDR to 0x8000.  Define
