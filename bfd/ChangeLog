@@ -28,7 +28,7 @@
 	* elfxx-ia64.c (oor_brl, oor_ip): Conditionally define.
 
 	* elf64-ppc.c (edit_opd): Only zero opd syms when function is
-	completely removed.
+	completely removed.  Correct local sym adjustment.
 
 2002-10-10  Stephen Clarke <stephen.clarke@superh.com>
 
