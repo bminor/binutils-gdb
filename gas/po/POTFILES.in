@@ -178,6 +178,7 @@ input-file.c
 input-file.h
 input-scrub.c
 input-scrub.c
+itbl-lex.h
 itbl-ops.c
 itbl-ops.h
 listing.c

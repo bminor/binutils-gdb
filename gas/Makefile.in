@@ -448,6 +448,7 @@ HFILES = \
 	frags.h \
 	hash.h \
 	input-file.h \
+	itbl-lex.h \
 	itbl-ops.h \
 	listing.h \
 	macro.h \
@@ -3063,9 +3064,9 @@ $(srcdir)/config/m68k-parse.h: ; @true
 # The instruction table specification lexical analyzer and parser.
 
 itbl-lex.c: $(srcdir)/itbl-lex.l
-itbl-lex.o: itbl-lex.c itbl-parse.h
+itbl-lex.o: itbl-lex.c itbl-parse.h $(srcdir)/itbl-lex.h
 
-itbl-parse.o: itbl-parse.c itbl-parse.h $(srcdir)/itbl-ops.h
+itbl-parse.o: itbl-parse.c itbl-parse.h $(srcdir)/itbl-ops.h $(srcdir)/itbl-lex.h
 
 itbl-ops.o: $(srcdir)/itbl-ops.c $(srcdir)/itbl-ops.h itbl-parse.h
 
