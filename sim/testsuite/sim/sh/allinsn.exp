@@ -5,6 +5,16 @@ set all "sh shdsp"
 if [istarget sh-*elf] {
     run_sim_test add.s    $all
     run_sim_test and.s    $all
+    run_sim_test bandor.s sh
+    run_sim_test bandornot.s sh
+    run_sim_test bclr.s   sh
+    run_sim_test bld.s    sh
+    run_sim_test bldnot.s sh
+    run_sim_test bset.s   sh
+    run_sim_test bst.s    sh
+    run_sim_test bxor.s   sh
+    run_sim_test clip.s   sh
+    run_sim_test div.s    sh
     run_sim_test dmxy.s   shdsp
     run_sim_test fabs.s   sh
     run_sim_test fadd.s   sh
@@ -32,10 +42,12 @@ if [istarget sh-*elf] {
     run_sim_test loop.s   shdsp
     run_sim_test macl.s   sh
     run_sim_test macw.s   sh
+    run_sim_test mov.s    $all
     run_sim_test movi.s   $all
     run_sim_test movli.s  $all
     run_sim_test movua.s  $all
     run_sim_test movxy.s  shdsp
+    run_sim_test mulr.s   sh
     run_sim_test pabs.s   shdsp
     run_sim_test paddc.s  shdsp
     run_sim_test padd.s   shdsp
@@ -52,7 +64,9 @@ if [istarget sh-*elf] {
     run_sim_test pshlr.s  shdsp
     run_sim_test psub.s   shdsp
     run_sim_test pswap.s  shdsp
-    run_sim_test sett.s   $all
+    run_sim_test pushpop.s sh
+    run_sim_test resbank.s sh
+    run_sim_test sett.s   sh
     run_sim_test shll.s   $all
     run_sim_test shll2.s  $all
     run_sim_test shll8.s  $all
