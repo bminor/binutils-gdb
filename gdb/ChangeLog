@@ -1,5 +1,22 @@
 2005-01-14  Andrew Cagney  <cagney@gnu.org>
 
+	* exceptions.h (exception_fprintf): Declare.
+	(exception_print): Drop pre_print parameter.
+	* mi/mi-main.c (mi_execute_command): Update exception_print call.
+	* cli/cli-interp.c (safe_execute_command): Update exception_print
+	call.
+	* remote.c (remote_open_1): Instead of passing an error prefix to
+	catch_exceptions, use catch_exceptions and exception_fprintf.
+	(remote_start_remote): Change return type to void.
+	* breakpoint.c (insert_bp_location): Instead of passing an error
+	prefix to catch_exceptions, use catch_exceptions and
+	exception_fprintf.
+	(insert_catchpoint): Change return type to void.
+	(break_command_1): Update exception_print call.
+	* exceptions.c (exception_fprintf): New function.
+	(print_exception): New function.
+	(exception_print): Use print_exception.
+	
 	* utils.c (error_output_message): Delete function.
 	* defs.h (error_output_message): Delete declaration.
 

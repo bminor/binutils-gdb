@@ -67,9 +67,11 @@ struct exception
 extern const struct exception exception_none;
 
 /* If E is an exception, print it's error message on the specified
-   stream.  */
-extern void exception_print (struct ui_file *file, const char *pre_print,
-			     struct exception e);
+   stream. for _fprintf, prefix the message with PREFIX...  */
+extern void exception_print (struct ui_file *file, struct exception e);
+extern void exception_fprintf (struct ui_file *file, struct exception e,
+			       const char *prefix,
+			       ...) ATTR_FORMAT (printf, 3, 4);
 
 /* Throw an exception (as described by "struct exception").  Will
    execute a LONG JUMP to the inner most containing exception handler

@@ -709,7 +709,7 @@ deprecated_read_memory_nobpt (CORE_ADDR memaddr, char *myaddr, unsigned len)
 
 
 /* A wrapper function for inserting catchpoints.  */
-static int
+static void
 insert_catchpoint (struct ui_out *uo, void *args)
 {
   struct breakpoint *b = (struct breakpoint *) args;
@@ -733,8 +733,6 @@ insert_catchpoint (struct ui_out *uo, void *args)
 
   if (val < 0)
     throw_reason (RETURN_ERROR);
-
-  return 0;
 }
 
 /* Helper routine: free the value chain for a breakpoint (watchpoint).  */
@@ -1073,13 +1071,11 @@ insert_bp_location (struct bp_location *bpt,
 	   || bpt->owner->type == bp_catch_vfork
 	   || bpt->owner->type == bp_catch_exec)
     {
-      char *prefix = xstrprintf ("warning: inserting catchpoint %d: ",
-				 bpt->owner->number);
-      struct cleanup *cleanups = make_cleanup (xfree, prefix);
-      val = catch_exceptions (uiout, insert_catchpoint, bpt->owner, prefix,
-			      RETURN_MASK_ERROR);
-      do_cleanups (cleanups);
-      if (val < 0)
+      struct exception e = catch_exception (uiout, insert_catchpoint,
+					    bpt->owner, RETURN_MASK_ERROR);
+      exception_fprintf (gdb_stderr, e, "warning: inserting catchpoint %d: ",
+			 bpt->owner->number);
+      if (e.reason < 0)
 	bpt->owner->enable_state = bp_disabled;
       else
 	bpt->inserted = 1;
@@ -5134,7 +5130,7 @@ break_command_1 (char *arg, int flag, int from_tty, struct breakpoint *pending_b
   switch (e.reason)
     {
     case RETURN_QUIT:
-      exception_print (gdb_stderr, NULL, e);
+      exception_print (gdb_stderr, e);
       return e.reason;
     case RETURN_ERROR:
       switch (e.error)
@@ -5145,7 +5141,7 @@ break_command_1 (char *arg, int flag, int from_tty, struct breakpoint *pending_b
 	  if (pending_bp)
 	    return e.reason;
 
-	  exception_print (gdb_stderr, NULL, e);
+	  exception_print (gdb_stderr, e);
 
 	  /* If pending breakpoint support is turned off, throw
 	     error.  */
@@ -5171,7 +5167,7 @@ break_command_1 (char *arg, int flag, int from_tty, struct breakpoint *pending_b
 	  pending = 1;
 	  break;
 	default:
-	  exception_print (gdb_stderr, NULL, e);
+	  exception_print (gdb_stderr, e);
 	  return e.reason;
 	}
     default:

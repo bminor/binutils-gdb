@@ -302,9 +302,28 @@ do_write (void *data, const char *buffer, long length_buffer)
 }
 
 
+static void
+print_exception (struct ui_file *file, struct exception e)
+{
+  /* KLUGE: cagney/2005-01-13: Write the string out one line at a time
+     as that way the MI's behavior is preserved.  */
+  const char *start;
+  const char *end;
+  for (start = e.message; start != NULL; start = end)
+    {
+      end = strchr (start, '\n');
+      if (end == NULL)
+	fputs_filtered (start, file);
+      else
+	{
+	  end++;
+	  ui_file_write (file, start, end - start);
+	}
+    }					    
+}
+
 void
-exception_print (struct ui_file *file, const char *pre_print,
-		 struct exception e)
+exception_print (struct ui_file *file, struct exception e)
 {
   if (e.reason < 0 && e.message != NULL)
     {
@@ -312,26 +331,29 @@ exception_print (struct ui_file *file, const char *pre_print,
       wrap_here ("");		/* Force out any buffered output */
       gdb_flush (file);
       annotate_error_begin ();
-      if (pre_print)
-	fputs_filtered (pre_print, file);
+      print_exception (file, e);
+      fprintf_filtered (file, "\n");
+    }
+}
 
-      /* KLUGE: cagney/2005-01-13: Write the string out one line at a
-	 time as that way the MI's behavior is preserved.  */
-      {
-	const char *start;
-	const char *end;
-	for (start = e.message; start != NULL; start = end)
-	  {
-	    end = strchr (start, '\n');
-	    if (end == NULL)
-	      fputs_filtered (start, file);
-	    else
-	      {
-		end++;
-		ui_file_write (file, start, end - start);
-	      }
-	  }					    
-      }
+void
+exception_fprintf (struct ui_file *file, struct exception e,
+		   const char *prefix, ...)
+{
+  if (e.reason < 0 && e.message != NULL)
+    {
+      va_list args;
+      target_terminal_ours ();
+      wrap_here ("");		/* Force out any buffered output */
+      gdb_flush (file);
+      annotate_error_begin ();
+
+      /* Print the prefix.  */
+      va_start (args, prefix);
+      vfprintf_filtered (file, prefix, args);
+      va_end (args);
+
+      print_exception (file, e);
       fprintf_filtered (file, "\n");
     }
 }

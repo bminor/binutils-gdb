@@ -83,8 +83,6 @@ static void remote_resume (ptid_t ptid, int step,
                            enum target_signal siggnal);
 static void remote_async_resume (ptid_t ptid, int step,
 				 enum target_signal siggnal);
-static int remote_start_remote (struct ui_out *uiout, void *dummy);
-
 static void remote_open (char *name, int from_tty);
 static void remote_async_open (char *name, int from_tty);
 
@@ -2019,7 +2017,7 @@ remote_start_remote_dummy (struct ui_out *uiout, void *dummy)
   return 1;
 }
 
-static int
+static void
 remote_start_remote (struct ui_out *uiout, void *dummy)
 {
   immediate_quit++;		/* Allow user to interrupt it.  */
@@ -2037,9 +2035,7 @@ remote_start_remote (struct ui_out *uiout, void *dummy)
   putpkt ("?");			/* Initiate a query from remote machine.  */
   immediate_quit--;
 
-  /* NOTE: See comment above in remote_start_remote_dummy().  This
-     function returns something >=0.  */
-  return remote_start_remote_dummy (uiout, dummy);
+  remote_start_remote_dummy (uiout, dummy);
 }
 
 /* Open a connection to a remote debugger.
@@ -2157,7 +2153,7 @@ static void
 remote_open_1 (char *name, int from_tty, struct target_ops *target,
 	       int extended_p, int async_p)
 {
-  int ex;
+  struct exception ex;
   struct remote_state *rs = get_remote_state ();
   if (name == 0)
     error ("To open a remote debug connection, you need to specify what\n"
@@ -2260,17 +2256,15 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target,
      been fixed - the function set_cmd_context() makes it possible for
      all the ``target ....'' commands to share a common callback
      function.  See cli-dump.c.  */
-  ex = catch_exceptions (uiout,
-			 remote_start_remote, NULL,
-			 "Couldn't establish connection to remote"
-			 " target\n",
-			 RETURN_MASK_ALL);
-  if (ex < 0)
+  ex = catch_exception (uiout, remote_start_remote, NULL, RETURN_MASK_ALL);
+  exception_fprintf (gdb_stderr, ex, "Couldn't establish connection to remote"
+		     " target\n");
+  if (ex.reason < 0)
     {
       pop_target ();
       if (async_p)
 	wait_forever_enabled_p = 1;
-      throw_reason (ex);
+      throw_reason (ex.reason);
     }
 
   if (async_p)

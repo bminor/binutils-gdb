@@ -133,7 +133,7 @@ safe_execute_command (struct ui_out *uiout, char *command, int from_tty)
 		       RETURN_MASK_ALL);
   /* FIXME: cagney/2005-01-13: This shouldn't be needed.  Instead the
      caller should print the exception.  */
-  exception_print (gdb_stderr, NULL, e);
+  exception_print (gdb_stderr, e);
   return e;
 }
 
