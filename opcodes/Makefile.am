@@ -33,6 +33,7 @@ CFILES = \
 	arc-dis.c \
 	arc-opc.c \
 	arm-dis.c \
+	avr-dis.c \
 	cgen-asm.c \
 	cgen-dis.c \
 	cgen-opc.c \
@@ -96,6 +97,7 @@ ALL_MACHINES = \
 	arc-dis.lo \
 	arc-opc.lo \
 	arm-dis.lo \
+	avr-dis.lo \
 	cgen-asm.lo \
 	cgen-dis.lo \
 	cgen-opc.lo \
