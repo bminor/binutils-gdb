@@ -5,6 +5,11 @@ Tue Jan  4 15:12:43 1994  Stan Shebs  (shebs@andros.cygnus.com)
 	* app.c, flonum.h, hex-value.c (const): Change #if to be more
 	portable.
 
+Tue Jan  4 22:11:34 1994  Rob Savoye  (rob@darkstar.cygnus.com)
+
+        * config/ho-vsta.h, configure.in, .Sanitize: Add support for VSTa
+        micro-kernel.
+
 Thu Dec 30 15:27:16 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* write.c (write_relocs): bfd_perform_relocation now takes an
