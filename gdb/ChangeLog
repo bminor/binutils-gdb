@@ -1,5 +1,8 @@
 Mon Jul 12 11:29:44 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* c-valprint.c (c_val_print): Fix thinko with unspecified length
+	arrays.
+
 	* hppa-tdep.c (find_proc_framesize): If there is a frame pointer,
 	use it.
 
