@@ -1,3 +1,9 @@
+2003-03-24  Adam Fedor  <fedor@gnu.org>
+
+	* Makefile.in (YYOBJ): Add objc-exp.tab.o
+	* objc-lang.h: Add multiple inclusion protection.
+	(start_msglist, add_msglist, end_msglist): Additional declarations.
+
 2003-03-24  Richard Earnshaw  <rearnsha@arm.com>
 
 	* armnbsd-tdep.c (arm_netbsd_aout_init_abi): ARM_FLOAT_SOFT enum

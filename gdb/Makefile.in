@@ -874,6 +874,7 @@ YYFILES = c-exp.tab.c \
 	jv-exp.tab.c \
 	f-exp.tab.c m2-exp.tab.c p-exp.tab.c
 YYOBJ = c-exp.tab.o \
+	objc-exp.tab.o \
 	jv-exp.tab.o \
 	f-exp.tab.o m2-exp.tab.o p-exp.tab.o
 
