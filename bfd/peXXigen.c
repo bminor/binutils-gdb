@@ -3,21 +3,21 @@
    Free Software Foundation, Inc.
    Written by Cygnus Solutions.
 
-This file is part of BFD, the Binary File Descriptor library.
+   This file is part of BFD, the Binary File Descriptor library.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* Most of this hacked by Steve Chamberlain <sac@cygnus.com>.
 
@@ -1142,7 +1142,7 @@ pe_print_idata (abfd, vfile)
 
   adj = section->vma - extra->ImageBase;
 
-  /* print all image import descriptors */ 
+  /* Print all image import descriptors.  */
   for (i = 0; i < datasize; i += onaline)
     {
       bfd_vma hint_addr;
@@ -1154,7 +1154,7 @@ pe_print_idata (abfd, vfile)
       bfd_size_type j;
       char *dll;
 
-      /* print (i + extra->DataDirectory[1].VirtualAddress)  */
+      /* Print (i + extra->DataDirectory[1].VirtualAddress).  */
       fprintf (file, " %08lx\t", (unsigned long) (i + adj + dataoff));
 #if 0
       if (i + 20 > datasize)
@@ -1190,11 +1190,11 @@ pe_print_idata (abfd, vfile)
 	  int differ = 0;
 	  int ft_allocated = 0;
 
-	  fprintf (file, _("\tvma:  Hint/Ord Member-Name\n"));
+	  fprintf (file, _("\tvma:  Hint/Ord Member-Name Bound-To\n"));
 
 	  idx = hint_addr - adj;
-
-		ft_addr = first_thunk + extra->ImageBase;
+	  
+	  ft_addr = first_thunk + extra->ImageBase;
 	  ft_data = data;
 	  ft_idx = first_thunk - adj;
 	  ft_allocated = 0; 
@@ -1234,7 +1234,10 @@ pe_print_idata (abfd, vfile)
 		    continue;
 
 		  /* Read datasize bfd_bytes starting at offset ft_idx.  */
-		  if (! bfd_get_section_contents (abfd, ft_section, (PTR) ft_data, (bfd_vma) ft_idx, datasize))
+		  if (! bfd_get_section_contents (abfd, ft_section,
+						  (PTR) ft_data,
+						  (bfd_vma) ft_idx,
+						  datasize))
 		    {
 		      free (ft_data);
 		      continue;
@@ -1244,17 +1247,19 @@ pe_print_idata (abfd, vfile)
 		  ft_allocated = 1;
 		}
 	    }
-	  /* print HintName vector entries */ 
+
+	  /* Print HintName vector entries.  */
 	  for (j = 0; j < datasize; j += 4)
 	    {
 	      unsigned long member = bfd_get_32 (abfd, data + idx + j);
 
-	      /* print single IMAGE_IMPORT_BY_NAME vector */ 
+	      /* Print single IMAGE_IMPORT_BY_NAME vector.  */ 
 	      if (member == 0)
 		break;
+
 	      if (member & 0x80000000)
-		fprintf (file, "\t%04lx\t %4lu", member,
-	       member & 0x7fffffff);
+		fprintf (file, "\t%04lx\t %4lu  <none>",
+			 member, member & 0x7fffffff);
 	      else
 		{
 		  int ordinal;
@@ -1265,59 +1270,17 @@ pe_print_idata (abfd, vfile)
 		  fprintf (file, "\t%04lx\t %4d  %s",
 			   member, ordinal, member_name);
 		}
-	
+
 	      /* If the time stamp is not zero, the import address
-		       table holds actual addresses. */
-	      if (time_stamp != 0 && first_thunk != 0 && first_thunk != hint_addr)
+		 table holds actual addresses.  */
+	      if (time_stamp != 0
+		  && first_thunk != 0
+		  && first_thunk != hint_addr)
 		fprintf (file, "\t%04lx",
 			 (long) bfd_get_32 (abfd, ft_data + ft_idx + j));
 
 	      fprintf (file, "\n");
 	    }
-
-	  for (j = 0; j < datasize; j += 4)
-	    {
-	      int ordinal;
-	      char *member_name;
-	      bfd_vma hint_member = 0;
-	      bfd_vma iat_member;
-
-	      if (hint_addr != 0)
-		hint_member = bfd_get_32 (abfd, data + idx + j);
-	      iat_member = bfd_get_32 (abfd, ft_data + ft_idx + j);
-
-	      if (hint_addr == 0 && iat_member == 0)
-		break;
-
-	      if (hint_addr == 0 || hint_member != iat_member)
-		{
-		  if (differ == 0)
-		    {
-		      fprintf (file,
-			       _("\tThe Import Address Table (difference found)\n"));
-		      fprintf (file, _("\tvma:  Hint/Ord Member-Name\n"));
-		      differ = 1;
-		    }
-
-		  if (iat_member == 0)
-		    fprintf (file,
-			     _("\t>>> Ran out of IAT members!\n"));
-
-		  else if (hint_member != 0)
-		    {
-		      ordinal = bfd_get_16 (abfd, data + hint_member - adj);
-		      member_name = (char *) data + hint_member - adj + 2;
-		      fprintf (file, "\t%04lx\t %4d  %s\n",
-			       (unsigned long) iat_member, ordinal, member_name);
-		    }
-		}
-
-	      if (hint_addr != 0 && hint_member == 0)
-		break;
-	    }
-
-	  if (differ == 0)
-	    fprintf (file, _("\tThe Import Address Table is identical\n"));
 
 	  if (ft_allocated)
 	    free (ft_data);

@@ -1,3 +1,8 @@
+2002-05-29 Ralf Habacker <ralf.habacker@freenet.de>
+
+	* peXXigen.c (pe_print_idata): Remove double printed
+	import table lines; add Bound-To comment.
+
 2002-05-29  Matt Thomas  <matt@3am-software.com>
 
 	* Makefile.am (BFD32_BACKENDS): Add elf32-vax.lo.
