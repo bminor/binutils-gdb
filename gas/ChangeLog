@@ -1,5 +1,36 @@
 2001-05-22  Alan Modra  <amodra@one.net.au>
 
+	* symbols.c (resolve_symbol_value): Remove "finalize" param,
+	instead use finalize_syms directly.  Don't treat expressions
+	specially with regard to finalize_syms.  Update calls to self.
+	(resolve_local_symbol): Update call to resolve_symbol_value.
+	(S_GET_VALUE): Likewise.  Return resolve_symbol_value if
+	!finalize_syms.
+	* symbols.h (resolve_symbol_value): Update prototype.
+	* config/obj-aout.c (obj_crawl_symbol_chain): Update call
+	to resolve_symbol_value.
+	* config/obj-bout.c (obj_crawl_symbol_chain): Likewise.
+	* config/obj-coff.c (do_relocs_for): Likewise.
+	(yank_symbols): Likewise.
+	(fixup_segment): Likewise.
+	* config/obj-vms.c (obj_crawl_symbol_chain): Likewise.
+	* config/tc-mips.c (md_convert_frag): Likewise.
+	* config/tc-ppc.c (ppc_frob_symbol): Likewise.
+	(ppc_fix_adjustable): Likewise.
+	* dwarf2dbg.c (dwarf2dbg_estimate_size_before_relax): Likewise.
+	(dwarf2dbg_convert_frag): Likewise.
+	* ehopt.c (eh_frame_estimate_size_before_relax): Likewise.
+	(eh_frame_convert_frag): Likewise.
+	* expr.c (make_expr_symbol): Likewise.
+	* write.c (adjust_reloc_syms): Likewise.
+	(write_object_file): Likewise.
+	(relax_segment): Likewise.
+	(fixup_segment): Likewise.
+	(finalize_syms): Init to zero, and update comment.
+	(write_object_file): Set finalize_syms to 1 rather than 2.
+	* doc/internals.texi (sy_value): Mention finalize_syms.
+	(S_GET_VALUE): Remove restriction on when S_GET_VALUE can be called.
+
 	* config/tc-m68k.c (relaxable_symbol): Only treat external symbols
 	as relaxable if embedded system, make weak syms non-relaxable.
 	Move definition..

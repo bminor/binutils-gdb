@@ -831,9 +831,8 @@ verify_symbol_chain_2 (sym)
    values.  */
 
 valueT
-resolve_symbol_value (symp, finalize)
+resolve_symbol_value (symp)
      symbolS *symp;
-     int finalize;
 {
   int resolved;
   valueT final_val;
@@ -850,7 +849,7 @@ resolve_symbol_value (symp, finalize)
       final_val = (local_symbol_get_frag (locsym)->fr_address
 		   + locsym->lsy_offset) / bfd_octets_per_byte (stdoutput);
 
-      if (finalize)
+      if (finalize_syms)
 	{
 	  locsym->lsy_offset = final_val;
 	  local_symbol_mark_resolved (locsym);
@@ -870,14 +869,10 @@ resolve_symbol_value (symp, finalize)
 
   resolved = 0;
   final_seg = S_GET_SEGMENT (symp);
-  /* Expressions aren't really symbols, so don't finalize their values
-     until relaxation is complete.  */
-  if (final_seg == expr_section && finalize != 2)
-    finalize = 0;
 
   if (symp->sy_resolving)
     {
-      if (finalize)
+      if (finalize_syms)
 	as_bad (_("Symbol definition loop encountered at %s"),
 		S_GET_NAME (symp));
       final_val = 0;
@@ -917,7 +912,7 @@ resolve_symbol_value (symp, finalize)
 
 	case O_symbol:
 	case O_symbol_rva:
-	  left = resolve_symbol_value (add_symbol, finalize);
+	  left = resolve_symbol_value (add_symbol);
 	do_symbol:
 
 	  if (symp->sy_mri_common)
@@ -929,7 +924,7 @@ resolve_symbol_value (symp, finalize)
 	      break;
 	    }
 
-	  if (finalize && final_val == 0)
+	  if (finalize_syms && final_val == 0)
 	    {
 	      if (LOCAL_SYMBOL_CHECK (add_symbol))
 		add_symbol = local_symbol_convert ((struct local_symbol *)
@@ -945,7 +940,7 @@ resolve_symbol_value (symp, finalize)
              is equated.  */
 	  if (! S_IS_DEFINED (add_symbol) || S_IS_COMMON (add_symbol))
 	    {
-	      if (finalize)
+	      if (finalize_syms)
 		{
 		  S_SET_SEGMENT (symp, S_GET_SEGMENT (add_symbol));
 		  symp->sy_value.X_op = O_symbol;
@@ -969,7 +964,7 @@ resolve_symbol_value (symp, finalize)
 	case O_uminus:
 	case O_bit_not:
 	case O_logical_not:
-	  left = resolve_symbol_value (add_symbol, finalize);
+	  left = resolve_symbol_value (add_symbol);
 
 	  if (op == O_uminus)
 	    left = -left;
@@ -1004,8 +999,8 @@ resolve_symbol_value (symp, finalize)
 	case O_gt:
 	case O_logical_and:
 	case O_logical_or:
-	  left = resolve_symbol_value (add_symbol, finalize);
-	  right = resolve_symbol_value (op_symbol, finalize);
+	  left = resolve_symbol_value (add_symbol);
+	  right = resolve_symbol_value (op_symbol);
 	  seg_left = S_GET_SEGMENT (add_symbol);
 	  seg_right = S_GET_SEGMENT (op_symbol);
 
@@ -1047,7 +1042,7 @@ resolve_symbol_value (symp, finalize)
 	      && (op != O_subtract
 		  || seg_left != seg_right
 		  || seg_left == undefined_section)
-	      && finalize)
+	      && finalize_syms)
 	    {
 	      char *file;
 	      unsigned int line;
@@ -1089,7 +1084,7 @@ resolve_symbol_value (symp, finalize)
 	    {
 	      /* If seg_right is not absolute_section, then we've
                  already issued a warning about using a bad symbol.  */
-	      if (seg_right == absolute_section && finalize)
+	      if (seg_right == absolute_section && finalize_syms)
 		{
 		  char *file;
 		  unsigned int line;
@@ -1149,7 +1144,7 @@ resolve_symbol_value (symp, finalize)
       symp->sy_resolving = 0;
     }
 
-  if (finalize)
+  if (finalize_syms)
     {
       S_SET_VALUE (symp, final_val);
 
@@ -1163,7 +1158,7 @@ resolve_symbol_value (symp, finalize)
 
 exit_dont_set_value:
   /* Don't worry if we can't resolve an expr_section symbol.  */
-  if (finalize)
+  if (finalize_syms)
     {
       if (resolved)
 	symp->sy_resolved = 1;
@@ -1190,7 +1185,7 @@ resolve_local_symbol (key, value)
      PTR value;
 {
   if (value != NULL)
-    resolve_symbol_value (value, finalize_syms);
+    resolve_symbol_value (value);
 }
 
 #endif
@@ -1583,8 +1578,8 @@ S_GET_VALUE (s)
 
   if (!s->sy_resolved && s->sy_value.X_op != O_constant)
     {
-      valueT val = resolve_symbol_value (s, finalize_syms);
-      if (finalize_syms != 2 && S_GET_SEGMENT (s) == expr_section)
+      valueT val = resolve_symbol_value (s);
+      if (!finalize_syms)
 	return val;
     }
   if (s->sy_value.X_op != O_constant)

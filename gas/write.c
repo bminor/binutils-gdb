@@ -61,10 +61,8 @@ extern CONST int md_short_jump_size;
 extern CONST int md_long_jump_size;
 #endif
 
-/* Used to control final evaluation of expressions that are more
-   complex than symbol + constant.  1 means set final value for simple
-   expressions, 2 means set final value for more complex expressions.  */
-int finalize_syms = 1;
+/* Used to control final evaluation of expressions.  */
+int finalize_syms = 0;
 
 int symbol_table_frozen;
 void print_fixup PARAMS ((fixS *));
@@ -760,10 +758,10 @@ adjust_reloc_syms (abfd, sec, xxx)
 	   symbols, though, since they are not in the regular symbol
 	   table.  */
 	if (sym != NULL)
-	  resolve_symbol_value (sym, finalize_syms);
+	  resolve_symbol_value (sym);
 
 	if (fixp->fx_subsy != NULL)
-	  resolve_symbol_value (fixp->fx_subsy, finalize_syms);
+	  resolve_symbol_value (fixp->fx_subsy);
 
 	/* If this symbol is equated to an undefined symbol, convert
            the fixup to being against that symbol.  */
@@ -1582,7 +1580,7 @@ write_object_file ()
 #endif /* BFD_ASSEMBLER  */
 
   /* Relaxation has completed.  Freeze all syms.  */
-  finalize_syms = 2;
+  finalize_syms = 1;
 
 #if defined (BFD_ASSEMBLER) && defined (OBJ_COFF) && defined (TE_GO32)
   /* Now that the segments have their final sizes, run through the
@@ -1902,7 +1900,7 @@ write_object_file ()
       symbolS *symp;
 
       for (symp = symbol_rootP; symp; symp = symbol_next (symp))
-	resolve_symbol_value (symp, finalize_syms);
+	resolve_symbol_value (symp);
     }
   resolve_local_symbol_values ();
 
@@ -1950,7 +1948,7 @@ write_object_file ()
 	  /* Do it again, because adjust_reloc_syms might introduce
 	     more symbols.  They'll probably only be section symbols,
 	     but they'll still need to have the values computed.  */
-	  resolve_symbol_value (symp, finalize_syms);
+	  resolve_symbol_value (symp);
 
 	  /* Skip symbols which were equated to undefined or common
              symbols.  */
@@ -2488,7 +2486,7 @@ relax_segment (segment_frag_root, segment)
 		  valueT value;
 		  int size;
 
-		  value = resolve_symbol_value (fragP->fr_symbol, 0);
+		  value = resolve_symbol_value (fragP->fr_symbol);
 		  size = sizeof_leb128 (value, fragP->fr_subtype);
 		  growth = size - fragP->fr_offset;
 		  fragP->fr_offset = size;
@@ -2611,7 +2609,7 @@ fixup_segment (fixP, this_segment_type)
 
       if (sub_symbolP)
 	{
-	  resolve_symbol_value (sub_symbolP, finalize_syms);
+	  resolve_symbol_value (sub_symbolP);
 	  if (add_symbolP == NULL || add_symbol_segment == absolute_section)
 	    {
 	      if (add_symbolP != NULL)

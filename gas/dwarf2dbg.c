@@ -772,7 +772,7 @@ dwarf2dbg_estimate_size_before_relax (frag)
   offsetT addr_delta;
   int size;
 
-  addr_delta = resolve_symbol_value (frag->fr_symbol, 0);
+  addr_delta = resolve_symbol_value (frag->fr_symbol);
   size = size_inc_line_addr (frag->fr_offset, addr_delta);
 
   frag->fr_subtype = size;
@@ -806,7 +806,7 @@ dwarf2dbg_convert_frag (frag)
 {
   offsetT addr_diff;
 
-  addr_diff = resolve_symbol_value (frag->fr_symbol, finalize_syms);
+  addr_diff = resolve_symbol_value (frag->fr_symbol);
 
   /* fr_var carries the max_chars that we created the fragment with.
      fr_subtype carries the current expected length.  We must, of

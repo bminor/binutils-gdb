@@ -1,5 +1,5 @@
 /* symbols.h -
-   Copyright 1987, 1990, 1992, 1993, 1994, 1995, 1997, 1999, 2000
+   Copyright 1987, 1990, 1992, 1993, 1994, 1995, 1997, 1999, 2000, 2001
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -61,7 +61,7 @@ void local_colon PARAMS ((int n));
 void symbol_begin PARAMS ((void));
 void symbol_print_statistics PARAMS ((FILE *));
 void symbol_table_insert PARAMS ((symbolS * symbolP));
-valueT resolve_symbol_value PARAMS ((symbolS *, int));
+valueT resolve_symbol_value PARAMS ((symbolS *));
 void resolve_local_symbol_values PARAMS ((void));
 
 void print_symbol_value PARAMS ((symbolS *));

@@ -4221,7 +4221,7 @@ ppc_frob_symbol (sym)
       ppc_last_function = sym;
       if (symbol_get_tc (sym)->size != (symbolS *) NULL)
 	{
-	  resolve_symbol_value (symbol_get_tc (sym)->size, finalize_syms);
+	  resolve_symbol_value (symbol_get_tc (sym)->size);
 	  SA_SET_SYM_FSIZE (sym,
 			    (long) S_GET_VALUE (symbol_get_tc (sym)->size));
 	}
@@ -4281,7 +4281,7 @@ ppc_frob_symbol (sym)
 				     - S_GET_VALUE (sym));
 	  else
 	    {
-	      resolve_symbol_value (symbol_get_tc (sym)->next, finalize_syms);
+	      resolve_symbol_value (symbol_get_tc (sym)->next);
 	      a->x_csect.x_scnlen.l = (S_GET_VALUE (symbol_get_tc (sym)->next)
 				       - S_GET_VALUE (sym));
 	    }
@@ -4334,7 +4334,7 @@ ppc_frob_symbol (sym)
 	    }
 	  else
 	    {
-	      resolve_symbol_value (next, finalize_syms);
+	      resolve_symbol_value (next);
 	      a->x_csect.x_scnlen.l = (S_GET_VALUE (next)
 				       - S_GET_VALUE (sym));
 	    }
@@ -4365,8 +4365,7 @@ ppc_frob_symbol (sym)
 	    {
 	      while (symbol_get_tc (csect)->next != (symbolS *) NULL)
 		{
-		  resolve_symbol_value (symbol_get_tc (csect)->next,
-					finalize_syms);
+		  resolve_symbol_value (symbol_get_tc (csect)->next);
 		  if (S_GET_VALUE (symbol_get_tc (csect)->next)
 		      > S_GET_VALUE (sym))
 		    break;
@@ -4412,7 +4411,7 @@ ppc_frob_symbol (sym)
       /* The value is the offset from the enclosing csect.  */
       block = symbol_get_tc (sym)->within;
       csect = symbol_get_tc (block)->within;
-      resolve_symbol_value (csect, finalize_syms);
+      resolve_symbol_value (csect);
       S_SET_VALUE (sym, S_GET_VALUE (sym) - S_GET_VALUE (csect));
     }
   else if (S_GET_STORAGE_CLASS (sym) == C_BINCL
@@ -4629,7 +4628,7 @@ ppc_fix_adjustable (fix)
 {
   valueT val;
 
-  resolve_symbol_value (fix->fx_addsy, finalize_syms);
+  resolve_symbol_value (fix->fx_addsy);
   val = S_GET_VALUE (fix->fx_addsy);
   if (ppc_toc_csect != (symbolS *) NULL
       && fix->fx_addsy != (symbolS *) NULL
@@ -4649,7 +4648,7 @@ ppc_fix_adjustable (fix)
 	    continue;
 	  if (symbol_get_tc (sy)->class != XMC_TC)
 	    break;
-	  resolve_symbol_value (sy, finalize_syms);
+	  resolve_symbol_value (sy);
 	  if (val == S_GET_VALUE (sy))
 	    {
 	      fix->fx_addsy = sy;
@@ -4733,8 +4732,7 @@ ppc_fix_adjustable (fix)
       && S_GET_SEGMENT (fix->fx_addsy) == bss_section
       && ! S_IS_EXTERNAL (fix->fx_addsy))
     {
-      resolve_symbol_value (symbol_get_frag (fix->fx_addsy)->fr_symbol,
-			    finalize_syms);
+      resolve_symbol_value (symbol_get_frag (fix->fx_addsy)->fr_symbol);
       fix->fx_offset +=
 	(S_GET_VALUE (fix->fx_addsy)
 	 - S_GET_VALUE (symbol_get_frag (fix->fx_addsy)->fr_symbol));

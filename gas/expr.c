@@ -105,7 +105,7 @@ make_expr_symbol (expressionP)
   symbol_set_value_expression (symbolP, expressionP);
 
   if (expressionP->X_op == O_constant)
-    resolve_symbol_value (symbolP, finalize_syms);
+    resolve_symbol_value (symbolP);
 
   n = (struct expr_symbol_line *) xmalloc (sizeof *n);
   n->sym = symbolP;

@@ -130,11 +130,12 @@ Symbol structures contain the following fields:
 @item sy_value
 This is an @code{expressionS} that describes the value of the symbol.  It might
 refer to one or more other symbols; if so, its true value may not be known
-until @code{resolve_symbol_value} is called in @code{write_object_file}.
+until @code{resolve_symbol_value} is called with @var{finalize_syms} non-zero
+in @code{write_object_file}.
 
 The expression is often simply a constant.  Before @code{resolve_symbol_value}
-is called, the value is the offset from the frag (@pxref{Frags}).  Afterward,
-the frag address has been added in.
+is called with @var{finalize_syms} set, the value is the offset from the frag
+(@pxref{Frags}).  Afterward, the frag address has been added in.
 
 @item sy_resolved
 This field is non-zero if the symbol's value has been completely resolved.  It
@@ -208,9 +209,7 @@ Set the symbol's value.
 @item S_GET_VALUE
 @cindex S_GET_VALUE
 Get the symbol's value.  This will cause @code{resolve_symbol_value} to be
-called if necessary, so @code{S_GET_VALUE} should only be called when it is
-safe to resolve symbols (i.e., after the entire input file has been read and
-all symbols have been defined).
+called if necessary.
 
 @item S_SET_SEGMENT
 @cindex S_SET_SEGMENT

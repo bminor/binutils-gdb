@@ -11356,7 +11356,7 @@ md_convert_frag (abfd, asec, fragp)
 	  ext = false;
 	}
 
-      resolve_symbol_value (fragp->fr_symbol, finalize_syms);
+      resolve_symbol_value (fragp->fr_symbol);
       val = S_GET_VALUE (fragp->fr_symbol);
       if (op->pcrel)
 	{

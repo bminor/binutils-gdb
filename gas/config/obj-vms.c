@@ -532,7 +532,7 @@ obj_crawl_symbol_chain (headers)
   symbolPP = &symbol_rootP;	/* -> last symbol chain link.  */
   while ((symbolP = *symbolPP) != NULL)
     {
-      resolve_symbol_value (symbolP, finalize_syms);
+      resolve_symbol_value (symbolP);
 
      /* OK, here is how we decide which symbols go out into the
 	brave new symtab.  Symbols that do are:
