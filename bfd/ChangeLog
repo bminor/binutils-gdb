@@ -5,6 +5,11 @@ Wed Nov  8 20:03:44 1995  Eric Freudenthal <freudenthal@nyu.edu>
 
 Wed Nov  8 11:31:11 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* coff-a29k.c (a29k_reloc): Change handling of R_IREL reloc to be
+	compatible with AMD generated COFF files.  Try to support both AMD
+	and GNU formats simultaneously.
+	(coff_a29k_relocate_section): Likewise.
+
 	* libbfd.c (bfd_get_file_window): Change writable parameter from
 	int to boolean; update all callers.  Pass MAP_SHARED if not
 	writable--it's required on Solaris.  Cast fprintf argument to

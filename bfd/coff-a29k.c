@@ -134,18 +134,23 @@ a29k_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
     signed_value = EXTRACT_HWORD(insn);
     signed_value = SIGN_EXTEND_HWORD(signed_value);
     signed_value <<= 2;
-    signed_value +=  sym_value + reloc_entry->addend;
-    if (((signed_value + reloc_entry->address) & ~0x3ffff) == 0)
+
+    /* See the note on the R_IREL reloc in coff_a29k_relocate_section.  */
+    if (signed_value == - (long) reloc_entry->address)
+      signed_value = 0;
+
+    signed_value += sym_value + reloc_entry->addend;
+    if ((signed_value & ~0x3ffff) == 0)
     {				/* Absolute jmp/call */
       insn |= (1<<24);		/* Make it absolute */
-      signed_value += reloc_entry->address;
       /* FIXME: Should we change r_type to R_IABS */
     } 
     else 
     {
       /* Relative jmp/call, so subtract from the value the
 	 address of the place we're coming from */
-      signed_value -= (input_section->output_section->vma
+      signed_value -= (reloc_entry->address
+		       + input_section->output_section->vma
 		       + input_section->output_offset);
       if (signed_value>0x1ffff || signed_value<-0x20000) 
        return(bfd_reloc_overflow);
@@ -422,8 +427,29 @@ coff_a29k_relocate_section (output_bfd, info, input_bfd, input_section,
 	  signed_value = SIGN_EXTEND_HWORD (signed_value);
 	  signed_value <<= 2;
 
+	  /* Unfortunately, there are two different versions of COFF
+	     a29k.  In the original AMD version, the value stored in
+	     the field for the R_IREL reloc is a simple addend.  In
+	     the GNU version, the value is the negative of the address
+	     of the reloc within section.  We try to cope here by
+	     assuming the AMD version, unless the addend is exactly
+	     the negative of the address; in the latter case we assume
+	     the GNU version.  This means that something like
+	         .text
+		 nop
+		 jmp i-4
+	     will fail, because the addend of -4 will happen to equal
+	     the negative of the address within the section.  The
+	     compiler will never generate code like this.
+
+	     At some point in the future we may want to take out this
+	     check.  */
+
+	  if (signed_value == - (long) (rel->r_vaddr - input_section->vma))
+	    signed_value = 0;
+
 	  /* Determine the destination of the jump.  */
-	  signed_value += val + rel->r_vaddr - input_section->vma;
+	  signed_value += val;
 
 	  if ((signed_value & ~0x3ffff) == 0)
 	    {
