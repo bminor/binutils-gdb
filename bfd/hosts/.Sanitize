@@ -57,6 +57,7 @@ m68klynx.h
 miniframe.h
 mipsbsd.h
 news.h
+news-mips.h
 ncr3000.h
 riscos.h
 rs6000.h
