@@ -3,10 +3,13 @@
 #
 
 # We're testing bits in obj-elf -- don't run on anything else.
-if { [istarget "*-elf*"]		
-     || [istarget "*-linux*"]
-     || [istarget "sparc*-*-solaris*"]
-     || [istarget "mips*-*-irix6*"] } then {
+if { ([istarget "*-*-elf*"]		
+      || [istarget "*-*-linux*"]
+      || [istarget "sparc*-*-solaris*"]
+      || [istarget "mips*-*-irix6*"])
+     && ![istarget *-*-linux*aout*]
+     && ![istarget *-*-linux*oldld*]
+} then {
 
     # FIXME: This doesn't work for MIPS targets because of the .reginfo
     # and .mdebug sections.

@@ -15,8 +15,10 @@ proc run_list_test { name opts } {
 }
 
 # Vtable bits are only supported by ELF targets.
-if {[istarget "*-*-elf*"] || [istarget "*-*-linux*"]} then {
-
+if { ([istarget "*-*-elf*"]		
+      || [istarget "*-*-linux*"])
+     && ![istarget *-*-linux*aout*]
+     && ![istarget *-*-linux*oldld*] } then {
 
     # not supported by D30V
     if {[istarget "d30v-*-*"]} {
