@@ -23,6 +23,8 @@
 #ifndef LDLANG_H
 #define LDLANG_H
 
+#define DEFAULT_MEMORY_REGION   "*default*"
+
 typedef enum {
   lang_input_file_is_l_enum,
   lang_input_file_is_symbols_only_enum,
@@ -388,7 +390,7 @@ extern int lang_statement_iteration;
 extern void lang_init
   (void);
 extern struct memory_region_struct *lang_memory_region_lookup
-  (const char *const);
+  (const char *const, bfd_boolean);
 extern struct memory_region_struct *lang_memory_region_default
   (asection *);
 extern void lang_map

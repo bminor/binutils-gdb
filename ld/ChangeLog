@@ -1,3 +1,19 @@
+2003-10-21  Nick Clifton  <nickc@redhat.com>
+
+        * ldlang.c (lang_memory_region_lookup): Add second parameter -
+        create - which is true if the region is being created.  Issue
+        appropriate warning messages for finding and not finding
+        already created regions.
+        (lang_memory_default): Use DEFAULT_MEMORY_REGION.
+        (lang_leave_overlay_section): Likewise.
+        (lang_size_sections_1): Likewise.
+        Pass second parameter to lang_memory_region_lookup.
+        (lang_get_regions): Likewise.
+        * ldlang.h (DEFAULT_MEMORY_REGION): Define.
+        Update prototype for lang_memory_region_lookup.        
+	* ldgram.y: Pass second parameter to lang_memory_region_lookup.
+        Use DEFAULT_MEMORY_REGION instead of "*default".
+        
 2003-10-20  Andrew Cagney  <cagney@redhat.com>
 
 	* pe-dll.c: Replace "struct sec" with "struct bfd_section".

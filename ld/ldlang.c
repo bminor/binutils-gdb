@@ -504,13 +504,19 @@ lang_init (void)
   We maintain a list of all the regions here.
 
   If no regions are specified in the script, then the default is used
-  which is created when looked up to be the entire data space.  */
+  which is created when looked up to be the entire data space.
+
+  If create is true we are creating a region inside a MEMORY block.
+  In this case it is probably an error to create a region that has
+  already been created.  If we are not inside a MEMORY block it is
+  dubious to use an undeclared region name (except DEFAULT_MEMORY_REGION)
+  and so we issue a warning.  */
 
 static lang_memory_region_type *lang_memory_region_list;
 static lang_memory_region_type **lang_memory_region_list_tail = &lang_memory_region_list;
 
 lang_memory_region_type *
-lang_memory_region_lookup (const char *const name)
+lang_memory_region_lookup (const char *const name, bfd_boolean create)
 {
   lang_memory_region_type *p;
   lang_memory_region_type *new;
@@ -520,10 +526,12 @@ lang_memory_region_lookup (const char *const name)
     return NULL;
 
   for (p = lang_memory_region_list; p != NULL; p = p->next)
-    {
-      if (strcmp (p->name, name) == 0)
+    if (strcmp (p->name, name) == 0)
+      {
+	if (create)
+	  einfo (_("%P:%S: warning: redeclaration of memory region '%s'\n"), name);
 	return p;
-    }
+      }
 
 #if 0
   /* This code used to always use the first region in the list as the
@@ -532,12 +540,15 @@ lang_memory_region_lookup (const char *const name)
      NOLOAD sections to work reasonably without requiring a region.
      People should specify what region they mean, if they really want
      a region.  */
-  if (strcmp (name, "*default*") == 0)
+  if (strcmp (name, DEFAULT_MEMORY_REGION) == 0)
     {
       if (lang_memory_region_list != NULL)
 	return lang_memory_region_list;
     }
 #endif
+
+  if (!create && strcmp (name, DEFAULT_MEMORY_REGION))
+    einfo (_("%P:%S: warning: memory region %s not declared\n"), name);
 
   new = stat_alloc (sizeof (lang_memory_region_type));
 
@@ -575,7 +586,7 @@ lang_memory_default (asection *section)
 	  return p;
 	}
     }
-  return lang_memory_region_lookup ("*default*");
+  return lang_memory_region_lookup (DEFAULT_MEMORY_REGION, FALSE);
 }
 
 lang_output_section_statement_type *
@@ -2889,7 +2900,7 @@ lang_size_sections_1
 			|| (((bfd_get_section_flags (output_bfd, os->bfd_section)
 			      & (SEC_ALLOC | SEC_LOAD)) != 0)
 			    && os->region->name[0] == '*'
-			    && strcmp (os->region->name, "*default*") == 0))
+			    && strcmp (os->region->name, DEFAULT_MEMORY_REGION) == 0))
 		      {
 			os->region = lang_memory_default (os->bfd_section);
 		      }
@@ -2902,10 +2913,10 @@ lang_size_sections_1
 			    & SEC_NEVER_LOAD) == 0
 			&& ! link_info.relocatable
 			&& check_regions
-			&& strcmp (os->region->name, "*default*") == 0
+			&& strcmp (os->region->name, DEFAULT_MEMORY_REGION) == 0
 			&& lang_memory_region_list != NULL
 			&& (strcmp (lang_memory_region_list->name,
-				    "*default*") != 0
+				    DEFAULT_MEMORY_REGION) != 0
 			    || lang_memory_region_list->next != NULL))
 		      {
 			/* By default this is an error rather than just a
@@ -3160,7 +3171,7 @@ lang_size_sections_1
 		  {
 		    /* If we don't have an output section, then just adjust
 		       the default memory address.  */
-		    lang_memory_region_lookup ("*default*")->current = newdot;
+		    lang_memory_region_lookup (DEFAULT_MEMORY_REGION, FALSE)->current = newdot;
 		  }
 		else
 		  {
@@ -4464,10 +4475,11 @@ lang_float (bfd_boolean maybe)
 /* Work out the load- and run-time regions from a script statement, and
    store them in *LMA_REGION and *REGION respectively.
 
-   MEMSPEC is the name of the run-time region, or "*default*" if the
-   statement didn't specify one.  LMA_MEMSPEC is the name of the
-   load-time region, or null if the statement didn't specify one.
-   HAVE_LMA_P is TRUE if the statement had an explicit load address.
+   MEMSPEC is the name of the run-time region, or the value of
+   DEFAULT_MEMORY_REGION if the statement didn't specify one.
+   LMA_MEMSPEC is the name of the load-time region, or null if the
+   statement didn't specify one.HAVE_LMA_P is TRUE if the statement
+   had an explicit load address.
 
    It is an error to specify both a load region and a load address.  */
 
@@ -4478,14 +4490,14 @@ lang_get_regions (struct memory_region_struct **region,
 		  const char *lma_memspec,
 		  int have_lma_p)
 {
-  *lma_region = lang_memory_region_lookup (lma_memspec);
+  *lma_region = lang_memory_region_lookup (lma_memspec, FALSE);
 
   /* If no runtime region has been given, but the load region has
      been, use the load region.  */
-  if (lma_memspec != 0 && strcmp (memspec, "*default*") == 0)
+  if (lma_memspec != 0 && strcmp (memspec, DEFAULT_MEMORY_REGION) == 0)
     *region = *lma_region;
   else
-    *region = lang_memory_region_lookup (memspec);
+    *region = lang_memory_region_lookup (memspec, FALSE);
 
   if (have_lma_p && lma_memspec != 0)
     einfo (_("%X%P:%S: section has both a load address and a load region\n"));
@@ -4849,10 +4861,11 @@ lang_leave_overlay_section (fill_type *fill,
 
   name = current_section->name;
 
-  /* For now, assume that "*default*" is the run-time memory region and
-     that no load-time region has been specified.  It doesn't really
-     matter what we say here, since lang_leave_overlay will override it.  */
-  lang_leave_output_section_statement (fill, "*default*", phdrs, 0);
+  /* For now, assume that DEFAULT_MEMORY_REGION is the run-time memory
+     region and that no load-time region has been specified.  It doesn't
+     really matter what we say here, since lang_leave_overlay will
+     override it.  */
+  lang_leave_output_section_statement (fill, DEFAULT_MEMORY_REGION, phdrs, 0);
 
   /* Define the magic symbols.  */
 

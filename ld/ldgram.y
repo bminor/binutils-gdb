@@ -627,7 +627,7 @@ memory_spec_list:
 
 
 memory_spec: 	NAME
-		{ region = lang_memory_region_lookup($1); }
+		{ region = lang_memory_region_lookup ($1, TRUE); }
 		attributes_opt ':'
 		origin_spec opt_comma length_spec
 		{}
@@ -924,7 +924,7 @@ opt_nocrossrefs:
 memspec_opt:
 		'>' NAME
 		{ $$ = $2; }
-	|	{ $$ = "*default*"; }
+	|	{ $$ = DEFAULT_MEMORY_REGION; }
 	;
 
 phdr_opt:
