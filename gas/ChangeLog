@@ -17,6 +17,22 @@ Mon Feb  7 03:56:05 1994  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 	is smaller than word size.  Otherwise, we always wind up with
 	zeros.
 
+	* config/tc-alpha.c (md_section_align): Change second argument and
+	return type to valueT, to agree with tc.h.
+	(alpha_do_align): Local static array nop_pattern is now unsigned
+	char, to avoid overflow warnings.
+	* config/tc-alpha.h (md_section_align): Delete declaration.
+
+	* config/obj-ecoff.c (ecoff_frob_file): Ensure that ecoff_data for
+	output bfd is non-null before indirecting through it.
+
+	* config/tc-alpha.c (alpha_frob_ecoff_data): Renamed from
+	alpha_frob_file.
+	* config/tc-alpha.h (tc_frob_file): Macro deleted.
+	* config/obj-ecoff.c (ecoff_frob_file) [TC_ALPHA]: Call
+	alpha_frob_ecoff_data, then fill in optional-header info with gp
+	value and register masks.
+
 Sun Feb  6 16:13:47 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* configure.in (hiux): Fixes from m-kasahr@sramhc.sra.co.JP.
