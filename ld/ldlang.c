@@ -1018,7 +1018,7 @@ DEFUN(print_input_section,(in),
       lang_input_section_type *in)
 {
   asection *i = in->section;
-  int size = i->flags & SEC_HAS_CONTENTS ?
+  int size = i->reloc_done ?
    bfd_get_section_size_after_reloc(i) :
     bfd_get_section_size_before_reloc(i);
   
@@ -1097,7 +1097,7 @@ DEFUN(print_data_statement,(data),
   print_space();
 /*  ASSERT(print_dot == data->output_vma);*/
 
-  print_address(data->output_vma);
+  print_address(data->output_vma + data->output_section->vma);
   print_space();
   print_address(data->value);
   print_space();
@@ -1136,6 +1136,7 @@ DEFUN(print_padding_statement,(s),
   print_space();
   print_fill(s->fill);
   print_nl();
+  print_dot = s->output_offset + s->output_section->vma + s->size;
 }
 
 static void 

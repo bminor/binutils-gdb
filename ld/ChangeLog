@@ -1,3 +1,18 @@
+Tue Feb  4 15:28:01 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
+
+	* ldlex.l: Put pack -noinhibit-exec and -sort-common
+	* ldlang.c (print_data_statement): print the right address.
+
+Thu Jan 30 17:51:53 1992  Per Bothner  (bothner at cygnus.com)
+
+	* Makefile.in:  The rule for testing ld by re-linking itself
+	via an intermediate -r link was moved to the ld1 rule
+	instead of the ld2 rule.  This allows ld2 and ld3 to be identical,
+	which allows the bootstrap rule to work.
+	* ldctor.c (find_constructors):  Don't create a constructor
+	list if it is already defined (as would happen if ld is
+	invoked by collect).
+
 Wed Jan 29 08:35:39 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
 
 	* config/mh-sparc.h: now uses libgcc.a
