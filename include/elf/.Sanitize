@@ -34,6 +34,7 @@ fi
 Things-to-keep:
 
 ChangeLog
+alpha.h
 common.h
 dwarf.h
 external.h
