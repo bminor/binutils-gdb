@@ -1,3 +1,16 @@
+Tue Jan 12 14:50:10 1999  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* inftarg.c (child_ops): Don't initialize statically.
+	(init_child_ops): New function, fills in child_ops.
+	(_initialize_inftarg): Use it.
+	(child_post_attach): Declare extern.
+	(child_wait): Fix ambiguous parens.
+	(child_attach_to_process): Remove unused local wstatus.
+	(child_insert_fork_catchpoint, child_remove_fork_catchpoint,
+	child_insert_vfork_catchpoint, child_remove_vfork_catchpoint,
+	child_has_forked, child_insert_exec_catchpoint,
+	child_remove_exec_catchpoint): Return a value.
+
 Mon Jan 11 16:43:44 1999  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* remote.c (remote_wait): Add inferior_pid to thread list only
@@ -11,7 +24,7 @@ Mon Jan 11 16:43:44 1999  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 Mon Jan 11 13:45:57 1999  Stu Grossman  <grossman@babylon-5.cygnus.com>
 
-	* dwarf2read.c (dump_die):  Change stderr gdb_stderr.
+	* dwarf2read.c (dump_die):  Change stderr to gdb_stderr.
 	* expprint.c (print_subexp):  fprintf => fprintf_unfiltered.
 	* jv-typeprint.c (java_type_print_base):  fputs => fputs_filtered.
 	* stack.c (struct function_bounds):  Remove superfluous `typedef'.
