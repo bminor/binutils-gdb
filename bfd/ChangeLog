@@ -1,3 +1,17 @@
+2000-12-19  Kazu Hirata  <kazu@hxi.com>
+
+	* sco5-core.c: Fix formatting.
+	* section.c: Likewise.
+	* sparclinux.c: Likewise.
+	* sparclynx.c: Likewise.
+	* sparcnetbsd.c: Likewise.
+	* srec.c: Likewise.
+	* stabs.c: Likewise.
+	* stab-syms.c: Likewise.
+	* sunos.c: Likewise.
+	* syms.c: Likewise.
+	* sysdep.h: Likewise.
+
 2000-12-18  Nick Clifton  <nickc@redhat.com>
 
 	* coff-arm.c (EXTRA_S_FLAGS): Only define if not already

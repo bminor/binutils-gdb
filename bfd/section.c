@@ -111,7 +111,6 @@ SUBSECTION
 |     size            0x103   |
 |     output_section  --------|
 
-
 SUBSECTION
 	Link orders
 
@@ -132,7 +131,6 @@ SUBSECTION
 	a link_order by link_order basis.
 
 */
-
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -642,7 +640,6 @@ bfd_get_section_by_name (abfd, name)
   return NULL;
 }
 
-
 /*
 FUNCTION
 	bfd_get_unique_section_name
@@ -693,7 +690,6 @@ bfd_get_unique_section_name (abfd, templat, count)
   return sname;
 }
 
-
 /*
 FUNCTION
 	bfd_make_section_old_way
@@ -718,7 +714,6 @@ DESCRIPTION
 	If memory allocation fails.
 
 */
-
 
 asection *
 bfd_make_section_old_way (abfd, name)
@@ -867,7 +862,6 @@ bfd_make_section (abfd, name)
   return bfd_make_section_anyway (abfd, name);
 }
 
-
 /*
 FUNCTION
 	bfd_set_section_flags
@@ -911,14 +905,13 @@ bfd_set_section_flags (abfd, section, flags)
   return true;
 }
 
-
 /*
 FUNCTION
 	bfd_map_over_sections
 
 SYNOPSIS
 	void bfd_map_over_sections(bfd *abfd,
-				   void (*func)(bfd *abfd,
+				   void (*func) (bfd *abfd,
 						asection *sect,
 						PTR obj),
 				   PTR obj);
@@ -936,7 +929,6 @@ DESCRIPTION
 |	   section *p;
 |	   for (p = abfd->sections; p != NULL; p = p->next)
 |	      func(abfd, p, ...)
-
 
 */
 
@@ -956,7 +948,6 @@ bfd_map_over_sections (abfd, operation, user_storage)
   if (i != abfd->section_count)	/* Debugging */
     abort ();
 }
-
 
 /*
 FUNCTION
@@ -982,7 +973,7 @@ bfd_set_section_size (abfd, ptr, val)
      bfd_size_type val;
 {
   /* Once you've started writing to any section you cannot create or change
-     the size of any others. */
+     the size of any others.  */
 
   if (abfd->output_has_begun)
     {
@@ -1008,14 +999,11 @@ SYNOPSIS
          file_ptr offset,
          bfd_size_type count);
 
-
 DESCRIPTION
 	Sets the contents of the section @var{section} in BFD
 	@var{abfd} to the data starting in memory at @var{data}. The
 	data is written to the output section starting at offset
 	@var{offset} for @var{count} octets.
-
-
 
 	Normally <<true>> is returned, else <<false>>. Possible error
 	returns are:
@@ -1026,7 +1014,6 @@ DESCRIPTION
 
 	This routine is front end to the back end function
 	<<_bfd_set_section_contents>>.
-
 
 */
 
@@ -1116,8 +1103,6 @@ DESCRIPTION
 	<<SEC_HAS_CONTENTS>> flag set, then the @var{location} is filled
 	with zeroes. If no errors occur, <<true>> is returned, else
 	<<false>>.
-
-
 
 */
 boolean
