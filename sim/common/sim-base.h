@@ -18,10 +18,62 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-/* This file is meant to be included by sim-basics.h.  */
+
+/* Simulator state pseudo baseclass.
+
+   Each simulator is required to have a sim-main.h file that includes
+   sim-basics.h, defines the base type sim_cia (the data type that
+   contains the complete current instruction address information), and
+   then sim-base.h:
+
+     #include "sim-basics.h"
+     typedef address_word sim_cia;
+     #include "sim-base.h"
+   
+   and defines two key simulator structures.  Firstly, struct
+   _sim_cpu:
+
+     struct _sim_cpu {
+        ... simulator specific members ...
+        sim_cpu_base base;
+     };
+
+   and secondly, struct sim_state (which uses the sim_cpu structure):
+
+     struct sim_state {
+       sim_cpu cpu[MAX_NR_PROCESSORS];
+     #if (WITH_SMP)
+     #define STATE_CPU(sd,n) (&(sd)->cpu[n])
+     #else
+     #define STATE_CPU(sd,n) (&(sd)->cpu[0])
+     #endif
+       ... simulator specific members ...
+       sim_state_base base;
+     };
+
+   Note that `base' appears last.  This makes `base.magic' appear last
+   in the entire struct and helps catch miscompilation errors. */
+
 
 #ifndef SIM_BASE_H
 #define SIM_BASE_H
+
+/* Pre-declare certain types. */
+
+/* typedef <target-dependant> sim_cia; */
+#ifndef NULL_CIA
+#define NULL_CIA ((sim_cia) 0)
+#endif
+typedef struct _sim_cpu sim_cpu;
+
+#include "sim-module.h"
+#include "sim-trace.h"
+#include "sim-profile.h"
+#include "sim-model.h"
+#include "sim-core.h"
+#include "sim-events.h"
+#include "sim-io.h"
+
 
 /* Global pointer to current state while sim_resume is running.
    On a machine with lots of registers, it might be possible to reserve
@@ -32,50 +84,22 @@ with this program; if not, write to the Free Software Foundation, Inc.,
    If CURRENT_STATE_REG is defined, it means current_state is living in
    a global register.  */
 
+
 #ifdef CURRENT_STATE_REG
 /* FIXME: wip */
 #else
 extern struct sim_state *current_state;
 #endif
 
+
 /* The simulator may provide different (and faster) definition.  */
 #ifndef CURRENT_STATE
 #define CURRENT_STATE current_state
 #endif
 
-/* Simulator state pseudo baseclass.
-   Each simulator is required to have a sim-main.h file that includes
-   sim-basics.h and defines struct sim_state to be:
-
-   struct sim_state {
-     sim_cpu cpu;
-   #define STATE_CPU(sd,n) (&(sd)->cpu)
-     ... simulator specific members ...
-     sim_state_base base;
-   };
-
-   for a single processor or
-
-   struct sim_state {
-     sim_cpu cpu[MAX_NR_PROCESSORS]; -- could be also be array of pointers
-   #define STATE_CPU(sd,n) (&(sd)->cpu[n])
-     ... simulator specific members ...
-     sim_state_base base;
-   };
-
-   for multiprocessors.
-   Note that `base' appears last.  This makes `base.magic' appear last
-   in the entire struct and helps catch miscompilation errors.
-
-   sim_cpu is defined to be:
-
-   typedef struct _sim_cpu {
-      ... simulator specific members ...
-      sim_cpu_base base;
-   } sim_cpu;
-   */
 
 typedef struct {
+
   /* Simulator's argv[0].  */
   const char *my_name;
 #define STATE_MY_NAME(sd) ((sd)->base.my_name)
@@ -151,17 +175,28 @@ typedef struct {
 #define STATE_MEMORY(sd) ((sd)->base.memory)
 #endif
 
+  /* core memory bus */
+#define STATE_CORE(sd) (&(sd)->base.core)
+  sim_core core;
+
+  /* event handler */
+#define STATE_EVENTS(sd) (&(sd)->base.events)
+  sim_events events;
+
   /* Marker for those wanting to do sanity checks.
      This should remain the last member of this struct to help catch
      miscompilation errors.  */
   int magic;
 #define SIM_MAGIC_NUMBER 0x4242
 #define STATE_MAGIC(sd) ((sd)->base.magic)
+
 } sim_state_base;
+
 
 /* Pseudo baseclass for each cpu.  */
 
 typedef struct {
+
   /* Backlink to main state struct.  */
   SIM_DESC state;
 #define CPU_STATE(cpu) ((cpu)->base.state)
@@ -193,10 +228,13 @@ typedef struct {
   /* Profile data.  See sim-profile.h.  */
   PROFILE_DATA profile_data;
 #define CPU_PROFILE_DATA(cpu) (& (cpu)->base.profile_data)
+
 } sim_cpu_base;
+
 
 /* Functions for allocating/freeing a sim_state.  */
 SIM_DESC sim_state_alloc PARAMS ((void));
 void sim_state_free PARAMS ((SIM_DESC));
+
 
 #endif /* SIM_BASE_H */
