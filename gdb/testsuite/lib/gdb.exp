@@ -1470,6 +1470,11 @@ proc gdb_expect_list {test sentinel list} {
 			fail "${test} (pattern ${index} + sentinel)"
 			set ok 0
 		    }
+		    -re ".*A problem internal to GDB has been detected" {
+			fail "${test} (GDB internal error)"
+			set ok 0
+			gdb_internal_error_resync
+		    }
 		    timeout {
 			fail "${test} (pattern ${index} + sentinel) (timeout)"
 			set ok 0
@@ -1487,6 +1492,11 @@ proc gdb_expect_list {test sentinel list} {
 		    -re "${sentinel}" {
 			fail "${test} (pattern ${index})"
 			set ok 0
+		    }
+		    -re ".*A problem internal to GDB has been detected" {
+			fail "${test} (GDB internal error)"
+			set ok 0
+			gdb_internal_error_resync
 		    }
 		    timeout {
 			fail "${test} (pattern ${index}) (timeout)"

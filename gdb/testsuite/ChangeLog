@@ -1,3 +1,8 @@
+2004-02-10  Andrew Cagney  <cagney@redhat.com>
+
+	* lib/gdb.exp (gdb_expect_list): Recover from internal-errors
+	using gdb_internal_error_resync.
+
 2004-02-09  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.threads/thread-specific.exp: Stop early if no threads are
