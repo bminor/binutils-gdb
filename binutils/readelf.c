@@ -3099,7 +3099,7 @@ struct unw_aux_info
       }
     *table;				/* Unwind table.  */
     unsigned long         table_len;	/* Length of unwind table.  */
-    const unsigned char * info;		/* Unwind info.  */
+    unsigned char *       info;		/* Unwind info.  */
     unsigned long         info_size;	/* Size of unwind info.  */
     bfd_vma               info_addr;	/* starting address of unwind info.  */
     bfd_vma               seg_base;	/* Starting address of segment.  */
@@ -3400,7 +3400,7 @@ process_unwind (file)
 	{
 	  aux.info_size = sec->sh_size;
 	  aux.info_addr = sec->sh_addr;
-	  GET_DATA_ALLOC (sec->sh_offset, aux.info_size, (char *) aux.info,
+	  GET_DATA_ALLOC (sec->sh_offset, aux.info_size, aux.info,
 			  char *, "unwind info");
 	}
     }

@@ -1,3 +1,9 @@
+2001-02-11  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
+
+	* readelf.c (struct unw_aux_info): Remove const from the info member.
+	(process_unwind): Don't type-cast the third argument to the
+	GET_DATA_ALLOC macro.
+
 2001-02-11  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (dump_relocations): Free corrected allocated
@@ -177,7 +183,7 @@ Mon Dec 11 14:30:21 MET 2000  Jan Hubicka  <jh@suse.cz>
 
 2000-11-28  Hans-Peter Nilsson  <hp@bitrange.com>
 
-	* MAINTAINERS: Add Jörn Rennecke and self as SH maintainers.
+	* MAINTAINERS: Add Jvrn Rennecke and self as SH maintainers.
 	Change sourceware.cygnus.com to sources.redhat.com.
 	Fix typo for "amongst".
 
