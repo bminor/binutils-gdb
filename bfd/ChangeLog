@@ -1,3 +1,22 @@
+2001-08-27  Daniel Jacobowitz  <drow@mvista.com>
+
+	* elf32-i386.c (elf_i386_grok_prstatus): New function.
+	(elf_i386_grok_psinfo): New function.
+	(elf_backend_grok_prstatus): Define.
+	(elf_backend_grok_psinfo): Likewise.
+	* elf32-ppc.c (ppc_elf_grok_prstatus): New function.
+	(ppc_elf_grok_psinfo): New function.
+	(elf_backend_grok_prstatus): Define.
+	(elf_backend_grok_psinfo): Likewise.
+	* elf32-sh-lin.c (elf32_shlin_grok_prstatus): New function.
+	(elf32_shlin_grok_psinfo): New function.
+	(elf_backend_grok_prstatus): Define.
+	(elf_backend_grok_psinfo): Likewise.
+	* elfarm-nabi.c (elf32_arm_nabi_grok_prstatus): New function.
+	(elf32_arm_nabi_grok_psinfo): New function.
+	(elf_backend_grok_prstatus): Define.
+	(elf_backend_grok_psinfo): Likewise.
+
 2001-08-27  H.J. Lu  <hjl@gnu.org>
 
 	* elf32-mips.c (mips_elf_create_dynamic_relocation): Add more
