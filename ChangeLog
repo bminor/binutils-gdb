@@ -1,3 +1,14 @@
+Tue Jul 14 23:41:03 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Strip any --no option from CONFIG_ARGUMENTS, to
+	avoid confusion with --no-recursion.
+
+Tue Jul 14 15:37:41 1998  Geoffrey Noer  <noer@cygnus.com>
+
+	* configure.in: Win32 hosts shouldn't use install -x
+	* install-sh: remove -x option, and special .exe-handling
+	hack.
+
 start-sanitize-beos
 Tue Jul 14 15:28:41 1998  Richard Henderson  <rth@cygnus.com>
 
