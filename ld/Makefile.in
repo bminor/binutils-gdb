@@ -171,11 +171,15 @@ ALL_EMULATIONS = \
 	eaixrs6.o \
 	ealpha.o \
 	earcelf.o \
+	$(start-sanitize-armelf) \
 	earmelf.o \
+	$(end-sanitize-armelf) \
 	earmaoutb.o \
 	earmaoutl.o \
 	earmcoff.o \
+	$(start-sanitize-armelf) \
 	earmelf.o \
+	$(end-sanitize-armelf) \
 	earmpe.o \
 	ecoff_sparc.o \
 	ed10velf.o \
@@ -890,9 +894,11 @@ ealpha.c: $(srcdir)/emulparams/alpha.sh \
 earcelf.c: $(srcdir)/emulparams/arcelf.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} arcelf "$(tdir_arcelf)"
+# start-sanitize-armelf
 earmelf.c: $(srcdir)/emulparams/armelf.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/armelf.em $(srcdir)/scripttempl/elfarm.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} armelf "$(tdir_armelf)"
+# end-sanitize-armelf
 earmaoutb.c:	$(srcdir)/emulparams/armaoutb.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/armaout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} armaoutb "$(tdir_armaoutb)"
