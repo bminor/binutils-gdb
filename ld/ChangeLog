@@ -1,3 +1,7 @@
+2001-06-05  Danny Smith  <danny_r_smith_2001@yahoo.co.nz>
+
+	* emultempl/pe.em (init): Reduce default stack reserve to 0x200000.
+
 2001-05-31  H.J. Lu  <hjl@gnu.org>
 
 	* ldlang.c (open_input_bfds): Don't change the bfd error

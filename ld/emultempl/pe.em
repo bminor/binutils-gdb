@@ -267,7 +267,7 @@ static definfo init[] =
 #endif
   D(MinorSubsystemVersion,"__minor_subsystem_version__", 0),
   D(Subsystem,"__subsystem__", ${SUBSYSTEM}),
-  D(SizeOfStackReserve,"__size_of_stack_reserve__", 0x2000000),
+  D(SizeOfStackReserve,"__size_of_stack_reserve__", 0x200000),
   D(SizeOfStackCommit,"__size_of_stack_commit__", 0x1000),
   D(SizeOfHeapReserve,"__size_of_heap_reserve__", 0x100000),
   D(SizeOfHeapCommit,"__size_of_heap_commit__", 0x1000),
