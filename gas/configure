@@ -3,9 +3,6 @@
 # configure.in and a configure template.
 configdirs=
 
-# the debugger.
-#set -x
-
 #!/bin/sh
 
 # Configuration script template
@@ -13,19 +10,19 @@ configdirs=
 
 #This file is part of GNU.
 
-#GNU CC is free software; you can redistribute it and/or modify
-#it under the terms of the GNU General Public License as published by
-#the Free Software Foundation; either version 1, or (at your option)
-#any later version.
-
-#GNU CC is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU General Public License for more details.
-
-#You should have received a copy of the GNU General Public License
-#along with GNU CC; see the file COPYING.  If not, write to
-#the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 # $Id$
 
@@ -55,6 +52,8 @@ defaulttargets=
 destdir=
 fatal=
 hostsubdir=
+Makefile=Makefile
+Makefile_in=Makefile.in
 norecurse=
 removing=
 srcdir=
@@ -203,6 +202,9 @@ if [ -n "${template}" ] ; then
 	-e '/^#### configure.in per-target parts come in here.$/,/^## end of per-target part.$/c\
 #### configure.in per-target parts come in here.\
 ## end of per-target part.' \
+	-e '/^#### configure.in post-target parts come in here.$/,/^## end of post-target part.$/c\
+#### configure.in post-target parts come in here.\
+## end of post-target part.' \
 	< ${template} > template.new
 
 	if [ -r configure.in ] ; then
@@ -216,18 +218,26 @@ if [ -n "${template}" ] ; then
 			exit 1
 		fi
 
-		# split configure.in into common, per-host, and per-target parts
+		# split configure.in into common, per-host, per-target,
+		# and post-target parts.  Post-target is optional.
 		sed -e '/^# per\-host:/,$d' configure.in > configure.com
 		sed -e '1,/^# per\-host:/d' -e '/^# per\-target:/,$d' configure.in > configure.hst
-		sed -e '1,/^# per\-target:/d' configure.in > configure.tgt
+		if grep -s '^# post-target:' configure.in ; then
+		  sed -e '1,/^# per\-target:/d' -e '/^# post\-target:/,$d' configure.in > configure.tgt
+		  sed -e '1,/^# post\-target:/d' configure.in > configure.pos
+		else
+		  sed -e '1,/^# per\-target:/d' configure.in > configure.tgt
+		  echo >configure.pos
+		fi
 
 		# and insert them
 		sed -e '/^#### configure.in common parts come in here.$/  r configure.com' \
 			-e '/^#### configure.in per\-host parts come in here.$/  r configure.hst' \
 			-e '/^#### configure.in per\-target parts come in here.$/  r configure.tgt' \
+			-e '/^#### configure.in post\-target parts come in here.$/  r configure.pos' \
 			template.new > configure.new
 
-		rm -f configure.com configure.tgt configure.hst
+		rm -f configure.com configure.tgt configure.hst configure.pos
 	else
 		echo Warning: no configure.in in `pwd`
 		cat ${template} >> configure
@@ -240,6 +250,13 @@ if [ -n "${template}" ] ; then
 	echo Rebuilt configure in `pwd`
 
 	if [ -z "${norecurse}" ] ; then
+		# If template is relative path, make it absolute for recursing.
+		if echo "${template}" | grep -s '^/' ; then
+		   true
+		else
+		   template=`pwd`/${template}
+		fi
+
 		while [ -n "${configdirs}" ] ; do
 			# set configdir to car of configdirs, configdirs to cdr of configdirs
 			set ${configdirs}; configdir=$1; shift; configdirs=$*
@@ -291,7 +308,7 @@ for host in ${hosts} ; do
 	for target in ${targets} ; do
 
 		if [ -n "${verbose}" ] ; then
-			echo host \= \"${host}\", target \= \"${target}\".
+			echo "	target=\"${target}\""
 		fi
 
 		target_makefile_frag=config/tmake-${target}
@@ -314,6 +331,9 @@ i960*)
 	;;
 a29k*)
 	cpu_type=a29k
+	;;
+m68k*)
+	cpu_type=m68k
 	;;
 *)
 	cpu_type=generic
@@ -370,13 +390,13 @@ links="host.h targ-cpu.c targ-cpu.h targ-env.h obj-format.h obj-format.c atof-ta
 					echo Warning: no `pwd`/${hostsubdir} to remove.
 				fi
 			else
-				rm -f Makefile config.status ${links}
+				rm -f ${Makefile} config.status ${links}
 			fi
 		else
 			if [ -n "${forcesubdirs}" ] ; then
 				# check for existing status before allowing forced subdirs.
-				if [ -f Makefile ] ; then
-					echo "Makefile already exists in source directory.  `pwd` not configured."
+				if [ -f ${Makefile} ] ; then
+					echo "${Makefile} already exists in source directory.  `pwd` not configured."
 					exit 1
 				fi
 
@@ -465,62 +485,57 @@ links="host.h targ-cpu.c targ-cpu.h targ-env.h obj-format.h obj-format.c atof-ta
 
 			# Define macro CROSS_COMPILE in compilation if this is a cross-compiler.
 			if [ "${host}" != "${target}" ] ; then
-				echo "CROSS=-DCROSS_COMPILE" > Makefile
-				echo "ALL=start.encap" >> Makefile
+				echo "CROSS=-DCROSS_COMPILE" > ${Makefile}
+				echo "ALL=start.encap" >> ${Makefile}
 			else
-				echo "ALL=all.internal" > Makefile
+				echo "ALL=all.internal" > ${Makefile}
 			fi
 
 			# set target, host, VPATH
-			echo "host = ${host}" >> Makefile
-			echo "target = ${target}" >> Makefile
+			echo "host = ${host}" >> ${Makefile}
+			echo "target = ${target}" >> ${Makefile}
 
 			if [ -n "${forcesubdirs}" ] ; then
-				echo "subdir = /${hostsubdir}/${targetsubdir}" >> Makefile
+				echo "subdir = /${hostsubdir}/${targetsubdir}" >> ${Makefile}
 			else
-				echo "subdir =" >> Makefile
+				echo "subdir =" >> ${Makefile}
 			fi
 
-		#	echo "workdir = `pwd`" >> Makefile
-			echo "VPATH = ${srcdir}" >> Makefile
+		#	echo "workdir = `pwd`" >> ${Makefile}
+			echo "VPATH = ${srcdir}" >> ${Makefile}
 
-			# add Makefile.in
-			cat ${srcdir}/Makefile.in >> Makefile
+			# add "Makefile.in" (or whatever it's called)
+			cat ${srcdir}/${Makefile_in} >> ${Makefile}
 
-			# and shake thoroughly.
 			# Conditionalize the makefile for this host.
 			if [ -f ${srcdir}/${host_makefile_frag} ] ; then
-				sed -e "/^####/  r ${srcdir}/${host_makefile_frag}" Makefile > Makefile.tem
-				mv Makefile.tem Makefile
+				sed -e "/^####/  r ${srcdir}/${host_makefile_frag}" ${Makefile} > Makefile.tem
+				mv Makefile.tem ${Makefile}
 			fi
 
 			# Conditionalize the makefile for this target.
 			if [ -f ${srcdir}/${target_makefile_frag} ] ; then
-				sed -e "/^####/  r ${srcdir}/${target_makefile_frag}" Makefile > Makefile.tem
-				mv Makefile.tem Makefile
+				sed -e "/^####/  r ${srcdir}/${target_makefile_frag}" ${Makefile} > Makefile.tem
+				mv Makefile.tem ${Makefile}
 			fi
 
 			# set srcdir
-			sed "s@^srcdir = \.@srcdir = ${srcdir}@" Makefile > Makefile.tem
-			mv Makefile.tem Makefile
+			sed "s@^srcdir = \.@srcdir = ${srcdir}@" ${Makefile} > Makefile.tem
+			mv Makefile.tem ${Makefile}
 
 			# set destdir
 			if [ -n "${destdir}" ] ; then
-				sed "s:^destdir =.*$:destdir = ${destdir}:" Makefile > Makefile.tem
-				mv Makefile.tem Makefile
+				sed "s:^destdir =.*$:destdir = ${destdir}:" ${Makefile} > Makefile.tem
+				mv Makefile.tem ${Makefile}
 			fi
 
-			# Remove all formfeeds, since some Makes get confused by them.
-			sed "s///" Makefile >> Makefile.tem
-			mv Makefile.tem Makefile
-
 			# reset SUBDIRS
-			sed "s:^SUBDIRS =.*$:SUBDIRS = ${configdirs}:" Makefile > Makefile.tem
-			mv Makefile.tem Makefile
+			sed "s:^SUBDIRS =.*$:SUBDIRS = ${configdirs}:" ${Makefile} > Makefile.tem
+			mv Makefile.tem ${Makefile}
 
 			# reset NONSUBDIRS
-			sed "s:^NONSUBDIRS =.*$:NONSUBDIRS = ${noconfigdirs}:" Makefile > Makefile.tem
-			mv Makefile.tem Makefile
+			sed "s:^NONSUBDIRS =.*$:NONSUBDIRS = ${noconfigdirs}:" ${Makefile} > Makefile.tem
+			mv Makefile.tem ${Makefile}
 
 			using=
 			if [ -f ${srcdir}/${host_makefile_frag} ] ; then
@@ -537,7 +552,11 @@ links="host.h targ-cpu.c targ-cpu.h targ-env.h obj-format.h obj-format.c atof-ta
 				andusing=${using}
 			fi
 
-			echo "Created \"Makefile\"" in `pwd`${andusing}.
+			echo "Created \"${Makefile}\"" in `pwd`${andusing}.
+
+#### configure.in post-target parts come in here.
+
+## end of post-target part.
 
 			if [ "${host}" = "${target}" ] ; then
 				echo "Links are now set up for use with a ${target}." \
@@ -554,19 +573,21 @@ links="host.h targ-cpu.c targ-cpu.h targ-env.h obj-format.h obj-format.c atof-ta
 		fi
 	done # for each target
 
-#	# Now build a Makefile for this host.
-#	if [ -n "${forcesubdirs}" ] ; then
-#		cd ${hostsubdir}
-#		cat > GNUmakefile << E!O!F
-## Makefile generated by configure for host ${host}.
-#
-#%:
-#	for i in ${targets} ; do \
-#		$(MAKE) -C Target-\$i \$@
-#
-#all clean stage1 stage2 stage3 stage4etags tags TAGS
-#E!O!F
-#	fi
+	# Now build a Makefile for this host.
+	if [ -n "${forcesubdirs}" ] ; then
+		cd ${hostsubdir}
+		cat > GNUmakefile << E!O!F
+# Makefile generated by configure for host ${host}.
+
+ALL := $(shell ls -d Target-*)
+
+%:
+	$(foreach subdir,$(ALL),$(MAKE) -C $(subdir) \$@ &&) true
+
+all:
+E!O!F
+		cd ..
+	fi
 done # for each host
 
 # If there are subdirectories, then recurse. 
@@ -593,7 +614,7 @@ for configdir in ${configdirs} ; do
 		if [ -n "${commons}" ] ; then
 			if [ -d ${configdir} ] ; then
 				(cd ${configdir} ;
-					./configure ${commons} ${verbose} ${forcesubdirs} ${removing}) \
+					./configure ${commons} ${verbose} ${forcesubdirs} ${removing} +destdir=${destdir}) \
 					| sed 's/^/	/'
 			else
 				echo Warning: directory \"${configdir}\" is missing.
@@ -604,7 +625,7 @@ for configdir in ${configdirs} ; do
 			for host in ${specifics} ; do
 				echo Configuring target specific directory ${configdir}.${host}...
 				(cd ${configdir}.${host} ;
-					./configure ${host} ${verbose} ${forcesubdirs} ${removing}) \
+					./configure ${host} ${verbose} ${forcesubdirs} ${removing} +destdir=${destdir}) \
 					| sed 's/^/	/'
 			done # for host in specifics
 		fi # if there are any specifics
@@ -629,7 +650,8 @@ for configdir in ${configdirs} ; do
 		if [ -n "${commons}" ] ; then
 			if [ -d ${configdir} ] ; then
 				(cd ${configdir} ;
-					./configure ${hosts} ${verbose} ${forcesubdirs} ${removing} ${commons}) \
+					./configure ${hosts} ${verbose} ${forcesubdirs} ${removing} \
+						${commons} +destdir=${destdir}) \
 					| sed 's/^/	/'
 			else
 				echo Warning: directory \"${configdir}\" is missing.
@@ -640,7 +662,8 @@ for configdir in ${configdirs} ; do
 			for target in ${specifics} ; do
 				echo Configuring target specific directory ${configdir}.${target}...
 				(cd ${configdir}.${target} ;
-					./configure ${hosts} ${verbose} ${forcesubdirs} ${removing} "+target=${target}") \
+					./configure ${hosts} ${verbose} ${forcesubdirs} ${removing} \
+						"+target=${target}" +destdir=${destdir}) \
 					| sed 's/^/	/'
 			done
 		fi # if any specifics
@@ -651,18 +674,43 @@ exit 0
 
 #
 # $Log$
-# Revision 1.11  1991/05/27 20:54:32  rich
-# fixed a bug in multiple targets
+# Revision 1.15  1991/08/05 21:36:41  rich
+# *** empty log message ***
 #
-# Revision 1.14  1991/05/22  01:44:04  rich
-# remove gdb until config issues resolve.
+# Revision 1.22  1991/07/20  01:22:30  rich
+# propogate gdb changes and destdir fix
 #
-# Revision 1.13  1991/05/19  08:00:09  rich
-# Added gdb.
+# Revision 1.21  1991/07/20  00:55:20  gnu
+# Roll in new configure that handles GDB.  Make sure that the "configure"
+# that is checked-in reflects the latest "configure.in", which includes gdb.
 #
-# Revision 1.12  1991/05/19  00:32:13  rich
-# Changes to deal with missing subdirs gracefully, and changes dictated
-# from dropping configure over gdb.
+# Revision 1.9  1991/07/06  04:35:51  gnu
+# Fix bug in configure when iterating targets.
+# Depend on alldeps.mak, not ${srcdir}/alldeps.mak, so it can be found
+# in either spot.
+#
+# Revision 1.8  1991/07/05  00:04:58  gnu
+# Thu Jul  4 14:47:06 1991  John Gilmore  (gnu at cygint.cygnus.com)
+#
+#         * configure.in, Makefile.in:  Avoid rebuilding "depend" as much.
+#         Avoid declaring Makefile dependencies, because GNU Make stupidly
+#         tries to update it if we do.
+#
+#         * coffread.c:  Revise for minor changes to bfd internal coff
+#         indexes.
+#
+#         * configure:  If -template= is given a relative path, make it
+#         absolute before recurring in subdirectories.
+#
+# Revision 1.7  1991/07/04  15:59:46  gnu
+# Make gdb work with configure.  Only thing that doesn't work is the -list
+# option (as far as I know).
+#
+# Revision 1.6  1991/06/04  07:28:16  gnu
+# Change GDB over to GNU General Public License version 2.
+#
+# Revision 1.5  1991/05/19  07:26:54  rich
+# configure changes and -opcode.h movement.
 #
 # Revision 1.4  1991/05/19  00:16:45  rich
 # Configure for gdb.
