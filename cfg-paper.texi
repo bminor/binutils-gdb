@@ -10,7 +10,7 @@ This document attempts to describe the general concepts behind
 configuration of the Cygnus Support release of the @sc{gnu} Development
 Tools.  It also discusses common usage..
 
-Copyright (C) 1991, 1992 Cygnus Support
+Copyright 1991, 1992 Free Software Foundation, Inc.
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
 are preserved on all copies.
@@ -41,7 +41,7 @@ by Cygnus Support.
 @page
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1991, 1992 Cygnus Support
+Copyright @copyright{} 1991, 1992 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice

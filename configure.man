@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" Copyright (c) 1991, 1992 Cygnus Support
+.\" Copyright 1991, 1992 Free Software Foundation, Inc.
 .\" written by K. Richard Pixley
 .TH configure 1 "13 December 1991" "cygnus support" "Cygnus Support"
 .de BP
