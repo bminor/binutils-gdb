@@ -2266,15 +2266,9 @@ m68k_ip (instring)
 		    {
 		      if (opP->reg == PC)
 			{
-#if 0
-			  add_frag (adds (opP->con1),
-				    offs (opP->con1) + 2,
-				    TAB (PCLEA, SZ_UNDEF));
-#else
 			  addword (0x0170);
 			  add_fix ('l', opP->con1, 1);
 			  addword (0), addword (0);
-#endif
 			  break;
 			}
 		      else
