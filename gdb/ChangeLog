@@ -574,6 +574,11 @@ Thu Oct  8 16:27:45 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
 	* doc/gdbint.texinfo: document a few more macros, create new
 	  section for native macros.
 
+Thu Oct  8 13:52:46 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* Makefile.in alldeps.mak depend:  Rip out 29k/udi pending
+	resolution of copyright issues.
+
 Wed Oct  7 20:08:53 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* Makefile.in (setup-to-dist):  Remove -norecursion so that doc
@@ -619,6 +624,7 @@ Tue Oct  6 14:47:11 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
 	remote-mm.c (mm_ops),
 	remote-nindy.c (nindy_ops),
 	remote-st2000.c (st2000_ops),
+	remote-udi.c (udi_ops),
 	remote-vx.c (vx_ops, vx_run_ops),
 	remote.c (remote_ops),
 	target.c (dummy_target),
@@ -689,9 +695,21 @@ Fri Sep  4 00:34:30 1992  Per Bothner  (bothner@rtl.cygnus.com)
 
 Mon Oct  5 16:02:04 1992  Stu Grossman  (grossman at cygnus.com)
 
+	* Makefile.in:  Re-install 29K/UDI stuff.
+	* remote-udi.c (udi_resume):  Clean up.
+	* (udi_wait):  Rewrite, leave out bugs.
+	* Add debugging code to print out all register fetches and stores.
+	* Straighten out target_ops.
 	* tm-29k.h (DUMMY_FRAME_RSIZE):  Pad out to doubleword.
 
 Mon Oct  5 09:46:44 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* remote-udi.c (udi_create_inferior): run with no arguments should
+	not pass the program name as an argument, since the UDI code
+	already handles that.
+	(udi_load): get the symbols from prog_name, not arg_string (the
+	load command should really use arg_string as the program name, not
+	prog_name, but at least the run command works now).
 
 	* munch: HP9000/300 nm puts an extra space between T and symbol
 	name.
@@ -898,14 +916,15 @@ Fri Sep 25 21:59:27 1992  John Gilmore  (gnu@cygnus.com)
 	* inftarg.c (child_attach):  Remove target independent stuff.
 	* remote-adapt.c (adapt_attach):  Ditto.
 	* remote-mm.c (mm_attach):  Ditto.
+	* remote-udi.c (udi_attach):  Ditto.
 	* remote-vx.c (vx_attach):  Ditto.
 
 	Cleanup.
 
 	* remote-hms.c (hms_attach):  Remove completely, it was useless.
-	* remote-mm.c, remote-hms.c, remote-adapt.c:  Remove
+	* remote-mm.c, remote-hms.c, remote-udi.c, remote-adapt.c:  Remove
 	commented-out start_remote calls.
-	* remote-hms.c, remote-adapt.c, remote-mm.c: Remove
+	* remote-hms.c, remote-adapt.c, remote-mm.c, remote-udi.c: Remove
 	DENTER and DEXIT macros and their calls.  Use a real debugger --
 	like gdb -- to see what functions are being called when.
 	* utils.c (strcmp_iw):  Make nonstatic, for lint.
@@ -924,6 +943,16 @@ Fri Sep 25 15:13:44 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* remote.c (remote_wait):  Make regs be char to avoid picayune
 	ANSI compiler warnings.
+
+	* energize.h:  Move all external struct decls to inside of
+	__STDC__, add prototype for energize_shell_wait().
+	* energize.c (getpty):  Clean up, make us really get a controlling
+	terminal.
+	* (energize_initialize):  Disable SIGIO prior to setting up for
+	I/O interrupts.  Move setsid(), et. al. to getpty().
+	* (energize_shell_wait):  New routine to wait for things started
+	via the shell command, uses wait() instead of /dev/proc.
+	* Also, add prototype for execute_command_1().
 
 Fri Sep 25 12:09:33 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
 
@@ -1063,6 +1092,8 @@ Wed Sep 16 22:31:55 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 	* remote-mm.c (mm_attach): change printf to error to prevent
 	fallthrough bug.
+	* remote-udi.c (udi_attach): change printf to error to prevent
+	fallthrough bug.
 
 	* rs6000-tdep.c (push_dummy_frame, pop_dummy_frame): replace
 	calls to {fetch|store}_inferior_registers with calls to
@@ -1182,6 +1213,21 @@ Tue Sep 15 01:18:50 1992  John Gilmore  (gnu@cygnus.com)
 
 Mon Sep 14 19:20:43 1992  Stu Grossman  (grossman at cygnus.com)
 
+	* energize.c (pty_to_kernel):  Must check for EAGAIN as
+	termination condition.
+	(full_filename):  Don't prepend dirname if filename begins with /.
+	(breakpoint_notify, kernel_dispatch):  Deal with DynamicLoad
+	messages properly!!
+	(getpty (NCR)):  Lotsa bug fixes...
+	(kernel_dispatch (case StopRType)):  Use kill() instead of
+	killpg() so we can deal with losing systems...
+	(wait_for_events):  Work around NCR select() lossage.  It doesn't
+	zero out readfds when select() returns zero.
+	(energize_initialize):  Use I_SETSIG to get SIGIO interrupts.  Use
+	getcwd() instead of getwd() (NCR getwd() seg faults).
+	(energize_wait):  Use sigaction() for NCR.  Their version of signal()
+	is unreliable by default.
+
 	* procfs.c (proc_wait):  Call print_sys_errmsg() if we get an
 	error from PIOCSWSTOP.
 
@@ -1189,10 +1235,16 @@ Mon Sep 14 19:20:43 1992  Stu Grossman  (grossman at cygnus.com)
 	symfile.c, target.c, valprint.c:  Use _filtered form of *printf.
 	defs.h, utils.c:  Make vfprintf_filtered global.
 
+	* energize.c (send_location):  New routine to consolidate all
+	places where we must notify kernel of where the given pc is.
+	(cplus_demangle):  Put single-quotes around demangled names.
+	(energize_call_command):  Call send_location() after doing up,
+	down, and frame commands.
+
 Fri Sep 11 18:28:28 1992  Roland H. Pesch  (pesch@fowanton.cygnus.com)
 
 	* doc/gdb.texinfo, doc/gdbinv-m.m4.in, doc/gdbinv-s.m4.in: first
-	pass at doc for new remote target--- Tandem
+	pass at doc for two new remote targets---29K using UDI, and Tandem
 	ST2000 using STDBUG.
 
 	* doc/all.m4, doc/none.m4: new m4 switch, _ST2000__
@@ -1717,6 +1769,8 @@ Thu Aug  6 10:56:01 1992  Fred Fish  (fnf@cygnus.com)
 
 Wed Aug  5 01:42:40 1992  John Gilmore  (gnu at cygnus.com)
 
+	* remote-udi.c:  Update comments.
+
 	* remote.c (getpkt):  Only force retransmission ten times;
 	after that, assume bug in target code, and handle pkt anyway.
 
@@ -1827,6 +1881,13 @@ Fri Jul 17 17:07:24 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 	* configure.in: recognize hppa* instead of hppa
 
 Fri Jul 17 16:52:04 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* energize.c:  Second cut at DynamicLoad message handling.
+
+	* energize.c:  Relativize pathnames in #include statements.
+	* (kernel_dispatch):  Better error messages for unknown protocol
+	messages.
+	* (kernel_dispatch):  First cut at DynamicLoad message handling.
 
 	* Makefile.in:  Remove -I../readline from all compilations,
 	include a special case for main.o instead.
@@ -2108,6 +2169,14 @@ Sun Jul  5 17:17:16 1992  Fred Fish  (fnf@cygnus.com)
 	maintenanceinfolist instead.
 	main.c (initialize_main):  Set up maintenance class commands.
 
+Sun Jul  5 11:03:53 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* energize-patches:  Fix minor problems with building energize lib.
+
+	* energize-patches:  Change names of all cadillac procedure calls
+	to be energize procedure calls.  Simplify many hooks by moving
+	tests energize.c.  Configure energize, and build it automatically now.
+
 Sun Jul  5 09:43:28 1992  Fred Fish  (fnf@cygnus.com)
 
 	* Makefile.in (VERSION):  Bump to 4.5.7.
@@ -2115,6 +2184,16 @@ Sun Jul  5 09:43:28 1992  Fred Fish  (fnf@cygnus.com)
 	seen type to guard against bogus values from malformed manglings.
 	* valops.c (value_struct_elt_for_reference):  Guard against
 	blindly using NULL return value from lookup_symbol.
+
+Sun Jul  5 09:46:43 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* cadillac.c, cadillac-patches:  Rename to energize.c and
+	energize-patches.  Change all routines and variables named
+	'cadillac*' to 'energize*'.  Create new file called energize.h to
+	hold all interface declarations.
+
+	* deblib/connection/*:  Move all of this stuff into energize/, but
+	delete unneeded files.
 
 Sun Jul  5 03:06:39 1992  John Gilmore  (gnu at cygnus.com)
 
@@ -2296,6 +2375,8 @@ Sat Jun 27 12:12:20 1992  Fred Fish  (fnf@cygnus.com)
 
 	* sparc-pinsn.c:  Use <string.h> rather than "string.h", for
 	consistency with all other gdb files.
+	* cadillac.c:  Use <string.h> rather than <strings.h>.
+	* cadillac.c (kernel_dispatch):  Convert rindex usage to strrchr.
 	* Makefile.in (MAKE):  Remove definition for consistency with
 	other Makefile.in files and to fix problem with recursive makes.
 
@@ -2348,7 +2429,7 @@ Thu Jun 25 04:00:10 1992  John Gilmore  (gnu at cygnus.com)
 
 	* am29k-pinsn.c, am29k-tdep.c, copying.awk, copying.c,
 	hppa-coredep.c, hppa-pinsn.c, hppabsd-core.c, hppabsd-tdep.c,
-	hppabsd-xdep.c, hppahpux-tdep.c, hppahpux-xdep.c,
+	hppabsd-xdep.c, hppahpux-tdep.c, hppahpux-xdep.c, remote-udi.c,
 	ser-go32.c, xcoffsolib.c:  Remove <stdio.h> which is already in
 	"defs.h".
 
@@ -2395,6 +2476,8 @@ Tue Jun 23 21:46:26 1992  Fred Fish  (fnf@cygnus.com)
 	* sparc-xdep.c, a68v-xdep.c (fetch_inferior_registers,
 	store_inferior_registers): Supply missing fourth argument to
 	ptrace().
+	* cadillac.c (kernel_dispatch):  Make return type void.
+	* cadillac.c (iosig):  Signal handlers take one int arg.
 	* valprint.c (val_print_fields):  Call fprint_symbol to get
 	automatic C++ demangling for mangled field names.
 
@@ -2699,7 +2782,7 @@ Thu Jun 11 12:31:50 1992  John Gilmore  (gnu at cygnus.com)
 Thu Jun 11 01:33:40 1992  John Gilmore  (gnu at cygnus.com)
 
 	* inferior.h (register_valid):  Declare.
-	* rs6000-xdep.c, sparc-xdep.c, tm-rs6000.h:  Remove decl.
+	* remote-udi.c, rs6000-xdep.c, sparc-xdep.c, tm-rs6000.h:  Remove decl.
 	* objfiles.h (ALL_OBJFILE_{SYMTABS,PSYMTABS,MSYMBOLS}):  Add
 	macros for traversing the data structures in a single objfile.
 	* tm-m88k.h, tm-sparc.h (REGISTER_NAMES):  Remove extra semicolon.
@@ -2921,6 +3004,13 @@ Fri May  8 11:42:15 1992  Per Bothner  (bothner@rtl.cygnus.com)
 	* mipsread.c (parse_procedure):  Return rather than using
 	uninitialized variable 'b'.
 
+Fri May  8 07:48:27 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* Makefile.in, remote-udi.c, remote-vx.c, 29k-share/dfe/mini2udi.c,
+	29k-share/dfe/yank.c, vx-share/xdr_ptrace.c, vx-share/xdr_regs.c:
+	Remove -I29k-share, -Ivx-share from Makefile.in.  Make #includes
+	relative to each source file.
+
 Fri May  8 07:48:27 1992  K. Richard Pixley  (rich@cygnus.com)
 
 	* Makefile.in: propogate INSTALL, INSTALL_DATA, INSTALL_PROGRAM on
@@ -2931,7 +3021,20 @@ Thu May  7 10:00:52 1992  Stu Grossman  (grossman at cygnus.com)
 	* am29k-pinsn.c:  Use new opcode table in "opcode/a29k.h".
 	* am29k-tdep.c:  Update to latest code from AMD.
 	(get_saved_register) don't crap out if no frame.
+	* remote-udi.c:  Set/clear inferior_pid as appropriate.
+	(udi_open) call target_preopen, don't close fd 0!!!, clean up
+	error handling.  Fixup end-of-debugging messages.
+	(udi_fetch_registers) clean up big time, mainly don't multiply
+	register_valid indices by 4, and use proper Offset when reading
+	gr96-gr127.  (udi_store_registers) general cleanup.
+	(fetch_register) cleanup, simplify.  (regnum_to_srnum)
+	INT_REGNUM->INTE_REGNUM.
 	* tm-29k.h:  Upgrade to latest code from AMD.
+	* 29k-share/udi/udip2soc.c:  Get rid of useless errmsg_m macro.
+	(UDIConnect) Clean up error processing (like, don't do exit() if
+	execlp fails), make code restartable, make more attractive.
+	(UDIStop) Use SIGINT instead of SIGUSR1, as isstip won't stop
+	otherwise.
 
 Wed May  6 14:34:18 1992  Per Bothner  (bothner@rtl.cygnus.com)
 
@@ -3042,6 +3145,12 @@ Fri Apr 24 07:41:19 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* Makefile.in (make-proto-gdb-1):  1st cut at packaging
 	29k-share/* subdirs...
+
+	* remote-udi.c (udi_insert/remove_breakpoint):  Completely
+	rewrite, only leave out the bugs.
+
+	* Makefile.in:  Add 29k/UDI support.  Improve depend.
+	* alldeps.mak, configure.in, depend:  Add 29k/UDI support.
 
 	* am29k-tdep.c:  Update to use new calling conventions, and misc
 	symbol elements.
