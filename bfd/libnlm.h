@@ -74,21 +74,21 @@ extern boolean bfd_nlm64_set_arch_mach
 struct nlm_obj_tdata
 {
   /* Actual data, but ref like ptr */
-  Nlm_Internal_Fixed_Header	nlm_fixed_header[1];
-  Nlm_Internal_Variable_Header	nlm_variable_header[1];
-  Nlm_Internal_Version_Header	nlm_version_header[1];
-  Nlm_Internal_Copyright_Header	nlm_copyright_header[1];
-  Nlm_Internal_Extended_Header	nlm_extended_header[1];
-  Nlm_Internal_Custom_Header	nlm_custom_header[1];
+  Nlm_Internal_Fixed_Header	nlm_fixed_hdr[1];
+  Nlm_Internal_Variable_Header	nlm_variable_hdr[1];
+  Nlm_Internal_Version_Header	nlm_version_hdr[1];
+  Nlm_Internal_Copyright_Header	nlm_copyright_hdr[1];
+  Nlm_Internal_Extended_Header	nlm_extended_hdr[1];
+  Nlm_Internal_Custom_Header	nlm_custom_hdr[1];
 };
 
 #define nlm_tdata(bfd)			((bfd) -> tdata.nlm_obj_data)
-#define nlm_fixed_header(bfd)		(nlm_tdata(bfd) -> nlm_fixed_header)
-#define nlm_variable_header(bfd)	(nlm_tdata(bfd) -> nlm_variable_header)
-#define nlm_version_header(bfd)		(nlm_tdata(bfd) -> nlm_version_header)
-#define nlm_copyright_header(bfd)	(nlm_tdata(bfd) -> nlm_copyright_header)
-#define nlm_extended_header(bfd)	(nlm_tdata(bfd) -> nlm_extended_header)
-#define nlm_custom_header(bfd)		(nlm_tdata(bfd) -> nlm_custom_header)
+#define nlm_fixed_header(bfd)		(nlm_tdata(bfd) -> nlm_fixed_hdr)
+#define nlm_variable_header(bfd)	(nlm_tdata(bfd) -> nlm_variable_hdr)
+#define nlm_version_header(bfd)		(nlm_tdata(bfd) -> nlm_version_hdr)
+#define nlm_copyright_header(bfd)	(nlm_tdata(bfd) -> nlm_copyright_hdr)
+#define nlm_extended_header(bfd)	(nlm_tdata(bfd) -> nlm_extended_hdr)
+#define nlm_custom_header(bfd)		(nlm_tdata(bfd) -> nlm_custom_hdr)
 
 /* The NLM code, data, and uninitialized sections have no names defined
    in the NLM, but bfd wants to give them names, so use the traditional

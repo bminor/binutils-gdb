@@ -96,7 +96,7 @@ DEFUN (nlm_object_p, (abfd), bfd * abfd)
 
   /* Check to see if we have an NLM file by matching the NLM signature. */
 
-  if (strncmp (&x_fxdhdr.signature, NLM_SIGNATURE, NLM_SIGNATURE_SIZE) != 0)
+  if (strncmp (x_fxdhdr.signature, NLM_SIGNATURE, NLM_SIGNATURE_SIZE) != 0)
     {
     wrong:
       bfd_error = wrong_format;
@@ -107,7 +107,7 @@ DEFUN (nlm_object_p, (abfd), bfd * abfd)
      a sane version number after doing byte swapping appropriate for this
      XVEC.  (Hack alert!) */
 
-  if (get_word (abfd, (bfd_byte *) &x_fxdhdr.version) > 0xFFFF)
+  if (get_word (abfd, (bfd_byte *) x_fxdhdr.version) > 0xFFFF)
     {
       goto wrong;
     }
@@ -269,7 +269,7 @@ DEFUN (nlm_swap_variable_header_in, (abfd),
 
   /* Read and convert the stackSize field. */
 
-  if (bfd_read ((PTR) &temp, sizeof (temp), 1, abfd) != sizeof (temp))
+  if (bfd_read ((PTR) temp, sizeof (temp), 1, abfd) != sizeof (temp))
     {
       bfd_error = system_call_error;
       return (false);
@@ -278,7 +278,7 @@ DEFUN (nlm_swap_variable_header_in, (abfd),
 
   /* Read and convert the reserved field. */
 
-  if (bfd_read ((PTR) &temp, sizeof (temp), 1, abfd) != sizeof (temp))
+  if (bfd_read ((PTR) temp, sizeof (temp), 1, abfd) != sizeof (temp))
     {
       bfd_error = system_call_error;
       return (false);

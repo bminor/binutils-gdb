@@ -1,3 +1,9 @@
+Tue Jul 20 15:02:23 1993  Fred Fish  (fnf@deneb.cygnus.com)
+
+	* libnlm.h (nlm_obj_tdata):  Rename hidden struct members to avoid
+	apparent Sun C preprocessor recursion.  Fix access macros.
+	* nlmcode.h:  Remove spurious '&' before several array references.
+
 Tue Jul 20 14:36:27 1993  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
 	* Rename for DOS uniqueness: coff-m68k-un.c -> coff-u68k.c
