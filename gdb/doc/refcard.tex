@@ -40,42 +40,18 @@
 % to omit.  In general, not all synonyms for commands are covered.
 % The GDB-under-Emacs section omits gdb-mode functions without default
 % keybindings.  GDB startup options are not described.
+% set print sevenbit-strings, set symbol-reloading omitted.
+% set check range/type omitted at least til code is in GDB.
 %
-%
-\input threecol
 {%
 \def\$#1${{#1}}%   Kluge: collect RCS revision info without $...$
 \xdef\manvers{\$Revision$}%
-}
+}%
+\input threecol
+\input rcfonts
+%
 \vsize=8in
 \hyphenpenalty=5000\tolerance=2000\raggedright\raggedbottom
-%
-%The Times-Roman family is used below because it is both more
-%attractive and more compact than Computer Modern.  On the other hand,
-%while common, it is not Free.  The commented-out font definitions
-%will be close (but may cause some column overflows) if you must use
-%the CM fonts.
-%\font\bbf=cmbx10
-\font\bbf=Times-Bold at 10pt
-%\font\vbbf=cmbx12
-\font\vbbf=Times-Bold at 12pt
-%\font\smrm=cmr5
-\font\smrm=Times-Roman at 6pt
-%\font\brm=cmr10
-\font\brm=Times-Roman at 10pt
-%\font\rm=cmr7
-\font\rm=Times-Roman at 8pt
-%\font\it=cmti7
-\font\it=Times-Italic at 8pt
-% We *do* use CMtt rather than Courier because TeX and PS fonts have
-% different ideas about where ``funny'' chars go.
-\font\tt=cmtt8
-% Finally, the following common-but-not-free font (Symbol) is used
-% only for the copyright symbol.  Comment out the whole definition of
-% \copyright if you insist on using only Free fonts, and you'll pick
-% up the kluge in plain.tex that defines \copyright by overstriking.
-\font\sym=Symbol at 7pt
-\def\copyright{{\sym\char'323}}
 \normalbaselineskip=9pt\baselineskip=9pt
 %
 \parindent=0pt
@@ -89,9 +65,8 @@
 \long\def\sec#1;#2\endsec{\vskip 1pc
 \halign{%
 %COL 1 (of halign):
-\vtop{\hsize=1in\tt
-##\par\vskip 2pt
-}\quad
+\vtop{\hsize=1.1in\tt
+##\par\vskip 2pt }\hfil
 %COL 2 (of halign):
 &\vtop{\hsize=2.1in\hangafter=1\hangindent=0.5em
 \rm ##\par\vskip 2pt}\cr
@@ -103,18 +78,18 @@
 
 {\vbbf GDB QUICK REFERENCE}
 \vskip 5pt
-{\smrm GDB Version 4.0---Cygnus Support 1991}
+{\smrm GDB Version 4.2---Cygnus Support 1991}
 
 \sec Essential Commands;
 gdb {\it program} \opt{{\it core}}&debug {\it program} \opt{using
 coredump {\it core}}\cr
-bt& backtrace: display program stack\cr
 b \opt{\it file\tt:}{\it function}&set breakpoint at {\it function} \opt{in \it file}\cr
 run \opt{{\it arglist}}&start your program \opt{with {\it arglist}}\cr
+bt& backtrace: display program stack\cr
 p {\it expr}&display the value of an expression\cr
 c &continue running your program\cr
-n &execute next line, including function calls\cr
-s &execute until another line is reached\cr
+n &next line, stepping over function calls\cr
+s &next line, stepping into function calls\cr
 \endsec
 
 \sec Starting GDB;
@@ -278,7 +253,7 @@ optional format spec follows slash\cr
 \quad {\it f}&printing format.  Any {\tt print} format, or\cr
 &{\tt\qquad s}\ null-terminated string\cr
 &{\tt\qquad i}\ machine instructions\cr
-disassemble \opt{\it addr}&display memory as machine instructions\cr
+disassem \opt{\it addr}&display memory as machine instructions\cr
 \endsec
 
 \sec Automatic Display;
@@ -287,9 +262,9 @@ program stops \opt{according to format {\it f}\/}\cr
 display&display all enabled expressions on list\cr
 undisplay {\it n}&remove number(s) {\it n} from list of
 automatically displayed expressions\cr
-disable display {\it n}&disable display for expression(s) number {\it
+disable disp {\it n}&disable display for expression(s) number {\it
 n}\cr
-enable display {\it n}&enable display for expression(s) number {\it
+enable disp {\it n}&enable display for expression(s) number {\it
 n}\cr
 info display&numbered list of display expressions\cr
 \endsec
@@ -297,7 +272,7 @@ info display&numbered list of display expressions\cr
 \vfill\eject
 
 \sec Expressions;
-{\it expr}&an expression in C or C++ (including function calls), or:\cr
+{\it expr}&an expression in C, C++, or Modula-2 (including function calls), or:\cr
 {\it addr\/}@{\it len}&an array of {\it len} elements beginning at {\it
 addr}\cr
 {\it file}::{\it nm}&a variable or function {\it nm} defined in {\it
@@ -344,9 +319,9 @@ end&end of {\it help text}\cr
 \endsec
 
 \sec Signals;
-handle {\it signal} {\it act}&specify GDB actions when {\it signal} occurs:\cr
-\quad print&announce when signal occurs\cr
-\quad noprint&be silent when signal occurs\cr
+handle {\it signal} {\it act}&specify GDB actions for {\it signal}:\cr
+\quad print&announce signal\cr
+\quad noprint&be silent for signal\cr
 \quad stop&halt execution on signal\cr
 \quad nostop&do not halt execution\cr
 \quad pass&allow your program to handle signal\cr
@@ -363,19 +338,23 @@ detach&release target from GDB control\cr
 
 \vfill\eject
 \sec Controlling GDB;
-set {\it param} {\it expr}&set one of GDB's internal parameters\cr
+set {\it param} {\it value}&set one of GDB's internal parameters\cr
 show {\it param}&display current setting of a GDB parameter\cr
 \xtra{\rm Parameters understood by {\tt set} and {\tt show}:}
 \quad complaints {\it limit}&number of messages on unusual symbols\cr
 \quad confirm {\it on/off}&enable or disable cautionary queries\cr
 \quad editing {\it on/off}&control {\tt readline} command-line editing\cr
-\quad height {\it lpp}&number of lines before pause in
-display\cr
+\quad height {\it lpp}&number of lines before pause in display\cr
+\quad language {\it lang}&Language for GDB expressions ({\tt auto}, {\tt c} or
+{\tt modula-2})\cr
+\quad listsize {\it n}&number of lines shown by {\tt list}\cr
 \quad prompt {\it str}&use {\it str} as GDB prompt\cr
 \quad radix {\it base}&octal, decimal, or hex number representation\cr
 \quad verbose {\it on/off}&control messages when loading
 symbol table\cr
 \quad width {\it cpl}&number of characters before line folded\cr
+\quad write {\it on/off}&Allow or forbid patching binary, core files
+(when reopened with {\tt exec} or {\tt core})
 \cr
 \quad history $\ldots$&({\tt h}) groups the following options:\cr
 \quad h exp {\it off/on}&disable or enable {\tt readline} history expansion\cr
@@ -389,7 +368,7 @@ command history\cr
 values\cr
 \quad p  array {\it off/on}&compact or attractive format for
 arrays\cr
-\quad p demangle {\it on/off}&source or internal form for C++
+\quad p demangl {\it on/off}&source (demangled) or internal form for C++
 symbols\cr
 \quad p asm-dem {\it on/off}&demangle C++ symbols in
 machine-instruction output\cr
@@ -407,19 +386,17 @@ show commands +&show next 10 commands\cr
 \endsec
 
 \sec Working Files;
-file {\it name}&use {\it file} for symbols and executable\cr
-core {\it name}&read {\it file} as coredump\cr
-exec {\it name}&use {\it file} as executable only\cr
-symbol {\it name}&use only symbol table from {\it file}\cr
+file {\it file}&use {\it file} for symbols and executable\cr
+core {\it file}&read {\it file} as coredump\cr
+exec {\it file}&use {\it file} as executable only\cr
+symbol {\it file}&use only symbol table from {\it file}\cr
 load {\it file}&dynamically link {\it file\/} and add its symbols\cr
 add-sym {\it file} {\it addr}&read additional symbols from {\it file},
 dynamically loaded at {\it addr}\cr
 info files&display working files and targets in use\cr
 path {\it dirs}&add {\it dirs} to front of path searched for
 executable and symbol files\cr
-info path&display executable and symbol file path\cr
-share \opt{\it regex}&add symbol information for shared libraries
-matching {\it regex}, or all shared libraries\cr
+show path&display executable and symbol file path\cr
 info share&list names of shared libraries currently loaded\cr
 \endsec
 
@@ -462,16 +439,27 @@ M-d&down {\it arg} frames ({\tt down})\cr
 \ctl{x} SPC&(in source file) set break at point\cr
 \endsec
 
+\sec GDB License;
+info copying&Display GNU General Public License\cr
+info warranty&There is NO WARRANTY for GDB.  Display full no-warranty
+statement.\cr 
+\endsec
+
 
 \vfill
 {\smrm\parskip=6pt
 \centerline{Copyright \copyright 1991 Free Software Foundation, Inc.}
-\centerline{Roland Pesch (pesch@cygnus.com), May 1991---\manvers}
+\centerline{Roland Pesch (pesch@cygnus.com), September 1991---\manvers}
 \centerline{The author assumes no responsibility for any errors on this card.}
 
 This card may be freely distributed under the terms of the GNU
 General Public License.
 
-\centerline{Please contribute to development of this card by annotating it.}
+\centerline{Please contribute to development of this card by
+annotating it.}
+
+GDB itself is free software; you are welcome to distribute copies of
+it under the terms of the GNU General Public License.  There is
+absolutely no warranty for GDB.
 }
 \end
