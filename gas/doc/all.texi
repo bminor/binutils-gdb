@@ -35,6 +35,7 @@
 @set HPPA
 @set I370
 @set I80386
+@set I860
 @set I960
 @set M32R
 @set M68HC11

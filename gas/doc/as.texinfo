@@ -5027,6 +5027,9 @@ subject, see the hardware manufacturer's manual.
 @ifset I80386
 * i386-Dependent::              Intel 80386 Dependent Features
 @end ifset
+@ifset I860
+* i860-Dependent::              Intel 80860 Dependent Features
+@end ifset
 @ifset I960
 * i960-Dependent::              Intel 80960 Dependent Features
 @end ifset
@@ -5206,6 +5209,10 @@ family.
 
 @ifset I80386
 @include c-i386.texi
+@end ifset
+
+@ifset I860
+@include c-i860.texi
 @end ifset
 
 @ifset I960

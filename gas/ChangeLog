@@ -1,3 +1,11 @@
+2000-07-31  Jason Eckhardt  <jle@cygnus.com>
+
+	* doc/c-i860.texi: New file.
+	* doc/Makefile.am (CPU_DOCS): Add c-i860.texi.
+	* doc/Makefile.in: Regenerate.
+	* doc/all.texi: Add I860 as relevant architecture.
+	* doc/as.texinfo: Include i860 dependent file c-i860.texi.
+
 2000-07-31  Kazu Hirata  <kazu@hxi.com>
 
 	* config/tc-d30v.c: Fix formatting.
