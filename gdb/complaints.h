@@ -53,12 +53,24 @@ extern void clear_complaints (struct complaints **complaints,
 /* Deprecated interfaces to keep the old code working (until it is all
    converted to the above).  Existing code such as:
 
-     struct deprecated_complaint msg = { "msg", 0, 0 };
-     complaint (&msg);
+     struct deprecated_complaint msg = { "msg 0x%08x[sic]", 0, 0 };
+     deprecated_complain (&msg, addr);
 
-   should be replaced by:
+   should be replaced by either the new call (for the singular case):
 
-     complaint (&symtab_complaints, __FILE__, __LINE__, "msg");
+     complaint (&symtab_complaints, "msg 0x%s", paddr (addr));
+
+   or with a wrapper function (for the many-of case):
+
+     msg_complaint (CORE_ADDR addr)
+     { complaint (&symtab_complaints, "msg 0x%s", paddr (addr)); }
+     ...
+     msg_complaint (addr);
+
+   Yes, the typo is intentional.  The motivation behind this interface
+   change is to eliminate all possability of this problem re-occuring
+   (it has occured in the past and no one is sure that it isn't
+   present now).
 
    Support for complaining about things in the symbol file that aren't
    catastrophic.

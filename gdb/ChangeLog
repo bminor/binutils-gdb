@@ -1,3 +1,8 @@
+2002-11-15  Andrew Cagney  <ac131313@redhat.com>
+
+	* complaints.h: Add comment explaining how to eliminate a
+	deprecated_complain call.
+
 2002-11-15  David Carlton  <carlton@math.stanford.edu>
 
 	* printcmd.c: Remove #include "disasm.h".
