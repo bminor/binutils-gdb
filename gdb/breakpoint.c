@@ -1144,7 +1144,17 @@ update_breakpoints_after_exec (void)
 
        ??rehrauer: Let's hope that merely clearing out this catchpoint's
        target address field, if any, is sufficient to have it be reset
-       automagically.  Certainly on HP-UX that's true. */
+       automagically.  Certainly on HP-UX that's true.
+
+       Jim Blandy <jimb@redhat.com>: Actually, zero is a perfectly
+       valid code address on some platforms (like the mn10200 and
+       mn10300 simulators).  We shouldn't assign any special
+       interpretation to a breakpoint with a zero address.  And in
+       fact, GDB doesn't --- I can't see what that comment above is
+       talking about.  As far as I can tell, setting the address of a
+       bp_catch_exec/bp_catch_vfork/bp_catch_fork breakpoint to zero
+       is meaningless, since those are implemented with HP-UX kernel
+       hackery, not by storing breakpoint instructions somewhere.  */
     if ((b->type == bp_catch_exec) ||
 	(b->type == bp_catch_vfork) ||
 	(b->type == bp_catch_fork))
@@ -1195,7 +1205,13 @@ update_breakpoints_after_exec (void)
 
     /* If this breakpoint has survived the above battery of checks, then
        it must have a symbolic address.  Be sure that it gets reevaluated
-       to a target address, rather than reusing the old evaluation.  */
+       to a target address, rather than reusing the old evaluation.
+
+       Jim Blandy <jimb@redhat.com>: As explained above in the comment
+       for bp_catch_exec and friends, I'm pretty sure this is entirely
+       unnecessary.  A call to breakpoint_re_set_one always recomputes
+       the breakpoint's address from scratch, or deletes it if it can't.
+       So I think this assignment could be deleted without effect.  */
     b->address = (CORE_ADDR) NULL;
   }
 }
@@ -3734,7 +3750,11 @@ check_duplicates (struct breakpoint *bpt)
   CORE_ADDR address = bpt->address;
   asection *section = bpt->section;
 
-  if (address == 0)		/* Watchpoints are uninteresting */
+  /* Watchpoints are uninteresting.  */
+  if (bpt->type == bp_watchpoint
+      || bpt->type == bp_hardware_watchpoint
+      || bpt->type == bp_read_watchpoint
+      || bpt->type == bp_access_watchpoint)
     return;
 
   ALL_BREAKPOINTS (b)

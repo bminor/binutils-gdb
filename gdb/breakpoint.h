@@ -193,16 +193,17 @@ struct breakpoint
     /* Number assigned to distinguish breakpoints.  */
     int number;
 
-    /* Address to break at, or NULL if not a breakpoint.  */
+    /* Address to break at.
+       Note that zero is a perfectly valid code address on some
+       platforms (for example, the mn10200 and mn10300 simulators).
+       NULL is not a special value for this field.  */
     CORE_ADDR address;
 
-    /* Line number of this address.  Only matters if address is
-       non-NULL.  */
+    /* Line number of this address.  */
 
     int line_number;
 
-    /* Source file name of this address.  Only matters if address is
-       non-NULL.  */
+    /* Source file name of this address.  */
 
     char *source_file;
 
@@ -217,11 +218,10 @@ struct breakpoint
        control of the target insert_breakpoint and remove_breakpoint routines.
        No other code should assume anything about the value(s) here.  */
     char shadow_contents[BREAKPOINT_MAX];
-    /* Nonzero if this breakpoint is now inserted.  Only matters if address
-       is non-NULL.  */
+    /* Nonzero if this breakpoint is now inserted.  */
     char inserted;
     /* Nonzero if this is not the first breakpoint in the list
-       for the given address.  Only matters if address is non-NULL.  */
+       for the given address.  */
     char duplicate;
     /* Chain of command lines to execute when this breakpoint is hit.  */
     struct command_line *commands;
@@ -231,8 +231,7 @@ struct breakpoint
     /* Conditional.  Break only if this expression's value is nonzero.  */
     struct expression *cond;
 
-    /* String we used to set the breakpoint (malloc'd).  Only matters if
-       address is non-NULL.  */
+    /* String we used to set the breakpoint (malloc'd).  */
     char *addr_string;
     /* Language we used to set the breakpoint.  */
     enum language language;

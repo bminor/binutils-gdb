@@ -1,5 +1,11 @@
 2001-05-05  Jim Blandy  <jimb@redhat.com>
 
+	* breakpoint.c (check_duplicates): Use the breakpoint's type, not
+	its address, to decide whether it's a watchpoint or not.  Zero
+	is a valid code address.
+	(update_breakpoints_after_exec): Admonishing comments.
+	* breakpoint.h (struct breakpoint): Doc fixes.
+
 	* breakpoint.c (check_duplicates): Take a breakpoint object as an
 	argument, rather than an address and section.  All callers changed.
 
