@@ -1,3 +1,8 @@
+2001-07-07  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* ecoff.c (add_file): Only set debug_type to DEBUG_NONE if it is
+	DEBUG_UNSPECIFIED.
+
 2001-07-06  John Healy  <jhealy@redhat.com>
 
 	* cgen.c (gas_cgen_save_fixups): Modified to allow more than one
