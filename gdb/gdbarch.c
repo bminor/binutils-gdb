@@ -1053,14 +1053,14 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
 #ifdef CANNOT_FETCH_REGISTER
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
-                      "CANNOT_FETCH_REGISTER(reg_nr)",
-                      XSTRING (CANNOT_FETCH_REGISTER (reg_nr)));
+                      "CANNOT_FETCH_REGISTER(regnum)",
+                      XSTRING (CANNOT_FETCH_REGISTER (regnum)));
 #endif
 #ifdef CANNOT_STORE_REGISTER
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
-                      "CANNOT_STORE_REGISTER(reg_nr)",
-                      XSTRING (CANNOT_STORE_REGISTER (reg_nr)));
+                      "CANNOT_STORE_REGISTER(regnum)",
+                      XSTRING (CANNOT_STORE_REGISTER (regnum)));
 #endif
 #ifdef USE_GENERIC_DUMMY_FRAMES
   fprintf_unfiltered (file,
@@ -3089,14 +3089,14 @@ set_gdbarch_register_bytes_ok (struct gdbarch *gdbarch,
 }
 
 int
-gdbarch_cannot_fetch_register (struct gdbarch *gdbarch, int reg_nr)
+gdbarch_cannot_fetch_register (struct gdbarch *gdbarch, int regnum)
 {
   if (gdbarch->cannot_fetch_register == 0)
     internal_error (__FILE__, __LINE__,
                     "gdbarch: gdbarch_cannot_fetch_register invalid");
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_cannot_fetch_register called\n");
-  return gdbarch->cannot_fetch_register (reg_nr);
+  return gdbarch->cannot_fetch_register (regnum);
 }
 
 void
@@ -3107,14 +3107,14 @@ set_gdbarch_cannot_fetch_register (struct gdbarch *gdbarch,
 }
 
 int
-gdbarch_cannot_store_register (struct gdbarch *gdbarch, int reg_nr)
+gdbarch_cannot_store_register (struct gdbarch *gdbarch, int regnum)
 {
   if (gdbarch->cannot_store_register == 0)
     internal_error (__FILE__, __LINE__,
                     "gdbarch: gdbarch_cannot_store_register invalid");
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_cannot_store_register called\n");
-  return gdbarch->cannot_store_register (reg_nr);
+  return gdbarch->cannot_store_register (regnum);
 }
 
 void

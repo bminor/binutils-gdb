@@ -1,3 +1,7 @@
+2001-06-16  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbarch.c: Regenerate.  Out-of-sync with gdbarch.sh.
+
 2001-06-15  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbarch.sh (CANNOT_FETCH_REGISTER): Multi-arch.
