@@ -1,3 +1,17 @@
+2003-08-07  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-bfd.h: Remove PARAMS macro.  Replace PTR with void *.
+	(NAME): Use ## rather than CONCAT4 macro.
+	* elfcode.h: Remove one remaining PARAMS macro.
+	* elf-eh-frame.c: Convert to C90, remove unneeded casts and prototypes.
+	* elf-strtab.c: Likewise.
+	* elf-hppa.h: Likewise.
+	* elf32-hppa.h: Likewise.
+	* elf32-hppa.c: Likewise.
+	(elf32_hppa_add_symbol_hook): Delete.
+	(elf_backend_add_symbol_hook): Don't define.
+	* libhppa.h: Convert to C90.  Replace INLINE with inline.
+
 2003-08-06  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (ppc_stub_name): Tweak names for better readability.

@@ -818,7 +818,7 @@ elf_write_relocs (bfd *abfd, asection *sec, void *data)
   bfd_boolean *failedp = data;
   Elf_Internal_Shdr *rela_hdr;
   bfd_vma addr_offset;
-  void (*swap_out) PARAMS ((bfd *, const Elf_Internal_Rela *, bfd_byte *));
+  void (*swap_out) (bfd *, const Elf_Internal_Rela *, bfd_byte *);
   size_t extsize;
   bfd_byte *dst_rela;
   unsigned int idx;
