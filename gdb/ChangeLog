@@ -1,3 +1,11 @@
+2004-01-29  Roland McGrath  <roland@redhat.com>
+
+	* configure.in (NEW_PROC_API): Also match solaris2.9 for this test.
+	* configure: Regenerated.
+
+	* procfs.c: Include gdb_string.h for str* decls, otherwise warnings.
+	* Makefile.in (procfs.o): Add dep.
+
 2004-01-28  Andrew Cagney  <cagney@redhat.com>
 
 	* tui/tui-stack.h: Update copyright.
@@ -29,7 +37,7 @@
 	* dwarf2read.c (read_func_scope): Re-indent comment.
 
 2004-01-27  Paul N. Hilfinger  <hilfinger@gnat.com>
-	
+
 	* breakpoint.c (breakpoint_re_set_one): Set b->cond, b->val, and
 	b->exp to NULL after freeing so that error during re-parsing or
 	evaluation of expressions associated with breakpoint don't
