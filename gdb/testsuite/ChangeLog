@@ -1,3 +1,11 @@
+2001-10-31  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.base/miscexprs.c (main): Add usage of preprocessor
+	symbol `STORAGE' to allow to choose the storage class of
+	the local datastructures.
+	* gdb.base/miscexprs.exp: Handle setting a `-DSTORAGE=...'
+	compiler directive.
+
 2001-10-30  Michael Snyder  <msnyder@redhat.com>
 
 	* gdb.base/jump.exp: Allow it to run for all targets.

@@ -7,27 +7,27 @@ marker1 ()
 int
 main ()
 {
-  struct {
+  STORAGE struct {
     char c[100];
   } cbig;
 
-  struct {
+  STORAGE struct {
     int i[800];
   } ibig;
 
-  struct {
+  STORAGE struct {
     long l[900];
   } lbig;
 
-  struct {
+  STORAGE struct {
     float f[200];
   } fbig;
 
-  struct {
+  STORAGE struct {
     double d[300];
   } dbig;
 
-  struct {
+  STORAGE struct {
     short s[400];
   } sbig;
 

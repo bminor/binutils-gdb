@@ -30,6 +30,17 @@ if $tracelevel then {
         strace $tracelevel
         }
 
+# By default, the datastructures are allocated on the stack.  For targets
+# with very small stack, that will not work.  In that case, just set
+# storage to `-DSTORAGE=static' which changes the datastructures to be
+# allocated in data segment.
+set storage "-DSTORAGE="
+if [target_info exists gdb,small_stack_section] {
+    set storage "-DSTORAGE=static"
+}
+
+set additional_flags "additional_flags=-w ${storage}"
+
 #
 # test running programs
 #
@@ -40,7 +51,7 @@ set testfile "miscexprs"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
 
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug additional_flags=-w}] != "" } {
+if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [list debug ${additional_flags}]] != "" } {
     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
 
