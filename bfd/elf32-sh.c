@@ -3805,7 +3805,8 @@ sh_elf_create_dynamic_sections (abfd, info)
       || ! bfd_set_section_alignment (abfd, s, ptralign))
     return FALSE;
 
-  if (! create_got_section (abfd, info))
+  if (htab->sgot == NULL
+      && !create_got_section (abfd, info))
     return FALSE;
 
   {
@@ -3887,14 +3888,13 @@ sh_elf_adjust_dynamic_symbol (info, h)
   struct elf_sh_link_hash_table *htab;
   struct elf_sh_link_hash_entry *eh;
   struct elf_sh_dyn_relocs *p;
-  bfd *dynobj;
   asection *s;
   unsigned int power_of_two;
 
-  dynobj = elf_hash_table (info)->dynobj;
+  htab = sh_elf_hash_table (info);
 
   /* Make sure we know what is going on here.  */
-  BFD_ASSERT (dynobj != NULL
+  BFD_ASSERT (htab->root.dynobj != NULL
 	      && ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT)
 		  || h->weakdef != NULL
 		  || ((h->elf_link_hash_flags
@@ -3996,7 +3996,6 @@ sh_elf_adjust_dynamic_symbol (info, h)
      both the dynamic object and the regular object will refer to the
      same memory location for the variable.  */
 
-  htab = sh_elf_hash_table (info);
   s = htab->sdynbss;
   BFD_ASSERT (s != NULL);
 
@@ -4022,9 +4021,9 @@ sh_elf_adjust_dynamic_symbol (info, h)
 
   /* Apply the required alignment.  */
   s->_raw_size = BFD_ALIGN (s->_raw_size, (bfd_size_type) (1 << power_of_two));
-  if (power_of_two > bfd_get_section_alignment (dynobj, s))
+  if (power_of_two > bfd_get_section_alignment (htab->root.dynobj, s))
     {
-      if (! bfd_set_section_alignment (dynobj, s, power_of_two))
+      if (! bfd_set_section_alignment (htab->root.dynobj, s, power_of_two))
 	return FALSE;
     }
 
@@ -6199,7 +6198,6 @@ sh_elf_check_relocs (abfd, info, sec, relocs)
   struct elf_sh_link_hash_table *htab;
   const Elf_Internal_Rela *rel;
   const Elf_Internal_Rela *rel_end;
-  bfd *dynobj;
   bfd_vma *local_got_offsets;
   asection *sgot;
   asection *srelgot;
@@ -6221,7 +6219,6 @@ sh_elf_check_relocs (abfd, info, sec, relocs)
     sym_hashes_end -= symtab_hdr->sh_info;
 
   htab = sh_elf_hash_table (info);
-  dynobj = htab->root.dynobj;
   local_got_offsets = elf_local_got_offsets (abfd);
 
   rel_end = relocs + sec->reloc_count;
@@ -6295,10 +6292,13 @@ sh_elf_check_relocs (abfd, info, sec, relocs)
 	    case R_SH_TLS_GD_32:
 	    case R_SH_TLS_LD_32:
 	    case R_SH_TLS_IE_32:
-	      if (dynobj == NULL)
-		htab->root.dynobj = dynobj = abfd;
-	      if (! create_got_section (dynobj, info))
-		return FALSE;
+	      if (htab->sgot == NULL)
+		{
+		  if (htab->root.dynobj == NULL)
+		    htab->root.dynobj = abfd;
+		  if (!create_got_section (htab->root.dynobj, info))
+		    return FALSE;
+		}
 	      break;
 
 	    default:
@@ -6535,8 +6535,8 @@ sh_elf_check_relocs (abfd, info, sec, relocs)
 	      struct elf_sh_dyn_relocs *p;
 	      struct elf_sh_dyn_relocs **head;
 
-	      if (dynobj == NULL)
-		htab->root.dynobj = dynobj = abfd;
+	      if (htab->root.dynobj == NULL)
+		htab->root.dynobj = abfd;
 
 	      /* When creating a shared object, we must copy these
 		 reloc types into the output file.  We create a reloc
@@ -6556,19 +6556,21 @@ sh_elf_check_relocs (abfd, info, sec, relocs)
 			      && strcmp (bfd_get_section_name (abfd, sec),
 					 name + 5) == 0);
 
-		  sreloc = bfd_get_section_by_name (dynobj, name);
+		  sreloc = bfd_get_section_by_name (htab->root.dynobj, name);
 		  if (sreloc == NULL)
 		    {
 		      flagword flags;
 
-		      sreloc = bfd_make_section (dynobj, name);
+		      sreloc = bfd_make_section (htab->root.dynobj, name);
 		      flags = (SEC_HAS_CONTENTS | SEC_READONLY
 			       | SEC_IN_MEMORY | SEC_LINKER_CREATED);
 		      if ((sec->flags & SEC_ALLOC) != 0)
 			flags |= SEC_ALLOC | SEC_LOAD;
 		      if (sreloc == NULL
-			  || ! bfd_set_section_flags (dynobj, sreloc, flags)
-			  || ! bfd_set_section_alignment (dynobj, sreloc, 2))
+			  || ! bfd_set_section_flags (htab->root.dynobj,
+						      sreloc, flags)
+			  || ! bfd_set_section_alignment (htab->root.dynobj,
+							  sreloc, 2))
 			return FALSE;
 		    }
 		  if (sec->flags & SEC_READONLY)
@@ -6598,7 +6600,7 @@ sh_elf_check_relocs (abfd, info, sec, relocs)
 	      if (p == NULL || p->sec != sec)
 		{
 		  bfd_size_type amt = sizeof (*p);
-		  p = ((struct elf_sh_dyn_relocs *) bfd_alloc (dynobj, amt));
+		  p = bfd_alloc (htab->root.dynobj, amt);
 		  if (p == NULL)
 		    return FALSE;
 		  p->next = *head;
@@ -6788,10 +6790,8 @@ sh_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
      Elf_Internal_Sym *sym;
 {
   struct elf_sh_link_hash_table *htab;
-  bfd *dynobj;
 
   htab = sh_elf_hash_table (info);
-  dynobj = htab->root.dynobj;
 
   if (h->plt.offset != (bfd_vma) -1)
     {
@@ -7076,15 +7076,12 @@ sh_elf_finish_dynamic_sections (output_bfd, info)
      struct bfd_link_info *info;
 {
   struct elf_sh_link_hash_table *htab;
-  bfd *dynobj;
   asection *sgot;
   asection *sdyn;
 
   htab = sh_elf_hash_table (info);
-  dynobj = htab->root.dynobj;
-
   sgot = htab->sgotplt;
-  sdyn = bfd_get_section_by_name (dynobj, ".dynamic");
+  sdyn = bfd_get_section_by_name (htab->root.dynobj, ".dynamic");
 
   if (htab->root.dynamic_sections_created)
     {
@@ -7103,7 +7100,7 @@ sh_elf_finish_dynamic_sections (output_bfd, info)
 	  const char *name;
 #endif
 
-	  bfd_elf32_swap_dyn_in (dynobj, dyncon, &dyn);
+	  bfd_elf32_swap_dyn_in (htab->root.dynobj, dyncon, &dyn);
 
 	  switch (dyn.d_tag)
 	    {

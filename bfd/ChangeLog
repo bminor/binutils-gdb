@@ -1,5 +1,14 @@
 2003-07-04  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-sparc.c (elf32_sparc_check_relocs): Don't call
+	create_got_section if we already have done so.
+	* elf32-sh.c (sh_elf_create_dynamic_sections): Likewise.
+	(sh_elf_check_relocs): Likewise.
+	(sh_elf_adjust_dynamic_symbol): Delete "dynobj" var.  Use
+	htab->root.dynobj instead.
+	(sh_elf_check_relocs): Likewise.
+	(sh_elf_finish_dynamic_sections): Likewise.
+
 	* section.c (bfd_make_section): Return NULL for existing section.
 
 2003-07-04  Alan Modra  <amodra@bigpond.net.au>

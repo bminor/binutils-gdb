@@ -1024,10 +1024,13 @@ elf32_sparc_check_relocs (abfd, info, sec, relocs)
 	      }
 	  }
 
-	  if (htab->elf.dynobj == NULL)
-	    htab->elf.dynobj = abfd;
-	  if (!create_got_section (htab->elf.dynobj, info))
-	    return FALSE;
+	  if (htab->sgot == NULL)
+	    {
+	      if (htab->elf.dynobj == NULL)
+		htab->elf.dynobj = abfd;
+	      if (!create_got_section (htab->elf.dynobj, info))
+		return FALSE;
+	    }
 	  break;
 
 	case R_SPARC_TLS_GD_CALL:
