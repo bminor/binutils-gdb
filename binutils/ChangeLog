@@ -1,5 +1,12 @@
 Mon Sep 16 15:30:54 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ieee.c (struct ieee_write_type): Add reflocalp field.
+	(ieee_pointer_type): Set reflocalp after pushing type.
+	(ieee_function_type): If reflocalp is set, make this type local.
+	(ieee_range_type, ieee_array_type, ieee_set_type): Likewise.
+	(ieee_const_type, ieee_volatile_type): Likewise.
+	(ieee_struct_field, ieee_class_baseclass): Likewise.
+
 	* ieee.c (struct ieee_info): Add global_types field.
 	(parse_ieee_bb): When starting a BB1, initialize the types field
 	to the global_types field.

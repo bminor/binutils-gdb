@@ -3735,6 +3735,9 @@ struct ieee_write_type
   unsigned int referencep : 1;
   /* Whether this is in the local type block.  */
   unsigned int localp : 1;
+  /* If this is not local, whether a reference to this type should be
+     local.  */
+  unsigned reflocalp : 1;
   /* Whether this is a duplicate struct definition which we are
      ignoring.  */
   unsigned int ignorep : 1;
@@ -5511,7 +5514,10 @@ ieee_enum_type (p, tag, names, vals)
   return true;
 }
 
-/* Make a pointer type.  */
+/* Make a pointer type.  The HP debugger seems to sometimes get
+ confused by global pointers to global pointers.  Therefore, we mark
+ all pointers as reflocalp, so that references to global pointers are
+ forced to be local.  This is probably less efficient than possible.  */
 
 static boolean
 ieee_pointer_type (p)
@@ -5522,13 +5528,18 @@ ieee_pointer_type (p)
   unsigned int indx;
   struct ieee_modified_type *m = NULL;
 
-  localp = info->type_stack->type.localp;
+  localp = info->type_stack->type.localp || info->type_stack->type.reflocalp;
   indx = ieee_pop_type (info);
 
   /* A pointer to a simple builtin type can be obtained by adding 32.
      FIXME: Will this be a short pointer, and will that matter?  */
   if (indx < 32)
-    return ieee_push_type (info, indx + 32, 0, true, false);
+    {
+      if (! ieee_push_type (info, indx + 32, 0, true, false))
+	return false;
+      /* I don't think we need to set reflocalp for this case.  */
+      return true;
+    }
 
   if (! localp)
     {
@@ -5538,7 +5549,12 @@ ieee_pointer_type (p)
 
       /* FIXME: The size should depend upon the architecture.  */
       if (m->pointer > 0)
-	return ieee_push_type (info, m->pointer, 4, true, false);
+	{
+	  if (! ieee_push_type (info, m->pointer, 4, true, false))
+	    return false;
+	  info->type_stack->type.reflocalp = true;
+	  return true;
+	}
     }
 
   if (! ieee_define_type (info, 4, true, localp)
@@ -5548,6 +5564,8 @@ ieee_pointer_type (p)
 
   if (! localp)
     m->pointer = info->type_stack->type.indx;
+
+  info->type_stack->type.reflocalp = true;
 
   return true;
 }
@@ -5578,7 +5596,8 @@ ieee_function_type (p, argcount, varargs)
       args = (unsigned int *) xmalloc (argcount * sizeof *args);
       for (i = argcount - 1; i >= 0; i--)
 	{
-	  if (info->type_stack->type.localp)
+	  if (info->type_stack->type.localp
+	      || info->type_stack->type.reflocalp)
 	    localp = true;
 	  args[i] = ieee_pop_type (info);
 	}
@@ -5586,7 +5605,7 @@ ieee_function_type (p, argcount, varargs)
   else if (argcount < 0)
     varargs = false;
 
-  if (info->type_stack->type.localp)
+  if (info->type_stack->type.localp || info->type_stack->type.reflocalp)
     localp = true;
   retindx = ieee_pop_type (info);
 
@@ -5673,7 +5692,7 @@ ieee_range_type (p, low, high)
 
   size = info->type_stack->type.size;
   unsignedp = info->type_stack->type.unsignedp;
-  localp = info->type_stack->type.localp;
+  localp = info->type_stack->type.localp || info->type_stack->type.reflocalp;
   ieee_pop_unused_type (info);
   return (ieee_define_type (info, size, unsignedp, localp)
 	  && ieee_write_number (info, 'R')
@@ -5701,7 +5720,7 @@ ieee_array_type (p, low, high, stringp)
 
   /* IEEE does not store the range, so we just ignore it.  */
   ieee_pop_unused_type (info);
-  localp = info->type_stack->type.localp;
+  localp = info->type_stack->type.localp || info->type_stack->type.reflocalp;
   eleindx = ieee_pop_type (info);
 
   if (! localp)
@@ -5757,7 +5776,7 @@ ieee_set_type (p, bitstringp)
   boolean localp;
   unsigned int eleindx;
 
-  localp = info->type_stack->type.localp;
+  localp = info->type_stack->type.localp || info->type_stack->type.reflocalp;
   eleindx = ieee_pop_type (info);
 
   /* FIXME: We don't know the size, so we just use 4.  */
@@ -5825,7 +5844,7 @@ ieee_const_type (p)
 
   size = info->type_stack->type.size;
   unsignedp = info->type_stack->type.unsignedp;
-  localp = info->type_stack->type.localp;
+  localp = info->type_stack->type.localp || info->type_stack->type.reflocalp;
   indx = ieee_pop_type (info);
 
   if (! localp)
@@ -5865,7 +5884,7 @@ ieee_volatile_type (p)
 
   size = info->type_stack->type.size;
   unsignedp = info->type_stack->type.unsignedp;
-  localp = info->type_stack->type.localp;
+  localp = info->type_stack->type.localp || info->type_stack->type.reflocalp;
   indx = ieee_pop_type (info);
 
   if (! localp)
@@ -6053,7 +6072,7 @@ ieee_struct_field (p, name, bitpos, bitsize, visibility)
   size = info->type_stack->type.size;
   unsignedp = info->type_stack->type.unsignedp;
   referencep = info->type_stack->type.referencep;
-  localp = info->type_stack->type.localp;
+  localp = info->type_stack->type.localp || info->type_stack->type.reflocalp;
   indx = ieee_pop_type (info);
 
   if (localp)
@@ -6331,7 +6350,7 @@ ieee_class_baseclass (p, bitpos, virtual, visibility)
 	  && ! ieee_buffer_emptyp (&info->type_stack->next->type.strdef));
 
   bname = info->type_stack->type.name;
-  localp = info->type_stack->type.localp;
+  localp = info->type_stack->type.localp || info->type_stack->type.reflocalp;
   bindx = ieee_pop_type (info);
 
   /* We are currently defining both a struct and a class.  We must
