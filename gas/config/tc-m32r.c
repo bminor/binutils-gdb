@@ -1,4 +1,4 @@
-/* tc-m32r.c -- Assembler for the Mitsubishi M32R.
+/* tc-m32r.c -- Assembler for the Renesas M32R.
    Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
