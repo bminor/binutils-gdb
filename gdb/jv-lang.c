@@ -1054,6 +1054,7 @@ const struct language_defn java_language_defn =
   java_print_type,		/* Print a type using appropriate syntax */
   java_val_print,		/* Print a value using appropriate syntax */
   java_value_print,		/* Print a top-level value */
+  NULL,				/* Language specific skip_trampoline */
   {"", "", "", ""},		/* Binary format info */
   {"0%lo", "0", "o", ""},	/* Octal format info */
   {"%ld", "", "d", ""},		/* Decimal format info */

@@ -1,4 +1,22 @@
-2003-03-25  Andrew Cagney  <cagney@redhat.com>
+2003-03-25  Adam Fedor  <fedor@gnu.org>
+
+	* Makefile.in (infrun.o): Add $(language_h)
+	* infrun.c (handle_inferior_event): Use skip_language_trampoline
+	for language specific trampolines.
+	* language.h (struct language_defn): Add skip_trampoline.
+	(skip_language_trampoline): Declare.
+	* language.c (unk_lang_trampoline, skip_language_trampoline):
+	New functions.
+	(unknown_language_defn, auto_language_defn, local_language_defn):
+	Add ukn_lang_trampoline.
+	* ada-lang.c (ada_language_defn): Add NULL for language
+	specific skip_trampoline.
+	* c-lang.c, f-lang.c, jv-lang.c, m2-lang.c, p-lang.c,
+	scm-lang.c: Likewise.
+	* objc-lang.c (objc_skip_trampoline): New function.
+	(objc_language_defn): Add objc_skip_trampoline.
+
+I2003-03-25  Andrew Cagney  <cagney@redhat.com>
 
 	* frame.c (get_prev_frame): Delay validating a frame's ID -
 	non-NULL, didn't go backwards - until an attempt to unwind it to

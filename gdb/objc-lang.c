@@ -593,6 +593,35 @@ objc_create_fundamental_type (struct objfile *objfile, int typeid)
   return (type);
 }
 
+/* Determine if we are currently in the Objective-C dispatch function.
+   If so, get the address of the method function that the dispatcher
+   would call and use that as the function to step into instead. Also
+   skip over the trampoline for the function (if any).  This is better
+   for the user since they are only interested in stepping into the
+   method function anyway.  */
+static CORE_ADDR 
+objc_skip_trampoline (CORE_ADDR stop_pc)
+{
+  CORE_ADDR real_stop_pc;
+  CORE_ADDR method_stop_pc;
+  
+  real_stop_pc = SKIP_TRAMPOLINE_CODE (stop_pc);
+
+  if (real_stop_pc != 0)
+    find_objc_msgcall (real_stop_pc, &method_stop_pc);
+  else
+    find_objc_msgcall (stop_pc, &method_stop_pc);
+
+  if (method_stop_pc)
+    {
+      real_stop_pc = SKIP_TRAMPOLINE_CODE (method_stop_pc);
+      if (real_stop_pc == 0)
+	real_stop_pc = method_stop_pc;
+    }
+
+  return real_stop_pc;
+}
+
 
 /* Table mapping opcodes into strings for printing operators
    and precedences of the operators.  */
@@ -670,6 +699,7 @@ const struct language_defn objc_language_defn = {
   c_print_type,			/* Print a type using appropriate syntax */
   c_val_print,			/* Print a value using appropriate syntax */
   c_value_print,		/* Print a top-level value */
+  objc_skip_trampoline, 	/* Language specific skip_trampoline */
   {"",     "",    "",  ""},	/* Binary format info */
   {"0%lo",  "0",   "o", ""},	/* Octal format info */
   {"%ld",   "",    "d", ""},	/* Decimal format info */

@@ -43,6 +43,7 @@
 #include "regcache.h"
 #include "value.h"
 #include "observer.h"
+#include "language.h"
 
 /* Prototypes for local functions */
 
@@ -2386,7 +2387,9 @@ process_event_stop_test:
          function.  That's what tells us (a) whether we want to step
          into it at all, and (b) what prologue we want to run to
          the end of, if we do step into it.  */
-      real_stop_pc = SKIP_TRAMPOLINE_CODE (stop_pc);
+      real_stop_pc = skip_language_trampoline (stop_pc);
+      if (real_stop_pc == 0)
+	real_stop_pc = SKIP_TRAMPOLINE_CODE (stop_pc);
       if (real_stop_pc != 0)
 	ecs->stop_func_start = real_stop_pc;
 
