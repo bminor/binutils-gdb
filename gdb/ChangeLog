@@ -1,3 +1,23 @@
+Fri Oct 14 10:29:08 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* exec.c (map_vmap): Cast return from xmalloc to its proper type,
+	not to PTR.
+
+	* symfile.c (reread_symbols): Include bfd_errmsg string in error
+	message if bfd_close fails.
+	* exec.c (exec_close), solib.c (clear_solib), corelow.c
+	(core_close), objfiles.c (free_objfile), irix5-nat.c
+	(clear_solib), remote-utils.c (gr_load_image):
+	Check for errors from bfd_close.
+	* solib.c (look_for_base), remote-utils.c (gr_load_image),
+	remote-udi.c (download), corelow.c (core_open), symfile.c
+	(symfile_bfd_open), symfile.c (generic_load): Add comment
+	regarding error from bfd_close.
+	* remote-udi.c (download), remote-utils.c (gr_load_image): Add
+	comment about bogus handling of errors from bfd_openr.
+	* exec.c (exec_close): Add comment regarding memory leak and
+	dangling reference to vp->name.
+
 Sat Oct 15 03:43:00 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* eval.c (evaluate_subexp):  Make fnptr a LONGEST instead

@@ -1139,8 +1139,13 @@ download(load_arg_string, from_tty)
   pbfd = bfd_openr (filename, gnutarget);
 
   if (!pbfd) 
+    /* FIXME: should be using bfd_errmsg, not assuming it was
+       bfd_error_system_call.  */
     perror_with_name (filename);
   
+  /* FIXME: should be checking for errors from bfd_close (for one thing,
+     on error it does not free all the storage associated with the
+     bfd).  */
   make_cleanup (bfd_close, pbfd);
 
   QUIT;
