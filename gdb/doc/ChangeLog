@@ -1,3 +1,8 @@
+2002-02-24  Andrew Cagney  <ac131313@redhat.com>
+
+	* Makefile.in (gdb.info): Add explicit path to gdb.texinfo.
+	Remove reference to 3.12.
+
 2002-02-23  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbint.texinfo: Include fdl.texi.

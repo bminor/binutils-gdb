@@ -263,10 +263,9 @@ gdb.pdf: ${SFILES_DOC}
 		gdb.tp* gdb.vr*
 
 # GDB MANUAL: info file
-# We're using texinfo 3.12; older makeinfo's may not be able to
-# cope with all the markup.  
 gdb.info: ${SFILES_DOC}
-	$(MAKEINFO) -I ${READLINE_DIR} -I ${GDBMI_DIR} -I $(srcdir) -o ./gdb.info gdb.texinfo
+	$(MAKEINFO) -I ${READLINE_DIR} -I ${GDBMI_DIR} -I $(srcdir) \
+		-o gdb.info $(srcdir)/gdb.texinfo
 
 # GDB MANUAL: roff translations
 # Try to use a recent texi2roff.  v2 was put on prep in jan91.
