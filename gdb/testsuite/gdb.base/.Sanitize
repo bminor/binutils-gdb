@@ -27,6 +27,8 @@ Makefile.in
 README
 a1-selftest.exp
 a2-run.exp
+bar.c
+baz.c
 bitfields.c
 bitfields.exp
 break.c
@@ -40,13 +42,17 @@ configure.in
 corefile.exp
 coremaker.c
 crossload.exp
+d10v.ld
+d10vovly.c
 default.exp
 echo.exp
 exprs.c
 exprs.exp
+foo.c
 funcargs.c
 funcargs.exp
 gdbvars.exp
+grbx.c
 help.exp
 i486-elf.u
 i860-elf.u
@@ -62,6 +68,8 @@ list.exp
 list0.c
 list0.h
 list1.c
+m32r.ld
+m32rovly.c
 m68k-aout.u
 m68k-aout2.u
 m68k-elf.u
@@ -73,6 +81,9 @@ nodebug.exp
 opaque.exp
 opaque0.c
 opaque1.c
+overlays.c
+overlays.exp
+ovlymgr.h
 printcmds.c
 printcmds.exp
 ptype.c
