@@ -1,3 +1,7 @@
+Wed Jan 26 15:31:57 1994  Roland H. Pesch  (pesch@fowanton.cygnus.com)
+
+	* gdb.texinfo, remote.texi: general editing pass prior to Net release
+
 Tue Jan 25 12:12:04 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* stabs.texinfo (String Field): Discuss continuing stabs with ?.

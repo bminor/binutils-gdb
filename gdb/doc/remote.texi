@@ -131,12 +131,12 @@ Use this auxiliary subroutine to make your program contain a
 breakpoint.  Depending on the particular situation, this may be the only
 way for @value{GDBN} to get control.  For instance, if your target
 machine has some sort of interrupt button, you won't need to call this;
-pressing the interrupt button will transfer control to
+pressing the interrupt button transfers control to
 @code{handle_exception}---in effect, to @value{GDBN}.  On some machines,
 simply receiving characters on the serial port may also trigger a trap;
 again, in that situation, you don't need to call @code{breakpoint} from
 your own program---simply running @samp{target remote} from the host
-@value{GDBN} session will get control.  
+@value{GDBN} session gets control.  
 
 Call @code{breakpoint} if none of these is true, or if you simply want
 to make certain your program stops at a predetermined point for the
@@ -229,7 +229,7 @@ either obtain it from your hardware manufacturer, or write your own.
 @end table
 
 If you do not use the GNU C compiler, you may need other standard
-library subroutines as well; this will vary from one stub to another,
+library subroutines as well; this varies from one stub to another,
 but in general the stubs are likely to use any of the common library
 subroutines which @code{gcc} generates as inline code.
 
@@ -430,7 +430,7 @@ If you have trouble with the serial connection, you can use the command
 back and forth across the serial line to the remote machine.  The
 packet-debugging information is printed on the @value{GDBN} standard output
 stream.  @code{set remotedebug off} turns it off, and @code{show
-remotedebug} will show you its current state.
+remotedebug} shows you its current state.
 
 @ifset GDBSERVER
 @node Server
@@ -788,7 +788,7 @@ Byte Write Available  = Yes
 @end example
 
 Then exit the @code{cu} or @code{tip} program (done in the example by
-typing @code{~.} at the @code{EBMON} prompt).  @code{EBMON} will keep
+typing @code{~.} at the @code{EBMON} prompt).  @code{EBMON} keeps
 running, ready for @value{GDBN} to take over.
 
 For this example, we've assumed what is probably the most convenient
@@ -797,7 +797,7 @@ system: a PC/NFS connection that establishes ``drive @code{G:}'' on the
 PC as a file system on the Unix host.  If you do not have PC/NFS or
 something similar connecting the two systems, you must arrange some
 other way---perhaps floppy-disk transfer---of getting the 29K program
-from the Unix system to the PC; @value{GDBN} will @emph{not} download it over the
+from the Unix system to the PC; @value{GDBN} does @emph{not} download it over the
 serial line.
 
 @node gdb-EB29K
@@ -878,7 +878,7 @@ concentrator) using the syntax @code{@var{hostname}:@var{portnumber}}.
 
 The @code{load} and @code{attach} commands are @emph{not} defined for
 this target; you must load your program into the ST2000 as you normally
-would for standalone operation.  @value{GDBN} will read debugging information
+would for standalone operation.  @value{GDBN} reads debugging information
 (such as symbols) from a separate, debugging version of the program
 available on your host computer.
 @c FIXME!! This is terribly vague; what little content is here is
@@ -900,7 +900,7 @@ manual for available commands.
 @cindex connect (to STDBUG)
 Connect the controlling terminal to the STDBUG command monitor.  When
 you are done interacting with STDBUG, typing either of two character
-sequences will get you back to the @value{GDBN} command prompt:
+sequences gets you back to the @value{GDBN} command prompt:
 @kbd{@key{RET}~.} (Return, followed by tilde and period) or
 @kbd{@key{RET}~@key{C-d}} (Return, followed by tilde and control-D).
 @end table
@@ -928,7 +928,7 @@ To use @value{GDBN} with VxWorks, you must rebuild your VxWorks kernel
 to include the remote debugging interface routines in the VxWorks
 library @file{rdb.a}.  To do this, define @code{INCLUDE_RDB} in the
 VxWorks configuration file @file{configAll.h} and rebuild your VxWorks
-kernel.  The resulting kernel will contain @file{rdb.a} and spawn the
+kernel.  The resulting kernel contains @file{rdb.a}, and spawns the
 source debugging task @code{tRdbTask} when VxWorks is booted.  For more
 information on configuring and remaking VxWorks, see the manufacturer's
 manual.
@@ -1023,7 +1023,7 @@ Reading symbol data from wherever/vw/demo/rdb/prog.o... done.
 
 You can also use the @code{load} command to reload an object module
 after editing and recompiling the corresponding source file.  Note that
-this will cause @value{GDBN} to delete all currently-defined breakpoints,
+this makes @value{GDBN} delete all currently-defined breakpoints,
 auto-displays, and convenience variables, and to clear the value
 history.  (This is necessary in order to preserve the integrity of
 debugger data structures that reference the target system's symbol
@@ -1042,7 +1042,7 @@ follows:
 
 @noindent
 where @var{task} is the VxWorks hexadecimal task ID.  The task can be running
-or suspended when you attach to it.  If running, it will be suspended at
+or suspended when you attach to it.  Running tasks are suspended at
 the time of attachment.
 @end ifset
 
@@ -1179,7 +1179,7 @@ normally.  The communications protocol provides no other way for @value{GDBN}
 to detect program completion.
 @end itemize
 
-In either case, @value{GDBN} will see the effect of a @sc{reset} on the
+In either case, @value{GDBN} sees the effect of a @sc{reset} on the
 development board as a ``normal exit'' of your program.
 @end ifset
 @end ifset
@@ -1357,6 +1357,6 @@ Execution time in 60ths of a second.
 
 You can refer to these values in @value{GDBN} expressions with the usual
 conventions; for example, @w{@samp{b fputc if $cycles>5000}} sets a
-conditional breakpoint that will suspend only after at least 5000
+conditional breakpoint that suspends only after at least 5000
 simulated clock ticks.
 @end ifset
