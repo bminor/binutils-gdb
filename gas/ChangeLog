@@ -1,9 +1,8 @@
 Fri Oct 29 13:26:12 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
-	* as.c (main): Disable "-R" option if NO_FOLD_DATA_AND_TEXT
-	is defined.
-	* config/tc-hppa.h (NO_FOLD_DATA_AND_TEXT): Define.  Folding
-	of text and data segments fails miserably on the PA.
+	* config/tc-hppa.c (md_begin): Disable "-R" option to fold
+	textand data segments.  Warn user "-R" is unsupported on the
+	PA.
 
 Thu Oct 28 12:36:13 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
