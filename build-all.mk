@@ -192,8 +192,8 @@ all-native:
 
 all-cross:
 	[ -d $(INSTALLDIR) ] || mkdir $(INSTALLDIR)
-	rm -f /usr/cygnus/$(TAG)
-	ln -s $(INSTALLDIR) /usr/cygnus/$(TAG)
+	rm -f $(ROOTING)/$(RELEASE_TAG)
+	ln -s $(INSTALLDIR) $(ROOTING)/$(RELEASE_TAG)
 	@for i in $(TARGETS) ; do \
 	    echo "building $(canonhost) cross to $$i" ; \
             $(MAKE) -f test-build.mk $(FLAGS_TO_PASS) target=$$i build=$(build) do-cygnus $(tlog) && \
