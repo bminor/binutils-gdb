@@ -300,7 +300,7 @@ print_insn (cd, pc, info, buf, buflen)
 	    }
 	  else
 	    length = CGEN_EXTRACT_FN (cd, insn)
-	      (cd, insn, &ex_info, insn_value, &fields, pc);
+	      (cd, insn, &ex_info, insn_value_cropped, &fields, pc);
 
 	  /* length < 0 -> error */
 	  if (length < 0)

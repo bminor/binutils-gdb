@@ -1,3 +1,7 @@
+2001-05-15  Frank Ch. Eigler  <fche@redhat.com>
+
+	* cgen-dis.in (extract_normal): Complete support for min<base case.
+
 2001-05-15  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* mips-dis.c (INSNLEN): Rename MAXLEN.
