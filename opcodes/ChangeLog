@@ -1,3 +1,7 @@
+Thu Oct 23 21:13:37 1997  Fred Fish  <fnf@cygnus.com>
+ 
+        * d10v-opc.c (d10v_opcodes): Correct entry for RTE.
+ 
 Mon Dec  8 11:21:07 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* disassemble.c: Remove disasm_symaddr() function.
