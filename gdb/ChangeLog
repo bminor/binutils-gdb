@@ -1,3 +1,13 @@
+2004-11-30  Randolph Chung  <tausq@debian.org>
+
+	* breakpoint.c (break_at_finish_command): Delete.
+	(break_at_finish_command_1): Delete.
+	(break_at_finish_at_depth_command): Delete.
+	(break_at_finish_at_depth_command_1): Delete.
+	(tbreak_at_finish_command): Delete.
+	* hppa-tdep.c (_initialize_hppa_tdep): Remove deprecated xbreak, tbreak
+	and bx commands.
+
 2004-11-30  Andrew Cagney  <cagney@gnu.org>
 
 	* config/nm-gnu.h: Delete file.

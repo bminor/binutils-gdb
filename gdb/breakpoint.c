@@ -86,11 +86,6 @@ static void watch_command (char *, int);
 
 static int can_use_hardware_watchpoint (struct value *);
 
-extern void break_at_finish_command (char *, int);
-extern void break_at_finish_at_depth_command (char *, int);
-
-extern void tbreak_at_finish_command (char *, int);
-
 static int break_command_1 (char *, int, int, struct breakpoint *);
 
 static void mention (struct breakpoint *);
@@ -180,11 +175,6 @@ static void solib_load_unload_1 (char *hookname,
 static void create_fork_vfork_event_catchpoint (int tempflag,
 						char *cond_string,
 						enum bptype bp_kind);
-
-static void break_at_finish_at_depth_command_1 (char *arg,
-						int flag, int from_tty);
-
-static void break_at_finish_command_1 (char *arg, int flag, int from_tty);
 
 static void stop_command (char *arg, int from_tty);
 
@@ -5449,169 +5439,6 @@ gdb_breakpoint (char *address, char *condition,
 }
 
 
-static void
-break_at_finish_at_depth_command_1 (char *arg, int flag, int from_tty)
-{
-  struct frame_info *frame;
-  CORE_ADDR low, high, selected_pc = 0;
-  char *extra_args = NULL;
-  char *level_arg;
-  int extra_args_len = 0, if_arg = 0;
-
-  if (!arg ||
-      (arg[0] == 'i' && arg[1] == 'f' && (arg[2] == ' ' || arg[2] == '\t')))
-    {
-
-      if (default_breakpoint_valid)
-	{
-	  if (deprecated_selected_frame)
-	    {
-	      selected_pc = get_frame_pc (deprecated_selected_frame);
-	      if (arg)
-		if_arg = 1;
-	    }
-	  else
-	    error ("No selected frame.");
-	}
-      else
-	error ("No default breakpoint address now.");
-    }
-  else
-    {
-      extra_args = strchr (arg, ' ');
-      if (extra_args)
-	{
-	  extra_args++;
-	  extra_args_len = strlen (extra_args);
-	  level_arg = (char *) xmalloc (extra_args - arg);
-	  strncpy (level_arg, arg, extra_args - arg - 1);
-	  level_arg[extra_args - arg - 1] = '\0';
-	}
-      else
-	{
-	  level_arg = (char *) xmalloc (strlen (arg) + 1);
-	  strcpy (level_arg, arg);
-	}
-
-      frame = parse_frame_specification (level_arg);
-      if (frame)
-	selected_pc = get_frame_pc (frame);
-      else
-	selected_pc = 0;
-    }
-  if (if_arg)
-    {
-      extra_args = arg;
-      extra_args_len = strlen (arg);
-    }
-
-  if (selected_pc)
-    {
-      if (find_pc_partial_function (selected_pc, (char **) NULL, &low, &high))
-	{
-	  char *addr_string;
-	  if (extra_args_len)
-	    addr_string = xstrprintf ("*0x%s %s", paddr_nz (high), extra_args);
-	  else
-	    addr_string = xstrprintf ("*0x%s", paddr_nz (high));
-	  break_command_1 (addr_string, flag, from_tty, NULL);
-	  xfree (addr_string);
-	}
-      else
-	error ("No function contains the specified address");
-    }
-  else
-    error ("Unable to set breakpoint at procedure exit");
-}
-
-
-static void
-break_at_finish_command_1 (char *arg, int flag, int from_tty)
-{
-  char *addr_string, *break_string, *beg_addr_string;
-  CORE_ADDR low, high;
-  struct symtabs_and_lines sals;
-  struct symtab_and_line sal;
-  struct cleanup *old_chain;
-  char *extra_args = NULL;
-  int extra_args_len = 0;
-  int i, if_arg = 0;
-
-  if (!arg ||
-      (arg[0] == 'i' && arg[1] == 'f' && (arg[2] == ' ' || arg[2] == '\t')))
-    {
-      if (default_breakpoint_valid)
-	{
-	  if (deprecated_selected_frame)
-	    {
-	      addr_string = xstrprintf ("*0x%s",
-					paddr_nz (get_frame_pc (deprecated_selected_frame)));
-	      if (arg)
-		if_arg = 1;
-	    }
-	  else
-	    error ("No selected frame.");
-	}
-      else
-	error ("No default breakpoint address now.");
-    }
-  else
-    {
-      addr_string = (char *) xmalloc (strlen (arg) + 1);
-      strcpy (addr_string, arg);
-    }
-
-  if (if_arg)
-    {
-      extra_args = arg;
-      extra_args_len = strlen (arg);
-    }
-  else if (arg)
-    {
-      /* get the stuff after the function name or address */
-      extra_args = strchr (arg, ' ');
-      if (extra_args)
-	{
-	  extra_args++;
-	  extra_args_len = strlen (extra_args);
-	}
-    }
-
-  sals.sals = NULL;
-  sals.nelts = 0;
-
-  beg_addr_string = addr_string;
-  sals = decode_line_1 (&addr_string, 1, (struct symtab *) NULL, 0,
-			(char ***) NULL, NULL);
-
-  xfree (beg_addr_string);
-  old_chain = make_cleanup (xfree, sals.sals);
-  for (i = 0; (i < sals.nelts); i++)
-    {
-      sal = sals.sals[i];
-      if (find_pc_partial_function (sal.pc, (char **) NULL, &low, &high))
-	{
-	  break_string;
-	  if (extra_args_len)
-	    break_string = xstrprintf ("*0x%s %s", paddr_nz (high),
-				       extra_args);
-	  else
-	    break_string = xstrprintf ("*0x%s", paddr_nz (high));
-	  break_command_1 (break_string, flag, from_tty, NULL);
-	  xfree (break_string);
-	}
-      else
-	error ("No function contains the specified address");
-    }
-  if (sals.nelts > 1)
-    {
-      warning ("Multiple breakpoints were set.\n");
-      warning ("Use the \"delete\" command to delete unwanted breakpoints.");
-    }
-  do_cleanups (old_chain);
-}
-
-
 /* Helper function for break_command_1 and disassemble_command.  */
 
 void
@@ -5668,27 +5495,9 @@ break_command (char *arg, int from_tty)
 }
 
 void
-break_at_finish_command (char *arg, int from_tty)
-{
-  break_at_finish_command_1 (arg, 0, from_tty);
-}
-
-void
-break_at_finish_at_depth_command (char *arg, int from_tty)
-{
-  break_at_finish_at_depth_command_1 (arg, 0, from_tty);
-}
-
-void
 tbreak_command (char *arg, int from_tty)
 {
   break_command_1 (arg, BP_TEMPFLAG, from_tty, NULL);
-}
-
-void
-tbreak_at_finish_command (char *arg, int from_tty)
-{
-  break_at_finish_command_1 (arg, BP_TEMPFLAG, from_tty);
 }
 
 static void
