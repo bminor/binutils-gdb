@@ -29,100 +29,85 @@ INSTALL = install -c
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL)
 
-$(start-sanitize-chill)
 CFLAGS = -g
+$(start-sanitize-chill)
 CHILLFLAGS = $(CFLAGS)
 CHILL_LIB = -lchill
 $(end-sanitize-chill)
-CXX = gcc
 CXXFLAGS = -g -O
 
 LINK=		ln -s
 SUBDIRS=
+RUNTEST = runtest
+RUNTESTFLAGS = 
 
-CC_FOR_TARGET = ` \
-  if [ -f $${rootme}../gcc/Makefile ] ; then \
-    echo $${rootme}../gcc/xgcc -B$${rootme}../gcc/; \
+CC = ` \
+  if [ -f $${rootme}../../gcc/Makefile ] ; then \
+    echo $${rootme}../../gcc/xgcc -B$${rootme}../../gcc/; \
   else \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
-      echo $(CC); \
-    else \
-      t='$(program_transform_name)'; echo gcc | sed -e '' $$t; \
-    fi; \
-  fi`
-
-GCC_FOR_TARGET = ` \
-  if [ -f $${rootme}../gcc/Makefile ] ; then \
-    echo $${rootme}../gcc/xgcc -B$${rootme}../gcc/; \
-  else \
-    if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
-      echo $(CC); \
+      echo cc; \
     else \
       t='$(program_transform_name)'; echo gcc | sed -e '' $$t; \
     fi; \
   fi`
 
 $(start-sanitize-chill)
-CHILL_FOR_TARGET = ` \
-  if [ -f $${rootme}../gcc/Makefile ] ; then \
-    echo $${rootme}../gcc/xgcc -B$${rootme}../gcc/ -L$${rootme}../chillrt/; \
+CHILL = ` \
+  if [ -f $${rootme}../../gcc/Makefile ] ; then \
+    echo $${rootme}../../gcc/xgcc -B$${rootme}../../gcc/ -L$${rootme}../../chillrt/; \
   else \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
-      echo $(CC); \
+      echo gcc; \
     else \
       t='$(program_transform_name)'; echo gcc | sed -e '' $$t; \
     fi; \
   fi`
 $(end-sanitize-chill)
 
-CXX_FOR_TARGET = ` \
-  if [ -f $${rootme}../gcc/Makefile ] ; then \
-    echo $${rootme}../gcc/xgcc -B$${rootme}../gcc/; \
+CXX = ` \
+  if [ -f $${rootme}../../gcc/Makefile ] ; then \
+    echo $${rootme}../../gcc/xgcc -B$${rootme}../../gcc/; \
   else \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
-      echo $(CXX); \
+      echo gcc; \
     else \
       t='$(program_transform_name)'; echo gcc | sed -e '' $$t; \
     fi; \
   fi`
 
-GDB = `if [ -f $${rootme}../gdb/gdb ] ; \
-	then echo $${rootme}../gdb/gdb ; \
+GDB = `if [ -f $${rootme}../gdb ] ; \
+	then echo $${rootme}../gdb ; \
 	else echo gdb; fi`
 GDBFLAGS =
 
-EXPECT = `if [ -f $${rootme}../expect/expect ] ; \
-	then echo $${rootme}../expect/expect ; \
+EXPECT = `if [ -f $${rootme}../../expect/expect ] ; \
+	then echo $${rootme}../../expect/expect ; \
 	else echo expect; fi`
+
+SUBDIRS=gdb.t00 gdb.t01 gdb.t02 gdb.t03 gdb.t04 gdb.t05 gdb.t06 \
+	gdb.t07 gdb.t08 gdb.t09 gdb.t10 gdb.t11 gdb.t12 gdb.t13 gdb.t15 \
+	gdb.t16 gdb.t20 gdb.t21 gdb.t22 gdb.t23 gdb.t30 gdb.t31
 
 #### host, target, and site specific Makefile frags come in here.
 
 FLAGS_TO_PASS = \
-	"AR=$(AR)" \
-	"AR_FLAGS=$(AR_FLAGS)" \
-	"AR_FOR_TARGET=$(AR_FOR_TARGET)" \
 	"CXX=$(CXX)" \
 	"CXXFLAGS=$(CXXFLAGS)" \
-	"CXX_FOR_TARGET=$(CXX_FOR_TARGET)" \
 	"CC=$(CC)" \
-	"CC_FOR_TARGET=$(CC_FOR_TARGET)" \
 	"CFLAGS=$(CFLAGS)" \
 	$(start-sanitize-chill)\
 	"CHILLFLAGS=$(CHILLFLAGS)" \
-	"CHILL_FOR_TARGET=$(CHILL_FOR_TARGET)" \
+	"CHILL=$(CHILL)" \
 	"CHILL_LIB=$(CHILL_LIB)" \
 	$(end-sanitize-chill)\
-	"GCC_FOR_TARGET=$(GCC_FOR_TARGET)" \
 	"INSTALL=$(INSTALL)" \
 	"INSTALL_DATA=$(INSTALL_DATA)" \
 	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
 	"LDFLAGS=$(LDFLAGS)" \
 	"LINK=$(LINK)" \
-	"LEX=$(LEX)" \
 	"LOADLIBES=$(LOADLIBES)" \
 	"MAKEINFO=$(MAKEINFO)" \
-	"RANLIB=$(RANLIB)" \
-	"RANLIB_FOR_TARGET=$(RANLIB_FOR_TARGET)" \
 	"exec_prefix=$(exec_prefix)" \
 	"prefix=$(prefix)" 
 
@@ -134,17 +119,17 @@ info:
 	@rootme=`pwd`/ ; export rootme ; \
 	rootsrc=`cd $(srcdir); pwd`/ ; export rootsrc ; \
 	$(MAKE) subdir_do DO=info "DODIRS=$(INFODIRS)" $(FLAGS_TO_PASS)
+
 install-info:
 	@rootme=`pwd`/ ; export rootme ; \
 	$(MAKE) subdir_do DO=install-info "DODIRS=$(INFODIRS)" $(FLAGS_TO_PASS)
 
 install:
-	-parent=`echo $(bindir)|sed -e 's@/[^/]*$$@@'`; \
+	-parent=`echo $(datadir)|sed -e 's@/[^/]*$$@@'`; \
 	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
-	-if [ -d $(man1dir) ] ; then true ; else mkdir $(man1dir) ; fi
-	-if [ -d $(bindir) ] ; then true ; else mkdir $(bindir) ; fi
-	-if [ -d $(libdir) ] ; then true ; else mkdir $(libdir) ; fi
 	-if [ -d $(datadir) ] ; then true ; else mkdir $(datadir) ; fi
+	-parent=`echo $(targetdir)|sed -e 's@/[^/]*$$@@'`; \
+	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
 	-if [ -d $(targetdir) ] ; then true ; else mkdir $(targetdir) ; fi
 	-for file in ./lib/*.exp; \
 	do \
@@ -159,6 +144,9 @@ uninstall: force
 #	-rm -f $(datadir)/*.exp
 	-rm -fr $(targetdir)
 
+check:
+	$(RUNTEST) $(RUNTESTFLAGS) --tool gdb GDB=$(GDB)
+
 subdir_do: force
 	@for i in $(DODIRS); do \
 		if [ -d ./$$i ] ; then \
@@ -169,7 +157,8 @@ subdir_do: force
 			else exit 1 ; fi ; \
 		else true ; fi ; \
 	done
-force:
+
+force:;
 
 
 subdirs:
@@ -183,26 +172,25 @@ subdirs:
 		fi; \
 	done
 
-clean:
+clean mostlyclean:
 	-rm -f *~ core *.o a.out xgdb *.x
-		for dir in ${SUBDIRS}; \
-		do \
-			echo "$$dir:"; \
-			if [ -d $$dir ]; then \
-				(cd $$dir; $(MAKE) clean); \
-			fi; \
-		done
+	for dir in ${SUBDIRS}; \
+	do \
+		echo "$$dir:"; \
+		if [ -d $$dir ]; then \
+			(cd $$dir; $(MAKE) clean); \
+		fi; \
+	done
 
-distclean: clean
+distclean realclean: clean
 	-rm -f *~ core
 	-rm -f Makefile config.status *-init.exp
 	-rm -fr *.log summary detail
-		for dir in ${SUBDIRS}; \
-		do \
-			echo "$$dir:"; \
-			(cd $$dir; $(MAKE) distclean); \
-		done
+	for dir in ${SUBDIRS}; \
+	do \
+		echo "$$dir:"; \
+		(cd $$dir; $(MAKE) distclean); \
+	done
 
 Makefile : $(srcdir)/Makefile.in $(host_makefile_frag) $(target_makefile_frag)
 	$(SHELL) ./config.status
-
