@@ -1,3 +1,10 @@
+2002-06-24  Don Howard  <dhoward@redhat.com>
+
+        * memattr.c (create_mem_region): Treat hi == 0 as a special case
+        that means max CORE_ADDR+1.
+        (lookup_mem_region): Ditto.
+        (mem_info_command): Ditto.
+
 2002-06-24  Grace Sainsbury  <graces@redhat.com>
 
 	* config/m68k/tm-m68k.h (DECR_PC_AFTER_BREAK): Remove.

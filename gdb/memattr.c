@@ -47,7 +47,7 @@ create_mem_region (CORE_ADDR lo, CORE_ADDR hi,
   struct mem_region *n, *new;
 
   /* lo == hi is a useless empty region */
-  if (lo >= hi)
+  if (lo >= hi && hi != 0)
     {
       printf_unfiltered ("invalid memory region: low >= high\n");
       return NULL;
@@ -57,8 +57,9 @@ create_mem_region (CORE_ADDR lo, CORE_ADDR hi,
   while (n)
     {
       /* overlapping node */
-      if ((lo >= n->lo && lo < n->hi) ||
-	  (hi > n->lo && hi <= n->hi))
+      if ((lo >= n->lo && (lo < n->hi || n->hi == 0)) 
+	  || (hi > n->lo && (hi <= n->hi || n->hi == 0))
+	  || (lo <= n->lo && (hi >= n->hi || hi == 0)))
 	{
 	  printf_unfiltered ("overlapping memory region\n");
 	  return NULL;
@@ -111,7 +112,7 @@ lookup_mem_region (CORE_ADDR addr)
     {
       if (m->enabled_p == 1)
 	{
-	  if (addr >= m->lo && addr < m->hi)
+	  if (addr >= m->lo && (addr < m->hi || m->hi == 0))
 	    return m;
 
 	  if (addr >= m->hi && lo < m->hi)
@@ -234,6 +235,7 @@ mem_info_command (char *args, int from_tty)
 
   for (m = mem_region_chain; m; m = m->next)
     {
+      CORE_ADDR hi;
       char *tmp;
       printf_filtered ("%-3d %-3c\t",
 		       m->number,
@@ -244,11 +246,12 @@ mem_info_command (char *args, int from_tty)
 	tmp = local_hex_string_custom ((unsigned long) m->lo, "016l");
       
       printf_filtered ("%s ", tmp);
-      
+      hi = (m->hi == 0 ? ~0 : m->hi);
+
       if (TARGET_ADDR_BIT <= 32)
-	tmp = local_hex_string_custom ((unsigned long) m->hi, "08l");
+	tmp = local_hex_string_custom ((unsigned long) hi, "08l");
       else
-	tmp = local_hex_string_custom ((unsigned long) m->hi, "016l");
+	tmp = local_hex_string_custom ((unsigned long) hi, "016l");
       
       printf_filtered ("%s ", tmp);
 
