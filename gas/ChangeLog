@@ -1,3 +1,22 @@
+Mon Feb  7 03:56:05 1994  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* atof-generic.c (atof_generic): Calculate maximum number of
+	useful digits in integer arithmetic, to eliminate only source of
+	dependence on floating point support, which doesn't work yet on
+	the Alpha.
+
+	* ecoff.c (ecoff_build_debug) [TC_ALPHA]: Specify version stamp as
+	0x30b for Alpha for now, until ".verstamp" is handled.
+
+	* literal.c (add_to_literal_pool): Use seginfo->frchainP, which
+	actually refers to the literal pool section, rather than
+	frchain_now, which refers to whatever section the assembler was
+	in.
+
+	* write.c (fixup_segment): Only do range checking if size of fixup
+	is smaller than word size.  Otherwise, we always wind up with
+	zeros.
+
 Sun Feb  6 16:13:47 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* configure.in (hiux): Fixes from m-kasahr@sramhc.sra.co.JP.
