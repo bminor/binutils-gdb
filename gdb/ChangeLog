@@ -1,3 +1,18 @@
+Fri Jul 15 14:33:40 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+        From Kevin A. Buettner (kev@cujo.geg.mot.com).
+	* m88k-tdep.c (examine_prologue): Modified to handle prologues for
+	pic code in addition to prologues where an instruction from the
+	prologue gets moved into the delay slot of a branch instruction
+	immediately following the prologue.  A table of potential prologue
+	instructions (prologue_insn_tbl) is now used for picking apart a
+	function prologue.
+	(frame_find_saved_regs): Changed the way in which limit gets set
+	so that the delay slot of branch instructions immediately
+	following the prologue gets examined.
+	(pushed_size, store_parm_word, store_parm, push_parameters,
+	collect_returned_value):  Deleted.
+
 Fri Jul 15 01:06:00 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* infrun.c (wait_for_inferior):  Handle stepping into leaf

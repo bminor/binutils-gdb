@@ -118,29 +118,71 @@ init_extra_frame_info (fromleaf, fi)
 
 #define BITMASK(pos, width) (((0x1 << (width)) - 1) << (pos))
 #define EXTRACT_FIELD(val, pos, width) ((val) >> (pos) & BITMASK (0, width))
+#define	SUBU_OFFSET(x)	((unsigned)(x & 0xFFFF))
+#define	ST_OFFSET(x)	((unsigned)((x) & 0xFFFF))
+#define	ST_SRC(x)	EXTRACT_FIELD ((x), 21, 5)
+#define	ADDU_OFFSET(x)	((unsigned)(x & 0xFFFF))
 
-/* Prologue code that handles position-independent-code setup.  */
+/*
+ * prologue_insn_tbl is a table of instructions which may comprise a
+ * function prologue.  Associated with each table entry (corresponding
+ * to a single instruction or group of instructions), is an action.
+ * This action is used by examine_prologue (below) to determine
+ * the state of certain machine registers and where the stack frame lives.
+ */
 
-struct pic_prologue_code {
-  unsigned long insn, mask;
+enum prologue_insn_action {
+  PIA_SKIP,			/* don't care what the instruction does */
+  PIA_NOTE_ST,			/* note register stored and where */
+  PIA_NOTE_STD,			/* note pair of registers stored and where */
+  PIA_NOTE_SP_ADJUSTMENT,	/* note stack pointer adjustment */
+  PIA_NOTE_FP_ASSIGNMENT,	/* note frame pointer assignment */
+  PIA_NOTE_PROLOGUE_END,	/* no more prologue */
 };
 
-static struct pic_prologue_code pic_prologue_code [] = {
-/* FIXME -- until this is translated to hex, we won't match it... */
-  { 0xffffffff, 0 },
-					/* or r10,r1,0  (if not saved) */
-					/* bsr.n LabN */
-					/* or.u r25,r0,const */
-					/*LabN: or r25,r25,const2 */
-					/* addu r25,r25,1 */
-					/* or r1,r10,0  (if not saved) */
+struct prologue_insns {
+    unsigned long insn;
+    unsigned long mask;
+    enum prologue_insn_action action;
 };
+
+struct prologue_insns prologue_insn_tbl[] = {
+  /* Various register move instructions */
+  { 0x58000000, 0xf800ffff, PIA_SKIP },		/* or/or.u with immed of 0 */
+  { 0xf4005800, 0xfc1fffe0, PIA_SKIP },		/* or rd, r0, rs */
+  { 0xf4005800, 0xfc00ffff, PIA_SKIP },		/* or rd, rs, r0 */
+
+  /* Stack pointer setup: "subu sp, sp, n" where n is a multiple of 8 */
+  { 0x67ff0000, 0xffff0007, PIA_NOTE_SP_ADJUSTMENT },
+
+  /* Frame pointer assignment: "addu r30, r31, n" */
+  { 0x63df0000, 0xffff0000, PIA_NOTE_FP_ASSIGNMENT },
+
+  /* Store to stack instructions; either "st rx, sp, n" or "st.d rx, sp, n" */
+  { 0x241f0000, 0xfc1f0000, PIA_NOTE_ST },	/* st rx, sp, n */
+  { 0x201f0000, 0xfc1f0000, PIA_NOTE_STD },	/* st.d rs, sp, n */
+
+  /* Instructions needed for setting up r25 for pic code. */
+  { 0x5f200000, 0xffff0000, PIA_SKIP },		/* or.u r25, r0, offset_high */
+  { 0xcc000002, 0xffffffff, PIA_SKIP },		/* bsr.n Lab */
+  { 0x5b390000, 0xffff0000, PIA_SKIP },		/* or r25, r25, offset_low */
+  { 0xf7396001, 0xffffffff, PIA_SKIP },		/* Lab: addu r25, r25, r1 */
+
+  /* Various branch or jump instructions which have a delay slot -- these
+     do not form part of the prologue, but the instruction in the delay
+     slot might be a store instruction which should be noted. */
+  { 0xc4000000, 0xe4000000, PIA_NOTE_PROLOGUE_END }, 
+  					/* br.n, bsr.n, bb0.n, or bb1.n */
+  { 0xec000000, 0xfc000000, PIA_NOTE_PROLOGUE_END }, /* bcnd.n */
+  { 0xf400c400, 0xfffff7e0, PIA_NOTE_PROLOGUE_END } /* jmp.n or jsr.n */
+
+};
+
 
 /* Fetch the instruction at ADDR, returning 0 if ADDR is beyond LIM or
    is not the address of a valid instruction, the address of the next
    instruction beyond ADDR otherwise.  *PWORD1 receives the first word
-   of the instruction.  PWORD2 is ignored -- a remnant of the original
-   i960 version.  */
+   of the instruction. */
 
 #define NEXT_PROLOGUE_INSN(addr, lim, pword1) \
   (((addr) < (lim)) ? next_insn (addr, pword1) : 0)
@@ -193,152 +235,74 @@ examine_prologue (ip, limit, frame_sp, fsr, fi)
 {
   register CORE_ADDR next_ip;
   register int src;
-  register struct pic_prologue_code *pcode;
   unsigned int insn;
   int size, offset;
   char must_adjust[32];		/* If set, must adjust offsets in fsr */
   int sp_offset = -1;		/* -1 means not set (valid must be mult of 8) */
   int fp_offset = -1;		/* -1 means not set */
   CORE_ADDR frame_fp;
+  CORE_ADDR prologue_end = 0;
 
   memset (must_adjust, '\0', sizeof (must_adjust));
   next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn);
 
-  /* Accept move of incoming registers to other registers, using
-     "or rd,rs,0" or "or.u rd,rs,0" or "or rd,r0,rs" or "or rd,rs,r0".
-     We don't have to worry about walking into the first lines of code,
-     since the first line number will stop us (assuming we have symbols).
-     What we have actually seen is "or r10,r0,r12".  */
-
-#define	OR_MOVE_INSN	0x58000000		/* or/or.u with immed of 0 */
-#define	OR_MOVE_MASK	0xF800FFFF
-#define	OR_REG_MOVE1_INSN	0xF4005800	/* or rd,r0,rs */
-#define	OR_REG_MOVE1_MASK	0xFC1FFFE0
-#define	OR_REG_MOVE2_INSN	0xF4005800	/* or rd,rs,r0 */
-#define	OR_REG_MOVE2_MASK	0xFC00FFFF
-  while (next_ip && 
-	 ((insn & OR_MOVE_MASK) == OR_MOVE_INSN ||
-	  (insn & OR_REG_MOVE1_MASK) == OR_REG_MOVE1_INSN ||
-	  (insn & OR_REG_MOVE2_MASK) == OR_REG_MOVE2_INSN
-	 )
-	)
-    {
-      /* We don't care what moves to where.  The result of the moves 
- 	 has already been reflected in what the compiler tells us is the
-	 location of these parameters.  */
-      ip = next_ip;
-      next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn);
-    }
-
-  /* Accept an optional "subu sp,sp,n" to set up the stack pointer.  */
-
-#define	SUBU_SP_INSN	0x67ff0000
-#define	SUBU_SP_MASK	0xffff0007	/* Note offset must be mult. of 8 */
-#define	SUBU_OFFSET(x)	((unsigned)(x & 0xFFFF))
-  if (next_ip &&
-      ((insn & SUBU_SP_MASK) == SUBU_SP_INSN))	/* subu r31, r31, N */
-    {
-      sp_offset = -SUBU_OFFSET (insn);
-      ip = next_ip;
-      next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn);
-    }
-
-  /* The function must start with a stack-pointer adjustment, or
-     we don't know WHAT'S going on... */
-  if (sp_offset == -1)
-    return ip;
-
-  /* Accept zero or more instances of "st rx,sp,n" or "st.d rx,sp,n".  
-     This may cause us to mistake the copying of a register
-     parameter to the frame for the saving of a callee-saved
-     register, but that can't be helped, since with the
-     "-fcall-saved" flag, any register can be made callee-saved.
-     This probably doesn't matter, since the ``saved'' caller's values of
-     non-callee-saved registers are not relevant anyway.  */
-
-#define	STD_STACK_INSN	0x201f0000
-#define	STD_STACK_MASK	0xfc1f0000
-#define	ST_STACK_INSN	0x241f0000
-#define	ST_STACK_MASK	0xfc1f0000
-#define	ST_OFFSET(x)	((unsigned)((x) & 0xFFFF))
-#define	ST_SRC(x)	EXTRACT_FIELD ((x), 21, 5)
-
   while (next_ip)
     {
-           if ((insn & ST_STACK_MASK)  == ST_STACK_INSN)
- 	size = 1;
-      else if ((insn & STD_STACK_MASK) == STD_STACK_INSN)
-	size = 2;
-      else
-	break;
+      struct prologue_insns *pip; 
 
-      src = ST_SRC (insn);
-      offset = ST_OFFSET (insn);
-      while (size--)
+      for (pip=prologue_insn_tbl; (insn & pip->mask) != pip->insn; )
+	  if (++pip >= prologue_insn_tbl + sizeof prologue_insn_tbl)
+	      goto end_of_prologue_found;	/* not a prologue insn */
+
+      switch (pip->action)
 	{
-	  must_adjust[src] = 1;
-	  fsr->regs[src++] = offset;		/* Will be adjusted later */
-	  offset += 4;
+	  case PIA_NOTE_ST:
+	  case PIA_NOTE_STD:
+	    if (sp_offset != -1) {
+		src = ST_SRC (insn);
+		offset = ST_OFFSET (insn);
+		must_adjust[src] = 1;
+		fsr->regs[src++] = offset;	/* Will be adjusted later */
+		if (pip->action == PIA_NOTE_STD && src < 32)
+		  {
+		    offset += 4;
+		    must_adjust[src] = 1;
+		    fsr->regs[src++] = offset;
+		  }
+	    }
+	    else
+		goto end_of_prologue_found;
+	    break;
+	  case PIA_NOTE_SP_ADJUSTMENT:
+	    if (sp_offset == -1)
+		sp_offset = -SUBU_OFFSET (insn);
+	    else
+		goto end_of_prologue_found;
+	    break;
+	  case PIA_NOTE_FP_ASSIGNMENT:
+	    if (fp_offset == -1)
+		fp_offset = ADDU_OFFSET (insn);
+	    else
+		goto end_of_prologue_found;
+	    break;
+	  case PIA_NOTE_PROLOGUE_END:
+	    if (!prologue_end)
+		prologue_end = ip;
+	    break;
+	  case PIA_SKIP:
+	  default :
+	    /* Do nothing */
+	    break;
 	}
+
       ip = next_ip;
       next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn);
     }
 
-  /* Accept an optional "addu r30,r31,n" to set up the frame pointer.  */
+end_of_prologue_found:
 
-#define	ADDU_FP_INSN	0x63df0000
-#define	ADDU_FP_MASK	0xffff0000
-#define	ADDU_OFFSET(x)	((unsigned)(x & 0xFFFF))
-  if (next_ip &&
-      ((insn & ADDU_FP_MASK) == ADDU_FP_INSN))	/* addu r30, r31, N */
-    {
-      fp_offset = ADDU_OFFSET (insn);
-      ip = next_ip;
-      next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn);
-    }
-
-  /* Accept the PIC prologue code if present.  */
-
-  pcode = pic_prologue_code;
-  size = sizeof (pic_prologue_code) / sizeof (*pic_prologue_code);
-  /* If return addr is saved, we don't use first or last insn of PICstuff.  */
-  if (fsr->regs[SRP_REGNUM]) {
-    pcode++;
-    size-=2;
-  }
-
-  while (size-- && next_ip && (pcode->insn == (pcode->mask & insn)))
-    {
-      pcode++;
-      ip = next_ip;
-      next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn);
-    }
-
-  /* Accept moves of parameter registers to other registers, using
-     "or rd,rs,0" or "or.u rd,rs,0" or "or rd,r0,rs" or "or rd,rs,r0".
-     We don't have to worry about walking into the first lines of code,
-     since the first line number will stop us (assuming we have symbols).
-     What gcc actually seems to produce is "or rd,r0,rs".  */
-
-#define	OR_MOVE_INSN	0x58000000		/* or/or.u with immed of 0 */
-#define	OR_MOVE_MASK	0xF800FFFF
-#define	OR_REG_MOVE1_INSN	0xF4005800	/* or rd,r0,rs */
-#define	OR_REG_MOVE1_MASK	0xFC1FFFE0
-#define	OR_REG_MOVE2_INSN	0xF4005800	/* or rd,rs,r0 */
-#define	OR_REG_MOVE2_MASK	0xFC00FFFF
-  while (next_ip && 
-	 ((insn & OR_MOVE_MASK) == OR_MOVE_INSN ||
-	  (insn & OR_REG_MOVE1_MASK) == OR_REG_MOVE1_INSN ||
-	  (insn & OR_REG_MOVE2_MASK) == OR_REG_MOVE2_INSN
-	 )
-	)
-    {
-      /* We don't care what moves to where.  The result of the moves 
- 	 has already been reflected in what the compiler tells us is the
-	 location of these parameters.  */
-      ip = next_ip;
-      next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn);
-    }
+    if (prologue_end)
+	ip = prologue_end;
 
   /* We're done with the prologue.  If we don't care about the stack
      frame itself, just return.  (Note that fsr->regs has been trashed,
@@ -465,11 +429,15 @@ frame_find_saved_regs (fi, fsr)
 
       /* Find the start and end of the function prologue.  If the PC
 	 is in the function prologue, we only consider the part that
-	 has executed already.  */
+	 has executed already.  In the case where the PC is not in
+	 the function prologue, we set limit to two instructions beyond
+	 where the prologue ends in case if any of the prologue instructions
+	 were moved into a delay slot of a branch instruction. */
          
       ip = get_pc_function_start (fi->pc);
       sal = find_pc_line (ip, 0);
-      limit = (sal.end && sal.end < fi->pc) ? sal.end: fi->pc;
+      limit = (sal.end && sal.end < fi->pc) ? sal.end + 2 * BYTES_PER_88K_INSN 
+					    : fi->pc;
 
       /* This will fill in fields in *fi as well as in cache_fsr.  */
 #ifdef SIGTRAMP_FRAME_FIXUP
@@ -539,229 +507,6 @@ frame_saved_pc (frame)
   return read_next_frame_reg(frame, SRP_REGNUM);
 }
 
-#if 0
-/* I believe this is all obsolete call dummy stuff.  */
-static int
-pushed_size (prev_words, v)
-     int prev_words;
-     struct value *v;
-{
-  switch (TYPE_CODE (VALUE_TYPE (v)))
-    {
-      case TYPE_CODE_VOID:		/* Void type (values zero length) */
-
-	return 0;	/* That was easy! */
-
-      case TYPE_CODE_PTR:		/* Pointer type */
-      case TYPE_CODE_ENUM:		/* Enumeration type */
-      case TYPE_CODE_INT:		/* Integer type */
-      case TYPE_CODE_REF:		/* C++ Reference types */
-      case TYPE_CODE_ARRAY:		/* Array type, lower & upper bounds */
-
-	return 1;
-
-      case TYPE_CODE_FLT:		/* Floating type */
-
-	if (TYPE_LENGTH (VALUE_TYPE (v)) == 4)
-	  return 1;
-	else
-	  /* Assume that it must be a double.  */
-	  if (prev_words & 1)		/* at an odd-word boundary */
-	    return 3;			/* round to 8-byte boundary */
-	  else
-	    return 2;
-
-      case TYPE_CODE_STRUCT:		/* C struct or Pascal record */
-      case TYPE_CODE_UNION:		/* C union or Pascal variant part */
-
-	return (((TYPE_LENGTH (VALUE_TYPE (v)) + 3) / 4) * 4);
-
-      case TYPE_CODE_FUNC:		/* Function type */
-      case TYPE_CODE_SET:		/* Pascal sets */
-      case TYPE_CODE_RANGE:		/* Range (integers within bounds) */
-      case TYPE_CODE_STRING:		/* String type */
-      case TYPE_CODE_MEMBER:		/* Member type */
-      case TYPE_CODE_METHOD:		/* Method type */
-	/* Don't know how to pass these yet.  */
-
-      case TYPE_CODE_UNDEF:		/* Not used; catches errors */
-      default:
-	abort ();
-    }
-}
-
-static void
-store_parm_word (address, val)
-     CORE_ADDR address;
-     int val;
-{
-  write_memory (address, (char *)&val, 4);
-}
-
-static int
-store_parm (prev_words, left_parm_addr, v)
-     unsigned int prev_words;
-     CORE_ADDR left_parm_addr;
-     struct value *v;
-{
-  CORE_ADDR start = left_parm_addr + (prev_words * 4);
-  int *val_addr = (int *)VALUE_CONTENTS(v);
-
-  switch (TYPE_CODE (VALUE_TYPE (v)))
-    {
-      case TYPE_CODE_VOID:		/* Void type (values zero length) */
-
-	return 0;
-
-      case TYPE_CODE_PTR:		/* Pointer type */
-      case TYPE_CODE_ENUM:		/* Enumeration type */
-      case TYPE_CODE_INT:		/* Integer type */
-      case TYPE_CODE_ARRAY:		/* Array type, lower & upper bounds */
-      case TYPE_CODE_REF:		/* C++ Reference types */
-
-	store_parm_word (start, *val_addr);
-	return 1;
-
-      case TYPE_CODE_FLT:		/* Floating type */
-
-	if (TYPE_LENGTH (VALUE_TYPE (v)) == 4)
-	  {
-	    store_parm_word (start, *val_addr);
-	    return 1;
-	  }
-	else
-	  {
-	    store_parm_word (start + ((prev_words & 1) * 4), val_addr[0]);
-	    store_parm_word (start + ((prev_words & 1) * 4) + 4, val_addr[1]);
-	    return 2 + (prev_words & 1);
-	  }
-
-      case TYPE_CODE_STRUCT:		/* C struct or Pascal record */
-      case TYPE_CODE_UNION:		/* C union or Pascal variant part */
-
-	{
-	  unsigned int words = (((TYPE_LENGTH (VALUE_TYPE (v)) + 3) / 4) * 4);
-	  unsigned int word;
-
-	  for (word = 0; word < words; word++)
-	    store_parm_word (start + (word * 4), val_addr[word]);
-	  return words;
-	}
-
-      default:
-	abort ();
-    }
-}
-
- /* This routine sets up all of the parameter values needed to make a pseudo
-    call.  The name "push_parameters" is a misnomer on some archs,
-    because (on the m88k) most parameters generally end up being passed in
-    registers rather than on the stack.  In this routine however, we do
-    end up storing *all* parameter values onto the stack (even if we will
-    realize later that some of these stores were unnecessary).  */
-
-#define	FIRST_PARM_REGNUM	2
-
-void
-push_parameters (return_type, struct_conv, nargs, args)
-      struct type *return_type; 
-      int struct_conv;
-      int nargs;
-      value *args;
-{
-   int parm_num;
-   unsigned int p_words = 0;
-   CORE_ADDR left_parm_addr;
- 
-   /* Start out by creating a space for the return value (if need be).  We
-      only need to do this if the return value is a struct or union.  If we
-      do make a space for a struct or union return value, then we must also
-      arrange for the base address of that space to go into r12, which is the
-      standard place to pass the address of the return value area to the
-      callee.  Note that only structs and unions are returned in this fashion.
-      Ints, enums, pointers, and floats are returned into r2.  Doubles are
-      returned into the register pair {r2,r3}.  Note also that the space
-      reserved for a struct or union return value only has to be word aligned
-      (not double-word) but it is double-word aligned here anyway (just in
-      case that becomes important someday).  */
- 
-   switch (TYPE_CODE (return_type))
-     {
-       case TYPE_CODE_STRUCT:
-       case TYPE_CODE_UNION:
-         {
-           int return_bytes = ((TYPE_LENGTH (return_type) + 7) / 8) * 8;
-           CORE_ADDR rv_addr;
- 
-           rv_addr = read_register (SP_REGNUM) - return_bytes;
- 
-           write_register (SP_REGNUM, rv_addr); /* push space onto the stack */
-           write_register (SRA_REGNUM, rv_addr);/* set return value register */
-	   break;
-         }
-       default: break;
-     }
- 
-   /* Here we make a pre-pass on the whole parameter list to figure out exactly
-      how many words worth of stuff we are going to pass.  */
- 
-   for (p_words = 0, parm_num = 0; parm_num < nargs; parm_num++)
-     p_words += pushed_size (p_words, value_arg_coerce (args[parm_num]));
- 
-   /* Now, check to see if we have to round up the number of parameter words
-      to get up to the next 8-bytes boundary.  This may be necessary because
-      of the software convention to always keep the stack aligned on an 8-byte
-      boundary.  */
- 
-   if (p_words & 1)
-     p_words++;		/* round to 8-byte boundary */
- 
-   /* Now figure out the absolute address of the leftmost parameter, and update
-      the stack pointer to point at that address.  */
- 
-   left_parm_addr = read_register (SP_REGNUM) - (p_words * 4);
-   write_register (SP_REGNUM, left_parm_addr);
- 
-   /* Now we can go through all of the parameters (in left-to-right order)
-      and write them to their parameter stack slots.  Note that we are not
-      really "pushing" the parameter values.  The stack space for these values
-      was already allocated above.  Now we are just filling it up.  */
- 
-   for (p_words = 0, parm_num = 0; parm_num < nargs; parm_num++)
-     p_words +=
-       store_parm (p_words, left_parm_addr, value_arg_coerce (args[parm_num]));
- 
-   /* Now that we are all done storing the parameter values into the stack, we
-      must go back and load up the parameter registers with the values from the
-      corresponding stack slots.  Note that in the two cases of (a) gaps in the
-      parameter word sequence causes by (otherwise) misaligned doubles, and (b)
-      slots correcponding to structs or unions, the work we do here in loading
-      some parameter registers may be unnecessary, but who cares?  */
- 
-   for (p_words = 0; p_words < 8; p_words++)
-     {
-       write_register (FIRST_PARM_REGNUM + p_words,
-         read_memory_integer (left_parm_addr + (p_words * 4), 4));
-     }
-}
-
-void
-collect_returned_value (rval, value_type, struct_return, nargs, args)
-     value *rval;
-     struct type *value_type;
-     int struct_return;
-     int nargs;
-     value *args;
-{
-  char retbuf[REGISTER_BYTES];
-
-  memcpy (retbuf, registers, REGISTER_BYTES);
-  *rval = value_being_returned (value_type, retbuf, struct_return);
-  return;
-}
-#endif /* 0 */
-
-/*start of lines added by kev*/
 
 #define DUMMY_FRAME_SIZE 192
 
