@@ -29,6 +29,20 @@ targ64_selvecs=
 targ_cflags=
 targ_underscore=no
 
+# Catch obsolete configurations.
+case $targ in
+ vax-*-vms*			\
+ )
+    if test "x$enable_obsolete" != xyes; then
+      echo "*** Configuration $targ is obsolete." >&2
+      echo "*** Specify --enable-obsolete to build it anyway." >&2
+      echo "*** Support will be REMOVED in the next major release of BINUTILS," >&2
+      echo "*** unless a maintainer comes forward." >&2
+      exit 1
+    fi;;
+esac
+
+
 targ_cpu=`echo $targ | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\1/'`
 case "${targ_cpu}" in
 alpha*)          targ_archs=bfd_alpha_arch ;;

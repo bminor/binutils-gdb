@@ -1,3 +1,9 @@
+2003-08-01  Nick Clifton  <nickc@redhat.com>
+
+	* config.bfd: Add code to catch obsolete configurations and warn
+	about them unless --enable-obsolete is used.  Use this to mark
+	vax-vms port as obsolete.
+
 2003-07-30  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-ppc.c (ppc_elf_install_value): Tidy.
