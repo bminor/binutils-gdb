@@ -1,3 +1,10 @@
+Sun Apr  2 08:15:45 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* gdb.base/list.exp:  Adjust some alternate expect patterns to
+	match recent list0.c change. Add alternate expect pattern for
+	output from `list default lines around main' for optimizing
+	compilers.
+
 Sat Apr  1 07:23:22 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* lib/gdb.exp: If nosignals is not set, set it to 0.
