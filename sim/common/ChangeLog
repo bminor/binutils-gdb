@@ -1,3 +1,18 @@
+Sat Apr  4 01:07:06 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-trace.c (set_trace_option_mask): Keep TRACE_ANY_P
+	up-to-date.
+
+	* sim-trace.h (TRACE_ANY_P): Define.
+	(struct _trace_data): Add trace_any_p.
+
+start-sanitize-sky
+Tue Mar 31 16:44:15 1998  Jim Lemke <jlemke@cygnus.com>
+
+	* sim-base.h: Add fp_type_opt etc to sim_state_base for
+	the global option "float_type".
+
+end-sanitize-sky
 Mon Mar 30 17:11:55 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* run.c (main): Handle all alternatives of enum sim_stop.

@@ -1,6 +1,6 @@
 /*  This file is part of the program psim.
 
-    Copyright (C) 1994-1997, Andrew Cagney <cagney@highland.com.au>
+    Copyright (C) 1994-1998, Andrew Cagney <cagney@highland.com.au>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -333,18 +333,15 @@ print_my_defines (lf *file,
 
 
 static int
-print_itrace_prefix (lf *file,
-		     const char *phase_lc)
+print_itrace_prefix (lf *file)
 {
-  const char *prefix = "trace_one_insn (";
+  const char *prefix = "trace_prefix (";
   int indent = strlen (prefix);
-  lf_printf (file, "%sSD, CPU, %s, TRACE_LINENUM_P (CPU), \\\n",
-	     prefix, (options.gen.delayed_branch ? "cia.ip" : "cia"));
+  lf_printf (file, "%sSD, CPU, cia, CIA, TRACE_LINENUM_P (CPU), \\\n", prefix);
   lf_indent (file, +indent);
   lf_printf (file, "%sitable[MY_INDEX].file, \\\n", options.prefix.itable.name);
   lf_printf (file, "%sitable[MY_INDEX].line_nr, \\\n", options.prefix.itable.name);
-  lf_printf (file, "\"%s\", \\\n", phase_lc);
-  lf_printf (file, "\"%%-18s - ");
+  lf_printf (file, "\"");
   return indent;
 }
 
@@ -360,12 +357,6 @@ print_itrace_format (lf *file,
     {
       const char *chp = assembler->format;
       chp++; /* skip the leading quote */
-      /* prefix the format with the insn `name' */
-      if (pass == 2)
-	{
-	  lf_printf (file, ", \\\n");
-	  lf_printf (file, "%sitable[MY_INDEX].name", options.prefix.itable.name);
-	}
       /* write out the format/args */
       while (*chp != '\0')
 	{
@@ -485,78 +476,82 @@ print_itrace (lf *file,
 	      insn_entry *insn,
 	      int idecode)
 {
-  /* NB: Here we escape each eoln. This is so that the the compiler
+  /* NB: Here we escape each EOLN. This is so that the the compiler
      treats a trace function call as a single line.  Consequently any
      errors in the line are refered back to the same igen assembler
      source line */
   const char *phase = (idecode) ? "DECODE" : "INSN";
-  const char *phase_lc = (idecode) ? "decode" : "insn";
   lf_printf (file, "\n");
   lf_indent_suppress (file);
   lf_printf (file, "#if defined (WITH_TRACE)\n");
-  lf_printf (file, "/* trace the instructions execution if enabled */\n");
-  lf_printf (file, "if (TRACE_%s_P (CPU))\n", phase);
-  if (insn->mnemonics != NULL)
-    {
-      insn_mnemonic_entry *assembler = insn->mnemonics;
-      int is_first = 1;
-      lf_printf (file, "  {\n");
-      lf_indent (file, +4);
-      do
-	{
-	  if (assembler->condition != NULL)
-	    {
-	      int indent;
-	      lf_printf (file, "%sif (%s)\n",
-			 is_first ? "" : "else ",
-			 assembler->condition);
-	      lf_indent (file, +2);
-	      lf_print__line_ref (file, assembler->line);
-	      indent = print_itrace_prefix (file, phase_lc);
-	      print_itrace_format (file, assembler);
-	      lf_print__internal_ref (file);
-	      lf_indent (file, -indent);
-	      lf_indent (file, -2);
-	      if (assembler->next == NULL)
-		error (assembler->line, "Missing final unconditional assembler\n");
-	    }
-	  else
-	    {
-	      int indent;
-	      if (!is_first)
-		{
-		  lf_printf (file, "else\n");
-		  lf_indent (file, +2);
-		}
-	      lf_print__line_ref (file, assembler->line);
-	      indent = print_itrace_prefix (file, phase_lc);
-	      print_itrace_format (file, assembler);
-	      lf_print__internal_ref (file);
-	      lf_indent (file, -indent);
-	      if (!is_first)
+  lf_printf (file, "/* generate a trace prefix if any tracing enabled */\n");
+  lf_printf (file, "if (TRACE_ANY_P (CPU))\n");
+  lf_printf (file, "  {\n");
+  lf_indent (file, +4);
+  {
+    if (insn->mnemonics != NULL)
+      {
+	insn_mnemonic_entry *assembler = insn->mnemonics;
+	int is_first = 1;
+	do
+	  {
+	    if (assembler->condition != NULL)
+	      {
+		int indent;
+		lf_printf (file, "%sif (%s)\n",
+			   is_first ? "" : "else ",
+			   assembler->condition);
+		lf_indent (file, +2);
+		lf_print__line_ref (file, assembler->line);
+		indent = print_itrace_prefix (file);
+		print_itrace_format (file, assembler);
+		lf_print__internal_ref (file);
+		lf_indent (file, -indent);
 		lf_indent (file, -2);
-	      if (assembler->next != NULL)
-		error (assembler->line, "Unconditional assembler is not last\n");
-	    }
-	  is_first = 0;
-	  assembler = assembler->next;
-	}
-      while (assembler != NULL);
-      lf_indent (file, -4);
-      lf_printf (file, "  }\n");
-    }
-  else
-    {
-      int indent;
-      lf_indent (file, +2);
-      lf_print__line_ref (file, insn->line);
-      indent = print_itrace_prefix (file, phase_lc);
-      lf_printf (file, "?\", \\\n");
-      lf_printf (file, "itable[MY_INDEX].name);\n");
-      lf_print__internal_ref (file);
-      lf_indent (file, -indent);
-      lf_indent (file, -2);
-    }
+		if (assembler->next == NULL)
+		  error (assembler->line, "Missing final unconditional assembler\n");
+	      }
+	    else
+	      {
+		int indent;
+		if (!is_first)
+		  {
+		    lf_printf (file, "else\n");
+		    lf_indent (file, +2);
+		  }
+		lf_print__line_ref (file, assembler->line);
+		indent = print_itrace_prefix (file);
+		print_itrace_format (file, assembler);
+		lf_print__internal_ref (file);
+		lf_indent (file, -indent);
+		if (!is_first)
+		  lf_indent (file, -2);
+		if (assembler->next != NULL)
+		  error (assembler->line, "Unconditional assembler is not last\n");
+	      }
+	    is_first = 0;
+	    assembler = assembler->next;
+	  }
+	while (assembler != NULL);
+      }
+    else
+      {
+	int indent;
+	lf_indent (file, +2);
+	lf_print__line_ref (file, insn->line);
+	indent = print_itrace_prefix (file);
+	lf_printf (file, "%%s\", \\\n");
+	lf_printf (file, "itable[MY_INDEX].name);\n");
+	lf_print__internal_ref (file);
+	lf_indent (file, -indent);
+	lf_indent (file, -2);
+      }
+    lf_printf (file, "/* trace the instruction execution if enabled */\n");
+    lf_printf (file, "if (TRACE_%s_P (CPU))\n", phase);
+    lf_printf (file, "  trace_generic (SD, CPU, TRACE_%s_IDX, \" %%s\", itable[MY_INDEX].name);\n", phase);
+  }
+  lf_indent (file, -4);
+  lf_printf (file, "  }\n");
   lf_indent_suppress (file);
   lf_printf (file, "#endif\n");
 }
@@ -786,16 +781,12 @@ gen_idecode_h (lf *file,
       gen_list *entry;
       for (entry = gen->tables; entry != NULL; entry = entry->next)
 	{
-	  if (entry->model != NULL)
-	    print_idecode_issue_function_header (file,
-						 entry->model->name,
-						 is_function_declaration,
-						 1/*ALWAYS ONE WORD*/);
-	  else
-	    print_idecode_issue_function_header (file,
-						 NULL,
-						 is_function_declaration,
-						 1/*ALWAYS ONE WORD*/);
+	  print_idecode_issue_function_header (file,
+					       (options.gen.multi_sim
+						? entry->model->name
+						: NULL),
+					       is_function_declaration,
+					       1/*ALWAYS ONE WORD*/);
 	}
       if (options.gen.multi_sim)
 	{
@@ -838,16 +829,12 @@ gen_idecode_c (lf *file,
 	    /* output the main idecode routine */
 	    if (!options.gen.icache)
 	      {
-		if (entry->model != NULL)
-		  print_idecode_issue_function_header (file,
-						       entry->model->name,
-						       1/*is definition*/,
-						       1/*ALWAYS ONE WORD*/);
-		else
-		  print_idecode_issue_function_header (file,
-						       NULL,
-						       1/*is definition*/,
-						       1/*ALWAYS ONE WORD*/);
+		print_idecode_issue_function_header (file,
+						     (options.gen.multi_sim
+						      ? entry->model->name
+						      : NULL),
+						     1/*is definition*/,
+						     1/*ALWAYS ONE WORD*/);
 		lf_printf (file, "{\n");
 		lf_indent (file, +2);
 		lf_printf (file, "%sinstruction_address nia;\n",
@@ -1057,7 +1044,9 @@ main (int argc,
       printf ("  -Werror\n");
       printf ("\t Make warnings errors\n");
       printf ("  -Wnodiscard\n");
-      printf ("\t Suppress warnings about discarded instructions\n");
+      printf ("\t Suppress warnings about discarded functions and instructions\n");
+      printf ("  -Wnowidth\n");
+      printf ("\t Suppress warnings about instructions with invalid widths\n");
       printf ("\n");
       printf ("  -G [!]<gen-option>\n");
       printf ("\t Any of the following options:\n");
@@ -1266,6 +1255,10 @@ main (int argc,
 	      options.warn.discard = 0;
 	    else if (strcmp (optarg, "discard") == 0)
 	      options.warn.discard = 1;
+	    else if (strcmp (optarg, "nowidth") == 0)
+	      options.warn.width = 0;
+	    else if (strcmp (optarg, "width") == 0)
+	      options.warn.width = 1;
 	    else
 	      error (NULL, "Unknown -W argument `%s'\n", optarg);
 	    break;

@@ -1,3 +1,13 @@
+Sat Apr  4 02:15:35 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* igen.c (print_itrace): Use TRACE_ANY_P macro to determine if any
+ 	tracing is needed.
+
+Thu Mar 26 20:51:23 1998  Stu Grossman  <grossman@bhuna.cygnus.co.uk>
+
+	* table.c (table_push):  Redo, using stdio.  Fixes NT native
+	problem with <CRLF>=><LF> translation...
+
 Tue Mar 24 23:30:07 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gen-engine.c (print_run_body): Re-extract the CIA after
