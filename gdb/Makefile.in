@@ -1265,7 +1265,7 @@ ALLDEPFILES = \
 	hppab-nat.c hppah-nat.c hpread.c \
 	i386-tdep.c i386b-nat.c i386v-nat.c i386-linux-nat.c \
 	i386v4-nat.c i386ly-tdep.c i386-cygwin-tdep.c \
-	i386bsd-nat.c i386bsd-tdep.c i386fbsd-nat.c \
+	i386bsd-nat.c i386bsd-tdep.c i386fbsd-nat.c i386fbsd-tdep.c \
 	i387-tdep.c \
 	i386-linux-tdep.c i386-nat.c \
 	i386gnu-nat.c i386gnu-tdep.c \
@@ -1829,6 +1829,8 @@ i386-cygwin-tdep.o: i386-cygwin-tdep.c $(defs_h) $(osabi_h) $(gdb_string_h) \
 	$(i386_tdep_h)
 i386fbsd-nat.o: i386fbsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
 	$(i386_tdep_h)
+i386fbsd-tdep.o: i386fbsd-tdep.c $(defs_h) $(arch_utils_h) $(osabi_h) \
+	$(i386_tdep_h) $(i387_tdep_h)
 i386gnu-nat.o: i386gnu-nat.c $(defs_h) $(inferior_h) $(floatformat_h) \
 	$(regcache_h) $(gdb_assert_h) $(i386_tdep_h) $(gnu_nat_h) \
 	$(i387_tdep_h) $(gregset_h)

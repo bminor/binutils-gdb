@@ -1,5 +1,29 @@
 2003-10-11  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386fbsd-tdep.c: New file.
+	(i386fbsd_sigtramp_start, i386fbsd_sigtramp_end,
+	i386fbsd_sc_reg_offset, i386fbsdaout_init_abi, i386fbsd_init_abi,
+	i386fbsd4_sc_reg_offset, i386fbsd4_init_abi): Move here from
+	i386bsd-tdep.c.
+	(_initialize_i386fbsd_tdep): New function.
+	(i386fbsd_r_reg_offset, i386fbsd4_r_reg_offset): New varibles.
+	(i386fbsdaout_init_abi): Initialize TDEP->gregset_reg_offset,
+	TDEP->gregset_num_regs, TDEP->sizeof_gregset and
+	TDEP->sizeof_fpregset.  Use ARRAY_SIZE to initialize
+	TDEP->sc_num_regs.
+	(i386fbsd4_init_abi): Initialize TDEP->gregset_reg_offset,
+	TDEP->gregset_num_regs and TDEP->sizeof_gregset.  Use ARRAY_SIZE
+	to initialize TDEP->sc_num_regs.
+	* i386bsd-tdep.c (i386fbsd_sigtramp_start, i386fbsd_sigtramp_end,
+	i386fbsd_sc_reg_offset, i386fbsdaout_init_abi, i386fbsd_init_abi,
+	i386fbsd4_sc_reg_offset, i386fbsd4_init_abi): Remove.
+	(_initialize_i386bsd_tdep): Don't register FreeBSD a.out and
+	FreeBSD ELF OS/ABI's here.
+	* Makefile.in (ALLDEPFILES): Add i386fbsd-tdep.c.
+	(i386fbsd-tdep.o): New target.
+	* config/i386/fbsd.mt (TDEPFILES): Add i386fbsd-tdep.o.
+	* config/i386/fbsd64.mt (TDEPFILES):  Add i386fbsd-tdep.o.
+
 	* amd64fbsd-tdep.c (amd64fbsd_r_reg_offset): New variable.
 	(amd64fbsd_init_abi): Set TDEP->gregset_reg_offset,
 	TDEP->gregset_num_regs and TDEP->sizeof_gregset.  Use ARRAY_SIZE
