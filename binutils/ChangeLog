@@ -1,3 +1,8 @@
+2002-10-07  Gordon Chaffee <chaffee@netvmg.com>
+
+	* addr2line.c (slurp_symtab): Read in dynamic symbols if no
+	ordinary ones are available.
+
 2002-09-30  H.J. Lu <hjl@gnu.org>
 
 	* readelf.c (get_machine_flags): Handle E_MIPS_MACH_4120,

@@ -96,19 +96,16 @@ static void
 slurp_symtab (abfd)
      bfd *abfd;
 {
-  long storage;
   long symcount;
+  unsigned int size;
 
   if ((bfd_get_file_flags (abfd) & HAS_SYMS) == 0)
     return;
 
-  storage = bfd_get_symtab_upper_bound (abfd);
-  if (storage < 0)
-    bfd_fatal (bfd_get_filename (abfd));
+  symcount = bfd_read_minisymbols (abfd, false, (PTR) &syms, &size);
+  if (symcount == 0)
+    symcount = bfd_read_minisymbols (abfd, true /* dynamic */, (PTR) &syms, &size);
 
-  syms = (asymbol **) xmalloc (storage);
-
-  symcount = bfd_canonicalize_symtab (abfd, syms);
   if (symcount < 0)
     bfd_fatal (bfd_get_filename (abfd));
 }
