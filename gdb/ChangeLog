@@ -1,3 +1,22 @@
+Thu Mar 23 13:18:26 2000  Philippe De Muyter  <phdm@macqel.be>
+
+	* m68k-tdep.c (P_LINKL_FP, P_LINKW_FP): Macros renamed from P_LINK_L
+	and P_LINK_W.
+	(P_PEA_FP, P_MOVL_SP_FP): New macros.
+	(P_MOVL, P_LEAL, P_MOVML): Macros renamed from P_MOV_L, P_LEA_L and
+	P_MOVM_L.
+	(altos_skip_prologue, isi_skip_prologue): Use P_* macros, not octal
+ 	constants.
+	(delta68_in_sigtramp): New function.
+	(delta68_frame_args_address, delta68_frame_saved_pc): Ditto.
+	(m68k_skip_prologue): Use P_* macros, not hex constants.
+	(m68k_find_saved_regs): Do not expect a fixed sequence of register save
+	instructions, but accept them in any order; use P_* macros, not octal
+	or hex constants; recognize also `fmovemx to (fp + displacement)' and
+ 	`moveml to (fp + displacement)'.
+	* m68/tm-delta68.h (IN_SIGTRAMP): New macro.
+	(FRAME_SAVED_PC, FRAME_ARGS_ADDRESS): Ditto.
+	
 Fri Mar 24 13:44:57 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* MAINTAINERS: Add Fernando Nasser to testsuite maintainers. 
