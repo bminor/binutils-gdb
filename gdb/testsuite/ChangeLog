@@ -1,3 +1,13 @@
+Wed Jul 19 22:42:43 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* gdb.base/printcmds.exp:  Adjust expect patterns for addresses
+	of structure member arrays to match gdb/valops.c:value_addr change.
+
+Mon Jul 17 10:12:27 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* gdb.base/a1-selftest.exp: Fix unmatched quotes in many timeout
+	cases.
+
 Wed Jul 12 10:20:08 1995  Fred Fish  (fnf@rtl.cygnus.com)
 
 	* configure.in (configdirs):  Remove gdb.chill from default list
