@@ -1,3 +1,7 @@
+Mon Nov 16 19:15:19 1998  Dave Brolley  <brolley@cygnus.com>
+
+	* po/bfd.pot: Regenerated.
+
 Mon Nov 16 10:57:06 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* elf32-v850.c (hi16s_location): Replaced fixed size array with
