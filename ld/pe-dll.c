@@ -515,7 +515,7 @@ fill_edata (abfd, info)
      bfd *abfd;
      struct bfd_link_info *info;
 {
-  int i;
+  int i, hint;
   unsigned char *edirectory;
   unsigned long *eaddresses;
   unsigned long *enameptrs;
@@ -550,6 +550,7 @@ fill_edata (abfd, info)
   bfd_put_32 (abfd, ERVA (eordinals), edata_d + 36);
 
   /* Ok, now for the filling in part */
+  hint = 0;
   for (i = 0; i < export_table_size; i++)
     {
       int s = exported_symbols[i];
@@ -569,6 +570,7 @@ fill_edata (abfd, info)
 	      enamestr += strlen (enamestr) + 1;
 	      bfd_put_16 (abfd, i, (void *) eordinals);
 	      enameptrs++;
+	      pe_def_file->exports[s].hint = hint++;
 	    }
 	  eordinals++;
 	}
@@ -891,6 +893,471 @@ pe_dll_generate_def_file (pe_out_def_filename)
     {
       /* xgettext:c-format */
       einfo (_("%P: Error closing file `%s'\n"), pe_out_def_filename);
+    }
+}
+
+/************************************************************************
+
+ Generate the import library
+
+ ************************************************************************/
+
+static asymbol **symtab;
+static int symptr;
+static int tmp_seq;
+static const char *dll_filename;
+static char *dll_symname;
+
+static asection *
+quick_section(abfd, name, flags, align)
+     bfd *abfd;
+     const char *name;
+     int flags;
+     int align;
+{
+  asection *sec;
+  asymbol *sym;
+
+  sec = bfd_make_section_old_way(abfd, name);
+  sec->output_section = sec;
+  bfd_set_section_flags (abfd, sec, flags);
+  bfd_set_section_alignment (abfd, sec, align);
+
+  sym = bfd_make_empty_symbol(abfd);
+  symtab[symptr++] = sym;
+  sym->name = sec->name;
+  sym->section = sec;
+  sym->flags = BSF_LOCAL;
+  sym->value = 0;
+
+  return sec;
+}
+
+static void
+quick_symbol (abfd, n1, n2, n3, sec, flags, addr)
+     bfd *abfd;
+     char *n1;
+     char *n2;
+     char *n3;
+     asection *sec;
+     int flags;
+     int addr;
+{
+  asymbol *sym = bfd_make_empty_symbol(abfd);
+  char *name = (char *) xmalloc (strlen(n1) + strlen(n2) + strlen(n3) + 1);
+  strcpy (name, n1);
+  strcat (name, n2);
+  strcat (name, n3);
+  sym->name = name;
+  sym->section = sec;
+  sym->flags = flags;
+  sym->value = addr;
+  symtab[symptr++] = sym;
+}
+
+static arelent **reltab = 0;
+static int relcount = 0, relsize = 0;
+
+static void
+quick_reloc (abfd, address, which_howto, symidx)
+     bfd *abfd;
+     int address;
+     int which_howto;
+     int symidx;
+{
+  if (relcount >= (relsize-1))
+    {
+      relsize += 10;
+      if (reltab)
+	reltab = (arelent **) xrealloc (reltab, relsize * sizeof (arelent *));
+      else
+	reltab = (arelent **) xmalloc (relsize * sizeof (arelent *));
+    }
+  reltab[relcount] = (arelent *) xmalloc (sizeof (arelent));
+  reltab[relcount]->address = address;
+  reltab[relcount]->addend = 0;
+  reltab[relcount]->howto = bfd_reloc_type_lookup (abfd, which_howto);
+  reltab[relcount]->sym_ptr_ptr = symtab + symidx;
+  relcount++;
+}
+
+static void
+save_relocs (asection *sec)
+{
+  reltab[relcount] = 0;
+  sec->orelocation = reltab;
+  sec->reloc_count = relcount;
+  reltab = 0;
+  relcount = relsize = 0;
+}
+
+#define UNDSEC (asection *) &bfd_und_section
+
+/*
+ *	.section	.idata$2
+ *	.global		__head_my_dll
+ * __head_my_dll:
+ *	.rva		hname
+ *	.long		0
+ *	.long		0
+ *	.rva		__my_dll_iname
+ *	.rva		fthunk
+ *
+ *	.section	.idata$5
+ *	.long		0
+ * fthunk:
+ *
+ *	.section	.idata$4
+ *	.long		0
+ * hname:
+ */
+
+#define BFD_OPEN_OLDWAY 0
+
+bfd *
+make_head (parent)
+     bfd *parent;
+{
+  asection *id2, *id5, *id4;
+  unsigned char *d2, *d5, *d4;
+
+#if BFD_OPEN_OLDWAY
+  bfd *abfd = bfd_openw ("dh.o", 0);
+#else
+  bfd *abfd = bfd_create ("dh.o", parent);
+  bfd_make_writable (abfd);
+#endif
+  bfd_set_format (abfd, bfd_object);
+  bfd_set_arch_mach (abfd, bfd_arch_i386, 0);
+
+  symptr = 0;
+  symtab = (asymbol **) xmalloc (6 * sizeof (asymbol *));
+  id2 = quick_section(abfd, ".idata$2", SEC_HAS_CONTENTS, 2);
+  id5 = quick_section(abfd, ".idata$5", SEC_HAS_CONTENTS, 2);
+  id4 = quick_section(abfd, ".idata$4", SEC_HAS_CONTENTS, 2);
+  quick_symbol (abfd, "__head_", dll_symname, "", id2, BSF_GLOBAL, 0);
+  quick_symbol (abfd, "_", dll_symname, "_iname", UNDSEC, BSF_GLOBAL, 0);
+
+  bfd_set_section_size(abfd, id2, 20);
+  d2 = (unsigned char *) xmalloc (20);
+  memset (d2, 0, 20);
+  d2[0] = d2[16] = 4; /* reloc addend */
+  quick_reloc(abfd,  0, BFD_RELOC_RVA, 2);
+  quick_reloc(abfd, 12, BFD_RELOC_RVA, 4);
+  quick_reloc(abfd, 16, BFD_RELOC_RVA, 1);
+  save_relocs(id2);
+
+  bfd_set_section_size (abfd, id5, 4);
+  d5 = (unsigned char *) xmalloc (4);
+  memset (d5, 0, 4);
+
+  bfd_set_section_size (abfd, id4, 4);
+  d4 = (unsigned char *) xmalloc (4);
+  memset (d4, 0, 4);
+
+  bfd_set_symtab(abfd, symtab, symptr);
+
+  bfd_set_section_contents(abfd, id2, d2, 0, 20);
+  bfd_set_section_contents(abfd, id5, d5, 0, 4);
+  bfd_set_section_contents(abfd, id4, d4, 0, 4);
+
+#if BFD_OPEN_OLDWAY
+  bfd_close (abfd);
+  return bfd_openr("dh.o", 0);
+#else
+  bfd_make_readable (abfd);
+  return abfd;
+#endif
+}
+
+/*
+ *	.section	.idata$4
+ *	.long		0
+ *	.section	.idata$5
+ *	.long		0
+ *	.section	idata$7
+ *	.global		__my_dll_iname
+ *__my_dll_iname:
+ *	.asciz		"my.dll"
+ */
+
+bfd *
+make_tail (parent)
+     bfd *parent;
+{
+  asection *id4, *id5, *id7;
+  unsigned char *d4, *d5, *d7;
+  int len;
+
+#if BFD_OPEN_OLDWAY
+  bfd *abfd = bfd_openw ("dt.o", 0);
+#else
+  bfd *abfd = bfd_create ("dt.o", parent);
+  bfd_make_writable (abfd);
+#endif
+  bfd_set_format (abfd, bfd_object);
+  bfd_set_arch_mach (abfd, bfd_arch_i386, 0);
+
+  symptr = 0;
+  symtab = (asymbol **) xmalloc (5 * sizeof (asymbol *));
+  id4 = quick_section(abfd, ".idata$4", SEC_HAS_CONTENTS, 2);
+  id5 = quick_section(abfd, ".idata$5", SEC_HAS_CONTENTS, 2);
+  id7 = quick_section(abfd, ".idata$7", SEC_HAS_CONTENTS, 2);
+  quick_symbol (abfd, "_", dll_symname, "_iname", id7, BSF_GLOBAL, 0);
+
+  bfd_set_section_size(abfd, id4, 4);
+  d4 = (unsigned char *) xmalloc (4);
+  memset (d4, 0, 4);
+
+  bfd_set_section_size (abfd, id5, 4);
+  d5 = (unsigned char *) xmalloc (4);
+  memset (d5, 0, 4);
+
+  len = strlen(dll_filename)+1;
+  if (len & 1)
+    len ++;
+  bfd_set_section_size (abfd, id7, len);
+  d7 = (unsigned char *) xmalloc (len);
+  strcpy (d7, dll_filename);
+
+  bfd_set_symtab(abfd, symtab, symptr);
+
+  bfd_set_section_contents(abfd, id4, d4, 0, 4);
+  bfd_set_section_contents(abfd, id5, d5, 0, 4);
+  bfd_set_section_contents(abfd, id7, d7, 0, len);
+
+#if BFD_OPEN_OLDWAY
+  bfd_close (abfd);
+  return bfd_openr ("dt.o", 0);
+#else
+  bfd_make_readable (abfd);
+  return abfd;
+#endif
+}
+
+/*
+ *	.text
+ *	.global		_function
+ *	.global		___imp_function
+ *	.global		__imp__function
+ *_function:
+ *	jmp		*__imp__function:
+ *
+ *	.section	idata$7
+ *	.long		__head_my_dll
+ *
+ *	.section	.idata$5
+ *___imp_function:
+ *__imp__function:
+ *iat?
+ *	.section	.idata$4
+ *iat?
+ *	.section	.idata$6
+ *ID<ordinal>:
+ *	.short		<hint>
+ *	.asciz		"function" xlate? (add underscore, kill at)
+ */
+
+unsigned char jmp_ix86_bytes[] = {
+  0xff, 0x25, 0x00, 0x00, 0x00, 0x00, 0x90, 0x90
+};
+
+
+bfd *
+make_one (exp, parent)
+     def_file_export *exp;
+     bfd *parent;
+{
+  asection *tx, *id7, *id5, *id4, *id6;
+  unsigned char *td, *d7, *d5, *d4, *d6;
+  int len;
+  char *oname;
+  bfd *abfd;
+
+  oname = (char *) xmalloc (20);
+  sprintf(oname, "ds%d.o", tmp_seq);
+  tmp_seq++;
+#if BFD_OPEN_OLDWAY
+  abfd = bfd_openw (oname, 0);
+#else
+  abfd = bfd_create (oname, parent);
+  bfd_make_writable (abfd);
+#endif
+  bfd_set_format (abfd, bfd_object);
+  bfd_set_arch_mach (abfd, bfd_arch_i386, 0);
+
+  symptr = 0;
+  symtab = (asymbol **) xmalloc (10 * sizeof (asymbol *));
+  tx  = quick_section(abfd, ".text",    SEC_CODE|SEC_HAS_CONTENTS, 2);
+  id7 = quick_section(abfd, ".idata$7", SEC_HAS_CONTENTS, 2);
+  id5 = quick_section(abfd, ".idata$5", SEC_HAS_CONTENTS, 2);
+  id4 = quick_section(abfd, ".idata$4", SEC_HAS_CONTENTS, 2);
+  id6 = quick_section(abfd, ".idata$6", SEC_HAS_CONTENTS, 2);
+  quick_symbol (abfd, "_", exp->name, "", tx, BSF_GLOBAL, 0);
+  quick_symbol (abfd, "__head_", dll_symname, "", UNDSEC, BSF_GLOBAL, 0);
+  quick_symbol (abfd, "___imp_", exp->name, "", id5, BSF_GLOBAL, 0);
+  quick_symbol (abfd, "__imp__", exp->name, "", id5, BSF_GLOBAL, 0);
+
+  bfd_set_section_size (abfd, tx, 8);
+  td = (unsigned char *) xmalloc (8);
+  memcpy (td, jmp_ix86_bytes, 8);
+  quick_reloc (abfd, 2, BFD_RELOC_32, 2);
+  save_relocs (tx);
+
+  bfd_set_section_size(abfd, id7, 4);
+  d7 = (unsigned char *) xmalloc (4);
+  memset (d7, 0, 4);
+  quick_reloc (abfd, 0, BFD_RELOC_RVA, 6);
+  save_relocs (id7);
+
+  bfd_set_section_size (abfd, id5, 4);
+  d5 = (unsigned char *) xmalloc (4);
+  memset (d5, 0, 4);
+  if (exp->flag_noname)
+    {
+      d5[0] = exp->ordinal;
+      d5[1] = exp->ordinal >> 8;
+      d5[3] = 0x80;
+    }
+  else
+    {
+      quick_reloc (abfd, 0, BFD_RELOC_RVA, 4);
+      save_relocs (id5);
+    }
+
+  bfd_set_section_size (abfd, id4, 4);
+  d4 = (unsigned char *) xmalloc (4);
+  memset (d4, 0, 4);
+  if (exp->flag_noname)
+    {
+      d5[0] = exp->ordinal;
+      d5[1] = exp->ordinal >> 8;
+      d5[3] = 0x80;
+    }
+  else
+    {
+      quick_reloc (abfd, 0, BFD_RELOC_RVA, 4);
+      save_relocs (id4);
+    }
+
+  if (exp->flag_noname)
+    {
+      len = 0;
+      bfd_set_section_size(abfd, id6, 0);
+    }
+  else
+    {
+      len = strlen(exp->name) + 3;
+      if (len & 1)
+	len++;
+      bfd_set_section_size(abfd, id6, len);
+      d6 = (unsigned char *) xmalloc (len);
+      memset (d6, 0, len);
+      d6[0] = exp->hint & 0xff;
+      d6[1] = exp->hint >> 8;
+      strcpy(d6+2, exp->name);
+    }
+
+  bfd_set_symtab(abfd, symtab, symptr);
+
+  bfd_set_section_contents(abfd, tx, td, 0, 8);
+  bfd_set_section_contents(abfd, id7, d7, 0, 4);
+  bfd_set_section_contents(abfd, id5, d5, 0, 4);
+  bfd_set_section_contents(abfd, id4, d4, 0, 4);
+  bfd_set_section_contents(abfd, id6, d6, 0, len);
+
+#if BFD_OPEN_OLDWAY
+  bfd_close(abfd);
+  return bfd_openr(oname, 0);
+#else
+  bfd_make_readable (abfd);
+  return abfd;
+#endif
+}
+
+void
+pe_dll_generate_implib (def, impfilename)
+     def_file *def;
+     char *impfilename;
+{
+  int i;
+  /*export_type *exp;*/
+  bfd *ar_head;
+  bfd *ar_tail;
+  bfd *outarch;
+  bfd * head  = 0;
+
+  dll_filename = def->name;
+  if (dll_filename == 0)
+    {
+      dll_filename = dll_name;
+      for (i=0; impfilename[i]; i++)
+	if (impfilename[i] == '/' || impfilename[i] == '\\')
+	  dll_filename = impfilename+1;
+    }
+  dll_symname = xstrdup (dll_filename);
+  for (i=0; dll_symname[i]; i++)
+    if (!isalnum (dll_symname[i]))
+      dll_symname[i] = '_';
+
+  unlink (impfilename);
+
+  outarch = bfd_openw (impfilename, 0);
+
+  if (!outarch)
+    {
+      /* xgettext:c-format */
+      einfo (_("%XCan't open .lib file: %s\n"), impfilename);
+      return;
+    }
+
+  /* xgettext:c-format */
+  einfo (_("Creating library file: %s\n"), impfilename);
+  
+  bfd_set_format (outarch, bfd_archive);
+  outarch->has_armap = 1;
+
+  /* Work out a reasonable size of things to put onto one line. */
+
+  ar_head = make_head (outarch);
+  ar_tail = make_tail (outarch);
+
+  if (ar_head == NULL || ar_tail == NULL)
+    return;
+
+  for (i = 0; i<def->num_exports; i++)
+    {
+      bfd *n = make_one (def->exports+i, outarch);
+      n->next = head;
+      head = n;
+    }
+
+  /* Now stick them all into the archive */
+
+  ar_head->next = head;
+  ar_tail->next = ar_head;
+  head = ar_tail;
+
+  if (! bfd_set_archive_head (outarch, head))
+    einfo ("%Xbfd_set_archive_head: %s\n", bfd_errmsg (bfd_get_error ()));
+  
+  if (! bfd_close (outarch))
+    einfo ("%Xbfd_close %s: %s\n", impfilename, bfd_errmsg (bfd_get_error ()));
+
+  while (head != NULL)
+    {
+      bfd *n = head->next;
+      bfd_close (head);
+      head = n;
+    }
+
+  unlink ("dh.o");
+  unlink ("dt.o");
+  for (i=0; i<tmp_seq; i++)
+    {
+      char buf[20];
+      sprintf (buf, "ds%d.o", i);
+      unlink (buf);
     }
 }
 

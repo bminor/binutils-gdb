@@ -70,6 +70,7 @@ int pe_dll_do_default_excludes = 1;
 int pe_dll_kill_ats = 0;
 int pe_dll_stdcall_aliases = 0;
 int pe_enable_stdcall_fixup = -1; /* 0=disable 1=enable */
+static char *pe_implib_filename = 0;
 
 extern const char *output_filename;
 
@@ -108,6 +109,7 @@ gld_${EMULATION_NAME}_before_parse()
 #define OPTION_STDCALL_ALIASES		(OPTION_KILL_ATS + 1)
 #define OPTION_ENABLE_STDCALL_FIXUP	(OPTION_STDCALL_ALIASES + 1)
 #define OPTION_DISABLE_STDCALL_FIXUP	(OPTION_ENABLE_STDCALL_FIXUP + 1)
+#define OPTION_IMPLIB_FILENAME		(OPTION_DISABLE_STDCALL_FIXUP + 1)
 
 static struct option longopts[] =
 {
@@ -127,6 +129,7 @@ static struct option longopts[] =
   {"stack", required_argument, NULL, OPTION_STACK},
   {"subsystem", required_argument, NULL, OPTION_SUBSYSTEM},
   {"support-old-code", no_argument, NULL, OPTION_SUPPORT_OLD_CODE},
+#ifdef TARGET_IS_i386pe
   /* getopt allows abbreviations, so we do this to stop it from treating -o
      as an abbreviation for this option */
   {"output-def", required_argument, NULL, OPTION_OUT_DEF},
@@ -137,6 +140,8 @@ static struct option longopts[] =
   {"add-stdcall-alias", no_argument, NULL, OPTION_STDCALL_ALIASES},
   {"enable-stdcall-fixup", no_argument, NULL, OPTION_ENABLE_STDCALL_FIXUP},
   {"disable-stdcall-fixup", no_argument, NULL, OPTION_DISABLE_STDCALL_FIXUP},
+  {"out-implib", required_argument, NULL, OPTION_IMPLIB_FILENAME},
+#endif
   {NULL, no_argument, NULL, 0}
 };
 
@@ -198,13 +203,16 @@ gld_${EMULATION_NAME}_list_options (file)
   fprintf (file, _("  --stack <size>                     Set size of the initial stack\n"));
   fprintf (file, _("  --subsystem <name>[:<version>]     Set required OS subsystem [& version]\n"));
   fprintf (file, _("  --support-old-code                 Support interworking with old code\n"));
-  fprintf (file, _("  --output-def <file>                Generate a .DEF file for the built DLL\n"));
-  fprintf (file, _("  --export-all-symbols               Automatically export all globals to DLL\n"));
-  fprintf (file, _("  --exclude-symbols sym,sym,...      Exclude symbols from automatic export\n"));
-  fprintf (file, _("  --kill-at                          Remove @nn from exported symbols\n"));
+#ifdef TARGET_IS_i386pe
   fprintf (file, _("  --add-stdcall-alias                Export symbols with and without @nn\n"));
-  fprintf (file, _("  --enable-stdcall-fixup             Link _sym to _sym@nn without warnings\n"));
   fprintf (file, _("  --disable-stdcall-fixup            Don't link _sym to _sym@nn\n"));
+  fprintf (file, _("  --enable-stdcall-fixup             Link _sym to _sym@nn without warnings\n"));
+  fprintf (file, _("  --exclude-symbols sym,sym,...      Exclude symbols from automatic export\n"));
+  fprintf (file, _("  --export-all-symbols               Automatically export all globals to DLL\n"));
+  fprintf (file, _("  --kill-at                          Remove @nn from exported symbols\n"));
+  fprintf (file, _("  --out-implib <file>                Generate import library\n"));
+  fprintf (file, _("  --output-def <file>                Generate a .DEF file for the built DLL\n"));
+#endif
 }
 
 static void
@@ -423,6 +431,9 @@ gld_${EMULATION_NAME}_parse_args(argc, argv)
       break;
     case OPTION_DISABLE_STDCALL_FIXUP:
       pe_enable_stdcall_fixup = 0;
+      break;
+    case OPTION_IMPLIB_FILENAME:
+      pe_implib_filename = xstrdup (optarg);
       break;
     }
   return 1;
@@ -773,7 +784,11 @@ gld_${EMULATION_NAME}_finish ()
 {
 #ifdef TARGET_IS_i386pe
   if (link_info.shared)
-    pe_dll_fill_sections (output_bfd, &link_info);
+    {
+      pe_dll_fill_sections (output_bfd, &link_info);
+      if (pe_implib_filename)
+	pe_dll_generate_implib (pe_def_file, pe_implib_filename);
+    }
   if (pe_out_def_filename)
     pe_dll_generate_def_file (pe_out_def_filename);
 #endif

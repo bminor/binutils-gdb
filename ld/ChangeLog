@@ -1,3 +1,11 @@
+Mon Nov 16 22:14:07 1998  DJ Delorie  <dj@cygnus.com>
+
+	* emultempl/pe.em (gld_i386_finish): generate import library
+	* deffile.h: add hint member.
+	* pe-dll.c (pe_dll_generate_implib): New function with helpers;
+ 	generates the import library directly from the export table.
+	(fill_edata): remember the actual hint for the import library.
+
 Sat Nov 14 14:36:24 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ld.1: Some cleanups from NOKUBI Hirotaka <hnokubi@yyy.or.jp>.
