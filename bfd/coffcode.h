@@ -556,85 +556,84 @@ DEFUN(coff_swap_sym_out,(abfd, inp, extp),
 }
 
 static void
-DEFUN(coff_swap_aux_in,(abfd, ext1, type, class, in1),
+DEFUN(coff_swap_aux_in,(abfd, ext1, type, class, in),
       bfd            *abfd AND
       PTR 	      ext1 AND
       int             type AND
       int             class AND
-      PTR 	      in1)
+      union internal_auxent *in)
 {
   AUXENT    *ext = (AUXENT *)ext1;
-  union internal_auxent  *in = (union internal_auxent *)in1;
+
   switch (class) {
-  case C_FILE:
-    if (ext->x_file.x_fname[0] == 0) {
-      in->x_file.x_n.x_zeroes = 0;
-      in->x_file.x_n.x_offset = 
-	bfd_h_get_32(abfd, (bfd_byte *) ext->x_file.x_n.x_offset);
-    } else {
+    case C_FILE:
+      if (ext->x_file.x_fname[0] == 0) {
+	  in->x_file.x_n.x_zeroes = 0;
+	  in->x_file.x_n.x_offset = 
+	   bfd_h_get_32(abfd, (bfd_byte *) ext->x_file.x_n.x_offset);
+	} else {
 #if FILNMLEN != E_FILNMLEN
-   -> Error, we need to cope with truncating or extending FILNMLEN!;
+	    -> Error, we need to cope with truncating or extending FILNMLEN!;
 #else
-      memcpy (in->x_file.x_fname, ext->x_file.x_fname, FILNMLEN);
+	    memcpy (in->x_file.x_fname, ext->x_file.x_fname, FILNMLEN);
 #endif
-    }
-    break;
-
-  /* RS/6000 "csect" auxents */
-#ifdef RS6000COFF_C
-  case C_EXT:
-  case C_HIDEXT:
-    in->x_csect.x_scnlen   = bfd_h_get_32 (abfd, (bfd_byte *) ext->x_csect.x_scnlen);
-    in->x_csect.x_parmhash = bfd_h_get_32 (abfd, (bfd_byte *) ext->x_csect.x_parmhash);
-    in->x_csect.x_snhash   = bfd_h_get_16 (abfd, (bfd_byte *) ext->x_csect.x_snhash);
-    /* We don't have to hack bitfields in x_smtyp because it's defined by
-       shifts-and-ands, which are equivalent on all byte orders.  */
-    in->x_csect.x_smtyp    = bfd_h_get_8  (abfd, (bfd_byte *) ext->x_csect.x_smtyp);
-    in->x_csect.x_smclas   = bfd_h_get_8  (abfd, (bfd_byte *) ext->x_csect.x_smclas);
-    in->x_csect.x_stab     = bfd_h_get_32 (abfd, (bfd_byte *) ext->x_csect.x_stab);
-    in->x_csect.x_snstab   = bfd_h_get_16 (abfd, (bfd_byte *) ext->x_csect.x_snstab);
-    break;
-#endif
-
-  case C_STAT:
-#ifdef C_LEAFSTAT
-  case C_LEAFSTAT:
-#endif
-  case C_HIDDEN:
-    if (type == T_NULL) {
-      in->x_scn.x_scnlen = GET_SCN_SCNLEN(abfd, ext);
-      in->x_scn.x_nreloc = GET_SCN_NRELOC(abfd, ext);
-      in->x_scn.x_nlinno = GET_SCN_NLINNO(abfd, ext);
+	  }
       break;
-    }
 
-  default:
-    in->x_sym.x_tagndx.l = bfd_h_get_32(abfd, (bfd_byte *) ext->x_sym.x_tagndx);
+      /* RS/6000 "csect" auxents */
+#ifdef RS6000COFF_C
+    case C_EXT:
+    case C_HIDEXT:
+      in->x_csect.x_scnlen   = bfd_h_get_32 (abfd, (bfd_byte *) ext->x_csect.x_scnlen);
+      in->x_csect.x_parmhash = bfd_h_get_32 (abfd, (bfd_byte *) ext->x_csect.x_parmhash);
+      in->x_csect.x_snhash   = bfd_h_get_16 (abfd, (bfd_byte *) ext->x_csect.x_snhash);
+      /* We don't have to hack bitfields in x_smtyp because it's defined by
+	 shifts-and-ands, which are equivalent on all byte orders.  */
+      in->x_csect.x_smtyp    = bfd_h_get_8  (abfd, (bfd_byte *) ext->x_csect.x_smtyp);
+      in->x_csect.x_smclas   = bfd_h_get_8  (abfd, (bfd_byte *) ext->x_csect.x_smclas);
+      in->x_csect.x_stab     = bfd_h_get_32 (abfd, (bfd_byte *) ext->x_csect.x_stab);
+      in->x_csect.x_snstab   = bfd_h_get_16 (abfd, (bfd_byte *) ext->x_csect.x_snstab);
+      break;
+#endif
+
+    case C_STAT:
+#ifdef C_LEAFSTAT
+    case C_LEAFSTAT:
+#endif
+    case C_HIDDEN:
+      if (type == T_NULL) {
+	  in->x_scn.x_scnlen = GET_SCN_SCNLEN(abfd, ext);
+	  in->x_scn.x_nreloc = GET_SCN_NRELOC(abfd, ext);
+	  in->x_scn.x_nlinno = GET_SCN_NLINNO(abfd, ext);
+	  break;
+	}
+    default:
+      in->x_sym.x_tagndx.l = bfd_h_get_32(abfd, (bfd_byte *) ext->x_sym.x_tagndx);
 #ifndef NO_TVNDX
-    in->x_sym.x_tvndx = bfd_h_get_16(abfd, (bfd_byte *) ext->x_sym.x_tvndx);
+      in->x_sym.x_tvndx = bfd_h_get_16(abfd, (bfd_byte *) ext->x_sym.x_tvndx);
 #endif
 
-    if (ISARY(type) || class == C_BLOCK) {
+      if (ISARY(type) || class == C_BLOCK) {
 #if DIMNUM != E_DIMNUM
-   -> Error, we need to cope with truncating or extending DIMNUM!;
+	  -> Error, we need to cope with truncating or extending DIMNUM!;
 #else
-      in->x_sym.x_fcnary.x_ary.x_dimen[0] = bfd_h_get_16(abfd, (bfd_byte *) ext->x_sym.x_fcnary.x_ary.x_dimen[0]);
-      in->x_sym.x_fcnary.x_ary.x_dimen[1] = bfd_h_get_16(abfd, (bfd_byte *) ext->x_sym.x_fcnary.x_ary.x_dimen[1]);
-      in->x_sym.x_fcnary.x_ary.x_dimen[2] = bfd_h_get_16(abfd, (bfd_byte *) ext->x_sym.x_fcnary.x_ary.x_dimen[2]);
-      in->x_sym.x_fcnary.x_ary.x_dimen[3] = bfd_h_get_16(abfd, (bfd_byte *) ext->x_sym.x_fcnary.x_ary.x_dimen[3]);
+	  in->x_sym.x_fcnary.x_ary.x_dimen[0] = bfd_h_get_16(abfd, (bfd_byte *) ext->x_sym.x_fcnary.x_ary.x_dimen[0]);
+	  in->x_sym.x_fcnary.x_ary.x_dimen[1] = bfd_h_get_16(abfd, (bfd_byte *) ext->x_sym.x_fcnary.x_ary.x_dimen[1]);
+	  in->x_sym.x_fcnary.x_ary.x_dimen[2] = bfd_h_get_16(abfd, (bfd_byte *) ext->x_sym.x_fcnary.x_ary.x_dimen[2]);
+	  in->x_sym.x_fcnary.x_ary.x_dimen[3] = bfd_h_get_16(abfd, (bfd_byte *) ext->x_sym.x_fcnary.x_ary.x_dimen[3]);
 #endif
-    }
+	}
       in->x_sym.x_fcnary.x_fcn.x_lnnoptr = GET_FCN_LNNOPTR(abfd, ext);
       in->x_sym.x_fcnary.x_fcn.x_endndx.l = GET_FCN_ENDNDX(abfd, ext);
 
-    if (ISFCN(type)) {
-      in->x_sym.x_misc.x_fsize = bfd_h_get_32(abfd, (bfd_byte *) ext->x_sym.x_misc.x_fsize);
+      if (ISFCN(type)) {
+	  in->x_sym.x_misc.x_fsize = bfd_h_get_32(abfd, (bfd_byte *) ext->x_sym.x_misc.x_fsize);
+	}
+      else {
+	  in->x_sym.x_misc.x_lnsz.x_lnno = GET_LNSZ_LNNO(abfd, ext);
+	  in->x_sym.x_misc.x_lnsz.x_size = GET_LNSZ_SIZE(abfd, ext);
+	}
     }
-    else {
-      in->x_sym.x_misc.x_lnsz.x_lnno = GET_LNSZ_LNNO(abfd, ext);
-      in->x_sym.x_misc.x_lnsz.x_size = GET_LNSZ_SIZE(abfd, ext);
-    }
-  }
 }
 
 static unsigned int
@@ -1498,7 +1497,7 @@ unsigned int written)
 
   coff_swap_sym_out(abfd, &native->u.syment, &buf);
   bfd_write((PTR)& buf, 1, SYMESZ, abfd);
-  for (j = 0; j != native->u.syment.n_numaux;  j++)
+  for (j = 0; j <= native->u.syment.n_numaux;  j++)
   {
     AUXENT buf1;
     bzero((PTR)&buf, AUXESZ);
@@ -1881,9 +1880,10 @@ DEFUN(coff_print_symbol,(ignore_abfd, filep, symbol, how),
 	      fprintf(file, "File ");
 	      break;
 	    default:
-	      fprintf(file, "AUX lnno %x size %x",
+	      fprintf(file, "AUX lnno %x size %x tagndx %x",
 		      combined[aux+1].u.auxent.x_sym.x_misc.x_lnsz.x_lnno,
-		      combined[aux+1].u.auxent.x_sym.x_misc.x_lnsz.x_size);
+		      combined[aux+1].u.auxent.x_sym.x_misc.x_lnsz.x_size,
+		      combined[aux+1].u.auxent.x_sym.x_tagndx.l);
 	      break;
     
 	    }
@@ -2673,12 +2673,12 @@ bfd            *abfd)
 
   unsigned int raw_size;
   if (obj_raw_syments(abfd) != (combined_entry_type *)NULL) {
-    return obj_raw_syments(abfd);
-  }
+      return obj_raw_syments(abfd);
+    }
   if ((size = bfd_get_symcount(abfd) * sizeof(combined_entry_type)) == 0) {
-    bfd_error = no_symbols;
-    return (NULL);
-  }
+      bfd_error = no_symbols;
+      return (NULL);
+    }
 
   internal = (combined_entry_type *)bfd_alloc(abfd, size);
   internal_end = internal + bfd_get_symcount(abfd);
@@ -2688,9 +2688,9 @@ bfd            *abfd)
 
   if (bfd_seek(abfd, obj_sym_filepos(abfd), SEEK_SET) == -1
       || bfd_read((PTR)raw, raw_size, 1, abfd) != raw_size) {
-    bfd_error = system_call_error;
-    return (NULL);
-  }
+      bfd_error = system_call_error;
+      return (NULL);
+    }
   /* mark the end of the symbols */
   raw_end = raw + bfd_get_symcount(abfd);
   /*
@@ -2703,63 +2703,62 @@ bfd            *abfd)
        raw_src < raw_end;
        raw_src++, internal_ptr++) {
 
-    unsigned int i;
-    coff_swap_sym_in(abfd, (char *)raw_src, (char *)&internal_ptr->u.syment);
-    internal_ptr->fix_tag = 0;
-    internal_ptr->fix_end = 0;
-    symbol_ptr = internal_ptr;
-    
-    for (i = 0;
-	 i < symbol_ptr->u.syment.n_numaux;
-	 i++) 
-    {
-      internal_ptr++;
-      raw_src++;
-      
+      unsigned int i;
+      coff_swap_sym_in(abfd, (char *)raw_src, (char *)&internal_ptr->u.syment);
       internal_ptr->fix_tag = 0;
       internal_ptr->fix_end = 0;
+      symbol_ptr = internal_ptr;
+    
+      for (i = 0;
+	   i < symbol_ptr->u.syment.n_numaux;
+	   i++) 
+      {
+	internal_ptr++;
+	raw_src++;
+      
+	internal_ptr->fix_tag = 0;
+	internal_ptr->fix_end = 0;
+	coff_swap_aux_in(abfd, (char *)(raw_src),
+			 symbol_ptr->u.syment.n_type,
+			 symbol_ptr->u.syment.n_sclass,
+			 &(internal_ptr->u.auxent));
 
-      coff_swap_aux_in(abfd, (char *)(raw_src),
-		       symbol_ptr->u.syment.n_type,
-		       symbol_ptr->u.syment.n_sclass,
-		       &(internal_ptr->u.auxent));
-
-     coff_pointerize_aux(abfd,
-			  internal,
-			  symbol_ptr->u.syment.n_type,
-			  symbol_ptr->u.syment.n_sclass,
-			  internal_ptr);
+	coff_pointerize_aux(abfd,
+			    internal,
+			    symbol_ptr->u.syment.n_type,
+			    symbol_ptr->u.syment.n_sclass,
+			    internal_ptr);
+      }
     }
-  }
 
   /* Free all the raw stuff */
   bfd_release(abfd, raw);
 
   for (internal_ptr = internal; internal_ptr < internal_end;
        internal_ptr ++)
-      {
-	if (internal_ptr->u.syment.n_sclass == C_FILE) {
-	  /* make a file symbol point to the name in the auxent, since
-	     the text ".file" is redundant */
-	  if ((internal_ptr+1)->u.auxent.x_file.x_n.x_zeroes == 0) {
+  {
+    if (internal_ptr->u.syment.n_sclass == C_FILE) {
+	/* make a file symbol point to the name in the auxent, since
+	   the text ".file" is redundant */
+	if ((internal_ptr+1)->u.auxent.x_file.x_n.x_zeroes == 0) {
 	    /* the filename is a long one, point into the string table */
 	    if (string_table == NULL) {
-	      string_table = build_string_table(abfd);
-	    }
+		string_table = build_string_table(abfd);
+	      }
 
 	    internal_ptr->u.syment._n._n_n._n_offset =
-	      (int) (string_table - 4 +
-		     (internal_ptr+1)->u.auxent.x_file.x_n.x_offset);
+	     (int) (string_table - 4 +
+		    (internal_ptr+1)->u.auxent.x_file.x_n.x_offset);
 	  }
-	  else {
+	else {
 	    /* ordinary short filename, put into memory anyway */
 	    internal_ptr->u.syment._n._n_n._n_offset = (int)
-	      copy_name(abfd, (internal_ptr+1)->u.auxent.x_file.x_fname,
-			FILNMLEN);
+	     copy_name(abfd, (internal_ptr+1)->u.auxent.x_file.x_fname,
+		       FILNMLEN);
 	  }
-	}
-	else {
-	  if (internal_ptr->u.syment._n._n_n._n_zeroes != 0) {
+      }
+    else {
+	if (internal_ptr->u.syment._n._n_n._n_zeroes != 0) {
 	    /* This is a "short" name.  Make it long.  */
 	    unsigned long   i = 0;
 	    char           *newstring = NULL;
@@ -2767,39 +2766,39 @@ bfd            *abfd)
 	    /* find the length of this string without walking into memory
 	       that isn't ours.  */
 	    for (i = 0; i < 8; ++i) {
-	      if (internal_ptr->u.syment._n._n_name[i] == '\0') {
-		break;
-	      }			/* if end of string */
-	    }			/* possible lengths of this string. */
+		if (internal_ptr->u.syment._n._n_name[i] == '\0') {
+		    break;
+		  }		/* if end of string */
+	      }			/* possible lengths of this string. */
 
 	    if ((newstring = (PTR) bfd_alloc(abfd, ++i)) == NULL) {
-	      bfd_error = no_memory;
-	      return (NULL);
-	    }			/* on error */
+		bfd_error = no_memory;
+		return (NULL);
+	      }			/* on error */
 	    bzero(newstring, i);
 	    strncpy(newstring, internal_ptr->u.syment._n._n_name, i-1);
 	    internal_ptr->u.syment._n._n_n._n_offset =  (int) newstring;
 	    internal_ptr->u.syment._n._n_n._n_zeroes = 0;
 	  }
-	  else if (!SYMNAME_IN_DEBUG(&internal_ptr->u.syment)) {
+	else if (!SYMNAME_IN_DEBUG(&internal_ptr->u.syment)) {
 	    /* Long name already.  Point symbol at the string in the table.  */
 	    if (string_table == NULL) {
-	      string_table = build_string_table(abfd);
-	    }
+		string_table = build_string_table(abfd);
+	      }
 	    internal_ptr->u.syment._n._n_n._n_offset = (int)
-	      (string_table - 4 + internal_ptr->u.syment._n._n_n._n_offset);
+	     (string_table - 4 + internal_ptr->u.syment._n._n_n._n_offset);
 	  }
-	  else {
+	else {
 	    /* Long name in debug section.  Very similar.  */
 	    if (debug_section == NULL) {
-	      debug_section = build_debug_section(abfd);
-	    }
+		debug_section = build_debug_section(abfd);
+	      }
 	    internal_ptr->u.syment._n._n_n._n_offset = (int)
-	      (debug_section + internal_ptr->u.syment._n._n_n._n_offset);
+	     (debug_section + internal_ptr->u.syment._n._n_n._n_offset);
 	  }
-	}
-	internal_ptr += internal_ptr->u.syment.n_numaux;
       }
+    internal_ptr += internal_ptr->u.syment.n_numaux;
+  }
 
   obj_raw_syments(abfd) = internal;
 

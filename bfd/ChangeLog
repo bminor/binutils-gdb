@@ -1,3 +1,11 @@
+Fri Feb 21 10:57:54 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
+
+	* coffcode.h (coff_swap_aux_in): lint, (coff_print_symbol): prints
+	out tagndx too.
+	* aoutx.h (swap_std_reloc_out, swap_ext_reloc_out): use the output
+	section of a symbol rather than the section of a reffed symbol to
+	determine the r_index of an emmitted reloc.
+
 Thu Feb 20 18:10:34 1992  Per Bothner  (bothner at cygnus.com)
 
 	* PORTING: New (preliminary) porting guide.
