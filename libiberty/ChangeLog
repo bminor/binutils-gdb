@@ -1,3 +1,10 @@
+2002-04-15  Andrew Cagney  <ac131313@redhat.com>
+
+	From mainline: 2002-03-06  Jim Blandy  <jimb@redhat.com>
+	* splay-tree.c (splay_tree_xmalloc_allocate,
+	splay_tree_xmalloc_deallocate): Use K&R-style definitions, not
+	prototyped definitions.  Mark `data' arguments as unused.
+
 2002-02-21  Jim Blandy  <jimb@redhat.com>
 
 	* splay-tree.c (splay_tree_xmalloc_allocate,
