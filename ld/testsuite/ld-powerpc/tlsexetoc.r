@@ -5,7 +5,7 @@
 #readelf: -WSsrl
 #target: powerpc64*-*-*
 
-There are 21 section headers.*
+There are 20 section headers.*
 
 Section Headers:
  +\[Nr\] Name +Type +Address +Off +Size +ES Flg Lk Inf Al
@@ -15,21 +15,20 @@ Section Headers:
  +\[ 3\] \.dynsym +DYNSYM +0+100001e0 0+1e0 0+d8 18 +A +4 +1 +8
  +\[ 4\] \.dynstr +STRTAB +0+100002b8 0+2b8 0+4c 0+ +A +0 +0 +1
  +\[ 5\] \.rela\.dyn +RELA +0+10000308 0+308 0+30 18 +A +3 +0 +8
- +\[ 6\] \.rela\.plt +RELA +0+10000338 0+338 0+18 18 +A +3 +10 +8
+ +\[ 6\] \.rela\.plt +RELA +0+10000338 0+338 0+18 18 +A +3 +f +8
  +\[ 7\] \.text +PROGBITS +0+10000350 0+350 0+bc 0+ +AX +0 +0 +4
  +\[ 8\] \.data +PROGBITS +0+10010410 0+410 0+ 0+ +WA +0 +0 +1
  +\[ 9\] \.branch_lt +PROGBITS +0+10010410 0+410 0+ 0+ +WA +0 +0 +8
  +\[10\] \.tdata +PROGBITS +0+10010410 0+410 0+38 0+ WAT +0 +0 +8
  +\[11\] \.tbss +NOBITS +0+10010448 0+448 0+38 0+ WAT +0 +0 +8
  +\[12\] \.dynamic +DYNAMIC +0+10010448 0+448 0+150 10 +WA +4 +0 +8
- +\[13\] \.got +PROGBITS +0+10010598 0+598 0+8 08 +WA +0 +0 +8
- +\[14\] \.toc +PROGBITS +0+100105a0 0+5a0 0+50 0+ +WA +0 +0 +1
- +\[15\] \.sbss +PROGBITS +0+100105f0 0+5f0 0+ 0+ +W +0 +0 +1
- +\[16\] \.plt +NOBITS +0+100105f0 0+5f0 0+30 18 +WA +0 +0 +8
- +\[17\] \.bss +NOBITS +0+10010620 0+5f0 0+ 0+ +WA +0 +0 +1
- +\[18\] \.shstrtab +STRTAB +0+ 0+5f0 0+8f 0+ +0 +0 +1
- +\[19\] \.symtab +SYMTAB +0+ 0+bc0 0+438 18 +20 +1d +8
- +\[20\] \.strtab +STRTAB +0+ 0+ff8 0+8c 0+ +0 +0 +1
+ +\[13\] \.got +PROGBITS +0+10010598 0+598 0+58 08 +WA +0 +0 +8
+ +\[14\] \.sbss +PROGBITS +0+100105f0 0+5f0 0+ 0+ +W +0 +0 +1
+ +\[15\] \.plt +NOBITS +0+100105f0 0+5f0 0+30 18 +WA +0 +0 +8
+ +\[16\] \.bss +NOBITS +0+10010620 0+5f0 0+ 0+ +WA +0 +0 +1
+ +\[17\] \.shstrtab +STRTAB +0+ 0+5f0 0+8a 0+ +0 +0 +1
+ +\[18\] \.symtab +SYMTAB +0+ 0+b80 0+420 18 +19 +1c +8
+ +\[19\] \.strtab +STRTAB +0+ 0+fa0 0+8c 0+ +0 +0 +1
 #...
 
 Elf file type is EXEC \(Executable file\)
@@ -51,7 +50,7 @@ Program Headers:
  +0+ +
  +01 +\.interp 
  +02 +\.interp \.hash \.dynsym \.dynstr \.rela\.dyn \.rela\.plt \.text 
- +03 +\.tdata \.tbss \.dynamic \.got \.toc \.plt 
+ +03 +\.tdata \.tbss \.dynamic \.got \.plt 
  +04 +\.tbss \.dynamic 
  +05 +\.tdata \.tbss 
 
@@ -76,7 +75,7 @@ Symbol table '\.dynsym' contains 9 entries:
  +7: 0+100105f0 +0 NOTYPE +GLOBAL DEFAULT +ABS _edata
  +8: 0+10010620 +0 NOTYPE +GLOBAL DEFAULT +ABS _end
 
-Symbol table '\.symtab' contains 45 entries:
+Symbol table '\.symtab' contains 44 entries:
  +Num: +Value +Size Type +Bind +Vis +Ndx Name
  +0: 0+ +0 NOTYPE +LOCAL +DEFAULT +UND 
  +1: 0+10000190 +0 SECTION LOCAL +DEFAULT +1 
@@ -92,34 +91,33 @@ Symbol table '\.symtab' contains 45 entries:
  +11: 0+10010448 +0 SECTION LOCAL +DEFAULT +11 
  +12: 0+10010448 +0 SECTION LOCAL +DEFAULT +12 
  +13: 0+10010598 +0 SECTION LOCAL +DEFAULT +13 
- +14: 0+100105a0 +0 SECTION LOCAL +DEFAULT +14 
+ +14: 0+100105f0 +0 SECTION LOCAL +DEFAULT +14 
  +15: 0+100105f0 +0 SECTION LOCAL +DEFAULT +15 
- +16: 0+100105f0 +0 SECTION LOCAL +DEFAULT +16 
- +17: 0+10010620 +0 SECTION LOCAL +DEFAULT +17 
+ +16: 0+10010620 +0 SECTION LOCAL +DEFAULT +16 
+ +17: 0+ +0 SECTION LOCAL +DEFAULT +17 
  +18: 0+ +0 SECTION LOCAL +DEFAULT +18 
  +19: 0+ +0 SECTION LOCAL +DEFAULT +19 
- +20: 0+ +0 SECTION LOCAL +DEFAULT +20 
- +21: 0+ +0 TLS +LOCAL +DEFAULT +10 gd4
- +22: 0+8 +0 TLS +LOCAL +DEFAULT +10 ld4
- +23: 0+10 +0 TLS +LOCAL +DEFAULT +10 ld5
- +24: 0+18 +0 TLS +LOCAL +DEFAULT +10 ld6
- +25: 0+20 +0 TLS +LOCAL +DEFAULT +10 ie4
- +26: 0+28 +0 TLS +LOCAL +DEFAULT +10 le4
- +27: 0+30 +0 TLS +LOCAL +DEFAULT +10 le5
- +28: 0+100105e8 +0 NOTYPE +LOCAL +DEFAULT +14 \.Lie0
- +29: 0+10010448 +0 OBJECT +GLOBAL DEFAULT +ABS _DYNAMIC
- +30: 0+ +0 TLS +GLOBAL DEFAULT +UND gd
- +31: 0+60 +0 TLS +GLOBAL DEFAULT +11 le0
- +32: 0+ +0 NOTYPE +GLOBAL DEFAULT +UND __tls_get_addr
- +33: 0+ +0 FUNC +GLOBAL DEFAULT +UND \.__tls_get_addr
- +34: 0+40 +0 TLS +GLOBAL DEFAULT +11 ld0
- +35: 0+68 +0 TLS +GLOBAL DEFAULT +11 le1
- +36: 0+ +0 TLS +GLOBAL DEFAULT +UND ld
- +37: 0+1000036c +0 NOTYPE +GLOBAL DEFAULT +7 _start
- +38: 0+50 +0 TLS +GLOBAL DEFAULT +11 ld2
- +39: 0+48 +0 TLS +GLOBAL DEFAULT +11 ld1
- +40: 0+100105f0 +0 NOTYPE +GLOBAL DEFAULT +ABS __bss_start
- +41: 0+100105f0 +0 NOTYPE +GLOBAL DEFAULT +ABS _edata
- +42: 0+10010620 +0 NOTYPE +GLOBAL DEFAULT +ABS _end
- +43: 0+38 +0 TLS +GLOBAL DEFAULT +11 gd0
- +44: 0+58 +0 TLS +GLOBAL DEFAULT +11 ie0
+ +20: 0+ +0 TLS +LOCAL +DEFAULT +10 gd4
+ +21: 0+8 +0 TLS +LOCAL +DEFAULT +10 ld4
+ +22: 0+10 +0 TLS +LOCAL +DEFAULT +10 ld5
+ +23: 0+18 +0 TLS +LOCAL +DEFAULT +10 ld6
+ +24: 0+20 +0 TLS +LOCAL +DEFAULT +10 ie4
+ +25: 0+28 +0 TLS +LOCAL +DEFAULT +10 le4
+ +26: 0+30 +0 TLS +LOCAL +DEFAULT +10 le5
+ +27: 0+100105e8 +0 NOTYPE +LOCAL +DEFAULT +13 \.Lie0
+ +28: 0+10010448 +0 OBJECT +GLOBAL DEFAULT +ABS _DYNAMIC
+ +29: 0+ +0 TLS +GLOBAL DEFAULT +UND gd
+ +30: 0+60 +0 TLS +GLOBAL DEFAULT +11 le0
+ +31: 0+ +0 NOTYPE +GLOBAL DEFAULT +UND __tls_get_addr
+ +32: 0+ +0 FUNC +GLOBAL DEFAULT +UND \.__tls_get_addr
+ +33: 0+40 +0 TLS +GLOBAL DEFAULT +11 ld0
+ +34: 0+68 +0 TLS +GLOBAL DEFAULT +11 le1
+ +35: 0+ +0 TLS +GLOBAL DEFAULT +UND ld
+ +36: 0+1000036c +0 NOTYPE +GLOBAL DEFAULT +7 _start
+ +37: 0+50 +0 TLS +GLOBAL DEFAULT +11 ld2
+ +38: 0+48 +0 TLS +GLOBAL DEFAULT +11 ld1
+ +39: 0+100105f0 +0 NOTYPE +GLOBAL DEFAULT +ABS __bss_start
+ +40: 0+100105f0 +0 NOTYPE +GLOBAL DEFAULT +ABS _edata
+ +41: 0+10010620 +0 NOTYPE +GLOBAL DEFAULT +ABS _end
+ +42: 0+38 +0 TLS +GLOBAL DEFAULT +11 gd0
+ +43: 0+58 +0 TLS +GLOBAL DEFAULT +11 ie0
