@@ -1,6 +1,6 @@
 .*: Assembler messages:
 .*:2: Warning: Section symbols are already global
-GAS LISTING .*
+.*GAS.*
 
 
    1              	          .section A

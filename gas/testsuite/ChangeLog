@@ -1,5 +1,10 @@
 2001-06-07  H.J. Lu  <hjl@gnu.org>
 
+	* gas/elf/section2.l: Match ".*GAS.*" instead of
+	"GAS LISTING .*".
+
+2001-06-07  H.J. Lu  <hjl@gnu.org>
+
 	* gas/mips/mips.exp: Set xfail for "lineno" on Linux/mips.
 
 2001-06-07  H.J. Lu  <hjl@gnu.org>
