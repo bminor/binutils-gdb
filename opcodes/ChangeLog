@@ -1,3 +1,7 @@
+2002-02-19  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* s390-dis.c (init_disasm): Use renamed architecture defines.
+
 2002-02-19  matthew green  <mrg@redhat.com>
 
 	* ppc-opc.c (powerpc_dialect): Fix comment; BookE is not Motorola
