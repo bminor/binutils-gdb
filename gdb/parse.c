@@ -912,12 +912,13 @@ _initialize_parse ()
     xmalloc (type_stack_size * sizeof (*type_stack));
 
   msym_text_symbol_type =
-    init_type (TYPE_CODE_FUNC, 1, 0, "<text variable without -g>", NULL);
+    init_type (TYPE_CODE_FUNC, 1, 0, "<text variable, no debug info>", NULL);
   TYPE_TARGET_TYPE (msym_text_symbol_type) = builtin_type_int;
   msym_data_symbol_type =
     init_type (TYPE_CODE_INT, TARGET_INT_BIT / HOST_CHAR_BIT, 0,
-	       "<data variable without -g>", NULL);
+	       "<data variable, no debug info>", NULL);
   msym_unknown_symbol_type =
-    init_type (TYPE_CODE_INT, 1, 0, "<unknown segment variable without -g>",
+    init_type (TYPE_CODE_INT, 1, 0,
+	       "<variable (not text or data), no debug info>",
 	       NULL);
 }
