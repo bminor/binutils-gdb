@@ -5,10 +5,11 @@
 #else
 #if defined (sparc) && defined (sun)
 #include <alloca.h>
-#else
+#endif
 extern char *alloca ();
 #endif
-#endif
+
+#include <sys/types.h>			/* Needed by dirent.h */
 
 #if defined (USG) && defined (TIOCGWINSZ)
 #include <sys/stream.h>

@@ -1,4 +1,4 @@
-/* System-dependent stuff, for ``normal'' systems */
+/* System-dependent stuff, for Sony NEwS systems */
 
 #ifdef __GNUC__
 #define alloca __builtin_alloca

@@ -1,3 +1,8 @@
+Fri Nov 22 09:02:32 1991  John Gilmore  (gnu at cygnus.com)
+
+	* sysdep-norm.h, sysdep-aix.h:  Add <sys/types.h>, which POSIX
+	requires to make <dirent.h> work.  Improve Sun alloca decl.
+
 Thu Nov 21 18:48:08 1991  John Gilmore  (gnu at cygnus.com)
 
 	* Makefile.in:  Clean up ../glob/tilde.c -> tilde.o path.
