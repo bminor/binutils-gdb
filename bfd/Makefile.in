@@ -67,7 +67,7 @@ SUBDIRS = doc
 TARGETLIB = libbfd.a
 
 # bfd.h goes here, for now
-BFD_H = ../include/bfd.h
+BFD_H = bfd.h
 
 BFD_LIBS = libbfd.o opncls.o bfd.o archive.o targets.o cache.o \
 	archures.o core.o section.o format.o syms.o reloc.o init.o \
@@ -311,24 +311,16 @@ gen-aout: $(srcdir)/gen-aout.c Makefile
 
 BFDIN_H= $(srcdir)/bfd-in2.h
 
-bfd.h : $(BFD_H) ; @true
 $(BFD_H): stmp-bfd.h ; @true
 
-# The funny stuff here with the generated script is because I haven't
-# figured out how to get sed to generate the correct sed script.  If you
-# can get it to work, portably, please let me know!
+# The file ../include/bfd.h is from earlier attempts to get this right.
+# If the file is still there, kill it.
 stmp-bfd.h : $(BFDIN_H) Makefile
-	rm -f sysdep.sed nsysdep.h
-	echo "exec sed -e '/^\\$$/d' \\" > sysdep.sed
-	-grep -n '#include.*hosts/' sysdep.h \
-	    | sed -e 's|\([0-9]*\):.*hosts/\(.*\)"| -e "\1r $(srcdir)/hosts/\2" -e \1d \\|' \
-	    >> sysdep.sed
-	echo "" >> sysdep.sed
-	sh sysdep.sed < sysdep.h > nsysdep.h
-	sed -e 's/@WORDSIZE@/$(WORDSIZE)/' \
-	    -e '/INSERT SYSDEP HERE/ r nsysdep.h' < $(BFDIN_H) > bfd.h2
-	test -d ../include || mkdir ../include
+	rm -f bfd.h2 64 ../include/bfd.h
+	-grep HOST_64_BIT sysdep.h > 64
+	sed -e 's/@WORDSIZE@/$(WORDSIZE)/' -e '/64-bit.*sysdep.h/ r 64' < $(BFDIN_H) > bfd.h2
 	$(srcdir)/../move-if-change bfd.h2 $(BFD_H)
+	rm -f 64
 	touch stmp-bfd.h
 
 # Could really use a "copy-if-change"...
