@@ -1,3 +1,18 @@
+Tue Mar  2 17:57:56 1993  Fred Fish  (fnf@cygnus.com)
+
+	* c-exp.y (parse_number):  Change high_bit to unsigned.
+	* demangle.c:  Change all references to cfront to ARM, since the
+	actual algorithm is the one specified in the Annotated Reference
+	Manual.  This was confusing users into thinking that full cfront
+	support was implemented.
+	* dwarfread.c (CFRONT_PRODUCER):  Remove, was never really used.
+	* eval.c (evaluate_subexp):  For STRUCTOP_PTR pass the arg type
+	directly to lookup_struct_elt_type, which will do the
+	dereferencing itself.
+	* gdbtypes.c (lookup_struct_elt_type):  Expand comments.  Fix
+	NULL dereferencing bug for unnamed structs, comment out
+	questionable code.
+	
 Mon Mar  1 17:54:41 1993  John Gilmore  (gnu@cygnus.com)
 
 	* coffread.c (process_coff_symbol):  Change PCC argument correction

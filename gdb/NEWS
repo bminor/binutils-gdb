@@ -6,6 +6,12 @@
 (This is a prototype to remind us of things that should be announced
 in the next release...)
 
+'Cfront' style demangling has had its name changed to 'ARM' style, to
+emphasize that it was written from the specifications in the Annotated
+Reference Manual, not to be compatible with AT&T cfront.  Despite disclaimers,
+it still generated too much confusion with users attempting to use gdb with
+AT&T cfront.
+
 H8/300 simulator
 H8/500 simulator (probably by the next release)
 Z8000 family simulator

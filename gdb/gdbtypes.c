@@ -691,6 +691,12 @@ lookup_template_type (name, type, block)
 }
 
 /* Given a type TYPE, lookup the type of the component of type named NAME.  
+
+   TYPE can be either a struct or union, or a pointer or reference to a struct or
+   union.  If it is a pointer or reference, its target type is automatically used.
+   Thus '.' and '->' are interchangable, as specified for the definitions of the
+   expression element types STRUCTOP_STRUCT and STRUCTOP_PTR.
+
    If NOERR is nonzero, return zero if NAME is not suitably defined.
    If NAME is the name of a baseclass type, return that type.  */
 
@@ -701,6 +707,7 @@ lookup_struct_elt_type (type, name, noerr)
     int noerr;
 {
   int i;
+  char *typename;
 
   if (TYPE_CODE (type) == TYPE_CODE_PTR ||
       TYPE_CODE (type) == TYPE_CODE_REF)
@@ -718,8 +725,15 @@ lookup_struct_elt_type (type, name, noerr)
 
   check_stub_type (type);
 
-  if (STREQ (type_name_no_tag (type), name))
+#if 0
+  /* FIXME:  This change put in by Michael seems incorrect for the case where
+     the structure tag name is the same as the member name.  I.E. when doing
+     "ptype bell->bar" for "struct foo { int bar; int foo; } bell;"
+     Disabled by fnf. */
+  typename = type_name_no_tag (type);
+  if (typename != NULL && STREQ (typename, name))
     return type;
+#endif
 
   for (i = TYPE_NFIELDS (type) - 1; i >= TYPE_N_BASECLASSES (type); i--)
     {

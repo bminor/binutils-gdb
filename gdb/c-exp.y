@@ -962,7 +962,7 @@ parse_number (p, len, parsed_float, putithere)
   register int base = input_radix;
   int unsigned_p = 0;
   int long_p = 0;
-  LONGEST high_bit;
+  unsigned LONGEST high_bit;
   struct type *signed_type;
   struct type *unsigned_type;
 
@@ -1047,13 +1047,13 @@ parse_number (p, len, parsed_float, putithere)
 
     if ((TARGET_INT_BIT != TARGET_LONG_BIT && (n >> TARGET_INT_BIT)) || long_p)
       {
-         high_bit = ((LONGEST)1) << (TARGET_LONG_BIT-1);
+         high_bit = ((unsigned LONGEST)1) << (TARGET_LONG_BIT-1);
 	 unsigned_type = builtin_type_unsigned_long;
 	 signed_type = builtin_type_long;
       }
     else 
       {
-	 high_bit = ((LONGEST)1) << (TARGET_INT_BIT-1);
+	 high_bit = ((unsigned LONGEST)1) << (TARGET_INT_BIT-1);
 	 unsigned_type = builtin_type_unsigned_int;
 	 signed_type = builtin_type_int;
       }    

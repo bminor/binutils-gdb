@@ -197,10 +197,6 @@ typedef unsigned int DIE_REF;	/* Reference to a DIE */
 #define LCC_PRODUCER "NCR C/C++"
 #endif
 
-#ifndef CFRONT_PRODUCER
-#define CFRONT_PRODUCER "CFRONT "	/* A wild a** guess... */
-#endif
-
 /* start-sanitize-chill */
 #ifndef CHILL_PRODUCER
 #define CHILL_PRODUCER "GNU Chill "
@@ -1916,7 +1912,6 @@ handle_producer (producer)
      is not auto.  We also leave the demangling style alone if we find a
      gcc (cc1) producer, as opposed to a g++ (cc1plus) producer. */
 
-#if 1 /* Works, but is experimental.  -fnf */
   if (AUTO_DEMANGLING)
     {
       if (STREQN (producer, GPLUS_PRODUCER, strlen (GPLUS_PRODUCER)))
@@ -1927,12 +1922,7 @@ handle_producer (producer)
 	{
 	  set_demangling_style (LUCID_DEMANGLING_STYLE_STRING);
 	}
-      else if (STREQN (producer, CFRONT_PRODUCER, strlen (CFRONT_PRODUCER)))
-	{
-	  set_demangling_style (CFRONT_DEMANGLING_STYLE_STRING);
-	}
     }
-#endif
 }
 
 
