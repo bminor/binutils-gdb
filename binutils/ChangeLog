@@ -1,5 +1,10 @@
 Thu Apr 21 12:12:26 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* objdump.c (_DUMMY_NAME_): Don't define.
+	(display_target_list): Use tmpnam to get a file name rather than
+	using _DUMMY_NAME_.  Unlink it when done.
+	(display_info_table): Likewise.
+
 	* nlmconv.c (secsec): New static variable.
 	(main): Create .nlmsections section in output BFD.  Store
 	information about it in sections header.

@@ -1322,13 +1322,6 @@ dump_reloc_set (abfd, relpp, relcount)
     }
 }
 
-/* A file to open each BFD on.  It will never actually be written to.  */
-#ifdef __GO32__
-#define _DUMMY_NAME_ "##dummy"
-#else
-#define _DUMMY_NAME_ "/dev/null"
-#endif
-
 /* The length of the longest architecture name + 1.  */
 #define LONGEST_ARCH sizeof("rs6000:6000")
 
@@ -1338,20 +1331,24 @@ dump_reloc_set (abfd, relpp, relcount)
 static void
 display_target_list ()
 {
+  extern char *tmpnam ();
   extern bfd_target *bfd_target_vector[];
+  char *dummy_name;
   int t;
 
+  dummy_name = tmpnam ((char *) NULL);
   for (t = 0; bfd_target_vector[t]; t++)
     {
       int a;
       bfd_target *p = bfd_target_vector[t];
-      bfd *abfd = bfd_openw (_DUMMY_NAME_, p->name);
+      bfd *abfd = bfd_openw (dummy_name, p->name);
 
       /* It *is* possible that bfd_openw might fail; avoid the
 	 tragic consequences that would otherwise ensue. */
       if (abfd == NULL)
 	{
-	  bfd_nonfatal (_DUMMY_NAME_);
+	  bfd_nonfatal (dummy_name);
+	  unlink (dummy_name);
 	  return;
 	}
       bfd_set_format (abfd, bfd_object);
@@ -1363,6 +1360,7 @@ display_target_list ()
 	  printf ("  %s\n",
 		  bfd_printable_arch_mach ((enum bfd_architecture) a, 0));
     }
+  unlink (dummy_name);
 }
 
 /* Print a table showing which architectures are supported for entries
@@ -1374,8 +1372,10 @@ display_info_table (first, last)
      int first;
      int last;
 {
-  int t, a;
   extern bfd_target *bfd_target_vector[];
+  extern char *tmpnam ();
+  int t, a;
+  char *dummy_name;
 
   /* Print heading of target names.  */
   printf ("\n%*s", (int) LONGEST_ARCH, " ");
@@ -1383,6 +1383,7 @@ display_info_table (first, last)
     printf ("%s ", bfd_target_vector[t]->name);
   putchar ('\n');
 
+  dummy_name = tmpnam ((char *) NULL);
   for (a = (int) bfd_arch_obscure + 1; a < (int) bfd_arch_last; a++)
     if (strcmp (bfd_printable_arch_mach (a, 0), "UNKNOWN!") != 0)
       {
@@ -1391,12 +1392,13 @@ display_info_table (first, last)
 	for (t = first; t++ < last && bfd_target_vector[t];)
 	  {
 	    bfd_target *p = bfd_target_vector[t];
-	    bfd *abfd = bfd_openw (_DUMMY_NAME_, p->name);
+	    bfd *abfd = bfd_openw (dummy_name, p->name);
 
 	    /* Just in case the open failed somehow. */
 	    if (abfd == NULL)
 	      {
-		bfd_nonfatal (_DUMMY_NAME_);
+		bfd_nonfatal (dummy_name);
+		unlink (dummy_name);
 		return;
 	      }
 	    bfd_set_format (abfd, bfd_object);
@@ -1412,6 +1414,7 @@ display_info_table (first, last)
 	  }
 	putchar ('\n');
       }
+  unlink (dummy_name);
 }
 
 /* Print tables of all the target-architecture combinations that
