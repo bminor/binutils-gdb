@@ -1,3 +1,12 @@
+start-sanitize-arc
+Sat Apr 29 21:44:57 1995  Doug Evans  <dje@chestnut.cygnus.com>
+
+	* config/tc-arc.c (delay_slot_type): Deleted.
+	(md_assemble): Remember suffixes seen.
+	Issue warnings for 8 byte jump with delay slot, and conditional
+	branch immediately following set of condition codes.
+end-sanitize-arc
+
 Thu Apr 27 20:07:33 1995  Doug Evans  <dje@canuck.cygnus.com>
 
 	* Makefile.in (RUNTEST): Use one in srcdir if present.
