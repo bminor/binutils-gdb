@@ -353,7 +353,6 @@ static reloc_howto_type ia64_howto_table[] =
     IA64_HOWTO (R_IA64_LTOFF_FPTR64MSB, "LTOFF_FPTR64MSB", 4, false, true),
     IA64_HOWTO (R_IA64_LTOFF_FPTR64LSB, "LTOFF_FPTR64LSB", 4, false, true),
 
-    IA64_HOWTO (R_IA64_SEGBASE,	    "SEGBASE",	   4, false, true),
     IA64_HOWTO (R_IA64_SEGREL32MSB, "SEGREL32MSB", 2, false, true),
     IA64_HOWTO (R_IA64_SEGREL32LSB, "SEGREL32LSB", 2, false, true),
     IA64_HOWTO (R_IA64_SEGREL64MSB, "SEGREL64MSB", 4, false, true),
@@ -380,8 +379,6 @@ static reloc_howto_type ia64_howto_table[] =
 
     IA64_HOWTO (R_IA64_IPLTMSB,	    "IPLTMSB",	   4, false, true),
     IA64_HOWTO (R_IA64_IPLTLSB,	    "IPLTLSB",	   4, false, true),
-    IA64_HOWTO (R_IA64_EPLTMSB,	    "EPLTMSB",	   4, false, true),
-    IA64_HOWTO (R_IA64_EPLTLSB,	    "EPLTLSB",	   4, false, true),
     IA64_HOWTO (R_IA64_COPY,	    "COPY",	   4, false, true),
     IA64_HOWTO (R_IA64_LTOFF22X,    "LTOFF22X",	   0, false, true),
     IA64_HOWTO (R_IA64_LDXMOV,	    "LDXMOV",	   0, false, true),
@@ -476,7 +473,6 @@ elfNN_ia64_reloc_type_lookup (abfd, bfd_code)
     case BFD_RELOC_IA64_LTOFF_FPTR64MSB: rtype = R_IA64_LTOFF_FPTR64MSB; break;
     case BFD_RELOC_IA64_LTOFF_FPTR64LSB: rtype = R_IA64_LTOFF_FPTR64LSB; break;
 
-    case BFD_RELOC_IA64_SEGBASE:	rtype = R_IA64_SEGBASE; break;
     case BFD_RELOC_IA64_SEGREL32MSB:	rtype = R_IA64_SEGREL32MSB; break;
     case BFD_RELOC_IA64_SEGREL32LSB:	rtype = R_IA64_SEGREL32LSB; break;
     case BFD_RELOC_IA64_SEGREL64MSB:	rtype = R_IA64_SEGREL64MSB; break;
@@ -499,8 +495,6 @@ elfNN_ia64_reloc_type_lookup (abfd, bfd_code)
 
     case BFD_RELOC_IA64_IPLTMSB:	rtype = R_IA64_IPLTMSB; break;
     case BFD_RELOC_IA64_IPLTLSB:	rtype = R_IA64_IPLTLSB; break;
-    case BFD_RELOC_IA64_EPLTMSB:	rtype = R_IA64_EPLTMSB; break;
-    case BFD_RELOC_IA64_EPLTLSB:	rtype = R_IA64_EPLTLSB; break;
     case BFD_RELOC_IA64_COPY:		rtype = R_IA64_COPY; break;
     case BFD_RELOC_IA64_LTOFF22X:	rtype = R_IA64_LTOFF22X; break;
     case BFD_RELOC_IA64_LDXMOV:		rtype = R_IA64_LDXMOV; break;
@@ -1864,6 +1858,14 @@ elfNN_ia64_check_relocs (abfd, info, sec, relocs)
 	  dynrel_type = R_IA64_DIR64LSB;
 	  break;
 
+	case R_IA64_IPLTMSB:
+	case R_IA64_IPLTLSB:
+	  /* Shared objects will always need at least a REL relocation.  */
+	  if (info->shared || maybe_dynamic)
+	    need_entry = NEED_DYNREL;
+	  dynrel_type = R_IA64_IPLTLSB;
+	  break;
+
 	case R_IA64_PCREL22:
 	case R_IA64_PCREL64I:
 	case R_IA64_PCREL32MSB:
@@ -2184,6 +2186,8 @@ allocate_dynrel_entries (dyn_i, data)
 
   for (rent = dyn_i->reloc_entries; rent; rent = rent->next)
     {
+      int count = rent->count;
+
       switch (rent->type)
 	{
 	case R_IA64_FPTR64LSB:
@@ -2201,8 +2205,18 @@ allocate_dynrel_entries (dyn_i, data)
 	  if (!dynamic_symbol && !shared)
 	    continue;
 	  break;
+	case R_IA64_IPLTLSB:
+	  if (!dynamic_symbol && !shared)
+	    continue;
+	  /* Use two REL relocations for IPLT relocations
+	     against local symbols.  */
+	  if (!dynamic_symbol)
+	    count *= 2;
+	  break;
+	default:
+	  abort ();
 	}
-      rent->srel->_raw_size += sizeof (ElfNN_External_Rela) * rent->count;
+      rent->srel->_raw_size += sizeof (ElfNN_External_Rela) * count;
     }
 
   /* Take care of the GOT and PLT relocations.  */
@@ -2639,25 +2653,6 @@ elfNN_ia64_install_value (abfd, hit_addr, val, r_type)
       break;
 
       /* Unsupported / Dynamic relocations.  */
-
-    case R_IA64_REL32MSB:
-    case R_IA64_REL32LSB:
-    case R_IA64_REL64MSB:
-    case R_IA64_REL64LSB:
-
-    case R_IA64_IPLTMSB:
-    case R_IA64_IPLTLSB:
-    case R_IA64_EPLTMSB:
-    case R_IA64_EPLTLSB:
-    case R_IA64_COPY:
-
-    case R_IA64_SEGBASE:
-
-    case R_IA64_TPREL22:
-    case R_IA64_TPREL64MSB:
-    case R_IA64_TPREL64LSB:
-    case R_IA64_LTOFF_TP22:
-
     default:
       return bfd_reloc_notsupported;
     }
@@ -2937,10 +2932,11 @@ set_pltoff_entry (abfd, info, dyn_i, value, is_plt)
   if ((! dyn_i->want_plt || is_plt)
       && !dyn_i->pltoff_done)
     {
+      bfd_vma gp = _bfd_get_gp_value (abfd);
+
       /* Fill in the function descriptor.  */
       bfd_put_64 (abfd, value, pltoff_sec->contents + dyn_i->pltoff_offset);
-      bfd_put_64 (abfd, _bfd_get_gp_value (abfd),
-		  pltoff_sec->contents + dyn_i->pltoff_offset + 8);
+      bfd_put_64 (abfd, gp, pltoff_sec->contents + dyn_i->pltoff_offset + 8);
 
       /* Install dynamic relocations if needed.  */
       if (!is_plt && info->shared)
@@ -2955,11 +2951,11 @@ set_pltoff_entry (abfd, info, dyn_i, value, is_plt)
 	  elfNN_ia64_install_dyn_reloc (abfd, NULL, pltoff_sec,
 					ia64_info->rel_pltoff_sec,
 					dyn_i->pltoff_offset,
-					dyn_r_type, 0, 0);
+					dyn_r_type, 0, value);
 	  elfNN_ia64_install_dyn_reloc (abfd, NULL, pltoff_sec,
 					ia64_info->rel_pltoff_sec,
 					dyn_i->pltoff_offset + 8,
-					dyn_r_type, 0, 0);
+					dyn_r_type, 0, gp);
 	}
 
       dyn_i->pltoff_done = 1;
@@ -3366,6 +3362,7 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	    {
 	      unsigned int dyn_r_type;
 	      long dynindx;
+	      bfd_vma addend;
 
 	      BFD_ASSERT (srel != NULL);
 
@@ -3373,7 +3370,11 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 		 matching RELATIVE relocation.  */
 	      dyn_r_type = r_type;
 	      if (dynamic_symbol_p)
-		dynindx = h->dynindx;
+		{
+		  dynindx = h->dynindx;
+		  addend = rel->r_addend;
+		  value = 0;
+		}
 	      else
 		{
 		  switch (r_type)
@@ -3405,11 +3406,12 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 		      continue;
 		    }
 		  dynindx = 0;
+		  addend = value;
 		}
 
 	      elfNN_ia64_install_dyn_reloc (output_bfd, info, input_section,
 					    srel, rel->r_offset, dyn_r_type,
-					    dynindx, rel->r_addend);
+					    dynindx, addend);
 	    }
 	  /* FALLTHRU */
 
@@ -3678,23 +3680,51 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	  r = elfNN_ia64_install_value (output_bfd, hit_addr, value, r_type);
 	  break;
 
-	case R_IA64_SEGBASE:
-
-	case R_IA64_REL32MSB:
-	case R_IA64_REL32LSB:
-	case R_IA64_REL64MSB:
-	case R_IA64_REL64LSB:
-
 	case R_IA64_IPLTMSB:
 	case R_IA64_IPLTLSB:
-	case R_IA64_EPLTMSB:
-	case R_IA64_EPLTLSB:
-	case R_IA64_COPY:
+	  /* Install a dynamic relocation for this reloc.  */
+	  if ((dynamic_symbol_p || info->shared)
+	      && (input_section->flags & SEC_ALLOC) != 0)
+	    {
+	      long dynindx;
 
-	case R_IA64_TPREL22:
-	case R_IA64_TPREL64MSB:
-	case R_IA64_TPREL64LSB:
-	case R_IA64_LTOFF_TP22:
+	      BFD_ASSERT (srel != NULL);
+
+	      /* If we don't need dynamic symbol lookup, install two
+		 RELATIVE relocations.  */
+	      if (! dynamic_symbol_p)
+		{
+		  unsigned int dyn_r_type;
+		
+		  if (r_type == R_IA64_IPLTMSB)
+		    dyn_r_type = R_IA64_REL64MSB;
+		  else
+		    dyn_r_type = R_IA64_REL64LSB;
+
+		  elfNN_ia64_install_dyn_reloc (output_bfd, info,
+						input_section,
+						srel, rel->r_offset,
+						dyn_r_type, 0, value);
+		  elfNN_ia64_install_dyn_reloc (output_bfd, info,
+						input_section,
+						srel, rel->r_offset + 8,
+						dyn_r_type, 0, gp_val);
+		}
+	      else
+		elfNN_ia64_install_dyn_reloc (output_bfd, info, input_section,
+					      srel, rel->r_offset, r_type,
+					      h->dynindx, rel->r_addend);
+	    }
+
+	  if (r_type == R_IA64_IPLTMSB)
+	    r_type = R_IA64_DIR64MSB;
+	  else
+	    r_type = R_IA64_DIR64LSB;
+	  elfNN_ia64_install_value (output_bfd, hit_addr, value, r_type);
+	  r = elfNN_ia64_install_value (output_bfd, hit_addr + 8, gp_val,
+					r_type);
+	  break;
+
 	default:
 	  r = bfd_reloc_notsupported;
 	  break;

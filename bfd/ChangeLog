@@ -1,3 +1,16 @@
+2000-11-16  Richard Henderson  <rth@redhat.com>
+
+	* elfxx-ia64.c (elfNN_ia64_check_relocs): Handle IPLT relocs.
+	(allocate_dynrel_entries): Likewise.
+	(elfNN_ia64_relocate_section): Likewise.  Set REL addends correctly.
+	(set_pltoff_entry): Likewise.
+	(ia64_howto_table): Remove R_IA64_SEGBASE, and R_IA64_EPLT[ML]SB
+	(elfNN_ia64_reloc_type_lookup): Likewise.
+	(elfNN_ia64_install_value): Likewise.
+	(elfNN_ia64_relocate_section): Likewise.
+	* reloc.c (BFD_RELOC_IA64_SEGBASE): Remove.
+	(BFD_RELOC_IA64_EPLTMSB, BFD_RELOC_IA64_EPLTLSB): Remove.
+
 2000-11-16  Kazu Hirata  <kazu@hxi.com>
 
 	* cpu-a29k.c: Fix formatting.
