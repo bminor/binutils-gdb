@@ -1,3 +1,9 @@
+Tue Jan 12 16:54:37 1999  Edith Epstein  <eepstein@sophia.cygnus.com>
+	
+	* gdb.texinfo (Shell Commands): fixed messages about shell usage. 
+	  HP was insisting on C shell. Now all UNIX platforms have the 
+	  same message. removed @ifset HPPA and @ifclear HPPA
+
 Wed Jan  6 11:55:34 1999  David Taylor  <taylor@texas.cygnus.com>
 
 	The following changes were made by Edith Epstein

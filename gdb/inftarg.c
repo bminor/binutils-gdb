@@ -571,7 +571,7 @@ child_create_inferior (exec_file, allargs, env)
   else
     shell_file = tryname;
 
-  fork_inferior (exec_file, allargs, env, ptrace_me, ptrace_him, pre_fork_inferior, shell_file);
+  fork_inferior (exec_file, allargs, env, ptrace_me, ptrace_him, pre_fork_inferior, NULL);
 #else
  fork_inferior (exec_file, allargs, env, ptrace_me, ptrace_him, NULL, NULL);
 #endif
