@@ -1,3 +1,7 @@
+2002-02-18  Daniel Jacobowitz  <drow@mvista.com>
+
+	* config/obj-coff.h: Check !target_big_endian, not shl, for coff-sh.
+
 2002-02-16  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* doc/as.texinfo (Machine Dependencies): Fix typo: MMIX used
