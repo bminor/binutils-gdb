@@ -1,3 +1,8 @@
+Mon Jan  6 11:15:14 1997  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* symtab.c (fixup_symbol_section):  Handle NULL symbols without
+	crashing.
+
 Fri Jan  3 12:08:16 1997  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* Makefile.in configure configure.in:  Remove ENABLE_CLIBS,
