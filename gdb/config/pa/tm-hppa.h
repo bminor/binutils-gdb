@@ -90,12 +90,6 @@ extern int hppa_pc_requires_run_before_use (CORE_ADDR pc);
       (buf)[sizeof(CORE_ADDR) -1] &= ~0x3; \
   } while (0)
 
-/* Define DEPRECATED_DO_REGISTERS_INFO() to do machine-specific
-   formatting of register dumps. */
-
-#define DEPRECATED_DO_REGISTERS_INFO(_regnum, fp) pa_do_registers_info (_regnum, fp)
-extern void pa_do_registers_info (int, int);
-
 /* PA specific macro to see if the current instruction is nullified. */
 #ifndef INSTRUCTION_NULLIFIED
 extern int hppa_instruction_nullified (void);
