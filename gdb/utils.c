@@ -81,6 +81,11 @@ extern PTR realloc ();
 #ifdef NEED_DECLARATION_FREE
 extern void free ();
 #endif
+/* Actually, we'll never have the decl, since we don't define _GNU_SOURCE.  */
+#if defined(HAVE_CANONICALIZE_FILE_NAME) \
+    && defined(NEED_DECLARATION_CANONICALIZE_FILE_NAME)
+extern char *canonicalize_file_name (const char *);
+#endif
 
 #undef XMALLOC
 #define XMALLOC(TYPE) ((TYPE*) xmalloc (sizeof (TYPE)))
@@ -2532,20 +2537,28 @@ string_to_core_addr (const char *my_string)
 char *
 gdb_realpath (const char *filename)
 {
-#ifdef HAVE_CANONICALIZE_FILE_NAME
-  return canonicalize_file_name (filename);
-#elif defined (HAVE_REALPATH)
-#if defined (PATH_MAX)
+#if defined(HAVE_REALPATH)
+# if defined (PATH_MAX)
   char buf[PATH_MAX];
-#elif defined (MAXPATHLEN)
+#  define USE_REALPATH
+# elif defined (MAXPATHLEN)
   char buf[MAXPATHLEN];
-#elif defined (HAVE_UNISTD_H) && defined(HAVE_ALLOCA)
+#  define USE_REALPATH
+# elif defined (HAVE_UNISTD_H) && defined(HAVE_ALLOCA)
   char *buf = alloca ((size_t)pathconf ("/", _PC_PATH_MAX));
-#else
-#error "Neither PATH_MAX nor MAXPATHLEN defined"
-#endif
+#  define USE_REALPATH
+# endif
+#endif /* HAVE_REALPATH */
+
+#if defined(USE_REALPATH)
   char *rp = realpath (filename, buf);
   return xstrdup (rp ? rp : filename);
+#elif defined(HAVE_CANONICALIZE_FILE_NAME)
+  char *rp = canonicalize_file_name (filename);
+  if (rp == NULL)
+    return xstrdup (filename);
+  else
+    return rp;
 #else
   return xstrdup (filename);
 #endif
