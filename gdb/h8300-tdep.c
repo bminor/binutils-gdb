@@ -829,14 +829,14 @@ _initialize_h8300m (void)
 void
 h8300_print_register_hook (int regno)
 {
-  if (regno == 8)
+  if (regno == CCR_REGNUM)
     {
       /* CCR register */
       int C, Z, N, V;
-      unsigned char b[4];
+      unsigned char b[REGISTER_SIZE];
       unsigned char l;
       frame_register_read (selected_frame, regno, b);
-      l = b[REGISTER_VIRTUAL_SIZE (8) - 1];
+      l = b[REGISTER_VIRTUAL_SIZE (CCR_REGNUM) - 1];
       printf_unfiltered ("\t");
       printf_unfiltered ("I-%d - ", (l & 0x80) != 0);
       printf_unfiltered ("H-%d - ", (l & 0x20) != 0);

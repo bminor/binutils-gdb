@@ -1,3 +1,7 @@
+2002-05-17  Andrey Volkov <avolkov@transas.com>
+
+	* h8300-tdep.c: Change literal regnums to REGNO.
+	
 2002-05-17  Jim Blandy  <jimb@redhat.com>
 
 	* NEWS: Note addition of macro support.
