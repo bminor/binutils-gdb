@@ -1,3 +1,8 @@
+Mon Jul 13 13:55:42 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* expr.c (make_expr_symbol): Catch attempts to turn an O_big
+	expression into a symbol.
+
 Mon Jul 13 13:29:04 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* config/tc-i386.c (mode_from_disp_size): Change arg and return
