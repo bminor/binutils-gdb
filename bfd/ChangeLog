@@ -1,3 +1,7 @@
+Wed Apr 19 16:28:40 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* bfd-in2.h: Re-generate.
+
 Fri Apr  7 15:56:57 2000  Andrew Cagney  <cagney@b1.cygnus.com>
  
 	* configure.in (WARN_CFLAGS): Set to -W -Wall by default.  Add
