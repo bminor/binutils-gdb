@@ -128,6 +128,8 @@ RUNTEST_CXX = `if [ -f ../gcc/xgcc ] ; then \
 	        echo ../gcc/xgcc -B../gcc/; \
 	    else echo gcc; \
 	    fi`
+# FIX_ME: using ../gcc/xgcc breaks the cdtest. 
+RUNTEST_CXX = CXX
 RUNTEST_CXXFLAGS = $(CXXFLAGS)
 
 all:
