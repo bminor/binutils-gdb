@@ -1,3 +1,7 @@
+Mon Jul 26 08:09:19 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
+
+	* srec.c (srec_write_symbols):  Get CR LF in the right order.
+
 Mon Jul 26 02:08:41 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* hosts/vaxbsd.h: Include std-host.h.  Don't include <machine/param.h>.
