@@ -1,4 +1,7 @@
-Mon Jul 24 23:11:55 1995  Jeff Law  (law@snake.cs.utah.edu)
+Tue Jul 25 01:03:52 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* gdb.base/signals.exp: xfail test where "next" acts like
+	"continue" for lynx.
 
 	* gdb.base/interrupt.exp: xfail test for calling function while
 	inferior is asleep for lynx.
