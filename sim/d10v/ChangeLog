@@ -1,3 +1,8 @@
+Sat Sep 14 22:18:43 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* interp.c (do_2_short): If the instruction encodes jump->ins,
+	don't do the second instruction if the jump succeeds.
+
 Fri Sep 13 22:35:19 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* simops.c (OP_5F00): Use unknown traps to print all GPRs,

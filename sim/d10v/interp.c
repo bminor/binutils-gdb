@@ -158,12 +158,15 @@ do_long (ins)
   ins_type_counters[ (int)State.ins_type ]++;
   (h->ops->func)();
 }
+
 static void
 do_2_short (ins1, ins2, leftright)
      uint16 ins1, ins2;
      enum _leftright leftright;
 {
   struct hash_entry *h;
+  reg_t orig_pc = PC;
+
 #ifdef DEBUG
   if ((d10v_debug & DEBUG_INSTRUCTION) != 0)
     (*d10v_callback->printf_filtered) (d10v_callback, "do_2_short 0x%x (%s) -> 0x%x\n",
@@ -175,12 +178,18 @@ do_2_short (ins1, ins2, leftright)
   State.ins_type = (leftright == LEFT_FIRST) ? INS_LEFT : INS_RIGHT;
   ins_type_counters[ (int)State.ins_type ]++;
   (h->ops->func)();
-  h = lookup_hash (ins2, 0);
-  get_operands (h->ops, ins2);
-  State.ins_type = (leftright == LEFT_FIRST) ? INS_RIGHT : INS_LEFT;
-  ins_type_counters[ (int)State.ins_type ]++;
-  (h->ops->func)();
+
+  /* If the PC has changed (ie, a jump), don't do the second instruction */
+  if (orig_pc == PC)
+    {
+      h = lookup_hash (ins2, 0);
+      get_operands (h->ops, ins2);
+      State.ins_type = (leftright == LEFT_FIRST) ? INS_RIGHT : INS_LEFT;
+      ins_type_counters[ (int)State.ins_type ]++;
+      (h->ops->func)();
+    }
 }
+
 static void
 do_parallel (ins1, ins2)
      uint16 ins1, ins2;
