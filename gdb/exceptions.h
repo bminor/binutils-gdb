@@ -115,10 +115,13 @@ int exceptions_state_mc_action_iter_1 (void);
   */
 
 #define TRY_CATCH(EXCEPTION,MASK) \
-    for (EXCEPTIONS_SIGSETJMP \
-           (*exceptions_state_mc_init (uiout, &(EXCEPTION), (MASK))); \
-         exceptions_state_mc_action_iter (); ) \
-      while (exceptions_state_mc_action_iter_1 ())
+     { \
+       EXCEPTIONS_SIGJMP_BUF *buf = \
+	 exceptions_state_mc_init (uiout, &(EXCEPTION), (MASK)); \
+       EXCEPTIONS_SIGSETJMP (*buf); \
+     } \
+     while (exceptions_state_mc_action_iter ()) \
+       while (exceptions_state_mc_action_iter_1 ())
 
 /* *INDENT-ON* */
 

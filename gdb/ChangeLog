@@ -1,7 +1,11 @@
-2004-03-09  Joel Brobecker  <brobecker@adacore.com>
+2005-03-09  Corinna Vinschen  <vinschen@redhat.com>
 
-        * dwarf2read.c (dwarf_decode_lines): Use the complete filename
-        when creating include psymtabs.
+	* exceptions.h (TRY_CATCH): Define setjmp/sigsetjmp macro safe.
+
+2005-03-09  Joel Brobecker  <brobecker@adacore.com>
+
+	* dwarf2read.c (dwarf_decode_lines): Use the complete filename
+	when creating include psymtabs.
 
 2005-03-08  Mark Mitchell  <mark@codesourcery.com>
 
