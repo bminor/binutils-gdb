@@ -1,6 +1,6 @@
 /* Target-dependent code for GDB, the GNU debugger.
    Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   1998, 1999, 2000, 2001
+   1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -2514,9 +2514,9 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_bytes (gdbarch, off);
   set_gdbarch_register_byte (gdbarch, rs6000_register_byte);
   set_gdbarch_register_raw_size (gdbarch, rs6000_register_raw_size);
-  set_gdbarch_max_register_raw_size (gdbarch, 8);
+  set_gdbarch_max_register_raw_size (gdbarch, 16);
   set_gdbarch_register_virtual_size (gdbarch, generic_register_virtual_size);
-  set_gdbarch_max_register_virtual_size (gdbarch, 8);
+  set_gdbarch_max_register_virtual_size (gdbarch, 16);
   set_gdbarch_register_virtual_type (gdbarch, rs6000_register_virtual_type);
   set_gdbarch_do_registers_info (gdbarch, rs6000_do_registers_info);
 
