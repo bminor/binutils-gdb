@@ -99,7 +99,7 @@ SIM_AC_OPTION_SMP($mips_smp)
 #
 sim_gen=IGEN
 sim_igen_machine="-M mipsIV"
-sim_m16_machine="-M mips16"
+sim_m16_machine="-M mips16,mipsIII"
 sim_igen_filter="32,64,f"
 sim_m16_filter="16"
 sim_mach_default="mips8000"
