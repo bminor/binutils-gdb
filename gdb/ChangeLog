@@ -1,3 +1,9 @@
+Mon Jan  4 12:53:03 1999  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* remote-vx.c (init_vx_ops, init_vx_run_ops): Remove unneeded
+	inits of new fields, including ref to bogus field.
+	(vx_ops, vx_run_ops): Make static.
+
 Mon Jan  4 15:05:29 1999  David Taylor  <taylor@texas.cygnus.com>
 
 	* inferior.h (START_INFERIOR_TRAPS_EXPECTED): delete,

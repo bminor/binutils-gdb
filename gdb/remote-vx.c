@@ -68,7 +68,14 @@ extern int stop_soon_quietly;		/* for wait_for_inferior */
 static int net_step ();
 static int net_ptrace_clnt_call ();	/* Forward decl */
 static enum clnt_stat net_clnt_call ();	/* Forward decl */
-extern struct target_ops vx_ops, vx_run_ops;	/* Forward declaration */
+
+/* Target ops structure for accessing memory and such over the net */
+
+static struct target_ops vx_ops;
+
+/* Target ops structure for accessing VxWorks child processes over the net */
+
+static struct target_ops vx_run_ops;
 
 /* Saved name of target host and called function for "info files".
    Both malloc'd.  */
@@ -1392,162 +1399,69 @@ vx_proc_open (name, from_tty)
   error ("Use the \"run\" command to start a VxWorks process.");
 }
 
-/* Target ops structure for accessing memory and such over the net */
-
-struct target_ops vx_ops ;
-
-static void init_vx_ops(void)
+static void
+init_vx_ops ()
 {
-  vx_ops.to_shortname =   "vxworks";
-  vx_ops.to_longname =   "VxWorks target memory via RPC over TCP/IP";
-  vx_ops.to_doc =   "Use VxWorks target memory.  \n\
-Specify the name of the machine to connect to.",
-    vx_ops.to_open =   vx_open;
-  vx_ops.to_close =   vx_close;
-  vx_ops.to_attach =   vx_attach;
-  vx_ops.to_post_attach = NULL;  
-  vx_ops.to_require_attach = NULL;
-  vx_ops.to_detach =   0; /* vx_detach, */
-  vx_ops.to_require_detach = NULL;
-  vx_ops.to_resume =   0;
-  vx_ops.to_wait  =   0; /* resume, wait */
-  vx_ops.to_post_wait = NULL;
-  vx_ops.to_fetch_registers  =   0;
-  vx_ops.to_store_registers  =   0; /* read_reg, write_reg */
-  vx_ops.to_prepare_to_store =   0; /* prep_to_store, */
-  vx_ops.to_xfer_memory  =   vx_xfer_memory;
-  vx_ops.to_files_info  =   vx_files_info;
-  vx_ops.to_insert_breakpoint =   0;
-  vx_ops.to_remove_breakpoint =   0; /* insert_breakpoint, remove_breakpoint */
-  vx_ops.to_terminal_init  =   0;
-  vx_ops.to_terminal_inferior =   0;
-  vx_ops.to_terminal_ours_for_output =   0;
-  vx_ops.to_terminal_ours  =   0;
-  vx_ops.to_terminal_info  =   0;	/* terminal stuff */
-  vx_ops.to_kill  =   0; /* vx_kill, */
-  vx_ops.to_load  =   vx_load_command;
-  vx_ops.to_lookup_symbol =   vx_lookup_symbol;
-  vx_ops.to_create_inferior =   vx_create_inferior;
-  vx_ops.to_post_startup_inferior = NULL;
-  vx_ops.to_acknowledge_created_inferior = NULL;
-  vx_ops.to_clone_and_follow_inferior = NULL;
-  vx_ops.to_post_follow_inferior_by_clone = NULL;
-  vx_ops.to_insert_fork_catchpoint = NULL;
-  vx_ops.to_remove_fork_catchpoint = NULL;
-  vx_ops.to_insert_vfork_catchpoint = NULL;
-  vx_ops.to_remove_vfork_catchpoint = NULL;
-  vx_ops.to_has_forked = NULL;
-  vx_ops.to_has_vforked = NULL;
-  vx_ops.to_can_follow_vfork_prior_to_exec = NULL;
-  vx_ops.to_post_follow_vfork = NULL;
-  vx_ops.to_insert_exec_catchpoint = NULL;
-  vx_ops.to_remove_exec_catchpoint = NULL;
-  vx_ops.to_has_execd = NULL;
-  vx_ops.to_reported_exec_events_per_exec_call = NULL;
-  vx_ops.to_has_exited = NULL;
-  vx_ops.to_mourn_inferior =   0;  /* mourn_inferior */
-  vx_ops.to_can_run  =   0; /* can_run */
-  vx_ops.to_notice_signals =   0; /* notice_signals */
-  vx_ops.to_thread_alive  =   0; /* thread_alive */
-  vx_ops.to_stop  =   0;				/* to_stop */
-  vx_ops.to_pid_to_exec_file = NULL;
-  vx_ops.to_core_file_to_sym_file = NULL;
-  vx_ops.to_stratum =   core_stratum;
-  vx_ops.DONT_USE =   0; /* next */
-  vx_ops.to_has_all_memory =   1;
-  vx_ops.to_has_memory =   1;
-  vx_ops.to_has_stack =   0;
-  vx_ops.to_has_registers =   0;
-  vx_ops.to_has_execution =   0;	/* all mem, mem, stack, regs, exec */
-  vx_ops.to_sections =   0;
-  vx_ops.to_sections_end =   0;
-  vx_ops.to_magic =   OPS_MAGIC;		/* Always the last thing */
+  vx_ops.to_shortname = "vxworks";
+  vx_ops.to_longname = "VxWorks target memory via RPC over TCP/IP";
+  vx_ops.to_doc = "Use VxWorks target memory.  \n\
+Specify the name of the machine to connect to.";
+  vx_ops.to_open = vx_open;
+  vx_ops.to_close = vx_close;
+  vx_ops.to_attach = vx_attach;
+  vx_ops.to_xfer_memory = vx_xfer_memory;
+  vx_ops.to_files_info = vx_files_info;
+  vx_ops.to_load = vx_load_command;
+  vx_ops.to_lookup_symbol = vx_lookup_symbol;
+  vx_ops.to_create_inferior = vx_create_inferior;
+  vx_ops.to_stratum = core_stratum;
+  vx_ops.to_has_all_memory = 1;
+  vx_ops.to_has_memory = 1;
+  vx_ops.to_magic = OPS_MAGIC;		/* Always the last thing */
 };
 
-/* Target ops structure for accessing VxWorks child processes over the net */
-
-struct target_ops vx_run_ops ;
-
-static void init_vx_run_ops(void)
+static void
+init_vx_run_ops ()
 {
-  vx_run_ops.to_shortname =   "vxprocess";
-  vx_run_ops.to_longname =   "VxWorks process";
-  vx_run_ops.to_doc =   "VxWorks process; started by the \"run\" command.",
-    vx_run_ops.to_open =   vx_proc_open;
-  vx_run_ops.to_close =   vx_proc_close;
-  vx_run_ops.to_attach =   0;
-  vx_run_ops.to_post_attach = NULL;
-  vx_run_ops.to_require_attach = NULL;
-  vx_run_ops.to_detach =   vx_detach; 
-  vx_run_ops.to_require_detach = NULL;
-  vx_run_ops.to_resume =   vx_resume;
-  vx_run_ops.to_wait  =   vx_wait;
-  vx_run_ops.to_post_wait = NULL;
-  vx_run_ops.to_fetch_registers  =   vx_read_register;
-  vx_run_ops.to_store_registers  =   vx_write_register;
-  vx_run_ops.to_prepare_to_store =   vx_prepare_to_store;
-  vx_run_ops.to_xfer_memory  =   vx_xfer_memory;
-  vx_run_ops.to_files_info  =   vx_run_files_info;
-  vx_run_ops.to_insert_breakpoint =   vx_insert_breakpoint;
-  vx_run_ops.to_remove_breakpoint =   vx_remove_breakpoint;
-  vx_run_ops.to_terminal_init  =   0;
-  vx_run_ops.to_terminal_inferior =   0;
-  vx_run_ops.to_terminal_ours_for_output =   0;
-  vx_run_ops.to_terminal_ours  =   0;
-  vx_run_ops.to_terminal_info  =   0;
-  vx_run_ops.to_kill  =   vx_kill;
-  vx_run_ops.to_load  =   vx_load_command;
-  vx_run_ops.to_lookup_symbol =   vx_lookup_symbol;
-  vx_run_ops.to_create_inferior =   0;
-  vx_run_ops.to_post_startup_inferior = NULL;
-  vx_run_ops.to_acknowledge_created_inferior = NULL;
-  vx_run_ops.to_clone_and_follow_inferior = NULL;
-  vx_run_ops.to_post_follow_inferior_by_clone = NULL;
-  vx_run_ops.to_insert_fork_catchpoint = NULL;
-  vx_run_ops.to_remove_fork_catchpoint = NULL;
-  vx_run_ops.to_insert_vfork_catchpoint = NULL;
-  vx_run_ops.to_remove_vfork_catchpoint = NULL;
-  vx_run_ops.to_has_forked = NULL;
-  vx_run_ops.to_has_vforked = NULL;
-  vx_run_ops.to_can_follow_vfork_prior_to_exec = NULL;
-  vx_run_ops.to_post_follow_fork = NULL;
-  vx_run_ops.to_insert_exec_catchpoint = NULL;
-  vx_run_ops.to_remove_exec_catchpoint = NULL;
-  vx_run_ops.to_has_execd = NULL;
-  vx_run_ops.to_reported_exec_events_per_exec_call = NULL;
-  vx_run_ops.to_has_exited = NULL;
-  vx_run_ops.to_mourn_inferior =   vx_mourn_inferior ;
-  vx_run_ops.to_can_run =   0; 
-  vx_run_ops.to_notice_signals  =   0; 
-  vx_run_ops.to_thread_alive =   0; 
-  vx_run_ops.to_stop  =   0;
-  vx_run_ops.to_pid_to_exec_file = NULL;
-  vx_run_ops.to_core_file_to_sym_file = NULL;	
-  vx_run_ops.to_stratum  =   process_stratum;
-  vx_run_ops.DONT_USE =   0; 
-  vx_run_ops.to_has_all_memory =   0; 
-  vx_run_ops.to_has_memory =   1;
-  vx_run_ops.to_has_stack =   1;
-  vx_run_ops.to_has_registers =   1;
-  vx_run_ops.to_has_execution =   1;	
-  vx_run_ops.to_sections =   0;
-  vx_run_ops.to_sections_end =   0;	
-  vx_run_ops.to_magic =   OPS_MAGIC;	
+  vx_run_ops.to_shortname = "vxprocess";
+  vx_run_ops.to_longname = "VxWorks process";
+  vx_run_ops.to_doc = "VxWorks process; started by the \"run\" command.";
+  vx_run_ops.to_open = vx_proc_open;
+  vx_run_ops.to_close = vx_proc_close;
+  vx_run_ops.to_detach = vx_detach;
+  vx_run_ops.to_resume = vx_resume;
+  vx_run_ops.to_wait = vx_wait;
+  vx_run_ops.to_fetch_registers = vx_read_register;
+  vx_run_ops.to_store_registers = vx_write_register;
+  vx_run_ops.to_prepare_to_store = vx_prepare_to_store;
+  vx_run_ops.to_xfer_memory = vx_xfer_memory;
+  vx_run_ops.to_files_info = vx_run_files_info;
+  vx_run_ops.to_insert_breakpoint = vx_insert_breakpoint;
+  vx_run_ops.to_remove_breakpoint = vx_remove_breakpoint;
+  vx_run_ops.to_kill = vx_kill;
+  vx_run_ops.to_load = vx_load_command;
+  vx_run_ops.to_lookup_symbol = vx_lookup_symbol;
+  vx_run_ops.to_mourn_inferior = vx_mourn_inferior ;
+  vx_run_ops.to_stratum = process_stratum;
+  vx_run_ops.to_has_memory = 1;
+  vx_run_ops.to_has_stack = 1;
+  vx_run_ops.to_has_registers = 1;
+  vx_run_ops.to_has_execution = 1;	
+  vx_run_ops.to_magic = OPS_MAGIC;	
 }
-/* ==> Remember when reading at end of file, there are two "ops" structs here. */
 
 void
 _initialize_vx ()
 {
-  init_vx_ops() ;
-  init_vx_run_ops() ;
+  init_vx_ops ();
+  add_target (&vx_ops);
+  init_vx_run_ops ();
+  add_target (&vx_run_ops);
+
   add_show_from_set
     (add_set_cmd ("vxworks-timeout", class_support, var_uinteger,
 		  (char *) &rpcTimeout.tv_sec,
 		  "Set seconds to wait for rpc calls to return.\n\
 Set the number of seconds to wait for rpc calls to return.", &setlist),
      &showlist);
-
-  add_target (&vx_ops);
-  add_target (&vx_run_ops);
 }
