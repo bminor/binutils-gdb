@@ -147,7 +147,7 @@ for i in $never_files ; do
         fi
 done
 
-cygnus_files="ChangeLog Makefile.am Makefile.in configure.in configure"
+cygnus_files="ChangeLog Makefile.am Makefile.in configure.in configure m10300-opc.c m10300-dis.c"
 if ( echo $* | grep keep\-cygnus > /dev/null ) ; then
 	for i in $cygnus_files ; do
 		if test ! -d $i && (grep sanitize-cygnus $i > /dev/null) ; then
@@ -174,35 +174,6 @@ else
 		fi
 	done
 fi
-
-am33_files="ChangeLog m10300-opc.c m10300-dis.c"
-if ( echo $* | grep keep\-am33 > /dev/null ) ; then
-	for i in $am33_files ; do
-		if test ! -d $i && (grep sanitize-am33 $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Keeping am33 stuff in $i
-			fi
-		fi
-	done
-else
-	for i in $am33_files ; do
-		if test ! -d $i && (grep sanitize-am33 $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Removing traces of \"am33\" from $i...
-			fi
-			cp $i new
-			sed '/start\-sanitize\-am33/,/end-\sanitize\-am33/d' < $i > new
-			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-				if [ -n "${verbose}" ] ; then
-					echo Caching $i in .Recover...
-				fi
-				mv $i .Recover
-			fi
-			mv new $i
-		fi
-	done
-fi
-
 
 v850e_files="ChangeLog Makefile.in Makefile.am configure.in configure disassemble.c v850-opc.c v850-dis.c"
 if ( echo $* | grep keep\-v850e > /dev/null ) ; then

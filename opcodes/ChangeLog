@@ -1,3 +1,8 @@
+Tue Jan 19 18:01:54 1999  David Taylor  <taylor@texas.cygnus.com>
+
+	* hppa-dis.c: revert HP merge changes until HP gives us
+	an updated file.
+	
 1999-01-19  Nick Clifton  <nickc@cygnus.com>
 
 	* arm-dis.c (print_insn_arm): Display ARM syntax for PC relative
@@ -388,7 +393,7 @@ start-sanitize-cygnus
 end-sanitize-cygnus
 	* m32r-opc.c,m32r-opc.h,m32r-asm.c,m32r-dis.c: Regenerate.
 
-start-sanitize-am33
+start-sanitize-cygnus
 Wed Oct 14 12:12:25 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* m10300-opc.c: Allow autoincrement stores using the same register
@@ -401,17 +406,17 @@ Mon Oct 12 10:43:51 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* m10300-opc.c (lsr_add): Fix typo for "lsr_add imm,reg,reg,reg" case.
 
-end-sanitize-am33
+end-sanitize-cygnus
 Fri Oct  9 14:01:56 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* m32r-opc.h,m32r-opc.c: Regenerate.
 
-start-sanitize-am33
+start-sanitize-cygnus
 Thu Oct  8 06:04:38 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* m10300-opc.c (asr, lsr, asl): Fix am33 single bit shift opcode.
 
-end-sanitize-am33
+end-sanitize-cygnus
 Sun Oct  4 21:01:44 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* i386-dis.c (OP_3DNowSuffix): New static function.
@@ -580,25 +585,25 @@ Tue Jul 28 11:00:09 1998  Jeffrey A Law  (law@cygnus.com)
 	* m10300-opc.c: Add entries for "no_match_operands" field in
 	the opcode table.
 
-start-sanitize-am33
+start-sanitize-cygnus
 Fri Jul 24 15:22:40 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* m10300-dis.c: Do not emit a comma before a PLUS (autoincrement)
 	operand.
 
-end-sanitize-am33
+end-sanitize-cygnus
 Fri Jul 24 11:41:37 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* m32r-asm.c,m32r-opc.c: Regenerate (-Wall cleanups).
 
-start-sanitize-am33
+start-sanitize-cygnus
 Thu Jul 23 09:21:03 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* m10300-opc.c: Add DSP autoincrement memory loads/stores.
 
 	* m10300-opc.c: Add autoincrement memory loads/stores.
 
-end-sanitize-am33
+end-sanitize-cygnus
 start-sanitize-r5900
 Wed Jul 22 17:05:40 1998  Jeffrey A Law  (law@cygnus.com)
 
@@ -623,7 +628,7 @@ start-sanitize-cygnus
 end-sanitize-cygnus
 	* m32r-opc.h,m32r-opc.c,m32r-asm.c,m32r-dis.c: Regenerate.
 
-start-sanitize-am33
+start-sanitize-cygnus
 Mon Jul 20 12:10:37 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* m10300-opc.c: Fix load to sp and store from sp for the am33.
@@ -634,7 +639,7 @@ Thu Jul 16 18:04:46 1998  Jeffrey A Law  (law@cygnus.com)
 	* m10300-opc.c (mn10300_opcodes): Fix opcode for 4 operand "mul" and
 	"mulu".
 
-end-sanitize-am33
+end-sanitize-cygnus
 start-sanitize-r5900
 Mon Jul 13 18:14:24 1998  Jeffrey A Law  (law@cygnus.com)
 
@@ -650,7 +655,7 @@ Mon Jul 13 14:53:59 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
 	(OP_J): Remove unnecessary subtraction when 16-bit displacement
 	will be masked later.
 
-start-sanitize-am33
+start-sanitize-cygnus
 Fri Jul 10 23:09:56 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* m10300-opc.c (mn10300_opcodes): Fix destination operand for 3 operand
@@ -661,7 +666,7 @@ Wed Jul  8 11:32:44 1998  Jeffrey A Law  (law@cygnus.com)
 	* m10300-dis.c (disassemble): When printing RREGs and XRREGs, map
 	from raw register #s to symbolic names to make debugging easier.
 
-end-sanitize-am33
+end-sanitize-cygnus
 Thu Jul  2 17:11:27 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* m32r-opc.h (CGEN_MIN_INSN_SIZE): New #define.
@@ -684,7 +689,7 @@ start-sanitize-cygnus
 	* configure: Regenerate.
 end-sanitize-cygnus
 
-start-sanitize-am33
+start-sanitize-cygnus
 Tue Jun 30 09:59:37 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* m10300-opc.c: Reorder "movbu" and "movhu" instructions too.
@@ -695,7 +700,7 @@ Mon Jun 29 14:54:32 1998  Jeffrey A Law  (law@cygnus.com)
 	accidentally match a mn10300 instruction when we really
 	wanted an am33 instruction.
 
-end-sanitize-am33
+end-sanitize-cygnus
 Fri Jun 26 11:08:55 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* m10300-dis.c: Only recognize instructions from the currently
@@ -727,7 +732,7 @@ Wed Jun 24 17:14:01 1998  Ian Carmichael  <iancarm@cygnus.com>
 	the DVP_OPERAND_RELOC_11_S4 relocation.
 
 end-sanitize-sky
-start-sanitize-am33
+start-sanitize-cygnus
 Wed Jun 24 09:53:06 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* m10300-dis.c (print_insn_mn10300): 0xf7 opcode prefix specifies
@@ -748,7 +753,7 @@ Wed Jun 24 09:53:06 1998  Jeffrey A Law  (law@cygnus.com)
 	am33 instructions to use IMM32_HIGH8_MEM.  Fix typos in "mac" and
 	"macbu" instructions.  Fix typos in a couple DSP instructions too.
 
-end-sanitize-am33
+end-sanitize-cygnus
 Tue Jun 23 19:42:18 1998  Mark Alexander  <marka@cygnus.com>
 
 	* m10200-dis.c (print_insn_mn10200): Fix various non-portabilities
@@ -768,33 +773,33 @@ Mon Jun 22 15:48:29 1998  Ian Carmichael  <iancarm@cygnus.com>
 	be used as immediate values.
 
 end-sanitize-sky
-start-sanitize-am33
+start-sanitize-cygnus
 Mon Jun 22 13:36:27 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* m10300-opc.c: Support 4 byte DSP instructions.
 
-end-sanitize-am33
+end-sanitize-cygnus
 Sat Jun 20 14:46:20 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* mips-dis.c (_print_insn_mips): Fix argument interchange typo.
 
-start-sanitize-am33
+start-sanitize-cygnus
 Fri Jun 19 16:47:06 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* m10300-opc.c: Support 6 and 7 byte am33 instructions.
 
-end-sanitize-am33
+end-sanitize-cygnus
 Fri Jun 19 09:16:42 1998  Mark Alexander  <marka@cygnus.com>
 
 	* m10200-dis.c (print_insn_mn10200): Recognize 'break' pseudo-op.
 
-start-sanitize-am33
+start-sanitize-cygnus
 Fri Jun 19 09:42:51 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* m10300-opc.c: Support for 3 byte and 4 byte extended instructions
 	found on the mn10300.
 
-end-sanitize-am33
+end-sanitize-cygnus
 1998-06-18  Ulrich Drepper  <drepper@cygnus.com>
 
 	* i386-dis.c: Add support for fxsave, fxrstor, sysenter and
@@ -819,11 +824,11 @@ Wed Jun 17 21:19:01 1998  Mark Alexander  <marka@cygnus.com>
 
 Wed Jun 17 17:49:23 1998  Jeffrey A Law  (law@cygnus.com)
 
-start-sanitize-am33
+start-sanitize-cygnus
 	* m10300-opc.c (USP, SSP, MSP, PC, IMM4, EPSW, RN0, RM1): New
 	operands for the am33.
 	(mn10300_opcodes): Add new instructions from the am33.
-end-sanitize-am33
+end-sanitize-cygnus
 	* m10300-opc.c (mn10300_opcodes): Change opcode for "syscall".
 
 Tue Jun 16 13:10:51 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
