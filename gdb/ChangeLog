@@ -1,5 +1,11 @@
 2004-08-11  Joel Brobecker  <brobecker@gnat.com>
 
+	* config/powerpc/xm-aix.h: Remove "config/xm-aix4.h", that file
+	is now empty.
+	(termdef): Remove prototype, function no longer used.
+
+2004-08-11  Joel Brobecker  <brobecker@gnat.com>
+
 	* doc/gdbint.texinfo (Host Definition): Remove documentation
 	for USE_O_NOCTTY, no longer used.
 	* config/xm-aix4.h (USE_O_NOCTTY): Remove, no longer used.

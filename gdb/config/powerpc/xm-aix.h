@@ -19,11 +19,6 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#include "config/xm-aix4.h"
-
-/* This doesn't seem to be declared in any header file I can find.  */
-char *termdef (int, int);
-
 /* UINT_MAX is defined in <sys/limits.h> as a decimal constant (4294967295)
    which is too large to fit in a signed int when it is parsed by the
    compiler, so it issues a diagnostic.  Just undef it here so that we
