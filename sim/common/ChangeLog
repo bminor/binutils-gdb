@@ -1,5 +1,22 @@
 Wed Apr  2 15:06:28 1997  Doug Evans  <dje@canuck.cygnus.com>
 
+	* Make-common.in (SIM_EXTRA_DEPS): New config var.
+	(sim_main_headers): Define.
+	(sim-*.o): Depend on $(SIM_EXTRA_DEPS).
+	(BUILT_SRC_FROM_COMMON): Move here from ../d30v/Makefile.in.
+	(clean): Use it.
+	(sim-utils.o): Add rule for.
+	* sim-utils.o: New file.
+	* sim-basics.h: #include sim-base.h.
+	(zalloc): Make argument unsigned long.
+	* sim-base.h: New file.
+	* sim-inline.h (SIM_IO support): Delete.
+	* sim-io.h: Delete inline support.
+	* sim-io.c: Likewise.  sim-state.h renamed to sim-main.h.
+	* sim-config.c: sim-state.h renamed to sim-main.h.
+	* sim-core.c: Likewise.
+	* sim-events.c: Likewise.
+
 	* run.c (main): Pass SIM_OPEN_STANDALONE to sim_open.
 
 	* aclocal.m4: Check for stdlib.h, string.h, strings.h, unistd.h.
