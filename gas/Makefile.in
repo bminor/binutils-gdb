@@ -1,21 +1,21 @@
 # Makefile for GNU Assembler
-#   Copyright (C) 1987-1992 Free Software Foundation, Inc.
+#   Copyright (C) 1987-1992, 1993 Free Software Foundation, Inc.
 
-#This file is part of GNU GAS.
+# This file is part of GNU GAS.
 
-#GNU GAS is free software; you can redistribute it and/or modify
-#it under the terms of the GNU General Public License as published by
-#the Free Software Foundation; either version 2, or (at your option)
-#any later version.
+# GNU GAS is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
 
-#GNU GAS is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU General Public License for more details.
+# GNU GAS is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 
-#You should have received a copy of the GNU General Public License
-#along with GNU GAS; see the file COPYING.  If not, write to
-#the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+# You should have received a copy of the GNU General Public License
+# along with GNU GAS; see the file COPYING.  If not, write to
+# the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 # The targets for external use include:
 # all, doc, proto, install, uninstall, includes, TAGS,
@@ -25,6 +25,7 @@
 # See below for how to change them for certain systems.
 
 srcdir = .
+srcroot = $(srcdir)/..
 
 prefix = /usr/local
 
@@ -53,7 +54,7 @@ VERSION=2.1.4
 
 SHELL = /bin/sh
 
-INSTALL = `cd $(srcdir)/..;pwd`/install.sh -c
+INSTALL = $${srcroot}/install.sh -c
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL)
 INSTALL_XFORM = $(INSTALL) -t='$(program_transform_name)'
@@ -66,6 +67,8 @@ MAKEINFO = makeinfo
 TEXI2DVI = texi2dvi
 RANLIB = ranlib
 CFLAGS = -g
+
+MAKEOVERRIDES=
 
 AS_FOR_TARGET = $${here}/as.new
 
@@ -125,7 +128,8 @@ CHECKFLAGS= \
 	"AS_FOR_TARGET=$(AS_FOR_TARGET)" \
 	"CC_FOR_TARGET=$(CC_FOR_TARGET)" \
 	"NM_FOR_TARGET=$(NM_FOR_TARGET)" \
-	"OBJDUMP_FOR_TARGET=$(OBJDUMP_FOR_TARGET)"
+	"OBJDUMP_FOR_TARGET=$(OBJDUMP_FOR_TARGET)" \
+	"RUNTEST_FLAGS=$(RUNTEST_FLAGS)"
 
 # Lists of files for various purposes.
 
@@ -219,16 +223,12 @@ OBJS = \
 #### host, target, and site specific Makefile frags come in here.
 
 all: as.new
-	@(cd doc ; $(MAKE) $(FLAGS_TO_PASS) all)
+	@srcroot=`cd $(srcroot); pwd`; export srcroot; \
+	(cd doc ; $(MAKE) $(FLAGS_TO_PASS) all)
 
-dvi info:
-	@(cd doc ; $(MAKE) $(FLAGS_TO_PASS) $@)
-
-install-info:
-	@(cd doc ; $(MAKE) $(FLAGS_TO_PASS) install-info)
-
-clean-info:
-	@(cd doc ; $(MAKE) $(FLAGS_TO_PASS) clean-info)
+dvi info install-info clean-info:
+	@srcroot=`cd $(srcroot); pwd`; export srcroot; \
+	(cd doc ; $(MAKE) $(FLAGS_TO_PASS) $@)
 
 # Now figure out from those variables how to compile and link.
 
@@ -289,7 +289,7 @@ config-stamp: Makefile
 app.o : app.c as.h host.h targ-env.h obj-format.h \
   targ-cpu.h struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h 
-as.o : as.c as.h host.h targ-env.h obj-format.h \
+as.o : as.c as.h host.h targ-env.h obj-format.h output-file.h \
   targ-cpu.h struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h subsegs.h \
   tc.h obj.h config.h
@@ -380,23 +380,33 @@ doc: $(srcdir)/as.info
 $(srcdir)/as.info: $(srcdir)/doc/as.texinfo
 	@(cd doc; $(MAKE) $(FLAGS_TO_PASS) as.info; mv as.info $srcdir)	
 
-clean:
-	@(cd doc ; $(MAKE) $(FLAGS_TO_PASS) clean)
-	@(cd testsuite ; $(MAKE) $(FLAGS_TO_PASS) clean)
+clean-here:
 	-rm -f $(STAGESTUFF) core
 
+clean:
+	@cd doc ; $(MAKE) $(FLAGS_TO_PASS) clean
+	@if [ -d testsuite ] ; then \
+	  cd testsuite ; $(MAKE) $(FLAGS_TO_PASS) clean ; \
+	else true; fi
+
 # Like clean but also delete the links made to configure gas.
-distclean: clean
+distclean: clean-here
+	@cd doc ; $(MAKE) $(FLAGS_TO_PASS) distclean
+	@if [ -d testsuite ] ; then \
+	  cd testsuite ; $(MAKE) $(FLAGS_TO_PASS) distclean ; \
+	else true; fi
 	-rm -f config.status Makefile host.h targ-env.h targ-cpu.h \
-		targ-cpu.c obj-format.h obj-format.c atof-targ.c TAGS
+		targ-cpu.c obj-format.h obj-format.c atof-targ.c TAGS \
+		config-stamp config.h
 
 # Entry points `install', `includes' and `uninstall'.
 
 # Copy the files into directories where they will be run.
 install:
+	srcroot=`cd $(srcroot); pwd`; export srcroot; \
 	$(INSTALL_XFORM) as.new $(bindir)/as; \
-	$(INSTALL_XFORM1) $(srcdir)/doc/as.1 $(man1dir)/as.1; 
-	-n=`t='$(program_transform_name)'; echo as | sed -e "" $$t`; \
+	$(INSTALL_XFORM1) $(srcdir)/doc/as.1 $(man1dir)/as.1; \
+	n=`t='$(program_transform_name)'; echo as | sed -e "" $$t`; \
 	if [ -d $(tooldir) ]; then \
 	  if [ -d $(tooldir)/bin ] ; then true ; else mkdir $(tooldir)/bin ; fi; \
 	  rm -f $(tooldir)/bin/as; \
