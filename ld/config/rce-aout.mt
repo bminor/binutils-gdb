@@ -1,1 +1,1 @@
-EMUL=sopaout
+EMUL=rce

@@ -459,6 +459,11 @@ ens32knbsd.c:	$(srcdir)/emulparams/ns32knbsd.sh \
 esparcnbsd.c:	$(srcdir)/emulparams/sparcnbsd.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} sparcnbsd
+# start-santize-rce
+erce.c: $(srcdir)/emulparams/rce.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/rce.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} rce
+# end-santize-rce
 
 $(LD_PROG): $(OFILES) $(BFDLIB) $(LIBIBERTY)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $(LD_PROG) $(OFILES) $(BFDLIB) $(LIBIBERTY) $(EXTRALIBS)

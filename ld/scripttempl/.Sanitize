@@ -15,6 +15,13 @@
 
 Do-first:
 
+rce_files="rce.sc"
+
+if ( echo $* | grep keep\-rce > /dev/null ) ; then
+	keep_these_too="${rce_files} ${keep_these_too}"
+else
+	lose_these_too="${rce_files} ${lose_these_too}"
+fi
 
 # All files listed between the "Things-to-keep:" line and the
 # "Do-last:" line will be kept.  All other files will be removed.
