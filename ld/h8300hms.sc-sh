@@ -15,17 +15,17 @@ SECTIONS
 	{ 					
 	  *(.text) 				
 	  *(.strings)
-	} > ram
+	} ${RELOCATING+ > ram}
 .data  :
 	{
 	*(.data)
-	} > ram
+	} ${RELOCATING+ > ram}
 .bss  :
 	{
 	${RELOCATING+ _bss_start = .}
 	*(.bss)
 	*(COMMON)
 	${RELOCATING+ _end = .}
-	} >ram			
+	} ${RELOCATING+ >ram}
 }
 EOF

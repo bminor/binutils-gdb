@@ -1,0 +1,63 @@
+Some incomplete notes about porting GNU ld
+-----------------------------------------
+
+Before porting ld itself, you will need to port the BFD library.
+
+We tarlk about the 'host' system as the machine and software
+nevironment where ld runs (generates an execuitble *on*),
+while the 'target' is the machine ld generates an executable *for*.
+Most often, host==target, but ld supports cross-linking
+(and to some extent the same ld binary can be used a linker
+for multiple target rachitectures).
+
+Doing a 'host' port means working around broken or missing
+include files or libraries. ...
+
+Porting to a new target
+-----------------------
+
+Writing a new script script
+---------------------------
+
+You may need to write a new script file for your emulation.
+
+The variable RELOCATING is only set if relocation is happening
+(i.e. unless the linker is invoked with -r).
+Thus your script should has an action ACTION
+that should only be done when relocating,
+express that as:
+	${RELOCATING+ ACTION}
+In general, this is the case for most assignments, which should look like:
+	${RELOCATING+ _end = .}
+
+Also, you should assign absolute addresses to sections only
+when relocating, so:
+	  .text ${RELOCATING+ ${TEXT_START_ADDR}}:
+
+The forms:
+	 .section { ... } > section
+should be:
+	 .section { ... } > ${RELOCATING+ section}
+
+Old Makefile comments (re-write - FXIME!)
+-----------------------------------------
+
+# The .xn script is used if the -n flag is given (write-protect text)..
+# Sunos starts the text segment for demand-paged binaries at 0x2020
+# and other binaries at 0x2000, since the exec header is paged in
+# with the text.  Some other Unix variants do the same.
+# For -n and -N flags the offset of the exec header must be removed.
+# This sed script does this if the master script contains
+# a line of the form ".text 0xAAAA BLOCK(0xBBBB):" - the
+# output will contain ".text 0xBBBB:".  (For Sunos AAAA=2020 and BBBB=2000.)
+.x.xn:
+	sed -e '/text/s/\.text .* BLOCK(\([^)]*\)):/.text \1:/' < $< >$*.xn
+
+# The .xN script is used if the -N flag is given (don't write-protect text).
+# This is like -n, except that the data segment need not be page-aligned.
+# So get rid of commands for page-alignment:  We assume these use ALIGN
+# with a hex constant that end with 00, since any normal page size is be
+# at least divisible by 256.  We use the 00 to avoid matching
+# anything that tries to align of (say) 8-byte boundaries.
+.xn.xN:
+	sed -e '/ALIGN/s/ALIGN( *0x[0-9a-fA-F]*00 *)/./' < $< >$*.xN

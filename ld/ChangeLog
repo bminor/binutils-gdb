@@ -1,3 +1,66 @@
+Sat Feb 15 13:59:54 1992  Per Bothner  (bothner at cygnus.com)
+
+	Major rewrite of how ld is configured.  The major idea
+	is to use shell scripts to generate everything.
+	* generic.em replaces ldtemplate.
+	* Other *.em files replace various *.c files.
+	A *.em file is a shell script that generates the corresponding
+	ld__*.c file that implements an emulation.  This is usually
+	a straight 'cat' of a here-document, possibly with substitutions.
+	* Script files (*.sc) are places by *.sc-sh scripts.
+	Again, these are simple shell scripts that 'cat'
+	here-documents, usually with some substitutions.
+	The output a *.sc-sh is a script file.
+	* Each emulation is defined by a short shell script with
+	extension *.sh that specifies the emulation-specific
+	parameters (such as the name of the *.sh-sc and *.em
+	files to use).
+	* genscript.sh is the master shell script used to generate
+	an emulation.  It is passed various argument, including
+	the name a the emulation-speciic *.sh file that it
+	"sources" to set variables to emulation-specifc parameters.
+	* config/mt-foo:  Changed EMUL=GLDFOO_EMULATION_NAME
+	to EMUL=foo. (The GLDFOO_EMULATION_NAMEs have bee removed.)
+	* config/mh-foo:  Rename LDEMULATION names as appropriate
+	(usually 'gldfoo' -> plain 'foo').
+	* ldwrite.c:  Fixed a typo in a comment.
+	* Makefile.in:  Major changes.  Removed some the sed
+	magic to converts scripts, since that is now handled
+	by genscripts.sh and the *.sc-sh scipt generators.
+	* config.h:  Remove a bunch of macros defining emulations
+	and targets.  This becomes one less file to edit when
+	adding emulations or targets.
+	* ldemul.h (struct ld_emulation_xfer_struct):  Add
+	emulation_name and target_name fields.
+	* ldemul.c, ldemul.h:  Define some default functions used
+	by most emulations (and remove from the *.em scripts).
+	* ldemul.c (ldemul_choose_target):  Search the new
+	ld_emulations array using a loop (instead of a hardwired
+	nested if statement).
+	Define the ld_emulation from the automatically-geenrated
+	ldemul-list.h.  This means you no longer have to edit ldemul.c
+	to add a new emulation.
+	* ldmain.c:  Replace {GLD,LNK}960_EMULATION_NAME by
+	their expansions, since the former no longer exist.
+	* PORTING:  A very rough first draft of a porting guide.
+
+	* ldgram.y, ldlex.l, lexsup.c: Changes to allow an assignment
+	to be terminated by a new-line (instead of requiring a semicolon).
+
+Mon Feb 10 16:21:02 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
+
+	* ldexp.c, ldlang.c: added new idea "abs_output_section", removes
+	tests for NULL pointers all over the place.
+	* ldlang.c (lang_process): remember to relocate global symbols
+	*after* relaxing has done it stuff.
+
+Thu Feb  6 11:40:15 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
+
+	* config/mt-coff-h8300: use EMUL like everything else
+	* ldlang.c: (print_padding_statement): print the right address.
+	* Makefile.in, config.h, ldemul.c: renamed  h8300hds to h8300hms
+	
+
 Tue Feb  4 15:28:01 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
 
 	* ldlex.l: Put pack -noinhibit-exec and -sort-common
