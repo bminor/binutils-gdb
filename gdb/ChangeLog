@@ -1,5 +1,9 @@
 2002-09-11  J. Brobecker  <brobecker@gnat.com>
 
+	* osabi.c (gdb_osabi_name): Add entry for GDB_OSABI_INTERIX.
+
+2002-09-11  J. Brobecker  <brobecker@gnat.com>
+
 	* osabi.h (gdb_osabi): Add new GDB_OSABI_INTERIX enum value for
 	Interix.
 
