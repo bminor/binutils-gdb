@@ -18,6 +18,12 @@ Mon Jan 10 09:52:23 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 	(pa_proc): It is not an error if the procedure's label isn't
 	defined before the .PROC directive.
 
+Sun Jan  9 04:43:30 1994  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
+
+	* config/te-netbsd.h: New file.
+	* config/tc-i386.h (TARGET_FORMAT) [TE_NetBSD]: Use bfd target
+	a.out-netbsd-386 for this configuration.
+
 Fri Jan  7 17:38:28 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ecoff.c (ecoff_stab): Don't clobber the ECOFF symbol information
