@@ -8189,7 +8189,7 @@ case $host_os in
       LIBS="../libtermcap/libtermcap.a $LIBS"
       ac_cv_search_tgetent="../libtermcap/libtermcap.a"
     fi ;;
-  go32* | *djgpp*)
+  go32* | *djgpp* | *mingw32* )
     ac_cv_search_tgetent="none required"
     ;;
 esac

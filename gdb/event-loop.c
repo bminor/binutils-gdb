@@ -133,6 +133,11 @@ event_queue;
 
 static unsigned char use_poll = USE_POLL;
 
+#ifdef WINAPI
+#include <windows.h>
+#include <io.h>
+#endif
+
 static struct
   {
     /* Ptr to head of file handler list. */
@@ -146,15 +151,19 @@ static struct
     int poll_timeout;
 #endif
 
+#ifdef WINAPI
+    HANDLE handles[MAXIMUM_WAIT_OBJECTS];
+#else
     /* Masks to be used in the next call to select.
        Bits are set in response to calls to create_file_handler. */
     fd_set check_masks[3];
 
     /* What file descriptors were found ready by select. */
     fd_set ready_masks[3];
-
+#endif
     /* Number of file descriptors to monitor. (for poll) */
     /* Number of valid bits (highest fd value + 1). (for select) */
+    /* Number of handles (for Windows).  */
     int num_fds;
 
     /* Time structure for calls to select(). */
@@ -524,6 +533,10 @@ create_file_handler (int fd, int mask, handler_func * proc, gdb_client_data clie
 	}
       else
 	{
+#ifdef WINAPI
+	  gdb_notifier.handles[gdb_notifier.num_fds++] 
+	    = (HANDLE) _get_osfhandle (fd);
+#else
 	  if (mask & GDB_READABLE)
 	    FD_SET (fd, &gdb_notifier.check_masks[0]);
 	  else
@@ -541,6 +554,7 @@ create_file_handler (int fd, int mask, handler_func * proc, gdb_client_data clie
 
 	  if (gdb_notifier.num_fds <= fd)
 	    gdb_notifier.num_fds = fd + 1;
+#endif
 	}
     }
 
@@ -602,6 +616,16 @@ delete_file_handler (int fd)
     }
   else
     {
+#ifdef WINAPI
+      HANDLE h = (HANDLE) _get_osfhandle (fd);
+      for (i = 0; i < gdb_notifier.num_fds; ++i)
+	if (gdb_notifier.handles[i] == h)
+	  {
+	    gdb_notifier.handles[i] =
+	      gdb_notifier.handles[gdb_notifier.num_fds--];
+	    break;
+	  }
+#else
       if (file_ptr->mask & GDB_READABLE)
 	FD_CLR (fd, &gdb_notifier.check_masks[0]);
       if (file_ptr->mask & GDB_WRITABLE)
@@ -623,6 +647,7 @@ delete_file_handler (int fd)
 	    }
 	  gdb_notifier.num_fds = i;
 	}
+#endif
     }
 
   /* Deactivate the file descriptor, by clearing its mask, 
@@ -737,7 +762,11 @@ gdb_wait_for_event (void)
 {
   file_handler *file_ptr;
   gdb_event *file_event_ptr;
+#ifdef WINAPI
+  DWORD event = 0;
+#else
   int num_found = 0;
+#endif
   int i;
 
   /* Make sure all output is done before getting another event. */
@@ -766,6 +795,16 @@ gdb_wait_for_event (void)
     }
   else
     {
+#ifdef WINAPI
+      event
+	= WaitForMultipleObjects(gdb_notifier.num_fds,
+				 gdb_notifier.handles,
+				 FALSE,
+				 gdb_notifier.timeout_valid
+				 ? (gdb_notifier.select_timeout.tv_sec * 1000
+				    + gdb_notifier.select_timeout.tv_usec)
+				 : INFINITE);
+#else
       gdb_notifier.ready_masks[0] = gdb_notifier.check_masks[0];
       gdb_notifier.ready_masks[1] = gdb_notifier.check_masks[1];
       gdb_notifier.ready_masks[2] = gdb_notifier.check_masks[2];
@@ -786,6 +825,7 @@ gdb_wait_for_event (void)
 	  if (errno != EINTR)
 	    perror_with_name (("select"));
 	}
+#endif
     }
 
   /* Enqueue all detected file events. */
@@ -828,6 +868,20 @@ gdb_wait_for_event (void)
     }
   else
     {
+#ifdef WINAPI
+      HANDLE h;
+
+      h = gdb_notifier.handles[event - WAIT_OBJECT_0];
+      file_ptr = gdb_notifier.first_file_handler;
+      while ((HANDLE) _get_osfhandle (file_ptr->fd) != h)
+	file_ptr = file_ptr->next_file;
+      if (file_ptr->ready_mask == 0)
+	{
+	  file_event_ptr = create_file_event (file_ptr->fd);
+	  async_queue_event (file_event_ptr, TAIL);
+	}
+      file_ptr->ready_mask = GDB_READABLE;
+#else      
       for (file_ptr = gdb_notifier.first_file_handler;
 	   (file_ptr != NULL) && (num_found > 0);
 	   file_ptr = file_ptr->next_file)
@@ -856,6 +910,7 @@ gdb_wait_for_event (void)
 	    }
 	  file_ptr->ready_mask = mask;
 	}
+#endif
     }
   return 0;
 }
