@@ -1360,3 +1360,68 @@ callrimm:
 	callr 1472+(.+2)
 	callr 1618+(.+2)
 	callr 978+(.+2)
+
+movgrgrsi:
+	mov.b r0,(r0,extsym)
+	mov.w r7,(r15,extsym-1)
+	mov.w r4,(r8,extsym-2048)
+	mov.b r3,(r7,extsym+2047)
+	mov.w r1,(r1,extsym+1)
+	mov.w r6,(r8,extsym-452)
+	mov.w r4,(r11,extsym+572)
+	mov.b r1,(r1,extsym-1718)
+	.text
+	.global movgrgriipostinc
+movgrgrsipostinc:
+	mov.b r0,(r0++,extsym)
+	mov.w r7,(r15++,extsym-1)
+	mov.w r4,(r8++,extsym-2048)
+	mov.b r3,(r7++,extsym+2047)
+	mov.w r1,(r1++,extsym+1)
+	mov.w r6,(r0++,extsym-64)
+	mov.b r7,(r15++,extsym+1060)
+	mov.b r0,(r7++,extsym+847)
+	.text
+	.global movgrgriipredec
+movgrgrsipredec:
+	mov.b r0,(--r0,extsym)
+	mov.w r7,(--r15,extsym-1)
+	mov.w r4,(--r8,extsym-2048)
+	mov.b r3,(--r7,extsym+2047)
+	mov.w r1,(--r1,extsym+1)
+	mov.w r0,(--r15,extsym+1780)
+	mov.w r6,(--r1,extsym+1506)
+	mov.w r7,(--r3,extsym-2033)
+	.text
+	.global movgriigr
+movgrsigr:
+	mov.b (r0,extsym),r0
+	mov.w (r15,extsym-1),r7
+	mov.w (r8,extsym-2048),r4
+	mov.b (r7,extsym+2047),r3
+	mov.w (r1,extsym+1),r1
+	mov.w (r7,extsym+1948),r5
+	mov.b (r3,extsym-844),r4
+	mov.w (r15,extsym+1704),r0
+	.text
+	.global movgriipostincgr
+movgrsipostincgr:
+	mov.b (r0++,extsym),r0
+	mov.w (r15++,extsym-1),r7
+	mov.w (r8++,extsym-2048),r4
+	mov.b (r7++,extsym+2047),r3
+	mov.w (r1++,extsym+1),r1
+	mov.w (r2++,extsym-176),r7
+	mov.w (r8++,extsym+1389),r4
+	mov.b (r3++,extsym+47),r0
+	.text
+	.global movgriipredecgr
+movgrsipredecgr:
+	mov.b (--r0,extsym),r0
+	mov.w (--r15,extsym-1),r7
+	mov.w (--r8,extsym-2048),r4
+	mov.b (--r7,extsym+2047),r3
+	mov.w (--r1,extsym+1),r1
+	mov.b (--r8,extsym+1004),r4
+	mov.w (--r14,extsym-1444),r2
+	mov.b (--r5,extsym-927),r4

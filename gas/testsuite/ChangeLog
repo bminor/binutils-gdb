@@ -1,3 +1,9 @@
+2002-12-20  DJ Delorie  <dj@redhat.com>
+
+	* gas/xstormy16/allinsn.sh: Add tests for 12-bit reloc.
+	* gas/xstormy16/allinsn.s: Likewise.
+	* gas/xstormy16/allinsn.d: Likewise.
+
 2002-12-18  Chris Demetriou  <cgd@broadcom.com>
 
 	* gas/mips/rol.s: Add ".set noat" and some new instructions to test.
