@@ -19,116 +19,142 @@ fi
 
 # per-target:
 
-case "${target}" in
+# Canonicalize the secondary target names.
+if [ -n "$with_targets" ]; then
+    for targ in `echo $with_targets | sed 's/,/ /g'`
+    do
+	result=`$configsub $targ 2>/dev/null`
+	if [ -n "$result" ]; then
+	    canon_targets="$canon_targets $result"
+	else
+	    # Allow targets that config.sub doesn't recognize, like "all".
+	    canon_targets="$canon_targets $targ"
+	fi
+    done
+fi
 
-  sparc-sun-sunos4*) 	my_target=sun4 
-			;;
-  m68k-sun-sunos[34]*)	my_target=sun3
-			;;
-  sparclite*-fujitsu-*) my_target=sun4
-			;;
+all_targets=false
+
+for targ in $target $canon_targets
+do
+
+case "${targ}" in
+
+  sparc-sun-sunos4*) 	ld_target=sun4 ;;
+  m68k-sun-sunos[34]*)	ld_target=sun3 ;;
+  sparclite*-fujitsu-*) ld_target=sun4 ;;
 # start-sanitize-v9
-  sparc64-*-elf*)	my_target=sparc64-elf
-			;;
-  sparc64*)		my_target=sun4
-			;;
+  sparc64-*-elf*)	ld_target=sparc64-elf ;;
+  sparc64*)		ld_target=sun4 ;;
 # end-sanitize-v9
-  sparc*-*-aout)	my_target=sun4
-			;;
-  sparc*-*-elf)		my_target=sun4sol2
-			;;
-  sparc*-*-solaris2*)	my_target=sun4sol2
-			;;
-  i960-wrs-vxworks*)    my_target=i960
-			;;
-  i960-intel-nindy)	my_target=i960
-			;;
-  m68k-wrs-vxworks*)    my_target=vxworks68
-			;;
-  m680[01234]0-wrs-vxworks*) my_target=vxworks68
-			;;
-  m683?2-wrs-vxworks*)  my_target=vxworks68
-			;;
-  sparc*-wrs-vxworks*)  my_target=sun4
-			;;
-  m68k-ericsson-ose)	my_target=ose68
-			;;
-  m680[01234]0-ericsson-ose) my_target=ose68
-			;;
-  m683?2-ericsson-ose)	my_target=ose68
-			;;
-  *-tandem-none)	my_target=st2000 # FIXME needs better name
-			;;
-  i[34]86-*-go32)	my_target=go32
-			;;
-  i[34]86-*-aix*)	my_target=i386-coff
-			;;
-  i[34]86-*-sco*)	my_target=i386-coff
-			;;
-  i[34]86-*-coff)	my_target=i386-coff
-			;;
-  i[34]86-*-bsd)	my_target=i386-bsd
-			;;
-  i[34]86-*-aout)	my_target=i386-aout
-			;;
-  i[34]86-*-sysv*)	my_target=i386-coff
-			;;
-  m88k-*-*)		my_target=m88k-bcs
-			;;
-  a29k-*-udi)		my_target=sa29200
-			;;
-  a29k-*-ebmon)		my_target=ebmon29k
-			;;
-  a29k-*-*)		my_target=coff-a29k
-			;;
-  h8300-*-hms)		my_target=coff-h8300
-			;;
-  h8300h-*-hms)		my_target=coff-h8300h
-			;;
-  h8500-*-hms)		my_target=coff-h8500
-			;;
-  sh-*-*)		my_target=coff-sh	
-			;;
-  m68k-sony-*)		my_target=news
-			;;
-  m68k-hp-bsd*)		my_target=hp300bsd
-			;;
-  m68*-*-aout)		my_target=m68k
-			;;
-  m68*-*-coff)		my_target=m68k-coff
-			;;
-  m68*-*-hpux)		my_target=hp300hpux
-			;;
-  m68*-*-*)		echo '***' "Unknown m68k target vendor for ld:" ${target_vendor} 1>&2
-			exit 1
-			;;
-  hppa*-hp-osf)		my_target=hppaosf
-			;;
-  vax-dec-ultrix* | vax-dec-bsd*) my_target=vax
-			;;
-  mips-dec-ultrix*)	my_target=mips-lit
-			;;
-  mips-sgi-irix*)	my_target=mips-big
-			;;
-  mips-idt-ecoffl*)	my_target=mips-idtl
-			;;
-  mips-idt-ecoff*)	my_target=mips-idt
-			;;
-  mips-dec-bsd*)	my_target=mipsbsd
-			;;
-  z8k-*sim)		my_target=z8ksim
-			;;
-  *-*-aout)		my_target=${target_cpu}-${target_vendor} 
-			;;
-  *-*-coff)		my_target=${target_cpu}-${target_vendor} 
-			;;
+  sparc*-*-aout)	ld_target=sun4 ;;
+  sparc*-*-elf)		ld_target=sun4sol2 ;;
+  sparc*-*-solaris2*)	ld_target=sun4sol2 ;;
+  i960-wrs-vxworks*)    ld_target=i960 ;;
+  i960-intel-nindy)	ld_target=i960 ;;
+  m68k-wrs-vxworks*)    ld_target=vxworks68 ;;
+  m680[01234]0-wrs-vxworks*) ld_target=vxworks68 ;;
+  m683?2-wrs-vxworks*)  ld_target=vxworks68 ;;
+  sparc*-wrs-vxworks*)  ld_target=sun4 ;;
+  m68k-ericsson-ose)	ld_target=ose68 ;;
+  m680[01234]0-ericsson-ose) ld_target=ose68 ;;
+  m683?2-ericsson-ose)	ld_target=ose68 ;;
+  *-tandem-none)	ld_target=st2000 ;; # FIXME needs better name
+  i[34]86-*-go32)	ld_target=go32 ;;
+  i[34]86-*-aix*)	ld_target=i386-coff ;;
+  i[34]86-*-sco*)	ld_target=i386-coff ;;
+  i[34]86-*-lynxos*)	ld_target=i386-lynx ;;
+  i[34]86-*-coff)	ld_target=i386-coff ;;
+  i[34]86-*-bsd)	ld_target=i386-bsd ;;
+  i[34]86-*-aout)	ld_target=i386-aout ;;
+  i[34]86-*-linux)	ld_target=i386-linux ;;
+  i[34]86-*-sysv4*)	ld_target=i386-elf ;;
+  i[34]86-*-elf*)	ld_target=i386-elf ;;
+  i[34]86-*-sysv*)	ld_target=i386-coff ;;
+  m8*-*-*)		ld_target=m88k-bcs ;;
+  a29k-*-udi)		ld_target=sa29200 ;;
+  a29k-*-ebmon)		ld_target=ebmon29k ;;
+  a29k-*-*)		ld_target=coff-a29k ;;
+  h8300-*-hms)		ld_target=coff-h8300 ;;
+  h8300h-*-hms)		ld_target=coff-h8300h ;;
+  h8500-*-hms)		ld_target=coff-h8500 ;;
+  sh-*-*)		ld_target=coff-sh ;;
+  m68k-sony-*)		ld_target=news ;;
+  m68k-hp-bsd*)		ld_target=hp300bsd ;;
+  m68*-*-aout)		ld_target=m68k ;;
+  m68*-*-coff)		ld_target=m68k-coff ;;
+  m68*-*-hpux)		ld_target=hp300hpux ;;
+  m68*-*-lynxos*)	ld_target=m68k-lynx ;;
+  m68*-*-*)
+    echo '***' "Unknown m68k target vendor for ld:" ${target_vendor} 1>&2
+			exit 1 ;;
+  hppa*-hp-osf)		ld_target=hppaosf ;;
+  vax-dec-ultrix* | vax-dec-bsd*) ld_target=vax ;;
+  mips-dec-ultrix*)	ld_target=mips-lit ;;
+  mips-sgi-irix*)	ld_target=mips-big ;;
+  mips-idt-ecoffl*)	ld_target=mips-idtl ;;
+  mips-idt-ecoff*)	ld_target=mips-idt ;;
+  mips-dec-bsd*)	ld_target=mipsbsd ;;
+  mips-*-elf*)		ld_target=mipsb-elf32 ;;
+  alpha-*-osf*)		ld_target=alpha ;;
+  z8k-*-sim | z8k-*-coff) ld_target=z8ksim ;;
+  *-*-aout)		ld_target=${target_cpu}-${target_vendor} ;;
+  *-*-coff)		ld_target=${target_cpu}-${target_vendor} ;;
+
+  all)			ld_target=all ;;
 esac
 
-target_makefile_frag=config/${my_target}.mt
+    if [ "x$ld_target" = "xall" ]; then
+        all_targets=true
+    else
+	if [ ! -f ${srcdir}/config/${ld_target}.mt ] ; then
+	    echo '***' No file ${srcdir}/config/${ld_target}.mt 1>&2
+	    echo '***' GNU LD does not support target ${ld_target} 1>&2
+	    echo '***' Look in ld/configure.in for supported targets 1>&2
+	    exit 1
+	fi
 
-if [ ! -r ${srcdir}/${target_makefile_frag} ]; then
-	echo '***' GNU LD does not support target ${target} 1>&2
-	exit 1
-fi
+	if [ "x$targ" = "x$target" ]; then
+	    target_makefile_frag=${srcdir}/config/${ld_target}.mt
+	else
+	    target_extra_frags="$target_extra_frags ${srcdir}/config/${ld_target}.mt"
+	fi
+    fi
+done
+
+# We don't do any links based on the target system, just makefile config.
+
+# post-target:
+
+rm -f Makefile.tmp Makefile.2
+mv Makefile Makefile.tmp
+
+if [ x${all_targets} = xfalse ]; then
+
+    allfrags="$target_makefile_frag $target_extra_frags"
+
+    # The emulations in all the configured targets.
+    tb=`sed -n '
+    s/EMUL[ 	]*=[ 	]*\([^ 	]*\)/em_\1.o/p
+    ' $allfrags`
+    # uniq the list.
+    f=""
+    for i in $tb ; do
+	case " $f " in
+	*" $i "*) ;;
+	*) f="$f $i" ;;
+	esac
+    done
+    tb="$f"
+
+    echo "EMULATION_OFILES = $tb" >> Makefile.2
+
+else	# all_targets is true
+    echo 'EMULATION_OFILES = $(ALL_EMULATIONS)' >> Makefile.2
+fi	# all_targets is true
+
+cat Makefile.tmp >> Makefile.2
+rm -f Makefile.tmp
+mv Makefile.2 Makefile
 
 mkdir ldscripts 2>/dev/null

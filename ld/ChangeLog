@@ -1,3 +1,19 @@
+Tue Oct 19 15:46:28 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* configure.in (alpha-*-osf*): New target; use alpha.mt.
+	* Makefile.in (ALL_EMULATIONS): Added em_alpha.o.
+	(em_alpha.c): New target; use alpha.sh and alpha.sc.
+	* config/alphaosf.mh (NATIVE_LIB_DIRS, HOSTING_CRT0): Define.
+	* config/alpha.mt: New file.
+	* emulparams/alpha.sh: New file.
+	* scripttempl/alpha.sc: New file.
+
+Fri Oct 15 02:20:04 1993  Doug Evans  (dje@canuck.cygnus.com)
+
+	* ldlang.c (lang_size_sections, lang_common): ALIGN_N can't handle
+	types of different sizes (eg: 64 and 32 bits), so coerce.
+	* ld.h (ALIGN_N): Add warning about usage.
+
 Wed Oct 13 16:02:39 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ldmain.c (enter_global_ref): Just ignore any weak symbol for
