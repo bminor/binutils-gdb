@@ -3742,8 +3742,8 @@ md_estimate_size_before_relax (fragP, segment)
 #ifndef BFD_ASSEMBLER
 void
 md_convert_frag (headers, sec, fragP)
-     object_headers *headers;
-     segT sec;
+     object_headers *headers ATTRIBUTE_UNUSED;
+     segT sec ATTRIBUTE_UNUSED;
      register fragS *fragP;
 #else
 void
@@ -3877,7 +3877,7 @@ int
 md_apply_fix3 (fixP, valp, seg)
      fixS *fixP;		/* The fix we're to put in.  */
      valueT *valp;		/* Pointer to the value of the bits.  */
-     segT seg;			/* Segment fix is from.  */
+     segT seg ATTRIBUTE_UNUSED;	/* Segment fix is from.  */
 {
   register char *p = fixP->fx_where + fixP->fx_frag->fr_literal;
   valueT value = *valp;

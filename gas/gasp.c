@@ -2659,8 +2659,8 @@ do_irp (idx, in, irpc)
 static
 void 
 do_local (idx, line)
-     int idx;
-     sb *line;
+     int idx ATTRIBUTE_UNUSED;
+     sb *line ATTRIBUTE_UNUSED;
 {
   ERROR ((stderr, _("LOCAL outside of MACRO")));
 }

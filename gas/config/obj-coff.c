@@ -171,7 +171,7 @@ tag_find_or_make (name)
 
 static void
 obj_coff_bss (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   if (*input_line_pointer == '\n')
     subseg_new (".bss", get_absolute_expression ());
@@ -183,7 +183,7 @@ obj_coff_bss (ignore)
 
 static void
 obj_coff_weak (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   char *name;
   int c;
@@ -1091,9 +1091,13 @@ coff_frob_symbol (symp, punt)
       set_end = NULL;
     }
 
-  if (next_set_end != NULL
-      && ! *punt)
-    set_end = next_set_end;
+  if (next_set_end != NULL)
+    {
+      if (set_end != NULL)
+	as_warn ("Warning: internal error: forgetting to set endndx of %s",
+		 S_GET_NAME (set_end));
+      set_end = next_set_end;
+    }
 
   if (! *punt
       && S_GET_STORAGE_CLASS (symp) == C_FCN
@@ -1434,9 +1438,10 @@ symbol_dump ()
 #define S_SET_ZEROES(s,v)		((s)->sy_symbol.ost_entry.n_zeroes = (v))
 
 #define MIN(a,b) ((a) < (b)? (a) : (b))
-/* This vector is used to turn an internal segment into a section #
-   suitable for insertion into a coff symbol table
- */
+
+/* This vector is used to turn a gas internal segment number into a
+   section number suitable for insertion into a coff symbol table.
+   This must correspond to seg_info_off_by_4.  */
 
 const short seg_N_TYPE[] =
 {				/* in: segT   out: N_TYPE bits */
@@ -1512,49 +1517,40 @@ static void obj_coff_data PARAMS ((int));
 static void obj_coff_ident PARAMS ((int));
 void obj_coff_section PARAMS ((int));
 
-/* Section stuff
+/* When not using BFD_ASSEMBLER, we permit up to 40 sections.
 
-   We allow more than just the standard 3 sections, infact, we allow
-   40 sections, (though the usual three have to be there).
+   This array maps a COFF section number into a gas section number.
+   Because COFF uses negative section numbers, you must add 4 to the
+   COFF section number when indexing into this array; this is done via
+   the SEG_INFO_FROM_SECTION_NUMBER macro.  This must correspond to
+   seg_N_TYPE.  */
 
-   This structure performs the mappings for us:
-*/
-
-
-typedef struct
+static const segT seg_info_off_by_4[] =
 {
-  segT seg_t;
-  int i;
-} seg_info_type;
-
-static const seg_info_type seg_info_off_by_4[] =
-{
- {SEG_PTV,  },
- {SEG_NTV,  },
- {SEG_DEBUG, },
- {SEG_ABSOLUTE,  },
- {SEG_UNKNOWN,	 },
- {SEG_E0}, {SEG_E1}, {SEG_E2}, {SEG_E3}, {SEG_E4},
- {SEG_E5}, {SEG_E6}, {SEG_E7}, {SEG_E8}, {SEG_E9},
- {SEG_E10},{SEG_E11},{SEG_E12},{SEG_E13},{SEG_E14},
- {SEG_E15},{SEG_E16},{SEG_E17},{SEG_E18},{SEG_E19},
- {SEG_E20},{SEG_E21},{SEG_E22},{SEG_E23},{SEG_E24},
- {SEG_E25},{SEG_E26},{SEG_E27},{SEG_E28},{SEG_E29},
- {SEG_E30},{SEG_E31},{SEG_E32},{SEG_E33},{SEG_E34},
- {SEG_E35},{SEG_E36},{SEG_E37},{SEG_E38},{SEG_E39},
- {(segT)40},
- {(segT)41},
- {(segT)42},
- {(segT)43},
- {(segT)44},
- {(segT)45},
- {(segT)0},
- {(segT)0},
- {(segT)0},
- {SEG_REGISTER}
+ SEG_PTV,
+ SEG_NTV,
+ SEG_DEBUG,
+ SEG_ABSOLUTE,
+ SEG_UNKNOWN,
+ SEG_E0,  SEG_E1,  SEG_E2,  SEG_E3,  SEG_E4,
+ SEG_E5,  SEG_E6,  SEG_E7,  SEG_E8,  SEG_E9,
+ SEG_E10, SEG_E11, SEG_E12, SEG_E13, SEG_E14,
+ SEG_E15, SEG_E16, SEG_E17, SEG_E18, SEG_E19,
+ SEG_E20, SEG_E21, SEG_E22, SEG_E23, SEG_E24,
+ SEG_E25, SEG_E26, SEG_E27, SEG_E28, SEG_E29,
+ SEG_E30, SEG_E31, SEG_E32, SEG_E33, SEG_E34,
+ SEG_E35, SEG_E36, SEG_E37, SEG_E38, SEG_E39,
+ (segT) 40,
+ (segT) 41,
+ (segT) 42,
+ (segT) 43,
+ (segT) 44,
+ (segT) 45,
+ (segT) 0,
+ (segT) 0,
+ (segT) 0,
+ SEG_REGISTER
 };
-
-
 
 #define SEG_INFO_FROM_SECTION_NUMBER(x) (seg_info_off_by_4[(x)+4])
 
@@ -1576,14 +1572,14 @@ segT
 s_get_segment (x)
      symbolS * x;
 {
-  return SEG_INFO_FROM_SECTION_NUMBER (x->sy_symbol.ost_entry.n_scnum).seg_t;
+  return SEG_INFO_FROM_SECTION_NUMBER (x->sy_symbol.ost_entry.n_scnum);
 }
 
 /* calculate the size of the frag chain and fill in the section header
    to contain all of it, also fill in the addr of the sections */
 static unsigned int
 size_section (abfd, idx)
-     bfd * abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      unsigned int idx;
 {
 
@@ -1847,7 +1843,7 @@ do_relocs_for (abfd, h, file_cursor)
 static void
 fill_section (abfd, h, file_cursor)
      bfd * abfd;
-     object_headers *h;
+     object_headers *h ATTRIBUTE_UNUSED;
      unsigned long *file_cursor;
 {
 
@@ -2162,7 +2158,7 @@ obj_coff_ln (appline)
 
 static void
 obj_coff_def (what)
-     int what;
+     int what ATTRIBUTE_UNUSED;
 {
   char name_end;		/* Char after the end of name */
   char *symbol_name;		/* Name of the debug symbol */
@@ -2217,7 +2213,7 @@ unsigned int dim_index;
 
 static void
 obj_coff_endef (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   symbolS *symbolP = 0;
   /* DIM BUG FIX sac@cygnus.com */
@@ -2400,7 +2396,7 @@ obj_coff_endef (ignore)
 
 static void
 obj_coff_dim (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   int dim_index;
 
@@ -2440,7 +2436,7 @@ obj_coff_dim (ignore)
 
 static void
 obj_coff_line (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   int this_base;
   const char *name;
@@ -2485,7 +2481,7 @@ obj_coff_line (ignore)
 
 static void
 obj_coff_size (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   if (def_symbol_in_progress == NULL)
     {
@@ -2501,7 +2497,7 @@ obj_coff_size (ignore)
 
 static void
 obj_coff_scl (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   if (def_symbol_in_progress == NULL)
     {
@@ -2516,7 +2512,7 @@ obj_coff_scl (ignore)
 
 static void
 obj_coff_tag (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   char *symbol_name;
   char name_end;
@@ -2552,7 +2548,7 @@ obj_coff_tag (ignore)
 
 static void
 obj_coff_type (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   if (def_symbol_in_progress == NULL)
     {
@@ -2574,7 +2570,7 @@ obj_coff_type (ignore)
 
 static void
 obj_coff_val (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   if (def_symbol_in_progress == NULL)
     {
@@ -3001,7 +2997,7 @@ tie_tags ()
 static void
 crawl_symbols (h, abfd)
      object_headers *h;
-     bfd * abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
 {
   unsigned int i;
 
@@ -3460,7 +3456,7 @@ obj_coff_add_segment (name)
 
 void
 obj_coff_section (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   /* Strip out the section name */
   char *section_name, *name;
@@ -3541,7 +3537,7 @@ obj_coff_section (ignore)
 
 static void
 obj_coff_text (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   subseg_new (".text", get_absolute_expression ());
 }
@@ -3549,7 +3545,7 @@ obj_coff_text (ignore)
 
 static void
 obj_coff_data (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   if (flag_readonly_data_in_text)
     subseg_new (".text", get_absolute_expression () + 1000);
@@ -3559,7 +3555,7 @@ obj_coff_data (ignore)
 
 static void
 obj_coff_ident (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   segT current_seg = now_seg;		/* save current seg	*/
   subsegT current_subseg = now_subseg;
@@ -3818,7 +3814,7 @@ w_symbols (abfd, where, symbol_rootP)
 
 static void
 obj_coff_lcomm (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   s_lcomm(0);
   return;
@@ -4427,7 +4423,7 @@ const pseudo_typeS obj_pseudo_table[] =
   /* The m88k uses sdef instead of def.  */
   {"sdef", obj_coff_def, 0},
 #endif
-  {NULL}			/* end sentinel */
+  {NULL, NULL, 0}		/* end sentinel */
 };				/* obj_pseudo_table */
 
 #ifdef BFD_ASSEMBLER

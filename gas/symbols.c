@@ -2112,7 +2112,7 @@ symbol_resolved_p (s)
 
 int
 symbol_section_p (s)
-     symbolS *s;
+     symbolS *s ATTRIBUTE_UNUSED;
 {
   if (LOCAL_SYMBOL_CHECK (s))
     return 0;

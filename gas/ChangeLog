@@ -1,5 +1,16 @@
 1999-08-03  Ian Lance Taylor  <ian@zembu.com>
 
+	* config/obj-coff.c (coff_frob_symbol): Always update set_end with
+	next_set_end even if the end symbol is being discarded.
+
+	* gasp.c: Add ATTRIBUTE_UNUSED as needed for non-BFD_ASSEMBLER.
+	* output-file.c, symbols.c, config/tc-i386.c: Likewise.
+	* config/obj-coff.c: Likewise.
+	(seg_info_type): Remove.
+	(seg_info_off_by_4): Change to array of segT.
+	(s_get_segment): Adjust accordingly.
+	(obj_pseudo_table): Fully initialize sentinel entry.
+
 	* config/tc-mips.c (append_insn): Correct INSN_SYNC test.  From
 	Ralf Baechle <ralf@uni-koblenz.de>.
 
