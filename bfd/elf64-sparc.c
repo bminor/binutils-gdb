@@ -1331,11 +1331,9 @@ sparc64_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
       if (p->name != NULL && strcmp (p->name, *namep))
 	{
           (*_bfd_error_handler)
-            (_("Register %%g%d used incompatibly: %s in %s"),
+            (_("Register %%g%d used incompatibly: %s in %s, previously %s in %s"),
              (int) sym->st_value,
-             **namep ? *namep : "#scratch", bfd_archive_filename (abfd));
-          (*_bfd_error_handler)
-            (_("  previously %s in %s"),
+             **namep ? *namep : "#scratch", bfd_archive_filename (abfd),
              *p->name ? p->name : "#scratch", bfd_archive_filename (p->abfd));
 	  return false;
 	}
@@ -1356,10 +1354,8 @@ sparc64_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
 		  if (type > STT_FUNC)
 		    type = 0;
 		  (*_bfd_error_handler)
-		    (_("Symbol `%s' has differing types: %s in %s"),
-		     *namep, "REGISTER", bfd_archive_filename (abfd));
-		  (*_bfd_error_handler)
-		    (_("  previously %s in %s"),
+		    (_("Symbol `%s' has differing types: REGISTER in %s, previously %s in %s"),
+		     *namep, bfd_archive_filename (abfd),
 		     stt_types[type], bfd_archive_filename (p->abfd));
 		  return false;
 		}
@@ -1405,11 +1401,9 @@ sparc64_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
 	    if (type > STT_FUNC)
 	      type = 0;
 	    (*_bfd_error_handler)
-	      (_("Symbol `%s' has differing types: %s in %s"),
-	       *namep, stt_types[type], bfd_archive_filename (abfd));
-	    (*_bfd_error_handler)
-	      (_("  previously %s in %s"),
-	       "REGISTER", bfd_archive_filename (p->abfd));
+	      (_("Symbol `%s' has differing types: %s in %s, previously REGISTER in %s"),
+	       *namep, stt_types[type], bfd_archive_filename (abfd),
+	       bfd_archive_filename (p->abfd));
 	    return false;
 	  }
     }

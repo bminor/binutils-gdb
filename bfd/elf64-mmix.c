@@ -1264,11 +1264,18 @@ mmix_final_link_relocate (howto, input_section, contents,
 	}
       else
 	{
-	  (*_bfd_error_handler)
-	    (_("%s: register relocation against non-register symbol: %s in %s"),
-	     bfd_get_filename (input_section->owner),
-	     symname == NULL || *symname == 0 ? _("(unknown)") : symname,
-	     bfd_get_section_name (symsec->owner, symsec));
+	  /* Note: This is seperated out into two messages in order
+	     to ease the translation into other languages.  */
+	  if (symname == NULL || *symname == 0)
+	    (*_bfd_error_handler)
+	      (_("%s: register relocation against non-register symbol: (unknown) in %s"),
+	       bfd_get_filename (input_section->owner),
+	       bfd_get_section_name (symsec->owner, symsec));
+	  else
+	    (*_bfd_error_handler)
+	      (_("%s: register relocation against non-register symbol: %s in %s"),
+	       bfd_get_filename (input_section->owner), symname,
+	       bfd_get_section_name (symsec->owner, symsec));
 
 	  /* The bfd_reloc_outofrange return value, though intuitively a
 	     better value, will not get us an error.  */

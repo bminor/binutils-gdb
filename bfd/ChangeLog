@@ -1,3 +1,30 @@
+2002-01-30  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* vms-tir.c (cmd_name): New function.
+	(tir_cmd_name): New function.
+	(etir_sta, etir_sto, etir_opr, etir_stc): Use cmd_name().
+	(tir_opr, tir_ctl, tir_cmd): use tir_cmd_name().
+	Fix formatting.
+	
+	* peXXigen.c (pe_print_idata): Rearrange message to aid in
+	translation.
+	(pe_print_pdata):  Rearrange message to aid in translation.
+
+	* libbfd.c (warn_deprecated): Rearrange error message to aid in
+	translation.
+
+	* ihex.c (ihex_write_object_contents): Fix spelling typo.
+
+	* ieee.c (ieee_slurp_external_symbols): Remove spurious space.
+
+	* elf64-sparc.c (sparc64_elf_add_symbol_hook): Rearrange error
+	message to aid in translation.
+
+	* elf64-mmix.c (mmix_final_link_relocate): Rearrange error message
+	to aid in translation.
+
+	* elf32-arm.h (elf32_arm_merge_private_bfd_data): Fix typo.
+
 2002-30-01  Philipp Thomas  <pthomas@suse.de>
 
 	* coff-arm.c, elf32-elf.h: Unify messages.

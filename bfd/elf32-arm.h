@@ -2301,12 +2301,12 @@ Error: %s passes floats in integer registers, whereas %s passes them in FP regis
 	{
 	  if (in_flags & EF_ARM_VFP_FLOAT)
 	    _bfd_error_handler (_("\
-Error: %s uses VFP instructions, whereas %s FPA instructions"),
+Error: %s uses VFP instructions, whereas %s uses FPA instructions"),
 				bfd_archive_filename (ibfd),
 				bfd_get_filename (obfd));
 	  else
 	    _bfd_error_handler (_("\
-Error: %s uses FPA instructions, whereas %s VFP instructions"),
+Error: %s uses FPA instructions, whereas %s uses VFP instructions"),
 				bfd_archive_filename (ibfd),
 				bfd_get_filename (obfd));
 
