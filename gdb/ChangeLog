@@ -1,5 +1,8 @@
 2002-10-20  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386bsd-nat.c (i386bsd_dr_set, i386bsd_dr_get_status): Use
+	DBREG_DRX macro to acces debug registers.
+
 	* Makefile.in (i386obsd-tdep.o): New target.
 
 	* solib-sunos.c: Include "bcache.h" and "regcache.h".
