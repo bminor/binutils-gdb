@@ -1,5 +1,5 @@
 /* BFD back-end for Intel 960 b.out binaries.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
+   Copyright 1990, 91, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -519,7 +519,7 @@ b_out_slurp_reloc_table (abfd, asect, symbols)
 
 
 
-  if (abfd->xvec->header_byteorder_big_p) {
+  if (bfd_header_big_endian (abfd)) {
     /* big-endian bit field allocation order */
     pcrel_mask  = 0x80;
     extern_mask = 0x10;
@@ -545,7 +545,7 @@ b_out_slurp_reloc_table (abfd, asect, symbols)
     unsigned int symnum;
     cache_ptr->address = bfd_h_get_32 (abfd, raw + 0);
     cache_ptr->howto = 0;
-    if (abfd->xvec->header_byteorder_big_p)
+    if (bfd_header_big_endian (abfd))
     {
       symnum = (raw[4] << 16) | (raw[5] << 8) | raw[6];
     }
@@ -699,7 +699,7 @@ b_out_squirt_out_relocs (abfd, section)
   if (!native && natsize != 0)
     return false;
 
-  if (abfd->xvec->header_byteorder_big_p)
+  if (bfd_header_big_endian (abfd))
   {
     /* Big-endian bit field allocation order */
     pcrel_mask  = 0x80;
@@ -795,7 +795,7 @@ b_out_squirt_out_relocs (abfd, section)
       r_idx  = output_section->target_index;
     }
 
-    if (abfd->xvec->header_byteorder_big_p) {
+    if (bfd_header_big_endian (abfd)) {
       raw[4] = (unsigned char) (r_idx >> 16);
       raw[5] = (unsigned char) (r_idx >>  8);
       raw[6] = (unsigned char) (r_idx     );
@@ -929,6 +929,8 @@ b_out_set_arch_mach (abfd, arch, machine)
     case bfd_mach_i960_xa:
     case bfd_mach_i960_ca:
     case bfd_mach_i960_ka_sa:
+    case bfd_mach_i960_jx:
+    case bfd_mach_i960_hx:
     case 0:
       return true;
     default:
@@ -1390,8 +1392,8 @@ const bfd_target b_out_vec_big_host =
 {
   "b.out.big",			/* name */
   bfd_target_aout_flavour,
-  false,			/* data byte order is little */
-  true,				/* hdr byte order is big */
+  BFD_ENDIAN_LITTLE,		/* data byte order is little */
+  BFD_ENDIAN_BIG,		/* hdr byte order is big */
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
    HAS_SYMS | HAS_LOCALS | WP_TEXT | BFD_IS_RELAXABLE ),
@@ -1431,8 +1433,8 @@ const bfd_target b_out_vec_little_host =
 {
   "b.out.little",		/* name */
   bfd_target_aout_flavour,
-  false,			/* data byte order is little */
-  false,			/* header byte order is little */
+  BFD_ENDIAN_LITTLE,		/* data byte order is little */
+  BFD_ENDIAN_LITTLE,		/* header byte order is little */
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
    HAS_SYMS | HAS_LOCALS | WP_TEXT | BFD_IS_RELAXABLE ),

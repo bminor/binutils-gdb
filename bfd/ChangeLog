@@ -1,3 +1,7 @@
+Fri Feb 16 12:46:18 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* bout.c (b_out_set_arch_mach): Recognize bfd_mach_i960_jx.
+
 Thu Feb 15 11:29:13 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Call AC_PROG_CC before configure.host.
