@@ -32,6 +32,7 @@ mt-i960-nindy
 mt-lynx
 mt-m68k
 mt-mips-ecoff
+mt-slite
 mt-sparc-aout
 mt-vxworks
 
