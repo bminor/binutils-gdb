@@ -1,3 +1,25 @@
+Tue Dec  3 23:18:29 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config/tc-ppc.h ({tc,ppc}_comment_chars): Define, so that we can
+	change the comment characters.
+
+	* config/tc-ppc.c (comment_chars): Delete in favor of
+	tc_comment_chars.
+	(ppc_{eabi,solaris}_comment_chars): Eabi and Solaris versions of
+	comment chars.
+	(ppc_comment_chars): Select appropriate comment chars by default.
+	(msolaris): New flag for -m{,no-}solaris.
+	(md_parse_option): Recognize -K pic.  Add support for
+	-m{,no-}solaris.
+	(md_show_usage): Update.
+	(md_begin): Do not set ELF flags if Solaris.
+	(ppc_elf_suffix): @local sets R_PPC_LOCAL24PC relocation.
+	(md_apply_fix3): Add support for R_PPC_LOCAL24PC.
+
+Mon Dec  2 13:48:57 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* as.c (main): Correct handling of flag_always_generate_output.
+
 Sun Dec  1 21:46:05 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-mn10300.c (tc_gen_reloc): Get the addend from

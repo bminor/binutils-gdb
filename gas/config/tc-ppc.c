@@ -110,11 +110,17 @@ static void ppc_pe_tocd PARAMS ((int));
 /* Generic assembler global variables which must be defined by all
    targets.  */
 
-/* Characters which always start a comment.  */
+/* This string holds the chars that always start a comment.  If the
+   pre-processor is disabled, these aren't very useful.  The macro
+   tc_comment_chars points to this.  We use this, rather than the
+   usual comment_chars, so that we can switch for Solaris conventions.  */
+static const char ppc_solaris_comment_chars[] = "#!";
+static const char ppc_eabi_comment_chars[] = "#";
+
 #ifdef TARGET_SOLARIS_COMMENT
-const char comment_chars[] = "#!";
+const char *ppc_comment_chars = ppc_solaris_comment_chars;
 #else
-const char comment_chars[] = "#";
+const char *ppc_comment_chars = ppc_eabi_comment_chars;
 #endif
 
 /* Characters which start a comment at the beginning of a line.  */
@@ -584,6 +590,15 @@ static boolean mrelocatable = false;
 
 /* Flags to set in the elf header */
 static flagword ppc_flags = 0;
+
+/* Whether this is Solaris or not.  */
+#ifdef TARGET_SOLARIS_COMMENT
+#define SOLARIS_P true
+#else
+#define SOLARIS_P false
+#endif
+
+static boolean msolaris = SOLARIS_P;
 #endif
 
 #ifdef OBJ_XCOFF
@@ -706,7 +721,7 @@ md_parse_option (c, arg)
 
     case 'K':
       /* Recognize -K PIC */
-      if (strcmp (arg, "PIC") == 0)
+      if (strcmp (arg, "PIC") == 0 || strcmp (arg, "pic") == 0)
 	{
 	  mrelocatable = true;
 	  ppc_flags |= EF_PPC_RELOCATABLE_LIB;
@@ -789,6 +804,18 @@ md_parse_option (c, arg)
 	  target_big_endian = 1;
 	  set_target_endian = 1;
 	}
+
+      else if (strcmp (arg, "solaris") == 0)
+	{
+	  msolaris = true;
+	  ppc_comment_chars = ppc_solaris_comment_chars;
+	}
+
+      else if (strcmp (arg, "no-solaris") == 0)
+	{
+	  msolaris = false;
+	  ppc_comment_chars = ppc_eabi_comment_chars;
+	}
 #endif
       else
 	{
@@ -850,6 +877,8 @@ PowerPC options:\n\
 -mlittle, -mlittle-endian\n\
 			generate code for a little endian machine\n\
 -mbig, -mbig-endian	generate code for a big endian machine\n\
+-msolaris		generate code for Solaris\n\
+-mno-solaris		do not generate code for Solaris\n\
 -V			print assembler version number\n\
 -Qy, -Qn		ignored\n");
 #endif
@@ -922,7 +951,7 @@ md_begin ()
 
 #ifdef OBJ_ELF
   /* Set the ELF flags if desired. */
-  if (ppc_flags)
+  if (ppc_flags && !msolaris)
     bfd_set_private_flags (stdoutput, ppc_flags);
 #endif
 
@@ -1105,6 +1134,7 @@ ppc_elf_suffix (str_p)
     MAP ("copy",	BFD_RELOC_PPC_COPY),
     MAP ("globdat",	BFD_RELOC_PPC_GLOB_DAT),
     MAP ("local24pc",	BFD_RELOC_PPC_LOCAL24PC),
+    MAP ("local",	BFD_RELOC_PPC_LOCAL24PC),
     MAP ("plt",		BFD_RELOC_32_PLTOFF),
     MAP ("pltrel",	BFD_RELOC_32_PLT_PCREL),
     MAP ("plt@l",	BFD_RELOC_LO16_PLTOFF),
@@ -1262,7 +1292,7 @@ ppc_elf_lcomm(xxx)
 
   /* The third argument to .lcomm is the alignment.  */
   if (*input_line_pointer != ',')
-    align = 3;
+    align = 8;
   else
     {
       ++input_line_pointer;
@@ -1270,7 +1300,7 @@ ppc_elf_lcomm(xxx)
       if (align <= 0)
 	{
 	  as_warn ("ignoring bad alignment");
-	  align = 3;
+	  align = 8;
 	}
     }
 
@@ -4582,8 +4612,17 @@ md_apply_fix3 (fixp, valuep, seg)
 	}
       else
 	{
-	  as_bad_where (fixp->fx_file, fixp->fx_line,
-			"unresolved expression that must be resolved");
+	  char *sfile;
+	  unsigned int sline;
+
+	  /* Use expr_symbol_where to see if this is an expression
+             symbol.  */
+	  if (expr_symbol_where (fixp->fx_addsy, &sfile, &sline))
+	    as_bad_where (fixp->fx_file, fixp->fx_line,
+			  "unresolved expression that must be resolved");
+	  else
+	    as_bad_where (fixp->fx_file, fixp->fx_line,
+			  "unsupported relocation type");
 	  fixp->fx_done = 1;
 	  return 1;
 	}
@@ -4665,6 +4704,12 @@ md_apply_fix3 (fixp, valuep, seg)
 
 	  md_number_to_chars (fixp->fx_frag->fr_literal + fixp->fx_where,
 			      value, 1);
+	  break;
+
+	case BFD_RELOC_PPC_LOCAL24PC:
+	  if (!fixp->fx_pcrel)
+	    abort ();
+
 	  break;
 
 	default:
