@@ -1,3 +1,11 @@
+Mon Jan 31 07:19:30 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
+
+	* Makefile.in: Support for Gnu ASsembler Preprocessor.
+	* gasp.c: New file.
+	* read.c (s_lcomm): Align lcomm data.
+	* config/tc-z8k.c (tc_reloc_mangle): Don't allow subtraction 
+	from different sections.
+
 Sun Jan 30 14:58:26 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* write.c (write_object_file): If tc_frob_file is defined, call it

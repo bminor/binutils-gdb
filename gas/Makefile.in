@@ -231,7 +231,7 @@ OBJS = \
 
 #### host, target, and site specific Makefile frags come in here.
 
-all: as.new
+all: as.new gasp.new
 	@srcroot=`cd $(srcroot); pwd`; export srcroot; \
 	(cd doc ; $(MAKE) $(FLAGS_TO_PASS) all)
 
@@ -271,6 +271,9 @@ STAGESTUFF = *.o as.new
 as.new: $(OBJS) $(LIBS)
 	$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o as.new $(OBJS) $(LIBS) $(LOADLIBES)
 
+gasp.new: gasp.o
+	$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o gasp.new gasp.o $(LIBS) $(LOADLIBES)
+
 installcheck:
 	@echo No installcheck target is available yet for the GNU assembler.
 
@@ -297,6 +300,7 @@ config-stamp: Makefile
 
 # Compiling object files from source files.
 
+gasp.o : gasp.c
 app.o : app.c as.h host.h targ-env.h obj-format.h \
   targ-cpu.h struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h 
@@ -434,12 +438,23 @@ install:
 	  ln $(bindir)/$$n $(tooldir)/bin/as \
 	   || $(INSTALL_PROGRAM) as.new $(tooldir)/bin/as; \
 	else true; fi
+	srcroot=`cd $(srcroot); pwd`; export srcroot; \
+	$(INSTALL_XFORM) gasp.new $(bindir)/gasp; \
+	n=`t='$(program_transform_name)'; echo gasp | sed -e "" $$t`; \
+	if [ -d $(tooldir) ]; then \
+	  if [ -d $(tooldir)/bin ] ; then true ; else mkdir $(tooldir)/bin ; fi; \
+	  rm -f $(tooldir)/bin/gasp; \
+	  ln $(bindir)/$$n $(tooldir)/bin/gasp \
+	   || $(INSTALL_PROGRAM) gasp $(tooldir)/bin/gasp; \
+	else true; fi
 
 # Cancel installation by deleting the installed files.
 uninstall:
 	-n=`t='$(program_transform_name)'; echo as | sed -e "" $$t`; \
 	rm -f $(bindir)/$$n; \
 	rm -f $(mandir)/$$n.1
+	-n=`t='$(program_transform_name)'; echo gasp | sed -e "" $$t`; \
+	rm -f $(bindir)/$$n; \
 
 # These exist for maintenance purposes.
 

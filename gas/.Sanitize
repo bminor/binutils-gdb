@@ -73,6 +73,7 @@ flonum-mult.c
 flonum.h
 frags.c
 frags.h
+gasp.c
 hash.c
 hash.h
 hex-value.c
