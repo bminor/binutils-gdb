@@ -1,5 +1,13 @@
 2002-01-14   Richard Earnshaw  <rearnsha@arm.com>
 
+	* gas/arm/armv1.s, arm/armv1.d, arm/fpa-mem.s, arm/fpa-mem.d
+	arm/fpa-monadic.s, arm/fpa-monadic.d, arm/fpa-dyadic.s,
+	arm/fpa-dyadic.d: New tests.
+	* gas/arm/le-fpconst.d (objdump): pass --section=.text
+	* gas/arm/arm.exp: Add new tests.  Run le-fpconst test on elf targets.
+
+2002-01-14   Richard Earnshaw  <rearnsha@arm.com>
+
 	* gas/arm/armv1-bad.s gas/arm/armv1-bad.l: New files.
 	* gas/arm/arm.exp (run_error_test): New proc.
 	(armv1-bad): New error test.

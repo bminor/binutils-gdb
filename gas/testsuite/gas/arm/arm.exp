@@ -19,6 +19,8 @@ if {[istarget *arm*-*-*] || [istarget "xscale-*-*"]} then {
 
     run_dump_test "ldconst"
 
+    run_dump_test "armv1"
+
     run_errors_test "armv1-bad" "-marm1" "ARM v1 errors"
 
     gas_test "arm3.s" "-marm3" $stdoptlist "Arm 3 instructions"
@@ -38,6 +40,12 @@ if {[istarget *arm*-*-*] || [istarget "xscale-*-*"]} then {
     gas_test "immed.s" "" $stdoptlist "immediate expressions"
 
     gas_test "float.s" "" $stdoptlist "Core floating point instructions"
+
+    run_dump_test "fpa-monadic"
+
+    run_dump_test "fpa-dyadic"
+
+    run_dump_test "fpa-mem"
 
     run_dump_test "xscale"
 
