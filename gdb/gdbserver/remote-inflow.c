@@ -44,8 +44,7 @@ char registers[REGISTER_BYTES];
 #include <sys/ptrace.h>
 
 /* Start an inferior process and returns its pid.
-   ALLARGS is a vector of program-name and args.
-   ENV is the environment vector to pass.  */
+   ALLARGS is a vector of program-name and args. */
 
 int
 create_inferior (program, allargs)
@@ -60,11 +59,21 @@ create_inferior (program, allargs)
 
   if (pid == 0)
     {
+      int pgrp;
+
+      /* Switch child to it's own process group so that signals won't
+	 directly affect gdbserver. */
+
+      pgrp = getpid();
+      setpgrp(0, pgrp);
+      ioctl (0, TIOCSPGRP, &pgrp);
+
       ptrace (PTRACE_TRACEME);
 
       execv (program, allargs);
 
-      fprintf (stderr, "Cannot exec %s: %s.\n", program,
+      fprintf (stderr, "GDBserver (process %d):  Cannot exec %s: %s.\n",
+	       getpid(), program,
 	       errno < sys_nerr ? sys_errlist[errno] : "unknown error");
       fflush (stderr);
       _exit (0177);
@@ -317,10 +326,19 @@ write_inferior_memory (memaddr, myaddr, len)
 
   for (i = 0; i < count; i++, addr += sizeof (int))
     {
-      errno = 0;
-      ptrace (PTRACE_POKETEXT, inferior_pid, addr, buffer[i]);
-      if (errno)
-	return errno;
+      while (1)
+	{
+	  errno = 0;
+	  ptrace (PTRACE_POKETEXT, inferior_pid, addr, buffer[i]);
+	  if (errno)
+	    {
+	      fprintf(stderr, "ptrace (PTRACE_POKETEXT): errno=%d, inferior_pid=0x%x, addr=0x%x, buffer[i] = 0x%x\n", errno, inferior_pid, addr, buffer[i]);
+	      fprintf(stderr, "Sleeping for 1 second\n");
+	      sleep(1);
+	    }
+	  else
+	    break;
+	}
     }
 
   return 0;

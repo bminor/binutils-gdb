@@ -1,3 +1,10 @@
+Mon Aug  2 08:42:50 1993  Stu Grossman  (grossman at cygnus.com)
+
+	* gdbserver/remote-inflow.c (create_inferior):  Fix comments, and
+	error msg.  Setup seperate process group for child.
+	* (write_inferior_memory):  Sleep for 1 second and retry on ptrace
+	failure.
+
 Sun Aug  1 22:58:18 1993  Stu Grossman  (grossman at cygnus.com)
 
 	* config/i386/i386lynx.mh (NATDEPFILES):  Drop coredep (for now).
