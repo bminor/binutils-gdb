@@ -1,3 +1,13 @@
+1999-08-24  Nick Clifton  <nickc@cygnus.com>
+
+	From a patch submitted by Roland McGrath  <roland@baalperazim.frob.com>
+
+	* configure.tgt (arm-*-netbsd*): New target.
+	* Makefile.am (ALL_EMULATIONS): Add earmnbsd.o.
+	(earmnbsd.c): New rule with deps.
+	* Makefile.on: Regenerate.
+	* emulparams/armnbsd.sh: New file.
+
 1999-08-23  Nick Clifton  <nickc@cygnus.com>
 
 	* emulparams/elf32mcore.sh (PARSE_AND_LIST_ARGS): Define.
