@@ -6,23 +6,29 @@ Mon Feb  6 14:44:36 1995  Rob Savoye  <rob@darkstar.cygnus.com>
 	GDB.
 	* mips-tdep.c: Add LSI33k register names and processor type.
 
-Sun Feb  5 20:32:44 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
-
 start-sanitize-gdbtk
+Sun Feb  5 20:32:44 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 	* gdbtk.c (gdb_disassemble): Deference pointer to function before
 	calling it (pre-ANSI compilers generally require this).
-
 end-sanitize-gdbtk
+
+Sat Feb  4 13:29:52 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* config/m68k/est.mt (TDEPFILES): Remove m68k-pinsn.o.
+
 Fri Feb  3 16:47:31 1995  Kung Hsu  <kung@mexican.cygnus.com>
 
 	* ser-go32-para.c (dos_read): fix syntax errors.
 
 Fri Feb  3 11:19:20 1995  Stu Grossman  (grossman@cygnus.com)
 
-	* core.c (dis_asm_read_memory), defs.h, gdbtk.c (gdb_disassemble),
-	top.c :  Get rid of dis_asm_read_memory_hook.  We can now call the
-	disassemblers directly and have no need for this hook anymore.
-	* defs.h, printcmd.c:  Make print_insn be static.
+	* core.c (dis_asm_read_memory), defs.h, top.c: Get rid of
+	dis_asm_read_memory_hook.  We can now call the disassemblers
+	directly and have no need for this hook anymore.
+start-sanitize-gdbtk
+	* gdbtk.c (gdb_disassemble): Ditto.
+end-sanitize-gdbtk
+	* defs.h, printcmd.c: Make print_insn be static.
 
 	* ser-go32.c (dos_comisr):  Make this 8 bit clean.
 	* (dos_open dos_close):  Allow multiple opens to the same device.
@@ -43,7 +49,7 @@ Thu Feb  2 19:02:45 1995  Rob Savoye  <rob@darkstar.cygnus.com>
 
 Thu Feb  2 16:11:04 1995  Kung Hsu  <kung@mexican.cygnus.com>
 
-	* config/arc/.Sanitize: New file for config/arc directory.
+start-sanitize-arc
 	* config/arc/arc.mt: new target makefile for arc processor.
 	* config/arc/tm-arc.h: new target header for arc processor.
 	* config/arc/go32.mh: new go32 host makefile for arc processor.
@@ -51,8 +57,8 @@ Thu Feb  2 16:11:04 1995  Kung Hsu  <kung@mexican.cygnus.com>
 	* arc-tdep.c: new target dependent codes for arc processor.
 	* remote-arc.c: new file for arc-specific protocol through
 	parallel line.
+end-sanitize-arc
 	* ser-go32-para.c: new file for go32 parallel port communication.
-	* .Sanitize: sanitize arc specific files out.
 
 Thu Feb  2 13:58:40 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
