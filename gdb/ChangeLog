@@ -1,3 +1,40 @@
+2001-05-06  Mark Kettenis  <kettenis@gnu.org>
+
+	Implement attach/detach for multi-threaded programs on Linux.
+	* thread-db.c (keep_thread_db): Adjust comment.
+	(deactivate_target): Removed.
+	(thread_db_new_objfile): Don't call deactivate_target.  Implement
+	guts of deactivate_target inline instead.
+	(attach_thread): Call ATTACH_LWP unconditionally if defined.
+	(thread_db_attach): New function.
+	(thread_db_detach): Don't call deactivate_target.  Do necessary
+	cleanup inline instead.  Set inferior_ptid to LWP corresponding to
+	the current user-level thread.
+	(thread_db_kill): Set inferior_ptid to LWP corresponding to the
+	current user-level thread.
+	(thread_db_create_inferior): Deactivate target vector if
+	KEEP_THREAD_DB is zero.
+	(thread_db_mourn_inferior): Don't call deactivate_target.  Do
+	necessary cleanup inline instead.
+	(init_thread_db_ops): Initialize to_attach field to
+	thread_db_attach.
+	* lin-lwp.c (lin_lwp_mourn_inferior): Remove prototype.
+	(stop_wait_callback): Add prototype.
+	(init_lwp_list): Add comment about when to re-initialize the LWP
+	list.
+	(lin_lwp_attach_lwp): Only call ptrace for cloned processes.
+	Avoid adding publicates to the LWP list.  Only mark an LWP as
+	signalled if it doesn't correspond to a cloned process.
+	(lin_lwp_attach): Add initial process to the LWP list.  Make sure
+	it's stopped and fake a SIGSTOP.
+	(detach_callback): New function.
+	(lin_lwp_detach): Implement.
+	(lin_lwp_create_inferior): Don't re-initialize LWP list here.
+	Call child_ops.to_create_inferior directly instead of via
+	target_beneath local.
+	(lin_lwp_mourn_inferior): Call child_ops.to_mourn_inferior
+	directly instead of via target_beneath local.
+
 2001-05-06  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* symtab.c (lookup_symtab_1, lookup_partial_symtab): Use basename

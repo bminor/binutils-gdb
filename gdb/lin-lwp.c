@@ -151,10 +151,13 @@ static sigset_t blocked_mask;
 
 
 /* Prototypes for local functions.  */
-static void lin_lwp_mourn_inferior (void);
+static int stop_wait_callback (struct lwp_info *lp, void *data);
 
 
-/* Initialize the list of LWPs.  */
+/* Initialize the list of LWPs.  Note that this module, contrary to
+   what GDB's generic threads layer does for its thread list,
+   re-initializes the LWP lists whenever we mourn or detach (which
+   doesn't involve mourning) the inferior.  */
 
 static void
 init_lwp_list (void)
@@ -344,26 +347,96 @@ lin_lwp_attach_lwp (ptid_t ptid, int verbose)
   if (verbose)
     printf_filtered ("[New %s]\n", target_pid_to_str (ptid));
 
-  if (ptrace (PTRACE_ATTACH, GET_LWP (ptid), 0, 0) < 0)
+  /* We assume that we're already tracing the initial process.  */
+  if (is_cloned (ptid) && ptrace (PTRACE_ATTACH, GET_LWP (ptid), 0, 0) < 0)
     error ("Can't attach %s: %s", target_pid_to_str (ptid), strerror (errno));
 
-  lp = add_lwp (ptid);
-  lp->signalled = 1;
+  lp = find_lwp_pid (ptid);
+  if (lp == NULL)
+    lp = add_lwp (ptid);
+
+  if (is_cloned (ptid))
+    lp->signalled = 1;
 }
 
 static void
 lin_lwp_attach (char *args, int from_tty)
 {
+  struct lwp_info *lp;
+
   /* FIXME: We should probably accept a list of process id's, and
      attach all of them.  */
-  error("Not implemented yet");
+  child_ops.to_attach (args, from_tty);
+
+  /* Add the initial process as the first LWP to the list.  */
+  lp = add_lwp (BUILD_LWP (inferior_ptid, inferior_ptid));
+
+  /* Make sure the initial process is stopped.  The user-level threads
+     layer might want to poke around in the inferior, and that won't
+     work if things haven't stabilized yet.  */
+  lp->signalled = 1;
+  stop_wait_callback (lp, NULL);
+  gdb_assert (lp->status == 0);
+
+  /* Fake the SIGSTOP that core GDB expects.  */
+  lp->status = W_STOPCODE (SIGSTOP);
+}
+
+static int
+detach_callback (struct lwp_info *lp, void *data)
+{
+  gdb_assert (lp->status == 0 || WIFSTOPPED (lp->status));
+
+  if (debug_lin_lwp && lp->status)
+    fprintf_unfiltered (gdb_stdlog, "Pending %s for LWP %d on detach.\n",
+			strsignal (WSTOPSIG (lp->status)), GET_LWP (lp->ptid));
+
+  while (lp->signalled && lp->stopped)
+    {
+      if (ptrace (PTRACE_CONT, GET_LWP (lp->ptid), 0,
+		  WSTOPSIG (lp->status)) < 0)
+	error ("Can't continue %s: %s", target_pid_to_str (lp->ptid),
+	       strerror (errno));
+
+      lp->stopped = 0;
+      lp->status = 0;
+      stop_wait_callback (lp, NULL);
+
+      gdb_assert (lp->status == 0 || WIFSTOPPED (lp->status));
+    }
+
+  if (is_cloned (lp->ptid))
+    {
+      if (ptrace (PTRACE_DETACH, GET_LWP (lp->ptid), 0,
+		  WSTOPSIG (lp->status)) < 0)
+	error ("Can't detach %s: %s", target_pid_to_str (lp->ptid),
+	       strerror (errno));
+
+      delete_lwp (lp->ptid);
+    }
+
+  return 0;
 }
 
 static void
 lin_lwp_detach (char *args, int from_tty)
 {
-  /* FIXME: Provide implementation when we implement lin_lwp_attach.  */
-  error ("Not implemented yet");
+  iterate_over_lwps (detach_callback, NULL);
+
+  /* Only the initial (uncloned) process should be left right now.  */
+  gdb_assert (num_lwps == 1);
+
+  trap_ptid = null_ptid;
+
+  /* Destroy LWP info; it's no longer valid.  */
+  init_lwp_list ();
+
+  /* Restore the original signal mask.  */
+  sigprocmask (SIG_SETMASK, &normal_mask, NULL);
+  sigemptyset (&blocked_mask);
+
+  inferior_ptid = GET_PID (inferior_ptid);
+  child_ops.to_detach (args, from_tty);
 }
 
 
@@ -899,37 +972,22 @@ lin_lwp_kill (void)
 static void
 lin_lwp_create_inferior (char *exec_file, char *allargs, char **env)
 {
-  struct target_ops *target_beneath;
-
-  init_lwp_list ();
-
-#if 0
-  target_beneath = find_target_beneath (&lin_lwp_ops);
-#else
-  target_beneath = &child_ops;
-#endif
-  target_beneath->to_create_inferior (exec_file, allargs, env);
+  child_ops.to_create_inferior (exec_file, allargs, env);
 }
 
 static void  
 lin_lwp_mourn_inferior (void)
 {
-  struct target_ops *target_beneath;
-
-  init_lwp_list ();
-
   trap_ptid = null_ptid;
+
+  /* Destroy LWP info; it's no longer valid.  */
+  init_lwp_list ();
 
   /* Restore the original signal mask.  */
   sigprocmask (SIG_SETMASK, &normal_mask, NULL);
   sigemptyset (&blocked_mask);
 
-#if 0
-  target_beneath = find_target_beneath (&lin_lwp_ops);
-#else
-  target_beneath = &child_ops;
-#endif
-  target_beneath->to_mourn_inferior ();
+  child_ops.to_mourn_inferior ();
 }
 
 static void
