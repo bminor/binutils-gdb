@@ -1,3 +1,9 @@
+2004-10-07  Richard Sandiford  <rsandifo@redhat.com>
+
+	* elf64-mips.c (mips_elf64_write_rel): Use STN_UNDEF for relocs
+	against the absolute section.
+	(mips_elf64_write_rela): Likewise.
+
 2004-10-07  Jan Beulich <jbeulich@novell.com>
 
 	* elf.c (elf_find_function): Don't generally check for matching
