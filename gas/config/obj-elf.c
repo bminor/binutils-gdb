@@ -65,12 +65,9 @@ static void obj_elf_type PARAMS ((int));
 static void obj_elf_ident PARAMS ((int));
 static void obj_elf_weak PARAMS ((int));
 static void obj_elf_local PARAMS ((int));
-static void obj_elf_common PARAMS ((int));
 static void obj_elf_symver PARAMS ((int));
 static void obj_elf_vtable_inherit PARAMS ((int));
 static void obj_elf_vtable_entry PARAMS ((int));
-static void obj_elf_data PARAMS ((int));
-static void obj_elf_text PARAMS ((int));
 static void obj_elf_subsection PARAMS ((int));
 static void obj_elf_popsection PARAMS ((int));
 
@@ -256,7 +253,7 @@ elf_file_symbol (s)
 #endif
 }
 
-static void
+void
 obj_elf_common (is_common)
      int is_common;
 {
@@ -867,7 +864,7 @@ obj_elf_section (push)
 
 /* Change to the .data section.  */
 
-static void
+void
 obj_elf_data (i)
      int i;
 {
@@ -886,7 +883,7 @@ obj_elf_data (i)
 
 /* Change to the .text section.  */
 
-static void
+void
 obj_elf_text (i)
      int i;
 {

@@ -52,9 +52,12 @@ static void   dump_literals PARAMS ((int));
 static void   check_literals PARAMS ((int, int));
 static void   mcore_s_text    PARAMS ((int));
 static void   mcore_s_data    PARAMS ((int));
-#ifdef OBJ_ELF
 static void   mcore_s_section PARAMS ((int));
+static void   mcore_s_bss     PARAMS ((int));
+#ifdef OBJ_ELF
+static void   mcore_s_comm    PARAMS ((int));
 #endif
+
 
 /* Several places in this file insert raw instructions into the
    object. They should use MCORE_INST_XXX macros to get the opcodes
@@ -163,7 +166,6 @@ const pseudo_typeS md_pseudo_table[] =
   { "import",   s_ignore,         0 },
   { "literals", mcore_s_literals, 0 },
   { "page",     listing_eject,    0 },
-  { "bss",      s_lcomm_bytes,    1 },
 
   /* The following are to intercept the placement of data into the text
      section (eg addresses for a switch table), so that the space they
@@ -195,13 +197,15 @@ const pseudo_typeS md_pseudo_table[] =
   /* Allow for the effect of section changes.  */
   { "text",      mcore_s_text,    0 },
   { "data",      mcore_s_data,    0 },
-  
-#ifdef OBJ_ELF
+  { "bss",       mcore_s_bss,     1 },
+#ifdef OBJ_EF
+  { "comm",      mcore_s_comm,    0 },
+#endif
   { "section",   mcore_s_section, 0 },
   { "section.s", mcore_s_section, 0 },
   { "sect",      mcore_s_section, 0 },
   { "sect.s",    mcore_s_section, 0 },
-#endif  
+  
   { 0,          0,                0 }
 };
 
@@ -302,13 +306,20 @@ mcore_stringer (append_zero)
   check_literals (2, 0);
 }
 
+/* Handle the section changing pseudo-ops.  These call through to the
+   normal implementations, but they dump the literal pool first.  */
+
 static void
 mcore_s_text (ignore)
      int ignore;
 {
   dump_literals (0);
   
+#ifdef OBJ_ELF
+  obj_elf_text (ignore);
+#else
   s_text (ignore);
+#endif
 }
 
 static void
@@ -317,8 +328,46 @@ mcore_s_data (ignore)
 {
   dump_literals (0);
   
+#ifdef OBJ_ELF
+  obj_elf_data (ignore);
+#else
   s_data (ignore);
+#endif
 }
+
+static void
+mcore_s_section (ignore)
+     int ignore;
+{
+  dump_literals (0);
+
+#ifdef OBJ_ELF
+  obj_elf_section (ignore);
+#endif
+#ifdef OBJ_COFF
+  obj_coff_section (ignore);
+#endif
+}
+
+static void
+mcore_s_bss (needs_align)
+     int needs_align;
+{
+  dump_literals (0);
+  
+  s_lcomm_bytes (needs_align);
+}
+
+#ifdef OBJ_ELF
+static void
+mcore_s_comm (needs_align)
+     int needs_align;
+{
+  dump_literals (0);
+  
+  obj_elf_common (needs_align);
+}
+#endif
 
 /* This function is called once, at assembler startup time.  This should
   set up all the tables, etc that the MD part of the assembler needs.  */
@@ -2168,16 +2217,5 @@ mcore_fix_adjustable (fixP)
     return 0;
 
   return 1;
-}
-
-/* Handle the .section pseudo-op.  This is like the usual one, but it
-   dumps the literal pool before changing the section.  */
-static void
-mcore_s_section (ignore)
-     int ignore;
-{
-  dump_literals (0);
-
-  obj_elf_section (ignore);
 }
 #endif /* OBJ_ELF */

@@ -1,3 +1,21 @@
+1999-06-23  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-mcore.c (md_pseudo_table): Add .comm for ELF and allow
+	.section for COFF.
+	(mcore_s_text): Call obj_elf_text for ELF target.
+	(mcore_s_data): Call obj_elf_data for ELF target.
+	(mcore_s_section): No longer ELF specific.  Call obj_coff_section
+	for COFF target.
+	(mcore_s_bss): New function:  Dump literal table before changing
+	sections.
+	(mcore_s_comm): New function:  Dump literal table before changing
+	sections.
+	
+	* config/obj-elf.c (obj_elf_common, obj_elf_data, obj_elf_text):
+	No longer static functions.
+	* config/obj-elf.h (obj_elf_common, obj_elf_data, obj_elf_text):
+	Provide prototypes for these functions.
+
 1999-06-22  Ian Lance Taylor  <ian@zembu.com>
 
 	* subsegs.c (subseg_text_p): Rewrite non BFD_ASSEMBLER case to use
