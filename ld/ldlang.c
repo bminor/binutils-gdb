@@ -84,7 +84,7 @@ static void output_section_callback
   PARAMS ((lang_wild_statement_type *, asection *,
 	   lang_input_statement_type *, PTR));
 static lang_input_statement_type *lookup_name PARAMS ((const char *));
-static void load_symbols
+static boolean load_symbols
   PARAMS ((lang_input_statement_type *, lang_statement_list_type *));
 static void wild
   PARAMS ((lang_wild_statement_type *, const char *, const char *,
@@ -360,7 +360,8 @@ walk_wild (s, section, file, callback, data)
 
       /* Perform the iteration over a single file.  */
       f = lookup_name (file);
-      walk_wild_file (s, section, f, callback, data);
+      if (f)
+	walk_wild_file (s, section, f, callback, data);
     }
 }
 
@@ -1425,14 +1426,15 @@ lookup_name (name)
       || search->filename == (const char *) NULL)
     return search;
 
-  load_symbols (search, (lang_statement_list_type *) NULL);
+  if (! load_symbols (search, (lang_statement_list_type *) NULL))
+    return NULL;
 
   return search;
 }
 
 /* Get the symbols for an input file.  */
 
-static void
+static boolean
 load_symbols (entry, place)
      lang_input_statement_type *entry;
      lang_statement_list_type *place;
@@ -1440,7 +1442,7 @@ load_symbols (entry, place)
   char **matching;
 
   if (entry->loaded)
-    return;
+    return true;
 
   ldfile_open_file (entry);
 
@@ -1449,12 +1451,13 @@ load_symbols (entry, place)
     {
       bfd_error_type err;
       lang_statement_list_type *hold;
-
+      boolean bad_load = true;
+      
       err = bfd_get_error ();
 
       /* See if the emulation has some special knowledge.  */
       if (ldemul_unrecognized_file (entry))
-	return;
+	return true;
 
       if (err == bfd_error_file_ambiguously_recognized)
 	{
@@ -1468,8 +1471,10 @@ load_symbols (entry, place)
 	}
       else if (err != bfd_error_file_not_recognized
 	       || place == NULL)
-	einfo (_("%F%B: file not recognized: %E\n"), entry->the_bfd);
-
+	  einfo (_("%F%B: file not recognized: %E\n"), entry->the_bfd);
+      else
+	bad_load = false;
+      
       bfd_close (entry->the_bfd);
       entry->the_bfd = NULL;
 
@@ -1486,11 +1491,11 @@ load_symbols (entry, place)
 
       stat_ptr = hold;
 
-      return;
+      return ! bad_load;
     }
 
   if (ldemul_recognized_file (entry))
-    return;
+    return true;
 
   /* We don't call ldlang_add_file for an archive.  Instead, the
      add_symbols entry point will call ldlang_add_file, via the
@@ -1510,32 +1515,46 @@ load_symbols (entry, place)
     case bfd_archive:
       if (entry->whole_archive)
 	{
-	  bfd *member = bfd_openr_next_archived_file (entry->the_bfd,
-						      (bfd *) NULL);
-	  while (member != NULL)
+	  bfd * member = NULL;
+	  boolean loaded = true;
+
+	  for (;;)
 	    {
+	      member = bfd_openr_next_archived_file (entry->the_bfd, member);
+
+	      if (member == NULL)
+		break;
+	      
 	      if (! bfd_check_format (member, bfd_object))
-		einfo (_("%F%B: object %B in archive is not object\n"),
-		       entry->the_bfd, member);
+		{
+		  einfo (_("%F%B: member %B in archive is not an object\n"),
+			 entry->the_bfd, member);
+		  loaded = false;
+		}
+
 	      if (! ((*link_info.callbacks->add_archive_element)
 		     (&link_info, member, "--whole-archive")))
 		abort ();
+
 	      if (! bfd_link_add_symbols (member, &link_info))
-		einfo (_("%F%B: could not read symbols: %E\n"), member);
-	      member = bfd_openr_next_archived_file (entry->the_bfd,
-						     member);
+		{
+		  einfo (_("%F%B: could not read symbols: %E\n"), member);
+		  loaded = false;
+		}
 	    }
 
-	  entry->loaded = true;
-
-	  return;
+	  entry->loaded = loaded;
+	  return loaded;
 	}
+      break;
     }
 
-  if (! bfd_link_add_symbols (entry->the_bfd, &link_info))
+  if (bfd_link_add_symbols (entry->the_bfd, &link_info))
+    entry->loaded = true;
+  else
     einfo (_("%F%B: could not read symbols: %E\n"), entry->the_bfd);
 
-  entry->loaded = true;
+  return entry->loaded;
 }
 
 /* Handle a wild statement.  SECTION or FILE or both may be NULL,
@@ -1929,7 +1948,8 @@ open_input_bfds (s, force)
 
 	      lang_list_init (&add);
 
-	      load_symbols (&s->input_statement, &add);
+	      if (! load_symbols (&s->input_statement, &add))
+		config.make_executable = false;
 
 	      if (add.head != NULL)
 		{
