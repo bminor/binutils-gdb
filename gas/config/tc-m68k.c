@@ -762,7 +762,49 @@ tc_gen_reloc (section, fixp)
     abort ();
 
   if (fixp->fx_r_type != BFD_RELOC_NONE)
-    code = fixp->fx_r_type;
+    {
+      code = fixp->fx_r_type;
+
+      /* Since DIFF_EXPR_OK is defined in tc-m68k.h, it is possible
+         that fixup_segment converted a non-PC relative reloc into a
+         PC relative reloc.  In such a case, we need to convert the
+         reloc code.  */
+      if (fixp->fx_pcrel)
+	{
+	  switch (code)
+	    {
+	    case BFD_RELOC_8:
+	      code = BFD_RELOC_8_PCREL;
+	      break;
+	    case BFD_RELOC_16:
+	      code = BFD_RELOC_16_PCREL;
+	      break;
+	    case BFD_RELOC_32:
+	      code = BFD_RELOC_32_PCREL;
+	      break;
+	    case BFD_RELOC_8_PCREL:
+	    case BFD_RELOC_16_PCREL:
+	    case BFD_RELOC_32_PCREL:
+	    case BFD_RELOC_8_GOT_PCREL:
+	    case BFD_RELOC_16_GOT_PCREL:
+	    case BFD_RELOC_32_GOT_PCREL:
+	    case BFD_RELOC_8_GOTOFF:
+	    case BFD_RELOC_16_GOTOFF:
+	    case BFD_RELOC_32_GOTOFF:
+	    case BFD_RELOC_8_PLT_PCREL:
+	    case BFD_RELOC_16_PLT_PCREL:
+	    case BFD_RELOC_32_PLT_PCREL:
+	    case BFD_RELOC_8_PLTOFF:
+	    case BFD_RELOC_16_PLTOFF:
+	    case BFD_RELOC_32_PLTOFF:
+	      break;
+	    default:
+	      as_bad_where (fixp->fx_file, fixp->fx_line,
+			    "Cannot make %s relocation PC relative",
+			    bfd_get_reloc_code_name (code));
+	    }
+	}
+    }
   else
     {
 #define F(SZ,PCREL)		(((SZ) << 1) + (PCREL))
@@ -794,16 +836,12 @@ tc_gen_reloc (section, fixp)
 #else
   if (!fixp->fx_pcrel)
     reloc->addend = fixp->fx_addnumber;
-  else if ((fixp->fx_addsy->bsym->flags & BSF_SECTION_SYM) != 0)
+  else
     reloc->addend = (section->vma
 		     + (fixp->fx_pcrel_adjust == 64
 			? -1 : fixp->fx_pcrel_adjust)
 		     + fixp->fx_addnumber
 		     + md_pcrel_from (fixp));
-  else
-    reloc->addend = (fixp->fx_offset
-		     + (fixp->fx_pcrel_adjust == 64
-			? -1 : fixp->fx_pcrel_adjust));
 #endif
 
   reloc->howto = bfd_reloc_type_lookup (stdoutput, code);
@@ -6361,7 +6399,7 @@ md_show_usage (stream)
 -l			use 1 word for refs to undefined symbols [default 2]\n\
 -m68000 | -m68008 | -m68010 | -m68020 | -m68030 | -m68040 | -m68060\n\
  | -m68302 | -m68331 | -m68332 | -m68333 | -m68340 | -m68360\n\
- | -mcpu32 | -mcf5200\n\
+ | -mcpu32 | -m5200\n\
 			specify variant of 680X0 architecture [default 68020]\n\
 -m68881 | -m68882 | -mno-68881 | -mno-68882\n\
 			target has/lacks floating-point coprocessor\n\
