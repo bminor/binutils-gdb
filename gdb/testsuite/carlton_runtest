@@ -26,6 +26,7 @@ FASTTESTS="gdb.base/assign.exp \
   gdb.c++/m-static.exp \
   gdb.c++/method.exp \
   gdb.c++/breakpoint.exp \
+  gdb.c++/pr-1210.exp \
   gdb.c++/rtti.exp"
 
 # 6 seconds or more (usually around 10).

@@ -102,9 +102,8 @@ extern struct symbol *cp_lookup_symbol_namespace (const char *namespace,
 						  const domain_enum domain,
 						  struct symtab **symtab);
 
-extern void cp_check_namespace_symbol (const char *name);
-
-extern void cp_check_possible_namespace_symbols (const char *name);
+extern void cp_check_possible_namespace_symbols (const char *name,
+						 struct objfile *objfile);
 
 struct type *lookup_transparent_type_namespace (const char *name);
 

@@ -1,3 +1,11 @@
+2003-06-27  David Carlton  <carlton@kealia.com>
+
+	* carlton_runtest (FASTTESTS): Add gdb.c++/pr-1210.exp.
+	* gdb.c++/namespace.exp: Delete test for maint cp namespace.
+	* gdb.c++/maint.exp (test_help): Tweak output for 'help maint cp
+	namespace'.
+	(test_namespace): Tweak comment.
+
 2003-06-24  Joel Brobecker  <brobecker@gnat.com>
 
 	* gdb.base/bang.exp: New testcase.

@@ -1675,7 +1675,8 @@ add_partial_symbol (struct partial_die_info *pdi, struct objfile *objfile,
       && namespace == NULL
       && psym != NULL
       && SYMBOL_CPLUS_DEMANGLED_NAME (psym) != NULL)
-    cp_check_possible_namespace_symbols (SYMBOL_CPLUS_DEMANGLED_NAME (psym));
+    cp_check_possible_namespace_symbols (SYMBOL_CPLUS_DEMANGLED_NAME (psym),
+					 objfile);
 }
 
 static int
@@ -1722,9 +1723,13 @@ add_partial_namespace (struct partial_die_info *pdi, char *info_ptr,
     strcat (full_name, "::");
   strcat (full_name, new_name);
 
-  /* Make sure that there's a symbol associated to that namespace.  */
+  /* FIXME: carlton/2003-06-27: Should we replace this by a call to
+     add_partial_symbol?  */
 
-  cp_check_namespace_symbol (full_name);
+  add_psymbol_to_list (full_name, strlen (full_name),
+		       VAR_DOMAIN, LOC_TYPEDEF,
+		       &objfile->global_psymbols,
+		       0, 0, cu_language, objfile);
 
   /* Now scan partial symbols in that namespace.  */
 
@@ -3573,6 +3578,23 @@ read_namespace (struct die_info *die, struct objfile *objfile,
     cp_add_using_directive (processing_current_prefix,
 			    strlen (previous_prefix),
 			    strlen (processing_current_prefix));
+
+  /* Add a symbol associated to this if we haven't seen the namespace
+     before.  */
+
+  if (dwarf2_extension (die) == NULL)
+    {
+      struct type *type;
+
+      /* FIXME: carlton/2003-06-27: Once GDB is more const-correct,
+	 this cast will hopefully become unnecessary.  */
+      type = init_type (TYPE_CODE_NAMESPACE, 0, 0,
+			(char *) processing_current_prefix,
+			objfile);
+      TYPE_TAG_NAME (type) = TYPE_NAME (type);
+
+      new_symbol (die, type, objfile, cu_header);
+    }
 
   if (die->child != NULL)
     {
@@ -5503,7 +5525,11 @@ new_symbol (struct die_info *die, struct type *type, struct objfile *objfile,
   struct attribute *attr2 = NULL;
   CORE_ADDR addr = 0;
 
-  name = dwarf2_linkage_name (die);
+  if (die->tag != DW_TAG_namespace)
+    name = dwarf2_linkage_name (die);
+  else
+    name = TYPE_NAME (type);
+
   if (name)
     {
       sym = (struct symbol *) obstack_alloc (&objfile->symbol_obstack,
@@ -5750,6 +5776,10 @@ new_symbol (struct die_info *die, struct type *type, struct objfile *objfile,
 	  
 	    add_symbol_to_list (sym, list_to_add);
 	  }
+	  break;
+	case DW_TAG_namespace:
+	  SYMBOL_CLASS (sym) = LOC_TYPEDEF;
+	  add_symbol_to_list (sym, &global_symbols);
 	  break;
 	default:
 	  /* Not a tag we recognize.  Hopefully we aren't processing

@@ -1,5 +1,43 @@
 2003-06-27  David Carlton  <carlton@kealia.com>
 
+	* dwarf2read.c (add_partial_symbol): Add 'objfile' argument to
+	call to cp_check_possible_namespace_symbols.
+	(add_partial_namespace): Add partial symbol instead of calling
+	cp_check_namespace_symbol.
+	(read_namespace): Add symbol associated to namespace.
+	(new_symbol): Handle DW_TAG_namespace.
+	* cp-support.h: Delete declaration of cp_check_namespace_symbol;
+	add 'objfile' argument to declaration of
+	cp_check_possible_namespace_symbols.
+	* cp-namespace.c: Delete variables namespace_block,
+	possible_namespace_block, namespace_objfile.
+	Delete functions get_namespace_block, get_namespace_objfile,
+	cp_check_namespace_symbol, check_namespace_symbol_block,
+	lookup_namespace_symbol.
+	(lookup_symbol_file): Delete call to lookup_namespace_symbol;
+	tweak call to lookup_possible_namespace_symbol.
+	(initialize_namespace_symtab): Rename from
+	initialize_namespace_blocks; add 'objfile' argument, don't do
+	anything special with global block.
+	(get_possible_namespace_block): Add 'objfile' argument.
+	(check_possible_namespace_symbols_loop)
+	(cp_check_possible_namespace_symbols): Ditto.
+	(free_namespace_block): Rename from free_namespace_blocks; don't
+	do anything special with global block.
+	(check_one_possible_namespace_symbol): Add 'objfile' argument, and
+	inline call to check_namespace_symbol_block.
+	(lookup_possible_namespace_symbol): Add 'symtab' argument, loop
+	over all objfiles.
+	(maintenance_cplus_namespace): Only have possible symbols; add
+	loop over objfiles.
+	(_initialize_cp_namespace): Tweak doc string.
+	* objfiles.h: Add opaque declaration of struct symtab.
+	(struct objfile): Add cp_namespace_symtab member.
+	* objfiles.c (allocate_objfile): Set
+	objfile->cp_namespace_symtab.
+
+2003-06-27  David Carlton  <carlton@kealia.com>
+
 	* Merge with mainline; tag is carlton_dictionary-20030627-merge.
 
 2003-06-27  Elena Zannoni  <ezannoni@redhat.com>
