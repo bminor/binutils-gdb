@@ -1,6 +1,9 @@
 start-sanitize-am33
 Wed Jun 24 09:53:06 1998  Jeffrey A Law  (law@cygnus.com)
 
+	* mn10300-opc.c (mn10300_opcodes): Fix typo in IMM24 versions of the
+	am33 shift instructions.
+
 	* mn10300-dis.c (print_insn_mn10300): 0xf9 opcode prefix specifies
 	3 byte instructions.
 	(disassemble): Handle new instruction formats FMT_D6, FMT_D7, FMT_D8
