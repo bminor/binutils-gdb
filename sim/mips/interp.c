@@ -345,8 +345,8 @@ sim_open (kind, cb, abfd, argv)
 /* start-sanitize-sky */
 
 #if defined(TARGET_SKY) && defined(SKY_FUNIT)
-  /* Set "--float-type target" as the default. */
-  STATE_FP_TYPE_OPT (sd) |= STATE_FP_TYPE_OPT_TARGET;
+  /* Set "--float-type host" as the default. */
+  STATE_FP_TYPE_OPT (sd) &= ~STATE_FP_TYPE_OPT_TARGET;
 #endif
 /* end-sanitize-sky */
 
@@ -474,6 +474,8 @@ sim_open (kind, cb, abfd, argv)
     /* Finally the VIF registers */
     for( rn = 2*NUM_VU_REGS; rn < 2*NUM_VU_REGS + 2*NUM_VIF_REGS; rn++ )
       cpu->register_widths[rn + NUM_R5900_REGS] = 32;
+
+    cpu->cur_device = 0;
 #endif
     /* end-sanitize-sky */
   }
