@@ -1,3 +1,11 @@
+Thu Mar  4 17:42:03 1993  John Gilmore  (gnu@cygnus.com)
+
+	Lint fixes from Paul Eggert (eggert@twinsun.com):
+
+	* command.c (do_setshow_command):  var_uintegers are unsigned.
+	* sparc-tdep.c (save_insn_opcodes, restore_insn_opcodes): 
+	unsigned, since they use hex values with the high bit set.
+
 Thu Mar  4 08:22:55 1993  Fred Fish  (fnf@cygnus.com)
 
 	Fixes submitted by Karl Berry (karl@nermal.hq.ileaf.com):

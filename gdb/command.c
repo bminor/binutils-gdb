@@ -1054,9 +1054,9 @@ do_setshow_command (arg, from_tty, c)
 	case var_uinteger:
 	  if (arg == NULL)
 	    error_no_arg ("integer to set it to.");
-	  *(int *) c->var = parse_and_eval_address (arg);
-	  if (*(int *) c->var == 0)
-	    *(int *) c->var = UINT_MAX;
+	  *(unsigned int *) c->var = parse_and_eval_address (arg);
+	  if (*(unsigned int *) c->var == 0)
+	    *(unsigned int *) c->var = UINT_MAX;
 	  break;
 	case var_zinteger:
 	  if (arg == NULL)
