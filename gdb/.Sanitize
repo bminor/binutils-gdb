@@ -254,13 +254,17 @@ xm-vax.h
 
 Do-last:
 
-echo "Configuring GDB for host and target 'none', and making depend."
-echo >depend
-./config.gdb none
+echo "Configuring GDB for host and target 'none', and making alldeps.mak"
+echo "and depend."
+./configure none
+rm alldeps.mak
+make alldeps.mak
+./configure none
 rm depend
 make depend
 echo "Making GDB texinfo and info files"
 make gdb.info
 echo Done in `pwd`.
+./configure -rm none
 
 # End of file.
