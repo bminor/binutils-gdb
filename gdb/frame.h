@@ -455,10 +455,14 @@ enum print_what
 extern void *frame_obstack_zalloc (unsigned long size);
 #define FRAME_OBSTACK_ZALLOC(TYPE) ((TYPE *) frame_obstack_zalloc (sizeof (TYPE)))
 
-/* If DEPRECATED_FRAME_CHAIN_VALID returns zero it means that the
-   given frame is the outermost one and has no caller.  */
+/* If legacy_frame_chain_valid() returns zero it means that the given
+   frame is the outermost one and has no caller.
 
-extern int frame_chain_valid (CORE_ADDR, struct frame_info *);
+   This method has been superseeded by the per-architecture
+   frame_unwind_pc() (returns 0 to indicate an invalid return address)
+   and per-frame this_id() (returns a NULL frame ID to indicate an
+   invalid frame).  */
+extern int legacy_frame_chain_valid (CORE_ADDR, struct frame_info *);
 
 extern void generic_save_dummy_frame_tos (CORE_ADDR sp);
 

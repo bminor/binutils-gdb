@@ -554,12 +554,12 @@ deprecated_pc_in_call_dummy_at_entry_point (CORE_ADDR pc, CORE_ADDR sp,
 	  && (pc) <= (CALL_DUMMY_ADDRESS () + DECR_PC_AFTER_BREAK));
 }
 
-/* Function: frame_chain_valid 
-   Returns true for a user frame or a call_function_by_hand dummy frame,
-   and false for the CRT0 start-up frame.  Purpose is to terminate backtrace.  */
+/* Returns true for a user frame or a call_function_by_hand dummy
+   frame, and false for the CRT0 start-up frame.  Purpose is to
+   terminate backtrace.  */
 
 int
-frame_chain_valid (CORE_ADDR fp, struct frame_info *fi)
+legacy_frame_chain_valid (CORE_ADDR fp, struct frame_info *fi)
 {
   /* Don't prune CALL_DUMMY frames.  */
   if (DEPRECATED_USE_GENERIC_DUMMY_FRAMES

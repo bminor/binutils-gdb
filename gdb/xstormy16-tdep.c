@@ -748,9 +748,8 @@ xstormy16_frame_init_saved_regs (struct frame_info *fi)
 
 /* Function: xstormy16_frame_saved_pc
    Returns the return address for the selected frame. 
-   Called by frame_info, frame_chain_valid, and sometimes by
-   get_prev_frame.
-*/
+   Called by frame_info, legacy_frame_chain_valid, and sometimes by
+   get_prev_frame.  */
 
 static CORE_ADDR
 xstormy16_frame_saved_pc (struct frame_info *fi)

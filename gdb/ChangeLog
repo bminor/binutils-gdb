@@ -1,5 +1,15 @@
 2003-04-06  Andrew Cagney  <cagney@redhat.com>
 
+	* frame.h (legacy_frame_chain_valid): Rename frame_chain_valid.
+	Update comment.
+	* frame.c (legacy_saved_regs_this_id): Update.
+	(legacy_get_prev_frame): Update.
+	* xstormy16-tdep.c: Update comment.
+	* sparc-tdep.c (sparc_frame_chain): Update comment.
+	* blockframe.c (legacy_frame_chain_valid): Update.
+
+2003-04-06  Andrew Cagney  <cagney@redhat.com>
+
 	* valprint.c (val_print_type_code_int): Delete #ifdef
 	PRINT_TYPELESS_INTEGER code.
 

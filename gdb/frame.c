@@ -821,7 +821,7 @@ legacy_saved_regs_this_id (struct frame_info *next_frame,
       gdb_assert (DEPRECATED_FRAME_CHAIN_P ());
       base = DEPRECATED_FRAME_CHAIN (next_frame);
 
-      if (!frame_chain_valid (base, next_frame))
+      if (!legacy_frame_chain_valid (base, next_frame))
 	return;
     }
   if (base == 0)
@@ -1246,7 +1246,7 @@ legacy_get_prev_frame (struct frame_info *this_frame)
       gdb_assert (DEPRECATED_FRAME_CHAIN_P ());
       address = DEPRECATED_FRAME_CHAIN (this_frame);
 
-      if (!frame_chain_valid (address, this_frame))
+      if (!legacy_frame_chain_valid (address, this_frame))
 	return 0;
     }
   if (address == 0)
