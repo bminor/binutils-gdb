@@ -1,3 +1,7 @@
+2005-03-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* po/tr.po: Commit new Turkish translation.
+
 2005-03-12  Zack Weinberg  <zack@codesourcery.com>
 
 	* config/tc-arm.c (tinsns): Add ARMv6K instructions sev, wfe,

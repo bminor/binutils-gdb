@@ -1,3 +1,7 @@
+2005-03-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* po/tr.po: Commit new Turkish translation.
+
 2005-03-11  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.am: Remove references to em68klynx.o and esparclynx.o.
