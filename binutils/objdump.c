@@ -77,6 +77,10 @@ static int dump_debugging_tags;		/* --debugging-tags */
 static bfd_vma adjust_section_vma = 0;	/* --adjust-vma */
 static int file_start_context = 0;      /* --file-start-context */
 
+/* Variables for handling include file path table.  */
+static const char **include_paths;
+static int include_path_count;
+
 /* Extra info to pass to the disassembler address printing function.  */
 struct objdump_disasm_info
 {
@@ -165,6 +169,7 @@ usage (FILE *stream, int status)
   -EB --endian=big               Assume big endian format when disassembling\n\
   -EL --endian=little            Assume little endian format when disassembling\n\
       --file-start-context       Include context from start of file (with -S)\n\
+  -I, --include=DIR              Add DIR to search list for source files\n\
   -l, --line-numbers             Include line numbers and filenames in output\n\
   -C, --demangle[=STYLE]         Decode mangled/processed symbol names\n\
                                   The STYLE, if specified, can be `auto', `gnu',\n\
@@ -228,6 +233,7 @@ static struct option long_options[]=
   {"section-headers", no_argument, NULL, 'h'},
   {"show-raw-insn", no_argument, &show_raw_insn, 1},
   {"source", no_argument, NULL, 'S'},
+  {"include", required_argument, NULL, 'I'},
   {"stabs", no_argument, NULL, 'G'},
   {"start-address", required_argument, NULL, OPTION_START_ADDRESS},
   {"stop-address", required_argument, NULL, OPTION_STOP_ADDRESS},
@@ -841,7 +847,8 @@ static unsigned int prev_line;
 struct print_file_list
 {
   struct print_file_list *next;
-  char *filename;
+  const char *filename;
+  const char *modname;
   unsigned int line;
   FILE *f;
 };
@@ -852,6 +859,89 @@ static struct print_file_list *print_files;
    displaying a file for the first time.  */
 
 #define SHOW_PRECEDING_CONTEXT_LINES (5)
+
+/* Tries to open MODNAME, and if successful adds a node to print_files
+   linked list and returns that node.  Returns NULL on failure.  */
+
+static struct print_file_list *
+try_print_file_open (const char *origname, const char *modname)
+{
+  struct print_file_list *p;
+  FILE *f;
+
+  f = fopen (modname, "r");
+  if (f == NULL)
+    return NULL;
+
+  if (print_files != NULL && print_files->f != NULL)
+    {
+      fclose (print_files->f);
+      print_files->f = NULL;
+    }
+
+  p = xmalloc (sizeof (struct print_file_list));
+  p->filename = origname;
+  p->modname = modname;
+  p->line = 0;
+  p->f = f;
+  p->next = print_files;
+  print_files = p;
+  return p;
+}
+
+/* If the the source file, as described in the symtab, is not found
+   try to locate it in one of the paths specified with -I
+   If found, add location to print_files linked list.  */
+
+static struct print_file_list *
+update_source_path (const char *filename)
+{
+  struct print_file_list *p;
+  const char *fname;
+  int i;
+
+  if (filename == NULL)
+    return NULL;
+
+  p = try_print_file_open (filename, filename);
+  if (p != NULL)
+    return p;
+
+  if (include_path_count == 0)
+    return NULL;
+
+  /* Get the name of the file.  */
+  fname = strrchr (filename, '/');
+#ifdef HAVE_DOS_BASED_FILE_SYSTEM
+  {
+    /* We could have a mixed forward/back slash case.  */
+    char *backslash = strrchr (filename, '\\');
+    if (fname == NULL || (backslash != NULL && backslash > fname))
+      fname = backslash;
+    if (fname == NULL && filename[0] != '\0' && filename[1] == ':')
+      fname = filename + 1;
+  }
+#endif
+  if (fname == NULL)
+    fname = filename;
+  else
+    ++fname;
+
+  /* If file exists under a new path, we need to add it to the list
+     so that show_line knows about it.  */
+  for (i = 0; i < include_path_count; i++)
+    {
+      char *modname = concat (include_paths[i], "/", fname, (const char *) 0);
+
+      p = try_print_file_open (filename, modname);
+      if (p)
+	return p;
+
+      free (modname);
+    }
+
+  return NULL;
+}
 
 /* Skip ahead to a given line in a file, optionally printing each
    line.  */
@@ -950,7 +1040,7 @@ show_line (bfd *abfd, asection *section, bfd_vma addr_offset)
 
 	      if (p->f == NULL)
 		{
-		  p->f = fopen (p->filename, "r");
+		  p->f = fopen (p->modname, "r");
 		  p->line = 0;
 		}
 	      if (p->f != NULL)
@@ -973,27 +1063,11 @@ show_line (bfd *abfd, asection *section, bfd_vma addr_offset)
 	}
       else
 	{
-	  FILE *f;
+	  p = update_source_path (filename);
 
-	  f = fopen (filename, "r");
-	  if (f != NULL)
+	  if (p != NULL)
 	    {
 	      int l;
-
-	      p = ((struct print_file_list *)
-		   xmalloc (sizeof (struct print_file_list)));
-	      p->filename = xmalloc (strlen (filename) + 1);
-	      strcpy (p->filename, filename);
-	      p->line = 0;
-	      p->f = f;
-
-	      if (print_files != NULL && print_files->f != NULL)
-		{
-		  fclose (print_files->f);
-		  print_files->f = NULL;
-		}
-	      p->next = print_files;
-	      print_files = p;
 
 	      if (file_start_context)
 		l = 0;
@@ -1152,7 +1226,7 @@ disassemble_bytes (struct disassemble_info * info,
       bfd_boolean need_nl = FALSE;
 
       /* If we see more than SKIP_ZEROES octets of zeroes, we just
-         print `...'.  */
+	 print `...'.  */
       for (z = addr_offset * opb; z < stop_offset * opb; z++)
 	if (data[z] != 0)
 	  break;
@@ -1166,9 +1240,9 @@ disassemble_bytes (struct disassemble_info * info,
 	  printf ("\t...\n");
 
 	  /* If there are more nonzero octets to follow, we only skip
-             zeroes in multiples of 4, to try to avoid running over
-             the start of an instruction which happens to start with
-             zero.  */
+	     zeroes in multiples of 4, to try to avoid running over
+	     the start of an instruction which happens to start with
+	     zero.  */
 	  if (z != stop_offset * opb)
 	    z = addr_offset * opb + ((z - addr_offset * opb) &~ 3);
 
@@ -1220,7 +1294,7 @@ disassemble_bytes (struct disassemble_info * info,
 
 #ifdef DISASSEMBLER_NEEDS_RELOCS
 	      /* FIXME: This is wrong.  It tests the number of octets
-                 in the last instruction, not the current one.  */
+		 in the last instruction, not the current one.  */
 	      if (*relppp < relppend
 		  && (**relppp)->address >= rel_offset + addr_offset
 		  && ((**relppp)->address
@@ -1268,7 +1342,7 @@ disassemble_bytes (struct disassemble_info * info,
 	      bfd_vma j;
 
 	      /* If ! prefix_addresses and ! wide_output, we print
-                 octets_per_line octets per line.  */
+		 octets_per_line octets per line.  */
 	      pb = octets;
 	      if (pb > octets_per_line && ! prefix_addresses && ! wide_output)
 		pb = octets_per_line;
@@ -1685,9 +1759,9 @@ disassemble_data (bfd *abfd)
 	  else
 	    {
 	      /* Search forward for the next appropriate symbol in
-                 SECTION.  Note that all the symbols are sorted
-                 together into one big array, and that some sections
-                 may have overlapping addresses.  */
+		 SECTION.  Note that all the symbols are sorted
+		 together into one big array, and that some sections
+		 may have overlapping addresses.  */
 	      while (place < sorted_symcount
 		     && (sorted_syms[place]->section != section
 			 || (bfd_asymbol_value (sorted_syms[place])
@@ -2169,7 +2243,7 @@ dump_data (bfd *abfd)
 	    {
 	      char buf[64];
 	      int count, width;
-	      
+
 	      printf (_("Contents of section %s:\n"), section->name);
 
 	      if (bfd_section_size (abfd, section) == 0)
@@ -2308,8 +2382,8 @@ dump_symbols (bfd *abfd ATTRIBUTE_UNUSED, bfd_boolean dynamic)
 	      if (do_demangle && name != NULL && *name != '\0')
 		{
 		  /* If we want to demangle the name, we demangle it
-                     here, and temporarily clobber it while calling
-                     bfd_print_symbol.  FIXME: This is a gross hack.  */
+		     here, and temporarily clobber it while calling
+		     bfd_print_symbol.  FIXME: This is a gross hack.  */
 		  alloc = demangle (cur_bfd, name);
 		  (*current)->name = alloc;
 		}
@@ -2537,6 +2611,23 @@ dump_reloc_set (bfd *abfd, asection *sec, arelent **relpp, long relcount)
       printf ("\n");
     }
 }
+
+/* Creates a table of paths, to search for source files.  */
+
+static void
+add_include_path (const char *path)
+{
+  if (path[0] == 0)
+    return;
+  include_path_count++;
+  include_paths = xrealloc (include_paths,
+			    include_path_count * sizeof (*include_paths));
+#ifdef HAVE_DOS_BASED_FILE_SYSTEM
+  if (path[1] == ':' && path[2] == 0)
+    path = concat (path, ".", (const char *) 0);
+#endif
+  include_paths[include_path_count - 1] = path;
+}
 
 int
 main (int argc, char **argv)
@@ -2562,7 +2653,7 @@ main (int argc, char **argv)
   bfd_init ();
   set_default_bfd_target ();
 
-  while ((c = getopt_long (argc, argv, "pib:m:M:VvCdDlfaHhrRtTxsSj:wE:zgeG",
+  while ((c = getopt_long (argc, argv, "pib:m:M:VvCdDlfaHhrRtTxsSI:j:wE:zgeG",
 			   long_options, (int *) 0))
 	 != EOF)
     {
@@ -2582,16 +2673,10 @@ main (int argc, char **argv)
 	    disassembler_options = optarg;
 	  break;
 	case 'j':
-	  if (only == NULL)
-	    {
-	      only_size = 8;
-	      only = (char **) xmalloc (only_size * sizeof (char *));
-	    }
-	  else if (only_used == only_size)
+	  if (only_used == only_size)
 	    {
 	      only_size += 8;
-	      only = (char **) xrealloc (only,
-					 only_size * sizeof (char *));
+	      only = xrealloc (only, only_size * sizeof (char *));
 	    }
 	  only [only_used++] = optarg;
 	  break;
@@ -2657,6 +2742,9 @@ main (int argc, char **argv)
 	case 'i':
 	  formats_info = TRUE;
 	  seenflag = TRUE;
+	  break;
+	case 'I':
+	  add_include_path (optarg);
 	  break;
 	case 'p':
 	  dump_private_headers = TRUE;

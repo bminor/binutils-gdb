@@ -1,3 +1,15 @@
+2003-08-04  Bradley Harrington  <bharring@us.ibm.com>
+	    Alan Modra  <amodra@bigpond.net.au>
+
+	* objdump.c (include_paths, include_path_count): New vars.
+	(usage): Describe --include.
+	(long_options): Add "include".
+	(add_include_path): New function.
+	(struct print_file_list): Make filename const.  Add modname.
+	(try_print_file_open, update_source_path): New functions.
+	(show_line): Use them.
+	(main): Handle 'I' option.  Don't check for NULL xrealloc arg.
+
 2003-07-30  Alan Modra  <amodra@bigpond.net.au>
 
 	* objdump.c: Remove unnecessary prototypes.
