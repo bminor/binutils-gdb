@@ -1,4 +1,3 @@
-set -x
 # Configure fragment invoked in the post-target section for subdirs
 # wanting multilib support.
 #
@@ -670,7 +669,7 @@ if [ -n "${multidirs}" ] && [ -z "${norecursion}" ]; then
     if [ -f ${newsrcdir}/configure ]; then
       recprog=${newsrcdir}/configure
     fi
-    if eval ${config_shell} -x ${recprog} \
+    if eval ${config_shell} ${recprog} \
 	--with-multisubdir=${dir} --with-multisrctop=${multisrctop} \
 	$arguments ${srcdiroption} ; then
       true
