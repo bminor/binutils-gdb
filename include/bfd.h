@@ -52,7 +52,7 @@ here.  */
 #	endif
 #endif
 
-#define BFD_VERSION "1.96"
+#define BFD_VERSION "1.97"
 
 /* forward declaration */
 typedef struct _bfd bfd;
