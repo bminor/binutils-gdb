@@ -97,7 +97,6 @@ extern CORE_ADDR h8300_skip_prologue ();
 
 /* Say how long registers are.  */
 
-#define REGISTER_TYPE  unsigned short
 #define REGISTER_SIZE 4
 
 #define NUM_REGS 13  
