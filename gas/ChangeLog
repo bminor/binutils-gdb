@@ -1,3 +1,12 @@
+2004-07-16  Richard Earnshaw  <rearnsha@arm.com>
+
+	* config/tc-arm.c: Include include/opcode/arm.h.
+	(ARM_EXT_*, ARM_ARCH_*, ARM_ANY, ARM_ALL, COPROC_ANY): Delete.
+	(FPU_FPA_EXT_* FPU_VFP_EXT_*, FPU_ANY, FPU_NONE, FPU_MAVERICK): Delete.
+	(FPU_ARCH_*): Delete.
+	* Makefile.am: Update dependencies.
+	* Makefile.in: Regenerate.
+
 2004-07-15  Nick Clifton  <nickc@redhat.com>
 
 	* configure.in: Accept armbe as a big-endian arm configuration.

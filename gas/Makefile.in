@@ -810,19 +810,20 @@ DEPTC_arc_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
 
 DEPTC_arm_aout = $(INCDIR)/symcat.h $(srcdir)/config/obj-aout.h \
   $(srcdir)/config/tc-arm.h $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h \
-  $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h
+  $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/opcode/arm.h
 
 DEPTC_arm_coff = $(INCDIR)/symcat.h $(srcdir)/config/obj-coff.h \
   $(srcdir)/config/tc-arm.h $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/arm.h $(INCDIR)/coff/external.h $(BFDDIR)/libcoff.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/safe-ctype.h subsegs.h \
-  $(INCDIR)/obstack.h
+  $(INCDIR)/obstack.h $(INCDIR)/opcode/arm.h
 
 DEPTC_arm_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
   $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-arm.h \
   $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
-  $(INCDIR)/elf/arm.h $(INCDIR)/elf/reloc-macros.h dwarf2dbg.h
+  $(INCDIR)/elf/arm.h $(INCDIR)/elf/reloc-macros.h dwarf2dbg.h \
+  $(INCDIR)/opcode/arm.h
 
 DEPTC_avr_coff = $(INCDIR)/symcat.h $(srcdir)/config/obj-coff.h \
   $(srcdir)/config/tc-avr.h $(INCDIR)/coff/internal.h \
