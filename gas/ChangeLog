@@ -1,3 +1,19 @@
+Wed Nov  5 10:51:49 1997  Doug Evans  <devans@canuck.cygnus.com>
+
+	Based on a patch from Ian.Dall@dsto.defence.gov.au.
+	* as.h (struct frag, frag support): Moved from here.
+	* frags.h: To here.
+	(struct frag, member tc_frag_data): New member if TC_FRAG_TYPE
+	is defined.
+	(struct frag, member fr_cgen): Renamed from fr_targ.cgen.
+	* cgen.c (cgen_asm_finish_insn): Update.
+	* config/tc-m32r.c (md_estimate_size_before_relax): Update.
+	* config/tc-m32r.h (TC_FRAG_INIT): Renamed from md_init_frag.
+	(md_convert_frag): Ditto.
+	* config/tc-ns32k.h (TC_FRAG_TYPE): Define.
+	(frag_opcode_frag,frag_opcode_offset,frag_bsr): Update.
+	(TC_FRAG_INIT): Update.
+
 Tue Nov  4 16:35:57 1997  Ian Dall  <Ian.Dall@dsto.defence.gov.au>
 
 	* write.c (print_fixup): Use TC_FIX_DATA_PRINT (if defined) to
