@@ -17,6 +17,10 @@ gdb/439: gdb/291: On some ELF object files, gdb was reporting:
 dwarf2read.c:1072: gdb-internal-error: sect_index_text not initialize
 Fix, by Fred Fish, imported from mainline.
 
+Dwarf2 .debug_frame & .eh_frame handler improved in many ways. 
+Surprisingly enough, it works now.
+By Michal Ludvig, imported from mainline.
+
 *** Changes in GDB 5.2:
 
 * New command "set trust-readonly-sections on[off]".
