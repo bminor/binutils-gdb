@@ -1,5 +1,12 @@
 2002-08-25  Stephane Carrez  <stcarrez@nerim.fr>
 
+	* tuiStack.c (tui_get_function_from_frame): Rename from 
+	_getFuncNameFromFrame; use print_address_symbolic to get symbolic
+	name of address.
+	(tuiUpdateLocatorInfoFromFrame): Update.
+
+2002-08-25  Stephane Carrez  <stcarrez@nerim.fr>
+
 	* tuiRegs.c (tuiDisplayRegistersFrom): Remove unused locals.
 	(_tuiRegisterFormat, _tuiSetSpecialRegsContent): Likewise.
 	(_tuiSetGeneralAndSpecialRegsContent): Likewise.

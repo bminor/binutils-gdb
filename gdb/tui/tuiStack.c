@@ -52,19 +52,47 @@
 #include "tuiGeneralWin.h"
 #include "tuiSource.h"
 #include "tuiSourceWin.h"
+#include "tui-file.h"
 
 
-/*****************************************
-** STATIC LOCAL FUNCTIONS FORWARD DECLS    **
-******************************************/
+/* Get a printable name for the function at the address.
+   The symbol name is demangled if demangling is turned on.
+   Returns a pointer to a static area holding the result.  */
+static char* tui_get_function_from_frame (struct frame_info *fi);
 
-static char *_getFuncNameFromFrame (struct frame_info *);
 static void tui_update_command (char *, int);
 
 
-/*****************************************
-** PUBLIC FUNCTION                        **
-******************************************/
+/* Get a printable name for the function at the address.
+   The symbol name is demangled if demangling is turned on.
+   Returns a pointer to a static area holding the result.  */
+static char*
+tui_get_function_from_frame (struct frame_info *fi)
+{
+  static char name[256];
+  struct ui_file *stream = tui_sfileopen (256);
+  char *p;
+
+  print_address_symbolic (fi->pc, stream, demangle, "");
+  p = tui_file_get_strbuf (stream);
+
+  /* Use simple heuristics to isolate the function name.  The symbol can
+     be demangled and we can have function parameters.  Remove them because
+     the status line is too short to display them.  */
+  if (*p == '<')
+    p++;
+  strncpy (name, p, sizeof (name));
+  p = strchr (name, '(');
+  if (!p)
+    p = strchr (name, '>');
+  if (p)
+    *p = 0;
+  p = strchr (name, '+');
+  if (p)
+    *p = 0;
+  ui_file_delete (stream);
+  return name;
+}
 
 /*
    ** tuiClearLocatorDisplay()
@@ -230,13 +258,13 @@ tuiUpdateLocatorInfoFromFrame (struct frame_info *frameInfo,
 			    !frame_in_dummy (frameInfo->next)));
   if (symtabAndLine.symtab && symtabAndLine.symtab->filename)
     tuiSetLocatorInfo (symtabAndLine.symtab->filename,
-		       _getFuncNameFromFrame (frameInfo),
+		       tui_get_function_from_frame (frameInfo),
 		       symtabAndLine.line,
 		       frameInfo->pc,
 		       element);
   else
     tuiSetLocatorInfo ((char *) NULL,
-		       _getFuncNameFromFrame (frameInfo),
+		       tui_get_function_from_frame (frameInfo),
 		       0,
 		       frameInfo->pc,
 		       element);
@@ -394,27 +422,6 @@ _initialize_tuiStack (void)
            "Update the source window and locator to display the current "
            "execution point.\n");
 }
-
-
-/*****************************************
-** STATIC LOCAL FUNCTIONS                 **
-******************************************/
-
-/*
-   **    _getFuncNameFromFrame().
- */
-static char *
-_getFuncNameFromFrame (struct frame_info *frameInfo)
-{
-  char *funcName = (char *) NULL;
-
-  find_pc_partial_function (frameInfo->pc,
-			    &funcName,
-			    (CORE_ADDR *) NULL,
-			    (CORE_ADDR *) NULL);
-  return funcName;
-}				/* _getFuncNameFromFrame */
-
 
 /* Command to update the display with the current execution point.  */
 static void
