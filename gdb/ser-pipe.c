@@ -144,7 +144,7 @@ _initialize_ser_pipe (void)
   ops->next = 0;
   ops->open = pipe_open;
   ops->close = pipe_close;
-  ops->readchar = ser_unix_readchar;
+  ops->readchar = ser_base_readchar;
   ops->write = ser_base_write;
   ops->flush_output = ser_base_flush_output;
   ops->flush_input = ser_base_flush_input;
@@ -158,5 +158,7 @@ _initialize_ser_pipe (void)
   ops->setstopbits = ser_base_setstopbits;
   ops->drain_output = ser_base_drain_output;
   ops->async = ser_base_async;
+  ops->read_prim = ser_unix_read_prim;
+  ops->write_prim = ser_unix_write_prim;
   serial_add_interface (ops);
 }

@@ -451,6 +451,7 @@ AC_CHECK_FUNCS(canonicalize_file_name realpath)
 AC_CHECK_FUNCS(getuid getgid)
 AC_CHECK_FUNCS(poll)
 AC_CHECK_FUNCS(pread64)
+AC_CHECK_FUNCS(recv send)
 AC_CHECK_FUNCS(sbrk)
 AC_CHECK_FUNCS(setpgid setpgrp)
 AC_CHECK_FUNCS(sigaction sigprocmask sigsetmask)
@@ -1187,6 +1188,13 @@ if test x$gdb_cv_os_cygwin = xyes; then
 	;;
     esac
 fi
+
+# The ser-tcp.c module requires sockets.
+case ${host} in
+  *mingw32*)
+    WIN32LIBS="$WIN32LIBS -lws2_32"
+    ;;
+esac	    
 AC_SUBST(WIN32LIBS)
 
 LIBGUI="../libgui/src/libgui.a"

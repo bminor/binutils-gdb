@@ -1153,6 +1153,10 @@ extern int use_windows;
 #define SLASH_STRING "/"
 #endif
 
+#if defined(__WIN32__) && !defined(__CYGWIN__)
+#define WINAPI
+#endif
+
 /* Provide default definitions of PIDGET, TIDGET, and MERGEPID.
    The name ``TIDGET'' is a historical accident.  Many uses of TIDGET
    in the code actually refer to a lightweight process id, i.e,

@@ -58,6 +58,10 @@
 
 #include <sys/param.h>		/* For MAXPATHLEN */
 
+#ifdef WINAPI
+#include <winerror.h>
+#endif
+
 #include "gdb_curses.h"
 
 #include "readline/readline.h"
@@ -846,13 +850,27 @@ char *
 safe_strerror (int errnum)
 {
   char *msg;
+  static char buf[32];
 
-  msg = strerror (errnum);
-  if (msg == NULL)
+#ifdef WINAPI
+  /* The strerror function only works for functions that set errno.
+     In the case of Windows sockets, we can get error numbers that
+     strerror cannot handle.  */
+  if (errnum > WSABASEERR)
     {
-      static char buf[32];
-      xsnprintf (buf, sizeof buf, "(undocumented errno %d)", errnum);
+      xsnprintf (buf, sizeof buf, "(winsock error %d)", errnum);
       msg = buf;
+    }
+  else
+#endif
+    {
+      msg = strerror (errnum);
+    
+      if (msg == NULL)
+	{
+	  xsnprintf (buf, sizeof buf, "(undocumented errno %d)", errnum);
+	  msg = buf;
+	}
     }
   return (msg);
 }
