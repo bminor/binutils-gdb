@@ -35,7 +35,7 @@ dose.h
 go32.h
 harris.h
 hp300bsd.h
-hp9000.h
+hp300.h
 hppabsd.h
 hppahpux.h
 i386linux.h
