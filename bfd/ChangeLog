@@ -1,3 +1,18 @@
+2004-01-05  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
+
+	* elf32-mips.c (ELF_MAXPAGESIZE): Redefine for traditional
+	targets to support pages of up to 64kB.
+	(elf32_bed): Redefine to get a separate backend data structure for
+	traditional targets.
+	* elf64-mips.c (ELF_MAXPAGESIZE): Redefine for traditional
+	targets to support pages of up to 64kB.
+	(elf64_bed): Redefine to get a separate backend data structure for
+	traditional targets.
+	* elfn32-mips.c (ELF_MAXPAGESIZE): Redefine for traditional
+	targets to support pages of up to 64kB.
+	(elf32_bed): Redefine to get a separate backend data structure for
+	traditional targets.
+
 2004-01-04  Mark Kettenis  <kettenis@gnu.org>
 
 	* elf32-sparc.c (elf32_sparc_grok_psinfo): New function.
