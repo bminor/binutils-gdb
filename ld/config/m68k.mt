@@ -1,2 +1,1 @@
-# This seems somewhat bogus.
-EMUL=sun3
+EMUL=m68kaout
