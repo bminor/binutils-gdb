@@ -1,3 +1,8 @@
+2003-04-27  Daniel Jacobowitz  <drow@mvista.com>
+
+	* configure.in: Bump version on HEAD to 2.14.90.
+	* configure: Regenerated.
+
 2003-04-26  Stephane Carrez  <stcarrez@nerim.fr>
 
 	PR savannah/3331:
