@@ -1,3 +1,16 @@
+2001-07-28  Andrew Cagney  <ac131313@redhat.com>
+
+	From 2001-07-23 Andreas Schwab <schwab@suse.de>:
+	* config/m68k/tm-m68k.h (TARGET_LONG_DOUBLE_FORMAT): Define.
+	(TARGET_LONG_DOUBLE_BIT): Define.
+	(REGISTER_VIRTUAL_SIZE): Return 12 for floating point registers.
+	(MAX_REGISTER_VIRTUAL_SIZE): Increase to 12.
+	(REGISTER_VIRTUAL_TYPE): Return builtin_type_long_double for
+	floating point registers.
+	(REGISTER_CONVERTIBLE, REGISTER_CONVERT_TO_VIRTUAL)
+	(REGISTER_CONVERT_TO_RAW): Remove.
+	* config/m68k/xm-linux.h (HOST_LONG_DOUBLE_FORMAT): Define.
+
 2001-07-26  Andrew Cagney  <ac131313@redhat.com>
 
 	* thread.c, breakpoint.c: Include "gdb.h".
