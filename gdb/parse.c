@@ -101,6 +101,40 @@ unsigned num_std_regs = (sizeof std_regs / sizeof std_regs[0]);
 
 #endif
 
+/* The generic method for targets to specify how their registers are named.
+   The mapping can be derived from three sources: reg_names; std_regs; or
+   a target specific alias hook. */
+
+int
+target_map_name_to_register (str, len)
+     char *str;
+     int len;
+{
+  int i;
+
+  /* First search architectural register name space. */
+  for (i = 0; i < NUM_REGS; i++)
+    if (reg_names[i] && len == strlen (reg_names[i])
+	&& STREQN (str, reg_names[i], len))
+      {
+	return i;
+      }
+
+  /* Try standard aliases */
+  for (i = 0; i < num_std_regs; i++)
+    if (std_regs[i].name && len == strlen (std_regs[i].name)
+	&& STREQN (str, std_regs[i].name, len))
+      {
+	return std_regs[i].regnum;
+      }
+
+  /* Try target specific aliases */
+#ifdef REGISTER_NAME_ALIAS_HOOK
+  return REGISTER_NAME_ALIAS_HOOK (str, len);
+#endif
+
+  return -1;
+}
 
 /* Begin counting arguments for a function call,
    saving the data about any containing call.  */
@@ -455,19 +489,9 @@ write_dollar_variable (str)
   
   /* Handle tokens that refer to machine registers:
      $ followed by a register name.  */
-  for (i = 0; i < NUM_REGS; i++)
-    if (reg_names[i] && str.length - 1 == strlen (reg_names[i])
-	&& STREQN (str.ptr + 1, reg_names[i], str.length - 1))
-      {
-	goto handle_register;
-      }
-  for (i = 0; i < num_std_regs; i++)
-    if (std_regs[i].name && str.length - 1 == strlen (std_regs[i].name)
-	&& STREQN (str.ptr + 1, std_regs[i].name, str.length - 1))
-      {
-	i = std_regs[i].regnum;
-	goto handle_register;
-      }
+  i = target_map_name_to_register( str.ptr + 1, str.length - 1 );
+  if( i >= 0 )
+    goto handle_register;
 
   /* Any other names starting in $ are debugger internal variables.  */
 
