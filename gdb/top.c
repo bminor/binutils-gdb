@@ -1833,6 +1833,12 @@ char *gdb_completer_word_break_characters =
 char *gdb_completer_command_word_break_characters =
 " \t\n!@#$%^&*()+=|~`}{[]\"';:?/>.<,";
 
+/* When completing on file names, we remove from the list of word
+   break characters any characters that are commonly used in file
+   names, such as '-', '+', '~', etc.  Otherwise, readline displays
+   incorrect completion candidates.  */
+char *gdb_completer_file_name_break_characters = " \t\n*|\"';:?/><";
+
 /* Characters that can be used to quote completion strings.  Note that we
    can't include '"' because the gdb C parser treats such quoted sequences
    as strings. */
@@ -2122,6 +2128,9 @@ line_completion_function (text, matches, line_buffer, point)
 		      /* It is a normal command; what comes after it is
 		         completed by the command's completer function.  */
 		      list = (*c->completer) (p, word);
+		      if (c->completer == filename_completer)
+			rl_completer_word_break_characters =
+			  gdb_completer_file_name_break_characters;
 		    }
 		}
 	      else
@@ -2168,6 +2177,9 @@ line_completion_function (text, matches, line_buffer, point)
 		{
 		  /* It is a normal command.  */
 		  list = (*c->completer) (p, word);
+		  if (c->completer == filename_completer)
+		    rl_completer_word_break_characters =
+		      gdb_completer_file_name_break_characters;
 		}
 	    }
 	}
