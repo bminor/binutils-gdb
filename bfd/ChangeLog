@@ -1,3 +1,9 @@
+Wed Sep 11 11:57:56 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf.c (assign_file_positions_for_segments): Test SEC_ALLOC
+	rather than SEC_LOAD when aligning the file offset for the first
+	section in a segment.
+
 Tue Sep 10 16:18:30 1996  Fred Fish  <fnf@cygnus.com>
 
 	* syms.c (coff_section_type): Make arg const.

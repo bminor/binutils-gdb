@@ -2041,7 +2041,7 @@ assign_file_positions_for_segments (abfd)
 
       if (p->p_type == PT_LOAD
 	  && m->count > 0
-	  && (m->sections[0]->flags & SEC_LOAD) != 0)
+	  && (m->sections[0]->flags & SEC_ALLOC) != 0)
 	{
 	  if ((abfd->flags & D_PAGED) != 0)
 	    off += (m->sections[0]->vma - off) % bed->maxpagesize;
