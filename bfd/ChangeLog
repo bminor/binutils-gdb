@@ -1,3 +1,19 @@
+Thu Dec  8 14:19:41 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* pc532-mach.c (NAME): Define to use ns32kaout prefix.
+	* ns32knetbsd.c (NAME): Ditto.
+	(ns32kaout_32_get_section_contents): Define to standard aout-32
+	version.
+
+Fri Dec  2 13:56:49 1994  Ian Lance Taylor  <ian@rtl.cygnus.com>
+
+	* coff-mips.c (mips_read_relocs): New static function, broken out
+	of mips_relax_section.
+	(mips_relax_section): Call mips_read_relocs.
+	(bfd_mips_ecoff_create_embedded_relocs): New function.
+	* bfd-in.h (bfd_mnips_ecoff_create_embedded_relocs): Declare.
+	* bfd-in2.h: Rebuild.
+
 Wed Nov 30 14:12:55 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* coff-sh.c: Use _bfd_dummy_target instead of no_archive.
