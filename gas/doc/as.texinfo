@@ -5090,7 +5090,6 @@ floating point register), or @samp{fu} (upper half of float register).
 For @samp{priv_lev}, @var{r} is an integer.
 
 @item .half @var{n}
-@c ?? Not in HP manual
 Define a two-byte integer constant @var{n}; synonym for the portable
 @code{@value{AS}} directive @code{.short}.
 
@@ -5102,7 +5101,6 @@ use the same conventions as the first two arguments for @code{.export}.
 Define @var{name} as a label for the current assembly location.
 
 @item .leave
-@c ?? Not in HP manual
 Not yet supported; the assembler rejects programs containing this directive.
 
 @item .origin @var{lc}
@@ -5124,13 +5122,19 @@ Use following the last statement of a procedure.
 Synonym for @code{.equ}; define @var{label} with the absolute expression
 @var{expr} as its value.
 
-@item .space @var{secname}
+@item .space @var{secname} [ ,@var{params} ]
 Switch to section @var{secname}, creating a new section by that name if
-necessary.  You may only use @var{keywords} when creating a new section, not
+necessary.  You may only use @var{params} when creating a new section, not
 when switching to an existing one.  @var{secname} may identify a section by
 number rather than by name.
-@c FIXME! Shouldn't there be optional parameters the first time?  I don't see
-@c provision for them in pa_space.
+
+If specified, the list @var{params} declares attributes of the section,
+identified by keywords.  The keywords recognized are @samp{spnum=@var{exp}}
+(identify this section by the number @var{exp}, an absolute expression),
+@samp{sort=@var{exp}} (order sections according to this sort key when linking;
+@var{exp} is an absolute expression), @samp{unloadable} (section contains no
+loadable data), @samp{notdefined} (this section defined elsewhere), and
+@samp{private} (data in this section not available to other programs).
 
 @ignore
 @item .spnum
@@ -5159,16 +5163,16 @@ Similar to @code{.space}, but selects a subsection @var{name} within the
 current section.  You may only specify @var{params} when you create a
 subsection (in the first instance of @code{.subspa} for this @var{name}).
 
-If specified, @var{params} declare attributes of the subsection, identified by
-keywords.  The keywords recognized are @samp{quad=@var{expr}} (``quadrant'' for
-this subsection), @samp{align=@var{expr}} (alignment for beginning of this
-subsection; a power of two), @samp{access=@var{expr}} (value for ``access
-rights'' field), @samp{sort=@var{expr}} (sorting order for this subspace in
-link), @samp{code_only} (subsection contains only code), @samp{unloadable}
-@c ?!
-(subsection cannot be loaded into memory), @samp{common} (subsection is common
-block), @samp{dup_comm} (initialized data may have duplicate names),
-or @samp{zero} (subsection is all zeros, do not write in object file).
+If specified, the list @var{params} declares attributes of the subsection,
+identified by keywords.  The keywords recognized are @samp{quad=@var{expr}}
+(``quadrant'' for this subsection), @samp{align=@var{expr}} (alignment for
+beginning of this subsection; a power of two), @samp{access=@var{expr}} (value
+for ``access rights'' field), @samp{sort=@var{expr}} (sorting order for this
+subspace in link), @samp{code_only} (subsection contains only code),
+@samp{unloadable} (subsection cannot be loaded into memory), @samp{common}
+(subsection is common block), @samp{dup_comm} (initialized data may have
+duplicate names), or @samp{zero} (subsection is all zeros, do not write in
+object file).
 
 @item .version "@var{str}"
 Write @var{str} as version identifier in object code.
