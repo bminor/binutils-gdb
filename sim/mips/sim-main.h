@@ -30,7 +30,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 
 /* hobble some common features for moment */
-#define WITH_TRACE 0
 #define WITH_WATCHPOINTS 1
 
 #include "sim-basics.h"

@@ -1,3 +1,16 @@
+Wed Nov  5 11:21:11 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-main.h (WITH_TRACE): Delete definition.  Enables common
+ 	trace options.
+
+	* interp.c (logfh, logfile): Delete globals.
+	(sim_open, sim_close): Delete code opening & closing log file.
+	(mips_option_handler): Delete -l and -n options.
+	(OPTION mips_options): Ditto.
+
+	* interp.c (OPTION mips_options): Rename option trace to dinero.
+	(mips_option_handler): Update.
+
 Wed Nov  5 09:35:59 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* interp.c (fetch_str): New function.

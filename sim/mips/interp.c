@@ -155,14 +155,14 @@ static unsigned char *monitor = NULL;
 static ut_reg monitor_base = MONITOR_BASE;
 static unsigned monitor_size = MONITOR_SIZE; /* power-of-2 */
 
-static char *logfile = NULL; /* logging disabled by default */
-static FILE *logfh = NULL;
-
 #if defined(TRACE)
 static char *tracefile = "trace.din"; /* default filename for trace log */
 static FILE *tracefh = NULL;
 static void open_trace PARAMS((SIM_DESC sd));
 #endif /* TRACE */
+
+#define OPTION_DINERO_TRACE  200
+#define OPTION_DINERO_FILE   201
 
 static SIM_RC
 mips_option_handler (sd, opt, arg)
@@ -172,24 +172,7 @@ mips_option_handler (sd, opt, arg)
 {
   switch (opt)
     {
-    case 'l':
-      if (arg != NULL) {
-	char *tmp;
-	tmp = (char *)malloc(strlen(arg) + 1);
-	if (tmp == NULL)
-	  sim_io_printf(sd,"Failed to allocate buffer for logfile name \"%s\"\n",optarg);
-	else {
-	  strcpy(tmp,optarg);
-	  logfile = tmp;
-	}
-      }
-      return SIM_RC_OK;
-
-    case 'n': /* OK */
-      sim_io_printf(sd,"Explicit model selection not yet available (Ignoring \"%s\")\n",optarg);
-      return SIM_RC_FAIL;
-
-    case 't': /* ??? */
+    case OPTION_DINERO_TRACE: /* ??? */
 #if defined(TRACE)
       /* Eventually the simTRACE flag could be treated as a toggle, to
 	 allow external control of the program points being traced
@@ -201,20 +184,24 @@ mips_option_handler (sd, opt, arg)
 	STATE |= simTRACE;
       else if (strcmp (arg, "no") == 0)
 	STATE &= ~simTRACE;
+      else if (strcmp (arg, "on") == 0)
+	STATE |= simTRACE;
+      else if (strcmp (arg, "off") == 0)
+	STATE &= ~simTRACE;
       else
 	{
-	  fprintf (stderr, "Unreconized trace option `%s'\n", arg);
+	  fprintf (stderr, "Unreconized dinero-trace option `%s'\n", arg);
 	  return SIM_RC_FAIL;
 	}
       return SIM_RC_OK;
 #else /* !TRACE */
       fprintf(stderr,"\
-Simulator constructed without tracing support (for performance).\n\
+Simulator constructed without dinero tracing support (for performance).\n\
 Re-compile simulator with \"-DTRACE\" to enable this option.\n");
       return SIM_RC_FAIL;
 #endif /* !TRACE */
 
-    case 'z':
+    case OPTION_DINERO_FILE:
 #if defined(TRACE)
       if (optarg != NULL) {
 	char *tmp;
@@ -240,17 +227,11 @@ Re-compile simulator with \"-DTRACE\" to enable this option.\n");
 
 static const OPTION mips_options[] =
 {
-  { {"log",      required_argument, NULL,'l'},
-      'l', "FILE", "Log file",
+  { {"dinero-trace", optional_argument, NULL, OPTION_DINERO_TRACE},
+      '\0', "on|off", "Enable dinero tracing",
       mips_option_handler },
-  { {"name",     required_argument, NULL,'n'},
-      'n', "MODEL", "Select arch model",
-      mips_option_handler },
-  { {"trace",    optional_argument, NULL,'t'},
-      't', "on|off", "Enable tracing",
-      mips_option_handler },
-  { {"tracefile",required_argument, NULL,'z'},
-      'z', "FILE", "Write trace to file",
+  { {"dinero-file", required_argument, NULL, OPTION_DINERO_FILE},
+      '\0', "FILE", "Write dinero trace to FILE",
       mips_option_handler },
   { {NULL, no_argument, NULL, 0}, '\0', NULL, NULL, NULL }
 };
@@ -402,18 +383,6 @@ sim_open (kind, cb, abfd, argv)
   }
 
 
-  if (logfile != NULL) {
-    if (strcmp(logfile,"-") == 0)
-     logfh = stdout;
-    else {
-      logfh = fopen(logfile,"wb+");
-      if (logfh == NULL) {
-        sim_io_printf(sd,"Failed to create file \"%s\", writing log information to stderr.\n",tracefile);
-        logfh = stderr;
-      }
-    }
-  }
-
   /* FIXME: In the future both of these malloc's can be replaced by
      calls to sim-core.  */
 
@@ -535,10 +504,6 @@ sim_close (sd, quitting)
   tracefh = NULL;
   STATE &= ~simTRACE;
 #endif /* TRACE */
-
-  if (logfh != NULL && logfh != stdout && logfh != stderr)
-   fclose(logfh);
-  logfh = NULL;
 
   if (STATE_MEMORY (sd) != NULL)
     free(STATE_MEMORY (sd)); /* cfree not available on all hosts */
