@@ -1,3 +1,7 @@
+Mon Oct 25 14:36:50 1993  Stu Grossman  (grossman at cygnus.com)
+
+	* gdb.disasm/hppa.mt:  Use $(srcdir) in hppa.o make rule.
+
 Mon Oct 25 13:35:29 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.t06/signals.exp: Skip whole file with xfail for HPPA.
