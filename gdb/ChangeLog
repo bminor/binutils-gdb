@@ -1,5 +1,9 @@
 2004-06-09  Andrew Cagney  <cagney@gnu.org>
 
+	* config/ia64/tm-linux.h (TARGET_ELF64): Delete macro, Update
+	copyright.
+	* config/ia64/tm-aix.h (TARGET_ELF64): Ditto.
+
 	* config/mips/mipsv4.mh: Delete file.
 
 	* config/pa/tm-hppa64.h (HPREAD_ADJUST_STACK_ADDRESS): Delete
