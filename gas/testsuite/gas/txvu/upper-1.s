@@ -1,4 +1,5 @@
 ; One version of each upper instruction
+	.vu
 foo:
 ABS.xyz  	VF01xyz , VF00xyz                                 NOP
 ADD.xyz  	VF02xyz , VF00xyz , VF01xyz                       NOP

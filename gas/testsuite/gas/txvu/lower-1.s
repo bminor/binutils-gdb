@@ -1,4 +1,5 @@
 ; Each lower instruction, once each.
+	.vu
 foo:
 NOP B 		0x3ff
 NOP BAL		VI03, 0x3ff
