@@ -79,6 +79,11 @@ VPATH = @srcdir@
 
 YACC=@YACC@
 
+# This is used to rebuild ada-lex.c from ada-lex.l.  If the program is 
+# not defined, but ada-lex.c is present, compilation will continue,
+# possibly with a warning.
+FLEX = flex
+
 YLWRAP = $(srcdir)/../ylwrap
 
 # where to find makeinfo, preferably one designed for texinfo-2
@@ -518,7 +523,8 @@ TARGET_FLAGS_TO_PASS = \
 # Links made at configuration time should not be specified here, since
 # SFILES is used in building the distribution archive.
 
-SFILES = ax-general.c ax-gdb.c bcache.c blockframe.c breakpoint.c \
+SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
+	ax-general.c ax-gdb.c bcache.c blockframe.c breakpoint.c \
 	buildsym.c c-exp.y c-lang.c c-typeprint.c c-valprint.c \
 	coffread.c \
 	complaints.c completer.c corefile.c cp-valprint.c dbxread.c \
@@ -764,6 +770,7 @@ SUBDIRS = @SUBDIRS@
 
 # For now, shortcut the "configure GDB for fewer languages" stuff.
 YYFILES = c-exp.tab.c \
+	ada-exp.tab.c \
 	jv-exp.tab.c \
 	f-exp.tab.c m2-exp.tab.c p-exp.tab.c
 YYOBJ = c-exp.tab.o \
@@ -1025,6 +1032,7 @@ local-maintainer-clean:
 	@echo "This command is intended for maintainers to use;"
 	@echo "it deletes files that may require special tools to rebuild."
 	rm -f c-exp.tab.c \
+		ada-lex.c ada-exp.tab.c \
 		jv-exp.tab \
 		f-exp.tab.c m2-exp.tab.c p-exp.tab.c
 	rm -f TAGS $(INFOFILES)
@@ -1160,6 +1168,33 @@ m2-exp.tab.c: m2-exp.y
 	-rm m2-exp.tmp
 	mv m2-exp.new ./m2-exp.tab.c
 
+# ada-exp.tab.c is generated in objdir from ada-exp.y if it doesn't exist
+# in srcdir, then compiled in objdir to ada-exp.tab.o.
+# Remove bogus decls for malloc/realloc/free which conflict with everything
+# else.
+ada-exp.tab.c: ada-exp.y 
+	$(YACC) $(YFLAGS) $(srcdir)/ada-exp.y
+	-sed -e '/extern.*malloc/d' \
+	-e '/extern.*realloc/d' \
+	-e '/extern.*free/d' \
+	-e '/include.*malloc.h/d' \
+	-e 's/malloc/xmalloc/g' \
+	-e 's/realloc/xrealloc/g' \
+	< y.tab.c > ada-exp.new
+	-rm y.tab.c
+	mv ada-exp.new ./ada-exp.tab.c
+
+ada-lex.c: ada-lex.l
+	@if [ "$(FLEX)" ] && $(FLEX) --version >/dev/null 2>&1; then \
+	    echo $(FLEX) -Isit $(srcdir)/ada-lex.l ">" ada-lex.c; \
+	    $(FLEX) -Isit $(srcdir)/ada-lex.l > ada-lex.c; \
+	elif [ ! -f ada-lex.c -a ! -f $(srcdir)/ada-lex.c ]; then \
+	    echo "ada-lex.c missing and flex not available."; \
+	    false; \
+	elif [ ! -f ada-lex.c ]; then \
+	    echo "Warning: ada-lex.c older than ada-lex.l and flex not available."; \
+	fi
+
 # p-exp.tab.c is generated in objdir from p-exp.y if it doesn't exist
 # in srcdir, then compiled in objdir to p-exp.tab.o.
 # Remove bogus decls for malloc/realloc/free which conflict with everything
@@ -1180,7 +1215,7 @@ p-exp.tab.c: p-exp.y
 
 # These files are updated atomically, so make never has to remove them
 .PRECIOUS: m2-exp.tab.c f-exp.tab.c c-exp.tab.c
-.PRECIOUS: jv-exp.tab.c p-exp.tab.c
+.PRECIOUS: jv-exp.tab.c p-exp.tab.c ada-exp.tab.c
 
 lint: $(LINTFILES)
 	$(LINT) $(INCLUDE_CFLAGS) $(LINTFLAGS) $(LINTFILES) \
@@ -1305,6 +1340,21 @@ a68v-nat.o: a68v-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) \
 aix-thread.o: aix-thread.c $(defs_h) $(gdbcore_h) $(gdbthread_h) \
 	$(inferior_h) $(target_h) $(regcache_h) $(gdbcmd_h) $(gdb_assert_h) \
 	$(ppc_tdep_h) $(language_h)
+
+ada-lang.o: ada-lang.c ada-lang.h c-lang.h $(defs_h) $(expression_h) \
+	$(gdbtypes_h) $(inferior_h) language.h parser-defs.h $(symtab_h) \
+	$(gdbcmd_h) $(ui_out_h) symfile.h objfiles.h $(gdbcore_h)
+
+ada-tasks.o: ada-tasks.c ada-lang.h $(defs_h) language.h $(value_h) \
+	$(command_h) $(value_h) $(gdbcore_h)
+
+ada-typeprint.o: ada-typeprint.c ada-lang.h $(defs_h) $(expression_h) \
+	$(gdbcmd_h) $(gdbcore_h) $(gdbtypes_h) language.h $(symtab_h) \
+	target.h typeprint.h $(value_h) ada-lang.h
+
+ada-valprint.o: ada-valprint.c $(defs_h) $(expression_h) $(gdbtypes_h) \
+	language.h $(symtab_h) valprint.h $(value_h) c-lang.h ada-lang.h \
+	annotate.h
 
 alpha-nat.o: alpha-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) $(target_h) \
 	$(regcache_h) $(alpha_tdep_h)
@@ -2278,6 +2328,11 @@ m2-exp.tab.o: m2-exp.tab.c $(defs_h) $(expression_h) $(gdbtypes_h) \
 p-exp.tab.o: p-exp.tab.c $(defs_h) $(expression_h) $(gdbtypes_h) \
 	$(language_h) p-lang.h $(parser_defs_h) $(symtab_h) $(value_h) \
 	$(bfd_h) $(objfiles_h) $(symfile_h)
+
+ada-exp.tab.o: ada-exp.tab.c ada-lex.c ada-lang.h \
+	$(defs_h) $(expression_h) \
+	$(gdbtypes_h) language.h parser-defs.h $(symtab_h) $(value_h) \
+	$(bfd_h) objfiles.h symfile.h
 
 gdb-events.o: gdb-events.c $(gdb_events_h) $(defs_h) $(gdbcmd_h)
 
