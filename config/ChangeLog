@@ -1,3 +1,14 @@
+start-sanitize-r5900
+Mon Feb 24 22:37:52 1997  Gavin Koch  <gavin@cygnus.com>
+
+	* mt-r5900 (LDFLAGS_FOR_TARGET): changed to idt.
+
+end-sanitize-r5900        
+Wed Jan  8 19:56:43 1997  Geoffrey Noer  <noer@cygnus.com>
+
+        * mh-cygwin32: override CFLAGS so debug info isn't included
+        in cygwin32-hosted tools by default
+
 Tue Dec 31 16:04:26 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* mh-linux: Remove.
