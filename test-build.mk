@@ -68,7 +68,8 @@ FLAGS_TO_PASS := \
 	"CFLAGS=$(CFLAGS)" \
 	"TIME=$(TIME)" \
 	"MF=$(MF)" \
-	"host=$(host)"
+	"host=$(host)" \
+	"RELEASE_TAG=$(RELEASE_TAG)"
 
 ifneq  '$(CC)' 'cc'
 FLAGS_TO_PASS := "CC=$(CC)" $(FLAGS_TO_PASS)
@@ -78,6 +79,11 @@ endif
 prefixes	= --prefix=$(release_root) --exec-prefix=$(release_root)/H-$(host)
 relbindir	= $(release_root)/H-$(host)/bin
 
+ifeq ($(host),mips-dec-ultrix)
+configargs	= -with-gnu-as
+else
+configargs	=
+endif
 
 ### general config stuff
 WORKING_DIR 	:= $(host)-objdir
@@ -150,7 +156,7 @@ $(arch)-stamp-native-built: $(host)-stamp-holes $(arch)-stamp-native-configured
 
 $(arch)-stamp-native-configured: $(host)-stamp-holes
 	[ -d $(NATIVEDIR) ] || mkdir $(NATIVEDIR)
-	$(SET_NATIVE_HOLES) cd $(NATIVEDIR) ; $(TIME) ../$(TREE)/configure $(config) -v --srcdir=../$(TREE) $(prefixes)
+	$(SET_NATIVE_HOLES) cd $(NATIVEDIR) ; $(TIME) ../$(TREE)/configure $(config) -v --srcdir=../$(TREE) $(prefixes) $(configargs)
 	touch $@
 
 
@@ -181,7 +187,7 @@ $(arch)-stamp-cygnus-built:  $(host)-stamp-holes $(arch)-stamp-cygnus-configured
 
 $(arch)-stamp-cygnus-configured:  $(host)-stamp-holes
 	[ -d $(CYGNUSDIR) ] || mkdir $(CYGNUSDIR)
-	$(SET_CYGNUS_PATH) cd $(CYGNUSDIR) ; $(GNUC) $(TIME) ../$(TREE)/configure $(config) -v --srcdir=../$(TREE) $(prefixes)
+	$(SET_CYGNUS_PATH) cd $(CYGNUSDIR) ; $(GNUC) $(TIME) ../$(TREE)/configure $(config) -v --srcdir=../$(TREE) $(prefixes) $(configargs)
 	touch $@
 
 .PHONY: do-latest
@@ -208,7 +214,7 @@ $(arch)-stamp-latest-built: $(arch)-stamp-latest-configured
 
 $(arch)-stamp-latest-configured:
 	[ -d $(LATESTDIR) ] || mkdir $(LATESTDIR)
-	$(SET_LATEST_PATH) cd $(LATESTDIR) ; $(GNUC) $(TIME) ../$(TREE)/configure $(config) -v --srcdir=../$(TREE) $(prefixes)
+	$(SET_LATEST_PATH) cd $(LATESTDIR) ; $(GNUC) $(TIME) ../$(TREE)/configure $(config) -v --srcdir=../$(TREE) $(prefixes) $(configargs)
 	touch $@
 
 
@@ -242,7 +248,7 @@ $(host)-stamp-in-place-built: $(host)-stamp-in-place-configured
 	touch $@
 
 $(host)-stamp-in-place-configured: $(host)-stamp-in-place-cp
-	cd $(INPLACEDIR) ; $(TIME) ./configure $(host) -v $(prefixes)
+	cd $(INPLACEDIR) ; $(TIME) ./configure $(host) -v $(prefixes) $(configargs)
 	touch $@
 
 $(host)-stamp-in-place-cp:
@@ -294,7 +300,7 @@ $(host)-stamp-stage1-built: $(host)-stamp-stage1-configured
 $(host)-stamp-stage1-configured:
 	[ -d $(WORKING_DIR) ] || mkdir $(WORKING_DIR)
 	$(SET_NATIVE_HOLES) cd $(WORKING_DIR) ; \
-	  $(TIME) ../$(TREE)/configure $(host) -v --srcdir=../$(TREE) $(prefixes)
+	  $(TIME) ../$(TREE)/configure $(host) -v --srcdir=../$(TREE) $(prefixes) $(configargs)
 	touch $@
 
 .PHONY: do2
@@ -328,7 +334,7 @@ $(host)-stamp-stage2-built: $(host)-stamp-stage2-configured
 $(host)-stamp-stage2-configured:
 	[ -d $(WORKING_DIR) ] || mkdir $(WORKING_DIR)
 	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; \
-	  $(GNUC) $(TIME) ../$(TREE)/configure $(host) -v --srcdir=../$(TREE) $(prefixes)
+	  $(GNUC) $(TIME) ../$(TREE)/configure $(host) -v --srcdir=../$(TREE) $(prefixes) $(configargs)
 	touch $@
 
 .PHONY: do3
@@ -362,7 +368,7 @@ $(host)-stamp-stage3-built: $(host)-stamp-stage3-configured
 $(host)-stamp-stage3-configured:
 	[ -d $(WORKING_DIR) ] || mkdir $(WORKING_DIR)
 	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; \
-	  $(GNUC) $(TIME) ../$(TREE)/configure $(host) -v --srcdir=../$(TREE) $(prefixes)
+	  $(GNUC) $(TIME) ../$(TREE)/configure $(host) -v --srcdir=../$(TREE) $(prefixes) $(configargs)
 	touch $@
 
 # These things are needed by a three-stage, but are not included locally.

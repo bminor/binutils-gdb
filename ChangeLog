@@ -1,5 +1,14 @@
 Thu Apr  1 08:25:42 1993  Ian Lance Taylor  (ian@cygnus.com)
 
+	* build-all.mk: If host not specified, use config.guess.  Pass TAG
+	to test-build.mk as RELEASE_TAG.
+	* test-build.mk (configargs): New variable containing arguments to
+	pass to configure.  Set to -with-gnu-as on mips-dec-ultrix.
+	(FLAGS_TO_PASS): Pass down RELEASE_TAG.
+
+	* config.guess: Use /bin/uname when checking -X argument on SCO,
+	to avoid invoking GNU uname which doesn't understand -X.
+
 	* test-build.mk: Don't use /usr/unsupported/bin/as on AIX.
 
 	* configure.in: Build gas for mips-*-*.

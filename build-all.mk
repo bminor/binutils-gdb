@@ -5,21 +5,19 @@
 #
 #
 
-ifndef host
-error:; @echo You must set the variable \"host\" to use this Makefile ; exit 1
-else
-
-# the rest of the makefile
-
 TREE	= devo
 
 NATIVE  = native
 
-DATE	= 930309
+DATE	= 930401
 
 TAG	= latest-$(DATE)
 
 INSTALLDIR = /build/ian/devo-test/$(TAG)
+
+ifndef host
+host := $(shell $(TREE)/config.guess)
+endif
 
 GCC = gcc -O 
 CFLAGS = -g
@@ -28,7 +26,15 @@ log	= 1>$(canonhost)-build-log 2>&1
 tlog    = 1> $(canonhost)-x-$$i-build-log 2>&1
 
 canonhost := $(shell $(TREE)/config.sub $(host))
-ifeq ($(canonhost),i386-unknown-sco3.2v4)
+
+# Convert config.guess results to a simpler form.
+ifeq ($(canonhost),mips-dec-ultrix4.2)
+canonhost := mips-dec-ultrix
+endif
+ifeq ($(canonhost),mips-sgi-irix4.0.1)
+canonhost := mips-sgi-irix4
+endif
+ifeq ($(canonhost),i486-unknown-sco3.2v4.0)
 canonhost := i386-sco3.2v4
 endif
 
@@ -98,7 +104,8 @@ FLAGS_TO_PASS := \
 	"GCC=$(GCC)" \
 	"CC=$(CC)" \
 	"CFLAGS=$(CFLAGS)" \
-	"host=$(canonhost)"
+	"host=$(canonhost)" \
+	"RELEASE_TAG=$(TAG)"
 
 all-cygnus:
 	@echo build started at `date`
@@ -194,8 +201,6 @@ build:
 	       echo "     completed successfully" ; \
 	  fi ; \
 	done
-
-endif  # host
 
 ### Local Variables:
 ### fill-column: 131
