@@ -1,4 +1,8 @@
 start-sanitize-sky
+Fri Feb 27 10:00:44 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* dvp.h (VIF_FLAG_U): New macro.
+
 Wed Feb 25 00:23:49 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* dvp.h (DVP_OPERAND_MIPS_ADDRESS): Renamed from DVP_OPERAND_ADDRESS.
