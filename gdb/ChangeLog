@@ -1,5 +1,10 @@
 2004-08-11  Joel Brobecker  <brobecker@gnat.com>
 
+	* config/powerpc/aix.mh: Remove obsolete comment.
+	* config/powerpc/aix432.mh: Likewise.
+
+2004-08-11  Joel Brobecker  <brobecker@gnat.com>
+
 	* config/powerpc/xm-aix.h (UINT_MAX): Remove undef.
 
 2004-08-11  Joel Brobecker  <brobecker@gnat.com>
