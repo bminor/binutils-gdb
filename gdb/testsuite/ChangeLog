@@ -1,5 +1,10 @@
 2002-01-20  Daniel Jacobowitz  <drow@mvista.com>
 
+	* gdb.c++/inherit.exp: Update copyright years.
+	* gdb.c++/method.exp: Likewise.
+
+2002-01-20  Daniel Jacobowitz  <drow@mvista.com>
+
 	* gdb.c++/classes.exp: Update for improved v3 support and skipping
 	artificial methods/arguments.
 	* gdb.c++/derivation.exp: Likewise.
