@@ -1,6 +1,7 @@
 /* Target machine definitions for GDB on a Sequent Symmetry under dynix 3.0,
    with Weitek 1167 and i387 support.
-   Copyright 1986, 1987, 1989, 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994
+   Free Software Foundation, Inc.
    Symmetry version by Jay Vosburgh (fubar@sequent.com).
 
 This file is part of GDB.
@@ -21,20 +22,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* I don't know if this will work for cross-debugging, even if you do get
    a copy of the right include file.  */
-#ifdef _SEQUENT_
-/* ptx */
-#include <sys/reg.h>
-#else
-/* dynix */
 #include <machine/reg.h>
-#endif
-
-#ifdef _SEQUENT_
-/* ptx, not dynix */
-#define SDB_REG_TO_REGNUM(value) ptx_coff_regno_to_gdb(value)
-extern int ptx_coff_regno_to_gdb();
-
-#endif /* _SEQUENT_ */
 
 #define START_INFERIOR_TRAPS_EXPECTED 2
 
@@ -45,13 +33,6 @@ extern int ptx_coff_regno_to_gdb();
 #define DECR_PC_AFTER_BREAK 0
 
 #include "i386/tm-i386v.h"
-
-/* Nonzero if instruction at PC is a return instruction.  */
-/* For Symmetry, this is really the 'leave' instruction, which */
-/* is right before the ret */
-
-#undef ABOUT_TO_RETURN
-#define ABOUT_TO_RETURN(pc) (read_memory_integer (pc, 1) == 0xc9)
 
 #if 0
 /* --- this code can't be used unless we know we are running native,
@@ -126,8 +107,17 @@ extern int ptx_coff_regno_to_gdb();
 #define PS_REGNUM 17		/* eflags--Contains processor status */
 #define EFLAGS_REGNUM 17
 
-#ifndef _SEQUENT_
-/* dynix, not ptx.  For ptx, see register_addr in symm-tdep.c */
+/*
+ * Following macro translates i386 opcode register numbers to Symmetry
+ * register numbers.  This is used by i386_frame_find_saved_regs.
+ *
+ *           %eax  %ecx  %edx  %ebx  %esp  %ebp  %esi  %edi
+ * i386        0     1     2     3     4     5     6     7
+ * Symmetry    0     2     1     5    14    15     6     7
+ *
+ */
+#define I386_REGNO_TO_SYMMETRY(n) \
+((n)==0?0 :(n)==1?2 :(n)==2?1 :(n)==3?5 :(n)==4?14 :(n)==5?15 :(n))
 
 /* The magic numbers below are offsets into u_ar0 in the user struct.
  * They live in <machine/reg.h>.  Gdb calls this macro with blockend
@@ -146,12 +136,10 @@ switch (regno) { \
   case 2: \
       addr = blockend + ECX * sizeof(int); break; \
   case 3:			/* st(0) */ \
-      addr = blockend - \
-	  ((int)&foo.u_fpusave.fpu_stack[0][0] - (int)&foo); \
+      addr = ((int)&foo.u_fpusave.fpu_stack[0][0] - (int)&foo); \
       break; \
   case 4:			/* st(1) */ \
-      addr = blockend - \
-	  ((int) &foo.u_fpusave.fpu_stack[1][0] - (int)&foo); \
+      addr = ((int) &foo.u_fpusave.fpu_stack[1][0] - (int)&foo); \
       break; \
   case 5: \
       addr = blockend + EBX * sizeof(int); break; \
@@ -160,28 +148,22 @@ switch (regno) { \
   case 7: \
       addr = blockend + EDI * sizeof(int); break; \
   case 8:			/* st(2) */ \
-      addr = blockend - \
-	  ((int) &foo.u_fpusave.fpu_stack[2][0] - (int)&foo); \
+      addr = ((int) &foo.u_fpusave.fpu_stack[2][0] - (int)&foo); \
       break; \
   case 9:			/* st(3) */ \
-      addr = blockend - \
-	  ((int) &foo.u_fpusave.fpu_stack[3][0] - (int)&foo); \
+      addr = ((int) &foo.u_fpusave.fpu_stack[3][0] - (int)&foo); \
       break; \
   case 10:			/* st(4) */ \
-      addr = blockend - \
-	  ((int) &foo.u_fpusave.fpu_stack[4][0] - (int)&foo); \
+      addr = ((int) &foo.u_fpusave.fpu_stack[4][0] - (int)&foo); \
       break; \
   case 11:			/* st(5) */ \
-      addr = blockend - \
-	  ((int) &foo.u_fpusave.fpu_stack[5][0] - (int)&foo); \
+      addr = ((int) &foo.u_fpusave.fpu_stack[5][0] - (int)&foo); \
       break; \
   case 12:			/* st(6) */ \
-      addr = blockend - \
-	  ((int) &foo.u_fpusave.fpu_stack[6][0] - (int)&foo); \
+      addr = ((int) &foo.u_fpusave.fpu_stack[6][0] - (int)&foo); \
       break; \
   case 13:			/* st(7) */ \
-      addr = blockend - \
-	  ((int) &foo.u_fpusave.fpu_stack[7][0] - (int)&foo); \
+      addr = ((int) &foo.u_fpusave.fpu_stack[7][0] - (int)&foo); \
       break; \
   case 14: \
       addr = blockend + ESP * sizeof(int); break; \
@@ -222,126 +204,9 @@ switch (regno) { \
   case 46:			/* fp29 */ \
   case 47:			/* fp30 */ \
   case 48:			/* fp31 */ \
-     addr = blockend - \
-	 ((int) &foo.u_fpasave.fpa_regs[(regno)-18] - (int)&foo); \
+     addr = ((int) &foo.u_fpasave.fpa_regs[(regno)-18] - (int)&foo); \
   } \
 }
-#endif /* not _SEQUENT_ */
-
-#ifdef _SEQUENT_
-/* ptx.  For Dynix, see above */
-
-/*
- * For ptx, this is a little bit bizarre, since the register block
- * is below the u area in memory.  This means that blockend here ends
- * up being negative (for the call from coredep.c) since the value in
- * u.u_ar0 will be less than KERNEL_U_ADDR (and coredep.c passes us
- * u.u_ar0 - KERNEL_U_ADDR in blockend).  Since we also define
- * FETCH_INFERIOR_REGISTERS (and supply our own functions for that),
- * the core file case will be the only use of this function.
- */
-
-#define REGISTER_U_ADDR(addr, blockend, regno) \
-{ struct user foo;	/* needed for finding fpu regs */ \
-switch (regno) { \
-    case 0: \
-      addr = blockend + (NBPG * UPAGES) - sizeof(struct user) + (EAX * sizeof(int)); break; \
-  case 1: \
-      addr = blockend + (NBPG * UPAGES) - sizeof(struct user) + (EDX * sizeof(int)); break; \
-  case 2: \
-      addr = blockend + (NBPG * UPAGES) - sizeof(struct user) + (ECX * sizeof(int)); break; \
-  case 3:			/* st(0) */ \
-      addr = blockend - KERNEL_U_ADDR + \
-	  ((int)&foo.u_fpusave.fpu_stack[0][0] - (int)&foo); \
-      break; \
-  case 4:			/* st(1) */ \
-      addr = blockend - KERNEL_U_ADDR + \
-	  ((int) &foo.u_fpusave.fpu_stack[1][0] - (int)&foo); \
-      break; \
-  case 5: \
-      addr = blockend + (NBPG * UPAGES) - sizeof(struct user) + (EBX * sizeof(int)); break; \
-  case 6: \
-      addr = blockend + (NBPG * UPAGES) - sizeof(struct user) + (ESI * sizeof(int)); break; \
-  case 7: \
-      addr = blockend + (NBPG * UPAGES) - sizeof(struct user) + (EDI * sizeof(int)); break; \
-  case 8:			/* st(2) */ \
-      addr = blockend - KERNEL_U_ADDR + \
-	  ((int) &foo.u_fpusave.fpu_stack[2][0] - (int)&foo); \
-      break; \
-  case 9:			/* st(3) */ \
-      addr = blockend - KERNEL_U_ADDR + \
-	  ((int) &foo.u_fpusave.fpu_stack[3][0] - (int)&foo); \
-      break; \
-  case 10:			/* st(4) */ \
-      addr = blockend - KERNEL_U_ADDR + \
-	  ((int) &foo.u_fpusave.fpu_stack[4][0] - (int)&foo); \
-      break; \
-  case 11:			/* st(5) */ \
-      addr = blockend - KERNEL_U_ADDR + \
-	  ((int) &foo.u_fpusave.fpu_stack[5][0] - (int)&foo); \
-      break; \
-  case 12:			/* st(6) */ \
-      addr = blockend - KERNEL_U_ADDR + \
-	  ((int) &foo.u_fpusave.fpu_stack[6][0] - (int)&foo); \
-      break; \
-  case 13:			/* st(7) */ \
-      addr = blockend - KERNEL_U_ADDR + \
-	  ((int) &foo.u_fpusave.fpu_stack[7][0] - (int)&foo); \
-      break; \
-  case 14: \
-      addr = blockend + (NBPG * UPAGES) - sizeof(struct user) + (ESP * sizeof(int)); break; \
-  case 15: \
-      addr = blockend + (NBPG * UPAGES) - sizeof(struct user) + (EBP * sizeof(int)); break; \
-  case 16: \
-      addr = blockend + (NBPG * UPAGES) - sizeof(struct user) + (EIP * sizeof(int)); break; \
-  case 17: \
-      addr = blockend + (NBPG * UPAGES) - sizeof(struct user) + (FLAGS * sizeof(int)); break; \
-  case 18:			/* fp1 */ \
-  case 19:			/* fp2 */ \
-  case 20:			/* fp3 */ \
-  case 21:			/* fp4 */ \
-  case 22:			/* fp5 */ \
-  case 23:			/* fp6 */ \
-  case 24:			/* fp7 */ \
-  case 25:			/* fp8 */ \
-  case 26:			/* fp9 */ \
-  case 27:			/* fp10 */ \
-  case 28:			/* fp11 */ \
-  case 29:			/* fp12 */ \
-  case 30:			/* fp13 */ \
-  case 31:			/* fp14 */ \
-  case 32:			/* fp15 */ \
-  case 33:			/* fp16 */ \
-  case 34:			/* fp17 */ \
-  case 35:			/* fp18 */ \
-  case 36:			/* fp19 */ \
-  case 37:			/* fp20 */ \
-  case 38:			/* fp21 */ \
-  case 39:			/* fp22 */ \
-  case 40:			/* fp23 */ \
-  case 41:			/* fp24 */ \
-  case 42:			/* fp25 */ \
-  case 43:			/* fp26 */ \
-  case 44:			/* fp27 */ \
-  case 45:			/* fp28 */ \
-  case 46:			/* fp29 */ \
-  case 47:			/* fp30 */ \
-  case 48:			/* fp31 */ \
-     addr = blockend - KERNEL_U_ADDR + \
-	 ((int) &foo.u_fpasave.fpa_regs[(regno)-18] - (int)&foo); \
-  } \
-}
-#endif /* _SEQUENT_ */
-
-#undef FRAME_CHAIN
-#define FRAME_CHAIN(thisframe) ((thisframe)->pc == 0 ? \
-	0 : read_memory_integer((thisframe)->frame, 4))
-
-#define FRAME_CHAIN_VALID(chain, thisframe) \
-	((chain) != 0)
-
-#undef FRAME_ARGS_SKIP
-#define FRAME_ARGS_SKIP 0
 
 /* Total amount of space needed to store our copies of the machine's
    register state, the array `registers'.  */
@@ -389,6 +254,8 @@ switch (regno) { \
 (N < 14) ? 1 : \
     0)
 
+#include "floatformat.h"
+
 /* Convert data from raw format for register REGNUM in buffer FROM
    to virtual format with type TYPE in buffer TO.  */
 
@@ -396,11 +263,9 @@ switch (regno) { \
 #define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,TYPE,FROM,TO) \
 { \
   double val; \
-  i387_to_double ((FROM), (char *)&val); \
+  floatformat_to_double (&floatformat_i387_ext, (FROM), &val); \
   store_floating ((TO), TYPE_LENGTH (TYPE), val); \
 }
-extern void
-i387_to_double PARAMS ((char *, char *));
 
 /* Convert data from virtual format with type TYPE in buffer FROM
    to raw format for register REGNUM in buffer TO.  */
@@ -409,10 +274,8 @@ i387_to_double PARAMS ((char *, char *));
 #define REGISTER_CONVERT_TO_RAW(TYPE,REGNUM,FROM,TO) \
 { \
   double val = extract_floating ((FROM), TYPE_LENGTH (TYPE)); \
-  double_to_i387((char *)&val, (TO)); \
+  floatformat_from_double (&floatformat_i387_ext, &val, (TO)); \
 }
-extern void
-double_to_i387 PARAMS ((char *, char *));
 
 /* Return the GDB type object for the "standard" data type
    of data in register N.  */
@@ -425,17 +288,14 @@ double_to_i387 PARAMS ((char *, char *));
 (N < 14) ? builtin_type_double : \
     builtin_type_int)
 
-/* from m-i386.h (now known as tm-i386v.h).  */
 /* Store the address of the place in which to copy the structure the
-   subroutine will return.  This is called from call_function.  FIXME:
-   Why is it writing register 0?  Is the symmetry different from tm-i386v.h,
-   or is it some sort of artifact?  FIXME.  */
+   subroutine will return.  This is called from call_function.
+   Native cc passes the address in eax, gcc (up to version 2.5.8)
+   passes it on the stack.  gcc should be fixed in future versions to
+   adopt native cc conventions.  */
 
 #undef STORE_STRUCT_RETURN
-#define STORE_STRUCT_RETURN(ADDR, SP) \
-  { (SP) -= sizeof (ADDR);		\
-    write_memory ((SP), (char *) &(ADDR), sizeof (ADDR)); \
-    write_register(0, (ADDR)); }
+#define STORE_STRUCT_RETURN(ADDR, SP) write_register(0, (ADDR))
 
 /* Extract from an array REGBUF containing the (raw) register state
    a function return value of type TYPE, and copy that, in virtual format,
@@ -451,3 +311,46 @@ print_387_control_word PARAMS ((unsigned int));
 
 extern void
 print_387_status_word PARAMS ((unsigned int));
+
+/* The following redefines make backtracing through sigtramp work.
+   They manufacture a fake sigtramp frame and obtain the saved pc in sigtramp
+   from the sigcontext structure which is pushed by the kernel on the
+   user stack, along with a pointer to it.  */
+
+#define IN_SIGTRAMP(pc, name) ((name) && STREQ ("_sigcode", name))
+
+/* Offset to saved PC in sigcontext, from <signal.h>.  */
+#define SIGCONTEXT_PC_OFFSET 16
+
+/* FRAME_CHAIN takes a frame's nominal address and produces the frame's
+   chain-pointer.
+   In the case of the i386, the frame's nominal address
+   is the address of a 4-byte word containing the calling frame's address.  */
+#undef FRAME_CHAIN
+#define FRAME_CHAIN(thisframe)  \
+  (thisframe->signal_handler_caller \
+   ? thisframe->frame \
+   : (!inside_entry_file ((thisframe)->pc) \
+      ? read_memory_integer ((thisframe)->frame, 4) \
+      : 0))
+
+/* A macro that tells us whether the function invocation represented
+   by FI does not have a frame on the stack associated with it.  If it
+   does not, FRAMELESS is set to 1, else 0.  */
+#undef FRAMELESS_FUNCTION_INVOCATION
+#define FRAMELESS_FUNCTION_INVOCATION(FI, FRAMELESS) \
+  do { \
+    if ((FI)->signal_handler_caller) \
+      (FRAMELESS) = 0; \
+    else \
+      (FRAMELESS) = frameless_look_for_prologue(FI); \
+  } while (0)
+
+/* Saved Pc.  Get it from sigcontext if within sigtramp.  */
+
+#undef FRAME_SAVED_PC
+#define FRAME_SAVED_PC(FRAME) \
+  (((FRAME)->signal_handler_caller \
+    ? sigtramp_saved_pc (FRAME) \
+    : read_memory_integer ((FRAME)->frame + 4, 4)) \
+   )
