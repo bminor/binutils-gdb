@@ -33,6 +33,7 @@ IT_OBJS=itbl-parse.o itbl-lex.o itbl-ops.o
 CPU_TYPES = \
 	a29k \
 	alpha \
+	arc \
 	arm \
 	d10v \
 	h8300 \
@@ -178,6 +179,7 @@ HFILES = \
 TARGET_CPU_CFILES = \
 	config/tc-a29k.c \
 	config/tc-alpha.c \
+	config/tc-arc.c \
 	config/tc-arm.c \
 	config/tc-d10v.c \
 	config/tc-h8300.c \
@@ -205,6 +207,7 @@ TARGET_CPU_CFILES = \
 TARGET_CPU_HFILES = \
 	config/tc-a29k.h \
 	config/tc-alpha.h \
+	config/tc-arc.h \
 	config/tc-arm.h \
 	config/tc-d10v.h \
 	config/tc-h8300.h \
@@ -296,10 +299,13 @@ MULTI_CFILES = \
 	config/e-mipsecoff.c \
 	config/e-mipself.c
 
-OBJS = \
+CONFIG_OBJS = \
 	$(TARG_CPU_O) \
 	$(OBJ_FORMAT_O) \
 	$(ATOF_TARG_O) \
+	$(extra_objects)
+
+GENERIC_OBJS = \
 	app.o \
 	as.o \
 	atof-generic.o \
@@ -325,17 +331,20 @@ OBJS = \
 	ecoff.o \
 	stabs.o \
 	sb.o \
-	macro.o \
-	$(extra_objects)
+	macro.o
+
+OBJS = $(CONFIG_OBJS) $(GENERIC_OBJS)
 
 noinst_PROGRAMS = as-new gasp-new
 noinst_SCRIPTS = .gdbinit
 
-make-gas.com: stamp-mk.com
+$(srcdir)/make-gas.com: stamp-mk.com
 stamp-mk.com: vmsconf.sh Makefile
-	sh $(srcdir)/vmsconf.sh $(OBJS) > new-make.com
+	sh $(srcdir)/vmsconf.sh $(GENERIC_OBJS) > new-make.com
 	$(SHELL) $(srcdir)/../move-if-change new-make.com $(srcdir)/make-gas.com
 	touch stamp-mk.com
+
+EXTRA_DIST = make-gas.com
 
 # Now figure out from those variables how to compile and link.
 
@@ -356,7 +365,7 @@ INCLUDES = -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(srcdir)/config -I$(INCDIR)
 GASLIBS = @OPCODES_LIB@ @BFDLIB@ ../libiberty/libiberty.a
 
 # Files to be copied away after each stage in building.
-STAGESTUFF = *.o $(bin_PROGRAMS)
+STAGESTUFF = *.o $(noinst_PROGRAMS)
 
 $(OBJS): @ALL_OBJ_DEPS@
 
@@ -457,7 +466,7 @@ e-i386elf.o: $(srcdir)/config/e-i386elf.c
 
 # The m68k operand parser.
 
-EXTRA_as_new_SOURCES = m68k-parse.y
+EXTRA_as_new_SOURCES = config/m68k-parse.y
 
 m68k-parse.c: $(srcdir)/config/m68k-parse.y
 	$(SHELL) $(YLWRAP) "$(YACC)" $(srcdir)/config/m68k-parse.y y.tab.c m68k-parse.c --
@@ -529,23 +538,23 @@ install-exec-local: $(noinst_PROGRAMS)
 bootstrap: as-new
 	$(MAKE) stage1
 	rm -f stage && ln -s stage1 stage
-	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage/ $(CFLAGS)" libdir=$(libdir) ALLOCA= $(bin_PROGRAMS)
+	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage/ $(CFLAGS)" libdir=$(libdir) ALLOCA= $(noinst_PROGRAMS)
 	$(MAKE) stage2
 	rm -f stage && ln -s stage2 stage
-	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage/ $(CFLAGS)" libdir=$(libdir) ALLOCA= $(bin_PROGRAMS)
+	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage/ $(CFLAGS)" libdir=$(libdir) ALLOCA= $(noinst_PROGRAMS)
 	$(MAKE) comparison against=stage2
 
 bootstrap2:
 	rm -f stage && ln -s stage1 stage
-	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage/ $(CFLAGS)" libdir=$(libdir) ALLOCA= $(bin_PROGRAMS)
+	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage/ $(CFLAGS)" libdir=$(libdir) ALLOCA= $(noinst_PROGRAMS)
 	$(MAKE) stage2
 	rm -f stage && ln -s stage2 stage
-	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage/ $(CFLAGS)" libdir=$(libdir) ALLOCA= $(bin_PROGRAMS)
+	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage/ $(CFLAGS)" libdir=$(libdir) ALLOCA= $(noinst_PROGRAMS)
 	$(MAKE) comparison against=stage2
 
 bootstrap3:
 	rm -f stage && ln -s stage2 stage
-	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage/ $(CFLAGS)" libdir=$(libdir) ALLOCA= $(bin_PROGRAMS)
+	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage/ $(CFLAGS)" libdir=$(libdir) ALLOCA= $(noinst_PROGRAMS)
 	$(MAKE) comparison against=stage2
 
 # Copy the object files from a particular stage into a subdirectory.
@@ -818,7 +827,6 @@ subsegs.o: subsegs.c subsegs.h $(INCDIR)/obstack.h
 symbols.o: symbols.c $(INCDIR)/obstack.h subsegs.h
 write.o: write.c subsegs.h $(INCDIR)/obstack.h output-file.h
 gasp.o: gasp.c sb.h macro.h
-itbl-ops.o: itbl-ops.c itbl-ops.h
 e-i386coff.o: $(srcdir)/config/e-i386coff.c emul.h \
   emul-target.h
 e-i386elf.o: $(srcdir)/config/e-i386elf.c emul.h emul-target.h
@@ -851,6 +859,14 @@ TCDEP_alpha_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
 TCDEP_alpha_evax = $(srcdir)/config/obj-evax.h $(srcdir)/config/tc-alpha.h \
   subsegs.h $(INCDIR)/obstack.h $(INCDIR)/opcode/alpha.h \
   $(srcdir)/config/atof-vax.c
+TCDEP_arc_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-arc.h \
+  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
+  subsegs.h $(INCDIR)/obstack.h $(INCDIR)/opcode/arc.h \
+  $(INCDIR)/elf/arc.h
+TCDEP_arc_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-arc.h subsegs.h \
+  $(INCDIR)/obstack.h $(INCDIR)/opcode/arc.h $(INCDIR)/elf/arc.h
 TCDEP_arm_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-arm.h \
   $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h subsegs.h $(INCDIR)/obstack.h
 TCDEP_arm_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-arm.h \
@@ -1043,10 +1059,13 @@ TCDEP_w65_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-w65.h subsegs.h \
   $(INCDIR)/obstack.h $(srcdir)/../opcodes/w65-opc.h
+TCDEP_v850_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-v850.h \
+  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
+  subsegs.h $(INCDIR)/obstack.h $(INCDIR)/opcode/v850.h
 TCDEP_v850_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-v850.h subsegs.h \
-  $(INCDIR)/obstack.h 
+  $(INCDIR)/obstack.h $(INCDIR)/opcode/v850.h
 TCDEP_z8k_coff = $(srcdir)/../opcodes/z8k-opc.h $(srcdir)/config/obj-coff.h \
   $(srcdir)/config/tc-z8k.h $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/z8k.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h
@@ -1082,6 +1101,13 @@ OBJDEP_alpha_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/obstack.h ecoff.h $(INCDIR)/coff/sym.h $(INCDIR)/coff/ecoff.h \
   $(INCDIR)/aout/aout64.h
 OBJDEP_alpha_evax = $(srcdir)/config/obj-evax.h $(srcdir)/config/tc-alpha.h
+OBJDEP_arc_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-arc.h \
+  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
+  $(INCDIR)/obstack.h subsegs.h
+OBJDEP_arc_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-arc.h subsegs.h \
+  $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
 OBJDEP_arm_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-arm.h \
   $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h $(INCDIR)/aout/aout64.h \
   $(INCDIR)/obstack.h
@@ -1271,6 +1297,9 @@ OBJDEP_w65_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-w65.h subsegs.h \
   $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
+OBJDEP_v850_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-v850.h \
+  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
+  $(INCDIR)/obstack.h subsegs.h
 OBJDEP_v850_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-v850.h subsegs.h \
@@ -1304,6 +1333,11 @@ DEP_alpha_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-alpha.h
 DEP_alpha_evax = $(srcdir)/config/obj-evax.h $(srcdir)/config/tc-alpha.h
+DEP_arc_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-arc.h \
+  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h
+DEP_arc_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-arc.h
 DEP_arm_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-arm.h \
   $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h
 DEP_arm_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-arm.h \
@@ -1446,6 +1480,8 @@ DEP_w65_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-w65.h \
 DEP_w65_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-w65.h
+DEP_v850_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-v850.h \
+  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h
 DEP_v850_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-v850.h

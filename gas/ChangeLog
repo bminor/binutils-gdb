@@ -1,3 +1,22 @@
+Thu Jan 29 14:42:44 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.am (CONFIG_OBJS): New variable, containing part of old
+	OBJS variable.
+	(GENERIC_OBJS): New variable, with the rest of the old OBJS
+	variable.
+	(OBJS): Now just $(CONFIG_OBJS) and $(GENERIC_OBJS).
+	($(srcdir)/make-gas.com): Rename from make-gas.com.
+	(stamp-mk.com): Replace $(OBJS) with $(GENERIC_OBJS).
+	(EXTRA_DIST): Define.
+	* vmsconf.sh: Handle {targ-cpu, obj-format, atof-targ} modules
+	explicitly rather than via the list of object files.
+	(gcc-as.opt): New file created when make-gas.com is run.
+	* config-gas.com: Create {targ-cpu.h, obj-format.h, targ-env.h,
+	itbl-cpu.h} to #include appropriate file rather than copying that
+	file.
+	* config/vms-conf.h: Synchronize with current config.in.
+	* Makefile.in: Rebuild.
+
 start-sanitize-m32rx
 Wed Jan 28 16:27:27 1998  Nick Clifton  <nickc@cygnus.com>
 

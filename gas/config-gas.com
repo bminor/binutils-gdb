@@ -1,40 +1,36 @@
-$!
+$!config-gas.com
 $! This file sets things up to build gas on a VMS system to generate object
 $! files for a VMS system.  We do not use the configure script, since we
 $! do not have /bin/sh to execute it.
 $!
 $!
-$gas_host="vms"
-$!
-$arch_indx = 1 + ((f$getsyi("CPU").ge.128).and.1)      ! vax==1, alpha==2
-$arch = f$element(arch_indx,"|","|VAX|Alpha|")
-$if arch .eqs. "VAX"
-$then
-$cpu_type="vax"
-$obj_format="vms"
-$atof="vax"
-$else
-$ cpu_type="alpha"
-$ obj_format="evax"
-$ atof="ieee"
-$endif
-$
-$emulation="generic"
+$ gas_host="vms"
+$ arch_indx = 1 + ((f$getsyi("CPU").ge.128).and.1)	! vax==1, alpha==2
+$ arch = f$element(arch_indx,"|","|VAX|Alpha|")
+$ if arch.eqs."VAX"
+$ then
+$  cpu_type="vax"
+$  obj_format="vms"
+$  atof="vax"
+$ else
+$  cpu_type="alpha"
+$  obj_format="evax"
+$  atof="ieee"
+$ endif
+$ emulation="generic"
 $!
 $	DELETE	= "delete/noConfirm"
 $	ECHO	= "write sys$output"
 $!
 $! Target specific information
-$call link targ-cpu.c	[.config]tc-'cpu_type'.c
-$call link targ-cpu.h	[.config]tc-'cpu_type'.h
-$call link targ-env.h	[.config]te-'emulation'.h
+$ call make "targ-cpu.h" "[.config]tc-''cpu_type'.h"
+$ call make "targ-env.h" "[.config]te-''emulation'.h"
 $!
 $! Code to handle the object file format.
-$call link obj-format.h	[.config]obj-'obj_format'.h
-$call link obj-format.c	[.config]obj-'obj_format'.c
+$ call make "obj-format.h" "[.config]obj-''obj_format'.h"
 $!
-$! Code to handle floating point.
-$call link atof-targ.c	[.config]atof-'atof'.c
+$! (not currently used for vax or alpha)
+$ call make "itbl-cpu.h" "[.config]itbl-''cpu_type'.h"
 $!
 $!
 $! Create the file version.opt, which helps identify the executable.
@@ -179,9 +175,12 @@ $ type []config.status
 $exit
 $!
 $!
-$link:
-$subroutine
+$make: subroutine
 $  if f$search(p1).nes."" then DELETE 'p1';*
-$  copy 'p2' 'p1'
-$  ECHO "Copied ''f$edit(p2,"LOWERCASE")' to ''f$edit(p1,"LOWERCASE")'."
-$endsubroutine
+$  create 'p1'
+$  if f$trnlnm("IFILE$").nes."" then  close/noLog ifile$
+$  open/Append ifile$ 'p1'
+$  write ifile$ "#include ""''f$string(p2 - "[.config]")'"""
+$  close ifile$
+$  ECHO "Created ''p1' for ''p2'."
+$endsubroutine !make
