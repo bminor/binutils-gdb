@@ -1,5 +1,10 @@
 Thu Sep  4 09:44:10 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* Makefile.am: Rebuild dependencies.
+ 	(ALL_MACHINES_CFILES): Add cpu-v850.c.
+	(ALL_MACHINES_CFILES): Add elf32-v850.c.
+	* Makefile.in: Rebuild.
+
 	* reloc.c: Remove extraneous commas from relocation entries.
 	Remove BFD_RELOC_V850_16_PCREL.
 	* bfd-in2.h: Rebuild.
