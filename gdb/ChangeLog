@@ -1,3 +1,71 @@
+Fri Oct  7 08:48:18 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	The point of these changes is to avoid reading the frame pointer
+	and stack pointer during stepping, to speed things up.
+	A.  Changes to not select a frame until we need a selected frame:
+	    * blockframe.c (flush_cached_frames): Call select_frame (NULL, -1).
+	    * infrun.c (wait_for_inferior): Move call to select_frame back to
+	    normal_stop.  This reverts a change of 13 Apr 94 (it says Jeff
+	    Law, but the change was my idea); the only reason for that change
+	    was so we could save and restore the selected frame in
+	    wait_for_inferior, and now that flush_cached frames clears the
+	    selected frame, that should work OK now.
+	B.  Changes to not create a current_frame until we need one:
+	    * blockframe.c (get_current_frame): If current_frame is NULL, try
+	    to create an innermost frame.
+	    * sparc-tdep.c (sparc_pop_frame), infcmd.c (run-stack_dummy),
+	    infrun.c (wait_for_inferior), thread.c (thread_switch),
+	    convex-tdep.c (set_thread_command), a29k-tdep.c (pop_frame),
+	    alpha-tdep.c (alpha_pop_frame), convex-xdep.c (core_file_command),
+	    h8300-tdep.c (h8300_pop_frame), h8500-tdep.c (h8300_pop_frame),
+	    hppa-tdep.c (hppa_pop_frame), i386-tdep.c (i386_pop_frame),
+	    i960-tdep.c (pop_frame), m68k-tdep.c
+	    (m68k_pop_frame), mips-tdep.c (mips_pop_frame), rs6000-tdep.c
+	    (push_dummy_frame, pop_dummy_frame, pop_frame), sh-tdep.c
+	    (pop_frame), config/arm/tm-arm.h (POP_FRAME),
+	    config/convex/tm-convex.h (POP_FRAME), config/gould/tm-pn.h
+	    (POP_FRAME), config/ns32k/tm-merlin.h (POP_FRAME),
+	    config/ns32k/tm-umax.h (POP_FRAME), config/tahoe/tm-tahoe.h
+	    (POP_FRAME), config/vax/tm-vax.h (POP_FRAME): Don't
+	    call create_new_frame.
+	    * corelow.c (core_open), altos-xdep.c (core_file_command),
+	    arm-xdep.c (core_file_command), gould-xdep.c (core_file_command),
+	    m3-nat.c (select_thread), sun386-nat.c (core_file_command),
+	    umax-xdep.c (core_file_command): Don't call create_new_frame; do
+	    call flush_cached_frames.
+	    * blockframe.c (reinit_frame_cache): Don't call create_new_frame
+	    or select_frame.
+	C.  Changes to get rid of stop_frame_address and instead only
+	fetch the frame pointer when we need it.
+	    * breakpoint.c (bpstat_stop_status): Remove argument
+	    frame_address; use FRAME_FP (get_current_frame ()).
+	    * infrun.c (wait_for_inferior): Don't pass frame pointer to
+	    bpstat_stop_status.
+	    * infrun.c (wait_for_inferior): Use FRAME_FP (get_current_frame
+	    ()) instead of stop_frame_address.
+	    * infrun.c (save_inferior_status, restore_inferior_status),
+	    inferior.h (struct inferior_status): Don't save and restore
+	    stop_frame_address.
+	    * inferior.h, infcmd.c, thread.c (thread_switch), m3-nat.c
+	    (select_thread): Remove stop_frame_address and uses thereof.
+	D.  Same thing for the stack pointer.
+	    * infrun.c (wait_for_inferior): Remove stop_sp and replace
+	    uses thereof with read_sp ().
+	E.  Change to eliminate one nasty little spot where we were
+	wanting to know the frame pointer from before the current step
+	(idea from GDB 3.5, which saved my ass, because my other ideas of
+	how to fix it were very baroque).
+	    * infrun.c: Remove prev_frame_address.
+	    * infrun.c (wait_for_inferior, step_over_function): Use
+	    step_frame_address instead of prev_frame_address.
+	F.  Same basic idea for the stack pointer.
+	    * inferior.h, infcmd.c: New variable step_sp.
+	    * infcmd.c (step_1, until_next_command): Set it.
+	    * infrun.c: Remove prev_sp and replace uses by step_sp.
+	    * infrun.c (wait_for_inferior): If we get out of the step
+	    range, then set step_sp to the current stack pointer before we
+	    start going again.
+
 Fri Oct  7 12:17:17 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* top.c (target_byte_order_auto): New static variable.

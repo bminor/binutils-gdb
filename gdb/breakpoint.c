@@ -320,6 +320,7 @@ condition_command (arg, from_tty)
 	    if (*arg)
 	      error ("Junk at end of expression");
 	  }
+	breakpoints_changed ();
 	return;
       }
 
@@ -1214,9 +1215,8 @@ print_it_noop (bs)
  */
 
 bpstat
-bpstat_stop_status (pc, frame_address, not_a_breakpoint)
+bpstat_stop_status (pc, not_a_breakpoint)
      CORE_ADDR *pc;
-     FRAME_ADDR frame_address;
      int not_a_breakpoint;
 {
   register struct breakpoint *b;
@@ -1357,7 +1357,7 @@ bpstat_stop_status (pc, frame_address, not_a_breakpoint)
 	real_breakpoint = 1;
 #endif
 
-      if (b->frame && b->frame != frame_address)
+      if (b->frame && b->frame != FRAME_FP (get_current_frame ()))
 	bs->stop = 0;
       else
 	{
@@ -1779,8 +1779,8 @@ breakpoint_1 (bnum, allflag)
 	  {
 	    /* FIXME should make an annotation for this */
 
-	    printf_filtered ("\tbreakpoint already hit %d times\n",
-			     b->hit_count);
+	    printf_filtered ("\tbreakpoint already hit %d time%s\n",
+			     b->hit_count, (b->hit_count == 1 ? "" : "s"));
 	  }
 
 	if (b->ignore_count)

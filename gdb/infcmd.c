@@ -134,10 +134,6 @@ enum target_signal stop_signal;
 
 CORE_ADDR stop_pc;
 
-/* Stack frame when program stopped.  */
-
-FRAME_ADDR stop_frame_address;
-
 /* Chain containing status of breakpoint(s) that we have stopped at.  */
 
 bpstat stop_bpstat;
@@ -172,6 +168,10 @@ CORE_ADDR step_range_end; /* Exclusive */
    and how to set the frame for the breakpoint used to step out.  */
 
 FRAME_ADDR step_frame_address;
+
+/* Our notion of the current stack pointer.  */
+
+CORE_ADDR step_sp;
 
 /* 1 means step over all subroutine calls.
    0 means don't step over calls (used by stepi).
@@ -212,7 +212,6 @@ run_command (args, from_tty)
 
   dont_repeat ();
 
-  /* Shouldn't this be target_has_execution?  FIXME.  */
   if (inferior_pid)
     {
       if (
@@ -369,6 +368,7 @@ step_1 (skip_subroutines, single_inst, count_string)
       if (!fr)				/* Avoid coredump here.  Why tho? */
 	error ("No current frame");
       step_frame_address = FRAME_FP (fr);
+      step_sp = read_sp ();
 
       if (! single_inst)
 	{
@@ -587,7 +587,6 @@ run_stack_dummy (addr, buffer)
        frame in case there is only one copy of the dummy (e.g.
        CALL_DUMMY_LOCATION == AFTER_TEXT_END).  */
     flush_cached_frames ();
-    set_current_frame (create_new_frame (read_fp (), sal.pc));
 
     /* If defined, CALL_DUMMY_BREAKPOINT_OFFSET is where we need to put
        a breakpoint instruction.  If not, the call dummy already has the
@@ -670,7 +669,8 @@ until_next_command (from_tty)
   
   step_over_calls = 1;
   step_frame_address = FRAME_FP (frame);
-  
+  step_sp = read_sp ();
+
   step_multi = 0;		/* Only one call to proceed */
   
   proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 1);
@@ -976,15 +976,18 @@ const char * const reg_names[] = REGISTER_NAMES;
    to provide that format.  */  
 
 #if !defined (DO_REGISTERS_INFO)
+
 #define DO_REGISTERS_INFO(regnum, fp) do_registers_info(regnum, fp)
+
 static void
 do_registers_info (regnum, fpregs)
      int regnum;
      int fpregs;
 {
   register int i;
+  int numregs = ARCH_NUM_REGS;
 
-  for (i = 0; i < NUM_REGS; i++)
+  for (i = 0; i < numregs; i++)
     {
       char raw_buffer[MAX_REGISTER_RAW_SIZE];
       char virtual_buffer[MAX_REGISTER_VIRTUAL_SIZE];
@@ -1021,13 +1024,17 @@ do_registers_info (regnum, fpregs)
 		REGISTER_VIRTUAL_SIZE (i));
 
       /* If virtual format is floating, print it that way, and in raw hex.  */
-      if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (i)) == TYPE_CODE_FLT
-	  && ! INVALID_FLOAT (virtual_buffer, REGISTER_VIRTUAL_SIZE (i)))
+      if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (i)) == TYPE_CODE_FLT)
 	{
 	  register int j;
 
-	  val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0,
-		     gdb_stdout, 0, 1, 0, Val_pretty_default);
+#ifdef INVALID_FLOAT
+	  if (INVALID_FLOAT (virtual_buffer, REGISTER_VIRTUAL_SIZE (i)))
+	    printf_filtered ("<invalid float>");
+	  else
+#endif
+	    val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0,
+		       gdb_stdout, 0, 1, 0, Val_pretty_default);
 
 	  printf_filtered ("\t(raw 0x");
 	  for (j = 0; j < REGISTER_RAW_SIZE (i); j++)
@@ -1072,7 +1079,7 @@ registers_info (addr_exp, fpregs)
      char *addr_exp;
      int fpregs;
 {
-  int regnum;
+  int regnum, numregs;
   register char *end;
 
   if (!target_has_registers)
@@ -1091,13 +1098,14 @@ registers_info (addr_exp, fpregs)
       end = addr_exp;
       while (*end != '\0' && *end != ' ' && *end != '\t')
 	++end;
-      for (regnum = 0; regnum < NUM_REGS; regnum++)
+      numregs = ARCH_NUM_REGS;
+      for (regnum = 0; regnum < numregs; regnum++)
 	if (!strncmp (addr_exp, reg_names[regnum], end - addr_exp)
 	    && strlen (reg_names[regnum]) == end - addr_exp)
 	  goto found;
       if (*addr_exp >= '0' && *addr_exp <= '9')
 	regnum = atoi (addr_exp);		/* Take a number */
-      if (regnum >= NUM_REGS)		/* Bad name, or bad number */
+      if (regnum >= numregs)		/* Bad name, or bad number */
 	error ("%.*s: invalid register", end - addr_exp, addr_exp);
 
 found:

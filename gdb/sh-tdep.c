@@ -276,8 +276,6 @@ pop_frame ()
   write_register (PC_REGNUM, fi->return_pc);
   write_register (SP_REGNUM, fp + 4);
   flush_cached_frames ();
-  set_current_frame (create_new_frame (read_register (FP_REGNUM),
-				       read_pc ()));
 }
 
 /* Print the registers in a form similar to the E7000 */

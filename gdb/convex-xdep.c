@@ -956,8 +956,6 @@ core_file_command (filename, from_tty)
       core_aouthdr.a_magic = 0;
 
       flush_cached_frames ();
-      set_current_frame (create_new_frame (read_register (FP_REGNUM),
-					     read_pc ()));
       select_frame (get_current_frame (), 0);
       validate_files ();
 

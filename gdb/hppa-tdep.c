@@ -1181,8 +1181,6 @@ hppa_pop_frame ()
     write_register (SP_REGNUM, fp);
 
   flush_cached_frames ();
-  set_current_frame (create_new_frame (read_register (FP_REGNUM),
-                                       read_pc ()));
 }
 
 /*

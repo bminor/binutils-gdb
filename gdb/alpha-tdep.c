@@ -869,8 +869,6 @@ alpha_pop_frame()
     }
   write_register (SP_REGNUM, new_sp);
   flush_cached_frames ();
-  /* We let init_extra_frame_info figure out the frame pointer */
-  set_current_frame (create_new_frame (0, read_pc ()));
 
   if (proc_desc && PROC_DESC_IS_DUMMY(proc_desc))
     {

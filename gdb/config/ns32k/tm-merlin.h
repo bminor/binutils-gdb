@@ -289,8 +289,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
   write_register (PC_REGNUM, read_memory_integer (fp + 4, 4));   \
   write_register (SP_REGNUM, fp + 8);				 \
   flush_cached_frames ();					 \
-  set_current_frame (create_new_frame (read_register (FP_REGNUM),\
-				       read_pc ()));		 \
 }
 
 /* This sequence of words is the instructions

@@ -207,8 +207,6 @@ thread_switch (pid)
   flush_cached_frames ();
   registers_changed ();
   stop_pc = read_pc();
-  set_current_frame (create_new_frame (read_fp (), stop_pc));
-  stop_frame_address = FRAME_FP (get_current_frame ());
   select_frame (get_current_frame (), 0);
 }
 

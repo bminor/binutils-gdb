@@ -130,8 +130,7 @@ core_file_command (filename, from_tty)
 	  corefile = concat (current_directory, "/", filename, NULL);
 	}
 
-      set_current_frame ( create_new_frame (read_register (FP_REGNUM),
-					    read_pc ()));
+      flush_cached_frames ();
       select_frame (get_current_frame (), 0);
 
       validate_files ();

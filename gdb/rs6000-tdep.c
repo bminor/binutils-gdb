@@ -358,7 +358,6 @@ push_dummy_frame ()
      otherwise things like do_registers_info() wouldn't work properly! */
 
   flush_cached_frames ();
-  set_current_frame (create_new_frame (sp-DUMMY_FRAME_SIZE, pc));
 
   /* save program counter in link register's space. */
   write_memory (sp+8, pc_targ, 4);
@@ -444,7 +443,6 @@ pop_dummy_frame ()
   target_store_registers (-1);
   pc = read_pc ();
   flush_cached_frames ();
-  set_current_frame (create_new_frame (sp, pc));
 }
 
 
@@ -500,7 +498,6 @@ pop_frame ()
   write_register (SP_REGNUM, prev_sp);
   target_store_registers (-1);
   flush_cached_frames ();
-  set_current_frame (create_new_frame (prev_sp, lr));
 }
 
 /* fixup the call sequence of a dummy function, with the real function address.

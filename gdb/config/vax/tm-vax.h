@@ -309,8 +309,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
       fp += (regnum + 1) * 4; }					 \
   write_register (SP_REGNUM, fp);				 \
   flush_cached_frames ();					 \
-  set_current_frame (create_new_frame (read_register (FP_REGNUM),\
-					read_pc ())); }
+}
 
 /* This sequence of words is the instructions
      calls #69, @#32323232

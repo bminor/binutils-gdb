@@ -28,6 +28,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "value.h"		/* for read_register */
 #include "target.h"		/* for target_has_stack */
 #include "inferior.h"		/* for read_pc */
+#include "annotate.h"
 
 /* Is ADDR inside the startup file?  Note that if your machine
    has a way to detect the bottom of the stack, there is no need
@@ -117,9 +118,13 @@ struct obstack frame_cache_obstack;
 FRAME
 get_current_frame ()
 {
-  /* We assume its address is kept in a general register;
-     param.h says which register.  */
-
+  if (current_frame == NULL)
+    {
+      if (target_has_stack)
+	current_frame = create_new_frame (read_fp (), read_pc ());
+      else
+	error ("No stack.");
+    }
   return current_frame;
 }
 
@@ -129,6 +134,9 @@ set_current_frame (frame)
 {
   current_frame = frame;
 }
+
+/* Create an arbitrary (i.e. address specified by user) or innermost frame.
+   Always returns a non-NULL value.  */
 
 FRAME
 create_new_frame (addr, pc)
@@ -192,19 +200,21 @@ flush_cached_frames ()
   obstack_init (&frame_cache_obstack);
 
   current_frame = (struct frame_info *) 0; /* Invalidate cache */
-  if (annotation_level > 1)
-    {
-      target_terminal_ours ();
-      printf_unfiltered ("\n\032\032frames-invalid\n");
-    }
+  select_frame ((FRAME) 0, -1);
+  annotate_frames_invalid ();
 }
 
 /* Flush the frame cache, and start a new one if necessary.  */
+
 void
 reinit_frame_cache ()
 {
   flush_cached_frames ();
-  if (target_has_stack)
+#if 0
+  /* The inferior_pid test is wrong if there is a corefile.  But I don't
+     think this code is needed at all, now that get_current_frame will
+     create the frame if it is needed.  */
+  if (inferior_pid != 0)
     {
       set_current_frame (create_new_frame (read_fp (), read_pc ()));
       select_frame (get_current_frame (), 0);
@@ -214,6 +224,7 @@ reinit_frame_cache ()
       set_current_frame (0);
       select_frame ((FRAME) 0, -1);
     }
+#endif
 }
 
 /* Return a structure containing various interesting information
@@ -819,7 +830,7 @@ find_frame_addr_in_frame_chain (frame_addr)
 {
   FRAME frame = NULL;
 
-  if (frame_addr == NULL)
+  if (frame_addr == (CORE_ADDR)0)
     return NULL;
 
   while (1)

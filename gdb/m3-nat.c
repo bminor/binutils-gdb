@@ -1102,12 +1102,9 @@ select_thread (task, thread_id, flag)
       CHK ("Could not abort system calls when selecting a thread", ret);
 
       stop_pc = read_pc();
-      set_current_frame (create_new_frame (read_register (FP_REGNUM),
-					   stop_pc));
+      flush_cached_frames ();
 
       select_frame (get_current_frame (), 0);
-
-      stop_frame_address = FRAME_FP (get_current_frame ());
     }
 
   return KERN_SUCCESS;

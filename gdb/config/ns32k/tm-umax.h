@@ -344,8 +344,7 @@ extern CORE_ADDR ns32k_get_enter_addr ();
   write_register (PC_REGNUM, read_memory_integer (fp + 4, 4));   \
   write_register (SP_REGNUM, fp + 8);				 \
   flush_cached_frames ();					 \
-  set_current_frame (create_new_frame (read_register (FP_REGNUM),\
-				       read_pc ())); }
+}
 
 /* This sequence of words is the instructions
      enter	0xff,0		82 ff 00

@@ -719,8 +719,6 @@ set_thread_command (arg)
 
     stop_pc = read_pc ();
     flush_cached_frames ();
-    set_current_frame (create_new_frame (read_register (FP_REGNUM),
-					 read_pc ()));
     select_frame (get_current_frame (), 0);
     print_stack_frame (selected_frame, selected_frame_level, -1);
 }

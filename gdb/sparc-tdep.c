@@ -25,9 +25,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "target.h"
 #include "value.h"
 
-#include "symfile.h" /* for objfiles.h */
-#include "objfiles.h" /* for find_pc_section */
-
 #ifdef	USE_PROC_FS
 #include <sys/procfs.h>
 #endif
@@ -432,7 +429,8 @@ sparc_frame_find_saved_regs (fi, saved_regs_addr)
       frame = fi->bottom ?
 	fi->bottom : read_register (SP_REGNUM);
       for (regnum = L0_REGNUM; regnum < L0_REGNUM+16; regnum++)
-	saved_regs_addr->regs[regnum] = frame + (regnum-L0_REGNUM) * 4;
+	saved_regs_addr->regs[regnum] =
+	  frame + (regnum - L0_REGNUM) * REGISTER_RAW_SIZE (L0_REGNUM);
     }
   if (fi->next)
     {
@@ -442,7 +440,8 @@ sparc_frame_find_saved_regs (fi, saved_regs_addr)
 	 fi->next->bottom :
 	 read_register (SP_REGNUM));
       for (regnum = O0_REGNUM; regnum < O0_REGNUM+8; regnum++)
-	saved_regs_addr->regs[regnum] = next_next_frame + regnum * 4;
+	saved_regs_addr->regs[regnum] =
+	  next_next_frame + regnum * REGISTER_RAW_SIZE (O0_REGNUM);
     }
   /* Otherwise, whatever we would get from ptrace(GETREGS) is accurate */
   saved_regs_addr->regs[SP_REGNUM] = FRAME_FP (fi);
@@ -578,8 +577,6 @@ sparc_pop_frame ()
       write_register (NPC_REGNUM, pc + 4);
     }
   flush_cached_frames ();
-  set_current_frame ( create_new_frame (read_register (FP_REGNUM),
-					read_pc ()));
 }
 
 /* On the Sun 4 under SunOS, the compile will leave a fake insn which
@@ -782,24 +779,3 @@ get_longjmp_target(pc)
   return 1;
 }
 #endif /* GET_LONGJMP_TARGET */
-
-/* So far used only for sparc solaris.  In sparc solaris, we recognize
-   a trampoline by it's section name.  That is, if the pc is in a
-   section named ".plt" then we are in a trampline.  */
-
-int
-in_solib_trampoline(pc, name)
-     CORE_ADDR pc;
-     char *name;
-{
-  struct obj_section *s;
-  int retval = 0;
-  
-  s = find_pc_section(pc);
-  
-  retval = (s != NULL
-	    && s->the_bfd_section->name != NULL
-	    && STREQ (s->the_bfd_section->name, ".plt"));
-  return(retval);
-}
-

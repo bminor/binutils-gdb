@@ -795,7 +795,6 @@ pop_frame ()
         }								      
     }
   flush_cached_frames ();						      
-  set_current_frame (create_new_frame (0, read_pc()));		      
 }
 
 /* Push an empty stack frame, to record the current PC, etc.  */
