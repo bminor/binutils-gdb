@@ -1,5 +1,25 @@
 Mon Oct 31 14:19:08 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
+	* elf32-hppa.c (ELF32_PARISC_SX_SIZE): Define.
+	(ELF32_PARISC_SX_GET, ELF32_PARISC_SX_PUT): Define.
+	(symextn_entry): Don't define.
+	(symext_chain_size): Change type to bfd_size_type.
+	(symextn_contents): Change type to bfd_byte *.
+	(elf32_hppa_backend_begin_write_processing): Use
+	ELF32_PARISC_SX_SIZE instead of sizeof (symext_entryS).
+	(elf32_hppa_size_symext): Likewise.  Also, change type of sizep to
+	bfd_size_type *.
+	(elf_hppa_tc_make_sections): Cast symextn_contents assignment to
+	bfd_byte *.  Use ELF32_PARISC_SX_PUT instead of direct assignment.
+	(elf32_hppa_backend_symbol_table_processing): Use
+	ELF32_PARISC_SX_SIZE instead of sizeof (symext_entryS).  Use
+	ELF32_PARISC_SX_GET insetad of direct assignment.
+	(elf32_hppa_read_symext_info): Change type of contents, and its
+	assignment cast, to bfd_byte *.  Use ELF32_PARISC_SX_SIZE instead
+	of sizeof (symextn_entry).  Use symext_entryS instead of
+	symextn_entry.  Use ELF32_PARISC_SX_GET instead of direct
+	assignment.
+
 	* archive.c (bfd_dont_truncate_arname): Add the ar padding
 	character, if there is room for it, even if the name is the
 	maximum length.
