@@ -1,6 +1,6 @@
 #! /bin/sh
 # Attempt to guess a canonical system name.
-#   Copyright (C) 1992, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
+#   Copyright (C) 1992, 93-97, 1998 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by
@@ -65,9 +65,14 @@ case "${UNAME_MACHINE}:${UNAME_SYSTEM}:${UNAME_RELEASE}:${UNAME_VERSION}" in
 main:
 	.frame \$30,0,\$26,0
 	.prologue 0
-	.long 0x47e03d84
-	cmoveq \$4,0,\$3
-	addl \$3,\$31,\$0
+	.long 0x47e03d80 # implver $0
+	lda \$2,259
+	.long 0x47e20c21 # amask $2,$1
+	srl \$1,8,\$2
+	sll \$2,2,\$2
+	sll \$0,3,\$0
+	addl \$1,\$0,\$0
+	addl \$2,\$0,\$0
 	ret \$31,(\$26),1
 	.end main
 EOF
@@ -75,11 +80,20 @@ EOF
 	if test "$?" = 0 ; then
 		./dummy
 		case "$?" in
-			1)
+			7)
+				UNAME_MACHINE="alpha"
+				;;
+			15)
 				UNAME_MACHINE="alphaev5"
 				;;
-			2)
+			14)
 				UNAME_MACHINE="alphaev56"
+				;;
+			10)
+				UNAME_MACHINE="alphapca56"
+				;;
+			16)
+				UNAME_MACHINE="alphaev6"
 				;;
 		esac
 	fi
@@ -344,8 +358,13 @@ EOF
 	case "${UNAME_MACHINE}" in
 	    9000/31? )            HP_ARCH=m68000 ;;
 	    9000/[34]?? )         HP_ARCH=m68k ;;
-	    9000/7?? | 9000/8?[13679] ) HP_ARCH=hppa1.1 ;;
-	    9000/8?? )            HP_ARCH=hppa1.0 ;;
+	    9000/6?? )		  HP_ARCH=hppa1.0 ;;
+	    9000/78? )		  HP_ARCH=hppa1.1 ;; # FIXME: really hppa2.0
+	    9000/7?? )		  HP_ARCH=hppa1.1 ;;
+	    9000/8[67]1 | 9000/80[24] | 9000/8[78]9 | 9000/893 )
+				  HP_ARCH=hppa1.1 ;; # FIXME: really hppa2.0
+	    9000/8?[13679] )	  HP_ARCH=hppa1.1 ;;
+	    9000/8?? )		  HP_ARCH=hppa1.0 ;;
 	esac
 	HPUX_REV=`echo ${UNAME_RELEASE}|sed -e 's/[^.]*.[0B]*//'`
 	echo ${HP_ARCH}-hp-hpux${HPUX_REV}
@@ -479,6 +498,12 @@ EOF
 	echo `echo ${UNAME_MACHINE}|sed -e 's,[-/].*$,,'`-unknown-gnu`echo ${UNAME_RELEASE}|sed -e 's,/.*$,,'`
 	exit 0 ;;
     *:Linux:*:*)
+	# uname on the ARM produces all sorts of strangeness, and we need to
+	# filter it out.
+	case "$UNAME_MACHINE" in
+	  arm* | sa110*)	      UNAME_MACHINE="arm" ;;
+	esac
+
 	# The BFD linker knows what the default object file format is, so
 	# first see if it will tell us.
 	ld_help_string=`ld --help 2>&1`
@@ -492,8 +517,38 @@ EOF
 	  i?86linux)  echo "${UNAME_MACHINE}-pc-linux-gnuaout"      ; exit 0 ;;
 	  i?86coff)   echo "${UNAME_MACHINE}-pc-linux-gnucoff"      ; exit 0 ;;
 	  sparclinux) echo "${UNAME_MACHINE}-unknown-linux-gnuaout" ; exit 0 ;;
+	  armlinux)   echo "${UNAME_MACHINE}-unknown-linux-gnuaout" ; exit 0 ;;
 	  m68klinux)  echo "${UNAME_MACHINE}-unknown-linux-gnuaout" ; exit 0 ;;
-	  elf32ppc)   echo "powerpc-unknown-linux-gnu"              ; exit 0 ;;
+	  elf32ppc)
+		# Determine Lib Version
+		cat >dummy.c <<EOF
+#include <features.h>
+#if defined(__GLIBC__)
+extern char __libc_version[];
+extern char __libc_release[];
+#endif
+main(argc, argv)
+     int argc;
+     char *argv[];
+{
+#if defined(__GLIBC__)
+  printf("%s %s\n", __libc_version, __libc_release);
+#else
+  printf("unkown\n");
+#endif
+  return 0;
+}
+EOF
+		LIBC=""
+		${CC-cc} dummy.c -o dummy 2>/dev/null
+		if test "$?" = 0 ; then
+			./dummy | grep 1\.99 > /dev/null
+			if test "$?" = 0 ; then
+				LIBC="libc1"
+			fi
+		fi	
+		rm -f dummy.c dummy
+		echo powerpc-unknown-linux-gnu${LIBC} ; exit 0 ;;
 	esac
 
 	if test "${UNAME_MACHINE}" = "alpha" ; then
@@ -503,9 +558,14 @@ EOF
 	main:
 		.frame \$30,0,\$26,0
 		.prologue 0
-		.long 0x47e03d84
-		cmoveq \$4,0,\$3
-		addl \$3,\$31,\$0
+		.long 0x47e03d80 # implver $0
+		lda \$2,259
+		.long 0x47e20c21 # amask $2,$1
+		srl \$1,8,\$2
+		sll \$2,2,\$2
+		sll \$0,3,\$0
+		addl \$1,\$0,\$0
+		addl \$2,\$0,\$0
 		ret \$31,(\$26),1
 		.end main
 EOF
@@ -514,12 +574,21 @@ EOF
 		if test "$?" = 0 ; then
 			./dummy
 			case "$?" in
-				1)
-					UNAME_MACHINE="alphaev5"
-				;;	
-			2)	
-					UNAME_MACHINE="alphaev56"
-				;;	
+			7)
+				UNAME_MACHINE="alpha"
+				;;
+			15)
+				UNAME_MACHINE="alphaev5"
+				;;
+			14)
+				UNAME_MACHINE="alphaev56"
+				;;
+			10)
+				UNAME_MACHINE="alphapca56"
+				;;
+			16)
+				UNAME_MACHINE="alphaev6"
+				;;
 			esac	
 
 			objdump --private-headers dummy | \
@@ -610,6 +679,13 @@ EOF
 		echo ${UNAME_MACHINE}-pc-sysv${UNAME_RELEASE}
 	fi
 	exit 0 ;;
+    i?86:*:5:7)
+       UNAME_REL=`(/bin/uname -X|egrep Release|sed -e 's/.*= //')`
+       (/bin/uname -X|egrep i80486 >/dev/null) && UNAME_MACHINE=i486
+       (/bin/uname -X|egrep '^Machine.*Pentium' >/dev/null) \
+               && UNAME_MACHINE=i586
+       echo ${UNAME_MACHINE}-${UNAME_SYSTEM}${UNAME_VERSION}-sysv${UNAME_RELEASE}
+       exit 0 ;;
     i?86:*:3.2:*)
 	if test -f /usr/options/cb.name; then
 		UNAME_REL=`sed -n 's/.*Version //p' </usr/options/cb.name`
@@ -714,6 +790,12 @@ EOF
 	        echo mips-unknown-sysv${UNAME_RELEASE}
 	fi
         exit 0 ;;
+    BeBox:BeOS:*:*)	# BeOS running on hardware made by Be, PPC only.
+	echo powerpc-be-beos
+	exit 0 ;;
+    BeMac:BeOS:*:*)	# BeOS running on Mac or Mac clone, PPC only.
+	echo powerpc-apple-beos
+	exit 0 ;;
 esac
 
 #echo '(No uname command or uname output not recognized.)' 1>&2

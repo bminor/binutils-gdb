@@ -81,6 +81,11 @@ case $1 in
 		set mips64tx49-unknown-elf
                 ;;
 # end-sanitize-tx49
+# start-sanitize-vr4111
+	mips-vr4111-elf)
+		set mips64vr4111-unknown-elf
+                ;;
+# end-sanitize-vr4111
 # start-sanitize-vr5400
 	mips64vr5xxx-elf)
 		set mips64vr5000-elf
@@ -211,6 +216,11 @@ case $basic_machine in
 	mips64vr5000 | mips64vr5000el) # CYGNUS LOCAL ian/vr5000
 		basic_machine=$basic_machine-unknown
 		;;
+# start-sanitize-vr4111
+	mips64vr4111 | mips64vr4111el)
+		basic_machine=$basic_machine-unknown
+		;;
+# end-sanitize-vr4111
 # start-sanitize-vr5400
 	mips64vr5400)			 # CYGNUS LOCAL cagney/vr5400
 		basic_machine=$basic_machine-unknown
@@ -239,6 +249,11 @@ case $basic_machine in
 		basic_machine=$basic_machine-unknown
 		;;
 # end-sanitize-tic80
+# start-sanitize-sky
+	txvu)
+		basic_machine=$basic_machine-unknown
+		;;
+# end-sanitize-sky
 # start-sanitize-v850e
 	v850e)				# CYGNUS LOCAL jtc/v850
 		basic_machine=$basic_machine-unknown
@@ -284,6 +299,10 @@ case $basic_machine in
 		;;
 	thumb-*) # CYGNUS LOCAL angela/thumb
 		;;
+# start-sanitize-sky
+	txvu-*)
+		;;
+# end-sanitize-sky
 	v850-*) # CYGNUS LOCAL
 	        ;;
 # start-sanitize-v850e
@@ -300,6 +319,10 @@ case $basic_machine in
 		;;
 	mips64vr4100-* | mips64vr4100el-*) # CYGNUS LOCAL jsmith/vr4100
 		;;
+# start-sanitize-vr4111
+	mips64vr4111-* | mips64vr4111el-*)
+		;;
+# end-sanitize-vr4111
 # start-sanitize-tx19
 	mipstx19-* | mipstx19el-*)
 		;;
@@ -514,7 +537,22 @@ case $basic_machine in
 	hp9k3[2-9][0-9])
 		basic_machine=m68k-hp
 		;;
-	hp9k7[0-9][0-9] | hp7[0-9][0-9] | hp9k8[0-9]7 | hp8[0-9]7)
+	hp9k6[0-9][0-9] | hp6[0-9][0-9] )
+		basic_machine=hppa1.0-hp
+		;;
+	hp9k7[0-79][0-9] | hp7[0-79][0-9] )
+		basic_machine=hppa1.1-hp
+		;;
+	hp9k78[0-9] | hp78[0-9] )
+		# FIXME: really hppa2.0-hp
+		basic_machine=hppa1.1-hp
+		;;
+	hp9k8[67]1 | hp8[67]1 | hp9k80[24] | hp80[24] | \
+	hp9k8[78]9 | hp8[78]9 | hp9k893 | hp893 )
+		# FIXME: really hppa2.0-hp
+		basic_machine=hppa1.1-hp
+		;;
+	hp9k8[0-9][13679] | hp8[0-9][13679] )
 		basic_machine=hppa1.1-hp
 		;;
 	hp9k8[0-9][0-9] | hp8[0-9][0-9])
@@ -559,6 +597,10 @@ case $basic_machine in
 	i386-go32 | go32)				# CYGNUS LOCAL
 		basic_machine=i386-unknown
 		os=-go32
+		;;
+	i386-mingw32 | mingw32)
+		basic_machine=i386-unknown
+		os=-mingw32
 		;;
 	iris | iris4d)
 		basic_machine=mips-sgi
