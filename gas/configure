@@ -6153,7 +6153,7 @@ if test "$LEX" = :; then
   LEX=${am_missing_run}flex
 fi
 
-ALL_LINGUAS="fr tr es"
+ALL_LINGUAS="fr tr es rw"
 if test -n "$ac_tool_prefix"; then
   # Extract the first word of "${ac_tool_prefix}ranlib", so it can be a program name with args.
 set dummy ${ac_tool_prefix}ranlib; ac_word=$2

@@ -1,3 +1,9 @@
+2005-04-06  Nick Clifton  <nickc@redhat.com>
+
+	* po/rw.po: New translation: Kinyarwanda
+	* configure.in (ALL_LINGUAS): Add rw
+	* configure: Regenerate.
+
 2005-04-05  Sterling Augustine  <sterling@tensilica.com>
 	    Bob Wilson  <bob.wilson@acm.org>
 
