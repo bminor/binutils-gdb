@@ -1187,7 +1187,6 @@ pe_print_idata (abfd, vfile)
 	  bfd_vma ft_addr;
 	  bfd_size_type ft_datasize;
 	  int ft_idx;
-	  int differ = 0;
 	  int ft_allocated = 0;
 
 	  fprintf (file, _("\tvma:  Hint/Ord Member-Name Bound-To\n"));
