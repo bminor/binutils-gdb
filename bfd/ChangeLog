@@ -1,3 +1,14 @@
+2001-02-22  Timothy Wall  <twall@cygnus.com>
+
+	* config.bfd (targ_cpu): Add vectors for ia64-*-aix* (aka Monterey).
+	* configure.in: Add objects for elf64_ia64_aix vectors.
+	* configure: Regenerated.
+	* configure.host: Recognize ia64-*-aix*.
+	* elfxx-ia64.c: Add hooks for ELF64 on AIX5.  Define new vectors
+	for AIX.  AIX5 requires most relocations to be dynamic (*all*
+	binaries are somewhat similar to shared libraries).
+	* targets.c: Add elf64_ia64_aix vectors.
+	
 2001-02-21  David Mosberger  <davidm@hpl.hp.com>
 
 	* cpu-ia64-opc.c (elf64_ia64_operands}: Fix typo: error string for

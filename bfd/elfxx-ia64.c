@@ -169,6 +169,14 @@ static boolean elfNN_ia64_add_symbol_hook
   PARAMS ((bfd *abfd, struct bfd_link_info *info, const Elf_Internal_Sym *sym,
 	   const char **namep, flagword *flagsp, asection **secp,
 	   bfd_vma *valp));
+static boolean elfNN_ia64_aix_vec 
+  PARAMS ((const bfd_target *vec));
+static boolean elfNN_ia64_aix_add_symbol_hook
+  PARAMS ((bfd *abfd, struct bfd_link_info *info, const Elf_Internal_Sym *sym,
+	   const char **namep, flagword *flagsp, asection **secp,
+	   bfd_vma *valp));
+static boolean elfNN_ia64_aix_link_add_symbols
+  PARAMS ((bfd *abfd, struct bfd_link_info *info));
 static int elfNN_ia64_additional_program_headers
   PARAMS ((bfd *abfd));
 static boolean elfNN_ia64_is_local_label_name
@@ -558,6 +566,9 @@ static const bfd_byte plt_full_entry[PLT_FULL_ENTRY_SIZE] =
 };
 
 #define ELF_DYNAMIC_INTERPRETER "/usr/lib/ld.so.1"
+#define AIX_DYNAMIC_INTERPRETER "/usr/lib/ia64l64/libc.so.1"
+#define DYNAMIC_INTERPRETER(abfd) \
+  (elfNN_ia64_aix_vec (abfd->xvec) ? AIX_DYNAMIC_INTERPRETER : ELF_DYNAMIC_INTERPRETER)
 
 /* Select out of range branch fixup type.  Note that Itanium does
    not support brl, and so it gets emulated by the kernel.  */
@@ -1109,6 +1120,124 @@ elfNN_ia64_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
     }
 
   return true;
+}
+
+static boolean
+elfNN_ia64_aix_vec (const bfd_target *vec)
+{
+  extern const bfd_target bfd_elfNN_ia64_aix_little_vec;
+  extern const bfd_target bfd_elfNN_ia64_aix_big_vec;
+
+  return (/**/vec == & bfd_elfNN_ia64_aix_little_vec 
+	  ||  vec == & bfd_elfNN_ia64_aix_big_vec);
+}
+
+/* Hook called by the linker routine which adds symbols from an object
+   file.  We use it to handle OS-specific symbols.  */
+
+static boolean
+elfNN_ia64_aix_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
+     bfd *abfd;
+     struct bfd_link_info *info;
+     const Elf_Internal_Sym *sym;
+     const char **namep;
+     flagword *flagsp;
+     asection **secp;
+     bfd_vma *valp;
+{
+  if (strcmp (*namep, "__GLOB_DATA_PTR") == 0)
+    {
+      /* Define __GLOB_DATA_PTR.  This is expected to be a linker-defined
+	 symbol by the Aix C runtime startup code.  Define the symbol
+	 when it is encountered.  IBM sez no one else should use it b/c it is
+	 undocumented.  */
+      struct elf_link_hash_entry *h;
+
+      h = (struct elf_link_hash_entry *) bfd_link_hash_lookup (info->hash, *namep, false, false, false);
+      if (h == NULL) 
+	{
+	  struct elf_backend_data *bed;
+	  struct elfNN_ia64_link_hash_table *ia64_info;
+
+	  bed = get_elf_backend_data (abfd);
+	  ia64_info = elfNN_ia64_hash_table (info);
+	  
+	  if (!(_bfd_generic_link_add_one_symbol
+		(info, abfd, *namep, BSF_GLOBAL, ia64_info->got_sec,
+		 bed->got_symbol_offset, (const char *) NULL, false,
+		 bed->collect, (struct bfd_link_hash_entry **) &h)))
+	    return false;
+	  
+	  h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
+	  h->type = STT_OBJECT;
+	  
+	  if (info->shared
+	      && ! _bfd_elf_link_record_dynamic_symbol (info, h))
+	    return false;
+	}
+
+      return true;
+    }
+  else if (sym->st_shndx == SHN_LOOS)
+    {
+      int i;
+      
+      /* SHN_MONTEREY_SYSCALL (Description from IBM):
+	 Special symbols on AIX; if the value is non-zero, the value
+         should be put in the gp member of the function descriptor.  the
+         function address member should be set to the address of the entry
+         point of the user-space portion of the system call (epc insn in a
+         priviledged page).  If the symbol value is zero, look in the special
+         table for extended system calls.  The number for extended system
+         calls will come from that table.  The index is set when the linker
+         sees an export file that contains the syscall attribute after an
+         exported symbol.  Kernel extensions indicate extended system calls
+         they define by having STO_MONTEREY_SYSCALL in their st_other symbol
+         table member. This is used by the system loader to add extended
+         system calls to its table, which is subsequently provided to the
+         runtime linker at each process startup.  */
+      for (i = 1; i < elf_elfheader (abfd)->e_shnum; i++)
+	{
+	  asection * sec = bfd_section_from_elf_index (abfd, i);
+	  
+	  if (sec && strcmp (sec->name, ".text") == 0)
+	    {
+	      *secp = sec;
+	      break;
+	    }
+	}
+
+      /* FIXME need to determine the proper section instead of defaulting to
+	 .text.  */
+      if (*secp == NULL)
+	*secp = bfd_abs_section_ptr;
+      
+      *valp = sym->st_size;
+      
+      return true;
+    }
+  else 
+    {
+      return elfNN_ia64_add_symbol_hook (abfd, info, sym, 
+					 namep, flagsp, secp, valp);
+    }
+}
+
+boolean
+elfNN_ia64_aix_link_add_symbols (abfd, info)
+     bfd *abfd;
+     struct bfd_link_info *info;
+{
+  /* Make sure dynamic sections are always created.  */
+  if (! elf_hash_table (info)->dynamic_sections_created
+      && abfd->xvec == info->hash->creator)
+    {
+      if (! bfd_elfNN_link_create_dynamic_sections (abfd, info))
+	return false;
+    }
+
+  /* Now do the standard call.  */
+  return bfd_elfNN_bfd_link_add_symbols (abfd, info);
 }
 
 /* Return the number of additional phdrs we will need.  */
@@ -1861,7 +1990,8 @@ elfNN_ia64_check_relocs (abfd, info, sec, relocs)
       maybe_dynamic = false;
       if (h && ((info->shared && ! info->symbolic)
 		|| ! (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)
-		|| h->root.type == bfd_link_hash_defweak))
+		|| h->root.type == bfd_link_hash_defweak
+		|| elfNN_ia64_aix_vec (abfd->xvec)))
 	maybe_dynamic = true;
 
       need_entry = 0;
@@ -1885,7 +2015,9 @@ elfNN_ia64_check_relocs (abfd, info, sec, relocs)
 	case R_IA64_FPTR32LSB:
 	case R_IA64_FPTR64MSB:
 	case R_IA64_FPTR64LSB:
-	  if (info->shared || h)
+	  if (elfNN_ia64_aix_vec (abfd->xvec))
+	    need_entry = NEED_FPTR | NEED_DYNREL;
+	  else if (info->shared || h)
 	    need_entry = NEED_FPTR | NEED_DYNREL;
 	  else
 	    need_entry = NEED_FPTR;
@@ -1934,7 +2066,12 @@ elfNN_ia64_check_relocs (abfd, info, sec, relocs)
 	case R_IA64_DIR64MSB:
 	case R_IA64_DIR64LSB:
 	  /* Shared objects will always need at least a REL relocation.  */
-	  if (info->shared || maybe_dynamic)
+	  if (info->shared || maybe_dynamic
+	      /* On AIX, we always need a relocation, but make sure
+		 __GLOB_DATA_PTR doesn't get an entry.  */ 
+	      || (elfNN_ia64_aix_vec (abfd->xvec)
+		  && (!h || strcmp (h->root.root.string, 
+				    "__GLOB_DATA_PTR") != 0)))
 	    need_entry = NEED_DYNREL;
 	  dynrel_type = R_IA64_DIR64LSB;
 	  break;
@@ -1998,7 +2135,9 @@ elfNN_ia64_check_relocs (abfd, info, sec, relocs)
 	  /* FPTRs for shared libraries are allocated by the dynamic
 	     linker.  Make sure this local symbol will appear in the
 	     dynamic symbol table.  */
-	  if (!h && info->shared)
+	  if (!h && (info->shared
+		     /* AIX also needs one */
+		     || elfNN_ia64_aix_vec (abfd->xvec)))
 	    {
 	      if (! (_bfd_elfNN_link_record_local_dynamic_symbol
 		     (info, abfd, r_symndx)))
@@ -2054,7 +2193,8 @@ allocate_global_data_got (dyn_i, data)
 
   if (dyn_i->want_got
       && ! dyn_i->want_fptr
-      && elfNN_ia64_dynamic_symbol_p (dyn_i->h, x->info))
+      && (elfNN_ia64_dynamic_symbol_p (dyn_i->h, x->info)
+	  || elfNN_ia64_aix_vec (x->info->hash->creator)))
      {
        dyn_i->got_offset = x->ofs;
        x->ofs += 8;
@@ -2073,7 +2213,8 @@ allocate_global_fptr_got (dyn_i, data)
 
   if (dyn_i->want_got
       && dyn_i->want_fptr
-      && elfNN_ia64_dynamic_symbol_p (dyn_i->h, x->info))
+      && (elfNN_ia64_dynamic_symbol_p (dyn_i->h, x->info)
+	  || elfNN_ia64_aix_vec (x->info->hash->creator)))
     {
       dyn_i->got_offset = x->ofs;
       x->ofs += 8;
@@ -2091,7 +2232,8 @@ allocate_local_got (dyn_i, data)
   struct elfNN_ia64_allocate_data *x = (struct elfNN_ia64_allocate_data *)data;
 
   if (dyn_i->want_got
-      && ! elfNN_ia64_dynamic_symbol_p (dyn_i->h, x->info))
+      && ! (elfNN_ia64_dynamic_symbol_p (dyn_i->h, x->info)
+	    || elfNN_ia64_aix_vec (x->info->hash->creator)))
     {
       dyn_i->got_offset = x->ofs;
       x->ofs += 8;
@@ -2137,7 +2279,12 @@ allocate_fptr (dyn_i, data)
 	       || h->root.type == bfd_link_hash_warning)
 	  h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
-      if (x->info->shared)
+      if (x->info->shared
+	  /* AIX needs an FPTR in this case. */
+	  || (elfNN_ia64_aix_vec (x->info->hash->creator)
+	      && (!h
+		  || h->root.type == bfd_link_hash_defined
+		  || h->root.type == bfd_link_hash_defweak)))
 	{
 	  if (h && h->dynindx == -1)
 	    {
@@ -2260,7 +2407,8 @@ allocate_dynrel_entries (dyn_i, data)
   boolean dynamic_symbol, shared;
 
   ia64_info = elfNN_ia64_hash_table (x->info);
-  dynamic_symbol = elfNN_ia64_dynamic_symbol_p (dyn_i->h, x->info);
+  dynamic_symbol = elfNN_ia64_dynamic_symbol_p (dyn_i->h, x->info)
+    || elfNN_ia64_aix_vec (x->info->hash->creator);
   shared = x->info->shared;
 
   /* Take care of the normal data relocations.  */
@@ -2377,8 +2525,8 @@ elfNN_ia64_size_dynamic_sections (output_bfd, info)
     {
       sec = bfd_get_section_by_name (dynobj, ".interp");
       BFD_ASSERT (sec != NULL);
-      sec->contents = (bfd_byte *) ELF_DYNAMIC_INTERPRETER;
-      sec->_raw_size = strlen (ELF_DYNAMIC_INTERPRETER) + 1;
+      sec->contents = (bfd_byte *) DYNAMIC_INTERPRETER (output_bfd);
+      sec->_raw_size = strlen (DYNAMIC_INTERPRETER (output_bfd)) + 1;
     }
 
   /* Allocate the GOT entries.  */
@@ -2884,6 +3032,7 @@ set_got_entry (abfd, info, dyn_i, dynindx, addend, value, dyn_r_type)
       /* Install a dynamic relocation if needed.  */
       if (info->shared
           || elfNN_ia64_dynamic_symbol_p (dyn_i->h, info)
+	  || elfNN_ia64_aix_vec (abfd->xvec)
 	  || (dynindx != -1 && dyn_r_type == R_IA64_FPTR64LSB))
 	{
 	  if (dynindx == -1)
@@ -3373,7 +3522,13 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_IA64_DIR64MSB:
 	case R_IA64_DIR64LSB:
 	  /* Install a dynamic relocation for this reloc.  */
-	  if ((dynamic_symbol_p || info->shared)
+	  if ((dynamic_symbol_p || info->shared
+	       || (elfNN_ia64_aix_vec (info->hash->creator)
+		   /* We want REL relocation for _GLOB_DATA_PTR, which would
+		      otherwise be an IMM64, which isn't handled below.  The
+		      symbol comes from the C runtime.  */
+		   && (!h || 
+		       strcmp (h->root.root.string, "__GLOB_DATA_PTR") != 0)))
 	      && (input_section->flags & SEC_ALLOC) != 0)
 	    {
 	      unsigned int dyn_r_type;
@@ -3425,6 +3580,8 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 		  addend = value;
 		}
 
+	      if (elfNN_ia64_aix_vec (info->hash->creator))
+		rel->r_addend = value;
 	      elfNN_ia64_install_dyn_reloc (output_bfd, info, input_section,
 					    srel, rel->r_offset, dyn_r_type,
 					    dynindx, addend);
@@ -3564,7 +3721,8 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_IA64_PCREL64MSB:
 	case R_IA64_PCREL64LSB:
 	  /* Install a dynamic relocation for this reloc.  */
-	  if (dynamic_symbol_p)
+	  if (dynamic_symbol_p
+	      || elfNN_ia64_aix_vec (info->hash->creator))
 	    {
 	      BFD_ASSERT (srel != NULL);
 
@@ -4216,5 +4374,26 @@ elfNN_ia64_print_private_bfd_data (abfd, ptr)
 #define elf_backend_want_dynbss		0
 #define elf_backend_copy_indirect_symbol elfNN_ia64_hash_copy_indirect
 #define elf_backend_hide_symbol		elfNN_ia64_hash_hide_symbol
+
+#include "elfNN-target.h"
+
+/* AIX-specific vectors.  */
+
+#undef  TARGET_LITTLE_SYM
+#define TARGET_LITTLE_SYM		bfd_elfNN_ia64_aix_little_vec
+#undef  TARGET_LITTLE_NAME
+#define TARGET_LITTLE_NAME		"elfNN-ia64-aix-little"
+#undef  TARGET_BIG_SYM
+#define TARGET_BIG_SYM			bfd_elfNN_ia64_aix_big_vec
+#undef  TARGET_BIG_NAME
+#define TARGET_BIG_NAME			"elfNN-ia64-aix-big"
+
+#undef  elf_backend_add_symbol_hook
+#define elf_backend_add_symbol_hook 	elfNN_ia64_aix_add_symbol_hook
+
+#undef  bfd_elfNN_bfd_link_add_symbols
+#define bfd_elfNN_bfd_link_add_symbols 	elfNN_ia64_aix_link_add_symbols
+
+#define elfNN_bed elfNN_ia64_aix_bed
 
 #include "elfNN-target.h"
