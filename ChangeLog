@@ -1,3 +1,17 @@
+Tue Jan 28 23:51:07 1992  Per Bothner  (bothner at cygnus.com)
+
+	* Makefile.in:  For libg++, make sure the -I pointing
+	to the gcc directory goes *after* all the libg++-local -I flags.
+	Also, move just-gcc dependency from just-libg++ to all-libg++.
+
+Tue Jan 28 12:56:24 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* configure:  Change -x to -f to keep Ultrix /bin/test happy.
+
+Sat Jan 18 17:45:11 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* Makefile.in (make-gdb.tar.Z):  Remove texinfo targets.
+
 Sat Jan 18 17:03:21 1992  Fred Fish  (fnf at cygnus.com)
 
 	* config.sub:  Add stratus configuration frags.  Also 

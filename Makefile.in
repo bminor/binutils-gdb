@@ -1233,6 +1233,8 @@ install-cvs: install-rcs install-gdbm force
 	if [ -d $(unsubdir)/cvs ] ; then \
 		(cd $(unsubdir)/cvs$(subdir); \
 		$(MAKE) \
+			"bindir=$(bindir)" \
+			"mandir=$(man1dir)" \
 			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
@@ -1486,13 +1488,15 @@ install-fileutils: force
 
 ### libg++
 .PHONY: all-libg++ just-libg++
-all-libg++: just-libg++
-# NOTE!  We have added GXX= to the $(MAKE) line!!!  Do not clone this one.
-just-libg++: just-gcc force
+all-libg++: just-gcc just-libg++
+# NOTE!  We have added GXX= and XTRAFLAGS to the $(MAKE) line!!!
+# Do not clone this one.
+just-libg++: force
 	if [ -d $(unsubdir)/libg++ ] ; then \
 		(cd $(unsubdir)/libg++$(subdir); \
 		$(MAKE) \
-			GXX=`cd $(unsubdir)/..$(subdir); pwd`"/gcc/gcc -B"`cd $(unsubdir)/..$(subdir);pwd`"/gcc/ -I"`cd $(unsubdir)/..$(subdir); pwd`/gcc/include \
+			GXX=`cd $(unsubdir)/..$(subdir); pwd`"/gcc/gcc -B"`cd $(unsubdir)/..$(subdir);pwd`"/gcc/" \
+			"XTRAFLAGS=-I"`cd $(unsubdir)/..$(subdir); pwd`/gcc/include\
 			"prefix=$(prefix)" \
 			"datadir=$(datadir)" \
 			"mandir=$(mandir)" \
@@ -1744,6 +1748,12 @@ make-gdb.tar.Z: $(DEVO_SUPPORT) $(GDB_SUPPORT_DIRS) gdb texinfo/fsf/texinfo.tex
 	# Take out glob from buildable dirs
 	rm proto-toplev/Makefile.in
 	sed '/^SUBDIRS =/s/glob //' <Makefile.in >proto-toplev/Makefile.in
+	# Take out texinfo from buildable dirs
+	cp proto-toplev/Makefile.in temp.$$
+	sed '/^all\.normal: /s/all-texinfo //' <temp.$$ >temp1.$$
+	sed '/^clean: /s/clean-texinfo //' <temp1.$$ >temp.$$
+	sed '/^install\.all: /s/install-texinfo //' <temp.$$ >proto-toplev/Makefile.in
+	rm temp.$$ temp1.$$
 	mkdir proto-toplev/texinfo
 	mkdir proto-toplev/texinfo/fsf
 	ln -s ../../../texinfo/fsf/texinfo.tex proto-toplev/texinfo/fsf/
