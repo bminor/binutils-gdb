@@ -150,9 +150,15 @@ static char * uptok (char *, int);
 /* YYSTYPE gets defined by %union */
 static int
 parse_number (char *, int, int, YYSTYPE *);
+
+static struct type *current_type;
+
+static void push_current_type ();
+static void pop_current_type ();
+static int search_field;
 %}
 
-%type <voidval> exp exp1 type_exp start variable qualified_name
+%type <voidval> exp exp1 type_exp start normal_start variable qualified_name
 %type <tval> type typebase
 /* %type <bval> block */
 
@@ -170,7 +176,8 @@ parse_number (char *, int, int, YYSTYPE *);
    Contexts where this distinction is not important can use the
    nonterminal "name", which matches either NAME or TYPENAME.  */
 
-%token <sval> STRING
+%token <sval> STRING 
+%token <sval> FIELDNAME
 %token <ssym> NAME /* BLOCKNAME defined below to give it higher precedence. */
 %token <tsym> TYPENAME
 %type <sval> name
@@ -219,15 +226,21 @@ parse_number (char *, int, int, YYSTYPE *);
 
 %%
 
-start   :	exp1
+start   :	{ current_type = NULL;
+		  search_field = 0;
+		}
+		normal_start;
+
+normal_start	:
+		exp1
 	|	type_exp
 	;
 
 type_exp:	type
 			{ write_exp_elt_opcode(OP_TYPE);
 			  write_exp_elt_type($1);
-			  write_exp_elt_opcode(OP_TYPE);}
-	;
+			  write_exp_elt_opcode(OP_TYPE);
+			  current_type = $1; } ;
 
 /* Expressions, including the comma operator.  */
 exp1	:	exp
@@ -237,10 +250,14 @@ exp1	:	exp
 
 /* Expressions, not including the comma operator.  */
 exp	:	exp '^'   %prec UNARY
-			{ write_exp_elt_opcode (UNOP_IND); }
+			{ write_exp_elt_opcode (UNOP_IND);
+			  if (current_type) 
+			    current_type = TYPE_TARGET_TYPE (current_type); }
 
 exp	:	'@' exp    %prec UNARY
-			{ write_exp_elt_opcode (UNOP_ADDR); }
+			{ write_exp_elt_opcode (UNOP_ADDR); 
+			  if (current_type)
+			    current_type = TYPE_POINTER_TYPE (current_type); }
 
 exp	:	'-' exp    %prec UNARY
 			{ write_exp_elt_opcode (UNOP_NEG); }
@@ -258,24 +275,55 @@ exp	:	DECREMENT  '(' exp ')'   %prec UNARY
 			{ write_exp_elt_opcode (UNOP_PREDECREMENT); }
 	;
 
-exp	:	exp '.' name
+exp	:	exp '.' { search_field = 1; } 
+		FIELDNAME 
+		/* name */
 			{ write_exp_elt_opcode (STRUCTOP_STRUCT);
-			  write_exp_string ($3);
-			  write_exp_elt_opcode (STRUCTOP_STRUCT); }
-	;
-
-exp	:	exp '[' exp1 ']'
-			{ write_exp_elt_opcode (BINOP_SUBSCRIPT); }
-	;
+			  write_exp_string ($4); 
+			  write_exp_elt_opcode (STRUCTOP_STRUCT);
+			  search_field = 0; 
+			  if (current_type)
+			    { while (TYPE_CODE (current_type) == TYPE_CODE_PTR)
+				current_type = TYPE_TARGET_TYPE (current_type);
+			      current_type = lookup_struct_elt_type (
+				current_type, $4.ptr, false); };
+			 } ; 
+exp	:	exp '['
+			/* We need to save the current_type value */
+			{ char *arrayname; 
+			  int arrayfieldindex;
+			  arrayfieldindex = is_pascal_string_type (
+				current_type, NULL, NULL,
+				NULL, NULL, &arrayname); 
+			  if (arrayfieldindex) 
+			    {
+			      struct stoken stringsval;
+			      stringsval.ptr = alloca (strlen (arrayname) + 1);
+			      stringsval.length = strlen (arrayname);
+			      strcpy (stringsval.ptr, arrayname);
+			      current_type = TYPE_FIELD_TYPE (current_type,
+				arrayfieldindex - 1); 
+			      write_exp_elt_opcode (STRUCTOP_STRUCT);
+			      write_exp_string (stringsval); 
+			      write_exp_elt_opcode (STRUCTOP_STRUCT);
+			    }
+			  push_current_type ();  }
+		exp1 ']'
+			{ pop_current_type ();
+			  write_exp_elt_opcode (BINOP_SUBSCRIPT);
+			  if (current_type)
+			    current_type = TYPE_TARGET_TYPE (current_type); }
 
 exp	:	exp '('
 			/* This is to save the value of arglist_len
 			   being accumulated by an outer function call.  */
-			{ start_arglist (); }
+			{ push_current_type ();
+			  start_arglist (); }
 		arglist ')'	%prec ARROW
 			{ write_exp_elt_opcode (OP_FUNCALL);
 			  write_exp_elt_longcst ((LONGEST) end_arglist ());
-			  write_exp_elt_opcode (OP_FUNCALL); }
+			  write_exp_elt_opcode (OP_FUNCALL); 
+			  pop_current_type (); }
 	;
 
 arglist	:
@@ -288,7 +336,8 @@ arglist	:
 exp	:	type '(' exp ')' %prec UNARY
 			{ write_exp_elt_opcode (UNOP_CAST);
 			  write_exp_elt_type ($1);
-			  write_exp_elt_opcode (UNOP_CAST); }
+			  write_exp_elt_opcode (UNOP_CAST); 
+			  current_type = $1; }
 	;
 
 exp	:	'(' exp1 ')'
@@ -567,9 +616,11 @@ variable:	name_not_typename
 			      write_exp_elt_block (NULL);
 			      write_exp_elt_sym (sym);
 			      write_exp_elt_opcode (OP_VAR_VALUE);
-			    }
+			      current_type = sym->type; }
 			  else if ($1.is_a_field_of_this)
 			    {
+			      struct value * this_val;
+			      struct type * this_type;
 			      /* Object pascal: it hangs off of `this'.  Must
 			         not inadvertently convert from a method call
 				 to data ref.  */
@@ -581,6 +632,18 @@ variable:	name_not_typename
 			      write_exp_elt_opcode (STRUCTOP_PTR);
 			      write_exp_string ($1.stoken);
 			      write_exp_elt_opcode (STRUCTOP_PTR);
+			      /* we need type of this */
+			      this_val = value_of_this (0); 
+			      if (this_val)
+				this_type = this_val->type;
+			      else
+				this_type = NULL;
+			      if (this_type)
+				current_type = lookup_struct_elt_type (
+				  this_type,
+				  $1.stoken.ptr, false);
+			      else
+				current_type = NULL; 
 			    }
 			  else
 			    {
@@ -881,6 +944,36 @@ parse_number (p, len, parsed_float, putithere)
    return INT;
 }
 
+
+struct type_push
+{
+  struct type *stored;
+  struct type_push *next;
+};
+
+static struct type_push *tp_top = NULL;
+
+static void push_current_type ()
+{
+  struct type_push *tpnew;
+  tpnew = (struct type_push *) malloc (sizeof (struct type_push));
+  tpnew->next = tp_top;
+  tpnew->stored = current_type;
+  current_type = NULL;
+  tp_top = tpnew; 
+}
+
+static void pop_current_type ()
+{
+  struct type_push *tp = tp_top;
+  if (tp)
+    {
+      current_type = tp->stored;
+      tp_top = tp->next;
+      xfree (tp);
+    }
+}
+
 struct token
 {
   char *operator;
@@ -907,8 +1000,8 @@ static const struct token tokentab2[] =
     {"<>", NOTEQUAL, BINOP_END},
     {"<=", LEQ, BINOP_END},
     {">=", GEQ, BINOP_END},
-    {":=", ASSIGN, BINOP_END}
-  };
+    {":=", ASSIGN, BINOP_END},
+    {"::", COLONCOLON, BINOP_END} };
 
 /* Allocate uppercased var */
 /* make an uppercased copy of tokstart */
@@ -1149,6 +1242,7 @@ yylex ()
 	  {
 	    tempbuf = (char *) realloc (tempbuf, tempbufsize += 64);
 	  }
+
 	switch (*tokptr)
 	  {
 	  case '\0':
@@ -1295,25 +1389,37 @@ yylex ()
     char *tmp = copy_name (yylval.sval);
     struct symbol *sym;
     int is_a_field_of_this = 0;
+    int is_a_field = 0;
     int hextype;
 
-    sym = lookup_symbol (tmp, expression_context_block,
-			 VAR_NAMESPACE,
-			 &is_a_field_of_this,
-			 (struct symtab **) NULL);
+
+    if (search_field && current_type)
+      is_a_field = (lookup_struct_elt_type (current_type, tmp, 1) != NULL);	
+    if (is_a_field)
+      sym = NULL;
+    else
+      sym = lookup_symbol (tmp, expression_context_block,
+			   VAR_NAMESPACE,
+			   &is_a_field_of_this,
+			   (struct symtab **) NULL);
     /* second chance uppercased (as Free Pascal does).  */
-    if (!sym && !is_a_field_of_this)
+    if (!sym && !is_a_field_of_this && !is_a_field)
       {
        for (i = 0; i <= namelen; i++)
          {
            if ((tmp[i] >= 'a' && tmp[i] <= 'z'))
              tmp[i] -= ('a'-'A');
          }
-       sym = lookup_symbol (tmp, expression_context_block,
+       if (search_field && current_type)
+	 is_a_field = (lookup_struct_elt_type (current_type, tmp, 1) != NULL);	
+       if (is_a_field)
+	 sym = NULL;
+       else
+	 sym = lookup_symbol (tmp, expression_context_block,
                         VAR_NAMESPACE,
                         &is_a_field_of_this,
                         (struct symtab **) NULL);
-       if (sym || is_a_field_of_this)
+       if (sym || is_a_field_of_this || is_a_field)
          for (i = 0; i <= namelen; i++)
            {
              if ((tokstart[i] >= 'a' && tokstart[i] <= 'z'))
@@ -1321,7 +1427,7 @@ yylex ()
            }
       }
     /* Third chance Capitalized (as GPC does).  */
-    if (!sym && !is_a_field_of_this)
+    if (!sym && !is_a_field_of_this && !is_a_field)
       {
        for (i = 0; i <= namelen; i++)
          {
@@ -1334,11 +1440,16 @@ yylex ()
            if ((tmp[i] >= 'A' && tmp[i] <= 'Z'))
              tmp[i] -= ('A'-'a');
           }
-       sym = lookup_symbol (tmp, expression_context_block,
+       if (search_field && current_type)
+	 is_a_field = (lookup_struct_elt_type (current_type, tmp, 1) != NULL);	
+       if (is_a_field)
+	 sym = NULL;
+       else
+	 sym = lookup_symbol (tmp, expression_context_block,
                          VAR_NAMESPACE,
                          &is_a_field_of_this,
                          (struct symtab **) NULL);
-        if (sym || is_a_field_of_this)
+       if (sym || is_a_field_of_this || is_a_field)
           for (i = 0; i <= namelen; i++)
             {
               if (i == 0)
@@ -1351,6 +1462,15 @@ yylex ()
                   tokstart[i] -= ('A'-'a');
             }
       }
+
+    if (is_a_field)
+      {
+	tempbuf = (char *) realloc (tempbuf, namelen + 1);
+	strncpy (tempbuf, tokstart, namelen); tempbuf [namelen] = 0;
+	yylval.sval.ptr = tempbuf;
+	yylval.sval.length = namelen; 
+	return FIELDNAME;
+      } 
     /* Call lookup_symtab, not lookup_partial_symtab, in case there are
        no psymtabs (coff, xcoff, or some future change to blow away the
        psymtabs once once symbols are read).  */
