@@ -1,5 +1,5 @@
 /* frv simulator support code
-   Copyright (C) 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright (C) 1999, 2000, 2001, 2003 Free Software Foundation, Inc.
    Contributed by Red Hat.
 
 This file is part of the GNU simulators.
@@ -35,6 +35,10 @@ frv_initialize (SIM_CPU *current_cpu, SIM_DESC sd)
   int insn_cache_enabled = CACHE_INITIALIZED (insn_cache);
   int data_cache_enabled = CACHE_INITIALIZED (data_cache);
   USI hsr0;
+
+  /* Initialize the register control information first since some of the
+     register values are used in further configuration.  */
+  frv_register_control_init (current_cpu);
 
   /* We need to ensure that the caches are initialized even if they are not
      initially enabled (via commandline) because they can be enabled by
@@ -77,9 +81,6 @@ frv_initialize (SIM_CPU *current_cpu, SIM_DESC sd)
 
   cgen_init_accurate_fpu (current_cpu, CGEN_CPU_FPU (current_cpu),
 			  frvbf_fpu_error);
-
-  /* Initialize the register control information.  */
-  frv_register_control_init (current_cpu);
 
   /* Now perform power-on reset.  */
   frv_power_on_reset (current_cpu);

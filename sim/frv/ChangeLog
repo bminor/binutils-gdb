@@ -1,3 +1,7 @@
+2003-09-25  Dave Brolley  <brolley@redhat.com>
+
+	* reset.c (frv_initialize): Call frv_register_control_init first.
+
 2003-09-24  Dave Brolley  <brolley@redhat.com>
 
 	* profile.h (update_FR_ptime): New prototype.
