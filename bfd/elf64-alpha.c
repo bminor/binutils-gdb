@@ -3100,7 +3100,7 @@ elf64_alpha_check_relocs (abfd, info, sec, relocs)
 
 	case R_ALPHA_REFLONG:
 	case R_ALPHA_REFQUAD:
-	  if (info->shared || maybe_dynamic)
+	  if ((info->shared && (sec->flags & SEC_ALLOC)) || maybe_dynamic)
 	    need = NEED_DYNREL;
 	  break;
 

@@ -1,3 +1,8 @@
+2002-10-23  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf64-alpha.c (elf64_alpha_check_relocs): Only put maybe_dynamic
+	relocs into shared lib non-allocated reloc sections.
+
 2002-10-23  Nathan Tallent  <eraxxon@alumni.rice.edu>
 
 	* dwarf2.c (add_line_info): Ensure that the line_info_table is
