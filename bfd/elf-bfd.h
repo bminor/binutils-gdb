@@ -296,9 +296,10 @@ struct eh_cie_fde
   unsigned char lsda_offset;
   unsigned int cie : 1;
   unsigned int removed : 1;
+  unsigned int add_augmentation_size : 1;
+  unsigned int add_fde_encoding : 1;
   unsigned int make_relative : 1;
   unsigned int make_lsda_relative : 1;
-  unsigned int need_relative : 1;
   unsigned int need_lsda_relative : 1;
   unsigned int per_encoding_relative : 1;
 };

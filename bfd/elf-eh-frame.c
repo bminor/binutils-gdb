@@ -200,6 +200,60 @@ int cie_compare (struct cie *c1, struct cie *c2)
   return 1;
 }
 
+/* Return the number of extra bytes that we'll be inserting into
+   ENTRY's augmentation string.  */
+
+static INLINE unsigned int
+extra_augmentation_string_bytes (struct eh_cie_fde *entry)
+{
+  unsigned int size = 0;
+  if (entry->cie)
+    {
+      if (entry->add_augmentation_size)
+	size++;
+      if (entry->add_fde_encoding)
+	size++;
+    }
+  return size;
+}
+
+/* Likewise ENTRY's augmentation data.  */
+
+static INLINE unsigned int
+extra_augmentation_data_bytes (struct eh_cie_fde *entry)
+{
+  unsigned int size = 0;
+  if (entry->cie)
+    {
+      if (entry->add_augmentation_size)
+	size++;
+      if (entry->add_fde_encoding)
+	size++;
+    }
+  else
+    {
+      if (entry->cie_inf->add_augmentation_size)
+	size++;
+    }
+  return size;
+}
+
+/* Return the size that ENTRY will have in the output.  ALIGNMENT is the
+   required alignment of ENTRY in bytes.  */
+
+static unsigned int
+size_of_output_cie_fde (struct eh_cie_fde *entry, unsigned int alignment)
+{
+  if (entry->removed)
+    return 0;
+  if (entry->size == 4)
+    return 4;
+  return (entry->size
+	  + extra_augmentation_string_bytes (entry)
+	  + extra_augmentation_data_bytes (entry)
+	  + alignment - 1) & -alignment;
+}
+
 /* This function is called for each input file before the .eh_frame
    section is relocated.  It discards duplicate CIEs and FDEs for discarded
    functions.  The function returns TRUE iff any entries have been
@@ -221,7 +275,6 @@ _bfd_elf_discard_section_eh_frame
   struct eh_frame_sec_info *sec_info = NULL;
   unsigned int leb128_tmp;
   unsigned int cie_usage_count, offset;
-  bfd_size_type new_size;
   unsigned int ptr_size;
 
   if (sec->size == 0)
@@ -267,7 +320,6 @@ _bfd_elf_discard_section_eh_frame
   last_cie_inf = NULL;
   memset (&cie, 0, sizeof (cie));
   cie_usage_count = 0;
-  new_size = sec->size;
   sec_info = bfd_zmalloc (sizeof (struct eh_frame_sec_info)
 			  + 99 * sizeof (struct eh_cie_fde));
   if (sec_info == NULL)
@@ -379,10 +431,7 @@ _bfd_elf_discard_section_eh_frame
 		       == hdr_info->last_cie_sec->output_section)
 		   && cie_compare (&cie, &hdr_info->last_cie) == 0)
 		  || cie_usage_count == 0)
-		{
-		  new_size -= cie.hdr.length + 4;
-		  last_cie_inf->removed = 1;
-		}
+		last_cie_inf->removed = 1;
 	      else
 		{
 		  hdr_info->last_cie = cie;
@@ -517,9 +566,22 @@ _bfd_elf_discard_section_eh_frame
 	  if (info->shared
 	      && (get_elf_backend_data (abfd)
 		  ->elf_backend_can_make_relative_eh_frame
-		  (abfd, info, sec))
-	      && (cie.fde_encoding & 0xf0) == DW_EH_PE_absptr)
-	    cie.make_relative = 1;
+		  (abfd, info, sec)))
+	    {
+	      if ((cie.fde_encoding & 0xf0) == DW_EH_PE_absptr)
+		cie.make_relative = 1;
+	      /* If the CIE doesn't already have an 'R' entry, it's fairly
+		 easy to add one, provided that there's no aligned data
+		 after the augmentation string.  */
+	      else if (cie.fde_encoding == DW_EH_PE_omit
+		       && (cie.per_encoding & 0xf0) != DW_EH_PE_aligned)
+		{
+		  if (*cie.augmentation == 0)
+		    this_inf->add_augmentation_size = 1;
+		  this_inf->add_fde_encoding = 1;
+		  cie.make_relative = 1;
+		}
+	    }
 
 	  if (info->shared
 	      && (get_elf_backend_data (abfd)
@@ -556,12 +618,9 @@ _bfd_elf_discard_section_eh_frame
 	    goto free_no_table;
 
 	  if ((*reloc_symbol_deleted_p) (buf - ehbuf, cookie))
-	    {
-	      /* This is a FDE against a discarded section.  It should
-		 be deleted.  */
-	      new_size -= hdr.length + 4;
-	      this_inf->removed = 1;
-	    }
+	    /* This is a FDE against a discarded section.  It should
+	       be deleted.  */
+	    this_inf->removed = 1;
 	  else
 	    {
 	      if (info->shared
@@ -608,23 +667,23 @@ _bfd_elf_discard_section_eh_frame
   for (ent = sec_info->entry; ent < sec_info->entry + sec_info->count; ++ent)
     if (!ent->removed)
       {
-	ent->new_offset = offset;
-	offset += ent->size;
 	if (ent->cie)
 	  last_cie_inf = ent;
 	else
 	  ent->cie_inf = last_cie_inf;
+	ent->new_offset = offset;
+	offset += size_of_output_cie_fde (ent, ptr_size);
       }
   hdr_info->last_cie_inf = last_cie_inf;
 
-  /* Shrink the sec as needed.  */
+  /* Resize the sec as needed.  */
   sec->rawsize = sec->size;
-  sec->size = new_size;
+  sec->size = offset;
   if (sec->size == 0)
     sec->flags |= SEC_EXCLUDE;
 
   free (ehbuf);
-  return new_size != sec->rawsize;
+  return offset != sec->rawsize;
 
 free_no_table:
   if (ehbuf)
@@ -762,13 +821,8 @@ _bfd_elf_eh_frame_section_offset (bfd *output_bfd ATTRIBUTE_UNUSED,
      relocation against FDE's initial_location field.  */
   if (!sec_info->entry[mid].cie
       && sec_info->entry[mid].cie_inf->make_relative
-      && offset == sec_info->entry[mid].offset + 8
-      && (sec_info->entry[mid].cie_inf->need_relative
-	  || !hdr_info->offsets_adjusted))
-    {
-      sec_info->entry[mid].cie_inf->need_relative = 1;
-      return (bfd_vma) -2;
-    }
+      && offset == sec_info->entry[mid].offset + 8)
+    return (bfd_vma) -2;
 
   /* If converting LSDA pointers to DW_EH_PE_pcrel, there will be no need
      for run-time relocation against LSDA field.  */
@@ -785,8 +839,11 @@ _bfd_elf_eh_frame_section_offset (bfd *output_bfd ATTRIBUTE_UNUSED,
 
   if (hdr_info->offsets_adjusted)
     offset -= sec->output_offset;
+  /* Any new augmentation bytes go before the first relocation.  */
   return (offset + sec_info->entry[mid].new_offset
-	  - sec_info->entry[mid].offset);
+	  - sec_info->entry[mid].offset
+	  + extra_augmentation_string_bytes (sec_info->entry + mid)
+	  + extra_augmentation_data_bytes (sec_info->entry + mid));
 }
 
 /* Write out .eh_frame section.  This is called with the relocated
@@ -801,7 +858,6 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
   struct eh_frame_sec_info *sec_info;
   struct elf_link_hash_table *htab;
   struct eh_frame_hdr_info *hdr_info;
-  bfd_byte *p, *buf;
   unsigned int leb128_tmp;
   unsigned int ptr_size;
   struct eh_cie_fde *ent;
@@ -854,29 +910,66 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
   if (hdr_info->array == NULL)
     hdr_info = NULL;
 
-  p = contents;
+  /* The new offsets can be bigger or smaller than the original offsets.
+     We therefore need to make two passes over the section: one backward
+     pass to move entries up and one forward pass to move entries down.
+     The two passes won't interfere with each other because entries are
+     not reordered  */
+  for (ent = sec_info->entry + sec_info->count; ent-- != sec_info->entry;)
+    if (!ent->removed && ent->new_offset > ent->offset)
+      memmove (contents + ent->new_offset - sec->output_offset,
+	       contents + ent->offset - sec->output_offset, ent->size);
+
+  for (ent = sec_info->entry; ent < sec_info->entry + sec_info->count; ++ent)
+    if (!ent->removed && ent->new_offset < ent->offset)
+      memmove (contents + ent->new_offset - sec->output_offset,
+	       contents + ent->offset - sec->output_offset, ent->size);
+
   for (ent = sec_info->entry; ent < sec_info->entry + sec_info->count; ++ent)
     {
+      unsigned char *buf, *end;
+      unsigned int new_size;
+
       if (ent->removed)
 	continue;
+
+      if (ent->size == 4)
+	{
+	  /* Any terminating FDE must be at the end of the section.  */
+	  BFD_ASSERT (ent == sec_info->entry + sec_info->count - 1);
+	  continue;
+	}
+
+      buf = contents + ent->new_offset - sec->output_offset;
+      end = buf + ent->size;
+      new_size = size_of_output_cie_fde (ent, ptr_size);
+
+      /* Install the new size, filling the extra bytes with DW_CFA_nops.  */
+      if (new_size != ent->size)
+	{
+	  memset (end, 0, new_size - ent->size);
+	  bfd_put_32 (abfd, new_size - 4, buf);
+	}
 
       if (ent->cie)
 	{
 	  /* CIE */
-	  if (ent->need_relative
+	  if (ent->make_relative
 	      || ent->need_lsda_relative
 	      || ent->per_encoding_relative)
 	    {
 	      unsigned char *aug;
-	      unsigned int action;
+	      unsigned int action, extra_string, extra_data;
 	      unsigned int dummy, per_width, per_encoding;
 
 	      /* Need to find 'R' or 'L' augmentation's argument and modify
 		 DW_EH_PE_* value.  */
-	      action = ((ent->need_relative ? 1 : 0)
+	      action = ((ent->make_relative ? 1 : 0)
 			| (ent->need_lsda_relative ? 2 : 0)
 			| (ent->per_encoding_relative ? 4 : 0));
-	      buf = contents + ent->offset - sec->output_offset;
+	      extra_string = extra_augmentation_string_bytes (ent);
+	      extra_data = extra_augmentation_data_bytes (ent);
+
 	      /* Skip length, id and version.  */
 	      buf += 9;
 	      aug = buf;
@@ -886,8 +979,28 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
 	      read_uleb128 (dummy, buf);
 	      if (*aug == 'z')
 		{
-		  read_uleb128 (dummy, buf);
+		  /* The uleb128 will always be a single byte for the kind
+		     of augmentation strings that we're prepared to handle.  */
+		  *buf++ += extra_data;
 		  aug++;
+		}
+
+	      /* Make room for the new augmentation string and data bytes.  */
+	      memmove (buf + extra_string + extra_data, buf, end - buf);
+	      memmove (aug + extra_string, aug, buf - aug);
+	      buf += extra_string;
+
+	      if (ent->add_augmentation_size)
+		{
+		  *aug++ = 'z';
+		  *buf++ = extra_data - 1;
+		}
+	      if (ent->add_fde_encoding)
+		{
+		  BFD_ASSERT (action & 1);
+		  *aug++ = 'R';
+		  *buf++ = DW_EH_PE_pcrel;
+		  action &= ~1;
 		}
 
 	      while (action)
@@ -919,6 +1032,7 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
 			val = read_value (abfd, buf, per_width,
 					  get_DW_EH_PE_signed (per_encoding));
 			val += ent->offset - ent->new_offset;
+			val -= extra_string + extra_data;
 			write_value (abfd, buf, val, per_width);
 			action &= ~4;
 		      }
@@ -938,13 +1052,12 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
 		  }
 	    }
 	}
-      else if (ent->size > 4)
+      else
 	{
 	  /* FDE */
 	  bfd_vma value, address;
 	  unsigned int width;
 
-	  buf = contents + ent->offset - sec->output_offset;
 	  /* Skip length.  */
 	  buf += 4;
 	  value = ent->new_offset + 4 - ent->cie_inf->new_offset;
@@ -975,7 +1088,7 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
 		  address += sec->output_section->vma + ent->offset + 8;
 		  break;
 		}
-	      if (ent->cie_inf->need_relative)
+	      if (ent->cie_inf->make_relative)
 		value -= sec->output_section->vma + ent->new_offset + 8;
 	      write_value (abfd, buf, value, width);
 	    }
@@ -1004,14 +1117,15 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
 		  write_value (abfd, buf, value, width);
 		}
 	    }
+	  else if (ent->cie_inf->add_augmentation_size)
+	    {
+	      /* Skip the PC and length and insert a zero byte for the
+		 augmentation size.  */
+	      buf += width * 2;
+	      memmove (buf + 1, buf, end - buf);
+	      *buf = 0;
+	    }
 	}
-      else
-	/* Terminating FDE must be at the end of .eh_frame section only.  */
-	BFD_ASSERT (ent == sec_info->entry + sec_info->count - 1);
-
-      BFD_ASSERT (p == contents + ent->new_offset - sec->output_offset);
-      memmove (p, contents + ent->offset - sec->output_offset, ent->size);
-      p += ent->size;
     }
 
     {
@@ -1024,6 +1138,9 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
 	  && ((sec->output_offset + sec->size + pad)
 	      <= sec->output_section->size))
 	{
+	  bfd_byte *buf;
+	  unsigned int new_size;
+
 	  /* Find the last CIE/FDE.  */
 	  ent = sec_info->entry + sec_info->count;
 	  while (--ent != sec_info->entry)
@@ -1035,22 +1152,16 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
 	    abort ();
 
 	  pad = alignment - pad;
-
 	  buf = contents + ent->new_offset - sec->output_offset;
-
-	  /* Update length.  */
-	  ent->size += pad;
-	  bfd_put_32 (abfd, ent->size - 4, buf);
+	  new_size = size_of_output_cie_fde (ent, ptr_size);
 
 	  /* Pad it with DW_CFA_nop  */
-	  memset (p, 0, pad);
-	  p += pad;
+	  memset (buf + new_size, 0, pad);
+	  bfd_put_32 (abfd, new_size + pad - 4, buf);
 
 	  sec->size += pad;
 	}
     }
-
-  BFD_ASSERT ((bfd_size_type) (p - contents) == sec->size);
 
   return bfd_set_section_contents (abfd, sec->output_section,
 				   contents, (file_ptr) sec->output_offset,

@@ -1,3 +1,20 @@
+2004-11-16  Richard Sandiford  <rsandifo@redhat.com>
+
+	* elf-bfd.h (eh_cie_fde): Add new fields: add_augmentation_size and
+	add_fde_encoding.  Remove need_relative.
+	* elf-eh-frame.c (extra_augmentation_string_bytes)
+	(extra_augmentation_data_bytes, size_of_output_cie_fde): New functions.
+	(_bfd_elf_discard_section_eh_frame): Consider changing the FDE encoding
+	in cases where the CIE has no existing 'R' augmentation.  Use
+	size_of_output_cie_fde when assigning offsets.  Use the final offset
+	as the new section size.
+	(_bfd_elf_eh_frame_section_offset): Remove need_relative handling.
+	Account for any extra augmentation bytes in the returned offset.
+	(_bfd_elf_write_section_eh_frame): Rework so that the entries are
+	moved before being modified.  Pad growing entries with DW_CFA_nops.
+	Add 'z' and 'R' augmentations as directed by add_augmentation_size
+	and add_fde_encoding.
+
 2004-11-15  Mark Mitchell  <mark@codesourcery.com>
 
 	* elf32-arm.c (elf32_arm_relocate_section): Use

@@ -1,3 +1,9 @@
+2004-11-16  Richard Sandiford  <rsandifo@redhat.com>
+
+	* ld-mips-elf/eh-frame1.{s,ld},
+	* ld-mips-elf/eh-frame1-{n32,n64},d: New test.
+	* ld-mips-elf/mips-elf.exp: Run it.
+
 2004-11-10  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-d10v/reloc-003.d: Update for changed error message.
