@@ -1,3 +1,11 @@
+Tue Jan 25 11:43:28 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* som.c, som.h (bfd_som_set_section_attributes,
+	bfd_som_set_subsection_attributes): Change parameters from char
+	to int.  Following a prototype with an old-style function definition
+	in the presence of widened parameters is a GCC-ism not supported
+	by the HP compiler in ANSI mode.
+
 Tue Jan 25 11:46:46 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* archive.c: Reindented to GNU standards.
