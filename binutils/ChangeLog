@@ -1,3 +1,8 @@
+Mon May 31 09:56:22 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
+
+	* readelf.c (process_relocs): Determine type of reloc from
+	DT_PLTREL and from section type.
+
 1999-05-29  Nick Clifton  <nickc@cygnus.com>
 
 	* readelf.c (get_elf_class): Display unknown class number.

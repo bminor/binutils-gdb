@@ -1889,7 +1889,18 @@ process_relocs (file)
 	{
 	  rel_offset = dynamic_info[DT_JMPREL];
 	  rel_size   = dynamic_info[DT_PLTRELSZ];
-	  is_rela    = UNKNOWN;
+	  switch (dynamic_info[DT_PLTREL])
+	    {
+	    case DT_REL:
+	      is_rela = FALSE;
+	      break;
+	    case DT_RELA:
+	      is_rela = TRUE;
+	      break;
+	    default:
+	      is_rela = UNKNOWN;
+	      break;
+	    }
 	}
 
       if (rel_size)
@@ -1934,18 +1945,10 @@ process_relocs (file)
 	      if (string_table == NULL)
 		{
 		  printf ("%d", section->sh_name);
-		  is_rela = UNKNOWN;
 		}
 	      else
 		{
 		  printf ("'%s'", SECTION_NAME (section));
-
-		  if (strncmp (".rela.", SECTION_NAME (section), 6) == 0)
-		    is_rela = TRUE;
-		  else if (strncmp (".rel.", SECTION_NAME (section), 5) == 0)
-		    is_rela = FALSE;
-		  else
-		    is_rela = UNKNOWN;
 		}
 
 	      printf (_(" at offset 0x%lx contains %lu entries:\n"),
@@ -1963,6 +1966,8 @@ process_relocs (file)
 
 	      GET_DATA_ALLOC (strsec->sh_offset, strsec->sh_size, strtab,
 			      char *, "string table");
+	      
+	      is_rela = section->sh_type == SHT_RELA;
 
 	      dump_relocations (file, rel_offset, rel_size, symtab, strtab, is_rela);
 
