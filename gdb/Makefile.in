@@ -229,7 +229,9 @@ SFILES_SUBDIR = \
 # Non-source files in subdirs, that should go into gdb.tar.Z.
 NONSRC_SUBDIR = \
 	 ${srcdir}/nindy-share/Makefile \
-	 ${srcdir}/nindy-share/VERSION
+	 ${srcdir}/nindy-share/VERSION \
+	 ${srcdir}/nindy-share/README \
+	 ${srcdir}/vx-share/README
 
 # All source files that go into linking GDB, except config-specified files.
 SFILES = $(SFILES_MAINDIR) $(SFILES_SUBDIR)
@@ -245,13 +247,14 @@ SFILES_KGDB  = $(SFILES) stuff.c kdb-start.c
 # Header files that are not named in config/* Makefile fragments go here.
 HFILES=	breakpoint.h buildsym.h call-cmds.h command.h defs.h \
 	environ.h expression.h frame.h gdbcmd.h gdbcore.h gdbtypes.h \
-	gdb-stabs.h \
-	ieee-float.h inferior.h minimon.h objfiles.h partial-stab.h \
-	serial.h signals.h symfile.h symtab.h solib.h xcoffsolib.h \
-	target.h terminal.h tm-68k.h tm-i960.h tm-sunos.h tm-sysv4.h \
-	xm-m68k.h xm-sysv4.h language.h parser-defs.h value.h xm-vax.h
+	gdb-stabs.h ieee-float.h inferior.h language.h \
+	minimon.h objfiles.h parser-defs.h partial-stab.h \
+	serial.h signals.h solib.h symfile.h symtab.h stabsread.h \
+	target.h terminal.h xcoffsolib.h value.h \
+	tm-68k.h tm-hppa.h tm-i960.h tm-sparc.h tm-sunos.h tm-sysv4.h \
+	xm-m68k.h xm-sparc.h xm-sysv4.h xm-vax.h
 
-REMOTE_EXAMPLES = m68k-stub.c i386-stub.c rem-multi.shar
+REMOTE_EXAMPLES = m68k-stub.c i386-stub.c sparc-stub.c rem-multi.shar
 
 POSSLIBS_MAINDIR = regex.c regex.h alloca.c
 POSSLIBS = $(POSSLIBS_MAINDIR)
@@ -260,7 +263,7 @@ TESTS = testbpt.c testfun.c testrec.c testreg.c testregs.c
 
 OTHERS = Makefile.in depend alldeps.mak createtags munch configure.in \
 	 ChangeLog ChangeLog-9091 ChangeLog-3.x gdb.1 refcard.ps \
-	 README TODO TAGS WHATS.NEW Projects \
+	 README TODO TAGS NEWS Projects \
 	 .gdbinit COPYING $(YYFILES) \
 	 copying.c Convex.notes copying.awk \
 	 saber.suppress standalone.c stuff.c kdb-start.c \
@@ -532,15 +535,23 @@ gdb.tar.Z: force_update
 	$(MAKE) $(MFLAGS) -f Makefile.in setup-to-dist
 	$(MAKE) $(MFLAGS) -f Makefile.in gdb-$(VERSION).tar.Z
 
-# Set up the GDB directory for distribution, by building all files that
-# are products of other files.
-setup-to-dist: force_update
+# Update the "alldeps.mak" file in a source directory.
+update-alldeps: force_update
 	../configure none
 	rm -f alldeps.mak
 	$(MAKE) $(MFLAGS) alldeps.mak
+
+# Update the "depend" and "alldeps.mak" files in a source directory.
+# We update alldeps.mak first, since it is used to generate the list
+# of files to be checked for dependencies.
+update-depend: update-alldeps force_update
 	../configure none
 	rm -f depend
 	$(MAKE) $(MFLAGS) depend
+
+# Set up the GDB source directory for distribution, by building all files that
+# are products of other files.
+setup-to-dist: update-depend force_update
 	../configure none
 	(cd doc; $(MAKE) $(MFLAGS) gdbVN.m4)
 	$(MAKE) $(MFLAGS) gdb.info

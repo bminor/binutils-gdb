@@ -19,6 +19,13 @@ Wed Sep 16 21:57:14 1992  Stu Grossman  (grossman at cygnus.com)
 	* tm-68k-noun.h, tm-sun3.h (SAVED_PC_AFTER_CALL):  Use
 	m68k_saved... instead of sun3_saved...
 
+Wed Sep 16 17:00:07 1992  John Gilmore  (gnu@cygnus.com)
+
+	* Makefile.in (update-depend, update-alldeps): Split out of
+	setup-to-dist, for convenience in rebuilding the depend and
+	alldeps.mak files.
+	(assorted):  Update to catch straggler files when building gdb.tar.Z.
+
 Mon Sep 14 19:20:43 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* energize.c (pty_to_kernel):  Must check for EAGAIN as
