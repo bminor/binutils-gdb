@@ -71,6 +71,7 @@ cisco-core.c
 coff-a29k.c
 coff-alpha.c
 coff-apollo.c
+coff-go32.c
 coff-h8300.c
 coff-h8500.c
 coff-i386.c

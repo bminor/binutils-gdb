@@ -50,7 +50,7 @@ infodir = $(prefix)/info
 includedir = $(prefix)/include
 docdir = $(datadir)/doc
 
-VERSION=cygnus-2.2.90
+VERSION=cygnus-2.3.1
 
 SHELL = /bin/sh
 

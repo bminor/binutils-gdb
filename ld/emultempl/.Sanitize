@@ -25,6 +25,7 @@ Do-first:
 Things-to-keep:
 
 README
+stringify.sed
 elf32.em
 generic.em
 gld960.em

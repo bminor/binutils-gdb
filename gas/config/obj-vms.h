@@ -421,11 +421,13 @@ extern int vms_resolve_symbol_redef ();
 #define DBG_S_C_UCHAR		0x02
 #define DBG_S_C_USINT		0x03
 #define DBG_S_C_ULINT		0x04
+#define DBG_S_C_UQUAD		0x05
 #define DBG_S_C_SCHAR		0x06
 #define DBG_S_C_SSINT		0x07
 #define DBG_S_C_SLINT		0x08
+#define DBG_S_C_SQUAD		0x09
 #define DBG_S_C_REAL4		0x0a
-#define DBG_S_C_REAL8		0x0b
+#define DBG_S_C_REAL8		0x0b		/* D_float (G_float is 0x1b) */
 #define DBG_S_C_FUNCTION_ADDR	0x17
 #define DBG_S_C_ADVANCED_TYPE	0xa3
 /*  These are the codes that are used to generate the definitions of struct

@@ -249,7 +249,7 @@ ldlex.c: ldlex.l
 # These all start with e so 'make clean' can find them.
 
 GENSCRIPTS = $(SHELL) $(srcdir)/genscripts.sh ${srcdir} ${libdir} ${host_alias} ${target_alias} ${EMUL} "$(NATIVE_LIB_DIRS)"
-GEN_DEPENDS = $(srcdir)/genscripts.sh
+GEN_DEPENDS = $(srcdir)/genscripts.sh $(srcdir)/emultempl/stringify.sed
 
 esun4.c: $(srcdir)/emulparams/sun4.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}

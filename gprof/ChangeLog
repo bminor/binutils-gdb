@@ -1,3 +1,15 @@
+Fri May 27 12:24:57 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	From binutils-2.4 release:
+
+	Wed May 11 22:32:00 1994  DJ Delorie (dj@ctron.com)
+
+	* configure.bat: [new] build makefile from makefile.in (dos)
+	* hertz.c: allow static HERTZ (msdos needs it)
+	* gprof.c: allow target to select "r" or "rb" for fopen
+	* gprof.c: ignore __gnu_compiled symbols
+	* i386.h: dfine FOPEN_RB to "rb" for dos.
+
 Tue May 17 15:30:22 1994  E. Michael Smith (ems@cygnus.com)
 
 	* Makefile.in (.m.c:):  Added .SUFFIXES : .m 

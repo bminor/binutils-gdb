@@ -1,3 +1,21 @@
+Thu May 26 18:05:52 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* config/mh-alphaosf (CFLAGS): Don't specify both -g and -O;
+	they're not compatible under native cc.  Use -O1 instead.
+
+	* Makefile.in (VERSION): Updated to cygnus-2.4.1.
+
+	Changes from binutils-2.4 net release:
+
+	* Makefile.in (MANPAGES): Use $(DEMANGLER_PROG).
+	($(DEMANGLER_PROG).1): Build from cxxfilt.man, using sed.
+	* cxxfilt.man: Renamed from c++filt.1, replaced "c++filt" with
+	magic token to be replaced by sed.
+
+	Wed May 11 22:32:00 1994  DJ Delorie (dj@ctron.com)
+
+	* configure.bat: update for latest makefile.in
+
 Fri May 13 23:25:13 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* bucomm.c: Check ANSI_PROTOTYPES rather than __STDC__.

@@ -124,6 +124,7 @@ BFD32_BACKENDS = \
 	coff-h8300.o \
 	coff-h8500.o \
 	coff-i386.o \
+	coff-go32.o \
 	coff-i960.o \
 	coff-m68k.o \
 	coff-m88k.o \
@@ -220,7 +221,7 @@ ALL_CFLAGS=$(CFLAGS) $(HDEFINES) $(TDEFINES) $(CSEARCH) $(CSWITCHES)
 
 # C source files that correspond to .o's.
 CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c \
-	 archures.c coff-i386.c aout64.c aout32.c sunos.c demo64.c \
+	 archures.c coff-i386.c coff-go32.c aout64.c aout32.c sunos.c demo64.c \
 	 coff-i960.c srec.c tekhex.c oasys.c ieee.c aout0.c \
 	 ecoff.c ecofflink.c coff-m68k.c coff-u68k.c coff-apollo.c \
 	 coff-a29k.c coff-rs6000.c coff-sparc.c coffgen.c format.c \
@@ -474,9 +475,17 @@ $(BFD_H): stmp-bfd.h ; @true
 
 # The file ../include/bfd.h is from earlier attempts to get this right.
 # If the file is still there, kill it.
+# The weird sh*t with grep is to avoid printing "exit 1 (ignored)" type
+# messages from make, and avoid various ways in which different versions
+# of make will screw up exit status checks.
+#	-grep...		-> make prints "exit 1" message
+#	grep ... ; exit 0	-> sun(?) make notices grep failure
+#	grep ... || exit 0	-> bsd4.4 make still notices
+#	if grep ...		-> seems okay so far
 stmp-bfd.h : $(srcdir)/bfd-in2.h Makefile
 	rm -f bfd.h-new 64 ../include/bfd.h
-	grep BFD_HOST_64_BIT sysdep.h > 64 2>/dev/null || exit 0
+	if grep BFD_HOST_64_BIT sysdep.h > 64 2>/dev/null; then true; \
+	else true; fi
 	sed -e 's/@WORDSIZE@/$(WORDSIZE)/' \
 	    -e "s/@VERSION@/`cat $(srcdir)/VERSION`/" \
 	    -e '/64-bit.*sysdep.h/ r 64' \
@@ -521,6 +530,8 @@ targets.o: targets.c
 cache.o: cache.c
 archures.o: archures.c
 coff-i386.o: coff-i386.c $(INCDIR)/coff/i386.h $(INCDIR)/coff/internal.h \
+  libcoff.h coffcode.h coffswap.h
+coff-go32.o: coff-go32.c $(INCDIR)/coff/i386.h $(INCDIR)/coff/internal.h \
   libcoff.h coffcode.h coffswap.h
 aout64.o: aout64.c aoutx.h $(INCDIR)/bfdlink.h libaout.h \
   $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def \

@@ -1,3 +1,9 @@
+Fri May 27 12:24:18 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* gas/m68k/disperr.s: Use % for registers.
+
+	* gas/m68k-coff/gas.exp: Expect failure for p2389a.s.
+
 Tue May 17 14:53:08 1994  Bill Cox  (bill@rtl.cygnus.com)
 
 	* lib/gas-defs.exp: Replace error proc calls with perror calls.

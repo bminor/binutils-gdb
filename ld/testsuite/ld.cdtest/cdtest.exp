@@ -63,7 +63,7 @@ foreach test [glob -nocomplain $srcdir/$subdir/*.dat] {
     
     # load (execute) the target 	
     if ![file exists $tmptarget] then {
-	unresolved "$tmptarget doesn't exist. $result"
+	unresolved "$tmptarget doesn't exist."
     } else {
 	catch "exec $tmptarget > $tmptarget.out" exec_output
 		

@@ -1,3 +1,36 @@
+Fri May 27 12:25:33 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* ldver.c (ldversion): Changed version to "cygnus-2.4.1".
+
+	Changes from binutils-2.4 release:
+
+	* genscripts.sh (RELOCATING, CONSTRUCTING): When setting
+	variables, use whitespace, so scripts don't break.
+
+	* config/alphaosf.mh (HDEFINES, CFLAGS): Deleted.
+
+	* emultempl/generic.em: Find emultempl/stringify.sed in ${srcdir}.
+
+	* cdtest-bar.cc: Renamed from cdtest-func.cc.
+	* Makefile.in: Noted change.
+
+	* scripttempl/a29k.sc: Don't include /lab3/u3/..../segments.o; I
+	don't know where that's supposed to come from, or why it's
+	necessary.
+
+	Wed May 11 22:32:00 1994  DJ Delorie (dj@ctron.com)
+
+	* configure.bat: update to latest makefile.in
+	* emulpara/go32.sh: set to coff-go32 not aout
+	* emultemp/generic.em: strength-reduce the structure of
+	  this shell script, since the only available shell for
+	  DOS can't handle complex syntax.
+	* emultemp/stringify.sed: for "sed -f" instead of inline.
+	* makefile.in: depend on stringify.sed as well as genscripts.sh
+	* scripttemp/go32coff.sc: correct for djgpp 1.11's COFF format
+	* genscripts.sh: empty variables aren't always considered "set",
+	  so set them to "y" instead.
+
 Fri May 27 01:08:14 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ldlang.c (entry_symbol): Make static.

@@ -1,3 +1,33 @@
+Thu May 26 13:56:03 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* nlmcode.h (nlm_swap_auxiliary_headers_in): Cast bfd_byte pointer
+	to char pointer to avoid compiler warnings.
+
+	* dep-in.sed: Remove spaces before colons.
+
+	Merged changes back in from FSF gas release 2.3:
+
+	* Makefile.in (stmp-bfd.h): Wrap `if' block around grep
+	invocation, to avoid a bug in BSD 4.4 make.
+
+	From Ralph Campbell:
+	* mipsbsd.c (mips_fix_jmp_addr): If symbol is undefined, return an
+	error.
+	(mips_fix_hi16_s): Ditto.
+
+	Fri May 13 21:21:00 1994  DJ Delorie (dj@ctron.com)
+
+	* makefile.dos: define a default target, or archives won't work
+	  due to multiple matches.
+
+	Wed May 11 22:32:00 1994  DJ Delorie (dj@ctron.com)
+
+	* configure.bat: update for latest files
+	* makefile.dos: update for correct targets and sources
+	* coff-go32.c: [new] go32's COFF format (i386coff with underscores)
+	* targets.c: add go32coff target
+	* makefile.in: add coff-go32.c support
+
 Thu May 26 10:10:21 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* som.c (som_prep_headers): Do not set the system_id here, private

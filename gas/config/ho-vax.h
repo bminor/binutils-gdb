@@ -22,6 +22,7 @@
 #endif /* not ansi */
 
 extern char *malloc ();
+extern char *realloc ();
 extern int free ();
 
 /* end of ho-vax.h */

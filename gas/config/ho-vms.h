@@ -28,10 +28,13 @@
 #include <perror.h>
 
 #ifndef EXIT_SUCCESS
-#define EXIT_SUCCESS 1
-#define EXIT_FAILURE 0
+#define EXIT_SUCCESS 1			/* SS$_NORMAL, STS$K_SUCCESS */
+#define EXIT_FAILURE 0x10000002		/* (STS$K_ERROR | STS$M_INHIB_MSG) */
 #endif
 
 #define unlink delete
+
+extern char *strchr ();
+extern char *strdup ();
 
 /* end of ho-vms.h */

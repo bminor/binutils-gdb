@@ -38,8 +38,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define Nlm_External_Copyright_Header	NlmNAME(External_Copyright_Header)
 #define Nlm_External_Extended_Header	NlmNAME(External_Extended_Header)
 #define Nlm_External_Custom_Header	NlmNAME(External_Custom_Header)
-#define Nlm_External_Cygnus_Section_Header \
-  NlmNAME(External_Cygnus_Section_Header)
+#define Nlm_External_Cygnus_Ext_Header	NlmNAME(External_Cygnus_Ext_Header)
 
 #define nlm_symbol_type			nlmNAME(symbol_type)
 #define nlm_get_symtab_upper_bound	nlmNAME(get_symtab_upper_bound)
@@ -180,7 +179,7 @@ nlm_object_p (abfd)
 
   /* Add the sections supplied by all NLM's, and then read in the
      auxiliary headers.  Reading the auxiliary headers may create
-     additional sections described in the cygnus_sections header.
+     additional sections described in the cygnus_ext header.
      From this point on we assume that we have an NLM, and do not
      treat errors as indicating the wrong format.  */
 
@@ -505,24 +504,6 @@ nlm_swap_auxiliary_headers_in (abfd)
 	  nlm_extended_header (abfd)->reserved5 =
 	    get_word (abfd, (bfd_byte *) thdr.reserved5);
 	}
-      else if (strncmp (tempstr, "CuStHeAd", 8) == 0)
-	{
-	  Nlm_External_Custom_Header thdr;
-	  if (bfd_read ((PTR) &thdr, sizeof (thdr), 1, abfd) != sizeof (thdr))
-	    return false;
-	  memcpy (nlm_custom_header (abfd)->stamp, thdr.stamp,
-		  sizeof (thdr.stamp));
-	  nlm_custom_header (abfd)->dataLength =
-	    get_word (abfd, (bfd_byte *) thdr.dataLength);
-	  nlm_custom_header (abfd)->data =
-	    bfd_alloc (abfd, nlm_custom_header (abfd)->dataLength);
-	  if (nlm_custom_header (abfd)->data == NULL)
-	    return false;
-	  if (bfd_read (nlm_custom_header (abfd)->data, 1,
-			nlm_custom_header (abfd)->dataLength, abfd)
-	      != nlm_custom_header (abfd)->dataLength)
-	    return false;
-	}
       else if (strncmp (tempstr, "CoPyRiGhT=", 10) == 0)
 	{
 	  if (bfd_read ((PTR) nlm_copyright_header (abfd)->stamp,
@@ -541,83 +522,160 @@ nlm_swap_auxiliary_headers_in (abfd)
 	      nlm_copyright_header (abfd)->copyrightMessageLength + 1)
 	    return (false);
 	}
-      else if (strncmp (tempstr, "CyGnUsSeCs", 10) == 0)
+      else if (strncmp (tempstr, "CuStHeAd", 8) == 0)
 	{
-	  Nlm_External_Cygnus_Section_Header thdr;
-	  bfd_size_type len;
-	  file_ptr pos;
-	  bfd_byte *contents;
-	  bfd_byte *p, *pend;
+	  Nlm_External_Custom_Header thdr;
+	  bfd_size_type hdrLength;
+	  file_ptr dataOffset;
+	  bfd_size_type dataLength;
+	  char dataStamp[8];
+	  PTR hdr;
 
-	  if (bfd_read ((PTR) &thdr, sizeof (thdr), 1, abfd) != sizeof (thdr))
+	  /* Read the stamp ("CuStHeAd").  */
+	  if (bfd_read ((PTR) thdr.stamp, 1, sizeof (thdr.stamp), abfd)
+	      != sizeof (thdr.stamp))
 	    return false;
-	  memcpy (nlm_cygnus_section_header (abfd)->stamp, thdr.stamp,
-		  sizeof (thdr.stamp));
-	  nlm_cygnus_section_header (abfd)->offset =
-	    get_word (abfd, (bfd_byte *) thdr.offset);
-	  len = get_word (abfd, (bfd_byte *) thdr.length);
-	  nlm_cygnus_section_header (abfd)->length = len;
-
-	  /* This data this header points to provides a list of the
-	     sections which were in the original object file which was
-	     converted to become an NLM.  We locate those sections and
-	     add them to the BFD.  Note that this is likely to create
-	     a second .text, .data and .bss section; retrieving the
-	     sections by name will get the actual NLM sections, which
-	     is what we want to happen.  The sections from the
-	     original file, which may be subsets of the NLM section,
-	     can only be found using bfd_map_over_sections.  */
-
-	  contents = (bfd_byte *) bfd_alloc (abfd, len);
-	  if (contents == (bfd_byte *) NULL)
+	  /* Read the length of this custom header.  */
+	  if (bfd_read ((PTR) thdr.length, 1, sizeof (thdr.length), abfd)
+	      != sizeof (thdr.length))
+	    return false;
+	  hdrLength = get_word (abfd, (bfd_byte *) thdr.length);
+	  /* Read further fields if we have them.  */
+	  if (hdrLength < NLM_TARGET_LONG_SIZE)
+	    dataOffset = 0;
+	  else
 	    {
-	      bfd_set_error (bfd_error_no_memory);
-	      return false;
+	      if (bfd_read ((PTR) thdr.dataOffset, 1,
+			    sizeof (thdr.dataOffset), abfd)
+		  != sizeof (thdr.dataOffset))
+		return false;
+	      dataOffset = get_word (abfd, (bfd_byte *) thdr.dataOffset);
 	    }
-	  pos = bfd_tell (abfd);
-	  if (bfd_seek (abfd, nlm_cygnus_section_header (abfd)->offset,
-			SEEK_SET) != 0
-	      || bfd_read (contents, len, 1, abfd) != len)
-	    return false;
-	  p = contents;
-	  pend = p + len;
-	  while (p < pend)
+	  if (hdrLength < 2 * NLM_TARGET_LONG_SIZE)
+	    dataLength = 0;
+	  else
 	    {
-	      char *name;
-	      size_t l;
-	      file_ptr filepos;
-	      bfd_size_type size;
-	      asection *newsec;
+	      if (bfd_read ((PTR) thdr.dataLength, 1,
+			    sizeof (thdr.dataLength), abfd)
+		  != sizeof (thdr.dataLength))
+		return false;
+	      dataLength = get_word (abfd, (bfd_byte *) thdr.dataLength);
+	    }
+	  if (hdrLength < 2 * NLM_TARGET_LONG_SIZE + 8)
+	    memset (dataStamp, 0, sizeof (dataStamp));
+	  else
+	    {
+	      if (bfd_read ((PTR) dataStamp, 1, sizeof (dataStamp), abfd)
+		  != sizeof (dataStamp))
+		return false;
+	    }
 
-	      /* The format of this information is
+	  /* Read the rest of the header, if any.  */
+	  if (hdrLength <= 2 * NLM_TARGET_LONG_SIZE + 8)
+	    {
+	      hdr = NULL;
+	      hdrLength = 0;
+	    }
+	  else
+	    {
+	      hdrLength -= 2 * NLM_TARGET_LONG_SIZE + 8;
+	      hdr = bfd_alloc (abfd, hdrLength);
+	      if (hdr == NULL)
+		{
+		  bfd_set_error (bfd_error_no_memory);
+		  return false;
+		}
+	      if (bfd_read (hdr, 1, hdrLength, abfd) != hdrLength)
+		return false;
+	    }
+
+	  /* If we have found a Cygnus header, process it.  Otherwise,
+	     just save the associated data without trying to interpret
+	     it.  */
+	  if (strncmp (dataStamp, "CyGnUsEx", 8) == 0)
+	    {
+	      file_ptr pos;
+	      bfd_byte *contents;
+	      bfd_byte *p, *pend;
+
+	      BFD_ASSERT (hdrLength == 0 && hdr == NULL);
+
+	      pos = bfd_tell (abfd);
+	      if (bfd_seek (abfd, dataOffset, SEEK_SET) != 0)
+		return false;
+	      contents = (bfd_byte *) bfd_alloc (abfd, dataLength);
+	      if (contents == NULL)
+		{
+		  bfd_set_error (bfd_error_no_memory);
+		  return false;
+		}
+	      if (bfd_read (contents, 1, dataLength, abfd) != dataLength)
+		return false;
+	      if (bfd_seek (abfd, pos, SEEK_SET) != 0)
+		return false;
+
+	      memcpy (nlm_cygnus_ext_header (abfd), "CyGnUsEx", 8);
+	      nlm_cygnus_ext_header (abfd)->offset = dataOffset;
+	      nlm_cygnus_ext_header (abfd)->length = dataLength;
+
+	      /* This data this header points to provides a list of
+		 the sections which were in the original object file
+		 which was converted to become an NLM.  We locate
+		 those sections and add them to the BFD.  Note that
+		 this is likely to create a second .text, .data and
+		 .bss section; retrieving the sections by name will
+		 get the actual NLM sections, which is what we want to
+		 happen.  The sections from the original file, which
+		 may be subsets of the NLM section, can only be found
+		 using bfd_map_over_sections.  */
+	      p = contents;
+	      pend = p + dataLength;
+	      while (p < pend)
+		{
+		  char *name;
+		  size_t l;
+		  file_ptr filepos;
+		  bfd_size_type size;
+		  asection *newsec;
+
+		  /* The format of this information is
 		     null terminated section name
 		     zeroes to adjust to 4 byte boundary
 		     4 byte section data file pointer
 		     4 byte section size
-		 */
+		     */
 
-	      name = p;
-	      l = strlen (name) + 1;
-	      l = (l + 3) &~ 3;
-	      p += l;
-	      filepos = bfd_h_get_32 (abfd, p);
-	      p += 4;
-	      size = bfd_h_get_32 (abfd, p);
-	      p += 4;
+		  name = (char *) p;
+		  l = strlen (name) + 1;
+		  l = (l + 3) &~ 3;
+		  p += l;
+		  filepos = bfd_h_get_32 (abfd, p);
+		  p += 4;
+		  size = bfd_h_get_32 (abfd, p);
+		  p += 4;
 
-	      newsec = bfd_make_section_anyway (abfd, name);
-	      if (newsec == (asection *) NULL)
-		return false;
-	      newsec->_raw_size = size;
-	      if (filepos != 0)
-		{
-		  newsec->filepos = filepos;
-		  newsec->flags |= SEC_HAS_CONTENTS;
+		  newsec = bfd_make_section_anyway (abfd, name);
+		  if (newsec == (asection *) NULL)
+		    return false;
+		  newsec->_raw_size = size;
+		  if (filepos != 0)
+		    {
+		      newsec->filepos = filepos;
+		      newsec->flags |= SEC_HAS_CONTENTS;
+		    }
 		}
 	    }
-
-	  if (bfd_seek (abfd, pos, SEEK_SET) != 0)
-	    return false;
+	  else
+	    {
+	      memcpy (nlm_custom_header (abfd)->stamp, thdr.stamp,
+		      sizeof (thdr.stamp));
+	      nlm_custom_header (abfd)->hdrLength = hdrLength;
+	      nlm_custom_header (abfd)->dataOffset = dataOffset;
+	      nlm_custom_header (abfd)->dataLength = dataLength;
+	      memcpy (nlm_custom_header (abfd)->dataStamp, dataStamp,
+		      sizeof (dataStamp));
+	      nlm_custom_header (abfd)->hdr = hdr;
+	    }
 	}
       else
 	{
@@ -771,26 +829,6 @@ nlm_swap_auxiliary_headers_out (abfd)
 	return false;
     }
 
-  /* Write out the custom header if there is one.   */
-  if (find_nonzero ((PTR) nlm_custom_header (abfd),
-		    sizeof (Nlm_Internal_Custom_Header)))
-    {
-      Nlm_External_Custom_Header thdr;
-
-      /* Right now we assume the custom header is always the suggested
-	 format for alternate debugging records.  */
-      BFD_ASSERT (nlm_custom_header (abfd)->dataLength == 8);
-
-      memcpy (thdr.stamp, "CuStHeAd", 8);
-      put_word (abfd, (bfd_vma) nlm_custom_header (abfd)->dataLength,
-		(bfd_byte *) thdr.dataLength);
-      if (bfd_write ((PTR) &thdr, sizeof (thdr), 1, abfd) != sizeof (thdr))
-	return false;
-      if (bfd_write (nlm_custom_header (abfd)->data, 1,
-		     nlm_custom_header (abfd)->dataLength, abfd)
-	  != nlm_custom_header (abfd)->dataLength)
-	return false;
-    }
 
   /* Write out the copyright header if there is one.  */
   if (find_nonzero ((PTR) nlm_copyright_header (abfd),
@@ -814,17 +852,59 @@ nlm_swap_auxiliary_headers_out (abfd)
 	return false;
     }
 
-  /* Write out the Cygnus debugging header if there is one.  */
-  if (find_nonzero ((PTR) nlm_cygnus_section_header (abfd),
-		    sizeof (Nlm_Internal_Cygnus_Section_Header)))
+  /* Write out the custom header if there is one.   */
+  if (find_nonzero ((PTR) nlm_custom_header (abfd),
+		    sizeof (Nlm_Internal_Custom_Header)))
     {
-      Nlm_External_Cygnus_Section_Header thdr;
+      Nlm_External_Custom_Header thdr;
+      boolean ds;
+      bfd_size_type hdrLength;
 
-      memcpy (thdr.stamp, "CyGnUsSeCs", 10);
-      put_word (abfd, (bfd_vma) nlm_cygnus_section_header (abfd)->offset,
-		(bfd_byte *) thdr.offset);
-      put_word (abfd, (bfd_vma) nlm_cygnus_section_header (abfd)->length,
+      ds = find_nonzero ((PTR) nlm_custom_header (abfd)->dataStamp,
+			 sizeof (nlm_custom_header (abfd)->dataStamp));
+      memcpy (thdr.stamp, "CuStHeAd", 8);
+      hdrLength = (2 * NLM_TARGET_LONG_SIZE + (ds ? 8 : 0)
+		   + nlm_custom_header (abfd)->hdrLength);
+      put_word (abfd, hdrLength, thdr.length);
+      put_word (abfd, (bfd_vma) nlm_custom_header (abfd)->dataOffset,
+		thdr.dataOffset);
+      put_word (abfd, (bfd_vma) nlm_custom_header (abfd)->dataLength,
+		thdr.dataLength);
+      if (! ds)
+	{
+	  BFD_ASSERT (nlm_custom_header (abfd)->hdrLength == 0);
+	  if (bfd_write ((PTR) &thdr, 1,
+			 sizeof (thdr) - sizeof (thdr.dataStamp), abfd)
+	      != sizeof (thdr) - sizeof (thdr.dataStamp))
+	    return false;
+	}
+      else
+	{
+	  memcpy (thdr.dataStamp, nlm_custom_header (abfd)->dataStamp,
+		  sizeof (thdr.dataStamp));
+	  if (bfd_write ((PTR) &thdr, sizeof (thdr), 1, abfd) != sizeof (thdr))
+	    return false;
+	  if (bfd_write (nlm_custom_header (abfd)->hdr, 1,
+			 nlm_custom_header (abfd)->hdrLength, abfd)
+	      != nlm_custom_header (abfd)->hdrLength)
+	    return false;
+	}
+    }
+
+  /* Write out the Cygnus debugging header if there is one.  */
+  if (find_nonzero ((PTR) nlm_cygnus_ext_header (abfd),
+		    sizeof (Nlm_Internal_Cygnus_Ext_Header)))
+    {
+      Nlm_External_Custom_Header thdr;
+
+      memcpy (thdr.stamp, "CuStHeAd", 8);
+      put_word (abfd, (bfd_vma) 2 * NLM_TARGET_LONG_SIZE + 8,
 		(bfd_byte *) thdr.length);
+      put_word (abfd, (bfd_vma) nlm_cygnus_ext_header (abfd)->offset,
+		(bfd_byte *) thdr.dataOffset);
+      put_word (abfd, (bfd_vma) nlm_cygnus_ext_header (abfd)->length,
+		(bfd_byte *) thdr.dataLength);
+      memcpy (thdr.dataStamp, "CyGnUsEx", 8);
       if (bfd_write ((PTR) &thdr, sizeof (thdr), 1, abfd) != sizeof (thdr))
 	return false;
     }
@@ -1361,17 +1441,17 @@ nlm_compute_section_file_positions (abfd)
   if (find_nonzero ((PTR) nlm_extended_header (abfd),
 		    sizeof (Nlm_Internal_Extended_Header)))
     sofar += sizeof (Nlm_External_Extended_Header);
-  if (find_nonzero ((PTR) nlm_custom_header (abfd),
-		    sizeof (Nlm_Internal_Custom_Header)))
-    sofar += (sizeof (Nlm_External_Custom_Header)
-	      + nlm_custom_header (abfd)->dataLength);
   if (find_nonzero ((PTR) nlm_copyright_header (abfd),
 		    sizeof (Nlm_Internal_Copyright_Header)))
     sofar += (sizeof (Nlm_External_Copyright_Header)
 	      + nlm_copyright_header (abfd)->copyrightMessageLength + 1);
-  if (find_nonzero ((PTR) nlm_cygnus_section_header (abfd),
-		    sizeof (Nlm_Internal_Cygnus_Section_Header)))
-    sofar += sizeof (Nlm_External_Cygnus_Section_Header);
+  if (find_nonzero ((PTR) nlm_custom_header (abfd),
+		    sizeof (Nlm_Internal_Custom_Header)))
+    sofar += (sizeof (Nlm_External_Custom_Header)
+	      + nlm_custom_header (abfd)->hdrLength);
+  if (find_nonzero ((PTR) nlm_cygnus_ext_header (abfd),
+		    sizeof (Nlm_Internal_Cygnus_Ext_Header)))
+    sofar += sizeof (Nlm_External_Custom_Header);
 
   /* Compute the section file positions in two passes.  First get the
      sizes of the text and data sections, and then set the file

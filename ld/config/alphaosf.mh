@@ -1,4 +1,2 @@
-HDEFINES=-DHOST_64_BIT="long "
-CFLAGS=-non_shared
 NATIVE_LIB_DIRS=/usr/ccs/lib
 HOSTING_CRT0=/usr/ccs/lib/crt0.o

@@ -29,7 +29,7 @@ void
 ldversion (noisy)
      int noisy;
 {
-  fprintf(stdout,"ld version 2.4.1 (with BFD %s)\n", BFD_VERSION);
+  fprintf(stdout,"ld version cygnus-2.4.1 (with BFD %s)\n", BFD_VERSION);
 
   if (noisy) 
   {

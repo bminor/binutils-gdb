@@ -31,6 +31,10 @@ static char sccsid[] = "@(#)gprof.c	5.6 (Berkeley) 6/1/90";
 
 #include "gprof.h"
 
+#ifndef FOPEN_RB
+#define FOPEN_RB "r"
+#endif
+
 bfd	*abfd;
 
 char	*whoami;
@@ -391,7 +395,7 @@ openpfile(filename)
     struct rawhdr raw;
     FILE	*pfile;
 
-    if((pfile = fopen(filename, "r")) == NULL) {
+    if((pfile = fopen(filename, FOPEN_RB)) == NULL) {
 	perror(filename);
 	done();
     }
@@ -769,7 +773,11 @@ funcsymbol( symp )
    * Perhaps it should be made configurable.
    */
 
-  if (symprefix && symprefix != *symp->name)
+  if (symprefix && symprefix != *symp->name
+      /* Gcc may add special symbols to help gdb figure out the file
+	 language.  We want to ignore these, since sometimes they
+	 mask the real function.  (dj@ctron)  */
+      || !strncmp (symp->name, "__gnu_compiled", 14))
     return FALSE;
 
   return TRUE;

@@ -29,8 +29,15 @@ static char sccsid[] = "@(#)hertz.c	5.4 (Berkeley) 6/1/90";
      */
 #define	HZ_WRONG	0
 
+#ifdef __MSDOS__
+#define HERTZ 18
+#endif
+
 hertz()
 {
+#ifdef HERTZ
+	return HERTZ;
+#else
 	struct itimerval tim;
 
 	tim.it_interval.tv_sec = 0;
@@ -42,4 +49,5 @@ hertz()
 	if (tim.it_interval.tv_usec < 2)
 		return(HZ_WRONG);
 	return (1000000 / tim.it_interval.tv_usec);
+#endif
 }

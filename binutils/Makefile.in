@@ -46,7 +46,7 @@ SHELL = /bin/sh
 
 INSTALL = `cd $(srcdir)/..;pwd`/install.sh -c
 INSTALL_PROGRAM = $(INSTALL)
-INSTALL_DATA = $(INSTALL)
+INSTALL_DATA = $(INSTALL) 
 INSTALL_XFORM = $(INSTALL) -t='$(program_transform_name)'
 INSTALL_XFORM1 = $(INSTALL_XFORM) -b=.1
 
@@ -70,7 +70,7 @@ LEX_OPTIONS = -I -Cem
 LEX = `if [ -f ../flex/flex ] ; then echo ../flex/flex ; else echo flex ; fi`
 
 # Distribution version
-VERSION=cygnus-2.3.1
+VERSION=cygnus-2.4.1
 # Distribution name
 DIST_NAME=binutils-${VERSION}
 
@@ -79,9 +79,8 @@ version=`./../gcc/gcc -dumpversion`
 # Where to find texinfo.tex to format docn with TeX
 TEXIDIR = $(srcdir)/../texinfo
 
-MANPAGES= ar nm objdump ranlib size strings strip c++filt objcopy nlmconv
-
 #CC=gcc -Wall
+CC=cc
 # these two are almost the same program
 AR_PROG=ar
 RANLIB_PROG=ranlib
@@ -98,16 +97,19 @@ NM_PROG=nm.new
 OBJDUMP_PROG=objdump
 
 # This is the demangler, as a standalone program.
+# Note: This one is used as the installed name too, unlike the above.
 DEMANGLER_PROG=c++filt
 
 NLMCONV_PROG=nlmconv
 
-SRCONV_PROG=srconv sysdump coffdump
+SRCONV_PROG=srconv sysdump coffdump 
 
-PROGS = $(SIZE_PROG) $(OBJDUMP_PROG) $(NM_PROG) $(AR_PROG) $(STRINGS_PROG) $(STRIP_PROG) $(RANLIB_PROG) $(DEMANGLER_PROG) $(OBJCOPY_PROG) $(BUILD_NLMCONV) $(BUILD_SRCONV)
+MANPAGES= ar nm objdump ranlib size strings strip $(DEMANGLER_PROG) objcopy nlmconv
+
+PROGS = $(SIZE_PROG) $(OBJDUMP_PROG) $(NM_PROG) $(AR_PROG) $(STRINGS_PROG) $(STRIP_PROG) $(RANLIB_PROG) $(DEMANGLER_PROG) $(OBJCOPY_PROG) $(BUILD_NLMCONV) $(BUILD_SRCONV) $(SYSINFO_PROG) 
 STAGESTUFF = $(PROGS) *.o
 # Files that can be generated, but should be in the distribution.
-DISTSTUFF=arparse.c arlex.c nlmheader.c info
+DISTSTUFF=arparse.c arlex.c nlmheader.c sysinfo.c syslex.c info
 
 BASEDIR = $(srcdir)/..
 BFDDIR = $(BASEDIR)/bfd
@@ -265,10 +267,11 @@ sysroff.c: sysinfo sysroff.info
 	./sysinfo -g <$(srcdir)/sysroff.info >>sysroff.c
 	./sysinfo -d <$(srcdir)/sysroff.info >sysroff.h	
 
-sysinfo.c: sysinfo.y 
+sysinfo.h sysinfo.c: sysinfo.y 
 	$(BISON) -tvd $(srcdir)/sysinfo.y
 	rm -f sysinfo.c
 	-mv y.tab.c sysinfo.c
+	-mv y.tab.h sysinfo.h
 
 syslex.c : syslex.l
 	$(LEX) $(LEX_OPTIONS) $(srcdir)/syslex.l
@@ -277,7 +280,7 @@ syslex.c : syslex.l
 sysinfo: sysinfo.o syslex.o $(ADDL_LIBS)
 	$(CC_FOR_BUILD) $(CFLAGS) $(LDFLAGS) -o $@ sysinfo.o syslex.o 
 
-syslex.o: syslex.c
+syslex.o: syslex.c sysinfo.h
 	$(CC_FOR_BUILD) -c -I. $(CFLAGS)  syslex.c 
 
 sysinfo.o: sysinfo.c
@@ -395,6 +398,10 @@ binutils.dvi: $(srcdir)/binutils.texi
 binutils.info: $(srcdir)/binutils.texi
 	$(MAKEINFO) -o binutils.info $(srcdir)/binutils.texi
 
+$(DEMANGLER_PROG).1: cxxfilt.man Makefile
+	sed -e 's/@PROGRAM@/$(DEMANGLER_PROG)/' < $(srcdir)/cxxfilt.man \
+		> $(DEMANGLER_PROG).1
+
 #   different targets for -ms, -mm, -me
 # Try to use a recent texi2roff.  v2 was put on prep in jan91.
 # If you want an index, see texi2roff doc for postprocessing 
@@ -468,7 +475,7 @@ distclean:
 	@if [ -d testsuite ] ; then \
 	  cd testsuite ; $(MAKE) $(FLAGS_TO_PASS) distclean ; \
 	else true; fi
-	-rm -f Makefile config.status sysdep.h *.o *~ \#* core \
+	-rm -f Makefile config.status sysdep.h *.o *~ \#* core y.* \
 		binutils.?? binutils.??s binutils.aux binutils.log binutils.toc
 	-rm -f $(PROGS) underscore.c
 realclean: clean distclean
@@ -479,7 +486,7 @@ etags tags: TAGS
 TAGS: force
 	etags $(INCDIR)/*.h $(srcdir)/*.[hc] 
 
-install: all
+install: all $(DEMANGLER_PROG).1
 	for i in $(PROGS) ; do \
 	  $(INSTALL_XFORM) $$i $(bindir)/`echo $$i | sed -e 's/.new//'` ; \
 	done
@@ -506,7 +513,7 @@ install-info: binutils.info
 	else \
 	  dir=$(srcdir) ; \
 	fi ; \
-	for i in $$dir/binutils.info* ; do \
+	for i in `cd $$dir; echo binutils.info*` ; do \
 		$(INSTALL_DATA) $$i $(infodir)/$$i ; \
 	done
 

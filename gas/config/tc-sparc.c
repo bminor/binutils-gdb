@@ -2240,7 +2240,6 @@ md_parse_option (argP, cntP, vecP)
   if (!strcmp (*argP, "bump"))
     {
       warn_on_bump = 1;
-
     }
   else if (**argP == 'A')
     {
@@ -2277,6 +2276,10 @@ md_parse_option (argP, cntP, vecP)
   else if (**argP == 's')
     {
       /* use .stab instead of .stab.excl */
+    }
+  else if (**argP == 'q')
+    {
+      /* quick -- native assembler does fewer checks */
     }
 #endif
   else if (strcmp (*argP, "sparc") == 0)

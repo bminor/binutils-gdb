@@ -53,8 +53,6 @@ char *compiler_version_string;
 
 char vms_name_mapping = 0;
 
-
-extern char *strchr ();
 extern char *myname;
 static symbolS *Entry_Point_Symbol = 0;	/* Pointer to "_main" */
 
@@ -661,8 +659,8 @@ VMS_Set_Data (Psect_Index, Offset, Record_Type, Force)
 	  PUT_CHAR (TIR_S_C_STA_WPB);
 	  PUT_SHORT (Psect_Index);
 	  PUT_CHAR (Offset);
-	};
-    };
+	}
+    }
   /*
    *	Set relocation base
    */
@@ -947,8 +945,8 @@ VMS_TBT_Routine_End (Max_Size, sp)
 	       !strcmp (S_GET_NAME (sp), "gcc2_compiled.")))
 	    Size = S_GET_VALUE (symbolP);
 
-	};
-    };
+	}
+    }
   if (Size == 0x7fffffff)
     Size = Max_Size;
   Size -= S_GET_VALUE (sp);	/* and get the size of the routine */
@@ -1417,7 +1415,7 @@ find_file (sp)
 	break;
       if (fpnt->spnt == sp)
 	return fpnt;
-    };
+    }
   for (fpnt = file_root; fpnt; fpnt = fpnt->next)
     {
       if (fpnt == (struct input_file *) NULL)
@@ -1428,9 +1426,9 @@ find_file (sp)
 	    return fpnt;
 	  same_file = fpnt;
 	  break;
-	};
-    };
-  fpnt = (struct input_file *) malloc (sizeof (struct input_file));
+	}
+    }
+  fpnt = (struct input_file *) xmalloc (sizeof (struct input_file));
   if (file_root == (struct input_file *) NULL)
     file_root = fpnt;
   else
@@ -1438,7 +1436,7 @@ find_file (sp)
       struct input_file *fpnt1;
       for (fpnt1 = file_root; fpnt1->next; fpnt1 = fpnt1->next) ;
       fpnt1->next = fpnt;
-    };
+    }
   fpnt->next = (struct input_file *) NULL;
   fpnt->name = S_GET_NAME (sp);
   fpnt->min_line = 0x7fffffff;
@@ -1522,7 +1520,7 @@ fix_name (pnt)
     {
       if (*pnt1 == '.')
 	*pnt1 = '$';
-    };
+    }
   return pnt;
 }
 
@@ -1566,7 +1564,7 @@ find_symbol (dbx_type)
       if (spnt->dbx_type == dbx_type)
 	break;
       spnt = spnt->next;
-    };
+    }
   if (spnt == (struct VMS_DBG_Symbol *) NULL)
     return 0;			/*Dunno what this is*/
   if(spnt->advanced == ALIAS)
@@ -1595,7 +1593,7 @@ push (value, size)
 	  overflow = 1;
 	  Lpnt = 1;
 	  return;
-	};
+	}
       Lpnt -= size1;
       md_number_to_chars (&Local[Lpnt + 1], value, size1);
     }
@@ -1606,10 +1604,10 @@ push (value, size)
 	  overflow = 1;
 	  Apoint = MAX_DEBUG_RECORD - 1;
 	  return;
-	};
+	}
       md_number_to_chars (&Asuffix[Apoint], value, size1);
       Apoint += size1;
-    };
+    }
 }
 
 /* this routine generates the array descriptor for a given array */
@@ -1629,7 +1627,7 @@ array_suffix (spnt2)
       spnt = find_symbol (spnt->type2);
       if (spnt == (struct VMS_DBG_Symbol *) NULL)
 	return;
-    };
+    }
   spnt1 = spnt;
   spnt1 = spnt;
   total_size = 1;
@@ -1638,10 +1636,10 @@ array_suffix (spnt2)
       rank++;
       total_size *= (spnt1->index_max - spnt1->index_min + 1);
       spnt1 = find_symbol (spnt1->type2);
-    };
+    }
   total_size = total_size * spnt1->data_size;
   push (spnt1->data_size, 2);
-  if (spnt1->VMS_type == 0xa3)
+  if (spnt1->VMS_type == DBG_S_C_ADVANCED_TYPE)
     push (0, 1);
   else
     push (spnt1->VMS_type, 1);
@@ -1657,14 +1655,14 @@ array_suffix (spnt2)
     {
       push (spnt1->index_max - spnt1->index_min + 1, 4);
       spnt1 = find_symbol (spnt1->type2);
-    };
+    }
   spnt1 = spnt;
   while (spnt1->advanced == ARRAY)
     {
       push (spnt1->index_min, 4);
       push (spnt1->index_max, 4);
       spnt1 = find_symbol (spnt1->type2);
-    };
+    }
 }
 
 /* this routine generates the start of a variable descriptor based upon
@@ -1677,7 +1675,7 @@ new_forward_ref (dbx_type)
      int dbx_type;
 {
   struct forward_ref *fpnt;
-  fpnt = (struct forward_ref *) malloc (sizeof (struct forward_ref));
+  fpnt = (struct forward_ref *) xmalloc (sizeof (struct forward_ref));
   fpnt->next = f_ref_root;
   f_ref_root = fpnt;
   fpnt->dbx_type = dbx_type;
@@ -1718,7 +1716,7 @@ gen1 (spnt, array_suffix_len)
 	  total_len = 2;
 	  push (total_len, -2);
 	  return 1;
-	};
+	}
       push (0, -4);
       push (0xfa02, -2);
       total_len = -2;
@@ -1748,7 +1746,7 @@ gen1 (spnt, array_suffix_len)
 	  push (DBG_S_C_POINTER, -1);
 	  total_len += 3;
 	  push (total_len, -2);
-	};
+	}
       return 1;
     case ARRAY:
       spnt1 = spnt;
@@ -1762,7 +1760,7 @@ gen1 (spnt, array_suffix_len)
 		      spnt->type2);
 	      return;
 	    }
-	};
+	}
 /* It is too late to generate forward references, so the user gets a message.
  * This should only happen on a compiler error */
       i = gen1 (spnt1, 1);
@@ -1781,10 +1779,10 @@ gen1 (spnt, array_suffix_len)
 	  push (0xfa, -1);
 	  push (0x0101, -2);
 	  push (DBG_S_C_COMPLEX_ARRAY, -1);
-	};
+	}
       total_len += array_suffix_len + 8;
       push (total_len, -2);
-    };
+    }
 }
 
 /* This generates a suffix for a variable.  If it is not a defined type yet,
@@ -1811,10 +1809,10 @@ generate_suffix (spnt, dbx_type)
     new_forward_ref (dbx_type);
   else
     {
-      if (spnt->VMS_type != 0xa3)
+      if (spnt->VMS_type != DBG_S_C_ADVANCED_TYPE)
 	return 0;		/* no suffix needed */
       gen1 (spnt, 0);
-    };
+    }
   push (0x00af, -2);
   total_len += 4;
   push (total_len, -1);
@@ -1826,7 +1824,7 @@ generate_suffix (spnt, dbx_type)
       printf (" Variable descriptor %d too complicated. Defined as *void ", spnt->dbx_type);
       VMS_Store_Immediate_Data (pvoid, 6, OBJ_S_C_DBG);
       return;
-    };
+    }
   i = 0;
   while (Lpnt < MAX_DEBUG_RECORD - 1)
     Local[i++] = Local[++Lpnt];
@@ -1837,7 +1835,7 @@ generate_suffix (spnt, dbx_type)
       VMS_Store_Immediate_Data (Local, Lpnt, OBJ_S_C_DBG);
       Lpnt = 0;
       VMS_Store_Struct (struct_number);
-    };
+    }
 /* we use this for a forward reference to a structure that has yet to be
 *defined.  We store four bytes of zero to make room for the actual address once
 * it is known
@@ -1852,7 +1850,7 @@ generate_suffix (spnt, dbx_type)
 	Local[Lpnt++] = 0;
       VMS_Store_Immediate_Data (Local, Lpnt, OBJ_S_C_DBG);
       Lpnt = 0;
-    };
+    }
   i = 0;
   while (i < Apoint)
     Local[Lpnt++] = Asuffix[i++];
@@ -1952,7 +1950,7 @@ VMS_local_stab_Parse (sp)
 	      {
 		char * pnt3=(char*) strchr (S_GET_NAME (sp1), ':') + 1;
 		if (*pnt3 == 'F' || *pnt3 == 'f') break;
-	      };
+	      }
 	    if (S_GET_RAW_TYPE (sp1) != N_RSYM)
 	      continue;
 	    str1 = S_GET_NAME (sp1);	/* and get the name */
@@ -1963,15 +1961,15 @@ VMS_local_stab_Parse (sp)
 		  break;
 		pnt2++;
 		str1++;
-	      };
+	      }
 	    if ((*str1 != ':') || (*pnt2 != ':'))
 	      continue;
 	    return;		/* they are the same!  lets skip this one */
-	  };			/* for */
+	  }			/* for */
 /* first find the dbx symbol type from list, and then find VMS type */
 	pnt++;			/* skip p in case no register */
-      };			/* if */
-  };				/* p block */
+      }			/* if */
+  }				/* p block */
   pnt = cvt_integer (pnt, &dbx_type);
   spnt = find_symbol (dbx_type);
   if (spnt == (struct VMS_DBG_Symbol *) NULL)
@@ -2037,13 +2035,13 @@ VMS_stab_parse (sp, expected_type, type1, type2, Text_Psect)
 		      (S_GET_RAW_TYPE (vsp->Symbol) == type2)))
 		break;
 	  vsp = vsp->Next;
-	};
+	}
       if (vsp != (struct VMS_Symbol *) NULL)
 	{
 	  VMS_DBG_record (spnt, vsp->Psect_Index, vsp->Psect_Offset, str);
 	  *pnt1 = ':';		/* and restore the string */
 	  return 1;
-	};
+	}
 /* the symbol was not in the symbol list, but it may be an "entry point"
    if it was a constant */
       for (sp1 = symbol_rootP; sp1; sp1 = symbol_next (sp1))
@@ -2068,7 +2066,7 @@ VMS_stab_parse (sp, expected_type, type1, type2, Text_Psect)
 		  printf ("definitions of global variables in your source module(s).  Don't say\n");
 		  printf ("I didn't warn you!");
 		  gave_compiler_message = 1;
-		};
+		}
 	      VMS_DBG_record (spnt,
 			      Text_Psect,
 			      S_GET_VALUE (sp1),
@@ -2078,9 +2076,9 @@ VMS_stab_parse (sp, expected_type, type1, type2, Text_Psect)
 	      /* fool assembler to not output this
 	       * as a routine in the TBT */
 	      return 1;
-	    };
-	};
-    };
+	    }
+	}
+    }
   *pnt1 = ':';			/* and restore the string */
   return 0;
 }
@@ -2158,7 +2156,7 @@ VMS_RSYM_Parse (sp, Current_Routine, Text_Psect)
 	{
 	  pnt=(char*) strchr (S_GET_NAME (symbolP), ':') + 1;
 	  if (*pnt == 'F' || *pnt == 'f') break;
-	};
+	}
     }
 /* check to see that the addresses were defined.  If not, then there were no
  * brackets in the function, and we must try to search for the next function
@@ -2190,7 +2188,7 @@ VMS_RSYM_Parse (sp, Current_Routine, Text_Psect)
  * as a marker of the max PC for which this reg is valid */
       if (Max_Offset == 0x7fffffff)
 	Max_Offset = Max_Source_Offset;
-    };
+    }
   dbx_type = 0;
   str = S_GET_NAME (sp);
   pnt = (char *) strchr (str, ':');
@@ -2268,8 +2266,8 @@ forward_reference (pnt)
 	  if (spnt1 == (struct VMS_DBG_Symbol *) NULL)
 	    break;
 	  spnt = spnt1;
-	};
-      };
+	}
+      }
       pnt = cvt_integer (pnt + 1, &i);
       pnt = cvt_integer (pnt + 1, &i);
   } while (*++pnt != ';');
@@ -2290,8 +2288,8 @@ final_forward_reference (spnt)
 	       (spnt1 == (struct VMS_DBG_Symbol*) NULL))return 1;
 	    if(spnt1 == (struct VMS_DBG_Symbol*) NULL) break;
 	    spnt=spnt1;
-	  };
-	};
+	  }
+	}
 	return 0;	/* no forward refences found */
 }
 
@@ -2337,7 +2335,7 @@ VMS_typedef_parse (str)
     {				/* check for static constants */
       *str = '\0';		/* for now we ignore them */
       return 0;
-    };
+    }
   while ((*pnt <= '9') && (*pnt >= '0'))
     pnt--;
   pnt++;			/* and get back to the number */
@@ -2346,20 +2344,11 @@ VMS_typedef_parse (str)
 /* first we see if this has been defined already, due to a forward reference*/
   if (spnt == (struct VMS_DBG_Symbol *) NULL)
     {
-      if (VMS_Symbol_type_list == (struct VMS_DBG_Symbol *) NULL)
-	{
-	  spnt = (struct VMS_DBG_Symbol *) malloc (sizeof (struct VMS_DBG_Symbol));
-	  spnt->next = (struct VMS_DBG_Symbol *) NULL;
-	  VMS_Symbol_type_list = spnt;
-	}
-      else
-	{
-	  spnt = (struct VMS_DBG_Symbol *) malloc (sizeof (struct VMS_DBG_Symbol));
-	  spnt->next = VMS_Symbol_type_list;
-	  VMS_Symbol_type_list = spnt;
-	};
+      spnt = (struct VMS_DBG_Symbol *) xmalloc (sizeof (struct VMS_DBG_Symbol));
+      spnt->next = VMS_Symbol_type_list;
+      VMS_Symbol_type_list = spnt;
       spnt->dbx_type = i1;	/* and save the type */
-    };
+    }
 /* for structs and unions, do a partial parse, otherwise we sometimes get
  * circular definitions that are impossible to resolve. We read enough info
  * so that any reference to this type has enough info to be resolved
@@ -2367,7 +2356,7 @@ VMS_typedef_parse (str)
   pnt = str + 1;		/* point to character past equal sign */
   if ((*pnt == 'u') || (*pnt == 's'))
     {
-    };
+    }
   if ((*pnt <= '9') && (*pnt >= '0'))
     {
       if (type_check ("void"))
@@ -2375,13 +2364,13 @@ VMS_typedef_parse (str)
 	  *str = '\0';
 	  spnt->advanced = VOID;
 	  return 0;
-	};
+	}
       if (type_check ("unknown type"))
 	{			/* this is the void symbol */
 	  *str = '\0';
 	  spnt->advanced = UNKNOWN;
 	  return 0;
-	};
+	}
       pnt1 = cvt_integer(pnt,&i1);
       if(i1 != spnt->dbx_type)
 	{
@@ -2393,7 +2382,7 @@ VMS_typedef_parse (str)
       printf ("gcc-as warning(debugger output):");
       printf (" %d is an unknown untyped variable.\n", spnt->dbx_type);
       return 1;			/* do not know what this is */
-    };
+    }
 /* now define this module*/
   pnt = str + 1;		/* point to character past equal sign */
   switch (*pnt)
@@ -2452,8 +2441,31 @@ VMS_typedef_parse (str)
 	}
       else if (type_check ("double"))
 	{
+	  /* caveat: this assumes D_float, and is not correct for G_float */
 	  spnt->VMS_type = DBG_S_C_REAL8;
 	  spnt->data_size = 8;
+	}
+      else if (type_check ("long double"))
+	{
+	  /* same as double, at least for now */
+	  spnt->VMS_type = DBG_S_C_REAL8;
+	  spnt->data_size = 8;
+	}
+      else if (type_check ("long long int"))
+	{
+	  spnt->VMS_type = DBG_S_C_SQUAD;	/* signed quadword */
+	  spnt->data_size = 8;
+	}
+      else if (type_check ("long long unsigned int"))
+	{
+	  spnt->VMS_type = DBG_S_C_UQUAD;	/* unsigned quadword */
+	  spnt->data_size = 8;
+	}
+      else
+	{
+	  /* something more substantial ought to be done here */
+	  spnt->VMS_type = 0;
+	  spnt->data_size = 0;
 	}
       pnt1 = (char *) strchr (str, ';') + 1;
       break;
@@ -2482,9 +2494,9 @@ VMS_typedef_parse (str)
 	      fpnt->resolved = 'Y';
 	      VMS_Set_Struct (fpnt->struc_numb);
 	      VMS_Store_Struct (spnt->struc_numb);
-	    };
+	    }
 	  fpnt = fpnt->next;
-	};
+	}
       VMS_Set_Struct (spnt->struc_numb);
       i = 0;
       Local[i++] = 11 + strlen (pnt);
@@ -2505,7 +2517,7 @@ VMS_typedef_parse (str)
 	{
 	  pnt += strlen (pnt);
 	  *pnt = ':';
-	};			/* replace colon for later */
+	}			/* replace colon for later */
       while (*++pnt1 != ';')
 	{
 	  pnt = (char *) strchr (pnt1, ':');
@@ -2558,8 +2570,8 @@ VMS_typedef_parse (str)
 		generate_suffix (spnt1, dtype);
 	      else if (spnt1->VMS_type == DBG_S_C_ADVANCED_TYPE)
 		generate_suffix (spnt1, 0);
-	    };
-	};
+	    }
+	}
       pnt1++;
       Local[i++] = 0x01;	/* length byte */
       Local[i++] = DBG_S_C_STRUCT_END;
@@ -2580,9 +2592,9 @@ VMS_typedef_parse (str)
 	      fpnt->resolved = 'Y';
 	      VMS_Set_Struct (fpnt->struc_numb);
 	      VMS_Store_Struct (spnt->struc_numb);
-	    };
+	    }
 	  fpnt = fpnt->next;
-	};
+	}
       VMS_Set_Struct (spnt->struc_numb);
       i = 0;
       Local[i++] = 3 + strlen (symbol_name);
@@ -2611,7 +2623,7 @@ VMS_typedef_parse (str)
 	  VMS_Store_Immediate_Data (Local, i, OBJ_S_C_DBG);
 	  i = 0;
 	  pnt = pnt1;		/* Skip final semicolon */
-	};
+	}
       Local[i++] = 0x01;	/* len byte */
       Local[i++] = DBG_S_C_ENUM_END;
       VMS_Store_Immediate_Data (Local, i, OBJ_S_C_DBG);
@@ -2654,7 +2666,7 @@ VMS_typedef_parse (str)
       printf ("gcc-as warning(debugger output):");
       printf (" %d is an unknown type of variable.\n", spnt->dbx_type);
       return 1;			/* unable to decipher */
-    };
+    }
 /* this removes the evidence of the definition so that the outer levels of
 parsing do not have to worry about it */
   pnt = str;
@@ -2731,7 +2743,7 @@ VMS_LSYM_Parse ()
 			pnt = str + strlen(str) - 1;
 		      } while (*pnt == '?');
 		      tlen += strlen(str);
-		      parse_buffer = (char *) malloc (tlen + 1);
+		      parse_buffer = (char *) xmalloc (tlen + 1);
 		      strcpy(parse_buffer, S_GET_NAME (sp));
 		      pnt2 = parse_buffer + strlen(S_GET_NAME (sp)) - 1;
 		      *pnt2 = '\0';
@@ -2747,7 +2759,7 @@ VMS_LSYM_Parse ()
 		      } while (1 == 1);
 		      str = parse_buffer;
 		      symbol_name = str;
-		    };
+		    }
 		  pnt = (char *) strchr (str, ':');
 		  if (pnt != (char *) NULL)
 		    {
@@ -2763,9 +2775,9 @@ VMS_LSYM_Parse ()
 			strcpy(S_GET_NAME (sp), parse_buffer);
 			free (parse_buffer);
 			parse_buffer = 0;
-		      };
+		      }
 		      *pnt = ':';	/* put back colon so variable def code finds dbx_type*/
-		    };
+		    }
 		  break;
 		}		/*switch*/
 	    }			/* if */
@@ -2776,7 +2788,7 @@ VMS_LSYM_Parse ()
         {
           final_pass = 1;
 	  incom1 ++;  /* Force one last pass through */
-	};
+	}
   } while ((incomplete != 0) && (incomplete != incom1));
   /* repeat until all refs resolved if possible */
 /*	if (pass > 1) printf(" Required %d passes\n",pass);*/
@@ -2784,7 +2796,7 @@ VMS_LSYM_Parse ()
     {
       printf ("gcc-as warning(debugger output):");
       printf ("Unable to resolve %d circular references.\n", incomplete);
-    };
+    }
   fpnt = f_ref_root;
   symbol_name = "\0";
   while (fpnt != (struct forward_ref *) NULL)
@@ -2798,14 +2810,14 @@ VMS_LSYM_Parse ()
 	      printf ("Forward reference error, dbx type %d\n",
 		      fpnt->dbx_type);
 	      break;
-	    };
+	    }
 	  fixit[0] = 0;
 	  sprintf (&fixit[1], "%d=s4;", fpnt->dbx_type);
 	  pnt2 = (char *) strchr (&fixit[1], '=');
 	  VMS_typedef_parse (pnt2);
-	};
+	}
       fpnt = fpnt->next;
-    };
+    }
 }
 
 static
@@ -2821,7 +2833,7 @@ Define_Local_Symbols (s1, s2)
 	{
 	  char * pnt=(char*) strchr (S_GET_NAME (symbolP1), ':') + 1;
 	  if (*pnt == 'F' || *pnt == 'f') break;
-	};
+	}
       /*
        *	Deal with STAB symbols
        */
@@ -2868,7 +2880,7 @@ Define_Routine (symbolP, Level)
 	{
 	  char * pnt=(char*) strchr (S_GET_NAME (symbolP1), ':') + 1;
 	  if (*pnt == 'F' || *pnt == 'f') break;
-	};
+	}
       /*
        *	Deal with STAB symbols
        */
@@ -2884,7 +2896,7 @@ Define_Routine (symbolP, Level)
 		{
 		  sprintf (str, "$%d", rcount++);
 		  VMS_TBT_Block_Begin (symbolP1, Text_Psect, str);
-		};
+		}
 	      Offset = S_GET_VALUE (symbolP1);
 	      Define_Local_Symbols (sstart, symbolP1);
 	      symbolP1 =
@@ -3045,6 +3057,9 @@ Write_VMS_MHD_Records ()
   /*
    *	Store language processor name and version
    *	(not a counted string!)
+   *
+   *	This is normally supplied by the gcc driver for the command line
+   *	which invokes gas.  If absent, we fall back to gas's version.
    */
   cp = compiler_version_string;
   if (cp == 0)
@@ -3052,12 +3067,9 @@ Write_VMS_MHD_Records ()
       cp = "GNU AS  V";
       while (*cp)
 	PUT_CHAR (*cp++);
-      cp = strchr (GAS_VERSION, '.');
-      while (*cp != ' ')
-	cp--;
-      cp++;
-    };
-  while (*cp >= 32)
+      cp = GAS_VERSION;
+    }
+  while (*cp >= ' ')
     PUT_CHAR (*cp++);
   /*
    *	Flush the record
@@ -3216,7 +3228,7 @@ VMS_Case_Hack_Symbol (In, Out)
 	    *Out++ = isupper(*In) ? tolower(*In++) : *In++;
 	  }
 	  break;
-	};
+	}
     }
   /*
    *	If we saw a dollar sign, we don't do case hacking
@@ -3269,7 +3281,7 @@ VMS_Case_Hack_Symbol (In, Out)
 		  tolower(*In++) :
 		    *In++;
 		  break;
-		};
+		}
 	    }
 	}
     }
@@ -3480,7 +3492,7 @@ VMS_Global_Symbol_Spec (Name, Psect_Number, Psect_Offset, Defined)
       else
 	{
 	  PUT_SHORT (GSY_S_M_DEF);
-	};
+	}
       /*
        *	Psect Number
        */
@@ -3511,7 +3523,7 @@ VMS_Global_Symbol_Spec (Name, Psect_Number, Psect_Offset, Defined)
       else
 	{
 	  PUT_SHORT (0);
-	};
+	}
     }
   /*
    *	Finally, the global symbol name
@@ -3601,7 +3613,7 @@ VMS_Psect_Spec (Name, Size, Type, vsp)
       vsp->Psect_Index = -1;	/* to catch errors */
       S_GET_RAW_TYPE (vsp->Symbol) = N_UNDF;	/* make refs work */
       return 1;			/* decrement psect counter */
-    };
+    }
 
   if ((Psect_Attributes & GLOBALSYMBOL_BIT) != 0)
     {
@@ -3626,9 +3638,9 @@ VMS_Psect_Spec (Name, Size, Type, vsp)
 		     Name);
 	    error (Error_Line);
 	    break;
-	  };
-	};			/* switch */
-    };
+	  }
+	}			/* switch */
+    }
 
   Psect_Attributes &= 0xffff;	/* clear out the globalref/def stuff */
   /*
@@ -3772,7 +3784,7 @@ VMS_Emit_Globalvalues (text_siz, data_siz, Data_Segment)
       if (!HAS_PSECT_ATTRIBUTES (Name))
 	continue;
 
-      stripped_name = (char *) malloc (strlen (Name) + 1);
+      stripped_name = (char *) xmalloc (strlen (Name) + 1);
       strcpy (stripped_name, Name);
       Psect_Attributes = 0;
       VMS_Modify_Psect_Attributes (stripped_name, &Psect_Attributes);
@@ -3799,10 +3811,10 @@ VMS_Emit_Globalvalues (text_siz, data_siz, Data_Segment)
 	    default:
 	      printf (" Invalid globalvalue of %s\n", stripped_name);
 	      break;
-	    };			/* switch */
-	};			/* if */
+	    }			/* switch */
+	}			/* if */
       free (stripped_name);	/* clean up */
-    };				/* for */
+    }				/* for */
 
 }
 
@@ -4546,7 +4558,7 @@ VMS_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 	    as_warn("g++ wrote an extern reference to %s as a routine.",
 		    S_GET_NAME (sp));
 	    as_warn("I will fix it, but I hope that it was not really a routine");
-	  };
+	  }
 	break;
       default:
 	break;
@@ -5233,13 +5245,13 @@ VMS_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 		  Current_File->file_number = 0;
 		  File_Number--;
 		  continue;
-		};
-	    };
+		}
+	    }
 	  VMS_TBT_Source_Lines (Current_File->file_number,
 				Current_File->min_line,
 		       Current_File->max_line - Current_File->min_line + 1);
-	};			/* for */
-    };				/* scope */
+	}			/* for */
+    }				/* scope */
     Current_File = (struct input_file *) NULL;
 
     for (symbolP = symbol_rootP; symbolP; symbolP = symbol_next (symbolP))
@@ -5294,11 +5306,11 @@ VMS_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 		    continue;
 		  while (*pnt++ == *pnt1++)
 		    {
-		    };
+		    }
 		  if (*pnt1 != 'F' && *pnt1 != 'f') continue;
 		  if ((*(--pnt) == '\0') && (*(--pnt1) == ':'))
 		    break;
-		};
+		}
 	      if (symbolP1 != (symbolS *) NULL)
 		VMS_DBG_Define_Routine (symbolP1, Current_Routine, Text_Psect);
 	    }			/* local symbol block */

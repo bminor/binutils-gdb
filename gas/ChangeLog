@@ -1,3 +1,67 @@
+Thu May 19 13:45:59 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	Merged in changes from gas-2.3 net release:
+
+	* Makefile.in (VERSION): Updated to cygnus-2.3.1.
+
+	* config/obj-vms.c: Replaced unchecked uses of malloc with
+	xmalloc.
+
+	* listing.c (list_symbol_table): Only test BFD64, not
+	BFD_ASSEMBLER too.
+
+	* config/obj-coff.c (fixup_segment) [DIFF_EXPR_OK]: Don't check
+	pcrel, just convert it.
+
+	* config/obj-vms.c: Removed lots of extra semicolons after
+	compound statements.
+	(strchr): Don't declare here.
+
+	* config/ho-vax.h (realloc): Declare.
+
+	* config/ho-vms.h (strchr, strdup): Declare.
+
+	* config/tc-sparc.c (md_parse_option) [OBJ_ELF]: Accept and ignore
+	option `-q'.
+
+	Wed May 18 20:50:35 1994  Pat Rankin  (rankin@eql.caltech.edu)
+
+	* config/obj-vms.h (DBG_S_C_SQUAD, DBG_S_C_UQUAD): define these
+	new VMS symbol-type macros; signed and unsigned quadword integers,
+	for `long long' support.  Their values come from the existing
+	DSC$K_DTYPE_QU and DSC$K_DTYPE_Q macros in <descrip.h>.  The
+	VMS debugger now recognizes `long long' variables correctly.
+	config/obj-vms.c (VMS_typedef_parse) [case 'r']: add entries
+	for gcc2's predefined types "long double" (same as double, as
+	per gcc's current state), "long long int", "long long unsigned
+	int", and final `otherwise' case (to avoid uninitialized type
+	and size fields).  [caveat:  predefined types "complex int",
+	"complex float", "complex double", and "complex long double" are
+	still missing.]
+
+	* config/ho-vms.h (EXIT_FAILURE): define as 0x10000002 instead
+	of 0, because the latter indicates success rather than failure
+	when passed to `exit' or return from `main' compiled by gcc2.
+
+	* config/obj-vms.c (array_suffix, generate_suffix): replace two
+	hardcoded `0xa3's with macro DBG_S_C_ADVANCED_TYPE from obj-vms.h.
+	(VMS_typedef_parse): eliminate redundant if-then-else when
+	allocating new symbol entry and linking it to VMS_Symbol_type_list.
+
+	Tue May 17 20:47:31 1994  Pat Rankin  (rankin@eql.caltech.edu)
+
+	* config/obj-vms.c (Write_VMS_MHD_Records): don't try to interpret
+	the contents of the GAS_VERSION string when falling back to it for
+	language processor identification.
+
+	* make-gas.com, vmsconf.sh (ENVIRON): fix misspelling of
+	`psect_attr' in linker options.
+
+	Wed May 11 22:32:00 1994  DJ Delorie (dj@ctron.com)
+
+	* configure.bat: update to latest makefile.in
+	* config/te-go32.h: [new] go32's environment
+
 Fri May 20 17:59:34 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* as.h: Don't declare parameters for strstr.

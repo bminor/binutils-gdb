@@ -178,6 +178,56 @@ MY(write_object_contents) (abfd)
 #define MIPS_RELOC_LO16		5
 
 /*
+ * This is only called when performing a BFD_RELOC_MIPS_JMP relocation.
+ * The jump destination address is formed from the upper 4 bits of the
+ * "current" program counter concatenated with the jump instruction's
+ * 26 bit field and two trailing zeros.
+ * If the destination address is not in the same segment as the "current"
+ * program counter, then we need to signal an error.
+ */
+static bfd_reloc_status_type
+mips_fix_jmp_addr (abfd,reloc_entry,symbol,data,input_section,output_bfd)
+     bfd *abfd;
+     arelent *reloc_entry;
+     struct symbol_cache_entry *symbol;
+     PTR data;
+     asection *input_section;
+     bfd *output_bfd;
+{
+  bfd_vma relocation, pc;
+ 
+  /* If this is a partial relocation, just continue. */
+  if (output_bfd != (bfd *)NULL)
+    return bfd_reloc_continue;
+
+  /* If this is an undefined symbol, return error */
+  if (symbol->section == &bfd_und_section
+      && (symbol->flags & BSF_WEAK) == 0)
+    return bfd_reloc_undefined;
+
+  /* 
+   * Work out which section the relocation is targetted at and the
+   * initial relocation command value.
+   */
+  if (bfd_is_com_section (symbol->section))
+    relocation = 0;
+  else
+    relocation = symbol->value;
+
+  relocation += symbol->section->output_section->vma;
+  relocation += symbol->section->output_offset;
+  relocation += reloc_entry->addend;
+
+  pc = input_section->output_section->vma + input_section->output_offset +
+    reloc_entry->address + 4;
+
+  if ((relocation & 0xF0000000) != (pc & 0xF0000000))
+    return bfd_reloc_overflow;
+
+  return bfd_reloc_continue;
+}
+
+/*
  * This is only called when performing a BFD_RELOC_HI16_S relocation.
  * We need to see if bit 15 is set in the result. If it is, we add
  * 0x10000 and continue normally. This will compensate for the sign extension
@@ -204,11 +254,16 @@ mips_fix_hi16_s (abfd, reloc_entry, symbol, data, input_section,
   if (output_bfd != (bfd *)NULL)
     return bfd_reloc_continue;
 
+  /* If this is an undefined symbol, return error */
+  if (symbol->section == &bfd_und_section
+      && (symbol->flags & BSF_WEAK) == 0)
+    return bfd_reloc_undefined;
+
   /* 
    * Work out which section the relocation is targetted at and the
    * initial relocation command value.
    */
-  if (symbol->section == &bfd_com_section)
+  if (bfd_is_com_section (symbol->section))
     relocation = 0;
   else
     relocation = symbol->value;
@@ -226,7 +281,8 @@ mips_fix_hi16_s (abfd, reloc_entry, symbol, data, input_section,
 static reloc_howto_type mips_howto_table_ext[] = {
   {MIPS_RELOC_32,      0, 2, 32, false, 0,  complain_overflow_bitfield, 0,
 	"32",       false, 0, 0xffffffff, false},
-  {MIPS_RELOC_JMP,     2, 2, 26, false, 0, complain_overflow_bitfield, 0,
+  {MIPS_RELOC_JMP,     2, 2, 26, false, 0, complain_overflow_dont,
+	mips_fix_jmp_addr,
 	"MIPS_JMP", false, 0, 0x03ffffff, false},
   {MIPS_RELOC_WDISP16, 2, 1, 16, true,  0, complain_overflow_signed, 0,
 	"WDISP16",  false, 0, 0x0000ffff, false},

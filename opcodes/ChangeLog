@@ -1,4 +1,28 @@
+Wed May 11 22:32:00 1994  DJ Delorie (dj@ctron.com)
+
+	* configure.bat: update to latest makefile.in
+
+Sat May  7 17:13:21 1994  Steve Chamberlain  (sac@cygnus.com)
+
+	* a29k-dis.c (print_insn): Print 'x' type operand in hex.
+	* h8300-dis.c (bfd_h8_disassemble): Print 16bit rels correctly.
+	* sh-dis.c (print_insn_sh): Don't recur endlessly if delay
+	slot insn is in a delay slot.
+	* z8k-opc.h: (resflg): Fix patterns.
+	* h8500-opc.h Fix CR insn patterns.
+
+Fri May  6 14:34:46 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ppc-opc.c (powerpc_opcodes): Put PowerPC versions of "cmp" and
+	"cmpl" before POWER versions, so that gas -many uses them.
+
 Thu Apr 28 18:32:36 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* disassemble.c: New file.
+	* Makefile.in (OFILES): Add disassemble.o.
+	(disassemble.o): Provide dependencies; compile with $(ARCHDEFS).
+	* configure.in: Define ARCHDEFS in Makefile.  Code taken from
+	binutils/configure.in.
 
 	* m68k-dis.c (print_insn_m68k): If F_ALIAS flag is set, skip the
 	opcode being examined.

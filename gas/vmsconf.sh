@@ -80,5 +80,5 @@ done
 cat << 'EOF'
 gnu_cc:[000000]gcclib/lib,sys$share:vaxcrtl/lib
 ! Tell linker exactly what psect attributes we want -- match VAXCRTL.
-psect_addr=ENVIRON,long,pic,ovr,rel,gbl,noshr,noexe,rd,wrt
+psect_attr=ENVIRON,long,pic,ovr,rel,gbl,noshr,noexe,rd,wrt
 EOF
