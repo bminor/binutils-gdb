@@ -1,3 +1,8 @@
+2000-12-06  Fernando Nasser  <fnasser@redhat.com>
+
+	* cli/cli-decode.c (lookup_cmd): Remove old stale copy of this routine
+	which was not being used for quite some time.
+
 2000-12-05  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb-stabs.h (SECT_OFF_MAX): Increase to 64.
