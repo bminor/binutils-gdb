@@ -600,7 +600,7 @@ bcache_h =	bcache.h
 builtin_regs_h = builtin-regs.h
 breakpoint_h =	breakpoint.h $(frame_h) $(value_h)
 buildsym_h =	buildsym.h
-c_lang_h =	c-lang.h $(value_h)
+c_lang_h =	c-lang.h $(value_h) $(macroexp_h)
 call_cmds_h =	call-cmds.h
 cli_cmds_h =	$(srcdir)/cli/cli-cmds.h
 cli_decode_h =	$(srcdir)/cli/cli-decode.h $(command_h)
@@ -1318,7 +1318,8 @@ builtin-regs.o: builtin-regs.c $(defs.h) $(builtin_regs_h) $(gdbtypes_h) \
 	$(gdb_string_h) $(value_h) $(frame_h)
 
 c-lang.o: c-lang.c $(c_lang_h) $(defs_h) $(expression_h) $(gdbtypes_h) \
-	$(language_h) $(parser_defs_h) $(symtab_h)
+	$(language_h) $(parser_defs_h) $(symtab_h) $(macroscope_h) \
+	gdb_assert.h
 
 c-typeprint.o: c-typeprint.c $(c_lang_h) $(defs_h) $(expression_h) \
 	$(gdbcmd_h) $(gdbcore_h) $(gdbtypes_h) $(language_h) $(symtab_h) \

@@ -24,6 +24,7 @@
 #define C_LANG_H 1
 
 #include "value.h"
+#include "macroexp.h"
 
 
 extern int c_parse (void);	/* Defined in c-exp.y */
@@ -48,6 +49,13 @@ extern void c_printchar (int, struct ui_file *);
 extern void c_printstr (struct ui_file * stream, char *string,
 			unsigned int length, int width,
 			int force_ellipses);
+
+extern void scan_macro_expansion (char *expansion);
+extern int scanning_macro_expansion (void);
+extern void finished_macro_expansion (void);
+
+extern macro_lookup_ftype *expression_macro_lookup_func;
+extern void *expression_macro_lookup_baton;
 
 extern struct type *c_create_fundamental_type (struct objfile *, int);
 

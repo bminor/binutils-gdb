@@ -1246,6 +1246,17 @@ yylex ()
    
  retry:
 
+  /* Check if this is a macro invocation that we need to expand.  */
+  if (! scanning_macro_expansion ())
+    {
+      char *expanded = macro_expand_next (&lexptr,
+                                          expression_macro_lookup_func,
+                                          expression_macro_lookup_baton);
+
+      if (expanded)
+        scan_macro_expansion (expanded);
+    }
+
   prev_lexptr = lexptr;
   unquoted_expr = 1;
 
@@ -1271,7 +1282,17 @@ yylex ()
   switch (c = *tokstart)
     {
     case 0:
-      return 0;
+      /* If we were just scanning the result of a macro expansion,
+         then we need to resume scanning the original text.
+         Otherwise, we were already scanning the original text, and
+         we're really done.  */
+      if (scanning_macro_expansion ())
+        {
+          finished_macro_expansion ();
+          goto retry;
+        }
+      else
+        return 0;
 
     case ' ':
     case '\t':
@@ -1324,7 +1345,9 @@ yylex ()
       return c;
 
     case ',':
-      if (comma_terminates && paren_depth == 0)
+      if (comma_terminates
+          && paren_depth == 0
+          && ! scanning_macro_expansion ())
 	return 0;
       lexptr++;
       return c;
@@ -1503,9 +1526,13 @@ yylex ()
       c = tokstart[++namelen];
     }
 
-  /* The token "if" terminates the expression and is NOT 
-     removed from the input stream.  */
-  if (namelen == 2 && tokstart[0] == 'i' && tokstart[1] == 'f')
+  /* The token "if" terminates the expression and is NOT removed from
+     the input stream.  It doesn't count if it appears in the
+     expansion of a macro.  */
+  if (namelen == 2
+      && tokstart[0] == 'i'
+      && tokstart[1] == 'f'
+      && ! scanning_macro_expansion ())
     {
       return 0;
     }

@@ -37,6 +37,12 @@ extern int expout_ptr;
 
 extern struct block *expression_context_block;
 
+/* If expression_context_block is non-zero, then this is the PC within
+   the block that we want to evaluate expressions at.  When debugging
+   C or C++ code, we use this to find the exact line we're at, and
+   then look up the macro definitions active at that point.  */
+CORE_ADDR expression_context_pc;
+
 /* The innermost context required by the stack and register variables
    we've encountered so far. */
 extern struct block *innermost_block;

@@ -1,3 +1,31 @@
+2002-05-17  Jim Blandy  <jimb@redhat.com>
+
+	Expand preprocessor macros in C expressions.
+	* c-lang.h: #include "macroexp.h", for macro_lookup_ftype.
+	(scan_macro_expansion, scanning_macro_expansion,
+	finished_macro_expansion): New function declarations.
+	(expression_macro_lookup_func, expression_macro_lookup_baton): New
+	variable declarations.
+	* parser-defs.h (expression_context_pc): New declaration.
+	* parse.c (expression_context_pc): New variable.
+	(parse_exp_1): Set expression_context_pc, as well as
+	expression_context_block.
+	* c-exp.y (yylex): If we're not already reading the result of a
+	macro expansion, try to macro-expand the next token.  When we're
+	done scanning a macro expansion, switch back to the mainline text.
+	Commas and `if's in a macro's expansion don't terminate the input.
+	* c-lang.c: #include "macroscope.h" and "gdb_assert.h".
+	(macro_original_text, macro_expanded_text,
+	expression_macro_lookup_func, expression_macro_lookup_baton): New
+	variables.
+	(scan_macro_expansion, scanning_macro_expansion,
+	finished_macro_expansion, scan_macro_cleanup, null_macro_lookup,
+	c_preprocess_and_parse): New functions.
+	(c_language_defn, cplus_language_defn, asm_language_defn): Call
+	c_preprocess_and_parse, instead of c_parse.
+	* Makefile.in (c_lang_h): Note that this #includes macroexp.h.
+	(c-lang.o): Note dependency on macroscope.h and gdb_assert.h.
+
 Fri May 17 14:26:19 2002  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* sh-tdep.c (gdb_print_insn_sh64): Delete.
