@@ -24,7 +24,7 @@ load_lib gdb.exp
 # variables that need to set up
 #
 if ![info exists prompt] then {
-    set prompt "\(gdb\)"
+    set prompt "\[(\]gdb\[)\]"
 }
 # some convenience abbreviations
 #
@@ -98,9 +98,7 @@ proc gdb_start {} {
     global prompt
     global spawn_id
     global timeout
-    if $verbose>1 then {
-	send_user "Spawning $GDB $GDBFLAGS\n"
-    }
+    verbose "Spawning $GDB $GDBFLAGS"
     
     set oldtimeout $timeout
     set timeout [expr "$timeout + 60"]
@@ -120,10 +118,8 @@ proc gdb_start {} {
 	}
     }
     expect {
-	-re ".*$prompt $"	{
-	    if $verbose>1 then {
-		send_user "GDB initialized for native mode\n"
-	    }
+	-re ".*\r\n$prompt $" {
+	    verbose "GDB initialized for native mode"
 	}
 	-re "$prompt $"	{
 	    perror "GDB never initialized."
@@ -139,7 +135,7 @@ proc gdb_start {} {
     send "set height 0\n"
     expect {
 	-re ".*$prompt $" { 
-	    verbose "Seting height to 0."
+	    verbose "Setting height to 0." 2
 	}
 	timeout {
 	    warning "Couldn't set the height to 0."
@@ -149,9 +145,7 @@ proc gdb_start {} {
     send "set width 0\n"
     expect {
 	-re ".*$prompt $" {
-	    if $verbose>2 then {
-		send_user "Seting width to 0.\n"
-	    }
+	    verbose "Seting width to 0." 2
 	}
 	timeout {
 	    warning "Couldn't set the width to 0."
