@@ -1,3 +1,7 @@
+Thu Mar 12 04:56:24 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* Makefile.in: add libiberty stmp to all and all.cross.
+
 Wed Mar 11 02:07:52 1992  K. Richard Pixley  (rich@cygnus.com)
 
 	* Makefile.in: remove force dependencies, add grep to all.
