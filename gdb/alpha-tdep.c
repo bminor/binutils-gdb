@@ -813,7 +813,8 @@ alpha_sigtramp_frame_this_id (struct frame_info *next_frame,
   /* The stack address is trivially read from the sigcontext.  */
   stack_addr = alpha_sigtramp_register_address (info->sigcontext_addr,
 						ALPHA_SP_REGNUM);
-  stack_addr = read_memory_unsigned_integer (stack_addr, ALPHA_REGISTER_SIZE);
+  stack_addr = get_frame_memory_unsigned (next_frame, stack_addr,
+					  ALPHA_REGISTER_SIZE);
 
   *this_id = frame_id_build (stack_addr, code_addr);
 }
@@ -842,7 +843,7 @@ alpha_sigtramp_frame_prev_register (struct frame_info *next_frame,
 	  *addrp = addr;
 	  *realnump = -1;
 	  if (bufferp != NULL)
-	    read_memory (addr, bufferp, ALPHA_REGISTER_SIZE);
+	    get_frame_memory (next_frame, addr, bufferp, ALPHA_REGISTER_SIZE);
 	  return;
 	}
     }
@@ -1174,7 +1175,7 @@ alpha_heuristic_frame_prev_register (struct frame_info *next_frame,
       *addrp = info->saved_regs[regnum];
       *realnump = -1;
       if (bufferp != NULL)
-	read_memory (*addrp, bufferp, ALPHA_REGISTER_SIZE);
+	get_frame_memory (next_frame, *addrp, bufferp, ALPHA_REGISTER_SIZE);
       return;
     }
 
@@ -1364,7 +1365,7 @@ alpha_next_pc (CORE_ADDR pc)
   int offset;
   LONGEST rav;
 
-  insn = read_memory_unsigned_integer (pc, sizeof (insn));
+  insn = alpha_read_insn (pc);
 
   /* Opcode is top 6 bits. */
   op = (insn >> 26) & 0x3f;

@@ -275,7 +275,7 @@ alpha_mdebug_frame_prev_register (struct frame_info *next_frame,
       *addrp = info->saved_regs[regnum];
       *realnump = -1;
       if (bufferp != NULL)
-	read_memory (*addrp, bufferp, ALPHA_REGISTER_SIZE);
+	get_frame_memory (next_frame, *addrp, bufferp, ALPHA_REGISTER_SIZE);
       return;
     }
 
