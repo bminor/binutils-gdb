@@ -1053,7 +1053,7 @@ usage ()
   fprintf (stdout, _("  -x <number> or --hex-dump=<number>\n"));
   fprintf (stdout, _("                            Dump the contents of section <number>\n"));
   fprintf (stdout, _("  -w[liap] or --debug-dump[=line,=info,=abbrev,=pubnames]\n"));
-  fprintf (stdout, _("                            Display the contents of DWARF debug sections\n"));
+  fprintf (stdout, _("                            Display the contents of DWARF2 debug sections\n"));
 #ifdef SUPPORT_DISASSEMBLY
   fprintf (stdout, _("  -i <number> or --instruction-dump=<number>\n"));
   fprintf (stdout, _("                            Disassemble the contents of section <number>\n"));
@@ -3109,7 +3109,7 @@ process_symbol_table (file)
     printf
       (_("\nDynamic symbol information is not available for displaying symbols.\n"));
 
-  if (do_histogram)
+  if (do_histogram && buckets != NULL)
     {
       int *lengths;
       int *counts;
