@@ -575,51 +575,68 @@ DEFUN(bfd_perform_relocation,(abfd,
       reloc_entry->addend = 0;
     }
 
-
   /* FIXME: This overflow checking is incomplete, because the value
      might have overflowed before we get here.  For a correct check we
      need to compute the value in a size larger than bitsize, but we
      can't reasonably do that for a reloc the same size as a host
      machine word.  */
-  switch (howto->complain_on_overflow)
+  if (howto->complain_on_overflow != complain_overflow_dont)
     {
-    case complain_overflow_dont:
-      break;
-    case complain_overflow_signed:
-      {
-	/* Assumes two's complement.  */
-	bfd_signed_vma reloc_signed_max = (1 << (howto->bitsize - 1)) - 1;
-	bfd_signed_vma reloc_signed_min = ~ reloc_signed_max;
+      bfd_vma check;
 
-	if ((bfd_signed_vma) relocation > reloc_signed_max
-	    || (bfd_signed_vma) relocation < reloc_signed_min)
-	  flag = bfd_reloc_overflow;
-      }
-      break;
-    case complain_overflow_unsigned:
-      {
-	/* Assumes two's complement.  This expression avoids overflow
-	   if howto->bitsize is the number of bits in bfd_vma.  */
-	bfd_vma reloc_unsigned_max =
-	  (((1 << (howto->bitsize - 1)) - 1) << 1) | 1;
+      /* Get the value that will be used for the relocation, but
+	 starting at bit position zero.  */
+      if (howto->rightshift > howto->bitpos)
+	check = relocation >> (howto->rightshift - howto->bitpos);
+      else
+	check = relocation << (howto->bitpos - howto->rightshift);
+      switch (howto->complain_on_overflow)
+	{
+	case complain_overflow_signed:
+	  {
+	    /* Assumes two's complement.  */
+	    bfd_signed_vma reloc_signed_max = (1 << (howto->bitsize - 1)) - 1;
+	    bfd_signed_vma reloc_signed_min = ~ reloc_signed_max;
 
-	if ((bfd_vma) relocation > reloc_unsigned_max)
-	  flag = bfd_reloc_overflow;
-      }
-      break;
-    case complain_overflow_bitfield:
-      {
-	/* Assumes two's complement.  This expression avoids overflow
-	   if howto->bitsize is the number of bits in bfd_vma.  */
-	bfd_vma reloc_bits = (((1 << (howto->bitsize - 1)) - 1) << 1) | 1;
+	    /* The above right shift is incorrect for a signed value.
+	       Fix it up by forcing on the upper bits.  */
+	    if (howto->rightshift > howto->bitpos
+		&& (bfd_signed_vma) relocation < 0)
+	      check |= ((bfd_vma) -1
+			&~ ((bfd_vma) -1
+			    >> (howto->rightshift - howto->bitpos)));
+	    if ((bfd_signed_vma) check > reloc_signed_max
+		|| (bfd_signed_vma) check < reloc_signed_min)
+	      flag = bfd_reloc_overflow;
+	  }
+	  break;
+	case complain_overflow_unsigned:
+	  {
+	    /* Assumes two's complement.  This expression avoids
+	       overflow if howto->bitsize is the number of bits in
+	       bfd_vma.  */
+	    bfd_vma reloc_unsigned_max =
+	      (((1 << (howto->bitsize - 1)) - 1) << 1) | 1;
 
-	if (((bfd_vma) relocation &~ reloc_bits) != 0
-	    && ((bfd_vma) relocation &~ reloc_bits) != (-1 &~ reloc_bits))
-	  flag = bfd_reloc_overflow;
-      }
-      break;
-    default:
-      abort ();
+	    if ((bfd_vma) check > reloc_unsigned_max)
+	      flag = bfd_reloc_overflow;
+	  }
+	  break;
+	case complain_overflow_bitfield:
+	  {
+	    /* Assumes two's complement.  This expression avoids
+	       overflow if howto->bitsize is the number of bits in
+	       bfd_vma.  */
+	    bfd_vma reloc_bits = (((1 << (howto->bitsize - 1)) - 1) << 1) | 1;
+
+	    if (((bfd_vma) check &~ reloc_bits) != 0
+		&& ((bfd_vma) check &~ reloc_bits) != (-1 &~ reloc_bits))
+	      flag = bfd_reloc_overflow;
+	  }
+	  break;
+	default:
+	  abort ();
+	}
     }
   
   /* 
@@ -705,8 +722,20 @@ DEFUN(bfd_perform_relocation,(abfd,
        break;
 
      case 3:
-
        /* Do nothing */
+       break;
+
+     case 4:
+#ifdef BFD64
+       if (relocation)
+	 {
+	   bfd_vma x = bfd_get_64 (abfd, (bfd_byte *) data + addr);
+	   DOIT (x);
+	   bfd_put_64 (abfd, x, (bfd_byte *) data + addr);
+	 }
+#else
+       abort ();
+#endif
        break;
      default:
        return bfd_reloc_other;
