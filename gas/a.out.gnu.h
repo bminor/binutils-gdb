@@ -55,6 +55,10 @@ enum machine_type {
   /* skip a bunch so we don't run into any of sun's numbers */
   M_386 = 100,
   M_29K = 101,
+  /* HP/BSD formats */
+  M_HP200 = 200,	/* hp200 (68010) BSD binary */
+  M_HP300 = 300,	/* hp300 (68020+68881) BSD binary */
+  M_HPUX23 = 0x020C,	/* hp200/300 HPUX binary */
 };
 
 #define N_MAGIC(exec) ((exec).a_info & 0xffff)

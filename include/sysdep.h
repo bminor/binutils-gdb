@@ -50,6 +50,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define	VAX_BSD_SYS 14
 #define	TAHOE_BSD_SYS 15
 #define RTBSD_SYS 16  /* IBM RT/PC running bsd Unix */
+#define HP300BSD_SYS 17
 
 #include <ansidecl.h>
 
@@ -129,6 +130,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #if HOST_SYS == RTBSD_SYS	
 #include <sys/h-rtbsd.h>
+#endif
+
+#if HOST_SYS == HP300BSD_SYS
+#include <sys/h-hp300bsd.h>
 #endif
 
 #endif 
