@@ -98,14 +98,14 @@ proc gdb_unload {} {
     global gdb_prompt
     send_gdb "file\n"
     gdb_expect {
-	-re "No exec file now.*\r" { exp_continue }
-	-re "No symbol file now.*\r" { exp_continue }
+	-re "No exec file now\[^\r\n\]*\[\r\n\]" { exp_continue }
+	-re "No symbol file now\[^\r\n\]*\[\r\n\]" { exp_continue }
 	-re "A program is being debugged already..*Kill it.*y or n. $"\
 	    { send_gdb "y\n"
 		verbose "\t\tKilling previous program being debugged"
 	    exp_continue
 	}
-	-re "Discard symbol table from .*y or n. $" {
+	-re "Discard symbol table from .*y or n.*$" {
 	    send_gdb "y\n"
 	    exp_continue
 	}
@@ -128,18 +128,18 @@ proc delete_breakpoints {} {
 
     send_gdb "delete breakpoints\n"
     gdb_expect {
-	 -re ".*Delete all breakpoints.*y or n.*$" {
+	 -re "Delete all breakpoints.*y or n.*$" {
 	    send_gdb "y\n";
 	    exp_continue
 	}
-	 -re ".*$gdb_prompt $" { # This happens if there were no breakpoints
+	 -re "$gdb_prompt $" { # This happens if there were no breakpoints
 	    }
 	 timeout { perror "Delete all breakpoints in delete_breakpoints (timeout)" ; return }
     }
     send_gdb "info breakpoints\n"
     gdb_expect {
 	 -re "No breakpoints or watchpoints..*$gdb_prompt $" {}
-	 -re ".*$gdb_prompt $" { perror "breakpoints not deleted" ; return }
+	 -re "$gdb_prompt $" { perror "breakpoints not deleted" ; return }
 	 -re "Delete all breakpoints.*or n.*$" {
 	    send_gdb "y\n";
 	    exp_continue
@@ -162,7 +162,7 @@ proc gdb_run_cmd {args} {
     if [target_info exists gdb_init_command] {
 	send_gdb "[target_info gdb_init_command]\n";
 	gdb_expect {
-	    -re ".*$gdb_prompt $" { }
+	    -re "$gdb_prompt $" { }
 	    default {
 		perror "gdb_init_command for target failed";
 		return;
@@ -203,7 +203,7 @@ proc gdb_run_cmd {args} {
 	}
 	if [target_info exists gdb_stub] {
 	    gdb_expect {
-		-re ".*$gdb_prompt $" {
+		-re "$gdb_prompt $" {
 		    send_gdb "continue\n"
 		}
 	    }
@@ -360,7 +360,7 @@ proc gdb_test { args } {
     }
 
     gdb_expect {
-	 -re ".*Ending remote debugging.*$gdb_prompt$" {
+	 -re "Ending remote debugging.*$gdb_prompt$" {
 	    if ![isnative] then {
 		warning "Can`t communicate to remote target."
 	    }
@@ -386,7 +386,7 @@ proc gdb_test { args } {
 	    perror "\"$command\" is not a unique command name."
 	    set result 1
 	}
-	 -re ".*Program exited with code \[0-9\]+.*$gdb_prompt $" {
+	 -re "Program exited with code \[0-9\]+.*$gdb_prompt $" {
 	    if ![string match "" $message] then {
 		set errmsg "$message: the program exited"
 	    } else {
@@ -460,35 +460,35 @@ proc test_print_reject { args } {
     }
     send_gdb "$sendthis\n"
     gdb_expect {
-	-re ".*A .* in expression.*\\.*$gdb_prompt $" {
+	-re "A .* in expression.*\\.*$gdb_prompt $" {
 	    pass "reject $sendthis"
 	    return 1
 	}
-	-re ".*Invalid syntax in expression.*$gdb_prompt $" {
+	-re "Invalid syntax in expression.*$gdb_prompt $" {
 	    pass "reject $sendthis"
 	    return 1
 	}
-	-re ".*Junk after end of expression.*$gdb_prompt $" {
+	-re "Junk after end of expression.*$gdb_prompt $" {
 	    pass "reject $sendthis"
 	    return 1
 	}
-	-re ".*Invalid number.*$gdb_prompt $" {
+	-re "Invalid number.*$gdb_prompt $" {
 	    pass "reject $sendthis"
 	    return 1
 	}
-	-re ".*Invalid character constant.*$gdb_prompt $" {
+	-re "Invalid character constant.*$gdb_prompt $" {
 	    pass "reject $sendthis"
 	    return 1
 	}
-	-re ".*No symbol table is loaded.*$gdb_prompt $" {
+	-re "No symbol table is loaded.*$gdb_prompt $" {
 	    pass "reject $sendthis"
 	    return 1
 	}
-	-re ".*No symbol .* in current context.*$gdb_prompt $" {
+	-re "No symbol .* in current context.*$gdb_prompt $" {
 	    pass "reject $sendthis"
 	    return 1
 	}
-	-re ".*$expectthis.*$gdb_prompt $" {
+	-re "$expectthis.*$gdb_prompt $" {
 	    pass "reject $sendthis"
 	    return 1
 	}
@@ -566,17 +566,17 @@ proc gdb_reinitialize_dir { subdir } {
 			-re "Source directories searched.*$gdb_prompt $" {
 			    verbose "Dir set to $subdir"
 			}
-			-re ".*$gdb_prompt $" {
+			-re "$gdb_prompt $" {
 			    perror "Dir \"$subdir\" failed."
 			}
 		    }
 		}
-		-re ".*$gdb_prompt $" {
+		-re "$gdb_prompt $" {
 		    perror "Dir \"$subdir\" failed."
 		}
 	    }
 	}
-	-re ".*$gdb_prompt $" {
+	-re "$gdb_prompt $" {
 	    perror "Dir \"$subdir\" failed."
 	}
     }
@@ -606,7 +606,7 @@ proc default_gdb_exit {} {
     if [is_remote host] {
 	send_gdb "quit\n";
 	gdb_expect {
-	     -re ".*and kill it.*y or n. " {
+	     -re "and kill it.*y or n. " {
 		send_gdb "y\n";
 		exp_continue;
 	    }
@@ -666,7 +666,7 @@ proc gdb_file_cmd { arg } {
                 }
             }
 	}
-        -re ".*No such file or directory.*$gdb_prompt $" {
+        -re "No such file or directory.*$gdb_prompt $" {
             perror "($arg) No such file or directory\n"
             return -1
         }
@@ -729,7 +729,7 @@ proc default_gdb_start { } {
     }
     set timeout 10
     gdb_expect {
-	-re ".*\[\r\n\]$gdb_prompt $" {
+	-re "\[\r\n\]$gdb_prompt $" {
 	    verbose "GDB initialized."
 	}
 	-re "$gdb_prompt $"	{
@@ -751,7 +751,7 @@ proc default_gdb_start { } {
 
     send_gdb "set height 0\n"
     gdb_expect {
-	-re ".*$gdb_prompt $" { 
+	-re "$gdb_prompt $" { 
 	    verbose "Setting height to 0." 2
 	}
 	timeout {
@@ -761,7 +761,7 @@ proc default_gdb_start { } {
     # force the width to "unlimited", so no wraparound occurs
     send_gdb "set width 0\n"
     gdb_expect {
-	-re ".*$gdb_prompt $" {
+	-re "$gdb_prompt $" {
 	    verbose "Setting width to 0." 2
 	}
 	timeout {
@@ -890,8 +890,14 @@ proc gdb_suppress_tests { args } {
 proc gdb_stop_suppressing_tests { } {
     global suppress_flag;
 
-    set suppress_flag 0;
-    clone_output "Tests restarted.\n";
+    if [info exists suppress_flag] {
+	if { $suppress_flag != 0 } {
+	    set suppress_flag 0;
+	    clone_output "Tests restarted.\n";
+	}
+    } else {
+	set suppress_flag 0;
+    }
 }
 
 proc gdb_start { } {
