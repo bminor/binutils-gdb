@@ -3754,6 +3754,8 @@ sh_elf_create_dynamic_sections (abfd, info)
     }
 
   htab = sh_elf_hash_table (info);
+  if (htab->root.dynamic_sections_created)
+    return TRUE;
 
   /* We need to create .plt, .rel[a].plt, .got, .got.plt, .dynbss, and
      .rel[a].bss sections.  */
@@ -3768,16 +3770,12 @@ sh_elf_create_dynamic_sections (abfd, info)
   if (bed->plt_readonly)
     pltflags |= SEC_READONLY;
 
-  s = htab->splt;
-  if (s == NULL)
-    {
-      s = bfd_make_section (abfd, ".plt");
-      htab->splt = s;
-      if (s == NULL
-	  || ! bfd_set_section_flags (abfd, s, pltflags)
-	  || ! bfd_set_section_alignment (abfd, s, bed->plt_alignment))
-	return FALSE;
-    }
+  s = bfd_make_section (abfd, ".plt");
+  htab->splt = s;
+  if (s == NULL
+      || ! bfd_set_section_flags (abfd, s, pltflags)
+      || ! bfd_set_section_alignment (abfd, s, bed->plt_alignment))
+    return FALSE;
 
   if (bed->want_plt_sym)
     {
@@ -3801,17 +3799,13 @@ sh_elf_create_dynamic_sections (abfd, info)
 	return FALSE;
     }
 
-  if (htab->srelplt == NULL)
-    {
-      s = bfd_make_section (abfd,
-			    (bed->default_use_rela_p ?
-			     ".rela.plt" : ".rel.plt"));
-      htab->srelplt = s;
-      if (s == NULL
-	  || ! bfd_set_section_flags (abfd, s, flags | SEC_READONLY)
-	  || ! bfd_set_section_alignment (abfd, s, ptralign))
-	return FALSE;
-    }
+  s = bfd_make_section (abfd,
+			bed->default_use_rela_p ? ".rela.plt" : ".rel.plt");
+  htab->srelplt = s;
+  if (s == NULL
+      || ! bfd_set_section_flags (abfd, s, flags | SEC_READONLY)
+      || ! bfd_set_section_alignment (abfd, s, ptralign))
+    return FALSE;
 
   if (htab->sgot == NULL
       && !create_got_section (abfd, info))
@@ -3851,14 +3845,11 @@ sh_elf_create_dynamic_sections (abfd, info)
 	 image and use a R_*_COPY reloc to tell the dynamic linker to
 	 initialize them at run time.  The linker script puts the .dynbss
 	 section into the .bss section of the final image.  */
-      if (htab->sdynbss == NULL)
-	{
-	  s = bfd_make_section (abfd, ".dynbss");
-	  htab->sdynbss = s;
-	  if (s == NULL
-	      || ! bfd_set_section_flags (abfd, s, SEC_ALLOC))
-	    return FALSE;
-	}
+      s = bfd_make_section (abfd, ".dynbss");
+      htab->sdynbss = s;
+      if (s == NULL
+	  || ! bfd_set_section_flags (abfd, s, SEC_ALLOC))
+	return FALSE;
 
       /* The .rel[a].bss section holds copy relocs.  This section is not
 	 normally needed.  We need to create it here, though, so that the
@@ -3871,7 +3862,7 @@ sh_elf_create_dynamic_sections (abfd, info)
 	 be needed, we can discard it later.  We will never need this
 	 section when generating a shared object, since they do not use
 	 copy relocs.  */
-      if (! info->shared && htab->srelbss == NULL)
+      if (! info->shared)
 	{
 	  s = bfd_make_section (abfd,
 				(bed->default_use_rela_p
