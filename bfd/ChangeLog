@@ -1,3 +1,8 @@
+Sun Nov 29 08:37:13 1992  Fred Fish  (fnf@cygnus.com)
+
+	* aoutx.h (some_aout_object_p):  Protect arg prototype in
+	callback_to_real_object_p with PARAMS macro for non-ANSI compilers.
+
 Sat Nov 28 04:01:21 1992  John Gilmore  (gnu@cygnus.com)
 
 	* aout-target.h, aoutf1.h, trad-core.c, coffcode.h, libaout.h,

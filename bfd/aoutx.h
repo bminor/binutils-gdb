@@ -339,7 +339,7 @@ bfd_target *
 DEFUN(NAME(aout,some_aout_object_p),(abfd, execp, callback_to_real_object_p),
       bfd *abfd AND
       struct internal_exec *execp AND
-      bfd_target *(*callback_to_real_object_p) (bfd *))
+      bfd_target *(*callback_to_real_object_p) PARAMS ((bfd *)))
 {
   struct aout_data_struct *rawptr, *oldrawptr;
   bfd_target *result;
