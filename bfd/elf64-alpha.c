@@ -554,7 +554,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
 	 false,			/* partial_inplace */
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
-	 false),		/* pcrel_offset */
+	 true),			/* pcrel_offset */
 
   /* 32 bit PC relative offset.  */
   HOWTO (R_ALPHA_SREL32,	/* type */
@@ -569,7 +569,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
 	 false,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 false),		/* pcrel_offset */
+	 true),			/* pcrel_offset */
 
   /* A 64 bit PC relative offset.  */
   HOWTO (R_ALPHA_SREL64,	/* type */
@@ -584,7 +584,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
 	 false,			/* partial_inplace */
 	 MINUS_ONE,		/* src_mask */
 	 MINUS_ONE,		/* dst_mask */
-	 false),		/* pcrel_offset */
+	 true),			/* pcrel_offset */
 
   /* Push a value on the reloc evaluation stack.  */
   /* Not implemented -- it's dumb.  */
