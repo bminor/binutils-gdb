@@ -1,3 +1,10 @@
+2004-01-13  Daniel Jacobowitz  <drow@mvista.com>
+
+	* elf32-arm.h (elf32_arm_final_link_relocate): Check that we created
+	the .plt section.
+	(elf32_arm_check_relocs): Don't increment the PLT refcount for
+	relocs which would not use the PLT.
+
 2004-01-13  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (ppc64_elf_check_relocs): Ignore !SEC_ALLOC relocs.
