@@ -173,11 +173,12 @@ news_frame_num_args (struct frame_info *fi)
    We use the BFD routines to store a big-endian value of known size.  */
 
 void
-m68k_fix_call_dummy(char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs, 
-		    struct value **args, struct type *type, int gcc_p)
+m68k_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
+		     struct value **args, struct type *type, int gcc_p)
 {
-  bfd_putb32 (fun,     (unsigned char *) dummy + CALL_DUMMY_START_OFFSET + 2);  
-  bfd_putb32 (nargs*4, (unsigned char *) dummy + CALL_DUMMY_START_OFFSET + 8);
+  bfd_putb32 (fun, (unsigned char *) dummy + CALL_DUMMY_START_OFFSET + 2);
+  bfd_putb32 (nargs * 4,
+	      (unsigned char *) dummy + CALL_DUMMY_START_OFFSET + 8);
 }
 
 
@@ -235,7 +236,8 @@ m68k_pop_frame (void)
     {
       if (frame->saved_regs[regnum])
 	{
-	  write_register (regnum, read_memory_integer (frame->saved_regs[regnum], 4));
+	  write_register (regnum,
+			  read_memory_integer (frame->saved_regs[regnum], 4));
 	}
     }
   if (frame->saved_regs[PS_REGNUM])
@@ -711,9 +713,10 @@ m68k_saved_pc_after_call (struct frame_info *frame)
 static struct gdbarch *
 m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  static LONGEST call_dummy_words[7] = {0xf227e0ff, 0x48e7fffc, 0x426742e7, 
-					0x4eb93232, 0x3232dffc, 0x69696969, 
-					(0x4e404e71 | (BPT_VECTOR << 16))};
+  static LONGEST call_dummy_words[7] = { 0xf227e0ff, 0x48e7fffc, 0x426742e7,
+    0x4eb93232, 0x3232dffc, 0x69696969,
+    (0x4e404e71 | (BPT_VECTOR << 16))
+  };
   struct gdbarch_tdep *tdep = NULL;
   struct gdbarch *gdbarch;
 
@@ -729,24 +732,24 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   gdbarch = gdbarch_alloc (&info, 0);
 
   set_gdbarch_frame_init_saved_regs (gdbarch, m68k_frame_init_saved_regs);
-  
+
   set_gdbarch_use_generic_dummy_frames (gdbarch, 0);
   set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
   set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
-  set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 24); 
+  set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 24);
   set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_on_stack);
   set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
   set_gdbarch_call_dummy_length (gdbarch, 28);
   set_gdbarch_call_dummy_start_offset (gdbarch, 12);
-  
+
   set_gdbarch_call_dummy_words (gdbarch, call_dummy_words);
   set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof (call_dummy_words));
   set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
   set_gdbarch_fix_call_dummy (gdbarch, m68k_fix_call_dummy);
   set_gdbarch_push_dummy_frame (gdbarch, m68k_push_dummy_frame);
   set_gdbarch_pop_frame (gdbarch, m68k_pop_frame);
- 
+
   return gdbarch;
 }
 
