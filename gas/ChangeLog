@@ -1,3 +1,24 @@
+2004-10-05  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (unwind): New variable.
+	(vfp_sp_encode_reg): New function.
+	(vfp_sp_reg_required_here): Use it.
+	(vfp_sp_reg_list, vfp_dp_reg_list): Remove.
+	(vfp_parse_reg_list): New function.
+	(s_arm_unwind_fnstart, s_arm_unwind_fnend, s_arm_unwind_cantunwind,
+	s_arm_unwind_personality, s_arm_unwind_personalityindex,
+	s_arm_unwind_handlerdata, s_arm_unwind_save, s_arm_unwind_movsp,
+	s_arm_unwind_pad, s_arm_unwind_setfp, s_arm_unwind_raw): New
+	functions.
+	(md_pseudo_table): Add them.
+	(do_vfp_reg2_from_sp2): Use vfp_parse_reg_list and vfp_sp_encode_reg.
+	(do_vfp_sp2_from_reg2, vfp_sp_ldstm, vfp_dp_ldstm): Ditto.
+	(set_section, add_unwind_adjustsp, flush_pending_unwind,
+	finish_unwind_opcodes, start_unwind_section, create_unwind_entry,
+	require_hashconst, add_unwind_opcode): New functions.
+	* doc/tc-arm.text: Document unwinding opcodes.
+	* NEWS: Mention the new feature.
+
 2004-10-04  Eric Christopher  <echristo@redhat.com>
 
 	* config/tc-mips.c (md_apply_fix3): Remove erroneous assert.

@@ -58,10 +58,11 @@ if {[istarget *arm*-*-*] || [istarget "xscale-*-*"]} then {
     run_errors_test "r15-bad" "" "Invalid use of r15 errors"
     run_errors_test "undefined" "" "Undefined local label error"
 
-    if {[istarget *-*-elf*] || [istarget *-*-linux*]} then {
+    if {[istarget *-*-*elf*] || [istarget *-*-linux*] || [istarget *-*-*eabi]} then {
 	run_dump_test "pic"
 	run_dump_test "mapping"
 	gas_test "bignum1.s" "" $stdoptlist "bignums"
+	run_dump_test "unwind"
     }
 
     if {! [istarget arm*-*-aout] && ![istarget arm-*-pe]} then {

@@ -43,8 +43,45 @@
 #include "dwarf2dbg.h"
 #endif
 
-/* XXX Set this to 1 after the next binutils release */
+/* XXX Set this to 1 after the next binutils release.  */
 #define WARN_DEPRECATED 0
+
+#ifdef OBJ_ELF
+/* Must be at least the size of the largest unwind opcode (currently two).  */
+#define ARM_OPCODE_CHUNK_SIZE 8
+
+/* This structure holds the unwinding state.  */
+
+static struct
+{
+  symbolS *       proc_start;
+  symbolS *       table_entry;
+  symbolS *       personality_routine;
+  int             personality_index;
+  /* The segment containing the function.  */
+  segT            saved_seg;
+  subsegT         saved_subseg;
+  /* Opcodes generated from this function.  */
+  unsigned char * opcodes;
+  int             opcode_count;
+  int             opcode_alloc;
+  /* The number of bytes pushed to the stack.  */
+  offsetT         frame_size;
+  /* We don't add stack adjustment opcodes immediately so that we can merge
+     multiple adjustments.  We can also omit the final adjustment
+     when using a frame pointer.  */
+  offsetT         pending_offset;
+  /* These two fields are set by both unwind_movsp and unwind_setfp.  They
+     hold the reg+offset to use when restoring sp from a frame pointer.  */
+  offsetT         fp_offset;
+  int             fp_reg;
+  /* Nonzero if an unwind_setfp directive has been seen.  */
+  unsigned        fp_used:1;
+  /* Nonzero if the last opcode restores sp from fp_reg.  */
+  unsigned        sp_restored:1;
+} unwind;
+
+#endif /* OBJ_ELF */
 
 enum arm_float_abi
 {
@@ -7270,32 +7307,40 @@ do_fpa_to_reg (char * str)
   end_of_line (str);
 }
 
+/* Encode a VFP SP register number.  */
+
+static void
+vfp_sp_encode_reg (int reg, enum vfp_sp_reg_pos pos)
+{
+  switch (pos)
+    {
+    case VFP_REG_Sd:
+      inst.instruction |= ((reg >> 1) << 12) | ((reg & 1) << 22);
+      break;
+
+    case VFP_REG_Sn:
+      inst.instruction |= ((reg >> 1) << 16) | ((reg & 1) << 7);
+      break;
+
+    case VFP_REG_Sm:
+      inst.instruction |= ((reg >> 1) << 0) | ((reg & 1) << 5);
+      break;
+
+    default:
+      abort ();
+    }
+}
+
 static int
 vfp_sp_reg_required_here (char ** str,
 			  enum vfp_sp_reg_pos pos)
 {
   int    reg;
-  char *start = *str;
+  char * start = *str;
 
   if ((reg = arm_reg_parse (str, all_reg_maps[REG_TYPE_SN].htab)) != FAIL)
     {
-      switch (pos)
-	{
-	case VFP_REG_Sd:
-	  inst.instruction |= ((reg >> 1) << 12) | ((reg & 1) << 22);
-	  break;
-
-	case VFP_REG_Sn:
-	  inst.instruction |= ((reg >> 1) << 16) | ((reg & 1) << 7);
-	  break;
-
-	case VFP_REG_Sm:
-	  inst.instruction |= ((reg >> 1) << 0) | ((reg & 1) << 5);
-	  break;
-
-	default:
-	  abort ();
-	}
+      vfp_sp_encode_reg (reg, pos);
       return reg;
     }
 
@@ -7445,21 +7490,21 @@ do_vfp_reg_from_sp (char * str)
   end_of_line (str);
 }
 
-/* Parse and encode a VFP SP register list, storing the initial
-   register in position POS and returning the range as the result.  If
-   the string is invalid return FAIL (an invalid range).  */
+/* Parse a VFP register list.  If the string is invalid return FAIL.
+   Otherwise return the number of registers, and set PBASE to the first
+   register.  Double precision registers are matched if DP is nonzero.  */
 
-static long
-vfp_sp_reg_list (char ** str, enum vfp_sp_reg_pos pos)
+static int
+vfp_parse_reg_list (char **str, int *pbase, int dp)
 {
-  long range = 0;
-  int base_reg = 0;
+  int base_reg;
   int new_base;
-  long base_bits = 0;
+  int regtype;
+  int max_regs;
   int count = 0;
-  long tempinst;
-  unsigned long mask = 0;
   int warned = 0;
+  unsigned long mask = 0;
+  int i;
 
   if (**str != '{')
     return FAIL;
@@ -7467,20 +7512,30 @@ vfp_sp_reg_list (char ** str, enum vfp_sp_reg_pos pos)
   (*str)++;
   skip_whitespace (*str);
 
-  tempinst = inst.instruction;
+  if (dp)
+    {
+      regtype = REG_TYPE_DN;
+      max_regs = 16;
+    }
+  else
+    {
+      regtype = REG_TYPE_SN;
+      max_regs = 32;
+    }
+
+  base_reg = max_regs;
 
   do
     {
-      inst.instruction = 0;
-
-      if ((new_base = vfp_sp_reg_required_here (str, pos)) == FAIL)
-	return FAIL;
-
-      if (count == 0 || base_reg > new_base)
+      new_base = arm_reg_parse (str, all_reg_maps[regtype].htab);
+      if (new_base == FAIL)
 	{
-	  base_reg = new_base;
-	  base_bits = inst.instruction;
+	  inst.error = _(all_reg_maps[regtype].expected);
+	  return FAIL;
 	}
+
+      if (new_base < base_reg)
+	base_reg = new_base;
 
       if (mask & (1 << new_base))
 	{
@@ -7506,10 +7561,10 @@ vfp_sp_reg_list (char ** str, enum vfp_sp_reg_pos pos)
 	  (*str)++;
 
 	  if ((high_range
-	       = arm_reg_parse (str, all_reg_maps[REG_TYPE_SN].htab))
+	       = arm_reg_parse (str, all_reg_maps[regtype].htab))
 	      == FAIL)
 	    {
-	      inst.error = _(all_reg_maps[REG_TYPE_SN].expected);
+	      inst.error = _(all_reg_maps[regtype].expected);
 	      return FAIL;
 	    }
 
@@ -7534,37 +7589,33 @@ vfp_sp_reg_list (char ** str, enum vfp_sp_reg_pos pos)
     }
   while (skip_past_comma (str) != FAIL);
 
-  if (**str != '}')
-    {
-      inst.error = _("invalid register list");
-      return FAIL;
-    }
-
   (*str)++;
 
-  range = count;
-
   /* Sanity check -- should have raised a parse error above.  */
-  if (count == 0 || count > 32)
+  if (count == 0 || count > max_regs)
     abort ();
 
+  *pbase = base_reg;
+
   /* Final test -- the registers must be consecutive.  */
-  while (count--)
+  mask >>= base_reg;
+  for (i = 0; i < count; i++)
     {
-      if ((mask & (1 << base_reg++)) == 0)
+      if ((mask & (1u << i)) == 0)
 	{
 	  inst.error = _("non-contiguous register range");
 	  return FAIL;
 	}
     }
 
-  inst.instruction = tempinst | base_bits;
-  return range;
+  return count;
 }
 
 static void
 do_vfp_reg2_from_sp2 (char * str)
 {
+  int reg;
+
   skip_whitespace (str);
 
   if (reg_required_here (&str, 12) == FAIL
@@ -7578,11 +7629,12 @@ do_vfp_reg2_from_sp2 (char * str)
     }
 
   /* We require exactly two consecutive SP registers.  */
-  if (vfp_sp_reg_list (&str, VFP_REG_Sm) != 2)
+  if (vfp_parse_reg_list (&str, &reg, 0) != 2)
     {
       if (! inst.error)
 	inst.error = _("only two consecutive VFP SP registers allowed here");
     }
+  vfp_sp_encode_reg (reg, VFP_REG_Sm);
 
   end_of_line (str);
 }
@@ -7609,14 +7661,17 @@ do_vfp_sp_from_reg (char * str)
 static void
 do_vfp_sp2_from_reg2 (char * str)
 {
+  int reg;
+
   skip_whitespace (str);
 
   /* We require exactly two consecutive SP registers.  */
-  if (vfp_sp_reg_list (&str, VFP_REG_Sm) != 2)
+  if (vfp_parse_reg_list (&str, &reg, 0) != 2)
     {
       if (! inst.error)
 	inst.error = _("only two consecutive VFP SP registers allowed here");
     }
+  vfp_sp_encode_reg (reg, VFP_REG_Sm);
 
   if (skip_past_comma (&str) == FAIL
       || reg_required_here (&str, 12) == FAIL
@@ -7851,122 +7906,12 @@ do_vfp_dp_ldst (char * str)
   end_of_line (str);
 }
 
-static long
-vfp_dp_reg_list (char ** str)
-{
-  long range = 0;
-  int base_reg = 0;
-  int new_base;
-  int count = 0;
-  long tempinst;
-  unsigned long mask = 0;
-  int warned = 0;
-
-  if (**str != '{')
-    return FAIL;
-
-  (*str)++;
-  skip_whitespace (*str);
-
-  tempinst = inst.instruction;
-
-  do
-    {
-      inst.instruction = 0;
-
-      if ((new_base = vfp_dp_reg_required_here (str, VFP_REG_Dd)) == FAIL)
-	return FAIL;
-
-      if (count == 0 || base_reg > new_base)
-	{
-	  base_reg = new_base;
-	  range = inst.instruction;
-	}
-
-      if (mask & (1 << new_base))
-	{
-	  inst.error = _("invalid register list");
-	  return FAIL;
-	}
-
-      if ((mask >> new_base) != 0 && ! warned)
-	{
-	  as_tsktsk (_("register list not in ascending order"));
-	  warned = 1;
-	}
-
-      mask |= 1 << new_base;
-      count++;
-
-      skip_whitespace (*str);
-
-      if (**str == '-') /* We have the start of a range expression */
-	{
-	  int high_range;
-
-	  (*str)++;
-
-	  if ((high_range
-	       = arm_reg_parse (str, all_reg_maps[REG_TYPE_DN].htab))
-	      == FAIL)
-	    {
-	      inst.error = _(all_reg_maps[REG_TYPE_DN].expected);
-	      return FAIL;
-	    }
-
-	  if (high_range <= new_base)
-	    {
-	      inst.error = _("register range not in ascending order");
-	      return FAIL;
-	    }
-
-	  for (new_base++; new_base <= high_range; new_base++)
-	    {
-	      if (mask & (1 << new_base))
-		{
-		  inst.error = _("invalid register list");
-		  return FAIL;
-		}
-
-	      mask |= 1 << new_base;
-	      count++;
-	    }
-	}
-    }
-  while (skip_past_comma (str) != FAIL);
-
-  if (**str != '}')
-    {
-      inst.error = _("invalid register list");
-      return FAIL;
-    }
-
-  (*str)++;
-
-  range |= 2 * count;
-
-  /* Sanity check -- should have raised a parse error above.  */
-  if (count == 0 || count > 16)
-    abort ();
-
-  /* Final test -- the registers must be consecutive.  */
-  while (count--)
-    {
-      if ((mask & (1 << base_reg++)) == 0)
-	{
-	  inst.error = _("non-contiguous register range");
-	  return FAIL;
-	}
-    }
-
-  inst.instruction = tempinst;
-  return range;
-}
 
 static void
 vfp_sp_ldstm (char * str, enum vfp_ldstm_type ldstm_type)
 {
-  long range;
+  int count;
+  int reg;
 
   skip_whitespace (str);
 
@@ -7987,21 +7932,23 @@ vfp_sp_ldstm (char * str, enum vfp_ldstm_type ldstm_type)
     }
 
   if (skip_past_comma (&str) == FAIL
-      || (range = vfp_sp_reg_list (&str, VFP_REG_Sd)) == FAIL)
+      || (count = vfp_parse_reg_list (&str, &reg, 0)) == FAIL)
     {
       if (!inst.error)
 	inst.error = BAD_ARGS;
       return;
     }
+  vfp_sp_encode_reg (reg, VFP_REG_Sd);
 
-  inst.instruction |= range;
+  inst.instruction |= count;
   end_of_line (str);
 }
 
 static void
 vfp_dp_ldstm (char * str, enum vfp_ldstm_type ldstm_type)
 {
-  long range;
+  int count;
+  int reg;
 
   skip_whitespace (str);
 
@@ -8022,17 +7969,18 @@ vfp_dp_ldstm (char * str, enum vfp_ldstm_type ldstm_type)
     }
 
   if (skip_past_comma (&str) == FAIL
-      || (range = vfp_dp_reg_list (&str)) == FAIL)
+      || (count = vfp_parse_reg_list (&str, &reg, 1)) == FAIL)
     {
       if (!inst.error)
 	inst.error = BAD_ARGS;
       return;
     }
 
+  count <<= 1;
   if (ldstm_type == VFP_LDSTMIAX || ldstm_type == VFP_LDSTMDBX)
-    range += 1;
+    count += 1;
 
-  inst.instruction |= range;
+  inst.instruction |= (reg << 12) | count;
   end_of_line (str);
 }
 
@@ -10071,7 +10019,7 @@ static const struct asm_opcode insns[] =
   { "wfe",       0xe320f002, 3,  ARM_EXT_V6K,      do_empty},
   { "wfi",       0xe320f003, 3,  ARM_EXT_V6K,      do_empty},
   { "yield",     0xe320f001, 5,  ARM_EXT_V6K,      do_empty},
-  
+
   /*  ARM V6Z.  */
   { "smi",       0xe1600070, 3,  ARM_EXT_V6Z,      do_smi},
 
@@ -13692,6 +13640,1128 @@ s_arm_rel31 (int ignored ATTRIBUTE_UNUSED)
 
   demand_empty_rest_of_line ();
 }
+
+/* Code to deal with unwinding tables.  */
+
+static void add_unwind_adjustsp (offsetT);
+
+/* Switch to section NAME and create section if necessary.  It's
+   rather ugly that we have to manipulate input_line_pointer but I
+   don't see any other way to accomplish the same thing without
+   changing obj-elf.c (which may be the Right Thing, in the end).
+   Copied from tc-ia64.c.  */
+
+static void
+set_section (char *name)
+{
+  char *saved_input_line_pointer;
+
+  saved_input_line_pointer = input_line_pointer;
+  input_line_pointer = name;
+  obj_elf_section (0);
+  input_line_pointer = saved_input_line_pointer;
+}
+
+/* Cenerate and deferred unwind frame offset.  */
+
+static void
+flush_pending_unwind (void)
+{
+  offsetT offset;
+
+  offset = unwind.pending_offset;
+  unwind.pending_offset = 0;
+  if (offset != 0)
+    add_unwind_adjustsp (offset);
+}
+
+/* Add an opcode to this list for this function.  Two-byte opcodes should
+   be passed as op[0] << 8 | op[1].  The list of opcodes is built in reverse
+   order.  */
+
+static void
+add_unwind_opcode (valueT op, int length)
+{
+  /* Add any deferred stack adjustment.  */
+  if (unwind.pending_offset)
+    flush_pending_unwind ();
+
+  unwind.sp_restored = 0;
+
+  if (unwind.opcode_count + length > unwind.opcode_alloc)
+    {
+      unwind.opcode_alloc += ARM_OPCODE_CHUNK_SIZE;
+      if (unwind.opcodes)
+	unwind.opcodes = xrealloc (unwind.opcodes,
+				   unwind.opcode_alloc);
+      else
+	unwind.opcodes = xmalloc (unwind.opcode_alloc);
+    }
+  while (length > 0)
+    {
+      length--;
+      unwind.opcodes[unwind.opcode_count] = op & 0xff;
+      op >>= 8;
+      unwind.opcode_count++;
+    }
+}
+
+/* Add unwind opcodes to adjust the stack pointer.  */
+
+static void
+add_unwind_adjustsp (offsetT offset)
+{
+  valueT op;
+
+  if (offset > 0x200)
+    {
+      /* We need at most 5 bytes to hold a 32-bit value in a uleb128.  */
+      char bytes[5];
+      int n;
+      valueT o;
+
+      /* Long form: 0xb2, uleb128.  */
+      /* This might not fit in a word so add the individual bytes,
+	 remembering the list is built in reverse order.  */
+      o = (valueT) ((offset - 0x204) >> 2);
+      if (o == 0)
+	add_unwind_opcode (0, 1);
+
+      /* Calculate the uleb128 encoding of the offset.  */
+      n = 0;
+      while (o)
+	{
+	  bytes[n] = o & 0x7f;
+	  o >>= 7;
+	  if (o)
+	    bytes[n] |= 0x80;
+	  n++;
+	}
+      /* Add the insn.  */
+      for (; n; n--)
+	add_unwind_opcode (bytes[n - 1], 1);
+      add_unwind_opcode (0xb2, 1);
+    }
+  else if (offset > 0x100)
+    {
+      /* Two short opcodes.  */
+      add_unwind_opcode (0x3f, 1);
+      op = (offset - 0x104) >> 2;
+      add_unwind_opcode (op, 1);
+    }
+  else if (offset > 0)
+    {
+      /* Short opcode.  */
+      op = (offset - 4) >> 2;
+      add_unwind_opcode (op, 1);
+    }
+  else if (offset < 0)
+    {
+      offset = -offset;
+      while (offset > 0x100)
+	{
+	  add_unwind_opcode (0x7f, 1);
+	  offset -= 0x100;
+	}
+      op = ((offset - 4) >> 2) | 0x40;
+      add_unwind_opcode (op, 1);
+    }
+}
+
+/* Finish the list of unwind opcodes for this function.  */
+static void
+finish_unwind_opcodes (void)
+{
+  valueT op;
+
+  if (unwind.fp_used)
+    {
+      /* Adjust sp as neccessary.  */
+      unwind.pending_offset += unwind.fp_offset - unwind.frame_size;
+      flush_pending_unwind ();
+
+      /* After restoring sp from the frame pointer.  */
+      op = 0x90 | unwind.fp_reg;
+      add_unwind_opcode (op, 1);
+    }
+  else
+    flush_pending_unwind ();
+}
+
+
+/* Start an exception table entry.  If idx is nonzero this is an index table
+   entry.  */
+
+static void
+start_unwind_section (const segT text_seg, int idx)
+{
+  const char * text_name;
+  const char * prefix;
+  const char * prefix_once;
+  size_t prefix_len;
+  size_t text_len;
+  char * sec_name;
+  size_t sec_name_len;
+
+  if (idx)
+    {
+      prefix = ELF_STRING_ARM_unwind;
+      prefix_once = ELF_STRING_ARM_unwind_once;
+    }
+  else
+    {
+      prefix = ELF_STRING_ARM_unwind_info;
+      prefix_once = ELF_STRING_ARM_unwind_info_once;
+    }
+
+  text_name = segment_name (text_seg);
+  if (streq (text_name, ".text"))
+    text_name = "";
+
+  if (strncmp (text_name, ".gnu.linkonce.t.",
+	       strlen (".gnu.linkonce.t.")) == 0)
+    {
+      prefix = prefix_once;
+      text_name += strlen (".gnu.linkonce.t.");
+    }
+
+  prefix_len = strlen (prefix);
+  text_len = strlen (text_name);
+  sec_name_len = prefix_len + text_len;
+  sec_name = alloca (sec_name_len + 1);
+  memcpy (sec_name, prefix, prefix_len);
+  memcpy (sec_name + prefix_len, text_name, text_len);
+  sec_name[prefix_len + text_len] = '\0';
+
+  /* Handle COMDAT group.  */
+  if (prefix != prefix_once && (text_seg->flags & SEC_LINK_ONCE) != 0)
+    {
+      char *section;
+      size_t len, group_name_len;
+      const char *group_name = elf_group_name (text_seg);
+
+      if (group_name == NULL)
+        {
+          as_bad ("Group section `%s' has no group signature",
+                  segment_name (text_seg));
+          ignore_rest_of_line ();
+          return;
+        }
+      /* We have to construct a fake section directive.  */
+      group_name_len = strlen (group_name);
+      if (idx)
+	prefix_len = 13;
+      else
+	prefix_len = 16;
+
+      len = (sec_name_len
+             + prefix_len             /* ,"aG",%sectiontype,  */
+             + group_name_len         /* ,group_name  */
+             + 7);                    /* ,comdat  */
+
+      section = alloca (len + 1);
+      memcpy (section, sec_name, sec_name_len);
+      if (idx)
+	  memcpy (section + sec_name_len, ",\"aG\",%exidx,", 13);
+      else
+	  memcpy (section + sec_name_len, ",\"aG\",%progbits,", 16);
+      memcpy (section + sec_name_len + prefix_len, group_name, group_name_len);
+      memcpy (section + len - 7, ",comdat", 7);
+      section [len] = '\0';
+      set_section (section);
+    }
+  else
+    {
+      set_section (sec_name);
+      bfd_set_section_flags (stdoutput, now_seg,
+			     SEC_LOAD | SEC_ALLOC | SEC_READONLY);
+    }
+
+  /* Set the setion link for index tables.  */
+  if (idx)
+    elf_linked_to_section (now_seg) = text_seg;
+}
+
+
+/* Start an unwind table entry.  HAVE_DATA is nonzero if we have additional
+   personality routine data.  Returns zero, or the index table value for
+   and inline entry.  */
+
+static valueT
+create_unwind_entry (int have_data)
+{
+  int size;
+  addressT where;
+  unsigned char *ptr;
+  /* The current word of data.  */
+  valueT data;
+  /* The number of bytes left in this word.  */
+  int n;
+
+  finish_unwind_opcodes ();
+
+  /* Remember the current text section.  */
+  unwind.saved_seg = now_seg;
+  unwind.saved_subseg = now_subseg;
+
+  start_unwind_section (now_seg, 0);
+
+  if (unwind.personality_routine == NULL)
+    {
+      if (unwind.personality_index == -2)
+	{
+	  if (have_data)
+	    as_bad (_("handerdata in cantunwind frame"));
+	  return 1; /* EXIDX_CANTUNWIND.  */
+	}
+
+      /* Use a default personality routine if none is specified.  */
+      if (unwind.personality_index == -1)
+	{
+	  if (unwind.opcode_count > 3)
+	    unwind.personality_index = 1;
+	  else
+	    unwind.personality_index = 0;
+	}
+
+      /* Space for the personality routine entry.  */
+      if (unwind.personality_index == 0)
+	{
+	  if (unwind.opcode_count > 3)
+	    as_bad (_("too many unwind opcodes for personality routine 0"));
+
+	  if (!have_data)
+	    {
+	      /* All the data is inline in the index table.  */
+	      data = 0x80;
+	      n = 3;
+	      while (unwind.opcode_count > 0)
+		{
+		  unwind.opcode_count--;
+		  data = (data << 8) | unwind.opcodes[unwind.opcode_count];
+		  n--;
+		}
+
+	      /* Pad with "finish" opcodes.  */
+	      while (n--)
+		data = (data << 8) | 0xb0;
+
+	      return data;
+	    }
+	  size = 0;
+	}
+      else
+	/* We get two opcodes "free" in the first word.  */
+	size = unwind.opcode_count - 2;
+    }
+  else
+    /* An extra byte is required for the opcode count.  */
+    size = unwind.opcode_count + 1;
+
+  size = (size + 3) >> 2;
+  if (size > 0xff)
+    as_bad (_("too many unwind opcodes"));
+
+  frag_align (2, 0, 0);
+  record_alignment (now_seg, 2);
+  unwind.table_entry = expr_build_dot ();
+
+  /* Allocate the table entry.  */
+  ptr = frag_more ((size << 2) + 4);
+  where = frag_now_fix () - ((size << 2) + 4);
+
+  switch (unwind.personality_index)
+    {
+    case -1:
+      /* ??? Should this be a PLT generating relocation?  */
+      /* Custom personality routine.  */
+      fix_new (frag_now, where, 4, unwind.personality_routine, 0, 1,
+	       BFD_RELOC_ARM_PREL31);
+      where += 4;
+      ptr += 4;
+
+      /* Set the first byte to the number of additional words.  */
+      data = size - 1;
+      n = 3;
+      break;
+
+    /* ABI defined personality routines.  */
+    /* TODO: Emit R_ARM_NONE to the personality routine.  */
+    case 0:
+      /* Three opcodes bytes are packed into the first word.  */
+      data = 0x80;
+      n = 3;
+      break;
+
+    case 1:
+    case 2:
+      /* The size and first two opcode bytes go in the first word.  */
+      data = ((0x80 + unwind.personality_index) << 8) | size;
+      n = 2;
+      break;
+
+    default:
+      /* Should never happen.  */
+      abort ();
+    }
+
+  /* Pack the opcodes into words (MSB first), reversing the list at the same
+     time.  */
+  while (unwind.opcode_count > 0)
+    {
+      if (n == 0)
+	{
+	  md_number_to_chars (ptr, data, 4);
+	  ptr += 4;
+	  n = 4;
+	  data = 0;
+	}
+      unwind.opcode_count--;
+      n--;
+      data = (data << 8) | unwind.opcodes[unwind.opcode_count];
+    }
+
+  /* Finish off the last word.  */
+  if (n < 4)
+    {
+      /* Pad with "finish" opcodes.  */
+      while (n--)
+	data = (data << 8) | 0xb0;
+
+      md_number_to_chars (ptr, data, 4);
+    }
+
+  if (!have_data)
+    {
+      /* Add an empty descriptor if there is no user-specified data.   */
+      ptr = frag_more (4);
+      md_number_to_chars (ptr, 0, 4);
+    }
+
+  return 0;
+}
+
+
+/* Parse an unwind_fnstart directive.  Simply records the current location.  */
+
+static void
+s_arm_unwind_fnstart (int ignored ATTRIBUTE_UNUSED)
+{
+  demand_empty_rest_of_line ();
+  /* Mark the start of the function.  */
+  unwind.proc_start = expr_build_dot ();
+
+  /* Reset the rest of the unwind info.  */
+  unwind.opcode_count = 0;
+  unwind.table_entry = NULL;
+  unwind.personality_routine = NULL;
+  unwind.personality_index = -1;
+  unwind.frame_size = 0;
+  unwind.fp_offset = 0;
+  unwind.fp_reg = 13;
+  unwind.fp_used = 0;
+  unwind.sp_restored = 0;
+}
+
+
+/* Parse a handlerdata directive.  Creates the exception handling table entry
+   for the function.  */
+
+static void
+s_arm_unwind_handlerdata (int ignored ATTRIBUTE_UNUSED)
+{
+  demand_empty_rest_of_line ();
+  if (unwind.table_entry)
+    as_bad (_("dupicate .handlerdata directive"));
+
+  create_unwind_entry (1);
+}
+
+/* Parse an unwind_fnend directive.  Generates the index table entry.  */
+
+static void
+s_arm_unwind_fnend (int ignored ATTRIBUTE_UNUSED)
+{
+  long where;
+  unsigned char *ptr;
+  valueT val;
+
+  demand_empty_rest_of_line ();
+
+  /* Add eh table entry.  */
+  if (unwind.table_entry == NULL)
+    val = create_unwind_entry (0);
+  else
+    val = 0;
+
+  /* Add index table entry.  This is two words.  */
+  start_unwind_section (unwind.saved_seg, 1);
+  frag_align (2, 0, 0);
+  record_alignment (now_seg, 2);
+
+  ptr = frag_more (8);
+  where = frag_now_fix () - 8;
+
+  /* Self relative offset of the function start.  */
+  fix_new (frag_now, where, 4, unwind.proc_start, 0, 1,
+	   BFD_RELOC_32);
+
+  if (val)
+    /* Inline exception table entry.  */
+    md_number_to_chars (ptr + 4, val, 4);
+  else
+    /* Self relative offset of the table entry.  */
+    fix_new (frag_now, where + 4, 4, unwind.table_entry, 0, 1,
+	     BFD_RELOC_ARM_PREL31);
+
+  /* Restore the original section.  */
+  subseg_set (unwind.saved_seg, unwind.saved_subseg);
+}
+
+
+/* Parse an unwind_cantunwind directive.  */
+
+static void
+s_arm_unwind_cantunwind (int ignored ATTRIBUTE_UNUSED)
+{
+  demand_empty_rest_of_line ();
+  if (unwind.personality_routine || unwind.personality_index != -1)
+    as_bad (_("personality routine specified for cantunwind frame"));
+
+  unwind.personality_index = -2;
+}
+
+
+/* Parse a personalityindex directive.  */
+
+static void
+s_arm_unwind_personalityindex (int ignored ATTRIBUTE_UNUSED)
+{
+  expressionS exp;
+
+  if (unwind.personality_routine || unwind.personality_index != -1)
+    as_bad (_("duplicate .personalityindex directive"));
+
+  SKIP_WHITESPACE ();
+
+  expression (&exp);
+
+  if (exp.X_op != O_constant
+      || exp.X_add_number < 0 || exp.X_add_number > 15)
+    {
+      as_bad (_("bad personality routine number"));
+      ignore_rest_of_line ();
+      return;
+    }
+
+  unwind.personality_index = exp.X_add_number;
+
+  demand_empty_rest_of_line ();
+}
+
+
+/* Parse a personality directive.  */
+
+static void
+s_arm_unwind_personality (int ignored ATTRIBUTE_UNUSED)
+{
+  char *name, *p, c;
+
+  if (unwind.personality_routine || unwind.personality_index != -1)
+    as_bad (_("duplicate .personality directive"));
+
+  SKIP_WHITESPACE ();
+  name = input_line_pointer;
+  c = get_symbol_end ();
+  p = input_line_pointer;
+  unwind.personality_routine = symbol_find_or_make (name);
+  *p = c;
+  SKIP_WHITESPACE ();
+  demand_empty_rest_of_line ();
+}
+
+
+/* Parse a directive saving core registers.  */
+
+static void
+s_arm_unwind_save_core (void)
+{
+  valueT op;
+  long range;
+  int n;
+
+  SKIP_WHITESPACE ();
+  range = reg_list (&input_line_pointer);
+  if (range == FAIL)
+    {
+      as_bad (_("expected register list"));
+      ignore_rest_of_line ();
+      return;
+    }
+
+  demand_empty_rest_of_line ();
+
+  /* Turn .unwind_movsp ip followed by .unwind_save {..., ip, ...}
+     into .unwind_save {..., sp...}.  We aren't bothered about the value of
+     ip because it is clobbered by calls.  */
+  if (unwind.sp_restored && unwind.fp_reg == 12
+      && (range & 0x3000) == 0x1000)
+    {
+      unwind.opcode_count--;
+      unwind.sp_restored = 0;
+      range = (range | 0x2000) & ~0x1000;
+      unwind.pending_offset = 0;
+    }
+
+  /* See if we can use the short opcodes.  These pop a block of upto 8
+     registers starting with r4, plus maybe r14.  */
+  for (n = 0; n < 8; n++)
+    {
+      /* Break at the first non-saved register.  */
+      if ((range & (1 << (n + 4))) == 0)
+	break;
+    }
+  /* See if there are any other bits set.  */
+  if (n == 0 || (range & (0xfff0 << n) & 0xbff0) != 0)
+    {
+      /* Use the long form.  */
+      op = 0x8000 | ((range >> 4) & 0xfff);
+      add_unwind_opcode (op, 2);
+    }
+  else
+    {
+      /* Use the short form.  */
+      if (range & 0x4000)
+	op = 0xa8; /* Pop r14.  */
+      else
+	op = 0xa0; /* Do not pop r14.  */
+      op |= (n - 1);
+      add_unwind_opcode (op, 1);
+    }
+
+  /* Pop r0-r3.  */
+  if (range & 0xf)
+    {
+      op = 0xb100 | (range & 0xf);
+      add_unwind_opcode (op, 2);
+    }
+
+  /* Record the number of bytes pushed.  */
+  for (n = 0; n < 16; n++)
+    {
+      if (range & (1 << n))
+	unwind.frame_size += 4;
+    }
+}
+
+
+/* Parse a directive saving FPA registers.  */
+
+static void
+s_arm_unwind_save_fpa (int reg)
+{
+  expressionS exp;
+  int num_regs;
+  valueT op;
+
+  /* Get Number of registers to transfer.  */
+  if (skip_past_comma (&input_line_pointer) != FAIL)
+    expression (&exp);
+  else
+    exp.X_op = O_illegal;
+
+  if (exp.X_op != O_constant)
+    {
+      as_bad (_("expected , <constant>"));
+      ignore_rest_of_line ();
+      return;
+    }
+
+  num_regs = exp.X_add_number;
+
+  if (num_regs < 1 || num_regs > 4)
+    {
+      as_bad (_("number of registers must be in the range [1:4]"));
+      ignore_rest_of_line ();
+      return;
+    }
+
+  demand_empty_rest_of_line ();
+
+  if (reg == 4)
+    {
+      /* Short form.  */
+      op = 0xb4 | (num_regs - 1);
+      add_unwind_opcode (op, 1);
+    }
+  else
+    {
+      /* Long form.  */
+      op = 0xc800 | (reg << 4) | (num_regs - 1);
+      add_unwind_opcode (op, 2);
+    }
+  unwind.frame_size += num_regs * 12;
+}
+
+
+/* Parse a directive saving VFP registers.  */
+
+static void
+s_arm_unwind_save_vfp (void)
+{
+  int count;
+  int reg;
+  valueT op;
+
+  count = vfp_parse_reg_list (&input_line_pointer, &reg, 1);
+  if (count == FAIL)
+    {
+      as_bad (_("expected register list"));
+      ignore_rest_of_line ();
+      return;
+    }
+
+  demand_empty_rest_of_line ();
+
+  if (reg == 8)
+    {
+      /* Short form.  */
+      op = 0xb8 | (count - 1);
+      add_unwind_opcode (op, 1);
+    }
+  else
+    {
+      /* Long form.  */
+      op = 0xb300 | (reg << 4) | (count - 1);
+      add_unwind_opcode (op, 2);
+    }
+  unwind.frame_size += count * 8 + 4;
+}
+
+
+/* Parse a directive saving iWMMXt registers.  */
+
+static void
+s_arm_unwind_save_wmmx (void)
+{
+  int reg;
+  int hi_reg;
+  int i;
+  unsigned wcg_mask;
+  unsigned wr_mask;
+  valueT op;
+
+  if (*input_line_pointer == '{')
+    input_line_pointer++;
+
+  wcg_mask = 0;
+  wr_mask = 0;
+  do
+    {
+      reg = arm_reg_parse (&input_line_pointer,
+			   all_reg_maps[REG_TYPE_IWMMXT].htab);
+
+      if (wr_register (reg))
+	{
+	  i = reg & ~WR_PREFIX;
+	  if (wr_mask >> i)
+	    as_tsktsk (_("register list not in ascending order"));
+	  wr_mask |= 1 << i;
+	}
+      else if (wcg_register (reg))
+	{
+	  i = (reg & ~WC_PREFIX) - 8;
+	  if (wcg_mask >> i)
+	    as_tsktsk (_("register list not in ascending order"));
+	  wcg_mask |= 1 << i;
+	}
+      else
+	{
+	  as_bad (_("expected wr or wcgr"));
+	  goto error;
+	}
+
+      SKIP_WHITESPACE ();
+      if (*input_line_pointer == '-')
+	{
+	  hi_reg = arm_reg_parse (&input_line_pointer,
+				  all_reg_maps[REG_TYPE_IWMMXT].htab);
+	  if (wr_register (reg) && wr_register (hi_reg))
+	    {
+	      for (; reg < hi_reg; reg++)
+		wr_mask |= 1 << (reg & ~WR_PREFIX);
+	    }
+	  else if (wcg_register (reg) && wcg_register (hi_reg))
+	    {
+	      for (; reg < hi_reg; reg++)
+		wcg_mask |= 1 << ((reg & ~WC_PREFIX) - 8);
+	    }
+	  else
+	    {
+	      as_bad (_("bad register range"));
+	      goto error;
+	    }
+	}
+    }
+  while (skip_past_comma (&input_line_pointer) != FAIL);
+
+  SKIP_WHITESPACE ();
+  if (*input_line_pointer == '}')
+    input_line_pointer++;
+
+  demand_empty_rest_of_line ();
+
+  if (wr_mask && wcg_mask)
+    {
+      as_bad (_("inconsistent register types"));
+      goto error;
+    }
+
+  /* Generate any deferred opcodes becuuse we're going to be looking at
+     the list.  */
+  flush_pending_unwind ();
+
+  if (wcg_mask)
+    {
+      for (i = 0; i < 16; i++)
+	{
+	  if (wcg_mask & (1 << i))
+	    unwind.frame_size += 4;
+	}
+      op = 0xc700 | wcg_mask;
+      add_unwind_opcode (op, 2);
+    }
+  else
+    {
+      for (i = 0; i < 16; i++)
+	{
+	  if (wr_mask & (1 << i))
+	    unwind.frame_size += 8;
+	}
+      /* Attempt to combine with a previous opcode.  We do this because gcc
+	 likes to output separate unwind directives for a single block of
+	 registers.  */
+      if (unwind.opcode_count > 0)
+	{
+	  i = unwind.opcodes[unwind.opcode_count - 1];
+	  if ((i & 0xf8) == 0xc0)
+	    {
+	      i &= 7;
+	      /* Only merge if the blocks are contiguous.  */
+	      if (i < 6)
+		{
+		  if ((wr_mask & 0xfe00) == (1 << 9))
+		    {
+		      wr_mask |= ((1 << (i + 11)) - 1) & 0xfc00;
+		      unwind.opcode_count--;
+		    }
+		}
+	      else if (i == 6 && unwind.opcode_count >= 2)
+		{
+		  i = unwind.opcodes[unwind.opcode_count - 2];
+		  reg = i >> 4;
+		  i &= 0xf;
+
+		  op = 0xffff << (reg - 1);
+		  if (reg > 0
+		      || ((wr_mask & op) == (1u << (reg - 1))))
+		    {
+		      op = (1 << (reg + i + 1)) - 1;
+		      op &= ~((1 << reg) - 1);
+		      wr_mask |= op;
+		      unwind.opcode_count -= 2;
+		    }
+		}
+	    }
+	}
+
+      hi_reg = 15;
+      /* We want to generate opcodes in the order the registers have been
+	 saved, ie. descending order.  */
+      for (reg = 15; reg >= -1; reg--)
+	{
+	  /* Save registers in blocks.  */
+	  if (reg < 0
+	      || !(wr_mask & (1 << reg)))
+	    {
+	      /* We found an unsaved reg.  Generate opcodes to save the
+		 preceeding block.  */
+	      if (reg != hi_reg)
+		{
+		  if (reg == 9)
+		    {
+		      /* Short form.  */
+		      op = 0xc0 | (hi_reg - 10);
+		      add_unwind_opcode (op, 1);
+		    }
+		  else
+		    {
+		      /* Long form.  */
+		      op = 0xc600 | ((reg + 1) << 4) | ((hi_reg - reg) - 1);
+		      add_unwind_opcode (op, 2);
+		    }
+		}
+	      hi_reg = reg - 1;
+	    }
+	}
+    }
+  return;
+error:
+  ignore_rest_of_line ();
+}
+
+
+/* Parse an unwind_save directive.  */
+
+static void
+s_arm_unwind_save (int ignored ATTRIBUTE_UNUSED)
+{
+  char *saved_ptr;
+  int reg;
+
+  /* Figure out what sort of save we have.  */
+  SKIP_WHITESPACE ();
+  saved_ptr = input_line_pointer;
+
+  reg = arm_reg_parse (&input_line_pointer, all_reg_maps[REG_TYPE_FN].htab);
+  if (reg != FAIL)
+    {
+      s_arm_unwind_save_fpa (reg);
+      return;
+    }
+
+  if (*input_line_pointer == '{')
+    input_line_pointer++;
+
+  SKIP_WHITESPACE ();
+
+  reg = arm_reg_parse (&input_line_pointer, all_reg_maps[REG_TYPE_RN].htab);
+  if (reg != FAIL)
+    {
+      input_line_pointer = saved_ptr;
+      s_arm_unwind_save_core ();
+      return;
+    }
+
+  reg = arm_reg_parse (&input_line_pointer, all_reg_maps[REG_TYPE_DN].htab);
+  if (reg != FAIL)
+    {
+      input_line_pointer = saved_ptr;
+      s_arm_unwind_save_vfp ();
+      return;
+    }
+
+  reg = arm_reg_parse (&input_line_pointer,
+		       all_reg_maps[REG_TYPE_IWMMXT].htab);
+  if (reg != FAIL)
+    {
+      input_line_pointer = saved_ptr;
+      s_arm_unwind_save_wmmx ();
+      return;
+    }
+
+  /* TODO: Maverick registers.  */
+  as_bad (_("unrecognised register"));
+}
+
+
+/* Parse an unwind_movsp directive.  */
+
+static void
+s_arm_unwind_movsp (int ignored ATTRIBUTE_UNUSED)
+{
+  int reg;
+  valueT op;
+
+  SKIP_WHITESPACE ();
+  reg = reg_required_here (&input_line_pointer, -1);
+  if (reg == FAIL)
+    {
+      as_bad (_("ARM register expected"));
+      ignore_rest_of_line ();
+      return;
+    }
+
+  if (reg == 13 || reg == 15)
+    {
+      as_bad (_("r%d not permitted in .unwind_movsp directive"), reg);
+      ignore_rest_of_line ();
+      return;
+    }
+
+  if (unwind.fp_reg != 13)
+    as_bad (_("unexpected .unwind_movsp directive"));
+
+  /* Generate opcode to restore the value.  */
+  op = 0x90 | reg;
+  add_unwind_opcode (op, 1);
+
+  /* Record the information for later.  */
+  unwind.fp_reg = reg;
+  unwind.fp_offset = unwind.frame_size;
+  unwind.sp_restored = 1;
+  demand_empty_rest_of_line ();
+}
+
+
+/* Parse #<number>.  */
+
+static int
+require_hashconst (int * val)
+{
+  expressionS exp;
+
+  SKIP_WHITESPACE ();
+  if (*input_line_pointer == '#')
+    {
+      input_line_pointer++;
+      expression (&exp);
+    }
+  else
+    exp.X_op = O_illegal;
+
+  if (exp.X_op != O_constant)
+    {
+      as_bad (_("expected #constant"));
+      ignore_rest_of_line ();
+      return FAIL;
+    }
+  *val = exp.X_add_number;
+  return SUCCESS;
+}
+
+/* Parse an unwind_pad directive.  */
+
+static void
+s_arm_unwind_pad (int ignored ATTRIBUTE_UNUSED)
+{
+  int offset;
+
+  if (require_hashconst (&offset) == FAIL)
+    return;
+
+  if (offset & 3)
+    {
+      as_bad (_("stack increment must be multiple of 4"));
+      ignore_rest_of_line ();
+      return;
+    }
+
+  /* Don't generate any opcodes, just record the details for later.  */
+  unwind.frame_size += offset;
+  unwind.pending_offset += offset;
+
+  demand_empty_rest_of_line ();
+}
+
+/* Parse an unwind_setfp directive.  */
+
+static void
+s_arm_unwind_setfp (int ignored ATTRIBUTE_UNUSED)
+{
+  int sp_reg;
+  int fp_reg;
+  int offset;
+
+  fp_reg = reg_required_here (&input_line_pointer, -1);
+  if (skip_past_comma (&input_line_pointer) == FAIL)
+    sp_reg = FAIL;
+  else
+    sp_reg = reg_required_here (&input_line_pointer, -1);
+
+  if (fp_reg == FAIL || sp_reg == FAIL)
+    {
+      as_bad (_("expected <reg>, <reg>"));
+      ignore_rest_of_line ();
+      return;
+    }
+
+  /* Optonal constant.  */
+  if (skip_past_comma (&input_line_pointer) != FAIL)
+    {
+      if (require_hashconst (&offset) == FAIL)
+	return;
+    }
+  else
+    offset = 0;
+
+  demand_empty_rest_of_line ();
+
+  if (sp_reg != 13 && sp_reg != unwind.fp_reg)
+    {
+      as_bad (_("register must be either sp or set by a previous"
+		"unwind_movsp directive"));
+      return;
+    }
+
+  /* Don't generate any opcodes, just record the information for later.  */
+  unwind.fp_reg = fp_reg;
+  unwind.fp_used = 1;
+  if (sp_reg == 13)
+    unwind.fp_offset = unwind.frame_size - offset;
+  else
+    unwind.fp_offset -= offset;
+}
+
+/* Parse an unwind_raw directive.  */
+
+static void
+s_arm_unwind_raw (int ignored ATTRIBUTE_UNUSED)
+{
+  expressionS exp;
+  /* This is an arbitary limit.  */
+  unsigned char op[16];
+  int count;
+
+  SKIP_WHITESPACE ();
+  expression (&exp);
+  if (exp.X_op == O_constant
+      && skip_past_comma (&input_line_pointer) != FAIL)
+    {
+      unwind.frame_size += exp.X_add_number;
+      expression (&exp);
+    }
+  else
+    exp.X_op = O_illegal;
+
+  if (exp.X_op != O_constant)
+    {
+      as_bad (_("expected <offset>, <opcode>"));
+      ignore_rest_of_line ();
+      return;
+    }
+
+  count = 0;
+
+  /* Parse the opcode.  */
+  for (;;)
+    {
+      if (count >= 16)
+	{
+	  as_bad (_("unwind opcode too long"));
+	  ignore_rest_of_line ();
+	}
+      if (exp.X_op != O_constant || exp.X_add_number & ~0xff)
+	{
+	  as_bad (_("invalid unwind opcode"));
+	  ignore_rest_of_line ();
+	  return;
+	}
+      op[count++] = exp.X_add_number;
+
+      /* Parse the next byte.  */
+      if (skip_past_comma (&input_line_pointer) == FAIL)
+	break;
+
+      expression (&exp);
+    }
+
+  /* Add the opcode bytes in reverse order.  */
+  while (count--)
+    add_unwind_opcode (op[count], 1);
+
+  demand_empty_rest_of_line ();
+}
 
 #endif /* OBJ_ELF */
 
@@ -13815,6 +14885,17 @@ const pseudo_typeS md_pseudo_table[] =
   { "word",        s_arm_elf_cons, 4 },
   { "long",        s_arm_elf_cons, 4 },
   { "rel31",       s_arm_rel31,   0 },
+  { "fnstart",		s_arm_unwind_fnstart,	0 },
+  { "fnend",		s_arm_unwind_fnend,	0 },
+  { "cantunwind",	s_arm_unwind_cantunwind, 0 },
+  { "personality",	s_arm_unwind_personality, 0 },
+  { "personalityindex",	s_arm_unwind_personalityindex, 0 },
+  { "handlerdata",	s_arm_unwind_handlerdata, 0 },
+  { "save",		s_arm_unwind_save,	0 },
+  { "movsp",		s_arm_unwind_movsp,	0 },
+  { "pad",		s_arm_unwind_pad,	0 },
+  { "setfp",		s_arm_unwind_setfp,	0 },
+  { "unwind_raw",	s_arm_unwind_raw,	0 },
 #else
   { "word",        cons, 4},
 #endif

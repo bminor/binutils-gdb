@@ -407,6 +407,104 @@ it prevents accurate control of the placement of literal pools.
 @item .pool
 This is a synonym for .ltorg.
 
+@cindex @code{.fnstart} directive, ARM
+@item .unwind_fnstart
+Marks the start of a function with an unwind table entry.
+
+@cindex @code{.fnend} directive, ARM
+@item .unwind_fnend
+Marks the end of a function with an unwind table entry.  The unwind index
+table entry is created when this directive is processed.
+
+If no personality routine has been specified then standard personality
+routine 0 or 1 will be used, depending on the number of unwind opcodes
+required.
+
+@cindex @code{.cantunwind} directive, ARM
+@item .cantunwind
+Prevents unwinding through the current function.  No personality routine
+or exception table data is required or permitted.
+
+@cindex @code{.personality} directive, ARM
+@item .personality @var{name}
+Sets the personality routine for the current function to @var{name}.
+
+@cindex @code{.personalityindex} directive, ARM
+@item .personalityindex @var{index}
+Sets the personality routine for the current function to the EABI standard
+routine number @var{index}
+
+@cindex @code{.handlerdata} directive, ARM
+@item .handlerdata
+Marks the end of the current function, and the start of the exception table
+entry for that function.  Anything between this directive and the
+@code{.fnend} directive will be added to the exception table entry.
+
+Must be preceded by a @code{.personality} or @code{.personalityindex}
+directive.
+
+@cindex @code{.save} directive, ARM
+@item .save @var{reglist}
+Generate unwinder annotations to restore the registers in @var{reglist}.
+The format of @var{reglist} is the same as the corresponding store-multiple
+instruction.
+
+@smallexample
+@exdent @emph{core registers}
+  .save @{r4, r5, r6, lr@}
+  stmfd sp!, @{r4, r5, r6, lr@}
+@exdent @emph{FPA registers}
+  .save f4, 2
+  sfmfd f4, 2, [sp]!
+@exdent @emph{VFP registers}
+  .save @{d8, d9, d10@}
+  fstmdf sp!, @{d8, d9, d10@}
+@exdent @emph{iWMMXt registers}
+  .save @{wr10, wr11@}
+  wstrd wr11, [sp, #-8]!
+  wstrd wr10, [sp, #-8]!
+or
+  .save wr11
+  wstrd wr11, [sp, #-8]!
+  .save wr10
+  wstrd wr10, [sp, #-8]!
+@end smallexample
+
+@cindex @code{.pad} directive, ARM
+@item .pad #@var{count}
+Generate unwinder annotations for a stack adjustment of @var{count} bytes.
+A positive value indicates the function prologue allocated stack space by
+decrementing the stack pointer.
+
+@cindex @code{.movsp} directive, ARM
+@item .movsp @var{reg}
+Tell the unwinder that @var{reg} contains the current stack pointer.
+
+@cindex @code{.setfp} directive, ARM
+@item .setfp @var{fpreg}, @var{spreg} [, #@var{offset}]
+Make all unwinder annotations relaive to a frame pointer.  Without this
+the unwinder will use offsets from the stack pointer.
+
+The syntax of this directive is the same as the @code{sub} or @code{mov}
+instruction used to set the frame pointer.  @var{spreg} must be either
+@code{sp} or mentioned in a previous @code{.movsp} directive.
+
+@smallexample
+.movsp ip
+mov ip, sp
+@dots{}
+.setfp fp, ip, #4
+sub fp, ip, #4
+@end smallexample
+
+@cindex @code{.unwind_raw} directive, ARM
+@item .raw @var{offset}, @var{byte1}, @dots{}
+Insert one of more arbitary unwind opcode bytes, which are known to adjust
+the stack pointer by @var{offset} bytes.
+
+For example @code{.unwind_raw 4, 0xb1, 0x01} is equivalent to
+@code{.save @{r0@}}
+
 @end table
 
 @node ARM Opcodes
