@@ -1,5 +1,49 @@
 2002-05-10  Elena Zannoni  <ezannoni@redhat.com>
 
+        New support for sh64-elf (sh5) target.
+
+        * configure.tgt: For sh64-elf target, default to sh-elf.
+
+        * config/sh/tm-sh.h (enum sh-abi): Possible ABI's.
+        (struct gdbarch_tdep): Add new fields for new registers and ABI
+        info.
+        
+        * sh-tdep.c: Include elf-bfd.h, elf/sh.h, gdb/sim-sh.h.
+        (NUM_PSEUDO_REGS_SH_MEDIA, NUM_PSEUDO_REGS_SH_COMPACT,
+        MSYMBOL_IS_SPECIAL, IS_ISA32_ADDR, MAKE_ISA32_ADDR,
+        UNMAKE_ISA32_ADDR, IS_PTABSL_R18, IS_STS_R0, IS_STS_PR,
+        IS_MOV_TO_R15, IS_MOV_R14, IS_STQ_R18_R14, IS_STQ_R18_R15,
+        IS_STL_R18_R15, IS_STQ_R14_R15, IS_STL_R14_R15, IS_ADDIL_SP_MEDIA,
+        IS_ADDI_SP_MEDIA, IS_ADDL_SP_FP_MEDIA, IS_ADD_SP_FP_MEDIA,
+        IS_MOV_SP_FP_MEDIA, IS_MOV_R0, IS_MOVL_R0, IS_ADD_SP_R0,
+        IS_MOV_R14_R0, IS_MEDIA_IND_ARG_MOV, IS_MEDIA_ARG_MOV,
+        IS_MEDIA_MOV_TO_R14, IS_COMPACT_IND_ARG_MOV, IS_COMPACT_ARG_MOV,
+        IS_COMPACT_MOV_TO_R14, IS_JSR_R0, IS_NOP): New macros.
+        (sh_sh64_register_name, sh64_elf_make_msymbol_special,
+        pc_is_isa32, sh_sh64_breakpoint_from_pc, look_for_args_moves,
+        sh64_skip_prologue_hard_way, sh64_use_struct_convention,
+        gdb_print_insn_sh64, translate_insn_rn, sh64_frame_chain,
+        sh64_get_saved_pr, fpp_reg_base_num, is_media_pseudo,
+        sh64_get_gdb_regnum, sh64_media_reg_base_num,
+        sh64_compact_reg_base_num, translate_rn_to_arch_reg_num,
+        sign_extend, sh64_nofp_frame_init_saved_regs,
+        sh64_init_extra_frame_info, sh64_get_saved_register,
+        sh64_extract_struct_value_address, sh64_pop_frame,
+        sh64_push_arguments, sh64_extract_return_value,
+        sh64_store_return_value, sh64_show_media_regs,
+        sh64_show_compact_regs, sh64_show_regs, sh_sh64_register_byte,
+        sh_sh64_register_raw_size, sh_sh64_register_virtual_size,
+        sh_sh64_register_virtual_type,
+        sh_sh64_register_convert_to_virtual,
+        sh_sh64_register_convert_to_raw, sh64_pseudo_register_read,
+        sh64_register_read, sh64_pseudo_register_write,
+        sh64_register_write, do_fv_c_register_info, do_dr_c_register_info,
+        do_r_c_register_info, do_fpp_register_info, do_cr_c_register_info,
+        sh64_do_pseudo_register, sh_compact_do_registers_info,
+        sh64_do_registers_info, sh_gdbarch_init): New functions.
+
+2002-05-10  Elena Zannoni  <ezannoni@redhat.com>
+
 	* sh-tdep.c (sh_breakpoint_from_pc): Add 'const' to return type.
 
 2002-05-10 Daniel Jacobowitz  <drow@mvista.com>

@@ -1,5 +1,5 @@
 /* Target-specific definition for a Hitachi Super-H.
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -23,6 +23,8 @@
 
 #define GDB_MULTI_ARCH 1
 
+/* Information that is dependent on the processor variant. */
+
 /* ABI variants that we know about.  If you add to this enum, please
    update the table of names in sh-tdep.c.  */
 enum sh_osabi
@@ -31,10 +33,15 @@ enum sh_osabi
   SH_OSABI_LINUX,
   SH_OSABI_NETBSD_ELF,
 
-  SH_OSABI_INVALID	/* Keep this last.  */
+  SH_OSABI_INVALID     /* Keep this last.  */
 };
 
-/* Information that is dependent on the processor variant. */
+enum sh_abi
+  {
+    SH_ABI_UNKNOWN,
+    SH_ABI_32,
+    SH_ABI_64
+  };
 
 struct gdbarch_tdep
   {
@@ -63,13 +70,36 @@ struct gdbarch_tdep
     int DR_LAST_REGNUM; /*                           sh4 */
     int FV0_REGNUM;   /*                             sh4 */
     int FV_LAST_REGNUM; /*                           sh4 */
+    /* FPP stands for Floating Point Pair, to avoid confusion with
+       GDB's FP0_REGNUM, which is the number of the first Floating
+       point register. Unfortunately on the sh5, the floating point
+       registers are called FR, and the floating point pairs are called FP. */
+    int TR7_REGNUM;       /*                            sh5-media*/
+    int FPP0_REGNUM;      /*                            sh5-media*/
+    int FPP_LAST_REGNUM;  /*                            sh5-media*/
+    int R0_C_REGNUM;      /*                            sh5-compact*/
+    int R_LAST_C_REGNUM;  /*                            sh5-compact*/
+    int PC_C_REGNUM;      /*                            sh5-compact*/
+    int GBR_C_REGNUM;     /*                            sh5-compact*/
+    int MACH_C_REGNUM;    /*                            sh5-compact*/
+    int MACL_C_REGNUM;    /*                            sh5-compact*/
+    int PR_C_REGNUM;      /*                            sh5-compact*/
+    int T_C_REGNUM;       /*                            sh5-compact*/
+    int FPSCR_C_REGNUM;   /*                            sh5-compact*/
+    int FPUL_C_REGNUM;    /*                            sh5-compact*/
+    int FP0_C_REGNUM;     /*                            sh5-compact*/
+    int FP_LAST_C_REGNUM; /*                            sh5-compact*/
+    int DR0_C_REGNUM;     /*                            sh5-compact*/
+    int DR_LAST_C_REGNUM; /*                            sh5-compact*/
+    int FV0_C_REGNUM;     /*                            sh5-compact*/
+    int FV_LAST_C_REGNUM; /*                            sh5-compact*/
     int ARG0_REGNUM;
     int ARGLAST_REGNUM;
     int FLOAT_ARGLAST_REGNUM;
     int RETURN_REGNUM;
-
-    enum sh_osabi sh_osabi;	/* OS/ABI of the inferior */
-    const char *osabi_name;	/* Name of the above */
+    enum sh_osabi sh_osabi;    /* OS/ABI of the inferior */
+    const char *osabi_name;    /* Name of the above */
+    enum sh_abi sh_abi;
   };
 
 /* Registers common to all the SH variants. */
