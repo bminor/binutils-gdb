@@ -167,18 +167,18 @@ fi
 if [ x${enable_shared} = xyes ]; then
   waugh=
   case "${host}" in
-    hppa*-*-*)		waugh=config/mh-papic ;;
-    i[345]86-*-*)	waugh=config/mh-x86pic ;;
-    *-*-*)		waugh=config/mh-${host_cpu}pic ;;
+    hppa*)		waugh=config/mh-papic ;;
+    i[345]86-*)		waugh=config/mh-x86pic ;;
+    *)			waugh=config/mh-${host_cpu}pic ;;
   esac
   if [ -f ${srcdir}/${waugh} ]; then
     if [ -n "${host_makefile_frag}" ] ; then
       cat ${srcdir}/${host_makefile_frag} > mh-frag
       cat ${srcdir}/${waugh} >> mh-frag
       host_makefile_frag=mh-frag
+    else
+      host_makefile_frag=${waugh}
     fi
-  else
-    host_makefile_frag=${waugh}
   fi
 fi
 
@@ -536,9 +536,9 @@ fi
 
 if [ x${enable_shared} = xyes ]; then
   case "${target}" in
-    hppa*-*-*)		target_makefile_frag=config/mt-papic ;;
-    i[345]86-*-*)	target_makefile_frag=config/mt-x86pic ;;
-    *-*-*)		target_makefile_frag=config/mt-${target_cpu}pic ;;
+    hppa*)		target_makefile_frag=config/mt-papic ;;
+    i[345]86-*)		target_makefile_frag=config/mt-x86pic ;;
+    *)			target_makefile_frag=config/mt-${target_cpu}pic ;;
   esac
 fi
 
