@@ -1,5 +1,9 @@
 2003-03-20  Corinna Vinschen  <vinschen@redhat.com>
 
+	* gdb.base/args.exp: Fix regular expression.
+
+2003-03-20  Corinna Vinschen  <vinschen@redhat.com>
+
 	* gdb.base/help.exp: Allow Win32 child process.
 
 2003-03-20  Corinna Vinschen  <vinschen@redhat.com>
