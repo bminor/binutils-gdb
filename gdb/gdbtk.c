@@ -33,10 +33,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <unistd.h>
 #include <setjmp.h>
 #include "top.h"
-#ifndef FASYNC
+#include <sys/ioctl.h>
+#include <string.h>
+
+#ifndef FIOASYNC
 #include <sys/stropts.h>
 #endif
-#include <string.h>
 
 /* Non-zero means that we're doing the gdbtk interface. */
 int gdbtk = 0;
@@ -718,28 +720,23 @@ gdbtk_wait (pid, ourstatus)
      int pid;
      struct target_waitstatus *ourstatus;
 {
-#ifdef FASYNC
-  signal (SIGIO, x_event);
-#else
-#if 1
-  sigset (SIGIO, x_event);
-#else
-  /* This is possibly needed for SVR4... */
-  {
-    struct sigaction action;
-    static sigset_t nullsigmask = {0};
+  struct sigaction action;
+  static sigset_t nullsigmask = {0};
 
-    action.sa_handler = iosig;
-    action.sa_mask = nullsigmask;
-    action.sa_flags = SA_RESTART;
-    sigaction(SIGIO, &action, NULL);
-  }
+#ifndef SA_RESTART
+  /* Needed for SunOS 4.1.x */
+#define SA_RESTART 0
 #endif
-#endif
+
+  action.sa_handler = x_event;
+  action.sa_mask = nullsigmask;
+  action.sa_flags = SA_RESTART;
+  sigaction(SIGIO, &action, NULL);
 
   pid = target_wait (pid, ourstatus);
 
-  signal (SIGIO, SIG_IGN);
+  action.sa_handler = SIG_IGN;
+  sigaction(SIGIO, &action, NULL);
 
   return pid;
 }
@@ -772,6 +769,8 @@ gdbtk_init ()
   struct cleanup *old_chain;
   char *gdbtk_filename;
   int i;
+  struct sigaction action;
+  static sigset_t nullsigmask = {0};
 
   old_chain = make_cleanup (cleanup_init, 0);
 
@@ -824,16 +823,23 @@ gdbtk_init ()
 
   /* Setup for I/O interrupts */
 
-  signal (SIGIO, SIG_IGN);
+  action.sa_mask = nullsigmask;
+  action.sa_flags = 0;
+  action.sa_handler = SIG_IGN;
+  sigaction(SIGIO, &action, NULL);
 
-#ifdef FASYNC
-  i = fcntl (x_fd, F_GETFL, 0);
-  fcntl (x_fd, F_SETFL, i|FASYNC);
-  fcntl (x_fd, F_SETOWN, getpid()); 
+#ifdef FIOASYNC
+  i = 1;
+  if (ioctl (x_fd, FIOASYNC, &i))
+    perror_with_name ("gdbtk_init: ioctl FIOASYNC failed");
+
+  i = getpid();
+  if (ioctl (x_fd, SIOCSPGRP, &i))
+    perror_with_name ("gdbtk_init: ioctl SIOCSPGRP failed");
 #else
   if (ioctl (x_fd,  I_SETSIG, S_INPUT|S_RDNORM) < 0)
-    perror ("gdbtk_init: ioctl I_SETSIG failed");
-#endif /* ifndef FASYNC */
+    perror_with_name ("gdbtk_init: ioctl I_SETSIG failed");
+#endif /* ifndef FIOASYNC */
 
   command_loop_hook = Tk_MainLoop;
   fputs_unfiltered_hook = gdbtk_fputs;

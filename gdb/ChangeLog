@@ -1,3 +1,9 @@
+Fri Dec 23 16:18:50 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* Makefile.in (CLIBS):  Put LIBIBERTY last.
+	* gdbtk.c (gdbtk_wait gdbtk_init):  Portability improvements for
+	SIGIO handling.
+
 Thu Dec 22 09:27:16 1994  Jim Kingdon  <kingdon@deneb.cygnus.com>
 
 	* ser-tcp.c (tcp_open): Cast to struct sockaddr when passing to

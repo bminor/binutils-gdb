@@ -185,8 +185,8 @@ REGEX1 = regex.o
 INSTALLED_LIBS=-lbfd -lreadline $(TERMCAP) -lopcodes -lmmalloc \
 	-liberty $(XM_CLIBS) $(TM_CLIBS) $(NAT_CLIBS) $(ENABLE_CLIBS)
 CLIBS = $(BFD) $(READLINE) $(OPCODES) $(MMALLOC) \
-	$(LIBIBERTY) $(TERMCAP) $(XM_CLIBS) $(TM_CLIBS) $(NAT_CLIBS) \
-	$(ENABLE_CLIBS)
+	$(ENABLE_CLIBS) $(TERMCAP) $(XM_CLIBS) $(TM_CLIBS) $(NAT_CLIBS) \
+	$(LIBIBERTY)
 CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(BFD) $(READLINE) $(OPCODES) \
 	$(MMALLOC) $(LIBIBERTY)
 
@@ -519,7 +519,14 @@ install-only:
 	@$(MAKE) DO=install "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS) subdir_do 
 
 uninstall: force
-	rm -f $(bindir)/gdb $(man1dir)/gdb.1
+	transformed_name=`t='$(program_transform_name)'; \
+			  echo gdb | sed -e "s/brokensed/brokensed/" $$t` ; \
+	if test "x$$transformed_name" = x; then \
+	  transformed_name=gdb ; \
+	else \
+	  true ; \
+	fi ; \
+	rm -f $(bindir)/$$transformed_name $(man1dir)/$$transformed_name.1
 	@$(MAKE) DO=uninstall "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS) subdir_do 
 
 # We do this by grepping through sources.  If that turns out to be too slow,
@@ -855,14 +862,6 @@ MAKEOVERRIDES=
 ## with no dependencies and no actions.
 unexport CHILLFLAGS CHILL_LIB CHILL_FOR_TARGET :
 
-# These are things from config/*/*.m? fragments.  There is no good reason
-# why they are separate from the lists of files above.
-
-HPREAD_SOURCE=
-# start-sanitize-hpread
-HPREAD_SOURCE=hpread.c
-# end-sanitize-hpread
-
 ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	29k-share/udi/udi2go32.c \
 	a29k-pinsn.c a29k-tdep.c a68v-nat.c alpha-nat.c alpha-tdep.c \
@@ -873,6 +872,7 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	delta68-nat.c dpx2-nat.c dstread.c exec.c fork-child.c \
 	go32-xdep.c gould-pinsn.c gould-xdep.c h8300-tdep.c h8500-tdep.c \
 	hp300ux-nat.c hppa-pinsn.c hppa-tdep.c hppab-nat.c hppah-nat.c \
+	hpread.c \
 	i386-pinsn.c i386-tdep.c i386b-nat.c i386mach-nat.c i386v-nat.c \
 	i386aix-nat.c i386m3-nat.c i386v4-nat.c i386ly-tdep.c \
 	i387-tdep.c \
@@ -1271,10 +1271,8 @@ somread.o: somread.c $(bfd_h) buildsym.h complaints.h $(defs_h) \
 
 somsolib.o: somsolib.c $(defs_h)
 
-# start-sanitize-hpread
 hpread.o: hpread.c $(bfd_h) buildsym.h complaints.h $(defs_h) \
 	gdb-stabs.h objfiles.h symfile.h $(symtab_h)
-# end-sanitize-hpread
 
 parse.o: parse.c $(command_h) $(defs_h) $(expression_h) $(frame_h) \
 	$(gdbtypes_h) language.h parser-defs.h $(symtab_h) $(value_h)
