@@ -1,3 +1,8 @@
+Mon Aug  1 15:42:39 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdbint.texinfo: Remove references to BROKEN_LARGE_ALLOCA and
+	SET_STACK_LIMIT_HUGE; they were removed from GDB 14 May 1994.
+
 Mon Aug  1 15:12:02 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* gdbint.texinfo: Put regex conditionals in their own table.
