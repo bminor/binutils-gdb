@@ -1,3 +1,8 @@
+2001-02-10  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-v850.c (v850_elf_reloc): Do not convert reloc addend to PC
+	rel, it will be handled later on.
+
 2001-02-09  David Mosberger  <davidm@hpl.hp.com>
 
 	* elfxx-ia64.c (is_unwind_section_name): New function.  Returns
