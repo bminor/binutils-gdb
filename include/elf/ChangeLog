@@ -1,3 +1,13 @@
+1999-01-27  Nick Clifton  <nickc@cygnus.com>
+
+	* dwarf2.h: Add typedefs for structures found in dwarf2 sections.
+
+start-sanitize-vr4xxx
+1998-12-16  Gavin Romig-Koch  <gavin@cygnus.com>
+
+	* mips.h (E_MIPS_MACH_4111): New.
+
+end-sanitize-vr4xxx
 1998-12-15  Gavin Romig-Koch  <gavin@cygnus.com>
 
 	* mips.h (EF_MIPS_ABI,E_MIPS_ABI_O32,E_MIPS_ABI_O64,
