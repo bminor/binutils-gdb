@@ -1,3 +1,8 @@
+Wed Jun 17 15:54:57 1992  Ken Raeburn  (Raeburn@Cygnus.COM)
+
+	* coffcode.h (coff_compute_section_file_positions): For I960,
+	don't align sections in file.
+
 Tue Jun 16 06:28:21 1992  Ken Raeburn  (Raeburn@Cygnus.COM)
 
 	* targets.c (struct bfd_target): Added field for target-specific

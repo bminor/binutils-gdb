@@ -2204,10 +2204,13 @@ DEFUN(coff_compute_section_file_positions,(abfd),
 
       current->filepos = sofar;
 
+      sofar += current->_raw_size;
+#ifndef I960
       /* make sure that this section is of the right size too */
-      old_sofar =  sofar += current->_raw_size;
+      old_sofar =  sofar;
       sofar = BFD_ALIGN(sofar, 1 << current->alignment_power);
       current->_raw_size += sofar - old_sofar ;
+#endif
 
       previous = current;
     }
