@@ -1,3 +1,9 @@
+Fri Aug 23 00:44:57 1996  Fred Fish  <fnf@ninemoons.com>
+
+	* gdbtk.c (gdbtk_init): Check for a DISPLAY env variable and
+	gracefully degrade to using command line interface if none is
+	found.
+
 Wed Aug 21 16:31:27 1996  Fred Fish  <fnf@rtl.cygnus.com>
 
 	* valprint.c (print_longest): Test for CC_HAS_LONG_LONG as well as

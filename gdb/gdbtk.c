@@ -1240,6 +1240,13 @@ gdbtk_init ()
   struct sigaction action;
   static sigset_t nullsigmask = {0};
 
+  /* If there is no DISPLAY environment variable, Tk_Init below will fail,
+     causing gdb to abort.  If instead we simply return here, gdb will
+     gracefully degrade to using the command line interface. */
+
+  if (getenv ("DISPLAY") == NULL)
+    return;
+
   old_chain = make_cleanup (cleanup_init, 0);
 
   /* First init tcl and tk. */
