@@ -3484,6 +3484,9 @@ Wide character; see @ref{Builtin Type Descriptors}.
 @item x
 Cross-reference; see @ref{Cross-References}.
 
+@item Y
+Used by IBM's xlC C++ compiler (for structures, I think).
+
 @item z
 gstring; see @ref{Strings}.
 @end table

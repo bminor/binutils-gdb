@@ -1,3 +1,7 @@
+Wed Mar 16 08:20:19 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabs.texinfo (Type Descriptors): Add 'Y' type descriptor.
+
 Tue Mar 15 08:43:02 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdbint.texinfo (Host Conditionals, Target Conditionals): Remove
