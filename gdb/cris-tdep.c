@@ -1076,6 +1076,17 @@ cris_abi_v2_extract_return_value (struct type *type, char *regbuf,
     internal_error (__FILE__, __LINE__, "cris_abi_v2_extract_return_value: type length too large");
 }
 
+/* Store the address of the place in which to copy the structure the
+   subroutine will return.  In the CRIS ABI, R9 is used in order to
+   pass the address of the allocated area where a structure return
+   value must be stored.  */
+
+static void
+cris_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
+{
+  write_register (STR_REGNUM, addr);
+}
+
 /* Returns 1 if the given type will be passed by pointer rather than 
    directly.  */
 

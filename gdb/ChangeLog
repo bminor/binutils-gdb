@@ -1,5 +1,8 @@
 2004-01-17  Andrew Cagney  <cagney@redhat.com>
 
+	* cris-tdep.c (cris_store_struct_return): Put back accidently
+	deleted function.
+
 	* gdbarch.sh: Update copyright year.
 	* gdbarch.h, gdbarch.c: Re-generate.
 
