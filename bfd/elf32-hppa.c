@@ -3666,16 +3666,11 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 	    }
 	  else if (h->elf.root.type == bfd_link_hash_undefweak)
 	    ;
-	  else if (info->shared && !info->no_undefined
+	  else if (info->shared
+		   && !info->no_undefined
 		   && ELF_ST_VISIBILITY (h->elf.other) == STV_DEFAULT
 		   && h->elf.type != STT_PARISC_MILLI)
-	    {
-	      if (!((*info->callbacks->undefined_symbol)
-		    (info, h->elf.root.root.string, input_bfd,
-		     input_section, rel->r_offset, FALSE)))
-		return FALSE;
-	      warned_undef = TRUE;
-	    }
+	    ;
 	  else
 	    {
 	      if (!((*info->callbacks->undefined_symbol)
