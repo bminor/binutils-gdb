@@ -3221,11 +3221,10 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		}
 	      else
 		{
+		  outrel.r_addend = relocation + rel->r_addend;
+
 		  if (r_type == R_PPC_ADDR32)
-		    {
-		      outrel.r_info = ELF32_R_INFO (0, R_PPC_RELATIVE);
-		      outrel.r_addend = relocation + rel->r_addend;
-		    }
+		    outrel.r_info = ELF32_R_INFO (0, R_PPC_RELATIVE);
 		  else
 		    {
 		      long indx;
@@ -3239,7 +3238,8 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 					  == bfd_link_hash_defweak));
 			  sec = h->root.u.def.section;
 			}
-		      if (sec != NULL && bfd_is_abs_section (sec))
+
+		      if (bfd_is_abs_section (sec))
 			indx = 0;
 		      else if (sec == NULL || sec->owner == NULL)
 			{
@@ -3250,6 +3250,11 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 			{
 			  asection *osec;
 
+			  /* We are turning this relocation into one
+			     against a section symbol.  It would be
+			     proper to subtract the symbol's value,
+			     osec->vma, from the emitted reloc addend,
+			     but ld.so expects buggy relocs.  */
 			  osec = sec->output_section;
 			  indx = elf_section_data (osec)->dynindx;
 			  BFD_ASSERT (indx > 0);
@@ -3264,7 +3269,6 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 			}
 
 		      outrel.r_info = ELF32_R_INFO (indx, r_type);
-		      outrel.r_addend = relocation + rel->r_addend;
 		    }
 		}
 

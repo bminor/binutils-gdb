@@ -1,3 +1,8 @@
+2002-12-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-ppc.c (ppc_elf_relocate_section): Reorganize dynamic reloc
+	code a little.  Comment on dynamic relocs against section symbols.
+
 2002-12-17  Roger Sayle  <roger@eyesopen.com>
 
 	* configure.host (ia64-*-hpux*): Support 64 bit targets using
