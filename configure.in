@@ -365,7 +365,7 @@ case "${target}" in
 	"" | cc*) noconfigdirs="$noconfigdirs emacs emacs19" ;;
         *) ;;
     esac
-    noconfigdirs="$noconfigdirs ld shellutils tk"
+    noconfigdirs="$noconfigdirs ld shellutils"
     ;;
   i[345]86-*-go32)
     # add the go32 support tools to the list
