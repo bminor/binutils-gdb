@@ -1,3 +1,9 @@
+2000-06-08  Fernando Nasser  <fnasser@cygnus.com>
+
+	* values.c (value_primitive_field): Copy VALUE_REGNO as well.
+	With typed registers we may have the location information in this field,
+	in addition to VALUE_ADDRESS (which was already being copied).
+
 Thu Jun  8 15:26:44 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* config/mips/tm-mips.h (GDB_MULTI_ARCH): Define as 1.

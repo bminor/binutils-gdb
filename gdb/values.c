@@ -841,6 +841,7 @@ value_primitive_field (arg1, offset, fieldno, arg_type)
   if (VALUE_LVAL (arg1) == lval_internalvar)
     VALUE_LVAL (v) = lval_internalvar_component;
   VALUE_ADDRESS (v) = VALUE_ADDRESS (arg1);
+  VALUE_REGNO (v) = VALUE_REGNO (arg1);
 /*  VALUE_OFFSET (v) = VALUE_OFFSET (arg1) + offset
    + TYPE_FIELD_BITPOS (arg_type, fieldno) / 8; */
   return v;
