@@ -55,11 +55,12 @@ SECTIONS
   .rela.bss	: { *(.rela.bss) }
   .rel.plt	: { *(.rel.plt) }
   .rela.plt	: { *(.rela.plt) }
-  .init		: { *(.init) } =0
+  .init		: { KEEP (*(.init)) } =0
   .plt		: { *(.plt) }
 
   .text		: {
     *(.text)
+    ${RELOCATING+*(.text.*)}
     /* .gnu.warning sections are handled specially by elf32.em.  */
     *(.gnu.warning)
     *(.gnu.linkonce.t*)
@@ -83,25 +84,26 @@ SECTIONS
 
 /* end-sanitize-v850e */
 
-  .fini		: { *(.fini)    } =0
-  .rodata	: { *(.rodata) *(.gnu.linkonce.r*) }
+  .fini		: { KEEP (*(.fini))    } =0
+  .rodata	: { *(.rodata) ${RELOCATING+*(.rodata.*)} *(.gnu.linkonce.r*) }
   .rodata1	: { *(.rodata1) }
 
   .data		: {
     *(.data)
+    ${RELOCATING+*(.data.*)}
     *(.gnu.linkonce.d*)
     CONSTRUCTORS
   }
   .data1	: { *(.data1) }
   .ctors	: {
     ${RELOCATING+___ctors = .;}
-    *(.ctors)
+    KEEP (*(.ctors))
     ${RELOCATING+___ctors_end = .;}
   }
 
   .dtors	: {
     ${RELOCATING+___dtors = .;}
-    *(.dtors)
+    KEEP (*(.dtors))
     ${RELOCATING+___dtors_end = .;}
   }
 

@@ -1,3 +1,11 @@
+Mon Oct  5 09:40:43 1998  Catherine Moore  <clm@cygnus.com>
+  
+        * ldmain.c (main):  Error if --gc-sections and 
+        dyanmic linking.
+        * scripttempl/v850.sc:  Add KEEP attribute to .init,
+        .fini, .dtors and .ctors.  Add .data and .text
+        wildcards to support section garbage collection.
+
 Wed Sep 30 11:19:15 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* scripttempl/v850.sc: Rename .call_table section to
