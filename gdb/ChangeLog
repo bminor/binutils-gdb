@@ -1,3 +1,7 @@
+2001-07-02  Daniel Jacobowitz  <drow@mvista.com>
+	* solib-svr4.c: Include "elf/mips.h".
+	(elf_locate_base): Make DT_MIPS_RLD_MAP block unconditional.
+
 2001-07-02  Jim Blandy  <jimb@redhat.com>
 
 	* dwarf2read.c (read_comp_unit, sibling_die, dump_die,

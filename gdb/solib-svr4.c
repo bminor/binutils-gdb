@@ -37,6 +37,7 @@
 #else
 #include "elf/external.h"
 #include "elf/common.h"
+#include "elf/mips.h"
 #endif
 
 #include "symtab.h"
@@ -623,7 +624,6 @@ elf_locate_base (void)
 				      (bfd_byte *) x_dynp->d_un.d_ptr);
 	      return dyn_ptr;
 	    }
-#ifdef DT_MIPS_RLD_MAP
 	  else if (dyn_tag == DT_MIPS_RLD_MAP)
 	    {
 	      char *pbuf;
@@ -637,7 +637,6 @@ elf_locate_base (void)
 		return 0;
 	      return extract_unsigned_integer (pbuf, sizeof (pbuf));
 	    }
-#endif
 	}
     }
   else /* 64-bit elf */
