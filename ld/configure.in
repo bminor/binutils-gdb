@@ -20,8 +20,8 @@ fi
 # per-target:
 
 # Canonicalize the secondary target names.
-if [ -n "$with_targets" ]; then
-    for targ in `echo $with_targets | sed 's/,/ /g'`
+if [ -n "$enable_targets" ]; then
+    for targ in `echo $enable_targets | sed 's/,/ /g'`
     do
 	result=`$configsub $targ 2>/dev/null`
 	if [ -n "$result" ]; then
@@ -106,6 +106,8 @@ case "${targ}" in
   alpha-*-osf*)		ld_target=alpha ;;
   alpha-*-netware*)	ld_target=alpha ;;
   z8k-*-sim | z8k-*-coff) ld_target=z8ksim ;;
+  ns32k-pc532-mach)	ld_target=pc532mach ;;
+  ns32k-pc532-netbsd*)  ld_target=netbsd532 ;;
   powerpc-*-elf*)	ld_target=ppc-elf32 ;;
   powerpc-*-netware*)	ld_target=ppc-elf32 ;;
   *-*-aout)		ld_target=${target_cpu}-${target_vendor} ;;
@@ -147,6 +149,7 @@ if [ x${all_targets} = xfalse ]; then
     # The emulations in all the configured targets.
     tb=`sed -n '
     s/EMUL[ 	]*=[ 	]*\([^ 	]*\)/e\1.o/p
+    s/EMUL_EXTRA.*=[ 	]*\([^ 	]*\)/e\1.o/p
     ' $allfrags`
     # uniq the list.
     f=""

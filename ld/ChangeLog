@@ -1,3 +1,21 @@
+Sun Jul 10 00:33:24 1994  Ian Dall  (dall@hfrd.dsto.gov.au)
+
+	* emulparams/pc532machaout.sh: New file. Pc532 mach script
+	parameters. 
+
+	* emulparams/netbsd532.sh: New file. Netbsd 532 script parameters.
+
+	* config/pc532mach.mt: New file. Pc532 mach target support.
+
+	* config/pc532mach.mh: New file. Pc532 mach host support.
+
+	* config/netbsd532.mt: New file. Netbsd 532 target support.
+
+	* configure.in: Add ns32k-pc532-mach and ns32k-pc532-netbsd support.
+
+	* Makefile.in: Add epcmachaout.c dependency and enetbsd532.c
+	dependency.
+
 Fri Jul  8 10:57:02 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* emultempl/sunos.em (gld${EMULATION_NAME}_before_allocation): Use

@@ -1,0 +1,2 @@
+EMUL=pc532machaout
+OTHER_EMULATIONS=epc532machaout.o

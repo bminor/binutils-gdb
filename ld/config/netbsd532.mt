@@ -1,0 +1,2 @@
+EMUL=netbsd532
+OTHER_EMULATIONS=enetbsd532.o

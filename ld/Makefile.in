@@ -179,16 +179,12 @@ ALL_EMULATIONS = elnk960.o esun3.o ei386aout.o ego32.o evsta.o \
 	eh8500b.o eh8500s.o eh8500c.o eh8500m.o \
 	ehppaelf.o emipsidtl.o esh.o eelf_i386.o ealpha.o \
 	ei386lynx.o em68klynx.o esparclynx.o ecoff_sparc.o \
-	eelf32ppc.o ei386go32.o em68kaout.o \
-	$(OTHER_EMULATIONS)
-
-# This is now set by configure.in.
-#EMULATION_OFILES = ${ALL_EMULATIONS}
+	eelf32ppc.o ei386go32.o em68kaout.o ei386linux.o \
+	eelf32_sparc.o eelf64_sparc.o
 
 CFILES = ldctor.c ldemul.c ldexp.c ldfile.c ldlang.c \
 	ldmain.c ldmisc.c ldver.c ldwrite.c lexsup.c \
 	mri.c
-
 
 HFILES = config.h ld.h ldctor.h ldemul.h ldexp.h ldfile.h \
 	ldlang.h ldlex.h ldmain.h ldmisc.h ldver.h \
@@ -392,6 +388,23 @@ eelf32ppc.c: $(srcdir)/emulparams/elf32ppc.sh \
 em68kaout.c: $(srcdir)/emulparams/m68kaout.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} m68kaout
+ei386linux.c: $(srcdir)/emulparams/i386linux.sh \
+  $(srcdir)/emultempl/linux.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} i386linux
+eelf32_sparc.c: $(srcdir)/emulparams/elf32_sparc.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32_sparc
+eelf64_sparc.c: $(srcdir)/emulparams/elf64_sparc.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf64_sparc
+
+epc532machaout.c: $(srcdir)/emulparams/pc532machaout.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} pc532machaout
+
+enetbsd532.c: $(srcdir)/emulparams/netbsd532.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} netbsd532
 
 $(LD_PROG): $(OFILES) $(BFDLIB) $(LIBIBERTY)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $(LD_PROG) $(OFILES) $(BFDLIB) $(LIBIBERTY) $(EXTRALIBS)
@@ -775,7 +788,8 @@ ldctor.o : ldctor.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   ldgram.h ldmain.h ldctor.h
 ldemul.o : ldemul.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/obstack.h ../bfd/sysdep.h $(INCDIR)/fopen-same.h \
-  config.h ld.h ldemul.h ldmisc.h ldfile.h ldmain.h ldemul-list.h
+  config.h ld.h ldemul.h ldmisc.h ldexp.h ldlang.h ldfile.h \
+  ldmain.h ldemul-list.h
 ldexp.o : ldexp.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/obstack.h ../bfd/sysdep.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/bfdlink.h ld.h ldmain.h ldmisc.h ldexp.h \
@@ -783,7 +797,7 @@ ldexp.o : ldexp.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
 ldfile.o : ldfile.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/obstack.h ../bfd/sysdep.h $(INCDIR)/fopen-same.h \
   ld.h ldmisc.h ldexp.h ldlang.h ldfile.h ldmain.h ldgram.h \
-  ldlex.h
+  ldlex.h ldemul.h
 ldlang.o : ldlang.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/obstack.h ../bfd/sysdep.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/libiberty.h $(INCDIR)/bfdlink.h ld.h ldmain.h \
