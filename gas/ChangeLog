@@ -1,5 +1,8 @@
 Wed Oct 27 11:48:56 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* config/obj-ecoff.c (obj_ecoff_ent): Ignore an optional number
+	after a .ent directive.
+
 	* config/tc-mips.c (mips_ip): Handle '>' case (shift amount
 	between 32 and 63 for double shift instruction).  Do & 0x1f rather
 	than % 32.
