@@ -1,5 +1,10 @@
 2004-09-02  Andrew Cagney  <cagney@gnu.org>
 
+	* configure.in: Let TM_FILE, XM_FILE and NAT_FILE specify a path.
+	* configure: Re-generate.
+	* config/arm/nbsd.mt (TM_FILE): Set to "solib.h".
+	* config/arm/tm-nbsd.h: Delete file.
+	
 	* config/powerpc/tm-ppcle-sim.h: Delete.
 	* config/powerpc/tm-ppcle-eabi.h: Delete.
 	* config/powerpc/tm-nbsd.h: Delete.

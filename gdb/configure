@@ -11032,7 +11032,10 @@ rm -f xm.h
 xm_h=""
 if test "${hostfile}" != ""; then
     xm_h=xm.h
-    GDB_XM_FILE="config/${gdb_host_cpu}/${hostfile}"
+    case "${hostfile}" in
+      xm-*.h ) GDB_XM_FILE="config/${gdb_host_cpu}/${hostfile}" ;;
+      * ) GDB_XM_FILE="${hostfile}"
+    esac
     files="${files} ${GDB_XM_FILE}"
     links="${links} xm.h"
     cat >> confdefs.h <<EOF
@@ -11046,7 +11049,10 @@ rm -f tm.h
 tm_h=""
 if test "${targetfile}" != ""; then
     tm_h=tm.h
-    GDB_TM_FILE="config/${gdb_target_cpu}/${targetfile}"
+    case "${targetfile}" in
+      tm-*.h ) GDB_TM_FILE="config/${gdb_host_cpu}/${targetfile}" ;;
+      * ) GDB_TM_FILE="${targetfile}"
+    esac
     files="${files} ${GDB_TM_FILE}"
     links="${links} tm.h"
     cat >> confdefs.h <<EOF
@@ -11060,7 +11066,10 @@ rm -f nm.h
 nm_h=""
 if test "${nativefile}" != ""; then
     nm_h=nm.h
-    GDB_NM_FILE="config/${gdb_host_cpu}/${nativefile}"
+    case "${nativefile}" in
+      nm-*.h ) GDB_NM_FILE="config/${gdb_host_cpu}/${nativefile}" ;;
+      * ) GDB_NM_FILE="${nativefile}"
+    esac
     files="${files} ${GDB_NM_FILE}"
     links="${links} nm.h"
     cat >> confdefs.h <<EOF
@@ -11073,12 +11082,12 @@ fi
 
 
 echo $ac_n "checking for Cygwin environment""... $ac_c" 1>&6
-echo "configure:11077: checking for Cygwin environment" >&5
+echo "configure:11086: checking for Cygwin environment" >&5
 if eval "test \"`echo '$''{'ac_cv_cygwin'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 11082 "configure"
+#line 11091 "configure"
 #include "confdefs.h"
 
 int main() {
@@ -11089,7 +11098,7 @@ int main() {
 return __CYGWIN__;
 ; return 0; }
 EOF
-if { (eval echo configure:11093: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:11102: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_cygwin=yes
 else
@@ -11106,19 +11115,19 @@ echo "$ac_t""$ac_cv_cygwin" 1>&6
 CYGWIN=
 test "$ac_cv_cygwin" = yes && CYGWIN=yes
 echo $ac_n "checking for mingw32 environment""... $ac_c" 1>&6
-echo "configure:11110: checking for mingw32 environment" >&5
+echo "configure:11119: checking for mingw32 environment" >&5
 if eval "test \"`echo '$''{'ac_cv_mingw32'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 11115 "configure"
+#line 11124 "configure"
 #include "confdefs.h"
 
 int main() {
 return __MINGW32__;
 ; return 0; }
 EOF
-if { (eval echo configure:11122: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:11131: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_mingw32=yes
 else
@@ -11137,7 +11146,7 @@ test "$ac_cv_mingw32" = yes && MINGW32=yes
 
 
 echo $ac_n "checking for executable suffix""... $ac_c" 1>&6
-echo "configure:11141: checking for executable suffix" >&5
+echo "configure:11150: checking for executable suffix" >&5
 if eval "test \"`echo '$''{'ac_cv_exeext'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -11147,7 +11156,7 @@ else
   rm -f conftest*
   echo 'int main () { return 0; }' > conftest.$ac_ext
   ac_cv_exeext=
-  if { (eval echo configure:11151: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+  if { (eval echo configure:11160: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
     for file in conftest.*; do
       case $file in
       *.c | *.o | *.obj | *.ilk | *.pdb) ;;
@@ -11189,7 +11198,7 @@ fi
 
 
   echo $ac_n "checking for iconv""... $ac_c" 1>&6
-echo "configure:11193: checking for iconv" >&5
+echo "configure:11202: checking for iconv" >&5
 if eval "test \"`echo '$''{'am_cv_func_iconv'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -11197,7 +11206,7 @@ else
     am_cv_func_iconv="no, consider installing GNU libiconv"
     am_cv_lib_iconv=no
     cat > conftest.$ac_ext <<EOF
-#line 11201 "configure"
+#line 11210 "configure"
 #include "confdefs.h"
 #include <stdlib.h>
 #include <iconv.h>
@@ -11207,7 +11216,7 @@ iconv_t cd = iconv_open("","");
        iconv_close(cd);
 ; return 0; }
 EOF
-if { (eval echo configure:11211: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:11220: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   am_cv_func_iconv=yes
 else
@@ -11219,7 +11228,7 @@ rm -f conftest*
       am_save_LIBS="$LIBS"
       LIBS="$LIBS -liconv"
       cat > conftest.$ac_ext <<EOF
-#line 11223 "configure"
+#line 11232 "configure"
 #include "confdefs.h"
 #include <stdlib.h>
 #include <iconv.h>
@@ -11229,7 +11238,7 @@ iconv_t cd = iconv_open("","");
          iconv_close(cd);
 ; return 0; }
 EOF
-if { (eval echo configure:11233: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:11242: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   am_cv_lib_iconv=yes
         am_cv_func_iconv=yes
@@ -11250,13 +11259,13 @@ echo "$ac_t""$am_cv_func_iconv" 1>&6
 EOF
 
     echo $ac_n "checking for iconv declaration""... $ac_c" 1>&6
-echo "configure:11254: checking for iconv declaration" >&5
+echo "configure:11263: checking for iconv declaration" >&5
     if eval "test \"`echo '$''{'am_cv_proto_iconv'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   
       cat > conftest.$ac_ext <<EOF
-#line 11260 "configure"
+#line 11269 "configure"
 #include "confdefs.h"
 
 #include <stdlib.h>
@@ -11275,7 +11284,7 @@ int main() {
 
 ; return 0; }
 EOF
-if { (eval echo configure:11279: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:11288: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   am_cv_proto_iconv_arg1=""
 else

@@ -1520,7 +1520,10 @@ rm -f xm.h
 xm_h=""
 if test "${hostfile}" != ""; then
     xm_h=xm.h
-    GDB_XM_FILE="config/${gdb_host_cpu}/${hostfile}"
+    case "${hostfile}" in
+      xm-*.h ) GDB_XM_FILE="config/${gdb_host_cpu}/${hostfile}" ;;
+      * ) GDB_XM_FILE="${hostfile}"
+    esac
     files="${files} ${GDB_XM_FILE}"
     links="${links} xm.h"
     AC_DEFINE_UNQUOTED(GDB_XM_FILE, "${GDB_XM_FILE}")
@@ -1531,7 +1534,10 @@ rm -f tm.h
 tm_h=""
 if test "${targetfile}" != ""; then
     tm_h=tm.h
-    GDB_TM_FILE="config/${gdb_target_cpu}/${targetfile}"
+    case "${targetfile}" in
+      tm-*.h ) GDB_TM_FILE="config/${gdb_host_cpu}/${targetfile}" ;;
+      * ) GDB_TM_FILE="${targetfile}"
+    esac
     files="${files} ${GDB_TM_FILE}"
     links="${links} tm.h"
     AC_DEFINE_UNQUOTED(GDB_TM_FILE, "${GDB_TM_FILE}")
@@ -1542,7 +1548,10 @@ rm -f nm.h
 nm_h=""
 if test "${nativefile}" != ""; then
     nm_h=nm.h
-    GDB_NM_FILE="config/${gdb_host_cpu}/${nativefile}"
+    case "${nativefile}" in
+      nm-*.h ) GDB_NM_FILE="config/${gdb_host_cpu}/${nativefile}" ;;
+      * ) GDB_NM_FILE="${nativefile}"
+    esac
     files="${files} ${GDB_NM_FILE}"
     links="${links} nm.h"
     AC_DEFINE_UNQUOTED(GDB_NM_FILE, "${GDB_NM_FILE}")
