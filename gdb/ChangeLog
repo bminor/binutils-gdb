@@ -1,5 +1,7 @@
 Tue Mar 24 14:17:48 1992  Stu Grossman  (grossman@cygnus.com)
 
+	* xm-mips.h:  declare strdup for ultrix.
+
 	* mipsread.c (fixup_sigtramp):  Make sure that current_objfile is setup
 	when calling new_symbol.
 	* mips-tdep.c (mips_frame_chain):  Use symfile_objfile instead of

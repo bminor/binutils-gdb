@@ -29,6 +29,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define KERNEL_U_ADDR 0 /* Not needed. */
 
+#ifdef ultrix
+extern char *strdup();
+#endif
+
 /* Only used for core files on DECstations. */
 
 #define REGISTER_U_ADDR(addr, blockend, regno) 		\
