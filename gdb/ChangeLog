@@ -1,3 +1,7 @@
+Wed Apr 26 19:01:08 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+ 
+ 	* remote-hms.c: Rewrite to use new monitor conventions.
+
 Tue Apr 25 11:27:14 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* dbxread.c: Add comment explaining lowest_text_address.
@@ -460,6 +464,7 @@ Fri Apr  7 17:43:01 1995  Stu Grossman  (grossman@andros.cygnus.com)
 
 	* config/pa/tm-hppa.h:  Define lots register offsets needed by
 	w89k-rom.c.
+
 
 Thu Apr  6 17:00:46 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
