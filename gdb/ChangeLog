@@ -1,3 +1,8 @@
+Tue Aug 25 13:21:58 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* ax-gdb.c (gen_var_ref): Allow for typedef types.
+	(gen_cast, gen_bitfield_ref, gen_expr): ditto.
+
 Mon Aug 24 18:29:03 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* tracepoint.c (collect_symbol): Handle register doubles that
