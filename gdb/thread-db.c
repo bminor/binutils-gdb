@@ -404,7 +404,7 @@ enable_thread_event_reporting (void)
   err = td_ta_event_addr_p (thread_agent, TD_DEATH, &notify);
   if (err != TD_OK)
     {
-      warning ("Unable to get location for thread creation breakpoint: %s",
+      warning ("Unable to get location for thread death breakpoint: %s",
 	       thread_db_err_str (err));
       return;
     }
