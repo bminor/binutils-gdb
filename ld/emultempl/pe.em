@@ -105,6 +105,8 @@ static boolean gld_${EMULATION_NAME}_place_orphan
 static char *gld_${EMULATION_NAME}_get_script PARAMS ((int *));
 static int gld_${EMULATION_NAME}_parse_args PARAMS ((int, char **));
 static void gld_${EMULATION_NAME}_finish PARAMS ((void));
+static boolean gld_${EMULATION_NAME}_open_dynamic_archive 
+  PARAMS ((const char *, search_dirs_type *, lang_input_statement_type *));
 
 static struct internal_extra_pe_aouthdr pe;
 static int dll;
@@ -114,8 +116,8 @@ static lang_assignment_statement_type *image_base_statement = 0;
 
 static int pe_enable_stdcall_fixup = -1; /* 0=disable 1=enable */
 #ifdef DLL_SUPPORT
-static char *pe_out_def_filename = 0;
-static char *pe_implib_filename = 0;
+static char *pe_out_def_filename = NULL;
+static char *pe_implib_filename = NULL;
 #endif
 
 extern const char *output_filename;
@@ -814,7 +816,7 @@ gld_${EMULATION_NAME}_after_open ()
 		sprintf (new_name, "%s.%c", is->the_bfd->filename, seq);
 		is->the_bfd->filename = new_name;
 
-		new_name = xmalloc (strlen(is->filename) + 3);
+		new_name = xmalloc (strlen (is->filename) + 3);
 		sprintf (new_name, "%s.%c", is->filename, seq);
 		is->filename = new_name;
 	      }
@@ -868,10 +870,10 @@ gld_${EMULATION_NAME}_before_allocation()
 #endif /* TARGET_IS_armpe */
 }
 
-
+#ifdef DLL_SUPPORT
 /* This is called when an input file isn't recognized as a BFD.  We
    check here for .DEF files and pull them in automatically. */
-#ifdef DLL_SUPPORT
+
 static int
 saw_option(char *option)
 {
@@ -881,7 +883,7 @@ saw_option(char *option)
       return init[i].inited;
   return 0;
 }
-#endif
+#endif /* DLL_SUPPORT */
 
 static boolean
 gld_${EMULATION_NAME}_unrecognized_file(entry)
@@ -1047,6 +1049,7 @@ gld_${EMULATION_NAME}_finish ()
 	pe_dll_generate_implib (pe_def_file, pe_implib_filename);
     }
 #if defined(TARGET_IS_shpe) || defined(TARGET_IS_mipspe)
+  /* ARM doesn't need relocs.  */
   else
     {
       pe_exe_fill_sections (output_bfd, &link_info);
@@ -1055,7 +1058,7 @@ gld_${EMULATION_NAME}_finish ()
   
   if (pe_out_def_filename)
     pe_dll_generate_def_file (pe_out_def_filename);
-#endif
+#endif /* DLL_SUPPORT */
 }
 
 
@@ -1303,6 +1306,45 @@ gld_${EMULATION_NAME}_place_orphan (file, s)
   return true;
 }
 
+static boolean
+gld_${EMULATION_NAME}_open_dynamic_archive (arch, search, entry)
+     const char * arch;
+     search_dirs_type * search;
+     lang_input_statement_type * entry;
+{
+  const char * filename;
+  char * string;
+
+  if (! entry->is_archive)
+    return false;
+
+  filename = entry->filename;
+
+  string = (char *) xmalloc (strlen (search->name)
+                             + strlen (filename) 
+                             + sizeof "/lib.dll"
+                             + 1);
+
+  /* Try "foo.dll" first.  */
+  sprintf (string, "%s/%s.dll", search->name, filename);
+
+  if (! ldfile_try_open_bfd (string, entry))
+    {
+      /* Try "libfoo.dll" next.  */
+      sprintf (string, "%s/lib%s.dll", search->name, filename);
+
+      if (! ldfile_try_open_bfd (string, entry))
+        {
+          free (string);
+          return false;
+        }
+    }
+  
+  entry->filename = string;
+
+  return true;
+}
+
 static int
 gld_${EMULATION_NAME}_find_potential_libraries (name, entry)
      char * name;
@@ -1356,7 +1398,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   "${OUTPUT_FORMAT}",
   gld_${EMULATION_NAME}_finish, /* finish */
   NULL, /* create output section statements */
-  NULL, /* open dynamic archive */
+  gld_${EMULATION_NAME}_open_dynamic_archive,
   gld_${EMULATION_NAME}_place_orphan,
   gld_${EMULATION_NAME}_set_symbols,
   gld_${EMULATION_NAME}_parse_args,

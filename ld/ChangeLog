@@ -1,3 +1,10 @@
+2000-05-16  Charles Wilson <cwilson@ece.gatech.edu>
+
+	* ld/emultempl/pe.em (_open_dynamic_archive): New function: Search
+	the library path for "foo.dll" and "libfoo.dll" dynamic libraries
+	before searching for 'libfoo.a' in response to a '-Bdynamic -lfoo'
+	link options.
+	
 2000-05-15  David O'Brien  <obrien@FreeBSD.org>
 
 	* lexsup.c (parse_args): Update the year in the copyright notice.
@@ -560,7 +567,7 @@ Wed Nov  3 23:31:19 1999  Jeffrey A Law  (law@cygnus.com)
 
 1999-09-22  Nick Clifton  <nickc@cygnus.com>
 
-	* Makefile.am: Add earm_epoc_pe.c build target. 
+	* Makefile.am: Add earm_epoc_pe.c build target.
 
 Sat Sep 18 07:57:10 1999  Jeffrey A Law  (law@cygnus.com)
 
