@@ -1,5 +1,9 @@
 Thu Mar 21 13:17:34 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ldmisc.c (vfinfo): case 'I': If the file is not in an archive,
+	and the local symbol name does not match the filename, print the
+	filename as well.
+
 	Patches from John Polstra <jdp@polstra.com> for FreeBSD ELF:
 	* lexsup.c (parse_args): -Bshareable is a synonym for -shared.
 	* emulparams/elf_i386.sh (NONPAGED_TEXT_START_ADDR): Make the same
