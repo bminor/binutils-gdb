@@ -1,5 +1,9 @@
 Thu Feb  3 16:49:35 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* ecofflink.c (bfd_ecoff_debug_externals): If a small undefined
+	symbol has a value in the ECOFF symbol but not in the BFD symbol,
+	keep the value in the ECOFF symbol.  This helps gas.
+
 	* linker.c (_bfd_generic_link_output_symbols,
 	_bfd_generic_link_write_global_symbol): Don't require that all
 	references to a common symbol be themselves common symbols.

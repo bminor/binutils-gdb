@@ -991,7 +991,15 @@ bfd_ecoff_debug_externals (abfd, debug, swap, relocateable, get_extr,
 
       if (bfd_is_com_section (sym_ptr->section)
 	  || sym_ptr->section == &bfd_und_section)
-	esym.asym.value = sym_ptr->value;
+	{
+	  /* FIXME: gas does not keep the value of a small undefined
+	     symbol in the symbol itself, because of relocation
+	     problems.  */
+	  if (esym.asym.sc != scSUndefined
+	      || esym.asym.value == 0
+	      || sym_ptr->value != 0)
+	    esym.asym.value = sym_ptr->value;
+	}
       else
 	esym.asym.value = (sym_ptr->value
 			   + sym_ptr->section->output_offset
