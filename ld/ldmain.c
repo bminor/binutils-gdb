@@ -325,7 +325,7 @@ main (argc, argv)
 
       if (saved_script_handle)
 	{
-	  const int BSIZE = 8192;
+	  static const int BSIZE = 8192;
 	  size_t n;
 	  char *buf = xmalloc (BSIZE);
 

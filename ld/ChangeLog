@@ -1,3 +1,7 @@
+2001-08-27  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* ldmain.c (main): Declare BSIZE as static.
+
 2001-08-23  Jakub Jelinek  <jakub@redhat.com>
 
 	* emultempl/elf32.em (place_orphan): Place orphan .rel* sections
