@@ -9410,6 +9410,21 @@ COFF shared library information.
 Section contains common symbols.
 @end table
 @end table
+@kindex set trust-readonly-sections
+@item set trust-readonly-sections on
+Tell @value{GDBN} that readonly sections in your object file
+really are read-only (ie.@: that their contents will not change).
+In that case, @value{GDBN} can fetch values from these sections
+out of the object file, rather than from the target program.
+For some targets (notably embedded ones), this can be a significant
+enhancement to debugging performance.
+
+The default is off.
+
+@item set trust-readonly-sections off
+Tell @value{gdbn} not to trust readonly sections.  This means that
+the contents of the section might change while the program is running,
+and must therefore be fetched from the target when needed.
 @end table
 
 All file-specifying commands allow both absolute and relative file names
