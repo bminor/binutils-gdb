@@ -1,3 +1,8 @@
+2003-01-28    Dmitry Diky <diwil@mail.ru>
+	
+	* config/tc-msp430.c: Replace occurences of 'tolower' with
+	'TOLOWER'.
+
 2003-01-27  David Mosberger  <davidm@hpl.hp.com>
 
 	* config/tc-ia64.c (dot_vframesp): Correct error message.

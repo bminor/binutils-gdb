@@ -1,6 +1,6 @@
 /* tc-msp430.c -- Assembler code for the Texas Instruments MSP430
 
-  Copyright (C) 2002 Free Software Foundation, Inc.
+  Copyright (C) 2002, 2003 Free Software Foundation, Inc.
   Contributed by Dmitry Diky <diwil@mail.ru>
 
   This file is part of GAS, the GNU Assembler.
@@ -424,7 +424,7 @@ md_assemble (str)
 
   while (cmd[i] && i < sizeof (cmd))
     {
-      char a = tolower (cmd[i]);
+      char a = TOLOWER (cmd[i]);
       cmd[i] = a;
       i++;
     }
@@ -475,7 +475,7 @@ msp430_operands (opcode, line)
      .b @r2+, 5(R1).  */
 
   /* Check if byte or word operation.  */
-  if (*line == '.' && tolower (*(line + 1)) == 'b')
+  if (*line == '.' && TOLOWER (*(line + 1)) == 'b')
     {
       bin |= BYTE_OPERATION;
       byte_op = 1;
