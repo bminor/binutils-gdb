@@ -1,5 +1,7 @@
 Thu Oct 15 21:43:22 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
 
+	* getopt.h (struct option): use the provided enum for has_arg.
+
 	* demangle.h (AUTO_DEMANGLING, GNU_DEMANGLING,
 	  LUCID_DEMANGLING): ultrix compilers require enums to be
 	  enums and ints to be ints and casts where they meet.  cast some
