@@ -206,13 +206,29 @@ xstormy16_cons_fix_new (f, where, nbytes, exp)
 
   if (exp->X_op == O_fptr_symbol)
     {
-      if (nbytes != 2)
+      switch (nbytes)
 	{
+ 	case 4:
+ 	  /* This can happen when gcc is generating debug output.
+ 	     For example it can create a stab with the address of
+ 	     a function:
+ 	     
+ 	     	.stabs	"foo:F(0,21)",36,0,0,@fptr(foo)
+ 
+ 	     Since this does not involve switching code pages, we
+ 	     just allow the reloc to be generated without any
+ 	     @fptr behaviour.  */
+ 	  exp->X_op = O_symbol;
+ 	  code = BFD_RELOC_32;
+ 	  break;
+ 	case 2:
+ 	  exp->X_op = O_symbol;
+ 	  code = BFD_RELOC_XSTORMY16_FPTR16;
+ 	  break;
+ 	default:
 	  as_bad ("unsupported fptr fixup size %d", nbytes);
 	  return;
 	}
-      exp->X_op = O_symbol;
-      code = BFD_RELOC_XSTORMY16_FPTR16;
     }
   else if (nbytes == 1)
     code = BFD_RELOC_8;

@@ -1,3 +1,8 @@
+2004-10-18  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-xstormy16.c (xstormy16_cons_fix_new): Accept and
+	ignore @fptr() directives for 4-byte fixups.
+
 2004-10-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am"
