@@ -6,6 +6,9 @@
    interface, for making instruction-processing programs more independent
    of the instruction set being processed.  */
 
+#ifndef DIS_ASM_H
+#define DIS_ASM_H
+
 #include <stdio.h>
 #include "bfd.h"
 
@@ -84,10 +87,6 @@ typedef struct disassemble_info {
 
 } disassemble_info;
 
-
-
-
-
 
 /* Standard disassemblers.  Disassemble one instruction at the given
    target address.  Return number of bytes processed.  */
@@ -104,6 +103,9 @@ extern int print_insn_h8300		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_h8300h		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_h8500		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_alpha		PARAMS ((bfd_vma, disassemble_info*));
+/* start-sanitize-arc */
+extern int print_insn_arc		PARAMS ((bfd_vma, disassemble_info*));
+/* end-sanitize-arc */
 extern int print_insn_arm		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_sparc		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_big_a29k		PARAMS ((bfd_vma, disassemble_info*));
@@ -179,3 +181,5 @@ dis_asm_print_address PARAMS ((bfd_vma addr, disassemble_info *info));
   (INFO).memory_error_func = dis_asm_memory_error, \
   (INFO).print_address_func = dis_asm_print_address, \
   (INFO).insn_info_valid = 0
+
+#endif /* ! defined (DIS_ASM_H) */

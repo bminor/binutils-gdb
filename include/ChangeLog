@@ -1,3 +1,18 @@
+Fri Jan  6 17:44:14 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* dis-asm.h: Make idempotent.
+
+Wed Dec 14 13:08:43 1994  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* progress.h: New file, empty definitions for progress macros.
+
+start-sanitize-arc
+Tue Nov 29 17:38:20 1994  Doug Evans  <dje@canuck.cygnus.com>
+
+	* dis-asm.h (print_insn_arc): Declare.
+	* elf/common.h (EM_CYGNUS_ARC): Define.
+end-sanitize-arc
+
 Fri Nov 25 00:14:05 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* hp-symtab.h: New file describing the debug symbols emitted
