@@ -638,6 +638,8 @@ static void xtensa_move_seg_list_to_beginning
   PARAMS ((seg_list *));
 static void xtensa_move_literals
   PARAMS ((void));
+static void mark_literal_frags
+  PARAMS ((seg_list *));
 static void xtensa_reorder_seg_list
   PARAMS ((seg_list *, segT));
 static void xtensa_reorder_segments
@@ -7485,21 +7487,9 @@ xtensa_move_literals ()
   fixS *fix, *next_fix, **fix_splice;
   sym_list *lit;
 
-  /* As clunky as this is, we can't rely on frag_var
-     and frag_variant to get called in all situations.  */
-
-  segment = literal_head->next;
-  while (segment)
-    {
-      frchain_from = seg_info (segment->seg)->frchainP;
-      search_frag = frchain_from->frch_root;
-      while (search_frag) 
-	{
-	  search_frag->tc_frag_data.is_literal = TRUE;
-	  search_frag = search_frag->fr_next;
-	}
-      segment = segment->next;
-    }
+  mark_literal_frags (literal_head->next);
+  mark_literal_frags (init_literal_head->next);
+  mark_literal_frags (fini_literal_head->next);
 
   if (use_literal_section)
     return;
@@ -7599,6 +7589,31 @@ xtensa_move_literals ()
       symbolS *lit_sym = lit->sym;
       segT dest_seg = symbol_get_frag (lit_sym)->tc_frag_data.lit_seg;
       S_SET_SEGMENT (lit_sym, dest_seg);
+    }
+}
+
+
+/* Walk over all the frags for segments in a list and mark them as
+   containing literals.  As clunky as this is, we can't rely on frag_var
+   and frag_variant to get called in all situations.  */
+
+static void
+mark_literal_frags (segment)
+     seg_list *segment;
+{
+  frchainS *frchain_from;
+  fragS *search_frag;
+
+  while (segment)
+    {
+      frchain_from = seg_info (segment->seg)->frchainP;
+      search_frag = frchain_from->frch_root;
+      while (search_frag) 
+	{
+	  search_frag->tc_frag_data.is_literal = TRUE;
+	  search_frag = search_frag->fr_next;
+	}
+      segment = segment->next;
     }
 }
 
@@ -7872,11 +7887,11 @@ xtensa_post_relax_hook ()
 
   xtensa_create_property_segments (get_frag_is_insn,
 				   XTENSA_INSN_SEC_NAME,
-				   xt_literal_sec);
+				   xt_insn_sec);
   if (use_literal_section)
     xtensa_create_property_segments (get_frag_is_literal,
 				     XTENSA_LIT_SEC_NAME,
-				     xt_insn_sec);
+				     xt_literal_sec);
 }
 
 
