@@ -127,14 +127,14 @@ new_sim_core_mapping(SIM_DESC sd,
 STATIC_INLINE_SIM_CORE\
 (void)
 sim_core_map_attach(SIM_DESC sd,
-		sim_core_map *access_map,
-		attach_type attach,
-		int space,
-		unsigned_word addr,
-		unsigned nr_bytes, /* host limited */
-		device *client, /*callback/default*/
-		void *buffer, /*raw_memory*/
-		int free_buffer) /*raw_memory*/
+		    sim_core_map *access_map,
+		    attach_type attach,
+		    int space,
+		    unsigned_word addr,
+		    unsigned nr_bytes, /* host limited */
+		    device *client, /*callback/default*/
+		    void *buffer, /*raw_memory*/
+		    int free_buffer) /*raw_memory*/
 {
   /* find the insertion point for this additional mapping and then
      insert */
@@ -192,18 +192,25 @@ sim_core_map_attach(SIM_DESC sd,
 INLINE_SIM_CORE\
 (void)
 sim_core_attach(SIM_DESC sd,
-	    attach_type attach,
-	    access_type access,
-	    int space,
-	    unsigned_word addr,
-	    unsigned nr_bytes, /* host limited */
-	    device *client,
-	    void *optional_buffer)
+		sim_cpu *cpu,
+		attach_type attach,
+		access_type access,
+		int space,
+		unsigned_word addr,
+		unsigned nr_bytes, /* host limited */
+		device *client,
+		void *optional_buffer)
 {
   sim_core *memory = STATE_CORE(sd);
   sim_core_maps map;
   void *buffer;
   int buffer_freed;
+  int i;
+
+  /* check for for attempt to use unimplemented per-processor core map */
+  if (cpu != NULL)
+    sim_io_error (sd, "sim_core_map_attach - processor specific memory map not yet supported");
+
   if ((access & access_read_write_exec) == 0
       || (access & ~access_read_write_exec) != 0) {
 #if (WITH_DEVICES)
@@ -270,31 +277,45 @@ sim_core_attach(SIM_DESC sd,
       break;
     }
   }
+
+  /* Just copy this map to each of the processor specific data structures.
+     FIXME - later this will be replaced by true processor specific
+     maps. */
+  for (i = 0; i < MAX_NR_PROCESSORS; i++)
+    *CPU_CORE (STATE_CPU (sd, i)) = *STATE_CORE (sd);
 }
 
 
 STATIC_INLINE_SIM_CORE\
 (sim_core_mapping *)
-sim_core_find_mapping(SIM_DESC sd,
+sim_core_find_mapping(sim_core *core,
 		      sim_core_maps map,
 		      unsigned_word addr,
 		      unsigned nr_bytes,
-		      int abort, /*either 0 or 1 - helps inline */
-		      sim_cpu *cpu,
+		      int abort, /*either 0 or 1 - hint to inline/-O */
+		      sim_cpu *cpu, /* abort => cpu != NULL */
 		      sim_cia cia)
 {
-  sim_core_mapping *mapping = STATE_CORE (sd)->map[map].first;
-  SIM_ASSERT((addr & (nr_bytes - 1)) == 0); /* must be aligned */
-  SIM_ASSERT((addr + (nr_bytes - 1)) >= addr); /* must not wrap */
-  while (mapping != NULL) {
-    if (addr >= mapping->base
-	&& (addr + (nr_bytes - 1)) <= mapping->bound)
-      return mapping;
-    mapping = mapping->next;
-  }
+  sim_core_mapping *mapping = core->map[map].first;
+  ASSERT ((addr & (nr_bytes - 1)) == 0); /* must be aligned */
+  ASSERT ((addr + (nr_bytes - 1)) >= addr); /* must not wrap */
+  ASSERT (!abort || cpu != NULL); /* abort needs a non null CPU */
+  while (mapping != NULL)
+    {
+      if (addr >= mapping->base
+	  && (addr + (nr_bytes - 1)) <= mapping->bound)
+	return mapping;
+      mapping = mapping->next;
+    }
   if (abort)
-    sim_io_error (sd, "access to unmaped address 0x%lx (%d bytes)\n",
-		  (unsigned long) addr, nr_bytes);
+    {
+      if (cpu == NULL)
+	sim_io_error (NULL, "sim_core_find_map - internal error - can not abort without a processor");
+      else
+	sim_io_error (CPU_STATE (cpu),
+		      "access to unmaped address 0x%lx (%d bytes)\n",
+		      (unsigned long) addr, nr_bytes);
+    }
   return NULL;
 }
 
@@ -320,7 +341,7 @@ sim_core_read_buffer(SIM_DESC sd,
   while (count < len) {
     unsigned_word raddr = addr + count;
     sim_core_mapping *mapping =
-      sim_core_find_mapping(sd, map,
+      sim_core_find_mapping(STATE_CORE (sd), map,
 			    raddr, 1,
 			    0, NULL, NULL_CIA); /*dont-abort*/
     if (mapping == NULL)
@@ -361,7 +382,7 @@ sim_core_write_buffer(SIM_DESC sd,
   unsigned count = 0;
   while (count < len) {
     unsigned_word raddr = addr + count;
-    sim_core_mapping *mapping = sim_core_find_mapping(sd, map,
+    sim_core_mapping *mapping = sim_core_find_mapping(STATE_CORE (sd), map,
 						      raddr, 1,
 						      0, NULL, NULL_CIA); /*dont-abort*/
     if (mapping == NULL)

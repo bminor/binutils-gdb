@@ -201,6 +201,10 @@ typedef struct {
   SIM_DESC state;
 #define CPU_STATE(cpu) ((cpu)->base.state)
 
+  /* Processor specific core data */
+#define CPU_CORE(cpu) (& (cpu)->base.core)
+  sim_cpu_core core;
+
   /* Trace data.  See sim-trace.h.  */
   TRACE_DATA trace_data;
 #define CPU_TRACE_DATA(cpu) (& (cpu)->base.trace_data)

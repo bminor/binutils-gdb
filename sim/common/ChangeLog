@@ -1,3 +1,28 @@
+Mon May  5 11:16:12 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-config.h (FORCED_ALIGNMENT): New alignment option -
+ 	addresses are masked forcing them to be correctly aligned.
+	(WITH_ALIGNMENT): Make NONSTRICT_ALIGNMENT the default.
+	* sim-config.c (config_alignment_to_a): Update.
+
+	* sim-core.h (sim_cpu_core): New data type contains cpu specific
+ 	core data.
+	* sim-base.h (CPU_CORE): Add cpu specific core data to cpu base
+ 	type.
+	* sim-core.c (sim_core_attach): Add CPU argument.  Ready for
+ 	processor specific core maps.
+	(sim_core_map_attach): Copy the core map data to each of the
+ 	processor specific core data structures.
+	* sim-core.c (sim_core_find_mapping): Update.
+
+	* sim-n-core.h (sim_core_read_N, sim_core_write_N): Rename.
+	(sim_core_write_aligned_N, sim_core_write_aligned_N): New names.
+	(sim_core_write_unaligned_N, sim_core_write_unaligned_N): New
+ 	alternatives that handle unaligned addresses.
+	(sim_core_{read,write}_{,un}aligned_N): Drop SIM_DESC arg, replace
+ 	with just CPU arg.
+	* cgen-utils.c (sim_disassemble_insn): Update.
+
 Mon May  5 13:19:16 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-trace.h (TRACE_FPU_IDX): Add Floating-point specific

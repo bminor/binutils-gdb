@@ -87,10 +87,12 @@ sim_open (SIM_OPEN_KIND kind, char **argv)
 
   /* external memory */
   sim_core_attach(&simulation,
+		  NULL,
 		  attach_raw_memory,
 		  access_read_write_exec,
 		  0, TIC80_MEM_START, TIC80_MEM_SIZE, NULL, NULL);
   sim_core_attach(&simulation,
+		  NULL,
 		  attach_raw_memory,
 		  access_read_write_exec,
 		  0, 0, TIC80_MEM_SIZE, NULL, NULL);

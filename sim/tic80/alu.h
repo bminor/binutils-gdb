@@ -39,19 +39,18 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* Bring data in from the cold */
 
 #define IMEM(EA) \
-(sim_core_read_4(sd, sim_core_execute_map, (EA), \
- STATE_CPU (sd, 0), cia))
+(sim_core_read_aligned_4(STATE_CPU (sd, 0), cia, sim_core_execute_map, (EA)))
 
 #define MEM(SIGN, EA, NR_BYTES) \
-((SIGN##_##NR_BYTES) sim_core_read_##NR_BYTES (SD, sim_core_read_map, \
-                                               (EA) & ~(NR_BYTES - 1), \
-                                               STATE_CPU (sd, 0), cia))
+((SIGN##_##NR_BYTES) sim_core_read_unaligned_##NR_BYTES (STATE_CPU (sd, 0), cia, \
+                                                         sim_core_read_map, \
+                                                         (EA)))
 
 #define STORE(EA, NR_BYTES, VAL) \
 do { \
-  sim_core_write_##NR_BYTES (SD, sim_core_write_map, \
-                             (EA) & ~(NR_BYTES - 1), (VAL), \
-                             STATE_CPU (sd, 0), cia); \
+  sim_core_write_unaligned_##NR_BYTES (STATE_CPU (sd, 0), cia, \
+                                       sim_core_write_map, \
+                                       (EA), (VAL)); \
 } while (0)
 
 

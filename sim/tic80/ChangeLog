@@ -1,3 +1,9 @@
+Mon May  5 11:50:43 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* alu.h: Update usage of core object to reflect recent changes in
+ 	../common/sim-*core.
+	* sim-calls.c (sim_open): Ditto.
+
 Mon May  5 14:10:17 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* insn (cmnd): No-op cache flushes.

@@ -1,3 +1,11 @@
+Mon May  5 12:45:28 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-if.c (sim_open): Update to reflect changes to core in
+ 	../common/.
+	* mem-ops.h (GETMEMQI, GETMEMHI, GETMEMSI, GETMEMDI, GETMEMUQI,
+ 	GETMEMUHI, GETMEMUSI, GETMEMUDI, SETMEMQI, SETMEMHI, SETMEMSI,
+ 	SETMEMDI, SETMEMUQI, SETMEMUHI, SETMEMUSI, SETMEMUDI): Ditto.
+
 Sat May  3 08:38:55 1997  Doug Evans  <dje@seba.cygnus.com>
 
 	* decode.c (decode): Add computed goto support.

@@ -38,6 +38,8 @@ struct _sim_core_mapping {
   void *buffer;
   /* callback map */
   device *device;
+  /* tracing */
+  int trace;
   /* growth */
   sim_core_mapping *next;
 };
@@ -54,11 +56,19 @@ typedef enum {
   nr_sim_core_maps,
 } sim_core_maps;
 
+
+/* Main core structure */
+
 typedef struct _sim_core sim_core;
 struct _sim_core {
   int trace;
   sim_core_map map[nr_sim_core_maps];
 };
+
+
+/* Per CPU distributed component of the core */
+
+typedef sim_core sim_cpu_core;
 
 
 /* Install the "core" module.  */
@@ -74,11 +84,13 @@ EXTERN_SIM_CORE\
 sim_core_uninstall (SIM_DESC sd);
 
 
+
 /* initialize */
 
 EXTERN_SIM_CORE\
 (SIM_RC) sim_core_init
 (SIM_DESC sd);
+
 
 
 /* tracing */
@@ -90,11 +102,15 @@ INLINE_SIM_CORE\
 
 
 
-/* Create a memory space within the core. */
+/* Create a memory space within the core.
+
+   The CPU option (when non NULL) specifes the single processor that
+   the memory space is to be attached to. (unimplemented) */
 
 INLINE_SIM_CORE\
 (void) sim_core_attach
 (SIM_DESC sd,
+ sim_cpu *cpu,
  attach_type attach,
  access_type access,
  int address_space,
@@ -107,9 +123,9 @@ INLINE_SIM_CORE\
 
 /* Variable sized read/write
 
-   Transfer (zero) a variable size block of data between the host and
-   target (possibly byte swapping it).  Should any problems occure,
-   the number of bytes actually transfered is returned. */
+   Transfer a variable sized block of raw data between the host and
+   target.  Should any problems occure, the number of bytes
+   successfully transfered is returned. */
 
 INLINE_SIM_CORE\
 (unsigned) sim_core_read_buffer
@@ -128,41 +144,70 @@ INLINE_SIM_CORE\
  unsigned nr_bytes);
 
 
-/* Fixed sized read/write
+/* Fixed sized, processor oriented, read/write.
 
    Transfer a fixed amout of memory between the host and target.  The
-   memory always being translated and the operation always aborting
-   should a problem occure */
+   data transfered is translated from/to host to/from target byte
+   order.  Should the transfer fail, the operation shall abort (no
+   return).  The aligned alternative makes the assumption that that
+   the address is N byte aligned (no alignment checks are made).  The
+   unaligned alternative checks the address for correct byte
+   alignment.  Action, as defined by WITH_ALIGNMENT, being taken
+   should the check fail. */
 
-#define DECLARE_SIM_CORE_WRITE_N(N) \
+#define DECLARE_SIM_CORE_WRITE_N(ALIGNMENT,N) \
 INLINE_SIM_CORE\
-(void) sim_core_write_##N \
-(SIM_DESC sd, \
+(void) sim_core_write_##ALIGNMENT##_##N \
+(sim_cpu *cpu, \
+ sim_cia cia, \
  sim_core_maps map, \
  unsigned_word addr, \
  unsigned_##N val);
 
-DECLARE_SIM_CORE_WRITE_N(1)
-DECLARE_SIM_CORE_WRITE_N(2)
-DECLARE_SIM_CORE_WRITE_N(4)
-DECLARE_SIM_CORE_WRITE_N(8)
-DECLARE_SIM_CORE_WRITE_N(word)
+DECLARE_SIM_CORE_WRITE_N(aligned,1)
+DECLARE_SIM_CORE_WRITE_N(aligned,2)
+DECLARE_SIM_CORE_WRITE_N(aligned,4)
+DECLARE_SIM_CORE_WRITE_N(aligned,8)
+DECLARE_SIM_CORE_WRITE_N(aligned,word)
+
+DECLARE_SIM_CORE_WRITE_N(unaligned,1)
+DECLARE_SIM_CORE_WRITE_N(unaligned,2)
+DECLARE_SIM_CORE_WRITE_N(unaligned,4)
+DECLARE_SIM_CORE_WRITE_N(unaligned,8)
+DECLARE_SIM_CORE_WRITE_N(unaligned,word)
+
+#define sim_core_write_1 sim_core_write_aligned_1
+#define sim_core_write_2 sim_core_write_aligned_2
+#define sim_core_write_4 sim_core_write_aligned_4
+#define sim_core_write_8 sim_core_write_aligned_8
 
 #undef DECLARE_SIM_CORE_WRITE_N
 
 
-#define DECLARE_SIM_CORE_READ_N(N) \
+#define DECLARE_SIM_CORE_READ_N(ALIGNMENT,N) \
 INLINE_SIM_CORE\
-(unsigned_##N) sim_core_read_##N \
-(SIM_DESC sd, \
+(unsigned_##N) sim_core_read_##ALIGNMENT##_##N \
+(sim_cpu *cpu, \
+ sim_cia cia, \
  sim_core_maps map, \
  unsigned_word addr);
 
-DECLARE_SIM_CORE_READ_N(1)
-DECLARE_SIM_CORE_READ_N(2)
-DECLARE_SIM_CORE_READ_N(4)
-DECLARE_SIM_CORE_READ_N(8)
-DECLARE_SIM_CORE_READ_N(word)
+DECLARE_SIM_CORE_READ_N(aligned,1)
+DECLARE_SIM_CORE_READ_N(aligned,2)
+DECLARE_SIM_CORE_READ_N(aligned,4)
+DECLARE_SIM_CORE_READ_N(aligned,8)
+DECLARE_SIM_CORE_READ_N(aligned,word)
+
+DECLARE_SIM_CORE_READ_N(unaligned,1)
+DECLARE_SIM_CORE_READ_N(unaligned,2)
+DECLARE_SIM_CORE_READ_N(unaligned,4)
+DECLARE_SIM_CORE_READ_N(unaligned,8)
+DECLARE_SIM_CORE_READ_N(unaligned,word)
+
+#define sim_core_read_1 sim_core_read_aligned_1
+#define sim_core_read_2 sim_core_read_aligned_2
+#define sim_core_read_4 sim_core_read_aligned_4
+#define sim_core_read_8 sim_core_read_aligned_8
 
 #undef DECLARE_SIM_CORE_READ_N
 

@@ -81,6 +81,7 @@ sim_open (kind, argv)
 
   /* FIXME:wip */
   sim_core_attach (sd,
+		   NULL,
 		   attach_raw_memory,
 		   access_read_write_exec,
 		   0, 0, 0x100000, NULL, NULL);
@@ -191,13 +192,15 @@ static void
 print_m32r_misc_cpu (SIM_CPU *cpu, int verbose)
 {
   SIM_DESC sd = CPU_STATE (cpu);
+  char buf[20];
 
   if (CPU_PROFILE_FLAGS (cpu) [PROFILE_INSN_IDX])
     {
       sim_io_printf (sd, "Miscellaneous Statistics\n\n");
-      sim_io_printf (sd, "  %-*s %ld\n\n",
+      sim_io_printf (sd, "  %-*s %s\n\n",
 		     PROFILE_LABEL_WIDTH, "Fill nops:",
-		     CPU_M32R_PROFILE (cpu).fillnop_count);
+		     sim_add_commas (buf, sizeof (buf),
+				     CPU_M32R_PROFILE (cpu).fillnop_count));
     }
 }
 
