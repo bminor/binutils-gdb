@@ -338,6 +338,7 @@ dump_relocations (file, rel_offset, rel_size, symtab, strtab)
   /* Compute number of relocations and read them in.  */
   switch (elf_header.e_machine)
     {
+    case EM_ARM:
     case EM_386:
     case EM_486:
     case EM_CYGNUS_M32R:
@@ -368,7 +369,6 @@ dump_relocations (file, rel_offset, rel_size, symtab, strtab)
       }
     break;
 
-    case EM_ARM:
     case EM_68K:
     case EM_SPARC:
     case EM_PPC:
