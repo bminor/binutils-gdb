@@ -8,6 +8,50 @@
 	* gdb.texinfo: Add chapter on interpreters. Refer the
 	command-line option "-i"/"--interpreter" to this chapter.
 
+2002-10-26  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Delete
+	definition of DO_REGISTERS_INFO.
+
+2002-10-18  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdbint.texinfo (Address Classes): Fix problems with insertion
+	of ``{'' and ``}'' in example.
+
+2002-10-17  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdbint.texinfo (Address Classes): New section.
+	(Target Conditionals): Document ADDRESS_CLASS_NAME_TO_TYPE_FLAGS,
+	ADDRESS_CLASS_NAME_TO_TYPE_FLAGS_P, ADDRESS_CLASS_TYPE_FLAGS,
+	ADDRESS_CLASS_TYPE_FLAGS_P, ADDRESS_CLASS_TYPE_FLAGS_TO_NAME, and
+	ADDRESS_CLASS_TYPE_FLAGS_TO_NAME_P.
+
+2002-10-11  Klee Dienes  <kdienes@apple.com>
+
+	* gdb.texinfo (Registers): Mention vector registers as well as
+	floating registers in the documentation for 'info registers' and
+	'info all-registers'.
+
+2002-10-11  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdbint.texinfo (CPLUS_MARKER): Remove item.
+
+2002-10-03  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* gdbint.texinfo (Item Output Functions): Add new ui_out_field_fmt_int
+	interface definition.
+
+2002-10-03  Marko Mlinar   <markom@opencores.org>
+
+	* gdb.texinfo (Target Commands): Add or1k target specific
+	commands.
+	* gdb.texinfo (Contributors): Add myself to the contributors list.
+
+2002-10-01  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb.texinfo (Mode Options): Update --interpreter option.  "mi2"
+	and "mi1" instead of "mi1" and "mi0".
+
 2002-09-29  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* gdb.texinfo (Packets): Fix typos "alligned".

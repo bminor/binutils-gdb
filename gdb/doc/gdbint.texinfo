@@ -1011,6 +1011,13 @@ This function outputs a value of an @code{int} variable.  It uses the
 the name of the field.
 @end deftypefun
 
+@deftypefun void ui_out_field_fmt_int (struct ui_out *@var{uiout}, int @var{width}, enum ui_align @var{alignment}, const char *@var{fldname}, int @var{value})
+This function outputs a value of an @code{int} variable.  It differs from
+@code{ui_out_field_int} in that the caller specifies the desired @var{width} and @var{alignment} of the output.
+@var{fldname} specifies
+the name of the field.
+@end deftypefun
+
 @deftypefun void ui_out_field_core_addr (struct ui_out *@var{uiout}, const char *@var{fldname}, CORE_ADDR @var{address})
 This function outputs an address.
 @end deftypefun
@@ -2623,6 +2630,91 @@ This function may safely assume that @var{type} is either a pointer or a
 C@t{++} reference type.
 @end deftypefn
 
+@section Address Classes
+@cindex address classes
+@cindex DW_AT_byte_size
+@cindex DW_AT_address_class
+
+Sometimes information about different kinds of addresses is available
+via the debug information.  For example, some programming environments
+define addresses of several different sizes.  If the debug information
+distinguishes these kinds of address classes through either the size
+info (e.g, @code{DW_AT_byte_size} in @w{DWARF 2}) or through an explicit
+address class attribute (e.g, @code{DW_AT_address_class} in @w{DWARF 2}), the
+following macros should be defined in order to disambiguate these
+types within @value{GDBN} as well as provide the added information to
+a @value{GDBN} user when printing type expressions.
+
+@deftypefn {Target Macro} int ADDRESS_CLASS_TYPE_FLAGS (int @var{byte_size}, int @var{dwarf2_addr_class})
+Returns the type flags needed to construct a pointer type whose size
+is @var{byte_size} and whose address class is @var{dwarf2_addr_class}.
+This function is normally called from within a symbol reader.  See
+@file{dwarf2read.c}.
+@end deftypefn
+
+@deftypefn {Target Macro} char *ADDRESS_CLASS_TYPE_FLAGS_TO_NAME (int @var{type_flags})
+Given the type flags representing an address class qualifier, return
+its name.
+@end deftypefn
+@deftypefn {Target Macro} int ADDRESS_CLASS_NAME_to_TYPE_FLAGS (int @var{name}, int *var{type_flags_ptr})
+Given an address qualifier name, set the @code{int} refererenced by @var{type_flags_ptr} to the type flags
+for that address class qualifier.
+@end deftypefn
+
+Since the need for address classes is rather rare, none of
+the address class macros defined by default.  Predicate
+macros are provided to detect when they are defined.
+
+Consider a hypothetical architecture in which addresses are normally
+32-bits wide, but 16-bit addresses are also supported.  Furthermore,
+suppose that the @w{DWARF 2} information for this architecture simply
+uses a @code{DW_AT_byte_size} value of 2 to indicate the use of one
+of these "short" pointers.  The following functions could be defined
+to implement the address class macros:
+
+@smallexample
+somearch_address_class_type_flags (int byte_size,
+                                   int dwarf2_addr_class)
+@{
+  if (byte_size == 2)
+    return TYPE_FLAG_ADDRESS_CLASS_1;
+  else
+    return 0;
+@}
+
+static char *
+somearch_address_class_type_flags_to_name (int type_flags)
+@{
+  if (type_flags & TYPE_FLAG_ADDRESS_CLASS_1)
+    return "short";
+  else
+    return NULL;
+@}
+
+int
+somearch_address_class_name_to_type_flags (char *name,
+                                           int *type_flags_ptr)
+@{
+  if (strcmp (name, "short") == 0)
+    @{
+      *type_flags_ptr = TYPE_FLAG_ADDRESS_CLASS_1;
+      return 1;
+    @}
+  else
+    return 0;
+@}
+@end smallexample
+
+The qualifier @code{@@short} is used in @value{GDBN}'s type expressions
+to indicate the presence of one of these "short" pointers.  E.g, if
+the debug information indicates that @code{short_ptr_var} is one of these
+short pointers, @value{GDBN} might show the following behavior:
+
+@smallexample
+(gdb) ptype short_ptr_var
+type = int * @@short
+@end smallexample
+
 
 @section Raw and Virtual Register Representations
 @cindex raw register representation
@@ -2850,6 +2942,49 @@ boundaries, the processor masks out these bits to generate the actual
 address of the instruction.  ADDR_BITS_REMOVE should filter out these
 bits with an expression such as @code{((addr) & ~3)}.
 
+@item ADDRESS_CLASS_NAME_TO_TYPE_FLAGS (@var{name}, @var{type_flags_ptr})
+@findex ADDRESS_CLASS_NAME_TO_TYPE_FLAGS
+If @var{name} is a valid address class qualifier name, set the @code{int}
+referenced by @var{type_flags_ptr} to the mask representing the qualifier
+and return 1.  If @var{name} is not a valid address class qualifier name,
+return 0.
+
+The value for @var{type_flags_ptr} should be one of
+@code{TYPE_FLAG_ADDRESS_CLASS_1}, @code{TYPE_FLAG_ADDRESS_CLASS_2}, or
+possibly some combination of these values or'd together.
+@xref{Target Architecture Definition, , Address Classes}.
+
+@item ADDRESS_CLASS_NAME_TO_TYPE_FLAGS_P ()
+@findex ADDRESS_CLASS_NAME_TO_TYPE_FLAGS_P
+Predicate which indicates whether @code{ADDRESS_CLASS_NAME_TO_TYPE_FLAGS}
+has been defined.
+
+@item ADDRESS_CLASS_TYPE_FLAGS (@var{byte_size}, @var{dwarf2_addr_class})
+@findex ADDRESS_CLASS_TYPE_FLAGS (@var{byte_size}, @var{dwarf2_addr_class})
+Given a pointers byte size (as described by the debug information) and
+the possible @code{DW_AT_address_class} value, return the type flags
+used by @value{GDBN} to represent this address class.  The value
+returned should be one of @code{TYPE_FLAG_ADDRESS_CLASS_1},
+@code{TYPE_FLAG_ADDRESS_CLASS_2}, or possibly some combination of these
+values or'd together.
+@xref{Target Architecture Definition, , Address Classes}.
+
+@item ADDRESS_CLASS_TYPE_FLAGS_P ()
+@findex ADDRESS_CLASS_TYPE_FLAGS_P
+Predicate which indicates whether @code{ADDRESS_CLASS_TYPE_FLAGS} has
+been defined.
+
+@item ADDRESS_CLASS_TYPE_FLAGS_TO_NAME (@var{type_flags})
+@findex ADDRESS_CLASS_TYPE_FLAGS_TO_NAME
+Return the name of the address class qualifier associated with the type
+flags given by @var{type_flags}.
+
+@item ADDRESS_CLASS_TYPE_FLAGS_TO_NAME_P ()
+@findex ADDRESS_CLASS_TYPE_FLAGS_TO_NAME_P
+Predicate which indicates whether @code{ADDRESS_CLASS_TYPE_FLAGS_TO_NAME} has
+been defined.
+@xref{Target Architecture Definition, , Address Classes}.
+
 @item ADDRESS_TO_POINTER (@var{type}, @var{buf}, @var{addr})
 @findex ADDRESS_TO_POINTER
 Store in @var{buf} a pointer of type @var{type} representing the address
@@ -3062,13 +3197,6 @@ Return non-zero if register @var{regnum} can represent data values in a
 non-standard form.
 @xref{Target Architecture Definition, , Using Different Register and Memory Data Representations}.
 
-@item CPLUS_MARKER
-@findex CPLUS_MARKERz
-Define this to expand into the character that G@t{++} uses to distinguish
-compiler-generated identifiers from programmer-specified identifiers.
-By default, this expands into @code{'$'}.  Most System V targets should
-define this to @code{'.'}.
-
 @item DBX_PARM_SYMBOL_CLASS
 @findex DBX_PARM_SYMBOL_CLASS
 Hook for the @code{SYMBOL_CLASS} of a parameter when decoding DBX symbol
@@ -3089,12 +3217,6 @@ Similarly, for hardware breakpoints.
 @findex DISABLE_UNSETTABLE_BREAK
 If defined, this should evaluate to 1 if @var{addr} is in a shared
 library in which breakpoints cannot be set and so should be disabled.
-
-@item DO_REGISTERS_INFO
-@findex DO_REGISTERS_INFO
-If defined, use this to print the value of a register or all registers.
-
-This method is deprecated.
 
 @item PRINT_FLOAT_INFO()
 @findex PRINT_FLOAT_INFO

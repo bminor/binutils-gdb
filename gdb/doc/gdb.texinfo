@@ -394,6 +394,7 @@ Michael Tiemann contributed SPARC support.
 Tim Tucker contributed support for the Gould NP1 and Gould Powernode.
 Pace Willison contributed Intel 386 support.
 Jay Vosburgh contributed Symmetry support.
+Marko Mlinar contributed OpenRISC 1000 support.
 
 Andreas Schwab contributed M68K @sc{gnu}/Linux support.
 
@@ -1127,6 +1128,13 @@ Use the interpreter @var{interp} for interface with the controlling
 program or device.  This option is meant to be set by programs which
 communicate with @value{GDBN} using it as a back end. @xref{Interpreters, ,
 Command Interpreters}.
+
+@samp{--interpreter=mi} (or @samp{--interpreter=mi2}) causes
+@value{GDBN} to use the current @dfn{@sc{gdb/mi} interface}
+(@pxref{GDB/MI, , The @sc{gdb/mi} Interface}).  The previous @sc{gdb/mi}
+interface, included in @value{GDBN} version 5.3, can be selected with
+@samp{--interpreter=mi1}.  Earlier @sc{gdb/mi} interfaces
+are not supported.
 
 @item -write
 @cindex @code{--write}
@@ -5550,13 +5558,13 @@ your machine.
 @kindex info registers
 @item info registers
 Print the names and values of all registers except floating-point
-registers (in the selected stack frame).
+and vector registers (in the selected stack frame).
 
 @kindex info all-registers
 @cindex floating point registers
 @item info all-registers
 Print the names and values of all registers, including floating-point
-registers.
+and vector registers (in the selected stack frame).
 
 @item info registers @var{regname} @dots{}
 Print the @dfn{relativized} value of each specified register @var{regname}.
@@ -11644,6 +11652,7 @@ configurations.
 * M68K::                        Motorola M68K
 @c OBSOLETE * M88K::                        Motorola M88K
 * MIPS Embedded::               MIPS Embedded
+* OpenRISC 1000::               OpenRisc 1000
 * PA::                          HP PA Embedded
 * PowerPC:                      PowerPC
 * SH::                          Hitachi SH
@@ -12230,6 +12239,130 @@ The timeout set by @code{set timeout} does not apply when @value{GDBN}
 is waiting for your program to stop.  In that case, @value{GDBN} waits
 forever because it has no way of knowing how long the program is going
 to run before stopping.
+@end table
+
+@node OpenRISC 1000
+@subsection OpenRISC 1000
+@cindex OpenRISC 1000
+
+@cindex or1k boards
+See OR1k Architecture document (@uref{www.opencores.org}) for more information
+about platform and commands.
+
+@table @code
+
+@kindex target jtag
+@item target jtag jtag://@var{host}:@var{port}
+
+Connects to remote JTAG server.
+JTAG remote server can be either an or1ksim or JTAG server,
+connected via parallel port to the board.
+
+Example: @code{target jtag jtag://localhost:9999}
+
+@kindex or1ksim
+@item or1ksim @var{command}
+If connected to @code{or1ksim} OpenRISC 1000 Architectural
+Simulator, proprietary commands can be executed.
+
+@kindex info or1k spr
+@item info or1k spr
+Displays spr groups.
+
+@item info or1k spr @var{group}
+@itemx info or1k spr @var{groupno}
+Displays register names in selected group.
+
+@item info or1k spr @var{group} @var{register}
+@itemx info or1k spr @var{register}
+@itemx info or1k spr @var{groupno} @var{registerno}
+@itemx info or1k spr @var{registerno}
+Shows information about specified spr register.
+
+@kindex spr
+@item spr @var{group} @var{register} @var{value}
+@itemx spr @var{register @var{value}}
+@itemx spr @var{groupno} @var{registerno @var{value}}
+@itemx spr @var{registerno @var{value}}
+Writes @var{value} to specified spr register.
+@end table
+
+Some implementations of OpenRISC 1000 Architecture also have hardware trace.
+It is very similar to @value{GDBN} trace, except it does not interfere with normal
+program execution and is thus much faster.  Hardware breakpoints/watchpoint
+triggers can be set using:
+@table @code
+@item $LEA/$LDATA
+Load effective address/data
+@item $SEA/$SDATA
+Store effective address/data
+@item $AEA/$ADATA
+Access effective address ($SEA or $LEA) or data ($SDATA/$LDATA)
+@item $FETCH
+Fetch data
+@end table
+
+When triggered, it can capture low level data, like: @code{PC}, @code{LSEA},
+@code{LDATA}, @code{SDATA}, @code{READSPR}, @code{WRITESPR}, @code{INSTR}.
+
+@code{htrace} commands:
+@cindex OpenRISC 1000 htrace
+@table @code
+@kindex hwatch
+@item hwatch @var{conditional}
+Set hardware watchpoint on combination of Load/Store Effecive Address(es)
+or Data.  For example:
+
+@code{hwatch ($LEA == my_var) && ($LDATA < 50) || ($SEA == my_var) && ($SDATA >= 50)}
+
+@code{hwatch ($LEA == my_var) && ($LDATA < 50) || ($SEA == my_var) && ($SDATA >= 50)}
+
+@kindex htrace info
+@item htrace info
+Display information about current HW trace configuration.
+
+@kindex htrace trigger
+@item htrace trigger @var{conditional}
+Set starting criteria for HW trace.
+
+@kindex htrace qualifier
+@item htrace qualifier @var{conditional}
+Set acquisition qualifier for HW trace.
+
+@kindex htrace stop
+@item htrace stop @var{conditional}
+Set HW trace stopping criteria.
+
+@kindex htrace record
+@item htrace record @var{[data]*}
+Selects the data to be recorded, when qualifier is met and HW trace was
+triggered.
+
+@kindex htrace enable
+@item htrace enable
+@kindex htrace disable
+@itemx htrace disable
+Enables/disables the HW trace.
+
+@kindex htrace rewind
+@item htrace rewind @var{[filename]}
+Clears currently recorded trace data.
+
+If filename is specified, new trace file is made and any newly collected data
+will be written there.
+
+@kindex htrace print
+@item htrace print @var{[start [len]]}
+Prints trace buffer, using current record configuration.
+
+@kindex htrace mode continuous
+@item htrace mode continuous
+Set continuous trace mode.
+
+@kindex htrace mode suspend
+@item htrace mode suspend
+Set suspend trace mode.
+
 @end table
 
 @node PowerPC
