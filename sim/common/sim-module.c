@@ -87,6 +87,8 @@ sim_pre_argv_init (SIM_DESC sd, const char *myname)
       }
   }
 
+  sim_config_default (sd);
+
   /* Install all configured in modules.  */
   if (sim_module_install (sd) != SIM_RC_OK)
     return SIM_RC_FAIL;
@@ -108,7 +110,10 @@ sim_post_argv_init (SIM_DESC sd)
 
   /* Set the cpu->state backlinks for each cpu.  */
   for (i = 0; i < MAX_NR_PROCESSORS; ++i)
-    CPU_STATE (STATE_CPU (sd, i)) = sd;
+    {
+      CPU_STATE (STATE_CPU (sd, i)) = sd;
+      CPU_INDEX (STATE_CPU (sd, i)) = i;
+    }
 
   return SIM_RC_OK;
 }

@@ -1,3 +1,10 @@
+Fri Mar 27 14:55:06 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-base.h (CPU_INDEX): Define.
+
+	* sim-utils.c (sim_state_alloc): Initialize.
+	* sim-module.c (sim_post_argv_init): Ditto.
+
 start-sanitize-am30
 Thu Mar 26 10:07:57 1998  Stu Grossman  <grossman@bhuna.cygnus.co.uk>
 

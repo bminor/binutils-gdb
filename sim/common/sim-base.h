@@ -1,5 +1,5 @@
 /* Simulator pseudo baseclass.
-   Copyright (C) 1997 Free Software Foundation, Inc.
+   Copyright (C) 1997-1998 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 This file is part of GDB, the GNU debugger.
@@ -174,6 +174,10 @@ typedef struct {
   struct _bfd *prog_bfd;
 #define STATE_PROG_BFD(sd) ((sd)->base.prog_bfd)
 
+  /* Symbol table for prog_bfd */
+  struct symbol_cache_entry **prog_syms;
+#define STATE_PROG_SYMS(sd) ((sd)->base.prog_syms)
+
   /* The program's text section.  */
   struct sec *text_section;
   /* Starting and ending text section addresses from the bfd.  */
@@ -242,6 +246,10 @@ typedef struct {
   /* Backlink to main state struct.  */
   SIM_DESC state;
 #define CPU_STATE(cpu) ((cpu)->base.state)
+
+  /* Processor index within the SD_DESC */
+  int index;
+#define CPU_INDEX(cpu) ((cpu)->base.index)
 
   /* The name of the cpu.  */
   const char *name;
