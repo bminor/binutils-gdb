@@ -1,3 +1,8 @@
+Tue Aug 10 14:50:30 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* objfiles.h (struct objfile): Clean up comments for
+	{obj,sym}_private to clarify what they are private to.
+
 Mon Aug  9 16:45:00 1993  Stan Shebs  (shebs@rtl.cygnus.com)
 
 	* stabsread.c, buildsym.c (hashname): Moved function to

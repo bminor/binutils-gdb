@@ -270,14 +270,17 @@ struct objfile
 
   struct entry_info ei;
 
-  /* Hook for information which is shared by sym_init and sym_read for
-     this objfile.  It is typically a pointer to malloc'd memory.  */
+  /* Hook for information for use by the symbol reader (currently used
+     for information shared by sym_init and sym_read).  It is
+     typically a pointer to malloc'd memory.  The symbol reader's finish
+     function is responsible for freeing the memory thusly allocated.  */
 
   PTR sym_private;
 
-  /* Hook for other info specific to this objfile.  This must point to
-     memory allocated on one of the obstacks in this objfile, so that it
-     gets freed automatically when reading a new object file. */
+  /* Hook for target-architecture-specific information.  This must
+     point to memory allocated on one of the obstacks in this objfile,
+     so that it gets freed automatically when reading a new object
+     file. */
 
   PTR obj_private;
 
