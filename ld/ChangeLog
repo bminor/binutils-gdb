@@ -1,3 +1,10 @@
+Fri Mar 25 17:20:01 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ldlang.c (print_input_section): For section size, use
+	_cooked_size if it is non-zero, size otherwise.
+	(size_input_section): Likewise.
+	(lang_do_assignments): Likewise (case lang_input_section_enum).
+
 Thu Mar 24 15:20:47 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ldlang.c (new_afile): Add new argument add_to_list.  Don't set

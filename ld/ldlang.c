@@ -1281,9 +1281,7 @@ print_input_section (in)
      lang_input_section_type * in;
 {
   asection *i = in->section;
-  int size = i->reloc_done ?
-  bfd_get_section_size_after_reloc (i) :
-  bfd_get_section_size_before_reloc (i);
+  bfd_size_type size = i->_cooked_size != 0 ? i->_cooked_size : i->_raw_size;
 
   if (size != 0)
     {
@@ -1611,14 +1609,10 @@ size_input_section (this_ptr, output_section_statement, fill, dot, relax)
 
       /* Mark how big the output section must be to contain this now
 	 */
-      if (relax)
-	{
-	  dot += i->_cooked_size;
-	}
+      if (i->_cooked_size != 0)
+	dot += i->_cooked_size;
       else
-	{
-	  dot += i->_raw_size;
-	}
+	dot += i->_raw_size;
       output_section_statement->bfd_section->_raw_size = dot - output_section_statement->bfd_section->vma;
     }
   else
@@ -1982,7 +1976,10 @@ lang_do_assignments (s, output_section_statement, fill, dot)
 	  {
 	    asection *in = s->input_section.section;
 
-	    dot += bfd_get_section_size_before_reloc (in);
+	    if (in->_cooked_size != 0)
+	      dot += in->_cooked_size;
+	    else
+	      dot += in->_raw_size;
 	  }
 	  break;
 
