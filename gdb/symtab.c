@@ -488,7 +488,24 @@ symbol_init_demangled_name (struct general_symbol_info *gsymbol,
 #endif
 }
 
+/* Return the demangled name for a symbol based on the language for
+   that symbol.  If no demangled name exists, return NULL. */
+char *
+symbol_demangled_name (struct general_symbol_info *gsymbol)
+{
+  if (gsymbol->language == language_cplus
+      || gsymbol->language == language_java)
+    return gsymbol->language_specific.cplus_specific.demangled_name;
 
+  else if (gsymbol->language == language_objc)
+    return gsymbol->language_specific.objc_specific.demangled_name;
+
+  else 
+    return NULL;
+
+  /* OBSOLETE (SYMBOL_LANGUAGE (symbol) == language_chill */
+  /* OBSOLETE ? SYMBOL_CHILL_DEMANGLED_NAME (symbol) */
+}
 
 
 

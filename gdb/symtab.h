@@ -151,19 +151,11 @@ extern void symbol_init_language_specific (struct general_symbol_info *symbol,
 extern void symbol_init_demangled_name (struct general_symbol_info *symbol,
 					struct obstack *obstack);
 
-
-/* Macro that returns the demangled name for a symbol based on the language
-   for that symbol.  If no demangled name exists, returns NULL. */
-
-#define SYMBOL_DEMANGLED_NAME(symbol)					\
-  (SYMBOL_LANGUAGE (symbol) == language_cplus				\
-   || SYMBOL_LANGUAGE (symbol) == language_java				\
-   ? SYMBOL_CPLUS_DEMANGLED_NAME (symbol)				\
-      : (SYMBOL_LANGUAGE (symbol) == language_objc			\
-         ? SYMBOL_OBJC_DEMANGLED_NAME (symbol)				\
-   : /* OBSOLETE (SYMBOL_LANGUAGE (symbol) == language_chill */		\
-     /* OBSOLETE ? SYMBOL_CHILL_DEMANGLED_NAME (symbol) */		\
-	 NULL))
+/* Return the demangled name for a symbol based on the language for
+   that symbol.  If no demangled name exists, return NULL. */
+#define SYMBOL_DEMANGLED_NAME(symbol) \
+  (symbol_demangled_name (&(symbol)->ginfo))
+extern char *symbol_demangled_name (struct general_symbol_info *symbol);
 
 /* OBSOLETE #define SYMBOL_CHILL_DEMANGLED_NAME(symbol) */
 /* OBSOLETE (symbol)->ginfo.language_specific.chill_specific.demangled_name */
