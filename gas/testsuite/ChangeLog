@@ -1,3 +1,7 @@
+2005-04-01  Jan Beulich  <jbeulich@novell.com>
+	* gas/i386/x86-64-pcrel.[sd]: New.
+	* gas/i386/i386.exp: Run new test.
+
 2005-03-30  Julian Brown  <julian@codesourcery.com>
 
 	* gas/arm/mapping.d: Update expected output due to mapping symbols
