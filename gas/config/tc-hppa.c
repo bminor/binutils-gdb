@@ -3102,7 +3102,6 @@ md_apply_fix_1 (fixP, val)
 
 	  dis_assemble_12 (result, &w1, &w);
 	  result = ((w1 << 2) | w);
-	  fixP->fx_addsy = NULL;
 	  break;
 
 #define stub_needed(CALLER, CALLEE) \
@@ -3129,7 +3128,6 @@ md_apply_fix_1 (fixP, val)
 	  sign_unext ((new_val - 8) >> 2, 17, &result);
 	  dis_assemble_17 (result, &w1, &w2, &w);
 	  result = ((w2 << 2) | (w1 << 16) | w);
-	  fixP->fx_addsy = NULL;
 	  break;
 
 #undef too_far
@@ -6343,6 +6341,39 @@ hppa_fix_adjustable (fixp)
       || (fixp->fx_addsy->bsym->flags & BSF_FUNCTION) == 0)
     return 1;
 
+  return 0;
+}
+
+/* Return nonzero if the fixup in FIXP will require a relocation,
+   even it if appears that the fixup could be completely handled
+   within GAS.  */
+
+int
+hppa_force_relocation (fixp)
+     fixS *fixp;
+{
+  struct hppa_fix_struct *hppa_fixp = fixp->tc_fix_data;
+
+#ifdef OBJ_SOM
+  if (fixp->fx_r_type == R_HPPA_ENTRY || fixp->fx_r_type == R_HPPA_EXIT)
+    return 1;
+#endif
+
+#define stub_needed(CALLER, CALLEE) \
+  ((CALLEE) && (CALLER) && ((CALLEE) != (CALLER)))
+
+  /* It is necessary to force PC-relative calls/jumps to have a relocation
+     entry if they're going to need either a argument relocation or long
+     call stub.  FIXME.  Can't we need the same for absolute calls?  */
+  if (fixp->fx_pcrel
+      && (stub_needed (((obj_symbol_type *)
+			fixp->fx_addsy->bsym)->tc_data.hppa_arg_reloc,
+		       hppa_fixp->fx_arg_reloc)))
+	return 1;
+
+#undef stub_needed
+
+  /* No need (yet) to force another relocations to be emitted.  */
   return 0;
 }
 

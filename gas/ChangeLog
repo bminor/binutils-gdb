@@ -1,3 +1,16 @@
+Tue Nov 30 13:40:30 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* write.c (TC_FORCE_RELOCATION): Provide a default definition.
+	(fixup_segment): Allow the target machine to specify that a 
+	relocation must be generated for a particular fixup.  Remove
+	#ifndef TC_HPPA hack.
+
+	* config/tc-hppa.h (TC_FORCE_RELOCATION): Define.
+
+	* config/tc-hppa.c (md_apply_fix_1): Never change fx_addsy to
+	be NULL.  Only fixup_segment is supposed to do that.
+	(hppa_force_relocation): New function.
+
 Tue Nov 30 11:21:41 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* Makefile.in (stabs.o): Added dependencies.

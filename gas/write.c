@@ -30,6 +30,10 @@
 #define NOP_OPCODE 0x00
 #endif
 
+#ifndef TC_FORCE_RELOCATION
+#define TC_FORCE_RELOCATION(FIXP) 0
+#endif
+
 #ifndef WORKING_DOT_WORD
 extern CONST int md_short_jump_size;
 extern CONST int md_long_jump_size;
@@ -638,9 +642,7 @@ write_relocs (abfd, sec, xxx)
       if (fixp->fx_where + fixp->fx_size
 	  > fixp->fx_frag->fr_fix + fixp->fx_frag->fr_offset)
 	abort ();
-      /* Pass bogus address so that when bfd_perform_relocation adds
-	 `address' back in, it'll come up with `data', which is where
-	 we want it to operate.  */
+
       if (reloc->howto->partial_inplace == false
 	  && reloc->howto->pcrel_offset == true
 	  && reloc->howto->pc_relative == true)
@@ -648,6 +650,9 @@ write_relocs (abfd, sec, xxx)
 	  /* bfd_perform_relocation screws this up */
 	  reloc->addend += reloc->address;
 	}
+      /* Pass bogus address so that when bfd_perform_relocation adds
+	 `address' back in, it'll come up with `data', which is where
+	 we want it to operate.  */
       s = bfd_perform_relocation (stdoutput, reloc, data - reloc->address,
 				  sec, stdoutput);
       switch (s)
@@ -1288,10 +1293,6 @@ write_object_file ()
 #endif /* VMS */
 #else /* BFD_ASSEMBLER */
 
-#ifdef obj_check_file_symbols
-  obj_check_file_symbols ();
-#endif
-
   bfd_map_over_sections (stdoutput, adjust_reloc_syms, (char *)0);
 
   /* Set up symbol table, and write it out.  */
@@ -1329,60 +1330,58 @@ write_object_file ()
 		  symp->bsym->flags,
 		  segment_name (symp->bsym->section));
 #endif
-	  if (! symp->sy_used_in_reloc)
-	    {
+
 #ifdef obj_frob_symbol
-	      {
-		int punt = 0;
-		obj_frob_symbol (symp, punt);
-		if (punt)
-		  goto punt_it;
-	      }
+	  {
+	    int punt = 0;
+	    obj_frob_symbol (symp, punt);
+	    if (punt)
+	      goto punt_it;
+	  }
 #endif
 #ifdef tc_frob_symbol
-	      {
-		int punt = 0;
-		tc_frob_symbol (symp, punt);
-		if (punt)
-		  goto punt_it;
-	      }
+	  {
+	    int punt = 0;
+	    tc_frob_symbol (symp, punt);
+	    if (punt)
+	      goto punt_it;
+	  }
 #endif
-	    }
 
 	  /* If we don't want to keep this symbol, splice it out of the
 	     chain now.  */
-	  if (! symp->sy_used_in_reloc
-	      && S_IS_LOCAL (symp))
+	  if (S_IS_LOCAL (symp))
 	    {
-	      symbolS *prev, *next;
-#if defined (obj_frob_symbol) || defined (tc_frob_symbol)
 	    punt_it:
-#endif
-	      prev = symbol_previous (symp);
-	      next = symbol_next (symp);
-#ifdef DEBUG_SYMS
-	      verify_symbol_chain_2 (symp);
-#endif
-	      if (prev)
+	      if (! symp->sy_used_in_reloc)
 		{
-		  symbol_next (prev) = next;
-		  symp = prev;
-		}
-	      else if (symp == symbol_rootP)
-		symbol_rootP = next;
-	      else
-		abort ();
-	      if (next)
-		symbol_previous (next) = prev;
-	      else
-		symbol_lastP = prev;
+		  symbolS *prev, *next;
+		  prev = symbol_previous (symp);
+		  next = symbol_next (symp);
 #ifdef DEBUG_SYMS
-	      if (prev)
-		verify_symbol_chain_2 (prev);
-	      else if (next)
-		verify_symbol_chain_2 (next);
+		  verify_symbol_chain_2 (symp);
 #endif
-	      continue;
+		  if (prev)
+		    {
+		      symbol_next (prev) = next;
+		      symp = prev;
+		    }
+		  else if (symp == symbol_rootP)
+		    symbol_rootP = next;
+		  else
+		    abort ();
+		  if (next)
+		    symbol_previous (next) = prev;
+		  else
+		    symbol_lastP = prev;
+#ifdef DEBUG_SYMS
+		  if (prev)
+		    verify_symbol_chain_2 (prev);
+		  else if (next)
+		    verify_symbol_chain_2 (next);
+#endif
+		  continue;
+		}
 	    }
 
 	  /* Make sure we really got a value for the symbol.  */
@@ -1896,7 +1895,12 @@ fixup_segment (fixP, this_segment_type)
 		  S_GET_VALUE (sub_symbolP);
 
 		add_symbolP = NULL;
-		fixP->fx_addsy = NULL;
+
+		/* Let the target machine make the final determination
+		   as to whether or not a relocation will be needed to
+		   handle this fixup.  */
+		if (!TC_FORCE_RELOCATION (fixP))
+		  fixP->fx_addsy = NULL;
 	      }
 	    else
 	      {
@@ -1960,9 +1964,12 @@ fixup_segment (fixP, this_segment_type)
 		add_number += S_GET_VALUE (add_symbolP);
 		add_number -= md_pcrel_from (fixP);
 		pcrel = 0;	/* Lie. Don't want further pcrel processing. */
-#ifndef TC_HPPA
-		fixP->fx_addsy = NULL;	/* No relocations please. */
-#endif
+
+		/* Let the target machine make the final determination
+		   as to whether or not a relocation will be needed to
+		   handle this fixup.  */
+		if (!TC_FORCE_RELOCATION (fixP))
+		  fixP->fx_addsy = NULL;
 	      }
 	    else
 	      {
@@ -1973,7 +1980,12 @@ fixup_segment (fixP, this_segment_type)
 		    reloc_callj (fixP);
 #endif /* TC_I960 */
 		    add_number += S_GET_VALUE (add_symbolP);
-		    fixP->fx_addsy = NULL;
+
+		    /* Let the target machine make the final determination
+		       as to whether or not a relocation will be needed to
+		       handle this fixup.  */
+		    if (!TC_FORCE_RELOCATION (fixP))
+		      fixP->fx_addsy = NULL;
 		    add_symbolP = NULL;
 		  }
 		else if (add_symbol_segment == undefined_section
@@ -1991,7 +2003,12 @@ fixup_segment (fixP, this_segment_type)
 			 * relocation.
 			 */
 			as_bad ("can't use COBR format with external label");
-			fixP->fx_addsy = NULL;	/* No relocations please. */
+
+			/* Let the target machine make the final determination
+			   as to whether or not a relocation will be needed to
+			   handle this fixup.  */
+			if (!TC_FORCE_RELOCATION (fixP))
+			  fixP->fx_addsy = NULL;
 			continue;
 		      }		/* COBR */
 #endif /* TC_I960 */
