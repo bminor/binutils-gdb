@@ -1,5 +1,10 @@
 2003-11-07  Andrew Cagney  <cagney@redhat.com>
 
+	* inftarg.c (child_xfer_partial): New function
+	(init_child_ops): Set "to_xfer_partial".
+
+2003-11-07  Andrew Cagney  <cagney@redhat.com>
+
 	* ppc-linux-tdep.c (ppc_linux_init_abi): When 32-bit GNU/Linux,
 	set "return_value" instead of "use_struct_convention".
 	(ppc_linux_use_struct_convention): Delete function.
