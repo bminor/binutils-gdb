@@ -3459,8 +3459,7 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
 	case R_PPC_REL14_BRNTAKEN:
 	case R_PPC_REL32:
 	  if (h == NULL
-	      || strcmp (h->root.root.string, "_GLOBAL_OFFSET_TABLE_") == 0
-	      || SYMBOL_REFERENCES_LOCAL (info, h))
+	      || strcmp (h->root.root.string, "_GLOBAL_OFFSET_TABLE_") == 0)
 	    break;
 	  /* fall through */
 
@@ -3745,8 +3744,7 @@ ppc_elf_gc_sweep_hook (abfd, info, sec, relocs)
 	case R_PPC_REL14_BRNTAKEN:
 	case R_PPC_REL32:
 	  if (h == NULL
-	      || strcmp (h->root.root.string, "_GLOBAL_OFFSET_TABLE_") == 0
-	      || SYMBOL_REFERENCES_LOCAL (info, h))
+	      || strcmp (h->root.root.string, "_GLOBAL_OFFSET_TABLE_") == 0)
 	    break;
 	  /* Fall thru */
 

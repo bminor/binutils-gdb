@@ -1,3 +1,9 @@
+2003-04-03  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-ppc.c (ppc_elf_check_relocs): Don't use SYMBOL_REFERENCES_LOCAL
+	here as it's too early to reliably determine locality.
+	(ppc_elf_gc_sweep_hook): Likewise.
+
 2003-04-02  Bob Wilson  <bob.wilson@acm.org>
 
 	* xtensa-modules.c: Remove comment indicating that this is a
