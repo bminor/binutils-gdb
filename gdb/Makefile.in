@@ -235,7 +235,7 @@ FLAGS_TO_PASS = \
 # Flags that we pass when building the testsuite.
 
 CC_FOR_TARGET = ` \
-  if [ -f $${rootme}/../gcc/Makefile ] ; then \
+  if [ -f $${rootme}/../gcc/xgcc ] ; then \
     echo $${rootme}/../gcc/xgcc -B$${rootme}/../gcc/; \
   else \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \

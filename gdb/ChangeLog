@@ -1,5 +1,8 @@
 Mon Nov  8 10:42:03 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* Makefile.in (CC_FOR_TARGET): Test for existence of gcc/xgcc, not
+	for existence of gcc/Makefile.
+
 	* inflow.c (terminal_init_inferior), infptrace.c (child_resume):
 	Add comments about use of Lynx PIDGET and how we will want to
 	clean it up.
