@@ -1,3 +1,8 @@
+2001-05-16  Jeff Johnston  <jjohnstn@redhat.com>
+
+        * cgen.c (gas_cgen_tc_gen_reloc): Changed error message when
+        howto entry is not found.
+
 2001-05-15  Alexandre Oliva  <aoliva@redhat.com>
 
 	* config/tc-mn10300.c (mn10300_force_relocation): Don't

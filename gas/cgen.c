@@ -669,8 +669,7 @@ gas_cgen_tc_gen_reloc (section, fixP)
   if (reloc->howto == (reloc_howto_type *) NULL)
     {
       as_bad_where (fixP->fx_file, fixP->fx_line,
-		    _("internal error: can't export reloc type %d (`%s')"),
-		    fixP->fx_r_type, bfd_get_reloc_code_name (fixP->fx_r_type));
+		    _("relocation is not supported"));
       return NULL;
     }
 
