@@ -1,3 +1,13 @@
+2003-01-02  Ben Elliston  <bje@redhat.com>
+
+	* Makefile.am (ALL_EMULATIONS): Add eelf32iq2000.o.
+	(eelf32iq2000.c): New target.
+	* Makefile.in: Regenerate.
+	* configure.tgt: Handle iq2000-*-elf.
+	* emulparams/elf32iq10.sh: New file.
+	* emulparams/elf32iq2000.sh: New file.
+	* scripttempl/iq2000.sc: New file.
+	
 2003-01-02 Charles Wilson <cwilson@ece.gatech.edu>
 
 	* pe-dll.c (autofilter_symbollist): Add do_pseudo_reloc 
