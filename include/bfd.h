@@ -113,7 +113,8 @@ typedef unsigned long symindex;
 
 #define BFD_NO_MORE_SYMBOLS ((symindex) ~0)
 
-typedef enum {bfd_symclass_unknown = 0,
+typedef enum bfd_symclass {
+	      bfd_symclass_unknown = 0,
 	      bfd_symclass_fcommon, /* fortran common symbols */
 	      bfd_symclass_global, /* global symbol, what a surprise */
 	      bfd_symclass_debugger, /* some debugger symbol */
@@ -183,7 +184,8 @@ typedef struct stat stat_type;
 
 /** Error handling */
 
-typedef enum {no_error = 0, system_call_error, invalid_target,
+typedef enum bfd_error {
+	      no_error = 0, system_call_error, invalid_target,
 	      wrong_format, invalid_operation, no_memory,
 	      no_symbols, no_relocation_info,
 	      no_more_archived_files, malformed_archive,
