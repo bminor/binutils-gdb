@@ -1,4 +1,33 @@
+Fri Jan 20 12:14:23 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.c++/classes.exp, gdb.c++/cplusfuncs.exp,
+	gdb.c++/inherit.exp, gdb.c++/templates.exp, gdb.c++/virtfunc.exp,
+	gdb.fortran/exprs.exp, gdb.fortran/types.exp, gdb.chill/chexp.exp,
+	gdb.base/printcmds.exp: Remove passcount, failcount, etc., stuff;
+	it makes the tests harder to understand and confuses test-o-matic.
+	The preferred style is that each test provides a PASS or a FAIL,
+	and has a unique message (e.g. "continue #54" not just "continue")
+	which is the same for the pass and the fail.
+	* gdb.fortran/exprs.exp, gdb.fortran/types.exp,
+	gdb.chill/chexp.exp: Move test_print_accept and test_print_reject
+	to lib/gdb.exp.
+	* gdb.base/printcmds.exp: Use test_print_accept.  Remove
+	prt_accept which was basically the same thing.  Likewise for
+	test_print_reject and prt_reject.
+	* lib/gdb.exp (test_print_reject): Add some more error message
+	patterns to match from the former printcmds.exp (prt_reject).
+	* gdb.c++/classes.exp, gdb.base/scope.exp: Remove spurious xfails.
+	One defect of the passcount stuff is that some of it failed to
+	report XPASS where appropriate.
+	* gdb.c++/cplusfuncs.exp (print_addr_of): No longer accept extra
+	stuff before and after arg in expected pattern.
+	(test_paddr_operator_functions): Re-do test without print_addr_of;
+	this is the only test which seems to want extra stuff there.
+
 Tue Jan 17 10:47:53 1995  Jim Kingdon  <kingdon@lioth.cygnus.com>
+
+	* gdb.base/nodebug.exp: Update new tests to reflect improved
+	wording of gdb output.
 
 	* gdb.base/nodebug.exp: Add tests to check that "print", "whatis"
 	and "ptype" work on variables in files compiled without -g.

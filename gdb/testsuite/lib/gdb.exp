@@ -1,4 +1,4 @@
-# Copyright (C) 1992, 1994 Free Software Foundation, Inc.
+# Copyright (C) 1992, 1994, 1995 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -40,15 +40,15 @@ if ![info exists prompt] then {
 }
 
 #
-# gdb_version -- extract and print the version number of gcc
+# gdb_version -- extract and print the version number of GDB
 #
 proc default_gdb_version {} {
     global GDB
     global GDBFLAGS
     if {[which $GDB] != 0} then {
-	set tmp [exec echo "q" | $GDB]
+	set tmp [exec echo "q" | $GDB -nw]
 	regexp " \[0-9\.\]+" $tmp version
-	clone_output "[which $GDB] version$version $GDBFLAGS\n"
+	clone_output "[which $GDB] version$version -nw $GDBFLAGS \n"
     } else {
 	warning "$GDB does not exist"
     }
@@ -157,9 +157,9 @@ proc runto { function } {
     send "break $function\n"
     # The first two regexps are what we get with -g, the third is without -g.
     expect {
-	-re "Breakpoint \[0-9\]* at 0x\[0-9a-f\]*: file .*, line $decimal.\r\n$prompt $" {}
+	-re "Breakpoint \[0-9\]* at .*: file .*, line $decimal.\r\n$prompt $" {}
 	-re "Breakpoint \[0-9\]*: file .*, line $decimal.\r\n$prompt $" {}
-	-re "Breakpoint \[0-9\]* at 0x\[0-9a-f\]*.*$prompt $" {}
+	-re "Breakpoint \[0-9\]* at .*$prompt $" {}
 	-re "$prompt $" { fail "setting breakpoint at $function" ; return 0 }
 	timeout { fail "setting breakpoint at $function (timeout)" ; return 0 }
     }
@@ -285,7 +285,131 @@ proc gdb_test { args } {
     }
     return $result
 }
+
+# Testing printing of a specific value.  For passes and fails, return
+# a 1 to indicate that more tests can proceed.  However a timeout
+# is a serious error, generates a special fail message, and causes
+# a 0 to be returned to indicate that more tests are likely to fail
+# as well.
+#
+# Args are:
+#
+#	First one is string to send to gdb
+#	Second one is string to match gdb result to
+#	Third one is an optional message to be printed
+#
+# This differs from gdb_test in a few ways: (1) no catch on the send (there is
+# no reason for this to be different from gdb_test but I think the lack of 
+# catch is correct), (2) it tests for the " =" (that could easily be moved
+# to the callers, (3) the pattern must be followed by \r\n and the prompt,
+# not other garbage as in gdb_test (this feature seems kind of worthwhile).
 
+proc test_print_accept { args } {
+    global prompt
+    global verbose
+
+    if [llength $args]==3 then {
+	set message [lindex $args 2]
+    } else {
+	set message [lindex $args 0]
+    }
+    set sendthis [lindex $args 0]
+    set expectthis [lindex $args 1]
+    if $verbose>2 then {
+	send_user "Sending \"$sendthis\" to gdb\n"
+	send_user "Looking to match \"$expectthis\"\n"
+	send_user "Message is \"$message\"\n"
+    }
+    send "$sendthis\n"
+    expect {
+	-re ".* = $expectthis\r\n$prompt $" {
+	    if ![string match "" $message] then {
+		pass "$sendthis ($message)"
+	    } else {
+		pass "$sendthis"
+	    }
+	    return 1
+	}
+	-re ".*$prompt $" {
+	    if ![string match "" $message] then {
+		fail "$sendthis ($message)"
+	    } else {
+		fail "$sendthis"
+	    }
+	    return 1
+	}
+	timeout {
+	    fail "$sendthis (timeout)"
+	    return 0
+	}
+    }
+}
+
+# Testing printing of a specific value.  For pass or fail, return
+# a 1 to indicate that more tests can proceed.  However a timeout
+# is a serious error, generates a special fail message, and causes
+# a 0 to be returned to indicate that more tests are likely to fail
+# as well.
+
+proc test_print_reject { args } {
+    global prompt
+    global verbose
+
+    if [llength $args]==2 then {
+	set expectthis [lindex $args 1]
+    } else {
+	set expectthis "should never match this bogus string"
+    }
+    set sendthis [lindex $args 0]
+    if $verbose>2 then {
+	send_user "Sending \"$sendthis\" to gdb\n"
+	send_user "Looking to match \"$expectthis\"\n"
+    }
+    send "$sendthis\n"
+    expect {
+	-re ".*A .* in expression.*\\.*$prompt $" {
+	    pass "reject $sendthis"
+	    return 1
+	}
+	-re ".*Invalid syntax in expression.*$prompt $" {
+	    pass "reject $sendthis"
+	    return 1
+	}
+	-re ".*Junk after end of expression.*$prompt $" {
+	    pass "reject $sendthis"
+	    return 1
+	}
+	-re ".*Invalid number.*$prompt $" {
+	    pass "reject $sendthis"
+	    return 1
+	}
+	-re ".*Invalid character constant.*$prompt $" {
+	    pass "reject $sendthis"
+	    return 1
+	}
+	-re ".*No symbol table is loaded.*$prompt $" {
+	    pass "reject $sendthis"
+	    return 1
+	}
+	-re ".*No symbol .* in current context.*$prompt $" {
+	    pass "reject $sendthis"
+	    return 1
+	}
+	-re ".*$expectthis.*$prompt $" {
+	    pass "reject $sendthis"
+	    return 1
+	}
+	-re ".*$prompt $" {
+	    fail "reject $sendthis"
+	    return 1
+	}
+	default {
+	    fail "reject $sendthis (eof or timeout)"
+	    return 0
+	}
+    }
+}
+
 # Given an input string, adds backslashes as needed to create a
 # regexp that will match the string.
 
@@ -308,7 +432,7 @@ proc gdb_test_exact { args } {
     }
     return [gdb_test $command $pattern $message]
 }
-
+
 proc gdb_reinitialize_dir { subdir } {
     global prompt
 
@@ -434,7 +558,7 @@ proc default_gdb_start { } {
     global prompt
     global spawn_id
     global timeout
-    verbose "Spawning $GDB $GDBFLAGS"
+    verbose "Spawning $GDB -nw $GDBFLAGS"
 
     if { [which $GDB] == 0 } then {
 	perror "$GDB does not exist."
@@ -443,11 +567,7 @@ proc default_gdb_start { } {
     
     set oldtimeout $timeout
     set timeout [expr "$timeout + 60"]
-    if [ llength $GDBFLAGS ] then {
-	    spawn $GDB $GDBFLAGS
-    } else {
-	    spawn $GDB
-    }
+    eval "spawn $GDB -nw $GDBFLAGS"
     expect {
 	-re ".*\r\n$prompt $" {
 	    verbose "GDB initialized."

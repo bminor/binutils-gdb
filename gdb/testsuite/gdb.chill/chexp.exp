@@ -55,62 +55,8 @@ proc set_lang_chill {} {
     }
 }
 
-# Testing printing of a specific value.  Increment passcount for
-# success or issue fail message for failure.  In both cases, return
-# a 1 to indicate that more tests can proceed.  However a timeout
-# is a serious error, generates a special fail message, and causes
-# a 0 to be returned to indicate that more tests are likely to fail
-# as well.
-#
-# Args are:
-#
-#	First one is string to send to gdb
-#	Second one is string to match gdb result to
-#	Third one is an optional message to be printed
-
-proc test_print_accept { args } {
-    global prompt
-    global passcount
-    global verbose
-
-    if [llength $args]==3 then {
-	set message [lindex $args 2]
-    } else {
-	set message [lindex $args 0]
-    }
-    set sendthis [lindex $args 0]
-    set expectthis [lindex $args 1]
-    if $verbose>2 then {
-	send_user "Sending \"$sendthis\" to gdb\n"
-	send_user "Looking to match \"$expectthis\"\n"
-	send_user "Message is \"$message\"\n"
-    }
-    send "$sendthis\n"
-    expect {
-	-re ".* = $expectthis\r\n$prompt $" {
-	    incr passcount
-	    return 1
-	}
-	-re ".*$prompt $" {
-	    if ![string match "" $message] then {
-		fail "$sendthis ($message)"
-	    } else {
-		fail "$sendthis"
-	    }
-	    return 1
-	}
-	timeout {
-	    fail "$sendthis (timeout)"
-	    return 0
-	}
-    }
-}
-
 proc test_integer_literals_accepted {} {
     global prompt
-    global passcount
-
-    set passcount 0
 
     # Test various decimal values.
 
@@ -166,17 +112,10 @@ proc test_integer_literals_accepted {} {
     test_print_accept "p H'AbCdEf" "11259375"
     test_print_accept "p H'_A_b_C_d_E_f_" "11259375"
     test_print_accept "p/x H'123" "H'123"
-
-    if $passcount then {
-	pass "$passcount correct integer literals printed"
-    }
 }
 
 proc test_character_literals_accepted {} {
     global prompt
-    global passcount
-
-    set passcount 0
 
     # Test various decimal values.
 
@@ -190,68 +129,10 @@ proc test_character_literals_accepted {} {
     test_print_accept "p/x C'FF'" "H'ff"
     # test_print_accept "p/x '^(H'FF)'" "H'ff"	(not in GNU Chill)
     # test_print_accept "p/x '^(D'255)'" "H'ff"	(not in GNU Chill)
-
-    if $passcount then {
-	pass "$passcount correct character literals printed"
-    }
-}
-
-# Testing printing of a specific value.  Increment passcount for
-# success or issue fail message for failure.  In both cases, return
-# a 1 to indicate that more tests can proceed.  However a timeout
-# is a serious error, generates a special fail message, and causes
-# a 0 to be returned to indicate that more tests are likely to fail
-# as well.
-
-proc test_print_reject { args } {
-    global prompt
-    global passcount
-    global verbose
-
-    if [llength $args]==2 then {
-	set expectthis [lindex $args 1]
-    } else {
-	set expectthis "should never match this bogus string"
-    }
-    set sendthis [lindex $args 0]
-    if $verbose>2 then {
-	send_user "Sending \"$sendthis\" to gdb\n"
-	send_user "Looking to match \"$expectthis\"\n"
-    }
-    send "$sendthis\n"
-    expect {
-	-re ".*A .* in expression.*\\.*$prompt $" {
-	    incr passcount
-	    return 1
-	}
-	-re ".*Junk after end of expression.*$prompt $" {
-	    incr passcount
-	    return 1
-	}
-	-re ".*No symbol table is loaded.*$prompt $" {
-	    incr passcount
-	    return 1
-	}
-	-re ".*$expectthis.*$prompt $" {
-	    incr passcount
-	    return 1
-	}
-	-re ".*$prompt $" {
-	    fail "$sendthis not properly rejected"
-	    return 1
-	}
-	timeout {
-	    fail "$sendthis (timeout)"
-	    return 0
-	}
-    }
 }
 
 proc test_integer_literals_rejected {} {
     global prompt
-    global passcount
-
-    set passcount 0
 
     # These are valid integer literals in Z.200, but not GNU-Chill.
 
@@ -293,33 +174,19 @@ proc test_integer_literals_rejected {} {
 
     test_print_reject "p H'G" 
     test_print_reject "p H'AG" 
-
-    if $passcount then {
-	pass "$passcount incorrect integer literals rejected"
-    }
 }
 
 proc test_boolean_literals_accepted {} {
     global prompt
-    global passcount
-
-    set passcount 0
 
     # Test the only possible values for a boolean, TRUE and FALSE.
 
     test_print_accept "p TRUE" "TRUE"
     test_print_accept "p FALSE" "FALSE"
-
-    if $passcount then {
-	pass "$passcount correct boolean literals printed"
-    }
 }
 
 proc test_float_literals_accepted {} {
     global prompt
-    global passcount
-
-    set passcount 0
 
     # Test various floating point formats
 
@@ -376,10 +243,6 @@ proc test_float_literals_accepted {} {
     test_print_accept "p _.1e+10 > _.1e+11" "0"
     test_print_accept "p __.1e-12 < __.1e-11" "1"
     test_print_accept "p __.1e-12 > __.1e-11" "0"
-
-    if $passcount then {
-	pass "$passcount correct float literal comparisons"
-    }
 }
 
 proc test_convenience_variables {} {
@@ -463,9 +326,6 @@ proc test_value_history {} {
 
 proc test_arithmetic_expressions {} {
     global prompt
-    global passcount
-
-    set passcount 0
 
     # Test unary minus with various operands
 
@@ -564,10 +424,6 @@ proc test_arithmetic_expressions {} {
 	"Integer-only operation on floating point number.*"
     test_print_reject "p 6.0 REM 3.0" \
 	"Integer-only operation on floating point number.*"
-
-    if $passcount then {
-	pass "$passcount correct arithmetic expressions"
-    }
 }
 
 # Start with a fresh gdb.
