@@ -833,7 +833,7 @@ md_assemble (str)
 
   prev_insn = the_insn;
   strncpy (prev_str, str, 10);
-  if (prev_insn.reloc = R_HPPA_NONE)
+  if (prev_insn.reloc == R_HPPA_NONE)
     {
       prev_fix = NULL;
     }
@@ -857,17 +857,15 @@ pa_ip (str)
   struct pa_opcode *insn;
   char *argsStart;
   unsigned long opcode;
-  unsigned int mask;
   int match = FALSE;
   int comma = 0;
-
-  int reg, reg1, reg2, s2, s3;
+  int reg, s2, s3;
   unsigned int im21, im14, im11, im5;
   int m, a, uu, f;
   int cmpltr, nullif, flag;
   int sfu, cond;
   char *name;
-  char *p, *save_s;
+  char *save_s;
 
 #ifdef PA_DEBUG
   fprintf (stderr, "STATEMENT: \"%s\"\n", str);
@@ -1515,7 +1513,7 @@ pa_ip (str)
 	      /* (unsigned value for the break instruction) */
 	      getExpression (s);
 	      im5 = evaluateAbsolute (the_insn.exp, the_insn.field_selector);
-	      if (im5 > 31 || im5 < 0)
+	      if (im5 > 31)
 		{
 		  as_bad ("Operand out of range. Was: %d. Should be [0..31]. Assuming %d.\n", im5, im5 & 0x1f);
 		  im5 = im5 & 0x1f;
@@ -1527,7 +1525,7 @@ pa_ip (str)
 	      /* (unsigned value for the ssm and rsm instruction) */
 	      getExpression (s);
 	      im5 = evaluateAbsolute (the_insn.exp, the_insn.field_selector);
-	      if (im5 > 31 || im5 < 0)
+	      if (im5 > 31)
 		{
 		  as_bad ("Operand out of range. Was: %d. Should be [0..31]. Assuming %d.\n", im5, im5 & 0x1f);
 		  im5 = im5 & 0x1f;
@@ -1875,7 +1873,7 @@ pa_ip (str)
 	      /* (unsigned bit position value for the bb instruction) */
 	      getExpression (s);
 	      im5 = evaluateAbsolute (the_insn.exp, the_insn.field_selector);
-	      if (im5 > 31 || im5 < 0)
+	      if (im5 > 31)
 		{
 		  as_bad ("Operand out of range. Was: %d. Should be [0..31]. Assuming %d.\n", im5, im5 & 0x1f);
 		  im5 = im5 & 0x1f;
@@ -1975,7 +1973,6 @@ pa_ip (str)
 	    case 'v':		/* a 't' type extended to handle L/R register halves. */
 	      {
 		struct pa_89_fp_reg_struct result;
-		int status;
 
 		pa_89_parse_number (&s, &result);
 		if (result.number_part < 32 && result.number_part >= 0)
@@ -2004,7 +2001,6 @@ pa_ip (str)
 	    case 'E':		/* a 'b' type extended to handle L/R register halves. */
 	      {
 		struct pa_89_fp_reg_struct result;
-		int status;
 
 		pa_89_parse_number (&s, &result);
 		if (result.number_part < 32 && result.number_part >= 0)
@@ -2023,8 +2019,6 @@ pa_ip (str)
 	    case 'X':		/* an 'x' type extended to handle L/R register halves. */
 	      {
 		struct pa_89_fp_reg_struct result;
-		int status;
-
 
 		pa_89_parse_number (&s, &result);
 		if (result.number_part < 32 && result.number_part >= 0)
@@ -2165,7 +2159,7 @@ pa_ip (str)
 	    }
 	  break;
 	}
-    error:
+
       if (match == FALSE)
 	{
 	  /* Args don't match.  */
@@ -4468,7 +4462,7 @@ is_same_frag (frag1P, frag2P)
   else if (frag1P == frag2P)
     return (TRUE);
   else if (frag2P->fr_type == rs_fill && frag2P->fr_fix == 0)
-    is_same_frag (frag1P, frag2P->fr_next);
+    return (is_same_frag (frag1P, frag2P->fr_next));
   else
     return (FALSE);
 }
@@ -4730,7 +4724,6 @@ pa_callinfo ()
   register char c;
   register char *p;
   register int temp;
-  register symbolS *symbolP;
 
   if (!within_procedure)
     as_bad (".callinfo is not within a procedure definition");
@@ -4869,8 +4862,7 @@ n.
 void
 pa_comm ()
 {
-  register char *p;
-  register int size, i;
+  register int size;
   register symbolS *symbolP;
   register label_symbolS *label_symbolP = pa_get_label ();
 
@@ -4942,9 +4934,6 @@ pa_copyright ()
 {
   register char *name;
   register char c;
-  register char *p;
-  register int temp;
-  register symbolS *symbolP;
 
   SKIP_WHITESPACE ();
   if (*input_line_pointer == '\"')
@@ -5232,8 +5221,6 @@ pa_export ()
   register char *name;
   register char c;
   register char *p;
-  register int temp;
-  register int regno;
   register symbolS *symbolP;
 
   name = input_line_pointer;
@@ -5422,7 +5409,6 @@ pa_import ()
   register char c;
   register char *p;
   register symbolS *symbolP;
-  register expressionS resultP;	/* Deliver result here. */
 
   name = input_line_pointer;
   c = get_symbol_end ();
@@ -5547,8 +5533,6 @@ pa_param ()
   char *name;
   char c;
   char *p;
-  int temp;
-  int regno;
   symbolS *symbolP;
 
   name = input_line_pointer;
@@ -5834,9 +5818,7 @@ pa_space ()
 {
   register char *name;
   register char c;
-  register char *p;
   register int temp;
-  register symbolS *symbolP;
   register space_dict_chainS *sd_chain;
   char space_name[40];
 
@@ -6037,22 +6019,16 @@ pa_subspace ()
 {
   register char *name;
   register char c;
-  register char *p;
   register int temp;
-  register symbolS *symbolP;
-
   char loadable, code_only, common, dup_common, zero;
   char sort;
-  int number;
   int i;
   int access;
   int space_index;
   int alignment;
   int quadrant;
-  int subseg;
   space_dict_chainS *space;
   subspace_dict_chainS *ssd;
-  subspace_dict_chainS *ssdCh;
   char *ss_name;
   int is_power_of_2 ();
 

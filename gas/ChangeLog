@@ -1,3 +1,20 @@
+Thu Sep  9 17:10:00 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	Changes from Jeff Law:
+
+	* config/tc-hppa.c (md_assemble): Fix typo.
+	(pa_ip): Delete unused variables and labels.  Do not check for 
+	unsigned values being < 0, it can't happen.
+	(is_same_frag): Return a value in recursive call case.
+	(pa_callinfo): Delete unused variables and labels.
+	(pa_comm): Likewise.
+	(pa_copyright): Likewise.
+	(pa_export): Likewise.
+	(pa_import): Likewise.
+	(pa_param): Likewise.
+	(pa_space): Likewise.
+	(pa_subspace): Likewise.
+
 Thu Sep  9 15:05:34 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* read.c (get_stab_string_offset, s_stab_generic): If
