@@ -403,6 +403,10 @@ void (*print_frame_info_listing_hook) PARAMS ((struct symtab *s, int line,
 
 int (*query_hook) PARAMS ((const char *, va_list));
 
+/* Replaces most of warning.  */
+
+void (*warning_hook) PARAMS ((const char *, va_list));
+
 /* Called from gdb_flush to flush output.  */
 
 void (*flush_hook) PARAMS ((FILE *stream));

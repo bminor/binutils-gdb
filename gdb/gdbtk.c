@@ -35,6 +35,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <winuser.h>
 #endif
 
+#include <sys/stat.h>
+
 #include <tcl.h>
 #include <tk.h>
 #include <itcl.h> 
@@ -95,6 +97,8 @@ static void null_routine PARAMS ((int));
 static void gdbtk_flush PARAMS ((FILE *));
 static void gdbtk_fputs PARAMS ((const char *, FILE *));
 static int gdbtk_query PARAMS ((const char *, va_list));
+static void gdbtk_warning PARAMS ((const char *, va_list));
+static void gdbtk_ignorable_warning PARAMS ((const char *, va_list));
 static char *gdbtk_readline PARAMS ((char *));
 static void gdbtk_init PARAMS ((char *));
 static void tk_command_loop PARAMS ((void));
@@ -303,6 +307,38 @@ gdbtk_fputs (ptr, stream)
   in_fputs = 0;
 }
 
+static void
+gdbtk_warning (warning, args)
+     const char *warning;
+     va_list args;
+{
+  char buf[200], *merge[2];
+  char *command;
+
+  vsprintf (buf, warning, args);
+  merge[0] = "gdbtk_tcl_warning";
+  merge[1] = buf;
+  command = Tcl_Merge (2, merge);
+  Tcl_Eval (interp, command);
+  Tcl_Free (command);
+}
+
+static void
+gdbtk_ignorable_warning (warning, args)
+     const char *warning;
+     va_list args;
+{
+  char buf[200], *merge[2];
+  char *command;
+
+  vsprintf (buf, warning, args);
+  merge[0] = "gdbtk_tcl_ignorable_warning";
+  merge[1] = buf;
+  command = Tcl_Merge (2, merge);
+  Tcl_Eval (interp, command);
+  Tcl_Free (command);
+}
+
 static int
 gdbtk_query (query, args)
      const char *query;
@@ -318,7 +354,7 @@ gdbtk_query (query, args)
   command = Tcl_Merge (2, merge);
   Tcl_Eval (interp, command);
   Tcl_Free (command);
-
+ 
   val = atol (interp->result);
   return val;
 }
@@ -2135,6 +2171,7 @@ gdbtk_init ( argv0 )
   command_loop_hook = tk_command_loop;
   print_frame_info_listing_hook = gdbtk_print_frame_info;
   query_hook = gdbtk_query;
+  warning_hook = gdbtk_warning;
   flush_hook = gdbtk_flush;
   create_breakpoint_hook = gdbtk_create_breakpoint;
   delete_breakpoint_hook = gdbtk_delete_breakpoint;
@@ -3000,6 +3037,13 @@ full_lookup_symtab(file)
   return NULL;
 }
 
+static int
+perror_with_name_wrapper (args)
+  char * args;
+{
+  perror_with_name (args);
+  return 1;
+}
 
 /* gdb_loadfile loads a c source file into a text widget. */
 
@@ -3024,6 +3068,9 @@ gdb_loadfile (clientData, interp, objc, objv)
   char *ltable;
   struct symtab *symtab;
   struct linetable_entry *le;
+  long mtime = 0;
+  struct stat st;
+
  
   if (objc != 4)
     {
@@ -3046,6 +3093,22 @@ gdb_loadfile (clientData, interp, objc, objv)
       fclose (fp);
       return TCL_ERROR;
     }
+
+  if (fstat (fp->_file, &st) < 0)
+    {
+      catch_errors (perror_with_name_wrapper, "gdbtk: get time stamp", "",
+                    RETURN_MASK_ALL);
+      return TCL_ERROR;
+    }
+
+  if (symtab && symtab->objfile && symtab->objfile->obfd)
+      mtime = bfd_get_mtime(symtab->objfile->obfd);
+  else if (exec_bfd)
+      mtime = bfd_get_mtime(exec_bfd);
+ 
+  if (mtime && mtime < st.st_mtime)
+     gdbtk_ignorable_warning("Source file is more recent than executable.\n", (va_list)0);
+
 
   /* Source linenumbers don't appear to be in order, and a sort is */
   /* too slow so the fastest solution is just to allocate a huge */

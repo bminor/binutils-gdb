@@ -1,3 +1,14 @@
+Mon Apr 13 16:28:07 1998  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+	
+	* gdbtk.c: (perror_with_name_wrapper) new function to call 
+	perror_with_name safely.
+	(gdb_loadfile) added source vs. executable time stamp check.
+	(gdbtk_warning) new function to pass a warning message to the gui.
+	(gdbtk_ignorable_warning) new function to pass a warning
+	to the gui. Used only for the src. vs. exec check.
+	(gdbtk_init) added warning_hook 
+	added include <sys/stat.h>
+
 Mon Apr 13 12:58:26 1998  Keith Seitz  <keiths@onions.cygnus.com>
 
 	* gdbtk.c (gdbtk_start_timer): Include on all platforms. Decrease

@@ -1,3 +1,15 @@
+Mon Apr 13 16:28:07 1998  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* utils.c: (warning) added call to warning_hook
+
+	* source.c: (find_source_lines) modified to call warning in case
+	of source vs. executable time stamp mismatch. Simplified object
+	file check. Initialized mtime to 0.
+
+	* defs.h: added warning_hook prototype
+
+	* top.c: added warning_hook prototype.
+
 Mon Apr 13 09:54:08 1998  Keith Seitz  <keiths@andros.cygnus.com>
 
 	* config/sparc/tm-sun4os4.h (IS_STATIC_TRANSFORM_NAME): Add missing
@@ -71,6 +83,7 @@ Wed Apr  8 16:47:33 1998  Jason Molenda  (crash@bugshack.cygnus.com)
 	* breakpoint.c (breakpoint_re_set_one): Remove Ulrich Drepper's
 	patch of March 23 1998.
 
+>>>>>>> 1.4385
 Sat Apr  4 10:05:00 1998  Dawn Perchik  <dawn@cygnus.com>
 
 	* mdebugread.c (parse_partial_symbols): If this is an .mdebug 
