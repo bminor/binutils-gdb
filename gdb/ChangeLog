@@ -1,3 +1,13 @@
+2003-07-31  Andrew Cagney  <cagney@redhat.com>
+
+	* regcache.c (struct regcache_descr): Update comments on
+	nr_raw_registers.
+	(init_legacy_regcache_descr): Don't set nr_raw_registers or
+	sizeof_raw_register_valid_p.
+	(init_regcache_descr): Set nr_raw_registers and
+	sizeof_raw_register_valid_p before calling
+	init_legacy_regcache_descr.
+
 2003-07-28  Andrew Cagney  <cagney@redhat.com>
 
 	* annotate.c (annotate_breakpoints_headers): Restrict annotation
