@@ -105,7 +105,7 @@ case "${target}" in
 # end-sanitize-r5900
   mips64*-*-*)          mips_fpu=HARD_FLOATING_POINT ;;
   mips16*-*-*)          mips_fpu=HARD_FLOATING_POINT ;;
-  mips*-*-*)            mips_fpu=HARD_FLOATING_POINT ;;
+  mips*-*-*)            mips_fpu=HARD_FLOATING_POINT ; mips_fpu_bitsize=32 ;;
   *)                    mips_fpu=HARD_FLOATING_POINT ;;
 esac
 SIM_AC_OPTION_FLOAT($mips_fpu,$mips_fpu_bitsize)
