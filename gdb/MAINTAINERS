@@ -28,7 +28,7 @@ variants.  *-tdep.c. The Target/Architecture maintainer works with the
 host maintainer when resolving build issues.
 
 d10v target		Andrew Cagney		cagney@cygnus.com
-d30v target		David Taylor		cagney@cygnus.com
+d30v target		David Taylor		taylor@cygnus.com
 mips target		Andrew Cagney		cagney@cygnus.com
 mn10300 target		Andrew Cagney		cagney@cygnus.com
 powerpc target		Kevin Buettner		kevinb@cygnus.com
