@@ -784,7 +784,8 @@ _bfd_elf_merge_sections (abfd, info)
   return true;
 }
 
-/* Copy the program header from one object module to another */
+/* Copy the program header and other data from one object module to
+   another.  */
 
 boolean
 _bfd_elf_copy_private_bfd_data (ibfd, obfd)
@@ -799,6 +800,7 @@ _bfd_elf_copy_private_bfd_data (ibfd, obfd)
 	      || (elf_elfheader (obfd)->e_flags
 		  == elf_elfheader (ibfd)->e_flags));
 
+  elf_gp (obfd) = elf_gp (ibfd);
   elf_elfheader (obfd)->e_flags = elf_elfheader (ibfd)->e_flags;
   elf_flags_init (obfd) = true;
   return true;
