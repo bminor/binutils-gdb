@@ -136,11 +136,11 @@ print_stack_frame_stub (void *args)
   return 0;
 }
 
-/* Show or print a stack frame briefly.  FRAME_INFI should be the
-   frame info.  This prints the level, the function executing, the
-   arguments, and the file name and line number.  If the pc is not at
-   the beginning of the source line, the actual pc is printed at the
-   beginning.  */
+/* Show or print a stack frame FI briefly.  The output is format
+   according to PRINT_LEVEL and PRINT_WHAT printing the frame's
+   relative level, function name, argument list, and file name and
+   line number.  If the frame's PC is not at the beginning of the
+   source line, the actual PC is printed at the beginning.  */
 
 void
 print_stack_frame (struct frame_info *fi, int print_level,

@@ -1,5 +1,7 @@
 2004-04-28  Andrew Cagney  <cagney@redhat.com>
 
+	* stack.c (print_stack_frame): Fix description.
+
 	* NEWS: Mention gdb/gdbserver/configure execute permission
 	changed.  PR server/519.
 
