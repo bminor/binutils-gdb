@@ -1,3 +1,7 @@
+2002-08-23  John David Anglin  <dave@hiauly1.hia.nrc.ca>
+
+	* MAINTAINERS: Add Dave Anglin as HPPA co-maintainer.
+
 2002-08-22  Nick Clifton  <nickc@redhat.com>
 
 	* MAINTAINERS: Add Jeff Law as (maintainance) maintainer for

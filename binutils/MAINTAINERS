@@ -62,6 +62,7 @@ responsibility among the other maintainers.
   FRV		   Dave Brolley <brolley@redhat.com>
   HPPA elf32	   Alan Modra <amodra@bigpond.net.au>
   HPPA elf64	   Jeff Law <law@redhat.com> [Basic maintainance only]
+  HPPA		   Dave Anglin <dave.anglin@nrc.ca>
   IA64		   Jim Wilson <wilson@redhat.com>
   i860		   Jason Eckhardt <jle@redhat.com>
   ix86		   Alan Modra <amodra@bigpond.net.au>
