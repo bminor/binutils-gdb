@@ -32,6 +32,7 @@ as.dvi:	as-${CONFIG}.texinfo
 as.ms: as-${CONFIG}.texinfo
 	sed -e '/\\input texinfo/d' \
 		-e '/@c TEXI2ROFF-KILL/,/@c END TEXI2ROFF-KILL/d' \
+		-e 's/{.*,,/{/' \
 		as-${CONFIG}.texinfo | \
 	texi2roff -ms >as.ms 
 
