@@ -89,7 +89,6 @@ gmalloc.h
 gould-pinsn.c
 gould-xdep.c
 h8300-tdep.c
-hds-tdep.c
 hp300ux-xdep.c
 i386-pinsn.c
 i386-stub.c
@@ -150,6 +149,7 @@ regex.h
 rem-multi.shar
 remote-adapt.c
 remote-eb.c
+remote-hds.c
 remote-mm.c
 remote-nindy.c
 remote-vx.c

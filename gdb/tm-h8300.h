@@ -90,7 +90,7 @@ read_memory_integer (read_register (SP_REGNUM), 2)
 
 /* Say how long registers are.  */
 
-#define REGISTER_TYPE short
+#define REGISTER_TYPE unsigned short
 
 #  define NUM_REGS 10 
 #  define REGISTER_BYTES (10*2)
@@ -262,3 +262,6 @@ read_memory_integer (read_register (SP_REGNUM), 2)
 
 #define POP_FRAME		{ h8300_pop_frame (); }
 
+
+#define	BEFORE_MAIN_LOOP_HOOK	\
+  hms_before_main_loop();
