@@ -3050,6 +3050,30 @@ d_print_comp (dpi, dc)
     case DEMANGLE_COMPONENT_RESTRICT:
     case DEMANGLE_COMPONENT_VOLATILE:
     case DEMANGLE_COMPONENT_CONST:
+      {
+	struct d_print_mod *pdpm;
+
+	/* When printing arrays, it's possible to have cases where the
+	   same CV-qualifier gets pushed on the stack multiple times.
+	   We only need to print it once.  */
+
+	for (pdpm = dpi->modifiers; pdpm != NULL; pdpm = pdpm->next)
+	  {
+	    if (! pdpm->printed)
+	      {
+		if (pdpm->mod->type != DEMANGLE_COMPONENT_RESTRICT
+		    && pdpm->mod->type != DEMANGLE_COMPONENT_VOLATILE
+		    && pdpm->mod->type != DEMANGLE_COMPONENT_CONST)
+		  break;
+		if (pdpm->mod->type == dc->type)
+		  {
+		    d_print_comp (dpi, d_left (dc));
+		    return;
+		  }
+	      }
+	  }
+      }
+      /* Fall through.  */
     case DEMANGLE_COMPONENT_RESTRICT_THIS:
     case DEMANGLE_COMPONENT_VOLATILE_THIS:
     case DEMANGLE_COMPONENT_CONST_THIS:
@@ -3125,23 +3149,64 @@ d_print_comp (dpi, dc)
 
     case DEMANGLE_COMPONENT_ARRAY_TYPE:
       {
-	struct d_print_mod dpm;
+	struct d_print_mod *hold_modifiers;
+	struct d_print_mod adpm[4];
+	unsigned int i;
+	struct d_print_mod *pdpm;
 
 	/* We must pass this type down as a modifier in order to print
-	   multi-dimensional arrays correctly.  */
+	   multi-dimensional arrays correctly.  If the array itself is
+	   CV-qualified, we act as though the element type were
+	   CV-qualified.  We do this by copying the modifiers down
+	   rather than fiddling pointers, so that we don't wind up
+	   with a d_print_mod higher on the stack pointing into our
+	   stack frame after we return.  */
 
-	dpm.next = dpi->modifiers;
-	dpi->modifiers = &dpm;
-	dpm.mod = dc;
-	dpm.printed = 0;
-	dpm.templates = dpi->templates;
+	hold_modifiers = dpi->modifiers;
+
+	adpm[0].next = hold_modifiers;
+	dpi->modifiers = &adpm[0];
+	adpm[0].mod = dc;
+	adpm[0].printed = 0;
+	adpm[0].templates = dpi->templates;
+
+	i = 1;
+	pdpm = hold_modifiers;
+	while (pdpm != NULL
+	       && (pdpm->mod->type == DEMANGLE_COMPONENT_RESTRICT
+		   || pdpm->mod->type == DEMANGLE_COMPONENT_VOLATILE
+		   || pdpm->mod->type == DEMANGLE_COMPONENT_CONST))
+	  {
+	    if (! pdpm->printed)
+	      {
+		if (i >= sizeof adpm / sizeof adpm[0])
+		  {
+		    d_print_error (dpi);
+		    return;
+		  }
+
+		adpm[i] = *pdpm;
+		adpm[i].next = dpi->modifiers;
+		dpi->modifiers = &adpm[i];
+		pdpm->printed = 1;
+		++i;
+	      }
+
+	    pdpm = pdpm->next;
+	  }
 
 	d_print_comp (dpi, d_right (dc));
 
-	dpi->modifiers = dpm.next;
+	dpi->modifiers = hold_modifiers;
 
-	if (dpm.printed)
+	if (adpm[0].printed)
 	  return;
+
+	while (i > 1)
+	  {
+	    --i;
+	    d_print_mod (dpi, adpm[i].mod);
+	  }
 
 	d_print_array_type (dpi, dc, dpi->modifiers);
 
@@ -3643,19 +3708,19 @@ d_print_array_type (dpi, dc, mods)
       need_paren = 0;
       for (p = mods; p != NULL; p = p->next)
 	{
-	  if (p->printed)
-	    break;
-
-	  if (p->mod->type == DEMANGLE_COMPONENT_ARRAY_TYPE)
+	  if (! p->printed)
 	    {
-	      need_space = 0;
-	      break;
-	    }
-	  else
-	    {
-	      need_paren = 1;
-	      need_space = 1;
-	      break;
+	      if (p->mod->type == DEMANGLE_COMPONENT_ARRAY_TYPE)
+		{
+		  need_space = 0;
+		  break;
+		}
+	      else
+		{
+		  need_paren = 1;
+		  need_space = 1;
+		  break;
+		}
 	    }
 	}
 
@@ -3944,29 +4009,46 @@ __cxa_demangle (mangled_name, output_buffer, length, status)
   char *demangled;
   size_t alc;
 
-  if (status == NULL)
-    return NULL;
-
   if (mangled_name == NULL)
     {
-      *status = -3;
+      if (status != NULL)
+	*status = -3;
       return NULL;
     }
 
   if (output_buffer != NULL && length == NULL)
     {
-      *status = -3;
+      if (status != NULL)
+	*status = -3;
       return NULL;
     }
 
-  demangled = d_demangle (mangled_name, DMGL_TYPES, &alc);
+  /* The specification for __cxa_demangle() is that if the mangled
+     name could be either an extern "C" identifier, or an internal
+     built-in type name, then we resolve it as the identifier.  All
+     internal built-in type names are a single lower case character.
+     Frankly, this simplistic disambiguation doesn't make sense to me,
+     but it is documented, so we implement it here.  */
+  if (IS_LOWER (mangled_name[0])
+      && mangled_name[1] == '\0'
+      && cplus_demangle_builtin_types[mangled_name[0] - 'a'].name != NULL)
+    {
+      if (status != NULL)
+	*status = -2;
+      return NULL;
+    }
+
+  demangled = d_demangle (mangled_name, DMGL_PARAMS | DMGL_TYPES, &alc);
 
   if (demangled == NULL)
     {
-      if (alc == 1)
-	*status = -1;
-      else
-	*status = -2;
+      if (status != NULL)
+	{
+	  if (alc == 1)
+	    *status = -1;
+	  else
+	    *status = -2;
+	}
       return NULL;
     }
 
@@ -3990,7 +4072,8 @@ __cxa_demangle (mangled_name, output_buffer, length, status)
 	}
     }
 
-  *status = 0;
+  if (status != NULL)
+    *status = 0;
 
   return demangled;
 }
@@ -4296,7 +4379,11 @@ main (argc, argv)
 
 	  if (dyn_string_length (mangled) > 0)
 	    {
+#ifdef IN_GLIBCPP_V3
+	      s = __cxa_demangle (dyn_string_buf (mangled), NULL, NULL, NULL);
+#else
 	      s = cplus_demangle_v3 (dyn_string_buf (mangled), options);
+#endif
 
 	      if (s != NULL)
 		{
@@ -4328,9 +4415,16 @@ main (argc, argv)
       for (i = optind; i < argc; ++i)
 	{
 	  char *s;
+#ifdef IN_GLIBCPP_V3
+	  int status;
+#endif
 
 	  /* Attempt to demangle.  */
+#ifdef IN_GLIBCPP_V3
+	  s = __cxa_demangle (argv[i], NULL, NULL, &status);
+#else
 	  s = cplus_demangle_v3 (argv[i], options);
+#endif
 
 	  /* If it worked, print the demangled name.  */
 	  if (s != NULL)
@@ -4339,7 +4433,13 @@ main (argc, argv)
 	      free (s);
 	    }
 	  else
-	    fprintf (stderr, "Failed: %s\n", argv[i]);
+	    {
+#ifdef IN_GLIBCPP_V3
+	      fprintf (stderr, "Failed: %s (status %d)\n", argv[i], status);
+#else
+	      fprintf (stderr, "Failed: %s\n", argv[i]);
+#endif
+	    }
 	}
     }
 
