@@ -1,3 +1,7 @@
+Mon Apr 21 09:49:25 1997  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* remote-pa.c:  Remove.  It's broken and no longer necessary.
+
 Sat Apr 19 11:56:10 1997  Per Bothner  <bothner@deneb.cygnus.com>
 
 	* java-exp.y:  Combine TRUE and FALSE into BOOLEAN_LITERAL.
