@@ -1,3 +1,8 @@
+2001-07-14  matthew green  <mrg@eterna.com.au>
+
+	* configure.tgt (i386-*-netbsdelf*): New target.
+	(i386-*-netbsd*): Set targ_extra_emuls to `elf_i386'
+
 2001-06-27  Alan Modra  <amodra@bigpond.net.au>
 
 	* emulparams/hppa64linux.sh: New file.
