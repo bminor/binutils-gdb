@@ -1,3 +1,7 @@
+Wed Jul  1 15:57:54 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* sim/m32r/hw-trap.ms: New testcase.
+
 start-sanitize-sky
 Wed Jun 24 19:09:03 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
