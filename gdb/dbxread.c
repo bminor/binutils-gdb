@@ -1809,7 +1809,10 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 	.stab "foo:V...",N_STSYM	is relative (section base subtracted).
 	This leaves us no choice but to search for the 'S' or 'V'...
 	(or pass the whole section_offsets stuff down ONE MORE function
-	call level, which we really don't want to do).  */
+	call level, which we really don't want to do).
+
+	The above is indeed true for Solaris 2.1.  I'm not sure what
+	happens in Solaris 2.3, in which ld stops relocating stabs.  */
       {
 	char *p;
 	p = strchr (name, ':');
@@ -1817,7 +1820,9 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 	  {
 	    /* FIXME!  We relocate it by the TEXT offset, in case the
 	       whole module moved in memory.  But this is wrong, since
-	       the sections can side around independently.  */
+	       the sections can side around independently.  (I suspect that
+	       the text offset is always zero anyway--elfread.c doesn't
+	       process (and Sun cc doesn't produce) Ttext.text symbols).  */
 	    valu += ANOFFSET (section_offsets, SECT_OFF_TEXT);
 	    goto define_a_symbol;
 	  }
