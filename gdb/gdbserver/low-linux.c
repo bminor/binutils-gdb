@@ -541,6 +541,19 @@ initialize_arch (void)
 {
   return;
 }
+
+#elif defined(ARM_GNULINUX_TARGET)
+int arm_register_u_addr(blockend, regnum)
+     int blockend;
+     int regnum;
+{
+  return blockend + REGISTER_BYTE(regnum);  
+}
+
+static void
+initialize_arch ()
+{
+}
 #endif
 
 CORE_ADDR

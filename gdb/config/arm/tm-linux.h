@@ -21,6 +21,10 @@
 #ifndef TM_ARMLINUX_H
 #define TM_ARMLINUX_H
 
+#ifdef GDBSERVER
+#define	ARM_GNULINUX_TARGET
+#endif
+
 /* Include the common ARM target definitions.  */
 #include "arm/tm-arm.h"
 
