@@ -1,3 +1,7 @@
+Fri Mar  6 01:02:03 1998  Richard Henderson  <rth@cygnus.com>
+
+	* config.sub: Accept alphapca56 and alphaev6 properly.
+
 start-sanitize-vr4320
 Tue Mar  3 11:01:52 1998  Gavin Koch  <gavin@cygnus.com>
 
@@ -123,12 +127,6 @@ Fri Jan 16 00:41:37 1998  Alexandre Oliva <oliva@dcc.unicamp.br>
 	* configure.in: check whether host and target makefile
 	fragments exist before adding them to *_makefile_frag
 
-start-sanitize-vr4111
-Thu Jan 15 09:36:48 1998  Gavin Koch  <gavin@cygnus.com>
-
-	* config.sub: Create the vr4111 as a copy of vr4100. 
-
-end-sanitize-vr4111
 Wed Jan 14 23:39:10 1998  Bob Manson  <manson@charmed.cygnus.com>
 
 	* configure.in (target_configdirs): Add cygmon for sparc64-elf.
