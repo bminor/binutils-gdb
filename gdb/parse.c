@@ -535,7 +535,7 @@ prefixify_subexp (inexpr, outexpr, inend, outbeg)
       args=1;
       break;
 
-   case STRUCTOP_STRUCT:
+    case STRUCTOP_STRUCT:
     case STRUCTOP_PTR:
       args = 1;
       /* fall through */
