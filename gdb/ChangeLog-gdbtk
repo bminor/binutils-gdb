@@ -1,3 +1,7 @@
+Thu Apr 23 19:01:05 1998  Keith Seitz  <keiths@onions.cygnus.com>
+
+	* Makefile.in (install-only): Install help files.
+
 Wed Apr 15 11:23:53 1998  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* gdbtcl: Remove directory and contents, this version of

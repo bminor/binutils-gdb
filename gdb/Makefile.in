@@ -601,8 +601,10 @@ install-only:
 	$(SHELL) $(srcdir)/../mkinstalldirs \
 		$(datadir)/gdbtcl/images \
 		$(datadir)/gdbtcl/images2 ; \
+	$(SHELL) $(srcdir)/../mkinstalldirs $(datadir)/gdbtcl/help \
+		$(datadir)/gdbtcl/help/images; \
 	cd $(srcdir)/gdbtcl2 ; \
-	for i in *.tcl images/*.gif images2/*.gif tclIndex; \
+	for i in *.tcl images/*.gif images2/*.gif tclIndex help/*.html help/index.toc help/images/*.gif; \
 	  do \
 		$(INSTALL_DATA) $$i $(datadir)/gdbtcl/$$i ; \
 	  done ;
