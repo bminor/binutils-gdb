@@ -1,3 +1,9 @@
+1999-01-11  Doug Evans  <devans@casey.cygnus.com>
+
+	* Makefile.in: Regenerate.
+	* configure.in: Redo test for using cgen.
+	* configure: Regenerate.
+
 1999-01-09  Nick Clifton  <nickc@cygnus.com>
 
 	* config/obj-coff.h (obj_adjust_symtab): Prevent accidental
@@ -84,12 +90,10 @@ end-sanitize-vr4xxx
 	suggest that it may be the operand modes that are the problem, not
 	necessarily the opcode.
 
-start-sanitize-fr30
 1998-12-10  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-fr30.c: Add line separator character.
 
-end-sanitize-fr30
 start-sanitize-sky
 Wed Dec  9 17:06:48 1998  Doug Evans  <devans@canuck.cygnus.com>
 
@@ -172,7 +176,6 @@ Sun Dec  6 12:46:36 1998  Ian Lance Taylor  <ian@cygnus.com>
 	* expr.c (operator): And with 0xff to avoid problems with signed
 	char.
 
-start-sanitize-fr30
 1998-12-03  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-fr30.c (md_cgen_lookup_reloc): Generate
@@ -193,7 +196,6 @@ Tue Nov 24 17:21:52 1998  Nick Clifton  <nickc@cygnus.com>
 	* config/tc-fr30.c (md_pcrel_from_section): Fix calculation of
 	pcrel point.
 
-end-sanitize-fr30
 start-sanitize-vr4xxx
 1998-11-24  Gavin Romig-Koch  <gavin@cygnus.com>
 
@@ -208,13 +210,11 @@ Tue Nov 24 14:54:38 1998  Nick Clifton  <nickc@cygnus.com>
 	(d10v_cleanup): Only generate previous insn if a multiline insn is
 	not pending.
 
-start-sanitize-fr30
 Fri Nov 20 11:41:13 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-fr30.c (md_cgen_lookup_reloc): Add support for
 	FR30_OPERAND_I32. 
 
-end-sanitize-fr30
 Thu Nov 19 15:01:29 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-arm.c (md_parse_option): Add support for -marm7xxx and
@@ -225,21 +225,16 @@ Thu Nov 19 15:01:29 1998  Nick Clifton  <nickc@cygnus.com>
 	* Makefile.am (DEP): Use $(srcdir)/../mkdep.
 	(itbl-ops.o): Delete duplicate dependencies.
 	Rebuild dependencies.
-start-sanitize-fr30
 	Add fr30 dependencies.
-end-sanitize-fr30
 	* Makefile.in: Rebuild.
 
 Tue Nov 17 13:42:42 1998  Nick Clifton  <nickc@cygnus.com>
 
-start-sanitize-fr30
 	* config/tc-fr30.c (md_cgen_lookup_reloc): Updated to match latest
 	opcode list.
-end-sanitize-fr30
 	* listing.c: Ignore line terminator characters found inside
 	strings. 
 
-start-sanitize-fr30
 Thu Nov 12 19:21:24 1998  Dave Brolley  <brolley@cygnus.com>
 
 	* po/gas.pot: Regenerated.
@@ -263,7 +258,6 @@ Tue Nov 10 13:13:05 1998  Nick Clifton  <nickc@cygnus.com>
 	* config/tc-fr30.h: New file.
 	* config/tc-fr30.c: Tweaking so that it will compile.
 
-end-sanitize-fr30
 Tue Nov 10 14:41:33 1998  Catherine Moore  <clm@cygnus.com>
 
         * config/tc-d10v.h (obj_fix_adjustable):  Define.
@@ -279,7 +273,6 @@ Mon Nov  9 14:25:06 1998  Nick Clifton  <nickc@cygnus.com>
 	* config/tc-d30v.c: Change default behaviour to ignore potential
 	conflicts between register name and symbol names.
 
-start-sanitize-fr30
 Wed Nov  4 18:42:00 1998  Dave Brolley  <brolley@cygnus.com>
 
 	* configure.in: Add fr30-*-*.
@@ -290,7 +283,6 @@ Wed Nov  4 18:42:00 1998  Dave Brolley  <brolley@cygnus.com>
 	* doc/Makefile.in: Regenerated.
 	* po/gas.pot: Regenerated.
 
-end-sanitize-fr30
 Mon Nov  2 20:54:16 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* config/tc-m32r.c (assemble_two_insns): Ensure both insns
