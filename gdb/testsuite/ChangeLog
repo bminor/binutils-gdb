@@ -1,3 +1,9 @@
+2001-10-29  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.base/ending-run.exp: Create identical output when passing
+	`step to end of run' case.  Add regular expression branch satisfying
+	Stormy16 target.  
+
 2001-10-28  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.base/interrupt.exp: Treat SIGILL similar to SIGSEGV such

@@ -219,14 +219,18 @@ if {![target_info exists use_cygmon] || ![target_info use_cygmon]} {
 		# If we actually have debug info for the start function,
 		# then we won't get the "Single-stepping until function
 		# exit" message.
-		pass "step to end of run 1"
+		pass "step to end of run"
 	    }
 	    -re ".*Single.*Program exited.*$gdb_prompt $" {
-		pass "step to end of run 1"
+		pass "step to end of run"
 	    }
 	    -re ".*Single.*in exit.*from.*dld.sl.*$gdb_prompt $" {
-		pass "step to end of run 2" 
+		pass "step to end of run" 
 		gdb_test "c" ".*" "continue after exit"
+	    }
+	    -re ".*Single.*_int_reset.*$gdb_prompt $" {
+	        pass "step to end of run"
+		setup_xfail "stormy16-*-*"
 	    }
 	    -re ".*$gdb_prompt $" {
 		fail "step to end of run"
