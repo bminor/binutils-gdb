@@ -1,3 +1,7 @@
+2004-02-09  Daniel Jacobowitz  <drow@mvista.com>
+
+	* config/djgpp/fnchange.lst: Add cp-names.tab.c.
+
 2003-01-13  Daniel Jacobowitz  <drow@mvista.com>
 
 	* Makefile.in (cp_demangle_h): Remove.

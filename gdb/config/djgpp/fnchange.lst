@@ -101,6 +101,7 @@
 @V@/gdb/config/rs6000/tm-rs6000-aix4.h @V@/gdb/config/rs6000/tm-rs6kaix4.h
 @V@/gdb/config/sparc/tm-sparclynx.h @V@/gdb/config/sparc/tm-splynx.h
 @V@/gdb/config/vax/xm-vaxult2.h @V@/gdb/config/vax/xm-vaxut2.h
+@V@/gdb/cp-names.tab.c @V@/gdb/cp-names_tab.c
 @V@/gdb/f-exp.tab.c @V@/gdb/f-exp_tab.c
 @V@/gdb/gdbtk/ChangeLog-2001 @V@/gdb/gdbtk/ChangeLog.001
 @V@/gdb/gdbtk/ChangeLog-2002 @V@/gdb/gdbtk/ChangeLog.002
