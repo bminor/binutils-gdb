@@ -1,3 +1,13 @@
+Tue Oct  4 11:23:12 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* elfcode.h (swap_out_syms): If the alignment of a common symbol
+	was not set, use a sensible default rather than zero.
+
+Mon Oct  3 16:04:29 1994  H.J. Lu (hlu@nynexst.com)
+
+	* opncls.c (bfd_close): Honor umask when setting execution bits.
+	(bfd_close_all_done): Likewise.
+
 Mon Oct  3 04:41:49 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* rs6000-core.c (rs6000coff_core_p):  Set SEC_HAS_CONTENTS flag
