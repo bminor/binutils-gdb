@@ -277,7 +277,7 @@ push_sigtramp_desc (CORE_ADDR low_addr)
 }
 
 
-static char *
+static const char *
 alpha_register_name (int regno)
 {
   static char *register_names[] =

@@ -78,7 +78,7 @@ static int i386_register_size[I386_SSE_NUM_REGS] = {
 
 /* Return the name of register REG.  */
 
-char *
+const char *
 i386_register_name (int reg)
 {
   if (reg < 0)

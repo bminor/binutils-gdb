@@ -270,7 +270,7 @@ static struct cmd_list_element *showmipscmdlist = NULL;
 char *mips_generic_reg_names[] = MIPS_REGISTER_NAMES;
 char **mips_processor_reg_names = mips_generic_reg_names;
 
-char *
+const char *
 mips_register_name (int i)
 {
   return mips_processor_reg_names[i];

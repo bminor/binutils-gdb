@@ -205,7 +205,7 @@ static CORE_ADDR v850_scan_prologue (CORE_ADDR pc, struct prologue_info *fs);
 /* Function: v850_register_name
    Returns the name of the v850/v850e register N. */
 
-static char *
+static const char *
 v850_register_name (int regnum)
 {
   if (regnum < 0 || regnum >= E_NUM_REGS)

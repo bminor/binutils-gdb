@@ -137,7 +137,7 @@ generic_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
   return 0;
 }
 
-char *
+const char *
 legacy_register_name (int i)
 {
 #ifdef REGISTER_NAMES

@@ -93,7 +93,7 @@ extern int in_sigtramp (CORE_ADDR, char *);
 
 /* Given the register index, return the name of the corresponding
    register. */
-extern char *mips_register_name (int regnr);
+extern const char *mips_register_name (int regnr);
 #define REGISTER_NAME(i) mips_register_name (i)
 
 /* Initializer for an array of names of registers.

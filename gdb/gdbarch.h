@@ -658,8 +658,8 @@ extern void set_gdbarch_dwarf2_reg_to_regnum (struct gdbarch *gdbarch, gdbarch_d
 #define REGISTER_NAME(regnr) (legacy_register_name (regnr))
 #endif
 
-typedef char * (gdbarch_register_name_ftype) (int regnr);
-extern char * gdbarch_register_name (struct gdbarch *gdbarch, int regnr);
+typedef const char * (gdbarch_register_name_ftype) (int regnr);
+extern const char * gdbarch_register_name (struct gdbarch *gdbarch, int regnr);
 extern void set_gdbarch_register_name (struct gdbarch *gdbarch, gdbarch_register_name_ftype *register_name);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (REGISTER_NAME)
 #error "Non multi-arch definition of REGISTER_NAME"

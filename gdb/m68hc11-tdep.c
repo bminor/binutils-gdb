@@ -255,7 +255,7 @@ m68hc11_store_pseudo_register (int regno)
     }
 }
 
-static char *
+static const char *
 m68hc11_register_name (int reg_nr)
 {
   if (reg_nr < 0)

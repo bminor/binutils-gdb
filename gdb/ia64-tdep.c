@@ -243,7 +243,7 @@ struct gdbarch_tdep
 #define FIND_GLOBAL_POINTER \
   (gdbarch_tdep (current_gdbarch)->find_global_pointer)
 
-static char *
+static const char *
 ia64_register_name (int reg)
 {
   return ia64_register_names[reg];

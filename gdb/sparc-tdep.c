@@ -2551,7 +2551,7 @@ sparc_print_extra_frame_info (struct frame_info *fi)
 
 /* MULTI_ARCH support */
 
-static char *
+static const char *
 sparc32_register_name (int regno)
 {
   static char *register_names[] = 
@@ -2575,7 +2575,7 @@ sparc32_register_name (int regno)
     return register_names[regno];
 }
 
-static char *
+static const char *
 sparc64_register_name (int regno)
 {
   static char *register_names[] = 
@@ -2607,7 +2607,7 @@ sparc64_register_name (int regno)
     return register_names[regno];
 }
 
-static char *
+static const char *
 sparclite_register_name (int regno)
 {
   static char *register_names[] = 
@@ -2632,7 +2632,7 @@ sparclite_register_name (int regno)
     return register_names[regno];
 }
 
-static char *
+static const char *
 sparclet_register_name (int regno)
 {
   static char *register_names[] = 

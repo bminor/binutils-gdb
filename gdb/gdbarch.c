@@ -2806,7 +2806,7 @@ set_gdbarch_dwarf2_reg_to_regnum (struct gdbarch *gdbarch,
   gdbarch->dwarf2_reg_to_regnum = dwarf2_reg_to_regnum;
 }
 
-char *
+const char *
 gdbarch_register_name (struct gdbarch *gdbarch, int regnr)
 {
   gdb_assert (gdbarch != NULL);

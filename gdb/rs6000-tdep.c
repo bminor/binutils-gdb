@@ -1575,7 +1575,7 @@ regsize (const struct reg *reg, int wordsize)
 /* Return the name of register number N, or null if no such register exists
    in the current architecture. */
 
-static char *
+static const char *
 rs6000_register_name (int n)
 {
   struct gdbarch_tdep *tdep = TDEP;

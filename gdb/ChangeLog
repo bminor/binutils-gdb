@@ -1,3 +1,42 @@
+2002-06-17  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh (REGISTER_NAME): Change return type a constant string
+	pointer.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* config/mips/tm-mips.h (mips_register_name): Update.
+	* i386-tdep.h (i386_register_name): Update.
+	* mips-tdep.c (mips_register_name): Update
+	* alpha-tdep.c (alpha_register_name): Update.
+	* arch-utils.c (legacy_register_name): Update.
+	* arch-utils.h (legacy_register_name): Update.
+	* avr-tdep.c (avr_register_name): Update.
+	* ia64-tdep.c (ia64_register_name): Update.
+	* i386-tdep.c (i386_register_name): Update.
+	* sparc-tdep.c (sparc32_register_name): Update.
+	(sparc64_register_name): Update.
+	(sparclite_register_name): Update.
+	(sparclet_register_name): Update.
+	* sh-tdep.c (sh_generic_register_name): Update.
+	(sh_sh_register_name): Update.
+	(sh_sh3_register_name): Update.
+	(sh_sh3e_register_name): Update.
+	(sh_sh_dsp_register_name): Update.
+	(sh_sh3_dsp_register_name): Update.
+	(sh_sh4_register_name): Update.
+	(sh_sh64_register_name): Update.
+	* s390-tdep.c (s390_register_name): Update.
+	* rs6000-tdep.c (rs6000_register_name): Update.
+	* ns32k-tdep.c (ns32k_register_name_32082): Update.
+	(ns32k_register_name_32382): Update.
+	* d10v-tdep.c (d10v_ts2_register_name): Update.
+	(d10v_ts3_register_name): Update.
+	* xstormy16-tdep.c (xstormy16_register_name): Update.
+	* vax-tdep.c (vax_register_name): Update.
+	* v850-tdep.c (v850_register_name): Update.
+	* m68hc11-tdep.c (m68hc11_register_name): Update.
+	* mn10300-tdep.c (mn10300_generic_register_name): Update.
+	(am33_register_name): Update.
+
 2002-06-17  Grace Sainsbury  <graces@redhat.com>
 
 	* m68k-tdep.c: Reindented.

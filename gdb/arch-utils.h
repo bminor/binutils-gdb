@@ -48,7 +48,7 @@ extern gdbarch_frameless_function_invocation_ftype generic_frameless_function_in
 extern gdbarch_return_value_on_stack_ftype generic_return_value_on_stack_not;
 
 /* Map onto old REGISTER_NAMES. */
-extern char *legacy_register_name (int i);
+extern const char *legacy_register_name (int i);
 
 /* Accessor for old global function pointer for disassembly. */
 extern int legacy_print_insn (bfd_vma vma, disassemble_info *info);

@@ -187,7 +187,7 @@ enum ts2_regnums
     TS2_A0_REGNUM = 35
   };
 
-static char *
+static const char *
 d10v_ts2_register_name (int reg_nr)
 {
   static char *register_names[] =
@@ -213,7 +213,7 @@ enum ts3_regnums
     TS3_A0_REGNUM = 32
   };
 
-static char *
+static const char *
 d10v_ts3_register_name (int reg_nr)
 {
   static char *register_names[] =

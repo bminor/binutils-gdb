@@ -36,7 +36,7 @@ static CORE_ADDR ns32k_get_enter_addr (CORE_ADDR);
 static int ns32k_localcount (CORE_ADDR enter_pc);
 static void flip_bytes (void *, int);
 
-static char *
+static const char *
 ns32k_register_name_32082 (int regno)
 {
   static char *register_names[] =
@@ -55,7 +55,7 @@ ns32k_register_name_32082 (int regno)
   return (register_names[regno]);
 }
 
-static char *
+static const char *
 ns32k_register_name_32382 (int regno)
 {
   static char *register_names[] =

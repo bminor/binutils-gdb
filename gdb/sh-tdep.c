@@ -68,7 +68,7 @@ struct frame_extra_info
   int f_offset;
 };
 
-static char *
+static const char *
 sh_generic_register_name (int reg_nr)
 {
   static char *register_names[] =
@@ -90,7 +90,7 @@ sh_generic_register_name (int reg_nr)
   return register_names[reg_nr];
 }
 
-static char *
+static const char *
 sh_sh_register_name (int reg_nr)
 {
   static char *register_names[] =
@@ -112,7 +112,7 @@ sh_sh_register_name (int reg_nr)
   return register_names[reg_nr];
 }
 
-static char *
+static const char *
 sh_sh3_register_name (int reg_nr)
 {
   static char *register_names[] =
@@ -134,7 +134,7 @@ sh_sh3_register_name (int reg_nr)
   return register_names[reg_nr];
 }
 
-static char *
+static const char *
 sh_sh3e_register_name (int reg_nr)
 {
   static char *register_names[] =
@@ -156,7 +156,7 @@ sh_sh3e_register_name (int reg_nr)
   return register_names[reg_nr];
 }
 
-static char *
+static const char *
 sh_sh_dsp_register_name (int reg_nr)
 {
   static char *register_names[] =
@@ -178,7 +178,7 @@ sh_sh_dsp_register_name (int reg_nr)
   return register_names[reg_nr];
 }
 
-static char *
+static const char *
 sh_sh3_dsp_register_name (int reg_nr)
 {
   static char *register_names[] =
@@ -201,7 +201,7 @@ sh_sh3_dsp_register_name (int reg_nr)
   return register_names[reg_nr];
 }
 
-static char *
+static const char *
 sh_sh4_register_name (int reg_nr)
 {
   static char *register_names[] =
@@ -236,7 +236,7 @@ sh_sh4_register_name (int reg_nr)
   return register_names[reg_nr];
 }
 
-static char *
+static const char *
 sh_sh64_register_name (int reg_nr)
 {
   static char *register_names[] =
