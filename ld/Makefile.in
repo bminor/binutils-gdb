@@ -6,6 +6,18 @@
 
 srcdir = .
 
+destdir = /usr/local
+
+version=`$(srcdir)/../gcc$(subdir)/gcc -dumpversion`
+prefix = $(destdir)
+bindir = $(prefix)/bin
+libdir = $(prefix)/lib
+libsubdir = $(libdir)/gcc/$(target)/$(version)
+
+INSTALL = install -c
+INSTALL_PROGRAM = $(INSTALL)
+INSTALL_FILE = $(INSTALL)
+
 BASEDIR	= ../..
 HOSTDIR = ../$(HOST)/
 INCLUDE	= $(srcdir)/../include-cygnus
@@ -159,8 +171,7 @@ release:
 objdump:objdump.c 
 
 install: $(PROGS)
-	rm -f $G960BASE/bin/$(PROGS)
-	cp $(PROGS) $$G960BASE/bin/gld960c
+	$(INSTALL_PROGRAM) ld.new $(libsubdir)/ld
 
 #-----------------------------------------------------------------------------
 #		'STANDARD' GNU/960 TARGETS BELOW THIS POINT
@@ -216,7 +227,10 @@ make:
 
 Makefile: $(srcdir)/Makefile.in $(srcdir)/configure
 	(cd $(srcdir) ; \
-		./configure `if [ "$(srcdir)" != "." ] ; then echo +f; fi` -host=$(host) $(target))
+		./configure +destdir=$(destdir) \
+		+norecurse \
+		`if [ "$(srcdir)" != "." ] ; then echo +f; fi` \
+		$(host) +target=$(target))
 
 ### Local Variables: ***
 ### mode:fundamental ***
