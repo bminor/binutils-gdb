@@ -1,3 +1,8 @@
+Wed Jul 28 04:33:58 1999  Jerry Quinn <jquinn@nortelnetworks.com>
+
+	* hppa-dis.c (print_insn_hppa): Remove unnecessary test in 'E'
+	code.
+
 1999-07-21  Ian Lance Taylor  <ian@zembu.com>
 
 	From Mark Elbrecht:

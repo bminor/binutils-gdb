@@ -327,11 +327,7 @@ print_insn_hppa (memaddr, info)
 		  fput_creg (GET_FIELD (insn, 6, 10), info);
 		  break;
 		case 'E':
-                  if (GET_FIELD (insn, 25, 25))
-		      fput_fp_reg_r (GET_FIELD (insn, 6, 10), info);
-		  else
-		      fput_fp_reg (GET_FIELD (insn, 6, 10), info);
-		  break;
+		  fput_fp_reg (GET_FIELD (insn, 6, 10), info);
 		case 't':
 		  fput_reg (GET_FIELD (insn, 27, 31), info);
 		  break;
