@@ -177,7 +177,7 @@ struct rdep
   int nchks;                   
   int total_chks;                   /* total #of terminal insns */
   int *chks;                        /* insn classes which read (RAW), write
-                                       (WAW), or write (WAR) this rsrc */ // 
+                                       (WAW), or write (WAR) this rsrc */
   int *chknotes;                    /* dependency notes for each class */
   int nregs;
   int total_regs;                   /* total #of terminal insns */
@@ -461,7 +461,7 @@ fetch_insn_class(const char *full_name, int create)
      existing class or terminal with the same name. */ 
   if ((xsect || comment || notestr) && is_class)
     {
-      // first, populate with the class we're based on
+      /* First, populate with the class we're based on.  */
       char *subname = name;
       if (xsect)
         *xsect = 0;
