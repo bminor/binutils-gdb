@@ -19,11 +19,38 @@
 
 srcdir = .
 
-ddestdir = /usr/local
-idestdir = $(ddestdir)
+prefix = /usr/local
+
+bindir = $(prefix)/bin
+datadir = $(prefix)/lib
+libdir = $(prefix)/lib
+mandir = $(datadir)/man
+man1dir = $(mandir)/man1
+man2dir = $(mandir)/man2
+man3dir = $(mandir)/man3
+man4dir = $(mandir)/man4
+man5dir = $(mandir)/man5
+man6dir = $(mandir)/man6
+man7dir = $(mandir)/man7
+man8dir = $(mandir)/man8
+man9dir = $(mandir)/man9
+infodir = $(prefix)/info
+includedir = $(prefix)/include
+docdir = $(datadir)/doc
 
 SHELL = /bin/sh
 
+INSTALL = install -c
+INSTALL_PROGRAM = $(INSTALL)
+INSTALL_DATA = $(INSTALL)
+
+AR = ar
+AR_FLAGS = qv
+BISON = bison
+RANLIB = ranlib
+
+#### Host, target, and site specific Makefile fragments come in here.
+###
 # main GDB source directory
 gdbdir = ..
 
@@ -55,15 +82,14 @@ CONFIG=all
 
 all install:
 
-all-info: gdb.info gdbint.info
+info: gdb.info gdbint.info
 #all: gdb.info gdb.dvi refcard.dvi gdb-internals gdbint.dvi
+clean-info:
+	-rm -f *.info*
 
-install-info: all-info
+install-info: info
 	for i in *.info* ; do \
-		echo Installing $$i... ; \
-		(cp $$i $(idestdir)/info/$$i.n \
-			&& mv -f $(idestdir)/info/$$i.n $(idestdir)/info/$$i) \
-		|| exit 1 ; \
+		$(INSTALL_DATA) $$i $(infodir)/$$i ; \
 	done
 
 STAGESTUFF = *.info* gdb-all.texi gdbVN.m4
@@ -87,16 +113,16 @@ comparison: force
 	for i in $(STAGESTUFF) ; do cmp $$i $(against)/$$i ; done
 
 de-stage1: force
-	- (cd stage1 ; mv -f * ..)
-	- rmdir stage1
+	-(cd stage1 ; mv -f * ..)
+	-rmdir stage1
 
 de-stage2: force
-	- (cd stage2 ; mv -f * ..)
-	- rmdir stage2
+	-(cd stage2 ; mv -f * ..)
+	-rmdir stage2
 
 de-stage3: force
-	- (cd stage3 ; mv -f * ..)
-	- rmdir stage3
+	-(cd stage3 ; mv -f * ..)
+	-rmdir stage3
 
 clean:
 	rm -f gdb.dvi rdl-apps.texi gdb-all* gdb.info* gdbVN.m4

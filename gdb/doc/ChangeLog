@@ -1,0 +1,12 @@
+Fri Dec  6 23:57:34 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
+
+	* Makefile.in: remove spaces following hyphens, bsd make can't
+	  cope.  install using INSTALL_DATA.  added clean-info.  added
+	  standards.text support. 
+
+Thu Dec  5 22:46:12 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
+
+	* Makefile.in: idestdir and ddestdir go away.  Added copyrights
+	  and shift gpl to v2.  Added ChangeLog if it didn't exist. docdir
+	  and mandir now keyed off datadir by default.
+
