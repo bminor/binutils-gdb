@@ -110,14 +110,12 @@ stamp-arch: $(CGEN_READ_SCM) $(CGEN_ARCH_SCM) $(srccgen)/i960.cpu
 	  FLAGS="with-scache with-profile=fn"
 	touch stamp-arch
 arch.h arch.c cpuall.h: $(CGEN_MAINT) stamp-arch
-	@true
 
 stamp-cpu: $(CGEN_READ_SCM) $(CGEN_CPU_SCM) $(CGEN_DECODE_SCM) $(srccgen)/i960.cpu
 	$(MAKE) cgen-cpu-decode $(CGEN_FLAGS_TO_PASS) \
 	  cpu=i960base mach=i960:ka_sa,i960:ca SUFFIX= FLAGS="with-scache with-profile=fn" EXTRAFILES="$(CGEN_CPU_SEM) $(CGEN_CPU_SEMSW)"
 	touch stamp-cpu
 cpu.h sem.c sem-switch.c model.c decode.c decode.h: $(CGEN_MAINT) stamp-cpu
-	@true
 
 stamp-desc: $(CGEN_READ_SCM) $(CGEN_DESC_SCM) \
 		$(srccgen)/sparc.cpu $(srccgen)/sparccom.cpu $(srccgen)/i960.cpu $(srccgen)/i960.cpu
@@ -125,4 +123,3 @@ stamp-desc: $(CGEN_READ_SCM) $(CGEN_DESC_SCM) \
 		cpu=i960 mach=all
 	touch stamp-desc
 i960-desc.c i960-desc.h i960-opc.h: $(CGEN_MAINT) stamp-desc
-	@true

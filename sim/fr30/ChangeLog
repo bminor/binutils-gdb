@@ -1,3 +1,8 @@
+2000-11-18  Greg McGary  <greg@mcgary.org>
+
+	* Makefile.in: remove `@true' commands for rules that have
+	$(CGEN_MAINT) as a prerequisite.
+
 2000-10-06  Dave Brolley  <brolley@redhat.com>
 
 	* sem.c: Regenerated.

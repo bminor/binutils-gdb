@@ -1,3 +1,8 @@
+2000-11-18  Greg McGary  <greg@mcgary.org>
+
+	* Makefile.in: remove `@true' commands for rules that have
+	$(CGEN_MAINT) as a prerequisite.
+
 2000-08-21  Frank Ch. Eigler  <fche@redhat.com>
 
 	* Makefile.in (i960-clean): Add stamp-arch, stamp-cpu.
