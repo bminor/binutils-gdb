@@ -94,9 +94,6 @@ EOF
 		M ) staticdefault="0" ;;
 		* ) test "${staticdefault}" || staticdefault=0 ;;
 	    esac
-	    # NOT YET: Breaks BELIEVE_PCC_PROMOTION and confuses non-
-	    # multi-arch defaults.
-	    # test "${predefault}" || predefault=0
 
 	    # come up with a format, use a few guesses for variables
 	    case ":${class}:${fmt}:${print}:" in
@@ -119,13 +116,16 @@ EOF
 	    F | V | M )
 		case "${invalid_p}" in
 		"" )
-		    if test -n "${predefault}" -a "${predefault}" != "0"
+		    if test -n "${predefault}"
 		    then
 			#invalid_p="gdbarch->${function} == ${predefault}"
 			predicate="gdbarch->${function} != ${predefault}"
-		    else
-			# filled in later
-			predicate=""
+		    elif class_is_variable_p
+		    then
+			predicate="gdbarch->${function} != 0"
+		    elif class_is_function_p
+		    then
+			predicate="gdbarch->${function} != NULL"
 		    fi
 		    ;;
 		* )
@@ -435,8 +435,8 @@ F:2:TARGET_READ_SP:CORE_ADDR:read_sp:void
 # serious shakedown.
 f:2:TARGET_VIRTUAL_FRAME_POINTER:void:virtual_frame_pointer:CORE_ADDR pc, int *frame_regnum, LONGEST *frame_offset:pc, frame_regnum, frame_offset::0:legacy_virtual_frame_pointer::0
 #
-M:::void:pseudo_register_read:struct regcache *regcache, int cookednum, void *buf:regcache, cookednum, buf:
-M:::void:pseudo_register_write:struct regcache *regcache, int cookednum, const void *buf:regcache, cookednum, buf:
+M:::void:pseudo_register_read:struct regcache *regcache, int cookednum, void *buf:regcache, cookednum, buf
+M:::void:pseudo_register_write:struct regcache *regcache, int cookednum, const void *buf:regcache, cookednum, buf
 #
 v:2:NUM_REGS:int:num_regs::::0:-1
 # This macro gives the number of pseudo-registers that live in the
@@ -468,9 +468,9 @@ f:2:DWARF2_REG_TO_REGNUM:int:dwarf2_reg_to_regnum:int dwarf2_regnr:dwarf2_regnr:
 f::REGISTER_NAME:const char *:register_name:int regnr:regnr
 
 # REGISTER_TYPE is a direct replacement for REGISTER_VIRTUAL_TYPE.
-M:2:REGISTER_TYPE:struct type *:register_type:int reg_nr:reg_nr::0:
+M:2:REGISTER_TYPE:struct type *:register_type:int reg_nr:reg_nr
 # REGISTER_TYPE is a direct replacement for REGISTER_VIRTUAL_TYPE.
-F:2:REGISTER_VIRTUAL_TYPE:struct type *:deprecated_register_virtual_type:int reg_nr:reg_nr::0:0
+F:2:REGISTER_VIRTUAL_TYPE:struct type *:deprecated_register_virtual_type:int reg_nr:reg_nr
 # DEPRECATED_REGISTER_BYTES can be deleted.  The value is computed
 # from REGISTER_TYPE.
 v::DEPRECATED_REGISTER_BYTES:int:deprecated_register_bytes
@@ -500,7 +500,7 @@ V:2:DEPRECATED_MAX_REGISTER_RAW_SIZE:int:deprecated_max_register_raw_size
 V:2:DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE:int:deprecated_max_register_virtual_size
 
 # See gdbint.texinfo, and PUSH_DUMMY_CALL.
-M::UNWIND_DUMMY_ID:struct frame_id:unwind_dummy_id:struct frame_info *info:info::0:0
+M::UNWIND_DUMMY_ID:struct frame_id:unwind_dummy_id:struct frame_info *info:info
 # Implement UNWIND_DUMMY_ID and PUSH_DUMMY_CALL, then delete
 # SAVE_DUMMY_FRAME_TOS.
 F:2:DEPRECATED_SAVE_DUMMY_FRAME_TOS:void:deprecated_save_dummy_frame_tos:CORE_ADDR sp:sp
@@ -520,7 +520,7 @@ F:2:DEPRECATED_PUSH_ARGUMENTS:CORE_ADDR:deprecated_push_arguments:int nargs, str
 v::DEPRECATED_USE_GENERIC_DUMMY_FRAMES:int:deprecated_use_generic_dummy_frames:::::1::0
 # Implement PUSH_RETURN_ADDRESS, and then merge in
 # DEPRECATED_PUSH_RETURN_ADDRESS.
-F:2:DEPRECATED_PUSH_RETURN_ADDRESS:CORE_ADDR:deprecated_push_return_address:CORE_ADDR pc, CORE_ADDR sp:pc, sp:::0
+F:2:DEPRECATED_PUSH_RETURN_ADDRESS:CORE_ADDR:deprecated_push_return_address:CORE_ADDR pc, CORE_ADDR sp:pc, sp
 # Implement PUSH_DUMMY_CALL, then merge in DEPRECATED_DUMMY_WRITE_SP.
 F:2:DEPRECATED_DUMMY_WRITE_SP:void:deprecated_dummy_write_sp:CORE_ADDR val:val
 # DEPRECATED_REGISTER_SIZE can be deleted.
@@ -538,14 +538,14 @@ v::DEPRECATED_CALL_DUMMY_WORDS:LONGEST *:deprecated_call_dummy_words::::0:legacy
 # Implement PUSH_DUMMY_CALL, then delete DEPRECATED_SIZEOF_CALL_DUMMY_WORDS.
 v::DEPRECATED_SIZEOF_CALL_DUMMY_WORDS:int:deprecated_sizeof_call_dummy_words::::0:legacy_sizeof_call_dummy_words::0
 # Implement PUSH_DUMMY_CALL, then delete DEPRECATED_CALL_DUMMY_STACK_ADJUST.
-V:2:DEPRECATED_CALL_DUMMY_STACK_ADJUST:int:deprecated_call_dummy_stack_adjust::::0
+V:2:DEPRECATED_CALL_DUMMY_STACK_ADJUST:int:deprecated_call_dummy_stack_adjust
 # DEPRECATED_FIX_CALL_DUMMY can be deleted.  For the SPARC, implement
 # PUSH_DUMMY_CODE and set CALL_DUMMY_LOCATION to ON_STACK.
 F::DEPRECATED_FIX_CALL_DUMMY:void:deprecated_fix_call_dummy:char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs, struct value **args, struct type *type, int gcc_p:dummy, pc, fun, nargs, args, type, gcc_p
 # This is a replacement for DEPRECATED_FIX_CALL_DUMMY et.al.
-M::PUSH_DUMMY_CODE:CORE_ADDR:push_dummy_code:CORE_ADDR sp, CORE_ADDR funaddr, int using_gcc, struct value **args, int nargs, struct type *value_type, CORE_ADDR *real_pc, CORE_ADDR *bp_addr:sp, funaddr, using_gcc, args, nargs, value_type, real_pc, bp_addr:
+M::PUSH_DUMMY_CODE:CORE_ADDR:push_dummy_code:CORE_ADDR sp, CORE_ADDR funaddr, int using_gcc, struct value **args, int nargs, struct type *value_type, CORE_ADDR *real_pc, CORE_ADDR *bp_addr:sp, funaddr, using_gcc, args, nargs, value_type, real_pc, bp_addr
 # Implement PUSH_DUMMY_CALL, then delete DEPRECATED_PUSH_DUMMY_FRAME.
-F:2:DEPRECATED_PUSH_DUMMY_FRAME:void:deprecated_push_dummy_frame:void:-:::0
+F:2:DEPRECATED_PUSH_DUMMY_FRAME:void:deprecated_push_dummy_frame:void:-
 # Implement PUSH_DUMMY_CALL, then delete
 # DEPRECATED_EXTRA_STACK_ALIGNMENT_NEEDED.
 v:2:DEPRECATED_EXTRA_STACK_ALIGNMENT_NEEDED:int:deprecated_extra_stack_alignment_needed::::0:0::0:::
@@ -557,11 +557,11 @@ M:2:PRINT_VECTOR_INFO:void:print_vector_info:struct ui_file *file, struct frame_
 # MAP a GDB RAW register number onto a simulator register number.  See
 # also include/...-sim.h.
 f:2:REGISTER_SIM_REGNO:int:register_sim_regno:int reg_nr:reg_nr:::legacy_register_sim_regno::0
-F:2:REGISTER_BYTES_OK:int:register_bytes_ok:long nr_bytes:nr_bytes::0:0
+F:2:REGISTER_BYTES_OK:int:register_bytes_ok:long nr_bytes:nr_bytes
 f:2:CANNOT_FETCH_REGISTER:int:cannot_fetch_register:int regnum:regnum:::cannot_register_not::0
 f:2:CANNOT_STORE_REGISTER:int:cannot_store_register:int regnum:regnum:::cannot_register_not::0
 # setjmp/longjmp support.
-F:2:GET_LONGJMP_TARGET:int:get_longjmp_target:CORE_ADDR *pc:pc::0:0
+F:2:GET_LONGJMP_TARGET:int:get_longjmp_target:CORE_ADDR *pc:pc
 # NOTE: cagney/2002-11-24: This function with predicate has a valid
 # (callable) initial value.  As a consequence, even when the predicate
 # is false, the corresponding function works.  This simplifies the
@@ -594,21 +594,21 @@ f:2:ADDRESS_TO_POINTER:void:address_to_pointer:struct type *type, void *buf, COR
 F:2:INTEGER_TO_ADDRESS:CORE_ADDR:integer_to_address:struct type *type, void *buf:type, buf
 #
 f:2:RETURN_VALUE_ON_STACK:int:return_value_on_stack:struct type *type:type:::generic_return_value_on_stack_not::0
-F:2:DEPRECATED_POP_FRAME:void:deprecated_pop_frame:void:-:::0
+F:2:DEPRECATED_POP_FRAME:void:deprecated_pop_frame:void:-
 # NOTE: cagney/2003-03-24: Replaced by PUSH_ARGUMENTS.
-F:2:DEPRECATED_STORE_STRUCT_RETURN:void:deprecated_store_struct_return:CORE_ADDR addr, CORE_ADDR sp:addr, sp:::0
+F:2:DEPRECATED_STORE_STRUCT_RETURN:void:deprecated_store_struct_return:CORE_ADDR addr, CORE_ADDR sp:addr, sp
 #
 f:2:EXTRACT_RETURN_VALUE:void:extract_return_value:struct type *type, struct regcache *regcache, void *valbuf:type, regcache, valbuf:::legacy_extract_return_value::0
 f:2:STORE_RETURN_VALUE:void:store_return_value:struct type *type, struct regcache *regcache, const void *valbuf:type, regcache, valbuf:::legacy_store_return_value::0
 f:2:DEPRECATED_EXTRACT_RETURN_VALUE:void:deprecated_extract_return_value:struct type *type, char *regbuf, char *valbuf:type, regbuf, valbuf
 f:2:DEPRECATED_STORE_RETURN_VALUE:void:deprecated_store_return_value:struct type *type, char *valbuf:type, valbuf
 #
-F:2:EXTRACT_STRUCT_VALUE_ADDRESS:CORE_ADDR:extract_struct_value_address:struct regcache *regcache:regcache:::0
-F:2:DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS:CORE_ADDR:deprecated_extract_struct_value_address:char *regbuf:regbuf:::0
+F:2:EXTRACT_STRUCT_VALUE_ADDRESS:CORE_ADDR:extract_struct_value_address:struct regcache *regcache:regcache
+F:2:DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS:CORE_ADDR:deprecated_extract_struct_value_address:char *regbuf:regbuf
 f:2:USE_STRUCT_CONVENTION:int:use_struct_convention:int gcc_p, struct type *value_type:gcc_p, value_type:::generic_use_struct_convention::0
 #
-F:2:DEPRECATED_FRAME_INIT_SAVED_REGS:void:deprecated_frame_init_saved_regs:struct frame_info *frame:frame:::0
-F:2:DEPRECATED_INIT_EXTRA_FRAME_INFO:void:deprecated_init_extra_frame_info:int fromleaf, struct frame_info *frame:fromleaf, frame:::0
+F:2:DEPRECATED_FRAME_INIT_SAVED_REGS:void:deprecated_frame_init_saved_regs:struct frame_info *frame:frame
+F:2:DEPRECATED_INIT_EXTRA_FRAME_INFO:void:deprecated_init_extra_frame_info:int fromleaf, struct frame_info *frame:fromleaf, frame
 #
 f:2:SKIP_PROLOGUE:CORE_ADDR:skip_prologue:CORE_ADDR ip:ip::0:0
 f:2:PROLOGUE_FRAMELESS_P:int:prologue_frameless_p:CORE_ADDR ip:ip::0:generic_prologue_frameless_p::0
@@ -623,14 +623,14 @@ m::REMOTE_TRANSLATE_XFER_ADDRESS:void:remote_translate_xfer_address:struct regca
 #
 v:2:FRAME_ARGS_SKIP:CORE_ADDR:frame_args_skip::::0:-1
 f:2:FRAMELESS_FUNCTION_INVOCATION:int:frameless_function_invocation:struct frame_info *fi:fi:::generic_frameless_function_invocation_not::0
-F:2:DEPRECATED_FRAME_CHAIN:CORE_ADDR:deprecated_frame_chain:struct frame_info *frame:frame::0:0
-F:2:DEPRECATED_FRAME_CHAIN_VALID:int:deprecated_frame_chain_valid:CORE_ADDR chain, struct frame_info *thisframe:chain, thisframe::0:0
+F:2:DEPRECATED_FRAME_CHAIN:CORE_ADDR:deprecated_frame_chain:struct frame_info *frame:frame
+F:2:DEPRECATED_FRAME_CHAIN_VALID:int:deprecated_frame_chain_valid:CORE_ADDR chain, struct frame_info *thisframe:chain, thisframe
 # DEPRECATED_FRAME_SAVED_PC has been replaced by UNWIND_PC.  Please
 # note, per UNWIND_PC's doco, that while the two have similar
 # interfaces they have very different underlying implementations.
-F:2:DEPRECATED_FRAME_SAVED_PC:CORE_ADDR:deprecated_frame_saved_pc:struct frame_info *fi:fi::0:0
-M::UNWIND_PC:CORE_ADDR:unwind_pc:struct frame_info *next_frame:next_frame:
-M::UNWIND_SP:CORE_ADDR:unwind_sp:struct frame_info *next_frame:next_frame:
+F:2:DEPRECATED_FRAME_SAVED_PC:CORE_ADDR:deprecated_frame_saved_pc:struct frame_info *fi:fi
+M::UNWIND_PC:CORE_ADDR:unwind_pc:struct frame_info *next_frame:next_frame
+M::UNWIND_SP:CORE_ADDR:unwind_sp:struct frame_info *next_frame:next_frame
 # DEPRECATED_FRAME_ARGS_ADDRESS as been replaced by the per-frame
 # frame-base.  Enable frame-base before frame-unwind.
 F::DEPRECATED_FRAME_ARGS_ADDRESS:CORE_ADDR:deprecated_frame_args_address:struct frame_info *fi:fi::get_frame_base:get_frame_base
@@ -640,9 +640,9 @@ F::DEPRECATED_FRAME_LOCALS_ADDRESS:CORE_ADDR:deprecated_frame_locals_address:str
 F::DEPRECATED_SAVED_PC_AFTER_CALL:CORE_ADDR:deprecated_saved_pc_after_call:struct frame_info *frame:frame
 F:2:FRAME_NUM_ARGS:int:frame_num_args:struct frame_info *frame:frame
 #
-F:2:STACK_ALIGN:CORE_ADDR:stack_align:CORE_ADDR sp:sp::0:0
+F:2:STACK_ALIGN:CORE_ADDR:stack_align:CORE_ADDR sp:sp
 M:::CORE_ADDR:frame_align:CORE_ADDR address:address
-F:2:REG_STRUCT_HAS_ADDR:int:reg_struct_has_addr:int gcc_p, struct type *type:gcc_p, type::0:0
+F:2:REG_STRUCT_HAS_ADDR:int:reg_struct_has_addr:int gcc_p, struct type *type:gcc_p, type
 v:2:PARM_BOUNDARY:int:parm_boundary
 #
 v:2:TARGET_FLOAT_FORMAT:const struct floatformat *:float_format::::::default_float_format (gdbarch)::%s:(TARGET_FLOAT_FORMAT)->name
@@ -670,7 +670,7 @@ f:2:SMASH_TEXT_ADDRESS:CORE_ADDR:smash_text_address:CORE_ADDR addr:addr:::core_a
 #
 # FIXME/cagney/2001-01-18: The logic is backwards.  It should be asking if the target can
 # single step.  If not, then implement single step using breakpoints.
-F:2:SOFTWARE_SINGLE_STEP:void:software_single_step:enum target_signal sig, int insert_breakpoints_p:sig, insert_breakpoints_p::0:0
+F:2:SOFTWARE_SINGLE_STEP:void:software_single_step:enum target_signal sig, int insert_breakpoints_p:sig, insert_breakpoints_p
 f:2:TARGET_PRINT_INSN:int:print_insn:bfd_vma vma, disassemble_info *info:vma, info:::legacy_print_insn::0
 f:2:SKIP_TRAMPOLINE_CODE:CORE_ADDR:skip_trampoline_code:CORE_ADDR pc:pc:::generic_skip_trampoline_code::0
 
@@ -725,19 +725,19 @@ m:::int:in_function_epilogue_p:CORE_ADDR addr:addr::0:generic_in_function_epilog
 # ARGC is the number of elements in the vector.
 # ARGV is an array of strings, one per argument.
 m::CONSTRUCT_INFERIOR_ARGUMENTS:char *:construct_inferior_arguments:int argc, char **argv:argc, argv:::construct_inferior_arguments::0
-F:2:DWARF2_BUILD_FRAME_INFO:void:dwarf2_build_frame_info:struct objfile *objfile:objfile:::0
+F:2:DWARF2_BUILD_FRAME_INFO:void:dwarf2_build_frame_info:struct objfile *objfile:objfile
 f:2:ELF_MAKE_MSYMBOL_SPECIAL:void:elf_make_msymbol_special:asymbol *sym, struct minimal_symbol *msym:sym, msym:::default_elf_make_msymbol_special::0
 f:2:COFF_MAKE_MSYMBOL_SPECIAL:void:coff_make_msymbol_special:int val, struct minimal_symbol *msym:val, msym:::default_coff_make_msymbol_special::0
 v:2:NAME_OF_MALLOC:const char *:name_of_malloc::::"malloc":"malloc"::0:%s:NAME_OF_MALLOC
 v:2:CANNOT_STEP_BREAKPOINT:int:cannot_step_breakpoint::::0:0::0
 v:2:HAVE_NONSTEPPABLE_WATCHPOINT:int:have_nonsteppable_watchpoint::::0:0::0
 F:2:ADDRESS_CLASS_TYPE_FLAGS:int:address_class_type_flags:int byte_size, int dwarf2_addr_class:byte_size, dwarf2_addr_class
-M:2:ADDRESS_CLASS_TYPE_FLAGS_TO_NAME:const char *:address_class_type_flags_to_name:int type_flags:type_flags:
+M:2:ADDRESS_CLASS_TYPE_FLAGS_TO_NAME:const char *:address_class_type_flags_to_name:int type_flags:type_flags
 M:2:ADDRESS_CLASS_NAME_TO_TYPE_FLAGS:int:address_class_name_to_type_flags:const char *name, int *type_flags_ptr:name, type_flags_ptr
 # Is a register in a group
 m:::int:register_reggroup_p:int regnum, struct reggroup *reggroup:regnum, reggroup:::default_register_reggroup_p::0
 # Fetch the pointer to the ith function argument.  
-F::FETCH_POINTER_ARGUMENT:CORE_ADDR:fetch_pointer_argument:struct frame_info *frame, int argi, struct type *type:frame, argi, type:::::::::
+F::FETCH_POINTER_ARGUMENT:CORE_ADDR:fetch_pointer_argument:struct frame_info *frame, int argi, struct type *type:frame, argi, type
 EOF
 }
 
@@ -1729,16 +1729,7 @@ do
 	printf "gdbarch_${function}_p (struct gdbarch *gdbarch)\n"
 	printf "{\n"
         printf "  gdb_assert (gdbarch != NULL);\n"
-	if [ -n "${predicate}" ]
-	then
-	    printf "  return ${predicate};\n"
-	elif class_is_variable_p
-	then
-	    printf "  return gdbarch->${function} != 0;\n"
-	elif class_is_function_p
-	then
-	    printf "  return gdbarch->${function} != NULL;\n"
-	fi
+	printf "  return ${predicate};\n"
 	printf "}\n"
     fi
     if class_is_function_p
@@ -1754,7 +1745,7 @@ do
 	printf "{\n"
         printf "  gdb_assert (gdbarch != NULL);\n"
 	printf "  gdb_assert (gdbarch->${function} != NULL);\n"
-	if class_is_predicate_p && test -n "${predicate}"
+	if class_is_predicate_p && test -n "${predefault}"
 	then
 	    # Allow a call to a function with a predicate.
 	    printf "  /* Do not check predicate: ${predicate}, allow call.  */\n"

@@ -1,5 +1,10 @@
 2003-07-10  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbarch.sh: Simplify predicate methods.  Remove need to provide
+	pre-default.   Note: re-generate has no effect.
+	
+2003-07-10  Andrew Cagney  <cagney@redhat.com>
+
 	* gdbarch.sh: When a variable, but not a function, compare against
 	0.  Fix problem in previous patch.
 	* gdbarch.c: Re-generate.
