@@ -1,3 +1,40 @@
+Tue Apr 18 12:14:51 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* mips-dis.c (print_insn_little_mips): Cast return value from
+	bfd_getl32 from bfd_vma to unsigned long, because _print_insn_mips
+	expects an unsigned long, and that might be fewer words of
+	argument storage (e.g., if bfd_vma is long long on a 32-bit
+	machine).
+	(print_insn_big_mips): Likewise with bfd_getb32 value.
+	(_print_insn_mips): Now static.
+
+Mon Apr 17 12:23:28 1995  Kung Hsu  <kung@rtl.cygnus.com>
+
+	* m68k-dis.c: Take out #define BREAK_UP_BIG_DECL kludge, because
+	gcc memory hog problem with initializer is fixed.
+
+start-sanitize-arc
+Wed Apr 12 09:04:12 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* arc-opc.c (NULL): Define.
+	(arc_operands, insn fields u,s): Delete.
+	(arc_operands, insn fields a,b,c): Mark as signed.
+	(arc_opcodes): No longer const, links computed at run-time.
+	(arc_opcodes, mac/mul insns): Breakout suffixes as we don't handle
+	suffixes that affect the insn code.
+	(arc_opcodes): Resort table to macros are first.
+	(arc_opcodes, ld [b,c] entry): Add %Q to prevent shimms.
+	(arc_opcodes, st [b] entry): Likewise.
+	(arc_opcodes, st [b,d] entry): Fix mask, value.
+	(arc_reg_names): Add entries for r29, r30, r31, r60.
+	(opcode_map, icode_map): New static globals.
+	(arc_opcode_init_tables): Initialize them.
+	(arc_opcode_lookup_asm, arc_opcode_lookup_dis): New functions.
+	(insert_shimmoffset): Signal error if register present.
+	Validate constant.
+	* arc-dis.c (print_insn): Call arc_opcode_lookup_dis.
+end-sanitize-arc
+
 Mon Apr 10 15:55:01 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	Merge in support for Mac MPW as a host.
