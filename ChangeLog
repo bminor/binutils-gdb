@@ -1,3 +1,15 @@
+Wed Nov  4 17:57:47 1992  Michael Werner  (mtw@rtl.cygnus.com)
+
+	* Makefile.in:  Added stuff for building deja-gnu.
+	* ./deja-gnu/gdb.t21/ & ./deja-gnu/gdb.t22/:
+	  Moved in-gdbme.C file to in-gdbme.cc because gcc was changed to
+	  not recognize .C extensions anymore.  Changed the configure.in
+	  file to reflect the filename extension change.
+
+Sun Nov  1 16:38:17 1992  Per Bothner  (bothner@cygnus.com)
+
+	* Makefile.in:  Added separate definitions for C++.
+
 Fri Oct 30 11:37:52 1992  Fred Fish  (fnf@cygnus.com)
 
 	* configure.in (configdirs):  Add deja-gnu.
