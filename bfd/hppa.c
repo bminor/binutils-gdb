@@ -43,108 +43,19 @@ struct container {
   struct som_exec_auxhdr e;
 };
 
-#undef USIZE
-#undef UPAGES
-
-#define USIZE 3
-#define UPAGES 7
-
-void
-fill_spaces(abfd, file_hdr, dbx_subspace, dbx_strings_subspace)
+static bfd_target *
+hppa_object_setup (abfd, file_hdrp, aux_hdrp)
      bfd *abfd;
-     struct header *file_hdr;
-     struct subspace_dictionary_record *dbx_subspace, *dbx_strings_subspace;
-{
-  char *space_strings = (char *) alloca (file_hdr->space_strings_size);
-  int i;
-  /* for millicode games. */
-  struct space_dictionary_record space;
-  struct subspace_dictionary_record subspace;
-  int index;
-  /* indices of subspace entries for $TEXT$ and $GDB_DEBUG$ */
-  long text_index = 0, gdb_debug_index = -1;
-
-  /* initialize in case we don't find any dbx symbols. */
-  dbx_subspace->subspace_length = dbx_strings_subspace->subspace_length = 0;
-  bfd_seek (abfd, file_hdr->space_strings_location, SEEK_SET);
-  if (bfd_read ((PTR) space_strings, 1, file_hdr->space_strings_size, abfd) 
-      != file_hdr->space_strings_size)
-    {
-      bfd_error = wrong_format;  /* space strings table corrupted. */
-      return;
-    }
-  bfd_seek (abfd, file_hdr->space_location, SEEK_SET);
-  for (i = 0; i < file_hdr->space_total; i++)
-    {
-      bfd_read ((PTR) &space, 1, sizeof(space), abfd);
-      index = (file_hdr->subspace_location +
-               (space.subspace_index * sizeof(subspace)));
-      if (!strcmp (space_strings + space.name.n_strx, "$TEXT$"))
-        text_index = index;
-      else if (!strcmp (space_strings + space.name.n_strx, "$GDB_DEBUG$"))
-        gdb_debug_index = index;
-    }
-  /* search out the beginning and end if millicode */
-  bfd_seek (abfd, text_index, SEEK_SET);
-  for (i = 0; i < file_hdr->subspace_total; i++)
-    {
-      bfd_read ((PTR) &subspace, 1, sizeof(subspace), abfd);
-      if (!strcmp (space_strings + subspace.name.n_strx, "$MILLICODE$"))
-        {
-          millicode_start = subspace.subspace_start;
-          millicode_end = (millicode_start + subspace.subspace_length);
-        }
-      else if (!strncmp (space_strings + subspace.name.n_strx, "$UNWIND", 7))
-	{
-	  int *foo;
-	  long s;
-
-#if 0
-	  s = bfd_tell(abfd);
-	  printf("Found %s\n", space_strings + subspace.name.n_strx);
-	  foo = malloc (subspace.initialization_length);
-	  bfd_seek (abfd, subspace.file_loc_init_value, SEEK_SET);
-	  bfd_read (foo, 1, subspace.initialization_length, abfd);
-	  bfd_seek (abfd, s, SEEK_SET);
-	  free (foo);
-#endif
-	}
-    }
-
-  if (gdb_debug_index == -1)
-    return;
-
-  /* read symbols subspace and strings subspace in possibly arbitrary
-     order. */
-  bfd_seek (abfd, gdb_debug_index, SEEK_SET);
-  bfd_read ((PTR) &subspace, 1, sizeof(struct subspace_dictionary_record), 
-	    abfd);
-  if (!strcmp (space_strings + subspace.name.n_strx, "$GDB_STRINGS$"))
-    {
-      *dbx_strings_subspace = subspace;
-      bfd_read ((PTR) dbx_subspace, 1, 
-		sizeof(struct subspace_dictionary_record), abfd);
-    }
-  else
-    {
-      *dbx_subspace = subspace;
-      bfd_read ((PTR) dbx_strings_subspace, 1, 
-		sizeof(struct subspace_dictionary_record), abfd);
-    }
-}
-
-bfd_target *
-DEFUN(hppa_object_setup,(abfd, file_hdrp, aux_hdrp, dbx_subspace, 
-			 dbx_strings_subspace),
-      bfd *abfd AND
-      struct header *file_hdrp AND
-      struct som_exec_auxhdr *aux_hdrp AND
-      struct subspace_dictionary_record *dbx_subspace AND
-      struct subspace_dictionary_record *dbx_strings_subspace)
+     struct header *file_hdrp;
+     struct som_exec_auxhdr *aux_hdrp;
 {
   struct container *rawptr;
   struct header *f;
   struct hppa_data_struct *rawptr1;
+  asection *dbx, *dbx_strings;
+
+  dbx = bfd_get_section_by_name (abfd, "$GDB_SYMBOLS$");
+  dbx_strings = bfd_get_section_by_name (abfd, "$GDB_STRINGS$");
 
   rawptr = (struct container *) bfd_zalloc (abfd, sizeof (struct container));
   if (rawptr == NULL) {
@@ -178,7 +89,7 @@ DEFUN(hppa_object_setup,(abfd, file_hdrp, aux_hdrp, dbx_subspace,
 
   obj_pa_symbols (abfd) = (hppa_symbol_type *)NULL;
   obj_hp_sym_count (abfd) = file_hdrp->symbol_total;
-  obj_dbx_sym_count (abfd) = dbx_subspace->subspace_length / 
+  obj_dbx_sym_count (abfd) = bfd_section_size (abfd, dbx) / 
     obj_dbx_symbol_entry_size (abfd);
   bfd_get_symcount (abfd) = obj_hp_sym_count (abfd) + obj_dbx_sym_count (abfd);
 
@@ -193,9 +104,11 @@ DEFUN(hppa_object_setup,(abfd, file_hdrp, aux_hdrp, dbx_subspace,
   (void)bfd_make_section(abfd, ".data");
   (void)bfd_make_section(abfd, ".bss");
 
+#if 0
   abfd->sections = obj_textsec (abfd);
   obj_textsec (abfd)->next = obj_datasec (abfd);
   obj_datasec (abfd)->next = obj_bsssec (abfd);
+#endif
 
   obj_datasec (abfd)->_raw_size = aux_hdrp->exec_dsize;
   obj_bsssec (abfd)->_raw_size = aux_hdrp->exec_bsize;
@@ -221,17 +134,166 @@ DEFUN(hppa_object_setup,(abfd, file_hdrp, aux_hdrp, dbx_subspace,
   /* The file offsets of the string table and symbol table.  */         
   obj_hp_sym_filepos (abfd) = file_hdrp->symbol_location;                  
   obj_hp_str_filepos (abfd) = file_hdrp->symbol_strings_location;           
-  obj_dbx_sym_filepos (abfd) = dbx_subspace->file_loc_init_value;  
-  obj_dbx_str_filepos (abfd) = dbx_strings_subspace->file_loc_init_value; 
+  obj_dbx_sym_filepos (abfd) = dbx->filepos;  
+  obj_dbx_str_filepos (abfd) = dbx_strings->filepos; 
   obj_hp_stringtab_size (abfd) = file_hdrp->symbol_strings_size;
-  obj_dbx_stringtab_size (abfd) = dbx_strings_subspace->subspace_length;
+  obj_dbx_stringtab_size (abfd) = bfd_section_size (abfd, dbx_strings);
 
   return abfd->xvec;
 }
 
-bfd_target *
-DEFUN(hppa_object_p,(abfd),
-      bfd *abfd)
+/* Create a new BFD section for NAME.  If NAME already exists, then create a
+   new unique name, with NAME as the prefix.  This exists because SOM .o files
+   created by the native compiler can have a $CODE$ section for each
+   subroutine.
+ */
+
+static asection *
+make_unique_section (abfd, name, num)
+     bfd *abfd;
+     CONST char *name;
+     int num;
+{
+  asection *sect;
+  char *newname;
+  char altname[100];
+
+  sect = bfd_make_section (abfd, name);
+  while (!sect)
+    {
+      sprintf(altname, "%s-%d", name, num++);
+      sect = bfd_make_section (abfd, altname);
+    }
+
+  newname = bfd_alloc (abfd, strlen(sect->name) + 1);
+  strcpy (newname, sect->name);
+
+  sect->name = newname;
+  return sect;
+}
+
+/* Convert all of the space and subspace info into BFD sections.  Each space
+   contains a number of subspaces, which in turn describe the mapping between
+   regions of the exec file, and the address space that the program runs in.
+   BFD sections which correspond to spaces will overlap the sections for the
+   associated subspaces.  */
+
+static int
+setup_sections (abfd, file_hdr)
+     bfd *abfd;
+     struct header *file_hdr;
+{
+  char *space_strings;
+  int space_index;
+
+/* First, read in space names */
+
+  space_strings = alloca (file_hdr->space_strings_size);
+  if (!space_strings)
+    return 0;
+
+  if (bfd_seek (abfd, file_hdr->space_strings_location, SEEK_SET) < 0)
+    return 0;
+  if (bfd_read (space_strings, 1, file_hdr->space_strings_size, abfd)
+      != file_hdr->space_strings_size)
+    return 0;
+
+  /* Loop over all of the space dictionaries, building up sections */
+
+  for (space_index = 0; space_index < file_hdr->space_total; space_index++)
+    {
+      struct space_dictionary_record space;
+      struct subspace_dictionary_record subspace;
+      int subspace_index, tmp;
+      asection *space_asect;
+
+      /* Read the space dictionary element */
+      if (bfd_seek (abfd, file_hdr->space_location
+		           + space_index * sizeof space, SEEK_SET) < 0)
+	return 0;
+      if (bfd_read (&space, 1, sizeof space, abfd) != sizeof space)
+	return 0;
+
+      /* Setup the space name string */
+      space.name.n_name = space.name.n_strx + space_strings;
+
+      /* Make a section out of it */
+      space_asect = make_unique_section (abfd, space.name.n_name, space_index);
+      if (!space_asect)
+	return 0;
+
+      /* Now, read in the first subspace for this space */
+      if (bfd_seek (abfd, file_hdr->subspace_location
+		       + space.subspace_index * sizeof subspace,
+		SEEK_SET) < 0)
+	return 0;
+      if (bfd_read (&subspace, 1, sizeof subspace, abfd) != sizeof subspace)
+	return 0;
+      /* Seek back to the start of the subspaces for loop below */
+      if (bfd_seek (abfd, file_hdr->subspace_location
+		       + space.subspace_index * sizeof subspace,
+		SEEK_SET) < 0)
+	return 0;
+
+      /* Setup the section flags as appropriate (this is somewhat bogus, as
+	 there isn't a clear mapping between what's in the space record, and
+	 what BFD can describe here). */
+      if (space.is_loadable)
+	space_asect->flags |= SEC_ALLOC;
+      if (space.is_defined)
+	space_asect->flags |= SEC_LOAD;
+
+      /* Setup the start address and file loc from the first subspace record */
+      space_asect->vma = subspace.subspace_start;
+      space_asect->filepos = subspace.file_loc_init_value;
+      space_asect->alignment_power = subspace.alignment;
+
+      /* Loop over the rest of the subspaces, building up more sections */
+      for (subspace_index = 0; subspace_index < space.subspace_quantity;
+	   subspace_index++)
+	{
+	  asection *subspace_asect;
+
+	  /* Read in the next subspace */
+	  if (bfd_read (&subspace, 1, sizeof subspace, abfd)
+	      != sizeof subspace)
+	    return 0;
+
+	  /* Setup the subspace name string */
+	  subspace.name.n_name = subspace.name.n_strx + space_strings;
+
+	  /* Make a section out of this subspace */
+	  subspace_asect = make_unique_section (abfd, subspace.name.n_name,
+						space.subspace_index + subspace_index);
+
+	  if (!subspace_asect)
+	    return 0;
+
+	  if (subspace.is_loadable)
+	    subspace_asect->flags |= SEC_ALLOC | SEC_LOAD;
+	  if (subspace.code_only)
+	    subspace_asect->flags |= SEC_CODE;
+
+	  subspace_asect->vma = subspace.subspace_start;
+	  subspace_asect->_cooked_size = subspace.subspace_length;
+	  subspace_asect->_raw_size = subspace.initialization_length;
+	  subspace_asect->alignment_power = subspace.alignment;
+	  subspace_asect->filepos = subspace.file_loc_init_value;
+
+	}
+      /* Setup the sizes for the space section based upon the info in the
+	 last subspace of the space. */
+      space_asect->_cooked_size = (subspace.subspace_start - space_asect->vma)
+				  + subspace.subspace_length;
+      space_asect->_raw_size = (subspace.file_loc_init_value
+				- space_asect->filepos)
+			       + subspace.initialization_length;
+    }
+}
+
+static bfd_target *
+hppa_object_p (abfd)
+     bfd *abfd;
 {
   struct header file_hdr;
   struct som_exec_auxhdr aux_hdr;
@@ -239,17 +301,17 @@ DEFUN(hppa_object_p,(abfd),
   struct subspace_dictionary_record dbx_strings_subspace;
 
   if (bfd_read ((PTR) &file_hdr, 1, FILE_HDR_SIZE, abfd) != FILE_HDR_SIZE)
+    return 0;
+
+  if (!_PA_RISC_ID (file_hdr.system_id))
     {
       bfd_error = wrong_format;
       return 0;
     }
 
-  if (!_PA_RISC_ID (file_hdr.system_id))
-    return 0;
-
   switch (file_hdr.a_magic)
     {
-    case RELOC_MAGIC:		/* I'm not really sure about all of these types... */
+    case RELOC_MAGIC:	/* I'm not really sure about all of these types... */
     case EXEC_MAGIC:
     case SHARE_MAGIC:
     case DEMAND_MAGIC:
@@ -257,20 +319,25 @@ DEFUN(hppa_object_p,(abfd),
     case SHL_MAGIC:
       break;
     default:
+      bfd_error = wrong_format;
       return 0;
     }
 
-  if (bfd_read ((PTR) &aux_hdr, 1, AUX_HDR_SIZE, abfd) != AUX_HDR_SIZE)
+  if (file_hdr.version_id != VERSION_ID
+      && file_hdr.version_id != NEW_VERSION_ID)
     {
       bfd_error = wrong_format;
       return 0;
     }
-  
-  fill_spaces(abfd, &file_hdr, &dbx_subspace, &dbx_strings_subspace);
 
-  return hppa_object_setup(abfd, &file_hdr, &aux_hdr, &dbx_subspace, &dbx_strings_subspace);
+  if (bfd_read ((PTR) &aux_hdr, 1, AUX_HDR_SIZE, abfd) != AUX_HDR_SIZE)
+    bfd_error = wrong_format;
+
+  if (!setup_sections (abfd, &file_hdr))
+    return 0;
+
+  return hppa_object_setup(abfd, &file_hdr, &aux_hdr);
 }
-
 
 static boolean
 DEFUN(hppa_mkobject,(abfd),
@@ -292,11 +359,9 @@ DEFUN(hppa_write_object_contents,(abfd),
   return (false);
 }
 
-
-
-unsigned int
-DEFUN(hppa_get_symtab_upper_bound,(abfd),
-      bfd *abfd)
+static unsigned int
+hppa_get_symtab_upper_bound (abfd)
+     bfd *abfd;
 {
   fprintf (stderr, "hppa_get_symtab_upper_bound unimplemented\n");
   fflush (stderr);
@@ -304,10 +369,10 @@ DEFUN(hppa_get_symtab_upper_bound,(abfd),
   return (0);
 }
 
-unsigned int
-DEFUN(hppa_get_reloc_upper_bound,(abfd, asect),
-      bfd *abfd AND
-      sec_ptr asect)
+static unsigned int
+hppa_get_reloc_upper_bound (abfd, asect)
+     bfd *abfd;
+     sec_ptr asect;
 {
   fprintf (stderr, "hppa_get_reloc_upper_bound unimplemented\n");
   fflush (stderr);
@@ -315,12 +380,12 @@ DEFUN(hppa_get_reloc_upper_bound,(abfd, asect),
   return (0);
 }
 
-unsigned int
-DEFUN(hppa_canonicalize_reloc,(abfd, section, relptr, symbols),
-      bfd *abfd AND
-      sec_ptr section AND
-      arelent **relptr AND
-      asymbol **symbols)
+static unsigned int
+hppa_canonicalize_reloc (abfd, section, relptr, symbols)
+     bfd *abfd;
+     sec_ptr section;
+     arelent **relptr;
+     asymbol **symbols;
 {
   fprintf (stderr, "hppa_canonicalize_reloc unimplemented\n");
   fflush (stderr);
@@ -328,10 +393,11 @@ DEFUN(hppa_canonicalize_reloc,(abfd, section, relptr, symbols),
 }
 
 extern bfd_target hppa_vec;
-unsigned int
-DEFUN(hppa_get_symtab,(abfd, location),
-      bfd *abfd AND
-      asymbol **location)
+
+static unsigned int
+hppa_get_symtab (abfd, location)
+     bfd *abfd;
+     asymbol **location;
 {
   fprintf (stderr, "hppa_get_symtab unimplemented\n");
   fflush (stderr);
@@ -339,9 +405,9 @@ DEFUN(hppa_get_symtab,(abfd, location),
   return (0);
 }
 
-asymbol *
-DEFUN(hppa_make_empty_symbol,(abfd),
-      bfd *abfd)
+static asymbol *
+hppa_make_empty_symbol (abfd)
+     bfd *abfd;
 {
   hppa_symbol_type  *new =
     (hppa_symbol_type *)bfd_zalloc (abfd, sizeof (hppa_symbol_type));
@@ -350,25 +416,22 @@ DEFUN(hppa_make_empty_symbol,(abfd),
   return &new->symbol;
 }
 
-
-void 
-DEFUN(hppa_print_symbol,(ignore_abfd, afile,  symbol, how),
-      bfd *ignore_abfd AND
-      PTR afile AND
-      asymbol *symbol AND
-      bfd_print_symbol_type how)
+static void 
+hppa_print_symbol (ignore_abfd, afile,  symbol, how)
+     bfd *ignore_abfd;
+     PTR afile;
+     asymbol *symbol;
+     bfd_print_symbol_type how;
 {
   fprintf (stderr, "hppa_print_symbol unimplemented\n");
   fflush (stderr);
   abort ();
 }
 
-
-
-boolean
-DEFUN(hppa_new_section_hook,(abfd, newsect),
-      bfd *abfd AND
-      asection *newsect)
+static boolean
+hppa_new_section_hook (abfd, newsect)
+     bfd *abfd;
+     asection *newsect;
 {
   /* align to double at least */
   newsect->alignment_power = 3;
@@ -394,16 +457,13 @@ DEFUN(hppa_new_section_hook,(abfd, newsect),
   return true;
 }
 
-
-
-
-boolean
-DEFUN(hppa_set_section_contents,(abfd, section, location, offset, count),
-      bfd *abfd AND
-      sec_ptr section AND
-      PTR location AND
-      file_ptr offset AND
-      bfd_size_type count)
+static boolean
+hppa_set_section_contents (abfd, section, location, offset, count)
+     bfd *abfd;
+     sec_ptr section;
+     PTR location;
+     file_ptr offset;
+     bfd_size_type count;
 {
   fprintf (stderr, "hppa_set_section_contents unimplimented\n");
   fflush (stderr);
@@ -411,12 +471,11 @@ DEFUN(hppa_set_section_contents,(abfd, section, location, offset, count),
   return false;
 }
 
-
-boolean
-DEFUN(hppa_set_arch_mach,(abfd, arch, machine),
-      bfd *abfd AND
-      enum bfd_architecture arch AND
-      unsigned long machine)
+static boolean
+hppa_set_arch_mach (abfd, arch, machine)
+     bfd *abfd;
+     enum bfd_architecture arch;
+     unsigned long machine;
 {
   fprintf (stderr, "hppa_set_arch_mach unimplemented\n");
   fflush (stderr);
@@ -424,22 +483,16 @@ DEFUN(hppa_set_arch_mach,(abfd, arch, machine),
   return  bfd_default_set_arch_mach(abfd, arch, machine);
 }
 
-
 static boolean
-DEFUN (hppa_find_nearest_line,(abfd,
-                              section,
-                              symbols,
-                              offset,
-                              filename_ptr,
-                              functionname_ptr,
-                              line_ptr),
-      bfd            *abfd AND
-      asection       *section AND
-      asymbol       **symbols AND
-      bfd_vma         offset AND
-      CONST char      **filename_ptr AND
-      CONST char       **functionname_ptr AND
-      unsigned int   *line_ptr)
+hppa_find_nearest_line (abfd, section, symbols, offset, filename_ptr,
+			functionname_ptr, line_ptr)
+     bfd *abfd;
+     asection *section;
+     asymbol **symbols;
+     bfd_vma offset;
+     CONST char **filename_ptr;
+     CONST char **functionname_ptr;
+     unsigned int *line_ptr;
 {
   fprintf (stderr, "hppa_find_nearest_line unimplemented\n");
   fflush (stderr);
@@ -448,9 +501,9 @@ DEFUN (hppa_find_nearest_line,(abfd,
 }
 
 static int
-DEFUN (hppa_sizeof_headers, (abfd, reloc),
-      bfd *abfd AND
-      boolean reloc)
+hppa_sizeof_headers (abfd, reloc)
+      bfd *abfd;
+      boolean reloc;
 {
   fprintf (stderr, "hppa_sizeof_headers unimplemented\n");
   fflush (stderr);
@@ -469,28 +522,20 @@ make_bfd_asection (abfd, name, flags, _raw_size, vma, alignment_power)
 {
   asection *asect;
 
-  asect = bfd_zalloc (abfd, sizeof (asection));
+  asect = bfd_make_section (abfd, name);
   if (!asect)
-    {
-      bfd_error = no_memory;
-      return NULL;
-    }
+    return NULL;
 
-  asect->name = name;
   asect->flags = flags;
   asect->_raw_size = _raw_size;
   asect->vma = vma;
   asect->filepos = bfd_tell (abfd);
   asect->alignment_power = alignment_power;
 
-  asect->next = abfd->sections;
-  abfd->sections = asect;
-  abfd->section_count++;
-
   return asect;
 }
 
-bfd_target *
+static bfd_target *
 hppa_core_file_p (abfd)
      bfd *abfd;
 {
@@ -544,7 +589,7 @@ hppa_core_file_p (abfd)
 	  bfd_seek (abfd, core_header.len, SEEK_CUR);
 	  break;
 	case CORE_STACK:
-	  core_stacksec (abfd) = make_bfd_asection (abfd, ".data",
+	  core_stacksec (abfd) = make_bfd_asection (abfd, ".stack",
 						    SEC_ALLOC+SEC_LOAD+SEC_HAS_CONTENTS,
 						    core_header.len,
 						    core_header.addr,
@@ -566,7 +611,7 @@ hppa_core_file_p (abfd)
   return abfd->xvec;
 }
 
-char *
+static char *
 hppa_core_file_failing_command (abfd)
      bfd *abfd;
 {
@@ -574,7 +619,7 @@ hppa_core_file_failing_command (abfd)
 }
 
 /* ARGSUSED */
-int
+static int
 hppa_core_file_failing_signal (abfd)
      bfd *abfd;
 {
@@ -582,7 +627,7 @@ hppa_core_file_failing_signal (abfd)
 }
 
 /* ARGSUSED */
-boolean
+static boolean
 hppa_core_file_matches_executable_p  (core_bfd, exec_bfd)
      bfd *core_bfd, *exec_bfd;
 {
@@ -625,14 +670,11 @@ bfd_target hppa_vec =
    /* leading_symbol_char: is the first char of a user symbol
       predictable, and if so what is it */
    0,
-
-
   ' ',				/* ar_pad_char */
   16,				/* ar_max_namelen */
     3,				/* minimum alignment */
 _do_getb64, _do_putb64, _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* data */
 _do_getb64, _do_putb64,  _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* hdrs */
-
   { _bfd_dummy_target,
      hppa_object_p,		/* bfd_check_format */
      bfd_generic_archive_p,

@@ -1,3 +1,22 @@
+Mon Dec 28 14:30:55 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* hppa.c:  Get rid of DEFUN, use more conventional prolog stuff.
+	Make a bunch more routines be static.
+	* hppa.c (fill_spaces):  Get rid of this, replace with much better
+	written setup_sections().
+	* (setup_sections):  New routine to create BFD sections for each
+	space and subspace in SOM files.
+	* (hppa_object_setup):  Use BFD sections created by
+	setup_sections() to locate GDB symbol table info.
+	* (make_unique_section):  New routine to create a BFD section.  It
+	ensures that the given name is unique, and will generate a unique
+	one if necessary.
+	* (hppa_object_p):  Become much more paranoid about file header.
+	* (make_bfd_asection):  Call bfd_make_section to do the dirty
+	work.  Simplify code somewhat.
+	* (hppa_core_file_p):  Use proper name for stack section.
+	* libhppa.h:  Remove millicode_start, millicode_end decls.
+
 Mon Dec 28 11:03:22 1992  Ken Raeburn  (raeburn@cygnus.com)
 
 	* Makefile.in (coff-we32k.o, coff-z8k.o): Note dependencies.
