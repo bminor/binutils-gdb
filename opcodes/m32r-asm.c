@@ -56,10 +56,13 @@ static void insert_insn_normal
 
 static CGEN_INLINE void
 insert_normal (value, attrs, start, length, shift, total_length, buffer)
-     long value;
+     long         value;
      unsigned int attrs;
-     int start, length, shift, total_length;
-     char *buffer;
+     int          start;
+     int          length;
+     int          shift;
+     int          total_length;
+     char *       buffer;
 {
   bfd_vma x;
 
@@ -70,7 +73,7 @@ insert_normal (value, attrs, start, length, shift, total_length, buffer)
   switch (total_length)
     {
     case 8:
-      x = *(unsigned char *) buffer;
+      x = * (unsigned char *) buffer;
       break;
     case 16:
       if (CGEN_CURRENT_ENDIAN == CGEN_ENDIAN_BIG)
@@ -99,7 +102,7 @@ insert_normal (value, attrs, start, length, shift, total_length, buffer)
   switch (total_length)
     {
     case 8:
-      *buffer = value;
+      * buffer = value;
       break;
     case 16:
       if (CGEN_CURRENT_ENDIAN == CGEN_ENDIAN_BIG)
@@ -120,6 +123,404 @@ insert_normal (value, attrs, start, length, shift, total_length, buffer)
 }
 
 /* -- assembler routines inserted here */
+/* -- asm.c */
+
+/* Handle shigh(), high().  */
+
+static const char *
+parse_h_hi16 (strp, opindex, min, max, valuep)
+     const char **strp;
+     int opindex;
+     unsigned long min, max;
+     unsigned long *valuep;
+{
+  const char *errmsg;
+  enum cgen_parse_operand_result result_type;
+
+  /* FIXME: Need # in assembler syntax (means '#' is optional).  */
+  if (**strp == '#')
+    ++*strp;
+
+  if (strncmp (*strp, "high(", 5) == 0)
+    {
+      *strp += 5;
+      errmsg = cgen_parse_address (strp, opindex, BFD_RELOC_M32R_HI16_ULO,
+				   &result_type, valuep);
+      if (**strp != ')')
+	return "missing `)'";
+      ++*strp;
+      if (errmsg == NULL
+  	  && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
+	*valuep >>= 16;
+      return errmsg;
+    }
+  else if (strncmp (*strp, "shigh(", 6) == 0)
+    {
+      *strp += 6;
+      errmsg = cgen_parse_address (strp, opindex, BFD_RELOC_M32R_HI16_SLO,
+ 				   &result_type, valuep);
+      if (**strp != ')')
+	return "missing `)'";
+      ++*strp;
+      if (errmsg == NULL
+	  && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
+	*valuep = (*valuep >> 16) + ((*valuep) & 0x8000 ? 1 : 0);
+      return errmsg;
+    }
+
+  return cgen_parse_unsigned_integer (strp, opindex, min, max, valuep);
+}
+
+/* Handle low() in a signed context.  Also handle sda().
+   The signedness of the value doesn't matter to low(), but this also
+   handles the case where low() isn't present.  */
+
+static const char *
+parse_h_slo16 (strp, opindex, min, max, valuep)
+     const char **strp;
+     int opindex;
+     long min, max;
+     long *valuep;
+{
+  const char *errmsg;
+  enum cgen_parse_operand_result result_type;
+
+  /* FIXME: Need # in assembler syntax (means '#' is optional).  */
+  if (**strp == '#')
+    ++*strp;
+
+  if (strncmp (*strp, "low(", 4) == 0)
+    {
+      *strp += 4;
+      errmsg = cgen_parse_address (strp, opindex, BFD_RELOC_M32R_LO16,
+				   &result_type, valuep);
+      if (**strp != ')')
+	return "missing `)'";
+      ++*strp;
+      return errmsg;
+    }
+
+  if (strncmp (*strp, "sda(", 4) == 0)
+    {
+      *strp += 4;
+      errmsg = cgen_parse_address (strp, opindex, BFD_RELOC_M32R_SDA16, NULL, valuep);
+      if (**strp != ')')
+	return "missing `)'";
+      ++*strp;
+      return errmsg;
+    }
+
+  return cgen_parse_signed_integer (strp, opindex, min, max, valuep);
+}
+
+/* Handle low() in an unsigned context.
+   The signedness of the value doesn't matter to low(), but this also
+   handles the case where low() isn't present.  */
+
+static const char *
+parse_h_ulo16 (strp, opindex, min, max, valuep)
+     const char **strp;
+     int opindex;
+     unsigned long min, max;
+     unsigned long *valuep;
+{
+  const char *errmsg;
+  enum cgen_parse_operand_result result_type;
+
+  /* FIXME: Need # in assembler syntax (means '#' is optional).  */
+  if (**strp == '#')
+    ++*strp;
+
+  if (strncmp (*strp, "low(", 4) == 0)
+    {
+      *strp += 4;
+      errmsg = cgen_parse_address (strp, opindex, BFD_RELOC_M32R_LO16,
+				   &result_type, valuep);
+      if (**strp != ')')
+	return "missing `)'";
+      ++*strp;
+      return errmsg;
+    }
+
+  return cgen_parse_unsigned_integer (strp, opindex, min, max, valuep);
+}
+
+/* -- */
+
+/* Main entry point for operand parsing.
+
+   This function is basically just a big switch statement.  Earlier versions
+   used tables to look up the function to use, but
+   - if the table contains both assembler and disassembler functions then
+     the disassembler contains much of the assembler and vice-versa,
+   - there's a lot of inlining possibilities as things grow,
+   - using a switch statement avoids the function call overhead.
+
+   This function could be moved into `parse_insn_normal', but keeping it
+   separate makes clear the interface between `parse_insn_normal' and each of
+   the handlers.
+*/
+
+CGEN_INLINE const char *
+m32r_cgen_parse_operand (opindex, strp, fields)
+     int opindex;
+     const char ** strp;
+     CGEN_FIELDS * fields;
+{
+  const char * errmsg;
+
+  switch (opindex)
+    {
+    case M32R_OPERAND_SR :
+      errmsg = cgen_parse_keyword (strp, & m32r_cgen_opval_h_gr, & fields->f_r2);
+      break;
+    case M32R_OPERAND_DR :
+      errmsg = cgen_parse_keyword (strp, & m32r_cgen_opval_h_gr, & fields->f_r1);
+      break;
+    case M32R_OPERAND_SRC1 :
+      errmsg = cgen_parse_keyword (strp, & m32r_cgen_opval_h_gr, & fields->f_r1);
+      break;
+    case M32R_OPERAND_SRC2 :
+      errmsg = cgen_parse_keyword (strp, & m32r_cgen_opval_h_gr, & fields->f_r2);
+      break;
+    case M32R_OPERAND_SCR :
+      errmsg = cgen_parse_keyword (strp, & m32r_cgen_opval_h_cr, & fields->f_r2);
+      break;
+    case M32R_OPERAND_DCR :
+      errmsg = cgen_parse_keyword (strp, & m32r_cgen_opval_h_cr, & fields->f_r1);
+      break;
+    case M32R_OPERAND_SIMM8 :
+      errmsg = cgen_parse_signed_integer (strp, 7, -128, 127, &fields->f_simm8);
+      break;
+    case M32R_OPERAND_SIMM16 :
+      errmsg = cgen_parse_signed_integer (strp, 8, -32768, 32767, &fields->f_simm16);
+      break;
+    case M32R_OPERAND_UIMM4 :
+      errmsg = cgen_parse_unsigned_integer (strp, 9, 0, 15, &fields->f_uimm4);
+      break;
+    case M32R_OPERAND_UIMM5 :
+      errmsg = cgen_parse_unsigned_integer (strp, 10, 0, 31, &fields->f_uimm5);
+      break;
+    case M32R_OPERAND_UIMM16 :
+      errmsg = cgen_parse_unsigned_integer (strp, 11, 0, 65535, &fields->f_uimm16);
+      break;
+    case M32R_OPERAND_HI16 :
+      errmsg = parse_h_hi16 (strp, 12, 0, 65535, &fields->f_hi16);
+      break;
+    case M32R_OPERAND_SLO16 :
+      errmsg = parse_h_slo16 (strp, 13, -32768, 32767, &fields->f_simm16);
+      break;
+    case M32R_OPERAND_ULO16 :
+      errmsg = parse_h_ulo16 (strp, 14, 0, 65535, &fields->f_uimm16);
+      break;
+    case M32R_OPERAND_UIMM24 :
+      errmsg = cgen_parse_address (strp, 15, 0, NULL, & fields->f_uimm24);
+      break;
+    case M32R_OPERAND_DISP8 :
+      errmsg = cgen_parse_address (strp, 16, 0, NULL, & fields->f_disp8);
+      break;
+    case M32R_OPERAND_DISP16 :
+      errmsg = cgen_parse_address (strp, 17, 0, NULL, & fields->f_disp16);
+      break;
+    case M32R_OPERAND_DISP24 :
+      errmsg = cgen_parse_address (strp, 18, 0, NULL, & fields->f_disp24);
+      break;
+
+    default :
+      fprintf (stderr, "Unrecognized field %d while parsing.\n", opindex);
+      abort ();
+  }
+
+  return errmsg;
+}
+
+/* Main entry point for operand insertion.
+
+   This function is basically just a big switch statement.  Earlier versions
+   used tables to look up the function to use, but
+   - if the table contains both assembler and disassembler functions then
+     the disassembler contains much of the assembler and vice-versa,
+   - there's a lot of inlining possibilities as things grow,
+   - using a switch statement avoids the function call overhead.
+
+   This function could be moved into `parse_insn_normal', but keeping it
+   separate makes clear the interface between `parse_insn_normal' and each of
+   the handlers.  It's also needed by GAS to insert operands that couldn't be
+   resolved during parsing.
+*/
+
+CGEN_INLINE void
+m32r_cgen_insert_operand (opindex, fields, buffer)
+     int           opindex;
+     CGEN_FIELDS * fields;
+     cgen_insn_t * buffer;
+{
+  switch (opindex)
+    {
+    case M32R_OPERAND_SR :
+      insert_normal (fields->f_r2, 0|(1<<CGEN_OPERAND_UNSIGNED), 12, 4, 0, CGEN_FIELDS_BITSIZE (fields), buffer);
+      break;
+    case M32R_OPERAND_DR :
+      insert_normal (fields->f_r1, 0|(1<<CGEN_OPERAND_UNSIGNED), 4, 4, 0, CGEN_FIELDS_BITSIZE (fields), buffer);
+      break;
+    case M32R_OPERAND_SRC1 :
+      insert_normal (fields->f_r1, 0|(1<<CGEN_OPERAND_UNSIGNED), 4, 4, 0, CGEN_FIELDS_BITSIZE (fields), buffer);
+      break;
+    case M32R_OPERAND_SRC2 :
+      insert_normal (fields->f_r2, 0|(1<<CGEN_OPERAND_UNSIGNED), 12, 4, 0, CGEN_FIELDS_BITSIZE (fields), buffer);
+      break;
+    case M32R_OPERAND_SCR :
+      insert_normal (fields->f_r2, 0|(1<<CGEN_OPERAND_UNSIGNED), 12, 4, 0, CGEN_FIELDS_BITSIZE (fields), buffer);
+      break;
+    case M32R_OPERAND_DCR :
+      insert_normal (fields->f_r1, 0|(1<<CGEN_OPERAND_UNSIGNED), 4, 4, 0, CGEN_FIELDS_BITSIZE (fields), buffer);
+      break;
+    case M32R_OPERAND_SIMM8 :
+      insert_normal (fields->f_simm8, 0, 8, 8, 0, CGEN_FIELDS_BITSIZE (fields), buffer);
+      break;
+    case M32R_OPERAND_SIMM16 :
+      insert_normal (fields->f_simm16, 0, 16, 16, 0, CGEN_FIELDS_BITSIZE (fields), buffer);
+      break;
+    case M32R_OPERAND_UIMM4 :
+      insert_normal (fields->f_uimm4, 0|(1<<CGEN_OPERAND_UNSIGNED), 12, 4, 0, CGEN_FIELDS_BITSIZE (fields), buffer);
+      break;
+    case M32R_OPERAND_UIMM5 :
+      insert_normal (fields->f_uimm5, 0|(1<<CGEN_OPERAND_UNSIGNED), 11, 5, 0, CGEN_FIELDS_BITSIZE (fields), buffer);
+      break;
+    case M32R_OPERAND_UIMM16 :
+      insert_normal (fields->f_uimm16, 0|(1<<CGEN_OPERAND_UNSIGNED), 16, 16, 0, CGEN_FIELDS_BITSIZE (fields), buffer);
+      break;
+    case M32R_OPERAND_HI16 :
+      insert_normal (fields->f_hi16, 0|(1<<CGEN_OPERAND_SIGN_OPT)|(1<<CGEN_OPERAND_UNSIGNED), 16, 16, 0, CGEN_FIELDS_BITSIZE (fields), buffer);
+      break;
+    case M32R_OPERAND_SLO16 :
+      insert_normal (fields->f_simm16, 0, 16, 16, 0, CGEN_FIELDS_BITSIZE (fields), buffer);
+      break;
+    case M32R_OPERAND_ULO16 :
+      insert_normal (fields->f_uimm16, 0|(1<<CGEN_OPERAND_UNSIGNED), 16, 16, 0, CGEN_FIELDS_BITSIZE (fields), buffer);
+      break;
+    case M32R_OPERAND_UIMM24 :
+      insert_normal (fields->f_uimm24, 0|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_ABS_ADDR)|(1<<CGEN_OPERAND_UNSIGNED), 8, 24, 0, CGEN_FIELDS_BITSIZE (fields), buffer);
+      break;
+    case M32R_OPERAND_DISP8 :
+      insert_normal (fields->f_disp8, 0|(1<<CGEN_OPERAND_RELAX)|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_PCREL_ADDR), 8, 8, 2, CGEN_FIELDS_BITSIZE (fields), buffer);
+      break;
+    case M32R_OPERAND_DISP16 :
+      insert_normal (fields->f_disp16, 0|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_PCREL_ADDR), 16, 16, 2, CGEN_FIELDS_BITSIZE (fields), buffer);
+      break;
+    case M32R_OPERAND_DISP24 :
+      insert_normal (fields->f_disp24, 0|(1<<CGEN_OPERAND_RELAX)|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_PCREL_ADDR), 8, 24, 2, CGEN_FIELDS_BITSIZE (fields), buffer);
+      break;
+
+    default :
+      fprintf (stderr, "Unrecognized field %d while building insn.\n",
+	       opindex);
+      abort ();
+  }
+}
+
+/* Main entry point for operand validation.
+
+   This function is called from GAS when it has fully resolved an operand
+   that couldn't be resolved during parsing.
+
+   The result is NULL for success or an error message (which may be
+   computed into a static buffer).
+*/
+
+CGEN_INLINE const char *
+m32r_cgen_validate_operand (opindex, fields)
+     int                 opindex;
+     const CGEN_FIELDS * fields;
+{
+  const char * errmsg = NULL;
+
+  switch (opindex)
+    {
+    case M32R_OPERAND_SR :
+      /* nothing to do */
+      break;
+    case M32R_OPERAND_DR :
+      /* nothing to do */
+      break;
+    case M32R_OPERAND_SRC1 :
+      /* nothing to do */
+      break;
+    case M32R_OPERAND_SRC2 :
+      /* nothing to do */
+      break;
+    case M32R_OPERAND_SCR :
+      /* nothing to do */
+      break;
+    case M32R_OPERAND_DCR :
+      /* nothing to do */
+      break;
+    case M32R_OPERAND_SIMM8 :
+      errmsg = cgen_validate_signed_integer (fields->f_simm8, -128, 127);
+      break;
+    case M32R_OPERAND_SIMM16 :
+      errmsg = cgen_validate_signed_integer (fields->f_simm16, -32768, 32767);
+      break;
+    case M32R_OPERAND_UIMM4 :
+      errmsg = cgen_validate_unsigned_integer (fields->f_uimm4, 0, 15);
+      break;
+    case M32R_OPERAND_UIMM5 :
+      errmsg = cgen_validate_unsigned_integer (fields->f_uimm5, 0, 31);
+      break;
+    case M32R_OPERAND_UIMM16 :
+      errmsg = cgen_validate_unsigned_integer (fields->f_uimm16, 0, 65535);
+      break;
+    case M32R_OPERAND_HI16 :
+      errmsg = cgen_validate_unsigned_integer (fields->f_hi16, 0, 65535);
+      break;
+    case M32R_OPERAND_SLO16 :
+      errmsg = cgen_validate_signed_integer (fields->f_simm16, -32768, 32767);
+      break;
+    case M32R_OPERAND_ULO16 :
+      errmsg = cgen_validate_unsigned_integer (fields->f_uimm16, 0, 65535);
+      break;
+    case M32R_OPERAND_UIMM24 :
+      /* nothing to do */
+      break;
+    case M32R_OPERAND_DISP8 :
+      /* nothing to do */
+      break;
+    case M32R_OPERAND_DISP16 :
+      /* nothing to do */
+      break;
+    case M32R_OPERAND_DISP24 :
+      /* nothing to do */
+      break;
+
+    default :
+      fprintf (stderr, "Unrecognized field %d while validating operand.\n",
+	       opindex);
+      abort ();
+  }
+
+  return errmsg;
+}
+
+cgen_parse_fn * m32r_cgen_parse_handlers[] = 
+{  0, /* default */
+  parse_insn_normal,
+};
+
+cgen_insert_fn * m32r_cgen_insert_handlers[] = 
+{  0, /* default */
+  insert_insn_normal,
+};
+
+void
+m32r_cgen_init_asm (mach, endian)
+     int mach;
+     enum cgen_endian endian;
+{
+  m32r_cgen_init_tables (mach);
+  cgen_set_cpu (& m32r_cgen_opcode_data, mach, endian);
+  cgen_asm_init ();
+}
+
 
 /* Default insn parser.
 
@@ -137,25 +538,25 @@ insert_normal (value, attrs, start, length, shift, total_length, buffer)
 
 static const char *
 parse_insn_normal (insn, strp, fields)
-     const CGEN_INSN *insn;
-     const char **strp;
-     CGEN_FIELDS *fields;
+     const CGEN_INSN *  insn;
+     const char **      strp;
+     CGEN_FIELDS *      fields;
 {
-  const CGEN_SYNTAX *syntax = CGEN_INSN_SYNTAX (insn);
-  const char *str = *strp;
-  const char *errmsg;
-  const char *p;
-  const unsigned char *syn;
+  const CGEN_SYNTAX *   syntax = CGEN_INSN_SYNTAX (insn);
+  const char *          str = *strp;
+  const char *          errmsg;
+  const char *          p;
+  const unsigned char * syn;
 #ifdef CGEN_MNEMONIC_OPERANDS
-  int past_opcode_p;
+  int                   past_opcode_p;
 #endif
 
   /* For now we assume the mnemonic is first (there are no leading operands).
      We can parse it without needing to set up operand parsing.  */
   p = CGEN_INSN_MNEMONIC (insn);
-  while (*p && *p == *str)
-    ++p, ++str;
-  if (*p || (*str && !isspace (*str)))
+  while (* p && * p == * str)
+    ++ p, ++ str;
+  if (* p || (* str && !isspace (* str)))
     return "unrecognized instruction";
 
   CGEN_INIT_PARSE ();
@@ -167,24 +568,27 @@ parse_insn_normal (insn, strp, fields)
   /* We don't check for (*str != '\0') here because we want to parse
      any trailing fake arguments in the syntax string.  */
   syn = CGEN_SYNTAX_STRING (CGEN_INSN_SYNTAX (insn));
+  
   /* Mnemonics come first for now, ensure valid string.  */
-  if (! CGEN_SYNTAX_MNEMONIC_P (*syn))
+  if (! CGEN_SYNTAX_MNEMONIC_P (* syn))
     abort ();
+  
   ++syn;
-  while (*syn != 0)
+  
+  while (* syn != 0)
     {
       /* Non operand chars must match exactly.  */
       /* FIXME: Need to better handle whitespace.  */
-      if (CGEN_SYNTAX_CHAR_P (*syn))
+      if (CGEN_SYNTAX_CHAR_P (* syn))
 	{
-	  if (*str == CGEN_SYNTAX_CHAR (*syn))
+	  if (*str == CGEN_SYNTAX_CHAR (* syn))
 	    {
 #ifdef CGEN_MNEMONIC_OPERANDS
-	      if (*syn == ' ')
+	      if (* syn == ' ')
 		past_opcode_p = 1;
 #endif
-	      ++syn;
-	      ++str;
+	      ++ syn;
+	      ++ str;
 	    }
 	  else
 	    {
@@ -202,20 +606,20 @@ parse_insn_normal (insn, strp, fields)
 	return errmsg;
 
       /* Done with this operand, continue with next one.  */
-      ++syn;
+      ++ syn;
     }
 
   /* If we're at the end of the syntax string, we're done.  */
-  if (*syn == '\0')
+  if (* syn == '\0')
     {
       /* FIXME: For the moment we assume a valid `str' can only contain
 	 blanks now.  IE: We needn't try again with a longer version of
 	 the insn and it is assumed that longer versions of insns appear
 	 before shorter ones (eg: lsr r2,r3,1 vs lsr r2,r3).  */
-      while (isspace (*str))
-	++str;
+      while (isspace (* str))
+	++ str;
 
-      if (*str != '\0')
+      if (* str != '\0')
 	return "junk at end of line"; /* FIXME: would like to include `str' */
 
       return NULL;
@@ -230,13 +634,13 @@ parse_insn_normal (insn, strp, fields)
 
 static void
 insert_insn_normal (insn, fields, buffer)
-     const CGEN_INSN *insn;
-     CGEN_FIELDS *fields;
-     cgen_insn_t *buffer;
+     const CGEN_INSN *  insn;
+     CGEN_FIELDS *      fields;
+     cgen_insn_t *      buffer;
 {
-  const CGEN_SYNTAX *syntax = CGEN_INSN_SYNTAX (insn);
-  bfd_vma value;
-  const unsigned char *syn;
+  const CGEN_SYNTAX *   syntax = CGEN_INSN_SYNTAX (insn);
+  bfd_vma               value;
+  const unsigned char * syn;
 
   CGEN_INIT_INSERT ();
   value = CGEN_INSN_VALUE (insn);
@@ -251,7 +655,7 @@ insert_insn_normal (insn, fields, buffer)
   switch (min (CGEN_BASE_INSN_BITSIZE, CGEN_FIELDS_BITSIZE (fields)))
     {
     case 8:
-      *buffer = value;
+      * buffer = value;
       break;
     case 16:
       if (CGEN_CURRENT_ENDIAN == CGEN_ENDIAN_BIG)
@@ -273,9 +677,9 @@ insert_insn_normal (insn, fields, buffer)
   /* ??? Rather than scanning the syntax string again, we could store
      in `fields' a null terminated list of the fields that are present.  */
 
-  for (syn = CGEN_SYNTAX_STRING (syntax); *syn != '\0'; ++syn)
+  for (syn = CGEN_SYNTAX_STRING (syntax); * syn != '\0'; ++ syn)
     {
-      if (CGEN_SYNTAX_CHAR_P (*syn))
+      if (CGEN_SYNTAX_CHAR_P (* syn))
 	continue;
 
       m32r_cgen_insert_operand (CGEN_SYNTAX_FIELD (*syn), fields, buffer);
@@ -292,17 +696,17 @@ insert_insn_normal (insn, fields, buffer)
 
 const CGEN_INSN *
 m32r_cgen_assemble_insn (str, fields, buf, errmsg)
-     const char *str;
-     CGEN_FIELDS *fields;
-     cgen_insn_t *buf;
-     char **errmsg;
+     const char *  str;
+     CGEN_FIELDS * fields;
+     cgen_insn_t * buf;
+     char **       errmsg;
 {
-  const char *start;
-  CGEN_INSN_LIST *ilist;
+  const char *     start;
+  CGEN_INSN_LIST * ilist;
 
   /* Skip leading white space.  */
-  while (isspace (*str))
-    ++str;
+  while (isspace (* str))
+    ++ str;
 
   /* The instructions are stored in hashed lists.
      Get the first in the list.  */
@@ -343,9 +747,9 @@ m32r_cgen_assemble_insn (str, fields, buf, errmsg)
 	 inline functions but of course that would only work for gcc.  Since
 	 we're machine generating some code we could do that here too.  Maybe
 	 later.  */
-      if (! (*CGEN_PARSE_FN (insn)) (insn, &str, fields))
+      if (! CGEN_PARSE_FN (insn) (insn, & str, fields))
 	{
-	  (*CGEN_INSERT_FN (insn)) (insn, fields, buf);
+	  CGEN_INSERT_FN (insn) (insn, fields, buf);
 	  /* It is up to the caller to actually output the insn and any
 	     queued relocs.  */
 	  return insn;
@@ -376,12 +780,12 @@ m32r_cgen_assemble_insn (str, fields, buf, errmsg)
 
 void
 m32r_cgen_asm_hash_keywords (opvals)
-     CGEN_KEYWORD *opvals;
+     CGEN_KEYWORD * opvals;
 {
   CGEN_KEYWORD_SEARCH search = cgen_keyword_search_init (opvals, NULL);
-  const CGEN_KEYWORD_ENTRY *ke;
+  const CGEN_KEYWORD_ENTRY * ke;
 
-  while ((ke = cgen_keyword_search_next (&search)) != NULL)
+  while ((ke = cgen_keyword_search_next (& search)) != NULL)
     {
 #if 0 /* Unnecessary, should be done in the search routine.  */
       if (! m32r_cgen_opval_supported (ke))

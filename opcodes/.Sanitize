@@ -87,9 +87,7 @@ hppa-dis.c
 i386-dis.c
 i960-dis.c
 m32r-asm.c
-m32r-asm.in
 m32r-dis.c
-m32r-dis.in
 m32r-opc.c
 m32r-opc.h
 m68k-dis.c
