@@ -1,3 +1,7 @@
+2004-01-27  Michael Snyder  <msnyder@redhat.com>
+
+	* gencode.c: Comment and whitespace clean-ups.
+
 2004-01-07  Michael Snyder  <msnyder@redhat.com>
 
 	* gencode.c: Whitespace cleanup.
