@@ -49,6 +49,7 @@ INSTALL = install -c
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL)
 
+AS = as
 AR = ar
 AR_FLAGS = qc
 CFLAGS = -g
@@ -68,6 +69,10 @@ MAKEINFO = `if [ -f $${rootme}/texinfo/C/makeinfo ] ; \
 	then echo $${rootme}/texinfo/C/makeinfo ; \
 	else echo makeinfo ; fi`
 
+# C compiler to use to create programs which must be run in the build
+# environment.
+CC_FOR_BUILD = $(CC)
+
 SUBDIRS = libiberty mmalloc glob readline opcodes bfd gdb  binutils ld gas tgas gcc libg++ newlib
 OTHERS = 
 
@@ -86,6 +91,17 @@ CC_FOR_TARGET = ` \
     else \
       t='$(program_transform_name)'; echo gcc | sed -e '' $$t; \
     fi; \
+  fi`
+
+AS_FOR_TARGET = ` \
+  if [ -f $${rootme}/gas/Makefile ] ; then \
+    echo $${rootme}/gas/as.new ; \
+  else \
+    if [ "$(host_cpu)-$(host_vendor)-$(host_os)" = "$(target_cpu)-$(target_vendor)-$(target_os)" ] ; then \
+      echo $(AS); \
+    else \
+       t='$(program_transform_name)'; echo as | sed -e '' $$t ; \
+    fi \
   fi`
 
 AR_FOR_TARGET = ` \
@@ -152,7 +168,8 @@ FLAGS_TO_PASS = \
 	"MAKEINFO=$(MAKEINFO)" \
 	"INSTALL=$(INSTALL)" \
 	"INSTALL_DATA=$(INSTALL_DATA)" \
-	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)"
+	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
+	"CC_FOR_BUILD=$(CC_FOR_BUILD)"
 
 # Flags to pass down to makes which are built with the target
 # environment (e.g. libg++, xiberty, newlib).
@@ -170,7 +187,9 @@ TARGET_FLAGS_TO_PASS = \
 	"INSTALL=$(INSTALL)" \
 	"INSTALL_DATA=$(INSTALL_DATA)" \
 	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
+	"CC_FOR_BUILD=$(CC_FOR_BUILD)" \
 	"CC=$(CC_FOR_TARGET)" \
+	"AS=$(AS_FOR_TARGET)" \
 	"AR=$(AR_FOR_TARGET)" \
 	"RANLIB=$(RANLIB_FOR_TARGET)" \
 	"NM=$(NM_FOR_TARGET)" \

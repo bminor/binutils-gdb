@@ -1,3 +1,11 @@
+Thu Sep 10 10:43:19 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Makefile.in: added AS_FOR_TARGET, passed down in
+	TARGET_FLAGS_TO_PASS.  Added CC_FOR_BUILD, which is intended to be
+	the C compiler to use to create programs which are run in the
+	build environment, set it to default to $(CC), and passed it down
+	in FLAGS_TO_PASS and TARGET_FLAGS_TO_PASS.
+
 Wed Sep  9 12:21:42 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* Makefile.in: added TARGET_FLAGS_TO_PASS, CC_FOR_TARGET,
