@@ -3119,6 +3119,18 @@ elf_adjust_dynamic_symbol (h, data)
 	}
     }
 
+  /* If a symbol has no type and no size and does not require a PLT
+     entry, then we are probably about to do the wrong thing here: we
+     are probably going to create a COPY reloc for an empty object.
+     This case can arise when a shared object is built with assembly
+     code, and the assembly code fails to set the symbol type.  */
+  if (h->size == 0
+      && h->type == STT_NOTYPE
+      && (h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) == 0)
+    (*_bfd_error_handler)
+      (_("warning: type and size of dynamic symbol `%s' are not defined"),
+	 h->root.root.string);
+
   dynobj = elf_hash_table (eif->info)->dynobj;
   bed = get_elf_backend_data (dynobj);
   if (! (*bed->elf_backend_adjust_dynamic_symbol) (eif->info, h))
