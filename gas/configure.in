@@ -65,7 +65,7 @@ case "${host}" in
   sparc-sun-sunos*)
     gas_host=sun4 
     ;;
-  sparc-sun-solaris2)
+  sparc-sun-solaris2*)
     gas_host=sysv
     ;;
   *-*-ansi | *-*-ultrix | *-*-hpux | *-*-sysv*)
