@@ -224,7 +224,7 @@ proc do_function_calls {} {
     gdb_test "p t_structs_c(struct_val1)" "= 120 'x'" \
 	"call inferior func with struct - returns char"
     gdb_test "p t_structs_s(struct_val1)" "= 87" \
-	"call inferior func with struct -  returns short"
+	"call inferior func with struct - returns short"
     gdb_test "p t_structs_i(struct_val1)" "= 76" \
 	"call inferior func with struct - returns int"
     gdb_test "p t_structs_l(struct_val1)" "= 51" \
