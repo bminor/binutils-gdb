@@ -1081,6 +1081,7 @@ static lang_output_section_statement_type *hold_use;
 struct orphan_save
 {
   lang_output_section_statement_type *os;
+  asection **section;
   lang_statement_union_type **stmt;
 };
 static struct orphan_save hold_text;
@@ -1099,6 +1100,7 @@ gld_${EMULATION_NAME}_place_orphan (file, s)
 {
   const char *secname;
   char *dollar = NULL;
+  lang_statement_list_type add_child;
 
   secname = bfd_get_section_name (s->owner, s);
 
@@ -1117,11 +1119,16 @@ gld_${EMULATION_NAME}_place_orphan (file, s)
   hold_use = NULL;
   lang_for_each_statement (gld${EMULATION_NAME}_place_section);
 
-  if (hold_use == NULL)
+  lang_list_init (&add_child);
+
+  if (hold_use != NULL)
+    {
+      wild_doit (&add_child, s, hold_use, file);
+    }
+  else
     {
       struct orphan_save *place;
       char *outsecname;
-      asection *snew, **pps;
       lang_statement_list_type *old;
       lang_statement_list_type add;
       etree_type *address;
@@ -1129,8 +1136,10 @@ gld_${EMULATION_NAME}_place_orphan (file, s)
       /* Try to put the new output section in a reasonable place based
 	 on the section name and section flags.  */
       place = NULL;
-      if ((s->flags & SEC_HAS_CONTENTS) == 0
-	  && hold_bss.os != NULL)
+      if ((s->flags & SEC_ALLOC) == 0)
+	;
+      else if ((s->flags & SEC_HAS_CONTENTS) == 0
+	       && hold_bss.os != NULL)
 	place = &hold_bss;
       else if ((s->flags & SEC_READONLY) == 0
 	       && hold_data.os != NULL)
@@ -1168,29 +1177,6 @@ gld_${EMULATION_NAME}_place_orphan (file, s)
 	  outsecname = newname;
 	}
 
-      /* We don't want to free OUTSECNAME, as it may get attached to
-	 the output section statement.  */
-
-      /* Create the section in the output file, and put it in the
-	 right place.  This shuffling is to make the output file look
-	 neater.  */
-      snew = bfd_make_section (output_bfd, outsecname);
-      if (snew == NULL)
-	einfo ("%P%F: output format %s cannot represent section called %s\n",
-	       output_bfd->xvec->name, outsecname);
-      if (place != NULL && place->os->bfd_section != NULL)
-	{
-	  /* Unlink it first.  */
-	  for (pps = &output_bfd->sections; *pps != snew; pps = &(*pps)->next)
-	    ;
-	  *pps = snew->next;
-	  snew->next = NULL;
-	  /* Now tack it on to the end of the "place->os" section list.  */
-	  for (pps = &place->os->bfd_section; *pps; pps = &(*pps)->next)
-	    ;
-	  *pps = snew;
-	}
-
       /* Start building a list of statements for this section.  */
       old = stat_ptr;
       stat_ptr = &add;
@@ -1213,15 +1199,52 @@ gld_${EMULATION_NAME}_place_orphan (file, s)
 					   (etree_type *) NULL);
 
       hold_use = lang_output_section_statement_lookup (outsecname);
+      wild_doit (&add_child, s, hold_use, file);
 
       lang_leave_output_section_statement
 	((bfd_vma) 0, "*default*",
 	 (struct lang_output_section_phdr_list *) NULL,
 	"*default*");
 
+      stat_ptr = old;
+
       if (place != NULL)
 	{
-	  if (! place->stmt)
+	  asection *snew, **pps;
+
+	  snew = hold_use->bfd_section;
+	  if (place->os->bfd_section != NULL || place->section != NULL)
+	    {
+	      /* Shuffle the section to make the output file look neater.  */
+	      if (place->section == NULL)
+		{
+#if 0
+		  /* Finding the end of the list is a little tricky.  We
+		     make a wild stab at it by comparing section flags.  */
+		  flagword first_flags = place->os->bfd_section->flags;
+		  for (pps = &place->os->bfd_section->next;
+		       *pps != NULL && (*pps)->flags == first_flags;
+		       pps = &(*pps)->next)
+		    ;
+		  place->section = pps;
+#else
+		  /* Put orphans after the first section on the list.  */
+		  place->section = &place->os->bfd_section->next;
+#endif
+		}
+
+	      /*  Unlink the section.  */
+	      for (pps = &output_bfd->sections; *pps != snew; pps = &(*pps)->next)
+		;
+	      *pps = snew->next;
+
+	      /* Now tack it on to the "place->os" section list.  */
+	      snew->next = *place->section;
+	      *place->section = snew;
+	    }
+	  place->section = &snew->next;	/* Save the end of this list.  */
+
+	  if (place->stmt == NULL)
 	    {
 	      /* Put the new statement list right at the head.  */
 	      *add.tail = place->os->header.next;
@@ -1235,55 +1258,50 @@ gld_${EMULATION_NAME}_place_orphan (file, s)
 	    }
 	  place->stmt = add.tail;	/* Save the end of this list.  */
 	}
-
-      stat_ptr = old;
     }
 
-  if (dollar == NULL)
-    wild_doit (&hold_use->children, s, hold_use, file);
-  else
-    {
-      lang_statement_union_type **pl;
-      boolean found_dollar;
-      lang_statement_list_type list;
+  {
+    lang_statement_union_type **pl = &hold_use->children.head;
 
-      /* The section name has a '$'.  Sort it with the other '$'
-         sections.  */
+    if (dollar != NULL)
+      {
+	boolean found_dollar;
 
-      found_dollar = false;
-      for (pl = &hold_use->children.head; *pl != NULL; pl = &(*pl)->next)
-	{
-	  lang_input_section_type *ls;
-	  const char *lname;
+	/* The section name has a '$'.  Sort it with the other '$'
+	   sections.  */
 
-	  if ((*pl)->header.type != lang_input_section_enum)
-	    continue;
+	found_dollar = false;
+	for ( ; *pl != NULL; pl = &(*pl)->next)
+	  {
+	    lang_input_section_type *ls;
+	    const char *lname;
 
-	  ls = &(*pl)->input_section;
+	    if ((*pl)->header.type != lang_input_section_enum)
+	      continue;
 
-	  lname = bfd_get_section_name (ls->ifile->the_bfd, ls->section);
-	  if (strchr (lname, '$') == NULL)
-	    {
-	      if (found_dollar)
-		break;
-	    }
-	  else
-	    {
-	      found_dollar = true;
-	      if (strcmp (secname, lname) < 0)
-		break;
-	    }
-	}
+	    ls = &(*pl)->input_section;
 
-      lang_list_init (&list);
-      wild_doit (&list, s, hold_use, file);
-      if (list.head != NULL)
-	{
-	  ASSERT (list.head->next == NULL);
-	  list.head->next = *pl;
-	  *pl = list.head;
-	}
-    }
+	    lname = bfd_get_section_name (ls->ifile->the_bfd, ls->section);
+	    if (strchr (lname, '$') == NULL)
+	      {
+		if (found_dollar)
+		  break;
+	      }
+	    else
+	      {
+		found_dollar = true;
+		if (strcmp (secname, lname) < 0)
+		  break;
+	      }
+	  }
+      }
+
+    if (add_child.head != NULL)
+      {
+	add_child.head->next = *pl;
+	*pl = add_child.head;
+      }
+  }
 
   free (hold_section_name);
 

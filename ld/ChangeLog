@@ -1,3 +1,14 @@
+2000-04-18  Alan Modra  <alan@linuxcare.com.au>
+
+	* emultempl/elf32.em (struct orphan_save): Add section field.
+	(gld${EMULATION_NAME}_place_orphan): Use above to keep sections in
+	better order, and place first orphan section as we did before the
+	2000-04-12 patch.  Ignore ~SEC_ALLOC sections when choosing place.
+	Don't call make_bfd_section here, let wild_doit do the job for us.
+	Don't build a statement list when we'll only throw it away.
+	* emultempl/armelf.em: Ditto.
+	* emultempl/pe.em: Similarly.
+
 2000-04-14  Geoff Keating  <geoffk@cygnus.com>
 
 	* scripttempl/elfppc.sc: Remove.
@@ -13,10 +24,10 @@
 
 2000-04-14  Alan Modra  <alan@linuxcare.com.au>
 
-	* emultempl/elf32.em (gld${EMULATION_NAME}_place_section): Process
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Process
 	~SEC_ALLOC sections too.  Init start address of debug sections.
-	* emultempl/armelf.em (gld${EMULATION_NAME}_place_section): Ditto.
-	* emultempl/pe.em (gld${EMULATION_NAME}_place_section): Ditto.
+	* emultempl/armelf.em (gld${EMULATION_NAME}_place_orphan): Ditto.
+	* emultempl/pe.em (gld${EMULATION_NAME}_place_orphan): Ditto.
 	Also set all relocateable section start addresses.
 
 2000-04-13  Geoff Keating  <geoffk@cygnus.com>

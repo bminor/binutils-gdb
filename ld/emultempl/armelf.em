@@ -789,6 +789,7 @@ static lang_output_section_statement_type *hold_use;
 struct orphan_save
 {
   lang_output_section_statement_type *os;
+  asection **section;
   lang_statement_union_type **stmt;
 };
 static struct orphan_save hold_text;
@@ -805,7 +806,6 @@ gld${EMULATION_NAME}_place_orphan (file, s)
      asection *s;
 {
   struct orphan_save *place;
-  asection *snew, **pps;
   lang_statement_list_type *old;
   lang_statement_list_type add;
   etree_type *address;
@@ -845,6 +845,8 @@ gld${EMULATION_NAME}_place_orphan (file, s)
      in the first page.  */
   if (s->flags & SEC_EXCLUDE)
     return false;
+  else if ((s->flags & SEC_ALLOC) == 0)
+    place = NULL;
   else if ((s->flags & SEC_LOAD) != 0
 	   && strncmp (secname, ".note", 4) == 0
 	   && hold_interp.os != NULL)
@@ -892,45 +894,29 @@ gld${EMULATION_NAME}_place_orphan (file, s)
       outsecname = newname;
     }
 
-  /* Create the section in the output file, and put it in the right
-     place.  This shuffling is to make the output file look neater.  */
-  snew = bfd_make_section (output_bfd, outsecname);
-  if (snew == NULL)
-      einfo ("%P%F: output format %s cannot represent section called %s\n",
-	     output_bfd->xvec->name, outsecname);
-  if (place != NULL && place->os->bfd_section != NULL)
+  if (place != NULL)
     {
-      /* Unlink it first.  */
-      for (pps = &output_bfd->sections; *pps != snew; pps = &(*pps)->next)
-	;
-      *pps = snew->next;
-      snew->next = NULL;
-      /* Now tack it on to the end of the "place->os" section list.  */
-      for (pps = &place->os->bfd_section; *pps; pps = &(*pps)->next)
-	;
-      *pps = snew;
-    }
+      /* Start building a list of statements for this section.  */
+      old = stat_ptr;
+      stat_ptr = &add;
+      lang_list_init (stat_ptr);
 
-  /* Start building a list of statements for this section.  */
-  old = stat_ptr;
-  stat_ptr = &add;
-  lang_list_init (stat_ptr);
+      /* If the name of the section is representable in C, then create
+	 symbols to mark the start and the end of the section.  */
+      for (ps = outsecname; *ps != '\0'; ps++)
+	if (! isalnum ((unsigned char) *ps) && *ps != '_')
+	  break;
+      if (*ps == '\0' && config.build_constructors)
+	{
+	  char *symname;
+	  etree_type *e_align;
 
-  /* If the name of the section is representable in C, then create
-     symbols to mark the start and the end of the section.  */
-  for (ps = outsecname; *ps != '\0'; ps++)
-    if (! isalnum ((unsigned char) *ps) && *ps != '_')
-      break;
-  if (*ps == '\0' && config.build_constructors)
-    {
-      char *symname;
-
-      symname = (char *) xmalloc (ps - outsecname + sizeof "__start_");
-      sprintf (symname, "__start_%s", outsecname);
-      lang_add_assignment (exp_assop ('=', symname,
-				      exp_unop (ALIGN_K,
-						exp_intop ((bfd_vma) 1
-							   << s->alignment_power))));
+	  symname = (char *) xmalloc (ps - outsecname + sizeof "__start_");
+	  sprintf (symname, "__start_%s", outsecname);
+	  e_align = exp_unop (ALIGN_K,
+			      exp_intop ((bfd_vma) 1 << s->alignment_power));
+	  lang_add_assignment (exp_assop ('=', symname, e_align));
+	}
     }
 
   if (link_info.relocateable || (s->flags & (SEC_LOAD | SEC_ALLOC)) == 0)
@@ -947,24 +933,59 @@ gld${EMULATION_NAME}_place_orphan (file, s)
   os = lang_output_section_statement_lookup (outsecname);
   wild_doit (&os->children, s, os, file);
 
-  lang_leave_output_section_statement
-    ((bfd_vma) 0, "*default*", (struct lang_output_section_phdr_list *) NULL,
-     "*default*");
-  stat_ptr = &add;
-
-  if (*ps == '\0' && config.build_constructors)
-    {
-      char *symname;
-
-      symname = (char *) xmalloc (ps - outsecname + sizeof "__stop_");
-      sprintf (symname, "__stop_%s", outsecname);
-      lang_add_assignment (exp_assop ('=', symname,
-				      exp_nameop (NAME, ".")));
-    }
-
   if (place != NULL)
     {
-      if (! place->stmt)
+      asection *snew, **pps;
+
+      lang_leave_output_section_statement
+	((bfd_vma) 0, "*default*",
+	 (struct lang_output_section_phdr_list *) NULL, "*default*");
+      stat_ptr = &add;
+
+      if (*ps == '\0' && config.build_constructors)
+	{
+	  char *symname;
+
+	  symname = (char *) xmalloc (ps - outsecname + sizeof "__stop_");
+	  sprintf (symname, "__stop_%s", outsecname);
+	  lang_add_assignment (exp_assop ('=', symname,
+					  exp_nameop (NAME, ".")));
+	}
+      stat_ptr = old;
+
+      snew = os->bfd_section;
+      if (place->os->bfd_section != NULL || place->section != NULL)
+	{
+	  /* Shuffle the section to make the output file look neater.  */
+	  if (place->section == NULL)
+	    {
+#if 0
+	      /* Finding the end of the list is a little tricky.  We
+		 make a wild stab at it by comparing section flags.  */
+	      flagword first_flags = place->os->bfd_section->flags;
+	      for (pps = &place->os->bfd_section->next;
+		   *pps != NULL && (*pps)->flags == first_flags;
+		   pps = &(*pps)->next)
+		;
+	      place->section = pps;
+#else
+	      /* Put orphans after the first section on the list.  */
+	      place->section = &place->os->bfd_section->next;
+#endif
+	    }
+
+	  /*  Unlink the section.  */
+	  for (pps = &output_bfd->sections; *pps != snew; pps = &(*pps)->next)
+	    ;
+	  *pps = snew->next;
+
+	  /* Now tack it on to the "place->os" section list.  */
+	  snew->next = *place->section;
+	  *place->section = snew;
+	}
+      place->section = &snew->next;	/* Save the end of this list.  */
+
+      if (place->stmt == NULL)
 	{
 	  /* Put the new statement list right at the head.  */
 	  *add.tail = place->os->header.next;
@@ -976,9 +997,8 @@ gld${EMULATION_NAME}_place_orphan (file, s)
 	  *add.tail = *place->stmt;
 	  *place->stmt = add.head;
 	}
-      place->stmt = add.tail;	/* Save the end of this list.  */
+      place->stmt = add.tail;		/* Save the end of this list.  */
     }
-  stat_ptr = old;
 
   return true;
 }
