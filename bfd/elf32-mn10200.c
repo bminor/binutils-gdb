@@ -37,12 +37,10 @@ static bfd_reloc_status_type bfd_elf32_mn10200_reloc
 enum reloc_type
 {
   R_MN10200_NONE = 0,
-#if 0
   R_MN10200_32,
   R_MN10200_16,
   R_MN10200_8,
-  R_MN10200_32B,
-  R_MN10200_16B,
+#if 0
   R_MN10200_PCREL32_1BYTE,
   R_MN10200_PCREL16_1BYTE,
   R_MN10200_PCREL8_1BYTE,
@@ -68,7 +66,6 @@ static reloc_howto_type elf_mn10200_howto_table[] =
 	 0,
 	 0,
 	 false),
-#if 0
   /* Standard 32 bit reloc.  */
   HOWTO (R_MN10200_32,
 	 0,
@@ -111,34 +108,7 @@ static reloc_howto_type elf_mn10200_howto_table[] =
 	 0xff,
 	 0xff,
 	 false),
-  /* Standard 32 bit reloc, except it explicitly writes big-endian format.  */
-  HOWTO (R_MN10200_32B,
-	 0,
-	 2,
-	 32,
-	 false,
-	 0,
-	 complain_overflow_bitfield,
-	 bfd_elf32_mn10200_reloc,
-	 "R_MN10200_32B",
-	 false,
-	 0xffffffff,
-	 0xffffffff,
-	 false),
-  /* Standard 16 bit reloc, except it explicitly writes big-endian format.  */
-  HOWTO (R_MN10200_16B,
-	 0,
-	 1,
-	 16,
-	 false,
-	 0,
-	 complain_overflow_bitfield,
-	 bfd_elf32_mn10200_reloc,
-	 "R_MN10200_16B",
-	 false,
-	 0xffff,
-	 0xffff,
-	 false),
+#if 0
   /* Simple 32bit pc-relative reloc with a 1 byte adjustment
      to get the pc-relative offset correct.  */
   HOWTO (R_MN10200_PCREL32_1BYTE,
@@ -226,10 +196,10 @@ struct mn10200_reloc_map
 static const struct mn10200_reloc_map mn10200_reloc_map[] =
 {
   { BFD_RELOC_NONE, R_MN10200_NONE, },
-#if 0
   { BFD_RELOC_32, R_MN10200_32, },
   { BFD_RELOC_16, R_MN10200_16, },
   { BFD_RELOC_8, R_MN10200_8, },
+#if 0
   { BFD_RELOC_MN10200_32B, R_MN10200_32B, },
   { BFD_RELOC_MN10200_16B, R_MN10200_16B, },
   { BFD_RELOC_32_PCREL, R_MN10200_PCREL32_1BYTE, },

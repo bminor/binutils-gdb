@@ -1,3 +1,10 @@
+Wed Dec 18 10:04:30 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* elf32-mn10200.c (enum reloc_type): Enable basic 8, 16, and
+	32 bit relocs.
+	(elf_mn10200_howto_table): Likewise.
+	(mn10200_reloc_map): Likewise.
+
 Tue Dec 17 11:09:36 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf32-mips.c (mips_elf_add_symbol_hook): Add 1 to the value of a
