@@ -85,7 +85,7 @@ case ${generic_target} in
 			 emulation=i386aix ;;
   i386-*-bsd*)		obj_format=aout emulation=386bsd ;;
   i386-*-netbsd0.8)	obj_format=aout emulation=386bsd ;;
-  i386-*-netbsd*)	obj_format=aout emulation=netbsd ;;
+  i386-*-netbsd*)	obj_format=aout emulation=nbsd bfd_gas=yes;;
   i386-*-linux*elf*)	obj_format=elf  emulation=linux ;;
   i386-*-linux*coff*)	obj_format=coff emulation=linux
 			 gas_target=i386coff ;;
@@ -119,6 +119,7 @@ case ${generic_target} in
   m68k-*-hpux*)		obj_format=hp300 emulation=hp300 ;;
   m68k-*-lynxos*)	obj_format=coff gas_target=m68kcoff
 			 emulation=lynx ;;
+  m68k-*-netbsd*)	obj_format=aout emulation=nbsd bfd_gas=yes ;;
 
   m88k-*-coff*)		obj_format=coff gas_target=m88kcoff ;;
 
@@ -160,6 +161,7 @@ case ${generic_target} in
   sparc*-fujitsu-none)	obj_format=aout ;;
   sparc*-*-elf | sparc*-*-solaris*)
 			obj_format=elf ;;
+  sparc*-*-netbsd*)	obj_format=aout emulation=nbsd bfd_gas=yes ;;
 
   vax-*-bsd* | vax-*-ultrix*)
 			obj_format=aout ;;

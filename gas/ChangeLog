@@ -1,3 +1,15 @@
+Thu Nov  3 16:09:59 1994  J.T. Conklin  (jtc@rtl.cygnus.com)
+
+	* config/tc-m68k.h (TARGET_FORMAT): If TE_NetBSD define as
+	  "a.out-m68k-netbsd".
+	* config/tc-sparc.h (TARGET_FORMAT): If TE_NetBSD define as
+	  "a.out-sparc-netbsd".
+
+	* config/te-nbsd.h: New file, NetBSD target emulation
+	* config/te-netbsd.h: Removed.
+	* configure.in (i[345]86-*-netbsd*,m68*-*-netbsd*,sparc*-*-netbsd*): 
+	  Set bfd_gas.  Use nbsd emulation.
+
 Thu Nov  3 17:44:47 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	Changes from net 2.5.2 release branch:

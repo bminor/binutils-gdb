@@ -1,4 +1,4 @@
-/* te-386bsd.h -- 386BSD target environment declarations.
+/* te-nbsd.h -- NetBSD target environment declarations.
    Copyright (C) 1987, 1990, 1991, 1992 Free Software Foundation, Inc.
    
    This file is part of GAS, the GNU Assembler.
@@ -18,14 +18,4 @@
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define TE_NetBSD	1
-
 #include "obj-format.h"
-
-/*
- * Local Variables:
- * comment-column: 0
- * fill-column: 131
- * End:
- */
-
-/* end of te-sun3.h */
