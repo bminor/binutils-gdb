@@ -235,18 +235,18 @@ cpp_line (s)
   char *send, *fn;
 
   ++s;
-  while (isspace (*s))
+  while (isspace ((unsigned char) *s))
     ++s;
   
   line = strtol (s, &send, 0);
-  if (*send != '\0' && ! isspace (*send))
+  if (*send != '\0' && ! isspace ((unsigned char) *send))
     return;
 
   /* Subtract 1 because we are about to count the newline.  */
   rc_lineno = line - 1;
 
   s = send;
-  while (isspace (*s))
+  while (isspace ((unsigned char) *s))
     ++s;
 
   if (*s != '"')
@@ -392,8 +392,8 @@ handle_quotes (input, len)
       else
 	{
 	  ++t;
-	  assert (isspace (*t));
-	  while (isspace (*t))
+	  assert (isspace ((unsigned char) *t));
+	  while (isspace ((unsigned char) *t))
 	    ++t;
 	  if (*t == '\0')
 	    break;

@@ -124,6 +124,9 @@ read_coff_rsrc (filename, target)
   bfd_byte *data;
   struct coff_file_info finfo;
 
+  if (filename == NULL)
+    fatal (_("filename required for COFF input"));
+
   abfd = bfd_openr (filename, target);
   if (abfd == NULL)
     bfd_fatal (filename);
@@ -139,7 +142,7 @@ read_coff_rsrc (filename, target)
   sec = bfd_get_section_by_name (abfd, ".rsrc");
   if (sec == NULL)
     {
-      fprintf (stderr, "%s: %s: no resource section\n", program_name,
+      fprintf (stderr, _("%s: %s: no resource section\n"), program_name,
 	       filename);
       xexit (1);
     }
@@ -148,7 +151,7 @@ read_coff_rsrc (filename, target)
   data = (bfd_byte *) res_alloc (size);
 
   if (! bfd_get_section_contents (abfd, sec, data, 0, size))
-    bfd_fatal ("can't read resource section");
+    bfd_fatal (_("can't read resource section"));
 
   finfo.filename = filename;
   finfo.data = data;
@@ -174,7 +177,7 @@ overrun (finfo, msg)
      const struct coff_file_info *finfo;
      const char *msg;
 {
-  fatal ("%s: %s: address out of bounds", finfo->filename, msg);
+  fatal (_("%s: %s: address out of bounds"), finfo->filename, msg);
 }
 
 /* Read a resource directory.  */
@@ -192,8 +195,8 @@ read_coff_res_dir (data, finfo, type, level)
   struct res_entry **pp;
   const struct extern_res_entry *ere;
 
-  if (finfo->data_end - data < sizeof (struct extern_res_directory))
-    overrun (finfo, "directory");
+  if ((size_t) (finfo->data_end - data) < sizeof (struct extern_res_directory))
+    overrun (finfo, _("directory"));
 
   erd = (const struct extern_res_directory *) data;
 
@@ -221,7 +224,7 @@ read_coff_res_dir (data, finfo, type, level)
       int length, j;
 
       if ((const bfd_byte *) ere >= finfo->data_end)
-	overrun (finfo, "named directory entry");
+	overrun (finfo, _("named directory entry"));
 
       name = getfi_32 (finfo, ere->name);
       rva = getfi_32 (finfo, ere->rva);
@@ -229,8 +232,8 @@ read_coff_res_dir (data, finfo, type, level)
       /* For some reason the high bit in NAME is set.  */
       name &=~ 0x80000000;
 
-      if (name > finfo->data_end - finfo->data)
-	overrun (finfo, "directory entry name");
+      if (name > (size_t) (finfo->data_end - finfo->data))
+	overrun (finfo, _("directory entry name"));
 
       ers = finfo->data + name;
 
@@ -249,16 +252,16 @@ read_coff_res_dir (data, finfo, type, level)
       if ((rva & 0x80000000) != 0)
 	{
 	  rva &=~ 0x80000000;
-	  if (rva >= finfo->data_end - finfo->data)
-	    overrun (finfo, "named subdirectory");
+	  if (rva >= (size_t) (finfo->data_end - finfo->data))
+	    overrun (finfo, _("named subdirectory"));
 	  re->subdir = 1;
 	  re->u.dir = read_coff_res_dir (finfo->data + rva, finfo, type,
 					 level + 1);
 	}
       else
 	{
-	  if (rva >= finfo->data_end - finfo->data)
-	    overrun (finfo, "named resource");
+	  if (rva >= (size_t) (finfo->data_end - finfo->data))
+	    overrun (finfo, _("named resource"));
 	  re->subdir = 0;
 	  re->u.res = read_coff_data_entry (finfo->data + rva, finfo, type);
 	}
@@ -273,7 +276,7 @@ read_coff_res_dir (data, finfo, type, level)
       struct res_entry *re;
 
       if ((const bfd_byte *) ere >= finfo->data_end)
-	overrun (finfo, "ID directory entry");
+	overrun (finfo, _("ID directory entry"));
 
       name = getfi_32 (finfo, ere->name);
       rva = getfi_32 (finfo, ere->rva);
@@ -289,16 +292,16 @@ read_coff_res_dir (data, finfo, type, level)
       if ((rva & 0x80000000) != 0)
 	{
 	  rva &=~ 0x80000000;
-	  if (rva >= finfo->data_end - finfo->data)
-	    overrun (finfo, "ID subdirectory");
+	  if (rva >= (size_t) (finfo->data_end - finfo->data))
+	    overrun (finfo, _("ID subdirectory"));
 	  re->subdir = 1;
 	  re->u.dir = read_coff_res_dir (finfo->data + rva, finfo, type,
 					 level + 1);
 	}
       else
 	{
-	  if (rva >= finfo->data_end - finfo->data)
-	    overrun (finfo, "ID resource");
+	  if (rva >= (size_t) (finfo->data_end - finfo->data))
+	    overrun (finfo, _("ID resource"));
 	  re->subdir = 0;
 	  re->u.res = read_coff_data_entry (finfo->data + rva, finfo, type);
 	}
@@ -324,23 +327,23 @@ read_coff_data_entry (data, finfo, type)
   const bfd_byte *resdata;
 
   if (type == NULL)
-    fatal ("resource type unknown");
+    fatal (_("resource type unknown"));
 
-  if (finfo->data_end - data < sizeof (struct extern_res_data))
-    overrun (finfo, "data entry");
+  if ((size_t) (finfo->data_end - data) < sizeof (struct extern_res_data))
+    overrun (finfo, _("data entry"));
 
   erd = (const struct extern_res_data *) data;
 
   size = getfi_32 (finfo, erd->size);
   rva = getfi_32 (finfo, erd->rva);
   if (rva < finfo->secaddr
-      || rva - finfo->secaddr >= finfo->data_end - finfo->data)
-    overrun (finfo, "resource data");
+      || rva - finfo->secaddr >= (size_t) (finfo->data_end - finfo->data))
+    overrun (finfo, _("resource data"));
 
   resdata = finfo->data + (rva - finfo->secaddr);
 
-  if (size > finfo->data_end - resdata)
-    overrun (finfo, "resource data size");
+  if (size > (size_t) (finfo->data_end - resdata))
+    overrun (finfo, _("resource data size"));
 
   r = bin_to_res (*type, resdata, size, finfo->big_endian);
 
@@ -422,7 +425,6 @@ static void coff_res_to_bin
    would require doing the basic work of objcopy, just modifying or
    adding the .rsrc section.  */
 
-
 void
 write_coff_file (filename, target, resources)
      const char *filename;
@@ -434,6 +436,9 @@ write_coff_file (filename, target, resources)
   struct coff_write_info cwi;
   struct bindata *d;
   unsigned long length, offset;
+
+  if (filename == NULL)
+    fatal (_("filename required for COFF output"));
 
   abfd = bfd_openw (filename, target);
   if (abfd == NULL)
@@ -721,7 +726,7 @@ coff_res_to_bin (res, cwi)
   r->addend = 0;
   r->howto = bfd_reloc_type_lookup (cwi->abfd, BFD_RELOC_RVA);
   if (r->howto == NULL)
-    bfd_fatal ("can't get BFD_RELOC_RVA relocation type");
+    bfd_fatal (_("can't get BFD_RELOC_RVA relocation type"));
 
   cwi->relocs = xrealloc (cwi->relocs,
 			  (cwi->reloc_count + 2) * sizeof (arelent *));

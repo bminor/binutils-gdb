@@ -107,7 +107,7 @@ static unsigned long class;
 %token BEDIT HEDIT IEDIT
 %token FONT
 %token ICON
-%token LANGUAGE CHARACTERISTICS VERSION
+%token LANGUAGE CHARACTERISTICS VERSIONK
 %token MENU MENUEX MENUITEM SEPARATOR POPUP CHECKED GRAYED HELP INACTIVE
 %token MENUBARBREAK MENUBREAK
 %token MESSAGETABLE
@@ -221,6 +221,9 @@ acc_entry:
 	    $$ = $1;
 	    $$.id = $2;
 	    $$.flags |= $4;
+	    if (($$.flags & ACC_VIRTKEY) == 0
+		&& ($$.flags & (ACC_SHIFT | ACC_CONTROL | ACC_ALT)) != 0)
+	      rcparse_warning (_("inappropriate modifiers for non-VIRTKEY"));
 	  }
 	;
 
@@ -228,21 +231,27 @@ acc_event:
 	  QUOTEDSTRING
 	  {
 	    const char *s = $1;
+	    char ch;
 
+	    $$.next = NULL;
 	    $$.id = 0;
-	    if (*s != '^')
+	    ch = *s;
+	    if (ch != '^')
 	      $$.flags = 0;
 	    else
 	      {
-		$$.flags = ACC_CONTROL;
+		$$.flags = ACC_CONTROL | ACC_VIRTKEY;
 		++s;
+		ch = *s;
+		ch = toupper ((unsigned char) ch);
 	      }
-	    $$.key = *s;
+	    $$.key = ch;
 	    if (s[1] != '\0')
-	      rcparse_warning ("accelerator should only be one character");
+	      rcparse_warning (_("accelerator should only be one character"));
 	  }
 	| posnumexpr
 	  {
+	    $$.next = NULL;
 	    $$.flags = 0;
 	    $$.id = 0;
 	    $$.key = $1;
@@ -257,6 +266,11 @@ acc_options:
 	| acc_options ',' acc_option
 	  {
 	    $$ = $1 | $3;
+	  }
+	/* I've had one report that the comma is optional.  */
+	| acc_options acc_option
+	  {
+	    $$ = $1 | $2;
 	  }
 	;
 
@@ -422,7 +436,7 @@ styles:
 	    dialog.pointsize = $3;
 	    unicode_from_ascii ((int *) NULL, &dialog.font, $5);
 	    if (dialog.ex == NULL)
-	      rcparse_warning ("extended FONT requires DIALOGEX");
+	      rcparse_warning (_("extended FONT requires DIALOGEX"));
 	    else
 	      {
 		dialog.ex->weight = $6;
@@ -441,7 +455,7 @@ styles:
 	  {
 	    sub_res_info.language = $3 | ($4 << 8);
 	  }
-	| styles VERSION numexpr
+	| styles VERSIONK numexpr
 	  {
 	    sub_res_info.version = $3;
 	  }
@@ -500,7 +514,7 @@ control:
 	  {
 	    $$ = $3;
 	    if (dialog.ex == NULL)
-	      rcparse_warning ("IEDIT requires DIALOGEX");
+	      rcparse_warning (_("IEDIT requires DIALOGEX"));
 	    res_string_to_id (&$$->class, "BEDIT");
 	  }
 	| CHECKBOX
@@ -530,7 +544,7 @@ control:
 	    if ($11 != NULL)
 	      {
 		if (dialog.ex == NULL)
-		  rcparse_warning ("control data requires DIALOGEX");
+		  rcparse_warning (_("control data requires DIALOGEX"));
 		$$->data = $11;
 	      }
 	  }
@@ -539,7 +553,7 @@ control:
 	  {
 	    $$ = define_control ($2, $3, $6, $7, $8, $9, $4, style, $10);
 	    if (dialog.ex == NULL)
-	      rcparse_warning ("help ID requires DIALOGEX");
+	      rcparse_warning (_("help ID requires DIALOGEX"));
 	    $$->help = $11;
 	    $$->data = $12;
 	  }
@@ -593,7 +607,7 @@ control:
 	  {
 	    $$ = $3;
 	    if (dialog.ex == NULL)
-	      rcparse_warning ("IEDIT requires DIALOGEX");
+	      rcparse_warning (_("IEDIT requires DIALOGEX"));
 	    res_string_to_id (&$$->class, "HEDIT");
 	  }
 	| ICON optstringc numexpr cnumexpr cnumexpr opt_control_data
@@ -603,7 +617,7 @@ control:
 	    if ($6 != NULL)
 	      {
 		if (dialog.ex == NULL)
-		  rcparse_warning ("control data requires DIALOGEX");
+		  rcparse_warning (_("control data requires DIALOGEX"));
 		$$->data = $6;
 	      }
 	  }
@@ -615,7 +629,7 @@ control:
 	    if ($10 != NULL)
 	      {
 		if (dialog.ex == NULL)
-		  rcparse_warning ("control data requires DIALOGEX");
+		  rcparse_warning (_("control data requires DIALOGEX"));
 		$$->data = $10;
 	      }
 	  }
@@ -625,7 +639,7 @@ control:
     	    $$ = define_control ($2, $3, $4, $5, $6, $7, CTL_STATIC,
 				 style, $9);
 	    if (dialog.ex == NULL)
-	      rcparse_warning ("help ID requires DIALOGEX");
+	      rcparse_warning (_("help ID requires DIALOGEX"));
 	    $$->help = $10;
 	    $$->data = $11;
 	  }
@@ -639,7 +653,7 @@ control:
 	  {
 	    $$ = $3;
 	    if (dialog.ex == NULL)
-	      rcparse_warning ("IEDIT requires DIALOGEX");
+	      rcparse_warning (_("IEDIT requires DIALOGEX"));
 	    res_string_to_id (&$$->class, "IEDIT");
 	  }
 	| LISTBOX
@@ -748,7 +762,7 @@ control_params:
 	    if ($7 != NULL)
 	      {
 		if (dialog.ex == NULL)
-		  rcparse_warning ("control data requires DIALOGEX");
+		  rcparse_warning (_("control data requires DIALOGEX"));
 		$$->data = $7;
 	      }
 	  }
@@ -759,7 +773,7 @@ control_params:
 	    if ($9 != NULL)
 	      {
 		if (dialog.ex == NULL)
-		  rcparse_warning ("control data requires DIALOGEX");
+		  rcparse_warning (_("control data requires DIALOGEX"));
 		$$->data = $9;
 	      }
 	  }
@@ -768,7 +782,7 @@ control_params:
 	  {
 	    $$ = define_control ($1, $2, $3, $4, $5, $6, class, style, $8);
 	    if (dialog.ex == NULL)
-	      rcparse_warning ("help ID requires DIALOGEX");
+	      rcparse_warning (_("help ID requires DIALOGEX"));
 	    $$->help = $9;
 	    $$->data = $10;
 	  }
@@ -1221,8 +1235,8 @@ id:
 	    /* It seems that resource ID's are forced to upper case.  */
 	    copy = xstrdup ($1);
 	    for (s = copy; *s != '\0'; s++)
-	      if (islower (*s))
-		*s = toupper (*s);
+	      if (islower ((unsigned char) *s))
+		*s = toupper ((unsigned char) *s);
 	    res_string_to_id (&$$, copy);
 	    free (copy);
 	  }
@@ -1255,7 +1269,7 @@ suboptions:
 	    $$ = $1;
 	    $$.language = $3 | ($4 << 8);
 	  }
-	| suboptions VERSION numexpr
+	| suboptions VERSIONK numexpr
 	  {
 	    $$ = $1;
 	    $$.version = $3;

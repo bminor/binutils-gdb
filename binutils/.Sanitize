@@ -111,6 +111,8 @@ testsuite
 version.c
 windres.c
 windres.h
+winduni.c
+winduni.h
 wrstabs.c
 
 Things-to-lose:

@@ -24,6 +24,8 @@
 /* This is the header file for the windres program.  It defines
    structures and declares functions used within the program.  */
 
+#include "winduni.h"
+
 /* We represent resources internally as a tree, similar to the tree
    used in the .rsrc section of a COFF file.  The root is a
    res_directory structure.  */
@@ -55,9 +57,9 @@ struct res_id
     struct
     {
       /* Length of the name.  */
-      unsigned short length;
+      int length;
       /* Pointer to the name, which is a Unicode string.  */
-      unsigned short *name;
+      unichar *name;
     } n;
     /* If the named field is zero, this is the ID.  */
     unsigned long id;
@@ -162,7 +164,7 @@ struct res_resource
     struct
     {
       unsigned long length;
-      unsigned char *data;
+      const unsigned char *data;
     } data;
     struct accelerator *acc;
     struct cursor *cursor;
@@ -170,10 +172,10 @@ struct res_resource
     struct dialog *dialog;
     struct fontdir *fontdir;
     struct group_icon *group_icon;
-    struct menuitem *menu;
-    struct rcdata_data *rcdata;
+    struct menu *menu;
+    struct rcdata_item *rcdata;
     struct stringtable *stringtable;
-    struct rcdata_data *userdata;
+    struct rcdata_item *userdata;
     struct versioninfo *versioninfo;
   } u;
   /* Information from a res file.  */
@@ -200,15 +202,15 @@ struct res_resource
 #define RT_STRING		 6
 #define RT_FONTDIR		 7
 #define RT_FONT			 8
-#define RT_ACCELERATORS		 9
+#define RT_ACCELERATOR		 9
 #define RT_RCDATA		10
 #define RT_MESSAGETABLE		11
 #define RT_GROUP_CURSOR		12
 #define RT_GROUP_ICON		14
 #define RT_VERSION		16
 #define RT_DLGINCLUDE		17
-#define RT_PLUGPLAY		18
-#define RT_VXD			19
+#define RT_PLUGPLAY		19
+#define RT_VXD			20
 #define RT_ANICURSOR		21
 #define RT_ANIICON		22
 
@@ -247,7 +249,7 @@ struct cursor
   /* Length of bitmap data.  */
   unsigned long length;
   /* Data.  */
-  unsigned char *data;
+  const unsigned char *data;
 };
 
 /* A group_cursor resource is a list of group_cursor structures.  */
@@ -291,11 +293,11 @@ struct dialog
   /* Class name.  */
   struct res_id class;
   /* Caption.  */
-  char *caption;
+  unichar *caption;
   /* Font point size.  */
   unsigned short pointsize;
   /* Font name.  */
-  char *font;
+  unichar *font;
   /* Extended information for a dialogex.  */
   struct dialog_ex *ex;
   /* Controls.  */
@@ -491,7 +493,7 @@ struct dialog_control
   /* Associated text.  */
   struct res_id text;
   /* Extra data for the window procedure.  */
-  struct rcdata_data *data;
+  struct rcdata_item *data;
   /* Help ID.  Only used in an extended dialog.  */
   unsigned long help;
 };
@@ -516,7 +518,7 @@ struct fontdir
   /* Length of font information.  */
   unsigned long length;
   /* Font information. */
-  unsigned char *data;
+  const unsigned char *data;
 };
 
 /* A group_icon resource is a list of group_icon structures.  */
@@ -541,6 +543,17 @@ struct group_icon
   unsigned short index;
 };
 
+/* A menu resource.  */
+
+struct menu
+{
+  /* List of menuitems.  */
+  struct menuitem *items;
+  /* Help ID.  I don't think there is any way to set this in an rc
+     file, but it can appear in the binary format.  */
+  unsigned long help;
+};
+
 /* A menu resource is a list of menuitem structures.  */
 
 struct menuitem
@@ -554,8 +567,8 @@ struct menuitem
   unsigned long state;
   /* Id.  */
   unsigned short id;
-  /* Text.  */
-  char *text;
+  /* Unicode text.  */
+  unichar *text;
   /* Popup menu items for a popup.  */
   struct menuitem *popup;
   /* Help ID.  This is only used in a menuex.  */
@@ -573,19 +586,11 @@ struct menuitem
 #define MENUITEM_POPUP		0x010
 #define MENUITEM_MENUBARBREAK	0x020
 #define MENUITEM_MENUBREAK	0x040
+#define MENUITEM_ENDMENU	0x080
 #define MENUITEM_HELP	       0x4000
 
-/* An rcdata resource is a pointer to an rcdata_data structure.  */
-
-struct rcdata_data
-{
-  /* First data item.  */
-  struct rcdata_item *first;
-  /* Last data item.  */
-  struct rcdata_item *last;
-};
-
-/* For an rcdata resource we keep a list of rcdata_item structures.  */
+/* An rcdata resource is a pointer to a list of rcdata_item
+   structures.  */
 
 struct rcdata_item
 {
@@ -604,12 +609,20 @@ struct rcdata_item
   {
     unsigned int word;
     unsigned long dword;
-    char *string;
-    unsigned short *wstring;
     struct
     {
       unsigned long length;
-      unsigned char *data;
+      const char *s;
+    } string;
+    struct
+    {
+      unsigned long length;
+      const unichar *w;
+    } wstring;
+    struct
+    {
+      unsigned long length;
+      const unsigned char *data;
     } buffer;
   } u;
 };
@@ -622,9 +635,9 @@ struct stringtable
   struct
   {
     /* Length of string.  */
-    unsigned short length;
+    int length;
     /* String data if length > 0.  */
-    unsigned short *string;
+    unichar *string;
   } strings[16];
 };
 
@@ -677,7 +690,7 @@ struct ver_info
     struct
     {
       /* Language.  */
-      unsigned short *language;
+      unichar *language;
       /* Strings.  */
       struct ver_stringinfo *strings;
     } string;
@@ -685,7 +698,7 @@ struct ver_info
     struct
     {
       /* Key.  */
-      unsigned short *key;
+      unichar *key;
       /* Values.  */
       struct ver_varinfo *var;
     } var;
@@ -699,9 +712,9 @@ struct ver_stringinfo
   /* Next string.  */
   struct ver_stringinfo *next;
   /* Key.  */
-  unsigned short *key;
+  unichar *key;
   /* Value.  */
-  unsigned short *value;
+  unichar *value;
 };
 
 /* A list of variable version information.  */
@@ -714,6 +727,19 @@ struct ver_varinfo
   unsigned short language;
   /* Character set ID.  */
   unsigned short charset;
+};
+
+/* This structure is used when converting resource information to
+   binary.  */
+
+struct bindata
+{
+  /* Next data.  */
+  struct bindata *next;
+  /* Length of data.  */
+  unsigned long length;
+  /* Data.  */
+  unsigned char *data;
 };
 
 /* Function declarations.  */
@@ -730,8 +756,15 @@ extern void write_res_file
 extern void write_coff_file
   PARAMS ((const char *, const char *, const struct res_directory *));
 
+extern struct res_resource *bin_to_res
+  PARAMS ((struct res_id, const unsigned char *, unsigned long, int));
+extern struct bindata *res_to_bin PARAMS ((const struct res_resource *, int));
+
 extern FILE *open_file_search
   PARAMS ((const char *, const char *, const char *, char **));
+
+extern PTR res_alloc PARAMS ((size_t));
+extern PTR reswr_alloc PARAMS ((size_t));
 
 /* Resource ID handling.  */
 
@@ -739,12 +772,6 @@ extern int res_id_cmp PARAMS ((struct res_id, struct res_id));
 extern void res_id_print PARAMS ((FILE *, struct res_id, int));
 extern void res_ids_print PARAMS ((FILE *, int, const struct res_id *));
 extern void res_string_to_id PARAMS ((struct res_id *, const char *));
-
-/* Unicode support.  */
-
-extern void unicode_from_ascii
-  PARAMS ((unsigned short *, unsigned short **, const char *));
-extern void unicode_print PARAMS ((FILE *, const unsigned short *, int));
 
 /* Manipulation of the resource tree.  */
 
@@ -754,7 +781,7 @@ extern struct res_resource *define_standard_resource
   PARAMS ((struct res_directory **, int, struct res_id, int, int));
 
 extern int extended_dialog PARAMS ((const struct dialog *));
-extern int extended_menu PARAMS ((const struct menuitem *));
+extern int extended_menu PARAMS ((const struct menu *));
 
 /* Communication between the rc file support and the parser and lexer.  */
 
@@ -767,6 +794,9 @@ extern int yylex PARAMS ((void));
 extern void yyerror PARAMS ((const char *));
 extern void rcparse_warning PARAMS ((const char *));
 extern void rcparse_set_language PARAMS ((int));
+extern void rcparse_discard_strings PARAMS ((void));
+extern void rcparse_rcdata PARAMS ((void));
+extern void rcparse_normal PARAMS ((void));
 
 extern void define_accelerator
   PARAMS ((struct res_id, const struct res_res_info *, struct accelerator *));
@@ -777,7 +807,7 @@ extern void define_cursor
 extern void define_dialog
   PARAMS ((struct res_id, const struct res_res_info *, const struct dialog *));
 extern struct dialog_control *define_control
-  PARAMS ((char *, unsigned long, unsigned long, unsigned long,
+  PARAMS ((const char *, unsigned long, unsigned long, unsigned long,
 	   unsigned long, unsigned long, unsigned long, unsigned long,
 	   unsigned long));
 extern void define_font
@@ -787,23 +817,20 @@ extern void define_icon
 extern void define_menu
   PARAMS ((struct res_id, const struct res_res_info *, struct menuitem *));
 extern struct menuitem *define_menuitem
-  PARAMS ((char *, int, unsigned long, unsigned long, unsigned long,
+  PARAMS ((const char *, int, unsigned long, unsigned long, unsigned long,
 	   struct menuitem *));
 extern void define_messagetable
   PARAMS ((struct res_id, const struct res_res_info *, const char *));
 extern void define_rcdata
-  PARAMS ((struct res_id, const struct res_res_info *, struct rcdata_data *));
-extern struct rcdata_data *append_rcdata_item
-  PARAMS ((struct rcdata_data *, struct rcdata_item *));
-extern struct rcdata_data *append_rcdata_string
-  PARAMS ((struct rcdata_data *, char *));
-extern struct rcdata_data *append_rcdata_number
-  PARAMS ((struct rcdata_data *, unsigned long, int));
+  PARAMS ((struct res_id, const struct res_res_info *, struct rcdata_item *));
+extern struct rcdata_item *define_rcdata_string
+  PARAMS ((const char *, unsigned long));
+extern struct rcdata_item *define_rcdata_number PARAMS ((unsigned long, int));
 extern void define_stringtable
-  PARAMS ((const struct res_res_info *, unsigned long, char *));
+  PARAMS ((const struct res_res_info *, unsigned long, const char *));
 extern void define_user_data
   PARAMS ((struct res_id, struct res_id, const struct res_res_info *,
-	   struct rcdata_data *));
+	   struct rcdata_item *));
 extern void define_user_file
   PARAMS ((struct res_id, struct res_id, const struct res_res_info *,
 	   const char *));
@@ -811,10 +838,10 @@ extern void define_versioninfo
   PARAMS ((struct res_id, int, struct fixed_versioninfo *,
 	   struct ver_info *));
 extern struct ver_info *append_ver_stringfileinfo
-  PARAMS ((struct ver_info *, char *, struct ver_stringinfo *));
+  PARAMS ((struct ver_info *, const char *, struct ver_stringinfo *));
 extern struct ver_info *append_ver_varfileinfo
-  PARAMS ((struct ver_info *, char *, struct ver_varinfo *));
+  PARAMS ((struct ver_info *, const char *, struct ver_varinfo *));
 extern struct ver_stringinfo *append_verval
-  PARAMS ((struct ver_stringinfo *, char *, char *));
+  PARAMS ((struct ver_stringinfo *, const char *, const char *));
 extern struct ver_varinfo *append_vertrans
   PARAMS ((struct ver_varinfo *, unsigned long, unsigned long));

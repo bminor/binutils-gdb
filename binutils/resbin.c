@@ -105,7 +105,7 @@ bin_to_res (type, data, length, big_endian)
 	  return bin_to_res_fontdir (data, length, big_endian);
 	case RT_FONT:
 	  return bin_to_res_generic (RES_TYPE_FONT, data, length);
-	case RT_ACCELERATORS:
+	case RT_ACCELERATOR:
 	  return bin_to_res_accelerators (data, length, big_endian);
 	case RT_RCDATA:
 	  return bin_to_res_rcdata (data, length, big_endian);
@@ -127,7 +127,7 @@ static void
 toosmall (msg)
      const char *msg;
 {
-  fatal ("%s: not enough binary data", msg);
+  fatal (_("%s: not enough binary data"), msg);
 }
 
 /* Swap in a NULL terminated unicode string.  */
@@ -145,8 +145,8 @@ get_unicode (data, length, big_endian, retlen)
   c = 0;
   while (1)
     {
-      if (length < c * 2 + 2)
-	toosmall ("null terminated unicode string");
+      if (length < (unsigned long) c * 2 + 2)
+	toosmall (_("null terminated unicode string"));
       if (get_16 (big_endian, data + c * 2) == 0)
 	break;
       ++c;
@@ -176,13 +176,13 @@ get_resid (id, data, length, big_endian)
   int first;
 
   if (length < 2)
-    toosmall ("resource ID");
+    toosmall (_("resource ID"));
 
   first = get_16 (big_endian, data);
   if (first == 0xffff)
     {
       if (length < 4)
-	toosmall ("resource ID");
+	toosmall (_("resource ID"));
       id->named = 0;
       id->u.id = get_16 (big_endian, data + 2);
       return 4;
@@ -226,7 +226,7 @@ bin_to_res_cursor (data, length, big_endian)
   struct res_resource *r;
 
   if (length < 4)
-    toosmall ("cursor");
+    toosmall (_("cursor"));
 
   c = (struct cursor *) res_alloc (sizeof *c);
   c->xhotspot = get_16 (big_endian, data);
@@ -260,35 +260,35 @@ bin_to_res_menu (data, length, big_endian)
   r->u.menu = m;
 
   if (length < 2)
-    toosmall ("menu header");
+    toosmall (_("menu header"));
 
   version = get_16 (big_endian, data);
 
   if (version == 0)
     {
       if (length < 4)
-	toosmall ("menu header");
+	toosmall (_("menu header"));
       m->help = 0;
       m->items = bin_to_res_menuitems (data + 4, length - 4, big_endian,
 				       &read);
     }
   else if (version == 1)
     {
-      int offset;
+      unsigned int offset;
 
       if (length < 8)
-	toosmall ("menuex header");
+	toosmall (_("menuex header"));
       m->help = get_32 (big_endian, data + 4);
       offset = get_16 (big_endian, data + 2);
       if (offset + 4 >= length)
-	toosmall ("menuex offset");
+	toosmall (_("menuex offset"));
       m->items = bin_to_res_menuexitems (data + 4 + offset,
 					 length - (4 + offset),
 					 big_endian,
 					 &read);
     }
   else
-    fatal ("unsupported menu version %d", version);
+    fatal (_("unsupported menu version %d"), version);
 
   return r;
 }
@@ -311,18 +311,19 @@ bin_to_res_menuitems (data, length, big_endian, read)
 
   while (length > 0)
     {
-      int flags, stroff, slen, itemlen;
+      int flags, slen, itemlen;
+      unsigned int stroff;
       struct menuitem *mi;
 
       if (length < 4)
-	toosmall ("menuitem header");
+	toosmall (_("menuitem header"));
 
       mi = (struct menuitem *) res_alloc (sizeof *mi);
       mi->state = 0;
       mi->help = 0;
 
       flags = get_16 (big_endian, data);
-      mi->type = flags;
+      mi->type = flags &~ (MENUITEM_POPUP | MENUITEM_ENDMENU);
 
       if ((flags & MENUITEM_POPUP) == 0)
 	stroff = 4;
@@ -330,7 +331,7 @@ bin_to_res_menuitems (data, length, big_endian, read)
 	stroff = 2;
 
       if (length < stroff + 2)
-	toosmall ("menuitem header");
+	toosmall (_("menuitem header"));
 
       if (get_16 (big_endian, data + stroff) == 0)
 	{
@@ -391,11 +392,12 @@ bin_to_res_menuexitems (data, length, big_endian, read)
 
   while (length > 0)
     {
-      int flags, slen, itemlen;
+      int flags, slen;
+      unsigned int itemlen;
       struct menuitem *mi;
 
       if (length < 14)
-	toosmall ("menuitem header");
+	toosmall (_("menuitem header"));
 
       mi = (struct menuitem *) res_alloc (sizeof *mi);
       mi->type = get_32 (big_endian, data);
@@ -425,7 +427,7 @@ bin_to_res_menuexitems (data, length, big_endian, read)
 	  int subread;
 
 	  if (length < itemlen + 4)
-	    toosmall ("menuitem");
+	    toosmall (_("menuitem"));
 	  mi->help = get_32 (big_endian, data + itemlen);
 	  itemlen += 4;
 
@@ -460,12 +462,13 @@ bin_to_res_dialog (data, length, big_endian)
 {
   int version;
   struct dialog *d;
-  int c, sublen, off, i;
+  int c, sublen, i;
+  unsigned int off;
   struct dialog_control **pp;
   struct res_resource *r;
 
   if (length < 18)
-    toosmall ("dialog header");
+    toosmall (_("dialog header"));
 
   d = (struct dialog *) res_alloc (sizeof *d);
 
@@ -483,7 +486,7 @@ bin_to_res_dialog (data, length, big_endian)
 
       signature = get_16 (big_endian, data + 2);
       if (signature != 1)
-	fatal ("unexpected dialog signature %d", signature);
+	fatal (_("unexpected dialog signature %d"), signature);
 
       d->ex = (struct dialog_ex *) res_alloc (sizeof (struct dialog_ex));
       d->ex->help = get_32 (big_endian, data + 4);
@@ -493,7 +496,7 @@ bin_to_res_dialog (data, length, big_endian)
     }
 
   if (length < off + 10)
-    toosmall ("dialog header");
+    toosmall (_("dialog header"));
 
   c = get_16 (big_endian, data + off);
   d->x = get_16  (big_endian, data + off + 2);
@@ -525,7 +528,7 @@ bin_to_res_dialog (data, length, big_endian)
   else
     {
       if (length < off + 2)
-	toosmall ("dialog font point size");
+	toosmall (_("dialog font point size"));
 
       d->pointsize = get_16 (big_endian, data + off);
       off += 2;
@@ -533,7 +536,7 @@ bin_to_res_dialog (data, length, big_endian)
       if (d->ex != NULL)
 	{
 	  if (length < off + 4)
-	    toosmall ("dialogex font information");
+	    toosmall (_("dialogex font information"));
 	  d->ex->weight = get_16 (big_endian, data + off);
 	  d->ex->italic = get_16 (big_endian, data + off + 2);
 	  off += 4;
@@ -558,7 +561,7 @@ bin_to_res_dialog (data, length, big_endian)
       if (d->ex == NULL)
 	{
 	  if (length < off + 8)
-	    toosmall ("dialog control");
+	    toosmall (_("dialog control"));
 
 	  dc->style = get_32 (big_endian, data + off);
 	  dc->exstyle = get_32 (big_endian, data + off + 4);
@@ -568,7 +571,7 @@ bin_to_res_dialog (data, length, big_endian)
       else
 	{
 	  if (length < off + 12)
-	    toosmall ("dialogex control");
+	    toosmall (_("dialogex control"));
 	  dc->help = get_32 (big_endian, data + off);
 	  dc->exstyle = get_32 (big_endian, data + off + 4);
 	  dc->style = get_32 (big_endian, data + off + 18);
@@ -576,7 +579,7 @@ bin_to_res_dialog (data, length, big_endian)
 	}
 
       if (length < off + 10)
-	toosmall ("dialog control");
+	toosmall (_("dialog control"));
 
       dc->x = get_16 (big_endian, data + off);
       dc->y = get_16 (big_endian, data + off + 2);
@@ -593,7 +596,7 @@ bin_to_res_dialog (data, length, big_endian)
       off += sublen;
 
       if (length < off + 2)
-	toosmall ("dialog control end");
+	toosmall (_("dialog control end"));
 
       datalen = get_16 (big_endian, data + off);
       off += 2;
@@ -605,7 +608,7 @@ bin_to_res_dialog (data, length, big_endian)
 	  off = (off + 3) &~ 3;
 
 	  if (length < off + datalen)
-	    toosmall ("dialog control data");
+	    toosmall (_("dialog control data"));
 
 	  dc->data = ((struct rcdata_item *)
 		      res_alloc (sizeof (struct rcdata_item)));
@@ -645,20 +648,20 @@ bin_to_res_string (data, length, big_endian)
 
   for (i = 0; i < 16; i++)
     {
-      int slen;
+      unsigned int slen;
 
       if (length < 2)
-	toosmall ("stringtable string length");
+	toosmall (_("stringtable string length"));
       slen = get_16 (big_endian, data);
       st->strings[i].length = slen;
 
       if (slen > 0)
 	{
 	  unichar *s;
-	  int j;
+	  unsigned int j;
 
 	  if (length < 2 + 2 * slen)
-	    toosmall ("stringtable string");
+	    toosmall (_("stringtable string"));
 
 	  s = (unichar *) res_alloc (slen * sizeof (unichar));
 	  st->strings[i].string = s;
@@ -691,7 +694,7 @@ bin_to_res_fontdir (data, length, big_endian)
   struct res_resource *r;
 
   if (length < 2)
-    toosmall ("fontdir header");
+    toosmall (_("fontdir header"));
 
   c = get_16 (big_endian, data);
 
@@ -701,10 +704,10 @@ bin_to_res_fontdir (data, length, big_endian)
   for (i = 0; i < c; i++)
     {
       struct fontdir *fd;
-      int off;
+      unsigned int off;
 
       if (length < 56)
-	toosmall ("fontdir");
+	toosmall (_("fontdir"));
 
       fd = (struct fontdir *) res_alloc (sizeof *fd);
       fd->index = get_16 (big_endian, data);
@@ -720,13 +723,13 @@ bin_to_res_fontdir (data, length, big_endian)
       while (off < length && data[off] != '\0')
 	++off;
       if (off >= length)
-	toosmall ("fontdir device name");
+	toosmall (_("fontdir device name"));
       ++off;
 
       while (off < length && data[off] != '\0')
 	++off;
       if (off >= length)
-	toosmall ("fontdir face name");
+	toosmall (_("fontdir face name"));
       ++off;
 
       fd->length = off;
@@ -769,7 +772,9 @@ bin_to_res_accelerators (data, length, big_endian)
       struct accelerator *a;
 
       if (length < 8)
-	toosmall ("accelerator");
+	toosmall (_("accelerator"));
+
+      a = (struct accelerator *) res_alloc (sizeof *a);
 
       a->flags = get_16 (big_endian, data);
       a->key = get_16 (big_endian, data + 2);
@@ -831,11 +836,11 @@ bin_to_res_group_cursor (data, length, big_endian)
   struct res_resource *r;
 
   if (length < 6)
-    toosmall ("group cursor header");
+    toosmall (_("group cursor header"));
 
   type = get_16 (big_endian, data + 2);
   if (type != 2)
-    fatal ("unexpected group cursor type %d", type);
+    fatal (_("unexpected group cursor type %d"), type);
 
   c = get_16 (big_endian, data + 4);
 
@@ -850,7 +855,7 @@ bin_to_res_group_cursor (data, length, big_endian)
       struct group_cursor *gc;
 
       if (length < 14)
-	toosmall ("group cursor");
+	toosmall (_("group cursor"));
 
       gc = (struct group_cursor *) res_alloc (sizeof *gc);
 
@@ -889,11 +894,11 @@ bin_to_res_group_icon (data, length, big_endian)
   struct res_resource *r;
 
   if (length < 6)
-    toosmall ("group icon header");
+    toosmall (_("group icon header"));
 
   type = get_16 (big_endian, data + 2);
   if (type != 1)
-    fatal ("unexpected group icon type %d", type);
+    fatal (_("unexpected group icon type %d"), type);
 
   c = get_16 (big_endian, data + 4);
 
@@ -908,7 +913,7 @@ bin_to_res_group_icon (data, length, big_endian)
       struct group_icon *gi;
 
       if (length < 14)
-	toosmall ("group icon");
+	toosmall (_("group icon"));
 
       gi = (struct group_icon *) res_alloc (sizeof *gi);
 
@@ -978,8 +983,8 @@ get_version_header (data, length, big_endian, key, pkey, len, vallen, type,
 	{
 	  if (length < 2)
 	    toosmall (key);
-	  if (get_16 (big_endian, data) != *key)
-	    fatal ("unexpected version string");
+	  if (get_16 (big_endian, data) != (unsigned char) *key)
+	    fatal (_("unexpected version string"));
 
 	  *off += 2;
 	  length -= 2;
@@ -1012,12 +1017,12 @@ bin_to_res_version (data, length, big_endian)
   get_version_header (data, length, big_endian, "VS_VERSION_INFO",
 		      (unichar *) NULL, &verlen, &vallen, &type, &off);
 
-  if (verlen != length)
-    fatal ("version length %d does not match resource length %lu",
+  if ((unsigned int) verlen != length)
+    fatal (_("version length %d does not match resource length %lu"),
 	   verlen, length);
 
   if (type != 0)
-    fatal ("unexpected version type %d", type);
+    fatal (_("unexpected version type %d"), type);
 
   data += off;
   length -= off;
@@ -1029,18 +1034,18 @@ bin_to_res_version (data, length, big_endian)
       unsigned long signature, fiv;
 
       if (vallen != 52)
-	fatal ("unexpected fixed version information length %d", vallen);
+	fatal (_("unexpected fixed version information length %d"), vallen);
 
       if (length < 52)
-	toosmall ("fixed version info");
+	toosmall (_("fixed version info"));
 
       signature = get_32 (big_endian, data);
       if (signature != 0xfeef04bd)
-	fatal ("unexpected fixed version signature %lu", signature);
+	fatal (_("unexpected fixed version signature %lu"), signature);
 
       fiv = get_32 (big_endian, data + 4);
       if (fiv != 0 && fiv != 0x10000)
-	fatal ("unexpected fixed version info version %lu", fiv);
+	fatal (_("unexpected fixed version info version %lu"), fiv);
 
       fi = (struct fixed_versioninfo *) res_alloc (sizeof *fi);
 
@@ -1069,7 +1074,7 @@ bin_to_res_version (data, length, big_endian)
       int ch;
 
       if (length < 8)
-	toosmall ("version var info");
+	toosmall (_("version var info"));
 
       vi = (struct ver_info *) res_alloc (sizeof *vi);
 
@@ -1086,7 +1091,7 @@ bin_to_res_version (data, length, big_endian)
 			      &off);
 
 	  if (vallen != 0)
-	    fatal ("unexpected stringfileinfo value length %d", vallen);
+	    fatal (_("unexpected stringfileinfo value length %d"), vallen);
 
 	  data += off;
 	  length -= off;
@@ -1096,7 +1101,7 @@ bin_to_res_version (data, length, big_endian)
 			      &type, &off);
 
 	  if (vallen != 0)
-	    fatal ("unexpected version stringtable value length %d", vallen);
+	    fatal (_("unexpected version stringtable value length %d"), vallen);
 
 	  data += off;
 	  length -= off;
@@ -1130,7 +1135,7 @@ bin_to_res_version (data, length, big_endian)
 	      valoff = (valoff + 3) &~ 3;
 
 	      if (off + valoff != subverlen)
-		fatal ("unexpected version string length %d != %d + %d",
+		fatal (_("unexpected version string length %d != %d + %d"),
 		       subverlen, off, valoff);
 
 	      vs->next = NULL;
@@ -1141,7 +1146,7 @@ bin_to_res_version (data, length, big_endian)
 	      length -= valoff;
 
 	      if (verlen < subverlen)
-		fatal ("unexpected version string length %d < %d",
+		fatal (_("unexpected version string length %d < %d"),
 		       verlen, subverlen);
 
 	      verlen -= subverlen;
@@ -1158,7 +1163,7 @@ bin_to_res_version (data, length, big_endian)
 			      &off);
 
 	  if (vallen != 0)
-	    fatal ("unexpected varfileinfo value length %d", vallen);
+	    fatal (_("unexpected varfileinfo value length %d"), vallen);
 
 	  data += off;
 	  length -= off;
@@ -1177,7 +1182,7 @@ bin_to_res_version (data, length, big_endian)
 	      struct ver_varinfo *vv;
 
 	      if (length < 4)
-		toosmall ("version varfileinfo");
+		toosmall (_("version varfileinfo"));
 
 	      vv = (struct ver_varinfo *) res_alloc (sizeof *vv);
 
@@ -1192,13 +1197,13 @@ bin_to_res_version (data, length, big_endian)
 	      length -= 4;
 
 	      if (vallen < 4)
-		fatal ("unexpected version value length %d", vallen);
+		fatal (_("unexpected version value length %d"), vallen);
 
 	      vallen -= 4;
 	    }
 	}
       else
-	fatal ("unexpected version string");
+	fatal (_("unexpected version string"));
 
       vi->next = NULL;
       *pp = vi;
@@ -1448,7 +1453,7 @@ res_to_bin_accelerator (accelerators, big_endian)
       d->data = (unsigned char *) reswr_alloc (8);
 
       put_16 (big_endian,
-	      a->flags | (a->next == NULL ? 0 : ACC_LAST),
+	      a->flags | (a->next != NULL ? 0 : ACC_LAST),
 	      d->data);
       put_16 (big_endian, a->key, d->data + 2);
       put_16 (big_endian, a->id, d->data + 4);
@@ -1559,7 +1564,7 @@ res_to_bin_dialog (dialog, big_endian)
   if (! dialogex)
     {
       put_32 (big_endian, dialog->style, first->data);
-      put_32 (big_endian, dialog->style, first->data + 4);
+      put_32 (big_endian, dialog->exstyle, first->data + 4);
       off = 8;
     }
   else
@@ -1599,7 +1604,7 @@ res_to_bin_dialog (dialog, big_endian)
       struct bindata *d;
 
       d = (struct bindata *) reswr_alloc (sizeof *d);
-      d->length = dialogex ? 2 : 6;
+      d->length = dialogex ? 6 : 2;
       d->data = (unsigned char *) reswr_alloc (d->length);
 
       length += d->length;
@@ -1631,7 +1636,6 @@ res_to_bin_dialog (dialog, big_endian)
   c = 0;
   for (dc = dialog->controls; dc != NULL; dc = dc->next)
     {
-      unsigned long length;
       struct bindata *d;
       int dcoff;
 
@@ -1690,14 +1694,21 @@ res_to_bin_dialog (dialog, big_endian)
 	put_16 (big_endian, 0, d->data);
       else
 	{
+	  unsigned long sublen;
+
 	  dword_align_bin (&pp, &length);
 
 	  *pp = res_to_bin_rcdata (dc->data, big_endian);
+	  sublen = 0;
 	  while (*pp != NULL)
 	    {
-	      length += (*pp)->length;
+	      sublen += (*pp)->length;
 	      pp = &(*pp)->next;
 	    }
+
+	  put_16 (big_endian, sublen, d->data);
+
+	  length += sublen;
 	}
     }
 
