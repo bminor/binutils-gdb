@@ -66,7 +66,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 							\
   "ccsr", "ccpr", "cccrcr", "ccor", "ccobr", "ccibr", "ccir", "", \
 								  \
-  "asr1",  "asr15", "asr17", "asr18", "asr19", "asr20", "asr21", "asr22", \
+  /*       ASR15                 ASR19 (don't display them) */    \
+  "asr1",  "", "asr17", "asr18", "", "asr20", "asr21", "asr22",   \
 /*									  \
   "awr0",  "awr1",  "awr2",  "awr3",  "awr4",  "awr5",  "awr6",  "awr7",  \
   "awr8",  "awr9",  "awr10", "awr11", "awr12", "awr13", "awr14", "awr15", \

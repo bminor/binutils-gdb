@@ -1,11 +1,16 @@
+Thu Dec 26 15:15:21 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* config/sparc/tm-sparclet.h: make registers ASR15, ASR19 invisible
+          (they're not useful, you can't change, write or even read them)
+	
 Thu Dec 26 15:20:48 1996  Fred Fish  <fnf@cygnus.com>
 
 	* config/pa/hppahpux.mh (TERMCAP): Always link to libc before
 	libcurses, to avoid picking up broken select() from libcurses
 	on some versions of HPUX.
 
-Thu Dec 26 15:15:21 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
-
+Thu Dec 26 15:14:41 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
+	
 	* sparclet-rom.c: Remove includes of Unix system files.
 	  Add function "sparclet_supply_register" so that parse_register_dump
 	  will not seg-fault by calling a null function pointer.
