@@ -1518,7 +1518,25 @@ int   QuietMode = 0;		/* used for debugging */
 static struct target_ops udi_ops = {
         "udi",
 	"Remote UDI connected TIP",
-	"Remote debug an AMD 29k using UDI socket connection to TIP process",
+	"Remote debug an AMD 29k using UDI socket connection to TIP process.\n\
+Arguments are\n\
+`configuration-id AF_INET hostname port-number'\n\
+    To connect via the network, where hostname and port-number specify the\n\
+    host and port where you can connect via UDI.\n\
+    configuration-id is unused.\n\
+\n\
+`configuration-id AF_UNIX socket-name tip-program'\n\
+    To connect using a local connection to the "tip.exe" program which is\n\
+    supplied by AMD.  If socket-name specifies an AF_UNIX socket then the\n\
+    tip program must already be started; connect to it using that socket.\n\
+    If not, start up tip-program, which should be the name of the tip\n\
+    program.  If appropriate, the PATH environment variable is searched.\n\
+    configuration-id is unused.\n\
+\n\
+`configuration-id'\n\
+    Look up the configuration in ./udi_soc or /etc/udi_soc, which\n\
+    are files containing lines in the above formats.  configuration-id is\n\
+    used to pick which line of the file to use.",
         udi_open,
 	udi_close,
         udi_attach,
