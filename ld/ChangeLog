@@ -1,3 +1,10 @@
+Thu Jun 16 14:25:22 1994  Eric Youngdale  (ericy@cais.cais.com)
+
+	* emultempl/linux.em: New file providing support for linking
+	against Linux shared libraries.
+	* config/i386-linux.mt (ei386linux.c): Depend upon linux.em.
+	* emulparams/i386linux.sh (TEMPLATE_NAME): Define as linux.
+
 Thu Jun 16 12:22:01 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ldexp.c (exp_print_tree): Don't crash if etree_rel section has

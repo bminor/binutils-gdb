@@ -31,6 +31,7 @@ generic.em
 gld960.em
 gld960c.em
 hppaelf.em
+linux.em
 lnk960.em
 m88kbcs.em
 sunos.em
