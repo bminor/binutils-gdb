@@ -1297,7 +1297,8 @@ do_scrub_chars (get, tostart, tolen)
 	  /* Some relatively `normal' character.  */
 	  if (state == 0)
 	    {
-	      state = 11;	/* Now seeing label definition */
+	      if (IS_SYMBOL_COMPONENT (ch))
+		state = 11;	/* Now seeing label definition */
 	    }
 	  else if (state == 1)
 	    {
@@ -1305,7 +1306,7 @@ do_scrub_chars (get, tostart, tolen)
 	    }
 	  else if (state == 9)
 	    {
-	      if (lex[ch] != LEX_IS_SYMBOL_COMPONENT)
+	      if (!IS_SYMBOL_COMPONENT (ch))
 		state = 3;
 	    }
 	  else if (state == 10)
