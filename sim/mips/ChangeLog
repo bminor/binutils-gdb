@@ -1,3 +1,13 @@
+Fri Oct  9 18:02:25 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* interp.c: #include "itable.h" if WITH_IGEN.
+	(get_insn_name): New function.
+	(sim_open): Initialize CPU_INSN_NAME,CPU_MAX_INSNS.
+
+Mon Sep 14 12:36:44 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* configure: Rebuilt to inhale new common/aclocal.m4.
+
 start-sanitize-r5900
 Thu Sep 10 11:50:54 1998  Doug Evans  <devans@canuck.cygnus.com>
 
