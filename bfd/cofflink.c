@@ -1,5 +1,5 @@
 /* COFF specific linker code.
-   Copyright 1994 Free Software Foundation, Inc.
+   Copyright 1994, 1995 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -78,6 +78,9 @@ struct coff_final_link_info
   bfd_byte *external_relocs;
   /* Buffer large enough to hold swapped relocs of any input section.  */
   struct internal_reloc *internal_relocs;
+
+enum   bfd_link_subsystem  subsystem;
+bfd_link_stack_heap stack_heap_parameters;
 };
 
 static struct bfd_hash_entry *coff_link_hash_newfunc
@@ -99,6 +102,45 @@ static boolean coff_write_global_sym
 static boolean coff_reloc_link_order
   PARAMS ((bfd *, struct coff_final_link_info *, asection *,
 	   struct bfd_link_order *));
+
+
+/* These new data and data types are used to keep track of the .idata$4 and
+   .idata$5 relocations which are put into the .idata section for all of the
+   *.dll input libraries linked in.  This is not a great solution, and may
+   break in the future if MS changes the format of its libraries, but it
+   does work for the collection of mstools libraries we are currently working
+   with.  The main problem is that there are some new majic symbols defined
+   in the libraries which are non-standard coff and simply aren't handled 
+   completely by ld.  What has been included here will help finish up the job.
+     Basically, during the link, .idata$4 and .idata$5 pointers are correctly
+   relocated to the image.  At the very end of the link, the .idata$2
+   information is written.  This data appears at the beginning of the .idata
+   section and a 'set' of information appears for each *.dll passed in.
+   Each set of information consists of 3 addresses, a pointer to the .idata$4
+   start, a pointer to .idata$6 (which has the name of the dll), and a pointer
+   to .idata$5 start.  The idata$4 and 5 information is a list of pointers
+   which appear to point to the name of various functions found within the dll.
+   When invoked, the loader will write over these names with the correct
+   addresses to use for these functions.  
+     Without this 'fix', all information appears correctly except for the
+   addresses of the .idata$4 and 5 starts within the .idata$2 portion of the
+   .idata section.  What we will do is to keep track of the dll's processed
+   and the number of functions needed from each dll.  From this information
+   we can correctly compute the start of the idata$4 and 5 lists for each
+   dll in the idata section */
+static int num_DLLs_done = 0;
+static int num_DLLs      = 0;
+static int all_entries   = 0;
+struct DLL_struct {
+  const char * DLL_name;
+  int          num_entries;
+};
+struct DLL_struct MS_DLL[10];
+static bfd_vma idata_4_prev = 0;
+static bfd_vma idata_5_prev = 0;
+static bfd_vma add_to_val   = 0;
+
+
 
 /* Create an entry in a COFF linker hash table.  */
 
@@ -304,7 +346,7 @@ coff_read_string_table (abfd)
   else
     {
 #if STRING_SIZE_SIZE == 4
-      strsize = bfd_h_get_32 (abfd, extstrsize);
+      strsize = bfd_h_get_32 (abfd, (bfd_byte *) extstrsize);
 #else
  #error Change bfd_h_get_32
 #endif
@@ -566,9 +608,10 @@ coff_link_add_symbols (abfd, info)
 		      bfd_byte *eaux;
 		      union internal_auxent *iaux;
 
-		      alloc = bfd_hash_allocate (&info->hash->table,
-						 (sym.n_numaux
-						  * sizeof (*alloc)));
+		      alloc = ((union internal_auxent *)
+			       bfd_hash_allocate (&info->hash->table,
+						  (sym.n_numaux
+						   * sizeof (*alloc))));
 		      if (alloc == NULL)
 			{
 			  bfd_set_error (bfd_error_no_memory);
@@ -593,6 +636,126 @@ coff_link_add_symbols (abfd, info)
   return true;
 }
 
+/* parse out a -heap <reserved>,<commit> line */
+
+static char *
+dores_com (ptr, def,res, com)
+     char *ptr;
+     int *def;
+     int *res;
+     int *com;
+{
+  *def = 1;
+  *res = strtoul (ptr, &ptr, 0);
+  if (ptr[0] == ',')
+    *com = strtoul (ptr+1, &ptr, 0);
+  return ptr;
+}
+
+static char *get_name(ptr, dst)
+char *ptr;
+char **dst;
+{
+  while (*ptr == ' ')
+    ptr++;
+  *dst = ptr;
+  while (*ptr && *ptr != ' ')
+    ptr++;
+  *ptr = 0;
+  return ptr+1;
+}
+/* Process any magic embedded commands in a section called .drectve */
+			
+static int
+process_embedded_commands (abfd)
+     bfd *abfd;
+{
+  asection *sec = bfd_get_section_by_name (abfd, ".drectve");
+  char *s;
+  char *e;
+  char *copy;
+  if (!s) 
+    return 1;
+
+  copy = malloc (sec->_raw_size);
+  if (!copy) 
+    {
+      bfd_set_error (bfd_error_no_memory);
+      return 0;
+    }
+  if (! bfd_get_section_contents(abfd, sec, copy, 0, sec->_raw_size)) 
+    {
+      free (copy);
+      return 0;
+    }
+  e = copy + sec->_raw_size;
+  for (s = copy;  s < e ; ) 
+    {
+      if (s[0]!= '-') {
+	s++;
+	continue;
+      }
+      if (strncmp (s,"-attr", 5) == 0)
+	{
+	  char *name;
+	  char *attribs;
+	  asection *asec;
+
+	  int loop = 1;
+	  int had_write = 0;
+	  int had_read = 0;
+	  int had_exec= 0;
+	  int had_shared= 0;
+	  s += 5;
+	  s = get_name(s, &name);
+	  s = get_name(s, &attribs);
+	  while (loop) {
+	    switch (*attribs++) 
+	      {
+	      case 'W':
+		had_write = 1;
+		break;
+	      case 'R':
+		had_read = 1;
+		break;
+	      case 'S':
+		had_shared = 1;
+		break;
+	      case 'X':
+		had_exec = 1;
+		break;
+	      default:
+		loop = 0;
+	      }
+	  }
+	  asec = bfd_get_section_by_name (abfd, name);
+	  if (asec) {
+	    if (had_exec)
+	      asec->flags |= SEC_CODE;
+	    if (!had_write)
+	      asec->flags |= SEC_READONLY;
+	  }
+	}
+      else if (strncmp (s,"-heap", 5) == 0)
+	{
+	  s = dores_com (s+5, 
+			 &NT_stack_heap.heap_defined,
+			 &NT_stack_heap.heap_reserve,
+			 &NT_stack_heap.heap_commit);
+	}
+      else if (strncmp (s,"-stack", 6) == 0)
+	{
+	  s = dores_com (s+6,
+			 &NT_stack_heap.heap_defined,
+			 &NT_stack_heap.heap_reserve,
+			 &NT_stack_heap.heap_commit);
+	}
+      else 
+	s++;
+    }
+  free (copy);
+  return 1;
+}
 /* Do the final link step.  */
 
 boolean
@@ -632,6 +795,15 @@ _bfd_coff_final_link (abfd, info)
   finfo.contents = NULL;
   finfo.external_relocs = NULL;
   finfo.internal_relocs = NULL;
+
+  if (obj_pe(abfd))
+    {
+      /* store the subsystem, stack and heap parameters in variables defined
+	 in internal.h so that when they are needed to write the NT optional
+	 file header (coffcode.h), they will be available */
+      NT_subsystem  = info->subsystem;
+      NT_stack_heap = info->stack_heap_parameters;
+    }
 
   finfo.strtab = _bfd_stringtab_init ();
   if (finfo.strtab == NULL)
@@ -989,7 +1161,7 @@ _bfd_coff_final_link (abfd, info)
 #if STRING_SIZE_SIZE == 4
   bfd_h_put_32 (abfd,
 		_bfd_stringtab_size (finfo.strtab) + STRING_SIZE_SIZE,
-		strbuf);
+		(bfd_byte *) strbuf);
 #else
  #error Change bfd_h_put_32
 #endif
@@ -1054,6 +1226,9 @@ coff_link_input_bfd (finfo, input_bfd)
      bfd *input_bfd;
 {
   boolean (*sym_is_global) PARAMS ((bfd *, struct internal_syment *));
+  boolean (*adjust_symndx) PARAMS ((bfd *, struct bfd_link_info *, bfd *,
+				    asection *, struct internal_reloc *,
+				    boolean *));
   bfd *output_bfd;
   const char *strings;
   bfd_size_type syment_base;
@@ -1109,6 +1284,13 @@ coff_link_input_bfd (finfo, input_bfd)
   indexp = finfo->sym_indices;
   output_index = syment_base;
   outsym = finfo->outsyms;
+
+  if (obj_pe (output_bfd))
+      {
+	if (!process_embedded_commands (input_bfd))
+	  return false;
+      }
+
   while (esym < esym_end)
     {
       struct internal_syment isym;
@@ -1387,7 +1569,8 @@ coff_link_input_bfd (finfo, input_bfd)
 		{
 		  /* If this is a long filename, we must put it in the
 		     string table.  */
-		  if (auxp->x_file.x_n.x_zeroes == 0)
+		  if (auxp->x_file.x_n.x_zeroes == 0
+		      && auxp->x_file.x_n.x_offset != 0)
 		    {
 		      const char *filename;
 		      bfd_size_type indx;
@@ -1570,13 +1753,14 @@ coff_link_input_bfd (finfo, input_bfd)
      symbol will be the first symbol in the next input file.  In the
      normal case, this will save us from writing out the C_FILE symbol
      again.  */
-  if (finfo->last_file_index >= syment_base)
+  if (finfo->last_file_index != -1
+      && finfo->last_file_index >= syment_base)
     {
       finfo->last_file.n_value = output_index;
       bfd_coff_swap_sym_out (output_bfd, (PTR) &finfo->last_file,
 			     (PTR) (finfo->outsyms
-				    + ((finfo->last_file_index - syment_base)
-				       * osymesz)));
+ 				    + ((finfo->last_file_index - syment_base)
+ 				       * osymesz)));
     }
 
   /* Write the modified symbols to the output file.  */
@@ -1598,6 +1782,7 @@ coff_link_input_bfd (finfo, input_bfd)
 
   /* Relocate the contents of each section.  */
   relsz = bfd_coff_relsz (input_bfd);
+  adjust_symndx = coff_backend_info (input_bfd)->_bfd_coff_adjust_symndx;
   for (o = input_bfd->sections; o != NULL; o = o->next)
     {
       if ((o->flags & SEC_HAS_CONTENTS) == 0)
@@ -1605,7 +1790,7 @@ coff_link_input_bfd (finfo, input_bfd)
 
       if (! bfd_get_section_contents (input_bfd, o, finfo->contents,
 				      (file_ptr) 0, o->_raw_size))
-	return false;
+ 	return false;
 
       if ((o->flags & SEC_RELOC) != 0)
 	{
@@ -1655,7 +1840,6 @@ coff_link_input_bfd (finfo, input_bfd)
 	      struct coff_link_hash_entry **rel_hash;
 
 	      offset = o->output_section->vma + o->output_offset - o->vma;
-
 	      irel = internal_relocs;
 	      irelend = irel + o->reloc_count;
 	      rel_hash = (finfo->section_info[target_index].rel_hashes
@@ -1663,6 +1847,7 @@ coff_link_input_bfd (finfo, input_bfd)
 	      for (; irel < irelend; irel++, rel_hash++)
 		{
 		  struct coff_link_hash_entry *h;
+		  boolean adjusted;
 
 		  *rel_hash = NULL;
 
@@ -1672,6 +1857,16 @@ coff_link_input_bfd (finfo, input_bfd)
 
 		  if (irel->r_symndx == -1)
 		    continue;
+
+		  if (adjust_symndx)
+		    {
+		      if (! (*adjust_symndx) (output_bfd, finfo->info,
+					      input_bfd, o, irel,
+					      &adjusted))
+			return false;
+		      if (adjusted)
+			continue;
+		    }
 
 		  h = obj_coff_sym_hashes (input_bfd)[irel->r_symndx];
 		  if (h != NULL)
@@ -1792,12 +1987,13 @@ coff_write_global_sym (h, data)
       return false;
 
     case bfd_link_hash_undefined:
-    case bfd_link_hash_weak:
+    case bfd_link_hash_undefweak:
       isym.n_scnum = N_UNDEF;
       isym.n_value = 0;
       break;
 
     case bfd_link_hash_defined:
+    case bfd_link_hash_defweak:
       {
 	asection *sec;
 
@@ -1897,7 +2093,7 @@ coff_reloc_link_order (output_bfd, finfo, output_section, link_order)
      asection *output_section;
      struct bfd_link_order *link_order;
 {
-  const reloc_howto_type *howto;
+  reloc_howto_type *howto;
   struct internal_reloc *irel;
   struct coff_link_hash_entry **rel_hash_ptr;
 
@@ -2039,6 +2235,7 @@ _bfd_coff_generic_relocate_section (output_bfd, info, input_bfd,
   struct internal_reloc *rel;
   struct internal_reloc *relend;
 
+
   rel = relocs;
   relend = rel + input_section->reloc_count;
   for (; rel < relend; rel++)
@@ -2048,7 +2245,7 @@ _bfd_coff_generic_relocate_section (output_bfd, info, input_bfd,
       struct internal_syment *sym;
       bfd_vma addend;
       bfd_vma val;
-      const reloc_howto_type *howto;
+      reloc_howto_type *howto;
       bfd_reloc_status_type rstat;
 
       symndx = rel->r_symndx;
@@ -2068,21 +2265,33 @@ _bfd_coff_generic_relocate_section (output_bfd, info, input_bfd,
          size of the symbol is included in the section contents, or it
          is not.  We assume that the size is not included, and force
          the rtype_to_howto function to adjust the addend as needed.  */
+
       if (sym != NULL && sym->n_scnum != 0)
 	addend = - sym->n_value;
       else
 	addend = 0;
+
 
       howto = bfd_coff_rtype_to_howto (input_bfd, input_section, rel, h,
 				       sym, &addend);
       if (howto == NULL)
 	return false;
 
+      /* WINDOWS_NT; in this next section, the value of 'val' will be computed.
+         With respect to the .idata and .rsrc sections, the NT_IMAGE_BASE
+         must be removed from the value that is to be relocated (NT_IMAGE_BASE
+         is currently defined in internal.h and has value 400000).  Now this
+         value should only be removed from addresses being relocated in the
+         .idata and .rsrc sections, not the .text section which should have
+         the 'real' address.  In addition, the .rsrc val's must also be
+         adjusted by the input_section->vma.  */
+
       val = 0;
 
       if (h == NULL)
 	{
 	  asection *sec;
+          int i;
 
 	  if (symndx == -1)
 	    {
@@ -2092,15 +2301,30 @@ _bfd_coff_generic_relocate_section (output_bfd, info, input_bfd,
 	  else
 	    {
 	      sec = sections[symndx];
-	      val = (sec->output_section->vma
+              val = (sec->output_section->vma
 		     + sec->output_offset
 		     + sym->n_value
 		     - sec->vma);
+	      if (obj_pe(output_bfd)) {
+		/* Make a correction here to val if the sec is either .rsrc
+		   or .idata */
+		if (strcmp (input_section->name, ".text") != 0)
+		  {
+		    if (strncmp (sec->name, ".idata$", 7) == 0)
+		      val -= NT_IMAGE_BASE;
+		    else if (strncmp (sec->name, ".rsrc$", 6) == 0) 
+		      {
+			val -= NT_IMAGE_BASE;
+			val += sec->vma;
+		      }
+		  }
+	      }
 	    }
 	}
       else
 	{
-	  if (h->root.type == bfd_link_hash_defined)
+	  if (h->root.type == bfd_link_hash_defined
+	      || h->root.type == bfd_link_hash_defweak)
 	    {
 	      asection *sec;
 
@@ -2108,6 +2332,20 @@ _bfd_coff_generic_relocate_section (output_bfd, info, input_bfd,
 	      val = (h->root.u.def.value
 		     + sec->output_section->vma
 		     + sec->output_offset);
+	      if (obj_pe (output_bfd)) {
+		/* Make a correction here to val if the sec is either .rsrc
+		   or .idata */
+		if (strcmp (input_section->name, ".text") != 0)
+		  {
+		    if (strncmp (sec->name, ".idata$", 7) == 0)
+		      val -= NT_IMAGE_BASE;
+		    else if (strncmp (sec->name, ".rsrc$", 6) == 0) 
+		      {
+			val -= NT_IMAGE_BASE;
+			val += sec->vma;
+		      }
+		  }
+	      }
 	    }
 	  else if (! info->relocateable)
 	    {
@@ -2118,6 +2356,102 @@ _bfd_coff_generic_relocate_section (output_bfd, info, input_bfd,
 	    }
 	}
 
+      if (obj_pe (output_bfd)) {
+
+	/* Here's where we will collect the information about the dll .idata$4 
+	   and 5 entries and fix up the vals for .idata$2 information.  When
+	   we encounter processing for .idata$5 (this could also be done for
+	   .idata$4) we will keep track of the number of entries made for a
+	   particular dll.  Now if we are processing .idata$2 input_section,
+	   then we know how many entries have been made from each dll and we
+	   have to fix up the .idata$2 start addresses for .idata$4 and 
+	   .idata$5. */
+	add_to_val = 0;
+	if (strncmp (input_section->name, ".idata$5", 8) == 0)
+	  {
+	    if (num_DLLs == 0)  /* this is the first one */
+	      {
+		num_DLLs += 1;
+		MS_DLL[num_DLLs].DLL_name = input_bfd->filename;
+		MS_DLL[num_DLLs].num_entries += 1;
+	      }
+	    else if (!strcmp (input_bfd->filename, MS_DLL[num_DLLs].DLL_name))
+	      {
+		/* this is just another entry */
+		MS_DLL[num_DLLs].num_entries += 1;
+	      }
+	    else
+	      {
+		/* This is a new DLL */
+		num_DLLs += 1;
+		MS_DLL[num_DLLs].DLL_name = input_bfd->filename;
+		MS_DLL[num_DLLs].num_entries += 1; 
+	      }
+	    all_entries += 1;
+	  }
+
+	else if (strncmp (input_section->name, ".idata$2", 8) == 0)
+	  {
+	    /* All information about the number of entries needed from each
+	       DLL has been collected at this point.  Now we actually want to
+	       make and adjustment to the val's for .idata$4 and .idata$5
+	       which are part of the .idata$2 section. */
+	    /* first we have to get the symbol name from sym.  This will be
+	       either .idata$4, .idata$5 or .idata$6.  A 'fixup' is computed for
+	       .idata$4 and .idata$5 but not for .idata$6 (this value is handled
+	       correctly already and doesn't have to be fixed) */
+	    const char *name;
+	    char buf[SYMNMLEN + 1];
+
+	    if (sym->_n._n_n._n_zeroes == 0 && sym->_n._n_n._n_offset != 0)
+	      name = obj_coff_strings (input_bfd) + sym->_n._n_n._n_offset;
+	    else
+	      {
+		strncpy (buf, sym->_n._n_name, SYMNMLEN);
+		buf[SYMNMLEN] = '\0';
+		name = buf;
+	      }
+
+	    if (num_DLLs_done)
+	      {
+		/* we have done at least one.  The val fixups are based on the
+		   previous fixups */
+		if (strncmp (name, ".idata$4", 8) == 0)
+		  {
+		    add_to_val = idata_4_prev +
+		      ((MS_DLL[num_DLLs_done].num_entries + 1) * 4);
+		    idata_4_prev = add_to_val;
+		  }
+		else if (strncmp (name, ".idata$5", 8) == 0)
+		  {
+		    add_to_val = idata_5_prev +
+		      ((MS_DLL[num_DLLs_done].num_entries + 1) * 4);
+		    idata_5_prev = add_to_val;
+		    num_DLLs_done += 1;	/* assuming that idata$5 is done after $4*/
+		  }
+	      }
+	    else
+	      {
+		/* This is the first one.  The other idata$4 and 5 entries will be
+		   computed from these */
+		if (strncmp (name, ".idata$4", 8) == 0)
+		  {
+		    add_to_val = ((num_DLLs - 1) * 0x14) + 0x28;
+		    idata_4_prev = add_to_val;
+		  }
+		else if (strncmp (name, ".idata$5", 8) == 0)
+		  {
+		    add_to_val = idata_4_prev + (all_entries + num_DLLs) * 4;
+		    idata_5_prev = add_to_val;
+		    num_DLLs_done += 1;	/* assuming that idata$5 is done after $4*/
+		  }
+            
+	      }
+	  }
+	val = val + add_to_val;
+       
+      }
+  
       rstat = _bfd_final_link_relocate (howto, input_bfd, input_section,
 					contents,
 					rel->r_vaddr - input_section->vma,
