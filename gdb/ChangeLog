@@ -1,3 +1,7 @@
+2004-07-10  Mark Kettenis  <kettenis@gnu.org>
+
+	* NEWS: Mention BSD libkvm interface.
+
 2004-07-10  Michael Snyder  <msnyder@redhat.com>
 
 	* symfile.c (generic_load): Comment typo.
