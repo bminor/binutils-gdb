@@ -1,3 +1,9 @@
+Thu Jun 27 18:13:57 1996  Fred Fish  <fnf@cygnus.com>
+
+	* config/unix-gdb.exp: Increase default timeout from 30 to 60 sec.
+	* config/netware.exp (gdb_run_cmd): Restore old timeout before doing
+	error return.
+
 Thu Jun 27 10:54:58 1996  Fred Fish  <fnf@cygnus.com>
 
 	* lib/gdb.exp (default_gdb_start): When reporting a timeout during
