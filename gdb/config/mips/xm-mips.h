@@ -64,8 +64,7 @@ extern void *memset();
 /* Kernel is a bit tenacious about sharing text segments, disallowing bpts.  */
 #define	ONE_PROCESS_WRITETEXT
 
-/* HAVE_SGTTY also works, except for the lack of usleep (which it would be
-   possible to work around by writing our own using setitimer directly).
+/* HAVE_SGTTY also works, last we tried.
 
    But we have termios, at least as of Ultrix 4.2A, so use it.  */
 #define HAVE_TERMIOS

@@ -1,3 +1,7 @@
+Tue Oct 12 22:54:41 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* config/mips/xm-mips.h: Remove comment about HAVE_SGTTY vs. usleep.
+
 Tue Oct 12 12:01:29 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
 
 	* configure.in: only configure gdbserver for native environments
