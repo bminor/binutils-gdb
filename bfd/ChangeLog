@@ -1,5 +1,11 @@
 Tue Jan 17 10:52:32 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
+	* bfd-in.h (bfd_byte, reloc_howto_type): Define here, not...
+	* reloc.c (bfd_byte, reloc_howto_type): here.
+	* Changed all occurrences of ``const struct reloc_howto_struct''
+	to be ``reloc_howto_type'' instead.
+	* bfd-in2.h, libbfd.h, libcoff.h: Rebuilt.
+
 	* opncls.c (bfd_openstreamr): New function.
 	* bfd-in2.h: Rebuilt.
 

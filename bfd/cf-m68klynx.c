@@ -44,7 +44,7 @@ struct internal_syment;
 static bfd_reloc_status_type _bfd_m68klynx_special_fn
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 static boolean lynx_link_add_symbols PARAMS ((bfd *, struct bfd_link_info *));
-static const struct reloc_howto_struct *coff_m68k_lynx_rtype_to_howto
+static reloc_howto_type *coff_m68k_lynx_rtype_to_howto
   PARAMS ((bfd *, asection *, struct internal_reloc *,
 	   struct coff_link_hash_entry *, struct internal_syment *,
 	   bfd_vma *));
@@ -219,7 +219,7 @@ lynx_link_add_symbols (abfd, info)
    coff-m68k.c, because it uses RTYPE2HOWTO.  */
 
 /*ARGSUSED*/
-static const struct reloc_howto_struct *
+static reloc_howto_type *
 coff_m68k_lynx_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
      bfd *abfd;
      asection *sec;
@@ -229,7 +229,7 @@ coff_m68k_lynx_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
      bfd_vma *addendp;
 {
   arelent relent;
-  const struct reloc_howto_struct *howto;
+  reloc_howto_type *howto;
 
   RTYPE2HOWTO (&relent, rel);
 
