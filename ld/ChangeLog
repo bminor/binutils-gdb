@@ -1,4 +1,18 @@
-Sun Sep 04 17:58:10 1994	Richard Earnshaw (rwe@pegasus.esprit.ec.org)
+Tue Sep  6 23:51:45 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* scripttempl/m68kcoff.sc: Put .bss in data segment.
+
+	* scripttempl/h8300.sc: Change .stab and .stabstr to use a VMA of
+	0, and to only be marked as NOLOAD if relocating.
+	* scripttempl/h8500.sc, scripttempl/h8500b.sc: Likewise.
+	* scripttempl/h8500c.sc, scripttempl/h8500m.sc: Likewise.
+	* scripttempl/h8500s.sc, scripttempl/i386coff.sc: Likewise.
+	* scripttempl/i386go32.sc, scripttempl/i386lynx.sc: Likewise.
+	* scripttempl/m68kcoff.sc, scripttempl/m68klynx.sc: Likewise.
+	* scripttempl/sh.sc, scripttempl/sparccoff.sc: Likewise.
+	* scripttempl/sparclynx.sc: Likewise.
+
+Sun Sep 04 17:58:10 1994  Richard Earnshaw (rwe@pegasus.esprit.ec.org)
 
 	* Makefile.in, configure.in: Add support (disabled) the ARM/RISCiX.
 	* config/riscix.mt, emulparams/riscix.sh, scripttempl/riscix.sc:
