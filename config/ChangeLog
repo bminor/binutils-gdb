@@ -1,5 +1,9 @@
 Thu Feb 15 13:07:43 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* mh-go32: Remove most variable settings, since they presumed a
+	Canadian Cross, which is now handled correctly by the configure
+	script.
+
 	* mh-sparcpic (PICFLAG): Set to -fPIC, not -fpic.
 
 Mon Feb 12 14:53:39 1996  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
