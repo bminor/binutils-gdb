@@ -196,7 +196,7 @@ dnl end-sanitize-beos
       i386-*-msdos*)        fmt=aout ;;
       i386-*-moss*)	    fmt=elf ;;
       i386-*-pe)            fmt=coff em=pe ;;
-      i386-*-cygwin32*)     fmt=coff em=pe bfd_gas=yes ;;
+      i386-*-cygwin*)       fmt=coff em=pe bfd_gas=yes ;;
       i386-*-mingw32*)      fmt=coff em=pe bfd_gas=yes ;;
       i386-*-*nt*)          fmt=coff em=pe ;;
       i960-*-bout)          fmt=bout ;;
@@ -252,7 +252,7 @@ dnl end-sanitize-beos
 			    fmt=elf ;;
       mn10200-*-*)	    fmt=elf bfd_gas=yes ;;
       mn10300-*-*)	    fmt=elf bfd_gas=yes ;;
-      ppc-*-pe | ppc-*-cygwin32 | ppc-*-winnt*)
+      ppc-*-pe | ppc-*-cygwin* | ppc-*-winnt*)
 		            fmt=coff em=pe ;;
       ppc-*-aix*)           fmt=coff ;;
       ppc-*-beos*)          fmt=coff ;;
