@@ -1,3 +1,9 @@
+Tue Oct 19 14:15:40 1993  Kung Hsu  (kung@cirdan.cygnus.com)
+
+	* values.c (value_virtual_fn_field): Fix the offset calculation
+	when calling virtual functions. (gdb.t22/virtfunc.exp).
+	* eval.c (evaluate_subexp): same as above.
+
 Tue Oct 19 10:43:16 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* config/rs6000/rs6000.mh (TERMCAP): Define to -lcurses.
@@ -65,7 +71,7 @@ Sun Oct 17 09:18:57 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 Sun Oct 17 02:06:01 1993  Stu Grossman  (grossman at cygnus.com)
 
 	* procfs.c:  Handle process exits more elegantly by trapping on
-	entry to _exit.  Also, cleanup procinfo list when process dies of
+	entry to exit.  Also, cleanup procinfo list when process dies of
 	it's own accord (as opposed to being killed).
 
 Sat Oct 16 20:47:30 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
@@ -563,7 +569,7 @@ Thu Sep 30 11:30:56 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 Thu Sep 30 11:25:55 1993  Kung Hsu  (kung@cygnus.com)
 
 	* cp-valprint.c (cp_is_vtbl_ptr_type):
-	change vtable field name to __vtbl (pr2695).
+	change vtable field name to _vtbl (pr2695).
 
 	* symtab.c (gdb_mangle_name): fix a bug, to get mangled name right.
 
@@ -1603,7 +1609,7 @@ Mon Aug 16 02:56:01 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 	* blockframe.c (create_new_frame, get_prev_frame_info):
 	Use the function name when calling IN_SIGTRAMP.
 	* config/m68k/tm-m68k.h (SIG_PC_FP_OFFSET, SIG_SP_FP_OFFSET):
-	Define for correct handling of bachtraces through _sigtramp.
+	Define for correct handling of bachtraces through sigtramp.
 	* m68k-tdep.c (m68k_find_saved_regs):  Adjust saved sp for fake
 	sigtramp frames.
 	* mipsread.c (parse_type):  Handle corrupt TIR info with complaint
@@ -1765,7 +1771,7 @@ Sat Aug  7 10:59:03 1993  Fred Fish  (fnf@deneb.cygnus.com)
 	* elfread.c (elf_symtab_read):  Properly sort out the bss symbols
 	from the data symbols and give them the correct minimal_symbol_type.
 	Add file static symbols to the minimal symbol table, not just
-	global symbols.  Add absolute symbols as well (like _edata, _end).
+	global symbols.  Add absolute symbols as well (like edata, end).
 	Redo stabs-in-elf special symbol handling now that file static
 	symbols are entered into the into the minimal symbol table.
 	* dwarfread.c (add_partial_symbol):  Add comment about limitations
@@ -2133,7 +2139,7 @@ Tue Jul 27 12:36:49 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 	* coffread.c, dbxread.c, mipsread.c, xcoffread.c (*_symfile_read):
 	Lint cleanup code, call do_cleanups explicitly.
 	* symfile.c (symbol_file_add):  Call new_symfile_objfile and
-	reinit_frame_cache _after_ the new symbols are read in.
+	reinit_frame_cache after_ the new symbols are read in.
 
 Tue Jul 27 01:57:01 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
@@ -2513,7 +2519,7 @@ Thu Jul  8 14:48:54 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 	* hppa-tdep.c (hppa_push_arguments): Allocate enough space for
 	arguments.
 
-	* hppa-tdep.c: Change _initialize_hppab_tdep to _initialize_hppa_tdep.
+	* hppa-tdep.c: Change initialize_hppab_tdep to _initialize_hppa_tdep.
 
 start-sanitize-v9
 Thu Jul  8 14:47:00 1993  Doug Evans  (dje@canuck.cygnus.com)
@@ -2675,7 +2681,7 @@ Tue Jun 29 11:02:58 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 	* fork-child.c (fork_inferior): Use gdb_setpgid.
 	* serial.h, ser-unix.c, ser-go32.c: Provide gdb_setpgid.
 	* utils.c (quit): Use current_target->to_terminal_ours to figure
-	out whether we care about lack of job control, rather than __GO32__.
+	out whether we care about lack of job control, rather than _GO32__.
 	* utils.c: Include serial.h not terminal.h
 	(quit): Use job_control not TIOCGPGRP.
 	* terminal.h: Don't undefine TIOCGPGRP.
@@ -3614,9 +3620,9 @@ Sat May 22 10:03:09 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 Sat May 22 03:33:07 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
-	Fix stack unwinding through _sigtramp on Irix. These patches are from
+	Fix stack unwinding through sigtramp on Irix. These patches are from
 	Paul Flinders <ptf@delcam.co.uk>.
-	* mipsread.c (fixup_sigtramp): Find _sigtramp on Irix even when the
+	* mipsread.c (fixup_sigtramp): Find sigtramp on Irix even when the
 	executable uses sigvec.
 	* mips-tdep.c (read_next_frame_reg): Allow tm-file to override
 	sigcontext offsets.
@@ -4832,7 +4838,7 @@ Thu Mar 25 12:26:50 1993  Stu Grossman  (grossman@cygnus.com)
 	cuz there's no difference between the raw & virtual forms.
 	Replaced by memcpy in tm file.
 	(register_virtual_type):  Rename to h8500_register_virtual_type.
-	Get rid of pointer pseudo-regs, use _REGNUM with all reg names.
+	Get rid of pointer pseudo-regs, use REGNUM with all reg names.
 	(_initialize_h8500_tdep):  Get rid of crock to ensure that GDB &
 	emulator have same reg offsets.  This is all handled in the
 	simulator code now.
@@ -5421,7 +5427,7 @@ Thu Feb 18 01:56:06 1993  John Gilmore  (gnu@cygnus.com)
 
 	* nm-hp300bsd.h (ATTACH_DETACH, PTRACE_ATTACH, PTRACE_DETACH): define.
 	* config/hp300bsd.mh (REGEX, REGEX1):  Define.
-	* m68k-pinsn.c (BREAK_UP_BIG_DECL, AND_OTHER_PART):  #if __GNUC__,
+	* m68k-pinsn.c (BREAK_UP_BIG_DECL, AND_OTHER_PART):  #if _GNUC__,
 	define to kludge the large opcode table into two smaller tables,
 	since GCC take exponential space to build the table.  Lint.
 	(NOPCODES):  Remove, use "numopcodes" from opcode/m68k.h instead.
