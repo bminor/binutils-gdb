@@ -1894,6 +1894,10 @@ rs6000_register_virtual_type (int n)
       int size = regsize (reg, tdep->wordsize);
       switch (size)
 	{
+	case 0:
+	  return builtin_type_int0;
+	case 4:
+	  return builtin_type_int32;
 	case 8:
 	  if (tdep->ppc_ev0_regnum <= n && n <= tdep->ppc_ev31_regnum)
 	    return builtin_type_vec64;
@@ -1904,8 +1908,8 @@ rs6000_register_virtual_type (int n)
 	  return builtin_type_vec128;
 	  break;
 	default:
-	  return builtin_type_int32;
-	  break;
+	  internal_error (__FILE__, __LINE__, "Register %d size %d unknown",
+			  n, size);
 	}
     }
 }
