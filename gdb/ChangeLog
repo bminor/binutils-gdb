@@ -1,3 +1,9 @@
+Sat Dec 25 20:05:41 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+    * hppa-tdep.c (init_extra_frame_info): Correctly adjust the base
+	of the current frame when "fromleaf" is true.  Do not adjust the
+	frame base of the innermost frame if it is a leaf function.
+
 Sat Dec 25 13:39:21 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* stabsread.c (define_symbol): Only combine a p/r pair into a

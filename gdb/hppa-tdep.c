@@ -497,27 +497,47 @@ init_extra_frame_info (fromleaf, frame)
   int flags;
   int framesize;
 
-  if (frame->next)		/* Only do this for outermost frame */
+  if (frame->next && !fromleaf)
     return;
+
+  /* If the next frame represents a frameless function invocation
+     then we have to do some adjustments that are normally done by
+     FRAME_CHAIN.  (FRAME_CHAIN is not called in this case.)  */
+  if (fromleaf)
+    {
+      /* Find the framesize of *this* frame without peeking at the PC
+	 in the current frame structure (it isn't set yet).  */
+      framesize = find_proc_framesize (FRAME_SAVED_PC (get_next_frame (frame)));
+
+      /* Now adjust our base frame accordingly.  If we have a frame pointer
+	 use it, else subtract the size of this frame from the current
+	 frame.  (we always want frame->frame to point at the lowest address
+	 in the frame).  */
+      if (framesize == -1)
+	frame->frame = read_register (FP_REGNUM);
+      else
+	frame->frame -= framesize;
+      return;
+    }
 
   flags = read_register (FLAGS_REGNUM);
   if (flags & 2)	/* In system call? */
     frame->pc = read_register (31) & ~0x3;
 
-  /* The outermost frame is always derived from PC-framesize */
+  /* The outermost frame is always derived from PC-framesize
+
+     One might think frameless innermost frames should have
+     a frame->frame that is the same as the parent's frame->frame.
+     That is wrong; frame->frame in that case should be the *high*
+     address of the parent's frame.  It's complicated as hell to
+     explain, but the parent *always* creates some stack space for
+     the child.  So the child actually does have a frame of some
+     sorts, and its base is the high address in its parent's frame.  */
   framesize = find_proc_framesize(frame->pc);
   if (framesize == -1)
     frame->frame = read_register (FP_REGNUM);
   else
     frame->frame = read_register (SP_REGNUM) - framesize;
-
-  if (!frameless_function_invocation (frame)) /* Frameless? */
-    return;				    /* No, quit now */
-
-  /* For frameless functions, we need to look at the caller's frame */
-  framesize = find_proc_framesize(FRAME_SAVED_PC(frame));
-  if (framesize != -1)
-    frame->frame -= framesize;
 }
 
 /* Given a GDB frame, determine the address of the calling function's frame.
