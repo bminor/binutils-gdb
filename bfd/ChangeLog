@@ -1,3 +1,8 @@
+Wed Feb 19 21:39:37 1992  John Gilmore  (gnu at cygnus.com)
+
+	* bout.c (callj_callback), coff-a29k.c (a29k_reloc), coff-m88k.c
+	(howto_hvrt16):  lint.
+
 Mon Feb 17 12:02:17 1992  Per Bothner  (bothner at cygnus.com)
 
 	* hp300bsd.c (new), config/mt-hp300bsd:  Make hp300bsd

@@ -67,7 +67,7 @@ DEFUN(a29k_reloc,(abfd, reloc_entry, symbol_in, data, input_section),
       bfd *abfd AND
       arelent *reloc_entry AND
       asymbol *symbol_in AND
-      unsigned char *data AND
+      PTR data AND
       asection *input_section)
 {
     /* the consth relocation comes in two parts, we have to remember
