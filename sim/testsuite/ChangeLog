@@ -4,6 +4,10 @@ Tue Dec  8 13:16:53 1998  Dave Brolley  <brolley@cygnus.com>
 	(set_s_system): Correct Mask.
 	* sim/fr30/ld.cgs (ld): Move previously failing test back
 	into place.
+	* sim/fr30/ldm0.cgs: New testcase.
+	* sim/fr30/ldm1.cgs: New testcase.
+	* sim/fr30/stm0.cgs: New testcase.
+	* sim/fr30/stm1.cgs: New testcase.
 
 Thu Dec  3 14:20:03 1998  Dave Brolley  <brolley@cygnus.com>
 
