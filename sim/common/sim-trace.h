@@ -23,9 +23,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef SIM_TRACE_H
 #define SIM_TRACE_H
 
-/* Tracing support.  */
+/* forward reference */
+struct _sim_cpu;
 
-#if WITH_SMP
+/* Tracing support.  */
 
 /* Return non-zero if tracing of IDX is enabled for CPU.  */
 #define TRACE_P(cpu,idx) \
@@ -34,41 +35,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /* Non-zero if "--trace-insn" specified for CPU.  */
 #define TRACE_INSN_P(cpu) TRACE_P (cpu, TRACE_INSN_IDX)
+/* Non-zero if "--trace-decode" specified for CPU.  */
+#define TRACE_DECODE_P(cpu) TRACE_P (cpu, TRACE_DECODE_IDX)
 
-#define TRACE_PRINTF(cpu, idx, args) \
-do { \
-  if ((WITH_TRACE & (1 << (idx))) != 0 \
-      && CPU_TRACE_FLAGS (cpu)[idx] != 0) \
-    trace_printf args; \
-} while (0)
-
-#else
-
-/* Fetch current tracing flags.  */
-#define CURRENT_TRACE_FLAGS CPU_TRACE_FLAGS (& CURRENT_STATE->cpu)
-
-/* Return non-zero if tracing of IDX is enabled.  */
-#define TRACE_P(idx) \
-((WITH_TRACE & (1 << (idx))) != 0 \
- && CURRENT_TRACE_FLAGS[idx] != 0)
-
-/* Non-zero if "--trace-insn" specified.  */
-#define TRACE_INSN_P TRACE_P (TRACE_INSN_IDX)
-
-#define TRACE_PRINTF(idx, args) \
-do { \
-  if ((WITH_TRACE & (1 << (idx))) != 0 \
-      && CURRENT_TRACE_FLAGS[idx] != 0) \
-    trace_printf args; \
-} while (0)
-
-#endif /* WITH_SMP */
-
-extern void trace_printf PARAMS ((char *, ...));
+extern void trace_printf PARAMS ((struct _sim_cpu *, const char *, ...));
 
 /* Debug support.  */
-
-#if WITH_SMP
 
 /* Return non-zero if debugging of IDX for CPU is enabled.  */
 #define DEBUG_P(cpu, idx) \
@@ -78,35 +50,6 @@ extern void trace_printf PARAMS ((char *, ...));
 /* Non-zero if "--debug-insn" specified.  */
 #define DEBUG_INSN_P(cpu) DEBUG_P (cpu, DEBUG_INSN_IDX)
 
-#define DEBUG_PRINTF(cpu, idx, args) \
-do { \
-  if ((WITH_DEBUG & (1 << (idx))) != 0 \
-      && CPU_DEBUG_FLAGS (cpu)[idx] != 0) \
-    debug_printf args; \
-} while (0)
-
-#else
-
-/* Fetch current debugging flags.  */
-#define CURRENT_DEBUG_FLAGS CPU_DEBUG_FLAGS (& CURRENT_STATE->cpu)
-
-/* Return non-zero if debugging of IDX is enabled.  */
-#define DEBUG_P(idx) \
-((WITH_DEBUG & (1 << (idx))) != 0 \
- && CURRENT_DEBUG_FLAGS[idx] != 0)
-
-/* Non-zero if "--debug-insn" specified.  */
-#define DEBUG_INSN_P DEBUG_P (DEBUG_INSN_IDX)
-
-#define DEBUG_PRINTF(idx, args) \
-do { \
-  if ((WITH_DEBUG & (1 << (idx))) != 0 \
-      && CURRENT_DEBUG_FLAGS[idx] != 0) \
-    debug_printf args; \
-} while (0)
-
-#endif /* WITH_SMP */
-
-extern void debug_printf PARAMS ((char *, ...));
+extern void debug_printf PARAMS ((struct _sim_cpu *, const char *, ...));
 
 #endif /* SIM_TRACE_H */
