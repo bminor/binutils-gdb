@@ -1,4 +1,26 @@
+Mon June 8 13:30:00 1998  Joyce Janczyn  <janczyn@cygnus.com>
+	* interp.c: (mn10300_option_handler): New function parses arguments
+	using sim-options.
 start-sanitize-am30
+	* (board): Add --board option for specifying am32.
+	* (sim_open): Create new timer and serial devices and control
+	configuration of other am32 devices via board option.
+	* dv-mn103tim.c, dv-mn103ser.c: New files for timers and serial devices.
+	* dv-mn103cpu.c: Fix typos in opening comments.
+	* dv-mn103int.c: Adjust interrupt controller settings for am32 instead of am30.
+	* configure.in: Add mn103tim and mn103ser to hw_device list.
+	* configure: Re-generate.
+end-sanitize-am30
+
+start-sanitize-am30
+Mon May 25 20:50:35 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* dv-mn103int.c, dv-mn103cpu.c: Rename *_callback to *_method.
+
+	* dv-mn103cpu.c, dv-mn103int.c: Include hw-main.h and
+ 	sim-main.h. Declare a struct hw_descriptor instead of struct
+ 	hw_device_descriptor.
+
 Mon May 25 17:33:33 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* dv-mn103cpu.c (struct mn103cpu): Change type of pending_handler
