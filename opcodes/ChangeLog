@@ -1,3 +1,8 @@
+2002-03-21  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+
 2002-03-21  Anton Blanchard  <anton@samba.org>
 
 	* ppc-opc.c: Add optional field to mtmsrd.

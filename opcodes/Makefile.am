@@ -604,12 +604,12 @@ s390-dis.lo: s390-dis.c $(INCDIR)/ansidecl.h sysdep.h \
   $(INCDIR)/opcode/s390.h
 sh-dis.lo: sh-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   sh-opc.h $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h
-sh64-opc.lo: sh64-opc.c sh64-opc.h
 sh64-dis.lo: sh64-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
   $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h sysdep.h config.h \
   sh64-opc.h $(INCDIR)/libiberty.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/elf/sh.h $(INCDIR)/elf/reloc-macros.h
+sh64-opc.lo: sh64-opc.c sh64-opc.h
 sparc-dis.lo: sparc-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/sparc.h $(INCDIR)/dis-asm.h $(BFD_H) \
   $(INCDIR)/symcat.h $(INCDIR)/libiberty.h opintl.h
