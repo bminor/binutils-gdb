@@ -1,3 +1,8 @@
+Wed Mar 30 00:31:49 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* i386-dis.c (struct private):  Renamed to dis_private. `private'
+	is a reserved word for dynix cc.
+
 Mon Mar 28 13:00:15 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* configure.in: Change error message to refer to bfd/config.bfd
