@@ -1,3 +1,39 @@
+1999-02-09  Doug Evans  <devans@casey.cygnus.com>
+
+	* Makefile.am (DISTCLEANFILES): Change cgen-opc.h to cgen-desc.h.
+	(cgen.o): Ditto.
+	(EXTRA_as_new_SOURCES): Comment out.
+	(.tcdep): <arch>-opc.h renamed to <arch>-desc.h.
+	* Makefile.in: Rebuild.
+	* doc/Makefile.in: Rebuild.
+	* configure.in: Require autoconf 2.13.  Redo using_cgen handling.
+	Delete call to AM_CYGWIN32.  Replace AM_EXEEXT with AC_EXEEXT.
+	(AC_OUTPUT): <arch>-opc.h renamed to <arch>-desc.h.
+	* configure: Rebuild.
+	* aclocal.m4: Rebuild.
+	* config.in: Rebuild.
+	* cgen.c: Include cgen-desc.h, not cgen-opc.h.
+	(*): CGEN_OPCODE_DESC renamed to CGEN_CPU_DESC.
+	(gas_cgen_cpu_desc): Renamed from gas_cgen_opcode_desc.
+	CGEN_INSN_ATTR renamed to CGEN_INSN_ATTR_VALUE.
+	CGEN_OPERAND_ATTR renamed to CGEN_OPERAND_ATTR_VALUE.
+	(gas_cgen_record_fixup): Remove unnecessary != 0 test.
+	(gas_cgen_record_fixup_exp): Ditto.
+	(gas_cgen_finish_insn): Ditto.  Refer to operand table via cpu
+	descriptor, not global variable.
+	(gas_cgen_md_apply_fix3): Refer to operand_table via cpu
+	descriptor, not global variable.  Refer to insert_operand handler
+	via cpu descriptor, not global function.
+	* cgen.h (*): CGEN_OPCODE_DESC renamed to CGEN_CPU_DESC.
+	* config/tc-fr30.c: Include opcodes/fr30-desc.h.
+	(*): gas_cgen_opcode_desc renamed to gas_cgen_cpu_desc.
+	CGEN_INSN_ATTR renamed to CGEN_INSN_ATTR_VALUE.
+	Update call to CGEN_OPERAND_TYPE,CGEN_INSN_OPERANDS.
+	* config/tc-m32r.c: Ditto.
+	(assemble_two_insns): Update calls to cgen_lookup_get_insn_operands.
+	(md_assemble): Ditto.
+	(md_convert_frag): Update call to CGEN_OPERAND_ENTRY.
+
 1999-02-09  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-arm.c (md_apply_fix3): Fix handling of label1 - label2
