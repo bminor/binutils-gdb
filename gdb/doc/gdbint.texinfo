@@ -13,7 +13,7 @@ END-INFO-DIR-ENTRY
 @ifinfo
 This file documents the internals of the GNU debugger GDB.
 
-Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
+Copyright 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
 Contributed by Cygnus Support.  Written by John Gilmore.
 
 Permission is granted to make and distribute verbatim copies of
@@ -51,7 +51,7 @@ regarded as a program in the language TeX).
 @end tex
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1990, 1991, 1992 Free Software Foundation, Inc.
+Copyright @copyright{} 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -366,7 +366,7 @@ on machine @var{xxx}.
 In particular, this lists the required native-dependent object files,
 by defining @samp{NATDEPFILES=@dots{}}.  Also
 specifies the header file which describes native support on @var{xxx},
-by defining @samp{NM_FILE= nm-@var{xxx}.h}.
+by defining @samp{NAT_FILE= nm-@var{xxx}.h}.
 You can also define @samp{NAT_CFLAGS},
 @samp{NAT_ADD_FILES}, @samp{NAT_CLIBS}, @samp{NAT_CDEPS},
 etc.; see @file{Makefile.in}.
