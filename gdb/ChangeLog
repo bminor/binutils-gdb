@@ -1,3 +1,10 @@
+Fri Jun 11 10:17:41 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* dbxread.c (process_one_symbol): Rather than having
+	BLOCK_ADDRESS_FUNCTION_RELATIVE a macro, make it a variable which
+	is true if we are doing stabs-in-elf, false otherwise.
+	config/sparc/tm-sun4sol2.h: Don't define it.
+
 Fri Jun 11 13:33:40 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* remote-mips.c (mips_send_packet): Don't print garbage character

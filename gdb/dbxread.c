@@ -212,9 +212,8 @@ init_header_files PARAMS ((void));
 static struct pending *
 copy_pending PARAMS ((struct pending *, int, struct pending *));
 
-static struct symtab *
-read_ofile_symtab PARAMS ((struct objfile *, int, int, CORE_ADDR, int, 
-			   struct section_offsets *));
+static void
+read_ofile_symtab PARAMS ((struct partial_symtab *));
 
 static void
 dbx_psymtab_to_symtab PARAMS ((struct partial_symtab *));
@@ -1234,10 +1233,7 @@ dbx_psymtab_to_symtab_1 (pst)
 
       /* Read in this file's symbols */
       bfd_seek (pst->objfile->obfd, SYMBOL_OFFSET (pst), L_SET);
-      pst->symtab =
-	read_ofile_symtab (pst->objfile, LDSYMOFF(pst), LDSYMLEN(pst),
-			   pst->textlow, pst->texthigh - pst->textlow,
-			   pst->section_offsets);
+      read_ofile_symtab (pst);
       sort_symtab_syms (pst->symtab);
 
       do_cleanups (old_chain);
@@ -1291,26 +1287,11 @@ dbx_psymtab_to_symtab (pst)
     }
 }
 
-/* Read in a defined section of a specific object file's symbols.
+/* Read in a defined section of a specific object file's symbols. */
   
-   DESC is the file descriptor for the file, positioned at the
-   beginning of the symtab
-   SYM_OFFSET is the offset within the file of
-   the beginning of the symbols we want to read
-   SYM_SIZE is the size of the symbol info to read in.
-   TEXT_OFFSET is the beginning of the text segment we are reading symbols for
-   TEXT_SIZE is the size of the text segment read in.
-   SECTION_OFFSETS are the relocation offsets which get added to each symbol. */
-
-static struct symtab *
-read_ofile_symtab (objfile, sym_offset, sym_size, text_offset, text_size,
-		   section_offsets)
-     struct objfile *objfile;
-     int sym_offset;
-     int sym_size;
-     CORE_ADDR text_offset;
-     int text_size;
-     struct section_offsets *section_offsets;
+static void
+read_ofile_symtab (pst)
+     struct partial_symtab *pst;
 {
   register char *namestring;
   register struct internal_nlist *bufp;
@@ -1318,6 +1299,19 @@ read_ofile_symtab (objfile, sym_offset, sym_size, text_offset, text_size,
   unsigned max_symnum;
   register bfd *abfd;
   struct symtab *rtn;
+  struct objfile *objfile;
+  int sym_offset;		/* Offset to start of symbols to read */
+  int sym_size;			/* Size of symbols to read */
+  CORE_ADDR text_offset;	/* Start of text segment for symbols */
+  int text_size;		/* Size of text segment for symbols */
+  struct section_offsets *section_offsets;
+
+  objfile = pst->objfile;
+  sym_offset = LDSYMOFF(pst);
+  sym_size = LDSYMLEN(pst);
+  text_offset = pst->textlow;
+  text_size = pst->texthigh - pst->textlow;
+  section_offsets = pst->section_offsets;
 
   current_objfile = objfile;
   subfile_stack = NULL;
@@ -1443,10 +1437,11 @@ read_ofile_symtab (objfile, sym_offset, sym_size, text_offset, text_size,
   if (last_source_start_addr == 0)
     last_source_start_addr = text_offset;
 
-  rtn = end_symtab (text_offset + text_size, 0, 0, objfile, SECT_OFF_TEXT);
+  pst->symtab = end_symtab (text_offset + text_size, 0, 0, objfile,
+			    SECT_OFF_TEXT);
   end_stabs ();
-  return (rtn);
 }
+
 
 /* This handles a single symbol from the symbol-file, building symbols
    into a GDB symtab.  It takes these arguments and an implicit argument.
@@ -1485,11 +1480,20 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
   static CORE_ADDR function_start_offset;
   char *colon_pos;
 
-#ifndef	BLOCK_ADDRESS_FUNCTION_RELATIVE
-  /* N_LBRAC, N_RBRAC and N_SLINE entries are not relative to the
-     function start address, so just use the text offset.  */
-  function_start_offset = ANOFFSET (section_offsets, SECT_OFF_TEXT);
-#endif
+  /* If this is nonzero, N_LBRAC, N_RBRAC, and N_SLINE entries are relative
+     to the function start address.  */
+  int block_address_function_relative;
+
+  /* This is true for Solaris (and all other stabs-in-elf systems, hopefully,
+     since it would be silly to do things differently from Solaris), and
+     false for SunOS4 and other a.out file formats.  */
+  block_address_function_relative =
+    0 == strncmp (bfd_get_target (objfile->obfd), "elf", 3);
+
+  if (!block_address_function_relative)
+    /* N_LBRAC, N_RBRAC and N_SLINE entries are not relative to the
+       function start address, so just use the text offset.  */
+    function_start_offset = ANOFFSET (section_offsets, SECT_OFF_TEXT);
 
   /* Something is wrong if we see real data before
      seeing a source file name.  */
@@ -1541,14 +1545,13 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
       last_pc_address = valu;	/* Save for SunOS bug circumcision */
 #endif
 
-#ifdef	BLOCK_ADDRESS_FUNCTION_RELATIVE
-      /* On Solaris 2.0 compilers, the block addresses and N_SLINE's
-	 are relative to the start of the function.  On normal systems,
-	 and when using gcc on Solaris 2.0, these addresses are just
-	 absolute, or relative to the N_SO, depending on
-	 BLOCK_ADDRESS_ABSOLUTE.  */
-      function_start_offset = valu;	
-#endif
+      if (block_address_function_relative)
+	/* On Solaris 2.0 compilers, the block addresses and N_SLINE's
+	   are relative to the start of the function.  On normal systems,
+	   and when using gcc on Solaris 2.0, these addresses are just
+	   absolute, or relative to the N_SO, depending on
+	   BLOCK_ADDRESS_ABSOLUTE.  */
+	function_start_offset = valu;	
 
       within_function = 1;
       if (context_stack_depth > 0)
@@ -1570,13 +1573,17 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
       /* This "symbol" just indicates the start of an inner lexical
 	 context within a function.  */
 
-#if defined(BLOCK_ADDRESS_ABSOLUTE) || defined(BLOCK_ADDRESS_FUNCTION_RELATIVE)
-      /* Relocate for dynamic loading and Sun ELF acc fn-relative syms.  */
+#if defined(BLOCK_ADDRESS_ABSOLUTE)
+      /* Relocate for dynamic loading (?).  */
       valu += function_start_offset;
 #else
-      /* On most machines, the block addresses are relative to the
-	 N_SO, the linker did not relocate them (sigh).  */
-      valu += last_source_start_addr;
+      if (block_address_function_relative)
+	/* Relocate for Sun ELF acc fn-relative syms.  */
+	valu += function_start_offset;
+      else
+	/* On most machines, the block addresses are relative to the
+	   N_SO, the linker did not relocate them (sigh).  */
+	valu += last_source_start_addr;
 #endif
 
 #ifndef SUN_FIXED_LBRAC_BUG
@@ -1593,13 +1600,17 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
       /* This "symbol" just indicates the end of an inner lexical
 	 context that was started with N_LBRAC.  */
 
-#if defined(BLOCK_ADDRESS_ABSOLUTE) || defined(BLOCK_ADDRESS_FUNCTION_RELATIVE)
-      /* Relocate for dynamic loading and Sun ELF acc fn-relative syms.  */
+#if defined(BLOCK_ADDRESS_ABSOLUTE)
+      /* Relocate for dynamic loading (?).  */
       valu += function_start_offset;
 #else
-      /* On most machines, the block addresses are relative to the
-	 N_SO, the linker did not relocate them (sigh).  */
-      valu += last_source_start_addr;
+      if (block_address_function_relative)
+	/* Relocate for Sun ELF acc fn-relative syms.  */
+	valu += function_start_offset;
+      else
+	/* On most machines, the block addresses are relative to the
+	   N_SO, the linker did not relocate them (sigh).  */
+	valu += last_source_start_addr;
 #endif
 
       new = pop_context();
