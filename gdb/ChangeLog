@@ -1,5 +1,12 @@
 Wed Jul 14 17:37:03 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* mipsread.c (psymtab_to_symtab_1, parse_procedure): For stabs,
+	save the indices of the MIPS_EFI_SYMBOL_NAME symbol rather than
+	looking them up by the names of the functions.
+
+	* mipsread.c (mylookup_symbol): Use strcmp, not STREQ, as we have
+	already checked the first characters.
+
 	Changes from Jeffrey Law:
 	* printcmd.c (makeva_list): Use MAKEVA_EXTRA_INFO to define
 	machine dependent fields in the makeva_list structure.

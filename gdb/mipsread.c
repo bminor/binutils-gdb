@@ -1518,15 +1518,20 @@ upgrade_type (tpp, tq, ax, bigend)
    images that have been partially stripped (ld -x) have been deprived
    of local symbols, and we have to cope with them here.  FIRST_OFF is
    the offset of the first procedure for this FDR; we adjust the
-   address by this amount, but I don't know why.  */
+   address by this amount, but I don't know why.
+
+   EFI_SYMBOL is the MIPS_EFI_SYMBOL_NAME symbol to use, or NULL which
+   means to look up the name using the block in top_stack.  */
+
+static void parse_procedure PARAMS ((PDR *, struct symbol *, unsigned long));
 
 static void
-parse_procedure (pr, have_stabs, first_off)
+parse_procedure (pr, efi_symbol, first_off)
      PDR *pr;
-     int have_stabs;
+     struct symbol *efi_symbol;
      unsigned long first_off;
 {
-  struct symbol *s, *i;
+  struct symbol *s;
   struct block *b;
   struct mips_extra_func_info *e;
   char *sh_name;
@@ -1564,55 +1569,50 @@ parse_procedure (pr, have_stabs, first_off)
       sh_name = ecoff_data (cur_bfd)->ss + cur_fdr->issBase + sh.iss;
     }
 
-  if (have_stabs)
+  if (efi_symbol == NULL)
     {
-      /* We have to save the cur_fdr across the call to lookup_symbol.
-	 If the pdr is for a static function and if a global function with
-	 the same name exists, lookup_symbol will eventually read in the symtab
-	 for the global function and clobber cur_fdr.  */
-      FDR *save_cur_fdr = cur_fdr;
-      s = lookup_symbol (sh_name, NULL, VAR_NAMESPACE, 0, NULL);
-      cur_fdr = save_cur_fdr;
-    }
-  else
-    s = mylookup_symbol (sh_name, top_stack->cur_block,
-			 VAR_NAMESPACE, LOC_BLOCK);
+      /* OK, first find the function.  */
 
-  if (s != 0)
-    {
-      b = SYMBOL_BLOCK_VALUE (s);
-    }
-  else
-    {
-      complain (&pdr_for_nonsymbol_complaint, sh_name);
+      s = mylookup_symbol (sh_name, top_stack->cur_block,
+			   VAR_NAMESPACE, LOC_BLOCK);
+
+      if (s != 0)
+	{
+	  b = SYMBOL_BLOCK_VALUE (s);
+	}
+      else
+	{
+	  complain (&pdr_for_nonsymbol_complaint, sh_name);
 #if 1
-      return;
+	  return;
 #else
 /* FIXME -- delete.  We can't do symbol allocation now; it's all done.  */
-      s = new_symbol (sh_name);
-      SYMBOL_NAMESPACE (s) = VAR_NAMESPACE;
-      SYMBOL_CLASS (s) = LOC_BLOCK;
-      /* Donno its type, hope int is ok */
-      SYMBOL_TYPE (s) = lookup_function_type (builtin_type_int);
-      add_symbol (s, top_stack->cur_block);
-      /* Wont have symbols for this one */
-      b = new_block (2);
-      SYMBOL_BLOCK_VALUE (s) = b;
-      BLOCK_FUNCTION (b) = s;
-      BLOCK_START (b) = pr->adr;
-      /* BOUND used to be the end of procedure's text, but the
-	 argument is no longer passed in.  */
-      BLOCK_END (b) = bound;
-      BLOCK_SUPERBLOCK (b) = top_stack->cur_block;
-      add_block (b, top_stack->cur_st);
+	  s = new_symbol (sh_name);
+	  SYMBOL_NAMESPACE (s) = VAR_NAMESPACE;
+	  SYMBOL_CLASS (s) = LOC_BLOCK;
+	  /* Donno its type, hope int is ok */
+	  SYMBOL_TYPE (s) = lookup_function_type (builtin_type_int);
+	  add_symbol (s, top_stack->cur_block);
+	  /* Wont have symbols for this one */
+	  b = new_block (2);
+	  SYMBOL_BLOCK_VALUE (s) = b;
+	  BLOCK_FUNCTION (b) = s;
+	  BLOCK_START (b) = pr->adr;
+	  /* BOUND used to be the end of procedure's text, but the
+	     argument is no longer passed in.  */
+	  BLOCK_END (b) = bound;
+	  BLOCK_SUPERBLOCK (b) = top_stack->cur_block;
+	  add_block (b, top_stack->cur_st);
 #endif
+	}
+
+      efi_symbol = mylookup_symbol
+	(MIPS_EFI_SYMBOL_NAME, b, LABEL_NAMESPACE, LOC_CONST);
     }
 
-  i = mylookup_symbol (MIPS_EFI_SYMBOL_NAME, b, LABEL_NAMESPACE, LOC_CONST);
-
-  if (i)
+  if (efi_symbol)
     {
-      e = (struct mips_extra_func_info *) SYMBOL_VALUE (i);
+      e = (struct mips_extra_func_info *) SYMBOL_VALUE (efi_symbol);
       e->pdr = *pr;
       e->pdr.isym = (long) s;
       e->pdr.adr += cur_fdr->adr - first_off;
@@ -2458,12 +2458,23 @@ psymtab_to_symtab_1 (pst, filename)
 
   if (processing_gcc_compilation != 0)
     {
+      /* This symbol table contains stabs-in-ecoff entries.  */
+
       struct pdr_ext *pdr_ptr;
       struct pdr_ext *pdr_end;
       int first_pdr;
       unsigned long first_off;
+      struct cleanup *old_cleanups;
 
-      /* This symbol table contains stabs-in-ecoff entries.  */
+      /* Given a symbol index in the symbol file, find the
+	 MIPS_EFI_SYMBOL_NAME symbol which goes with it.  If this is taking
+	 up too much memory, we could get fancy with hash tables or some
+	 such.  */
+      struct symbol **mips_func_info_by_isym;
+
+      mips_func_info_by_isym = (struct symbol **)
+	xmalloc (fh->csym * sizeof (*mips_func_info_by_isym));
+      old_cleanups = make_cleanup (free, mips_func_info_by_isym);
 
       /* Parse local symbols first */
 
@@ -2504,6 +2515,7 @@ psymtab_to_symtab_1 (pst, filename)
 		  SYMBOL_TYPE (s) = builtin_type_void;
 		  SYMBOL_VALUE (s) = (int) e;
 		  add_symbol_to_list (s, &local_symbols);
+		  mips_func_info_by_isym[cur_sdx] = s;
 		}
 	    }
 	  else if (sh.st == stLabel && sh.index != indexNil)
@@ -2541,8 +2553,10 @@ psymtab_to_symtab_1 (pst, filename)
 	      first_off = pr.adr;
 	      first_pdr = 0;
 	    }
-	  parse_procedure (&pr, 1, first_off);
+	  parse_procedure (&pr, mips_func_info_by_isym [pr.isym], first_off);
 	}
+
+      do_cleanups (old_cleanups);
     }
   else
     {
@@ -2811,7 +2825,7 @@ mylookup_symbol (name, block, namespace, class)
       if (SYMBOL_NAME (sym)[0] == inc
 	  && SYMBOL_NAMESPACE (sym) == namespace
 	  && SYMBOL_CLASS (sym) == class
-	  && STREQ (SYMBOL_NAME (sym), name))
+	  && strcmp (SYMBOL_NAME (sym), name) == 0)
 	return sym;
       bot++;
     }
