@@ -234,6 +234,15 @@ sim_create_inferior (sd, abfd, argv, env)
       break;
 
     case bfd_mach_arm_5:
+      /* This is a special case in order to support COFF based ARM toolchains.
+	 The COFF header does not have enough room to store all the different
+	 kinds of ARM cpu, so the XScale, v5T and v5TE architectures all default
+	 to v5.  (See coff_set_flags() in bdf/coffcode.h).  So if we see a v5
+	 machine type here, we assume it could be any of the above architectures
+	 and so select the most feature-full.  */
+      ARMul_SelectProcessor (state, ARM_v5_Prop | ARM_v5e_Prop | ARM_XScale_Prop);
+      break;
+
     case bfd_mach_arm_5T:
       ARMul_SelectProcessor (state, ARM_v5_Prop);
       break;
