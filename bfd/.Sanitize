@@ -602,7 +602,7 @@ else
 	done
 fi
 
-armelf_files="ChangeLog Makefile.am Makefile.in config.bfd configure configure.in elf.c elf32-arm.c targets.c"
+armelf_files="ChangeLog Makefile.am Makefile.in config.bfd configure configure.in elf.c targets.c"
 if ( echo $* | grep keep\-armelf > /dev/null ) ; then
 	for i in $armelf_files ; do
 		if test ! -d $i && (grep sanitize-armelf $i > /dev/null) ; then
