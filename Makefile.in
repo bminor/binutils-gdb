@@ -54,13 +54,20 @@ AS = as
 AR = ar
 AR_FLAGS = rc
 CC = cc
+
+# We don't specify -g -O because many compilers don't support -g -O,
+# and/or -O is broken in and of itself.
 CFLAGS = -g
+
 # start-sanitize-chill
 CHILLFLAGS = $(CFLAGS)
 CHILL_LIB = -lchill
 # end-sanitize-chill
 CXX = gcc
-CXXFLAGS = -g
+
+# Use -O to stress test the compiler.
+CXXFLAGS = -g -O
+
 RANLIB = ranlib
 NM = nm
 MUNCH_NM = $(NM)
@@ -1052,7 +1059,7 @@ taz: $(DEVO_SUPPORT) $(SUPPORT_FILES) texinfo/texinfo.tex texinfo/gpl.texinfo
 	# Do this first so "diststuff" files get built properly.
 	for f in $(DISTBISONFILES) ; do \
 	  if [ -r $$f ]; then \
-	    sed '/^BISON *=.*$/s/.*/BISON = bison -y/' <$$f >tmp ; \
+	    sed '/^BISON *=.*$$/s/.*/BISON = bison -y/' <$$f >tmp ; \
 	    mv -f tmp $$f ; \
 	  else true; fi ; \
 	done
@@ -1070,7 +1077,7 @@ taz: $(DEVO_SUPPORT) $(SUPPORT_FILES) texinfo/texinfo.tex texinfo/gpl.texinfo
 	    case " $$p " in \
 	    *" $$d "*)	\
 		echo making diststuff in $$d ; \
-		(cd $$d ; $(MAKE) diststuff) || exit 1  ;; \
+		(cd $$d ; pwd ; $(MAKE) diststuff BISON="bison -y") || exit 1  ;; \
 	    esac ; \
 	    if [ -d $$d/proto-$$d.dir ]; then \
 	      ln -s ../$$d/proto-$$d.dir proto-toplev/$$d ; \
