@@ -1,3 +1,7 @@
+Fri Nov 12 15:26:21 1993  Ken Raeburn  (raeburn@cygnus.com)
+
+	* Makefile.in (VERSION): Updated following 2.2 release.
+
 Fri Nov 12 14:52:17 1993  Jeffrey A. Law  (law@snake.cs.utah.edu
 
 	* config/tc-hppa.c (hppa_fix_struct): Use a real type for the
