@@ -1,3 +1,10 @@
+2004-03-04  Daniel Jacobowitz  <drow@mvista.com>
+
+	* dwarf2read.c: Add comment describing memory lifetimes.
+	(struct dwarf2_pinfo): Update comment.
+	(dwarf2_add_field, dwarf2_add_member_fn, read_structure_scope)
+	(read_enumeration, new_symbol): Don't use obsavestring.
+
 2004-03-04  Mark Kettenis  <kettenis@gnu.org>
 
 	* amd64-linux-nat.c (fill_fpregset): Call amd64_colletc_fxsave

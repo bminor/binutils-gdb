@@ -50,6 +50,20 @@
 #include "gdb_assert.h"
 #include <sys/types.h>
 
+/* A note on memory usage for this file.
+   
+   At the present time, this code reads the debug info sections into
+   the objfile's objfile_obstack.  A definite improvement for startup
+   time, on platforms which do not emit relocations for debug
+   sections, would be to use mmap instead.  The object's complete
+   debug information is loaded into memory, partly to simplify
+   absolute DIE references.
+
+   Whether using obstacks or mmap, the sections should remain loaded
+   until the objfile is released, and pointers into the section data
+   can be used for any other data associated to the objfile (symbol
+   names, type names, location expressions to name a few).  */
+
 #ifndef DWARF2_REG_TO_REGNUM
 #define DWARF2_REG_TO_REGNUM(REG) (REG)
 #endif
@@ -444,12 +458,11 @@ static int isreg;		/* Object lives in register.
 
 /* We put a pointer to this structure in the read_symtab_private field
    of the psymtab.
-   The complete dwarf information for an objfile is kept in the
-   objfile_obstack, so that absolute die references can be handled.
+
    Most of the information in this structure is related to an entire
-   object file and could be passed via the sym_private field of the objfile.
-   It is however conceivable that dwarf2 might not be the only type
-   of symbols read from an object file.  */
+   object file and could be passed via the sym_private field of the
+   objfile.  It is possible to have both dwarf2 and some other form
+   of debug symbols in one object file.  */
 
 struct dwarf2_pinfo
   {
@@ -2664,8 +2677,10 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
       attr = dwarf2_attr (die, DW_AT_name, cu);
       if (attr && DW_STRING (attr))
 	fieldname = DW_STRING (attr);
-      fp->name = obsavestring (fieldname, strlen (fieldname),
-			       &objfile->objfile_obstack);
+
+      /* The name is already allocated along with this objfile, so we don't
+	 need to duplicate it for the type.  */
+      fp->name = fieldname;
 
       /* Change accessibility for artificial fields (e.g. virtual table
          pointer or virtual base class pointer) to private.  */
@@ -2696,11 +2711,11 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
       /* Get physical name.  */
       physname = dwarf2_linkage_name (die, cu);
 
-      SET_FIELD_PHYSNAME (*fp, obsavestring (physname, strlen (physname),
-					     &objfile->objfile_obstack));
+      /* The name is already allocated along with this objfile, so we don't
+	 need to duplicate it for the type.  */
+      SET_FIELD_PHYSNAME (*fp, physname ? physname : "");
       FIELD_TYPE (*fp) = die_type (die, cu);
-      FIELD_NAME (*fp) = obsavestring (fieldname, strlen (fieldname),
-				       &objfile->objfile_obstack);
+      FIELD_NAME (*fp) = fieldname;
     }
   else if (die->tag == DW_TAG_inheritance)
     {
@@ -2868,8 +2883,9 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
 
   /* Fill in the member function field info.  */
   fnp = &new_fnfield->fnfield;
-  fnp->physname = obsavestring (physname, strlen (physname),
-				&objfile->objfile_obstack);
+  /* The name is already allocated along with this objfile, so we don't
+     need to duplicate it for the type.  */
+  fnp->physname = physname ? physname : "";
   fnp->type = alloc_type (objfile);
   if (die->type && TYPE_CODE (die->type) == TYPE_CODE_FUNC)
     {
@@ -3000,7 +3016,7 @@ read_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
   struct objfile *objfile = cu->objfile;
   struct type *type;
   struct attribute *attr;
-  const char *name = NULL;
+  char *name = NULL;
   const char *previous_prefix = processing_current_prefix;
   struct cleanup *back_to = NULL;
   /* This says whether or not we want to try to update the structure's
@@ -3045,8 +3061,9 @@ read_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 	}
       else
 	{
-	  TYPE_TAG_NAME (type) = obsavestring (name, strlen (name),
-					       &objfile->objfile_obstack);
+	  /* The name is already allocated along with this objfile, so
+	     we don't need to duplicate it for the type.  */
+	  TYPE_TAG_NAME (type) = name;
 	  need_to_update_name = (cu->language == language_cplus);
 	}
     }
@@ -3251,7 +3268,7 @@ read_enumeration (struct die_info *die, struct dwarf2_cu *cu)
   attr = dwarf2_attr (die, DW_AT_name, cu);
   if (attr && DW_STRING (attr))
     {
-      const char *name = DW_STRING (attr);
+      char *name = DW_STRING (attr);
 
       if (processing_has_namespace_info)
 	{
@@ -3263,8 +3280,9 @@ read_enumeration (struct die_info *die, struct dwarf2_cu *cu)
 	}
       else
 	{
-	  TYPE_TAG_NAME (type) = obsavestring (name, strlen (name),
-					       &objfile->objfile_obstack);
+	  /* The name is already allocated along with this objfile, so
+	     we don't need to duplicate it for the type.  */
+	  TYPE_TAG_NAME (type) = name;
 	}
     }
 
@@ -5677,11 +5695,11 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 		{
 		  /* FIXME: carlton/2003-11-10: Should this use
 		     SYMBOL_SET_NAMES instead?  (The same problem also
-		     arises a further down in the function.)  */
-		  SYMBOL_LINKAGE_NAME (sym)
-		    = obsavestring (TYPE_TAG_NAME (type),
-				    strlen (TYPE_TAG_NAME (type)),
-				    &objfile->objfile_obstack);
+		     arises further down in this function.)  */
+		  /* The type's name is already allocated along with
+		     this objfile, so we don't need to duplicate it
+		     for the symbol.  */
+		  SYMBOL_LINKAGE_NAME (sym) = TYPE_TAG_NAME (type);
 		}
 	    }
 
@@ -5712,11 +5730,11 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 				 sizeof (struct symbol));
 		*typedef_sym = *sym;
 		SYMBOL_DOMAIN (typedef_sym) = VAR_DOMAIN;
+		/* The symbol's name is already allocated along with
+		   this objfile, so we don't need to duplicate it for
+		   the type.  */
 		if (TYPE_NAME (SYMBOL_TYPE (sym)) == 0)
-		  TYPE_NAME (SYMBOL_TYPE (sym)) =
-		    obsavestring (SYMBOL_NATURAL_NAME (sym),
-				  strlen (SYMBOL_NATURAL_NAME (sym)),
-				  &objfile->objfile_obstack);
+		  TYPE_NAME (SYMBOL_TYPE (sym)) = SYMBOL_NATURAL_NAME (sym);
 		add_symbol_to_list (typedef_sym, list_to_add);
 	      }
 	  }
