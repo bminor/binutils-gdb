@@ -58,7 +58,8 @@ keep_these_too="${keep_these_too} .cvsignore CYGNUS autoconf
 	rcs readline sed send-pr shellutils sim tar textutils time
 	texinfo tgas utils uudecode wdiff xiberty
 	configure.bat makeall.bat setup.com makefile.vms winsup
-	mpw-README mpw-configure mpw-config.in mpw-build.in mpw-install"
+	mpw-README mpw-configure mpw-config.in mpw-build.in mpw-install
+	ltconfig ltmain.sh missing"
 
 lose_these_too="${lose_these_too} testsuite"
 

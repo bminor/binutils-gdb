@@ -1,3 +1,8 @@
+Thu Jul 31 19:49:49 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ltconfig, ltmain.sh: New files, from libtool 1.0.
+	* missing: New file, from automake 1.2.
+
 Thu Jul 24 12:57:56 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in: Treat tix like tk, putting it in X11_MODULES.  Add
