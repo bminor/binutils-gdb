@@ -185,7 +185,7 @@ RUNTESTFLAGS=
 # part of libiberty) a POSIX interface.  But at least for now the
 # host-dependent makefile fragment might need to use something else
 # besides ser-unix.o
-SER_HARDWIRE=ser-unix.o ser-tcp.o
+SER_HARDWIRE=ser-unix.o # ser-tcp.o
 
 # Host and target-dependent makefile fragments come in here.
 ####

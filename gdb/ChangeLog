@@ -1,5 +1,7 @@
 Sun May 30 15:35:21 1993  Fred Fish  (fnf@cygnus.com)
 
+	* Makefile.in (SER_HARDWIRE):  Temporarily comment out ser-tcp.o.
+
 	* {dbxread.c, dwarfread.c} (read_ofile_symtab):  Rewrite to take
 	single parameter, the pointer to the partial symtab, rather than
 	a bunch of args that are derived from the partial symtab.  Change
