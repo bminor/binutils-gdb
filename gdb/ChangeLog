@@ -1,3 +1,9 @@
+Tue Jul 30 17:57:46 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* stabsread.c (get_substring): Declare second arg as int.
+
+	* remote-es.c: Include gdb_string.h after defs.h.
+
 Mon Jul 29 21:13:20 1996  Fred Fish  <fnf@cygnus.com>
 
 	* rs6000-tdep.c (push_arguments): Remove unused variable "pc".
@@ -212,7 +218,9 @@ Fri Jul 26 14:07:37 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* printcmd.c (_initialize_printcmd): Initialize
 	tm_print_insn_info.flavour.
+start-sanitize-gdbtk
 	* gdbtk.c (gdb_disassemble): Initialize di.flavour.
+end-sanitize-gdbtk
 
 Thu Jul 25 19:41:31 1996  Fred Fish  <fnf@cygnus.com>
 
@@ -254,7 +262,6 @@ Thu Jul 25 19:41:31 1996  Fred Fish  <fnf@cygnus.com>
  	(strerror): Ditto.
 	* f-valprint.c (f77_print_array_1): Remove extra arg that was being
 	passed to f77_print_array_1.
-	* gdbtk.c (register_changed_p): Remove unused local variable "buf".
 	* gdbtypes.c (add_name): Remove unused variables lenstrlen and lenstr.
 	* scm-exp.c (scm_istr2int): Remove unused variable "j".
 	(scm_parse): Remove unused variable "str".
@@ -496,6 +503,7 @@ Thu Jul 25 19:41:31 1996  Fred Fish  <fnf@cygnus.com>
  	(debug_to_notice_signals): Ditto.
 	(debug_to_thread_alive): Ditto.
  	(debug_to_stop): Ditto.
+start-sanitize-gdbtk
 	* gdbtk.c (null_routine): Ditto.
 	(gdbtk_flush): Ditto.
  	(gdbtk_fputs): Ditto.
@@ -533,6 +541,7 @@ Thu Jul 25 19:41:31 1996  Fred Fish  <fnf@cygnus.com>
 	(gdbtk_call_command): Ditto.
  	(tk_command_loop): Ditto.
  	(gdbtk_init): Ditto.
+end-sanitize-gdbtk
 	* breakpoint.h (set_breakpoint_sal): Ditto.
 	* remote-utils.c (usage): Ditto.
 	* remote.c (set_thread): Ditto.
@@ -721,9 +730,11 @@ Thu Jul 25 19:41:31 1996  Fred Fish  <fnf@cygnus.com>
 	uninitialized.
 	* utils.c (vfprintf_maybe_filtered): Change second arg from "char *"
 	to "const char *".
+start-sanitize-gdbtk
 	* gdbtk.c (gdb_fetch_registers): Cast fourth arg to map_arg_registers
 	to proper pointer type, from int.
 	(gdbtk_query): Change first arg to "const char *" from "char *".
+end-sanitize-gdbtk
 	* infptrace.c (udot_info): Add two dummy args so that the type is
 	correct for passing to add_info.
 	* f-lang.c (saved_fcn): Move decl to head of file so it can be used
@@ -750,6 +761,9 @@ Thu Jul 25 19:41:31 1996  Fred Fish  <fnf@cygnus.com>
  	* eval.c (init_array_element): Declare previously undeclared
 	last two args as LONGEST.
 	* dcache.c (dcache_xfer_memory):  Change xfunc decls to prototype form.
+start-sanitize-gdbtk
+	* gdbtk.c (register_changed_p): Remove unused local variable "buf".
+end-sanitize-gdbtk
 
 Thu Jul 25 16:11:54 1996  Doug Evans  <dje@canuck.cygnus.com>
 
@@ -766,12 +780,14 @@ Mon Jul 22 18:13:27 1996  Stu Grossman  (grossman@critters.cygnus.com)
 	partial-stab.h.
 	* stabsread.h (end_psymtab):  Add textlow_not_set arg to prototype.
 
+start-sanitize-gdbtk
 Sat Jul 20 17:46:40 1996  Fred Fish  <fnf@cygnus.com>
 
 	* gdbtk.tcl (files_command): Reorder the binding tags for
 	the listbox widget to avoid referencing the listbox after
 	the containing widget has been destroyed by the action of
 	a previous binding.
+end-sanitize-gdbtk
 
 Sat Jul 20 10:41:06 1996  Fred Fish  <fnf@cygnus.com>
 
@@ -779,6 +795,7 @@ Sat Jul 20 10:41:06 1996  Fred Fish  <fnf@cygnus.com>
 	to "struct fileinfo" to avoid conflict with "struct file" in
 	<sys/file.h> on HPUX and Solaris.
 
+start-sanitize-gdbtk
 Sat Jul 20 10:09:28 1996  Fred Fish  <fnf@cygnus.com>
 
 	* gdbtk.tcl (delete_expr): Unset corresponding element of
@@ -786,6 +803,7 @@ Sat Jul 20 10:09:28 1996  Fred Fish  <fnf@cygnus.com>
 	(create_expr_window): Initialize expr_num, delete_expr_num,
 	and expr_update_list here when each new expression window
 	is created, rather than once at startup.
+end-sanitize-gdbtk
 
 Fri Jul 19 14:05:57 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
@@ -832,8 +850,10 @@ Mon Jul 15 16:44:05 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* defs.h printcmd.c:  Create global disassemble_info structure
 	tm_print_insn_info.
+start-sanitize-gdbtk
 	* gdbtk.c (gdb_disassemble):  Setup di.mach from
 	tm_print_insn_info.mach, and set endian from TARGET_BYTE_ORDER.
+end-sanitize-gdbtk
 	* i386-tdep.c (set_assembly_language_command):  set
 	tm_print_insn_info.mach to the appropriate value for 386 or 8086
 	disassembly.

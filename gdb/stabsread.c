@@ -80,7 +80,7 @@ read_one_struct_field PARAMS ((struct field_info *, char **, char *,
 			       struct type *, struct objfile *));
 
 static char * 
-get_substring PARAMS ((char **, char));
+get_substring PARAMS ((char **, int));
 
 static struct type *
 dbx_alloc_type PARAMS ((int [2], struct objfile *));
@@ -538,16 +538,17 @@ read_type_number (pp, typenums)
 
 /* This code added to support parsing of ARM/Cfront stabs strings */
 
-/* get substring from string up to char c 
-   advance string pointer past suibstring */
+/* Get substring from string up to char c, advance string pointer past
+   suibstring. */
+
 static char * 
-get_substring(p, c)
+get_substring (p, c)
   char ** p;
-  char c;
+  int c;
 {
-  char * str;
+  char *str;
   str = *p;
-  *p = strchr(*p,c);
+  *p = strchr (*p, c);
   if (*p) 
     {
       **p = 0;
@@ -558,35 +559,36 @@ get_substring(p, c)
   return str;
 }
 
-/* Physname gets strcat'd onto sname in order to recreate the mangled name
-   (see funtion gdb_mangle_name in gdbtypes.c).  For cfront, make the physname
-   look like that of g++ - take out the initial mangling 
+/* Physname gets strcat'd onto sname in order to recreate the mangled
+   name (see funtion gdb_mangle_name in gdbtypes.c).  For cfront, make
+   the physname look like that of g++ - take out the initial mangling
    eg: for sname="a" and fname="foo__1aFPFs_i" return "FPFs_i" */
+
 static char * 
-get_cfront_method_physname(fname)
-  char * fname;
+get_cfront_method_physname (fname)
+  char *fname;
 {
-  int len=0;
+  int len = 0;
   /* FIXME would like to make this generic for g++ too, but 
      that is already handled in read_member_funcctions */
   char * p = fname;
 
   /* search ahead to find the start of the mangled suffix */
   if (*p == '_' && *(p+1)=='_') /* compiler generated; probably a ctor/dtor */
-    p+=2;  		
-  while (p && ((p+1) - fname) < strlen(fname) && *(p+1)!='_')
-    p = strchr(p,'_');
-  if (!(p && *p=='_' && *(p+1)=='_')) 
-    error("Invalid mangled function name %s",fname);
-  p+=2; /* advance past '__' */
+    p += 2;  		
+  while (p && ((p+1) - fname) < strlen (fname) && *(p+1) != '_')
+    p = strchr (p, '_');
+  if (!(p && *p == '_' && *(p+1) == '_')) 
+    error ("Invalid mangled function name %s",fname);
+  p += 2; /* advance past '__' */
 
   /* struct name length and name of type should come next; advance past it */
-  while (isdigit(*p))
+  while (isdigit (*p))
     {
-      len = len*10 + (*p - '0');
+      len = len * 10 + (*p - '0');
       p++;
     }
-  p+=len;
+  p += len;
 
   return p;
 }
@@ -598,12 +600,13 @@ get_cfront_method_physname(fname)
        A:ZcA;;foopri__1AFv foopro__1AFv __ct__1AFv __ct__1AFRC1A foopub__1AFv ;;;
              ^
    */
+
 static int
-read_cfront_baseclasses(fip, pp, type, objfile) 
+read_cfront_baseclasses (fip, pp, type, objfile) 
   struct field_info *fip;
-  struct objfile * objfile;
+  struct objfile *objfile;
   char ** pp;
-  struct type * type;
+  struct type *type;
 {
   static struct complaint msg_unknown = {"\
 	 Unsupported token in stabs string %s.\n",
@@ -611,21 +614,22 @@ read_cfront_baseclasses(fip, pp, type, objfile)
   static struct complaint msg_notfound = {"\
 	           Unable to find base type for %s.\n",
                                 0, 0};
-  int bnum=0;
+  int bnum = 0;
   char * p;
   int i;
   struct nextfield *new;
 
-  if (**pp==';')		/* no base classes; return */
+  if (**pp == ';')		/* no base classes; return */
     {
       ++(*pp);
       return 1;
     }
 
   /* first count base classes so we can allocate space before parsing */
-  for (p = *pp; p && *p && *p!=';'; p++)
+  for (p = *pp; p && *p && *p != ';'; p++)
     {
-      if (*p==' ') bnum++;
+      if (*p == ' ')
+	bnum++;
     }
   bnum++;	/* add one more for last one */
 
@@ -638,11 +642,11 @@ read_cfront_baseclasses(fip, pp, type, objfile)
   {
     int num_bytes = B_BYTES (TYPE_N_BASECLASSES (type));
     char *pointer;
+
     pointer = (char *) TYPE_ALLOC (type, num_bytes);
     TYPE_FIELD_VIRTUAL_BITS (type) = (B_TYPE *) pointer;
   }
   B_CLRALL (TYPE_FIELD_VIRTUAL_BITS (type), TYPE_N_BASECLASSES (type));
-
 
   for (i = 0; i < TYPE_N_BASECLASSES (type); i++)
     {
