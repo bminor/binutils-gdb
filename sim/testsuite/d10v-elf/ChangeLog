@@ -1,3 +1,7 @@
+Tue Dec  9 10:41:44 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* t-rep.s: Check rep repeats correct number of times.
+
 Fri Dec  5 10:11:18 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* t-mvtc.s: Check for stuck-zero in MOD_E, MOD_S.

@@ -146,7 +146,7 @@ enum
 #define BPSW	(0 + State.cregs[PSW_CR])
 #define BPC	(State.cregs[BPC_CR])
 #define RPT_C	(State.cregs[RPT_C_CR])
-#define RPT_S	(State.cregs[RPT_E_CR])
+#define RPT_S	(State.cregs[RPT_S_CR])
 #define RPT_E	(State.cregs[RPT_E_CR])
 #define MOD_S	(0 + State.cregs[MOD_S_CR])
 #define MOD_E	(0 + State.cregs[MOD_E_CR])

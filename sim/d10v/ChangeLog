@@ -1,3 +1,7 @@
+Tue Dec  9 10:28:31 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* d10v_sim.h (RPT_S): Index cregs with RPT_S_CR not RPT_E_CR.
+
 Mon Dec  8 12:58:33 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* simops.c (OP_5F00): From Martin Hunt <hunt@cygnus.com>. Change
