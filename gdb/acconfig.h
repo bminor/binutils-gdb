@@ -44,4 +44,4 @@
    to initialize mmalloc, and we want to force checking to be used anyway.
    This may cause spurious memory corruption messages if the runtime tries
    to explicitly deallocate that memory when gdb calls exit. */
-#undef FORCE_MMCHECK
+#undef MMCHECK_FORCE

@@ -989,7 +989,7 @@ check_typedef (type)
       struct type *range_type;
       struct type *target_type = check_typedef (TYPE_TARGET_TYPE (type));
 
-      if (TYPE_FLAGS (target_type) & TYPE_FLAG_STUB)
+      if (TYPE_FLAGS (target_type) & (TYPE_FLAG_STUB | TYPE_FLAG_TARGET_STUB))
 	{ }
       else if (TYPE_CODE (type) == TYPE_CODE_ARRAY
 	       && TYPE_NFIELDS (type) == 1

@@ -1,3 +1,15 @@
+Tue Feb 17 14:28:33 1998  Peter Schauer <pes@regent.e-technik.tu-muenchen.de>
+
+        * acconfig.h: FORCE_MMCHECK changed to MMCHECK_FORCE.
+        * configure.in: Ditto.
+        * configure: Regenerated.
+
+Tue Feb 17 14:07:34 1998  Peter Schauer <pes@regent.e-technik.tu-muenchen.de>
+
+        * gdbtypes.c (check_typedef): Do not try to resolve the length of      
+        a type which has TYPE_FLAG_TARGET_STUB set, if the target type has      
+        set TYPE_FLAG_TARGET_STUB as well.
+
 Tue Feb 17 14:32:18 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* remote-sim.c (gdbsim_fetch_register, gdbsim_store_register):

@@ -279,7 +279,7 @@ esac],[want_mmalloc=false])dnl
 
 if test x$want_mmalloc = xtrue; then
    AC_DEFINE(USE_MMALLOC)
-   AC_DEFINE(FORCE_MMCHECK)
+   AC_DEFINE(MMCHECK_FORCE)
    MMALLOC_CFLAGS="-I$srcdir/../mmalloc"
    MMALLOC='../mmalloc/libmmalloc.a'
 fi

@@ -2517,7 +2517,7 @@ if test x$want_mmalloc = xtrue; then
 EOF
 
    cat >> confdefs.h <<\EOF
-#define FORCE_MMCHECK 1
+#define MMCHECK_FORCE 1
 EOF
 
    MMALLOC_CFLAGS="-I$srcdir/../mmalloc"
@@ -3446,8 +3446,7 @@ echo "configure:3446: checking for executable suffix" >&5
 if eval "test \"`echo '$''{'am_cv_exeext'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
-  
-if test "$CYGWIN32" = yes -o "$MINGW32" = yes; then
+  if test "$CYGWIN32" = yes || test "$MINGW32" = yes; then
 am_cv_exeext=.exe
 else
 cat > am_c_test.c << 'EOF'
