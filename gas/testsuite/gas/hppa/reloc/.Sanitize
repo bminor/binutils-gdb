@@ -33,6 +33,7 @@ exitbug.s
 fixupbug.s
 funcrelocbug.s
 labelopbug.s
+picreloc.s
 plabelbug.s
 reduce.s
 reduce2.s

@@ -215,9 +215,9 @@ proc do_plabel_relocation_test {} {
 	# Check that we make PLABEL relocation entries when they're needed.
 	while 1 {
 	    expect {
-		-re "^\[0c\]0000000\[^\n\]*PLABEL\[^\n\]*\n"
+		-re "^00000000\[^\n\]*PLABEL\[^\n\]*\n"
 		    { set x [expr $x+1] }
-		-re "^\[0c\]0000004\[^\n\]*PLABEL\[^\n\]*\n"
+		-re "^00000004\[^\n\]*PLABEL\[^\n\]*\n"
 		    { set x [expr $x+1] }
 		-re "\[^\n\]*\n"			{ }
 		timeout				{ perror "timeout\n"; break }
@@ -541,7 +541,7 @@ proc do_r_no_reloc {} {
 	# Make sure GAS generated a correct relocation for the reference.
 	while 1 {
 	    expect {
-	        -re "^\[0c\]00c0004\[^\n\]*PLABEL\[^\n]*g\[^\n\]*\n" 
+	        -re "^000c0004\[^\n\]*PLABEL\[^\n]*g\[^\n\]*\n" 
 		    { set x [expr $x+1] }
 	        -re "\[^\n\]*\n"		{ }
 	        timeout				{ perror "timeout\n"; break }
@@ -559,6 +559,33 @@ proc do_r_no_reloc {} {
     }
 }
 
+proc do_pic_relocation_test {} {
+    set testname "picreloc.s: Test for proper PIC relocation (part 2)"
+    set x 0
+
+    # ELF (osf) doesn't really handle extra sections too well...
+    if [istarget hppa*-*-*elf*] then {
+	return;
+    }
+
+    gas_start "picreloc.s" "-al"
+
+    while 1 {
+	expect {
+	    -re "^ +\[0-9\]+ 0000 00000004\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "\[^\n\]*\n"				{ }
+	    timeout				{ perror "timeout\n"; break }
+	    eof					{ break }
+	}
+    }
+
+    # This was intended to do any cleanup necessary.  It kinda looks like it
+    # isn't needed, but just in case, please keep it in for now.
+    gas_finish
+
+    # Did we find what we were looking for?  If not, flunk it.
+    if [expr $x==1] then { pass $testname } else { fail $testname }
+}
 if [istarget hppa*-*-*] then {
     # Make sure we put the right relocation entry on a BLE instruction.
     do_ble_relocation_test
@@ -607,4 +634,8 @@ if [istarget hppa*-*-*] then {
     # Test for an off-by-one bug in the handling of 4-byte R_NO_RELOCATION
     # fixups.
     do_r_no_reloc
+
+    # Test a relocation problem which shows up when building shared
+    # libraries in SOM
+    do_pic_relocation_test
 }
