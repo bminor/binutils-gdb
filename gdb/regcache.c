@@ -671,7 +671,7 @@ legacy_read_register_gen (int regnum, char *myaddr)
 }
 
 void
-regcache_raw_read (struct regcache *regcache, int regnum, char *buf)
+regcache_raw_read (struct regcache *regcache, int regnum, void *buf)
 {
   gdb_assert (regcache != NULL && buf != NULL);
   gdb_assert (regnum >= 0 && regnum < regcache->descr->nr_raw_registers);
@@ -724,7 +724,7 @@ read_register_gen (int regnum, char *buf)
    REGISTER_RAW_BYTES(REGNUM), which must be in target byte-order.  */
 
 static void
-legacy_write_register_gen (int regnum, char *myaddr)
+legacy_write_register_gen (int regnum, const void *myaddr)
 {
   int size;
   gdb_assert (regnum >= 0 && regnum < (NUM_REGS + NUM_PSEUDO_REGS));
@@ -761,7 +761,7 @@ legacy_write_register_gen (int regnum, char *myaddr)
 }
 
 void
-regcache_raw_write (struct regcache *regcache, int regnum, char *buf)
+regcache_raw_write (struct regcache *regcache, int regnum, const void *buf)
 {
   gdb_assert (regcache != NULL && buf != NULL);
   gdb_assert (regnum >= 0 && regnum < regcache->descr->nr_raw_registers);
@@ -987,7 +987,7 @@ write_register_pid (int regnum, CORE_ADDR val, ptid_t ptid)
    fact, and report it to the users of read_register and friends.  */
 
 void
-supply_register (int regnum, char *val)
+supply_register (int regnum, const void *val)
 {
 #if 1
   if (! ptid_equal (registers_ptid, inferior_ptid))

@@ -1,3 +1,15 @@
+2002-07-24  Andrew Cagney  <cagney@redhat.com>
+
+	* regcache.c (regcache_raw_write): Change buf parameter to a
+	constant void pointer.
+	(regcache_raw_read): Change buf parameter to a void pointer.
+	(legacy_write_register_gen): Change myaddr parameter a constant
+	void pointer.
+	(supply_register): Change val parameter to a const void pointer.
+	* regcache.h (regcache_raw_write): Update declaration.
+	(regcache_raw_read): Update declaration.
+	(supply_register): Update declaration.
+
 2002-07-24  Tom Tromey  <tromey@redhat.com>
 
 	* defs.h (gdb_readline_wrapper): Declare.
