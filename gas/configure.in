@@ -97,7 +97,7 @@ emulation=generic
 # check for architecture variants
 case ${target_cpu} in
   sparclite*)   cpu_type=sparc ;;
-  sparc64)	cpu_type=sparc obj_format=aout ;; # v9
+  sparc64)	cpu_type=sparc64 obj_format=elf ;; # v9
   m680[01234]0) cpu_type=m68k ;;
   m683??)       cpu_type=m68k ;;
   i486)		cpu_type=i386 ;;
@@ -119,6 +119,8 @@ case ${generic_target} in
 
   hppa-*-osf)		obj_format=elf emulation=hppa ;;
   hppa-*-hpux*)		obj_format=som emulation=hppa ;;
+
+  h8300-*-coff)		obj_format=coffbfd ;;
 
   i386-ibm-aix*)	obj_format=coffbfd gas_target=i386coff
 			 emulation=i386aix ;;
@@ -147,7 +149,7 @@ case ${generic_target} in
 
   sparc*-*-sunos4*)	bfd_gas=preferred obj_format=aout emulation=sun3 ;;
 
-  sparclite*-fujitsu-none)
+  sparc*-fujitsu-none)
 			obj_format=aout ;;
 
   *-*-aout | *-*-scout | *-*-linux)
@@ -260,5 +262,15 @@ case ${need_bfd} in
   *)
     ;;
 esac
+
+if [ x${host} = x${target} ] ; then
+    rm -f Makefile.tem
+    mv Makefile Makefile.tem
+    echo CROSS=-DCROSS_COMPILE
+    cat Makefile.tem >> Makefile
+    rm -f Makefile.tem
+else
+    true
+fi
 
 # end of gas/configure.in
