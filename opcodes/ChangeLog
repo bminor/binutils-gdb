@@ -1,3 +1,10 @@
+start-sanitize-cygnus
+Wed May  6 14:47:17 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* cgen.sh: s/@ARCH@/${ARCH}/ in opc.h generation.
+	* m32r-opc.h: Regenerate.
+
+end-sanitize-cygnus
 Wed May  6 15:30:06 1998  Klaus Kaempf  <kkaempf@progis.de>
 
 	* makefile.vms: Run dec c with /nodebug.
