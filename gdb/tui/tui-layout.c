@@ -248,7 +248,7 @@ tui_set_layout (enum tui_layout_type layoutType,
 		   newLayout == DISASSEM_DATA_COMMAND))
 		tuiDisplayAllData ();
 
-	      tuiUpdateSourceWindowsWithAddr (addr);
+	      tui_update_source_windows_with_addr (addr);
 	    }
 	  if (regsPopulate)
 	    {
@@ -799,7 +799,7 @@ _showSourceDisassemCommand (void)
 	{
 	  TuiGenWinInfoPtr locator = locatorWinInfoPtr ();
 
-	  tuiShowSourceContent (srcWin);
+	  tui_show_source_content (srcWin);
 	  if (m_winPtrIsNull (disassemWin))
 	    {
 	      _makeDisassemWindow (&disassemWin, asmHeight, srcHeight - 1);
@@ -843,7 +843,7 @@ _showSourceDisassemCommand (void)
 	      disassemWin->detail.sourceInfo.hasLocator = TRUE;
 	      m_beVisible (locator);
 	      tui_show_locator_content ();
-	      tuiShowSourceContent (disassemWin);
+	      tui_show_source_content (disassemWin);
 
 	      if (m_winPtrIsNull (cmdWin))
 		_makeCommandWindow (&cmdWin,
@@ -1114,7 +1114,7 @@ _showSourceOrDisassemAndCommand (TuiLayoutType layoutType)
 	  (*winInfoPtr)->detail.sourceInfo.hasLocator = TRUE;
 	  m_beVisible (locator);
 	  tui_show_locator_content ();
-	  tuiShowSourceContent (*winInfoPtr);
+	  tui_show_source_content (*winInfoPtr);
 
 	  if (m_winPtrIsNull (cmdWin))
 	    {

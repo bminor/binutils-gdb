@@ -374,12 +374,12 @@ tui_show_frame_info (struct frame_info *fi)
 	      TuiLineOrAddress l;
 	      l.lineNo = startLine;
 	      if (!(sourceAlreadyDisplayed
-		    && tuiLineIsDisplayed (item->locator.lineNo, winInfo, TRUE)))
-		tuiUpdateSourceWindow (winInfo, sal.symtab, l, TRUE);
+		    && tui_line_is_displayed (item->locator.lineNo, winInfo, TRUE)))
+		tui_update_source_window (winInfo, sal.symtab, l, TRUE);
 	      else
 		{
 		  l.lineNo = item->locator.lineNo;
-		  tuiSetIsExecPointAt (l, winInfo);
+		  tui_set_is_exec_point_at (l, winInfo);
 		}
 	    }
 	  else
@@ -388,16 +388,16 @@ tui_show_frame_info (struct frame_info *fi)
 		{
 		  TuiLineOrAddress a;
 		  a.addr = low;
-		  if (!tuiAddrIsDisplayed (item->locator.addr, winInfo, TRUE))
-		    tuiUpdateSourceWindow (winInfo, sal.symtab, a, TRUE);
+		  if (!tui_addr_is_displayed (item->locator.addr, winInfo, TRUE))
+		    tui_update_source_window (winInfo, sal.symtab, a, TRUE);
 		  else
 		    {
 		      a.addr = item->locator.addr;
-		      tuiSetIsExecPointAt (a, winInfo);
+		      tui_set_is_exec_point_at (a, winInfo);
 		    }
 		}
 	    }
-	  tuiUpdateExecInfo (winInfo);
+	  tui_update_exec_info (winInfo);
 	}
     }
   else
@@ -407,8 +407,8 @@ tui_show_frame_info (struct frame_info *fi)
       for (i = 0; i < (sourceWindows ())->count; i++)
 	{
 	  winInfo = (TuiWinInfoPtr) (sourceWindows ())->list[i];
-	  tuiClearSourceContent (winInfo, EMPTY_SOURCE_PROMPT);
-	  tuiUpdateExecInfo (winInfo);
+	  tui_clear_source_content (winInfo, EMPTY_SOURCE_PROMPT);
+	  tui_update_exec_info (winInfo);
 	}
     }
 }

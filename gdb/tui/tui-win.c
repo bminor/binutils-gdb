@@ -524,7 +524,7 @@ tuiScrollLeft (TuiWinInfoPtr winToScroll, int numToScroll)
          ** command window do nothing since the term should handle it.
        */
       if (winToScroll == srcWin || winToScroll == disassemWin)
-	tuiHorizontalSourceScroll (winToScroll, LEFT_SCROLL, _numToScroll);
+	tui_horizontal_source_scroll (winToScroll, LEFT_SCROLL, _numToScroll);
     }
   return;
 }				/* tuiScrollLeft */
@@ -549,7 +549,7 @@ tuiScrollRight (TuiWinInfoPtr winToScroll, int numToScroll)
          ** command window do nothing since the term should handle it.
        */
       if (winToScroll == srcWin || winToScroll == disassemWin)
-	tuiHorizontalSourceScroll (winToScroll, RIGHT_SCROLL, _numToScroll);
+	tui_horizontal_source_scroll (winToScroll, RIGHT_SCROLL, _numToScroll);
     }
   return;
 }				/* tuiScrollRight */
@@ -602,10 +602,10 @@ tuiRefreshAll (void)
 	    {
 	    case SRC_WIN:
 	    case DISASSEM_WIN:
-	      tuiShowSourceContent (winList[type]);
+	      tui_show_source_content (winList[type]);
 	      checkAndDisplayHighlightIfNeeded (winList[type]);
-	      tuiEraseExecInfoContent (winList[type]);
-	      tuiUpdateExecInfo (winList[type]);
+	      tui_erase_exec_info_content (winList[type]);
+	      tui_update_exec_info (winList[type]);
 	      break;
 	    case DATA_WIN:
 	      tuiRefreshDataWin ();
@@ -689,7 +689,7 @@ tuiResizeAll (void)
 	  _makeVisibleWithNewHeight (firstWin);
 	  _makeVisibleWithNewHeight (cmdWin);
 	  if (firstWin->generic.contentSize <= 0)
-	    tuiEraseSourceContent (firstWin, EMPTY_SOURCE_PROMPT);
+	    tui_erase_source_content (firstWin, EMPTY_SOURCE_PROMPT);
 	  break;
 	default:
 	  if (curLayout == SRC_DISASSEM_COMMAND)
@@ -755,9 +755,9 @@ tuiResizeAll (void)
 	  _makeVisibleWithNewHeight (secondWin);
 	  _makeVisibleWithNewHeight (cmdWin);
 	  if (firstWin->generic.contentSize <= 0)
-	    tuiEraseSourceContent (firstWin, EMPTY_SOURCE_PROMPT);
+	    tui_erase_source_content (firstWin, EMPTY_SOURCE_PROMPT);
 	  if (secondWin->generic.contentSize <= 0)
-	    tuiEraseSourceContent (secondWin, EMPTY_SOURCE_PROMPT);
+	    tui_erase_source_content (secondWin, EMPTY_SOURCE_PROMPT);
 	  break;
 	}
       /*
@@ -1185,7 +1185,7 @@ _tuiAdjustWinHeights (TuiWinInfoPtr primaryWinInfo, int newHeight)
 	      _makeVisibleWithNewHeight (winInfo);
 	      _makeVisibleWithNewHeight (primaryWinInfo);
 	      if (srcWinInfo->generic.contentSize <= 0)
-		tuiEraseSourceContent (srcWinInfo, EMPTY_SOURCE_PROMPT);
+		tui_erase_source_content (srcWinInfo, EMPTY_SOURCE_PROMPT);
 	    }
 	  else
 	    {
@@ -1286,9 +1286,9 @@ _tuiAdjustWinHeights (TuiWinInfoPtr primaryWinInfo, int newHeight)
 	      _makeVisibleWithNewHeight (secondWin);
 	      _makeVisibleWithNewHeight (firstWin);
 	      if (firstWin->generic.contentSize <= 0)
-		tuiEraseSourceContent (firstWin, EMPTY_SOURCE_PROMPT);
+		tui_erase_source_content (firstWin, EMPTY_SOURCE_PROMPT);
 	      if (secondWin->generic.contentSize <= 0)
-		tuiEraseSourceContent (secondWin, EMPTY_SOURCE_PROMPT);
+		tui_erase_source_content (secondWin, EMPTY_SOURCE_PROMPT);
 	    }
 	}
     }
@@ -1389,8 +1389,7 @@ _makeVisibleWithNewHeight (TuiWinInfoPtr winInfo)
 	    lineOrAddr.addr =
 	      winInfo->detail.sourceInfo.startLineOrAddr.addr;
 	  freeWinContent (&winInfo->generic);
-	  tuiUpdateSourceWindow (winInfo,
-				 cursal.symtab, lineOrAddr, TRUE);
+	  tui_update_source_window (winInfo, cursal.symtab, lineOrAddr, TRUE);
 	}
       else if (deprecated_selected_frame != (struct frame_info *) NULL)
 	{
@@ -1405,7 +1404,7 @@ _makeVisibleWithNewHeight (TuiWinInfoPtr winInfo)
 	    {
 	      find_line_pc (s, cursal.line, &line.addr);
 	    }
-	  tuiUpdateSourceWindow (winInfo, s, line, TRUE);
+	  tui_update_source_window (winInfo, s, line, TRUE);
 	}
       if (m_hasLocator (winInfo))
 	{

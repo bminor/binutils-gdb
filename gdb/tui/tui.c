@@ -565,7 +565,7 @@ tui_show_source (const char *file, int line)
   /* make sure that the source window is displayed */
   tui_add_win_to_layout (SRC_WIN);
 
-  tuiUpdateSourceWindowsWithLine (cursal.symtab, line);
+  tui_update_source_windows_with_line (cursal.symtab, line);
   tui_update_locator_filename (file);
 }
 
@@ -573,7 +573,7 @@ void
 tui_show_assembly (CORE_ADDR addr)
 {
   tui_add_win_to_layout (DISASSEM_WIN);
-  tuiUpdateSourceWindowsWithAddr (addr);
+  tui_update_source_windows_with_addr (addr);
 }
 
 int

@@ -22,7 +22,9 @@
 #ifndef _TUI_SOURCE_H
 #define _TUI_SOURCE_H
 
-#include "defs.h"
+struct tui_win_info;
+
+extern void tui_set_source_content_nil (struct tui_win_info *, char *);
 
 extern TuiStatus tuiSetSourceContent (struct symtab *, int, int);
 extern void tuiShowSource (struct symtab *, TuiLineOrAddress, int);

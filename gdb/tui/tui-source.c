@@ -56,7 +56,7 @@ tuiSetSourceContent (struct symtab *s, int lineNo, int noerror)
       register int i, desc, c, lineWidth, nlines;
       register char *srcLine = 0;
 
-      if ((ret = tuiAllocSourceBuffer (srcWin)) == TUI_SUCCESS)
+      if ((ret = tui_alloc_source_buffer (srcWin)) == TUI_SUCCESS)
 	{
 	  lineWidth = srcWin->generic.width - 1;
 	  /* Take hilite (window border) into account, when calculating
@@ -229,11 +229,11 @@ tuiSetSourceContent (struct symtab *s, int lineNo, int noerror)
 /* elz: this function sets the contents of the source window to empty
    except for a line in the middle with a warning message about the
    source not being available. This function is called by
-   tuiEraseSourceContents, which in turn is invoked when the source files
-   cannot be accessed */
+   tuiEraseSourceContents, which in turn is invoked when the source
+   files cannot be accessed.  */
 
 void
-tuiSetSourceContentNil (TuiWinInfoPtr winInfo, char *warning_string)
+tui_set_source_content_nil (TuiWinInfoPtr winInfo, char *warning_string)
 {
   int lineWidth;
   int nLines;
@@ -303,7 +303,7 @@ void
 tuiShowSource (struct symtab *s, TuiLineOrAddress line, int noerror)
 {
   srcWin->detail.sourceInfo.horizontalOffset = 0;
-  tuiUpdateSourceWindowAsIs(srcWin, s, line, noerror);
+  tui_update_source_window_as_is (srcWin, s, line, noerror);
 }
 
 

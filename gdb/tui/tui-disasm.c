@@ -190,7 +190,7 @@ tui_set_disassem_content (CORE_ADDR pc)
   if (pc == 0)
     return TUI_FAILURE;
 
-  ret = tuiAllocSourceBuffer (disassemWin);
+  ret = tui_alloc_source_buffer (disassemWin);
   if (ret != TUI_SUCCESS)
     return ret;
 
@@ -280,7 +280,7 @@ tui_show_disassem (CORE_ADDR startAddr)
 
   val.addr = startAddr;
   tui_add_win_to_layout (DISASSEM_WIN);
-  tuiUpdateSourceWindow (disassemWin, s, val, FALSE);
+  tui_update_source_window (disassemWin, s, val, FALSE);
   /*
      ** if the focus was in the src win, put it in the asm win, if the
      ** source view isn't split
@@ -309,7 +309,7 @@ tui_show_disassem_and_update_source (CORE_ADDR startAddr)
        */
       sal = find_pc_line (startAddr, 0);
       val.lineNo = sal.line;
-      tuiUpdateSourceWindow (srcWin, sal.symtab, val, TRUE);
+      tui_update_source_window (srcWin, sal.symtab, val, TRUE);
       if (sal.symtab)
 	{
 	  set_current_source_symtab_and_line (&sal);
@@ -398,6 +398,6 @@ tui_vertical_disassem_scroll (enum tui_scroll_direction scrollDirection,
       dir = (scrollDirection == FORWARD_SCROLL) ? maxLines : - maxLines;
 
       val.addr = tui_find_disassembly_address (pc, dir);
-      tuiUpdateSourceWindowAsIs (disassemWin, s, val, FALSE);
+      tui_update_source_window_as_is (disassemWin, s, val, FALSE);
     }
 }

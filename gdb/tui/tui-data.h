@@ -150,7 +150,7 @@ typedef enum tui_register_display_type
 TuiRegisterDisplayType, *TuiRegisterDisplayTypePtr;
 
 /* Structure describing source line or line address */
-typedef union _TuiLineOrAddress
+typedef union tui_line_or_address
   {
     int lineNo;
     CORE_ADDR addr;
@@ -284,7 +284,7 @@ TuiCommandInfo, *TuiCommandInfoPtr;
 
 
 /* This defines information about each logical window */
-typedef struct _TuiWinInfo
+typedef struct tui_win_info
   {
     TuiGenWinInfo generic;	/* general window information */
     union

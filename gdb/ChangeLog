@@ -1,3 +1,38 @@
+2004-02-06  Andrew Cagney  <cagney@redhat.com>
+
+	* tui/tui-source.h: Do not include "defs.h".
+	(struct tui_win_info): Declare.
+	(tui_set_source_content_nil): Declare.
+	* tui/tui-data.h (struct tui_win_info): Rename _TuiWinInfo.
+	(union tui_line_or_address): Rename _TuiLineOrAddress.
+	* tui/tui-winsource.h: Update copyright.  Include "tui-data.h".
+	(tui_update_source_window): Rename tuiUpdateSourceWindow.
+	(tui_update_source_window_as_is): Rename
+	tuiUpdateSourceWindowAsIs.
+	(tui_update_source_windows_with_addr): Rename
+	tuiUpdateSourceWindowsWithAddr.
+	(tui_update_source_windows_with_line): Rename
+	tuiUpdateSourceWindowsWithLine.
+	(tui_clear_source_content): Rename tuiClearSourceContent.
+	(tui_erase_source_content): Rename tuiEraseSourceContent.
+	(tui_set_source_content_nil): Rename tuiSetSourceContentNil.
+	(tui_show_source_content): Rename tuiShowSourceContent.
+	(tui_horizontal_source_scroll): Rename tuiHorizontalSourceScroll.
+	(tui_set_exec_info_content): Rename tuiSetExecInfoContent.
+	(tui_show_exec_info_content): Rename tuiShowExecInfoContent.
+	(tui_erase_exec_info_content): Rename tuiEraseExecInfoContent.
+	(tui_clear_exec_info_content): Rename tuiClearExecInfoContent.
+	(tui_update_exec_info): Rename tuiUpdateExecInfo.
+	(tui_set_is_exec_point_at): Rename tuiSetIsExecPointAt.
+	(tui_alloc_source_buffer): Rename tuiAllocSourceBuffer.
+	(tui_line_is_displayed): Rename tuiLineIsDisplayed.
+	(tui_addr_is_displayed): Rename tuiAddrIsDisplayed.
+	(struct tui_win_info): Declare.
+	* tui/tui-stack.c: Update references.
+	* tui/tui-layout.c, tui/tui-winsource.c: Ditto.
+	* tui/tui-win.c, tui/tui-source.c: Ditto.
+	* tui/tui.c, tui/tui-disasm.c: Ditto.
+
 2004-02-06  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-linux-tdep.c (i386_linux_sigcontext_addr): Fix calculation
