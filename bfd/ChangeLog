@@ -1,3 +1,8 @@
+1999-06-22  Mark Mitchell  <mark@codesourcery.com>
+
+	* elflink.h (size_dynamic_sections): Use user-specified init/fini
+	functions instead of _init/_fini if requested.
+
 1999-06-23  Ian Lance Taylor  <ian@zembu.com>
 
 	* elf.c (bfd_section_from_shdr): Avoid crashing on a bogus sh_link

@@ -2589,8 +2589,14 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
       /* Add some entries to the .dynamic section.  We fill in some of the
 	 values later, in elf_bfd_final_link, but we must add the entries
 	 now so that we know the final size of the .dynamic section.  */
-      h =  elf_link_hash_lookup (elf_hash_table (info), "_init", false,
-				false, false);
+
+      /* If there are initialization and/or finalization functions to
+	 call then add the corresponding DT_INIT/DT_FINI entries.  */
+      h = (info->init_function
+	   ? elf_link_hash_lookup (elf_hash_table (info), 
+				   info->init_function, false,
+				   false, false)
+	   : NULL);
       if (h != NULL
 	  && (h->elf_link_hash_flags & (ELF_LINK_HASH_REF_REGULAR
 					| ELF_LINK_HASH_DEF_REGULAR)) != 0)
@@ -2598,8 +2604,11 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 	  if (! elf_add_dynamic_entry (info, DT_INIT, 0))
 	    return false;
 	}
-      h =  elf_link_hash_lookup (elf_hash_table (info), "_fini", false,
-				 false, false);
+      h = (info->fini_function
+	   ? elf_link_hash_lookup (elf_hash_table (info), 
+				   info->fini_function, false,
+				   false, false)
+	   : NULL);
       if (h != NULL
 	  && (h->elf_link_hash_flags & (ELF_LINK_HASH_REF_REGULAR
 					| ELF_LINK_HASH_DEF_REGULAR)) != 0)
@@ -2607,6 +2616,7 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 	  if (! elf_add_dynamic_entry (info, DT_FINI, 0))
 	    return false;
 	}
+
       strsize = _bfd_stringtab_size (elf_hash_table (info)->dynstr);
       if (! elf_add_dynamic_entry (info, DT_HASH, 0)
 	  || ! elf_add_dynamic_entry (info, DT_STRTAB, 0)
@@ -4159,15 +4169,11 @@ elf_bfd_final_link (abfd, info)
 	    {
 	    default:
 	      break;
-
-	      /* SVR4 linkers seem to set DT_INIT and DT_FINI based on
-                 magic _init and _fini symbols.  This is pretty ugly,
-                 but we are compatible.  */
 	    case DT_INIT:
-	      name = "_init";
+	      name = info->init_function;
 	      goto get_sym;
 	    case DT_FINI:
-	      name = "_fini";
+	      name = info->fini_function;
 	    get_sym:
 	      {
 		struct elf_link_hash_entry *h;
