@@ -347,8 +347,9 @@ static void
 coff_start_symtab ()
 {
   start_symtab (
-		/* We fill in the filename later.  But start_symtab
-		   expects something we can later free() (in end_symtab).
+		/* We fill in the filename later.  start_symtab
+		   puts this pointer into last_source file and in
+		   coff_end_symtab we assume we can free() it.
 		   FIXME: leaks memory.  */
 		savestring ("", 0),
 		/* We never know the directory name for COFF.  */
