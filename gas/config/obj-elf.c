@@ -1,5 +1,5 @@
 /* ELF object file format
-   Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000
+   Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -55,7 +55,6 @@ static void elf_s_set_size PARAMS ((symbolS *, bfd_vma));
 static bfd_vma elf_s_get_align PARAMS ((symbolS *));
 static void elf_s_set_align PARAMS ((symbolS *, bfd_vma));
 static void elf_s_set_other PARAMS ((symbolS *, int));
-static void elf_copy_symbol_attributes PARAMS ((symbolS *, symbolS *));
 static int elf_sec_sym_ok_for_reloc PARAMS ((asection *));
 static void adjust_stab_sections PARAMS ((bfd *, asection *, PTR));
 static int elf_separate_stab_sections PARAMS ((void));
@@ -240,13 +239,6 @@ elf_s_set_other (sym, other)
      int other;
 {
   S_SET_OTHER (sym, other);
-}
-
-static void
-elf_copy_symbol_attributes (dest, src)
-     symbolS *dest, *src;
-{
-  OBJ_COPY_SYMBOL_ATTRIBUTES (dest, src);
 }
 
 static int
@@ -1328,6 +1320,33 @@ elf_obj_symbol_new_hook (symbolP)
   if (ECOFF_DEBUGGING)
     ecoff_symbol_new_hook (symbolP);
 #endif
+}
+
+/* When setting one symbol equal to another, by default we probably
+   want them to have the same "size", whatever it means in the current
+   context.  */
+
+void
+elf_copy_symbol_attributes (dest, src)
+     symbolS *dest, *src;
+{
+  struct elf_obj_sy *srcelf = symbol_get_obj (src);		
+  struct elf_obj_sy *destelf = symbol_get_obj (dest);		
+  if (srcelf->size)						
+    {								
+      if (destelf->size == NULL)				
+	destelf->size =					
+	  (expressionS *) xmalloc (sizeof (expressionS));	
+      *destelf->size = *srcelf->size;				
+    }								
+  else							
+    {								
+      if (destelf->size != NULL)				
+	free (destelf->size);					
+      destelf->size = NULL;					
+    }								
+  S_SET_SIZE (dest, S_GET_SIZE (src));			
+  S_SET_OTHER (dest, S_GET_OTHER (src));			
 }
 
 void

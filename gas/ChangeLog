@@ -1,5 +1,10 @@
 2001-08-08  Alan Modra  <amodra@bigpond.net.au>
 
+	* config/obj-elf.c (elf_copy_symbol_attributes): Make it a global
+	function, and expand old obj-elf.h OBJ_COPY_SYMBOL_ATTRIBUTES here.
+	* config/obj-elf.h (elf_copy_symbol_attributes): Declare.
+	(OBJ_COPY_SYMBOL_ATTRIBUTES): Call elf_copy_symbol_attributes.
+
 	* output-file.c (output_file_create): Don't try to open using
 	FOPEN_W as it's unnecessary and VMS doesn't define FOPEN_W.
 
