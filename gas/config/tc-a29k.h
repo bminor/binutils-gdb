@@ -38,3 +38,5 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define COFF_FLAGS F_AR32W
 #define reloc_type int
 #define NEED_FX_R_TYPE
+
+#define ZERO_BASED_SEGMENTS

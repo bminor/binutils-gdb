@@ -17,11 +17,15 @@ You should have received a copy of the GNU General Public License
 along with GAS; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
+#if 0
 #define MASK_CHAR (0xFF)	/* If your chars aren't 8 bits, you will
 				   change this a bit.  But then, GNU isn't
 				   spozed to run on your machine anyway.
 				   (RMS is so shortsighted sometimes.)
 				   */
+#else
+#define MASK_CHAR ((int)(unsigned char)-1)
+#endif
 
 #define MAXIMUM_NUMBER_OF_CHARS_FOR_FLOAT (16)
 /* This is the largest known floating point */
@@ -29,8 +33,8 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 /* do 4361 style flonums. */
 
 
-/* Routines that read assembler source text to build spagetti in memory. */
-/* Another group of these functions is in the as-expr.c module */
+/* Routines that read assembler source text to build spagetti in memory.
+   Another group of these functions is in the expr.c module.  */
 
 #include <ctype.h>
 
@@ -38,8 +42,16 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
 #include "obstack.h"
 #include "listing.h"
-char *input_line_pointer;	/*->next char of source file to parse. */
 
+/* The NOP_OPCODE is for the alignment fill value.
+ * fill it a nop instruction so that the disassembler does not choke
+ * on it
+ */
+#ifndef NOP_OPCODE
+#define NOP_OPCODE 0x00
+#endif
+
+char *input_line_pointer;	/*->next char of source file to parse. */
 
 #if BITS_PER_CHAR != 8
 /*  The following table is indexed by[(char)] and will break if
@@ -47,109 +59,96 @@ char *input_line_pointer;	/*->next char of source file to parse. */
 die horribly;
 #endif
 
-     const char			/* used by is_... macros. our ctype[] */
-       lex_type[256] =
-     {
-       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* @ABCDEFGHIJKLMNO */
-       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* PQRSTUVWXYZ[\]^_ */
-       0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0,	/* _!"#$%&'()*+,-./ */
-       1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0,	/* 0123456789:;<=>? */
-       0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,	/* @ABCDEFGHIJKLMNO */
-       3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 3,	/* PQRSTUVWXYZ[\]^_ */
-       0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,	/* `abcdefghijklmno */
-       3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0,	/* pqrstuvwxyz{|}~. */
-       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-     };
+/* used by is_... macros. our ctype[] */
+const char lex_type[256] =
+{
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* @ABCDEFGHIJKLMNO */
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* PQRSTUVWXYZ[\]^_ */
+  0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0,	/* _!"#$%&'()*+,-./ */
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0,	/* 0123456789:;<=>? */
+  0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,	/* @ABCDEFGHIJKLMNO */
+  3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 3,	/* PQRSTUVWXYZ[\]^_ */
+  0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,	/* `abcdefghijklmno */
+  3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0,	/* pqrstuvwxyz{|}~. */
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+};
 
 
-     /*
+/*
  * In: a character.
  * Out: 1 if this character ends a line.
  */
 #define _ (0)
-     char is_end_of_line[256] =
-     {
+char is_end_of_line[256] =
+{
 #ifdef CR_EOL
-       _, _, _, _, _, _, _, _, _, _, 99, _, _, 99, _, _,	/* @abcdefghijklmno */
+  _, _, _, _, _, _, _, _, _, _, 99, _, _, 99, _, _,	/* @abcdefghijklmno */
 #else
-       _, _, _, _, _, _, _, _, _, _, 99, _, _, _, _, _,	/* @abcdefghijklmno */
+  _, _, _, _, _, _, _, _, _, _, 99, _, _, _, _, _,	/* @abcdefghijklmno */
 #endif
-       _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,	/* */
-       _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,	/* */
-       _, _, _, _, _, _, _, _, _, _, _, 99, _, _, _, _,	/* 0123456789:;<=>? */
-       _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,	/* */
-       _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,	/* */
-       _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,	/* */
-       _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,	/* */
-       _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,	/* */
-       _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,	/* */
-       _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,	/* */
-       _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,	/* */
-       _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _	/* */
-     };
+  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,	/* */
+  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,	/* */
+  _, _, _, _, _, _, _, _, _, _, _, 99, _, _, _, _,	/* 0123456789:;<=>? */
+  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,	/* */
+  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,	/* */
+  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,	/* */
+  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,	/* */
+  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,	/* */
+  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,	/* */
+  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,	/* */
+  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,	/* */
+  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,	/* */
+};
 #undef _
 
-     /* Functions private to this file. */
+/* Functions private to this file. */
 
-     static char *buffer;	/* 1st char of each buffer of lines is here. */
-     static char *buffer_limit;	/*->1 + last char in buffer. */
+static char *buffer;	/* 1st char of each buffer of lines is here. */
+static char *buffer_limit;	/*->1 + last char in buffer. */
 
-     static char *bignum_low;	/* Lowest char of bignum. */
-     static char *bignum_limit;	/* 1st illegal address of bignum. */
-     static char *bignum_high;	/* Highest char of bignum. */
-     /* May point to (bignum_start-1). */
-     /* Never >= bignum_limit. */
-     static char *old_buffer = 0;	/* JF a hack */
-     static char *old_input;
-     static char *old_limit;
+static char *bignum_low;	/* Lowest char of bignum. */
+static char *bignum_limit;	/* 1st illegal address of bignum. */
+static char *bignum_high;	/* Highest char of bignum. */
+/* May point to (bignum_start-1). */
+/* Never >= bignum_limit. */
 
-     /* Variables for handling include file directory list. */
+static char *old_buffer = 0;	/* JF a hack */
+static char *old_input;
+static char *old_limit;
 
-     char **include_dirs;	/* List of pointers to directories to
-				   search for .include's */
-     int include_dir_count;	/* How many are in the list */
-     int include_dir_maxlen = 1;/* Length of longest in list */
+/* Variables for handling include file directory list. */
+
+char **include_dirs;	/* List of pointers to directories to
+			   search for .include's */
+int include_dir_count;	/* How many are in the list */
+int include_dir_maxlen = 1;/* Length of longest in list */
 
 #ifndef WORKING_DOT_WORD
-     struct broken_word *broken_words;
-     int new_broken_words = 0;
+struct broken_word *broken_words;
+int new_broken_words = 0;
 #endif
 
-#ifdef __STDC__
+static char *demand_copy_string PARAMS ((int *lenP));
+int is_it_end_of_statement PARAMS ((void));
+unsigned int next_char_of_string PARAMS ((void));
+static segT get_known_segmented_expression PARAMS ((expressionS * expP));
+static void grow_bignum PARAMS ((void));
+static void pobegin PARAMS ((void));
+void stringer PARAMS ((int append_zero));
 
-     static char *demand_copy_string (int *lenP);
-     int is_it_end_of_statement (void);
-     unsigned int next_char_of_string (void);
-     static segT get_known_segmented_expression (expressionS * expP);
-     static void grow_bignum (void);
-     static void pobegin (void);
-     void stringer (int append_zero);
-
-#else /* __STDC__ */
-
-     static char *demand_copy_string ();
-     int is_it_end_of_statement ();
-     unsigned int next_char_of_string ();
-     static segT get_known_segmented_expression ();
-     static void grow_bignum ();
-     static void pobegin ();
-     void stringer ();
-
-#endif /* __STDC__ */
-
-     extern int listing;
+extern int listing;
 
 
-     void
-       read_begin ()
+void
+read_begin ()
 {
-  char *p;
+  const char *p;
 
   pobegin ();
   obj_read_begin_hook ();
@@ -169,16 +168,14 @@ die horribly;
 
 /* set up pseudo-op tables */
 
-struct hash_control *
-  po_hash = NULL;		/* use before set up: NULL->address error */
+struct hash_control *po_hash = NULL; /* use before set up: NULL->address error */
 
 #ifdef DONTDEF
 void s_gdbline (), s_gdblinetab ();
 void s_gdbbeg (), s_gdbblock (), s_gdbend (), s_gdbsym ();
 #endif
 
-static const pseudo_typeS
-  potable[] =
+static const pseudo_typeS potable[] =
 {
   {"abort", s_abort, 0},
   {"align", s_align_ptwo, 0},
@@ -722,10 +719,10 @@ s_align_bytes (arg)
       input_line_pointer++;
       temp_fill = get_absolute_expression ();
     }
+  else if (now_seg != SEG_DATA && now_seg != SEG_BSS)
+    temp_fill = NOP_OPCODE;
   else
-    {
-      temp_fill = 0;
-    }
+    temp_fill = 0;
   /* Only make a frag if we HAVE to. . . */
   if (temp && !need_pass_2)
     frag_align (temp, (int) temp_fill);
@@ -754,6 +751,8 @@ s_align_ptwo ()
       input_line_pointer++;
       temp_fill = get_absolute_expression ();
     }
+  else if (now_seg != SEG_DATA && now_seg != SEG_BSS)
+    temp_fill = NOP_OPCODE;
   else
     temp_fill = 0;
   /* Only make a frag if we HAVE to. . . */

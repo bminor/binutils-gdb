@@ -1,4 +1,39 @@
+Sat Dec 12 15:26:34 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* listing.c: Call xmalloc, not malloc; don't declare malloc.
+
+	* Changes to support SCO 3.2v4:
+	* read.c (s_align_bytes, s_align_ptwo): If not SEG_DATA or
+	SEG_BSS, fill with NOP_OPCODE.
+	* config/i386coff.mt: Add opcode/i386.h to TARG_CPU_DEPENDENTS.
+	* config/obj-coffbfd.c (do_relocs_for): Increment addr even if not
+	using ZERO_BASED_SEGMENTS.
+	(fill_section): If ZERO_BASED_SEGMENTS, set segment addresses, but
+	never set segment address for SEG_E2 (.bss) and don't write out
+	SEG_E2 contents.  Set .init and .fini sections to STYP_TEXT.
+	(obj_coff_endef): Don't merge labels or symbols awaiting forward
+	definitions, and don't merge tags with non-tags.  Check for .bf
+	rather than just checking whether the second character is b and
+	the third character is f.
+	(obj_coff_val): gcc can generate values which we don't handle
+	correctly; discard information for now, since it only affects the
+	debugging information.
+	(tag_find_or_name): Don't insert tags in the symbol table.
+	(yank_symbols): Don't merge labels.
+	(write_object_file): Don't define SUB_SEGMENT_ALIGN if it is
+	already defined.  Fill subsegments with NOP_OPCODE, not 0.  Don't
+	set segment address if ZERO_BASED_SEGMENTS.
+	(obj_coff_section): Accept and ignore a trailing quoted string, as
+	used in AT&T i386 syntax.
+	(fixup_segment): Take segment as argument.  On the i386, adjust PC
+	relative addends by the segment vaddr.
+	* tc-i386.h: Define SUB_SEGMENT_ALIGN.
+	* tc-a29k.h: Define ZERO_BASED_SEGMENTS.
+	* tc-i386.c: (i386_operand): If I386COFF, accept any segment type.
+
 Tue Dec  8 00:06:48 1992  Ken Raeburn  (raeburn@rtl.cygnus.com)
+
+	* config/obj-coffbfd.c: Include libcoff.h.
 
 	* version.c: Now version 1.93.
 

@@ -43,6 +43,11 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "../bfd/libbfd.h"
 #include "../bfd/libcoff.h"
 
+/* The NOP_OPCODE is for the alignment fill value.  Fill with nop so
+   that we can stick sections together without causing trouble.  */
+#ifndef NOP_OPCODE
+#define NOP_OPCODE 0x00
+#endif
 
 #define MIN(a,b) ((a) < (b)? (a) : (b))
 /* This vector is used to turn an internal segment into a section #
@@ -96,7 +101,7 @@ bfd *abfd;
 void EXFUN (bfd_as_write_hook, (struct internal_filehdr *,
 				bfd * abfd));
 
-static void EXFUN (fixup_segment, (fixS * fixP,
+static void EXFUN (fixup_segment, (segment_info_type *segP,
 				   segT this_segment_type));
 
 
@@ -446,15 +451,7 @@ DEFUN (do_relocs_for, (abfd, file_cursor),
 	  *file_cursor += external_reloc_size;
 	  free (external_reloc_vec);
 	}
-#ifndef ZERO_BASED_SEGMENTS
-      /* Supposedly setting segment addresses non-zero causes problems
-       for some platforms, although it shouldn't.  If you define
-       ZERO_BASED_SEGMENTS, all the segments will be based at 0.
-       Please don't make this the default, since some systems (e.g.,
-       SVR3.2) require the segments to be non-zero based.  Ian Taylor
-       <ian@cygnus.com>.  */
       addr += segment_info[idx].scnhdr.s_size;
-#endif
     }
 }
 
@@ -470,6 +467,9 @@ DEFUN (fill_section, (abfd, filehdr, file_cursor),
 {
 
   unsigned int i;
+#ifdef ZERO_BASED_SEGMENTS
+  unsigned int paddr = 0;
+#endif
 
   for (i = SEG_E0; i < SEG_UNKNOWN; i++)
     {
@@ -480,11 +480,22 @@ DEFUN (fill_section, (abfd, filehdr, file_cursor),
       if (s->s_name[0])
 	{
 	  fragS *frag = segment_info[i].frchainP->frch_root;
-	  char *buffer = malloc (s->s_size);
-	  if (s->s_size != 0)
-	    s->s_scnptr = *file_cursor;
+	  char *buffer;
+
+	  if (s->s_size != 0 && i != SEG_E2)
+	    {
+	      buffer = malloc (s->s_size);
+	      s->s_scnptr = *file_cursor;
+#ifdef ZERO_BASED_SEGMENTS
+	      s->s_paddr = paddr;
+	      s->s_vaddr = paddr;
+#endif
+	    }
 	  else
-	    s->s_scnptr = 0;
+	    {
+	      buffer = NULL;
+	      s->s_scnptr = 0;
+	    }
 
 	  s->s_flags = STYP_REG;
 	  if (strcmp (s->s_name, ".text") == 0)
@@ -495,7 +506,10 @@ DEFUN (fill_section, (abfd, filehdr, file_cursor),
 	    s->s_flags |= STYP_BSS | STYP_NOLOAD;
 	  else if (strcmp (s->s_name, ".lit") == 0)
 	    s->s_flags = STYP_LIT | STYP_TEXT;
-
+	  else if (strcmp (s->s_name, ".init") == 0)
+	    s->s_flags |= STYP_TEXT;
+	  else if (strcmp (s->s_name, ".fini") == 0)
+	    s->s_flags |= STYP_TEXT;
 
 	  while (frag)
 	    {
@@ -548,15 +562,17 @@ DEFUN (fill_section, (abfd, filehdr, file_cursor),
 	      frag = frag->fr_next;
 	    }
 
-
-	  bfd_write (buffer, s->s_size, 1, abfd);
-	  free (buffer);
-
-	  *file_cursor += s->s_size;
-
+	  if (s->s_size != 0 && i != SEG_E2)
+	    {
+	      bfd_write (buffer, s->s_size, 1, abfd);
+	      free (buffer);
+	      *file_cursor += s->s_size;
+	    }
+#ifdef ZERO_BASED_SEGMENTS
+	  paddr += s->s_size;
+#endif
 	}
     }
-
 }
 
 
@@ -886,8 +902,8 @@ DEFUN_VOID (obj_coff_endef)
     case C_FCN:
       S_SET_SEGMENT (def_symbol_in_progress, SEG_E0);
 
-      if (def_symbol_in_progress->sy_symbol.ost_entry._n._n_nptr[1][1] == 'b'
-      && def_symbol_in_progress->sy_symbol.ost_entry._n._n_nptr[1][2] == 'f')
+      if (strcmp (def_symbol_in_progress->sy_symbol.ost_entry._n._n_nptr,
+		  ".bf") == 0)
 	{			/* .bf */
 	  if (function_lineoff < 0)
 	    {
@@ -929,10 +945,14 @@ DEFUN_VOID (obj_coff_endef)
       break;
     }				/* switch on storage class */
 
-  /* Now that we have built a debug symbol, try to
-       find if we should merge with an existing symbol
-       or not.  If a symbol is C_EFCN or SEG_ABSOLUTE or
-       untagged SEG_DEBUG it never merges. */
+  /* Now that we have built a debug symbol, try to find if
+       we should merge with an existing symbol or not.  If a
+       symbol is C_EFCN or SEG_ABSOLUTE or untagged
+       SEG_DEBUG it never merges.  We also don't merge
+       labels, which are in a different namespace, nor
+       symbols which have not yet been defined since they
+       are typically unique, nor do we merge tags with
+       non-tags.  */
 
   /* Two cases for functions.  Either debug followed
        by definition or definition followed by debug.
@@ -950,10 +970,13 @@ DEFUN_VOID (obj_coff_endef)
        leave an undefined symbol at link time. */
 
   if (S_GET_STORAGE_CLASS (def_symbol_in_progress) == C_EFCN
+      || S_GET_STORAGE_CLASS (def_symbol_in_progress) == C_LABEL
       || (S_GET_SEGMENT (def_symbol_in_progress) == SEG_DEBUG
 	  && !SF_GET_TAG (def_symbol_in_progress))
       || S_GET_SEGMENT (def_symbol_in_progress) == SEG_ABSOLUTE
-      || (symbolP = symbol_find_base (S_GET_NAME (def_symbol_in_progress), DO_NOT_STRIP)) == NULL)
+      || def_symbol_in_progress->sy_forward != NULL
+      || (symbolP = symbol_find_base (S_GET_NAME (def_symbol_in_progress), DO_NOT_STRIP)) == NULL
+      || (SF_GET_TAG (def_symbol_in_progress) != SF_GET_TAG (symbolP)))
     {
 
       symbol_append (def_symbol_in_progress, symbol_lastP, &symbol_rootP, &symbol_lastP);
@@ -1207,9 +1230,22 @@ obj_coff_val ()
 			   reference is solved, then copy the segment id
 			   from the forward symbol. */
 	  SF_SET_GET_SEGMENT (def_symbol_in_progress);
+
+	  /* FIXME: gcc can generate address expressions
+	     here in unusual cases (search for "obscure"
+	     in sdbout.c).  We just ignore the offset
+	     here, thus generating incorrect debugging
+	     information.  We ignore the rest of the
+	     line just below.  */
 	}
-      /* Otherwise, it is the name of a non debug symbol and its value will be calculated later. */
+      /* Otherwise, it is the name of a non debug symbol and
+	 its value will be calculated later. */
       *input_line_pointer = name_end;
+
+      /* FIXME: this is to avoid an error message in the
+	 FIXME case mentioned just above.  */
+      while (! is_end_of_line[*input_line_pointer])
+	++input_line_pointer;
     }
   else
     {
@@ -1260,7 +1296,6 @@ tag_find_or_make (name)
 			    &zero_address_frag);
 
       tag_insert (S_GET_NAME (symbolP), symbolP);
-      symbol_table_insert (symbolP);
     }				/* not found */
 
   return (symbolP);
@@ -1319,6 +1354,7 @@ DEFUN_VOID (yank_symbols)
 
 	  /* L* and C_EFCN symbols never merge. */
 	  if (!SF_GET_LOCAL (symbolP)
+	      && S_GET_STORAGE_CLASS (symbolP) != C_LABEL
 	      && (real_symbolP = symbol_find_base (S_GET_NAME (symbolP), DO_NOT_STRIP))
 	      && real_symbolP != symbolP)
 	    {
@@ -1789,8 +1825,10 @@ DEFUN_VOID (write_object_file)
 	       frag */
 
       subseg_new (frchain_ptr->frch_seg, frchain_ptr->frch_subseg);
+#ifndef SUB_SEGMENT_ALIGN
 #define SUB_SEGMENT_ALIGN 1
-      frag_align (SUB_SEGMENT_ALIGN, 0);
+#endif
+      frag_align (SUB_SEGMENT_ALIGN, NOP_OPCODE);
       frag_wane (frag_now);
       frag_now->fr_fix = 0;
       know (frag_now->fr_next == NULL);
@@ -1819,19 +1857,30 @@ DEFUN_VOID (write_object_file)
 	  filehdr.f_nscns++;
 	}
 
-#ifndef ZERO_BASED_SEGMENTS
-      /* See the comment at the previous ZERO_BASED_SEGMENTS check.  */
+      /* Supposedly setting segment addresses non-zero
+	 causes problems for some platforms, although it
+	 shouldn't.  If you define ZERO_BASED_SEGMENTS, all
+	 the segments will be based at 0.  Please don't make
+	 this the default, since some systems (e.g., SVR3.2)
+	 require the segments to be non-zero based.  Ian
+	 Taylor <ian@cygnus.com>.  */
+
       if (i == SEG_E2)
 	{
 	  /* This is a special case, we leave the size alone, which
 	     will have been made up from all and any lcomms seen.  */
+#ifndef ZERO_BASED_SEGMENTS
 	  addr += segment_info[i].scnhdr.s_size;
+#endif
 	}
       else
 	{
+#ifndef ZERO_BASED_SEGMENTS
 	  addr += size_section (abfd, i);
-	}
+#else
+	  size_section (abfd, i);
 #endif
+	}
     }
 
 
@@ -1842,7 +1891,7 @@ DEFUN_VOID (write_object_file)
   for (i = SEG_E0; i < SEG_UNKNOWN; i++)
     {
       fixup_mdeps (segment_info[i].frchainP->frch_root);
-      fixup_segment (segment_info[i].fix_root, i);
+      fixup_segment (&segment_info[i], i);
     }
 #endif
 
@@ -1941,24 +1990,28 @@ DEFUN_VOID (obj_coff_section)
   len = section_name_end - section_name;
   input_line_pointer++;
   SKIP_WHITESPACE ();
-  if (c == ',')
+
+  /* Some 386 assemblers stick a quoted string at the end of
+     a .section; we just ignore it.  */
+  if (c == ',' && *input_line_pointer != '"')
     {
       exp = get_absolute_expression ();
     }
-  else if (*input_line_pointer == ',')
+  else if (*input_line_pointer == ','
+	   && input_line_pointer[1] != '"')
     {
-
       input_line_pointer++;
       exp = get_absolute_expression ();
     }
   else
     {
       exp = 0;
+      while (! is_end_of_line[*input_line_pointer])
+	++input_line_pointer;
     }
 
   change_to_section (section_name, len, exp);
   *section_name_end = c;
-
 }
 
 
@@ -2242,9 +2295,10 @@ DEFUN (fixup_mdeps, (frags),
 #if 1
 static void
 DEFUN (fixup_segment, (fixP, this_segment_type),
-       register fixS * fixP AND
+       segment_info_type * segP AND
        segT this_segment_type)
 {
+  register fixS * fixP;
   register symbolS *add_symbolP;
   register symbolS *sub_symbolP;
   register long add_number;
@@ -2256,7 +2310,7 @@ DEFUN (fixup_segment, (fixP, this_segment_type),
   register segT add_symbol_segment = SEG_ABSOLUTE;
 
 
-  for (; fixP; fixP = fixP->fx_next)
+  for (fixP = segP->fix_root; fixP; fixP = fixP->fx_next)
     {
       fragP = fixP->fx_frag;
       know (fragP);
@@ -2365,6 +2419,11 @@ DEFUN (fixup_segment, (fixP, this_segment_type),
 
 	      add_number += S_GET_VALUE (add_symbolP);
 	      add_number -= md_pcrel_from (fixP);
+#ifdef TC_I386
+	      /* On the 386 we must adjust by the segment
+		 vaddr as well.  Ian Taylor.  */
+	      add_number -= segP->scnhdr.s_vaddr;
+#endif
 	      pcrel = 0;	/* Lie. Don't want further pcrel processing. */
 	      fixP->fx_addsy = NULL;	/* No relocations please. */
 	    }
@@ -2402,10 +2461,10 @@ DEFUN (fixup_segment, (fixP, this_segment_type),
 #endif /* TC_I960 */
 #ifdef TC_I386
 		  /* 386 COFF uses a peculiar format in
-			       which the value of a common symbol is
-			       stored in the .text segment (I've
-			       checked this on SVR3.2 and SCO 3.2.2)
-			       Ian Taylor <ian@cygnus.com>.  */
+		     which the value of a common symbol is
+		     stored in the .text segment (I've
+		     checked this on SVR3.2 and SCO 3.2.2)
+		     Ian Taylor <ian@cygnus.com>.  */
 		  add_number += S_GET_VALUE (add_symbolP);
 #endif
 		  break;
@@ -2422,6 +2481,11 @@ DEFUN (fixup_segment, (fixP, this_segment_type),
 	    {
 	      fixP->fx_addsy = &abs_symbol;
 	    }			/* if there's an add_symbol */
+#ifdef TC_I386
+	  /* On the 386 we must adjust by the segment vaddr
+	     as well.  Ian Taylor.  */
+	  add_number -= segP->scnhdr.s_vaddr;
+#endif
 	}			/* if pcrel */
 
       if (!fixP->fx_bit_fixP)
