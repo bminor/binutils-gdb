@@ -45,6 +45,11 @@ stabs.texinfo
 
 Things-to-lose:
 
+a4rc.sed
+config
+cyglogo.eps
+cygref.tex
+
 # The README file for gdb testers using snapshots.
 snapshots.readme
 
