@@ -67,7 +67,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define SOFT_TMP_REGNUM     10
 #define SOFT_ZS_REGNUM      11
 #define SOFT_XY_REGNUM      12
-#define SOFT_D1_REGNUM      13
+#define SOFT_UNUSED_REGNUM  13
+#define SOFT_D1_REGNUM      14
 #define SOFT_D32_REGNUM     (SOFT_D1_REGNUM+31)
 #define M68HC11_MAX_SOFT_REGS 32
 
@@ -111,7 +112,7 @@ static char *
 m68hc11_register_names[] =
 {
   "x",    "d",    "y",    "sp",   "pc",   "a",    "b",
-  "ccr",  "z",    "frame","tmp",  "zs",   "xy",
+  "ccr",  "z",    "frame","tmp",  "zs",   "xy",   0,
   "d1",   "d2",   "d3",   "d4",   "d5",   "d6",   "d7",
   "d8",   "d9",   "d10",  "d11",  "d12",  "d13",  "d14",
   "d15",  "d16",  "d17",  "d18",  "d19",  "d20",  "d21",

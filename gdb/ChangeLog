@@ -1,5 +1,10 @@
 2000-12-03  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
+	* m68hc11-tdep.c (SOFT_D1_REGNUM): Soft registers start at 14.
+	(m68hc11_register_names): Add null for register 13.
+
+2000-12-03  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
 	* m68hc11-tdep.c (m68hc11_frame_args_address): Fix args address
 	computation.
 	(m68hc11_frame_init_saved_regs): Frame pointer is saved only if
