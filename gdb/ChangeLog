@@ -1,3 +1,10 @@
+2002-08-08  Andrew Cagney  <ac131313@redhat.com>
+
+	* configure.tgt: Replace powerpc-*-sysv*, powerpc-*-elf*,
+	powerpcle-*-eabi*, powerpcle-*-sysv* and powerpcle-*-elf* with
+	powerpc*-*-*.
+	* MAINTAINERS: Remove redundant rs6000-ibm-aix4.1 target.
+
 2002-08-08  Andrew Cagney  <cagney@redhat.com>
 
 	* gcore.c (override_derive_stack_segment): Delete variable.

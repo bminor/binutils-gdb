@@ -136,9 +136,6 @@ maintainer works with the native maintainer when resolving API issues.
 	powerpc		--target=powerpc-eabi ,-Werror
 			Kevin Buettner		kevinb@redhat.com
 
-	rs6000		--target=rs6000-ibm-aix4.1 ,-Werror
-			(see rs6000 native and ppc target)
-
 	s390		--target=s390-linux ,-Werror
 			(contact DJ Barrow	djbarrow@de.ibm.com)
 

@@ -218,22 +218,15 @@ ns32k-*-netbsd*)	gdb_target=nbsdaout ;;
 
 powerpc-*-netbsd*)	gdb_target=nbsd ;;
 powerpc-*-aix*)		gdb_target=aix ;;
-powerpc-*-eabi* | powerpc-*-sysv* | powerpc-*-elf*)
-			if test -f ../sim/ppc/Makefile; then
-			  gdb_target=ppc-sim
-			else
-			  gdb_target=ppc-eabi
-			fi ;;
-powerpcle-*-eabi* | powerpcle-*-sysv* | powerpcle-*-elf*)
-			if test -f ../sim/ppc/Makefile; then
-			  gdb_target=ppcle-sim
-			else
-			  gdb_target=ppcle-eabi
-			fi ;;
 powerpc-*-linux*)	gdb_target=linux
 			build_gdbserver=yes
 			;;
 powerpc-*-vxworks*)	gdb_target=vxworks ;;
+powerpc*-*-*)		if test -f ../sim/ppc/Makefile; then
+			  gdb_target=ppc-sim
+			else
+			  gdb_target=ppc-eabi
+			fi ;;
 
 rs6000-*-lynxos*)	gdb_target=rs6000lynx ;;
 rs6000-*-aix4*)		gdb_target=aix4 ;;
