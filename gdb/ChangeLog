@@ -1,5 +1,7 @@
 Wed Apr 24 09:45:17 1991  Jim Kingdon  (kingdon at cygint.cygnus.com)
 
+	* i386-stub.c: New file.
+
 	* WHATS.NEW: Remove mention of readline and more paging (in 3.5).
 	Try to keep command names up to date with renaming.
 
