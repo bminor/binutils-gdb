@@ -1,3 +1,9 @@
+Sat Dec 30 09:59:51 1995  Jeffrey A Law  (law@cygnus.com)
+
+	* nm.c ( long_options): Add "--defined-only" option.
+	(usage): Update for new "--defined-only" option.
+	(filter_symbols): Handle "--defined-only".
+
 Fri Dec 29 16:04:56 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* arparse.y: Include "bucomm.h", not <sysdep.h>.

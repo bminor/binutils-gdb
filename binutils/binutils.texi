@@ -580,6 +580,7 @@ nm [ -a | --debug-syms ]  [ -g | --extern-only ]
    [ -r | --reverse-sort ]  [ --size-sort ] [ -u | --undefined-only ]
    [ -t @var{radix} | --radix=@var{radix} ] [ -P | --portability ]
    [ --target=@var{bfdname} ] [ -f @var{format} | --format=@var{format} ]
+   [ --defined-only ]
    [ --no-demangle ] [ -V | --version ]  [ --help ]  [ @var{objfile}@dots{} ]
 @end smallexample
 
@@ -734,6 +735,11 @@ Specify an object code format other than your system's default format.
 @cindex external symbols
 @cindex undefined symbols
 Display only undefined symbols (those external to each object file).
+
+@item --defined-only
+@cindex external symbols
+@cindex undefined symbols
+Display only defined symbols for each object file.
 
 @item -V
 @itemx --version
