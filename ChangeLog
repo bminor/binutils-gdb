@@ -1,3 +1,8 @@
+Wed Feb  2 14:53:05 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* Makefile.in, test-build.mk: Remove MUNCH_NM; it was only needed
+	for GDB and GDB has been fixed to not need it.
+
 Mon Jan 31 18:40:55 1994  Stu Grossman  (grossman at cygnus.com)
 
 	* config/mh-lynxosrs6k:  Account for lack of ranlib!

@@ -70,7 +70,6 @@ CXXFLAGS = -g -O
 
 RANLIB = ranlib
 NM = nm
-MUNCH_NM = $(NM)
 # Not plain GZIP, since gzip looks there for extra command-line options.
 GZIPPROG = gzip
 
@@ -246,7 +245,6 @@ BASE_FLAGS_TO_PASS = \
 	"LEX=$(LEX)" \
 	"M4=$(M4)" \
 	"MAKEINFO=$(MAKEINFO) $(MAKEINFOFLAGS)" \
-	"MUNCH_NM=$(MUNCH_NM)" \
 	"NM_FOR_TARGET=$(NM_FOR_TARGET)" \
 	"RANLIB_FOR_TARGET=$(RANLIB_FOR_TARGET)" \
 	"SHELL=$(SHELL)" \
