@@ -331,6 +331,7 @@ rdi-share
 remote-adapt.c
 remote-array.c
 remote-bug.c
+remote-d10v.c
 remote-e7000.c
 remote-eb.c
 remote-es.c
