@@ -95,7 +95,7 @@ int unwind_on_signal_p = 0;
 /* Find the address of function name NAME in the inferior.  */
 
 struct value *
-find_function_in_inferior (char *name)
+find_function_in_inferior (const char *name)
 {
   register struct symbol *sym;
   sym = lookup_symbol (name, 0, VAR_NAMESPACE, 0, NULL);

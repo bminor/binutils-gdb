@@ -1,5 +1,12 @@
 2002-09-12  Joel Brobecker  <brobecker@gnat.com>
 
+	* value.h (find_function_in_inferior): Add const keyword to
+	one of the parameters. Allows us to invoke this function with
+	a const char *.
+	* valops.c (find_function_in_inferior): Likewise.
+
+2002-09-12  Joel Brobecker  <brobecker@gnat.com>
+
 	* exec.c (xfer_memory): Fix compilation warning with old versions
 	of GCC.
 	* tracepoint.c (trace_find_tracepoint_command): Likewise.
