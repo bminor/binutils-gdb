@@ -69,7 +69,8 @@ extern int i386_skip_prologue (int);
    through the frames for this because on some machines the new frame is not
    set up until the new function executes some instructions.  */
 
-#define SAVED_PC_AFTER_CALL(frame) (read_memory_integer (read_register (SP_REGNUM), 4))
+#define SAVED_PC_AFTER_CALL(frame) \
+     (read_memory_unsigned_integer (read_register (SP_REGNUM), 4))
 
 /* Stack grows downward.  */
 
@@ -327,7 +328,7 @@ extern void i386_extract_return_value (struct type *type, char *regbuf,
   ((thisframe)->signal_handler_caller \
    ? (thisframe)->frame \
    : (!inside_entry_file ((thisframe)->pc) \
-      ? read_memory_integer ((thisframe)->frame, 4) \
+      ? read_memory_unsigned_integer ((thisframe)->frame, 4) \
       : 0))
 
 /* A macro that tells us whether the function invocation represented
@@ -342,7 +343,7 @@ extern void i386_extract_return_value (struct type *type, char *regbuf,
 #define FRAME_SAVED_PC(FRAME) \
   (((FRAME)->signal_handler_caller \
     ? sigtramp_saved_pc (FRAME) \
-    : read_memory_integer ((FRAME)->frame + 4, 4)) \
+    : read_memory_unsigned_integer ((FRAME)->frame + 4, 4)) \
    )
 
 extern CORE_ADDR sigtramp_saved_pc (struct frame_info *);

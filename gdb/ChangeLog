@@ -1,3 +1,10 @@
+2000-07-21  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* config/i386/tm-i386.h: treat PC and FP as unsigned.
+	(SAVED_PC_AFTER_CALL): Use read_memory_unsigned_integer.
+	(FRAME_SAVED_PC): Ditto.
+	(FRAME_CHAIN): Ditto.
+
 2000-07-20  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* valarith.c (value_sub): Call check_typedef.
