@@ -200,17 +200,3 @@ write_arrays ();
 booleans ();
 
 END;
-
-PR_5020: MODULE
-  dummy_pr_5020: PROC ();
-  END;
-  NEWMODE x = STRUCT (l LONG, b BOOL);
-
-  DCL y ARRAY ('a':'b') x;
-
-  y('a').l := 10;
-  y('a').b := TRUE;
-  y('b').l := 111;
-  y('b').b := FALSE;
-  dummy_pr_5020 ();
-END;

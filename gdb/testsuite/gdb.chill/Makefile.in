@@ -53,13 +53,13 @@ RUNTEST = runtest
 
 RUNTESTFLAGS = 
 
-EXPECT = `if [ -f $${rootme}/../../expect/expect ] ; then \
-          echo $${rootme}/../../expect/expect ; \
+EXPECT = `if [ -f $${rootme}../../../expect/expect ] ; then \
+          echo $${rootme}../../../expect/expect ; \
           else echo expect ; fi`
 
 RUNTEST_FOR_TARGET = ` \
-  if [ -f $${rootme}/../../dejagnu/site.exp ] ; then \
-    echo $${rootme}/../../dejagnu/runtest ; \
+  if [ -f $${rootme}../../../dejagnu/site.exp ] ; then \
+    echo $${rootme}../../../dejagnu/runtest ; \
   else \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
       echo $(RUNTEST); \
@@ -68,11 +68,12 @@ RUNTEST_FOR_TARGET = ` \
     fi; \
   fi`
 
+CFLAGS = -g
 CHILLFLAGS = $(CFLAGS)
 
 CHILL_FOR_TARGET = ` \
-  if [ -f $${rootme}/../../gcc/Makefile ] ; then \
-    echo $${rootme}/../../gcc/xgcc -B$${rootme}../../gcc/; \
+  if [ -f $${rootme}../../../gcc/Makefile ] ; then \
+    echo $${rootme}../../../gcc/xgcc -B$${rootme}../../../gcc/; \
   else \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
       echo gcc; \
@@ -84,16 +85,16 @@ CHILL_FOR_TARGET = ` \
 CHILL = $(CHILL_FOR_TARGET)
 
 CHILL_LIB = ` \
-  if [ -f $${rootme}/../../gcc/ch/runtime/libchill.a ] ; then \
-    echo $${rootme}/../../gcc/ch/runtime/chillrt0.o \
-      $${rootme}/../../gcc/ch/runtime/libchill.a; \
+  if [ -f $${rootme}../../../gcc/ch/runtime/libchill.a ] ; then \
+    echo $${rootme}../../../gcc/ch/runtime/chillrt0.o \
+      $${rootme}../../../gcc/ch/runtime/libchill.a; \
   else \
       echo -lchill; \
   fi`
 
 GDB = ` \
-  if [ -f $${rootme}/../gdb ] ; \
-    then echo $${rootme}|sed -e 's@/[^/]*$$@@'|sed -e 's@$$@/gdb@' ; \
+  if [ -f $${rootme}../../gdb ] ; \
+    then echo $${rootme}../../gdb; \
     else echo gdb; \
   fi`
 
@@ -101,15 +102,17 @@ GDBFLAGS = -nx
 
 #### host, target, and site specific Makefile frags come in here.
 
-EXECUTABLES = chillvars
+EXECUTABLES = chillvars.exe pr-5020.exe pr-5022.exe
 
 all:	$(EXECUTABLES)
 
-chillvars: chillvars.o
-	$(CHILL_FOR_TARGET) $(CHILLFLAGS) $(LDFLAGS) -o chillvars chillvars.o $(CHILL_LIB) $(LIBS)
+.SUFFIXES: .ch .exe
 
-chillvars.o: chillvars.ch
-	$(CHILL_FOR_TARGET) $(CHILLFLAGS) -fspecial_UC -c $(srcdir)/chillvars.ch
+.o.exe:
+	$(CHILL_FOR_TARGET) $(CHILLFLAGS) $(LDFLAGS) -o $*.exe $*.o $(CHILL_LIB) $(LIBS)
+
+.ch.o:
+	$(CHILL_FOR_TARGET) $(CHILLFLAGS) -fspecial_UC -c $<
 
 .NOEXPORT:
 INFODIRS=doc
@@ -152,13 +155,11 @@ site.exp: ./config.status Makefile
 installcheck:
 check: site.exp all just-check
 just-check:
-	rootme=`pwd`; export rootme; \
-	srcdir=${srcdir} ; export srcdir ; \
-	EXPECT=${EXPECT} ; export EXPECT ; \
-	if [ -f $${rootme}/../../expect/expect ] ; then  \
-	  TCL_LIBRARY=$${srcdir}/../../tcl/library ; \
-	  export TCL_LIBRARY ; fi ; \
-	$(RUNTEST_FOR_TARGET) $(RUNTESTFLAGS) --tool gdb GDB=$(GDB) --srcdir $(srcdir)
+	tests=`cd ${srcdir}; echo *.exp` ; \
+	rootme=`pwd`/; export rootme; \
+	cd .. ; \
+	$(MAKE) just-check RUNTESTFLAGS="${RUNTESTFLAGS} $${tests}" \
+	  GDB=${GDB} EXPECT=${EXPECT}
 
 clean mostlyclean:
 	-rm -f *~ core *.o a.out xgdb *.x $(EXECUTABLES)

@@ -220,7 +220,7 @@ proc test_print_reject { args } {
     }
     send "$sendthis\n"
     expect {
-	-re ".*Invalid syntax in expression.*$prompt $" {
+	-re ".*A .* in expression.*\\.*$prompt $" {
 	    incr passcount
 	    return 1
 	}

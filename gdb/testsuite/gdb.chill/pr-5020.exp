@@ -54,15 +54,19 @@ proc test_pr_5020 {} {
     global prompt
     runto dummy_pr_5020
     gdb_test_exact "print y" \
-	{= [ ('a') [.l: 10, .b: TRUE], ('b') [.l: 111, .b: FALSE]]}
+	{= [('a'): [.l: 10, .b: TRUE], ('b'): [.l: 111, .b: FALSE]]}
+    gdb_test_exact "print boolarr" \
+	{= [(FALSE): [.l: 10, .b: TRUE], (TRUE): [.l: 111, .b: FALSE]]}
+    gdb_test_exact "print intarr" \
+	{= [(10): [.l: 10, .b: TRUE], (11): [.l: 111, .b: FALSE]]}
+    gdb_test_exact "print setarr" \
+	{= [(aa): [.l: 10, .b: TRUE], (bb): [.l: 111, .b: FALSE]]}
     send "set print pretty\n" ; expect -re "$prompt $"
     gdb_test_exact "print y" \
-{= [
-  (`a`) [
+{= [('a'): [
     .l: 10, 
     .b: TRUE
-  ], 
-  ('b') [
+  ], ('b'): [
     .l: 111, 
     .b: FALSE
   ]]} "print y pretty"
@@ -72,13 +76,11 @@ proc test_pr_5020 {} {
 # haven't tried to compile one, or the compilation failed for some reason.
 # In either case, just notify the user and skip the tests in this file.
 
-set binfile "chillvars"
+set binfile "pr-5020.exe"
 set srcfile $binfile.ch
 
 if ![file exists $objdir/$subdir/$binfile] then {
-    if $all_flag then {
-	warning "$binfile does not exist; tests suppressed."
-    }
+	warning "$objdir/$subdir/$binfile does not exist; tests suppressed."
 } else {
     do_tests
 }

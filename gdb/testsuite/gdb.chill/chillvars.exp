@@ -289,13 +289,11 @@ proc test_structs {} {
 # haven't tried to compile one, or the compilation failed for some reason.
 # In either case, just notify the user and skip the tests in this file.
 
-set binfile "chillvars"
+set binfile "chillvars.exe"
 set srcfile $binfile.ch
 
 if ![file exists $objdir/$subdir/$binfile] then {
-    if $all_flag then {
-	warning "$binfile does not exist; tests suppressed."
-    }
+    warning "$binfile does not exist; tests suppressed."
 } else {
     do_tests
 }
