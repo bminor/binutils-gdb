@@ -1,3 +1,7 @@
+2003-10-20  Andrew Cagney  <cagney@redhat.com>
+
+	* pe-dll.c: Replace "struct sec" with "struct bfd_section".
+
 2003-10-19  Marek Michalkiewicz  <marekm@amelek.gda.pl>
 
 	* Makefile.am: Remove old (before GCC 3.3) emulations for AVR

@@ -899,7 +899,7 @@ tic30_aout_set_arch_mach (abfd, arch, machine)
 #endif
 #ifndef MY_bfd_debug_info_accumulate
 #define MY_bfd_debug_info_accumulate	\
-			(void (*) PARAMS ((bfd*, struct sec *))) bfd_void
+		(void (*) PARAMS ((bfd*, struct bfd_section *))) bfd_void
 #endif
 
 #ifndef MY_core_file_failing_command

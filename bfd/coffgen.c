@@ -329,7 +329,7 @@ coff_section_from_bfd_index (abfd, index)
      bfd *abfd;
      int index;
 {
-  struct sec *answer = abfd->sections;
+  struct bfd_section *answer = abfd->sections;
 
   if (index == N_ABS)
     return bfd_abs_section_ptr;

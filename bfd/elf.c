@@ -4432,7 +4432,7 @@ _bfd_elf_write_corefile_contents (bfd *abfd)
 /* Given a section, search the header to find them.  */
 
 int
-_bfd_elf_section_from_bfd_section (bfd *abfd, struct sec *asect)
+_bfd_elf_section_from_bfd_section (bfd *abfd, struct bfd_section *asect)
 {
   const struct elf_backend_data *bed;
   int index;

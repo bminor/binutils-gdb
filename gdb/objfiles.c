@@ -1044,14 +1044,14 @@ map_to_file (int fd)
 
 #endif /* defined(USE_MMALLOC) && defined(HAVE_MMAP) */
 
-/* Returns a section whose range includes PC and SECTION, 
-   or NULL if none found.  Note the distinction between the return type, 
-   struct obj_section (which is defined in gdb), and the input type
-   struct sec (which is a bfd-defined data type).  The obj_section
-   contains a pointer to the bfd struct sec section.  */
+/* Returns a section whose range includes PC and SECTION, or NULL if
+   none found.  Note the distinction between the return type, struct
+   obj_section (which is defined in gdb), and the input type "struct
+   bfd_section" (which is a bfd-defined data type).  The obj_section
+   contains a pointer to the "struct bfd_section".  */
 
 struct obj_section *
-find_pc_sect_section (CORE_ADDR pc, struct sec *section)
+find_pc_sect_section (CORE_ADDR pc, struct bfd_section *section)
 {
   struct obj_section *s;
   struct objfile *objfile;

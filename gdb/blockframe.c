@@ -294,7 +294,7 @@ get_frame_function (struct frame_info *frame)
    Returns 0 if function is not known.  */
 
 struct symbol *
-find_pc_sect_function (CORE_ADDR pc, struct sec *section)
+find_pc_sect_function (CORE_ADDR pc, struct bfd_section *section)
 {
   struct block *b = block_for_pc_sect (pc, section);
   if (b == 0)
@@ -317,7 +317,7 @@ find_pc_function (CORE_ADDR pc)
 static CORE_ADDR cache_pc_function_low = 0;
 static CORE_ADDR cache_pc_function_high = 0;
 static char *cache_pc_function_name = 0;
-static struct sec *cache_pc_function_section = NULL;
+static struct bfd_section *cache_pc_function_section = NULL;
 
 /* Clear cache, e.g. when symbol table is discarded. */
 

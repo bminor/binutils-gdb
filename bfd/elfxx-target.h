@@ -99,7 +99,7 @@
 #define bfd_elfNN_bfd_debug_info_start	bfd_void
 #define bfd_elfNN_bfd_debug_info_end	bfd_void
 #define bfd_elfNN_bfd_debug_info_accumulate \
-  ((void (*) (bfd*, struct sec *)) bfd_void)
+  ((void (*) (bfd*, struct bfd_section *)) bfd_void)
 
 #ifndef bfd_elfNN_bfd_get_relocated_section_contents
 #define bfd_elfNN_bfd_get_relocated_section_contents \

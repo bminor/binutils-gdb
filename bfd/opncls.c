@@ -1024,7 +1024,7 @@ FUNCTION
 	bfd_create_gnu_debuglink_section
 
 SYNOPSIS
-	struct sec *bfd_create_gnu_debuglink_section
+	struct bfd_section *bfd_create_gnu_debuglink_section
 	  (bfd *abfd, const char *filename);
 
 DESCRIPTION
@@ -1089,7 +1089,7 @@ FUNCTION
 
 SYNOPSIS
 	bfd_boolean bfd_fill_in_gnu_debuglink_section
-	  (bfd *abfd, struct sec *sect, const char *filename);
+	  (bfd *abfd, struct bfd_section *sect, const char *filename);
 
 DESCRIPTION
 
@@ -1105,7 +1105,7 @@ RETURNS
 
 bfd_boolean
 bfd_fill_in_gnu_debuglink_section (bfd *abfd,
-				   struct sec *sect,
+				   struct bfd_section *sect,
 				   const char *filename)
 {
   bfd_size_type debuglink_size;

@@ -1736,7 +1736,7 @@ minsym_found (int funfirstline, struct minimal_symbol *msymbol)
   values.sals = (struct symtab_and_line *)
     xmalloc (sizeof (struct symtab_and_line));
   values.sals[0] = find_pc_sect_line (SYMBOL_VALUE_ADDRESS (msymbol),
-				      (struct sec *) 0, 0);
+				      (struct bfd_section *) 0, 0);
   values.sals[0].section = SYMBOL_BFD_SECTION (msymbol);
   if (funfirstline)
     {

@@ -1,3 +1,8 @@
+2003-10-20  Andrew Cagney  <cagney@redhat.com>
+
+	* coffgrok.h (coff_section): Replace 'struct sec" with "struct
+	bfd_section".
+
 2003-10-07  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* objdump.c (read_section_stabs): Just read one section, return

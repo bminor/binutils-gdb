@@ -321,7 +321,7 @@ alent;
 #define	align_power(addr, align)	\
   (((addr) + ((bfd_vma) 1 << (align)) - 1) & ((bfd_vma) -1 << (align)))
 
-typedef struct sec *sec_ptr;
+typedef struct bfd_section *sec_ptr;
 
 #define bfd_get_section_name(bfd, ptr) ((ptr)->name + 0)
 #define bfd_get_section_vma(bfd, ptr) ((ptr)->vma + 0)
@@ -527,7 +527,7 @@ extern bfd_boolean bfd_cache_close
 
 extern bfd_boolean bfd_record_phdr
   (bfd *, unsigned long, bfd_boolean, flagword, bfd_boolean, bfd_vma,
-	   bfd_boolean, bfd_boolean, unsigned int, struct sec **);
+   bfd_boolean, bfd_boolean, unsigned int, struct bfd_section **);
 
 /* Byte swapping routines.  */
 
@@ -608,7 +608,7 @@ extern bfd_boolean bfd_ecoff_write_accumulated_debug
    const struct ecoff_debug_swap *swap,
    struct bfd_link_info *info, file_ptr where);
 extern bfd_boolean bfd_mips_ecoff_create_embedded_relocs
-  (bfd *, struct bfd_link_info *, struct sec *, struct sec *, char **);
+  (bfd *, struct bfd_link_info *, struct bfd_section *, struct bfd_section *, char **);
 
 /* Externally visible ELF routines.  */
 
@@ -627,10 +627,10 @@ extern bfd_boolean bfd_elf_get_bfd_needed_list
   (bfd *, struct bfd_link_needed_list **);
 extern bfd_boolean bfd_elf32_size_dynamic_sections
   (bfd *, const char *, const char *, const char *, const char * const *,
-   struct bfd_link_info *, struct sec **, struct bfd_elf_version_tree *);
+   struct bfd_link_info *, struct bfd_section **, struct bfd_elf_version_tree *);
 extern bfd_boolean bfd_elf64_size_dynamic_sections
   (bfd *, const char *, const char *, const char *, const char * const *,
-   struct bfd_link_info *, struct sec **, struct bfd_elf_version_tree *);
+   struct bfd_link_info *, struct bfd_section **, struct bfd_elf_version_tree *);
 extern void bfd_elf_set_dt_needed_name
   (bfd *, const char *);
 extern void bfd_elf_set_dt_needed_soname
@@ -685,9 +685,9 @@ extern int bfd_get_sign_extend_vma
   (bfd *);
 
 extern bfd_boolean bfd_m68k_elf32_create_embedded_relocs
-  (bfd *, struct bfd_link_info *, struct sec *, struct sec *, char **);
+  (bfd *, struct bfd_link_info *, struct bfd_section *, struct bfd_section *, char **);
 extern bfd_boolean bfd_mips_elf32_create_embedded_relocs
-  (bfd *, struct bfd_link_info *, struct sec *, struct sec *, char **);
+  (bfd *, struct bfd_link_info *, struct bfd_section *, struct bfd_section *, char **);
 
 /* SunOS shared library support routines for the linker.  */
 
@@ -696,7 +696,7 @@ extern struct bfd_link_needed_list *bfd_sunos_get_needed_list
 extern bfd_boolean bfd_sunos_record_link_assignment
   (bfd *, struct bfd_link_info *, const char *);
 extern bfd_boolean bfd_sunos_size_dynamic_sections
-  (bfd *, struct bfd_link_info *, struct sec **, struct sec **, struct sec **);
+  (bfd *, struct bfd_link_info *, struct bfd_section **, struct bfd_section **, struct bfd_section **);
 
 /* Linux shared library support routines for the linker.  */
 
@@ -750,7 +750,7 @@ extern bfd_boolean bfd_xcoff_record_link_assignment
 extern bfd_boolean bfd_xcoff_size_dynamic_sections
   (bfd *, struct bfd_link_info *, const char *, const char *,
    unsigned long, unsigned long, unsigned long, bfd_boolean,
-   int, bfd_boolean, bfd_boolean, struct sec **, bfd_boolean);
+   int, bfd_boolean, bfd_boolean, struct bfd_section **, bfd_boolean);
 extern bfd_boolean bfd_xcoff_link_generate_rtinit
   (bfd *, const char *, const char *, bfd_boolean);
 
@@ -775,7 +775,7 @@ extern bfd_boolean bfd_coff_set_symbol_class
   (bfd *, struct symbol_cache_entry *, unsigned int);
 
 extern bfd_boolean bfd_m68k_coff_create_embedded_relocs
-  (bfd *, struct bfd_link_info *, struct sec *, struct sec *, char **);
+  (bfd *, struct bfd_link_info *, struct bfd_section *, struct bfd_section *, char **);
 
 /* ARM Interworking support.  Called from linker.  */
 extern bfd_boolean bfd_arm_allocate_interworking_sections
@@ -822,10 +822,10 @@ extern unsigned int bfd_arm_get_mach_from_notes
 
 /* TI COFF load page support.  */
 extern void bfd_ticoff_set_section_load_page
-  (struct sec *, int);
+  (struct bfd_section *, int);
 
 extern int bfd_ticoff_get_section_load_page
-  (struct sec *);
+  (struct bfd_section *);
 
 /* H8/300 functions.  */
 extern bfd_vma bfd_h8300_pad_address
@@ -865,11 +865,11 @@ unsigned long bfd_calc_gnu_debuglink_crc32
 
 char *bfd_follow_gnu_debuglink (bfd *abfd, const char *dir);
 
-struct sec *bfd_create_gnu_debuglink_section
+struct bfd_section *bfd_create_gnu_debuglink_section
    (bfd *abfd, const char *filename);
 
 bfd_boolean bfd_fill_in_gnu_debuglink_section
-   (bfd *abfd, struct sec *sect, const char *filename);
+   (bfd *abfd, struct bfd_section *sect, const char *filename);
 
 /* Extracted from libbfd.c.  */
 
@@ -1036,7 +1036,7 @@ struct bfd_comdat_info
   long symbol;
 };
 
-typedef struct sec
+typedef struct bfd_section
 {
   /* The name of the section; the name isn't a copy, the pointer is
      the same as that passed to bfd_make_section.  */
@@ -1049,7 +1049,7 @@ typedef struct sec
   int index;
 
   /* The next section in the list belonging to the BFD, or NULL.  */
-  struct sec *next;
+  struct bfd_section *next;
 
   /* The field flags contains attributes of the section. Some
      flags are read in from the object file, and some are
@@ -1315,7 +1315,7 @@ typedef struct sec
   bfd_vma output_offset;
 
   /* The output section through which to map on output.  */
-  struct sec *output_section;
+  struct bfd_section *output_section;
 
   /* The alignment requirement of the section, as an exponent of 2 -
      e.g., 3 aligns to 2^3 (or 8).  */
@@ -1365,7 +1365,7 @@ typedef struct sec
 
   /* Points to the kept section if this section is a link-once section,
      and is discarded.  */
-  struct sec *kept_section;
+  struct bfd_section *kept_section;
 
   /* When a section is being output, this value changes as more
      linenumbers are written out.  */
@@ -3593,7 +3593,7 @@ typedef struct symbol_cache_entry
   /* A pointer to the section to which this symbol is
      relative.  This will always be non NULL, there are special
      sections for undefined and absolute symbols.  */
-  struct sec *section;
+  struct bfd_section *section;
 
   /* Back end special data.  */
   union
@@ -3724,10 +3724,10 @@ struct bfd
   struct bfd_hash_table section_htab;
 
   /* Pointer to linked list of sections.  */
-  struct sec *sections;
+  struct bfd_section *sections;
 
   /* The place where we add to the section list.  */
-  struct sec **section_tail;
+  struct bfd_section **section_tail;
 
   /* The number of sections.  */
   unsigned int section_count;
@@ -3973,8 +3973,8 @@ struct bfd_preserve
   void *tdata;
   flagword flags;
   const struct bfd_arch_info *arch_info;
-  struct sec *sections;
-  struct sec **section_tail;
+  struct bfd_section *sections;
+  struct bfd_section **section_tail;
   unsigned int section_count;
   struct bfd_hash_table section_htab;
 };
@@ -4240,7 +4240,7 @@ typedef struct bfd_target
 
   alent *     (*_get_lineno) (bfd *, struct symbol_cache_entry *);
   bfd_boolean (*_bfd_find_nearest_line)
-    (bfd *, struct sec *, struct symbol_cache_entry **, bfd_vma,
+    (bfd *, struct bfd_section *, struct symbol_cache_entry **, bfd_vma,
      const char **, const char **, unsigned int *);
  /* Back-door to allow format-aware applications to create debug symbols
     while using BFD for everything else.  Currently used by the assembler
@@ -4300,7 +4300,7 @@ typedef struct bfd_target
      bfd_byte *, bfd_boolean, struct symbol_cache_entry **);
 
   bfd_boolean (*_bfd_relax_section)
-    (bfd *, struct sec *, struct bfd_link_info *, bfd_boolean *);
+    (bfd *, struct bfd_section *, struct bfd_link_info *, bfd_boolean *);
 
   /* Create a hash table for the linker.  Different backends store
      different information in this table.  */
@@ -4321,7 +4321,7 @@ typedef struct bfd_target
   bfd_boolean (*_bfd_final_link) (bfd *, struct bfd_link_info *);
 
   /* Should this section be split up into smaller pieces during linking.  */
-  bfd_boolean (*_bfd_link_split_section) (bfd *, struct sec *);
+  bfd_boolean (*_bfd_link_split_section) (bfd *, struct bfd_section *);
 
   /* Remove sections that are not referenced from the output.  */
   bfd_boolean (*_bfd_gc_sections) (bfd *, struct bfd_link_info *);
@@ -4330,7 +4330,7 @@ typedef struct bfd_target
   bfd_boolean (*_bfd_merge_sections) (bfd *, struct bfd_link_info *);
 
   /* Discard members of a group.  */
-  bfd_boolean (*_bfd_discard_group) (bfd *, struct sec *);
+  bfd_boolean (*_bfd_discard_group) (bfd *, struct bfd_section *);
 
   /* Routines to handle dynamic symbols and relocs.  */
 #define BFD_JUMP_TABLE_DYNAMIC(NAME) \

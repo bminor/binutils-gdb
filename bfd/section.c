@@ -166,7 +166,7 @@ CODE_FRAGMENT
 .  long symbol;
 .};
 .
-.typedef struct sec
+.typedef struct bfd_section
 .{
 .  {* The name of the section; the name isn't a copy, the pointer is
 .     the same as that passed to bfd_make_section.  *}
@@ -179,7 +179,7 @@ CODE_FRAGMENT
 .  int index;
 .
 .  {* The next section in the list belonging to the BFD, or NULL.  *}
-.  struct sec *next;
+.  struct bfd_section *next;
 .
 .  {* The field flags contains attributes of the section. Some
 .     flags are read in from the object file, and some are
@@ -445,7 +445,7 @@ CODE_FRAGMENT
 .  bfd_vma output_offset;
 .
 .  {* The output section through which to map on output.  *}
-.  struct sec *output_section;
+.  struct bfd_section *output_section;
 .
 .  {* The alignment requirement of the section, as an exponent of 2 -
 .     e.g., 3 aligns to 2^3 (or 8).  *}
@@ -495,7 +495,7 @@ CODE_FRAGMENT
 .
 .  {* Points to the kept section if this section is a link-once section,
 .     and is discarded.  *}
-.  struct sec *kept_section;
+.  struct bfd_section *kept_section;
 .
 .  {* When a section is being output, this value changes as more
 .     linenumbers are written out.  *}
@@ -635,7 +635,7 @@ static const asymbol global_syms[] =
        0,   0,   0,            0,					\
 									\
     /* output_offset, output_section,      alignment_power,          */	\
-       0,             (struct sec *) &SEC, 0,				\
+       0,             (struct bfd_section *) &SEC, 0,			\
 									\
     /* relocation, orelocation, reloc_count, filepos, rel_filepos,   */	\
        NULL,       NULL,        0,           0,       0,		\

@@ -305,7 +305,7 @@ struct coff_link_hash_table
 /* Functions in coffgen.c.  */
 extern const bfd_target *coff_object_p
   PARAMS ((bfd *));
-extern struct sec *coff_section_from_bfd_index
+extern struct bfd_section *coff_section_from_bfd_index
   PARAMS ((bfd *, int));
 extern long coff_get_symtab_upper_bound
   PARAMS ((bfd *));

@@ -137,7 +137,7 @@ int pe_dll_extra_pe_debug = 0;
 
 static bfd_vma image_base;
 static bfd *filler_bfd;
-static struct sec *edata_s, *reloc_s;
+static struct bfd_section *edata_s, *reloc_s;
 static unsigned char *edata_d, *reloc_d;
 static size_t edata_sz, reloc_sz;
 static int runtime_pseudo_relocs_created = 0;
@@ -339,7 +339,7 @@ pe_export_sort (const void *va, const void *vb)
    defined, since we can't export symbols we don't have.  */
 
 static bfd_vma *exported_symbol_offsets;
-static struct sec **exported_symbol_sections;
+static struct bfd_section **exported_symbol_sections;
 static int export_table_size;
 static int count_exported;
 static int count_exported_byname;
@@ -501,7 +501,7 @@ process_def_file (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
   int i, j;
   struct bfd_link_hash_entry *blhe;
   bfd *b;
-  struct sec *s;
+  struct bfd_section *s;
   def_file_export *e = 0;
 
   if (!pe_def_file)
@@ -626,9 +626,9 @@ process_def_file (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
   e = pe_def_file->exports;
 
   exported_symbol_offsets = xmalloc (NE * sizeof (bfd_vma));
-  exported_symbol_sections = xmalloc (NE * sizeof (struct sec *));
+  exported_symbol_sections = xmalloc (NE * sizeof (struct bfd_section *));
 
-  memset (exported_symbol_sections, 0, NE * sizeof (struct sec *));
+  memset (exported_symbol_sections, 0, NE * sizeof (struct bfd_section *));
   max_ordinal = 0;
   min_ordinal = 65536;
   count_exported = 0;
@@ -967,7 +967,7 @@ fill_edata (bfd *abfd, struct bfd_link_info *info ATTRIBUTE_UNUSED)
     {
       if (pe_def_file->exports[s].ordinal != -1)
 	{
-	  struct sec *ssec = exported_symbol_sections[s];
+	  struct bfd_section *ssec = exported_symbol_sections[s];
 	  unsigned long srva = (exported_symbol_offsets[s]
 				+ ssec->output_section->vma
 				+ ssec->output_offset);
@@ -993,7 +993,7 @@ fill_edata (bfd *abfd, struct bfd_link_info *info ATTRIBUTE_UNUSED)
 }
 
 
-static struct sec *current_sec;
+static struct bfd_section *current_sec;
 
 void
 pe_walk_relocs_of_symbol (struct bfd_link_info *info,
@@ -1060,7 +1060,7 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
   unsigned long page_ptr, page_count;
   int bi;
   bfd *b;
-  struct sec *s;
+  struct bfd_section *s;
 
   total_relocs = 0;
   for (b = info->input_bfds; b; b = b->link_next)

@@ -1342,7 +1342,7 @@ extern bfd_boolean _bfd_elf_slurp_version_tables
 extern bfd_boolean _bfd_elf_merge_sections
   (bfd *, struct bfd_link_info *);
 extern bfd_boolean bfd_elf_discard_group
-  (bfd *, struct sec *);
+  (bfd *, struct bfd_section *);
 extern void bfd_elf_set_group_contents
   (bfd *, asection *, void *);
 extern void _bfd_elf_link_just_syms

@@ -293,7 +293,7 @@ CODE_FRAGMENT
 .  {* A pointer to the section to which this symbol is
 .     relative.  This will always be non NULL, there are special
 .     sections for undefined and absolute symbols.  *}
-.  struct sec *section;
+.  struct bfd_section *section;
 .
 .  {* Back end special data.  *}
 .  union
@@ -581,7 +581,7 @@ coff_section_type (const char *s)
    we could perhaps obsolete coff_section_type.  */
 
 static char
-decode_section_type (const struct sec *section)
+decode_section_type (const struct bfd_section *section)
 {
   if (section->flags & SEC_CODE)
     return 't';

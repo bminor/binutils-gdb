@@ -1,3 +1,12 @@
+2003-10-20  Andrew Cagney  <cagney@redhat.com>
+
+	* targets.c: Replace "struct sec" with "struct bfd_section"
+	* syms.c, sparclynx.c, section.c, opncls.c: Ditto.
+	* libcoff-in.h, libbfd-in.h, elfxx-target.h: Ditto.
+	* elf.c, coffgen.c, bfd.c, bfd-in.h, aoutf1.h: Ditto.
+	* aout-tic30.c, aout-target.h:
+	* bfd-in2.h, libcoff.h, libbfd.h: Regenerate.
+	
 2003-10-18  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	Support linker relaxation of new R_MMIX_PUSHJ_STUBBABLE relocs.

@@ -179,7 +179,7 @@ typedef struct {
 #define STATE_PROG_SYMS(sd) ((sd)->base.prog_syms)
 
   /* The program's text section.  */
-  struct sec *text_section;
+  struct bfd_section *text_section;
   /* Starting and ending text section addresses from the bfd.  */
   SIM_ADDR text_start, text_end;
 #define STATE_TEXT_SECTION(sd) ((sd)->base.text_section)

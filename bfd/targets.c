@@ -354,7 +354,7 @@ BFD_JUMP_TABLE macros.
 .
 .  alent *     (*_get_lineno) (bfd *, struct symbol_cache_entry *);
 .  bfd_boolean (*_bfd_find_nearest_line)
-.    (bfd *, struct sec *, struct symbol_cache_entry **, bfd_vma,
+.    (bfd *, struct bfd_section *, struct symbol_cache_entry **, bfd_vma,
 .     const char **, const char **, unsigned int *);
 . {* Back-door to allow format-aware applications to create debug symbols
 .    while using BFD for everything else.  Currently used by the assembler
@@ -414,7 +414,7 @@ BFD_JUMP_TABLE macros.
 .     bfd_byte *, bfd_boolean, struct symbol_cache_entry **);
 .
 .  bfd_boolean (*_bfd_relax_section)
-.    (bfd *, struct sec *, struct bfd_link_info *, bfd_boolean *);
+.    (bfd *, struct bfd_section *, struct bfd_link_info *, bfd_boolean *);
 .
 .  {* Create a hash table for the linker.  Different backends store
 .     different information in this table.  *}
@@ -435,7 +435,7 @@ BFD_JUMP_TABLE macros.
 .  bfd_boolean (*_bfd_final_link) (bfd *, struct bfd_link_info *);
 .
 .  {* Should this section be split up into smaller pieces during linking.  *}
-.  bfd_boolean (*_bfd_link_split_section) (bfd *, struct sec *);
+.  bfd_boolean (*_bfd_link_split_section) (bfd *, struct bfd_section *);
 .
 .  {* Remove sections that are not referenced from the output.  *}
 .  bfd_boolean (*_bfd_gc_sections) (bfd *, struct bfd_link_info *);
@@ -444,7 +444,7 @@ BFD_JUMP_TABLE macros.
 .  bfd_boolean (*_bfd_merge_sections) (bfd *, struct bfd_link_info *);
 .
 .  {* Discard members of a group.  *}
-.  bfd_boolean (*_bfd_discard_group) (bfd *, struct sec *);
+.  bfd_boolean (*_bfd_discard_group) (bfd *, struct bfd_section *);
 .
 .  {* Routines to handle dynamic symbols and relocs.  *}
 .#define BFD_JUMP_TABLE_DYNAMIC(NAME) \

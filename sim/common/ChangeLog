@@ -1,3 +1,7 @@
+2003-10-20  Andrew Cagney  <cagney@redhat.com>
+
+	* sim-base.h: Replace "struct sec" with "struct bfd_section".
+
 2003-10-15  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* callback.c (os_ftruncate, os_truncate): New functions.
