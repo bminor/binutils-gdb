@@ -29,6 +29,8 @@
 #		(rt = all, build-cygnus for cross)
 # build-all-latest - build 3stage native and all supported cross targets
 #		(rt = $(canonhost)-stamp-3stage-done, build-latest for cross)
+# clean		- remove objdir directories, stamp files
+#		(rt = clean)
 #
 # To configure/build for fewer targets, specify TARGETS="native cross1 ...".
   
@@ -384,6 +386,9 @@ build-all-latest:
 	       echo "     completed successfully" ; \
 	  fi ; \
 	done
+
+clean:
+	$(MAKE) -f test-build.mk $(FLAGS_TO_PASS) clean $(log)
 
 ### Local Variables:
 ### fill-column: 131

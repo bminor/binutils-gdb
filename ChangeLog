@@ -1,3 +1,7 @@
+Thu Apr  7 17:31:43 1994  Doug Evans  (dje@canuck.cygnus.com)
+
+	* build-all.mk: Add `clean' target.
+
 Wed Apr  6 20:44:56 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* config.guess:  Add SINIX support.
