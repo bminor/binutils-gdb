@@ -1,3 +1,13 @@
+2001-02-21  David Mosberger  <davidm@hpl.hp.com>
+
+	* config/tc-ia64.c (struct unwind): Add member "prologue_count".
+	(dot_proc): Clear unwind.prologue_count to zero.
+	(dot_prologue): Increment unwind.prologue_count.
+	(dot_restore): If second operand is omitted, use
+	unwind.prologue_count -1 for "ecount" (# of additional regions to
+	pop).  Decrement unwind.prologue_count by number of regions
+	popped.
+
 2001-02-21  Nick Clifton  <nickc@redhat.com>
 
 	* doc/as.texinfo (Section): Note that some flags to the COFF
