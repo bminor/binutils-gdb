@@ -115,6 +115,9 @@ resolving more generic problems.
 The host maintainer ensures that gdb (including mmalloc) can be built
 as a cross debugger on their platform.
 
+AIX			Peter Schauer		Peter.Schauer@regent.e-technik.tu-muenchen.de
+			Kevin Buettner		kevinb@cygnus.com
+
 djgpp native		Eli Zaretskii		eliz@gnu.org
 			DJ Delorie		dj@cygnus.com
 MS Windows (NT, CE, '00, 9x, Me) host & native
@@ -174,7 +177,11 @@ expression eval		David Taylor		taylor@cygnus.com
 defs.h			David Taylor		taylor@cygnus.com
 utils.c			David Taylor		taylor@cygnus.com
 Scheme support		Jim Blandy		jimb@cygnus.com
-svr4 shlibs (solib.c)	Jim Blandy		jimb@cygnus.com
+
+shared libs (devolved)	Jim Blandy		jimb@cygnus.com
+			Kevin Buettner		kevinb@cygnus.com
+  xcoffsolib		Peter Schauer		Peter.Schauer@regent.e-technik.tu-muenchen.de
+
 remote.c		Andrew Cagney		cagney@cygnus.com
 			J.T. Conklin		jtc@redback.com
 include/remote-sim.h, remote-sim.c
