@@ -1,3 +1,39 @@
+Wed Oct  4 11:52:31 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure: If CC and CXX are not set in the environment, set
+	them, based on either an existing Makefile or on searching for gcc
+	in PATH.  Substitute for CC and CXX in Makefile.
+	* configure.in: Remove libm from target_libs.  Separate
+	target_configdirs from configdirs.  If CC is not set in
+	environment, try to get it from a host Makefile fragment.  Rewrite
+	changes of configdirs to use skipdirs instead.  A few minor
+	tweaks.  Take directories out of target_configdirs as they are
+	taken out of configdirs.  Remove existing Makefile files from
+	subdirectories.  Substitute for TARGET_CONFIGDIRS and
+	CONFIG_ARGUMENTS in Makefile.
+	* Makefile.in (TARGET_CONFIGDIRS): New variable, automatically set
+	by configure.in.
+	(CONFIG_ARGUMENTS): Likewise.
+	(CONFIGURE_TARGET_MODULES): New variable.
+	($(DO_X)): Loop over TARGET_CONFIGDIRS as well as SUBDIRS.
+	($(CONFIGURE_TARGET_MODULES)): New target.
+	(configure-libg++, configure-libio): New targets.
+	(all-libg++): Depend upon configure-libg++.
+	(all-libio): Depend upon configure-libio.
+	(configure-libgloss, all-libgloss): New targets.
+	(configure-libstdc++): New target.
+	(all-libstdc++): Depend upon configure-libstdc++.
+	(configure-librx, all-librx): New targets.
+	(configure-newlib): New target.
+	(all-newlib): Depend upon configure-newlib
+	(configure-xiberty): New target.
+	(all-xiberty): Depend upon configure-xiberty.
+
+Sat Sep 30 04:32:59 1995  Jason Molenda (crash@phydeaux.cygnus.com)
+
+	* configure.in (host i[345]86-*-win32):  Expand the
+	noconfigdirs again.
+
 Thu Sep 28 21:18:49 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-configure: Fix sed command file name.

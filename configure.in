@@ -42,7 +42,7 @@ host_tools="texinfo byacc flex bison binutils ld gas gcc gdb make patch
 # these libraries are built for the target environment, and are built after
 # the host libraries and the host tools (which may be a cross compiler)
 #
-target_libs="libm xiberty libgloss newlib libio librx libstdc++ libg++"
+target_libs="xiberty libgloss newlib libio librx libstdc++ libg++"
 
 
 # these tools are built using the target libs, and are intended to run only
@@ -75,8 +75,11 @@ cross_only="xiberty libgloss newlib"
 ## All tools belong in one of the four categories, and are assigned above
 ## We assign ${configdirs} this way to remove all embedded newlines.  This
 ## is important because configure will choke if they ever get through.
+## ${configdirs} is directories we build using the host tools.
+## ${target_configdirs} is directories we build using the target tools.
 #
-configdirs=`echo ${host_libs} ${host_tools} ${target_libs} ${target_tools}`
+configdirs=`echo ${host_libs} ${host_tools}`
+target_configdirs=`echo ${target_libs} ${target_tools}`
 
 ################################################################################
 
@@ -126,6 +129,13 @@ case "${host}" in
   *-*-sysv4*)             host_makefile_frag=config/mh-sysv4 ;;
   *-*-sysv*)              host_makefile_frag=config/mh-sysv ;;
 esac
+fi
+
+# See if we can extract a definition of CC from the fragment.
+if [ -z "${CC}" ]; then
+  if [ -n "${host_makefile_frag}" -a -f ${host_makefile_frag} ]; then
+    CC=`sed -n -e 's/CC[ 	]*=[ 	]*\(.*\)$/\1/p' < ${host_makefile_frag}`
+  fi
 fi
 
 # The Solaris /usr/ucb/cc compiler does not appear to work.
@@ -191,6 +201,7 @@ case "${target}" in
   powerpc-*-netware*)   target_makefile_frag=config/mt-netware ;;
 esac
 
+skipdirs=
 gasdir=gas
 use_gnu_ld=
 use_gnu_as=
@@ -202,7 +213,7 @@ case ${with_x} in
   yes | "")  # the default value for this tree is that X11 is available
 	;;
   no)
-    	configdirs=`echo " ${configdirs} " | sed -e 's/ tk / /;/ gash / /'`
+	skipdirs="${skipdirs} tk gash"
 	;;
   *)
     	echo "*** bad value \"${with_x}\" for -with-x flag; ignored" 1>&2
@@ -219,16 +230,12 @@ is_cross_compiler=
 if [ x"${host}" = x"${target}" ] ; then
 	# when doing a native toolchain, don't build the targets
 	# that are in the 'cross only' list
-	for i in ${cross_only} ; do
-	  configdirs=`echo " ${configdirs} " | sed -e "s/ $i / /"`
-	done
+	skipdirs="${skipdirs} ${cross_only}"
 	is_cross_compiler=no
 else
 	# similarly, don't build the targets in the 'native only' 
 	# list when building a cross compiler
-	for i in ${native_only} ; do
-	  configdirs=`echo " ${configdirs} " | sed -e "s/ $i / /"`
-	done
+	skipdirs="${skipdirs} ${native_only}"
 	is_cross_compiler=yes
 fi	
 
@@ -276,10 +283,9 @@ fi
 
 # Recognize --with-newlib/--without-newlib.
 if [ x${with_newlib} = xno ]; then
-  configdirs=`echo " ${configdirs} " | sed -e 's/ newlib / /'`
+  skipdirs="${skipdirs} newlib"
 elif [ x${with_newlib} = xyes ]; then
-  configdirs=`echo " ${configdirs} " | sed -e 's/ newlib / /'`
-  configdirs="${configdirs} newlib"
+  skipdirs=`echo " ${skipdirs} " | sed -e 's/ newlib / /'`
 fi
 
 # Handle ${copy_dirs}
@@ -386,9 +392,7 @@ case "${target}" in
     noconfigdirs="$noconfigdirs ld shellutils"
     ;;
   i[345]86-*-go32)
-    # add the go32 support tools to the list
     # but don't build gdb
-    configdirs=`echo go32 ${configdirs}`
     noconfigdirs="$noconfigdirs gdb libg++ libstdc++ libio librx"
     ;;
 
@@ -396,7 +400,7 @@ case "${target}" in
     # Can't build gdb for win32 target
     noconfigdirs="$noconfigdirs gdb tk"
     # but put newlib back
-    configdirs="$configdirs newlib"
+    skipdirs=`echo " ${skipdirs} " | sed -e 's/ newlib / /'`
     ;;    
   i[345]86-*-pe)
     noconfigdirs="$noconfigdirs libg++ libstdc++ libio librx"
@@ -459,14 +463,13 @@ case "${target}" in
     noconfigdirs="$noconfigdirs gprof"
     ;;
   romp-*-*)
-    noconfigdirs="bfd binutils ld gas opcodes"
+    noconfigdirs="$noconfigdirs bfd binutils ld gas opcodes"
     ;;
   sh-*-*)
     case "${host}" in
       i[345]86-*-vsta) ;; # don't add gprof back in
-      *) configdirs=`echo gprof ${configdirs}` ;;
       i[345]86-*-go32) ;; # don't add gprof back in
-      *) configdirs=`echo gprof ${configdirs}` ;;
+      *) skipdirs=`echo " ${skipdirs} " | sed -e 's/ gprof / /'` ;;
     esac
     ;;
   sparc-*-sunos4*)
@@ -491,17 +494,41 @@ case "${target}" in
      ;;    
 esac
 
-# Remove the entries in $noconfigdirs from $configdirs.  If we have the
-# source for them, add them to $notsupp.
+# Remove the entries in $skipdirs and $noconfigdirs from $configdirs and
+# $target_configdirs.
+# If we have the source for $noconfigdirs entries, add them to $notsupp.
 notsupp=""
-for dir in . $noconfigdirs ; do
+for dir in . $skipdirs $noconfigdirs ; do
   if [ $dir != . ]  && echo " ${configdirs} " | grep " ${dir} " >/dev/null 2>&1; then
     configdirs=`echo " ${configdirs} " | sed -e "s/ ${dir} / /"`
     if [ -r $srcdir/$dir/configure ] || [ -r $srcdir/$dir/configure.in ]; then
-      notsupp="$notsupp $dir"
+      if echo " ${skipdirs} " | grep " ${dir} " >/dev/null 2>&1; then
+	true
+      else
+	notsupp="$notsupp $dir"
+      fi
+    fi
+  fi
+  if [ $dir != . ]  && echo " ${target_configdirs} " | grep " ${dir} " >/dev/null 2>&1; then
+    target_configdirs=`echo " ${target_configdirs} " | sed -e "s/ ${dir} / /"`
+    if [ -r $srcdir/$dir/configure ] || [ -r $srcdir/$dir/configure.in ]; then
+      if echo " ${skipdirs} " | grep " ${dir} " >/dev/null 2>&1; then
+	true
+      else
+	notsupp="$notsupp $dir"
+      fi
     fi
   fi
 done
+
+# Deconfigure all subdirectories, in case we are changing the
+# configuration from one where a subdirectory is supported to one where it
+# is not.
+if [ -z "${norecursion}" ]; then
+  for i in ${configdirs} ${target_configdirs}; do
+    rm -f $i/Makefile
+  done
+fi
 
 # Produce a warning message for the subdirs we can't configure.
 # This isn't especially interesting in the Cygnus tree, but in the individual
@@ -515,9 +542,15 @@ if [ -n "${notsupp}" ] && [ -z "${norecursion}" ]; then
   # pretend that all is well.)
   if [ -n "$appdirs" ]; then
     for dir in $appdirs ; do
-      if [ -r $dir/Makefile.in ] && echo " ${configdirs} " | grep " ${dir} " >/dev/null 2>&1 ; then
-	appdirs=""
-	break
+      if [ -r $dir/Makefile.in ]; then
+	if echo " ${configdirs} " | grep " ${dir} " >/dev/null 2>&1; then
+	  appdirs=""
+	  break
+	fi
+	if echo " ${target_configdirs} " | grep " ${dir} " >/dev/null 2>&1; then
+	  appdirs=""
+	  break
+	fi
       fi
     done
     if [ -n "$appdirs" ]; then
@@ -566,6 +599,19 @@ if [ x${enable_shared} = xyes ]; then
     *)			target_makefile_frag=config/mt-${target_cpu}pic ;;
   esac
 fi
+
+# post-target:
+
+# Record target_configdirs and the configure arguments in Makefile.
+targargs=`echo "${arguments}" | \
+	sed -e 's/--*norecursion//' \
+	    -e 's/--*cache[a-z-]*=[^ 	]*//' \
+	    -e 's/--*cache[a-z-]*[ 	][ 	]*[^ 	]*//'`
+sed -e "s:^TARGET_CONFIGDIRS[ 	]*=.*$:TARGET_CONFIGDIRS = ${target_configdirs}:" \
+    -e "s%^CONFIG_ARGUMENTS[ 	]*=.*$%CONFIG_ARGUMENTS = ${targargs}%" \
+       Makefile > Makefile.tem
+rm -f Makefile
+mv -f Makefile.tem Makefile
 
 #
 # Local Variables:

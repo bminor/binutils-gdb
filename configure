@@ -17,7 +17,7 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 # Please report any problems running this configure script to
 # configure@cygnus.com
@@ -523,7 +523,7 @@ tmpfile=${TMPDIR}/cONf$$
 # is at the end of the script; these actions are duplicated there, minus
 # the "exit 1".  Don't use "exit 0" anywhere after this without resetting the
 # trap handler, or you'll lose.
-trap "rm -f ${tmpfile}.com ${tmpfile}.tgt ${tmpfile}.hst ${tmpfile}.pos; exit 1" 0 1 2 15
+trap "rm -f Makefile.tem ${tmpfile}.com ${tmpfile}.tgt ${tmpfile}.hst ${tmpfile}.pos; exit 1" 0 1 2 15
 
 # split ${srcdir}/configure.in into common, per-host, per-target,
 # and post-target parts.  Post-target is optional.
@@ -551,7 +551,15 @@ case "${srctrigger}" in
 esac
 
 case "${build_alias}" in
-"")	;;
+"")
+	if result=`${config_shell} ${configsub} ${host_alias}` ; then
+	    build_cpu=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\1/'`
+	    build_vendor=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\2/'`
+	    build_os=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\3/'`
+	    build=${host_cpu}-${host_vendor}-${host_os}
+	    build_alias=${host_alias}
+	fi
+	;;
 *)
 	if result=`${config_shell} ${configsub} ${build_alias}` ; then
 	    buildopt="--build=${build_alias}"
@@ -638,6 +646,45 @@ fi
 if [ "${program_prefix}" != "" ] ; then
     program_transform_name="-e s,^,${program_prefix}, ${program_transform_name}"
 fi
+
+# If CC and CXX are not set in the environment, and the Makefile
+# exists, try to extract them from it.  This is to handle running
+# ./config.status by hand.
+if [ -z "${CC}" -a -r Makefile ]; then
+  sed -n -e ':loop
+/\\$/ N
+/\\$/ b loop
+s/\\\n//g
+/^CC[ 	]*=/ s/CC[ 	]*=\(.*\)/\1/p' < Makefile > Makefile.cc
+  CC=`tail -1 Makefile.cc`
+  rm -f Makefile.cc
+fi
+
+if [ -z "${CXX}" -a -r Makefile ]; then
+  sed -n -e ':loop
+/\\$/ N
+/\\$/ b loop
+s/\\\n//g
+/^CXX[ 	]*=/ s/CXX[ 	]*=\(.*\)/\1/p' < Makefile > Makefile.cc
+  CXX=`tail -1 Makefile.cc`
+  rm -f Makefile.cc
+fi
+
+# If CC is still not set, try to get gcc.
+if [ -z "${CC}" ]; then
+  IFS="${IFS= 	}"; save_ifs="$IFS"; IFS="${IFS}:"
+  for dir in $PATH; do
+    test -z "$dir" && dir=.
+    if test -f $dir/gcc; then
+      CC="gcc"
+      break
+    fi
+  done
+  IFS="$save_ifs"
+  CC=${CC-cc}
+fi
+
+CXX=${CXX-"g++ -O"}
 
 for subdir in . ${subdirs} ; do
 
@@ -876,11 +923,6 @@ EOF
                 echo site_makefile_frag = ${invsubdir}${site_makefile_frag} >>${Makefile}
             fi 
 
-	    # make sure that some sort of reasonable default exists for these 
-	    # two variables
-	    CXX=${CXX-"g++ -O"}
-	    CC=${CC-cc}
-
             # reset prefix, exec_prefix, srcdir, SUBDIRS, NONSUBDIRS,
             # remove any form feeds.
             if [ -z "${subdirs}" ]; then
@@ -893,6 +935,24 @@ EOF
             fi
             sed -e "s:^prefix[ 	]*=.*$:prefix = ${prefix}:" \
                     -e "s:^exec_prefix[ 	]*=.*$:exec_prefix = ${exec_prefix}:" \
+		    -e "/^CC[ 	]*=/{
+			b chkcc
+			:contcc
+			N
+			:chkcc
+			s/\\\\$//
+			t contcc
+			s%^CC[ 	]*=.*$%CC = ${CC}%
+			}" \
+		    -e "/^CXX[ 	]*=/{
+			b chkcxx
+			:contcxx
+			N
+			:chkcxx
+			s/\\\\$//
+			t contcxx
+			s%^CXX[ 	]*=.*$%CXX = ${CXX}%
+			}" \
 		    -e "s:^SHELL[	 ]*=.*$:SHELL = ${config_shell}:" \
                     -e "s:^srcdir[ 	]*=.*$:srcdir = ${makesrcdir}:" \
                     -e "s///" \

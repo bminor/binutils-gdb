@@ -133,6 +133,13 @@ CXX_FOR_BUILD = $(CXX)
 SUBDIRS = "this is set via configure, don't edit this"
 OTHERS = 
 
+# This is set by the configure script to the list of directories which
+# should be built using the target tools.
+TARGET_CONFIGDIRS = xiberty libgloss newlib libio librx libstdc++ libg++
+
+# This is set by the configure script to the arguments passed to configure.
+CONFIG_ARGUMENTS = 
+
 ALL = all.normal
 INSTALL_TARGET = install-dirs \
 	$(INSTALL_MODULES) \
@@ -536,9 +543,6 @@ INSTALL_X11_MODULES = \
 # This is a list of the targets for all of the modules which are compiled
 # using $(TARGET_FLAGS_TO_PASS).
 ALL_TARGET_MODULES = \
-	$(start-sanitize-chill) \
-	all-chillrt \
-	$(end-sanitize-chill) \
 	all-libio \
 	all-libstdc++ \
 	all-librx \
@@ -547,12 +551,20 @@ ALL_TARGET_MODULES = \
 	all-libgloss \
 	all-xiberty
 
+# This is a list of the configure targets for all of the modules which
+# are compiled using the target tools.
+CONFIGURE_TARGET_MODULES = \
+	configure-libio \
+	configure-libstdc++ \
+	configure-librx \
+	configure-libg++ \
+	configure-newlib \
+	configure-libgloss \
+	configure-xiberty
+
 # This is a list of the check targets for all of the modules which are
 # compiled using $(TARGET_FLAGS_TO_PASS).
 CHECK_TARGET_MODULES = \
-	$(start-sanitize-chill) \
-	check-chillrt \
-	$(end-sanitize-chill) \
 	check-libio \
 	check-libstdc++ \
 	check-libg++ \
@@ -562,9 +574,6 @@ CHECK_TARGET_MODULES = \
 # This is a list of the install targets for all of the modules which are
 # compiled using $(TARGET_FLAGS_TO_PASS).
 INSTALL_TARGET_MODULES = \
-	$(start-sanitize-chill) \
-	install-chillrt \
-	$(end-sanitize-chill) \
 	install-libio \
 	install-libstdc++ \
 	install-libg++ \
@@ -575,9 +584,6 @@ INSTALL_TARGET_MODULES = \
 # This is a shell case of all modules which are compiled using
 # $(TARGET_FLAGS_TO_PASS), used in the do-X rule.
 TARGET_LIBS = libio | libstdc++ | librx | libg++ | newlib | xiberty
-# start-sanitize-chill
-TARGET_LIBS = chillrt | libio | libstdc++ | librx | libg++ | newlib | xiberty
-# end-sanitize-chill
 
 # The first rule in the file had better be this one.  Don't put any above it.
 all: all.normal
@@ -606,14 +612,14 @@ DO_X = \
 	do-install-info \
 	do-installcheck \
 	do-mostlyclean \
-	do-realclean \
+	do-maintainer-clean \
 	do-TAGS
 .PHONY: $(DO_X)
 $(DO_X):
 	@target=`echo $@ | sed -e 's/^do-//'`; \
 	r=`pwd`; export r; \
 	srcroot=`cd $(srcdir); pwd`; export srcroot; \
-	for i in $(SUBDIRS); do \
+	for i in $(SUBDIRS) $(TARGET_CONFIGDIRS); do \
 	  if [ -f ./$$i/Makefile ]; then \
 	    case $$i in \
 	    $(TARGET_LIBS) ) \
@@ -645,7 +651,8 @@ $(DO_X):
 # Here are the targets which correspond to the do-X targets.
 
 .PHONY: info installcheck dvi install-info
-.PHONY: clean distclean mostlyclean realclean local-clean local-distclean
+.PHONY: clean distclean mostlyclean maintainer-clean realclean
+.PHONY: local-clean local-distclean local-maintainer-clean
 info: do-info
 installcheck: do-installcheck
 dvi: do-dvi
@@ -662,10 +669,16 @@ local-clean:
 local-distclean:
 	-rm -f Makefile config.status
 
+local-maintainer-clean:
+	@echo "This command is intended for maintainers to use;"
+	@echo "it deletes files that may require special tools to rebuild."
+
 clean: do-clean local-clean
 mostlyclean: do-mostlyclean local-clean
 distclean: do-distclean local-clean local-distclean
-realclean: do-realclean local-clean local-distclean
+maintainer-clean: local-maintainer-clean do-maintainer-clean local-clean 
+maintainer-clean: local-distclean
+realclean: maintainer-clean
 
 # Check target.
 
@@ -791,6 +804,31 @@ $(INSTALL_MODULES): install-dirs
 	  r=`pwd`; export r; \
 	  srcroot=`cd $(srcdir); pwd`; export srcroot; \
 	  (cd $${dir}; $(MAKE) $(FLAGS_TO_PASS) install); \
+	else \
+	  true; \
+	fi
+
+# This rule is used to configure the modules which are built with the
+# target tools.
+.PHONY: $(CONFIGURE_TARGET_MODULES)
+$(CONFIGURE_TARGET_MODULES):
+	@dir=`echo $@ | sed -e 's/configure-//'`; \
+	if [ -f ./$${dir}/Makefile ] ; then \
+	  true; \
+	elif echo " $(TARGET_CONFIGDIRS) " | grep " $${dir} " >/dev/null 2>&1; then \
+	  if [ -d ./$${dir} ]; then true; else mkdir $${dir}; fi; \
+	  r=`pwd`; export r; \
+	  srcroot=`cd $(srcdir); pwd`; export srcroot; \
+	  AR="$(AR_FOR_TARGET)"; export AR; \
+	  AS="$(AS_FOR_TARGET)"; export AS; \
+	  CC="$(CC_FOR_TARGET)"; export CC; \
+	  CFLAGS="$(CFLAGS_FOR_TARGET)"; export CFLAGS; \
+	  CXX="$(CXX_FOR_TARGET)"; export CXX; \
+	  CXXFLAGS="$(CXXFLAGS_FOR_TARGET)"; export CXXFLAGS; \
+	  NM="$(NM_FOR_TARGET)"; export NM; \
+	  RANLIB="$(RANLIB_FOR_TARGET)"; export RANLIB; \
+	  cd $${dir}; \
+	  $${srcroot}/configure $(CONFIG_ARGUMENTS) --srcdir=$${srcroot}/$${dir}; \
 	else \
 	  true; \
 	fi
@@ -931,9 +969,6 @@ all-autoconf: all-m4
 all-bfd:
 all-binutils: all-libiberty all-opcodes all-bfd all-flex all-byacc
 all-byacc:
-# start-sanitize-chill
-all-chillrt: all-binutils all-gas all-gcc all-newlib
-# end-sanitize-chill
 all-cvs:
 all-dejagnu: all-tcl all-expect all-tk
 all-diff: all-libiberty
@@ -957,14 +992,22 @@ all-hello: all-libiberty
 all-indent:
 all-ispell: all-emacs19
 all-ld: all-libiberty all-bfd all-byacc all-flex
-all-libg++: all-gas all-ld all-gcc all-xiberty all-newlib all-libio all-librx all-libstdc++
-all-libio: all-gas all-ld all-gcc all-xiberty all-newlib 
+configure-libg++: all-gcc
+all-libg++: configure-libg++ all-gas all-ld all-gcc all-xiberty all-newlib all-libio all-librx all-libstdc++
+configure-libgloss: all-gcc
+all-libgloss: configure-libgloss
+configure-libio: all-gcc
+all-libio: configure-libio all-gas all-ld all-gcc all-xiberty all-newlib
 all-libiberty:
-all-libstdc++: all-gas all-ld all-gcc all-xiberty all-newlib all-libio
+configure-librx: all-gcc all-newlib
+all-librx: configure-librx
+configure-libstdc++: all-gcc
+all-libstdc++: configure-libstdc++ all-gas all-ld all-gcc all-xiberty all-newlib all-libio
 all-m4: all-libiberty
 all-make: all-libiberty
 all-mmalloc:
-all-newlib: all-binutils all-gas all-gcc
+configure-newlib: all-gcc
+all-newlib: configure-newlib all-binutils all-gas all-gcc
 all-opcodes: all-bfd
 all-patch:
 all-prms: all-libiberty
@@ -985,7 +1028,8 @@ all-tgas: all-libiberty all-bfd
 all-time:
 all-wdiff:
 all-uudecode: all-libiberty
-all-xiberty: all-gcc all-ld all-newlib
+configure-xiberty: all-gcc
+all-xiberty: configure-xiberty all-gcc all-ld all-newlib
 
 ### other supporting targets
 
@@ -1178,9 +1222,10 @@ gnats.tar.gz: $(DIST_SUPPORT) $(GNATS_SUPPORT_DIRS) gnats
 
 .PHONY: gdb.tar.gz
 GDB_SUPPORT_DIRS= bfd include libiberty mmalloc opcodes readline sim utils
+GDBTK_SUPPORT_DIRS= `if [ -d tcl -a -d tk ] ; then echo tcl tk ; fi`
 gdb.tar.gz: $(DIST_SUPPORT) $(GDB_SUPPORT_DIRS) gdb
 	$(MAKE) -f Makefile.in taz TOOL=gdb \
-		SUPPORT_FILES="$(GDB_SUPPORT_DIRS)"
+		SUPPORT_FILES="$(GDB_SUPPORT_DIRS) $(GDBTK_SUPPORT_DIRS)"
 
 .PHONY: newlib.tar.gz
 NEWLIB_SUPPORT_DIRS=libgloss
