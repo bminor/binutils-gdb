@@ -636,4 +636,7 @@ _do_getb64, _do_putb64,  _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* hdrs
   JUMP_TABLE(hppa)
 };
 
-#endif
+#else	/* notdef hp9000s800 */
+/* Prevent "empty translation unit" warnings from the idiots at X3J11. */
+static char ansi_c_idiots = 69;
+#endif	/* hp9000s800 */

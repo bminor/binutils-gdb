@@ -1,3 +1,8 @@
+Tue Jun 30 16:49:12 1992  Fred Fish  (fnf@cygnus.com)
+
+	* hppa.c:  Apply John's standard fix to avoid "empty translation
+	unit" warnings from some ANSI-C compilers.
+
 Thu Jun 25 04:39:25 1992  John Gilmore  (gnu at cygnus.com)
 
 	* hosts/solaris2.h:  Configure same as sysv4.
