@@ -5947,7 +5947,7 @@ mips_elf_calculate_relocation (abfd,
 	   addresses.  */
 	symbol = 0;
       else if (info->shared && !info->symbolic && !info->no_undefined)
-	relocation = 0;
+	symbol = 0;
       else if (strcmp (h->root.root.root.string, "_DYNAMIC_LINK") == 0)
 	{
 	  /* If this is a dynamic link, we should have created a
@@ -5957,7 +5957,7 @@ mips_elf_calculate_relocation (abfd,
 	     somehow as well.  */
 	  BFD_ASSERT (! info->shared);
 	  BFD_ASSERT (bfd_get_section_by_name (abfd, ".dynamic") == NULL);
-	  relocation = 0;
+	  symbol = 0;
 	}
       else
 	{

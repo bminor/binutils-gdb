@@ -1,3 +1,8 @@
+1999-08-15  Mark Mitchell  <mark@codesourcery.com>
+
+	* elf32-mips.c (mips_elf_calculate_relocation): Fix unfortunate
+	coincidence of variable names between old and new code.
+
 1999-08-12  Nick Clifton  <nickc@cygnus.com>
 
 	* elf32-arm.h (elf32_arm_to_thumb_stub):  Make 'offset' parameter
