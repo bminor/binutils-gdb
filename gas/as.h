@@ -371,28 +371,25 @@ typedef struct lineno_struct lineno;
 /* for use with -Wformat */
 #define PRINTF_LIKE(FCN)	void FCN (const char *format, ...) \
 					__attribute__ ((format (printf, 1, 2)))
+#define PRINTF_WHERE_LIKE(FCN)	void FCN (char *file, unsigned int line, \
+					  const char *format, ...) \
+					__attribute__ ((format (printf, 3, 4)))
 #else /* ANSI C with stdarg, but not GNU C */
 #define PRINTF_LIKE(FCN)	void FCN (const char *format, ...)
+#define PRINTF_WHERE_LIKE(FCN)	void FCN (char *file, unsigned int line, \
+					  const char *format, ...)
 #endif
 #else /* not ANSI C, or not stdarg */
 #define PRINTF_LIKE(FCN)	void FCN ()
+#define PRINTF_WHERE_LIKE(FCN)	void FCN ()
 #endif
 
 PRINTF_LIKE (as_bad);
 PRINTF_LIKE (as_fatal);
 PRINTF_LIKE (as_tsktsk);
 PRINTF_LIKE (as_warn);
-
-#if defined (__STDC__) && !defined (NO_STDARG)
-#if __GNUC__ >= 2
-void as_bad_where (char *file, unsigned int line, const char *format, ...)
-     __attribute__ ((format (printf, 3, 4)));
-#else /* ANSI C with stdarg, but not GNU C */
-void as_bad_where (char *file, unsigned int line, const char *format, ...);
-#endif
-#else /* not ANSI C, or not stdarg */
-void as_bad_where ();
-#endif
+PRINTF_WHERE_LIKE (as_bad_where);
+PRINTF_WHERE_LIKE (as_warn_where);
 
 void fprint_value PARAMS ((FILE *file, addressT value));
 void sprint_value PARAMS ((char *buf, addressT value));
