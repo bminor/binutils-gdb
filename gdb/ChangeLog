@@ -1,3 +1,8 @@
+2004-06-29  Corinna Vinschen  <vinschen@redhat.com>
+
+	* infcmd.c (attach_command): Move call to target_terminal_inferior
+	behind loading symbol table.
+
 2004-06-28  Andrew Cagney  <cagney@gnu.org>
 
 	* rdi-share/ardi.c (angel_RDI_ExecuteOrStep): Revert 2004-06-24

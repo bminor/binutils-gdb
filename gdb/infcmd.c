@@ -1788,9 +1788,6 @@ attach_command (char *args, int from_tty)
      based on what modes we are starting it with.  */
   target_terminal_init ();
 
-  /* Install inferior's terminal modes.  */
-  target_terminal_inferior ();
-
   /* Set up execution context to know that we should return from
      wait_for_inferior as soon as the target reports a stop.  */
   init_wait_for_inferior ();
@@ -1848,6 +1845,9 @@ attach_command (char *args, int from_tty)
   /* Take any necessary post-attaching actions for this platform.
    */
   target_post_attach (PIDGET (inferior_ptid));
+
+  /* Install inferior's terminal modes.  */
+  target_terminal_inferior ();
 
   normal_stop ();
 
