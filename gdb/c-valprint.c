@@ -118,6 +118,7 @@ c_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 		  fprintf_filtered (stream, "0x%x ", address);
 		}
 	      LA_PRINT_STRING (stream, valaddr, len, 0);
+	      i = len;
 	    }
 	  else
 	    {

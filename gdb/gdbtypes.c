@@ -314,8 +314,10 @@ allocate_stub_method (type)
 }
 
 /* Create a range type using either a blank type supplied in RESULT_TYPE,
-   or creating a new type.  Indices will be of type INDEX_TYPE, and will
-   range from LOW_BOUND to HIGH_BOUND, inclusive.
+   or creating a new type, inheriting the objfile from INDEX_TYPE.
+
+   Indices will be of type INDEX_TYPE, and will range from LOW_BOUND to
+   HIGH_BOUND, inclusive.
 
    FIXME:  Maybe we should check the TYPE_CODE of RESULT_TYPE to make
    sure it is TYPE_CODE_UNDEF before we bash it into a range type? */
@@ -348,8 +350,10 @@ create_range_type (result_type, index_type, low_bound, high_bound)
 
 
 /* Create an array type using either a blank type supplied in RESULT_TYPE,
-   or creating a new type.  Elements will be of type ELEMENT_TYPE, the
-   indices will be of type RANGE_TYPE.
+   or creating a new type, inheriting the objfile from RANGE_TYPE.
+
+   Elements will be of type ELEMENT_TYPE, the indices will be of type
+   RANGE_TYPE.
 
    FIXME:  Maybe we should check the TYPE_CODE of RESULT_TYPE to make
    sure it is TYPE_CODE_UNDEF before we bash it into an array type? */
@@ -374,7 +378,7 @@ create_array_type (result_type, element_type, range_type)
     }
   if (result_type == NULL)
     {
-      result_type = alloc_type (TYPE_OBJFILE (element_type));
+      result_type = alloc_type (TYPE_OBJFILE (range_type));
     }
   TYPE_CODE (result_type) = TYPE_CODE_ARRAY;
   TYPE_TARGET_TYPE (result_type) = element_type;

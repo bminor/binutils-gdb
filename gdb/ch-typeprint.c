@@ -70,6 +70,16 @@ chill_print_type (type, varstring, stream, show, level)
 	fputs_filtered (") ", stream);
 	chill_print_type (TYPE_TARGET_TYPE (type), "", stream, show, level);
 	break;
+
+      case TYPE_CODE_STRING:
+	range_type = TYPE_FIELD_TYPE (type, 0);
+	index_type = TYPE_TARGET_TYPE (range_type);
+	high_bound = TYPE_FIELD_BITPOS (range_type, 1);
+        fputs_filtered ("char (", stream);
+	print_type_scalar (index_type, high_bound + 1, stream);
+	fputs_filtered (") ", stream);
+	break;
+
       default:
         chill_print_type_base (type, stream, show, level);
 	break;

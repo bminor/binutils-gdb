@@ -52,7 +52,7 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
      enum val_prettyprint pretty;
 {
   LONGEST val;
-  unsigned int i;
+  unsigned int i = 0;		/* Number of characters printed.  */
   struct type *elttype;
   unsigned eltlen;
   CORE_ADDR addr;
@@ -156,7 +156,6 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
       
       /* For a pointer to char or unsigned char, also print the string
 	 pointed to, unless pointer is null.  */
-      i = 0;		/* Number of characters printed.  */
       if (TYPE_LENGTH (elttype) == 1
 	  && TYPE_CODE (elttype) == TYPE_CODE_CHAR
 	  && (format == 0 || format == 's')
@@ -178,15 +177,12 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 	  print_scalar_formatted (valaddr, type, format, 0, stream);
 	  break;
 	}
-      addr = unpack_pointer (lookup_pointer_type (builtin_type_char), valaddr);
       if (addressprint && format != 's')
 	{
-	  fprintf_filtered (stream, "0x%x", addr);
+	  fprintf_filtered (stream, "0x%x ", addr);
 	}
-      if (addr != 0)
-	{
-	  i = val_print_string (addr, TYPE_LENGTH (type), stream);
-	}
+      i = TYPE_LENGTH (type);
+      LA_PRINT_STRING (stream, valaddr, i, 0);
       /* Return number of characters printed, plus one for the terminating
 	 null if we have "reached the end".  */
       return (i + (print_max && i != print_max));

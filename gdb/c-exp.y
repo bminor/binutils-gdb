@@ -318,6 +318,17 @@ arglist	:	arglist ',' exp   %prec ABOVE_COMMA
 			{ arglist_len++; }
 	;
 
+exp	:	'{' 
+			/* This is to save the value of arglist_len
+			   being accumulated by an outer function call.  */
+			{ start_arglist (); }
+		arglist '}'	%prec ARROW
+			{ write_exp_elt_opcode (OP_ARRAY);
+			  write_exp_elt_longcst ((LONGEST) 0);
+			  write_exp_elt_longcst ((LONGEST) end_arglist () - 1);
+			  write_exp_elt_opcode (OP_ARRAY); }
+	;
+
 exp	:	'{' type '}' exp  %prec UNARY
 			{ write_exp_elt_opcode (UNOP_MEMVAL);
 			  write_exp_elt_type ($2);

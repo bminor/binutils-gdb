@@ -523,6 +523,9 @@ static void
 read_tag_pointer_type PARAMS ((struct dieinfo *dip));
 
 static void
+read_tag_string_type PARAMS ((struct dieinfo *dip));
+
+static void
 read_subroutine_type PARAMS ((struct dieinfo *, char *, char *));
 
 static void
@@ -1526,6 +1529,60 @@ read_tag_pointer_type (dip)
 
 LOCAL FUNCTION
 
+	read_tag_string_type -- read TAG_string_type DIE
+
+SYNOPSIS
+
+	static void read_tag_string_type (struct dieinfo *dip)
+
+DESCRIPTION
+
+	Extract all information from a TAG_string_type DIE and add to
+	the user defined type vector.  It isn't really a user defined
+	type, but it behaves like one, with other DIE's using an
+	AT_user_def_type attribute to reference it.
+ */
+
+static void
+read_tag_string_type (dip)
+     struct dieinfo *dip;
+{
+  struct type *utype;
+  struct type *indextype;
+  struct type *rangetype;
+  unsigned long lowbound = 0;
+  unsigned long highbound;
+
+  if ((utype = lookup_utype (dip -> die_ref)) != NULL)
+    {
+      /* Ack, someone has stuck a type in the slot we want.  Complain
+	 about it. */
+      complain (&dup_user_type_definition, DIE_ID, DIE_NAME);
+    }
+  else
+    {
+      if (dip -> has_at_byte_size)
+	{
+	  /* A fixed bounds string */
+	  highbound = dip -> at_byte_size - 1;
+	}
+      else
+	{
+	  /* A varying length string.  Stub for now.  (FIXME) */
+	  highbound = 1;
+	}
+      indextype = dwarf_fundamental_type (current_objfile, FT_INTEGER);
+      rangetype = create_range_type ((struct type *) NULL, indextype,
+				     lowbound, highbound);
+      utype = create_string_type ((struct type *) NULL, rangetype);
+      alloc_utype (dip -> die_ref, utype);
+    }
+}
+
+/*
+
+LOCAL FUNCTION
+
 	read_subroutine_type -- process TAG_subroutine_type dies
 
 SYNOPSIS
@@ -2010,6 +2067,9 @@ process_dies (thisdie, enddie, objfile)
 	      break;
 	    case TAG_pointer_type:
 	      read_tag_pointer_type (&di);
+	      break;
+	    case TAG_string_type:
+	      read_tag_string_type (&di);
 	      break;
 	    default:
 	      new_symbol (&di, objfile);
