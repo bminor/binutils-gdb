@@ -1,3 +1,7 @@
+Thu Jun  4 09:12:27 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* objcopy.c (copy_usage): Add missing \n\ from help description.
+
 Wed Jun  3 19:31:33 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.am (YACC): Correct bison -L option.

@@ -310,9 +310,9 @@ Usage: %s [-vVSpgxX] [-I bfdname] [-O bfdname] [-F bfdname] [-b byte]\n\
 	   program_name);
   fprintf (stream, _("\
        [--gap-fill=val] [--pad-to=address] [--preserve-dates]\n\
-       [--set-start=val]
-       [--change-start=incr] [--change-addresses=incr]
-       (--adjust-start   and  --adjust-vma are aliases for these two)
+       [--set-start=val] \n\
+       [--change-start=incr] [--change-addresses=incr] \n\
+       (--adjust-start   and  --adjust-vma are aliases for these two) \n\
        [--change-section-address=section{=,+,-}val]\n\
        (--adjust-section-vma is an alias for --change-section-address)\n\
        [--change-section-lma=section{=,+,-}val]\n\
