@@ -1,3 +1,15 @@
+2000-03-20  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* remote.c (remote_threads_extra_info): new function.
+	Implement the extra thread info query for "info threads".
+	(remote_threads_info): clean up a bit.
+	(use_threadinfo_query, use_threadextra_query): new variables.
+	Control whether GDB will use the new or old protocol for 
+	thread info queries.
+	(remote_open_1): initialize new variables.
+	(remote_async_open_1): ditto.
+	(remote_cisco_open): ditto.
+
 2000-03-20  Kevin Buettner  <kevinb@redhat.com>
 
 	* ia64-linux-nat.c, ia64-tdep.c, config/ia64/linux.mh,

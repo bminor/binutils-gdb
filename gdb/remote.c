@@ -699,6 +699,17 @@ show_remote_protocol_Z_packet_cmd (args, from_tty)
 
 static struct packet_config remote_protocol_binary_download;
 
+/* Should we try the 'ThreadInfo' query packet?
+
+   This variable (NOT available to the user: auto-detect only!)
+   determines whether GDB will use the new, simpler "ThreadInfo"
+   query or the older, more complex syntax for thread queries.
+   This is an auto-detect variable (set to true at each connect, 
+   and set to false when the target fails to recognize it).  */
+
+static int use_threadinfo_query;
+static int use_threadextra_query;
+
 static void
 set_remote_protocol_binary_download_cmd (char *args,
 					 int from_tty,
@@ -828,7 +839,7 @@ typedef unsigned char threadref[OPAQUETHREADBYTES];
 
 typedef int gdb_threadref;	/* internal GDB thread reference */
 
-/*  gdb_ext_thread_info is an internal GDB data structure which is
+/* gdb_ext_thread_info is an internal GDB data structure which is
    equivalint to the reply of the remote threadinfo packet */
 
 struct gdb_ext_thread_info
@@ -1558,7 +1569,9 @@ remote_current_thread (oldpid)
     return oldpid;
 }
 
-/* Find new threads for info threads command.  */
+/* Find new threads for info threads command.  
+ * Original version, using John Metzler's thread protocol.  
+ */
 
 static void
 remote_find_new_threads ()
@@ -1568,6 +1581,13 @@ remote_find_new_threads ()
   if (inferior_pid == MAGIC_NULL_PID)	/* ack ack ack */
     inferior_pid = remote_current_thread (inferior_pid);
 }
+
+/*
+ * Find all threads for info threads command.
+ * Uses new thread protocol contributed by Cisco.
+ * Falls back and attempts to use the older method (above)
+ * if the target doesn't respond to the new method.
+ */
 
 static void
 remote_threads_info (void)
@@ -1579,29 +1599,108 @@ remote_threads_info (void)
   if (remote_desc == 0)		/* paranoia */
     error ("Command can only be used when connected to the remote target.");
 
-  putpkt ("qfThreadInfo");
-  bufp = buf;
-  getpkt (bufp, PBUFSIZ, 0);
-  if (bufp[0] == '\0')		/* q packet not recognized! */
-    {				/* try old jmetzler method  */
-      remote_find_new_threads ();
-      return;
+  if (use_threadinfo_query)
+    {
+      putpkt ("qfThreadInfo");
+      bufp = buf;
+      getpkt (bufp, PBUFSIZ, 0);
+      if (bufp[0] != '\0')		/* q packet recognized */
+	{	
+	  while (*bufp++ == 'm')	/* reply contains one or more TID */
+	    {
+	      do
+		{
+		  tid = strtol (bufp, &bufp, 16);
+		  if (tid != 0 && !in_thread_list (tid))
+		    add_thread (tid);
+		}
+	      while (*bufp++ == ',');	/* comma-separated list */
+	      putpkt ("qsThreadInfo");
+	      bufp = buf;
+	      getpkt (bufp, PBUFSIZ, 0);
+	    }
+	  return;	/* done */
+	}
     }
-  else				/* try new 'q' method */
-    while (*bufp++ == 'm')	/* reply contains one or more TID */
-      {
-	do
-	  {
-	    tid = strtol (bufp, &bufp, 16);
-	    if (tid != 0 && !in_thread_list (tid))
-	      add_thread (tid);
-	  }
-	while (*bufp++ == ',');	/* comma-separated list */
-	putpkt ("qsThreadInfo");
-	bufp = buf;
-	getpkt (bufp, PBUFSIZ, 0);
-      }
+
+  /* Else fall back to old method based on jmetzler protocol. */
+  use_threadinfo_query = 0;
+  remote_find_new_threads ();
+  return;
 }
+
+/* 
+ * Collect a descriptive string about the given thread.
+ * The target may say anything it wants to about the thread
+ * (typically info about its blocked / runnable state, name, etc.).
+ * This string will appear in the info threads display.
+ * 
+ * Optional: targets are not required to implement this function.
+ */
+
+static char *
+remote_threads_extra_info (struct thread_info *tp)
+{
+  int result;
+  int set;
+  threadref id;
+  struct gdb_ext_thread_info threadinfo;
+  static char display_buf[100];	/* arbitrary... */
+  char *bufp = alloca (PBUFSIZ);
+  int n = 0;                    /* position in display_buf */
+
+  if (remote_desc == 0)		/* paranoia */
+    internal_error ("remote_threads_extra_info");
+
+  if (use_threadextra_query)
+    {
+      sprintf (bufp, "qfThreadExtraInfo,%x", tp->pid);
+      putpkt (bufp);
+      getpkt (bufp, PBUFSIZ, 0);
+      if (bufp[0] != 0)
+	{
+	  char *p;
+
+	  for (p = display_buf; 
+	       p < display_buf + sizeof(display_buf) - 1 &&
+		 bufp[0] != 0 &&
+		 bufp[1] != 0;
+	       p++, bufp+=2)
+	    {
+	      *p = fromhex (bufp[0]) * 16 + fromhex (bufp[1]);
+	    }
+	  *p = 0;
+	  return display_buf;
+	}
+    }
+
+  /* If the above query fails, fall back to the old method.  */
+  use_threadextra_query = 0;
+  set = TAG_THREADID | TAG_EXISTS | TAG_THREADNAME
+    | TAG_MOREDISPLAY | TAG_DISPLAY;
+  int_to_threadref (&id, tp->pid);
+  if (remote_get_threadinfo (&id, set, &threadinfo))
+    if (threadinfo.active)
+      {
+	if (*threadinfo.shortname)
+	  n += sprintf(&display_buf[0], " Name: %s,", threadinfo.shortname);
+	if (*threadinfo.display)
+	  n += sprintf(&display_buf[n], " State: %s,", threadinfo.display);
+	if (*threadinfo.more_display)
+	  n += sprintf(&display_buf[n], " Priority: %s",
+		       threadinfo.more_display);
+
+	if (n > 0)
+	  {
+	    /* for purely cosmetic reasons, clear up trailing commas */
+	    if (',' == display_buf[n-1])
+	      display_buf[n-1] = ' ';
+	    return display_buf;
+	  }
+      }
+  return NULL;
+}
+
 
 
 /*  Restart the remote side; this is an extended protocol operation.  */
@@ -1967,6 +2066,10 @@ serial device is attached to the remote system\n\
      binary downloading. */
   init_packet_config (&remote_protocol_binary_download);
 
+  /* Probe for ability to use "ThreadInfo" query, as required.  */
+  use_threadinfo_query = 1;
+  use_threadextra_query = 1;
+
   /* Without this, some commands which require an active target (such
      as kill) won't work.  This variable serves (at least) double duty
      as both the pid of the target process (if it has such), and as a
@@ -2051,6 +2154,10 @@ serial device is attached to the remote system\n\
   /* Force remote_write_bytes to check whether target supports
      binary downloading. */
   init_packet_config (&remote_protocol_binary_download);
+
+  /* Probe for ability to use "ThreadInfo" query, as required.  */
+  use_threadinfo_query = 1;
+  use_threadextra_query = 1;
 
   /* Without this, some commands which require an active target (such
      as kill) won't work.  This variable serves (at least) double duty
@@ -4898,6 +5005,7 @@ Specify the serial device it is connected to\n\
   remote_ops.to_mourn_inferior = remote_mourn;
   remote_ops.to_thread_alive = remote_thread_alive;
   remote_ops.to_find_new_threads = remote_threads_info;
+  remote_ops.to_extra_thread_info = remote_threads_extra_info;
   remote_ops.to_stop = remote_stop;
   remote_ops.to_query = remote_query;
   remote_ops.to_rcmd = remote_rcmd;
@@ -5034,6 +5142,10 @@ device is attached to the remote system (e.g. host:port).");
      binary downloading. */
   init_packet_config (&remote_protocol_binary_download);
 
+  /* Probe for ability to use "ThreadInfo" query, as required.  */
+  use_threadinfo_query = 1;
+  use_threadextra_query = 1;
+  
   /* Without this, some commands which require an active target (such
      as kill) won't work.  This variable serves (at least) double duty
      as both the pid of the target process (if it has such), and as a
@@ -5309,6 +5421,7 @@ Specify the serial device it is connected to (e.g. host:2020).";
   remote_cisco_ops.to_mourn_inferior = remote_cisco_mourn;
   remote_cisco_ops.to_thread_alive = remote_thread_alive;
   remote_cisco_ops.to_find_new_threads = remote_threads_info;
+  remote_ops.to_extra_thread_info = remote_threads_extra_info;
   remote_cisco_ops.to_stratum = process_stratum;
   remote_cisco_ops.to_has_all_memory = 1;
   remote_cisco_ops.to_has_memory = 1;
@@ -5397,6 +5510,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   remote_async_ops.to_mourn_inferior = remote_async_mourn;
   remote_async_ops.to_thread_alive = remote_thread_alive;
   remote_async_ops.to_find_new_threads = remote_threads_info;
+  remote_ops.to_extra_thread_info = remote_threads_extra_info;
   remote_async_ops.to_stop = remote_stop;
   remote_async_ops.to_query = remote_query;
   remote_async_ops.to_rcmd = remote_rcmd;
