@@ -397,6 +397,8 @@ print_symtabs (filename)
   if (filename == 0)
     error_no_arg ("file to write symbol data in");
   outfile = fopen (filename, "w");
+  if (outfile == 0)
+    perror_with_name (filename);
 
   cleanups = make_cleanup (fclose, outfile);
   immediate_quit++;

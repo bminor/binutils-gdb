@@ -1,40 +1,14 @@
-/*
-Date: Thu, 2 Apr 87 00:02:42 EST
-From: crl@maxwell.physics.purdue.edu (Charles R. LaBrec)
-Message-Id: <8704020502.AA01744@maxwell.physics.purdue.edu>
-To: bug-gdb@prep.ai.mit.edu
-Subject: gdb for ISI Optimum V
+/* Parameters for execution on a Sony/NEWS, for GDB, the GNU debugger.
 
-Here is an m-isi-ov.h file for gdb version 2.1.  It supports the 68881
-registers, and tracks down the function prologue (since the ISI cc
-puts it at the end of the function and branches to it if not
-optimizing).  Also included are diffs to core.c, findvar.c, and
-inflow.c, since the original code assumed that registers are an int in
-the user struct, which isn't the case for 68020's with 68881's (and
-not using the NEW_SUN_PTRACE).  I have not fixed the bugs associated
-with the other direction (writing registers back to the user struct).
-I have also included a diff that turns m68k-pinsn.c into isi-pinsn.c,
-which is needed since the 3.05 release of as does not understand
-floating point ops, and it compiles incorrectly under "cc -20"
+Here is an m-news800.h file for gdb version 2.1.  It supports the reading
+the 68881 registers, but the kernel doesn't know how to write them
+and probably cannot write the frame pointer register either.
 
-I have used gdb for a while now, and it seems to work relatively well,
-but I do not guarantee that it is perfect.  The more that use it, the
-faster the bugs will get shaken out.  One bug I know of is not in gdb,
-but in the assembler.  It seems to screw up the .stabs of variables.
-For externs, this is not important since gdb uses the global symbol
-value, but for statics, this makes gdb unable to find them.  I am
-currently trying to track it down.
-
-As an aside, I notice that only global functions are used as symbols
-to print as relative addresses, i.e. "<function + offset>", and not
-static functions, which end up printing as large offsets from the last
-global one.  Would there be a problem if static functions were also
-recorded as misc functions in read_dbx_symtab?
-
-Charles LaBrec
-crl @ maxwell.physics.purdue.edu
-
-  Definitions to make GDB run on a ISI Optimum V (3.05) under 4.2bsd.
+Now(9/2 '87) NEWS's printf has a bug. 
+And support Sun assembly format instead of Motorola one.
+Probably not well support floating registers from core file rarely that
+I do not know detail.
+(hikichi@srava.sra.junet or hikichi%srava.sra.junet%kddlabs%seismo.CSS.GOV) 
 
    Copyright (C) 1987 Free Software Foundation, Inc.
 
@@ -55,18 +29,27 @@ In other words, go ahead and share GDB, but don't try to stop
 anyone else from sharing it farther.  Help stamp out software hoarding!
 */
 
-
 /* Identify this machine */
-#ifndef ISI68K
-#define ISI68K
+#ifndef news800
+#define news800
 #endif
+
+#define USE_GAS
+
+/* Motorola assembly format */
+#ifndef USE_GAS
+#define MOTOROLA
+#endif
+
+/* bug when printf special number; NAN */
+#define PRINTF_BUG
 
 /* Define this if the C compiler puts an underscore at the front
    of external names before giving them to the linker.  */
 
 #define NAMES_HAVE_UNDERSCORE
 
-/* Debugger information will be in DBX format.  */
+/* Debugger info will be in DBX format. */
 
 #define READ_DBX_FORMAT
 
@@ -83,13 +66,7 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
   if (op == 0047126)					\
     pc += 4;   /* Skip link #word */			\
   else if (op == 0044016)				\
-    pc += 6;   /* Skip link #long */			\
-  else if (op == 0060000)				\
-    pc += 4;   /* Skip bra #word */			\
-  else if (op == 00600377)				\
-    pc += 6;   /* skip bra #long */			\
-  else if ((op & 0177400) == 0060000)			\
-    pc += 2;   /* skip bra #char */			\
+    pc += 6;   /* Skip link #long */                    \
 }
 
 
@@ -101,14 +78,14 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 #define SAVED_PC_AFTER_CALL(frame) \
 read_memory_integer (read_register (SP_REGNUM), 4)
 
-/* This is the amount to subtract from u.u_ar0
-   to get the offset in the core file of the register values.  */
+/* THis is the amount to subtract from u.u_ar0
+   to get the offset in the core file of the register values. */
 
-#define KERNEL_U_ADDR 0x10800000
+#define KERNEL_U_ADDR UADDR
 
 /* Address of end of stack space.  */
 
-#define STACK_END_ADDR 0x10000000
+#define STACK_END_ADDR	(0x80000000 - ctob(UPAGES + 1))
 
 /* Stack grows downward.  */
 
@@ -118,26 +95,15 @@ read_memory_integer (read_register (SP_REGNUM), 4)
 
 #define BREAKPOINT {0x4e, 0x4f}
 
-/* Data segment starts at etext rounded up to DATAROUND in {N,Z}MAGIC files */
-
-#define DATAROUND	0x20000
-#define N_DATADDR(hdr)	(hdr.a_magic != OMAGIC ? \
-	(hdr.a_text + DATAROUND) & ~(DATAROUND-1) : hdr.a_text)
-
-/* Text segment starts at sizeof (struct exec) in {N,Z}MAGIC files */
-
-#define N_TXTADDR(hdr)	(hdr.a_magic != OMAGIC ? sizeof (struct exec) : 0)
-
 /* Amount PC must be decremented by after a breakpoint.
    This is often the number of bytes in BREAKPOINT
-   but not always.  
-   On the ISI, the kernel resets the pc to the trap instr */
+   but not always.  */
 
-#define DECR_PC_AFTER_BREAK 0
+#define DECR_PC_AFTER_BREAK 2
 
 /* Nonzero if instruction at PC is a return instruction.  */
 
-#define ABOUT_TO_RETURN(pc) (read_memory_integer (pc, 2) == 0x4e76)
+#define ABOUT_TO_RETURN(pc) (read_memory_integer (pc, 2) == 0x4e75)
 
 /* Return 1 if P points to an invalid floating point value.  */
 
@@ -157,7 +123,7 @@ read_memory_integer (read_register (SP_REGNUM), 4)
 #define REGISTER_NAMES  \
  {"d0", "d1", "d2", "d3", "d4", "d5", "d6", "d7", \
   "a0", "a1", "a2", "a3", "a4", "a5", "fp", "sp", \
-  "ps", "pc",  \
+  "pc", "ps",  \
   "fp0", "fp1", "fp2", "fp3", "fp4", "fp5", "fp6", "fp7", \
   "fpcontrol", "fpstatus", "fpiaddr" }
 
@@ -170,27 +136,27 @@ read_memory_integer (read_register (SP_REGNUM), 4)
 
 #define FP_REGNUM 14		/* Contains address of executing stack frame */
 #define SP_REGNUM 15		/* Contains address of top of stack */
-#define PS_REGNUM 16		/* Contains processor status */
-#define PC_REGNUM 17		/* Contains program counter */
+#define PC_REGNUM 16		/* Contains program counter */
+#define PS_REGNUM 17		/* Contains processor status */
 #define FP0_REGNUM 18		/* Floating point register 0 */
 #define FPC_REGNUM 26		/* 68881 control register */
 
 #define REGISTER_U_ADDR(addr, blockend, regno)		\
-{	if (regno < 2) addr = blockend - 0x18 + regno * 4;	\
-	else if (regno < 8) addr = blockend - 0x54 + regno * 4;	\
-	else if (regno < 10) addr = blockend - 0x30 + regno * 4;\
-	else if (regno < 15) addr = blockend - 0x5c + regno * 4;\
-	else if (regno < 16) addr = blockend - 0x1c;		\
-	else if (regno < 18) addr = blockend - 0x44 + regno * 4;\
-	else if (regno < 26) addr = (int) ((struct user *)0)->u_68881_regs \
-	    + (regno - 18) * 12;				\
-	else if (regno < 29) addr = (int) ((struct user *)0)->u_68881_regs \
-	    + 8 * 12 + (regno - 26) * 4;			\
+{	if (regno <= FP_REGNUM) \
+	  addr = blockend + 4 + regno * 4; \
+	else if (regno == SP_REGNUM) \
+	  addr = blockend - 4 * 4; \
+	else if (regno <= PS_REGNUM) \
+	  addr = blockend + (regno - PS_REGNUM) * 4; \
+	else if (regno < FPC_REGNUM) \
+	  addr = blockend + 4 + 4 * 14 + 4 * 5 + (regno - FP0_REGNUM) * 12; \
+	else \
+	  addr = blockend + 4 + 4 * 16 + (regno - FPC_REGNUM) * 4; \
 }
 
 /* Total amount of space needed to store our copies of the machine's
    register state, the array `registers'.  */
-#define REGISTER_BYTES (16*4+8*12+8+20)
+#define REGISTER_BYTES (16*4+8*12+8+12)
 
 /* Index within `registers' of the first byte of the space for
    register N.  */
@@ -254,19 +220,31 @@ read_memory_integer (read_register (SP_REGNUM), 4)
    into VALBUF.  */
 
 #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
-  bcopy (REGBUF, VALBUF, TYPE_LENGTH (TYPE))
+  { if (TYPE_CODE (TYPE) != TYPE_CODE_FLT) \
+      bcopy (REGBUF, VALBUF, TYPE_LENGTH (TYPE)); \
+    else \
+      convert_from_68881 (REGBUF + REGISTER_BYTE (FP0_REGNUM), VALBUF); }
 
 /* Write into appropriate registers a function return value
    of type TYPE, given in virtual format.  */
 
 #define STORE_RETURN_VALUE(TYPE,VALBUF) \
-  write_register_bytes (0, VALBUF, TYPE_LENGTH (TYPE))
+  { if (TYPE_CODE (TYPE) != TYPE_CODE_FLT) \
+      write_register_bytes (0, VALBUF, TYPE_LENGTH (TYPE)); \
+    else \
+      { \
+	char raw_buffer[12]; \
+	convert_to_68881 (VALBUF, raw_buffer); \
+	write_register_bytes (REGISTER_BYTE(FP0_REGNUM), raw_buffer, 12); }}
 
 /* Extract from an array REGBUF containing the (raw) register state
    the address in which a function should return its structure value,
    as a CORE_ADDR (or an expression that can be used as one).  */
 
 #define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) (*(int *)(REGBUF))
+
+/* Compensate for lack of `vprintf' function.  */ 
+#define vprintf(format, ap) _doprnt (format, ap, stdout) 
 
 /* Describe the pointer in each stack frame to the previous stack frame
    (its caller).  */
@@ -281,7 +259,7 @@ read_memory_integer (read_register (SP_REGNUM), 4)
    it means the given frame is the outermost one and has no caller.
    In that case, FRAME_CHAIN_COMBINE is not used.  */
 
-/* In the case of the ISI, the frame's nominal address
+/* In the case of the NEWS, the frame's nominal address
    is the address of a 4-byte word containing the calling frame's address.  */
 
 #define FRAME_CHAIN(thisframe)  (read_memory_integer (thisframe, 4))
@@ -437,16 +415,16 @@ retry:									\
 }
 
 /* This sequence of words is the instructions
-     fmovem #<f0-f7>,-(sp)
-     moveml 0xfffc,-(sp)
-     clrw -(sp)
-     movew ccr,-(sp)
+     fmove.m #<f0-f7>,-(sp)
+     movem.l 0xfffc,-(sp)
+     clr.w -(sp)
+     move.w ccr,-(sp)
      /..* The arguments are pushed at this point by GDB;
 	no code is needed in the dummy for this.
 	The CALL_DUMMY_START_OFFSET gives the position of 
 	the following jsr instruction.  *../
-     jsr @#32323232
-     addl #69696969,sp
+     jbsr (#32323232)
+     add.l #69696969,sp
      bpt
      nop
 Note this is 24 bytes.
@@ -491,34 +469,66 @@ taken for the arguments.  */
    BEG and END should be symbols meaningful to the assembler.
    This is used only for kdb.  */
 
+#ifdef MOTOROLA
 #define INIT_STACK(beg, end)  \
 { asm (".globl end");         \
-  asm ("movl $ end, sp");      \
+  asm ("move.l $ end, sp");      \
+  asm ("clr.l fp"); }
+#else
+#define INIT_STACK(beg, end)  \
+{ asm (".globl end");         \
+  asm ("movel $ end, sp");      \
   asm ("clrl fp"); }
+#endif
 
 /* Push the frame pointer register on the stack.  */
+#ifdef MOTOROLA
+#define PUSH_FRAME_PTR        \
+  asm ("move.l fp, -(sp)");
+#else
 #define PUSH_FRAME_PTR        \
   asm ("movel fp, -(sp)");
+#endif
 
 /* Copy the top-of-stack to the frame pointer register.  */
+#ifdef MOTOROLA
+#define POP_FRAME_PTR  \
+  asm ("move.l (sp), fp");
+#else
 #define POP_FRAME_PTR  \
   asm ("movl (sp), fp");
+#endif
 
 /* After KDB is entered by a fault, push all registers
    that GDB thinks about (all NUM_REGS of them),
    so that they appear in order of ascending GDB register number.
    The fault code will be on the stack beyond the last register.  */
 
+#ifdef MOTOROLA
+#define PUSH_REGISTERS        \
+{ asm ("clr.w -(sp)");	      \
+  asm ("pea (10,sp)");	      \
+  asm ("movem $ 0xfffe,-(sp)"); }
+#else
 #define PUSH_REGISTERS        \
 { asm ("clrw -(sp)");	      \
   asm ("pea 10(sp)");	      \
   asm ("movem $ 0xfffe,-(sp)"); }
+#endif
 
 /* Assuming the registers (including processor status) have been
    pushed on the stack in order of ascending GDB register number,
    restore them and return to the address in the saved PC register.  */
 
+#ifdef MOTOROLA
+#define POP_REGISTERS          \
+{ asm ("subi.l $8,28(sp)");     \
+  asm ("movem (sp),$ 0xffff"); \
+  asm ("rte"); }
+#else
 #define POP_REGISTERS          \
 { asm ("subil $8,28(sp)");     \
   asm ("movem (sp),$ 0xffff"); \
   asm ("rte"); }
+#endif
+

@@ -1,4 +1,4 @@
-/* Print values for GNU debugger gdb.
+/* Print values for GNU debugger GDB.
    Copyright (C) 1986, 1987, 1988 Free Software Foundation, Inc.
 
 GDB is distributed in the hope that it will be useful, but WITHOUT ANY
@@ -54,8 +54,17 @@ static CORE_ADDR last_examine_address;
 
 static value last_examine_value;
 
+/* Number of auto-display expression currently being displayed.
+   So that we can deleted it if we get an error or a signal within it.
+   -1 when not doing one.  */
+
+int current_display_number;
+
+static void do_one_display ();
+
 void do_displays ();
 void print_address ();
+void print_scalar_formatted ();
 
 START_FILE
 
@@ -123,25 +132,11 @@ print_formatted (val, format, size)
   if (VALUE_LVAL (val) == lval_memory)
     next_address = VALUE_ADDRESS (val) + len;
 
-  if (format && format != 's')
-    {
-      val_long = value_as_long (val);
-
-      /* If value is unsigned, truncate it in case negative.  */
-      if (format != 'd')
-	{
-	  if (len == sizeof (char))
-	    val_long &= (1 << 8 * sizeof(char)) - 1;
-	  else if (len == sizeof (short))
-	    val_long &= (1 << 8 * sizeof(short)) - 1;
-	}
-    }
-
   switch (format)
     {
     case 's':
       next_address = VALUE_ADDRESS (val)
-	+ value_print (value_addr (val), stdout);
+	+ value_print (value_addr (val), stdout, 0);
       break;
 
     case 'i':
@@ -149,6 +144,49 @@ print_formatted (val, format, size)
 	+ print_insn (VALUE_ADDRESS (val), stdout);
       break;
 
+    default:
+      if (format == 0
+	  || TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_ARRAY
+	  || TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_STRUCT
+	  || TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_UNION)
+	value_print (val, stdout, format);
+      else
+	print_scalar_formatted (VALUE_CONTENTS (val), VALUE_TYPE (val),
+				format, size, stdout);
+    }
+}
+
+/* Print a scalar of data of type TYPE, pointed to in GDB by VALADDR,
+   according to letters FORMAT and SIZE on STREAM.
+   FORMAT may not be zero.  Formats s and i are not supported at this level.
+
+   This is how the elements of an array or structure are printed
+   with a format.  */
+
+void
+print_scalar_formatted (valaddr, type, format, size, stream)
+     char *valaddr;
+     struct type *type;
+     char format;
+     int size;
+     FILE *stream;
+{
+  long val_long;
+  int len = TYPE_LENGTH (type);
+
+  val_long = unpack_long (type, valaddr);
+
+  /* If value is unsigned, truncate it in case negative.  */
+  if (format != 'd')
+    {
+      if (len == sizeof (char))
+	val_long &= (1 << 8 * sizeof(char)) - 1;
+      else if (len == sizeof (short))
+	val_long &= (1 << 8 * sizeof(short)) - 1;
+    }
+
+  switch (format)
+    {
     case 'x':
       switch (size)
 	{
@@ -186,31 +224,30 @@ print_formatted (val, format, size)
       break;
 
     case 'a':
-      print_address (val_long, stdout);
+      print_address (val_long, stream);
       break;
 
     case 'c':
-      value_print (value_cast (builtin_type_char, val), stdout);
+      value_print (value_from_long (builtin_type_char, val_long), stream, 0);
       break;
 
     case 'f':
-      if (TYPE_LENGTH (VALUE_TYPE (val)) == sizeof (float))
-	VALUE_TYPE (val) = builtin_type_float;
-      if (TYPE_LENGTH (VALUE_TYPE (val)) == sizeof (double))
-	VALUE_TYPE (val) = builtin_type_double;
+      if (len == sizeof (float))
+	type = builtin_type_float;
+      if (len == sizeof (double))
+	type = builtin_type_double;
 #ifdef IEEE_FLOAT
-      if (is_nan (value_as_double (val)))
+      if (is_nan (unpack_double (type, valaddr)))
 	{
 	  printf ("Nan");
 	  break;
 	}
 #endif
-      printf ("%g", value_as_double (val));
+      printf ("%g", unpack_double (type, valaddr));
       break;
 
     case 0:
-      value_print (val, stdout);
-      break;
+      abort ();
 
     default:
       error ("Undefined output format \"%c\".", format);
@@ -364,7 +401,6 @@ print_command (exp)
   else
     val = access_value_history (0);
 
-  if (!val) return;       /*  C++  */
   histindex = record_latest_value (val);
   printf ("$%d = ", histindex);
 
@@ -414,41 +450,17 @@ set_command (exp)
   do_cleanups (old_chain);
 }
 
-/* C++: Modified to give useful information about variable which
-   hang off of `this'.  */
 static void
 address_info (exp)
      char *exp;
 {
   register struct symbol *sym;
   register CORE_ADDR val;
-  struct block *block, *get_selected_block ();
 
   if (exp == 0)
     error ("Argument required.");
 
-  block = get_selected_block ();
-  sym = lookup_symbol_1 (exp, block, VAR_NAMESPACE);
-  if (! sym)
-    {
-      value v;
-
-      /* C++: see if it hangs off of `this'.  Must
-	 not inadvertently convert from a method call
-	 to data ref.  */
-      v = value_of_this (0);
-      if (v)
-	{
-	  val = check_field (v, exp);
-	  if (val)
-	    {
-	      printf ("Symbol \"%s\" is a field of the local class variable `this'\n", exp);
-	      return;
-	    }
-	}
-      else
-	sym = lookup_symbol_2 (exp, 0, VAR_NAMESPACE);
-    }
+  sym = lookup_symbol (exp, get_selected_block (), VAR_NAMESPACE);
   if (sym == 0)
     {
       register int i;
@@ -572,12 +584,9 @@ whatis_command (exp)
   else
     val = access_value_history (0);
 
-  if (val != 0)
-    {
-      printf ("type = ");
-      type_print (VALUE_TYPE (val), "", stdout, 1);
-      printf ("\n");
-    }
+  printf ("type = ");
+  type_print (VALUE_TYPE (val), "", stdout, 1);
+  printf ("\n");
 
   if (exp)
     do_cleanups (old_chain);
@@ -639,143 +648,6 @@ ptype_command (typename)
   type_print (type, "", stdout, 1);
   printf ("\n");
 }
-
-/* Print all the methods that correspond to the name METHOD.
-   Can optionally qualify the method with a CLASSNAME, as
-   in CLASSNAME :: METHODNAME.  This routine does not call
-   parse_c_expression, so the input must conform to one of
-   these two forms.  */
-
-static void
-pmethod_command (exp)
-     char *exp;
-{
-# if 0
-  struct expression *expr;
-  register value val;
-  register struct cleanup *old_chain;
-  char *classname, *methodname;
-
-  methodname = exp;
-  while (*exp++ <= ' ') ;	/* remove leading whitespace */
-  if (exp[-1] == ':')
-    if (*exp == ':')
-      classname = (char *)1;
-    else error ("Invalid syntax: \"%s\"", methodname);
-  else
-    {
-      classname = exp-1;
-      while (*exp++ != ':') ;
-      exp[-1] = '\0';
-      if (*exp == ':')
-	{
-	  while (*exp++ <= ' ') ; /* remove leading 2nd whitespace */
-	  methodname = exp-1;
-	  while (((*exp | 0x20) >= 'a' && ((*exp | 0x20) <= 'z')) || *exp == '_')
-	    exp++;
-	  if (*exp)
-	    {
-	      *exp++ = '\0';
-	      while (*exp)
-		if (*exp > ' ') error ("junk after method name");
-	    }
-	}
-      else error ("Invalid syntax: \"%s\"", methodname);
-    }
-  if (classname)
-    {
-      if (classname != (char *)1)
-	classtype = lookup_typename (classname);
-      else
-	{
-	  register struct symtab *s;
-	  register struct blockvector *bv;
-	  struct blockvector *prev_bv = 0;
-	  register struct block *b;
-	  register int i, j;
-	  register struct symbol *sym;
-	  char *val;
-	  int found_in_file;
-	  static char *classnames[]
-	    = {"variable", "function", "type", "method"};
-	  int print_count = 0;
-
-	  if (regexp)
-	    if (val = (char *) re_comp (regexp))
-	      error ("Invalid regexp: %s", val);
-
-	  printf (regexp
-		  ? "All %ss matching regular expression \"%s\":\n"
-		  : "All defined %ss:\n",
-		  classnames[class],
-		  regexp);
-
-	  for (s = symtab_list; s; s = s->next)
-	    {
-	      found_in_file = 0;
-	      bv = BLOCKVECTOR (s);
-	      /* Often many files share a blockvector.
-		 Scan each blockvector only once so that
-		 we don't get every symbol many times.
-		 It happens that the first symtab in the list
-		 for any given blockvector is the main file.  */
-	      if (bv != prev_bv)
-		for (i = 0; i < 2; i++)
-		  {
-		    b = BLOCKVECTOR_BLOCK (bv, i);
-		    for (j = 0; j < BLOCK_NSYMS (b); j++)
-		      {
-			QUIT;
-			sym = BLOCK_SYM (b, j);
-			if ((regexp == 0 || re_exec (SYMBOL_NAME (sym)))
-			    && ((class == 0 && SYMBOL_CLASS (sym) != LOC_TYPEDEF
-				 && SYMBOL_CLASS (sym) != LOC_BLOCK)
-				|| (class == 1 && SYMBOL_CLASS (sym) == LOC_BLOCK)
-				|| (class == 2 && SYMBOL_CLASS (sym) == LOC_TYPEDEF)
-				|| (class == 3 && SYMBOL_CLASS (sym) == LOC_BLOCK)))
-			  {
-			    if (!found_in_file)
-			      {
-				printf ("\nFile %s:\n", s->filename);
-				print_count += 2;
-			      }
-			    found_in_file = 1;
-			    MORE;
-			    if (i == 1)
-			      printf ("static ");
-
-			    type_print (SYMBOL_TYPE (sym),
-					(SYMBOL_CLASS (sym) == LOC_TYPEDEF
-					 ? "" : SYMBOL_NAME (sym)),
-					stdout, 0);
-			    printf (";\n");
-			  }
-		      }
-		  }
-	      prev_bv = bv;
-	    }
-	}
-    }
-  if (exp)
-    {
-      expr = parse_c_expression (exp);
-      old_chain = make_cleanup (free_current_contents, &expr);
-      val = evaluate_type (expr);
-    }
-  else
-    val = access_value_history (0);
-
-  if (val != 0)
-    {
-      printf ("type = ");
-      type_print (VALUE_TYPE (val), "", stdout, 1);
-      printf ("\n");
-    }
-
-  if (exp)
-    do_cleanups (old_chain);
-# endif
-}
 
 struct display
 {
@@ -802,8 +674,9 @@ static int display_number;
    Specify the expression.  */
 
 static void
-display_command (exp)
+display_command (exp, from_tty)
      char *exp;
+     int from_tty;
 {
   struct format_data fmt;
   register struct expression *expr;
@@ -841,6 +714,9 @@ display_command (exp)
   new->format = fmt;
   display_chain = new;
 
+  if (from_tty)
+    do_one_display (new);
+
   dont_repeat ();
 }
 
@@ -867,6 +743,38 @@ clear_displays ()
       display_chain = d->next;
       free (d);
     }
+}
+
+/* Delete the auto-display number NUM.  */
+
+void
+delete_display (num)
+     int num;
+{
+  register struct display *d1, *d;
+
+  if (!display_chain)
+    error ("No display number %d.", num);
+
+  if (display_chain->number == num)
+    {
+      d1 = display_chain;
+      display_chain = d1->next;
+      free_display (d1);
+    }
+  else
+    for (d = display_chain; ; d = d->next)
+      {
+	if (d->next == 0)
+	  error ("No display number %d.", num);
+	if (d->next->number == num)
+	  {
+	    d1 = d->next;
+	    d->next = d1->next;
+	    free_display (d1);
+	    break;
+	  }
+      }
 }
 
 /* Delete some values from the auto-display chain.
@@ -898,30 +806,53 @@ undisplay_command (args)
 
       num = atoi (p);
 
-      if (display_chain->number == num)
-	{
-	  d1 = display_chain;
-	  display_chain = d1->next;
-	  free_display (d1);
-	}
-      else
-	for (d = display_chain; ; d = d->next)
-	  {
-	    if (d->next == 0)
-	      error ("No display number %d.", num);
-	    if (d->next->number == num)
-	      {
-		d1 = d->next;
-		d->next = d1->next;
-		free_display (d1);
-		break;
-	      }
-	  }
+      delete_display (num);
 
       p = p1;
       while (*p == ' ' || *p == '\t') p++;
     }
   dont_repeat ();
+}
+
+/* Display a single auto-display.  */
+
+static void
+do_one_display (d)
+     struct display *d;
+{
+  current_display_number = d->number;
+
+  printf ("%d: ", d->number);
+  if (d->format.size)
+    {
+      printf ("x/");
+      if (d->format.count != 1)
+	printf ("%d", d->format.count);
+      printf ("%c", d->format.format);
+      if (d->format.format != 'i' && d->format.format != 's')
+	printf ("%c", d->format.size);
+      printf (" ");
+      print_expression (d->exp, stdout);
+      if (d->format.count != 1)
+	printf ("\n");
+      else
+	printf ("  ");
+      do_examine (d->format,
+		  value_as_long (evaluate_expression (d->exp)));
+    }
+  else
+    {
+      if (d->format.format)
+	printf ("/%c ", d->format.format);
+      print_expression (d->exp, stdout);
+      printf (" = ");
+      print_formatted (evaluate_expression (d->exp),
+		       d->format.format, d->format.size);
+      printf ("\n");
+    }
+
+  fflush (stdout);
+  current_display_number = -1;
 }
 
 /* Display all of the values on the auto-display chain.  */
@@ -932,37 +863,22 @@ do_displays ()
   register struct display *d;
 
   for (d = display_chain; d; d = d->next)
+    do_one_display (d);
+}
+
+/* Delete the auto-display which we were in the process of displaying.
+   This is done when there is an error or a signal.  */
+
+void
+delete_current_display ()
+{
+  if (current_display_number >= 0)
     {
-      printf ("%d: ", d->number);
-      if (d->format.size)
-	{
-	  printf ("x/");
-	  if (d->format.count != 1)
-	    printf ("%d", d->format.count);
-	  printf ("%c", d->format.format);
-	  if (d->format.format != 'i' && d->format.format != 's')
-	    printf ("%c", d->format.size);
-	  printf (" ");
-	  print_expression (d->exp, stdout);
-	  if (d->format.count != 1)
-	    printf ("\n");
-	  else
-	    printf ("  ");
-	  do_examine (d->format,
-		      value_as_long (evaluate_expression (d->exp)));
-	}
-      else
-	{
-	  if (d->format.format)
-	    printf ("/%c ", d->format.format);
-	  print_expression (d->exp, stdout);
-	  printf (" = ");
-	  print_formatted (evaluate_expression (d->exp),
-			   d->format.format, d->format.size);
-	  printf ("\n");
-	}
-      fflush (stdout);
+      delete_display (current_display_number);
+      fprintf (stderr, "Deleting display %d to avoid infinite recursion.\n",
+	       current_display_number);
     }
+  current_display_number = -1;
 }
 
 static void
@@ -998,7 +914,7 @@ print_variable_value (var, frame, stream)
      FILE *stream;
 {
   value val = read_var_value (var, frame);
-  value_print (val, stream);
+  value_print (val, stream, 0);
 }
 
 /* Print the arguments of a stack frame, given the function FUNC
@@ -1057,7 +973,7 @@ print_frame_args (func, addr, num, stream)
       if (! first)
 	fprintf (stream, ", ");
       fprintf (stream, "%s=", SYMBOL_NAME (sym));
-      value_print (val, stream);
+      value_print (val, stream, 0);
       first = 0;
       last_offset = SYMBOL_VALUE (sym) + TYPE_LENGTH (SYMBOL_TYPE (sym));
       /* Round up address of next arg to multiple of size of int.  */
@@ -1255,6 +1171,8 @@ printf_command (arg)
 static
 initialize ()
 {
+  current_display_number = -1;
+
   add_info ("address", address_info,
 	   "Describe where variable VAR is stored.");
 
@@ -1280,11 +1198,6 @@ The selected stack frame's lexical context is used to look up the name.");
 
   add_com ("whatis", class_vars, whatis_command,
 	   "Print data type of expression EXP.");
-
-  add_com ("pmethod", class_vars, pmethod_command,
-	   "Print definitions of method METHOD.\n\
-Argument must resolve to a method name within the containing scope.\n\
-All definitions found go into history array.");
 
   add_info ("display", display_info,
 	    "Expressions to display when program stops, with code numbers.");

@@ -79,7 +79,7 @@ read_memory_integer (read_register (SP_REGNUM), 4)
 
 /* Nonzero if instruction at PC is a return instruction.  */
 
-#define ABOUT_TO_RETURN(pc) (read_memory_integer (pc, 2) == 0x4e76)
+#define ABOUT_TO_RETURN(pc) (read_memory_integer (pc, 2) == 0x4e75)
 
 /* Return 1 if P points to an invalid floating point value.  */
 

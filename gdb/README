@@ -1,0 +1,32 @@
+This is GDB, a source-level debugger intended for GNU,
+presently running under un*x.
+
+Before compiling GDB, you must set up links to four files according to
+the kind of machine you are running on.  To do this, type `config.gdb
+machine', where machine is something like `vax' or `sun2'.  This
+creates links named `param.h', `m-init.h', `opcode.h', and `pinsn.c'.
+(Note: we lack information on certain machines.)
+
+Also, `Makefile' must be changed to say `OBSTACK = obstack.o' instead
+of `OBSTACK=-lobstack' (unless you want to install obstack.o as
+/lib/libobstack.a).
+
+Once these files are set up, just `make' will do everything,
+producing an executable `gdb' in this directory.
+
+About the machine-dependent files...
+
+m-<machine>.h
+
+This file contains macro definitions that express information
+about the machine's registers, stack frame format and instructions.
+
+m-<machine>init.h
+
+This file defines one macro, which says how to round up from the
+address of the end of the text of one .o file to the beginning of
+the text of the next .o file.
+
+<machine>-opcode.h, <machine>-pinsn.c
+These files contain the information necessary to print instructions
+for your cpu type.

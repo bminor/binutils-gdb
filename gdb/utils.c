@@ -19,8 +19,13 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 */
 
 #include <stdio.h>
+#include <signal.h>
 #include <sys/ioctl.h>
 #include "defs.h"
+#include "param.h"
+#ifdef HAVE_TERMIO
+#include <termio.h>
+#endif
 
 void error ();
 void fatal ();
@@ -191,8 +196,16 @@ void
 quit ()
 {
   fflush (stdout);
+#ifdef HAVE_TERMIO
+  ioctl (fileno (stdout), TCFLSH, 1);
+#else /* not HAVE_TERMIO */
   ioctl (fileno (stdout), TIOCFLUSH, 0);
+#endif /* not HAVE_TERMIO */
+#ifdef TIOCGPGRP
   error ("Quit");
+#else
+  error ("Quit (expect signal %d when inferior is resumed)", SIGINT);
+#endif /* TIOCGPGRP */
 }
 
 /* Control C comes here */
@@ -386,10 +399,14 @@ parse_escape (string_ptr)
     }
 }
 
+/* Print the character CH on STREAM as part of the contents
+   of a literal string whose delimiter is QUOTER.  */
+
 void
-printchar (ch, stream)
+printchar (ch, stream, quoter)
      unsigned char ch;
      FILE *stream;
+     int quoter;
 {
   register int c = ch;
   if (c < 040 || c >= 0177)
@@ -413,7 +430,7 @@ printchar (ch, stream)
     }
   else
     {
-      if (c == '\\' || c == '"' || c == '\'')
+      if (c == '\\' || c == quoter)
 	fputc ('\\', stream);
       fputc (c, stream);
     }

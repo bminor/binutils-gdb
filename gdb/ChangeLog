@@ -1,0 +1,1609 @@
+Sat Sep  3 12:05:36 1988  Richard Stallman  (rms at sugar-bombs.ai.mit.edu)
+
+	* Version 2.8 released.
+
+	* valprint.c: include param.h.
+
+	* inflow.c (store_inferior_registers): Fix typo and missing decl.
+
+Thu Sep  1 13:18:22 1988  Richard Stallman  (rms at sugar-bombs.ai.mit.edu)
+
+	* Version 2.7 released.
+
+	* m-hp9k320bsd.h: New file supports BSD on hp9000 series 300.
+
+Tue Aug 30 17:54:50 1988  Richard Stallman  (rms at sugar-bombs.ai.mit.edu)
+
+	* m-news.h ({EXTRACT,STORE}_RETURN_VALUE): Handle floating pt values.
+
+	* inflow.c (store_inferior_registers) [usual case]:
+	Handle registers longer than one word.
+
+Sat Aug 27 00:19:32 1988  Richard Stallman  (rms at spiff)
+
+	* inflow.c (create_inferior): Use execve to avoid NEWSOS bug in execle.
+
+Wed Aug 10 20:36:36 1988  Richard Stallman  (rms at sugar-bombs.ai.mit.edu)
+
+	* m-news.h: Define READ_DBX_FORMAT, {EXTRACT,STORE}_RETURN_VALUE.
+	(INVALID_FLOAT): Add 2nd argument.
+	(vprintf): Define to call _doprnt.
+
+Tue Jul 26 03:05:28 1988  Peter TerMaat  (pete at corn-chex.ai.mit.edu)
+
+	* symmisc.c: (print_symtabs)  Check the status of the fopen and
+	call perror_with_name if needed.
+
+Sat Jul 23 00:14:20 1988  Peter TerMaat  (pete at corn-chex.ai.mit.edu)
+
+	* printcmd.c: (delete_display) Check for existence of display
+	chain before deleting anything.
+
+Thu Jul  7 08:47:03 1988  Richard Stallman  (rms at sugar-bombs.ai.mit.edu)
+
+	* main.c: New vars win_argv, win_argc, win_prgm to talk to xgdb.
+
+Thu Jul  7 02:05:29 1988  Pete TerMaat  (pete at frosted-flakes.ai.mit.edu)
+
+	* dbxread.c: (define_symbol) store static functions ('f') in the
+	same way as global functions ('F') -- that is, as `function of
+	type X' rather than as `X'.
+
+Mon Jul  4 17:07:31 1988  Pete TerMaat  (pete at frosted-flakes.ai.mit.edu)
+
+	* dbxread.c: (read_dbx_symtab) Avoid reading symbol tables of
+	libraries by checking for symbols which begin with "-l" (in
+	addition to those which end with ".o").
+
+Mon Jun 27 23:27:51 1988  Pete TerMaat  (pete at frosted-flakes.ai.mit.edu)
+
+	* dbxread.c: (define_symbol) and coffread.c: (process_coff_symbol)
+	If the current symbol is a function, assign its type to be 
+	`function of type X' rather than `X'.  TYPE_TARGET_TYPE (symbol)
+	is `X'
+
+	* findvar.c: (locate_var_value, read_var_value) got rid of checks
+	for LOC_BLOCK which called `lookup_function_type'.  These checks
+	are no longer needed because of the change to dbxread.c.
+
+	* infcmd.c: (finish_command) Now uses target_type instead of type
+	for functions, in keeping with the change to dbxread.c.
+
+Sat Jun 25 00:24:09 1988  Pete TerMaat  (pete at corn-chex.ai.mit.edu)
+
+	* infrun.c: (normal_stop) Added a check for permissions on the
+	exec file before printing the "You have encountered a bug in sh"
+	message.  Apparently on some systems an attempt by the shell to
+	exec an	unexecutable file had resulted in the "You have 
+	encountered" message.
+
+Wed Jun 22 00:00:02 1988  Pete TerMaat  (pete at corn-chex.ai.mit.edu)
+
+	* config.gdb: installed shell script to make the proper links to
+	param.h, m-init.h, opcode.h, and pinsn.c, given a machine name.
+
+Tue Jun 21 23:55:09 1988  Pete TerMaat  (pete at corn-chex.ai.mit.edu)
+
+	* m-suninit.h, m-isi-ov.h, m-news800.h: moved to m-sun3init.h, 
+	m-isi.h, m-news.h for consistency.
+
+Fri Jun 17 21:24:48 1988  Pete TerMaat  (pete at lucky-charms.ai.mit.edu)
+
+	* m-umax.h: (FIX_CALL_DUMMY): fixed typo (the last `flipped' was
+	`fliped')
+
+	* m-pn.h, m-npl.h: added #define gould, since this is needed in
+	core.c.
+
+Tue Jun 14 04:07:50 1988  Pete TerMaat  (pete at lucky-charms.ai.mit.edu)
+
+	* Removed unused variables from m-pn.h, m-npl.h in
+	FRAME_FIND_SAVED_REGS, PUSH_DUMMY_FRAME, and POP_FRAME.
+
+Mon Jun 13 05:57:47 1988  Richard Stallman  (rms at corn-chex.ai.mit.edu)
+
+	* inflow.c (create_inferior): Allow two macros SHELL_FILE and
+	SHELL_COMMAND_CONCAT, if defined, to customize how the shell is run.
+
+Thu Jun  9 05:42:20 1988  Richard Stallman  (rms at sugar-bombs.ai.mit.edu)
+
+	* breakpoint.c (ignore_command): P was used before initialized.
+
+Fri Jun  3 06:52:25 1988  Richard Stallman  (rms at sugar-bombs.ai.mit.edu)
+
+	* dbxread.c (read_dbx_symtab): Change handling of N_NBTEXT (Gould).
+
+Mon May 30 22:48:48 1988  Richard Stallman  (rms at sugar-bombs.ai.mit.edu)
+
+	* main.c (main, disconnect): Handle SIGHUP by killing inferior.
+	* inflow.c (kill_inferior_fast): New function used to do that.
+
+	* utils.c (printchar): New 3rd arg is the string's delimiter,
+	which is the char that needs backslashing.
+	* valprint.c (value_print, val_print): Pass new arg.
+	* expprint.c (print_subexp): Pass new arg.
+
+Mon May 23 14:54:54 1988  Richard Stallman  (rms at frosted-flakes.ai.mit.edu)
+
+	* source.c (print_source_lines): New arg NOERROR nonzero means
+	if file is not found just print message and return (don't throw).
+	Callers changed here and in stack.c.
+
+Sun May 22 14:22:54 1988  Richard Stallman  (rms at frosted-flakes.ai.mit.edu)
+
+	* source.c (identify_source_line): Set defaults for `list' command.
+
+	* dbxread.c (sort_syms): If not sorting the block, reverse it, so
+	that for a parm declared register the register comes before the parm.
+
+	* defs.h: declare alloca.
+
+Fri May 20 15:02:50 1988  Richard Stallman  (rms at frosted-flakes.ai.mit.edu)
+
+	* values.c (value_of_internalvar): `return' stmt was missing.
+
+Tue May 10 23:03:29 1988  Richard Stallman  (rms at corn-chex.ai.mit.edu)
+
+	* source.c ({forward,reverse}_search_command, print_source_lines):
+	Line number symtab->nlines is just barely in range.
+	(find_source_lines): Newline as last char in file doesn't start a line.
+
+Thu May  5 15:04:40 1988  Richard Stallman  (rms at frosted-flakes.ai.mit.edu)
+
+	* Version 2.6.
+
+	* printcmd.c (do_one_display): New fn, display one auto-display.
+	(do_displays): Use that fn.
+	(display_command): If cmd is from tty, display the new display now.
+
+	* printcmd.c (do_display): Record # of display being displayed.
+	(delete_current_display): New fn: delete that display (if any).
+	* main.c (return_to_top_level): Call delete_current_display.
+	* infrun.c (normal_stop): Likewise.
+
+	* main.c (catch_error): New fn: like list `errset'.
+	* breakpoint.c (breakpoint_cond_eval): Eval an expression and
+	return 1 if the expression is zero.
+	(breakpoint_stop_status): Use those two fcns; avoid lossage on error
+	in evalling a breakpoint condition.
+
+	* infcmd.c (jump_command): Typo in call to `query'.
+
+Tue May  3 10:52:08 1988  Richard Stallman  (rms at frosted-flakes.ai.mit.edu)
+
+	* core.c (exec_file_command): If no file, pass 0 to display-hook.
+
+	* core.c (get_exec_file): New arg ERR says whether to err if no file.
+	All callers changed.
+
+	* main.c (print_prompt): New fn to print the prompt string.
+
+	* xgdb.c: Numerous changes.  It now semi-works but the text display
+	often gets messed up.
+
+Sun May  1 12:12:43 1988  Richard Stallman  (rms at frosted-flakes.ai.mit.edu)
+
+	* wait.h [HAVE_WAIT_STRUCT] (WSETSTOP): Fix typos.
+
+Sat Apr 30 10:18:56 1988  Richard Stallman  (rms at frosted-flakes.ai.mit.edu)
+
+	* expread.y: BLOCK::NAME action called copy_name in wrong place.
+
+Fri Apr 15 01:01:40 1988  Chris Hanson  (cph at kleph)
+
+	* inflow.c [! TIOCGPGRP]: Do not call `setpgrp' for inferior.
+	Instead, disable SIGINT and SIGQUIT while the inferior is running.
+	Unfortunately this means that C-c typed while GDB is running will
+	cause the inferior to receive SIGINT when it is resumed.
+	* utils.c (quit) [! TIOCGPGRP]: Cause quit message to remind user
+	that the inferior will see SIGINT.
+
+Thu Apr 14 23:38:02 1988  Richard Stallman  (rms at frosted-flakes.ai.mit.edu)
+
+	* infrun.c (wait_for_inferior): If step into a function, and
+	immediately arrive at start of first line of user code,
+	don't step: stop immediately.
+	Set prev_pc before, not after, calling `resume'.
+
+	* source.c (identify_source_line): New 3rd arg controls additional
+	output datum: `beg' or `middle', saying whether pc is at beg of line.
+	* stack.c (print_frame_info): Pass that argument.
+
+	* main.c (cd_command): Convert any relative pathname to absolute.
+	Simplify if `.' or `..' appear.
+
+Thu Apr 14 21:17:11 1988  Chris Hanson  (cph at kleph)
+
+	* infrun.c: Add new flag `trap_expected_after_continue' to
+	compensate for spurious trace trap generated by HP-UX after
+	running a stack dummy.
+
+	* inflow.c (term_status_command) [HAVE_TERMIO]: Show all available
+	terminal status information.
+
+Tue Apr 12 19:11:00 1988  Chris Hanson  (cph at kleph)
+
+	* stack.c (print_frame_info): When -fullname is given and
+	`identify_source_line' succeeds, do not print real pc even if it
+	differs from the start pc for the source line.  This information
+	is not very useful and tends to screw up gdb-mode in emacs.
+
+Mon Apr 11 14:22:10 1988  Chris Hanson  (cph at kleph)
+
+	* dbxread.c (define_symbol): Don't forget to terminate
+	SYMBOL_NAME.
+
+	* m-hp9k320.h (CALL_DUMMY): Fix bug -- breakpoint instruction is
+	TRAP #1 not TRAP #15.
+
+	* inflow.c (store_inferior_register_1) [HP9K320]: Ignore `errno',
+	as there is a bug in HP-UX which (mistakenly) causes errno to be
+	non-zero when writing fp7.
+
+Sat Apr  9 01:04:23 1988  Richard Stallman  (rms at frosted-flakes.ai.mit.edu)
+
+	* dbxread.c (symbol_file_command): Check stringtab size by doing `stat'
+	and, if it is ridiculous, complain and don't call alloca.
+	Don't discard existing symtab until after that check.
+
+Fri Apr  8 16:39:11 1988  Richard Stallman  (rms at frosted-flakes.ai.mit.edu)
+
+	* Makefile: Delete `-lg' entirely; not needed now that linking is done
+	with $(CC).
+
+Fri Apr  8 13:41:46 1988  Chris Hanson  (cph at kleph)
+
+	* m68k-opcode.h: Fix operand-string of fmovel insns.
+
+	* Makefile: Put "-lg" in CLIBS because there is no such library in
+	HPUX.  Update the comment for HPUX.
+
+Fri Apr  8 03:30:23 1988  Richard Stallman  (rms at frosted-flakes.ai.mit.edu)
+
+	* findvar.c (locate_var_value): For &FCN, do lookup_function_type.
+
+	* valprint.c (val_print): Fix typo testing whether ptr is a string.
+
+Thu Apr  7 21:11:00 1988  Chris Hanson  (cph at frosted-flakes.ai.mit.edu)
+
+	* m-hp9k320.h: New file.
+
+	* main.c (stop_sig, read_line): #ifdef SIGTSTP around uses of SIGTSTP.
+
+	* wait.h: Fix bug in WSETEXIT.
+
+	* remote.c: If HAVE_TERMIO, use termio and fake it to look like stty.
+	Include wait.h
+	(remote_wait): Use the wait.h interface.
+
+	* utils.c (quit): Need HAVE_TERMIO conditional.  Also include param.h.
+
+	* inflow.c: If HAVE_TERMIO, use termio and fake it to look like stty.
+	Define TERMINAL for data type of terminal data.
+	Use of tchars, ltchars, pgrp conditional on existence of the
+	ioctls that handle them.
+	(terminal_init_inferior, terminal_inferior, terminal_ours,
+	 term_status_command, initialize):
+	Conditionals for HAVE_TERMIO and existence of various ioctls.
+	({fetch,store}_inferior_registers): Separate versions for HP9K320.
+
+	* m68k-pinsn.c (convert_{to,from}_68881): Alternate asms for HPUX_ASM.
+
+	* core.c (register_addr): Change #ifdef to REGISTER_U_ADDR
+	(core_file_command) [HP9K320]: Special code to get regs from HPUX
+	core file.
+
+Thu Apr  7 01:15:56 1988  Richard Stallman  (rms at frosted-flakes.ai.mit.edu)
+
+	* dbxread.c (add_symbol_to_list, finish_block, read_enum_type):
+	Symbol-lists now hold up to 20 symbols in each `struct pending'
+	to save time in malloc.  When a `struct pending' becomes free,
+	don't call `free'; put it on a free-list `free_pendings'.
+	(really_free_pendings): Call `free' for each `struct pending'
+	on the free-list, and others that are easily found.
+	(symbol_file_command): Set up `really_free_pendings' as a cleanup.
+
+	* dbxread.c (start_symtab, end_symtab, process_one_symbol):
+	Context_stack is now contiguous, to save malloc-time.
+
+	* dbxread.c (read_enum_type): Allocate the enum const syms
+	in the symbol_obstack.
+	(obsavestring): New fn, like savestring but alloc in symbol_obstack.
+	(obconcat): New fn, like concat but etc.
+	Most calls to savestring and concat changed to call these fns.
+	(define_symbol): Open-code bcopy; don't bother to zero the symbol.
+	(compare_symbols): Compare 1st char of name before calling strcmp.
+
+	* Do explicit buffering to read symtab--don't use stdio.
+	Variables symbuf... hold the buffer and indices.
+	* dbxread.c (fill_symbuf): Fill the buffer, record how much was read.
+	(read_dbx_symbols, next_symbol_text): Fetch data direct from buffer;
+	call fill_symbuf when necessary.
+
+	* dbxread.c (sort_syms): Don't sort blocks with < 40 syms.
+	* symtab.c (lookup_block_symbol): Don't binary search such blocks.
+	Compare 1st char of name before calling strcmp, and other speedups.
+
+	* symtab.c (sort_block_syms): New fn, sort one block's syms. 
+	(list_symbols): If block not normally sorted, sort it here.
+
+	* dbxread.c (define_symbol): Ignore sym if name is empty.
+	(process_one_symbol): Ignore N_ENTRY sym if no N_SO seen yet.
+	(read_dbx_symtab): Recognize N_NBTEXT like N_TEXT (if it's defined).
+	Set end_of_text_addr from END_OF_TEXT_DEFAULT (if it's defined).
+	(NUMBER_OF_SYMBOLS): New macro for # entries in symtab.
+	(SYMBOL_TABLE_OFFSET): New macro for file-offset of symtab.
+	(STRING_TABLE_OFFSET): New macro for file-offset of string tab.
+	(READ_STRING_TABLE_SIZE): New macro to store size of string tab.
+	(DECLARE_FILE_HEADERS): New macro to declare vars to hold header info.
+	(READ_FILE_HEADERS): New macro to read that info from a descriptor.
+	All these macros can be overriden by the m-....h file.
+	(symbol_file_command): These macros replace open code.
+
+	* values.c (unpack_double): When fetching `double' from memory,
+	make it double-aligned, since some machines need that.
+
+	* core.c (exec_file_command): Insert conditionals for `gould'.
+
+	* m-sun[23].h, m-isi-ov.h, m-news800.h (ABOUT_TO_RETURN):
+	Fix typo in opcode number.
+
+	* main.c (read_line): Ignore backslash-newline.
+
+Fri Apr  1 17:37:25 1988  Richard M. Stallman  (rms at frosted-flakes.ai.mit.edu)
+
+	* main.c (main): New -c switch specifies current directory.
+	Discard trailing slash from arg.
+	(pwd_command): Call getwd.  Print its result as well as
+	current_directory if they differ.
+	(cd_command): Leave user's form of path in current_directory.
+	Discard trailing slash from arg.
+
+	* source.c (init_source_path, directory_command):
+	Use current_directory rather than calling getwd.
+
+Fri Mar 25 14:51:39 1988  Richard M. Stallman  (rms at frosted-flakes.ai.mit.edu)
+
+	* dbxread.c (read_struct_type): Only ints and enums can be bit-fields.
+
+	* command.c (lookup_command): Allow 0 in command name.
+
+	* valprint.c (value_print): New arg FORMAT.  Most callers pass 0.
+	Pass FORMAT to val_print.
+	(val_print): New arg FORMAT.  Most callers pass 0.
+	When FORMAT is nonzero, use `print_scalar_formatted' to print a scalar
+	and inhibit special treatment of char-pointers and arrays.
+
+	* printcmd.c (print_scalar_formatted): Guts of `print_formatted'
+	broken out, except for `i', `s' and 0 formats.
+	Type and data-address passed separately.
+
+	* valprint.c (val_print): Any array of 1-byte ints is a string;
+	any 1-byte int is a character.
+
+Thu Mar 24 23:01:24 1988  Richard M. Stallman  (rms at frosted-flakes.ai.mit.edu)
+
+	* coffread.c:
+	Make read_coff_symtab interruptible.
+	Use obstack rather than xmalloc for blocks, blockvectors and symbols.
+	Fix error checking for reading the stringtab.
+
+	* ns32k-pinsn.c (fbit_extract): New function.
+	(print_insn_arg): Use it for immediate floating args.
+	Also print float reg args as `f<digit>', not `r<digit>'.
+
+	* m68k-opcode.h: mulu and muluw had wrong arg-format-string.
+
+	* valprint.c (value_print): Any pointer to 1-byte ints
+	is printed as a string.
+
+	* inflow.c (attach, detach): Change conditional on these to
+	ATTACH_DETACH.  In a UMAX_PTRACE conditional, define the Sun
+	attach/detach names in terms of the Umax ones.
+
+	* m-umax.h: Define ATTACH_DETACH.
+
+	* infcmd.c (attach_command): `remote' was not being initialized.
+
+	* m-umax.h: Include defs.h if nec so that CORE_ADDR is defined.
+
+	* m-umax.h, m-vax.h: Define vprintf to use _doprnt.
+	* m-isi-ov.h, m-merlin.h: Likewise.
+
+	* inflow.c [UMAX_PTRACE]: Don't include user.h; do include sys/ptrace.h
+
+	* m-umax.h: Rename `n32k...' to `ns32k...'.
+	* ns32k-pinsn.c: Likewise.
+
+	* stack.c (print_block_frame_locals): Mention static locals as well.
+
+	* main.c (validate_comname): Allow 0 in a command name.
+
+	* core.c (myread): If successful, return # chars read.
+
+	* blockframe.c (find_pc_misc_function): Don't die due to index -1
+	if there are no misc functions.
+
+Sun Mar 20 17:52:00 1988  Richard M. Stallman  (rms at frosted-flakes.ai.mit.edu)
+
+	* m-isiinit.h: New file needed on ISI machines.
+	Symbol BSD43_ISI40D controls choice of system version.
+
+	* m-isi-ov.h: BSD43_ISI40D affects REGISTER_U_ADDR.
+
+Sat Mar 19 17:56:02 1988  Richard M. Stallman  (rms at frosted-flakes.ai.mit.edu)
+
+	* dbxread.c (symbol_file_command): Clear global_sym_chain here
+	before read_symsegs
+	(read_dbx_symtab): instead of clearing it here.
+
+	* valprint.c (type_print_base): Handle if TYPE is 0.
+	(type_print_varspec_{prefix,suffix}): Do nothing if TYPE is 0.
+
+	* main.c (copyright_info): Fix typo in string.
+	* symseg.h: Fix typo in struct.
+
+Fri Mar 18 01:07:10 1988  Chris Hanson  (cph at kleph)
+
+	* breakpoint.c (commands_command): Flush stdout after printing
+	message for benefit of terminals which are pipes.
+
+Tue Feb 16 18:28:24 1988  Richard Stallman  (rms at frosted-flakes.ai.mit.edu)
+
+	* dbxread.c (process_one_symbol): Ignore some Fortran symbol types.
+
+Wed Feb 10 15:48:30 1988  Richard Stallman  (rms at frosted-flakes.ai.mit.edu)
+
+	* Version 2.5.
+
+	* symtab.h: Delete free_explicit.
+	* symmisc.c (free_all_symtabs): Delete free_explicit case.
+
+	* symseg.h (struct source): It contains a linetable.  Define linetable.
+	* symtab.h: Don't define linetable here.
+
+	* symmisc.c (relocate_source): Relocate the linetable it contains.
+	* dbxread.c (symbol_file_command): Convert each symseg to one or
+	more symtabs according to its sourcevector.  Give each symtab
+	a linetable that comes from the sourcevector.
+
+	Free old symtabs and Print "Reading..." before reading symsegs.
+
+	* dbxread.c (start_symtab): If find a current_symseg, return
+	doing nothing more.
+	* dbxread.c (end_symtab): If have a current_symseg,
+	just zero a couple of variables and return.  Delete the rest
+	of the if-statement for current_symseg != 0.
+
+Sat Feb  6 12:59:29 1988  Richard Stallman  (rms at frosted-flakes.ai.mit.edu)
+
+	* findvar.c (locate_var_value): Remove space from middle of `+ ='.
+
+	* symtab.h (struct symtab): New field `fullname'.
+	* source.c: Callers of `openp' store the `fullname' field.
+
+	* source.c (identify_source_line): New function prints
+	^z^zFILENAME:LINENUM:CHARPOS\n.  For Emacs interface (gdb.el).
+
+	* main.c (main): `-fullname' option sets `frame_file_full_name'.
+	* stack.c (print_stack_frame): After printing source line,
+	if `frame_file_full_name', call `identify_source_line'.
+
+Fri Feb  5 00:07:44 1988  Richard Stallman  (rms at frosted-flakes.ai.mit.edu)
+
+	* core.c (core_file_command): For UMAX, print the core file's
+	program name.  For UMAX and Sun, print the signal number.
+
+	* printcmd.c (decode_format): Don't let size `g' be used for integers.
+
+	* coffread.c (read_coff_symtab): Don't lose a file
+	just because it contains only data and types (no text).
+
+	* source.c: Rename line_info_default_line to last_line_listed.
+	* source.c (*_search_command): Use that as default place to start.
+	Set current_source_line so that `list' with no args is centered
+	on that line.
+
+Thu Feb  4 19:32:31 1988  Richard Stallman  (rms at frosted-flakes.ai.mit.edu)
+
+	* dbxread.c (end_symtab): Always initialize symtab->free_ptr.
+
+	* main.c (main, cd_command): Set up `dirbuf' and `current_directory'
+	* main.c (pwd_command): Use `current_directory'.
+
+Wed Feb  3 11:49:10 1988  Richard Stallman  (rms at frosted-flakes.ai.mit.edu)
+
+	* remote.c: New file, for communication to remote debugger.
+
+	* defs.h (current_directory): New variable.
+
+	* core.c (core_file_command): Use current_directory instead of getwd.
+
+	* inflow.c (callers of ptrace): If remote_debugging, call another
+	function named remote_... instead of ptrace.
+
+	* infcmd.c (start_inferior): Special things if remote_debugging.
+
+	* infcmd.c (attach_command): If arg starts with a slash,
+	call `remote_open' and `start_remote'.
+
+	* infcmd.c (run_command): if remote_debugging,
+	don't hassle the args and don't fork.
+
+	* infrun.c, inferior.h (remote_debugging): New variable.
+	* infrun.c (wait_for_inferior): If remote_debugging, use remote_wait.
+	* infrun.c (start_remote): New function.
+
+	* symtab.c (find_line_common): Find the linetable entry
+	for a specified source line, of the first following line that has one.
+	No longer assumes lines are in increasing order.
+
+	* symtab.c (find_line_pc, find_line_pc_range): Use find_line_common.
+
+	* symtab.c (lookup_misc_func): New function to return the index
+	in misc_function_vector of a specified name.
+
+	* symtab.c (decode_line_1): Use `lookup_misc_func'.
+
+	* source.c (forward_search_command, reverse_search_command):
+	New functions to search a source file.
+
+	* source.c (openp): Get dir from `current_directory', not getwd.
+
+	* source.c (line_info): 2nd arg to decode_line_spec was missing.
+
+	* printcmd.c (printf_command): New command to do printf
+	with specified string and arguments.  Thoroughly rewritten from
+	Next's version.
+
+	* eval.c (parse_to_comma_and_eval): New function.
+
+	* expread.y (parse_c_1): New arg COMMA means stop parsing at a comma.
+	* breakpoint.c (condition_command, break_command): Pass 0 for COMMA.
+	* eval.c (parse_and_eval_address_1): Pass 0 for COMMA.
+
+	* printcmd.c (print_formatted): New arg SIZE so hex nums line up.
+	Changed all callers (all in this file).
+
+	* dbxread.c (symbol_file_command): Error-check result of alloca.
+	On some systems it seems it can return zero.
+
+	* dbxread.c (read_dbx_symtab): Make this interruptable.
+
+	* blockframe.c (find_pc_misc_function): Use binary search.
+
+Thu Jan 28 08:48:00 1988  Richard Stallman  (rms at frosted-flakes.ai.mit.edu)
+
+	* m68k-pinsn.c (print_insn_arg): For operand type 'd',
+	operand value is a register-name.
+
+Sat Jan 23 01:04:51 1988  Richard Stallman  (rms at frosted-flakes.ai.mit.edu)
+
+	* symseg.h: Add `struct sourcevector', etc., for describing
+	line number info.
+
+Fri Jan 15 05:09:18 1988  Richard Stallman  (rms at frosted-flakes)
+
+	* valprint.c [IEEE_FLOAT]: New function `is_nan' checks
+	whether a double is a nan.
+
+	* printcmd.c (print_formatted) [IEEE_FLOAT]:
+	Detect nans and print specially.
+	* valprint.c (val_print) [IEEE_FLOAT]: Same thing.
+
+	* m68k-pinsn.c (convert_{to,from}_68881): Hand-assemble
+	all the assembler code.
+
+	* m-newsinit.h, m-news800.h: Two new files.
+
+Thu Jan  7 22:25:16 1988  Richard Stallman  (rms at frosted-flakes)
+
+	* valops.c (value_assign): Don't coerce the arg being stored in.
+	Coercion is not right either for an array or for an enum.
+
+Tue Jan  5 00:59:29 1988  Richard Stallman  (rms at frosted-flakes)
+
+	* symtab.c (decode_line_1): Don't complain about no symtabs loaded
+	until after trying the misc function table.
+
+Sat Jan  2 13:16:08 1988  Richard Stallman  (rms at frosted-flakes)
+
+	* stack.c (record_selected_frame): New fn to access
+	the selected frame and its level.
+	* infcmd.c (run_stack_dummy): Save and restore the selected
+	frame and its level.
+
+Wed Dec 30 18:44:41 1987  Richard Stallman  (rms at frosted-flakes)
+
+	* valprint.c (type_print_varspec_prefix):
+	Treat arrays just like functions.
+	* valprint.c (type_print_varspec_{prefix,suffix}):
+	When passed_a_ptr is handled, pass 0 for it in the recursive call.
+
+Fri Dec 18 10:24:14 1987  Richard Stallman  (rms at frosted-flakes)
+
+	* findvar.c (read_var_value): Share code between values really
+	in registers and values in saved registers.
+	Register short on a big-endian machine needs a VALUE_OFFSET.
+
+	* findvar.c (locate_var_value): Offset the address of a
+	saved register variable that's shorter than the register.
+
+Thu Dec 17 08:26:31 1987  Richard Stallman  (rms at lucky-charms)
+
+	* valprint.c (type_print_base): Print nameless bit fields
+	to indicate gaps before bit fields.
+
+	* source.c (select_source_symtab): Ignore .h files.
+	Also, if a function `main' exists, make the default listing line
+	the beginning of `main'.
+
+	* breakpoint.c ({get,set}_breakpoint_commands):
+	Commands to examine or set the pending breakpoint-commands.
+
+	* infcmd.c (run_stack_dummy): Save and restore the breakpoint
+	commands around the function call.
+
+	* stack.c (return_command): Don't query or print if not interactive.
+
+	* value.h (COERCE_ENUM): New macro: if arg is enum, convert to int.
+	* value.h (COERCE_ARRAY): Do that, as well as old job.
+
+	* valarith.c (value_binop, value_neg, value_lognot):
+	Use COERCE_ENUM on the arguments.
+	* valops.c (value_arg_coerce): Likewise.
+	* valops.c (value_cast): AVOID coercing enums when arrays are.
+
+	* eval.c (evaluate_subexp): In the BINOP_SUB case,
+	use evaluate_subexp_with_coercion.
+
+	* inflow.c (terminal_ours_1, terminal_inferior):
+	Ignore inferior_thisrun_terminal since our terminal
+	is the inferior's controlling terminal regardless.
+
+	* m-sun3.h: Fix assembler syntax for kdb macros.
+
+	* infcmd.c ({attach,detach}_command): New functions from Dave Taylor.
+	* inflow.c (attach, detach): New functions from Dave Taylor.
+	* infrun.c (attach_process): New function, middle-level.
+	Does all the work of attaching a process, assuming there is no
+	inferior yet, except for printing and querying.
+
+	* infrun.c (clear_proceed_status): Clear `stop_after_attach'.
+	* infrun.c (wait_for_inferior): Handle `stop_after_attach'.
+
+Sat Dec 12 04:36:39 1987  Richard Stallman  (rms at corn-chex)
+
+	* dbxread.c (end_symtab): The free_code for a symseg got
+	from a file should be free_linetable.
+
+	* dbxread.c: Allocate blockvector, blocks, symbols and symbol names
+	from the symbol-obstack, and use free_linetable for all files.
+	The typevector is still malloc'd, so put it in the free_ptr
+	to get it freed.
+
+	* symmisc.c (free_symtab): Always free the `free_ptr' if nonzero.
+	`free_explicit' therefore now the same as `free_nothing'.
+
+	* dbxread.c (define_symbol): Handle defn code 'c', used by
+	fortran, which defines integer and real constant symbols.
+
+	* symseg.h: Define LOC_CONST_BYTES for constants longer than a
+	word.  New `bytes' alternative for the value of a symbol.
+
+	* symtab.h (SYMBOL_VALUE_BYTES): Macro to access `bytes'.
+
+	* findvar.c ({read,locate}_var_value): Handle LOC_CONST_BYTES.
+	* printcmd.c (address_info): Handle LOC_CONST_BYTES.
+	* symmisc.c (print_symbol): Handle LOC_CONST_BYTES.
+
+Tue Dec  8 20:26:37 1987  Richard Stallman  (rms at frosted-flakes)
+
+	* symtab.c (find_line_pc_range): Detection of last line in file
+	was erroneous.
+
+Fri Dec  4 21:52:52 1987  Richard Stallman  (rms at frosted-flakes)
+
+	* dbxread.c (read_range_type): Accept the typenums as argument.
+	Use read_type_number to read the subrange-of type.
+	A type defined as a subrange of itself is void.
+
+Thu Dec  3 12:45:10 1987  Richard Stallman  (rms at frosted-flakes)
+
+	* inflow.c ({fetch,store}_inferior_registers): Support UMAX_PTRACE.
+
+	* m-umax.h: New file, for Encore machines.
+
+	* core.c (exec_file_command, etc): Decode COFF files.
+	* core.c (core_file_command): Support UMAX_CORE format.
+	* core.c (validate_files, exec_file_command):
+	Set exec_mtime in exec_file_command so that COFF vs non-COFF
+	differences appear all in one place.
+
+	* coffread.c: New file from Dave Johnson.
+
+	* core.c (specify_exec_file_hook): New function to specify
+	a hook to be called by exec_file_command.  Last #ifdef X_WINDOWS gone.
+	* xgdb.c (initialize): Specify a hook.
+
+	* infrun.c, inferior.h: Replace stop_r0 and stop_r1 with an array
+	`stop_registers' that will hold ALL the registers.
+	* infcmd.c (run_stack_dummy): Get the value from `stop_registers'
+	and copy all of that into BUFFER.
+	* infcmd.c (finish_command): Specify `stop_registers'
+	to `value_being_returned'.
+	* values.c (value_being_returned): Use the new EXTRACT... macros.
+	* values.c (set_return_value): Use new STORE_RETURN_VALUE macro.
+	* valops.c (call_function): Allocate retbuf long enough for all regs.
+	* m-*.h: New macros EXTRACT_RETURN_VALUE, STORE_RETURN_VALUE and
+	EXTRACT_STRUCT_VALUE_ADDRESS that express machine-dependencies
+	in where return values are stored.
+
+	* valops.c (call_function): Flush default for CALL_DUMMY_START_OFFSET.
+	Assume it is defined.
+	* m-vax.h: Define CALL_DUMMY_START_OFFSET.
+
+	* ns32k-pinsn.c (ns32k-localcount): Fix decoding of `enter' insn.
+	* ns32k-pinsn.c (n32k_get_enter_addr): New fn used from m-umax.h.
+
+	* m-*.h: Change INVALID_FLOAT to accept 2nd arg which is length
+	of the float.
+	* values.c (unpack_double): Pass the 2nd arg.
+	* vax-pinsn.c (print_insn_arg): Pass the 2nd arg.
+	* infcmd.c (registers_info): Pass the 2nd arg.
+
+Wed Nov 25 15:06:55 1987  Richard Stallman  (rms at frosted-flakes)
+
+	* Bug fixes by David Johnson (ddj%cs.brown.edu@relay.cs.net).
+
+	* symtab.c (list_symbols): Print typedef names, and don't call
+	them `static'.
+
+	* symmisc.c (print_symtabs): Allow immediate quit, and close the
+	output file if that happens.
+
+	* stack.c (frame_command): Declare args `unsigned' so a negative
+	number is a frame address, not a level number.
+
+	* source.c: Check for error-return from calls to `getwd'.
+
+	* printcmd.c (address_info): Fix error in case of a function name.
+
+	* inflow.c (create_inferior): Return the inferior pid properly.
+
+	* inferior.h: Define `inferior_io_terminal'.
+	* infrun.c (tty_command): New command to specify inferior_io_terminal.
+	* inflow.c (new_tty): Open specified terminal for the inferior.
+	* inflow.c (terminal_{ours,inferior}): Do nothing if inferior was
+	started with its own terminal.
+	* main.c (main): -t switch calls `tty_command'.
+
+	* expread.y (rule for `block'): `copy_name' was called in wrong
+	place and with wrong args.
+
+	* dbxread.c: Entire file #ifdef READ_DBX_FORMAT.
+	* m-*.h: Define READ_DBX_FORMAT.
+
+	* breakpoint.c (initialize): Error in doc string of `info breakpoints'.
+
+Wed Nov 11 12:57:28 1987  Richard Stallman  (rms at frosted-flakes)
+
+	* ns32k-opcode.h, ns32k-pinsn.c: Two new files.
+	* m-merlin.h: New file, for one 32000 box.
+
+Mon Nov  9 10:31:42 1987  Brian Fox  (bfox at sugar-smacks)
+
+	* eval.c (evaluate_subexp): Made the case of OP_FUNCALL use
+	evaluate_subexp_with_coercion, so that array references would
+	get converted into pointer references.
+
+Mon Nov  9 05:50:24 1987  Richard Stallman  (rms at sugar-smacks)
+
+	* breakpoint.c (ignore_command): Error if no arg.
+
+Sat Nov  7 13:57:40 1987  Richard Stallman  (rms at frosted-flakes)
+
+	* main.c (quit_command): Get rid of execfile before the kill_inferior.
+
+	* xgdb.c: New file, interface to X windows.
+
+	* main.c (main): Look for flag arguments before
+	calling the initialization functions.  -nw switch sets
+	`inhibit_windows' which xgdb.c looks at.
+	* main.c (command_loop): Call the window hook function, if any.
+
+	* source.c (get_filename_and_charpos): New function
+	that interfaces to find_source_lines.
+	* source.c (source_line_charpos, source_charpos_line):
+	New functions translate source line number to char pos and vice versa.
+
+	* breakpoint.c (describe_other_breakpoints): New subroutine
+	to list all breakpoints at PC in a message about "other
+	breakpoints".
+	* breakpoint.c (break_command_1): Use describe_other_breakpoints.
+	* breakpoint.c (set_breakpoint): Like break_command_1
+	but takes arg predecoded into symtab and line.
+
+	* core.c (exec_file_command): Call xgdb_display_exec_file.
+
+	* valprint.c (type_print_base): For struct bitfields,
+	print the bit size.
+
+Thu Aug 20 02:46:47 1987  Richard M. Stallman  (rms at prep)
+
+	* Version 2.4.
+
+	* m68k-pinsn.c (print_insn_arg): Implement place = '3'.
+
+	* findvar.c (write_register_bytes): Arg to
+	store_inferior_registers should be -1: write all registers.
+
+	* dbxread.c (symbol_file_command): If no arg,
+	just discard all symbols.
+
+	* core.c (myread): Flush the 4th arg (filename).
+	* source.c (find_source_lines): Don't pass 4th arg.
+	* symmisc.c (read_symsegs): Ditto.
+
+	* dbxread.c (process_one_symbol): One call to `define_symbol'
+	lacked 3rd arg.
+
+	* inflow.c (write_inferior_memory): On failure, return the errno value.
+	* core.c (write_memory): ditto.
+	* breakpoint.c ({insert,remove}_breakpoints): ditto.
+	* utils.c (print_sys_errmsg): Like perror_with_name but don't
+	signal an error; also, the error code is an arg instead of from
+	`errno'.
+	* infrun.c : Save the value from insert_breakpoints and pass it to
+	print_sys_errmsg.
+
+	* main.c (input_from_terminal_p): Put in omitted `return'.
+
+	* Makefile (expread.o): Use $(CC).
+
+Sun Jun  7 04:42:51 1987  Richard M. Stallman  (rms at prep)
+
+	* version.c: Version 2.3.
+
+	* inflow.c (terminal_ours): Save fcntl flags correctly.
+	* inflow.c (term_status_command):
+	Print the tchars and ltchars structures, byte by byte.
+
+Mon May 25 14:37:14 1987  Richard M. Stallman  (rms at prep)
+
+	* version.c: Version 2.2.
+
+	* breakpoint.c (do_breakpoint_commands):
+	Advance breakpoint_commands before executing the command,
+	in case command is `cont' and it hits another bpt with commands.
+
+Sun May 24 20:45:04 1987  Richard M. Stallman  (rms at prep)
+
+	* value.h: Declare `contents' long and cast its address to char *.
+
+	* expread.y (prefixify_expression): Don't call alloca among the decls.
+
+	* printcmd.c (print_variable_value): Flush unused local `space'.
+
+	* main.c (execute_command): Barf on "user" like other class names.
+
+Fri May 22 01:34:37 1987  Richard M. Stallman  (rms at prep)
+
+	* m68k-pinsn.c (fetch_arg): New arg position 'j', for movec.
+	(print_insn_arg): New arg syntax 'J', for movec.
+	* m68k-opcode.h: movec uses 'Jj'.  Everything reformatted.
+	bf... and cas... insns were corrected.
+
+	* inflow.c (create_inferior): Fork and exec with given args and env.
+	Call close_exec_file.
+	(inferior_died): Record the fact that the inferior no longer exists.
+	Call reopen_exec_file.
+
+	* core.c (close_exec_file): New fn: Close the execchan if it's open.
+	(reopen_exec_file): New fn: Reopen execchan if not currently open.
+
+	* infrun.c (wait_for_inferior): Call inferior_died if it exits.
+
+	* infcmd.c (run_command): Don't fork and exec; call create_inferior.
+
+	* findvar.c (read_var_value): For reg var in a convertable reg,
+	fetch reg in its own virtual type and then cast to variable's type.
+
+	* symtab.h: Declare xmalloc to return char *.
+
+	* dbxread.c (read_dbx_symtab): Record static text syms as
+	misc-functions.  But if an assembler symbol supplies the address
+	for a debugger symbol, don't record it as a misc-function.
+
+	* utils.c (query): Do clearerr (stdin) frequently in case of C-d.
+
+	* dbxread.c (process_one_symbol, define_symbol):
+	Pass the stab's DESC down to define_symbol.
+	DESC = 0 means GCC output: if type is "short", believe it.
+
+	* dbxread.c (read_enum_type): Don't allocate the type here;
+	take it as an argument.  (Like read_struct_type.)
+	(read_type)): Before call to read_enum_type, allocate the type
+	or get the one already allocated.
+
+	* printcmd.c (print_frame_args): Print a comma before
+	every arg except the first.
+
+Wed May 13 00:36:00 1987  Richard M. Stallman  (rms at prep)
+
+	* m68k-pinsn.c (convert_{to,from}_68881):
+	Hand-assemble the fmoved and fmovex insns.
+
+	* dbxread.c (define_symbol): For case 'p', a parameter,
+	if specified type is short or char, change it to int.
+	This is for how PCC handles arguments.
+	Define new case 'P' that does what 'p' used to do.
+	Maybe GCC will use this.
+
+Mon May  4 21:52:44 1987  Richard M. Stallman  (rms at prep)
+
+	* main.c (main): If SET_STACK_LIMIT_HUGE, set the
+	run-time stack limit as high as it can go.
+	* m-sun3.h, m-vax.h: define SET_STACK_LIMIT_HUGE.
+
+Sun May  3 08:46:23 1987  Richard Mlynarik  (mly at prep)
+
+	* command.c, expread.y, findvar.c, infcmd.c, inflow.c, utils.c,
+	values.c, defs.h:  Various ANSI C compatibility changes
+	(fouts@wilbur.arpa <8705010117.AA13112@wilbur.arpa>)
+
+	* core.c, inflow.c: Fix calls to supply_register.
+	* findvar.c (supply_register): Instead of register value as int,
+	pass address of buffer in core containing contents in raw form.
+
+Sat Apr 18 17:09:42 1987  Richard Mlynarik  (mly at prep)
+
+	* main.c (command_loop):
+	Do any cleanups made by a executing a command each time around.
+
+	* source.c (directory_command):
+	make_cleanup (free, dirname), not
+	make_cleanup (free_current_contents, &dirname)
+	(rlk <8704180416.AA29572@PARIS.MIT.EDU>)
+
+Mon Apr 13 20:28:26 1987  Leonard H. Tower Jr.  (tower at prep)
+
+	* gdb.1: fixed typo and italicization errors.
+	(<kgk%cs.brown.edu@RELAY.CS.NET> id AA16470;Sun,12 Apr 87 14:30:07 EST)
+
+Sat Apr 11 15:41:01 1987  Richard Mlynarik  (mly at prep)
+
+	* dbxread.c (read_dbx_symtab):
+	No name for symbol => "" not 0 (avoid referencing memory 0)
+	(tower <8704081854.AA00135@buit3.bu.edu>)
+
+Mon Mar 30 22:24:07 1987  Leonard H. Tower Jr.  (tower at prep)
+
+	* gdb.1: Unix style manual page pointing at internal gdb
+	documentation, and info sub-system in GNU Emacs.
+
+Fri Mar 20 12:07:15 1987  Richard M. Stallman  (rms at prep)
+
+	* COPYING: Clarifications about distribution fees and mixing.
+	* main.c (copying_info): Same changes.
+
+Tue Mar 17 17:40:14 1987  Richard M. Stallman  (rms at prep)
+
+	* values.c (unpack_field_as_long): Avoid >>= operator
+	since ISI compiler has a bug.
+
+Sat Mar  7 12:19:35 1987  Richard M. Stallman  (rms at prep)
+
+	* GDB version 2.1.
+
+	* values.c (unpack-field-as-long): Tests for endianness were broken.
+	* findvar.c (read_var_value):
+	Now we initialize the union as an int and test it as a char.
+
+Sun Mar  1 16:16:20 1987  Richard M. Stallman  (rms at prep)
+
+	* main.c (define_command): Command class symbols
+	must be cast to int.
+
+Mon Feb 23 02:47:44 1987  Richard M. Stallman  (rms at prep)
+
+	* source.c (list_command): Reword error messages.
+	New message for case of first arg not just a line-number
+	and no symtab specified by it.
+
+Sun Feb 22 21:15:19 1987  Richard M. Stallman  (rms at prep)
+
+	* dbxread.c (compare_misc_functions):
+	Compare the addresses as unsigned numbers.
+
+Sun Feb 22 13:11:45 1987  Richard Mlynarik  (mly at prep)
+
+	* main.c (define_command, document_command):
+	Stuff was being unnecessarily malloced (-and- not freed!)
+
+	* main.c (execute_command):
+	User-defined commands don't take args.
+	Don't confuse empty user command with no command.
+	Replace bogus `etext' test with a comparison against
+	class_user.
+
+	* main.c (define_command):
+	If the command of the specified name is built-in, note that when
+	asking whether to redefine it (this is suppressed for class_alias
+	-- should it not be?)
+
+	* main.c (define_command):
+	If command was previously built-in, don't preserve its
+	documentation (otherwise could get error later when trying to free
+	the non-malloced text of built-in documentation strings)
+
+Tue Feb 17 16:23:57 1987  Richard Mlynarik  (mly at prep)
+
+	* main.c (echo_command): Don't die if not given any arg.
+	* main.c (cd_command):  Echo new cwd if interactive.
+
+Thu Feb 12 11:22:56 1987  Richard M. Stallman  (rms at prep)
+
+	* stack.c (initialize): "bt" now appears in help aliases.
+
+	* Version 2.0 released.
+
+Wed Feb 11 17:45:45 1987  Richard M. Stallman  (rms at prep)
+
+	* m68k-opcode.h: Errors corrected in several instructions
+	and reordering done for assembler's sake.
+
+	* m-vax.h (POP_FRAME): End with call to set_current_frame.
+
+Tue Feb 10 15:06:07 1987  Richard M. Stallman  (rms at prep)
+
+	* infrun.c (wait_for_inferior): Set stop_print_frame to 1
+	after checking breakpoint condition.
+
+	* infcmd.c (run_stack_dummy): Save many flags.
+
+Thu Feb  5 07:12:20 1987  Richard Mlynarik  (mly at prep)
+
+	* source.c (directory_command):
+	Step over `:'
+
+Mon Feb  2 23:40:32 1987  Richard M. Stallman  (rms at prep)
+
+	* infcmd.c (set_environment_command): Fix stupid error
+	for case where no "=" appears in the string.
+
+Mon Jan 26 13:46:52 1987  Richard M. Stallman  (rms at prep)
+
+	* printcmd.c (print_frame_args): Round end-of-arg offset
+	up rather than down to multiple of int.
+
+Fri Jan 23 15:11:50 1987  Richard M. Stallman  (rms at prep)
+
+	* source.c (directory_command): If dir is not added cause already
+	present, print explanation.
+
+	* infrun.c (proceed): Use read_pc (), not stop_pc,
+	to get current pc to think about.  stop_pc could have been
+	clobbered by call_function.
+
+Fri Jan 23 15:00:55 1987  Richard Mlynarik  (mly at prep)
+
+	* source.c (directory_command):
+	If dir is already in source_path, don't append another copy of it.
+
+Thu Jan 22 00:31:03 1987  Richard M. Stallman  (rms at prep)
+
+	* Version 2.0.
+
+	* blockframe.c (get_pc_function_start):
+	Understand misc functions.
+
+	* core.c (core_file_command):
+	Copy all register contents into the array `registers'
+	Save a.out header of executable file in core_aouthdr.
+	Print name of executable file that was running, if we know
+	where to find it.
+
+	* core.c (exec_file_command):
+	Save a.out header in exec_aouthdr and file's mtime
+	in exec_mtime.
+
+	* core.c (validate_files): Check that core file's a.out hdr
+	matches exec file's.
+
+	* New handling of registers:
+	Now all registers are fetched once when the program stops or
+	when a core file is selected.  Their contents are kept in
+	`registers', an array of bytes.  This is done by
+	`fetch_inferior_registers'.  `read_register', etc., just look
+	there.  Writing a register works through
+	`store_inferior_registers' which writes one or all registers
+	from `registers' back to the inferior.
+
+	A register now can have a "raw" data format and a "virtual"
+	data format, which may require conversion or even be different sizes.
+	The conversion can be different for different registers.
+	For example, the 68000 cpu registers need no conversion
+	and both raw and virtual size is 4, but the 68881 floating point
+	registers have raw size 12 (for extended fmt) and virtual size 8
+	(for double).  Macros in the m- file such as REGISTER_BYTES,
+	REGISTER_BYTE, REGISTER_{RAW,VIRTUAL}_SIZE, and
+	REGISTER_CONVERT_TO_{RAW,VIRTUAL} control these things.
+
+	`read_register' and `write_register' are usable only on registers
+	which hold an int and need no conversion (raw fmt = virtual fmt).
+	For other registers, `read_register_bytes' is used, or
+	`read_relative_register_raw_bytes'.
+
+	* m-sun3.h: Define the 68881 fp registers.
+	Know how to recognize insns that save them.
+	Make dummy frames save them.
+
+	* core.c (read_register, write_registers): Functions deleted.
+	* findvar.c (read_register, write_registers): New functions,
+	not the same as the old ones of the same name.
+
+	* findvar.c (supply_register): Function used by
+	fetch_inferior_registers, etc., to install the register
+	values fetched from the inferior.
+
+	* findvar.c (read_register_bytes, write_register_bytes):
+	Read spec'd number of bytes from the byte-array `registers'.
+
+	* findvar.c (read_relative_register_raw_bytes):
+	Replaces old function `read_relative_register'; accepts
+	address of where to store the contents; # bytes stored is size
+	of the specified register in raw format.
+
+	* findvar.c (value_of_register, read_var_value):
+	Convert register values and values of register variables
+	from raw format to virtual format.
+
+	* findvar.c (locate_var_value): Like `read_var_value' but
+	returns value for variable's address.
+
+	* value.h: Add new field VALUE_REGNO to each value.  It holds
+	register number to control virtual-to-raw conversion
+	for assignments to the value.
+
+	* valops.c (value_assign): Convert data from virtual to raw format
+	if value came from a register variable.
+	Use read_register_bytes and write_register_bytes.
+
+
+	* infcmd.c (continue_command): Subtract 1 from arg
+	before setting breakpoint's ignore-count.
+
+	* infcmd.c (jump_command): Query if spec'd line is outside
+	of the current function.
+
+	* infcmd.c (finish_command): Now finish the selected frame,
+	and no arg required.
+
+	* infcmd.c (set_environment_command): Allow space to separate
+	varname and value.
+
+	* infcmd.c (registers_info): Print both raw and virtual data
+	format if they differ.  Allow register name as arg.
+	Ask for a Newline each 16 registers.
+
+	* inflow.c (kill_inferior): call mark_breakpoints_out.
+	* inflow.c ({fetch,store}_inferior_registers for Sun):
+	Get the fp registers and store them in right places in
+	`registers'.
+	* inflow.c ({read,write}_inferior_register): Deleted.
+
+	* infrun.c (wait_for_inferior): Single-stepping is not considered
+	to have hit a breakpoint unless the pc before the step matches the
+	address of the breakpoint.  Necessary on machines where
+	breakpoints leave the pc incremented.
+
+	If shell gets SIGSEGV, pass the signal silently to it.
+
+	* m68k-pinsn.c, m68k-opcode.h:
+	Add the 68881 instructions.  New operand codes `F', `I', `s'
+	and `k' are needed for them.  New place codes `78tcik'.
+	NEXTBYTE now skips a word but fetches just a byte.
+	Explicit sign-extension removed from NEXTBYTE and NEXTWORD.
+	NEXTSINGLE, NEXTDOUBLE, NEXTEXTEND and NEXTPACKED defined.
+	Various changes to implement the new operand and place codes.
+	print_index changed because displacement-size codes for
+	word and long displacement were interchanged.
+
+	* m68k-pinsn.c (convert_{from,to}_68881): Functions added
+	to support REGISTER_CONVERT_TO_{RAW,VIRTUAL} on 68000.
+
+	* main.c (main): Move around calls to setjmp.
+	* main.c (define_command, document_command):
+	Accept a from_tty argument instead of calling input_from_terminal_p.
+
+	* printcmd.c (address_info): Print info on class and address
+	of a specified symbol.  For register symbols, gives name of register.
+
+	* printcmd.c (print_command): Remember explicitly whether
+	`make_cleanup' was called.
+
+	* printcmd.c (print_frame_args): Know how arg-addresses vary with
+	data type on big-endian machines.
+
+	* source.c (directory_command): Detect `:' in arg and reject it.
+	Free the old directory-path.  Simplify things like `/.' in
+	dirname.
+
+	* source.c (openp): Simplify `./' in specified name.
+
+	* source.c (find_source_lines): Compare source mtime against
+	`exec_mtime' and warn if source is newer.
+
+	* source.c (line_info): No arg means use last line listed
+	or line following last one this command was used on.
+	If from tty, clear out argument so Return is like `i li' without
+	arg.
+
+	* stack.c (frame_info): Print addresses registers are saved at.
+
+	* stack.c (return_command): When asking for confirmation, give
+	name of function that will be made to return.
+
+	* valops.c (call_function): If function type is
+	pointer-to-function, dereference it to compute return type.
+	If pointer-to-object, assume function returns int.
+	If char, assume that the value's address is the function address
+	(because it's a misc functon).  If int, the value itself is the
+	function address.
+
+	* dbxread.c (compare_symbols): Sort register symbols
+	before all others.
+
+	* eval.c (evaluate_subexp_for_address): New function like
+	`evaluate_subexp' but returns a value for the address where
+	the subexpression's value would be located.
+
+	* eval.c (evaluate_subexp_for_sizeof): New function like
+	`evaluate_subexp' but returns a value for the size of the subexp.
+
+	* eval.c (evaluate_subexp_with_coercion): Like `evaluate_subexp'
+	but coerces arrays to pointers (without taking the time to
+	read the array contents).
+
+	* eval.c (evaluate_subexp): Use the three new functions above
+	when appropriate instead of calling self recursively.
+
+Wed Jan 14 17:00:03 1987  Richard Mlynarik  (mly at prep)
+
+	* core.c (core_file_command):
+	Use correct file in calls to perror_with_name
+
+Mon Jan 12 03:34:35 1987  Richard Mlynarik  (mly at prep)
+
+	* breakpoint.c (map_breakpoint_numbers):
+	Err if no args not supplied, otherwise would get mpv.
+
+	* main.c (main):
+	Command-line arg "-d dir" adds dir to source-file directory
+	search-list.
+
+Sun Jan 11 19:19:52 1987  Richard Mlynarik  (mly at prep)
+
+	* symmisc.c (free_all_symtabs):
+	Don't call free on 0.
+
+	* core.c (exec_file_command):
+	Use correct name in call to perror_with_name.
+	Record absolute pathname.
+	Don't savestring an arg to concat.
+
+	* dbxread.c (symbol_file_command):
+	Record absolute name of pathname opened.
+	Print a message if file doesn't have a symbol-table.
+	Don't savestring an arg to concat.
+
+	* source.c (openp):
+	Add new arg filename_opened, which if non-zero will be set to a
+	malloced string of the absolute name of the actual filename opened.
+
+	* breakpoint.c (clear_command):
+	If from_tty or cleared more than one breakpoint at location,
+	print which bpts were deleted.
+
+	* breakpoint.c (break_command_1, break_command, tbreak_command):
+	If from_tty, mention any other breakpoints set at same location.
+
+	* symtab.c (decode_line_1):
+	If no symtabs, err mentioning `symbol-file' command rather than
+	saying "function foo not defined"
+
+Fri Jan  9 01:25:19 1987 Richard Mlynarik  (mly at prep)
+
+	* main.c (set_prompt_command):
+	Add support command "set-prompt"
+
+	* printcmd.c (undisplay_command):
+	Fix paren error to make "undisplay <number>" work.
+
+Wed Jan  7 12:06:09 1987  Richard Mlynarik  (mly at prep)
+
+	* main.c (print_gdb_version, gdb_version_info):
+	Add command "info version" to report the version
+	of gdb for use in bug reports.
+
+	* infcmd.c:
+	Ensure inferior_args always points to string starting with a space
+	and is never 0.	
+
+	* printcmd.c: (clear_displays, undisplay_command):
+	Fix bug in clear_displays which led to looping.
+	Make undisplay_command call it instead of wrong-looking code which
+	looked at (display->number == 0) instead of (display == 0) to
+	determine if it were at the end of the chain.
+
+Mon Dec 15 20:57:06 1986  Richard M. Stallman  (rms at prep)
+
+	* utils.c (query): Don't ignore a second line if given a null line.
+
+	* infrun.c (normal_stop): Print "bug in shell" message
+	only for a segmentation fault.
+
+	* main.c (main): Read init file from home directory if any,
+	before init file from current directory.
+
+Thu Dec  4 09:05:35 1986  Richard M. Stallman  (rms at prep)
+
+	* source.c (select_source_symtab): Don't ref thru arg if null.
+
+	* m68k.opcode.h: For trap instruction code, use type T.
+	* m68k-pinsn.c (print_insn_arg): Recognize new arg-code T
+	and print the trap vector properly.
+
+	* m-sun[23].h (FRAME_FIND_SAVED_REGS): Recognize a movl REG,-(sp)
+	as a way to save one register.  Recognize clrw -(sp); movw -(sp)
+	after saving regs as a way to save the PS register.  Adjust the
+	way to find the starting pc of a stack dummy frame for the fact
+	that these frames now save the PS.
+
+	* m-sun[23].h (POP_FRAME): Restore PS register if frame saved it.
+
+	* m-sun[23].h (PUSH_DUMMY_FRAME): Push the old PS register.
+
+	* m-sun[23].h (CALL_DUMMY, etc.): Fix erroneous binary code for
+	the addl #nnn,sp instruction.  Insert clrw -(sp); movw -(sp)
+	to indicate that the PS has been saved.
+
+	* infrun.c (wait_for_inferior): If inferior exits, call
+	mark_breakpoints_out so it works to delete breakpoints afterward.
+
+	* infrun.c (normal_stop): After popping a stack dummy frame,
+	select the frame that we get to.
+
+	* dbxread.c (process_one_symbol): Store new `depth' field
+	in all context_stack elements created.  For N_RBRAC, test
+	that depth matches that in the context_stack; if not, error.
+
+	* dbxread.c (all callers of error): Make all error messages
+	start "Invalid symbol data: " and end with value of symnum.
+	Also change a few aborts to errors.
+
+Mon Dec  1 20:20:37 1986  Richard M. Stallman  (rms at prep)
+
+	* version.c: Version 1.11.
+
+	* breakpoint.c (condition_command): If no condition spec'd,
+	print "breakpoint N now unconditional".
+
+	* breakpoint.c (commands_command): Give different error messages
+	for cases of args not containing a breakpoint number
+	and args containing anything after the breakpoint number.
+
+	* commands.c (lookup_command): Don't store a zero in *p
+	if have an undefined subcommand that is not an error.
+
+	* commands.c (lookup_command): For recursive call,
+	pass subcommand list properly.  Was passing the address
+	of the word containing the list.
+
+	* core.c ({core,exec}_file_name): If no arg, tell user
+	what the effect is.
+
+	* dbxread.c (define_symbol): Accept class code 'v'
+	for static variable within a function.
+
+	* dbxread.c (read_type): Now allow any plain number or
+	pair of numbers in parens, with no code letter.  This means
+	define new type same as type with specified number, or define
+	it as void if specified number's type is not yet mentioned.
+
+	* m68k-pinsn.c (print_insn_arg): Case of general operand
+	in byte insn that happened to be immediate used wrong arg-size.
+
+	* printcmd.c (set_next_address): Set next_address from arg
+	and also set value of `$_' from it.
+
+	* printcmd.c (do_examine): Save address in last_examine_address
+	and value fetched to examine in last_examine_value.
+
+	* printcmd.c (x_command): Copy last_examine_{address,value}
+	into values of `$_' and `$__'.  Change `x' documentation string.
+
+	* source.c (directory_command): Query when no args now says
+	what new value it wants use for the path.
+
+	* source.c (list_command): Don't die in cases like `list ,+30'.
+
+	* source.c (line_info): Call `set_next_address' to make `x'
+	display the text of the line.  Change `info list' doc string.
+
+Sat Nov 29 07:59:29 1986  Richard M. Stallman  (rms at prep)
+
+	* printcmd.c (undisplay_command): If get no arg,
+	rather than crashing, query and then delete undisplay everything.
+
+Fri Nov 28 15:43:52 1986  Richard M. Stallman  (rms at prep)
+
+	* dbxread.c (process_one_symbol): If N_LBRAC sym
+	has a greater value that N_RBRAC, ignore the
+	N_LBRAC value and give the block zero length.
+
+Tue Nov 25 03:10:12 1986  Richard M. Stallman  (rms at prep)
+
+	* dbxread.c (process_one_symbol): Ignore N_NSYMS symbols
+	that appear in Ultrix.
+
+Sat Nov 22 22:49:06 1986  Richard M. Stallman  (rms at prep)
+
+	* version.c: version 1.10.
+
+	* valprint.c (type_print*):
+	SHOW < 0 now means abbreviate struct/union members
+	or enum values with `...'.  SHOW now decremented on
+	each recursion in type_print_base.  Several places
+	that used to check !show now check show <= 0.
+
+	* valprint.c (val_print): Pass -1 for SHOW to type_print
+	when printing typename inside parens or braces.
+
+	* printcmd.c (print_command): If no value specified to print,
+	print the value of $.
+
+	* expression.h, expread.y, eval.c, expprint.c:
+	OP_MEMVAL renamed UNOP_MEMVAL
+	and now allows any expression, not just an integer address.
+	It now has same format as UNOP_CAST and works almost like it.
+	Each place that referred to it has been rewritten
+	starting with a copy of the code that handles UNOP_CAST.
+	Doc for `print' command changed for this.
+
+	* source.c (init_source_path):
+	Free and zero out any line_charpos's saved in source symtabs.
+
+	* breakpoint.c (condition_command):
+	Parse the condition in the environment of the code where the
+	breakpoint is set.  This requires finding the breakpoint
+	before parsing, so code is rearranged.
+
+	* dbxread.c (dbx_alloc_type):
+	New function given typenums returns the type for those typenums
+	or allocates a new, empty type for those typenums and returns it.
+
+	* symtab.c (smash_type_to_{pointer,function}):
+	New functions modify an already-allocated type object
+	to be a pointer to or function returning some given type.
+
+	* dbxread.c (read_type): Uses dbx_alloc_type in many cases.
+	Reading a pointer or function type now works by doing that,
+	then reading the value type or type pointed to, then smashing
+	it into the type already allocated.  This makes some fwd refs win.
+	Likewise for structs and unions.
+
+	* dbxread.c (read_struct_type): Now receives the type object
+	as args.  Used to get typenums as args and look up the type
+	itself.
+
+	* dbxread.c (symbol_file_command):
+	At very end, clear out any type name that `char *' has received.
+
+Thu Nov 20 16:43:53 1986  Richard M. Stallman  (rms at prep)
+
+	* m-sun2.h, m-sun3.h (FIND_FRAME_SAVED_REGS):
+	Was incrementing address even for regs not saved.
+
+Sun Nov 16 14:59:07 1986  Richard M. Stallman  (rms at prep)
+
+	* values.c (value_field): Was adding in byte offset
+	before calling unpack_field_as_long, which itself
+	adds in the offset.  Now pass addr of start of structure.
+
+	* infrun.c (normal_stop): Clean up inferior_pid conditionals:
+	just return early if no inferior.
+
+Thu Nov 13 15:45:50 1986  Richard M. Stallman  (rms at prep)
+
+	* dbxread.c (struct header_file): add new field .instance
+	to distinguish the various entries for one header file.
+
+	* dbxread.c (process_one_symbol): Use the `value' of
+	a N_BINCL or N_EXCL as the instance code for the header file.
+
+	* dbxread.c (add_{new,old}_header_file):
+	Accept an instance code as arg and treat it as if it were
+	part of the file name for distinguishing and finding entries.
+
+	* dbxread.c (add_new_header_file, read_type):
+	Turn off the header_file_prev_index feature with #if 0.
+
+	* values.c (unpack_field_as_long, modify_field):
+	Run-time test to distinguish big and little endian machines
+	and do shifting accordingly.
+
+Tue Nov 11 00:31:18 1986  Richard M. Stallman  (rms at prep)
+
+	* version.c: version 1.9.
+
+	* breakpoint.c (delete_command):
+	Don't query if 2nd arg is zero.
+
+	* breakpoint.c (clear_breakpoints):
+	Pass 2nd arg of zero to delete_command.
+
+Sat Nov  8 23:29:19 1986  Richard M. Stallman  (rms at prep)
+
+	* breakpoint.c (delete_command):
+	Ask for confirmation when used with no arg (delete all).
+
+Fri Nov  7 11:23:09 1986  Richard M. Stallman  (rms at prep)
+
+	* infrun.c (start_inferior, wait_for_inferior):
+	Eliminate `stop_in_shell' which was not being maintained right.
+	New variable `running_in_shell' is set to 1 or 0 when the
+	expected SIGTRAPs happen, and is simply examined at other times.
+
+	* infrun.c (wait_for_inferior):
+	If get SIGSEGV with running_in_shell == 1, it is sh
+	allocating memory.  Pass the signal silently to the shell.
+
+	* core.c (exec_file_command):
+	data_{start,end} are adjusted unconditionally when an
+	exec file is opened, so closing counter-adjustment is
+	now unconditional as well.
+
+	* printcmd.c (x_command):
+	Don't erase the expression from the calling args
+	if cllaed noninteractively (used to be clobbering
+	definitions of user-defined commands).
+
+	* source.c (list_command): likewise.
+
+Wed Nov  5 09:41:00 1986  Richard M. Stallman  (rms at prep)
+
+	* Makefile: New variable OBSTACK1 that people can use
+	to make obstack.o a dependency of gdb.
+
+	* breakpoint.c (initialize):
+	Define new aliases "br", "bre" and "brea" for "break".
+
+Sun Nov  2 21:16:06 1986  Richard Mlynarik  (mly at prep)
+
+	* symmisc.c (read_symsegs):
+	Add an extra protection against invalid symbol-file
+
+	* m-vax.h:
+	Set KERNEL_U_ADDR and STACK_END_ADDR non-4.2-specifically
+
+Tue Oct 21 13:34:14 1986  Richard Mlynarik  (mly at prep)
+
+	* breakpoints.c (initialize):
+	Delet reference to non-existent command "tenable" from doc of "enable"
+
+Tue Oct 14 19:58:27 1986  Richard Mlynarik  (mly at prep)
+
+	* printcmd.c (display_command, undisplay_command):
+	* infcmd.c (run_command):
+	Call dont_repeat. 
+
+
+Local Variables:
+mode: indented-text
+eval: (auto-fill-mode 1)
+left-margin: 8
+fill-column: 74
+version-control: never
+End:

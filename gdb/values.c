@@ -286,7 +286,7 @@ history_info (num_exp)
     {
       val = access_value_history (i);
       printf ("$%d = ", i);
-      value_print (val, stdout);
+      value_print (val, stdout, 0);
       printf ("\n");
     }
 }
@@ -330,6 +330,7 @@ value_of_internalvar (var)
   register value val = value_copy (var->value);
   VALUE_LVAL (val) = lval_internalvar;
   VALUE_INTERNALVAR (val) = var;
+  return val;
 }
 
 void
@@ -397,7 +398,7 @@ use \"set\" as in \"set $foo = 5\" to define them.\n");
   for (var = internalvars; var; var = var->next)
     {
       printf ("$%s: ", var->name);
-      value_print (var->value, stdout);
+      value_print (var->value, stdout, 0);
       printf ("\n");
     }
 }
@@ -424,12 +425,7 @@ value_as_double (val)
 /* Unpack raw data (copied from debugee) at VALADDR
    as a long, or as a double, assuming the raw data is described
    by type TYPE.  Knows how to convert different sizes of values
-   and can convert between fixed and floating point.
-
-   C++: It is assumed that the front-end has taken care of
-   all matters concerning pointers to members.  A pointer
-   to member which reaches here is considered to be equivalent
-   to an INT (or some size).  After all, it is only an offset.  */
+   and can convert between fixed and floating point.  */
 
 long
 unpack_long (type, valaddr)
@@ -478,14 +474,11 @@ unpack_long (type, valaddr)
       if (len == sizeof (long))
 	return * (long *) valaddr;
     }
-  else if (code == TYPE_CODE_PTR
-	   || code == TYPE_CODE_REF)
+  else if (code == TYPE_CODE_PTR)
     {
       if (len == sizeof (char *))
 	return (CORE_ADDR) * (char **) valaddr;
     }
-  else if (code == TYPE_CODE_MEMBER)
-    error ("not impelmented: member types in unpack_long");
 
   error ("Value not integer or pointer.");
 }
@@ -508,7 +501,13 @@ unpack_double (type, valaddr)
 	return * (float *) valaddr;
 
       if (len == sizeof (double))
-	return * (double *) valaddr;
+	{
+	  /* Some machines require doubleword alignment for doubles.
+	     This code works on them, and on other machines.  */
+	  double temp;
+	  bcopy ((char *) valaddr, (char *) &temp, sizeof (double));
+	  return temp;
+	}
     }
   else if (code == TYPE_CODE_INT && nosign)
     {
@@ -544,9 +543,7 @@ unpack_double (type, valaddr)
 
 /* Given a value ARG1 of a struct or union type,
    extract and return the value of one of its fields.
-   FIELDNO says which field.
-
-   For C++, must also be able to return values from static fields */
+   FIELDNO says which field.  */
 
 value
 value_field (arg1, fieldno)
@@ -581,96 +578,6 @@ value_field (arg1, fieldno)
     VALUE_LVAL (v) = lval_internalvar_component;
   VALUE_ADDRESS (v) = VALUE_ADDRESS (arg1);
   VALUE_OFFSET (v) = offset + VALUE_OFFSET (arg1);
-  return v;
-}
-
-value
-value_fn_field (arg1, fieldno, subfieldno)
-     register value arg1;
-     register int fieldno;
-{
-  register value v;
-  struct fn_field *f = TYPE_FN_FIELDLIST1 (VALUE_TYPE (arg1), fieldno);
-  register struct type *type = TYPE_FN_FIELD_TYPE (f, subfieldno);
-  struct symbol *sym;
-
-  sym = lookup_symbol (TYPE_FN_FIELD_PHYSNAME (f, subfieldno),
-		       0, VAR_NAMESPACE);
-  if (! sym) error ("Internal error: could not find physical method named %s",
-		    TYPE_FN_FIELD_PHYSNAME (f, subfieldno));
-  
-  v = allocate_value (type);
-  VALUE_ADDRESS (v) = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
-  VALUE_TYPE (v) = type;
-  return v;
-}
-
-/* The value of a static class member does not depend
-   on its instance, only on its type.  If FIELDNO >= 0,
-   then fieldno is a valid field number and is used directly.
-   Otherwise, FIELDNAME is the name of the field we are
-   searching for.  If it is not a static field name, an
-   error is signaled.  TYPE is the type in which we look for the
-   static field member.  */
-value
-value_static_field (type, fieldname, fieldno)
-     register struct type *type;
-     char *fieldname;
-     register int fieldno;
-{
-  register value v;
-  struct symbol *sym;
-
-  if (fieldno < 0)
-    {
-      register struct type *t = type;
-      /* Look for static field.  */
-      while (t)
-	{
-	  int i;
-	  for (i = TYPE_NFIELDS (t) - 1; i >= 0; i--)
-	    if (! strcmp (TYPE_FIELD_NAME (t, i), fieldname))
-	      {
-		if (TYPE_FIELD_STATIC (t, i))
-		  {
-		    fieldno = i;
-		    goto found;
-		  }
-		else
-		  error ("field `%s' is not static");
-	      }
-	  t = TYPE_BASECLASS (t);
-	}
-
-      t = type;
-
-      if (destructor_name_p (fieldname, t))
-	error ("use `info method' command to print out value of destructor");
-
-      while (t)
-	{
-	  int i, j;
-
-	  for (i = TYPE_NFN_FIELDS (t) - 1; i >= 0; i--)
-	    {
-	      if (! strcmp (TYPE_FN_FIELDLIST_NAME (t, i), fieldname))
-		{
-		  error ("use `info method' command to print value of method \"%s\"", fieldname);
-		}
-	    }
-	  t = TYPE_BASECLASS (t);
-	}
-      error("there is no field named %s", fieldname);
-    }
-
- found:
-
-  sym = lookup_symbol (TYPE_FIELD_STATIC_PHYSNAME (type, fieldno),
-		       0, VAR_NAMESPACE);
-  if (! sym) error ("Internal error: could not find physical static variable named %s", TYPE_FIELD_BITSIZE (type, fieldno));
-
-  type = TYPE_FIELD_TYPE (type, fieldno);
-  v = value_at (type, (CORE_ADDR)SYMBOL_BLOCK_VALUE (sym));
   return v;
 }
 

@@ -12,6 +12,7 @@
 #define WSTOPSIG(w) ((w) >> 8)
 #define WCOREDUMP(w) (((w)&0200) != 0)
 #define WTERMSIG(w) ((w) & 0177)
+#define WSETEXIT(w, status) ((w) = (status))
 #define WSETSTOP(w,sig)  ((w) = (0177 | ((sig) << 8)))
 #else
 #include <sys/wait.h>
@@ -20,6 +21,7 @@
 #define WSTOPSIG(w) (w).w_stopsig
 #define WCOREDUMP(w) (w).w_coredump
 #define WTERMSIG(w) (w).w_termsig
+#define WSETEXIT(w, status) ((w).w_status = (status))
 #define WSETSTOP(w,sig)  \
-  ((w).stopsig = (sig), (w).coredump = 0, (w).termsig = 0177)
+  ((w).w_stopsig = (sig), (w).w_coredump = 0, (w).w_termsig = 0177)
 #endif

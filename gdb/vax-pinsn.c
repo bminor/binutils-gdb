@@ -23,7 +23,7 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 #include "defs.h"
 #include "param.h"
 #include "symtab.h"
-#include "vax-opcode.h"
+#include "opcode.h"
 
 /* Vax instructions are never longer than this.  */
 #define MAXLEN 62

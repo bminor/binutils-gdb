@@ -297,6 +297,10 @@ find_pc_misc_function (pc)
 
   /* Note that the last thing in the vector is always _etext.  */
 
+  /* Above statement is not *always* true - fix for case where there are */
+  /* no misc functions at all (ie no symbol table has been read). */
+  if (hi < 0) return -1;        /* no misc functions recorded */
+
   /* trivial reject range test */
   if (pc < misc_function_vector[0].address || 
       pc > misc_function_vector[hi].address)

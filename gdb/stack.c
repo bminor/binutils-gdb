@@ -120,12 +120,15 @@ print_frame_info (fi, level, source, args)
   if (source != 0 && sal.symtab)
     {
       int done = 0;
-      if (source < 0 && fi->pc != sal.pc)
-	printf ("0x%x\t", fi->pc);
+      int mid_statement = source < 0 && fi->pc != sal.pc;
       if (frame_file_full_name)
-	done = identify_source_line (sal.symtab, sal.line);
+	done = identify_source_line (sal.symtab, sal.line, mid_statement);
       if (!done)
-	print_source_lines (sal.symtab, sal.line, sal.line + 1);
+	{
+	  if (mid_statement)
+	    printf ("0x%x\t", fi->pc);
+	  print_source_lines (sal.symtab, sal.line, sal.line + 1, 1);
+	}
       current_source_line = max (sal.line - 5, 1);
     }
   if (source != 0)
@@ -278,7 +281,8 @@ print_block_frame_locals (b, frame, stream)
     {
       sym = BLOCK_SYM (b, i);
       if (SYMBOL_CLASS (sym) == LOC_LOCAL
-	  || SYMBOL_CLASS (sym) == LOC_REGISTER)
+	  || SYMBOL_CLASS (sym) == LOC_REGISTER
+	  || SYMBOL_CLASS (sym) == LOC_STATIC)
 	{
 	  fprintf (stream, "%s = ", SYMBOL_NAME (sym));
 	  print_variable_value (sym, frame, stream);

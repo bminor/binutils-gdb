@@ -56,14 +56,10 @@ typedef struct value *value;
 #define VALUE_REGNO(val) (val)->regno
 
 /* If ARG is an array, convert it to a pointer.
-   If ARG is an enum, convert it to an integer.
-
-   References are dereferenced.  */
+   If ARG is an enum, convert it to an integer.  */
 
 #define COERCE_ARRAY(arg)    \
-{ if (TYPE_CODE (arg) == TYPE_CODE_REF)					\
-    arg = value_ind (arg);						\
-  if (VALUE_REPEATED (arg)						\
+{ if (VALUE_REPEATED (arg)						\
       || TYPE_CODE (VALUE_TYPE (arg)) == TYPE_CODE_ARRAY)		\
     arg = value_coerce_array (arg);					\
   if (TYPE_CODE (VALUE_TYPE (arg)) == TYPE_CODE_ENUM)			\
@@ -73,9 +69,7 @@ typedef struct value *value;
 /* If ARG is an enum, convert it to an integer.  */
 
 #define COERCE_ENUM(arg)    \
-{ if (TYPE_CODE (arg) == TYPE_CODE_REF)					\
-    arg = value_ind (arg);						\
-  if (TYPE_CODE (VALUE_TYPE (arg)) == TYPE_CODE_ENUM)			\
+{ if (TYPE_CODE (VALUE_TYPE (arg)) == TYPE_CODE_ENUM)			\
     arg = value_cast (builtin_type_unsigned_int, arg);			\
 }
 
@@ -114,7 +108,7 @@ value value_addr ();
 value value_assign ();
 value value_neg ();
 value value_lognot ();
-value value_struct_elt (), value_struct_elt_for_address ();
+value value_struct_elt ();
 value value_field ();
 value value_cast ();
 value value_repeat ();
@@ -135,11 +129,3 @@ struct internalvar *lookup_internalvar ();
 int value_equal ();
 int value_less ();
 int value_zerop ();
-
-/* C++ */
-value value_of_this ();
-value value_static_field ();
-value value_x_binop ();
-value value_x_unop ();
-int binop_must_be_user_defined ();
-int unop_must_be_user_defined ();

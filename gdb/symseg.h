@@ -1,6 +1,5 @@
 /* GDB symbol table format definitions.
    Copyright (C) 1986 Free Software Foundation, Inc.
-   Hacked by Michael Tiemann (tiemann@mcc.com)
 
 GDB is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY.  No author or distributor accepts responsibility to anyone
@@ -118,10 +117,6 @@ enum type_code
   TYPE_CODE_SET,		/* Pascal sets */
   TYPE_CODE_RANGE,		/* Range (integers within spec'd bounds) */
   TYPE_CODE_PASCAL_ARRAY,	/* Array with explicit type of index */
-
-  /* C++ */
-  TYPE_CODE_MEMBER,		/* Member type */
-  TYPE_CODE_REF,		/* C++ Reference types */
 };
 
 /* This appears in a type's flags word for an unsigned integer type.  */
@@ -149,22 +144,11 @@ struct type
      The debugger may add the address of such a type
      if it has to construct one later.  */ 
   struct type *pointer_type;
-  /* C++: also need a reference type.  */
-  struct type *reference_type;
   /* Type that is a function returning this type.
      Zero if no such function type is known here.
      The debugger may add the address of such a type
      if it has to construct one later.  */
   struct type *function_type;
-
-/* Handling of pointers to members:
-   TYPE_MAIN_VARIANT is used for pointer and pointer
-   to member types.  Normally it the value of the address of its
-   containing type.  However, for pointers to members, we must be
-   able to allocate pointer to member types and look them up
-   from some place of reference.  */
-  struct type *main_variant;
-
   /* Flags about this type.  */
   short flags;
   /* Number of fields described for this type */
@@ -201,75 +185,6 @@ struct type
 	 Zero for range bounds and array domains.  */
       char *name;
     } *fields;
-
-  /* C++ */
-  int *private_field_bits;
-  int *protected_field_bits;
-
-  /* Some flags to make life easier.  */
-  unsigned char has_constructor;
-  unsigned char has_destructor;
-
-  /* Number of methods described for this type */
-  short nfn_fields;
-
-  /* Number of methods described for this type plus all the
-     methods that it derives from.  */
-  int nfn_fields_total;
-
-  /* For classes, structures, and unions, a description of each field,
-     which consists of an overloaded name, followed by the types of
-     arguments that the method expects, and then the name after it
-     has been renamed to make it distinct. */
-  struct fn_fieldlist
-    {
-      /* The overloaded name.  */
-      char *name;
-      /* The number of methods with this name.  */
-      int length;
-      /* The list of methods.  */
-      struct fn_field
-	{
-#if 0
-	  /* The overloaded name */
-	  char *name;
-#endif
-	  /* The type of the argument */
-	  struct type *type;
-	  /* The argument list */
-	  struct type **args;
-	  /* The name after it has been processed */
-	  char *physname;
-	  /* If this is a virtual function, the offset into the vtbl-1,
-	     else 0.  */
-	  int voffset;
-	} *fn_fields;
-
-      int *private_fn_field_bits;
-      int *protected_fn_field_bits;
-
-    } *fn_fieldlists;
-
-  unsigned char via_protected;
-  unsigned char via_public;
-
-  /* For types with virtual functions, VPTR_BASETYPE is the base class which
-     defined the virtual function table pointer.  VPTR_FIELDNO is
-     the field number of that pointer in the structure.
-
-     For types that are pointer to member types, VPTR_BASETYPE
-     ifs the type that this pointer is a member of.
-
-     Unused otherwise.  */
-  struct type *vptr_basetype;
-
-  int vptr_fieldno;
-
-  /* If this type has a base class, put it here.
-     If this type is a pointer type, the chain of member pointer
-     types goes here.
-     Unused otherwise.  */
-  struct type *baseclass;
 };
 
 /* All of the name-scope contours of the program

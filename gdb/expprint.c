@@ -79,9 +79,7 @@ static struct op_print op_print_tab[] =
     {"&", UNOP_ADDR, PREC_PREFIX, 0},
     {"sizeof ", UNOP_SIZEOF, PREC_PREFIX, 0},
     {"++", UNOP_PREINCREMENT, PREC_PREFIX, 0},
-    {"--", UNOP_PREDECREMENT, PREC_PREFIX, 0},
-    /* C++  */
-    {"::", BINOP_SCOPE, PREC_PREFIX, 0},
+    {"--", UNOP_PREDECREMENT, PREC_PREFIX, 0}
   };
 
 static void print_subexp ();
@@ -121,30 +119,18 @@ print_subexp (exp, pos, stream, prec)
   opcode = exp->elts[pc].opcode;
   switch (opcode)
     {
-    case OP_SCOPE:
-      myprec = PREC_PREFIX;
-      assoc = 0;
-      (*pos) += 2;
-      print_subexp (exp, pos, stream, (int) myprec + assoc);
-      fprintf (stream, " :: ");
-      nargs = strlen (&exp->elts[pc + 2].string);
-      (*pos) += 1 + (nargs + sizeof (union exp_element)) / sizeof (union exp_element);
-
-      fprintf (stream, &exp->elts[pc + 2].string);
-      return;
-
     case OP_LONG:
       (*pos) += 3;
       value_print (value_from_long (exp->elts[pc + 1].type,
 				    exp->elts[pc + 2].longconst),
-		   stream);
+		   stream, 0);
       return;
 
     case OP_DOUBLE:
       (*pos) += 3;
       value_print (value_from_double (exp->elts[pc + 1].type,
 				      exp->elts[pc + 2].doubleconst),
-		   stream);
+		   stream, 0);
       return;
 
     case OP_VAR_VALUE:
@@ -187,7 +173,7 @@ print_subexp (exp, pos, stream, prec)
       (*pos) += 2 + (nargs + sizeof (union exp_element)) / sizeof (union exp_element);
       fprintf (stream, "\"");
       for (tem = 0; tem < nargs; tem++)
-	printchar ((&exp->elts[pc + 1].string)[tem], stream);
+	printchar ((&exp->elts[pc + 1].string)[tem], stream, '"');
       fprintf (stream, "\"");
       return;
 

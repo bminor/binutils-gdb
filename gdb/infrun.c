@@ -29,6 +29,7 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 #include <stdio.h>
 #include <signal.h>
 #include <a.out.h>
+#include <sys/file.h>
 
 #ifdef UMAX_PTRACE
 #include <sys/param.h>
@@ -75,6 +76,12 @@ static int step_resume_break_duplicate;
    a trap after the exec of sh and a second when the program is exec'd.  */
 
 static int trap_expected;
+
+/* Nonzero if the next time we try to continue the inferior, it will
+   step one instruction and generate a spurious trace trap.
+   This is used to compensate for a bug in HP-UX.  */
+
+static int trap_expected_after_continue;
 
 /* Nonzero means expecting a trace trap
    and should stop the inferior and return silently when it happens.  */
@@ -168,17 +175,26 @@ proceed (addr, signal, step)
 	 so that we do not stop right away.  */
 
       if (!pc_changed && breakpoint_here_p (read_pc ()))
-	{
-	  oneproc = 1;
-	  /* We will get a trace trap after one instruction.
-	     Continue it automatically and insert breakpoints then.  */
-	  trap_expected = 1;
-	}
+	oneproc = 1;
     }
   else
     write_register (PC_REGNUM, addr);
 
-  if (!oneproc)
+  if (trap_expected_after_continue)
+    {
+      /* If (step == 0), a trap will be automatically generated after
+	 the first instruction is executed.  Force step one
+	 instruction to clear this condition.  This should not occur
+	 if step is nonzero, but it is harmless in that case.  */
+      oneproc = 1;
+      trap_expected_after_continue = 0;
+    }
+
+  if (oneproc)
+    /* We will get a trace trap after one instruction.
+       Continue it automatically and insert breakpoints then.  */
+    trap_expected = 1;
+  else
     {
       int temp = insert_breakpoints ();
       if (temp)
@@ -232,6 +248,7 @@ start_inferior ()
      it will get another trace trap.  Then insert breakpoints and continue.  */
   trap_expected = 2;
   running_in_shell = 0;		/* Set to 1 at first SIGTRAP, 0 at second.  */
+  trap_expected_after_continue = 0;
   breakpoints_inserted = 0;
   mark_breakpoints_out ();
 
@@ -321,10 +338,10 @@ wait_for_inferior ()
   struct symtab_and_line sal;
   int prev_pc;
 
+  prev_pc = read_pc ();
+
   while (1)
     {
-      prev_pc = read_pc ();
-
       if (remote_debugging)
 	remote_wait (&w);
       else
@@ -545,6 +562,9 @@ wait_for_inferior ()
 	    {
 	      stop_print_frame = 0;
 	      stop_stack_dummy = 1;
+#ifdef HP9K320
+	      trap_expected_after_continue = 1;
+#endif
 	      break;
 	    }
 
@@ -611,20 +631,27 @@ wait_for_inferior ()
 		     continue to the end of that source line.
 		     Otherwise, just go to end of prologue.  */
 		  if (sal.end && sal.pc != newfun_pc)
-		    step_resume_break_address = sal.end;
-		  else
-		    step_resume_break_address = newfun_pc;
+		    newfun_pc = sal.end;
 
-		  step_resume_break_duplicate
-		    = breakpoint_here_p (step_resume_break_address);
-		  if (breakpoints_inserted)
-		    insert_step_breakpoint ();
-		  /* Do not specify what the fp should be when we stop
-		     since on some machines the prologue
-		     is where the new fp value is established.  */
-		  step_frame = 0;
-		  /* And make sure stepping stops right away then.  */
-		  step_range_end = step_range_start;
+		  if (newfun_pc == stop_pc)
+		    /* We are already there: stop now.  */
+		    stop_step = 1;
+		  else
+		    /* Put the step-breakpoint there and go until there.  */
+		    {
+		      step_resume_break_address = newfun_pc;
+
+		      step_resume_break_duplicate
+			= breakpoint_here_p (step_resume_break_address);
+		      if (breakpoints_inserted)
+			insert_step_breakpoint ();
+		      /* Do not specify what the fp should be when we stop
+			 since on some machines the prologue
+			 is where the new fp value is established.  */
+		      step_frame = 0;
+		      /* And make sure stepping stops right away then.  */
+		      step_range_end = step_range_start;
+		    }
 		}
 	      /* No subroutince call; stop now.  */
 	      else
@@ -634,6 +661,9 @@ wait_for_inferior ()
 		}
 	    }
 	}
+
+      /* Save the pc before execution, to compare with pc after stop.  */
+      prev_pc = read_pc ();
 
       /* If we did not do break;, it means we should keep
 	 running the inferior and not return to debugger.  */
@@ -723,6 +753,11 @@ Further execution is probably impossible.\n");
 
   breakpoint_auto_delete (stop_breakpoint);
 
+  /* If an auto-display called a function and that got a signal,
+     delete that auto-display to avoid an infinite recursion.  */
+
+  delete_current_display ();
+
   if (step_multi && stop_step)
     return;
 
@@ -731,7 +766,13 @@ Further execution is probably impossible.\n");
   if (running_in_shell)
     {
       if (stop_signal == SIGSEGV)
-	printf ("\
+	{
+	  char *exec_file = (char *) get_exec_file (1);
+
+	  if (access (exec_file, X_OK) != 0)
+	    printf ("The file \"%s\" is not executable.\n", exec_file);
+	  else
+	    printf ("\
 You have just encountered a bug in \"sh\".  GDB starts your program\n\
 by running \"sh\" with a command to exec your program.\n\
 This is so that \"sh\" will process wildcards and I/O redirection.\n\
@@ -743,6 +784,7 @@ some variables whose values are large; then do \"run\" again.\n\
 \n\
 If that works, you might want to put those \"unset-env\" commands\n\
 into a \".gdbinit\" file in this directory so they will happen every time.\n");
+	}
       /* Don't confuse user with his program's symbols on sh's data.  */
       stop_print_frame = 0;
     }

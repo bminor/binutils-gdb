@@ -189,6 +189,9 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
    as a CORE_ADDR (or an expression that can be used as one).  */
 
 #define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) (*(int *)(REGBUF))
+
+/* Compensate for lack of `vprintf' function.  */ 
+#define vprintf(format, ap) _doprnt (format, ap, stdout) 
 
 /* Describe the pointer in each stack frame to the previous stack frame
    (its caller).  */

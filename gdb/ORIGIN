@@ -1,0 +1,16 @@
+Host akbar.cac.washington.edu (128.95.112.1)
+Last updated 17:04 11 Nov 1990
+    Location: local/emacs.pmax/info
+      FILE      rw-rw-r--    2515  Feb 12  1988   gdb
+    Location: local/emacs.pmax.old
+      DIRECTORY rwxr-xr-x    2048  Sep 11 01:16   gdb
+    Location: local/emacs.pmax.old/info
+      FILE      rw-rw-r--    2515  Feb 12  1988   gdb
+    Location: local/emacs.pmax4.0
+      DIRECTORY rwxr-xr-x    2048  Aug 11 01:16   gdb
+    Location: local/emacs.pmax4.0/info
+      FILE      rw-r--r--    2515  Feb 12  1988   gdb
+    Location: local/emacs.sun386
+      DIRECTORY rwxr-xr-x    2048  May 23 01:17   gdb
+    Location: local/emacs.sun386/info
+      FILE      rw-rw-r--    2515  Feb 12  1988   gdb

@@ -53,8 +53,8 @@ int misc_function_count;
 
 #include "symseg.h"
 
-/* Each source file is represented by a struct symtab.  */
-/* These objects are chained through the `next' field.  */
+/* Each source file is represented by a struct symtab.
+   These objects are chained through the `next' field.  */
 
 struct symtab
   {
@@ -75,7 +75,7 @@ struct symtab
        free_linetable => free just the linetable.  */
     enum free_code {free_nothing, free_contents, free_linetable}
       free_code;
-    /* Pointer to one block of storage to be freed, if nonzero.  */
+    /* Pointer to one block storage to be freed, if nonzero.  */
     char *free_ptr;
     /* Total number of lines found in source file.  */
     int nlines;
@@ -132,6 +132,9 @@ int current_source_line;
 #define BLOCK_FUNCTION(bl) (bl)->function
 #define BLOCK_SUPERBLOCK(bl) (bl)->superblock
 
+/* Nonzero if symbols of block BL should be sorted alphabetically.  */
+#define BLOCK_SHOULD_SORT(bl) ((bl)->nsyms >= 40)
+
 #define SYMBOL_NAME(symbol) (symbol)->name
 #define SYMBOL_NAMESPACE(symbol) (symbol)->namespace
 #define SYMBOL_CLASS(symbol) (symbol)->class
@@ -145,34 +148,16 @@ int current_source_line;
    These types are never freed.  */
 #define TYPE_FLAG_PERM 4
 
-/* Some macros for bitfields.  */
-#define B_SET(a,x) (a[x>>5] |= (1 << (x&31)))
-#define B_CLR(a,x) (a[x>>5] &= ~(1 << (x&31)))
-#define B_TST(a,x) (a[x>>5] & (1 << (x&31)))
-
 #define TYPE_NAME(thistype) (thistype)->name
 #define TYPE_TARGET_TYPE(thistype) (thistype)->target_type
 #define TYPE_POINTER_TYPE(thistype) (thistype)->pointer_type
-#define TYPE_REFERENCE_TYPE(thistype) (thistype)->reference_type
 #define TYPE_FUNCTION_TYPE(thistype) (thistype)->function_type
-#define TYPE_MAIN_VARIANT(thistype) (thistype)->main_variant
 #define TYPE_LENGTH(thistype) (thistype)->length
 #define TYPE_FLAGS(thistype) (thistype)->flags
 #define TYPE_UNSIGNED(thistype) ((thistype)->flags & TYPE_FLAG_UNSIGNED)
 #define TYPE_CODE(thistype) (thistype)->code
 #define TYPE_NFIELDS(thistype) (thistype)->nfields
 #define TYPE_FIELDS(thistype) (thistype)->fields
-/* C++ */
-#define TYPE_VPTR_BASETYPE(thistype) (thistype)->vptr_basetype
-#define TYPE_DOMAIN_TYPE(thistype) (thistype)->vptr_basetype
-#define TYPE_VPTR_FIELDNO(thistype) (thistype)->vptr_fieldno
-#define TYPE_FN_FIELDS(thistype) (thistype)->fn_fields
-#define TYPE_NFN_FIELDS(thistype) (thistype)->nfn_fields
-#define TYPE_NFN_FIELDS_TOTAL(thistype) (thistype)->nfn_fields_total
-#define TYPE_BASECLASS(thistype) (thistype)->baseclass
-#define TYPE_VIA_PUBLIC(thistype) (thistype)->via_public
-#define TYPE_VIA_PROTECTED(thistype) (thistype)->via_protected
-#define TYPE_CHAIN(thistype) (thistype)->baseclass
 
 #define TYPE_FIELD(thistype, n) (thistype)->fields[n]
 #define TYPE_FIELD_TYPE(thistype, n) (thistype)->fields[n].type
@@ -181,46 +166,11 @@ int current_source_line;
 #define TYPE_FIELD_BITPOS(thistype, n) (thistype)->fields[n].bitpos
 #define TYPE_FIELD_BITSIZE(thistype, n) (thistype)->fields[n].bitsize
 #define TYPE_FIELD_PACKED(thistype, n) (thistype)->fields[n].bitsize
-
-#define TYPE_FIELD_PRIVATE_BITS(thistype) (thistype)->private_field_bits
-#define TYPE_FIELD_PROTECTED_BITS(thistype) (thistype)->protected_field_bits
-#define SET_TYPE_FIELD_PRIVATE(thistype, n) B_SET ((thistype)->private_field_bits, (n))
-#define SET_TYPE_FIELD_PROTECTED(thistype, n) B_SET ((thistype)->protected_field_bits, (n))
-#define TYPE_FIELD_PRIVATE(thistype, n) B_TST((thistype)->private_field_bits, (n))
-#define TYPE_FIELD_PROTECTED(thistype, n) B_TST((thistype)->protected_field_bits, (n))
-
-#define TYPE_HAS_DESTRUCTOR(thistype) ((thistype)->has_destructor)
-#define TYPE_HAS_CONSTRUCTOR(thistype) ((thistype)->has_constructor)
-
-#define TYPE_FIELD_STATIC(thistype, n) ((thistype)->fields[n].bitpos == -1)
-#define TYPE_FIELD_STATIC_PHYSNAME(thistype, n) ((char *)(thistype)->fields[n].bitsize)
-
-#define TYPE_FN_FIELDLISTS(thistype) (thistype)->fn_fieldlists
-#define TYPE_FN_FIELDLIST(thistype, n) (thistype)->fn_fieldlists[n]
-#define TYPE_FN_FIELDLIST1(thistype, n) (thistype)->fn_fieldlists[n].fn_fields
-#define TYPE_FN_FIELDLIST_NAME(thistype, n) (thistype)->fn_fieldlists[n].name
-#define TYPE_FN_FIELDLIST_LENGTH(thistype, n) (thistype)->fn_fieldlists[n].length
-
-#define TYPE_FN_FIELD(thistype) (thistype)[n]
-#define TYPE_FN_FIELD_NAME(thistype, n) (thistype)[n].name
-#define TYPE_FN_FIELD_TYPE(thistype, n) (thistype)[n].type
-#define TYPE_FN_FIELD_ARGS(thistype, n) (thistype)[n].args
-#define TYPE_FN_FIELD_PHYSNAME(thistype, n) (thistype)[n].physname
-#define TYPE_FN_FIELD_VIRTUAL_P(thistype, n) (thistype)[n].voffset
-#define TYPE_FN_FIELD_VOFFSET(thistype, n) ((thistype)[n].voffset-1)
-
-#define TYPE_FN_PRIVATE_BITS(thistype) (thistype).private_fn_field_bits
-#define TYPE_FN_PROTECTED_BITS(thistype) (thistype).protected_fn_field_bits
-#define SET_TYPE_FN_PRIVATE(thistype, n) B_SET ((thistype).private_fn_field_bits, n)
-#define SET_TYPE_FN_PROTECTED(thistype, n) B_SET ((thistype).protected_fn_field_bits, n)
-#define TYPE_FN_PRIVATE(thistype, n) B_TST ((thistype).private_fn_field_bits, n)
-#define TYPE_FN_PROTECTED(thistype, n) B_TST ((thistype).protected_fn_field_bits, n)
 
 /* Functions that work on the objects described above */
 
 extern struct symtab *lookup_symtab ();
 extern struct symbol *lookup_symbol ();
-extern struct symbol *lookup_symbol_1 (), *lookup_symbol_2 ();
 extern struct type *lookup_typename ();
 extern struct type *lookup_unsigned_typename ();
 extern struct type *lookup_struct ();
@@ -231,12 +181,6 @@ extern struct type *lookup_function_type ();
 extern struct symbol *block_function ();
 extern struct symbol *find_pc_function ();
 extern int find_pc_misc_function ();
-
-/* C++ stuff.  */
-extern struct type *lookup_reference_type ();
-extern struct type *lookup_member_type ();
-extern struct type *lookup_class ();
-/* end of C++ stuff.  */
 
 extern struct type *builtin_type_void;
 extern struct type *builtin_type_char;
@@ -258,12 +202,6 @@ struct symtab_and_line
   CORE_ADDR end;
 };
 
-struct symtabs_and_lines
-{
-  struct symtab_and_line *sals;
-  int nelts;
-};
-
 /* Given a pc value, return line number it is in.
    Second arg nonzero means if pc is on the boundary
    use the previous statement's line number.  */
@@ -273,5 +211,5 @@ struct symtab_and_line find_pc_line ();
 /* Given a string, return the line specified by it.
    For commands like "list" and "breakpoint".  */
 
-struct symtabs_and_lines decode_line_spec ();
-struct symtabs_and_lines decode_line_1 ();
+struct symtab_and_line decode_line_spec ();
+struct symtab_and_line decode_line_1 ();

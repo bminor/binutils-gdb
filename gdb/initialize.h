@@ -111,7 +111,7 @@ what you give them.   Help stamp out software-hoarding!  */
    of the end of one object file's text to the start of the next
    object file's text.  */
 
-#include "m-suninit.h"
+#include "m-init.h"
 
 /* This is used to make a file's initialization function.
    It calls another function named `initialize', which must

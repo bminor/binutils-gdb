@@ -59,16 +59,13 @@ select_source_symtab (s)
 {
   if (s)
     {
-      struct symtabs_and_lines sals;
       struct symtab_and_line sal;
 
       /* Make the default place to list be the function `main'
 	 if one exists.  */
       if (lookup_symbol ("main", 0, VAR_NAMESPACE))
 	{
-	  sals = decode_line_spec ("main", 1);
-	  sal = sals.sals[0];
-	  free (sals.sals);
+	  sal = decode_line_spec ("main", 1);
 	  current_source_symtab = sal.symtab;
 	  current_source_line = sal.line - 9;
 	  return;
@@ -96,15 +93,12 @@ directories_info ()
   printf ("Source directories searched: %s\n", source_path);
 }
 
-static void
+void
 init_source_path ()
 {
   register struct symtab *s;
-  char wd[MAXPATHLEN];
-  if (getwd (wd) == NULL)
-    perror_with_name ("getwd");
 
-  source_path = savestring (wd, strlen (wd));
+  source_path = savestring (current_directory, strlen (current_directory));
 
   /* Forget what we learned about line positions in source files;
      must check again now since files may be found in
@@ -124,13 +118,9 @@ directory_command (dirname, from_tty)
 {
   char *old = source_path;
 
-  char wd[MAXPATHLEN];
-  if (getwd (wd) == NULL)
-    perror_with_name ("getwd");
-
   if (dirname == 0)
     {
-      if (query ("Reinitialize source path to %s? ", wd))
+      if (query ("Reinitialize source path to %s? ", current_directory))
 	{
 	  init_source_path ();
 	  free (old);
@@ -154,7 +144,7 @@ directory_command (dirname, from_tty)
 	  if (len == 1)
 	    {
 	      /* "." => getwd () */
-	      dirname = wd;
+	      dirname = current_directory;
 	      goto append;
 	    }
 	  else if (dirname[len - 2] == '/')
@@ -176,7 +166,7 @@ directory_command (dirname, from_tty)
 	}
 
       if (dirname[0] != '/')
-	dirname = concat (wd, "/", dirname);
+	dirname = concat (current_directory, "/", dirname);
       else
 	dirname = savestring (dirname, len);
       make_cleanup (free, dirname);
@@ -302,7 +292,7 @@ find_source_lines (s, desc)
   extern int exec_mtime;
 
   fstat (desc, &st);
-  if (get_exec_file () != 0 && exec_mtime < st.st_mtime)
+  if (get_exec_file (0) != 0 && exec_mtime < st.st_mtime)
     printf ("Source file is more recent than executable.\n");
 
   data = (char *) alloca (st.st_size);
@@ -313,11 +303,16 @@ find_source_lines (s, desc)
   nlines = 1;
   while (p != end)
     {
-      if (*p++ == '\n')
+      if (*p++ == '\n'
+	  /* A newline at the end does not start a new line.  */
+	  && p != end)
 	{
 	  if (nlines == lines_allocated)
-	    line_charpos = (int *) xrealloc (line_charpos,
-					     sizeof (int) * (lines_allocated *= 2));
+	    {
+	      lines_allocated *= 2;
+	      line_charpos = (int *) xrealloc (line_charpos,
+					       sizeof (int) * lines_allocated);
+	    }
 	  line_charpos[nlines++] = p - data;
 	}
     }
@@ -396,18 +391,27 @@ get_filename_and_charpos (s, line, fullname)
    The text starts with two Ctrl-z so that the Emacs-GDB interface
    can easily find it.
 
+   MID_STATEMENT is nonzero if the PC is not at the beginning of that line.
+
    Return 1 if successful, 0 if could not find the file.  */
 
 int
-identify_source_line (s, line)
+identify_source_line (s, line, mid_statement)
      struct symtab *s;
      int line;
+     int mid_statement;
 {
   if (s->line_charpos == 0)
     get_filename_and_charpos (s, line, 0);
   if (s->fullname == 0)
     return 0;
-  printf ("\032\032%s:%d:%d\n", s->fullname, line, s->line_charpos[line - 1]);
+  printf ("\032\032%s:%d:%d:%s\n", s->fullname,
+	  line, s->line_charpos[line - 1],
+	  mid_statement ? "middle" : "beg");
+  current_source_line = line;
+  first_line_listed = line;
+  last_line_listed = line;
+  current_source_symtab = s;
   return 1;
 }
 
@@ -415,9 +419,10 @@ identify_source_line (s, line)
    starting with line number LINE and stopping before line number STOPLINE.  */
 
 void
-print_source_lines (s, line, stopline)
+print_source_lines (s, line, stopline, noerror)
      struct symtab *s;
      int line, stopline;
+     int noerror;
 {
   register int c;
   register int desc;
@@ -426,12 +431,18 @@ print_source_lines (s, line, stopline)
 
   desc = openp (source_path, 0, s->filename, O_RDONLY, 0, &s->fullname);
   if (desc < 0)
-    perror_with_name (s->filename);
+    {
+      extern int errno;
+      if (! noerror)
+	perror_with_name (s->filename);
+      print_sys_errmsg (s->filename, errno);
+      return;
+    }
 
   if (s->line_charpos == 0)
     find_source_lines (s, desc);
 
-  if (line < 1 || line >= s->nlines)
+  if (line < 1 || line > s->nlines)
     {
       close (desc);
       error ("Line number out of range; %s has %d lines.",
@@ -479,7 +490,6 @@ list_command (arg, from_tty)
      char *arg;
      int from_tty;
 {
-  struct symtabs_and_lines sals, sals_end;
   struct symtab_and_line sal, sal_end;
   struct symbol *sym;
   char *arg1;
@@ -499,7 +509,7 @@ list_command (arg, from_tty)
       if (current_source_symtab == 0)
 	error ("No default source file yet.  Do \"help list\".");
       print_source_lines (current_source_symtab, current_source_line,
-			  current_source_line + 10);
+			  current_source_line + 10, 0);
       return;
     }
 
@@ -510,7 +520,7 @@ list_command (arg, from_tty)
 	error ("No default source file yet.  Do \"help list\".");
       print_source_lines (current_source_symtab,
 			  max (first_line_listed - 10, 1),
-			  first_line_listed);
+			  first_line_listed, 0);
       return;
     }
 
@@ -524,18 +534,7 @@ list_command (arg, from_tty)
   if (*arg1 == ',')
     dummy_beg = 1;
   else
-    {
-      sals = decode_line_1 (&arg1, 0, 0, 0);
-
-      if (! sals.nelts) return;  /*  C++  */
-      if (sals.nelts != 1)
-	{
-	  error ("Unreasonable listing request");
-	}
-
-      sal = sals.sals[0];
-      free (sals.sals);
-    }
+    sal = decode_line_1 (&arg1, 0, 0, 0);
 
   /* Record whether the BEG arg is all digits.  */
 
@@ -552,16 +551,10 @@ list_command (arg, from_tty)
 	arg1++;
       if (*arg1 == 0)
 	dummy_end = 1;
+      else if (dummy_beg)
+	sal_end = decode_line_1 (&arg1, 0, 0, 0);
       else
-	{
-	  if (dummy_beg)
-	    sals_end = decode_line_1 (&arg1, 0, 0, 0);
-	  else
-	    sals_end = decode_line_1 (&arg1, 0, sal.symtab, sal.line);
-	  if (! sals_end.nelts) return;  /* C++ */
-	  sal_end = sals_end.sals[0];
-	  free (sals_end.sals);
-	}
+	sal_end = decode_line_1 (&arg1, 0, sal.symtab, sal.line);
     }
 
   if (*arg1)
@@ -607,14 +600,15 @@ list_command (arg, from_tty)
     error ("No default source file yet.  Do \"help list\".");
   if (dummy_beg)
     print_source_lines (sal_end.symtab, max (sal_end.line - 9, 1),
-			sal_end.line + 1);
+			sal_end.line + 1, 0);
   else if (sal.symtab == 0)
     error ("No default source file yet.  Do \"help list\".");
   else if (no_end)
-    print_source_lines (sal.symtab, max (sal.line - 5, 1), sal.line + 5);
+    print_source_lines (sal.symtab, max (sal.line - 5, 1), sal.line + 5, 0);
   else
     print_source_lines (sal.symtab, sal.line,
-			dummy_end ? sal.line + 10 : sal_end.line + 1);
+			dummy_end ? sal.line + 10 : sal_end.line + 1,
+			0);
 }
 
 /* Print info on range of pc's in a specified line.  */
@@ -624,7 +618,6 @@ line_info (arg, from_tty)
      char *arg;
      int from_tty;
 {
-  struct symtabs_and_lines sals;
   struct symtab_and_line sal;
   int start_pc, end_pc;
 
@@ -635,15 +628,8 @@ line_info (arg, from_tty)
     }
   else
     {
-      sals = decode_line_spec (arg);
+      sal = decode_line_spec (arg, 0);
 
-      if (sals.nelts == 0)
-	return;			/* C++ */
-      if (sals.nelts != 1)
-	error ("unreasonable line info request");
-      
-      sal = sals.sals[0];
-      free (sals.sals);
       /* If this command is repeated with RET,
 	 turn it into the no-arg variant.  */
 
@@ -701,7 +687,7 @@ forward_search_command (regex, from_tty)
   if (current_source_symtab->line_charpos == 0)
     find_source_lines (current_source_symtab, desc);
 
-  if (line < 1 || line >= current_source_symtab->nlines)
+  if (line < 1 || line > current_source_symtab->nlines)
     {
       close (desc);
       error ("Expression not found");
@@ -733,7 +719,7 @@ forward_search_command (regex, from_tty)
 	/* Match! */
 	fclose (stream);
 	print_source_lines (current_source_symtab,
-			   line, line+1);
+			   line, line+1, 0);
 	current_source_line = max (line - 5, 1);
 	return;
       }
@@ -771,7 +757,7 @@ reverse_search_command (regex, from_tty)
   if (current_source_symtab->line_charpos == 0)
     find_source_lines (current_source_symtab, desc);
 
-  if (line < 1 || line >= current_source_symtab->nlines)
+  if (line < 1 || line > current_source_symtab->nlines)
     {
       close (desc);
       error ("Expression not found");
@@ -804,7 +790,7 @@ reverse_search_command (regex, from_tty)
 	  /* Match! */
 	  fclose (stream);
 	  print_source_lines (current_source_symtab,
-			      line, line+1);
+			      line, line+1, 0);
 	  current_source_line = max (line - 5, 1);
 	  return;
 	}

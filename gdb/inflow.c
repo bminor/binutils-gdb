@@ -27,19 +27,43 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 #include <stdio.h>
 #include <sys/param.h>
 #include <sys/dir.h>
+#ifndef UMAX_PTRACE
 #include <sys/user.h>
+#endif
 #include <signal.h>
 #include <sys/ioctl.h>
-#include <sgtty.h>
 #include <fcntl.h>
 
 #ifdef UMAX_PTRACE
 #include <a.out.h>
+#include <sys/ptrace.h>
+#define PTRACE_ATTACH PT_ATTACH
+#define PTRACE_DETACH PT_FREEPROC
 #endif
 
 #ifdef NEW_SUN_PTRACE
 #include <sys/ptrace.h>
 #include <machine/reg.h>
+#endif
+
+#ifdef HP9K320
+#include <sys/ptrace.h>
+#include <sys/reg.h>
+#include <sys/trap.h>
+#endif
+
+#ifdef HAVE_TERMIO
+#include <termio.h>
+#undef TIOCGETP
+#define TIOCGETP TCGETA
+#undef TIOCSETN
+#define TIOCSETN TCSETA
+#undef TIOCSETP
+#define TIOCSETP TCSETAF
+#define TERMINAL struct termio
+#else
+#include <sgtty.h>
+#define TERMINAL struct sgttyb
 #endif
 
 extern int errno;
@@ -53,19 +77,27 @@ START_FILE
 
 /* Record terminal status separately for debugger and inferior.  */
 
-static struct sgttyb sg_inferior;
-static struct tchars tc_inferior;
-static struct ltchars ltc_inferior;
-static int lmode_inferior;
+static TERMINAL sg_inferior;
+static TERMINAL sg_ours;
 static int tflags_inferior;
-static int pgrp_inferior;
-
-static struct sgttyb sg_ours;
-static struct tchars tc_ours;
-static struct ltchars ltc_ours;
-static int lmode_ours;
 static int tflags_ours;
+
+#ifdef TIOCGLTC
+static struct tchars tc_inferior;
+static struct tchars tc_ours;
+static struct ltchars ltc_inferior;
+static struct ltchars ltc_ours;
+static int lmode_inferior;
+static int lmode_ours;
+#endif /* TIOCGLTC */
+
+#ifdef TIOCGPGRP
+static int pgrp_inferior;
 static int pgrp_ours;
+#else
+static int (*sigint_ours) ();
+static int (*sigquit_ours) ();
+#endif /* TIOCGPGRP */
 
 /* Copy of inferior_io_terminal when inferior was last started.  */
 static char *inferior_thisrun_terminal;
@@ -86,11 +118,17 @@ terminal_init_inferior ()
     return;
 
   sg_inferior = sg_ours;
+  tflags_inferior = tflags_ours;
+
+#ifdef TIOCGLTC
   tc_inferior = tc_ours;
   ltc_inferior = ltc_ours;
   lmode_inferior = lmode_ours;
-  tflags_inferior = tflags_ours;
+#endif /* TIOCGLTC */
+
+#ifdef TIOCGPGRP
   pgrp_inferior = inferior_pid;
+#endif /* TIOCGPGRP */
 
   terminal_is_ours = 1;
 }
@@ -109,10 +147,19 @@ terminal_inferior ()
       fcntl (0, F_SETFL, tflags_inferior);
       fcntl (0, F_SETFL, tflags_inferior);
       ioctl (0, TIOCSETN, &sg_inferior);
+
+#ifdef TIOCGLTC
       ioctl (0, TIOCSETC, &tc_inferior);
       ioctl (0, TIOCSLTC, &ltc_inferior);
       ioctl (0, TIOCLSET, &lmode_inferior);
+#endif /* TIOCGLTC */
+
+#ifdef TIOCGPGRP
       ioctl (0, TIOCSPGRP, &pgrp_inferior);
+#else
+      sigint_ours = (signal (SIGINT, SIG_IGN));
+      sigquit_ours = (signal (SIGQUIT, SIG_IGN));
+#endif /* TIOCGPGRP */
     }
   terminal_is_ours = 0;
 }
@@ -151,38 +198,63 @@ static void
 terminal_ours_1 (output_only)
      int output_only;
 {
+#ifdef TIOCGPGRP
   /* Ignore this signal since it will happen when we try to set the pgrp.  */
   int (*osigttou) ();
+#endif /* TIOCGPGRP */
 
   if (!terminal_is_ours)  /*   && inferior_thisrun_terminal == 0)  */
     {
       terminal_is_ours = 1;
 
+#ifdef TIOCGPGRP
       osigttou = signal (SIGTTOU, SIG_IGN);
 
       ioctl (0, TIOCGPGRP, &pgrp_inferior);
       ioctl (0, TIOCSPGRP, &pgrp_ours);
 
       signal (SIGTTOU, osigttou);
+#else
+      signal (SIGINT, sigint_ours);
+      signal (SIGQUIT, sigquit_ours);
+#endif /* TIOCGPGRP */
 
       tflags_inferior = fcntl (0, F_GETFL, 0);
       ioctl (0, TIOCGETP, &sg_inferior);
+
+#ifdef TIOCGLTC
       ioctl (0, TIOCGETC, &tc_inferior);
       ioctl (0, TIOCGLTC, &ltc_inferior);
       ioctl (0, TIOCLGET, &lmode_inferior);
+#endif /* TIOCGLTC */
     }
 
+#ifdef HAVE_TERMIO
+  sg_ours.c_lflag |= ICANON;
+  if (output_only && !(sg_inferior.c_lflag & ICANON))
+    sg_ours.c_lflag &= ~ICANON;
+#else /* not HAVE_TERMIO */
   sg_ours.sg_flags &= ~RAW & ~CBREAK;
   if (output_only)
     sg_ours.sg_flags |= (RAW | CBREAK) & sg_inferior.sg_flags;
+#endif /* not HAVE_TERMIO */
 
   fcntl (0, F_SETFL, tflags_ours);
   fcntl (0, F_SETFL, tflags_ours);
   ioctl (0, TIOCSETN, &sg_ours);
+
+#ifdef TIOCGLTC
   ioctl (0, TIOCSETC, &tc_ours);
   ioctl (0, TIOCSLTC, &ltc_ours);
   ioctl (0, TIOCLSET, &lmode_ours);
+#endif /* TIOCGLTC */
+
+
+#ifdef HAVE_TERMIO
+  sg_ours.c_lflag |= ICANON;
+#else /* not HAVE_TERMIO */
   sg_ours.sg_flags &= ~RAW & ~CBREAK;
+#endif /* not HAVE_TERMIO */
 }
 
 static void
@@ -197,6 +269,20 @@ term_status_command ()
     }
 
   printf ("Inferior's terminal status (currently saved by GDB):\n");
+
+#ifdef HAVE_TERMIO
+
+  printf ("fcntl flags = 0x%x, c_iflag = 0x%x, c_oflag = 0x%x,\n",
+	  tflags_inferior, sg_inferior.c_iflag, sg_inferior.c_oflag);
+  printf ("c_cflag = 0x%x, c_lflag = 0x%x, c_line = 0x%x.\n",
+	  sg_inferior.c_cflag, sg_inferior.c_lflag, sg_inferior.c_line);
+  printf ("c_cc: ");
+  for (i = 0; (i < NCC); i += 1)
+    printf ("0x%x ", sg_inferior.c_cc[i]);
+  printf ("\n");
+
+#else /* not HAVE_TERMIO */
+
   printf ("fcntl flags = 0x%x, lmode = 0x%x,\nsgttyb.sg_flags = 0x%x, owner pid = %d.\n",
 	  tflags_inferior, lmode_inferior,
 	  sg_inferior.sg_flags, pgrp_inferior);
@@ -207,7 +293,8 @@ term_status_command ()
   printf ("ltchars: ");
   for (i = 0; i < sizeof (struct ltchars); i++)
     printf ("0x%x ", ((char *)&ltc_inferior)[i]);
-  printf ("\n");
+
+#endif /* not HAVE_TERMIO */
 }
 
 static void
@@ -243,18 +330,33 @@ new_tty (ttyname)
 }
 
 /* Start an inferior process and returns its pid.
-   ALLARGS is a vector of program-name and args.
+   ALLARGS is a string containing shell command to run the program.
    ENV is the environment vector to pass.  */
+
+#ifndef SHELL_FILE
+#define SHELL_FILE "/bin/sh"
+#endif
 
 int
 create_inferior (allargs, env)
-     char **allargs;
+     char *allargs;
      char **env;
 {
   int pid;
+  char *shell_command;
   extern int sys_nerr;
   extern char *sys_errlist[];
   extern int errno;
+
+  /* If desired, concat something onto the front of ALLARGS.
+     SHELL_COMMAND is the result.  */
+#ifdef SHELL_COMMAND_CONCAT
+  shell_command = (char *) alloca (strlen (SHELL_COMMAND_CONCAT) + strlen (allargs) + 1);
+  strcpy (shell_command, SHELL_COMMAND_CONCAT);
+  strcat (shell_command, allargs);
+#else
+  shell_command = allargs;
+#endif
 
   /* exec is said to fail if the executable is open.  */
   close_exec_file ();
@@ -265,8 +367,12 @@ create_inferior (allargs, env)
 
   if (pid == 0)
     {
+      char *args[4];
+
+#ifdef TIOCGPGRP
       /* Run inferior in a separate process group.  */
       setpgrp (getpid (), getpid ());
+#endif /* TIOCGPGRP */
 
       inferior_thisrun_terminal = inferior_io_terminal;
       if (inferior_io_terminal != 0)
@@ -278,9 +384,15 @@ create_inferior (allargs, env)
       signal (SIGINT, SIG_DFL);  */
 
       ptrace (0);
-      execle ("/bin/sh", "sh", "-c", allargs, 0, env);
 
-      fprintf (stderr, "Cannot exec /bin/sh: %s.\n",
+      args[0] = "sh";
+      args[1] = "-c";
+      args[2] = shell_command;
+      args[3] = 0;
+
+      execve (SHELL_FILE, args, env);
+
+      fprintf (stderr, "Cannot exec %s: %s.\n", SHELL_FILE,
 	       errno < sys_nerr ? sys_errlist[errno] : "unknown error");
       fflush (stderr);
       _exit (0177);
@@ -313,6 +425,18 @@ kill_inferior ()
   inferior_died ();
 }
 
+/* This is used when GDB is exiting.  It gives less chance of error.*/
+
+kill_inferior_fast ()
+{
+  if (remote_debugging)
+    return;
+  if (inferior_pid == 0)
+    return;
+  ptrace (8, inferior_pid, 0, 0);
+  wait (0);
+}
+
 inferior_died ()
 {
   inferior_pid = 0;
@@ -343,7 +467,7 @@ resume (step, signal)
     }
 }
 
-#ifdef NEW_SUN_PTRACE
+#ifdef ATTACH_DETACH
 
 /* Start debugging the process whose number is PID.  */
 
@@ -372,7 +496,7 @@ detach (signal)
     perror_with_name ("ptrace");
   attach_flag = 0;
 }
-#endif
+#endif /* ATTACH_DETACH */
 
 #ifdef NEW_SUN_PTRACE
 
@@ -431,6 +555,146 @@ store_inferior_registers (regno)
 }
 
 #else
+#ifdef HP9K320
+
+#define FP_REGISTER_ADDR_DIFF(u, regno)					\
+  (((char *) (FP_REGISTER_ADDR (u, regno))) - ((char *) &(u)))
+
+#define INFERIOR_AR0(u)							\
+  ((ptrace								\
+    (PT_RUAREA, inferior_pid, ((char *) &u.u_ar0 - (char *) &u), 0))	\
+   - KERNEL_U_ADDR)
+
+static void
+fetch_inferior_register (regno, regaddr)
+     register int regno;
+     register unsigned int regaddr;
+{
+#ifndef HPUX_VERSION_5
+  if (regno == PS_REGNUM)
+    {
+      union { int i; short s[2]; } ps_val;
+      int regval;
+
+      ps_val.i = (ptrace (PT_RUAREA, inferior_pid, regaddr, 0));
+      regval = ps_val.s[0];
+      supply_register (regno, &regval);
+    }
+  else
+#endif /* not HPUX_VERSION_5 */
+    {
+      char buf[MAX_REGISTER_RAW_SIZE];
+      register int i;
+
+      for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (int))
+	{
+	  *(int *) &buf[i] = ptrace (PT_RUAREA, inferior_pid, regaddr, 0);
+	  regaddr += sizeof (int);
+	}
+      supply_register (regno, buf);
+    }
+  return;
+}
+
+static void
+store_inferior_register_1 (regno, regaddr, value)
+     int regno;
+     unsigned int regaddr;
+     int value;
+{
+  errno = 0;
+  ptrace (PT_WUAREA, inferior_pid, regaddr, value);
+#if 0
+  /* HP-UX randomly sets errno to non-zero for regno == 25.
+     However, the value is correctly written, so ignore errno. */
+  if (errno != 0)
+    {
+      char string_buf[64];
+
+      sprintf (string_buf, "writing register number %d", regno);
+      perror_with_name (string_buf);
+    }
+#endif
+  return;
+}
+
+static void
+store_inferior_register (regno, regaddr)
+     register int regno;
+     register unsigned int regaddr;
+{
+#ifndef HPUX_VERSION_5
+  if (regno == PS_REGNUM)
+    {
+      union { int i; short s[2]; } ps_val;
+
+      ps_val.i = (ptrace (PT_RUAREA, inferior_pid, regaddr, 0));
+      ps_val.s[0] = (read_register (regno));
+      store_inferior_register_1 (regno, regaddr, ps_val.i);
+    }
+  else
+#endif /* not HPUX_VERSION_5 */
+    {
+      char buf[MAX_REGISTER_RAW_SIZE];
+      register int i;
+      extern char registers[];
+
+      for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (int))
+	{
+	  store_inferior_register_1
+	    (regno, regaddr,
+	     (*(int *) &registers[(REGISTER_BYTE (regno)) + i]));
+	  regaddr += sizeof (int);
+	}
+    }
+  return;
+}
+
+void
+fetch_inferior_registers ()
+{
+  struct user u;
+  register int regno;
+  register unsigned int ar0_offset;
+
+  ar0_offset = (INFERIOR_AR0 (u));
+  for (regno = 0; (regno < FP0_REGNUM); regno++)
+    fetch_inferior_register (regno, (REGISTER_ADDR (ar0_offset, regno)));
+  for (; (regno < NUM_REGS); regno++)
+    fetch_inferior_register (regno, (FP_REGISTER_ADDR_DIFF (u, regno)));
+}
+
+/* Store our register values back into the inferior.
+   If REGNO is -1, do this for all registers.
+   Otherwise, REGNO specifies which register (so we can save time).  */
+
+store_inferior_registers (regno)
+     register int regno;
+{
+  struct user u;
+  register unsigned int ar0_offset;
+
+  if (regno >= FP0_REGNUM)
+    {
+      store_inferior_register (regno, (FP_REGISTER_ADDR_DIFF (u, regno)));
+      return;
+    }
+
+  ar0_offset = (INFERIOR_AR0 (u));
+  if (regno >= 0)
+    {
+      store_inferior_register (regno, (REGISTER_ADDR (ar0_offset, regno)));
+      return;
+    }
+
+  for (regno = 0; (regno < FP0_REGNUM); regno++)
+    store_inferior_register (regno, (REGISTER_ADDR (ar0_offset, regno)));
+  for (; (regno < NUM_REGS); regno++)
+    store_inferior_register (regno, (FP_REGISTER_ADDR_DIFF (u, regno)));
+  return;
+}
+
+#else /* not HP9K320 */
 
 void
 fetch_inferior_registers ()
@@ -469,6 +733,8 @@ store_inferior_registers (regno)
 {
   register unsigned int regaddr;
   char buf[80];
+  extern char registers[];
+  int i;
 
 #ifdef UMAX_PTRACE
   unsigned int offset = 0;
@@ -481,27 +747,38 @@ store_inferior_registers (regno)
   if (regno >= 0)
     {
       regaddr = register_addr (regno, offset);
-      errno = 0;
-      ptrace (6, inferior_pid, regaddr, read_register (regno));
-      if (errno != 0)
+      for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof(int))
 	{
-	  sprintf (buf, "writing register number %d", regno);
-	  perror_with_name (buf);
+	  errno = 0;
+	  ptrace (6, inferior_pid, regaddr,
+		  *(int *) &registers[REGISTER_BYTE (regno) + i]);
+	  if (errno != 0)
+	    {
+	      sprintf (buf, "writing register number %d(%d)", regno, i);
+	      perror_with_name (buf);
+	    }
+	  regaddr += sizeof(int);
 	}
     }
   else for (regno = 0; regno < NUM_REGS; regno++)
     {
       regaddr = register_addr (regno, offset);
-      errno = 0;
-      ptrace (6, inferior_pid, regaddr, read_register (regno));
-      if (errno != 0)
+      for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof(int))
 	{
-	  sprintf (buf, "writing register number %d", regno);
-	  perror_with_name (buf);
+	  errno = 0;
+	  ptrace (6, inferior_pid, regaddr,
+		  *(int *) &registers[REGISTER_BYTE (regno) + i]);
+	  if (errno != 0)
+	    {
+	      sprintf (buf, "writing register number %d(%d)", regno, i);
+	      perror_with_name (buf);
+	    }
+	  regaddr += sizeof(int);
 	}
     }
 }
 
+#endif /* not HP9K320 */
 #endif /* not NEW_SUN_PTRACE */
 
 /* NOTE! I tried using PTRACE_READDATA, etc., to read and write memory
@@ -641,11 +918,17 @@ Report which ones can be written.");
   inferior_pid = 0;
 
   ioctl (0, TIOCGETP, &sg_ours);
+  fcntl (0, F_GETFL, tflags_ours);
+
+#ifdef TIOCGLTC
   ioctl (0, TIOCGETC, &tc_ours);
   ioctl (0, TIOCGLTC, &ltc_ours);
   ioctl (0, TIOCLGET, &lmode_ours);
-  fcntl (0, F_GETFL, tflags_ours);
+#endif /* TIOCGLTC */
+
+#ifdef TIOCGPGRP
   ioctl (0, TIOCGPGRP, &pgrp_ours);
+#endif /* TIOCGPGRP */
 
   terminal_is_ours = 1;
 }

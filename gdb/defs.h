@@ -26,6 +26,7 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 extern char *savestring ();
 extern char *concat ();
 extern char *xmalloc (), *xrealloc ();
+extern char *alloca ();
 extern int parse_escape ();
 extern char *reg_names[];
 

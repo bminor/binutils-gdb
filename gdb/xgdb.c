@@ -26,16 +26,13 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 #include "symtab.h"
 #include "frame.h"
 
-#include <X11/Xlib.h>
-#include <X11/Intrinsic.h>
-#include <X11/Xresource.h>
-#include <X11/Atoms.h>
-#include <X11/TopLevel.h>
-#include <X11/VPane.h>
+#include <X11/IntrinsicP.h>
+#include <X11/StringDefs.h>
 #include <X11/Label.h>
-#include <X11/Text.h>
 #include <X11/Command.h>
-#include <X11/ButtonBox.h>
+#include <X11/TextP.h>
+#include <X11/Box.h>
+#include <X11/VPaned.h>
 
 #include <stdio.h>
 
@@ -63,20 +60,26 @@ static short gdb_mask_bits[] = {
 
 /* The X display on which the window appears.  */
 
-Display *screen_display;
-
-/* The graphics context.  */
-
-GC default_gc;
+static Display *screen_display;
 
 /* Windows manipulated by this package.  */
 
-static Window icon_window;
+static Widget main_widget;
 static Widget containing_widget;
+static Widget title_widget;
 static Widget source_name_widget;
 static Widget source_text_widget;
 static Widget exec_name_widget;
 static Widget button_box_widget;
+
+#ifdef VTFD
+/* Interaction Window */
+
+static Widget interactive_widget;
+XtTextSource PseudoDiskSourceCreate();
+XtTextSource TSource;
+static int vtfd[2], vifd[2];
+#endif
 
 /* Source text display.  */
 
@@ -88,14 +91,27 @@ static Widget create_text_widget ();
 
 START_FILE
 
+/* Return number of text lines displayed in text widget W.  */
+
+int /* was XtTextPosition */
+XtTextLines (w)
+     Widget w;
+{
+  TextWidget ctx = (TextWidget)w;
+
+  return ctx->text.lt.lines;
+}
+
 /* Display an appropriate piece of source code in the source window.  */
 
 xgdb_display_source ()
 {
   char *filename;
-  static Arg labelArgs[1];
+  Arg args[1];
+  Arg labelArgs[1];
   int linenumbers_changed = 0;
-  static int new = 1;
+  int must_scroll = 0;
+  int height = XtTextLines (source_text_widget);
 
   struct symtab_and_line get_selected_frame_sal ();
   struct symtab_and_line sal;
@@ -132,12 +148,18 @@ xgdb_display_source ()
 
   if (linenumbers_changed || source_window_symtab != sal.symtab)
     {
-      static Arg fileArgs[1];
-      new = 1;
+      Arg fileArgs[1];
+      XtTextSource src;
+
+      must_scroll = 1;
       source_window_symtab = sal.symtab;
 
+      src = XtTextGetSource (source_text_widget);
+      XtDiskSourceDestroy (src);
+      
       XtSetArg (fileArgs[0], XtNfile, filename);
-      XtSetValues (source_text_widget, fileArgs, XtNumber (fileArgs));
+      src = XtDiskSourceCreate (source_text_widget->core.parent, fileArgs, 1);
+      XtTextSetSource (source_text_widget, src, 0);
 
       XtSetArg (labelArgs[0], XtNlabel,
 		filename ? filename : "No source displayed.");
@@ -148,46 +170,38 @@ xgdb_display_source ()
   /* Update display and cursor positions as necessary.
      Cursor should be placed on line sal.line.  */
 
-  {
-    static int top_line_number, bottom_line_number;
-    int current_top;
-    Arg textArgs[1];
+  /* Find out where the display is positioned (in case user scrolled it).  */
 
-    if (! new)
-      {
-	int new_top;
+  if (! must_scroll)
+    {
+      int top_line_number;
 
-	/* Get positions of start of display, and caret */
-	XtSetArg (textArgs[0], XtNdisplayPosition, NULL);
-	XtGetValues (source_text_widget, textArgs, XtNumber (textArgs));
-	new_top = source_charpos_line (source_window_symtab,
-				       (int) textArgs[0].value);
-	bottom_line_number += new_top - top_line_number;
-	top_line_number = new_top;
-      }
+      XtSetArg (args[0], XtNdisplayPosition, NULL);
+      XtGetValues (source_text_widget, args, 1);
+      top_line_number = source_charpos_line (source_window_symtab,
+					     (int) args[0].value);
+      /* If desired position is off screen, we must scroll.  */
+      if (sal.line < top_line_number
+	  || sal.line >= top_line_number + height)
+	must_scroll = 1;
+    }
 
-    /* If appropriate, scroll the text display.  */
-    if (sal.line < top_line_number
-	|| sal.line > bottom_line_number
-	|| new)
-      {
-	/* yes, these magic numbers are ugly, but I don't know how
-	 * to get the height of a text widget in a V11-portable way
-	 */
-	top_line_number = (sal.line > 15) ? sal.line - 15 : 0;
-	bottom_line_number = top_line_number + 35;
-      
-	XtSetArg (textArgs[0], XtNdisplayPosition,
-		  source_line_charpos (source_window_symtab, top_line_number));
-	XtSetValues (source_text_widget, textArgs, XtNumber (textArgs));
-      }
+  /* If appropriate, scroll the text display.  */
 
-    /* Set the text display cursor position within the text.  */
+  if (must_scroll)
+    {
+      int top_line_number = (sal.line > height/3) ? sal.line - height/3 : 1;
 
-    XtSetArg (textArgs[0], XtNinsertPosition, 
-	      source_line_charpos (source_window_symtab, sal.line));
-    XtSetValues (source_text_widget, textArgs, XtNumber (textArgs));
-  }
+      XtSetArg (args[0], XtNdisplayPosition,
+		source_line_charpos (source_window_symtab, top_line_number));
+      XtSetValues (source_text_widget, args, 1);
+    }
+
+  /* Set the text display cursor position within the text.  */
+
+  XtSetArg (args[0], XtNinsertPosition, 
+	    source_line_charpos (source_window_symtab, sal.line));
+  XtSetValues (source_text_widget, args, 1);
 }
 
 /* Display FILENAME in the title bar at bottom of window.  */
@@ -209,7 +223,10 @@ static void
 print_prompt ()
 {
   if (prompt_string)
-    printf ("%s", prompt_string);
+    {
+      printf ("%s", prompt_string);
+      fflush (stdout);
+    }
 }
 
 /* Handlers for buttons.  */
@@ -219,16 +236,17 @@ print_prompt ()
    Get the "selection" from X and use it as the operand of a print command.  */
 
 static void
-print_1 (starflag)
+print_button (w, starflag, call_data)
+     Widget w;
      int starflag;
+     caddr_t call_data;
 {
   int selected_length;
   char *selected_text;
-
   char *cmd = starflag ? "print * " : "print ";
   register int cmdlen = strlen (cmd);
   
-  selected_text = XFetchBytes (&selected_length);
+  selected_text = XFetchBytes (screen_display, &selected_length);
   if (selected_length)
     {
       char *line = xmalloc (cmdlen + selected_length + 1);
@@ -245,29 +263,20 @@ print_1 (starflag)
   print_prompt ();
 }
 
-static void
-print_button () 
-{
-  print_1 (0);
-}
-
-static void
-print_star_button () 
-{
-  print_1 (1);
-}
 
 /* Subroutine used by "stop at" and "go till" buttons.
    Set a breakpoint at the position indicated by the "selection"
    in the source window, and, if RUNFLAG is nonzero, continue.  */
 
 static void
-breakpoint_button_1 (runflag)
+breakpoint_button (w, runflag, call_data)
+     Widget w;
      int runflag;
+     caddr_t call_data;
 {
   XtTextPosition start, finish;
   
-  XtTextGetSelectionPos (screen_display, source_text_widget, &start, &finish);
+  XtTextGetSelectionPos (source_text_widget, &start, &finish);
   if (!source_window_symtab)
     printf ("No source file displayed.\n");
   else
@@ -282,18 +291,6 @@ breakpoint_button_1 (runflag)
 	}
     }
   print_prompt ();
-}
-
-static void
-breakpoint_button ()
-{
-  breakpoint_button_1 (0);
-}
-
-static void
-until_button ()
-{
-  breakpoint_button_1 (1);
 }
 
 /* decide if a character is trash */
@@ -342,92 +339,50 @@ explicit_breakpoint_button ()
   print_prompt ();
 }
 
-/* Various trivial buttons,
-   most of which just run one GDB command with no arg.  */
+/* Handle a button by running the command COMMAND.  */
 
 static void
-next_button ()
+do_command (w, command, call_data)
+     Widget w;
+     char *command;
+     caddr_t call_data;
 {
-  execute_command ("next", 0);
+  execute_command (command, 0);
   xgdb_display_source ();
   print_prompt ();
 }
 
 static void
-step_button ()
+redisplay_button()
 {
-  execute_command ("step", 0);
-  xgdb_display_source ();
-  print_prompt ();
-}
-
-static void
-cont_button ()
-{
-  execute_command ("cont", 0);
-  xgdb_display_source ();
-  print_prompt ();
-}
-
-static void
-finish_button ()
-{
-  execute_command ("finish", 0);
-  xgdb_display_source ();
-  print_prompt ();
-}
-
-#if 0
-static void
-deiconify_button ()
-{
-  XUnmapWindow (screen_display, icon_window);
-  XMapWindow (screen_display, containing_widget);
-}
-
-static void
-iconify_button ()
-{
-#if 0
-  static Arg iconArgs[1];
-  XtSetArg (iconArgs[0], XtNlabel, prompt_string);
-  XtCommandSetValues (icon_window, iconArgs, XtNumber (iconArgs));
-#endif 0
-  XUnmapWindow (screen_display, containing_widget);
-  XMapWindow (screen_display, icon_window);
-}
-#endif 0
-
-static void
-up_button ()
-{
-  execute_command ("up", 0);
-  xgdb_display_source ();
-  print_prompt ();
-}
-
-static void
-down_button ()
-{
-  execute_command ("down", 0);
-  xgdb_display_source ();
-  print_prompt ();
+  xgdb_display_source();
 }
 
 /* Define and display all the buttons.  */
 
 static void
-addbutton (parent, name, function)
+addbutton (parent, name, function, closure)
      Widget parent;
      char *name;
      void (*function) ();
+     caddr_t closure;
 {
-  static Arg commandArgs[2];
+  static XtCallbackRec Callback[] =
+    {
+      {NULL, (caddr_t)NULL},
+      {NULL, (caddr_t)NULL},
+    };
+  static Arg commandArgs[] =
+    {
+      {XtNlabel, (XtArgVal)NULL},
+      {XtNcallback, (XtArgVal)Callback},
+    };
 
-  XtSetArg (commandArgs[0], XtNlabel, name);
-  XtSetArg (commandArgs[1], XtNfunction, function);
-  XtCreateWidget (name, commandWidgetClass, parent,
-		  commandArgs, XtNumber (commandArgs));
+  Callback[0].callback = (XtCallbackProc)function;
+  Callback[0].closure = (caddr_t)closure;
+  commandArgs[0].value = (XtArgVal)name;
+  XtCreateManagedWidget (name, commandWidgetClass, parent,
+			 commandArgs, XtNumber(commandArgs));
 }
 
 /* Create the button windows and store them in `buttons'.  */
@@ -436,22 +391,25 @@ static void
 create_buttons (parent)
      Widget parent;
 {
-  addbutton (parent, "Brk At", breakpoint_button);
-  addbutton (parent, "Brk In", explicit_breakpoint_button);
-  addbutton (parent, "Go 'til", until_button);
+  addbutton (parent, "run", do_command, "run");
+  addbutton (parent, "quit", do_command, "quit");
 
-  addbutton (parent, "Print", print_button);
-  addbutton (parent, "Print*", print_star_button);
+  addbutton (parent, "break in", explicit_breakpoint_button, NULL);
+  addbutton (parent, "break at", breakpoint_button, 0);
+  addbutton (parent, "go until", breakpoint_button, 1);
 
-  addbutton (parent, "Next", next_button);
-  addbutton (parent, "Step", step_button);
-  addbutton (parent, "Cont", cont_button);
-  addbutton (parent, "Finish", finish_button);
+  addbutton (parent, "print", print_button, 0);
+  addbutton (parent, "print*", print_button, 1);
+
+  addbutton (parent, "next", do_command, "next");
+  addbutton (parent, "step", do_command, "step");
+  addbutton (parent, "cont", do_command, "cont");
+  addbutton (parent, "finish", do_command, "finish");
   
-  addbutton (parent, "Up", up_button);
-  addbutton (parent, "Down", down_button);
+  addbutton (parent, "up", do_command, "up");
+  addbutton (parent, "down", do_command, "down");
 
-/*  addbutton (parent, "Iconify", iconify_button); */
+  addbutton (parent, "redisplay", redisplay_button, NULL);
 }
 
 /* Create a "label window" that just displays the string LABEL.  */
@@ -460,12 +418,16 @@ static Widget
 create_label (name, label)
      char *name, *label;
 {
-  static Arg labelArgs[2];
+  Arg labelArgs[2];
+  Widget w; 
   
   XtSetArg (labelArgs[0], XtNname, name);
   XtSetArg (labelArgs[1], XtNlabel, label);
-  return XtCreateWidget ("label1", labelWidgetClass, containing_widget,
-			 labelArgs, XtNumber (labelArgs));
+
+  w = XtCreateManagedWidget ("label", labelWidgetClass, containing_widget,
+			     labelArgs, XtNumber (labelArgs));
+  XtPanedSetMinMax (w, w->core.height, w->core.height);
+  return w;
 }
 
 /* Create a subwindow of PARENT that displays and scrolls the contents
@@ -473,143 +435,138 @@ create_label (name, label)
 
 static Widget
 create_text_widget (parent, filename)
-     Window parent;
+     Widget parent;
      char *filename;
 {
-  static Arg fileArgs[2];
-  
+  static Arg fileArgs[3];
+  XtTextSource src;
+  XtTextSink   sink;
+
   XtSetArg (fileArgs[0], XtNfile, filename);
-  XtSetArg (fileArgs[1], XtNtextOptions, scrollVertical);
-  return XtTextDiskCreate (parent, fileArgs, XtNumber (fileArgs));
+  src = XtDiskSourceCreate(parent, fileArgs, 1);
+  sink = XtAsciiSinkCreate(parent, NULL, 0);
+
+  XtSetArg (fileArgs[0], XtNtextOptions, scrollVertical);
+  XtSetArg (fileArgs[1], XtNtextSource, src);
+  XtSetArg (fileArgs[2], XtNtextSink, sink);
+  return XtCreateManagedWidget ("disk", textWidgetClass, parent,
+				fileArgs, XtNumber (fileArgs));
+
+#if 0 /* This is tucker's method.  */
+
+  /* Create an empty source-display window and add to containing_widget */
+  XtSetArg (argl[0], XtNfile, "/dev/null");
+  XtSetArg (argl[1], XtNtextOptions, scrollVertical);
+  XtSetArg (argl[2], XtNheight, (XtArgVal)sheight);
+  source_text_widget = XtCreateManagedWidget (NULL, asciiDiskWidgetClass,
+					      containing_widget, argl,
+					      XtNumber (argl));
+
+  /* Create NULL disk source */
+  XtSetArg (argl[0], XtNfile, "/dev/null");
+  NullSource = XtDiskSourceCreate (source_text_widget, argl, ONE);
+#endif
 }
 
-/* Entry point to create the widgets representing our display.  */
+/* window manager argument parsing */
+extern int *win_argc;
+extern char **win_argv;
 
+/* Entry point to create the widgets representing our display.  */
 int
 xgdb_create_window ()
 {
-  static Arg frameArgs[]= {
-      {XtNwidth, (XtArgVal) 600},
-      {XtNheight, (XtArgVal) 700},
-  };
+  int width, height;
+  int sheight;
+  Arg argl[3];
   
-  XrmResourceDataBase db;
-  FILE *rdb_file;
-  XGCValues dummy;
-  
-  /* Init and database stuff.  */
-  screen_display = XOpenDisplay (NULL);
-  if (screen_display == 0)
-    {
-      fprintf (stderr, "Cannot connect to X server");
-      return 0;
-    }
+  /* initialize toolkit, setup defaults */
+  main_widget = XtInitialize ("gdb", "gdb", NULL, 0, win_argc, win_argv);
+  screen_display = XtDisplay (main_widget);
 
+  /* Find out what size the user specified.  */
+
+  XtSetArg (argl[0], XtNwidth, (XtArgVal)&width);
+  XtSetArg (argl[1], XtNheight, (XtArgVal)&height);
+  XtGetValues (main_widget, argl, XtNumber(argl));
+
+  /* If none specified, set a default size.  */
+
+  if (!width || !height)
+    {
+      width = 500, height = 700;
+      XtSetArg (argl[0], XtNwidth, (XtArgVal)width);
+      XtSetArg (argl[1], XtNheight, (XtArgVal)height);
+      XtSetValues (main_widget, argl, XtNumber(argl));
+    }
+  sheight = (float)height / 2.5;
+
+  /* Create the (toplevel) main_widget */
+  XtSetArg (argl[0], XtNwidth, (XtArgVal)width);
+  XtSetArg (argl[1], XtNheight, (XtArgVal)height);
+  containing_widget
+    = XtCreateManagedWidget ("vpaned", vPanedWidgetClass,
+			     main_widget, argl, XtNumber (argl));
+  XtPanedSetRefigureMode (containing_widget, FALSE);
+  
+  /* Create title */
   {
-    char *dummy1[1];
-    dummy1[0] = 0;
-    XtInitialize ("gdb", "gdb", 0, 0, 0, dummy1);
+    char buf[200];
+    extern char *version;
+    sprintf (buf, "GDB %s", version);
+    title_widget =
+      create_label ("Title", buf);
   }
 
-  /* should be checking .Xdefaults in $HOME */
-  rdb_file = fopen (".Xresources", "r");
-  if (rdb_file != NULL)
-    {
-      XrmGetDataBase (rdb_file, &db);
-      XrmSetCurrentDataBase (db);
-      fclose (rdb_file);
-    }
-  
-  /* Create the containing_widget.  */
+  /* Create exec file name window and add */
+  exec_name_widget =
+    create_label ("Executable", "No executable specified");
 
-  containing_widget = XtCreateWidget ("frame", vPaneWidgetClass, 0,
-				      frameArgs, XtNumber (frameArgs));
-  
-  default_gc = XCreateGC (screen_display, containing_widget, 0, dummy);
+  /* Create window full of buttons.  */
+  button_box_widget = XtCreateManagedWidget ("buttons", boxWidgetClass,
+					     containing_widget, NULL, 0);
+  create_buttons (button_box_widget);
 
   /* Create source file name window and add to containing_widget */
-  source_name_widget
-    = create_label ("Source File", "No source file yet.");
+  source_name_widget =
+    create_label ("Source File", "No source file yet.");
 
   /* Create an empty source-display window and add to containing_widget */
   source_text_widget = create_text_widget (containing_widget, "/dev/null");
 
-  /* Create window full of buttons.  */
-  button_box_widget = XtCreateWidget ("Buttons", buttonBoxWidgetClass,
-				      containing_widget, NULL, 0);
-  create_buttons (button_box_widget);
-
-  /* Create exec file name window and add */
-  exec_name_widget = create_label ("Executable", "No executable specified.");
-
-#if 0
-  /* Create icon window.  */
+#ifdef VFTD
+  /* Create Fake Text source */
   {
-    static Arg iconArgs[2];
-    void (*compiler_bug) () = deiconify_button;
-    XtSetArg (iconArgs[0], XtNlabel, "(gdb)");
-    XtSetArg (iconArgs[1], XtNfunction, compiler_bug);
-    icon_window = XtCommandCreate (DefaultRootWindow (screen_display),
-				   iconArgs, XtNumber (iconArgs));
-    XMoveWindow (screen_display, icon_window, 100, 100);	/* HACK */
-#if 0
-    XSetIconWindow (screen_display, containing_widget, icon_window);
-#endif 0
+    extern XtTextSource TCreateApAsSource();
+    TSource = TCreateApAsSource();
   }
-#endif 0
 
+  /* Create interactive box */
+  XtSetArg (argl[0], XtNtextSource, (XtArgVal)TSource);
+  XtSetArg (argl[1], XtNtextSink,
+	    (XtArgVal)XtAsciiSinkCreate(containing_widget, NULL, 0));
+  XtSetArg (argl[2], XtNtextOptions,
+	    (XtArgVal)(scrollVertical | wordBreak));
+  interactive_widget = XtCreateManagedWidget ("gdbWindow", textWidgetClass,
+					      containing_widget, argl, THREE);
+#endif
+
+  /* Put them one screen */
+  XtPanedSetRefigureMode(containing_widget, TRUE);
+  XtRealizeWidget (main_widget);
+
+  /* Define GDB cursor */
 #if 0
-  /* Now make the whole thing appear on the display.  */
-  {
-    Pixmap pm1, pm2;
-    XImage image;
-    Cursor curse;
+  XDefineCursor (screen_display, XtWindow (main_widget),
+		 XCreateFontCursor (screen_display, XC_circle));
+#endif
 
-    image.width = gdb_width;
-    image.height = gdb_height;
-    image.xoffset = 0;
-    image.format = XYBitmap;
-    image.byte_order = LSBFirst;
-    image.bitmap_unit = 16;
-    image.bitmap_bit_order = LSBFirst;
-    image.depth = 1;
-    image.bytes_per_line = 2;
-    image.bits_per_pixel = 1;
-
-    pm1 = XCreatePixmap (screen_display, DefaultScreen (screen_display),
-			 gdb_width, gdb_height, 1);
-    pm2 = XCreatePixmap (screen_display, DefaultScreen (screen_display),
-			 gdb_width, gdb_height, 1);
-
-    image.data = (char *) gdb_bits;
-    XPutImage (screen_display, pm1, default_gc, &image, 0, 0, 0, 0,
-	       gdb_width, gdb_height);
-
-    image.data = (char *) gdb_mask_bits;
-    XPutImage (screen_display, pm2, default_gc, &image, 0, 0, 0, 0,
-	       gdb_width, gdb_height);
-
-    curse = XCreatePixmapCursor (screen_display, pm1, pm2,
-				 BlackPixel (screen_display,
-					     DefaultScreen (screen_display)),
-				 WhitePixel (screen_display,
-					     DefaultScreen (screen_display)),
-				 gdb_x_hot, gdb_y_hot);
-
-    XFreePixmap (screen_display, pm1);
-    XFreePixmap (screen_display, pm2);
-
-    XDefineCursor (screen_display, containing_widget, curse);
-    XDefineCursor (screen_display, icon_window, curse);
-  }
-#endif 0
-
-  XtRealizeWidget (containing_widget);
   XFlush (screen_display);
-
   return 1;
 }
 
+#define MAX_XGDB_READ 128
+
 /* xgdb_dispatch -- Loop, dispatching on window events,
    until data is available on FP (which is normally stdin).
    Then return, so the data on FP can be processed.  */
@@ -624,13 +581,20 @@ xgdb_dispatch (fp)
   int nfds;
   XEvent ev;
   int pend;
-  
+  int nread;
+  char buf[1024];
+  int ipmask;
+
+#ifdef VTFD
+  ipmask = 1 << vtfd[0];
+#endif
+
   while (! (rfds & inmask))
     {
-      pend = XPending ();
+      pend = XPending (screen_display);
       if (!pend)
 	{
-	  rfds = inmask | xmask;
+	  rfds = inmask | xmask | ipmask;
 	  /* this isn't right for 4.3 but it works 'cuz of 4.2 compatibility */
 	  nfds = select (32, &rfds, 0, 0, (struct timeval *) 0);
 	}
@@ -639,8 +603,131 @@ xgdb_dispatch (fp)
 	  XNextEvent (screen_display, &ev);
 	  XtDispatchEvent (&ev);
 	}
+
+#ifdef VTFD
+      /* Handle I/O through the command window.  */
+      if (pend == 0 && (rfds & ipmask))
+	{
+	  nread = read (vtfd[0], buf, sizeof(buf));
+	  xgdb_write (buf, nread);
+	}
+      nread = xgdb_read (buf, MAX_XGDB_READ);
+      if (pend == 0 && nread > 0)
+	{
+	  write (vifd[1], buf, nread);
+	}
+#endif
     }
 }  
+
+#ifdef VTFD
+
+static int output_size;
+static int used_size;
+static char *output_string;
+
+static void
+xgdb_init_text ()
+{
+  Arg args[2];
+
+  output_size = 1000;
+  output_string = (char *) xmalloc (output_size);
+  used_size = 0;
+
+  XtSetArg (args[0], XtNstring, (XtArgVal) output_string);
+  XtSetArg (args[1], XtNlength, (XtArgVal) output_size);
+  TSource
+    = XtStringSourceCreate (toplevel, args, 2);
+
+  XtSetArg (args[0], XtNtextSource, TSource);
+  XtSetValues (interaction_widget, Args, 1);
+}
+
+static void
+xgdb_grow_text (size)
+     int size;
+{
+  if (output_size < used_size + size + 200)
+    {
+      Arg args[2];
+
+      XtStringSourceDestroy (TSource);
+
+      output_size = (used_size + size + 1010 + 512) / 1010 * 1010;
+      output_string = xrealloc (output_string, output_size);
+
+      XtSetArg (args[0], XtNstring, (XtArgVal) output_string);
+      XtSetArg (args[1], XtNlength, (XtArgVal) output_size);
+      TSource
+	= XtStringSourceCreate (toplevel, args, 2);
+
+      XtSetArg (args[0], XtNtextSource, TSource);
+      XtSetValues (interaction_widget, Args, 1);
+    }
+}
+
+/*VARARGS*/
+xgdb_printf (fmt, arg1, arg2, arg3, arg4)
+     char *fmt;
+{
+  char buf[1024];
+  XtTextBlock text;
+  XtTextPosition pos;
+
+/* ??? This will crash on the wrong data.  */
+  pos = (*TSource->Scan)(TSource, 0, XtstAll, XtsdRight, 1, 0);
+  sprintf (buf, fmt, arg1, arg2, arg3, arg4);
+  text.length = strlen (buf);
+  text.ptr = buf;
+  xgdb_grow_text (text.length);
+  used_size += text.length;
+  XtTextReplace (interactive_widget, pos, pos, &text);
+  XtTextSetInsertionPoint (interactive_widget, pos + text.length);
+  XFlush (screen_display);
+}
+
+int
+xgdb_write (buf, len)
+    char *buf;
+    int len;
+{
+  XtTextBlock text;
+  XtTextPosition pos;
+
+  pos = (*TSource->Scan)(TSource, 0, XtstAll, XtsdRight, 1, 0);
+  text.length = len;
+  text.ptr = buf;
+  xgdb_grow_text (text.length);
+  used_size += text.length;
+  XtTextReplace (interactive_widget, pos, pos, &text);
+  XtTextSetInsertionPoint (interactive_widget, pos + text.length);
+  XFlush (screen_display);
+}
+
+int
+xgdb_read (buf, maxlen)
+     char *buf;
+     int maxlen;
+{
+  XtTextBlock text;
+  XtTextPosition endpos;
+  int length = 0;
+
+  xgdb_grow_text (maxlen);
+  endpos = XtTextGetInsertionPoint (interactive_widget);
+  length = endpos - used_size;
+  if (length > 0)
+    {
+      (*TSource->Read) (TSource, lastpos, &text, maxlen - 10);
+      length = text.length;
+      strncpy(buf, text.ptr, length);
+      buf[length] = NULL;
+      used_size += length;
+    }
+  return length;
+}
+#endif /* VTFD */
 
 /* If we use an X window, the GDB command loop is told to call this function
    before reading a command from stdin.
@@ -670,3 +757,4 @@ initialize ()
 }
 
 END_FILE
+

@@ -341,7 +341,8 @@ core_file_command ()
 {}
 
 char *
-get_exec_file ()
+get_exec_file (err)
+     int err;
 {
   /* Makes one printout look reasonable; value does not matter otherwise.  */
   return "run";

@@ -370,7 +370,7 @@ lookup_cmd (line, list, cmdtype, allow_unknown)
   while (*p == '-'
 	 || (*p >= 'a' && *p <= 'z')
 	 || (*p >= 'A' && *p <= 'Z')
-	 || (*p >= '1' && *p <= '9'))
+	 || (*p >= '0' && *p <= '9'))
     {
       if (*p >= 'A' && *p <= 'Z')
 	*p += 'a' - 'A';

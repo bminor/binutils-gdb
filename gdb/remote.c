@@ -71,11 +71,24 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 #include "frame.h"
 #include "inferior.h"
 
-#include <sys/wait.h>
+#include "wait.h"
 #include <sys/ioctl.h>
 #include <a.out.h>
 #include <sys/file.h>
+
+#ifdef HAVE_TERMIO
+#include <termio.h>
+#undef TIOCGETP
+#define TIOCGETP TCGETA
+#undef TIOCSETN
+#define TIOCSETN TCSETA
+#undef TIOCSETP
+#define TIOCSETP TCSETAF
+#define TERMINAL struct termio
+#else
 #include <sgtty.h>
+#define TERMINAL struct sgttyb
+#endif
 
 int kiodebug;
 
@@ -101,7 +114,7 @@ remote_open (name, from_tty)
      char *name;
      int from_tty;
 {
-  struct sgttyb sg;
+  TERMINAL sg;
 
   remote_debugging = 0;
   dcache_init ();
@@ -111,7 +124,11 @@ remote_open (name, from_tty)
     perror_with_name (name);
 
   ioctl (remote_desc, TIOCGETP, &sg);
+#ifdef HAVE_TERMIO
+  sg.c_lflag &= ~ICANON;
+#else
   sg.sg_flags = RAW;
+#endif
   ioctl (remote_desc, TIOCSETP, &sg);
 
   if (from_tty)
@@ -165,18 +182,17 @@ remote_resume (step, signal)
 
 int
 remote_wait (status)
-     union wait *status;
+     WAITTYPE *status;
 {
   char buf[PBUFSIZ];
 
-  status->w_status = 0;
+  WSETEXIT ((*status), 0);
   getpkt (buf);
   if (buf[0] == 'E')
     error ("Remote failure reply: %s", buf);
   if (buf[0] != 'S')
     error ("Invalid remote reply: %s", buf);
-  status->w_stopval = WSTOPPED;
-  status->w_stopsig = (fromhex (buf[1]) << 4) + fromhex (buf[2]);
+  WSETSTOP ((*status), (((fromhex (buf[1])) << 4) + (fromhex (buf[2]))));
 }
 
 /* Read the remote registers into the block REGS.  */

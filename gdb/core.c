@@ -42,8 +42,16 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 #include <sys/ptrace.h>
 #else /* not UMAX_CORE */
 #include <sys/user.h>
-#endif
-#endif /* NEW_SUN_CORE */
+#ifdef HP9K320
+#include <sys/reg.h>
+#include <sys/trap.h>
+#ifdef HPUX_VERSION_5
+#define e_PS e_regs[PS]
+#define e_PC e_regs[PC]
+#endif /* HPUX_VERSION_5 */
+#endif /* HP9K320 */
+#endif /* not UMAX_CORE */
+#endif /* not NEW_SUN_CORE */
 
 #ifndef N_TXTADDR
 #define N_TXTADDR(hdr) 0
@@ -258,6 +266,39 @@ core_file_command (filename, from_tty)
 	/* Read the register values out of the core file and store
 	   them where `read_register' will find them.  */
 
+#ifdef HP9K320
+	{
+	  register int regno;
+	  struct exception_stack es;
+	  int val;
+
+	  val = lseek (corechan, (REGISTER_ADDR (reg_offset, 0)), 0);
+	  if (val < 0)
+	    perror_with_name (filename);
+	  val = myread (corechan, es,
+			((char *) &es.e_regs[R0] - (char *) &es.e_offset));
+	  if (val < 0)
+	    perror_with_name (filename);
+	  for (regno = 0; (regno < PS_REGNUM); regno++)
+	    supply_register (regno, &es.e_regs[regno + R0]);
+	  val = es.e_PS;
+	  supply_register (regno++, &val);
+	  supply_register (regno++, &es.e_PC);
+	  for (; (regno < NUM_REGS); regno++)
+	    {
+	      char buf[MAX_REGISTER_RAW_SIZE];
+
+	      val = lseek (corechan, (FP_REGISTER_ADDR (u, regno)), 0);
+	      if (val < 0)
+		perror_with_name (filename);
+
+ 	      val = myread (corechan, buf, sizeof buf);
+	      if (val < 0)
+		perror_with_name (filename);
+	      supply_register (regno, buf);
+	    }
+	}
+#else /* not HP9K320 */
 	{
 	  register int regno;
 
@@ -275,6 +316,7 @@ core_file_command (filename, from_tty)
 	      supply_register (regno, buf);
 	    }
 	}
+#endif /* not HP9K320 */
       }
 #endif /* not NEW_SUN_CORE */
       if (filename[0] == '/')
@@ -357,17 +399,30 @@ exec_file_command (filename, from_tty)
       {
 	struct stat st_exec;
 
+#ifdef gould
+	FILHDR exec_coffhdr;
+
+        val = myread (execchan, &exec_coffhdr, sizeof exec_coffhdr);
+        if (val < 0)
+          perror_with_name (filename);
+#endif
 	val = myread (execchan, &exec_aouthdr, sizeof (AOUTHDR));
 
 	if (val < 0)
 	  perror_with_name (filename);
 
-	text_start = N_TXTADDR (exec_aouthdr);
-	text_end = text_start + exec_aouthdr.a_text;
+        text_start = N_TXTADDR (exec_aouthdr);
+        exec_data_start = N_DATADDR (exec_aouthdr);
+#ifdef gould
+        text_offset = N_TXTOFF (exec_coffhdr, exec_aouthdr);
+        exec_data_offset = N_TXTOFF (exec_coffhdr, exec_aouthdr)
+                + exec_aouthdr.a_text;
+#else
 	text_offset = N_TXTOFF (exec_aouthdr);
-	exec_data_start = N_DATADDR (exec_aouthdr);
-	exec_data_end = exec_data_start + exec_aouthdr.a_data;
 	exec_data_offset = N_TXTOFF (exec_aouthdr) + exec_aouthdr.a_text;
+#endif
+	text_end = text_start + exec_aouthdr.a_text;
+        exec_data_end = exec_data_start + exec_aouthdr.a_data;
 	data_start = exec_data_start;
 	data_end += exec_data_start;
 
@@ -383,8 +438,7 @@ exec_file_command (filename, from_tty)
 
   /* Tell display code (if any) about the changed file name.  */
   if (exec_file_display_hook)
-    (*exec_file_display_hook)
-      (filename ? filename : "No executable specified.\n");
+    (*exec_file_display_hook) (filename);
 }
 
 /* Call this to specify the hook for exec_file_command to call back.
@@ -439,10 +493,15 @@ validate_files ()
     }
 }
 
+/* Return the name of the executable file as a string.
+   ERR nonzero means get error if there is none specified;
+   otherwise return 0 in that case.  */
+
 char *
-get_exec_file ()
+get_exec_file (err)
+     int err;
 {
-  if (execfile == 0)
+  if (err && execfile == 0)
     error ("No executable file specified.\n\
 Use the \"exec-file\" and \"symbol-file\" commands.");
   return execfile;
@@ -648,9 +707,10 @@ myread (desc, addr, len)
       len -= val;
       addr += val;
     }
+  return orglen;
 }
 
-#ifndef NEW_SUN_CORE
+#ifdef REGISTER_U_ADDR
 
 /* Return the address in the core dump or inferior of register REGNO.
    BLOCKEND is the address of the end of the user structure.  */
@@ -670,7 +730,7 @@ register_addr (regno, blockend)
   return addr;
 }
 
-#endif /* not NEW_SUN_CORE */
+#endif /* REGISTER_U_ADDR */
 
 static
 initialize ()

@@ -212,9 +212,6 @@ read_var_value (var, frame)
   int val = SYMBOL_VALUE (var);
   register int len;
 
-  if (SYMBOL_CLASS (var) == LOC_BLOCK)
-    type = lookup_function_type (type, 0);
-
   v = allocate_value (type);
   VALUE_LVAL (v) = lval_memory;	/* The most likely possibility.  */
   len = TYPE_LENGTH (type);
@@ -347,6 +344,7 @@ locate_var_value (var, frame)
   register CORE_ADDR addr = 0;
   int val = SYMBOL_VALUE (var);
   struct frame_info fi;
+  struct type *type = SYMBOL_TYPE (var);
 
   if (frame == 0) frame = selected_frame;
 
@@ -362,7 +360,7 @@ locate_var_value (var, frame)
       if (addr != 0)
 	{
 	  union { int i; char c; } test;
-	  int len = TYPE_LENGTH (SYMBOL_TYPE (var));
+	  int len = TYPE_LENGTH (type);
 	  /* If var is less than the full size of register, we need to
 	     test for a big-endian or little-endian machine.  */
 	  test.i = 1;
@@ -398,7 +396,7 @@ locate_var_value (var, frame)
       break;
     }
 
-  return value_cast (lookup_pointer_type (SYMBOL_TYPE (var)),
+  return value_cast (lookup_pointer_type (type),
 		     value_from_long (builtin_type_long, addr));
 }
 

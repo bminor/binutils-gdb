@@ -1,0 +1,12 @@
+coffread.c is truncated.
+
+It ends on a 4096-byte boundary, which makes me think it got chopped
+in a disk operation, so the modification date probably doesn't reflect
+the date of the damage.
+
+We checked the backups of Sep 8, 1992 and June 3, 1991, and in both
+cases it was truncated.  So we would appear to be out of luck.
+
+Someone found gdb-assorted on a dump of /s3 from cygint on November
+19, 1990, but no gdb-2.8.  The guess is that gdb-2.8 moved there after
+/s3 moved to /work (which was apparently a new 1gig disk at the time).

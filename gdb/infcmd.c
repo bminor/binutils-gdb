@@ -172,7 +172,7 @@ Start it from the beginning? "))
       if (args)
 	set_args_command (args);
 
-      exec_file = (char *) get_exec_file ();
+      exec_file = (char *) get_exec_file (1);
       if (from_tty)
 	{
 	  printf ("Starting program: %s%s\n",
@@ -299,7 +299,6 @@ jump_command (arg, from_tty)
      int from_tty;
 {
   register CORE_ADDR addr;
-  struct symtabs_and_lines sals;
   struct symtab_and_line sal;
 
   ERROR_NO_INFERIOR;
@@ -307,14 +306,7 @@ jump_command (arg, from_tty)
   if (!arg)
     error_no_arg ("starting address");
 
-  sals = decode_line_spec (arg, 1);
-  if (sals.nelts != 1)
-    {
-      error ("Unreasonable jump request");
-    }
-
-  sal = sals.sals[0];
-  free (sals.sals);
+  sal = decode_line_spec (arg, 1);
 
   if (sal.symtab == 0 && sal.pc == 0)
     error ("No source file has been specified.");
@@ -326,7 +318,7 @@ jump_command (arg, from_tty)
     struct symbol *fn = get_frame_function (get_current_frame ());
     struct symbol *sfn = find_pc_function (sal.pc);
     if (fn != 0 && sfn != fn
-	&& ! query ("That is not in function %s.  Continue there? ",
+	&& ! query ("Line %d is not in `%s'.  Jump anyway? ",
 		    sal.line, SYMBOL_NAME (fn)))
       error ("Not confirmed.");
   }
@@ -482,14 +474,13 @@ finish_command (arg, from_tty)
       struct type *value_type;
       register value val;
 
-      if (TYPE_CODE (SYMBOL_TYPE (function)) != TYPE_CODE_VOID)
-	value_type = SYMBOL_TYPE (function);
-      else
+      value_type = TYPE_TARGET_TYPE (SYMBOL_TYPE (function));
+      if (TYPE_CODE (value_type) == TYPE_CODE_VOID)
 	return;
 
       val = value_being_returned (value_type, stop_registers);
       printf ("Value returned is $%d = ", record_latest_value (val));
-      value_print (val, stdout);
+      value_print (val, stdout, 0);
       putchar ('\n');
     }
 }
@@ -679,7 +670,7 @@ registers_info (addr_exp)
       /* If virtual format is floating, print it that way.  */
       if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (i)) == TYPE_CODE_FLT
 	  && ! INVALID_FLOAT (virtual_buffer, REGISTER_VIRTUAL_SIZE (i)))
-	val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, stdout);
+	val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, stdout, 0);
       /* Else if virtual format is too long for printf,
 	 print in hex a byte at a time.  */
       else if (REGISTER_VIRTUAL_SIZE (i) > sizeof (long))
@@ -743,7 +734,7 @@ attach_command (args, from_tty)
 {
   char *exec_file;
   int pid;
-  int remote;
+  int remote = 0;
 
   dont_repeat();
 
@@ -765,7 +756,7 @@ attach_command (args, from_tty)
 	error ("Inferior not killed.");
     }
 
-  exec_file = (char *) get_exec_file ();
+  exec_file = (char *) get_exec_file (1);
 
   if (from_tty)
     {
@@ -802,13 +793,15 @@ detach_command (args, from_tty)
      char *args;
      int from_tty;
 {
-  char *exec_file = (char *)get_exec_file ();
   int signal = 0;
 
   if (!inferior_pid)
     error ("Not currently tracing a program\n");
   if (from_tty)
     {
+      char *exec_file = (char *)get_exec_file (0);
+      if (exec_file == 0)
+	exec_file = "";
       printf ("Detaching program: %s pid %d\n",
 	      exec_file, inferior_pid);
       fflush (stdout);

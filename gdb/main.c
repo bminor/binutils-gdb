@@ -1,5 +1,5 @@
 /* Top level for GDB, the GNU debugger.
-   Copyright (C) 1986, 1987 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1987, 1988 Free Software Foundation, Inc.
 
 GDB is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY.  No author or distributor accepts responsibility to anyone
@@ -52,12 +52,18 @@ FILE *instream;
 
 char *current_directory;
 
-/* The directory name is actually stored here.  */
+/* The directory name is actually stored here (usually).  */
 static char dirbuf[MAXPATHLEN];
 
 /* Nonzero if we should refrain from using an X window.  */
 
 int inhibit_windows = 0;
+
+/* Hook for window manager argument parsing.  */
+
+int *win_argc;
+char **win_argv;
+char *win_prgm;
 
 /* Function to call before reading a command, if nonzero.
    The function receives two args: an input stream,
@@ -82,7 +88,7 @@ static char *prompt;
 
 char *line;
 int linesize;
-
+
 /* This is how `error' returns to command level.  */
 
 jmp_buf to_top_level;
@@ -93,8 +99,47 @@ return_to_top_level ()
   immediate_quit = 0;
   clear_breakpoint_commands ();
   clear_momentary_breakpoints ();
+  delete_current_display ();
   do_cleanups (0);
   longjmp (to_top_level, 1);
+}
+
+/* Call FUNC with arg ARG, catching any errors.
+   If there is no error, return the value returned by FUNC.
+   If there is an error, return zero after printing ERRSTRING
+    (which is in addition to the specific error message already printed).  */
+
+int
+catch_errors (func, arg, errstring)
+     int (*func) ();
+     int arg;
+     char *errstring;
+{
+  jmp_buf saved;
+  int val;
+
+  bcopy (to_top_level, saved, sizeof (jmp_buf));
+
+  if (setjmp (to_top_level) == 0)
+    val = (*func) (arg);
+  else
+    {
+      fprintf (stderr, "%s\n", errstring);
+      val = 0;
+    }
+
+  bcopy (saved, to_top_level, sizeof (jmp_buf));
+  return val;
+}
+
+/* Handler for SIGHUP.  */
+
+static void
+disconnect ()
+{
+  kill_inferior_fast ();
+  signal (SIGHUP, SIG_DFL);
+  kill (getpid (), SIGHUP);
 }
 
 main (argc, argv, envp)
@@ -117,6 +162,10 @@ main (argc, argv, envp)
   getwd (dirbuf);
   current_directory = dirbuf;
 
+  win_argc = &argc;
+  win_argv = argv;
+  win_prgm = argv[0];
+
 #ifdef SET_STACK_LIMIT_HUGE
   {
     struct rlimit rlim;
@@ -129,8 +178,6 @@ main (argc, argv, envp)
   }
 #endif /* SET_STACK_LIMIT_HUGE */
 
-  /* Run the init function of each source file */
-
   /* Look for flag arguments.  */
 
   for (i = 1; i < argc; i++)
@@ -141,10 +188,10 @@ main (argc, argv, envp)
 	inhibit_gdbinit = 1;
       else if (!strcmp (argv[i], "-nw"))
 	inhibit_windows = 1;
-      else if (!strcmp (argv[i], "-fullname"))
-	frame_file_full_name = 1;
       else if (!strcmp (argv[i], "-batch"))
 	batch = 1, quiet = 1;
+      else if (!strcmp (argv[i], "-fullname"))
+	frame_file_full_name = 1;
       else if (argv[i][0] == '-')
 	i++;
     }
@@ -156,6 +203,8 @@ main (argc, argv, envp)
 
   signal (SIGINT, request_quit);
   signal (SIGQUIT, SIG_IGN);
+  if (signal (SIGHUP, SIG_IGN) != SIG_IGN)
+    signal (SIGHUP, disconnect);
 
   if (!quiet)
     print_gdb_version ();
@@ -206,6 +255,17 @@ main (argc, argv, envp)
 	      else if (!strcmp (arg, "-d") || !strcmp (arg, "-dir")
 		       || !strcmp (arg, "-directory"))
 		directory_command (argv[i], 0);
+	      /* -cd FOO: specify current directory as FOO.
+		 GDB remembers the precise string FOO as the dirname.  */
+	      else if (!strcmp (arg, "-cd"))
+		{
+		  int len = strlen (argv[i]);
+		  current_directory = argv[i];
+		  if (len > 1 && current_directory[len - 1] == '/')
+		    current_directory = savestring (current_directory, len-1);
+		  chdir (current_directory);
+		  init_source_path ();
+		}
 	      /* -t /def/ttyp1: use /dev/ttyp1 for inferior I/O.  */
 	      else if (!strcmp (arg, "-t") || !strcmp (arg, "-tty"))
 		tty_command (argv[i], 0);
@@ -292,8 +352,7 @@ execute_command (p, from_tty)
       else if (c->class == (int) class_user)
 	{
 	  if (*p)
-	    error ("User-defined commands cannot take command-line arguments: \"%s\"",
-		   p);
+	    error ("User-defined commands cannot take arguments.");
 	  cmdlines = (struct command_line *) c->function;
 	  if (cmdlines == (struct command_line *) 0)
 	    /* Null command */
@@ -339,6 +398,7 @@ command_loop ()
     }
 }
 
+#ifdef SIGTSTP
 static void
 stop_sig ()
 {
@@ -352,6 +412,7 @@ stop_sig ()
   /* Forget about any previous command -- null line now will do nothing.  */
   *line = 0;
 }
+#endif /* SIGTSTP */
 
 /* Commands call this if they do not want to be repeated by null lines.  */
 
@@ -378,17 +439,25 @@ read_line (repeat)
   /* Control-C quits instantly if typed while in this loop
      since it should not wait until the user types a newline.  */
   immediate_quit++;
+#ifdef SIGTSTP
   signal (SIGTSTP, stop_sig);
+#endif
 
   while (1)
     {
       c = fgetc (instream);
       if (c == -1 || c == '\n')
 	break;
+      /* Ignore backslash-newline; keep adding to the same line.  */
       else if (c == '\\')
-	if ((c = fgetc (instream)) == '\n')
-	  continue;
-	else ungetc (c, instream);
+	{
+	  int c1 = fgetc (instream);
+	  if (c1 == '\n')
+	    continue;
+	  else
+	    ungetc (c1, instream);
+	}
+
       if (p - line == linesize - 1)
 	{
 	  linesize *= 2;
@@ -398,7 +467,10 @@ read_line (repeat)
 	}
       *p++ = c;
     }
+
+#ifdef SIGTSTP
   signal (SIGTSTP, SIG_DFL);
+#endif
   immediate_quit--;
 
   /* If we just got an empty line, and that is supposed
@@ -573,7 +645,7 @@ validate_comname (comname)
     {
       if (!(*p >= 'A' && *p <= 'Z')
 	  && !(*p >= 'a' && *p <= 'z')
-	  && !(*p >= '1' && *p <= '9')
+	  && !(*p >= '0' && *p <= '9')
 	  && *p != '-')
 	error ("Junk in argument list: \"%s\"", p);
       p++;
@@ -668,7 +740,7 @@ copying_info ()
 {
   immediate_quit++;
   printf ("		    GDB GENERAL PUBLIC LICENSE\n\
-\n		    (Clarified 11 Feb 1988)\
+		    (Clarified 11 Feb 1988)\n\
 \n\
  Copyright (C) 1988 Richard M. Stallman\n\
  Everyone is permitted to copy and distribute verbatim copies\n\
@@ -862,6 +934,17 @@ version_info ()
   immediate_quit--;
 }
 
+/* xgdb calls this to reprint the usual GDB prompt.  */
+
+void
+print_prompt ()
+{
+  printf ("%s", prompt);
+  fflush (stdout);
+}
+
+/* Command to specify a prompt string instead of "(gdb) ".  */
+
 static void
 set_prompt_command (text)
      char *text;
@@ -930,7 +1013,13 @@ pwd_command (arg, from_tty)
      int from_tty;
 {
   if (arg) error ("The \"pwd\" command does not take an argument: %s", arg);
-  printf ("Working directory %s.\n", dirbuf);
+  getwd (dirbuf);
+
+  if (strcmp (dirbuf, current_directory))
+    printf ("Working directory %s\n (canonically %s).\n",
+	    current_directory, dirbuf);
+  else
+    printf ("Working directory %s.\n", current_directory);
 }
 
 static void
@@ -938,16 +1027,57 @@ cd_command (dir, from_tty)
      char *dir;
      int from_tty;
 {
+  int len;
+  int change;
+
   if (dir == 0)
     error_no_arg ("new working directory");
 
+  len = strlen (dir);
+  dir = savestring (dir, len - (len > 1 && dir[len-1] == '/'));
+  if (dir[0] == '/')
+    current_directory = dir;
+  else
+    {
+      current_directory = concat (current_directory, "/", dir);
+      free (dir);
+    }
+
+  /* Now simplify any occurrences of `.' and `..' in the pathname.  */
+
+  change = 1;
+  while (change)
+    {
+      char *p;
+      change = 0;
+
+      for (p = current_directory; *p;)
+	{
+	  if (!strncmp (p, "/./", 2)
+	      && (p[2] == 0 || p[2] == '/'))
+	    strcpy (p, p + 2);
+	  else if (!strncmp (p, "/..", 3)
+		   && (p[3] == 0 || p[3] == '/')
+		   && p != current_directory)
+	    {
+	      char *q = p;
+	      while (q != current_directory && q[-1] != '/') q--;
+	      if (q != current_directory)
+		{
+		  strcpy (q-1, p+3);
+		  p = q-1;
+		}
+	    }
+	  else p++;
+	}
+    }
+
   if (chdir (dir) < 0)
     perror_with_name (dir);
-  getwd (dirbuf);
+
   if (from_tty)
     pwd_command ((char *) 0, 1);
 }
-
 
 /* Clean up on error during a "source" command.
    Close the file opened by the command
@@ -1019,12 +1149,11 @@ dump_me_command ()
       kill (getpid (), SIGQUIT);
     }
 }
-
 
 static void
 initialize_main ()
 {
-  prompt = savestring ("(gdb+) ", 7);
+  prompt = savestring ("(gdb) ", 6);
 
   /* Define the classes of commands.
      They will appear in the help list in the reverse of this order.  */
