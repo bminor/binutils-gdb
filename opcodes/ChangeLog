@@ -1,5 +1,8 @@
 2000-01-27  Nick Clifton  <nickc@redhat.com>
 
+	* arm-dis.c: (parse_disassembler_option): Rename to
+	parse_arm_disassembler_option and allow to be exported.
+
 	* disassemble.c (disassembler_usage): New function: Print out any
 	target specific disassembler options.
 	Call arm_disassembler_options() if the ARM architecture is being

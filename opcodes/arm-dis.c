@@ -88,7 +88,6 @@ static char * arm_shift[] =
 static void arm_decode_shift PARAMS ((long, fprintf_ftype, void *));
 static int  print_insn_arm   PARAMS ((bfd_vma, struct disassemble_info *, long));
 static int  print_insn_thumb PARAMS ((bfd_vma, struct disassemble_info *, long));
-static void parse_disassembler_option PARAMS ((char *));
 static void parse_disassembler_options PARAMS ((char *));
 static int  print_insn       PARAMS ((bfd_vma, struct disassemble_info *, boolean));
 
