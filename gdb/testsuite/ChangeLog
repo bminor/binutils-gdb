@@ -1,5 +1,7 @@
 Mon Jun 14 09:09:04 1993  Jim Kingdon  (kingdon@cygnus.com)
 
+	* gdb.t12/scope.exp: Test printing of variables before run.
+
 	* gdb.t12/{gdbme0.c,scope.exp}: Test for bug where parameters are
 	printed in wrong order due to sorting.
 
