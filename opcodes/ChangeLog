@@ -1,3 +1,11 @@
+2004-09-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.am (AUTOMAKE_OPTIONS): Require 1.9.
+	(CONFIG_STATUS_DEPENDENCIES): New.
+	(Makefile): Removed.
+	(config.status): Likewise.
+	* Makefile.in: Regenerated.
+
 2004-09-17  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am".

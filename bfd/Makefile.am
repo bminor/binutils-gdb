@@ -1,6 +1,6 @@
 ## Process this file with automake to generate Makefile.in
 
-AUTOMAKE_OPTIONS = cygnus
+AUTOMAKE_OPTIONS = 1.9 cygnus
 
 # Uncomment the following line when doing a release.
 # RELEASE=y
@@ -575,6 +575,14 @@ OPTIONAL_BACKENDS_CFILES = \
 	trad-core.c \
 	cisco-core.c
 
+# We want to rerun configure if configure.in, config.bfd or
+# configure.host change. configure.in is needed since the version
+# number in Makefile comes from configure.in.
+CONFIG_STATUS_DEPENDENCIES = \
+	$(srcdir)/configure.in \
+	$(srcdir)/config.bfd \
+	$(srcdir)/configure.host
+
 # These are defined by configure.in:
 WORDSIZE = @wordsize@
 ALL_BACKENDS = @all_backends@
@@ -763,8 +771,6 @@ uninstall_libbfd:
 	rm -f $(DESTDIR)$(bfdincludedir)/symcat.h
 	rm -f $(DESTDIR)$(bfdincludedir)/bfdlink.h
 
-Makefile: $(srcdir)/configure.in
-
 # Have to get rid of DEP1 here so that "$?" later includes all of $(CFILES).
 DEP: dep.sed $(CFILES) $(HFILES) bfd.h
 	rm -f DEP1
@@ -870,10 +876,6 @@ CLEANFILES = bfd.h dep.sed stmp-bfd-h DEP DEPA DEP1 DEP2 libbfd.a stamp-lib \
 	stmp-bin2-h stmp-lbfd-h stmp-lcoff-h
 
 DISTCLEANFILES = $(BUILD_CFILES) $(BUILD_HFILES)
-
-# We want to rerun configure if configure, config.bfd or configure.host change.
-config.status: $(srcdir)/configure $(srcdir)/config.bfd $(srcdir)/configure.host
-	$(SHELL) ./config.status --recheck
 
 bfdver.h: $(srcdir)/version.h $(srcdir)/Makefile.in
 	@echo "creating $@"

@@ -229,7 +229,7 @@ target_cpu = @target_cpu@
 target_noncanonical = @target_noncanonical@
 target_os = @target_os@
 target_vendor = @target_vendor@
-AUTOMAKE_OPTIONS = cygnus
+AUTOMAKE_OPTIONS = 1.9 cygnus
 SUBDIRS = po
 INCDIR = $(srcdir)/../include
 BFDDIR = $(srcdir)/../bfd
@@ -502,6 +502,10 @@ ALL_MACHINES = \
 	z8k-dis.lo
 
 OFILES = @BFD_MACHINES@
+
+# We should reconfigure whenever bfd/configure.in changes, because
+# that's where the version number in Makefile comes from.
+CONFIG_STATUS_DEPENDENCIES = $(BFDDIR)/configure.in
 INCLUDES = -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(INCDIR) -I$(BFDDIR) @HDEFINES@ -I$(srcdir)/../intl -I../intl
 libopcodes_la_SOURCES = dis-buf.c disassemble.c dis-init.c
 # It's desirable to list ../bfd/libbfd.la in DEPENDENCIES and LIBADD.
@@ -571,6 +575,15 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	cd $(top_srcdir) && \
 	  $(AUTOMAKE) --cygnus  Makefile
 .PRECIOUS: Makefile
+Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
+	@case '$?' in \
+	  *config.status*) \
+	    echo ' $(SHELL) ./config.status'; \
+	    $(SHELL) ./config.status;; \
+	  *) \
+	    echo ' cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__depfiles_maybe)'; \
+	    cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__depfiles_maybe);; \
+	esac;
 
 $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	$(SHELL) ./config.status --recheck
@@ -878,11 +891,6 @@ po/POTFILES.in: @MAINT@ Makefile
 	for f in $(POTFILES); do echo $$f; done | LC_COLLATE= sort > tmp \
 	  && mv tmp $(srcdir)/po/POTFILES.in
 
-# We should reconfigure whenever bfd/configure.in changes, because
-# that's where the version number comes from.
-config.status: $(srcdir)/configure $(srcdir)/../bfd/configure.in
-	$(SHELL) ./config.status --recheck
-
 install-bfdlibLTLIBRARIES: @INSTALL_LIBBFD_TRUE@install_libopcodes
 	@$(NORMAL_INSTALL)
 
@@ -985,8 +993,6 @@ s390-opc.tab: s390-mkopc s390-opc.txt
 
 sh-dis.lo: sh-dis.c
 	$(LIBTOOL) --mode=compile $(COMPILE) -c @archdefs@ $<
-
-Makefile: $(BFDDIR)/configure.in
 
 # This dependency stuff is copied from BFD.
 

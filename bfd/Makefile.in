@@ -246,7 +246,7 @@ target_os = @target_os@
 target_vendor = @target_vendor@
 tdefaults = @tdefaults@
 wordsize = @wordsize@
-AUTOMAKE_OPTIONS = cygnus
+AUTOMAKE_OPTIONS = 1.9 cygnus
 
 # Uncomment the following line when doing a release.
 # RELEASE=y
@@ -815,6 +815,15 @@ OPTIONAL_BACKENDS_CFILES = \
 	cisco-core.c
 
 
+# We want to rerun configure if configure.in, config.bfd or
+# configure.host change. configure.in is needed since the version
+# number in Makefile comes from configure.in.
+CONFIG_STATUS_DEPENDENCIES = \
+	$(srcdir)/configure.in \
+	$(srcdir)/config.bfd \
+	$(srcdir)/configure.host
+
+
 # These are defined by configure.in:
 WORDSIZE = @wordsize@
 ALL_BACKENDS = @all_backends@
@@ -908,6 +917,15 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	cd $(top_srcdir) && \
 	  $(AUTOMAKE) --cygnus  Makefile
 .PRECIOUS: Makefile
+Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
+	@case '$?' in \
+	  *config.status*) \
+	    echo ' $(SHELL) ./config.status'; \
+	    $(SHELL) ./config.status;; \
+	  *) \
+	    echo ' cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__depfiles_maybe)'; \
+	    cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__depfiles_maybe);; \
+	esac;
 
 $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	$(SHELL) ./config.status --recheck
@@ -1323,8 +1341,6 @@ uninstall_libbfd:
 	rm -f $(DESTDIR)$(bfdincludedir)/symcat.h
 	rm -f $(DESTDIR)$(bfdincludedir)/bfdlink.h
 
-Makefile: $(srcdir)/configure.in
-
 # Have to get rid of DEP1 here so that "$?" later includes all of $(CFILES).
 DEP: dep.sed $(CFILES) $(HFILES) bfd.h
 	rm -f DEP1
@@ -1415,10 +1431,6 @@ stmp-lcoff-h: $(LIBCOFF_H_FILES)
 	cp $(docdir)/libcoff.h libcoff.h-new
 	$(SHELL) $(srcdir)/../move-if-change libcoff.h-new $(srcdir)/libcoff.h
 	touch stmp-lcoff-h
-
-# We want to rerun configure if configure, config.bfd or configure.host change.
-config.status: $(srcdir)/configure $(srcdir)/config.bfd $(srcdir)/configure.host
-	$(SHELL) ./config.status --recheck
 
 bfdver.h: $(srcdir)/version.h $(srcdir)/Makefile.in
 	@echo "creating $@"

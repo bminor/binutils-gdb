@@ -1,6 +1,6 @@
 ## Process this file with automake to generate Makefile.in
 
-AUTOMAKE_OPTIONS = cygnus
+AUTOMAKE_OPTIONS = 1.9 cygnus
 
 SUBDIRS = po
 
@@ -281,6 +281,10 @@ ALL_MACHINES = \
 
 OFILES = @BFD_MACHINES@
 
+# We should reconfigure whenever bfd/configure.in changes, because
+# that's where the version number in Makefile comes from.
+CONFIG_STATUS_DEPENDENCIES = $(BFDDIR)/configure.in
+
 INCLUDES = -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(INCDIR) -I$(BFDDIR) @HDEFINES@ -I$(srcdir)/../intl -I../intl
 
 disassemble.lo: disassemble.c $(INCDIR)/dis-asm.h
@@ -318,11 +322,6 @@ POTFILES = $(HFILES) $(CFILES)
 po/POTFILES.in: @MAINT@ Makefile
 	for f in $(POTFILES); do echo $$f; done | LC_COLLATE= sort > tmp \
 	  && mv tmp $(srcdir)/po/POTFILES.in
-
-# We should reconfigure whenever bfd/configure.in changes, because
-# that's where the version number comes from.
-config.status: $(srcdir)/configure $(srcdir)/../bfd/configure.in
-	$(SHELL) ./config.status --recheck
 
 install-bfdlibLTLIBRARIES: @INSTALL_LIBBFD_TRUE@install_libopcodes
 	@$(NORMAL_INSTALL)
@@ -464,8 +463,6 @@ s390-opc.tab: s390-mkopc s390-opc.txt
 
 sh-dis.lo: sh-dis.c
 	$(LIBTOOL) --mode=compile $(COMPILE) -c @archdefs@ $<
-
-Makefile: $(BFDDIR)/configure.in
 
 # This dependency stuff is copied from BFD.
 
