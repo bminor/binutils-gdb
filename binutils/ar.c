@@ -46,6 +46,12 @@ extern int errno;
 #endif
 #define BUFSIZE 8192
 
+#ifdef __GO32___
+#define EXT_NAME_LEN 3 /* bufflen of addition to name if it's MS-DOS */
+#else
+#define EXT_NAME_LEN 6 /* ditto for *NIX */
+#endif
+
 /* Kludge declaration from BFD!  This is ugly!  FIXME!  XXX */
 
 struct ar_hdr *
@@ -76,7 +82,6 @@ ranlib_only PARAMS ((char *archname));
 
 /** Globals and flags */
 
-char           *program_name = NULL;
 bfd            *inarch;		/* The input arch we're manipulating */
 
 int mri_mode;
@@ -119,26 +124,6 @@ char           *posname = NULL;
 enum pos {
     pos_default, pos_before, pos_after, pos_end
 }               postype = pos_default;
-
-#ifdef GNU960
-	char *default_target;
-
-	void
-	gnu960_verify_target(abfd)
-	bfd *abfd;
-	{
-	    if ( abfd->format == bfd_unknown ){
-		bfd_check_format(abfd, bfd_object);
-		/* Don't really care if it's an object --
-		 * just want to get the correct xvec.
-		 */
-	    }
-	    if ( !BFD_COFF_FILE_P(abfd) ){
-		fatal( "'%s' not a COFF file -- operation aborted",
-							abfd->filename );
-	    }
-	}
-#endif
 
 int interactive = 0;
 void
@@ -192,7 +177,7 @@ DEFUN(map_over_members,(function, files, count),
       }
     }
     if (!found)
-     fprintf(stderr, "No entry %s in archive.\n", *files);
+     fprintf(stderr, "no entry %s in archive\n", *files);
   }
 }
 
@@ -204,16 +189,21 @@ extern char *program_version;
 void
 do_show_version ()
 {
-  printf ("%s version %s\n", program_name, program_version);
+  printf ("GNU %s version %s\n", program_name, program_version);
+  exit (0);
 }
 
 void
 usage ()
 {
-  fprintf(stderr, "ar %s\n\
-Usage: %s [-]{dmpqrtx}[abcilosuv] [member-name] archive-file file...\n\
+  if (is_ranlib == 0)
+    fprintf(stderr, "\
+Usage: %s [-]{dmpqrtx}[abcilosuvV] [member-name] archive-file file...\n\
        %s -M [<mri-script]\n",
-	  program_version, program_name, program_name);
+	    program_name, program_name);
+  else
+    fprintf(stderr, "\
+Usage: %s [-vV] archive\n", program_name);
   exit(1);
 }
 
@@ -240,10 +230,6 @@ main(argc, argv)
 
   bfd_init();
   show_version = 0;
-#ifdef GNU960
-  check_v960( argc, argv );
-  default_target = bfd_make_targ_name(BFD_COFF_FORMAT,HOST_BYTE_ORDER_BIG_P);
-#endif
 
   program_name = argv[0];
 
@@ -253,17 +239,16 @@ main(argc, argv)
   else
    ++temp;
   if (is_ranlib > 0 || (is_ranlib < 0 && strcmp(temp, "ranlib") == 0)) {
-    if (argc < 2)
+    is_ranlib = 1;
+    if (argc < 2 || argc > 3)
       usage ();
     arg_ptr = argv[1];
-    if (strcmp(argv[1], "-V") == 0 || strcmp(argv[1], "-v") == 0) {
+    if (strcmp(argv[1], "-V") == 0 || strcmp(argv[1], "-v") == 0)
       do_show_version();
-      if (argc == 2)
-	exit(0);
-      arg_ptr = argv[2];
-    }
     ranlib_only(arg_ptr);
   }
+  else
+    is_ranlib = 0;
 
   if (argc == 2 && strcmp(argv[1],"-M") == 0) {
     mri_emul();
@@ -278,7 +263,7 @@ main(argc, argv)
   if (*arg_ptr == '-')
    ++arg_ptr;			/* compatibility */
 
-  while (c = *arg_ptr++) {
+  while ((c = *arg_ptr++) != '\0') {
     switch (c) {
      case 'd':
      case 'm':
@@ -288,7 +273,7 @@ main(argc, argv)
      case 't':
      case 'x':
       if (operation != none)
-       fatal("two different operation switches specified");
+       fatal("two different operation options specified");
       switch (c) {
        case 'd':
 	operation = delete;
@@ -346,22 +331,19 @@ main(argc, argv)
       postype = pos_before;
       break;
      case 'M':
-
       mri_mode = 1;
       break;
      default:
-      fatal("invalid option %c", c);
+      fprintf(stderr, "%s: illegal option -- %c", program_name, c);
+      usage ();
     }
   }
 
   if (show_version)
-     do_show_version();
+    do_show_version();
 
   if (argc < 3)
-    if (show_version)
-       exit(0);
-    else
-      usage ();
+    usage ();
 
   if (mri_mode) {
     mri_emul();
@@ -369,29 +351,30 @@ main(argc, argv)
   else {
     if ((operation == none || operation == print_table) 
 	&& write_armap == 1)
-     ranlib_only(argv[2]);
+      ranlib_only(argv[2]);
 
     if (operation == none)
-     fatal("no operation specified");
+      fatal("no operation specified");
 
     if (newer_only && operation != replace)
-     fatal("'u' only meaningful with 'r' option.");
+      fatal("`u' is only meaningful with the `r' option.");
 
     arg_index = 2;
 
     if (postype != pos_default)
-     posname = argv[arg_index++];
+      posname = argv[arg_index++];
 
     inarch_filename = argv[arg_index++];
 
     files = arg_index < argc ? argv + arg_index : NULL;
 
-    if (operation == quick_append) {
-      if (files != NULL)
-       do_quick_append(inarch_filename, files);
-      exit(0);
-    }
-
+    if (operation == quick_append)
+      {
+	/* Note that quick appending to a non-existent archive creates it,
+	   even if there are no files to append. */
+	do_quick_append(inarch_filename, files);
+	exit(0);
+      }
 
     open_inarch(inarch_filename);
 
@@ -426,7 +409,9 @@ main(argc, argv)
 
       /* Shouldn't happen! */
      default:
-      fprintf(stderr, "Sorry; this option not implemented.\n");
+      fprintf(stderr, "%s: internal error -- this option not implemented\n",
+	      program_name);
+      exit (1);
     }
   }
   return (0);
@@ -454,37 +439,43 @@ open_inarch(archive_filename)
     bfd            *next_one;
     struct stat     sbuf;
     bfd_error = no_error;
+
     if (stat(archive_filename, &sbuf) != 0) {
+
+#ifndef __GO32__
+
+/* KLUDGE ALERT! Temporary fix until I figger why
+ * stat() is wrong ... think it's buried in GO32's IDT
+ * - Jax
+ */
 	if (errno != ENOENT)
 	    bfd_fatal(archive_filename);
+#endif
+
 	if (!operation_alters_arch) {
-	  fprintf (stderr, "%s: %s not found.\n", program_name,
-		   archive_filename);
+	  fprintf (stderr, "%s: ", program_name);
+	  perror (archive_filename);
 	  maybequit();
 	  return 0;
 	}	
 
 	/* This routine is one way to forcibly create the archive. */
+
 	do_quick_append(archive_filename, 0);
     }
 
-#ifdef GNU960
-    inarch = bfd_openr(archive_filename, default_target);
-#else
     inarch = bfd_openr(archive_filename, NULL);
-#endif
     if (inarch == NULL) {
+
       bloser:
+
         fprintf (stderr, "%s: ", program_name);
 	bfd_perror(archive_filename);
 	exit(1);
     }
 
     if (bfd_check_format(inarch, bfd_archive) != true)
-	fatal("File %s is not an archive.", archive_filename);
-#ifdef GNU960
-    gnu960_verify_target(inarch);	/* Exits on failure */
-#endif
+	fatal("%s is not an archive", archive_filename);
     last_one = &(inarch->next);
     /* Read all the contents right away, regardless. */
     for (next_one = bfd_openr_next_archived_file(inarch, NULL);
@@ -511,7 +502,7 @@ print_contents(abfd)
     struct stat     buf;
     long            size;
     if (bfd_stat_arch_elt(abfd, &buf) != 0)
-	fatal("Internal stat error on %s", abfd->filename);
+	fatal("internal stat error on %s", abfd->filename);
 
     if (verbose)
 	printf("\n<member %s>\n\n", abfd->filename);
@@ -530,7 +521,7 @@ print_contents(abfd)
 							   abstraction!  */
 
 	if (nread != tocopy)
-	    fatal("file %s not a valid archive", abfd->my_archive->filename);
+	    fatal("%s is not a valid archive", abfd->my_archive->filename);
 	fwrite(cbuf, 1, nread, stdout);
 	ncopied += tocopy;
     }
@@ -561,7 +552,7 @@ extract_file(abfd)
     long            size;
     struct stat     buf;
     if (bfd_stat_arch_elt(abfd, &buf) != 0)
-	fatal("Internal stat error on %s", abfd->filename);
+	fatal("internal stat error on %s", abfd->filename);
     size = buf.st_size;
 
     if (verbose)
@@ -585,7 +576,7 @@ extract_file(abfd)
 
 	nread = bfd_read(cbuf, 1, tocopy, abfd);
 	if (nread != tocopy)
-	    fatal("file %s not a valid archive", abfd->my_archive->filename);
+	    fatal("%s is not a valid archive", abfd->my_archive->filename);
 
 	/* See comment above; this saves disk arm motion */
 	if (!ostream) {
@@ -647,8 +638,18 @@ do_quick_append(archive_filename, files_to_append)
     bfd_error = no_error;
 
     if (stat(archive_filename, &sbuf) != 0) {
+
+#ifndef __GO32__
+
+/* KLUDGE ALERT! Temporary fix until I figger why
+ * stat() is wrong ... think it's buried in GO32's IDT
+ * - Jax
+ */
+
 	if (errno != ENOENT)
 	    bfd_fatal(archive_filename);
+#endif
+
 	newfile = true;
     }
 
@@ -659,12 +660,7 @@ do_quick_append(archive_filename, files_to_append)
 	exit(1);
     }
 
-    /* bletch */
-#ifdef GNU960
-    temp = bfd_openr(archive_filename, default_target);
-#else
     temp = bfd_openr(archive_filename, NULL);
-#endif
     if (temp == NULL) {
         fprintf (stderr, "%s: ", program_name);
 	bfd_perror(archive_filename);
@@ -672,15 +668,13 @@ do_quick_append(archive_filename, files_to_append)
     }
     if (newfile == false) {
 	if (bfd_check_format(temp, bfd_archive) != true)
-	    fatal("File %s is not an archive.", archive_filename);
-#ifdef GNU960
-	gnu960_verify_target(temp);	/* Exits on failure */
-#endif
+	    fatal("%s is not an archive", archive_filename);
     }
     else {
 	fwrite(ARMAG, 1, SARMAG, ofile);
 	if (!silent_create)
-	    fprintf(stderr, "%s: creating %s\n", program_name, archive_filename);
+	    fprintf(stderr, "%s: creating %s\n",
+		    program_name, archive_filename);
     }
 
     /* assume it's an achive, go straight to the end, sans $200 */
@@ -736,11 +730,17 @@ write_archive()
 {
     bfd            *obfd;
     int             namelen = strlen(inarch->filename);
-    char           *new_name = xmalloc(namelen + 6);
+    char           *new_name = xmalloc(namelen + EXT_NAME_LEN);
     bfd            *contents_head = inarch->next;
 
 	strcpy(new_name, inarch->filename);
+
+#ifdef __GO32__	/* avoid long .extensions for MS-DOS */
+	strcpy(new_name + namelen, "-a");
+#else
 	strcpy(new_name + namelen, "-art");
+#endif
+
 	obfd = bfd_openw(new_name,
 		 /* FIXME: violates abstraction; need a better protocol */
 			 (inarch->xvec ? bfd_get_target(inarch) : NULL));
@@ -887,8 +887,8 @@ move_members(files_to_move)
 	    }
 	    current_ptr_ptr = &((*current_ptr_ptr)->next);
 	}
-	fprintf(stderr, "No entry %s in archive %s!\n",
-		*files_to_move, inarch->filename);
+	fprintf(stderr, "%s: no entry %s in archive %s!\n",
+		program_name, *files_to_move, inarch->filename);
 	exit(1);
 next_file:;
     }
@@ -921,7 +921,7 @@ replace_members(files_to_move)
 		    if (current->arelt_data == NULL) {
 		      /* This can only happen if you specify a file on the
 			 command line more than once. */
-		      fprintf (stderr, "Duplicate file specified: %s -- skipping.\n", *files_to_move);
+		      fprintf (stderr, "%s: duplicate file specified: %s -- skipping\n", program_name, *files_to_move);
 		      goto next_file;
 		    }
 
@@ -931,7 +931,7 @@ replace_members(files_to_move)
 			goto next_file;
 		    }
 		    if (bfd_stat_arch_elt(current, &asbuf) != 0)
-			fatal("Internal stat error on %s", current->filename);
+			fatal("internal stat error on %s", current->filename);
 
 		    if (fsbuf.st_mtime <= asbuf.st_mtime)
 			goto next_file;
@@ -944,12 +944,10 @@ replace_members(files_to_move)
 		temp = *after_bfd;
 		*after_bfd = bfd_openr(*files_to_move, NULL);
 		if (*after_bfd == (bfd *) NULL) {
-		    fprintf(stderr, "Can't open file %s\n", *files_to_move);
+		    fprintf(stderr, "%s: ", program_name);
+		    bfd_perror (*files_to_move);
 		    exit(1);
 		}
-#ifdef GNU960
-		gnu960_verify_target(*after_bfd);	/* Exits on failure */
-#endif
 		(*after_bfd)->next = temp;
 
 		if (verbose) {
@@ -967,12 +965,10 @@ replace_members(files_to_move)
 	temp = *after_bfd;
 	*after_bfd = bfd_openr(*files_to_move, NULL);
 	if (*after_bfd == (bfd *) NULL) {
-	    fprintf(stderr, "Can't open file %s\n", *files_to_move);
-	    exit(1);
+	  fprintf(stderr, "%s: ", program_name);
+	  bfd_perror (*files_to_move);
+	  exit(1);
 	}
-#ifdef GNU960
-	gnu960_verify_target(*after_bfd);	/* Exits on failure */
-#endif
 	if (verbose) {
 	    printf("c - %s\n", *files_to_move);
 	}
