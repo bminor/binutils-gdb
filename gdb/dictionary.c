@@ -60,10 +60,13 @@ enum dict_type
     DICT_LINEAR,
     /* Symbols are stored in an expandable array.  */
     DICT_LINEAR_EXPANDABLE,
+#if 0
     /* Symbols are stored in a fixed-size block.  */
     DICT_BLOCK,
     /* Symbols are stored in an expandable block.  */
     DICT_BLOCK_EXPANDABLE,
+    
+#endif
   };
 
 /* The virtual function table.  */
@@ -98,6 +101,26 @@ struct dictionary_hashed
   struct symbol **buckets;
 };
 
+struct dictionary_linear
+{
+  int nsyms;
+  struct symbol **syms;
+};
+
+/* In this implementation, symbols are stored in an array that grows
+   as necessary.  Note: the entries are ordered so that its initial
+   segment matches dictionary_linear.  */
+
+struct dictionary_linear_expandable
+{
+  /* How many symbols we currently have.  */
+  int nsyms;
+  struct symbol **syms;
+  /* How many symbols we can store before needing to reallocate.  */
+  int capacity;
+};
+
+#if 0
 struct dictionary_block
 {
   struct block *block;
@@ -106,8 +129,9 @@ struct dictionary_block
 struct dictionary_block_expandable
 {
   struct block *block;
-  unsigned int maxsyms;
+  unsigned int capacity;
 };
+#endif
 
 /* And now, the star of our show.  */
 
@@ -117,8 +141,12 @@ struct dictionary
   union
   {
     struct dictionary_hashed hashed;
+    struct dictionary_linear linear;
+    struct dictionary_linear_expandable linear_expandable;
+#if 0
     struct dictionary_block block;
     struct dictionary_block_expandable block_expandable;
+#endif
   }
   data;
 };
@@ -131,16 +159,32 @@ struct dictionary
 #define DICT_HASHED_BUCKETS(d)		(d)->data.hashed.buckets
 #define DICT_HASHED_BUCKET(d,i)		DICT_HASHED_BUCKETS (d) [i]
 
-/* This can be used for block_expandables, too.  */
+/* These can be used for DICT_LINEAR_EXPANDABLEs, too.  */
+
+#define DICT_LINEAR_NSYMS(d)		(d)->data.linear.nsyms
+#define DICT_LINEAR_SYMS(d)		(d)->data.linear.syms
+#define DICT_LINEAR_SYM(d,i)		DICT_LINEAR_SYMS (d) [i]
+
+#define DICT_LINEAR_EXPANDABLE_CAPACITY(d) \
+		(d)->data.linear_expandable.capacity
+
+#if 0
+/* This can be used for DICT_BLOCK_EXPANDABLES, too.  */
 
 #define DICT_BLOCK_BLOCK(d)		(d)->data.block.block
 
-#define DICT_BLOCK_EXPANDABLE_MAXSYMS(d) (d)->data.block_expandable.maxsyms
+#define DICT_BLOCK_EXPANDABLE_CAPACITY(d) (d)->data.block_expandable.capacity
 
-/* The initial size of a DICT_HASHED dictionary.  */
+#endif
+/* The initial size of a DICT_LINEAR_EXPANDABLE dictionary.  */
 
-#define DICT_HASHED_INITIAL_MAXSYMS 10
-#define DICT_BLOCK_EXPANDABLE_INITIAL_MAXSYMS DICT_HASHED_INITIAL_MAXSYMS
+#define DICT_LINEAR_EXPANDABLE_INITIAL_CAPACITY 10
+
+#if 0
+#define DICT_BLOCK_EXPANDABLE_INITIAL_CAPACITY \
+		DICT_LINEAR_EXPANDABLE_INITIAL_CAPACITY
+
+#endif
 
 /* This calculates the number of buckets we'll use in a hashtable,
    given the number of symbols that it will contain.  */
@@ -165,8 +209,10 @@ struct dictionary
 
 static struct symbol *iterator_hashed_advance (struct dict_iterator *iter);
 
+#if 0
 static struct symbol *iterator_block_hashed_advance (struct dict_iterator
 						     *iter);
+#endif
 
 /* Declarations of functions for vtbls.  */
 
@@ -189,6 +235,27 @@ static struct symbol *iterator_first_hashed (const struct dictionary *dict,
 
 static struct symbol *iterator_next_hashed (struct dict_iterator *iterator);
 
+/* Functions for DICT_LINEAR and DICT_LINEAR_EXPANDABLE
+   dictionaries.  */
+
+static struct symbol *lookup_linear (const struct dictionary *dict,
+				     const char *name,
+				     const char *mangled_name,
+				     const namespace_enum namespace);
+
+static struct symbol *iterator_first_linear (const struct dictionary *dict,
+					     struct dict_iterator *iterator);
+
+static struct symbol *iterator_next_linear (struct dict_iterator *iterator);
+
+/* Functions only for DICT_LINEAR_EXPANDABLE.  */
+
+static void free_linear_expandable (struct dictionary *dict);
+
+static void add_symbol_linear_expandable (struct dictionary *dict,
+					  struct symbol *sym);
+
+#if 0
 /* Functions for blocks.  */
 
 static struct symbol *lookup_block (const struct dictionary *dict,
@@ -204,25 +271,42 @@ static struct symbol *iterator_first_block (const struct dictionary *dict,
 
 static struct symbol *iterator_next_block (struct dict_iterator *iterator);
 
+#endif
+
 /* Various vtbls that we'll actually use.  */
 
-const struct dict_vtbl dict_hashed_vtbl =
+static const struct dict_vtbl dict_hashed_vtbl =
   {
     DICT_HASHED, free_obstack, lookup_hashed, iterator_first_hashed,
     iterator_next_hashed, add_symbol_nonexpandable,
   };
 
-const struct dict_vtbl dict_block_vtbl =
+static const struct dict_vtbl dict_linear_vtbl =
+  {
+    DICT_LINEAR, free_obstack, lookup_linear, iterator_first_linear,
+    iterator_next_linear, add_symbol_nonexpandable,
+  };
+
+static const struct dict_vtbl dict_linear_expandable_vtbl =
+  {
+    DICT_LINEAR_EXPANDABLE, free_linear_expandable, lookup_linear,
+    iterator_first_linear, iterator_next_linear,
+    add_symbol_linear_expandable,
+  };
+
+#if 0
+static const struct dict_vtbl dict_block_vtbl =
   {
     DICT_BLOCK, free_block, lookup_block, iterator_first_block,
     iterator_next_block, add_symbol_nonexpandable,
   };
 
-const struct dict_vtbl dict_block_expandable_vtbl =
+static const struct dict_vtbl dict_block_expandable_vtbl =
   {
     DICT_BLOCK_EXPANDABLE, free_block, lookup_block, iterator_first_block,
     iterator_next_block, add_symbol_nonexpandable,
   };
+#endif
 
 /* The creation functions.  */
 
@@ -276,7 +360,6 @@ dict_create_hashed (struct obstack *obstack,
   return retval;
 }
 
-#if 0
 /* Create a dictionary implemented via a fixed-size array.  All memory
    it uses is allocated on OBSTACK; the environment is initialized
    from the SYMBOL_LIST.  The symbols are ordered in the same order
@@ -285,6 +368,42 @@ dict_create_hashed (struct obstack *obstack,
 struct dictionary *
 dict_create_linear (struct obstack *obstack,
 		    const struct pending *symbol_list)
+{
+  struct dictionary *retval;
+  int nsyms, i, j;
+  struct symbol **syms;
+  const struct pending *list_counter;
+
+  retval = obstack_alloc (obstack, sizeof (struct dictionary));
+  DICT_VTBL (retval) = &dict_linear_vtbl;
+
+  /* Calculate the number of symbols, and allocate space for them.  */
+  for (nsyms = 0, list_counter = symbol_list;
+       list_counter != NULL;
+       nsyms += list_counter->nsyms, list_counter = list_counter->next)
+    {
+      /* EMPTY */ ;
+    }
+  DICT_LINEAR_NSYMS (retval) = nsyms;
+  syms = obstack_alloc (obstack, nsyms * sizeof (struct symbol *));
+  DICT_LINEAR_SYMS (retval) = syms;
+
+  /* Now fill in the symbols.  Start filling in from the back, so as
+     to preserve the original order of the symbols.  */
+  for (list_counter = symbol_list, j = nsyms - 1;
+       list_counter != NULL;
+       list_counter = list_counter->next)
+    {
+      for (i = list_counter->nsyms - 1;
+	   i >= 0;
+	   --i, --j)
+	{
+	  syms[j] = list_counter->symbol[i];
+	}
+    }
+
+  return retval;
+}
 
 /* Create a dictionary implemented via an array that grows as
    necessary.  The dictionary is initially empty; to add symbols to
@@ -299,8 +418,22 @@ dict_create_linear (struct obstack *obstack,
 
 struct dictionary *
 dict_create_linear_expandable (void)
-#endif
+{
+  struct dictionary *retval;
 
+  retval = xmalloc (sizeof (struct dictionary));
+  DICT_VTBL (retval) = &dict_linear_expandable_vtbl;
+  DICT_LINEAR_NSYMS (retval) = 0;
+  DICT_LINEAR_EXPANDABLE_CAPACITY (retval)
+    = DICT_LINEAR_EXPANDABLE_INITIAL_CAPACITY;
+  DICT_LINEAR_SYMS (retval)
+    = xmalloc (DICT_LINEAR_EXPANDABLE_CAPACITY (retval)
+	       * sizeof (struct symbol *));
+
+  return retval;
+}
+
+#if 0
 /* Allocate a dictionary in which symbol lookup is implemented via
    BLOCK.  Needs to be freed by dict_free; I won't worry about that,
    however, since this will go away soon.  */
@@ -324,10 +457,12 @@ dict_create_block_expandable (struct block *block)
   DICT_VTBL (retval) = &dict_block_expandable_vtbl;
   DICT_BLOCK_BLOCK (retval) = block;
   /* We'll resize the block the first time we add a symbol to it.  */
-  DICT_BLOCK_EXPANDABLE_MAXSYMS (retval) = 0;
+  DICT_BLOCK_EXPANDABLE_CAPACITY (retval) = 0;
 
   return retval;
 }
+
+#endif
 
 /* The functions providing the dictionary interface.  */
 
@@ -491,6 +626,150 @@ iterator_hashed_advance (struct dict_iterator *iterator)
 
   return NULL;
 }
+
+/* Functions for DICT_LINEAR and DICT_LINEAR_EXPANDABLE.  */
+
+static struct symbol *
+lookup_linear (const struct dictionary *dict,
+	       const char *name,
+	       const char *mangled_name,
+	       const namespace_enum namespace)
+{
+  /* More or less copied from lookup_block_symbol() in symtab.c,
+     including the comments.  */
+
+  int i, nsyms = DICT_LINEAR_NSYMS (dict);
+  struct symbol *sym, *sym_found = NULL;
+  
+  for (i = 0; i < nsyms; ++i)
+    {
+      sym = DICT_LINEAR_SYM (dict, i);
+
+      /* NOTE: carlton/2002-09-24: I copied the following comment here
+	 from the sorted linear symbol case of lookup_block_symbol.
+	 But Jim Blandy complained, and said it didn't belong in the
+	 non-sorted case.  (Understandable, since it refers to
+	 sorting!)  I wish I understood exactly what its purpose
+	 had been.  */
+
+      /* If there is more than one symbol with the right name and
+	 namespace, we return the first one; I believe it is now
+	 impossible for us to encounter two symbols with the same name
+	 and namespace here, because blocks containing argument
+	 symbols are no longer sorted.  The exception is for C++,
+	 where multiple functions (cloned constructors / destructors,
+	 in particular) can have the same demangled name.  So if we
+	 have a particular mangled name to match, try to do so.  */
+      if (SYMBOL_NAMESPACE (sym) == namespace
+	  && (mangled_name
+	      ? strcmp (SYMBOL_NAME (sym), mangled_name) == 0
+	      : SYMBOL_MATCHES_NAME (sym, name)))
+	{
+
+#if 0
+	  /* FIXME: carlton/2002-09-11: According to
+	     <http://sources.redhat.com/ml/gdb/2002-03/msg00232.html>,
+	     the SYMBOL_ALIASES stuff is unused, and it makes the code
+	     messier, so I'm #if'ing it out here.  */
+
+	  /* If SYM has aliases, then use any alias that is active at
+	     the current PC.  If no alias is active at the current PC,
+	     then use the main symbol.
+	     
+	     ?!? Is checking the current pc correct?  Is this routine
+	     ever called to look up a symbol from another context?
+		   
+	     FIXME: No, it's not correct.  If someone sets a
+	     conditional breakpoint at an address, then the
+	     breakpoint's `struct expression' should refer to the
+	     `struct symbol' appropriate for the breakpoint's address,
+	     which may not be the PC.
+		   
+	     Even if it were never called from another context, it's
+	     totally bizarre for lookup_symbol's behavior to depend on
+	     the value of the inferior's current PC.  We should pass
+	     in the appropriate PC as well as the block.  The
+	     interface to lookup_symbol should change to require the
+	     caller to provide a PC.  */
+
+	  if (SYMBOL_ALIASES (sym))
+	    sym = find_active_alias (sym, read_pc ());
+#endif /* 0 */
+	  /* NOTE: carlton/2002-09-11: I wish I understood exactly the
+	     situations where this next bit is important.  Sigh.  */
+		
+	  /* Note that parameter symbols do not always show up last in
+	     the list; this loop makes sure to take anything else
+	     other than parameter symbols first; it only uses
+	     parameter symbols as a last resort.  Note that this only
+	     takes up extra computation time on a match.  */
+
+	  sym_found = sym;
+	  if (SYMBOL_CLASS (sym) != LOC_ARG &&
+	      SYMBOL_CLASS (sym) != LOC_LOCAL_ARG &&
+	      SYMBOL_CLASS (sym) != LOC_REF_ARG &&
+	      SYMBOL_CLASS (sym) != LOC_REGPARM &&
+	      SYMBOL_CLASS (sym) != LOC_REGPARM_ADDR &&
+	      SYMBOL_CLASS (sym) != LOC_BASEREG_ARG)
+	    {
+	      break;
+	    }
+	}
+    }
+  
+  return (sym_found);		/* Will be NULL if not found. */
+}
+
+static struct symbol *
+iterator_first_linear (const struct dictionary *dict,
+		       struct dict_iterator *iterator)
+{
+  DICT_ITERATOR_DICT (iterator) = dict;
+  DICT_ITERATOR_INDEX (iterator) = 0;
+  return DICT_LINEAR_NSYMS (dict) ? DICT_LINEAR_SYM (dict, 0) : NULL;
+}
+
+static struct symbol *
+iterator_next_linear (struct dict_iterator *iterator)
+{
+  const struct dictionary *dict = DICT_ITERATOR_DICT (iterator);
+
+  if (++DICT_ITERATOR_INDEX (iterator) >= DICT_LINEAR_NSYMS (dict))
+    return NULL;
+  else
+    return DICT_LINEAR_SYM (dict, DICT_ITERATOR_INDEX (iterator));
+}
+
+/* Functions only for DICT_LINEAR_EXPANDABLE.  */
+
+static void
+free_linear_expandable (struct dictionary *dict)
+{
+  xfree (DICT_LINEAR_SYMS (dict));
+  xfree (dict);
+}
+
+
+static void
+add_symbol_linear_expandable (struct dictionary *dict,
+			      struct symbol *sym)
+{
+  int nsyms = ++DICT_LINEAR_NSYMS (dict);
+
+  /* Do we have enough room?  If not, grow it.  */
+  if (nsyms > DICT_LINEAR_EXPANDABLE_CAPACITY (dict)) {
+    DICT_LINEAR_EXPANDABLE_CAPACITY (dict) *= 2;
+    DICT_LINEAR_SYMS (dict)
+      = xrealloc (DICT_LINEAR_SYMS (dict),
+		  DICT_LINEAR_EXPANDABLE_CAPACITY (dict)
+		  * sizeof (struct symbol *));
+  }
+
+  DICT_LINEAR_SYM (dict, nsyms - 1) = sym;
+}
+
+
+#if 0
 
 /* Functions for DICT_BLOCK and DICT_BLOCK_EXPANDABLE.  */
 
@@ -685,17 +964,17 @@ dict_add_symbol_block (struct dictionary *dict, struct symbol *sym)
 
   struct block *block = DICT_BLOCK_BLOCK (dict);
 
-  if (++BLOCK_NSYMS (block) > DICT_BLOCK_EXPANDABLE_MAXSYMS (dict))
+  if (++BLOCK_NSYMS (block) > DICT_BLOCK_EXPANDABLE_CAPACITY (dict))
     {
-      if (DICT_BLOCK_EXPANDABLE_MAXSYMS (dict))
-	DICT_BLOCK_EXPANDABLE_MAXSYMS (dict) *= 2;
+      if (DICT_BLOCK_EXPANDABLE_CAPACITY (dict))
+	DICT_BLOCK_EXPANDABLE_CAPACITY (dict) *= 2;
       else
-	DICT_BLOCK_EXPANDABLE_MAXSYMS (dict)
-	  = DICT_BLOCK_EXPANDABLE_INITIAL_MAXSYMS;
+	DICT_BLOCK_EXPANDABLE_CAPACITY (dict)
+	  = DICT_BLOCK_EXPANDABLE_INITIAL_CAPACITY;
 
       block = xrealloc (block,
 			sizeof (struct block)
-			+ ((DICT_BLOCK_EXPANDABLE_MAXSYMS (dict) -1)
+			+ ((DICT_BLOCK_EXPANDABLE_CAPACITY (dict) -1)
 			   * sizeof (struct symbol)));
       DICT_BLOCK_BLOCK (dict) = block;
     }
@@ -704,3 +983,4 @@ dict_add_symbol_block (struct dictionary *dict, struct symbol *sym)
 
   return block;
 }
+#endif

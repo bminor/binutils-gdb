@@ -2255,10 +2255,10 @@ again2:
 
       bv = BLOCKVECTOR (s);
       if (BLOCKVECTOR_NBLOCKS (bv) > 2
-	  || ! dict_empty (BLOCK_DICT (BLOCK_NSYMS (BLOCKVECTOR_BLOCK
-						    (bv, GLOBAL_BLOCK))))
-	  || ! dict_empty (BLOCK_DICT (BLOCK_NSYMS (BLOCKVECTOR_BLOCK
-						    (bv, STATIC_BLOCK)))))
+	  || ! dict_empty (BLOCK_DICT (BLOCKVECTOR_BLOCK
+				       (bv, GLOBAL_BLOCK)))
+	  || ! dict_empty (BLOCK_DICT (BLOCKVECTOR_BLOCK
+				       (bv, STATIC_BLOCK))))
 	{
 	  complaint (&symfile_complaints, "Replacing old symbols for `%s'",
 		     name);

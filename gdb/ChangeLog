@@ -1,3 +1,54 @@
+2002-09-24  David Carlton  <carlton@math.stanford.edu>
+
+	* dictionary.c: Comment out block-specific stuff.
+	* jv-lang.c (get_java_class_symtab): Allocate GLOBAL_BLOCK on
+	obstack.
+	(free_class_block): Don't free GLOBAL_BLOCK.
+	* dictionary.h: Comment out block-specific stuff.
+	* symtab.h: Comment out the members of struct block that
+	BLOCK_DICT obsoletes, and their accessors.
+	* Makefile.in (buildsym.o): Depend on gdb_assert_h.
+	* buildsym.c (finish_block): Don't count number of symbols.
+	(finish_block): Replace BLOCK_SYM reference with use of iterator.
+	#include "gdb_assert.h"
+	* symfile.c (free_named_symtabs): Fix calls to dict_empty
+	(which would seem to be #if'd out; oops...).
+	* buildsym.c (finish_block): Don't set BLOCK_HASHTABLE.
+	* jv-lang.c (get_java_class_symtab): Don't set BLOCK_HASHTABLE and
+	BLOCK_NSYMS.
+	* mdebugread.c (new_block): Allocate BLOCK_DICT via
+	dict_create_linear_expandable.
+	(add_symbol): Add symbol via dict_add_symbol; no need to chase
+	pointers.
+	(fixup_sigtramp): Add symbol via dict_add_symbol.
+	(new_symtab): Add FIXME comment on freeing blocks.
+	* jv-lang.c (get_java_class_symtab): Allocate GLOBAL_BLOCK's dict
+	using dict_create_linear_expandable.
+	(add_class_symtab_symbol): Add symbol using dict_add_symbol.
+	* dictionary.c (struct dictionary_linear_expandable): New struct.
+	(struct dictionary): Added member 'linear_expandable'.
+	(DICT_LINEAR_EXPANDABLE_MAXSYMS): New macro.
+	New variable dict_block_vtbl.  Made all the _vtbl variables static.
+	Renamed all 'maxsyms' to 'capacity'.
+	(dict_create_linear_expandable): New function.
+	(add_symbol_linear_expandable): New function.
+	(free_linear_expandable): New function.
+	* jv-lang.c (get_java_class_symtab): Create static block's
+	dictionary with dict_create_linear.
+	* buildsym.c (finish_block): Create function blocks' dictionaries
+	with dict_create_linear.
+	* dictionary.c (lookup_linear): New function.
+	(iterator_first_linear): New function.
+	(iterator_next_linear): New function.
+	* dictionary.h: Moved comment.
+	* dictionary.c (struct dictionary_linear): New struct.
+	(struct dictionary): Added 'linear' member.
+	(DICT_LINEAR_NSYMS): New macro.
+	(DICT_LINEAR_SYMS): New macro.
+	(DICT_LINEAR_SYM): New macro.
+	New variable dict_linear_vtbl.
+	(dict_create_linear): New function.
+
 2002-09-23  David Carlton  <carlton@math.stanford.edu>
 
 	* dictionary.c (struct dict_vtbl): 'add_symbol' field.

@@ -110,20 +110,20 @@ get_java_class_symtab (void)
       /* Allocate dummy STATIC_BLOCK. */
       bl = (struct block *)
 	obstack_alloc (&objfile->symbol_obstack, sizeof (struct block));
-      BLOCK_NSYMS (bl) = 0;
-      BLOCK_HASHTABLE (bl) = 0;
       BLOCK_START (bl) = 0;
       BLOCK_END (bl) = 0;
       BLOCK_FUNCTION (bl) = NULL;
       BLOCK_SUPERBLOCK (bl) = NULL;
-      BLOCK_DICT (bl) = dict_create_block (bl);
+      BLOCK_DICT (bl) = dict_create_linear (&objfile->symbol_obstack,
+					    NULL);
       BLOCK_GCC_COMPILED (bl) = 0;
       BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK) = bl;
 
-      /* Allocate GLOBAL_BLOCK.  This has to be relocatable. */
-      bl = xmalloc (sizeof (struct block));
+      /* Allocate GLOBAL_BLOCK.  */
+      bl = (struct block *)
+	obstack_alloc (&objfile->symbol_obstack, sizeof (struct block));
       *bl = *BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-      BLOCK_DICT (bl) = dict_create_block_expandable (bl);
+      BLOCK_DICT (bl) = dict_create_linear_expandable ();
       BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK) = bl;
       class_symtab->free_func = free_class_block;
     }
@@ -135,10 +135,7 @@ add_class_symtab_symbol (struct symbol *sym)
 {
   struct symtab *symtab = get_java_class_symtab ();
   struct blockvector *bv = BLOCKVECTOR (symtab);
-  BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK)
-    = dict_add_symbol_block (BLOCK_DICT (BLOCKVECTOR_BLOCK (bv,
-							    GLOBAL_BLOCK)),
-			     sym);
+  dict_add_symbol (BLOCK_DICT (BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK)), sym);
 }
 
 static struct symbol *add_class_symbol (struct type *type, CORE_ADDR addr);
@@ -168,7 +165,6 @@ free_class_block (struct symtab *symtab)
   struct block *bl = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
 
   dict_free (BLOCK_DICT (bl));
-  xfree (bl);
 }
 #endif
 

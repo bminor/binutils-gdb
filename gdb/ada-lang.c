@@ -3948,7 +3948,7 @@ ada_add_block_symbols (struct block *block, const char *name,
 		       namespace_enum namespace, struct objfile *objfile,
 		       int wild)
 {
-  struct dict_iterator;
+  struct dict_iterator iter;
   int name_len = strlen (name);
   /* A matching argument symbol, if any. */
   struct symbol *arg_sym;

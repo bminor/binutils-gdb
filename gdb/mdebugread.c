@@ -4421,32 +4421,7 @@ add_symbol (struct symbol *s, struct block *b)
   struct block *newb;
   struct parse_stack *stackp;
 
-  newb = dict_add_symbol_block (BLOCK_DICT (b), s);
-
-  /* Update all the pointers to b that we can find.  */
-  if (newb != b)
-    {
-      int i;
-      struct blockvector *bv = BLOCKVECTOR (top_stack->cur_st);
-
-      if (BLOCK_FUNCTION (newb)
-	  && SYMBOL_BLOCK_VALUE (BLOCK_FUNCTION (newb)) == b)
-	SYMBOL_BLOCK_VALUE (BLOCK_FUNCTION (newb)) = newb;
-      for (i = 0; i < BLOCKVECTOR_NBLOCKS (bv); i++)
-	if (BLOCKVECTOR_BLOCK (bv, i) == b)
-	  BLOCKVECTOR_BLOCK (bv, i) = newb;
-	else if (BLOCK_SUPERBLOCK (BLOCKVECTOR_BLOCK (bv, i)) == b)
-	  BLOCK_SUPERBLOCK (BLOCKVECTOR_BLOCK (bv, i)) = newb;
-      /* Now run through the stack replacing pointers to the
-         original block.  */
-      for (stackp = top_stack; stackp; stackp = stackp->next)
-	{
-	  if (stackp->cur_block == b)
-	    {
-	      stackp->cur_block = newb;
-	    }
-	}
-    }
+  dict_add_symbol (BLOCK_DICT (b), s);
 }
 
 /* Add a new block B to a symtab S */
@@ -4588,6 +4563,8 @@ new_symtab (char *name, int maxlines, struct objfile *objfile)
   BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), STATIC_BLOCK) = static_block;
   BLOCK_SUPERBLOCK (static_block) = global_block;
 
+  /* FIXME: carlton/2002-09-24: But how do the blocks get freed?
+     Oy.  */
   s->free_code = free_linetable;
   s->debugformat = obsavestring ("ECOFF", 5,
 				 &objfile->symbol_obstack);
@@ -4674,7 +4651,7 @@ static struct block *
 new_block (void)
 {
   struct block *retval = xzalloc (sizeof (struct block));
-  BLOCK_DICT (retval) = dict_create_block_expandable (retval);
+  BLOCK_DICT (retval) = dict_create_linear_expandable ();
 
   return retval;
 }
@@ -4845,7 +4822,7 @@ fixup_sigtramp (void)
     current_objfile = NULL;
   }
 
-  b = dict_add_symbol_block (BLOCK_DICT (b), s);
+  dict_add_symbol (BLOCK_DICT (b), s);
   add_block (b, st);
   sort_blocks (st);
 }

@@ -42,6 +42,7 @@
 #include "macrotab.h"
 #include "demangle.h"		/* Needed by SYMBOL_INIT_DEMANGLED_NAME.  */
 #include "dictionary.h"
+#include "gdb_assert.h"
 /* Ask buildsym.h to define the vars it normally declares `extern'.  */
 #define	EXTERN
 /**/
@@ -233,33 +234,16 @@ finish_block (struct symbol *symbol, struct pending **listhead,
   register struct block *block;
   register struct pending_block *pblock;
   struct pending_block *opblock;
-  register int i;
   register int j;
 
-  /* Count the length of the list of symbols.  */
-
-  for (next = *listhead, i = 0;
-       next;
-       i += next->nsyms, next = next->next)
-    {
-      /* EMPTY */ ;
-    }
-
-  /* Copy the symbols into the block.  */
+  /* Initialize the block's dictionary.  */
 
   if (symbol)
     {
       block = (struct block *) 
-	obstack_alloc (&objfile->symbol_obstack,
-		       (sizeof (struct block) + 
-			((i - 1) * sizeof (struct symbol *))));
-      BLOCK_NSYMS (block) = i;
-      for (next = *listhead; next; next = next->next)
-	for (j = next->nsyms - 1; j >= 0; j--)
-	  {
-	    BLOCK_SYM (block, --i) = next->symbol[j];
-	  }
-      BLOCK_DICT (block) = dict_create_block (block);
+	obstack_alloc (&objfile->symbol_obstack, sizeof (struct block));
+      BLOCK_DICT (block) = dict_create_linear (&objfile->symbol_obstack,
+					       *listhead);
     }
   else
     {
@@ -283,7 +267,6 @@ finish_block (struct symbol *symbol, struct pending **listhead,
       struct type *ftype = SYMBOL_TYPE (symbol);
       SYMBOL_BLOCK_VALUE (symbol) = block;
       BLOCK_FUNCTION (block) = symbol;
-      BLOCK_HASHTABLE (block) = 0;
       struct dict_iterator iter;
 
       if (TYPE_NFIELDS (ftype) <= 0)
@@ -328,9 +311,12 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 	      TYPE_FIELDS (ftype) = (struct field *)
 		TYPE_ALLOC (ftype, nparams * sizeof (struct field));
 
-	      for (i = iparams = 0; iparams < nparams; i++)
+	      for (sym = dict_iterator_first (BLOCK_DICT (block), &iter),
+		     iparams = 0;
+		   iparams < nparams;
+		   sym = dict_iterator_next (&iter))
 		{
-		  sym = BLOCK_SYM (block, i);
+		  gdb_assert (sym != NULL);
 		  switch (SYMBOL_CLASS (sym))
 		    {
 		    case LOC_ARG:
@@ -366,7 +352,6 @@ finish_block (struct symbol *symbol, struct pending **listhead,
   else
     {
       BLOCK_FUNCTION (block) = NULL;
-      BLOCK_HASHTABLE (block) = 1;
     }
 
   /* Now "free" the links of the list, and empty the list.  */

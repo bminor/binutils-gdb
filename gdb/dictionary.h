@@ -21,6 +21,10 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+/* FIXME: carlton/2002-09-24: because of namespace_enum, you have to
+   include symtab.h before including this file.  But I'm leaving in
+   opaque declarations as if that weren't true.  */
+
 /* An opaque type for dictionaries; only dictionary.c should know
    about its innards.  */
 
@@ -67,6 +71,8 @@ extern struct dictionary *dict_create_linear (struct obstack *obstack,
 
 extern struct dictionary *dict_create_linear_expandable (void);
 
+#if 0
+
 /* Create a DICT_BLOCK dictionary pointing BLOCK.  */
 
 extern struct dictionary *
@@ -77,6 +83,8 @@ dict_create_block (struct block *block);
 extern struct dictionary *
 dict_create_block_expandable (struct block *block);
 
+#endif
+
 
 /* The functions providing the interface to dictionaries.  */
 
@@ -85,9 +93,6 @@ dict_create_block_expandable (struct block *block);
    If MANGLED_NAME is non-NULL, verify that any symbol we find has this
    particular mangled name.
 */
-
-/* FIXME: carlton/2002-09-23: namespace_enum is a typedef in
-   symtab.h...  */
 
 extern struct symbol *dict_lookup (const struct dictionary *dict,
 				   const char *name,
@@ -107,11 +112,14 @@ extern void dict_add_symbol (struct dictionary *dict, struct symbol *sym);
 
 extern int dict_empty (struct dictionary *dict);
 
+#if 0
+
 /* Special case.  */
 
 extern struct block *dict_add_symbol_block (struct dictionary *dict,
 					    struct symbol *sym);
 
+#endif
 
 /* A type containing data that is used when iterating over all symbols
    in a dictionary.  */

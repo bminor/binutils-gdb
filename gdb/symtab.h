@@ -405,6 +405,10 @@ struct block
      The table is laid out in NSYMS/5 buckets and symbols are chained via
      their hash_next field.  */
 
+#if 0
+  /* NOTE: carlton/2002-09-24: The rest of the members have been
+     obsoleted by DICT.  */
+  
   /* If this is really a hashtable of the symbols, this flag is 1.  */
 
   unsigned char hashtable;
@@ -417,6 +421,7 @@ struct block
      in the order in which we would like to print them.  */
 
   struct symbol *sym[1];
+#endif /* 0 */
 };
 
 #define BLOCK_START(bl)		(bl)->startaddr
@@ -425,6 +430,11 @@ struct block
 #define BLOCK_SUPERBLOCK(bl)	(bl)->superblock
 #define BLOCK_DICT(bl)		(bl)->dict
 #define BLOCK_GCC_COMPILED(bl)	(bl)->gcc_compile_flag
+
+#if 0
+
+/* NOTE: carlton/2002-09-24: These have been obsoleted by dictionary
+   stuff.  */
 #define BLOCK_HASHTABLE(bl)	(bl)->hashtable
 
 /* For blocks without a hashtable (BLOCK_HASHTABLE (bl) == 0) only.  */
@@ -439,7 +449,6 @@ struct block
 /* Macro used to set the size of a hashtable for N symbols.  */
 #define BLOCK_HASHTABLE_SIZE(n)	((n)/5 + 1)
 
-#if 0
 /* Macro to loop through all symbols in a block BL, in no particular order.
    i counts which bucket we are in, and sym points to the current symbol.  */
 
@@ -447,7 +456,7 @@ struct block
 	for ((i) = 0; (i) < BLOCK_BUCKETS ((bl)); (i)++)	\
 	  for ((sym) = BLOCK_BUCKET ((bl), (i)); (sym);		\
 	       (sym) = (sym)->hash_next)
-#endif
+#endif /* 0 */
 
 
 
