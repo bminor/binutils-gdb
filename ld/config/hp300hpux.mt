@@ -1,0 +1,1 @@
+EMUL=hp300hpux
