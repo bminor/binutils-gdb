@@ -1,3 +1,9 @@
+2003-02-24  Jim Blandy  <jimb@redhat.com>
+
+	* MAINTAINERS (GNU/Linux/x86, linespec, breakpoints, Scheme
+	support, shared libs): Remove my name from here, to better reflect
+	reality.
+
 2003-02-24  Kris Warkentin  <kewarken@qnx.com>
 
 	* target.h: (HAVE_CONTINUABLE_WATCHPOINT): Define.

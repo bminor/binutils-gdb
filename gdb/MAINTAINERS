@@ -185,7 +185,6 @@ MS Windows (NT, '00, 9x, Me, XP) host & native
 			Chris Faylor		cgf@redhat.com
 GNU/Linux/x86 native & host
 			Mark Kettenis		kettenis@gnu.org
-			Jim Blandy		jimb@redhat.com
 GNU/Linux PPC native	Kevin Buettner		kevinb@redhat.com
 GNU/Linux MIPS native & host
 			Daniel Jacobowitz	dan@debian.org
@@ -225,8 +224,7 @@ generic symtabs		Jim Blandy		jimb@redhat.com
   coff reader		Philippe De Muyter	phdm@macqel.be
   xcoff reader		Any maintainer can modify this; please send tricky
 			ones to Kevin Buettner <kevinb@redhat.com>
-  linespec		Jim Blandy		jimb@redhat.com
-			Elena Zannoni		ezannoni@redhat.com
+  linespec		Elena Zannoni		ezannoni@redhat.com
 			Fernando Nasser		fnasser@redhat.com
   HP/UX readers		Any [past] maintainer can modify this.
 			Please send tricky ones to the symtabs maintainers.
@@ -236,15 +234,12 @@ tracing			Michael Snyder		msnyder@redhat.com
 threads			Michael Snyder		msnyder@redhat.com
 			Mark Kettenis		kettenis@gnu.org
 breakpoints		Michael Snyder		msnyder@redhat.com
-			Jim Blandy		jimb@redhat.com
 language support	(Blanket Write Privs Maintainers)
   C++			Daniel Jacobowitz	dan@debian.org
   Java support		(Global Maintainers)
   Pascal support	Pierre Muller		muller@sources.redhat.com
-  Scheme support	Jim Blandy		jimb@redhat.com
 
-shared libs (devolved)	Jim Blandy		jimb@redhat.com
-			Kevin Buettner		kevinb@redhat.com
+shared libs (devolved)	Kevin Buettner		kevinb@redhat.com
   xcoffsolib		Peter Schauer		Peter.Schauer@regent.e-technik.tu-muenchen.de
 
 remote.c		Andrew Cagney		cagney@redhat.com
