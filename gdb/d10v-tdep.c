@@ -26,26 +26,213 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "inferior.h"
 #include "dis-asm.h"  
 
+void d10v_frame_find_saved_regs PARAMS ((struct frame_info *fi, struct frame_saved_regs *fsr));
+
+/* Discard from the stack the innermost frame,
+   restoring all saved registers.  */
+
 void
 d10v_pop_frame ()
 {
+  struct frame_info *frame = get_current_frame ();
+  CORE_ADDR fp, r13;
+  int regnum;
+  struct frame_saved_regs fsr;
+  char raw_buffer[8];
+
+  fp = FRAME_FP (frame);
+  /* printf("pop_frame 0x%x\n",fp); */
+
+  /* fill out fsr with the address of where each */
+  /* register was stored in the frame */
+  get_frame_saved_regs (frame, &fsr);
+  
+  /* r13 contains the old PC.  save it. */
+  r13 = read_register (13);
+
+  /* now update the current registers with the old values */
+  for (regnum = A0_REGNUM; regnum < A0_REGNUM+2 ; regnum++)
+    {
+      if (fsr.regs[regnum])
+	{
+	  read_memory (fsr.regs[regnum] & 0xFFFF, raw_buffer, 8);
+	  write_register_bytes (REGISTER_BYTE (regnum), raw_buffer, 8);
+	}
+    }
+  for (regnum = 0; regnum < SP_REGNUM; regnum++)
+    {
+      if (fsr.regs[regnum])
+	{
+	  write_register (regnum, read_memory_integer (fsr.regs[regnum] & 0xFFFF, 2));
+	}
+    }
+  if (fsr.regs[PSW_REGNUM])
+    {
+      write_register (PSW_REGNUM, read_memory_integer (fsr.regs[PSW_REGNUM] & 0xFFFF, 2));
+    }
+
+  /* PC is set to r13 */
+  write_register (PC_REGNUM, r13);
+  /* printf("setting stack to %x\n",fp - frame->size); */
+  write_register (SP_REGNUM, fp - frame->size);
+  flush_cached_frames ();
+}
+
+static int 
+check_prologue (op)
+     unsigned short op;
+{
+  /* st  rn, @-sp */
+  if ((op & 0x7E1F) == 0x6C1F)
+    return 1;
+
+  /* st2w  rn, @-sp */
+  if ((op & 0x7E3F) == 0x6E1F)
+    return 1;
+
+  /* subi  sp, n */
+  if ((op & 0x7FE1) == 0x01E1)
+    return 1;
+
+  /* mv  r11, sp */
+  if (op == 0x417E)
+    return 1;
+
+  /* nop */
+  if (op == 0x5E00)
+    return 1;
+
+  /* st  rn, @sp */
+  if ((op & 0x7E1F) == 0x681E)
+    return 1;
+
+  /* st2w  rn, @sp */
+ if ((op & 0x7E3F) == 0x3A1E)
+   return 1;
+
+
+  return 0;
 }
 
 CORE_ADDR
-d10v_skip_prologue (start_pc)
-     CORE_ADDR start_pc;
+d10v_skip_prologue (pc)
+     CORE_ADDR pc;
 {
+  unsigned long op;
+  unsigned short op1, op2;
+
+  if (target_read_memory (pc, (char *)&op, 4))
+    return pc;			/* Can't access it -- assume no prologue. */
+
+  while (1)
+    {
+      op = read_memory_integer (pc, 4);
+      if ((op & 0xC0000000) == 0xC0000000)
+	{
+	  /* long instruction */
+	  if ( ((op & 0x3FFF0000) != 0x01FF0000) &&   /* add3 sp,sp,n */
+	       ((op & 0x3F0F0000) != 0x340F0000) &&   /* st  rn, @(offset,sp) */
+ 	       ((op & 0x3F1F0000) != 0x350F0000))     /* st2w  rn, @(offset,sp) */
+	    break;
+	}
+      else
+	{
+	  /* short instructions */
+	  op1 = (op & 0x3FFF8000) >> 15;
+	  op2 = op & 0x7FFF;
+	  if (!check_prologue(op1) || !check_prologue(op2))
+	    break;
+	}
+      pc += 4;
+    }
+  return pc;
 }
  
+/* Given a GDB frame, determine the address of the calling function's frame.
+   This will be used to create a new GDB frame struct, and then
+   INIT_EXTRA_FRAME_INFO and INIT_FRAME_PC will be called for the new frame.
+
+   For us, the frame address is its stack pointer value, so we look up
+   the function prologue to determine the caller's sp value, and return it.  */
+
 CORE_ADDR
 d10v_frame_chain (frame)
      struct frame_info *frame;
 {
-  if (!inside_entry_file (frame->pc))
-    return read_memory_integer (FRAME_FP (frame) + frame->f_offset, 4);
-  else
-    return 0;
+  struct frame_saved_regs fsr;
+  /* printf("frame_chain %x\n",frame->frame); */
+  d10v_frame_find_saved_regs (frame, &fsr);
+  /* printf("pc=%x\n",fsr.regs[PC_REGNUM]);
+  printf("fp=%x (%x)\n",fsr.regs[FP_REGNUM],read_memory_integer(fsr.regs[FP_REGNUM],2) & 0xffff); */
+  return read_memory_integer(fsr.regs[FP_REGNUM],2) & 0xffff;
 }  
+
+static int next_addr;
+
+static int 
+prologue_find_regs (op, fsr, addr)
+     unsigned short op;
+     struct frame_saved_regs *fsr;
+     CORE_ADDR addr;
+{
+  int n;
+
+  /* st  rn, @-sp */
+  if ((op & 0x7E1F) == 0x6C1F)
+    {
+      n = (op & 0x1E0) >> 5;
+      next_addr -= 2;
+      fsr->regs[n] = next_addr;
+      return 1;
+    }
+
+  /* st2w  rn, @-sp */
+  else if ((op & 0x7E3F) == 0x6E1F)
+    {
+      n = (op & 0x1E0) >> 5;
+      next_addr -= 4;
+      fsr->regs[n] = next_addr;
+      fsr->regs[n+1] = next_addr+2;
+      return 1;
+    }
+
+  /* subi  sp, n */
+  if ((op & 0x7FE1) == 0x01E1)
+    {
+      n = (op & 0x1E) >> 1;
+      if (n == 0)
+	n = 16;
+      next_addr -= n;
+      return 1;
+    }
+
+  /* mv  r11, sp */
+  if (op == 0x417E)
+    return 1;
+
+  /* nop */
+  if (op == 0x5E00)
+    return 1;
+
+  /* st  rn, @sp */
+  if ((op & 0x7E1F) == 0x681E)
+    {
+      n = (op & 0x1E0) >> 5;
+      fsr->regs[n] = next_addr;
+      return 1;
+    }
+
+  /* st2w  rn, @sp */
+  if ((op & 0x7E3F) == 0x3A1E)
+    {
+      n = (op & 0x1E0) >> 5;
+      fsr->regs[n] = next_addr;
+      fsr->regs[n+1] = next_addr+2;
+      return 1;
+    }
+
+  return 0;
+}
 
 /* Put here the code to store, into a struct frame_saved_regs, the
    addresses of the saved registers of frame described by FRAME_INFO.
@@ -56,7 +243,68 @@ void
 d10v_frame_find_saved_regs (fi, fsr)
      struct frame_info *fi;
      struct frame_saved_regs *fsr;
-{                             
+{
+  CORE_ADDR fp, pc;
+  unsigned long op;
+  unsigned short op1, op2;
+  int i;
+
+  fp = fi->frame;
+  memset (fsr, 0, sizeof (*fsr));
+  next_addr = 0;
+
+  pc = get_pc_function_start (fi->pc);
+
+  while (1)
+    {
+      op = read_memory_integer (pc, 4);
+      if ((op & 0xC0000000) == 0xC0000000)
+	{
+	  /* long instruction */
+	  if ((op & 0x3FFF0000) == 0x01FF0000)
+	    {
+	      /* add3 sp,sp,n */
+	      short n = op & 0xFFFF;
+	      next_addr += n;
+	    }
+	  else if ((op & 0x3F0F0000) == 0x340F0000)
+	    {
+	      /* st  rn, @(offset,sp) */
+	      short offset = op & 0xFFFF;
+	      short n = (op >> 20) & 0xF;
+	      fsr->regs[n] = next_addr + offset;
+	    }
+	  else if ((op & 0x3F1F0000) == 0x350F0000)
+	    {
+	      /* st2w  rn, @(offset,sp) */
+	      short offset = op & 0xFFFF;
+	      short n = (op >> 20) & 0xF;
+	      fsr->regs[n] = next_addr + offset;
+	      fsr->regs[n+1] = next_addr + offset + 2;
+	    }
+	  else
+	    break;
+	}
+      else
+	{
+	  /* short instructions */
+	  op1 = (op & 0x3FFF8000) >> 15;
+	  op2 = op & 0x7FFF;
+	  if (!prologue_find_regs(op1,fsr,pc) || !prologue_find_regs(op2,fsr,pc))
+	    break;
+	}
+      pc += 4;
+    }
+  
+  fi->size = -next_addr;
+  fi->return_pc = read_register (13);
+
+  for (i=0; i<NUM_REGS; i++)
+    if (fsr->regs[i])
+      {
+	fsr->regs[i] = fp - (next_addr - fsr->regs[i]); 
+	/* printf("register %d = *(%x) = %x\n",i,fsr->regs[i],read_memory_integer((fsr->regs[i]) & 0xffff, 2)); */
+      }
 }
 
 void
@@ -65,9 +313,11 @@ d10v_init_extra_frame_info (fromleaf, fi)
      struct frame_info *fi;
 {
   struct frame_saved_regs dummy;
-  if (fi->next)
-    fi->pc = fi->next->return_pc;
-  d10v_frame_find_saved_regs (fi, &dummy);
+  /* printf("extra init %x  next=%x  pc=%x\n",fi->frame,fi->next,fi->pc); */
+
+  /*   fi->pc = fi->next->return_pc; */
+  d10v_frame_find_saved_regs (fi, &dummy); 
+  /* printf("           %x  next=%x  pc=%x\n",fi->frame,fi->next,fi->pc); */
 }
 
 static void
