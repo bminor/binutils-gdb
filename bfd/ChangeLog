@@ -1,5 +1,11 @@
 Tue Apr  5 11:22:38 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* elf32-mips.c (mips_elf_final_link): Don't remove empty sections.
+	It turns out not to be required on Irix 5, and it causes problems
+	if the sections happen to contain symbols.
+
+	* elfcode.h (write_shdrs_and_ehdr): Correct bfd_write check.
+
 	* aoutx.h (NAME(aout,canonicalize_reloc)): Don't error out if
 	section->relocation is NULL; malloc might have returned NULL when
 	given a zero size if there were no relocations.
