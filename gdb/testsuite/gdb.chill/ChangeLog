@@ -1,3 +1,16 @@
+Sat Nov 23 14:00:59 1996  Fred Fish  <fnf@cygnus.com>
+
+	* misc.exp: Change x86 linux setup_xfails to use new
+ 	i*86-pc-linux*-gnu quads.
+	* tuples.exp: Ditto.
+	* tests2.exp: Ditto.
+	* pr-5016.exp: Ditto.
+
+	* tuples.exp: Add i*86-pc-linux-gnu setup_fail to existing
+	xfails for 'set var vs1 := [ "bar", 42, m_ps[ a ] ]',
+	'set var $i := m_s1["foo", 44, m_ps[a ]]', and
+	'set var vs2 := [ 10+3, m_s1[ "foo" , 42, m_ps[ b ]]]'.
+	
 Mon Nov 11 10:27:32 1996  Fred Fish  <fnf@cygnus.com>
 
 	* callch.exp: Add mips*-sgi-irix* xfail for

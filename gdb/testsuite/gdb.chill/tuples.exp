@@ -123,18 +123,18 @@ proc do_tests {} {
     gdb_test_exact "set var vs1 := \[ \"foo\", 41, \[ b \] \]"  {}
     gdb_test_exact "print vs1" { = [.str: "foo", .i: 41, .ps: [b]]} \
 	"print vs1 after tuple assign 1"
-    setup_xfail "sparc-*-solaris*" "sparc-*-sunos*"
+    setup_xfail "i*86-pc-linux*-gnu" "sparc-*-solaris*" "sparc-*-sunos*"
     gdb_test_exact "set var vs1 := \[ \"bar\", 42, m_ps\[ a \] \]" {}
-    setup_xfail "i*86-*-linux*" "sparc-*-solaris*" "sparc-*-sunos*"
+    setup_xfail "i*86-pc-linux*-gnu" "sparc-*-solaris*" "sparc-*-sunos*"
     gdb_test_exact "print vs1" { = [.str: "bar", .i: 42, .ps: [a]]} \
 	"print vs1 after tuple assign 2"
 
     gdb_test_exact "set var \$i := m_s1\[\"foo\", 42, \[a \]\]" {}
     gdb_test_exact {print $i} { = [.str: "foo", .i: 42, .ps: [a]]} \
 	"print \$i after tuple assign 1"
-    setup_xfail "sparc-*-solaris*" "sparc-*-sunos*"
+    setup_xfail "i*86-pc-linux*-gnu" "sparc-*-solaris*" "sparc-*-sunos*"
     gdb_test_exact "set var \$i := m_s1\[\"foo\", 44, m_ps\[a \]\]" {}
-    setup_xfail "i*86-*-linux*" "sparc-*-solaris*" "sparc-*-sunos*"
+    setup_xfail "i*86-pc-linux*-gnu" "sparc-*-solaris*" "sparc-*-sunos*"
     gdb_test_exact {print $i} { = [.str: "foo", .i: 44, .ps: [a]]} \
 	"print \$i after tuple assign 2"
 
@@ -142,9 +142,9 @@ proc do_tests {} {
     gdb_test_exact "print vs2" \
 	{ = [.i: 10, .s: [.str: "foo", .i: 42, .ps: [b]]]} \
 	"print vs2 after tuple assign 1"
-    setup_xfail "sparc-*-solaris*" "sparc-*-sunos*"
+    setup_xfail "i*86-pc-linux*-gnu" "sparc-*-solaris*" "sparc-*-sunos*"
     gdb_test_exact "set var vs2 := \[ 10+3, m_s1\[ \"foo\" , 42, m_ps\[ b \] \] \]" {}
-    setup_xfail "i*86-*-linux*" "sparc-*-solaris*" "sparc-*-sunos*"
+    setup_xfail "i*86-pc-linux*-gnu" "sparc-*-solaris*" "sparc-*-sunos*"
     gdb_test_exact "print vs2" \
 	{ = [.i: 13, .s: [.str: "foo", .i: 42, .ps: [b]]]} \
 	"print vs2 after tuple assign 2"
