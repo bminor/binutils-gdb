@@ -1241,6 +1241,7 @@ get_machine_name (e_machine)
     case EM_SVX:      		return "Silicon Graphics SVx";
     case EM_ST19:     		return "STMicroelectronics ST19 8-bit microcontroller";
     case EM_VAX:      		return "Digital VAX";
+    case EM_AVR:                return "AVR";
     default:
       sprintf (buff, _("<unknown>: %x"), e_machine);
       return buff;

@@ -3,6 +3,8 @@
 	* readelf.c (decode_ARM_machine_flags): New function.
 	(get_machine_flags): Call decode_ARM_machine_flags for ARM
 	targets.
+	
+	(get_machine_name): Catch EM_AVR
 
 2000-04-05  Alan Modra  <alan@linuxcare.com.au>
 
