@@ -1,5 +1,9 @@
 Tue Sep  6 14:00:45 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
+	* coffgen.c (coff_print_symbol, case bfd_symbol_print_all): Check
+	for section symbol, and print its aux fields with appropriate
+	labels.
+
 	* Makefile.in (ALL_MACHINES): Added cpu-arm.o.
 
 Sun Sep 04 17:58:10 1994  Richard Earnshaw (rwe@pegasus.esprit.ec.org)

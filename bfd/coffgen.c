@@ -1557,8 +1557,20 @@ coff_print_symbol (abfd, filep, symbol, how)
 		case C_FILE:
 		  fprintf (file, "File ");
 		  break;
-		default:
 
+		case C_STAT:
+		  if (combined->u.syment.n_type == T_NULL)
+		    /* probably a section symbol? */
+		    {
+		      fprintf (file, "AUX scnlen 0x%lx nreloc %d nlnno %d",
+			       (long) auxp->u.auxent.x_scn.x_scnlen,
+			       auxp->u.auxent.x_scn.x_nreloc,
+			       auxp->u.auxent.x_scn.x_nlinno);
+		      break;
+		    }
+		  /* else fall through */
+
+		default:
 		  fprintf (file, "AUX lnno %d size 0x%x tagndx %ld",
 			   auxp->u.auxent.x_sym.x_misc.x_lnsz.x_lnno,
 			   auxp->u.auxent.x_sym.x_misc.x_lnsz.x_size,
