@@ -1,5 +1,12 @@
 2003-07-27  Andrew Cagney  <cagney@redhat.com>
 
+	* config/pa/tm-hppa.h (init_frame_pc_default): Declare.
+	* infcall.c (legacy_push_dummy_code) [GDB_TARGET_IS_HPPA]: Update
+	REAL_PC and not the pointer.
+	* hppa-hpux-tdep.c: Include frame.h
+
+2003-07-27  Andrew Cagney  <cagney@redhat.com>
+
 	* config/pa/tm-hppa64.h (GDB_MULTI_ARCH): Set to
 	GDB_MULTI_ACH_PARTIAL.
 

@@ -35,6 +35,9 @@
 #define DEPRECATED_USE_GENERIC_DUMMY_FRAMES 0
 #define CALL_DUMMY_LOCATION ON_STACK
 #define DEPRECATED_PC_IN_CALL_DUMMY(pc, sp, frame_address) deprecated_pc_in_call_dummy_on_stack (pc, sp, frame_address)
+/* Hack, get around problem with including "arch-utils.h".  */
+struct frame_info;
+extern CORE_ADDR init_frame_pc_default (int fromleaf, struct frame_info *prev);
 #define DEPRECATED_INIT_FRAME_PC(l,f) (init_frame_pc_default (l, f))
 
 /* Forward declarations of some types we use in prototypes */
