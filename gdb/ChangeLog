@@ -1,3 +1,8 @@
+2003-05-29  Kevin Buettner  <kevinb@redhat.com>
+
+	From Jimi X <jimix@watson.ibm.com>:
+	* rs6000-tdep.c (skip_prologue): Improve support for 64-bit code.
+
 2003-05-28  Jim Blandy  <jimb@redhat.com>
 
 	* ppc-linux-nat.c (store_altivec_registers): Don't cast fourth
