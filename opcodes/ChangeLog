@@ -1,3 +1,7 @@
+2001-12-18  matthew green  <mrg@redhat.com>
+
+	* ppc-opc.c (PPCVEC): Include PPC_OPCODE_ANY.
+
 2001-12-17  Richard Henderson  <rth@redhat.com>
 
 	* alpha-opc.c (unop): Encode with RB as $sp.
