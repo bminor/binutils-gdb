@@ -1,3 +1,9 @@
+Thu Sep  5 15:23:08 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* stabs.c (_bfd_link_section_stabs): If the output_section field
+	of either section is bfd_abs_section, then the linker is
+	discarding the section and we should not optimize it.
+
 Tue Sep  3 12:16:20 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* Makefile.in (aout-sparcle.o): New target.
