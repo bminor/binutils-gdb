@@ -40,6 +40,9 @@ enum hppa_regnum
   HPPA_FLAGS_REGNUM = 0,	/* Various status flags */
   HPPA_RP_REGNUM = 2,		/* return pointer */
   HPPA_FP_REGNUM = 3,		/* The ABI's frame pointer, when used */
+  HPPA_DP_REGNUM = 27,
+  HPPA_RET0_REGNUM = 28,
+  HPPA_RET1_REGNUM = 29,
   HPPA_SP_REGNUM = 30,		/* Stack pointer.  */
   HPPA_R31_REGNUM = 31,
   HPPA_SAR_REGNUM = 32,		/* Shift Amount Register */
@@ -63,6 +66,7 @@ enum hppa_regnum
   HPPA_CR27_REGNUM = 60,	/* Base register for thread-local storage, cr27 */
   HPPA_FP0_REGNUM = 64,		/* First floating-point.  */
   HPPA_FP4_REGNUM = 72,
+  HPPA64_FP4_REGNUM = 68,
 
   HPPA_ARG0_REGNUM = 26,	/* The first argument of a callee. */
   HPPA_ARG1_REGNUM = 25,	/* The second argument of a callee. */

@@ -1,3 +1,20 @@
+2004-12-19  Mark Kettenis  <kettenis@gnu.org>
+
+	* hppa-tdep.h (hppa_regnum): Add HPPA_DP_REGNUM, HPPA_RET0_REGNUM,
+	HPPA_RET1_REGNUM and HPPA64_FP4_REGNUM.
+	* hppa-tdep.c (hppa64_integral_or_pointer_p)
+	(hppa64_floating_p) New functions.
+	(hppa64_push_dummy_call): Re-implement.
+	(hppa32_register_type): Rename argument reg_nr to regnum.
+	(hppa64_register_type): Likewise.  Use HPPA64_FP4_REGNUM instead
+	of HPPA_FP4_REGNUM.
+	(hppa32_cannot_store_register): Renamed from
+	hppa_cannot_store_register.
+	(hppa64_cannot_store_register): New function.
+	(hppa_gdbarch_init): Set cannot_store_register and
+	cannot_fetch_register to hppa32_cannot_store_register or
+	hppa64_cannot_store_register when appropriate.
+
 2004-12-18  Mark Kettenis  <kettenis@gnu.org>
 
 	* hppah-nat.c: Remove file.

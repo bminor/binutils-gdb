@@ -928,138 +928,203 @@ hppa32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   return param_end;
 }
 
-/* This function pushes a stack frame with arguments as part of the
-   inferior function calling mechanism.
+/* The 64-bit PA-RISC calling conventions are documented in "64-Bit
+   Runtime Architecture for PA-RISC 2.0", which is distributed as part
+   as of the HP-UX Software Transition Kit (STK).  This implementation
+   is based on version 3.3, dated October 6, 1997.  */
 
-   This is the version for the PA64, in which later arguments appear
-   at higher addresses.  (The stack always grows towards higher
-   addresses.)
+/* Check whether TYPE is an "Integral or Pointer Scalar Type".  */
 
-   We simply allocate the appropriate amount of stack space and put
-   arguments into their proper slots.
+static int
+hppa64_integral_or_pointer_p (const struct type *type)
+{
+  switch (TYPE_CODE (type))
+    {
+    case TYPE_CODE_INT:
+    case TYPE_CODE_BOOL:
+    case TYPE_CODE_CHAR:
+    case TYPE_CODE_ENUM:
+    case TYPE_CODE_RANGE:
+      {
+	int len = TYPE_LENGTH (type);
+	return (len == 1 || len == 2 || len == 4 || len == 8);
+      }
+    case TYPE_CODE_PTR:
+    case TYPE_CODE_REF:
+      return (TYPE_LENGTH (type) == 8);
+    default:
+      break;
+    }
 
-   This ABI also requires that the caller provide an argument pointer
-   to the callee, so we do that too.  */
-   
+  return 0;
+}
+
+/* Check whether TYPE is a "Floating Scalar Type".  */
+
+static int
+hppa64_floating_p (const struct type *type)
+{
+  switch (TYPE_CODE (type))
+    {
+    case TYPE_CODE_FLT:
+      {
+	int len = TYPE_LENGTH (type);
+	return (len == 4 || len == 8 || len == 16);
+      }
+    default:
+      break;
+    }
+
+  return 0;
+}
+
 static CORE_ADDR
 hppa64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			struct regcache *regcache, CORE_ADDR bp_addr,
 			int nargs, struct value **args, CORE_ADDR sp,
 			int struct_return, CORE_ADDR struct_addr)
 {
-  /* NOTE: cagney/2004-02-27: This is a guess - its implemented by
-     reverse engineering testsuite failures.  */
-
-  /* Stack base address at which any pass-by-reference parameters are
-     stored.  */
-  CORE_ADDR struct_end = 0;
-  /* Stack base address at which the first parameter is stored.  */
-  CORE_ADDR param_end = 0;
-
-  /* The inner most end of the stack after all the parameters have
-     been pushed.  */
-  CORE_ADDR new_sp = 0;
-
-  /* Global pointer (r27) of the function we are trying to call.  */
-  CORE_ADDR gp;
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  int i, offset = 0;
+  CORE_ADDR gp;
 
-  /* Two passes.  First pass computes the location of everything,
-     second pass writes the bytes out.  */
-  int write_pass;
-  for (write_pass = 0; write_pass < 2; write_pass++)
+  /* "The outgoing parameter area [...] must be aligned at a 16-byte
+     boundary."  */
+  sp = align_up (sp, 16);
+
+  for (i = 0; i < nargs; i++)
     {
-      CORE_ADDR struct_ptr = 0;
-      CORE_ADDR param_ptr = 0;
-      int i;
-      for (i = 0; i < nargs; i++)
+      struct value *arg = args[i];
+      struct type *type = value_type (arg);
+      int len = TYPE_LENGTH (type);
+      char *valbuf;
+      int regnum;
+
+      /* "Each parameter begins on a 64-bit (8-byte) boundary."  */
+      offset = align_up (offset, 8);
+
+      if (hppa64_integral_or_pointer_p (type))
 	{
-	  struct value *arg = args[i];
-	  struct type *type = check_typedef (value_type (arg));
-	  if ((TYPE_CODE (type) == TYPE_CODE_INT
-	       || TYPE_CODE (type) == TYPE_CODE_ENUM)
-	      && TYPE_LENGTH (type) <= 8)
+	  /* "Integral scalar parameters smaller than 64 bits are
+             padded on the left (i.e., the value is in the
+             least-significant bits of the 64-bit storage unit, and
+             the high-order bits are undefined)."  Therefore we can
+             safely sign-extend them.  */
+	  if (len < 8)
 	    {
-	      /* Integer value store, right aligned.  "unpack_long"
-		 takes care of any sign-extension problems.  */
-	      param_ptr += 8;
-	      if (write_pass)
-		{
-		  ULONGEST val = unpack_long (type, VALUE_CONTENTS (arg));
-		  int reg = 27 - param_ptr / 8;
-		  write_memory_unsigned_integer (param_end - param_ptr,
-						 val, 8);
-		  if (reg >= 19)
-		    regcache_cooked_write_unsigned (regcache, reg, val);
-		}
+	      arg = value_cast (builtin_type_int64, arg);
+	      len = 8;
+	    }
+	}
+      else if (hppa64_floating_p (type))
+	{
+	  if (len > 8)
+	    {
+	      /* "Quad-precision (128-bit) floating-point scalar
+		 parameters are aligned on a 16-byte boundary."  */
+	      offset = align_up (offset, 16);
+
+	      /* "Double-extended- and quad-precision floating-point
+                 parameters within the first 64 bytes of the parameter
+                 list are always passed in general registers."  */
 	    }
 	  else
 	    {
-	      /* Small struct value, store left aligned?  */
-	      int reg;
-	      if (TYPE_LENGTH (type) > 8)
+	      if (len == 4)
 		{
-		  param_ptr = align_up (param_ptr, 16);
-		  reg = 26 - param_ptr / 8;
-		  param_ptr += align_up (TYPE_LENGTH (type), 16);
+		  /* "Single-precision (32-bit) floating-point scalar
+		     parameters are padded on the left with 32 bits of
+		     garbage (i.e., the floating-point value is in the
+		     least-significant 32 bits of a 64-bit storage
+		     unit)."  */
+		  offset += 4;
 		}
-	      else
+
+	      /* "Single- and double-precision floating-point
+                 parameters in this area are passed according to the
+                 available formal parameter information in a function
+                 prototype.  [...]  If no prototype is in scope,
+                 floating-point parameters must be passed both in the
+                 corresponding general registers and in the
+                 corresponding floating-point registers."  */
+	      regnum = HPPA64_FP4_REGNUM + offset / 8;
+
+	      if (regnum < HPPA64_FP4_REGNUM + 8)
 		{
-		  param_ptr = align_up (param_ptr, 8);
-		  reg = 26 - param_ptr / 8;
-		  param_ptr += align_up (TYPE_LENGTH (type), 8);
-		}
-	      if (write_pass)
-		{
-		  int byte;
-		  write_memory (param_end - param_ptr, VALUE_CONTENTS (arg),
-				TYPE_LENGTH (type));
-		  for (byte = 0; byte < TYPE_LENGTH (type); byte += 8)
-		    {
-		      if (reg >= 19)
-			{
-			  int len = min (8, TYPE_LENGTH (type) - byte);
-			  regcache_cooked_write_part (regcache, reg, 0, len,
-						      VALUE_CONTENTS (arg) + byte);
-			}
-		      reg--;
-		    }
+		  /* "Single-precision floating-point parameters, when
+		     passed in floating-point registers, are passed in
+		     the right halves of the floating point registers;
+		     the left halves are unused."  */
+		  regcache_cooked_write_part (regcache, regnum, offset % 8,
+					      len, VALUE_CONTENTS (arg));
 		}
 	    }
 	}
-      /* Update the various stack pointers.  */
-      if (!write_pass)
+      else
 	{
-	  struct_end = sp + struct_ptr;
-	  /* PARAM_PTR already accounts for all the arguments passed
-	     by the user.  However, the ABI mandates minimum stack
-	     space allocations for outgoing arguments.  The ABI also
-	     mandates minimum stack alignments which we must
-	     preserve.  */
-	  param_end = struct_end + max (align_up (param_ptr, 16), 64);
+	  if (len > 8)
+	    {
+	      /* "Aggregates larger than 8 bytes are aligned on a
+		 16-byte boundary, possibly leaving an unused argument
+		 slot, which is filled with garbage. If necessary,
+		 they are padded on the right (with garbage), to a
+		 multiple of 8 bytes."  */
+	      offset = align_up (offset, 16);
+	    }
 	}
+
+      /* Always store the argument in memory.  */
+      write_memory (sp + offset, VALUE_CONTENTS (arg), len);
+
+      valbuf = VALUE_CONTENTS (arg);
+      regnum = HPPA_ARG0_REGNUM - offset / 8;
+      while (regnum > HPPA_ARG0_REGNUM - 8 && len > 0)
+	{
+	  regcache_cooked_write_part (regcache, regnum,
+				      offset % 8, min (len, 8), valbuf);
+	  offset += min (len, 8);
+	  valbuf += min (len, 8);
+	  len -= min (len, 8);
+	  regnum--;
+	}
+
+      offset += len;
     }
 
-  /* If a structure has to be returned, set up register 28 to hold its
-     address */
+  /* Set up GR29 (%ret1) to hold the argument pointer (ap).  */
+  regcache_cooked_write_unsigned (regcache, HPPA_RET1_REGNUM, sp + 64);
+
+  /* Allocate the outgoing parameter area.  Make sure the outgoing
+     parameter area is multiple of 16 bytes in length.  */
+  sp += max (align_up (offset, 16), 64);
+
+  /* Allocate 32-bytes of scratch space.  The documentation doesn't
+     mention this, but it seems to be needed.  */
+  sp += 32;
+
+  /* Allocate the frame marker area.  */
+  sp += 16;
+
+  /* If a structure has to be returned, set up GR 28 (%ret0) to hold
+     its address.  */
   if (struct_return)
-    write_register (28, struct_addr);
+    regcache_cooked_write_unsigned (regcache, HPPA_RET0_REGNUM, struct_addr);
 
+  /* Set up GR27 (%dp) to hold the global pointer (gp).  */
   gp = tdep->find_global_pointer (function);
-
   if (gp != 0)
-    write_register (27, gp);
+    regcache_cooked_write_unsigned (regcache, HPPA_DP_REGNUM, gp);
 
-  /* Set the return address.  */
+  /* Set up GR2 (%rp) to hold the return pointer (rp).  */
   if (!gdbarch_push_dummy_code_p (gdbarch))
     regcache_cooked_write_unsigned (regcache, HPPA_RP_REGNUM, bp_addr);
 
-  /* Update the Stack Pointer.  */
-  regcache_cooked_write_unsigned (regcache, HPPA_SP_REGNUM, param_end + 64);
+  /* Set up GR30 to hold the stack pointer (sp).  */
+  regcache_cooked_write_unsigned (regcache, HPPA_SP_REGNUM, sp);
 
-  /* The stack will have 32 bytes of additional space for a frame marker.  */
-  return param_end + 64;
+  return sp;
 }
+
 
 static CORE_ADDR
 hppa32_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
@@ -2426,41 +2491,46 @@ hppa_pc_requires_run_before_use (CORE_ADDR pc)
   return (!target_has_stack && (pc & 0xFF000000));
 }
 
-/* Return the GDB type object for the "standard" data type of data
-   in register N.  */
+/* Return the GDB type object for the "standard" data type of data in
+   register REGNUM.  */
 
 static struct type *
-hppa32_register_type (struct gdbarch *gdbarch, int reg_nr)
+hppa32_register_type (struct gdbarch *gdbarch, int regnum)
 {
-   if (reg_nr < HPPA_FP4_REGNUM)
+   if (regnum < HPPA_FP4_REGNUM)
      return builtin_type_uint32;
    else
      return builtin_type_ieee_single_big;
 }
 
-/* Return the GDB type object for the "standard" data type of data
-   in register N.  hppa64 version.  */
-
 static struct type *
-hppa64_register_type (struct gdbarch *gdbarch, int reg_nr)
+hppa64_register_type (struct gdbarch *gdbarch, int regnum)
 {
-   if (reg_nr < HPPA_FP4_REGNUM)
+   if (regnum < HPPA64_FP4_REGNUM)
      return builtin_type_uint64;
    else
      return builtin_type_ieee_double_big;
 }
 
-/* Return True if REGNUM is not a register available to the user
-   through ptrace().  */
+/* Return non-zero if REGNUM is not a register available to the user
+   through ptrace/ttrace.  */
 
 static int
-hppa_cannot_store_register (int regnum)
+hppa32_cannot_store_register (int regnum)
 {
   return (regnum == 0
           || regnum == HPPA_PCSQ_HEAD_REGNUM
           || (regnum >= HPPA_PCSQ_TAIL_REGNUM && regnum < HPPA_IPSW_REGNUM)
           || (regnum > HPPA_IPSW_REGNUM && regnum < HPPA_FP4_REGNUM));
+}
 
+static int
+hppa64_cannot_store_register (int regnum)
+{
+  return (regnum == 0
+          || regnum == HPPA_PCSQ_HEAD_REGNUM
+          || (regnum >= HPPA_PCSQ_TAIL_REGNUM && regnum < HPPA_IPSW_REGNUM)
+          || (regnum > HPPA_IPSW_REGNUM && regnum < HPPA64_FP4_REGNUM));
 }
 
 static CORE_ADDR
@@ -2636,11 +2706,19 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
         set_gdbarch_num_regs (gdbarch, hppa32_num_regs);
         set_gdbarch_register_name (gdbarch, hppa32_register_name);
         set_gdbarch_register_type (gdbarch, hppa32_register_type);
+	set_gdbarch_cannot_store_register (gdbarch,
+					   hppa32_cannot_store_register);
+	set_gdbarch_cannot_fetch_register (gdbarch,
+					   hppa32_cannot_store_register);
         break;
       case 8:
         set_gdbarch_num_regs (gdbarch, hppa64_num_regs);
         set_gdbarch_register_name (gdbarch, hppa64_register_name);
         set_gdbarch_register_type (gdbarch, hppa64_register_type);
+	set_gdbarch_cannot_store_register (gdbarch,
+					   hppa64_cannot_store_register);
+	set_gdbarch_cannot_fetch_register (gdbarch,
+					   hppa64_cannot_store_register);
         break;
       default:
         internal_error (__FILE__, __LINE__, "Unsupported address size: %d",
@@ -2664,8 +2742,6 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_inner_than (gdbarch, core_addr_greaterthan);
   set_gdbarch_sp_regnum (gdbarch, HPPA_SP_REGNUM);
   set_gdbarch_fp0_regnum (gdbarch, HPPA_FP0_REGNUM);
-  set_gdbarch_cannot_store_register (gdbarch, hppa_cannot_store_register);
-  set_gdbarch_cannot_fetch_register (gdbarch, hppa_cannot_store_register);
   set_gdbarch_addr_bits_remove (gdbarch, hppa_smash_text_address);
   set_gdbarch_smash_text_address (gdbarch, hppa_smash_text_address);
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
