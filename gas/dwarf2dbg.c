@@ -1248,8 +1248,15 @@ dwarf2_finish ()
   segT line_seg;
   struct line_seg *s;
 
-  /* If no debug information was recorded, nothing to do.  */
-  if (all_segs == NULL && files_in_use <= 1)
+  /* We don't need to do anything unless:
+     - Some debug information was recorded via .file/.loc
+     - or, we are generating DWARF2 information ourself (--gdwarf2)
+     - or, there is a user-provided .debug_info section which could
+       reference the file table in the .debug_line section we generate
+       below.  */
+  if (all_segs == NULL
+      && debug_type != DEBUG_DWARF2
+      && bfd_get_section_by_name (stdoutput, ".debug_info") == NULL)
     return;
 
   /* Calculate the size of an address for the target machine.  */
