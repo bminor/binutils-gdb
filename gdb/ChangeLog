@@ -1,3 +1,8 @@
+2001-02-16  Michael Snyder  <msnyder@mvstp600e.cygnus.com>
+
+	* remote.c (build_remote_gdbarch_data): Use new TARGET_ADDR_BIT 
+	instead of TARGET_PTR_BIT (to support Harvard architectures).
+
 2001-02-16  Andrew Cagney  <ac131313@redhat.com>
 
 	From 2001-02-11 Paul Hilfinger <hilfingr@lisbon.int.act-europe.fr>
@@ -29,6 +34,7 @@
 	* f-exp.y: Include <ctype.h>.
 	(parse_number): Ensure that ``i'' is always initialized.
 
+>>>>>>> 1.966
 2001-02-14  Jim Kingdon  <jkingdon@engr.sgi.com>
 
 	* MAINTAINERS: Add myself to paper trail section.

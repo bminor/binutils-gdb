@@ -5516,7 +5516,7 @@ build_remote_gdbarch_data (void)
 
   /* Cisco stuff */
   tty_input = xmalloc (PBUFSIZ);
-  remote_address_size = TARGET_PTR_BIT;
+  remote_address_size = TARGET_ADDR_BIT;
 }
 
 void
