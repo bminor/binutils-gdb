@@ -1,3 +1,10 @@
+2001-02-16  Andrew Cagney  <ac131313@redhat.com>
+
+	From 2001-02-11 Paul Hilfinger <hilfingr@lisbon.int.act-europe.fr>
+	* hpux-thread.c (hpux_thread_xfer_memory): Add mem_attrib 
+	argument to parameter list and to call in order to conform to 
+	to_xfer_memory field of struct target_ops.
+
 2001-02-12  Michael Chastain  <chastain@redhat.com>
 
 	* somsolib.c (som_solib_add_solib_objfile): Do not use

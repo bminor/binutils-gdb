@@ -434,7 +434,8 @@ hpux_thread_prepare_to_store (void)
 
 static int
 hpux_thread_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len,
-			 int dowrite, struct target_ops *target)
+			 int dowrite, struct mem_attrib *attribs,
+			 struct target_ops *target)
 {
   int retval;
   struct cleanup *old_chain;
@@ -443,7 +444,8 @@ hpux_thread_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len,
 
   inferior_pid = main_pid;
 
-  retval = child_ops.to_xfer_memory (memaddr, myaddr, len, dowrite, target);
+  retval = 
+    child_ops.to_xfer_memory (memaddr, myaddr, len, dowrite, attribs, target);
 
   do_cleanups (old_chain);
 
