@@ -1,5 +1,10 @@
 2003-08-21  Andrew Cagney  <cagney@redhat.com>
 
+	* x86-64-linux-nat.c (ps_get_thread_area): When architecture is
+	i386 use PTRACE_GET_THREAD_AREA.  Suggested by Roland McGrath.
+
+2003-08-21  Andrew Cagney  <cagney@redhat.com>
+
 	* thread-db.c (verbose_dlsym): New function.
 	(thread_db_load): Use verbose_dlsym
 	(thread_db_new_objfile): Print that libthread_db was loaded, and
