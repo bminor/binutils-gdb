@@ -1,3 +1,10 @@
+Mon May 15 11:23:23 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* proc-events.c (init_syscall_table): Delete stray ``;''.
+	* ui-out.c (ui_out_set_flags, ui_out_clear_flags): Return old
+ 	value.
+	* mdebugread.c (START_PSYMTAB): Add paren to avoid x=x=x.
+
 2000-05-12  Kevin Buettner  <kevinb@redhat.com>
 
 	* dwarf2read.c (dwarf2_const_value_data): Fix typo in sign

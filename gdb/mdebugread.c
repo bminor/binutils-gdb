@@ -2769,7 +2769,7 @@ parse_partial_symbols (objfile)
 #define CUR_SYMBOL_TYPE type_code
 #define CUR_SYMBOL_VALUE sh.value
 #define START_PSYMTAB(ofile,fname,low,symoff,global_syms,static_syms)\
-  pst = save_pst
+  (pst = save_pst)
 #define END_PSYMTAB(pst,ilist,ninc,c_off,c_text,dep_list,n_deps,textlow_not_set) (void)0
 #define HANDLE_RBRAC(val) \
   if ((val) > save_pst->texthigh) save_pst->texthigh = (val);
