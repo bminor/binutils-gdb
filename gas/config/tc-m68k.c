@@ -4495,8 +4495,8 @@ md_convert_frag (headers, sec, fragP)
 
 void
 md_convert_frag (abfd, sec, fragP)
-     bfd *abfd;
-     segT sec;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     segT sec ATTRIBUTE_UNUSED;
      fragS *fragP;
 {
   md_convert_frag_1 (fragP);
@@ -4834,8 +4834,8 @@ void
 md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
      char *ptr;
      addressT from_addr, to_addr;
-     fragS *frag;
-     symbolS *to_symbol;
+     fragS *frag ATTRIBUTE_UNUSED;
+     symbolS *to_symbol ATTRIBUTE_UNUSED;
 {
   valueT offset;
 
@@ -5020,7 +5020,7 @@ get_num (exp, ok)
 
 static void
 s_data1 (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   subseg_set (data_section, 1);
   demand_empty_rest_of_line ();
@@ -5028,7 +5028,7 @@ s_data1 (ignore)
 
 static void
 s_data2 (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   subseg_set (data_section, 2);
   demand_empty_rest_of_line ();
@@ -5036,7 +5036,7 @@ s_data2 (ignore)
 
 static void
 s_bss (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   /* We don't support putting frags in the BSS segment, we fake it
      by marking in_bss, then looking at s_skip for clues.  */
@@ -5047,7 +5047,7 @@ s_bss (ignore)
 
 static void
 s_even (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   register int temp;
   register long temp_fill;
@@ -5062,7 +5062,7 @@ s_even (ignore)
 
 static void
 s_proc (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   demand_empty_rest_of_line ();
 }
@@ -5138,7 +5138,7 @@ mri_chip ()
 
 static void
 s_chip (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   char *stop = NULL;
   char stopc;
@@ -5155,7 +5155,7 @@ s_chip (ignore)
 
 static void
 s_fopt (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   SKIP_WHITESPACE ();
 
@@ -5265,7 +5265,7 @@ static const struct opt_action opt_table[] =
 
 static void
 s_opt (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   do
     {
@@ -5333,8 +5333,8 @@ s_opt (ignore)
 
 static void
 skip_to_comma (arg, on)
-     int arg;
-     int on;
+     int arg ATTRIBUTE_UNUSED;
+     int on ATTRIBUTE_UNUSED;
 {
   while (*input_line_pointer != ','
 	 && ! is_end_of_line[(unsigned char) *input_line_pointer])
@@ -5345,8 +5345,8 @@ skip_to_comma (arg, on)
 
 static void
 opt_nest (arg, on)
-     int arg;
-     int on;
+     int arg ATTRIBUTE_UNUSED;
+     int on ATTRIBUTE_UNUSED;
 {
   if (*input_line_pointer != '=')
     {
@@ -5362,8 +5362,8 @@ opt_nest (arg, on)
 
 static void
 opt_chip (arg, on)
-     int arg;
-     int on;
+     int arg ATTRIBUTE_UNUSED;
+     int on ATTRIBUTE_UNUSED;
 {
   if (*input_line_pointer != '=')
     {
@@ -5379,7 +5379,7 @@ opt_chip (arg, on)
 
 static void
 opt_list (arg, on)
-     int arg;
+     int arg ATTRIBUTE_UNUSED;
      int on;
 {
   listing_list (on);
@@ -5389,7 +5389,7 @@ opt_list (arg, on)
 
 static void
 opt_list_symbols (arg, on)
-     int arg;
+     int arg ATTRIBUTE_UNUSED;
      int on;
 {
   if (on)
@@ -5402,7 +5402,7 @@ opt_list_symbols (arg, on)
 
 static void
 s_reg (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   char *s;
   int c;
@@ -5506,7 +5506,7 @@ static struct save_opts *save_stack;
 
 static void
 s_save (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   struct save_opts *s;
 
@@ -5531,7 +5531,7 @@ s_save (ignore)
 
 static void
 s_restore (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   struct save_opts *s;
 
@@ -6208,7 +6208,7 @@ s_mri_else (qual)
 
 static void
 s_mri_endi (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   if (mri_control_stack == NULL
       || mri_control_stack->type != mri_if)
@@ -6551,7 +6551,7 @@ s_mri_for (qual)
 
 static void
 s_mri_endf (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   if (mri_control_stack == NULL
       || mri_control_stack->type != mri_for)
@@ -6587,7 +6587,7 @@ s_mri_endf (ignore)
 
 static void
 s_mri_repeat (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   struct mri_control_info *n;
 
@@ -6692,7 +6692,7 @@ s_mri_while (qual)
 
 static void
 s_mri_endw (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   char *buf;
 
@@ -7051,7 +7051,7 @@ is_label (str)
 /* ARGSUSED */
 symbolS *
 md_undefined_symbol (name)
-     char *name;
+     char *name ATTRIBUTE_UNUSED;
 {
   return 0;
 }
@@ -7059,7 +7059,7 @@ md_undefined_symbol (name)
 /* Round up a section size to the appropriate boundary.  */
 valueT
 md_section_align (segment, size)
-     segT segment;
+     segT segment ATTRIBUTE_UNUSED;
      valueT size;
 {
 #ifdef OBJ_AOUT
