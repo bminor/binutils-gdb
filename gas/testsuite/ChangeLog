@@ -1,3 +1,8 @@
+2000-12-11  H.J. Lu  <hjl@gnu.org>
+
+	* gas/i386/intel.d: Adjusted for the a.out assembler.
+	* gas/i386/intel.s: Likewise.
+
 2000-12-09  Nick Clifton  <nickc@redhat.com>
 
 	* gas/m68k/pcrel.d: Update to match latest assembler output.

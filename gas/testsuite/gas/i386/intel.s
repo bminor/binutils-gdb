@@ -616,7 +616,5 @@ rot5:
  jmp	[eax]
  jmp	[bar]
  jmp	bar
- nop
- nop
- nop
  mov	eax, DWORD PTR gs_foo@GOT[ebx]
+ nop
