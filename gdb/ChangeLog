@@ -1,3 +1,8 @@
+Wed Oct 19 15:13:51 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* objfiles.h (struct objfile): Fix comment--minimal_symbol_count
+	does *not* include the terminating NULL msymbol.
+
 Tue Oct 18 20:53:29 1994  Rob Savoye  <rob@darkstar.cygnus.com>
 
 	* monitor.c (monitor_load_srec,monitor_make_srec): Add an asrecord

@@ -236,7 +236,7 @@ struct objfile
      by a "null symbol", one that has a NULL pointer for the name and a zero
      value for the address.  This makes it easy to walk through the array
      when passed a pointer to somewhere in the middle of it.  There is also
-     a count of the number of symbols, which does include the terminating
+     a count of the number of symbols, which does not include the terminating
      null symbol.  The array itself, as well as all the data that it points
      to, should be allocated on the symbol_obstack for this file. */
 
