@@ -1,3 +1,14 @@
+Mon Aug 32 11:12:04 1998  Catherine Moore  <clm@cygnus.com>
+   
+        * emulparams/armelf.sh:  Change SCRIPT_NAME to
+        elf.  Change TEXT_START_ADDR to 0x8000.  Define
+        OTHER_TEXT_SECTIONS, OTHER_BSS_SYMBOLS and
+        OTHER_BSS_END_SYMBOLS.
+        * scripttempl/elf.sc:  Modify to use 
+        OTHER_BSS_END_SYMBOLS.
+        * scripttempl/elfarm.sc:  Remove file.
+
+.Santizie ChangeLog Makefile.am Makefile.in configure.tgt
 Tue Aug 18 12:05:34 1998  Catherine Moore  <clm@cygnus.com>
 
         * emultempl/armelf.em (gld_armelf_before_allocation):
