@@ -61,6 +61,8 @@ struct reloc_std_external;
 struct aout_link_hash_entry
 {
   struct bfd_link_hash_entry root;
+  /* Whether this symbol has been written out.  */
+  boolean written;
   /* Symbol index in output file.  */
   int indx;
 };
@@ -375,7 +377,8 @@ NAME(aout,mkobject) PARAMS ((bfd *abfd));
 
 enum machine_type
 NAME(aout,machine_type) PARAMS ((enum bfd_architecture arch,
-				 unsigned long machine));
+				 unsigned long machine,
+				 boolean *unknown));
 
 boolean
 NAME(aout,set_arch_mach) PARAMS ((bfd *abfd, enum bfd_architecture arch,

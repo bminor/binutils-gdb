@@ -625,13 +625,15 @@ DESCRIPTION
 */
 
 enum machine_type
-NAME(aout,machine_type) (arch, machine)
+NAME(aout,machine_type) (arch, machine, unknown)
      enum bfd_architecture arch;
      unsigned long machine;
+     boolean *unknown;
 {
   enum machine_type arch_flags;
 
   arch_flags = M_UNKNOWN;
+  *unknown = true;
 
   switch (arch) {
   case bfd_arch_sparc:
@@ -641,7 +643,7 @@ NAME(aout,machine_type) (arch, machine)
   case bfd_arch_m68k:
     switch (machine) {
     case 0:		arch_flags = M_68010; break;
-    case 68000:		arch_flags = M_UNKNOWN;	break;
+    case 68000:		arch_flags = M_UNKNOWN;	*unknown = false; break;
     case 68010:		arch_flags = M_68010; break;
     case 68020:		arch_flags = M_68020; break;
     default:		arch_flags = M_UNKNOWN; break;
@@ -671,6 +673,10 @@ NAME(aout,machine_type) (arch, machine)
   default:
     arch_flags = M_UNKNOWN;
   }
+
+  if (arch_flags != M_UNKNOWN)
+    *unknown = false;
+
   return arch_flags;
 }
 
@@ -700,9 +706,14 @@ NAME(aout,set_arch_mach) (abfd, arch, machine)
   if (! bfd_default_set_arch_mach (abfd, arch, machine))
     return false;
 
-  if (arch != bfd_arch_unknown &&
-      NAME(aout,machine_type) (arch, machine) == M_UNKNOWN)
-    return false;		/* We can't represent this type */
+  if (arch != bfd_arch_unknown)
+    {
+      boolean unknown;
+
+      NAME(aout,machine_type) (arch, machine, &unknown);
+      if (unknown)
+	return false;
+    }
 
   /* Determine the size of a relocation entry */
   switch (arch) {

@@ -63,7 +63,7 @@ The name put into the target vector.
 /*SUPPRESS558*/
 /*SUPPRESS529*/
 
-void
+static void
 #if ARCH_SIZE == 64
 sunos_64_set_arch_mach
 #else
@@ -170,6 +170,9 @@ aout_32_sunos4_write_object_contents
     case bfd_arch_m68k:
       switch (bfd_get_mach (abfd))
 	{
+	case 68000:
+	  N_SET_MACHTYPE (*execp, M_UNKNOWN);
+	  break;
 	case 68010:
 	  N_SET_MACHTYPE (*execp, M_68010);
 	  break;
@@ -194,84 +197,9 @@ aout_32_sunos4_write_object_contents
 
   choose_reloc_size (abfd);
 
-#if 0
-  /* Some tools want this to be 0, some tools want this to be one.
-     Today, it seems that 0 is the most important setting (PR1927) */
-  N_SET_FLAGS (*execp, 0x0);
-#else
-
-  /* Fri Jun 11 14:23:31 PDT 1993
-     FIXME
-     Today's optimal setting is 1.  This is a pain, since it
-     reopens 1927.  This should be readdressed by creating a new
-     target for each each supported, giving perhaps sun3/m68k
-     and sun4/sparc a.out formats.
-     */
-  N_SET_FLAGS (*execp, 1);
-#endif
+  N_SET_FLAGS (*execp, aout_backend_info (abfd)->exec_hdr_flags);
 
   N_SET_DYNAMIC (*execp, bfd_get_file_flags (abfd) & DYNAMIC);
-
-  /* At least for SunOS, the dynamic symbols and relocs are embedded
-     in the .text section, and we do not want to write them out with
-     the symbol table.  FIXME: This may be right if there is any other
-     form of a.out shared libraries.  */
-  if ((bfd_get_file_flags (abfd) & DYNAMIC) != 0
-      && bfd_get_outsymbols (abfd) != (asymbol **) NULL)
-    {
-      bfd_size_type i;
-      asymbol **sym_ptr_ptr;
-      bfd_size_type count;
-      arelent **rel_ptr_ptr;
-
-      sym_ptr_ptr = bfd_get_outsymbols (abfd);
-      count = bfd_get_symcount (abfd);
-      for (i = 0; i < count; i++, sym_ptr_ptr++)
-	{
-	  if (((*sym_ptr_ptr)->flags & BSF_DYNAMIC) != 0)
-	    {
-	      /* This assumes that all dynamic symbols follow all
-		 non-dynamic symbols, which is what slurp_symbol_table
-		 does.  */
-	      *sym_ptr_ptr = NULL;
-	      bfd_get_symcount (abfd) = i;
-	      break;
-	    }
-	}
-
-      if (obj_textsec (abfd)->reloc_count > 0)
-	{
-	  rel_ptr_ptr = obj_textsec (abfd)->orelocation;
-	  count = obj_textsec (abfd)->reloc_count;
-	  for (i = 0; i < count; i++, rel_ptr_ptr++)
-	    {
-	      if (((*(*rel_ptr_ptr)->sym_ptr_ptr)->flags & BSF_DYNAMIC) != 0)
-		{
-		  /* This assumes that all relocs against dynamic
-		     symbols follow all relocs against other symbols,
-		     which is what slurp_reloc_table does.  */
-		  *rel_ptr_ptr = NULL;
-		  obj_textsec (abfd)->reloc_count = i;
-		  break;
-		}
-	    }
-	}
-
-      if (obj_datasec (abfd)->reloc_count > 0)
-	{
-	  rel_ptr_ptr = obj_datasec (abfd)->orelocation;
-	  count = obj_datasec (abfd)->reloc_count;
-	  for (i = 0; i < count; i++, rel_ptr_ptr++)
-	    {
-	      if (((*(*rel_ptr_ptr)->sym_ptr_ptr)->flags & BSF_DYNAMIC) != 0)
-		{
-		  *rel_ptr_ptr = NULL;
-		  obj_datasec (abfd)->reloc_count = i;
-		  break;
-		}
-	    }
-	}
-    }
 
   WRITE_HEADERS (abfd, execp);
 
@@ -690,22 +618,45 @@ sunos4_set_sizes (abfd)
     }
 }
 
-#ifndef MY_read_dynamic_symbols
-#define MY_read_dynamic_symbols 0
+/* We default to setting the toolversion field to 1, as is required by
+   SunOS.  */
+#ifndef MY_exec_hdr_flags
+#define MY_exec_hdr_flags 1
 #endif
-#ifndef MY_read_dynamic_relocs
-#define MY_read_dynamic_relocs 0
+
+#ifndef MY_add_dynamic_symbols
+#define MY_add_dynamic_symbols 0
+#endif
+#ifndef MY_add_one_symbol
+#define MY_add_one_symbol 0
+#endif
+#ifndef MY_link_dynamic_object
+#define MY_link_dynamic_object 0
+#endif
+#ifndef MY_write_dynamic_symbol
+#define MY_write_dynamic_symbol 0
+#endif
+#ifndef MY_check_dynamic_reloc
+#define MY_check_dynamic_reloc 0
+#endif
+#ifndef MY_finish_dynamic_link
+#define MY_finish_dynamic_link 0
 #endif
 
 static CONST struct aout_backend_data sunos4_aout_backend =
 {
   0,				/* zmagic files are not contiguous */
   1,				/* text includes header */
+  MY_exec_hdr_flags,
   0,				/* default text vma */
   sunos4_set_sizes,
   0,				/* header is counted in zmagic text */
-  MY_read_dynamic_symbols,
-  MY_read_dynamic_relocs
+  MY_add_dynamic_symbols,
+  MY_add_one_symbol,
+  MY_link_dynamic_object,
+  MY_write_dynamic_symbol,
+  MY_check_dynamic_reloc,
+  MY_finish_dynamic_link
 };
 
 #define	MY_core_file_failing_command 	sunos4_core_file_failing_command

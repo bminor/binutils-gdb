@@ -1,3 +1,15 @@
+Mon Jun 13 14:20:07 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* aoutf1.h (aout_32_sunos4_write_object_contents): Handle a
+	machine type of 68000.
+	* aoutx.h (NAME(aout,machine_type)): Add new argument unknown.
+	Set *unknown to true if machine type is really unknown, as opposed
+	to M_UNKNOWN for the 68000.
+	(NAME(aout,set_arch_mach)): Change NAME(aout,machine_type) call
+	accordingly.
+	* libaout.h (NAME(aout,machine_type)): Add new argument to
+	prototype.
+
 Sun Jun 12 20:21:03 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* som.c (EXEC_AUX_ID): Define based on availablity of HPUX_AUX_ID
