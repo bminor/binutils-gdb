@@ -1011,6 +1011,18 @@ thread_db_mourn_inferior (void)
   proc_handle.pid = 0;
 
   target_beneath->to_mourn_inferior ();
+
+  /* Detach thread_db target ops if not dealing with a statically
+     linked threaded program.  This allows a corefile to be debugged
+     after finishing debugging of a threaded program.  At present,
+     debugging a statically-linked threaded program is broken, but
+     the check is added below in the event that it is fixed in the
+     future.  */
+  if (!keep_thread_db)
+    {
+      unpush_target (&thread_db_ops);
+      using_thread_db = 0;
+    }
 }
 
 static int

@@ -1,3 +1,8 @@
+2003-06-03  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* thread-db.c (thread_db_mourn_inferior): Unpush thread target
+	layer if not dealing with a statically-linked threaded program.
+
 2003-06-03  Kris Warkentin  <kewarken@qnx.com>
 
 	* solib.c (solib_open): Update comment to reflect actual search order.
