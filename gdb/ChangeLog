@@ -1,5 +1,12 @@
 2001-03-19  Kevin Buettner  <kevinb@redhat.com>
 
+	* configure.in (AC_CHECK_HEADERS): Check for existence of nlist.h.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* solib-legacy.c (nlist.h): Include if HAVE_NLIST_H is defined.
+
+2001-03-19  Kevin Buettner  <kevinb@redhat.com>
+
 	* config/i386/i386v42mp.mh (NATDEPFILES): List all files on
 	same line to avoid problems with Unixware 7's make when building
 	a cross debugger.

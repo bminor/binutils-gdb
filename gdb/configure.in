@@ -118,7 +118,7 @@ case $host_os in solaris2.7 | solaris2.8) case "$GCC" in yes)
     AC_DEFINE(_MSE_INT_H)
 esac; esac
 
-AC_CHECK_HEADERS(ctype.h endian.h link.h thread_db.h proc_service.h \
+AC_CHECK_HEADERS(ctype.h endian.h nlist.h link.h thread_db.h proc_service.h \
 	memory.h objlist.h ptrace.h sgtty.h stddef.h stdlib.h \
 	string.h sys/procfs.h sys/ptrace.h sys/reg.h stdint.h \
 	term.h termio.h termios.h unistd.h wait.h sys/wait.h \

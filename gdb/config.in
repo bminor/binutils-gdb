@@ -289,6 +289,9 @@
 /* Define if you have the <nl_types.h> header file.  */
 #undef HAVE_NL_TYPES_H
 
+/* Define if you have the <nlist.h> header file.  */
+#undef HAVE_NLIST_H
+
 /* Define if you have the <objlist.h> header file.  */
 #undef HAVE_OBJLIST_H
 

@@ -3379,7 +3379,7 @@ EOF
 
 esac; esac
 
-for ac_hdr in ctype.h endian.h link.h thread_db.h proc_service.h \
+for ac_hdr in ctype.h endian.h nlist.h link.h thread_db.h proc_service.h \
 	memory.h objlist.h ptrace.h sgtty.h stddef.h stdlib.h \
 	string.h sys/procfs.h sys/ptrace.h sys/reg.h stdint.h \
 	term.h termio.h termios.h unistd.h wait.h sys/wait.h \

@@ -25,6 +25,12 @@
 #include "solib-svr4.h"
 
 #ifdef HAVE_LINK_H
+
+#ifdef HAVE_NLIST_H
+/* nlist.h needs to be included before link.h on some older *BSD systems. */
+#include <nlist.h>
+#endif
+
 #include <link.h>
 
 /* Fetch (and possibly build) an appropriate link_map_offsets structure
