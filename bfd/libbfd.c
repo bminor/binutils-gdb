@@ -89,7 +89,7 @@ DEFUN(_bfd_dummy_core_file_matches_executable_p,(ignore_core_bfd, ignore_exec_bf
 /* of course you can't initialize a function to be the same as another, grr */
 
 char *
-DEFUN(_bfd_dummy_core_file_failing_commandl(ignore_abfd),
+DEFUN(_bfd_dummy_core_file_failing_command,(ignore_abfd),
       bfd *ignore_abfd)
 {
   return (char *)NULL;
@@ -214,8 +214,8 @@ DEFUN(bfd_tell,(abfd),
 boolean
 DEFUN(bfd_add_to_string_table,(table, new_string, table_length, free_ptr),
       char **table AND
-      char **free_ptr AND
       char *new_string AND
+      char **free_ptr AND
       unsigned int *table_length)
 {
   size_t string_length = strlen (new_string) + 1; /* include null here */
