@@ -1,3 +1,9 @@
+2004-03-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-ia64.c (md_assemble): Properly handle NULL
+	align_frag.
+	(ia64_handle_align): Don't abort if failed to add a stop bit.
+
 2004-03-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.in: Regenerated.

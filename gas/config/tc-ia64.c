@@ -10010,9 +10010,12 @@ md_assemble (str)
 	  while (align_frag->fr_type != rs_align_code)
 	    {
 	      align_frag = align_frag->fr_next;
-	      assert (align_frag);
+	      if (!align_frag)
+		break;
 	    }
-	  if (align_frag->fr_next == frag_now)
+	  /* align_frag can be NULL if there are directives in
+	     between.  */
+	  if (align_frag && align_frag->fr_next == frag_now)
 	    align_frag->tc_frag_data = 1;
 	}
 
@@ -10872,8 +10875,16 @@ ia64_handle_align (fragp)
   if (!bytes && fragp->tc_frag_data)
     {
       if (fragp->fr_fix < 16)
+#if 1
+	/* FIXME: It won't work with
+	   .align 16
+	   alloc r32=ar.pfs,1,2,4,0
+	 */
+	;
+#else
 	as_bad_where (fragp->fr_file, fragp->fr_line,
 		      _("Can't add stop bit to mark end of instruction group"));
+#endif
       else
 	/* Bundles are always in little-endian byte order. Make sure
 	   the previous bundle has the stop bit.  */
