@@ -1,5 +1,10 @@
 2002-05-08  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* config/djgpp/fnchange.lst: Add alphanbsd-nat.c and
+	alphanbsd-tdep.c.
+
+2002-05-08  Jason Thorpe  <thorpej@wasabisystems.com>
+
 	* sh-nbsd-nat.c: Rename to...
 	* shnbsd-nat.c: ...this.
 	* sh-nbsd-tdep.c: Rename to...
