@@ -245,14 +245,14 @@ non_dle( buf, n )
     char *buf;		/* Character buffer; NOT '\0'-terminated */
     int n;		/* Number of characters in buffer */
 {
-	int i;
+  int i;
 
-	for ( i = 0; i < n; i++ ){
-		if ( buf[i] == DLE ){
-			break;
-		}
-	}
-	return i;
+  for ( i = 0; i < n; i++ ){
+    if ( buf[i] == DLE ){
+      break;
+    }
+  }
+  return i;
 }
 
 /* Tell the remote machine to resume.  */
@@ -265,13 +265,14 @@ nindy_resume (pid, step, siggnal)
   if (siggnal != TARGET_SIGNAL_0 && siggnal != stop_signal)
     warning ("Can't send signals to remote NINDY targets.");
 
-	dcache_flush(nindy_dcache);
-	if ( regs_changed ){
-		nindy_store_registers (-1);
-		regs_changed = 0;
-	}
-	have_regs = 0;
-	ninGo( step );
+  dcache_flush(nindy_dcache);
+  if ( regs_changed )
+    {
+      nindy_store_registers (-1);
+      regs_changed = 0;
+    }
+  have_regs = 0;
+  ninGo( step );
 }
 
 /* FIXME, we can probably use the normal terminal_inferior stuff here.
@@ -358,45 +359,45 @@ nindy_wait( pid, status )
 
   while (1)
     {
-	  /* Input on remote */
+      /* Input on remote */
+      c = SERIAL_READCHAR (nindy_serial, -1);
+      if (c == SERIAL_ERROR)
+	{
+	  error ("Cannot read from serial line");
+	}
+      else if (c == 0x1b) /* ESC */
+	{
 	  c = SERIAL_READCHAR (nindy_serial, -1);
-	  if (c == SERIAL_ERROR)
+	  c &= ~0x40;
+	} 
+      else if (c != 0x10) /* DLE */
+	/* Write out any characters preceding DLE */
+	{
+	  buf[0] = (char)c;
+	  write (1, buf, 1);
+	}
+      else
+	{
+	  stop_exit = ninStopWhy(&stop_code,
+				 &ip_value, &fp_value, &sp_value);
+	  if (!stop_exit && (stop_code == STOP_SRQ))
 	    {
-	      error ("Cannot read from serial line");
-	    }
-	  else if (c == 0x1b) /* ESC */
-	    {
-	      c = SERIAL_READCHAR (nindy_serial, -1);
-	      c &= ~0x40;
-	    } 
-	  else if (c != 0x10) /* DLE */
-	  /* Write out any characters preceding DLE */
-	    {
-	      buf[0] = (char)c;
-	      write (1, buf, 1);
+	      immediate_quit++;
+	      ninSrq();
+	      immediate_quit--;
 	    }
 	  else
 	    {
-		  stop_exit = ninStopWhy(&stop_code,
-					 &ip_value, &fp_value, &sp_value);
-		  if (!stop_exit && (stop_code == STOP_SRQ))
-		    {
-		      immediate_quit++;
-		      ninSrq();
-		      immediate_quit--;
-		    }
-		  else
-		    {
-		      /* Get out of loop */
-		      supply_register (IP_REGNUM, 
-				       (char *)&ip_value);
-		      supply_register (FP_REGNUM, 
-				       (char *)&fp_value);
-		      supply_register (SP_REGNUM, 
-				       (char *)&sp_value);
-		      break;
-		    }
+	      /* Get out of loop */
+	      supply_register (IP_REGNUM, 
+			       (char *)&ip_value);
+	      supply_register (FP_REGNUM, 
+			       (char *)&fp_value);
+	      supply_register (SP_REGNUM, 
+			       (char *)&sp_value);
+	      break;
 	    }
+	}
     }
 
   SERIAL_SET_TTY_STATE (tty_args.serial, tty_args.state);
@@ -770,7 +771,7 @@ nindy_before_main_loop ()
 			      RETURN_MASK_ALL);
 	      }
 	  }
-  }
+      }
 }
 
 /* Define the target subroutine names */
