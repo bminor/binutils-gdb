@@ -1,7 +1,11 @@
 Mon Jun 16 11:11:10 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* Makefile.in (DISTBISONFILES): Remove.
+	(taz): Don't futz with DISTBISONFILES.  Change BISON to use
+	$(DEFAULT_YACC).
+
 	* configure.in: Build itl, db, sn, etc., when building for native
-	cygwin32.
+ 	cygwin32.
 
 	* Makefile.in (LD): New variable.
 	(EXTRA_HOST_FLAGS): Pass down LD.
