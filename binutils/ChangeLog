@@ -4,6 +4,10 @@ Thu Jul  4 12:00:55 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Released binutils 2.7.
 
+	* rdcoff.c (parse_coff): Get address to pass to debug_end_function
+	from function size, not value of .ef symbol.  From Ning
+	Mosberger-Tang <ning@AZStarNet.com>.
+
 Sat Jun 29 21:18:09 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* objcopy.c (strip_main): Add -o option, and handle it.
