@@ -245,6 +245,7 @@ main (argc, argv)
   link_info.keep_memory = true;
   link_info.input_bfds = NULL;
   link_info.create_object_symbols_section = NULL;
+  link_info.gc_sym_list = NULL;
   link_info.hash = NULL;
   link_info.keep_hash = NULL;
   link_info.notice_all = false;

@@ -1,3 +1,22 @@
+2002-07-01  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.h (entry_sym): Make it a struct bfd_sym_chain.
+	* ldlang.c (entry_sym): Likewise.
+	(ldlang_undef_chain_list_type): Likewise.
+	(lang_finish): Adjust references to entry_symbol.
+	(lang_add_entry): Likewise.
+	(lang_gc_sections): Use link_info.gc_sym_list.
+	(lang_process): Set link_info.gc_sym_list.
+	* ldlex.l: Include bfdlink.h.
+	* ldmain.c (main): Init link_info.gc_sym_list.
+	* emultempl/aix.em: Adjust references to entry_symbol.
+	* emultempl/armcoff.em: Likewise.
+	* emultempl/armelf.em: Likewise.
+	* emultempl/pe.em: Likewise.
+	* emultempl/ppc64elf.em (ppc_after_open): New function.
+	(LDEMUL_AFTER_OPEN): Define.
+	* emulparams/elf64ppc.sh: KEEP .opd sections.
+
 2002-06-29  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* emulparams/m68hc12elfb.sh (EEPROM_MEMORY): Define.

@@ -184,7 +184,7 @@ lang_output_section_statement_type *abs_output_section;
 lang_statement_list_type lang_output_section_statement;
 lang_statement_list_type *stat_ptr = &statement_list;
 lang_statement_list_type file_chain = { NULL, NULL };
-const char *entry_symbol = NULL;
+struct bfd_sym_chain entry_symbol = { NULL, NULL };
 const char *entry_section = ".text";
 boolean entry_from_cmdline;
 boolean lang_has_input_file = false;
@@ -2030,13 +2030,9 @@ lang_reasonable_defaults ()
    on a list, then, once the output file has been opened, transfer the
    name to the symbol table.  */
 
-typedef struct ldlang_undef_chain_list
-{
-  struct ldlang_undef_chain_list *next;
-  char *name;
-}                       ldlang_undef_chain_list_type;
+typedef struct bfd_sym_chain ldlang_undef_chain_list_type;
 
-static ldlang_undef_chain_list_type *ldlang_undef_chain_list_head;
+#define ldlang_undef_chain_list_head entry_symbol.next
 
 void
 ldlang_add_undef (name)
@@ -3523,15 +3519,16 @@ lang_finish ()
   else
     warn = true;
 
-  if (entry_symbol == (char *) NULL)
+  if (entry_symbol.name == (const char *) NULL)
     {
       /* No entry has been specified.  Look for start, but don't warn
 	 if we don't find it.  */
-      entry_symbol = "start";
+      entry_symbol.name = "start";
       warn = false;
     }
 
-  h = bfd_link_hash_lookup (link_info.hash, entry_symbol, false, false, true);
+  h = bfd_link_hash_lookup (link_info.hash, entry_symbol.name,
+			    false, false, true);
   if (h != (struct bfd_link_hash_entry *) NULL
       && (h->type == bfd_link_hash_defined
 	  || h->type == bfd_link_hash_defweak)
@@ -3544,7 +3541,7 @@ lang_finish ()
 				    h->u.def.section->output_section)
 	     + h->u.def.section->output_offset);
       if (! bfd_set_start_address (output_bfd, val))
-	einfo (_("%P%F:%s: can't set start address\n"), entry_symbol);
+	einfo (_("%P%F:%s: can't set start address\n"), entry_symbol.name);
     }
   else
     {
@@ -3553,7 +3550,7 @@ lang_finish ()
 
       /* We couldn't find the entry symbol.  Try parsing it as a
          number.  */
-      val = bfd_scan_vma (entry_symbol, &send, 0);
+      val = bfd_scan_vma (entry_symbol.name, &send, 0);
       if (*send == '\0')
 	{
 	  if (! bfd_set_start_address (output_bfd, val))
@@ -3570,7 +3567,8 @@ lang_finish ()
 	    {
 	      if (warn)
 		einfo (_("%P: warning: cannot find entry symbol %s; defaulting to %V\n"),
-		       entry_symbol, bfd_get_section_vma (output_bfd, ts));
+		       entry_symbol.name,
+		       bfd_get_section_vma (output_bfd, ts));
 	      if (! bfd_set_start_address (output_bfd,
 					   bfd_get_section_vma (output_bfd,
 								ts)))
@@ -3580,7 +3578,7 @@ lang_finish ()
 	    {
 	      if (warn)
 		einfo (_("%P: warning: cannot find entry symbol %s; not setting start address\n"),
-		       entry_symbol);
+		       entry_symbol.name);
 	    }
 	}
     }
@@ -4146,25 +4144,16 @@ static void
 lang_gc_sections ()
 {
   struct bfd_link_hash_entry *h;
-  ldlang_undef_chain_list_type *ulist, fake_list_start;
+  ldlang_undef_chain_list_type *ulist;
 
   /* Keep all sections so marked in the link script.  */
 
   lang_gc_sections_1 (statement_list.head);
 
-  /* Keep all sections containing symbols undefined on the command-line.
-     Handle the entry symbol at the same time.  */
+  /* Keep all sections containing symbols undefined on the command-line,
+     and the section containing the entry symbol.  */
 
-  if (entry_symbol != NULL)
-    {
-      fake_list_start.next = ldlang_undef_chain_list_head;
-      fake_list_start.name = (char *) entry_symbol;
-      ulist = &fake_list_start;
-    }
-  else
-    ulist = ldlang_undef_chain_list_head;
-
-  for (; ulist; ulist = ulist->next)
+  for (ulist = link_info.gc_sym_list; ulist; ulist = ulist->next)
     {
       h = bfd_link_hash_lookup (link_info.hash, ulist->name,
 				false, false, false);
@@ -4200,6 +4189,10 @@ lang_process ()
   /* Create a bfd for each input file.  */
   current_target = default_target;
   open_input_bfds (statement_list.head, false);
+
+  link_info.gc_sym_list = &entry_symbol;
+  if (entry_symbol.name == NULL)
+    link_info.gc_sym_list = ldlang_undef_chain_list_head;
 
   ldemul_after_open ();
 
@@ -4391,11 +4384,11 @@ lang_add_entry (name, cmdline)
      const char *name;
      boolean cmdline;
 {
-  if (entry_symbol == NULL
+  if (entry_symbol.name == NULL
       || cmdline
       || ! entry_from_cmdline)
     {
-      entry_symbol = name;
+      entry_symbol.name = name;
       entry_from_cmdline = cmdline;
     }
 }

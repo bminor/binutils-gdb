@@ -42,6 +42,7 @@ static bfd_signed_vma group_size = 1;
 static int dotsyms = 1;
 
 static void ppc_create_output_section_statements PARAMS ((void));
+static void ppc_after_open PARAMS ((void));
 static asection *ppc_add_stub_section PARAMS ((const char *, asection *));
 static void ppc_layout_sections_again PARAMS ((void));
 static void gld${EMULATION_NAME}_after_allocation PARAMS ((void));
@@ -71,6 +72,17 @@ ppc_create_output_section_statements ()
   ldlang_add_file (stub_file);
 }
 
+static void
+ppc_after_open ()
+{
+  if (!ppc64_elf_mark_entry_syms (&link_info))
+    {
+      einfo ("%X%P: can not mark entry symbols %E\n");
+      return;
+    }
+
+  gld${EMULATION_NAME}_after_open ();
+}
 
 struct hook_stub_info
 {
@@ -473,6 +485,7 @@ PARSE_AND_LIST_ARGS_CASES='
 
 # Put these extra ppc64elf routines in ld_${EMULATION_NAME}_emulation
 #
+LDEMUL_AFTER_OPEN=ppc_after_open
 LDEMUL_AFTER_ALLOCATION=gld${EMULATION_NAME}_after_allocation
 LDEMUL_FINISH=gld${EMULATION_NAME}_finish
 LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS=ppc_create_output_section_statements

@@ -172,10 +172,10 @@ arm_elf_finish ()
       
       sprintf_vma (buffer + 2, val);
 
-      if (entry_symbol != NULL && entry_from_cmdline)
+      if (entry_symbol.name != NULL && entry_from_cmdline)
 	einfo (_("%P: warning: '--thumb-entry %s' is overriding '-e %s'\n"),
-	       thumb_entry_symbol, entry_symbol);
-      entry_symbol = buffer;
+	       thumb_entry_symbol, entry_symbol.name);
+      entry_symbol.name = buffer;
     }
   else
     einfo (_("%P: warning: connot find thumb start symbol %s\n"),

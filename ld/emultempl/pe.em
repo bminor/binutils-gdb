@@ -758,8 +758,8 @@ gld_${EMULATION_NAME}_after_parse ()
      opened, so registering the symbol as undefined will make a
      difference.  */
 
-  if (! link_info.relocateable && entry_symbol != NULL)
-    ldlang_add_undef (entry_symbol);
+  if (! link_info.relocateable && entry_symbol.name != NULL)
+    ldlang_add_undef (entry_symbol.name);
 }
 
 /* pe-dll.c directly accesses pe_data_import_dll,
@@ -1418,10 +1418,10 @@ gld_${EMULATION_NAME}_finish ()
 
 	  sprintf_vma (buffer + 2, val);
 
-	  if (entry_symbol != NULL && entry_from_cmdline)
+	  if (entry_symbol.name != NULL && entry_from_cmdline)
 	    einfo (_("%P: warning: '--thumb-entry %s' is overriding '-e %s'\n"),
-		   thumb_entry_symbol, entry_symbol);
-	  entry_symbol = buffer;
+		   thumb_entry_symbol, entry_symbol.name);
+	  entry_symbol.name = buffer;
 	}
       else
 	einfo (_("%P: warning: connot find thumb start symbol %s\n"), thumb_entry_symbol);

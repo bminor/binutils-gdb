@@ -37,6 +37,7 @@ This was written by steve chamberlain
 #include "bfd.h"
 #include "sysdep.h"
 #include "safe-ctype.h"
+#include "bfdlink.h"
 #include "ld.h"
 #include "ldmisc.h"
 #include "ldexp.h"
