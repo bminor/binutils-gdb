@@ -1,3 +1,18 @@
+Mon Aug  3 12:21:57 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	Move all global state data into opcode table struct, and treat
+	opcode table as something that is "opened/closed".
+	* cgen.h (CGEN_OPCODE_DESC): New type.
+	(all fns): New first arg of opcode table descriptor.
+	(cgen_set_parse_operand_fn): Add prototype.
+	(cgen_current_machine,cgen_current_endian): Delete.
+	(CGEN_OPCODE_TABLE): New members mach,endian,operand_table,
+	parse_operand_fn,asm_hash_table,asm_hash_table_entries,
+	dis_hash_table,dis_hash_table_entries.
+	(opcode_open,opcode_close): Add prototypes.
+
+	* cgen.h (cgen_insn): New element `cdx'.
+
 Thu Jul 30 21:44:25 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* d30v.h (FLAG_LKR): New flag for "left-kills-right" instructions.

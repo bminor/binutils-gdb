@@ -74,9 +74,13 @@ enum cgen_endian
 
 /* Forward decl.  */
 typedef struct cgen_insn CGEN_INSN;
+
+/* Opaque pointer version for use by external world.  */
+typedef struct cgen_opcode_table * CGEN_OPCODE_DESC;
 
 /* Attributes.
-   Attributes are used to describe various random things.  */
+   Attributes are used to describe various random things.
+   ??? Will need to be revisited when expression support is added.  */
 
 /* Struct to record attribute information.  */
 typedef struct
@@ -163,68 +167,72 @@ typedef struct cgen_fields CGEN_FIELDS;
 #ifdef BFD_VERSION
 
 /* Parse handler.
-   The first argument is a pointer to a struct describing the insn being
-   parsed.
-   The second argument is a pointer to a pointer to the text being parsed.
-   The third argument is a pointer to a cgen_fields struct
-   in which the results are placed.
-   If the expression is successfully parsed, the pointer to the text is
-   updated.  If not it is left alone.
+   OD is an opcode table descriptor.
+   INSN is a pointer to a struct describing the insn being parsed.
+   STRP is a pointer to a pointer to the text being parsed.
+   FIELDS is a pointer to a cgen_fields struct in which the results are placed.
+   If the expression is successfully parsed, *STRP is updated.
+   If not it is left alone.
    The result is NULL if success or an error message.  */
-typedef const char * (cgen_parse_fn) PARAMS ((const struct cgen_insn *,
-					      const char **,
-					      CGEN_FIELDS *));
-
-/* Print handler.
-   The first argument is a pointer to the disassembly info.
-   Eg: disassemble_info.  It's defined as `PTR' so this file can be included
-   without dis-asm.h.
-   The second argument is a pointer to a struct describing the insn being
-   printed.
-   The third argument is a pointer to a cgen_fields struct.
-   The fourth argument is the pc value of the insn.
-   The fifth argument is the length of the insn, in bytes.  */
-typedef void (cgen_print_fn) PARAMS ((PTR, const struct cgen_insn *,
-				      CGEN_FIELDS *, bfd_vma, int));
+typedef const char * (cgen_parse_fn)
+     PARAMS ((CGEN_OPCODE_DESC /*od*/, const CGEN_INSN * /*insn*/,
+	      const char ** /*strp*/, CGEN_FIELDS * /*fields*/));
 
 /* Insert handler.
-   The first argument is a pointer to a struct describing the insn being
-   parsed.
-   The second argument is a pointer to a cgen_fields struct
-   from which the values are fetched.
-   The third argument is a pointer to a buffer in which to place the insn.
-   The fourth argument is the pc value of the insn.
+   OD is an opcode table descriptor.
+   INSN is a pointer to a struct describing the insn being parsed.
+   FIELDS is a pointer to a cgen_fields struct from which the values
+   are fetched.
+   INSNP is a pointer to a buffer in which to place the insn.
+   PC is the pc value of the insn.
    The result is an error message or NULL if success.  */
-typedef const char * (cgen_insert_fn) PARAMS ((const struct cgen_insn *,
-					       CGEN_FIELDS *, cgen_insn_t *,
-					       bfd_vma));
+typedef const char * (cgen_insert_fn)
+     PARAMS ((CGEN_OPCODE_DESC, const CGEN_INSN * /*insn*/,
+	      CGEN_FIELDS * /*fields*/, cgen_insn_t * /*insnp*/,
+	      bfd_vma /*pc*/));
 
 /* Extract handler.
-   The first argument is a pointer to a struct describing the insn being
-   parsed.
+   OD is an opcode table descriptor.
+   INSN is a pointer to a struct describing the insn being parsed.
    The second argument is a pointer to a struct controlling extraction
    (only used for variable length insns).
-   The third argument is the first CGEN_BASE_INSN_SIZE bytes.
-   The fourth argument is a pointer to a cgen_fields struct
-   in which the results are placed.
-   The fifth argument is the pc value of the insn.
-   The result is the length of the insn or zero if not recognized.  */
-typedef int (cgen_extract_fn) PARAMS ((const struct cgen_insn *,
-				       void *, cgen_insn_t,
-				       CGEN_FIELDS *, bfd_vma));
+   BUF_CTRL is a pointer to a struct for controlling reading of further
+   bytes for the insn.
+   BASE_INSN is the first CGEN_BASE_INSN_SIZE bytes.
+   FIELDS is a pointer to a cgen_fields struct in which the results are placed.
+   PC is the pc value of the insn.
+   The result is the length of the insn in bits or zero if not recognized.  */
+typedef int (cgen_extract_fn)
+     PARAMS ((CGEN_OPCODE_DESC, const CGEN_INSN * /*insn*/,
+	      PTR /*buf_ctrl*/, unsigned long /*base_insn*/,
+	      CGEN_FIELDS * /*fields*/, bfd_vma /*pc*/));
+
+/* Print handler.
+   OD is an opcode table descriptor.
+   INFO is a pointer to the disassembly info.
+   Eg: disassemble_info.  It's defined as `PTR' so this file can be included
+   without dis-asm.h.
+   INSN is a pointer to a struct describing the insn being printed.
+   FIELDS is a pointer to a cgen_fields struct.
+   PC is the pc value of the insn.
+   LEN is the length of the insn, in bits.  */
+typedef void (cgen_print_fn)
+     PARAMS ((CGEN_OPCODE_DESC /*od*/, PTR /*info*/,
+	      const CGEN_INSN * /*insn*/,
+	      CGEN_FIELDS * /*fields*/, bfd_vma /*pc*/, int /*len*/));
 
 /* The `parse' and `insert' fields are indices into these tables.
    The elements are pointer to specialized handler functions.
    Element 0 is special, it means use the default handler.  */
-extern cgen_parse_fn * CGEN_SYM (parse_handlers) [];
+extern cgen_parse_fn * const CGEN_SYM (parse_handlers) [];
 #define CGEN_PARSE_FN(x) (CGEN_SYM (parse_handlers)[(x)->base.parse])
-extern cgen_insert_fn * CGEN_SYM (insert_handlers) [];
+extern cgen_insert_fn * const CGEN_SYM (insert_handlers) [];
 #define CGEN_INSERT_FN(x) (CGEN_SYM (insert_handlers)[(x)->base.insert])
 
 /* Likewise for the `extract' and `print' fields.  */
-extern cgen_extract_fn * CGEN_SYM (extract_handlers) [];
+extern cgen_extract_fn * const CGEN_SYM (extract_handlers) [];
 #define CGEN_EXTRACT_FN(x) (CGEN_SYM (extract_handlers)[(x)->base.extract])
-extern cgen_print_fn * CGEN_SYM (print_handlers) [];
+extern cgen_print_fn * const CGEN_SYM (print_handlers) [];
 #define CGEN_PRINT_FN(x) (CGEN_SYM (print_handlers)[(x)->base.print])
 
 /* Default insn parser, printer.  */
@@ -241,7 +249,9 @@ extern cgen_print_fn CGEN_SYM (print_insn);
 
    Instructions and expressions all share this data in common.
    It's a collection of the common elements needed to parse, insert, extract,
-   and print each of them.  */
+   and print each of them.
+   This is an underutilized facility, and exists as a potential escape hatch
+   for handling more complicated assembler syntaxes.  */
 
 struct cgen_base
 {
@@ -266,7 +276,7 @@ struct cgen_base
    Parsing is controlled by the assembler which calls
    CGEN_SYM (assemble_insn).  If it can parse and build the entire insn
    it doesn't call back to the assembler.  If it needs/wants to call back
-   to the assembler, (*cgen_parse_operand_fn) is called which can either
+   to the assembler, cgen_parse_operand_fn is called which can either
 
    - return a number to be inserted in the insn
    - return a "register" value to be inserted
@@ -296,23 +306,20 @@ enum cgen_parse_operand_result
 };
 
 #ifdef BFD_VERSION /* Don't require bfd.h unnecessarily.  */
-extern const char * (*cgen_parse_operand_fn)
-     PARAMS ((enum cgen_parse_operand_type, const char **, int, int,
+typedef const char * (cgen_parse_operand_fn)
+     PARAMS ((CGEN_OPCODE_DESC,
+	      enum cgen_parse_operand_type, const char **, int, int,
 	      enum cgen_parse_operand_result *, bfd_vma *));
+#else
+typedef const char * (cgen_parse_operand_fn) ();
 #endif
+
+/* Set the cgen_parse_operand_fn callback.  */
+extern void cgen_set_parse_operand_fn
+     PARAMS ((CGEN_OPCODE_DESC, cgen_parse_operand_fn));
 
 /* Called before trying to match a table entry with the insn.  */
-extern void cgen_init_parse_operand PARAMS ((void));
-
-/* The result is an error message or NULL for success.
-   The parsed value is stored in the bfd_vma *.  */
-#ifdef BFD_VERSION /* Don't require bfd.h unnecessarily.  */
-extern const char * cgen_parse_operand
-     PARAMS ((enum cgen_parse_operand_type,
-	      const char **, int, int,
-	      enum cgen_parse_operand_result *,
-	      bfd_vma *));
-#endif
+extern void cgen_init_parse_operand PARAMS ((CGEN_OPCODE_DESC));
 
 /* Operand values (keywords, integers, symbols, etc.)  */
 
@@ -336,8 +343,10 @@ typedef struct cgen_hw_entry
   PTR asm_data;
 } CGEN_HW_ENTRY;
 
-extern const CGEN_HW_ENTRY * cgen_hw_lookup_by_name PARAMS ((const char *));
-extern const CGEN_HW_ENTRY * cgen_hw_lookup_by_num PARAMS ((int));
+extern const CGEN_HW_ENTRY * cgen_hw_lookup_by_name
+     PARAMS ((CGEN_OPCODE_DESC, const char *));
+extern const CGEN_HW_ENTRY * cgen_hw_lookup_by_num
+     PARAMS ((CGEN_OPCODE_DESC, int));
 
 /* This struct is used to describe things like register names, etc.  */
 
@@ -429,22 +438,22 @@ const CGEN_KEYWORD_ENTRY *cgen_keyword_search_next
   PARAMS ((CGEN_KEYWORD_SEARCH *));
 
 /* Operand value support routines.  */
-/* FIXME: some of the long's here will need to be bfd_vma or some such.  */
 
-extern const char * cgen_parse_keyword PARAMS ((const char **,
-						CGEN_KEYWORD *,
-						long *));
-extern const char * cgen_parse_signed_integer PARAMS ((const char **, int,
-						       long *));
-extern const char * cgen_parse_unsigned_integer PARAMS ((const char **, int,
-							 unsigned long *));
-extern const char * cgen_parse_address PARAMS ((const char **, int, int,
-						enum cgen_parse_operand_result *,
-						long *));
-extern const char * cgen_validate_signed_integer PARAMS ((long, long, long));
-extern const char * cgen_validate_unsigned_integer PARAMS ((unsigned long,
-							    unsigned long,
-							    unsigned long));
+extern const char * cgen_parse_keyword
+     PARAMS ((CGEN_OPCODE_DESC, const char **, CGEN_KEYWORD *, long *));
+#ifdef BFD_VERSION /* Don't require bfd.h unnecessarily.  */
+extern const char * cgen_parse_signed_integer
+     PARAMS ((CGEN_OPCODE_DESC, const char **, int, long *));
+extern const char * cgen_parse_unsigned_integer
+     PARAMS ((CGEN_OPCODE_DESC, const char **, int, unsigned long *));
+extern const char * cgen_parse_address
+     PARAMS ((CGEN_OPCODE_DESC, const char **, int, int,
+	      enum cgen_parse_operand_result *, bfd_vma *));
+extern const char * cgen_validate_signed_integer
+     PARAMS ((long, long, long));
+extern const char * cgen_validate_unsigned_integer
+     PARAMS ((unsigned long, unsigned long, unsigned long));
+#endif
 
 /* Operand modes.  */
 
@@ -523,13 +532,6 @@ enum cgen_operand_type;
 /* FIXME: Rename, cpu-opc.h defines this as the typedef of the enum.  */
 #define CGEN_OPERAND_TYPE(operand) ((enum cgen_operand_type) CGEN_OPERAND_INDEX (operand))
 #define CGEN_OPERAND_ENTRY(n) (& CGEN_SYM (operand_table) [n])
-
-/* Types of parse/insert/extract/print cover-fn handlers.  */
-/* FIXME: move opindex first to match caller.  */
-/* FIXME: also need types of insert/extract/print fns.  */
-/* FIXME: not currently used as type of 3rd arg varies.  */
-typedef const char * (CGEN_PARSE_OPERAND_FN) PARAMS ((const char **, int,
-						      long *));
 
 /* Instruction operand instances.
 
@@ -672,6 +674,12 @@ struct cgen_insn
 #define CGEN_INSN_VALUE(insn) ((insn)->value)
 #define CGEN_INSN_MASK(insn) ((insn)->format.mask)
 
+  /* Semantics, as CDL.  */
+  /* ??? Note that the operand instance table could be computed at runtime
+     if we parse this and cache the results.  */
+  const char *cdx;
+#define CGEN_INSN_CDX(insn) ((insn)->cdx)
+
   /* Opaque pointer to "subclass" specific data.
      In the case of real insns this points to a NULL entry terminated
      table of operands used, or NULL if none.
@@ -729,7 +737,8 @@ extern const CGEN_INSN CGEN_SYM (insn_table_entries)[];
 
 /* Return number of instructions.  This includes any added at runtime.  */
 
-extern int cgen_insn_count PARAMS ((void));
+extern int cgen_insn_count PARAMS ((CGEN_OPCODE_DESC));
+extern int cgen_macro_insn_count PARAMS ((CGEN_OPCODE_DESC));
 
 /* Macro instructions.
    Macro insns aren't real insns, they map to one or more real insns.
@@ -779,7 +788,7 @@ typedef struct cgen_minsn_expansion {
    may contain further macro invocations.  */
 
 extern const char * cgen_expand_macro_insn
-     PARAMS ((const struct cgen_minsn_expansion *,
+     PARAMS ((CGEN_OPCODE_DESC, const struct cgen_minsn_expansion *,
 	      const char *, const char **, int *, CGEN_OPERAND **));
 
 /* The assembler insn table is hashed based on some function of the mnemonic
@@ -801,8 +810,9 @@ extern const char * cgen_expand_macro_insn
 #endif
 #endif
 
-extern CGEN_INSN_LIST * cgen_asm_lookup_insn PARAMS ((const char *));
-#define CGEN_ASM_LOOKUP_INSN(string) cgen_asm_lookup_insn (string)
+extern CGEN_INSN_LIST * cgen_asm_lookup_insn
+     PARAMS ((CGEN_OPCODE_DESC, const char *));
+#define CGEN_ASM_LOOKUP_INSN(od, string) cgen_asm_lookup_insn ((od), (string))
 #define CGEN_ASM_NEXT_INSN(insn) ((insn)->next)
 
 /* The disassembler insn table is hashed based on some function of machine
@@ -823,118 +833,147 @@ extern CGEN_INSN_LIST * cgen_asm_lookup_insn PARAMS ((const char *));
 #define CGEN_DIS_HASH(buffer, value) (*(unsigned char *) (buffer))
 #endif
 
-extern CGEN_INSN_LIST * cgen_dis_lookup_insn PARAMS ((const char *,
-						      unsigned long));
-#define CGEN_DIS_LOOKUP_INSN(buf, value) cgen_dis_lookup_insn ((buf), (value))
+extern CGEN_INSN_LIST * cgen_dis_lookup_insn
+     PARAMS ((CGEN_OPCODE_DESC, const char *, unsigned long));
+#define CGEN_DIS_LOOKUP_INSN(od, buf, value) cgen_dis_lookup_insn ((od), (buf), (value))
 #define CGEN_DIS_NEXT_INSN(insn) ((insn)->next)
 
-/* Top level structures and functions.  */
+/* The opcode table.
+   A copy of this is created when the opcode table is "opened".
+   All global state information is recorded here.  */
+/* ??? This is all low level implementation stuff here that might be better
+   put in an internal file (much like the distinction between bfd.h and
+   libbfd.h).  That is an extra complication that is left for later.  */
 
-typedef struct
+typedef struct cgen_opcode_table
 {
   const CGEN_HW_ENTRY * hw_list;
+#define CGEN_OPCODE_HW_LIST(od) ((od)->hw_list)
 
-  /*CGEN_OPERAND_TABLE * operand_table; - FIXME:wip */
+  const CGEN_OPERAND * operand_table;
+#define CGEN_OPCODE_OPERAND_TABLE(od) ((od)->operand_table)
 
-  CGEN_INSN_TABLE * insn_table;
+  CGEN_INSN_TABLE insn_table;
+#define CGEN_OPCODE_INSN_TABLE(od) (& (od)->insn_table)
 
   /* Macro instructions are defined separately and are combined with real
      insns during hash table computation.  */
-  CGEN_INSN_TABLE * macro_insn_table;
+  CGEN_INSN_TABLE macro_insn_table;
+#define CGEN_OPCODE_MACRO_INSN_TABLE(od) (& (od)->macro_insn_table)
 
   /* Return non-zero if insn should be added to hash table.  */
   int (* asm_hash_p) PARAMS ((const CGEN_INSN *));
+#define CGEN_OPCODE_ASM_HASH_P(od) ((od)->asm_hash_p)
 
   /* Assembler hash function.  */
   unsigned int (* asm_hash) PARAMS ((const char *));
+#define CGEN_OPCODE_ASM_HASH(od) ((od)->asm_hash)
 
   /* Number of entries in assembler hash table.  */
-  unsigned int asm_hash_table_size;
+  unsigned int asm_hash_size;
+#define CGEN_OPCODE_ASM_HASH_SIZE(od) ((od)->asm_hash_size)
 
   /* Return non-zero if insn should be added to hash table.  */
   int (* dis_hash_p) PARAMS ((const CGEN_INSN *));
+#define CGEN_OPCODE_DIS_HASH_P(od) ((od)->dis_hash_p)
 
   /* Disassembler hash function.  */
   unsigned int (* dis_hash) PARAMS ((const char *, unsigned long));
+#define CGEN_OPCODE_DIS_HASH(od) ((od)->dis_hash)
 
   /* Number of entries in disassembler hash table.  */
-  unsigned int dis_hash_table_size;
+  unsigned int dis_hash_size;
+#define CGEN_OPCODE_DIS_HASH_SIZE(od) ((od)->dis_hash_size)
+
+  /* Operand parser callback.  */
+  cgen_parse_operand_fn * parse_operand_fn;
+#define CGEN_OPCODE_PARSE_OPERAND_FN(od) ((od)->parse_operand_fn)
+
+  /* Current machine (a la BFD machine number).  */
+  int mach;
+#define CGEN_OPCODE_MACH(od) ((od)->mach)
+
+  /* Current endian.  */
+  enum cgen_endian endian;
+#define CGEN_OPCODE_ENDIAN(od) ((od)->endian)
+
+  /* Assembler instruction hash table.  */
+  CGEN_INSN_LIST **asm_hash_table;
+#define CGEN_OPCODE_ASM_HASH_TABLE(od) ((od)->asm_hash_table)
+  CGEN_INSN_LIST *asm_hash_table_entries;
+#define CGEN_OPCODE_ASM_HASH_TABLE_ENTRIES(od) ((od)->asm_hash_table_entries)
+
+  /* Disassembler instruction hash table.  */
+  CGEN_INSN_LIST ** dis_hash_table;
+#define CGEN_OPCODE_DIS_HASH_TABLE(od) ((od)->dis_hash_table)
+  CGEN_INSN_LIST * dis_hash_table_entries;
+#define CGEN_OPCODE_DIS_HASH_TABLE_ENTRIES(od) ((od)->dis_hash_table_entries)
+
 } CGEN_OPCODE_TABLE;
-
-/* Each CPU has one of these.  */
-extern const CGEN_OPCODE_TABLE CGEN_SYM (opcode_table);
-
-/* Global state access macros.
-   Some of these are tucked away and accessed with cover fns.
-   Simpler things like the current machine and endian are not.  */
-
-extern int cgen_current_machine;
-#define CGEN_CURRENT_MACHINE cgen_current_machine
-
-extern enum cgen_endian cgen_current_endian;
-#define CGEN_CURRENT_ENDIAN cgen_current_endian
-
+
 /* Prototypes of major functions.  */
 
-/* Set the current cpu (+ mach number, endian, etc.).  */
-extern void cgen_set_cpu PARAMS ((const CGEN_OPCODE_TABLE *, int,
-				  enum cgen_endian));
-
-/* Initialize the assembler, disassembler.  */
-extern void cgen_asm_init PARAMS ((void));
-extern void cgen_dis_init PARAMS ((void));
+/* Open an opcode table for use.  */
+extern CGEN_OPCODE_DESC CGEN_SYM (opcode_open)
+     PARAMS ((int, enum cgen_endian));
+/* Close it.  */
+extern void CGEN_SYM (opcode_close) PARAMS ((CGEN_OPCODE_DESC));
 
 /* `init_tables' must be called before `xxx_supported'.  */
 extern void CGEN_SYM (init_tables) PARAMS ((int));
-extern void CGEN_SYM (init_asm) PARAMS ((int, enum cgen_endian));
-extern void CGEN_SYM (init_dis) PARAMS ((int, enum cgen_endian));
+
+/* Initialize an opcode table for assembler or disassembler use.
+   These must be called immediately after opcode_open.  */
+extern void CGEN_SYM (init_asm) PARAMS ((CGEN_OPCODE_DESC));
+extern void CGEN_SYM (init_dis) PARAMS ((CGEN_OPCODE_DESC));
+
+/* Change the mach and/or endianness.  */
+extern void cgen_set_cpu PARAMS ((CGEN_OPCODE_DESC, int, enum cgen_endian));
 
 /* FIXME: This prototype is wrong ifndef CGEN_INT_INSN.
    Furthermore, ifdef CGEN_INT_INSN, the insn is created in
    target byte order (in which case why use int's at all).
    Perhaps replace cgen_insn_t * with char *?  */
-extern const struct cgen_insn *
-CGEN_SYM (assemble_insn) PARAMS ((const char *, CGEN_FIELDS *,
-				  cgen_insn_t *, char **));
+extern const CGEN_INSN * CGEN_SYM (assemble_insn)
+     PARAMS ((CGEN_OPCODE_DESC, const char *, CGEN_FIELDS *, cgen_insn_t *, char **));
 #if 0 /* old */
-extern int CGEN_SYM (insn_supported) PARAMS ((const struct cgen_insn *));
+extern int CGEN_SYM (insn_supported) PARAMS ((const CGEN_INSN *));
 extern int CGEN_SYM (opval_supported) PARAMS ((const struct cgen_opval *));
 #endif
 
-extern const CGEN_KEYWORD  CGEN_SYM (operand_mach);
+extern const CGEN_KEYWORD CGEN_SYM (operand_mach);
 extern int CGEN_SYM (get_mach) PARAMS ((const char *));
 
-extern const CGEN_INSN *
-CGEN_SYM (lookup_insn) PARAMS ((const CGEN_INSN *, cgen_insn_t,
-				int, CGEN_FIELDS *, int));
-extern void
-CGEN_SYM (get_insn_operands) PARAMS ((const CGEN_INSN *, const CGEN_FIELDS *,
-				      int *));
-extern const CGEN_INSN *
-CGEN_SYM (lookup_get_insn_operands) PARAMS ((const CGEN_INSN *, cgen_insn_t,
-					     int, int *));
+extern const CGEN_INSN * CGEN_SYM (lookup_insn)
+     PARAMS ((CGEN_OPCODE_DESC, const CGEN_INSN *,
+	      cgen_insn_t, int, CGEN_FIELDS *, int));
+extern void CGEN_SYM (get_insn_operands)
+     PARAMS ((CGEN_OPCODE_DESC, const CGEN_INSN *, const CGEN_FIELDS *, int *));
+extern const CGEN_INSN * CGEN_SYM (lookup_get_insn_operands)
+     PARAMS ((CGEN_OPCODE_DESC, const CGEN_INSN *, cgen_insn_t, int, int *));
 
 /* Get/set fields in the CGEN_FIELDS struct.  */
-int
-CGEN_SYM (get_int_operand) PARAMS ((int, const CGEN_FIELDS *));
-void
-CGEN_SYM (set_int_operand) PARAMS ((int, CGEN_FIELDS *, int));
+int CGEN_SYM (get_int_operand)
+     PARAMS ((int, const CGEN_FIELDS *));
+void CGEN_SYM (set_int_operand)
+     PARAMS ((int, CGEN_FIELDS *, int));
 #ifdef BFD_VERSION /* Don't require bfd.h unnecessarily.  */
-bfd_vma
-CGEN_SYM (get_vma_operand) PARAMS ((int, const CGEN_FIELDS *));
-void
-CGEN_SYM (set_vma_operand) PARAMS ((int, CGEN_FIELDS *, bfd_vma));
+bfd_vma CGEN_SYM (get_vma_operand)
+     PARAMS ((int, const CGEN_FIELDS *));
+void CGEN_SYM (set_vma_operand)
+     PARAMS ((int, CGEN_FIELDS *, bfd_vma));
 #endif
 
-extern const char *
-CGEN_SYM (parse_operand) PARAMS ((int, const char **, CGEN_FIELDS *));
+extern const char * CGEN_SYM (parse_operand)
+     PARAMS ((CGEN_OPCODE_DESC, int, const char **, CGEN_FIELDS *));
 
 #ifdef BFD_VERSION /* Don't require bfd.h unnecessarily.  */
-extern const char *
-CGEN_SYM (insert_operand) PARAMS ((int, CGEN_FIELDS *, char *, bfd_vma));
+extern const char * CGEN_SYM (insert_operand)
+     PARAMS ((CGEN_OPCODE_DESC, int, CGEN_FIELDS *, char *, bfd_vma));
 #endif
 
 /* Read in a cpu description file.  */
-extern const char * cgen_read_cpu_file PARAMS ((const char *));
+extern const char * cgen_read_cpu_file
+     PARAMS ((CGEN_OPCODE_DESC, const char * /*filename*/));
 
 #endif /* CGEN_H */
