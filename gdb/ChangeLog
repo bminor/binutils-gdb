@@ -1,3 +1,7 @@
+2000-02-05  J.T. Conklin  <jtc@redback.com>
+
+	* remote.c (putpkt_binary): Handle NAK from target stub.
+
 2000-02-08  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* configure.in: Remove the addition of sol-thread.c to the

@@ -3730,6 +3730,7 @@ putpkt_binary (buf, cnt)
 	      switch (ch)
 		{
 		case '+':
+		case '-':
 		case SERIAL_TIMEOUT:
 		case '$':
 		  if (started_error_output)
@@ -3746,6 +3747,9 @@ putpkt_binary (buf, cnt)
 	      if (remote_debug)
 		fprintf_unfiltered (gdb_stdlog, "Ack\n");
 	      return 1;
+	    case '-':
+	      if (remote_debug)
+		fprintf_unfiltered (gdb_stdlog, "Nak\n");
 	    case SERIAL_TIMEOUT:
 	      tcount++;
 	      if (tcount > 3)
