@@ -51,7 +51,9 @@ static char *the_object_file;
 
 char *next_object_file_charP;	/* Tracks object file bytes. */
 
+#ifndef OBJ_VMS
 int magic_number_for_object_file = DEFAULT_MAGIC_NUMBER_FOR_OBJECT_FILE;
+#endif
 
 static int is_dnrange PARAMS ((struct frag * f1, struct frag * f2));
 static long fixup_segment PARAMS ((fixS * fixP, segT this_segment_type));
@@ -154,26 +156,28 @@ write_object_file ()
 
   long object_file_size;
 
-#ifdef	VMS
+#ifdef	OBJ_VMS
   /*
-	 *	Under VMS we try to be compatible with VAX-11 "C".  Thus, we
-	 *	call a routine to check for the definition of the procedure
-	 *	"_main", and if so -- fix it up so that it can be program
-	 *	entry point.
-	 */
+   *	Under VMS we try to be compatible with VAX-11 "C".  Thus, we
+   *	call a routine to check for the definition of the procedure
+   *	"_main", and if so -- fix it up so that it can be program
+   *	entry point.
+   */
   VMS_Check_For_Main ();
 #endif /* VMS */
   /*
-	 * After every sub-segment, we fake an ".align ...". This conforms to
-	 * BSD4.2 brane-damage. We then fake ".fill 0" because that is the
-	 * kind of frag that requires least thought. ".align" frags like to
-	 * have a following frag since that makes calculating their intended
-	 * length trivial.
-	 */
+   * After every sub-segment, we fake an ".align ...". This conforms to
+   * BSD4.2 brane-damage. We then fake ".fill 0" because that is the
+   * kind of frag that requires least thought. ".align" frags like to
+   * have a following frag since that makes calculating their intended
+   * length trivial.
+   */
+#ifndef SUB_SEGMENT_ALIGN
 #define SUB_SEGMENT_ALIGN (2)
+#endif
   for (frchainP = frchain_root; frchainP; frchainP = frchainP->frch_next)
     {
-#ifdef	VMS
+#ifdef	OBJ_VMS
       /*
        *	Under VAX/VMS, the linker (and PSECT specifications)
        *	take care of correctly aligning the segments.
@@ -528,12 +532,12 @@ write_object_file ()
   }
 #endif /* not WORKING_DOT_WORD */
 
-#ifndef	VMS
+#ifndef	OBJ_VMS
   {				/* not vms */
     /*
-		 * Scan every FixS performing fixups. We had to wait until now to do
-		 * this because md_convert_frag() may have made some fixSs.
-		 */
+     * Scan every FixS performing fixups. We had to wait until now to do
+     * this because md_convert_frag() may have made some fixSs.
+     */
     int trsize, drsize;
 
     subseg_change (SEG_TEXT, 0);
@@ -623,14 +627,14 @@ write_object_file ()
     know ((next_object_file_charP - the_object_file) == (H_GET_HEADER_SIZE (&headers) + H_GET_TEXT_SIZE (&headers) + H_GET_DATA_SIZE (&headers) + H_GET_TEXT_RELOCATION_SIZE (&headers) + H_GET_DATA_RELOCATION_SIZE (&headers) + H_GET_LINENO_SIZE (&headers)));
 
     /*
-		 * Emit symbols.
-		 */
+     * Emit symbols.
+     */
     obj_emit_symbols (&next_object_file_charP, symbol_rootP);
     know ((next_object_file_charP - the_object_file) == (H_GET_HEADER_SIZE (&headers) + H_GET_TEXT_SIZE (&headers) + H_GET_DATA_SIZE (&headers) + H_GET_TEXT_RELOCATION_SIZE (&headers) + H_GET_DATA_RELOCATION_SIZE (&headers) + H_GET_LINENO_SIZE (&headers) + H_GET_SYMBOL_TABLE_SIZE (&headers)));
 
     /*
-		 * Emit strings.
-		 */
+     * Emit strings.
+     */
 
     if (string_byte_count > 0)
       {
@@ -654,9 +658,10 @@ write_object_file ()
   }				/* non vms output */
 #else /* VMS */
   /*
-	 *	Now do the VMS-dependent part of writing the object file
-	 */
-  VMS_write_object_file (text_siz, data_siz, text_frag_root, data_frag_root);
+   *	Now do the VMS-dependent part of writing the object file
+   */
+  VMS_write_object_file (H_GET_TEXT_SIZE (&headers), data_siz,
+			 text_frag_root, data_frag_root);
 #endif /* VMS */
 }				/* write_object_file() */
 
@@ -1310,12 +1315,5 @@ record_alignment (seg, align)
 
   return;
 }				/* record_alignment() */
-
-/*
- * Local Variables:
- * comment-column: 0
- * fill-column: 131
- * End:
- */
 
 /* end of write.c */

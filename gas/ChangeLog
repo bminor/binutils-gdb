@@ -1,3 +1,8 @@
+Wed Dec 16 12:12:33 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* write.c, obj-ieee.c: don't define SUB_SEGMENT_ALIGN if it is
+	already defined.
+
 Tue Dec 15 12:40:11 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* app.c (do_scrub_begin): allow single quote strings if so
