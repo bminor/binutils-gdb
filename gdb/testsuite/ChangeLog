@@ -1,3 +1,13 @@
+Thu Mar 30 15:36:55 1995  Kung Hsu  <kung@mexican.cygnus.com>
+
+	* lib/gdb.exp (gdb_run_cmd): Special handling for targets use stubs.
+	* gdb.base/break.exp: ditto.
+	* gdb.base/list.exp: ditto.
+	* gdb.base/bitfields.c: Add #ifdef usestubs in main().
+	* gdb.base/run.c: ditto.
+	* gdb.base/list0.c: ditto.
+	* gdb.base/funcargs.c: ditto.
+
 Wed Mar 29 17:09:29 1995  Stu Grossman  (grossman@cygnus.com)
 
 	* testsuite/config/rom68k.exp (gdb_target_rom68k):  Use

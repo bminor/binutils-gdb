@@ -143,10 +143,7 @@ if !$usestubs then {
   }
 }
 
-if $usestubs {
-    gdb_test $cmd "Starting program.*Breakpoint \[0-9\]+,.*main .*argc.*argv.* at .*$srcfile:56.*56\[\t \]+if .argc.*" \
-	"run until function breakpoint"
-}
+#if $usestubs {}
 
 #
 # run until the breakpoint at a line number

@@ -900,6 +900,14 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load $objdir/$subdir/$binfile
 
+if $usestubs {
+    send "step\n"
+    # if use stubs step out of the breakpoint() function.
+    expect {
+        -re "main.* at .*$prompt $" {}
+        timeout { fail "single step at breakpoint() (timeout)" ; return 0 }
+    }
+
 send "set width 0\n"
 expect -re "$prompt $"
 
