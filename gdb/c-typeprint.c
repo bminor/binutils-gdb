@@ -576,7 +576,9 @@ c_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
 	{
 	  int i, len = TYPE_NFIELDS (type);
 	  fprintf_filtered (stream, "(");
-	  if ((len == 0) && (current_language->la_language == language_cplus))
+	  if (len == 0
+              && (TYPE_PROTOTYPED (type)
+                  || current_language->la_language == language_cplus))
 	    {
 	      fprintf_filtered (stream, "void");
 	    }
