@@ -51,7 +51,7 @@ extern int alpha_flag_mdebug;
 #ifdef MIPS_STABS_ELF
 #define ECOFF_DEBUGGING 0
 #else
-#define ECOFF_DEBUGGING 1
+#define ECOFF_DEBUGGING (debug_type == DEBUG_ECOFF)
 #endif /* MIPS_STABS_ELF */
 #endif /* TC_MIPS */
 
