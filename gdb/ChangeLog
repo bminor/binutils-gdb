@@ -1,3 +1,9 @@
+2004-04-08  Kevin Buettner  <kevinb@redhat.com>
+
+	* ppc-linux-tdep.c (ELF_NREG, ELF_NFPREG, ELF_NVRREG)
+	(ELF_FPREGSET_SIZE):  Delete constants formerly used in core
+	file support.
+
 2004-04-07  Kevin Buettner  <kevinb@redhat.com>
 
 	* ia64-tdep.c (elf.h): Don't include.

@@ -848,17 +848,6 @@ ppc64_linux_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
   return addr;
 }
 
-
-enum {
-  ELF_NGREG = 48,
-  ELF_NFPREG = 33,
-  ELF_NVRREG = 33
-};
-
-enum {
-  ELF_FPREGSET_SIZE = (ELF_NFPREG * 8)
-};
-
 static void
 right_supply_register (struct regcache *regcache, int wordsize, int regnum,
 		       const bfd_byte *buf)
