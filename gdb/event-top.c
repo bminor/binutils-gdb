@@ -1,5 +1,8 @@
 /* Top level stuff for GDB, the GNU debugger.
-   Copyright 1999, 2000, 2001, 2002, 2004 Free Software Foundation, Inc.
+
+   Copyright 1999, 2000, 2001, 2002, 2004, 2005 Free Software
+   Foundation, Inc.
+
    Written by Elena Zannoni <ezannoni@cygnus.com> of Cygnus Solutions.
 
    This file is part of GDB.
@@ -646,15 +649,7 @@ command_line_handler (char *rl)
   gdb_flush (gdb_stderr);
 
   if (source_file_name != NULL)
-    {
-      ++source_line_number;
-      sprintf (source_error,
-	       "%s%s:%d: Error in sourced command file:\n",
-	       source_pre_error,
-	       source_file_name,
-	       source_line_number);
-      error_pre_print = source_error;
-    }
+    ++source_line_number;
 
   /* If we are in this case, then command_handler will call quit 
      and exit from gdb. */

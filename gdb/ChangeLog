@@ -1,3 +1,16 @@
+2005-01-17  Andrew Cagney  <cagney@gnu.org>
+
+	* top.h (source_error, source_pre_error): Delete declaration.
+	* cli/cli-script.c (source_error_allocated, source_error): Delete.
+	(script_from_file, source_cleanup_lines): Do not manipulate
+	source_error_allocated, error_pre_print and source_error.
+	(struct source_cleanup_lines_args): Delete fields old_pre_error,
+	and old_error_pre_print.
+	* top.c (source_error_allocated, source_error)
+	(source_pre_error): Delete.
+	(command_line_input): Do not set error_pre_print.
+	* event-top.c (command_line_handler): Do not set error_pre_print.
+
 2005-01-16  Jason Thorpe  <thorpej@netbsd.org>
 
 	* MAINTAINERS: Update my email address.

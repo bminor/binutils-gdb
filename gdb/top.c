@@ -1,7 +1,7 @@
 /* Top level stuff for GDB, the GNU debugger.
 
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -318,21 +318,6 @@ quit_cover (void *s)
    gdb to use the event loop as the default command loop and we merge
    event-top.c into this file, top.c */
 /* static */ char *source_file_name;
-
-/* Buffer containing the error_pre_print used by the source stuff.
-   Malloc'd.  */
-/* NOTE 1999-04-29: This variable will be static again, once we modify
-   gdb to use the event loop as the default command loop and we merge
-   event-top.c into this file, top.c */
-/* static */ char *source_error;
-static int source_error_allocated;
-
-/* Something to glom on to the start of error_pre_print if source_file_name
-   is set.  */
-/* NOTE 1999-04-29: This variable will be static again, once we modify
-   gdb to use the event loop as the default command loop and we merge
-   event-top.c into this file, top.c */
-/* static */ char *source_pre_error;
 
 /* Clean up on error during a "source" command (or execution of a
    user-defined command).  */
@@ -873,15 +858,7 @@ command_line_input (char *prompt_arg, int repeat, char *annotation_suffix)
       gdb_flush (gdb_stderr);
 
       if (source_file_name != NULL)
-	{
-	  ++source_line_number;
-	  sprintf (source_error,
-		   "%s%s:%d: Error in sourced command file:\n",
-		   source_pre_error,
-		   source_file_name,
-		   source_line_number);
-	  error_pre_print = source_error;
-	}
+	++source_line_number;
 
       if (annotation_level > 1 && instream == stdin)
 	{

@@ -48,9 +48,6 @@ static void validate_comname (char *);
 /* Level of control structure.  */
 static int control_level;
 
-/* Source command state variable. */
-static int source_error_allocated;
-
 /* Structure for arguments to user defined functions.  */
 #define MAXUSERARGS 10
 struct user_args
@@ -1230,8 +1227,6 @@ struct source_cleanup_lines_args
 {
   int old_line;
   char *old_file;
-  char *old_pre_error;
-  char *old_error_pre_print;
 };
 
 static void
@@ -1241,8 +1236,6 @@ source_cleanup_lines (void *args)
   (struct source_cleanup_lines_args *) args;
   source_line_number = p->old_line;
   source_file_name = p->old_file;
-  source_pre_error = p->old_pre_error;
-  error_pre_print = p->old_error_pre_print;
 }
 
 static void
@@ -1281,29 +1274,12 @@ script_from_file (FILE *stream, char *file)
 
   old_lines.old_line = source_line_number;
   old_lines.old_file = source_file_name;
-  old_lines.old_pre_error = source_pre_error;
-  old_lines.old_error_pre_print = error_pre_print;
   make_cleanup (source_cleanup_lines, &old_lines);
   source_line_number = 0;
   source_file_name = file;
-  source_pre_error = error_pre_print == NULL ? "" : error_pre_print;
-  source_pre_error = savestring (source_pre_error, strlen (source_pre_error));
-  make_cleanup (xfree, source_pre_error);
   /* This will get set every time we read a line.  So it won't stay "" for
      long.  */
   error_pre_print = "";
-
-  needed_length = strlen (source_file_name) + strlen (source_pre_error) + 80;
-  if (source_error_allocated < needed_length)
-    {
-      source_error_allocated *= 2;
-      if (source_error_allocated < needed_length)
-	source_error_allocated = needed_length;
-      if (source_error == NULL)
-	source_error = xmalloc (source_error_allocated);
-      else
-	source_error = xrealloc (source_error, source_error_allocated);
-    }
 
   {
     struct exception e;
@@ -1318,10 +1294,8 @@ script_from_file (FILE *stream, char *file)
       case RETURN_ERROR:
 	/* Re-throw the error, but with the file name information
 	   prepended.  */
-	throw_error (e.error, "%s%s:%d: Error in sourced command file:\n%s",
-		     source_pre_error, source_file_name,
-		     source_line_number,
-		     e.message);
+	throw_error (e.error, "%s:%d: Error in sourced command file:\n%s",
+		     source_file_name, source_line_number, e.message);
       default:
 	internal_error (__FILE__, __LINE__, "bad reason");
       }
