@@ -94,7 +94,7 @@ enum {
   iacc0_regnum = first_pseudo_regnum + 0,
 
   last_pseudo_regnum = iacc0_regnum,
-  frv_num_pseudo_regs = last_pseudo_regnum + first_pseudo_regnum + 1,
+  frv_num_pseudo_regs = last_pseudo_regnum - first_pseudo_regnum + 1,
 };
 
 static LONGEST frv_call_dummy_words[] =
