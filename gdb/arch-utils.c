@@ -383,9 +383,9 @@ void
 init_frame_pc_default (int fromleaf, struct frame_info *prev)
 {
   if (fromleaf)
-    prev->pc = SAVED_PC_AFTER_CALL (prev->next);
-  else if (prev->next != NULL)
-    prev->pc = FRAME_SAVED_PC (prev->next);
+    prev->pc = SAVED_PC_AFTER_CALL (get_next_frame (prev));
+  else if (get_next_frame (prev) != NULL)
+    prev->pc = FRAME_SAVED_PC (get_next_frame (prev));
   else
     prev->pc = read_pc ();
 }

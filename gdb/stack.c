@@ -837,15 +837,15 @@ frame_info (char *addr_exp, int from_tty)
       printf_filtered (" called by frame at ");
       print_address_numeric (calling_frame_info->frame, 1, gdb_stdout);
     }
-  if (fi->next && calling_frame_info)
+  if (get_next_frame (fi) && calling_frame_info)
     puts_filtered (",");
   wrap_here ("   ");
-  if (fi->next)
+  if (get_next_frame (fi))
     {
       printf_filtered (" caller of frame at ");
-      print_address_numeric (fi->next->frame, 1, gdb_stdout);
+      print_address_numeric (get_next_frame (fi)->frame, 1, gdb_stdout);
     }
-  if (fi->next || calling_frame_info)
+  if (get_next_frame (fi) || calling_frame_info)
     puts_filtered ("\n");
   if (s)
     printf_filtered (" source language %s.\n",

@@ -213,8 +213,8 @@ frame_address_in_block (struct frame_info *frame)
   /* FIXME: cagney/2002-11-10: Should this instead test for
      NORMAL_FRAME?  A dummy frame (in fact all the abnormal frames)
      save the PC value in the block.  */
-  if (frame->next != 0
-      && get_frame_type (frame->next) != SIGTRAMP_FRAME)
+  if (get_next_frame (frame) != 0
+      && get_frame_type (get_next_frame (frame)) != SIGTRAMP_FRAME)
     --pc;
 
   return pc;

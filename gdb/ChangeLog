@@ -1,5 +1,15 @@
 2002-12-08  Andrew Cagney  <ac131313@redhat.com>
 
+	* stack.c (frame_info): Use get_prev_frame.
+	* blockframe.c (frame_address_in_block): Ditto.
+	* rs6000-tdep.c (rs6000_init_extra_frame_info): Ditto.
+	(rs6000_frameless_function_invocation): Ditto.
+	(rs6000_frame_saved_pc): Ditto.
+	(rs6000_frame_chain): Ditto.
+	* arch-utils.c (init_frame_pc_default): Ditto.
+
+2002-12-08  Andrew Cagney  <ac131313@redhat.com>
+
 	* config/mn10200/tm-mn10200.h (DEPRECATED_PC_IN_CALL_DUMMY):
 	Delete redundant definition.
 

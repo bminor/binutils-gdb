@@ -169,7 +169,7 @@ rs6000_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   fi->extra_info = (struct frame_extra_info *)
     frame_obstack_alloc (sizeof (struct frame_extra_info));
   fi->extra_info->initial_sp = 0;
-  if (fi->next != (CORE_ADDR) 0
+  if (get_next_frame (fi) != (CORE_ADDR) 0
       && fi->pc < TEXT_SEGMENT_BASE)
     /* We're in get_prev_frame */
     /* and this is a special signal frame.  */
@@ -1477,7 +1477,8 @@ rs6000_frameless_function_invocation (struct frame_info *fi)
 
   /* Don't even think about framelessness except on the innermost frame
      or if the function was interrupted by a signal.  */
-  if (fi->next != NULL && !(get_frame_type (fi->next) == SIGTRAMP_FRAME))
+  if (get_next_frame (fi) != NULL
+      && !(get_frame_type (get_next_frame (fi)) == SIGTRAMP_FRAME))
     return 0;
 
   func_start = get_pc_function_start (fi->pc);
@@ -1526,10 +1527,11 @@ rs6000_frame_saved_pc (struct frame_info *fi)
 
   (void) skip_prologue (func_start, fi->pc, &fdata);
 
-  if (fdata.lr_offset == 0 && fi->next != NULL)
+  if (fdata.lr_offset == 0 && get_next_frame (fi) != NULL)
     {
-      if ((get_frame_type (fi->next) == SIGTRAMP_FRAME))
-	return read_memory_addr (fi->next->frame + SIG_FRAME_LR_OFFSET,
+      if ((get_frame_type (get_next_frame (fi)) == SIGTRAMP_FRAME))
+	return read_memory_addr (get_next_frame (fi)->frame
+				 + SIG_FRAME_LR_OFFSET,
 				 wordsize);
       else if (DEPRECATED_PC_IN_CALL_DUMMY (get_next_frame (fi)->pc, 0, 0))
 	/* The link register wasn't saved by this frame and the next
@@ -1756,8 +1758,8 @@ rs6000_frame_chain (struct frame_info *thisframe)
   if ((get_frame_type (thisframe) == SIGTRAMP_FRAME))
     fp = read_memory_addr (thisframe->frame + SIG_FRAME_FP_OFFSET,
 			      wordsize);
-  else if (thisframe->next != NULL
-	   && (get_frame_type (thisframe->next) == SIGTRAMP_FRAME)
+  else if (get_next_frame (thisframe) != NULL
+	   && (get_frame_type (get_next_frame (thisframe)) == SIGTRAMP_FRAME)
 	   && FRAMELESS_FUNCTION_INVOCATION (thisframe))
     /* A frameless function interrupted by a signal did not change the
        frame pointer.  */
