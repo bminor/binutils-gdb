@@ -1,3 +1,25 @@
+Thu Aug  5 13:08:56 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* read.c (emit_expr): Use BFD_RELOC_64 for 8-byte expressions.
+
+Tue Aug  3 15:43:55 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* config/obj-elf.c (obj_elf_stab_generic, in disabled code): If
+	debug section is new, allocate an extra 12 bytes at its start.  If
+	".stabs" type is N_SO, fill in filename symbol field of that first
+	entry.  Return early if "goof", to simplify later code slightly.
+	(adjust_stab_sections): New function.
+	(elf_frob_file): Apply adjust_stab_sections to each section.
+
+	* config/obj-elf.c (obj_elf_section, obj_elf_previous): No longer
+	static.
+	* config/obj-elf.h (obj_elf_section, obj_elf_previous): Declare.
+	* config/tc-sparc.c (md_pseudo_table): Call them for "pushsection"
+	and "popsection", and call cons for "uaword" and "uahalf".
+
+	* config/obj-elf.c (obj_elf_version): Use English in error
+	messages.
+
 Tue Aug  3 11:29:06 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* config/obj-ecoff.c: Updated for BFD ECOFF changes.  Now gets the
