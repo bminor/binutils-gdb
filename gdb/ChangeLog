@@ -1,3 +1,9 @@
+2005-01-19  Andrew Cagney  <cagney@gnu.org>
+
+	* infrun.c: (resume, proceed, wait_for_inferior)
+	(handle_inferior_event, stop_stepping)
+	(prepare_to_wait): Write debug output to gdb_stdlog.
+
 2005-01-19  Mark Kettenis  <kettenis@gnu.org>
 
 	* inf-ptrace.c (inf_ptrace_prepare_to_store)
