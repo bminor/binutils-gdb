@@ -248,7 +248,9 @@ extern CORE_ADDR sparc_pc_adjust PARAMS ((CORE_ADDR));
    subroutine will return.  This is called from call_function. */
 
 #define STORE_STRUCT_RETURN(ADDR, SP) \
-  { target_write_memory ((SP)+(16*4), (char *)&(ADDR), 4); }
+  { char val[4]; \
+    store_unsigned_integer (val, 4, (ADDR)); \
+    write_memory ((SP)+(16*4), val, 4); }
 
 /* Extract from an array REGBUF containing the (raw) register state
    a function return value of type TYPE, and copy that, in virtual format,
