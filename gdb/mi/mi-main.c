@@ -405,13 +405,13 @@ register_changed_p (int regnum)
   if (! frame_register_read (deprecated_selected_frame, regnum, raw_buffer))
     return -1;
 
-  if (memcmp (&old_regs[REGISTER_BYTE (regnum)], raw_buffer,
+  if (memcmp (&old_regs[DEPRECATED_REGISTER_BYTE (regnum)], raw_buffer,
 	      REGISTER_RAW_SIZE (regnum)) == 0)
     return 0;
 
   /* Found a changed register. Return 1. */
 
-  memcpy (&old_regs[REGISTER_BYTE (regnum)], raw_buffer,
+  memcpy (&old_regs[DEPRECATED_REGISTER_BYTE (regnum)], raw_buffer,
 	  REGISTER_RAW_SIZE (regnum));
 
   return 1;
@@ -642,7 +642,7 @@ mi_cmd_data_write_register_values (char *command, char **argv, int argc)
 	  old_chain = make_cleanup (xfree, buffer);
 	  store_signed_integer (buffer, DEPRECATED_REGISTER_SIZE, value);
 	  /* Write it down */
-	  deprecated_write_register_bytes (REGISTER_BYTE (regnum), buffer, REGISTER_RAW_SIZE (regnum));
+	  deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (regnum), buffer, REGISTER_RAW_SIZE (regnum));
 	  /* Free the buffer.  */
 	  do_cleanups (old_chain);
 	}

@@ -508,29 +508,29 @@ extern void set_gdbarch_deprecated_register_bytes (struct gdbarch *gdbarch, int 
    function works.  This simplifies the migration process - old code,
    calling DEPRECATED_REGISTER_BYTE, doesn't need to be modified. */
 
-#if defined (REGISTER_BYTE)
-/* Legacy for systems yet to multi-arch REGISTER_BYTE */
-#if !defined (REGISTER_BYTE_P)
-#define REGISTER_BYTE_P() (1)
+#if defined (DEPRECATED_REGISTER_BYTE)
+/* Legacy for systems yet to multi-arch DEPRECATED_REGISTER_BYTE */
+#if !defined (DEPRECATED_REGISTER_BYTE_P)
+#define DEPRECATED_REGISTER_BYTE_P() (1)
 #endif
 #endif
 
 extern int gdbarch_deprecated_register_byte_p (struct gdbarch *gdbarch);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (REGISTER_BYTE_P)
-#error "Non multi-arch definition of REGISTER_BYTE"
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_REGISTER_BYTE_P)
+#error "Non multi-arch definition of DEPRECATED_REGISTER_BYTE"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (REGISTER_BYTE_P)
-#define REGISTER_BYTE_P() (gdbarch_deprecated_register_byte_p (current_gdbarch))
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_REGISTER_BYTE_P)
+#define DEPRECATED_REGISTER_BYTE_P() (gdbarch_deprecated_register_byte_p (current_gdbarch))
 #endif
 
 typedef int (gdbarch_deprecated_register_byte_ftype) (int reg_nr);
 extern int gdbarch_deprecated_register_byte (struct gdbarch *gdbarch, int reg_nr);
 extern void set_gdbarch_deprecated_register_byte (struct gdbarch *gdbarch, gdbarch_deprecated_register_byte_ftype *deprecated_register_byte);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (REGISTER_BYTE)
-#error "Non multi-arch definition of REGISTER_BYTE"
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_REGISTER_BYTE)
+#error "Non multi-arch definition of DEPRECATED_REGISTER_BYTE"
 #endif
-#if !defined (REGISTER_BYTE)
-#define REGISTER_BYTE(reg_nr) (gdbarch_deprecated_register_byte (current_gdbarch, reg_nr))
+#if !defined (DEPRECATED_REGISTER_BYTE)
+#define DEPRECATED_REGISTER_BYTE(reg_nr) (gdbarch_deprecated_register_byte (current_gdbarch, reg_nr))
 #endif
 
 /* If all registers have identical raw and virtual sizes and those
@@ -2036,7 +2036,7 @@ extern void set_gdbarch_addr_bits_remove (struct gdbarch *gdbarch, gdbarch_addr_
 #define ADDR_BITS_REMOVE(addr) (gdbarch_addr_bits_remove (current_gdbarch, addr))
 #endif
 
-/* It is not at all clear why SMASH_TEXT_ADDRESS is not folded into 
+/* It is not at all clear why SMASH_TEXT_ADDRESS is not folded into
    ADDR_BITS_REMOVE. */
 
 typedef CORE_ADDR (gdbarch_smash_text_address_ftype) (CORE_ADDR addr);
@@ -2330,7 +2330,7 @@ typedef int (gdbarch_register_reggroup_p_ftype) (struct gdbarch *gdbarch, int re
 extern int gdbarch_register_reggroup_p (struct gdbarch *gdbarch, int regnum, struct reggroup *reggroup);
 extern void set_gdbarch_register_reggroup_p (struct gdbarch *gdbarch, gdbarch_register_reggroup_p_ftype *register_reggroup_p);
 
-/* Fetch the pointer to the ith function argument.   */
+/* Fetch the pointer to the ith function argument. */
 
 #if defined (FETCH_POINTER_ARGUMENT)
 /* Legacy for systems yet to multi-arch FETCH_POINTER_ARGUMENT */

@@ -47,13 +47,13 @@ fetch_inferior_registers (int regno)
 
   memcpy (deprecated_registers, &inferior_registers, 16 * 4);
   if (FP0_REGNUM >= 0)
-    memcpy (&deprecated_registers[REGISTER_BYTE (FP0_REGNUM)],
+    memcpy (&deprecated_registers[DEPRECATED_REGISTER_BYTE (FP0_REGNUM)],
 	    &inferior_fp_registers, sizeof inferior_fp_registers.fps_regs);
 
-  *(int *) &deprecated_registers[REGISTER_BYTE (PS_REGNUM)] = inferior_registers.r_ps;
-  *(int *) &deprecated_registers[REGISTER_BYTE (PC_REGNUM)] = inferior_registers.r_pc;
+  *(int *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (PS_REGNUM)] = inferior_registers.r_ps;
+  *(int *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (PC_REGNUM)] = inferior_registers.r_pc;
   if (FP0_REGNUM >= 0)
-    memcpy (&deprecated_registers[REGISTER_BYTE (FPC_REGNUM)],
+    memcpy (&deprecated_registers[DEPRECATED_REGISTER_BYTE (FPC_REGNUM)],
 	    &inferior_fp_registers.fps_control,
 	    sizeof inferior_fp_registers - 
 	    sizeof inferior_fp_registers.fps_regs);
@@ -72,15 +72,15 @@ store_inferior_registers (int regno)
   memcpy (&inferior_registers, deprecated_registers, 16 * 4);
   if (FP0_REGNUM >= 0)
     memcpy (&inferior_fp_registers,
-	    &deprecated_registers[REGISTER_BYTE (FP0_REGNUM)],
+	    &deprecated_registers[DEPRECATED_REGISTER_BYTE (FP0_REGNUM)],
 	    sizeof inferior_fp_registers.fps_regs);
 
-  inferior_registers.r_ps = *(int *) &&deprecated_registers[REGISTER_BYTE (PS_REGNUM)];
-  inferior_registers.r_pc = *(int *) &&deprecated_registers[REGISTER_BYTE (PC_REGNUM)];
+  inferior_registers.r_ps = *(int *) &&deprecated_registers[DEPRECATED_REGISTER_BYTE (PS_REGNUM)];
+  inferior_registers.r_pc = *(int *) &&deprecated_registers[DEPRECATED_REGISTER_BYTE (PC_REGNUM)];
 
   if (FP0_REGNUM >= 0)
     memcpy (&inferior_fp_registers.fps_control,
-	    &&deprecated_registers[REGISTER_BYTE (FPC_REGNUM)],
+	    &&deprecated_registers[DEPRECATED_REGISTER_BYTE (FPC_REGNUM)],
 	    sizeof inferior_fp_registers - 
 	    sizeof inferior_fp_registers.fps_regs);
 
@@ -131,10 +131,10 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
 	{
 	  if (FP0_REGNUM >= 0)
 	    {
-	      memcpy (&&deprecated_registers[REGISTER_BYTE (FP0_REGNUM)],
+	      memcpy (&&deprecated_registers[DEPRECATED_REGISTER_BYTE (FP0_REGNUM)],
 		      fpustruct->f_fpstatus.fps_regs,
 		      sizeof fpustruct->f_fpstatus.fps_regs);
-	      memcpy (&&deprecated_registers[REGISTER_BYTE (FPC_REGNUM)],
+	      memcpy (&&deprecated_registers[DEPRECATED_REGISTER_BYTE (FPC_REGNUM)],
 		      &fpustruct->f_fpstatus.fps_control,
 		      sizeof fpustruct->f_fpstatus -
 		      sizeof fpustruct->f_fpstatus.fps_regs);

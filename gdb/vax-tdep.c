@@ -267,7 +267,7 @@ vax_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 static void
 vax_extract_return_value (struct type *valtype, char *regbuf, char *valbuf)
 {
-  memcpy (valbuf, regbuf + REGISTER_BYTE (0), TYPE_LENGTH (valtype));
+  memcpy (valbuf, regbuf + DEPRECATED_REGISTER_BYTE (0), TYPE_LENGTH (valtype));
 }
 
 static void
@@ -279,7 +279,7 @@ vax_store_return_value (struct type *valtype, char *valbuf)
 static CORE_ADDR
 vax_extract_struct_value_address (char *regbuf)
 {
-  return (extract_unsigned_integer (regbuf + REGISTER_BYTE (0),
+  return (extract_unsigned_integer (regbuf + DEPRECATED_REGISTER_BYTE (0),
 				    REGISTER_RAW_SIZE (0)));
 }
 

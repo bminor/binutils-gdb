@@ -936,7 +936,7 @@ sparc_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
     {
       if (lval != NULL)
 	*lval = lval_register;
-      addr = REGISTER_BYTE (regnum);
+      addr = DEPRECATED_REGISTER_BYTE (regnum);
       if (raw_buffer != NULL)
 	deprecated_read_register_gen (regnum, raw_buffer);
     }
@@ -972,10 +972,10 @@ sparc_push_dummy_frame (void)
   if (GDB_TARGET_IS_SPARC64)
     {
       /* PC, NPC, CCR, FSR, FPRS, Y, ASI */
-      deprecated_read_register_bytes (REGISTER_BYTE (PC_REGNUM),
+      deprecated_read_register_bytes (DEPRECATED_REGISTER_BYTE (PC_REGNUM),
 				      &register_temp[0],
 				      REGISTER_RAW_SIZE (PC_REGNUM) * 7);
-      deprecated_read_register_bytes (REGISTER_BYTE (PSTATE_REGNUM), 
+      deprecated_read_register_bytes (DEPRECATED_REGISTER_BYTE (PSTATE_REGNUM), 
 				      &register_temp[7 * SPARC_INTREG_SIZE],
 				      REGISTER_RAW_SIZE (PSTATE_REGNUM));
       /* FIXME: not sure what needs to be saved here.  */
@@ -983,21 +983,21 @@ sparc_push_dummy_frame (void)
   else
     {
       /* Y, PS, WIM, TBR, PC, NPC, FPS, CPS regs */
-      deprecated_read_register_bytes (REGISTER_BYTE (Y_REGNUM),
+      deprecated_read_register_bytes (DEPRECATED_REGISTER_BYTE (Y_REGNUM),
 				      &register_temp[0],
 				      REGISTER_RAW_SIZE (Y_REGNUM) * 8);
     }
 
-  deprecated_read_register_bytes (REGISTER_BYTE (O0_REGNUM),
+  deprecated_read_register_bytes (DEPRECATED_REGISTER_BYTE (O0_REGNUM),
 				  &register_temp[8 * SPARC_INTREG_SIZE],
 				  SPARC_INTREG_SIZE * 8);
 
-  deprecated_read_register_bytes (REGISTER_BYTE (G0_REGNUM),
+  deprecated_read_register_bytes (DEPRECATED_REGISTER_BYTE (G0_REGNUM),
 				  &register_temp[16 * SPARC_INTREG_SIZE],
 				  SPARC_INTREG_SIZE * 8);
 
   if (SPARC_HAS_FPU)
-    deprecated_read_register_bytes (REGISTER_BYTE (FP0_REGNUM),
+    deprecated_read_register_bytes (DEPRECATED_REGISTER_BYTE (FP0_REGNUM),
 				    &register_temp[24 * SPARC_INTREG_SIZE],
 				    FP_REGISTER_BYTES);
 
@@ -1224,7 +1224,7 @@ sparc_pop_frame (void)
       if (fsr[FP0_REGNUM])
 	{
 	  read_memory (fsr[FP0_REGNUM], raw_buffer, FP_REGISTER_BYTES);
-	  deprecated_write_register_bytes (REGISTER_BYTE (FP0_REGNUM),
+	  deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (FP0_REGNUM),
 					   raw_buffer, FP_REGISTER_BYTES);
 	}
       if (!(GDB_TARGET_IS_SPARC64))
@@ -1244,7 +1244,7 @@ sparc_pop_frame (void)
   if (fsr[G1_REGNUM])
     {
       read_memory (fsr[G1_REGNUM], raw_buffer, 7 * SPARC_INTREG_SIZE);
-      deprecated_write_register_bytes (REGISTER_BYTE (G1_REGNUM), raw_buffer,
+      deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (G1_REGNUM), raw_buffer,
 				       7 * SPARC_INTREG_SIZE);
     }
 
@@ -1297,10 +1297,10 @@ sparc_pop_frame (void)
 
       /* Restore the out registers.
          Among other things this writes the new stack pointer.  */
-      deprecated_write_register_bytes (REGISTER_BYTE (O0_REGNUM), raw_buffer,
+      deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (O0_REGNUM), raw_buffer,
 				       SPARC_INTREG_SIZE * 8);
 
-      deprecated_write_register_bytes (REGISTER_BYTE (L0_REGNUM), reg_temp,
+      deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (L0_REGNUM), reg_temp,
 				       SPARC_INTREG_SIZE * 16);
     }
 
@@ -1711,7 +1711,7 @@ fill_fpregset (gdb_fpregset_t *fpregsetp, int regno)
     {
       if ((regno == -1) || (regno == regi))
 	{
-	  from = (char *) &deprecated_registers[REGISTER_BYTE (regi)];
+	  from = (char *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (regi)];
 	  to = (char *) &fpregsetp->pr_fr.pr_regs[regi - FP0_REGNUM];
 	  memcpy (to, from, REGISTER_RAW_SIZE (regi));
 	}
@@ -1720,7 +1720,7 @@ fill_fpregset (gdb_fpregset_t *fpregsetp, int regno)
   if (!(GDB_TARGET_IS_SPARC64)) /* FIXME: does Sparc64 have this register? */
     if ((regno == -1) || (regno == FPS_REGNUM))
       {
-	from = (char *)&deprecated_registers[REGISTER_BYTE (FPS_REGNUM)];
+	from = (char *)&deprecated_registers[DEPRECATED_REGISTER_BYTE (FPS_REGNUM)];
 	to = (char *) &fpregsetp->pr_fsr;
 	memcpy (to, from, REGISTER_RAW_SIZE (FPS_REGNUM));
       }
@@ -2416,7 +2416,7 @@ sparc_store_return_value (struct type *type, char *valbuf)
       deprecated_write_register_gen (regno, buffer);
     }
   else
-    deprecated_write_register_bytes (REGISTER_BYTE (regno), valbuf,
+    deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (regno), valbuf,
 				     TYPE_LENGTH (type));
 }
 
@@ -2693,7 +2693,7 @@ sparc64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	      default:
 		internal_error (__FILE__, __LINE__, "bad switch");
 	      }
-	      deprecated_write_register_bytes (REGISTER_BYTE (fpreg),
+	      deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (fpreg),
 					       VALUE_CONTENTS (args[i]),
 					       len);
 	    }
@@ -2726,7 +2726,7 @@ sp64_extract_return_value (struct type *type, char *regbuf, char *valbuf,
 
   if (TYPE_CODE (type) == TYPE_CODE_FLT && SPARC_HAS_FPU)
     {
-      memcpy (valbuf, &regbuf[REGISTER_BYTE (FP0_REGNUM)], typelen);
+      memcpy (valbuf, &regbuf[DEPRECATED_REGISTER_BYTE (FP0_REGNUM)], typelen);
       return;
     }
 

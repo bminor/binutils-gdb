@@ -481,7 +481,7 @@ v::DEPRECATED_REGISTER_BYTES:int:deprecated_register_bytes
 # consequence, even when the predicate is false, the corresponding
 # function works.  This simplifies the migration process - old code,
 # calling DEPRECATED_REGISTER_BYTE, doesn't need to be modified.
-F::REGISTER_BYTE:int:deprecated_register_byte:int reg_nr:reg_nr::generic_register_byte:generic_register_byte
+F::DEPRECATED_REGISTER_BYTE:int:deprecated_register_byte:int reg_nr:reg_nr::generic_register_byte:generic_register_byte
 # If all registers have identical raw and virtual sizes and those
 # sizes agree with the value computed from REGISTER_TYPE,
 # DEPRECATED_REGISTER_RAW_SIZE can be deleted.  See: maint print

@@ -1452,6 +1452,25 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       (long) current_gdbarch->deprecated_push_return_address
                       /*DEPRECATED_PUSH_RETURN_ADDRESS ()*/);
 #endif
+#ifdef DEPRECATED_REGISTER_BYTE_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_REGISTER_BYTE_P()",
+                      XSTRING (DEPRECATED_REGISTER_BYTE_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_REGISTER_BYTE_P() = %d\n",
+                      DEPRECATED_REGISTER_BYTE_P ());
+#endif
+#ifdef DEPRECATED_REGISTER_BYTE
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_REGISTER_BYTE(reg_nr)",
+                      XSTRING (DEPRECATED_REGISTER_BYTE (reg_nr)));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_REGISTER_BYTE = <0x%08lx>\n",
+                      (long) current_gdbarch->deprecated_register_byte
+                      /*DEPRECATED_REGISTER_BYTE ()*/);
+#endif
 #ifdef DEPRECATED_REGISTER_BYTES
   fprintf_unfiltered (file,
                       "gdbarch_dump: DEPRECATED_REGISTER_BYTES # %s\n",
@@ -1996,25 +2015,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: push_dummy_code = 0x%08lx\n",
                       (long) current_gdbarch->push_dummy_code);
-#ifdef REGISTER_BYTE_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "REGISTER_BYTE_P()",
-                      XSTRING (REGISTER_BYTE_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: REGISTER_BYTE_P() = %d\n",
-                      REGISTER_BYTE_P ());
-#endif
-#ifdef REGISTER_BYTE
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "REGISTER_BYTE(reg_nr)",
-                      XSTRING (REGISTER_BYTE (reg_nr)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: REGISTER_BYTE = <0x%08lx>\n",
-                      (long) current_gdbarch->deprecated_register_byte
-                      /*REGISTER_BYTE ()*/);
-#endif
 #ifdef REGISTER_BYTES_OK_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",

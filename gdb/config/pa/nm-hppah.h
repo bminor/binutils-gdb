@@ -25,7 +25,7 @@
 
 /* What a coincidence! */
 #define REGISTER_U_ADDR(addr, blockend, regno)				\
-{ addr = (int)(blockend) + REGISTER_BYTE (regno);}
+{ addr = (int)(blockend) + DEPRECATED_REGISTER_BYTE (regno);}
 
 /* This isn't really correct, because ptrace is actually a 32-bit
    interface.  However, the modern HP-UX targets all really use

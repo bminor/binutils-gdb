@@ -277,9 +277,9 @@ d10v_ts3_imap_register (void *regcache, int reg_nr)
   return reg;
 }
 
-/* MAP GDB's internal register numbering (determined by the layout fo
-   the REGISTER_BYTE array) onto the simulator's register
-   numbering. */
+/* MAP GDB's internal register numbering (determined by the layout
+   from the DEPRECATED_REGISTER_BYTE array) onto the simulator's
+   register numbering. */
 
 static int
 d10v_ts2_register_sim_regno (int nr)

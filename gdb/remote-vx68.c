@@ -88,10 +88,10 @@ vx_read_register (int regno)
   bcopy (&mc68k_greg_packet[MC68K_R_D0], deprecated_registers,
 	 16 * MC68K_GREG_SIZE);
   bcopy (&mc68k_greg_packet[MC68K_R_SR],
-	 &deprecated_registers[REGISTER_BYTE (PS_REGNUM)],
+	 &deprecated_registers[DEPRECATED_REGISTER_BYTE (PS_REGNUM)],
 	 MC68K_GREG_SIZE);
   bcopy (&mc68k_greg_packet[MC68K_R_PC],
-	 &deprecated_registers[REGISTER_BYTE (PC_REGNUM)],
+	 &deprecated_registers[DEPRECATED_REGISTER_BYTE (PC_REGNUM)],
 	 MC68K_GREG_SIZE);
 
   /* Get floating-point registers, if the target system has them.
@@ -103,17 +103,17 @@ vx_read_register (int regno)
 			  PTRACE_GETFPREGS);
 
       bcopy (&mc68k_fpreg_packet[MC68K_R_FP0],
-	     &deprecated_registers[REGISTER_BYTE (FP0_REGNUM)],
+	     &deprecated_registers[DEPRECATED_REGISTER_BYTE (FP0_REGNUM)],
 	     MC68K_FPREG_SIZE * 8);
       bcopy (&mc68k_fpreg_packet[MC68K_R_FPCR],
-	     &deprecated_registers[REGISTER_BYTE (FPC_REGNUM)],
+	     &deprecated_registers[DEPRECATED_REGISTER_BYTE (FPC_REGNUM)],
 	     MC68K_FPREG_PLEN - (MC68K_FPREG_SIZE * 8));
     }
   else
     {
-      bzero (&deprecated_registers[REGISTER_BYTE (FP0_REGNUM)],
+      bzero (&deprecated_registers[DEPRECATED_REGISTER_BYTE (FP0_REGNUM)],
 	     MC68K_FPREG_SIZE * 8);
-      bzero (&deprecated_registers[REGISTER_BYTE (FPC_REGNUM)],
+      bzero (&deprecated_registers[DEPRECATED_REGISTER_BYTE (FPC_REGNUM)],
 	     MC68K_FPREG_PLEN - (MC68K_FPREG_SIZE * 8));
     }
 
@@ -136,9 +136,9 @@ vx_write_register (int regno)
 
   bcopy (deprecated_registers, &mc68k_greg_packet[MC68K_R_D0],
 	 16 * MC68K_GREG_SIZE);
-  bcopy (&deprecated_registers[REGISTER_BYTE (PS_REGNUM)],
+  bcopy (&deprecated_registers[DEPRECATED_REGISTER_BYTE (PS_REGNUM)],
 	 &mc68k_greg_packet[MC68K_R_SR], MC68K_GREG_SIZE);
-  bcopy (&deprecated_registers[REGISTER_BYTE (PC_REGNUM)],
+  bcopy (&deprecated_registers[DEPRECATED_REGISTER_BYTE (PC_REGNUM)],
 	 &mc68k_greg_packet[MC68K_R_PC], MC68K_GREG_SIZE);
 
   net_write_registers (mc68k_greg_packet, MC68K_GREG_PLEN, PTRACE_SETREGS);
@@ -147,10 +147,10 @@ vx_write_register (int regno)
 
   if (target_has_fp)
     {
-      bcopy (&deprecated_registers[REGISTER_BYTE (FP0_REGNUM)],
+      bcopy (&deprecated_registers[DEPRECATED_REGISTER_BYTE (FP0_REGNUM)],
 	     &mc68k_fpreg_packet[MC68K_R_FP0],
 	     MC68K_FPREG_SIZE * 8);
-      bcopy (&deprecated_registers[REGISTER_BYTE (FPC_REGNUM)],
+      bcopy (&deprecated_registers[DEPRECATED_REGISTER_BYTE (FPC_REGNUM)],
 	     &mc68k_fpreg_packet[MC68K_R_FPCR],
 	     MC68K_FPREG_PLEN - (MC68K_FPREG_SIZE * 8));
 

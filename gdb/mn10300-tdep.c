@@ -125,15 +125,15 @@ static void
 mn10300_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 {
   if (TYPE_CODE (type) == TYPE_CODE_PTR)
-    memcpy (valbuf, regbuf + REGISTER_BYTE (4), TYPE_LENGTH (type));
+    memcpy (valbuf, regbuf + DEPRECATED_REGISTER_BYTE (4), TYPE_LENGTH (type));
   else
-    memcpy (valbuf, regbuf + REGISTER_BYTE (0), TYPE_LENGTH (type));
+    memcpy (valbuf, regbuf + DEPRECATED_REGISTER_BYTE (0), TYPE_LENGTH (type));
 }
 
 static CORE_ADDR
 mn10300_extract_struct_value_address (char *regbuf)
 {
-  return extract_unsigned_integer (regbuf + REGISTER_BYTE (4),
+  return extract_unsigned_integer (regbuf + DEPRECATED_REGISTER_BYTE (4),
 				   REGISTER_RAW_SIZE (4));
 }
 
@@ -141,10 +141,10 @@ static void
 mn10300_store_return_value (struct type *type, char *valbuf)
 {
   if (TYPE_CODE (type) == TYPE_CODE_PTR)
-    deprecated_write_register_bytes (REGISTER_BYTE (4), valbuf,
+    deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (4), valbuf,
 				     TYPE_LENGTH (type));
   else
-    deprecated_write_register_bytes (REGISTER_BYTE (0), valbuf,
+    deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (0), valbuf,
 				     TYPE_LENGTH (type));
 }
 

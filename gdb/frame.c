@@ -1089,9 +1089,9 @@ const struct frame_unwind *legacy_saved_regs_unwind = &legacy_saved_regs_unwinde
    calculated rather than fetched).  We will use not_lval for values
    fetched from generic dummy frames.
 
-   Set *ADDRP to the address, either in memory or as a REGISTER_BYTE
-   offset into the registers array.  If the value is stored in a dummy
-   frame, set *ADDRP to zero.
+   Set *ADDRP to the address, either in memory or as a
+   DEPRECATED_REGISTER_BYTE offset into the registers array.  If the
+   value is stored in a dummy frame, set *ADDRP to zero.
 
    The argument RAW_BUFFER must point to aligned memory.  */
 
@@ -1172,7 +1172,7 @@ deprecated_generic_get_saved_register (char *raw_buffer, int *optimized,
   if (lval)			/* found it in a live register */
     *lval = lval_register;
   if (addrp)
-    *addrp = REGISTER_BYTE (regnum);
+    *addrp = DEPRECATED_REGISTER_BYTE (regnum);
   if (raw_buffer)
     deprecated_read_register_gen (regnum, raw_buffer);
 }
