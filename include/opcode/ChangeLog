@@ -1,3 +1,34 @@
+Mon May 10 06:02:25 1993  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
+
+	* m68k.h: Move split point for gcc compilation more towards
+	middle.
+
+Fri Apr  9 13:26:16 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* rs6k.h: Clean up instructions for primary opcode 19 (many were
+	simply wrong, ics, rfi, & rfsvc were missing).
+	Add "a" to opr_ext for "bb".  Doc fix.
+
+Thu Mar 18 13:45:31 1993  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* i386.h:  486 extensions from John Hassey (hassey@dg-rtp.dg.com).
+	* mips.h:  Add casts, to suppress warnings about shifting too much.
+	* m68k.h:  Document the placement code '9'.
+
+Thu Feb 18 02:03:14 1993  John Gilmore  (gnu@cygnus.com)
+
+	* m68k.h (BREAK_UP_BIG_DECL, AND_OTHER_PART):  Add kludge which
+	allows callers to break up the large initialized struct full of
+	opcodes into two half-sized ones.  This permits GCC to compile 
+	this module, since it takes exponential space for initializers.
+	(numopcodes, endop):  Revise to use AND_OTHER_PART in size calcs.
+
+Thu Feb  4 02:06:56 1993  John Gilmore  (gnu@cygnus.com)
+
+	* a29k.h:  Remove RCS crud, update GPL to v2, update copyrights.
+	* convex.h:  Added, from GDB's convx-opcode.h.  Added CONST to all
+	initialized structs in it.
+
 Thu Jan 28 21:32:22 1993  John Gilmore  (gnu@cygnus.com)
 
 	Delta 88 changes inspired by Carl Greco, <cgreco@Creighton.Edu>:
