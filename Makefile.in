@@ -24,7 +24,7 @@ prefix = /usr/local
 exec_prefix = $(prefix)
 bindir = $(exec_prefix)/bin
 libdir = $(exec_prefix)/lib
-tooldir = $(libdir)
+tooldir = $(exec_prefix)/$(target)
 
 program_transform_name =
 
@@ -62,6 +62,7 @@ CXX = gcc
 CXXFLAGS = -g -O
 RANLIB = ranlib
 NM = nm
+MUNCH_NM = $(NM)
 GZIP = gzip
 COMPRESS = compress
 
@@ -79,8 +80,12 @@ MAKEINFO = `if [ -f $${rootme}/texinfo/makeinfo/makeinfo ] ; \
 	then echo $${rootme}/texinfo/makeinfo/makeinfo ; \
 	else echo makeinfo ; fi`
 
-RUNTEST = `if [ -f $${rootme}/dejagnu/runtest ] ; \
-	then echo EXPECT=$${rootme}/expect/expect $${rootme}/dejagnu/runtest ; \
+EXPECT = `if [ -f $${rootme}/expect/expect ] ; \
+	then echo $${rootme}/expect/expect ; \
+	else echo expect ; fi`
+
+RUNTEST = `if [ -f $${srcroot}/dejagnu/runtest ] ; \
+	then echo $${srcroot}/dejagnu/runtest ; \
 	else echo runtest ; fi`
 
 
@@ -221,10 +226,13 @@ BASE_FLAGS_TO_PASS = \
 	"LEX=$(LEX)" \
 	"LOADLIBES=$(LOADLIBES)" \
 	"MAKEINFO=$(MAKEINFO)" \
+	"MUNCH_NM=$(MUNCH_NM)" \
 	"NM_FOR_TARGET=$(NM_FOR_TARGET)" \
 	"PRMS=$(PRMS)" \
 	"RANLIB_FOR_TARGET=$(RANLIB_FOR_TARGET)" \
+	"EXPECT=$(EXPECT)" \
 	"RUNTEST=$(RUNTEST)" \
+	"RUNTESTFLAGS=$(RUNTESTFLAGS)" \
 	"XTRAFLAGS_FOR_TARGET=$(XTRAFLAGS)" \
 	"exec_prefix=$(exec_prefix)" \
 	"prefix=$(prefix)" \
@@ -270,11 +278,19 @@ TARGET_FLAGS_TO_PASS = $(BASE_FLAGS_TO_PASS) $(EXTRA_TARGET_FLAGS)
 # unfortunately needs the native compiler and the target ar and
 # ranlib.
 # If any variables are added here, they must be added to do-*, below.
+# The HOST_* variables are a special case, which are used for the gcc
+# cross-building scheme.
+HOST_CC = $(CC_FOR_BUILD)
+HOST_PREFIX = 
+HOST_PREFIX_1 = loser-
 EXTRA_GCC_FLAGS = \
 	'AR=$$(AR_FOR_TARGET)' \
 	'AS=$(AS)' \
 	'CC=$(CC)' \
 	'CXX=$(CXX)' \
+	'HOST_CC=$(CC_FOR_BUILD)' \
+	'HOST_PREFIX=$(HOST_PREFIX)' \
+	'HOST_PREFIX_1=$(HOST_PREFIX_1)' \
 	'NM=$(NM)' \
 	'RANLIB=$$(RANLIB_FOR_TARGET)' \
 	'XTRAFLAGS='
@@ -636,8 +652,8 @@ gcc-no-fixedincludes:
 	  rm -rf gcc/tmp-include; \
 	  mv gcc/include gcc/tmp-include 2>/dev/null; \
 	  mkdir gcc/include; \
-	  touch gcc/stmp-fixincludes; \
-	  rm -f gcc/stmp-headers; \
+	  touch gcc/stmp-fixinc; \
+	  rm -f gcc/stmp-headers gcc/stmp-int-hdrs; \
 	  rootme=`pwd`; export rootme; \
 	  srcroot=`cd $(srcdir); pwd` ; export srcroot; \
 	  (cd ./gcc; \
@@ -838,7 +854,7 @@ all-flex: all-libiberty all-byacc
 all-gas: all-libiberty all-opcodes all-bfd
 all-gawk:
 all-gcc: all-libiberty all-byacc all-binutils all-gas
-all-gdb: all-libiberty all-opcodes all-bfd all-mmalloc all-readline all-glob all-byacc
+all-gdb: all-libiberty all-opcodes all-bfd all-mmalloc all-readline all-glob all-byacc all-sim
 all-glob:
 all-gprof: all-libiberty all-bfd
 all-grep:
@@ -1007,15 +1023,23 @@ make-gdb.tar.Z: $(DEVO_SUPPORT) $(GDB_SUPPORT_DIRS) gdb texinfo/texinfo.tex
 
 	# Make the testsuite archive separately.
 	ln -s ../../gdb/proto-testsuite.dir/testsuite proto-toplev/gdb/testsuite
+	# Blow away the Chill test that requires a Chill compiled executable,
+	# since GNU Chill is not yet publically available.
+	rm -rf proto-toplev/gdb/testsuite/gdb.t31
+
 	# Put a copy of COPYING in the tar file.
 	ln proto-toplev/gdb/COPYING proto-toplev/gdb/testsuite/COPYING
 	chmod og=u `find proto-toplev/gdb/testsuite -print`
 	(VER=`sed <gdb/Makefile.in -n 's/VERSION = //p'`; \
 		echo "==> Making gdb-$$VER-testsuite.tar.Z"; \
-		tar cfh - gdb-$$VER/gdb/testsuite | \
+		tar cfh - gdb-$$VER/configure gdb-$$VER/config.guess \
+			gdb-$$VER/config.sub gdb-$$VER/move-if-change \
+			gdb-$$VER/gdb/testsuite | \
 			$(COMPRESS) -v >gdb-$$VER-testsuite.tar.Z; \
 		echo "==> Making gdb-$$VER-testsuite.tar.z"; \
-		tar cfh - gdb-$$VER/gdb/testsuite | \
+		tar cfh - gdb-$$VER/configure gdb-$$VER/config.guess \
+			gdb-$$VER/config.sub gdb-$$VER/move-if-change \
+			gdb-$$VER/gdb/testsuite | \
 			$(GZIP) -v -9 >gdb-$$VER-testsuite.tar.z)
 
 # When you use `make setup-dirs' or `make taz' you should always redefine
@@ -1024,43 +1048,41 @@ SUPPORT_FILES = list-of-support-files-for-tool-in-question
 # Directories that might want `make proto-dir' run.
 PROTODIRS= gdb
 
-.PHONY: setup-dirs taz
-setup-dirs:
+.PHONY: taz
+
+taz: $(DEVO_SUPPORT) $(SUPPORT_FILES) texinfo/texinfo.tex
 	./configure sun4
 	$(MAKE) clean
 	./configure -rm sun4
 	chmod og=u `find etc $(DEVO_SUPPORT) $(SUPPORT_FILES) -print`
-	for d in .. $(PROTODIRS) ; do \
-	  if [ $$d != ".." ] && [ -d $$d ]; then \
-	    (cd $$d ; $(MAKE) -f Makefile.in proto-dir) ; \
-	  else true ; fi ; \
+	# Make links, and run "proto-dir" stuff when needed.
+	# The `echo' for setting `p' is to convert all whitespace to spaces.
+	# Then the `case' further below should tell whether $$d is in
+	# PROTODIRS.
+	rm -rf proto-toplev ; mkdir proto-toplev
+	dirs="$(TOOL) $(DEVO_SUPPORT) $(SUPPORT_FILES)" ; \
+	p=" `echo $(PROTODIRS)` " ; \
+	for d in $$dirs ; do \
+	  if [ -d $$d ]; then \
+	    case " $(PROTODIRS) " in \
+	    "* $$d *")	(cd $$d ; $(MAKE) -f Makefile.in proto-dir) ; \
+			ln -s ../$$d/proto-$$d.dir proto-toplev/$$d ;; \
+	    *)		ln -s ../$$d proto-toplev/$$d ;; \
+	    esac ; \
+	  else ln -s ../$$d proto-toplev/$$d ; fi ; \
 	done
-
-taz: $(DEVO_SUPPORT) $(SUPPORT_FILES) texinfo/texinfo.tex
-	rm -rf proto-toplev; mkdir proto-toplev
-	for d in .. $(PROTODIRS) ; do \
-	  if [ $$d != .. ]; then \
-	    if [ -d $$d ]; then \
-	      ln -s ../$$d/proto-$$d.dir proto-toplev/$$d ; \
-	    else true ; fi ; \
-	  else true ; fi ; \
-	done
-	(cd proto-toplev; for i in $(TOOL) $(DEVO_SUPPORT) $(SUPPORT_FILES); do \
-		if [ ! -d $$i ]; then ln -s ../$$i . ; else true ; fi ; \
-	done)
+	#
 	mkdir proto-toplev/etc
 	(cd proto-toplev/etc; for i in $(ETC_SUPPORT); do \
 		ln -s ../../etc/$$i . ; \
 	done)
-	# Put only one copy (four hard links) of COPYING in the tar file.
-	## FIX ME LATER
-
+	#
 	# Take out texinfo and glob from configurable dirs
 	rm proto-toplev/configure.in
 	sed -e '/^host_tools=/s/texinfo //' \
 	    -e '/^host_libs=/s/glob //' \
 	    <configure.in >proto-toplev/configure.in
-
+	#
 	# Take out texinfo from a few places; make simple BISON=bison line.
 	rm proto-toplev/Makefile.in
 	sed -e '/^all\.normal: /s/\all-texinfo //' \
@@ -1068,7 +1090,7 @@ taz: $(DEVO_SUPPORT) $(SUPPORT_FILES) texinfo/texinfo.tex
 	    -e '/^BISON = /,/^$$/d' \
 	    -e '/^# BISON:/s/.*/BISON = bison -y/' \
 	<Makefile.in >proto-toplev/Makefile.in
-
+	#
 	mkdir proto-toplev/texinfo
 	ln -s ../../texinfo/texinfo.tex proto-toplev/texinfo/
 	ln -s ../../texinfo/tex3patch   proto-toplev/texinfo/
@@ -1083,13 +1105,11 @@ GAS_SUPPORT_DIRS= bfd include libiberty opcodes
 
 .PHONY: gas.tar.z
 gas.tar.z: $(DEVO_SUPPORT) $(GAS_SUPPORT_DIRS) gas texinfo/texinfo.tex
-	$(MAKE) -f Makefile.in setup-dirs SUPPORT_FILES="$(GAS_SUPPORT_DIRS)"
 	$(MAKE) -f Makefile.in taz SUPPORT_FILES="$(GAS_SUPPORT_DIRS)" TOOL=gas
 
 .PHONY: gas+binutils.tar.z
-GASB_SUPPORT_DIRS= $(GAS_SUPPORT_DIRS) binutils ld
+GASB_SUPPORT_DIRS= $(GAS_SUPPORT_DIRS) binutils ld gprof
 gas+binutils.tar.z: $(DEVO_SUPPORT) $(GASB_SUPPORT_DIRS) gas texinfo/texinfo.tex
-	$(MAKE) -f Makefile.in setup-dirs SUPPORT_FILES="$(GASB_SUPPORT_DIRS)"
 	$(MAKE) -f Makefile.in taz SUPPORT_FILES="$(GASB_SUPPORT_DIRS)" TOOL=gas
 
 .NOEXPORT:
