@@ -2190,7 +2190,7 @@ symbol_get_tc (s)
 /* Set the processor information for a symbol.  */
 
 void
-symbol_set_obj (s, o)
+symbol_set_tc (s, o)
      symbolS *s;
      TC_SYMFIELD_TYPE *o;
 {
