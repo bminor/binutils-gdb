@@ -237,7 +237,6 @@ struct value *
 call_function_by_hand (struct value *function, int nargs, struct value **args)
 {
   register CORE_ADDR sp;
-  int rc;
   CORE_ADDR dummy_addr;
   struct type *value_type;
   unsigned char struct_return;
@@ -724,34 +723,6 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
     SAVE_DUMMY_FRAME_TOS (sp);
 
   {
-    char *name;
-    struct symbol *symbol;
-
-    name = NULL;
-    symbol = find_pc_function (funaddr);
-    if (symbol)
-      {
-	name = SYMBOL_PRINT_NAME (symbol);
-      }
-    else
-      {
-	/* Try the minimal symbols.  */
-	struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (funaddr);
-
-	if (msymbol)
-	  {
-	    name = SYMBOL_PRINT_NAME (msymbol);
-	  }
-      }
-    if (name == NULL)
-      {
-	char format[80];
-	sprintf (format, "at %s", local_hex_format ());
-	name = alloca (80);
-	/* FIXME-32x64: assumes funaddr fits in a long.  */
-	sprintf (name, format, (unsigned long) funaddr);
-      }
-
     {
       /* Execute a "stack dummy", a piece of code stored in the stack
 	 by the debugger to be executed in the inferior.
@@ -769,7 +740,6 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 	 eventually be popped when we do hit the dummy end
 	 breakpoint).  */
 
-      struct regcache *buffer = retbuf;
       struct cleanup *old_cleanups = make_cleanup (null_cleanup, 0);
       int saved_async = 0;
 
@@ -815,97 +785,115 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
       
       discard_cleanups (old_cleanups);
   
-      if (stopped_by_random_signal)
-	/* We can stop during an inferior call because a signal is
-	   received. */
-	rc = 1;
-      else if (!stop_stack_dummy)
-	/* We may also stop prematurely because we hit a breakpoint in
-	   the called routine. */
-	rc = 2;
-      else
-	{
-	  /* On normal return, the stack dummy has been popped
-             already.  */
-	  regcache_cpy_no_passthrough (buffer, stop_registers);
-	  rc = 0;
-	}
     }
+  }
 
-    if (rc == 1)
+  if (stopped_by_random_signal || !stop_stack_dummy)
+    {
+      /* Find the name of the function we're about to complain about.  */
+      char *name = NULL;
       {
-	/* We stopped inside the FUNCTION because of a random signal.
-	   Further execution of the FUNCTION is not allowed. */
-
-        if (unwind_on_signal_p)
+	struct symbol *symbol = find_pc_function (funaddr);
+	if (symbol)
+	  name = SYMBOL_PRINT_NAME (symbol);
+	else
 	  {
-	    /* The user wants the context restored. */
+	    /* Try the minimal symbols.  */
+	    struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (funaddr);
+	    if (msymbol)
+	      name = SYMBOL_PRINT_NAME (msymbol);
+	  }
+      }
+      if (name == NULL)
+	{
+	  /* NOTE: cagney/2003-04-23: Don't blame me.  This code dates
+             back to 1993-07-08, I simply moved it.  */
+	  char format[80];
+	  sprintf (format, "at %s", local_hex_format ());
+	  name = alloca (80);
+	  /* FIXME-32x64: assumes funaddr fits in a long.  */
+	  sprintf (name, format, (unsigned long) funaddr);
+	}
+      if (stopped_by_random_signal)
+	{
+	  /* We stopped inside the FUNCTION because of a random
+	     signal.  Further execution of the FUNCTION is not
+	     allowed. */
 
-            /* We must get back to the frame we were before the dummy
-               call. */
-	    frame_pop (get_current_frame ());
+	  if (unwind_on_signal_p)
+	    {
+	      /* The user wants the context restored. */
 
-	    /* FIXME: Insert a bunch of wrap_here; name can be very long if it's
-	       a C++ name with arguments and stuff.  */
-	    error ("\
+	      /* We must get back to the frame we were before the
+		 dummy call. */
+	      frame_pop (get_current_frame ());
+
+	      /* FIXME: Insert a bunch of wrap_here; name can be very
+		 long if it's a C++ name with arguments and stuff.  */
+	      error ("\
 The program being debugged was signaled while in a function called from GDB.\n\
 GDB has restored the context to what it was before the call.\n\
 To change this behavior use \"set unwindonsignal off\"\n\
 Evaluation of the expression containing the function (%s) will be abandoned.",
-		   name);
-	  }
-	else
-	  {
-	    /* The user wants to stay in the frame where we stopped (default).*/
-
-	    /* If we restored the inferior status (via the cleanup),
-	       we would print a spurious error message (Unable to
-	       restore previously selected frame), would write the
-	       registers from the inf_status (which is wrong), and
-	       would do other wrong things.  */
-	    discard_cleanups (inf_status_cleanup);
-	    discard_inferior_status (inf_status);
-
-	    /* FIXME: Insert a bunch of wrap_here; name can be very long if it's
-	       a C++ name with arguments and stuff.  */
-	    error ("\
+		     name);
+	    }
+	  else
+	    {
+	      /* The user wants to stay in the frame where we stopped
+                 (default).*/
+	      /* If we restored the inferior status (via the cleanup),
+		 we would print a spurious error message (Unable to
+		 restore previously selected frame), would write the
+		 registers from the inf_status (which is wrong), and
+		 would do other wrong things.  */
+	      discard_cleanups (inf_status_cleanup);
+	      discard_inferior_status (inf_status);
+	      /* FIXME: Insert a bunch of wrap_here; name can be very
+		 long if it's a C++ name with arguments and stuff.  */
+	      error ("\
 The program being debugged was signaled while in a function called from GDB.\n\
 GDB remains in the frame where the signal was received.\n\
 To change this behavior use \"set unwindonsignal on\"\n\
 Evaluation of the expression containing the function (%s) will be abandoned.",
-		   name);
-	  }
-      }
+		     name);
+	    }
+	}
 
-    if (rc == 2)
-      {
-	/* We hit a breakpoint inside the FUNCTION. */
-
-	/* If we restored the inferior status (via the cleanup), we
-	   would print a spurious error message (Unable to restore
-	   previously selected frame), would write the registers from
-	   the inf_status (which is wrong), and would do other wrong
-	   things.  */
-	discard_cleanups (inf_status_cleanup);
-	discard_inferior_status (inf_status);
-
-	/* The following error message used to say "The expression
-	   which contained the function call has been discarded."  It
-	   is a hard concept to explain in a few words.  Ideally, GDB
-	   would be able to resume evaluation of the expression when
-	   the function finally is done executing.  Perhaps someday
-	   this will be implemented (it would not be easy).  */
-
-	/* FIXME: Insert a bunch of wrap_here; name can be very long if it's
-	   a C++ name with arguments and stuff.  */
-	error ("\
+      if (!stop_stack_dummy)
+	{
+	  /* We hit a breakpoint inside the FUNCTION. */
+	  /* If we restored the inferior status (via the cleanup), we
+	     would print a spurious error message (Unable to restore
+	     previously selected frame), would write the registers
+	     from the inf_status (which is wrong), and would do other
+	     wrong things.  */
+	  discard_cleanups (inf_status_cleanup);
+	  discard_inferior_status (inf_status);
+	  /* The following error message used to say "The expression
+	     which contained the function call has been discarded."
+	     It is a hard concept to explain in a few words.  Ideally,
+	     GDB would be able to resume evaluation of the expression
+	     when the function finally is done executing.  Perhaps
+	     someday this will be implemented (it would not be easy).  */
+	  /* FIXME: Insert a bunch of wrap_here; name can be very long if it's
+	     a C++ name with arguments and stuff.  */
+	  error ("\
 The program being debugged stopped while in a function called from GDB.\n\
 When the function (%s) is done executing, GDB will silently\n\
 stop (instead of continuing to evaluate the expression containing\n\
 the function call).", name);
-      }
+	}
 
+      /* The above code errors out, so ...  */
+      internal_error (__FILE__, __LINE__, "... should not be here");
+    }
+
+  {
     /* If we get here the called FUNCTION run to completion. */
+
+    /* On normal return, the stack dummy has been popped
+       already.  */
+    regcache_cpy_no_passthrough (retbuf, stop_registers);
 
     /* Restore the inferior status, via its cleanup.  At this stage,
        leave the RETBUF alone.  */
