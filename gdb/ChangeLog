@@ -1,3 +1,9 @@
+2004-05-10  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
+
+	* acinclude.m4: Quote macro names being defined by AC_DEFUN 
+	throughout.
+	* aclocal.m4: Regenerate.
+
 2004-05-10  Nathan J. Williams  <nathanw@wasabisystems.com>
 
 	* alphanbsd-tdep.c: Fix include of "gdb_string.h".
