@@ -54,11 +54,15 @@ static void
 core_close (quitting)
      int quitting;
 {
+  char *name;
   inferior_pid = 0;		/* Avoid confusion from thread stuff */
 
   if (core_bfd) {
-    free (bfd_get_filename (core_bfd));
-    bfd_close (core_bfd);
+    name = bfd_get_filename (core_bfd);
+    if (!bfd_close (core_bfd))
+      warning ("cannot close \"%s\": %s",
+	       bfd_filename, bfd_errmsg (bfd_get_error ()));
+    free (name);
     core_bfd = NULL;
 #ifdef CLEAR_SOLIB
     CLEAR_SOLIB ();
@@ -154,6 +158,9 @@ core_open (filename, from_tty)
   if (!bfd_check_format (temp_bfd, bfd_core))
     {
       /* Do it after the err msg */
+      /* FIXME: should be checking for errors from bfd_close (for one thing,
+	 on error it does not free all the storage associated with the
+	 bfd).  */
       make_cleanup (bfd_close, temp_bfd);
       error ("\"%s\" is not a core dump: %s", filename, bfd_errmsg(bfd_get_error ()));
     }

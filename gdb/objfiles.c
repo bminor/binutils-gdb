@@ -341,7 +341,9 @@ free_objfile (objfile)
   if (objfile -> obfd != NULL)
     {
       char *name = bfd_get_filename (objfile->obfd);
-      bfd_close (objfile -> obfd);
+      if (!bfd_close (objfile -> obfd))
+	warning ("cannot close \"%s\": %s",
+		 name, bfd_errmsg (bfd_get_error ()));
       free (name);
     }
 

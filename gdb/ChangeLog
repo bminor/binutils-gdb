@@ -7,8 +7,8 @@ Fri Oct 14 10:29:08 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 	message if bfd_close fails.
 	* exec.c (exec_close), solib.c (clear_solib), corelow.c
 	(core_close), objfiles.c (free_objfile), irix5-nat.c
-	(clear_solib), remote-utils.c (gr_load_image):
-	Check for errors from bfd_close.
+	(clear_solib), osfsolib.c (clear_solib), remote-utils.c
+	(gr_load_image): Check for errors from bfd_close.
 	* solib.c (look_for_base), remote-utils.c (gr_load_image),
 	remote-udi.c (download), corelow.c (core_open), symfile.c
 	(symfile_bfd_open), symfile.c (generic_load): Add comment

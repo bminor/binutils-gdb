@@ -679,7 +679,9 @@ clear_solib()
       if (so_list_head -> abfd)
 	{
 	  bfd_filename = bfd_get_filename (so_list_head -> abfd);
-	  bfd_close (so_list_head -> abfd);
+	  if (!bfd_close (so_list_head -> abfd))
+	    warning ("cannot close \"%s\": %s",
+		     bfd_filename, bfd_errmsg (bfd_get_error ()));
 	}
       else
 	/* This happens for the executable on SVR4.  */

@@ -648,8 +648,13 @@ gr_load_image (args, fromtty)
   abfd = bfd_openr (args, (char *) 0);
 
   if (!abfd)
+    /* FIXME: should be using bfd_errmsg, not assuming it was
+       bfd_error_system_call.  */
     perror_with_name (args);
 
+  /* FIXME: should be checking for errors from bfd_close (for one thing,
+     on error it does not free all the storage associated with the
+     bfd).  */
   old_cleanups = make_cleanup (bfd_close, abfd);
 
   QUIT;
@@ -682,7 +687,9 @@ gr_load_image (args, fromtty)
 
   free (buffer);
   write_pc (bfd_get_start_address (abfd));
-  bfd_close (abfd);
+  if (!bfd_close (abfd))
+    warning ("cannot close \"%s\": %s",
+	     args, bfd_errmsg (bfd_get_error ()));
   discard_cleanups (old_cleanups);
 }
 
