@@ -1876,7 +1876,7 @@ load_register (counter, reg, ep, dbl)
      int dbl;
 {
   int shift, freg;
-  expressionS hi32, lo32, tmp;
+  expressionS hi32, lo32;
 
   if (ep->X_op != O_big)
     {

@@ -1,3 +1,7 @@
+Wed Sep  4 10:23:20 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-mips.c (load_register): Remove unused variable tmp.
+
 Wed Sep  4 11:24:29 1996  James G. Smith  <jsmith@cygnus.co.uk>
 
 	* config/tc-mips.c (load_register): Remove unnecessary code that
