@@ -21,6 +21,7 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 #include "bfd.h"
 #include "sysdep.h"
 #include "libiberty.h"
+#include "obstack.h"
 #include "bfdlink.h"
 
 #include "ld.h"
@@ -736,7 +737,11 @@ section_already_linked (abfd, sec, data)
    explicit actions, like foo.o(.text), bar.o(.text) and
    foo.o(.text, .data).  */
 
-/* Return true if the PATTERN argument is a wildcard pattern.  */
+/* Return true if the PATTERN argument is a wildcard pattern.
+   Although backslashes are treated specially if a pattern contains
+   wildcards, we do not consider the mere presence of a backslash to
+   be enough to cause the the pattern to be treated as a wildcard.
+   That lets us handle DOS filenames more naturally.  */
 
 static boolean
 wildcardp (pattern)
@@ -746,7 +751,6 @@ wildcardp (pattern)
 
   for (s = pattern; *s != '\0'; ++s)
     if (*s == '?'
-	|| *s == '\\'
 	|| *s == '*'
 	|| *s == '[')
       return true;
@@ -1366,7 +1370,7 @@ lang_place_undefineds ()
 
       h = bfd_link_hash_lookup (link_info.hash, ptr->name, true, false, true);
       if (h == (struct bfd_link_hash_entry *) NULL)
-	einfo ("%P%F: bfd_link_hash_lookup failed: %E");
+	einfo ("%P%F: bfd_link_hash_lookup failed: %E\n");
       if (h->type == bfd_link_hash_new)
 	{
 	  h->type = bfd_link_hash_undefined;
@@ -1670,6 +1674,10 @@ print_data_statement (data)
     case QUAD:
       size = QUAD_SIZE;
       name = "QUAD";
+      break;
+    case SQUAD:
+      size = QUAD_SIZE;
+      name = "SQUAD";
       break;
     }
 
@@ -2046,7 +2054,7 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 	   if (os->children.head == NULL
 	       || os->children.head->next != NULL
 	       || os->children.head->header.type != lang_input_section_enum)
-	     einfo ("%P%X: Internal error on COFF shared library section %s",
+	     einfo ("%P%X: Internal error on COFF shared library section %s\n",
 		    os->name);
 
 	   input = os->children.head->input_section.section;
@@ -2176,21 +2184,22 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 	output_section_statement->bfd_section;
 
        switch (s->data_statement.type)
-       {
-        case QUAD:
-	 size = QUAD_SIZE;
-	 break;
-	case LONG:
-	 size = LONG_SIZE;
-	 break;
-	case SHORT:
-	 size = SHORT_SIZE;
-	 break;
-	case BYTE:
-	 size = BYTE_SIZE;
-	 break;
+	 {
+	 case QUAD:
+	 case SQUAD:
+	   size = QUAD_SIZE;
+	   break;
+	 case LONG:
+	   size = LONG_SIZE;
+	   break;
+	 case SHORT:
+	   size = SHORT_SIZE;
+	   break;
+	 case BYTE:
+	   size = BYTE_SIZE;
+	   break;
+	 }
 
-       }
        dot += size;
        output_section_statement->bfd_section->_raw_size += size;
        /* The output section gets contents, and then we inspect for
@@ -2414,6 +2423,7 @@ lang_do_assignments (s, output_section_statement, fill, dot)
 	  switch (s->data_statement.type)
 	    {
 	    case QUAD:
+	    case SQUAD:
 	      dot += QUAD_SIZE;
 	      break;
 	    case LONG:
@@ -2621,8 +2631,10 @@ lang_check ()
 	       bfd_printable_name (input_bfd), input_bfd,
 	       bfd_printable_name (output_bfd));
 
-      else
-	bfd_merge_private_bfd_data (input_bfd, output_bfd);
+      else if (! bfd_merge_private_bfd_data (input_bfd, output_bfd))
+	{
+	  einfo ("%E%X: failed to merge target specific data of file %B\n", input_bfd);
+	}
     }
 }
 
@@ -3082,6 +3094,13 @@ lang_process ()
 
   ldemul_after_open ();
 
+  /* Make sure that we're not mixing architectures.  We call this
+     after all the input files have been opened, but before we do any
+     other processing, so that any operations merge_private_bfd_data
+     does on the output file will be known during the rest of the
+     link.  */
+  lang_check ();
+
   /* Build all sets based on the information gathered from the input
      files.  */
   ldctor_build_sets ();
@@ -3089,14 +3108,14 @@ lang_process ()
   /* Size up the common data */
   lang_common ();
 
-  /* Run through the contours of the script and attatch input sections
+  /* Run through the contours of the script and attach input sections
      to the correct output sections
      */
   map_input_to_output_sections (statement_list.head, (char *) NULL,
 				(lang_output_section_statement_type *) NULL);
 
 
-  /* Find any sections not attatched explicitly and handle them */
+  /* Find any sections not attached explicitly and handle them */
   lang_place_orphans ();
 
   ldemul_before_allocation ();
@@ -3156,10 +3175,6 @@ lang_process ()
   lang_do_assignments (statement_list.head,
 		       abs_output_section,
 		       (fill_type) 0, (bfd_vma) 0);
-
-  /* Make sure that we're not mixing architectures */
-
-  lang_check ();
 
   /* Final stuffs */
 
