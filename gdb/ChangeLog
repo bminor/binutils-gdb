@@ -1,5 +1,11 @@
 2001-06-15  Andrew Cagney  <ac131313@redhat.com>
 
+	From 2001-02-26  D.J. Barrow <djbarrow@de.ibm.com>:
+	* configure.tgt: Add S/390 31 & 64 bit target configuration.
+	* configure.host: Ditto for host.
+
+2001-06-15  Andrew Cagney  <ac131313@redhat.com>
+
 	* gdbarch.sh (EXTRACT_STRUCT_VALUE_ADDRESS_P): Delete definition.
 	(EXTRACT_STRUCT_VALUE_ADDRESS): Change to a function with
 	predicate.

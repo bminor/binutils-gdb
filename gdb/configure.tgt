@@ -23,6 +23,7 @@ mips*)			gdb_target_cpu=mips ;;
 powerpc*)		gdb_target_cpu=powerpc ;;
 sparc*)			gdb_target_cpu=sparc ;;
 thumb*)			gdb_target_cpu=arm ;;
+s390*)			gdb_target_cpu=s390 ;;
 strongarm*)		gdb_target_cpu=arm ;;
 xscale*)		gdb_target_cpu=arm ;;
 v850*)			gdb_target_cpu=v850 ;;
@@ -255,6 +256,9 @@ rs6000-*-lynxos*)	gdb_target=rs6000lynx
 		configdirs="${configdirs} gdbserver" ;;
 rs6000-*-aix4*)		gdb_target=aix4 ;;
 rs6000-*-*)		gdb_target=rs6000 ;;
+
+s390-*-*)		gdb_target=s390 ;;
+s390x-*-*)		gdb_target=s390x ;;
 
 sh*-*-pe)		gdb_target=wince ;;
 sh-*-hms)		gdb_target=embed ;;
