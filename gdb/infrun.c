@@ -2437,7 +2437,7 @@ process_event_stop_test:
       return;
     }
 
-  if (frame_id_eq (get_frame_id (get_prev_frame (get_current_frame ())),
+  if (frame_id_eq (frame_unwind_id (get_current_frame ()),
                    step_frame_id))
     {
       /* It's a subroutine call.  */

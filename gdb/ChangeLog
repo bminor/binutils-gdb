@@ -1,3 +1,7 @@
+2004-05-13  Andrew Cagney  <cagney@redhat.com>
+
+	* infrun.c (handle_inferior_event): Use frame_unwind_id.
+
 2004-05-13  Bryce McKinlay  <mckinlay@redhat.com>
 
 	* dwarf2loc.c (find_location_expression): Use ANOFFSET to adjust
