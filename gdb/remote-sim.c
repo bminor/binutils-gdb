@@ -344,7 +344,7 @@ int regno;
       for (regno = 0; regno < NUM_REGS; regno++)
 	gdbsim_fetch_register (regno);
     }
-  else
+  else if (reg_names[regno] != NULL && *reg_names[regno] != '\0')
     {
       char buf[MAX_REGISTER_RAW_SIZE];
 

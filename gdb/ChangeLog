@@ -1,3 +1,20 @@
+Fri Sep 26 12:22:00 1997  Mark Alexander  <marka@cygnus.com>
+
+	* config/mips-tm-mips.h (mips_extra_func_info): New frame_adjust
+	member for storing offset of MIPS16 frame pointer from SP.
+	* mips-tdep.c: Use RA_REGNUM instead of hardcoded 31 throughout.
+	(PROC_FRAME_ADJUST): Define.
+	(mips16_heuristic_proc_desc): Store frame pointer adjustment value.
+	(get_frame_pointer): Use frame pointer adjustment value when
+	calculating frame address.
+	* remote-sim.c (gdbsim_fetch_register): Don't fetch registers
+	that have a null or empty name.
+start-sanitize-tx19
+	* config/mips/tm-tx19.h (MIPS_DEFAULT_FPU_TYPE): Define.
+	(REGISTER_NAMES): Redefine to eliminate FP registers.
+	* config/mips/tm-tx19l.h: Ditto.
+end-sanitize-tx19
+
 Fri Sep 26 12:40:51 1997  Jeffrey A Law  (law@cygnus.com)
                           Michael Snyder  (msnyder@cleaver.cygnus.com)
 

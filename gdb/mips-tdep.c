@@ -190,6 +190,7 @@ static unsigned int heuristic_fence_post = 0;
 #define PROC_HIGH_ADDR(proc) ((proc)->high_addr) /* upper address bound */
 #define PROC_FRAME_OFFSET(proc) ((proc)->pdr.frameoffset)
 #define PROC_FRAME_REG(proc) ((proc)->pdr.framereg)
+#define PROC_FRAME_ADJUST(proc)  ((proc)->frame_adjust)
 #define PROC_REG_MASK(proc) ((proc)->pdr.regmask)
 #define PROC_FREG_MASK(proc) ((proc)->pdr.fregmask)
 #define PROC_REG_OFFSET(proc) ((proc)->pdr.regoffset)
@@ -323,7 +324,7 @@ mips16_decode_reg_save (inst, gen_mask)
     }
   else if ((inst & 0xff00) == 0x6200		/* sw $ra,n($sp) */
 	   || (inst & 0xff00) == 0xfa00)	/* sd $ra,n($sp) */
-    *gen_mask |= (1 << 31);
+    *gen_mask |= (1 << RA_REGNUM);
 }
 
 
@@ -721,7 +722,7 @@ Otherwise, you told GDB there was a function where there isn't one, or\n\
 static int
 mips16_get_imm (prev_inst, inst, nbits, scale, is_signed)
     unsigned short prev_inst;	/* previous instruction */
-    unsigned short inst;	/* current current instruction */
+    unsigned short inst;	/* current instruction */
     int nbits;			/* number of bits in imm field */
     int scale;			/* scale factor to be applied to imm */
     int is_signed;		/* is the imm field signed? */
@@ -763,7 +764,8 @@ mips16_heuristic_proc_desc(start_pc, limit_pc, next_frame, sp)
   unsigned short prev_inst = 0;	/* saved copy of previous instruction */
   unsigned inst = 0;		/* current instruction */
 
-  PROC_FRAME_OFFSET(&temp_proc_desc) = 0;
+  PROC_FRAME_OFFSET(&temp_proc_desc) = 0;	/* size of stack frame */
+  PROC_FRAME_ADJUST(&temp_proc_desc) = 0;	/* offset of FP from SP */
 
   for (cur_pc = start_pc; cur_pc < limit_pc; cur_pc += MIPS16_INSTLEN)
     {
@@ -804,14 +806,14 @@ mips16_heuristic_proc_desc(start_pc, limit_pc, next_frame, sp)
       else if ((inst & 0xff00) == 0x6200)	/* sw $ra,n($sp) */
 	{
 	  offset = mips16_get_imm (prev_inst, inst, 8, 4, 0);
-	  PROC_REG_MASK(&temp_proc_desc) |= (1 << 31);
-	  temp_saved_regs.regs[31] = sp + offset;
+	  PROC_REG_MASK(&temp_proc_desc) |= (1 << RA_REGNUM);
+	  temp_saved_regs.regs[RA_REGNUM] = sp + offset;
 	}
       else if ((inst & 0xff00) == 0xfa00)	/* sd $ra,n($sp) */
 	{
 	  offset = mips16_get_imm (prev_inst, inst, 8, 8, 0);
-	  PROC_REG_MASK(&temp_proc_desc) |= (1 << 31);
-	  temp_saved_regs.regs[31] = sp + offset;
+	  PROC_REG_MASK(&temp_proc_desc) |= (1 << RA_REGNUM);
+	  temp_saved_regs.regs[RA_REGNUM] = sp + offset;
 	}
       else if (inst == 0x673d)			/* move $s1, $sp */
 	{
@@ -823,6 +825,7 @@ mips16_heuristic_proc_desc(start_pc, limit_pc, next_frame, sp)
 	  offset = mips16_get_imm (prev_inst, inst, 8, 4, 0);
 	  frame_addr = sp + offset;
 	  PROC_FRAME_REG (&temp_proc_desc) = 17;
+	  PROC_FRAME_ADJUST (&temp_proc_desc) = offset;
 	}
       else if ((inst & 0xFF00) == 0xd900)	/* sw reg,offset($s1) */
 	{
@@ -858,8 +861,8 @@ mips16_heuristic_proc_desc(start_pc, limit_pc, next_frame, sp)
 	  offset = 28;
 	  if (inst & 0x20)
 	    {
-	      PROC_REG_MASK(&temp_proc_desc) |= 1 << 31;
-	      temp_saved_regs.regs[31] = sp + offset;
+	      PROC_REG_MASK(&temp_proc_desc) |= 1 << RA_REGNUM;
+	      temp_saved_regs.regs[RA_REGNUM] = sp + offset;
 	      offset -= MIPS_REGSIZE;
 	    }
 
@@ -1110,8 +1113,9 @@ get_frame_pointer(frame, proc_desc)
     struct frame_info *frame;
     mips_extra_func_info_t proc_desc;
 {
-  return ADDR_BITS_REMOVE (read_next_frame_reg (frame,
-    PROC_FRAME_REG(proc_desc)) + PROC_FRAME_OFFSET(proc_desc));
+  return ADDR_BITS_REMOVE (
+    read_next_frame_reg (frame, PROC_FRAME_REG (proc_desc)) +
+      PROC_FRAME_OFFSET (proc_desc) - PROC_FRAME_ADJUST (proc_desc));
 }
 
 mips_extra_func_info_t cached_proc_desc;
