@@ -153,6 +153,7 @@ te-aux.h
 te-delta.h
 te-delt88.h
 te-dpx2.h
+te-dynix.h
 te-generic.h
 te-go32.h
 te-hp300.h

@@ -9,6 +9,13 @@ Fri Feb 14 18:09:59 1997  Philippe De Muyter  <phdm@info.ucl.ac.be>
 
 Fri Feb 14 17:24:48 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	Based on notes from Peter Eriksson <peter@ifm.liu.se>.  The target
+	does not actually work, though:
+	* configure.in (i386-sequent-bsd*): New target.
+	* configure: Rebuild.
+	* config/tc-dynix.h: New file.
+	* config/tc-i386.h: Define TARGET_FORMAT if TE_DYNIX.
+
 	* read.c (do_align): Add max parameter.  Change all callers.
 	Remove useless static variables.
 	(s_align): New static function.  Do common portion of
