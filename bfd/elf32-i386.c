@@ -506,6 +506,12 @@ elf_i386_grok_psinfo (abfd, note)
 
 #define ELF_DYNAMIC_INTERPRETER "/usr/lib/libc.so.1"
 
+/* If ELIMINATE_COPY_RELOCS is non-zero, the linker will try to avoid
+   copying dynamic variables from a shared lib into an app's dynbss
+   section, and instead use a dynamic relocation to point into the
+   shared lib.  */
+#define ELIMINATE_COPY_RELOCS 1
+
 /* The size in bytes of an entry in the procedure linkage table.  */
 
 #define PLT_ENTRY_SIZE 16
@@ -1106,7 +1112,8 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 			   || h->root.type == bfd_link_hash_defweak
 			   || (h->elf_link_hash_flags
 			       & ELF_LINK_HASH_DEF_REGULAR) == 0))))
-	      || (!info->shared
+	      || (ELIMINATE_COPY_RELOCS
+		  && !info->shared
 		  && (sec->flags & SEC_ALLOC) != 0
 		  && h != NULL
 		  && (h->root.type == bfd_link_hash_defweak
@@ -1372,8 +1379,6 @@ elf_i386_adjust_dynamic_symbol (info, h)
      struct elf_link_hash_entry *h;
 {
   struct elf_i386_link_hash_table *htab;
-  struct elf_i386_link_hash_entry * eh;
-  struct elf_i386_dyn_relocs *p;
   asection *s;
   unsigned int power_of_two;
 
@@ -1418,6 +1423,10 @@ elf_i386_adjust_dynamic_symbol (info, h)
 		  || h->weakdef->root.type == bfd_link_hash_defweak);
       h->root.u.def.section = h->weakdef->root.u.def.section;
       h->root.u.def.value = h->weakdef->root.u.def.value;
+      if (ELIMINATE_COPY_RELOCS || info->nocopyreloc)
+	h->elf_link_hash_flags
+	  = ((h->elf_link_hash_flags & ~ELF_LINK_NON_GOT_REF)
+	     | (h->weakdef->elf_link_hash_flags & ELF_LINK_NON_GOT_REF));
       return TRUE;
     }
 
@@ -1443,20 +1452,26 @@ elf_i386_adjust_dynamic_symbol (info, h)
       return TRUE;
     }
 
-  eh = (struct elf_i386_link_hash_entry *) h;
-  for (p = eh->dyn_relocs; p != NULL; p = p->next)
+  if (ELIMINATE_COPY_RELOCS)
     {
-      s = p->sec->output_section;
-      if (s != NULL && (s->flags & SEC_READONLY) != 0)
-	break;
-    }
+      struct elf_i386_link_hash_entry * eh;
+      struct elf_i386_dyn_relocs *p;
 
-  /* If we didn't find any dynamic relocs in read-only sections, then
-     we'll be keeping the dynamic relocs and avoiding the copy reloc.  */
-  if (p == NULL)
-    {
-      h->elf_link_hash_flags &= ~ELF_LINK_NON_GOT_REF;
-      return TRUE;
+      eh = (struct elf_i386_link_hash_entry *) h;
+      for (p = eh->dyn_relocs; p != NULL; p = p->next)
+	{
+	  s = p->sec->output_section;
+	  if (s != NULL && (s->flags & SEC_READONLY) != 0)
+	    break;
+	}
+
+      /* If we didn't find any dynamic relocs in read-only sections, then
+	 we'll be keeping the dynamic relocs and avoiding the copy reloc.  */
+      if (p == NULL)
+	{
+	  h->elf_link_hash_flags &= ~ELF_LINK_NON_GOT_REF;
+	  return TRUE;
+	}
     }
 
   /* We must allocate the symbol in our .dynbss section, which will
@@ -1676,7 +1691,7 @@ allocate_dynrelocs (h, inf)
 	    }
 	}
     }
-  else
+  else if (ELIMINATE_COPY_RELOCS)
     {
       /* For the non-shared case, discard space for relocs against
 	 symbols which turn out to need copy relocs or are not
@@ -2412,7 +2427,8 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 		       && (! info->symbolic
 			   || (h->elf_link_hash_flags
 			       & ELF_LINK_HASH_DEF_REGULAR) == 0))))
-	      || (!info->shared
+	      || (ELIMINATE_COPY_RELOCS
+		  && !info->shared
 		  && h != NULL
 		  && h->dynindx != -1
 		  && (h->elf_link_hash_flags & ELF_LINK_NON_GOT_REF) == 0

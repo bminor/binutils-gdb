@@ -1,3 +1,15 @@
+2003-03-07  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-ppc.c (ELIMINATE_COPY_RELOCS): Define as one.
+	(ppc_elf_adjust_dynamic_symbol): For weak symbols, copy
+	ELF_LINK_NON_GOT_REF from weakdef.
+	* elf64-ppc.c (ELIMINATE_COPY_RELOCS): Define as one.
+	(ppc64_elf_adjust_dynamic_symbol): For weak symbols, copy
+	ELF_LINK_NON_GOT_REF from weakdef.
+	* elf32-i386.c (ELIMINATE_COPY_RELOCS): Define as one.  Use throughout.
+	(elf_i386_adjust_dynamic_symbol): For weak symbols, copy
+	ELF_LINK_NON_GOT_REF from weakdef.
+
 2003-03-06  Jakub Jelinek <jakub@redhat.com>
 	Andrew Haley  <aph@redhat.com>
 

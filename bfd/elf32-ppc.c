@@ -2455,7 +2455,7 @@ ppc_elf_create_dynamic_sections (abfd, info)
    copying dynamic variables from a shared lib into an app's dynbss
    section, and instead use a dynamic relocation to point into the
    shared lib.  */
-#define ELIMINATE_COPY_RELOCS 0
+#define ELIMINATE_COPY_RELOCS 1
 
 /* Adjust a symbol defined by a dynamic object and referenced by a
    regular object.  The current definition is in some section of the
@@ -2525,6 +2525,10 @@ ppc_elf_adjust_dynamic_symbol (info, h)
 		  || h->weakdef->root.type == bfd_link_hash_defweak);
       h->root.u.def.section = h->weakdef->root.u.def.section;
       h->root.u.def.value = h->weakdef->root.u.def.value;
+      if (ELIMINATE_COPY_RELOCS)
+	h->elf_link_hash_flags
+	  = ((h->elf_link_hash_flags & ~ELF_LINK_NON_GOT_REF)
+	     | (h->weakdef->elf_link_hash_flags & ELF_LINK_NON_GOT_REF));
       return TRUE;
     }
 
