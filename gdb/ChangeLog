@@ -1,3 +1,14 @@
+2001-07-04  Andrew Cagney  <ac131313@redhat.com>
+
+	* ui-out.h (struct ui_out_impl): Add field is_mi_like_p.
+	(ui_out_is_mi_like_p): Declare.
+	* ui-out.c (ui_out_is_mi_like_p): Define.
+	(default_ui_out_impl): Initialize is_mi_like_p to zero.
+	* cli-out.c (cli_ui_out_impl): Ditto.
+	* breakpoint.c (print_it_typical): Use ui_out_is_mi_like_p.
+	(watchpoint_check, print_one_breakpoint, mention): Ditto.
+	* infrun.c (print_stop_reason, normal_stop): Ditto.
+
 2001-07-05  Daniel Jacobowitz  <drow@mvista.com>
 
 	* mips-tdep.c (mips_software_single_step): New function.

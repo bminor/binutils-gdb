@@ -3308,7 +3308,7 @@ print_stop_reason (enum inferior_stop_reason stop_reason, int stop_info)
       /* Print a message only if not in the middle of doing a "step n"
 	 operation for n > 1 */
       if (!step_multi || !stop_step)
-	if (interpreter_p && strncmp (interpreter_p, "mi", 2) == 0)
+	if (ui_out_is_mi_like_p (uiout))
 	  ui_out_field_string (uiout, "reason", "end-stepping-range");
 #endif
       break;
@@ -3320,7 +3320,7 @@ print_stop_reason (enum inferior_stop_reason stop_reason, int stop_info)
       /* The inferior was terminated by a signal. */
 #ifdef UI_OUT
       annotate_signalled ();
-      if (interpreter_p && strncmp (interpreter_p, "mi", 2) == 0)
+      if (ui_out_is_mi_like_p (uiout))
 	ui_out_field_string (uiout, "reason", "exited-signalled");
       ui_out_text (uiout, "\nProgram terminated with signal ");
       annotate_signal_name ();
@@ -3354,7 +3354,7 @@ print_stop_reason (enum inferior_stop_reason stop_reason, int stop_info)
       annotate_exited (stop_info);
       if (stop_info)
 	{
-	  if (interpreter_p && strncmp (interpreter_p, "mi", 2) == 0)
+	  if (ui_out_is_mi_like_p (uiout))
 	    ui_out_field_string (uiout, "reason", "exited");
 	  ui_out_text (uiout, "\nProgram exited with code ");
 	  ui_out_field_fmt (uiout, "exit-code", "0%o", (unsigned int) stop_info);
@@ -3362,7 +3362,7 @@ print_stop_reason (enum inferior_stop_reason stop_reason, int stop_info)
 	}
       else
 	{
-	  if (interpreter_p && strncmp (interpreter_p, "mi", 2) == 0)
+	  if (ui_out_is_mi_like_p (uiout))
 	    ui_out_field_string (uiout, "reason", "exited-normally");
 	  ui_out_text (uiout, "\nProgram exited normally.\n");
 	}
@@ -3548,12 +3548,12 @@ and/or watchpoints.\n");
 #ifdef UI_OUT
 	  /* For mi, have the same behavior every time we stop:
              print everything but the source line. */
-	  if (interpreter_p && strncmp (interpreter_p, "mi", 2) == 0)
+	  if (ui_out_is_mi_like_p (uiout))
 	    source_flag = LOC_AND_ADDRESS;
 #endif
 
 #ifdef UI_OUT
-	  if (interpreter_p && strncmp (interpreter_p, "mi", 2) == 0)
+	  if (ui_out_is_mi_like_p (uiout))
 	    ui_out_field_int (uiout, "thread-id",
 	                      pid_to_thread_id (inferior_ptid));
 #endif

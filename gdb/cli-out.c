@@ -89,7 +89,8 @@ static struct ui_out_impl cli_ui_out_impl =
   cli_text,
   cli_message,
   cli_wrap_hint,
-  cli_flush
+  cli_flush,
+  0, /* Does not need MI hacks (i.e. needs CLI hacks).  */
 };
 
 /* Prototypes for local functions */

@@ -88,7 +88,8 @@ struct ui_out_impl mi_ui_out_impl =
   mi_text,
   mi_message,
   mi_wrap_hint,
-  mi_flush
+  mi_flush,
+  1, /* Needs MI hacks.  */
 };
 
 /* Prototypes for local functions */

@@ -184,6 +184,13 @@ extern void gdb_error (struct ui_out *uiout, int severity, char *format, ...);
 extern void gdb_query (struct ui_out *uiout, int qflags, char *qprompt);
 #endif
 
+/* HACK: Code in GDB is currently checking to see the type of ui_out
+   builder when determining which output to produce.  This function is
+   a hack to encapsulate that test.  Once GDB manages to separate the
+   CLI/MI from the core of GDB the problem should just go away ....  */
+
+extern int ui_out_is_mi_like_p (struct ui_out *uiout);
+
 /* From here on we have things that are only needed by implementation
    routines and main.c.   We should pehaps have a separate file for that,
    like a  ui-out-impl.h  file */
@@ -253,6 +260,7 @@ struct ui_out_impl
     message_ftype *message;
     wrap_hint_ftype *wrap_hint;
     flush_ftype *flush;
+    int is_mi_like_p;
   };
 
 extern struct ui_out_data *ui_out_data (struct ui_out *uiout);

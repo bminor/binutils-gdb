@@ -190,7 +190,8 @@ struct ui_out_impl default_ui_out_impl =
   default_text,
   default_message,
   default_wrap_hint,
-  default_flush
+  default_flush,
+  0, /* Does not need MI hacks.  */
 };
 
 /* The default ui_out */
@@ -711,6 +712,12 @@ gdb_query (struct ui_out *uiout, int qflags, char *qprompt)
 {
 }
 #endif
+
+int
+ui_out_is_mi_like_p (struct ui_out *uiout)
+{
+  return uiout->impl->is_mi_like_p;
+}
 
 /* default gdb-out hook functions */
 
