@@ -310,6 +310,19 @@ extern CONST short _bfd_host_big_endian;
 
 /*THE FOLLOWING IS EXTRACTED FROM THE SOURCE */
 
+
+/*:init.c*/
+/* bfd_init
+
+This routine must be called before any other bfd function to initialize
+magical internal data structures.
+*/
+
+ void EXFUN(bfd_init,(void));
+
+/*
+*/
+
 /*:opncls.c*/
 /* *i bfd_openr
 Opens the file supplied (using @code{fopen}) with the target supplied, it
@@ -376,99 +389,6 @@ BFD.
 /*
 */
 
-/*:archures.c*/
-/* bfd_architecture
-This enum gives the object file's CPU
-architecture, in a global sense.  E.g. what processor family does it
-belong to?  There is another field, which indicates what processor
-within the family is in use.  The machine gives a number which
-distingushes different versions of the architecture, containing for
-example 2 and 3 for Intel i960 KA and i960 KB, and 68020 and 68030 for
-Motorola 68020 and 68030.
-*/
-
-enum bfd_architecture 
-{
-  bfd_arch_unknown,   /* File arch not known */
-  bfd_arch_obscure,   /* Arch known, not one of these */
-  bfd_arch_m68k,      /* Motorola 68xxx */
-  bfd_arch_vax,       /* DEC Vax */   
-  bfd_arch_i960,      /* Intel 960 */
-    /* The order of the following is important.
-       lower number indicates a machine type that 
-       only accepts a subset of the instructions
-       available to machines with higher numbers.
-       The exception is the "ca", which is
-       incompatible with all other machines except 
-       "core". */
-
-#define bfd_mach_i960_core      1
-#define bfd_mach_i960_ka_sa     2
-#define bfd_mach_i960_kb_sb     3
-#define bfd_mach_i960_mc        4
-#define bfd_mach_i960_xa        5
-#define bfd_mach_i960_ca        6
-
-  bfd_arch_a29k,      /* AMD 29000 */
-  bfd_arch_sparc,     /* SPARC */
-  bfd_arch_mips,      /* MIPS Rxxxx */
-  bfd_arch_i386,      /* Intel 386 */
-  bfd_arch_ns32k,     /* National Semiconductor 32xxx */
-  bfd_arch_tahoe,     /* CCI/Harris Tahoe */
-  bfd_arch_i860,      /* Intel 860 */
-  bfd_arch_romp,      /* IBM ROMP RS/6000 */
-  bfd_arch_alliant,   /* Alliant */
-  bfd_arch_convex,    /* Convex */
-  bfd_arch_m88k,      /* Motorola 88xxx */
-  bfd_arch_pyramid,   /* Pyramid Technology */
-  bfd_arch_h8_300,    /* Hitachi H8/300 */
-  bfd_arch_last
-  };
-
-/*
-stuff
-
- bfd_prinable_arch_mach
-Return a printable string representing the architecture and machine
-type. The result is only good until the next call to
-@code{bfd_printable_arch_mach}.  
-*/
- PROTO(CONST char *,bfd_printable_arch_mach,
-    (enum bfd_architecture arch, unsigned long machine));
-
-/*
-
-*i bfd_scan_arch_mach
-Scan a string and attempt to turn it into an archive and machine type combination.  
-*/
- PROTO(boolean, bfd_scan_arch_mach,
-    (CONST char *, enum bfd_architecture *, unsigned long *));
-
-/*
-
-*i bfd_arch_compatible
-This routine is used to determine whether two BFDs' architectures and machine types are
-compatible.  It calculates the lowest common denominator between the
-two architectures and machine types implied by the BFDs and sets the
-objects pointed at by @var{archp} and @var{machine} if non NULL. 
-
-This routine returns @code{true} if the BFDs are of compatible type,
-otherwise @code{false}.
-*/
- PROTO(boolean, bfd_arch_compatible,
-     (bfd *abfd,
-     bfd *bbfd,
-     enum bfd_architecture *archp,
-     unsigned long *machinep));
-
-/*
-
- bfd_set_arch_mach
-Set atch mach
-*/
-#define bfd_set_arch_mach(abfd, arch, mach) \
-     BFD_SEND (abfd, _bfd_set_arch_mach,\
-                    (abfd, arch, mach))
 
 /*:libbfd.c*/
 /* *i bfd_put_size
@@ -919,6 +839,519 @@ Possible errors are:
 */
 
 
+
+/*:archures.c*/
+/* bfd_architecture
+This enum gives the object file's CPU
+architecture, in a global sense.  E.g. what processor family does it
+belong to?  There is another field, which indicates what processor
+within the family is in use.  The machine gives a number which
+distingushes different versions of the architecture, containing for
+example 2 and 3 for Intel i960 KA and i960 KB, and 68020 and 68030 for
+Motorola 68020 and 68030.
+*/
+
+enum bfd_architecture 
+{
+  bfd_arch_unknown,   /* File arch not known */
+  bfd_arch_obscure,   /* Arch known, not one of these */
+  bfd_arch_m68k,      /* Motorola 68xxx */
+  bfd_arch_vax,       /* DEC Vax */   
+  bfd_arch_i960,      /* Intel 960 */
+    /* The order of the following is important.
+       lower number indicates a machine type that 
+       only accepts a subset of the instructions
+       available to machines with higher numbers.
+       The exception is the "ca", which is
+       incompatible with all other machines except 
+       "core". */
+
+#define bfd_mach_i960_core      1
+#define bfd_mach_i960_ka_sa     2
+#define bfd_mach_i960_kb_sb     3
+#define bfd_mach_i960_mc        4
+#define bfd_mach_i960_xa        5
+#define bfd_mach_i960_ca        6
+
+  bfd_arch_a29k,      /* AMD 29000 */
+  bfd_arch_sparc,     /* SPARC */
+  bfd_arch_mips,      /* MIPS Rxxxx */
+  bfd_arch_i386,      /* Intel 386 */
+  bfd_arch_ns32k,     /* National Semiconductor 32xxx */
+  bfd_arch_tahoe,     /* CCI/Harris Tahoe */
+  bfd_arch_i860,      /* Intel 860 */
+  bfd_arch_romp,      /* IBM ROMP RS/6000 */
+  bfd_arch_alliant,   /* Alliant */
+  bfd_arch_convex,    /* Convex */
+  bfd_arch_m88k,      /* Motorola 88xxx */
+  bfd_arch_pyramid,   /* Pyramid Technology */
+  bfd_arch_h8300,     /* Hitachi H8/300 */
+  bfd_arch_last
+  };
+
+/*
+stuff
+
+ bfd_arch_info_struct
+This structure contains information on architectures.
+*/
+typedef int bfd_reloc_code_enum_type;
+
+typedef struct bfd_arch_info_struct 
+{
+  int bits_per_word;
+  int bits_per_address;
+  int bits_per_byte;
+  enum bfd_architecture arch;
+  long mach;
+  char *arch_name;
+  CONST  char *printable_name;
+/* true if this is the default machine for the architecture */
+  boolean the_default;	
+  CONST struct bfd_arch_info_struct * EXFUN((*compatible),(CONST struct bfd_arch_info_struct *a,
+						     CONST struct bfd_arch_info_struct *b));
+
+		     
+  boolean EXFUN((*scan),(CONST struct bfd_arch_info_struct *,CONST char *));
+  unsigned int EXFUN((*disassemble),(bfd_vma addr, CONST char *data,
+				     PTR stream));
+  CONST struct reloc_howto_struct *EXFUN((*reloc_type_lookup), (bfd_reloc_code_enum_type  code));
+
+  struct bfd_arch_info_struct *next;
+
+} bfd_arch_info_struct_type;
+
+/*
+ bfd_printable_arch_mach
+Return a printable string representing the architecture and machine
+type. 
+
+NB. The use of this routine is depreciated.
+*/
+
+ PROTO(CONST char *,bfd_printable_arch_mach,
+    (enum bfd_architecture arch, unsigned long machine));
+
+/*
+
+ bfd_printable_name
+
+Return a printable string representing the architecture and machine
+from the pointer to the arch info structure 
+*/
+
+ CONST char *EXFUN(bfd_printable_name,(bfd *abfd));
+
+/*
+
+*i bfd_scan_arch
+This routine is provided with a string and tries to work out if bfd
+supports any cpu which could be described with the name provided.  The
+routine returns a pointer to an arch_info structure if a machine is
+found, otherwise NULL.
+*/
+
+ bfd_arch_info_struct_type *EXFUN(bfd_scan_arch,(CONST char *));
+
+/*
+
+ bfd_arch_get_compatible
+This routine is used to determine whether two BFDs' architectures and
+machine types are compatible.  It calculates the lowest common
+denominator between the two architectures and machine types implied by
+the BFDs and returns a pointer to an arch_info structure describing
+the compatible machine.
+*/
+
+ CONST bfd_arch_info_struct_type *EXFUN(bfd_arch_get_compatible,
+     (CONST bfd *abfd,
+     CONST bfd *bbfd));
+
+/*
+
+ bfd_set_arch_info
+*/
+
+ void EXFUN(bfd_set_arch_info,(bfd *, bfd_arch_info_struct_type *));
+
+/*
+
+ bfd_get_arch
+
+Returns the enumerated type which describes the supplied bfd's
+architecture
+*/
+
+ enum bfd_architecture EXFUN(bfd_get_arch, (bfd *abfd));
+
+/*
+
+ bfd_get_mach
+
+Returns the long type which describes the supplied bfd's
+machine
+*/
+
+ unsigned long EXFUN(bfd_get_mach, (bfd *abfd));
+
+/*
+
+ bfd_arch_bits_per_byte
+
+Returns the number of bits in one of the architectures bytes
+*/
+
+ unsigned int EXFUN(bfd_arch_bits_per_byte, (bfd *abfd));
+
+/*
+
+ bfd_arch_bits_per_address
+
+Returns the number of bits in one of the architectures addresses
+*/
+
+ unsigned int EXFUN(bfd_arch_bits_per_address, (bfd *abfd));
+
+/*
+
+ bfd_get_arch_info
+*/
+
+ bfd_arch_info_struct_type * EXFUN(bfd_get_arch_info,(bfd *));
+
+/*
+*/
+
+
+/*:howto.c*/
+/* bfd_reloc_code_enum_type
+*/
+
+typedef enum 
+{
+
+/*
+16 bits wide, simple reloc 
+*/
+
+  BFD_RELOC_16,	
+
+/*
+8 bits wide, but used to form an address like 0xffnn
+*/
+
+  BFD_RELOC_8_FFnn,
+
+/*
+8 bits wide, simple
+*/
+
+  BFD_RELOC_8,
+
+/*
+8 bits wide, pc relative
+*/
+
+  BFD_RELOC_8_PCREL
+ } bfd_reloc_code_enum_real_type;
+
+/*
+
+ bfd_reloc_type_lookup
+This routine returns a pointer to a howto struct which when invoked,
+will perform the supplied relocation on data from the architecture
+noted.
+
+[Note] This function will go away.
+*/
+
+ PROTO(struct reloc_howto_struct *,
+	bfd_reloc_type_lookup,
+	(enum bfd_architecture arch, bfd_reloc_code_enum_type code));
+
+/*
+*/
+/*:reloc.c*/
+/* bfd_perform_relocation
+The relocation routine returns as a status an enumerated type:
+*/
+
+typedef enum bfd_reloc_status {
+/* No errors detected
+*/
+
+  bfd_reloc_ok,
+
+/*
+The relocation was performed, but there was an overflow.
+*/
+
+  bfd_reloc_overflow,
+
+/*
+The address to relocate was not within the section supplied
+*/
+
+  bfd_reloc_outofrange,
+
+/*
+Used by special functions
+*/
+
+  bfd_reloc_continue,
+
+/*
+Unused 
+*/
+
+  bfd_reloc_notsupported,
+
+/*
+Unsupported relocation size requested. 
+*/
+
+  bfd_reloc_other,
+
+/*
+The symbol to relocate against was undefined.
+*/
+
+  bfd_reloc_undefined,
+
+/*
+The relocation was performed, but may not be ok - presently generated
+only when linking i960 coff files with i960 b.out symbols.
+*/
+
+  bfd_reloc_dangerous
+   }
+ bfd_reloc_status_enum_type;
+
+/*
+*/
+
+typedef struct reloc_cache_entry 
+{
+
+/*
+A pointer into the canonical table of pointers 
+*/
+
+  struct symbol_cache_entry **sym_ptr_ptr;
+
+/*
+offset in section                 
+*/
+
+  rawdata_offset address;
+
+/*
+addend for relocation value        
+*/
+
+  bfd_vma addend;    
+
+/*
+if sym is null this is the section 
+*/
+
+  struct sec *section;
+
+/*
+Pointer to how to perform the required relocation
+*/
+
+  CONST struct reloc_howto_struct *howto;
+} arelent;
+
+/*
+
+ reloc_howto_type
+The @code{reloc_howto_type} is a structure which contains all the
+information that BFD needs to know to tie up a back end's data.
+*/
+
+typedef CONST struct reloc_howto_struct 
+{ 
+/* The type field has mainly a documetary use - the back end can to what
+it wants with it, though the normally the back end's external idea of
+what a reloc number would be would be stored in this field. For
+example, the a PC relative word relocation in a coff environment would
+have the type 023 - because that's what the outside world calls a
+R_PCRWORD reloc.
+*/
+
+  unsigned int type;
+
+/*
+The value the final relocation is shifted right by. This drops
+unwanted data from the relocation. 
+*/
+
+  unsigned int rightshift;
+
+/*
+The size of the item to be relocated - 0, is one byte, 1 is 2 bytes, 3
+is four bytes.
+*/
+
+  unsigned int size;
+
+/*
+Now obsolete
+*/
+
+  unsigned int bitsize;
+
+/*
+Notes that the relocation is relative to the location in the data
+section of the addend. The relocation function will subtract from the
+relocation value the address of the location being relocated.
+*/
+
+  boolean pc_relative;
+
+/*
+Now obsolete
+*/
+
+  unsigned int bitpos;
+
+/*
+Now obsolete
+*/
+
+  boolean absolute;
+
+/*
+Causes the relocation routine to return an error if overflow is
+detected when relocating.
+*/
+
+  boolean complain_on_overflow;
+
+/*
+If this field is non null, then the supplied function is called rather
+than the normal function. This allows really strange relocation
+methods to be accomodated (eg, i960 callj instructions).
+*/
+
+  bfd_reloc_status_enum_type (*special_function)();
+
+/*
+The textual name of the relocation type.
+*/
+
+  char *name;
+
+/*
+When performing a partial link, some formats must modify the
+relocations rather than the data - this flag signals this.
+*/
+
+  boolean partial_inplace;
+
+/*
+The src_mask is used to select what parts of the read in data are to
+be used in the relocation sum. Eg, if this was an 8 bit bit of data
+which we read and relocated, this would be 0x000000ff. When we have
+relocs which have an addend, such as sun4 extended relocs, the value
+in the offset part of a relocating field is garbage so we never use
+it. In this case the mask would be 0x00000000.
+*/
+
+  bfd_word src_mask;
+/* The dst_mask is what parts of the instruction are replaced into the
+instruction. In most cases src_mask == dst_mask, except in the above
+special case, where dst_mask would be 0x000000ff, and src_mask would
+be 0x00000000.
+*/
+
+  bfd_word dst_mask;           
+
+/*
+When some formats create PC relative instructions, they leave the
+value of the pc of the place being relocated in the offset slot of the
+instruction, so that a PC relative relocation can be made just by
+adding in an ordinary offset (eg sun3 a.out). Some formats leave the
+displacement part of an instruction empty (eg m88k bcs), this flag
+signals the fact.
+*/
+
+  boolean pcrel_offset;
+} reloc_howto_type;
+
+/*
+
+ HOWTO
+The HOWTO define is horrible and will go away.
+*/
+#define HOWTO(C, R,S,B, P, BI, ABS, O, SF, NAME, INPLACE, MASKSRC, MASKDST, PC) \
+  {(unsigned)C,R,S,B, P, BI, ABS,O,SF,NAME,INPLACE,MASKSRC,MASKDST,PC}
+
+/*
+And will be replaced with the totally magic way. But for the moment,
+we are compatible, so do it this way..
+*/
+
+#define NEWHOWTO( FUNCTION, NAME,SIZE,REL) HOWTO(0,0,SIZE,0,REL,0,false,false,FUNCTION, NAME,false,0,0,false)
+
+/*
+Helper routine to turn a symbol into a relocation value.
+*/
+
+
+#define HOWTO_PREPARE(relocation, symbol) 	\
+  {						\
+  if (symbol != (asymbol *)NULL) {		\
+    if (symbol->flags & BSF_FORT_COMM) {	\
+      relocation = 0;				\
+    }						\
+    else {					\
+      relocation = symbol->value;		\
+    }						\
+  }						\
+  if (symbol->section != (asection *)NULL) {	\
+    relocation += symbol->section->output_section->vma +	\
+      symbol->section->output_offset;		\
+  }						\
+}			
+
+/*
+ reloc_chain
+*/
+typedef unsigned char bfd_byte;
+
+typedef struct relent_chain {
+  arelent relent;
+  struct   relent_chain *next;
+} arelent_chain;
+
+/*
+
+If an output_bfd is supplied to this function the generated image
+will be relocatable, the relocations are copied to the output file
+after they have been changed to reflect the new state of the world.
+There are two ways of reflecting the results of partial linkage in an
+output file; by modifying the output data in place, and by modifying
+the relocation record. Some native formats (eg basic a.out and basic
+coff) have no way of specifying an addend in the relocation type, so
+the addend has to go in the output data.  This is no big deal since in
+these formats the output data slot will always be big enough for the
+addend. Complex reloc types with addends were invented to solve just
+this problem.
+*/
+ PROTO(bfd_reloc_status_enum_type,
+                bfd_perform_relocation,
+                        (bfd * abfd,
+                        arelent *reloc_entry,
+                        PTR data,
+                        asection *input_section,
+                        bfd *output_bfd));
+
+/*
+*/
+
 /*:syms.c*/
 /* @subsection typedef asymbol
 An @code{asymbol} has the form:
@@ -1289,16 +1722,10 @@ The start address.
   struct symbol_cache_entry  **outsymbols;             
 
 /*
-Architecture of object machine, eg m68k 
+Pointer to structure which contains architecture information
 */
 
-  enum bfd_architecture obj_arch;
-
-/*
-Particular machine within arch, e.g. 68010
-*/
-
-  unsigned long obj_machine;
+  struct bfd_arch_info_struct *arch_info;
 
 /*
 Stuff only useful for archives:
@@ -1383,6 +1810,9 @@ before); else determine modify time, cache it, and return it.
 #define bfd_coff_swap_lineno_in(a,e,i) \
         BFD_SEND ( a, _bfd_coff_swap_lineno_in, (a,e,i))
 
+#define bfd_set_arch_mach(abfd, arch, mach)\
+        BFD_SEND ( abfd, _bfd_set_arch_mach, (abfd, arch, mach))
+
 /*
 */
 
@@ -1453,260 +1883,6 @@ or else @code{false}.
 */
  PROTO(boolean, core_file_matches_executable_p,
     (bfd *core_bfd, bfd *exec_bfd));
-
-/*
-*/
-
-/*:reloc.c*/
-/* bfd_perform_relocation
-The relocation routine returns as a status an enumerated type:
-*/
-
-typedef enum bfd_reloc_status {
-/* No errors detected
-*/
-
-  bfd_reloc_ok,
-
-/*
-The relocation was performed, but there was an overflow.
-*/
-
-  bfd_reloc_overflow,
-
-/*
-The address to relocate was not within the section supplied
-*/
-
-  bfd_reloc_outofrange,
-
-/*
-Used by special functions
-*/
-
-  bfd_reloc_continue,
-
-/*
-Unused 
-*/
-
-  bfd_reloc_notsupported,
-
-/*
-Unsupported relocation size requested. 
-*/
-
-  bfd_reloc_other,
-
-/*
-The symbol to relocate against was undefined.
-*/
-
-  bfd_reloc_undefined,
-
-/*
-The relocation was performed, but may not be ok - presently generated
-only when linking i960 coff files with i960 b.out symbols.
-*/
-
-  bfd_reloc_dangerous
-   }
- bfd_reloc_status_enum_type;
-
-/*
-*/
-
-typedef struct reloc_cache_entry 
-{
-
-/*
-A pointer into the canonical table of pointers 
-*/
-
-  struct symbol_cache_entry **sym_ptr_ptr;
-
-/*
-offset in section                 
-*/
-
-  rawdata_offset address;
-
-/*
-addend for relocation value        
-*/
-
-  bfd_vma addend;    
-
-/*
-if sym is null this is the section 
-*/
-
-  struct sec *section;
-
-/*
-Pointer to how to perform the required relocation
-*/
-
-  CONST struct reloc_howto_struct *howto;
-} arelent;
-
-/*
-
- reloc_howto_type
-The @code{reloc_howto_type} is a structure which contains all the
-information that BFD needs to know to tie up a back end's data.
-*/
-
-typedef CONST struct reloc_howto_struct 
-{ 
-/* The type field has mainly a documetary use - the back end can to what
-it wants with it, though the normally the back end's external idea of
-what a reloc number would be would be stored in this field. For
-example, the a PC relative word relocation in a coff environment would
-have the type 023 - because that's what the outside world calls a
-R_PCRWORD reloc.
-*/
-
-  unsigned int type;
-
-/*
-The value the final relocation is shifted right by. This drops
-unwanted data from the relocation. 
-*/
-
-  unsigned int rightshift;
-
-/*
-The size of the item to be relocated - 0, is one byte, 1 is 2 bytes, 3
-is four bytes.
-*/
-
-  unsigned int size;
-
-/*
-Now obsolete
-*/
-
-  unsigned int bitsize;
-
-/*
-Notes that the relocation is relative to the location in the data
-section of the addend. The relocation function will subtract from the
-relocation value the address of the location being relocated.
-*/
-
-  boolean pc_relative;
-
-/*
-Now obsolete
-*/
-
-  unsigned int bitpos;
-
-/*
-Now obsolete
-*/
-
-  boolean absolute;
-
-/*
-Causes the relocation routine to return an error if overflow is
-detected when relocating.
-*/
-
-  boolean complain_on_overflow;
-
-/*
-If this field is non null, then the supplied function is called rather
-than the normal function. This allows really strange relocation
-methods to be accomodated (eg, i960 callj instructions).
-*/
-
-  bfd_reloc_status_enum_type (*special_function)();
-
-/*
-The textual name of the relocation type.
-*/
-
-  char *name;
-
-/*
-When performing a partial link, some formats must modify the
-relocations rather than the data - this flag signals this.
-*/
-
-  boolean partial_inplace;
-
-/*
-The src_mask is used to select what parts of the read in data are to
-be used in the relocation sum. Eg, if this was an 8 bit bit of data
-which we read and relocated, this would be 0x000000ff. When we have
-relocs which have an addend, such as sun4 extended relocs, the value
-in the offset part of a relocating field is garbage so we never use
-it. In this case the mask would be 0x00000000.
-*/
-
-  bfd_word src_mask;
-/* The dst_mask is what parts of the instruction are replaced into the
-instruction. In most cases src_mask == dst_mask, except in the above
-special case, where dst_mask would be 0x000000ff, and src_mask would
-be 0x00000000.
-*/
-
-  bfd_word dst_mask;           
-
-/*
-When some formats create PC relative instructions, they leave the
-value of the pc of the place being relocated in the offset slot of the
-instruction, so that a PC relative relocation can be made just by
-adding in an ordinary offset (eg sun3 a.out). Some formats leave the
-displacement part of an instruction empty (eg m88k bcs), this flag
-signals the fact.
-*/
-
-  boolean pcrel_offset;
-} reloc_howto_type;
-
-/*
-
- HOWTO
-The HOWTO define is horrible and will go away.
-*/
-#define HOWTO(C, R,S,B, P, BI, ABS, O, SF, NAME, INPLACE, MASKSRC, MASKDST, PC) \
-  {(unsigned)C,R,S,B, P, BI, ABS,O,SF,NAME,INPLACE,MASKSRC,MASKDST,PC}
-
-/*
-
- reloc_chain
-*/
-typedef unsigned char bfd_byte;
-
-typedef struct relent_chain {
-  arelent relent;
-  struct   relent_chain *next;
-} arelent_chain;
-
-/*
-
-If an output_bfd is supplied to this function the generated image
-will be relocatable, the relocations are copied to the output file
-after they have been changed to reflect the new state of the world.
-There are two ways of reflecting the results of partial linkage in an
-output file; by modifying the output data in place, and by modifying
-the relocation record. Some native formats (eg basic a.out and basic
-coff) have no way of specifying an addend in the relocation type, so
-the addend has to go in the output data.  This is no big deal since in
-these formats the output data slot will always be big enough for the
-addend. Complex reloc types with addends were invented to solve just
-this problem.
-*/
- PROTO(bfd_reloc_status_enum_type,
-                bfd_perform_relocation,
-                        (bfd * abfd,
-                        arelent *reloc_entry,
-                        PTR data,
-                        asection *input_section,
-                        bfd *output_bfd));
 
 /*
 */
@@ -2041,3 +2217,8 @@ returns a pointer to a const string "invalid", "object", "archive",
 */
 
 #endif
+
+
+
+
+
