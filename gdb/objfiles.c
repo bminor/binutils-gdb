@@ -277,15 +277,24 @@ free_objfile (objfile)
      case.  Note that the mmalloc_detach or the mfree is the last thing
      we can do with this objfile. */
 
+#if !defined(NO_MMALLOC) && defined(HAVE_MMAP)
+
   if (objfile -> flags & OBJF_MAPPED)
     {
       /* Remember the fd so we can close it.  We can't close it before
 	 doing the detach, and after the detach the objfile is gone. */
       mmfd = objfile -> mmfd;
       mmalloc_detach (objfile -> md);
+      objfile = NULL;
       (void) close (mmfd);
     }
-  else
+
+#endif	/* !defined(NO_MMALLOC) && defined(HAVE_MMAP) */
+
+  /* If we still have an objfile, then either we don't support reusable
+     objfiles or this one was not reusable.  So free it normally. */
+
+  if (objfile != NULL)
     {
       if (objfile -> name != NULL)
 	{
@@ -296,6 +305,7 @@ free_objfile (objfile)
       obstack_free (&objfile -> symbol_obstack, 0);
       obstack_free (&objfile -> type_obstack, 0);
       mfree (objfile -> md, objfile);
+      objfile = NULL;
     }
 }
 

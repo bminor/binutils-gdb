@@ -1114,7 +1114,7 @@ do_args (type, decl, work)
   if (PRINT_ARG_TYPES)
     string_append (decl, "(");
 
-  while (**type != '_' && **type != '\0' && **type != 'e' && **type != 'v')
+  while (**type != '_' && **type != '\0' && **type != 'e')
     {
       if (**type == 'N')
 	{
@@ -1149,9 +1149,7 @@ do_args (type, decl, work)
 	}
     }
 
-  if (**type == 'v')
-    *type += 1;
-  else if (**type == 'e')
+  if (**type == 'e')
     {
       *type += 1;
       if (PRINT_ARG_TYPES)

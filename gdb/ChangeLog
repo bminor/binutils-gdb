@@ -1,3 +1,15 @@
+Wed May  6 14:12:35 1992  Fred Fish  (fnf@cygnus.com)
+
+	* cplus-dem.c (do_args):  Handle void args the same as others.
+	* objfiles.c (free_objfile):  Only try to unmap files when
+	reusable objfiles are supported.
+	* valprint.c (type_print_varspec_suffix):  Add parameter that
+	specifies if C++ demangling included function arguments.  Use
+	it to suppress printing extra pair of ()'s.
+	* valprint.c (type_print_1):  Fix problem with printing demangled
+	C++ function types where demangled type includes the function
+	args.
+
 Tue May  5 11:10:27 1992  Fred Fish  (fnf@cygnus.com)
 
 	* Makefile.in (DEMANGLER):  Define and default to cplus-dem.
