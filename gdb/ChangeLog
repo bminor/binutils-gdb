@@ -1,3 +1,8 @@
+2002-05-01  Andreas Schwab  <schwab@suse.de>
+
+	* config/s390/s390.mh (NATDEPFILES): Remove solib.o, add
+	linux-proc.o and gcore.o.
+
 2002-04-30  Michael Chastain  <mec@shout.net>
 
 	Merge from trunk.  This also fixes PR gdb/172.
