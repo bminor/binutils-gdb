@@ -147,6 +147,19 @@
 	* value.h: Ditto.
 	* scm-lang.c (scm_lookup_name): Ditto.
 
+2002-01-03  Michael Snyder  <msnyder@redhat.com>
+ 
+	Abstract the functionality of iterating over mapped memory
+	regions into a general purpose iterator function.
+	* procfs.c (iterate_over_mappings): New function, general purpose 
+	iterator for memory sections.
+	(proc_iterate_over_mappings): Reimplement using iterate_over_mappings.
+	(solib_mappings_callback): New function, callback for above.
+	(info_proc_mappings): Reimpliment using iterate_over_mappings.
+	(info_mappings_callback): New function, callback for above.
+
+	* procfs.c (proc_set_watchpoint): Add cast to suppress warning.
+
 2002-01-01  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-tdep.h (struct gdbarch_tdep): Add `os_ident' member.
