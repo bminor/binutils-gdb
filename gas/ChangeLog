@@ -1,3 +1,7 @@
+2002-08-28  Alan Modra  <amodra@bigpond.net.au>
+
+	* app.c (do_scrub_chars): Don't test IGNORE_NONSTANDARD_ESCAPES.  Tidy.
+
 2002-08-27  Alan Modra  <amodra@bigpond.net.au>
 
 	* dwarf2dbg.c: Always include dwarf2dbg.h.

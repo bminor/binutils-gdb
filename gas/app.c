@@ -1,6 +1,6 @@
 /* This is the Assembler Pre-Processor
    Copyright 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000
+   1999, 2000, 2002
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -611,6 +611,11 @@ do_scrub_chars (get, tostart, tolen)
 	      PUT ('\\');
 	      continue;
 
+	    case EOF:
+	      as_warn (_("end of file in string; '\"' inserted"));
+	      PUT ('"');
+	      continue;
+
 	    case '"':
 	    case '\\':
 	    case 'b':
@@ -630,20 +635,12 @@ do_scrub_chars (get, tostart, tolen)
 	    case '6':
 	    case '7':
 	      break;
-#if defined(IGNORE_NONSTANDARD_ESCAPES) | defined(ONLY_STANDARD_ESCAPES)
-	    default:
-	      as_warn (_("unknown escape '\\%c' in string; ignored"), ch);
-	      break;
-#else  /* ONLY_STANDARD_ESCAPES */
-	    default:
-	      /* Accept \x as x for any x */
-	      break;
-#endif /* ONLY_STANDARD_ESCAPES */
 
-	    case EOF:
-	      as_warn (_("end of file in string; '\"' inserted"));
-	      PUT ('"');
-	      continue;
+	    default:
+#ifdef ONLY_STANDARD_ESCAPES
+	      as_warn (_("unknown escape '\\%c' in string; ignored"), ch);
+#endif
+	      break;
 	    }
 	  PUT (ch);
 	  continue;
