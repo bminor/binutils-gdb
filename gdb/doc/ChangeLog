@@ -1,7 +1,11 @@
+Sat Mar 16 15:10:20 1996  Fred Fish  <fnf@cygnus.com>
+
+	From Peter Schauer <Peter.Schauer@Regent.E-Technik.TU-Muenchen.DE>
+	* gdb.texinfo (Expressions): Fix erroneous array constant example.
+
 Sat Mar 16 13:28:45 1996  Fred Fish  <fnf@cygnus.com>
 
-	* gdb.texinfo: Add missing "@bullet" to some "@itemize"
-	commands.
+	* gdb.texinfo: Add missing "@bullet" to some "@itemize" commands.
 
 Sat Feb 10 03:28:36 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 

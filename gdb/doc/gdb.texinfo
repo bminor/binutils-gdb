@@ -4000,8 +4000,8 @@ and string constants.  It unfortunately does not include symbols defined
 by preprocessor @code{#define} commands.
 
 @value{GDBN} now supports array constants in expressions input by
-the user.  The syntax is @var{element, element@dots{}}.  For example,
-you can now use the command @code{print @{1 2 3@}} to build up an array in 
+the user.  The syntax is @var{@{element, element@dots{}@}}.  For example,
+you can now use the command @code{print @{1, 2, 3@}} to build up an array in 
 memory that is malloc'd in the target program.
 
 @ifclear CONLY
