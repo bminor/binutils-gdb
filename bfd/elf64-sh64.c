@@ -3019,7 +3019,7 @@ static const bfd_byte elf_sh64_plt0_entry_be[PLT_ENTRY_SIZE] =
   0xc8, 0x00, 0x01, 0x10, /* shori (.got.plt >> 16) & 65535, r17 */
   0xc8, 0x00, 0x01, 0x10, /* shori .got.plt & 65535, r17 */
   0x8d, 0x10, 0x09, 0x90, /* ld.q  r17, 16, r25 */
-  0x6b, 0xf1, 0x46, 0x00, /* ptabs r17, tr0 */
+  0x6b, 0xf1, 0x66, 0x00, /* ptabs r25, tr0 */
   0x8d, 0x10, 0x05, 0x10, /* ld.q  r17, 8, r17 */
   0x44, 0x01, 0xff, 0xf0, /* blink tr0, r63 */
   0x6f, 0xf0, 0xff, 0xf0, /* nop */
@@ -3039,7 +3039,7 @@ static const bfd_byte elf_sh64_plt0_entry_le[PLT_ENTRY_SIZE] =
   0x10, 0x01, 0x00, 0xc8, /* shori (.got.plt >> 16) & 65535, r17 */
   0x10, 0x01, 0x00, 0xc8, /* shori .got.plt & 65535, r17 */
   0x90, 0x09, 0x10, 0x8d, /* ld.q  r17, 16, r25 */
-  0x00, 0x46, 0xf1, 0x6b, /* ptabs r17, tr0 */
+  0x00, 0x66, 0xf1, 0x6b, /* ptabs r25, tr0 */
   0x10, 0x05, 0x10, 0x8d, /* ld.q  r17, 8, r17 */
   0xf0, 0xff, 0x01, 0x44, /* blink tr0, r63 */
   0xf0, 0xff, 0xf0, 0x6f, /* nop */
@@ -3065,9 +3065,9 @@ static const bfd_byte elf_sh64_plt_entry_be[PLT_ENTRY_SIZE] =
   0x6b, 0xf1, 0x66, 0x00, /* ptabs r25, tr0 */
   0x44, 0x01, 0xff, 0xf0, /* blink tr0, r63 */
   0x6f, 0xf0, 0xff, 0xf0, /* nop */
-  0xcc, 0x00, 0x01, 0x90, /* movi  .PLT0 >> 16, r25 */
-  0xc8, 0x00, 0x01, 0x90, /* shori .PLT0 & 65535, r25 */
-  0x6b, 0xf1, 0x66, 0x00, /* ptabs r25, tr0 */
+  0xcc, 0x00, 0x01, 0x90, /* movi  (.+8-.PLT0) >> 16, r25 */
+  0xc8, 0x00, 0x01, 0x90, /* shori (.+4-.PLT0) & 65535, r25 */
+  0x6b, 0xf5, 0x66, 0x00, /* ptrel r25, tr0 */
   0xcc, 0x00, 0x01, 0x50, /* movi  reloc-offset >> 16, r21 */
   0xc8, 0x00, 0x01, 0x50, /* shori reloc-offset & 65535, r21 */
   0x44, 0x01, 0xff, 0xf0, /* blink tr0, r63 */
@@ -3085,9 +3085,9 @@ static const bfd_byte elf_sh64_plt_entry_le[PLT_ENTRY_SIZE] =
   0x00, 0x66, 0xf1, 0x6b, /* ptabs r25, tr0 */
   0xf0, 0xff, 0x01, 0x44, /* blink tr0, r63 */
   0xf0, 0xff, 0xf0, 0x6f, /* nop */
-  0x90, 0x01, 0x00, 0xcc, /* movi  .PLT0 >> 16, r25 */
-  0x90, 0x01, 0x00, 0xc8, /* shori .PLT0 & 65535, r25 */
-  0x00, 0x66, 0xf1, 0x6b, /* ptabs r25, tr0 */
+  0x90, 0x01, 0x00, 0xcc, /* movi  (.+8-.PLT0) >> 16, r25 */
+  0x90, 0x01, 0x00, 0xc8, /* shori (.+4-.PLT0) & 65535, r25 */
+  0x00, 0x66, 0xf5, 0x6b, /* ptrel r25, tr0 */
   0x50, 0x01, 0x00, 0xcc, /* movi  reloc-offset >> 16, r21 */
   0x50, 0x01, 0x00, 0xc8, /* shori reloc-offset & 65535, r21 */
   0xf0, 0xff, 0x01, 0x44, /* blink tr0, r63 */
@@ -3808,7 +3808,8 @@ sh64_elf64_finish_dynamic_symbol (output_bfd, info, h, sym)
 	 The first three are reserved.  */
       got_offset = (plt_index + 3) * 8;
 
-      got_offset -= GOT_BIAS;
+      if (info->shared)
+	got_offset -= GOT_BIAS;
 
       /* Fill in the entry in the procedure linkage table.  */
       if (! info->shared)
@@ -3827,8 +3828,11 @@ sh64_elf64_finish_dynamic_symbol (output_bfd, info, h, sym)
 			      (splt->contents + h->plt.offset
 			       + elf_sh64_plt_symbol_offset (info)));
 
+	  /* Set bottom bit because its for a branch to SHmedia */
 	  movi_shori_putval (output_bfd,
-			     (splt->output_section->vma + splt->output_offset),
+			     -(h->plt.offset
+			      + elf_sh64_plt_plt0_offset (info) + 8)
+			     | 1,
 			     (splt->contents + h->plt.offset
 			      + elf_sh64_plt_plt0_offset (info)));
 	}
@@ -3847,7 +3851,8 @@ sh64_elf64_finish_dynamic_symbol (output_bfd, info, h, sym)
 			      + elf_sh64_plt_symbol_offset (info)));
 	}
 
-      got_offset += GOT_BIAS;
+      if (info->shared)
+	got_offset += GOT_BIAS;
 
       movi_shori_putval (output_bfd,
 			 plt_index * sizeof (Elf64_External_Rela),

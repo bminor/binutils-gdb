@@ -2947,7 +2947,7 @@ static const bfd_byte elf_sh_plt0_entry_be[PLT_ENTRY_SIZE] =
   0xcc, 0x00, 0x01, 0x10, /* movi  .got.plt >> 16, r17 */
   0xc8, 0x00, 0x01, 0x10, /* shori .got.plt & 65535, r17 */
   0x89, 0x10, 0x09, 0x90, /* ld.l  r17, 8, r25 */
-  0x6b, 0xf1, 0x46, 0x00, /* ptabs r17, tr0 */
+  0x6b, 0xf1, 0x66, 0x00, /* ptabs r25, tr0 */
   0x89, 0x10, 0x05, 0x10, /* ld.l  r17, 4, r17 */
   0x44, 0x01, 0xff, 0xf0, /* blink tr0, r63 */
   0x6f, 0xf0, 0xff, 0xf0, /* nop */
@@ -2967,7 +2967,7 @@ static const bfd_byte elf_sh_plt0_entry_le[PLT_ENTRY_SIZE] =
   0x10, 0x01, 0x00, 0xcc, /* movi  .got.plt >> 16, r17 */
   0x10, 0x01, 0x00, 0xc8, /* shori .got.plt & 65535, r17 */
   0x90, 0x09, 0x10, 0x89, /* ld.l  r17, 8, r25 */
-  0x00, 0x46, 0xf1, 0x6b, /* ptabs r17, tr0 */
+  0x00, 0x66, 0xf1, 0x6b, /* ptabs r25, tr0 */
   0x10, 0x05, 0x10, 0x89, /* ld.l  r17, 4, r17 */
   0xf0, 0xff, 0x01, 0x44, /* blink tr0, r63 */
   0xf0, 0xff, 0xf0, 0x6f, /* nop */
@@ -5484,7 +5484,8 @@ sh_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
       got_offset = (plt_index + 3) * 4;
 
 #ifdef GOT_BIAS
-      got_offset -= GOT_BIAS;
+      if (info->shared)
+	got_offset -= GOT_BIAS;
 #endif
 
       /* Fill in the entry in the procedure linkage table.  */
@@ -5505,8 +5506,10 @@ sh_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 			     (splt->contents + h->plt.offset
 			      + elf_sh_plt_symbol_offset (info)));
 
+	  /* Set bottom bit because its for a branch to SHmedia */
 	  movi_shori_putval (output_bfd,
-			     (splt->output_section->vma + splt->output_offset),
+			     (splt->output_section->vma + splt->output_offset)
+			     | 1,
 			     (splt->contents + h->plt.offset
 			      + elf_sh_plt_plt0_offset (info)));
 #else
@@ -5545,7 +5548,8 @@ sh_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 	}
 
 #ifdef GOT_BIAS
-      got_offset += GOT_BIAS;
+      if (info->shared)
+	got_offset += GOT_BIAS;
 #endif
 
 #ifdef INCLUDE_SHMEDIA

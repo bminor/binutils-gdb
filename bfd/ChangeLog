@@ -1,3 +1,19 @@
+2002-08-23  Stephen Clarke <stephen.clarke@superh.com>
+
+	* elf32-sh.c (elf_sh_plt0_entry_be, elf_sh_plt0_entry_le): Copy
+	contents of .got.plt[2] to tr0, not address of .got.plt.
+	(sh_elf_finish_dynamic_symbol): Do not apply GOT_BIAS when
+	patching absolute plt entry. For shmedia plt entry, set bottom bit
+	of branch to plt0 as this is a branch to an shmedia instruction.
+	* elf64-sh64.c (elf_sh64_plt0_entry_be, elf_sh64_plt0_entry_le):
+	Copy contents of .got.plt[2] to tr0, not address of .got.plt.
+	(elf_sh64_plt_entry_be, elf_sh64_plt_entry_le): Use ptrel to
+	branch to plt0.
+	(sh64_elf64_finish_dynamic_symbol): Do not apply GOT_BIAS when
+	patching absolute plt entry. For shmedia plt entry, branch to
+	plt0 is now ptrel, so use relative offset.  Set bottom bit of
+	branch target as it is a branch to an shmedia instruction.
+
 2002-08-23  Stephen Clarke <stephen.clarke@superh.com>,
 	    Richard Shann <richard.shann@superh.com>
 
