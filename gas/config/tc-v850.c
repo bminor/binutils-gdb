@@ -40,7 +40,7 @@ struct reg_name
 const char comment_chars[] = "#";
 
 /* Characters which start a comment at the beginning of a line.  */
-const char line_comment_chars[] = ";#";
+const char line_comment_chars[] = ";#-";
 
 /* Characters which may be used to separate multiple commands on a 
    single line.  */
@@ -78,11 +78,52 @@ struct v850_fixup
 struct v850_fixup fixups[MAX_INSN_FIXUPS];
 static int fc;
 
+static void
+v850_section (int arg)
+{
+  char   saved_c;
+  char * ptr;
+  
+  for (ptr = input_line_pointer; * ptr != '\n' && * ptr != 0; ptr ++)
+    if (* ptr == ',')
+      break;
+
+  saved_c = * ptr;
+  * ptr = ';';
+  
+  obj_elf_section (arg);
+
+  * ptr = saved_c;
+}
+
+void
+v850_bss (int ignore)
+{
+  register int temp = get_absolute_expression ();
+  
+  subseg_set (bss_section, (subsegT) temp);
+  
+  demand_empty_rest_of_line ();
+}
+
+void
+v850_offset (int ignore)
+{
+  register int temp = get_absolute_expression ();
+  
+  subseg_set (now_seg, (subsegT) temp);
+  
+  demand_empty_rest_of_line ();
+}
+
 /* The target specific pseudo-ops which we support.  */
 const pseudo_typeS md_pseudo_table[] =
 {
-  {"word", cons, 4},
-  { NULL,       NULL,           0 }
+  {"bss",     v850_bss,     0},
+  {"offset",  v850_offset,  0},
+  {"section", v850_section, 0},
+  {"word",    cons,         4},
+  { NULL,     NULL,         0}
 };
 
 /* Opcode hash table.  */
@@ -130,11 +171,18 @@ static const struct reg_name pre_defined_registers[] =
   { "tp", 5 },			/* tp - text ptr */
   { "zero", 0 },
 };
-#define REG_NAME_CNT	(sizeof(pre_defined_registers) / sizeof(struct reg_name))
+#define REG_NAME_CNT	(sizeof (pre_defined_registers) / sizeof (struct reg_name))
 
 
 static const struct reg_name system_registers[] = 
 {
+/* start-sanitize-v850e */
+  { "ctbp",  20 },
+  { "ctpc",  16 },
+  { "ctpsw", 17 },
+  { "dbpc",  18 },
+  { "dbpsw", 19 },
+/* end-sanitize-v850e */
   { "ecr", 4 },
   { "eipc", 0 },
   { "eipsw", 1 },
@@ -142,7 +190,7 @@ static const struct reg_name system_registers[] =
   { "fepsw", 3 },
   { "psw", 5 },
 };
-#define SYSREG_NAME_CNT	(sizeof(system_registers) / sizeof(struct reg_name))
+#define SYSREG_NAME_CNT	(sizeof (system_registers) / sizeof (struct reg_name))
 
 static const struct reg_name cc_names[] =
 {
@@ -193,8 +241,8 @@ reg_name_search (regs, regcount, name)
 	high = middle - 1;
       else if (cmp > 0)
 	low = middle + 1;
-      else 
-	  return regs[middle].value;
+      else
+	return regs[middle].value;
     }
   while (low <= high);
   return -1;
@@ -258,8 +306,9 @@ register_name (expressionP)
  *	its original state.
  */
 static boolean
-system_register_name (expressionP)
-     expressionS *expressionP;
+system_register_name (expressionP, accept_numbers)
+     expressionS * expressionP;
+     boolean       accept_numbers;
 {
   int reg_number;
   char *name;
@@ -272,6 +321,31 @@ system_register_name (expressionP)
   c = get_symbol_end ();
   reg_number = reg_name_search (system_registers, SYSREG_NAME_CNT, name);
 
+  if (reg_number < 0
+      && accept_numbers)
+    {
+      * input_line_pointer = c;   /* put back the delimiting char */
+      input_line_pointer   = start; /* reset input_line pointer */
+      
+      reg_number = strtol (input_line_pointer, & input_line_pointer, 10);
+
+      /* Make sure that the register number is allowable. */
+      if (   reg_number < 0
+	  || reg_number > 5
+/* start-sanitize-v850e */
+	  && reg_number < 16
+	  || reg_number > 20
+/* end-sanitize-v850e */
+	     )
+	{
+	  reg_number = -1;
+	}
+      else
+	{
+	  c = * input_line_pointer;
+	}
+    }
+      
   /* look to see if it's in the register table */
   if (reg_number >= 0) 
     {
@@ -401,7 +475,7 @@ parse_register_list
 	      return false;
 	    }
 	}
-      else if (system_register_name (& exp))
+      else if (system_register_name (& exp, true))
 	{
 	  if (regs == type1_regs)
 	    {
@@ -736,7 +810,7 @@ md_assemble (str)
 	  hold = input_line_pointer;
 	  input_line_pointer = str;
 	  
-// fprintf (stderr, "operand: %s   index = %d, opcode = %s\n", input_line_pointer, opindex_ptr - opcode->operands, opcode->name );
+//fprintf (stderr, "operand: %s   index = %d, opcode = %s\n", input_line_pointer, opindex_ptr - opcode->operands, opcode->name );
 
 	  /* lo(), hi(), hi0(), etc... */
 	  if ((reloc = v850_reloc_prefix()) != BFD_RELOC_UNUSED)
@@ -817,9 +891,9 @@ md_assemble (str)
 		}
 	      else if ((operand->flags & V850_OPERAND_SRG) != 0) 
 		{
-		  if (!system_register_name (& ex))
+		  if (!system_register_name (& ex, true))
 		    {
-		      errmsg = "invalid system register name";
+		      errmsg = "UGG invalid system register name";
 		    }
 		}
 	      else if ((operand->flags & V850_OPERAND_EP) != 0)
@@ -900,7 +974,7 @@ md_assemble (str)
 		{
 		  errmsg = "syntax error: register not expected";
 		}
-	      else if (system_register_name (&ex)
+	      else if (system_register_name (& ex, false)
 		       && (operand->flags & V850_OPERAND_SRG) == 0)
 		{
 		  errmsg = "syntax error: system register not expected";
@@ -1022,9 +1096,11 @@ md_assemble (str)
       else
 	insn_size = 2;
 
+/* start-sanitize-v850e */
       /* Special case: 32 bit MOV */
       if ((insn & 0xffe0) == 0x0620)
 	insn_size = 2;
+/* end_sanitize-v850e */
       
       f = frag_more (insn_size);
       

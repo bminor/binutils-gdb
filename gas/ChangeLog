@@ -1,3 +1,11 @@
+start-sanitize-v850
+Thu Aug 21 10:54:27 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-v850.c (v850_section, v850_bss, v850_offset): New
+	functions.
+	(md_pseudo_table): New pseudo ops: .bss, .offset, .section
+end-sanitize-v850
+
 Thu Aug 21 00:59:53 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* config/tc-m32r.c (md_estimate_size_before_relax): Update recorded
