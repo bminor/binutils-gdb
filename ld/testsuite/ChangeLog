@@ -1,3 +1,16 @@
+Thu Sep 28 12:37:14 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-shared/shared.exp: Run the tests on sparc*-*-sunos4*.  Add
+	appropriate modifications and setup_xfails.
+	* ld-shared/sun4.dat: New file.
+
+Mon Sep 18 14:12:56 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* lib/ld.exp (default_ld_version): Call prune_system_crud.
+	(default_ld_relocate, default_ld_link): Likewise.
+	(default_ld_simple_link, default_ld_compile): Likewise.
+	(default_ld_assemble, default_ld_nm): Likewise.
+
 Fri Sep  8 17:15:38 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ld-cdtest/cdtest.exp: If the compiler does not exist, mark the
