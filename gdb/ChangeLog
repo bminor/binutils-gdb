@@ -1,5 +1,7 @@
 2003-03-10  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbarch.h: Re-generate.
+
 	* d10v-tdep.c (d10v_frame_register_unwind): Correctly unwind the
 	PC.
 	(d10v_frame_pop): Unwind the PC, and not the LR, when restoring

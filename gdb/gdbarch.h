@@ -2419,6 +2419,9 @@ extern void set_gdbarch_reg_struct_has_addr (struct gdbarch *gdbarch, gdbarch_re
 #endif
 #endif
 
+/* FIXME: kettenis/2003-03-08: This should be replaced by a function
+   parametrized with (at least) the regcache. */
+
 #if defined (SAVE_DUMMY_FRAME_TOS)
 /* Legacy for systems yet to multi-arch SAVE_DUMMY_FRAME_TOS */
 #if !defined (SAVE_DUMMY_FRAME_TOS_P)
