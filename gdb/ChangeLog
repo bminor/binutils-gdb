@@ -1,5 +1,11 @@
 Fri Nov 25 00:51:05 1994  Jeff Law  (law@snake.cs.utah.edu)
 
+	* hppa-tdep.c (in_solib_call_trampoline): Recognize calls through
+	_sr4export and $$dyncall as trampolines.  Likewise for long-call
+	stubs and parameter relocation stubs.
+	(in_solib_return_trampoline): Recognize a return trampoline for
+	return value relocation stubs.
+
 	* hpread.c: Include hp-symtab.h instead of hpux-symtab.h.
 	Various name changes to match those used by hp-symtab.h.
 

@@ -1572,8 +1572,10 @@ pa_print_fp_reg (i)
     }
 }
 
-/* Return one if PC is in the call path of a shared library trampoline, else
-   return zero.  */
+/* Return one if PC is in the call path of a trampoline, else return zero.
+
+   Note we return one for *any* call trampoline (long-call, arg-reloc), not
+   just shared library trampolines (import, export).  */
 
 in_solib_call_trampoline (pc, name)
      CORE_ADDR pc;
@@ -1581,6 +1583,33 @@ in_solib_call_trampoline (pc, name)
 {
   struct minimal_symbol *minsym;
   struct unwind_table_entry *u;
+  static CORE_ADDR dyncall = 0;
+  static CORE_ADDR sr4export = 0;
+
+/* FIXME XXX - dyncall and sr4export must be initialized whenever we get a
+   new exec file */
+
+  /* First see if PC is in one of the two C-library trampolines.  */
+  if (!dyncall)
+    {
+      minsym = lookup_minimal_symbol ("$$dyncall", NULL);
+      if (minsym)
+	dyncall = SYMBOL_VALUE_ADDRESS (minsym);
+      else
+	dyncall = -1;
+    }
+
+  if (!sr4export)
+    {
+      minsym = lookup_minimal_symbol ("_sr4export", NULL);
+      if (minsym)
+	sr4export = SYMBOL_VALUE_ADDRESS (minsym);
+      else
+	sr4export = -1;
+    }
+
+  if (pc == dyncall || pc == sr4export)
+    return 1;
 
   /* Get the unwind descriptor corresponding to PC, return zero
      if no unwind was found.  */
@@ -1589,9 +1618,12 @@ in_solib_call_trampoline (pc, name)
     return 0;
 
   /* If this isn't a linker stub, then return now.  */
-  if (u->stub_type != IMPORT
-      && u->stub_type != EXPORT)
+  if (u->stub_type == 0)
     return 0;
+
+  /* By definition a long-branch stub is a call stub.  */
+  if (u->stub_type == LONG_BRANCH)
+    return 1;
 
   /* The call and return path execute the same instructions within
      an IMPORT stub!  So an IMPORT stub is both a call and return
@@ -1599,21 +1631,56 @@ in_solib_call_trampoline (pc, name)
   if (u->stub_type == IMPORT)
     return 1;
 
-  /* The linker may group many EXPORT stubs into one unwind entry.  So
-     lookup the minimal symbol and use that as the beginning of this
-     particular stub.  */
-  minsym = lookup_minimal_symbol_by_pc (pc);
-  if (minsym == NULL)
-    return 0;
+  if (u->stub_type == EXPORT)
+    {
+      /* The linker may group many EXPORT stubs into one unwind entry.  So
+	 lookup the minimal symbol and use that as the beginning of this
+	 particular stub.  */
+      minsym = lookup_minimal_symbol_by_pc (pc);
+      if (minsym == NULL)
+	return 0;
 
-  /* Export stubs have distinct call and return paths.  The first
-     two instructions are the call path, following four are the
+      /* Export stubs have distinct call and return paths.  The first
+	 two instructions are the call path, following four are the
+	 return path.  */
+      return (pc >= SYMBOL_VALUE (minsym) && pc < SYMBOL_VALUE (minsym) + 8);
+    }
+
+  /* Parameter relocation stubs always have a call path and may have a
      return path.  */
-  return (pc >= SYMBOL_VALUE (minsym) && pc < SYMBOL_VALUE (minsym) + 8);
+  if (u->stub_type == PARAMETER_RELOCATION)
+    {
+      CORE_ADDR addr;
+
+      /* Search forward from the current PC until we hit a branch
+	 or the end of the stub.  */
+      for (addr = pc; addr <= u->region_end; addr += 4)
+	{
+	  unsigned long insn;
+
+	  insn = read_memory_integer (addr, 4);
+
+	  /* Does it look like a bl?  If so then it's the call path, if
+	     we find a bv first, then we're on the return path.  */
+	  if ((insn & 0xfc00e000) == 0xe8000000)
+	    return 1;
+	  else if ((insn & 0xfc00e001) == 0xe800c000)
+	    return 0;
+	}
+
+      /* Should never happen.  */
+      warning ("Unable to find branch in parameter relocation stub.\n");
+      return 0;
+    }
+
+  /* Unknown stub type.  For now, just return zero.  */
+  return 0;
 }
 
-/* Return one if PC is in the return path of a shared library trampoline,
-   else return zero.  */
+/* Return one if PC is in the return path of a trampoline, else return zero.
+
+   Note we return one for *any* call trampoline (long-call, arg-reloc), not
+   just shared library trampolines (import, export).  */
 
 in_solib_return_trampoline (pc, name)
      CORE_ADDR pc;
@@ -1628,9 +1695,9 @@ in_solib_return_trampoline (pc, name)
   if (!u)
     return 0;
 
-  /* If this isn't a linker stub, then return now.  */
-  if (u->stub_type != IMPORT
-      && u->stub_type != EXPORT)
+  /* If this isn't a linker stub or it's just a long branch stub, then
+     return zero.  */
+  if (u->stub_type == 0 || u->stub_type == LONG_BRANCH)
     return 0;
 
   /* The call and return path execute the same instructions within
@@ -1639,17 +1706,52 @@ in_solib_return_trampoline (pc, name)
   if (u->stub_type == IMPORT)
     return 1;
 
-  /* The linker may group many EXPORT stubs into one unwind entry.  So
-     lookup the minimal symbol and use that as the beginning of this
-     particular stub.  */
-  minsym = lookup_minimal_symbol_by_pc (pc);
-  if (minsym == NULL)
-    return 0;
+  if (u->stub_type == EXPORT)
+    {
+      /* The linker may group many EXPORT stubs into one unwind entry.  So
+	 lookup the minimal symbol and use that as the beginning of this
+	 particular stub.  */
+      minsym = lookup_minimal_symbol_by_pc (pc);
+      if (minsym == NULL)
+	return 0;
 
-  /* Export stubs have distinct call and return paths.  The first
-     two instructions are the call path, following four are the
+      /* Export stubs have distinct call and return paths.  The first
+	 two instructions are the call path, following four are the
+	 return path.  */
+      return (pc >= SYMBOL_VALUE (minsym) + 8
+	      && pc < SYMBOL_VALUE (minsym) + 20);
+    }
+
+  /* Parameter relocation stubs always have a call path and may have a
      return path.  */
-  return (pc >= SYMBOL_VALUE (minsym) + 8 && pc < SYMBOL_VALUE (minsym) + 20);
+  if (u->stub_type == PARAMETER_RELOCATION)
+    {
+      CORE_ADDR addr;
+
+      /* Search forward from the current PC until we hit a branch
+	 or the end of the stub.  */
+      for (addr = pc; addr <= u->region_end; addr += 4)
+	{
+	  unsigned long insn;
+
+	  insn = read_memory_integer (addr, 4);
+
+	  /* Does it look like a bl?  If so then it's the call path, if
+	     we find a bv first, then we're on the return path.  */
+	  if ((insn & 0xfc00e000) == 0xe8000000)
+	    return 0;
+	  else if ((insn & 0xfc00e001) == 0xe800c000)
+	    return 1;
+	}
+
+      /* Should never happen.  */
+      warning ("Unable to find branch in parameter relocation stub.\n");
+      return 0;
+    }
+
+  /* Unknown stub type.  For now, just return zero.  */
+  return 0;
+
 }
 
 /* Figure out if PC is in a trampoline, and if so find out where
