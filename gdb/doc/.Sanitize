@@ -42,7 +42,6 @@ pretex.m4
 rc-cm.tex
 rc-ps.tex
 rc-pslong.tex
-rdl-apps.texi
 refcard.tex
 sparc.m4
 threecol.tex
@@ -55,7 +54,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 2.7  1991/11/21 02:44:53  gnu
+# Revision 2.8  1991/12/10 02:13:54  pesch
+# rdl-apps.texi is no longer used, with the new improved doc Makefile.in.
+#
+# Revision 2.7  1991/11/21  02:44:53  gnu
 # For configure-able doc dir.
 #
 # Revision 2.6  1991/08/23  22:35:41  pesch
