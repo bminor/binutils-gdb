@@ -50,25 +50,592 @@ are preserved on all copies.
 
 @end titlepage
 
-@node Top, Cleanups, (dir), (dir)
+@node Top, README, (dir), (dir)
 
 @menu
-* Cleanups::			Cleanups
-* Wrapping::			Wrapping output lines
-* Releases::			Configuring GDB for release
-* README::			The README file
-* New Architectures::		Defining a new host or target architecture
+* README::			The README File
+* New Architectures::		Defining a New Host or Target Architecture
+* Config::			Adding a New Configuration
 * Host::			Adding a New Host
 * Target::			Adding a New Target
-* Config::			Extending @code{configure}
+* Languages::			Defining New Source Languages
+* Releases::			Configuring GDB for Release
 * BFD support for GDB::		How BFD and GDB interface
-* Host versus Target::		What features are in which files
-* Symbol Reading::		Defining new symbol readers
-* Languages::			Defining new source languages
+* Symbol Reading::		Defining New Symbol Readers
+* Cleanups::			Cleanups
+* Wrapping::			Wrapping Output Lines
 
 @end menu
 
-@node Cleanups, Wrapping, Top, Top
+@node README, New Architectures, Top, Top
+@chapter The @file{README} File
+
+Check the @file{README} file, it often has useful information that does not
+appear anywhere else in the directory.
+
+
+@node New Architectures, Config, README, Top
+@chapter Defining a New Host or Target Architecture
+
+When building support for a new host and/or target, much of the work you
+need to do is handled by specifying configuration files;
+@pxref{Config,,Adding a New Configuration}.  Further work can be
+divided into ``host-dependent'' (@pxref{Host,,Adding a New Host}) and
+``target=dependent'' (@pxref{Target,,Adding a New Target}).  The
+following discussion is meant to explain the difference between hosts
+and targets.
+
+@heading What is considered ``host-dependent'' versus ``target-dependent''?
+
+The @file{xconfig/*}, @file{xm-*.h} and @file{*-xdep.c} files are for
+host support.  Similarly, the @file{tconfig/*}, @file{tm-*.h} and
+@file{*-tdep.c} files are for target support.  The question is, what
+features or aspects of a debugging or cross-debugging environment are
+considered to be ``host'' support?
+
+Defines and include files needed to build on the host are host support.
+Examples are tty support, system defined types, host byte order, host
+float format.
+
+Unix child process support is considered an aspect of the host.  Since
+when you fork on the host you are still on the host, the various macros
+needed for finding the registers in the upage, running @code{ptrace}, and such
+are all in the host-dependent files.
+
+@c FIXME so what kinds of things are target support?
+
+This is still somewhat of a grey area; I (John Gilmore) didn't do the
+@file{xm-*} and @file{tm-*} split for gdb (it was done by Jim Kingdon)
+so I have had to figure out the grounds on which it was split, and make
+my own choices as I evolve it.  I have moved many things out of the xdep
+files actually, partly as a result of BFD and partly by removing
+duplicated code.
+
+
+@node Config, Host, New Architectures, Top
+@chapter Adding a New Configuration
+
+Most of the work in making GDB compile on a new machine is in specifying
+the configuration of the machine.  This is done in a dizzying variety of
+header files and configuration scripts, which we hope to make more
+sensible soon.  Let's say your new host is called an @var{xxx} (e.g.
+@samp{sun4}), and its full three-part configuration name is
+@code{@var{xarch}-@var{xvend}-@var{xos}} (e.g.  @samp{sparc-sun-sunos4}).  In
+particular:
+
+At the top level, edit @file{config.sub} and add @var{xarch},
+@var{xvend}, and @var{xos} to the lists of supported architectures,
+vendors, and operating systems near the bottom of the file.  Also, add
+@var{xxx} as an alias that maps to
+@code{@var{xarch}-@var{xvend}-@var{xos}}.  You can test your changes by
+running
+
+@example
+./config.sub @var{xxx}
+@end example
+@noindent
+and
+@example
+./config.sub @code{@var{xarch}-@var{xvend}-@var{xos}}
+@end example
+@noindent
+which should both respond with @code{@var{xarch}-@var{xvend}-@var{xos}}
+and no error messages.
+
+Then edit @file{include/sysdep.h}.  Add a new @code{#define} for
+@samp{@var{xxx}_SYS}, with a numeric value not already in use.  Add a
+new section that says
+
+@example
+#if HOST_SYS==@var{xxx}_SYS
+#include <sys/h-@var{xxx}.h>
+#endif
+@end example
+
+Now create a new file @file{include/sys/h-@var{xxx}.h}.  Examine the
+other @file{h-*.h} files as templates, and create one that brings in the
+right include files for your system, and defines any host-specific
+macros needed by GDB.
+
+Now, go to the @file{bfd} directory and edit @file{bfd/configure.in}.
+Add shell script code to recognize your
+@code{@var{xarch}-@var{xvend}-@var{xos}} configuration, and set
+@code{bfd_host} to @var{xxx} when you recognize it.  Now create a file
+@file{bfd/config/hmake-@var{xxx}}, which includes the line:
+
+@example
+HDEFINES=-DHOST_SYS=@var{xxx}_SYS
+@end example
+
+(If you have the binary utilities in the same tree, you'll have to do
+the same thing to in the @file{binutils} directory as you've done in the
+@file{bfd} directory.)
+
+It's likely that the @file{libiberty} and @file{readline} directories
+won't need any changes for your configuration, but if they do, you can
+change the @file{configure.in} file there to recognize your system and
+map to an @file{hmake-@var{xxx}} file.  Then add @file{hmake-@var{xxx}}
+to the @file{config/} subdirectory, to set any makefile variables you
+need.  The only current options in there are things like @samp{-DSYSV}.
+
+Aha!  Now to configure GDB itself!  You shouldn't edit the
+@code{configure} script itself to add hosts or targets; instead, edit
+the script fragments in the file @code{configure.in}.  Modify
+@file{gdb/configure.in} to recognize your system and set @code{gdb_host}
+to @var{xxx}, and (unless your desired target is already available) also
+set @code{gdb_target} to something appropriate (for instance,
+@var{xxx}).  To handle new hosts, modify the segment after the comment
+@samp{# per-host}; to handle new targets, modify after @samp{#
+per-target}.
+@c Would it be simpler to just use different per-host and per-target
+@c *scripts*, and call them from {configure} ?
+
+Then fold your changes into the @code{configure} script by using the
+@code{+template} option, and specifying @code{configure} itself as the
+template:
+@example
+configure +template=configure
+@end example
+@c If "configure" is the only workable option value for +template, it's
+@c kind of silly to insist that it be provided.  If it isn't, somebody
+@c please fill in here what are others... (then delete this comment!)
+
+Finally, you'll need to specify and define the host- and
+target-dependent files used for your configuration; the next two
+chapters discuss those.
+
+
+@node Host, Target, Config, Top
+@chapter Adding a New Host
+
+Once you have specified a new configuration for your host
+(@pxref{Config,,Adding a New Configuration}), there are two remaining
+pieces to making GDB work on a new machine.  First, you have to make it
+host on the new machine (compile there, handle that machine's terminals
+properly, etc).  If you will be cross-debugging to some other kind of
+system that's already supported, you are done.
+
+If you want to use GDB to debug programs that run on the new machine,
+you have to get it to understand the machine's object files, symbol
+files, and interfaces to processes.  @pxref{Target}.
+
+Add a file @file{gdb/xconfig/@var{xxx}} which specifies whatever object
+files are needed as the makefile macro @samp{XDEPFILES=@dots{}}.  In the
+same file, specify the header file to describe @var{xxx} as
+@samp{XM_FILE= xm-@var{xxx}.h}.  You can also define @samp{CC},
+@samp{REGEX} and @samp{REGEX1}, @samp{SYSV_DEFINE}, @samp{XM_CFLAGS},
+etc. in there; see @file{Makefile.in}.
+
+Create @file{gdb/xm-@var{xxx}.h} with the appropriate @code{#define}s
+for your system (crib from existing @file{xm-*.h} files).
+
+There are some ``generic'' versions of routines that can be used by
+various host systems.  These can be customized in various ways by macros
+defined in your @file{xm-@var{xxx}.h} file.  If these routines work for
+the @var{xxx} host, you can just include the generic file's name (with
+@samp{.o}, not @samp{.c}) in @code{XDEPFILES}.  
+
+Otherwise, if your machine needs custom support routines, you will need
+to write routines that perform the same functions as the generic file.
+Put them into @code{@var{xxx}-xdep.c}, and put @code{@var{xxx}-xdep.o}
+into @code{XDEPFILES}.  
+
+@subheading Generic Host Support Files
+
+@table @code
+
+@item infptrace.c
+@code{ptrace} support.
+
+@item coredep.c:fetch_core_registers()
+Support for reading registers out of a core file.  This routine calls
+@code{register_addr(}), see below.
+
+@item coredep.c:register_addr()
+If your @code{xm-@var{xxx}.h} file defines the macro
+@code{REGISTER_U_ADDR(reg)} to be the offset within the @samp{user}
+struct of a register (represented as a GDB register number),
+@file{coredep.c} will define the @code{register_addr()} function and use
+the macro in it.  If you do not define @code{REGISTER_U_ADDR}, but you
+are using the standard @code{fetch_core_registers()}, you will need to
+define your own version of @code{register_addr()}, put it into your
+@code{@var{xxx}-xdep.c} file, and be sure @code{@var{xxx}-xdep.o} is in
+the @code{XDEPFILES} list.  If you have your own
+@code{fetch_core_registers()}, you may not need a separate
+@code{register_addr()}.  Many custom @code{fetch_core_registers()}
+implementations simply locate the registers themselves.@refill
+@end table
+
+Object files needed when the target system is an @var{xxx} are listed
+in the file @file{tconfig/@var{xxx}}, in the makefile macro
+@samp{TDEPFILES = }@dots{}.  The header file that defines the target
+system should be called @file{tm-@var{xxx}.h}, and should be specified
+as the value of @samp{TM_FILE} in @file{tconfig/@var{xxx}}.  You can
+also define @samp{TM_CFLAGS}, @samp{TM_CLIBS}, and @samp{TM_CDEPS} in
+there; see @file{Makefile.in}.
+
+Now, from the top level (above @file{bfd}, @file{gdb}, etc), run:
+
+@example
+./configure -template=./configure
+@end example
+
+This will rebuild all your configure scripts, using the new
+@file{configure.in} files that you modified.  (You can also run this command
+at any subdirectory level.)  You are now ready to try configuring
+GDB to compile for your system.  Do:
+
+@example
+./configure @var{xxx} +target=vxworks960
+@end example
+
+This will configure your system to cross-compile for VxWorks on
+the Intel 960, which is probably not what you really want, but it's
+a test case that works at this stage.  (You haven't set up to be
+able to debug programs that run @emph{on} @var{xxx} yet.)
+
+If this succeeds, you can try building it all with:
+
+@example
+make
+@end example
+
+Good luck!  Comments and suggestions about this section are particularly
+welcome; send them to @samp{bug-gdb@@prep.ai.mit.edu}.
+
+When hosting GDB on a new operating system, to make it possible to debug
+core files, you will need to either write specific code for parsing your
+OS's core files, or customize @file{bfd/trad-core.c}.  First, use
+whatever @code{#include} files your machine uses to define the struct of
+registers that is accessible (possibly in the u-area) in a core file
+(rather than @file{machine/reg.h}), and an include file that defines whatever
+header exists on a core file (e.g. the u-area or a @samp{struct core}).  Then
+modify @code{trad_unix_core_file_p()} to use these values to set up the
+section information for the data segment, stack segment, any other
+segments in the core file (perhaps shared library contents or control
+information), ``registers'' segment, and if there are two discontiguous
+sets of registers (e.g.  integer and float), the ``reg2'' segment.  This
+section information basically delimits areas in the core file in a
+standard way, which the section-reading routines in BFD know how to seek
+around in.
+
+Then back in GDB, you need a matching routine called @code{fetch_core_registers()}.
+If you can use the generic one, it's in @file{core-dep.c}; if not, it's in
+your @file{@var{xxx}-xdep.c} file.  It will be passed a char pointer
+to the entire ``registers'' segment, its length, and a zero; or a char
+pointer to the entire ``regs2'' segment, its length, and a 2.  The
+routine should suck out the supplied register values and install them into
+GDB's ``registers'' array.  (@xref{New Architectures}
+for more info about this.)
+
+
+@node Target, Languages, Host, Top
+@chapter Adding a New Target
+
+For a new target called @var{ttt}, first specify the configuration as
+described in @ref{Config,,Adding a New Configuration}.  If your new
+target is the same as your new host, you've probably already done that.
+
+Add a file @file{gdb/tconfig/@var{ttt}} which specifies whatever object
+files are needed as the makefile macro @samp{TDEPFILES=@dots{}}.  In the
+same file, specify the header file to describe @var{ttt} as
+@samp{TM_FILE= tm-@var{ttt}.h}.  You can also define @samp{CC},
+@samp{REGEX} and @samp{REGEX1}, @samp{SYSV_DEFINE}, @samp{XM_CFLAGS},
+etc. in there; see @file{Makefile.in}.
+
+Create @file{gdb/tm-@var{ttt}.h} with the appropriate @code{#define}s
+for your system (crib from existing @file{tm-*.h} files).
+
+When adding support for a new target machine, there are various areas
+of support that might need change, or might be OK.
+
+The file @file{exec.c} defines functions for accessing files that are
+executable on the target system.  These functions open and examine an
+exec file, extract data from one, write data to one, print information
+about one, etc.  Now that executable files are handled with BFD, every
+target should be able to use the generic exec.c rather than its
+own custom code.
+
+If you are using an existing object file format (a.out or COFF), 
+there is probably little to be done.  See @file{bfd/doc/bfd.texinfo}
+for more information on writing new a.out or COFF versions.
+
+If you need to add a new object file format, you are beyond the scope
+of this document right now.  Look at the structure of the a.out
+and COFF support, build a transfer vector (@code{xvec}) for your new format,
+and start populating it with routines.  Add it to the list in 
+@file{bfd/targets.c}.
+
+If you are adding a new existing CPU chip (e.g. m68k family), you'll
+need to define an @file{@var{xarch}-opcode.h} file, a
+@file{tm-@var{xarch}.h} file that gives the basic layout of the chip
+(registers, stack, etc), probably an @file{@var{xarch}-tdep.c} file that
+has support routines for @file{tm-@var{xarch}.h}, etc.
+
+If you are adding a new operating system for an existing CPU chip, add a
+@file{tm-@var{xos}.h} file that describes the operating system
+facilities that are unusual (extra symbol table info; the breakpoint
+instruction needed; etc).  Then write a
+@file{tm-@var{xarch}-@var{xos}.h} that just @code{#include}s
+@file{tm-@var{xarch}.h} and @file{tm-@var{xos}.h}.  (Now that we have
+three-part configuration names, this will probably get revised to
+separate the @var{xos} configuration from the @var{xarch}
+configuration.)
+
+
+@node Languages, Releases, Target, Top
+@chapter Adding a Source Language to GDB
+
+To add other languages to GDB's expression parser, follow the following steps:
+
+@table @emph
+@item Create the expression parser.
+
+This should reside in a file @file{@var{lang}-exp.y}.  Routines for building
+parsed expressions into a @samp{union exp_element} list are in @file{parse.c}.
+
+Since we can't depend upon everyone having Bison, the following lines
+@emph{must} be included at the top of the YACC parser:
+
+@example
+#define yyparse 	@var{lang}_parse
+#define yylex 		@var{lang}_lex
+#define yyerror 	@var{lang}_error
+#define yylval 	@var{lang}_lval
+#define yychar 	@var{lang}_char
+#define yydebug 	@var{lang}_debug
+#define yypact  	@var{lang}_pact 
+#define yyr1		@var{lang}_r1   
+#define yyr2		@var{lang}_r2   
+#define yydef		@var{lang}_def  
+#define yychk		@var{lang}_chk  
+#define yypgo		@var{lang}_pgo  
+#define yyact  	@var{lang}_act  
+#define yyexca  	@var{lang}_exca
+@end example
+
+This will prevent name conflicts between the various parsers.
+
+@item Add any evaluation routines, if necessary
+
+If you need new opcodes (that represent the operations of the language),
+add them to the enumerated type in @file{expression.h}.  Add support
+code for these operations in @code{eval.c:evaluate_subexp()}.  Add cases
+for new opcodes in two functions from @file{parse.c}:
+@code{prefixify_subexp()} and @code{length_of_subexp()}.  These compute
+the number of @code{exp_element}s that a given operation takes up.
+
+@item Update some existing code
+
+Add an enumerated identifier for your language to the enumerated type
+@code{enum language} in @file{defs.h}.
+
+Update the routines in @file{language.c} so your language is included.  These
+routines include type predicates and such, which (in some cases) are
+language dependent.  If your language does not appear in the switch
+statement, an error is reported.
+
+Also included in @file{language.c} is the code that updates the variable
+@code{current_language}, and the routines that translate the
+@code{language_@var{lang}} enumerated identifier into a printable
+string.
+
+Update the function @code{_initialize_language} to include your language.  This
+function picks the default language upon startup, so is dependent upon
+which languages that GDB is built for.
+
+Update @code{symfile.c} and/or symbol-reading code so that the language of
+each symtab (source file) is set properly.  This is used to determine the
+language to use at each stack frame level.  Currently, the language
+is set based upon the extension of the source file.  If the language
+can be better inferred from the symbol information, please set the
+language of the symtab in the symbol-reading code.
+
+Add helper code to @code{expprint.c:print_subexp()} to handle any new
+expression opcodes you have added to @file{expression.h}.  Also, add the
+printed representations of your operators to @code{op_print_tab}.
+
+@item Add a place of call
+
+Add a call to @code{@var{lang}_parse()} and @code{@var{lang}_error} in
+@code{parse.c:parse_exp_1()}.
+
+@item Use macros to trim code
+
+The user has the option of building GDB for some or all of the
+languages.  If the user decides to build GDB for the language
+@var{lang}, then every file dependent on @file{language.h} will have the
+macro @code{_LANG_@var{lang}} defined in it.  Use @code{#ifdef}s to
+leave out large routines that the user won't need if he or she is not
+using your language.
+
+Note that you do not need to do this in your YACC parser, since if GDB
+is not build for @var{lang}, then @file{@var{lang}-exp.tab.o} (the
+compiled form of your parser) is not linked into GDB at all.
+
+See the file @file{configure.in} for how GDB is configured for different
+languages.
+
+@item Edit @file{Makefile.in}
+
+Add dependencies in @file{Makefile.in}.  Make sure you update the macro
+variables such as @code{HFILES} and @code{OBJS}, otherwise your code may
+not get linked in, or, worse yet, it may not get @code{tar}red into the
+distribution!
+@end table
+
+
+@node Releases, BFD support for GDB, Languages, Top
+@chapter Configuring GDB for Release
+
+GDB should be released after doing @samp{./configure none} in the top
+level directory.  This will leave a makefile there, but no @file{tm-*}
+or @file{xm-*} files.  The makefile is needed, for example, for
+@samp{make gdb.tar.Z}@dots{} If you have @file{tm-*} or @file{xm-*}
+files in the main source directory, C's include rules cause them to be
+used in preference to @file{tm-*} and @file{xm-*} files in the
+subdirectories where the user will actually configure and build the
+binaries.
+
+@samp{./configure none} is also a good way to rebuild the top level @file{Makefile}
+after changing @file{Makefile.in}, @file{alldeps.mak}, etc.
+
+@subheading TEMPORARY RELEASE PROCEDURE FOR DOCUMENTATION
+
+@file{gdb.texinfo} is currently marked up using the texinfo-2 macros,
+which are not yet a default for anything (but we have to start using
+them sometime).  
+
+For making paper, the only thing this implies is the right generation of
+@file{texinfo.tex} needs to be included in the distribution.
+
+For making info files, however, rather than duplicating the texinfo2
+distribution, generate @file{gdb-all.texinfo} locally, and include the files
+@file{gdb.info*} in the distribution.  Note the plural; @code{makeinfo} will
+split the document into one overall file and five or so included files.
+
+
+@node BFD support for GDB, Symbol Reading, Releases, Top
+@chapter Binary File Descriptor Library Support for GDB
+
+BFD provides support for GDB in several ways:
+
+@table @emph
+@item	identifying executable and core files
+BFD will identify a variety of file types, including a.out, coff, and
+several variants thereof, as well as several kinds of core files.
+
+@item	access to sections of files
+BFD parses the file headers to determine the names, virtual addresses,
+sizes, and file locations of all the various named sections in files
+(such as the text section or the data section).  GDB simply calls
+BFD to read or write section X at byte offset Y for length Z.
+
+@item	specialized core file support
+BFD provides routines to determine the failing command name stored
+in a core file, the signal with which the program failed, and whether
+a core file matches (i.e. could be a core dump of) a particular executable
+file.
+
+@item	locating the symbol information
+GDB uses an internal interface of BFD to determine where to find the
+symbol information in an executable file or symbol-file.  GDB itself
+handles the reading of symbols, since BFD does not ``understand'' debug
+symbols, but GDB uses BFD's cached information to find the symbols,
+string table, etc.
+@end table
+
+@c The interface for symbol reading is described in @ref{Symbol Reading}.
+
+
+@node Symbol Reading, Cleanups, BFD support for GDB, Top
+@chapter Symbol Reading
+
+GDB reads symbols from "symbol files".  The usual symbol file is the
+file containing the program which gdb is debugging.  GDB can be directed
+to use a different file for symbols (with the ``symbol-file''
+command), and it can also read more symbols via the ``add-file'' and ``load''
+commands, or while reading symbols from shared libraries.
+
+Symbol files are initially opened by @file{symfile.c} using the BFD
+library.  BFD identifies the type of the file by examining its header.
+@code{symfile_init} then uses this identification to locate a
+set of symbol-reading functions.
+
+Symbol reading modules identify themselves to GDB by calling
+@code{add_symtab_fns} during their module initialization.  The argument
+to @code{add_symtab_fns} is a @code{struct sym_fns} which contains
+the name (or name prefix) of the symbol format, the length of the prefix,
+and pointers to four functions.  These functions are called at various
+times to process symbol-files whose identification matches the specified
+prefix.
+
+The functions supplied by each module are:
+
+@table @code
+@item @var{xxx}_symfile_init(struct sym_fns *sf)
+
+Called from @code{symbol_file_add} when we are about to read a new
+symbol file.  This function should clean up any internal state
+(possibly resulting from half-read previous files, for example)
+and prepare to read a new symbol file. Note that the symbol file
+which we are reading might be a new "main" symbol file, or might
+be a secondary symbol file whose symbols are being added to the
+existing symbol table.
+
+The argument to @code{@var{xxx}_symfile_init} is a newly allocated
+@code{struct sym_fns} whose @code{bfd} field contains the BFD
+for the new symbol file being read.  Its @code{private} field
+has been zeroed, and can be modified as desired.  Typically,
+a struct of private information will be @code{malloc}'d, and
+a pointer to it will be placed in the @code{private} field.
+
+There is no result from @code{@var{xxx}_symfile_init}, but it can call
+@code{error} if it detects an unavoidable problem.
+
+@item @var{xxx}_new_init()
+
+Called from @code{symbol_file_add} when discarding existing symbols.
+This function need only handle 
+the symbol-reading module's internal state; the symbol table data
+structures visible to the rest of GDB will be discarded by
+@code{symbol_file_add}.  It has no arguments and no result.
+It may be called after @code{@var{xxx}_symfile_init}, if a new symbol
+table is being read, or may be called alone if all symbols are
+simply being discarded.
+
+@item @var{xxx}_symfile_read(struct sym_fns *sf, CORE_ADDR addr, int mainline)
+
+Called from @code{symbol_file_add} to actually read the symbols from a
+symbol-file into a set of psymtabs or symtabs.
+
+@code{sf} points to the struct sym_fns originally passed to
+@code{@var{xxx}_sym_init} for possible initialization.  @code{addr} is the
+offset between the file's specified start address and its true address
+in memory.  @code{mainline} is 1 if this is the main symbol table being
+read, and 0 if a secondary symbol file (e.g. shared library or
+dynamically loaded file) is being read.@refill
+@end table
+
+In addition, if a symbol-reading module creates psymtabs when
+@var{xxx}_symfile_read is called, these psymtabs will contain a pointer to
+a function @code{@var{xxx}_psymtab_to_symtab}, which can be called from
+any point in the GDB symbol-handling code.
+
+@table @code
+@item @var{xxx}_psymtab_to_symtab (struct partial_symtab *pst)
+
+Called from @code{psymtab_to_symtab} (or the PSYMTAB_TO_SYMTAB
+macro) if the psymtab has not already been read in and had its
+@code{pst->symtab} pointer set.  The argument is the psymtab
+to be fleshed-out into a symtab.  Upon return, pst->readin
+should have been set to 1, and pst->symtab should contain a
+pointer to the new corresponding symtab, or zero if there
+were no symbols in that part of the symbol file.
+@end table
+
+
+@node Cleanups, Wrapping, Symbol Reading, Top
 @chapter Cleanups
 
 Cleanups are a structured way to deal with things that need to be done
@@ -117,8 +684,8 @@ interruption must be on the cleanup chain before you call these functions,
 since they might never return to your code (they @samp{longjmp} instead).
 
 
-@node Wrapping, Releases, Cleanups, Top
-@chapter Wrapping output lines
+@node Wrapping,  , Cleanups, Top
+@chapter Wrapping Output Lines
 
 Output that goes through @code{printf_filtered} or @code{fputs_filtered} or
 @code{fputs_demangled} needs only to have calls to @code{wrap_here} added 
@@ -131,546 +698,16 @@ later.  It must remain valid until the next call to @code{wrap_here} or
 until a newline has been printed through the @code{*_filtered} functions.
 Don't pass in a local variable and then return!
 
-It is usually best to call wrap_here() after printing a comma or space.
+It is usually best to call @code{wrap_here()} after printing a comma or space.
 If you call it before printing a space, make sure that your indentation
 properly accounts for the leading space that will print if the line wraps
 there.
 
 Any function or set of functions that produce filtered output must finish
 by printing a newline, to flush the wrap buffer, before switching to
-unfiltered ("printf") output.  Symbol reading routines that print
+unfiltered (``@code{printf}'') output.  Symbol reading routines that print
 warnings are a good example.
 
-
-@node Releases, README, Wrapping, Top
-@chapter Configuring GDB for release
-
-
-GDB should be released after doing @samp{./configure none} in the top level
-directory.  This will leave a makefile there, but no tm- or xm- files.
-The makefile is needed, for example, for @samp{make gdb.tar.Z}@dots{}  If you
-have tm- or xm-files in the main source directory, C's include rules
-cause them to be used in preference to tm- and xm-files in the 
-subdirectories where the user will actually configure and build the
-binaries.
-
-@samp{./configure none} is also a good way to rebuild the top level Makefile
-after changing Makefile.in, alldeps.mak, etc.
-
-@emph{TEMPORARY RELEASE PROCEDURE FOR DOCUMENTATION}
-@file{gdb.texinfo} is currently marked up using the texinfo-2 macros,
-which are not yet a default for anything (but we have to start using
-them sometime).  
-
-For making paper, the only thing this implies is the right generation of
-texinfo.tex needs to be included in the distribution.
-
-For making info files, however, rather than duplicating the texinfo2
-distribution, generate gdb.texinfo locally, and include the files
-gdb.info* in the distribution.  Note the plural; 
-@samp{M-x texinfo-format-buffer} will split the document into one overall file
-and five or so include files.
-
-@node README, New Architectures, Releases, Top
-@chapter The README file
-
-
-Check the README file, it often has useful information that does not
-appear anywhere else in the directory.
-
-
-
-@node New Architectures, Host, README, Top
-@chapter Defining a new host or target architecture
-
-
-When building support for a new host and/or target, this will help you
-organize where to put the various parts.  @var{ARCH} stands for the
-architecture involved.
-
-Object files needed when the host system is an @var{ARCH} are listed in
-the file @file{xconfig/@var{ARCH}}, in the Makefile macro @samp{XDEPFILES
-= }@dots{}.  The header file that defines the host system should be
-called xm-@var{ARCH}.h, and should be specified as the value of @samp{XM_FILE=}
-in @file{xconfig/@var{ARCH}}.  
-You can also define @samp{CC}, @samp{REGEX} and @samp{REGEX1},
-@samp{SYSV_DEFINE}, @samp{XM_CFLAGS}, etc in there; see @file{Makefile.in}.
-
-There are some ``generic'' versions of routines that can be used by
-various host systems.  If these routines work for the @var{ARCH} host,
-you can just include the generic file's name (with .o, not .c) in
-@code{XDEPFILES}.  Otherwise, you will need to write routines that
-perform the same functions as the generic file, put them into
-@code{@var{ARCH}-xdep.c}, and put @code{@var{ARCH}-xdep.o} into
-@code{XDEPFILES}.  These generic host support files include:
-
-@example
-	coredep.c, coredep.o
-@end example
-
-@table @code
-@item fetch_core_registers()
-Support for reading registers out of a core file.  This routine calls
-@code{register_addr(}), see below.
-
-@item register_addr()
-If your @code{xm-@var{ARCH}.h} file defines the macro
-@code{REGISTER_U_ADDR(reg)} to be the offset within the @samp{user}
-struct of a register (represented as a GDB register number),
-@file{coredep.c} will define the @code{register_addr()} function and use
-the macro in it.  If you do not define @code{REGISTER_U_ADDR}, but you
-are using the standard @code{fetch_core_registers}, you will need to
-define your own version of @code{register_addr}, put it into your
-@code{@var{ARCH}-xdep.c} file, and be sure @code{@var{ARCH}-xdep.o} is
-in the @code{XDEPFILES} list.  If you have your own
-@code{fetch_core_registers}, you only need to define
-@code{register_addr} if your @code{fetch_core_registers} calls it.  Many
-custom @code{fetch_core_registers} implementations simply locate the
-registers themselves.@refill
-@end table
-
-Object files needed when the target system is an @var{ARCH} are listed in
-the file @file{tconfig/@var{ARCH}}, in the Makefile macro @samp{TDEPFILES
-= }@dots{}.  The header file that defines the target system should be
-called tm-@var{ARCH}.h, and should be specified as the value of @samp{TM_FILE}
-in @file{tconfig/@var{ARCH}}.  
-You can also define @samp{TM_CFLAGS}, @samp{TM_CLIBS}, and @samp{TM_CDEPS} 
-in there; see @file{Makefile.in}.
-
-Similar generic support files for target systems are:
-
-@example
-	exec.c, exec.o:
-@end example
-
-This file defines functions for accessing files that are executable
-on the target system.  These functions open and examine an exec file,
-extract data from one, write data to one, print information about one,
-etc.  Now that executable files are handled with BFD, every architecture
-should be able to use the generic exec.c rather than its own custom code.
-
-@node Host, Target, New Architectures, Top
-@chapter Adding a New Host
-
-There are two halves to making GDB work on a new machine.  First,
-you have to make it host on the new machine (compile there, handle
-that machine's terminals properly, etc).  If you will be cross-debugging
-to some other kind of system, you are done.
-
-(If you want to use GDB to debug programs that run on the new machine,
-you have to get it to understand the machine's object files, symbol
-files, and interfaces to processes.  @pxref{Target}.)
-
-Most of the work in making GDB compile on a new machine is in specifying
-the configuration of the machine.  This is done in a dizzying variety
-of header files and configuration scripts, which we hope to make more
-sensible soon.  Let's say your new host is called an XXX (e.g. sun4),
-and its full three-part configuration name is XARCH-XVEND-XOS (e.g.
-sparc-sun-sunos4).  In particular:
-
-At the top level, edit @file{config.sub} and add XARCH, XVEND, and
-XOS to the lists of supported architectures, vendors, and operating systems
-near the bottom of the file.  Also, add XXX as an alias that maps to
-XARCH-XVEND-XOS.  You can test your changes by running
-
-@example
-./config.sub XXX
-@end example
-@noindent
-and
-@example
-./config.sub XARCH-XVEND-XOS
-@end example
-@noindent
-which should both respond with XARCH-XVEND-XOS and no error messages.  
-
-Then edit @file{include/sysdep.h}.  Add a new #define for XXX_SYS, with
-a numeric value not already in use.  Add a new section that says
-
-@example
-#if HOST_SYS==XXX_SYS
-#include <sys/h-XXX.h>
-#endif
-@end example
-
-Now create a new file @file{include/sys/h-XXX.h}.  Examine the other
-h-*.h files as templates, and create one that brings in the right include
-files for your system, and defines any host-specific macros needed by
-GDB.
-
-Now, go to the bfd directory and edit @file{bfd/configure.in}.  Add shell
-script code to recognize your XARCH-XVEND-XOS configuration, and set
-bfd_host to XXX when you recognize it.  Now create a file
-@file{bfd/config/hmake-XXX}, which includes the line:
-
-@example
-HDEFINES=-DHOST_SYS=XXX_SYS
-@end example
-
-(If you have the binutils in the same tree, you'll have to do the same
-thing to in the binutils directory as you've done in the bfd directory.)
-
-It's likely that the libiberty and readline directories won't need any
-changes for your configuration, but if they do, you can change the
-@file{configure.in} file there to recognize your system and map to an
-hmake-XXX file.  Then add @file{hmake-XXX} to the @file{config/} subdirectory,
-to set any makefile variables you need.  The only current options
-in there are things like -DSYSV.
-
-Aha!  Now to configure GDB itself!  Modify @file{gdb/configure.in} to
-recognize your system and set gdb_host to XXX.  Add a file 
-@file{gdb/xconfig/XXX} which specifies XDEPFILES=(whatever is needed),
-and XM_FILE= xm-XXX.h.  Create @file{gdb/xm-XXX.h} with the appropriate
-#define's for your system (crib from existing xm-*.h files).
-If your machine needs custom support routines, you can put them in
-a file @file{gdb/XXX-xdep.c}, and add XXX-xdep.o to the XDEPFILES=
-line.  If not, you can use the generic routines for ptrace support
-(infptrace.o) and core files (coredep.o).  These can be customized
-in various ways by macros defined in your @file{xm-XXX.h} file.
-
-Now, from the top level (above bfd, gdb, etc), run:
-
-@example
-./configure -template=./configure
-@end example
-
-This will rebuild all your configure scripts, using the new
-configure.in files that you modified.  (You can also run this command
-at any subdirectory level.)  You are now ready to try configuring
-GDB to compile for your system.  Do:
-
-@example
-./configure XXX +target=vxworks960
-@end example
-
-This will configure your system to cross-compile for VxWorks on
-the Intel 960, which is probably not what you really want, but it's
-a test case that works at this stage.  (You haven't set up to be
-able to debug programs that run @emph{on} XXX yet.)
-
-If this succeeds, you can try building it all with:
-
-@example
-make
-@end example
-
-Good luck!  Comments and suggestions about this section are particularly
-welcome; send them to bug-gdb@@prep.ai.mit.edu.
-
-When hosting GDB on a new operating system, to make it possible
-to debug core files, you will need to either
-write specific code for parsing your OS's core files, or customize
-bfd/trad-core.c.   First, use whatever #include files your machine uses
-to define the struct of registers that is accessible (possibly in the
-upage) in a core file (rather than <machine/reg.h>), and an include
-file that defines whatever header exists on a core file (e.g. the
-u-area or a "struct core").  Then modify @samp{trad_unix_core_file_p}
-to use these values to set up the section information for the data
-segment, stack segment, any other segments in the core file (perhaps
-shared library contents or control information), "registers" segment,
-and if there are two discontiguous sets of registers (e.g.  integer and
-float), the "reg2" segment.  This section information basically
-delimits areas in the core file in a standard way, which the
-section-reading routines in BFD know how to seek around in.
-
-Then back in GDB, you need a matching routine called fetch_core_registers.
-If you can use the generic one, it's in core-dep.c; if not, it's in
-your foobar-xdep.c file.  It will be passed a char pointer
-to the entire "registers" segment, its length, and a zero; or a char
-pointer to the entire "regs2" segment, its length, and a 2.  The
-routine should suck out the supplied register values and install them into
-gdb's "registers" array.  (@xref{New Architectures}
-for more info about this.)
-
-@node Target, Config, Host, Top
-@chapter Adding a New Target
-
-When adding support for a new target machine, there are various areas
-of support that might need change, or might be OK.
-
-If you are using an existing object file format (a.out or COFF), 
-there is probably little to be done.  See @file{bfd/doc/bfd.texinfo}
-for more information on writing new a.out or COFF versions.
-
-If you need to add a new object file format, you are beyond the scope
-of this document right now.  Look at the structure of the a.out
-and COFF support, build a transfer vector (xvec) for your new format,
-and start populating it with routines.  Add it to the list in 
-@file{bfd/targets.c}.
-
-If you are adding a new existing CPU chip (e.g. m68k family), you'll
-need to define an XARCH-opcode.h file, a tm-XARCH.h file that gives
-the basic layout of the chip (registers, stack, etc), probably
-an XARCH-tdep.c file that has support routines for tm-XARCH.h, etc.
-
-If you are adding a new operating system for an existing CPU chip,
-add a tm-XOS.h file that describes the operating system facilities
-that are unusual (extra symbol table info; the breakpoint
-instruction needed; etc).  Then write a @file{tm-XARCH-XOS.h}
-that just #include's tm-XARCH.h and tm-XOS.h.  (Now that we have
-three-part configuration names, this will probably get revised to
-separate the OS configuration from the ARCH configuration.  FIXME.)
-
-@node Config, BFD support for GDB, Target, Top
-@chapter Extending @code{configure}
-Once you have added a new host, target, or both, you'll also need to
-extend the @code{configure} script to recognize the new configuration
-possibilities.  
-
-You shouldn't edit the @code{configure} script itself to add hosts or
-targets; instead, edit the script fragments in the file
-@code{configure.in}.  To handle new hosts, modify the segment after the
-comment @samp{# per-host}; to handle new targets, modify after @samp{#
-per-target}.
-@c Would it be simpler to just use different per-host and per-target
-@c *scripts*, and call them from {configure} ?
-
-Then fold your changes into the @code{configure} script by using the
-@code{+template} option, and specifying @code{configure} itself as the
-template:
-@example
-configure +template=configure
-@end example
-@c If "configure" is the only workable option value for +template, it's
-@c kind of silly to insist that it be provided.  If it isn't, somebody
-@c please fill in here what are others... (then delete this comment!)
-
-@node BFD support for GDB, Host versus Target, Config, Top
-@chapter Binary File Descriptor library support for GDB
-
-BFD provides support for GDB in several ways:
-
-@table @emph
-@item	identifying executable and core files
-BFD will identify a variety of file types, including a.out, coff, and
-several variants thereof, as well as several kinds of core files.
-
-@item	access to sections of files
-BFD parses the file headers to determine the names, virtual addresses,
-sizes, and file locations of all the various named sections in files
-(such as the text section or the data section).  GDB simply calls
-BFD to read or write section X at byte offset Y for length Z.
-
-@item	specialized core file support
-BFD provides routines to determine the failing command name stored
-in a core file, the signal with which the program failed, and whether
-a core file matches (i.e. could be a core dump of) a particular executable
-file.
-
-@item	locating the symbol information
-GDB uses an internal interface of BFD to determine where to find the
-symbol information in an executable file or symbol-file.  GDB itself
-handles the reading of symbols, since BFD does not ``understand'' debug
-symbols, but GDB uses BFD's cached information to find the symbols,
-string table, etc.
-@end table
-
-The interface for symbol reading is described in @xref{Symbol Reading}.
-
-@node Host versus Target, Symbol Reading, BFD support for GDB, Top
-@chapter What is considered ``host-dependent'' versus ``target-dependent''?
-
-The xconfig/*, xm-*.h and *-xdep.c files are for host support.  The
-question is, what features or aspects of a debugging or cross-debugging
-environment are considered to be ``host'' support.
-
-Defines and include files needed to build on the host are host support.
-Examples are tty support, system defined types, host byte order, host
-float format.
-
-Unix child process support is considered an aspect of the host.  Since
-when you fork on the host you are still on the host, the various macros
-needed for finding the registers in the upage, running ptrace, and such
-are all in the host-dependent files.
-
-This is still somewhat of a grey area; I (John Gilmore) didn't do the
-xm- and tm- split for gdb (it was done by Jim Kingdon) so I have had to
-figure out the grounds on which it was split, and make my own choices
-as I evolve it.  I have moved many things out of the xdep files
-actually, partly as a result of BFD and partly by removing duplicated
-code.
-
-
-@node Symbol Reading, Languages, Host versus Target, Top
-@chapter Symbol Reading
-
-GDB reads symbols from "symbol files".  The usual symbol file is the
-file containing the program which gdb is debugging.  GDB can be directed
-to use a different file for symbols (with the ``symbol-file''
-command), and it can also read more symbols via the ``add-file'' and ``load''
-commands, or while reading symbols from shared libraries.
-
-Symbol files are initially opened by @file{symfile.c} using the BFD
-library.  BFD identifies the type of the file by examining its header.
-@code{symfile_init} then uses this identification to locate a
-set of symbol-reading functions.
-
-Symbol reading modules identify themselves to GDB by calling
-@code{add_symtab_fns} during their module initialization.  The argument
-to @code{add_symtab_fns} is a @code{struct sym_fns} which contains
-the name (or name prefix) of the symbol format, the length of the prefix,
-and pointers to four functions.  These functions are called at various
-times to process symbol-files whose identification matches the specified
-prefix.
-
-The functions supplied by each module are:
-
-@table @code
-@item XXX_symfile_init(struct sym_fns *sf)
-
-Called from @code{symbol_file_add} when we are about to read a new
-symbol file.  This function should clean up any internal state
-(possibly resulting from half-read previous files, for example)
-and prepare to read a new symbol file. Note that the symbol file
-which we are reading might be a new "main" symbol file, or might
-be a secondary symbol file whose symbols are being added to the
-existing symbol table.
-
-The argument to @code{XXX_symfile_init} is a newly allocated
-@code{struct sym_fns} whose @code{bfd} field contains the BFD
-for the new symbol file being read.  Its @code{private} field
-has been zeroed, and can be modified as desired.  Typically,
-a struct of private information will be @code{malloc}'d, and
-a pointer to it will be placed in the @code{private} field.
-
-There is no result from @code{XXX_symfile_init}, but it can call
-@code{error} if it detects an unavoidable problem.
-
-@item XXX_new_init()
-
-Called from @code{symbol_file_add} when discarding existing symbols.
-This function need only handle 
-the symbol-reading module's internal state; the symbol table data
-structures visible to the rest of GDB will be discarded by
-@code{symbol_file_add}.  It has no arguments and no result.
-It may be called after @code{XXX_symfile_init}, if a new symbol
-table is being read, or may be called alone if all symbols are
-simply being discarded.
-
-@item XXX_symfile_read(struct sym_fns *sf, CORE_ADDR addr, int mainline)
-
-Called from @code{symbol_file_add} to actually read the symbols from a
-symbol-file into a set of psymtabs or symtabs.
-
-@code{sf} points to the struct sym_fns originally passed to
-@code{XXX_sym_init} for possible initialization.  @code{addr} is the
-offset between the file's specified start address and its true address
-in memory.  @code{mainline} is 1 if this is the main symbol table being
-read, and 0 if a secondary symbol file (e.g. shared library or
-dynamically loaded file) is being read.@refill
-@end table
-
-In addition, if a symbol-reading module creates psymtabs when
-XXX_symfile_read is called, these psymtabs will contain a pointer to
-a function @code{XXX_psymtab_to_symtab}, which can be called from
-any point in the GDB symbol-handling code.
-
-@table @code
-@item XXX_psymtab_to_symtab (struct partial_symtab *pst)
-
-Called from @code{psymtab_to_symtab} (or the PSYMTAB_TO_SYMTAB
-macro) if the psymtab has not already been read in and had its
-@code{pst->symtab} pointer set.  The argument is the psymtab
-to be fleshed-out into a symtab.  Upon return, pst->readin
-should have been set to 1, and pst->symtab should contain a
-pointer to the new corresponding symtab, or zero if there
-were no symbols in that part of the symbol file.
-@end table
-
-@node Languages,  , Host versus Target, Top
-@chapter Adding a Source Language to GDB
-
-To add other languages to GDB's expression parser, follow the following steps:
-
-@table @emph
-@item Create the expression parser.
-
-This should reside in a file called <lang>-exp.y.  Routines for building
-parsed expressions into a (struct exp_elt) list are in parser-code.c.
-
-Since we can't depend upon everyone having Bison, the following lines
-@emph{musg} be included at the top of the YACC parser:
-
-@example
-#define yyparse 	<lang>_parse
-#define yylex 		<lang>_lex
-#define yyerror 	<lang>_error
-#define yylval 	<lang>_lval
-#define yychar 	<lang>_char
-#define yydebug 	<lang>_debug
-#define yypact  	<lang>_pact 
-#define yyr1		<lang>_r1   
-#define yyr2		<lang>_r2   
-#define yydef		<lang>_def  
-#define yychk		<lang>_chk  
-#define yypgo		<lang>_pgo  
-#define yyact  	<lang>_act  
-#define yyexca  	<lang>_exca
-@end example
-
-This will prevent name conflicts between the various parsers.
-
-@item Add any evaluation routines, if necessary
-
-If you need new opcodes (that represent the operations of the language),
-add them to the ennumerated type in expression.h.
-Add support code for these operations in eval.c:evaluate_subexp()
-Add cases for new opcodes in parser-code.c:prefixify_subexp() and
-parser-code.c:length_of_subexp().  These compute the number of
-exp_elements that a given operation takes up.
-
-@item Update some existing code
-
-Add an ennumerated identifier for your language to the ennumerated type
-enum language in symtab.h.
-
-Update the routines in language.c so your language is included.  These
-routines include type predicates and such, which (in some cases) are
-language dependent.  If your language does not appear in the switch
-statement, an error is reported.
-
-Also included in language.c is the code that updates the variable
-working_lang, and the routines that translate the language_<lang>
-ennumerated identifier into a printable string.
-
-Update the function _intitialize_language to include your language.  This
-function picks the default language upon startup, so is dependent upon
-which languages that GDB is built for.
-
-Update symfile.c and/or symbol-reading code so that the language of
-each symtab (source file) is set properly.  This is used to determine the
-language to use at each stack frame level.  Currently, the language
-is set based upon the extension of the source file.  If the language
-can be better inferred from the symbol information, please set the
-language of the symtab in the symbol-reading code.
-
-Add helper code to expprint.c:print_subexp() to handle any new expression
-opcodes you have added to expression.h.  Also, add the printed
-representations of your operators to op_print_tab.
-
-@item Add a place of call
-
-Add a call to <lang>_parse() and <lang>_error in parse.c:parse_exp_1().
-
-@item Use macros to trim code
-
-The user has the option of building GDB for some or all of the languages.
-If the user decides to build GDB for the language <lang>, then every file
-dependent on language.h will have the macro _LANG_<lang> defined in it.
-Use #ifdefs to leave out large routines that the user won't need if
-he/she is not using your language.
-
-Note that you do not need to do this in your YACC parser, since if GDB is
-not build for <lang>, then <lang>-exp.tab.o (the compiled form of your
-parser) is not linked into GDB at all.
-
-See the file configure.in for how GDB is configured for different languages.
-
-@item Edit Makefile.in
-
-Add dependencies in Makefile.in.  Make sure you update the macro
-variables such as HFILES and OBJS, otherwise your code may not get linked
-in, or, worse yet, it may not get tarred into the distribution!
 
 @contents
 @bye
