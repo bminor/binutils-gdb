@@ -519,6 +519,18 @@ remote_remove_watchpoint, remote_insert_watchpoint into target vector.
 
 --
 
+Eliminate ``extern'' from C files.
+
+--
+
+Replace ``STREQ()'' et.al. with ``strcmp() == 0'' et.al.
+
+Extreme care is recommeded - perhaps only modify tests that are
+exercised by the testsuite (as determined using some type of code
+coverage analysis).
+
+--
+
 			New Features and Fixes
 			======================
 

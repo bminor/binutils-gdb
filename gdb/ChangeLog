@@ -1,3 +1,7 @@
+Mon Nov 20 12:22:32 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* TODO: Mention ``extern'' and ``STREQ'' cleanups.
+
 2000-11-19  Jim Blandy  <jimb@redhat.com>
 
 	* symtab.c (no_symtab_msg): Remove definition.
