@@ -2800,7 +2800,7 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 
 	  if (soname_indx != (bfd_size_type) -1)
 	    {
-	      def.vd_hash = bfd_elf_hash ((const unsigned char *) soname);
+	      def.vd_hash = bfd_elf_hash (soname);
 	      defaux.vda_name = soname_indx;
 	    }
 	  else
@@ -2809,7 +2809,7 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 	      bfd_size_type indx;
 
 	      name = output_bfd->filename;
-	      def.vd_hash = bfd_elf_hash ((const unsigned char *) name);
+	      def.vd_hash = bfd_elf_hash (name);
 	      indx = _bfd_stringtab_add (elf_hash_table (info)->dynstr,
 					    name, true, false);
 	      if (indx == (bfd_size_type) -1)
@@ -2857,7 +2857,7 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 		def.vd_flags |= VER_FLG_WEAK;
 	      def.vd_ndx = t->vernum + 1;
 	      def.vd_cnt = cdeps + 1;
-	      def.vd_hash = bfd_elf_hash ((const unsigned char *) t->name);
+	      def.vd_hash = bfd_elf_hash (t->name);
 	      def.vd_aux = sizeof (Elf_External_Verdef);
 	      if (t->next != NULL)
 		def.vd_next = (sizeof (Elf_External_Verdef)
@@ -2993,8 +2993,7 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 
 		for (a = t->vn_auxptr; a != NULL; a = a->vna_nextptr)
 		  {
-		    a->vna_hash = bfd_elf_hash ((const unsigned char *)
-						a->vna_nodename);
+		    a->vna_hash = bfd_elf_hash (a->vna_nodename);
 		    indx = _bfd_stringtab_add (elf_hash_table (info)->dynstr,
 					       a->vna_nodename, true, false);
 		    if (indx == (bfd_size_type) -1)

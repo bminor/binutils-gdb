@@ -1,3 +1,11 @@
+1999-07-11  Ian Lance Taylor  <ian@zembu.com>
+
+	* elf.c (bfd_elf_hash): Change parameter from unsigned char * to
+	char *.
+	* elf-bfd.h (bfd_elf_hash): Update declaration.
+	* elflink.h (NAME(bfd_elf,size_dynamic_sections)): Remove casts
+	when calling bfd_elf_hash.
+
 1999-07-11  Mark Mitchell  <mark@codesourcery.com>
 
 	* libbfd.c (bfd_put_8): Make it of type `void'.

@@ -200,10 +200,12 @@ _bfd_elf_swap_versym_out (abfd, src, dst)
 
 /* Standard ELF hash function.  Do not change this function; you will
    cause invalid hash tables to be generated.  */
+
 unsigned long
-bfd_elf_hash (name)
-     CONST unsigned char *name;
+bfd_elf_hash (namearg)
+     const char *namearg;
 {
+  const unsigned char *name = (const unsigned char *) namearg;
   unsigned long h = 0;
   unsigned long g;
   int ch;
