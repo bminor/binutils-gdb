@@ -1288,15 +1288,17 @@ i386_pc_in_sigtramp (CORE_ADDR pc, char *name)
    deals with switching between those.  */
 
 static int
-gdb_print_insn_i386 (bfd_vma memaddr, disassemble_info *info)
+i386_print_insn (bfd_vma pc, disassemble_info *info)
 {
-  if (disassembly_flavor == att_flavor)
-    return print_insn_i386_att (memaddr, info);
-  else if (disassembly_flavor == intel_flavor)
-    return print_insn_i386_intel (memaddr, info);
-  /* Never reached -- disassembly_flavour is always either att_flavor
-     or intel_flavor.  */
-  internal_error (__FILE__, __LINE__, "failed internal consistency check");
+  gdb_assert (disassembly_flavor == att_flavor
+	      || disassembly_flavor == intel_flavor);
+
+  /* FIXME: kettenis/20020915: Until disassembler_options is properly
+     constified, cast to prevent a compiler warning.  */
+  info->disassembler_options = (char *) disassembly_flavor;
+  info->mach = gdbarch_bfd_arch_info (current_gdbarch)->mach;
+
+  return print_insn_i386 (pc, info);
 }
 
 
@@ -1569,6 +1571,8 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pseudo_register_read (gdbarch, i386_pseudo_register_read);
   set_gdbarch_pseudo_register_write (gdbarch, i386_pseudo_register_write);
 
+  set_gdbarch_print_insn (gdbarch, i386_print_insn);
+
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch, osabi);
 
@@ -1600,9 +1604,6 @@ _initialize_i386_tdep (void)
 {
   register_gdbarch_init (bfd_arch_i386, i386_gdbarch_init);
 
-  tm_print_insn = gdb_print_insn_i386;
-  tm_print_insn_info.mach = bfd_lookup_arch (bfd_arch_i386, 0)->mach;
-
   /* Add the variable that controls the disassembly flavor.  */
   {
     struct cmd_list_element *new_cmd;
@@ -1623,7 +1624,7 @@ and the default value is \"att\".",
     struct cmd_list_element *new_cmd;
 
     new_cmd = add_set_enum_cmd ("struct-convention", no_class,
-				 valid_conventions,
+				valid_conventions,
 				&struct_convention, "\
 Set the convention for returning small structs, valid values \
 are \"default\", \"pcc\" and \"reg\", and the default value is \"default\".",
