@@ -717,6 +717,15 @@ if [ "${enable_shared}" = "yes" ]; then
       Makefile > Makefile.tem
   rm -f Makefile
   mv -f Makefile.tem Makefile
+
+  case "${host}" in
+  *-*-hpux*)
+    sed -e 's/RPATH_ENVVAR[ 	]*=.*$/RPATH_ENVVAR = SHLIB_PATH/' \
+	Makefile > Makefile.tem
+    rm -f Makefile
+    mv -f Makefile.tem Makefile
+    ;;
+  esac
 fi
 
 # Record target_configdirs and the configure arguments in Makefile.
