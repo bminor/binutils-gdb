@@ -1,7 +1,6 @@
-Mon Apr 24 16:23:41 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+Tue Apr 25 11:08:11 1995  Rob Savoye  <rob@darkstar.cygnus.com>
 
-	* config.guess (*:Linux:*:*): Determine whether the default
-	compiler is ELF or a.out.
+	* configure.in: Don't build newlib for m68k-vxworks5.1.
 
 Wed Apr 19 17:02:43 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
 

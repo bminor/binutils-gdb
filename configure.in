@@ -425,6 +425,9 @@ case "${target}" in
   m68k-apollo-*)
     noconfigdirs="$noconfigdirs ld binutils gprof"
     ;;
+  m68k-*-vxworks5.1)
+    noconfigdirs="$noconfigdirs newlib"
+    ;;
   mips*-*-irix5*)
     # The GNU linker does not support shared libraries.
     # emacs is emacs 18, which does not work on Irix 5 (emacs19 does work)
