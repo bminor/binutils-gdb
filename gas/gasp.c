@@ -37,6 +37,7 @@ suitable for gas to consume.
   -a use alternate syntax
      Pseudo ops can start with or without a .
      Labels have to be in first column.
+  -I specify include dir
     Macro arg parameters subsituted by name, don't need the &.
      String can start with ' too.
      Strings can be surrounded by <..>
@@ -309,6 +310,19 @@ struct include_stack *sp;
 #define isp (sp - include_stack)
 
 #define dsize 5
+
+
+
+/* Include file list */
+
+typedef struct include_path 
+{
+  struct include_path *next;
+  sb path;
+}  include_path;
+
+include_path *paths_head;
+include_path *paths_tail;
 
 
 void include_print_where_line ();
@@ -3316,14 +3330,30 @@ do_include (idx, in)
      sb *in;
 {
   sb t;
+  sb cat;
   char *text;
+  include_path *includes;
   sb_new (&t);
+  sb_new (&cat);
+
   idx = getstring (idx, in, &t);
-  text = sb_name (&t);
-  if (!new_file (text))
+
+  for (includes = paths_head; includes; includes = includes->next)
+    {
+      sb_reset (&cat);
+      sb_add_sb (&cat, &includes->path);
+      sb_add_char (&cat, '/');
+      sb_add_sb (&cat, &t);
+      if (new_file (sb_name (&cat)))
+	{
+	  break;
+	}
+    }
+  if (!includes)
     {
       FATAL ((stderr, "Can't open include file `%s'.\n", text));
     }
+  sb_kill (&cat);
   sb_kill (&t);
 }
 
@@ -3827,6 +3857,7 @@ char *program_name;
 static struct option long_options[] =
 {
   { "alternate", no_argument, 0, 'a' },
+  { "include", required_argument, 0, 'I' },
   { "commentchar", required_argument, 0, 'c' },
   { "copysource", no_argument, 0, 's' },
   { "debug", no_argument, 0, 'd' },
@@ -3857,6 +3888,7 @@ Usage: %s \n\
   [-u]      [--unreasonable]      allow unreasonable nesting\n\
   [-v]      [--version]           print the program version\n\
   [-Dname=value]                  create preprocessor variable called name, with value\n\
+  [-Ipath]                        add to include path list\n\
   [in-file]\n",   program_name);
   exit (status);
 }
@@ -3895,7 +3927,7 @@ main (argc, argv)
   sb_new (&label);
   process_init ();
 
-  while ((opt = getopt_long (argc, argv, "sdhavc:upo:D:", long_options,
+  while ((opt = getopt_long (argc, argv, "I:sdhavc:upo:D:", long_options,
 			     (int *) NULL))
 	 != EOF)
     {
@@ -3906,6 +3938,18 @@ main (argc, argv)
 	  break;
 	case 'u':
 	  unreasonable = 1;
+	  break;
+	case 'I':
+	  {
+	    include_path *p = (include_path *) xmalloc (sizeof (include_path));
+	    sb_new (&p->path);
+	    sb_add_string (&p->path, optarg);
+	    if (paths_tail)
+	      paths_tail->next = p;
+	    else
+	      paths_head = p;
+	    paths_tail = p;
+	  }
 	  break;
 	case 'p':
 	  print_line_number = 1;

@@ -9,8 +9,14 @@ Mon Jul 31 21:40:47 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 Mon Jul 31 18:19:26 1995  steve chamberlain  <sac@slash.cygnus.com>
 
-	* gasp.c (change_base): Don't modify numbers in strings. (pr7583)
- 	* testsuite/gas/gasp/*: New.
+	* gasp.c (main): Parse -I option.
+	(do_include): Look through include list.
+	* gasp.c (change_base): Don't modify numbers in strings. 
+	(pr7583)
+
+ 	* testsuite/gasp/*: New.
+	* testsuite/Makefile.in: Use gasp tests.
+	* testsuite/config/default.exp: Add gasp stuff.
 
 Mon Jul 31 12:16:21 1995  Ian Lance Taylor  <ian@cygnus.com>
 
