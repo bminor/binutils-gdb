@@ -1,3 +1,7 @@
+2000-06-04  Alan Modra  <alan@linuxcare.com.au>
+
+	* read.c (is_end_of_line): No ';' for TC_HPPA.
+
 2000-06-03  H.J. Lu  <hjl@gnu.org>
 
 	* read.c (is_end_of_line): Put back `;'.
