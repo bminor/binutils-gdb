@@ -1,3 +1,8 @@
+2001-02-01  Momchil Velikov  <velco@fadata.bg>
+
+	* dwarf2dbg.c (out_debug_abbrev): Terminate the abbreviations
+	for the compilation unit with a zero byte.
+
 2001-01-30  Alan Modra  <alan@linuxcare.com.au>
 
 	* config/tc-hppa.c (pa_ip): Support 12 bit branches to absolute

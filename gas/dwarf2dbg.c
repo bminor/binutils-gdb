@@ -1099,6 +1099,9 @@ out_debug_abbrev (abbrev_seg)
   out_abbrev (DW_AT_producer, DW_FORM_string);
   out_abbrev (DW_AT_language, DW_FORM_data2);
   out_abbrev (0, 0);
+
+  /* Terminate the abbreviations for this compilation unit.  */
+  out_byte (0);
 }
 
 /* Emit a description of this compilation unit for .debug_info.  */
