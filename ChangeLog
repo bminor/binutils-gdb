@@ -1,0 +1,28 @@
+Sat Dec  7 00:17:01 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
+
+	* Makefile.in: unwrapped some for loops so that parallel makes
+	  work again and so one can focus one's attention on a particular
+	  package.
+
+Fri Dec  6 00:22:08 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
+
+	* configure: added PWD as a stand in for `pwd` (for speed). use
+	  elif wherever possible.  make -srcdir work without -objdir.
+	  -objdir= commented out. 
+
+Thu Dec  5 22:46:52 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
+
+	* configure: +options become --options.  -subdirs commented out.
+	  added -host, -datadir.  Renamed -destdir to -prefix.  Comment in
+	  Makefile now at top of generated Makefile.  Removed cvs log
+	  entries.  added -srcdir.  create .gdbinit only if there is one
+	  in ${srcdir}.
+
+	* Makefile.in: idestdir and ddestdir go away.  Added copyrights
+	  and shift gpl to v2.  Added ChangeLog if it didn't exist. docdir
+	  and mandir now keyed off datadir by default.
+
+Fri Nov 22 07:38:11 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
+
+	* Freshly created ChangeLog.
+
