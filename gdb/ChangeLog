@@ -1,3 +1,9 @@
+1998-09-08  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+	* breakpoint.c (bpstat_stop_status):  Declare a bp match if the
+	current fp matches the bp->fp OR if the current fp is less than
+	the bp->fp if we're looking at a bp_step_resume breakpoint.
+
 Tue Sep  8 19:42:58 1998  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* symtab.h (struct symtab): Remove EXTRA_SYMTAB_INFO hook,
