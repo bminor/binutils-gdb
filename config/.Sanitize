@@ -27,10 +27,12 @@ echo Sanitizing `pwd`...
 
 Things-to-keep:
 
-hmake-dgux
-hmake-sysv
-hmake-svr4
-tmake-a29k
+mh-delta88
+mh-dgux
+mh-svr4
+mh-sysv
+mt-a29k
+mt-ebmon29k
 
 Do-last:
 
@@ -39,7 +41,16 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.4  1991/10/04 06:49:00  gnu
+# Revision 1.5  1991/11/05 20:58:27  sac
+# renamed to make:
+# mh-delta88
+# mh-dgux
+# mh-svr4
+# mh-sysv
+# mt-a29k
+# mt-ebmon29k
+#
+# Revision 1.4  1991/10/04  06:49:00  gnu
 # SVR4 support
 #
 # Revision 1.3  1991/09/17  06:53:29  grossman
