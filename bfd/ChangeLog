@@ -1,5 +1,7 @@
 Mon Nov 13 13:24:38 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* aout-target.h (MY(callback)): Set the lma of the sections.
+
 	* ecoff.c (ecoff_reloc_link_order): Turn a reloc against a defined
 	symbol into a reloc against the section.
 
