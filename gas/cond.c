@@ -1,5 +1,5 @@
 /* cond.c - conditional assembly pseudo-ops, and .include
-   Copyright 1990, 1991, 1992, 1993, 1995, 1997, 1998, 2000
+   Copyright 1990, 1991, 1992, 1993, 1995, 1997, 1998, 2000, 2001
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -47,7 +47,9 @@ struct conditional_frame {
   int else_seen;
   /* Whether we are currently ignoring input.  */
   int ignoring;
-  /* Whether a conditional at a higher level is ignoring input.  */
+  /* Whether a conditional at a higher level is ignoring input.
+     Set also when a branch of an "if .. elseif .." tree has matched
+     to prevent further matches.  */
   int dead_tree;
   /* Macro nesting level at which this conditional was created.  */
   int macro_nest;
@@ -259,7 +261,6 @@ s_elseif (arg)
   if (current_cframe == NULL)
     {
       as_bad (_("\".elseif\" without matching \".if\" - ignored"));
-
     }
   else if (current_cframe->else_seen)
     {
@@ -278,6 +279,7 @@ s_elseif (arg)
 
       if (!current_cframe->dead_tree)
 	{
+	  current_cframe->dead_tree = !current_cframe->ignoring;
 	  current_cframe->ignoring = !current_cframe->ignoring;
 	  if (LISTING_SKIP_COND ())
 	    {
@@ -289,21 +291,19 @@ s_elseif (arg)
 	}			/* if not a dead tree */
     }				/* if error else do it */
 
+  if (current_cframe == NULL || current_cframe->ignoring)
+    {
+      while (! is_end_of_line[(unsigned char) *input_line_pointer])
+	++input_line_pointer;
+      return;
+    }
+
   /* Leading whitespace is part of operand.  */
   SKIP_WHITESPACE ();
 
-  if (current_cframe != NULL && current_cframe->ignoring)
-    {
-      operand.X_add_number = 0;
-      while (! is_end_of_line[(unsigned char) *input_line_pointer])
-	++input_line_pointer;
-    }
-  else
-    {
-      expression (&operand);
-      if (operand.X_op != O_constant)
-	as_bad (_("non-constant expression in \".elseif\" statement"));
-    }
+  expression (&operand);
+  if (operand.X_op != O_constant)
+    as_bad (_("non-constant expression in \".elseif\" statement"));
 
   switch ((operatorT) arg)
     {
