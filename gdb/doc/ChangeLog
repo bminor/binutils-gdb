@@ -1,3 +1,9 @@
+Wed Oct  2 22:01:36 1996  Fred Fish  <fnf@fishfood.ninemoons.com>
+
+	* gdbint.texinfo (SIGTRAMP_START, SIGTRAMP_END): Update
+	documentation to account for START and END macros taking
+	one arg.
+
 Thu Aug 22 17:59:03 1996  Fred Fish  <fnf@cygnus.com>
 
 	From: Eberhard Mattes <mattes@azu.informatik.uni-stuttgart.de>

@@ -1,3 +1,13 @@
+Wed Oct  2 22:07:16 1996  Fred Fish  <fnf@cygnus.com>
+
+	* inferior.h (IN_SIGTRAMP): Pass pc to SIGTRAMP_START and
+	SIGTRAMP_END.
+	* config/i386/tm-i386os9k.h (SIGTRAMP_START, SIGTRAMP_END): 
+	Define with dummy pc arg.
+	* config/m68k/tm-nbsd.h: Ditto.
+	* doc/gdbint.texinfo: Document that SIGTRAMP_START and
+	SIGTRAMP_END are macros that take an single argument.
+
 Mon Sep 30 20:02:45 1996  Fred Fish  <fnf@cygnus.com>
 
 	* defs.h: Remove define of PRIVATE_XMALLOC.
