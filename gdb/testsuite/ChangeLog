@@ -1,5 +1,9 @@
 Fri Aug 12 19:35:41 1994  Jeff Law  (law@snake.cs.utah.edu)
 
+	* gdb.base/interrupt.exp: When trying to wake up the inferior,
+	send the newline ourselves instead of assuming gdb_test will do
+	so when passed an empty input string.
+
 	* gdb.stabs/hppa.mt: Use $(AS), not $(CC) to assemble the
 	stabs testcode.
 
