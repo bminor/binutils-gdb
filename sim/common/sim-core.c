@@ -660,7 +660,7 @@ sim_core_xor_read_buffer (SIM_DESC sd,
   else
     /* only break up transfers when xor-endian is both selected and enabled */
     {
-      unsigned_1 x[WITH_XOR_ENDIAN];
+      unsigned_1 x[WITH_XOR_ENDIAN + 1]; /* +1 to avoid zero-sized array */
       unsigned nr_transfered = 0;
       address_word start = addr;
       unsigned nr_this_transfer = (WITH_XOR_ENDIAN - (addr & ~(WITH_XOR_ENDIAN - 1)));

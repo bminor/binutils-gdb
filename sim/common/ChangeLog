@@ -1,3 +1,9 @@
+Tue Sep  9 21:46:46 1997  Felix Lee  <flee@cygnus.com>
+
+	* sim-core.h (sim_cpu_core): [WITH_XOR_ENDIAN + 1], to avoid
+	illegal zero-sized array.
+	* sim-core.c (sim_core_xor_read_buffer): same.
+
 Tue Sep  9 11:20:35 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* nltvals.def: Regenerate.
