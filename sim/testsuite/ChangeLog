@@ -1,3 +1,19 @@
+Fri May  8 14:41:28 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* lib/sim-defs.exp (sim_version): Simplify.
+	(sim_run): Implement.
+	(run_sim_test): Use sim_run.
+	(sim_compile): New proc.
+
+Mon May  4 17:59:11 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+start-sanitize-sky
+	* configure.in (testdir): Don't use old sky test directory.
+	* configure: Regenerated
+	* sky/Makefile.in: swallow stderr on buggy tests
+end-sanitize-sky
+	* config/default.exp: Added C compiler settings.
+
 Wed Apr 22 12:26:28 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* Makefile.in (TARGET_FLAGS_TO_PASS): Delete LIBS, LDFLAGS.
