@@ -458,27 +458,29 @@ static struct sparc_opcode sparc_opcodes[] =
 #endif
 
 /* Define all the conditions, all the branches, all the traps.  */
-cond (bvc,	tvc,  0xF, 0),
-cond (bvs,	tvs,  0x7, 0),
-cond (bpos,	tpos, 0xE, 0),
-cond (bneg,	tneg, 0x6, 0),
-cond (bcc,	tcc,  0xD, 0),
-cond (bcs,	tcs,  0x5, 0),
-cond (blu,	tlu,  0x5, F_ALIAS), 	/* for cs */
-cond (bgeu,	tgeu, 0xD, F_ALIAS),	/* for cc */
-cond (bgu,	tgu,  0xC, 0),
-cond (bleu,	tleu, 0x4, 0),
-cond (bge,	tge,  0xB, 0),
-cond (bl,	tl,   0x3, 0),
-cond (bg,	tg,   0xA, 0),
-cond (ble,	tle,  0x2, 0),
-cond (be,	te,   0x1, 0),
-cond (bz,	tz,   0x1, F_ALIAS),	/* for e */
-cond (bne,	tne,  0x9, 0),
-cond (bnz,	tnz,  0x9, F_ALIAS),	/* for ne */
-cond (b,	t,    0x8, 0),
-cond (ba,	ta,   0x8, F_ALIAS),	/* for nothing */
-cond (bn,	tn,   0x0, 0),
+/* Use no extra spaces or tabs around the first two args, since cpp
+   will include them in the printed strings.  */
+cond (bvc,tvc,   0xF, 0),
+cond (bvs,tvs,   0x7, 0),
+cond (bpos,tpos, 0xE, 0),
+cond (bneg,tneg, 0x6, 0),
+cond (bcc,tcc,   0xD, 0),
+cond (bcs,tcs,   0x5, 0),
+cond (blu,tlu,   0x5, F_ALIAS), /* for cs */
+cond (bgeu,tgeu, 0xD, F_ALIAS), /* for cc */
+cond (bgu,tgu,   0xC, 0),
+cond (bleu,tleu, 0x4, 0),
+cond (bge,tge,   0xB, 0),
+cond (bl,tl,     0x3, 0),
+cond (bg,tg,     0xA, 0),
+cond (ble,tle,   0x2, 0),
+cond (be,te,     0x1, 0),
+cond (bz,tz,     0x1, F_ALIAS), /* for e */
+cond (bne,tne,   0x9, 0),
+cond (bnz,tnz,   0x9, F_ALIAS), /* for ne */
+cond (b,t,       0x8, 0),
+cond (ba,ta,     0x8, F_ALIAS), /* for nothing */
+cond (bn,tn,     0x0, 0),
 
 #undef cond
 #undef br

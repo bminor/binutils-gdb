@@ -1,3 +1,35 @@
+Mon Jun 24 23:49:07 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	* sparc-opcode.h (trap opcodes):  Avoid leading spaces or
+	tabs, which end up in the disassembler output inadvertently.
+
+Wed May 29 23:01:03 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	Make it compile cleanly in an ANSI GCC2 environment.
+
+	* blockframe.c:  <stdio.h>
+	* cplus-dem.c:  free takes a void *, ifdef __STDC__
+	* dbxread.c (read_huge_number):  avoid gcc2 bug hoisting calc of
+	LONG_MAX/radix.
+	* defs.h (alloca):  Avoid doing anything if alloca already def'd.
+	* stddef.h, stdlib.h:  Remove these files.
+	* symtab.c:  Avoid declaring qsort, close.
+	* symfile.c:  Avoid declaring close.
+	* utils.c (vprintf):  Declare "ap" arg as proper va_alist.	
+	* sparc-tdep.c:  Avoid including lots of Sun-host-specific files.
+
+	Assorted other changes.
+	* dbxread.c:  include "libaout.h", not "liba.out.h".
+	* printcmd.c (print_frame_args):  Set recurse properly for
+	indentation of struct and array parameters.
+	* valops.c (value_cast):  Allow cast to void.
+	* infrun.c (resume):  If NO_SINGLE_STEP, call machine dependent
+	single_step() in a target-independent fashion.
+	* sparc-tdep.c (single_step):  Don't call ptrace ourselves, just
+	set up to be ready to continue.  This makes us target independent.
+	* infptrace.c (child_resume):  Remove call to single_step; now
+	can single step a SPARC target of any kind.
+
 Wed May 22 18:18:24 1991  Roland H. Pesch  (pesch at fowanton.cygnus.com)
 
 	* Makefile.dist, doc/gdb.texinfo, doc/*-m4.texinfo: split up GDB
