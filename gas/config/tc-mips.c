@@ -1660,6 +1660,7 @@ load_register (counter, reg, ep)
 		|| ((ep->X_add_number &~ (offsetT) 0x7fffffff)
 		    == ~ (offsetT) 0x7fffffff))
 	       && (mips_isa < 3
+		   || ! ep->X_unsigned
 		   || sizeof (ep->X_add_number) > 4
 		   || (ep->X_add_number & 0x80000000) == 0))
 	{
