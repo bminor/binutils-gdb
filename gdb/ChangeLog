@@ -1,3 +1,8 @@
+2002-02-08  Martin M. Hunt  <hunt@redhat.com>
+
+	* win32-nat.c (cygwin_pid_to_str): Fix typo.
+	xaprintf -> xasprintf.
+
 2002-02-08  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* win32-nat.c: Remove use of printf and sprintf functions.

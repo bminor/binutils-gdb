@@ -1763,7 +1763,7 @@ cygwin_pid_to_str (ptid_t ptid)
   int pid = PIDGET (ptid);
 
   if ((DWORD) pid == current_event.dwProcessId)
-    xaprintf (buf, "process %d", pid);
+    xasprintf (buf, "process %d", pid);
   else
     xasprintf (buf, "thread %ld.0x%x", current_event.dwProcessId, pid);
   return buf;
