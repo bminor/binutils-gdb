@@ -63,12 +63,19 @@ Sat Nov  9 00:40:32 1991  John Gilmore  (gnu at cygnus.com)
 	descriptor.  Use BFD internal functions instead.
 	(end_symtab):  Call global allocate_symtab.
 
-	* elfread.c:  Minor changes to accommodate objfiles.
+	* elfread.c, target.c:  Minor changes to accommodate objfiles.
 	* symtab.h:  partial_symbol_table has no symfile_name member now.
 	(fn_fieldlists voffset):  avoid non-int bitfield.
 	(struct symtab):  Add objfile * and objfile_chain * of symtabs.
 	(struct partial_symtab):  Add objfile * and objfile_chain * of
 	psymtabs.  Remove symfile_name.
+
+	* symmisc.c:  Lose free_all_symtabs, free_all_psymtabs.
+	(printsyms_command):  Rename from print_symtabs.  Add selective
+	listing if 2nd argument given.  Print objfile info.
+	(printpsyms_command):  Rename from print_partial_symtabs.  Ditto all.
+	(printobjfiles_command):  New; prints objfiles lists, and checks
+	for consistency of symtab, psymtab, and objfile lists.
 
 	* symfile.h, symfile.c, symtab.h:  Lint
 
