@@ -1,3 +1,7 @@
+Mon Jun 29 19:01:18 1998  Jim Wilson  <wilson@cygnus.com>
+
+        * gnu-regex.c (re_comp): Add cast to char * before gettext calls.
+
 Sun Jun 28 11:35:48 1998  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 
 	Improve support for SunPro F77.
