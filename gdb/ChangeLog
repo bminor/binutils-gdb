@@ -1,3 +1,9 @@
+2000-02-19  Philippe De Muyter  <phdm@macqel.be>
+
+        * cli-out.c (cli_table_header): Type of parameter `alignment' is
+        `enum ui_align', not `int'.
+        (cli_field_string, cli_field_skip): Likewise.
+
 2000-02-18  Jim Blandy  <jimb@redhat.com>
 
 	From Jimmy Guo <guo@cup.hp.com>:

@@ -132,7 +132,7 @@ void
 cli_table_header (uiout, width, alignment, colhdr)
      struct ui_out *uiout;
      int width;
-     int alignment;
+     enum ui_align alignment;
      char *colhdr;
 {
   cli_field_string (uiout, 0, width, alignment, 0, colhdr);
@@ -164,7 +164,7 @@ cli_field_int (uiout, fldno, width, alignment, fldname, value)
      struct ui_out *uiout;
      int fldno;
      int width;
-     int alignment;
+     enum ui_align alignment;
      char *fldname;
      int value;
 {
@@ -181,7 +181,7 @@ cli_field_skip (uiout, fldno, width, alignment, fldname)
      struct ui_out *uiout;
      int fldno;
      int width;
-     int alignment;
+     enum ui_align alignment;
      char *fldname;
 {
   cli_field_string (uiout, fldno, width, alignment, fldname, "");
@@ -194,7 +194,7 @@ void
 cli_field_string (struct ui_out *uiout,
 		  int fldno,
 		  int width,
-		  int align,
+		  enum ui_align align,
 		  char *fldname,
 		  const char *string)
 {
