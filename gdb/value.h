@@ -161,7 +161,7 @@ struct value
 	DOUBLEST force_doublest_align;
 	LONGEST force_longest_align;
 	CORE_ADDR force_core_addr_align;
-	void *force_pointer_aligh;
+	void *force_pointer_align;
       }
     aligner;
     /* Do not add any new members here -- contents above will trash them */

@@ -2,7 +2,9 @@
 
 	* value.h (struct value): Delete field ``substring_addr''.  Change
 	aligner fields to force_doublest_align, force_longest_align,
-	force_core_addr_align and force_pointer_align.
+	force_core_addr_align and force_pointer_aligh.
+
+	* value.h (struct value): Fix typo in above change.
 
 2002-03-16  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 
