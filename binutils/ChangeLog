@@ -1,3 +1,7 @@
+Tue Mar 18 11:37:24 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in: Rebuild dependencies.
+
 Sat Mar 15 15:35:56 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	Based on patches from Jamie Lokier <jamie@rebellion.co.uk>:

@@ -1,5 +1,5 @@
 # Makefile for GNU binary-file utilities
-# Copyright (C) 1992, 1993, 1994, 1995, 1996 Free Software Foundation, Inc.
+# Copyright (C) 1992, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
 
 # This file is part of GNU binutils.
 
@@ -276,6 +276,9 @@ stamp-under: Makefile
 version.o: version.c Makefile
 	$(CC) -DVERSION='"$(VERSION)"' $(ALL_CFLAGS) -c $(srcdir)/version.c
 
+bucomm.o: bucomm.c Makefile
+	$(CC) -DTARGET='"@target@"' $(ALL_CFLAGS) -c $(srcdir)/bucomm.c
+
 cplus-dem.o: $(BASEDIR)/libiberty/cplus-dem.c $(INCDIR)/getopt.h
 	$(CC) -c -DMAIN -DVERSION='"$(VERSION)"' $(ALL_CFLAGS) $(BASEDIR)/libiberty/cplus-dem.c
 
@@ -528,7 +531,7 @@ distclean:
 maintainer-clean realclean: clean distclean
 	@echo "This command is intended for maintainers to use;"
 	@echo "it deletes files that may require special tools to rebuild."
-	-rm -f $(DISTSTUFF) *.info TAGS
+	-rm -f $(DISTSTUFF) *.info* TAGS
 
 etags tags: TAGS
 
@@ -648,102 +651,90 @@ config.status: configure $(srcdir)/../bfd/configure.host $(srcdir)/../bfd/config
 # DO NOT DELETE THIS LINE -- mkdep uses it.
 # DO NOT PUT ANYTHING AFTER THIS LINE, IT WILL GO AWAY.
 
-ar.o: ar.c ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/obstack.h \
-  $(INCDIR)/libiberty.h $(INCDIR)/progress.h bucomm.h \
-  config.h $(INCDIR)/fopen-same.h $(INCDIR)/aout/ar.h \
-  $(BFDDIR)/libbfd.h arsup.h
+ar.o: ar.c ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/libiberty.h \
+  $(INCDIR)/progress.h bucomm.h config.h $(INCDIR)/fopen-same.h \
+  $(INCDIR)/aout/ar.h $(BFDDIR)/libbfd.h arsup.h
 arsup.o: arsup.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h arsup.h $(INCDIR)/libiberty.h bucomm.h \
-  config.h $(INCDIR)/fopen-same.h
+  arsup.h $(INCDIR)/libiberty.h bucomm.h config.h $(INCDIR)/fopen-same.h
 bucomm.o: bucomm.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h $(INCDIR)/libiberty.h bucomm.h \
-  config.h $(INCDIR)/fopen-same.h
+  $(INCDIR)/libiberty.h bucomm.h config.h $(INCDIR)/fopen-same.h
 coffdump.o: coffdump.c coffgrok.h bucomm.h config.h \
   $(INCDIR)/fopen-same.h
 coffgrok.o: coffgrok.c bucomm.h config.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
   coffgrok.h
 debug.o: debug.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h bucomm.h config.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/libiberty.h debug.h
+  bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
+  debug.h
 dlltool.o: dlltool.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h $(INCDIR)/libiberty.h bucomm.h \
-  config.h $(INCDIR)/fopen-same.h $(INCDIR)/getopt.h \
-  $(INCDIR)/demangle.h
-filemode.o: filemode.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h
-ieee.o: ieee.c ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/obstack.h \
-  $(INCDIR)/ieee.h bucomm.h config.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/libiberty.h debug.h budbg.h
+  $(INCDIR)/libiberty.h bucomm.h config.h $(INCDIR)/fopen-same.h \
+  $(INCDIR)/getopt.h $(INCDIR)/demangle.h
+filemode.o: filemode.c ../bfd/bfd.h $(INCDIR)/ansidecl.h
+ieee.o: ieee.c ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/ieee.h \
+  bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
+  debug.h budbg.h
 is-ranlib.o: is-ranlib.c
 is-strip.o: is-strip.c
 maybe-ranlib.o: maybe-ranlib.c
 maybe-strip.o: maybe-strip.c
 nlmconv.o: nlmconv.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h $(INCDIR)/libiberty.h bucomm.h \
-  config.h $(INCDIR)/fopen-same.h $(BFDDIR)/libnlm.h \
-  $(INCDIR)/nlm/common.h $(INCDIR)/nlm/internal.h $(INCDIR)/nlm/external.h \
-  nlmconv.h
-nm.o: nm.c ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/obstack.h \
-  $(INCDIR)/progress.h bucomm.h config.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/getopt.h $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def \
-  $(INCDIR)/aout/ranlib.h $(INCDIR)/demangle.h $(INCDIR)/libiberty.h
+  $(INCDIR)/libiberty.h bucomm.h config.h $(INCDIR)/fopen-same.h \
+  $(BFDDIR)/libnlm.h $(INCDIR)/nlm/common.h $(INCDIR)/nlm/internal.h \
+  $(INCDIR)/nlm/external.h nlmconv.h
+nm.o: nm.c ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/progress.h \
+  bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/getopt.h \
+  $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def $(INCDIR)/aout/ranlib.h \
+  $(INCDIR)/demangle.h $(INCDIR)/libiberty.h
 not-ranlib.o: not-ranlib.c
 not-strip.o: not-strip.c
 objcopy.o: objcopy.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h $(INCDIR)/progress.h bucomm.h config.h \
-  $(INCDIR)/fopen-same.h $(INCDIR)/getopt.h $(INCDIR)/libiberty.h \
-  budbg.h
+  $(INCDIR)/progress.h bucomm.h config.h $(INCDIR)/fopen-same.h \
+  $(INCDIR)/getopt.h $(INCDIR)/libiberty.h budbg.h
 objdump.o: objdump.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h $(INCDIR)/getopt.h $(INCDIR)/progress.h \
-  bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/dis-asm.h \
-  $(INCDIR)/libiberty.h debug.h budbg.h $(INCDIR)/aout/aout64.h
+  $(INCDIR)/getopt.h $(INCDIR)/progress.h bucomm.h config.h \
+  $(INCDIR)/fopen-same.h $(INCDIR)/dis-asm.h $(INCDIR)/libiberty.h \
+  $(INCDIR)/demangle.h debug.h budbg.h $(INCDIR)/aout/aout64.h
 prdbg.o: prdbg.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h bucomm.h config.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/libiberty.h debug.h budbg.h
+  bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
+  debug.h budbg.h
 rdcoff.o: rdcoff.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h $(INCDIR)/coff/internal.h bucomm.h \
-  config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
-  $(INCDIR)/demangle.h debug.h budbg.h $(BFDDIR)/libcoff.h \
-  $(INCDIR)/bfdlink.h
+  $(INCDIR)/coff/internal.h bucomm.h config.h $(INCDIR)/fopen-same.h \
+  $(INCDIR)/libiberty.h $(INCDIR)/demangle.h debug.h \
+  budbg.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h
 rddbg.o: rddbg.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h bucomm.h config.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/libiberty.h debug.h budbg.h
-size.o: size.c ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/obstack.h \
-  $(INCDIR)/getopt.h bucomm.h config.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/libiberty.h
+  bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
+  debug.h budbg.h
+size.o: size.c ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/getopt.h \
+  bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h
 srconv.o: srconv.c bucomm.h config.h $(INCDIR)/fopen-same.h \
   sysroff.h coffgrok.h $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h \
   $(INCDIR)/bfdlink.h sysroff.c
 stabs.o: stabs.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h bucomm.h config.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/libiberty.h $(INCDIR)/demangle.h debug.h \
-  budbg.h $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
-  $(INCDIR)/aout/stab.def
-strings.o: strings.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h bucomm.h config.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/libiberty.h
-sysdump.o: sysdump.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h bucomm.h config.h $(INCDIR)/fopen-same.h \
-  sysroff.h sysroff.c
-version.o: version.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h bucomm.h config.h $(INCDIR)/fopen-same.h
-wrstabs.o: wrstabs.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h bucomm.h config.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/libiberty.h debug.h budbg.h $(INCDIR)/aout/aout64.h \
+  bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
+  $(INCDIR)/demangle.h debug.h budbg.h $(INCDIR)/aout/aout64.h \
   $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def
+strings.o: strings.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h
+sysdump.o: sysdump.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  bucomm.h config.h $(INCDIR)/fopen-same.h sysroff.h \
+  sysroff.c
+version.o: version.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  bucomm.h config.h $(INCDIR)/fopen-same.h
+wrstabs.o: wrstabs.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
+  debug.h budbg.h $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
+  $(INCDIR)/aout/stab.def
 underscore.o: underscore.c
 arparse.o: arparse.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h bucomm.h config.h $(INCDIR)/fopen-same.h \
-  arsup.h
+  bucomm.h config.h $(INCDIR)/fopen-same.h arsup.h
 arlex.o: arlex.c arparse.h
 sysroff.o: sysroff.c
 sysinfo.o: sysinfo.c
 syslex.o: syslex.c sysinfo.h
 defparse.o: defparse.c
 deflex.o: deflex.c defparse.h
-nlmheader.o: nlmheader.c ../bfd/bfd.h $(INCDIR)/obstack.h \
-  bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/nlm/common.h \
-  $(INCDIR)/nlm/internal.h nlmconv.h
+nlmheader.o: nlmheader.c ../bfd/bfd.h bucomm.h config.h \
+  $(INCDIR)/fopen-same.h $(INCDIR)/nlm/common.h $(INCDIR)/nlm/internal.h \
+  nlmconv.h
 
 # IF YOU PUT ANYTHING HERE IT WILL GO AWAY
