@@ -133,6 +133,12 @@ mmalloc_getkey PARAMS ((PTR, int));
 /* From utils.c */
 
 extern char *
+demangle_and_match PARAMS ((const char *, const char *, int));
+
+extern int
+strcmp_iw PARAMS ((const char *, const char *));
+
+extern char *
 safe_strerror PARAMS ((int));
 
 extern char *
@@ -240,6 +246,9 @@ extern void
 symbol_file_command PARAMS ((char *, int));
 
 /* From main.c */
+
+extern char *
+skip_quoted PARAMS ((char *));
 
 extern char *
 gdb_readline PARAMS ((char *));
@@ -651,7 +660,7 @@ free PARAMS ((void *));					/* 4.10.3.2 */
 
 #endif	/* MALLOC_INCOMPATIBLE */
 
-extern PTR
+extern void
 qsort PARAMS ((void *base, size_t nmemb,		/* 4.10.5.2 */
 	       size_t size,
 	       int (*comp)(const void *, const void *)));

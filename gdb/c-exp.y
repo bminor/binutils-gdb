@@ -1112,6 +1112,9 @@ yylex ()
       goto retry;
 
     case '\'':
+      /* We either have a character constant ('0' or '\177' for example)
+	 or we have a quoted symbol reference ('foo(int,int)' in C++
+	 for example). */
       lexptr++;
       c = *lexptr++;
       if (c == '\\')
@@ -1119,7 +1122,17 @@ yylex ()
       yylval.lval = c;
       c = *lexptr++;
       if (c != '\'')
-	error ("Invalid character constant.");
+	{
+	  namelen = skip_quoted (tokstart) - tokstart;
+	  if (namelen > 2)
+	    {
+	      lexptr = tokstart + namelen;
+	      namelen -= 2;
+	      tokstart++;
+	      goto tryname;
+	    }
+	  error ("Invalid character constant.");
+	}
       return CHAR;
 
     case '(':
@@ -1272,6 +1285,7 @@ yylex ()
      and $$digits (equivalent to $<-digits> if you could type that).
      Make token type LAST, and put the number (the digits) in yylval.  */
 
+  tryname:
   if (*tokstart == '$')
     {
       register int negate = 0;

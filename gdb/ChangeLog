@@ -1,3 +1,28 @@
+Mon Jun  8 23:05:51 1992  Fred Fish  (fnf@cygnus.com)
+
+	* c-exp.y (yylex):  Recognize single-quoted strings that specify
+	tokens with embedded whitespace, such as C++ demangled names.
+	* defs.h (demangle_and_match, strcmp_iw, skip_quoted):  Prototypes.
+	* main.c (gdb_completer_quote_characters):  Add global variable.
+	* main.c (symbol_completion_function):  Total rewrite for C++
+	demangled name handling.
+	* main.c (skip_quoted):  New function.
+	* main.c (main):  Set rl_completer_quote_characters.
+	* symmisc.c (dump_symtab):  Print source language for symtab.	
+	* symtab.c (expensive_mangler):  Add prototype and function.
+	* symtab.c (completion_list_add_symbol):  Total rewrite for new
+	C++ demangled name handling.
+	* symtab.c (lookup_symbol): Check for demangled C++ symbol first,
+	other changes for demangled C++ symbol handling.
+	* symtab.c (lookup_demangled_block_symbol):  Use demangle_and_match.
+	* symtab.c (lookup_demangled_partial_symbol):  Use demangle_and_match.
+	* symtab.c (decode_line_1):  Recognize C++ demangled names on input.
+	* symtab.c (completion_list_add_symbol):  Total rewrite for new
+	C++ demangled name handling.
+	* symtab.c (expensive_mangler):  New function.
+	* utils.c (strcmp_iw, demangle_and_match):  New functions.
+	* xcoffread.c (aixcoff_symfile_read):  Fix prototype.
+
 Mon Jun  8 21:59:08 1992  John Gilmore  (gnu at cygnus.com)
 
 	* Makefile.in:  Roll VERSION to 4.5.4.

@@ -182,7 +182,7 @@ static void
 aixcoff_new_init PARAMS ((struct objfile *));
 
 static void
-aixcoff_symfile_read PARAMS ((struct sym_fns *, CORE_ADDR, int));
+aixcoff_symfile_read PARAMS ((struct objfile *, CORE_ADDR, int));
 
 static void
 aixcoff_symfile_finish PARAMS ((struct objfile *));
