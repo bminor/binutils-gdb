@@ -1,3 +1,8 @@
+2004-11-30  Randolph Chung  <tausq@debian.org>
+
+	* gdb.threads/thread_check.exp: Use ${srcfile} for test program name
+	instead of "tbug".  Fix regexp to work properly with gdb_test.
+
 2004-11-29  Paul Hilfinger  <Hilfinger@gnat.com>
 
 	* gdb.base/bitfields2.exp: New test.

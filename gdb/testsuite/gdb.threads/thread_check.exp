@@ -27,7 +27,7 @@
 #   in ptrace system call.
 #
 # Test Strategy:
-# - tbug.c creates 2 threads
+# - thread_check.c creates 2 threads
 # - start gdb 
 # - create 2 breakpoints #1 main() #2 tf() (the thread function)
 # - run gdb till #1 main() breakpoint is reached
@@ -74,14 +74,14 @@ gdb_test "break tf" \
 # continue to tf() breakpoint #2
 #
 gdb_test "continue" \
-    ".*Breakpoint 2.*tf.* at .*tbug.* .*\r\n.*$gdb_prompt $" \
+     ".*Breakpoint 2,.*tf.*at.*$srcfile:.*" \
      "continue to tf"
 
 #   
 # backtrace from thread function.
 #
 gdb_test "backtrace" \
-    "#0 .*tf .*at .*tbug.*" \
+    "#0 .*tf .*at .*$srcfile:.*" \
     "backtrace from thread function"
 
 
