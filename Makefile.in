@@ -1473,11 +1473,15 @@ taz: $(DEVO_SUPPORT) $(SUPPORT_FILES) \
 	  ln -s ../../../texinfo/util/tex3patch	proto-toplev/texinfo/util ; \
 	else true; fi
 	chmod og=u `find . -print`
-	(VER=`sed <$(TOOL)/Makefile.in -n 's/^VERSION *= *//p'`; \
-		echo "==> Making $(TOOL)-$$VER.tar.gz"; \
-		rm -f $(TOOL)-$$VER; ln -s proto-toplev $(TOOL)-$$VER; \
-		tar cfh - $(TOOL)-$$VER \
-		| $(GZIPPROG) -v -9 >$(TOOL)-$$VER.tar.gz )
+	$(MAKE) -f Makefile.in do-tar-gz TOOL=$(TOOL) \
+		VER=`sed <$(TOOL)/Makefile.in -n 's/^VERSION *= *//p'`
+
+do-tar-gz:
+	echo "==> Making $(TOOL)-$(VER).tar.gz"
+	-rm -f $(TOOL)-$(VER)
+	ln -s proto-toplev $(TOOL)-$(VER)
+	tar cfh $(TOOL)-$(VER).tar $(TOOL)-$(VER)
+	$(GZIPPROG) -v -9 $(TOOL)-$(VER).tar
 
 TEXINFO_SUPPORT= texinfo/texinfo.tex texinfo/gpl.texinfo texinfo/lgpl.texinfo
 DIST_SUPPORT= $(DEVO_SUPPORT) $(TEXINFO_SUPPORT)

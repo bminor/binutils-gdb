@@ -1,3 +1,9 @@
+Fri Jul 12 23:21:17 1996  Ken Raeburn  <raeburn@cygnus.com>
+
+	* Makefile.in (do-tar-gz): New target, split out from tail end of
+	taz target.  Run each command separately, don't use pipes.
+	(taz): Use it.
+
 Fri Jul 12 12:08:04 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-configure: Look for g-mpw-make.sed in config/mpw.
