@@ -1,0 +1,5 @@
+Thu Aug  1 17:05:24 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* ChangeLog, Makefile.in, configure, configure.in, d10v_sim.h, 
+	gencode.c, interp.c, simops.c: Created.
+
