@@ -622,15 +622,19 @@ case "${target}" in
   arm-*-coff*)
     noconfigdirs="$noconfigdirs target-libgloss"
     ;;
+# start-sanitize-armelf
   arm-*-elf*)
     noconfigdirs="$noconfigdirs target-libgloss"
     ;;
+# end-sanitize-armelf
   thumb-*-coff)
     noconfigdirs="$noconfigdirs target-libgloss"
     ;;
+# start-sanitize-armelf
   thumb-*-elf)
     noconfigdirs="$noconfigdirs target-libgloss"
     ;;
+# end-sanitize-armelf
   thumb-*-pe) # CYGNUS LOCAL nickc/thumb
     noconfigdirs="$noconfigdirs target-libgloss"
     ;;
