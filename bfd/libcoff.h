@@ -82,8 +82,21 @@ typedef struct coff_tdata
   int pe;
   /* Used by the COFF backend linker.  */
   struct coff_link_hash_entry **sym_hashes;
+
   struct bfd_link_info *link_info;
 } coff_data_type;
+
+/* Tdata for pe image files. */
+typedef struct pe_tdata
+{
+  coff_data_type coff;
+  struct internal_extra_pe_aouthdr pe_opthdr;
+  int dll;
+  int has_reloc_section;
+} pe_data_type;
+
+#define pe_data(bfd)		((bfd)->tdata.pe_obj_data)
+
 
 /* We take the address of the first element of a asymbol to ensure that the
  * macro is only ever applied to an asymbol.  */

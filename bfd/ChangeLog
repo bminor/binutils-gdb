@@ -1,3 +1,13 @@
+Thu Sep  7 12:45:34 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* coffcode.h (coff_compute_section_file_positions): Keep the
+	raw size safe. 
+	(coff_write_object_contents): Remember if it's a relocatable
+	file.
+	* libcoff-in.h (pe_data_type): New member 'has_reloc_section'
+	* peicode.h (coff_swap_filehdr_out): Clear not-reloc flag
+	if relocatable file. Swap out saved raw size.
+
 Tue Sep 12 12:14:33 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* dep-in.sed: Remove config.h from generated dependencies.

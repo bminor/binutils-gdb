@@ -298,23 +298,12 @@ CODE_FRAGMENT
 
 */
 
-#ifndef IMAGE_BASE
-#define IMAGE_BASE 0
+#ifdef COFF_IMAGE_WITH_PE
+#include "peicode.h"
+#else
+#include "coffswap.h"
 #endif
 
-
-static bfd_vma
-pe_value(ptr, def)
-     bfd_link_pe_info_dval *ptr;
-     bfd_vma def;
-{
-  if (ptr && ptr->defined)
-    return ptr->value;
-  return def;
-}
-
-
-#include "coffswap.h"
 
 /* void warning(); */
 
@@ -925,6 +914,7 @@ coff_set_alignment_hook (abfd, section, scnhdr)
 
 #endif /* ! I960 */
 
+#ifndef coff_mkobject
 static boolean
 coff_mkobject (abfd)
      bfd * abfd;
@@ -944,14 +934,12 @@ coff_mkobject (abfd)
   coff->relocbase = 0;
 /*  make_abs_section(abfd);*/
 
-#ifdef COFF_WITH_PE
-  obj_pe (abfd) = 1;
-#endif
   return true;
 }
+#endif
 
 /* Create the COFF backend specific information.  */
-
+#ifndef coff_mkobject_hook
 static PTR
 coff_mkobject_hook (abfd, filehdr, aouthdr)
      bfd * abfd;
@@ -985,6 +973,7 @@ coff_mkobject_hook (abfd, filehdr, aouthdr)
 
   return (PTR) coff;
 }
+#endif
 
 /* Determine the machine architecture and type.  FIXME: This is target
    dependent because the magic numbers are defined in the target
@@ -1518,8 +1507,7 @@ coff_compute_section_file_positions (abfd)
   int page_size;
   if (coff_data (abfd)->link_info) 
     {
-      page_size = pe_value (&(coff_data (abfd)->link_info->pe_info->file_alignment),
-			    PE_DEF_FILE_ALIGNMENT);
+      page_size = pe_data (abfd)->pe_opthdr.FileAlignment;
     }
   else
     page_size = PE_DEF_FILE_ALIGNMENT;
@@ -1584,10 +1572,17 @@ coff_compute_section_file_positions (abfd)
 	  && (current->flags & SEC_ALLOC) != 0)
 	sofar += (current->vma - sofar) % page_size;
 #endif
-
       current->filepos = sofar;
 
+#ifdef COFF_IMAGE_WITH_PE
+      /* With PE we have to pad each section to be a multiple of its page size
+	 too, and remember both sizes. Cooked_size becomes very useful. */
+      current->_cooked_size = current->_raw_size;
+      current->_raw_size = (current->_raw_size + page_size -1) & -page_size;
+#endif
+
       sofar += current->_raw_size;
+
 #ifndef I960
       /* make sure that this section is of the right size too */
       old_sofar = sofar;
@@ -1605,15 +1600,6 @@ coff_compute_section_file_positions (abfd)
 
       previous = current;
     }
-#ifdef COFF_IMAGE_WITH_PE
-  /* Normally, the starting location for the symbol table will be at the end
-     of the last section.  However, when dealing with NT, the last section
-     must be as long as its size rounded up to the next page (0x1000). */
-  sofar = (sofar + page_size - 1) & -page_size;
-
-  if (previous)
-    previous->_raw_size = (previous->_raw_size + page_size -1) & -page_size;
-#endif
 
   obj_relocbase (abfd) = sofar;
   abfd->output_has_begun = true;
@@ -1695,204 +1681,7 @@ coff_add_missing_symbols (abfd)
 
 #endif /* ! defined (RS6000COFF_C) */
 
-#ifdef COFF_WITH_PE
-static void add_data_entry (abfd, aout, idx, name, base)
-     bfd *abfd;
-     struct internal_aouthdr *aout;
-     int idx;
-     char *name;
-     bfd_vma base;
-{
-  asection *sec = bfd_get_section_by_name (abfd, name);
 
-  /* add import directory information if it exists */
-  if (sec != NULL)
-    {
-      aout->pe->DataDirectory[idx].VirtualAddress = sec->lma - base;
-      aout->pe->DataDirectory[idx].Size = sec->_raw_size;
-      sec->flags |= SEC_DATA;
-    }
-}
-
-
-static void 
-fill_pe_header_info (abfd, internal_f, internal_a)
-     bfd *abfd;
-     struct internal_filehdr *internal_f;
-     struct internal_aouthdr *internal_a;
-{
-  /* assign other filehdr fields for DOS header and NT signature */
-
-  int sa;
-  int fa;
-  bfd_vma ib;
-  bfd_link_pe_info *pe_info = coff_data (abfd)->link_info->pe_info;
-
-  internal_f->f_timdat = time (0);
-
-  if (pe_value  (&pe_info->dll, 0))
-    internal_f->f_flags |=  F_DLL ;
-
-
-  if (bfd_get_section_by_name (abfd, ".reloc"))
-    internal_f->f_flags &= ~F_RELFLG;
-
-
-  memset (internal_f->pe, 0, sizeof (struct internal_extra_pe_filehdr));
-  memset (internal_a->pe, 0, sizeof (struct internal_extra_pe_aouthdr));
-
-
-  ib =  internal_a->pe->ImageBase =  pe_value (&pe_info->image_base, NT_EXE_IMAGE_BASE);
-
-  if (internal_a->tsize) 
-    internal_a->text_start -= ib;
-  if (internal_a->dsize) 
-    internal_a->data_start -= ib;
-  if (internal_a->entry) 
-    internal_a->entry -= ib;
-
-
-  sa = internal_a->pe->SectionAlignment = pe_value (&pe_info->section_alignment,
-						    NT_SECTION_ALIGNMENT);
-
-  fa = internal_a->pe->FileAlignment = pe_value (&pe_info->file_alignment, 
-						 NT_FILE_ALIGNMENT);
-
-#define FA(x)  (((x) + fa -1 ) & (- fa))
-#define SA(x)  (((x) + sa -1 ) & (- sa))
-
-  /* We like to have the sizes aligned */
-
-  internal_a->bsize = FA (internal_a->bsize);
-
-  internal_f->pe->e_magic    = DOSMAGIC;
-  internal_f->pe->e_cblp     = 0x90;
-  internal_f->pe->e_cp       = 0x3;
-  internal_f->pe->e_crlc     = 0x0;
-  internal_f->pe->e_cparhdr  = 0x4;
-  internal_f->pe->e_minalloc = 0x0;
-  internal_f->pe->e_maxalloc = 0xffff;
-  internal_f->pe->e_ss       = 0x0;
-  internal_f->pe->e_sp       = 0xb8;
-  internal_f->pe->e_csum     = 0x0;
-  internal_f->pe->e_ip       = 0x0;
-  internal_f->pe->e_cs       = 0x0;
-  internal_f->pe->e_lfarlc   = 0x40;
-  internal_f->pe->e_ovno     = 0x0;
-  {
-    int idx;
-    for (idx=0; idx < 4; idx++)
-      internal_f->pe->e_res[idx] = 0x0;
-  }
-  internal_f->pe->e_oemid   = 0x0;
-  internal_f->pe->e_oeminfo = 0x0;
-  {
-    int idx;
-    for (idx=0; idx < 10; idx++)
-      internal_f->pe->e_res2[idx] = 0x0;
-  }
-  internal_f->pe->e_lfanew = 0x80;
-
-  /* this next collection of data are mostly just characters.  It appears
-     to be constant within the headers put on NT exes */
-  internal_f->pe->dos_message[0]  = 0x0eba1f0e;
-  internal_f->pe->dos_message[1]  = 0xcd09b400;
-  internal_f->pe->dos_message[2]  = 0x4c01b821;
-  internal_f->pe->dos_message[3]  = 0x685421cd;
-  internal_f->pe->dos_message[4]  = 0x70207369;
-  internal_f->pe->dos_message[5]  = 0x72676f72;
-  internal_f->pe->dos_message[6]  = 0x63206d61;
-  internal_f->pe->dos_message[7]  = 0x6f6e6e61;
-  internal_f->pe->dos_message[8]  = 0x65622074;
-  internal_f->pe->dos_message[9]  = 0x6e757220;
-  internal_f->pe->dos_message[10] = 0x206e6920;
-  internal_f->pe->dos_message[11] = 0x20534f44;
-  internal_f->pe->dos_message[12] = 0x65646f6d;
-  internal_f->pe->dos_message[13] = 0x0a0d0d2e;
-  internal_f->pe->dos_message[14] = 0x24;
-  internal_f->pe->dos_message[15] = 0x0;
-  internal_f->pe->nt_signature = NT_SIGNATURE;
-
-
-  /* write all of the other optional header data */
-
-  internal_a->pe->MajorOperatingSystemVersion =
-    pe_value (&pe_info->major_os_version, 1);
-
-  internal_a->pe->MinorOperatingSystemVersion =
-    pe_value (&pe_info->minor_os_version, 0);
-
-  internal_a->pe->MajorImageVersion =
-    pe_value (&pe_info->major_image_version, 1);
-
-  internal_a->pe->MinorImageVersion =
-    pe_value (&pe_info->minor_image_version, 0);
-
-
-  internal_a->pe->MajorSubsystemVersion =
-    pe_value (&pe_info->major_subsystem_version, 3);
-
-
-  internal_a->pe->MinorSubsystemVersion =
-    pe_value (&pe_info->minor_subsystem_version, 10);
-
-  internal_a->pe->Subsystem =
-    pe_value (&pe_info->subsystem, BFD_PE_CONSOLE);
-
-  /* Virtual start address, take virtual start address of last section, 
-     add its physical size and round up the next page (NT_SECTION_ALIGNMENT).
-     An assumption has been made that the sections stored in the abfd
-     structure are in order and that I have successfully saved the last
-     section's address and size. */
-
-  /* The headers go up to where the first section starts. */
-
-  internal_a->pe->SizeOfHeaders = abfd->sections->filepos;
-  internal_a->pe->CheckSum = 0;
-  internal_a->pe->DllCharacteristics = 0;
-
-  internal_a->pe->SizeOfStackReserve = pe_value (&pe_info->stack_reserve,
-						 NT_DEF_RESERVE);
-  internal_a->pe->SizeOfStackCommit = pe_value (&pe_info->stack_commit,
-						NT_DEF_COMMIT);
-
-  internal_a->pe->SizeOfHeapReserve = pe_value (&pe_info->heap_reserve,
-						NT_DEF_RESERVE);
-  internal_a->pe->SizeOfHeapCommit = pe_value (&pe_info->heap_commit,
-					       NT_DEF_COMMIT);
-
-  internal_a->pe->LoaderFlags = 0;
-  internal_a->pe->NumberOfRvaAndSizes = IMAGE_NUMBEROF_DIRECTORY_ENTRIES; /* 0x10 */
-
-  /* first null out all data directory entries .. */
-  memset (internal_a->pe->DataDirectory, sizeof (internal_a->pe->DataDirectory), 0);
-
-  add_data_entry (abfd, internal_a, 0, ".edata", ib);
-  add_data_entry (abfd, internal_a, 1, ".idata", ib);
-  add_data_entry (abfd, internal_a, 2, ".rsrc" ,ib);
-  add_data_entry (abfd, internal_a, 5, ".reloc", ib);
-  {
-    asection *sec;
-    bfd_vma dsize= 0;
-    bfd_vma isize = SA(abfd->sections->filepos);
-    bfd_vma tsize= 0;
-    for (sec = abfd->sections; sec; sec = sec->next)
-      {
-	int rounded = FA(sec->_raw_size);
-	if (sec->flags & SEC_DATA) 
-	  dsize += rounded;
-	if (sec->flags & SEC_CODE)
-	  tsize += rounded;
-	isize += SA(rounded);
-      }
-
-    internal_a->dsize = dsize;
-    internal_a->tsize = tsize;
-    internal_a->pe->SizeOfImage = isize;
-  }
-
-}
-#endif
 
 /* SUPPRESS 558 */
 /* SUPPRESS 529 */
@@ -1914,31 +1703,6 @@ coff_write_object_contents (abfd)
 
   struct internal_filehdr internal_f;
   struct internal_aouthdr internal_a;
-
-#ifdef COFF_IMAGE_WITH_PE
-  struct internal_extra_pe_aouthdr extra_a;
-  struct internal_extra_pe_filehdr extra_f;
-  bfd_link_pe_info defs;
-  struct bfd_link_info dummy_info;
-  struct bfd_link_info *info ;
-  struct bfd_link_pe_info *pe_info;
-
-  if (coff_data (abfd)->link_info)
-    info =coff_data (abfd)->link_info;
-  else 
-    {
-      coff_data (abfd)->link_info = info = &dummy_info;
-      info->pe_info = 0;
-    }
-  pe_info = (struct bfd_link_pe_info *)(info->pe_info);
-
-  if (!pe_info)
-    {
-      /* Just use sensible defaults */
-      memset (&defs, 0, sizeof (defs));
-      coff_data (abfd)->link_info->pe_info = &defs;
-    }
-#endif
 
   bfd_set_error (bfd_error_system_call);
 
@@ -2009,6 +1773,13 @@ coff_write_object_contents (abfd)
 	{
 	  continue;
 	}
+
+      /* If we've got a .reloc section, remember. */
+
+      if (strcmp (current->name, ".reloc") == 0)
+	{
+	  pe_data (abfd)->has_reloc_section = 1;
+	}
 #endif
       internal_f.f_nscns++;
       strncpy (&(section.s_name[0]), current->name, 8);
@@ -2019,9 +1790,13 @@ coff_write_object_contents (abfd)
 	section.s_vaddr = 0;
       else
 #endif
-	section.s_vaddr = current->lma;
+      section.s_vaddr = current->lma;
       section.s_paddr = current->lma;
-      section.s_size = current->_raw_size;
+      section.s_size =  current->_raw_size;
+
+#ifdef COFF_WITH_PE
+      section.s_paddr = current->_cooked_size;
+#endif
 
       /*
 	 If this section has no size or is unloadable then the scnptr
@@ -2255,16 +2030,6 @@ coff_write_object_contents (abfd)
 
   internal_a.entry = bfd_get_start_address (abfd);
   internal_f.f_nsyms = obj_raw_syment_count (abfd);
-
-
-
-#ifdef COFF_IMAGE_WITH_PE
-
-  internal_f.pe = & extra_f;
-  internal_a.pe = & extra_a;
-
-  fill_pe_header_info (abfd, &internal_f, &internal_a);
-#endif
 
   /* now write them */
   if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0)
@@ -3086,6 +2851,11 @@ static CONST bfd_coff_backend_data bfd_coff_std_swap_table =
 #define coff_bfd_copy_private_bfd_data _bfd_generic_bfd_copy_private_bfd_data
 #define coff_bfd_merge_private_bfd_data _bfd_generic_bfd_merge_private_bfd_data
 #define coff_bfd_set_private_flags _bfd_generic_bfd_set_private_flags
+
+#ifndef coff_bfd_print_private_bfd_data 
+#define coff_bfd_print_private_bfd_data \
+   _bfd_generic_bfd_print_private_bfd_data
+#endif
 
 #ifndef coff_bfd_is_local_label
 #define coff_bfd_is_local_label bfd_generic_is_local_label

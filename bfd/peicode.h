@@ -241,10 +241,11 @@ coff_swap_filehdr_out (abfd, in, out)
      PTR	in;
      PTR	out;
 {
+  int idx;
   struct internal_filehdr *filehdr_in = (struct internal_filehdr *)in;
   FILHDR *filehdr_out = (FILHDR *)out;
 
-  if (bfd_get_section_by_name (abfd, ".reloc"))
+  if (pe_data (abfd)->has_reloc_section)
     filehdr_in->f_flags &= ~F_RELFLG;
 
   if (pe_data (abfd)->dll)
@@ -264,18 +265,16 @@ coff_swap_filehdr_out (abfd, in, out)
   filehdr_in->pe.e_cs       = 0x0;
   filehdr_in->pe.e_lfarlc   = 0x40;
   filehdr_in->pe.e_ovno     = 0x0;
-  {
-    int idx;
-    for (idx=0; idx < 4; idx++)
-      filehdr_in->pe.e_res[idx] = 0x0;
-  }
+
+  for (idx=0; idx < 4; idx++)
+    filehdr_in->pe.e_res[idx] = 0x0;
+
   filehdr_in->pe.e_oemid   = 0x0;
   filehdr_in->pe.e_oeminfo = 0x0;
-  {
-    int idx;
-    for (idx=0; idx < 10; idx++)
-      filehdr_in->pe.e_res2[idx] = 0x0;
-  }
+
+  for (idx=0; idx < 10; idx++)
+    filehdr_in->pe.e_res2[idx] = 0x0;
+
   filehdr_in->pe.e_lfanew = 0x80;
 
   /* this next collection of data are mostly just characters.  It appears
@@ -877,7 +876,6 @@ static void
     GET_SCNHDR_PADDR (abfd, (bfd_byte *) scnhdr_ext->s_paddr);
   scnhdr_int->s_size =
     GET_SCNHDR_SIZE (abfd, (bfd_byte *) scnhdr_ext->s_size);
-
   scnhdr_int->s_scnptr =
     GET_SCNHDR_SCNPTR (abfd, (bfd_byte *) scnhdr_ext->s_scnptr);
   scnhdr_int->s_relptr =
@@ -904,6 +902,7 @@ PTR	out;
   struct internal_scnhdr *scnhdr_int = (struct internal_scnhdr *)in;
   SCNHDR *scnhdr_ext = (SCNHDR *)out;
   unsigned int ret = sizeof (SCNHDR);
+  bfd_vma s;
 
   memcpy(scnhdr_ext->s_name, scnhdr_int->s_name, sizeof(scnhdr_int->s_name));
 
@@ -913,22 +912,21 @@ PTR	out;
 		     - pe_data(abfd)->pe_opthdr.ImageBase),
 		    (bfd_byte *) scnhdr_ext->s_vaddr);
 
-  /* NT wants the physical address data to be the size (s_size data) of
-     the section */
-  PUT_SCNHDR_PADDR (abfd, scnhdr_int->s_size,
-		    (bfd_byte *) scnhdr_ext->s_paddr);
+  /* Note that we're really stuffing in the raw size into here. */
+
+
+  PUT_SCNHDR_SIZE (abfd, scnhdr_int->s_size,
+		    (bfd_byte *) scnhdr_ext->s_size);
+
   /* NT wants the size data to be rounded up to the next NT_FILE_ALIGNMENT
      value except for the BSS section, its s_size should be 0 */
-  if (strcmp (scnhdr_int->s_name, _BSS) == 0)
-    PUT_SCNHDR_SIZE (abfd, 0, (bfd_byte *) scnhdr_ext->s_size);
+
+  if (strcmp (scnhdr_int->s_name, _BSS) == 0) 
+    s = 0;
   else
-    {
-      bfd_vma rounded_size;
-      rounded_size = ((scnhdr_int->s_size + NT_FILE_ALIGNMENT - 1) / 
-		      NT_FILE_ALIGNMENT) *
-			NT_FILE_ALIGNMENT;
-      PUT_SCNHDR_SIZE (abfd, rounded_size, (bfd_byte *) scnhdr_ext->s_size);
-    }
+    s = scnhdr_int->s_paddr;
+
+  PUT_SCNHDR_PADDR (abfd, s, (bfd_byte *) scnhdr_ext->s_paddr);
 
   PUT_SCNHDR_SCNPTR (abfd, scnhdr_int->s_scnptr,
 		     (bfd_byte *) scnhdr_ext->s_scnptr);
