@@ -52,6 +52,8 @@ ldgld68k.sc
 ldm88k.sc
 ldgld960.c
 ldgld960.sc
+ldgld.c
+ldgld68k.c
 gld.1
 ldglda29k.sc
 ldgld68k.sc
@@ -89,7 +91,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.21  1991/11/05 21:56:06  sac
+# Revision 1.22  1991/11/06 09:26:59  sac
+# Added three files which had been forgotten
+#
+# Revision 1.21  1991/11/05  21:56:06  sac
 # *** empty log message ***
 #
 # Revision 1.20  1991/11/05  20:36:54  sac
