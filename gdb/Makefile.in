@@ -253,9 +253,9 @@ HFILES=	breakpoint.h buildsym.h call-cmds.h command.h defs.h \
 	target.h terminal.h xcoffsolib.h value.h \
 	tm-68k.h tm-hppa.h tm-i960.h tm-sparc.h tm-sunos.h tm-sysv4.h \
 	xm-m68k.h xm-sparc.h xm-sysv4.h xm-vax.h \
-	nm-irix3.h nm-irix4.h nm-mips.h nm-rs6000.h nm-sun2.h nm-sun3.h \
-	nm-sun4os4.h nm-trash.h nm-news.h nm-ultra3.h nm-m88k.h \
-	nm-i386mach.h nm-sun386.h nm-linux.h nm-i386v.h
+	nm-i386bsd.h nm-i386mach.h nm-i386v.h nm-i386v4.h nm-irix3.h \
+	nm-irix4.h nm-linux.h nm-m88k.h nm-mips.h nm-news.h nm-rs6000.h \
+	nm-sun2.h nm-sun3.h nm-sun386.h nm-sun4os4.h nm-trash.h nm-ultra3.h
 
 REMOTE_EXAMPLES = m68k-stub.c i386-stub.c sparc-stub.c rem-multi.shar
 
