@@ -1508,8 +1508,6 @@ typedef struct elf_linker_section
 {
   /* pointer to the section */
   asection *section;
-  /* pointer to the relocations needed for this section */
-  asection *rel_section;
   /* pointer to the created symbol hash value */
   struct elf_link_hash_entry *sym_hash;
   /* offset of symbol from beginning of section */
@@ -2593,18 +2591,6 @@ ppc_elf_create_linker_section (bfd *abfd,
 	return NULL;
     }
 
-  if (info->shared)
-    {
-      s = bfd_make_section_anyway (htab->elf.dynobj, rel_name);
-      lsect->rel_section = s;
-      flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY
-	       | SEC_LINKER_CREATED | SEC_READONLY);
-      if (s == NULL
-	  || ! bfd_set_section_flags (htab->elf.dynobj, s, flags)
-	  || ! bfd_set_section_alignment (htab->elf.dynobj, s, 2))
-	return NULL;
-    }
-
   return lsect;
 }
 
@@ -2658,9 +2644,6 @@ elf_create_pointer_linker_section (bfd *abfd,
 	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
 	    return FALSE;
 	}
-
-      if (lsect->rel_section)
-	lsect->rel_section->size += sizeof (Elf32_External_Rela);
     }
   else
     {
@@ -2689,15 +2672,6 @@ elf_create_pointer_linker_section (bfd *abfd,
 	return TRUE;
 
       ptr_linker_section_ptr = &ptr[r_symndx];
-
-      if (info->shared)
-	{
-	  /* If we are generating a shared object, we need to
-	     output a R_<xxx>_RELATIVE reloc so that the
-	     dynamic linker can adjust this GOT entry.  */
-	  BFD_ASSERT (lsect->rel_section != NULL);
-	  lsect->rel_section->size += sizeof (Elf32_External_Rela);
-	}
     }
 
   /* Allocate space for a pointer in the linker section, and allocate
@@ -4675,8 +4649,7 @@ elf_finish_pointer_linker_section (bfd *output_bfd,
 				   elf_linker_section_t *lsect,
 				   struct elf_link_hash_entry *h,
 				   bfd_vma relocation,
-				   const Elf_Internal_Rela *rel,
-				   int relative_reloc)
+				   const Elf_Internal_Rela *rel)
 {
   elf_linker_section_pointers_t *linker_section_ptr;
 
@@ -4737,35 +4710,6 @@ elf_finish_pointer_linker_section (bfd *output_bfd,
 	  linker_section_ptr->written_address_p = TRUE;
 	  bfd_put_ptr (output_bfd, relocation + linker_section_ptr->addend,
 		       lsect->section->contents + linker_section_ptr->offset);
-
-	  if (info->shared)
-	    {
-	      /* We need to generate a relative reloc for the dynamic
-		 linker.  */
-
-	      asection *srel = lsect->rel_section;
-	      Elf_Internal_Rela outrel[MAX_INT_RELS_PER_EXT_REL];
-	      bfd_byte *erel;
-	      const struct elf_backend_data *bed;
-	      unsigned int i;
-
-	      BFD_ASSERT (srel != NULL);
-
-	      bed = get_elf_backend_data (output_bfd);
-	      for (i = 0; i < bed->s->int_rels_per_ext_rel; i++)
-		{
-		  outrel[i].r_offset = (lsect->section->output_section->vma
-					+ lsect->section->output_offset
-					+ linker_section_ptr->offset);
-		  outrel[i].r_info = 0;
-		  outrel[i].r_addend = 0;
-		}
-	      outrel[0].r_info = ELF32_R_INFO (0, relative_reloc);
-	      erel = lsect->section->contents;
-	      erel += (elf_section_data (lsect->section)->rel_count++
-		       * sizeof (Elf32_External_Rela));
-	      bfd_elf32_swap_reloca_out (output_bfd, outrel, erel);
-	    }
 	}
     }
 
@@ -5658,7 +5602,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	  relocation
 	    = elf_finish_pointer_linker_section (output_bfd, input_bfd, info,
 						 htab->sdata, h, relocation,
-						 rel, R_PPC_RELATIVE);
+						 rel);
 	  break;
 
 	  /* Indirect .sdata2 relocation.  */
@@ -5667,7 +5611,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	  relocation
 	    = elf_finish_pointer_linker_section (output_bfd, input_bfd, info,
 						 htab->sdata2, h, relocation,
-						 rel, R_PPC_RELATIVE);
+						 rel);
 	  break;
 
 	  /* Handle the TOC16 reloc.  We want to use the offset within the .got

@@ -1,5 +1,15 @@
 2005-03-21  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-ppc.c (struct elf_linker_section): Remove rel_section.
+	(ppc_elf_create_linker_section): Don't create rel_section.
+	(elf_create_pointer_linker_section): Don't size relocs.
+	(elf_finish_pointer_linker_section): Remove relative_reloc parm.
+	Don't generate relocs.
+	(ppc_elf_relocate_section): Adjust calls to
+	elf_finish_pointer_linker_section.
+
+2005-03-21  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf32-ppc.c (is_ppc_elf_target): New function.
 	(ppc_elf_merge_private_bfd_data): Use it rather than just testing
 	for bfd_target_elf_flavour.  Do this test before endian check.
