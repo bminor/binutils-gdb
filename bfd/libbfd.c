@@ -124,6 +124,31 @@ DEFUN(zalloc,(size),
   return ptr;
 }
 #endif
+
+/*proto-internal* bfd_xmalloc
+bfd_xmalloc -- Like malloc, but exit if no more memory.
+*; PROTO(PTR, bfd_xmalloc,( bfd_size_type size));
+*/
+/** There is major inconsistency in how running out of memory is handled.
+  Some routines return a NULL, and set bfd_error to no_memory.
+  However, obstack routines can't do this ... */
+
+
+DEFUN(PTR bfd_xmalloc,(size),
+      bfd_size_type size)
+{
+  static char no_memory_message[] = "Virtual memory exhausted!\n";
+  PTR ptr;
+  if (size == 0) size = 1;
+  ptr = (PTR)malloc(size);
+  if (ptr == NULL)
+  if (!ptr)
+    {
+      write (2, no_memory_message, sizeof(no_memory_message)-1);
+      exit (-1);
+    }
+  return ptr;
+}
 
 /* Some IO code */
 
@@ -164,14 +189,18 @@ DEFUN(bfd_write,(ptr, size, nitems, abfd),
   return fwrite (ptr, 1, (int)(size*nitems), bfd_cache_lookup(abfd));
 }
 
+/*proto-internal* bfd_write_bigendian_4byte_int
+
+*; PROTO(void, bfd_write_bigendian_4byte_int,( bfd *abfd,  int i));
+*/
 void
 DEFUN(bfd_write_bigendian_4byte_int,(abfd, i),
       bfd *abfd AND
       int i)
 {
-  char buffer[4];
+  bfd_byte buffer[4];
   _do_putb32(i, buffer);
-  bfd_write(buffer, 4, 1, abfd);
+  bfd_write((PTR)buffer, 4, 1, abfd);
 }
 
 int
