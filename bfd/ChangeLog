@@ -1,3 +1,8 @@
+Thu Mar 28 11:00:36 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* config.bfd (sparc64-{sysv4*,solaris2*}): Delete.
+	Stick with sparc-*-{sysv4*,solaris2*}.
+
 Wed Mar 27 10:43:34 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* peicode.h (coff_swap_aux_in): Swap in extra PE x_scn fields.
