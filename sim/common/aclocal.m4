@@ -545,30 +545,46 @@ fi],[sim_default_model="-DWITH_DEFAULT_MODEL='\"${default_sim_default_model}\"'"
 AC_SUBST(sim_default_model)
 
 
+dnl --enable-sim-hardware is for users of the simulator
+dnl arg[1] is a space separated list of devices that override the defaults
+dnl arg[2] is a space separated list of extra target specific devices.
 AC_DEFUN(SIM_AC_OPTION_HARDWARE,
 [
+sim_hardware="-DWITH_HW=1"
+sim_hw_obj="hw-device.o hw-ports.o hw-properties.o hw-base.o hw-tree.o"
+hardware="ifelse([$1],,[core pal glue],[$1]) ifelse([$2],,,[$2])"
 AC_ARG_ENABLE(sim-hardware,
-[  --enable-sim-hardware=list		Specify the hardware to be included in the build.],
-[hardware="cpu,memory,nvram,iobus,htab,disk,trace,register,vm,init,core,pal,com,eeprom,opic,glue,phb,ide"
+[  --enable-sim-hardware=LIST		Specify the hardware to be included in the build.],
+[
 case "${enableval}" in
   yes)	;;
-  no)	AC_MSG_ERROR("List of hardware must be specified for --enable-sim-hardware"); hardware="";;
-  ,*)   hardware="${hardware}${enableval}";;
-  *,)   hardware="${enableval}${hardware}";;
-  *)	hardware="${enableval}"'';;
+  no)	hardware=""; sim_hardware="-DWITH_HW=0"; sim_hw_obj="";;
+  ,*)   hardware="${hardware} `echo ${enableval} | sed -e 's/,/ /'`";;
+  *,)   hardware="`echo ${enableval} | sed -e 's/,/ /'` ${hardware}";;
+  *)	hardware="`echo ${enableval} | sed -e 's/,/ /'`"'';;
 esac
-sim_hw_src=`echo $hardware | sed -e 's/,/.c hw_/g' -e 's/^/hw_/' -e s'/$/.c/'`
-sim_hw_obj=`echo $sim_hw_src | sed -e 's/\.c/.o/g'`
+dnl remove duplicates
+sim_hw=""
+for i in x $hardware ; do
+  case " $f " in
+    x) ;;
+    *" $i "*) ;;
+    *) sim_hw="$sim_hw $i" ;;
+  esac
+done
+sim_hw_obj="$sim_hw_obj `echo $sim_hw | sed -e 's/\([[^ ]]*\)/dv-\1.o/g'`"
 if test x"$silent" != x"yes" && test x"$hardware" != x""; then
-  echo "Setting hardware to $sim_hw_src, $sim_hw_obj"
-fi],[hardware="cpu,memory,nvram,iobus,htab,disk,trace,register,vm,init,core,pal,com,eeprom,opic,glue,phb,ide"
-sim_hw_src=`echo $hardware | sed -e 's/,/.c hw_/g' -e 's/^/hw_/' -e s'/$/.c/'`
-sim_hw_obj=`echo $sim_hw_src | sed -e 's/\.c/.o/g'`
+  echo "Setting hardware to $sim_hardware, $sim_hw, $sim_hw_obj"
+fi],[
+sim_hw="$hardware"
+sim_hw_obj="$sim_hw_obj `echo $sim_hw | sed -e 's/\([[^ ]]*\)/dv-\1.o/g'`"
 if test x"$silent" != x"yes"; then
-  echo "Setting hardware to $sim_hw_src, $sim_hw_obj"
+  echo "Setting hardware to $sim_hardware, $sim_hw, $sim_hw_obj"
 fi])dnl
 ])
 AC_SUBST(sim_hardware)
+AC_SUBST(sim_hw_obj)
+AC_SUBST(sim_hw)
 
 
 dnl --enable-sim-inline is for users that wish to ramp up the simulator's

@@ -1,3 +1,19 @@
+Wed Mar 25 12:35:29 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+Mon Mar 23 10:25:08 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* aclocal.m4 (SIM_AC_OPTION_HARDWARE): Add second argument,
+ 	appends extra devices.
+	(SIM_AC_OPTION_HARDWARE): Substute sim_hw, a non-duplicate list of
+ 	the device names.
+	
+	* Make-common.in (hw-config.h): New target, create hw-config.h
+ 	file.
+	(SIM_HW): Definition from @sim_hw@.
+	(hw-base.o): Depend on hw-config.h
+
 Tue Mar 24 17:41:35 1998  Stu Grossman  <grossman@bhuna.cygnus.co.uk>
 
 	* Make-common.in:  Get SHELL from configure.
