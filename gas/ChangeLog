@@ -1,3 +1,19 @@
+Fri Dec 27 22:51:51 1996  Fred Fish  <fnf@cygnus.com>
+
+	* NOTES.config (Implementation): as.h #define's "GAS" not "gas",
+	includes config.h instead of host.h, tc.h instead of tp.h, and
+	targ-env.h instead of target-environment.h.
+	Also, obj-format.h includes targ-cpu.h instead of
+ 	target-processor.h.
+start-sanitize-tic80
+	* configure.in (case ${generic_target}): Add tic80-*-coff entry.
+	* configure: Rebuild with autoconf.
+	* config/obj-coff.h (coff/tic80.h): Include if TC_TIC80 defined.
+	(TARGET_FORMAT): Define to "coff-tic80".
+	* config/tc-tic80.c: New file for TIc80 support.
+	* config/tc-tic80.h: New file for TIc80 support.
+end-sanitize-tic80
+	
 Fri Dec 27 11:42:29 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* doc/as.texinfo (M): Mention explicitly that -M changes macro

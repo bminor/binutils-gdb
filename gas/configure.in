@@ -63,7 +63,9 @@ emulations=""
 
 for this_target in $target $canon_targets ; do
 
-    eval `echo $this_target | sed 's/^\(.*\)-\(.*\)-\(.*\)$/cpu=\1 vendor=\2 os=\3/'`
+changequote(,)dnl
+    eval `echo $this_target | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/cpu=\1 vendor=\2 os=\3/'`
+changequote([,])dnl
 
     # check for architecture variants
     case ${cpu} in
@@ -287,6 +289,9 @@ changequote([,])dnl
 			    fmt=elf ;;
       sparc-*-netbsd*)      fmt=aout em=nbsd bfd_gas=yes ;;
 
+# start-sanitize-tic80
+      tic80-*-coff)	    fmt=coff targ=tic80coff;;
+# end-sanitize-tic80
       v850-*-*)		    fmt=elf bfd_gas=yes ;;
 
       vax-*-bsd* | vax-*-ultrix*)
