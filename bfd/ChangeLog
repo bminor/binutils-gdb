@@ -1,3 +1,8 @@
+2002-10-21  Elias Athanasopoulos  <eathan@otenet.gr>
+
+	* archive.c (_bfd_archive_bsd_update_armap_timestamp): Replace
+	perror with bfd_perror.
+
 2002-10-19  H.J. Lu <hjl@gnu.org>
 
 	* elflink.h (elf_link_add_object_symbols): Correctly handle
@@ -35,7 +40,7 @@
 2002-10-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am (BFD32_BACKENDS): Remove elfarmqnx-nabi.lo,
-	elf32-i386-fbsd.lo, elf32-i386qnx.lo, elf32-ppcqnx.lo, 
+	elf32-i386-fbsd.lo, elf32-i386qnx.lo, elf32-ppcqnx.lo,
 	elf32-sh-lin.lo, elf32-sh64-lin.lo, elf32-sh-nbsd.lo,
 	elf32-sh64-nbsd.lo, elf32-shqnx.lo.  Add elf32-qnx.lo.
 	(BFD32_BACKENDS_CFILES): Likewise for corresponding C files.
@@ -270,8 +275,8 @@
 	* elf32-sh64-lin.c: New file.
 	* elf64-sh64-lin.c: New file.
 	* targets.c: Add bfd_elf32_sh64lin_vec, bfd_elf32_sh64blin_vec,
- 	bfd_elf64_sh64lin_vec, bfd_elf64_sh64blin_vec.
-	
+	bfd_elf64_sh64lin_vec, bfd_elf64_sh64blin_vec.
+
 2002-10-08  H.J. Lu <hjl@gnu.org>
 
 	* elf32-i386.c (elf_i386_relocate_section): Re-arrange the
