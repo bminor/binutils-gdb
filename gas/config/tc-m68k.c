@@ -314,8 +314,11 @@ struct m68k_it {
 	} reloc[5];		/* Five is enough??? */
 };
 
+#define cpu_of_arch(x)		((x) & m68000up)
+#define float_of_arch(x)	((x) & mfloat)
+#define mmu_of_arch(x)		((x) & mmmu)
+
 static struct m68k_it the_ins;		/* the instruction being assembled */
-static enum m68k_architecture max_arch_this_insn;
 
 /* Macros for adding things to the m68k_it struct */
 
@@ -412,14 +415,7 @@ static void s_proc();
 
 #endif /* __STDC__ */
 
-static enum m68k_architecture current_architecture = m68020
-#ifndef NO_68881
-    | m68881
-#endif
-#ifndef NO_68851
-    | m68851
-#endif
-    ;
+static enum m68k_architecture current_architecture = 0;
 
 /* BCC68000 is for patching in an extra jmp instruction for long offsets
    on the 68000.  The 68000 doesn't support long branches with branchs */
@@ -558,9 +554,16 @@ register char **ccp;
 	} /* need prefix */
 #endif
 
-	for (p = c, q = ccp[0]; p < c + MAX_REG_NAME_LEN && *q != 0; ++p, ++q) {
-		*p = mklower(*q);
-	} /* downcase */
+	for (p = c, q = ccp[0]; p < c + MAX_REG_NAME_LEN; ++p, ++q)
+	  {
+	    if (*q == 0)
+	      {
+		*p = 0;
+		break;
+	      }
+	    else
+	      *p = mklower(*q);
+	  } /* downcase */
 
 	switch(c[0]) {
 	case 'a':
@@ -835,38 +838,37 @@ register struct m68k_op *opP;
 
 		if(i!=FAIL && (*str=='/' || *str=='-')) {
 			opP->mode=REGLST;
-			return get_regs(i,str,opP);
+			return(get_regs(i,str,opP));
 		}
 		if ((stmp=strchr(str,'@')) != '\0') {
 			opP->con1=add_exp(str,stmp-1);
 			if(stmp==strend) {
 				opP->mode=AINDX;
-				return OK;
+				return(OK);
 			}
+
+			if ((current_architecture & m68020up) == 0) {
+				return(FAIL);
+			} /* if target is not a '20 or better */
+
 			stmp++;
 			if(*stmp++!='(' || *strend--!=')') {
 				opP->error="Malformed operand";
-				return FAIL;
+				return(FAIL);
 			}
 			i=try_index(&stmp,opP);
 			opP->con2=add_exp(stmp,strend);
 			
 			if (i == FAIL) {
 				opP->mode=AMIND;
-				if (max_arch_this_insn < m68020) {
-					max_arch_this_insn = m68020;
-				} /* bump arch */
 			} else {
 				opP->mode=APODX;
-				if (max_arch_this_insn < m68020) {
-					max_arch_this_insn = m68020;
-				} /* bump arch */
 			}
-			return OK;
+			return(OK);
 		} /* if there's an '@' */
-		opP->mode=ABSL;
-		opP->con1=add_exp(str,strend);
-		return OK;
+		opP->mode = ABSL;
+		opP->con1 = add_exp(str,strend);
+		return(OK);
 	} /* not a register, not exactly a register, or no '@' */
 
 	opP->reg=i;
@@ -957,89 +959,84 @@ register struct m68k_op *opP;
 	}
 		/* We've now got offset)   offset,reg)   or    reg) */
 
-	if(*str=='\0') {
+	if (*str == '\0') {
 		/* Th-the-thats all folks */
-		if(opP->reg==FAIL) opP->mode=AINDX;	/* Other form of indirect */
-		else if(opP->ireg==FAIL) opP->mode=AOFF;
-		else opP->mode=AINDX;
-		return OK;
+		if (opP->reg == FAIL) opP->mode = AINDX;	/* Other form of indirect */
+		else if(opP->ireg == FAIL) opP->mode = AOFF;
+		else opP->mode = AINDX;
+		return(OK);
 	}
 		/* Next thing had better be another @ */
 	if(*str!='@' || str[1]!='(') {
-		opP->error="junk after indirect";
-		return FAIL;
+		opP->error = "junk after indirect";
+		return(FAIL);
 	}
+	
+	if ((current_architecture & m68020up) == 0) {
+		return(FAIL);
+	} /* if target is not a '20 or better */
+
 	str+=2;
-	if(opP->ireg!=FAIL) {
-		opP->mode=APRDX;
-		
-		if (max_arch_this_insn < m68020) {
-			max_arch_this_insn = m68020;
-		} /* bump arch */
-		
-		i=try_index(&str,opP);
-		if(i!=FAIL) {
-			opP->error="Two index registers!  not allowed!";
-			return FAIL;
+
+	if(opP->ireg != FAIL) {
+		opP->mode = APRDX;
+
+		i = try_index(&str, opP);
+		if (i != FAIL) {
+			opP->error = "Two index registers!  not allowed!";
+			return(FAIL);
 		}
-	} else
-		i=try_index(&str,opP);
+	} else {
+		i = try_index(&str, opP);
+	}
 
 	if (i == FAIL) {
 		char *beg_str;
 
-		beg_str=str;
-		for(i=1;i;) {
+		beg_str = str;
+
+		for (i = 1; i; ) {
 			switch(*str++) {
 			case '\0':
 				opP->error="Missing )";
-				return FAIL;
+				return(FAIL);
 			case ',': i=0; break;
 			case '(': i++; break;
 			case ')': --i; break;
 			}
 		}
+
 		opP->con2=add_exp(beg_str,str-2);
-		if(str[-1]==',') {
-			if(opP->ireg!=FAIL) {
-				opP->error="Can't have two index regs";
-				return FAIL;
+
+		if (str[-1] == ',') {
+			if (opP->ireg != FAIL) {
+				opP->error = "Can't have two index regs";
+				return(FAIL);
 			}
-			i=try_index(&str,opP);
-			if(i==FAIL) {
-				opP->error="malformed index reg";
-				return FAIL;
+
+			i = try_index(&str, opP);
+
+			if (i == FAIL) {
+				opP->error = "malformed index reg";
+				return(FAIL);
 			}
-			opP->mode=APODX;
-			if (max_arch_this_insn < m68020) {
-				max_arch_this_insn = m68020;
-			} /* bump arch */
-		} else if(opP->ireg!=FAIL) {
-			opP->mode=APRDX;
-			
-			if (max_arch_this_insn < m68020) {
-				max_arch_this_insn = m68020;
-			} /* bump arch */
+
+			opP->mode = APODX;
+		} else if (opP->ireg != FAIL) {
+			opP->mode = APRDX;
 		} else {
-			opP->mode=AMIND;
-			
-			if (max_arch_this_insn < m68020) {
-				max_arch_this_insn = m68020;
-			} /* bump arch */
+			opP->mode = AMIND;
 		}
 	} else {
-		opP->mode=APODX;
-		if (max_arch_this_insn < m68020) {
-			max_arch_this_insn = m68020;
-		} /* bump arch */
+		opP->mode = APODX;
 	}
 
 	if(*str!='\0') {
 		opP->error="Junk after indirect";
 		return FAIL;
 	}
-	return OK;
-}
+	return(OK);
+} /* m68k_ip_op() */
 
 /*
  * 
@@ -1206,8 +1203,6 @@ char *instring;
 	LITTLENUM_TYPE words[6];
 	LITTLENUM_TYPE *wordp;
 	
-	max_arch_this_insn = m68000;
-	
 	if (*instring == ' ')
 	    instring++;			/* skip leading whitespace */
 	
@@ -1253,7 +1248,7 @@ char *instring;
 		}
 	}
 	
-	opsfound=opP- &the_ins.operands[0];
+	opsfound = opP - &the_ins.operands[0];
 	
 	/* This ugly hack is to support the floating pt opcodes in their standard form */
 	/* Essentially, we fake a first enty of type COP#1 */
@@ -1272,13 +1267,13 @@ char *instring;
 	
 	/* We've got the operands.  Find an opcode that'll accept them */
 	for (losing = 0; ; ) {
-		/* if we didn't get the right number of ops, or either
-		   the modes of our args or this op line itself are out
-		   of order... */
+		/* if we didn't get the right number of ops,
+		   or we have no common model with this pattern
+		   then reject this pattern. */
 		
-		if ((opsfound != opcode->m_opnum)
-		    || ((max_arch_this_insn > current_architecture)
-			|| (opcode->m_arch > current_architecture))) {
+		if (opsfound != opcode->m_opnum
+		    || ((opcode->m_arch & current_architecture) == 0)) {
+
 			++losing;
 			
 		} else {
@@ -1291,8 +1286,10 @@ char *instring;
 				   it belongs to.  I hope this makes sense. */
 				switch(*s) {
 				case '!':
-					if(opP->mode==MSCR || opP->mode==IMMED ||
-					   opP->mode==DREG || opP->mode==AREG || opP->mode==AINC || opP->mode==ADEC || opP->mode==REGLST)
+					if (opP->mode == MSCR || opP->mode == IMMED
+					    || opP->mode == DREG || opP->mode == AREG
+					    || opP->mode == AINC || opP->mode == ADEC
+					    || opP->mode == REGLST)
 					    losing++;
 					break;
 					
@@ -1429,13 +1426,13 @@ char *instring;
 					if (opP->mode != MSCR
 					    || opP->reg < USP
 					    || opP->reg > URP
-					    || (current_architecture & m68000up) < m68010 /* before 68010 had none */
-					    || ((current_architecture & m68020up) == 0
+					    || cpu_of_arch(current_architecture) < m68010 /* before 68010 had none */
+					    || (cpu_of_arch(current_architecture) < m68020
 						&& opP->reg != SFC
 						&& opP->reg != DFC
 						&& opP->reg != USP
 						&& opP->reg != VBR) /* 68010's had only these */
-					    || ((current_architecture & m68040) == 0
+					    || (cpu_of_arch(current_architecture) < m68040
 						&& opP->reg != SFC
 						&& opP->reg != DFC
 						&& opP->reg != USP
@@ -1444,7 +1441,7 @@ char *instring;
 						&& opP->reg != CAAR
 						&& opP->reg != MSP
 						&& opP->reg != ISP) /* 680[23]0's have only these */
-					    || ((current_architecture & m68040) /* 68040 has all but this */
+					    || (cpu_of_arch(current_architecture) == m68040 /* 68040 has all but this */
 						&& opP->reg == CAAR)) {
 						losing++;
 					} /* doesn't cut it */
@@ -1609,7 +1606,8 @@ char *instring;
 		losing = 0;
 	}
 	
-	
+	/* now assemble it */
+
 	the_ins.args=opcode->m_operands;
 	the_ins.numargs=opcode->m_opnum;
 	the_ins.numo=opcode->m_codenum;
@@ -1778,9 +1776,7 @@ char *instring;
 			case APODX:
 			case AMIND:
 			case APRDX:
-				if (max_arch_this_insn < m68020) {
-					max_arch_this_insn = m68020;
-				} /* bump arch */
+				know(current_architecture & m68020up);
 				/* intentional fall-through */
 			case AINDX:
 				nextword=0;
@@ -1839,7 +1835,7 @@ char *instring;
 				/* It aint simple */
 				nextword|=0x100;
 				/* If the guy specified a width, we assume that
-				   it is wide enough.  Maybe it isn't.  Ifso, we lose
+				   it is wide enough.  Maybe it isn't.  If so, we lose
 				   */
 				switch(siz1) {
 				case 0:
@@ -1934,7 +1930,7 @@ char *instring;
 					   && !subs(opP->con1)
 					   && seg(opP->con1) == SEG_TEXT
 					   && now_seg == SEG_TEXT
-					   && (current_architecture & m68000up) <= m68010
+					   && cpu_of_arch(current_architecture) < m68020
 					   && !flagseen['S']
 					   && !strchr("~%&$?", s[0])) {
 						tmpreg=0x3A; /* 7.2 */
@@ -2045,7 +2041,7 @@ char *instring;
 				break;
 			case 'L':
 			long_branch:
-				if(current_architecture <= m68010) 	/* 68000 or 010 */
+				if (cpu_of_arch(current_architecture) < m68020) 	/* 68000 or 010 */
 				    as_warn("Can't use long branches on 68000/68010");
 				the_ins.opcode[the_ins.numo-1]|=0xff;
 				/* Offset the displacement to be relative to byte disp location */
@@ -2066,7 +2062,7 @@ char *instring;
 				   where opnd is absolute (it needs
 				   to use the 68000 hack since no
 				   conditional abs jumps).  */
-				if (((current_architecture <= m68010) || (0==adds(opP->con1)))
+				if (((cpu_of_arch(current_architecture) < m68020) || (0==adds(opP->con1)))
 				    && (the_ins.opcode[0] >= 0x6200)
 				    && (the_ins.opcode[0] <= 0x6f00)) {
 					add_frag(adds(opP->con1),offs(opP->con1),TAB(BCC68000,SZ_UNDEF));
@@ -2667,6 +2663,18 @@ char *str;
 	char	*to_beg_P;
 	int	shorts_this_frag;
 
+
+	if (current_architecture == 0) {
+		current_architecture = (m68020
+#ifndef NO_68881
+					| m68881
+#endif
+#ifndef NO_68851
+					| m68851
+#endif
+					);
+	} /* default current_architecture */
+
 	bzero((char *)(&the_ins),sizeof(the_ins));	/* JF for paranoia sake */
 	m68k_ip(str);
 	er=the_ins.error;
@@ -2759,7 +2767,7 @@ char *str;
 			    the_ins.reloc[m].pcrel,
 				NO_RELOC);
 		}
-		know(the_ins.fragb[n].fadd);
+		/* know(the_ins.fragb[n].fadd); */
 		(void)frag_var(rs_machine_dependent,10,0,(relax_substateT)(the_ins.fragb[n].fragty),
  the_ins.fragb[n].fadd,the_ins.fragb[n].foff,to_beg_P);
 	}
@@ -3054,7 +3062,7 @@ register fragS *fragP;
     ext=2;
     break;
   case TAB(BRANCH,LONG):
-    if (current_architecture <= m68010) {
+    if (cpu_of_arch(current_architecture) < m68020) {
       if (fragP->fr_opcode[0]==0x61) {
 	fragP->fr_opcode[0]= 0x4E;
 	fragP->fr_opcode[1]= 0xB9;	/* JBSR with ABSL LONG offset */
@@ -3276,7 +3284,7 @@ segT segment;
 		   && S_GET_SEGMENT(fragP->fr_symbol) == segment) {
                         fragP->fr_subtype=TAB(TABTYPE(fragP->fr_subtype),BYTE);
                         break;
-		} else if((fragP->fr_symbol == 0) || (current_architecture <= m68010)) {
+		} else if((fragP->fr_symbol == 0) || (cpu_of_arch(current_architecture) < m68020)) {
 			/* On 68000, or for absolute value, switch to abs long */
 			/* FIXME, we should check abs val, pick short or long */
 			if(fragP->fr_opcode[0]==0x61) {
@@ -3453,7 +3461,7 @@ symbolS	*to_symbol;
 {
 	long offset;
 
-	if (current_architecture <= m68010) {
+	if (cpu_of_arch(current_architecture) < m68020) {
 		offset=to_addr-S_GET_VALUE(to_symbol);
 		md_number_to_chars(ptr  ,(long)0x4EF9,2);
 		md_number_to_chars(ptr+2,(long)offset,4);
@@ -3752,14 +3760,16 @@ char ***vecP;
 			current_architecture |= m68040;
 
 #ifndef NO_68881
-		} else if (!strcmp(*argP, "68881")
-			   || !strcmp(*argP, "68882")) { 
-			current_architecture |= m68040;
+		} else if (!strcmp(*argP, "68881")) {
+			current_architecture |= m68881;
+
+		} else if (!strcmp(*argP, "68882")) {
+			current_architecture |= m68882;
 
 #endif /* NO_68881 */
 #ifndef NO_68851
 		} else if (!strcmp(*argP,"68851")) { 
-			current_architecture |= m68040;
+			current_architecture |= m68851;
 
 #endif /* NO_68851 */
 		} else {
