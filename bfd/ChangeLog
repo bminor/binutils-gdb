@@ -1,5 +1,11 @@
 1999-07-12  Ian Lance Taylor  <ian@zembu.com>
 
+	* Makefile.am: Rebuild dependencies.
+	* Makefile.in: Rebuild.
+
+	* bfd-in.h: Remove tests of COFF_IMAGE_WITH_PE.
+	* bfd-in2.h: Rebuild.
+
 	* Many files: Changes to avoid gcc warnings: Add ATTRIBUTE_UNUSED
 	as appropriate.  Use EMPTY_HOWTO as appropriate.  Fill in
 	structure initializations.  Add casts.
