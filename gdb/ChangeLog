@@ -1,5 +1,21 @@
 2002-07-30  Daniel Jacobowitz  <drow@mvista.com>
 
+	* ppc-linux-tdep.c (ELF_NGREG, ELF_NFPREG, ELF_NVRREG)
+	(ELF_FPREGSET_SIZE, ELF_GREGSET_SIZE): New enums.
+	(fetch_core_registers, ppc_linux_supply_gregset)
+	(ppc_linux_supply_fpregset): New functions.
+	(ppc_linux_regset_core_fns): New.
+	(_initialize_ppc_linux_tdep): Call add_core_fns.
+	* ppc-tdep.h: Add prototypes for ppc_linux_supply_fpregset
+	and ppc_linux_supply_gregset.
+	* ppc-linux-nat.c (supply_gregset): Call ppc_linux_supply_gregset.
+	(supply_fpregset): Call ppc_linux_supply_fpregset.
+	* config/powerpc/linux.mh (NATDEPFILES): Remove core-regset.o and
+	corelow.o.
+	* config/powerpc/linux.mt (TDEPFILES): Add corelow.o.
+
+2002-07-30  Daniel Jacobowitz  <drow@mvista.com>
+
 	* symtab.c (lookup_symbol): Demangle before lowercasing.
 
 2002-07-30  Andrew Cagney  <ac131313@redhat.com>

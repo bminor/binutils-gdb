@@ -39,6 +39,8 @@ CORE_ADDR ppc_sysv_abi_push_arguments (int, struct value **, CORE_ADDR, int,
 				       CORE_ADDR);
 int ppc_linux_memory_remove_breakpoint (CORE_ADDR addr, char *contents_cache);
 struct link_map_offsets *ppc_linux_svr4_fetch_link_map_offsets (void);
+void ppc_linux_supply_gregset (char *buf);
+void ppc_linux_supply_fpregset (char *buf);
 
 
 /* From rs6000-tdep.c... */

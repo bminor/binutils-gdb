@@ -600,6 +600,88 @@ ppc_linux_svr4_fetch_link_map_offsets (void)
   return lmp;
 }
 
+enum {
+  ELF_NGREG = 48,
+  ELF_NFPREG = 33,
+  ELF_NVRREG = 33
+};
+
+enum {
+  ELF_GREGSET_SIZE = (ELF_NGREG * 4),
+  ELF_FPREGSET_SIZE = (ELF_NFPREG * 8)
+};
+
+void
+ppc_linux_supply_gregset (char *buf)
+{
+  int regi;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch); 
+
+  for (regi = 0; regi < 32; regi++)
+    supply_register (regi, buf + 4 * regi);
+
+  supply_register (PC_REGNUM, buf + 4 * PPC_LINUX_PT_NIP);
+  supply_register (tdep->ppc_lr_regnum, buf + 4 * PPC_LINUX_PT_LNK);
+  supply_register (tdep->ppc_cr_regnum, buf + 4 * PPC_LINUX_PT_CCR);
+  supply_register (tdep->ppc_xer_regnum, buf + 4 * PPC_LINUX_PT_XER);
+  supply_register (tdep->ppc_ctr_regnum, buf + 4 * PPC_LINUX_PT_CTR);
+  if (tdep->ppc_mq_regnum != -1)
+    supply_register (tdep->ppc_mq_regnum, buf + 4 * PPC_LINUX_PT_MQ);
+  supply_register (tdep->ppc_ps_regnum, buf + 4 * PPC_LINUX_PT_MSR);
+}
+
+void
+ppc_linux_supply_fpregset (char *buf)
+{
+  int regi;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch); 
+
+  for (regi = 0; regi < 32; regi++)
+    supply_register (FP0_REGNUM + regi, buf + 8 * regi);
+
+  /* The FPSCR is stored in the low order word of the last doubleword in the
+     fpregset.  */
+  supply_register (tdep->ppc_fpscr_regnum, buf + 8 * 32 + 4);
+}
+
+/*
+  Use a local version of this function to get the correct types for regsets.
+*/
+
+static void
+fetch_core_registers (char *core_reg_sect,
+		      unsigned core_reg_size,
+		      int which,
+		      CORE_ADDR reg_addr)
+{
+  if (which == 0)
+    {
+      if (core_reg_size == ELF_GREGSET_SIZE)
+	ppc_linux_supply_gregset (core_reg_sect);
+      else
+	warning ("wrong size gregset struct in core file");
+    }
+  else if (which == 2)
+    {
+      if (core_reg_size == ELF_FPREGSET_SIZE)
+	ppc_linux_supply_fpregset (core_reg_sect);
+      else
+	warning ("wrong size fpregset struct in core file");
+    }
+}
+
+/* Register that we are able to handle ELF file formats using standard
+   procfs "regset" structures.  */
+
+static struct core_fns ppc_linux_regset_core_fns =
+{
+  bfd_target_elf_flavour,	/* core_flavour */
+  default_check_format,		/* check_format */
+  default_core_sniffer,		/* core_sniffer */
+  fetch_core_registers,		/* core_read_registers */
+  NULL				/* next */
+};
+
 static void
 ppc_linux_init_abi (struct gdbarch_info info,
                     struct gdbarch *gdbarch)
@@ -639,4 +721,5 @@ _initialize_ppc_linux_tdep (void)
 {
   gdbarch_register_osabi (bfd_arch_powerpc, GDB_OSABI_LINUX,
 			  ppc_linux_init_abi);
+  add_core_fns (&ppc_linux_regset_core_fns);
 }
