@@ -109,7 +109,7 @@ _fi__(!_GENERIC__)
 @page
 @tex
 {\parskip=0pt
-\hfill rms\@ai.mit.edu, pesch\@cygnus.com\par
+\hfill pesch\@cygnus.com\par
 \hfill {\it Using _GDBN__}, \manvers\par
 \hfill \TeX{}info \texinfoversion\par
 }
