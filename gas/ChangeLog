@@ -1,5 +1,7 @@
 Thu Mar 27 12:23:56 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* as.c (parse_args): Update copyright date in version message.
+
 	* Makefile.in (clean-here): Remove dependency files.
 
 	* read.c (s_comm): Check S_IS_COMMON as well as S_IS_DEFINED.
