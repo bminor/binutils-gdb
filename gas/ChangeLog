@@ -1,5 +1,7 @@
 Sat Nov  4 00:51:21 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-ppc.c (ppc_biei): Force symbol into text_section.
+
 	* config/tc-ppc.c (md_show_usage): Put backslash at end of line.
 
 Fri Nov  3 13:02:59 1995  Ian Lance Taylor  <ian@cygnus.com>

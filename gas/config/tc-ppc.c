@@ -2417,13 +2417,11 @@ ppc_biei (ei)
      to do the right thing.  */
 
   sym = symbol_make (name);
-  S_SET_SEGMENT (sym, now_seg);
-  S_SET_VALUE (sym, coff_n_line_nos);
-  sym->bsym->flags |= BSF_DEBUGGING;
-
   /* obj-coff.c currently only handles line numbers correctly in the
      .text section.  */
-  assert (now_seg == text_section);
+  S_SET_SEGMENT (sym, text_section);
+  S_SET_VALUE (sym, coff_n_line_nos);
+  sym->bsym->flags |= BSF_DEBUGGING;
 
   S_SET_STORAGE_CLASS (sym, ei ? C_EINCL : C_BINCL);
   sym->sy_tc.output = 1;
