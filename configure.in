@@ -12,6 +12,7 @@ srcname="gnu development package"
 # XXX - FIXME there needs to be a case for mh_dgux
 
 case "${host_os}" in
+aix*)		host_makefile_frag=config/mh-aix ;;
 m88kbcs)	host_makefile_frag=config/mh-delta88;;
 sysv4*)		host_makefile_frag=config/mh-sysv4 ;;
 sysv* | irix3)	host_makefile_frag=config/mh-sysv ;;
@@ -50,6 +51,7 @@ esac
 case "${target_cpu}" in
 	mips)  configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas//'`
 	;;
+	rs6000)configdirs=`echo ${configdirs} | sed -e 's/gas//'`
 esac
 
 target_makefile_frag=config/mt-${bfd_target}
