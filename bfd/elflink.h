@@ -366,6 +366,13 @@ elf_merge_symbol (abfd, info, name, sym, psec, pvalue, sym_hash,
       break;
     }
 
+  /* In cases involving weak versioned symbols, we may wind up trying
+     to merge a symbol with itself.  Catch that here, to avoid the
+     confusion that results if we try to override a symbol with
+     itself.  */
+  if (abfd == oldbfd)
+    return true;
+
   /* NEWDYN and OLDDYN indicate whether the new or old symbol,
      respectively, is from a dynamic object.  */
 
@@ -638,15 +645,25 @@ elf_merge_symbol (abfd, info, name, sym, psec, pvalue, sym_hash,
 
   /* Handle the special case of a weak definition in a regular object
      followed by a non-weak definition in a shared object.  In this
-     case, we prefer the definition in the shared object.  To make
-     this work we have to frob the flags.  */
+     case, we prefer the definition in the shared object.  */
   if (olddef
-      && ! olddyn
       && h->root.type == bfd_link_hash_defweak
       && newdef
       && newdyn
       && bind != STB_WEAK)
-    h->elf_link_hash_flags &= ~ ELF_LINK_HASH_DEF_REGULAR;
+    {
+      /* To make this work we have to frob the flags so that the rest
+         of the code does not think we are using the regular
+         definition.  */
+      h->elf_link_hash_flags &= ~ ELF_LINK_HASH_DEF_REGULAR;
+      h->elf_link_hash_flags |= ELF_LINK_HASH_REF_REGULAR;
+
+      /* If H is the target of an indirection, we want the caller to
+         use H rather than the indirect symbol.  Otherwise if we are
+         defining a new indirect symbol we will wind up attaching it
+         to the entry we are overriding.  */
+      *sym_hash = h;
+    }
 
   /* Handle the special case of a non-weak definition in a shared
      object followed by a weak definition in a regular object.  In
