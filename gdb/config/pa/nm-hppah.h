@@ -19,9 +19,34 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define U_REGS_OFFSET 0
 
+#define KERNEL_U_ADDR 0
+
 /* What a coincidence! */
 #define REGISTER_U_ADDR(addr, blockend, regno)				\
 { addr = (int)(blockend) + REGISTER_BYTE (regno);}
+
+/* HPUX 8.0, in its infinite wisdom, has chosen to prototype ptrace
+   with five arguments, so programs written for normal ptrace lose.  */
+#define FIVE_ARG_PTRACE
+
+/* We need to figure out where the text region is so that we use the
+   appropriate ptrace operator to manipulate text.  Simply reading/writing
+   user space will crap out HPUX.  */
+#define NEED_TEXT_START_END
+
+/* This macro defines the register numbers (from REGISTER_NAMES) that
+   are effectively unavailable to the user through ptrace().  It allows
+   us to include the whole register set in REGISTER_NAMES (inorder to
+   better support remote debugging).  If it is used in
+   fetch/store_inferior_registers() gdb will not complain about I/O errors
+   on fetching these registers.  If all registers in REGISTER_NAMES
+   are available, then return false (0).  */
+
+#define CANNOT_STORE_REGISTER(regno)            \
+                   ((regno) == 0) ||     \
+                   ((regno) == PCSQ_HEAD_REGNUM) || \
+                   ((regno) >= PCSQ_TAIL_REGNUM && (regno) < IPSW_REGNUM) ||  \
+                   ((regno) > IPSW_REGNUM && (regno) < FP4_REGNUM)
 
 /* fetch_inferior_registers is in hppah-nat.c.  */
 #define FETCH_INFERIOR_REGISTERS
