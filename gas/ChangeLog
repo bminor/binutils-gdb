@@ -1,3 +1,8 @@
+Thu Dec  5 23:44:42 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config/tc-ppc.c (comment_char): Correctly define for non ELF
+	systems.
+
 Thu Dec  5 11:03:31 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* write.c (fixup_segment): Don't discard the symbol for a PC
