@@ -1,12 +1,12 @@
-/* Table of opcodes for the AMD 29000
-   Copyright (C) 1990, 1991 Free Software Foundation, Inc.
+/* Table of opcodes for the AMD 29000 family.
+   Copyright 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
 
 This file is part of GDB and GAS.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
-any later version.
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -14,10 +14,8 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
-
-/* $Id$ */
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 struct a29k_opcode {
   /* Name of the instruction.  */
@@ -284,37 +282,3 @@ static CONST struct a29k_opcode a29k_opcodes[] =
 };
 
 CONST unsigned int num_opcodes = (((sizeof a29k_opcodes) / (sizeof a29k_opcodes[0])) - 1);
-
-/*
- * $Log$
- * Revision 1.1  1991/12/01 02:22:19  sac
- * Initial revision
- *
- * Revision 1.5  1991/11/07  16:59:19  sac
- * Fixed encoding of mtacc instruction.
- *
- * Revision 1.4  1991/08/06  07:20:27  rich
- * Fixing CONST declarations.
- *
- * Revision 1.3  1991/08/05  22:31:05  rich
- * *** empty log message ***
- *
- * Revision 1.2  1991/07/15  23:34:04  steve
- * *** empty log message ***
- *
- * Revision 1.1  1991/05/19  00:19:33  rich
- * Initial revision
- *
- * Revision 1.1.1.1  1991/04/04  18:15:23  rich
- * new gas main line
- *
- * Revision 1.1  1991/04/04  18:15:23  rich
- * Initial revision
- *
- * Revision 1.2  1991/03/30  17:13:19  rich
- * num_opcodes now unsigned.  Also, added rcsid and log.
- *
- *
- */
-
-/* end of a29k-opcode.h */
