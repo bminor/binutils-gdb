@@ -1,3 +1,11 @@
+Mon Jan 10 23:16:42 1994  John Gilmore  (gnu@cygnus.com)
+
+	* a29k-tdep.c (examine_prologue):  Don't worry if the ASGEQ
+	stack overflow check isn't right after the register stack
+	adjustment instruction.  Metaware R2.3u compiler moves other
+	things in front of it.  This fix isn't perfect but is what's
+	running.
+
 Mon Jan 10 20:08:23 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
 	* c-valprint.c (c_val_print): Treat TYPE_CODE_RANGE like TYPE_CODE_INT.

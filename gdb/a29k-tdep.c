@@ -1,5 +1,5 @@
 /* Target-machine dependent code for the AMD 29000
-   Copyright 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
    Contributed by Cygnus Support.  Written by Jim Kingdon.
 
 This file is part of GDB.
@@ -149,17 +149,18 @@ examine_prologue (pc, rsize, msize, mfp_used)
     }
   p += 4;
 
-  /* Next instruction must be asgeu V_SPILL,gr1,rab.  
+  /* Next instruction ought to be asgeu V_SPILL,gr1,rab.  
    * We don't check the vector number to allow for kernel debugging.  The 
    * kernel will use a different trap number. 
+   * If this insn is missing, we just keep going; Metaware R2.3u compiler
+   * generates prologue that intermixes initializations and puts the asgeu
+   * way down.
    */
   insn = read_memory_integer (p, 4);
-  if ((insn & 0xff00ffff) != (0x5e000100|RAB_HW_REGNUM))
+  if ((insn & 0xff00ffff) == (0x5e000100|RAB_HW_REGNUM))
     {
-      p = pc;
-      goto done;
+      p += 4;
     }
-  p += 4;
 
   /* Next instruction usually sets the frame pointer (lr1) by adding
      <size * 4> from gr1.  However, this can (and high C does) be
@@ -269,6 +270,19 @@ examine_prologue (pc, rsize, msize, mfp_used)
 		*msize = msize0;
 	    }
 	}
+    }
+
+  /* Next instruction might be asgeu V_SPILL,gr1,rab.  
+   * We don't check the vector number to allow for kernel debugging.  The 
+   * kernel will use a different trap number. 
+   * Metaware R2.3u compiler
+   * generates prologue that intermixes initializations and puts the asgeu
+   * way down after everything else.
+   */
+  insn = read_memory_integer (p, 4);
+  if ((insn & 0xff00ffff) == (0x5e000100|RAB_HW_REGNUM))
+    {
+      p += 4;
     }
 
  done:
