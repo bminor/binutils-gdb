@@ -2155,60 +2155,100 @@ write_rc_rcdata (e, rcdata, ind)
 	    for (i = 0; i + 3 < ri->u.buffer.length; i += 4)
 	      {
 		unsigned long l;
+		int j;
 
+		if (! first)
+		  indent (e, ind + 2);
 		l = ((((((ri->u.buffer.data[i + 3] << 8)
 			 | ri->u.buffer.data[i + 2]) << 8)
 		       | ri->u.buffer.data[i + 1]) << 8)
 		     | ri->u.buffer.data[i]);
-		if (first)
-		  first = 0;
-		else
-		  {
-		    fprintf (e, ",\n");
-		    indent (e, ind + 2);
-		  }
 		fprintf (e, "%luL", l);
+		if (i + 4 < ri->u.buffer.length || ri->next != NULL)
+		  fprintf (e, ",");
+		for (j = 0; j < 4; ++j)
+		  if (! isprint (ri->u.buffer.data[i + j])
+		      && ri->u.buffer.data[i + j] != 0)
+		    break;
+		if (j >= 4)
+		  {
+		    fprintf (e, "\t// ");
+		    for (j = 0; j < 4; ++j)
+		      {
+			if (! isprint (ri->u.buffer.data[i + j]))
+			  fprintf (e, "\\%03o", ri->u.buffer.data[i + j]);
+			else
+			  {
+			    if (ri->u.buffer.data[i + j] == '\\')
+			      fprintf (e, "\\");
+			    fprintf (e, "%c", ri->u.buffer.data[i + j]);
+			  }
+		      }
+		  }
+		fprintf (e, "\n");
+		first = 0;
 	      }
 
 	    if (i + 1 < ri->u.buffer.length)
 	      {
-		int i;
+		int s;
+		int j;
 
-		i = (ri->u.buffer.data[i + 1] << 8) | ri->u.buffer.data[i];
-		if (first)
-		  first = 0;
-		else
+		if (! first)
+		  indent (e, ind + 2);
+		s = (ri->u.buffer.data[i + 1] << 8) | ri->u.buffer.data[i];
+		fprintf (e, "%d", s);
+		if (i + 2 < ri->u.buffer.length || ri->next != NULL)
+		  fprintf (e, ",");
+		for (j = 0; j < 2; ++j)
+		  if (! isprint (ri->u.buffer.data[i + j])
+		      && ri->u.buffer.data[i + j] != 0)
+		    break;
+		if (j >= 2)
 		  {
-		    fprintf (e, ",\n");
-		    indent (e, ind + 2);
+		    fprintf (e, "\t// ");
+		    for (j = 0; j < 2; ++j)
+		      {
+			if (! isprint (ri->u.buffer.data[i + j]))
+			  fprintf (e, "\\%03o", ri->u.buffer.data[i + j]);
+			else
+			  {
+			    if (ri->u.buffer.data[i + j] == '\\')
+			      fprintf (e, "\\");
+			    fprintf (e, "%c", ri->u.buffer.data[i + j]);
+			  }
+		      }
 		  }
-		fprintf (e, "%d", i);
+		fprintf (e, "\n");
 		i += 2;
+		first = 0;
 	      }
 
 	    if (i < ri->u.buffer.length)
 	      {
-		if (first)
-		  first = 0;
-		else
-		  {
-		    fprintf (e, ",\n");
-		    indent (e, ind + 2);
-		  }
+		if (! first)
+		  indent (e, ind + 2);
 		if ((ri->u.buffer.data[i] & 0x7f) == ri->u.buffer.data[i]
 		    && isprint (ri->u.buffer.data[i]))
 		  fprintf (e, "\"%c\"", ri->u.buffer.data[i]);
 		else
-		  fprintf (e, "\"\%03o\"", ri->u.buffer.data[i]);
+		  fprintf (e, "\"\\%03o\"", ri->u.buffer.data[i]);
+		if (ri->next != NULL)
+		  fprintf (e, ",");
+		fprintf (e, "\n");
+		first = 0;
 	      }
 
 	    break;
 	  }
 	}
 
-      if (ri->next != NULL)
-	fprintf (e, ",");
-      fprintf (e, "\n");
+      if (ri->type != RCDATA_BUFFER)
+	{
+	  if (ri->next != NULL)
+	    fprintf (e, ",");
+	  fprintf (e, "\n");
+	}
     }
 
   indent (e, ind);

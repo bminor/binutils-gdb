@@ -1,3 +1,12 @@
+1999-09-19  Ian Lance Taylor  <ian@zembu.com>
+
+	* resrc.c (write_rc_rcdata): Fix local variable shadowing
+	problem.  If RCDATA_BUFFER data can be read as strings, modify
+	code to print the strings as comments.
+	* resres.c: Add casts to avoid warnings.
+	(write_res_data, read_res_data): Don't put the program name in the
+	error message; fatal already puts it there.
+
 1999-09-14  Michael Meissner  <meissner@cygnus.com>
 
 	* configure.in (Canonicalization of target names): Remove adding
