@@ -1,3 +1,9 @@
+2005-03-28  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparc-tdep.c (sparc_supply_rwindow, sparc_collect_rwindow):
+	Handle StackGhost in 64-bit code.
+	* sparc64-tdep.c (sparc64_frame_prev_register): Handle StackGhost.
+
 2005-03-27  Christopher Faylor  <cgf@timesys.com>
 
 	* win32-nat.c (handle_exception): Treat win32 routines which check for
