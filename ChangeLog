@@ -1,3 +1,22 @@
+Mon Apr 24 16:23:41 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config.guess (*:Linux:*:*): Determine whether the default
+	compiler is ELF or a.out.
+
+Wed Apr 19 17:02:43 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
+
+	* configure.in (mips-sgi-irix6): Use mh-irix5.
+
+Fri Apr 14 15:21:17 1995  Doug Evans  <dje@chestnut.cygnus.com>
+
+	* Makefile.in (all-gcc): Depend on all-ld (for libgcc1-test).
+
+Wed Apr 12 16:06:01 1995  Jason Merrill  <jason@phydeaux.cygnus.com>
+
+	* test-build.mk: Enable building of shared libraries on IRIX 5 and
+        OSF/1.  Fix compiler flags.
+	* build-all.mk: Support Linux and OSF/1 3.0.  Fix compiler flags.
+
 Tue Apr 11 18:55:40 1995  Doug Evans  <dje@canuck.cygnus.com>
 
 	* configure.in: Recognize --with-newlib.
