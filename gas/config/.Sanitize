@@ -36,6 +36,7 @@ atof-ns32k.c
 atof-tahoe.c
 atof-vax.c
 cplus-dem.c
+go32.mh
 h8300.mt
 h8500.mt
 ho-ansi.h

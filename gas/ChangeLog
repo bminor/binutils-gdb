@@ -1,3 +1,8 @@
+Fri May  6 14:13:15 1994  Steve Chamberlain  (sac@cygnus.com)
+
+        * config/go32.mh: New makefile fragment for go32 crossing.
+	* configure.in (host==go32): Use new fragment.
+
 Fri May  6 14:35:58 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* gasp.c: Include libiberty.h.

@@ -1,0 +1,2 @@
+CC=i386-go32-gcc -Xlinker -S -O2 -fno-omit-frame-pointer
+
