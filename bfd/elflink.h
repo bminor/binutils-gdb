@@ -2680,8 +2680,6 @@ struct elf_assign_sym_version_info
   struct bfd_link_info *info;
   /* Version tree.  */
   struct bfd_elf_version_tree *verdefs;
-  /* Whether we are exporting all dynamic symbols.  */
-  boolean export_dynamic;
   /* Whether we had a failure.  */
   boolean failed;
 };
@@ -2863,13 +2861,12 @@ compute_bucket_count (info)
 
 boolean
 NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
-				     export_dynamic, filter_shlib,
+				     filter_shlib,
 				     auxiliary_filters, info, sinterpptr,
 				     verdefs)
      bfd *output_bfd;
      const char *soname;
      const char *rpath;
-     boolean export_dynamic;
      const char *filter_shlib;
      const char * const *auxiliary_filters;
      struct bfd_link_info *info;
@@ -2973,7 +2970,7 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 
       /* If we are supposed to export all symbols into the dynamic symbol
          table (this is not the normal case), then do so.  */
-      if (export_dynamic)
+      if (info->export_dynamic)
 	{
 	  elf_link_hash_traverse (elf_hash_table (info), elf_export_symbol,
 			          (PTR) &eif);
@@ -2985,7 +2982,6 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
       asvinfo.output_bfd = output_bfd;
       asvinfo.info = info;
       asvinfo.verdefs = verdefs;
-      asvinfo.export_dynamic = export_dynamic;
       asvinfo.failed = false;
 
       elf_link_hash_traverse (elf_hash_table (info),
@@ -3914,7 +3910,7 @@ elf_link_assign_sym_version (h, data)
 			{
 			  if (h->dynindx != -1
 			      && info->shared
-			      && ! sinfo->export_dynamic)
+			      && ! info->export_dynamic)
 			    {
 			      h->elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;
 			      (*bed->elf_backend_hide_symbol) (info, h);
@@ -4026,7 +4022,7 @@ elf_link_assign_sym_version (h, data)
 		      h->verinfo.vertree = t;
 		      if (h->dynindx != -1
 			  && info->shared
-			  && ! sinfo->export_dynamic)
+			  && ! info->export_dynamic)
 			{
 			  h->elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;
 			  (*bed->elf_backend_hide_symbol) (info, h);
@@ -4048,7 +4044,7 @@ elf_link_assign_sym_version (h, data)
 	  h->verinfo.vertree = deflt;
 	  if (h->dynindx != -1
 	      && info->shared
-	      && ! sinfo->export_dynamic)
+	      && ! info->export_dynamic)
 	    {
 	      h->elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;
 	      (*bed->elf_backend_hide_symbol) (info, h);

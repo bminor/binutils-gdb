@@ -625,11 +625,11 @@ extern struct bfd_link_needed_list *bfd_elf_get_needed_list
 extern boolean bfd_elf_get_bfd_needed_list
   PARAMS ((bfd *, struct bfd_link_needed_list **));
 extern boolean bfd_elf32_size_dynamic_sections
-  PARAMS ((bfd *, const char *, const char *, boolean, const char *,
+  PARAMS ((bfd *, const char *, const char *, const char *,
 	   const char * const *, struct bfd_link_info *, struct sec **,
 	   struct bfd_elf_version_tree *));
 extern boolean bfd_elf64_size_dynamic_sections
-  PARAMS ((bfd *, const char *, const char *, boolean, const char *,
+  PARAMS ((bfd *, const char *, const char *, const char *,
 	   const char * const *, struct bfd_link_info *, struct sec **,
 	   struct bfd_elf_version_tree *));
 extern void bfd_elf_set_dt_needed_name PARAMS ((bfd *, const char *));

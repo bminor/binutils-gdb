@@ -1,3 +1,13 @@
+2001-06-18  Hans-Peter Nilsson  <hp@axis.com>
+
+	* elflink.h (struct elf_assign_sym_version_info): Remove member
+	export_dynamic.  All users changed to use info member.
+	NAME(bfd_elf,size_dynamic_sections)): Remove parameter
+	export_dynamic, instead use member in parameter info.
+	* bfd-in.h (bfd_elf32_size_dynamic_sections,
+	bfd_elf64_size_dynamic_sections): Update prototype.
+	* bfd-in2.h: Regenerate.
+
 2001-06-18  H.J. Lu  <hjl@gnu.org>
 
 	* elflink.h (elf_info_failed): Add a new field, verdefs.
