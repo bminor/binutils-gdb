@@ -1,3 +1,8 @@
+Tue Dec 26 17:37:23 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-srec/srec.exp: If powerpc*-*-eabi*, use --defsym to define
+	__eabi.
+
 Tue Dec 19 18:01:01 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ld-srec/srec.exp: Add setup_xfails for XCOFF targets.
