@@ -155,6 +155,7 @@ SECTIONS
   .rodata ${RELOCATING-0} : { *(.rodata) ${RELOCATING+*(.rodata.*)} ${RELOCATING+*(.gnu.linkonce.r.*)} } > ROM
   ${RELOCATING+${CTOR}}
   ${RELOCATING+${DTOR}}
+  .jcr : { KEEP (*(.jcr)) } > ROM
   .eh_frame : { KEEP (*(.eh_frame)) } > ROM
   .gcc_except_table : { *(.gcc_except_table) } > ROM
   .plt : { *(.plt) } > ROM

@@ -1,3 +1,7 @@
+2003-04-16  Nick Clifton  <nickc@redhat.com>
+
+	* scripttempl/xstormy16.sc: Add .jcr section mapping.
+
 2003-04-15  H.J. Lu <hjl@gnu.org>
 
 	From Debian by Jack Howarth <howarth@nitro.med.uc.edu>:
