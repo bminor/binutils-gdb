@@ -1,3 +1,8 @@
+2002-02-08  Alexandre Oliva  <aoliva@redhat.com>
+
+	* configure.in <bfd_sh_arc>: Enable sh64 support on sh-*.
+	* configure: Rebuilt.
+
 2002-02-08  Ivan Guzvinec <ivang@opencores.org>
 
 	* or32-opc.c: Fix compile time warning messages.

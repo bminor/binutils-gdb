@@ -210,8 +210,10 @@ if test x${all_targets} = xfalse ; then
 	bfd_s390_arch)		ta="$ta s390-dis.lo s390-opc.lo" ;;
 	bfd_sh_arch)
 	  # We can't decide what we want just from the CPU family.
+	  # We want SH5 support unless a specific version of sh is
+	  # specified, as in sh3-elf, sh3b-linux-gnu, etc.
 	  case " $target $canon_targets " in
-            *" all "* | *" sh64-"* )
+            *" all "* | *" sh64-"* | *" sh-"* | *" shl-"*)
 				ta="$ta sh64-dis.lo sh64-opc.lo"
 				archdefs="$archdefs -DINCLUDE_SHMEDIA";;
 	  esac;
