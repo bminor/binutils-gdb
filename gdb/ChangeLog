@@ -1,5 +1,14 @@
 2002-03-29  Daniel Jacobowitz  <drow@mvista.com>
 
+	2002-03-27  Daniel Jacobowitz  <drow@mvista.com>
+
+	* signals/signals.c: Include "server.h" in gdbserver build.
+	(target_signal_from_name): Don't use STREQ.
+	(_initialize_signals): Likewise.  Don't include function in
+	gdbserver build.
+
+2002-03-29  Daniel Jacobowitz  <drow@mvista.com>
+
 	Merge from trunk:
 	* signals/signals.c: New file, copied from signals.c.
 
