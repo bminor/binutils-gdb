@@ -1,4 +1,9 @@
 
+Wed Feb 12 14:42:47 1997  Dawn Perchik  <dawn@cygnus.com>
+
+        * debugify.c, debugify.h: New files.  Provide common macros
+	for writing debug info to a log file or stdio.
+
 Wed Feb 12 02:44:39 1997  Dawn Perchik  <dawn@cygnus.com>
 
         * c-valprint.c (c_val_print): Fix printing for arrays defined

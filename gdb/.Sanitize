@@ -199,6 +199,8 @@ dbug-rom.c
 dbxread.c
 dcache.c
 dcache.h
+debugify.h
+debugify.c
 defs.h
 delta68-nat.c
 demangle.c
