@@ -144,7 +144,6 @@ struct gdbarch_tdep
     int wordsize;              /* size in bytes of fixed-point word */
     const struct reg *regs;    /* from current variant */
     int ppc_gp0_regnum;		/* GPR register 0 */
-    int ppc_gprs_pseudo_p;      /* non-zero if GPRs are pseudo-registers */
     int ppc_toc_regnum;		/* TOC register */
     int ppc_ps_regnum;	        /* Processor (or machine) status (%msr) */
     int ppc_cr_regnum;		/* Condition register */
@@ -165,6 +164,7 @@ struct gdbarch_tdep
     int ppc_mq_regnum;		/* Multiply/Divide extension register */
     int ppc_vr0_regnum;		/* First AltiVec register */
     int ppc_vrsave_regnum;	/* Last AltiVec register */
+    int ppc_ev0_upper_regnum;   /* First GPR upper half register */
     int ppc_ev0_regnum;         /* First ev register */
     int ppc_ev31_regnum;        /* Last ev register */
     int ppc_acc_regnum;         /* SPE 'acc' register */

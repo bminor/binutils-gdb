@@ -1,5 +1,49 @@
 2004-08-04  Jim Blandy  <jimb@redhat.com>
 
+	Change the layout of the PowerPC E500 raw register cache to allow
+	the lower 32-bit halves of the GPRS to be their own raw registers,
+	not pseudoregisters.
+	* ppc-tdep.h (struct gdbarch_tdep): Remove ppc_gprs_pseudo_p flag;
+	add ppc_ev0_upper_regnum flag.
+	* rs6000-tdep.c: #include "reggroups.h".
+	(spe_register_p): Recognize the ev upper half registers as SPE
+	registers.
+	(init_sim_regno_table): Build gdb->sim mappings for the upper-half
+	registers.
+	(e500_move_ev_register): New function.
+	(e500_pseudo_register_read, e500_pseudo_register_write): The 'ev'
+	vector registers are the pseudo-registers now, formed by splicing
+	together the gprs and the upper-half registers.
+	(e500_register_reggroup_p): New function.
+	(P): Macro deleted.
+	(P8, A4): New macro.
+	(PPC_EV_REGS, PPC_GPRS_PSEUDO_REGS): Macros deleted.
+	(PPC_SPE_GP_REGS, PPC_SPE_UPPER_GP_REGS, PPC_EV_PSEUDO_REGS): New
+	macros.
+	(registers_e500): Rearrange register set so that the raw register
+	set contains 32-bit GPRs and upper-half registers, and the SPE
+	vector registers become pseudo-registers.
+	(rs6000_gdbarch_init): Don't initialize tdep->ppc_gprs_pseudo_p;
+	it has been deleted.  Initialize ppc_ev0_upper_regnum.  Many other
+	register numbers are now the same for the E500 as they are for
+	other PowerPC variants.  Register e500_register_reggroup_p as the
+	register group function for the E500.
+	* Makefile.in (rs6000-tdep.o): Update dependencies.
+
+	Adapt PPC E500 native support to the new raw regcache layout.
+	* ppc-linux-nat.c (struct gdb_evrregset_t): Doc fixes.
+	(read_spliced_spe_reg, write_spliced_spe_reg): Deleted.
+	(fetch_spe_register, store_spe_register): Handle fetching/storing
+	all the SPE registers at once, if regno == -1.  These now take
+	over the job of fetch_spe_registers and store_spe_registers.
+	(fetch_spe_registers, store_spe_registers): Deleted.
+	(fetch_ppc_registers, store_ppc_registers): Fetch/store gprs
+	unconditionally; they're always raw.  Fetch/store SPE upper half
+	registers, if present, instead of ev registers.
+	(fetch_register, store_register): Remove sanity checks: gprs are
+	never pseudo-registers now, so we never need to even mention any
+	registers that are ever pseudoregisters.
+
 	Use a fixed register numbering when communicating with the PowerPC
 	simulator.
 	* ppc-tdep.h (struct gdbarch_tdep): New member: 'sim_regno'.

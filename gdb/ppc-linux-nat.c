@@ -123,12 +123,10 @@ typedef char gdb_vrregset_t[SIZEOF_VRREGS];
    some SPE-specific registers.
 
    GDB itself continues to claim the general-purpose registers are 32
-   bits long; the full 64-bit registers are called 'ev0' -- 'ev31'.
-   The ev registers are raw registers, and the GPR's are pseudo-
-   registers mapped onto their lower halves.  This means that reading
-   and writing ev registers involves a mix of regset-at-once
-   PTRACE_{GET,SET}EVRREGS calls and register-at-a-time
-   PTRACE_{PEEK,POKE}USR calls.
+   bits long.  It has unnamed raw registers that hold the upper halves
+   of the gprs, and the the full 64-bit SIMD views of the registers,
+   'ev0' -- 'ev31', are pseudo-registers that splice the top and
+   bottom halves together.
 
    This is the structure filled in by PTRACE_GETEVRREGS and written to
    the inferior's registers by PTRACE_SETEVRREGS.  */
@@ -283,105 +281,46 @@ get_spe_registers (int tid, struct gdb_evrregset_t *evrregset)
   memset (evrregset, 0, sizeof (*evrregset));
 }
 
-/* Assuming TID refers to an SPE process, store the full 64-bit value
-   of TID's ev register EV_REGNUM in DEST, getting the high bits from
-   EVRREGS and the low bits from the kernel via ptrace.  */
-static void
-read_spliced_spe_reg (int tid, int ev_regnum,
-                      struct gdb_evrregset_t *evrregs,
-                      char *dest)
-{
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-
-  /* Make sure we're trying to read an EV register; that's all we
-     handle.  */
-  gdb_assert (tdep->ppc_ev0_regnum <= ev_regnum
-              && ev_regnum <= tdep->ppc_ev31_regnum);
-
-  /* Make sure the sizes for the splicing add up.  */
-  gdb_assert (sizeof (evrregs->evr[0]) + sizeof (PTRACE_XFER_TYPE)
-              == register_size (current_gdbarch, ev_regnum));
-
-  {
-    /* The index of ev_regnum in evrregs->evr[].  */
-    int ev_index = ev_regnum - tdep->ppc_ev0_regnum;
-
-    /* The number of the corresponding general-purpose register, which
-       holds the lower 32 bits of the EV register.  */
-    int gpr_regnum = tdep->ppc_gp0_regnum + ev_index;
-
-    /* The offset of gpr_regnum in the process's uarea.  */
-    CORE_ADDR gpr_uoffset = ppc_register_u_addr (gpr_regnum);
-
-    /* The low word of the EV register's value.  */
-    PTRACE_XFER_TYPE low_word;
-
-    /* The PTRACE_PEEKUSR / PT_READ_U ptrace requests need to be able
-       to return arbitrary register values, so they can't return -1 to
-       indicate an error.  So we clear errno, and then check it after
-       the call.  */
-    errno = 0;
-    low_word = ptrace (PT_READ_U, tid, (PTRACE_ARG3_TYPE) gpr_uoffset, 0);
-  
-    if (errno != 0)
-      {
-        char message[128];
-        sprintf (message, "reading register %s (#%d)",
-                 REGISTER_NAME (ev_regnum), ev_regnum);
-        perror_with_name (message);
-      }
-
-    if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
-      {
-        memcpy (dest, &evrregs->evr[ev_index],
-                sizeof (evrregs->evr[ev_index]));
-        * (PTRACE_XFER_TYPE *) (dest + sizeof (evrregs->evr[ev_index]))
-          = low_word;
-      }
-    else if (TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE)
-      {
-        * (PTRACE_XFER_TYPE *) dest = low_word;
-        memcpy (dest + sizeof (PTRACE_XFER_TYPE),
-                &evrregs->evr[ev_index], sizeof (evrregs->evr[ev_index]));
-      }
-    else
-      gdb_assert (0);
-  }
-}
-
-
-/* On SPE machines, supply the full value of the SPE register REGNO
-   from TID.  This handles ev0 -- ev31 and acc, which are 64 bits
-   long, and spefscr, which is 32 bits long.  */
+/* Supply values from TID for SPE-specific raw registers: the upper
+   halves of the GPRs, the accumulator, and the spefscr.  REGNO must
+   be the number of an upper half register, acc, spefscr, or -1 to
+   supply the values of all registers.  */
 static void
 fetch_spe_register (int tid, int regno)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   struct gdb_evrregset_t evrregs;
 
+  gdb_assert (sizeof (evrregs.evr[0])
+              == register_size (current_gdbarch, tdep->ppc_ev0_upper_regnum));
+  gdb_assert (sizeof (evrregs.acc)
+              == register_size (current_gdbarch, tdep->ppc_acc_regnum));
+  gdb_assert (sizeof (evrregs.spefscr)
+              == register_size (current_gdbarch, tdep->ppc_spefscr_regnum));
+
   get_spe_registers (tid, &evrregs);
 
-  if (tdep->ppc_ev0_regnum <= regno
-      && regno <= tdep->ppc_ev31_regnum)
+  if (regno == -1)
     {
-      char buf[MAX_REGISTER_SIZE];
-      read_spliced_spe_reg (tid, regno, &evrregs, buf);
-      regcache_raw_supply (current_regcache, regno, buf);
+      int i;
+
+      for (i = 0; i < ppc_num_gprs; i++)
+        regcache_raw_supply (current_regcache, tdep->ppc_ev0_upper_regnum + i,
+                             &evrregs.evr[i]);
     }
-  else if (regno == tdep->ppc_acc_regnum)
-    {
-      gdb_assert (sizeof (evrregs.acc)
-                  == register_size (current_gdbarch, regno));
-      regcache_raw_supply (current_regcache, regno, &evrregs.acc);
-    }
-  else if (regno == tdep->ppc_spefscr_regnum)
-    {
-      gdb_assert (sizeof (evrregs.spefscr)
-                  == register_size (current_gdbarch, regno));
-      regcache_raw_supply (current_regcache, regno, &evrregs.spefscr);
-    }
-  else
-    gdb_assert (0);
+  else if (tdep->ppc_ev0_upper_regnum <= regno
+           && regno < tdep->ppc_ev0_upper_regnum + ppc_num_gprs)
+    regcache_raw_supply (current_regcache, regno,
+                         &evrregs.evr[regno - tdep->ppc_ev0_upper_regnum]);
+
+  if (regno == -1
+      || regno == tdep->ppc_acc_regnum)
+    regcache_raw_supply (current_regcache, tdep->ppc_acc_regnum, &evrregs.acc);
+
+  if (regno == -1
+      || regno == tdep->ppc_spefscr_regnum)
+    regcache_raw_supply (current_regcache, tdep->ppc_spefscr_regnum,
+                         &evrregs.spefscr);
 }
 
 static void
@@ -393,12 +332,6 @@ fetch_register (int tid, int regno)
   int bytes_transferred;
   unsigned int offset;         /* Offset of registers within the u area. */
   char buf[MAX_REGISTER_SIZE];
-
-  /* Sanity check: this function should only be called to fetch raw
-     registers' values, never pseudoregisters' values.  */
-  if (tdep->ppc_gp0_regnum <= regno
-      && regno < tdep->ppc_gp0_regnum + ppc_num_gprs)
-    gdb_assert (! tdep->ppc_gprs_pseudo_p);
 
   if (altivec_register_p (regno))
     {
@@ -512,42 +445,14 @@ fetch_altivec_registers (int tid)
   supply_vrregset (&regs);
 }
 
-/* On SPE machines, fetch the full 64 bits of all the general-purpose
-   registers, as well as the SPE-specific registers 'acc' and
-   'spefscr'.  */
-static void
-fetch_spe_registers (int tid)
-{
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-  struct gdb_evrregset_t evrregs;
-  int i;
-
-  get_spe_registers (tid, &evrregs);
-
-  /* Splice and supply each of the EV registers.  */
-  for (i = 0; i < ppc_num_gprs; i++)
-    {
-      char buf[MAX_REGISTER_SIZE];
-
-      read_spliced_spe_reg (tid, tdep->ppc_ev0_regnum + i, &evrregs, buf);
-      regcache_raw_supply (current_regcache, tdep->ppc_ev0_regnum + i, buf);
-    }
-
-  /* Supply the SPE-specific registers.  */
-  regcache_raw_supply (current_regcache, tdep->ppc_acc_regnum, &evrregs.acc);
-  regcache_raw_supply (current_regcache, tdep->ppc_spefscr_regnum,
-		       &evrregs.spefscr);
-}
-
 static void 
 fetch_ppc_registers (int tid)
 {
   int i;
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
-  if (! tdep->ppc_gprs_pseudo_p)
-    for (i = 0; i < ppc_num_gprs; i++)
-      fetch_register (tid, tdep->ppc_gp0_regnum + i);
+  for (i = 0; i < ppc_num_gprs; i++)
+    fetch_register (tid, tdep->ppc_gp0_regnum + i);
   if (tdep->ppc_fp0_regnum >= 0)
     for (i = 0; i < ppc_num_fprs; i++)
       fetch_register (tid, tdep->ppc_fp0_regnum + i);
@@ -569,8 +474,8 @@ fetch_ppc_registers (int tid)
   if (have_ptrace_getvrregs)
     if (tdep->ppc_vr0_regnum != -1 && tdep->ppc_vrsave_regnum != -1)
       fetch_altivec_registers (tid);
-  if (tdep->ppc_ev0_regnum >= 0)
-    fetch_spe_registers (tid);
+  if (tdep->ppc_ev0_upper_regnum >= 0)
+    fetch_spe_register (tid, -1);
 }
 
 /* Fetch registers from the child process.  Fetch all registers if
@@ -655,102 +560,58 @@ set_spe_registers (int tid, struct gdb_evrregset_t *evrregset)
     }
 }
 
-/* Store the bytes at SRC as the contents of TID's EV register EV_REGNUM.
-   Write the less significant word to TID using ptrace, and copy the
-   more significant word to the appropriate slot in EVRREGS.  */
-static void
-write_spliced_spe_reg (int tid, int ev_regnum,
-                       struct gdb_evrregset_t *evrregs,
-                       char *src)
-{
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-
-  /* Make sure we're trying to write an EV register; that's all we
-     handle.  */
-  gdb_assert (tdep->ppc_ev0_regnum <= ev_regnum
-              && ev_regnum <= tdep->ppc_ev31_regnum);
-
-  /* Make sure the sizes for the splicing add up.  */
-  gdb_assert (sizeof (evrregs->evr[0]) + sizeof (PTRACE_XFER_TYPE)
-              == register_size (current_gdbarch, ev_regnum));
-
-  {
-    int ev_index = ev_regnum - tdep->ppc_ev0_regnum;
-
-    /* The number of the corresponding general-purpose register, which
-       holds the lower 32 bits of the EV register.  */
-    int gpr_regnum = tdep->ppc_gp0_regnum + ev_index;
-
-    /* The offset of gpr_regnum in the process's uarea.  */
-    CORE_ADDR gpr_uoffset = ppc_register_u_addr (gpr_regnum);
-
-    /* The PTRACE_POKEUSR / PT_WRITE_U ptrace requests need to be able
-       to return arbitrary register values, so they can't return -1 to
-       indicate an error.  So we clear errno, and check it again
-       afterwards.  */
-    errno = 0;
-
-    if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
-      {
-        memcpy (&evrregs->evr[ev_index], src, sizeof (evrregs->evr[ev_index]));
-        ptrace (PT_WRITE_U, tid, (PTRACE_ARG3_TYPE) gpr_uoffset,
-                * (PTRACE_XFER_TYPE *) (src + sizeof (evrregs->evr[0])));
-      }
-    else if (TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE)
-      {
-        ptrace (PT_WRITE_U, tid, (PTRACE_ARG3_TYPE) gpr_uoffset,
-                * (PTRACE_XFER_TYPE *) src);
-        memcpy (&evrregs->evr[ev_index], src + sizeof (PTRACE_XFER_TYPE),
-                sizeof (evrregs->evr[ev_index]));
-      }
-    else 
-      gdb_assert (0);
-
-    if (errno != 0)
-      {
-        char message[128];
-        sprintf (message, "writing register %s (#%d)", 
-                 REGISTER_NAME (ev_regnum), ev_regnum);
-        perror_with_name (message);
-      }
-  }
-}
-
-/* Write GDB's value for the SPE register REGNO to TID.  */
+/* Write GDB's value for the SPE-specific raw register REGNO to TID.
+   If REGNO is -1, write the values of all the SPE-specific
+   registers.  */
 static void
 store_spe_register (int tid, int regno)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   struct gdb_evrregset_t evrregs;
 
-  /* We can only read and write the entire EVR register set at a time,
-     so to write just a single register, we do a read-modify-write
-     maneuver.  */
-  get_spe_registers (tid, &evrregs);
+  gdb_assert (sizeof (evrregs.evr[0])
+              == register_size (current_gdbarch, tdep->ppc_ev0_upper_regnum));
+  gdb_assert (sizeof (evrregs.acc)
+              == register_size (current_gdbarch, tdep->ppc_acc_regnum));
+  gdb_assert (sizeof (evrregs.spefscr)
+              == register_size (current_gdbarch, tdep->ppc_spefscr_regnum));
 
-  if (tdep->ppc_ev0_regnum >= 0
-      && tdep->ppc_ev0_regnum <= regno && regno <= tdep->ppc_ev31_regnum)
-    {
-      char buf[MAX_REGISTER_SIZE];
-      regcache_raw_collect (current_regcache, regno, buf);
-      write_spliced_spe_reg (tid, regno, &evrregs, buf);
-    }
-  else if (tdep->ppc_acc_regnum >= 0
-           && regno == tdep->ppc_acc_regnum)
-    {
-      gdb_assert (sizeof (evrregs.acc)
-                  == register_size (current_gdbarch, regno));
-      regcache_raw_collect (current_regcache, regno, &evrregs.acc);
-    }
-  else if (tdep->ppc_spefscr_regnum >= 0
-           && regno == tdep->ppc_spefscr_regnum)
-    {
-      gdb_assert (sizeof (evrregs.spefscr)
-                  == register_size (current_gdbarch, regno));
-      regcache_raw_collect (current_regcache, regno, &evrregs.spefscr);
-    }
+  if (regno == -1)
+    /* Since we're going to write out every register, the code below
+       should store to every field of evrregs; if that doesn't happen,
+       make it obvious by initializing it with suspicious values.  */
+    memset (&evrregs, 42, sizeof (evrregs));
   else
-    gdb_assert (0);
+    /* We can only read and write the entire EVR register set at a
+       time, so to write just a single register, we do a
+       read-modify-write maneuver.  */
+    get_spe_registers (tid, &evrregs);
+
+  if (regno == -1)
+    {
+      int i;
+
+      for (i = 0; i < ppc_num_gprs; i++)
+        regcache_raw_collect (current_regcache,
+                              tdep->ppc_ev0_upper_regnum + i,
+                              &evrregs.evr[i]);
+    }
+  else if (tdep->ppc_ev0_upper_regnum <= regno
+           && regno < tdep->ppc_ev0_upper_regnum + ppc_num_gprs)
+    regcache_raw_collect (current_regcache, regno,
+                          &evrregs.evr[regno - tdep->ppc_ev0_upper_regnum]);
+
+  if (regno == -1
+      || regno == tdep->ppc_acc_regnum)
+    regcache_raw_collect (current_regcache,
+                          tdep->ppc_acc_regnum,
+                          &evrregs.acc);
+
+  if (regno == -1
+      || regno == tdep->ppc_spefscr_regnum)
+    regcache_raw_collect (current_regcache,
+                          tdep->ppc_spefscr_regnum,
+                          &evrregs.spefscr);
 
   /* Write back the modified register set.  */
   set_spe_registers (tid, &evrregs);
@@ -765,12 +626,6 @@ store_register (int tid, int regno)
   int i;
   size_t bytes_to_transfer;
   char buf[MAX_REGISTER_SIZE];
-
-  /* Sanity check: this function should only be called to store raw
-     registers' values, never pseudoregisters' values.  */
-  if (tdep->ppc_gp0_regnum <= regno
-      && regno < tdep->ppc_gp0_regnum + ppc_num_gprs)
-    gdb_assert (! tdep->ppc_gprs_pseudo_p);
 
   if (altivec_register_p (regno))
     {
@@ -875,44 +730,13 @@ store_altivec_registers (int tid)
 }
 
 static void
-store_spe_registers (int tid)
-{
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-  struct gdb_evrregset_t evrregs;
-  int i;
-
-  /* The code below should store to every field of evrregs; if that
-     doesn't happen, make it obvious by initializing it with
-     suspicious values.  */
-  memset (&evrregs, 42, sizeof (evrregs));
-
-  for (i = 0; i < ppc_num_gprs; i++)
-    {
-      char buf[MAX_REGISTER_SIZE];
-
-      regcache_raw_collect (current_regcache, tdep->ppc_ev0_regnum + i, buf);
-      write_spliced_spe_reg (tid, tdep->ppc_ev0_regnum + i, &evrregs, buf);
-    }
-
-  gdb_assert (sizeof (evrregs.acc)
-              == register_size (current_gdbarch, tdep->ppc_acc_regnum));
-  regcache_raw_collect (current_regcache, tdep->ppc_acc_regnum, &evrregs.acc);
-  gdb_assert (sizeof (evrregs.spefscr)
-              == register_size (current_gdbarch, tdep->ppc_spefscr_regnum));
-  regcache_raw_collect (current_regcache, tdep->ppc_acc_regnum, &evrregs.spefscr);
-
-  set_spe_registers (tid, &evrregs);
-}
-
-static void
 store_ppc_registers (int tid)
 {
   int i;
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   
-  if (! tdep->ppc_gprs_pseudo_p)
-    for (i = 0; i < ppc_num_gprs; i++)
-      store_register (tid, tdep->ppc_gp0_regnum + i);
+  for (i = 0; i < ppc_num_gprs; i++)
+    store_register (tid, tdep->ppc_gp0_regnum + i);
   if (tdep->ppc_fp0_regnum >= 0)
     for (i = 0; i < ppc_num_fprs; i++)
       store_register (tid, tdep->ppc_fp0_regnum + i);
@@ -934,8 +758,8 @@ store_ppc_registers (int tid)
   if (have_ptrace_getvrregs)
     if (tdep->ppc_vr0_regnum != -1 && tdep->ppc_vrsave_regnum != -1)
       store_altivec_registers (tid);
-  if (tdep->ppc_ev0_regnum >= 0)
-    store_spe_registers (tid);
+  if (tdep->ppc_ev0_upper_regnum >= 0)
+    store_spe_register (tid, -1);
 }
 
 void

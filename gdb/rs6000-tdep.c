@@ -39,6 +39,7 @@
 #include "infcall.h"
 #include "sim-regno.h"
 #include "gdb/sim-ppc.h"
+#include "reggroups.h"
 
 #include "libbfd.h"		/* for bfd_default_set_arch_mach */
 #include "coff/internal.h"	/* for libcoff.h */
@@ -159,6 +160,12 @@ spe_register_p (int regno)
       && tdep->ppc_ev0_regnum <= regno && regno <= tdep->ppc_ev31_regnum)
     return 1;
 
+  /* Is it a reference to one of the raw upper GPR halves?  */
+  if (tdep->ppc_ev0_upper_regnum >= 0
+      && tdep->ppc_ev0_upper_regnum <= regno
+      && regno < tdep->ppc_ev0_upper_regnum + ppc_num_gprs)
+    return 1;
+
   /* Is it a reference to the 64-bit accumulator, and do we have that?  */
   if (tdep->ppc_acc_regnum >= 0
       && tdep->ppc_acc_regnum == regno)
@@ -254,6 +261,11 @@ init_sim_regno_table (struct gdbarch *arch)
       set_sim_regno (sim_regno,
                      tdep->ppc_ev0_regnum + i,
                      sim_ppc_ev0_regnum + i);
+  if (tdep->ppc_ev0_upper_regnum >= 0)
+    for (i = 0; i < ppc_num_gprs; i++)
+      set_sim_regno (sim_regno,
+                     tdep->ppc_ev0_upper_regnum + i,
+                     sim_ppc_rh0_regnum + i);
   if (tdep->ppc_acc_regnum >= 0)
     set_sim_regno (sim_regno, tdep->ppc_acc_regnum, sim_ppc_acc_regnum);
   /* spefscr is a special-purpose register, so the code below handles it.  */
@@ -1865,55 +1877,113 @@ rs6000_value_to_register (struct frame_info *frame,
   put_frame_register (frame, regnum, to);
 }
 
+/* Move SPE vector register values between a 64-bit buffer and the two
+   32-bit raw register halves in a regcache.  This function handles
+   both splitting a 64-bit value into two 32-bit halves, and joining
+   two halves into a whole 64-bit value, depending on the function
+   passed as the MOVE argument.
+
+   EV_REG must be the number of an SPE evN vector register --- a
+   pseudoregister.  REGCACHE must be a regcache, and BUFFER must be a
+   64-bit buffer.
+
+   Call MOVE once for each 32-bit half of that register, passing
+   REGCACHE, the number of the raw register corresponding to that
+   half, and the address of the appropriate half of BUFFER.
+
+   For example, passing 'regcache_raw_read' as the MOVE function will
+   fill BUFFER with the full 64-bit contents of EV_REG.  Or, passing
+   'regcache_raw_supply' will supply the contents of BUFFER to the
+   appropriate pair of raw registers in REGCACHE.
+
+   You may need to cast away some 'const' qualifiers when passing
+   MOVE, since this function can't tell at compile-time which of
+   REGCACHE or BUFFER is acting as the source of the data.  If C had
+   co-variant type qualifiers, ...  */
+static void
+e500_move_ev_register (void (*move) (struct regcache *regcache,
+                                     int regnum, void *buf),
+                       struct regcache *regcache, int ev_reg,
+                       void *buffer)
+{
+  struct gdbarch *arch = get_regcache_arch (regcache);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (arch); 
+  int reg_index;
+  char *byte_buffer = buffer;
+
+  gdb_assert (tdep->ppc_ev0_regnum <= ev_reg
+              && ev_reg < tdep->ppc_ev0_regnum + ppc_num_gprs);
+
+  reg_index = ev_reg - tdep->ppc_ev0_regnum;
+
+  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+    {
+      move (regcache, tdep->ppc_ev0_upper_regnum + reg_index, byte_buffer);
+      move (regcache, tdep->ppc_gp0_regnum + reg_index, byte_buffer + 4);
+    }
+  else
+    {
+      move (regcache, tdep->ppc_gp0_regnum + reg_index, byte_buffer);
+      move (regcache, tdep->ppc_ev0_upper_regnum + reg_index, byte_buffer + 4);
+    }
+}
+
 static void
 e500_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 			   int reg_nr, void *buffer)
 {
-  int base_regnum;
-  int offset = 0;
-  char temp_buffer[MAX_REGISTER_SIZE];
+  struct gdbarch *regcache_arch = get_regcache_arch (regcache);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch); 
 
-  if (reg_nr >= tdep->ppc_gp0_regnum 
-      && reg_nr < tdep->ppc_gp0_regnum + ppc_num_gprs)
-    {
-      base_regnum = reg_nr - tdep->ppc_gp0_regnum + tdep->ppc_ev0_regnum;
-
-      /* Build the value in the provided buffer.  */ 
-      /* Read the raw register of which this one is the lower portion.  */
-      regcache_raw_read (regcache, base_regnum, temp_buffer);
-      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
-	offset = 4;
-      memcpy ((char *) buffer, temp_buffer + offset, 4);
-    }
+  gdb_assert (regcache_arch == gdbarch);
+ 
+  if (tdep->ppc_ev0_regnum <= reg_nr
+      && reg_nr < tdep->ppc_ev0_regnum + ppc_num_gprs)
+    e500_move_ev_register (regcache_raw_read, regcache, reg_nr, buffer);
+  else
+    /* We should only be called on pseudo-registers.  */
+    gdb_assert (0);
 }
 
 static void
 e500_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 			    int reg_nr, const void *buffer)
 {
-  int base_regnum;
-  int offset = 0;
-  char temp_buffer[MAX_REGISTER_SIZE];
+  struct gdbarch *regcache_arch = get_regcache_arch (regcache);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch); 
 
-  if (reg_nr >= tdep->ppc_gp0_regnum 
-      && reg_nr < tdep->ppc_gp0_regnum + ppc_num_gprs)
-    {
-      base_regnum = reg_nr - tdep->ppc_gp0_regnum + tdep->ppc_ev0_regnum;
-      /* reg_nr is 32 bit here, and base_regnum is 64 bits.  */
-      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
-	offset = 4;
+  gdb_assert (regcache_arch == gdbarch);
+ 
+  if (tdep->ppc_ev0_regnum <= reg_nr
+      && reg_nr < tdep->ppc_ev0_regnum + ppc_num_gprs)
+    e500_move_ev_register ((void (*) (struct regcache *, int, void *))
+                           regcache_raw_write,
+                           regcache, reg_nr, (void *) buffer);
+  else
+    /* We should only be called on pseudo-registers.  */
+    gdb_assert (0);
+}
 
-      /* Let's read the value of the base register into a temporary
-	 buffer, so that overwriting the last four bytes with the new
-	 value of the pseudo will leave the upper 4 bytes unchanged.  */
-      regcache_raw_read (regcache, base_regnum, temp_buffer);
+/* The E500 needs a custom reggroup function: it has anonymous raw
+   registers, and default_register_reggroup_p assumes that anonymous
+   registers are not members of any reggroup.  */
+static int
+e500_register_reggroup_p (struct gdbarch *gdbarch,
+                          int regnum,
+                          struct reggroup *group)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-      /* Write as an 8 byte quantity.  */
-      memcpy (temp_buffer + offset, (char *) buffer, 4);
-      regcache_raw_write (regcache, base_regnum, temp_buffer);
-    }
+  /* The save and restore register groups need to include the
+     upper-half registers, even though they're anonymous.  */
+  if ((group == save_reggroup
+       || group == restore_reggroup)
+      && (tdep->ppc_ev0_upper_regnum <= regnum
+          && regnum < tdep->ppc_ev0_upper_regnum + ppc_num_gprs))
+    return 1;
+
+  /* In all other regards, the default reggroup definition is fine.  */
+  return default_register_reggroup_p (gdbarch, regnum, group);
 }
 
 /* Convert a DBX STABS register number to a GDB register number.  */
@@ -2176,8 +2246,9 @@ rs6000_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
 /* Return a struct reg defining floating-point register NAME.  */
 #define F(name)		{ STR(name), 8, 8, 1, 0, -1 }
 
-/* Return a struct reg defining a pseudo register NAME.  */
-#define P(name)		{ STR(name), 4, 8, 0, 1, -1 }
+/* Return a struct reg defining a pseudo register NAME that is 64 bits
+   long on all systems.  */
+#define P8(name)	{ STR(name), 8, 8, 0, 1, -1 }
 
 /* Return a struct reg defining register NAME that's 32 bits on 32-bit
    systems and that doesn't exist on 64-bit systems.  */
@@ -2189,6 +2260,10 @@ rs6000_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
 
 /* Return a struct reg placeholder for a register that doesn't exist.  */
 #define R0		{ 0, 0, 0, 0, 0, -1 }
+
+/* Return a struct reg defining an anonymous raw register that's 32
+   bits on all systems.  */
+#define A4              { 0, 4, 4, 0, 0, -1 }
 
 /* Return a struct reg defining an SPR named NAME that is 32 bits on
    32-bit systems and 64 bits on 64-bit systems.  */
@@ -2254,19 +2329,38 @@ rs6000_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
   /*143*/R16(vr24),R16(vr25),R16(vr26),R16(vr27),R16(vr28),R16(vr29),R16(vr30),R16(vr31), \
   /*151*/R4(vscr), R4(vrsave)
 
-/* Vectors of hi-lo general purpose registers.  */
-#define PPC_EV_REGS \
-  /* 0*/R8(ev0), R8(ev1), R8(ev2), R8(ev3), R8(ev4), R8(ev5), R8(ev6), R8(ev7),  \
-  /* 8*/R8(ev8), R8(ev9), R8(ev10),R8(ev11),R8(ev12),R8(ev13),R8(ev14),R8(ev15), \
-  /*16*/R8(ev16),R8(ev17),R8(ev18),R8(ev19),R8(ev20),R8(ev21),R8(ev22),R8(ev23), \
-  /*24*/R8(ev24),R8(ev25),R8(ev26),R8(ev27),R8(ev28),R8(ev29),R8(ev30),R8(ev31)
 
-/* Lower half of the EV registers.  */
-#define PPC_GPRS_PSEUDO_REGS \
-  /*  0 */ P(r0), P(r1), P(r2), P(r3), P(r4), P(r5), P(r6), P(r7),  \
-  /*  8 */ P(r8), P(r9), P(r10),P(r11),P(r12),P(r13),P(r14),P(r15), \
-  /* 16 */ P(r16),P(r17),P(r18),P(r19),P(r20),P(r21),P(r22),P(r23), \
-  /* 24 */ P(r24),P(r25),P(r26),P(r27),P(r28),P(r29),P(r30),P(r31)
+/* On machines supporting the SPE APU, the general-purpose registers
+   are 64 bits long.  There are SIMD vector instructions to treat them
+   as pairs of floats, but the rest of the instruction set treats them
+   as 32-bit registers, and only operates on their lower halves.
+
+   In the GDB regcache, we treat their high and low halves as separate
+   registers.  The low halves we present as the general-purpose
+   registers, and then we have pseudo-registers that stitch together
+   the upper and lower halves and present them as pseudo-registers.  */
+
+/* SPE GPR lower halves --- raw registers.  */
+#define PPC_SPE_GP_REGS \
+  /*  0 */ R4(r0), R4(r1), R4(r2), R4(r3), R4(r4), R4(r5), R4(r6), R4(r7),  \
+  /*  8 */ R4(r8), R4(r9), R4(r10),R4(r11),R4(r12),R4(r13),R4(r14),R4(r15), \
+  /* 16 */ R4(r16),R4(r17),R4(r18),R4(r19),R4(r20),R4(r21),R4(r22),R4(r23), \
+  /* 24 */ R4(r24),R4(r25),R4(r26),R4(r27),R4(r28),R4(r29),R4(r30),R4(r31)
+
+/* SPE GPR upper halves --- anonymous raw registers.  */
+#define PPC_SPE_UPPER_GP_REGS                   \
+  /*  0 */ A4, A4, A4, A4, A4, A4, A4, A4,      \
+  /*  8 */ A4, A4, A4, A4, A4, A4, A4, A4,      \
+  /* 16 */ A4, A4, A4, A4, A4, A4, A4, A4,      \
+  /* 24 */ A4, A4, A4, A4, A4, A4, A4, A4
+
+/* SPE GPR vector registers --- pseudo registers based on underlying
+   gprs and the anonymous upper half raw registers.  */
+#define PPC_EV_PSEUDO_REGS \
+/* 0*/P8(ev0), P8(ev1), P8(ev2), P8(ev3), P8(ev4), P8(ev5), P8(ev6), P8(ev7), \
+/* 8*/P8(ev8), P8(ev9), P8(ev10),P8(ev11),P8(ev12),P8(ev13),P8(ev14),P8(ev15),\
+/*16*/P8(ev16),P8(ev17),P8(ev18),P8(ev19),P8(ev20),P8(ev21),P8(ev22),P8(ev23),\
+/*24*/P8(ev24),P8(ev25),P8(ev26),P8(ev27),P8(ev28),P8(ev29),P8(ev30),P8(ev31)
 
 /* IBM POWER (pre-PowerPC) architecture, user-level view.  We only cover
    user-level SPR's.  */
@@ -2446,16 +2540,14 @@ static const struct reg registers_7400[] =
 /* Motorola e500.  */
 static const struct reg registers_e500[] =
 {
-  R(pc), R(ps),
-  /* cr, lr, ctr, xer, "" */
-  PPC_UISA_NOFP_SPRS,
-  /* 7...38 */
-  PPC_EV_REGS,
-  R8(acc), S4(spefscr),
+  /*   0 ..  31 */ PPC_SPE_GP_REGS,
+  /*  32 ..  63 */ PPC_SPE_UPPER_GP_REGS,
+  /*  64 ..  65 */ R(pc), R(ps),
+  /*  66 ..  70 */ PPC_UISA_NOFP_SPRS,
+  /*  71 ..  72 */ R8(acc), S4(spefscr),
   /* NOTE: Add new registers here the end of the raw register
      list and just before the first pseudo register.  */
-  /* 41...72 */
-  PPC_GPRS_PSEUDO_REGS
+  /*  73 .. 104 */ PPC_EV_PSEUDO_REGS
 };
 
 /* Information about a particular processor variant.  */
@@ -2987,7 +3079,6 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->regs = v->regs;
 
   tdep->ppc_gp0_regnum = 0;
-  tdep->ppc_gprs_pseudo_p = 0;
   tdep->ppc_toc_regnum = 2;
   tdep->ppc_ps_regnum = 65;
   tdep->ppc_cr_regnum = 66;
@@ -3005,6 +3096,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->ppc_sr0_regnum = 71;
   tdep->ppc_vr0_regnum = -1;
   tdep->ppc_vrsave_regnum = -1;
+  tdep->ppc_ev0_upper_regnum = -1;
   tdep->ppc_ev0_regnum = -1;
   tdep->ppc_ev31_regnum = -1;
   tdep->ppc_acc_regnum = -1;
@@ -3047,26 +3139,18 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	tdep->ppc_vrsave_regnum = 152;
 	break;
       case bfd_mach_ppc_e500:
-        tdep->ppc_gp0_regnum = 41;
-        tdep->ppc_gprs_pseudo_p = 1;
         tdep->ppc_toc_regnum = -1;
-        tdep->ppc_ps_regnum = 1;
-        tdep->ppc_cr_regnum = 2;
-        tdep->ppc_lr_regnum = 3;
-        tdep->ppc_ctr_regnum = 4;
-        tdep->ppc_xer_regnum = 5;
-	tdep->ppc_ev0_regnum = 7;
-	tdep->ppc_ev31_regnum = 38;
+        tdep->ppc_ev0_upper_regnum = 32;
+	tdep->ppc_ev0_regnum = 73;
+	tdep->ppc_ev31_regnum = 104;
+        tdep->ppc_acc_regnum = 71;
+        tdep->ppc_spefscr_regnum = 72;
         tdep->ppc_fp0_regnum = -1;
         tdep->ppc_fpscr_regnum = -1;
         tdep->ppc_sr0_regnum = -1;
-        tdep->ppc_acc_regnum = 39;
-        tdep->ppc_spefscr_regnum = 40;
-        set_gdbarch_pc_regnum (gdbarch, 0);
-        set_gdbarch_sp_regnum (gdbarch, tdep->ppc_gp0_regnum + 1);
-        set_gdbarch_deprecated_fp_regnum (gdbarch, tdep->ppc_gp0_regnum + 1);
         set_gdbarch_pseudo_register_read (gdbarch, e500_pseudo_register_read);
         set_gdbarch_pseudo_register_write (gdbarch, e500_pseudo_register_write);
+        set_gdbarch_register_reggroup_p (gdbarch, e500_register_reggroup_p);
 	break;
 
       case bfd_mach_ppc64:
