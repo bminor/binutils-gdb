@@ -1,3 +1,7 @@
+2000-04-05  Alexandre Oliva  <oliva@lsd.ic.unicamp.br>
+
+	* config/tc-sparc.c (sparc_ip): Avoid string pasting.
+
 2000-04-04  Alan Modra  <alan@linuxcare.com.au>
 
 	* po/gas.pot: Regenerate.

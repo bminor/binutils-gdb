@@ -1894,8 +1894,7 @@ sparc_ip (str, pinsn)
 
 		  if ((mask & ~1) == 2 && sparc_arch_size == 64
 		      && no_undeclared_regs && ! globals [mask])
-		    as_bad (_("detected global register use not "
-			      "covered by .register pseudo-op"));
+		    as_bad (_("detected global register use not covered by .register pseudo-op"));
 
 		  /* Got the register, now figure out where
 		     it goes in the opcode.  */
