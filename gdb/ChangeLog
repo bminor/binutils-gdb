@@ -1,3 +1,12 @@
+2002-07-04  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* i386-nat.c (child_post_startup_inferior): New function
+	calling i386_cleanup_dregs if
+	I386_USE_GENERIC_WATCHPOINTS is defined.
+	* config/i386/nm-i386.h: define CHILD_POST_STARTUP_INFERIOR
+	conditional to acknowledge that i386-nat.c has its
+	own child_post_startup_inferior function.
+
 2002-07-04  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-tdep.h (I386_MAX_REGISTER_SIZE): New define.
