@@ -65,11 +65,6 @@ extern CORE_ADDR vax_skip_prologue (CORE_ADDR);
 
 #define DECR_PC_AFTER_BREAK 0
 
-/* Return 1 if P points to an invalid floating point value.
-   LEN is the length in bytes -- not relevant on the Vax.  */
-
-#define INVALID_FLOAT(p, len) ((*(short *) p & 0xff80) == 0x8000)
-
 /* Say how long (ordinary) registers are.  This is a piece of bogosity
    used in push_word and a few other places; REGISTER_RAW_SIZE is the
    real way to know how big a register is.  */

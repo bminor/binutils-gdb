@@ -1,3 +1,16 @@
+2002-01-28  Andrew Cagney  <ac131313@redhat.com>
+
+	* config/vax/tm-vax.h (INVALID_FLOAT): Move macro from here...
+	* vax-tdep.c (INVALID_FLOAT): To here.  Document why it is broken.
+
+	* rs6000-tdep.c (rs6000_do_registers_info): Delete code wrapped in
+	#ifdef INVALID_FLOAT.
+	* infcmd.c (do_registers_info): Ditto.
+	* values.c (unpack_double): Ditto.  Add comment.
+
+	* config/ns32k/tm-umax.h (INVALID_FLOAT): Delete macro that was
+	already commented out.
+
 2002-01-26  Andreas Schwab  <schwab@suse.de>
 
 	* config/m68k/nm-linux.h (FETCH_INFERIOR_REGISTERS): Define.

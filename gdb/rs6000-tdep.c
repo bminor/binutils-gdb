@@ -1763,13 +1763,8 @@ rs6000_do_registers_info (int regnum, int fpregs)
         {
           register int j;
 
-#ifdef INVALID_FLOAT
-          if (INVALID_FLOAT (virtual_buffer, REGISTER_VIRTUAL_SIZE (i)))
-            printf_filtered ("<invalid float>");
-          else
-#endif
-            val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, 0,
-                       gdb_stdout, 0, 1, 0, Val_pretty_default);
+	  val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, 0,
+		     gdb_stdout, 0, 1, 0, Val_pretty_default);
 
           printf_filtered ("\t(raw 0x");
           for (j = 0; j < REGISTER_RAW_SIZE (i); j++)
