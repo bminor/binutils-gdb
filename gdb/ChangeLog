@@ -1,3 +1,34 @@
+2003-06-16  Corinna Vinschen  <vinschen@redhat.com>
+
+	* h8300-tdep.c (E_PSEUDO_CCR_REGNUM): New define.
+	(E_PSEUDO_EXR_REGNUM): Ditto.
+	(h8300_is_argument_spill): Check for instructions moving argument
+	registers into safe registers. 
+	(h8300_skip_prologue): Check for stm instruction to push registers
+	used for register variables onto stack.
+	(gdb_print_insn_h8300): Remove.
+	(h8300_examine_prologue): Add a comment.
+	(h8300_register_name): Take pseudo registers into account.
+	(h8300s_register_name): Ditto.
+	(h8300sx_register_name): Ditto.
+	(h8300_print_register): Ditto.
+	(h8300_print_registers_info): Define "nice" printing order.
+	(h8300_saved_pc_after_call): Take pseudo registers into account.
+	(h8300_register_type): Ditto.  Return type used for remote connection
+	when requesting real CCR or EXR register, return actual type when
+	requesting pseudo CCR or EXR.
+	(h8300_pseudo_register_read): New function.
+	(h8300_pseudo_register_write): Ditto.
+	(h8300_dbg_reg_to_regnum): Ditto.
+	(h8300s_dbg_reg_to_regnum): Ditto.
+	(h8300_gdbarch_init): Call set_gdbarch_num_pseudo_regs,
+	set_gdbarch_ecoff_reg_to_regnum, set_gdbarch_dwarf_reg_to_regnum,
+	set_gdbarch_dwarf2_reg_to_regnum, set_gdbarch_stab_reg_to_regnum and
+	set_gdbarch_print_insn architecture dependent.
+	Call set_gdbarch_pseudo_register_read and
+	set_gdbarch_pseudo_register_write.
+	(_initialize_h8300_tdep): Remove assignment to deprecated_tm_print_insn.
+
 2003-06-16  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbarch.sh (SAVE_DUMMY_FRAME_TOS): Deprecate.
