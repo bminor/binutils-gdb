@@ -1,3 +1,8 @@
+2004-07-10  Joel Brobecker  <brobecker@gnat.com>
+
+	* hppa-hpux-tdep.c: Fix a compilation failure due to a comment
+	that was inserted inside a comment.
+
 2004-07-10  Randolph Chung  <tausq@debian.org>
 
 	* hppa-hpux-tdep.c (hppa_hpux_som_find_global_pointer): New 

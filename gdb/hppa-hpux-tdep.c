@@ -1255,14 +1255,14 @@ hppa_hpux_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp,
      function called __d_plt_call exists; __d_plt_call expects a PLABEL instead
      of an import stub as an argument.
 
-     /* *INDENT-OFF* */
+     // *INDENT-OFF*
      To summarize, the call flow is:
        current function -> dummy frame -> __gcc_plt_call (import stub) 
                         -> target function
      or
        current function -> dummy frame -> __d_plt_call (plabel)
                         -> target function
-     /* *INDENT-ON* */
+     // *INDENT-ON*
 
      In general the "funcaddr" argument passed to push_dummy_code is the actual
      entry point of the target function.  For __gcc_plt_call, we need to 
