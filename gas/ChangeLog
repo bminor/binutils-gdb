@@ -1,5 +1,26 @@
 Tue Apr 11 01:42:36 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
+	* configure.in: Require at least autoconf 2.3, because earlier
+	versions lose on some AIX versions.
+	* configure: Regenerated.
+
+	* configure.in: Add m68k-*-elf.
+	* config/tc-m68k.c (comment_chars) [OBJ_ELF]: Include '#'.
+	(md_pseudo_table) [OBJ_ELF]: Ignore "swbeg".
+	(md_begin): Set alt_notend_table['&'], so svr4-style immediate
+	operands are accepted.
+	(md_apply_fix): Argument VALP should point to valueT.
+	(md_convert_frag): Argument SEC should be type segT.
+	(md_shortopts) [OBJ_ELF]: Accept 'Q' with an argument.
+	(md_parse_option): Ignore it.
+	(md_convert_frag_1): Add in frag address for the symbol in the
+	displacement calculation.
+	* config/tc-m68k.h (TARGET_FORMAT) [OBJ_ELF]: Use "elf32-m68k".
+	(TARGET_ARCH): Define.
+	(REGISTER_PREFIX_OPTIONAL) [OBJ_ELF]: Default to 0.
+	(LOCAL_LABEL, FAKE_LABEL_NAME, REGISTER_PREFIX_OPTIONAL): Handle
+	these the same way for OBJ_ELF as for M68KCOFF.
+
 	* gdbinit.in: Add breakpoint in as_abort.
 
 	* write.c (cvt_frag_to_fill): If offset is less than zero,
