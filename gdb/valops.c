@@ -3392,7 +3392,7 @@ struct value *
 value_slice (struct value *array, int lowbound, int length)
 {
   struct type *slice_range_type, *slice_type, *range_type;
-  LONGEST lowerbound, upperbound, offset;
+  LONGEST lowerbound, upperbound;
   struct value *slice;
   struct type *array_type;
   array_type = check_typedef (VALUE_TYPE (array));
@@ -3443,7 +3443,7 @@ value_slice (struct value *array, int lowbound, int length)
   else
     {
       struct type *element_type = TYPE_TARGET_TYPE (array_type);
-      offset
+      LONGEST offset
 	= (lowbound - lowerbound) * TYPE_LENGTH (check_typedef (element_type));
       slice_type = create_array_type ((struct type *) NULL, element_type,
 				      slice_range_type);
