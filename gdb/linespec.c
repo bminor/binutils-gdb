@@ -54,6 +54,16 @@ static char *find_toplevel_char (char *s, char c);
 static struct symtabs_and_lines decode_line_2 (struct symbol *[],
 					       int, int, char ***);
 
+static void dl1_initialize_defaults (struct symtab **default_symtab,
+				     int *default_line);
+
+static struct symtabs_and_lines dl1_indirect (char **argptr);
+
+static void dl1_set_flags (char **argptr, int *is_quoted,
+			   char **paren_pointer);
+
+static char *dl1_locate_first_half (char **argptr, int *is_quote_enclosed);
+
 /* Helper functions. */
 
 /* Issue a helpful hint on using the command completion feature on
@@ -512,185 +522,51 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
   struct symtabs_and_lines values;
   struct symtab_and_line val;
   register char *p, *p1;
-  char *q, *pp, *ii, *p2;
-#if 0
-  char *q1;
-#endif
-  register struct symtab *s;
+  char *q, *ii, *p2;
+  /* This is NULL if there are no parens in argptr, or a pointer to
+     the closing parenthesis if there are parens.  */
+  char *paren_pointer;
+  register struct symtab *s = NULL;
 
   register struct symbol *sym;
   /* The symtab that SYM was found in.  */
   struct symtab *sym_symtab;
 
-  register CORE_ADDR pc;
   register struct minimal_symbol *msymbol;
   char *copy;
   struct symbol *sym_class;
   int i1;
   int is_quoted;
   int is_quote_enclosed;
-  int has_parens;
-  int has_if = 0;
-  int has_comma = 0;
   struct symbol **sym_arr;
   struct type *t;
   char *saved_arg = *argptr;
-  extern char *gdb_completer_quote_characters;
 
   init_sal (&val);		/* initialize to zeroes */
 
   /* Defaults have defaults.  */
 
-  if (default_symtab == 0)
-    {
-      /* Use whatever we have for the default source line.  We don't use
-         get_current_or_default_symtab_and_line as it can recurse and call
-	 us back! */
-      struct symtab_and_line cursal = 
-      			get_current_source_symtab_and_line ();
-      
-      default_symtab = cursal.symtab;
-      default_line = cursal.line;
-    }
-
+  dl1_initialize_defaults (&default_symtab, &default_line);
+  
   /* See if arg is *PC */
 
   if (**argptr == '*')
-    {
-      (*argptr)++;
-      pc = parse_and_eval_address_1 (argptr);
-
-      values.sals = (struct symtab_and_line *)
-	xmalloc (sizeof (struct symtab_and_line));
-
-      values.nelts = 1;
-      values.sals[0] = find_pc_line (pc, 0);
-      values.sals[0].pc = pc;
-      values.sals[0].section = find_pc_overlay (pc);
-
-      return values;
-    }
-
-  /* 'has_if' is for the syntax:
-   *     (gdb) break foo if (a==b)
-   */
-  if ((ii = strstr (*argptr, " if ")) != NULL ||
-      (ii = strstr (*argptr, "\tif ")) != NULL ||
-      (ii = strstr (*argptr, " if\t")) != NULL ||
-      (ii = strstr (*argptr, "\tif\t")) != NULL ||
-      (ii = strstr (*argptr, " if(")) != NULL ||
-      (ii = strstr (*argptr, "\tif( ")) != NULL)
-    has_if = 1;
-  /* Temporarily zap out "if (condition)" to not
-   * confuse the parenthesis-checking code below.
-   * This is undone below. Do not change ii!!
-   */
-  if (has_if)
-    {
-      *ii = '\0';
-    }
+    return dl1_indirect (argptr);
 
   /* Set various flags.
-   * 'has_parens' is important for overload checking, where
+   * 'paren_pointer' is important for overload checking, where
    * we allow things like: 
    *     (gdb) break c::f(int)
    */
 
-  /* Maybe arg is FILE : LINENUM or FILE : FUNCTION */
+  dl1_set_flags (argptr, &is_quoted, &paren_pointer);
 
-  is_quoted = (**argptr
-	       && strchr (get_gdb_completer_quote_characters (),
-			  **argptr) != NULL);
+  /* Locate the first half of the linespec, ending in a colon, period,
+     or whitespace.  (More or less.)  */
 
-  has_parens = ((pp = strchr (*argptr, '(')) != NULL
-		&& (pp = strrchr (pp, ')')) != NULL);
+  p = dl1_locate_first_half (argptr, &is_quote_enclosed);
 
-  /* Now that we're safely past the has_parens check,
-   * put back " if (condition)" so outer layers can see it 
-   */
-  if (has_if)
-    *ii = ' ';
-
-  /* Maybe we were called with a line range FILENAME:LINENUM,FILENAME:LINENUM
-     and we must isolate the first half.  Outer layers will call again later
-     for the second half.
-
-     Don't count commas that appear in argument lists of overloaded
-     functions, or in quoted strings.  It's stupid to go to this much
-     trouble when the rest of the function is such an obvious roach hotel.  */
-  ii = find_toplevel_char (*argptr, ',');
-  has_comma = (ii != 0);
-
-  /* Temporarily zap out second half to not
-   * confuse the code below.
-   * This is undone below. Do not change ii!!
-   */
-  if (has_comma)
-    {
-      *ii = '\0';
-    }
-
-  /* Maybe arg is FILE : LINENUM or FILE : FUNCTION */
-  /* May also be CLASS::MEMBER, or NAMESPACE::NAME */
-  /* Look for ':', but ignore inside of <> */
-
-  s = NULL;
-  p = *argptr;
-  if (p[0] == '"')
-    {
-      is_quote_enclosed = 1;
-      (*argptr)++;
-      p++;
-    }
-  else
-    is_quote_enclosed = 0;
-  for (; *p; p++)
-    {
-      if (p[0] == '<')
-	{
-	  char *temp_end = find_template_name_end (p);
-	  if (!temp_end)
-	    error ("malformed template specification in command");
-	  p = temp_end;
-	}
-      /* Check for the end of the first half of the linespec.  End of line,
-         a tab, a double colon or the last single colon, or a space.  But
-         if enclosed in double quotes we do not break on enclosed spaces */
-      if (!*p
-	  || p[0] == '\t'
-	  || ((p[0] == ':')
-	      && ((p[1] == ':') || (strchr (p + 1, ':') == NULL)))
-	  || ((p[0] == ' ') && !is_quote_enclosed))
-	break;
-      if (p[0] == '.' && strchr (p, ':') == NULL)	/* Java qualified method. */
-	{
-	  /* Find the *last* '.', since the others are package qualifiers. */
-	  for (p1 = p; *p1; p1++)
-	    {
-	      if (*p1 == '.')
-		p = p1;
-	    }
-	  break;
-	}
-    }
-  while (p[0] == ' ' || p[0] == '\t')
-    p++;
-
-  /* if the closing double quote was left at the end, remove it */
-  if (is_quote_enclosed)
-    {
-      char *closing_quote = strchr (p - 1, '"');
-      if (closing_quote && closing_quote[1] == '\0')
-	*closing_quote = '\0';
-    }
-
-  /* Now that we've safely parsed the first half,
-   * put back ',' so outer layers can see it 
-   */
-  if (has_comma)
-    *ii = ',';
-
-  if ((p[0] == ':' || p[0] == '.') && !has_parens)
+  if ((p[0] == ':' || p[0] == '.') && paren_pointer == NULL)
     {
       /*  C++ */
       /*  ... or Java */
@@ -767,36 +643,16 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
 		      while (*p && *p != ' ' && *p != '\t' && *p != ',' && *p != ':')
 			p++;
 		    }
-/*
-   q = operator_chars (*argptr, &q1);
-   if (q1 - q)
-   {
-   char *opname;
-   char *tmp = alloca (q1 - q + 1);
-   memcpy (tmp, q, q1 - q);
-   tmp[q1 - q] = '\0';
-   opname = cplus_mangle_opname (tmp, DMGL_ANSI);
-   if (opname == NULL)
-   {
-   cplusplus_error (saved_arg, "no mangling for \"%s\"\n", tmp);
-   }
-   copy = (char*) alloca (3 + strlen(opname));
-   sprintf (copy, "__%s", opname);
-   p = q1;
-   }
-   else
- */
-		  {
-		    copy = (char *) alloca (p - *argptr + 1);
-		    memcpy (copy, *argptr, p - *argptr);
-		    copy[p - *argptr] = '\0';
-		    if (p != *argptr
-			&& copy[p - *argptr - 1]
-			&& strchr (get_gdb_completer_quote_characters (),
-				   copy[p - *argptr - 1]) != NULL)
-		      copy[p - *argptr - 1] = '\0';
-		  }
 
+		  copy = (char *) alloca (p - *argptr + 1);
+		  memcpy (copy, *argptr, p - *argptr);
+		  copy[p - *argptr] = '\0';
+		  if (p != *argptr
+		      && copy[p - *argptr - 1]
+		      && strchr (get_gdb_completer_quote_characters (),
+				 copy[p - *argptr - 1]) != NULL)
+		    copy[p - *argptr - 1] = '\0';
+		  
 		  /* no line number may be specified */
 		  while (*p == ' ' || *p == '\t')
 		    p++;
@@ -960,43 +816,6 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
 	p++;
       *argptr = p;
     }
-#if 0
-  /* No one really seems to know why this was added. It certainly
-     breaks the command line, though, whenever the passed
-     name is of the form ClassName::Method. This bit of code
-     singles out the class name, and if funfirstline is set (for
-     example, you are setting a breakpoint at this function),
-     you get an error. This did not occur with earlier
-     verions, so I am ifdef'ing this out. 3/29/99 */
-  else
-    {
-      /* Check if what we have till now is a symbol name */
-
-      /* We may be looking at a template instantiation such
-         as "foo<int>".  Check here whether we know about it,
-         instead of falling through to the code below which
-         handles ordinary function names, because that code
-         doesn't like seeing '<' and '>' in a name -- the
-         skip_quoted call doesn't go past them.  So see if we
-         can figure it out right now. */
-
-      copy = (char *) alloca (p - *argptr + 1);
-      memcpy (copy, *argptr, p - *argptr);
-      copy[p - *argptr] = '\000';
-      sym = lookup_symbol (copy, 0, VAR_NAMESPACE, 0, &sym_symtab);
-      if (sym)
-	{
-	  /* Yes, we have a symbol; jump to symbol processing */
-	  /* Code after symbol_found expects S, SYM_SYMTAB, SYM, 
-	     and COPY to be set correctly */
-	  *argptr = (*p == '\'') ? p + 1 : p;
-	  s = (struct symtab *) 0;
-	  goto symbol_found;
-	}
-      /* Otherwise fall out from here and go to file/line spec
-         processing, etc. */
-    }
-#endif
 
   /* S is specified file's symtab, or 0 if no file specified.
      arg no longer contains the file name.  */
@@ -1098,9 +917,9 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
       if (p[-1] != '\'')
 	error ("Unmatched single quote.");
     }
-  else if (has_parens)
+  else if (paren_pointer != NULL)
     {
-      p = pp + 1;
+      p = paren_pointer + 1;
     }
   else
     {
@@ -1277,4 +1096,185 @@ minimal_symbol_found:		/* We also jump here from the case for variables
 
   error ("Function \"%s\" not defined.", copy);
   return values;		/* for lint */
+}
+
+/* Now come a bunch of helper functions for decode_line_1.  */
+
+/* Defaults have defaults.  */
+
+static void
+dl1_initialize_defaults (struct symtab **default_symtab, int *default_line)
+{
+  if (*default_symtab == NULL)
+    {
+      /* Use whatever we have for the default source line.  We don't use
+         get_current_or_default_symtab_and_line as it can recurse and call
+	 us back! */
+      struct symtab_and_line cursal
+	= get_current_source_symtab_and_line ();
+      
+      *default_symtab = cursal.symtab;
+      *default_line = cursal.line;
+    }
+}
+
+/* See if arg is *PC */
+
+static struct symtabs_and_lines
+dl1_indirect (char **argptr)
+{
+  struct symtabs_and_lines values;
+  CORE_ADDR pc;
+
+  (*argptr)++;
+  pc = parse_and_eval_address_1 (argptr);
+
+  values.sals = (struct symtab_and_line *)
+    xmalloc (sizeof (struct symtab_and_line));
+
+  values.nelts = 1;
+  values.sals[0] = find_pc_line (pc, 0);
+  values.sals[0].pc = pc;
+  values.sals[0].section = find_pc_overlay (pc);
+
+  return values;
+}
+
+static void
+dl1_set_flags (char **argptr, int *is_quoted, char **paren_pointer)
+{
+  char *ii;
+  int has_if = 0;
+  
+  /* 'has_if' is for the syntax:
+   *     (gdb) break foo if (a==b)
+   */
+  if ((ii = strstr (*argptr, " if ")) != NULL ||
+      (ii = strstr (*argptr, "\tif ")) != NULL ||
+      (ii = strstr (*argptr, " if\t")) != NULL ||
+      (ii = strstr (*argptr, "\tif\t")) != NULL ||
+      (ii = strstr (*argptr, " if(")) != NULL ||
+      (ii = strstr (*argptr, "\tif( ")) != NULL)
+    has_if = 1;
+  /* Temporarily zap out "if (condition)" to not
+   * confuse the parenthesis-checking code below.
+   * This is undone below. Do not change ii!!
+   */
+  if (has_if)
+    {
+      *ii = '\0';
+    }
+
+  /* Set various flags.
+   * 'paren_pointer' is important for overload checking, where
+   * we allow things like: 
+   *     (gdb) break c::f(int)
+   */
+
+  /* Maybe arg is FILE : LINENUM or FILE : FUNCTION */
+
+  *is_quoted = (**argptr
+		&& strchr (get_gdb_completer_quote_characters (),
+			   **argptr) != NULL);
+
+  *paren_pointer = strchr (*argptr, '(');
+
+  if (*paren_pointer != NULL)
+    *paren_pointer = strrchr (*paren_pointer, ')');
+
+  /* Now that we're safely past the has_parens check,
+   * put back " if (condition)" so outer layers can see it 
+   */
+  if (has_if)
+    *ii = ' ';
+}
+
+static char *
+dl1_locate_first_half (char **argptr, int *is_quote_enclosed)
+{
+  char *ii;
+  char *p, *p1;
+  int has_comma;
+
+  /* Maybe we were called with a line range
+     FILENAME:LINENUM,FILENAME:LINENUM and we must isolate the first
+     half.  Outer layers will call again later for the second half.
+
+     Don't count commas that appear in argument lists of overloaded
+     functions, or in quoted strings.  It's stupid to go to this much
+     trouble when the rest of the function is such an obvious roach
+     hotel.  */
+  
+  ii = find_toplevel_char (*argptr, ',');
+  has_comma = (ii != 0);
+
+  /* Temporarily zap out second half to not
+   * confuse the code below.
+   * This is undone below. Do not change ii!!
+   */
+  if (has_comma)
+    {
+      *ii = '\0';
+    }
+
+  /* Maybe arg is FILE : LINENUM or FILE : FUNCTION */
+  /* May also be CLASS::MEMBER, or NAMESPACE::NAME */
+  /* Look for ':', but ignore inside of <> */
+
+  p = *argptr;
+  if (p[0] == '"')
+    {
+      *is_quote_enclosed = 1;
+      (*argptr)++;
+      p++;
+    }
+  else
+    *is_quote_enclosed = 0;
+  for (; *p; p++)
+    {
+      if (p[0] == '<')
+	{
+	  char *temp_end = find_template_name_end (p);
+	  if (!temp_end)
+	    error ("malformed template specification in command");
+	  p = temp_end;
+	}
+      /* Check for the end of the first half of the linespec.  End of line,
+         a tab, a double colon or the last single colon, or a space.  But
+         if enclosed in double quotes we do not break on enclosed spaces */
+      if (!*p
+	  || p[0] == '\t'
+	  || ((p[0] == ':')
+	      && ((p[1] == ':') || (strchr (p + 1, ':') == NULL)))
+	  || ((p[0] == ' ') && !*is_quote_enclosed))
+	break;
+      if (p[0] == '.' && strchr (p, ':') == NULL)	/* Java qualified method. */
+	{
+	  /* Find the *last* '.', since the others are package qualifiers. */
+	  for (p1 = p; *p1; p1++)
+	    {
+	      if (*p1 == '.')
+		p = p1;
+	    }
+	  break;
+	}
+    }
+  while (p[0] == ' ' || p[0] == '\t')
+    p++;
+
+  /* if the closing double quote was left at the end, remove it */
+  if (*is_quote_enclosed)
+    {
+      char *closing_quote = strchr (p - 1, '"');
+      if (closing_quote && closing_quote[1] == '\0')
+	*closing_quote = '\0';
+    }
+
+  /* Now that we've safely parsed the first half,
+   * put back ',' so outer layers can see it 
+   */
+  if (has_comma)
+    *ii = ',';
+
+  return p;
 }

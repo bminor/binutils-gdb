@@ -1,3 +1,25 @@
+2002-10-28  David Carlton  <carlton@math.stanford.edu>
+
+	* linespec.c (dl1_initialize_defaults): New function.
+	(dl1_indirect): Ditto.
+	(dl1_set_flags): Ditto.
+	(dl1_locate_first_half): Ditto.
+	(decode_line_1): Call the above functions.
+	* symtab.c (lookup_symbol_aux_minsyms): Add block_index argument,
+	and delete is_a_field_of_this argument.
+	(lookup_symbol_aux_nonlocal): Add call to
+	lookup_symbol_aux_minsyms, and expand HP comment.
+	(lookup_symbol_aux): Delete calls to lookup_symbol_aux_minsyms.
+	Expand on comment before lookup_transparent_type.
+
+2002-10-25  David Carlton  <carlton@math.stanford.edu>
+
+	* ada-lang.c (standard_lookup): Set last argument to lookup_symbol
+	to NULL.
+	* p-valprint.c (pascal_val_print): Ditto.
+	* objc-lang.c (find_imps): Ditto.
+	* c-valprint.c (c_val_print): Ditto.
+
 2002-10-25  David Carlton  <carlton@math.stanford.edu>
 
 	* symtab.c (lookup_symbol_aux_block): New function.

@@ -213,13 +213,12 @@ c_val_print (struct type *type, char *valaddr, int embedded_offset,
 		  struct value *vt_val;
 		  struct symbol *wsym = (struct symbol *) NULL;
 		  struct type *wtype;
-		  struct symtab *s;
 		  struct block *block = (struct block *) NULL;
 		  int is_this_fld;
 
 		  if (msymbol != NULL)
 		    wsym = lookup_symbol (SYMBOL_NAME (msymbol), block,
-					  VAR_NAMESPACE, &is_this_fld, &s);
+					  VAR_NAMESPACE, &is_this_fld, NULL);
 
 		  if (wsym)
 		    {

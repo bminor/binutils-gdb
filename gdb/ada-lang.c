@@ -3180,8 +3180,8 @@ static struct symbol *
 standard_lookup (const char *name, namespace_enum namespace)
 {
   struct symbol *sym;
-  struct symtab *symtab;
-  sym = lookup_symbol (name, (struct block *) NULL, namespace, 0, &symtab);
+
+  sym = lookup_symbol (name, (struct block *) NULL, namespace, 0, NULL);
   return sym;
 }
 

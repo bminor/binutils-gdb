@@ -1436,8 +1436,6 @@ char *find_imps (struct symtab *symtab, struct block *block,
   tmp = parse_method (buf, &type, &class, &category, &selector);
 
   if (tmp == NULL) {
-    
-    struct symtab *sym_symtab = NULL;
     struct symbol *sym = NULL;
     struct minimal_symbol *msym = NULL;
     
@@ -1447,7 +1445,7 @@ char *find_imps (struct symtab *symtab, struct block *block,
     if (tmp == NULL)
       return NULL;
     
-    sym = lookup_symbol (selector, block, VAR_NAMESPACE, 0, &sym_symtab);
+    sym = lookup_symbol (selector, block, VAR_NAMESPACE, 0, NULL);
     if (sym != NULL) 
       {
 	if (syms)

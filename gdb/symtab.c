@@ -139,10 +139,10 @@ struct symbol *lookup_symbol_aux_using_loop (const char *prefix,
 					     struct symtab **symtab);
 
 static
-struct symbol *lookup_symbol_aux_minsyms (const char *name,
+struct symbol *lookup_symbol_aux_minsyms (int block_index,
+					  const char *name,
 					  const char *mangled_name,
 					  const namespace_enum namespace,
-					  int *is_a_field_of_this,
 					  struct symtab **symtab);
 
 
@@ -862,10 +862,11 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
 	return sym;
     }
 
-  /* Now search all global blocks.  Do the symtab's first, then
-     check the psymtab's. If a psymtab indicates the existence
-     of the desired name as a global, then do psymtab-to-symtab
-     conversion on the fly and return the found symbol.
+  /* Now search all global blocks.  Do the symtab's first, then the
+     minsyms, then check the psymtab's. If minsyms or psymtabs
+     indicate the existence of the desired name as a global, then
+     generate the appropriate symtab on the fly and return the found
+     symbol.
 
      We do this from within lookup_symbol_aux_using: that will apply
      appropriate using directives in the C++ case.  But it works fine
@@ -873,66 +874,27 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
 
   /* NOTE: carlton/2002-10-22: Is it worthwhile to try to figure out
      whether or not we're in the C++ case?  Doing
-     lookup_symbol_aux_using won't slow things down much at all in the
-     general case, though: other parts of this function are much, much
-     more expensive.  */
+     lookup_symbol_aux_using won't slow things down significantly in
+     the general case, though: other parts of this function are much,
+     much more expensive.  */
 
   sym = lookup_symbol_aux_using (name, mangled_name, block, namespace,
 				 symtab);
   if (sym != NULL)
     return sym;
 
-#ifndef HPUXHPPA
-
-  /* Check for the possibility of the symbol being a function or a
-     mangled variable that is stored in one of the minimal symbol
-     tables.  Eventually, all global symbols might be resolved in this
-     way.  */
-
-  sym = lookup_symbol_aux_minsyms (name, mangled_name,
-				   namespace, is_a_field_of_this,
-				   symtab);
-  if (sym != NULL)
-    return sym;
-
-#endif
-
   /* Now search all static file-level symbols.  Not strictly correct,
-     but more useful than an error.  Do the symtabs first, then check
-     the psymtabs.  If a psymtab indicates the existence of the
-     desired name as a file-level static, then do psymtab-to-symtab
-     conversion on the fly and return the found symbol. */
+     but more useful than an error.  */
+
+  /* FIXME: carlton/2002-10-28: See my FIXME comment in
+     lookup_symbol_aux_minsyms about the possible desirability of
+     having a msymbol_found flag that could cause us to skip the
+     STATIC_BLOCK search.  */
 
   sym = lookup_symbol_aux_nonlocal (STATIC_BLOCK, name, mangled_name,
 				    namespace, symtab);
   if (sym != NULL)
     return sym;
-
-#ifdef HPUXHPPA
-
-  /* Check for the possibility of the symbol being a function or a
-     global variable that is stored in one of the minimal symbol
-     tables.  The "minimal symbol table" is built from linker-supplied
-     info.
-
-     RT: I moved this check to last, after the complete search of the
-     global (p)symtab's and static (p)symtab's. For HP-generated
-     symbol tables, this check was causing a premature exit from
-     lookup_symbol with NULL return, and thus messing up symbol
-     lookups of things like "c::f". It seems to me a check of the
-     minimal symbol table ought to be a last resort in any case. I'm
-     vaguely worried about the comment within
-     lookup_symbol_aux_minsyms which talks about FORTRAN routines
-     "foo_" though... is it saying we need to do the "minsym" check
-     before the static check in this case?  */
-
-  sym = lookup_symbol_aux_minsyms (name, mangled_name,
-				   namespace, is_a_field_of_this,
-				   symtab);
-  if (sym != NULL)
-    return sym;
-
-#endif
 
   if (symtab != NULL)
     *symtab = NULL;
@@ -1039,8 +1001,63 @@ lookup_symbol_aux_nonlocal (int block_index,
   if (sym != NULL)
     return sym;
 
-  return lookup_symbol_aux_psymtabs (block_index, name, mangled_name,
-				     namespace, symtab);
+#ifndef HPUXHPPA
+  sym = lookup_symbol_aux_minsyms (block_index, name, mangled_name,
+				   namespace, symtab);
+  if (sym != NULL)
+    return sym;
+#endif
+
+  sym = lookup_symbol_aux_psymtabs (block_index, name, mangled_name,
+				    namespace, symtab);
+  if (sym != NULL)
+    return sym;
+
+#ifdef HPUXHPPA
+
+  /* FIXME: carlton/2002-10-28: The following comment was present in
+     lookup_symbol_aux before I broke it up: at that time, the HP
+     search order for nonlocal stuff was global symtab, global
+     psymtab, static symtab, static psymtab, global and static
+     minsyms.  (The minsyms are stored so that it's just as easy to do
+     global and static searches of them at the same time.)  Now it's
+     global symtab, global psymtab, global minsyms, static symtab,
+     static psymtab, static minsyms.  Also, it's now impossible for a
+     global minsym search to cause a NULL return by itself: if a
+     minsym search returns NULL, then the next search after that is
+     still performed.
+
+     Given that that's the case, I'm pretty sure that my search order
+     is safe; indeed, given that the comment below warns against
+     premature NULL returns, it even seems plausible to me that we can
+     treat HP symbol tables the same as non-HP symbol tables.  It
+     would be great if somebody who has access to HP machines (or,
+     even better, who understands the reason behind the HP special
+     case in the first place) could check on this.
+
+     But there's still the comment about "foo_" symbols in
+     lookup_symbol_aux_minsyms which I really don't understand, sigh.
+     _Should_ a minsym lookup sometimes be able to force a NULL return
+     from lookup_symbol?  */
+
+  /* RT: I moved this check to last, after the complete search of the
+     global (p)symtab's and static (p)symtab's. For HP-generated
+     symbol tables, this check was causing a premature exit from
+     lookup_symbol with NULL return, and thus messing up symbol
+     lookups of things like "c::f". It seems to me a check of the
+     minimal symbol table ought to be a last resort in any case. I'm
+     vaguely worried about the comment within
+     lookup_symbol_aux_minsyms which talks about FORTRAN routines
+     "foo_" though... is it saying we need to do the "minsym" check
+     before the static check in this case?  */
+
+  sym = lookup_symbol_aux_minsyms (block_index, name, mangled_name,
+				   namespace, symtab);
+  if (sym != NULL)
+    return sym;
+#endif
+
+  return NULL;
 }
 
 /* Check to see if the symbol is defined in one of the symtabs.
@@ -1270,10 +1287,9 @@ lookup_symbol_aux_using_loop (const char *prefix,
    way.  */
 
 static struct symbol *
-lookup_symbol_aux_minsyms (const char *name,
+lookup_symbol_aux_minsyms (int block_index, const char *name,
 			   const char *mangled_name,
 			   const namespace_enum namespace,
-			   int *is_a_field_of_this,
 			   struct symtab **symtab)
 {
   struct symbol *sym;
@@ -1297,7 +1313,30 @@ lookup_symbol_aux_minsyms (const char *name,
 	     know about demangled names, but we were given a mangled
 	     name...  */
 
-	  /* We first use the address in the msymbol to try to locate
+	  /* First, check to see that the symbol looks like it's
+	     global or static (depending on what we were asked to look
+	     for).  */
+
+	  /* NOTE: carlton/2002-10-28: lookup_minimal_symbol gives
+	     preference to global symbols over static symbols, so if
+	     block_index is STATIC_BLOCK then this might well miss
+	     static symbols that are shadowed by global symbols.  But
+	     that's okay: this is only called with block_index equal
+	     to STATIC_BLOCK if a global search has failed.  */
+
+	  switch (MSYMBOL_TYPE (msymbol))
+	    {
+	    case mst_file_text:
+	    case mst_file_data:
+	    case mst_file_bss:
+	      if (block_index == GLOBAL_BLOCK)
+		return NULL;
+	    default:
+	      if (block_index == STATIC_BLOCK)
+		return NULL;
+	    }
+	  
+	  /* We next use the address in the msymbol to try to locate
 	     the appropriate symtab. Note that find_pc_sect_symtab()
 	     has a side-effect of doing psymtab-to-symtab expansion,
 	     for the found symtab.  */
@@ -1307,7 +1346,7 @@ lookup_symbol_aux_minsyms (const char *name,
 	    {
 	      /* This is a function which has a symtab for its address.  */
 	      bv = BLOCKVECTOR (s);
-	      block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
+	      block = BLOCKVECTOR_BLOCK (bv, block_index);
 
 	      /* This call used to pass `SYMBOL_NAME (msymbol)' as the
 	         `name' argument to lookup_block_symbol.  But the name
@@ -1316,14 +1355,16 @@ lookup_symbol_aux_minsyms (const char *name,
 	         unmangled name.  */
 	      sym =
 		lookup_block_symbol (block, name, mangled_name, namespace);
-	      /* We kept static functions in minimal symbol table as well as
-	         in static scope. We want to find them in the symbol table. */
-	      if (!sym)
-		{
-		  block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-		  sym = lookup_block_symbol (block, name,
-					     mangled_name, namespace);
-		}
+
+	      /* FIXME: carlton/2002-10-28: this next comment dates
+		 from when this code was part of lookup_symbol_aux, so
+		 this return could return NULL from lookup_symbol_aux.
+		 Are there really situations where we want a minimal
+		 symbol lookup to be able to force a NULL return from
+		 lookup_symbol?  If so, maybe the thing to do would be
+		 to have lookup_symbol_aux_minsym to set a
+		 minsym_found flag, and to have lookup_symbol_aux only
+		 do the psymtab search if that flag is zero.  */
 
 	      /* sym == 0 if symbol was found in the minimal symbol table
 	         but not in the symtab.
@@ -1344,13 +1385,15 @@ lookup_symbol_aux_minsyms (const char *name,
 	    }
 	  else if (MSYMBOL_TYPE (msymbol) != mst_text
 		   && MSYMBOL_TYPE (msymbol) != mst_file_text
-		   && !STREQ (name, SYMBOL_NAME (msymbol)))
+		   && strcmp (name, SYMBOL_NAME (msymbol)) != 0)
 	    {
 	      /* This is a mangled variable, look it up by its
 	         mangled name.  */
-	      return lookup_symbol_aux (SYMBOL_NAME (msymbol), mangled_name,
-					NULL, namespace, is_a_field_of_this,
-					symtab);
+	      return lookup_symbol_aux_nonlocal (block_index,
+						 SYMBOL_NAME (msymbol),
+						 mangled_name,
+						 namespace,
+						 symtab);
 	    }
 	}
     }
@@ -1456,8 +1499,13 @@ lookup_partial_symbol (struct partial_symtab *pst, const char *name,
 
 /* FIXME: carlton/2002-10-25: This function duplicates too much of
    lookup_symbol_aux's code: it's a maintenance burden.  That should
-   be taken care of.  Or perhaps this function should eventually get
-   removed: it's only called in one place, I believe.  */
+   be taken care of.  Unfortunately, right now there's no clean fix
+   for that.  The obvious thing to do is to put in calls to
+   lookup_symbol_aux_nonlocal; but, if I'm reading its caller, it
+   seems like this is used when there are perhaps multiple definitions
+   for NAME, in which case lookup_symbol_aux_nonlocal might find the
+   wrong one.  Something to keep in mind when we have iterators,
+   though.  */
 
 struct type *
 lookup_transparent_type (const char *name)
