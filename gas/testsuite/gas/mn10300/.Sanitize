@@ -52,6 +52,7 @@ muldiv.s
 other.s
 shift.s
 sub.s
+udf.s
 
 Things-to-lose:
 
