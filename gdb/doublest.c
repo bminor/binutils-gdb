@@ -732,9 +732,9 @@ store_typed_floating (void *addr, const struct type *type, DOUBLEST val)
   memset (addr, 0, TYPE_LENGTH (type));
 
   if (TYPE_FLOATFORMAT (type) == NULL)
-    return store_floating (addr, TYPE_LENGTH (type), val);
-
-  floatformat_from_doublest (TYPE_FLOATFORMAT (type), &val, addr);
+    store_floating (addr, TYPE_LENGTH (type), val);
+  else
+    floatformat_from_doublest (TYPE_FLOATFORMAT (type), &val, addr);
 }
 
 /* Convert a floating-point number of type FROM_TYPE from a
