@@ -164,33 +164,25 @@ proc do_tests {} {
 proc print_wierd_var { var } {
 	global prompt
 
-	# GDB does not yet understand type attributes
-	setup_xfail "*-*-*"
-
 	# Make sure that the variable gets printed out correctly, without
 	# any sort of warning message.
 	send "print $var\n"
 	expect {
 		-re "^print $var\r*\n.\[0-9\]* = 42.*$prompt $" {
 			pass "variable $var printed properly"
-			return 0
 		}
 		-re ".*$prompt $" {
 			fail "variable $var not printed properly"
-			return 0
 		}
 		timeout { fail "variable $var not printed (timeout)" }
 		eof { fail "(eof) variable $var not printed" }
 	}
 
-	# GDB does not yet understand type attributes
-	setup_xfail "*-*-*"
-
 	# Make sure that the stabs did get loaded in a sensible way.
 	# If somehow the stabs got skipped, then the above test can
 	# pass because GDB assumes int for variables without a stab.
 
-	gdb_test "whatis $var\n" "type = (unsigned int|inttype)" "whatis on $var"
+	gdb_test "whatis $var" "type = (unsigned int|inttype)" "whatis on $var"
 }
 
 # Start with a fresh gdb
