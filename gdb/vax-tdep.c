@@ -210,7 +210,7 @@ vax_return_value (struct gdbarch *gdbarch, struct type *type,
   char buf[8];
 
   if (TYPE_CODE (type) == TYPE_CODE_STRUCT
-      || TYPE_CODE (type) == TYPE_CODE_STRUCT
+      || TYPE_CODE (type) == TYPE_CODE_UNION
       || TYPE_CODE (type) == TYPE_CODE_ARRAY)
     return RETURN_VALUE_STRUCT_CONVENTION;
 

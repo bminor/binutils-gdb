@@ -1,3 +1,7 @@
+2004-05-17  Mark Kettenis  <kettenis@gnu.org>
+
+	* vax-tdep.c (vax_return_value): Fix typo.
+
 2004-05-17  Andrew Cagney  <cagney@redhat.com>
 
 	* MAINTAINERS: Mark Salter was also responsible for
@@ -30,6 +34,9 @@
 	Remove static function declarations.
 
 2004-05-17  Mark Kettenis  <kettenis@gnu.org>
+
+	* alphabsd-nat.c: Update copyright year.
+	(getregs_supplies): Replace PC_REGNUM with ALPHA_PC_REGNUM.
 
 	* m68k-tdep.h (m68k_regnum): Add M68K_D2_REGNUM, M68K_D7_REGNUM
 	and M68K_A2_REGNUM.
