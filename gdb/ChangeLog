@@ -11,6 +11,11 @@ Mon Dec 14 17:18:42 1992  Stu Grossman  (grossman at cygnus.com)
 	from U. of Utah.
 	* tm-hppa.h (PUSH_DUMMY_FRAME, POP_FRAME):  Use char * for 2nd arg
 	to read/write_register_bytes().
+	* gdbtypes.h:  Remove const from decl for cplus_struct_default to
+	work around PA-GAS assembler bug.  Also, add trailing */ to some
+	comments.
+	* gdbtypes.c:  Remove const from decl for cplus_struct_default.
+	Same reason as above.
 
 Wed Dec  9 19:53:25 1992  John Gilmore  (gnu@cygnus.com)
 
