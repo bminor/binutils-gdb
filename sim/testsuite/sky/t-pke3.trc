@@ -191,6 +191,8 @@
 ? 0x10003c00 0x00002000 0x00002000
 # Reset PKE
 ! 0x10003c10 0x00000001
+# Reset GPUIF
+! 0x10003000 0x00000001
 # Read STAT register; confirm ER1 no longer set
 ? 0x10003c00 0x00000000 0x00002000
 # Test DIRECTHL instruction with bad operand alignment
@@ -400,9 +402,14 @@
 #
 # ---- MSKPATH3 ---- [test.code.mskpath3]
 #
-# Set then clear MSKPATH3 on PKE1
+# Clear & set MSKPATH3 on PKE1
 1 0x06008000_00000000_06000000_00000000 0x00000000 PPPP
-# XXX: test M3P register of GPUIF XXX
+# Check M3P & M3R fields of GPUIF STAT
+? 0x10003020 0x00000002 0x00000003
+# Clear MSKPATH3
+1 0x06000000_00000000_00000000_00000000 0x00000000 PPPP
+# Check M3P & M3R fields of GPUIF STAT
+? 0x10003020 0x00000000 0x00000003
 # Read STAT register; confirm ER1 not set
 ? 0x10003c00 0x00000000 0x00002000
 # Erroneously run this on PKE0

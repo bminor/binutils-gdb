@@ -1,3 +1,8 @@
+Sun Apr  5 12:34:56 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* t-pke3.trc: Modified to confirm parts of GPUIF PATH3-masking
+ 	functionality.
+	
 Fri Apr 3 15:41:07 1998  Jillian Ye <jillian@cygnus.com>
 
 	* c_gen.pl: Added subroutin process_data_reg64.
