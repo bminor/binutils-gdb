@@ -1,5 +1,8 @@
 Fri Apr 19 09:36:50 1991  Jim Kingdon  (kingdon at cygint.cygnus.com)
 
+	* tm-68k.h (NUM_REGS): Conditionalize on TARGET_SUN3 not sun.
+	tm-sun3.h: Define TARGET_SUN3.
+
 	* utils.c: Use CPLUS_MARKER not '$'.
 
 	* cplus-dem.c: Use CPLUS_MARKER not '$'.  If CPLUS_MARKER isn't

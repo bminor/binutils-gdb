@@ -19,6 +19,8 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define HAVE_68881
 
+#define TARGET_SUN3
+
 #include "tm-68k.h"
 
 /* Define this if the C compiler puts an underscore at the front
