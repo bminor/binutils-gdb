@@ -1,3 +1,7 @@
+Mon Jul 12 11:22:06 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.t15/{gdbme.c,funcargs.exp}: Test for alloca-influenced frames.
+
 Sun Jul 11 12:03:24 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.t17/interrupt.exp: Test for more things.
