@@ -1,3 +1,18 @@
+2003-01-12  Andrew Cagney  <ac131313@redhat.com>
+
+	* d10v-tdep.c (d10v_init_extra_frame_info): Remove checks for a
+	dummy frame.
+	(d10v_frame_saved_pc, d10v_frame_chain): Ditto.
+
+2003-01-12  Andrew Cagney  <ac131313@redhat.com>
+
+	* d10v-tdep.c: Include "gdb_assert.h".
+	(d10v_store_return_value): Rewrite to match current interface.
+	(d10v_extract_struct_value_address): Ditto.
+	(d10v_extract_return_value): Ditto.
+	(d10v_gdbarch_init): Set store_restore_value,
+	extract_struct_value_address and extract_return_value.
+
 2003-01-11  Andrew Cagney  <ac131313@redhat.com>
 
 	* frame.c (deprecated_update_frame_pc_hack)
