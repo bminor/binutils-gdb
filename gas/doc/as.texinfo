@@ -3691,13 +3691,7 @@ Some machine configurations provide additional directives.
 * Byte::                        @code{.byte @var{expressions}}
 * Comm::                        @code{.comm @var{symbol} , @var{length} }
 
-* CFI directives::		@code{.cfi_startproc}
-				@code{.cfi_endproc}
-				@code{.cfi_def_cfa @var{register}, @var{offset}}
-				@code{.cfi_def_cfa_register @var{register}}
-				@code{.cfi_def_cfa_offset @var{offset}}
-				@code{.cfi_adjust_cfa_offset @var{offset}}
-				@code{.cfi_offset @var{register}, @var{offset}}
+* CFI directives::		@code{.cfi_startproc}, @code{.cfi_endproc}, etc.
 
 * Data::                        @code{.data @var{subsection}}
 @ifset COFF
@@ -4020,8 +4014,10 @@ using the known displacement of the CFA register from the CFA.
 This is often easier to use, because the number will match the
 code it's annotating.
 
-@node Comm
-@section @code{.comm @var{symbol} , @var{length} }
+@section @code{.cfi_escape} @var{expression}[, @dots{}]
+Allows the user to add arbitrary bytes to the unwind info.  One
+might use this to add OS-specific CFI opcodes, or generic CFI
+opcodes that GAS does not yet support.
 
 @cindex @code{comm} directive
 @cindex symbol, common

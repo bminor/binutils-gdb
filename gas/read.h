@@ -133,6 +133,7 @@ extern void stabs_generate_asm_func PARAMS ((const char *, const char *));
 extern void stabs_generate_asm_endfunc PARAMS ((const char *, const char *));
 extern void do_repeat PARAMS((int,const char *,const char *));
 extern void end_repeat PARAMS((int));
+extern void do_parse_cons_expression PARAMS ((expressionS *, int));
 
 extern void generate_lineno_debug PARAMS ((void));
 

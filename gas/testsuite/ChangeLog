@@ -1,3 +1,8 @@
+2003-06-11  Richard Henderson  <rth@redhat.com>
+
+	* gas/cfi/cfi-common-3.[ds]: New.
+	* gas/cfi/cfi.exp: Run it.
+
 2003-06-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/macros/app1.d: Ignore section symbols.

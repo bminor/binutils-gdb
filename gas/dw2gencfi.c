@@ -68,6 +68,11 @@ struct cfi_insn_data
       symbolS *lab1;
       symbolS *lab2;
     } ll;
+
+    struct cfi_escape_data {
+      struct cfi_escape_data *next;
+      expressionS exp;
+    } *esc;
   } u;
 };
 
@@ -330,16 +335,11 @@ cfi_add_CFA_restore_state (void)
     }
 }
 
-void
-cfi_add_CFA_nop (void)
-{
-  cfi_add_CFA_insn (DW_CFA_nop);
-}
-
 
 /* Parse CFI assembler directives.  */
 
 static void dot_cfi (int);
+static void dot_cfi_escape (int);
 static void dot_cfi_startproc (int);
 static void dot_cfi_endproc (int);
 
@@ -347,6 +347,7 @@ static void dot_cfi_endproc (int);
 #define CFI_adjust_cfa_offset	0x100
 #define CFI_return_column	0x101
 #define CFI_rel_offset		0x102
+#define CFI_escape		0x103
 
 const pseudo_typeS cfi_pseudo_table[] =
   {
@@ -365,7 +366,7 @@ const pseudo_typeS cfi_pseudo_table[] =
     { "cfi_same_value", dot_cfi, DW_CFA_same_value },
     { "cfi_remember_state", dot_cfi, DW_CFA_remember_state },
     { "cfi_restore_state", dot_cfi, DW_CFA_restore_state },
-    { "cfi_nop", dot_cfi, DW_CFA_nop },
+    { "cfi_escape", dot_cfi_escape, 0 },
     { NULL, NULL, 0 }
   };
 
@@ -520,15 +521,44 @@ dot_cfi (int arg)
       cfi_add_CFA_restore_state ();
       break;
 
-    case DW_CFA_nop:
-      cfi_add_CFA_nop ();
-      break;
-
     default:
       abort ();
     }
 
   demand_empty_rest_of_line ();
+}
+
+static void
+dot_cfi_escape (int ignored ATTRIBUTE_UNUSED)
+{
+  struct cfi_escape_data *head, **tail, *e;
+  struct cfi_insn_data *insn;
+
+  if (!cur_fde_data)
+    {
+      as_bad (_("CFI instruction used without previous .cfi_startproc"));
+      return;
+    }
+
+  /* If the last address was not at the current PC, advance to current.  */
+  if (symbol_get_frag (last_address) != frag_now
+      || S_GET_VALUE (last_address) != frag_now_fix ())
+    cfi_add_advance_loc (symbol_temp_new_now ());
+
+  tail = &head;
+  do
+    {
+      e = xmalloc (sizeof (*e));
+      do_parse_cons_expression (&e->exp, 1);
+      *tail = e;
+      tail = &e->next;
+    }
+  while (*input_line_pointer++ == ',');
+  *tail = NULL;
+
+  insn = alloc_cfi_insn_data ();
+  insn->insn = CFI_escape;
+  insn->u.esc = head;
 }
 
 static void
@@ -757,9 +787,16 @@ output_cfi_insn (struct cfi_insn_data *insn)
 
     case DW_CFA_remember_state:
     case DW_CFA_restore_state:
-    case DW_CFA_nop:
       out_one (insn->insn);
       break;
+
+    case CFI_escape:
+      {
+	struct cfi_escape_data *e;
+	for (e = insn->u.esc; e ; e = e->next)
+	  emit_expr (&e->exp, 1);
+	break;
+      }
 
     default:
       abort ();
@@ -891,6 +928,10 @@ select_cie_for_fde (struct fde_entry *fde, struct cfi_insn_data **pfirst)
 	      if (i->u.i != j->u.i)
 		goto fail;
 	      break;
+
+	    case CFI_escape:
+	      /* Don't bother matching these for now.  */
+	      goto fail;
 
 	    default:
 	      abort ();

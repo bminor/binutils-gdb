@@ -48,6 +48,5 @@ extern void cfi_add_CFA_undefined (unsigned);
 extern void cfi_add_CFA_same_value (unsigned);
 extern void cfi_add_CFA_remember_state (void);
 extern void cfi_add_CFA_restore_state (void);
-extern void cfi_add_CFA_nop (void);
 
 #endif /* DW2GENCFI_H */

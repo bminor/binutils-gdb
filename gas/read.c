@@ -3346,6 +3346,13 @@ parse_repeat_cons PARAMS ((expressionS *exp, unsigned int nbytes));
 #endif
 #endif
 
+void
+do_parse_cons_expression (expressionS *exp, int nbytes)
+{
+  TC_PARSE_CONS_EXPRESSION (exp, nbytes);
+}
+
+
 /* Worker to do .byte etc statements.
    Clobbers input_line_pointer and checks end-of-line.  */
 
