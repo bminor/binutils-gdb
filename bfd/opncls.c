@@ -54,7 +54,6 @@ _bfd_new_bfd ()
       return 0;
     }
 
-  bfd_check_init();
   if (!obstack_begin(&nbfd->memory, 128))
     {
       bfd_set_error (bfd_error_no_memory);

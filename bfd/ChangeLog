@@ -1,3 +1,11 @@
+Mon Sep 25 11:48:02 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* init.c (initialized): Remove static variable.
+	(bfd_init): Don't bother setting initialized.
+	(bfd_check_init): Remove.
+	* opncls.c (_bfd_new_bfd): Don't call bfd_check_init.
+	* libbfd.h: Rebuild.
+
 Sat Sep 23 01:22:23 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* rs6000-core.c (rs6000coff_core_p):  Don't check the core file

@@ -464,9 +464,6 @@ extern boolean _bfd_ecoff_get_accumulated_ss PARAMS ((PTR, bfd_byte *));
 /* And more follows */
 
 void 
-bfd_check_init PARAMS ((void));
-
-void 
 bfd_write_bigendian_4byte_int PARAMS ((bfd *abfd,  int i));
 
 unsigned int 
