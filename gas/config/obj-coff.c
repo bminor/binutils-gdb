@@ -1397,23 +1397,24 @@ coff_frob_file_after_relocs ()
   bfd_map_over_sections (stdoutput, coff_adjust_section_syms, (char*) 0);
 }
 
-/*
- * implement the .section pseudo op:
- *	.section name {, "flags"}
- *                ^         ^
- *                |         +--- optional flags: 'b' for bss
- *                |                              'i' for info
- *                +-- section name               'l' for lib
- *                                               'n' for noload
- *                                               'o' for over
- *                                               'w' for data
- *						 'd' (apparently m88k for data)
- *                                               'x' for text
- *						 'r' for read-only data
- *						 's' for shared data (PE)
- * But if the argument is not a quoted string, treat it as a
- * subsegment number.
- */
+/* Implement the .section pseudo op:
+  	.section name {, "flags"}
+                  ^         ^
+                  |         +--- optional flags: 'b' for bss
+                  |                              'i' for info
+                  +-- section name               'l' for lib
+                                                 'n' for noload
+                                                 'o' for over
+                                                 'w' for data
+  						 'd' (apparently m88k for data)
+                                                 'x' for text
+  						 'r' for read-only data
+  						 's' for shared data (PE)
+   But if the argument is not a quoted string, treat it as a
+   subsegment number.
+
+   Note the 'a' flag is silently ignored.  This allows the same
+   .section directive to be parsed in both ELF and COFF formats.  */
 
 void
 obj_coff_section (ignore)
@@ -1466,6 +1467,7 @@ obj_coff_section (ignore)
 		case 'n': flags &=~ SEC_LOAD; flags |= SEC_NEVER_LOAD; break;
 		case 'd': flags |= SEC_DATA | SEC_LOAD; /* fall through */
 		case 'w': flags &=~ SEC_READONLY; break;
+		case 'a': break; /* For compatability with ELF.  */
 		case 'x': flags |= SEC_CODE | SEC_LOAD; break;
 		case 'r': flags |= SEC_READONLY; break;
 		case 's': flags |= SEC_SHARED; break;

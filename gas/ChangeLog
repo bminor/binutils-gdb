@@ -1,3 +1,10 @@
+2002-05-23  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* config/obj-coff.c (obj_coff_section): Silently ignore an 'a'
+	flag.
+        * doc/as.texinfo: Document that the COFF version of .section
+	ignores the 'a' flag.
+
 2002-05-23  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-alpha.c (assemble_tokens): Protect use of

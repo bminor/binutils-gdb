@@ -4978,6 +4978,8 @@ read-only section
 executable section
 @item s
 shared section (meaningful for PE targets)
+@item a
+ignored.  (For compatibility with the ELF version)
 @end table
 
 If no flags are specified, the default flags depend upon the section name.  If
