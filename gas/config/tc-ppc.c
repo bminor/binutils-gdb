@@ -4945,43 +4945,14 @@ md_apply_fix3 (fixp, valuep, seg)
       /* Determine a BFD reloc value based on the operand information.
 	 We are only prepared to turn a few of the operands into
 	 relocs.
-	 FIXME: We need to handle the DS field at the very least.
-	 FIXME: Selecting the reloc type is a bit haphazard; perhaps
-	 there should be a new field in the operand table.  */
-      if ((operand->flags & PPC_OPERAND_RELATIVE) != 0
-	  && operand->bits == 26
-	  && operand->shift == 0)
-	fixp->fx_r_type = BFD_RELOC_PPC_B26;
-      else if ((operand->flags & PPC_OPERAND_RELATIVE) != 0
-	  && operand->bits == 16
-	  && operand->shift == 0)
-	fixp->fx_r_type = BFD_RELOC_PPC_B16;
-      else if ((operand->flags & PPC_OPERAND_ABSOLUTE) != 0
-	       && operand->bits == 26
-	       && operand->shift == 0)
-	fixp->fx_r_type = BFD_RELOC_PPC_BA26;
-      else if ((operand->flags & PPC_OPERAND_ABSOLUTE) != 0
-	       && operand->bits == 16
-	       && operand->shift == 0)
-	fixp->fx_r_type = BFD_RELOC_PPC_BA16;
-      else if ((operand->flags & PPC_OPERAND_PARENS) != 0
-	       && operand->bits == 16
-	       && operand->shift == 0
-	       && fixp->fx_addsy != NULL
-	       && ppc_is_toc_sym (fixp->fx_addsy))
-	{
-	  fixp->fx_size = 2;
-	  if (target_big_endian)
-	    fixp->fx_where += 2;
-	  fixp->fx_r_type = BFD_RELOC_PPC_TOC16;
-	}
-      else
+	 For other operand types, give an error.  */
+      if (operand->reloc == 0)
 	{
 	  char *sfile;
 	  unsigned int sline;
 
 	  /* Use expr_symbol_where to see if this is an expression
-             symbol.  */
+	     symbol.  */
 	  if (expr_symbol_where (fixp->fx_addsy, &sfile, &sline))
 	    as_bad_where (fixp->fx_file, fixp->fx_line,
 			  _("unresolved expression that must be resolved"));
@@ -4990,6 +4961,28 @@ md_apply_fix3 (fixp, valuep, seg)
 			  _("unsupported relocation type"));
 	  fixp->fx_done = 1;
 	  return 1;
+	}
+
+      fixp->fx_r_type = operand->reloc;
+
+      if ((operand->flags & PPC_OPERAND_PARENS) != 0 && fixp->fx_addsy != NULL)
+	{
+	  /* For ld/st/la reloc types (`la' == load address).
+	     Instruction with D or DS field.  */
+	  if (ppc_is_toc_sym (fixp->fx_addsy))
+	    {
+	      fixp->fx_size = 2;
+	      if (target_big_endian)
+		fixp->fx_where += 2;
+	    }
+	  else
+	    {
+	      as_bad_where (fixp->fx_file, fixp->fx_line,
+			    _("unsupported relocation against %s"),
+			    S_GET_NAME (fixp->fx_addsy));
+	      fixp->fx_done = 1;
+	      return 1;
+	    }
 	}
     }
   else
@@ -5017,10 +5010,12 @@ md_apply_fix3 (fixp, valuep, seg)
 	  if (fixp->fx_pcrel)
 	    fixp->fx_r_type = BFD_RELOC_64_PCREL;
 	  /* fall through */
+
 	case BFD_RELOC_64_PCREL:
 	  md_number_to_chars (fixp->fx_frag->fr_literal + fixp->fx_where,
 			      value, 8);
 	  break;
+
 	case BFD_RELOC_LO16:
 	case BFD_RELOC_16:
 	case BFD_RELOC_GPREL16:
@@ -5071,6 +5066,7 @@ md_apply_fix3 (fixp, valuep, seg)
 	  md_number_to_chars (fixp->fx_frag->fr_literal + fixp->fx_where,
 			      value >> 16, 2);
 	  break;
+
 	case BFD_RELOC_HI16_S:
 	  if (fixp->fx_pcrel)
 	    abort ();

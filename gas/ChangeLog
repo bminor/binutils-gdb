@@ -1,5 +1,11 @@
 2001-08-08  Alan Modra  <amodra@bigpond.net.au>
 
+	From 1999-10-25  Torbjorn Granlund  <tege@swox.com>
+	* config/tc-ppc.c (md_apply_fix3): Replace haphazard code for
+	determining reloc type with code reading operands->reloc field.
+
+2001-08-08  Alan Modra  <amodra@bigpond.net.au>
+
 	* config/obj-elf.c (elf_copy_symbol_attributes): Make it a global
 	function, and expand old obj-elf.h OBJ_COPY_SYMBOL_ATTRIBUTES here.
 	* config/obj-elf.h (elf_copy_symbol_attributes): Declare.
