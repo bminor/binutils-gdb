@@ -25,6 +25,10 @@
 /* Include the common ARM definitions. */
 #include "arm/tm-arm.h"
 
+/* The remote stub should be able to single-step. */
+#undef SOFTWARE_SINGLE_STEP_P
+#define SOFTWARE_SINGLE_STEP_P() 0
+
 /* I don't know the real values for these.  */
 #define TARGET_UPAGES UPAGES
 #define TARGET_NBPG NBPG

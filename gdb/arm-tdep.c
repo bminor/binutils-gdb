@@ -1532,7 +1532,6 @@ condition_true (unsigned long cond, unsigned long status_reg)
   return 1;
 }
 
-#if SOFTWARE_SINGLE_STEP_P
 /* Support routines for single stepping.  Calculate the next PC value.  */
 #define submask(x) ((1L << ((x) + 1)) - 1)
 #define bit(obj,st) (((obj) >> (st)) & 1)
@@ -1887,12 +1886,11 @@ arm_software_single_step (ignore, insert_bpt)
   if (insert_bpt)
     {
       next_pc = arm_get_next_pc (read_register (PC_REGNUM));
-      target_insert_breakpoint (next_pc, &break_mem);
+      target_insert_breakpoint (next_pc, break_mem);
     }
   else
-    target_remove_breakpoint (next_pc, &break_mem);
+    target_remove_breakpoint (next_pc, break_mem);
 }
-#endif /* SOFTWARE_SINGLE_STEP_P */
 
 #include "bfd-in2.h"
 #include "libcoff.h"

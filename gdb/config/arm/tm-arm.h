@@ -453,13 +453,11 @@ void arm_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun,
 
 /* Most ARMs don't have single stepping capability, so provide a 
    single-stepping mechanism by default */
-#ifndef SOFTWARE_SINGLE_STEP_P
-#define SOFTWARE_SINGLE_STEP_P 1
-#endif
-#if SOFTWARE_SINGLE_STEP_P
+#undef SOFTWARE_SINGLE_STEP_P
+#define SOFTWARE_SINGLE_STEP_P() 1
+
 #define SOFTWARE_SINGLE_STEP(sig,bpt) arm_software_single_step((sig), (bpt))
 void arm_software_single_step PARAMS((int, int));
-#endif
 
 CORE_ADDR arm_get_next_pc (CORE_ADDR pc);
 

@@ -1,3 +1,12 @@
+2001-12-19  Fernando Nasser  <fnasser@redhat.com>
+
+	* config/arm/tm-arm.h: Properly define SOFTWARE_SINGLE_STEP_P.
+	Always define SOFTWARE_SINGLE_STEP.
+	* config/arm/tm-embed.h: Properly define SOFTWARE_SINGLE_STEP_P.
+	* arm-tdep.c (arm_get_next_pc, thumb_get_next_pc, bitcount,
+	shifted_reg_val): Always compile these functions.
+	(arm_software_single_step): Fix second argument in function calls.
+
 2001-12-19  Andrew Cagney  <ac131313@redhat.com>
 
 	* arch-utils.h (gdbarch_info_init): Declare.
