@@ -26,7 +26,7 @@ foo:
 	pshufhw		$0x4,0x0(%ebp),%xmm6
 	pshuflw		$0x1,%xmm2,%xmm3
 	pshuflw		$0x4,0x0(%ebp),%xmm6
-	movntq		%xmm2,(%eax)
+	movntdq		%xmm2,(%eax)
 	punpcklbw	0x90909090(%eax),%xmm2
 	punpcklwd	0x90909090(%eax),%xmm2
 	punpckldq	0x90909090(%eax),%xmm2

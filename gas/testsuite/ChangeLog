@@ -1,3 +1,8 @@
+2001-03-24  Alan Modra  <alan@linuxcare.com.au>
+
+	* gas/i386/ssemmx2.s: Change movntq to movntdq.
+	* gas/i386/ssemmx2.d: Matching change.
+
 2001-03-23  Hans-Peter Nilsson  <hp@axis.com>
 
 	* gas/cris/pic-err-1.s, gas/cris/rd-pic-1.s, gas/cris/rd-pic-1.d:

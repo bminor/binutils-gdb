@@ -409,6 +409,8 @@ static void BadOp PARAMS ((void));
 #define PREGRP22 NULL, NULL, 22, NULL, USE_PREFIX_USER_TABLE, NULL, 0
 #define PREGRP23 NULL, NULL, 23, NULL, USE_PREFIX_USER_TABLE, NULL, 0
 #define PREGRP24 NULL, NULL, 24, NULL, USE_PREFIX_USER_TABLE, NULL, 0
+#define PREGRP25 NULL, NULL, 25, NULL, USE_PREFIX_USER_TABLE, NULL, 0
+#define PREGRP26 NULL, NULL, 26, NULL, USE_PREFIX_USER_TABLE, NULL, 0
 
 #define FLOATCODE 50
 #define FLOAT NULL, NULL, FLOATCODE, NULL, 0, NULL, 0
@@ -1737,7 +1739,7 @@ static const struct dis386 dis386_twobyte_att[] = {
   { "punpckhwd", MX, EM, XX },
   { "punpckhdq", MX, EM, XX },
   { "packssdw", MX, EM, XX },
-  { "(bad)", XX, XX, XX },
+  { PREGRP26 },
   { PREGRP24 },
   { "movd", MX, Ed, XX },
   { PREGRP19 },
@@ -1875,7 +1877,7 @@ static const struct dis386 dis386_twobyte_att[] = {
   { "pmulhuw", MX, EM, XX },
   { "pmulhw", MX, EM, XX },
   { PREGRP15 },
-  { "movntq", Ev, MX, XX },
+  { PREGRP25 },
   /* e8 */
   { "psubsb", MX, EM, XX },
   { "psubsw", MX, EM, XX },
@@ -2029,7 +2031,7 @@ static const struct dis386 dis386_twobyte_intel[] = {
   { "punpckhwd", MX, EM, XX },
   { "punpckhdq", MX, EM, XX },
   { "packssdw", MX, EM, XX },
-  { "(bad)", XX, XX, XX },
+  { PREGRP26 },
   { PREGRP24 },
   { "movd", MX, Ed, XX },
   { PREGRP19 },
@@ -2167,7 +2169,7 @@ static const struct dis386 dis386_twobyte_intel[] = {
   { "pmulhuw", MX, EM, XX },
   { "pmulhw", MX, EM, XX },
   { PREGRP15 },
-  { "movntq", Ev, MX, XX },
+  { PREGRP25 },
   /* e8 */
   { "psubsb", MX, EM, XX },
   { "psubsw", MX, EM, XX },
@@ -2693,7 +2695,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "maskmovq", MX, EM, XX },
     { "(bad)", XM, EX, XX },
-    { "maskmovdqu", MX, EX, XX },
+    { "maskmovdqu", XM, EX, XX },
     { "(bad)", XM, EX, XX },
   },
   /* PREGRP19 */
@@ -2729,14 +2731,28 @@ static const struct dis386 prefix_user_table[][4] = {
     { "movd", Ed, MX, XX },
     { "movq", Ed, XM, XX },
     { "movd", Ed, XM, XX },
-    { "(bad)", EX, XM, XX },
+    { "(bad)", Ed, XM, XX },
   },
   /* PREGRP24 */
   {
-    { "(bad)", EX, XM, XX },
-    { "(bad)", EX, XM, XX },
+    { "(bad)", MX, EX, XX },
+    { "(bad)", XM, EX, XX },
     { "punpckhqdq", XM, EX, XX },
-    { "(bad)", EX, XM, XX },
+    { "(bad)", XM, EX, XX },
+  },
+  /* PREGRP25 */
+  {
+  { "movntq", Ev, MX, XX },
+  { "(bad)", Ev, XM, XX },
+  { "movntdq", Ev, XM, XX },
+  { "(bad)", Ev, XM, XX },
+  },
+  /* PREGRP26 */
+  {
+    { "(bad)", MX, EX, XX },
+    { "(bad)", XM, EX, XX },
+    { "punpcklqdq", XM, EX, XX },
+    { "(bad)", XM, EX, XX },
   },
 };
 
