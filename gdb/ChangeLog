@@ -1,3 +1,7 @@
+Mon Dec  9 17:12:19 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* monitor.c (monitor_insert_breakpoint): Handle bi-endian machines.
+
 Mon Dec  9 15:58:51 1996  Mark Alexander  <marka@cygnus.com>
 
 	* config/mips/tm-mips.h: Get rid of call-dummy code.

@@ -459,14 +459,13 @@ monitor_expect_regexp (pat, buf, buflen)
    o give your command
    o *then* wait for the prompt.
 
-   Thus the last thing that a procedure does with the serial line
-   will be an monitor_expect_prompt().  Exception:  monitor_resume does not
-   wait for the prompt, because the terminal is being handed over
-   to the inferior.  However, the next thing which happens after that
-   is a monitor_wait which does wait for the prompt.
-   Note that this includes abnormal exit, e.g. error().  This is
-   necessary to prevent getting into states from which we can't
-   recover.  */
+   Thus the last thing that a procedure does with the serial line will
+   be an monitor_expect_prompt().  Exception: monitor_resume does not
+   wait for the prompt, because the terminal is being handed over to
+   the inferior.  However, the next thing which happens after that is
+   a monitor_wait which does wait for the prompt.  Note that this
+   includes abnormal exit, e.g. error().  This is necessary to prevent
+   getting into states from which we can't recover.  */
 
 int
 monitor_expect_prompt (buf, buflen)
@@ -1168,32 +1167,33 @@ monitor_read_memory_single (memaddr, myaddr, len)
       cmd = current_monitor->getmem.cmdb;
     }
 
-/* Send the examine command.  */
+  /* Send the examine command.  */
 
   monitor_printf (cmd, memaddr);
 
-/* If RESP_DELIM is specified, we search for that as a leading delimiter for
-   the register value.  Otherwise, we just start searching from the start of
-   the buf.  */
+  /* If RESP_DELIM is specified, we search for that as a leading
+     delimiter for the memory value.  Otherwise, we just start
+     searching from the start of the buf.  */
 
   if (current_monitor->getmem.resp_delim)
     monitor_expect_regexp (&getmem_resp_delim_pattern, NULL, 0);
 
-/* Now, read the appropriate number of hex digits for this loc, skipping
-   spaces.  */
+  /* Now, read the appropriate number of hex digits for this loc,
+     skipping spaces.  */
 
-  /* Skip leading spaces and "0x" if MO_HEX_PREFIX flag is set */
+  /* Skip leading spaces and "0x" if MO_HEX_PREFIX flag is set. */
   if (current_monitor->flags & MO_HEX_PREFIX) 
     {
       int c;
+
       c = readchar (timeout);
       while (c == ' ')
 	c = readchar (timeout);
       if ((c == '0') && ((c = readchar (timeout)) == 'x'))
 	;
       else
-	  error ("monitor_read_memory_single (0x%x):  bad response from monitor: %.*s%c.",
-		 memaddr, i, membuf, c);
+	error ("monitor_read_memory_single (0x%x):  bad response from monitor: %.*s%c.",
+	       memaddr, i, membuf, c);
     }
   for (i = 0; i < len * 2; i++)
     {
@@ -1270,20 +1270,21 @@ monitor_read_memory (memaddr, myaddr, len)
 
   len = min (len, 16);
 
-/* See if xfer would cross a 16 byte boundary.  If so, clip it.  */
+  /* See if xfer would cross a 16 byte boundary.  If so, clip it.  */
   if (((memaddr ^ (memaddr + len - 1)) & ~0xf) != 0)
     len = ((memaddr + len) & ~0xf) - memaddr;
 
- /* send the memory examine command */
+  /* send the memory examine command */
 
   if (current_monitor->flags & MO_GETMEM_NEEDS_RANGE)
     monitor_printf (current_monitor->getmem.cmdb, memaddr, memaddr + len - 1);
   else
     monitor_printf (current_monitor->getmem.cmdb, memaddr, len);
 
-/* If TERM is present, we wait for that to show up.  Also, (if TERM is
-   present), we will send TERM_CMD if that is present.  In any case, we collect
-   all of the output into buf, and then wait for the normal prompt.  */
+  /* If TERM is present, we wait for that to show up.  Also, (if TERM
+     is present), we will send TERM_CMD if that is present.  In any
+     case, we collect all of the output into buf, and then wait for
+     the normal prompt.  */
 
   if (current_monitor->getmem.term)
     {
@@ -1305,9 +1306,9 @@ monitor_read_memory (memaddr, myaddr, len)
 
   p = buf;
 
-  /* If RESP_DELIM is specified, we search for that as a leading delimiter for
-     the values.  Otherwise, we just start searching from the start of the buf.
-   */
+  /* If RESP_DELIM is specified, we search for that as a leading
+     delimiter for the values.  Otherwise, we just start searching
+     from the start of the buf.  */
 
   if (current_monitor->getmem.resp_delim)
     {
@@ -1420,7 +1421,13 @@ monitor_insert_breakpoint (addr, shadow)
      char *shadow;
 {
   int i;
+  /* This is only used to compute the size of a breakpoint.  */
+#ifdef BREAKPOINT
   static unsigned char break_insn[] = BREAKPOINT;
+#else
+  /* In the bi-endian case we assume breakpoints are the same size.  */
+  static unsigned char break_insn[] = BIG_BREAKPOINT;
+#endif
 
   for (i = 0; i < NUM_MONITOR_BREAKPOINTS; i++)
     {
