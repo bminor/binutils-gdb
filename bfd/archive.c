@@ -2082,7 +2082,7 @@ _bfd_archive_bsd_update_armap_timestamp (arch)
   bfd_flush (arch);
   if (bfd_stat (arch, &archstat) == -1)
     {
-      perror (_("Reading archive file mod timestamp"));
+      bfd_perror (_("Reading archive file mod timestamp"));
 
       /* Can't read mod time for some reason.  */
       return true;
@@ -2108,8 +2108,7 @@ _bfd_archive_bsd_update_armap_timestamp (arch)
       || (bfd_bwrite (hdr.ar_date, (bfd_size_type) sizeof (hdr.ar_date), arch)
 	  != sizeof (hdr.ar_date)))
     {
-      /* FIXME: bfd can't call perror.  */
-      perror (_("Writing updated armap timestamp"));
+      bfd_perror (_("Writing updated armap timestamp"));
 
       /* Some error while writing.  */
       return true;

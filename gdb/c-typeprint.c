@@ -49,8 +49,8 @@ static void c_type_print_args (struct type *, struct ui_file *);
 
 static void cp_type_print_derivation_info (struct ui_file *, struct type *);
 
-void c_type_print_varspec_prefix (struct type *, struct ui_file *, int,
-				  int);
+static void c_type_print_varspec_prefix (struct type *, struct ui_file *, int,
+				         int, int);
 
 /* Print "const", "volatile", or address space modifiers. */
 static void c_type_print_modifier (struct type *, struct ui_file *,
@@ -67,6 +67,7 @@ c_print_type (struct type *type, char *varstring, struct ui_file *stream,
 {
   register enum type_code code;
   int demangled_args;
+  int need_post_space;
 
   if (show > 0)
     CHECK_TYPEDEF (type);
@@ -85,7 +86,8 @@ c_print_type (struct type *type, char *varstring, struct ui_file *stream,
 	|| code == TYPE_CODE_MEMBER
 	|| code == TYPE_CODE_REF)))
     fputs_filtered (" ", stream);
-  c_type_print_varspec_prefix (type, stream, show, 0);
+  need_post_space = (varstring != NULL && strcmp (varstring, "") != 0);
+  c_type_print_varspec_prefix (type, stream, show, 0, need_post_space);
 
   if (varstring != NULL)
     {
@@ -193,11 +195,15 @@ cp_type_print_method_args (struct type *mtype, char *prefix, char *varstring,
    On outermost call, pass 0 for PASSED_A_PTR.
    On outermost call, SHOW > 0 means should ignore
    any typename for TYPE and show its details.
-   SHOW is always zero on recursive calls.  */
+   SHOW is always zero on recursive calls.
+   
+   NEED_POST_SPACE is non-zero when a space will be be needed
+   between a trailing qualifier and a field, variable, or function
+   name.  */
 
 void
 c_type_print_varspec_prefix (struct type *type, struct ui_file *stream,
-			     int show, int passed_a_ptr)
+			     int show, int passed_a_ptr, int need_post_space)
 {
   char *name;
   if (type == 0)
@@ -211,15 +217,15 @@ c_type_print_varspec_prefix (struct type *type, struct ui_file *stream,
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_PTR:
-      c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 1);
+      c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 1, 1);
       fprintf_filtered (stream, "*");
-      c_type_print_modifier (type, stream, 1, 0);
+      c_type_print_modifier (type, stream, 1, need_post_space);
       break;
 
     case TYPE_CODE_MEMBER:
       if (passed_a_ptr)
 	fprintf_filtered (stream, "(");
-      c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 0);
+      c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 0, 0);
       fprintf_filtered (stream, " ");
       name = type_name_no_tag (TYPE_DOMAIN_TYPE (type));
       if (name)
@@ -232,7 +238,7 @@ c_type_print_varspec_prefix (struct type *type, struct ui_file *stream,
     case TYPE_CODE_METHOD:
       if (passed_a_ptr)
 	fprintf_filtered (stream, "(");
-      c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 0);
+      c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 0, 0);
       if (passed_a_ptr)
 	{
 	  fprintf_filtered (stream, " ");
@@ -242,19 +248,19 @@ c_type_print_varspec_prefix (struct type *type, struct ui_file *stream,
       break;
 
     case TYPE_CODE_REF:
-      c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 1);
+      c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 1, 0);
       fprintf_filtered (stream, "&");
-      c_type_print_modifier (type, stream, 1, 0);
+      c_type_print_modifier (type, stream, 1, need_post_space);
       break;
 
     case TYPE_CODE_FUNC:
-      c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 0);
+      c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 0, 0);
       if (passed_a_ptr)
 	fprintf_filtered (stream, "(");
       break;
 
     case TYPE_CODE_ARRAY:
-      c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 0);
+      c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 0, 0);
       if (passed_a_ptr)
 	fprintf_filtered (stream, "(");
       break;

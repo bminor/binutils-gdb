@@ -51,11 +51,6 @@
 #include "cp-abi.h"
 #include "cp-support.h"
 
-/* Prototype for one function in parser-defs.h,
-   instead of including that entire file. */
-
-extern char *find_template_name_end (char *);
-
 /* Prototypes for local functions */
 
 static void completion_list_add_name (char *, char *, int, char *, char *);
@@ -171,19 +166,6 @@ struct type *builtin_type_error;
    value_of_this. */
 
 const struct block *block_found;
-
-/* While the C++ support is still in flux, issue a possibly helpful hint on
-   using the new command completion feature on single quoted demangled C++
-   symbols.  Remove when loose ends are cleaned up.   FIXME -fnf */
-
-static void
-cplusplus_hint (char *name)
-{
-  while (*name == '\'')
-    name++;
-  printf_filtered ("Hint: try '%s<TAB> or '%s<ESC-?>\n", name, name);
-  printf_filtered ("(Note leading single quote.)\n");
-}
 
 /* Check for a symtab of a specific name; first in symtabs, then in
    psymtabs.  *If* there is no '/' in the name, a match after a '/'
@@ -436,6 +418,33 @@ gdb_mangle_name (struct type *type, int method_id, int signature_id)
 }
 
 
+/* Initialize the language dependent portion of a symbol
+   depending upon the language for the symbol. */
+void
+symbol_init_language_specific (struct general_symbol_info *gsymbol,
+			       enum language language)
+{
+  gsymbol->language = language;
+  if (gsymbol->language == language_cplus
+      || gsymbol->language == language_java)
+    {
+      gsymbol->language_specific.cplus_specific.demangled_name = NULL;
+    }
+  else if (gsymbol->language == language_objc)
+    {
+      gsymbol->language_specific.objc_specific.demangled_name = NULL;
+    }
+  /* OBSOLETE else if (SYMBOL_LANGUAGE (symbol) == language_chill) */
+  /* OBSOLETE   { */
+  /* OBSOLETE     SYMBOL_CHILL_DEMANGLED_NAME (symbol) = NULL; */
+  /* OBSOLETE   } */
+  else
+    {
+      memset (&gsymbol->language_specific, 0,
+	      sizeof (gsymbol->language_specific));
+    }
+}
+
 /* Initialize a symbol's mangled name.  */
 
 /* Try to initialize the demangled name for a symbol, based on the
@@ -512,7 +521,35 @@ symbol_init_demangled_name (struct general_symbol_info *gsymbol,
 #endif
 }
 
+/* Return the demangled name for a symbol based on the language for
+   that symbol.  If no demangled name exists, return NULL. */
+char *
+symbol_demangled_name (struct general_symbol_info *gsymbol)
+{
+  if (gsymbol->language == language_cplus
+      || gsymbol->language == language_java)
+    return gsymbol->language_specific.cplus_specific.demangled_name;
 
+  else if (gsymbol->language == language_objc)
+    return gsymbol->language_specific.objc_specific.demangled_name;
+
+  else 
+    return NULL;
+
+  /* OBSOLETE (SYMBOL_LANGUAGE (symbol) == language_chill */
+  /* OBSOLETE ? SYMBOL_CHILL_DEMANGLED_NAME (symbol) */
+}
+
+/* Initialize the structure fields to zero values.  */
+void
+init_sal (struct symtab_and_line *sal)
+{
+  sal->symtab = 0;
+  sal->section = 0;
+  sal->line = 0;
+  sal->pc = 0;
+  sal->end = 0;
+}
 
 
 
@@ -1898,7 +1935,7 @@ find_pc_sect_line (CORE_ADDR pc, struct sec *section, int notcurrent)
      But what we want is the statement containing the instruction.
      Fudge the pc to make sure we get that.  */
 
-  INIT_SAL (&val);		/* initialize to zeroes */
+  init_sal (&val);		/* initialize to zeroes */
 
   /* It's tempting to assume that, if we can't find debugging info for
      any function enclosing PC, that we shouldn't search for line

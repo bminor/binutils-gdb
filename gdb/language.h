@@ -288,7 +288,8 @@ language_mode;
 /* "cast" really means conversion */
 /* FIXME -- should be a setting in language_defn */
 #define CAST_IS_CONVERSION (current_language->la_language == language_c  || \
-			    current_language->la_language == language_cplus)
+			    current_language->la_language == language_cplus || \
+			    current_language->la_language == language_objc)
 
 extern void language_info (int);
 

@@ -196,6 +196,7 @@ CODE_FRAGMENT
 */
 
 #include "bfd.h"
+#include "bfdver.h"
 #include "sysdep.h"
 
 #ifdef ANSI_PROTOTYPES

@@ -54,7 +54,7 @@ boolean _bfd_m68hc12_elf_print_private_bfd_data PARAMS ((bfd *, PTR));
 
 
 /* Use REL instead of RELA to save space */
-#define USE_REL
+#define USE_REL	1
 
 /* The Motorola 68HC11 microcontroler only addresses 64Kb.
    We must handle 8 and 16-bit relocations.  The 32-bit relocation

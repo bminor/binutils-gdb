@@ -17,6 +17,10 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
+#ifndef USE_REL
+#define USE_REL	0
+#endif
+
 typedef unsigned long int insn32;
 typedef unsigned short int insn16;
 
@@ -76,7 +80,7 @@ static boolean elf32_arm_finish_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 static struct bfd_hash_entry * elf32_arm_link_hash_newfunc
   PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
-#ifdef USE_REL
+#if USE_REL
 static void arm_add_to_rel
   PARAMS ((bfd *, bfd_byte *, reloc_howto_type *, bfd_signed_vma));
 #endif
@@ -427,6 +431,7 @@ record_arm_to_thumb_glue (link_info, h)
   asection * s;
   char * tmp_name;
   struct elf_link_hash_entry * myh;
+  struct bfd_link_hash_entry * bh;
   struct elf32_arm_link_hash_table * globals;
   bfd_vma val;
 
@@ -460,11 +465,11 @@ record_arm_to_thumb_glue (link_info, h)
   /* The only trick here is using hash_table->arm_glue_size as the value. Even
      though the section isn't allocated yet, this is where we will be putting
      it.  */
+  bh = NULL;
   val = globals->arm_glue_size + 1;
   _bfd_generic_link_add_one_symbol (link_info, globals->bfd_of_glue_owner,
 				    tmp_name, BSF_GLOBAL, s, val,
-				    NULL, true, false,
-				    (struct bfd_link_hash_entry **) &myh);
+				    NULL, true, false, &bh);
 
   free (tmp_name);
 
@@ -482,6 +487,7 @@ record_thumb_to_arm_glue (link_info, h)
   asection *s;
   char *tmp_name;
   struct elf_link_hash_entry *myh;
+  struct bfd_link_hash_entry *bh;
   struct elf32_arm_link_hash_table *hash_table;
   char bind;
   bfd_vma val;
@@ -513,13 +519,14 @@ record_thumb_to_arm_glue (link_info, h)
       return;
     }
 
+  bh = NULL;
   val = hash_table->thumb_glue_size + 1;
   _bfd_generic_link_add_one_symbol (link_info, hash_table->bfd_of_glue_owner,
 				    tmp_name, BSF_GLOBAL, s, val,
-				    NULL, true, false,
-				    (struct bfd_link_hash_entry **) &myh);
+				    NULL, true, false, &bh);
 
   /* If we mark it 'Thumb', the disassembler will do a better job.  */
+  myh = (struct elf_link_hash_entry *) bh;
   bind = ELF_ST_BIND (myh->type);
   myh->type = ELF_ST_INFO (bind, STT_ARM_TFUNC);
 
@@ -536,13 +543,11 @@ record_thumb_to_arm_glue (link_info, h)
 
   sprintf (tmp_name, CHANGE_TO_ARM, name);
 
-  myh = NULL;
-
+  bh = NULL;
   val = hash_table->thumb_glue_size + 4,
   _bfd_generic_link_add_one_symbol (link_info, hash_table->bfd_of_glue_owner,
 				    tmp_name, BSF_LOCAL, s, val,
-				    NULL, true, false,
-				    (struct bfd_link_hash_entry **) &myh);
+				    NULL, true, false, &bh);
 
   free (tmp_name);
 
@@ -1093,7 +1098,7 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
   local_got_offsets = elf_local_got_offsets (input_bfd);
   r_symndx = ELF32_R_SYM (rel->r_info);
 
-#ifdef USE_REL
+#if USE_REL
   addend = bfd_get_32 (input_bfd, hit_data) & howto->src_mask;
 
   if (addend & ((howto->src_mask + 1) >> 1))
@@ -1369,7 +1374,7 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 
     case R_ARM_THM_ABS5:
       /* Support ldr and str instructions for the thumb.  */
-#ifdef USE_REL
+#if USE_REL
       /* Need to refetch addend.  */
       addend = bfd_get_16 (input_bfd, hit_data) & howto->src_mask;
       /* ??? Need to determine shift amount from operand size.  */
@@ -1401,7 +1406,7 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 	bfd_vma        check;
 	bfd_signed_vma signed_check;
 
-#ifdef USE_REL
+#if USE_REL
 	/* Need to refetch the addend and squish the two 11 bit pieces
 	   together.  */
 	{
@@ -1506,7 +1511,7 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 	bfd_signed_vma reloc_signed_min = ~ reloc_signed_max;
 	bfd_signed_vma signed_check;
 
-#ifdef USE_REL
+#if USE_REL
 	/* Need to refetch addend.  */
 	addend = bfd_get_16 (input_bfd, hit_data) & howto->src_mask;
 	if (addend & ((howto->src_mask + 1) >> 1))
@@ -1744,7 +1749,7 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
     }
 }
 
-#ifdef USE_REL
+#if USE_REL
 /* Add INCREMENT to the reloc (of type HOWTO) at ADDRESS.  */
 static void
 arm_add_to_rel (abfd, address, howto, increment)
@@ -1836,7 +1841,7 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
   Elf_Internal_Rela *           relend;
   const char *                  name;
 
-#ifndef USE_REL
+#if !USE_REL
   if (info->relocateable)
     return true;
 #endif
@@ -1865,7 +1870,7 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
           || r_type == R_ARM_GNU_VTINHERIT)
         continue;
 
-#ifdef USE_REL
+#if USE_REL
       elf32_arm_info_to_howto (input_bfd, & bfd_reloc,
 			       (Elf_Internal_Rel *) rel);
 #else
@@ -1873,7 +1878,7 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 #endif
       howto = bfd_reloc.howto;
 
-#ifdef USE_REL
+#if USE_REL
       if (info->relocateable)
 	{
 	  /* This is a relocateable link.  We don't have to change
@@ -1906,7 +1911,7 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 	{
 	  sym = local_syms + r_symndx;
 	  sec = local_sections[r_symndx];
-#ifdef USE_REL
+#if USE_REL
 	  relocation = (sec->output_section->vma
 			+ sec->output_offset
 			+ sym->st_value);
@@ -3648,9 +3653,7 @@ elf32_arm_reloc_type_class (rela)
 
 #define ELF_ARCH			bfd_arch_arm
 #define ELF_MACHINE_CODE		EM_ARM
-#ifndef ELF_MAXPAGESIZE
 #define ELF_MAXPAGESIZE			0x8000
-#endif
 
 #define bfd_elf32_bfd_copy_private_bfd_data	elf32_arm_copy_private_bfd_data
 #define bfd_elf32_bfd_merge_private_bfd_data	elf32_arm_merge_private_bfd_data
@@ -3677,7 +3680,7 @@ elf32_arm_reloc_type_class (rela)
 #define elf_backend_plt_readonly    1
 #define elf_backend_want_got_plt    1
 #define elf_backend_want_plt_sym    0
-#ifndef USE_REL
+#if !USE_REL
 #define elf_backend_rela_normal     1
 #endif
 

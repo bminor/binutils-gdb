@@ -90,6 +90,11 @@ struct general_symbol_info
       char *demangled_name;
     }
     cplus_specific;
+    struct objc_specific
+    {
+      char *demangled_name;
+    }
+    objc_specific;
 #if 0
 /* OBSOLETE struct chill_specific        *//* For Chill */
     /* OBSOLETE   { */
@@ -122,6 +127,14 @@ struct general_symbol_info
 
 extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, asection *);
 
+/* Note that all the following SYMBOL_* macros are used with the
+   SYMBOL argument being either a partial symbol, a minimal symbol or
+   a full symbol.  All three types have a ginfo field.  In particular
+   the SYMBOL_INIT_LANGUAGE_SPECIFIC, SYMBOL_INIT_DEMANGLED_NAME,
+   SYMBOL_DEMANGLED_NAME macros cannot be entirely substituted by
+   functions, unless the callers are changed to pass in the ginfo
+   field only, instead of the SYMBOL parameter.  */
+
 #define SYMBOL_NAME(symbol)		(symbol)->ginfo.name
 #define SYMBOL_VALUE(symbol)		(symbol)->ginfo.value.ivalue
 #define SYMBOL_VALUE_ADDRESS(symbol)	(symbol)->ginfo.value.address
@@ -135,48 +148,29 @@ extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, asection *);
 #define SYMBOL_CPLUS_DEMANGLED_NAME(symbol)	\
   (symbol)->ginfo.language_specific.cplus_specific.demangled_name
 
-/* Macro that initializes the language dependent portion of a symbol
+/* Initializes the language dependent portion of a symbol
    depending upon the language for the symbol. */
-
-#define SYMBOL_INIT_LANGUAGE_SPECIFIC(symbol,language)			\
-  do {									\
-    SYMBOL_LANGUAGE (symbol) = language;				\
-    if (SYMBOL_LANGUAGE (symbol) == language_cplus			\
-	|| SYMBOL_LANGUAGE (symbol) == language_java			\
-	)								\
-      {									\
-	SYMBOL_CPLUS_DEMANGLED_NAME (symbol) = NULL;			\
-      }									\
-    /* OBSOLETE else if (SYMBOL_LANGUAGE (symbol) == language_chill) */ \
-    /* OBSOLETE   { */						 	\
-    /* OBSOLETE     SYMBOL_CHILL_DEMANGLED_NAME (symbol) = NULL; */	\
-    /* OBSOLETE   } */							\
-    else								\
-      {									\
-	memset (&(symbol)->ginfo.language_specific, 0,			\
-		sizeof ((symbol)->ginfo.language_specific));		\
-      }									\
-  } while (0)
+#define SYMBOL_INIT_LANGUAGE_SPECIFIC(symbol,language) \
+  (symbol_init_language_specific (&(symbol)->ginfo, (language)))
+extern void symbol_init_language_specific (struct general_symbol_info *symbol,
+					   enum language language);
 
 #define SYMBOL_INIT_DEMANGLED_NAME(symbol,obstack) \
   (symbol_init_demangled_name (&symbol->ginfo, (obstack)))
 extern void symbol_init_demangled_name (struct general_symbol_info *symbol,
 					struct obstack *obstack);
 
-
-/* Macro that returns the demangled name for a symbol based on the language
-   for that symbol.  If no demangled name exists, returns NULL. */
-
-#define SYMBOL_DEMANGLED_NAME(symbol)					\
-  (SYMBOL_LANGUAGE (symbol) == language_cplus				\
-   || SYMBOL_LANGUAGE (symbol) == language_java				\
-   ? SYMBOL_CPLUS_DEMANGLED_NAME (symbol)				\
-   : /* OBSOLETE (SYMBOL_LANGUAGE (symbol) == language_chill */		\
-     /* OBSOLETE ? SYMBOL_CHILL_DEMANGLED_NAME (symbol) */		\
-     NULL)
+/* Return the demangled name for a symbol based on the language for
+   that symbol.  If no demangled name exists, return NULL. */
+#define SYMBOL_DEMANGLED_NAME(symbol) \
+  (symbol_demangled_name (&(symbol)->ginfo))
+extern char *symbol_demangled_name (struct general_symbol_info *symbol);
 
 /* OBSOLETE #define SYMBOL_CHILL_DEMANGLED_NAME(symbol) */
 /* OBSOLETE (symbol)->ginfo.language_specific.chill_specific.demangled_name */
+
+#define SYMBOL_OBJC_DEMANGLED_NAME(symbol)				\
+   (symbol)->ginfo.language_specific.objc_specific.demangled_name
 
 /* Macro that returns the "natural source name" of a symbol.  In C++ this is
    the "demangled" form of the name if demangle is on and the "mangled" form
@@ -630,8 +624,16 @@ enum address_class
   LOC_UNRESOLVED,
 
   /* Value is at a thread-specific location calculated by a
-     target-specific method. */
+     target-specific method. This is used only by hppa.  */
 
+  LOC_HP_THREAD_LOCAL_STATIC,
+
+  /* Value is at a thread-specific location calculated by a
+     target-specific method.  SYMBOL_OBJFILE gives the object file
+     in which the symbol is defined; the symbol's value is the
+     offset into that objfile's thread-local storage for the current
+     thread.  */
+      
   LOC_THREAD_LOCAL_STATIC,
 
   /* The variable does not actually exist in the program.
@@ -703,6 +705,12 @@ struct symbol
   {
     /* Used by LOC_BASEREG and LOC_BASEREG_ARG.  */
     short basereg;
+
+    /* Used by LOC_THREAD_LOCAL_STATIC.  The objfile in which this
+       symbol is defined.  To find a thread-local variable (e.g., a
+       variable declared with the `__thread' storage class), we may
+       need to know which object file it's in.  */
+    struct objfile *objfile;
   }
   aux_value;
 
@@ -724,6 +732,7 @@ struct symbol
 #define SYMBOL_TYPE(symbol)		(symbol)->type
 #define SYMBOL_LINE(symbol)		(symbol)->line
 #define SYMBOL_BASEREG(symbol)		(symbol)->aux_value.basereg
+#define SYMBOL_OBJFILE(symbol)          (symbol)->aux_value.objfile
 #define SYMBOL_ALIASES(symbol)		(symbol)->aliases
 #define SYMBOL_RANGES(symbol)		(symbol)->ranges
 
@@ -754,15 +763,6 @@ struct partial_symbol
 #define PSYMBOL_NAMESPACE(psymbol)	(psymbol)->namespace
 #define PSYMBOL_CLASS(psymbol)		(psymbol)->aclass
 
-
-/* Source-file information.  This describes the relation between source files,
-   line numbers and addresses in the program text.  */
-
-struct sourcevector
-{
-  int length;			/* Number of source files described */
-  struct source *source[1];	/* Descriptions of the files */
-};
 
 /* Each item represents a line-->pc (or the reverse) mapping.  This is
    somewhat more wasteful of space than one might wish, but since only
@@ -800,14 +800,6 @@ struct linetable
      `struct hack', you can shove it up your ANSI (seriously, if the
      committee tells us how to do it, we can probably go along).  */
   struct linetable_entry item[1];
-};
-
-/* All the information on one source file.  */
-
-struct source
-{
-  char *name;			/* Name of file */
-  struct linetable contents;
 };
 
 /* How to relocate the symbols from each section in a symbol file.
@@ -1234,13 +1226,7 @@ struct symtab_and_line
   CORE_ADDR end;
 };
 
-#define INIT_SAL(sal) { \
-  (sal)->symtab  = 0;   \
-  (sal)->section = 0;   \
-  (sal)->line    = 0;   \
-  (sal)->pc      = 0;   \
-  (sal)->end     = 0;   \
-}
+extern void init_sal (struct symtab_and_line *sal);
 
 struct symtabs_and_lines
 {
