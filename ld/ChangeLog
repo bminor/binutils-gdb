@@ -1,3 +1,7 @@
+Fri Mar 13 19:47:22 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* Makefile.in: install man page.
+
 Fri Mar 13 08:23:59 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* config/mt-<foo> renamed to <foo>.mt
