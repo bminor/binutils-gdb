@@ -22,8 +22,8 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
  * $Id$ 
  *
  * $Log$
- * Revision 1.1  1991/03/21 21:28:52  gumby
- * Initial revision
+ * Revision 1.2  1991/03/22 23:02:36  steve
+ * Brought up to sync with Intel again.
  *
  * Revision 1.1  1991/03/13  00:48:27  chrisb
  * Initial revision
@@ -181,7 +181,7 @@ main (argc, argv)
   command_line.force_common_definition = false;
 
   ldfile_add_arch("");
-
+  ldfile_add_library_path("./");
   config.make_executable = true;
   force_make_executable = false;
 

@@ -19,8 +19,8 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* $Id$ 
  *
  * $Log$
- * Revision 1.1  1991/03/21 21:28:45  gumby
- * Initial revision
+ * Revision 1.2  1991/03/22 23:02:34  steve
+ * Brought up to sync with Intel again.
  *
  * Revision 1.3  1991/03/16  22:19:21  rich
  * pop
@@ -731,8 +731,13 @@ char *target;
 static void
 lang_reasonable_defaults()
 {
+
+      lang_output_section_statement_lookup(".text");
+      lang_output_section_statement_lookup(".data");
+
   default_common_section = 
     lang_output_section_statement_lookup(".bss");
+
   if (placed_commons == false) {
     lang_wild_statement_type *new =
       new_stat(lang_wild_statement,
@@ -741,6 +746,7 @@ lang_reasonable_defaults()
     new->filename = (char *)NULL;
     lang_list_init(&new->children);
   }
+
 }
 
 static void lang()
@@ -2149,6 +2155,26 @@ char *memspec;
   current_section->fill = fill;
   current_section->region = lang_memory_region_lookup(memspec);
   stat_ptr = &statement_list;
+}
+
+void
+lang_abs_symbol_at_beginning_of(section, name)
+char *section;
+char *name;
+{
+  extern bfd *output_bfd;
+  extern asymbol *create_symbol();
+  asection *s = bfd_get_section_by_name(output_bfd, section);
+  asymbol *def = create_symbol(name,
+			       BSF_GLOBAL | BSF_EXPORT |
+			       BSF_ABSOLUTE,
+			       (asection *)NULL);
+  if (s != (asection *)NULL) {
+    def->value = s->vma;
+  }
+  else {
+    def->value = 0;
+  }
 }
 
 void

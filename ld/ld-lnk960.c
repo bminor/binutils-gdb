@@ -20,12 +20,9 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
    $Id$ 
 
    $Log$
-   Revision 1.1.1.1  1991/03/21 21:28:29  gumby
-   Back from Intel with Steve
+   Revision 1.2  1991/03/22 23:02:31  steve
+   Brought up to sync with Intel again.
 
- * Revision 1.1  1991/03/21  21:28:28  gumby
- * Initial revision
- *
  * Revision 1.2  1991/03/15  18:45:55  rich
  * foo
  *
@@ -204,6 +201,7 @@ lnk960_after_allocation()
 {
   lang_abs_symbol_at_end_of(".text","_etext");
   lang_abs_symbol_at_end_of(".data","_edata");
+  lang_abs_symbol_at_beginning_of(".bss","_bss_start");
   lang_abs_symbol_at_end_of(".bss","_end");
 }
 
