@@ -7,7 +7,7 @@ Thu Jul  8 14:41:43 1993  Mark Eichin  (eichin@cygnus.com)
 Thu Jul  8 14:15:05 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* config/tc-sparc.c (s_common): Revamp to handle both syntaxes,
-	and not be target-specific.
+	independent of format.
 
 Thu Jul  8 07:25:25 1993  Doug Evans  (dje@canuck.cygnus.com)
 

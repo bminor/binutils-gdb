@@ -408,6 +408,7 @@ s_common ()
 	  temp = 0;
 	  as_warn ("Common alignment negative; 0 assumed");
 	}
+#ifdef OBJ_ELF
       if (symbolP->local)
 	{
 	  segT old_sec;
@@ -434,6 +435,7 @@ s_common ()
 	  subseg_set (old_sec, old_subsec);
 	}
       else
+#endif
 	{
 	allocate_common:
 	  S_SET_VALUE (symbolP, size);
