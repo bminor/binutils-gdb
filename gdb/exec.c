@@ -545,6 +545,7 @@ void
 print_section_info (struct target_ops *t, bfd *abfd)
 {
   struct section_table *p;
+  /* FIXME: "016l" is not wide enough when TARGET_ADDR_BIT > 64.  */
   char *fmt = TARGET_ADDR_BIT <= 32 ? "08l" : "016l";
 
   printf_filtered ("\t`%s', ", bfd_get_filename (abfd));
@@ -560,6 +561,12 @@ print_section_info (struct target_ops *t, bfd *abfd)
     {
       printf_filtered ("\t%s", local_hex_string_custom (p->addr, fmt));
       printf_filtered (" - %s", local_hex_string_custom (p->endaddr, fmt));
+
+      /* FIXME: A format of "08l" is not wide enough for file offsets
+	 larger than 4GB.  OTOH, making it "016l" isn't desirable either
+	 since most output will then be much wider than necessary.  It
+	 may make sense to test the size of the file and choose the
+	 format string accordingly.  */
       if (info_verbose)
 	printf_filtered (" @ %s",
 			 local_hex_string_custom (p->the_bfd_section->filepos, "08l"));

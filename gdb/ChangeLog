@@ -1,3 +1,8 @@
+2002-12-20  Kevin Buettner  <kevinb@redhat.com>
+
+	* exec.c (print_section_info): Add FIXME comments regarding format
+	string choices.
+
 2002-12-23  Daniel Jacobowitz  <drow@mvista.com>
 
 	* config/pa/nm-hppab.h: Delete duplicate CANNOT_STORE_REGISTER decl.
