@@ -1,3 +1,7 @@
+Mon Mar 18 18:06:54 CET 2002  Jan Hubicka  <jh@suse.cz>
+
+	* cpu-i386.c (bfd_x86_64_arch): Rename to "i386:x86-64"
+
 2002-03-07  Daniel Jacobowitz  <drow@mvista.com>
 
 	* configure.in: Set is_release=y for 2.12 release.

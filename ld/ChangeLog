@@ -1,3 +1,14 @@
+Mon Mar 18 18:07:20 CET 2002  Jan Hubicka  <jh@suse.cz>
+			      Andreas Jaeger  <aj@suse.de>
+			      Andreas Schwab  <schwab@suse.de>
+
+	* cpu-i386.c (bfd_x86_64_arch): Rename to "i386:x86-64"
+
+	* configure.tgt (x86_64-*-linux-gnu*): Configure i386 as native.
+	
+	* elf_x86_64.sh (ARCH): Set to i386:x86-64
+	set libraries to default to lib64 paths.
+
 2002-03-07  Daniel Jacobowitz  <drow@mvista.com>
 
 	* ld.texinfo: Wrap @menu in @ifnottex, not @ifinfo.
