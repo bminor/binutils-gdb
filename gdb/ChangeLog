@@ -1,5 +1,7 @@
 2003-05-17  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/i386/x86-64linux.mh (NATDEPFILES): Fix typo.
+
 	* i386-tdep.c (i386_unwind_dummy_id): Use extract_unsigned_integer
 	instead of extract_typed_address for consistency with the rest of
 	the code in this file.
