@@ -1,3 +1,26 @@
+2004-02-07  Mark Kettenis  <kettenis@gnu.org>
+
+	* dwarf2-frame.h: Update copyright.
+	(enum dwarf2_frame_reg_rule): New.
+	(struct dwarf2_frame_state_reg): New.
+	(dwarf2_frame_sniffer, dwarf2_frame_base_sniffer): Make extern.
+	* dwarf2-frame.c: Update copyright.
+	(enum dwarf2_reg_rule): Remove.
+	(struct dwarf2_frame_state): Remove defenition of `struct
+	dwarf2_frame_state_reg'.
+	(read_reg): Call get_frame_arch to get the architecture instead of
+	using CURRENT_GDBARCH.
+	(execute_cfa_program): Prefix old `enum dwarf2_reg_rule' tags with
+	DWARF2_FRAME_.
+	(dwarf2_frame_init_reg): New function.
+	(dwarf2_frame_cache): Call get_frame_arch to get the architecture
+	instead of using CURRENT_GDBARCH.  Call dwarf2_frame_init_reg to
+	initialize the register state.  Prefix old `enum dwarf2_reg_rule'
+	tags with DWARF2_FRAME_.
+	(dwarf2_frame_prev_register): Call get_frame_arch to get the
+	architecture instead of using CURRENT_GDBARCH.  Prefix old `enum
+	dwarf2_reg_rule' tags with DWARF2_FRAME_.
+
 2004-02-06  Andrew Cagney  <cagney@redhat.com>
 
 	* tui/tui-data.h (struct tui_list): Rename _TuiList.
