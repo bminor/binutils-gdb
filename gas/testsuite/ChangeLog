@@ -6,11 +6,6 @@
 	* lib/gas-defs.exp (run_dump_test): Clean up logic for guessing
 	$program (the dump tool).
 
-1999-01-28  Jim Blandy  <jimb@zwingli.cygnus.com>
-
-	* gas/mips/mips.exp: Check if GAS assembles a file identically
-	with -m4650 and -mcpu=4650.
-
 start-sanitize-m32rx
 1999-02-10  Doug Evans  <devans@casey.cygnus.com>
 
