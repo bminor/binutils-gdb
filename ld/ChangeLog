@@ -1,3 +1,9 @@
+2002-12-30  Ralf Habacker  <Ralf.Habacker@freenet.de>
+            Charles Wilson  <cwilson@ece.gatech.edu>
+
+	* ld/config.in (HAVE_REALPATH): New entry.
+	(HAVE_SYS_STAT_H, HAVE_SYS_TYPES_H): Removed: obsolete.
+
 2002-12-30  Ralf Habacker  <ralf.habacker@freenet.de>
 
 	* ld.texinfo: New win32 topics: 'symbol aliasing' and 'export dll
