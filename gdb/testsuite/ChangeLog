@@ -1,5 +1,12 @@
 2002-03-30  Daniel Jacobowitz  <drow@mvista.com>
 
+	Fix PR gdb/452
+	* gdb.base/dbx.exp: Restore old definition of gdb_file_cmd
+	when finished.  Make gdb_file_cmd send "exec-file" when
+	appropriate.
+
+2002-03-30  Daniel Jacobowitz  <drow@mvista.com>
+
 	* gdb.base/attach.exp: Remove extra setup_xfail.
 
 2002-03-26  Michael Snyder  <msnyder@redhat.com>

@@ -168,6 +168,11 @@ proc dbx_reinitialize_dir { subdir } {
 # file into gdb for a dbx session. So why not just override gdb_file_cmd with the
 # right sequence of events, allowing gdb_load to do its normal thing? This way
 # remotes and simulators will work, too.
+#
+# [drow 2002-03-30]: We can restore the old gdb_file_cmd afterwards, though.
+set old_gdb_file_cmd_args [info args gdb_file_cmd]
+set old_gdb_file_cmd_body [info body gdb_file_cmd]
+
 proc gdb_file_cmd {arg} {
     global verbose
     global loadpath
@@ -206,6 +211,11 @@ proc gdb_file_cmd {arg} {
             verbose "\t\tLoaded $arg into the $GDB"
             send_gdb "exec-file $arg\n" 
             gdb_expect {
+	        -re "A program is being debugged already.*Kill it.*y or n. $" {
+	            send_gdb "y\n"
+	                verbose "\t\tKilling previous program being debugged"
+	            exp_continue
+	        }
                 -re ".*$gdb_prompt $" {
                     verbose "\t\tLoaded $arg with new symbol table into $GDB"
                     return 0
@@ -221,23 +231,9 @@ proc gdb_file_cmd {arg} {
             perror "$arg wasn't compiled with \"-g\""
             return -1
         }
-        -re "A program is being debugged already.*Kill it.*y or n. $" {
-            send_gdb "y\n"
-                verbose "\t\tKilling previous program being debugged"
-            exp_continue
-        }
         -re "Load new symbol table from \".*\".*y or n. $" {
             send_gdb "y\n"
-            gdb_expect {
-                -re "Reading symbols from.*done.*$gdb_prompt $" {
-                    verbose "\t\tLoaded $arg with new symbol table into $GDB"
-                    return 0
-                }
-                timeout {
-                    perror "(timeout) Couldn't load $arg, other program already loaded."
-                    return -1
-                }
-            }
+	    exp_continue
         }
         -re ".*No such file or directory.*$gdb_prompt $" {
             perror "($arg) No such file or directory\n"
@@ -339,4 +335,6 @@ test_func
 gdb_exit
 
 set GDBFLAGS $saved_gdbflags
+eval proc gdb_file_cmd {$old_gdb_file_cmd_args} {$old_gdb_file_cmd_body}
+
 return 0
