@@ -83,7 +83,7 @@ op tab[] =
   {"n","m","extu.b <REG_M>,<REG_N>", "0110nnnnmmmm1100", "R[n] = R[m] & 0xff;"},
   {"n","m","extu.w <REG_M>,<REG_N>", "0110nnnnmmmm1101", "R[n] = R[m] & 0xffff;"},
   {"","n","jmp @<REG_N>", "0100nnnn00101011", "ult = PC; PC=R[n]-2; SL(ult+2);"},
-  {"","n","jsr @<REG_N>", "0100nnnn00001011", "PR = PC; PC=R[n]-2; if (~doprofile) gotcall(PR,PC+2);SL(PR+2);"},
+  {"","n","jsr @<REG_N>", "0100nnnn00001011", "PR = PC + 4; PC=R[n]-2; if (~doprofile) gotcall(PR,PC+2);SL(PR-2);"},
   {"","n","ldc <REG_N>,GBR", "0100nnnn00011110", "GBR=R[n];"},
   {"","n","ldc <REG_N>,SR", "0100nnnn00001110", "SET_SR(R[n]);"},
   {"","n","ldc <REG_N>,VBR", "0100nnnn00101110", "VBR=R[n];"},
@@ -149,7 +149,7 @@ op tab[] =
   {"n","n","rotr <REG_N>", "0100nnnn00000101", "T=R[n]&1;R[n] = UR[n]>> 1;R[n]|=(T<<31);"},
   {"","","rte", "0000000000101011", 
     "{ int tmp = PC; PC=RLAT(R[15])+2;R[15]+=4;SET_SR(RLAT(R[15]) & 0x3f3);R[15]+=4;SL(tmp+2);}"},
-  {"","","rts", "0000000000001011", "ult=PC;PC=PR+2;SL(ult+2);"},
+  {"","","rts", "0000000000001011", "ult=PC;PC=PR;SL(ult+2);"},
   {"","","sett", "0000000000011000", "T=1;"},
   {"n","mn","shad <REG_M>,<REG_N>", "0100nnnnmmmm1100",
      "R[n] = (R[m] < 0) ? (((int)R[n]) >> -(R[m]&0x1f) ): (R[n] << ((R[m]) & 0x1f)) ;"},
@@ -186,7 +186,7 @@ op tab[] =
   {"n","nm","swap.w <REG_M>,<REG_N>", "0110nnnnmmmm1001", "R[n]=((R[m]<<16)&0xffff0000)|((R[m]>>16)&0x00ffff);"},
   {"","n","tas.b @<REG_N>", "0100nnnn00011011", "ult=RBAT(R[n]);T=ult==0;WBAT(R[n],ult|0x80);"},
   {"0","","trapa #<imm>", "11000011i8*1....", 
-     "{ long imm = 0xff & i; if (i<20||i==34||i==0xc3) trap(i,R,memory,maskl,maskw,little_endian); else { R[15]-=4; WLAT(R[15],GET_SR()); R[15]-=4;WLAT(R[15],PC+2); PC=RLAT(VBR+(imm<<2))-2;}}"},
+     "{ long imm = 0xff & i; if (i==0xc3) PC-=2; if (i<20||i==34||i==0xc3) trap(i,R,memory,maskl,maskw,little_endian); else { R[15]-=4; WLAT(R[15],GET_SR()); R[15]-=4;WLAT(R[15],PC+2); PC=RLAT(VBR+(imm<<2))-2;}}"},
   {"","0","tst #<imm>,R0", "11001000i8*1....", "T=(R0&i)==0;"},
   {"","mn","tst <REG_M>,<REG_N>", "0010nnnnmmmm1000", "T=(R[n]&R[m])==0;"},
   {"","0","tst.b #<imm>,@(R0,GBR)", "11001100i8*1....", "T=(RBAT(GBR+R0)&i)==0;"},
@@ -205,6 +205,41 @@ op tab[] =
   {"divs.l <REG_M>,<REG_N>", "0100nnnnmmmm1110", "divl(0,R[n],R[m]);"},
   {"divu.l <REG_M>,<REG_N>", "0100nnnnmmmm1101", "divl(0,R[n],R[m]);"},
 #endif
+
+/* start-sanitize-sh3e */
+  {"", "", "fmov.s @<REG_M>,<FREG_N>", "1111nnnnmmmm1000", "*(int *)buf = RLAT(R[m]);F[n] = *(float *)buf;"},
+  {"", "", "fmov.s <FREG_M>,@<REG_N>", "1111nnnnmmmm1010", "*(float *)buf = F[m]; WLAT(R[n], *(int *)buf);"},
+  {"", "", "fmov.s @<REG_M>+,<FREG_N>", "1111nnnnmmmm1001", "*(int *)buf = RLAT(R[m]); F[n] = *(float *)buf; R[m] += 4;"},
+  {"", "", "fmov.s <FREG_M>,@-<REG_N>", "1111nnnnmmmm1011", "R[n] -= 4; *(float *)buf = F[m]; WLAT(R[n], *(int *)buf);"},
+  {"", "", "fmov.s @(R0,<REG_M>),<FREG_N>", "1111nnnnmmmm0110", "*(int *)buf = RLAT((R[0]+R[m]));F[n] = *(float *)buf;"},
+  {"", "", "fmov.s <FREG_M>,@(R0,<REG_N>)", "1111nnnnmmmm0111", "*(float *)buf = F[m]; WLAT((R[0]+R[n]), *(int *)buf);"},
+  {"", "", "fmov <FREG_M>,<FREG_N>", "1111nnnnmmmm1100", "F[n] = F[m];"},
+  {"", "", "fldi0 <FREG_N>", "1111nnnn10001101", "F[n] = (float)0.0;"},
+  {"", "", "fldi1 <FREG_N>", "1111nnnn10011101", "F[n] = (float)1.0;"},
+  {"", "", "fadd <FREG_M>,<FREG_N>", "1111nnnnmmmm0000","F[n] = F[n] + F[m];"},
+  {"", "", "fsub <FREG_M>,<FREG_N>", "1111nnnnmmmm0001","F[n] = F[n] - F[m];"},
+  {"", "", "fmul <FREG_M>,<FREG_N>", "1111nnnnmmmm0010","F[n] = F[n] * F[m];"},
+  {"", "", "fdiv <FREG_M>,<FREG_N>", "1111nnnnmmmm0011","F[n] = F[n] / F[m];"},
+  {"", "", "fmac <FREG_0>,<FREG_M>,<FREG_N>", "1111nnnnmmmm1110", "F[n] = F[m] * F[0] + F[n];"},
+  {"", "", "fcmp/eq <FREG_M>,<FREG_N>", "1111nnnnmmmm0100", "T = F[n] == F[m] ? 1 : 0;"},
+  {"", "", "fcmp/gt <FREG_M>,<FREG_N>", "1111nnnnmmmm0101", "T = F[n] > F[m] ? 1 : 0;"},
+  {"", "", "fneg <FREG_N>", "1111nnnn01001101", "F[n] = -F[n];"},
+  {"", "", "fabs <FREG_N>", "1111nnnn01011101", "F[n] = fabs (F[n]);"},
+  {"", "", "fsqrt <FREG_N>", "1111nnnn01101101", "F[n] = sqrt (F[n]);"},
+  {"", "", "float FPUL,<FREG_N>", "1111nnnn00101101", "F[n] = (float)FPUL;"},
+  {"", "", "ftrc <FREG_N>, FPUL", "1111nnnn00111101", "FPUL = (int)F[n];"},
+  {"", "", "ftst/nan <FREG_N>", "1111nnnn01111101", "T = isnan (F[n]);"},
+  {"", "", "fsts FPUL,<FREG_N>", "1111nnnn00001101", "*(int *)buf = FPUL; F[n] = *(float *)buf;"},
+  {"", "", "flds <FREG_N>,FPUL", "1111nnnn00011101", "*(float *)buf = F[n]; FPUL = *(int *)buf;"},
+  {"", "", "lds <REG_N>,FPUL", "0100nnnn01011010", "FPUL = R[n];"},
+  {"", "", "sts FPUL,<REG_N>", "0000nnnn01011010", "R[n] = FPUL;"},
+  {"", "", "lds <REG_N>,FPSCR", "0100nnnn01101010", "*(int *)buf = R[n]; FPSCR = *(float *)buf;"},
+  {"", "", "sts FPSCR,<REG_N>", "0000nnnn01101010", "*(float *)buf = FPSCR; R[n] = *(int *)buf;"},
+  {"","","lds.l @<REG_N>+,FPUL", "0100nnnn01010110", "FPUL = RLAT(R[n]);R[n]+=4;"},
+  {"","","lds.l @<REG_N>+,FPSCR", "0100nnnn01100110", "*(int *)buf = RLAT(R[n]); FPSCR = *(float *)buf; R[n]+=4;"},
+  {"","","sts.l FPUL,@-<REG_N>", "0100nnnn01010010", "R[n]-=4;WLAT(R[n],FPUL);"},
+  {"","","sts.l FPSCR,@-<REG_N>", "0100nnnn01100010", "R[n]-=4;*(float *)buf = FPSCR; WLAT(R[n],*(int *)buf);"},
+/* end-sanitize-sh3e */
 
   {0, 0}};
 
@@ -605,6 +640,9 @@ gensim ()
   int j;
 
   printf ("{\n");
+/* start-sanitize-sh3e */
+  printf("char buf[4];\n");
+/* end-sanitize-sh3e */
   printf ("switch (jump_table[iword]) {\n");
 
   for (p = tab; p->name; p++)
@@ -714,7 +752,7 @@ gensim ()
       printf ("break;\n");
       printf ("}\n");
     }
-  printf("default:\n{\nabort();;\n}\n");
+  printf("default:\n{\nsaved_state.asregs.exception = SIGILL;\n}\n");
   printf ("}\n}\n");
 }
 
