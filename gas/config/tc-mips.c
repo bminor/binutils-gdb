@@ -121,9 +121,15 @@ mips_target_format ()
     case bfd_target_coff_flavour:
       return "pe-mips";
     case bfd_target_elf_flavour:
+#ifdef TE_TMIPS
+      /* This is traditional mips */
+      return (target_big_endian
+              ? "elf32-tradbigmips" : "elf32-tradlittlemips");
+#else
       return (target_big_endian
 	      ? (mips_64 ? "elf64-bigmips" : "elf32-bigmips")
 	      : (mips_64 ? "elf64-littlemips" : "elf32-littlemips"));
+#endif
     default:
       abort ();
       return NULL;
@@ -10988,6 +10994,7 @@ md_estimate_size_before_relax (fragp, segtype)
      asection *segtype;
 {
   int change = 0;
+  boolean linkonce = false;
 
   if (RELAX_MIPS16_P (fragp->fr_subtype))
     {
@@ -11030,10 +11037,26 @@ md_estimate_size_before_relax (fragp, segtype)
 
       symsec = S_GET_SEGMENT (sym);
 
+      /* duplicate the test for LINK_ONCE sections as in adjust_reloc_syms */
+      if (symsec != segtype && ! S_IS_LOCAL (sym))
+        {
+          if ((bfd_get_section_flags (stdoutput, symsec) & SEC_LINK_ONCE)
+              != 0)
+            linkonce = true;
+
+          /* The GNU toolchain uses an extension for ELF: a section
+             beginning with the magic string .gnu.linkonce is a linkonce
+             section.  */
+          if (strncmp (segment_name (symsec), ".gnu.linkonce",
+                       sizeof ".gnu.linkonce" - 1) == 0)
+            linkonce = true;
+        }
+
       /* This must duplicate the test in adjust_reloc_syms.  */
       change = (symsec != &bfd_und_section
 		&& symsec != &bfd_abs_section
 		&& ! bfd_is_com_section (symsec)
+		&& !linkonce
 #ifdef OBJ_ELF
 		/* A weak symbol is treated as external.  */
 		&& ! S_IS_WEAK (sym)
