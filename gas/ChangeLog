@@ -1,3 +1,13 @@
+Tue May 26 19:27:52 1998  Stan Cox  <scox@equinox.cygnus.com>
+
+	* config/tc-sparc.c (OPTION_LITTLE_ENDIAN_DATA): New.
+	(md_parse_option): Add for same.
+	(sparc_md_end): Set bfd_mach_sparc_sparclite_le.
+	(md_apply_fix3, tc_gen_reloc): Allow BFD_RELOC_SPARC_32LE.
+	(cons_fix_new_sparc): Added to create BFD_RELOC_SPARC_32LE.
+
+	* config/tc-sparc.h (cons_fix_new_sparc): Added.
+	
 Thu May 21 15:02:41 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-arm.c (find_real_start): Relax definition of local

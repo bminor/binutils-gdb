@@ -92,6 +92,8 @@ static int enforce_aligned_data;
 
 extern int target_big_endian;
 
+static int target_little_endian_data;
+
 /* V9 and 86x have big and little endian data, but instructions are always big
    endian.  The sparclet has bi-endian support but both data and insns have
    the same endianness.  Global `target_big_endian' is used for data.
@@ -389,6 +391,8 @@ struct option md_longopts[] = {
 #endif
 #define OPTION_ENFORCE_ALIGNED_DATA (OPTION_MD_BASE + 10)
   {"enforce-aligned-data", no_argument, NULL, OPTION_ENFORCE_ALIGNED_DATA},
+#define OPTION_LITTLE_ENDIAN_DATA (OPTION_MD_BASE + 11)
+  {"little-endian-data", no_argument, NULL, OPTION_LITTLE_ENDIAN_DATA},
   {NULL, no_argument, NULL, 0}
 };
 size_t md_longopts_size = sizeof(md_longopts);
@@ -454,10 +458,15 @@ md_parse_option (c, arg)
 #ifdef SPARC_BIENDIAN
     case OPTION_LITTLE_ENDIAN:
       target_big_endian = 0;
-      if (default_arch_type != sparc86x
-	  && default_arch_type != sparclet
-	  && default_arch_type != v9)
+      if (default_arch_type != sparclet)
 	as_fatal ("This target does not support -EL");
+      break;
+    case OPTION_LITTLE_ENDIAN_DATA:
+      target_little_endian_data = 1;
+      target_big_endian = 0;
+      if (default_arch_type != sparc86x
+	  && default_arch_type != v9)
+	as_fatal ("This target does not support --little-endian-data");
       break;
     case OPTION_BIG_ENDIAN:
       target_big_endian = 1;
@@ -593,7 +602,9 @@ md_show_usage (stream)
 #ifdef SPARC_BIENDIAN
   fprintf (stream, _("\
 -EL			generate code for a little endian machine\n\
--EB			generate code for a big endian machine\n"));
+-EB			generate code for a big endian machine\n\
+--little-endian-data	generate code for a machine having big endian
+                        instructions and little endian data."));
 #endif
 }
 
@@ -755,6 +766,8 @@ sparc_md_end ()
 	bfd_set_arch_mach (stdoutput, bfd_arch_sparc, bfd_mach_sparc_v8plusa);
       else if (current_architecture == SPARC_OPCODE_ARCH_SPARCLET)
 	bfd_set_arch_mach (stdoutput, bfd_arch_sparc, bfd_mach_sparc_sparclet);
+      else if (default_arch_type == sparc86x && target_little_endian_data)
+	bfd_set_arch_mach (stdoutput, bfd_arch_sparc, bfd_mach_sparc_sparclite_le);
       else
 	{
 	  /* The sparclite is treated like a normal sparc.  Perhaps it shouldn't
@@ -2540,7 +2553,8 @@ md_apply_fix3 (fixP, value, segment)
     {
       md_number_to_chars (buf, val, 2);
     }
-  else if (fixP->fx_r_type == BFD_RELOC_32)
+  else if (fixP->fx_r_type == BFD_RELOC_32
+	   || fixP->fx_r_type == BFD_RELOC_SPARC_32LE)
     {
       md_number_to_chars (buf, val, 4);
     }
@@ -2778,6 +2792,7 @@ tc_gen_reloc (section, fixp)
     case BFD_RELOC_SPARC_L44:
     case BFD_RELOC_SPARC_HIX22:
     case BFD_RELOC_SPARC_LOX10:
+    case BFD_RELOC_SPARC_32LE:
       code = fixp->fx_r_type;
       break;
     default:
@@ -3420,3 +3435,27 @@ sparc_elf_final_processing ()
     elf_elfheader (stdoutput)->e_flags |= EF_SPARC_SUN_US1;
 }
 #endif
+
+/* This is called by emit_expr via TC_CONS_FIX_NEW when creating a
+   reloc for a cons.  We could use the definition there, except that
+   we want to handle little endian relocs specially.  */
+
+void
+cons_fix_new_sparc (frag, where, nbytes, exp)
+     fragS *frag;
+     int where;
+     unsigned int nbytes;
+     expressionS *exp;
+{
+  bfd_reloc_code_real_type r;
+
+  r = (nbytes == 1 ? BFD_RELOC_8 :
+       (nbytes == 2 ? BFD_RELOC_16 :
+	(nbytes == 4 ? BFD_RELOC_32 : BFD_RELOC_64)));
+
+#ifdef OBJ_ELF
+  if (target_little_endian_data && nbytes == 4)
+    r = BFD_RELOC_SPARC_32LE;
+#endif  
+  fix_new_exp (frag, where, (int) nbytes, exp, 0, r);
+}

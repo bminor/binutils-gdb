@@ -1,3 +1,20 @@
+Tue May 26 19:37:47 1998  Stan Cox  <scox@equinox.cygnus.com>
+
+	* elf32-sparc.c (_bfd_sparc_elf_howto_table, sparc_reloc_map,
+	elf32_sparc_relocate_section): Added R_SPARC_32LE for little
+	endian data 32 bit relocations.
+	(elf32_sparc_merge_private_bfd_data): Check if linking little
+	endian objects with big endian objects.
+	(elf32_sparc_object_p): Set bfd_mach_sparc_sparclite_le.
+	(elf32_sparc_final_write_processing): Set EF_SPARC_LEDATA in e_flags.
+
+	* libbfd.h (bfd_reloc_code_real_names): Added BFD_RELOC_SPARC_32LE.
+	* reloc.c: Same.
+	
+	* cpu-sparc.c (arch_info_struct): Added sparc:sparclite_le
+
+	* archures.c (bfd_mach_sparc_sparclite_le): New.
+	
 Thu May 21 16:59:28 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* peicode.h (add_data_entry): Fix precedence of operators in if ()
