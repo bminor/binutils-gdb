@@ -521,14 +521,7 @@ d10v_extract_struct_value_address (struct regcache *regcache)
 static CORE_ADDR
 d10v_frame_saved_pc (struct frame_info *frame)
 {
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame),
-				   get_frame_base (frame),
-				   get_frame_base (frame)))
-    return d10v_make_iaddr (deprecated_read_register_dummy (get_frame_pc (frame), 
-							    get_frame_base (frame), 
-							    PC_REGNUM));
-  else
-    return (get_frame_extra_info (frame)->return_pc);
+  return (get_frame_extra_info (frame)->return_pc);
 }
 
 /* Immediately after a function call, return the saved pc.  We can't
@@ -699,10 +692,6 @@ d10v_frame_chain (struct frame_info *fi)
   CORE_ADDR addr;
 
   /* A generic call dummy's frame is the same as caller's.  */
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
-				   get_frame_base (fi)))
-    return get_frame_base (fi);
-
   d10v_frame_init_saved_regs (fi);
 
   
@@ -711,8 +700,7 @@ d10v_frame_chain (struct frame_info *fi)
     {
       /* This is meant to halt the backtrace at "_start".
 	 Make sure we don't halt it at a generic dummy frame. */
-      if (!DEPRECATED_PC_IN_CALL_DUMMY (get_frame_extra_info (fi)->return_pc, 0, 0))
-	return (CORE_ADDR) 0;
+      return (CORE_ADDR) 0;
     }
 
   if (!get_frame_saved_regs (fi)[FP_REGNUM])
@@ -929,15 +917,7 @@ d10v_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 
   /* The call dummy doesn't save any registers on the stack, so we can
      return now.  */
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
-				   get_frame_base (fi)))
-    {
-      return;
-    }
-  else
-    {
-      d10v_frame_init_saved_regs (fi);
-    }
+  d10v_frame_init_saved_regs (fi);
 }
 
 static void
