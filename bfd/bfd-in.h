@@ -538,6 +538,11 @@ void		bfd_putb32	   PARAMS ((bfd_vma, unsigned char *));
 void		bfd_putl32	   PARAMS ((bfd_vma, unsigned char *));
 void		bfd_putb16	   PARAMS ((bfd_vma, unsigned char *));
 void		bfd_putl16	   PARAMS ((bfd_vma, unsigned char *));
+
+/* Byte swapping routines which take size and endiannes as arguments.  */
+
+bfd_vma         bfd_get_bits       PARAMS ((bfd_byte *, int, boolean));
+void            bfd_put_bits       PARAMS ((bfd_vma, bfd_byte *, int, boolean));
 
 /* Externally visible ECOFF routines.  */
 

@@ -1,3 +1,10 @@
+2000-12-21  Richard Sandiford  <rsandifo@redhat.com>
+
+	* libbfd.c (bfd_get_bits): Added
+	(bfd_put_bits): Likewise
+	* bfd-in.h: Declared the above.
+	* bfd-in2.h: Regenerated.
+
 2000-12-20  Kazu Hirata  <kazu@hxi.com>
 
 	* targets.c: Fix formatting.

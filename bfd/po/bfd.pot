@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2000-12-18 10:57-0800\n"
+"POT-Creation-Date: 2000-12-21 10:12-0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1425,12 +1425,12 @@ msgstr ""
 msgid "not mapping: env var not set\n"
 msgstr ""
 
-#: libbfd.c:1335
+#: libbfd.c:1383
 #, c-format
 msgid "%s: compiled for a big endian system and target is little endian"
 msgstr ""
 
-#: libbfd.c:1337
+#: libbfd.c:1385
 #, c-format
 msgid "%s: compiled for a little endian system and target is big endian"
 msgstr ""
@@ -1864,12 +1864,12 @@ msgstr ""
 msgid "som_sizeof_headers unimplemented"
 msgstr ""
 
-#: srec.c:301
+#: srec.c:300
 #, c-format
 msgid "%s:%d: Unexpected character `%s' in S-record file\n"
 msgstr ""
 
-#: syms.c:974
+#: syms.c:968
 msgid "Unsupported .stab relocation"
 msgstr ""
 

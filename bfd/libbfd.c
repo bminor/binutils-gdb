@@ -1190,6 +1190,54 @@ bfd_putl64 (data, addr)
   BFD_FAIL();
 #endif
 }
+
+void
+bfd_put_bits (data, addr, bits, big_p)
+     bfd_vma data;
+     bfd_byte *addr;
+     int bits;
+     boolean big_p;
+{
+  int i;
+  int bytes;
+
+  if (bits % 8 != 0)
+    abort ();
+
+  bytes = bits / 8;
+  for (i = 0; i < bytes; i++)
+    {
+      int index = big_p ? bytes - i - 1 : i;
+
+      addr[index] = (bfd_byte) data;
+      data >>= 8;
+    }
+}
+
+bfd_vma
+bfd_get_bits (addr, bits, big_p)
+     bfd_byte *addr;
+     int bits;
+     boolean big_p;
+{
+  bfd_vma data;
+  int i;
+  int bytes;
+
+  if (bits % 8 != 0)
+    abort ();
+
+  data = 0;
+  bytes = bits / 8;
+  for (i = 0; i < bytes; i++)
+    {
+      int index = big_p ? i : bytes - i - 1;
+      
+      data = (data << 8) | addr[index];
+    }
+
+  return data;
+}
 
 /* Default implementation */
 

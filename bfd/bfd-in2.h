@@ -538,6 +538,11 @@ void		bfd_putb32	   PARAMS ((bfd_vma, unsigned char *));
 void		bfd_putl32	   PARAMS ((bfd_vma, unsigned char *));
 void		bfd_putb16	   PARAMS ((bfd_vma, unsigned char *));
 void		bfd_putl16	   PARAMS ((bfd_vma, unsigned char *));
+
+/* Byte swapping routines which take size and endiannes as arguments.  */
+
+bfd_vma         bfd_get_bits       PARAMS ((bfd_byte *, int, boolean));
+void            bfd_put_bits       PARAMS ((bfd_vma, bfd_byte *, int, boolean));
 
 /* Externally visible ECOFF routines.  */
 
@@ -1303,7 +1308,7 @@ bfd_set_section_flags PARAMS ((bfd *abfd, asection *sec, flagword flags));
 
 void 
 bfd_map_over_sections PARAMS ((bfd *abfd,
-    void (*func)(bfd *abfd,
+    void (*func) (bfd *abfd,
     asection *sect,
     PTR obj),
     PTR obj));
@@ -3186,13 +3191,13 @@ core_file_matches_executable_p
     (bfd_assert (__FILE__,__LINE__), NULL))
 #endif
 #define BFD_SEND_FMT(bfd, message, arglist) \
-            (((bfd)->xvec->message[(int)((bfd)->format)]) arglist)
+            (((bfd)->xvec->message[(int) ((bfd)->format)]) arglist)
 
 #ifdef DEBUG_BFD_SEND
 #undef BFD_SEND_FMT
 #define BFD_SEND_FMT(bfd, message, arglist) \
   (((bfd) && (bfd)->xvec && (bfd)->xvec->message) ? \
-   (((bfd)->xvec->message[(int)((bfd)->format)]) arglist) : \
+   (((bfd)->xvec->message[(int) ((bfd)->format)]) arglist) : \
    (bfd_assert (__FILE__,__LINE__), NULL))
 #endif
 enum bfd_flavour {
@@ -3227,10 +3232,10 @@ typedef struct bfd_target
   enum bfd_flavour flavour;
   enum bfd_endian byteorder;
   enum bfd_endian header_byteorder;
-  flagword object_flags;       
+  flagword object_flags;
   flagword section_flags;
   char symbol_leading_char;
-  char ar_pad_char;            
+  char ar_pad_char;
   unsigned short ar_max_namelen;
   bfd_vma      (*bfd_getx64) PARAMS ((const bfd_byte *));
   bfd_signed_vma (*bfd_getx_signed_64) PARAMS ((const bfd_byte *));
@@ -3269,7 +3274,7 @@ CAT(NAME,_get_section_contents_in_window)
   /* Called when a new section is created.  */
   boolean       (*_new_section_hook) PARAMS ((bfd *, sec_ptr));
   /* Read the contents of a section.  */
-  boolean       (*_bfd_get_section_contents) PARAMS ((bfd *, sec_ptr, PTR, 
+  boolean       (*_bfd_get_section_contents) PARAMS ((bfd *, sec_ptr, PTR,
                                             file_ptr, bfd_size_type));
   boolean       (*_bfd_get_section_contents_in_window)
                           PARAMS ((bfd *, sec_ptr, bfd_window *,
@@ -3293,7 +3298,7 @@ CAT(NAME,_bfd_print_private_bfd_data)\
      to another.  */
   boolean       (*_bfd_copy_private_section_data) PARAMS ((bfd *, sec_ptr,
                                                        bfd *, sec_ptr));
-  /* Called to copy BFD private symbol data from one symbol 
+  /* Called to copy BFD private symbol data from one symbol
      to another.  */
   boolean       (*_bfd_copy_private_symbol_data) PARAMS ((bfd *, asymbol *,
                                                           bfd *, asymbol *));
@@ -3329,10 +3334,10 @@ CAT(NAME,_update_armap_timestamp)
   boolean  (*_bfd_construct_extended_name_table)
              PARAMS ((bfd *, char **, bfd_size_type *, const char **));
   void     (*_bfd_truncate_arname) PARAMS ((bfd *, CONST char *, char *));
-  boolean  (*write_armap) PARAMS ((bfd *arch, 
+  boolean  (*write_armap) PARAMS ((bfd *arch,
                               unsigned int elength,
                               struct orl *map,
-                              unsigned int orl_count, 
+                              unsigned int orl_count,
                               int stridx));
   PTR (*_bfd_read_ar_hdr_fn) PARAMS ((bfd *));
   bfd *    (*openr_next_archived_file) PARAMS ((bfd *arch, bfd *prev));
@@ -3465,11 +3470,11 @@ CAT(NAME,_canonicalize_dynamic_reloc)
   long  (*_bfd_canonicalize_dynamic_reloc)
     PARAMS ((bfd *, arelent **, struct symbol_cache_entry **));
 
- /* Opposite endian version of this target.  */  
+ /* Opposite endian version of this target.  */
  const struct bfd_target * alternative_target;
- 
+
  PTR backend_data;
- 
+
 } bfd_target;
 boolean 
 bfd_set_default_target  PARAMS ((const char *name));
@@ -3481,7 +3486,7 @@ const char **
 bfd_target_list PARAMS ((void));
 
 const bfd_target * 
-bfd_search_for_target  PARAMS ((int (* search_func)(const bfd_target *, void *), void *));
+bfd_search_for_target  PARAMS ((int (* search_func) (const bfd_target *, void *), void *));
 
 boolean 
 bfd_check_format PARAMS ((bfd *abfd, bfd_format format));
