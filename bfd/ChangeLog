@@ -1,3 +1,7 @@
+Thu Mar  3 20:03:39 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* som.h (_PA_RISC_ID): Treat HOST_HPPAOSF just like HOST_HPPABSD.
+
 Wed Mar  2 13:28:06 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
 	* configure.host: Recognize i[34]86-sequent-*.

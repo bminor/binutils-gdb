@@ -31,7 +31,7 @@
 #include <ar.h>
 
 
-#ifdef HOST_HPPABSD
+#if defined(HOST_HPPABSD) || defined (HOST_HPPAOSF)
 /* BSD uses a completely different scheme for object file identification.
    so for now, define _PA_RISC_ID to accept any random value for a model
    number.  */
