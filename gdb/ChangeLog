@@ -1,3 +1,7 @@
+Fri Dec 31 14:33:49 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stack.c (print_block_frame_locals): Also print LOC_BASEREG variables.
+
 Fri Dec 31 06:55:38 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* symtab.c (find_methods): Call fprintf_symbol_filtered with DMGL_ANSI.
