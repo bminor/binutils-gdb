@@ -1,3 +1,12 @@
+Fri Jun 30 16:49:47 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* wrapper.c (sim_do_command): New function.
+
+Tue Jun 13 10:57:32 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* armos.c (ARMul_OSHandleSWI): New version to work with
+	newlib simply.
+
 Thu Jun  8 14:37:14 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	* run.c (main): Grab return value from right register.
