@@ -6,6 +6,7 @@
 #include <ctype.h>
 #include <string.h>
 #include <sys/file.h>
+#include <memory.h>
 
 void free();
 
@@ -15,17 +16,6 @@ void free();
 #define SEEK_SET 0
 #define SEEK_CUR 1
 
-/*
- * Some things that need to be defined in order to make code written for
- * BSD Unix compile under System V ("USG") Unix.  This file should be
- * conditionally included in the source.
- */
-
-#include <memory.h>
-#define bcmp(b1,b2,len)		memcmp(b1,b2,len)
-#define bcopy(src,dst,len)	memcpy(dst,src,len)
-#define bzero(s,n)		memset(s,0,n)
-
 #if 0
 static int
 rename(from, to)
@@ -34,26 +24,6 @@ rename(from, to)
   return(link(from, to));
 }
 #endif
-
-/*
- * Might not need these. Leave them out for now.
- *
-#include <string.h>
-#define index(s,c)		strchr(s,c)
-#define rindex(s,c)		strrchr(s,c)
-
-#ifdef SEEK_SET
-#	ifndef L_SET
-#		define L_SET SEEK_SET
-#	endif
-# endif
-
-#ifdef SEEK_CUR
-#	ifndef L_INCR
-#		define L_INCR SEEK_CUR
-#	endif
-# endif
- */
 
 /* EXACT TYPES */
 typedef char int8e_type;

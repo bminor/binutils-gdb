@@ -1,3 +1,8 @@
+Sat Sep 26 03:58:49 1992  John Gilmore  (gnu@cygnus.com)
+
+	* config/hppabsd.mh, config.hppahpux.mh:  Remove various bogosity.
+	* hosts/hppahpux.h:  Remove bcopy and index circumventions.
+
 Fri Sep 25 22:36:52 1992  John Gilmore  (gnu@cygnus.com)
 
 	* coff-z8k.c (func_da, func_jr):  Lint.
