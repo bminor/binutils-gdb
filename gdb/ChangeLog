@@ -1,3 +1,11 @@
+Wed Sep 13 13:33:58 1995  Kung Hsu  <kung@mexican.cygnus.com>
+
+	* symfile.c: Move global variable auto_solib_add_at_startup from
+	solib.c to symfile.c.
+	* solib.c: ditto.
+	* symfile.h: Add extern declaration of the above mentioned variable.
+	* infcmd.c: Take out extern declaration, since it's in symfile.h.
+
 Thu Sep 14 12:39:35 1995  Stu Grossman  (grossman@cygnus.com)
 
 	* coffread.c (coff_symtab_read):  Complain about unmatched .ef and

@@ -1126,8 +1126,6 @@ attach_command (args, from_tty)
      char *args;
      int from_tty;
 {
-  extern int auto_solib_add_at_startup;
-
   dont_repeat ();			/* Not for the faint of heart */
 
   if (target_has_execution)
