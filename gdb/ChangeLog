@@ -1,5 +1,8 @@
 Fri Apr 24 07:41:19 1992  Stu Grossman  (grossman at cygnus.com)
 
+	* am29k-tdep.c:  Update to use new calling conventions, and misc
+	symbol elements.
+
 	* m68k-pinsn.c (print_insn_arg):  Make branch offsets be signed.
 
 Thu Apr 23 18:43:17 1992  Fred Fish  (fnf@cygnus.com)

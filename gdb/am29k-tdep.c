@@ -66,7 +66,7 @@ examine_prologue (pc, rsize, msize, mfp_used)
   struct prologue_info *mi = 0;
 
   if (msymbol != NULL)
-    mi = (struct prologue_info *) msymbol -> misc_info;
+    mi = (struct prologue_info *) msymbol -> info;
 
   if (mi != 0)
     {
@@ -252,7 +252,7 @@ examine_prologue (pc, rsize, msize, mfp_used)
 	{
 	  /* Add a new cache entry.  */
 	  mi = (struct prologue_info *)xmalloc (sizeof (struct prologue_info));
-	  msymbol -> misc_info = (char *)mi;
+	  msymbol -> info = (char *)mi;
 	  mi->rsize_valid = 0;
 	  mi->msize_valid = 0;
 	  mi->mfp_valid = 0;
@@ -493,7 +493,7 @@ write_register_stack (memaddr, myaddr, actual_mem_addr)
       if (myaddr != NULL)
 	write_register (regnum, *(long *)myaddr);
       if (actual_mem_addr != NULL)
-	*actual_mem_addr = NULL;
+	*actual_mem_addr = 0;
     }
   else
     {
@@ -671,8 +671,8 @@ push_dummy_frame ()
       for (i = 0; i < num_bytes; i += 4)
 	{
 	  /* Note:  word is in target byte order.  */
-	  read_register_gen (LR0_REGNUM + i / 4, &word, 4);
-	  write_memory (rfb - num_bytes + i, &word, 4);
+	  read_register_gen (LR0_REGNUM + i / 4, (char *)&word);
+	  write_memory (rfb - num_bytes + i, (char *)&word, 4);
 	}
     }
 
