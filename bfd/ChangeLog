@@ -7,6 +7,13 @@ Mon Jan 29 14:27:24 1996  Kim Knuttila  <krk@cygnus.com>
 
 Mon Jan 29 13:06:28 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	From Basim Kadhim <kadhim@spock.cs.colorado.edu>:
+	* ecoff.c (struct extsym_info): Define.
+	(_bfd_ecoff_bfd_final_link): Pass a pointer to struct extsym_info
+	to ecoff_link_write_external.
+	(ecoff_link_write_external): Accept a struct extsym_info pointer.
+	Strip symbols when appropriate.
+
 	Based on patches from Ronald F. Guilmette <rfg@monkeys.com>:
 	* syms.c (BSF_OBJECT): Define.
 	(bfd_print_symbol_vandf): Print 'O' for BSF_OBJECT.
