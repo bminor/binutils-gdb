@@ -1,5 +1,12 @@
 2001-05-09  Kevin Buettner  <kevinb@redhat.com>
 
+	* lin-lwp.c (lin_lwp_pid_to_str): Revert inadvertent format
+	string change in 2001-05-03 changes.
+	(lin_lwp_wait): Revert GET_LWP coercion introduced in 2001-05-03
+	changes.
+
+2001-05-09  Kevin Buettner  <kevinb@redhat.com>
+
 	* lin-lwp.c (lin_lwp_attach): Use PIDGET() to fetch the pid
 	component from inferior_ptid.
 	(lin_lwp_detach): Use pid_to_ptid() to convert from a pid to a

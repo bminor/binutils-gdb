@@ -685,7 +685,7 @@ lin_lwp_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 	  if (debug_lin_lwp)
 	    fprintf_unfiltered (gdb_stdlog, 
 				"Using pending wait status for LWP %d.\n",
-				(int) GET_LWP (lp->ptid));
+				GET_LWP (lp->ptid));
 
 	  status = lp->status;
 	  lp->status = 0;
@@ -1032,7 +1032,7 @@ lin_lwp_pid_to_str (ptid_t ptid)
 
   if (is_lwp (ptid))
     {
-      snprintf (buf, sizeof (buf), "LWP %ld", GET_LWP (ptid));
+      snprintf (buf, sizeof (buf), "LWP %d", GET_LWP (ptid));
       return buf;
     }
 
