@@ -1,3 +1,7 @@
+2003-04-24  J"orn Rennecke <joern.rennecke@superh.com>
+
+	* ld-elfcomm/elfcomm.exp: Allow symbols to have '_' prepended.
+
 2003-04-23  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* ld-sh/tlsbin-1.d, ld-sh/tlsbin-2.d, ld-sh/tlsbin-3.d,
