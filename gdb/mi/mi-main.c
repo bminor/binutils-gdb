@@ -1164,8 +1164,8 @@ mi_execute_command (char *cmd, int from_tty)
       mi_parse_free (command);
     }
 
-  gdb_flush (raw_stdout);
   fputs_unfiltered ("(gdb) \n", raw_stdout);
+  gdb_flush (raw_stdout);
   /* print any buffered hook code */
   /* ..... */
 }
@@ -1296,6 +1296,7 @@ mi_execute_async_cli_command (char *mi, char *args, int from_tty)
 	fputs_unfiltered (last_async_command, raw_stdout);
       fputs_unfiltered ("^running\n", raw_stdout);
       fputs_unfiltered ("(gdb) \n", raw_stdout);
+      gdb_flush (raw_stdout);
     }
   else
     {
@@ -1337,6 +1338,7 @@ mi_exec_async_cli_cmd_continuation (struct continuation_arg *arg)
   mi_out_put (uiout, raw_stdout);
   fputs_unfiltered ("\n", raw_stdout);
   fputs_unfiltered ("(gdb) \n", raw_stdout);
+  gdb_flush (raw_stdout);
   do_exec_cleanups (ALL_CLEANUPS);
 }
 
@@ -1464,6 +1466,7 @@ mi_command_loop (int mi_version)
 
   /* Tell the world that we're alive */
   fputs_unfiltered ("(gdb) \n", raw_stdout);
+  gdb_flush (raw_stdout);
 
   if (!event_loop_p)
     simplified_command_loop (mi_input, mi_execute_command);

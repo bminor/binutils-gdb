@@ -1,3 +1,11 @@
+2001-07-12  Andrew Cagney  <ac131313@redhat.com>
+
+	* mi-main.c (mi_execute_command): Flush output after ``(gdb)''
+	prompt.  Bug reported by David Whedon.
+	(mi_execute_async_cli_command): Ditto.
+	(mi_exec_async_cli_cmd_continuation): Ditto.
+	(mi_command_loop): Ditto.
+
 2001-07-10  Mark Kettenis  <kettenis@gnu.org>
 
 	* mi-out.c (mi_out_new): Initialize suppress_ouput field of newly
