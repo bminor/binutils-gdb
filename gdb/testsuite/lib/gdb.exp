@@ -854,7 +854,15 @@ proc send_gdb { string } {
 #
 
 proc gdb_expect { args } {
+    upvar timeout timeout
+    if [target_info exists gdb,timeout] {
+	set oldt $timeout
+	set timeout [target_info gdb,timeout];
+    }
     set code [catch {uplevel remote_expect host $args} string];
+    if [info exists oldt] {
+	set timeout oldt
+    }
 
     if {$code == 1} {
 	return -code error -errorinfo $errorInfo -errorcode $errorCode $string

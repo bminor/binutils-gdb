@@ -1,5 +1,8 @@
 Thu May 22 18:51:32 1997  Bob Manson  <manson@charmed.cygnus.com>
 
+	* lib/gdb.exp(gdb_expect): Look for gdb,timeout target
+	feature.
+
 	* config/proelf.exp: New entry.
 
 Wed May 21 21:23:16 1997  Bob Manson  <manson@charmed.cygnus.com>
