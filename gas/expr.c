@@ -1011,14 +1011,6 @@ operand (expressionS *expressionP)
       mri_char_constant (expressionP);
       break;
 
-    case '+':
-      /* Do not accept ++e as +(+e).
-	 Disabled, since the preprocessor removes whitespace.  */
-      if (0 && *input_line_pointer == '+')
-	goto target_op;
-      (void) operand (expressionP);
-      break;
-
 #ifdef TC_M68K
     case '"':
       /* Double quote is the bitwise not operator in MRI mode.  */
@@ -1032,10 +1024,11 @@ operand (expressionS *expressionP)
 	goto isname;
     case '!':
     case '-':
+    case '+':
       {
-        /* Do not accept --e as -(-e)
+	/* Do not accept ++e or --e as +(+e) or -(-e)
 	   Disabled, since the preprocessor removes whitespace.  */
-	if (0 && c == '-' && *input_line_pointer == '-')
+	if (0 && (c == '-' || c == '+') && *input_line_pointer == c)
 	  goto target_op;
 	
 	operand (expressionP);
@@ -1052,7 +1045,7 @@ operand (expressionS *expressionP)
 	      }
 	    else if (c == '~' || c == '"')
 	      expressionP->X_add_number = ~ expressionP->X_add_number;
-	    else
+	    else if (c == '!')
 	      expressionP->X_add_number = ! expressionP->X_add_number;
 	  }
 	else if (expressionP->X_op == O_big
@@ -1099,14 +1092,17 @@ operand (expressionS *expressionP)
 	else if (expressionP->X_op != O_illegal
 		 && expressionP->X_op != O_absent)
 	  {
-	    expressionP->X_add_symbol = make_expr_symbol (expressionP);
-	    if (c == '-')
-	      expressionP->X_op = O_uminus;
-	    else if (c == '~' || c == '"')
-	      expressionP->X_op = O_bit_not;
-	    else
-	      expressionP->X_op = O_logical_not;
-	    expressionP->X_add_number = 0;
+	    if (c != '+')
+	      {
+		expressionP->X_add_symbol = make_expr_symbol (expressionP);
+		if (c == '-')
+		  expressionP->X_op = O_uminus;
+		else if (c == '~' || c == '"')
+		  expressionP->X_op = O_bit_not;
+		else
+		  expressionP->X_op = O_logical_not;
+		expressionP->X_add_number = 0;
+	      }
 	  }
 	else
 	  as_warn (_("Unary operator %c ignored because bad operand follows"),

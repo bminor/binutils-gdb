@@ -1,3 +1,8 @@
+2005-03-15  Jan Beulich  <jbeulich@novell.com>
+
+	* expr.c (operand): Merge handling of unary + into that for unary
+	-, !, and ~.
+
 2005-03-14  Eric Christopher  <echristo@redhat.com>
 
 	* config/tc-mips.c: Include dw2gencfi.h.
