@@ -1003,32 +1003,12 @@ h8300_saved_pc_after_call (struct frame_info *ignore)
   return read_memory_unsigned_integer (read_register (E_SP_REGNUM), BINWORD);
 }
 
-static int
-h8300_register_byte (int regno)
-{
-  if (regno < 0 || regno >= NUM_REGS)
-    internal_error (__FILE__, __LINE__,
-		    "h8300_register_byte: illegal register number %d", regno);
-  else
-    return regno * h8300_reg_size;
-}
-
-static int
-h8300h_register_byte (int regno)
-{
-  if (regno < 0 || regno >= NUM_REGS)
-    internal_error (__FILE__, __LINE__,
-		    "h8300_register_byte: illegal register number %d", regno);
-  else
-    return regno * h8300h_reg_size;
-}
-
 static struct type *
-h8300_register_virtual_type (int regno)
+h8300_register_type (struct gdbarch *gdbarch, int regno)
 {
   if (regno < 0 || regno >= NUM_REGS)
     internal_error (__FILE__, __LINE__,
-		    "h8300_register_virtual_type: illegal register number %d",
+		    "h8300_register_type: illegal register number %d",
 		    regno);
   else
     {
@@ -1062,7 +1042,7 @@ static CORE_ADDR
 h8300_extract_struct_value_address (char *regbuf)
 {
   return 
-    extract_unsigned_integer (regbuf + h8300_register_byte (E_ARG0_REGNUM),
+    extract_unsigned_integer (regbuf + h8300_reg_size * E_ARG0_REGNUM,
 			      h8300_reg_size);
 }
 
@@ -1070,7 +1050,7 @@ static CORE_ADDR
 h8300h_extract_struct_value_address (char *regbuf)
 {
   return 
-    extract_unsigned_integer (regbuf + h8300_register_byte (E_ARG0_REGNUM),
+    extract_unsigned_integer (regbuf + h8300h_reg_size * E_ARG0_REGNUM,
 			      h8300h_reg_size);
 }
 
@@ -1120,7 +1100,6 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       h8300hmode = 0;
       set_gdbarch_num_regs (gdbarch, 13);
       set_gdbarch_register_name (gdbarch, h8300_register_name);
-      set_gdbarch_deprecated_register_byte (gdbarch, h8300_register_byte);
       set_gdbarch_ptr_bit (gdbarch, 2 * TARGET_CHAR_BIT);
       set_gdbarch_addr_bit (gdbarch, 2 * TARGET_CHAR_BIT);
       break;
@@ -1131,7 +1110,6 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       h8300hmode = 1;
       set_gdbarch_num_regs (gdbarch, 13);
       set_gdbarch_register_name (gdbarch, h8300_register_name);
-      set_gdbarch_deprecated_register_byte (gdbarch, h8300h_register_byte);
       set_gdbarch_ptr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
       set_gdbarch_addr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
       break;
@@ -1142,7 +1120,6 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       h8300hmode = 1;
       set_gdbarch_num_regs (gdbarch, 14);
       set_gdbarch_register_name (gdbarch, h8300s_register_name);
-      set_gdbarch_deprecated_register_byte (gdbarch, h8300h_register_byte);
       set_gdbarch_ptr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
       set_gdbarch_addr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
       break;
@@ -1153,7 +1130,6 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       h8300hmode = 1;
       set_gdbarch_num_regs (gdbarch, 18);
       set_gdbarch_register_name (gdbarch, h8300sx_register_name);
-      set_gdbarch_deprecated_register_byte (gdbarch, h8300h_register_byte);
       set_gdbarch_ptr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
       set_gdbarch_addr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
       break;
@@ -1171,7 +1147,7 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_sp_regnum (gdbarch, E_SP_REGNUM);
   set_gdbarch_deprecated_fp_regnum (gdbarch, E_FP_REGNUM);
   set_gdbarch_pc_regnum (gdbarch, E_PC_REGNUM);
-  set_gdbarch_deprecated_register_virtual_type (gdbarch, h8300_register_virtual_type);
+  set_gdbarch_register_type (gdbarch, h8300_register_type);
   set_gdbarch_print_registers_info (gdbarch, h8300_print_registers_info);
   set_gdbarch_print_float_info (gdbarch, h8300_print_float_info);
 

@@ -1,3 +1,16 @@
+2003-06-13  Corinna Vinschen  <vinschen@redhat.com>
+
+	* h8300-tdep.c (h8300_register_byte): Remove.
+	(h8300h_register_byte): Remove.
+	(h8300_register_virtual_type): Remove.  Substitute by...
+	(h8300_register_type): New function.
+	(h8300_extract_struct_value_address): Drop usage of h8300_register_byte.
+	(h8300h_extract_struct_value_address): Ditto.
+	(h8300_gdbarch_init): Drop calls to
+	set_gdbarch_deprecated_register_byte and
+	set_gdbarch_deprecated_register_virtual_type.
+	Add call to set_gdbarch_register_type.
+
 2003-06-13  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbarch.sh: Update comments on registers.
