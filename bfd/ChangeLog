@@ -1,3 +1,106 @@
+Tue Jul 26 11:04:00 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	Add support for creating shared libraries under i386 ELF and SPARC
+	ELF.  Based on patches by Eric Youngdale <ericy@cais.cais.com>.
+	* libelf.h (struct elf_link_hash_entry): Remove copy_offset field.
+	Add got_offset and plt_offset fields.
+	(ELF_LINK_HASH_REF_DYNAMIC_MULTIPLE): Don't define.
+	(ELF_LINK_HASH_DEF_DYNAMIC_MULTIPLE): Don't define.
+	(ELF_LINK_HASH_NEEDS_COPY): Define.
+	(struct elf_backend_data): Add check_relocs field.
+	(struct bfd_elf_section_data): Change relocs from PTR to
+	Elf_Internal_Rela *.
+	(struct elf_obj_tdata): Add local_got_offsets field.
+	(elf_local_got_offsets): Define accessor macro.
+	(bfd_elf32_link_create_dynamic_sections): Declare.
+	(bfd_elf32_link_record_dynamic_symbol): Declare.
+	(bfd_elf64_link_create_dynamic_sections): Declare.
+	(bfd_elf64_link_record_dynamic_symbol): Declare.
+	* elfcode.h (elf_slurp_reloc_table): Don't use the section data
+	relocs field.
+	(elf_link_record_dynamic_symbol): Make globally visible.  Use
+	macro to rename to NAME(bfd_elf,link_record_dynamic_symbol).
+	(elf_link_add_object_symbols): If creating a shared library, put
+	make all local symbols dynamic.  Don't bother with the
+	DYNAMIC_MULTIPLE flags.  Call the check_relocs backend function if
+	it is defined.
+	(elf_link_create_dynamic_sections): Make globally visible.  Use
+	macro to rename to NAME(bfd_elf,link_create_dynamic_sections).  If
+	creating a shared library, make sure that _DYNAMIC is added as a
+	dynamic symbol.
+	(elf_link_read_relocs): New function.
+	(NAME(bfd_elf,record_link_assignment)): If creating a shared
+	library, always create symbols, and always make them dynamic.
+	(elf_bfd_final_link): Permit creation of shared libraries.
+	(elf_link_input_bfd): Use elf_link_read_relocs to get the relocs.
+	* elf.c (_bfd_elf_link_hash_newfunc): Don't initialize
+	copy_offset.  Initialize got_offset and plt_offset.
+	* elf32-target.h (elf_backend_check_relocs): Define as 0 if not
+	defined.
+	(elf32_bed): Initialize check_relocs field.
+	* elf64-target.h (elf_backend_check_relocs): Define as 0 if not
+	defined.
+	(elf64_bed): Initialize check_relocs field.
+	* elf32-i386.c (elf_howto_table): Change R_386_PLT32 and
+	R_386_GOTPC to be pc_relative and pcrel_offset.
+	(elf_i386_pic_plt0_entry): Define.
+	(elf_i386_pic_plt_entry): Define.
+	(elf_i386_create_dynamic_sections): Create a .got.plt section, and
+	define _GLOBAL_OFFSET_TABLE_ at the start of it.  If creating a
+	shared library, make sure that _GLOBAL_OFFSET_TABLE_ is added as a
+	dynamic symbol.  Don't create .rel.bss if creating a shared
+	library.
+	(elf_i386_check_relocs): New function.
+	(elf_i386_adjust_dynamic_symbol): Don't make a PLT entry if the
+	symbol already has one.  When making a PLT entry, set plt_offset.
+	Don't create a copy reloc when creating a shared library.  Don't
+	set copy_offset, just set ELF_LINK_HASH_NEEDS_COPY.
+	(elf_i386_allocate_dynamic_section): Remove.
+	(elf_i386_size_dynamic_sections): Look through all the sections
+	rather than assuming we know their names.  Remove any empty reloc
+	or plt sections.  Only add a DT_DEBUG entry if not creating a
+	shared library.  Only add a DT_PLTGOT entry if there is a PLT.
+	Add a DT_TEXTREL entry if required.
+	(elf_i386_relocate_section): Permit undefined symbols when
+	creating a shared library.  Handle the special relocation types
+	specially.
+	(elf_i386_finish_dynamic_symbol): Create a PLT entry if plt_offset
+	is set.  If creating a shared library, produce a PIC PLT entry.
+	Only mark a PLT symbol as undefined if it was not defined by a
+	regular object file.  Create a GOT entry if got_offset is set.
+	Create a copy reloc if ELF_LINK_HASH_NEEDS_COPY is set.
+	(elf_i386_finish_dynamic_sections): Change the handling of
+	DT_RELSZ to simply subtract out the size of .rel.plt.  If creating
+	a shared library, produce PIC PLT code.
+	(elf_backend_check_relocs): Define.
+	* elf32-sparc.c (elf_sparc_howto_table): Change R_SPARC_GOT10,
+	R_SPARC_GOT22, and R_SPARC_PC10 to not warn about reloc overflow.
+	(elf32_sparc_create_dynamic_sections): If creating a shared
+	library, make sure that _GLOBAL_OFFSET_TABLE_ is added as a
+        dynamic symbol, and set the type to STT_OBJECT.  Likewise for
+        _PROCEDURE_LINKAGE_TABLE_.  Don't create .rel.bss if creating a
+        shared library.
+	(elf32_sparc_check_relocs): New function.
+	(elf32_sparc_adjust_dynamic_symbol): Don't make a PLT entry if the
+	symbol already has one.  When making a PLT entry, set plt_offset.
+	Don't create a copy reloc when creating a shared library.  Don't
+	set copy_offset, just set ELF_LINK_HASH_NEEDS_COPY.
+	(elf32_sparc_allocate_dynamic_section): Remove.
+	(elf32_sparc_size_dynamic_sections): Look through all the sections
+	rather than assuming we know their names.  Only add a DT_DEBUG
+	entry if not creating a shared library.  Add a DT_TEXTREL entry if
+	required.
+	(elf32_sparc_relocate_section): Permit undefined symbols when
+	creating a shared library.  Handle the special relocation types
+	specially.
+	(elf32_sparc_finish_dynamic_symbol): Create a PLT entry if plt_offset
+	is set.  Only mark a PLT symbol as undefined if it was not defined
+	by a regular object file.  Create a GOT entry if got_offset is
+	set.  Create a copy reloc if ELF_LINK_HASH_NEEDS_COPY is set.
+	(elf32_sparc_finish_dynamic_sections): Store dynobj in a local
+	variable.
+	(elf_backend_check_relocs): Define.
+
 Mon Jul 25 12:21:07 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* configure.in (pc532mach_vec): Change to pc532machaout_vec.

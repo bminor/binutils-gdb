@@ -116,6 +116,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define elf_find_section		NAME(bfd_elf,find_section)
 #define elf_bfd_link_add_symbols	NAME(bfd_elf,bfd_link_add_symbols)
 #define elf_add_dynamic_entry		NAME(bfd_elf,add_dynamic_entry)
+#define elf_link_create_dynamic_sections \
+  NAME(bfd_elf,link_create_dynamic_sections)
+#define elf_link_record_dynamic_symbol  \
+  NAME(bfd_elf,link_record_dynamic_symbol)
 #define elf_bfd_final_link		NAME(bfd_elf,bfd_final_link)
 
 #if ARCH_SIZE == 64
@@ -2931,23 +2935,19 @@ elf_slurp_reloc_table (abfd, asect, symbols)
 	      && (asect->reloc_count
 		  == d->rel_hdr.sh_size / d->rel_hdr.sh_entsize));
 
-  native_relocs = (bfd_byte *) elf_section_data (asect)->relocs;
-  if (native_relocs == NULL)
+  allocated = (PTR) malloc (d->rel_hdr.sh_size);
+  if (allocated == NULL)
     {
-      allocated = (PTR) malloc (d->rel_hdr.sh_size);
-      if (allocated == NULL)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  goto error_return;
-	}
-
-      if (bfd_seek (abfd, asect->rel_filepos, SEEK_SET) != 0
-	  || (bfd_read (allocated, 1, d->rel_hdr.sh_size, abfd)
-	      != d->rel_hdr.sh_size))
-	goto error_return;
-
-      native_relocs = (bfd_byte *) allocated;
+      bfd_set_error (bfd_error_no_memory);
+      goto error_return;
     }
+
+  if (bfd_seek (abfd, asect->rel_filepos, SEEK_SET) != 0
+      || (bfd_read (allocated, 1, d->rel_hdr.sh_size, abfd)
+	  != d->rel_hdr.sh_size))
+    goto error_return;
+
+  native_relocs = (bfd_byte *) allocated;
 
   relents = ((arelent *)
 	     bfd_alloc (abfd, asect->reloc_count * sizeof (arelent)));
@@ -3750,10 +3750,8 @@ static boolean elf_link_add_object_symbols
   PARAMS ((bfd *, struct bfd_link_info *));
 static boolean elf_link_add_archive_symbols
   PARAMS ((bfd *, struct bfd_link_info *));
-static INLINE boolean elf_link_record_dynamic_symbol
-  PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
-static boolean elf_link_create_dynamic_sections
-  PARAMS ((bfd *, struct bfd_link_info *));
+static Elf_Internal_Rela *elf_link_read_relocs
+  PARAMS ((bfd *, asection *, PTR, Elf_Internal_Rela *, boolean));
 static boolean elf_adjust_dynamic_symbol
   PARAMS ((struct elf_link_hash_entry *, PTR));
 
@@ -3947,7 +3945,7 @@ elf_link_add_archive_symbols (abfd, info)
    read the input files, since we need to have a list of all of them
    before we can determine the final sizes of the output sections.  */
 
-static INLINE boolean
+INLINE boolean
 elf_link_record_dynamic_symbol (info, h)
      struct bfd_link_info *info;
      struct elf_link_hash_entry *h;
@@ -3977,6 +3975,8 @@ elf_link_add_object_symbols (abfd, info)
 				      const Elf_Internal_Sym *,
 				      const char **, flagword *,
 				      asection **, bfd_vma *));
+  boolean (*check_relocs) PARAMS ((bfd *, struct bfd_link_info *,
+				   asection *, const Elf_Internal_Rela *));
   boolean collect;
   Elf_Internal_Shdr *hdr;
   size_t symcount;
@@ -4055,9 +4055,9 @@ elf_link_add_object_symbols (abfd, info)
 
       dynamic = true;
 
-      /* You can't use -r against a dynamic object.  There's no hope
-	 of using a dynamic object which does not exactly match the
-	 format of the output file.  */
+      /* You can't use -r against a dynamic object.  Also, there's no
+	 hope of using a dynamic object which does not exactly match
+	 the format of the output file.  */
       if (info->relocateable
 	  || info->hash->creator != abfd->xvec)
 	{
@@ -4143,7 +4143,6 @@ elf_link_add_object_symbols (abfd, info)
       strindex = bfd_add_to_strtab (abfd,
 				    elf_hash_table (info)->dynstr,
 				    name);
-      
       if (strindex == (unsigned long) -1)
 	goto error_return;
       if (! elf_add_dynamic_entry (info, DT_NEEDED, strindex))
@@ -4334,6 +4333,7 @@ elf_link_add_object_symbols (abfd, info)
 	  weaks = *sym_hash;
 	}
 
+      /* Get the alignment of a common symbol.  */
       if (sym.st_shndx == SHN_COMMON
 	  && h->root.type == bfd_link_hash_common)
 	h->root.u.c.alignment_power = bfd_log2 (sym.st_value);
@@ -4344,7 +4344,7 @@ elf_link_add_object_symbols (abfd, info)
 	  boolean dynsym;
 	  int new_flag;
 
-	  /* Remember the symbol size, type and alignment.  */
+	  /* Remember the symbol size and type.  */
 	  if (sym.st_size != 0)
 	    {
 	      /* FIXME: We should probably somehow give a warning if
@@ -4372,8 +4372,9 @@ elf_link_add_object_symbols (abfd, info)
 		new_flag = ELF_LINK_HASH_REF_REGULAR;
 	      else
 		new_flag = ELF_LINK_HASH_DEF_REGULAR;
-	      if ((old_flags & (ELF_LINK_HASH_DEF_DYNAMIC
-				| ELF_LINK_HASH_REF_DYNAMIC)) != 0)
+	      if (info->shared
+		  || (old_flags & (ELF_LINK_HASH_DEF_DYNAMIC
+				   | ELF_LINK_HASH_REF_DYNAMIC)) != 0)
 		dynsym = true;
 	    }
 	  else
@@ -4382,20 +4383,10 @@ elf_link_add_object_symbols (abfd, info)
 		new_flag = ELF_LINK_HASH_REF_DYNAMIC;
 	      else
 		new_flag = ELF_LINK_HASH_DEF_DYNAMIC;
-	      if ((old_flags & new_flag) != 0)
-		{
-		  if (! definition)
-		    new_flag = ELF_LINK_HASH_REF_DYNAMIC_MULTIPLE;
-		  else
-		    new_flag = ELF_LINK_HASH_DEF_DYNAMIC_MULTIPLE;
-		  dynsym = true;
-		}
-	      else
-		{
-		  if ((old_flags & (ELF_LINK_HASH_DEF_REGULAR
-				    | ELF_LINK_HASH_REF_REGULAR)) != 0)
-		    dynsym = true;
-		}
+	      if ((old_flags & new_flag) != 0
+		  || (old_flags & (ELF_LINK_HASH_DEF_REGULAR
+				   | ELF_LINK_HASH_REF_REGULAR)) != 0)
+		dynsym = true;
 	    }
 
 	  h->elf_link_hash_flags |= new_flag;
@@ -4466,7 +4457,65 @@ elf_link_add_object_symbols (abfd, info)
     }
 
   if (buf != NULL)
-    free (buf);
+    {
+      free (buf);
+      buf = NULL;
+    }
+
+  /* If this object is the same format as the output object, and it is
+     not a shared library, then let the backend look through the
+     relocs.
+
+     This is required to build global offset table entries and to
+     arrange for dynamic relocs.  It is not required for the
+     particular common case of linking non PIC code, even when linking
+     against shared libraries, but unfortunately there is no way of
+     knowing whether an object file has been compiled PIC or not.
+     Looking through the relocs is not particularly time consuming.
+     The problem is that we must either (1) keep the relocs in memory,
+     which causes the linker to require additional runtime memory or
+     (2) read the relocs twice from the input file, which wastes time.
+     This would be a good case for using mmap.
+
+     I have no idea how to handle linking PIC code into a file of a
+     different format.  It probably can't be done.  */
+  check_relocs = get_elf_backend_data (abfd)->check_relocs;
+  if (! dynamic
+      && abfd->xvec == info->hash->creator
+      && check_relocs != NULL)
+    {
+      asection *o;
+
+      for (o = abfd->sections; o != NULL; o = o->next)
+	{
+	  Elf_Internal_Rela *internal_relocs;
+	  boolean ok;
+
+	  if ((o->flags & SEC_RELOC) == 0
+	      || o->reloc_count == 0)
+	    continue;
+
+	  /* I believe we can ignore the relocs for any section which
+             does not form part of the final process image, such as a
+             debugging section.  */
+	  if ((o->flags & SEC_ALLOC) == 0)
+	    continue;
+
+	  internal_relocs = elf_link_read_relocs (abfd, o, (PTR) NULL,
+						  (Elf_Internal_Rela *) NULL,
+						  info->keep_memory);
+	  if (internal_relocs == NULL)
+	    goto error_return;
+
+	  ok = (*check_relocs) (abfd, info, o, internal_relocs);
+
+	  if (! info->keep_memory)
+	    free (internal_relocs);
+
+	  if (! ok)
+	    goto error_return;
+	}
+    }
 
   return true;
 
@@ -4485,7 +4534,7 @@ elf_link_add_object_symbols (abfd, info)
    are assigned to the output sections.  We work out the actual
    contents and size of these sections later.  */
 
-static boolean
+boolean
 elf_link_create_dynamic_sections (abfd, info)
      bfd *abfd;
      struct bfd_link_info *info;
@@ -4509,6 +4558,25 @@ elf_link_create_dynamic_sections (abfd, info)
 	return false;
     }
 
+  s = bfd_make_section (abfd, ".dynsym");
+  if (s == NULL
+      || ! bfd_set_section_flags (abfd, s, flags | SEC_READONLY)
+      || ! bfd_set_section_alignment (abfd, s, LOG_FILE_ALIGN))
+    return false;
+
+  /* The first .dynsym symbol is a dummy.  */
+  elf_hash_table (info)->dynsymcount = 1;
+
+  s = bfd_make_section (abfd, ".dynstr");
+  if (s == NULL
+      || ! bfd_set_section_flags (abfd, s, flags | SEC_READONLY))
+    return false;
+
+  /* Create a strtab to hold the dynamic symbol names.  */
+  elf_hash_table (info)->dynstr = bfd_new_strtab (abfd);
+  if (elf_hash_table (info)->dynstr == NULL)
+    return false;
+
   s = bfd_make_section (abfd, ".dynamic");
   if (s == NULL
       || ! bfd_set_section_flags (abfd, s, flags)
@@ -4530,24 +4598,9 @@ elf_link_create_dynamic_sections (abfd, info)
 	  (struct bfd_link_hash_entry **) &h)))
     return false;
   h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
-
-  s = bfd_make_section (abfd, ".dynsym");
-  if (s == NULL
-      || ! bfd_set_section_flags (abfd, s, flags | SEC_READONLY)
-      || ! bfd_set_section_alignment (abfd, s, LOG_FILE_ALIGN))
-    return false;
-
-  /* The first .dynsym symbol is a dummy.  */
-  elf_hash_table (info)->dynsymcount = 1;
-
-  s = bfd_make_section (abfd, ".dynstr");
-  if (s == NULL
-      || ! bfd_set_section_flags (abfd, s, flags | SEC_READONLY))
-    return false;
-
-  /* Create a strtab to hold the dynamic symbol names.  */
-  elf_hash_table (info)->dynstr = bfd_new_strtab (abfd);
-  if (elf_hash_table (info)->dynstr == NULL)
+		 
+  if (info->shared
+      && ! elf_link_record_dynamic_symbol (info, h))
     return false;
 
   s = bfd_make_section (abfd, ".hash");
@@ -4604,6 +4657,122 @@ elf_add_dynamic_entry (info, tag, val)
   return true;
 }
 
+/* Read and swap the relocs for a section.  They may have been cached.
+   If the EXTERNAL_RELOCS and INTERNAL_RELOCS arguments are not NULL,
+   they are used as buffers to read into.  They are known to be large
+   enough.  If the INTERNAL_RELOCS relocs argument is NULL, the return
+   value is allocated using either malloc or bfd_alloc, according to
+   the KEEP_MEMORY argument.  */
+
+static Elf_Internal_Rela *
+elf_link_read_relocs (abfd, o, external_relocs, internal_relocs, keep_memory)
+     bfd *abfd;
+     asection *o;
+     PTR external_relocs;
+     Elf_Internal_Rela *internal_relocs;
+     boolean keep_memory;
+{
+  Elf_Internal_Shdr *rel_hdr;
+  PTR alloc1 = NULL;
+  Elf_Internal_Rela *alloc2 = NULL;
+
+  if (elf_section_data (o)->relocs != NULL)
+    return elf_section_data (o)->relocs;
+
+  if (o->reloc_count == 0)
+    return NULL;
+
+  rel_hdr = &elf_section_data (o)->rel_hdr;
+
+  if (internal_relocs == NULL)
+    {
+      size_t size;
+
+      size = o->reloc_count * sizeof (Elf_Internal_Rela);
+      if (keep_memory)
+	internal_relocs = (Elf_Internal_Rela *) bfd_alloc (abfd, size);
+      else
+	internal_relocs = alloc2 = (Elf_Internal_Rela *) malloc (size);
+      if (internal_relocs == NULL)
+	{
+	  bfd_set_error (bfd_error_no_memory);
+	  goto error_return;
+	}
+    }
+
+  if (external_relocs == NULL)
+    {
+      alloc1 = (PTR) malloc (rel_hdr->sh_size);
+      if (alloc1 == NULL)
+	{
+	  bfd_set_error (bfd_error_no_memory);
+	  goto error_return;
+	}
+      external_relocs = alloc1;
+    }
+
+  if ((bfd_seek (abfd, rel_hdr->sh_offset, SEEK_SET) != 0)
+      || (bfd_read (external_relocs, 1, rel_hdr->sh_size, abfd)
+	  != rel_hdr->sh_size))
+    goto error_return;
+
+  /* Swap in the relocs.  For convenience, we always produce an
+     Elf_Internal_Rela array; if the relocs are Rel, we set the addend
+     to 0.  */
+  if (rel_hdr->sh_entsize == sizeof (Elf_External_Rel))
+    {
+      Elf_External_Rel *erel;
+      Elf_External_Rel *erelend;
+      Elf_Internal_Rela *irela;
+
+      erel = (Elf_External_Rel *) external_relocs;
+      erelend = erel + o->reloc_count;
+      irela = internal_relocs;
+      for (; erel < erelend; erel++, irela++)
+	{
+	  Elf_Internal_Rel irel;
+
+	  elf_swap_reloc_in (abfd, erel, &irel);
+	  irela->r_offset = irel.r_offset;
+	  irela->r_info = irel.r_info;
+	  irela->r_addend = 0;
+	}
+    }
+  else
+    {
+      Elf_External_Rela *erela;
+      Elf_External_Rela *erelaend;
+      Elf_Internal_Rela *irela;
+
+      BFD_ASSERT (rel_hdr->sh_entsize == sizeof (Elf_External_Rela));
+
+      erela = (Elf_External_Rela *) external_relocs;
+      erelaend = erela + o->reloc_count;
+      irela = internal_relocs;
+      for (; erela < erelaend; erela++, irela++)
+	elf_swap_reloca_in (abfd, erela, irela);
+    }
+
+  /* Cache the results for next time, if we can.  */
+  if (keep_memory)
+    elf_section_data (o)->relocs = internal_relocs;
+		 
+  if (alloc1 != NULL)
+    free (alloc1);
+
+  /* Don't free alloc2, since if it was allocated we are passing it
+     back (under the name of internal_relocs).  */
+
+  return internal_relocs;
+
+ error_return:
+  if (alloc1 != NULL)
+    free (alloc1);
+  if (alloc2 != NULL)
+    free (alloc2);
+  return NULL;
+}
+
 /* Record an assignment to a symbol made by a linker script.  We need
    this in case some dynamic object refers to this symbol.  */
 
@@ -4617,17 +4786,20 @@ NAME(bfd_elf,record_link_assignment) (output_bfd, info, name)
   struct elf_link_hash_entry *h;
 
   /* This is called after we have examined all the input objects.  If
-     the symbol does not exist, it merely means that no object refers
-     to it, and we can just ignore it at this point.  */
+     we are generating a shared library, we always output these
+     symbols.  Otherwise, if the symbol does not exist, it merely
+     means that no object refers to it, and we can just ignore it at
+     this point.  */
   h = elf_link_hash_lookup (elf_hash_table (info), name,
-			    false, false, false);
+			    info->shared, info->shared, false);
   if (h == NULL)
-    return true;
+    return ! info->shared;
 
   h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
 
-  if ((h->elf_link_hash_flags & (ELF_LINK_HASH_DEF_DYNAMIC
-				 | ELF_LINK_HASH_REF_DYNAMIC)) != 0
+  if (((h->elf_link_hash_flags & (ELF_LINK_HASH_DEF_DYNAMIC
+				  | ELF_LINK_HASH_REF_DYNAMIC)) != 0
+       || info->shared)
       && h->dynindx == -1)
     {
       if (! elf_link_record_dynamic_symbol (info, h))
@@ -4969,12 +5141,7 @@ elf_bfd_final_link (abfd, info)
   struct elf_backend_data *bed = get_elf_backend_data (abfd);
 
   if (info->shared)
-    {
-      fprintf (stderr,
-	       "Generating ELF shared libraries is not yet supported\n");
-      bfd_set_error (bfd_error_invalid_operation);
-      return false;
-    }
+    abfd->flags |= DYNAMIC;
 
   dynobj = elf_hash_table (info)->dynobj;
 
@@ -5936,8 +6103,6 @@ elf_link_input_bfd (finfo, input_bfd)
   /* Relocate the contents of each section.  */
   for (o = input_bfd->sections; o != NULL; o = o->next)
     {
-      Elf_Internal_Shdr *input_rel_hdr;
-
       if ((o->flags & SEC_HAS_CONTENTS) == 0)
 	continue;
 
@@ -5956,59 +6121,16 @@ elf_link_input_bfd (finfo, input_bfd)
 
       if ((o->flags & SEC_RELOC) != 0)
 	{
-	  PTR external_relocs;
+	  Elf_Internal_Rela *internal_relocs;
 
-	  /* Get the external relocs.  They may have been cached.  */
-	  external_relocs = elf_section_data (o)->relocs;
-	  if (external_relocs == NULL)
-	    {
-	      input_rel_hdr = &elf_section_data (o)->rel_hdr;
-	      if ((bfd_seek (input_bfd, input_rel_hdr->sh_offset, SEEK_SET)
-		   != 0)
-		  || (bfd_read (finfo->external_relocs, 1,
-			       input_rel_hdr->sh_size, input_bfd)
-		      != input_rel_hdr->sh_size))
-		return false;
-	      external_relocs = finfo->external_relocs;
-	    }
-
-	  /* Swap in the relocs.  For convenience, we always produce
-	     an Elf_Internal_Rela array; if the relocs are Rel, we set
-	     the addend to 0.  */
-	  if (input_rel_hdr->sh_entsize == sizeof (Elf_External_Rel))
-	    {
-	      Elf_External_Rel *erel;
-	      Elf_External_Rel *erelend;
-	      Elf_Internal_Rela *irela;
-
-	      erel = (Elf_External_Rel *) external_relocs;
-	      erelend = erel + o->reloc_count;
-	      irela = finfo->internal_relocs;
-	      for (; erel < erelend; erel++, irela++)
-		{
-		  Elf_Internal_Rel irel;
-
-		  elf_swap_reloc_in (input_bfd, erel, &irel);
-		  irela->r_offset = irel.r_offset;
-		  irela->r_info = irel.r_info;
-		  irela->r_addend = 0;
-		}
-	    }
-	  else
-	    {
-	      Elf_External_Rela *erela;
-	      Elf_External_Rela *erelaend;
-	      Elf_Internal_Rela *irela;
-
-	      BFD_ASSERT (input_rel_hdr->sh_entsize
-			  == sizeof (Elf_External_Rela));
-
-	      erela = (Elf_External_Rela *) external_relocs;
-	      erelaend = erela + o->reloc_count;
-	      irela = finfo->internal_relocs;
-	      for (; erela < erelaend; erela++, irela++)
-		elf_swap_reloca_in (input_bfd, erela, irela);
-	    }
+	  /* Get the swapped relocs.  */
+	  internal_relocs = elf_link_read_relocs (input_bfd, o,
+						  finfo->external_relocs,
+						  finfo->internal_relocs,
+						  false);
+	  if (internal_relocs == NULL
+	      && o->reloc_count > 0)
+	    return false;
 
 	  /* Relocate the section by invoking a back end routine.
 
@@ -6033,7 +6155,7 @@ elf_link_input_bfd (finfo, input_bfd)
 	  if (! (*relocate_section) (output_bfd, finfo->info,
 				     input_bfd, o,
 				     finfo->contents,
-				     finfo->internal_relocs,
+				     internal_relocs,
 				     finfo->internal_syms,
 				     finfo->sections,
 				     finfo->symstrtab->tab))
@@ -6044,11 +6166,12 @@ elf_link_input_bfd (finfo, input_bfd)
 	      Elf_Internal_Rela *irela;
 	      Elf_Internal_Rela *irelaend;
 	      struct elf_link_hash_entry **rel_hash;
+	      Elf_Internal_Shdr *input_rel_hdr;
 	      Elf_Internal_Shdr *output_rel_hdr;
 
 	      /* Adjust the reloc addresses and symbol indices.  */
 
-	      irela = finfo->internal_relocs;
+	      irela = internal_relocs;
 	      irelaend = irela + o->reloc_count;
 	      rel_hash = (elf_section_data (o->output_section)->rel_hashes
 			  + o->output_section->reloc_count);
@@ -6164,10 +6287,11 @@ elf_link_input_bfd (finfo, input_bfd)
 		}
 
 	      /* Swap out the relocs.  */
+	      input_rel_hdr = &elf_section_data (o)->rel_hdr;
 	      output_rel_hdr = &elf_section_data (o->output_section)->rel_hdr;
 	      BFD_ASSERT (output_rel_hdr->sh_entsize
 			  == input_rel_hdr->sh_entsize);
-	      irela = finfo->internal_relocs;
+	      irela = internal_relocs;
 	      irelaend = irela + o->reloc_count;
 	      if (input_rel_hdr->sh_entsize == sizeof (Elf_External_Rel))
 		{
