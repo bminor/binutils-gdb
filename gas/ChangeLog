@@ -758,8 +758,16 @@ Tue Aug 23 12:32:14 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 Tue Aug 16 01:48:20 1994  Jeff Law  (law@snake.cs.utah.edu)
 
-	* gas/config/tc-hppa.c (pa_comm): Set sy_frag for the common
-	symbol to the zero address frag.
+	* gas/config/tc-hppa.c (pa_comm): Undo last change.  Set sy_frag for
+	the common symbol to the zero address frag (the correct fix).
+
+Tue Aug 16 01:48:20 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* gas/config/tc-hppa.c (pa_comm): Undo last change.  Set sy_frag for
+	the common symbol to the zero address frag (the correct fix).
+
+	* config/tc-hppa.c (pa_comm): Set sy_resolved for the common
+        symbol.
 
 Fri Aug 12 17:51:48 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
