@@ -4224,7 +4224,8 @@ swap_out_syms (abfd, sttp, relocatable_p)
 	  type = STT_NOTYPE;
 
         /* Processor-specific types */
-        if (bed->elf_backend_get_symbol_type)
+        if (type_ptr != NULL
+	    && bed->elf_backend_get_symbol_type)
           type = (*bed->elf_backend_get_symbol_type) (&type_ptr->internal_elf_sym, type);
 
 	if (flags & BSF_SECTION_SYM)

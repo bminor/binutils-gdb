@@ -1,3 +1,7 @@
+2000-03-06  Catherine Moore  <clm@cygnus.com>
+
+	* elf.c (swap_out_syms):  Check for null type_ptr.
+
 2000-03-01  Hans-Peter Nilsson  <hp@axis.com>
 
 	* aout-target.h (MY(write_object_contents)): Remove unused
