@@ -719,6 +719,31 @@ nlm_swap_auxiliary_headers_out (abfd)
 	return false;
     }
 
+  /* Note - the CoPyRiGhT tag is emitted before the MeSsAgEs
+     tag in order to make the NW4.x and NW5.x loaders happy.  */
+
+  /* Write out the copyright header if there is one.  */
+  if (find_nonzero ((PTR) nlm_copyright_header (abfd),
+		    sizeof (Nlm_Internal_Copyright_Header)))
+    {
+      Nlm_External_Copyright_Header thdr;
+
+      memcpy (thdr.stamp, "CoPyRiGhT=", 10);
+      amt = sizeof (thdr.stamp);
+      if (bfd_bwrite ((PTR) thdr.stamp, amt, abfd) != amt)
+	return false;
+      thdr.copyrightMessageLength[0] =
+	nlm_copyright_header (abfd)->copyrightMessageLength;
+      amt = 1;
+      if (bfd_bwrite ((PTR) thdr.copyrightMessageLength, amt, abfd) != amt)
+	return false;
+      /* The copyright message is a variable length string.  */
+      amt = nlm_copyright_header (abfd)->copyrightMessageLength + 1;
+      if (bfd_bwrite ((PTR) nlm_copyright_header (abfd)->copyrightMessage,
+		     amt, abfd) != amt)
+	return false;
+    }
+
   /* Write out the extended header if there is one.  */
   if (find_nonzero ((PTR) nlm_extended_header (abfd),
 		    sizeof (Nlm_Internal_Extended_Header)))
@@ -815,28 +840,6 @@ nlm_swap_auxiliary_headers_out (abfd)
 		(bfd_byte *) thdr.reserved5);
       if (bfd_bwrite ((PTR) &thdr, (bfd_size_type) sizeof (thdr), abfd)
 	  != sizeof (thdr))
-	return false;
-    }
-
-  /* Write out the copyright header if there is one.  */
-  if (find_nonzero ((PTR) nlm_copyright_header (abfd),
-		    sizeof (Nlm_Internal_Copyright_Header)))
-    {
-      Nlm_External_Copyright_Header thdr;
-
-      memcpy (thdr.stamp, "CoPyRiGhT=", 10);
-      amt = sizeof (thdr.stamp);
-      if (bfd_bwrite ((PTR) thdr.stamp, amt, abfd) != amt)
-	return false;
-      thdr.copyrightMessageLength[0] =
-	nlm_copyright_header (abfd)->copyrightMessageLength;
-      amt = 1;
-      if (bfd_bwrite ((PTR) thdr.copyrightMessageLength, amt, abfd) != amt)
-	return false;
-      /* The copyright message is a variable length string.  */
-      amt = nlm_copyright_header (abfd)->copyrightMessageLength + 1;
-      if (bfd_bwrite ((PTR) nlm_copyright_header (abfd)->copyrightMessage,
-		     amt, abfd) != amt)
 	return false;
     }
 
