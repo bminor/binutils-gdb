@@ -1,5 +1,4 @@
 # Sanitize.in for devo.
-# $Id$
 #
 
 # Each directory to survive it's way into a release will need a file
