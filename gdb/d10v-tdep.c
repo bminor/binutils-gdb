@@ -482,9 +482,20 @@ d10v_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 static void
 d10v_store_return_value (struct type *type, char *valbuf)
 {
-  write_register_bytes (REGISTER_BYTE (RET1_REGNUM),
-			valbuf,
-			TYPE_LENGTH (type));
+  char tmp = 0;
+  /* Only char return values need to be shifted right within R0.  */
+  if (TYPE_LENGTH (type) == 1
+      && TYPE_CODE (type) == TYPE_CODE_INT)
+    {
+      write_register_bytes (REGISTER_BYTE (RET1_REGNUM),
+			    &tmp, 1);	/* zero the high byte */
+      write_register_bytes (REGISTER_BYTE (RET1_REGNUM) + 1,
+			    valbuf, 1);	/* copy the low byte */
+    }
+  else
+    write_register_bytes (REGISTER_BYTE (RET1_REGNUM),
+			  valbuf,
+			  TYPE_LENGTH (type));
 }
 
 /* Extract from an array REGBUF containing the (raw) register state
@@ -1137,25 +1148,31 @@ d10v_extract_return_value (struct type *type, char regbuf[REGISTER_BYTES],
 			   char *valbuf)
 {
   int len;
-  /*    printf("RET: TYPE=%d len=%d r%d=0x%x\n", TYPE_CODE (type), TYPE_LENGTH (type), RET1_REGNUM - R0_REGNUM, (int) extract_unsigned_integer (regbuf + REGISTER_BYTE(RET1_REGNUM), REGISTER_RAW_SIZE (RET1_REGNUM)));  */
+#if 0
+  printf("RET: TYPE=%d len=%d r%d=0x%x\n", TYPE_CODE (type), 
+	 TYPE_LENGTH (type), RET1_REGNUM - R0_REGNUM, 
+	 (int) extract_unsigned_integer (regbuf + REGISTER_BYTE(RET1_REGNUM), 
+					 REGISTER_RAW_SIZE (RET1_REGNUM)));
+#endif
+  len = TYPE_LENGTH (type);
+  if (len == 1)
     {
-      len = TYPE_LENGTH (type);
-      if (len == 1)
-	{
-	  unsigned short c = extract_unsigned_integer (regbuf + REGISTER_BYTE (RET1_REGNUM), REGISTER_RAW_SIZE (RET1_REGNUM));
-	  store_unsigned_integer (valbuf, 1, c);
-	}
-      else if ((len & 1) == 0)
-	memcpy (valbuf, regbuf + REGISTER_BYTE (RET1_REGNUM), len);
-      else
-	{
-	  /* For return values of odd size, the first byte is in the
-	     least significant part of the first register.  The
-	     remaining bytes in remaining registers. Interestingly,
-	     when such values are passed in, the last byte is in the
-	     most significant byte of that same register - wierd. */
-	  memcpy (valbuf, regbuf + REGISTER_BYTE (RET1_REGNUM) + 1, len);
-	}
+      unsigned short c;
+
+      c = extract_unsigned_integer (regbuf + REGISTER_BYTE (RET1_REGNUM), 
+				    REGISTER_RAW_SIZE (RET1_REGNUM));
+      store_unsigned_integer (valbuf, 1, c);
+    }
+  else if ((len & 1) == 0)
+    memcpy (valbuf, regbuf + REGISTER_BYTE (RET1_REGNUM), len);
+  else
+    {
+      /* For return values of odd size, the first byte is in the
+	 least significant part of the first register.  The
+	 remaining bytes in remaining registers. Interestingly,
+	 when such values are passed in, the last byte is in the
+	 most significant byte of that same register - wierd. */
+      memcpy (valbuf, regbuf + REGISTER_BYTE (RET1_REGNUM) + 1, len);
     }
 }
 
