@@ -9,5 +9,6 @@ Set archname ARCH_{target_arch}
 Echo '# From mpw-config.in'       > "{o}"mk.tmp
 
 Echo "ARCHDEFS = -d" {archname}  >> "{o}"mk.tmp
+Echo "TDEFINES = "		 >> "{o}"mk.tmp
 
 Echo '# End from mpw-config.in'  >> "{o}"mk.tmp
