@@ -1,3 +1,7 @@
+2004-01-05  Michael Snyder  <msnyder@redhat.com>
+
+	* compile.c (sim_load): Don't pass a type to bfd_openr.
+
 2003-12-16  Michael Snyder  <msnyder@redhat.com>
 
 	Patch submitted by Anil Paranjape <AnilP1@KPITCummins.com>
