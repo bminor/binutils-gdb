@@ -4295,7 +4295,7 @@ sh_elf_finish_dynamic_sections (output_bfd, info)
 #define TARGET_LITTLE_NAME	"elf32-shl"
 #define ELF_ARCH		bfd_arch_sh
 #define ELF_MACHINE_CODE	EM_SH
-#define ELF_MAXPAGESIZE		0x1
+#define ELF_MAXPAGESIZE		128
 
 #define elf_symbol_leading_char '_'
 #endif /* ELF_ARCH */
