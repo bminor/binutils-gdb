@@ -1,6 +1,6 @@
 Thu Apr 17 13:46:56 1997  Per Fogelstrom  <pefo@openbsd.org>
 
-	* configure.host (mips*-*-openbsd*): New target.
+	* configure.host (mips*-*-openbsd*): New host.
 
 Thu Apr 17 11:10:54 1997  Ian Lance Taylor  <ian@cygnus.com>
 
