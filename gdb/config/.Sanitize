@@ -56,6 +56,8 @@ hppahpux.mt
 i386aout.mt
 i386mach.mh
 i386sco.mh
+i386sol2.mh
+i386sol2.mt
 i386v.mh
 i386v.mt
 i386v32.mh
