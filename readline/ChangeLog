@@ -1,3 +1,8 @@
+Tue Jun  9 17:30:23 1992  Fred Fish  (fnf@cygnus.com)
+
+	* config/{mh-ncr3000, mh-sysv4}:  Change INSTALL to use
+	/usr/ucb/install.
+
 Mon Jun  8 23:10:07 1992  Fred Fish  (fnf@cygnus.com)
 
 	* readline.h (rl_completer_quote_characters):  Add declaration.
