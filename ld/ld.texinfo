@@ -228,6 +228,20 @@ requires them.  For example, @samp{--oformat srec} and
 @samp{--oformat=srec} are equivalent.  Unique abbreviations of the names
 of multiple-letter options are accepted.
 
+Note - if the linker is being invoked indirectly, via a compiler driver
+(eg @samp{gcc}) then all the linker command line options should be
+prefixed by @samp{-Wl,}  like this:
+
+@smallexample
+  gcc -Wl,--startgroup foo.o bar.o -Wl,--endgroup
+@end smallexample
+
+This is important, because otherwise the compiler driver program may
+silently drop the linker options, resulting in a bad link.
+
+Here is a table of the generic command line switches accepted by the GNU
+linker:
+
 @table @code
 @kindex -a@var{keyword}
 @item -a@var{keyword}
