@@ -251,47 +251,44 @@ walk_wild_section (ptr, file, callback, data)
       struct wildcard_list *sec;
 
       sec = ptr->section_list;
-      do
+      if (sec == NULL)
+	(*callback) (ptr, sec, s, file, data);
+
+      while (sec != NULL)
 	{
 	  boolean skip = false;
+	  struct name_list *list_tmp;
 
-	  if (sec != NULL)
+	  /* Don't process sections from files which were
+	     excluded.  */
+	  for (list_tmp = sec->spec.exclude_name_list;
+	       list_tmp;
+	       list_tmp = list_tmp->next)
 	    {
-	      struct name_list *list_tmp;
+	      if (wildcardp (list_tmp->name))
+		skip = fnmatch (list_tmp->name, file->filename, 0) == 0;
+	      else
+		skip = strcmp (list_tmp->name, file->filename) == 0;
 
-	      /* Don't process sections from files which were
-		 excluded.  */
-	      for (list_tmp = sec->spec.exclude_name_list;
-		   list_tmp;
-		   list_tmp = list_tmp->next)
-		{
-		  if (wildcardp (list_tmp->name))
-		    skip = fnmatch (list_tmp->name, file->filename, 0) == 0;
-		  else
-		    skip = strcmp (list_tmp->name, file->filename) == 0;
+	      if (skip)
+		break;
+	    }
 
-		  if (skip)
-		    break;
-		}
+	  if (!skip && sec->spec.name != NULL)
+	    {
+	      const char *sname = bfd_get_section_name (file->the_bfd, s);
 
-	      if (!skip && sec->spec.name != NULL)
-		{
-		  const char *sname = bfd_get_section_name (file->the_bfd, s);
-
-		  if (wildcardp (sec->spec.name))
-		    skip = fnmatch (sec->spec.name, sname, 0) != 0;
-		  else
-		    skip = strcmp (sec->spec.name, sname) != 0;
-		}
+	      if (wildcardp (sec->spec.name))
+		skip = fnmatch (sec->spec.name, sname, 0) != 0;
+	      else
+		skip = strcmp (sec->spec.name, sname) != 0;
 	    }
 
 	  if (!skip)
 	    (*callback) (ptr, sec, s, file, data);
 
-	  if (sec != NULL)
-	    sec = sec->next;
+	  sec = sec->next;
 	}
-      while (sec != NULL);
     }
 }
 

@@ -1,8 +1,12 @@
+2001-11-21  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.c (walk_wild_section): Move sec == NULL case out of loop.
+
 2001-11-20  Angela Marie Thomas <angela@redhat.com>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_finish): Use NULL instead
-        of false when calling lang_size_sections.
-	(hppaelf_layout_sections_again): Likewise.
+	of false when calling lang_size_sections.
+	* emultempl/hppaelf.em (hppaelf_layout_sections_again): Likewise.
 
 2001-11-15  Alan Modra  <amodra@bigpond.net.au>
 
@@ -56,7 +60,7 @@ Tue Nov 13 11:27:14 2001  Ross Alexander <ross.alexander@uk.neceur.com>
 
 	* configure.tgt (mips*el-*-netbsd*, mips*-*-netbsd*):
 	Add support for targets.
-	
+
 2001-11-02  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* configure.in (ALL_LINGUAS): Add "fr" and "sv"
@@ -68,7 +72,7 @@ Tue Nov 13 11:27:14 2001  Ross Alexander <ross.alexander@uk.neceur.com>
 
 	* configure.tgt (sh-*-linux): Set targ_emul, targ_extra_emuls
 	as little endian default and to support big endian.
-	
+
 2001-11-01  Chris Demetriou  <cgd@broadcom.com>
 
 	* ld.texinfo (Options): Document new option, -nostdlib.
