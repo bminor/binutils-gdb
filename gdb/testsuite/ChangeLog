@@ -1,3 +1,10 @@
+Fri Jun 24 08:15:42 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* gdb.c++/cplusfuncs.exp:  Use string_to_regexp and a regular
+	expression match in print_addr_of to avoid unintented matches.
+	* gdb.c++/virtfunc.exp:  Accept alternate ptype output of g++
+	versions up to 2.5.8.
+
 Mon Jun 20 23:54:37 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* gdb.base/list.exp:  Tweak alternate pattern for listing of an
