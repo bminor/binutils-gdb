@@ -1,3 +1,10 @@
+Mon Apr  7 16:48:22 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Substitute SHLIB_LIBS.
+	* configure: Rebuild.
+	* Makefile.in (SHLIB_LIBS): New variable.
+	($(SHLIB)): Use $(SHLIB_LIBS).
+
 Mon Apr  7 11:45:44 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* cgen-dis.c (build_dis_hash_table): Fix xmalloc size computation.
