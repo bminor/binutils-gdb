@@ -1,5 +1,8 @@
 Fri Jun 11 18:40:21 1993  Ken Raeburn  (raeburn@cygnus.com)
 
+	* mips-dis.c: No longer need to bomb out if HOST_64_BIT is
+	defined, since gdb has been fixed.
+
 	Changes from Jeff Law, law@cs.utah.edu:
 	* hppa-dis.c (print_insn_hppa): Last argument to fput_reg, 
 	fput_reg_r, fput_creg, fput_const, and fputs_filtered should
