@@ -240,6 +240,7 @@ static struct option strip_options[] =
   {"keep-symbol", required_argument, 0, 'K'},
   {"output-format", required_argument, 0, 'O'},	/* Obsolete */
   {"output-target", required_argument, 0, 'O'},
+  {"output-file", required_argument, 0, 'o'},
   {"preserve-dates", no_argument, 0, 'p'},
   {"remove-section", required_argument, 0, 'R'},
   {"strip-all", no_argument, 0, 's'},
@@ -777,7 +778,7 @@ filter_symbols (abfd, obfd, osyms, isyms, symcount)
 	   even if relocatable is false.  External users of the
 	   library containing the $idata section may reference these
 	   symbols.  */
-	  keep = 1;
+	keep = 1;
       else if ((flags & BSF_GLOBAL) != 0	/* Global symbol.  */
 	       || (flags & BSF_WEAK) != 0
 	       || bfd_is_und_section (bfd_get_section (sym))
@@ -787,6 +788,10 @@ filter_symbols (abfd, obfd, osyms, isyms, symcount)
 	keep = (strip_symbols != STRIP_DEBUG
 		&& strip_symbols != STRIP_UNNEEDED
 		&& ! convert_debugging);
+      else if (bfd_get_section (sym)->comdat)
+	/* COMDAT sections store special information in local
+	   symbols, so we cannot risk stripping any of them.  */
+	keep = 1;
       else			/* Local symbol.  */
 	keep = (strip_symbols != STRIP_UNNEEDED
 		&& (discard_locals != LOCALS_ALL
@@ -799,7 +804,7 @@ filter_symbols (abfd, obfd, osyms, isyms, symcount)
 	keep = 1;
       if (keep && is_strip_section (abfd, bfd_get_section (sym)))
 	keep = 0;
-
+            
       if (keep && (flags & BSF_GLOBAL) != 0
 	  && (weaken || is_specified_symbol (name, weaken_specific_list)))
 	{
@@ -1840,7 +1845,7 @@ strip_main (argc, argv)
   struct section_list *p;
   char *output_file = NULL;
 
-  while ((c = getopt_long (argc, argv, "b:i:I:j:K:N:s:O:d:F:L:G:R:SpgxXVvW:",
+  while ((c = getopt_long (argc, argv, "b:i:o:I:j:K:N:s:O:d:F:L:G:R:SpgxXVvW:",
 			   strip_options, (int *) 0)) != EOF)
     {
       switch (c)

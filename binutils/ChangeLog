@@ -1,3 +1,8 @@
+2001-06-22  Jocelyn Mayer  <jocelyn.mayer@netgem.com>
+
+	* objcopy.c (strip_main): Support -o or --output-file command lien
+	switch.
+
 2001-06-19  H.J. Lu <hjl@gnu.org>
 
 	* doc/Makefile.in: Regenerated.
