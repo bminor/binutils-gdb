@@ -1,3 +1,36 @@
+Fri Aug 20 01:26:52 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* config/tc-i386.c (md_pseudo_table) [OBJ_ELF]: Handle ".zero".
+
+Thu Aug 19 12:15:18 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* config/tc-sparc.c (s_local): Function moved and renamed...
+	* config/obj-elf.c (obj_elf_local): ...to here.
+	* config/tc-sparc.c (md_pseudo_table), config/obj-elf.c
+	(obj_pseudo_table): Move handling of ".local".
+
+	* tc.h (md_parse_option): Don't declare if defined as a macro.
+
+	* config/tc-i386.h (NO_RELOC) [BFD_ASSEMBLER]: Define as
+	BFD_RELOC_NONE.
+	(md_parse_option): New macro, converted from function.
+	* config/tc-i386.c (md_parse_option): Function deleted.
+	(comment_chars) [OBJ_ELF]: Include "/".
+	(line_comment_chars) [OBJ_ELF || TE_I386AIX]: Don't include "/".
+	(md_assemble): Cast 0xe9 to char explicitly, to avoid compiler
+	warning.
+	(md_assemble, md_estimate_size_before_relax, md_create_long_jump):
+	Call reloc for fix_new type, or use correct enumerator, instead of
+	always using NO_RELOC.
+	(i386_operand): Change "ifndef I386COFF" to "ifdef OBJ_AOUT" for
+	tests for valid section.
+	(md_convert_frag) [BFD_ASSEMBLER]: Compensate for frag start
+	address.
+	(md_apply_fix_1) [BFD_ASSEMBLER]: For pc-relative reloc with
+	symbol, compensate for location of reloc.
+	(reloc, BFD_RELOC_32, BFD_RELOC_32_PCREL) [!BFD_ASSEMBLER]: Define
+	to return zero.
+
 Wed Aug 18 16:51:29 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* config/obj-elf.c: Undef NO_RELOC before including aout/aout64.h.
