@@ -402,7 +402,7 @@ the baud rate, and the name of the program to run on the remote system.");
 
 /* Close out all files and local state before this target loses control. */
 
-void
+static void
 eb_close (quitting)
      int quitting;
 {

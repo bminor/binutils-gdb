@@ -287,9 +287,9 @@ mm_open (name, from_tty)
   /* Find the first whitespace character, it separates dev_name from
      prog_name.  */
   for (p = name;
-       *p != '\0' && !isspace (*p); p++)
+       p && *p && !isspace (*p); p++)
     ;
-  if (*p == '\0')
+  if (p == 0 || *p == '\0')
 erroid:
     error ("Usage : <command> <serial-device> <baud-rate> [progname]");
   dev_name = (char*)malloc (p - name + 1);
