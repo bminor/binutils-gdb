@@ -1,3 +1,13 @@
+Wed May 31 12:04:01 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* sparclite/aload.c: Use a file descriptor instead of a stdio
+	  stream for i/o with target board.
+	  Use #error if HAVE_TERMIOS is not defined.
+
+	* sparclite/{Makefile.in, configure.in}: Converted to use
+	  autoconf.
+	* sparclite/configure: New file, generated with autoconf 2.3.
+
 Sun May 28 23:10:07 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* defs.h: Include either varargs.h or stdarg.h (for va_list).
