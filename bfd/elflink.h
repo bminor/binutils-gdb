@@ -895,7 +895,6 @@ elf_link_add_object_symbols (abfd, info)
   Elf_External_Sym *buf = NULL;
   struct elf_link_hash_entry **sym_hash;
   boolean dynamic;
-  bfd_byte *dynver = NULL;
   Elf_External_Versym *extversym = NULL;
   Elf_External_Versym *ever;
   Elf_External_Dyn *dynbuf = NULL;
@@ -1023,7 +1022,7 @@ elf_link_add_object_symbols (abfd, info)
 	  Elf_Internal_Shdr *versymhdr;
 
 	  versymhdr = &elf_tdata (abfd)->dynversym_hdr;
-	  extversym = (Elf_External_Versym *) bfd_malloc (hdr->sh_size);
+	  extversym = (Elf_External_Versym *) bfd_malloc (versymhdr->sh_size);
 	  if (extversym == NULL)
 	    goto error_return;
 	  if (bfd_seek (abfd, versymhdr->sh_offset, SEEK_SET) != 0
@@ -2186,8 +2185,6 @@ elf_link_add_object_symbols (abfd, info)
     free (buf);
   if (dynbuf != NULL)
     free (dynbuf);
-  if (dynver != NULL)
-    free (dynver);
   if (extversym != NULL)
     free (extversym);
   return false;

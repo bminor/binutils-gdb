@@ -1,3 +1,9 @@
+2001-05-09  H.J. Lu  <hjl@gnu.org>
+
+	* elflink.h (elf_link_add_object_symbols): Fix a typo. Allocate
+	versymhdr->sh_size bytes for extversym instead of hdr->sh_size.
+	Remove the unused veriable `dynver'.
+
 2001-05-08  Ian Lance Taylor  <ian@zembu.com>
 
 	* coff-i386.c (coff_i386_reloc): Don't dump core if output_bfd is
