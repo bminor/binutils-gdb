@@ -1,5 +1,16 @@
 2003-06-08  Andrew Cagney  <cagney@redhat.com>
 
+	* frame.c (get_prev_frame): Remove reference to
+	frame_args_address_correct in comments.
+	* frame-base.c (default_frame_args_address): Delete code
+	conditional on FRAME_ARGS_ADDRESS_CORRECT.
+	* vax-tdep.c (vax_frame_args_address_correct): Delete.
+	(vax_frame_args_address): Merge in vax_frame_args_address_correct.
+	* config/vax/tm-vax.h (FRAME_ARGS_ADDRESS_CORRECT): Delete
+	(vax_frame_args_address_correct): Delete declaration.
+
+2003-06-08  Andrew Cagney  <cagney@redhat.com>
+
 	* gdbarch.sh (UNWIND_SP): Add.
 	* gdbarch.h, gdbarch.c: Re-generate.
 	* frame.c (frame_sp_unwind): New function.

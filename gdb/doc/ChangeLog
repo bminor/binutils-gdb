@@ -1,5 +1,10 @@
 2003-06-08  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbint.texinfo (Target Architecture Definition): Delete
+	documentation on FRAME_ARGS_ADDRESS_CORRECT.
+
+2003-06-08  Andrew Cagney  <cagney@redhat.com>
+
 	* gdbint.texinfo (Target Architecture Definition): Document
 	"unwind_sp".  Cross reference "unwind_sp" and TARGET_READ_SP.
 

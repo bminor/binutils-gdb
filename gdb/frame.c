@@ -1944,11 +1944,11 @@ get_prev_frame (struct frame_info *this_frame)
      Doing this makes it possible for the user to examine a frame that
      has an invalid frame ID.
 
-     The very old VAX frame_args_address_correct() method noted: [...]
-     For the sake of argument, suppose that the stack is somewhat
-     trashed (which is one reason that "info frame" exists).  So,
-     return 0 (indicating we don't know the address of the arglist) if
-     we don't know what frame this frame calls.  */
+     Some very old VAX code noted: [...]  For the sake of argument,
+     suppose that the stack is somewhat trashed (which is one reason
+     that "info frame" exists).  So, return 0 (indicating we don't
+     know the address of the arglist) if we don't know what frame this
+     frame calls.  */
 
   /* Link it in.  */
   this_frame->prev = prev_frame;

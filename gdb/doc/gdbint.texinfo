@@ -3233,10 +3233,6 @@ the direction of stack growth.
 
 By default, no frame based stack alignment is performed.
 
-@item FRAME_ARGS_ADDRESS_CORRECT
-@findex FRAME_ARGS_ADDRESS_CORRECT
-See @file{stack.c}.
-
 @item DEPRECATED_FRAME_CHAIN(@var{frame})
 @findex DEPRECATED_FRAME_CHAIN
 Given @var{frame}, return a pointer to the calling frame.

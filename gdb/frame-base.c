@@ -46,17 +46,7 @@ static CORE_ADDR
 default_frame_args_address (struct frame_info *next_frame, void **this_cache)
 {
   struct frame_info *this_frame = get_prev_frame (next_frame);
-  /* FRAME_ARGS_ADDRESS_CORRECT is just like FRAME_ARGS_ADDRESS except
-     that if it is unsure about the answer, it returns 0 instead of
-     guessing (this happens on the VAX and i960, for example).
-
-     On most machines, we never have to guess about the args address,
-     so FRAME_ARGS_ADDRESS{,_CORRECT} are the same.  */
-#ifdef FRAME_ARGS_ADDRESS_CORRECT
-  return FRAME_ARGS_ADDRESS_CORRECT (this_frame);
-#else
   return FRAME_ARGS_ADDRESS (this_frame);
-#endif
 }
 
 const struct frame_base default_frame_base = {

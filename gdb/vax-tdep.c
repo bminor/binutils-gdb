@@ -165,15 +165,6 @@ vax_frame_saved_pc (struct frame_info *frame)
 CORE_ADDR
 vax_frame_args_address_correct (struct frame_info *frame)
 {
-  /* Cannot find the AP register value directly from the FP value.  Must
-     find it saved in the frame called by this one, or in the AP register
-     for the innermost frame.  However, there is no way to tell the
-     difference between the innermost frame and a frame for which we
-     just don't know the frame that it called (e.g. "info frame 0x7ffec789").
-     For the sake of argument, suppose that the stack is somewhat trashed
-     (which is one reason that "info frame" exists).  So, return 0 (indicating
-     we don't know the address of the arglist) if we don't know what frame
-     this frame calls.  */
   if (get_next_frame (frame))
     return (read_memory_integer (get_frame_base (get_next_frame (frame)) + 8, 4));
 
@@ -183,13 +174,21 @@ vax_frame_args_address_correct (struct frame_info *frame)
 static CORE_ADDR
 vax_frame_args_address (struct frame_info *frame)
 {
-  /* In most of GDB, getting the args address is too important to
-     just say "I don't know".  This is sometimes wrong for functions
-     that aren't on top of the stack, but c'est la vie.  */
+  /* In most of GDB, getting the args address is too important to just
+     say "I don't know".  This is sometimes wrong for functions that
+     aren't on top of the stack, but c'est la vie.  */
   if (get_next_frame (frame))
     return (read_memory_integer (get_frame_base (get_next_frame (frame)) + 8, 4));
-
-  return (read_register (VAX_AP_REGNUM));
+  /* Cannot find the AP register value directly from the FP value.
+     Must find it saved in the frame called by this one, or in the AP
+     register for the innermost frame.  However, there is no way to
+     tell the difference between the innermost frame and a frame for
+     which we just don't know the frame that it called (e.g. "info
+     frame 0x7ffec789").  For the sake of argument, suppose that the
+     stack is somewhat trashed (which is one reason that "info frame"
+     exists).  So, return 0 (indicating we don't know the address of
+     the arglist) if we don't know what frame this frame calls.  */
+  return 0;
 }
 
 static CORE_ADDR
