@@ -60,7 +60,7 @@ static reloc_howto_type howto_table[] =
 #define BADMAG(x) I386BADMAG(x)
 #define I386 1			/* Customize coffcode.h */
 
-#define RTYPETOHOWTO(cache_ptr, dst) \
+#define RTYPE2HOWTO(cache_ptr, dst) \
 	    cache_ptr->howto = howto_table + dst.r_type;
 
 #include "coffcode.h"

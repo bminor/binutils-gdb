@@ -28,6 +28,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define BADMAG(x) ECOFFBADMAG(x)
 
+/* Can't read these relocs */
+#define RTYPE2HOWTO(a,b) ;
 /* Define NO_COFF_SYMBOLS and NO_COFF_LINENOS to avoid coffcode.h
    defining a mess of useless functions.  */
 #define	NO_COFF_SYMBOLS
@@ -53,6 +55,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define	coff_swap_lineno_in (PROTO(void,(*),(bfd *,PTR,PTR))) bfd_void
 #define coff_find_nearest_line (PROTO(boolean, (*),(bfd*,asection*,asymbol**,bfd_vma, CONST char**, CONST char**, unsigned int *))) bfd_false
 #define coff_swap_lineno_out  (PROTO(unsigned,(*),(bfd *,PTR,PTR))) bfd_void
+
 bfd_target ecoff_little_vec =
     {"ecoff-littlemips",      /* name */
 	bfd_target_coff_flavour,

@@ -20,8 +20,11 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* This port currently only handles reading object files -- no archive
-   support, no core files, and no writing.  FIXME.  */
+/* This port currently only handles reading object files, except when
+   compiled on an RS/6000 host.  -- no archive support, no core files.
+   In all cases, it does not support writing.
+
+   FIXMEmgo comments are left from Metin Ozisik's original port.  */
 
 /* Internalcoff.h and coffcode.h modify themselves based on this flag.  */
 #define RS6000COFF_C 1
@@ -35,63 +38,38 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "libcoff.h"
 
 /* The main body of code is in coffcode.h.  */
+
+/* Can't read rs6000 relocs */
+#define RTYPE2HOWTO(a,b)
 #include "coffcode.h"
 
+#define	coff_archive_p		bfd_generic_archive_p
+#define	coff_mkarchive		_bfd_generic_mkarchive
 
-#if 0
-/* These are not yet ready for prime time.  */
-#define coff_core_file_matches_executable_p  \
-				     rs6000coff_core_file_matches_executable_p
-#define	coff_get_section_contents	rs6000coff_get_section_contents
-#define coff_openr_next_archived_file	rs6000coff_openr_next_archived_file
-#define coff_write_armap		rs6000coff_write_armap
-#define	coff_stat_arch_elt		rs6000coff_stat_arch_elt
-#define	coff_snarf_ar_hdr		rs6000coff_snarf_ar_hdr
-#define	coff_mkarchive			rs6000coff_mkarchive
+#ifdef ARCHIVES_PLEASE
 
-static bfd_target *rs6000coff_archive_p ();
-static bfd_target *rs6000coff_core_p ();
-static bfd_target *rs6000coff_object_p ();
-static bfd_target *rs6000coff_real_object_p ();
-#endif
-
-bfd_target rs6000coff_vec =
-{
-  "coff-rs6000",		/* name */
-  bfd_target_coff_flavour,	
-  true,				/* data byte order is big */
-  true,				/* header byte order is big */
-
-  (HAS_RELOC | EXEC_P |		/* object flags */
-   HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT),
-
-  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
-  '/',				/* ar_pad_char */
-  15,				/* ar_max_namelen??? FIXMEmgo */
-  3,				/* default alignment power */
-
-  _do_getb64, _do_putb64, _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* data */
-  _do_getb64, _do_putb64, _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* hdrs */
-
-  {_bfd_dummy_target, coff_object_p, 	/* bfd_check_format */
-     bfd_generic_archive_p, _bfd_dummy_target},
-  {bfd_false, coff_mkobject, _bfd_generic_mkarchive, /* bfd_set_format */
-     bfd_false},
-  {bfd_false, coff_write_object_contents,	/* bfd_write_contents */
-     _bfd_write_archive_contents, bfd_false},
-
-  JUMP_TABLE(coff),
-  COFF_SWAP_TABLE
-
-};
-
-
-#if 0	/* we don't have include file for this yet */
 /* ------------------------------------------------------------------------ */
 /*	Support for archive file stuff..				    */
-/*	Stolen from Damon A. Parmazel's `bfd' portation.		    */
+/*	Stolen from Damon A. Permezel's `bfd' portation.		    */
 /* ------------------------------------------------------------------------ */
+
+#undef	coff_openr_next_archived_file
+#define coff_openr_next_archived_file	rs6000coff_openr_next_archived_file
+
+#undef	coff_write_armap
+#define coff_write_armap		rs6000coff_write_armap
+
+#undef	coff_stat_arch_elt
+#define	coff_stat_arch_elt		rs6000coff_stat_arch_elt
+
+#undef	coff_snarf_ar_hdr
+#define	coff_snarf_ar_hdr		rs6000coff_snarf_ar_hdr
+
+#undef	coff_mkarchive
+#define	coff_mkarchive			rs6000coff_mkarchive
+
+#undef	coff_archive_p
+#define	coff_archive_p			rs6000coff_archive_p
 
 #include "/usr/include/ar.h"		/* <ar.h> doesn't do it.	*/
 
@@ -179,6 +157,45 @@ rs6000coff_snarf_ar_hdr (abfd)
 	return ared;
 }
 
+/* Stolen directly from archive.c, except it calls rs6000coff_snarf_ar_hdr.
+   Why wasn't this part of the transfer vector?  */
+
+bfd *
+rs6000coff_get_elt_at_filepos (archive, filepos)
+     bfd *archive;
+     file_ptr filepos;
+{
+  struct areltdata *new_areldata;
+  bfd *n_nfd;
+
+  n_nfd = look_for_bfd_in_cache (archive, filepos);
+  if (n_nfd) return n_nfd;
+
+  if (0 > bfd_seek (archive, filepos, SEEK_SET)) {
+    bfd_error = system_call_error;
+    return NULL;
+  }
+
+  if ((new_areldata = rs6000coff_snarf_ar_hdr (archive)) == NULL) return NULL;
+  
+  n_nfd = _bfd_create_empty_archive_element_shell (archive);
+  if (n_nfd == NULL) {
+    bfd_release (archive, (PTR)new_areldata);
+    return NULL;
+  }
+  n_nfd->origin = bfd_tell (archive);
+  n_nfd->arelt_data = (PTR) new_areldata;
+  n_nfd->filename = new_areldata->filename;
+
+  if (add_bfd_to_cache (archive, filepos, n_nfd))
+    return n_nfd;
+
+  /* huh? */
+  bfd_release (archive, (PTR)n_nfd);
+  bfd_release (archive, (PTR)new_areldata);
+  return NULL;
+}
+
 /*
  * xcoff_openr_next_archived_file -	xcoff has nxt/prv seek addrs.
  */
@@ -193,7 +210,7 @@ rs6000coff_openr_next_archived_file(archive, last_file)
 	else
 		filestart = atol(arch_hdr(last_file)->ar_nxtmem);
 
-	return get_elt_at_filepos (archive, filestart);
+	return rs6000coff_get_elt_at_filepos (archive, filestart);
 }
 
 
@@ -204,7 +221,7 @@ rs6000coff_archive_p (abfd)
 	struct fl_hdr hdr;
 	register struct artdata *art;
 
-	if (bfd_read (&hdr, 1, sizeof (hdr), abfd) != sizeof (hdr)) {
+	if (bfd_read (&hdr, sizeof (hdr), 1, abfd) != sizeof (hdr)) {
 		bfd_error = wrong_format;
 		return 0;
 	}
@@ -226,14 +243,11 @@ rs6000coff_archive_p (abfd)
 	art->first_file_filepos = atoi(hdr.fl_fstmoff);
 	*(struct fl_hdr *) (1 + art) = hdr;
 
-	/*
-	 * slurp in the member table, which I thing is the armap equivalent.
+	/* Someday...
+	 * slurp in the member table, which I think is the armap equivalent.
 	xcoff_slurp_armap(abfd);
 	 */
   
-	if (abfd->obj_arch == bfd_arch_unknown)	/* FIXME!!!	*/
-		abfd->obj_arch = bfd_arch_rs6000;
-
 	return abfd->xvec;
 }
 
@@ -262,6 +276,7 @@ rs6000coff_stat_arch_elt(abfd, buf)
 	foo (ar_gid, st_gid, 10);
 	foo (ar_mode, st_mode, 8);
 	foo (ar_size, st_size, 10);
+#undef foo
 
 	return 0;
 }
@@ -275,14 +290,28 @@ rs6000coff_write_armap (arch, elength, map, orl_count, stridx)
 	bfd_error = invalid_operation;
 	return false;
 }
+#endif	/* ARCHIVES_PLEASE */
+
+#ifdef	COREFILES_PLEASE
+
+#undef	coff_core_file_matches_executable_p
+#define coff_core_file_matches_executable_p  \
+				     rs6000coff_core_file_matches_executable_p
+
+#undef	coff_get_section_contents
+#define	coff_get_section_contents	rs6000coff_get_section_contents
 
 
-#endif	/* if 0 */
-
-#if 0	/* not sure if this will work on all hosts yet! */
+/* AOUTHDR is defined by the above.  We need another defn of it, from the
+   system include files.  Punt the old one and get us a new name for the
+   typedef in the system include files.  */
 #ifdef AOUTHDR
 #undef AOUTHDR
 #endif
+#define	AOUTHDR	second_AOUTHDR
+
+#undef	SCNHDR
+
 
 /* ------------------------------------------------------------------------ */
 /*	Support for core file stuff.. 					    */
@@ -293,9 +322,9 @@ rs6000coff_write_armap (arch, elength, map, orl_count, stridx)
 #include <sys/core.h>
 
 
-/* Number of special purpose registers supported bygdb. This value should match
-   `tm.h' in gdb directory. Clean this mess up and use the macros in sys/reg.h.
-   FIXMEmgo. */
+/* Number of special purpose registers supported by gdb.  This value
+   should match `tm.h' in gdb directory.  Clean this mess up and use
+   the macros in sys/reg.h.  FIXMEmgo. */
 
 #define	NUM_OF_SPEC_REGS  7
 #define	STACK_END_ADDR 0x2ff80000
@@ -469,7 +498,7 @@ rs6000coff_get_section_contents (abfd, section, location, offset, count)
 
       /* read GPR's into the location. */
       if ( bfd_seek(abfd, section->filepos + regoffset, SEEK_SET) == -1
-	|| bfd_read(location, 1, sizeof (mstatus.gpr), abfd) != sizeof (mstatus.gpr))
+	|| bfd_read(location, sizeof (mstatus.gpr), 1, abfd) != sizeof (mstatus.gpr))
 	return (false); /* on error */
 
       /* increment location to the beginning of special registers in the section,
@@ -480,7 +509,7 @@ rs6000coff_get_section_contents (abfd, section, location, offset, count)
       regoffset = (char*)&mstatus.iar - (char*)&mstatus;
 
       if ( bfd_seek(abfd, section->filepos + regoffset, SEEK_SET) == -1
-	|| bfd_read(location, 1, 4 * NUM_OF_SPEC_REGS, abfd) != 
+	|| bfd_read(location, 4 * NUM_OF_SPEC_REGS, 1, abfd) != 
 							4 * NUM_OF_SPEC_REGS)
 	return (false); /* on error */
       
@@ -495,4 +524,36 @@ rs6000coff_get_section_contents (abfd, section, location, offset, count)
       			(abfd, section, location, offset, count);
 }
 
-#endif /* if 0 - for CORE */
+#endif /* COREFILES_PLEASE */
+
+/* The transfer vector that leads the outside world to all of the above. */
+
+bfd_target rs6000coff_vec =
+{
+  "aixcoff-rs6000",		/* name */
+  bfd_target_coff_flavour,	
+  true,				/* data byte order is big */
+  true,				/* header byte order is big */
+
+  (HAS_RELOC | EXEC_P |		/* object flags */
+   HAS_LINENO | HAS_DEBUG |
+   HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT),
+
+  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
+  '/',				/* ar_pad_char */
+  15,				/* ar_max_namelen??? FIXMEmgo */
+  3,				/* default alignment power */
+
+  _do_getb64, _do_putb64, _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* data */
+  _do_getb64, _do_putb64, _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* hdrs */
+
+  {_bfd_dummy_target, coff_object_p, 	/* bfd_check_format */
+     coff_archive_p, _bfd_dummy_target},
+  {bfd_false, coff_mkobject, coff_mkarchive, /* bfd_set_format */
+     bfd_false},
+  {bfd_false, coff_write_object_contents,	/* bfd_write_contents */
+     _bfd_write_archive_contents, bfd_false},
+
+  JUMP_TABLE(coff),
+  COFF_SWAP_TABLE
+};
