@@ -1,5 +1,7 @@
 Tue Oct 12 03:33:26 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
+	* messages.c (as_fatal): Use myname when printing messages.
+
 	* config/tc-i960.c (md_begin): Use null pointer, not empty string,
 	as initial "return" value in case hashing isn't needed.
 
