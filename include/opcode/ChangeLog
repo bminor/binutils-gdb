@@ -1,3 +1,17 @@
+Fri Mar 14 15:22:01 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* sparc.h: Include <ansidecl.h>.  Update function declarations to
+	use prototypes, and to use const when appropriate.
+
+Thu Mar  6 14:18:30 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10300.h (MN10300_OPERAND_RELAX): Define.
+
+Mon Feb 24 15:15:56 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* d10v.h: Change pre_defined_registers to 
+	d10v_predefined_registers and reg_name_cnt to d10v_reg_name_cnt.
+
 Sat Feb 22 21:25:00 1997  Dawn Perchik  <dawn@cygnus.com>
 
 	* mips.h: Add macros for cop0, cop1 cop2 and cop3.
