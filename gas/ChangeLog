@@ -1,3 +1,9 @@
+Fri Oct 18 14:06:26 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/obj-aout.c (obj_pseudo_table): Use obj_aout_type for
+	.type pseudo-op.
+	(obj_aout_type): New static function.
+
 Thu Oct 17 17:55:17 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in ($(OBJS)): Depend upon libiberty.h.
