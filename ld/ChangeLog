@@ -6,6 +6,13 @@ Tue Apr  9 14:22:15 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 Tue Apr  9 12:18:57 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* lexsup.c (ld_options): New static array.
+	(parse_args): Build shortopts and longopts from ld_options array.
+	(help): New static function.
+	* ldver.h (help): Don't declare.
+	* ldver.c (ldversion): Reindent.
+	(help): Remove.
+
 	* ld.texinfo, ld.1: Mention -E as a synonym for -export-dynamic.
 
 Mon Apr  8 11:56:23 1996  Ian Lance Taylor  <ian@cygnus.com>

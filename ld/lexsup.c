@@ -46,28 +46,13 @@ unsigned long strtoul ();
 
 static void set_default_dirlist PARAMS ((char *dirlist_ptr));
 static void set_section_start PARAMS ((char *sect, char *valstr));
+static void help PARAMS ((void));
 
 /* Non-zero if we are processing a --defsym from the command line.  */
 int parsing_defsym = 0;
 
-void
-parse_args (argc, argv)
-     int argc;
-     char **argv;
-{
-  int i;
-  int ingroup = 0;
-  char *default_dirlist = NULL;
-
-  /* Starting the short option string with '-' is for programs that
-     expect options and other ARGV-elements in any order and that care about
-     the ordering of the two.  We describe each non-option ARGV-element
-     as if it were the argument of an option with character code 1.  */
-
-  const char *shortopts =
-    "-a:A:b:c:de:EF::G:gh:iL:l:Mm:NnO:o:R:rSsT:tu:VvXxY:y:z:()";
-
-  /* 150 isn't special; it's just an arbitrary non-ASCII char value.  */
+/* Codes used for the long options with no short synonyms.  150 isn't
+   special; it's just an arbitrary non-ASCII char value.  */
 
 #define OPTION_ASSERT			150
 #define OPTION_CALL_SHARED		(OPTION_ASSERT + 1)
@@ -110,66 +95,249 @@ parse_args (argc, argv)
 #define OPTION_WHOLE_ARCHIVE		(OPTION_SPLIT_BY_FILE + 1)
 #define OPTION_WRAP			(OPTION_WHOLE_ARCHIVE + 1)
 
-  static struct option longopts[] = {
-  /* Sorted alphabeticaly, except for the PE options grouped at the end. */
-    {"assert", required_argument, NULL, OPTION_ASSERT},
-    {"Bdynamic", no_argument, NULL, OPTION_CALL_SHARED},
-    {"Bshareable", no_argument, NULL, OPTION_SHARED }, /* FreeBSD.  */
-    {"Bstatic", no_argument, NULL, OPTION_NON_SHARED},
-    {"Bsymbolic", no_argument, NULL, OPTION_SYMBOLIC},
-    {"call_shared", no_argument, NULL, OPTION_CALL_SHARED},
-    {"dc", no_argument, NULL, 'd'},
-    {"defsym", required_argument, NULL, OPTION_DEFSYM},
-    {"dll-verbose", no_argument, NULL, OPTION_VERSION}, /* Linux.  */
-    {"dn", no_argument, NULL, OPTION_NON_SHARED},
-    {"dp", no_argument, NULL, 'd'},
-    {"dy", no_argument, NULL, OPTION_CALL_SHARED},
-    {"dynamic-linker", required_argument, NULL, OPTION_DYNAMIC_LINKER},
-    {"EB", no_argument, NULL, OPTION_EB},
-    {"EL", no_argument, NULL, OPTION_EL},
-    {"embedded-relocs", no_argument, NULL, OPTION_EMBEDDED_RELOCS},
-    {"end-group", no_argument, NULL, ')'},
-    {"export-dynamic", no_argument, NULL, OPTION_EXPORT_DYNAMIC},
-    {"format", required_argument, NULL, 'b'},
-    {"help", no_argument, NULL, OPTION_HELP},
-    {"Map", required_argument, NULL, OPTION_MAP},
-    {"no-keep-memory", no_argument, NULL, OPTION_NO_KEEP_MEMORY},
-    {"no-whole-archive", no_argument, NULL, OPTION_NO_WHOLE_ARCHIVE},
-    {"noinhibit-exec", no_argument, NULL, OPTION_NOINHIBIT_EXEC},
-    {"noinhibit_exec", no_argument, NULL, OPTION_NOINHIBIT_EXEC},
-    {"non_shared", no_argument, NULL, OPTION_NON_SHARED},
-    {"oformat", required_argument, NULL, OPTION_OFORMAT},
-    {"Qy", no_argument, NULL, OPTION_IGNORE},
-    {"qmagic", no_argument, NULL, OPTION_IGNORE}, /* Linux compatibility.  */
-    {"relax", no_argument, NULL, OPTION_RELAX},
-    {"retain-symbols-file", required_argument, NULL, OPTION_RETAIN_SYMBOLS_FILE},
-    {"rpath", required_argument, NULL, OPTION_RPATH},
-    {"rpath-link", required_argument, NULL, OPTION_RPATH_LINK},
-    {"shared", no_argument, NULL, OPTION_SHARED},
-    {"soname", required_argument, NULL, OPTION_SONAME},
-    {"sort-common", no_argument, NULL, OPTION_SORT_COMMON},
-    {"sort_common", no_argument, NULL, OPTION_SORT_COMMON},
-    {"start-group", no_argument, NULL, '('},
-    {"stats", no_argument, NULL, OPTION_STATS},
-    {"static", no_argument, NULL, OPTION_NON_SHARED},
-    {"Tbss", required_argument, NULL, OPTION_TBSS},
-    {"Tdata", required_argument, NULL, OPTION_TDATA},
-    {"Ttext", required_argument, NULL, OPTION_TTEXT},
-    {"traditional-format", no_argument, NULL, OPTION_TRADITIONAL_FORMAT},
-    {"Ur", no_argument, NULL, OPTION_UR},
-    {"verbose", no_argument, NULL, OPTION_VERBOSE},
-    {"version", no_argument, NULL, OPTION_VERSION},
-    {"warn-common", no_argument, NULL, OPTION_WARN_COMMON},
-    {"warn-constructors", no_argument, NULL, OPTION_WARN_CONSTRUCTORS},
-    {"warn-multiple-gp", no_argument, NULL, OPTION_WARN_MULTIPLE_GP},
-    {"warn-once", no_argument, NULL, OPTION_WARN_ONCE},
-    {"split-by-reloc", required_argument, NULL, OPTION_SPLIT_BY_RELOC},
-    {"split-by-file", no_argument, NULL, OPTION_SPLIT_BY_FILE},
-    {"whole-archive", no_argument, NULL, OPTION_WHOLE_ARCHIVE},
-    {"wrap", required_argument, NULL, OPTION_WRAP},
+/* The long options.  This structure is used for both the option
+   parsing and the help text.  */
 
-    {NULL, no_argument, NULL, 0}
-  };
+struct ld_option
+{
+  /* The long option information.  */
+  struct option opt;
+  /* The short option with the same meaning ('\0' if none).  */
+  char shortopt;
+  /* The name of the argument (NULL if none).  */
+  const char *arg;
+  /* The documentation string.  If this is NULL, this is a synonym for
+     the previous option.  */
+  const char *doc;
+  enum
+    {
+      /* Use one dash before long option name.  */
+      ONE_DASH,
+      /* Use two dashes before long option name.  */
+      TWO_DASHES,
+      /* Don't mention this option in --help output.  */
+      NO_HELP
+    } control;
+};
+
+static const struct ld_option ld_options[] =
+{
+  { {NULL, required_argument, NULL, '\0'},
+      'a', "KEYWORD", "Shared library control for HP/UX compatibility",
+      ONE_DASH },
+  { {"architecture", required_argument, NULL, 'A'},
+      'A', "ARCH", "Set architecture" , TWO_DASHES },
+  { {"format", required_argument, NULL, 'b'},
+      'b', "TARGET", "Specify target for following input files", TWO_DASHES },
+  { {"mri-script", required_argument, NULL, 'c'},
+      'c', "FILE", "Read MRI format linker script", TWO_DASHES },
+  { {"dc", no_argument, NULL, 'd'},
+      'd', NULL, "Force common symbols to be defined", ONE_DASH },
+  { {"dp", no_argument, NULL, 'd'},
+      '\0', NULL, NULL, ONE_DASH },
+  { {"entry", required_argument, NULL, 'e'},
+      'e', "ADDRESS", "Set start address", TWO_DASHES },
+  { {"export-dynamic", no_argument, NULL, OPTION_EXPORT_DYNAMIC},
+      'E', NULL, "Export all dynamic symbols", TWO_DASHES },
+  { {NULL, no_argument, NULL, '\0'},
+      'F', NULL, "Ignored", ONE_DASH },
+  { {"gpsize", required_argument, NULL, 'G'},
+      'G', "SIZE", "Small data size (if no size, same as --shared)",
+      TWO_DASHES },
+  { {NULL, no_argument, NULL, '\0'},
+      'g', NULL, "Ignored", ONE_DASH },
+  { {"soname", required_argument, NULL, OPTION_SONAME},
+      'h', "FILENAME", "Set internal name of shared library", ONE_DASH },
+  { {"library", required_argument, NULL, 'l'},
+      'l', "LIBNAME", "Search for library LIBNAME", TWO_DASHES },
+  { {"library-path", required_argument, NULL, 'L'},
+      'L', "DIRECTORY", "Add DIRECTORY to library search path", TWO_DASHES },
+  { {NULL, required_argument, NULL, '\0'},
+      'm', "EMULATION", "Set emulation", ONE_DASH },
+  { {"print-map", no_argument, NULL, 'M'},
+      'M', NULL, "Print map file on standard output", TWO_DASHES },
+  { {"nmagic", no_argument, NULL, 'n'},
+      'n', NULL, "Do not page align data", TWO_DASHES },
+  { {"omagic", no_argument, NULL, 'N'},
+      'N', NULL, "Do not page align data, do not make text readonly",
+      TWO_DASHES },
+  { {"output", required_argument, NULL, 'o'},
+      'o', "FILE", "Set output file name", TWO_DASHES },
+  { {NULL, required_argument, NULL, '\0'},
+      'O', NULL, "Ignored", ONE_DASH },
+  { {"relocateable", no_argument, NULL, 'r'},
+      'r', NULL, "Generate relocateable output", TWO_DASHES },
+  { {NULL, no_argument, NULL, '\0'},
+      'i', NULL, NULL, ONE_DASH },
+  { {"just-symbols", required_argument, NULL, 'R'},
+      'R', "FILE", "Just link symbols (if directory, same as --rpath)",
+      TWO_DASHES },
+  { {"strip-all", no_argument, NULL, 's'},
+      's', NULL, "Strip all symbols", TWO_DASHES },
+  { {"strip-debug", no_argument, NULL, 'S'},
+      'S', NULL, "Strip debugging symbols", TWO_DASHES },
+  { {"trace", no_argument, NULL, 't'},
+      't', NULL, "Trace file opens", TWO_DASHES },
+  { {"script", required_argument, NULL, 'T'},
+      'T', "FILE", "Read linker script", TWO_DASHES },
+  { {"undefined", required_argument, NULL, 'u'},
+      'u', "SYMBOL", "Start with undefined reference to SYMBOL", TWO_DASHES },
+  { {"version", no_argument, NULL, OPTION_VERSION},
+      'v', NULL, "Print version information", TWO_DASHES },
+  { {NULL, no_argument, NULL, '\0'},
+      'V', NULL, "Print version and emulation information", ONE_DASH },
+  { {"discard-all", no_argument, NULL, 'x'},
+      'x', NULL, "Discard all local symbols", TWO_DASHES },
+  { {"discard-locals", no_argument, NULL, 'X'},
+      'X', NULL, "Discard temporary local symbols", TWO_DASHES },
+  { {"trace-symbol", required_argument, NULL, 'y'},
+      'y', "SYMBOL", "Trace mentions of SYMBOL", TWO_DASHES },
+  { {NULL, required_argument, NULL, '\0'},
+      'Y', "PATH", "Default search path for Solaris compatibility", ONE_DASH },
+  { {NULL, required_argument, NULL, '\0'},
+      'z', "KEYWORD", "Ignored for Solaris compatibility", ONE_DASH },
+  { {"start-group", no_argument, NULL, '('},
+      '(', NULL, "Start a group", TWO_DASHES },
+  { {"end-group", no_argument, NULL, ')'},
+      ')', NULL, "End a group", TWO_DASHES },
+  { {"assert", required_argument, NULL, OPTION_ASSERT},
+      '\0', "KEYWORD", "Ignored for SunOS compatibility", ONE_DASH },
+  { {"Bdynamic", no_argument, NULL, OPTION_CALL_SHARED},
+      '\0', NULL, "Link against shared libraries", ONE_DASH },
+  { {"call_shared", no_argument, NULL, OPTION_CALL_SHARED},
+      '\0', NULL, NULL, ONE_DASH },
+  { {"dy", no_argument, NULL, OPTION_CALL_SHARED},
+      '\0', NULL, NULL, ONE_DASH },
+  { {"Bstatic", no_argument, NULL, OPTION_NON_SHARED},
+      '\0', NULL, "Do not link against shared libraries", ONE_DASH },
+  { {"dn", no_argument, NULL, OPTION_NON_SHARED},
+      '\0', NULL, NULL, ONE_DASH },
+  { {"non_shared", no_argument, NULL, OPTION_NON_SHARED},
+      '\0', NULL, NULL, ONE_DASH },
+  { {"static", no_argument, NULL, OPTION_NON_SHARED},
+      '\0', NULL, NULL, ONE_DASH },
+  { {"Bsymbolic", no_argument, NULL, OPTION_SYMBOLIC},
+      '\0', NULL, "Bind global references locally", ONE_DASH },
+  { {"defsym", required_argument, NULL, OPTION_DEFSYM},
+      '\0', "SYMBOL=EXPRESSION", "Define a symbol", TWO_DASHES },
+  { {"dynamic-linker", required_argument, NULL, OPTION_DYNAMIC_LINKER},
+      '\0', "PROGRAM", "Set the dynamic linker to use", TWO_DASHES },
+  { {"EB", no_argument, NULL, OPTION_EB},
+      '\0', NULL, "Link big-endian objects", ONE_DASH },
+  { {"EL", no_argument, NULL, OPTION_EL},
+      '\0', NULL, "Link little-endian objects", ONE_DASH },
+  { {"embedded-relocs", no_argument, NULL, OPTION_EMBEDDED_RELOCS},
+      '\0', NULL, "Generate embedded relocs", TWO_DASHES},
+  { {"help", no_argument, NULL, OPTION_HELP},
+      '\0', NULL, "Print option help", TWO_DASHES },
+  { {"Map", required_argument, NULL, OPTION_MAP},
+      '\0', "FILE", "Write a map file", ONE_DASH },
+  { {"no-keep-memory", no_argument, NULL, OPTION_NO_KEEP_MEMORY},
+      '\0', NULL, "Use less memory and more disk I/O", TWO_DASHES },
+  { {"no-whole-archive", no_argument, NULL, OPTION_NO_WHOLE_ARCHIVE},
+      '\0', NULL, "Turn off --whole-archive", TWO_DASHES },
+  { {"noinhibit-exec", no_argument, NULL, OPTION_NOINHIBIT_EXEC},
+      '\0', NULL, "Create an output file even if errors occur", TWO_DASHES },
+  { {"noinhibit_exec", no_argument, NULL, OPTION_NOINHIBIT_EXEC},
+      '\0', NULL, NULL, NO_HELP },
+  { {"oformat", required_argument, NULL, OPTION_OFORMAT},
+      '\0', "TARGET", "Specify target of output file", TWO_DASHES },
+  { {"qmagic", no_argument, NULL, OPTION_IGNORE},
+      '\0', NULL, "Ignored for Linux compatibility", ONE_DASH },
+  { {"Qy", no_argument, NULL, OPTION_IGNORE},
+      '\0', NULL, "Ignored for SVR4 compatibility", ONE_DASH },
+  { {"relax", no_argument, NULL, OPTION_RELAX},
+      '\0', NULL, "Relax branches on certain targets", TWO_DASHES },
+  { {"retain-symbols-file", required_argument, NULL,
+       OPTION_RETAIN_SYMBOLS_FILE},
+      '\0', "FILE", "Keep only symbols listed in FILE", TWO_DASHES },
+  { {"rpath", required_argument, NULL, OPTION_RPATH},
+      '\0', "PATH", "Set runtime shared library search path", ONE_DASH },
+  { {"rpath-link", required_argument, NULL, OPTION_RPATH_LINK},
+      '\0', "PATH", "Set line time shared library search path", ONE_DASH },
+  { {"shared", no_argument, NULL, OPTION_SHARED},
+      '\0', NULL, "Create a shared library", ONE_DASH },
+  { {"Bshareable", no_argument, NULL, OPTION_SHARED }, /* FreeBSD.  */
+      '\0', NULL, NULL, ONE_DASH },
+  { {"sort-common", no_argument, NULL, OPTION_SORT_COMMON},
+      '\0', NULL, "Sort common symbols by size", TWO_DASHES },
+  { {"sort_common", no_argument, NULL, OPTION_SORT_COMMON},
+      '\0', NULL, NULL, NO_HELP },
+  { {"split-by-file", no_argument, NULL, OPTION_SPLIT_BY_FILE},
+      '\0', NULL, "Split output sections for each file", TWO_DASHES },
+  { {"split-by-reloc", required_argument, NULL, OPTION_SPLIT_BY_RELOC},
+      '\0', "COUNT", "Split output sections every COUNT relocs", TWO_DASHES },
+  { {"stats", no_argument, NULL, OPTION_STATS},
+      '\0', NULL, "Print memory usage statistics", TWO_DASHES },
+  { {"traditional-format", no_argument, NULL, OPTION_TRADITIONAL_FORMAT},
+      '\0', NULL, "Use same format as native linker", TWO_DASHES },
+  { {"Tbss", required_argument, NULL, OPTION_TBSS},
+      '\0', "ADDRESS", "Set address of .bss section", ONE_DASH },
+  { {"Tdata", required_argument, NULL, OPTION_TDATA},
+      '\0', "ADDRESS", "Set address of .data section", ONE_DASH },
+  { {"Ttext", required_argument, NULL, OPTION_TTEXT},
+      '\0', "ADDRESS", "Set address of .text section", ONE_DASH },
+  { {"Ur", no_argument, NULL, OPTION_UR},
+      '\0', NULL, "Build global constructor/destructor tables", ONE_DASH },
+  { {"verbose", no_argument, NULL, OPTION_VERBOSE},
+      '\0', NULL, "Output lots of information during link", TWO_DASHES },
+  { {"dll-verbose", no_argument, NULL, OPTION_VERSION}, /* Linux.  */
+      '\0', NULL, NULL, NO_HELP },
+  { {"warn-common", no_argument, NULL, OPTION_WARN_COMMON},
+      '\0', NULL, "Warn about duplicate common symbols", TWO_DASHES },
+  { {"warn-constructors", no_argument, NULL, OPTION_WARN_CONSTRUCTORS},
+      '\0', NULL, "Warn if global constructors/destructors are seen",
+      TWO_DASHES },
+  { {"warn-multiple-gp", no_argument, NULL, OPTION_WARN_MULTIPLE_GP},
+      '\0', NULL, "Warn if the multiple GP values are used", TWO_DASHES },
+  { {"warn-once", no_argument, NULL, OPTION_WARN_ONCE},
+      '\0', NULL, "Warn only once per undefined symbol", TWO_DASHES },
+  { {"whole-archive", no_argument, NULL, OPTION_WHOLE_ARCHIVE},
+      '\0', NULL, "Include all objects from following archives", TWO_DASHES },
+  { {"wrap", required_argument, NULL, OPTION_WRAP},
+      '\0', "SYMBOL", "Use wrapper functions for SYMBOL", TWO_DASHES }
+};
+
+#define OPTION_COUNT (sizeof ld_options / sizeof ld_options[0])
+
+void
+parse_args (argc, argv)
+     int argc;
+     char **argv;
+{
+  int i, is, il;
+  int ingroup = 0;
+  char *default_dirlist = NULL;
+  char shortopts[OPTION_COUNT * 2 + 2];
+  struct option longopts[OPTION_COUNT + 1];
+
+  /* Starting the short option string with '-' is for programs that
+     expect options and other ARGV-elements in any order and that care about
+     the ordering of the two.  We describe each non-option ARGV-element
+     as if it were the argument of an option with character code 1.  */
+  shortopts[0] = '-';
+  is = 1;
+  il = 0;
+  for (i = 0; i < OPTION_COUNT; i++)
+    {
+      if (ld_options[i].shortopt != '\0')
+	{
+	  shortopts[is] = ld_options[i].shortopt;
+	  ++is;
+	  if (ld_options[i].opt.has_arg == required_argument)
+	    {
+	      shortopts[is] = ':';
+	      ++is;
+	    }
+	}
+      if (ld_options[i].opt.name != NULL)
+	{
+	  longopts[il] = ld_options[i].opt;
+	  ++il;
+	}
+    }
+  shortopts[is] = '\0';
+  longopts[il].name = NULL;
 
   /* The -G option is ambiguous on different platforms.  Sometimes it
      specifies the largest data size to put into the small data
@@ -596,3 +764,95 @@ set_section_start (sect, valstr)
   lang_section_start (sect, exp_intop (val));
 }
 
+/* Print help messages for the options.  */
+
+static void
+help ()
+{
+  int i;
+  const char **targets, **pp;
+
+  printf ("Usage: %s [options] file...\n", program_name);
+
+  printf ("Options:\n");
+  for (i = 0; i < OPTION_COUNT; i++)
+    {
+      if (ld_options[i].doc != NULL)
+	{
+	  boolean comma;
+	  int len;
+	  int j;
+
+	  printf ("  ");
+
+	  comma = false;
+	  len = 2;
+
+	  j = i;
+	  do
+	    {
+	      if (ld_options[j].shortopt != '\0'
+		  && ld_options[j].control != NO_HELP)
+		{
+		  printf ("%s-%c", comma ? ", " : "", ld_options[j].shortopt);
+		  len += (comma ? 2 : 0) + 2;
+		  if (ld_options[j].arg != NULL)
+		    {
+		      printf (" %s", ld_options[j].arg);
+		      len += 1 + strlen (ld_options[j].arg);
+		    }
+		  comma = true;
+		}
+	      ++j;
+	    }
+	  while (j < OPTION_COUNT && ld_options[j].doc == NULL);
+
+	  j = i;
+	  do
+	    {
+	      if (ld_options[j].opt.name != NULL
+		  && ld_options[j].control != NO_HELP)
+		{
+		  printf ("%s-%s%s",
+			  comma ? ", " : "",
+			  ld_options[j].control == TWO_DASHES ? "-" : "",
+			  ld_options[j].opt.name);
+		  len += ((comma ? 2 : 0)
+			  + 1
+			  + (ld_options[j].control == TWO_DASHES ? 1 : 0)
+			  + strlen (ld_options[j].opt.name));
+		  if (ld_options[j].arg != NULL)
+		    {
+		      printf (" %s", ld_options[j].arg);
+		      len += 1 + strlen (ld_options[j].arg);
+		    }
+		  comma = true;
+		}
+	      ++j;
+	    }
+	  while (j < OPTION_COUNT && ld_options[j].doc == NULL);
+
+	  if (len >= 30)
+	    {
+	      printf ("\n");
+	      len = 0;
+	    }
+
+	  for (; len < 30; len++)
+	    putchar (' ');
+
+	  printf ("%s\n", ld_options[i].doc);
+	}
+    }
+
+  printf ("%s: supported targets:", program_name);
+  targets = bfd_target_list ();
+  for (pp = targets; *pp != NULL; pp++)
+    printf (" %s", *pp);
+  free (targets);
+  printf ("\n");
+
+  printf ("%s: supported emulations: ", program_name);
+  ldemul_list_emulations (stdout);
+  printf ("\n");
+}
