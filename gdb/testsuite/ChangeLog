@@ -1,3 +1,8 @@
+2004-12-15  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.threads/linux-dp.exp: Fix output regexp to handle output
+	under NPTL when there is debugging info available for libpthread.
+
 2004-12-13  Jerome Guitton  <guitton@gnat.com>
 
 	* gdb.ada/fixed_points.c: New file.
