@@ -1,3 +1,7 @@
+2004-03-23  Daniel Jacobowitz  <drow@mvista.com>
+
+	* linux-low.c (linux_wait): Clear all_processes list also.
+
 2004-03-12  Daniel Jacobowitz  <drow@mvista.com>
 
 	* linux-low.c: Include <errno.h>.  Remove extern declaration of
