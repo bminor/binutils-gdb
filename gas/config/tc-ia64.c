@@ -9560,17 +9560,15 @@ remove_marked_resource (rs)
 	insn_group_break (1, 0, 0);
       if (rs->insn_srlz < STATE_SRLZ)
 	{
-	  int oldqp = CURR_SLOT.qp_regno;
-	  struct ia64_opcode *oldidesc = CURR_SLOT.idesc;
+	  struct slot oldslot = CURR_SLOT;
 	  /* Manually jam a srlz.i insn into the stream */
-	  CURR_SLOT.qp_regno = 0;
+	  memset (&CURR_SLOT, 0, sizeof (CURR_SLOT));
 	  CURR_SLOT.idesc = ia64_find_opcode ("srlz.i");
 	  instruction_serialization ();
 	  md.curr_slot = (md.curr_slot + 1) % NUM_SLOTS;
 	  if (++md.num_slots_in_use >= NUM_SLOTS)
 	    emit_one_bundle ();
-	  CURR_SLOT.qp_regno = oldqp;
-	  CURR_SLOT.idesc = oldidesc;
+	  CURR_SLOT = oldslot;
 	}
       insn_group_break (1, 0, 0);
       break;
@@ -9583,17 +9581,15 @@ remove_marked_resource (rs)
       if (rs->data_srlz < STATE_STOP)
 	insn_group_break (1, 0, 0);
       {
-	int oldqp = CURR_SLOT.qp_regno;
-	struct ia64_opcode *oldidesc = CURR_SLOT.idesc;
+	struct slot oldslot = CURR_SLOT;
 	/* Manually jam a srlz.d insn into the stream */
-	CURR_SLOT.qp_regno = 0;
+	memset (&CURR_SLOT, 0, sizeof (CURR_SLOT));
 	CURR_SLOT.idesc = ia64_find_opcode ("srlz.d");
 	data_serialization ();
 	md.curr_slot = (md.curr_slot + 1) % NUM_SLOTS;
 	if (++md.num_slots_in_use >= NUM_SLOTS)
 	  emit_one_bundle ();
-	CURR_SLOT.qp_regno = oldqp;
-	CURR_SLOT.idesc = oldidesc;
+	CURR_SLOT = oldslot;
       }
       break;
     case IA64_DVS_IMPLIED:
