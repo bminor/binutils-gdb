@@ -1,0 +1,56 @@
+#include "defs.h"
+#include <sys/signal.h>	/* for MAXSIG in sys/user.h */
+#include <sys/types.h>	/* for ushort in sys/dir.h */
+#include <sys/dir.h>	/* for struct direct in sys/user.h */
+#include <sys/user.h>
+
+#include <nlist.h>
+
+#if !defined (offsetof)
+#define offsetof(TYPE, MEMBER) ((unsigned long) &((TYPE *)0)->MEMBER)
+#endif
+
+/* Return the address in the core dump or inferior of register REGNO.
+   BLOCKEND is the address of the end of the user structure.  */
+
+unsigned int
+register_addr (regno, blockend)
+     int	regno;
+     int	blockend;
+{
+  static int	sysv68reg[] =
+    { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, -1, 15, 16 };
+
+  if (regno >= 0 && regno < sizeof(sysv68reg) / sizeof(sysv68reg[0]))
+    return blockend + sysv68reg[regno] * 4; 
+  else if (regno < FPC_REGNUM)
+    return offsetof (struct user, u_fpu.regs.reg[regno - FP0_REGNUM]
+  else if (regno == FPC_REGNUM)
+    return offsetof (struct user, u_fpu.regs.control);
+  else if (regno == FPS_REGNUM)
+    return offsetof (struct user, u_fpu.regs.status);
+  else if (regno == FPI_REGNUM)
+    return offsetof (struct user, u_fpu.regs.iaddr);
+  else
+    {
+      fprintf (stderr, "\
+Internal error: invalid register number %d in REGISTER_U_ADDR\n",
+	       regno);
+      return blockend;
+    }
+}
+
+CORE_ADDR kernel_u_addr;
+static struct nlist nl[] = {{ "_u", -1, }, { (char *) 0, }};
+
+/* Read the value of the u area from the kernel.  */
+void _initialize_kernel_u_addr ()
+{
+  if (nlist ("/sysV68", nl) == 0)
+    kernel_u_addr = nl[0].n_value;
+  else
+    {
+      perror ("Cannot get kernel u area address");
+      exit (1);
+    }
+}
