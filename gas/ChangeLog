@@ -1,3 +1,9 @@
+Thu Feb 15 14:48:38 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config/obj-elf.c (elf_frob_symbol): On the PowerPC, force all
+	symbols that are not function, file, or section symbols to be
+	object types.
+
 Thu Feb 15 11:20:18 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure: Set and substitute RPATH_ENVVAR.

@@ -1159,6 +1159,21 @@ elf_frob_symbol (symp, puntp)
 	as_bad ("Symbol `%s' can not be both weak and common",
 		S_GET_NAME (symp));
     }
+
+#ifdef TC_MIPS
+  /* The Irix 5 assembler appears to set the type of any common symbol
+     to STT_OBJECT.  We try to be compatible, since the Irix 5 linker
+     apparently sometimes cares.  FIXME: What about Irix 6?  */
+  if (S_IS_COMMON (symp))
+    symp->bsym->flags |= BSF_OBJECT;
+#endif
+
+#ifdef TC_PPC
+  /* Frob the PowerPC, so that the symbol always has object type
+     if it is not some other type.  VxWorks needs this.  */
+  if ((symp->bsym->flags & (BSF_FUNCTION | BSF_FILE | BSF_SECTION_SYM)) == 0)
+    symp->bsym->flags |= BSF_OBJECT;
+#endif
 }
 
 void 
