@@ -1,3 +1,9 @@
+2003-06-02  Elena Zannoni  <ezannoni@redhat.com>
+
+	* target.h (TARGET_SYMFILE_POSTREAD): Delete unused macro. 
+	* symfile.c (reread_symbols): Delete call to TARGET_SYMFILE_POSTREAD.
+	(syms_from_objfile): Ditto.
+
 2003-06-03  Andreas Schwab  <schwab@suse.de>
 
 	* m68k-tdep.c (m68k_gdbarch_init): Use set_gdbarch_print_insn ...
