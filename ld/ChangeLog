@@ -1,3 +1,9 @@
+2005-03-16  David Heine  <dlheine@tensilica.com>
+	    Bob Wilson  <bob.wilson@acm.org>
+
+	* ldlang.c (IGNORE_SECTION): Remove check for zero size.
+	(lang_check_section_addresses): Ignore zero size sections here.
+
 2005-03-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_finish): Remove

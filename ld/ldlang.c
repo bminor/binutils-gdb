@@ -3300,8 +3300,7 @@ size_input_section
   ((s->flags & SEC_NEVER_LOAD) != 0				\
    || (s->flags & SEC_ALLOC) == 0				\
    || ((s->flags & SEC_THREAD_LOCAL) != 0			\
-	&& (s->flags & SEC_LOAD) == 0)				\
-   || s->size == 0)
+	&& (s->flags & SEC_LOAD) == 0))
 
 /* Check to see if any allocated sections overlap with other allocated
    sections.  This can happen if a linker script specifies the output
@@ -3318,7 +3317,7 @@ lang_check_section_addresses (void)
       asection *os;
 
       /* Ignore sections which are not loaded or which have no contents.  */
-      if (IGNORE_SECTION (s))
+      if (IGNORE_SECTION (s) || s->size == 0)
 	continue;
 
       /* Once we reach section 's' stop our seach.  This prevents two
@@ -3332,7 +3331,7 @@ lang_check_section_addresses (void)
 	  bfd_vma os_end;
 
 	  /* Only consider loadable sections with real contents.  */
-	  if (IGNORE_SECTION (os))
+	  if (IGNORE_SECTION (os) || os->size == 0)
 	    continue;
 
 	  /* We must check the sections' LMA addresses not their
