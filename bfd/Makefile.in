@@ -480,10 +480,10 @@ install:
 	$(MAKE) subdir_do DO=install "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS); \
 	fi
 
-Makefile: Makefile.in config.status @frags@
+Makefile: Makefile.in config.status
 	$(SHELL) config.status
 
-config.status: configure configure.host config.bfd
+config.status: configure configure.host config.bfd @frags@
 	$(SHELL) config.status --recheck
 
 # Have to get rid of .dep1 here so that "$?" later includes all of $(CFILES).
