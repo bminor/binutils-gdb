@@ -1,0 +1,175 @@
+@node Assembler Internals
+@chapter Assembler Internals
+@cindex internals
+
+@menu
+* Data types::		Data types
+@end menu
+
+@node foo
+@section foo
+
+BFD_ASSEMBLER
+BFD, MANY_SECTIONS, BFD_HEADERS
+
+
+@node Data types
+@section Data types
+@cindex internals, data types
+
+@subheading Symbols
+@cindex internals, symbols
+@cindex symbols, internal
+
+... `local' symbols ... flags ...
+
+The definition for @code{struct symbol}, also known as @code{symbolS},
+is located in @file{struc-symbol.h}.  Symbol structures can contain the
+following fields:
+
+@table @code
+@item sy_value
+This is an @code{expressionS} that describes the value of the symbol.
+It might refer to another symbol; if so, its true value may not be known
+until @code{foo} is run.
+
+More generally, however, ... undefined? ... or an offset from the start
+of a frag pointed to by the @code{sy_frag} field.
+
+@item sy_resolved
+This field is non-zero if the symbol's value has been completely
+resolved.  It is used during the final pass over the symbol table.
+
+@item sy_resolving
+This field is used to detect loops while resolving the symbol's value.
+
+@item sy_used_in_reloc
+This field is non-zero if the symbol is used by a relocation entry.  If
+a local symbol is used in a relocation entry, it must be possible to
+redirect those relocations to other symbols, or this symbol cannot be
+removed from the final symbol list.
+
+@item sy_next
+@itemx sy_previous
+These pointers to other @code{symbolS} structures describe a singly or
+doubly linked list.  (If @code{SYMBOLS_NEED_BACKPOINTERS} is not
+defined, the @code{sy_previous} field will be omitted.)  These fields
+should be accessed with @code{symbol_next} and @code{symbol_previous}.
+
+@item sy_frag
+This points to the @code{fragS} that this symbol is attached to.
+
+@item sy_used
+Whether the symbol is used as an operand or in an expression.  Note: Not
+all the backends keep this information accurate; backends which use this
+bit are responsible for setting it when a symbol is used in backend
+routines.
+
+@item bsym
+If @code{BFD_ASSEMBLER} is defined, this points to the @code{asymbol}
+that will be used in writing the object file.
+
+@item sy_name_offset
+(Only used if @code{BFD_ASSEMBLER} is not defined.)
+This is the position of the symbol's name in the symbol table of the
+object file.  On some formats, this will start at position 4, with
+position 0 reserved for unnamed symbols.  This field is not used until
+@code{write_object_file} is called.
+
+@item sy_symbol
+(Only used if @code{BFD_ASSEMBLER} is not defined.)
+This is the format-specific symbol structure, as it would be written into
+the object file.
+
+@item sy_number
+(Only used if @code{BFD_ASSEMBLER} is not defined.)
+This is a 24-bit symbol number, for use in constructing relocation table
+entries.
+
+@item sy_obj
+This format-specific data is of type @code{OBJ_SYMFIELD_TYPE}.  If no
+macro by that name is defined in @file{obj-format.h}, this field is not
+defined.
+
+@item sy_tc
+This processor-specific data is of type @code{TC_SYMFIELD_TYPE}.  If no
+macro by that name is defined in @file{targ-cpu.h}, this field is not
+defined.
+
+@item TARGET_SYMBOL_FIELDS
+If this macro is defined, it defines additional fields in the symbol
+structure.  This macro is obsolete, and should be replaced when possible
+by uses of @code{OBJ_SYMFIELD_TYPE} and @code{TC_SYMFIELD_TYPE}.
+
+@end table
+
+Access with S_SET_SEGMENT, S_SET_VALUE, S_GET_VALUE, S_GET_SEGMENT,
+etc., etc.
+
+@foo Expressions
+@cindex internals, expressions
+@cindex expressions, internal
+
+Expressions are stored as a combination of operator, symbols, blah.
+
+@subheading Fixups
+@cindex internals, fixups
+@cindex fixups
+
+@subheading Frags
+@cindex internals, frags
+@cindex frags
+
+@subheading Broken Words
+@cindex internals, broken words
+@cindex broken words
+@cindex promises, promises
+
+@node What Happens?
+@section What Happens?
+
+Blah blah blah, initialization, argument parsing, file reading,
+whitespace munging, opcode parsing and lookup, operand parsing.  Now
+it's time to write the output file.
+
+In @code{BFD_ASSEMBLER} mode, processing of relocations and symbols and
+creation of the output file is initiated by calling
+@code{write_object_file}.
+
+@node Target Dependent Definitions
+@section Target Dependent Definitions
+
+@subheader Format-specific definitions
+
+@defmac obj_sec_sym_ok_for_reloc section
+(@code{BFD_ASSEMBLER} only.)
+Is it okay to use this section's section-symbol in a relocation entry?
+If not, a new internal-linkage symbol is generated and emitted if such a
+relocation entry is needed.  (Default: Always use a new symbol.)
+
+@defmac EMIT_SECTION_SYMBOLS
+(@code{BFD_ASSEMBLER} only.)
+Should section symbols be included in the symbol list if they're used in
+relocations?  Some formats can generate section-relative relocations,
+and thus don't need 
+(Default: 1.)
+
+@node Source File Summary
+@section Source File Summary
+
+The code in the @file{obj-coff} back end assumes @code{BFD_ASSEMBLER} is
+defined; the code in @file{obj-coffbfd} uses @code{BFD},
+@code{BFD_HEADERS}, and @code{MANY_SEGMENTS}, but does a lot of the file
+positioning itself.  This confusing situation arose from the history of
+the code.
+
+Originally, @file{obj-coff} was a purely non-BFD version, and
+@file{obj-coffbfd} was created to use BFD for low-level byte-swapping.
+When the @code{BFD_ASSEMBLER} conversion started, the first COFF target
+to be converted was using @file{obj-coff}, and the two files had
+diverged somewhat, and I didn't feel like first converting the support
+of that target over to use the low-level BFD interface.
+
+Currently, all COFF targets use one of the two BFD interfaces, so the
+non-BFD code can be removed.  Eventually, all should be converted to
+using one COFF back end, which uses the high-level BFD interface.
