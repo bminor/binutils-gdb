@@ -32,10 +32,6 @@ struct value;
 struct type;
 struct inferior_status;
 
-/* Target system byte order. */
-
-#define	TARGET_BYTE_ORDER BFD_ENDIAN_BIG
-
 /* By default assume we don't have to worry about software floating point.  */
 #ifndef SOFT_FLOAT
 #define SOFT_FLOAT 0

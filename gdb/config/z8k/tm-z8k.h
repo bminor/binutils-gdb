@@ -29,9 +29,6 @@
 #define TARGET_LONG_BIT 32
 #define TARGET_PTR_BIT (BIG ? 32: 16)
 
-/* Define the bit, byte, and word ordering of the machine.  */
-#define TARGET_BYTE_ORDER BFD_ENDIAN_BIG
-
 /* Offset from address of function to start of its code.
    Zero on most machines.  */
 

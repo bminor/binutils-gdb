@@ -21,8 +21,6 @@
 
 #include "regcache.h"
 
-#define TARGET_BYTE_ORDER BFD_ENDIAN_LITTLE
-
 #define NUM_REGS 66
 
 #define REGISTER_NAMES \

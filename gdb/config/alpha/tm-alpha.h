@@ -33,10 +33,6 @@ struct type;
 struct value;
 struct symbol;
 
-#if !defined (TARGET_BYTE_ORDER)
-#define TARGET_BYTE_ORDER BFD_ENDIAN_LITTLE
-#endif
-
 /* Redefine some target bit sizes from the default.  */
 
 #define TARGET_LONG_BIT 64

@@ -27,10 +27,6 @@
 
 #else /* defines needed for GDBSERVER */
 
-/* ia64 is little endian by default */
-
-#define TARGET_BYTE_ORDER BFD_ENDIAN_LITTLE
-
 /* Say how long (ordinary) registers are.  This is a piece of bogosity
    used in push_word and a few other places; REGISTER_RAW_SIZE is the
    real way to know how big a register is.  */

@@ -58,8 +58,6 @@ extern int h8300smode;
 
 extern void h8300_init_extra_frame_info ();
 
-/* Define the bit, byte, and word ordering of the machine.  */
-#define TARGET_BYTE_ORDER BFD_ENDIAN_BIG
 #undef TARGET_INT_BIT
 #define TARGET_INT_BIT  16
 #undef TARGET_LONG_BIT

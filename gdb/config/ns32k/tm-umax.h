@@ -21,10 +21,6 @@
 
 #include "regcache.h"
 
-/* This is also included by tm-ns32km3.h, as well as being used by umax.  */
-
-#define TARGET_BYTE_ORDER BFD_ENDIAN_LITTLE
-
 /* Need to get function ends by adding this to epilogue address from .bf
    record, not using x_fsize field.  */
 #define FUNCTION_EPILOGUE_SIZE 4

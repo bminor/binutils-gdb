@@ -1,5 +1,28 @@
 2002-01-28  Andrew Cagney  <ac131313@redhat.com>
 
+	* config/mips/tm-wince.h (TARGET_BYTE_ORDER): Delete.
+	* config/sparc/tm-sparc.h (TARGET_BYTE_ORDER): Delete.
+	* config/ns32k/tm-umax.h (TARGET_BYTE_ORDER): Delete.
+	* config/ia64/tm-ia64.h (TARGET_BYTE_ORDER): Delete.
+	* config/m32r/tm-m32r.h (TARGET_BYTE_ORDER): Delete.
+	* config/m68k/tm-m68k.h (TARGET_BYTE_ORDER): Delete.
+	* config/m88k/tm-m88k.h (TARGET_BYTE_ORDER): Delete.
+	* config/mn10200/tm-mn10200.h (TARGET_BYTE_ORDER): Delete.
+	* config/pa/tm-hppa.h (TARGET_BYTE_ORDER): Delete.
+	* config/sh/tm-wince.h (TARGET_BYTE_ORDER): Delete.
+	* config/v850/tm-v850.h (TARGET_BYTE_ORDER): Delete.
+	* config/vax/tm-vax.h (TARGET_BYTE_ORDER): Delete.
+	* config/z8k/tm-z8k.h (TARGET_BYTE_ORDER): Delete.
+	* config/i960/tm-i960.h (TARGET_BYTE_ORDER): Delete.
+	* config/i386/tm-i386.h (TARGET_BYTE_ORDER): Delete.
+	* config/h8500/tm-h8500.h (TARGET_BYTE_ORDER): Delete.
+	* config/h8300/tm-h8300.h (TARGET_BYTE_ORDER): Delete.
+	* config/fr30/tm-fr30.h (TARGET_BYTE_ORDER): Delete.
+	* config/d30v/tm-d30v.h (TARGET_BYTE_ORDER): Delete.
+	* config/alpha/tm-alpha.h (TARGET_BYTE_ORDER): Delete.
+
+2002-01-28  Andrew Cagney  <ac131313@redhat.com>
+
 	* arch-utils.c (TARGET_BYTE_ORDER_DEFAULT): Delete macro.
 	(target_byte_order): Initialize to BFD_ENDIAN_BIG.
 	(initialize_current_architecture): Update target_byte_order using

@@ -23,9 +23,6 @@
 /* Used by mswin.  */
 #define TARGET_M32R 1
 
-/* mvs_check TARGET_BYTE_ORDER BFD_ENDIAN_BIG */
-#define TARGET_BYTE_ORDER BFD_ENDIAN_BIG
-
 /* mvs_check REGISTER_NAMES */
 #define REGISTER_NAMES \
 { "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", \

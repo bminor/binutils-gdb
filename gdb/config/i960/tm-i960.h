@@ -38,9 +38,6 @@
 
 #define	DBX_PARM_SYMBOL_CLASS(type) ((type == N_LSYM)? LOC_LOCAL_ARG: LOC_ARG)
 
-/* Byte order is configurable, but this machine runs little-endian.  */
-#define	TARGET_BYTE_ORDER BFD_ENDIAN_LITTLE
-
 /* Offset from address of function to start of its code.
    Zero on most machines.  */
 

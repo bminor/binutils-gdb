@@ -25,9 +25,6 @@
 
 /* g++ support is not yet included.  */
 
-/* Define the bit, byte, and word ordering of the machine.  */
-#define TARGET_BYTE_ORDER BFD_ENDIAN_BIG
-
 /* We cache information about saved registers in the frame structure,
    to save us from having to re-scan function prologues every time
    a register in a non-current frame is accessed.  */

@@ -23,9 +23,6 @@
 
 /* Generic 68000 stuff, to be included by other tm-*.h files.  */
 
-/* Define the bit, byte, and word ordering of the machine.  */
-#define TARGET_BYTE_ORDER BFD_ENDIAN_BIG
-
 #define TARGET_LONG_DOUBLE_FORMAT &floatformat_m68881_ext
 
 #define TARGET_LONG_DOUBLE_BIT 96

@@ -25,10 +25,6 @@
 
 #define GDB_TARGET_IS_H8500
 
-/* Define the bit, byte, and word ordering of the machine.  */
-
-#define TARGET_BYTE_ORDER BFD_ENDIAN_BIG
-
 /* Define the sizes of integers and pointers.  */
 
 #define TARGET_INT_BIT 16

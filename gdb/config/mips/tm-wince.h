@@ -29,6 +29,5 @@
 #define SOFTWARE_SINGLE_STEP(sig, bp_p) wince_software_single_step (sig, bp_p)
 
 void wince_software_single_step (unsigned int, int);
-#define TARGET_BYTE_ORDER BFD_ENDIAN_LITTLE
 
 #endif /* TM_WINCE_H */
