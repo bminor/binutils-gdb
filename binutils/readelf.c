@@ -185,7 +185,7 @@ static void               dynamic_segment_parisc_val  PARAMS ((Elf_Internal_Dyn 
 static int                process_dynamic_segment     PARAMS ((FILE *));
 static int                process_symbol_table        PARAMS ((FILE *));
 static int                process_section_contents    PARAMS ((FILE *));
-static void               process_file                PARAMS ((char *));
+static int                process_file                PARAMS ((char *));
 static int                process_relocs              PARAMS ((FILE *));
 static int                process_version_sections    PARAMS ((FILE *));
 static char *             get_ver_flags               PARAMS ((unsigned int));
@@ -8734,7 +8734,7 @@ get_file_header (file)
   return 1;
 }
 
-static void
+static int
 process_file (file_name)
      char * file_name;
 {
@@ -8745,21 +8745,21 @@ process_file (file_name)
   if (stat (file_name, & statbuf) < 0)
     {
       error (_("Cannot stat input file %s.\n"), file_name);
-      return;
+      return 1;
     }
 
   file = fopen (file_name, "rb");
   if (file == NULL)
     {
       error (_("Input file %s not found.\n"), file_name);
-      return;
+      return 1;
     }
 
   if (! get_file_header (file))
     {
       error (_("%s: Failed to read file header\n"), file_name);
       fclose (file);
-      return;
+      return 1;
     }
 
   /* Initialise per file variables.  */
@@ -8776,7 +8776,7 @@ process_file (file_name)
   if (! process_file_header ())
     {
       fclose (file);
-      return;
+      return 1;
     }
 
   process_section_headers (file);
@@ -8834,6 +8834,8 @@ process_file (file_name)
       free (dynamic_syminfo);
       dynamic_syminfo = NULL;
     }
+
+  return 0;
 }
 
 #ifdef SUPPORT_DISASSEMBLY
@@ -8860,6 +8862,8 @@ main (argc, argv)
      int     argc;
      char ** argv;
 {
+  int err;
+
 #if defined (HAVE_SETLOCALE) && defined (HAVE_LC_MESSAGES)
   setlocale (LC_MESSAGES, "");
 #endif
@@ -8871,11 +8875,12 @@ main (argc, argv)
   if (optind < (argc - 1))
     show_name = 1;
 
+  err = 0;
   while (optind < argc)
-    process_file (argv [optind ++]);
+    err |= process_file (argv [optind ++]);
 
   if (dump_sects != NULL)
     free (dump_sects);
 
-  return 0;
+  return err;
 }

@@ -1,3 +1,8 @@
+2001-08-07  H.J. Lu  <hjl@gnu.org>
+
+	* readelf.c (process_file): Return 0 if OK, otherwise return 1.
+	(main): Return process_file ().
+
 2001-08-05  Philip Blundell  <philb@gnu.org>
 
 	* doc/binutils.texi: Use "Thumb" not "THUMB".
