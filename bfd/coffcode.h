@@ -396,8 +396,8 @@ DEFUN(styp_to_sec_flags, (styp_flags),
     return(sec_flags);
 }
 
-#define	get_index(symbol)	((int) (symbol)->value)
-#define	set_index(symbol, idx)	((symbol)->value = (idx))
+#define	get_index(symbol)	((int) (symbol)->udata)
+#define	set_index(symbol, idx)	((symbol)->udata =(PTR) (idx))
 
 /*  **********************************************************************
 Here are all the routines for swapping the structures seen in the
@@ -1611,9 +1611,25 @@ unsigned int written)
 
     count++;
     while (lineno[count].line_number) {
+#if 0
+/* 13 april 92. sac 
+I've been told this, but still need proof:
+> The second bug is also in `bfd/coffcode.h'.  This bug causes the linker to screw
+> up the pc-relocations for all the line numbers in COFF code.  This bug isn't
+> only specific to A29K implementations, but affects all systems using COFF
+> format binaries.  Note that in COFF object files, the line number core offsets
+> output by the assembler are relative to the start of each procedure, not
+> to the start of the .text section.  This patch relocates the line numbers
+> relative to the `native->u.syment.n_value' instead of the section virtual
+> address.  modular!olson@cs.arizona.edu (Jon Olson)
+*/
+       lineno[count].u.offset += native->u.syment.n_value;
+
+#else
       lineno[count].u.offset +=
 	symbol->symbol.section->output_section->vma +
 	  symbol->symbol.section->output_offset;
+#endif
       count++;
     }
     symbol->done_lineno = true;
@@ -2217,7 +2233,7 @@ DEFUN(coff_write_object_contents,(abfd),
 	}
       if (current->reloc_count) {
 	  current->rel_filepos = reloc_base;
-	  reloc_base += current->reloc_count * sizeof(struct internal_reloc);
+	  reloc_base += current->reloc_count * RELSZ;
 	}
       else {
 	  current->rel_filepos = 0;
