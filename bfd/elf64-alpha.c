@@ -1,5 +1,5 @@
 /* Alpha specific support for 64-bit ELF
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
    Contributed by Richard Henderson <rth@tamu.edu>.
 
@@ -2741,7 +2741,9 @@ elf64_alpha_output_extsym (h, data)
 
   if (h->root.indx == -2)
     strip = FALSE;
-  else if ((h->root.def_dynamic || h->root.ref_dynamic)
+  else if ((h->root.def_dynamic
+	    || h->root.ref_dynamic
+	    || h->root.root.type == bfd_link_hash_new)
 	   && !h->root.def_regular
 	   && !h->root.ref_regular)
     strip = TRUE;

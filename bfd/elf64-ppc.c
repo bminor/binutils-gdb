@@ -4066,34 +4066,7 @@ ppc64_elf_check_directives (bfd *abfd ATTRIBUTE_UNUSED,
      undef_weak.  */
   if (htab->twiddled_syms)
     {
-      struct bfd_link_hash_entry **pun;
-
-      pun = &htab->elf.root.undefs;
-      while (*pun != NULL)
-	{
-	  struct bfd_link_hash_entry *h = *pun;
-
-	  if (h->type != bfd_link_hash_undefined
-	      && h->type != bfd_link_hash_common)
-	    {
-	      *pun = h->u.undef.next;
-	      h->u.undef.next = NULL;
-	      if (h == htab->elf.root.undefs_tail)
-		{
-		  if (pun == &htab->elf.root.undefs)
-		    htab->elf.root.undefs_tail = NULL;
-		  else
-		    /* pun points at an u.undef.next field.  Go back to
-		       the start of the link_hash_entry.  */
-		    htab->elf.root.undefs_tail = (struct bfd_link_hash_entry *)
-		      ((char *) pun - ((char *) &h->u.undef.next - (char *) h));
-		  break;
-		}
-	    }
-	  else
-	    pun = &h->u.undef.next;
-	}
-
+      bfd_link_repair_undef_list (&htab->elf.root);
       htab->twiddled_syms = 0;
     }
   return TRUE;

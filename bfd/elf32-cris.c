@@ -3130,6 +3130,7 @@ elf_cris_discard_excess_program_dynamics (h, inf)
 	 introduce new problems.  Of course we don't do this if we're
 	 exporting all dynamic symbols.  */
       if (! info->export_dynamic
+	  && h->root.dynindx != -1
 	  && !h->root.def_dynamic
 	  && !h->root.ref_dynamic)
 	{

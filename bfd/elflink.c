@@ -210,14 +210,22 @@ _bfd_elf_link_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
     return FALSE;
 
   /* The special symbol _DYNAMIC is always set to the start of the
-     .dynamic section.  This call occurs before we have processed the
-     symbols for any dynamic object, so we don't have to worry about
-     overriding a dynamic definition.  We could set _DYNAMIC in a
-     linker script, but we only want to define it if we are, in fact,
-     creating a .dynamic section.  We don't want to define it if there
-     is no .dynamic section, since on some ELF platforms the start up
-     code examines it to decide how to initialize the process.  */
-  bh = NULL;
+     .dynamic section.  We could set _DYNAMIC in a linker script, but we
+     only want to define it if we are, in fact, creating a .dynamic
+     section.  We don't want to define it if there is no .dynamic
+     section, since on some ELF platforms the start up code examines it
+     to decide how to initialize the process.  */
+  h = elf_link_hash_lookup (elf_hash_table (info), "_DYNAMIC",
+			    FALSE, FALSE, FALSE);
+  if (h != NULL)
+    {
+      /* Zap symbol defined in an as-needed lib that wasn't linked.
+	 This is a symptom of a larger problem:  Absolute symbols
+	 defined in shared libraries can't be overridden, because we
+	 lose the link to the bfd which is via the symbol section.  */
+      h->root.type = bfd_link_hash_new;
+    }
+  bh = &h->root;
   if (! (_bfd_generic_link_add_one_symbol
 	 (info, abfd, "_DYNAMIC", BSF_GLOBAL, s, 0, NULL, FALSE,
 	  get_elf_backend_data (abfd)->collect, &bh)))
@@ -322,16 +330,16 @@ _bfd_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 	return FALSE;
 
       /* The .rel[a].bss section holds copy relocs.  This section is not
-     normally needed.  We need to create it here, though, so that the
-     linker will map it to an output section.  We can't just create it
-     only if we need it, because we will not know whether we need it
-     until we have seen all the input files, and the first time the
-     main linker code calls BFD after examining all the input files
-     (size_dynamic_sections) the input sections have already been
-     mapped to the output sections.  If the section turns out not to
-     be needed, we can discard it later.  We will never need this
-     section when generating a shared object, since they do not use
-     copy relocs.  */
+	 normally needed.  We need to create it here, though, so that the
+	 linker will map it to an output section.  We can't just create it
+	 only if we need it, because we will not know whether we need it
+	 until we have seen all the input files, and the first time the
+	 main linker code calls BFD after examining all the input files
+	 (size_dynamic_sections) the input sections have already been
+	 mapped to the output sections.  If the section turns out not to
+	 be needed, we can discard it later.  We will never need this
+	 section when generating a shared object, since they do not use
+	 copy relocs.  */
       if (! info->shared)
 	{
 	  s = bfd_make_section (abfd,
@@ -442,15 +450,16 @@ bfd_elf_record_link_assignment (bfd *output_bfd ATTRIBUTE_UNUSED,
 
   /* Since we're defining the symbol, don't let it seem to have not
      been defined.  record_dynamic_symbol and size_dynamic_sections
-     may depend on this.
-     ??? Changing bfd_link_hash_undefined to bfd_link_hash_new (or
-     to bfd_link_hash_undefweak, see linker.c:link_action) runs the risk
-     of some later symbol manipulation setting the symbol back to
-     bfd_link_hash_undefined, and the linker trying to add the symbol to
-     the undefs list twice.  */
+     may depend on this.  */
   if (h->root.type == bfd_link_hash_undefweak
       || h->root.type == bfd_link_hash_undefined)
-    h->root.type = bfd_link_hash_new;
+    {
+      struct elf_link_hash_table *htab = elf_hash_table (info);
+
+      if (h->root.u.undef.next != NULL || htab->root.undefs_tail == &h->root)
+	bfd_link_repair_undef_list (&htab->root);
+      h->root.type = bfd_link_hash_new;
+    }
 
   if (h->root.type == bfd_link_hash_new)
     h->non_elf = 0;
@@ -728,7 +737,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
   int bind;
   bfd *oldbfd;
   bfd_boolean newdyn, olddyn, olddef, newdef, newdyncommon, olddyncommon;
-  bfd_boolean newweak, oldweak, old_asneeded;
+  bfd_boolean newweak, oldweak;
 
   *skip = FALSE;
   *override = FALSE;
@@ -857,14 +866,6 @@ _bfd_elf_merge_symbol (bfd *abfd,
     olddef = FALSE;
   else
     olddef = TRUE;
-
-  /* If the old definition came from an as-needed dynamic library which
-     wasn't found to be needed, treat the sym as undefined.  */
-  old_asneeded = FALSE;
-  if (newdyn
-      && olddyn
-      && (elf_dyn_lib_class (oldbfd) & DYN_AS_NEEDED) != 0)
-    old_asneeded = TRUE;
 
   /* Check TLS symbol.  */
   if ((ELF_ST_TYPE (sym->st_info) == STT_TLS || h->type == STT_TLS)
@@ -1068,7 +1069,6 @@ _bfd_elf_merge_symbol (bfd *abfd,
 
   if (olddyn
       && olddef
-      && !old_asneeded
       && h->root.type == bfd_link_hash_defined
       && h->def_dynamic
       && (h->root.u.def.section->flags & SEC_ALLOC) != 0
@@ -1120,7 +1120,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
 
   if (newdyn
       && newdef
-      && ((olddef && !old_asneeded)
+      && (olddef
 	  || (h->root.type == bfd_link_hash_common
 	      && (newweak
 		  || ELF_ST_TYPE (sym->st_info) == STT_FUNC))))
@@ -1170,7 +1170,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
      symbol is a function or is weak.  */
 
   flip = NULL;
-  if ((!newdyn || old_asneeded)
+  if (!newdyn
       && (newdef
 	  || (bfd_is_com_section (sec)
 	      && (oldweak
@@ -2813,6 +2813,69 @@ elf_add_dt_needed_tag (bfd *abfd,
   return 0;
 }
 
+/* Called via elf_link_hash_traverse, elf_smash_syms sets all symbols
+   belonging to NOT_NEEDED to bfd_link_hash_new.  We know there are no
+   references to these symbols.  */
+
+struct elf_smash_syms_data
+{
+  bfd *not_needed;
+  struct elf_link_hash_table *htab;
+  bfd_boolean twiddled;
+};
+
+static bfd_boolean
+elf_smash_syms (struct elf_link_hash_entry *h, void *data)
+{
+  struct elf_smash_syms_data *inf = (struct elf_smash_syms_data *) data;
+  struct bfd_link_hash_entry *bh;
+
+  switch (h->root.type)
+    {
+    default:
+    case bfd_link_hash_new:
+      return TRUE;
+
+    case bfd_link_hash_undefined:
+    case bfd_link_hash_undefweak:
+      if (h->root.u.undef.abfd != inf->not_needed)
+	return TRUE;
+      break;
+
+    case bfd_link_hash_defined:
+    case bfd_link_hash_defweak:
+      if (h->root.u.def.section->owner != inf->not_needed)
+	return TRUE;
+      break;
+
+    case bfd_link_hash_common:
+      if (h->root.u.c.p->section->owner != inf->not_needed)
+	return TRUE;
+      break;
+
+    case bfd_link_hash_warning:
+    case bfd_link_hash_indirect:
+      elf_smash_syms ((struct elf_link_hash_entry *) h->root.u.i.link, data);
+      if (h->root.u.i.link->type != bfd_link_hash_new)
+	return TRUE;
+      if (h->root.u.i.link->u.undef.abfd != inf->not_needed)
+	return TRUE;
+      break;
+    }
+
+  /* Set sym back to newly created state, but keep undefs list pointer.  */
+  bh = h->root.u.undef.next;
+  if (bh != NULL || inf->htab->root.undefs_tail == &h->root)
+    inf->twiddled = TRUE;
+  (*inf->htab->root.table.newfunc) (&h->root.root,
+				    &inf->htab->root.table,
+				    h->root.root.string);
+  h->root.u.undef.next = bh;
+  h->root.u.undef.abfd = inf->not_needed;
+  h->non_elf = 0;
+  return TRUE;
+}
+
 /* Sort symbol by value and section.  */
 static int
 elf_sort_symbol (const void *arg1, const void *arg2)
@@ -4031,6 +4094,18 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
     free (isymbuf);
   isymbuf = NULL;
 
+  if (!add_needed)
+    {
+      struct elf_smash_syms_data inf;
+      inf.not_needed = abfd;
+      inf.htab = hash_table;
+      inf.twiddled = FALSE;
+      elf_link_hash_traverse (hash_table, elf_smash_syms, &inf);
+      if (inf.twiddled)
+	bfd_link_repair_undef_list (&hash_table->root);
+      weaks = NULL;
+    }
+
   /* Now set the weakdefs field correctly for all the weak defined
      symbols we found.  The only way to do this is to search all the
      symbols.  Since we only need the information for non functions in
@@ -4263,7 +4338,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	}
     }
 
-  if (is_elf_hash_table (hash_table))
+  if (is_elf_hash_table (hash_table) && add_needed)
     {
       /* Add this bfd to the loaded list.  */
       struct elf_link_loaded_list *n;
@@ -6170,7 +6245,6 @@ elf_link_output_extsym (struct elf_link_hash_entry *h, void *data)
   if (h->root.type == bfd_link_hash_undefined
       && h->ref_dynamic
       && !h->ref_regular
-      && (elf_dyn_lib_class (h->root.u.undef.abfd) & DYN_AS_NEEDED) == 0
       && ! elf_link_check_versioned_symbol (finfo->info, bed, h)
       && finfo->info->unresolved_syms_in_shared_libs != RM_IGNORE)
     {
@@ -6212,7 +6286,8 @@ elf_link_output_extsym (struct elf_link_hash_entry *h, void *data)
   if (h->indx == -2)
     strip = FALSE;
   else if ((h->def_dynamic
-	    || h->ref_dynamic)
+	    || h->ref_dynamic
+	    || h->root.type == bfd_link_hash_new)
 	   && !h->def_regular
 	   && !h->ref_regular)
     strip = TRUE;

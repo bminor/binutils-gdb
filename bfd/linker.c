@@ -1,6 +1,6 @@
 /* linker.c -- BFD linker routines
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004 Free Software Foundation, Inc.
+   2003, 2004, 2005 Free Software Foundation, Inc.
    Written by Steve Chamberlain and Ian Lance Taylor, Cygnus Support
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -622,6 +622,45 @@ bfd_link_add_undef (struct bfd_link_hash_table *table,
   if (table->undefs == NULL)
     table->undefs = h;
   table->undefs_tail = h;
+}
+
+/* The undefs list was designed so that in normal use we don't need to
+   remove entries.  However, if symbols on the list are changed from
+   bfd_link_hash_undefined to either bfd_link_hash_undefweak or
+   bfd_link_hash_new for some reason, then they must be removed from the
+   list.  Failure to do so might result in the linker attempting to add
+   the symbol to the list again at a later stage.  */
+
+void
+bfd_link_repair_undef_list (struct bfd_link_hash_table *table)
+{
+  struct bfd_link_hash_entry **pun;
+
+  pun = &table->undefs;
+  while (*pun != NULL)
+    {
+      struct bfd_link_hash_entry *h = *pun;
+
+      if (h->type == bfd_link_hash_new
+	  || h->type == bfd_link_hash_undefweak)
+	{
+	  *pun = h->u.undef.next;
+	  h->u.undef.next = NULL;
+	  if (h == table->undefs_tail)
+	    {
+	      if (pun == &table->undefs)
+		table->undefs_tail = NULL;
+	      else
+		/* pun points at an u.undef.next field.  Go back to
+		   the start of the link_hash_entry.  */
+		table->undefs_tail = (struct bfd_link_hash_entry *)
+		  ((char *) pun - ((char *) &h->u.undef.next - (char *) h));
+	      break;
+	    }
+	}
+      else
+	pun = &h->u.undef.next;
+    }
 }
 
 /* Routine to create an entry in a generic link hash table.  */

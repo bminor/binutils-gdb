@@ -1,3 +1,25 @@
+2005-02-01  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (ppc64_elf_check_directives): Move undefs list fixup..
+	* linker.c (bfd_link_repair_undef_list): ..to new function, but don't
+	remove anything but new and undefweak.
+	* elflink.c (_bfd_elf_link_create_dynamic_sections): Override any
+	existing _DYNAMIC.
+	(_bfd_elf_create_dynamic_sections): Formatting.
+	(bfd_elf_record_link_assignment): Call bfd_link_repair_undef_list.
+	(_bfd_elf_merge_symbol): Don't handle as-needed syms here.
+	(struct elf_smash_data): New.
+	(elf_smash_syms): New function.
+	(elf_link_add_object_symbols): Call elf_smash_syms.  Don't add
+	unneeded dynamic objects to loaded list.
+	(elf_link_output_extsym): Don't handle as-needed here.  Strip
+	bfd_link_hash_new symbols.
+	* elf32-cris.c (elf_cris_discard_excess_program_dynamics): Don't
+	delref when dynindx is already -1.
+	* elf64-alpha.c (elf64_alpha_output_extsym): Strip bfd_link_hash_new
+	symbols.
+	* elfxx-mips.c (mips_elf_output_extsym): Likewise.
+
 2005-02-01  Ben Elliston  <bje@au.ibm.com>
 
 	* elfxx-target.h (bfd_elfNN_bfd_discard_group): Redefine.

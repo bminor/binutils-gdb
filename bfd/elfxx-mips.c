@@ -1,6 +1,6 @@
 /* MIPS-specific support for ELF
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004 Free Software Foundation, Inc.
+   2003, 2004, 2005 Free Software Foundation, Inc.
 
    Most of the information added by Ian Lance Taylor, Cygnus Support,
    <ian@cygnus.com>.
@@ -1491,7 +1491,8 @@ mips_elf_output_extsym (struct mips_elf_link_hash_entry *h, void *data)
   if (h->root.indx == -2)
     strip = FALSE;
   else if ((h->root.def_dynamic
-	    || h->root.ref_dynamic)
+	    || h->root.ref_dynamic
+	    || h->root.type == bfd_link_hash_new)
 	   && !h->root.def_regular
 	   && !h->root.ref_regular)
     strip = TRUE;
