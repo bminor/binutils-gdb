@@ -259,6 +259,18 @@ record_latest_value (val)
       if (i) return -1;		/* Indicate value not saved in history */
     }
 
+  /* We don't want this value to have anything to do with the inferior anymore.
+     In particular, "set $1 = 50" should not affect the variable from which
+     the value was taken, and fast watchpoints should be able to assume that
+     a value on the value history never changes.  */
+  if (VALUE_LAZY (val))
+    value_fetch_lazy (val);
+  /* We preserve VALUE_LVAL so that the user can find out where it was fetched
+     from.  This is a bit dubious, because then *&$1 does not just return $1
+     but the current contents of that location.  c'est la vie...  */
+  val->modifiable = 0;
+  release_value (val);
+
   /* Here we treat value_history_count as origin-zero
      and applying to the value being stored now.  */
 
@@ -274,18 +286,6 @@ record_latest_value (val)
     }
 
   value_history_chain->values[i] = val;
-
-  /* We don't want this value to have anything to do with the inferior anymore.
-     In particular, "set $1 = 50" should not affect the variable from which
-     the value was taken, and fast watchpoints should be able to assume that
-     a value on the value history never changes.  */
-  if (VALUE_LAZY (val))
-    value_fetch_lazy (val);
-  /* We preserve VALUE_LVAL so that the user can find out where it was fetched
-     from.  This is a bit dubious, because then *&$1 does not just return $1
-     but the current contents of that location.  c'est la vie...  */
-  val->modifiable = 0;
-  release_value (val);
 
   /* Now we regard value_history_count as origin-one
      and applying to the value just stored.  */

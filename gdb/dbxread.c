@@ -52,7 +52,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "command.h"
 #include "target.h"
 #include "gdbcore.h"		/* for bfd stuff */
-#include "libbfd.h"		/* FIXME Secret internal BFD stuff (bfd_read) */
 #include "libaout.h"	 	/* FIXME Secret internal BFD stuff for a.out */
 #include "symfile.h"
 #include "objfiles.h"
@@ -177,10 +176,7 @@ struct complaint lbrac_mismatch_complaint =
   {"N_LBRAC/N_RBRAC symbol mismatch at symtab pos %d", 0, 0};
 
 struct complaint repeated_header_complaint =
-  {"\"repeated\" header file not previously seen, at symtab pos %d", 0, 0};
-
-struct complaint repeated_header_name_complaint =
-  {"\"repeated\" header file not previously seen, named %s", 0, 0};
+  {"\"repeated\" header file %s not previously seen, at symtab pos %d", 0, 0};
 
 /* During initial symbol readin, we need to have a structure to keep
    track of which psymtabs have which bincls in them.  This structure
@@ -346,8 +342,7 @@ add_old_header_file (name, instance)
 	add_this_object_header_file (i);
 	return;
       }
-  complain (&repeated_header_complaint, symnum);
-  complain (&repeated_header_name_complaint, name);
+  complain (&repeated_header_complaint, name, symnum);
 }
 
 /* Add to this file a "new" header file: definitions for its types follow.
@@ -568,21 +563,14 @@ dbx_symfile_read (objfile, section_offsets, mainline)
 		   bfd_section_vma  (sym_bfd, DBX_TEXT_SECT (objfile)),
 		   bfd_section_size (sym_bfd, DBX_TEXT_SECT (objfile)));
 
-  /* Add the dynamic symbols if we are reading the main symbol table.  */
+  /* Add the dynamic symbols.  */
 
-  if (mainline)
-    read_dbx_dynamic_symtab (section_offsets, objfile);
+  read_dbx_dynamic_symtab (section_offsets, objfile);
 
   /* Install any minimal symbols that have been collected as the current
      minimal symbols for this objfile. */
 
   install_minimal_symbols (objfile);
-
-  if (!have_partial_symbols ()) {
-    wrap_here ("");
-    printf_filtered ("(no debugging symbols found)...");
-    wrap_here ("");
-  }
 
   do_cleanups (back_to);
 }
@@ -876,6 +864,7 @@ find_corresponding_bincl_psymtab (name, instance)
 	&& STREQ (name, bincl->name))
       return bincl->pst;
 
+  complain (&repeated_header_complaint, name, symnum);
   return (struct partial_symtab *) 0;
 }
 
@@ -1002,7 +991,8 @@ read_dbx_dynamic_symtab (section_offsets, objfile)
        counter++, relptr++)
     {
       arelent *rel = *relptr;
-      CORE_ADDR address = rel->address;
+      CORE_ADDR address =
+	rel->address + ANOFFSET (section_offsets, SECT_OFF_DATA);
 
       switch (bfd_get_arch (abfd))
 	{

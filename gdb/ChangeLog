@@ -1,3 +1,16 @@
+Sat Sep 10 01:43:28 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* corelow.c (add_solib_stub):  Copy to_sections changes from
+	core_ops to current_target after adding the shared libraries.
+	* partial-stab.h (N_EXCL), dbxread.c (add_old_header_file,
+	find_corresponding_bincl_psymtab):  Change `repeated header not seen'
+	error to a complaint, simplify complaint.
+	* procfs.c (signalname, errnoname):  Make `name' const.
+	* symfile.c (reread_symbols):  Use filename from old BFD to
+	reopen the objfile.
+	* values.c (record_latest_value):  Don't record value in the
+	history chain until we are sure there won't be an error.
+
 Fri Sep  9 15:52:09 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
 
 	* nlm/Makefile.in: remove MMALLOC, READLINE, TERMCAP, and other

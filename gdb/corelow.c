@@ -79,8 +79,13 @@ static int
 solib_add_stub (from_ttyp)
      char *from_ttyp;
 {
-    SOLIB_ADD (NULL, *(int *)from_ttyp, &core_ops);
-    return 0;
+  SOLIB_ADD (NULL, *(int *)from_ttyp, &core_ops);
+
+  /* SOLIB_ADD usually modifies core_ops.to_sections, which has to
+     be reflected in current_target.  */
+  current_target.to_sections = core_ops.to_sections;
+  current_target.to_sections_end = core_ops.to_sections_end;
+  return 0;
 }
 #endif /* SOLIB_ADD */
 

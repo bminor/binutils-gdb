@@ -634,9 +634,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #endif
 		  }
 	      }
-	    else
-	      error ("Invalid symbol data: \"repeated\" header file not previously seen, at symtab pos %d.",
-		     symnum);
 	  }
 #endif /* DBXREAD_ONLY */
 	  continue;

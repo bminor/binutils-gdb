@@ -3080,7 +3080,7 @@ static char *
 signalname (signo)
      int signo;
 {
-  char *name;
+  const char *name;
   static char locbuf[32];
 
   name = strsigno (signo);
@@ -3099,7 +3099,7 @@ static char *
 errnoname (errnum)
      int errnum;
 {
-  char *name;
+  const char *name;
   static char locbuf[32];
 
   name = strerrno (errnum);
