@@ -1,5 +1,5 @@
 /* DWARF debugging format support for GDB.
-   Copyright (C) 1991, 1992 Free Software Foundation, Inc.
+   Copyright (C) 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
    Written by Fred Fish at Cygnus Support.  Portions based on dbxread.c,
    mipsread.c, coffread.c, and dwarfread.c from a Data General SVR4 gdb port.
 
@@ -1997,7 +1997,13 @@ process_dies (thisdie, enddie, objfile)
 	  switch (di.die_tag)
 	    {
 	    case TAG_compile_unit:
-	      read_file_scope (&di, thisdie, nextdie, objfile);
+	      /* Skip Tag_compile_unit if we are already inside a compilation
+		 unit, we are unable to handle nested compilation units
+		 properly (FIXME).  */
+	      if (current_subfile == NULL)
+		read_file_scope (&di, thisdie, nextdie, objfile);
+	      else
+		nextdie = thisdie + di.die_length;
 	      break;
 	    case TAG_global_subroutine:
 	    case TAG_subroutine:
@@ -2618,6 +2624,9 @@ add_partial_symbol (dip, objfile)
     case TAG_structure_type:
     case TAG_union_type:
     case TAG_enumeration_type:
+      /* Do not add opaque aggregate definitions to the psymtab.  */
+      if (!dip -> has_at_byte_size)
+	break;
       ADD_PSYMBOL_TO_LIST (dip -> at_name, strlen (dip -> at_name),
 			   STRUCT_NAMESPACE, LOC_TYPEDEF,
 			   objfile -> static_psymbols,

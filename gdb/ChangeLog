@@ -1,3 +1,9 @@
+Fri Feb  4 01:14:20 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* dwarfread.c (process_dies):  Skip nested TAG_compile_unit DIEs.
+	* dwarfread.c (add_partial_symbol):  Do not enter opaque aggregate
+	definitions into the psymtab.
+
 Thu Feb  3 12:38:58 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* m68k-stub.c: Treat mc68332 like mc68020 most places.  Provide
