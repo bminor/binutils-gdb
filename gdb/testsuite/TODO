@@ -10,6 +10,9 @@ test, but it hasn't been tried on a wide range of architectures).
 
 nodebug.exp--test printing variables.
 
+Test printing of structures passed by value, for the 7th, 8th, and
+9th arguments (PR 1714).
+
 Get crossload tests to use --with-targets and reenable them.
 
 corefile.exp:
@@ -41,16 +44,24 @@ weird.exp--test that unrecognized cross-reference types or
 unrecognized visibility or virtual characters get skipped properly
 (see stabs.texinfo).
 
-Test "jump" including jump to a breakpoint (the latter will need an
-xfail for UDI and probably VxWorks (PR 1786 for vxworks; PR 2416
-contains some info for 29k).
-
 Test C++ nested types (especially if PR 1954 is fixed; even if not
 *some* things already should work even in the presence of nested
 types).  Test classes nested more than 9 levels deep (g++ mangles
 these differently) (both a demangle test and some tests which also
 test the compiler).  Test calling a method of a class nested more than
 9 levels (for gdb_mangle_name and demangling).
+
+Test printing complex types, including functions, pointers to arrays
+of pointers of functions, functions which return pointers to
+functions, etc.
+
+Test GDB expressions--test all operators (and overloaded operators for
+C++).  Test integer constants which are signed or unsigned int, long,
+or long long.  Test detection of overflow of an integer constant.
+Here are a few integer constants to test (test they get the right
+types): 5, 5LL, 5LuL, 5L6u (invalid), 5LU.  Maybe things like
+0x12345678, 0x87654321, etc., but their types depend on sizes of int,
+long, etc.
 
 Test that printing const-qualified versions of various types works.
 In particular, on the sparc and probably other machines, "double" is
@@ -116,6 +127,10 @@ Test ability to process NMAGIC a.out files.
 If there are two breakpoints in the same place, and exactly one of
 them has its condition true, test that the correct breakpoint gets
 printed.
+
+Test "jump" including jump to a breakpoint (the latter will need an
+xfail for UDI and probably VxWorks (PR 1786 for vxworks; PR 2416
+contains some info for 29k).
 
 Set a watchpoint on a local variable (to be interesting, make a few
 calls, to be more interesting, make a recursive call).  Test that it
