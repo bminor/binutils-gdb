@@ -2525,6 +2525,9 @@ prep_headers (abfd)
       i_ehdrp->e_machine = EM_CYGNUS_M32R;
       break;
 /* end-sanitize-m32r */
+    case bfd_arch_mn10x00:
+      i_ehdrp->e_machine = EM_CYGNUS_MN10x00;
+      break;
       /* also note that EM_M32, AT&T WE32100 is unknown to bfd */
     default:
       i_ehdrp->e_machine = EM_NONE;
@@ -2929,6 +2932,10 @@ _bfd_elf_copy_private_symbol_data (ibfd, isymarg, obfd, osymarg)
      asymbol *osymarg;
 {
   elf_symbol_type *isym, *osym;
+
+  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
+      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
+    return true;
 
   isym = elf_symbol_from (ibfd, isymarg);
   osym = elf_symbol_from (obfd, osymarg);

@@ -1,3 +1,19 @@
+Wed Oct  2 21:40:55 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* cpu-mn10x00.c, elf32-mn10x00.c: New files.
+	* Makefile.in (ALL_MACHINES): Add cpu-mn10x00.o.
+	(BFD32_BACKENDS): Similarly for elf32-mn10x00.o.
+	(elf32-mn10x00.o): Add dependencies.
+	* archures.c (enum bfd_architecture): Add bfd_arch_mn10x00.
+	(bfd_mn10x00_arch): Declare.
+	(bfd_archures_list): Add bfd_mn10x00_arch.
+	* config.bfd: Add mn10x00-*-*.
+	* configure.in: Add bfd_elf32_mn10x00_vec.
+	* elf.c (prep_headers): Handle bfd_arch_mn10x00.
+	* targets.c (bfd_elf32_mn10x00_vec): Declare.
+	(bfd_target_vector): Add bfd_elf32_mn10x00_vec.
+	* bfd-in2.h, configure: Rebuilt.
+	
 Wed Oct  2 15:46:45 1996  Klaus Kaempf  <kkaempf@progis.de>
 
 	openVMS/Alpha: Provide filename and case_hack flags via

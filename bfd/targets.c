@@ -179,7 +179,7 @@ The order of bytes within the header parts of a file.
 .  enum bfd_endian header_byteorder;
 
 A mask of all the flags which an executable may have set -
-from the set <<NO_FLAGS>>, <<HAS_RELOC>>, ...<<D_PAGED>>.
+from the set <<BFD_NO_FLAGS>>, <<HAS_RELOC>>, ...<<D_PAGED>>.
 
 .  flagword object_flags;       
 
@@ -498,11 +498,20 @@ extern const bfd_target bfd_elf32_i860_vec;
 extern const bfd_target bfd_elf32_little_generic_vec;
 extern const bfd_target bfd_elf32_littlemips_vec;
 extern const bfd_target bfd_elf64_littlemips_vec;
+/* start-sanitize-m32r */
+extern const bfd_target bfd_elf32_m32r_vec;
+/* end-sanitize-m32r */
 extern const bfd_target bfd_elf32_m68k_vec;
 extern const bfd_target bfd_elf32_m88k_vec;
+extern const bfd_target bfd_elf32_mn10x00_vec;
 extern const bfd_target bfd_elf32_powerpc_vec;
 extern const bfd_target bfd_elf32_powerpcle_vec;
+extern const bfd_target bfd_elf32_sh_vec;
+extern const bfd_target bfd_elf32_shl_vec;
 extern const bfd_target bfd_elf32_sparc_vec;
+/* start-sanitize-v850 */
+extern const bfd_target bfd_elf32_v850_vec;
+/* end-sanitize-v850 */
 extern const bfd_target bfd_elf64_big_generic_vec;
 extern const bfd_target bfd_elf64_little_generic_vec;
 extern const bfd_target bfd_elf64_sparc_vec;
@@ -564,6 +573,7 @@ extern const bfd_target pmac_xcoff_vec;
 extern const bfd_target rs6000coff_vec;
 extern const bfd_target shcoff_vec;
 extern const bfd_target shlcoff_vec;
+extern const bfd_target sparcle_aout_vec;
 extern const bfd_target sparclynx_aout_vec;
 extern const bfd_target sparclynx_coff_vec;
 extern const bfd_target sparcnetbsd_vec;
@@ -651,10 +661,17 @@ const bfd_target * const bfd_target_vector[] = {
 #ifdef BFD64
 	&bfd_elf64_littlemips_vec,
 #endif
+/* start-sanitize-m32r */
+	&bfd_elf32_m32r_vec,
+/* end-sanitize-m32r */
+	&bfd_elf32_mn10x00_vec,
 	&bfd_elf32_m68k_vec,
 	&bfd_elf32_m88k_vec,
 	&bfd_elf32_sparc_vec,
 	&bfd_elf32_powerpc_vec,
+/* start-sanitize-v850 */
+	&bfd_elf32_v850_vec,
+/* end-sanitize-v850 */
 #ifdef BFD64			/* No one seems to use this.  */
 	&bfd_elf64_big_generic_vec,
 	&bfd_elf64_little_generic_vec,
@@ -765,6 +782,7 @@ const bfd_target * const bfd_target_vector[] = {
 	&ppcboot_vec,
 	&shcoff_vec,
 	&shlcoff_vec,
+	&sparcle_aout_vec,
 	&sparclynx_aout_vec,
 	&sparclynx_coff_vec,
 	&sparcnetbsd_vec,

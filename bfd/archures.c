@@ -121,6 +121,9 @@ DESCRIPTION
 .  bfd_arch_powerpc,   {* PowerPC *}
 .  bfd_arch_rs6000,    {* IBM RS/6000 *}
 .  bfd_arch_hppa,      {* HP PA RISC *}
+. {* start-sanitize-d10v *}
+.  bfd_arch_d10v,      {* Mitsubishi D10V *}
+. {* end-sanitize-d10v *}
 .  bfd_arch_z8k,       {* Zilog Z8000 *}
 .#define bfd_mach_z8001		1
 .#define bfd_mach_z8002		2
@@ -130,6 +133,9 @@ DESCRIPTION
 .  bfd_arch_arm,       {* Advanced Risc Machines ARM *}
 .  bfd_arch_ns32k,     {* National Semiconductors ns32000 *}
 .  bfd_arch_w65,       {* WDC 65816 *}
+. {* start-sanitize-v850 *}
+.  bfd_arch_v850,      {* NEC V850 *}
+. {* end-sanitize-v850 *}
 . {* start-sanitize-arc *}
 .  bfd_arch_arc,       {* Argonaut RISC Core *}
 .#define bfd_mach_arc_base 0
@@ -137,6 +143,10 @@ DESCRIPTION
 .#define bfd_mach_arc_graphics 2
 .#define bfd_mach_arc_audio 3
 . {* end-sanitize-arc *}
+. {* start-sanitize-m32r *}
+.  bfd_arch_m32r,      {* Mitsubishi M32R *}
+. {* end-sanitize-m32r *}
+.  bfd_arch_mn10x00,   {* Matsushita MN10x00 *}
 .  bfd_arch_last
 .  };
 
@@ -181,15 +191,22 @@ extern const bfd_arch_info_type bfd_alpha_arch;
 extern const bfd_arch_info_type bfd_arc_arch;
 /* end-sanitize-arc */
 extern const bfd_arch_info_type bfd_arm_arch;
+/* start-sanitize-d10v */
+extern const bfd_arch_info_type bfd_d10v_arch;
+/* end-sanitize-d10v */
 extern const bfd_arch_info_type bfd_h8300_arch;
 extern const bfd_arch_info_type bfd_h8500_arch;
 extern const bfd_arch_info_type bfd_hppa_arch;
 extern const bfd_arch_info_type bfd_i386_arch;
 extern const bfd_arch_info_type bfd_i860_arch;
 extern const bfd_arch_info_type bfd_i960_arch;
+/* start-sanitize-m32r */
+extern const bfd_arch_info_type bfd_m32r_arch;
+/* end-sanitize-m32r */
 extern const bfd_arch_info_type bfd_m68k_arch;
 extern const bfd_arch_info_type bfd_m88k_arch;
 extern const bfd_arch_info_type bfd_mips_arch;
+extern const bfd_arch_info_type bfd_mn10x00_arch;
 extern const bfd_arch_info_type bfd_powerpc_arch;
 extern const bfd_arch_info_type bfd_rs6000_arch;
 extern const bfd_arch_info_type bfd_sh_arch;
@@ -199,6 +216,9 @@ extern const bfd_arch_info_type bfd_we32k_arch;
 extern const bfd_arch_info_type bfd_z8k_arch;
 extern const bfd_arch_info_type bfd_ns32k_arch;
 extern const bfd_arch_info_type bfd_w65_arch;
+/* start-sanitize-v850 */
+extern const bfd_arch_info_type bfd_v850_arch;
+/* end-sanitize-v850 */
 
 static const bfd_arch_info_type * const bfd_archures_list[] =
 {
@@ -211,15 +231,22 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
   &bfd_arc_arch,
 /* end-sanitize-arc */
   &bfd_arm_arch,
+/* start-sanitize-d10v */
+  &bfd_d10v_arch,
+/* end-sanitize-d10v */
   &bfd_h8300_arch,
   &bfd_h8500_arch,
   &bfd_hppa_arch,
   &bfd_i386_arch,
   &bfd_i860_arch,
   &bfd_i960_arch,
+/* start-sanitize-m32r */
+  &bfd_m32r_arch,
+/* end-sanitize-m32r */
   &bfd_m68k_arch,
   &bfd_m88k_arch,
   &bfd_mips_arch,
+  &bfd_mn10x00_arch,
   &bfd_powerpc_arch,
   &bfd_rs6000_arch,
   &bfd_sh_arch,
@@ -229,6 +256,9 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
   &bfd_z8k_arch,
   &bfd_ns32k_arch,
   &bfd_w65_arch,
+/* start-sanitize-v850*/
+  &bfd_v850_arch,
+/* end-sanitize-v850 */
 #endif
   0
 };

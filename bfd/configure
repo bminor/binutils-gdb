@@ -1923,10 +1923,16 @@ do
     bfd_elf32_littlemips_vec) 	tb="$tb elf32-mips.o elf32.o $elf ecofflink.o" ;;
     bfd_elf64_littlemips_vec) 	tb="$tb elf64-mips.o elf64.o elf32-mips.o elf32.o $elf ecofflink.o"
 				target64=true ;;
+# start-sanitize-m32r
+    bfd_elf32_m32r_vec)		tb="$tb elf32-m32r.o elf32.o $elf" ;;
+# end-sanitize-m32r
     bfd_elf32_m68k_vec)		tb="$tb elf32-m68k.o elf32.o $elf" ;;
     bfd_elf32_m88k_vec)		tb="$tb elf32-m88k.o elf32.o $elf" ;;
+    bfd_elf32_mn10x00_vec)	tb="$tb elf32-mn10x00.o elf32.o $elf" ;;
     bfd_elf32_powerpc_vec)	tb="$tb elf32-ppc.o elf32.o $elf" ;;
     bfd_elf32_powerpcle_vec)	tb="$tb elf32-ppc.o elf32.o $elf" ;;
+    bfd_elf32_sh_vec)		tb="$tb elf32-sh.o elf32.o $elf coff-sh.o" ;;
+    bfd_elf32_shl_vec)		tb="$tb elf32-sh.o elf32.o $elf coff-sh.o" ;;
     bfd_elf32_sparc_vec)	tb="$tb elf32-sparc.o elf32.o $elf" ;;
 # start-sanitize-v850
     bfd_elf32_v850_vec)		tb="$tb elf32-v850.o elf32.o $elf" ;;
@@ -1997,6 +2003,7 @@ do
     shcoff_vec)			tb="$tb coff-sh.o cofflink.o" ;;
     shlcoff_vec)		tb="$tb coff-sh.o cofflink.o" ;;
     som_vec)			tb="$tb som.o" ;;
+    sparcle_aout_vec)		tb="$tb aout-sparcle.o aout32.o" ;;
     sparclynx_aout_vec)		tb="$tb sparclynx.o lynx-core.o aout32.o" ;;
     sparclynx_coff_vec)		tb="$tb cf-sparclynx.o lynx-core.o" ;;
     sparcnetbsd_vec)		tb="$tb sparcnetbsd.o aout32.o" ;;
@@ -2086,7 +2093,7 @@ if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 2090 "configure"
+#line 2096 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -2110,7 +2117,7 @@ $ac_func();
 
 ; return 0; }
 EOF
-if { (eval echo configure:2114: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+if { (eval echo configure:2120: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
   rm -rf conftest*
   eval "ac_cv_func_$ac_func=yes"
 else
@@ -2140,7 +2147,7 @@ else
   ac_cv_func_mmap=no
 else
 cat > conftest.$ac_ext <<EOF
-#line 2144 "configure"
+#line 2150 "configure"
 #include "confdefs.h"
 
 /* Thanks to Mike Haertel and Jim Avera for this test. */
@@ -2209,7 +2216,7 @@ main()
 }
 
 EOF
-{ (eval echo configure:2213: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }
+{ (eval echo configure:2219: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }
 if test -s conftest && (./conftest; exit) 2>/dev/null; then
   ac_cv_func_mmap=yes
 else
@@ -2234,7 +2241,7 @@ if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 2238 "configure"
+#line 2244 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -2258,7 +2265,7 @@ $ac_func();
 
 ; return 0; }
 EOF
-if { (eval echo configure:2262: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+if { (eval echo configure:2268: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
   rm -rf conftest*
   eval "ac_cv_func_$ac_func=yes"
 else

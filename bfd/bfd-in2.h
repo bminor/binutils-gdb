@@ -1146,7 +1146,7 @@ boolean
 bfd_copy_private_section_data PARAMS ((bfd *ibfd, asection *isec, bfd *obfd, asection *osec));
 
 #define bfd_copy_private_section_data(ibfd, isection, obfd, osection) \
-     BFD_SEND (ibfd, _bfd_copy_private_section_data, \
+     BFD_SEND (obfd, _bfd_copy_private_section_data, \
 		(ibfd, isection, obfd, osection))
 enum bfd_architecture 
 {
@@ -1229,6 +1229,7 @@ enum bfd_architecture
   /* start-sanitize-m32r */
   bfd_arch_m32r,       /* Mitsubishi M32R */
   /* end-sanitize-m32r */
+  bfd_arch_mn10x00,    /* Matsushita MN10x00 */
   bfd_arch_last
   };
 
@@ -1835,17 +1836,17 @@ assumed to be 0. */
 /* start-sanitize-m32r */
 
 /* Mitsubishi M32R relocs.
-This is a 10-bit reloc with the right 2 bits assumed to be 0. */
-  BFD_RELOC_M32R_10_PCREL,
+This is a 24 bit address. */
+  BFD_RELOC_M32R_UIMM24,
+
+/* This is a 10-bit reloc with the right 2 bits assumed to be 0. */
+  BFD_RELOC_M32R_DISP8,
 
 /* This is an 18-bit reloc with the right 2 bits assumed to be 0. */
-  BFD_RELOC_M32R_18_PCREL,
+  BFD_RELOC_M32R_DISP16,
 
 /* This is an 26-bit reloc with the right 2 bits assumed to be 0. */
-  BFD_RELOC_M32R_26_PCREL,
-
-/* This is a 24 bit reloc. */
-  BFD_RELOC_M32R_24,
+  BFD_RELOC_M32R_DISP24,
 /* end-sanitize-m32r */
 
 /* start-sanitize-v850 */
@@ -2014,7 +2015,7 @@ boolean
 bfd_copy_private_symbol_data PARAMS ((bfd *ibfd, asymbol *isym, bfd *obfd, asymbol *osym));
 
 #define bfd_copy_private_symbol_data(ibfd, isymbol, obfd, osymbol) \
-     BFD_SEND (ibfd, _bfd_copy_private_symbol_data, \
+     BFD_SEND (obfd, _bfd_copy_private_symbol_data, \
 		(ibfd, isymbol, obfd, osymbol))
 struct _bfd 
 {
@@ -2254,13 +2255,13 @@ boolean
 bfd_copy_private_bfd_data PARAMS ((bfd *ibfd, bfd *obfd));
 
 #define bfd_copy_private_bfd_data(ibfd, obfd) \
-     BFD_SEND (ibfd, _bfd_copy_private_bfd_data, \
+     BFD_SEND (obfd, _bfd_copy_private_bfd_data, \
 		(ibfd, obfd))
 boolean 
 bfd_merge_private_bfd_data PARAMS ((bfd *ibfd, bfd *obfd));
 
 #define bfd_merge_private_bfd_data(ibfd, obfd) \
-     BFD_SEND (ibfd, _bfd_merge_private_bfd_data, \
+     BFD_SEND (obfd, _bfd_merge_private_bfd_data, \
 		(ibfd, obfd))
 boolean 
 bfd_set_private_flags PARAMS ((bfd *abfd, flagword flags));
