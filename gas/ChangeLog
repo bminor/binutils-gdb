@@ -1,3 +1,16 @@
+Mon Feb  1 12:24:58 1999  Catherine Moore  <clm@cygnus.com>
+
+        * configure:  Regenerate.
+        * configure.in (arm-*-oabi):  New.
+        (thumb-*-oabi):  New.
+        * config/tc-arm.c (target_oabi):  Declare.
+        (md_apply_fix3): Support REL relocs.
+        (md_parse_option):  Handle -oabi.
+        (elf32_arm_target_format):  New routine.
+        (md_longopts):  Add OPTION_OABI.
+        * config/tc-arm.h:  Redefine TARGET_FORMAT.
+
+
 1999-01-28  Nick Clifton  <nickc@cygnus.com>
 
 	* write.c (write_relocs): Handle out or range error.

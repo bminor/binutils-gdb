@@ -1,5 +1,5 @@
 /* This file is tc-arm.h
-   Copyright (C) 1994, 1995, 1996, 1997, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1994, 1995, 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
    Contributed by Richard Earnshaw (rwe@pegasus.esprit.ec.org)
 	Modified by David Taylor (dtaylor@armltd.co.uk)
 
@@ -72,14 +72,18 @@
 # endif
 #endif
 
-/* start-sanitize-armelf */
+#ifdef OBJ_ELF
+#define TC_FORCE_RELOCATION(fixp) elf32_arm_force_relocation(fixp)
+extern int elf32_arm_force_relocation PARAMS ((struct fix *));
+#endif
+
 #ifdef OBJ_ELF
 extern boolean arm_validate_fix ();
 #define TC_VALIDATE_FIX(fixP,segType,Label) if (arm_validate_fix (fixP)) add_symbolP = fixP->fx_addsy
 #define ARM_BI_ENDIAN
-#define TARGET_FORMAT (target_big_endian ? "elf32-bigarm" : "elf32-littlearm")
+#define TARGET_FORMAT elf32_arm_target_format()
+extern const char *elf32_arm_target_format PARAMS ((void));
 #endif
-/* end-sanitize-armelf */
 
 #define md_convert_frag(b,s,f)		{as_fatal (_("arm convert_frag\n"));}
 
@@ -95,15 +99,11 @@ extern void arm_frob_label PARAMS ((struct symbol *));
    deliberately not been updated to mark assembler created stabs
    symbols as Thumb.  */
 
-/* start-sanitize-armelf */
 #ifdef OBJ_ELF
 #define obj_fix_adjustable(fixP) arm_fix_adjustable(fixP)
 #else
-/* end-sanitize-armelf */
 #define obj_fix_adjustable(fixP) 0
-/* start-sanitize-armelf */
 #endif
-/* end-sanitize-armelf */
 
 /* We need to keep some local information on symbols.  */
 
@@ -151,10 +151,10 @@ char *arm_canonicalize_symbol_name PARAMS ((char *));
 
 /* Finish processing the entire symbol table:  */
 #ifdef OBJ_ELF
-#define obj_adjust_symtab armelf_adjust_symtab 
+#define obj_adjust_symtab() armelf_adjust_symtab ()
 extern void armelf_adjust_symtab PARAMS ((void));
 #else
-#define obj_adjust_symtab arm_adjust_symtab 
+#define obj_adjust_symtab() arm_adjust_symtab ()
 extern void arm_adjust_symtab PARAMS ((void));
 #endif
 

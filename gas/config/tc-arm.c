@@ -1,5 +1,5 @@
 /* tc-arm.c -- Assemble for the ARM
-   Copyright (C) 1994, 95, 96, 97, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1994, 95, 96, 97, 98, 1999 Free Software Foundation, Inc.
    Contributed by Richard Earnshaw (rwe@pegasus.esprit.ec.org)
 	Modified by David Taylor (dtaylor@armltd.co.uk)
 
@@ -90,6 +90,7 @@
 #endif
 
 static unsigned long	cpu_variant = CPU_DEFAULT | FPU_DEFAULT;
+static int target_oabi = 0;
 
 #if defined OBJ_COFF || defined OBJ_ELF
 /* Flags stored in private area of BFD structure */
@@ -4980,13 +4981,11 @@ md_section_align (segment, size)
      segT segment;
      valueT size;
 {
-/* start-sanitize-armelf */
 #ifdef OBJ_ELF
   /* Don't align the dwarf2 debug sections */
   if (!strncmp(segment->name,".debug",5))
     return size;
 #endif
-/* end-sanitize-armelf */
   /* Round all sects to multiple of 4 */
   return (size + 3) & ~3;
 }
@@ -5239,8 +5238,20 @@ md_apply_fix3 (fixP, val, seg)
       break;
 
     case BFD_RELOC_ARM_PCREL_BRANCH:
+#ifdef OBJ_ELF
+      if (target_oabi)
+        value = (value >> 2) & 0x00ffffff;
+      else
+        value = fixP->fx_offset;
+#else
       value = (value >> 2) & 0x00ffffff;
+#endif
       newval = md_chars_to_number (buf, INSN_SIZE);
+#ifdef OBJ_ELF 
+      if (!target_oabi)
+        newval = (newval & 0xff000000);
+#endif
+      newval = (newval & 0xff000000);
       value = (value + (newval & 0x00ffffff)) & 0x00ffffff;
       newval = value | (newval & 0xff000000);
       md_number_to_chars (buf, newval, INSN_SIZE);
@@ -5282,7 +5293,7 @@ md_apply_fix3 (fixP, val, seg)
       {
         offsetT newval2;
         addressT diff;
-	
+
 	newval  = md_chars_to_number (buf, THUMB_SIZE);
         newval2 = md_chars_to_number (buf + THUMB_SIZE, THUMB_SIZE);
         diff = ((newval & 0x7ff) << 12) | ((newval2 & 0x7ff) << 1);
@@ -5303,17 +5314,41 @@ md_apply_fix3 (fixP, val, seg)
     case BFD_RELOC_8:
       if (fixP->fx_done || fixP->fx_pcrel)
 	md_number_to_chars (buf, value, 1);
+#ifdef OBJ_ELF
+      else if (!target_oabi)
+        {
+          value = fixP->fx_offset;
+          md_number_to_chars (buf, value, 1);
+        }
+#endif
       break;
 
     case BFD_RELOC_16:
       if (fixP->fx_done || fixP->fx_pcrel)
 	md_number_to_chars (buf, value, 2);
+#ifdef OBJ_ELF
+      else if (!target_oabi)
+        {
+          value = fixP->fx_offset;
+          md_number_to_chars (buf, value, 2);
+        }
+#endif
       break;
 
     case BFD_RELOC_RVA:
     case BFD_RELOC_32:
+#ifndef OBJ_ELF
       if (fixP->fx_done || fixP->fx_pcrel)
 	md_number_to_chars (buf, value, 4);
+#else
+      if (!target_oabi)
+        {
+          value = fixP->fx_offset;
+          md_number_to_chars (buf, value, 4);
+        }
+      else if (fixP->fx_done || fixP->fx_pcrel)
+        md_number_to_chars (buf, value, 4);
+#endif
       break;
 
     case BFD_RELOC_ARM_CP_OFF_IMM:
@@ -5476,6 +5511,11 @@ md_apply_fix3 (fixP, val, seg)
       md_number_to_chars (buf, newval , THUMB_SIZE);
       break;
 
+    case BFD_RELOC_VTABLE_INHERIT:
+    case BFD_RELOC_VTABLE_ENTRY:
+      fixP->fx_done = 0;
+      return 1;
+
     case BFD_RELOC_NONE:
     default:
       as_bad_where (fixP->fx_file, fixP->fx_line,
@@ -5538,6 +5578,8 @@ tc_gen_reloc (section, fixp)
     case BFD_RELOC_THUMB_PCREL_BRANCH9:
     case BFD_RELOC_THUMB_PCREL_BRANCH12:
     case BFD_RELOC_THUMB_PCREL_BRANCH23:
+    case BFD_RELOC_VTABLE_ENTRY:
+    case BFD_RELOC_VTABLE_INHERIT:
       code = fixp->fx_r_type;
       break;
 
@@ -5899,8 +5941,9 @@ _("Warning: Use of the 'nv' conditional is deprecated\n"));
  *            -m[arm]1                Currently not supported.
  *            -m[arm]2, -m[arm]250    Arm 2 and Arm 250 processor
  *            -m[arm]3                Arm 3 processor
- *            -m[arm]6,               Arm 6 processors
- *            -m[arm]7[t][[d]m]       Arm 7 processors
+ *            -m[arm]6[xx],           Arm 6 processors
+ *            -m[arm]7[xx][t][[d]m]   Arm 7 processors
+ *            -mstrongarm[110]	      Arm 8 processors
  *            -mall                   All (except the ARM1)
  *    FP variants:
  *            -mfpa10, -mfpa11        FPA10 and 11 co-processor instructions
@@ -5925,6 +5968,10 @@ struct option md_longopts[] =
   {"EB", no_argument, NULL, OPTION_EB},
 #define OPTION_EL (OPTION_MD_BASE + 1)
   {"EL", no_argument, NULL, OPTION_EL},
+#ifdef OBJ_ELF
+#define OPTION_OABI (OPTION_MD_BASE +2)
+  {"oabi", no_argument, NULL, OPTION_OABI},
+#endif
 #endif
   {NULL, no_argument, NULL, 0}
 };
@@ -5966,6 +6013,11 @@ md_parse_option (c, arg)
 	  if (! strcmp (str, "no-fpu"))
 	    cpu_variant &= ~FPU_ALL;
 	  break;
+
+        case 'o':
+          if (!strcmp (str, "oabi"))
+            target_oabi = true;
+          break;
 
         case 't':
           /* Limit assembler to generating only Thumb instructions: */
@@ -6091,15 +6143,33 @@ md_parse_option (c, arg)
 		goto bad;
 	      break;
 
-	    case '6':
-	      if (! strcmp (str, "6"))
-		cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_6;
-	      else
-		goto bad;
+	      switch (strtol (str, NULL, 10))
+		{
+		case 6:
+		case 60:
+		case 600:
+		case 610:
+		case 620:
+		  cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_6;
+		  break;
+		default:
+		  goto bad;
+		}
 	      break;
 
 	    case '7':
-              str++; /* eat the '7' */
+	      switch (strtol (str, & str, 10))	/* Eat the processor name */
+		{
+		case 7:
+		case 70:
+		case 700:
+		case 710:
+		case 7100:
+		case 7500:
+		  break;
+		default:
+		  goto bad;
+		}
               cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_7;
               for (; *str; str++)
                 {
@@ -6316,8 +6386,8 @@ arm_frob_label (sym)
 void
 arm_adjust_symtab ()
 {
-  symbolS * sym;
 #ifdef OBJ_COFF
+  symbolS * sym;
 
   for (sym = symbol_rootP; sym != NULL; sym = symbol_next (sym))
     {
@@ -6354,39 +6424,44 @@ arm_adjust_symtab ()
       if (ARM_IS_INTERWORK (sym))
 	coffsymbol(sym->bsym)->native->u.syment.n_flags = 0xFF;
     }
-#endif /* OBJ_COFF */
+#endif
 }
 #ifdef OBJ_ELF
 void
 armelf_adjust_symtab ()
 {
   symbolS * sym;
+  elf_symbol_type *elf_sym;
+  char bind;
 
   for (sym = symbol_rootP; sym != NULL; sym = symbol_next (sym))
     {
-      if (ARM_IS_THUMB (sym) && (THUMB_IS_FUNC (sym)))
-	{
-	  elf_symbol_type * elf_sym;
-	  unsigned char bind;
+      if (ARM_IS_THUMB (sym))
+        {
+	  if (THUMB_IS_FUNC (sym))
+	    {
+            elf_sym = elf_symbol(sym->bsym);
+            bind = ELF_ST_BIND(elf_sym);
+            elf_sym->internal_elf_sym.st_info = ELF_ST_INFO(bind, STT_ARM_TFUNC);
+            }
 
-	  elf_sym = elf_symbol (sym->bsym);
-	  bind = ELF_ST_BIND (elf_sym->internal_elf_sym.st_info);
-	  
-	  elf_sym->internal_elf_sym.st_info = ELF_ST_INFO (bind, STT_ARM_TFUNC);
-	}
-    }
+         }
+     }
 }
 
+#endif
+
+#ifdef OBJ_ELF
 void
 armelf_frob_symbol (symp, puntp)
-     symbolS * symp;
-     int * puntp;
+    symbolS *symp;
+    int *puntp;
+
 {
    elf_frob_symbol (symp, puntp);
-}
 
-#endif /* OBJ_ELF */
-
+} 
+#endif
 int
 arm_data_in_code ()
 {
@@ -6414,7 +6489,6 @@ arm_canonicalize_symbol_name (name)
 
   return name;
 }
-/* start-sanitize-armelf */
 #ifdef OBJ_ELF
 /* Relocations against Thumb function names must be left unadjusted,
    so that the linker can use this information to correctly set the
@@ -6433,17 +6507,44 @@ boolean
 arm_fix_adjustable (fixP)
    fixS *fixP;
 {
+
   if (fixP->fx_addsy == NULL)
     return 1;
   
+  /* Prevent all adjustments to global symbols. */
+  if (S_IS_EXTERN (fixP->fx_addsy))
+    return 0;
+  if (S_IS_WEAK (fixP->fx_addsy))
+    return 0;
+
   if (THUMB_IS_FUNC (fixP->fx_addsy)
       && fixP->fx_subsy == NULL)
     return 0;
   
+  /* We need the symbol name for the VTABLE entries */
+  if (fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
+      || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
+    return 0;
+
   return 1;
 }
 #endif /* OBJ_ELF */
-/* end-sanitize-armelf */
+
+#ifdef OBJ_ELF
+int
+elf32_arm_force_relocation (fixp)
+      struct fix *fixp;
+{
+  if (fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT
+      || fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
+    return 1;
+
+  if (fixp->fx_r_type == BFD_RELOC_ARM_PCREL_BRANCH)
+    return 1;
+
+  return 0;
+}
+#endif
 
 boolean
 arm_validate_fix (fixP)
@@ -6465,3 +6566,17 @@ arm_validate_fix (fixP)
   return false;
 }
 
+const char *
+elf32_arm_target_format ()
+{
+  if (target_big_endian)
+    if (target_oabi)
+      return "elf32-bigarm-oabi";
+    else
+      return "elf32-bigarm";
+  else
+    if (target_oabi)
+      return "elf32-littlearm-oabi";
+    else
+      return "elf32-littlearm";
+}

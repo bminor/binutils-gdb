@@ -1644,6 +1644,8 @@ for this_target in $target $canon_targets ; do
       arm-*-aout)	    fmt=aout ;;
       arm-*-coff | thumb-*-coff)           fmt=coff ;;
       arm-*-elf | thumb-*-elf)              fmt=elf ;;
+      arm-*-oabi | thumb-*-oabi)              fmt=elf ;;
+      arm-*-linux* | armv*-*-linux-gnu) fmt=elf em=linux ;;
       arm-*-riscix*)        fmt=aout ;;
       arm-*-pe | thumb-*-pe)               fmt=coff em=pe ;;
 

@@ -137,6 +137,7 @@ changequote([,])dnl
       arm-*-aout)	    fmt=aout ;;
       arm-*-coff | thumb-*-coff)           fmt=coff ;;
       arm-*-elf | thumb-*-elf)              fmt=elf ;;
+      arm-*-oabi | thumb-*-oabi)           fmt=elf ;;
       arm-*-riscix*)        fmt=aout ;;
       arm-*-pe | thumb-*-pe)               fmt=coff em=pe ;;
 
