@@ -1,5 +1,10 @@
 2001-03-26  Andrew Cagney  <ac131313@redhat.com>
 
+	* MAINTAINERS: Document m88k as a ``Known problem in 5.1''.
+	* TODO (GDB 5.1 - Cleanups): Update.
+
+2001-03-26  Andrew Cagney  <ac131313@redhat.com>
+
 	* fork-child.c (clone_and_follow_inferior): Delete #ifdef
 	HAVE_VFORK.
 

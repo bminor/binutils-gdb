@@ -99,6 +99,7 @@ maintainer works with the native maintainer when resolving API issues.
 			Maintenance only
 
 	m88k		(--target=m88k broken)
+			Known problem in 5.1
 			Maintenance only
 
 	mcore		--target=mcore-elf,mcore-pe ,-Werror

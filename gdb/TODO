@@ -152,15 +152,13 @@ patch has been submitted.
 
 The following code cleanups will hopefully be applied to GDB 5.1.
 
--- 2001-03-22
+-- 2001-03-26
 
 Resolve the build status of all broken targets as identified by the
 MAINTAINERS file.
 
 	o	arm-* vs NetBSD's lack of ``unix''
 	o	arm-* vs IRIX (see below)
-
-	o	delete m88k?
 
 	o	delete mpw?
 
@@ -242,6 +240,12 @@ z8k
 
 The z8k has suffered bit rot and is known to not build.  The problem
 was occuring in the opcodes directory.
+
+--
+
+m88k
+
+The m88k has suffered bit rot and is known to not build.
 
 --
 
