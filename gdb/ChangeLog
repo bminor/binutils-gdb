@@ -1,3 +1,16 @@
+2003-03-11  Kevin Buettner  <kevinb@redhat.com>
+
+	* mips-tdep.c (mips_ecoff_reg_to_regnum): Rename to
+	mips_dwarf_dwarf2_ecoff_reg_to_regnum().
+	(mips_dwarf_dwarf2_ecoff_reg_to_regnum, mips_stab_reg_to_regnum):
+	Do range checks on register number obtained from debugging info.
+	(mips_gdbarch_init): Call set_gdbarch_dwarf_reg_to_regnum() and
+	set_gdbarch_dwarf2_reg_to_regnum().  Adjust call of
+	set_gdbarch_ecoff_reg_to_regnum() to account for new name of
+	mapping function.
+	(do_fp_register_row): Fix typo which caused double type to be
+	used when attempting to unpack a float.
+
 2003-03-11  J. Brobecker  <brobecker@gnat.com>
 
 	* breakpoint.c (bpstat_stop_status): Fix a small memory leak.
