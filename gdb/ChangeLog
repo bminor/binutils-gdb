@@ -1,3 +1,11 @@
+2001-09-13  Kevin Buettner  <kevinb@redhat.com>
+
+	From Ilya Golubev <gin@mo.msk.ru>:
+	* solib.c (clear_solib): Call `remove_target_sections' to fix
+	stale pointers in `struct target_ops'.
+	* irix5-nat.c (clear_solib): Likewise.
+	* osfsolib.c (clear_solib): Likewise.
+
 2001-09-13  Jim Blandy  <jimb@redhat.com>
 
 	* monitor.c (monitor_load): Don't delete symtab users, or reset
