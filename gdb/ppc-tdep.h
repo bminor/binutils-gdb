@@ -142,7 +142,6 @@ extern void ppc_collect_fpregset (const struct regset *regset,
 struct gdbarch_tdep
   {
     int wordsize;              /* size in bytes of fixed-point word */
-    int *regoff;               /* byte offsets in register arrays */
     const struct reg *regs;    /* from current variant */
     int ppc_gp0_regnum;		/* GPR register 0 */
     int ppc_toc_regnum;		/* TOC register */

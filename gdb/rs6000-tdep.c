@@ -2896,14 +2896,6 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   else
     tdep->lr_frame_offset = 8;
 
-  /* Calculate byte offsets in raw register array.  */
-  tdep->regoff = xmalloc (v->num_tot_regs * sizeof (int));
-  for (i = off = 0; i < v->num_tot_regs; i++)
-    {
-      tdep->regoff[i] = off;
-      off += regsize (v->regs + i, wordsize);
-    }
-
   if (v->arch == bfd_arch_powerpc)
     switch (v->mach)
       {

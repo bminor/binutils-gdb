@@ -1,3 +1,8 @@
+2004-06-01  Jim Blandy  <jimb@redhat.com>
+
+	* ppc-tdep.h: Delete unused 'regoff' member.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Don't initialize it.
+
 2004-06-01  Michael Chastain  <mec.gnu@mindspring.com>
 
 	Fix PR symtab/1661.
