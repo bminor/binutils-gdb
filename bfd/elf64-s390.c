@@ -2605,9 +2605,43 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 	      else
 		{
 		  /* This symbol is local, or marked to become local.  */
-		  relocate = TRUE;
-		  outrel.r_info = ELF64_R_INFO (0, R_390_RELATIVE);
-		  outrel.r_addend = relocation + rel->r_addend;
+		  if (r_type == R_390_64)
+		    {
+		      relocate = TRUE;
+		      outrel.r_info = ELF64_R_INFO (0, R_390_RELATIVE);
+		      outrel.r_addend = relocation + rel->r_addend;
+		    }
+		  else
+		    {
+		      long sindx;
+
+		      if (h == NULL)
+			sec = local_sections[r_symndx];
+		      else
+			{
+			  BFD_ASSERT (h->root.type == bfd_link_hash_defined
+				      || (h->root.type
+					  == bfd_link_hash_defweak));
+			  sec = h->root.u.def.section;
+			}
+		      if (sec != NULL && bfd_is_abs_section (sec))
+			sindx = 0;
+		      else if (sec == NULL || sec->owner == NULL)
+			{
+			  bfd_set_error(bfd_error_bad_value);
+			  return FALSE;
+			}
+		      else
+			{
+			  asection *osec;
+
+			  osec = sec->output_section;
+			  sindx = elf_section_data (osec)->dynindx;
+			  BFD_ASSERT (sindx > 0);
+			}
+		      outrel.r_info = ELF64_R_INFO (sindx, r_type);
+		      outrel.r_addend = relocation + rel->r_addend;
+		    }
 		}
 
 	      sreloc = elf_section_data (input_section)->sreloc;

@@ -1,3 +1,12 @@
+2003-11-13  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* elf32-s390.c (elf_s390_relocate_section): Only convert R_390_32
+	to R_390_RELAVITE. Convert the other relocations against local
+	symbols to relocations against the start of the section.
+	* elf64-s390.c (elf_s390_relocate_section): Only convert R_390_64
+	to R_390_RELAVITE. Convert the other relocations against local
+	symbols to relocations against the start of the section.
+
 2003-11-11  Nick Clifton  <nickc@redhat.com>
 
 	* elf-m10300.c (bfd_mn10300_elf_size_dynamic_sections): Use
