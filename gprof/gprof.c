@@ -33,6 +33,7 @@
 #define VERSION "2.6"
 
 const char *whoami;
+const char *function_mapping_file;
 const char *a_out_name = A_OUTNAME;
 long hz = HZ_WRONG;
 
@@ -89,6 +90,8 @@ static struct option long_options[] =
   {"no-graph", optional_argument, 0, 'Q'},
   {"exec-counts", optional_argument, 0, 'C'},
   {"no-exec-counts", optional_argument, 0, 'Z'},
+  {"function-ordering", no_argument, 0, 'r'},
+  {"file-ordering", required_argument, 0, 'R'},
   {"file-info", no_argument, 0, 'i'},
   {"sum", no_argument, 0, 's'},
 
@@ -136,6 +139,7 @@ Usage: %s [-[abcDhilLsTvwxyz]] [-[ACeEfFJnNOpPqQZ][name]] [-I dirs]\n\
 	[--[no-]annotated-source[=name]] [--[no-]exec-counts[=name]]\n\
 	[--[no-]flat-profile[=name]] [--[no-]graph[=name]]\n\
 	[--[no-]time=name] [--all-lines] [--brief] [--debug[=level]]\n\
+	[--function-ordering] [--file-ordering]\n\
 	[--directory-path=dirs] [--display-unused-functions]\n\
 	[--file-format=name] [--file-info] [--help] [--line] [--min-count=n]\n\
 	[--no-static] [--print-path] [--separate-files]\n\
@@ -322,6 +326,15 @@ DEFUN (main, (argc, argv), int argc AND char **argv)
 	  output_style |= STYLE_CALL_GRAPH;
 	  user_specified |= STYLE_CALL_GRAPH;
 	  break;
+	case 'r':
+	  output_style |= STYLE_FUNCTION_ORDER;
+	  user_specified |= STYLE_FUNCTION_ORDER;
+	  break;
+	case 'R':
+	  output_style |= STYLE_FILE_ORDER;
+	  user_specified |= STYLE_FILE_ORDER;
+	  function_mapping_file = optarg;
+	  break;
 	case 'Q':
 	  if (optarg)
 	    {
@@ -389,6 +402,16 @@ DEFUN (main, (argc, argv), int argc AND char **argv)
 	default:
 	  usage (stderr, 1);
 	}
+    }
+
+  /* Don't allow both ordering options, they modify the arc data in-place.  */
+  if ((user_specified & STYLE_FUNCTION_ORDER)
+      && (user_specified & STYLE_FILE_ORDER))
+    {
+      fprintf (stderr,"\
+%s: Only one of --function-ordering and --file-ordering may be specified.\n",
+	       whoami);
+      done (1);
     }
 
   /* append value of GPROF_PATH to source search list if set: */
@@ -580,6 +603,14 @@ DEFUN (main, (argc, argv), int argc AND char **argv)
   if (output_style & STYLE_ANNOTATED_SOURCE)
     {
       print_annotated_source ();
+    }
+  if (output_style & STYLE_FUNCTION_ORDER)
+    {
+      cg_print_function_ordering ();
+    }
+  if (output_style & STYLE_FILE_ORDER)
+    {
+      cg_print_file_ordering ();
     }
   return 0;
 }

@@ -1,3 +1,34 @@
+Sat Dec 30 10:11:03 1995  Jeffrey A Law  (law@cygnus.com)
+
+	* gprof.c (long_options): Add "--function-ordering" and
+	"--file-ordering" options.
+	(usage): Add new options to usage message.
+	(main): Handle new options.
+	* gprof.h (STYLE_FUNCTION_ORDER): Define.
+	(STYLE_FILE_ORDER): Define.
+	(function_mapping_file): Declare.
+	* cg_arcs.c (arcs, numarcs): New globals.
+	(arc_add): Put new arcs into the arc array so the function/file
+	ordering code can examine them.
+	* cg_arcs.h (struct arc): New field "has_been_placed".
+	(arcs, numarcs): Declare new globals.
+	* core.c (symbol_map, symbol_map_count): New globals.
+	(read_function_mappings): New function to read in a function
+	to object map file.
+	(core_init): Call read_function_mappings if a function mapping
+	file exists.
+	(core_create_function_syms): Handle function to object file
+	mappings.
+	* symtab.h (struct sym): New fields "mapped", "has_been_placed",
+	"nuses", "prev".
+	* cg_print.c (cmp_arc_count): New function for sorting arcs.
+	(cmp_fun_nuses): Likewise for functions.
+	(cg_print_function_ordering): New function to print a suggested
+	function ordering.
+	(cg_print_file_ordering): Likewise for ordering .o files.
+	(order_and_dump_functions_by_arcs): Helper function for function
+	and object file ordering code.
+
 Sun Dec 24 21:32:27 1995  Jeffrey A Law  (law@cygnus.com)
 
 	* core.c (core_sym_class): Ignore symbols without BSF_FUNCTION
