@@ -2973,6 +2973,25 @@ set_pltoff_entry (abfd, info, dyn_i, value, is_plt)
   return value;
 }
 
+/* Called through qsort to sort the .IA_64.unwind section during a
+   non-relocatable link.  Set elf64_ia64_unwind_entry_compare_bfd
+   to the output bfd so we can do proper endianness frobbing.  */
+
+static bfd *elf64_ia64_unwind_entry_compare_bfd;
+
+static int
+elf64_ia64_unwind_entry_compare (a, b)
+     PTR a;
+     PTR b;
+{
+  bfd_vma av, bv;
+
+  av = bfd_get_64 (elf64_ia64_unwind_entry_compare_bfd, a);
+  bv = bfd_get_64 (elf64_ia64_unwind_entry_compare_bfd, b);
+
+  return (av < bv ? -1 : av > bv ? 1 : 0);
+}
+
 static boolean
 elf64_ia64_final_link (abfd, info)
      bfd *abfd;
@@ -3134,7 +3153,35 @@ elf64_ia64_final_link (abfd, info)
     }
 
   /* Invoke the regular ELF backend linker to do all the work.  */
-  return bfd_elf64_bfd_final_link (abfd, info);
+  if (!bfd_elf64_bfd_final_link (abfd, info))
+    return false;
+
+  /* If we're producing a final executable, we need to sort the contents
+     of the .IA_64.unwind section.  */
+  if (!info->relocateable)
+    {
+      asection *s = bfd_get_section_by_name (abfd, ELF_STRING_ia64_unwind);
+      if (s)
+	{
+	  bfd_size_type size = s->output_section->_raw_size;
+	  char *contents = bfd_malloc (size);
+
+	  if (contents == NULL)
+	    return false;
+	  if (! bfd_get_section_contents (abfd, s->output_section,
+					  contents, (file_ptr) 0, size))
+	    return false;
+
+	  elf64_ia64_unwind_entry_compare_bfd = abfd;
+	  qsort (contents, size / 24, 24, elf64_ia64_unwind_entry_compare);
+
+	  if (! bfd_set_section_contents (abfd, s->output_section,
+					  contents, (file_ptr) 0, size))
+	    return false;
+	}
+    }
+
+  return true;
 }
 
 static boolean

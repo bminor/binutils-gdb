@@ -1,3 +1,9 @@
+2000-10-09  Richard Henderson  <rth@cygnus.com
+
+	* elf64-ia64.c (elf64_ia64_unwind_entry_compare_bfd): New.
+	(elf64_ia64_unwind_entry_compare): New.
+	(elf64_ia64_final_link): Sort the .IA_64.unwind section.
+
 2000-10-07  Alan Modra  <alan@linuxcare.com.au>
 
 	* elflink.h (size_dynamic_sections): Don't create various tags if
