@@ -1,3 +1,11 @@
+Fri Jan 29 09:57:58 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* ldlex.l (COMMAND): Accept -EB and -EL command line arguments,
+	returning OPTION_EB and OPTION_EL.  gcc passes these to a MIPS
+	linker.
+	* ldgram.y (OPTION_EB, OPTION_EL): New tokens.
+	(command_line_option): Accept and ignore OPTION_EB and OPTION_EL.
+
 Thu Jan 28 15:12:04 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* Makefile.in (install): Remove $(tooldir)/bin/gld before creating
