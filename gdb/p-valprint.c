@@ -970,6 +970,7 @@ pascal_object_print_value (struct type *type, char *valaddr, CORE_ADDR address,
 
       if (boffset != -1 && (boffset < 0 || boffset >= TYPE_LENGTH (type)))
 	{
+	  /* FIXME (alloc): not safe is baseclass is really really big. */
 	  base_valaddr = (char *) alloca (TYPE_LENGTH (baseclass));
 	  if (target_read_memory (address + boffset, base_valaddr,
 				  TYPE_LENGTH (baseclass)) != 0)

@@ -99,12 +99,14 @@ som_symtab_read (bfd *abfd, struct objfile *objfile,
 
   number_of_symbols = bfd_get_symcount (abfd);
 
+  /* FIXME (alloca): could be quite large. */
   buf = alloca (symsize * number_of_symbols);
   bfd_seek (abfd, obj_som_sym_filepos (abfd), SEEK_SET);
   val = bfd_bread (buf, symsize * number_of_symbols, abfd);
   if (val != symsize * number_of_symbols)
     error ("Couldn't read symbol dictionary!");
 
+  /* FIXME (alloca): could be quite large. */
   stringtab = alloca (obj_som_stringtab_size (abfd));
   bfd_seek (abfd, obj_som_str_filepos (abfd), SEEK_SET);
   val = bfd_bread (stringtab, obj_som_stringtab_size (abfd), abfd);

@@ -697,6 +697,7 @@ value_assign (struct value *toval, struct value *fromval)
 	int amount_copied;
 
 	/* Make the buffer large enough in all cases.  */
+	/* FIXME (alloca): Not safe for very large data types. */
 	char *buffer = (char *) alloca (amount_to_copy
 					+ sizeof (LONGEST)
 					+ MAX_REGISTER_RAW_SIZE);

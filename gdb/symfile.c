@@ -3009,6 +3009,7 @@ simple_free_overlay_region_table (void)
 static void
 read_target_long_array (CORE_ADDR memaddr, unsigned int *myaddr, int len)
 {
+  /* FIXME (alloca): Not safe if array is very large. */
   char *buf = alloca (len * TARGET_LONG_BYTES);
   int i;
 

@@ -1,5 +1,11 @@
 2002-01-07  Michael Snyder  <msnyder@redhat.com>
 
+	* cp-valprint.c (cp_print_value): FIXME comment, alloca size.
+	* p-valprint.c (pascal_object_print_value): Ditto.
+	* somread.c (som_symtab_read): Ditto.
+	* symfile.c (simple_free_overlay_region_table): Ditto.
+	* valops.c (value_assign): Ditto.
+
 	* tracepoint.c (tracepoint_save_command): From Klee Dienes --
 	use tilde_expand and strerror for opening save-tracepoints file.
 
