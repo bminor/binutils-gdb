@@ -26,6 +26,7 @@
 #include "regcache.h"
 #include "target.h"
 #include "value.h"
+#include "gdbcore.h"		/* for get_exec_file */
 
 #include "gdb_assert.h"
 #include <fcntl.h>
@@ -73,6 +74,7 @@ bsd_kvm_open (char *filename, int from_tty)
 	}
     }
 
+  execfile = get_exec_file (0);
   temp_kd = kvm_openfiles (execfile, filename, NULL, O_RDONLY, errbuf);
   if (temp_kd == NULL)
     error ("%s", errbuf);

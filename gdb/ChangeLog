@@ -1,3 +1,8 @@
+2004-08-07  Nathan J. Williams  <nathanw@wasabisystems.com>
+
+	* bsd-kvm.c: Include "gdbcore.h"
+	(bsd_kvm_open): Use get_exec_file() to set 'execfile'.
+
 2004-08-07  Andrew Cagney  <cagney@gnu.org>
 
 	* gdbtypes.c (build_flt, build_complex): New functions.
