@@ -1,3 +1,7 @@
+Tue Sep  2 13:15:27 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gencode.c (tab): Order instructions according to SH3 document.
+
 Wed Aug 27 18:13:22 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.
@@ -19,6 +23,117 @@ Mon Aug 25 16:17:51 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* interp.c (sim_open): Add ABFD argument.
 
+Mon Jun 23 15:49:14 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (get_dr): Avoid SIGFPE by moving integers instead of
+ 	FP's around.
+	(set_dr): Ditto.
+	
+start-sanitize-sh4
+Mon Jun 23 15:02:40 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (XD, SET_XD): Delete.
+  	(XF, SET_XF, XD_TO_XF): Define, move around registers in either
+ 	FP bank.
+	
+	* gencode.c (fmov): Update.
+
+end-sanitize-sh4
+Sun Jun 22 19:33:33 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (set_fpscr1): From J"orn Rennecke
+ 	<amylaar@cygnus.co.uk>, Fix typo. Ditto for comment.
+	
+start-sanitize-sh4
+Tue Aug 12 00:19:11 1997  J"orn Rennecke <amylaar@cygnus.co.uk>
+
+	* interp.c (special_address): New function.
+	(BUSERROR): Call it.  Added parameters bits_written and data.
+	Changed all callers.
+	* gencode.c (tab): Fixed ocbwb and pref.
+
+end-sanitize-sh4
+start-sanitize-sh4
+Fri Jun 20 22:03:18 1997  J"orn Rennecke <amylaar@cygnus.co.uk>
+
+	* interp.c (do_wdat, do_wdat): Fix bug in register number calculation.
+
+end-sanitize-sh4
+Thu Jun 19 00:28:08 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (sim_create_inferior): Clear registers each time an
+ 	inferior is started.
+
+start-sanitize-sh4
+Mon Jun 16 14:01:55 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (*FP, FP_OP, FP_CMP, FP_UNARY): Provide a hook for
+ 	when a host doesn't support IEEE FP.
+	(*DP): Provide alternative definition that supports 64bit floating
+ 	point.
+	(target_little_endian): Combine little_endian and little_endian_p.
+	(saved_state_type): Make fpscr and sr simple integers.
+	(SET_FPSCR, GET_FPSCR): Use macros to update fpscr register.
+	(set_fpscr1): New function.  Handle swapping when PR / FR bits
+ 	changed. Call via *_FPSCR macro.
+	(SET_SR*, GET_SR*): Use macro's to access the SR bits - avoids
+ 	endian problems.
+
+	* gencode.c (tab): Update.
+	
+end-sanitize-sh4
+Sun Jun 15 15:22:52 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gencode.c (main): Perform basic checks on tab entries.
+
+	* Makefile.in (gencode): Always compile with -g.
+
+Sat Jun 14 13:45:09 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gencode.c (gensim): Move ref checking code to before `stuff'.
+  	For branches with delay slots refs were not being checked.
+
+	* interp.c (sim_resume): Use nia to specify the next instruction
+ 	address instead of overloading pc.
+	(C): Delete definiton - refer to cycles directly.
+	(SEXT12): New macro - sign extend a 12 bit quantity.
+	(Delay_Slot): Rename from SL.
+
+	* gencode.c (tab): Update/simplify.
+	
+	* gencode.c (gensim): Better formatting of output code.
+	(gensim): Replace 10 with constant MAX_NR_STUFF- define as 15.
+	(tab): Sort alphabetically.  Break `stuff' into multiple lines.
+
+Fri Jun 13 22:10:13 1997  J"orn Rennecke <amylaar@cygnus.co.uk>
+
+	* gencode.c (braf, bsrf): Fix branch destination calculation to
+	be in accordance with the documentation.
+
+Fri Jun 13 15:33:53 1997  J"orn Rennecke <amylaar@cygnus.co.uk>
+
+	* interp.c (init_pointers): Fix little endian test.
+
+start-sanitize-sh4
+Thu Jun  5 12:56:08 1997  J"orn Rennecke <amylaar@cygnus.co.uk>
+
+	* interp.c (init_pointers): SH4 hardware is always WORDS_BIT_ENDIAN.
+	* gencode (fmov from/to memory): take endian_mismatch into account
+	for 32 bit moves too.
+
+end-sanitize-sh4
+Wed May 28 23:42:35 1997  J"orn Rennecke <amylaar@cygnus.co.uk>
+
+        * gencode.c (swap.b): Fix treatment of high word.
+
+start-sanitize-sh4
+Wed May 28 23:42:35 1997  J"orn Rennecke <amylaar@cygnus.co.uk>
+
+        * sh/gencode.c,
+        * interp.c: experimental SH4 support.  Lacks sanitation.
+        DFmode moves are probaly broken for target little endian.
+
+end-sanitize-sh4
 Tue May 20 10:23:28 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* interp.c (sim_open): Add callback argument.

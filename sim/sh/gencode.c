@@ -31,13 +31,15 @@
 
 #include <stdio.h>
 
+#define MAX_NR_STUFF 20
+
 typedef struct
 {
-char *defs;
-char *refs;
+  char *defs;
+  char *refs;
   char *name;
   char *code;
-  char *stuff[10];
+  char *stuff[MAX_NR_STUFF];
   int index;
 }
 
@@ -47,210 +49,1316 @@ op;
 op tab[] =
 {
 
-  {"n","","add #<imm>,<REG_N>", "0111nnnni8*1....", "R[n] += SEXT(i);if (i == 0) { UNDEF(n); break; } "},
-  {"n","mn","add <REG_M>,<REG_N>", "0011nnnnmmmm1100", "R[n] += R[m];"},
-  {"n","mn","addc <REG_M>,<REG_N>", "0011nnnnmmmm1110",
-     "ult=R[n]+T;T=ult<R[n];R[n]=ult+R[m];T|=R[n]<ult;"},
-  {"n","mn","addv <REG_M>,<REG_N>", "0011nnnnmmmm1111",
-     "ult = R[n] + R[m]; T = ((~(R[n] ^ R[m]) & (ult ^ R[n])) >> 31); R[n] = ult;"},
-  {"0","","and #<imm>,R0", "11001001i8*1....", ";R0&=i;"},
-  {"n","nm","and <REG_M>,<REG_N>", "0010nnnnmmmm1001", " R[n]&=R[m];"},
-  {"","0","and.b #<imm>,@(R0,GBR)", "11001101i8*1....", ";WBAT(GBR+R0, RBAT(GBR+R0) & i);"},
+  { "n", "", "add #<imm>,<REG_N>", "0111nnnni8*1....",
+    "R[n] += SEXT(i);",
+    "if (i == 0) {",
+    "  UNDEF(n); /* see #ifdef PARANOID */",
+    "  break;",
+    "}",
+  },
+  { "n", "mn", "add <REG_M>,<REG_N>", "0011nnnnmmmm1100",
+    "R[n] += R[m];",
+  },
 
-  {"","","bra <bdisp12>", "1010i12.........", "ult = PC; PC=PC+(i<<1)+2;SL(ult+2);"},
-  {"","","bsr <bdisp12>", "1011i12.........", "PR = PC + 4; PC=PC+(i<<1)+2;SL(PR-2);"},
-  {"","","bt <bdisp8>", "10001001i8p1....", "if(T) {PC+=(SEXT(i)<<1)+2;C+=2;}"},
-  {"","","bf <bdisp8>", "10001011i8p1....", "if(T==0) {PC+=(SEXT(i)<<1)+2;C+=2;}"},
-  {"","","bt.s <bdisp8>", "10001101i8p1....","if(T) {ult = PC; PC+=(SEXT(i)<<1)+2;C+=2;SL(ult+2);}"},
-  {"","","bf.s <bdisp8>", "10001111i8p1....","if(!T) {ult = PC; PC+=(SEXT(i)<<1)+2;C+=2;SL(ult+2);}"},
-  {"","","clrmac", "0000000000101000", "MACH = MACL = 0;"},
-  {"","","clrs", "0000000001001000", "S= 0;"},
-  {"","","clrt", "0000000000001000", "T= 0;"},
-  {"","0","cmp/eq #<imm>,R0", "10001000i8*1....", ";T = R0 == SEXT(i);"},
-  {"","mn","cmp/eq <REG_M>,<REG_N>", "0011nnnnmmmm0000", "T=R[n]==R[m];"},
-  {"","mn","cmp/ge <REG_M>,<REG_N>", "0011nnnnmmmm0011", "T=R[n]>=R[m];"},
-  {"","mn","cmp/gt <REG_M>,<REG_N>", "0011nnnnmmmm0111", "T=R[n]>R[m];"},
-  {"","mn","cmp/hi <REG_M>,<REG_N>", "0011nnnnmmmm0110", "T=UR[n]>UR[m];"},
-  {"","mn","cmp/hs <REG_M>,<REG_N>", "0011nnnnmmmm0010", "T=UR[n]>=UR[m];"},
-  {"","n","cmp/pl <REG_N>", "0100nnnn00010101", "T = R[n]>0;"},
-  {"","n","cmp/pz <REG_N>", "0100nnnn00010001", "T = R[n]>=0;"},
-  {"","mn","cmp/str <REG_M>,<REG_N>", "0010nnnnmmmm1100",
-   "ult = R[n] ^ R[m]; T=((ult&0xff000000)==0) |((ult&0xff0000)==0) |((ult&0xff00)==0) |((ult&0xff)==0); "},
-  {"","mn","div0s <REG_M>,<REG_N>", "0010nnnnmmmm0111", "Q=(R[n]&sbit)!=0; M=(R[m]&sbit)!=0; T=M!=Q;;"},
-  {"","","div0u", "0000000000011001", "M=Q=T=0;"},
-  {"","","div1 <REG_M>,<REG_N>", "0011nnnnmmmm0100", "T=div1(R,m,n,T);"},
-  {"n","m","exts.b <REG_M>,<REG_N>", "0110nnnnmmmm1110", "R[n] = SEXT(R[m]);"},
-  {"n","m","exts.w <REG_M>,<REG_N>", "0110nnnnmmmm1111", "R[n] = SEXTW(R[m]);"},
-  {"n","m","extu.b <REG_M>,<REG_N>", "0110nnnnmmmm1100", "R[n] = R[m] & 0xff;"},
-  {"n","m","extu.w <REG_M>,<REG_N>", "0110nnnnmmmm1101", "R[n] = R[m] & 0xffff;"},
-  {"","n","jmp @<REG_N>", "0100nnnn00101011", "ult = PC; PC=R[n]-2; SL(ult+2);"},
-  {"","n","jsr @<REG_N>", "0100nnnn00001011", "PR = PC + 4; PC=R[n]-2; if (~doprofile) gotcall(PR,PC+2);SL(PR-2);"},
-  {"","n","ldc <REG_N>,SR", "0100nnnn00001110", "SET_SR(R[n]);"},
-  {"","n","ldc <REG_N>,GBR", "0100nnnn00011110", "GBR=R[n];"},
-  {"","n","ldc <REG_N>,VBR", "0100nnnn00101110", "VBR=R[n];"},
-  {"","n","ldc <REG_N>,SSR", "0100nnnn00111110", "SSR=R[n];"},
-  {"","n","ldc <REG_N>,SPC", "0100nnnn01001110", "SPC=R[n];"},
-  {"","n","ldc.l @<REG_N>+,SR", "0100nnnn00000111", "SET_SR(RLAT(R[n]));R[n]+=4;;"},
-  {"","n","ldc.l @<REG_N>+,GBR", "0100nnnn00010111", "GBR=RLAT(R[n]);R[n]+=4;;"},
-  {"","n","ldc.l @<REG_N>+,VBR", "0100nnnn00100111", "VBR=RLAT(R[n]);R[n]+=4;;"},
-  {"","n","ldc.l @<REG_N>+,SSR", "0100nnnn00110111", "SSR=RLAT(R[n]);R[n]+=4;;"},
-  {"","n","ldc.l @<REG_N>+,SPC", "0100nnnn01000111", "SPC=RLAT(R[n]);R[n]+=4;;"},
-  {"","n","lds <REG_N>,MACH", "0100nnnn00001010", "MACH = R[n];"},
-  {"","n","lds <REG_N>,MACL", "0100nnnn00011010", "MACL= R[n];"},
-  {"","n","lds <REG_N>,PR", "0100nnnn00101010", "PR = R[n];"},
-  {"","n","lds.l @<REG_N>+,MACH", "0100nnnn00000110", "MACH = SEXT(RLAT(R[n]));R[n]+=4;"},
-  {"","n","lds.l @<REG_N>+,MACL", "0100nnnn00010110", "MACL = RLAT(R[n]);R[n]+=4;"},
-  {"","n","lds.l @<REG_N>+,PR", "0100nnnn00100110", "PR = RLAT(R[n]);R[n]+=4;;"},
-  {"","","ldtlb", "0000000000111000", "/*XXX*/ abort();"},
-  {"","n","mac.w @<REG_M>+,@<REG_N>+", "0100nnnnmmmm1111", "macw(R0,memory,n,m);"},
-  {"n","","mov #<imm>,<REG_N>", "1110nnnni8*1....", "R[n] = SEXT(i);"},
-  {"n","m","mov <REG_M>,<REG_N>", "0110nnnnmmmm0011", "R[n] = R[m];"},
-  {"","mn0","mov.b <REG_M>,@(R0,<REG_N>)", "0000nnnnmmmm0100", "WBAT(R[n]+R0, R[m]);"},
-  {"","nm","mov.b <REG_M>,@-<REG_N>", "0010nnnnmmmm0100", "R[n]--; WBAT(R[n],R[m]);"},
-  {"","mn","mov.b <REG_M>,@<REG_N>", "0010nnnnmmmm0000", "WBAT(R[n], R[m]);"},
-  {"0","m","mov.b @(<disp>,<REG_M>),R0", "10000100mmmmi4*1", "R0=RSBAT(i+R[m]);L(0);"},
-  {"0","","mov.b @(<disp>,GBR),R0", "11000100i8*1....", "R0=RSBAT(i+GBR);L(0);"},
-  {"n","0m","mov.b @(R0,<REG_M>),<REG_N>", "0000nnnnmmmm1100", "R[n]=RSBAT(R0+R[m]);L(n);"},
-  {"n","m","mov.b @<REG_M>+,<REG_N>", "0110nnnnmmmm0100", "R[n] = RSBAT(R[m]);L(n);R[m]++;"},
-  {"n","m","mov.b @<REG_M>,<REG_N>", "0110nnnnmmmm0000", "R[n]=RSBAT(R[m]);L(n);"},
-  {"","m0","mov.b R0,@(<disp>,<REG_M>)", "10000000mmmmi4*1", "WBAT(i+R[m],R0);"},
-  {"","0","mov.b R0,@(<disp>,GBR)", "11000000i8*1....", "WBAT(i+GBR,R0);"},
-  {"","nm","mov.l <REG_M>,@(<disp>,<REG_N>)", "0001nnnnmmmmi4*4",   "WLAT(i+R[n],R[m]);"},
-  {"","nm0","mov.l <REG_M>,@(R0,<REG_N>)", "0000nnnnmmmm0110", "WLAT(R0+R[n],R[m]);"},
-  {"","nm","mov.l <REG_M>,@-<REG_N>", "0010nnnnmmmm0110", "R[n]-=4;WLAT(R[n],R[m]);"},
-  {"","nm","mov.l <REG_M>,@<REG_N>", "0010nnnnmmmm0010", "WLAT(R[n], R[m]);"},
-  {"n","m","mov.l @(<disp>,<REG_M>),<REG_N>","0101nnnnmmmmi4*4", "R[n]=RLAT(i+R[m]);L(n);"},
-  {"0","","mov.l @(<disp>,GBR),R0", "11000110i8*4....", "R0=RLAT(i+GBR);L(0);"},
-  {"n","","mov.l @(<disp>,PC),<REG_N>", "1101nnnni8p4....", "R[n]=RLAT((i+4+PC) & ~3);L(n);"},
-  {"n","m","mov.l @(R0,<REG_M>),<REG_N>", "0000nnnnmmmm1110", "R[n]=RLAT(R0+R[m]);L(n);"},
-{"nm","m","mov.l @<REG_M>+,<REG_N>", "0110nnnnmmmm0110", "R[n]=RLAT(R[m]);R[m]+=4;L(n);"},
-  {"n","m","mov.l @<REG_M>,<REG_N>", "0110nnnnmmmm0010", "R[n]=RLAT(R[m]);L(n);"},
-  {"","0","mov.l R0,@(<disp>,GBR)", "11000010i8*4....", "WLAT(i+GBR,R0);"},
-  {"","m0n","mov.w <REG_M>,@(R0,<REG_N>)", "0000nnnnmmmm0101", "WWAT(R0+R[n],R[m]);"},
-{"n","mn","mov.w <REG_M>,@-<REG_N>", "0010nnnnmmmm0101", "R[n]-=2;WWAT(R[n],R[m]);"},
-  {"","nm","mov.w <REG_M>,@<REG_N>", "0010nnnnmmmm0001", "WWAT(R[n],R[m]);"},
-  {"0","m","mov.w @(<disp>,<REG_M>),R0", "10000101mmmmi4*2", "R0=RSWAT(i+R[m]);L(0);"},
-  {"0","","mov.w @(<disp>,GBR),R0", "11000101i8*2....", "R0=RSWAT(i+GBR);L(0);"},
-  {"n","","mov.w @(<disp>,PC),<REG_N>", "1001nnnni8p2....", "R[n]=RSWAT(PC+i+4);L(n);"},
-{"n","m0","mov.w @(R0,<REG_M>),<REG_N>", "0000nnnnmmmm1101", "R[n]=RSWAT(R0+R[m]);L(n);"},
-{"nm","n","mov.w @<REG_M>+,<REG_N>", "0110nnnnmmmm0101", "R[n]=RSWAT(R[m]);R[m]+=2;L(n);"},
-  {"n","m","mov.w @<REG_M>,<REG_N>", "0110nnnnmmmm0001", "R[n]=RSWAT(R[m]);L(n);"},
-  {"","0m","mov.w R0,@(<disp>,<REG_M>)", "10000001mmmmi4*2",   "WWAT(i+R[m],R0);"},
-  {"","0","mov.w R0,@(<disp>,GBR)", "11000001i8*2....", "WWAT(i+GBR,R0);"},
-  {"0","","mova @(<disp>,PC),R0", "11000111i8p4....", "R0=((i+4+PC) & ~0x3);"},
-  {"n","","movt <REG_N>", "0000nnnn00101001", "R[n]=T;"},
-  {"","mn","muls <REG_M>,<REG_N>", "0010nnnnmmmm1111","MACL=((int)(short)R[n])*((int)(short)R[m]);"},
-  {"","mn","mul.l <REG_M>,<REG_N>","0000nnnnmmmm0111","MACL=((int)R[n])*((int)R[m]);"},
-  {"","mn","mulu <REG_M>,<REG_N>", "0010nnnnmmmm1110","MACL=((unsigned int)(unsigned short)R[n])*((unsigned int)(unsigned short)R[m]);"},
-  {"n","m","neg <REG_M>,<REG_N>", "0110nnnnmmmm1011", "R[n] = - R[m];"},
-  {"n","m","negc <REG_M>,<REG_N>", "0110nnnnmmmm1010", "ult=-T;T=ult>0;R[n]=ult-R[m];T|=R[n]>ult;"},
-  {"","","nop", "0000000000001001", ""},
-  {"n","m","not <REG_M>,<REG_N>", "0110nnnnmmmm0111", "R[n]=~R[m];"},
-  {"0","","or #<imm>,R0", "11001011i8*1....", "R0|=i;"},
-  {"n","m","or <REG_M>,<REG_N>", "0010nnnnmmmm1011", "R[n]|=R[m];"},
-  {"","0","or.b #<imm>,@(R0,GBR)", "11001111i8*1....", "WBAT(R0+GBR,RBAT(R0+GBR)|i);"},
-{"n","n","rotcl <REG_N>", "0100nnnn00100100", "ult=R[n]<0;R[n]=(R[n]<<1)|T;T=ult;"},
-  {"n","n","rotcr <REG_N>", "0100nnnn00100101", "ult=R[n]&1;R[n]=(UR[n]>>1)|(T<<31);T=ult;"},
-  {"n","n","rotl <REG_N>", "0100nnnn00000100", "T=R[n]<0;R[n]<<=1;R[n]|=T;"},
-  {"n","n","rotr <REG_N>", "0100nnnn00000101", "T=R[n]&1;R[n] = UR[n]>> 1;R[n]|=(T<<31);"},
-  {"","","rte", "0000000000101011", 
-    "{ int tmp = PC; PC=RLAT(R[15])+2;R[15]+=4;SET_SR(RLAT(R[15]) & 0x3f3);R[15]+=4;SL(tmp+2);}"},
-  {"","","rts", "0000000000001011", "ult=PC;PC=PR-2;SL(ult+2);"},
-  {"","","sets", "0000000001011000", "S=1;"},
-  {"","","sett", "0000000000011000", "T=1;"},
-  {"n","mn","shad <REG_M>,<REG_N>", "0100nnnnmmmm1100",
-    "R[n] = (R[m] < 0) ? (R[n] >> ((-R[m])&0x1f)) : (R[n] << (R[m] & 0x1f));"},
-  {"n","mn","shld <REG_M>,<REG_N>", "0100nnnnmmmm1101",
-    "R[n] = (R[m] < 0) ? (UR[n] >> ((-R[m])&0x1f)): (R[n] << (R[m] & 0x1f));"},
-  {"n","n","shal <REG_N>", "0100nnnn00100000", "T=R[n]<0; R[n]<<=1;"},
-  {"n","n","shar <REG_N>", "0100nnnn00100001", "T=R[n]&1; R[n] = R[n] >> 1;"},
-  {"n","n","shll <REG_N>", "0100nnnn00000000", "T=R[n]<0; R[n]<<=1;"},
-  {"n","n","shll16 <REG_N>", "0100nnnn00101000", "R[n]<<=16;"},
-  {"n","n","shll2 <REG_N>", "0100nnnn00001000", "R[n]<<=2;"},
-  {"n","n","shll8 <REG_N>", "0100nnnn00011000", "R[n]<<=8;"},
-  {"n","n","shlr <REG_N>", "0100nnnn00000001", "T=R[n]&1;R[n]=UR[n]>>1;"},
-  {"n","n","shlr16 <REG_N>", "0100nnnn00101001", "R[n]=UR[n]>>16;"},
-  {"n","n","shlr2 <REG_N>", "0100nnnn00001001", "R[n]=UR[n]>>2;"},
-  {"n","n","shlr8 <REG_N>", "0100nnnn00011001", "R[n]=UR[n]>>8;"},
-  {"","","sleep", "0000000000011011", "trap(0xc3,R0,memory,maskl,maskw,little_endian);PC-=2;"},
-  {"n","","stc SR,<REG_N>",  "0000nnnn00000010", "R[n]=GET_SR();"},
-  {"n","","stc GBR,<REG_N>", "0000nnnn00010010", "R[n]=GBR;"},
-  {"n","","stc VBR,<REG_N>", "0000nnnn00100010", "R[n]=VBR;"},
-  {"n","","stc SSR,<REG_N>", "0000nnnn00110010", "R[n]=SSR;"},
-  {"n","","stc SPC,<REG_N>", "0000nnnn01000010", "R[n]=SPC;"},
-  {"n","n","stc.l SR,@-<REG_N>",  "0100nnnn00000011", "R[n]-=4;WLAT(R[n],GET_SR());"},
-  {"n","n","stc.l GBR,@-<REG_N>", "0100nnnn00010011", "R[n]-=4;WLAT(R[n],GBR);;"},
-  {"n","n","stc.l VBR,@-<REG_N>", "0100nnnn00100011", "R[n]-=4;WLAT(R[n],VBR);"},
-  {"n","n","stc.l SSR,@-<REG_N>", "0100nnnn00110011", "R[n]-=4;WLAT(R[n],SSR);"},
-  {"n","n","stc.l SPC,@-<REG_N>", "0100nnnn01000011", "R[n]-=4;WLAT(R[n],SPC);"},
-  {"n","","sts MACH,<REG_N>", "0000nnnn00001010", "R[n]=MACH;"},
-  {"n","","sts MACL,<REG_N>", "0000nnnn00011010", "R[n]=MACL;"},
-  {"n","","sts PR,<REG_N>", "0000nnnn00101010", "R[n]=PR;"},
-  {"n","n","sts.l MACH,@-<REG_N>", "0100nnnn00000010", "R[n]-=4;WLAT(R[n],MACH);"},
-  {"n","n","sts.l MACL,@-<REG_N>", "0100nnnn00010010", "R[n]-=4;WLAT(R[n],MACL);"},
-  {"n","n","sts.l PR,@-<REG_N>", "0100nnnn00100010", "R[n]-=4;WLAT(R[n],PR);"},
-  {"n","nm","sub <REG_M>,<REG_N>", "0011nnnnmmmm1000", "R[n]-=R[m];"},
-{"n","nm","subc <REG_M>,<REG_N>", "0011nnnnmmmm1010", "ult=R[n]-T;T=ult>R[n];R[n]=ult-R[m];T|=R[n]>ult;"},
-  {"n","nm","subv <REG_M>,<REG_N>", "0011nnnnmmmm1011",
-     "ult = R[n] - R[m]; T = (((R[n] ^ R[m]) & (ult ^ R[n])) >> 31); R[n] = ult;"},
-  {"n","nm","swap.b <REG_M>,<REG_N>", "0110nnnnmmmm1000", "R[n]=((R[m]<<8)&0xff00)|((R[m]>>8)&0x00ff);"},
-  {"n","nm","swap.w <REG_M>,<REG_N>", "0110nnnnmmmm1001", "R[n]=((R[m]<<16)&0xffff0000)|((R[m]>>16)&0x00ffff);"},
-  {"","n","tas.b @<REG_N>", "0100nnnn00011011", "ult=RBAT(R[n]);T=ult==0;WBAT(R[n],ult|0x80);"},
-  {"0","","trapa #<imm>", "11000011i8*1....", 
-     "{ long imm = 0xff & i; if (i==0xc3) PC-=2; if (i<20||i==34||i==0xc3) trap(i,R,memory,maskl,maskw,little_endian); else { R[15]-=4; WLAT(R[15],GET_SR()); R[15]-=4;WLAT(R[15],PC+2); PC=RLAT(VBR+(imm<<2))-2;}}"},
-  {"","0","tst #<imm>,R0", "11001000i8*1....", "T=(R0&i)==0;"},
-  {"","mn","tst <REG_M>,<REG_N>", "0010nnnnmmmm1000", "T=(R[n]&R[m])==0;"},
-  {"","0","tst.b #<imm>,@(R0,GBR)", "11001100i8*1....", "T=(RBAT(GBR+R0)&i)==0;"},
-  {"","0","xor #<imm>,R0", "11001010i8*1....", "R0^=i;"},
-  {"n","mn","xor <REG_M>,<REG_N>", "0010nnnnmmmm1010", "R[n]^=R[m];"},
-  {"","0","xor.b #<imm>,@(R0,GBR)", "11001110i8*1....", "ult=RBAT(GBR+R0);ult^=i;WBAT(GBR+R0,ult);"},
-  {"n","nm","xtrct <REG_M>,<REG_N>", "0010nnnnmmmm1101", "R[n]=((R[n]>>16)&0xffff)|((R[m]<<16)&0xffff0000);"},
-  {"","nm","mul.l <REG_M>,<REG_N>", "0000nnnnmmmm0111", " MACL = R[n] * R[m];"},
-  {"n","n","dt <REG_N>", "0100nnnn00010000", "R[n]--; T=R[n] == 0;"},
-  {"","nm","dmuls.l <REG_M>,<REG_N>", "0011nnnnmmmm1101", "dmul(1,R[n],R[m]);"},
-  {"","nm","dmulu.l <REG_M>,<REG_N>", "0011nnnnmmmm0101", "dmul(0,R[n],R[m]);"},
-  {"","nm","mac.l @<REG_M>+,@<REG_N>+", "0000nnnnmmmm1111", "abort();"},
-  {"","n","braf <REG_N>", "0000nnnn00100011", "ult = PC; PC+=R[n]-2;SL(ult+2);"},
-  {"","n","bsrf <REG_N>", "0000nnnn00000011", "PR = PC + 4; PC+=R[n]-2;SL(PR-2);"},
+  { "n", "mn", "addc <REG_M>,<REG_N>", "0011nnnnmmmm1110",
+    "ult = R[n] + T;",
+    "SET_SR_T (ult < R[n]);",
+    "R[n] = ult + R[m];",
+    "SET_SR_T (T || (R[n] < ult));",
+  },
+
+  { "n", "mn", "addv <REG_M>,<REG_N>", "0011nnnnmmmm1111",
+    "ult = R[n] + R[m];",
+    "SET_SR_T ((~(R[n] ^ R[m]) & (ult ^ R[n])) >> 31);",
+    "R[n] = ult;",
+  },
+
+  { "0", "", "and #<imm>,R0", "11001001i8*1....",
+    "R0 &= i;",
+  },
+  { "n", "nm", "and <REG_M>,<REG_N>", "0010nnnnmmmm1001",
+    "R[n] &= R[m];",
+  },
+  { "", "0", "and.b #<imm>,@(R0,GBR)", "11001101i8*1....",
+    "MA (1);",
+    "WBAT (GBR + R0, RBAT (GBR + R0) & i);",
+  },
+
+  { "", "", "bf <bdisp8>", "10001011i8p1....",
+    "if (!T) {",
+    "  nia = PC + 4 + (SEXT(i) * 2);",
+    "  cycles += 2;",
+    "}",
+  },
+
+  { "", "", "bf.s <bdisp8>", "10001111i8p1....",
+    "if (!T) {",
+    "  nia = PC + 4 + (SEXT (i) * 2);",
+    "  cycles += 2;",
+    "  Delay_Slot (PC + 2);",
+    "}",
+  },
+
+  { "", "", "bra <bdisp12>", "1010i12.........",
+    "nia = PC + 4 + (SEXT12 (i) * 2);",
+    "Delay_Slot (PC + 2);",
+  },
+
+  { "", "n", "braf <REG_N>", "0000nnnn00100011",
+    "nia = PC + 4 + R[n];",
+    "Delay_Slot (PC + 2);",
+  },
+
+  { "", "", "bsr <bdisp12>", "1011i12.........",
+    "PR = PC + 4;",
+    "nia = PC + 4 + (SEXT12 (i) * 2);",
+    "Delay_Slot (PC + 2);",
+  },
+
+  { "", "n", "bsrf <REG_N>", "0000nnnn00000011",
+    "PR = PC + 4;",
+    "nia = PC + 4 + R[n];",
+    "Delay_Slot (PC + 2);",
+  },
+
+  { "", "", "bt <bdisp8>", "10001001i8p1....",
+    "if (T) {",
+    "  nia = PC + 4 + (SEXT (i) * 2);",
+    "  cycles += 2;",
+    "}",
+  },
+
+  { "", "", "bt.s <bdisp8>", "10001101i8p1....",
+    "if (T) {",
+    "  nia = PC + 4 + (SEXT (i) * 2);",
+    "  cycles += 2;",
+    "  Delay_Slot (PC + 2);",
+    "}",
+  },
+
+  { "", "", "clrmac", "0000000000101000",
+    "MACH = 0;",
+    "MACL = 0;",
+  },
+
+  { "", "", "clrs", "0000000001001000",
+    "SET_SR_S (0);",
+  },
+
+  { "", "", "clrt", "0000000000001000",
+    "SET_SR_T (0);",
+  },
+
+  { "", "0", "cmp/eq #<imm>,R0", "10001000i8*1....",
+    "SET_SR_T (R0 == SEXT (i));",
+  },
+  { "", "mn", "cmp/eq <REG_M>,<REG_N>", "0011nnnnmmmm0000",
+    "SET_SR_T (R[n] == R[m]);",
+  },
+  { "", "mn", "cmp/ge <REG_M>,<REG_N>", "0011nnnnmmmm0011",
+    "SET_SR_T (R[n] >= R[m]);",
+  },
+  { "", "mn", "cmp/gt <REG_M>,<REG_N>", "0011nnnnmmmm0111",
+    "SET_SR_T (R[n] > R[m]);",
+  },
+  { "", "mn", "cmp/hi <REG_M>,<REG_N>", "0011nnnnmmmm0110",
+    "SET_SR_T (UR[n] > UR[m]);",
+  },
+  { "", "mn", "cmp/hs <REG_M>,<REG_N>", "0011nnnnmmmm0010",
+    "SET_SR_T (UR[n] >= UR[m]);",
+  },
+  { "", "n", "cmp/pl <REG_N>", "0100nnnn00010101",
+    "SET_SR_T (R[n] > 0);",
+  },
+  { "", "n", "cmp/pz <REG_N>", "0100nnnn00010001",
+    "SET_SR_T (R[n] >= 0);",
+  },
+  { "", "mn", "cmp/str <REG_M>,<REG_N>", "0010nnnnmmmm1100",
+    "ult = R[n] ^ R[m];",
+    "SET_SR_T (((ult & 0xff000000) == 0)",
+    "          | ((ult & 0xff0000) == 0)",
+    "          | ((ult & 0xff00) == 0)",
+    "          | ((ult & 0xff) == 0));",
+  },
+
+  { "", "mn", "div0s <REG_M>,<REG_N>", "0010nnnnmmmm0111",
+    "SET_SR_Q ((R[n] & sbit) != 0);",
+    "SET_SR_M ((R[m] & sbit) != 0);",
+    "SET_SR_T (M != Q);",
+  },
+
+  { "", "", "div0u", "0000000000011001",
+    "SET_SR_M (0);",
+    "SET_SR_Q (0);",
+    "SET_SR_T (0);",
+  },
+
+  { "", "", "div1 <REG_M>,<REG_N>", "0011nnnnmmmm0100",
+    "div1 (R, m, n/*, T*/);",
+  },
+
+  { "", "nm", "dmuls.l <REG_M>,<REG_N>", "0011nnnnmmmm1101",
+    "dmul (1/*signed*/, R[n], R[m]);",
+  },
+
+  { "", "nm", "dmulu.l <REG_M>,<REG_N>", "0011nnnnmmmm0101",
+    "dmul (0/*unsigned*/, R[n], R[m]);",
+  },
+
+  { "n", "n", "dt <REG_N>", "0100nnnn00010000",
+    "R[n]--;",
+    "SET_SR_T (R[n] == 0);",
+  },
+
+  { "n", "m", "exts.b <REG_M>,<REG_N>", "0110nnnnmmmm1110",
+    "R[n] = SEXT (R[m]);",
+  },
+  { "n", "m", "exts.w <REG_M>,<REG_N>", "0110nnnnmmmm1111",
+    "R[n] = SEXTW (R[m]);",
+  },
+
+  { "n", "m", "extu.b <REG_M>,<REG_N>", "0110nnnnmmmm1100",
+    "R[n] = (R[m] & 0xff);",
+  },
+  { "n", "m", "extu.w <REG_M>,<REG_N>", "0110nnnnmmmm1101",
+    "R[n] = (R[m] & 0xffff);",
+  },
+
+  /* sh3e */
+  { "", "", "fabs <FREG_N>", "1111nnnn01011101",
+    "FP_UNARY (n, fabs);",
+    "/* FIXME: FR(n) &= 0x7fffffff; */",
+  },
+
+  /* sh3e */
+  { "", "", "fadd <FREG_M>,<FREG_N>", "1111nnnnmmmm0000",
+    "FP_OP (n, +, m);",
+  },
+
+  /* sh3e */
+  { "", "", "fcmp/eq <FREG_M>,<FREG_N>", "1111nnnnmmmm0100",
+    "FP_CMP (n, ==, m);",
+  },
+  /* sh3e */
+  { "", "", "fcmp/gt <FREG_M>,<FREG_N>", "1111nnnnmmmm0101",
+    "FP_CMP (n, >, m);",
+  },
+
+  /* start-sanitize-sh4 */
+  { "", "", "fcnvds <DR_N>,FPUL", "1111nnnn10111101",
+    "if (! FPSCR_PR || n & 1)",
+    "  saved_state.asregs.exception = SIGILL;",
+    "else",
+    "{",
+    "  char buf[4];",
+    "  *(float *)buf = DR(n);",
+    "  FPUL = *(int *)buf;",
+    "}",
+  },
+  /* end-sanitize-sh4 */
+
+  /* start-sanitize-sh4 */
+  { "", "", "fcnvsd FPUL,<DR_N>", "1111nnnn10101101",
+    "if (! FPSCR_PR || n & 1)",
+    "  saved_state.asregs.exception = SIGILL;",
+    "else",
+    "{",
+    "  char buf[4];",
+    "  *(int *)buf = FPUL;",
+    "  SET_DR(n, *(float *)buf);",
+    "}",
+  },
+  /* end-sanitize-sh4 */
+
+  /* sh3e */
+  { "", "", "fdiv <FREG_M>,<FREG_N>", "1111nnnnmmmm0011",
+    "FP_OP (n, /, m);",
+    "/* FIXME: check for DP and (n & 1) == 0? */",
+  },
+
+  /* start-sanitize-sh4 */
+  { "", "", "fipr <FV_M>,<FV_N>", "1111nnmm11101101",
+    "/* FIXME: not implemented */",
+    "saved_state.asregs.exception = SIGILL;",
+    "/* FIXME: check for DP and (n & 1) == 0? */",
+  },
+  /* end-sanitize-sh4 */
+
+  /* sh3e */
+  { "", "", "fldi0 <FREG_N>", "1111nnnn10001101",
+    "SET_FR (n, (float)0.0);",
+    "/* FIXME: check for DP and (n & 1) == 0? */",
+  },
+
+  /* sh3e */
+  { "", "", "fldi1 <FREG_N>", "1111nnnn10011101",
+    "SET_FR (n, (float)1.0);",
+    "/* FIXME: check for DP and (n & 1) == 0? */",
+  },
+
+  /* sh3e */
+  { "", "", "flds <FREG_N>,FPUL", "1111nnnn00011101",
+    "char buf[4];",
+    "*(float *)buf = FR(n);",
+    "FPUL = *(int *)buf;",
+  },
+
+  /* sh3e */
+  { "", "", "float FPUL,<FREG_N>", "1111nnnn00101101",
+    /* start-sanitize-sh4 */
+    "if (FPSCR_PR)",
+    "  SET_DR (n, (double)FPUL);",
+    "else",
+    /* end-sanitize-sh4 */
+    "{",
+    "  SET_FR (n, (float)FPUL);",
+    "}",
+  },
+
+  /* sh3e */
+  { "", "", "fmac <FREG_0>,<FREG_M>,<FREG_N>", "1111nnnnmmmm1110",
+    "SET_FR (n, FR(m) * FR(0) + FR(n));",
+    "/* FIXME: check for DP and (n & 1) == 0? */",
+  },
+
+  /* sh3e */
+  { "", "", "fmov <FREG_M>,<FREG_N>", "1111nnnnmmmm1100",
+    /* start-sanitize-sh4 */
+    "if (FPSCR_SZ) {",
+    "  int ni = XD_TO_XF (n);",
+    "  int mi = XD_TO_XF (m);",
+    "  SET_XF (ni + 0, XF (mi + 0));",
+    "  SET_XF (ni + 1, XF (mi + 1));",
+    "}",
+    "else",
+    /* end-sanitize-sh4 */
+    "{",
+    "  SET_FR (n, FR (m));",
+    "}",
+  },
+  /* sh3e */
+  { "", "", "fmov.s <FREG_M>,@<REG_N>", "1111nnnnmmmm1010",
+    /* start-sanitize-sh4 */
+    "if (FPSCR_SZ) {",
+    "  MA (2);",
+    "  WDAT (R[n], m);",
+    "}",
+    "else",
+    /* end-sanitize-sh4 */
+    "{",
+    "  MA (1);",
+    "  WLAT (R[n], FI(m));",
+    "}",
+  },
+  /* sh3e */
+  { "", "", "fmov.s @<REG_M>,<FREG_N>", "1111nnnnmmmm1000",
+    /* start-sanitize-sh4 */
+    "if (FPSCR_SZ) {",
+    "  MA (2);",
+    "  RDAT (R[m], n);",
+    "}",
+    "else",
+    /* end-sanitize-sh4 */
+    "{",
+    "  MA (1);",
+    "  SET_FI(n, RLAT(R[m]));",
+    "}",
+  },
+  /* sh3e */
+  { "", "", "fmov.s @<REG_M>+,<FREG_N>", "1111nnnnmmmm1001",
+    /* start-sanitize-sh4 */
+    "if (FPSCR_SZ) {",
+    "  MA (2);",
+    "  RDAT (R[m], n);",
+    "  R[m] += 8;",
+    "}",
+    "else",
+    /* end-sanitize-sh4 */
+    "{",
+    "  MA (1);",
+    "  SET_FI (n, RLAT (R[m]));",
+    "  R[m] += 4;",
+    "}",
+  },
+  /* sh3e */
+  { "", "", "fmov.s <FREG_M>,@-<REG_N>", "1111nnnnmmmm1011",
+    /* start-sanitize-sh4 */
+    "if (FPSCR_SZ) {",
+    "  MA (2);",
+    "  R[n] -= 8;",
+    "  WDAT (R[n], m);",
+    "}",
+    "else",
+    /* end-sanitize-sh4 */
+    "{",
+    "  MA (1);",
+    "  R[n] -= 4;",
+    "  WLAT (R[n], FI(m));",
+    "}",
+  },
+  /* sh3e */
+  { "", "", "fmov.s @(R0,<REG_M>),<FREG_N>", "1111nnnnmmmm0110",
+    /* start-sanitize-sh4 */
+    "if (FPSCR_SZ) {",
+    "  MA (2);",
+    "  RDAT (R[0]+R[m], n);",
+    "}",
+    "else",
+    /* end-sanitize-sh4 */
+    "{",
+    "  MA (1);",
+    "  SET_FI(n, RLAT(R[0] + R[m]));",
+    "}",
+  },
+  /* sh3e */
+  { "", "", "fmov.s <FREG_M>,@(R0,<REG_N>)", "1111nnnnmmmm0111",
+    /* start-sanitize-sh4 */
+    "if (FPSCR_SZ) {",
+    "  MA (2);",
+    "  WDAT (R[0]+R[n], m);",
+    "}",
+    "else",
+    /* end-sanitize-sh4 */
+    "{",
+    "  MA (1);",
+    "  WLAT((R[0]+R[n]), FI(m));",
+    "}",
+  },
+
+  /* start-sanitize-sh4 */
+  /* See fmov instructions above for move to/from extended fp
+     registers */
+  /* end-sanitize-sh4 */
+
+  /* sh3e */
+  { "", "", "fmul <FREG_M>,<FREG_N>", "1111nnnnmmmm0010",
+    "FP_OP(n, *, m);",
+  },
+
+  /* sh3e */
+  { "", "", "fneg <FREG_N>", "1111nnnn01001101",
+    "FP_UNARY(n, -);",
+  },
+
+  /* start-sanitize-sh4 */
+  { "", "", "frchg", "1111101111111101",
+    "SET_FPSCR (GET_FPSCR() ^ FPSCR_MASK_FR);",
+  },
+  /* end-sanitize-sh4 */
+
+  /* start-sanitize-sh4 */
+  { "", "", "fschg", "1111001111111101",
+    "SET_FPSCR (GET_FPSCR() ^ FPSCR_MASK_SZ);",
+  },
+  /* end-sanitize-sh4 */
+
+  /* sh3e */
+  { "", "", "fsqrt <FREG_N>", "1111nnnn01101101",
+    "FP_UNARY(n, sqrt);",
+  },
+
+  /* sh3e */
+  { "", "", "fsub <FREG_M>,<FREG_N>", "1111nnnnmmmm0001",
+    "FP_OP(n, -, m);",
+  },
+
+  /* sh3e */
+  { "", "", "ftrc <FREG_N>, FPUL", "1111nnnn00111101",
+    /* start-sanitize-sh4 */
+    "if (FPSCR_PR) {",
+    "  if (DR(n) != DR(n)) /* NaN */",
+    "    FPUL = 0x80000000;",
+    "  else",
+    "    FPUL =  (int)DR(n);",
+    "}",
+    "else",
+    /* end-sanitize-sh4 */
+    "if (FR(n) != FR(n)) /* NaN */",
+    "  FPUL = 0x80000000;",
+    "else",
+    "  FPUL = (int)FR(n);",
+  },
+
+  /* start-sanitize-sh4 */
 #if 0
-  {"divs.l <REG_M>,<REG_N>", "0100nnnnmmmm1110", "divl(0,R[n],R[m]);"},
-  {"divu.l <REG_M>,<REG_N>", "0100nnnnmmmm1101", "divl(0,R[n],R[m]);"},
+  /* ftst/nan would appear to have been dropped */
+  /* end-sanitize-sh4 */
+  /* sh3e */
+  { "", "", "ftst/nan <FREG_N>", "1111nnnn01111101",
+    "SET_SR_T (isnan (FR(n)));",
+  },
+  /* start-sanitize-sh4 */
+#endif
+  /* end-sanitize-sh4 */
+
+  /* sh3e */
+  { "", "", "fsts FPUL,<FREG_N>", "1111nnnn00001101",
+    "char buf[4];",
+    "*(int *)buf = FPUL;",
+    "SET_FR (n, *(float *)buf);",
+  },
+
+  { "", "n", "jmp @<REG_N>", "0100nnnn00101011",
+    "nia = R[n];",
+    "Delay_Slot (PC + 2);",
+  },
+
+  { "", "n", "jsr @<REG_N>", "0100nnnn00001011",
+    "PR = PC + 4;",
+    "nia = R[n];",
+    "if (~doprofile)",
+    "  gotcall (PR, nia);",
+    "Delay_Slot (PC + 2);",
+  },
+
+  { "", "n", "ldc <REG_N>,GBR", "0100nnnn00011110",
+    "GBR = R[n];",
+    "/* FIXME: user mode */",
+  },
+  { "", "n", "ldc <REG_N>,SR", "0100nnnn00001110",
+    "SET_SR (R[n]);",
+    "/* FIXME: user mode */",
+  },
+  { "", "n", "ldc <REG_N>,VBR", "0100nnnn00101110",
+    "VBR = R[n];",
+    "/* FIXME: user mode */",
+  },
+  { "", "n", "ldc <REG_N>,SSR", "0100nnnn00111110",
+    "SSR = R[n];",
+    "/* FIXME: user mode */",
+  },
+  { "", "n", "ldc <REG_N>,SPC", "0100nnnn01001110",
+    "SPC = R[n];",
+    "/* FIXME: user mode */",
+  },
+  /* start-sanitize-sh4 */
+#if 0
+  { "", "n", "ldc <REG_N>,DBR", "0100nnnn11111010",
+    "DBR = R[n];",
+    "/* FIXME: user mode */",
+  },
+#endif
+  /* end-sanitize-sh4 */
+  { "", "n", "ldc <REG_N>,R0_BANK", "0100nnnn10001110",
+    "SET_Rn_BANK (0, R[n]);",
+    "/* FIXME: user mode */",
+  },
+  { "", "n", "ldc <REG_N>,R1_BANK", "0100nnnn10011110",
+    "SET_Rn_BANK (1, R[n]);",
+    "/* FIXME: user mode */",
+  },
+  { "", "n", "ldc <REG_N>,R2_BANK", "0100nnnn10101110",
+    "SET_Rn_BANK (2, R[n]);",
+    "/* FIXME: user mode */",
+  },
+  { "", "n", "ldc <REG_N>,R3_BANK", "0100nnnn10111110",
+    "SET_Rn_BANK (3, R[n]);",
+    "/* FIXME: user mode */",
+  },
+  { "", "n", "ldc <REG_N>,R4_BANK", "0100nnnn11001110",
+    "SET_Rn_BANK (4, R[n]);",
+    "/* FIXME: user mode */",
+  },
+  { "", "n", "ldc <REG_N>,R5_BANK", "0100nnnn11011110",
+    "SET_Rn_BANK (5, R[n]);",
+    "/* FIXME: user mode */",
+  },
+  { "", "n", "ldc <REG_N>,R6_BANK", "0100nnnn11101110",
+    "SET_Rn_BANK (6, R[n]);",
+    "/* FIXME: user mode */",
+  },
+  { "", "n", "ldc <REG_N>,R7_BANK", "0100nnnn11111110",
+    "SET_Rn_BANK (7, R[n]);",
+    "/* FIXME: user mode */",
+  },
+  { "", "n", "ldc.l @<REG_N>+,GBR", "0100nnnn00010111",
+    "MA (1);",
+    "GBR = RLAT (R[n]);",
+    "R[n] += 4;",
+    "/* FIXME: user mode */",
+  },
+  { "", "n", "ldc.l @<REG_N>+,SR", "0100nnnn00000111",
+    "MA (1);",
+    "SET_SR (RLAT (R[n]));",
+    "R[n] += 4;",
+    "/* FIXME: user mode */",
+  },
+  { "", "n", "ldc.l @<REG_N>+,VBR", "0100nnnn00100111",
+    "MA (1);",
+    "VBR = RLAT (R[n]);",
+    "R[n] += 4;",
+    "/* FIXME: user mode */",
+  },
+  { "", "n", "ldc.l @<REG_N>+,SSR", "0100nnnn00110111",
+    "MA (1);",
+    "SSR = RLAT (R[n]);",
+    "R[n] += 4;",
+    "/* FIXME: user mode */",
+  },
+  { "", "n", "ldc.l @<REG_N>+,SPC", "0100nnnn01000111",
+    "MA (1);",
+    "SPC = RLAT (R[n]);",
+    "R[n] += 4;",
+    "/* FIXME: user mode */",
+  },
+  /* start-sanitize-sh4 */
+#if 0
+  { "", "n", "ldc.l @<REG_N>+,DBR", "0100nnnn11110110",
+    "MA (1);",
+    "DBR = RLAT (R[n]);",
+    "R[n] += 4;",
+    "/* FIXME: user mode */",
+  },
+#endif
+  /* end-sanitize-sh4 */
+  { "", "n", "ldc.l @<REG_N>+,R0_BANK", "0100nnnn10000111",
+    "MA (1);",
+    "SET_Rn_BANK (0, RLAT (R[n]));",
+    "R[n] += 4;",
+    "/* FIXME: user mode */",
+  },
+  { "", "n", "ldc.l @<REG_N>+,R1_BANK", "0100nnnn10010111",
+    "MA (1);",
+    "SET_Rn_BANK (1, RLAT (R[n]));",
+    "R[n] += 4;",
+    "/* FIXME: user mode */",
+  },
+  { "", "n", "ldc.l @<REG_N>+,R2_BANK", "0100nnnn10100111",
+    "MA (1);",
+    "SET_Rn_BANK (2, RLAT (R[n]));",
+    "R[n] += 4;",
+    "/* FIXME: user mode */",
+  },
+  { "", "n", "ldc.l @<REG_N>+,R3_BANK", "0100nnnn10110111",
+    "MA (1);",
+    "SET_Rn_BANK (3, RLAT (R[n]));",
+    "R[n] += 4;",
+    "/* FIXME: user mode */",
+  },
+  { "", "n", "ldc.l @<REG_N>+,R4_BANK", "0100nnnn11000111",
+    "MA (1);",
+    "SET_Rn_BANK (4, RLAT (R[n]));",
+    "R[n] += 4;",
+    "/* FIXME: user mode */",
+  },
+  { "", "n", "ldc.l @<REG_N>+,R5_BANK", "0100nnnn11010111",
+    "MA (1);",
+    "SET_Rn_BANK (5, RLAT (R[n]));",
+    "R[n] += 4;",
+    "/* FIXME: user mode */",
+  },
+  { "", "n", "ldc.l @<REG_N>+,R6_BANK", "0100nnnn11100111",
+    "MA (1);",
+    "SET_Rn_BANK (6, RLAT (R[n]));",
+    "R[n] += 4;",
+    "/* FIXME: user mode */",
+  },
+  { "", "n", "ldc.l @<REG_N>+,R7_BANK", "0100nnnn11110111",
+    "MA (1);",
+    "SET_Rn_BANK (7, RLAT (R[n]));",
+    "R[n] += 4;",
+    "/* FIXME: user mode */",
+  },
+
+  /* sh3e */
+  { "", "", "lds <REG_N>,FPUL", "0100nnnn01011010",
+    "FPUL = R[n];",
+  },
+  /* sh3e */
+  { "", "", "lds.l @<REG_N>+,FPUL", "0100nnnn01010110",
+    "MA (1);",
+    "FPUL = RLAT(R[n]);",
+    "R[n] += 4;",
+  },
+  /* sh3e */
+  { "", "", "lds <REG_N>,FPSCR", "0100nnnn01101010",
+    "SET_FPSCR(R[n]);",
+  },
+  /* sh3e */
+  { "", "", "lds.l @<REG_N>+,FPSCR", "0100nnnn01100110",
+    "MA (1);",
+    "SET_FPSCR (RLAT(R[n]));",
+    "R[n] += 4;",
+  },
+
+  { "", "n", "lds <REG_N>,MACH", "0100nnnn00001010",
+    "MACH = R[n];",
+  },
+  { "", "n", "lds <REG_N>,MACL", "0100nnnn00011010",
+    "MACL= R[n];",
+  },
+  { "", "n", "lds <REG_N>,PR", "0100nnnn00101010",
+    "PR = R[n];",
+  },
+  { "", "n", "lds.l @<REG_N>+,MACH", "0100nnnn00000110",
+    "MA (1);",
+    "MACH = SEXT(RLAT(R[n]));",
+    "R[n]+=4;",
+  },
+  { "", "n", "lds.l @<REG_N>+,MACL", "0100nnnn00010110",
+    "MA (1);",
+    "MACL = RLAT(R[n]);",
+    "R[n]+=4;",
+  },
+  { "", "n", "lds.l @<REG_N>+,PR", "0100nnnn00100110",
+    "MA (1);",
+    "PR = RLAT(R[n]);",
+    "R[n]+=4;;",
+  },
+
+  { "", "", "ldtlb", "0000000000111000",
+    "/* FIXME: XXX*/ abort();",
+  },
+
+  { "", "nm", "mac.l @<REG_M>+,@<REG_N>+", "0000nnnnmmmm1111",
+    "trap (255,R0,memory,maskl,maskw,little_endian);",
+    "/* FIXME: mac.l support */",
+  },
+
+  { "", "nm", "mac.w @<REG_M>+,@<REG_N>+", "0100nnnnmmmm1111",
+    "macw(R0,memory,n,m);",
+  },
+
+  { "n", "", "mov #<imm>,<REG_N>", "1110nnnni8*1....",
+    "R[n] = SEXT(i);",
+  },
+  { "n", "m", "mov <REG_M>,<REG_N>", "0110nnnnmmmm0011",
+    "R[n] = R[m];",
+  },
+
+  { "0", "", "mov.b @(<disp>,GBR),R0", "11000100i8*1....",
+    "MA (1);",
+    "R0 = RSBAT (i + GBR);",
+    "L (0);",
+  },
+  { "0", "m", "mov.b @(<disp>,<REG_M>),R0", "10000100mmmmi4*1",
+    "MA (1);",
+    "R0 = RSBAT (i + R[m]);",
+    "L (0);",
+  },
+  { "n", "0m", "mov.b @(R0,<REG_M>),<REG_N>", "0000nnnnmmmm1100",
+    "MA (1);",
+    "R[n] = RSBAT (R0 + R[m]);",
+    "L (n);",
+  },
+  { "n", "m", "mov.b @<REG_M>+,<REG_N>", "0110nnnnmmmm0100",
+    "MA (1);",
+    "R[n] = RSBAT (R[m]);",
+    "R[m] += 1;",
+    "L (n);",
+  },
+  { "", "mn", "mov.b <REG_M>,@<REG_N>", "0010nnnnmmmm0000",
+    "MA (1);",
+    "WBAT (R[n], R[m]);",
+  },
+  { "", "0", "mov.b R0,@(<disp>,GBR)", "11000000i8*1....",
+    "MA (1);",
+    "WBAT (i + GBR, R0);",
+  },
+  { "", "m0", "mov.b R0,@(<disp>,<REG_M>)", "10000000mmmmi4*1",
+    "MA (1);",
+    "WBAT (i + R[m], R0);",
+  },
+  { "", "mn0", "mov.b <REG_M>,@(R0,<REG_N>)", "0000nnnnmmmm0100",
+    "MA (1);",
+    "WBAT (R[n] + R0, R[m]);",
+  },
+  { "", "nm", "mov.b <REG_M>,@-<REG_N>", "0010nnnnmmmm0100",
+    "MA (1);",
+    "R[n] -= 1;",
+    "WBAT (R[n], R[m]);",
+  },
+  { "n", "m", "mov.b @<REG_M>,<REG_N>", "0110nnnnmmmm0000",
+    "MA (1);",
+    "R[n] = RSBAT (R[m]);",
+    "L (n);",
+  },
+
+  { "0", "", "mov.l @(<disp>,GBR),R0", "11000110i8*4....",
+    "MA (1);",
+    "R0 = RLAT (i + GBR);",
+    "L (0);",
+  },
+  { "n", "", "mov.l @(<disp>,PC),<REG_N>", "1101nnnni8p4....",
+    "MA (1);",
+    "R[n] = RLAT((PC & ~3) + 4 + i);",
+    "L (n);",
+  },
+  { "n", "m", "mov.l @(<disp>,<REG_M>),<REG_N>", "0101nnnnmmmmi4*4",
+    "MA (1);",
+    "R[n] = RLAT (i + R[m]);",
+    "L (n);",
+  },
+  { "n", "m0", "mov.l @(R0,<REG_M>),<REG_N>", "0000nnnnmmmm1110",
+    "MA (1);",
+    "R[n] = RLAT (R0 + R[m]);",
+    "L (n);",
+  },
+  { "nm", "m", "mov.l @<REG_M>+,<REG_N>", "0110nnnnmmmm0110",
+    "MA (1);",
+    "R[n] = RLAT (R[m]);",
+    "R[m] += 4;",
+    "L (n);",
+  },
+  { "n", "m", "mov.l @<REG_M>,<REG_N>", "0110nnnnmmmm0010",
+    "MA (1);",
+    "R[n] = RLAT (R[m]);",
+    "L (n);",
+  },
+  { "", "0", "mov.l R0,@(<disp>,GBR)", "11000010i8*4....",
+    "MA (1);",
+    "WLAT (i + GBR, R0);",
+  },
+  { "", "nm", "mov.l <REG_M>,@(<disp>,<REG_N>)", "0001nnnnmmmmi4*4",
+    "MA (1);",
+    "WLAT (i + R[n], R[m]);",
+  },
+  { "", "nm0", "mov.l <REG_M>,@(R0,<REG_N>)", "0000nnnnmmmm0110",
+    "MA (1);",
+    "WLAT (R0 + R[n], R[m]);",
+  },
+  { "", "nm", "mov.l <REG_M>,@-<REG_N>", "0010nnnnmmmm0110",
+    "MA (1) ;",
+    "R[n] -= 4;",
+    "WLAT (R[n], R[m]);",
+  },
+  { "", "nm", "mov.l <REG_M>,@<REG_N>", "0010nnnnmmmm0010",
+    "MA (1);",
+    "WLAT (R[n], R[m]);",
+  },
+
+  { "0", "", "mov.w @(<disp>,GBR),R0", "11000101i8*2....",
+    "MA (1)",
+    ";R0 = RSWAT (i + GBR);",
+    "L (0);",
+  },
+  { "n", "", "mov.w @(<disp>,PC),<REG_N>", "1001nnnni8p2....",
+    "MA (1);",
+    "R[n] = RSWAT (PC + 4 + i);",
+    "L (n);",
+  },
+  { "0", "m", "mov.w @(<disp>,<REG_M>),R0", "10000101mmmmi4*2",
+    "MA (1);",
+    "R0 = RSWAT (i + R[m]);",
+    "L (0);",
+  },
+  { "n", "m0", "mov.w @(R0,<REG_M>),<REG_N>", "0000nnnnmmmm1101",
+    "MA (1);",
+    "R[n] = RSWAT (R0 + R[m]);",
+    "L (n);",
+  },
+  { "nm", "n", "mov.w @<REG_M>+,<REG_N>", "0110nnnnmmmm0101",
+    "MA (1);",
+    "R[n] = RSWAT (R[m]);",
+    "R[m] += 2;",
+    "L (n);",
+  },
+  { "n", "m", "mov.w @<REG_M>,<REG_N>", "0110nnnnmmmm0001",
+    "MA (1);",
+    "R[n] = RSWAT (R[m]);",
+    "L (n);",
+  },
+  { "", "0", "mov.w R0,@(<disp>,GBR)", "11000001i8*2....",
+    "MA (1);",
+    "WWAT (i + GBR, R0);",
+  },
+  { "", "0m", "mov.w R0,@(<disp>,<REG_M>)", "10000001mmmmi4*2",
+    "MA (1);",
+    "WWAT (i + R[m], R0);",
+  },
+  { "", "m0n", "mov.w <REG_M>,@(R0,<REG_N>)", "0000nnnnmmmm0101",
+    "MA (1);",
+    "WWAT (R0 + R[n], R[m]);",
+  },
+  { "n", "mn", "mov.w <REG_M>,@-<REG_N>", "0010nnnnmmmm0101",
+    "MA (1);",
+    "R[n] -= 2;",
+    "WWAT (R[n], R[m]);",
+  },
+  { "", "nm", "mov.w <REG_M>,@<REG_N>", "0010nnnnmmmm0001",
+    "MA (1);",
+    "WWAT (R[n], R[m]);",
+  },
+
+  { "0", "", "mova @(<disp>,PC),R0", "11000111i8p4....",
+    "R0 = ((i + 4 + PC) & ~0x3);",
+  },
+
+  /* start-sanitize-sh4 */
+  { "0", "", "movca.l @R0, <REG_N>", "0000nnnn11000011",
+    "/* FIXME: Not implemented */",
+    "saved_state.asregs.exception = SIGILL;",
+  },
+  /* end-sanitize-sh4 */
+
+  { "n", "", "movt <REG_N>", "0000nnnn00101001",
+    "R[n] = T;",
+  },
+
+  { "", "mn", "mul.l <REG_M>,<REG_N>", "0000nnnnmmmm0111",
+    "MACL = ((int)R[n]) * ((int)R[m]);",
+  },
+#if 0
+  { "", "nm", "mul.l <REG_M>,<REG_N>", "0000nnnnmmmm0111",
+    "MACL = R[n] * R[m];",
+  },
 #endif
 
-/* start-sanitize-sh3e */
-  {"", "", "fmov.s @<REG_M>,<FREG_N>", "1111nnnnmmmm1000", "*(int *)buf = RLAT(R[m]);F[n] = *(float *)buf;"},
-  {"", "", "fmov.s <FREG_M>,@<REG_N>", "1111nnnnmmmm1010", "*(float *)buf = F[m]; WLAT(R[n], *(int *)buf);"},
-  {"", "", "fmov.s @<REG_M>+,<FREG_N>", "1111nnnnmmmm1001", "*(int *)buf = RLAT(R[m]); F[n] = *(float *)buf; R[m] += 4;"},
-  {"", "", "fmov.s <FREG_M>,@-<REG_N>", "1111nnnnmmmm1011", "R[n] -= 4; *(float *)buf = F[m]; WLAT(R[n], *(int *)buf);"},
-  {"", "", "fmov.s @(R0,<REG_M>),<FREG_N>", "1111nnnnmmmm0110", "*(int *)buf = RLAT((R[0]+R[m]));F[n] = *(float *)buf;"},
-  {"", "", "fmov.s <FREG_M>,@(R0,<REG_N>)", "1111nnnnmmmm0111", "*(float *)buf = F[m]; WLAT((R[0]+R[n]), *(int *)buf);"},
-  {"", "", "fmov <FREG_M>,<FREG_N>", "1111nnnnmmmm1100", "F[n] = F[m];"},
-  {"", "", "fldi0 <FREG_N>", "1111nnnn10001101", "F[n] = (float)0.0;"},
-  {"", "", "fldi1 <FREG_N>", "1111nnnn10011101", "F[n] = (float)1.0;"},
-  {"", "", "fadd <FREG_M>,<FREG_N>", "1111nnnnmmmm0000","F[n] = F[n] + F[m];"},
-  {"", "", "fsub <FREG_M>,<FREG_N>", "1111nnnnmmmm0001","F[n] = F[n] - F[m];"},
-  {"", "", "fmul <FREG_M>,<FREG_N>", "1111nnnnmmmm0010","F[n] = F[n] * F[m];"},
-  {"", "", "fdiv <FREG_M>,<FREG_N>", "1111nnnnmmmm0011","F[n] = F[n] / F[m];"},
-  {"", "", "fmac <FREG_0>,<FREG_M>,<FREG_N>", "1111nnnnmmmm1110", "F[n] = F[m] * F[0] + F[n];"},
-  {"", "", "fcmp/eq <FREG_M>,<FREG_N>", "1111nnnnmmmm0100", "T = F[n] == F[m] ? 1 : 0;"},
-  {"", "", "fcmp/gt <FREG_M>,<FREG_N>", "1111nnnnmmmm0101", "T = F[n] > F[m] ? 1 : 0;"},
-  {"", "", "fneg <FREG_N>", "1111nnnn01001101", "F[n] = -F[n];"},
-  {"", "", "fabs <FREG_N>", "1111nnnn01011101", "F[n] = fabs (F[n]);"},
-  {"", "", "fsqrt <FREG_N>", "1111nnnn01101101", "F[n] = sqrt (F[n]);"},
-  {"", "", "float FPUL,<FREG_N>", "1111nnnn00101101", "F[n] = (float)FPUL;"},
-  {"", "", "ftrc <FREG_N>, FPUL", "1111nnnn00111101", "if (F[n] != F[n]) /* NaN */ FPUL = 0x80000000; else FPUL = (int)F[n];"},
-  {"", "", "ftst/nan <FREG_N>", "1111nnnn01111101", "T = isnan (F[n]);"},
-  {"", "", "fsts FPUL,<FREG_N>", "1111nnnn00001101", "*(int *)buf = FPUL; F[n] = *(float *)buf;"},
-  {"", "", "flds <FREG_N>,FPUL", "1111nnnn00011101", "*(float *)buf = F[n]; FPUL = *(int *)buf;"},
-  {"", "", "lds <REG_N>,FPUL", "0100nnnn01011010", "FPUL = R[n];"},
-  {"", "", "sts FPUL,<REG_N>", "0000nnnn01011010", "R[n] = FPUL;"},
-  {"", "", "lds <REG_N>,FPSCR", "0100nnnn01101010", "*(int *)buf = R[n]; FPSCR = *(float *)buf;"},
-  {"", "", "sts FPSCR,<REG_N>", "0000nnnn01101010", "*(float *)buf = FPSCR; R[n] = *(int *)buf;"},
-  {"","","lds.l @<REG_N>+,FPUL", "0100nnnn01010110", "FPUL = RLAT(R[n]);R[n]+=4;"},
-  {"","","lds.l @<REG_N>+,FPSCR", "0100nnnn01100110", "*(int *)buf = RLAT(R[n]); FPSCR = *(float *)buf; R[n]+=4;"},
-  {"","","sts.l FPUL,@-<REG_N>", "0100nnnn01010010", "R[n]-=4;WLAT(R[n],FPUL);"},
-  {"","","sts.l FPSCR,@-<REG_N>", "0100nnnn01100010", "R[n]-=4;*(float *)buf = FPSCR; WLAT(R[n],*(int *)buf);"},
-/* end-sanitize-sh3e */
+  /* muls.w - see muls */
+  { "", "mn", "muls <REG_M>,<REG_N>", "0010nnnnmmmm1111",
+    "MACL = ((int)(short)R[n]) * ((int)(short)R[m]);",
+  },
+
+  /* mulu.w - see mulu */
+  { "", "mn", "mulu <REG_M>,<REG_N>", "0010nnnnmmmm1110",
+    "MACL = (((unsigned int)(unsigned short)R[n])",
+    "        * ((unsigned int)(unsigned short)R[m]));",
+  },
+
+  { "n", "m", "neg <REG_M>,<REG_N>", "0110nnnnmmmm1011",
+    "R[n] = - R[m];",
+  },
+
+  { "n", "m", "negc <REG_M>,<REG_N>", "0110nnnnmmmm1010",
+    "ult = -T;",
+    "SET_SR_T (ult > 0);",
+    "R[n] = ult - R[m];",
+    "SET_SR_T (T || (R[n] > ult));",
+  },
+
+  { "", "", "nop", "0000000000001001",
+    "/* nop */",
+  },
+
+  { "n", "m", "not <REG_M>,<REG_N>", "0110nnnnmmmm0111",
+    "R[n] = ~R[m];",
+  },
+
+  /* start-sanitize-sh4 */
+  { "0", "", "ocbi @<REG_N>", "0000nnnn10010011",
+    "/* FIXME: Not implemented */",
+    "saved_state.asregs.exception = SIGILL;",
+  },
+  /* end-sanitize-sh4 */
+
+  /* start-sanitize-sh4 */
+  { "0", "", "ocbp @<REG_N>", "0000nnnn10100011",
+    "/* FIXME: Not implemented */",
+    "saved_state.asregs.exception = SIGILL;",
+  },
+  /* end-sanitize-sh4 */
+
+  /* start-sanitize-sh4 */
+  { "", "n", "ocbwb @<REG_N>", "0000nnnn10110011",
+    "RSBAT (R[n]); /* Take exceptions like byte load.  */",
+    "/* FIXME: Cache not implemented */",
+  },
+  /* end-sanitize-sh4 */
+
+  { "0", "", "or #<imm>,R0", "11001011i8*1....",
+    "R0 |= i;",
+  },
+  { "n", "m", "or <REG_M>,<REG_N>", "0010nnnnmmmm1011",
+    "R[n] |= R[m];",
+  },
+  { "", "0", "or.b #<imm>,@(R0,GBR)", "11001111i8*1....",
+    "MA (1);",
+    "WBAT (R0 + GBR, (RBAT (R0 + GBR) | i));",
+  },
+
+  { "", "n", "pref @<REG_N>", "0000nnnn10000011",
+    "/* Except for the effect on the cache - which is not simulated -",
+    "   this is like a nop.  */",
+  },
+
+  { "n", "n", "rotcl <REG_N>", "0100nnnn00100100",
+    "ult = R[n] < 0;",
+    "R[n] = (R[n] << 1) | T;",
+    "SET_SR_T (ult);",
+  },
+
+  { "n", "n", "rotcr <REG_N>", "0100nnnn00100101",
+    "ult = R[n] & 1;",
+    "R[n] = (UR[n] >> 1) | (T << 31);",
+    "SET_SR_T (ult);",
+  },
+
+  { "n", "n", "rotl <REG_N>", "0100nnnn00000100",
+    "SET_SR_T (R[n] < 0);",
+    "R[n] <<= 1;",
+    "R[n] |= T;",
+  },
+
+  { "n", "n", "rotr <REG_N>", "0100nnnn00000101",
+    "SET_SR_T (R[n] & 1);",
+    "R[n] = UR[n] >> 1;",
+    "R[n] |= (T << 31);",
+  },
+
+  { "", "", "rte", "0000000000101011", 
+#if 0
+    /* SH-[12] */
+    "int tmp = PC;",
+    "nia = RLAT (R[15]) + 2;",
+    "R[15] += 4;",
+    "SET_SR (RLAT (R[15]) & 0x3f3);",
+    "R[15] += 4;",
+    "Delay_Slot (PC + 2);",
+#else
+    "nia = SPC;",
+    "SET_SR (SSR);",
+    "Delay_Slot (PC + 2);",
+#endif
+  },
+
+  { "", "", "rts", "0000000000001011",
+    "nia = PR;",
+    "Delay_Slot (PC + 2);",
+  },
+
+  { "", "", "sets", "0000000001011000",
+    "SET_SR_S (1);",
+  },
+
+  { "", "", "sett", "0000000000011000",
+    "SET_SR_T (1);",
+  },
+
+  { "n", "mn", "shad <REG_M>,<REG_N>", "0100nnnnmmmm1100",
+    "R[n] = (R[m] < 0) ? (R[n] >> ((-R[m])&0x1f)) : (R[n] << (R[m] & 0x1f));",
+  },
+
+  { "n", "n", "shal <REG_N>", "0100nnnn00100000",
+    "SET_SR_T (R[n] < 0);",
+    "R[n] <<= 1;",
+  },
+
+  { "n", "n", "shar <REG_N>", "0100nnnn00100001",
+    "SET_SR_T (R[n] & 1);",
+    "R[n] = R[n] >> 1;",
+  },
+
+  { "n", "mn", "shld <REG_M>,<REG_N>", "0100nnnnmmmm1101",
+    "R[n] = (R[m] < 0) ? (UR[n] >> ((-R[m])&0x1f)): (R[n] << (R[m] & 0x1f));",
+  },
+
+  { "n", "n", "shll <REG_N>", "0100nnnn00000000",
+    "SET_SR_T (R[n] < 0);",
+    "R[n] <<= 1;",
+  },
+
+  { "n", "n", "shll2 <REG_N>", "0100nnnn00001000",
+    "R[n] <<= 2;",
+  },
+  { "n", "n", "shll8 <REG_N>", "0100nnnn00011000",
+    "R[n] <<= 8;",
+  },
+  { "n", "n", "shll16 <REG_N>", "0100nnnn00101000",
+    "R[n] <<= 16;",
+  },
+
+  { "n", "n", "shlr <REG_N>", "0100nnnn00000001",
+    "SET_SR_T (R[n] & 1);",
+    "R[n] = UR[n] >> 1;",
+  },
+
+  { "n", "n", "shlr2 <REG_N>", "0100nnnn00001001",
+    "R[n] = UR[n] >> 2;",
+  },
+  { "n", "n", "shlr8 <REG_N>", "0100nnnn00011001",
+    "R[n] = UR[n] >> 8;",
+  },
+  { "n", "n", "shlr16 <REG_N>", "0100nnnn00101001",
+    "R[n] = UR[n] >> 16;",
+  },
+
+  { "", "", "sleep", "0000000000011011",
+    "trap (0xc3, R0, memory, maskl, maskw, little_endian);",
+    "nia = PC;",
+  },
+
+  { "n", "", "stc GBR,<REG_N>", "0000nnnn00010010",
+    "R[n] = GBR;",
+  },
+  { "n", "", "stc SR,<REG_N>",  "0000nnnn00000010",
+    "R[n] = GET_SR ();",
+  },
+  { "n", "", "stc VBR,<REG_N>", "0000nnnn00100010",
+    "R[n] = VBR;",
+  },
+  { "n", "", "stc SSR,<REG_N>", "0000nnnn00110010",
+    "R[n] = SSR;",
+  },
+  { "n", "", "stc SPC,<REG_N>", "0000nnnn01000010",
+    "R[n] = SPC;",
+  },
+  /* start-sanitize-sh4 */
+#if 0
+  { "n", "", "stc SGR,<REG_N>", "0000nnnn00111010",
+    "R[n] = SGR;",
+  },
+  { "n", "", "stc DBR,<REG_N>", "0000nnnn11111010",
+    "R[n] = DBR;",
+  },
+#endif
+  /* end-sanitize-sh4 */
+  { "n", "", "stc R0_BANK,<REG_N>", "0000nnnn10000010",
+    "R[n] = Rn_BANK (0);",
+  },
+  { "n", "", "stc R1_BANK,<REG_N>", "0000nnnn10010010",
+    "R[n] = Rn_BANK (1);",
+  },
+  { "n", "", "stc R2_BANK,<REG_N>", "0000nnnn10100010",
+    "R[n] = Rn_BANK (2);",
+  },
+  { "n", "", "stc R3_BANK,<REG_N>", "0000nnnn10110010",
+    "R[n] = Rn_BANK (3);",
+  },
+  { "n", "", "stc R4_BANK,<REG_N>", "0000nnnn11000010",
+    "R[n] = Rn_BANK (4);",
+  },
+  { "n", "", "stc R5_BANK,<REG_N>", "0000nnnn11010010",
+    "R[n] = Rn_BANK (5);",
+  },
+  { "n", "", "stc R6_BANK,<REG_N>", "0000nnnn11100010",
+    "R[n] = Rn_BANK (6);",
+  },
+  { "n", "", "stc R7_BANK,<REG_N>", "0000nnnn11110010",
+    "R[n] = Rn_BANK (7);",
+  },
+  { "n", "n", "stc.l GBR,@-<REG_N>", "0100nnnn00010011",
+    "MA (1);",
+    "R[n] -= 4;",
+    "WLAT (R[n], GBR);;",
+  },
+  { "n", "n", "stc.l SR,@-<REG_N>",  "0100nnnn00000011",
+    "MA (1);",
+    "R[n] -= 4;",
+    "WLAT (R[n], GET_SR());",
+  },
+  { "n", "n", "stc.l VBR,@-<REG_N>", "0100nnnn00100011",
+    "MA (1);",
+    "R[n] -= 4;",
+    "WLAT (R[n], VBR);",
+  },
+  { "n", "n", "stc.l SSR,@-<REG_N>", "0100nnnn00110011",
+    "MA (1);",
+    "R[n] -= 4;",
+    "WLAT (R[n], SSR);",
+  },
+  { "n", "n", "stc.l SPC,@-<REG_N>", "0100nnnn01000011",
+    "MA (1);",
+    "R[n] -= 4;",
+    "WLAT (R[n], SPC);",
+  },
+  /* start-sanitize-sh4 */
+#if 0
+  { "n", "n", "stc.l SGR,@-<REG_N>", "0100nnnn00110010",
+    "MA (1);",
+    "R[n] -= 4;",
+    "WLAT (R[n], SGR);",
+  },
+  { "n", "n", "stc.l DBR,@-<REG_N>", "0100nnnn11110010",
+    "MA (1);",
+    "R[n] -= 4;",
+    "WLAT (R[n], DBR);",
+  },
+#endif
+  /* end-sanitize-sh4 */
+  { "n", "", "stc R0_BANK,@-<REG_N>", "0100nnnn10000010",
+    "MA (1);",
+    "R[n] -= 4;",
+    "WLAT (R[n], Rn_BANK (0));",
+  },
+  { "n", "", "stc R1_BANK,@-<REG_N>", "0100nnnn10010010",
+    "MA (1);",
+    "R[n] -= 4;",
+    "WLAT (R[n], Rn_BANK (1));",
+  },
+  { "n", "", "stc R2_BANK,@-<REG_N>", "0100nnnn10100010",
+    "MA (1);",
+    "R[n] -= 4;",
+    "WLAT (R[n], Rn_BANK (2));",
+  },
+  { "n", "", "stc R3_BANK,@-<REG_N>", "0100nnnn10110010",
+    "MA (1);",
+    "R[n] -= 4;",
+    "WLAT (R[n], Rn_BANK (3));",
+  },
+  { "n", "", "stc R4_BANK,@-<REG_N>", "0100nnnn11000010",
+    "MA (1);",
+    "R[n] -= 4;",
+    "WLAT (R[n], Rn_BANK (4));",
+  },
+  { "n", "", "stc R5_BANK,@-<REG_N>", "0100nnnn11010010",
+    "MA (1);",
+    "R[n] -= 4;",
+    "WLAT (R[n], Rn_BANK (5));",
+  },
+  { "n", "", "stc R6_BANK,@-<REG_N>", "0100nnnn11100010",
+    "MA (1);",
+    "R[n] -= 4;",
+    "WLAT (R[n], Rn_BANK (6));",
+  },
+  { "n", "", "stc R7_BANK,@-<REG_N>", "0100nnnn11110010",
+    "MA (1);",
+    "R[n] -= 4;",
+    "WLAT (R[n], Rn_BANK (7));",
+  },
+
+  /* sh3e */
+  { "", "", "sts FPUL,<REG_N>", "0000nnnn01011010",
+    "R[n] = FPUL;",
+  },
+  /* sh3e */
+  { "", "", "sts.l FPUL,@-<REG_N>", "0100nnnn01010010",
+    "MA (1);",
+    "R[n] -= 4;",
+    "WLAT (R[n], FPUL);",
+  },
+  /* sh3e */
+  { "", "", "sts FPSCR,<REG_N>", "0000nnnn01101010",
+    "R[n] = GET_FPSCR ();",
+  },
+  /* sh3e */
+  { "", "", "sts.l FPSCR,@-<REG_N>", "0100nnnn01100010",
+    "MA (1);",
+    "R[n] -= 4;",
+    "WLAT (R[n], GET_FPSCR ());",
+  },
+
+  { "n", "", "sts MACH,<REG_N>", "0000nnnn00001010",
+    "R[n] = MACH;",
+  },
+  { "n", "", "sts MACL,<REG_N>", "0000nnnn00011010",
+    "R[n] = MACL;",
+  },
+  { "n", "", "sts PR,<REG_N>", "0000nnnn00101010",
+    "R[n] = PR;",
+  },
+  { "n", "n", "sts.l MACH,@-<REG_N>", "0100nnnn00000010",
+    "MA (1);",
+    "R[n] -= 4;",
+    "WLAT (R[n], MACH);",
+  },
+  { "n", "n", "sts.l MACL,@-<REG_N>", "0100nnnn00010010",
+    "MA (1);",
+    "R[n] -= 4;",
+    "WLAT (R[n], MACL);",
+  },
+  { "n", "n", "sts.l PR,@-<REG_N>", "0100nnnn00100010",
+    "MA (1);",
+    "R[n] -= 4;",
+    "WLAT (R[n], PR);",
+  },
+
+  { "n", "nm", "sub <REG_M>,<REG_N>", "0011nnnnmmmm1000",
+    "R[n] -= R[m];",
+  },
+
+  { "n", "nm", "subc <REG_M>,<REG_N>", "0011nnnnmmmm1010",
+    "ult = R[n] - T;",
+    "SET_SR_T (ult > R[n]);",
+    "R[n] = ult - R[m];",
+    "SET_SR_T (T || (R[n] > ult));",
+  },
+
+  { "n", "nm", "subv <REG_M>,<REG_N>", "0011nnnnmmmm1011",
+    "ult = R[n] - R[m];",
+    "SET_SR_T (((R[n] ^ R[m]) & (ult ^ R[n])) >> 31);",
+    "R[n] = ult;",
+  },
+
+  { "n", "nm", "swap.b <REG_M>,<REG_N>", "0110nnnnmmmm1000",
+    "R[n] = ((R[m] & 0xffff0000)",
+    "        | ((R[m] << 8) & 0xff00)",
+    "        | ((R[m] >> 8) & 0x00ff));",
+  },
+  { "n", "nm", "swap.w <REG_M>,<REG_N>", "0110nnnnmmmm1001",
+    "R[n] = (((R[m] << 16) & 0xffff0000)",
+    "        | ((R[m] >> 16) & 0x00ffff));",
+  },
+
+  { "", "n", "tas.b @<REG_N>", "0100nnnn00011011",
+    "MA (1);",
+    "ult = RBAT(R[n]);",
+    "SET_SR_T (ult == 0);",
+    "WBAT(R[n],ult|0x80);",
+  },
+
+  { "0", "", "trapa #<imm>", "11000011i8*1....", 
+#if 0
+    /* SH-[12] */
+    "long imm = 0xff & i;",
+    "if (i==0xc3)",
+    "  PC-=2;",
+    "if (i<20||i==34||i==0xc3)",
+    "  trap(i,R,memory,maskl,maskw,little_endian);",
+    "else {",
+    "  R[15]-=4;",
+    "  WLAT(R[15],GET_SR());",
+    "  R[15]-=4;",
+    "  WLAT(R[15],PC+2);",
+    "  PC=RLAT(VBR+(imm<<2))-2;",
+    "}",
+#else
+    "if (i == 0xc3)",
+    "  {",
+    "    nia = PC;",
+    "    trap (i, R, memory, maskl, maskw, little_endian);",
+    "  }",
+    "else if (i < 20 || i==34 || i==0xc3)",
+    "  trap (i, R, memory, maskl, maskw, little_endian);",
+    "else if (!SR_BL) {",
+    "  /* FIXME: TRA = (imm << 2); */",
+    "  SSR = GET_SR();",
+    "  SPC = PC + 2;",
+    "  SET_SR (GET_SR() | SR_MASK_MD | SR_MASK_BL | SR_MASK_RB);",
+    "  /* FIXME: EXPEVT = 0x00000160; */",
+    "  nia = VBR + 0x00000100;",
+    "}",
+#endif
+  },
+
+  { "", "mn", "tst <REG_M>,<REG_N>", "0010nnnnmmmm1000",
+    "SET_SR_T ((R[n] & R[m]) == 0);",
+  },
+  { "", "0", "tst #<imm>,R0", "11001000i8*1....",
+    "SET_SR_T ((R0 & i) == 0);",
+  },
+  { "", "0", "tst.b #<imm>,@(R0,GBR)", "11001100i8*1....",
+    "MA (1);",
+    "SET_SR_T ((RBAT (GBR+R0) & i) == 0);",
+  },
+
+  { "", "0", "xor #<imm>,R0", "11001010i8*1....",
+    "R0 ^= i;",
+  },
+  { "n", "mn", "xor <REG_M>,<REG_N>", "0010nnnnmmmm1010",
+    "R[n] ^= R[m];",
+  },
+  { "", "0", "xor.b #<imm>,@(R0,GBR)", "11001110i8*1....",
+    "MA (1);",
+    "ult = RBAT (GBR+R0);",
+    "ult ^= i;",
+    "WBAT (GBR + R0, ult);",
+  },
+
+  { "n", "nm", "xtrct <REG_M>,<REG_N>", "0010nnnnmmmm1101",
+    "R[n] = (((R[n] >> 16) & 0xffff)",
+    "        | ((R[m] << 16) & 0xffff0000));",
+  },
+
+  /* start-sanitize-sh4 */
+#if 0
+  { "divs.l <REG_M>,<REG_N>", "0100nnnnmmmm1110",
+    "divl(0,R[n],R[m]);",
+  },
+  { "divu.l <REG_M>,<REG_N>", "0100nnnnmmmm1101",
+    "divl(0,R[n],R[m]);",
+  },
+#endif
+  /* end-sanitize-sh4 */
 
   {0, 0}};
 
@@ -655,10 +1763,7 @@ gensim ()
   int j;
 
   printf ("{\n");
-/* start-sanitize-sh3e */
-  printf("char buf[4];\n");
-/* end-sanitize-sh3e */
-  printf ("switch (jump_table[iword]) {\n");
+  printf ("  switch (jump_table[iword]) {\n");
 
   for (p = tab; p->name; p++)
     {
@@ -668,10 +1773,10 @@ gensim ()
       
       char *s = p->code;
 
-      printf ("/* %s %s */\n", p->name, p->code);
-      printf ("case %d:      \n", p->index);
+      printf ("  /* %s %s */\n", p->name, p->code);
+      printf ("  case %d:      \n", p->index);
 
-      printf ("{\n");
+      printf ("    {\n");
       while (*s)
 	{
 	  switch (*s)
@@ -682,19 +1787,19 @@ gensim ()
 	      s += 4;
 	      break;
 	    case 'n':
-	      printf ("int n =  (iword >>8) & 0xf;\n");
+	      printf ("      int n = (iword >>8) & 0xf;\n");
 	      needn = 1;
 	      s += 4;
 	      break;
 	    case 'm':
-	      printf ("int m =  (iword >>4) & 0xf;\n");
+	      printf ("      int m = (iword >>4) & 0xf;\n");
 	      needm = 1;
 	      s += 4;
 
 	      break;
 
 	    case 'i':
-	      printf ("int i = (iword & 0x");
+	      printf ("      int i = (iword & 0x");
 
 	      switch (s[1])
 		{
@@ -729,46 +1834,58 @@ gensim ()
 	}
       if (sextbit > 0)
 	{
-	  printf ("i = (i ^ (1<<%d))-(1<<%d);\n", sextbit - 1, sextbit - 1);
+	  printf ("      i = (i ^ (1<<%d))-(1<<%d);\n",
+		  sextbit - 1, sextbit - 1);
 	}
+
       if (needm && needn)
-	printf("TB(m,n);");  
+	printf ("      TB(m,n);\n");  
       else if (needm)
-	printf("TL(m);");
+	printf ("      TL(m);\n");
       else if (needn)
-	printf("TL(n);");
-      for (j = 0; j < 10; j++)
+	printf ("      TL(n);\n");
+
+      {
+	/* Do the refs */
+	char *r;
+	for (r = p->refs; *r; r++)
+	  {
+	    if (*r == '0') printf("      CREF(0);\n"); 
+	    if (*r == 'n') printf("      CREF(n);\n"); 
+	    if (*r == 'm') printf("      CREF(m);\n"); 
+	  }
+      }
+
+      printf ("      {\n");
+      for (j = 0; j < MAX_NR_STUFF; j++)
 	{
 	  if (p->stuff[j])
 	    {
-	      printf ("%s\n", p->stuff[j]);
+	      printf ("        %s\n", p->stuff[j]);
 	    }
 	}
+      printf ("      }\n");
 
-      
       {
-	/* Do the defs and refs */
+	/* Do the defs */
 	char *r;
-	for (r = p->refs; *r; r++) {
-	 if (*r == '0') printf("CREF(0);\n"); 
-	 if (*r == 'n') printf("CREF(n);\n"); 
-	 if (*r == 'm') printf("CREF(m);\n"); 
-	 
-	}
 	for (r = p->defs; *r; r++) 
 	  {
-	 if (*r == '0') printf("CDEF(0);\n"); 
-	 if (*r == 'n') printf("CDEF(n);\n"); 
-	 if (*r == 'm') printf("CDEF(m);\n"); 
-	 
-	}
-
+	    if (*r == '0') printf("      CDEF(0);\n"); 
+	    if (*r == 'n') printf("      CDEF(n);\n"); 
+	    if (*r == 'm') printf("      CDEF(m);\n"); 
+	  }
       }
-      printf ("break;\n");
-      printf ("}\n");
+
+      printf ("      break;\n");
+      printf ("    }\n");
     }
-  printf("default:\n{\nsaved_state.asregs.exception = SIGILL;\n}\n");
-  printf ("}\n}\n");
+  printf ("  default:\n");
+  printf ("    {\n");
+  printf ("      saved_state.asregs.exception = SIGILL;\n");
+  printf ("    }\n");
+  printf ("  }\n");
+  printf ("}\n");
 }
 
 
@@ -799,6 +1916,22 @@ main (ac, av)
      int ac;
      char **av;
 {
+  /* verify the table before anything else */
+  {
+    op *p;
+    for (p = tab; p->name; p++)
+      {
+	/* check that the code field contains 16 bits */
+	if (strlen (p->code) != 16)
+	  {
+	    fprintf (stderr, "Code `%s' length wrong (%d) for `%s'\n",
+		     p->code, strlen (p->code), p->name);
+	    abort ();
+	  }
+      }
+  }
+
+  /* now generate the requested data */
   if (ac > 1)
     {
       if (strcmp (av[1], "-t") == 0)

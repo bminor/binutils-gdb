@@ -56,6 +56,92 @@
 #define DEFINE_TABLE
 #define DISASSEMBLER_TABLE
 
+typedef union
+{
+
+  struct
+  {
+
+    int regs[16];
+    int pc;
+    int pr;
+
+    int gbr;
+    int vbr;
+    int mach;
+    int macl;
+
+    int sr;
+
+    int fpul;
+
+    int fpscr;
+
+    /* sh3e */
+    union fregs_u
+      {
+	float f[16];
+	double d[8];
+	int i[16];
+      }
+    /* start-sanitize-sh4 */
+#if 1
+    fregs[2];
+#else
+    /* end-sanitize-sh4 */
+    fregs;
+    /* start-sanitize-sh4 */
+#endif
+    /* end-sanitize-sh4 */
+
+    int ssr;
+    int spc;
+    /* sh3 */
+    int bank[2][8];
+
+    int ticks;
+    int stalls;
+    int memstalls;
+    int cycles;
+    int insts;
+
+    int prevlock;
+    int thislock;
+    int exception;
+
+    int end_of_registers;
+
+    int msize;
+#define PROFILE_FREQ 1
+#define PROFILE_SHIFT 2
+    int profile;
+    unsigned short *profile_hist;
+    unsigned char *memory;
+  }
+  asregs;
+  int asints[28];
+} saved_state_type;
+
+saved_state_type saved_state;
+
+
+/* These variables are at file scope so that functions other than
+   sim_resume can use the fetch/store macros */
+
+static int target_little_endian;
+static int host_little_endian;
+
+#if 1
+static int maskl = ~0;
+static int maskw = ~0;
+#endif
+
+static SIM_OPEN_KIND sim_kind;
+static char *myname;
+
+
+/* Short hand definitions of the registers */
+
 #define SBIT(x) ((x)&sbit)
 #define R0 	saved_state.asregs.regs[0]
 #define Rn 	saved_state.asregs.regs[n]
@@ -70,26 +156,138 @@
 #define SPC	saved_state.asregs.spc
 #define MACH 	saved_state.asregs.mach
 #define MACL 	saved_state.asregs.macl
-#define M 	saved_state.asregs.sr.bits.m
-#define Q 	saved_state.asregs.sr.bits.q
-#define S 	saved_state.asregs.sr.bits.s
-#define FPSCR	saved_state.asregs.fpscr
 #define FPUL	saved_state.asregs.fpul
 
-#define GET_SR() (saved_state.asregs.sr.bits.t = T, saved_state.asregs.sr.word)
-#define SET_SR(x) {saved_state.asregs.sr.word = (x); T =saved_state.asregs.sr.bits.t;}
-
 #define PC pc
-#define C cycles
 
-static SIM_OPEN_KIND sim_kind;
-static char *myname;
-static int little_endian_p;
+
+
+/* Alternate bank of registers r0-r6 */
+
+/* Note: code controling SR handles flips between BANK0 and BANK1 */
+#define Rn_BANK(n) (saved_state.asregs.bank[!SR_RB][(n)])
+#define SET_Rn_BANK(n, EXP) do { saved_state.asregs.bank[!SR_RB][(n)] = (EXP); } while (0)
+
+
+/* Manipulate SR */
+
+#define SR_MASK_M (1 << 9)
+#define SR_MASK_Q (1 << 8)
+#define SR_MASK_I (0xf << 4)
+#define SR_MASK_S (1 << 1)
+#define SR_MASK_T (1 << 0)
+
+#define SR_MASK_BL (1 << 28)
+#define SR_MASK_RB (1 << 29)
+#define SR_MASK_MD (1 << 30)
+
+#define M 	((saved_state.asregs.sr & SR_MASK_M) != 0)
+#define Q 	((saved_state.asregs.sr & SR_MASK_Q) != 0)
+#define S 	((saved_state.asregs.sr & SR_MASK_S) != 0)
+#define T 	((saved_state.asregs.sr & SR_MASK_T) != 0)
+
+#define SR_BL ((saved_state.asregs.sr & SR_MASK_BL) != 0)
+#define SR_RB ((saved_state.asregs.sr & SR_MASK_RB) != 0)
+#define SR_MD ((saved_state.asregs.sr & SR_MASK_MD) != 0)
+
+/* Note: don't use this for privileged bits */
+#define SET_SR_BIT(EXP, BIT) \
+do { \
+  if ((EXP) & 1) \
+    saved_state.asregs.sr |= (BIT); \
+  else \
+    saved_state.asregs.sr &= ~(BIT); \
+} while (0)
+
+#define SET_SR_M(EXP) SET_SR_BIT ((EXP), SR_MASK_M)
+#define SET_SR_Q(EXP) SET_SR_BIT ((EXP), SR_MASK_Q)
+#define SET_SR_S(EXP) SET_SR_BIT ((EXP), SR_MASK_S)
+#define SET_SR_T(EXP) SET_SR_BIT ((EXP), SR_MASK_T)
+
+#define GET_SR() (saved_state.asregs.sr - 0)
+#define SET_SR(x) set_sr (x)
+static void
+set_sr (new_sr)
+     int new_sr;
+{
+  /* do we need to swap banks */
+  int old_gpr = (SR_MD ? !SR_RB : 0);
+  int new_gpr = ((new_sr & SR_MASK_MD)
+		 ? (new_sr & SR_MASK_RB) == 0
+		 : 0);
+  if (old_gpr != new_gpr)
+    {
+      int i;
+      for (i = 0; i < 8; i++)
+	{
+	  saved_state.asregs.bank[old_gpr][i] = saved_state.asregs.regs[i];
+	  saved_state.asregs.regs[i] = saved_state.asregs.bank[new_gpr][i];
+	}
+    }
+}
+
+
+/* Manipulate FPSCR */
+
+/* start-sanitize-sh4 */
+#if 1
+#define FPSCR_MASK_FR (1 << 21)
+#define FPSCR_MASK_SZ (1 << 20)
+#define FPSCR_MASK_PR (1 << 19)
+
+#define FPSCR_FR  ((GET_FPSCR() & FPSCR_MASK_FR) != 0)
+#define FPSCR_SZ  ((GET_FPSCR() & FPSCR_MASK_SZ) != 0)
+#define FPSCR_PR  ((GET_FPSCR() & FPSCR_MASK_PR) != 0)
+
+static void
+set_fpscr1 (x)
+	int x;
+{
+  int old = saved_state.asregs.fpscr;
+  saved_state.asregs.fpscr = (x);
+  /* swap the floating point register banks */
+  if ((saved_state.asregs.fpscr ^ old) & FPSCR_MASK_FR)
+    {
+      union fregs_u tmpf = saved_state.asregs.fregs[0];
+      saved_state.asregs.fregs[0] = saved_state.asregs.fregs[1];
+      saved_state.asregs.fregs[1] = tmpf;
+    }
+}
+
+#define GET_FPSCR()  (saved_state.asregs.fpscr)
+#define SET_FPSCR(x) \
+do { \
+  set_fpscr1 (x); \
+} while (0)
+#else
+/* end-sanitize-sh4 */
+#define set_fpscr1(x)
+#define SET_FPSCR(x) (saved_state.asregs.fpscr = (x))
+#define GET_FPSCR()  (saved_state.asregs.fpscr)
+/* start-sanitize-sh4 */
+#endif
+/* end-sanitize-sh4 */
+
 
 int 
 fail ()
 {
   abort ();
+}
+
+int
+special_address (addr, bits_written, data)
+     void *addr;
+     int bits_written, data;
+{
+  if ((unsigned) addr >> 24 == 0xf0 && bits_written == 32 && (data & 1) == 0)
+    /* This invalidates (if not associative) or might invalidate
+       (if assiciative) an instruction cache line.  This is used for
+       trampolines.  Since we don't simulate the cache, this is a no-op
+       as far as the simulator is concerned.  */
+    return 1;
+  /* We can't do anything useful with the other stuff, so fail.  */
+  return 0;
 }
 
 /* This function exists solely for the purpose of setting a breakpoint to
@@ -100,8 +298,18 @@ bp_holder ()
 {
 }
 
-#define BUSERROR(addr, mask) \
-  if (addr & ~mask) { saved_state.asregs.exception = SIGBUS;  bp_holder (); }
+/* FIXME: sim_resume should be renamed to sim_engine_run.  sim_resume
+   being implemented by ../common/sim_resume.c and the below should
+   make a call to sim_engine_halt */
+
+#define BUSERROR(addr, mask, bits_written, data) \
+  if (addr & ~mask) \
+    { \
+      if (special_address (addr, bits_written, data)) \
+	return; \
+      saved_state.asregs.exception = SIGBUS; \
+      bp_holder (); \
+    }
 
 /* Define this to enable register lifetime checking.
    The compiler generates "add #0,rn" insns to mark registers as invalid,
@@ -128,76 +336,122 @@ static int IOMEM PARAMS ((int addr, int write, int value));
 
 static host_callback *callback;
 
-/* These variables are at file scope so that functions other than
-   sim_resume can use the fetch/store macros */
 
-static int  little_endian;
 
+/* Floating point registers */
+
+/* start-sanitize-sh4 */
 #if 1
-static int maskl = ~0;
-static int maskw = ~0;
-#endif
-typedef union
+
+#define DR(n) (get_dr (n))
+static double
+get_dr (n)
+     int n;
 {
-
-  struct
-  {
-
-    int regs[16];
-    int pc;
-    int pr;
-
-    int gbr;
-    int vbr;
-    int mach;
-    int macl;
-
-    union
+  n = (n & ~1);
+  if (host_little_endian)
+    {
+      union
       {
-	struct
-	  {
-	    unsigned int d0:22;
-	    unsigned int m:1;
-	    unsigned int q:1;
-	    unsigned int i:4;
-	    unsigned int d1:2;
-	    unsigned int s:1;
-	    unsigned int t:1;
-	  }
-	bits;
-	int word;
-      }
-    sr;
+	int i[2];
+	double d;
+      } dr;
+      dr.i[1] = saved_state.asregs.fregs[0].i[n + 0];
+      dr.i[0] = saved_state.asregs.fregs[0].i[n + 1];
+      return dr.d;
+    }
+  else
+    return (saved_state.asregs.fregs[0].d[n >> 1]);
+}
 
-    int fpul;
-    float fpscr;
-    float fregs[16];
+#define SET_DR(n, EXP) set_dr ((n), (EXP))
+static void
+set_dr (n, exp)
+     int n;
+     double exp;
+{
+  n = (n & ~1);
+  if (host_little_endian)
+    {
+      union
+      {
+	int i[2];
+	double d;
+      } dr;
+      dr.d = exp;
+      saved_state.asregs.fregs[0].i[n + 0] = dr.i[1];
+      saved_state.asregs.fregs[0].i[n + 1] = dr.i[0];
+    }
+  else
+    saved_state.asregs.fregs[0].d[n >> 1] = exp;
+}
 
-    int ssr;
-    int spc;
-    int bregs[16];
+#define SET_FI(n,EXP) (saved_state.asregs.fregs[0].i[(n)] = (EXP))
+#define FI(n) (saved_state.asregs.fregs[0].i[(n)])
 
-    int ticks;
-    int stalls;
-    int memstalls;
-    int cycles;
-    int insts;
+#define FR(n) (saved_state.asregs.fregs[0].f[(n)])
+#define SET_FR(n,EXP) (saved_state.asregs.fregs[0].f[(n)] = (EXP))
 
-    int prevlock;
-    int thislock;
-    int exception;
-    int msize;
-#define PROFILE_FREQ 1
-#define PROFILE_SHIFT 2
-    int profile;
-    unsigned short *profile_hist;
-    unsigned char *memory;
-  }
-  asregs;
-  int asints[28];
-} saved_state_type;
+#define XD_TO_XF(n) ((((n) & 1) << 5) | ((n) & 0x1e))
+#define XF(n) (saved_state.asregs.fregs[(n) >> 5].i[(n) & 0x1f])
+#define SET_XF(n,EXP) (saved_state.asregs.fregs[(n) >> 5].i[(n) & 0x1f] = (EXP))
 
-saved_state_type saved_state;
+
+#define FP_OP(n, OP, m) \
+{ \
+  if (FPSCR_PR) \
+    { \
+      if (((n) & 1) || ((m) & 1)) \
+	saved_state.asregs.exception = SIGILL; \
+      else \
+	SET_DR(n, (DR(n) OP DR(m))); \
+    } \
+  else \
+    SET_FR(n, (FR(n) OP FR(m))); \
+} while (0)
+
+#define FP_UNARY(n, OP) \
+{ \
+  if (FPSCR_PR) \
+    { \
+      if ((n) & 1) \
+	saved_state.asregs.exception = SIGILL; \
+      else \
+	SET_DR(n, (OP (DR(n)))); \
+    } \
+  else \
+    SET_FR(n, (OP (FR(n)))); \
+} while (0)
+
+#define FP_CMP(n, OP, m) \
+{ \
+  if (FPSCR_PR) \
+    { \
+      if (((n) & 1) || ((m) & 1)) \
+	saved_state.asregs.exception = SIGILL; \
+      else \
+	SET_SR_T (DR(n) OP DR(m)); \
+    } \
+  else \
+    SET_SR_T (FR(n) OP FR(m)); \
+} while (0)
+
+#else
+/* end-sanitize-sh4 */
+#define FI(n) (saved_state.asregs.fregs.i[(n)])
+#define FR(n) (saved_state.asregs.fregs.f[(n)])
+
+#define SET_FI(n,EXP) (saved_state.asregs.fregs.i[(n)] = (EXP))
+#define SET_FR(n,EXP) (saved_state.asregs.fregs.f[(n)] = (EXP))
+
+#define FP_OP(n, OP, m) (SET_FR(n, (FR(n) OP FR(m))))
+#define FP_UNARY(n, OP) (SET_FR(n, (OP (FR(n)))))
+#define FP_CMP(n, OP, m) SET_SR_T(FR(n) OP FR(m))
+/* start-sanitize-sh4 */
+#endif
+/* end-sanitize-sh4 */
+
+
 
 static void INLINE 
 wlat_little (memory, x, value, maskl)
@@ -205,7 +459,7 @@ wlat_little (memory, x, value, maskl)
 {
   int v = value;
   unsigned char *p = memory + ((x) & maskl);
-  BUSERROR(x, maskl);
+  BUSERROR(x, maskl, 32, v);
   p[3] = v >> 24;
   p[2] = v >> 16;
   p[1] = v >> 8;
@@ -218,7 +472,7 @@ wwat_little (memory, x, value, maskw)
 {
   int v = value;
   unsigned char *p = memory + ((x) & maskw);
-  BUSERROR(x, maskw);
+  BUSERROR(x, maskw, 16, v);
 
   p[1] = v >> 8;
   p[0] = v;
@@ -231,7 +485,7 @@ wbat_any (memory, x, value, maskb)
   unsigned char *p = memory + (x & maskb);
   if (x > 0x5000000)
     IOMEM (x, 1, value);
-  BUSERROR(x, maskb);
+  BUSERROR(x, maskb, 8, value);
 
   p[0] = value;
 }
@@ -242,7 +496,7 @@ wlat_big (memory, x, value, maskl)
 {
   int v = value;
   unsigned char *p = memory + ((x) & maskl);
-  BUSERROR(x, maskl);
+  BUSERROR(x, maskl, 32, v);
 
   p[0] = v >> 24;
   p[1] = v >> 16;
@@ -256,7 +510,7 @@ wwat_big (memory, x, value, maskw)
 {
   int v = value;
   unsigned char *p = memory + ((x) & maskw);
-  BUSERROR(x, maskw);
+  BUSERROR(x, maskw, 16, v);
 
   p[0] = v >> 8;
   p[1] = v;
@@ -267,7 +521,7 @@ wbat_big (memory, x, value, maskb)
      unsigned char *memory;
 {
   unsigned char *p = memory + (x & maskb);
-  BUSERROR(x, maskb);
+  BUSERROR(x, maskb, 8, value);
 
   if (x > 0x5000000)
     IOMEM (x, 1, value);
@@ -281,7 +535,7 @@ rlat_little (memory, x, maskl)
      unsigned char *memory;
 {
   unsigned char *p = memory + ((x) & maskl);
-  BUSERROR(x, maskl);
+  BUSERROR(x, maskl, -32, -1);
 
   return (p[3] << 24) | (p[2] << 16) | (p[1] << 8) | p[0];
 }
@@ -291,7 +545,7 @@ rwat_little (memory, x, maskw)
      unsigned char *memory;
 {
   unsigned char *p = memory + ((x) & maskw);
-  BUSERROR(x, maskw);
+  BUSERROR(x, maskw, -16, -1);
 
   return (p[1] << 8) | p[0];
 }
@@ -301,7 +555,7 @@ rbat_any (memory, x, maskb)
      unsigned char *memory;
 {
   unsigned char *p = memory + ((x) & maskb);
-  BUSERROR(x, maskb);
+  BUSERROR(x, maskb, -8, -1);
 
   return p[0];
 }
@@ -311,7 +565,6 @@ rlat_big (memory, x, maskl)
      unsigned char *memory;
 {
   unsigned char *p = memory + ((x) & maskl);
-  BUSERROR(x, maskl);
 
   return (p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3];
 }
@@ -321,7 +574,7 @@ rwat_big (memory, x, maskw)
      unsigned char *memory;
 {
   unsigned char *p = memory + ((x) & maskw);
-  BUSERROR(x, maskw);
+  BUSERROR(x, maskw, -16, -1);
 
   return (p[0] << 8) | p[1];
 }
@@ -337,12 +590,72 @@ rwat_big (memory, x, maskw)
 #define RSWAT(x)  ((short)(RWAT(x)))
 #define RSBAT(x)  (SEXT(RBAT(x)))
 
-#define MA() ((pc & 3) != 0 ? ++memstalls : 0)
+/* start-sanitize-sh4 */
+#define RDAT(x, n) (do_rdat (memory, (x), (n), (little_endian)))
+static int
+do_rdat (memory, x, n, little_endian)
+     char *memory;
+     int x;
+     int n;
+     int little_endian;
+{
+  int f0;
+  int f1;
+  int i = (n & 1);
+  int j = (n & ~1);
+  if (little_endian)
+    {
+      f0 = rlat_little (memory, x + 0, maskl);
+      f1 = rlat_little (memory, x + 4, maskl);
+    }
+  else
+    {
+      f0 = rlat_big (memory, x + 0, maskl);
+      f1 = rlat_big (memory, x + 4, maskl);
+    }
+  saved_state.asregs.fregs[i].i[(j + 0)] = f0;
+  saved_state.asregs.fregs[i].i[(j + 1)] = f1;
+  return 0;
+}
+/* end-sanitize-sh4 */
 
-#define SEXT(x)     	(((x&0xff) ^ (~0x7f))+0x80)
+/* start-sanitize-sh4 */
+#define WDAT(x, n) (do_wdat (memory, (x), (n), (little_endian)))
+static int
+do_wdat (memory, x, n, little_endian)
+     char *memory;
+     int x;
+     int n;
+     int little_endian;
+{
+  int f0;
+  int f1;
+  int i = (n & 1);
+  int j = (n & ~1);
+  f0 = saved_state.asregs.fregs[i].i[(j + 0)];
+  f1 = saved_state.asregs.fregs[i].i[(j + 1)];
+  if (little_endian)
+    {
+      wlat_little (memory, (x + 0), f0, maskl);
+      wlat_little (memory, (x + 4), f1, maskl);
+    }
+  else
+    {
+      wlat_big (memory, (x + 0), f0, maskl);
+      wlat_big (memory, (x + 4), f1, maskl);
+    }
+  return 0;
+}
+/* end-sanitize-sh4 */
+
+
+#define MA(n) do { memstalls += (((pc & 3) != 0) ? (n) : ((n) - 1)); } while (0)
+
+#define SEXT(x)     	(((x &  0xff) ^ (~0x7f))+0x80)
+#define SEXT12(x)	(((x & 0xfff) ^ 0x800) - 0x800)
 #define SEXTW(y)    	((int)((short)y))
 
-#define SL(TEMPPC)  	iword= RUWAT(TEMPPC); goto top;
+#define Delay_Slot(TEMPPC)  	iword = RUWAT(TEMPPC); goto top;
 
 int empty[16];
 
@@ -421,6 +734,7 @@ swap (memory, n)
      unsigned char *memory;
      int n;
 {
+  int little_endian = target_little_endian;
   WLAT (0, n);
 }
 
@@ -429,6 +743,7 @@ swap16 (memory, n)
      unsigned char *memory;
      int n;
 {
+  int little_endian = target_little_endian;
   WWAT (0, n);
 }
 
@@ -627,17 +942,17 @@ control_c (sig, code, scp, addr)
 }
 
 static int
-div1 (R, iRn2, iRn1, T)
+div1 (R, iRn2, iRn1/*, T*/)
      int *R;
      int iRn1;
      int iRn2;
-     int T;
+     /* int T;*/
 {
   unsigned long tmp0;
   unsigned char old_q, tmp1;
 
   old_q = Q;
-  Q = (unsigned char) ((0x80000000 & R[iRn1]) != 0);
+  SET_SR_Q ((unsigned char) ((0x80000000 & R[iRn1]) != 0));
   R[iRn1] <<= 1;
   R[iRn1] |= (unsigned long) T;
 
@@ -653,10 +968,10 @@ div1 (R, iRn2, iRn1, T)
 	  switch (Q)
 	    {
 	    case 0:
-	      Q = tmp1;
+	      SET_SR_Q (tmp1);
 	      break;
 	    case 1:
-	      Q = (unsigned char) (tmp1 == 0);
+	      SET_SR_Q ((unsigned char) (tmp1 == 0));
 	      break;
 	    }
 	  break;
@@ -667,10 +982,10 @@ div1 (R, iRn2, iRn1, T)
 	  switch (Q)
 	    {
 	    case 0:
-	      Q = (unsigned char) (tmp1 == 0);
+	      SET_SR_Q ((unsigned char) (tmp1 == 0));
 	      break;
 	    case 1:
-	      Q = tmp1;
+	      SET_SR_Q (tmp1);
 	      break;
 	    }
 	  break;
@@ -686,10 +1001,10 @@ div1 (R, iRn2, iRn1, T)
 	  switch (Q)
 	    {
 	    case 0:
-	      Q = tmp1;
+	      SET_SR_Q (tmp1);
 	      break;
 	    case 1:
-	      Q = (unsigned char) (tmp1 == 0);
+	      SET_SR_Q ((unsigned char) (tmp1 == 0));
 	      break;
 	    }
 	  break;
@@ -700,18 +1015,19 @@ div1 (R, iRn2, iRn1, T)
 	  switch (Q)
 	    {
 	    case 0:
-	      Q = (unsigned char) (tmp1 == 0);
+	      SET_SR_Q ((unsigned char) (tmp1 == 0));
 	      break;
 	    case 1:
-	      Q = tmp1;
+	      SET_SR_Q (tmp1);
 	      break;
 	    }
 	  break;
 	}
       break;
     }
-  T = (Q == M);
-  return T;
+  /*T = (Q == M);*/
+  SET_SR_T (Q == M);
+  /*return T;*/
 }
 
 static void
@@ -761,6 +1077,7 @@ macw (regs, memory, n, m)
      unsigned char *memory;
      int m, n;
 {
+  int little_endian = target_little_endian;
   long tempm, tempn;
   long prod, macl, sum;
 
@@ -823,18 +1140,11 @@ sim_size (power)
 }
 
 static void
-set_static_little_endian (x)
-     int x;
-{
-  little_endian = x;
-}
-
-static void
 init_pointers ()
 {
-  int little_endian = little_endian_p;
-
-  set_static_little_endian (little_endian);
+  host_little_endian = 0;
+  *(char*)&host_little_endian = 1;
+  host_little_endian &= 1;
 
   if (saved_state.asregs.msize != 1 << sim_memory_size)
     {
@@ -916,17 +1226,17 @@ sim_resume (sd, step, siggnal)
   register int thislock;
   register unsigned int doprofile;
   register int pollcount = 0;
-  register int little_endian = little_endian_p;
+  register int little_endian = target_little_endian;
 
   int tick_start = get_now ();
   void (*prev) ();
+  void (*prev_fpe) ();
   extern unsigned char sh_jump_table0[];
 
   register unsigned char *jump_table = sh_jump_table0;
 
   register int *R = &(saved_state.asregs.regs[0]);
-  register float *F = &(saved_state.asregs.fregs[0]);
-  register int T;
+  /*register int T;*/
   register int PR;
 
   register int maskb = ((saved_state.asregs.msize - 1) & ~0);
@@ -936,6 +1246,7 @@ sim_resume (sd, step, siggnal)
   register unsigned int sbit = ((unsigned int) 1 << 31);
 
   prev = signal (SIGINT, control_c);
+  prev_fpe = signal (SIGFPE, SIG_IGN);
 
   init_pointers ();
 
@@ -952,7 +1263,7 @@ sim_resume (sd, step, siggnal)
 
   pc = saved_state.asregs.pc;
   PR = saved_state.asregs.pr;
-  T = saved_state.asregs.sr.bits.t;
+  /*T = GET_SR () & SR_MASK_T;*/
   prevlock = saved_state.asregs.prevlock;
   thislock = saved_state.asregs.thislock;
   doprofile = saved_state.asregs.profile;
@@ -966,6 +1277,7 @@ sim_resume (sd, step, siggnal)
     {
       register unsigned int iword = RUWAT (pc);
       register unsigned int ult;
+      register unsigned int nia = pc + 2;
 #ifndef ACE_FAST
       insts++;
 #endif
@@ -974,7 +1286,7 @@ sim_resume (sd, step, siggnal)
 #include "code.c"
 
 
-      pc += 2;
+      pc = nia;
 
       pollcount++;
       if (pollcount > 1000)
@@ -1025,7 +1337,8 @@ sim_resume (sd, step, siggnal)
   saved_state.asregs.memstalls += memstalls;
   saved_state.asregs.insts += insts;
   saved_state.asregs.pc = pc;
-  saved_state.asregs.sr.bits.t = T;
+  /* restore the T and other cached SR bits */
+  SET_SR (GET_SR());
   saved_state.asregs.pr = PR;
 
   saved_state.asregs.prevlock = prevlock;
@@ -1036,6 +1349,7 @@ sim_resume (sd, step, siggnal)
       dump_profile ();
     }
 
+  signal (SIGFPE, prev_fpe);
   signal (SIGINT, prev);
 }
 
@@ -1081,8 +1395,14 @@ sim_store_register (sd, rn, memory)
      int rn;
      unsigned char *memory;
 {
+  int little_endian;
   init_pointers ();
-  saved_state.asregs.regs[rn] = RLAT(0);
+  little_endian = target_little_endian;
+  if (&saved_state.asints[rn]
+      == &saved_state.asregs.fpscr)
+    set_fpscr1 (RLAT(0));
+  else
+    saved_state.asints[rn] = RLAT(0);
 }
 
 void
@@ -1091,8 +1411,10 @@ sim_fetch_register (sd, rn, memory)
      int rn;
      unsigned char *memory;
 {
+  int little_endian;
   init_pointers ();
-  WLAT (0, saved_state.asregs.regs[rn]);
+  little_endian = target_little_endian;
+  WLAT (0, saved_state.asints[rn]);
 }
 
 int
@@ -1197,7 +1519,7 @@ sim_open (kind, cb, abfd, argv)
 	      callback->printf_filtered (callback, "Missing argument to `-E'.\n");
 	      return 0;
 	    }
-	  little_endian_p = strcmp (*p, "big") != 0;
+	  target_little_endian = strcmp (*p, "big") != 0;
 	}
       else if (isdigit (**p))
 	parse_and_set_memory_size (*p);
@@ -1248,16 +1570,18 @@ sim_load (sd, prog, abfd, from_tty)
 }
 
 SIM_RC
-sim_create_inferior (sd, abfd, argv, env)
+sim_create_inferior (sd, prog_bfd, argv, env)
      SIM_DESC sd;
-     struct _bfd *abfd;
+     struct _bfd *prog_bfd;
      char **argv;
      char **env;
 {
-  if (abfd != NULL)
-    saved_state.asregs.pc = bfd_get_start_address (abfd);
-  else
-    saved_state.asregs.pc = 0;
+  /* clear the registers (retaining the PC) */
+  memset (&saved_state, 0,
+	  (char*)&saved_state.asregs.end_of_registers - (char*)&saved_state);
+  /* set the PC */
+  if (prog_bfd != NULL)
+    saved_state.asregs.pc = bfd_get_start_address (prog_bfd);
   return SIM_RC_OK;
 }
 
