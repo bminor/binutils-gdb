@@ -1,5 +1,40 @@
 2003-09-03  Daniel Jacobowitz  <drow@mvista.com>
 
+	* arm-tdep.c: Include frame-unwind.h, frame-base.h, and
+	trad-frame.h.
+	(arm_get_cache): Delete macro.
+	(struct arm_prologue_cache): Update comments.  Make saved_regs into
+	a trad_frame_saved_reg pointer.  Remove unwound_pc; rename unwound_sp
+	to prev_sp.
+	(thumb_scan_prologue): Update for cache changes.  Don't call
+	DEPRECATED_PC_IN_CALL_DUMMY.
+	(arm_scan_prologue): Update for cache changes.  Take NEXT_FRAME
+	argument and use it in desperation search for our prologue.  Do not
+	search past the specified PC.
+	(arm_make_prologue_cache): Simplify.
+
+	(arm_prologue_this_id, arm_prologue_prev_register)
+	(arm_prologue_unwind, arm_prologue_unwind_sniffer)
+	(arm_normal_frame_base, arm_normal_base, arm_make_sigtramp_cache)
+	(arm_sigtramp_this_id, arm_sigtramp_prev_register)
+	(arm_sigtramp_unwind, arm_sigtramp_unwind_sniffer)
+	(arm_unwind_dummy_id, arm_unwind_pc, arm_unwind_sp): New.
+
+	(arm_frame_chain_valid, arm_find_callers_reg)
+	(arm_frame_saved_pc, arm_read_fp, arm_frame_init_saved_regs)
+	(arm_pop_frame): Delete obsolete methods.
+	(arm_minimal_frame_chain, arm_minimal_frame_info): Delete.
+
+	(arm_gdbarch_init): Update for new frame methods.  Register prologue
+	and sigtramp unwinders.  Set the default frame base method.
+
+	* Makefile.in (arm-tdep.o): Update dependencies.
+	* varobj.c (find_frame_addr_in_frame_chain): Call
+	get_frame_base_address.
+	* std-regs.c (value_of_builtin_frame_fp_reg): Likewise.
+
+2003-09-03  Daniel Jacobowitz  <drow@mvista.com>
+
 	* arm-tdep.c (arm_minimal_frame_chain): Renamed from
 	arm_frame_chain.  Take NEXT_FRAME and CACHE arguments.
 	Use the cache instead of DEPRECATED_FRAME_SAVED_PC.

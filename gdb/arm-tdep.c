@@ -34,6 +34,9 @@
 #include "value.h"
 #include "arch-utils.h"
 #include "osabi.h"
+#include "frame-unwind.h"
+#include "frame-base.h"
+#include "trad-frame.h"
 
 #include "arm-tdep.h"
 #include "gdb/sim-arm.h"
@@ -155,21 +158,26 @@ static void convert_from_extended (const struct floatformat *, const void *,
 static void convert_to_extended (const struct floatformat *, void *,
 				 const void *);
 
-/* Define other aspects of the stack frame.  We keep the offsets of
-   all saved registers, 'cause we need 'em a lot!  We also keep the
-   current size of the stack frame, and the offset of the frame
-   pointer from the stack pointer (for frameless functions, and when
-   we're still in the prologue of a function with a frame).  */
-
-#define arm_get_cache(fi) ((struct arm_prologue_cache *) get_frame_extra_info (fi))
-
 struct arm_prologue_cache
 {
-  CORE_ADDR unwound_sp, unwound_pc;
+  /* The stack pointer at the time this frame was created; i.e. the
+     caller's stack pointer when this function was called.  It is used
+     to identify this frame.  */
+  CORE_ADDR prev_sp;
+
+  /* The frame base for this frame is just prev_sp + frame offset -
+     frame size.  FRAMESIZE is the size of this stack frame, and
+     FRAMEOFFSET if the initial offset from the stack pointer (this
+     frame's stack pointer, not PREV_SP) to the frame base.  */
+
   int framesize;
   int frameoffset;
+
+  /* The register used to hold the frame pointer for this frame.  */
   int framereg;
-  CORE_ADDR saved_regs[1];
+
+  /* Saved register offsets.  */
+  struct trad_frame_saved_reg *saved_regs;
 };
 
 /* Addresses for calling Thumb functions have the bit 0 set.
@@ -177,12 +185,6 @@ struct arm_prologue_cache
 #define IS_THUMB_ADDR(addr)	((addr) & 1)
 #define MAKE_THUMB_ADDR(addr)	((addr) | 1)
 #define UNMAKE_THUMB_ADDR(addr) ((addr) & ~1)
-
-static int
-arm_frame_chain_valid (CORE_ADDR chain, struct frame_info *thisframe)
-{
-  return (DEPRECATED_FRAME_SAVED_PC (thisframe) >= LOWEST_PC);
-}
 
 /* Set to true if the 32-bit mode is in use.  */
 
@@ -506,7 +508,6 @@ arm_skip_prologue (CORE_ADDR pc)
      2) which registers are saved on it
      3) the offsets of saved regs
      4) the offset from the stack pointer to the frame pointer
-   This information is stored in the "extra" fields of the frame_info.
 
    A typical Thumb function prologue would create this stack frame
    (offsets relative to FP)
@@ -523,7 +524,7 @@ arm_skip_prologue (CORE_ADDR pc)
 /* *INDENT-ON* */
 
 static void
-thumb_scan_prologue (struct arm_prologue_cache *cache)
+thumb_scan_prologue (CORE_ADDR prev_pc, struct arm_prologue_cache *cache)
 {
   CORE_ADDR prologue_start;
   CORE_ADDR prologue_end;
@@ -538,16 +539,12 @@ thumb_scan_prologue (struct arm_prologue_cache *cache)
   int findmask = 0;
   int i;
 
-  /* Don't try to scan dummy frames.  */
-  if (DEPRECATED_PC_IN_CALL_DUMMY (cache->unwound_pc, 0, 0))
-    return;
-
-  if (find_pc_partial_function (cache->unwound_pc, NULL, &prologue_start, &prologue_end))
+  if (find_pc_partial_function (prev_pc, NULL, &prologue_start, &prologue_end))
     {
       struct symtab_and_line sal = find_pc_line (prologue_start, 0);
 
       if (sal.line == 0)		/* no line info, use current PC  */
-	prologue_end = cache->unwound_pc;
+	prologue_end = prev_pc;
       else if (sal.end < prologue_end)	/* next line begins after fn end */
 	prologue_end = sal.end;		/* (probably means no prologue)  */
     }
@@ -556,7 +553,7 @@ thumb_scan_prologue (struct arm_prologue_cache *cache)
        16 pushes, an add, and "mv fp,sp".  */
     prologue_end = prologue_start + 40;
 
-  prologue_end = min (prologue_end, cache->unwound_pc);
+  prologue_end = min (prologue_end, prev_pc);
 
   /* Initialize the saved register map.  When register H is copied to
      register L, we will put H in saved_reg[L].  */
@@ -591,7 +588,7 @@ thumb_scan_prologue (struct arm_prologue_cache *cache)
 	    if (mask & (1 << regno))
 	      {
 		cache->framesize += 4;
-		cache->saved_regs[saved_reg[regno]] = -cache->framesize;
+		cache->saved_regs[saved_reg[regno]].addr = -cache->framesize;
 		/* Reset saved register map.  */
 		saved_reg[regno] = regno;
 	      }
@@ -708,11 +705,11 @@ thumb_scan_prologue (struct arm_prologue_cache *cache)
  */
 
 static void
-arm_scan_prologue (struct arm_prologue_cache *cache)
+arm_scan_prologue (struct frame_info *next_frame, struct arm_prologue_cache *cache)
 {
   int regno, sp_offset, fp_offset;
-  LONGEST return_value;
   CORE_ADDR prologue_start, prologue_end, current_pc;
+  CORE_ADDR prev_pc = frame_pc_unwind (next_frame);
 
   /* Assume there is no frame until proven otherwise.  */
   cache->framereg = ARM_SP_REGNUM;
@@ -720,15 +717,15 @@ arm_scan_prologue (struct arm_prologue_cache *cache)
   cache->frameoffset = 0;
 
   /* Check for Thumb prologue.  */
-  if (arm_pc_is_thumb (cache->unwound_pc))
+  if (arm_pc_is_thumb (prev_pc))
     {
-      thumb_scan_prologue (cache);
+      thumb_scan_prologue (prev_pc, cache);
       return;
     }
 
   /* Find the function prologue.  If we can't find the function in
      the symbol table, peek in the stack frame to find the PC.  */
-  if (find_pc_partial_function (cache->unwound_pc, NULL, &prologue_start, &prologue_end))
+  if (find_pc_partial_function (prev_pc, NULL, &prologue_start, &prologue_end))
     {
       /* One way to find the end of the prologue (which works well
          for unoptimized code) is to do the following:
@@ -736,7 +733,7 @@ arm_scan_prologue (struct arm_prologue_cache *cache)
 	    struct symtab_and_line sal = find_pc_line (prologue_start, 0);
 
 	    if (sal.line == 0)
-	      prologue_end = cache->unwound_pc;
+	      prologue_end = prev_pc;
 	    else if (sal.end < prologue_end)
 	      prologue_end = sal.end;
 
@@ -769,9 +766,16 @@ arm_scan_prologue (struct arm_prologue_cache *cache)
     }
   else
     {
-      /* Get address of the stmfd in the prologue of the callee; 
-         the saved PC is the address of the stmfd + 8.  */
-      if (!safe_read_memory_integer (cache->unwound_sp, 4,  &return_value))
+      /* We have no symbol information.  Our only option is to assume this
+	 function has a standard stack frame and the normal frame register.
+	 Then, we can find the value of our frame pointer on entrance to
+	 the callee (or at the present moment if this is the innermost frame).
+	 The value stored there should be the address of the stmfd + 8.  */
+      CORE_ADDR frame_loc;
+      LONGEST return_value;
+
+      frame_loc = frame_unwind_register_unsigned (next_frame, ARM_FP_REGNUM);
+      if (!safe_read_memory_integer (frame_loc, 4, &return_value))
         return;
       else
         {
@@ -779,6 +783,9 @@ arm_scan_prologue (struct arm_prologue_cache *cache)
           prologue_end = prologue_start + 64;	/* See above.  */
         }
     }
+
+  if (prev_pc < prologue_end)
+    prologue_end = prev_pc;
 
   /* Now search the prologue looking for instructions that set up the
      frame pointer, adjust the stack pointer, and save registers.
@@ -830,7 +837,7 @@ arm_scan_prologue (struct arm_prologue_cache *cache)
 	    if (mask & (1 << regno))
 	      {
 		sp_offset -= 4;
-		cache->saved_regs[regno] = sp_offset;
+		cache->saved_regs[regno].addr = sp_offset;
 	      }
 	}
       else if ((insn & 0xffffc000) == 0xe54b0000 ||	/* strb rx,[r11,#-n] */
@@ -866,7 +873,7 @@ arm_scan_prologue (struct arm_prologue_cache *cache)
 	{
 	  sp_offset -= 12;
 	  regno = ARM_F0_REGNUM + ((insn >> 12) & 0x07);
-	  cache->saved_regs[regno] = sp_offset;
+	  cache->saved_regs[regno].addr = sp_offset;
 	}
       else if ((insn & 0xffbf0fff) == 0xec2d0200)	/* sfmfd f0, 4, [sp!] */
 	{
@@ -893,7 +900,7 @@ arm_scan_prologue (struct arm_prologue_cache *cache)
 	  for (; fp_start_reg < fp_bound_reg; fp_start_reg++)
 	    {
 	      sp_offset -= 12;
-	      cache->saved_regs[fp_start_reg++] = sp_offset;
+	      cache->saved_regs[fp_start_reg++].addr = sp_offset;
 	    }
 	}
       else if ((insn & 0xf0000000) != 0xe0000000)
@@ -916,305 +923,253 @@ arm_scan_prologue (struct arm_prologue_cache *cache)
     cache->frameoffset = 0;
 }
 
-/* Find REGNUM on the stack.  Otherwise, it's in an active register.
-   One thing we might want to do here is to check REGNUM against the
-   clobber mask, and somehow flag it as invalid if it isn't saved on
-   the stack somewhere.  This would provide a graceful failure mode
-   when trying to get the value of caller-saves registers for an inner
-   frame.  */
-
-static CORE_ADDR
-arm_find_callers_reg (struct frame_info *fi, int regnum)
-{
-  /* NOTE: cagney/2002-05-03: This function really shouldn't be
-     needed.  Instead the (still being written) register unwind
-     function could be called directly.  */
-  for (; fi; fi = get_next_frame (fi))
-    {
-      if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), 0, 0))
-	{
-	  return deprecated_read_register_dummy (get_frame_pc (fi),
-						 get_frame_base (fi), regnum);
-	}
-      else if (get_frame_saved_regs (fi)[regnum] != 0)
-	{
-	  /* NOTE: cagney/2002-05-03: This would normally need to
-             handle ARM_SP_REGNUM as a special case as, according to
-             the frame.h comments, saved_regs[SP_REGNUM] contains the
-             SP value not its address.  It appears that the ARM isn't
-             doing this though.  */
-	  return read_memory_integer (get_frame_saved_regs (fi)[regnum],
-				      REGISTER_RAW_SIZE (regnum));
-	}
-    }
-  return read_register (regnum);
-}
-/* Function: frame_chain Given a GDB frame, determine the address of
-   the calling function's frame.  This will be used to create a new
-   GDB frame struct, and then DEPRECATED_INIT_EXTRA_FRAME_INFO and
-   DEPRECATED_INIT_FRAME_PC will be called for the new frame.  For
-   ARM, we save the frame size when we initialize the frame_info.  */
-
-CORE_ADDR
-arm_minimal_frame_chain (struct frame_info *next_frame, struct arm_prologue_cache *cache)
-{
-  CORE_ADDR caller_pc;
-  int framereg = arm_get_cache (next_frame)->framereg;
-
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (next_frame), 0, 0))
-    return get_frame_base (next_frame);
-
-  if (get_frame_pc (next_frame) < LOWEST_PC)
-    return 0;
-
-  caller_pc = cache->unwound_pc;
-
-  /* If the caller is Thumb and the caller is ARM, or vice versa,
-     the frame register of the caller is different from ours.
-     So we must scan the prologue of the caller to determine its
-     frame register number.  */
-  /* XXX Fixme, we should try to do this without creating a temporary
-     cache!  */
-  /* NOTE drow/2003-06-26: I'm quite suspicious of this code... what is it
-     really doing?  I have the feeling that it's trying to handle the case
-     where my framereg is ARM_FP_REGNUM, and my (Thumb) caller's framereg is
-     THUMB_FP_REGNUM, and switching between the two.  But the unwinder should
-     be taking care of that.  */
-  if (arm_pc_is_thumb (caller_pc) != arm_pc_is_thumb (get_frame_pc (next_frame)))
-    {
-      struct arm_prologue_cache *cache
-	= xcalloc (1, sizeof (struct arm_prologue_cache)
-		   + (NUM_REGS + NUM_PSEUDO_REGS - 1) * sizeof (CORE_ADDR));
-      struct cleanup *old_chain = make_cleanup (xfree, cache);
-
-      /* Now, scan the prologue and obtain the frame register.  */
-      cache->unwound_pc = caller_pc;
-      arm_scan_prologue (cache);
-      framereg = cache->framereg;
-
-      /* Deallocate the storage associated with the temporary frame
-	 created above.  */
-      do_cleanups (old_chain);
-    }
-
-  /* If the caller used a frame register, return its value.
-     Otherwise, return the caller's stack pointer.  */
-  if (framereg == ARM_FP_REGNUM || framereg == THUMB_FP_REGNUM)
-    return arm_find_callers_reg (next_frame, framereg);
-  else
-    /* FIXME drow/2003-06-26: The next frame is an opaque thing at this point,
-       we should only be using frame methods on it.  What if it's a dummy
-       frame, calling a frameless function (framereg == ARM_SP_REGNUM)?  Test
-       it.  */
-    return get_frame_base (next_frame) + arm_get_cache (next_frame)->framesize;
-}
-
-/* This function actually figures out the frame address for a given pc
-   and sp.  This is tricky because we sometimes don't use an explicit
-   frame pointer, and the previous stack pointer isn't necessarily
-   recorded on the stack.  The only reliable way to get this info is
-   to examine the prologue.  */
-
-static void
-arm_minimal_frame_info (struct frame_info *next_frame,
-			struct arm_prologue_cache *cache)
-{
-  int reg;
-  CORE_ADDR sp;
-
-  memset (cache->saved_regs, '\000', sizeof (CORE_ADDR) * (NUM_REGS + NUM_PSEUDO_REGS));
-
-  /* Compute stack pointer for this frame.  We use this value for both
-     the sigtramp and call dummy cases.  */
-
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (next_frame), 0, 0))
-    /* For generic dummy frames, pull the value direct from the frame.
-       Having an unwind function to do this would be nice.  */
-    sp = deprecated_read_register_dummy (get_frame_pc (next_frame),
-					 get_frame_base (next_frame),
-					 ARM_SP_REGNUM);
-  else if (arm_get_cache (next_frame))
-    sp = (get_frame_base (next_frame)
-	  - arm_get_cache (next_frame)->frameoffset
-	  + arm_get_cache (next_frame)->framesize);
-  else
-    sp = read_sp ();  /* FIXME remove case */
-
-  /* Determine whether or not we're in a sigtramp frame.
-     Unfortunately, it isn't sufficient to test (get_frame_type (fi)
-     == SIGTRAMP_FRAME) because this value is sometimes set after
-     invoking DEPRECATED_INIT_EXTRA_FRAME_INFO.  So we test *both*
-     (get_frame_type (fi) == SIGTRAMP_FRAME) and PC_IN_SIGTRAMP to
-     determine if we need to use the sigcontext addresses for the
-     saved registers.
-
-     Note: If an ARM PC_IN_SIGTRAMP method ever needs to compare
-     against the name of the function, the code below will have to be
-     changed to first fetch the name of the function and then pass
-     this name to PC_IN_SIGTRAMP.  */
-
-  /* FIXME: cagney/2002-11-18: This problem will go away once
-     frame.c:get_prev_frame() is modified to set the frame's type
-     before calling functions like this.  */
-
-  /* NOTE drow/2003-06-26: This will move to a predicate for a different unwinder shortly.  */
-
-  if (SIGCONTEXT_REGISTER_ADDRESS_P () 
-      && PC_IN_SIGTRAMP (cache->unwound_pc, (char *)0))
-    {
-      for (reg = 0; reg < NUM_REGS; reg++)
-	cache->saved_regs[reg] = SIGCONTEXT_REGISTER_ADDRESS (sp, cache->unwound_pc, reg);
-
-      /* FIXME: What about thumb mode?  */
-      cache->framereg = ARM_SP_REGNUM;
-      cache->unwound_sp = read_memory_integer (cache->saved_regs[cache->framereg], REGISTER_RAW_SIZE (cache->framereg));
-      cache->framesize = 0;
-      cache->frameoffset = 0;
-    }
-  else
-    {
-      /* At this point, the unwound sp is just the result of frame_chain.
-	 Then it gets changed below.  */
-
-      arm_scan_prologue (cache);
-
-      if (!next_frame)
-	/* This is the innermost frame?  */
-	cache->unwound_sp = read_register (cache->framereg);
-      else if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (next_frame), 0, 0))
-	/* Next inner most frame is a dummy, just grab its frame.
-           Dummy frames always have the same FP as their caller.  */
-	cache->unwound_sp = get_frame_base (next_frame);
-      else if (cache->framereg == ARM_FP_REGNUM
-	       || cache->framereg == THUMB_FP_REGNUM)
-	{
-	  /* not the innermost frame */
-	  /* If we have an FP, the callee saved it.  */
-	  if (get_frame_saved_regs (next_frame) /**/ && get_frame_saved_regs (next_frame)[cache->framereg] != 0)
-	    cache->unwound_sp = read_memory_integer (get_frame_saved_regs (next_frame)[cache->framereg], 4);
-	  else if (frame_relative_level (next_frame) == 0
-		   && FRAMELESS_FUNCTION_INVOCATION (next_frame))
-	    /* If we were called by a frameless fn.  then our frame is
-	       still in the frame pointer register on the board...  */
-	    cache->unwound_sp = deprecated_read_fp ();
-	}
-
-      /* Calculate actual addresses of saved registers using offsets
-         determined by arm_scan_prologue.  */
-      for (reg = 0; reg < NUM_REGS; reg++)
-	if (cache->saved_regs[reg] != 0)
-	  cache->saved_regs[reg] = (cache->saved_regs[reg]
-				    + cache->unwound_sp
-				    + cache->framesize
-				    - cache->frameoffset);
-    }
-}
-
 static struct arm_prologue_cache *
 arm_make_prologue_cache (struct frame_info *next_frame)
 {
+  int reg;
   struct arm_prologue_cache *cache;
+  CORE_ADDR unwound_fp;
 
-  cache = frame_obstack_zalloc (sizeof (struct arm_prologue_cache)
-				+ sizeof (CORE_ADDR) * (NUM_REGS + NUM_PSEUDO_REGS - 1));
+  cache = frame_obstack_zalloc (sizeof (struct arm_prologue_cache));
+  cache->saved_regs = trad_frame_alloc_saved_regs (next_frame);
 
-  cache->unwound_pc = frame_pc_unwind (next_frame);
-  if (frame_relative_level (next_frame) < 0)
-    cache->unwound_sp = deprecated_read_fp ();
-  else
-    cache->unwound_sp = arm_minimal_frame_chain (next_frame, cache);
-  arm_minimal_frame_info (next_frame, cache);
+  arm_scan_prologue (next_frame, cache);
+
+  unwound_fp = frame_unwind_register_unsigned (next_frame, cache->framereg);
+  if (unwound_fp == 0)
+    return cache;
+
+  cache->prev_sp = unwound_fp + cache->framesize - cache->frameoffset;
+
+  /* Calculate actual addresses of saved registers using offsets
+     determined by arm_scan_prologue.  */
+  for (reg = 0; reg < NUM_REGS; reg++)
+    if (cache->saved_regs[reg].addr != 0)
+      cache->saved_regs[reg].addr += cache->prev_sp;
 
   return cache;
 }
 
-static CORE_ADDR
-arm_frame_chain (struct frame_info *next_frame)
-{
-  struct arm_prologue_cache *cache;
-
-  cache = arm_make_prologue_cache (next_frame);
-  return cache->unwound_sp;
-}
+/* Our frame ID for a normal frame is the current function's starting PC
+   and the caller's SP when we were called.  */
 
 static void
-arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
+arm_prologue_this_id (struct frame_info *next_frame,
+		      void **this_cache,
+		      struct frame_id *this_id)
 {
   struct arm_prologue_cache *cache;
+  struct frame_id id;
+  CORE_ADDR func;
 
-  cache = arm_make_prologue_cache (deprecated_get_next_frame_hack (fi));
+  if (*this_cache == NULL)
+    *this_cache = arm_make_prologue_cache (next_frame);
+  cache = *this_cache;
 
-  if (get_frame_saved_regs (fi) == NULL)
-    frame_saved_regs_zalloc (fi);
+  func = frame_func_unwind (next_frame);
 
-  frame_extra_info_zalloc (fi, (sizeof (struct arm_prologue_cache)
-				+ ((NUM_REGS + NUM_PSEUDO_REGS - 1)
-				   * sizeof (CORE_ADDR))));
-
-  memcpy (get_frame_extra_info (fi), cache,  (sizeof (struct arm_prologue_cache)
-					      + ((NUM_REGS + NUM_PSEUDO_REGS - 1)
-						 * sizeof (CORE_ADDR))));
-  memcpy (get_frame_saved_regs (fi), cache->saved_regs,
-	  (NUM_REGS + NUM_PSEUDO_REGS - 1) * sizeof (CORE_ADDR));
-}
-
-/* Find the caller of this frame.  We do this by seeing if ARM_LR_REGNUM
-   is saved in the stack anywhere, otherwise we get it from the
-   registers.
-
-   The old definition of this function was a macro:
-   #define FRAME_SAVED_PC(FRAME) \
-   ADDR_BITS_REMOVE (read_memory_integer ((FRAME)->frame - 4, 4)) */
-
-static CORE_ADDR
-arm_frame_saved_pc (struct frame_info *fi)
-{
-  /* If a dummy frame, pull the PC out of the frame's register buffer.  */
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), 0, 0))
-    return deprecated_read_register_dummy (get_frame_pc (fi),
-					   get_frame_base (fi), ARM_PC_REGNUM);
-
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi),
-				   (get_frame_base (fi)
-				    - arm_get_cache (fi)->frameoffset),
-				   get_frame_base (fi)))
-    {
-      return read_memory_integer (get_frame_saved_regs (fi)[ARM_PC_REGNUM],
-				  REGISTER_RAW_SIZE (ARM_PC_REGNUM));
-    }
-  else
-    {
-      CORE_ADDR pc = arm_find_callers_reg (fi, ARM_LR_REGNUM);
-      return IS_THUMB_ADDR (pc) ? UNMAKE_THUMB_ADDR (pc) : pc;
-    }
-}
-
-/* Return the frame address.  On ARM, it is R11; on Thumb it is R7.
-   Examine the Program Status Register to decide which state we're in.  */
-
-static CORE_ADDR
-arm_read_fp (void)
-{
-  if (read_register (ARM_PS_REGNUM) & 0x20)	/* Bit 5 is Thumb state bit */
-    return read_register (THUMB_FP_REGNUM);	/* R7 if Thumb */
-  else
-    return read_register (ARM_FP_REGNUM);	/* R11 if ARM */
-}
-
-/* Store into a struct frame_saved_regs the addresses of the saved
-   registers of frame described by FRAME_INFO.  This includes special
-   registers such as PC and FP saved in special ways in the stack
-   frame.  SP is even more special: the address we return for it IS
-   the sp for the next frame.  */
-
-static void
-arm_frame_init_saved_regs (struct frame_info *fip)
-{
-
-  if (get_frame_saved_regs (fip))
+  /* This is meant to halt the backtrace at "_start".  Make sure we
+     don't halt it at a generic dummy frame. */
+  if (func <= LOWEST_PC || inside_entry_file (func))
     return;
 
-  arm_init_extra_frame_info (0, fip);
+  /* If we've hit a wall, stop.  */
+  if (cache->prev_sp == 0)
+    return;
+
+  id = frame_id_build (cache->prev_sp, func);
+
+  /* Check that we're not going round in circles with the same frame
+     ID (but avoid applying the test to sentinel frames which do go
+     round in circles).  */
+  if (frame_relative_level (next_frame) >= 0
+      && get_frame_type (next_frame) == NORMAL_FRAME
+      && frame_id_eq (get_frame_id (next_frame), id))
+    return;
+
+  *this_id = id;
+}
+
+static void
+arm_prologue_prev_register (struct frame_info *next_frame,
+			    void **this_cache,
+			    int prev_regnum,
+			    int *optimized,
+			    enum lval_type *lvalp,
+			    CORE_ADDR *addrp,
+			    int *realnump,
+			    void *valuep)
+{
+  struct arm_prologue_cache *cache;
+
+  if (*this_cache == NULL)
+    *this_cache = arm_make_prologue_cache (next_frame);
+  cache = *this_cache;
+
+  /* If we are asked to unwind the PC, then we need to return the LR
+     instead.  The saved value of PC points into this frame's
+     prologue, not the next frame's resume location.  */
+  if (prev_regnum == ARM_PC_REGNUM)
+    prev_regnum = ARM_LR_REGNUM;
+
+  /* SP is generally not saved to the stack, but this frame is
+     identified by NEXT_FRAME's stack pointer at the time of the call.
+     The value was already reconstructed into PREV_SP.  */
+  if (prev_regnum == ARM_SP_REGNUM)
+    {
+      *lvalp = not_lval;
+      if (valuep)
+	store_unsigned_integer (valuep, 4, cache->prev_sp);
+      return;
+    }
+
+  trad_frame_prev_register (next_frame, cache->saved_regs, prev_regnum,
+			    optimized, lvalp, addrp, realnump, valuep);
+}
+
+struct frame_unwind arm_prologue_unwind = {
+  NORMAL_FRAME,
+  arm_prologue_this_id,
+  arm_prologue_prev_register
+};
+
+static const struct frame_unwind *
+arm_prologue_unwind_sniffer (struct frame_info *next_frame)
+{
+  return &arm_prologue_unwind;
+}
+
+static CORE_ADDR
+arm_normal_frame_base (struct frame_info *next_frame, void **this_cache)
+{
+  struct arm_prologue_cache *cache;
+
+  if (*this_cache == NULL)
+    *this_cache = arm_make_prologue_cache (next_frame);
+  cache = *this_cache;
+
+  return cache->prev_sp + cache->frameoffset - cache->framesize;
+}
+
+struct frame_base arm_normal_base = {
+  &arm_prologue_unwind,
+  arm_normal_frame_base,
+  arm_normal_frame_base,
+  arm_normal_frame_base
+};
+
+static struct arm_prologue_cache *
+arm_make_sigtramp_cache (struct frame_info *next_frame)
+{
+  struct arm_prologue_cache *cache;
+  int reg;
+
+  cache = frame_obstack_zalloc (sizeof (struct arm_prologue_cache));
+
+  cache->prev_sp = frame_unwind_register_unsigned (next_frame, ARM_SP_REGNUM);
+
+  cache->saved_regs = trad_frame_alloc_saved_regs (next_frame);
+
+  for (reg = 0; reg < NUM_REGS; reg++)
+    cache->saved_regs[reg].addr
+      = SIGCONTEXT_REGISTER_ADDRESS (cache->prev_sp,
+				     frame_pc_unwind (next_frame), reg);
+
+  /* FIXME: What about thumb mode?  */
+  cache->framereg = ARM_SP_REGNUM;
+  cache->prev_sp
+    = read_memory_integer (cache->saved_regs[cache->framereg].addr,
+			   REGISTER_RAW_SIZE (cache->framereg));
+
+  return cache;
+}
+
+static void
+arm_sigtramp_this_id (struct frame_info *next_frame,
+		      void **this_cache,
+		      struct frame_id *this_id)
+{
+  struct arm_prologue_cache *cache;
+
+  if (*this_cache == NULL)
+    *this_cache = arm_make_sigtramp_cache (next_frame);
+  cache = *this_cache;
+
+  /* FIXME drow/2003-07-07: This isn't right if we single-step within
+     the sigtramp frame; the PC should be the beginning of the trampoline.  */
+  *this_id = frame_id_build (cache->prev_sp, frame_pc_unwind (next_frame));
+}
+
+static void
+arm_sigtramp_prev_register (struct frame_info *next_frame,
+			    void **this_cache,
+			    int prev_regnum,
+			    int *optimized,
+			    enum lval_type *lvalp,
+			    CORE_ADDR *addrp,
+			    int *realnump,
+			    void *valuep)
+{
+  struct arm_prologue_cache *cache;
+
+  if (*this_cache == NULL)
+    *this_cache = arm_make_sigtramp_cache (next_frame);
+  cache = *this_cache;
+
+  trad_frame_prev_register (next_frame, cache->saved_regs, prev_regnum,
+			    optimized, lvalp, addrp, realnump, valuep);
+}
+
+struct frame_unwind arm_sigtramp_unwind = {
+  SIGTRAMP_FRAME,
+  arm_sigtramp_this_id,
+  arm_sigtramp_prev_register
+};
+
+static const struct frame_unwind *
+arm_sigtramp_unwind_sniffer (struct frame_info *next_frame)
+{
+  /* Note: If an ARM PC_IN_SIGTRAMP method ever needs to compare
+     against the name of the function, the code below will have to be
+     changed to first fetch the name of the function and then pass
+     this name to PC_IN_SIGTRAMP.  */
+
+  if (SIGCONTEXT_REGISTER_ADDRESS_P ()
+      && PC_IN_SIGTRAMP (frame_pc_unwind (next_frame), (char *) 0))
+    return &arm_sigtramp_unwind;
+
+  return NULL;
+}
+
+/* Assuming NEXT_FRAME->prev is a dummy, return the frame ID of that
+   dummy frame.  The frame ID's base needs to match the TOS value
+   saved by save_dummy_frame_tos() and returned from
+   arm_push_dummy_call, and the PC needs to match the dummy frame's
+   breakpoint.  */
+
+static struct frame_id
+arm_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
+{
+  return frame_id_build (frame_unwind_register_unsigned (next_frame, ARM_SP_REGNUM),
+			 frame_pc_unwind (next_frame));
+}
+
+/* Given THIS_FRAME, find the previous frame's resume PC (which will
+   be used to construct the previous frame's ID, after looking up the
+   containing function).  */
+
+static CORE_ADDR
+arm_unwind_pc (struct gdbarch *gdbarch, struct frame_info *this_frame)
+{
+  CORE_ADDR pc;
+  pc = frame_unwind_register_unsigned (this_frame, ARM_PC_REGNUM);
+  return IS_THUMB_ADDR (pc) ? UNMAKE_THUMB_ADDR (pc) : pc;
+}
+
+static CORE_ADDR
+arm_unwind_sp (struct gdbarch *gdbarch, struct frame_info *this_frame)
+{
+  return frame_unwind_register_unsigned (this_frame, ARM_SP_REGNUM);
 }
 
 /* Set the return address for a generic dummy frame.  ARM uses the
@@ -1357,40 +1312,6 @@ arm_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
   /* Put the target address in r4; the call dummy will copy this to
      the PC.  */
   write_register (4, fun);
-}
-
-/* Pop the current frame.  So long as the frame info has been
-   initialized properly (see arm_init_extra_frame_info), this code
-   works for dummy frames as well as regular frames.  I.e, there's no
-   need to have a special case for dummy frames.  */
-static void
-arm_pop_frame (void)
-{
-  int regnum;
-  struct frame_info *frame = get_current_frame ();
-  CORE_ADDR old_SP = (get_frame_base (frame)
-		      - arm_get_cache (frame)->frameoffset
-		      + arm_get_cache (frame)->framesize);
-
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame),
-				   get_frame_base (frame),
-				   get_frame_base (frame)))
-    {
-      generic_pop_dummy_frame ();
-      flush_cached_frames ();
-      return;
-    }
-
-  for (regnum = 0; regnum < NUM_REGS; regnum++)
-    if (get_frame_saved_regs (frame)[regnum] != 0)
-      write_register (regnum,
-		  read_memory_integer (get_frame_saved_regs (frame)[regnum],
-				       REGISTER_RAW_SIZE (regnum)));
-
-  write_register (ARM_PC_REGNUM, DEPRECATED_FRAME_SAVED_PC (frame));
-  write_register (ARM_SP_REGNUM, old_SP);
-
-  flush_cached_frames ();
 }
 
 /* When arguments must be pushed onto the stack, they go on in reverse
@@ -2873,10 +2794,6 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep = xmalloc (sizeof (struct gdbarch_tdep));
   gdbarch = gdbarch_alloc (&info, tdep);
 
-  /* NOTE: cagney/2002-12-06: This can be deleted when this arch is
-     ready to unwind the PC first (see frame.c:get_prev_frame()).  */
-  set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_default);
-
   /* We used to default to FPA for generic ARM, but almost nobody uses that
      now, and we now provide a way for the user to force the model.  So 
      default to the most useful variant.  */
@@ -2919,16 +2836,15 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_push_dummy_call (gdbarch, arm_push_dummy_call);
 
   /* Frame handling.  */
-  set_gdbarch_deprecated_frame_chain_valid (gdbarch, arm_frame_chain_valid);
-  set_gdbarch_deprecated_init_extra_frame_info (gdbarch, arm_init_extra_frame_info);
-  set_gdbarch_deprecated_target_read_fp (gdbarch, arm_read_fp);
-  set_gdbarch_deprecated_frame_chain (gdbarch, arm_frame_chain);
+  set_gdbarch_unwind_dummy_id (gdbarch, arm_unwind_dummy_id);
+  set_gdbarch_unwind_pc (gdbarch, arm_unwind_pc);
+  set_gdbarch_unwind_sp (gdbarch, arm_unwind_sp);
+
   set_gdbarch_frameless_function_invocation
     (gdbarch, arm_frameless_function_invocation);
-  set_gdbarch_deprecated_frame_saved_pc (gdbarch, arm_frame_saved_pc);
   set_gdbarch_frame_args_skip (gdbarch, 0);
-  set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, arm_frame_init_saved_regs);
-  set_gdbarch_deprecated_pop_frame (gdbarch, arm_pop_frame);
+
+  frame_base_set_default (gdbarch, &arm_normal_base);
 
   /* Address manipulation.  */
   set_gdbarch_smash_text_address (gdbarch, arm_smash_text_address);
@@ -2995,6 +2911,10 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Hook in the ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
+
+  /* Add some default predicates.  */
+  frame_unwind_append_sniffer (gdbarch, arm_sigtramp_unwind_sniffer);
+  frame_unwind_append_sniffer (gdbarch, arm_prologue_unwind_sniffer);
 
   /* Now we have tuned the configuration, set a few final things,
      based on what the OS ABI has told us.  */
