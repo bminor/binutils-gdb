@@ -19,7 +19,9 @@
 /* This is for g++ 1.36.1 (November 6 version). It will probably
    require changes for any other version.
 
-   Modified for g++ 1.36.2 (November 18 version).  */
+   Modified for g++ 1.36.2 (November 18 version).
+
+   Modified for g++ 1.90.06 (December 31 version).  */
 
 /* This file exports one function
 
@@ -97,12 +99,14 @@ static char **typevec = 0;
 static int ntypes = 0;
 static int typevec_size = 0;
 
-static struct {
+const static struct {
   const char *in;
   const char *out;
 } optable[] = {
-  "new", " new",
-  "delete", " delete",
+  "nw", " new",			/* new (1.92) */
+  "dl", " delete",		/* new (1.92) */
+  "new", " new",		/* old (1.91, and 1.x) */
+  "delete", " delete",		/* old (1.91, and 1.x) */
   "ne", "!=",
   "eq", "==",
   "ge", ">=",
@@ -134,6 +138,7 @@ static struct {
   "method_call", "->()",
   "addr", "&",		/* unary & */
   "array", "[]",
+  "compound", ",",
   "nop", "",			/* for operator= */
 };
 
@@ -187,6 +192,25 @@ static int do_args ();
 static void munge_function_name ();
 static void remember_type ();
 #endif
+
+/* Takes operator name as e.g. "++" and returns mangled
+   operator name (e.g. "postincrement_expr").  */
+char *
+cplus_mangle_opname (opname)
+     char *opname;
+{
+  int i, len = strlen (opname);
+  string name;
+
+  for (i = 0; i < sizeof (optable)/sizeof (optable[0]); i++)
+    {
+      if (strlen (optable[i].out) == len
+	  && memcmp (optable[i].out, opname, len) == 0)
+	return optable[i].in;
+    }
+  error ("no mangling for `%s'", opname);
+  return 0;
+}
 
 char *
 cplus_demangle (type, arg_mode)
@@ -410,6 +434,15 @@ do_type (type, result, arg_mode)
       int member;
       switch (**type)
 	{
+	case 'Q':
+	  n = (*type)[1] - '0';
+	  if (n < 0 || n > 9)
+	    success = 0;
+	  *type += 2;
+	  while (n-- > 0)
+	    do_type (type, result);
+	  break;
+
 	case 'P':
 	  *type += 1;
 	  string_prepend (&decl, "*");
