@@ -1,5 +1,18 @@
 Thu Oct 24 01:32:51 1991  Fred Fish  (fnf at cygnus.com)
 
+        * dwarfread.c: New file for DWARF debugging format support.
+
+	* elfread.c: New file for ELF object file format support.
+
+	* procfs.c: New file for SVR4 /proc (process file system) support.
+
+	* tm-amix.h, xm-amix.h, tconfig/amix, xconfig/amix: New files for
+	Amiga UNIX support.
+
+	* xm-svr4.h, tm-svr4.h: New files for SVR4 support.
+
+	* xm-m68k.h: New file for host machines with m68k cpu.
+
 	* Makefile.in: Add elfread.c and dwarfread.c to SFILES_MAINDIR.
 	Add elfread.o and dwarfread.o to OBS.
 
