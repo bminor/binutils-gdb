@@ -924,6 +924,9 @@ append_insn (place, ip, address_expr, reloc_type)
 		 there are any branches to anything other than a
 		 label, users must use .set noreorder.  */
 	      || insn_label != NULL
+	      /* If the previous instruction is in a variant frag, we
+		 can not do the swap.  */
+	      || prev_insn_frag->fr_type == rs_machine_dependent
 	      /* If the branch reads the condition codes, we don't
 		 even try to swap, because in the sequence
 		   ctc1 $X,$31
@@ -3009,7 +3012,16 @@ macro (ip)
 					  ! used_at && mips_noat),
 			    offset_expr.X_add_symbol, (long) 0,
 			    (char *) NULL);
-	      offset_expr.X_add_number -= 4;
+
+	      /* We just generated two relocs.  When tc_gen_reloc
+		 handles this case, it will skip the first reloc and
+		 handle the second.  The second reloc already has an
+		 extra addend of 4, which we added above.  We must
+		 subtract it out, and then subtract another 4 to make
+		 the first reloc come out right.  The second reloc
+		 will come out right because we are going to add 4 to
+		 offset_expr when we build its instruction below.  */
+	      offset_expr.X_add_number -= 8;
 	      offset_expr.X_op = O_constant;
 	    }
 	  macro_build_lui (p, &icnt, &offset_expr, AT);
