@@ -4139,16 +4139,24 @@ coff_slurp_symbol_table (abfd)
 #endif
 
 	    case C_BLOCK:	/* ".bb" or ".eb"		 */
-	    case C_FCN:		/* ".bf" or ".ef"		 */
+	    case C_FCN:		/* ".bf" or ".ef" (or PE ".lf")	 */
 	    case C_EFCN:	/* physical end of function	 */
-	      dst->symbol.flags = BSF_LOCAL;
 #if defined COFF_WITH_PE
 	      /* PE sets the symbol to a value relative to the start
 		 of the section.  */
 	      dst->symbol.value = src->u.syment.n_value;
+	      if (strcmp (dst->symbol.name, ".bf") != 0)
+		{
+		  /* PE uses funny values for .ef and .lf; don't
+                     relocate them.  */
+		  dst->symbol.flags = BSF_DEBUGGING;
+		}
+	      else
+		dst->symbol.flags = BSF_DEBUGGING | BSF_DEBUGGING_RELOC;
 #else
 	      /* Base the value as an index from the base of the
 		 section.  */
+	      dst->symbol.flags = BSF_LOCAL;
 	      dst->symbol.value = (src->u.syment.n_value
 				   - dst->symbol.section->vma);
 #endif

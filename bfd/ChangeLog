@@ -12,6 +12,9 @@
 	function symbols.
 
 	* syms.c (BSF_DEBUGGING_RELOC): Define.
+	* coffcode.h (coff_slurp_symbol_table): If PE, set BSF_DEBUGGING
+	for C_FCN/C_EFCN symbols, and set BSF_DEBUGGING_RELOC for such
+	symbols named .bf.
 	* coffgen.c (fixup_symbol_value): Relocate a symbol which has
 	BSF_DEBUGGING_RELOC set.
 	* bfd-in2.h: Rebuild.
