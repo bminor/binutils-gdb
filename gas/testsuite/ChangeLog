@@ -1,3 +1,8 @@
+Fri May 15 14:51:01 1998  Gavin Koch  <gavin@cygnus.com>
+
+	* gas/mips/mips.exp: Distinguish chains with 32-bit addresses.
+	* gas/mips/ld-ilocks-addr32.d : New.
+
 Wed May 13 15:06:31 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* gas/m32r/uppercase.[sd]: Test for HIGH,SHIGH,LOW,SDA.
