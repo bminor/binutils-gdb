@@ -23,6 +23,10 @@
 
 #include "i386/tm-i386.h"
 
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+
 /* These defines allow the recognition of sigtramps as a function name
    <sigtramp>.
 
