@@ -65,6 +65,7 @@
 #include "elf/i860.h"
 #include "elf/i960.h"
 #include "elf/ia64.h"
+#include "elf/ip2k.h"
 #include "elf/m32r.h"
 #include "elf/m68k.h"
 #include "elf/m68hc11.h"
@@ -652,6 +653,8 @@ guess_is_rela (e_machine)
     case EM_MMIX:
     case EM_XSTORMY16:
     case EM_VAX:
+    case EM_IP2K:
+    case EM_IP2K_OLD:
       return TRUE;
 
     case EM_MMA:
@@ -1127,6 +1130,11 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 	case EM_VAX:
 	  rtype = elf_vax_reloc_type (type);
 	  break;
+
+	case EM_IP2K:
+	case EM_IP2K_OLD:
+	  rtype = elf_ip2k_reloc_type (type);
+	  break;
 	}
 
       if (rtype == NULL)
@@ -1569,6 +1577,8 @@ get_machine_name (e_machine)
     case EM_OPENRISC:
     case EM_OR32:		return "OpenRISC";
     case EM_DLX:		return "OpenDLX";
+    case EM_IP2K_OLD:
+    case EM_IP2K:               return "Ubicom IP2xxx 8-bit microcontrollers";
     default:
       sprintf (buff, _("<unknown>: %x"), e_machine);
       return buff;
