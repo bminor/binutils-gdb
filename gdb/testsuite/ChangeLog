@@ -1,5 +1,10 @@
 2001-10-01  Daniel Jacobowitz  <drow@mvista.com>
 
+	* gdb.threads/pthreads.exp: Wait for output and delay
+	before sending ^C.
+
+2001-10-01  Daniel Jacobowitz  <drow@mvista.com>
+
 	* gdb.mi/mi-var-display.exp (continue to incr_a):  Recognize
 	some incorrect output instead of timing out.
 	* gdb.mi/mi-var-display.exp (continue to incr_a):  Likewise.
