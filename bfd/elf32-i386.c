@@ -488,10 +488,13 @@ elf_i386_size_dynamic_sections (output_bfd, info)
   BFD_ASSERT (dynobj != NULL);
 
   /* Set the contents of the .interp section to the interpreter.  */
-  s = bfd_get_section_by_name (dynobj, ".interp");
-  BFD_ASSERT (s != NULL);
-  s->_raw_size = sizeof ELF_DYNAMIC_INTERPRETER;
-  s->contents = (unsigned char *) ELF_DYNAMIC_INTERPRETER;
+  if (! info->shared)
+    {
+      s = bfd_get_section_by_name (dynobj, ".interp");
+      BFD_ASSERT (s != NULL);
+      s->_raw_size = sizeof ELF_DYNAMIC_INTERPRETER;
+      s->contents = (unsigned char *) ELF_DYNAMIC_INTERPRETER;
+    }
 
   /* The adjust_dynamic_symbol entry point has determined the sizes of
      the various dynamic sections.  Allocate some memory for them to
@@ -505,8 +508,10 @@ elf_i386_size_dynamic_sections (output_bfd, info)
   /* Add some entries to the .dynamic section.  We fill in the values
      later, in elf_i386_finish_dynamic_sections, but we must add the
      entries now so that we get the correct size for the .dynamic
-     section.  */
-  if (! bfd_elf32_add_dynamic_entry (info, DT_PLTGOT, 0))
+     section.  The DT_DEBUG entry is filled in by the dynamic linker
+     and used by the debugger.  */
+  if (! bfd_elf32_add_dynamic_entry (info, DT_DEBUG, 0)
+      || ! bfd_elf32_add_dynamic_entry (info, DT_PLTGOT, 0))
     return false;
 
   s = bfd_get_section_by_name (dynobj, ".plt");

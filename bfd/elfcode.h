@@ -2125,7 +2125,13 @@ prep_headers (abfd)
   for (count = EI_PAD; count < EI_NIDENT; count++)
     i_ehdrp->e_ident[count] = 0;
 
-  i_ehdrp->e_type = (abfd->flags & EXEC_P) ? ET_EXEC : ET_REL;
+  if ((abfd->flags & DYNAMIC) != 0)
+    i_ehdrp->e_type = ET_DYN;
+  else if ((abfd->flags & EXEC_P) != 0)
+    i_ehdrp->e_type = ET_EXEC;
+  else
+    i_ehdrp->e_type = ET_REL;
+
   switch (bfd_get_arch (abfd))
     {
     case bfd_arch_unknown:
@@ -4131,7 +4137,23 @@ elf_link_add_object_symbols (abfd, info)
   elf_sym_hashes (abfd) = sym_hash;
 
   if (elf_elfheader (abfd)->e_type != ET_DYN)
-    dynamic = false;
+    {
+      dynamic = false;
+
+      /* If we are creating a shared library, create all the dynamic
+         sections immediately.  We need to attach them to something,
+         so we attach them to this BFD, provided it is the right
+         format.  FIXME: If there are no input BFD's of the same
+         format as the output, we can't make a shared library.  */
+      if (info->shared
+	  && elf_hash_table (info)->dynobj == NULL
+	  && abfd->xvec == info->hash->creator)
+	{
+	  if (! elf_link_create_dynamic_sections (abfd, info))
+	    goto error_return;
+	  elf_hash_table (info)->dynobj = abfd;
+	}
+    }
   else
     {
       asection *s;
@@ -4571,10 +4593,15 @@ elf_link_create_dynamic_sections (abfd, info)
      sections.  */
   flags = SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY;
 
-  s = bfd_make_section (abfd, ".interp");
-  if (s == NULL
-      || ! bfd_set_section_flags (abfd, s, flags | SEC_READONLY))
-    return false;
+  /* A dynamically linked executable has a .interp section, but a
+     shared library does not.  */
+  if (! info->shared)
+    {
+      s = bfd_make_section (abfd, ".interp");
+      if (s == NULL
+	  || ! bfd_set_section_flags (abfd, s, flags | SEC_READONLY))
+	return false;
+    }
 
   s = bfd_make_section (abfd, ".dynamic");
   if (s == NULL
@@ -4755,7 +4782,7 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, info, sinterpptr)
     return true;
 
   *sinterpptr = bfd_get_section_by_name (dynobj, ".interp");
-  BFD_ASSERT (*sinterpptr != NULL);
+  BFD_ASSERT (*sinterpptr != NULL || info->shared);
 
   /* Set the size of the .dynsym and .hash sections.  We counted the
      number of dynamic symbols in elf_link_add_object_symbols.  We
@@ -5515,7 +5542,11 @@ elf_bfd_final_link (abfd, info)
 	{
 	  if ((o->flags & SEC_HAS_CONTENTS) == 0)
 	    continue;
-	  BFD_ASSERT ((o->flags & SEC_IN_MEMORY) != 0);
+	  if ((o->flags & SEC_IN_MEMORY) == 0)
+	    {
+	      BFD_ASSERT (info->shared);
+	      continue;
+	    }
 	  if (! bfd_set_section_contents (abfd, o->output_section,
 					  o->contents, o->output_offset,
 					  o->_raw_size))
@@ -5964,6 +5995,14 @@ elf_link_input_bfd (finfo, input_bfd)
 
       if ((o->flags & SEC_HAS_CONTENTS) == 0)
 	continue;
+
+      if ((o->flags & SEC_IN_MEMORY) != 0
+	  && input_bfd == elf_hash_table (finfo->info)->dynobj)
+	{
+	  /* Section was created by elf_link_create_dynamic_sections.
+             FIXME: This test is fragile.  */
+	  continue;
+	}
 
       /* Read the contents of the section.  */
       if (! bfd_get_section_contents (input_bfd, o, finfo->contents,

@@ -1,5 +1,19 @@
 Thu Jun 23 15:31:28 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	Preliminary support for generating shared libraries, from Eric
+	Youngdale <ericy@cais.cais.com>.
+	* elfcode.h (prep_headers): If DYNAMIC, set e_type to ET_DYN.
+	(elf_link_add_object_symbols): If generating a shared library,
+	create dynamic sections for first input BFD with the right format.
+	(elf_link_create_dynamic_sections): Don't create .interp section
+	if creating a shared library.
+	(elf_link_input_bfd): Skip dynamic sections in input file.
+	(elf_bfd_final_link): If creating a shared library, it's OK for
+	dynobj to have sections which are not SEC_IN_MEMORY.
+	* elf32-i386.c (elf_i386_size_dynamic_sections): Only set .interp
+	section if not creating a shared library.
+	* elf32-sparc.c (elf_sparc_size_dynamic_sections): Likewise.
+
 	* elfcode.h (elf_object_p): Don't set DYNAMIC just because there
 	is an SHT_DYNAMIC section.
 

@@ -472,10 +472,13 @@ elf32_sparc_size_dynamic_sections (output_bfd, info)
   BFD_ASSERT (dynobj != NULL);
 
   /* Set the contents of the .interp section to the interpreter.  */
-  s = bfd_get_section_by_name (dynobj, ".interp");
-  BFD_ASSERT (s != NULL);
-  s->_raw_size = sizeof ELF_DYNAMIC_INTERPRETER;
-  s->contents = (unsigned char *) ELF_DYNAMIC_INTERPRETER;
+  if (! info->shared)
+    {
+      s = bfd_get_section_by_name (dynobj, ".interp");
+      BFD_ASSERT (s != NULL);
+      s->_raw_size = sizeof ELF_DYNAMIC_INTERPRETER;
+      s->contents = (unsigned char *) ELF_DYNAMIC_INTERPRETER;
+    }
 
   /* Make space for the trailing nop in .plt.  */
   s = bfd_get_section_by_name (dynobj, ".plt");
@@ -492,10 +495,12 @@ elf32_sparc_size_dynamic_sections (output_bfd, info)
     return false;
 
   /* Add some entries to the .dynamic section.  We fill in the values
-     later, in elf32_sparc_finish_dynamic_sections, but we must add the
-     entries now so that we get the correct size for the .dynamic
-     section.  */
-  if (! bfd_elf32_add_dynamic_entry (info, DT_PLTGOT, 0)
+     later, in elf32_sparc_finish_dynamic_sections, but we must add
+     the entries now so that we get the correct size for the .dynamic
+     section.  The DT_DEBUG entry is filled in by the dynamic linker
+     and used by the debugger.  */
+  if (! bfd_elf32_add_dynamic_entry (info, DT_DEBUG, 0)
+      || ! bfd_elf32_add_dynamic_entry (info, DT_PLTGOT, 0)
       || ! bfd_elf32_add_dynamic_entry (info, DT_PLTRELSZ, 0)
       || ! bfd_elf32_add_dynamic_entry (info, DT_PLTREL, DT_RELA)
       || ! bfd_elf32_add_dynamic_entry (info, DT_JMPREL, 0)
