@@ -1090,6 +1090,20 @@ rw_common (int dowrite, const struct ps_prochandle *ph, gdb_ps_addr_t addr,
 
 	  return PS_ERR;
 	}
+      else if (cc == 0)
+	{
+	  if (dowrite == 0)
+	    warning ("rw_common (): unable to read at addr 0x%lx", 
+		     (long) addr);
+	  else
+	    warning ("rw_common (): unable to write at addr 0x%lx", 
+		     (long) addr);
+
+	  do_cleanups (old_chain);
+
+	  return PS_ERR;
+	}
+
       size -= cc;
       buf += cc;
     }

@@ -1,3 +1,10 @@
+2000-06-01  Michael Snyder  <msnyder@seadog.cygnus.com>
+
+	* sol-thread.c (rw_common): Circumstances (eg. a bug in Sun's 
+	thread_db library) may cause this function to be called with an
+	illegal address, in which case procfs_to_xfer_memory will 
+	return zero.  Return an error code instead of looping forever.
+
 Thu Jun  1 20:05:26 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* TODO: More suggestions added.
