@@ -1,5 +1,7 @@
 Thu Aug 29 13:53:29 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* simops.c: Add shift support.
+
 	* simops.c: Add multiply & divide support.  Abort for system
 	instructions.
 

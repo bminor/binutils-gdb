@@ -3,11 +3,6 @@
 #include "simops.h"
 
 void
-OP_280 ()
-{
-}
-
-void
 OP_220 ()
 {
 }
@@ -228,16 +223,6 @@ OP_40 ()
 }
 
 void
-OP_8007E0 ()
-{
-}
-
-void
-OP_C007E0 ()
-{
-}
-
-void
 OP_10720 ()
 {
 }
@@ -254,11 +239,6 @@ OP_720 ()
 
 void
 OP_60 ()
-{
-}
-
-void
-OP_2A0 ()
 {
 }
 
@@ -356,18 +336,70 @@ OP_20 ()
   State.regs[OP[1]] = ~State.regs[OP[0]];
 }
 
+/* sar zero_extend(imm5),reg1
+
+   XXX condition codes.  */
+void
+OP_2A0 ()
+{
+  int temp = State.regs[OP[1]];
+
+  temp >>= (OP[0] & 0x1f);
+
+  State.regs[OP[1]] = temp;
+}
+
+/* sar reg1, reg2
+
+   XXX condition codes.  */
 void
 OP_A007E0 ()
 {
+  int temp = State.regs[OP[1]];
+
+  temp >>= (State.regs[OP[0]] & 0x1f);
+
+  State.regs[OP[1]] = temp;
+}
+
+/* shl zero_extend(imm5),reg1
+
+   XXX condition codes.  */
+void
+OP_2C0 ()
+{
+  State.regs[OP[1]] <<= (OP[0] & 0x1f);
+}
+
+/* shl reg1, reg2
+
+   XXX condition codes.  */
+void
+OP_C007E0 ()
+{
+  State.regs[OP[1]] <<= (State.regs[OP[0]] & 0x1f);
+}
+
+/* shr zero_extend(imm5),reg1
+
+   XXX condition codes.  */
+void
+OP_280 ()
+{
+  State.regs[OP[1]] >>= (OP[0] & 0x1f);
+}
+
+/* shr reg1, reg2
+
+   XXX condition codes.  */
+void
+OP_8007E0 ()
+{
+  State.regs[OP[1]] >>= (State.regs[OP[0]] & 0x1f);
 }
 
 void
 OP_500 ()
-{
-}
-
-void
-OP_2C0 ()
 {
 }
 
