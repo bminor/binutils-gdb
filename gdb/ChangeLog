@@ -1,3 +1,8 @@
+2004-02-10  Andrew Cagney  <cagney@redhat.com>
+
+	* Makefile.in (SFILES): Remove explictly listed tui files.
+	(SUBDIR_GDBTK_SRCS): Fix path to gdbtk-interp.c.
+
 2004-02-10  Jeff Johnston  <jjohnstn@redhat.com>
 	
 	* ia64-tdep.c (ia64_frame_this_id): Fix tracing print statement

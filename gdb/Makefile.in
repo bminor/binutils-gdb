@@ -285,7 +285,8 @@ SUBDIR_GDBTK_OBS = \
 	gdbtk-register.o gdbtk-stack.o gdbtk-varobj.o gdbtk-wrapper.o
 SUBDIR_GDBTK_SRCS = \
 	gdbtk/generic/gdbtk.c gdbtk/generic/gdbtk-bp.c \
-	gdbtk/generic/gdbtk-cmds.c gdbtk/generic/gdbtk-hooks.c gdbtk-interp.c \
+	gdbtk/generic/gdbtk-cmds.c gdbtk/generic/gdbtk-hooks.c \
+	gdbtk/generic/gdbtk-interp.c \
 	gdbtk/generic/gdbtk-register.c gdbtk/generic/gdbtk-stack.c \
 	gdbtk/generic/gdbtk-varobj.c gdbtk/generic/gdbtk-wrapper.c \
 	gdbtk/generic/gdbtk-main.c
@@ -537,14 +538,6 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	target.c thread.c top.c tracepoint.c \
 	trad-frame.c \
 	typeprint.c \
-	tui/tui.c tui/tui.h tui/tuiCommand.c tui/tuiCommand.h \
-	tui/tuiData.c tui/tuiData.h tui/tuiDataWin.c tui/tuiDataWin.h \
-	tui/tuiDisassem.c tui/tuiDisassem.h tui/tuiGeneralWin.c \
-	tui/tuiGeneralWin.h tui/tuiIO.c tui/tuiIO.h tui/tuiLayout.c \
-	tui/tuiLayout.h tui/tuiRegs.c tui/tuiRegs.h tui/tuiSource.c \
-	tui/tuiSource.h tui/tuiSourceWin.c tui/tuiSourceWin.h \
-	tui/tuiStack.c tui/tuiStack.h tui/tuiWin.c tui/tuiWin.h \
-	tui/tui-file.h tui/tui-file.c tui/tui-out.c tui/tui-hooks.c \
 	ui-out.c utils.c ui-file.h ui-file.c \
 	user-regs.c \
 	valarith.c valops.c valprint.c values.c varobj.c \
