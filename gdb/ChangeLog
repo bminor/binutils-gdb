@@ -1,3 +1,9 @@
+2003-05-29  Adam Fedor  <fedor@gnu.org>
+
+	* objc-lang.c (CONVERT_FUNCPTR): Remove macro
+	(find_implementation_from_class): Replace it with the standard
+	case i.e. do nothing.
+
 2003-05-29  Richard Henderson  <rth@redhat.com>
 
 	* alpha-linux-tdep.c (alpha_linux_sigtramp_offset_1): New.

@@ -1730,11 +1730,6 @@ static unsigned long FETCH_ARGUMENT (int i)
   internal_error (__FILE__, __LINE__, "FETCH_ARGUMENT not implemented");
   return 0;
 }
-static CORE_ADDR CONVERT_FUNCPTR (CORE_ADDR pc)
-{
-  internal_error (__FILE__, __LINE__, "CONVERT_FUNCPTR not implemented");
-  return pc;
-}
 #else
 #if defined (__powerpc__) || defined (__ppc__)
 static unsigned long FETCH_ARGUMENT (int i)
@@ -1761,20 +1756,6 @@ static unsigned long FETCH_ARGUMENT (int i)
 #error unknown architecture
 #endif
 
-#if defined (__hppa__) || defined (__hppa)
-static CORE_ADDR CONVERT_FUNCPTR (CORE_ADDR pc)
-{
-  if (pc & 0x2)
-    pc = (CORE_ADDR) read_memory_integer (pc & ~0x3, 4);
-
-  return pc;
-}
-#else
-static CORE_ADDR CONVERT_FUNCPTR (CORE_ADDR pc)
-{
-  return pc;
-}
-#endif
 #endif
 
 static void 
@@ -1865,7 +1846,9 @@ find_implementation_from_class (CORE_ADDR class, CORE_ADDR sel)
 #endif
 
 	      if (meth_str.name == sel) 
-		return CONVERT_FUNCPTR (meth_str.imp);
+		/* FIXME: hppa arch was doing a pointer dereference
+		   here. There needs to be a better way to do that.  */
+		return meth_str.imp;
 	    }
 	  mlistnum++;
 	}
