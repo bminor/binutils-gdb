@@ -136,6 +136,7 @@
 @V@/gdb/jv-exp.tab.c @V@/gdb/jv-exp_tab.c
 @V@/gdb/f-exp.tab.c @V@/gdb/f-exp_tab.c
 @V@/gdb/m2-exp.tab.c @V@/gdb/m2-exp_tab.c
+@V@/gdb/p-exp.tab.c @V@/gdb/p-exp_tab.c
 @V@/gdb/testsuite/gdb.c++ @V@/gdb/testsuite/gdb.cxx
 @V@/gdb/testsuite/gdb.c++/Makefile.in @V@/gdb/testsuite/gdb.cxx/Makefile.in
 @V@/gdb/testsuite/gdb.c++/ambiguous.cc @V@/gdb/testsuite/gdb.cxx/ambiguous.cc

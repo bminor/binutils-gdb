@@ -1,3 +1,8 @@
+2000-08-25  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+       * Makefile.in: add rules to compile and link pascal specific files.
+       * config/djgpp/fnchange.lst: add substitution for p-exp.tab.c.
+
 2000-08-20  Michael Chastain  <chastain@redhat.com>
 
         * remote.c (read_frame): Handle SERIAL_TIMEOUT while reading

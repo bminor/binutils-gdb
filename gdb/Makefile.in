@@ -488,7 +488,8 @@ SFILES = ax-general.c ax-gdb.c bcache.c blockframe.c breakpoint.c \
 	varobj.c wrapper.c \
 	jv-exp.y jv-lang.c jv-valprint.c jv-typeprint.c \
 	m2-exp.y m2-lang.c m2-typeprint.c m2-valprint.c main.c maint.c \
-	mem-break.c minsyms.c mipsread.c nlmread.c objfiles.c parse.c \
+	mem-break.c minsyms.c mipsread.c nlmread.c objfiles.c \
+	p-exp.y p-lang.c p-typeprint.c p-valprint.c parse.c \
 	printcmd.c remote.c remote-nrom.c scm-exp.c scm-lang.c \
 	scm-valprint.c source.c stabsread.c stack.c symfile.c \
 	symmisc.c symtab.c target.c thread.c top.c tracepoint.c \
@@ -580,7 +581,7 @@ HFILES_NO_SRCDIR = bcache.h buildsym.h call-cmds.h coff-solib.h defs.h \
 	symfile.h stabsread.h target.h terminal.h typeprint.h xcoffsolib.h \
 	c-lang.h ch-lang.h f-lang.h \
 	jv-lang.h \
-	m2-lang.h \
+	m2-lang.h  p-lang.h \
 	complaints.h valprint.h \
 	29k-share/udi/udiids.h 29k-share/udi_soc nindy-share/b.out.h \
 	nindy-share/block_io.h nindy-share/coff.h \
@@ -634,7 +635,7 @@ COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o regcache.o \
 	ui-out.o cli-out.o \
 	varobj.o wrapper.o \
 	jv-lang.o jv-valprint.o jv-typeprint.o \
-	m2-lang.o \
+ 	m2-lang.o p-lang.o p-typeprint.o p-valprint.o \
 	scm-exp.o scm-lang.o scm-valprint.o complaints.o typeprint.o \
 	c-typeprint.o ch-typeprint.o f-typeprint.o m2-typeprint.o \
 	c-valprint.o cp-valprint.o ch-valprint.o f-valprint.o m2-valprint.o \
@@ -654,10 +655,10 @@ SUBDIRS = @SUBDIRS@
 # For now, shortcut the "configure GDB for fewer languages" stuff.
 YYFILES = c-exp.tab.c \
 	jv-exp.tab.c \
-	f-exp.tab.c m2-exp.tab.c
+	f-exp.tab.c m2-exp.tab.c p-exp.tab.c
 YYOBJ = c-exp.tab.o \
 	jv-exp.tab.o \
-	f-exp.tab.o m2-exp.tab.o
+	f-exp.tab.o m2-exp.tab.o p-exp.tab.o
 
 # Things which need to be built when making a distribution.
 
@@ -805,11 +806,13 @@ saber_gdb: $(SFILES) $(DEPFILES) copying.c version.c
 	#unload $(srcdir)/c-exp.y
 	#unload $(srcdir)/jv-exp.y
 	#unload $(srcdir)/m2-exp.y
+	#unload $(srcdir)/p-exp.y
 	#unload vx-share/*.h
 	#unload nindy-share/[A-Z]*
 	#load c-exp.tab.c
 	#load jv-exp.tab.c
 	#load m2-exp.tab.c
+	#load p-exp.tab.c
 	#load copying.c version.c
 	#load ../opcodes/libopcodes.a
 	#load ../libiberty/libiberty.a
@@ -902,7 +905,7 @@ local-maintainer-clean:
 	@echo "it deletes files that may require special tools to rebuild."
 	rm -f c-exp.tab.c \
 		jv-exp.tab \
-		f-exp.tab.c m2-exp.tab.c
+		f-exp.tab.c m2-exp.tab.c p-exp.tab.c
 	rm -f TAGS $(INFOFILES)
 	rm -f $(YYFILES)
 	rm -f nm.h tm.h xm.h config.status
@@ -1036,9 +1039,27 @@ m2-exp.tab.c: m2-exp.y
 	-rm m2-exp.tmp
 	mv m2-exp.new ./m2-exp.tab.c
 
+# p-exp.tab.c is generated in objdir from p-exp.y if it doesn't exist
+# in srcdir, then compiled in objdir to p-exp.tab.o.
+# Remove bogus decls for malloc/realloc/free which conflict with everything
+# else.
+p-exp.tab.o: p-exp.tab.c
+p-exp.tab.c: p-exp.y
+	$(SHELL) $(YLWRAP) "$(YACC)" $(srcdir)/p-exp.y  y.tab.c p-exp.tmp -- $(YFLAGS)
+	-sed -e '/extern.*malloc/d' \
+	     -e '/extern.*realloc/d' \
+	     -e '/extern.*free/d' \
+	     -e '/include.*malloc.h/d' \
+	     -e 's/malloc/xmalloc/g' \
+	     -e 's/realloc/xrealloc/g' \
+	     -e '/^#line.*y.tab.c/d' \
+	  < p-exp.tmp > p-exp.new
+	-rm p-exp.tmp
+	mv p-exp.new ./p-exp.tab.c
+
 # These files are updated atomically, so make never has to remove them
 .PRECIOUS: m2-exp.tab.c f-exp.tab.c c-exp.tab.c
-.PRECIOUS: jv-exp.tab.c
+.PRECIOUS: jv-exp.tab.c p-exp.tab.c
 
 lint: $(LINTFILES)
 	$(LINT) $(INCLUDE_CFLAGS) $(LINTFLAGS) $(LINTFILES) \
@@ -1510,6 +1531,16 @@ m2-valprint.o: m2-valprint.c $(defs_h) $(gdbtypes_h) $(symtab_h) \
 m3-nat.o: m3-nat.c $(defs_h) $(inferior_h) $(value_h) language.h target.h \
 	gdb_wait.h $(gdbcmd_h) $(gdbcore_h)
 
+p-lang.o: p-lang.c p-lang.h $(defs_h) $(expression_h) $(gdbtypes_h) \
+	language.h parser-defs.h $(symtab_h) gdb_string.h
+
+p-typeprint.o: p-typeprint.c p-lang.h $(defs_h) $(expression_h) \
+	$(gdbcmd_h) $(gdbcore_h) $(gdbtypes_h) language.h $(symtab_h) \
+	target.h typeprint.h $(value_h) gdb_string.h
+
+p-valprint.o: p-valprint.c p-lang.h $(defs_h) $(expression_h) $(gdbtypes_h) \
+	language.h $(symtab_h) valprint.h $(value_h) gdb_string.h
+
 m68k-tdep.o: m68k-tdep.c $(defs_h) $(frame_h) $(symtab_h) $(value_h) \
 	$(gdbcore_h) gdb_string.h
 
@@ -1954,6 +1985,10 @@ f-exp.tab.o: f-exp.tab.c f-lang.h $(defs_h) $(expression_h) \
 
 m2-exp.tab.o: m2-exp.tab.c $(defs_h) $(expression_h) $(gdbtypes_h) \
 	language.h m2-lang.h parser-defs.h $(symtab_h) $(value_h) \
+	$(bfd_h) objfiles.h symfile.h
+
+p-exp.tab.o: p-exp.tab.c $(defs_h) $(expression_h) $(gdbtypes_h) \
+	language.h p-lang.h parser-defs.h $(symtab_h) $(value_h) \
 	$(bfd_h) objfiles.h symfile.h
 
 gdb-events.o: gdb-events.c gdb-events.h $(defs_h) $(gdbcmd_h)
