@@ -1,5 +1,9 @@
 Wed Feb 12 14:36:29 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-mips.c (my_getExpression): In mips16 mode, if it looks
+	like the expression was based on `.', adjust the value of the
+	symbol.
+
 	* config/tc-mips.c (append_insn): Warn about an attempt to put an
  	extended instruction in a delay slot when not reordering.  Set
  	prev_insn_valid even if not reordering.

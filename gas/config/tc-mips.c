@@ -7692,6 +7692,19 @@ my_getExpression (ep, str)
   expression (ep);
   expr_end = input_line_pointer;
   input_line_pointer = save_in;
+
+  /* If we are in mips16 mode, and this is an expression based on `.',
+     then we bump the value of the symbol by 1 since that is how other
+     text symbols are handled.  We don't bother to handle complex
+     expressions, just `.' plus or minus a constant.  */
+  if (mips16
+      && ep->X_op == O_symbol
+      && strcmp (S_GET_NAME (ep->X_add_symbol), FAKE_LABEL_NAME) == 0
+      && S_GET_SEGMENT (ep->X_add_symbol) == now_seg
+      && ep->X_add_symbol->sy_frag == frag_now
+      && ep->X_add_symbol->sy_value.X_op == O_constant
+      && ep->X_add_symbol->sy_value.X_add_number == frag_now_fix ())
+    ++ep->X_add_symbol->sy_value.X_add_number;
 }
 
 /* Turn a string in input_line_pointer into a floating point constant
