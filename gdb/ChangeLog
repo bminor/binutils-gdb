@@ -1,3 +1,7 @@
+2002-02-05  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdbserver/linux-low.c: New file, copied exactly from low-linux.c.
+
 2002-02-04  Pierre Muller  <muller@ics.u-strasbg.fr>
 	* win32-nat.c (handle_exception): Handle Ctrl-Break exception.
 
