@@ -142,7 +142,8 @@ enum option_values
   OPTION_PIE,
   OPTION_UNRESOLVED_SYMBOLS,
   OPTION_WARN_UNRESOLVED_SYMBOLS,
-  OPTION_ERROR_UNRESOLVED_SYMBOLS
+  OPTION_ERROR_UNRESOLVED_SYMBOLS,
+  OPTION_REDUCE_MEMORY_OVERHEADS
 };
 
 /* The long options.  This structure is used for both the option
@@ -445,7 +446,9 @@ static const struct ld_option ld_options[] =
   { {"no-as-needed", no_argument, NULL, OPTION_NO_AS_NEEDED},
       '\0', NULL, N_("Always set DT_NEEDED for following dynamic libs"), TWO_DASHES },
   { {"wrap", required_argument, NULL, OPTION_WRAP},
-      '\0', N_("SYMBOL"), N_("Use wrapper functions for SYMBOL"), TWO_DASHES }
+      '\0', N_("SYMBOL"), N_("Use wrapper functions for SYMBOL"), TWO_DASHES },
+  { {"reduce-memory-overheads", no_argument, NULL, OPTION_REDUCE_MEMORY_OVERHEADS},
+      '\0', NULL, N_("reduce memory overheads, possibly taking much longer"), TWO_DASHES },
 };
 
 #define OPTION_COUNT ARRAY_SIZE (ld_options)
@@ -1220,6 +1223,9 @@ parse_args (unsigned argc, char **argv)
 
 	case OPTION_FINI:
 	  link_info.fini_function = optarg;
+	  break;
+	case OPTION_REDUCE_MEMORY_OVERHEADS:
+	  command_line.reduce_memory_overheads = TRUE;
 	  break;
 	}
     }

@@ -47,6 +47,7 @@
 
 /* Locals variables.  */
 static struct obstack stat_obstack;
+static struct obstack map_obstack;
 
 #define obstack_chunk_alloc xmalloc
 #define obstack_chunk_free free
@@ -65,6 +66,7 @@ static struct bfd_hash_table lang_definedness_table;
 
 /* Forward declarations.  */
 static void exp_init_os (etree_type *);
+static void init_map_userdata (bfd *, asection *, void *);
 static bfd_boolean wildcardp (const char *);
 static lang_input_statement_type *lookup_name (const char *);
 static bfd_boolean load_symbols (lang_input_statement_type *,
@@ -72,6 +74,8 @@ static bfd_boolean load_symbols (lang_input_statement_type *,
 static struct bfd_hash_entry *lang_definedness_newfunc
  (struct bfd_hash_entry *, struct bfd_hash_table *, const char *);
 static void insert_undefined (const char *);
+static void print_all_symbols (asection *);
+static bfd_boolean sort_def_symbol (struct bfd_link_hash_entry *, void *);
 static void print_statement (lang_statement_union_type *,
 			     lang_output_section_statement_type *);
 static void print_statement_list (lang_statement_union_type *,
@@ -688,6 +692,7 @@ void
 lang_map (void)
 {
   lang_memory_region_type *m;
+  bfd *p;
 
   minfo (_("\nMemory Configuration\n\n"));
   fprintf (config.map_file, "%-16s %-18s %-18s %s\n",
@@ -733,7 +738,58 @@ lang_map (void)
 
   fprintf (config.map_file, _("\nLinker script and memory map\n\n"));
 
+  if (! command_line.reduce_memory_overheads)
+    {
+      obstack_begin (&map_obstack, 1000);
+      for (p = link_info.input_bfds; p != (bfd *) NULL; p = p->link_next)
+	bfd_map_over_sections (p, init_map_userdata, 0);
+      bfd_link_hash_traverse (link_info.hash, sort_def_symbol, 0);
+    }
   print_statements ();
+}
+
+static void
+init_map_userdata (abfd, sec, data)
+     bfd *abfd ATTRIBUTE_UNUSED;
+     asection *sec;
+     void *data ATTRIBUTE_UNUSED;
+{
+  fat_section_userdata_type *new_data
+    = ((fat_section_userdata_type *) (stat_alloc
+				      (sizeof (fat_section_userdata_type))));
+
+  ASSERT (get_userdata (sec) == NULL);
+  get_userdata (sec) = new_data;
+  new_data->map_symbol_def_tail = &new_data->map_symbol_def_head;
+}
+
+static bfd_boolean
+sort_def_symbol (hash_entry, info)
+     struct bfd_link_hash_entry *hash_entry;
+     void *info ATTRIBUTE_UNUSED;
+{
+  if (hash_entry->type == bfd_link_hash_defined
+      || hash_entry->type == bfd_link_hash_defweak)
+    {
+      struct fat_user_section_struct *ud;
+      struct map_symbol_def *def;
+
+      ud = get_userdata (hash_entry->u.def.section);
+      if  (! ud)
+	{
+	  /* ??? What do we have to do to initialize this beforehand?  */
+	  /* The first time we get here is bfd_abs_section...  */
+	  init_map_userdata (0, hash_entry->u.def.section, 0);
+	  ud = get_userdata (hash_entry->u.def.section);
+	}
+      else if  (!ud->map_symbol_def_tail)
+	ud->map_symbol_def_tail = &ud->map_symbol_def_head;
+      def = (struct map_symbol_def *) obstack_alloc (&map_obstack, sizeof *def);
+      def->entry = hash_entry;
+      *ud->map_symbol_def_tail = def;
+      ud->map_symbol_def_tail = &def->next;
+    }
+  return TRUE;
 }
 
 /* Initialize an output section.  */
@@ -741,7 +797,7 @@ lang_map (void)
 static void
 init_os (lang_output_section_statement_type *s)
 {
-  section_userdata_type *new;
+  lean_section_userdata_type *new;
 
   if (s->bfd_section != NULL)
     return;
@@ -749,7 +805,7 @@ init_os (lang_output_section_statement_type *s)
   if (strcmp (s->name, DISCARD_SECTION_NAME) == 0)
     einfo (_("%P%F: Illegal use of `%s' section\n"), DISCARD_SECTION_NAME);
 
-  new = stat_alloc (sizeof (section_userdata_type));
+  new = stat_alloc (SECTION_USERDATA_SIZE);
 
   s->bfd_section = bfd_get_section_by_name (output_bfd, s->name);
   if (s->bfd_section == NULL)
@@ -2367,7 +2423,7 @@ print_input_statement (lang_input_statement_type *statm)
 }
 
 /* Print all symbols defined in a particular section.  This is called
-   via bfd_link_hash_traverse.  */
+   via bfd_link_hash_traverse, or by print_all_symbols.  */
 
 static bfd_boolean
 print_one_symbol (struct bfd_link_hash_entry *hash_entry, void *ptr)
@@ -2391,6 +2447,18 @@ print_one_symbol (struct bfd_link_hash_entry *hash_entry, void *ptr)
     }
 
   return TRUE;
+}
+
+static void
+print_all_symbols (sec)
+     asection *sec;
+{
+  struct fat_user_section_struct *ud = get_userdata (sec);
+  struct map_symbol_def *def;
+
+  *ud->map_symbol_def_tail = 0;
+  for (def = ud->map_symbol_def_head; def; def = def->next)
+    print_one_symbol (def->entry, sec);
 }
 
 /* Print information about an input section to the map file.  */
@@ -2445,7 +2513,10 @@ print_input_section (lang_input_section_type *in)
 	      minfo (_("%W (size before relaxing)\n"), i->_raw_size);
 	    }
 
-	  bfd_link_hash_traverse (link_info.hash, print_one_symbol, i);
+	  if (command_line.reduce_memory_overheads)
+	    bfd_link_hash_traverse (link_info.hash, print_one_symbol, i);
+	  else
+	    print_all_symbols (i);
 
 	  print_dot = (i->output_section->vma + i->output_offset
 		       + TO_ADDR (size));

@@ -1734,6 +1734,14 @@ If you specify @option{--disable-new-dtags}, no new dynamic tags will be
 created. By default, the new dynamic tags are not created. Note that
 those options are only available for ELF systems.
 
+@kindex --reduce-memory-overheads
+@item --reduce-memory-overheads
+This option reduces memory requirements at ld runtime, at the expense of
+linking speed.  This was introduced to to select the old O(n^2) algorithm
+for link map file generation, rather than the new O(n) algorithm which uses
+about 40% more memory for symbol storage.  It may be also be used for
+similar such tradeoffs in the future.
+
 @end table
 
 @c man end

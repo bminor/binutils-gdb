@@ -78,11 +78,32 @@ struct wildcard_list {
   struct wildcard_spec spec;
 };
 
+struct map_symbol_def {
+  struct bfd_link_hash_entry *entry;
+  struct map_symbol_def *next;
+};
+
 /* Extra information we hold on sections */
-typedef struct user_section_struct {
-  /* Pointer to the section where this data will go */
+typedef struct lean_user_section_struct {
+  /* For output sections: pointer to the section where this data will go.  */
   struct lang_input_statement_struct *file;
-} section_userdata_type;
+} lean_section_userdata_type;
+
+/* The initial part of fat_user_section_struct has to be idential with
+   lean_user_section_struct.  */
+typedef struct fat_user_section_struct {
+  /* For output sections: pointer to the section where this data will go.  */
+  struct lang_input_statement_struct *file;
+  /* For input sections, when writing a map file: head / tail of a linked
+     list of hash table entries for symbols defined in this section.  */
+  struct map_symbol_def *map_symbol_def_head;
+  struct map_symbol_def **map_symbol_def_tail;
+} fat_section_userdata_type;
+
+#define SECTION_USERDATA_SIZE \
+ (command_line.reduce_memory_overheads \
+  ? sizeof (lean_section_userdata_type) \
+  : sizeof (fat_section_userdata_type))
 
 #define get_userdata(x) ((x)->userdata)
 
@@ -153,6 +174,10 @@ typedef struct {
      behaviour of the linker.  The new default behaviour is to reject such
      input files.  */
   bfd_boolean accept_unknown_input_arch;
+
+  /* If TRUE reduce memory overheads, at the expense of speed.
+     This will cause map file generation to use an O(N^2) algorithm.  */
+  bfd_boolean reduce_memory_overheads;
 
 } args_type;
 

@@ -1,3 +1,26 @@
+2004-05-19  J"orn Rennecke <joern.rennecke@superh.com>
+
+	* NEWS: Mention new linker map file generation and the
+	--reduce-memory-overheads option.
+	* ld.texinfo: Document --reduce-memory-overheads option.
+	* ld.h (map_symbol_def): New struct.
+	(struct user_section_struct, section_userdata_type): Rename to:
+	(struct lean_user_section_struct, lean_section_userdata_type).
+	(struct fat_user_section_struct, fat_section_userdata_type): New.
+	(SECTION_USERDATA_SIZE): Define.
+	(args_type): New member reduce_memory_overheads.
+	* ldlang.c (map_obstack): New static variable.
+	(init_map_userdata, print_all_symbols, sort_def_symbol): New functions.
+	(lang_map): Unless command_line.reduce_memory_overheads is set,
+	initialize lists of defined symbols for each section.
+	(print_input_section): Unless command_line.reduce_memory_overheads
+	is set, use print_all_symbols.
+	(init_os): Use lean_section_userdata_type / SECTION_USERDATA_SIZE.
+	* ldmain.c (main): Initialize command_line.reduce_memory_overheads.
+	* lexsup.c (enum option_values): Add OPTION_REDUCE_MEMORY_OVERHEADS.
+	(ld_options): Add entry for --reduce-memory-overheads.
+	(parse_args): Handle OPTION_REDUCE_MEMORY_OVERHEADS.
+
 2004-05-19  Jakub Jelinek  <jakub@redhat.com>
 
 	* ldgram.y (sect_constraint): New.
