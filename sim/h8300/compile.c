@@ -53,7 +53,7 @@ static void set_simcache_size (SIM_DESC, int);
 
 #define X(op, size)  (op * 4 + size)
 
-#define SP (h8300hmode ? SL : SW)
+#define SP (h8300hmode && !h8300_normal_mode ? SL : SW)
 
 #define h8_opcodes ops
 #define DEFINE_TABLE
@@ -510,6 +510,7 @@ enum { POLL_QUIT_INTERVAL = 0x80000 };
 
 int h8300hmode  = 0;
 int h8300smode  = 0;
+int h8300_normal_mode  = 0;
 int h8300sxmode = 0;
 
 static int memory_size;
@@ -539,7 +540,7 @@ bitfrom (int x)
     case L_32:
       return SL;
     case L_P:
-      return h8300hmode ? SL : SW;
+      return (h8300hmode && !h8300_normal_mode)? SL : SW;
     }
   return 0;
 }
@@ -575,9 +576,9 @@ lvalue (SIM_DESC sd, int x, int rn, unsigned int *val)
 static int
 cmdline_location()
 {
-  if (h8300smode)
+  if (h8300smode && !h8300_normal_mode)
     return 0xffff00L;
-  else if (h8300hmode)
+  else if (h8300hmode && !h8300_normal_mode)
     return 0x2ff00L;
   else
     return 0xff00L;
@@ -837,8 +838,10 @@ decode (SIM_DESC sd, int addr, unsigned char *data, decoded_inst *dst)
 		}
 	      else if ((looking_for & MODE) == VECIND)
 		{
-		  /* FIXME: Multiplier should be 2 for "normal" mode.  */
-		  cst[opnum] = ((data[1] & 0x7f) + 0x80) * 4;
+		  if(h8300_normal_mode)
+		    cst[opnum] = ((data[1] & 0x7f) + 0x80) * 2;
+		  else
+		    cst[opnum] = ((data[1] & 0x7f) + 0x80) * 4;
 		  cst[opnum] += h8_get_vbr (sd); /* Add vector base reg.  */
 		}
 	      else if ((looking_for & SIZE) == L_32)
@@ -1774,9 +1777,9 @@ init_pointers (SIM_DESC sd)
 
       littleendian.i = 1;
 
-      if (h8300smode)
+      if (h8300smode && !h8300_normal_mode)
 	memory_size = H8300S_MSIZE;
-      else if (h8300hmode)
+      else if (h8300hmode && !h8300_normal_mode)
 	memory_size = H8300H_MSIZE;
       else
 	memory_size = H8300_MSIZE;
@@ -1950,7 +1953,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
     }
 
   oldmask = h8_get_mask (sd);
-  if (!h8300hmode)
+  if (!h8300hmode || h8300_normal_mode)
     h8_set_mask (sd, 0xffff);
   do
     {
@@ -2790,7 +2793,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 
 	    /* Setting char_ptr_size to the sizeof (char *) on the different
 	       architectures.  */
-	    if (h8300hmode || h8300smode)
+	    if ((h8300hmode || h8300smode) && !h8300_normal_mode)
 	      {
 		char_ptr_size = 4;
 	      }
@@ -2859,7 +2862,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	    for (i = 0; i < no_of_args; i++)
 	      {
 		/* Saving the argv pointer.  */
-		if (h8300hmode || h8300smode)
+		if ((h8300hmode || h8300smode) && !h8300_normal_mode)
 		  {
 		    SET_MEMORY_L (argv_ptrs_location, argv_ptrs[i]);
 		  }
@@ -2875,7 +2878,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 
 	    /* Required by POSIX, Setting 0x0 at the end of the list of argv
 	       pointers.  */
-	    if (h8300hmode || h8300smode)
+	    if ((h8300hmode || h8300smode) && !h8300_normal_mode)
 	      {
 		SET_MEMORY_L (old_sp, 0x0);
 	      }
@@ -2914,7 +2917,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 
 	    /* Setting filename_ptr to first argument of open,  */
 	    /* and trying to get mode.  */
-	    if (h8300sxmode || h8300hmode || h8300smode)
+	    if ((h8300sxmode || h8300hmode || h8300smode) && !h8300_normal_mode)
 	      {
 		filename_ptr = GET_L_REG (0);
 		mode = GET_MEMORY_L (h8_get_reg (sd, SP_REGNUM) + 4);
@@ -2965,8 +2968,8 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	    int read_return = 0;	/* Return value from callback to
 					   read.  */
 
-	    fd = h8300hmode ? GET_L_REG (0) : GET_W_REG (0);
-	    buf_size = h8300hmode ? GET_L_REG (2) : GET_W_REG (2);
+	    fd = (h8300hmode && !h8300_normal_mode) ? GET_L_REG (0) : GET_W_REG (0);
+	    buf_size = (h8300hmode && !h8300_normal_mode) ? GET_L_REG (2) : GET_W_REG (2);
 
 	    char_ptr = (char *) malloc (sizeof (char) * buf_size);
 
@@ -3000,9 +3003,9 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	    int write_return;	/* Return value from callback to write.  */
 	    int i = 0;		/* Loop counter */
 
-	    fd = h8300hmode ? GET_L_REG (0) : GET_W_REG (0);
-	    char_ptr = h8300hmode ? GET_L_REG (1) : GET_W_REG (1);
-	    len = h8300hmode ? GET_L_REG (2) : GET_W_REG (2);
+	    fd = (h8300hmode && !h8300_normal_mode) ? GET_L_REG (0) : GET_W_REG (0);
+	    char_ptr = (h8300hmode && !h8300_normal_mode) ? GET_L_REG (1) : GET_W_REG (1);
+	    len = (h8300hmode && !h8300_normal_mode) ? GET_L_REG (2) : GET_W_REG (2);
 
 	    /* Allocating space for the characters to be written.  */
 	    ptr = (char *) malloc (sizeof (char) * len);
@@ -3032,9 +3035,9 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	    int origin;		/* Origin */
 	    int lseek_return;	/* Return value from callback to lseek.  */
 
-	    fd = h8300hmode ? GET_L_REG (0) : GET_W_REG (0);
-	    offset = h8300hmode ? GET_L_REG (1) : GET_W_REG (1);
-	    origin = h8300hmode ? GET_L_REG (2) : GET_W_REG (2);
+	    fd = (h8300hmode && !h8300_normal_mode) ? GET_L_REG (0) : GET_W_REG (0);
+	    offset = (h8300hmode && !h8300_normal_mode) ? GET_L_REG (1) : GET_W_REG (1);
+	    origin = (h8300hmode && !h8300_normal_mode) ? GET_L_REG (2) : GET_W_REG (2);
 
 	    /* Callback lseek and return offset.  */
 	    lseek_return =
@@ -3050,7 +3053,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	    int fd;		/* File descriptor */
 	    int close_return;	/* Return value from callback to close.  */
 
-	    fd = h8300hmode ? GET_L_REG (0) : GET_W_REG (0);
+	    fd = (h8300hmode && !h8300_normal_mode) ? GET_L_REG (0) : GET_W_REG (0);
 
 	    /* Callback close and return.  */
 	    close_return = sim_callback->close (sim_callback, fd);
@@ -3068,10 +3071,10 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	    int stat_ptr;	/* Pointer to stat record.  */
 	    char *temp_stat_ptr;	/* Temporary stat_rec pointer.  */
 
-	    fd = h8300hmode ? GET_L_REG (0) : GET_W_REG (0);
+	    fd = (h8300hmode && !h8300_normal_mode) ? GET_L_REG (0) : GET_W_REG (0);
 
 	    /* Setting stat_ptr to second argument of stat.  */
-	    stat_ptr = h8300hmode ? GET_L_REG (1) : GET_W_REG (1);
+	    stat_ptr = (h8300hmode && !h8300_normal_mode) ? GET_L_REG (1) : GET_W_REG (1);
 
 	    /* Callback stat and return.  */
 	    fstat_return = sim_callback->fstat (sim_callback, fd, &stat_rec);
@@ -3120,7 +3123,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	    int i = 0;		/* Loop Counter */
 
 	    /* Setting filename_ptr to first argument of open.  */
-	    filename_ptr = h8300hmode ? GET_L_REG (0) : GET_W_REG (0);
+	    filename_ptr = (h8300hmode && !h8300_normal_mode) ? GET_L_REG (0) : GET_W_REG (0);
 
 	    /* Trying to find the length of the filename.  */
 	    temp_char = GET_MEMORY_B (h8_get_reg (sd, 0));
@@ -3144,7 +3147,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 
 	    /* Setting stat_ptr to second argument of stat.  */
 	    /* stat_ptr = h8_get_reg (sd, 1); */
-	    stat_ptr = h8300hmode ? GET_L_REG (1) : GET_W_REG (1);
+	    stat_ptr = (h8300hmode && !h8300_normal_mode) ? GET_L_REG (1) : GET_W_REG (1);
 
 	    /* Callback stat and return.  */
 	    stat_return =
@@ -3552,7 +3555,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	call:
 	  tmp = h8_get_reg (sd, SP_REGNUM);
 
-	  if (h8300hmode)
+	  if (h8300hmode && !h8300_normal_mode)
 	    {
 	      tmp -= 4;
 	      SET_MEMORY_L (tmp, code->next_pc);
@@ -3584,7 +3587,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	      h8_set_exr (sd, GET_MEMORY_L (tmp));
 	      tmp += 4;
 	    }
-	  if (h8300hmode)
+	  if (h8300hmode && !h8300_normal_mode)
 	    {
 	      h8_set_ccr (sd, GET_MEMORY_L (tmp));
 	      tmp += 4;
@@ -3607,7 +3610,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	rts:
 	  tmp = h8_get_reg (sd, SP_REGNUM);
 
-	  if (h8300hmode)
+	  if (h8300hmode && !h8300_normal_mode)
 	    {
 	      pc = GET_MEMORY_L (tmp);
 	      tmp += 4;
@@ -3655,16 +3658,26 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 
 	case O (O_TRAPA, SB):		/* trapa */
 	  if (fetch (sd, &code->src, &res))
-	    goto end;			/* res is vector number.  */
-
-	  tmp = h8_get_reg (sd, SP_REGNUM);
-	  tmp -= 4;
-	  SET_MEMORY_L (tmp, code->next_pc);
-	  tmp -= 4; 
-	  SET_MEMORY_L (tmp, h8_get_ccr (sd));
-	  intMaskBit = 1;
-	  BUILDSR (sd);
-
+   	    goto end;			/* res is vector number.  */
+  
+   	  tmp = h8_get_reg (sd, SP_REGNUM);
+   	  if(h8300_normal_mode)
+   	    {
+   	      tmp -= 2;
+   	      SET_MEMORY_W (tmp, code->next_pc);
+   	      tmp -= 2;
+   	      SET_MEMORY_W (tmp, h8_get_ccr (sd));
+   	    }
+   	  else
+   	    {
+   	      tmp -= 4;
+   	      SET_MEMORY_L (tmp, code->next_pc);
+   	      tmp -= 4;
+   	      SET_MEMORY_L (tmp, h8_get_ccr (sd));
+   	    }
+   	  intMaskBit = 1;
+   	  BUILDSR (sd);
+ 
 	  if (h8300smode)
 	    {
 	      tmp -= 4;
@@ -3673,8 +3686,10 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 
 	  h8_set_reg (sd, SP_REGNUM, tmp);
 
-	  /* FIXME: "normal" mode should use 2-byte ptrs.  */
-	  pc = GET_MEMORY_L (0x20 + res * 4);
+	  if(h8300_normal_mode)
+	    pc = GET_MEMORY_L (0x10 + res * 2); /* Vector addresses are 0x10,0x12,0x14 and 0x16 */
+	  else
+	    pc = GET_MEMORY_L (0x20 + res * 4);
 	  goto end;
 
 	case O (O_BPT, SN):
@@ -4703,7 +4718,10 @@ sim_store_register (SIM_DESC sd, int rn, unsigned char *value, int length)
   switch (rn)
     {
     case PC_REGNUM:
-      h8_set_pc (sd, intval);
+      if(h8300_normal_mode)
+        h8_set_pc (sd, shortval); /* PC for Normal mode is 2 bytes */
+      else
+        h8_set_pc (sd, intval);
       break;
     default:
       (*sim_callback->printf_filtered) (sim_callback, 
@@ -4814,7 +4832,8 @@ sim_fetch_register (SIM_DESC sd, int rn, unsigned char *buf, int length)
       longreg = 1;
       break;
     }
-  if (h8300hmode || longreg)
+  /* In Normal mode PC is 2 byte, but other registers are 4 byte */
+  if ((h8300hmode || longreg) && !(rn == PC_REGNUM && h8300_normal_mode))
     {
       buf[0] = v >> 24;
       buf[1] = v >> 16;
@@ -4919,6 +4938,9 @@ set_h8300h (unsigned long machine)
 
   if (machine == bfd_mach_h8300h || machine == bfd_mach_h8300hn || h8300smode)
     h8300hmode = 1;
+
+  if(machine == bfd_mach_h8300hn || machine == bfd_mach_h8300sn || machine == bfd_mach_h8300sxn)
+    h8300_normal_mode = 1;
 }
 
 /* Cover function of sim_state_free to free the cpu buffers as well.  */
@@ -5054,9 +5076,9 @@ sim_load (SIM_DESC sd, char *prog, bfd *abfd, int from_tty)
      switching between H8/300 and H8/300H programs without exiting
      gdb.  */
 
-  if (h8300smode)
+  if (h8300smode && !h8300_normal_mode)
     memory_size = H8300S_MSIZE;
-  else if (h8300hmode)
+  else if (h8300hmode && !h8300_normal_mode)
     memory_size = H8300H_MSIZE;
   else
     memory_size = H8300_MSIZE;
