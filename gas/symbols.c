@@ -1824,6 +1824,17 @@ S_SET_EXTERNAL (s)
       /* Let .weak override .global.  */
       return;
     }
+  if (s->bsym->flags & BSF_SECTION_SYM)
+    {
+      char * file;
+      unsigned int line;
+      
+      /* Do not reassign section symbols.  */
+      as_where (& file, & line);
+      as_warn_where (file, line,
+		     _("Section symbols are already global"));
+      return;
+    }
   s->bsym->flags |= BSF_GLOBAL;
   s->bsym->flags &= ~(BSF_LOCAL | BSF_WEAK);
 }
