@@ -1,5 +1,7 @@
 Wed Aug 12 11:11:34 1998  Jeffrey A Law  (law@cygnus.com)
 
+	* m10300-opc.c: Fix typo in udf20 .. udf25 instruction opcodes.
+
 	* m10300-opc.c: First cut at UDF instructions.
 
 Mon Aug 10 14:08:22 1998  Doug Evans  <devans@canuck.cygnus.com>
