@@ -30,6 +30,8 @@ CFILES = \
 	a29k-dis.c \
 	alpha-dis.c \
 	alpha-opc.c \
+	arc-dis.c \
+	arc-opc.c \
 	arm-dis.c \
 	cgen-asm.c \
 	cgen-dis.c \
@@ -76,6 +78,8 @@ CFILES = \
 	tic30-dis.c \
 	tic80-dis.c \
 	tic80-opc.c \
+	v850-dis.c \
+	v850-opc.c \
 	vax-dis.c \
 	w65-dis.c \
 	z8k-dis.c \

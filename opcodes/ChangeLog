@@ -1,3 +1,8 @@
+Mon Jun  7 12:04:52 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
+
+	* Makefile.am (CFILES): Add arc-{dis,opc}.c and v850-{dis,opc}.c.
+	* Makefile.in: Regenerated.
+
 1999-06-03  Philip Blundell  <philb@gnu.org>
 
 	* arm-dis.c (print_insn_arm): Make LDRH/LDRB consistent with LDR
