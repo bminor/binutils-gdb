@@ -1,3 +1,13 @@
+Wed Apr 29 15:45:57 1998  Michael Meissner  <meissner@cygnus.com>
+
+	* config/tc-m32r.c ({,expand_}debug_sym): New functions to record
+	and expand a 'debug' symbol associated with the next instruction
+	that does not cause a short instruction to be filled with a NOP.
+	(md_pseudo_table): Add support for .debugsym.
+	(assemble_parallel_insn): Add calls to expand_debug_sym as
+	appropriate.
+	(md_assemble): Ditto.
+
 Tue Apr 28 19:16:26 1998  Tom Tromey  <tromey@cygnus.com>
 
 	* as.c (main): Conditionally call setlocale.
