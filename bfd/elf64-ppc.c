@@ -2669,7 +2669,10 @@ struct plt_entry
    .	bctr
 
    ppc_stub_plt_call:
-   Used to call a function in a shared library.
+   Used to call a function in a shared library.  If it so happens that
+   the plt entry referenced crosses a 64k boundary, then an extra
+   "addis %r12,%r12,1" will be inserted before the load at xxx+8 or
+   xxx+16 as appropriate.
    .	addis	%r12,%r2,xxx@toc@ha
    .	std	%r2,40(%r1)
    .	ld	%r11,xxx+0@toc@l(%r12)

@@ -1,3 +1,7 @@
+2004-07-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c: Correct "Linker stubs" comment.
+
 2004-07-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf-bfd.h (bfd_elf_section_data): Add a pointer for the
@@ -141,7 +145,7 @@
 	(elfNN_ia64_relax_brl): Change bfd_get_64 to bfd_getl64.  Change
 	bfd_put_64 to bfd_putl64.
 	(elfNN_ia64_relax_ldxmov, elfNN_ia64_install_value): Likewise.
-	
+
 2004-07-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR 240
