@@ -1740,7 +1740,7 @@ Usually, if the symbol is in the same section as the frag (given by the
 @var{sec} argument), the narrowest likely relaxation mode is stored in
 @code{fr_subtype}, and that's that.
 
-If the symbol is undefined, or in a different section (and therefore moveable
+If the symbol is undefined, or in a different section (and therefore movable
 to an arbitrarily large distance), the largest available relaxation mode is
 specified, @code{fix_new} is called to produce the relocation record,
 @code{fr_fix} is increased to include the relocated field (remember, this

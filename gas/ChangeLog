@@ -1,3 +1,12 @@
+2003-10-26  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* doc/c-alpha.texi: Fix typos.
+	* doc/c-ia64.texi: Likewise.
+	* doc/c-mmix.texi: Likewise.
+	* doc/c-sh64.texi: Likewise.
+	* doc/c-xtensa.texi: Likewise.
+	* doc/internals.texi: Likewise.
+
 2003-10-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/obj-elf.c (obj_elf_change_section): Allow SHF_ALLOC

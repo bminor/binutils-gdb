@@ -443,7 +443,7 @@ operand can be omitted, defaulting to a zero value.
 The directives @samp{WYDE}, @samp{TETRA} and @samp{OCTA} emit constants of
 two, four and eight bytes size respectively.  Before anything else happens
 for the directive, the current location is aligned to the respective
-constant-size bondary.  If a label is defined at the beginning of the
+constant-size boundary.  If a label is defined at the beginning of the
 line, its value will be that after the alignment.  A single operand can be
 omitted, defaulting to a zero value emitted for the directive.  Operands
 can be expressed as strings (@pxref{Strings}), in which case each
