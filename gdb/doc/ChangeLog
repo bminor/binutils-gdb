@@ -1,3 +1,8 @@
+2004-12-24  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdbint.texinfo (Algorithms): Remove description of
+	TARGET_DISABLE_HW_WATCHPOINTS and TARGET_ENABLE_HW_WATCHPOINTS.
+
 2004-12-07  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.texinfo (General Query Packets): Specify that thread ID's in

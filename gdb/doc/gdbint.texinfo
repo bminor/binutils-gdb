@@ -440,20 +440,6 @@ whose size is @var{size}.  @value{GDBN} only uses this macro as a
 fall-back, in case @code{TARGET_REGION_OK_FOR_HW_WATCHPOINT} is not
 defined.
 
-@findex TARGET_DISABLE_HW_WATCHPOINTS
-@item TARGET_DISABLE_HW_WATCHPOINTS (@var{pid})
-Disables watchpoints in the process identified by @var{pid}.  This is
-used, e.g., on HPPA-RISC machines running HP-UX, which provide
-operations to disable and enable the page-level memory protection that
-implements hardware watchpoints on that platform.
-
-@findex TARGET_ENABLE_HW_WATCHPOINTS
-@item TARGET_ENABLE_HW_WATCHPOINTS (@var{pid})
-Enables watchpoints in the process identified by @var{pid}.  This is
-used, e.g., on HPPA-RISC machines running HP-UX, which provide
-operations to disable and enable the page-level memory protection that
-implements hardware watchpoints on that platform.
-
 @cindex insert or remove hardware watchpoint
 @findex target_insert_watchpoint
 @findex target_remove_watchpoint
