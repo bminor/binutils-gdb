@@ -1,3 +1,42 @@
+Thu Jun 24 13:48:13 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* Makefile.in (.c.o, chew.o): Put CFLAGS last.
+	* bfdsumm.texi: New file, broken out of bfd.texinfo, to share
+	with ld.texinfo.
+
+Mon Jun 14 12:07:07 1993  david d `zoo' zuhn  (zoo at rtl.cygnus.com)
+
+	* Makefile.in (install-info): remove parentdir cruft, 
+
+Wed Jun  9 16:00:32 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* Makefile.in (mostlyclean): Remove chew.o.
+
+Tue May 25 14:46:58 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* Makefile.in (libbfd.h): Use elfcode.h, not elf32.c.
+
+Mon May 24 15:50:07 1993  Ken Raeburn  (raeburn@cygnus.com)
+
+	* chew.c (compile): Add a couple of missing casts.
+
+Wed May 12 14:45:14 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Makefile.in (CC_FOR_BUILD): New variable, define to be $(CC).
+	(chew.o, $(MKDOC)): Build using CC_FOR_BUILD rather than CC, since
+	it must run on the build machine.
+
+Tue Apr  6 22:38:10 1993  John Gilmore  (gnu@cygnus.com)
+
+	* Makefile.in (chew):  Don't compile from .c to executable in a
+	single step; it puts a temporary .o filename into the executable,
+	which makes multi-stage comparisons fail.  Compile chew.c to
+	chew.o, and link that, which makes identical executables every time.
+
+Wed Mar 24 17:26:29 1993  david d `zoo' zuhn  (zoo at poseidon.cygnus.com)
+
+	* Makefile.in: fix typo (bfd.texinfo not bfd.texino)
+
 Fri Mar 19 01:13:00 1993  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
 
 	* bfd.texinfo: Since BFD version number has been bumped, do same
