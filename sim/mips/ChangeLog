@@ -1,3 +1,15 @@
+Tue Feb  3 00:10:50 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (ColdReset): Call PENDING_INVALIDATE.
+
+	* sim-main.h (ENGINE_ISSUE_PREFIX_HOOK): Call PENDING_TICK.
+
+	* interp.c (pending_tick): New function.  Deliver pending writes.
+
+	* sim-main.h (PENDING_FILL, PENDING_TICK, PENDING_SCHED,
+ 	PENDING_BIT, PENDING_INVALIDATE): Re-write pipeline code so that
+ 	it can handle mixed sized quantites and single bits.
+	
 Mon Feb  2 17:43:15 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* interp.c (oengine.h): Do not include when building with IGEN.

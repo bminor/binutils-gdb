@@ -285,6 +285,81 @@ GPR_<type>(R,I) - return, as lvalue, the I'th <type> of general register R
 
 
 
+/* The following is probably not used for MIPS IV onwards: */
+/* Slots for delayed register updates. For the moment we just have a
+   fixed number of slots (rather than a more generic, dynamic
+   system). This keeps the simulator fast. However, we only allow
+   for the register update to be delayed for a single instruction
+   cycle. */
+#define PSLOTS (8) /* Maximum number of instruction cycles */
+
+typedef struct _pending_write_queue {
+  int in;
+  int out;
+  int total;
+  int slot_delay[PSLOTS];
+  int slot_size[PSLOTS];
+  int slot_bit[PSLOTS];
+  void *slot_dest[PSLOTS];
+  unsigned64 slot_value[PSLOTS];
+} pending_write_queue;
+
+#ifndef PENDING_TRACE
+#define PENDING_TRACE 0
+#endif
+#define PENDING_IN ((CPU)->pending.in)
+#define PENDING_OUT ((CPU)->pending.out)
+#define PENDING_TOTAL ((CPU)->pending.total)
+#define PENDING_SLOT_SIZE ((CPU)->pending.slot_size)
+#define PENDING_SLOT_BIT ((CPU)->pending.slot_size)
+#define PENDING_SLOT_DELAY ((CPU)->pending.slot_delay)
+#define PENDING_SLOT_DEST ((CPU)->pending.slot_dest)
+#define PENDING_SLOT_VALUE ((CPU)->pending.slot_value)
+
+/* Invalidate the pending write queue, all pending writes are
+   discarded. */
+
+#define PENDING_INVALIDATE() \
+memset (&(CPU)->pending, 0, sizeof ((CPU)->pending))
+
+/* Schedule a write to DEST for N cycles time.  For 64 bit
+   destinations, schedule two writes.  For floating point registers,
+   the caller should schedule a write to both the dest register and
+   the FPR_STATE register.  When BIT is non-negative, only BIT of DEST
+   is updated. */
+
+#define PENDING_SCHED(DEST,VAL,DELAY,BIT)				\
+  do {									\
+    if (PENDING_SLOT_DEST[PENDING_IN] != NULL)				\
+      sim_engine_abort (SD, CPU, cia,					\
+		        "PENDING_SCHED - buffer overflow\n");		\
+    if (PENDING_TRACE)							\
+      sim_io_printf (SD, "PENDING_SCHED - dest 0x%lx, val 0x%lx, pending_in %d, pending_out %d, pending_total %d\n", (unsigned long) (DEST), (unsigned long) (VAL), PENDING_IN, PENDING_OUT, PENDING_TOTAL); \
+    PENDING_SLOT_DELAY[PENDING_IN] = (DELAY) + 1;			\
+    PENDING_SLOT_DEST[PENDING_IN] = &(DEST);				\
+    PENDING_SLOT_VALUE[PENDING_IN] = (VAL);				\
+    PENDING_SLOT_SIZE[PENDING_IN] = sizeof (DEST);			\
+    PENDING_SLOT_BIT[PENDING_IN] = (BIT);				\
+  } while (0)
+
+#define PENDING_WRITE(DEST,VAL,DELAY) PENDING_SCHED(DEST,VAL,DELAY,-1)
+#define PENDING_BIT(DEST,VAL,DELAY,BIT) PENDING_SCHED(DEST,VAL,DELAY,BIT)
+
+#define PENDING_TICK() pending_tick (SD, CPU, cia)
+
+#define PENDING_FLUSH() abort () /* think about this one */
+#define PENDING_FP() abort () /* think about this one */
+
+/* For backward compatibility */
+#define PENDING_FILL(R,VAL) 						\
+{									\
+  if ((R) >= FGRIDX && (R) < FGRIDX + NR_FGR)				\
+    PENDING_SCHED(FGR[(R) - FGRIDX], VAL, 2, -1);			\
+  else									\
+    PENDING_SCHED(GPR[(R)], VAL, 2, -1);				\
+}
+
+
 
 struct _sim_cpu {
 
@@ -337,6 +412,8 @@ struct _sim_cpu {
 
 #define ENGINE_ISSUE_PREFIX_HOOK() \
   { \
+    /* Perform any pending writes */ \
+    PENDING_TICK(); \
     /* Set previous flag, depending on current: */ \
     if (STATE & simPCOC0) \
      STATE |= simPCOC1; \
@@ -376,6 +453,7 @@ struct _sim_cpu {
 
 #define GPR     (&REGISTERS[0])
 #define GPR_SET(N,VAL) (REGISTERS[(N)] = (VAL))
+#define NR_FGR  (32)
 #define FGRIDX  (38)
 #define FGR     (&REGISTERS[FGRIDX])
 #define LO      (REGISTERS[33])
@@ -412,42 +490,7 @@ struct _sim_cpu {
   FP_formats fpr_state[32];
 #define FPR_STATE ((CPU)->fpr_state)
 
-
-  /* Slots for delayed register updates. For the moment we just have a
-     fixed number of slots (rather than a more generic, dynamic
-     system). This keeps the simulator fast. However, we only allow
-     for the register update to be delayed for a single instruction
-     cycle. */
-#define PSLOTS (5) /* Maximum number of instruction cycles */
-  int pending_in;
-  int pending_out;
-  int pending_total;
-  int pending_slot_count[PSLOTS];
-  int pending_slot_reg[PSLOTS];
-  unsigned_word pending_slot_value[PSLOTS];
-#define PENDING_IN ((CPU)->pending_in)
-#define PENDING_OUT ((CPU)->pending_out)
-#define PENDING_TOTAL ((CPU)->pending_total)
-#define PENDING_SLOT_COUNT ((CPU)->pending_slot_count)
-#define PENDING_SLOT_REG ((CPU)->pending_slot_reg)
-#define PENDING_SLOT_VALUE ((CPU)->pending_slot_value)
-
-  /* The following are not used for MIPS IV onwards: */
-#define PENDING_FILL(r,v) {\
-/* printf("DBG: FILL BEFORE pending_in = %d, pending_out = %d, pending_total = %d\n",PENDING_IN,PENDING_OUT,PENDING_TOTAL); */\
-                            if (PENDING_SLOT_REG[PENDING_IN] != (LAST_EMBED_REGNUM + 1))\
-                             sim_io_eprintf(sd,"Attempt to over-write pending value\n");\
-                            PENDING_SLOT_COUNT[PENDING_IN] = 2;\
-                            PENDING_SLOT_REG[PENDING_IN] = (r);\
-                            PENDING_SLOT_VALUE[PENDING_IN] = (uword64)(v);\
-/*printf("DBG: FILL        reg %d value = 0x%s\n",(r),pr_addr(v));*/\
-                            PENDING_TOTAL++;\
-                            PENDING_IN++;\
-                            if (PENDING_IN == PSLOTS)\
-                             PENDING_IN = 0;\
-/*printf("DBG: FILL AFTER  pending_in = %d, pending_out = %d, pending_total = %d\n",PENDING_IN,PENDING_OUT,PENDING_TOTAL);*/\
-                          }
-
+  pending_write_queue pending;
 
   /* LLBIT = Load-Linked bit. A bit of "virtual" state used by atomic
      read-write instructions. It is set when a linked load occurs. It
@@ -736,5 +779,7 @@ unsigned32 ifetch32 PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, addres
 
 void dotrace PARAMS ((SIM_DESC sd, sim_cpu *cpu, FILE *tracefh, int type, SIM_ADDR address, int width, char *comment, ...));
 FILE *tracefh;
+
+void pending_tick PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia));
 
 #endif

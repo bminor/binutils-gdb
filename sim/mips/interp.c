@@ -1198,12 +1198,7 @@ ColdReset (SIM_DESC sd)
       
       /* Ensure that any instructions with pending register updates are
 	 cleared: */
-      {
-	int loop;
-	for (loop = 0; (loop < PSLOTS); loop++)
-	  PENDING_SLOT_REG[loop] = (LAST_EMBED_REGNUM + 1);
-	PENDING_IN = PENDING_OUT = PENDING_TOTAL = 0;
-      }
+      PENDING_INVALIDATE();
       
       /* Initialise the FPU registers to the unknown state */
       if (CURRENT_FLOATING_POINT == HARD_FLOATING_POINT)
@@ -3308,73 +3303,8 @@ sim_engine_run (sd, next_cpu_nr, nr_cpus, siggnal)
       CANCELDELAYSLOT();
     }
 
-    if (MIPSISA < 4) { /* The following is only required on pre MIPS IV processors: */
-      /* Deal with pending register updates: */
-#ifdef DEBUG
-      printf("DBG: EMPTY BEFORE pending_in = %d, pending_out = %d, pending_total = %d\n",pending_in,pending_out,pending_total);
-#endif /* DEBUG */
-      if (PENDING_OUT != PENDING_IN) {
-        int loop;
-        int index = PENDING_OUT;
-        int total = PENDING_TOTAL;
-        if (PENDING_TOTAL == 0) {
-          fprintf(stderr,"FATAL: Mis-match on pending update pointers\n");
-          exit(1);
-        }
-        for (loop = 0; (loop < total); loop++) {
-#ifdef DEBUG
-          printf("DBG: BEFORE index = %d, loop = %d\n",index,loop);
-#endif /* DEBUG */
-          if (PENDING_SLOT_REG[index] != (LAST_EMBED_REGNUM + 1)) {
-#ifdef DEBUG
-            printf("pending_slot_count[%d] = %d\n",index,PENDING_SLOT_COUNT[index]);
-#endif /* DEBUG */
-            if (--(PENDING_SLOT_COUNT[index]) == 0) {
-#ifdef DEBUG
-              printf("pending_slot_reg[%d] = %d\n",index,PENDING_SLOT_REG[index]);
-              printf("pending_slot_value[%d] = 0x%s\n",index,pr_addr(PENDING_SLOT_VALUE[index]));
-#endif /* DEBUG */
-              if (PENDING_SLOT_REG[index] == COCIDX)
-		{
-		  if (CURRENT_FLOATING_POINT == HARD_FLOATING_POINT)
-		    {
-		      SETFCC(0,((FCR31 & (1 << 23)) ? 1 : 0));
-		    }
-		}
-	      else
-		{
-		  REGISTERS[PENDING_SLOT_REG[index]] = PENDING_SLOT_VALUE[index];
-		  if (CURRENT_FLOATING_POINT == HARD_FLOATING_POINT)
-		    {
-		      /* The only time we have PENDING updates to FPU
-			 registers, is when performing binary transfers. This
-			 means we should update the register type field.  */
-		      if ((PENDING_SLOT_REG[index] >= FGRIDX) && (PENDING_SLOT_REG[index] < (FGRIDX + 32)))
-			FPR_STATE[PENDING_SLOT_REG[index] - FGRIDX] = fmt_uninterpreted;
-		    }
-		}
-#ifdef DEBUG
-              printf("registers[%d] = 0x%s\n",PENDING_SLOT_REG[index],pr_addr(REGISTERS[PENDING_SLOT_REG[index]]));
-#endif /* DEBUG */
-              PENDING_SLOT_REG[index] = (LAST_EMBED_REGNUM + 1);
-              PENDING_OUT++;
-              if (PENDING_OUT == PSLOTS)
-               PENDING_OUT = 0;
-              PENDING_TOTAL--;
-            }
-          }
-#ifdef DEBUG
-          printf("DBG: AFTER  index = %d, loop = %d\n",index,loop);
-#endif /* DEBUG */
-          index++;
-          if (index == PSLOTS)
-           index = 0;
-        }
-      }
-#ifdef DEBUG
-      printf("DBG: EMPTY AFTER  pending_in = %d, pending_out = %d, pending_total = %d\n",PENDING_IN,PENDING_OUT,PENDING_TOTAL);
-#endif /* DEBUG */
-    }
+    if (MIPSISA < 4)
+      PENDING_TICK();
 
 #if !defined(FASTSIM)
     if (sim_events_tickn (sd, pipeline_count))
@@ -3447,6 +3377,73 @@ pr_uword64(addr)
   return paddr_str;
 }
 
+
+void
+pending_tick (SIM_DESC sd,
+	      sim_cpu *cpu,
+	      address_word cia)
+{
+  if (PENDING_TRACE)							
+    sim_io_printf (sd, "PENDING_DRAIN - pending_in = %d, pending_out = %d, pending_total = %d\n", PENDING_IN, PENDING_OUT, PENDING_TOTAL); 
+  if (PENDING_OUT != PENDING_IN)					
+    {									
+      int loop;							
+      int index = PENDING_OUT;					
+      int total = PENDING_TOTAL;					
+      if (PENDING_TOTAL == 0)						
+	sim_engine_abort (SD, CPU, cia, "PENDING_DRAIN - Mis-match on pending update pointers\n"); 
+      for (loop = 0; (loop < total); loop++)				
+	{								
+	  if (PENDING_SLOT_DEST[index] != NULL)			
+	    {								
+	      PENDING_SLOT_DELAY[index] -= 1;				
+	      if (PENDING_SLOT_DELAY[index] == 0)			
+		{							
+		  if (PENDING_SLOT_BIT[index] >= 0)			
+		    switch (PENDING_SLOT_SIZE[index])                 
+		      {						
+		      case 32:					
+			if (PENDING_SLOT_VALUE[index])		
+			  *(unsigned32*)PENDING_SLOT_DEST[index] |= 	
+			    BIT32 (PENDING_SLOT_BIT[index]);		
+			else						
+			  *(unsigned32*)PENDING_SLOT_DEST[index] &= 	
+			    BIT32 (PENDING_SLOT_BIT[index]);		
+			break;					
+		      case 64:					
+			if (PENDING_SLOT_VALUE[index])		
+			  *(unsigned64*)PENDING_SLOT_DEST[index] |= 	
+			    BIT64 (PENDING_SLOT_BIT[index]);		
+			else						
+			  *(unsigned64*)PENDING_SLOT_DEST[index] &= 	
+			    BIT64 (PENDING_SLOT_BIT[index]);		
+			break;					
+			break;					
+		      }
+		  else
+		    switch (PENDING_SLOT_SIZE[index])                 
+		      {						
+		      case 32:					
+			*(unsigned32*)PENDING_SLOT_DEST[index] = 	
+			  PENDING_SLOT_VALUE[index];			
+			break;					
+		      case 64:					
+			*(unsigned64*)PENDING_SLOT_DEST[index] = 	
+			  PENDING_SLOT_VALUE[index];			
+			break;					
+		      }							
+		}							
+	      if (PENDING_OUT == index)				
+		{							
+		  PENDING_SLOT_DEST[index] = NULL;			
+		  PENDING_OUT = (PENDING_OUT + 1) % PSLOTS;		
+		  PENDING_TOTAL--;					
+		}							
+	    }								
+	}								
+      index = (index + 1) % PSLOTS;					
+    }									
+}
 
 /*---------------------------------------------------------------------------*/
 /*> EOF interp.c <*/
