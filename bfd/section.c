@@ -887,10 +887,10 @@ DEFUN(bfd_get_section_contents,(abfd, section, location, offset, count),
       bfd_error = bad_value;
       return false;
     }
-  sz = bfd_get_section_size_now (abfd, section);
-  if (offset > sz
-      || count > sz
-      || offset + count > sz)
+  /* Even if reloc_done is true, this function reads unrelocated
+     contents, so we want the raw size.  */
+  sz = section->_raw_size;
+  if (offset > sz || count > sz || offset + count > sz)
     goto bad_val;
 
   if (count == 0)
