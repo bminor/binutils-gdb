@@ -155,6 +155,7 @@ BFD32_BACKENDS = \
 	nlm.o \
 	nlm32-gen.o \
 	nlm32-i386.o \
+	nlm32-sparc.o \
 	nlm32.o \
 	oasys.o \
 	reloc16.o \
@@ -227,7 +228,7 @@ CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c \
 	 elf.c elf32.c elf32-sparc.c elf32-i386.c elf32-i860.c elf32-m68k.c \
 	 elf32-hppa.c elf32-m88k.c elf32-mips.c elf32-gen.c \
 	 elf64.c elf64-gen.c \
-	 nlm.c nlm32.c nlm32-gen.c nlm32-i386.c nlm64.c nlm64-gen.c \
+	 nlm.c nlm32.c nlm32-gen.c nlm32-i386.c nlm32-sparce.c nlm64.c nlm64-gen.c \
 	 coff-alpha.c cpu-alpha.c \
 	 hp300bsd.c hp300hpux.c \
 	 i386lynx.c cf-i386lynx.c m68klynx.c cf-m68klynx.c \
@@ -262,6 +263,8 @@ clean-info:
 	
 install-info: force
 	@$(MAKE) subdir_do DO=install-info "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
+
+diststuff: info
 
 # Various kinds of .o files to put in libbfd.a:
 # BFD_LIBS	Generic routines, always needed.
@@ -318,8 +321,13 @@ do_clean: do_mostlyclean
 	rm -f libbfd.a TAGS bfd.h stmp-bfd.h ofiles
 do_distclean: do_clean
 	rm -f Makefile config.status sysdep.h
+
+# Should we remove $(srcdir)/libcoff.h $(srcdir)/libbfd.h $(srcdir)/bfd-in2.h?
+# make-stds.texi says it depends on whether they can be regenerated using
+# this makefile.  Well, they can, but only via an explicit "make headers";
+# the makefile does not regenerate them as needed.  So I guess we should not
+# remove them in realclean.
 do_realclean: do_distclean
-	rm -f $(srcdir)/libcoff.h $(srcdir)/libbfd.h $(srcdir)/bfd-in2.h
 
 mostlyclean: do_mostlyclean
 	$(MAKE) subdir_do DO=mostlyclean "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
@@ -630,8 +638,12 @@ nlm32.o : nlm32.c nlmcode.h libnlm.h $(INCDIR)/nlm/common.h \
   $(INCDIR)/nlm/internal.h $(INCDIR)/nlm/external.h
 nlm32-gen.o : nlm32-gen.c libnlm.h $(INCDIR)/nlm/common.h \
   $(INCDIR)/nlm/internal.h $(INCDIR)/nlm/external.h nlm-target.h
-nlm32-i386.o : nlm32-i386.c libnlm.h $(INCDIR)/nlm/common.h \
-  $(INCDIR)/nlm/internal.h $(INCDIR)/nlm/external.h nlm-target.h
+nlm32-i386.o : nlm32-i386.c libnlm.h nlmswap.h $(INCDIR)/nlm/common.h \
+  $(INCDIR)/nlm/internal.h $(INCDIR)/nlm/external.h $(INCDIR)/nlm/i386-ext.h nlm-target.h
+nlm32-sparc.o : nlm32-sparc.c \
+ libnlm.h nlmswap.h \
+ $(INCDIR)/nlm/common.h $(INCDIR)/nlm/internal.h \
+ $(INCDIR)/nlm/external.h $(INCDIR)/nlm/i386-ext.h nlm-target.h
 nlm64.o : nlm64.c nlmcode.h libnlm.h $(INCDIR)/nlm/common.h \
   $(INCDIR)/nlm/internal.h $(INCDIR)/nlm/external.h
 nlm64-gen.o : nlm64-gen.c libnlm.h $(INCDIR)/nlm/common.h \
