@@ -341,63 +341,75 @@ config-stamp: Makefile conf
 # Compiling object files from source files.
 
 TARG_CPU_DEP_a29k    =
-TARG_CPU_DEP_alpha   = $(srcdir)/../include/opcode/alpha.h subsegs.h
+TARG_CPU_DEP_alpha   = $(srcdir)/../include/opcode/alpha.h subsegs.h \
+			$(srcdir)/../include/obstack.h
 # start-sanitize-arc
-TARG_CPU_DEP_arc     = $(srcdir)/../include/opcode/arc.h subsegs.h
+TARG_CPU_DEP_arc     = $(srcdir)/../include/opcode/arc.h subsegs.h \
+			$(srcdir)/../include/obstack.h
 # end-sanitize-arc
-TARG_CPU_DEP_arm     = subsegs.h
+TARG_CPU_DEP_arm     = subsegs.h $(srcdir)/../include/obstack.h
 TARG_CPU_DEP_generic =
 TARG_CPU_DEP_h8300   = $(srcdir)/../include/opcode/h8300.h
-TARG_CPU_DEP_h8500   = $(srcdir)/../opcodes/h8500-opc.h subsegs.h
-TARG_CPU_DEP_hppa    = subsegs.h
-TARG_CPU_DEP_i386    = $(srcdir)/../include/opcode/i386.h subsegs.h
+TARG_CPU_DEP_h8500   = $(srcdir)/../opcodes/h8500-opc.h subsegs.h \
+			$(srcdir)/../include/obstack.h
+TARG_CPU_DEP_hppa    = subsegs.h $(srcdir)/../include/obstack.h
+TARG_CPU_DEP_i386    = $(srcdir)/../include/opcode/i386.h subsegs.h \
+			$(srcdir)/../include/obstack.h
 TARG_CPU_DEP_i860    =
 TARG_CPU_DEP_i960    =
 TARG_CPU_DEP_m68k    = $(srcdir)/../include/opcode/m68k.h \
-			$(srcdir)/config/m68k-parse.h subsegs.h
-TARG_CPU_DEP_m88k    = $(srcdir)/config/m88k-opcode.h subsegs.h
-TARG_CPU_DEP_mips    = $(srcdir)/../include/opcode/mips.h subsegs.h  \
+			$(srcdir)/config/m68k-parse.h subsegs.h \
+			$(srcdir)/../include/obstack.h
+TARG_CPU_DEP_m88k    = $(srcdir)/config/m88k-opcode.h subsegs.h \
+			$(srcdir)/../include/obstack.h
+TARG_CPU_DEP_mips    = $(srcdir)/../include/opcode/mips.h subsegs.h \
+			$(srcdir)/../include/obstack.h \
 			$(srcdir)/config/itbl-mips.h $(srcdir)/itbl-ops.h
 TARG_CPU_DEP_ns32k   =
-TARG_CPU_DEP_ppc     = subsegs.h
-TARG_CPU_DEP_sh      = $(srcdir)/../opcodes/sh-opc.h subsegs.h
-TARG_CPU_DEP_sparc   = subsegs.h $(srcdir)/../include/opcode/sparc.h
+TARG_CPU_DEP_ppc     = subsegs.h $(srcdir)/../include/obstack.h
+TARG_CPU_DEP_sh      = $(srcdir)/../opcodes/sh-opc.h subsegs.h \
+			$(srcdir)/../include/obstack.h
+TARG_CPU_DEP_sparc   = subsegs.h $(srcdir)/../include/opcode/sparc.h \
+			$(srcdir)/../include/obstack.h
 TARG_CPU_DEP_tahoe   =
 TARG_CPU_DEP_vax     =
-TARG_CPU_DEP_w65     = $(srcdir)/../opcodes/w65-opc.h subsegs.h
+TARG_CPU_DEP_w65     = $(srcdir)/../opcodes/w65-opc.h subsegs.h \
+			$(srcdir)/../include/obstack.h
 TARG_CPU_DEP_z8k     = $(srcdir)/../opcodes/z8k-opc.h
 
 gasp.o : gasp.c sb.h macro.h config.h
 sb.o : sb.c sb.h config.h
 macro.o : macro.c macro.h sb.h hash.h config.h
 app.o : app.c write.h
-as.o : as.c output-file.h write.h subsegs.h sb.h macro.h
+as.o : as.c output-file.h write.h subsegs.h sb.h macro.h \
+	$(srcdir)/../include/obstack.h
 atof-generic.o : atof-generic.c
 bignum-copy.o : bignum-copy.c
-cond.o : cond.c
-debug.o : debug.c subsegs.h
-expr.o : expr.c
+cond.o : cond.c $(srcdir)/../include/obstack.h
+debug.o : debug.c subsegs.h $(srcdir)/../include/obstack.h
+expr.o : expr.c $(srcdir)/../include/obstack.h
 flonum-konst.o : flonum-konst.c
 flonum-copy.o : flonum-copy.c
 flonum-mult.o : flonum-mult.c
-frags.o : frags.c subsegs.h
+frags.o : frags.c subsegs.h $(srcdir)/../include/obstack.h
 hash.o : hash.c
 input-file.o : input-file.c input-file.h
 input-scrub.o : input-scrub.c input-file.h sb.h
-listing.o : listing.c input-file.h subsegs.h
-literal.o : literal.c subsegs.h
+listing.o : listing.c input-file.h subsegs.h $(srcdir)/../include/obstack.h
+literal.o : literal.c subsegs.h $(srcdir)/../include/obstack.h
 messages.o : messages.c
 output-file.o : output-file.c output-file.h
-read.o : read.c sb.h macro.h
-subsegs.o : subsegs.c subsegs.h
-symbols.o : symbols.c subsegs.h
-write.o : write.c subsegs.h output-file.h
+read.o : read.c sb.h macro.h $(srcdir)/../include/obstack.h
+subsegs.o : subsegs.c subsegs.h $(srcdir)/../include/obstack.h
+symbols.o : symbols.c subsegs.h $(srcdir)/../include/obstack.h
+write.o : write.c subsegs.h output-file.h $(srcdir)/../include/obstack.h
 ecoff.o : ecoff.c ecoff.h \
 	$(srcdir)/../include/coff/internal.h $(srcdir)/../include/coff/sym.h \
 	$(srcdir)/../include/coff/ecoff.h \
 	$(srcdir)/../include/coff/symconst.h \
 	$(srcdir)/../include/aout/stab_gnu.h
-stabs.o : stabs.c subsegs.h $(srcdir)/../include/aout/stab_gnu.h
+stabs.o : stabs.c subsegs.h $(srcdir)/../include/aout/stab_gnu.h \
+	$(srcdir)/../include/obstack.h
 atof-targ.o : atof-targ.c
 obj-format.o : obj-format.c
 targ-cpu.o : targ-cpu.c $(TARG_CPU_DEP_@target_cpu_type@) $(IT_HDRS)
