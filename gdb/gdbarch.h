@@ -1442,6 +1442,11 @@ extern void set_gdbarch_extract_struct_value_address (struct gdbarch *gdbarch, g
 #endif
 #endif
 
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (USE_STRUCT_CONVENTION)
+#define USE_STRUCT_CONVENTION(gcc_p, value_type) (generic_use_struct_convention (gcc_p, value_type))
+#endif
+
 typedef int (gdbarch_use_struct_convention_ftype) (int gcc_p, struct type *value_type);
 extern int gdbarch_use_struct_convention (struct gdbarch *gdbarch, int gcc_p, struct type *value_type);
 extern void set_gdbarch_use_struct_convention (struct gdbarch *gdbarch, gdbarch_use_struct_convention_ftype *use_struct_convention);

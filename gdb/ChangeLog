@@ -1,3 +1,11 @@
+2001-11-07  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbarch.sh (USE_STRUCT_CONVENTION): Default to
+	generic_use_struct_convention.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* values.c (USE_STRUCT_CONVENTION): Delete definition, moved to
+	gdbarch.h.
+
 2001-11-06  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbarch.sh (PC_IN_CALL_DUMMY): Require a value.

@@ -1382,11 +1382,6 @@ generic_use_struct_convention (int gcc_p, struct type *value_type)
 	       || TYPE_LENGTH (value_type) == 8));
 }
 
-#ifndef USE_STRUCT_CONVENTION
-#define USE_STRUCT_CONVENTION(gcc_p,type) generic_use_struct_convention (gcc_p, type)
-#endif
-
-
 /* Return true if the function specified is using the structure returning
    convention on this machine to return arguments, or 0 if it is using
    the value returning convention.  FUNCTION is the value representing

@@ -486,6 +486,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->pointer_to_address = unsigned_pointer_to_address;
   current_gdbarch->address_to_pointer = unsigned_address_to_pointer;
   current_gdbarch->return_value_on_stack = generic_return_value_on_stack_not;
+  current_gdbarch->use_struct_convention = generic_use_struct_convention;
   current_gdbarch->prologue_frameless_p = generic_prologue_frameless_p;
   current_gdbarch->breakpoint_from_pc = legacy_breakpoint_from_pc;
   current_gdbarch->memory_insert_breakpoint = default_memory_insert_breakpoint;
@@ -689,9 +690,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
       && (gdbarch->store_return_value == 0))
     fprintf_unfiltered (log, "\n\tstore_return_value");
   /* Skip verify of extract_struct_value_address, has predicate */
-  if ((GDB_MULTI_ARCH >= 2)
-      && (gdbarch->use_struct_convention == 0))
-    fprintf_unfiltered (log, "\n\tuse_struct_convention");
+  /* Skip verify of use_struct_convention, invalid_p == 0 */
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->frame_init_saved_regs == 0))
     fprintf_unfiltered (log, "\n\tframe_init_saved_regs");
