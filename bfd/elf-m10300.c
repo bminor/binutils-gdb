@@ -85,7 +85,7 @@ struct elf32_mn10300_link_hash_entry {
      to the target when it's valid and profitable to do so.  */
   unsigned char movm_args;
 
-  /* For funtion symbols, the amount of stack space that would be allocated
+  /* For function symbols, the amount of stack space that would be allocated
      by the movm instruction.  This is redundant with movm_args, but we
      add it to the hash table to avoid computing it over and over.  */
   unsigned char movm_stack_size;
@@ -1743,13 +1743,16 @@ elf32_mn10300_finish_hash_table_entry (gen_entry, in_args)
     byte_count += 2;
 
   /* Count the insn to allocate stack space too.  */
-  if (entry->stack_size > 0 && entry->stack_size <= 128)
-    byte_count += 3;
-  else if (entry->stack_size > 0 && entry->stack_size < 256)
-    byte_count += 4;
+  if (entry->stack_size > 0)
+    {
+      if (entry->stack_size <= 128)
+	byte_count += 3;
+      else
+	byte_count += 4;
+    }
 
   /* If using "call" will result in larger code, then turn all
-     the associated "call" instructions into "calls" instrutions.  */
+     the associated "call" instructions into "calls" instructions.  */
   if (byte_count < entry->direct_calls)
     entry->flags |= MN10300_CONVERT_CALL_TO_CALLS;
 
@@ -1759,7 +1762,7 @@ elf32_mn10300_finish_hash_table_entry (gen_entry, in_args)
 
 /* This function handles relaxing for the mn10300.
 
-   There's quite a few relaxing opportunites available on the mn10300:
+   There are quite a few relaxing opportunities available on the mn10300:
 
 	* calls:32 -> calls:16 					   2 bytes
 	* call:32  -> call:16					   2 bytes
@@ -2238,11 +2241,13 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 		      if (sym_hash->movm_args)
 			bytes += 2;
 
-		      if (sym_hash->stack_size && sym_hash->stack_size <= 128)
-			bytes += 3;
-		      else if (sym_hash->stack_size
-			       && sym_hash->stack_size < 256)
-			bytes += 4;
+		      if (sym_hash->stack_size > 0)
+			{
+			  if (sym_hash->stack_size <= 128)
+			    bytes += 3;
+			  else
+			    bytes += 4;
+			}
 
 		      /* Note that we've deleted prologue bytes for this
 			 function.  */
@@ -2290,11 +2295,13 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 		      if (sym_hash->movm_args)
 			bytes += 2;
 
-		      if (sym_hash->stack_size && sym_hash->stack_size <= 128)
-			bytes += 3;
-		      else if (sym_hash->stack_size
-			       && sym_hash->stack_size < 256)
-			bytes += 4;
+		      if (sym_hash->stack_size > 0)
+			{
+			  if (sym_hash->stack_size <= 128)
+			    bytes += 3;
+			  else
+			    bytes += 4;
+			}
 
 		      /* Note that we've deleted prologue bytes for this
 			 function.  */
@@ -3487,7 +3494,7 @@ compute_function_info (abfd, hash, addr, contents)
     }
 
   /* Now figure out how much stack space will be allocated by the movm
-     instruction.  We need this kept separate from the funtion's normal
+     instruction.  We need this kept separate from the function's normal
      stack space.  */
   if (hash->movm_args)
     {
@@ -4008,7 +4015,7 @@ static const bfd_byte elf_mn10300_pic_plt_entry[PIC_PLT_ENTRY_SIZE] =
 /* Return offset of the GOT id in PLT0 entry.  */
 #define elf_mn10300_plt0_gotid_offset(info) 9
 
-/* Return offset of the tempoline in PLT entry */
+/* Return offset of the temporary in PLT entry */
 #define elf_mn10300_plt_temp_offset(info) 8
 
 /* Return offset of the symbol in PLT entry.  */

@@ -587,7 +587,7 @@ coff_mcore_relocate_section (output_bfd, info, input_bfd, input_section,
 
 #include "coffcode.h"
 
-/* Forward declaration to initialise alterbative_target field.  */
+/* Forward declaration to initialise alternative_target field.  */
 extern const bfd_target TARGET_LITTLE_SYM;
 
 /* The transfer vectors that lead the outside world to all of the above.  */

@@ -35,8 +35,6 @@ extern int gdbarch_debug;
 /* Fallback for register convertible. */
 extern gdbarch_deprecated_register_convertible_ftype deprecated_register_convertible_not;
 
-extern CORE_ADDR generic_cannot_extract_struct_value_address (char *dummy);
-
 /* Implementation of extract return value that grubs around in the
    register cache.  */
 extern gdbarch_extract_return_value_ftype legacy_extract_return_value;
@@ -110,7 +108,8 @@ extern gdbarch_virtual_frame_pointer_ftype legacy_virtual_frame_pointer;
 
 extern CORE_ADDR generic_skip_trampoline_code (CORE_ADDR pc);
 
-extern CORE_ADDR generic_skip_solib_resolver (CORE_ADDR pc);
+extern CORE_ADDR generic_skip_solib_resolver (struct gdbarch *gdbarch,
+					      CORE_ADDR pc);
 
 extern int generic_in_solib_call_trampoline (CORE_ADDR pc, char *name);
 
@@ -149,9 +148,21 @@ extern int default_stabs_argument_has_addr (struct gdbarch *gdbarch,
 
 extern int legacy_register_sim_regno (int regnum);
 
+/* Return the selected byte order, or BFD_ENDIAN_UNKNOWN if no byte
+   order was explicitly selected.  */
+extern enum bfd_endian selected_byte_order (void);
+
+/* Return the selected architecture's name, or NULL if no architecture
+   was explicitly selected.  */
+extern const char *selected_architecture_name (void);
+
 /* Initialize a ``struct info''.  Can't use memset(0) since some
-   default values are not zero.  */
+   default values are not zero.  "fill" takes all available
+   information and fills in any unspecified fields.  */
+
 extern void gdbarch_info_init (struct gdbarch_info *info);
+extern void gdbarch_info_fill (struct gdbarch *gdbarch,
+			       struct gdbarch_info *info);
 
 /* Similar to init, but this time fill in the blanks.  Information is
    obtained from the specified architecture, global "set ..." options,

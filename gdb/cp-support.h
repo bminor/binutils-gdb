@@ -34,6 +34,7 @@ struct symbol;
 struct obstack;
 struct block;
 struct objfile;
+struct type;
 
 /* This struct is designed to store data from using directives.  It
    says that names from namespace INNER should be visible within
@@ -65,6 +66,9 @@ extern char *remove_params (const char *demangled_name);
 
 extern struct symbol **make_symbol_overload_list (const char *,
 						  const char *);
+
+extern struct type *cp_lookup_rtti_type (const char *name,
+					 struct block *block);
 
 /* Functions/variables from cp-namespace.c.  */
 

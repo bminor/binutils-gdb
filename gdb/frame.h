@@ -408,10 +408,6 @@ extern ULONGEST get_frame_register_unsigned (struct frame_info *frame,
 
 
 /* Use frame_unwind_register_signed.  */
-extern void frame_unwind_signed_register (struct frame_info *frame,
-					  int regnum, LONGEST *val);
-
-/* Use frame_unwind_register_signed.  */
 extern void frame_unwind_unsigned_register (struct frame_info *frame,
 					    int regnum, ULONGEST *val);
 
@@ -572,9 +568,7 @@ extern void show_frame_info (struct frame_info *, int, int, int);
 
 extern struct frame_info *block_innermost_frame (const struct block *);
 
-/* NOTE: cagney/2002-09-13: There is no need for this function.
-   Instead either of frame_unwind_signed_register() or
-   frame_unwind_unsigned_register() can be used.  */
+/* NOTE: cagney/2002-09-13: There is no need for this function.   */
 extern CORE_ADDR deprecated_read_register_dummy (CORE_ADDR pc,
 						 CORE_ADDR fp, int);
 extern void generic_push_dummy_frame (void);
@@ -702,25 +696,6 @@ extern void deprecated_update_frame_pc_hack (struct frame_info *frame,
 extern void deprecated_update_frame_base_hack (struct frame_info *frame,
 					       CORE_ADDR base);
 
-/* FIXME: cagney/2003-01-04: Explicitly set the frame's saved_regs
-   and/or extra_info.  Target code is allocating a fake frame and than
-   initializing that to get around the problem of, when creating the
-   inner most frame, there is no where to cache information such as
-   the prologue analysis.  This is fixed by the new unwind mechanism -
-   even the inner most frame has somewhere to store things like the
-   prolog analysis (or at least will once the frame overhaul is
-   finished).  */
-extern void deprecated_set_frame_saved_regs_hack (struct frame_info *frame,
-						  CORE_ADDR *saved_regs);
-extern void deprecated_set_frame_extra_info_hack (struct frame_info *frame,
-						  struct frame_extra_info *extra_info);
-
-/* FIXME: cagney/2003-01-04: Allocate a frame from the heap (rather
-   than the frame obstack).  Targets do this as a way of saving the
-   prologue analysis from the inner most frame before that frame has
-   been created.  By always creating a frame, this problem goes away.  */
-extern struct frame_info *deprecated_frame_xmalloc (void);
-
 /* FIXME: cagney/2003-01-05: Allocate a frame, along with the
    saved_regs and extra_info.  Set up cleanups for all three.  Same as
    for deprecated_frame_xmalloc, targets are calling this when
@@ -729,26 +704,6 @@ extern struct frame_info *deprecated_frame_xmalloc (void);
    common cache parameter and a frame.  */
 extern struct frame_info *deprecated_frame_xmalloc_with_cleanup (long sizeof_saved_regs,
 								 long sizeof_extra_info);
-
-/* FIXME: cagney/2003-01-07: These are just nasty.  Code shouldn't be
-   doing this.  I suspect it dates back to the days when every field
-   of an allocated structure was explicitly initialized.  */
-extern void deprecated_set_frame_next_hack (struct frame_info *fi,
-					    struct frame_info *next);
-extern void deprecated_set_frame_prev_hack (struct frame_info *fi,
-					    struct frame_info *prev);
-
-/* FIXME: cagney/2003-01-07: Instead of the dwarf2cfi having its own
-   dedicated `struct frame_info . context' field, the code should use
-   the per frame `unwind_cache' that is passed to the
-   frame_pc_unwind(), frame_register_unwind() and frame_id_unwind()
-   methods.
-
-   See "dummy-frame.c" for an example of how a cfi-frame object can be
-   implemented using this.  */
-extern struct context *deprecated_get_frame_context (struct frame_info *fi);
-extern void deprecated_set_frame_context (struct frame_info *fi,
-					  struct context *context);
 
 /* Return non-zero if the architecture is relying on legacy frame
    code.  */

@@ -1,27 +1,27 @@
 /* collection of junk waiting time to sort out
-   Copyright (C) 1996, 1997, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1996, 1997, 1998, 2003 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
-This file is part of the GNU Simulators.
+   This file is part of GDB, the GNU debugger.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2, or (at your option)
-any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2, or (at your option)
+   any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License along
+   with this program; if not, write to the Free Software Foundation, Inc.,
+   59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #ifndef M32R_SIM_H
 #define M32R_SIM_H
 
-/* gdb register numbers */
+/* GDB register numbers.  */
 #define PSW_REGNUM	16
 #define CBR_REGNUM	17
 #define SPI_REGNUM	18
@@ -34,6 +34,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define ACC1H_REGNUM	25
 #define BBPSW_REGNUM	26
 #define BBPC_REGNUM	27
+#define EVB_REGNUM	28
 
 extern int m32r_decode_gdb_ctrl_regnum (int);
 
@@ -41,29 +42,35 @@ extern int m32r_decode_gdb_ctrl_regnum (int);
    FIXME: Eventually move to cgen.  */
 #define GET_H_SM() ((CPU (h_psw) & 0x80) != 0)
 
-extern SI a_m32r_h_gr_get (SIM_CPU *, UINT);
-extern void a_m32r_h_gr_set (SIM_CPU *, UINT, SI);
-extern USI a_m32r_h_cr_get (SIM_CPU *, UINT);
-extern void a_m32r_h_cr_set (SIM_CPU *, UINT, USI);
-
-extern USI m32rbf_h_cr_get_handler (SIM_CPU *, UINT);
+#ifndef GET_H_CR
+extern USI  m32rbf_h_cr_get_handler (SIM_CPU *, UINT);
 extern void m32rbf_h_cr_set_handler (SIM_CPU *, UINT, USI);
 
-extern UQI m32rbf_h_psw_get_handler (SIM_CPU *);
+#define GET_H_CR(regno) \
+  XCONCAT2 (WANT_CPU,_h_cr_get_handler) (current_cpu, (regno))
+#define SET_H_CR(regno, val) \
+  XCONCAT2 (WANT_CPU,_h_cr_set_handler) (current_cpu, (regno), (val))
+#endif
+
+#ifndef  GET_H_PSW
+extern UQI  m32rbf_h_psw_get_handler (SIM_CPU *);
 extern void m32rbf_h_psw_set_handler (SIM_CPU *, UQI);
 
-extern DI m32rbf_h_accum_get_handler (SIM_CPU *);
+#define GET_H_PSW() \
+  XCONCAT2 (WANT_CPU,_h_psw_get_handler) (current_cpu)
+#define SET_H_PSW(val) \
+  XCONCAT2 (WANT_CPU,_h_psw_set_handler) (current_cpu, (val))
+#endif
+
+#ifndef  GET_H_ACCUM
+extern DI   m32rbf_h_accum_get_handler (SIM_CPU *);
 extern void m32rbf_h_accum_set_handler (SIM_CPU *, DI);
 
-extern USI m32rxf_h_cr_get_handler (SIM_CPU *, UINT);
-extern void m32rxf_h_cr_set_handler (SIM_CPU *, UINT, USI);
-extern UQI m32rxf_h_psw_get_handler (SIM_CPU *);
-extern void m32rxf_h_psw_set_handler (SIM_CPU *, UQI);
-extern DI m32rxf_h_accum_get_handler (SIM_CPU *);
-extern void m32rxf_h_accum_set_handler (SIM_CPU *, DI);
-
-extern DI m32rxf_h_accums_get_handler (SIM_CPU *, UINT);
-extern void m32rxf_h_accums_set_handler (SIM_CPU *, UINT, DI);
+#define GET_H_ACCUM() \
+  XCONCAT2 (WANT_CPU,_h_accum_get_handler) (current_cpu)
+#define SET_H_ACCUM(val) \
+  XCONCAT2 (WANT_CPU,_h_accum_set_handler) (current_cpu, (val))
+#endif
 
 /* Misc. profile data.  */
 
@@ -130,32 +137,6 @@ do { \
 
 /* Additional execution support.  */
 
-/* Result of semantic function is one of
-   - next address, branch only
-   - NEW_PC_SKIP, sc/snc insn
-   - NEW_PC_2, 2 byte non-branch non-sc/snc insn
-   - NEW_PC_4, 4 byte non-branch insn
-   The special values have bit 1 set so it's cheap to distinguish them.
-   This works because all cti's are defined to zero the bottom two bits
-   Note that the m32rx no longer doesn't implement its semantics with
-   functions, so this isn't used.  It's kept around should it be needed
-   again.  */
-/* FIXME: replace 0xffff0001 with 1?  */
-#define NEW_PC_BASE 0xffff0001
-#define NEW_PC_SKIP NEW_PC_BASE
-#define NEW_PC_2 (NEW_PC_BASE + 2)
-#define NEW_PC_4 (NEW_PC_BASE + 4)
-#define NEW_PC_BRANCH_P(addr) (((addr) & 1) == 0)
-
-/* Modify "next pc" support to handle parallel execution.
-   This is for the non-pbb case.  The m32rx no longer implements this.
-   It's kept around should it be needed again.  */
-#if defined (WANT_CPU_M32RXF) && ! WITH_SCACHE_PBB_M32RXF
-#undef SEM_NEXT_VPC
-#define SEM_NEXT_VPC(abuf, len) (NEW_PC_BASE + (len))
-#undef SEM_SKIP_INSN
-#define SEM_SKIP_INSN(cpu, sc, vpcvar, yes) FIXME
-#endif
 
 /* Hardware/device support.
    ??? Will eventually want to move device stuff to config files.  */
@@ -217,7 +198,7 @@ do { \
 
 /* Start address and length of all device support.  */
 #define M32R_DEVICE_ADDR	0xff000000
-#define M32R_DEVICE_LEN		0x01000000
+#define M32R_DEVICE_LEN		0x00ffffff
 
 /* sim_core_attach device argument.  */
 extern device m32r_devices;

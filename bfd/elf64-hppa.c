@@ -202,8 +202,8 @@ static bfd_boolean elf64_hppa_size_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 
 static bfd_boolean elf64_hppa_link_output_symbol_hook
-  PARAMS ((bfd *abfd, struct bfd_link_info *, const char *,
-	   Elf_Internal_Sym *, asection *input_sec));
+  PARAMS ((struct bfd_link_info *, const char *, Elf_Internal_Sym *,
+	   asection *, struct elf_link_hash_entry *));
 
 static bfd_boolean elf64_hppa_finish_dynamic_symbol
   PARAMS ((bfd *, struct bfd_link_info *,
@@ -213,7 +213,7 @@ static int elf64_hppa_additional_program_headers
   PARAMS ((bfd *));
 
 static bfd_boolean elf64_hppa_modify_segment_map
-  PARAMS ((bfd *));
+  PARAMS ((bfd *, struct bfd_link_info *));
 
 static enum elf_reloc_type_class elf64_hppa_reloc_type_class
   PARAMS ((const Elf_Internal_Rela *));
@@ -975,7 +975,7 @@ elf64_hppa_dynamic_symbol_p (h, info)
     return FALSE;
 }
 
-/* Mark all funtions exported by this file so that we can later allocate
+/* Mark all functions exported by this file so that we can later allocate
    entries in .opd for them.  */
 
 static bfd_boolean
@@ -1211,7 +1211,7 @@ elf64_hppa_post_process_headers (abfd, link_info)
 }
 
 /* Create function descriptor section (.opd).  This section is called .opd
-   because it contains "official prodecure descriptors".  The "official"
+   because it contains "official procedure descriptors".  The "official"
    refers to the fact that these descriptors are used when taking the address
    of a procedure, thus ensuring a unique address for each procedure.  */
 
@@ -1893,12 +1893,12 @@ elf64_hppa_size_dynamic_sections (output_bfd, info)
    table.  Ick.  */
 
 static bfd_boolean
-elf64_hppa_link_output_symbol_hook (abfd, info, name, sym, input_sec)
-     bfd *abfd ATTRIBUTE_UNUSED;
+elf64_hppa_link_output_symbol_hook (info, name, sym, input_sec, h)
      struct bfd_link_info *info;
      const char *name;
      Elf_Internal_Sym *sym;
      asection *input_sec ATTRIBUTE_UNUSED;
+     struct elf_link_hash_entry *h;
 {
   struct elf64_hppa_link_hash_table *hppa_info;
   struct elf64_hppa_dyn_hash_entry *dyn_h;
@@ -1912,6 +1912,8 @@ elf64_hppa_link_output_symbol_hook (abfd, info, name, sym, input_sec)
   hppa_info = elf64_hppa_hash_table (info);
   dyn_h = elf64_hppa_dyn_hash_lookup (&hppa_info->dyn_hash_table,
 				      name, FALSE, FALSE);
+  if (!dyn_h || dyn_h->h != h)
+    return TRUE;
 
   /* Function symbols for which we created .opd entries *may* have been
      munged by finish_dynamic_symbol and have to be un-munged here.
@@ -1920,7 +1922,7 @@ elf64_hppa_link_output_symbol_hook (abfd, info, name, sym, input_sec)
      into non-dynamic ones, so we initialize st_shndx to -1 in
      mark_exported_functions and check to see if it was overwritten
      here instead of just checking dyn_h->h->dynindx.  */
-  if (dyn_h && dyn_h->want_opd && dyn_h->st_shndx != -1)
+  if (dyn_h->want_opd && dyn_h->st_shndx != -1)
     {
       /* Restore the saved value and section index.  */
       sym->st_value = dyn_h->st_value;
@@ -2281,7 +2283,7 @@ elf64_hppa_finalize_dlt (dyn_h, data)
       bfd_put_64 (sdlt->owner, value, sdlt->contents + dyn_h->dlt_offset);
     }
 
-  /* Create a relocation for the DLT entry assocated with this symbol.
+  /* Create a relocation for the DLT entry associated with this symbol.
      When building a shared library the symbol does not have to be dynamic.  */
   if (dyn_h->want_dlt
       && (elf64_hppa_dynamic_symbol_p (dyn_h->h, info) || info->shared))
@@ -2609,8 +2611,9 @@ elf64_hppa_additional_program_headers (abfd)
    existence of a .interp section.  */
 
 static bfd_boolean
-elf64_hppa_modify_segment_map (abfd)
+elf64_hppa_modify_segment_map (abfd, info)
      bfd *abfd;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
 {
   struct elf_segment_map *m;
   asection *s;

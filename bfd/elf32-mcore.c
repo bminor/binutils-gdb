@@ -84,7 +84,7 @@ static reloc_howto_type mcore_elf_howto_raw[] =
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
-	 "ADDR32",		/* name *//* For compatability with coff/pe port.  */
+	 "ADDR32",		/* name *//* For compatibility with coff/pe port.  */
 	 FALSE,			/* partial_inplace */
 	 0x0,			/* src_mask */
 	 0xffffffff,		/* dst_mask */

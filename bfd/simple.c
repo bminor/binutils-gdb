@@ -211,7 +211,7 @@ bfd_simple_get_relocated_section_contents (bfd *abfd,
 
   /* The sections in ABFD may already have output sections and offsets set.
      Because this function is primarily for debug sections, and GCC uses the
-     knowledge that debug sections will generally have VMA 0 when emiting
+     knowledge that debug sections will generally have VMA 0 when emitting
      relocations between DWARF-2 sections (which are supposed to be
      section-relative offsets anyway), we need to reset the output offsets
      to zero.  We also need to arrange for section->output_section->vma plus

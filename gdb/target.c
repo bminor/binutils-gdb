@@ -1284,7 +1284,7 @@ target_disconnect (char *args, int from_tty)
 void
 target_link (char *modname, CORE_ADDR *t_reloc)
 {
-  if (STREQ (current_target.to_shortname, "rombug"))
+  if (DEPRECATED_STREQ (current_target.to_shortname, "rombug"))
     {
       (current_target.to_lookup_symbol) (modname, t_reloc);
       if (*t_reloc == 0)

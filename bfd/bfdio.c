@@ -395,7 +395,7 @@ DESCRIPTION
 	error when it tries to read the table, or a "virtual memory
 	exhausted" error when it tries to allocate 15 bazillon bytes
 	of space for the 15 bazillon byte table it is about to read.
-	This function at least allows us to answer the quesion, "is the
+	This function at least allows us to answer the question, "is the
 	size reasonable?".
 */
 

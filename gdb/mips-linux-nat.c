@@ -31,22 +31,19 @@ mips_linux_cannot_fetch_register (int regno)
 {
   if (regno > ZERO_REGNUM && regno < ZERO_REGNUM + 32)
     return 0;
-  else if (regno >= FP0_REGNUM && regno <= FP0_REGNUM + 32)
+  else if (regno >= mips_regnum (current_gdbarch)->fp0
+	   && regno <= mips_regnum (current_gdbarch)->fp0 + 32)
     return 0;
-
-  switch (regno)
-    {
-    case LO_REGNUM:
-    case HI_REGNUM:
-    case BADVADDR_REGNUM:
-    case CAUSE_REGNUM:
-    case PC_REGNUM:
-    case FCRCS_REGNUM:
-    case FCRIR_REGNUM:
-      return 0;
-    }
-
-  return 1;
+  else if (regno == mips_regnum (current_gdbarch)->lo
+	   || regno == mips_regnum (current_gdbarch)->hi
+	   || regno == mips_regnum (current_gdbarch)->badvaddr
+	   || regno == mips_regnum (current_gdbarch)->cause
+	   || regno == mips_regnum (current_gdbarch)->pc
+	   || regno == mips_regnum (current_gdbarch)->fp_control_status
+	   || regno == mips_regnum (current_gdbarch)->fp_implementation_revision)
+    return 0;
+  else
+    return 1;
 }
 
 int
@@ -56,15 +53,11 @@ mips_linux_cannot_store_register (int regno)
     return 0;
   else if (regno >= FP0_REGNUM && regno <= FP0_REGNUM + 32)
     return 0;
-
-  switch (regno)
-    {
-    case LO_REGNUM:
-    case HI_REGNUM:
-    case PC_REGNUM:
-    case FCRCS_REGNUM:
-      return 0;
-    }
-
-  return 1;
+  else if (regno == mips_regnum (current_gdbarch)->lo
+	   || regno == mips_regnum (current_gdbarch)->hi
+	   || regno == mips_regnum (current_gdbarch)->pc
+	   || regno == mips_regnum (current_gdbarch)->fp_control_status)
+    return 0;
+  else
+    return 1;
 }

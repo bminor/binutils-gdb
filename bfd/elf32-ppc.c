@@ -336,7 +336,8 @@ ppc_elf_copy_indirect_symbol (const struct elf_backend_data *bed,
     dir->elf_link_hash_flags |=
       (ind->elf_link_hash_flags & (ELF_LINK_HASH_REF_DYNAMIC
 				   | ELF_LINK_HASH_REF_REGULAR
-				   | ELF_LINK_HASH_REF_REGULAR_NONWEAK));
+				   | ELF_LINK_HASH_REF_REGULAR_NONWEAK
+				   | ELF_LINK_HASH_NEEDS_PLT));
   else
     _bfd_elf_link_hash_copy_indirect (bed, dir, ind);
 }
@@ -1674,11 +1675,8 @@ ppc_elf_relax_section (bfd *abfd,
 
   *again = FALSE;
 
-  /* Nothing to do if there are no relocations and no need for
-     the relax finalize pass.  */
-  if ((isec->flags & SEC_RELOC) == 0
-      || isec->reloc_count == 0
-      || link_info->relax_finalizing)
+  /* Nothing to do if there are no relocations.  */
+  if ((isec->flags & SEC_RELOC) == 0 || isec->reloc_count == 0)
     return TRUE;
 
   /* If needed, initialize this section's cooked size.  */
@@ -1763,7 +1761,7 @@ ppc_elf_relax_section (bfd *abfd,
 	    }
 	  isym = isymbuf + ELF32_R_SYM (irel->r_info);
 	  if (isym->st_shndx == SHN_UNDEF)
-	    continue;	/* We can't do anthing with undefined symbols.  */
+	    continue;	/* We can't do anything with undefined symbols.  */
 	  else if (isym->st_shndx == SHN_ABS)
 	    tsec = bfd_abs_section_ptr;
 	  else if (isym->st_shndx == SHN_COMMON)
@@ -2738,7 +2736,8 @@ ppc_elf_additional_program_headers (bfd *abfd)
 /* Modify the segment map if needed.  */
 
 static bfd_boolean
-ppc_elf_modify_segment_map (bfd *abfd ATTRIBUTE_UNUSED)
+ppc_elf_modify_segment_map (bfd *abfd ATTRIBUTE_UNUSED,
+			    struct bfd_link_info *info ATTRIBUTE_UNUSED)
 {
   return TRUE;
 }
@@ -4917,7 +4916,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	  branch_bit = BRANCH_PREDICT_BIT;
 	  /* Fall thru */
 
-	  /* Branch not taken predicition relocations.  */
+	  /* Branch not taken prediction relocations.  */
 	case R_PPC_ADDR14_BRNTAKEN:
 	case R_PPC_REL14_BRNTAKEN:
 	  insn = bfd_get_32 (output_bfd, contents + rel->r_offset);

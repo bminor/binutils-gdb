@@ -64,14 +64,6 @@
 #include "aout/stab_gnu.h"	/* We always use GNU stabs, not native, now */
 
 
-/* This macro returns the size field of a minimal symbol, which is normally
-   stored in the "info" field.  The macro can be overridden for specific
-   targets (e.g. MIPS16) that use the info field for other purposes.  */
-#ifndef MSYMBOL_SIZE
-#define MSYMBOL_SIZE(msym) ((long) MSYMBOL_INFO (msym))
-#endif
-
-
 /* We put a pointer to this structure in the read_symtab_private field
    of the psymtab.  */
 
@@ -491,7 +483,7 @@ record_minimal_symbol (char *name, CORE_ADDR address, int type,
          Record it as global even if it's local, not global, so
          lookup_minimal_symbol can find it.  We don't check symbol_leading_char
          because for SunOS4 it always is '_'.  */
-      if (name[8] == 'C' && STREQ ("__DYNAMIC", name))
+      if (name[8] == 'C' && DEPRECATED_STREQ ("__DYNAMIC", name))
 	ms_type = mst_data;
 
       /* Same with virtual function tables, both global and static.  */
@@ -2519,13 +2511,13 @@ read_ofile_symtab (struct partial_symtab *pst)
 	{
 	  const char *tempstring = namestring;
 
-	  if (STREQ (namestring, GCC_COMPILED_FLAG_SYMBOL))
+	  if (DEPRECATED_STREQ (namestring, GCC_COMPILED_FLAG_SYMBOL))
 	    processing_gcc_compilation = 1;
-	  else if (STREQ (namestring, GCC2_COMPILED_FLAG_SYMBOL))
+	  else if (DEPRECATED_STREQ (namestring, GCC2_COMPILED_FLAG_SYMBOL))
 	    processing_gcc_compilation = 2;
 	  if (tempstring[0] == bfd_get_symbol_leading_char (symfile_bfd))
 	    ++tempstring;
-	  if (STREQN (tempstring, "__gnu_compiled", 14))
+	  if (DEPRECATED_STREQN (tempstring, "__gnu_compiled", 14))
 	    processing_gcc_compilation = 2;
 	}
 
@@ -2591,9 +2583,9 @@ read_ofile_symtab (struct partial_symtab *pst)
 	     However, there is no reason not to accept
 	     the GCC_COMPILED_FLAG_SYMBOL anywhere.  */
 
-	  if (STREQ (namestring, GCC_COMPILED_FLAG_SYMBOL))
+	  if (DEPRECATED_STREQ (namestring, GCC_COMPILED_FLAG_SYMBOL))
 	    processing_gcc_compilation = 1;
-	  else if (STREQ (namestring, GCC2_COMPILED_FLAG_SYMBOL))
+	  else if (DEPRECATED_STREQ (namestring, GCC2_COMPILED_FLAG_SYMBOL))
 	    processing_gcc_compilation = 2;
 
 #if 0

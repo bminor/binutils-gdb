@@ -24,42 +24,60 @@
 
 /*
    If you are looking for DWARF-2 support, you are in the wrong file.
-   Go look in dwarf2read.c.  This file is for the original DWARF.
+   Go look in dwarf2read.c.  This file is for the original DWARF,
+   also known as DWARF-1.
 
-   DWARF (also known as DWARF-1) is headed for obsoletion.
+   DWARF-1 is slowly headed for obsoletion.
 
-   In gcc 3.2.1, these targets prefer dwarf-1:
+   In gcc HEAD 2003-11-29 16:28:31 UTC, no targets prefer dwarf-1.
 
-     i[34567]86-sequent-ptx4*   # TD-R2
-     i[34567]86-sequent-sysv4*  # TD-R2
-     i[34567]86-dg-dgux*        # obsolete in gcc 3.2.1, to be removed in 3.3
-     m88k-dg-dgux*              # TD-R2
-     mips-sni-sysv4             # TD-R2
-     sparc-hal-solaris2*        # TD-R2
+   In gcc 3.3.2, these targets prefer dwarf-1:
 
-    Configurations marked with "# TD-R2" are on Zach Weinberg's list
-    of "Target Deprecation, Round 2".  This is a candidate list of
-    targets to be deprecated in gcc 3.3 and removed in gcc 3.4.
+     i[34567]86-sequent-ptx4*
+     i[34567]86-sequent-sysv4*
+     mips-sni-sysv4
+     sparc-hal-solaris2*
 
-      http://gcc.gnu.org/ml/gcc/2002-12/msg00702.html
+   In gcc 3.2.2, these targets prefer dwarf-1:
 
-    gcc 2.95.3 had many configurations which prefer dwarf-1.
-    We may have to support dwarf-1 as long as we support gcc 2.95.3.
-    This could use more analysis.
+     i[34567]86-dg-dgux*
+     i[34567]86-sequent-ptx4*
+     i[34567]86-sequent-sysv4*
+     m88k-dg-dgux*
+     mips-sni-sysv4
+     sparc-hal-solaris2*
 
-    DG/UX (Data General Unix) used dwarf-1 for its native format.
-    DG/UX uses gcc for its system C compiler, but they have their
-    own linker and their own debuggers.
+   In gcc 2.95.3, these targets prefer dwarf-1:
 
-    Takis Psarogiannakopoulos has a complete gnu toolchain for DG/UX
-    with gcc 2.95.3, gdb 5.1, and debug formats of dwarf-2 and stabs.
-    For more info, see PR gdb/979 and PR gdb/1013; also:
+     i[34567]86-dg-dgux*
+     i[34567]86-ncr-sysv4*
+     i[34567]86-sequent-ptx4*
+     i[34567]86-sequent-sysv4*
+     i[34567]86-*-osf1*
+     i[34567]86-*-sco3.2v5*
+     i[34567]86-*-sysv4*
+     i860-alliant-*
+     i860-*-sysv4*
+     m68k-atari-sysv4*
+     m68k-cbm-sysv4*
+     m68k-*-sysv4*
+     m88k-dg-dgux*
+     m88k-*-sysv4*
+     mips-sni-sysv4
+     mips-*-gnu*
+     sh-*-elf*
+     sh-*-rtemself*
+     sparc-hal-solaris2*
+     sparc-*-sysv4*
 
-      http://sources.redhat.com/ml/gdb/2003-02/msg00074.html
+   Some non-gcc compilers produce dwarf-1: 
 
-    There may be non-gcc compilers that still emit dwarf-1.
+     PR gdb/1179 was from a user with Diab C++ 4.3.
+     Other users have also reported using Diab compilers with dwarf-1.
+     On 2003-06-09 the gdb list received a report from a user
+       with Absoft ProFortran f77 which is dwarf-1.
 
-    -- chastain 2003-02-04
+   -- chastain 2003-12-01
 */
 
 /*
@@ -1802,7 +1820,7 @@ handle_producer (char *producer)
   /* If this compilation unit was compiled with g++ or gcc, then set the
      processing_gcc_compilation flag. */
 
-  if (STREQN (producer, GCC_PRODUCER, strlen (GCC_PRODUCER)))
+  if (DEPRECATED_STREQN (producer, GCC_PRODUCER, strlen (GCC_PRODUCER)))
     {
       char version = producer[strlen (GCC_PRODUCER)];
       processing_gcc_compilation = (version == '2' ? 2 : 1);
@@ -1820,7 +1838,7 @@ handle_producer (char *producer)
 
   if (AUTO_DEMANGLING)
     {
-      if (STREQN (producer, GPLUS_PRODUCER, strlen (GPLUS_PRODUCER)))
+      if (DEPRECATED_STREQN (producer, GPLUS_PRODUCER, strlen (GPLUS_PRODUCER)))
 	{
 #if 0
 	  /* For now, stay with AUTO_DEMANGLING for g++ output, as we don't
@@ -1828,7 +1846,7 @@ handle_producer (char *producer)
 	  set_demangling_style (GNU_DEMANGLING_STYLE_STRING);
 #endif
 	}
-      else if (STREQN (producer, LCC_PRODUCER, strlen (LCC_PRODUCER)))
+      else if (DEPRECATED_STREQN (producer, LCC_PRODUCER, strlen (LCC_PRODUCER)))
 	{
 	  set_demangling_style (LUCID_DEMANGLING_STYLE_STRING);
 	}

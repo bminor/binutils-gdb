@@ -3340,15 +3340,6 @@ static bfd_boolean
 elf32_sparc_object_p (abfd)
      bfd *abfd;
 {
-  /* Allocate our special target data.  */
-  struct elf32_sparc_obj_tdata *new_tdata;
-  bfd_size_type amt = sizeof (struct elf32_sparc_obj_tdata);
-  new_tdata = bfd_zalloc (abfd, amt);
-  if (new_tdata == NULL)
-    return FALSE;
-  new_tdata->root = *abfd->tdata.elf_obj_data;
-  abfd->tdata.any = new_tdata;
-
   if (elf_elfheader (abfd)->e_machine == EM_SPARC32PLUS)
     {
       if (elf_elfheader (abfd)->e_flags & EF_SPARC_SUN_US3)

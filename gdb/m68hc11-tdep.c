@@ -50,16 +50,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    analysis to compute correct stack frame layout.
    
    The MSB of the minimal symbol's "info" field is used for this purpose.
-   This field is already being used to store the symbol size, so the
-   assumption is that the symbol size cannot exceed 2^30.
 
    MSYMBOL_SET_RTC	Actually sets the "RTC" bit.
    MSYMBOL_SET_RTI	Actually sets the "RTI" bit.
    MSYMBOL_IS_RTC       Tests the "RTC" bit in a minimal symbol.
-   MSYMBOL_IS_RTI       Tests the "RTC" bit in a minimal symbol.
-   MSYMBOL_SIZE         Returns the size of the minimal symbol,
-   			i.e. the "info" field with the "special" bit
-   			masked out.  */
+   MSYMBOL_IS_RTI       Tests the "RTC" bit in a minimal symbol.  */
 
 #define MSYMBOL_SET_RTC(msym)                                           \
         MSYMBOL_INFO (msym) = (char *) (((long) MSYMBOL_INFO (msym))	\
@@ -74,9 +69,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define MSYMBOL_IS_RTI(msym)				\
 	(((long) MSYMBOL_INFO (msym) & 0x40000000) != 0)
-
-#define MSYMBOL_SIZE(msym)				\
-	((long) MSYMBOL_INFO (msym) & 0x3fffffff)
 
 enum insn_return_kind {
   RETURN_RTS,

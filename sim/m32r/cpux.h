@@ -2,7 +2,7 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
 This file is part of the GNU simulators.
 
@@ -129,6 +129,9 @@ union sem_fields {
     int empty;
   } fmt_empty;
   struct { /*  */
+    UINT f_uimm8;
+  } sfmt_clrpsw;
+  struct { /*  */
     UINT f_uimm4;
   } sfmt_trap;
   struct { /*  */
@@ -174,6 +177,13 @@ union sem_fields {
     unsigned char in_sr;
     unsigned char out_h_gr_SI_14;
   } sfmt_jl;
+  struct { /*  */
+    SI* i_sr;
+    INT f_simm16;
+    UINT f_r2;
+    UINT f_uimm3;
+    unsigned char in_sr;
+  } sfmt_bset;
   struct { /*  */
     SI* i_dr;
     UINT f_r1;
@@ -725,6 +735,49 @@ struct scache {
   f_r2 = EXTRACT_MSB0_UINT (insn, 32, 12, 4); \
   f_uimm16 = EXTRACT_MSB0_UINT (insn, 32, 16, 16); \
 
+#define EXTRACT_IFMT_CLRPSW_VARS \
+  UINT f_op1; \
+  UINT f_r1; \
+  UINT f_uimm8; \
+  unsigned int length;
+#define EXTRACT_IFMT_CLRPSW_CODE \
+  length = 2; \
+  f_op1 = EXTRACT_MSB0_UINT (insn, 16, 0, 4); \
+  f_r1 = EXTRACT_MSB0_UINT (insn, 16, 4, 4); \
+  f_uimm8 = EXTRACT_MSB0_UINT (insn, 16, 8, 8); \
+
+#define EXTRACT_IFMT_BSET_VARS \
+  UINT f_op1; \
+  UINT f_bit4; \
+  UINT f_uimm3; \
+  UINT f_op2; \
+  UINT f_r2; \
+  INT f_simm16; \
+  unsigned int length;
+#define EXTRACT_IFMT_BSET_CODE \
+  length = 4; \
+  f_op1 = EXTRACT_MSB0_UINT (insn, 32, 0, 4); \
+  f_bit4 = EXTRACT_MSB0_UINT (insn, 32, 4, 1); \
+  f_uimm3 = EXTRACT_MSB0_UINT (insn, 32, 5, 3); \
+  f_op2 = EXTRACT_MSB0_UINT (insn, 32, 8, 4); \
+  f_r2 = EXTRACT_MSB0_UINT (insn, 32, 12, 4); \
+  f_simm16 = EXTRACT_MSB0_INT (insn, 32, 16, 16); \
+
+#define EXTRACT_IFMT_BTST_VARS \
+  UINT f_op1; \
+  UINT f_bit4; \
+  UINT f_uimm3; \
+  UINT f_op2; \
+  UINT f_r2; \
+  unsigned int length;
+#define EXTRACT_IFMT_BTST_CODE \
+  length = 2; \
+  f_op1 = EXTRACT_MSB0_UINT (insn, 16, 0, 4); \
+  f_bit4 = EXTRACT_MSB0_UINT (insn, 16, 4, 1); \
+  f_uimm3 = EXTRACT_MSB0_UINT (insn, 16, 5, 3); \
+  f_op2 = EXTRACT_MSB0_UINT (insn, 16, 8, 4); \
+  f_r2 = EXTRACT_MSB0_UINT (insn, 16, 12, 4); \
+
 /* Queued output values of an instruction.  */
 
 struct parexec {
@@ -921,6 +974,16 @@ struct parexec {
       USI h_memory_SI_new_src2_idx;
       SI src2;
     } sfmt_st_plus;
+    struct { /* e.g. sth $src1,@$src2+ */
+      HI h_memory_HI_new_src2;
+      USI h_memory_HI_new_src2_idx;
+      SI src2;
+    } sfmt_sth_plus;
+    struct { /* e.g. stb $src1,@$src2+ */
+      QI h_memory_QI_new_src2;
+      USI h_memory_QI_new_src2_idx;
+      SI src2;
+    } sfmt_stb_plus;
     struct { /* e.g. trap $uimm4 */
       UQI h_bbpsw_UQI;
       UQI h_bpsw_UQI;
@@ -955,6 +1018,19 @@ struct parexec {
     struct { /* e.g. sc */
       int empty;
     } sfmt_sc;
+    struct { /* e.g. clrpsw $uimm8 */
+      USI h_cr_USI_0;
+    } sfmt_clrpsw;
+    struct { /* e.g. setpsw $uimm8 */
+      USI h_cr_USI_0;
+    } sfmt_setpsw;
+    struct { /* e.g. bset $uimm3,@($slo16,$sr) */
+      QI h_memory_QI_add__DFLT_sr_slo16;
+      USI h_memory_QI_add__DFLT_sr_slo16_idx;
+    } sfmt_bset;
+    struct { /* e.g. btst $uimm3,$sr */
+      BI condbit;
+    } sfmt_btst;
   } operands;
   /* For conditionally written operands, bitmask of which ones were.  */
   int written;

@@ -319,7 +319,7 @@ CODE_FRAGMENT
 .
 .  {* If this field is non null, then the supplied function is
 .     called rather than the normal function.  This allows really
-.     strange relocation methods to be accomodated (e.g., i960 callj
+.     strange relocation methods to be accommodated (e.g., i960 callj
 .     instructions).  *}
 .  bfd_reloc_status_type (*special_function)
 .    (bfd *, arelent *, struct bfd_symbol *, void *, asection *,
@@ -627,7 +627,7 @@ bfd_perform_relocation (bfd *abfd,
 			      / bfd_octets_per_byte (abfd)))
     return bfd_reloc_outofrange;
 
-  /* Work out which section the relocation is targetted at and the
+  /* Work out which section the relocation is targeted at and the
      initial relocation command value.  */
 
   /* Get symbol value.  (Common symbols are special.)  */
@@ -1017,7 +1017,7 @@ bfd_install_relocation (bfd *abfd,
 			      / bfd_octets_per_byte (abfd)))
     return bfd_reloc_outofrange;
 
-  /* Work out which section the relocation is targetted at and the
+  /* Work out which section the relocation is targeted at and the
      initial relocation command value.  */
 
   /* Get symbol value.  (Common symbols are special.)  */
@@ -2507,7 +2507,7 @@ ENUMDOC
 ENUM
   BFD_RELOC_CTOR
 ENUMDOC
-  The type of reloc used to build a contructor table - at the moment
+  The type of reloc used to build a constructor table - at the moment
   probably a 32 bit wide absolute relocation, but the target can choose.
   It generally does map to one of the other relocation types.
 
@@ -2971,12 +2971,12 @@ ENUM
   BFD_RELOC_V850_SDA_16_16_SPLIT_OFFSET
 ENUMDOC
   This is a 16 bit offset from the short data area pointer, with the
-  bits placed non-contigously in the instruction.
+  bits placed non-contiguously in the instruction.
 ENUM
   BFD_RELOC_V850_ZDA_16_16_SPLIT_OFFSET
 ENUMDOC
   This is a 16 bit offset from the zero data area pointer, with the
-  bits placed non-contigously in the instruction.
+  bits placed non-contiguously in the instruction.
 ENUM
   BFD_RELOC_V850_CALLT_6_7_OFFSET
 ENUMDOC
@@ -3482,7 +3482,7 @@ ENUMDOC
   included in the output.
 
   VTABLE_INHERIT is a zero-space relocation used to describe to the
-  linker the inheritence tree of a C++ virtual function table.  The
+  linker the inheritance tree of a C++ virtual function table.  The
   relocation's symbol should be the parent class' vtable, and the
   relocation should be located at the child vtable.
 
@@ -3675,7 +3675,7 @@ ENUMDOC
   Motorola 68HC11 reloc.
   This reloc marks the beginning of a jump/call instruction.
   It is used for linker relaxation to correctly identify beginning
-  of instruction and change some branchs to use PC-relative
+  of instruction and change some branches to use PC-relative
   addressing mode.
 ENUM
   BFD_RELOC_M68HC11_RL_GROUP

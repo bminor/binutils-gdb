@@ -1,3 +1,25 @@
+/* This testcase is part of GDB, the GNU debugger.
+
+   Copyright 1992, 1993, 1994, 1995, 1999, 2002, 2003 Free Software
+   Foundation, Inc.
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+ 
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+
+   Please email any bugs, comments, and/or additions to this file to:
+   bug-gdb@prep.ai.mit.edu  */
+
 #ifdef vxworks
 
 #  include <stdio.h>
@@ -32,23 +54,16 @@ char *arg;
 #  include <stdlib.h>
 #endif /* ! vxworks */
 
-/*
- * The following functions do nothing useful.  They are included simply
- * as places to try setting breakpoints at.  They are explicitly
- * "one-line functions" to verify that this case works (some versions
- * of gcc have or have had problems with this).
- */
-
 #ifdef PROTOTYPES
-int marker1 (void) { return (0); }
-int marker2 (int a) { return (1); }
-void marker3 (char *a, char *b) {}
-void marker4 (long d) {}
+extern int marker1 (void);
+extern int marker2 (int a);
+extern void marker3 (char *a, char *b);
+extern void marker4 (long d);
 #else
-int marker1 () { return (0); }
-int marker2 (a) int a; { return (1); }
-void marker3 (a, b) char *a, *b; {}
-void marker4 (d) long d; {}
+extern int marker1 ();
+extern int marker2 ();
+extern void marker3 ();
+extern void marker4 ();
 #endif
 
 /*
@@ -69,21 +84,21 @@ char *argv[], **envp;
 #endif
 {
 #ifdef usestubs
-    set_debug_traps();
+    set_debug_traps();  /* set breakpoint 5 here */
     breakpoint();
 #endif
-    if (argc == 12345) {  /* an unlikely value < 2^16, in case uninited */
+    if (argc == 12345) {  /* an unlikely value < 2^16, in case uninited */ /* set breakpoint 6 here */
 	fprintf (stderr, "usage:  factorial <number>\n");
 	return 1;
     }
-    printf ("%d\n", factorial (atoi ("6")));
-
-    marker1 ();
-    marker2 (43);
-    marker3 ("stack", "trace");
+    printf ("%d\n", factorial (atoi ("6")));  /* set breakpoint 1 here */
+    /* set breakpoint 12 here */
+    marker1 ();  /* set breakpoint 11 here */
+    marker2 (43); /* set breakpoint 20 here */
+    marker3 ("stack", "trace"); /* set breakpoint 21 here */
     marker4 (177601976L);
-    argc = (argc == 12345); /* This is silly, but we can step off of it */
-    return argc;
+    argc = (argc == 12345); /* This is silly, but we can step off of it */ /* set breakpoint 2 here */
+    return argc;  /* set breakpoint 10 here */
 }
 
 #ifdef PROTOTYPES
@@ -93,10 +108,10 @@ int factorial (value)
 int value;
 #endif
 {
-    if (value > 1) {
+  if (value > 1) {  /* set breakpoint 7 here */
 	value *= factorial (value - 1);
     }
-    return (value);
+    return (value); /* set breakpoint 19 here */
 }
 
 #ifdef PROTOTYPES
@@ -106,7 +121,7 @@ int multi_line_if_conditional (a, b, c)
   int a, b, c;
 #endif
 {
-  if (a
+  if (a    /* set breakpoint 3 here */
       && b
       && c)
     return 0;
@@ -121,7 +136,7 @@ int multi_line_while_conditional (a, b, c)
   int a, b, c;
 #endif
 {
-  while (a
+  while (a /* set breakpoint 4 here */
       && b
       && c)
     {

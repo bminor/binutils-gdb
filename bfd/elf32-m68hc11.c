@@ -954,7 +954,7 @@ m68hc11_elf_relax_section (bfd *abfd, asection *sec,
             {
               unsigned long old_sec_size = sec->_cooked_size;
 
-              /* Note that we've changed the reldection contents, etc.  */
+              /* Note that we've changed the relocation contents, etc.  */
               elf_section_data (sec)->relocs = internal_relocs;
               free_relocs = NULL;
 
@@ -985,7 +985,7 @@ m68hc11_elf_relax_section (bfd *abfd, asection *sec,
               continue;
             }
 
-          /* Note that we've changed the reldection contents, etc.  */
+          /* Note that we've changed the relocation contents, etc.  */
           elf_section_data (sec)->relocs = internal_relocs;
           free_relocs = NULL;
 
@@ -1030,7 +1030,7 @@ m68hc11_elf_relax_section (bfd *abfd, asection *sec,
               if ((offset & 0xff80) == 0 || (offset & 0xff80) == 0xff80)
                 {
 
-                  /* Note that we've changed the reldection contents, etc.  */
+                  /* Note that we've changed the relocation contents, etc.  */
                   elf_section_data (sec)->relocs = internal_relocs;
                   free_relocs = NULL;
 

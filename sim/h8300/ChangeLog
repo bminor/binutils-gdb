@@ -1,3 +1,22 @@
+2003-12-11  Dhananjay Deshpande  <dhananjayd@kpitcummins.com>
+
+        * compile.c (set_h8300h): Initialize globals to zero.
+
+2003-10-17  Shrinivas Atre  <shrinivasa@KPITCummins.com>
+
+	* compile.c (h8300_normal_mode): New.
+	(SP): Handle normal mode.
+	(bitfrom): Use normal mode flag to return suitable value.
+	(lvalue): Use normal mode flag to return command line location.
+	(decode): Decode instruction correctly for normal mode.
+	(init_pointers): Initialise memory correctly for normal mode.
+	(sim_resume): Handle cases for normal mode using h8300_normal_mode
+	flag.
+	(sim_store_register): Handle 2 byte PC for normal mode.
+	(sim_fetch_register): Handle 2 byte PC for normal mode.
+	(set_h8300h): Set normal mode flag as per architechture.
+	(sim_load): Allocate 64K for normal mode instead of bigger memory.
+
 2003-07-18  Michael Snyder  <msnyder@redhat.com>
 
 	* compile.c (decode): Enhancements for mova.

@@ -88,7 +88,6 @@
 @V@/gdb/config/i386/xm-i386v4.h @V@/gdb/config/i386/xm-v4.h
 @V@/gdb/config/m88k/xm-delta88v4.h @V@/gdb/config/m88k/xm-d88v4.h
 @V@/gdb/config/mips/tm-linux.h @V@/gdb/config/mips/tm-lx.h
-@V@/gdb/config/mips/tm-linux64.h @V@/gdb/config/mips/tm-lx64.h
 @V@/gdb/config/pa/nm-hppah11.h @V@/gdb/config/pa/nm-hppa11.h
 @V@/gdb/config/powerpc/tm-ppcle-sim.h @V@/gdb/config/powerpc/tm-ppcl-sim.h
 @V@/gdb/config/rs6000/nm-rs6000ly.h @V@/gdb/config/rs6000/nm-rs6kly.h

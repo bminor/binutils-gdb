@@ -387,12 +387,6 @@ arm_linux_svr4_fetch_link_map_offsets (void)
     return lmp;
 }
 
-CORE_ADDR
-arm_linux_skip_solib_resolver (CORE_ADDR pc)
-{
-  return glibc_skip_solib_resolver (pc);
-}
-
 /* The constants below were determined by examining the following files
    in the linux kernel sources:
 
@@ -506,6 +500,7 @@ arm_linux_init_abi (struct gdbarch_info info,
   /* Shared library handling.  */
   set_gdbarch_in_solib_call_trampoline (gdbarch, in_plt_section);
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
+  set_gdbarch_skip_solib_resolver (gdbarch, glibc_skip_solib_resolver);
 }
 
 void

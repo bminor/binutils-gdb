@@ -223,8 +223,10 @@ enum target_object
   /* AVR target specific transfer.  See "avr-tdep.c" and "remote.c".  */
   TARGET_OBJECT_AVR,
   /* Transfer up-to LEN bytes of memory starting at OFFSET.  */
-  TARGET_OBJECT_MEMORY
-  /* Possible future ojbects: TARGET_OJBECT_FILE, TARGET_OBJECT_PROC,
+  TARGET_OBJECT_MEMORY,
+  /* Kernel Unwind Table.  See "ia64-tdep.c".  */
+  TARGET_OBJECT_UNWIND_TABLE,
+  /* Possible future objects: TARGET_OBJECT_FILE, TARGET_OBJECT_PROC,
      TARGET_OBJECT_AUXV, ...  */
 };
 

@@ -2469,7 +2469,6 @@ NAME(aout,get_symbol_info) (abfd, symbol, ret)
     }
 }
 
-/*ARGSUSED*/
 void
 NAME(aout,print_symbol) (abfd, afile, symbol, how)
      bfd * abfd;

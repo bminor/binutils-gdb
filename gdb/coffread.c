@@ -207,7 +207,7 @@ coff_locate_sections (bfd *abfd, asection *sectp, void *csip)
 
   csi = (struct coff_symfile_info *) csip;
   name = bfd_get_section_name (abfd, sectp);
-  if (STREQ (name, ".text"))
+  if (DEPRECATED_STREQ (name, ".text"))
     {
       csi->textaddr = bfd_section_vma (abfd, sectp);
       csi->textsize += bfd_section_size (abfd, sectp);
@@ -216,7 +216,7 @@ coff_locate_sections (bfd *abfd, asection *sectp, void *csip)
     {
       csi->textsize += bfd_section_size (abfd, sectp);
     }
-  else if (STREQ (name, ".stabstr"))
+  else if (DEPRECATED_STREQ (name, ".stabstr"))
     {
       csi->stabstrsect = sectp;
     }
@@ -828,7 +828,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 	case C_THUMBSTATFUNC:
 	  if (cs->c_name[0] == '.')
 	    {
-	      if (STREQ (cs->c_name, ".text"))
+	      if (DEPRECATED_STREQ (cs->c_name, ".text"))
 		{
 		  /* FIXME:  don't wire in ".text" as section name
 		     or symbol name! */
@@ -953,7 +953,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 	  break;
 
 	case C_FCN:
-	  if (STREQ (cs->c_name, ".bf"))
+	  if (DEPRECATED_STREQ (cs->c_name, ".bf"))
 	    {
 	      within_function = 1;
 
@@ -975,7 +975,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 	      new->name =
 		process_coff_symbol (&fcn_cs_saved, &fcn_aux_saved, objfile);
 	    }
-	  else if (STREQ (cs->c_name, ".ef"))
+	  else if (DEPRECATED_STREQ (cs->c_name, ".ef"))
 	    {
 	      if (!within_function)
 		error ("Bad coff function information\n");
@@ -1051,13 +1051,13 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 	  break;
 
 	case C_BLOCK:
-	  if (STREQ (cs->c_name, ".bb"))
+	  if (DEPRECATED_STREQ (cs->c_name, ".bb"))
 	    {
 	      tmpaddr = cs->c_value;
 	      tmpaddr += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 	      push_context (++depth, tmpaddr);
 	    }
-	  else if (STREQ (cs->c_name, ".eb"))
+	  else if (DEPRECATED_STREQ (cs->c_name, ".eb"))
 	    {
 	      if (context_stack_depth <= 0)
 		{		/* We attempted to pop an empty context stack */

@@ -360,6 +360,57 @@ proc gdb_continue_to_breakpoint {name} {
 }
 
 
+# gdb_internal_error_resync:
+#
+# Answer the questions GDB asks after it reports an internal error
+# until we get back to a GDB prompt.  Decline to quit the debugging
+# session, and decline to create a core file.  Return non-zero if the
+# resync succeeds.
+#
+# This procedure just answers whatever questions come up until it sees
+# a GDB prompt; it doesn't require you to have matched the input up to
+# any specific point.  However, it only answers questions it sees in
+# the output itself, so if you've matched a question, you had better
+# answer it yourself before calling this.
+#
+# You can use this function thus:
+#
+# gdb_expect {
+#     ...
+#     -re ".*A problem internal to GDB has been detected" {
+#         gdb_internal_error_resync
+#     }
+#     ...
+# }
+#
+proc gdb_internal_error_resync {} {
+    global gdb_prompt
+
+    set count 0
+    while {$count < 10} {
+	gdb_expect {
+	    -re "Quit this debugging session\\? \\(y or n\\) $" {
+		send_gdb "n\n"
+		incr count
+	    }
+	    -re "Create a core file of GDB\\? \\(y or n\\) $" {
+		send_gdb "n\n"
+		incr count
+	    }
+	    -re "$gdb_prompt $" {
+		# We're resynchronized.
+		return 1
+	    }
+	    timeout {
+		perror "Could not resync from internal error (timeout)"
+		return 0
+	    }
+	}
+    }
+    perror "Could not resync from internal error (resync count exceeded)"
+    return 0
+}
+
 
 # gdb_test_multiple COMMAND MESSAGE EXPECT_ARGUMENTS
 # Send a command to gdb; test the result.
@@ -379,6 +430,20 @@ proc gdb_continue_to_breakpoint {name} {
 #    0 if only user-supplied patterns matched
 #   -1 if there was an internal error.
 #  
+# You can use this function thus:
+#
+# gdb_test_multiple "print foo" "test foo" {
+#    -re "expected output 1" {
+#        pass "print foo"
+#    }
+#    -re "expected output 2" {
+#        fail "print foo"
+#    }
+# }
+#
+# The standard patterns, such as "Program exited..." and "A problem
+# ...", all being implicitly appended to that list.
+#
 proc gdb_test_multiple { command message user_code } {
     global verbose
     global gdb_prompt
@@ -511,6 +576,10 @@ proc gdb_test_multiple { command message user_code } {
     }
 
     set code {
+         -re ".*A problem internal to GDB has been detected" {
+             fail "$message (GDB internal error)"
+             gdb_internal_error_resync
+         }
 	 -re "\\*\\*\\* DOSEXIT code.*" {
 	     if { $message != "" } {
 		 fail "$message";
@@ -1025,6 +1094,9 @@ proc skip_hp_tests {} {
     return $skip_hp
 }
 
+global compiler_info
+set compiler_info unknown
+
 proc get_compiler_info {binfile args} {
     # Create and source the file that provides information about the compiler
     # used to compile the test case.
@@ -1034,6 +1106,7 @@ proc get_compiler_info {binfile args} {
     # These two come from compiler.c.
     global signed_keyword_not_used
     global gcc_compiled
+    global compiler_info
 
     if {![istarget "hppa*-*-hpux*"] && ![istarget "mips*-*-irix*"]} {
 	if { [llength $args] > 0 } {
@@ -1104,6 +1177,11 @@ proc get_compiler_info {binfile args} {
     }
 
     return 0;
+}
+
+proc test_compiler_info { compiler } {
+    global compiler_info
+    return [string match $compiler $compiler_info]
 }
 
 proc get_compiler {args} {

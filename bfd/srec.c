@@ -1009,7 +1009,7 @@ srec_write_header (abfd)
 {
   unsigned int len = strlen (abfd->filename);
 
-  /* I'll put an arbitary 40 char limit on header size.  */
+  /* I'll put an arbitrary 40 char limit on header size.  */
   if (len > 40)
     len = 40;
 

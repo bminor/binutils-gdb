@@ -1043,7 +1043,7 @@ ieee_slurp_external_symbols (abfd)
 	    (void) must_parse_int (&(ieee->h));
 	    /* Fetch the default size if not resolved.  */
 	    size = must_parse_int (&(ieee->h));
-	    /* Fetch the defautlt value if available.  */
+	    /* Fetch the default value if available.  */
 	    if (! parse_int (&(ieee->h), &value))
 	      {
 		value = 0;
@@ -1639,7 +1639,7 @@ ieee_object_p (abfd)
     const bfd_arch_info_type *arch;
     char family[10];
 
-    /* IEEE does not specify the format of the processor identificaton
+    /* IEEE does not specify the format of the processor identification
        string, so the compiler is free to put in it whatever it wants.
        We try here to recognize different processors belonging to the
        m68k family.  Code for other processors can be added here.  */

@@ -4,21 +4,21 @@
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
-This file is part of BFD, the Binary File Descriptor library.
+   This file is part of BFD, the Binary File Descriptor library.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -252,11 +252,11 @@ coff_arm_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
 #undef  ARM_THUMB12
 #undef  ARM_26D
 
+#define ARM_26D      0
 #define ARM_32       1
 #define ARM_RVA32    2
 #define ARM_26	     3
 #define ARM_THUMB12  4
-#define ARM_26D      5
 #define ARM_SECTION  14
 #define ARM_SECREL   15
 #endif
@@ -264,7 +264,19 @@ coff_arm_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
 static reloc_howto_type aoutarm_std_reloc_howto[] =
   {
 #ifdef ARM_WINCE
-    EMPTY_HOWTO (-1),
+    HOWTO (ARM_26D,
+	   2,
+	   2,
+	   24,
+	   FALSE,
+	   0,
+	   complain_overflow_dont,
+	   aoutarm_fix_pcrel_26_done,
+	   "ARM_26D",
+	   FALSE,
+	   0x00ffffff,
+	   0x0,
+	   FALSE),
     HOWTO (ARM_32,
 	   0,
 	   2,
@@ -274,7 +286,7 @@ static reloc_howto_type aoutarm_std_reloc_howto[] =
 	   complain_overflow_bitfield,
 	   coff_arm_reloc,
 	   "ARM_32",
-	   TRUE,
+	   FALSE,
 	   0xffffffff,
 	   0xffffffff,
 	   PCRELOFFSET),
@@ -287,7 +299,7 @@ static reloc_howto_type aoutarm_std_reloc_howto[] =
 	   complain_overflow_bitfield,
 	   coff_arm_reloc,
 	   "ARM_RVA32",
-	   TRUE,
+	   FALSE,
 	   0xffffffff,
 	   0xffffffff,
 	   PCRELOFFSET),
@@ -317,19 +329,7 @@ static reloc_howto_type aoutarm_std_reloc_howto[] =
 	   0x000007ff,
 	   0x000007ff,
 	   PCRELOFFSET),
-    HOWTO (ARM_26D,
-	   2,
-	   2,
-	   24,
-	   FALSE,
-	   0,
-	   complain_overflow_dont,
-	   aoutarm_fix_pcrel_26_done,
-	   "ARM_26D",
-	   TRUE,
-	   0x00ffffff,
-	   0x0,
-	   FALSE),
+    EMPTY_HOWTO (-1),
     EMPTY_HOWTO (-1),
     EMPTY_HOWTO (-1),
     EMPTY_HOWTO (-1),
@@ -346,8 +346,8 @@ static reloc_howto_type aoutarm_std_reloc_howto[] =
 	   0,
 	   complain_overflow_bitfield,
 	   coff_arm_reloc,
-	   "ARM_16",
-	   TRUE,
+	   "ARM_SECTION",
+	   FALSE,
 	   0x0000ffff,
 	   0x0000ffff,
 	   PCRELOFFSET),
@@ -359,8 +359,8 @@ static reloc_howto_type aoutarm_std_reloc_howto[] =
 	   0,
 	   complain_overflow_bitfield,
 	   coff_arm_reloc,
-	   "ARM_32",
-	   TRUE,
+	   "ARM_SECREL",
+	   FALSE,
 	   0xffffffff,
 	   0xffffffff,
 	   PCRELOFFSET),
@@ -921,13 +921,13 @@ struct coff_arm_link_hash_table
     /* The original coff_link_hash_table structure.  MUST be first field.  */
     struct coff_link_hash_table	root;
 
-    /* The size in bytes of the section containg the Thumb-to-ARM glue.  */
+    /* The size in bytes of the section containing the Thumb-to-ARM glue.  */
     bfd_size_type		thumb_glue_size;
 
-    /* The size in bytes of the section containg the ARM-to-Thumb glue.  */
+    /* The size in bytes of the section containing the ARM-to-Thumb glue.  */
     bfd_size_type		arm_glue_size;
 
-    /* An arbitary input BFD chosen to hold the glue sections.  */
+    /* An arbitrary input BFD chosen to hold the glue sections.  */
     bfd *			bfd_of_glue_owner;
 
     /* Support interworking with old, non-interworking aware ARM code.  */
@@ -991,7 +991,7 @@ arm_emit_base_file_entry (info, output_bfd, input_section, reloc_offset)
    instruction.
 
    It takes two thumb instructions to encode the target address. Each has
-   11 bits to invest. The upper 11 bits are stored in one (identifed by
+   11 bits to invest. The upper 11 bits are stored in one (identified by
    H-0.. see below), the lower 11 bits are stored in the other (identified
    by H-1).
 
@@ -1248,7 +1248,7 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 
       /* The relocation_section function will skip pcrel_offset relocs
          when doing a relocatable link.  However, we want to convert
-         ARM26 to ARM26D relocs if possible.  We return a fake howto in
+         ARM_26 to ARM_26D relocs if possible.  We return a fake howto in
          this case without pcrel_offset set, and adjust the addend to
          compensate.  */
       if (rel->r_type == ARM_26
@@ -1299,7 +1299,7 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 	  /* FIXME - it is not clear which targets need this next test
 	     and which do not.  It is known that it is needed for the
 	     VxWorks and EPOC-PE targets, but it is also known that it
-	     was supressed for other ARM targets.  This ought to be
+	     was suppressed for other ARM targets.  This ought to be
 	     sorted out one day.  */
 #ifdef ARM_COFF_BUGFIX
 	  /* We must not ignore the symbol value.  If the symbol is
@@ -2198,8 +2198,8 @@ bfd_arm_process_before_allocation (abfd, info, support_old_code)
 #define coff_bfd_copy_private_bfd_data          coff_arm_copy_private_bfd_data
 #define coff_bfd_link_hash_table_create		coff_arm_link_hash_table_create
 
-/* When doing a relocatable link, we want to convert ARM26 relocs
-   into ARM26D relocs.  */
+/* When doing a relocatable link, we want to convert ARM_26 relocs
+   into ARM_26D relocs.  */
 
 static bfd_boolean
 coff_arm_adjust_symndx (obfd, info, ibfd, sec, irel, adjustedp)
@@ -2210,7 +2210,7 @@ coff_arm_adjust_symndx (obfd, info, ibfd, sec, irel, adjustedp)
      struct internal_reloc *irel;
      bfd_boolean *adjustedp;
 {
-  if (irel->r_type == 3)
+  if (irel->r_type == ARM_26)
     {
       struct coff_link_hash_entry *h;
 
@@ -2219,7 +2219,7 @@ coff_arm_adjust_symndx (obfd, info, ibfd, sec, irel, adjustedp)
 	  && (h->root.type == bfd_link_hash_defined
 	      || h->root.type == bfd_link_hash_defweak)
 	  && h->root.u.def.section->output_section == sec->output_section)
-	irel->r_type = 7;
+	irel->r_type = ARM_26D;
     }
   *adjustedp = FALSE;
   return TRUE;
@@ -2228,7 +2228,7 @@ coff_arm_adjust_symndx (obfd, info, ibfd, sec, irel, adjustedp)
 /* Called when merging the private data areas of two BFDs.
    This is important as it allows us to detect if we are
    attempting to merge binaries compiled for different ARM
-   targets, eg different CPUs or differents APCS's.     */
+   targets, eg different CPUs or different APCS's.     */
 
 static bfd_boolean
 coff_arm_merge_private_bfd_data (ibfd, obfd)
@@ -2361,7 +2361,7 @@ coff_arm_print_private_bfd_data (abfd, ptr)
 
   if (APCS_SET (abfd))
     {
-      /* xgettext: APCS is ARM Prodecure Call Standard, it should not be translated.  */
+      /* xgettext: APCS is ARM Procedure Call Standard, it should not be translated.  */
       fprintf (file, " [APCS-%d]", APCS_26_FLAG (abfd) ? 26 : 32);
 
       if (APCS_FLOAT_FLAG (abfd))

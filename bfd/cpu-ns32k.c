@@ -194,7 +194,7 @@ do_ns32k_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
   if (reloc_entry->address > input_section->_cooked_size)
     return bfd_reloc_outofrange;
 
-  /* Work out which section the relocation is targetted at and the
+  /* Work out which section the relocation is targeted at and the
      initial relocation command value.  */
 
   /* Get symbol value.  (Common symbols are special.)  */
@@ -678,7 +678,7 @@ _bfd_do_ns32k_reloc_contents (howto, input_bfd, relocation, location,
 
 	  /* For the signed case we use ADD, rather than SIGNED_ADD,
 	     to avoid warnings from SVR4 cc.  This is OK since we
-	     explictly handle the sign bits.  */
+	     explicitly handle the sign bits.  */
 	  if (signed_add >= 0)
 	    signed_check += add >> howto->bitpos;
 	  else

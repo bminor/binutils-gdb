@@ -2007,7 +2007,7 @@ lookup_line (abfd, debug_info, debug_swap, line_info)
   /* eraxxon: 'fdrtab_lookup' doesn't give what we want, at least for Compaq's
      C++ compiler 6.2.  Consider three FDRs with starting addresses of x, y,
      and z, respectively, such that x < y < z.  Assume further that
-     y < 'offset' < z.  It is possble at times that the PDR for 'offset' is
+     y < 'offset' < z.  It is possible at times that the PDR for 'offset' is
      associated with FDR x and *not* with FDR y.  Erg!!
 
      From a binary dump of my C++ test case 'moo' using Compaq's coffobjanl
@@ -2030,7 +2030,7 @@ lookup_line (abfd, debug_info, debug_swap, line_info)
 
      Since the FDRs that are causing so much havok (in this case) 1) do not
      describe actual files (fdr.rss == -1), and 2) contain only compiler
-     genarated routines, I thought a simple fix would be to exclude them from
+     generated routines, I thought a simple fix would be to exclude them from
      the FDR table in 'mk_fdrtab'.  But, besides not knowing for certain
      whether this would be correct, it creates an additional problem.  If we
      happen to ask for source file info on a compiler generated (procedure)

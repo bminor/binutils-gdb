@@ -77,31 +77,31 @@ i[34567]86-*-cygwin*)	gdb_host=cygwin ;;
 ia64-*-aix*)		gdb_host=aix ;;
 ia64-*-linux*)		gdb_host=linux ;;
 
-m680[01]0-sun-sunos3*)	gdb_host=sun2os3 ;;
-m680[01]0-sun-sunos4*)	gdb_host=sun2os4 ;;
+# OBSOLETE m680[01]0-sun-sunos3*)	gdb_host=sun2os3 ;;
+# OBSOLETE m680[01]0-sun-sunos4*)	gdb_host=sun2os4 ;;
 
-m68*-att-*)		gdb_host=3b1 ;;
-m68*-bull*-sysv*)	gdb_host=dpx2 ;;
+# OBSOLETE m68*-att-*)		gdb_host=3b1 ;;
+# OBSOLETE m68*-bull*-sysv*)	gdb_host=dpx2 ;;
 m68*-*-linux*)		gdb_host=linux ;;
-m68*-*-lynxos*)		gdb_host=m68klynx ;;
+# OBSOLETE m68*-*-lynxos*)		gdb_host=m68klynx ;;
 m68*-*-netbsd*)		gdb_host=nbsdaout ;;
-m68*-*-sysv4*)		gdb_host=m68kv4 ;;
-m68*-motorola-*)	gdb_host=delta68 ;;
-m68*-sun-sunos3*)	gdb_host=sun3os3 ;;
-m68*-sun-sunos4*)	gdb_host=sun3os4 ;;
-m68*-sun-*)		gdb_host=sun3os4 ;;
+# OBSOLETE m68*-*-sysv4*)		gdb_host=m68kv4 ;;
+# OBSOLETE m68*-motorola-*)	gdb_host=delta68 ;;
+# OBSOLETE m68*-sun-sunos3*)	gdb_host=sun3os3 ;;
+# OBSOLETE m68*-sun-sunos4*)	gdb_host=sun3os4 ;;
+# OBSOLETE m68*-sun-*)		gdb_host=sun3os4 ;;
 
-mips-dec-*)		gdb_host=decstation ;;
-mips-little-*)		gdb_host=littlemips ;;
+# OBSOLETE mips-dec-*)		gdb_host=decstation ;;
+# OBSOLETE mips-little-*)		gdb_host=littlemips ;;
 mips-sgi-irix5*)	gdb_host=irix5 ;;
 mips-sgi-irix6*)	gdb_host=irix6 ;;
-mips-sony-*)		gdb_host=news-mips ;;
+# OBSOLETE mips-sony-*)		gdb_host=news-mips ;;
 mips*-*-linux*)		gdb_host=linux ;;
 mips*-*-netbsd*)	gdb_host=nbsd ;;
-mips-*-mach3*)		gdb_host=mipsm3 ;;
-mips-*-sysv4*)		gdb_host=mipsv4 ;;
-mips-*-sysv*)		gdb_host=riscos ;;
-mips-*-riscos*)		gdb_host=riscos ;;
+# OBSOLETE mips-*-mach3*)		gdb_host=mipsm3 ;;
+# OBSOLETE mips-*-sysv4*)		gdb_host=mipsv4 ;;
+# OBSOLETE mips-*-sysv*)		gdb_host=riscos ;;
+# OBSOLETE mips-*-riscos*)		gdb_host=riscos ;;
 
 none-*-*)		gdb_host=none ;;
 

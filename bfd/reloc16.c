@@ -193,7 +193,7 @@ bfd_coff_reloc16_relax_section (abfd, input_section, link_info, again)
       bfd_size_type amt;
 
       /* Allocate and initialize the shrinks array for this section.
-	 The last element is used as an accumlator of shrinks.  */
+	 The last element is used as an accumulator of shrinks.  */
       amt = reloc_count + 1;
       amt *= sizeof (unsigned);
       shrinks = (unsigned *) bfd_zmalloc (amt);

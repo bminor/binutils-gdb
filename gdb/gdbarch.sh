@@ -704,7 +704,7 @@ f:2:SKIP_TRAMPOLINE_CODE:CORE_ADDR:skip_trampoline_code:CORE_ADDR pc:pc:::generi
 # If IN_SOLIB_DYNSYM_RESOLVE_CODE returns true, and SKIP_SOLIB_RESOLVER
 # evaluates non-zero, this is the address where the debugger will place
 # a step-resume breakpoint to get us past the dynamic linker.
-f:2:SKIP_SOLIB_RESOLVER:CORE_ADDR:skip_solib_resolver:CORE_ADDR pc:pc:::generic_skip_solib_resolver::0
+m:2:SKIP_SOLIB_RESOLVER:CORE_ADDR:skip_solib_resolver:CORE_ADDR pc:pc:::generic_skip_solib_resolver::0
 # For SVR4 shared libraries, each call goes through a small piece of
 # trampoline code in the ".plt" section.  IN_SOLIB_CALL_TRAMPOLINE evaluates
 # to nonzero if we are currently stopped in one of these.
@@ -1215,6 +1215,7 @@ extern void set_gdbarch_data (struct gdbarch *gdbarch,
 extern void *gdbarch_data (struct gdbarch *gdbarch, struct gdbarch_data *);
 
 
+
 /* Register per-architecture memory region.
 
    Provide a memory-region swap mechanism.  Per-architecture memory
@@ -1231,33 +1232,6 @@ typedef void (gdbarch_swap_ftype) (void);
 extern void register_gdbarch_swap (void *data, unsigned long size, gdbarch_swap_ftype *init);
 #define REGISTER_GDBARCH_SWAP(VAR) register_gdbarch_swap (&(VAR), sizeof ((VAR)), NULL)
 
-
-
-/* The target-system-dependent byte order is dynamic */
-
-extern int target_byte_order;
-#ifndef TARGET_BYTE_ORDER
-#define TARGET_BYTE_ORDER (target_byte_order + 0)
-#endif
-
-extern int target_byte_order_auto;
-#ifndef TARGET_BYTE_ORDER_AUTO
-#define TARGET_BYTE_ORDER_AUTO (target_byte_order_auto + 0)
-#endif
-
-
-
-/* The target-system-dependent BFD architecture is dynamic */
-
-extern int target_architecture_auto;
-#ifndef TARGET_ARCHITECTURE_AUTO
-#define TARGET_ARCHITECTURE_AUTO (target_architecture_auto + 0)
-#endif
-
-extern const struct bfd_arch_info *target_architecture;
-#ifndef TARGET_ARCHITECTURE
-#define TARGET_ARCHITECTURE (target_architecture + 0)
-#endif
 
 
 /* Set the dynamic target-system-dependent parameters (architecture,

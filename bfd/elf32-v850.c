@@ -76,8 +76,8 @@ static bfd_boolean v850_elf_add_symbol_hook
   PARAMS ((bfd *, struct bfd_link_info *, const Elf_Internal_Sym *,
 	   const char **, flagword *, asection **, bfd_vma *));
 static bfd_boolean v850_elf_link_output_symbol_hook
-  PARAMS ((bfd *, struct bfd_link_info *, const char *,
-	   Elf_Internal_Sym *, asection *));
+  PARAMS ((struct bfd_link_info *, const char *, Elf_Internal_Sym *,
+	   asection *, struct elf_link_hash_entry *));
 static bfd_boolean v850_elf_section_from_shdr
   PARAMS ((bfd *, Elf_Internal_Shdr *, const char *));
 static bfd_boolean v850_elf_gc_sweep_hook
@@ -893,7 +893,7 @@ find_remembered_hi16s_reloc (addend, already_found)
   /* Extract the address.  */
   addr = match->address;
 
-  /* Remeber if this entry has already been used before.  */
+  /* Remember if this entry has already been used before.  */
   if (already_found)
     * already_found = match->found;
 
@@ -904,7 +904,7 @@ find_remembered_hi16s_reloc (addend, already_found)
 }
 
 /* FIXME:  The code here probably ought to be removed and the code in reloc.c
-   allowed to do its  stuff instead.  At least for most of the relocs, anwyay.  */
+   allowed to do its stuff instead.  At least for most of the relocs, anyway.  */
 
 static bfd_reloc_status_type
 v850_elf_perform_relocation (abfd, r_type, addend, address)
@@ -1362,7 +1362,7 @@ v850_elf_reloc (abfd, reloc, symbol, data, isection, obfd, err)
   if (reloc->address > isection->_cooked_size)
     return bfd_reloc_outofrange;
 
-  /* Work out which section the relocation is targetted at and the
+  /* Work out which section the relocation is targeted at and the
      initial relocation command value.  */
 
   if (reloc->howto->pc_relative)
@@ -2213,12 +2213,12 @@ v850_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
 }
 
 static bfd_boolean
-v850_elf_link_output_symbol_hook (abfd, info, name, sym, input_sec)
-     bfd *abfd ATTRIBUTE_UNUSED;
+v850_elf_link_output_symbol_hook (info, name, sym, input_sec, h)
      struct bfd_link_info *info ATTRIBUTE_UNUSED;
      const char *name ATTRIBUTE_UNUSED;
      Elf_Internal_Sym *sym;
      asection *input_sec;
+     struct elf_link_hash_entry *h ATTRIBUTE_UNUSED;
 {
   /* If we see a common symbol, which implies a relocatable link, then
      if a symbol was in a special common section in an input file, mark

@@ -210,7 +210,7 @@ struct som_section_data_struct
    should be internal to the BFD backend.
 
    The idea is both SOM and ELF define these basic relocation
-   types so they map into a SOM or ELF specific reloation as
+   types so they map into a SOM or ELF specific relocation as
    appropriate.  This allows GAS to share much more code
    between the two object formats.  */
 

@@ -1007,7 +1007,7 @@ ip2k_elf_relax_section_page (abfd, sec, again, misc, page_start, page_end)
   int switch_table_128;
   int switch_table_256;
   
-  /* Walk thru the section looking for relaxation opertunities.  */
+  /* Walk thru the section looking for relaxation opportunities.  */
   for (irel = misc->irelbase; irel < irelend; irel++)
     {
       if (ELF32_R_TYPE (irel->r_info) != (int) R_IP2K_PAGE3)
@@ -1388,7 +1388,7 @@ ip2k_final_link_relocate (howto, input_bfd, input_section, contents, rel,
     case R_IP2K_ADDR16CJP:
       if (BASEADDR (input_section) + rel->r_offset != page_addr + 2)
 	{
-	  /* No preceeding page instruction, verify that it isn't needed.  */
+	  /* No preceding page instruction, verify that it isn't needed.  */
 	  if (PAGENO (relocation + rel->r_addend) !=
 	      ip2k_nominal_page_bits (input_bfd, input_section,
 	      			      rel->r_offset, contents))
@@ -1398,7 +1398,7 @@ ip2k_final_link_relocate (howto, input_bfd, input_section, contents, rel,
         }
       else if (ip2k_relaxed)
         {
-          /* Preceeding page instruction. Verify that the page instruction is
+          /* Preceding page instruction. Verify that the page instruction is
              really needed. One reason for the relaxation to miss a page is if
              the section is not marked as executable.  */
 	  if (!ip2k_is_switch_table_128 (input_bfd, input_section, rel->r_offset - 2, contents) &&

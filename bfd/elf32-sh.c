@@ -457,7 +457,7 @@ static reloc_howto_type sh_elf_howto_table[] =
 	 TRUE),			/* pcrel_offset */
 
   /* The assembler will generate this reloc before a block of
-     instructions.  A section should be processed as assumining it
+     instructions.  A section should be processed as assuming it
      contains data, unless this reloc is seen.  */
   HOWTO (R_SH_CODE,		/* type */
 	 0,			/* rightshift */
@@ -2718,7 +2718,7 @@ sh_elf_relax_delete_bytes (bfd *abfd, asection *sec, bfd_vma addr,
 	      /* The addend will be against the section symbol, thus
 		 for adjusting the addend, the relevant start is the
 		 start of the section.
-		 N.B. If we want to abandom in-place changes here and
+		 N.B. If we want to abandon in-place changes here and
 		 test directly using symbol + addend, we have to take into
 		 account that the addend has already been adjusted by -4.  */
 	      if (stop > addr && stop < toaddr)
@@ -3412,7 +3412,7 @@ movi_shori_putval (bfd *output_bfd, unsigned long value, char *addr)
 
 #if 1
 /* Note - this code has been "optimised" not to use r2.  r2 is used by
-   GCC to return the address of large strutcures, so it should not be
+   GCC to return the address of large structures, so it should not be
    corrupted here.  This does mean however, that this PLT does not conform
    to the SH PIC ABI.  That spec says that r0 contains the type of the PLT
    and r2 contains the GOT id.  This version stores the GOT id in r0 and
@@ -3635,7 +3635,7 @@ static const bfd_byte *elf_sh_pic_plt_entry;
 /* Return offset of the GOT id in PLT0 entry.  */
 #define elf_sh_plt0_gotid_offset(info) 24
 
-/* Return offset of the tempoline in PLT entry */
+/* Return offset of the temporary in PLT entry */
 #define elf_sh_plt_temp_offset(info) 8
 
 /* Return offset of the symbol in PLT entry.  */
@@ -6339,7 +6339,8 @@ sh_elf_copy_indirect_symbol (const struct elf_backend_data *bed,
     dir->elf_link_hash_flags |=
       (ind->elf_link_hash_flags & (ELF_LINK_HASH_REF_DYNAMIC
 				   | ELF_LINK_HASH_REF_REGULAR
-				   | ELF_LINK_HASH_REF_REGULAR_NONWEAK));
+				   | ELF_LINK_HASH_REF_REGULAR_NONWEAK
+				   | ELF_LINK_HASH_NEEDS_PLT));
   else
     _bfd_elf_link_hash_copy_indirect (bed, dir, ind);
 }
@@ -6959,19 +6960,7 @@ sh_elf_merge_private_data (bfd *ibfd, bfd *obfd)
 static bfd_boolean
 sh_elf_object_p (bfd *abfd)
 {
-  struct sh_elf_obj_tdata *new_tdata;
-  bfd_size_type amt = sizeof (struct sh_elf_obj_tdata);
-
-  if (!sh_elf_set_mach_from_flags (abfd))
-    return FALSE;
-
-  /* Allocate our special target data.  */
-  new_tdata = bfd_zalloc (abfd, amt);
-  if (new_tdata == NULL)
-    return FALSE;
-  new_tdata->root = *abfd->tdata.elf_obj_data;
-  abfd->tdata.any = new_tdata;
-  return TRUE;
+  return sh_elf_set_mach_from_flags (abfd);
 }
 
 /* Finish up dynamic symbol handling.  We set the contents of various

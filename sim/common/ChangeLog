@@ -1,3 +1,8 @@
+2003-11-22  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* sim-options.c (standard_options): Fix the names of H8
+	variants.
+
 2003-10-30  Andrew Cagney  <cagney@redhat.com>
 
 	* sim-trace.c, sim-base.h: Replace "struct symbol_cache_entry"

@@ -152,25 +152,16 @@ static struct frame_info *analyze_dummy_frame (CORE_ADDR, CORE_ADDR);
 static struct frame_info *
 analyze_dummy_frame (CORE_ADDR pc, CORE_ADDR frame)
 {
-  static struct frame_info *dummy = NULL;
-  if (dummy == NULL)
-    {
-      struct frame_extra_info *extra_info;
-      CORE_ADDR *saved_regs;
-      dummy = deprecated_frame_xmalloc ();
-      saved_regs = xmalloc (SIZEOF_FRAME_SAVED_REGS);
-      deprecated_set_frame_saved_regs_hack (dummy, saved_regs);
-      extra_info = XMALLOC (struct frame_extra_info);
-      deprecated_set_frame_extra_info_hack (dummy, extra_info);
-    }
-  deprecated_set_frame_next_hack (dummy, NULL);
-  deprecated_set_frame_prev_hack (dummy, NULL);
+  struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
+  struct frame_info *dummy
+    = deprecated_frame_xmalloc_with_cleanup (SIZEOF_FRAME_SAVED_REGS,
+					     sizeof (struct frame_extra_info));
   deprecated_update_frame_pc_hack (dummy, pc);
   deprecated_update_frame_base_hack (dummy, frame);
   get_frame_extra_info (dummy)->status = 0;
   get_frame_extra_info (dummy)->stack_size = 0;
-  memset (deprecated_get_frame_saved_regs (dummy), '\000', SIZEOF_FRAME_SAVED_REGS);
   mn10300_analyze_prologue (dummy, pc);
+  do_cleanups (old_chain);
   return dummy;
 }
 

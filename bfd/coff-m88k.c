@@ -1,4 +1,4 @@
-/* BFD back-end for Motorola 88000 COFF "Binary Compatability Standard" files.
+/* BFD back-end for Motorola 88000 COFF "Binary Compatibility Standard" files.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1997, 1998, 1999, 2000,
    2001, 2002, 2003
    Free Software Foundation, Inc.
@@ -85,7 +85,7 @@ m88k_special_reloc (abfd, reloc_entry, symbol, data,
 	  asection *reloc_target_output_section;
 	  long relocation = 0;
 
-	  /* Work out which section the relocation is targetted at and the
+	  /* Work out which section the relocation is targeted at and the
 	     initial relocation command value.  */
 
 	  /* Get symbol value.  (Common symbols are special.)  */

@@ -834,7 +834,7 @@ i370_elf_size_dynamic_sections (output_bfd, info)
      FIXME: We assume that there will never be relocations to
      locations in linker-created sections that do not have
      externally-visible names. Instead, we should work out precisely
-     which sections relocations are targetted at.  */
+     which sections relocations are targeted at.  */
   if (info->shared)
     {
       int c;
@@ -1555,6 +1555,6 @@ static int i370_noop ()
 #define elf_backend_additional_program_headers \
   (int (*) PARAMS ((bfd *))) i370_noop
 #define elf_backend_modify_segment_map \
-  (bfd_boolean (*) PARAMS ((bfd *))) i370_noop
+  (bfd_boolean (*) PARAMS ((bfd *, struct bfd_link_info *))) i370_noop
 
 #include "elf32-target.h"

@@ -4163,7 +4163,7 @@ wait_again:
 		wstat = (what << 8) | 0177;
 		break;
 	      case PR_FAULTED:
-		switch (what) {	/* FIXME: FAULTED_USE_SIGINFO */
+		switch (what) {
 #ifdef FLTWATCH
 		case FLTWATCH:
 		  wstat = (SIGTRAP << 8) | 0177;

@@ -235,13 +235,13 @@ struct elf32_arm_link_hash_table
     /* The main hash table.  */
     struct elf_link_hash_table root;
 
-    /* The size in bytes of the section containg the Thumb-to-ARM glue.  */
+    /* The size in bytes of the section containing the Thumb-to-ARM glue.  */
     bfd_size_type thumb_glue_size;
 
-    /* The size in bytes of the section containg the ARM-to-Thumb glue.  */
+    /* The size in bytes of the section containing the ARM-to-Thumb glue.  */
     bfd_size_type arm_glue_size;
 
-    /* An arbitary input BFD chosen to hold the glue sections.  */
+    /* An arbitrary input BFD chosen to hold the glue sections.  */
     bfd * bfd_of_glue_owner;
 
     /* A boolean indicating whether knowledge of the ARM's pipeline
@@ -965,7 +965,7 @@ error_return:
    instruction.
 
    It takes two thumb instructions to encode the target address. Each has
-   11 bits to invest. The upper 11 bits are stored in one (identifed by
+   11 bits to invest. The upper 11 bits are stored in one (identified by
    H-0.. see below), the lower 11 bits are stored in the other (identified
    by H-1).
 
@@ -2610,7 +2610,7 @@ elf32_arm_print_private_bfd_data (abfd, ptr)
   switch (EF_ARM_EABI_VERSION (flags))
     {
     case EF_ARM_EABI_UNKNOWN:
-      /* The following flag bits are GNU extenstions and not part of the
+      /* The following flag bits are GNU extensions and not part of the
 	 official ARM ELF extended ABI.  Hence they are only decoded if
 	 the EABI version is not set.  */
       if (flags & EF_ARM_INTERWORK)
@@ -3985,7 +3985,7 @@ elf32_arm_finish_dynamic_sections (output_bfd, info)
 	      name = info->fini_function;
 	    get_sym:
 	      /* If it wasn't set by elf_bfd_final_link
-		 then there is nothing to ajdust.  */
+		 then there is nothing to adjust.  */
 	      if (dyn.d_un.d_val != 0)
 		{
 		  struct elf_link_hash_entry * eh;

@@ -638,14 +638,6 @@ static bfd_boolean
 elf_s390_object_p (abfd)
      bfd *abfd;
 {
-  /* Allocate our special target data.  */
-  struct elf_s390_obj_tdata *new_tdata;
-  bfd_size_type amt = sizeof (struct elf_s390_obj_tdata);
-  new_tdata = bfd_zalloc (abfd, amt);
-  if (new_tdata == NULL)
-    return FALSE;
-  new_tdata->root = *abfd->tdata.elf_obj_data;
-  abfd->tdata.any = new_tdata;
   /* Set the right machine number for an s390 elf32 file.  */
   return bfd_default_set_arch_mach (abfd, bfd_arch_s390, bfd_mach_s390_64);
 }
@@ -867,7 +859,8 @@ elf_s390_copy_indirect_symbol (bed, dir, ind)
     dir->elf_link_hash_flags |=
       (ind->elf_link_hash_flags & (ELF_LINK_HASH_REF_DYNAMIC
 				   | ELF_LINK_HASH_REF_REGULAR
-				   | ELF_LINK_HASH_REF_REGULAR_NONWEAK));
+				   | ELF_LINK_HASH_REF_REGULAR_NONWEAK
+				   | ELF_LINK_HASH_NEEDS_PLT));
   else
     _bfd_elf_link_hash_copy_indirect (bed, dir, ind);
 }
@@ -2605,9 +2598,41 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 	      else
 		{
 		  /* This symbol is local, or marked to become local.  */
-		  relocate = TRUE;
-		  outrel.r_info = ELF64_R_INFO (0, R_390_RELATIVE);
 		  outrel.r_addend = relocation + rel->r_addend;
+		  if (r_type == R_390_64)
+		    {
+		      relocate = TRUE;
+		      outrel.r_info = ELF64_R_INFO (0, R_390_RELATIVE);
+		    }
+		  else
+		    {
+		      long sindx;
+
+		      if (bfd_is_abs_section (sec))
+			sindx = 0;
+		      else if (sec == NULL || sec->owner == NULL)
+			{
+			  bfd_set_error(bfd_error_bad_value);
+			  return FALSE;
+			}
+		      else
+			{
+			  asection *osec;
+
+			  osec = sec->output_section;
+			  sindx = elf_section_data (osec)->dynindx;
+			  BFD_ASSERT (sindx > 0);
+
+			  /* We are turning this relocation into one
+			     against a section symbol, so subtract out
+			     the output section's address but not the
+			     offset of the input section in the output
+			     section.  */
+
+			  outrel.r_addend -= osec->vma;
+			}
+		      outrel.r_info = ELF64_R_INFO (sindx, r_type);
+		    }
 		}
 
 	      sreloc = elf_section_data (input_section)->sreloc;

@@ -1572,7 +1572,7 @@ coff_new_section_hook (abfd, section)
     return FALSE;
 
   /* We don't need to set up n_name, n_value, or n_scnum in the native
-     symbol information, since they'll be overriden by the BFD symbol
+     symbol information, since they'll be overridden by the BFD symbol
      anyhow.  However, we do need to set the type and storage class,
      in case this symbol winds up getting written out.  The value 0
      for n_numaux is already correct.  */
@@ -3014,6 +3014,11 @@ coff_compute_section_file_positions (abfd)
   if (coff_data (abfd)->link_info)
     {
       page_size = pe_data (abfd)->pe_opthdr.FileAlignment;
+
+      /* If no file alignment has been set, default to one.
+	 This repairs 'ld -r' for arm-wince-pe target.  */
+      if (page_size == 0)
+        page_size = 1;
     }
   else
     page_size = PE_DEF_FILE_ALIGNMENT;
@@ -4681,7 +4686,7 @@ coff_slurp_symbol_table (abfd)
 #endif
 	    case C_REGPARM:	/* Register parameter.  */
 	    case C_REG:		/* register variable.  */
-              /* C_AUTOARG conflictes with TI COFF C_UEXT.  */
+              /* C_AUTOARG conflicts with TI COFF C_UEXT.  */
 #if !defined (TIC80COFF) && !defined (TICOFF)
 #ifdef C_AUTOARG
 	    case C_AUTOARG:	/* 960-specific storage class.  */
@@ -5122,7 +5127,6 @@ static reloc_howto_type *coff_rtype_to_howto
 	   struct coff_link_hash_entry *, struct internal_syment *,
 	   bfd_vma *));
 
-/*ARGSUSED*/
 static reloc_howto_type *
 coff_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
      bfd *abfd ATTRIBUTE_UNUSED;

@@ -344,17 +344,17 @@ show_case_command (char *ignore, int from_tty)
 static void
 set_case_command (char *ignore, int from_tty)
 {
-   if (STREQ (case_sensitive, "on"))
+   if (DEPRECATED_STREQ (case_sensitive, "on"))
    {
       case_sensitivity = case_sensitive_on;
       case_mode = case_mode_manual;
    }
-   else if (STREQ (case_sensitive, "off"))
+   else if (DEPRECATED_STREQ (case_sensitive, "off"))
    {
       case_sensitivity = case_sensitive_off;
       case_mode = case_mode_manual;
    }
-   else if (STREQ (case_sensitive, "auto"))
+   else if (DEPRECATED_STREQ (case_sensitive, "auto"))
    {
       case_mode = case_mode_auto;
       set_type_range_case ();
@@ -1060,7 +1060,7 @@ language_enum (char *str)
   int i;
 
   for (i = 0; i < languages_size; i++)
-    if (STREQ (languages[i]->la_name, str))
+    if (DEPRECATED_STREQ (languages[i]->la_name, str))
       return languages[i]->la_language;
 
   return language_unknown;

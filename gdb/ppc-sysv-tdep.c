@@ -29,6 +29,7 @@
 #include "gdb_assert.h"
 #include "ppc-tdep.h"
 #include "target.h"
+#include "objfiles.h"
 
 /* Pass the arguments in either registers, or in the stack. Using the
    ppc sysv ABI, the first eight words of the argument list (that might
@@ -790,27 +791,38 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
      ".FN" and "FN" in the minimal symbol table.  "FN" points at the
      FN's descriptor, while ".FN" points at the entry point (which
      matches FUNC_ADDR).  Need to reverse from FUNC_ADDR back to the
-     FN's descriptor address.  */
+     FN's descriptor address (while at the same time being careful to
+     find "FN" in the same object file as ".FN").  */
   {
     /* Find the minimal symbol that corresponds to FUNC_ADDR (should
        have the name ".FN").  */
     struct minimal_symbol *dot_fn = lookup_minimal_symbol_by_pc (func_addr);
     if (dot_fn != NULL && SYMBOL_LINKAGE_NAME (dot_fn)[0] == '.')
       {
-	/* Now find the corresponding "FN" (dropping ".") minimal
-	   symbol's address.  */
-	struct minimal_symbol *fn =
-	  lookup_minimal_symbol (SYMBOL_LINKAGE_NAME (dot_fn) + 1, NULL,
-				 NULL);
-	if (fn != NULL)
+	/* Get the section that contains FUNC_ADR.  Need this for the
+           "objfile" that it contains.  */
+	struct obj_section *dot_fn_section = find_pc_section (func_addr);
+	if (dot_fn_section != NULL && dot_fn_section->objfile != NULL)
 	  {
-	    /* Got the address of that descriptor.  The TOC is the
-	       second double word.  */
-	    CORE_ADDR toc =
-	      read_memory_unsigned_integer (SYMBOL_VALUE_ADDRESS (fn) +
-					    tdep->wordsize, tdep->wordsize);
-	    regcache_cooked_write_unsigned (regcache,
-					    tdep->ppc_gp0_regnum + 2, toc);
+	    /* Now find the corresponding "FN" (dropping ".") minimal
+	       symbol's address.  Only look for the minimal symbol in
+	       ".FN"'s object file - avoids problems when two object
+	       files (i.e., shared libraries) contain a minimal symbol
+	       with the same name.  */
+	    struct minimal_symbol *fn =
+	      lookup_minimal_symbol (SYMBOL_LINKAGE_NAME (dot_fn) + 1, NULL,
+				     dot_fn_section->objfile);
+	    if (fn != NULL)
+	      {
+		/* Got the address of that descriptor.  The TOC is the
+		   second double word.  */
+		CORE_ADDR toc =
+		  read_memory_unsigned_integer (SYMBOL_VALUE_ADDRESS (fn)
+						+ tdep->wordsize,
+						tdep->wordsize);
+		regcache_cooked_write_unsigned (regcache,
+						tdep->ppc_gp0_regnum + 2, toc);
+	      }
 	  }
       }
   }

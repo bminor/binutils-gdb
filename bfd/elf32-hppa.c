@@ -1018,7 +1018,8 @@ elf32_hppa_copy_indirect_symbol (const struct elf_backend_data *bed,
     dir->elf_link_hash_flags |=
       (ind->elf_link_hash_flags & (ELF_LINK_HASH_REF_DYNAMIC
 				   | ELF_LINK_HASH_REF_REGULAR
-				   | ELF_LINK_HASH_REF_REGULAR_NONWEAK));
+				   | ELF_LINK_HASH_REF_REGULAR_NONWEAK
+				   | ELF_LINK_HASH_NEEDS_PLT));
   else
     _bfd_elf_link_hash_copy_indirect (bed, dir, ind);
 }
@@ -2304,9 +2305,6 @@ elf32_hppa_setup_section_lists (bfd *output_bfd, struct bfd_link_info *info)
   bfd_size_type amt;
   struct elf32_hppa_link_hash_table *htab = hppa_link_hash_table (info);
 
-  if (htab->elf.root.creator->flavour != bfd_target_elf_flavour)
-    return 0;
-
   /* Count the number of input BFDs and find the top input section id.  */
   for (input_bfd = info->input_bfds, bfd_count = 0, top_id = 0;
        input_bfd != NULL;
@@ -2910,21 +2908,8 @@ elf32_hppa_set_gp (bfd *abfd, struct bfd_link_info *info)
     }
   else
     {
-      asection *splt;
-      asection *sgot;
-
-      if (htab->elf.root.creator->flavour == bfd_target_elf_flavour)
-	{
-	  splt = htab->splt;
-	  sgot = htab->sgot;
-	}
-      else
-	{
-	  /* If we're not elf, look up the output sections in the
-	     hope we may actually find them.  */
-	  splt = bfd_get_section_by_name (abfd, ".plt");
-	  sgot = bfd_get_section_by_name (abfd, ".got");
-	}
+      asection *splt = bfd_get_section_by_name (abfd, ".plt");
+      asection *sgot = bfd_get_section_by_name (abfd, ".got");
 
       /* Choose to point our LTP at, in this order, one of .plt, .got,
 	 or .data, if these sections exist.  In the case of choosing

@@ -22,6 +22,9 @@
 #ifndef GLIBC_TDEP_H
 #define GLIBC_TDEP_H
 
-extern CORE_ADDR glibc_skip_solib_resolver (CORE_ADDR);
+struct gdbarch;
+
+extern CORE_ADDR glibc_skip_solib_resolver (struct gdbarch *gdbarch,
+					    CORE_ADDR);
 
 #endif /* glibc-tdep.h */

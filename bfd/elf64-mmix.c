@@ -157,8 +157,8 @@ struct bpo_greg_section_info
   };
 
 static bfd_boolean mmix_elf_link_output_symbol_hook
-  PARAMS ((bfd *, struct bfd_link_info *, const char *,
-	   Elf_Internal_Sym *, asection *));
+  PARAMS ((struct bfd_link_info *, const char *, Elf_Internal_Sym *,
+	   asection *, struct elf_link_hash_entry *));
 
 static bfd_reloc_status_type mmix_elf_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
@@ -1280,7 +1280,7 @@ mmix_elf_reloc (abfd, reloc_entry, symbol, data, input_section,
   if (reloc_entry->address > input_section->_cooked_size)
     return bfd_reloc_outofrange;
 
-  /* Work out which section the relocation is targetted at and the
+  /* Work out which section the relocation is targeted at and the
      initial relocation command value.  */
 
   /* Get symbol value.  (Common symbols are special.)  */
@@ -2113,12 +2113,12 @@ _bfd_mmix_check_all_relocs (abfd, info)
    number.  */
 
 static bfd_boolean
-mmix_elf_link_output_symbol_hook (abfd, info, name, sym, input_sec)
-     bfd *abfd ATTRIBUTE_UNUSED;
+mmix_elf_link_output_symbol_hook (info, name, sym, input_sec, h)
      struct bfd_link_info *info ATTRIBUTE_UNUSED;
      const char *name ATTRIBUTE_UNUSED;
      Elf_Internal_Sym *sym;
      asection *input_sec;
+     struct elf_link_hash_entry *h ATTRIBUTE_UNUSED;
 {
   if (input_sec != NULL
       && input_sec->name != NULL

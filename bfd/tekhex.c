@@ -29,7 +29,7 @@ DESCRIPTION
 	relocations. Their main application is communication with
 	devices like PROM programmers and ICE equipment.
 
-	It seems that the sections are descibed as being really big,
+	It seems that the sections are described as being really big,
         the example I have says that the text section is 0..ffffffff.
 	BFD would barf with this, many apps would try to alloc 4GB to
 	read in the file.

@@ -32,9 +32,9 @@
 
    A VERSAdos file looks like contains
 
-   o Indentification Record
+   o Identification Record
    o External Symbol Definition Record
-   o Object Text Recrod
+   o Object Text Record
    o End Record
 
  */

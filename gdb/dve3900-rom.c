@@ -29,6 +29,7 @@
 #include "gdb_string.h"
 #include <time.h>
 #include "regcache.h"
+#include "mips-tdep.h"
 
 /* Type of function passed to bfd_map_over_sections.  */
 
@@ -121,11 +122,11 @@ static char *r3900_regnames[] =
   "r24", "r25", "r26", "r27", "r28", "r29", "r30", "r31",
 
   "S",				/* PS_REGNUM */
-  "l",				/* LO_REGNUM */
-  "h",				/* HI_REGNUM */
-  "B",				/* BADVADDR_REGNUM */
-  "Pcause",			/* CAUSE_REGNUM */
-  "p"				/* PC_REGNUM */
+  "l",				/* MIPS_EMBED_LO_REGNUM */
+  "h",				/* MIPS_EMBED_HI_REGNUM */
+  "B",				/* MIPS_EMBED_BADVADDR_REGNUM */
+  "Pcause",			/* MIPS_EMBED_CAUSE_REGNUM */
+  "p"				/* MIPS_EMBED_PC_REGNUM */
 };
 
 
@@ -267,19 +268,19 @@ reg_table[] =
   }
   ,
   {
-    "HI", HI_REGNUM
+    "HI", MIPS_EMBED_HI_REGNUM
   }
   ,
   {
-    "LO", LO_REGNUM
+    "LO", MIPS_EMBED_LO_REGNUM
   }
   ,
   {
-    "PC", PC_REGNUM
+    "PC", MIPS_EMBED_PC_REGNUM
   }
   ,
   {
-    "BadV", BADVADDR_REGNUM
+    "BadV", MIPS_EMBED_BADVADDR_REGNUM
   }
   ,
   {
@@ -420,7 +421,7 @@ fetch_bad_vaddr (void)
   monitor_printf ("xB\r");
   monitor_expect ("BadV=", NULL, 0);
   monitor_expect_prompt (buf, sizeof (buf));
-  monitor_supply_register (BADVADDR_REGNUM, buf);
+  monitor_supply_register (mips_regnum (current_gdbarch)->badvaddr, buf);
 }
 
 
@@ -485,20 +486,15 @@ fetch_bitmapped_register (int regno, struct bit_field *bf)
 static void
 r3900_fetch_registers (int regno)
 {
-  switch (regno)
-    {
-    case BADVADDR_REGNUM:
-      fetch_bad_vaddr ();
-      return;
-    case PS_REGNUM:
-      fetch_bitmapped_register (PS_REGNUM, status_fields);
-      return;
-    case CAUSE_REGNUM:
-      fetch_bitmapped_register (CAUSE_REGNUM, cause_fields);
-      return;
-    default:
-      orig_monitor_fetch_registers (regno);
-    }
+  if (regno == mips_regnum (current_gdbarch)->badvaddr)
+    fetch_bad_vaddr ();
+  else if (regno == PS_REGNUM)
+    fetch_bitmapped_register (PS_REGNUM, status_fields);
+  else if (regno == mips_regnum (current_gdbarch)->cause)
+    fetch_bitmapped_register (mips_regnum (current_gdbarch)->cause,
+			      cause_fields);
+  else
+    orig_monitor_fetch_registers (regno);
 }
 
 
@@ -544,17 +540,13 @@ store_bitmapped_register (int regno, struct bit_field *bf)
 static void
 r3900_store_registers (int regno)
 {
-  switch (regno)
-    {
-    case PS_REGNUM:
-      store_bitmapped_register (PS_REGNUM, status_fields);
-      return;
-    case CAUSE_REGNUM:
-      store_bitmapped_register (CAUSE_REGNUM, cause_fields);
-      return;
-    default:
-      orig_monitor_store_registers (regno);
-    }
+  if (regno == PS_REGNUM)
+    store_bitmapped_register (PS_REGNUM, status_fields);
+  else if (regno == mips_regnum (current_gdbarch)->cause)
+    store_bitmapped_register (mips_regnum (current_gdbarch)->cause,
+			      cause_fields);
+  else
+    orig_monitor_store_registers (regno);
 }
 
 
@@ -648,7 +640,7 @@ debug_write (unsigned char *buf, int buflen)
 static void
 ignore_packet (void)
 {
-  int c;
+  int c = -1;
   int len;
 
   /* Ignore lots of trash (messages about section addresses, for example)

@@ -41,7 +41,7 @@
 #include "libiberty.h"
 
 static int elf_sort_sections (const void *, const void *);
-static bfd_boolean assign_file_positions_except_relocs (bfd *);
+static bfd_boolean assign_file_positions_except_relocs (bfd *, struct bfd_link_info *);
 static bfd_boolean prep_headers (bfd *);
 static bfd_boolean swap_out_syms (bfd *, struct bfd_strtab_hash **, int) ;
 static bfd_boolean elfcore_read_notes (bfd *, file_ptr, bfd_size_type) ;
@@ -894,7 +894,7 @@ merge_sections_remove_hook (bfd *abfd ATTRIBUTE_UNUSED,
 bfd_boolean
 _bfd_elf_merge_sections (bfd *abfd, struct bfd_link_info *info)
 {
-  if (!is_elf_hash_table (info))
+  if (!is_elf_hash_table (info->hash))
     return FALSE;
   if (elf_hash_table (info)->merge_info)
     _bfd_merge_sections (abfd, elf_hash_table (info)->merge_info,
@@ -907,7 +907,7 @@ _bfd_elf_link_just_syms (asection *sec, struct bfd_link_info *info)
 {
   sec->output_section = bfd_abs_section_ptr;
   sec->output_offset = sec->vma;
-  if (!is_elf_hash_table (info))
+  if (!is_elf_hash_table (info->hash))
     return;
 
   sec->sec_info_type = ELF_INFO_TYPE_JUST_SYMS;
@@ -1354,12 +1354,13 @@ _bfd_elf_link_hash_copy_indirect (const struct elf_backend_data *bed,
   /* Copy down any references that we may have already seen to the
      symbol which just became indirect.  */
 
-  dir->elf_link_hash_flags |=
-    (ind->elf_link_hash_flags
-     & (ELF_LINK_HASH_REF_DYNAMIC
-	| ELF_LINK_HASH_REF_REGULAR
-	| ELF_LINK_HASH_REF_REGULAR_NONWEAK
-	| ELF_LINK_NON_GOT_REF));
+  dir->elf_link_hash_flags
+    |= ind->elf_link_hash_flags & (ELF_LINK_HASH_REF_DYNAMIC
+				   | ELF_LINK_HASH_REF_REGULAR
+				   | ELF_LINK_HASH_REF_REGULAR_NONWEAK
+				   | ELF_LINK_NON_GOT_REF
+				   | ELF_LINK_HASH_NEEDS_PLT
+				   | ELF_LINK_POINTER_EQUALITY_NEEDED);
 
   if (ind->root.type != bfd_link_hash_indirect)
     return;
@@ -1503,7 +1504,7 @@ struct bfd_link_needed_list *
 bfd_elf_get_needed_list (bfd *abfd ATTRIBUTE_UNUSED,
 			 struct bfd_link_info *info)
 {
-  if (! is_elf_hash_table (info))
+  if (! is_elf_hash_table (info->hash))
     return NULL;
   return elf_hash_table (info)->needed;
 }
@@ -1515,7 +1516,7 @@ struct bfd_link_needed_list *
 bfd_elf_get_runpath_list (bfd *abfd ATTRIBUTE_UNUSED,
 			  struct bfd_link_info *info)
 {
-  if (! is_elf_hash_table (info))
+  if (! is_elf_hash_table (info->hash))
     return NULL;
   return elf_hash_table (info)->runpath;
 }
@@ -3102,7 +3103,7 @@ _bfd_elf_compute_section_file_positions (bfd *abfd,
   /* sh_offset is set in assign_file_positions_except_relocs.  */
   shstrtab_hdr->sh_addralign = 1;
 
-  if (!assign_file_positions_except_relocs (abfd))
+  if (!assign_file_positions_except_relocs (abfd, link_info))
     return FALSE;
 
   if (link_info == NULL && bfd_get_symcount (abfd) > 0)
@@ -3575,7 +3576,7 @@ elf_sort_sections (const void *arg1, const void *arg2)
    the file header, and writes out the program headers.  */
 
 static bfd_boolean
-assign_file_positions_for_segments (bfd *abfd)
+assign_file_positions_for_segments (bfd *abfd, struct bfd_link_info *link_info)
 {
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   unsigned int count;
@@ -3627,7 +3628,7 @@ assign_file_positions_for_segments (bfd *abfd)
 
   if (bed->elf_backend_modify_segment_map)
     {
-      if (! (*bed->elf_backend_modify_segment_map) (abfd))
+      if (! (*bed->elf_backend_modify_segment_map) (abfd, link_info))
 	return FALSE;
     }
 
@@ -4135,7 +4136,8 @@ get_program_header_size (bfd *abfd)
    We also don't set the positions of the .symtab and .strtab here.  */
 
 static bfd_boolean
-assign_file_positions_except_relocs (bfd *abfd)
+assign_file_positions_except_relocs (bfd *abfd,
+				     struct bfd_link_info *link_info)
 {
   struct elf_obj_tdata * const tdata = elf_tdata (abfd);
   Elf_Internal_Ehdr * const i_ehdrp = elf_elfheader (abfd);
@@ -4186,7 +4188,7 @@ assign_file_positions_except_relocs (bfd *abfd)
 
       /* Assign file positions for the loaded sections based on the
          assignment of sections to segments.  */
-      if (! assign_file_positions_for_segments (abfd))
+      if (! assign_file_positions_for_segments (abfd, link_info))
 	return FALSE;
 
       /* Assign file positions for the other sections.  */
@@ -4623,8 +4625,9 @@ copy_private_bfd_data (bfd *ibfd, bfd *obfd)
        2. It is an allocated segment,
        3. There is an output section associated with it,
        4. The section has not already been allocated to a previous segment.
-       5. PT_TLS segment includes only SHF_TLS sections.
-       6. SHF_TLS sections are only in PT_TLS or PT_LOAD segments.  */
+       5. PT_GNU_STACK segments do not include any sections.
+       6. PT_TLS segment includes only SHF_TLS sections.
+       7. SHF_TLS sections are only in PT_TLS or PT_LOAD segments.  */
 #define INCLUDE_SECTION_IN_SEGMENT(section, segment, bed)		\
   ((((segment->p_paddr							\
       ? IS_CONTAINED_BY_LMA (section, segment, segment->p_paddr)	\
@@ -4632,6 +4635,7 @@ copy_private_bfd_data (bfd *ibfd, bfd *obfd)
      && (section->flags & SEC_ALLOC) != 0)				\
     || IS_COREFILE_NOTE (segment, section))				\
    && section->output_section != NULL					\
+   && segment->p_type != PT_GNU_STACK					\
    && (segment->p_type != PT_TLS					\
        || (section->flags & SEC_THREAD_LOCAL))				\
    && (segment->p_type == PT_LOAD					\
@@ -4675,7 +4679,7 @@ copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 	  if (IS_SOLARIS_PT_INTERP (segment, section))
 	    {
 	      /* Mininal change so that the normal section to segment
-		 assigment code will work.  */
+		 assignment code will work.  */
 	      segment->p_vaddr = section->vma;
 	      break;
 	    }
@@ -6834,7 +6838,8 @@ elfcore_grok_netbsd_procinfo (bfd *abfd, Elf_Internal_Note *note)
   elf_tdata (abfd)->core_command
     = _bfd_elfcore_strndup (abfd, note->descdata + 0x7c, 31);
 
-  return TRUE;
+  return elfcore_make_note_pseudosection (abfd, ".note.netbsdcore.procinfo",
+					  note);
 }
 
 static bfd_boolean

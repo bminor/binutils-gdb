@@ -228,7 +228,7 @@ HOWTO (R_DLX_RELOC_16_LO,     /* type */
        FALSE);                /* pcrel_offset */
 
 
-/* The gas default beheaver is not to preform the %hi modifier so that the
+/* The gas default behavior is not to preform the %hi modifier so that the
    GNU assembler can have the lower 16 bits offset placed in the insn, BUT
    we do like the gas to indicate it is %hi reloc type so when we in the link
    loader phase we can have the corrected hi16 vale replace the buggous lo16
@@ -493,7 +493,7 @@ elf32_dlx_relocate26  (abfd, reloc_entry, symbol, data,
    More about this table - for dlx elf relocation we do not really
    need this table, if we have a rtype defined in this table will
    caused tc_gen_relocate confused and die on us, but if we remove
-   this table it will caused more problem, so for now simple soulation
+   this table it will caused more problem, so for now simple solution
    is to remove those entries which may cause problem.  */
 struct elf_reloc_map
 {

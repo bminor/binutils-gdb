@@ -82,6 +82,10 @@ gdb_breakpoint [gdb_get_line_number "constructs-done"]
 gdb_continue_to_breakpoint "end of constructors"
 
 gdb_test_multiple "print *e1" "print *e1" {
+    -re "warning: RTTI symbol not found for class 'n1::D1'.*$gdb_prompt $" {
+	# gdb HEAD 2003-12-05
+	kfail "gdb/488" "print *e1"
+    }
     -re "warning: can't find class named `n1::D1', as given by C\\+\\+ RTTI.*$gdb_prompt $" {
 	#kfail "gdb/488" "print *e1"
 	fail "print *e1"
@@ -102,6 +106,10 @@ gdb_test_multiple "print *e1" "print *e1" {
 # that fail branch to an xfail.
 
 gdb_test_multiple "print *e2" "print *e2" {
+    -re "warning: RTTI symbol not found for class 'n2::D2'.*$gdb_prompt $" {
+	# gdb HEAD 2003-12-05
+	kfail "gdb/488" "print *e2"
+    }
     -re "warning: can't find class named `n2::D2', as given by C\\+\\+ RTTI.*$gdb_prompt $" {
 	#kfail "gdb/488" "print *e2"
 	fail "print *e2"

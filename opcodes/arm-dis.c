@@ -639,6 +639,16 @@ print_insn_arm (pc, info, given)
 				  func (stream, "%d", reg);
 				}
 				break;
+			      case 'W':
+				{
+				  long reg;
+				  
+				  reg = given >> bitstart;
+				  reg &= (2 << (bitend - bitstart)) - 1;
+				  
+				  func (stream, "%d", reg + 1);
+				}
+				break;
 			      case 'x':
 				{
 				  long reg;
@@ -1143,6 +1153,23 @@ print_insn_thumb (pc, info, given)
 
   /* No match.  */
   abort ();
+}
+
+/* Disallow mapping symbols ($a, $b, $d, $t etc) from
+   being displayed in symbol relative addresses.  */
+
+bfd_boolean
+arm_symbol_is_valid (asymbol * sym,
+		     struct disassemble_info * info ATTRIBUTE_UNUSED)
+{
+  const char * name;
+  
+  if (sym == NULL)
+    return FALSE;
+
+  name = bfd_asymbol_name (sym);
+
+  return (name && *name != '$');
 }
 
 /* Parse an individual disassembler option.  */

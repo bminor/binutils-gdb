@@ -59,8 +59,8 @@ static bfd_boolean sh64_elf_add_symbol_hook
   (bfd *, struct bfd_link_info *, const Elf_Internal_Sym *, const char **,
    flagword *, asection **, bfd_vma *);
 static bfd_boolean sh64_elf_link_output_symbol_hook
-  (bfd *, struct bfd_link_info *, const char *, Elf_Internal_Sym *,
-   asection *);
+  (struct bfd_link_info *, const char *, Elf_Internal_Sym *, asection *,
+   struct elf_link_hash_entry *);
 static bfd_boolean sh64_backend_section_from_shdr
   (bfd *, Elf_Internal_Shdr *, const char *);
 static void sh64_elf_final_write_processing
@@ -380,7 +380,7 @@ sh64_elf_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
 {
   /* We want to do this for relocatable as well as final linking.  */
   if (ELF_ST_TYPE (sym->st_info) == STT_DATALABEL
-      && info->hash->creator->flavour == bfd_target_elf_flavour)
+      && is_elf_hash_table (info->hash))
     {
       struct elf_link_hash_entry *h;
 
@@ -470,11 +470,11 @@ sh64_elf_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
    DataLabel symbol.  */
 
 bfd_boolean
-sh64_elf_link_output_symbol_hook (bfd *abfd ATTRIBUTE_UNUSED,
-				  struct bfd_link_info *info,
+sh64_elf_link_output_symbol_hook (struct bfd_link_info *info,
 				  const char *cname,
 				  Elf_Internal_Sym *sym,
-				  asection *input_sec ATTRIBUTE_UNUSED)
+				  asection *input_sec ATTRIBUTE_UNUSED,
+				  struct elf_link_hash_entry *h ATTRIBUTE_UNUSED)
 {
   char *name = (char *) cname;
 

@@ -1530,7 +1530,7 @@ scan_unit_for_functions (unit)
 
 /* Parse a DWARF2 compilation unit starting at INFO_PTR.  This
    includes the compilation unit header that proceeds the DIE's, but
-   does not include the length field that preceeds each compilation
+   does not include the length field that precedes each compilation
    unit header.  END_PTR points one past the end of this comp unit.
    OFFSET_SIZE is the size of DWARF2 offsets (either 4 or 8 bytes).
 

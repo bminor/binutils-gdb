@@ -44,14 +44,6 @@
    need to skip over the dynamic linker call.  This function decides
    when to skip, and where to skip to.  See the comments for
    SKIP_SOLIB_RESOLVER at the top of infrun.c.  */
-extern CORE_ADDR arm_linux_skip_solib_resolver (CORE_ADDR pc);
-#define SKIP_SOLIB_RESOLVER arm_linux_skip_solib_resolver
-
-/* When we call a function in a shared library, and the PLT sends us
-   into the dynamic linker to find the function's real address, we
-   need to skip over the dynamic linker call.  This function decides
-   when to skip, and where to skip to.  See the comments for
-   SKIP_SOLIB_RESOLVER at the top of infrun.c.  */
 #if 0   
 #undef IN_SOLIB_DYNSYM_RESOLVE_CODE
 extern CORE_ADDR arm_in_solib_dynsym_resolve_code (CORE_ADDR pc, char *name);

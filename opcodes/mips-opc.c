@@ -517,6 +517,7 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"divu",    "d,v,t",	0,    (int) M_DIVU_3,	INSN_MACRO,		I1	},
 {"divu",    "d,v,I",	0,    (int) M_DIVU_3I,	INSN_MACRO,		I1	},
 {"dla",     "t,A(b)",	0,    (int) M_DLA_AB,	INSN_MACRO,		I3	},
+{"dlca",    "t,A(b)",	0,    (int) M_DLCA_AB,	INSN_MACRO,		I3	},
 {"dli",     "t,j",      0x24000000, 0xffe00000, WR_t,			I3	}, /* addiu */
 {"dli",	    "t,i",	0x34000000, 0xffe00000, WR_t,			I3	}, /* ori */
 {"dli",     "t,I",	0,    (int) M_DLI,	INSN_MACRO,		I3	},
@@ -640,6 +641,7 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"lb",      "t,A(b)",	0,    (int) M_LB_AB,	INSN_MACRO,		I1	},
 {"lbu",     "t,o(b)",	0x90000000, 0xfc000000,	LDD|RD_b|WR_t,		I1	},
 {"lbu",     "t,A(b)",	0,    (int) M_LBU_AB,	INSN_MACRO,		I1	},
+{"lca",     "t,A(b)",	0,    (int) M_LCA_AB,	INSN_MACRO,		I1	},
 {"ld",	    "t,o(b)",   0xdc000000, 0xfc000000, WR_t|RD_b,		I3	},
 {"ld",      "t,o(b)",	0,    (int) M_LD_OB,	INSN_MACRO,		I1	},
 {"ld",      "t,A(b)",	0,    (int) M_LD_AB,	INSN_MACRO,		I1	},

@@ -708,6 +708,7 @@ interps_h = interps.h
 jv_lang_h = jv-lang.h
 kod_h = kod.h
 language_h = language.h
+libunwind_frame_h = libunwind-frame.h
 linespec_h = linespec.h
 linux_nat_h = linux-nat.h
 m2_lang_h = m2-lang.h
@@ -1281,6 +1282,7 @@ ALLDEPFILES = \
 	i386gnu-nat.c i386gnu-tdep.c \
 	ia64-linux-nat.c ia64-linux-tdep.c ia64-tdep.c \
 	infptrace.c inftarg.c irix4-nat.c irix5-nat.c \
+	libunwind-frame.c \
 	lynx-nat.c m3-nat.c \
 	m68hc11-tdep.c \
 	m68k-tdep.c \
@@ -1724,7 +1726,8 @@ dummy-frame.o: dummy-frame.c $(defs_h) $(dummy_frame_h) $(regcache_h) \
 	$(frame_h) $(inferior_h) $(gdb_assert_h) $(frame_unwind_h) \
 	$(command_h) $(gdbcmd_h)
 dve3900-rom.o: dve3900-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
-	$(serial_h) $(inferior_h) $(command_h) $(gdb_string_h) $(regcache_h)
+	$(serial_h) $(inferior_h) $(command_h) $(gdb_string_h) $(regcache_h) \
+	$(mips_tdep_h)
 dwarf2expr.o: dwarf2expr.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(value_h) \
 	$(gdbcore_h) $(elf_dwarf2_h) $(dwarf2expr_h)
 dwarf2-frame.o: dwarf2-frame.c $(defs_h) $(dwarf2expr_h) $(elf_dwarf2_h) \
@@ -1912,7 +1915,7 @@ ia64-tdep.o: ia64-tdep.c $(defs_h) $(inferior_h) $(symfile_h) $(gdbcore_h) \
 	$(arch_utils_h) $(floatformat_h) $(regcache_h) $(reggroups_h) \
 	$(frame_h) $(frame_base_h) $(frame_unwind_h) $(doublest_h) \
 	$(value_h) $(gdb_assert_h) $(objfiles_h) $(elf_common_h) \
-	$(elf_bfd_h) $(dis_asm_h)
+	$(elf_bfd_h) $(dis_asm_h) $(libunwind_frame_h)
 infcall.o: infcall.c $(defs_h) $(breakpoint_h) $(target_h) $(regcache_h) \
 	$(inferior_h) $(gdb_assert_h) $(block_h) $(gdbcore_h) $(language_h) \
 	$(symfile_h) $(gdbcmd_h) $(command_h) $(gdb_string_h) $(infcall_h)
@@ -1960,6 +1963,10 @@ kod-cisco.o: kod-cisco.c $(defs_h) $(gdb_string_h) $(kod_h)
 language.o: language.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 	$(value_h) $(gdbcmd_h) $(expression_h) $(language_h) $(target_h) \
 	$(parser_defs_h) $(jv_lang_h) $(demangle_h)
+libunwind-frame.o: libunwind-frame.c $(defs_h) \
+	$(frame_h) $(frame_base_h) $(frame_unwind_h) $(gdbcore_h) \
+	$(gdbtypes_h) $(symtab_h) $(objfiles_h) $(regcache_h) \
+	$(gdb_assert_h) $(gdb_string_h) $(complaints_h) $(libunwind_frame_h)
 linespec.o: linespec.c $(defs_h) $(symtab_h) $(frame_h) $(command_h) \
 	$(symfile_h) $(objfiles_h) $(source_h) $(demangle_h) $(value_h) \
 	$(completer_h) $(cp_abi_h) $(parser_defs_h) $(block_h) \
@@ -2188,7 +2195,7 @@ remote-m32r-sdi.o: remote-m32r-sdi.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 	$(inferior_h) $(target_h) $(regcache_h) $(gdb_string_h) $(serial_h)
 remote-mips.o: remote-mips.c $(defs_h) $(inferior_h) $(bfd_h) $(symfile_h) \
 	$(gdbcmd_h) $(gdbcore_h) $(serial_h) $(target_h) $(remote_utils_h) \
-	$(gdb_string_h) $(gdb_stat_h) $(regcache_h)
+	$(gdb_string_h) $(gdb_stat_h) $(regcache_h) $(mips_tdep_h)
 remote-rdi.o: remote-rdi.c $(defs_h) $(gdb_string_h) $(frame_h) \
 	$(inferior_h) $(bfd_h) $(symfile_h) $(target_h) $(gdbcmd_h) \
 	$(objfiles_h) $(gdb_stabs_h) $(gdbthread_h) $(gdbcore_h) \

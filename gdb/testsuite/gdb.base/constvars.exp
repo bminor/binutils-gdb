@@ -82,9 +82,7 @@ if ![runto_main] then {
 get_debug_format
 
 proc local_compiler_xfail_check { } {
-    global gcc_compiled;
-
-    if {$gcc_compiled == 2} then {
+    if { [test_compiler_info gcc-2-*] } then {
 	if { ![test_debug_format "HP"] \
 		&& ![test_debug_format "DWARF 2"] } then {
 	    setup_xfail "*-*-*" 
@@ -128,7 +126,7 @@ send_gdb "break marker1\n" ; gdb_expect -re ".*$gdb_prompt $"
 # test function parameters
 
 local_compiler_xfail_check
-if {$gcc_compiled == 3 && [test_debug_format "stabs"]} then {
+if { [test_compiler_info gcc-3-*] && [test_debug_format "stabs"] } then {
     # With stabs, even GCC 3 does not get the const char arguments correct.
     setup_xfail "*-*-*"
 }
@@ -144,8 +142,6 @@ gdb_expect {
 # test vars and pointers
 
 proc do_constvar_tests {} {
-    global gcc_compiled
-
     gdb_test "print lave" " = 66 'B'"
     gdb_test "ptype lave" "type = char"
     gdb_test "print lavish" " = 10 '\\\\n'"
@@ -285,7 +281,7 @@ proc do_constvar_tests {} {
     gdb_test "ptype locust" "type = double \\* const"
 
     local_compiler_xfail_check
-    if {$gcc_compiled == 3 && [test_debug_format "stabs"]} then {
+    if { [test_compiler_info gcc-3-*] && [test_debug_format "stabs"] } then {
 	# With stabs, even GCC 3 does not get the constant structure member
 	# correct.
 	setup_xfail "*-*-*"

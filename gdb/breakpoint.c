@@ -332,6 +332,13 @@ int exception_support_initialized = 0;
    error ("catch of library unloads not yet implemented on this platform")
 #endif
 
+/* Return whether a breakpoint is an active enabled breakpoint.  */
+static int
+breakpoint_enabled (struct breakpoint *b)
+{
+  return b->enable_state == bp_enabled;
+}
+
 /* Set breakpoint count to NUM.  */
 
 void
@@ -757,7 +764,7 @@ insert_bp_location (struct bp_location *bpt,
 
   /* Permanent breakpoints cannot be inserted or removed.  Disabled
      breakpoints should not be inserted.  */
-  if (bpt->owner->enable_state != bp_enabled)
+  if (!breakpoint_enabled (bpt->owner))
     return 0;
 
   if (bpt->inserted || bpt->duplicate)
@@ -1071,7 +1078,11 @@ insert_bp_location (struct bp_location *bpt,
 	bpt->owner->enable_state = bp_disabled;
       else
 	bpt->inserted = 1;
-      return val;
+
+      /* We've already printed an error message if there was a problem
+	 inserting this catchpoint, and we've disabled the catchpoint,
+	 so just return success.  */
+      return 0;
     }
 
   return 0;
@@ -1103,7 +1114,7 @@ insert_breakpoints (void)
     {
       /* Permanent breakpoints cannot be inserted or removed.  Disabled
 	 breakpoints should not be inserted.  */
-      if (b->owner->enable_state != bp_enabled)
+      if (!breakpoint_enabled (b->owner))
 	continue;
 
       /* FIXME drow/2003-10-07: This code should be pushed elsewhere when
@@ -1453,7 +1464,7 @@ remove_breakpoint (struct bp_location *b, insertion_state_t is)
       b->inserted = (is == mark_inserted);
     }
   else if (b->loc_type == bp_loc_hardware_watchpoint
-	   && b->owner->enable_state == bp_enabled
+	   && breakpoint_enabled (b->owner)
 	   && !b->duplicate)
     {
       struct value *v;
@@ -1509,7 +1520,7 @@ remove_breakpoint (struct bp_location *b, insertion_state_t is)
   else if ((b->owner->type == bp_catch_fork ||
 	    b->owner->type == bp_catch_vfork ||
 	    b->owner->type == bp_catch_exec)
-	   && b->owner->enable_state == bp_enabled
+	   && breakpoint_enabled (b->owner)
 	   && !b->duplicate)
     {
       val = -1;
@@ -1534,7 +1545,7 @@ remove_breakpoint (struct bp_location *b, insertion_state_t is)
     }
   else if ((b->owner->type == bp_catch_catch ||
 	    b->owner->type == bp_catch_throw)
-	   && b->owner->enable_state == bp_enabled
+	   && breakpoint_enabled (b->owner)
 	   && !b->duplicate)
     {
 
@@ -1545,7 +1556,7 @@ remove_breakpoint (struct bp_location *b, insertion_state_t is)
     }
   else if (ep_is_exception_catchpoint (b->owner)
 	   && b->inserted	/* sometimes previous insert doesn't happen */
-	   && b->owner->enable_state == bp_enabled
+	   && breakpoint_enabled (b->owner)
 	   && !b->duplicate)
     {
 
@@ -1671,7 +1682,7 @@ breakpoint_here_p (CORE_ADDR pc)
 	  && bpt->loc_type != bp_loc_hardware_breakpoint)
 	continue;
 
-      if ((bpt->owner->enable_state == bp_enabled
+      if ((breakpoint_enabled (bpt->owner)
 	   || bpt->owner->enable_state == bp_permanent)
 	  && bpt->address == pc)	/* bp is enabled and matches pc */
 	{
@@ -1768,7 +1779,7 @@ breakpoint_thread_match (CORE_ADDR pc, ptid_t ptid)
 	  && bpt->loc_type != bp_loc_hardware_breakpoint)
 	continue;
 
-      if ((bpt->owner->enable_state == bp_enabled
+      if ((breakpoint_enabled (bpt->owner)
 	   || bpt->owner->enable_state == bp_permanent)
 	  && bpt->address == pc
 	  && (bpt->owner->thread == -1 || bpt->owner->thread == thread))
@@ -2570,9 +2581,7 @@ bpstat_stop_status (CORE_ADDR *pc, int not_a_sw_breakpoint)
 
   ALL_BREAKPOINTS_SAFE (b, temp)
   {
-    if (b->enable_state == bp_disabled
-	|| b->enable_state == bp_shlib_disabled
-	|| b->enable_state == bp_call_disabled)
+    if (!breakpoint_enabled (b) && b->enable_state != bp_permanent)
       continue;
 
     if (b->type != bp_watchpoint
@@ -3175,7 +3184,7 @@ bpstat_should_step (void)
 {
   struct breakpoint *b;
   ALL_BREAKPOINTS (b)
-    if (b->enable_state == bp_enabled && b->type == bp_watchpoint)
+    if (breakpoint_enabled (b) && b->type == bp_watchpoint)
       return 1;
   return 0;
 }
@@ -3186,7 +3195,7 @@ bpstat_have_active_hw_watchpoints (void)
 {
   struct bp_location *bpt;
   ALL_BP_LOCATIONS (bpt)
-    if ((bpt->owner->enable_state == bp_enabled)
+    if (breakpoint_enabled (bpt->owner)
 	&& bpt->inserted
 	&& bpt->loc_type == bp_loc_hardware_watchpoint)
       return 1;
@@ -4264,7 +4273,7 @@ disable_breakpoints_in_shlibs (int silent)
 #if defined (PC_SOLIB)
     if (((b->type == bp_breakpoint) ||
 	 (b->type == bp_hardware_breakpoint)) &&
-	b->enable_state == bp_enabled &&
+	breakpoint_enabled (b) &&
 	!b->loc->duplicate &&
 	PC_SOLIB (b->loc->address))
       {
@@ -4293,11 +4302,12 @@ re_enable_breakpoints_in_shlibs (void)
   ALL_BREAKPOINTS (b)
     if (b->enable_state == bp_shlib_disabled)
     {
-      char buf[1];
+      char buf[1], *lib;
 
       /* Do not reenable the breakpoint if the shared library
          is still not mapped in.  */
-      if (target_read_memory (b->loc->address, buf, 1) == 0)
+      lib = PC_SOLIB (b->loc->address);
+      if (lib != NULL && target_read_memory (b->loc->address, buf, 1) == 0)
 	b->enable_state = bp_enabled;
     }
 }
@@ -4486,14 +4496,13 @@ hw_watchpoint_used_count (enum bptype type, int *other_type_used)
   *other_type_used = 0;
   ALL_BREAKPOINTS (b)
   {
-    if (b->enable_state == bp_enabled)
+    if (breakpoint_enabled (b))
       {
 	if (b->type == type)
 	  i++;
 	else if ((b->type == bp_hardware_watchpoint ||
 		  b->type == bp_read_watchpoint ||
-		  b->type == bp_access_watchpoint)
-		 && b->enable_state == bp_enabled)
+		  b->type == bp_access_watchpoint))
 	  *other_type_used = 1;
       }
   }
@@ -4535,7 +4544,7 @@ disable_watchpoints_before_interactive_call_start (void)
 	 || (b->type == bp_read_watchpoint)
 	 || (b->type == bp_access_watchpoint)
 	 || ep_is_exception_catchpoint (b))
-	&& (b->enable_state == bp_enabled))
+	&& breakpoint_enabled (b))
       {
 	b->enable_state = bp_call_disabled;
 	check_duplicates (b);
@@ -7058,7 +7067,7 @@ breakpoint_re_set_one (void *bint)
 	value_free (b->val);
       b->val = evaluate_expression (b->exp);
       release_value (b->val);
-      if (VALUE_LAZY (b->val) && b->enable_state == bp_enabled)
+      if (VALUE_LAZY (b->val) && breakpoint_enabled (b))
 	value_fetch_lazy (b->val);
 
       if (b->cond_string != NULL)
@@ -7068,7 +7077,7 @@ breakpoint_re_set_one (void *bint)
 	    xfree (b->cond);
 	  b->cond = parse_exp_1 (&s, (struct block *) 0, 0);
 	}
-      if (b->enable_state == bp_enabled)
+      if (breakpoint_enabled (b))
 	mention (b);
       value_free_to_mark (mark);
       break;

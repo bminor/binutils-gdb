@@ -1,4 +1,4 @@
-# Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+# Copyright 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -109,7 +109,7 @@ gdb_expect {
     timeout           { fail "(timeout) print value of d_instance" }
   }
 
-  if {$gcc_compiled} then {
+  if { [test_compiler_info gcc-*] } then {
       send_gdb "ptype d_instance\n"
       gdb_expect {
 	  -re "type = class D : private A, public B, (protected|private) C \{\r\n\[\t \]*public:\r\n\[\t \]*int d;\r\n\[\t \]*int dd;\[\r\n\t ]+D & operator=\\(D const ?&\\);\[\r\n\t ]+D\\((D const|const D) ?&\\);\[\r\n\t \]+D\\((void|)\\);\r\n\[\t \]*int dfoo\\((void|)\\);\r\n\[\t \]*int foo\\((void|)\\);\r\n\}.*$gdb_prompt $"  { pass "ptype d_instance" }
@@ -140,7 +140,7 @@ gdb_expect {
     timeout           { fail "(timeout) print value of e_instance" }
   }
 
-  if {$gcc_compiled} {
+  if { [test_compiler_info gcc-*] } then {
       send_gdb "ptype e_instance\n"
       gdb_expect {
 	  -re "type = class E : public A, private B, (protected|private) C \{\r\n\[\t \]*public:\r\n\[\t \]*int e;\r\n\[\t \]*int ee;\[\r\n\t ]+E & operator=\\(E const ?&\\);\[\r\n\t ]+E\\((E const|const E) ?&\\);\[\r\n\t \]+E\\((void|)\\);\r\n\[\t \]*int efoo\\((void|)\\);\r\n\[\t \]*int foo\\((void|)\\);\r\n\}.*$gdb_prompt $"  { pass "ptype e_instance" }

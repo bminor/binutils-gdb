@@ -201,7 +201,7 @@ DESCRIPTION
 	descriptors for other opens), with the supplied @var{fd} used as
 	an initial file descriptor (but subject to closure at any time),
 	call bfd_set_cacheable(bfd, 1) on the returned BFD.  The default
-	is to assume no cacheing; the file descriptor will remain open
+	is to assume no caching; the file descriptor will remain open
 	until <<bfd_close>>, and will not be affected by BFD operations
 	on other files.
 

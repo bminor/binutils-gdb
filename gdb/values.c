@@ -1223,7 +1223,7 @@ register_value_being_returned (struct type *valtype, struct regcache *retbuf)
   struct value *val = allocate_value (valtype);
 
   /* If the function returns void, don't bother fetching the return
-     value.  */
+     value.  See also "using_struct_return".  */
   if (TYPE_CODE (valtype) == TYPE_CODE_VOID)
     return val;
 
@@ -1284,6 +1284,11 @@ using_struct_return (struct type *value_type, int gcc_p)
 
   if (code == TYPE_CODE_ERROR)
     error ("Function return type unknown.");
+
+  if (code == TYPE_CODE_VOID)
+    /* A void return value is never in memory.  See also corresponding
+       code in "register_value_being_returned".  */
+    return 0;
 
   if (!gdbarch_return_value_p (current_gdbarch))
     {

@@ -1101,11 +1101,6 @@ frv_frame_this_id (struct frame_info *next_frame,
   /* The FUNC is easy.  */
   func = frame_func_unwind (next_frame);
 
-  /* This is meant to halt the backtrace at "_start".  Make sure we
-     don't halt it at a generic dummy frame. */
-  if (inside_entry_func (func))
-    return;
-
   /* Check if the stack is empty.  */
   msym_stack = lookup_minimal_symbol ("_stack", NULL, NULL);
   if (msym_stack && info->base == SYMBOL_VALUE_ADDRESS (msym_stack))
@@ -1212,6 +1207,7 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     case bfd_mach_frvsimple:
     case bfd_mach_fr500:
     case bfd_mach_frvtomcat:
+    case bfd_mach_fr550:
       set_variant_num_gprs (var, 64);
       set_variant_num_fprs (var, 64);
       break;

@@ -34,10 +34,19 @@ set bug_id 0
 
 set testfile "break"
 set srcfile ${testfile}.c
+set srcfile1 ${testfile}1.c
 set binfile ${objdir}/${subdir}/${testfile}
 
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug additional_flags=-w}] != "" } {
-    gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}0.o" object {debug additional_flags=-w}] != "" } {
+     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+}
+
+if  { [gdb_compile "${srcdir}/${subdir}/${srcfile1}" "${binfile}1.o" object {debug additional_flags=-w}] != "" } {
+     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+}
+
+if  { [gdb_compile "${binfile}0.o ${binfile}1.o" "${binfile}" executable {debug additional_flags=-w}] != "" } {
+     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
 
 if [get_compiler_info ${binfile}] {
@@ -87,7 +96,7 @@ gdb_test "break main" \
 # test break at quoted function
 #
 gdb_test "break \"marker2\"" \
-    "Breakpoint.*at.* file .*$srcfile, line.*" \
+    "Breakpoint.*at.* file .*$srcfile1, line.*" \
     "breakpoint quoted function"
 
 #
@@ -96,6 +105,8 @@ gdb_test "break \"marker2\"" \
 gdb_test "break $srcfile:factorial" \
     "Breakpoint.*at.* file .*$srcfile, line.*" \
     "breakpoint function in file"
+
+set bp_location1 [gdb_get_line_number "set breakpoint 1 here"]
 
 #
 # test break at line number
@@ -109,44 +120,51 @@ gdb_test "break $srcfile:factorial" \
 gdb_test "list main" \
     ".*main \\(argc, argv, envp\\).*" \
     "use `list' to establish default source file"
-gdb_test "break 79" \
-    "Breakpoint.*at.* file .*$srcfile, line 79\\." \
+gdb_test "break $bp_location1" \
+    "Breakpoint.*at.* file .*$srcfile, line $bp_location1\\." \
     "breakpoint line number"
 
 #
 # test duplicate breakpoint
 #
-gdb_test "break 79" \
-    "Note: breakpoint \[0-9\]+ also set at pc.*Breakpoint \[0-9\]+ at.* file .*$srcfile, line 79\\." \
+gdb_test "break $bp_location1" \
+    "Note: breakpoint \[0-9\]+ also set at pc.*Breakpoint \[0-9\]+ at.* file .*$srcfile, line $bp_location1\\." \
     "breakpoint duplicate"
+
+set bp_location2 [gdb_get_line_number "set breakpoint 2 here"]
 
 #
 # test break at line number in file
 #
-gdb_test "break $srcfile:85" \
-    "Breakpoint.*at.* file .*$srcfile, line 85\\." \
+gdb_test "break $srcfile:$bp_location2" \
+    "Breakpoint.*at.* file .*$srcfile, line $bp_location2\\." \
     "breakpoint line number in file"
 
+set bp_location3 [gdb_get_line_number "set breakpoint 3 here"]
+set bp_location4 [gdb_get_line_number "set breakpoint 4 here"]
 
 #
 # Test putting a break at the start of a multi-line if conditional.
 # Verify the breakpoint was put at the start of the conditional.
 #
 gdb_test "break multi_line_if_conditional" \
-    "Breakpoint.*at.* file .*$srcfile, line 109\\." \
+    "Breakpoint.*at.* file .*$srcfile, line $bp_location3\\." \
     "breakpoint at start of multi line if conditional"
 
 gdb_test "break multi_line_while_conditional" \
-    "Breakpoint.*at.* file .*$srcfile, line 124\\." \
+    "Breakpoint.*at.* file .*$srcfile, line $bp_location4\\." \
     "breakpoint at start of multi line while conditional"
+
+set bp_location5 [gdb_get_line_number "set breakpoint 5 here"]
+set bp_location6 [gdb_get_line_number "set breakpoint 6 here"]
 
 #
 # check to see what breakpoints are set
 #
 if [target_info exists gdb_stub] {
-    set main_line 72
+    set main_line $bp_location5
 } else {
-    set main_line 75
+    set main_line $bp_location6
 }
 
 if {$hp_aCC_compiler} {
@@ -155,16 +173,20 @@ if {$hp_aCC_compiler} {
     set proto ""
 }
 
+set bp_location7 [gdb_get_line_number "set breakpoint 7 here"]
+set bp_location8 [gdb_get_line_number "set breakpoint 8 here" $srcfile1]
+set bp_location9 [gdb_get_line_number "set breakpoint 9 here" $srcfile1]
+
 gdb_test "info break" \
     "Num Type\[ \]+Disp Enb Address\[ \]+What.*
 \[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:$main_line.*
-\[0-9\]+\[\t \]+breakpoint     keep y.* in marker2 at .*$srcfile:4\[49\].*
-\[0-9\]+\[\t \]+breakpoint     keep y.* in factorial$proto at .*$srcfile:96.*
-\[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:79.*
-\[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:79.*
-\[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:85.*
-\[0-9\]+\[\t \]+breakpoint     keep y.* in multi_line_if_conditional at .*$srcfile:109.*
-\[0-9\]+\[\t \]+breakpoint     keep y.* in multi_line_while_conditional at .*$srcfile:124" \
+\[0-9\]+\[\t \]+breakpoint     keep y.* in marker2 at .*$srcfile1:($bp_location8|$bp_location9).*
+\[0-9\]+\[\t \]+breakpoint     keep y.* in factorial$proto at .*$srcfile:$bp_location7.*
+\[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:$bp_location1.*
+\[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:$bp_location1.*
+\[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:$bp_location2.*
+\[0-9\]+\[\t \]+breakpoint     keep y.* in multi_line_if_conditional at .*$srcfile:$bp_location3.*
+\[0-9\]+\[\t \]+breakpoint     keep y.* in multi_line_while_conditional at .*$srcfile:$bp_location4" \
     "breakpoint info"
 
 # FIXME: The rest of this test doesn't work with anything that can't
@@ -191,52 +213,53 @@ if ![target_info exists use_gdb_stub] {
 	send_gdb "y\n"
 	exp_continue
     }
-    -re "Starting program.*Breakpoint \[0-9\]+,.*main .*argc.*argv.* at .*$srcfile:75.*75\[\t \]+if .argc.* \{.*$gdb_prompt $"\
+    -re "Starting program.*Breakpoint \[0-9\]+,.*main .*argc.*argv.* at .*$srcfile:$bp_location6.*$bp_location6\[\t \]+if .argc.* \{.*$gdb_prompt $"\
 	                    { pass "run until function breakpoint" }
     -re ".*$gdb_prompt $"       { fail "run until function breakpoint" }
     timeout	            { fail "run until function breakpoint (timeout)" }
   }
 } else {
     if ![target_info exists gdb_stub] {
-	gdb_test continue ".*Continuing\\..*Breakpoint \[0-9\]+, main \\(argc=.*, argv=.*, envp=.*\\) at .*$srcfile:75.*75\[\t \]+if .argc.*\{.*" "stub continue"
+	gdb_test continue ".*Continuing\\..*Breakpoint \[0-9\]+, main \\(argc=.*, argv=.*, envp=.*\\) at .*$srcfile:$bp_location6.*$bp_location6\[\t \]+if .argc.*\{.*" "stub continue"
     }
 }
 
 #
 # run until the breakpoint at a line number
 #
-gdb_test continue "Continuing\\..*Breakpoint \[0-9\]+, main \\(argc=.*, argv=.*, envp=.*\\) at .*$srcfile:79.*79\[\t \]+printf.*factorial.*" \
+gdb_test continue "Continuing\\..*Breakpoint \[0-9\]+, main \\(argc=.*, argv=.*, envp=.*\\) at .*$srcfile:$bp_location1.*$bp_location1\[\t \]+printf.*factorial.*" \
 			"run until breakpoint set at a line number"
 
 #
 # Run until the breakpoint set in a function in a file
 #
 for {set i 6} {$i >= 1} {incr i -1} {
-	gdb_test continue "Continuing\\..*Breakpoint \[0-9\]+, factorial \\(value=$i\\) at .*$srcfile:96.*96\[\t \]+.*if .value > 1. \{.*" \
+	gdb_test continue "Continuing\\..*Breakpoint \[0-9\]+, factorial \\(value=$i\\) at .*$srcfile:$bp_location7.*$bp_location7\[\t \]+.*if .value > 1. \{.*" \
 			"run until file:function($i) breakpoint"
 }
 
 #
 # Run until the breakpoint set at a quoted function
 #
-gdb_test continue "Continuing\\..*Breakpoint \[0-9\]+, (0x\[0-9a-f\]+ in )?marker2 \\(a=43\\) at .*$srcfile:4\[49\].*" \
+gdb_test continue "Continuing\\..*Breakpoint \[0-9\]+, (0x\[0-9a-f\]+ in )?marker2 \\(a=43\\) at .*$srcfile1:($bp_location8|$bp_location9).*" \
 		"run until quoted breakpoint"
 #
 # run until the file:function breakpoint at a line number in a file
 #
-gdb_test continue "Continuing\\..*Breakpoint \[0-9\]+, main \\(argc=.*, argv=.*, envp=.*\\) at .*$srcfile:85.*85\[\t \]+argc = \\(argc == 12345\\);.*" \
+gdb_test continue "Continuing\\..*Breakpoint \[0-9\]+, main \\(argc=.*, argv=.*, envp=.*\\) at .*$srcfile:$bp_location2.*$bp_location2\[\t \]+argc = \\(argc == 12345\\);.*" \
 		"run until file:linenum breakpoint"
 
 # Test break at offset +1
+set bp_location10 [gdb_get_line_number "set breakpoint 10 here"]
 
 gdb_test "break +1" \
-    "Breakpoint.*at.* file .*$srcfile, line 86\\." \
+    "Breakpoint.*at.* file .*$srcfile, line $bp_location10\\." \
     "breakpoint offset +1"
 
 # Check to see if breakpoint is hit when stepped onto
 
 gdb_test "step" \
-    ".*Breakpoint \[0-9\]+, main \\(argc=.*, argv=.*, envp=.*\\) at .*$srcfile:86.*86\[\t \]+return argc;" \
+    ".*Breakpoint \[0-9\]+, main \\(argc=.*, argv=.*, envp=.*\\) at .*$srcfile:$bp_location10.*$bp_location10\[\t \]+return argc;.*breakpoint 10 here.*" \
     "step onto breakpoint"
 
 #
@@ -260,37 +283,38 @@ gdb_test "tbreak $srcfile:factorial" "Breakpoint.*at.* file .*$srcfile, line.*" 
 #
 # test break at line number
 #
-send_gdb "tbreak 79\n"
+send_gdb "tbreak $bp_location1\n"
 gdb_expect {
-    -re "Breakpoint.*at.* file .*$srcfile, line 79.*$gdb_prompt $" { pass "Temporary breakpoint line number #1" }
+    -re "Breakpoint.*at.* file .*$srcfile, line $bp_location1.*$gdb_prompt $" { pass "Temporary breakpoint line number #1" }
 	-re ".*$gdb_prompt $"   { pass "Temporary breakpoint line number #1" }
 	timeout	    { fail "breakpoint line number #1 (timeout)" }
 }
 
-gdb_test "tbreak 75" "Breakpoint.*at.* file .*$srcfile, line 75.*" "Temporary breakpoint line number #2"
+gdb_test "tbreak $bp_location6" "Breakpoint.*at.* file .*$srcfile, line $bp_location6.*" "Temporary breakpoint line number #2"
 
 #
 # test break at line number in file
 #
-send_gdb "tbreak $srcfile:85\n"
+send_gdb "tbreak $srcfile:$bp_location2\n"
 gdb_expect {
-    -re "Breakpoint.*at.* file .*$srcfile, line 85.*$gdb_prompt $" { pass "Temporary breakpoint line number in file #1" }
+    -re "Breakpoint.*at.* file .*$srcfile, line $bp_location2.*$gdb_prompt $" { pass "Temporary breakpoint line number in file #1" }
 	-re ".*$gdb_prompt $"   { pass "Temporary breakpoint line number in file #1" }
 	timeout	    { fail "Temporary breakpoint line number in file #1 (timeout)" }
 }
 
-gdb_test  "tbreak $srcfile:81" "Breakpoint.*at.* file .*$srcfile, line 81.*" "Temporary breakpoint line number in file #2"
+set bp_location11 [gdb_get_line_number "set breakpoint 11 here"]
+gdb_test  "tbreak $srcfile:$bp_location11" "Breakpoint.*at.* file .*$srcfile, line $bp_location11.*" "Temporary breakpoint line number in file #2"
 
 #
 # check to see what breakpoints are set (temporary this time)
 #
 gdb_test "info break" "Num Type.*Disp Enb Address.*What.*\[\r\n\]
 \[0-9\]+\[\t \]+breakpoint     del.*y.*in main at .*$srcfile:$main_line.*\[\r\n\]
-\[0-9\]+\[\t \]+breakpoint     del.*y.*in factorial$proto at .*$srcfile:96.*\[\r\n\]
-\[0-9\]+\[\t \]+breakpoint     del.*y.*in main at .*$srcfile:79.*\[\r\n\]
-\[0-9\]+\[\t \]+breakpoint     del.*y.*in main at .*$srcfile:75.*\[\r\n\]
-\[0-9\]+\[\t \]+breakpoint     del.*y.*in main at .*$srcfile:85.*\[\r\n\]
-\[0-9\]+\[\t \]+breakpoint     del.*y.*in main at .*$srcfile:81.*" \
+\[0-9\]+\[\t \]+breakpoint     del.*y.*in factorial$proto at .*$srcfile:$bp_location7.*\[\r\n\]
+\[0-9\]+\[\t \]+breakpoint     del.*y.*in main at .*$srcfile:$bp_location1.*\[\r\n\]
+\[0-9\]+\[\t \]+breakpoint     del.*y.*in main at .*$srcfile:$bp_location6.*\[\r\n\]
+\[0-9\]+\[\t \]+breakpoint     del.*y.*in main at .*$srcfile:$bp_location2.*\[\r\n\]
+\[0-9\]+\[\t \]+breakpoint     del.*y.*in main at .*$srcfile:$bp_location11.*" \
     "Temporary breakpoint info"
 
 
@@ -378,7 +402,7 @@ gdb_expect {
 # Run to the desired default location. If not positioned here, the
 # tests below don't work.
 #
-gdb_test "until 79" "main .* at .*:79.*" "until 79"
+gdb_test "until $bp_location1" "main .* at .*:$bp_location1.*" "until bp_location1"
 
 
 # Verify that GDB allows one to just say "break", which is treated
@@ -427,13 +451,13 @@ gdb_expect {
 #
 if ![runto_main] then { fail "break tests suppressed" }
 
-send_gdb "break 79\n"
+send_gdb "break $bp_location1\n"
 gdb_expect {
-  -re "Breakpoint (\[0-9\]*) at .*, line 79.*$gdb_prompt $"\
-          {pass "set to-be-silent break 79"}
+  -re "Breakpoint (\[0-9\]*) at .*, line $bp_location1.*$gdb_prompt $"\
+          {pass "set to-be-silent break bp_location1"}
   -re "$gdb_prompt $"\
-          {fail "set to-be-silent break 79"}
-  timeout {fail "(timeout) set to-be-silent break 79"}
+          {fail "set to-be-silent break bp_location1"}
+  timeout {fail "(timeout) set to-be-silent break bp_location1"}
 }
 
 send_gdb "commands $expect_out(1,string)\n"
@@ -441,33 +465,33 @@ send_gdb "silent\n"
 send_gdb "end\n"
 gdb_expect {
   -re ".*$gdb_prompt $"\
-          {pass "set silent break 79"}
-  timeout {fail "(timeout) set silent break 79"}
+          {pass "set silent break bp_location1"}
+  timeout {fail "(timeout) set silent break bp_location1"}
 }
 
 send_gdb "info break $expect_out(1,string)\n"
 gdb_expect {
-  -re "\[0-9\]*\[ \t\]*breakpoint.*:79\r\n\[ \t\]*silent.*$gdb_prompt $"\
-          {pass "info silent break 79"}
+  -re "\[0-9\]*\[ \t\]*breakpoint.*:$bp_location1\r\n\[ \t\]*silent.*$gdb_prompt $"\
+          {pass "info silent break bp_location1"}
   -re "$gdb_prompt $"\
-          {fail "info silent break 79"}
-  timeout {fail "(timeout) info silent break 79"}
+          {fail "info silent break bp_location1"}
+  timeout {fail "(timeout) info silent break bp_location1"}
 }
 send_gdb "continue\n"
 gdb_expect {
   -re "Continuing.\r\n$gdb_prompt $"\
-          {pass "hit silent break 79"}
+          {pass "hit silent break bp_location1"}
   -re "$gdb_prompt $"\
-          {fail "hit silent break 79"}
-  timeout {fail "(timeout) hit silent break 79"}
+          {fail "hit silent break bp_location1"}
+  timeout {fail "(timeout) hit silent break bp_location1"}
 }
 send_gdb "bt\n"
 gdb_expect {
-  -re "#0  main .* at .*:79.*$gdb_prompt $"\
-          {pass "stopped for silent break 79"}
+  -re "#0  main .* at .*:$bp_location1.*$gdb_prompt $"\
+          {pass "stopped for silent break bp_location1"}
   -re "$gdb_prompt $"\
-          {fail "stopped for silent break 79"}
-  timeout {fail "(timeout) stopped for silent break 79"}
+          {fail "stopped for silent break bp_location1"}
+  timeout {fail "(timeout) stopped for silent break bp_location1"}
 }
 
 # Verify that GDB can at least parse a breakpoint with the
@@ -475,7 +499,8 @@ gdb_expect {
 # thread-specific breakpoint really triggers appropriately.
 # The gdb.threads subdirectory contains tests for that.)
 #
-send_gdb "break 80 thread 999\n"
+set bp_location12 [gdb_get_line_number "set breakpoint 12 here"]
+send_gdb "break $bp_location12 thread 999\n"
 gdb_expect {
   -re "Unknown thread 999.*$gdb_prompt $"\
           {pass "thread-specific breakpoint on non-existent thread disallowed"}
@@ -483,7 +508,7 @@ gdb_expect {
           {fail "thread-specific breakpoint on non-existent thread disallowed"}
   timeout {fail "(timeout) thread-specific breakpoint on non-existent thread disallowed"}
 }
-send_gdb "break 80 thread foo\n"
+send_gdb "break $bp_location12 thread foo\n"
 gdb_expect {
   -re "Junk after thread keyword..*$gdb_prompt $"\
           {pass "thread-specific breakpoint on bogus thread ID disallowed"}
@@ -495,7 +520,7 @@ gdb_expect {
 # Verify that GDB responds gracefully to a breakpoint command with
 # trailing garbage.
 #
-send_gdb "break 80 foo\n"
+send_gdb "break $bp_location12 foo\n"
 gdb_expect {
   -re "Junk at end of arguments..*$gdb_prompt $"\
           {pass "breakpoint with trailing garbage disallowed"}
@@ -542,15 +567,15 @@ gdb_test "clear marker3" {Deleted breakpoints [0-9]+ [0-9]+.*}
 
 # Verify that a breakpoint can be set via a convenience variable.
 #
-send_gdb "set \$foo=81\n"
+send_gdb "set \$foo=$bp_location11\n"
 gdb_expect {
   -re "$gdb_prompt $"\
-          {pass "set convenience variable \$foo to 81"}
-  timeout {fail "(timeout) set convenience variable \$foo to 81"}
+          {pass "set convenience variable \$foo to bp_location11"}
+  timeout {fail "(timeout) set convenience variable \$foo to bp_location11"}
 }
 send_gdb "break \$foo\n"
 gdb_expect {
-  -re "Breakpoint (\[0-9\]*) at .*, line 81.*$gdb_prompt $"\
+  -re "Breakpoint (\[0-9\]*) at .*, line $bp_location11.*$gdb_prompt $"\
           {pass "set breakpoint via convenience variable"}
   -re "$gdb_prompt $"\
           {fail "set breakpoint via convenience variable"}
@@ -579,7 +604,7 @@ gdb_expect {
 #
 send_gdb "break marker2\n"
 gdb_expect {
-    -re "Breakpoint (\[0-9\]*) at .*, line 4\[49\].*$gdb_prompt $"\
+    -re "Breakpoint (\[0-9\]*) at .*, line ($bp_location8|$bp_location9).*$gdb_prompt $"\
           {pass "set breakpoint on to-be-called function"}
   -re "$gdb_prompt $"\
           {fail "set breakpoint on to-be-called function"}
@@ -602,9 +627,9 @@ gdb_expect {
 #
 send_gdb "bt\n"
 gdb_expect {
-    -re "#0\[ \t\]*($hex in )?marker2.*:4\[49\]\r\n#1.*_sr4export.*$gdb_prompt $"\
+    -re "#0\[ \t\]*($hex in )?marker2.*:($bp_location8|$bp_location9)\r\n#1.*_sr4export.*$gdb_prompt $"\
             {pass "backtrace while in called function"}
-    -re "#0\[ \t\]*($hex in )?marker2.*:4\[49\]\r\n#1.*function called from gdb.*$gdb_prompt $"\
+    -re "#0\[ \t\]*($hex in )?marker2.*:($bp_location8|$bp_location9)\r\n#1.*function called from gdb.*$gdb_prompt $"\
 	    {pass "backtrace while in called function"}
     -re "$gdb_prompt $"\
             {fail "backtrace while in called function"}
@@ -617,11 +642,11 @@ gdb_expect {
 #
 send_gdb "finish\n"
 gdb_expect {
-    -re "Run till exit from .*marker2.* at .*4\[49\]\r\n.* in _sr4export.*$gdb_prompt $"\
+    -re "Run till exit from .*marker2.* at .*($bp_location8|$bp_location9)\r\n.* in _sr4export.*$gdb_prompt $"\
             {pass "finish from called function"}
-    -re "Run till exit from .*marker2.* at .*4\[49\]\r\n.*function called from gdb.*$gdb_prompt $"\
+    -re "Run till exit from .*marker2.* at .*($bp_location8|$bp_location9)\r\n.*function called from gdb.*$gdb_prompt $"\
             {pass "finish from called function"}
-    -re "Run till exit from .*marker2.* at .*4\[49\]\r\n.*Value returned.*$gdb_prompt $"\
+    -re "Run till exit from .*marker2.* at .*($bp_location8|$bp_location9)\r\n.*Value returned.*$gdb_prompt $"\
             {pass "finish from called function"}
     -re "$gdb_prompt $"\
             {fail "finish from called function"}
@@ -833,8 +858,16 @@ test_next_with_recursion
 
 set binfileo2 ${objdir}/${subdir}/${testfile}o2
 
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfileo2}" executable {debug additional_flags="-O2" }] != "" } {
-    gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}O0.o" object {debug "additional_flags=-w -O2"}] != "" } {
+     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+}
+
+if  { [gdb_compile "${srcdir}/${subdir}/${srcfile1}" "${binfile}O1.o" object {debug "additional_flags=-w -O2"}] != "" } {
+     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+}
+
+if  { [gdb_compile "${binfile}O0.o ${binfile}O1.o" "${binfileo2}" executable {debug additional_flags=-w}] != "" } {
+     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
 
 if [get_compiler_info ${binfileo2}] {
@@ -861,7 +894,7 @@ gdb_test "break main" \
 # test break at function
 #
 gdb_test "break marker4" \
-    "Breakpoint.*at.* file .*$srcfile, line.*" \
+    "Breakpoint.*at.* file .*$srcfile1, line.*" \
     "breakpoint small function, optimized file"
 
 #
@@ -880,7 +913,7 @@ if ![target_info exists use_gdb_stub] {
 	send_gdb "y\n"
 	exp_continue
     }
-    -re "Starting program.*Breakpoint \[0-9\]+,.*main .*argc.*argv.* at .*$srcfile:75.*75\[\t \]+if .argc.* \{.*$gdb_prompt $"\
+    -re "Starting program.*Breakpoint \[0-9\]+,.*main .*argc.*argv.* at .*$srcfile:$bp_location6.*$bp_location6\[\t \]+if .argc.* \{.*$gdb_prompt $"\
 	                    { pass "run until function breakpoint, optimized file" }
     -re "Starting program.*Breakpoint \[0-9\]+,.*main .*argc.*argv.* at .*$gdb_prompt $"\
 	                    { pass "run until function breakpoint, optimized file (code motion)" }
@@ -889,7 +922,7 @@ if ![target_info exists use_gdb_stub] {
   }
 } else {
     if ![target_info exists gdb_stub] {
-	gdb_test continue ".*Continuing\\..*Breakpoint \[0-9\]+, main \\(argc=.*, argv=.*, envp=.*\\) at .*$srcfile:75.*75\[\t \]+if .argc.*\{.*" "stub continue, optimized file"
+	gdb_test continue ".*Continuing\\..*Breakpoint \[0-9\]+, main \\(argc=.*, argv=.*, envp=.*\\) at .*$srcfile:$bp_location6.*$bp_location6\[\t \]+if .argc.*\{.*" "stub continue, optimized file"
     }
 }
 
@@ -906,17 +939,19 @@ if ![target_info exists use_gdb_stub] {
 # has no exactly matching line symbol, and GDB reports the breakpoint
 # as if it were in the middle of a line rather than at the beginning.
 
+set bp_location13 [gdb_get_line_number "set breakpoint 13 here" $srcfile1]
+set bp_location14 [gdb_get_line_number "set breakpoint 14 here" $srcfile1]
 send_gdb "continue\n"
 gdb_expect {
-    -re "Breakpoint $decimal, marker4 \\(d=177601976\\) at .*$srcfile:51\[\r\n\]+51\[\t \]+void marker4.*" {
+    -re "Breakpoint $decimal, marker4 \\(d=177601976\\) at .*$srcfile1:$bp_location13\[\r\n\]+$bp_location13\[\t \]+void marker4.*" {
 	pass "run until breakpoint set at small function, optimized file"
     }
-    -re "Breakpoint $decimal, $hex in marker4 \\(d=177601976\\) at .*$srcfile:51\[\r\n\]+51\[\t \]+void marker4.*" {
+    -re "Breakpoint $decimal, $hex in marker4 \\(d=177601976\\) at .*$srcfile1:$bp_location13\[\r\n\]+$bp_location13\[\t \]+void marker4.*" {
 	pass "run until breakpoint set at small function, optimized file"
     }
-    -re "Breakpoint $decimal, marker4 \\(d=177601976\\) at .*$srcfile:46\[\r\n\]+46\[\t \]+void marker4.*" {
+    -re "Breakpoint $decimal, marker4 \\(d=177601976\\) at .*$srcfile1:$bp_location14\[\r\n\]+$bp_location14\[\t \]+void marker4.*" {
         # marker4() is defined at line 46 when compiled with -DPROTOTYPES
-	pass "run until breakpoint set at small function, optimized file (line 46)"
+	pass "run until breakpoint set at small function, optimized file (line bp_location14)"
     }
     -re ".*$gdb_prompt " {
 	fail "run until breakpoint set at small function, optimized file"

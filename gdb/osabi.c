@@ -347,11 +347,11 @@ gdbarch_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch)
 	}
     }
 
-  warning ("A handler for the OS ABI \"%s\" is not built into this "
-	   "configuration of GDB.  "
-	   "Attempting to continue with the default %s settings",
-	   gdbarch_osabi_name (info.osabi),
-	   info.bfd_arch_info->printable_name);
+  warning
+    ("A handler for the OS ABI \"%s\" is not built into this configuration\n"
+     "of GDB.  Attempting to continue with the default %s settings.\n",
+     gdbarch_osabi_name (info.osabi),
+     info.bfd_arch_info->printable_name);
 }
 
 
@@ -460,6 +460,13 @@ generic_elf_osabi_sniff_abi_tag_sections (bfd *abfd, asection *sect, void *obj)
 	     necessary yet.  */
 	  *os_ident_ptr = GDB_OSABI_NETBSD_ELF;
 	}
+      return;
+    }
+
+  /* .note.netbsdcore.procinfo notes, used by NetBSD.  */
+  if (strcmp (name, ".note.netbsdcore.procinfo") == 0 && sectsize > 0)
+    {
+      *os_ident_ptr = GDB_OSABI_NETBSD_ELF;
       return;
     }
 }
@@ -592,8 +599,6 @@ _initialize_gdb_osabi (void)
   gdbarch_register_osabi_sniffer (bfd_arch_unknown,
 				  bfd_target_elf_flavour,
 				  generic_elf_osabi_sniffer);
-
-  return;
 
   /* Register the "set osabi" command.  */
   c = add_set_enum_cmd ("osabi", class_support, gdb_osabi_available_names,

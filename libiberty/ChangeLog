@@ -1,6 +1,180 @@
+2003-12-15  Brendan Kehoe  <brendan@zen.org>
+
+	* libiberty/Makefile.in (floatformat.o): Add dependency on
+	config.h to accompany change of 2003-12-03.
+
+2003-12-15  Ian Lance Taylor  <ian@wasabisystems.com>
+
+	Fix handling of constructor/destructor of standard substitution:
+	* cp-demangle.c (struct d_standard_sub_info): Define.
+	(d_substitution): Add prefix argument.  Change all callers.
+	Rework handling of standard substitutions to print full name when
+	qualifying a constructor/destructor, or when DMGL_VERBOSE is set.
+	* testsuite/demangle-expected: Add test case.
+
+	Fix handling of negative literal constants:
+	* cp-demangle.c (enum d_comp_type): Add D_COMP_LITERAL_NEG.
+	(d_dump, d_make_comp): Handle D_COMP_LITERAL_NEG.
+	(d_expr_primary): Use D_COMP_LITERAL_NEG for a negative number.
+	(d_print_comp): Handle D_COMP_LITERAL_NEG.
+	* testsuite/demangle-expected: Add test case.
+
+2003-12-04  Ian Lance Taylor  <ian@wasabisystems.com>
+
+	* cp-demangle.c (IS_UPPER, IS_LOWER): Define.
+	(d_last_char): Define new macro.
+	(d_make_name): Reject an empty name.
+	(d_prefix, d_unqualified_name, d_type): Use new IS_* macros.
+	(d_substitution, d_print_identifier): Likewise.
+	(d_print_comp) [D_COMP_OPERATOR]: Likewise.
+	(d_print_comp) [D_COMP_TEMPLATE]: Use new d_last_char macro.
+	(d_print_mod) Use new d_last_char macro.
+	(d_print_cast): Use new d_last_char macro.
+	(is_ctor_or_dtor): Don't leak memory.
+
+	Fix handling of member function modifiers:
+	* cp-demangle.c (enum d_comp_type): Add D_COMP_RESTRICT_THIS,
+	D_COMP_VOLATILE_THIS, and D_COMP_CONST_THIS.
+	(d_dump): Dump new d_comp_type values.
+	(d_make_comp): Accept new d_comp_type values.
+	(has_return_type): Only accept _THIS variants of qualifiers.
+	(d_encoding): Without DMGL_PARAMS, only remove _THIS variants of
+	qualifiers.
+	(d_cv_qualifiers): Add member_fn parameter.  Change all callers.
+	(d_print_comp) [D_COMP_TYPED_NAME]: Rather than removing
+	qualifiers and printing them at the end, add _THIS qualifiers to
+	the modifier list.
+	(d_print_comp) [D_COMP_*_THIS]: New cases.
+	(d_print_comp) [D_COMP_PTRMEM_TYPE]: Remove special handling of
+	qualifiers.
+	(d_print_mod_list): Add suffix parameter.  Change all callers.
+	Keep walking the list even if the current modifier has been
+	printed.
+	(d_print_mod): Handle new _THIS qualifiers.
+	(d_print_function_type): Handle new _THIS qualifiers when deciding
+	whether to print a parenthesis.  Put a space before the
+	parenthesis in some cases.  Call d_print_mod_list again at the
+	end, passing suffix as 1.
+	(is_ctor_or_dtor): Look for new _THIS qualifiers.
+	* testsuite/demangle-expected: Add test case.
+
+	Fix for PR gcc/13304:
+	* cp-demangle.c (d_print_comp) [D_COMP_TEMPLATE]: If the character
+	before the '<' is itself a '<', insert a space.
+	(d_print_cast): Likewise.
+	* testsuite/demangle-expected: Add test case.
+
+	Fix for PR gcc/13244:
+	* cp-demangle.c (d_print_comp) [D_COMP_BINARY]: Wrap an expression
+	which uses the '>' operator in an extra layer of parens.
+	* testsuite/demangle-expected: Add test case.
+
+2003-12-03  Ian Lance Taylor  <ian@wasabisystems.com>
+
+	* floatformat.c: Include "config.h" and <string.h> if available.
+	(INFINITY, NAN): Define if not defined by <math.h>.
+	(floatformat_to_double): Handle NaN, infinity, and denormalized
+	numbers.
+	(floatformat_from_double): Likewise.
+	(ieee_test): In debugging code, use little endian rather than big
+	endian.  Correct tests to handle NaN and to check correct sign of
+	zero.  Omit m68k extended test.
+	(main): Add more debugging cases.
+
+2003-11-29  Ian Lance Taylor  <ian@wasabisystems.com>
+
+	* cp-demangle.c (d_demangle): Only return success if we consumed
+	the entire demangled string.
+	(is_ctor_or_dtor): Likewise.
+
+	* testsuite/demangle-expected: Revert one part of 2003-06-26 patch
+	to restore expected result of EDG test case to original expected
+	result.
+
+2003-11-26  Ian Lance Taylor  <ian@wasabisystems.com>
+
+	* cp-demangle.c (struct d_print_mod): Add templates field.
+	(d_make_builtin_type): Check for NULL type.
+	(d_make_extended_operator): Check for NULL name.
+	(d_make_ctor, d_make_dtor): Likewise.
+	(d_mangled_name): Add top_level parameter.  Change all callers.
+	(d_encoding): If DMGL_PARAMS is not set, strip off initial
+	CV-qualifiers.
+	(d_type): Check some return values we rely on.
+	(d_bare_function_type, d_array_type): Likewise.
+	(d_pointer_to_member_type, d_template_args): Likewise.
+	(d_add_substitution): Fail if argument is NULL.
+	(d_print_resize): Check whether buf is NULL.
+	(d_print_comp): Save current templates list with each modifier.
+	Don't pass the modifier list down when printing a template.
+	(d_print_cast): Don't pass the modifier list down when printing a
+	template.
+	(d_print_mod_list): Temporarily set templates list while printing
+	a modifier.
+	(d_print_mod): Check that buf is not NULL before using it.
+	(d_print_function_type): Print parens if there is no modifier.
+	(d_init_info): Permit as many substitutions as there are
+	characters in the mangled name.
+	* testsuite/demangle-expected: Add two new test cases.
+
+2003-11-25  Ian Lance Taylor  <ian@wasabisystems.com>
+
+	* cp-demangle.c (java_demangle_v3): Pass DMGL_PARAMS to
+	d_demangle.
+
+2003-11-22  Ian Lance Taylor  <ian@wasabisystems.com>
+
+	* cp-demangle.c (d_encoding): Add top_level parameter.  Change all
+	callers.
+	(print_usage): Display new -p option.
+	(long_options): Add --no-params.
+	(main): Accept and handle -p.
+
+2003-11-21  Ian Lance Taylor  <ian@wasabisystems.com>
+
+	* cp-demangle.c (has_return_type): Skip qualifiers when checking
+	whether we have a template.
+	* testsuite/demangle-expected: Add four new tests.
+
+2003-11-20  Ian Lance Taylor  <ian@wasabisystems.com>
+
+	* testsuite/demangle-expected: Minor changes to match output of
+	new demangler: adjust whitespace in four tests, and change order
+	of qualifiers in one test.
+
+	* cp-demangle.c: Complete rewrite.
+
+2003-11-19  Mark Mitchell  <mark@codesourcery.com>
+
+	* cp-demangle.c (demangle_type): Correct thinko in substitution
+	processing.
+
+2003-11-18  Ian Lance Taylor  <ian@wasabisystems.com>
+
+	* cp-demangle.c (demangle_operator_name): Remove space before
+	"sizeof".
+	(demangle_type_ptr): Put qualifiers in the right place.  Handle
+	qualifiers in pointer to member specially.
+	(demangle_type): Handle qualifiers for pointer or reference
+	specially.  Handle function type.
+	(demangle_local_name): Save and restore caret around demangling of
+	initial encoding.
+
+	* testsuite/test-demangle.c (main): Don't pass DMGL_VERBOSE to
+	cplus_demangle.
+
+	* testsuite/Makefile.in (test-demangle): Depend upon libiberty.a.
+
 2003-10-31  Andreas Jaeger  <aj@suse.de>
 
 	* floatformat.c (floatformat_always_valid): Add unused attribute.
+
+2003-10-30  Josef Zlomek  <zlomekj@suse.cz>
+
+	Jan Hubicka <jh@suse.cz>
+	* vasprintf.c (int_vasprintf): Pass va_list by value.
+	Use va_copy for copying va_list.
+	(vasprintf): Pass va_list by value.
 
 2003-10-30  Josef Zlomek  <zlomekj@suse.cz>
 

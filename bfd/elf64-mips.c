@@ -62,79 +62,76 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "ecoffswap.h"
 
 static void mips_elf64_swap_reloc_in
-  PARAMS ((bfd *, const Elf64_Mips_External_Rel *,
-	   Elf64_Mips_Internal_Rela *));
+  (bfd *, const Elf64_Mips_External_Rel *, Elf64_Mips_Internal_Rela *);
 static void mips_elf64_swap_reloca_in
-  PARAMS ((bfd *, const Elf64_Mips_External_Rela *,
-	   Elf64_Mips_Internal_Rela *));
+  (bfd *, const Elf64_Mips_External_Rela *, Elf64_Mips_Internal_Rela *);
 static void mips_elf64_swap_reloc_out
-  PARAMS ((bfd *, const Elf64_Mips_Internal_Rela *,
-	   Elf64_Mips_External_Rel *));
+  (bfd *, const Elf64_Mips_Internal_Rela *, Elf64_Mips_External_Rel *);
 static void mips_elf64_swap_reloca_out
-  PARAMS ((bfd *, const Elf64_Mips_Internal_Rela *,
-	   Elf64_Mips_External_Rela *));
+  (bfd *, const Elf64_Mips_Internal_Rela *, Elf64_Mips_External_Rela *);
 static void mips_elf64_be_swap_reloc_in
-  PARAMS ((bfd *, const bfd_byte *, Elf_Internal_Rela *));
+  (bfd *, const bfd_byte *, Elf_Internal_Rela *);
 static void mips_elf64_be_swap_reloc_out
-  PARAMS ((bfd *, const Elf_Internal_Rela *, bfd_byte *));
+  (bfd *, const Elf_Internal_Rela *, bfd_byte *);
 static void mips_elf64_be_swap_reloca_in
-  PARAMS ((bfd *, const bfd_byte *, Elf_Internal_Rela *));
+  (bfd *, const bfd_byte *, Elf_Internal_Rela *);
 static void mips_elf64_be_swap_reloca_out
-  PARAMS ((bfd *, const Elf_Internal_Rela *, bfd_byte *));
+  (bfd *, const Elf_Internal_Rela *, bfd_byte *);
 static reloc_howto_type *bfd_elf64_bfd_reloc_type_lookup
-  PARAMS ((bfd *, bfd_reloc_code_real_type));
+  (bfd *, bfd_reloc_code_real_type);
 static reloc_howto_type *mips_elf64_rtype_to_howto
-  PARAMS ((unsigned int, bfd_boolean));
+  (unsigned int, bfd_boolean);
 static void mips_elf64_info_to_howto_rel
-  PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
+  (bfd *, arelent *, Elf_Internal_Rela *);
 static void mips_elf64_info_to_howto_rela
-  PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
+  (bfd *, arelent *, Elf_Internal_Rela *);
 static long mips_elf64_get_reloc_upper_bound
-  PARAMS ((bfd *, asection *));
+  (bfd *, asection *);
 static long mips_elf64_canonicalize_reloc
-  PARAMS ((bfd *, asection *, arelent **, asymbol **));
-static long mips_elf64_get_dynamic_reloc_upper_bound PARAMS ((bfd *));
+  (bfd *, asection *, arelent **, asymbol **);
+static long mips_elf64_get_dynamic_reloc_upper_bound
+  (bfd *);
 static long mips_elf64_canonicalize_dynamic_reloc
-  PARAMS ((bfd *, arelent **, asymbol **));
+  (bfd *, arelent **, asymbol **);
 static bfd_boolean mips_elf64_slurp_one_reloc_table
-  PARAMS ((bfd *, asection *, Elf_Internal_Shdr *, bfd_size_type,
-	   arelent *, asymbol **, bfd_boolean));
+  (bfd *, asection *, Elf_Internal_Shdr *, bfd_size_type, arelent *,
+   asymbol **, bfd_boolean);
 static bfd_boolean mips_elf64_slurp_reloc_table
-  PARAMS ((bfd *, asection *, asymbol **, bfd_boolean));
+  (bfd *, asection *, asymbol **, bfd_boolean);
 static void mips_elf64_write_relocs
-  PARAMS ((bfd *, asection *, PTR));
+  (bfd *, asection *, void *);
 static void mips_elf64_write_rel
-  PARAMS((bfd *, asection *, Elf_Internal_Shdr *, int *, PTR));
+  (bfd *, asection *, Elf_Internal_Shdr *, int *, void *);
 static void mips_elf64_write_rela
-  PARAMS((bfd *, asection *, Elf_Internal_Shdr *, int *, PTR));
+  (bfd *, asection *, Elf_Internal_Shdr *, int *, void *);
 static bfd_reloc_status_type mips_elf64_hi16_reloc
-  PARAMS ((bfd *, arelent *, asymbol *,	PTR, asection *, bfd *, char **));
+  (bfd *, arelent *, asymbol *,	void *, asection *, bfd *, char **);
 static bfd_reloc_status_type mips_elf64_gprel16_reloc
-  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+  (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
 static bfd_reloc_status_type mips_elf64_literal_reloc
-  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+  (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
 static bfd_reloc_status_type mips_elf64_gprel32_reloc
-  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+  (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
 static bfd_reloc_status_type mips_elf64_shift6_reloc
-  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+  (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
 static bfd_reloc_status_type mips_elf64_got16_reloc
-  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+  (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
 static bfd_reloc_status_type mips16_jump_reloc
-  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+  (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
 static bfd_reloc_status_type mips16_gprel_reloc
-  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+  (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
 static bfd_boolean mips_elf64_assign_gp
-  PARAMS ((bfd *, bfd_vma *));
+  (bfd *, bfd_vma *);
 static bfd_reloc_status_type mips_elf64_final_gp
-  PARAMS ((bfd *, asymbol *, bfd_boolean, char **, bfd_vma *));
+  (bfd *, asymbol *, bfd_boolean, char **, bfd_vma *);
 static bfd_boolean mips_elf64_object_p
-  PARAMS ((bfd *));
+  (bfd *);
 static irix_compat_t elf64_mips_irix_compat
-  PARAMS ((bfd *));
+  (bfd *);
 static bfd_boolean elf64_mips_grok_prstatus
-  PARAMS ((bfd *, Elf_Internal_Note *));
+  (bfd *, Elf_Internal_Note *);
 static bfd_boolean elf64_mips_grok_psinfo
-  PARAMS ((bfd *, Elf_Internal_Note *));
+  (bfd *, Elf_Internal_Note *);
 
 extern const bfd_target bfd_elf64_bigmips_vec;
 extern const bfd_target bfd_elf64_littlemips_vec;
@@ -475,7 +472,7 @@ static reloc_howto_type mips_elf64_howto_table_rel[] =
 	 0x0000ffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
-  /* 64 bit substraction.  */
+  /* 64 bit subtraction.  */
   HOWTO (R_MIPS_SUB,		/* type */
 	 0,			/* rightshift */
 	 4,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -970,7 +967,7 @@ static reloc_howto_type mips_elf64_howto_table_rela[] =
 	 0x0000ffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
-  /* 64 bit substraction.  */
+  /* 64 bit subtraction.  */
   HOWTO (R_MIPS_SUB,		/* type */
 	 0,			/* rightshift */
 	 4,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -1262,10 +1259,8 @@ static reloc_howto_type elf_mips_gnu_rela16_s2 =
 /* Swap in a MIPS 64-bit Rel reloc.  */
 
 static void
-mips_elf64_swap_reloc_in (abfd, src, dst)
-     bfd *abfd;
-     const Elf64_Mips_External_Rel *src;
-     Elf64_Mips_Internal_Rela *dst;
+mips_elf64_swap_reloc_in (bfd *abfd, const Elf64_Mips_External_Rel *src,
+			  Elf64_Mips_Internal_Rela *dst)
 {
   dst->r_offset = H_GET_64 (abfd, src->r_offset);
   dst->r_sym = H_GET_32 (abfd, src->r_sym);
@@ -1279,10 +1274,8 @@ mips_elf64_swap_reloc_in (abfd, src, dst)
 /* Swap in a MIPS 64-bit Rela reloc.  */
 
 static void
-mips_elf64_swap_reloca_in (abfd, src, dst)
-     bfd *abfd;
-     const Elf64_Mips_External_Rela *src;
-     Elf64_Mips_Internal_Rela *dst;
+mips_elf64_swap_reloca_in (bfd *abfd, const Elf64_Mips_External_Rela *src,
+			   Elf64_Mips_Internal_Rela *dst)
 {
   dst->r_offset = H_GET_64 (abfd, src->r_offset);
   dst->r_sym = H_GET_32 (abfd, src->r_sym);
@@ -1296,10 +1289,8 @@ mips_elf64_swap_reloca_in (abfd, src, dst)
 /* Swap out a MIPS 64-bit Rel reloc.  */
 
 static void
-mips_elf64_swap_reloc_out (abfd, src, dst)
-     bfd *abfd;
-     const Elf64_Mips_Internal_Rela *src;
-     Elf64_Mips_External_Rel *dst;
+mips_elf64_swap_reloc_out (bfd *abfd, const Elf64_Mips_Internal_Rela *src,
+			   Elf64_Mips_External_Rel *dst)
 {
   H_PUT_64 (abfd, src->r_offset, dst->r_offset);
   H_PUT_32 (abfd, src->r_sym, dst->r_sym);
@@ -1312,10 +1303,8 @@ mips_elf64_swap_reloc_out (abfd, src, dst)
 /* Swap out a MIPS 64-bit Rela reloc.  */
 
 static void
-mips_elf64_swap_reloca_out (abfd, src, dst)
-     bfd *abfd;
-     const Elf64_Mips_Internal_Rela *src;
-     Elf64_Mips_External_Rela *dst;
+mips_elf64_swap_reloca_out (bfd *abfd, const Elf64_Mips_Internal_Rela *src,
+			    Elf64_Mips_External_Rela *dst)
 {
   H_PUT_64 (abfd, src->r_offset, dst->r_offset);
   H_PUT_32 (abfd, src->r_sym, dst->r_sym);
@@ -1329,10 +1318,8 @@ mips_elf64_swap_reloca_out (abfd, src, dst)
 /* Swap in a MIPS 64-bit Rel reloc.  */
 
 static void
-mips_elf64_be_swap_reloc_in (abfd, src, dst)
-     bfd *abfd;
-     const bfd_byte *src;
-     Elf_Internal_Rela *dst;
+mips_elf64_be_swap_reloc_in (bfd *abfd, const bfd_byte *src,
+			     Elf_Internal_Rela *dst)
 {
   Elf64_Mips_Internal_Rela mirel;
 
@@ -1354,10 +1341,8 @@ mips_elf64_be_swap_reloc_in (abfd, src, dst)
 /* Swap in a MIPS 64-bit Rela reloc.  */
 
 static void
-mips_elf64_be_swap_reloca_in (abfd, src, dst)
-     bfd *abfd;
-     const bfd_byte *src;
-     Elf_Internal_Rela *dst;
+mips_elf64_be_swap_reloca_in (bfd *abfd, const bfd_byte *src,
+			      Elf_Internal_Rela *dst)
 {
   Elf64_Mips_Internal_Rela mirela;
 
@@ -1379,10 +1364,8 @@ mips_elf64_be_swap_reloca_in (abfd, src, dst)
 /* Swap out a MIPS 64-bit Rel reloc.  */
 
 static void
-mips_elf64_be_swap_reloc_out (abfd, src, dst)
-     bfd *abfd;
-     const Elf_Internal_Rela *src;
-     bfd_byte *dst;
+mips_elf64_be_swap_reloc_out (bfd *abfd, const Elf_Internal_Rela *src,
+			      bfd_byte *dst)
 {
   Elf64_Mips_Internal_Rela mirel;
 
@@ -1405,10 +1388,8 @@ mips_elf64_be_swap_reloc_out (abfd, src, dst)
 /* Swap out a MIPS 64-bit Rela reloc.  */
 
 static void
-mips_elf64_be_swap_reloca_out (abfd, src, dst)
-     bfd *abfd;
-     const Elf_Internal_Rela *src;
-     bfd_byte *dst;
+mips_elf64_be_swap_reloca_out (bfd *abfd, const Elf_Internal_Rela *src,
+			       bfd_byte *dst)
 {
   Elf64_Mips_Internal_Rela mirela;
 
@@ -1433,19 +1414,14 @@ mips_elf64_be_swap_reloca_out (abfd, src, dst)
 /* Do a R_MIPS_HI16 relocation.  */
 
 static bfd_reloc_status_type
-mips_elf64_hi16_reloc (abfd, reloc_entry, symbol, data, input_section,
-		       output_bfd, error_message)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     arelent *reloc_entry;
-     asymbol *symbol;
-     PTR data ATTRIBUTE_UNUSED;
-     asection *input_section;
-     bfd *output_bfd;
-     char **error_message ATTRIBUTE_UNUSED;
+mips_elf64_hi16_reloc (bfd *abfd ATTRIBUTE_UNUSED, arelent *reloc_entry,
+		       asymbol *symbol, void *data ATTRIBUTE_UNUSED,
+		       asection *input_section, bfd *output_bfd,
+		       char **error_message ATTRIBUTE_UNUSED)
 {
   /* If we're relocating, and this is an external symbol, we don't
      want to change anything.  */
-  if (output_bfd != (bfd *) NULL
+  if (output_bfd != NULL
       && (symbol->flags & BSF_SECTION_SYM) == 0
       && (symbol->flags & BSF_LOCAL) != 0)
     {
@@ -1477,19 +1453,13 @@ mips_elf64_hi16_reloc (abfd, reloc_entry, symbol, data, input_section,
    not yet know how to create global offset tables.  */
 
 static bfd_reloc_status_type
-mips_elf64_got16_reloc (abfd, reloc_entry, symbol, data, input_section,
-			output_bfd, error_message)
-     bfd *abfd;
-     arelent *reloc_entry;
-     asymbol *symbol;
-     PTR data;
-     asection *input_section;
-     bfd *output_bfd;
-     char **error_message;
+mips_elf64_got16_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
+			void *data, asection *input_section, bfd *output_bfd,
+			char **error_message)
 {
   /* If we're relocating, and this is a local symbol, we can handle it
      just like an R_MIPS_HI16.  */
-  if (output_bfd != (bfd *) NULL
+  if (output_bfd != NULL
       && ((symbol->flags & BSF_SECTION_SYM) != 0
 	  || (symbol->flags & BSF_LOCAL) == 0))
     return mips_elf64_hi16_reloc (abfd, reloc_entry, symbol, data,
@@ -1505,9 +1475,7 @@ mips_elf64_got16_reloc (abfd, reloc_entry, symbol, data, input_section,
    dangerous relocation.  */
 
 static bfd_boolean
-mips_elf64_assign_gp (output_bfd, pgp)
-     bfd *output_bfd;
-     bfd_vma *pgp;
+mips_elf64_assign_gp (bfd *output_bfd, bfd_vma *pgp)
 {
   unsigned int count;
   asymbol **sym;
@@ -1523,7 +1491,7 @@ mips_elf64_assign_gp (output_bfd, pgp)
 
   /* The linker script will have created a symbol named `_gp' with the
      appropriate value.  */
-  if (sym == (asymbol **) NULL)
+  if (sym == NULL)
     i = count;
   else
     {
@@ -1559,12 +1527,8 @@ mips_elf64_assign_gp (output_bfd, pgp)
    external symbol if we are producing relocatable output.  */
 
 static bfd_reloc_status_type
-mips_elf64_final_gp (output_bfd, symbol, relocatable, error_message, pgp)
-     bfd *output_bfd;
-     asymbol *symbol;
-     bfd_boolean relocatable;
-     char **error_message;
-     bfd_vma *pgp;
+mips_elf64_final_gp (bfd *output_bfd, asymbol *symbol, bfd_boolean relocatable,
+		     char **error_message, bfd_vma *pgp)
 {
   if (bfd_is_und_section (symbol->section)
       && ! relocatable)
@@ -1599,15 +1563,9 @@ mips_elf64_final_gp (output_bfd, symbol, relocatable, error_message, pgp)
    become the offset from the gp register.  */
 
 static bfd_reloc_status_type
-mips_elf64_gprel16_reloc (abfd, reloc_entry, symbol, data, input_section,
-			  output_bfd, error_message)
-     bfd *abfd;
-     arelent *reloc_entry;
-     asymbol *symbol;
-     PTR data;
-     asection *input_section;
-     bfd *output_bfd;
-     char **error_message;
+mips_elf64_gprel16_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
+			  void *data, asection *input_section, bfd *output_bfd,
+			  char **error_message)
 {
   bfd_boolean relocatable;
   bfd_reloc_status_type ret;
@@ -1615,7 +1573,7 @@ mips_elf64_gprel16_reloc (abfd, reloc_entry, symbol, data, input_section,
 
   /* If we're relocating, and this is an external symbol, we don't want
      to change anything.  */
-  if (output_bfd != (bfd *) NULL
+  if (output_bfd != NULL
       && (symbol->flags & BSF_SECTION_SYM) == 0
       && (symbol->flags & BSF_LOCAL) != 0)
     {
@@ -1623,7 +1581,7 @@ mips_elf64_gprel16_reloc (abfd, reloc_entry, symbol, data, input_section,
       return bfd_reloc_ok;
     }
 
-  if (output_bfd != (bfd *) NULL)
+  if (output_bfd != NULL)
     relocatable = TRUE;
   else
     {
@@ -1644,15 +1602,9 @@ mips_elf64_gprel16_reloc (abfd, reloc_entry, symbol, data, input_section,
 /* Do a R_MIPS_LITERAL relocation.  */
 
 static bfd_reloc_status_type
-mips_elf64_literal_reloc (abfd, reloc_entry, symbol, data, input_section,
-			  output_bfd, error_message)
-     bfd *abfd;
-     arelent *reloc_entry;
-     asymbol *symbol;
-     PTR data;
-     asection *input_section;
-     bfd *output_bfd;
-     char **error_message;
+mips_elf64_literal_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
+			  void *data, asection *input_section, bfd *output_bfd,
+			  char **error_message)
 {
   bfd_boolean relocatable;
   bfd_reloc_status_type ret;
@@ -1660,7 +1612,7 @@ mips_elf64_literal_reloc (abfd, reloc_entry, symbol, data, input_section,
 
   /* If we're relocating, and this is an external symbol, we don't
      want to change anything.  */
-  if (output_bfd != (bfd *) NULL
+  if (output_bfd != NULL
       && (symbol->flags & BSF_SECTION_SYM) == 0
       && (symbol->flags & BSF_LOCAL) != 0)
     {
@@ -1669,7 +1621,7 @@ mips_elf64_literal_reloc (abfd, reloc_entry, symbol, data, input_section,
     }
 
   /* FIXME: The entries in the .lit8 and .lit4 sections should be merged.  */
-  if (output_bfd != (bfd *) NULL)
+  if (output_bfd != NULL)
     relocatable = TRUE;
   else
     {
@@ -1691,15 +1643,9 @@ mips_elf64_literal_reloc (abfd, reloc_entry, symbol, data, input_section,
    become the offset from the gp register.  */
 
 static bfd_reloc_status_type
-mips_elf64_gprel32_reloc (abfd, reloc_entry, symbol, data, input_section,
-			  output_bfd, error_message)
-     bfd *abfd;
-     arelent *reloc_entry;
-     asymbol *symbol;
-     PTR data;
-     asection *input_section;
-     bfd *output_bfd;
-     char **error_message;
+mips_elf64_gprel32_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
+			  void *data, asection *input_section, bfd *output_bfd,
+			  char **error_message)
 {
   bfd_boolean relocatable;
   bfd_reloc_status_type ret;
@@ -1709,7 +1655,7 @@ mips_elf64_gprel32_reloc (abfd, reloc_entry, symbol, data, input_section,
 
   /* If we're relocating, and this is an external symbol, we don't want
      to change anything.  */
-  if (output_bfd != (bfd *) NULL
+  if (output_bfd != NULL
       && (symbol->flags & BSF_SECTION_SYM) == 0
       && (symbol->flags & BSF_LOCAL) != 0)
     {
@@ -1718,7 +1664,7 @@ mips_elf64_gprel32_reloc (abfd, reloc_entry, symbol, data, input_section,
       return bfd_reloc_outofrange;
     }
 
-  if (output_bfd != (bfd *) NULL)
+  if (output_bfd != NULL)
     relocatable = TRUE;
   else
     {
@@ -1770,19 +1716,14 @@ mips_elf64_gprel32_reloc (abfd, reloc_entry, symbol, data, input_section,
    the rest is at bits 6-10. The bitpos already got right by the howto.  */
 
 static bfd_reloc_status_type
-mips_elf64_shift6_reloc (abfd, reloc_entry, symbol, data, input_section,
-			 output_bfd, error_message)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     arelent *reloc_entry;
-     asymbol *symbol;
-     PTR data ATTRIBUTE_UNUSED;
-     asection *input_section;
-     bfd *output_bfd;
-     char **error_message ATTRIBUTE_UNUSED;
+mips_elf64_shift6_reloc (bfd *abfd ATTRIBUTE_UNUSED, arelent *reloc_entry,
+			 asymbol *symbol, void *data ATTRIBUTE_UNUSED,
+			 asection *input_section, bfd *output_bfd,
+			 char **error_message ATTRIBUTE_UNUSED)
 {
   /* If we're relocating, and this is an external symbol, we don't
      want to change anything.  */
-  if (output_bfd != (bfd *) NULL
+  if (output_bfd != NULL
       && (symbol->flags & BSF_SECTION_SYM) == 0
       && (symbol->flags & BSF_LOCAL) != 0)
     {
@@ -1802,17 +1743,12 @@ mips_elf64_shift6_reloc (abfd, reloc_entry, symbol, data, input_section,
 /* Handle a mips16 jump.  */
 
 static bfd_reloc_status_type
-mips16_jump_reloc (abfd, reloc_entry, symbol, data, input_section,
-		   output_bfd, error_message)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     arelent *reloc_entry;
-     asymbol *symbol;
-     PTR data ATTRIBUTE_UNUSED;
-     asection *input_section;
-     bfd *output_bfd;
-     char **error_message ATTRIBUTE_UNUSED;
+mips16_jump_reloc (bfd *abfd ATTRIBUTE_UNUSED, arelent *reloc_entry,
+		   asymbol *symbol, void *data ATTRIBUTE_UNUSED,
+		   asection *input_section, bfd *output_bfd,
+		   char **error_message ATTRIBUTE_UNUSED)
 {
-  if (output_bfd != (bfd *) NULL
+  if (output_bfd != NULL
       && (symbol->flags & BSF_SECTION_SYM) == 0
       && (! reloc_entry->howto->partial_inplace
 	  || reloc_entry->addend == 0))
@@ -1838,15 +1774,9 @@ mips16_jump_reloc (abfd, reloc_entry, symbol, data, input_section,
 /* Handle a mips16 GP relative reloc.  */
 
 static bfd_reloc_status_type
-mips16_gprel_reloc (abfd, reloc_entry, symbol, data, input_section,
-		    output_bfd, error_message)
-     bfd *abfd;
-     arelent *reloc_entry;
-     asymbol *symbol;
-     PTR data;
-     asection *input_section;
-     bfd *output_bfd;
-     char **error_message;
+mips16_gprel_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
+		    void *data, asection *input_section, bfd *output_bfd,
+		    char **error_message)
 {
   bfd_boolean relocatable;
   bfd_reloc_status_type ret;
@@ -1913,13 +1843,10 @@ mips16_gprel_reloc (abfd, reloc_entry, symbol, data, input_section,
   if (reloc_entry->howto->partial_inplace)
     {
       bfd_put_16 (abfd,
-		  (bfd_vma) ((extend & 0xf800)
-			     | ((val >> 11) & 0x1f)
-			     | (val & 0x7e0)),
+		  (extend & 0xf800) | ((val >> 11) & 0x1f) | (val & 0x7e0),
 		  (bfd_byte *) data + reloc_entry->address);
       bfd_put_16 (abfd,
-		  (bfd_vma) ((insn & 0xffe0)
-			     | (val & 0x1f)),
+		  (insn & 0xffe0) | (val & 0x1f),
 		  (bfd_byte *) data + reloc_entry->address + 2);
     }
   else
@@ -1982,9 +1909,8 @@ static const struct elf_reloc_map mips_reloc_map[] =
 /* Given a BFD reloc type, return a howto structure.  */
 
 static reloc_howto_type *
-bfd_elf64_bfd_reloc_type_lookup (abfd, code)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     bfd_reloc_code_real_type code;
+bfd_elf64_bfd_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+				 bfd_reloc_code_real_type code)
 {
   unsigned int i;
   /* FIXME: We default to RELA here instead of choosing the right
@@ -2019,9 +1945,7 @@ bfd_elf64_bfd_reloc_type_lookup (abfd, code)
 /* Given a MIPS Elf_Internal_Rel, fill in an arelent structure.  */
 
 static reloc_howto_type *
-mips_elf64_rtype_to_howto (r_type, rela_p)
-     unsigned int r_type;
-     bfd_boolean rela_p;
+mips_elf64_rtype_to_howto (unsigned int r_type, bfd_boolean rela_p)
 {
   switch (r_type)
     {
@@ -2051,19 +1975,17 @@ mips_elf64_rtype_to_howto (r_type, rela_p)
 /* Prevent relocation handling by bfd for MIPS ELF64.  */
 
 static void
-mips_elf64_info_to_howto_rel (abfd, cache_ptr, dst)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     arelent *cache_ptr ATTRIBUTE_UNUSED;
-     Elf_Internal_Rela *dst ATTRIBUTE_UNUSED;
+mips_elf64_info_to_howto_rel (bfd *abfd ATTRIBUTE_UNUSED,
+			      arelent *cache_ptr ATTRIBUTE_UNUSED,
+			      Elf_Internal_Rela *dst ATTRIBUTE_UNUSED)
 {
   BFD_ASSERT (0);
 }
 
 static void
-mips_elf64_info_to_howto_rela (abfd, cache_ptr, dst)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     arelent *cache_ptr ATTRIBUTE_UNUSED;
-     Elf_Internal_Rela *dst ATTRIBUTE_UNUSED;
+mips_elf64_info_to_howto_rela (bfd *abfd ATTRIBUTE_UNUSED,
+			       arelent *cache_ptr ATTRIBUTE_UNUSED,
+			       Elf_Internal_Rela *dst ATTRIBUTE_UNUSED)
 {
   BFD_ASSERT (0);
 }
@@ -2072,16 +1994,13 @@ mips_elf64_info_to_howto_rela (abfd, cache_ptr, dst)
    to three relocs, we must tell the user to allocate more space.  */
 
 static long
-mips_elf64_get_reloc_upper_bound (abfd, sec)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     asection *sec;
+mips_elf64_get_reloc_upper_bound (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
 {
   return (sec->reloc_count * 3 + 1) * sizeof (arelent *);
 }
 
 static long
-mips_elf64_get_dynamic_reloc_upper_bound (abfd)
-     bfd *abfd;
+mips_elf64_get_dynamic_reloc_upper_bound (bfd *abfd)
 {
   return _bfd_elf_get_dynamic_reloc_upper_bound (abfd) * 3;
 }
@@ -2092,11 +2011,8 @@ mips_elf64_get_dynamic_reloc_upper_bound (abfd)
    3 to obtain the internal relocation count.  */
 
 static long
-mips_elf64_canonicalize_reloc (abfd, section, relptr, symbols)
-     bfd *abfd;
-     sec_ptr section;
-     arelent **relptr;
-     asymbol **symbols;
+mips_elf64_canonicalize_reloc (bfd *abfd, sec_ptr section,
+			       arelent **relptr, asymbol **symbols)
 {
   arelent *tblptr;
   unsigned int i;
@@ -2115,13 +2031,10 @@ mips_elf64_canonicalize_reloc (abfd, section, relptr, symbols)
 }
 
 static long
-mips_elf64_canonicalize_dynamic_reloc (abfd, storage, syms)
-     bfd *abfd;
-     arelent **storage;
-     asymbol **syms;
+mips_elf64_canonicalize_dynamic_reloc (bfd *abfd, arelent **storage,
+				       asymbol **syms)
 {
-  bfd_boolean (*slurp_relocs)
-    PARAMS ((bfd *, asection *, asymbol **, bfd_boolean));
+  bfd_boolean (*slurp_relocs) (bfd *, asection *, asymbol **, bfd_boolean);
   asection *s;
   long ret;
 
@@ -2164,24 +2077,20 @@ mips_elf64_canonicalize_dynamic_reloc (abfd, storage, syms)
    generic code seems to depend on this.  */
 
 static bfd_boolean
-mips_elf64_slurp_one_reloc_table (abfd, asect, rel_hdr, reloc_count,
-				  relents, symbols, dynamic)
-     bfd *abfd;
-     asection *asect;
-     Elf_Internal_Shdr *rel_hdr;
-     bfd_size_type reloc_count;
-     arelent *relents;
-     asymbol **symbols;
-     bfd_boolean dynamic;
+mips_elf64_slurp_one_reloc_table (bfd *abfd, asection *asect,
+				  Elf_Internal_Shdr *rel_hdr,
+				  bfd_size_type reloc_count,
+				  arelent *relents, asymbol **symbols,
+				  bfd_boolean dynamic)
 {
-  PTR allocated = NULL;
+  void *allocated;
   bfd_byte *native_relocs;
   arelent *relent;
   bfd_vma i;
   int entsize;
   reloc_howto_type *howto_table;
 
-  allocated = (PTR) bfd_malloc (rel_hdr->sh_size);
+  allocated = bfd_malloc (rel_hdr->sh_size);
   if (allocated == NULL)
     return FALSE;
 
@@ -2190,7 +2099,7 @@ mips_elf64_slurp_one_reloc_table (abfd, asect, rel_hdr, reloc_count,
 	  != rel_hdr->sh_size))
     goto error_return;
 
-  native_relocs = (bfd_byte *) allocated;
+  native_relocs = allocated;
 
   entsize = rel_hdr->sh_entsize;
   BFD_ASSERT (entsize == sizeof (Elf64_Mips_External_Rel)
@@ -2338,11 +2247,8 @@ mips_elf64_slurp_one_reloc_table (abfd, asect, rel_hdr, reloc_count,
    zero before processing the relocs of a section.  */
 
 static bfd_boolean
-mips_elf64_slurp_reloc_table (abfd, asect, symbols, dynamic)
-     bfd *abfd;
-     asection *asect;
-     asymbol **symbols;
-     bfd_boolean dynamic;
+mips_elf64_slurp_reloc_table (bfd *abfd, asection *asect,
+			      asymbol **symbols, bfd_boolean dynamic)
 {
   struct bfd_elf_section_data * const d = elf_section_data (asect);
   Elf_Internal_Shdr *rel_hdr;
@@ -2388,7 +2294,7 @@ mips_elf64_slurp_reloc_table (abfd, asect, symbols, dynamic)
 
   /* Allocate space for 3 arelent structures for each Rel structure.  */
   amt = (reloc_count + reloc_count2) * 3 * sizeof (arelent);
-  relents = (arelent *) bfd_alloc (abfd, amt);
+  relents = bfd_alloc (abfd, amt);
   if (relents == NULL)
     return FALSE;
 
@@ -2416,12 +2322,9 @@ mips_elf64_slurp_reloc_table (abfd, asect, symbols, dynamic)
 /* Write out the relocations.  */
 
 static void
-mips_elf64_write_relocs (abfd, sec, data)
-     bfd *abfd;
-     asection *sec;
-     PTR data;
+mips_elf64_write_relocs (bfd *abfd, asection *sec, void *data)
 {
-  bfd_boolean *failedp = (bfd_boolean *) data;
+  bfd_boolean *failedp = data;
   int count;
   Elf_Internal_Shdr *rel_hdr;
   unsigned int idx;
@@ -2482,21 +2385,18 @@ mips_elf64_write_relocs (abfd, sec, data)
 }
 
 static void
-mips_elf64_write_rel (abfd, sec, rel_hdr, count, data)
-     bfd *abfd;
-     asection *sec;
-     Elf_Internal_Shdr *rel_hdr;
-     int *count;
-     PTR data;
+mips_elf64_write_rel (bfd *abfd, asection *sec,
+		      Elf_Internal_Shdr *rel_hdr,
+		      int *count, void *data)
 {
-  bfd_boolean *failedp = (bfd_boolean *) data;
+  bfd_boolean *failedp = data;
   Elf64_Mips_External_Rel *ext_rel;
   unsigned int idx;
   asymbol *last_sym = 0;
   int last_sym_idx = 0;
 
-  rel_hdr->sh_size = (bfd_vma)(rel_hdr->sh_entsize * *count);
-  rel_hdr->contents = (PTR) bfd_alloc (abfd, rel_hdr->sh_size);
+  rel_hdr->sh_size = rel_hdr->sh_entsize * *count;
+  rel_hdr->contents = bfd_alloc (abfd, rel_hdr->sh_size);
   if (rel_hdr->contents == NULL)
     {
       *failedp = TRUE;
@@ -2581,21 +2481,18 @@ mips_elf64_write_rel (abfd, sec, rel_hdr, count, data)
 }
 
 static void
-mips_elf64_write_rela (abfd, sec, rela_hdr, count, data)
-     bfd *abfd;
-     asection *sec;
-     Elf_Internal_Shdr *rela_hdr;
-     int *count;
-     PTR data;
+mips_elf64_write_rela (bfd *abfd, asection *sec,
+		       Elf_Internal_Shdr *rela_hdr,
+		       int *count, void *data)
 {
-  bfd_boolean *failedp = (bfd_boolean *) data;
+  bfd_boolean *failedp = data;
   Elf64_Mips_External_Rela *ext_rela;
   unsigned int idx;
   asymbol *last_sym = 0;
   int last_sym_idx = 0;
 
-  rela_hdr->sh_size = (bfd_vma)(rela_hdr->sh_entsize * *count);
-  rela_hdr->contents = (PTR) bfd_alloc (abfd, rela_hdr->sh_size);
+  rela_hdr->sh_size = rela_hdr->sh_entsize * *count;
+  rela_hdr->contents = bfd_alloc (abfd, rela_hdr->sh_size);
   if (rela_hdr->contents == NULL)
     {
       *failedp = TRUE;
@@ -2683,8 +2580,7 @@ mips_elf64_write_rela (abfd, sec, rela_hdr, count, data)
 /* Set the right machine number for a MIPS ELF file.  */
 
 static bfd_boolean
-mips_elf64_object_p (abfd)
-     bfd *abfd;
+mips_elf64_object_p (bfd *abfd)
 {
   unsigned long mach;
 
@@ -2702,8 +2598,7 @@ mips_elf64_object_p (abfd)
 /* Depending on the target vector we generate some version of Irix
    executables or "normal" MIPS ELF ABI executables.  */
 static irix_compat_t
-elf64_mips_irix_compat (abfd)
-     bfd *abfd;
+elf64_mips_irix_compat (bfd *abfd)
 {
   if ((abfd->xvec == &bfd_elf64_bigmips_vec)
       || (abfd->xvec == &bfd_elf64_littlemips_vec))
@@ -2714,9 +2609,7 @@ elf64_mips_irix_compat (abfd)
 
 /* Support for core dump NOTE sections.  */
 static bfd_boolean
-elf64_mips_grok_prstatus (abfd, note)
-     bfd *abfd;
-     Elf_Internal_Note *note;
+elf64_mips_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
 {
   int offset;
   unsigned int raw_size;
@@ -2746,9 +2639,7 @@ elf64_mips_grok_prstatus (abfd, note)
 }
 
 static bfd_boolean
-elf64_mips_grok_psinfo (abfd, note)
-     bfd *abfd;
-     Elf_Internal_Note *note;
+elf64_mips_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
 {
   switch (note->descsz)
     {
@@ -2948,9 +2839,9 @@ const struct elf_size_info mips_elf64_size_info =
 /* MIPS ELF64 archive functions.  */
 #define bfd_elf64_archive_functions
 extern bfd_boolean bfd_elf64_archive_slurp_armap
-  PARAMS ((bfd *));
+  (bfd *);
 extern bfd_boolean bfd_elf64_archive_write_armap
-  PARAMS ((bfd *, unsigned int, struct orl *, unsigned int, int));
+  (bfd *, unsigned int, struct orl *, unsigned int, int);
 #define bfd_elf64_archive_slurp_extended_name_table \
 			_bfd_archive_coff_slurp_extended_name_table
 #define bfd_elf64_archive_construct_extended_name_table \

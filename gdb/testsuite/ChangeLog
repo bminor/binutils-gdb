@@ -1,3 +1,242 @@
+2003-12-13  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.base/freebpcmd.exp, gdb.base/freebpcmd.c: New test.
+
+2003-12-12  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdb.asm/frv.inc: New file.
+	* gdb.asm/asm-source.exp: Add frv-*-* as a supported target.
+
+2003-12-09  Fred Fish  <fnf@redhat.com>
+
+	* gdb.base/break.c (marker1, marker2, marker3, marker4): Move
+	functions to break1.c and leave prototypes behind.  Add more
+	"set breakpoint NN here" comments.
+	* gdb.base/break1.c: New file.
+
+	* gdb.base/break.exp: Handle compiling test case from multiple
+	source files and change source file references as needed.
+	* gdb.base/completion.exp: Ditto.
+	* gdb.base/condbreak.exp: Ditto.
+	* gdb.base/define.exp: Ditto.
+	* gdb.base/ena-dis-br.exp: Ditto.
+	* gdb.base/info-proc.exp: Ditto.
+	* gdb.base/maint.exp: Ditto.
+	* gdb.base/until.exp: Ditto.
+
+	* gdb.base/condbreak.exp: Use bp_locationNN variables instead of
+	hardcoded line numbers.
+	* gdb.base/define.exp: Ditto.
+	* gdb.base/ena-dis-br.exp: Ditto.
+	* gdb.base/maint.exp: Ditto.
+	* gdb.base/until.exp: Ditto.
+
+	* gdb.base/completion.exp: Use "break1" for completion tests since
+	"break" is no longer a unique prefix.
+
+2003-12-06  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/structs.exp (test_struct_returns): When applicable, set
+	"return_value_unimplemented".  When an unimplemented struct return
+	architecture, report incorrect values as a KFAIL
+
+2003-12-05  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/rtti.exp: Accept new wording of warning from
+	cp_lookup_rtti_type.
+
+2003-12-05  Michael Chastain  <mec.gnu@mindspring.com>
+
+	Partial fix for PR testsuite/1456.
+	* gdb.base/scope.exp (test_at_main): Replace references to
+	gcc_compiled with calls to test_compiler_info.
+	(test_at_foo): Likewise.
+	(test_at_bar): Likewise.
+
+2003-12-04  Michael Chastain  <mec.gnu@mindspring.com>
+
+	Partial fix for PR testsuite/1456.
+	* gdb.base/so-impl-ld.exp: Replace reference to gcc_compiled with call
+	to test_compiler_info.
+
+2003-12-03  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.base/so-impl-ld.exp: Update copyright notice.
+
+2003-12-02  Michael Chastain  <mec.gnu@mindspring.com>
+
+	Partial fix for PR testsuite/1456.
+	* gdb.base/mips_pro.exp: Replace references to gcc_compiled with calls
+	to test_compiler_info.
+
+2003-11-28  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.objc/objcdecode.exp: Match and KFAIL the output that comes
+	from current versions of gdb.  Clean up regular expressions.
+	Delete redundant timeout case.
+
+2003-11-28  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.objc/nondebug.exp: Match and KFAIL the output that comes
+	from current versions of gdb.  Clean up regular expressions.
+	Delete redundant timeout case.
+
+2003-12-01  Michael Chastain  <mec.gnu@mindspring.com>
+
+	Partial fix for PR testsuite/1456.
+	* gdb.base/callfuncs.exp (do_function_calls): Replace reference to
+	gcc_compiled with call to test_compiler_info.
+
+2003-11-30  Michael Chastain  <mec.gnu@mindspring.com>
+
+	Partial fix for PR testsuite/1456.
+	* gdb.base/list.exp (test_list_function): Delete unused declaration
+	of gcc_compiled.
+
+2003-11-29  Michael Chastain  <mec.gnu@mindspring.com>
+
+	Partial fix for PR testsuite/1456.
+	* gdb.base/complex.exp: Replace reference to gcc_compiled with
+	call to test_compiler_info.
+
+2003-11-29  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.asm/asm-source.exp: Initialize asm-note to "empty".  Set
+	asm-note to "netbsd" for *-*-netbsdelf* and x86_64-*-netbsd*.  Use
+	it to create the appropriate note.inc.
+	* gdb.asm/asmsrc1.s: Include "note.inc".
+	* gdb.asm/netbsd.inc: New file.
+	* gdb.asm/empty.inc: New file.
+
+2003-11-28  Michael Chastain  <mec.gnu@mindspring.com>
+
+	Partial fix for PR testsuite/1456.
+	* gdb.base/constvars.exp: Replace references to gcc_compiled with
+	calls to test_compiler_info.
+
+2003-11-27  Michael Chastain  <mec.gnu@mindspring.com>
+
+	Partial fix for PR testsuite/1456.
+	* gdb.base/volatile.exp: Replace references to gcc_compiled with
+	calls to test_compiler_info.
+
+2003-11-27  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/structs.exp: Use i*86-*-* instead of i686-*-* as a
+	pattern for the KFAILs.
+
+2003-11-25  Adam Fedor  <fedor@gnu.org>
+
+	* gdb.objc/objcdecode.exp: Test for PR objc/1238.
+	* gdb.objc/objcdecode.m: New file.
+
+2003-11-25  Adam Fedor  <fedor@gnu.org>
+
+	* gdb.objc/nondebug.exp: Test for PR objc/1236.
+	* gdb.objc/nondebug.m: New file.
+
+2003-11-26  Ben Elliston  <bje@wasabisystems.com>
+
+	* gdb.asm/asm-source.exp: Make sure the final link succeeds on
+	NetBSD as it does on FreeBSD.  Modelled on a similar change by
+	Mark Kettenis on 2003-05-30.
+	(link-flags): Set to "--entry _start" regardless of target.
+	Special linker flags are to be appended to $link-flags.
+	* gdb.asm/mips.inc (gdbasm_startup): Remove __start label.
+
+2003-11-25  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/method.exp: Accept output of new demangler.
+
+2003-11-25  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb/class2.exp: New file.
+	* gdb/class2.cc: New file.
+
+2003-11-25  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/templates.exp (test_ptype_of_templates): Accept output
+	of new demangler.
+
+2003-11-23  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.arch/i386-unwind.exp: Use gdb_run_cmd and gdb_expect instead
+	of gdb_test "run".
+
+2003-11-23  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.arch/i386-unwind.exp: Don't use runto_main.  Change
+	"continue" into "run".
+
+2003-11-23  Michael Chastain  <mec.gnu@mindspring.com>
+
+	Partial fix for PR testsuite/1456.
+	* gdb.cp/ambiguous.exp: Replace reference to gcc_compiled with
+	call to test_compiler_info.
+	* gdb.cp/ctti.exp: Likewise.
+	* gdb.cp/derivation.exp: Likewise.
+	* gdb.cp/member-ptr.exp: Likewise.
+	* gdb.cp/virtfunc.exp (test_virtual_calls): Remove unused
+	reference to gcc_compiled.
+
+2003-11-23  Michael Chastain  <mec.gnu@mindspring.com>
+
+	Fix PR testsuite/1463.
+	* gdb.base/structs.exp (start_structs_test): Call
+	get_debug_format before using the debug format.
+
+2003-11-22  Andrew Cagney  <cagney@redhat.com>
+
+	* lib/gdb.exp (gdb_test_multiple): Add simple example.
+	* gdb.base/structs.exp: Use gdb_test_multiple.
+
+2003-11-20  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/structs.exp: Handle and recover from internal errors.
+	Replace "foo${n}" with "foo<n>" in test messages.
+
+	* gdb.base/structs.exp: Update copyright.  Rewrite.
+	* gdb.base/structs.c: Update copyright.  Rewrite.
+
+	* lib/gdb.exp (gdb_internal_error_resync): Issue a perror when the
+	resync count exceeded.
+	
+	* gdb.base/maint.exp: Use gdb_internal_error_resync to recover
+	from the internal error.
+	* lib/gdb.exp (gdb_internal_error_resync): New procedure.
+	Original from Jim Blandy.
+	(gdb_test_multiple): Use gdb_internal_error_resync.
+
+2003-11-19  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/callfuncs.exp: Change the XFAILed descriptor test to a
+	KFAIL.
+
+2003-11-17  Mark Kettenis  <kettenis@gnu.org>
+
+	New testcase for PR backtrace/1435.
+	* gdb.arch/i386-unwind.exp: New file.
+	* gdb.arch/i386-unwind.c: New file.
+
+2003-11-17  Andrew Cagney  <cagney@redhat.com>
+
+	* lib/gdb.exp (compiler_info): New global.
+	(test_compiler_info): New function.
+	(get_compiler_info): Set compiler_info.
+	* lib/compiler.c, lib/compiler.cc: Add copyright.  When GNUC, set
+	"compiler_info" to gcc-<major>-<minor>.
+
+2003-11-15  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.trace/configure: Remove.
+
+2003-11-13  Elena Zannoni  <ezannoni@redhat.com>
+
+	* gdb.base/break.c: Add comments to aid finding line numbers for
+	breakpoints.  
+	* gdb.base/break.exp: Remove all references to explicit line
+	numbers.
+
 2003-11-11  David Carlton  <carlton@kealia.com>
 
 	* gdb.cp/namespace.exp: KFAIL various tests with respect to PR

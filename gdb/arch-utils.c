@@ -103,7 +103,7 @@ generic_skip_trampoline_code (CORE_ADDR pc)
 }
 
 CORE_ADDR
-generic_skip_solib_resolver (CORE_ADDR pc)
+generic_skip_solib_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   return 0;
 }
@@ -380,8 +380,17 @@ default_stabs_argument_has_addr (struct gdbarch *gdbarch, struct type *type)
    The choice of initial value is entirely arbitrary.  During startup,
    the function initialize_current_architecture() updates this value
    based on default byte-order information extracted from BFD.  */
-int target_byte_order = BFD_ENDIAN_BIG;
-int target_byte_order_auto = 1;
+static int target_byte_order = BFD_ENDIAN_BIG;
+static int target_byte_order_auto = 1;
+
+enum bfd_endian
+selected_byte_order (void)
+{
+  if (target_byte_order_auto)
+    return BFD_ENDIAN_UNKNOWN;
+  else
+    return target_byte_order;
+}
 
 static const char endian_big[] = "big";
 static const char endian_little[] = "little";
@@ -400,7 +409,7 @@ static const char *set_endian_string;
 static void
 show_endian (char *args, int from_tty)
 {
-  if (TARGET_BYTE_ORDER_AUTO)
+  if (target_byte_order_auto)
     printf_unfiltered ("The target endianness is set automatically (currently %s endian)\n",
 		       (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? "big" : "little"));
   else
@@ -443,9 +452,18 @@ set_endian (char *ignore_args, int from_tty, struct cmd_list_element *c)
 
 enum set_arch { set_arch_auto, set_arch_manual };
 
-int target_architecture_auto = 1;
+static int target_architecture_auto = 1;
 
-const char *set_architecture_string;
+static const char *set_architecture_string;
+
+const char *
+selected_architecture_name (void)
+{
+  if (target_architecture_auto)
+    return NULL;
+  else
+    return set_architecture_string;
+}
 
 /* Called if the user enters ``show architecture'' without an
    argument. */

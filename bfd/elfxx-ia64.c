@@ -53,7 +53,7 @@
  		descriptor for a MIN_PLT entry, and requires one IPLT reloc.
 
   MIN_PLT	Created by PLTOFF entries against dynamic symbols.  This
- 		does not reqire dynamic relocations.  */
+ 		does not require dynamic relocations.  */
 
 #define NELEMS(a)	((int) (sizeof (a) / sizeof ((a)[0])))
 
@@ -81,7 +81,7 @@ struct elfNN_ia64_dyn_sym_info
   bfd_vma dtpmod_offset;
   bfd_vma dtprel_offset;
 
-  /* The symbol table entry, if any, that this was derrived from.  */
+  /* The symbol table entry, if any, that this was derived from.  */
   struct elf_link_hash_entry *h;
 
   /* Used to count non-got, non-plt relocations for delayed sizing
@@ -194,7 +194,7 @@ static bfd_boolean elfNN_ia64_add_symbol_hook
 static int elfNN_ia64_additional_program_headers
   PARAMS ((bfd *abfd));
 static bfd_boolean elfNN_ia64_modify_segment_map
-  PARAMS ((bfd *));
+  PARAMS ((bfd *, struct bfd_link_info *));
 static bfd_boolean elfNN_ia64_is_local_label_name
   PARAMS ((bfd *abfd, const char *name));
 static bfd_boolean elfNN_ia64_dynamic_symbol_p
@@ -707,14 +707,14 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
   *again = FALSE;
 
   /* Don't even try to relax for non-ELF outputs.  */
-  if (link_info->hash->creator->flavour != bfd_target_elf_flavour)
+  if (!is_elf_hash_table (link_info->hash))
     return FALSE;
 
   /* Nothing to do if there are no relocations or there is no need for
      the relax finalize pass.  */
   if ((sec->flags & SEC_RELOC) == 0
       || sec->reloc_count == 0
-      || (link_info->relax_finalizing
+      || (!link_info->need_relax_finalize
 	  && sec->need_finalize_relax == 0))
     return TRUE;
 
@@ -765,14 +765,14 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 	case R_IA64_PCREL21BI:
 	case R_IA64_PCREL21M:
 	case R_IA64_PCREL21F:
-	  if (link_info->relax_finalizing)
+	  if (!link_info->need_relax_finalize)
 	    continue;
 	  is_branch = TRUE;
 	  break;
 
 	case R_IA64_LTOFF22X:
 	case R_IA64_LDXMOV:
-	  if (!link_info->relax_finalizing)
+	  if (link_info->need_relax_finalize)
 	    {
 	      sec->need_finalize_relax = 1;
 	      continue;
@@ -804,7 +804,7 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 
 	  isym = isymbuf + ELFNN_R_SYM (irel->r_info);
 	  if (isym->st_shndx == SHN_UNDEF)
-	    continue;	/* We can't do anthing with undefined symbols.  */
+	    continue;	/* We can't do anything with undefined symbols.  */
 	  else if (isym->st_shndx == SHN_ABS)
 	    tsec = bfd_abs_section_ptr;
 	  else if (isym->st_shndx == SHN_COMMON)
@@ -852,7 +852,7 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 
 	  else
 	    {
-	      /* We can't do anthing with undefined symbols.  */
+	      /* We can't do anything with undefined symbols.  */
 	      if (h->root.type == bfd_link_hash_undefined
 		  || h->root.type == bfd_link_hash_undefweak)
 		continue;
@@ -1073,7 +1073,7 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
       /* ??? Resize .rela.got too.  */
     }
 
-  if (link_info->relax_finalizing)
+  if (!link_info->need_relax_finalize)
     sec->need_finalize_relax = 0;
 
   *again = changed_contents || changed_relocs;
@@ -1405,8 +1405,9 @@ elfNN_ia64_additional_program_headers (abfd)
 }
 
 static bfd_boolean
-elfNN_ia64_modify_segment_map (abfd)
+elfNN_ia64_modify_segment_map (abfd, info)
      bfd *abfd;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
 {
   struct elf_segment_map *m, **pm;
   Elf_Internal_Shdr *hdr;
@@ -1592,7 +1593,8 @@ elfNN_ia64_hash_copy_indirect (bed, xdir, xind)
     (ind->root.elf_link_hash_flags
      & (ELF_LINK_HASH_REF_DYNAMIC
         | ELF_LINK_HASH_REF_REGULAR
-        | ELF_LINK_HASH_REF_REGULAR_NONWEAK));
+        | ELF_LINK_HASH_REF_REGULAR_NONWEAK
+        | ELF_LINK_HASH_NEEDS_PLT));
 
   if (ind->root.root.type != bfd_link_hash_indirect)
     return;
@@ -1952,7 +1954,7 @@ get_got (abfd, info, ia64_info)
 }
 
 /* Create function descriptor section (.opd).  This section is called .opd
-   because it contains "official prodecure descriptors".  The "official"
+   because it contains "official procedure descriptors".  The "official"
    refers to the fact that these descriptors are used when taking the address
    of a procedure, thus ensuring a unique address for each procedure.  */
 
@@ -1992,9 +1994,9 @@ get_fptr (abfd, info, ia64_info)
       if (info->pie)
 	{
 	  asection *fptr_rel;
-	  fptr_rel = bfd_make_section(abfd, ".rela.opd");
+	  fptr_rel = bfd_make_section(dynobj, ".rela.opd");
 	  if (fptr_rel == NULL
-	      || !bfd_set_section_flags (abfd, fptr_rel,
+	      || !bfd_set_section_flags (dynobj, fptr_rel,
 					 (SEC_ALLOC | SEC_LOAD
 					  | SEC_HAS_CONTENTS
 					  | SEC_IN_MEMORY
@@ -2926,6 +2928,15 @@ elfNN_ia64_size_dynamic_sections (output_bfd, info)
 	{
 	  if (strip)
 	    ia64_info->fptr_sec = NULL;
+	}
+      else if (sec == ia64_info->rel_fptr_sec)
+	{
+	  if (strip)
+	    ia64_info->rel_fptr_sec = NULL;
+	  else
+	    /* We use the reloc_count field as a counter if we need to
+	       copy relocs into the output file.  */
+	    sec->reloc_count = 0;
 	}
       else if (sec == ia64_info->plt_sec)
 	{

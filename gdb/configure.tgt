@@ -108,13 +108,13 @@ m32r-*-*)		gdb_target=m32r ;;
 
 m68hc11*-*-*|m6811*-*-*)	gdb_target=m68hc11 ;;
 
-m68000-*-sunos3*)	gdb_target=sun2os3 ;;
-m68000-*-sunos4*)	gdb_target=sun2os4 ;;
+# OBSOLETE m68000-*-sunos3*)	gdb_target=sun2os3 ;;
+# OBSOLETE m68000-*-sunos4*)	gdb_target=sun2os4 ;;
 
-m68*-bull-sysv*)	gdb_target=dpx2 ;;
-m68*-att-*)		gdb_target=3b1 ;;
+# OBSOLETE m68*-bull-sysv*)	gdb_target=dpx2 ;;
+# OBSOLETE m68*-att-*)		gdb_target=3b1 ;;
 m68*-cisco*-*)		gdb_target=cisco ;;
-m68*-motorola-*)	gdb_target=delta68 ;;
+# OBSOLETE m68*-motorola-*)	gdb_target=delta68 ;;
 m68*-netx-*)		gdb_target=vxworks68 ;;
 m68*-tandem-*)		gdb_target=st2000 ;;
 m68*-*-aout*)		gdb_target=monitor ;;
@@ -123,33 +123,25 @@ m68*-*-elf*)		gdb_target=monitor ;;
 m68*-*-linux*)		gdb_target=linux
 			build_gdbserver=yes
 			;;
-m68*-*-lynxos*)		gdb_target=m68klynx ;;
+# OBSOLETE m68*-*-lynxos*)		gdb_target=m68klynx ;;
 m68*-*-netbsd*)		gdb_target=nbsdaout ;;
 m68*-*-os68k*)		gdb_target=os68k ;;
-m68*-*-sunos3*)		gdb_target=sun3os3 ;;
-m68*-*-sunos4*)		gdb_target=sun3os4 ;;
-m68*-*-sysv4*)		gdb_target=m68kv4 ;;
+# OBSOLETE m68*-*-sunos3*)		gdb_target=sun3os3 ;;
+# OBSOLETE m68*-*-sunos4*)		gdb_target=sun3os4 ;;
+# OBSOLETE m68*-*-sysv4*)		gdb_target=m68kv4 ;;
 m68*-*-vxworks*)	gdb_target=vxworks68 ;;
 
 mcore*-*-*)		gdb_target=mcore ;;
 
-# "mipsisa64" targets are 64-bit MIPS, MIPS64 ISA.  They need these
-# special cases because otherwise they (obviously) are not matched by
-# the "mips64" target cases, and would therefore be treated as 32-bit.
-mipsisa64*-*-linux*)	gdb_target=linux64 ;;
-mipsisa64*-*-*)		gdb_target=embed64 ;;
 mips*-*-pe)		gdb_target=wince ;;
-mips*tx39*-elf*)	gdb_target=tx39 ;;
-mips64*-*-linux*)	gdb_target=linux64 ;;
 mips*-sgi-irix5*)	gdb_target=irix5 ;;
 mips*-sgi-irix6*)	gdb_target=irix6 ;;
 mips*-*-linux*)		gdb_target=linux
 			build_gdbserver=yes
 			;;
 mips*-*-netbsd*)	gdb_target=nbsd ;;
-mips*-*-sysv4*)		gdb_target=mipsv4 ;;
+# OBSOLETE mips*-*-sysv4*)		gdb_target=mipsv4 ;;
 mips*-*-vxworks*)       gdb_target=vxmips ;;
-mips64*-*-*)		gdb_target=embed64 ;;
 mips*-*-*)		gdb_target=embed ;;
 
 mn10300-*-*)		gdb_target=mn10300 ;;

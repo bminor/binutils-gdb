@@ -349,7 +349,7 @@ cp_lookup_symbol_nonlocal (const char *name,
    cp_lookup_symbol_nonlocal.
 
    For example, if we're within a function A::B::f and looking for a
-   symbol f, this will get called with NAME = "f", SCOPE = "A::B", and
+   symbol x, this will get called with NAME = "x", SCOPE = "A::B", and
    SCOPE_LEN = 0.  It then calls itself with NAME and SCOPE the same,
    but with SCOPE_LEN = 1.  And then it calls itself with NAME and
    SCOPE the same, but with SCOPE_LEN = 4.  This third call looks for

@@ -127,7 +127,9 @@ ppc_register_u_addr (int regno)
 {
   int u_addr = -1;
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-  int wordsize = tdep->wordsize;
+  /* NOTE: cagney/2003-11-25: This is the word size used by the ptrace
+     interface, and not the wordsize of the program's ABI.  */
+  int wordsize = sizeof (PTRACE_XFER_TYPE);
 
   /* General purpose registers occupy 1 slot each in the buffer */
   if (regno >= tdep->ppc_gp0_regnum && regno <= tdep->ppc_gplast_regnum )
@@ -235,6 +237,9 @@ fetch_register (int tid, int regno)
       return;
     }
 
+  /* Read the raw register using PTRACE_XFER_TYPE sized chunks.  On a
+     32-bit platform, 64-bit floating-point registers will require two
+     transfers.  */
   for (i = 0; i < DEPRECATED_REGISTER_RAW_SIZE (regno); i += sizeof (PTRACE_XFER_TYPE))
     {
       errno = 0;
@@ -248,7 +253,19 @@ fetch_register (int tid, int regno)
 	  perror_with_name (mess);
 	}
     }
-  supply_register (regno, buf);
+
+  /* Now supply the register.  Be careful to map between ptrace's and
+     the current_regcache's idea of the current wordsize.  */
+  if ((regno >= FP0_REGNUM && regno < FP0_REGNUM +32)
+      || gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_LITTLE)
+    /* FPs are always 64 bits.  Little endian values are always found
+       at the left-hand end of the register.  */
+    regcache_raw_supply (current_regcache, regno, buf);
+  else
+    /* Big endian register, need to fetch the right-hand end.  */
+    regcache_raw_supply (current_regcache, regno,
+                        (buf + sizeof (PTRACE_XFER_TYPE)
+                         - register_size (current_gdbarch, regno)));
 }
 
 static void
@@ -380,7 +397,21 @@ store_register (int tid, int regno)
   if (regaddr == -1)
     return;
 
-  regcache_collect (regno, buf);
+  /* First collect the register value from the regcache.  Be careful
+     to to convert the regcache's wordsize into ptrace's wordsize.  */
+  memset (buf, 0, sizeof buf);
+  if ((regno >= FP0_REGNUM && regno < FP0_REGNUM + 32)
+      || TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE)
+    /* Floats are always 64-bit.  Little endian registers are always
+       at the left-hand end of the register cache.  */
+    regcache_raw_collect (current_regcache, regno, buf);
+  else
+    /* Big-endian registers belong at the right-hand end of the
+       buffer.  */
+    regcache_raw_collect (current_regcache, regno,
+                         (buf + sizeof (PTRACE_XFER_TYPE)
+                          - register_size (current_gdbarch, regno)));
+
   for (i = 0; i < DEPRECATED_REGISTER_RAW_SIZE (regno); i += sizeof (PTRACE_XFER_TYPE))
     {
       errno = 0;

@@ -1616,11 +1616,13 @@ cisco-core.lo: cisco-core.c $(INCDIR)/filenames.h
 elf32-ia64.lo: elf32-ia64.c $(INCDIR)/filenames.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/opcode/ia64.h $(INCDIR)/elf/ia64.h \
-  $(INCDIR)/elf/reloc-macros.h elf32-target.h
+  $(INCDIR)/elf/reloc-macros.h $(INCDIR)/objalloc.h $(INCDIR)/hashtab.h \
+  elf32-target.h
 elf64-ia64.lo: elf64-ia64.c $(INCDIR)/filenames.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/opcode/ia64.h $(INCDIR)/elf/ia64.h \
-  $(INCDIR)/elf/reloc-macros.h elf64-target.h
+  $(INCDIR)/elf/reloc-macros.h $(INCDIR)/objalloc.h $(INCDIR)/hashtab.h \
+  elf64-target.h
 peigen.lo: peigen.c $(INCDIR)/filenames.h $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/i386.h $(INCDIR)/coff/external.h $(INCDIR)/coff/pe.h \
   libcoff.h $(INCDIR)/bfdlink.h libpei.h

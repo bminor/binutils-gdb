@@ -109,24 +109,6 @@ extern int hppa_instruction_nullified (void);
 #define INSTRUCTION_NULLIFIED hppa_instruction_nullified ()
 #endif
 
-/* elz: Return a large value, which is stored on the stack at addr.
-   This is defined only for the hppa, at this moment.  The above macro
-   DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS is not called anymore,
-   because it assumes that on exit from a called function which
-   returns a large structure on the stack, the address of the ret
-   structure is still in register 28. Unfortunately this register is
-   usually overwritten by the called function itself, on hppa. This is
-   specified in the calling convention doc. As far as I know, the only
-   way to get the return value is to have the caller tell us where it
-   told the callee to put it, rather than have the callee tell us.  */
-struct value *hppa_value_returned_from_stack (struct type *valtype,
-					      CORE_ADDR addr);
-/* FIXME: cagney/2003-09-27: This method should now be redundant.
-   Instead, when "struct return convention", the inferior function
-   call code always saves and uses the struct return's stack address.  */
-#define DEPRECATED_VALUE_RETURNED_FROM_STACK(valtype,addr) \
-  hppa_value_returned_from_stack (valtype, addr)
-
 extern void hppa_frame_init_saved_regs (struct frame_info *);
 #define DEPRECATED_FRAME_INIT_SAVED_REGS(FI) \
   hppa_frame_init_saved_regs (FI)

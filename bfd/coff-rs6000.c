@@ -1006,7 +1006,7 @@ xcoff_rtype2howto (relent, internal)
   /* Default howto layout works most of the time */
   relent->howto = &xcoff_howto_table[internal->r_type];
 
-  /* Special case some 16 bit reoloc */
+  /* Special case some 16 bit reloc */
   if (15 == (internal->r_size & 0x1f))
     {
       if (R_BA == internal->r_type)
@@ -1575,7 +1575,6 @@ normalize_filename (abfd)
 
 /* Write out an XCOFF armap.  */
 
-/*ARGSUSED*/
 static bfd_boolean
 xcoff_write_armap_old (abfd, elength, map, orl_count, stridx)
      bfd *abfd;

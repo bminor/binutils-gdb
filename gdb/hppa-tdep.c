@@ -2060,30 +2060,6 @@ hppa_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 
 #endif
 
-/* elz: this function returns a value which is built looking at the given address.
-   It is called from call_function_by_hand, in case we need to return a 
-   value which is larger than 64 bits, and it is stored in the stack rather than 
-   in the registers r28 and r29 or fr4.
-   This function does the same stuff as value_being_returned in values.c, but
-   gets the value from the stack rather than from the buffer where all the
-   registers were saved when the function called completed. */
-/* FIXME: cagney/2003-09-27: This function is no longer needed.  The
-   inferior function call code now directly handles the case described
-   above.  */
-struct value *
-hppa_value_returned_from_stack (struct type *valtype, CORE_ADDR addr)
-{
-  struct value *val;
-
-  val = allocate_value (valtype);
-  CHECK_TYPEDEF (valtype);
-  target_read_memory (addr, VALUE_CONTENTS_RAW (val), TYPE_LENGTH (valtype));
-
-  return val;
-}
-
-
-
 /* elz: Used to lookup a symbol in the shared libraries.
    This function calls shl_findsym, indirectly through a
    call to __d_shl_get. __d_shl_get is in end.c, which is always
@@ -3402,7 +3378,7 @@ hppa_skip_trampoline_code (CORE_ADDR pc)
 	  ALL_MSYMBOLS (objfile, msymbol)
 	  {
 	    if (MSYMBOL_TYPE (msymbol) == mst_text
-		&& STREQ (DEPRECATED_SYMBOL_NAME (msymbol), DEPRECATED_SYMBOL_NAME (msym)))
+		&& DEPRECATED_STREQ (DEPRECATED_SYMBOL_NAME (msymbol), DEPRECATED_SYMBOL_NAME (msym)))
 	      {
 		function_found = 1;
 		break;

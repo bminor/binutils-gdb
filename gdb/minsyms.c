@@ -659,6 +659,7 @@ prim_record_minimal_symbol_and_info (const char *name, CORE_ADDR address,
   MSYMBOL_TYPE (msymbol) = ms_type;
   /* FIXME:  This info, if it remains, needs its own field.  */
   MSYMBOL_INFO (msymbol) = info;	/* FIXME! */
+  MSYMBOL_SIZE (msymbol) = 0;
 
   /* The hash pointers must be cleared! If they're not,
      add_minsym_to_hash_table will NOT add this msymbol to the hash table. */
@@ -938,6 +939,7 @@ install_minimal_symbols (struct objfile *objfile)
       SYMBOL_LINKAGE_NAME (&msymbols[mcount]) = NULL;
       SYMBOL_VALUE_ADDRESS (&msymbols[mcount]) = 0;
       MSYMBOL_INFO (&msymbols[mcount]) = NULL;
+      MSYMBOL_SIZE (&msymbols[mcount]) = 0;
       MSYMBOL_TYPE (&msymbols[mcount]) = mst_unknown;
       SYMBOL_INIT_LANGUAGE_SPECIFIC (&msymbols[mcount], language_unknown);
 

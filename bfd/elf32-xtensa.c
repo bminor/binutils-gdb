@@ -47,9 +47,6 @@ static bfd_boolean elf_xtensa_check_relocs
 	   const Elf_Internal_Rela *));
 static void elf_xtensa_hide_symbol
   PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *, bfd_boolean));
-static void elf_xtensa_copy_indirect_symbol
-  PARAMS ((const struct elf_backend_data *, struct elf_link_hash_entry *,
-	   struct elf_link_hash_entry *));
 static asection *elf_xtensa_gc_mark_hook
   PARAMS ((asection *, struct bfd_link_info *, Elf_Internal_Rela *,
 	   struct elf_link_hash_entry *, Elf_Internal_Sym *));
@@ -63,7 +60,7 @@ static bfd_boolean elf_xtensa_adjust_dynamic_symbol
 static bfd_boolean elf_xtensa_size_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 static bfd_boolean elf_xtensa_modify_segment_map
-  PARAMS ((bfd *));
+  PARAMS ((bfd *, struct bfd_link_info *));
 static bfd_boolean elf_xtensa_relocate_section
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
 	   Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
@@ -796,19 +793,6 @@ elf_xtensa_hide_symbol (info, h, force_local)
 }
 
 
-static void
-elf_xtensa_copy_indirect_symbol (bed, dir, ind)
-     const struct elf_backend_data *bed;
-     struct elf_link_hash_entry *dir, *ind;
-{
-  _bfd_elf_link_hash_copy_indirect (bed, dir, ind);
-
-  /* The standard function doesn't copy the NEEDS_PLT flag.  */
-  dir->elf_link_hash_flags |=
-    (ind->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT);
-}
-
-
 /* Return the section that should be marked against GC for a given
    relocation.  */
 
@@ -1431,8 +1415,9 @@ elf_xtensa_size_dynamic_sections (output_bfd, info)
    this and it probably ought to be moved into elf.c as well.  */
 
 static bfd_boolean
-elf_xtensa_modify_segment_map (abfd)
+elf_xtensa_modify_segment_map (abfd, info)
      bfd *abfd;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
 {
   struct elf_segment_map **m_p;
 
@@ -1729,7 +1714,7 @@ bfd_elf_xtensa_reloc (abfd, reloc_entry, symbol, data, input_section,
 			      / bfd_octets_per_byte (abfd)))
     return bfd_reloc_outofrange;
 
-  /* Work out which section the relocation is targetted at and the
+  /* Work out which section the relocation is targeted at and the
      initial relocation command value.  */
 
   /* Get symbol value.  (Common symbols are special.)  */
@@ -4186,7 +4171,7 @@ analyze_relocations (link_info)
    expensive and unnecessary unless the target section is actually going
    to be relaxed.  This pass identifies all such sections by checking if
    they have L32Rs pointing to them.  In the process, the total number
-   of relocations targetting each section is also counted so that we
+   of relocations targeting each section is also counted so that we
    know how much space to allocate for source_relocs against each
    relaxable literal section.  */
 
@@ -5850,7 +5835,6 @@ static struct bfd_elf_special_section const elf_xtensa_special_sections[]=
 
 #define elf_backend_adjust_dynamic_symbol    elf_xtensa_adjust_dynamic_symbol
 #define elf_backend_check_relocs	     elf_xtensa_check_relocs
-#define elf_backend_copy_indirect_symbol     elf_xtensa_copy_indirect_symbol
 #define elf_backend_create_dynamic_sections  elf_xtensa_create_dynamic_sections
 #define elf_backend_discard_info	     elf_xtensa_discard_info
 #define elf_backend_ignore_discarded_relocs  elf_xtensa_ignore_discarded_relocs

@@ -657,10 +657,6 @@ e7000_open (char *args, int from_tty)
     }
   serial_raw (e7000_desc);
 
-#ifdef GDB_TARGET_IS_H8300
-  h8300hmode = 1;
-#endif
-
   /* Start the remote connection; if error (0), discard this target.
      In particular, if the user quits, be sure to discard it
      (we'd be in an inconsistent state otherwise).  */
@@ -909,15 +905,18 @@ e7000_fetch_registers (void)
 	  wanted = want_sh3;
 	}
     }
-#ifdef GDB_TARGET_IS_H8300
   if (TARGET_ARCHITECTURE->arch == bfd_arch_h8300)
     {
-      if (h8300smode)
-	wanted = want_h8300s;
-      else
-	wanted = want_h8300h;
+      wanted = want_h8300h;
+      switch (TARGET_ARCHITECTURE->mach)
+	{
+	case bfd_mach_h8300s:
+	case bfd_mach_h8300sn:
+	case bfd_mach_h8300sx:
+	case bfd_mach_h8300sxn:
+	  wanted = want_h8300s;
+	}
     }
-#endif
 
   fetch_regs_from_dump (gch, wanted);
 
@@ -2046,15 +2045,18 @@ e7000_wait (ptid_t ptid, struct target_waitstatus *status)
 	  wanted_nopc = want_nopc_sh3;
 	}
     }
-#ifdef GDB_TARGET_IS_H8300
   if (TARGET_ARCHITECTURE->arch == bfd_arch_h8300)
     {
-      if (h8300smode)
-	wanted_nopc = want_nopc_h8300s;
-      else
-	wanted_nopc = want_nopc_h8300h;
+      wanted_nopc = want_nopc_h8300h;
+      switch (TARGET_ARCHITECTURE->mach)
+	{
+	case bfd_mach_h8300s:
+	case bfd_mach_h8300sn:
+	case bfd_mach_h8300sx:
+	case bfd_mach_h8300sxn:
+	  wanted_nopc = want_nopc_h8300s;
+	}
     }
-#endif
   fetch_regs_from_dump (gch, wanted_nopc);
 
   /* And supply the extra ones the simulator uses */

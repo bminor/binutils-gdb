@@ -36,6 +36,7 @@
 #include "gdb_stat.h"
 #include "regcache.h"
 #include <ctype.h>
+#include "mips-tdep.h"
 
 
 /* Breakpoint types.  Values 0, 1, and 2 must agree with the watch
@@ -1606,9 +1607,7 @@ device is attached to the target board (e.g., /dev/ttya).\n"
   /* FIXME: Should we call start_remote here?  */
 
   /* Try to figure out the processor model if possible.  */
-  ptype = mips_read_processor_type ();
-  if (ptype)
-    mips_set_processor_type_command (xstrdup (ptype), 0);
+  deprecated_mips_set_processor_regs_hack ();
 
   /* This is really the job of start_remote however, that makes an
      assumption that the target is about to print out a status message
@@ -1902,26 +1901,24 @@ mips_map_regno (int regno)
 {
   if (regno < 32)
     return regno;
-  if (regno >= FP0_REGNUM && regno < FP0_REGNUM + 32)
-    return regno - FP0_REGNUM + 32;
-  switch (regno)
-    {
-    case PC_REGNUM:
-      return REGNO_OFFSET + 0;
-    case CAUSE_REGNUM:
-      return REGNO_OFFSET + 1;
-    case HI_REGNUM:
-      return REGNO_OFFSET + 2;
-    case LO_REGNUM:
-      return REGNO_OFFSET + 3;
-    case FCRCS_REGNUM:
-      return REGNO_OFFSET + 4;
-    case FCRIR_REGNUM:
-      return REGNO_OFFSET + 5;
-    default:
-      /* FIXME: Is there a way to get the status register?  */
-      return 0;
-    }
+  if (regno >= mips_regnum (current_gdbarch)->fp0
+      && regno < mips_regnum (current_gdbarch)->fp0 + 32)
+    return regno - mips_regnum (current_gdbarch)->fp0 + 32;
+  else if (regno == mips_regnum (current_gdbarch)->pc)
+    return REGNO_OFFSET + 0;
+  else if (regno == mips_regnum (current_gdbarch)->cause)
+    return REGNO_OFFSET + 1;
+  else if (regno == mips_regnum (current_gdbarch)->hi)
+    return REGNO_OFFSET + 2;
+  else if (regno == mips_regnum (current_gdbarch)->lo)
+    return REGNO_OFFSET + 3;
+  else if (regno == mips_regnum (current_gdbarch)->fp_control_status)
+    return REGNO_OFFSET + 4;
+  else if (regno == mips_regnum (current_gdbarch)->fp_implementation_revision)
+    return REGNO_OFFSET + 5;
+  else
+    /* FIXME: Is there a way to get the status register?  */
+    return 0;
 }
 
 /* Fetch the remote registers.  */

@@ -386,6 +386,7 @@ terminate_minimal_symbol_table (struct objfile *objfile)
     DEPRECATED_SYMBOL_NAME (m) = NULL;
     SYMBOL_VALUE_ADDRESS (m) = 0;
     MSYMBOL_INFO (m) = NULL;
+    MSYMBOL_SIZE (m) = 0;
     MSYMBOL_TYPE (m) = mst_unknown;
     SYMBOL_INIT_LANGUAGE_SPECIFIC (m, language_unknown);
   }
@@ -1103,7 +1104,7 @@ is_in_import_list (char *name, struct objfile *objfile)
     return 0;
 
   for (i = 0; i < objfile->import_list_size; i++)
-    if (objfile->import_list[i] && STREQ (name, objfile->import_list[i]))
+    if (objfile->import_list[i] && DEPRECATED_STREQ (name, objfile->import_list[i]))
       return 1;
   return 0;
 }

@@ -1,3 +1,93 @@
+2003-12-15  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
+
+	* m32r-opc.c: Regenerate.
+
+2003-12-14  Mark Mitchell  <mark@codesourcery.com>
+
+	* arm-opc.h (arm_opcodes): Put V6 instructions before XScale
+	instructions.
+
+2003-12-13  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* mmix-opc.c (mmix_opcodes): Use GO_INSN_BYTE, PUSHGO_INSN_BYTE,
+	SETL_INSN_BYTE, INCH_INSN_BYTE, INCMH_INSN_BYTE, INCML_INSN_BYTE
+	and SWYM_INSN_BYTE instead of raw numbers.
+
+2003-12-10  Zack Weinberg  <zack@codesourcery.com>
+
+	* ppc-opc.c (MO): Make optional.
+	(RAO, RSO, SHO): New optional forms of RA, RS, SH operands.
+	(tlbwe): Accept for both PPC403 and BOOKE.  Make all operands optional.
+
+2003-12-05  Ricardo Anguiano <anguiano@codesourcery.com>
+	    Mark Mitchell  <mark@codesourcery.com>
+	    Richard Earnshaw  <rearnsha@arm.com>
+
+	* arm-dis.c (print_arm_insn): Add 'W' macro.
+	* arm-opc.h (arm_opcodes): Add V6 instructions.
+	(thumb_opcodes): Likewise.
+
+2003-12-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* openrisc-asm.c: Regenerate.
+	* pj-opc.c: Update copyright date.
+
+2003-12-03  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
+
+	* m32r-asm.c: Regenerate.
+	* m32r-desc.c: Regenerate.
+	* m32r-desc.h: Regenerate.
+	* m32r-dis.c: Regenerate.
+	* m32r-ibld.c: Regenerate.
+	* m32r-opc.c: Regenerate.
+	* m32r-opc.h: Regenerate.
+	* m32r-opinst.c: Regenerate.
+
+2003-12-02  Alexandre Oliva  <aoliva@redhat.com>
+
+	* sh-opc.h: Add support for sh4a and no-fpu variants.
+	* sh-dis.c: Ditto.
+
+2003-12-02  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* alpha-opc.c: Remove ARGSUSED.
+	* i370-opc.c: Likewise.
+	* ppc-opc.c: Likewise.
+
+2003-12-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+
+2003-11-28  Christian Groessler  <chris@groessler.org>
+
+	* z8k-dis.c: Convert to ISO C90.
+	* z8kgen.c: Convert to ISO C90.
+	(opt): Move long opcode for "ldb rdb,imm8" after short one, now
+	the short one is created when assembling.
+	* z8k-opc.h: Regenerate with new z8kgen.c.
+
+2003-11-19  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* h8300-dis.c (print_colon_thingie): Remove.
+
+2003-11-18  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
+
+	* mips-opc.c (mips_builtin_opcodes): Handle new macros: "lca" and
+	"dlca".
+
+2003-11-14  Nick Clifton  <nickc@redhat.com>
+
+	* dis-init.c (init_disassemble_info): Initialise
+	symbol_is_valid field.
+	* dis-buf.c (generic_symbol_is_valid): New function.  Always
+	returns TRUE.
+	* arm-dis.c (arm_symbol_is_valid): New function.  Return FALSE
+	for ARM ELF mapping symbols.
+	* disassemble.c (disassemble_init_for_target): Set
+	symbol_is_valid field to arm_symbol_is_valid of the target is
+	an ARM.
+
 2003-11-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* m68k-opc.c (m68k_opcodes): Reorder "fmovel".
@@ -15,7 +105,7 @@
 	* m68hc11-dis.c: Convert to ISO C90 prototypes.
 
 2003-10-21  Peter Barada  <pbarada@mail.wm.sps.mot.com>
-            Bernardo Innocenti  <bernie@develer.com>
+	    Bernardo Innocenti  <bernie@develer.com>
 
 	* m68k-dis.c: Add MCFv4/MCF5528x support.
 	* m68k-opc.c: Likewise.
@@ -75,7 +165,7 @@
 
 	* v850-dis.c (disassemble): Accept bfd_mach_v850e1.
 	* v850-opc.c (v850_opcodes): Add DBTRAP and DBRET instructions.
-	
+
 2003-09-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* ppc-dis.c (struct dis_private): New.

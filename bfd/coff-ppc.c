@@ -929,7 +929,7 @@ ppc_record_toc_entry(abfd, info, sec, sym, toc_kind)
 	  local_syms[sym] = global_toc_size;
 	  global_toc_size += 4;
 
-	  /* The size must fit in a 16bit displacment.  */
+	  /* The size must fit in a 16-bit displacement.  */
 	  if (global_toc_size > 65535)
 	    {
 	      (*_bfd_error_handler) (_("TOC overflow"));
@@ -949,7 +949,7 @@ ppc_record_toc_entry(abfd, info, sec, sym, toc_kind)
 	  h->toc_offset = global_toc_size;
 	  global_toc_size += 4;
 
-	  /* The size must fit in a 16bit displacment.  */
+	  /* The size must fit in a 16-bit displacement.  */
 	  if (global_toc_size >= 65535)
 	    {
 	      (*_bfd_error_handler) (_("TOC overflow"));
@@ -1274,7 +1274,7 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 		    our_toc_offset = val - (toc_section->output_section->vma
 					    + toc_section->output_offset);
 
-		    /* The size must still fit in a 16bit displacment.  */
+		    /* The size must still fit in a 16-bit displacement.  */
 		    if ((bfd_vma) our_toc_offset >= 65535)
 		      {
 			(*_bfd_error_handler)
@@ -1931,7 +1931,7 @@ ppc_imglue_reloc (abfd, reloc_entry, symbol, data,
 #define MAX_RELOC_INDEX  \
       (sizeof (ppc_coff_howto_table) / sizeof (ppc_coff_howto_table[0]) - 1)
 
-/* FIXME: There is a possiblity that when we read in a reloc from a file,
+/* FIXME: There is a possibility that when we read in a reloc from a file,
           that there are some bits encoded in the upper portion of the
 	  type field. Not yet implemented.  */
 static void ppc_coff_rtype2howto PARAMS ((arelent *, struct internal_reloc *));

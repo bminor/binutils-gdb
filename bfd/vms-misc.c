@@ -49,7 +49,7 @@ static asymbol *new_symbol PARAMS ((bfd *, char *));
    ...
    9	almost everything
 
-   level is also identation level. Indentation is performed
+   level is also indentation level. Indentation is performed
    if level > 0
 	*/
 
@@ -668,7 +668,7 @@ _bfd_vms_output_begin (abfd, rectype, rechead)
 
   _bfd_vms_output_short (abfd, (unsigned int) rectype);
 
-  /* save current output position to fill in lenght later  */
+  /* save current output position to fill in length later  */
 
   if (PRIV (push_level) > 0)
     PRIV (length_pos) = PRIV (output_size);

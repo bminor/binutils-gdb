@@ -433,7 +433,7 @@ sparc_frame_saved_pc (struct frame_info *frame)
          as the third parameter.  The offset to the saved pc is 12.  */
       find_pc_partial_function (get_frame_pc (frame), &name,
 				(CORE_ADDR *) NULL, (CORE_ADDR *) NULL);
-      if (name && STREQ (name, "ucbsigvechandler"))
+      if (name && DEPRECATED_STREQ (name, "ucbsigvechandler"))
 	saved_pc_offset = 12;
 
       /* The sigcontext address is contained in register O2.  */

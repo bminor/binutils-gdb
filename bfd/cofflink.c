@@ -2565,7 +2565,7 @@ _bfd_coff_write_global_sym (struct coff_link_hash_entry *h, void *data)
       isym.n_sclass = C_STAT;
     }
 
-  /* When a weak symbol is not overriden by a strong one,
+  /* When a weak symbol is not overridden by a strong one,
      turn it into an external symbol when not building a
      shared or relocatable object.  */
   if (! finfo->info->shared

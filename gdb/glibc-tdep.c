@@ -66,7 +66,7 @@ find_minsym_and_objfile (char *name, struct objfile **objfile_p)
       trigger when the dynamic linker is done.  */
 
 CORE_ADDR
-glibc_skip_solib_resolver (CORE_ADDR pc)
+glibc_skip_solib_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   /* The GNU dynamic linker is part of the GNU C library, and is used
      by all GNU systems (GNU/Hurd, GNU/Linux).  An unresolved PLT

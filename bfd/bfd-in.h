@@ -185,7 +185,7 @@ typedef unsigned char bfd_byte;
 typedef enum bfd_format
 {
   bfd_unknown = 0,	/* File format is unknown.  */
-  bfd_object,		/* Linker/assember/compiler output.  */
+  bfd_object,		/* Linker/assembler/compiler output.  */
   bfd_archive,		/* Object archive file.  */
   bfd_core,		/* Core dump.  */
   bfd_type_end		/* Marks the end; don't use it!  */

@@ -2302,7 +2302,12 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target,
     {
       if (serial_setbaudrate (remote_desc, baud_rate))
 	{
+	  /* The requested speed could not be set.  Error out to
+	     top level after closing remote_desc.  Take care to
+	     set remote_desc to NULL to avoid closing remote_desc
+	     more than once.  */
 	  serial_close (remote_desc);
+	  remote_desc = NULL;
 	  perror_with_name (name);
 	}
     }
@@ -3561,9 +3566,23 @@ remote_fetch_registers (int regnum)
 	struct packet_reg *r = &rs->regs[i];
 	if (r->in_g_packet)
 	  {
-	    supply_register (r->regnum, regs + r->offset);
-	    if (buf[r->offset * 2] == 'x')
-	      set_register_cached (i, -1);
+	    if (r->offset * 2 >= strlen (buf))
+	      /* A short packet that didn't include the register's
+                 value, this implies that the register is zero (and
+                 not that the register is unavailable).  Supply that
+                 zero value.  */
+	      regcache_raw_supply (current_regcache, r->regnum, NULL);
+	    else if (buf[r->offset * 2] == 'x')
+	      {
+		gdb_assert (r->offset * 2 < strlen (buf));
+		/* The register isn't available, mark it as such (at
+                   the same time setting the value to zero).  */
+		regcache_raw_supply (current_regcache, r->regnum, NULL);
+		set_register_cached (i, -1);
+	      }
+	    else
+	      regcache_raw_supply (current_regcache, r->regnum,
+				   regs + r->offset);
 	  }
       }
   }
@@ -5555,7 +5574,12 @@ remote_cisco_open (char *name, int from_tty)
   baud_rate = (baud_rate > 0) ? baud_rate : 9600;
   if (serial_setbaudrate (remote_desc, baud_rate))
     {
+      /* The requested speed could not be set.  Error out to
+	 top level after closing remote_desc.  Take care to
+	 set remote_desc to NULL to avoid closing remote_desc
+	 more than once.  */
       serial_close (remote_desc);
+      remote_desc = NULL;
       perror_with_name (name);
     }
 

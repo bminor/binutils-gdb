@@ -117,7 +117,7 @@ _bfd_elf_link_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
   struct bfd_link_hash_entry *bh;
   const struct elf_backend_data *bed;
 
-  if (! is_elf_hash_table (info))
+  if (! is_elf_hash_table (info->hash))
     return FALSE;
 
   if (elf_hash_table (info)->dynamic_sections_created)
@@ -144,8 +144,7 @@ _bfd_elf_link_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 	return FALSE;
     }
 
-  if (! info->traditional_format
-      && info->hash->creator->flavour == bfd_target_elf_flavour)
+  if (! info->traditional_format)
     {
       s = bfd_make_section (abfd, ".eh_frame_hdr");
       if (s == NULL
@@ -424,7 +423,7 @@ bfd_elf_record_link_assignment (bfd *output_bfd ATTRIBUTE_UNUSED,
 {
   struct elf_link_hash_entry *h;
 
-  if (info->hash->creator->flavour != bfd_target_elf_flavour)
+  if (!is_elf_hash_table (info->hash))
     return TRUE;
 
   h = elf_link_hash_lookup (elf_hash_table (info), name, TRUE, TRUE, FALSE);
@@ -494,7 +493,7 @@ elf_link_record_local_dynamic_symbol (struct bfd_link_info *info,
   Elf_External_Sym_Shndx eshndx;
   char esym[sizeof (Elf64_External_Sym)];
 
-  if (! is_elf_hash_table (info))
+  if (! is_elf_hash_table (info->hash))
     return 0;
 
   /* See if the entry exists already.  */
@@ -795,7 +794,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
   else
     olddef = TRUE;
 
-  /* We need to rememeber if a symbol has a definition in a dynamic
+  /* We need to remember if a symbol has a definition in a dynamic
      object or is weak in all dynamic objects. Internal and hidden
      visibility will make it unavailable to dynamic objects.  */
   if (newdyn && (h->elf_link_hash_flags & ELF_LINK_DYNAMIC_DEF) == 0)
@@ -858,7 +857,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
       return TRUE;
     }
 
-  /* We need to treat weak definiton right, depending on if there is a
+  /* We need to treat weak definition right, depending on if there is a
      definition from a dynamic object.  */
   if (bind == STB_WEAK)
     {
@@ -1127,7 +1126,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
 	      h->size, abfd, bfd_link_hash_common, sym->st_size)))
 	return FALSE;
 
-      /* If the predumed common symbol in the dynamic object is
+      /* If the presumed common symbol in the dynamic object is
 	 larger, pretend that the new symbol has its size.  */
 
       if (h->size > *pvalue)
@@ -1257,7 +1256,7 @@ _bfd_elf_add_default_symbol (bfd *abfd,
 
   if (override)
     {
-      /* We are overridden by an old defition. We need to check if we
+      /* We are overridden by an old definition. We need to check if we
 	 need to create the indirect symbol from the default name.  */
       hi = elf_link_hash_lookup (elf_hash_table (info), name, TRUE,
 				 FALSE, FALSE);
@@ -1416,7 +1415,7 @@ nondefault:
     {
       /* Here SHORTNAME is a versioned name, so we don't expect to see
 	 the type of override we do in the case above unless it is
-	 overridden by a versioned definiton.  */
+	 overridden by a versioned definition.  */
       if (hi->root.type != bfd_link_hash_defined
 	  && hi->root.type != bfd_link_hash_defweak)
 	(*_bfd_error_handler)
@@ -2206,7 +2205,7 @@ _bfd_elf_fix_symbol_flags (struct elf_link_hash_entry *h,
      will force it local.  */
   if ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) != 0
       && eif->info->shared
-      && is_elf_hash_table (eif->info)
+      && is_elf_hash_table (eif->info->hash)
       && (eif->info->symbolic
 	  || ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0)
@@ -2276,7 +2275,7 @@ _bfd_elf_adjust_dynamic_symbol (struct elf_link_hash_entry *h, void *data)
   bfd *dynobj;
   const struct elf_backend_data *bed;
 
-  if (! is_elf_hash_table (eif->info))
+  if (! is_elf_hash_table (eif->info->hash))
     return FALSE;
 
   if (h->root.type == bfd_link_hash_warning)

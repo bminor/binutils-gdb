@@ -1,7 +1,7 @@
 /* Abstraction of GNU v3 abi.
    Contributed by Jim Blandy <jimb@redhat.com>
 
-   Copyright 2001, 2002 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -23,6 +23,7 @@
 #include "defs.h"
 #include "value.h"
 #include "cp-abi.h"
+#include "cp-support.h"
 #include "demangle.h"
 #include "gdb_assert.h"
 #include "gdb_string.h"
@@ -196,7 +197,6 @@ gnuv3_rtti_type (struct value *value,
   struct minimal_symbol *vtable_symbol;
   const char *vtable_symbol_name;
   const char *class_name;
-  struct symbol *class_symbol;
   struct type *run_time_type;
   struct type *base_type;
   LONGEST offset_to_top;
@@ -255,26 +255,10 @@ gnuv3_rtti_type (struct value *value,
   class_name = vtable_symbol_name + 11;
 
   /* Try to look up the class name as a type name.  */
-  class_symbol = lookup_symbol (class_name, 0, STRUCT_DOMAIN, 0, 0);
-  if (! class_symbol)
-    {
-      warning ("can't find class named `%s', as given by C++ RTTI", class_name);
-      return NULL;
-    }
-
-  /* Make sure the type symbol is sane.  (An earlier version of this
-     code would find constructor functions, who have the same name as
-     the class.)  */
-  if (SYMBOL_CLASS (class_symbol) != LOC_TYPEDEF
-      || TYPE_CODE (SYMBOL_TYPE (class_symbol)) != TYPE_CODE_CLASS)
-    {
-      warning ("C++ RTTI gives a class name of `%s', but that isn't a type name",
-	       class_name);
-      return NULL;
-    }
-
-  /* This is the object's run-time type!  */
-  run_time_type = SYMBOL_TYPE (class_symbol);
+  /* FIXME: chastain/2003-11-26: block=NULL is bogus.  See pr gdb/1465. */
+  run_time_type = cp_lookup_rtti_type (class_name, NULL);
+  if (run_time_type == NULL)
+    return NULL;
 
   /* Get the offset from VALUE to the top of the complete object.
      NOTE: this is the reverse of the meaning of *TOP_P.  */

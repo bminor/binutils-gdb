@@ -222,7 +222,6 @@ proc test_list_filename_and_number {} {
 
 proc test_list_function {} {
     global gdb_prompt
-    global gcc_compiled
 
     # gcc appears to generate incorrect debugging information for code
     # in include files, which breaks this test.

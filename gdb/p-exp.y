@@ -1370,29 +1370,29 @@ yylex ()
   switch (namelen)
     {
     case 6:
-      if (STREQ (uptokstart, "OBJECT"))
+      if (DEPRECATED_STREQ (uptokstart, "OBJECT"))
 	return CLASS;
-      if (STREQ (uptokstart, "RECORD"))
+      if (DEPRECATED_STREQ (uptokstart, "RECORD"))
 	return STRUCT;
-      if (STREQ (uptokstart, "SIZEOF"))
+      if (DEPRECATED_STREQ (uptokstart, "SIZEOF"))
 	return SIZEOF;
       break;
     case 5:
-      if (STREQ (uptokstart, "CLASS"))
+      if (DEPRECATED_STREQ (uptokstart, "CLASS"))
 	return CLASS;
-      if (STREQ (uptokstart, "FALSE"))
+      if (DEPRECATED_STREQ (uptokstart, "FALSE"))
 	{
           yylval.lval = 0;
           return FALSEKEYWORD;
         }
       break;
     case 4:
-      if (STREQ (uptokstart, "TRUE"))
+      if (DEPRECATED_STREQ (uptokstart, "TRUE"))
 	{
           yylval.lval = 1;
   	  return TRUEKEYWORD;
         }
-      if (STREQ (uptokstart, "SELF"))
+      if (DEPRECATED_STREQ (uptokstart, "SELF"))
         {
           /* here we search for 'this' like
              inserted in FPC stabs debug info */

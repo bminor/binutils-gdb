@@ -200,6 +200,9 @@ struct elf_link_hash_entry
 #define ELF_LINK_DYNAMIC_DEF 020000
   /* Symbol is weak in all shared objects.  */
 #define ELF_LINK_DYNAMIC_WEAK 040000
+  /* Symbol is referenced with a relocation where C/C++ pointer equality
+     matters.  */
+#define ELF_LINK_POINTER_EQUALITY_NEEDED 0100000
 };
 
 /* Will references to this symbol always reference the symbol
@@ -397,8 +400,8 @@ struct elf_link_hash_table
 #define elf_hash_table(p) ((struct elf_link_hash_table *) ((p)->hash))
 
 /* Returns TRUE if the hash table is a struct elf_link_hash_table.  */
-#define is_elf_hash_table(p)					      	\
-  ((p)->hash->type == bfd_link_elf_hash_table)
+#define is_elf_hash_table(htab)					      	\
+  (((struct bfd_link_hash_table *) (htab))->type == bfd_link_elf_hash_table)
 
 /* Used by bfd_section_from_r_symndx to cache a small number of local
    symbol to section mappings.  */
@@ -623,8 +626,8 @@ struct elf_backend_data
   /* If this field is not NULL, it is called by the elf_link_output_sym
      phase of a link for each symbol which will appear in the object file.  */
   bfd_boolean (*elf_backend_link_output_symbol_hook)
-    (bfd *, struct bfd_link_info *info, const char *, Elf_Internal_Sym *,
-     asection *);
+    (struct bfd_link_info *info, const char *, Elf_Internal_Sym *,
+     asection *, struct elf_link_hash_entry *);
 
   /* The CREATE_DYNAMIC_SECTIONS function is called by the ELF backend
      linker the first time it encounters a dynamic object in the link.
@@ -757,7 +760,7 @@ struct elf_backend_data
   /* This function is called to modify an existing segment map in a
      backend specific fashion.  */
   bfd_boolean (*elf_backend_modify_segment_map)
-    (bfd *);
+    (bfd *, struct bfd_link_info *);
 
   /* This function is called during section gc to discover the section a
      particular relocation refers to.  */
@@ -785,12 +788,13 @@ struct elf_backend_data
     (bfd *, void *, asymbol *);
 
   /* This function, if defined, is called after all local symbols and
-     global symbols converted to locals are emited into the symtab
+     global symbols converted to locals are emitted into the symtab
      section.  It allows the backend to emit special global symbols
      not handled in the hash table.  */
   bfd_boolean (*elf_backend_output_arch_syms)
     (bfd *, struct bfd_link_info *, void *,
-     bfd_boolean (*) (void *, const char *, Elf_Internal_Sym *, asection *));
+     bfd_boolean (*) (void *, const char *, Elf_Internal_Sym *, asection *,
+		      struct elf_link_hash_entry *));
 
   /* Copy any information related to dynamic linking from a pre-existing
      symbol to a newly created symbol.  Also called to copy flags and

@@ -1,6 +1,6 @@
 /* Target-dependent header for the MIPS architecture, for GDB, the GNU Debugger.
 
-   Copyright 2002 Free Software Foundation, Inc.
+   Copyright 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -42,5 +42,36 @@ enum mips_abi mips_abi (struct gdbarch *gdbarch);
 
 /* For wince :-(.  */
 extern CORE_ADDR mips_next_pc (CORE_ADDR pc);
+
+/* Return the "MIPS" register size.  Just a short cut to the BFD
+   architecture's word size.  */
+extern int mips_regsize (struct gdbarch *gdbarch);
+
+/* Return the current index for various MIPS registers.  */
+struct mips_regnum
+{
+  int pc;
+  int fp0;
+  int fp_implementation_revision;
+  int fp_control_status;
+  int badvaddr;		/* Bad vaddr for addressing exception.  */
+  int cause;		/* Describes last exception.  */
+  int hi;		/* Multiply/divide temp.  */
+  int lo;		/* ...  */
+};
+extern const struct mips_regnum *mips_regnum (struct gdbarch *gdbarch);
+
+enum {
+  MIPS_EMBED_LO_REGNUM = 33,
+  MIPS_EMBED_HI_REGNUM = 34,
+  MIPS_EMBED_BADVADDR_REGNUM = 35,
+  MIPS_EMBED_CAUSE_REGNUM = 36,
+  MIPS_EMBED_PC_REGNUM = 37,
+  MIPS_EMBED_FP0_REGNUM = 38
+};
+
+/* Defined in mips-tdep.c and used in remote-mips.c */
+extern void deprecated_mips_set_processor_regs_hack (void);
+
 
 #endif /* MIPS_TDEP_H */

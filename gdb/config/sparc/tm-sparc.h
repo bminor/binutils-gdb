@@ -143,7 +143,7 @@ extern CORE_ADDR sparc_pc_adjust (CORE_ADDR);
    never saving it onto the stack.  So we better not believe the "p" symbol
    descriptor stab.  */
 
-#define USE_REGISTER_NOT_ARG
+#define DEPRECATE_USE_REGISTER_NOT_ARG
 
 /* For acc, there's no need to correct LBRAC entries by guessing how
    they should work.  In fact, this is harmful because the LBRAC

@@ -455,7 +455,7 @@ _bfd_link_hash_newfunc (struct bfd_hash_entry *entry,
 
       /* Initialize the local fields.  */
       h->type = bfd_link_hash_new;
-      h->next = NULL;
+      h->und_next = NULL;
     }
 
   return entry;
@@ -614,9 +614,9 @@ void
 bfd_link_add_undef (struct bfd_link_hash_table *table,
 		    struct bfd_link_hash_entry *h)
 {
-  BFD_ASSERT (h->next == NULL);
+  BFD_ASSERT (h->und_next == NULL);
   if (table->undefs_tail != NULL)
-    table->undefs_tail->next = h;
+    table->undefs_tail->und_next = h;
   if (table->undefs == NULL)
     table->undefs = h;
   table->undefs_tail = h;
@@ -988,9 +988,9 @@ _bfd_generic_link_add_archive_symbols
 	     us to lose track of whether the symbol has been
 	     referenced).  */
 	  if (*pundef != info->hash->undefs_tail)
-	    *pundef = (*pundef)->next;
+	    *pundef = (*pundef)->und_next;
 	  else
-	    pundef = &(*pundef)->next;
+	    pundef = &(*pundef)->und_next;
 	  continue;
 	}
 
@@ -1013,7 +1013,7 @@ _bfd_generic_link_add_archive_symbols
 	    }
 	  if (arh == NULL)
 	    {
-	      pundef = &(*pundef)->next;
+	      pundef = &(*pundef)->und_next;
 	      continue;
 	    }
 	}
@@ -1062,7 +1062,7 @@ _bfd_generic_link_add_archive_symbols
 	    }
 	}
 
-      pundef = &(*pundef)->next;
+      pundef = &(*pundef)->und_next;
     }
 
   archive_hash_table_free (&arsym_hash);
@@ -1692,8 +1692,8 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
 
 	case REF:
 	  /* A reference to a defined symbol.  */
-	  if (h->next == NULL && info->hash->undefs_tail != h)
-	    h->next = h;
+	  if (h->und_next == NULL && info->hash->undefs_tail != h)
+	    h->und_next = h;
 	  break;
 
 	case BIG:
@@ -1879,8 +1879,8 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
 
 	case REFC:
 	  /* A reference to an indirect symbol.  */
-	  if (h->next == NULL && info->hash->undefs_tail != h)
-	    h->next = h;
+	  if (h->und_next == NULL && info->hash->undefs_tail != h)
+	    h->und_next = h;
 	  h = h->u.i.link;
 	  cycle = TRUE;
 	  break;
@@ -1895,10 +1895,10 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
 	case CWARN:
 	  /* Warn if this symbol has been referenced already,
 	     otherwise add a warning.  A symbol has been referenced if
-	     the next field is not NULL, or it is the tail of the
+	     the und_next field is not NULL, or it is the tail of the
 	     undefined symbol list.  The REF case above helps to
 	     ensure this.  */
-	  if (h->next != NULL || info->hash->undefs_tail == h)
+	  if (h->und_next != NULL || info->hash->undefs_tail == h)
 	    {
 	      if (! (*info->callbacks->warning) (info, string, h->root.string,
 						 hash_entry_bfd (h), NULL, 0))

@@ -571,14 +571,12 @@ child_xfer_partial (struct target_ops *ops, enum target_object object,
 				  NULL, ops);
       return -1;
 
-#if 0
     case TARGET_OBJECT_UNWIND_TABLE:
 #ifndef NATIVE_XFER_UNWIND_TABLE
 #define NATIVE_XFER_UNWIND_TABLE(OPS,OBJECT,ANNEX,WRITEBUF,READBUF,OFFSET,LEN) (-1)
 #endif
       return NATIVE_XFER_UNWIND_TABLE (ops, object, annex, readbuf, writebuf,
 				       offset, len);
-#endif
 
 #if 0
     case TARGET_OBJECT_AUXV:

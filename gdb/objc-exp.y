@@ -680,7 +680,7 @@ qualified_name:	typebase COLONCOLON name
 			    error ("`%s' is not defined as an aggregate type.",
 				   TYPE_NAME (type));
 
-			  if (!STREQ (type_name_no_tag (type), $4.ptr))
+			  if (!DEPRECATED_STREQ (type_name_no_tag (type), $4.ptr))
 			    error ("invalid destructor `%s::~%s'",
 				   type_name_no_tag (type), $4.ptr);
 
@@ -1266,7 +1266,7 @@ yylex ()
   tokstart = lexptr;
   /* See if it is a special token of length 3.  */
   for (i = 0; i < sizeof tokentab3 / sizeof tokentab3[0]; i++)
-    if (STREQN (tokstart, tokentab3[i].operator, 3))
+    if (DEPRECATED_STREQN (tokstart, tokentab3[i].operator, 3))
       {
 	lexptr += 3;
 	yylval.opcode = tokentab3[i].opcode;
@@ -1275,7 +1275,7 @@ yylex ()
 
   /* See if it is a special token of length 2.  */
   for (i = 0; i < sizeof tokentab2 / sizeof tokentab2[0]; i++)
-    if (STREQN (tokstart, tokentab2[i].operator, 2))
+    if (DEPRECATED_STREQN (tokstart, tokentab2[i].operator, 2))
       {
 	lexptr += 2;
 	yylval.opcode = tokentab2[i].opcode;
@@ -1590,43 +1590,43 @@ yylex ()
   switch (namelen)
     {
     case 8:
-      if (STREQN (tokstart, "unsigned", 8))
+      if (DEPRECATED_STREQN (tokstart, "unsigned", 8))
 	return UNSIGNED;
       if (current_language->la_language == language_cplus
 	  && strncmp (tokstart, "template", 8) == 0)
 	return TEMPLATE;
-      if (STREQN (tokstart, "volatile", 8))
+      if (DEPRECATED_STREQN (tokstart, "volatile", 8))
 	return VOLATILE_KEYWORD;
       break;
     case 6:
-      if (STREQN (tokstart, "struct", 6))
+      if (DEPRECATED_STREQN (tokstart, "struct", 6))
 	return STRUCT;
-      if (STREQN (tokstart, "signed", 6))
+      if (DEPRECATED_STREQN (tokstart, "signed", 6))
 	return SIGNED_KEYWORD;
-      if (STREQN (tokstart, "sizeof", 6))      
+      if (DEPRECATED_STREQN (tokstart, "sizeof", 6))      
 	return SIZEOF;
-      if (STREQN (tokstart, "double", 6))      
+      if (DEPRECATED_STREQN (tokstart, "double", 6))      
 	return DOUBLE_KEYWORD;
       break;
     case 5:
       if ((current_language->la_language == language_cplus)
 	  && strncmp (tokstart, "class", 5) == 0)
 	return CLASS;
-      if (STREQN (tokstart, "union", 5))
+      if (DEPRECATED_STREQN (tokstart, "union", 5))
 	return UNION;
-      if (STREQN (tokstart, "short", 5))
+      if (DEPRECATED_STREQN (tokstart, "short", 5))
 	return SHORT;
-      if (STREQN (tokstart, "const", 5))
+      if (DEPRECATED_STREQN (tokstart, "const", 5))
 	return CONST_KEYWORD;
       break;
     case 4:
-      if (STREQN (tokstart, "enum", 4))
+      if (DEPRECATED_STREQN (tokstart, "enum", 4))
 	return ENUM;
-      if (STREQN (tokstart, "long", 4))
+      if (DEPRECATED_STREQN (tokstart, "long", 4))
 	return LONG;
       break;
     case 3:
-      if (STREQN (tokstart, "int", 3))
+      if (DEPRECATED_STREQN (tokstart, "int", 3))
 	return INT_KEYWORD;
       break;
     default:

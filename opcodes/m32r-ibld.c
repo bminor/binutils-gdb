@@ -646,11 +646,17 @@ m32r_cgen_insert_operand (cd, opindex, fields, buffer, pc)
     case M32R_OPERAND_UIMM24 :
       errmsg = insert_normal (cd, fields->f_uimm24, 0|(1<<CGEN_IFLD_RELOC)|(1<<CGEN_IFLD_ABS_ADDR), 0, 8, 24, 32, total_length, buffer);
       break;
+    case M32R_OPERAND_UIMM3 :
+      errmsg = insert_normal (cd, fields->f_uimm3, 0, 0, 5, 3, 32, total_length, buffer);
+      break;
     case M32R_OPERAND_UIMM4 :
       errmsg = insert_normal (cd, fields->f_uimm4, 0, 0, 12, 4, 32, total_length, buffer);
       break;
     case M32R_OPERAND_UIMM5 :
       errmsg = insert_normal (cd, fields->f_uimm5, 0, 0, 11, 5, 32, total_length, buffer);
+      break;
+    case M32R_OPERAND_UIMM8 :
+      errmsg = insert_normal (cd, fields->f_uimm8, 0, 0, 8, 8, 32, total_length, buffer);
       break;
     case M32R_OPERAND_ULO16 :
       errmsg = insert_normal (cd, fields->f_uimm16, 0, 0, 16, 16, 32, total_length, buffer);
@@ -779,11 +785,17 @@ m32r_cgen_extract_operand (cd, opindex, ex_info, insn_value, fields, pc)
     case M32R_OPERAND_UIMM24 :
       length = extract_normal (cd, ex_info, insn_value, 0|(1<<CGEN_IFLD_RELOC)|(1<<CGEN_IFLD_ABS_ADDR), 0, 8, 24, 32, total_length, pc, & fields->f_uimm24);
       break;
+    case M32R_OPERAND_UIMM3 :
+      length = extract_normal (cd, ex_info, insn_value, 0, 0, 5, 3, 32, total_length, pc, & fields->f_uimm3);
+      break;
     case M32R_OPERAND_UIMM4 :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 12, 4, 32, total_length, pc, & fields->f_uimm4);
       break;
     case M32R_OPERAND_UIMM5 :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 11, 5, 32, total_length, pc, & fields->f_uimm5);
+      break;
+    case M32R_OPERAND_UIMM8 :
+      length = extract_normal (cd, ex_info, insn_value, 0, 0, 8, 8, 32, total_length, pc, & fields->f_uimm8);
       break;
     case M32R_OPERAND_ULO16 :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 16, 16, 32, total_length, pc, & fields->f_uimm16);
@@ -889,11 +901,17 @@ m32r_cgen_get_int_operand (cd, opindex, fields)
     case M32R_OPERAND_UIMM24 :
       value = fields->f_uimm24;
       break;
+    case M32R_OPERAND_UIMM3 :
+      value = fields->f_uimm3;
+      break;
     case M32R_OPERAND_UIMM4 :
       value = fields->f_uimm4;
       break;
     case M32R_OPERAND_UIMM5 :
       value = fields->f_uimm5;
+      break;
+    case M32R_OPERAND_UIMM8 :
+      value = fields->f_uimm8;
       break;
     case M32R_OPERAND_ULO16 :
       value = fields->f_uimm16;
@@ -979,11 +997,17 @@ m32r_cgen_get_vma_operand (cd, opindex, fields)
     case M32R_OPERAND_UIMM24 :
       value = fields->f_uimm24;
       break;
+    case M32R_OPERAND_UIMM3 :
+      value = fields->f_uimm3;
+      break;
     case M32R_OPERAND_UIMM4 :
       value = fields->f_uimm4;
       break;
     case M32R_OPERAND_UIMM5 :
       value = fields->f_uimm5;
+      break;
+    case M32R_OPERAND_UIMM8 :
+      value = fields->f_uimm8;
       break;
     case M32R_OPERAND_ULO16 :
       value = fields->f_uimm16;
@@ -1077,11 +1101,17 @@ m32r_cgen_set_int_operand (cd, opindex, fields, value)
     case M32R_OPERAND_UIMM24 :
       fields->f_uimm24 = value;
       break;
+    case M32R_OPERAND_UIMM3 :
+      fields->f_uimm3 = value;
+      break;
     case M32R_OPERAND_UIMM4 :
       fields->f_uimm4 = value;
       break;
     case M32R_OPERAND_UIMM5 :
       fields->f_uimm5 = value;
+      break;
+    case M32R_OPERAND_UIMM8 :
+      fields->f_uimm8 = value;
       break;
     case M32R_OPERAND_ULO16 :
       fields->f_uimm16 = value;
@@ -1163,11 +1193,17 @@ m32r_cgen_set_vma_operand (cd, opindex, fields, value)
     case M32R_OPERAND_UIMM24 :
       fields->f_uimm24 = value;
       break;
+    case M32R_OPERAND_UIMM3 :
+      fields->f_uimm3 = value;
+      break;
     case M32R_OPERAND_UIMM4 :
       fields->f_uimm4 = value;
       break;
     case M32R_OPERAND_UIMM5 :
       fields->f_uimm5 = value;
+      break;
+    case M32R_OPERAND_UIMM8 :
+      fields->f_uimm8 = value;
       break;
     case M32R_OPERAND_ULO16 :
       fields->f_uimm16 = value;

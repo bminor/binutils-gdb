@@ -140,6 +140,7 @@ coff_i860_reloc_nyi (bfd *abfd ATTRIBUTE_UNUSED,
 {
   reloc_howto_type *howto = reloc_entry->howto;
   fprintf (stderr, _("Relocation `%s' not yet implemented\n"), howto->name);
+  return bfd_reloc_notsupported;
 }
 
 #ifndef PCRELOFFSET
@@ -524,7 +525,7 @@ coff_i860_rtype_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
       BFD_ASSERT (h != NULL);
 
       /* I think we *do* want to bypass this.  If we don't, I have seen some data
-	 parameters get the wrong relcation address.  If I link two versions
+	 parameters get the wrong relocation address.  If I link two versions
 	 with and without this section bypassed and then do a binary comparison,
 	 the addresses which are different can be looked up in the map.  The
 	 case in which this section has been bypassed has addresses which correspond

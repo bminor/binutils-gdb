@@ -53,7 +53,6 @@ static void swap_abort
 
 /* Handle NetBSD-style core dump file.  */
 
-/* ARGSUSED */
 static const bfd_target *
 netbsd_core_file_p (abfd)
      bfd *abfd;
@@ -179,7 +178,6 @@ netbsd_core_file_failing_command (abfd)
   return abfd->tdata.netbsd_core_data->core.c_name;
 }
 
-/* ARGSUSED */
 static int
 netbsd_core_file_failing_signal (abfd)
 	bfd *abfd;
@@ -188,7 +186,6 @@ netbsd_core_file_failing_signal (abfd)
   return abfd->tdata.netbsd_core_data->core.c_signo;
 }
 
-/* ARGSUSED */
 static bfd_boolean
 netbsd_core_file_matches_executable_p  (core_bfd, exec_bfd)
      bfd *core_bfd ATTRIBUTE_UNUSED;
