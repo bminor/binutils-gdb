@@ -52,7 +52,7 @@ proc do_steps_and_nexts {} {
     gdb_reinitialize_dir $srcdir/..
 
     for {set count 0} {$count < 20} {incr count} {
-	send "list\n"
+	send_gdb "list\n"
 	gdb_expect {
 	    -re ".*symarg = NULL.*$gdb_prompt $" {
 		set description "step over symarg initialization"
@@ -143,7 +143,7 @@ proc do_steps_and_nexts {} {
 		return
 	    }
 	}
-	send "$command\n"
+	send_gdb "$command\n"
 	gdb_expect {
 	    -re ".*No such file or directory.\r\n$gdb_prompt $" {
 		fail "$description (no source available)"
@@ -167,7 +167,6 @@ proc test_with_self { executable } {
     global det_file
     global decimal
     global timeout
-    global gdb_spawn_id
 
     # load yourself into the debugger
     # This can take a relatively long time, particularly for testing where
@@ -220,7 +219,7 @@ proc test_with_self { executable } {
     set timeout 600
 
     set description "run until breakpoint at main"
-    send "run -nw\n"
+    send_gdb "run -nw\n"
     gdb_expect {
 	-re "Starting program.*Breakpoint \[0-9\]+,.*main .argc.*argv.* at .*main.c:.*$gdb_prompt $" {
 	    pass "$description"
@@ -249,7 +248,7 @@ proc test_with_self { executable } {
     verbose "Timeout is now $timeout seconds" 2
 
     # do we have a version number ?
-    send "print version\n"
+    send_gdb "print version\n"
     gdb_expect {
 	-re ".\[0-9\]+ = +0x.*\[0-9.\]+.*$gdb_prompt $" {
 	    pass "printed version"
@@ -272,7 +271,7 @@ proc test_with_self { executable } {
     # on most RISC processors.
     setup_xfail "alpha-*-*" "hppa*-*-*" "mips-*-*"
     set description "step into xmalloc call"
-    send "step\n"
+    send_gdb "step\n"
     gdb_expect {
 	-re "xmalloc.*size=.*at.*utils.c.*$gdb_prompt $" {
 	    pass "$description"
@@ -292,7 +291,7 @@ proc test_with_self { executable } {
     }
 
     # start the "xgdb" process
-    send "continue\n"
+    send_gdb "continue\n"
     gdb_expect {
 	-re "GNU gdb \[0-9\.\]*.*
 Copyright \[0-9\]* Free Software Foundation, Inc.*
@@ -312,7 +311,7 @@ GDB.*Copyright \[0-9\]+ Free Software Foundation, Inc..*$gdb_prompt $"\
     }
     
     # set xgdb prompt so we can tell which is which
-    send "set prompt (xgdb) \n"
+    send_gdb "set prompt (xgdb) \n"
     gdb_expect {
 	-re "\[(\]xgdb\[)\].*\[(\]xgdb\[)\] $"	{ pass "Set xgdb prompt" }
 	-re ".*$gdb_prompt $"		{ fail "Set xgdb prompt" }
@@ -321,7 +320,7 @@ GDB.*Copyright \[0-9\]+ Free Software Foundation, Inc..*$gdb_prompt $"\
     
     # kill the xgdb process
     set description "send ^C to child process"
-    send "\003"
+    send_gdb "\003"
     gdb_expect {
 	-re "Program received signal SIGINT.*$gdb_prompt $" {
 	    pass "$description"
@@ -335,7 +334,7 @@ GDB.*Copyright \[0-9\]+ Free Software Foundation, Inc..*$gdb_prompt $"\
     }
     
     set description "send SIGINT signal to child process"
-    send "signal SIGINT\n"
+    send_gdb "signal SIGINT\n"
     gdb_expect {
 	-re "Continuing with signal SIGINT.*$gdb_prompt $" {
 	    pass "$description"
@@ -355,7 +354,7 @@ GDB.*Copyright \[0-9\]+ Free Software Foundation, Inc..*$gdb_prompt $"\
     # The testsuite failures may not be limited to just aout systems.
     setup_xfail "i*86-pc-linuxaout-gnu" "hppa*-*-hpux*"
     set description "backtrace through signal handler"
-    send "backtrace\n"
+    send_gdb "backtrace\n"
     gdb_expect {
 	-re "#0.*read.*in main \\(.*\\) at .*main\\.c.*$gdb_prompt $" {
 	    pass "$description"

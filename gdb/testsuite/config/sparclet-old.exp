@@ -38,7 +38,6 @@ set gdb_prompt "\\(gdbslet\\)"
 
 proc gdb_run_cmd {} {
     global gdb_prompt
-    global gdb_spawn_id
 
     set timeout 60
     verbose "Timeout is now $timeout seconds, starting remote stub" 2
@@ -193,7 +192,6 @@ proc gdb_load { arg } {
     global gdb_prompt
     global GDB
     global expect_out
-    global gdb_spawn_id
 
     set loadfile [file tail $arg]
     set loadpath [file dirname $arg]

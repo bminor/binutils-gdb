@@ -37,7 +37,6 @@ set gdb_prompt "\\(gdbslet\\)"
 #
 
 proc gdb_start { } {
-    global gdb_spawn_id;
     global gdb_prompt
     global GDB
 
@@ -66,7 +65,6 @@ proc gdb_start { } {
 }
 
 proc gdb_sparclet_startup { } {
-    global gdb_spawn_id;
     global gdb_prompt
     global GDB
 
@@ -212,7 +210,6 @@ proc gdb_sparclet_startup { } {
 }
 
 proc gdb_run_cmd { args } {
-    global gdb_spawn_id
     global gdb_prompt
 
     gdb_breakpoint exit;
@@ -246,7 +243,6 @@ proc gdb_load { arg } {
     global gdb_prompt
     global GDB
     global expect_out
-    global gdb_spawn_id
 
     set loadfile [file tail $arg]
     set loadpath [file dirname $arg]

@@ -1,3 +1,19 @@
+Mon Mar  3 11:57:43 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* gdb.base/a1-selftest.exp: Use send_gdb consistently. Don't
+	refer to gdb_spawn_id.
+
+	* config/m32r-stub.exp: Remove references to gdb_spawn_id, no
+	longer used.
+	* config/sparclet.exp: Ditto.
+	* config/sparclet-old.exp: Ditto.
+	* config/slite.exp: Ditto.
+	* config/sim.exp: Ditto.
+	* gdb.base/funcargs.exp: Ditto.
+
+	* lib/gdb.exp:Remove references to gdb_spawn_id.
+	(gdb_expect): Move to remote.exp.
+
 Fri Feb 28 20:47:39 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 	* config/monitor.exp: Detect the "Couldn't establish connection"
