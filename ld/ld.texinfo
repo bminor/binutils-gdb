@@ -1702,9 +1702,9 @@ Here is a trivial example:
 
 @smallexample
 void *
-__wrap_malloc (int c)
+__wrap_malloc (size_t c)
 @{
-  printf ("malloc called with %ld\n", c);
+  printf ("malloc called with %zu\n", c);
   return __real_malloc (c);
 @}
 @end smallexample

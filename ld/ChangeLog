@@ -1,3 +1,7 @@
+2004-03-01  Andreas Schwab  <schwab@suse.de>
+
+	* ld.texinfo (Options): Fix example for --wrap.
+
 2004-02-25  Danny Smith  <dannysmith@users.sourceforge.net>
 
 	* pe-dll.c (fill_edata): Check that exported_symbol_sections is
