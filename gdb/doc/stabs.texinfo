@@ -373,13 +373,16 @@ file.  This information is contained in a symbol of stab type
 symbol is the start address of portion of the text section corresponding
 to that file.
 
+With the Sun Solaris2 compiler, the @code{desc} field contains a
+source-language code.
+
 Some compilers (for example, gcc2 and SunOS4 @file{/bin/cc}) also
 include the directory in which the source was compiled, in a second
 @code{N_SO} symbol preceding the one containing the file name.  This
-symbol can be distinguished by the fact that it ends in a slash.
-According to a comment in GDB's @file{partial-stab.h}, other compilers
-(especially unnamed C++ compilers) put out useless N_SO's for
-nonexistent source files (after the N_SO for the real source file).
+symbol can be distinguished by the fact that it ends in a slash.  Code
+from the cfront C++ compiler can have additional @code{N_SO} symbols for
+nonexistent source files after the @code{N_SO} for the real source file;
+these are believed to contain no useful information.
 
 For example:
 
@@ -408,15 +411,15 @@ the start of this one.  To specify the main source file again, use an
 A @code{N_BINCL} symbol specifies the start of an include file.  In an
 object file, only the name is significant.  The Sun linker puts data
 into some of the other fields.  The end of the include file is marked by
-a @code{N_EINCL} symbol of the same name.  In an ojbect file, there is
-no significant data in the @code{N_EINCL} symbol; the Sun linker puts
-data into some of the fields.  @code{N_BINCL} and @code{N_EINCL} can be
-nested.  If the linker detects that two source files have identical
-stabs with a @code{N_BINCL} and @code{N_EINCL} pair (as will generally
-be the case for a header file), then it only puts out the stabs once.
-Each additional occurance is replaced by an @code{N_EXCL} symbol.  I
-believe the Sun (SunOS4, not sure about Solaris) linker is the only one
-which supports this feature.
+a @code{N_EINCL} symbol (which has no name field).  In an ojbect file,
+there is no significant data in the @code{N_EINCL} symbol; the Sun
+linker puts data into some of the fields.  @code{N_BINCL} and
+@code{N_EINCL} can be nested.  If the linker detects that two source
+files have identical stabs with a @code{N_BINCL} and @code{N_EINCL} pair
+(as will generally be the case for a header file), then it only puts out
+the stabs once.  Each additional occurance is replaced by an
+@code{N_EXCL} symbol.  I believe the Sun (SunOS4, not sure about
+Solaris) linker is the only one which supports this feature.
 
 For the start of an include file in XCOFF, use the @file{.bi} assembler
 directive which generates a @code{C_BINCL} symbol.  A @file{.ei}
@@ -466,6 +469,35 @@ of the function.  The value field is the address of the start of the
 function.  The type information of the stab represents the return type
 of the function; thus @samp{foo:f5} means that foo is a function
 returning type 5.
+
+The type information of the stab is optionally followed by type
+information for each argument, with each argument preceded by @samp{;}.
+An argument type of 0 means that additional arguments are being passed,
+whose types and number may vary (@samp{...} in ANSI C).  This extension
+is used by Sun's Solaris compiler.  GDB has tolerated it (i.e. at least
+parsed the syntax, if not necessarily used the information) at least
+since version 4.8; I don't know whether all versions of dbx will
+tolerate it.  The argument types given here are not merely redundant
+with the symbols for the arguments themselves (@pxref{Parameters}), they
+are the types of the arguments as they are passed, before any
+conversions might take place.  For example, if a C function which is
+declared without a prototype takes a @code{float} argument, the value is
+passed as a @code{double} but then converted to a @code{float}.
+Debuggers need to use the types given in the arguments when printing
+values, but if calling the function they need to use the types given in
+the symbol defining the function.
+
+If the return type and types of arguments of a function which is defined
+in another source file are specified (i.e. a function prototype in ANSI
+C), traditionally compilers emit no stab; the only way for the debugger
+to find the information is if the source file where the function is
+defined was also compiled with debugging symbols.  As an extension the
+Solaris compiler uses symbol descriptor @samp{P} followed by the return
+type of the function, followed by the arguments, each preceded by
+@samp{;}, as in a stab with symbol descriptor @samp{f} or @samp{F}.
+This use of symbol descriptor @samp{P} can be distinguished from its use
+for register parameters (@pxref{Parameters}) by the fact that it has
+symbol type @code{N_FUN}.
 
 The AIX documentation also defines symbol descriptor @samp{J} as an
 internal function.  I assume this means a function nested within another
@@ -1165,9 +1197,9 @@ type definition.
 * Strings::			Like an array but also has a length.
 * Enumerations::		Like an integer but the values have names.
 * Structures::			An aggregate type of different-typed elements.
-* Typedefs::			Giving a type a name
-* Unions::
-* Function types::
+* Typedefs::			Giving a type a name.
+* Unions::			Different types sharing storage.
+* Function Types::
 @end menu
 
 @node Builtin types
@@ -1316,8 +1348,10 @@ them as Fortran complex, double complex, and complex*16, respectively,
 but what does that mean?  (i.e.  Single precision?  Double precison?).
 
 @item 6 (NF_LDOUBLE)
-Long double.  It would be cleaner to define a different code for every
-possible format of long double.
+Long double.  This should probably only be used for Sun format long
+double, and new codes should be used for other floating point formats
+(NF_DOUBLE can be used if a long double is really just an IEEE double,
+of course).
 @end table
 
 @var{bytes} is the number of bytes occupied by the type.  This allows a
@@ -2986,6 +3020,11 @@ Static symbol (data segment variable with internal linkage), @xref{N_STSYM}.
 @item 0x2a     N_MAIN    
 Name of main routine (not used in C), @xref{N_MAIN}.
 
+@c FIXME: discuss this in the main body of the text where we talk about
+@c using N_FUN for variables.
+@item 0x2c N_ROSYM
+Read-only data symbol (Solaris2).  Most systems use N_FUN for this.
+
 @item 0x30     N_PC      
 Global symbol (for Pascal), @xref{N_PC}.
 
@@ -2994,6 +3033,15 @@ Number of symbols (according to Ultrix V4.0), @xref{N_NSYMS}.
 
 @item 0x34     N_NOMAP   
 No DST map for sym (according to Ultrix V4.0), @xref{N_NOMAP}.
+
+@c FIXME: describe this solaris feature in the body of the text (see
+@c comments in include/aout/stab.def).
+@item 0x38 N_OBJ
+Object file (Solaris2).
+
+@c See include/aout/stab.def for (a little) more info.
+@item 0x3c N_OPT
+Debugger options (Solaris2).
 
 @item 0x40     N_RSYM    
 Register variable, @xref{N_RSYM}.
@@ -3016,6 +3064,9 @@ Sun source code browser, path to .cb file, @xref{N_BROWS}.
 @item 0x4a     N_DEFD    
 Gnu Modula2 definition module dependency, @xref{N_DEFD}.
 
+@item 0x4c N_FLINE
+Function start/body/end line numbers (Solaris2).
+
 @item 0x50     N_EHDECL  
 Gnu C++ exception variable, @xref{N_EHDECL}.
 
@@ -3027,6 +3078,9 @@ Gnu C++ "catch" clause, @xref{N_CATCH}.
 
 @item 0x60     N_SSYM    
 Structure of union element, @xref{N_SSYM}.
+
+@item 0x62 N_ENDM
+Last stab for module (Solaris2).
 
 @item 0x64     N_SO      
 Path and name of source file , @xref{Source Files}.
@@ -3070,20 +3124,24 @@ End named common block, @xref{N_ECOMM}.
 @item 0xe8     N_ECOML   
 End common (local name), @xref{N_ECOML}.
 
+@c FIXME: How does this really work?  Move it to main body of document.
+@item 0xea N_WITH
+Pascal @code{with} statement: type,,0,0,offset (Solaris2).
+
 @item 0xf0     N_NBTEXT  
-<< used on Gould systems for non-base registers syms >>, @xref{Gould}.
+Gould non-base registers, @xref{Gould}.
 
 @item 0xf2     N_NBDATA  
-<< used on Gould systems for non-base registers syms >>, @xref{Gould}.
+Gould non-base registers, @xref{Gould}.
 
 @item 0xf4     N_NBBSS
-<< used on Gould systems for non-base registers syms >>, @xref{Gould}.
+Gould non-base registers, @xref{Gould}.
 
 @item 0xf6     N_NBSTS   
-<< used on Gould systems for non-base registers syms >>, @xref{Gould}.
+Gould non-base registers, @xref{Gould}.
 
 @item 0xf8     N_NBLCS   
-<< used on Gould systems for non-base registers syms >>, @xref{Gould}.
+Gould non-base registers, @xref{Gould}.
 @end table
 
 @c Restore the default table indent
@@ -3679,9 +3737,15 @@ value is address.
 
 @node Gould
 @section Non-base registers on Gould systems
-<< used on Gould systems for non-base registers syms, values assigned
-at random, need real info from Gould. >> 
-<<?>>
+
+These are used on Gould systems for non-base registers syms.
+
+However, the following values are not the values used by Gould; they are
+the values which GNU has been documenting for these values for a long
+time, without actually checking what Gould uses.  I include these values
+only because perhaps some someone actually did something with the GNU
+information (I hope not, why GNU knowingly assigned wrong values to
+these in the header file is a complete mystery to me).
 
 @example
 240    0xf0     N_NBTEXT  ??
