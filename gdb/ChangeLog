@@ -1,3 +1,31 @@
+2003-06-12  Corinna Vinschen  <vinschen@redhat.com>
+
+	* h8300-tdep.c: Add H8SX registers. Drop E_NUM_REGS entirely,
+	substitute by NUM_REGS throughout.
+	(h8300_register_name): Only care for H8/300 and H8/300H registers.
+	(h8300s_register_name): New function for H8S registers.
+	(h8300sx_register_name): Ditto for H8SX registers.
+	(h8300_print_register): Revise register printing, avoid depending
+	on 32 bit long.
+	(h8300_register_byte); Only care for H8/300 registers.
+	(h8300h_register_byte): New function for any other architecture.
+	(h8300_register_raw_size): Remove.
+	(h8300_register_virtual_type): Revise to return actually useful
+	type.
+	(h8300_extract_struct_value_address): Only care for H8/300 registers.
+	(h8300h_extract_struct_value_address): New function for any other
+	architecture.
+	(h8300_gdbarch_init): Add h8300sxn.  Call set_gdbarch_num_regs,
+	set_gdbarch_register_name, set_gdbarch_register_byte,
+	set_gdbarch_ptr_bit and set_gdbarch_addr_bit architecture dependent.
+	Remove calls to set_gdbarch_deprecated_register_size,
+	set_gdbarch_deprecated_register_bytes, set_gdbarch_register_raw_size,
+	set_gdbarch_deprecated_max_register_raw_size,
+	set_gdbarch_register_virtual_size and
+	set_gdbarch_deprecated_max_register_virtual_size entirely.
+	Call set_gdbarch_long_long_bit, set_gdbarch_double_bit and
+	set_gdbarch_long_double_bit.
+
 2003-06-11  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* doublest.c (convert_doublest_to_floatformat): When dealing 

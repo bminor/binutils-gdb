@@ -44,8 +44,6 @@ struct frame_extra_info
   CORE_ADDR locals_pointer;
 };
 
-#define E_NUM_REGS (h8300smode ? 14 : 13)
-
 enum
 {
   h8300_reg_size = 2,
@@ -69,7 +67,11 @@ enum gdb_regnum
   E_CYCLES_REGNUM,
   E_TICK_REGNUM, E_EXR_REGNUM = E_TICK_REGNUM,
   E_INST_REGNUM, E_TICKS_REGNUM = E_INST_REGNUM,
-  E_INSTS_REGNUM
+  E_INSTS_REGNUM,
+  E_MACH_REGNUM,
+  E_MACL_REGNUM,
+  E_SBR_REGNUM,
+  E_VBR_REGNUM
 };
 
 #define UNSIGNED_SHORT(X) ((X) & 0xffff)
@@ -864,21 +866,47 @@ static struct cmd_list_element *setmachinelist;
 static const char *
 h8300_register_name (int regno)
 {
-  /* The register names change depending on whether the h8300h processor
+  /* The register names change depending on which h8300 processor
      type is selected. */
-  static char *h8300_register_names[] = {
+  static char *register_names[] = {
     "r0", "r1", "r2", "r3", "r4", "r5", "r6",
     "sp", "ccr","pc","cycles", "tick", "inst", ""
   };
-  static char *h8300s_register_names[] = {
+  if (regno < 0
+      || regno >= (sizeof (register_names) / sizeof (*register_names)))
+    internal_error (__FILE__, __LINE__,
+                    "h8300_register_name: illegal register number %d", regno);
+  else
+    return register_names[regno];
+}
+
+static const char *
+h8300s_register_name (int regno)
+{
+  static char *register_names[] = {
     "er0", "er1", "er2", "er3", "er4", "er5", "er6",
     "sp", "ccr", "pc", "cycles", "exr", "tick", "inst"
   };
-  char **register_names =
-  		h8300smode ? h8300s_register_names : h8300_register_names;
-  if (regno < 0 || regno >= E_NUM_REGS)
+  if (regno < 0
+      || regno >= (sizeof (register_names) / sizeof (*register_names)))
     internal_error (__FILE__, __LINE__,
-		    "h8300_register_name: illegal register number %d", regno);
+                    "h8300s_register_name: illegal register number %d", regno);
+  else
+    return register_names[regno];
+}
+
+static const char *
+h8300sx_register_name (int regno)
+{
+  static char *register_names[] = {
+    "er0", "er1", "er2", "er3", "er4", "er5", "er6",
+    "sp", "ccr", "pc", "cycles", "exr", "tick", "inst",
+    "mach", "macl", "sbr", "vbr"
+  };
+  if (regno < 0
+      || regno >= (sizeof (register_names) / sizeof (*register_names)))
+    internal_error (__FILE__, __LINE__,
+		    "h8300sx_register_name: illegal register number %d", regno);
   else
     return register_names[regno];
 }
@@ -887,44 +915,30 @@ static void
 h8300_print_register (struct gdbarch *gdbarch, struct ui_file *file,
 		      struct frame_info *frame, int regno)
 {
-  ULONGEST rval;
-  long val;
-  const char *name = h8300_register_name (regno);
+  LONGEST rval;
+  const char *name = gdbarch_register_name (gdbarch, regno);
 
   if (!name || !*name)
     return;
 
-  /* FIXME: cagney/2002-10-22: The code below assumes that VAL is at
-     least 4 bytes (32 bits) in size and hence is large enough to hold
-     the largest h8300 register.  Should instead be using ULONGEST and
-     the phex() functions.  */
-  gdb_assert (sizeof (val) >= 4);
-  frame_read_unsigned_register (frame, regno, &rval);
-  val = rval;
+  frame_read_signed_register (frame, regno, &rval);
 
   fprintf_filtered (file, "%-14s ", name);
-  if (h8300hmode)
+  if (regno == E_CCR_REGNUM || (regno == E_EXR_REGNUM && h8300smode))
     {
-      if (val)
-	fprintf_filtered (file, "0x%08lx   %-8ld", val, val);
-      else
-	fprintf_filtered (file, "0x%-8lx   %-8ld", val, val);
+      fprintf_filtered (file, "0x%02x        ", (unsigned char)rval);
+      print_longest (file, 'u', 1, rval);
     }
   else
     {
-      if (val)
-	fprintf_filtered (file, "0x%04lx   %-4ld", val, val);
-      else
-	fprintf_filtered (file, "0x%-4lx   %-4ld", val, val);
+      fprintf_filtered (file, "0x%s  ", phex ((ULONGEST)rval, BINWORD));
+      print_longest (file, 'd', 1, rval);
     }
   if (regno == E_CCR_REGNUM)
     {
       /* CCR register */
       int C, Z, N, V;
-      unsigned char b[h8300h_reg_size];
-      unsigned char l;
-      frame_register_read (deprecated_selected_frame, regno, b);
-      l = b[REGISTER_VIRTUAL_SIZE (E_CCR_REGNUM) - 1];
+      unsigned char l = rval & 0xff;
       fprintf_filtered (file, "\t");
       fprintf_filtered (file, "I-%d ", (l & 0x80) != 0);
       fprintf_filtered (file, "UI-%d ", (l & 0x40) != 0);
@@ -962,10 +976,7 @@ h8300_print_register (struct gdbarch *gdbarch, struct ui_file *file,
   else if (regno == E_EXR_REGNUM && h8300smode)
     {
       /* EXR register */
-      unsigned char b[h8300h_reg_size];
-      unsigned char l;
-      frame_register_read (deprecated_selected_frame, regno, b);
-      l = b[REGISTER_VIRTUAL_SIZE (E_EXR_REGNUM) - 1];
+      unsigned char l = rval & 0xff;
       fprintf_filtered (file, "\t");
       fprintf_filtered (file, "T-%d - - - ", (l & 0x80) != 0);
       fprintf_filtered (file, "I2-%d ", (l & 4) != 0);
@@ -980,7 +991,7 @@ h8300_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
 			    struct frame_info *frame, int regno, int cpregs)
 {
   if (regno < 0)
-    for (regno = 0; regno < E_NUM_REGS; ++regno)
+    for (regno = 0; regno < NUM_REGS; ++regno)
       h8300_print_register (gdbarch, file, frame, regno);
   else
     h8300_print_register (gdbarch, file, frame, regno);
@@ -995,34 +1006,50 @@ h8300_saved_pc_after_call (struct frame_info *ignore)
 static int
 h8300_register_byte (int regno)
 {
-  if (regno < 0 || regno >= E_NUM_REGS)
+  if (regno < 0 || regno >= NUM_REGS)
     internal_error (__FILE__, __LINE__,
 		    "h8300_register_byte: illegal register number %d", regno);
   else
-    return regno * BINWORD;
+    return regno * h8300_reg_size;
 }
 
 static int
-h8300_register_raw_size (int regno)
+h8300h_register_byte (int regno)
 {
-  if (regno < 0 || regno >= E_NUM_REGS)
+  if (regno < 0 || regno >= NUM_REGS)
     internal_error (__FILE__, __LINE__,
-		    "h8300_register_raw_size: illegal register number %d",
-		    regno);
+		    "h8300_register_byte: illegal register number %d", regno);
   else
-    return BINWORD;
+    return regno * h8300h_reg_size;
 }
 
 static struct type *
 h8300_register_virtual_type (int regno)
 {
-  if (regno < 0 || regno >= E_NUM_REGS)
+  if (regno < 0 || regno >= NUM_REGS)
     internal_error (__FILE__, __LINE__,
 		    "h8300_register_virtual_type: illegal register number %d",
 		    regno);
   else
-    return h8300hmode ?
-	   builtin_type_unsigned_long : builtin_type_unsigned_short;
+    {
+      switch (regno)
+        {
+	  case E_PC_REGNUM:
+	    return builtin_type_void_func_ptr;
+	  case E_SP_REGNUM:
+	  case E_FP_REGNUM:
+	    return builtin_type_void_data_ptr;
+	  case E_CCR_REGNUM:
+	    return builtin_type_uint8;
+	  case E_EXR_REGNUM:
+	    if (h8300smode)
+	      return builtin_type_uint8;
+	    /*FALLTHRU*/
+	  default:
+	    return h8300hmode ? builtin_type_int32
+			      : builtin_type_int16;
+        }
+    }
 }
 
 static void
@@ -1042,7 +1069,15 @@ h8300_extract_struct_value_address (char *regbuf)
 {
   return 
     extract_unsigned_integer (regbuf + h8300_register_byte (E_ARG0_REGNUM),
-			      h8300_register_raw_size (E_ARG0_REGNUM));
+			      h8300_reg_size);
+}
+
+static CORE_ADDR
+h8300h_extract_struct_value_address (char *regbuf)
+{
+  return 
+    extract_unsigned_integer (regbuf + h8300_register_byte (E_ARG0_REGNUM),
+			      h8300h_reg_size);
 }
 
 const static unsigned char *
@@ -1081,33 +1116,54 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   if (info.bfd_arch_info->arch != bfd_arch_h8300)
     return NULL;
 
+  gdbarch = gdbarch_alloc (&info, 0);
+
   switch (info.bfd_arch_info->mach)
     {
     case bfd_mach_h8300:
       h8300sxmode = 0;
       h8300smode = 0;
       h8300hmode = 0;
+      set_gdbarch_num_regs (gdbarch, 13);
+      set_gdbarch_register_name (gdbarch, h8300_register_name);
+      set_gdbarch_register_byte (gdbarch, h8300_register_byte);
+      set_gdbarch_ptr_bit (gdbarch, 2 * TARGET_CHAR_BIT);
+      set_gdbarch_addr_bit (gdbarch, 2 * TARGET_CHAR_BIT);
       break;
     case bfd_mach_h8300h:
     case bfd_mach_h8300hn:
       h8300sxmode = 0;
       h8300smode = 0;
       h8300hmode = 1;
+      set_gdbarch_num_regs (gdbarch, 13);
+      set_gdbarch_register_name (gdbarch, h8300_register_name);
+      set_gdbarch_register_byte (gdbarch, h8300h_register_byte);
+      set_gdbarch_ptr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
+      set_gdbarch_addr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
       break;
     case bfd_mach_h8300s:
     case bfd_mach_h8300sn:
       h8300sxmode = 0;
       h8300smode = 1;
       h8300hmode = 1;
+      set_gdbarch_num_regs (gdbarch, 14);
+      set_gdbarch_register_name (gdbarch, h8300s_register_name);
+      set_gdbarch_register_byte (gdbarch, h8300h_register_byte);
+      set_gdbarch_ptr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
+      set_gdbarch_addr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
       break;
     case bfd_mach_h8300sx:
+    case bfd_mach_h8300sxn:
       h8300sxmode = 1;
       h8300smode = 1;
       h8300hmode = 1;
+      set_gdbarch_num_regs (gdbarch, 18);
+      set_gdbarch_register_name (gdbarch, h8300sx_register_name);
+      set_gdbarch_register_byte (gdbarch, h8300h_register_byte);
+      set_gdbarch_ptr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
+      set_gdbarch_addr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
       break;
     }
-
-  gdbarch = gdbarch_alloc (&info, 0);
 
   /* NOTE: cagney/2002-12-06: This can be deleted when this arch is
      ready to unwind the PC first (see frame.c:get_prev_frame()).  */
@@ -1117,19 +1173,10 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
    * Basic register fields and methods.
    */
 
-  set_gdbarch_num_regs (gdbarch, E_NUM_REGS);
   set_gdbarch_num_pseudo_regs (gdbarch, 0);
   set_gdbarch_sp_regnum (gdbarch, E_SP_REGNUM);
   set_gdbarch_deprecated_fp_regnum (gdbarch, E_FP_REGNUM);
   set_gdbarch_pc_regnum (gdbarch, E_PC_REGNUM);
-  set_gdbarch_register_name (gdbarch, h8300_register_name);
-  set_gdbarch_deprecated_register_size (gdbarch, BINWORD);
-  set_gdbarch_deprecated_register_bytes (gdbarch, E_NUM_REGS * BINWORD);
-  set_gdbarch_register_byte (gdbarch, h8300_register_byte);
-  set_gdbarch_register_raw_size (gdbarch, h8300_register_raw_size);
-  set_gdbarch_deprecated_max_register_raw_size (gdbarch, h8300h_reg_size);
-  set_gdbarch_register_virtual_size (gdbarch, h8300_register_raw_size);
-  set_gdbarch_deprecated_max_register_virtual_size (gdbarch, h8300h_reg_size);
   set_gdbarch_register_virtual_type (gdbarch, h8300_register_virtual_type);
   set_gdbarch_print_registers_info (gdbarch, h8300_print_registers_info);
   set_gdbarch_print_float_info (gdbarch, h8300_print_float_info);
@@ -1187,8 +1234,9 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_int_bit (gdbarch, 2 * TARGET_CHAR_BIT);
   set_gdbarch_long_bit (gdbarch, 4 * TARGET_CHAR_BIT);
-  set_gdbarch_ptr_bit (gdbarch, BINWORD * TARGET_CHAR_BIT);
-  set_gdbarch_addr_bit (gdbarch, BINWORD * TARGET_CHAR_BIT);
+  set_gdbarch_long_long_bit (gdbarch, 4 * TARGET_CHAR_BIT);
+  set_gdbarch_double_bit (gdbarch, 4 * TARGET_CHAR_BIT);
+  set_gdbarch_long_double_bit (gdbarch, 4 * TARGET_CHAR_BIT);
 
   /* set_gdbarch_stack_align (gdbarch, SOME_stack_align); */
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
