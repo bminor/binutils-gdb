@@ -296,7 +296,7 @@ alpha_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 	  if (accumulate_size < sizeof (arg_reg_buffer)
 	      && TYPE_LENGTH (arg_type) == 4)
 	    {
-	      arg_type = builtin_type_double;
+	      arg_type = builtin_type_ieee_double_little;
 	      arg = value_cast (arg_type, arg);
 	    }
 	  /* Tru64 5.1 has a 128-bit long double, and passes this by

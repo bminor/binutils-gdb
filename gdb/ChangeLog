@@ -1,5 +1,8 @@
 2003-06-02  Richard Henderson  <rth@redhat.com>
 
+        * alpha-tdep.c (alpha_push_dummy_call): Use
+        builtin_type_ieee_double_little instead of builtin_type_double.
+
         * alpha-tdep.c (alpha_push_dummy_call): Handle ABI mandated 
         sign-extension of 32-bit values.
         (alpha_store_return_value): Similarly.
