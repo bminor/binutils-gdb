@@ -154,6 +154,118 @@ else
 	done
 fi
 
+vr4320_files="mips.h"
+if ( echo $* | grep keep\-vr4320 > /dev/null ) ; then
+	for i in $vr4320_files ; do
+		if test ! -d $i && (grep sanitize-vr4320 $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Keeping vr4320 stuff in $i
+			fi
+		fi
+	done
+else
+	for i in $vr4320_files ; do
+		if test ! -d $i && (grep sanitize-vr4320 $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"vr4320\" from $i...
+			fi
+			cp $i new
+			sed '/start\-sanitize\-vr4320/,/end-\sanitize\-vr4320/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
+
+tx49_files="mips.h"
+if ( echo $* | grep keep\-tx49 > /dev/null ) ; then
+	for i in $tx49_files ; do
+		if test ! -d $i && (grep sanitize-tx49 $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Keeping tx49 stuff in $i
+			fi
+		fi
+	done
+else
+	for i in $tx49_files ; do
+		if test ! -d $i && (grep sanitize-tx49 $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"tx49\" from $i...
+			fi
+			cp $i new
+			sed '/start\-sanitize\-tx49/,/end-\sanitize\-tx49/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
+
+vr5400_files="mips.h"
+if ( echo $* | grep keep\-vr5400 > /dev/null ) ; then
+	for i in $vr5400_files ; do
+		if test ! -d $i && (grep sanitize-vr5400 $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Keeping vr5400 stuff in $i
+			fi
+		fi
+	done
+else
+	for i in $vr5400_files ; do
+		if test ! -d $i && (grep sanitize-vr5400 $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"vr5400\" from $i...
+			fi
+			cp $i new
+			sed '/start\-sanitize\-vr5400/,/end-\sanitize\-vr5400/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
+
+r5900_files="mips.h"
+if ( echo $* | grep keep\-r5900 > /dev/null ) ; then
+	for i in $r5900_files ; do
+		if test ! -d $i && (grep sanitize-r5900 $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Keeping r5900 stuff in $i
+			fi
+		fi
+	done
+else
+	for i in $r5900_files ; do
+		if test ! -d $i && (grep sanitize-r5900 $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"r5900\" from $i...
+			fi
+			cp $i new
+			sed '/start\-sanitize\-r5900/,/end-\sanitize\-r5900/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
+
 for i in * ; do
 	if test ! -d $i && (grep sanitize $i > /dev/null) ; then
 		echo '***' Some mentions of Sanitize are still left in $i! 1>&2
