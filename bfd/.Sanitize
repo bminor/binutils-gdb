@@ -78,6 +78,7 @@ coff-we32k.c
 coff-z8k.c
 coffcode.h
 coffgen.c
+cofflink.c
 coffswap.h
 config
 config.bfd

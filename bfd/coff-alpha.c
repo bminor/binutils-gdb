@@ -35,6 +35,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 static const bfd_target *alpha_ecoff_object_p PARAMS ((bfd *));
 static boolean alpha_ecoff_bad_format_hook PARAMS ((bfd *abfd, PTR filehdr));
+static PTR alpha_ecoff_mkobject_hook PARAMS ((bfd *, PTR filehdr, PTR aouthdr));
 static void alpha_ecoff_swap_reloc_in PARAMS ((bfd *, PTR,
 					      struct internal_reloc *));
 static void alpha_ecoff_swap_reloc_out PARAMS ((bfd *,
@@ -472,6 +473,40 @@ alpha_ecoff_bad_format_hook (abfd, filehdr)
 
   return true;
 }
+
+/* This is a hook called by coff_real_object_p to create any backend
+   specific information.  */
+
+static PTR
+alpha_ecoff_mkobject_hook (abfd, filehdr, aouthdr)
+     bfd *abfd;
+     PTR filehdr;
+     PTR aouthdr;
+{
+  PTR ecoff;
+
+  ecoff = _bfd_ecoff_mkobject_hook (abfd, filehdr, aouthdr);
+
+  if (ecoff != NULL)
+    {
+      struct internal_filehdr *internal_f = (struct internal_filehdr *) filehdr;
+
+      /* Set additional BFD flags according to the object type from the
+	 machine specific file header flags.  */
+      switch (internal_f->f_flags & F_ALPHA_OBJECT_TYPE_MASK)
+	{
+	case F_ALPHA_SHARABLE:
+	  abfd->flags |= DYNAMIC;
+	  break;
+	case F_ALPHA_CALL_SHARED:
+	  /* Always executable if using shared libraries as the run time
+	     loader might resolve undefined references.  */
+	  abfd->flags |= (DYNAMIC | EXEC_P);
+	  break;
+	}
+    }
+  return ecoff;
+}
 
 /* Reloc handling.  */
 
@@ -641,7 +676,7 @@ alpha_adjust_reloc_in (abfd, intern, rptr)
 	 some reason the address of this reloc type is not adjusted by
 	 the section vma.  We record the gp value for this object file
 	 here, for convenience when doing the GPDISP relocation.  */
-      rptr->sym_ptr_ptr = bfd_abs_section.symbol_ptr_ptr;
+      rptr->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
       rptr->address = intern->r_vaddr;
       rptr->addend = ecoff_data (abfd)->gp;
       break;
@@ -954,7 +989,7 @@ alpha_ecoff_get_relocated_section_contents (abfd, link_info, link_order,
 	    /* Figure out the relocation of this symbol.  */
 	    symbol = *rel->sym_ptr_ptr;
 
-	    if (symbol->section == &bfd_und_section)
+	    if (bfd_is_und_section (symbol->section))
 	      r = bfd_reloc_undefined;
 
 	    if (bfd_is_com_section (symbol->section))
@@ -1014,7 +1049,7 @@ alpha_ecoff_get_relocated_section_contents (abfd, link_info, link_order,
 	    /* Figure out the relocation of this symbol.  */
 	    symbol = *rel->sym_ptr_ptr;
 
-	    if (symbol->section == &bfd_und_section)
+	    if (bfd_is_und_section (symbol->section))
 	      r = bfd_reloc_undefined;
 
 	    if (bfd_is_com_section (symbol->section))
@@ -1047,7 +1082,7 @@ alpha_ecoff_get_relocated_section_contents (abfd, link_info, link_order,
 	    /* Figure out the relocation of this symbol.  */
 	    symbol = *rel->sym_ptr_ptr;
 
-	    if (symbol->section == &bfd_und_section)
+	    if (bfd_is_und_section (symbol->section))
 	      r = bfd_reloc_undefined;
 
 	    if (bfd_is_com_section (symbol->section))
@@ -1382,7 +1417,7 @@ alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	bfd_get_section_by_name (input_bfd, ".fini");
       symndx_to_section[RELOC_SECTION_LITA] =
 	bfd_get_section_by_name (input_bfd, ".lita");
-      symndx_to_section[RELOC_SECTION_ABS] = &bfd_abs_section;
+      symndx_to_section[RELOC_SECTION_ABS] = bfd_abs_section_ptr;
 
       ecoff_data (input_bfd)->symndx_to_section = symndx_to_section;
     }
@@ -1911,13 +1946,14 @@ static const struct ecoff_backend_data alpha_ecoff_backend_data =
     (unsigned (*) PARAMS ((bfd *,PTR,PTR))) bfd_void, /* reloc_out */
     alpha_ecoff_swap_filehdr_out, alpha_ecoff_swap_aouthdr_out,
     alpha_ecoff_swap_scnhdr_out,
-    FILHSZ, AOUTSZ, SCNHSZ, 0, 0, 0, true,
+    FILHSZ, AOUTSZ, SCNHSZ, 0, 0, 0, 0, true,
     alpha_ecoff_swap_filehdr_in, alpha_ecoff_swap_aouthdr_in,
-    alpha_ecoff_swap_scnhdr_in, alpha_ecoff_bad_format_hook,
-    _bfd_ecoff_set_arch_mach_hook, _bfd_ecoff_mkobject_hook,
-    _bfd_ecoff_styp_to_sec_flags, _bfd_ecoff_make_section_hook,
-    _bfd_ecoff_set_alignment_hook, _bfd_ecoff_slurp_symbol_table,
-    NULL, NULL
+    alpha_ecoff_swap_scnhdr_in, NULL,
+    alpha_ecoff_bad_format_hook, _bfd_ecoff_set_arch_mach_hook,
+    alpha_ecoff_mkobject_hook, _bfd_ecoff_styp_to_sec_flags,
+    _bfd_ecoff_make_section_hook, _bfd_ecoff_set_alignment_hook,
+    _bfd_ecoff_slurp_symbol_table,
+    NULL, NULL, NULL, NULL, NULL, NULL
   },
   /* Supported architecture.  */
   bfd_arch_alpha,
@@ -2004,7 +2040,7 @@ const bfd_target ecoffalpha_little_vec =
 
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
+   HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT | D_PAGED),
 
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* sect
 							    flags */

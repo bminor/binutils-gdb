@@ -180,10 +180,7 @@ coff_real_object_p (abfd, nscns, internal_f, internal_a)
   if ((internal_f->f_flags & F_EXEC) != 0)
     abfd->flags |= D_PAGED;
 
-  obj_raw_syment_count (abfd) =
-    obj_conv_table_size (abfd) =
-      bfd_get_symcount(abfd) =
-	internal_f->f_nsyms;
+  bfd_get_symcount(abfd) = internal_f->f_nsyms;
   if (internal_f->f_nsyms)
     abfd->flags |= HAS_SYMS;
 
@@ -343,42 +340,53 @@ coff_get_symtab (abfd, alocation)
 
 int
 coff_count_linenumbers (abfd)
-     bfd            *abfd;
+     bfd *abfd;
 {
-  unsigned int    limit = bfd_get_symcount(abfd);
-  unsigned int    i;
+  unsigned int limit = bfd_get_symcount(abfd);
+  unsigned int i;
   int total = 0;
-  asymbol       **p;
- {
-   asection       *s = abfd->sections->output_section;
-   while (s) {
-     BFD_ASSERT(s->lineno_count == 0);
-     s = s->next;
-   }
- }
+  asymbol **p;
+  asection *s;
 
-
-  for (p = abfd->outsymbols, i = 0; i < limit; i++, p++) {
-    asymbol        *q_maybe = *p;
-    if (bfd_asymbol_flavour(q_maybe) == bfd_target_coff_flavour) {
-      coff_symbol_type *q = coffsymbol(q_maybe);
-      if (q->lineno) {
-	/*
-	  This symbol has a linenumber, increment the owning
-	  section's linenumber count
-	  */
-	alent          *l = q->lineno;
-	q->symbol.section->output_section->lineno_count++;
-	total ++;
-	l++;
-	while (l->line_number) {
-	  total ++;
-	  q->symbol.section->output_section->lineno_count++;
-	  l++;
-	}
-      }
+  if (limit == 0)
+    {
+      /* This may be from the backend linker, in which case the
+         lineno_count in the sections is correct.  */
+      for (s = abfd->sections; s != NULL; s = s->next)
+	total += s->lineno_count;
+      return total;
     }
-  }
+
+  for (s = abfd->sections; s != NULL; s = s->next)
+    BFD_ASSERT (s->lineno_count == 0);
+
+  for (p = abfd->outsymbols, i = 0; i < limit; i++, p++)
+    {
+      asymbol *q_maybe = *p;
+
+      if (bfd_asymbol_flavour (q_maybe) == bfd_target_coff_flavour)
+	{
+	  coff_symbol_type *q = coffsymbol (q_maybe);
+
+	  if (q->lineno != NULL)
+	    {
+	      /* This symbol has line numbers.  Increment the owning
+		 section's linenumber count.  */
+	      alent *l = q->lineno;
+
+	      ++q->symbol.section->output_section->lineno_count;
+	      ++total;
+	      ++l;
+	      while (l->line_number != 0)
+		{
+		  ++total;
+		  ++q->symbol.section->output_section->lineno_count;
+		  ++l;
+		}
+	    }
+	}
+    }
+
   return total;
 }
 
@@ -920,8 +928,6 @@ coff_write_symbols (abfd)
 	}
     }
 
-  bfd_get_symcount (abfd) = written;
-
   /* Now write out strings */
 
   if (string_size != 0)
@@ -1137,9 +1143,12 @@ coff_pointerize_aux (abfd, table_base, type, class, auxent)
   /* Otherwise patch up */
 #define N_TMASK coff_data (abfd)->local_n_tmask
 #define N_BTSHFT coff_data (abfd)->local_n_btshft
-  if (ISFCN(type) || ISTAG(class) || class == C_BLOCK) {
-      auxent->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.p = table_base +
-       auxent->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.l;
+  if ((ISFCN(type) || ISTAG(class) || class == C_BLOCK)
+      && auxent->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.l > 0)
+    {
+      auxent->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.p =
+	(table_base
+	 + auxent->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.l);
       auxent->fix_end = 1;
     }
   /* A negative tagndx is meaningless, but the SCO 3.2v4 cc can
@@ -1276,7 +1285,9 @@ coff_get_normalized_symtab (abfd)
   if (obj_raw_syments(abfd) != (combined_entry_type *)NULL) {
       return obj_raw_syments(abfd);
     }
-  if ((size = bfd_get_symcount(abfd) * sizeof(combined_entry_type)) == 0) {
+  size = obj_raw_syment_count (abfd) * sizeof (combined_entry_type);
+  if (size == 0)
+    {
       bfd_set_error (bfd_error_no_symbols);
       return (NULL);
     }
@@ -1287,10 +1298,10 @@ coff_get_normalized_symtab (abfd)
       bfd_set_error (bfd_error_no_memory);
       return NULL;
     }
-  internal_end = internal + bfd_get_symcount(abfd);
+  internal_end = internal + obj_raw_syment_count (abfd);
 
   symesz = bfd_coff_symesz (abfd);
-  raw_size =      bfd_get_symcount(abfd) * symesz;
+  raw_size =      obj_raw_syment_count (abfd) * symesz;
   raw = bfd_alloc(abfd,raw_size);
   if (!raw)
     {
@@ -1302,7 +1313,7 @@ coff_get_normalized_symtab (abfd)
       || bfd_read(raw, raw_size, 1, abfd) != raw_size)
       return (NULL);
   /* mark the end of the symbols */
-  raw_end = (char *) raw + bfd_get_symcount(abfd) * symesz;
+  raw_end = (char *) raw + obj_raw_syment_count (abfd) * symesz;
   /*
     FIXME SOMEDAY.  A string table size of zero is very weird, but
     probably possible.  If one shows up, it will probably kill us.
@@ -1575,6 +1586,11 @@ coff_print_symbol (abfd, filep, symbol, how)
 			   auxp->u.auxent.x_sym.x_misc.x_lnsz.x_lnno,
 			   auxp->u.auxent.x_sym.x_misc.x_lnsz.x_size,
 			   tagndx);
+		  if (auxp->fix_end)
+		    fprintf (file, " endndx %ld",
+			     ((long)
+			      (auxp->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.p
+			       - root)));
 		  break;
 		}
 	    }

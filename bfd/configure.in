@@ -135,7 +135,7 @@ do
     case "$vec" in
     # This list is alphabetized to make it easy to compare
     # with the two vector lists in targets.c.
-    a29kcoff_big_vec)		tb="$tb coff-a29k.o" ;;
+    a29kcoff_big_vec)		tb="$tb coff-a29k.o cofflink.o" ;;
     a_out_adobe_vec)		tb="$tb aout-adobe.o aout32.o stab-syms.o" ;;
     aout0_big_vec)		tb="$tb aout0.o aout32.o stab-syms.o" ;;
     aout_mips_big_vec)		tb="$tb mipsbsd.o aout32.o stab-syms.o" ;;

@@ -18,6 +18,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#include "bfdlink.h"
 
 /* Object file tdata; access macros */
 
@@ -31,12 +32,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define obj_raw_syment_count(bfd)	(coff_data(bfd)->raw_syment_count)
 #define obj_convert(bfd)	(coff_data(bfd)->conversion_table)
 #define obj_conv_table_size(bfd) (coff_data(bfd)->conv_table_size)
-#if CFILE_STUFF
-#define obj_symbol_slew(bfd)	(coff_data(bfd)->symbol_index_slew)
-#else
-#define obj_symbol_slew(bfd) 0
-#endif
 
+#define obj_coff_external_syms(bfd) (coff_data (bfd)->external_syms)
+#define obj_coff_strings(bfd)	(coff_data (bfd)->strings)
+#define obj_coff_sym_hashes(bfd) (coff_data (bfd)->sym_hashes)
 
 /* `Tdata' information kept for COFF files.  */
 
@@ -47,13 +46,8 @@ typedef struct coff_tdata
   int conv_table_size;
   file_ptr sym_filepos;
 
-  long symbol_index_slew;	/* used during read to mark whether a
-				   C_FILE symbol as been added. */
-
   struct coff_ptr_struct *raw_syments;
-  struct lineno *raw_linenos;
   unsigned int raw_syment_count;
-  unsigned short flags;
 
   /* These are only valid once writing has begun */
   long int relocbase;
@@ -68,11 +62,68 @@ typedef struct coff_tdata
   unsigned local_symesz;
   unsigned local_auxesz;
   unsigned local_linesz;
+
+  /* Used by the COFF backend linker.  */
+  PTR external_syms;
+  char *strings;
+  struct coff_link_hash_entry **sym_hashes;
 } coff_data_type;
 
 /* We take the address of the first element of a asymbol to ensure that the
  * macro is only ever applied to an asymbol.  */
 #define coffsymbol(asymbol) ((coff_symbol_type *)(&((asymbol)->the_bfd)))
+
+/* COFF linker hash table entries.  */
+
+struct coff_link_hash_entry
+{
+  struct bfd_link_hash_entry root;
+
+  /* Symbol index in output file.  Set to -1 initially.  Set to -2 if
+     there is a reloc against this symbol.  */
+  long indx;
+
+  /* Symbol type.  */
+  unsigned short type;
+
+  /* Symbol class.  */
+  unsigned char class;
+
+  /* Number of auxiliary entries.  */
+  char numaux;
+
+  /* BFD to take auxiliary entries from.  */
+  bfd *auxbfd;
+
+  /* Pointer to array of auxiliary entries, if any.  */
+  union internal_auxent *aux;
+};
+
+/* COFF linker hash table.  */
+
+struct coff_link_hash_table
+{
+  struct bfd_link_hash_table root;
+};
+
+/* Look up an entry in a COFF linker hash table.  */
+
+#define coff_link_hash_lookup(table, string, create, copy, follow)	\
+  ((struct coff_link_hash_entry *)					\
+   bfd_link_hash_lookup (&(table)->root, (string), (create),		\
+			 (copy), (follow)))
+
+/* Traverse a COFF linker hash table.  */
+
+#define coff_link_hash_traverse(table, func, info)			\
+  (bfd_link_hash_traverse						\
+   (&(table)->root,							\
+    (boolean (*) PARAMS ((struct bfd_link_hash_entry *, PTR))) (func),	\
+    (info)))
+
+/* Get the COFF linker hash table from a link_info structure.  */
+
+#define coff_hash_table(p) ((struct coff_link_hash_table *) ((p)->hash))
 
 /* Functions in coffgen.c.  */
 extern const bfd_target *coff_object_p PARAMS ((bfd *));
@@ -115,6 +166,15 @@ extern bfd_vma bfd_coff_reloc16_get_value PARAMS ((arelent *,
 extern void bfd_perform_slip PARAMS ((bfd *abfd, unsigned int slip,
 				      asection *input_section,
 				      bfd_vma val));
+
+/* Functions in cofflink.c.  */
+
+extern struct bfd_link_hash_table *_bfd_coff_link_hash_table_create
+  PARAMS ((bfd *));
+extern boolean _bfd_coff_link_add_symbols
+  PARAMS ((bfd *, struct bfd_link_info *));
+extern boolean _bfd_coff_final_link
+  PARAMS ((bfd *, struct bfd_link_info *));
 
 /* And more taken from the source .. */
 
@@ -232,6 +292,7 @@ typedef struct
  unsigned int _bfd_scnhsz;
  unsigned int _bfd_symesz;
  unsigned int _bfd_auxesz;
+ unsigned int _bfd_relsz;
  unsigned int _bfd_linesz;
  boolean _bfd_coff_long_filenames;
  void (*_bfd_coff_swap_filehdr_in) PARAMS ((
@@ -243,6 +304,10 @@ typedef struct
        PTR     ext,
        PTR     in));
  void (*_bfd_coff_swap_scnhdr_in) PARAMS ((
+       bfd     *abfd,
+       PTR     ext,
+       PTR     in));
+ void (*_bfd_coff_swap_reloc_in) PARAMS ((
        bfd     *abfd,
        PTR     ext,
        PTR     in));
@@ -286,6 +351,20 @@ typedef struct
        arelent *r,
        unsigned int shrink,
        struct bfd_link_info *link_info));
+ boolean (*_bfd_coff_sym_is_global) PARAMS ((
+       bfd *abfd,
+       struct internal_syment *));
+ void (*_bfd_coff_compute_section_file_positions) PARAMS ((
+       bfd *abfd));
+ boolean (*_bfd_coff_relocate_section) PARAMS ((
+       bfd *output_bfd,
+       struct bfd_link_info *info,
+       bfd *input_bfd,
+       asection *input_section,
+       bfd_byte *contents,
+       struct internal_reloc *relocs,
+       struct internal_syment *syms,
+       asection **sections));
 
 } bfd_coff_backend_data;
 
@@ -326,6 +405,7 @@ typedef struct
 #define bfd_coff_scnhsz(abfd) (coff_backend_info (abfd)->_bfd_scnhsz)
 #define bfd_coff_symesz(abfd) (coff_backend_info (abfd)->_bfd_symesz)
 #define bfd_coff_auxesz(abfd) (coff_backend_info (abfd)->_bfd_auxesz)
+#define bfd_coff_relsz(abfd)  (coff_backend_info (abfd)->_bfd_relsz)
 #define bfd_coff_linesz(abfd) (coff_backend_info (abfd)->_bfd_linesz)
 #define bfd_coff_long_filenames(abfd) (coff_backend_info (abfd)->_bfd_coff_long_filenames)
 #define bfd_coff_swap_filehdr_in(abfd, i,o) \
@@ -336,6 +416,9 @@ typedef struct
 
 #define bfd_coff_swap_scnhdr_in(abfd, i,o) \
         ((coff_backend_info (abfd)->_bfd_coff_swap_scnhdr_in) (abfd, i, o))
+
+#define bfd_coff_swap_reloc_in(abfd, i, o) \
+        ((coff_backend_info (abfd)->_bfd_coff_swap_reloc_in) (abfd, i, o))
 
 #define bfd_coff_bad_format_hook(abfd, filehdr) \
         ((coff_backend_info (abfd)->_bfd_coff_bad_format_hook) (abfd, filehdr))
@@ -367,4 +450,16 @@ typedef struct
 #define bfd_coff_reloc16_estimate(abfd, section, reloc, shrink, link_info)\
         ((coff_backend_info (abfd)->_bfd_coff_reloc16_estimate)\
          (abfd, section, reloc, shrink, link_info))
+
+#define bfd_coff_sym_is_global(abfd, sym)\
+        ((coff_backend_info (abfd)->_bfd_coff_sym_is_global)\
+         (abfd, sym))
+
+#define bfd_coff_compute_section_file_positions(abfd)\
+        ((coff_backend_info (abfd)->_bfd_coff_compute_section_file_positions)\
+         (abfd))
+
+#define bfd_coff_relocate_section(obfd,info,ibfd,o,con,rel,isyms,secs)\
+        ((coff_backend_info (ibfd)->_bfd_coff_relocate_section)\
+         (obfd, info, ibfd, o, con, rel, isyms, secs))
 

@@ -31,6 +31,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 static long get_symbol_value PARAMS ((asymbol *));
 static bfd_reloc_status_type a29k_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+static boolean coff_a29k_relocate_section
+  PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
+	   struct internal_reloc *, struct internal_syment *, asection **));
 
 #define INSERT_HWORD(WORD,HWORD)	\
     (((WORD) & 0xff00ff00) | (((HWORD) & 0xff00) << 8) | ((HWORD)& 0xff))
@@ -302,6 +305,224 @@ reloc_processing (relent,reloc, symbols, abfd, section)
 	abort ();
   }
 }
+
+/* The reloc processing routine for the optimized COFF linker.  */
+
+static boolean
+coff_a29k_relocate_section (output_bfd, info, input_bfd, input_section,
+			    contents, relocs, syms, sections)
+     bfd *output_bfd;
+     struct bfd_link_info *info;
+     bfd *input_bfd;
+     asection *input_section;
+     bfd_byte *contents;
+     struct internal_reloc *relocs;
+     struct internal_syment *syms;
+     asection **sections;
+{
+  struct internal_reloc *rel;
+  struct internal_reloc *relend;
+  boolean hihalf;
+  bfd_vma hihalf_val;
+
+  /* If we are performing a relocateable link, we don't need to do a
+     thing.  The caller will take care of adjusting the reloc
+     addresses and symbol indices.  */
+  if (info->relocateable)
+    return true;
+
+  hihalf = false;
+  hihalf_val = 0;
+
+  rel = relocs;
+  relend = rel + input_section->reloc_count;
+  for (; rel < relend; rel++)
+    {
+      long symndx;
+      bfd_byte *loc;
+      struct coff_link_hash_entry *h;
+      struct internal_syment *sym;
+      asection *sec;
+      bfd_vma val;
+      boolean overflow;
+      unsigned long insn;
+      long signed_value;
+      unsigned long unsigned_value;
+      bfd_reloc_status_type rstat;
+
+      symndx = rel->r_symndx;
+      loc = contents + rel->r_vaddr - input_section->vma;
+
+      h = obj_coff_sym_hashes (input_bfd)[symndx];
+
+      sym = NULL;
+      sec = NULL;
+      val = 0;
+
+      /* An R_IHCONST reloc does not have a symbol.  Instead, the
+         symbol index is an addend.  R_IHCONST is always used in
+         conjunction with R_IHHALF.  */
+      if (rel->r_type != R_IHCONST)
+	{
+	  if (h == NULL)
+	    {
+	      sym = syms + symndx;
+	      sec = sections[symndx];
+	      val = (sec->output_section->vma
+		     + sec->output_offset
+		     + sym->n_value
+		     - sec->vma);
+	    }
+	  else
+	    {
+	      if (h->root.type == bfd_link_hash_defined)
+		{
+		  sec = h->root.u.def.section;
+		  val = (h->root.u.def.value
+			 + sec->output_section->vma
+			 + sec->output_offset);
+		}
+	      else
+		{
+		  if (! ((*info->callbacks->undefined_symbol)
+			 (info, h->root.root.string, input_bfd, input_section,
+			  rel->r_vaddr - input_section->vma)))
+		    return false;
+		}
+	    }
+
+	  if (hihalf)
+	    {
+	      if (! ((*info->callbacks->reloc_dangerous)
+		     (info, "missing IHCONST reloc", input_bfd,
+		      input_section, rel->r_vaddr - input_section->vma)))
+		return false;
+	      hihalf = false;
+	    }
+	}
+
+      overflow = false;
+
+      switch (rel->r_type)
+	{
+	default:
+	  bfd_set_error (bfd_error_bad_value);
+	  return false;
+
+	case R_IREL:
+	  insn = bfd_get_32 (input_bfd, loc);
+
+	  /* Extract the addend.  */
+	  signed_value = EXTRACT_HWORD (insn);
+	  signed_value = SIGN_EXTEND_HWORD (signed_value);
+	  signed_value <<= 2;
+
+	  /* Determine the destination of the jump.  */
+	  signed_value += val + rel->r_vaddr - input_section->vma;
+
+	  if ((signed_value & ~0x3ffff) == 0)
+	    {
+	      /* We can use an absolute jump.  */
+	      insn |= (1 << 24);
+	    }
+	  else
+	    {
+	      /* Make the destination PC relative.  */
+	      signed_value -= (input_section->output_section->vma
+			       + input_section->output_offset
+			       + (rel->r_vaddr - input_section->vma));
+	      if (signed_value > 0x1ffff || signed_value < - 0x20000)
+		{
+		  overflow = true;
+		  signed_value = 0;
+		}
+	    }
+
+	  /* Put the adjusted value back into the instruction.  */
+	  signed_value >>= 2;
+	  insn = INSERT_HWORD (insn, signed_value);
+
+	  bfd_put_32 (input_bfd, (bfd_vma) insn, loc);
+
+	  break;
+
+	case R_ILOHALF:
+	  insn = bfd_get_32 (input_bfd, loc);
+	  unsigned_value = EXTRACT_HWORD (insn);
+	  unsigned_value += val;
+	  insn = INSERT_HWORD (insn, unsigned_value);
+	  bfd_put_32 (input_bfd, insn, loc);
+	  break;
+
+	case R_IHIHALF:
+	  /* Save the value for the R_IHCONST reloc.  */
+	  hihalf = true;
+	  hihalf_val = val;
+	  break;
+
+	case R_IHCONST:
+	  if (! hihalf)
+	    {
+	      if (! ((*info->callbacks->reloc_dangerous)
+		     (info, "missing IHIHALF reloc", input_bfd,
+		      input_section, rel->r_vaddr - input_section->vma)))
+		return false;
+	      hihalf_val = 0;
+	    }
+
+	  insn = bfd_get_32 (input_bfd, loc);
+	  unsigned_value = rel->r_symndx + hihalf_val;
+	  unsigned_value >>= 16;
+	  insn = INSERT_HWORD (insn, unsigned_value);
+	  bfd_put_32 (input_bfd, (bfd_vma) insn, loc);
+
+	  hihalf = false;
+
+	  break;
+
+	case R_BYTE:
+	case R_HWORD:
+	case R_WORD:
+	  rstat = _bfd_relocate_contents (howto_table + rel->r_type,
+					  input_bfd, val, loc);
+	  if (rstat == bfd_reloc_overflow)
+	    overflow = true;
+	  else if (rstat != bfd_reloc_ok)
+	    abort ();
+	  break;
+	}
+
+      if (overflow)
+	{
+	  const char *name;
+	  char buf[SYMNMLEN + 1];
+
+	  if (h != NULL)
+	    name = h->root.root.string;
+	  else if (sym == NULL)
+	    name = "*unknown*";
+	  else if (sym->_n._n_n._n_zeroes == 0
+		   && sym->_n._n_n._n_offset != 0)
+	    name = obj_coff_strings (input_bfd) + sym->_n._n_n._n_offset;
+	  else
+	    {
+	      strncpy (buf, sym->_n._n_name, SYMNMLEN);
+	      buf[SYMNMLEN] = '\0';
+	      name = buf;
+	    }
+
+	  if (! ((*info->callbacks->reloc_overflow)
+		 (info, name, howto_table[rel->r_type].name, (bfd_vma) 0,
+		  input_bfd, input_section,
+		  rel->r_vaddr - input_section->vma)))
+	    return false;
+	}
+    }     
+
+  return true;
+}
+
+#define coff_relocate_section coff_a29k_relocate_section
 
 #include "coffcode.h"
 

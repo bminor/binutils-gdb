@@ -542,7 +542,7 @@ mips_adjust_reloc_in (abfd, intern, rptr)
   /* If the type is MIPS_R_IGNORE, make sure this is a reference to
      the absolute section so that the reloc is ignored.  */
   if (intern->r_type == MIPS_R_IGNORE)
-    rptr->sym_ptr_ptr = bfd_abs_section.symbol_ptr_ptr;
+    rptr->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
 
   /* If this is a MIPS_R_SWITCH reloc, or an internal MIPS_R_RELHI or
      MIPS_R_RELLO reloc, we want the addend field of the BFD relocto
@@ -657,7 +657,7 @@ mips_refhi_reloc (abfd,
     }
 
   ret = bfd_reloc_ok;
-  if (symbol->section == &bfd_und_section
+  if (bfd_is_und_section (symbol->section)
       && output_bfd == (bfd *) NULL)
     ret = bfd_reloc_undefined;
 
@@ -784,7 +784,7 @@ mips_gprel_reloc (abfd,
       output_bfd = symbol->section->output_section->owner;
     }
 
-  if (symbol->section == &bfd_und_section
+  if (bfd_is_und_section (symbol->section)
       && relocateable == false)
     return bfd_reloc_undefined;
 
@@ -925,7 +925,7 @@ mips_relhi_reloc (abfd,
     }
 
   ret = bfd_reloc_ok;
-  if (symbol->section == &bfd_und_section
+  if (bfd_is_und_section (symbol->section)
       && output_bfd == (bfd *) NULL)
     ret = bfd_reloc_undefined;
 
@@ -990,7 +990,7 @@ mips_rello_reloc (abfd,
 	 symbol is not defined we don't want to do this, because we
 	 don't want the value in the object file to incorporate the
 	 address of the reloc.  */
-      if (bfd_get_section (symbol) != &bfd_und_section
+      if (! bfd_is_und_section (bfd_get_section (symbol))
 	  && ! bfd_is_com_section (bfd_get_section (symbol)))
 	val -= (input_section->output_section->vma
 		+ input_section->output_offset
@@ -2275,13 +2275,14 @@ static const struct ecoff_backend_data mips_ecoff_backend_data =
     (unsigned (*) PARAMS ((bfd *,PTR,PTR))) bfd_void, /* reloc_out */
     mips_ecoff_swap_filehdr_out, mips_ecoff_swap_aouthdr_out,
     mips_ecoff_swap_scnhdr_out,
-    FILHSZ, AOUTSZ, SCNHSZ, 0, 0, 0, true,
+    FILHSZ, AOUTSZ, SCNHSZ, 0, 0, 0, 0, true,
     mips_ecoff_swap_filehdr_in, mips_ecoff_swap_aouthdr_in,
-    mips_ecoff_swap_scnhdr_in, mips_ecoff_bad_format_hook,
-    _bfd_ecoff_set_arch_mach_hook, _bfd_ecoff_mkobject_hook,
-    _bfd_ecoff_styp_to_sec_flags, _bfd_ecoff_make_section_hook,
-    _bfd_ecoff_set_alignment_hook, _bfd_ecoff_slurp_symbol_table,
-    NULL, NULL
+    mips_ecoff_swap_scnhdr_in, NULL,
+    mips_ecoff_bad_format_hook, _bfd_ecoff_set_arch_mach_hook,
+    _bfd_ecoff_mkobject_hook, _bfd_ecoff_styp_to_sec_flags,
+    _bfd_ecoff_make_section_hook, _bfd_ecoff_set_alignment_hook,
+    _bfd_ecoff_slurp_symbol_table,
+    NULL, NULL, NULL, NULL, NULL, NULL
   },
   /* Supported architecture.  */
   bfd_arch_mips,

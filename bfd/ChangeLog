@@ -1,3 +1,71 @@
+Tue Sep  6 14:51:11 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	Add new style linker support to COFF backend.  a29k only for now.
+	* cofflink.c: New file.
+	* libcoff-in.h: Include bfdlink.h.
+	(obj_coff_external_syms, obj_coff_strings): Define accessor macro.
+	(obj_coff_sym_hashes): Define accessor macro.
+	(struct coff_tdata): Add fields external_syms, strings, and
+	sym_hashes.
+	(struct coff_link_hash_entry): Define.
+	(struct coff_link_hash_table): Define.
+	(coff_link_hash_lookup, coff_link_hash_traverse): Define.
+	(coff_hash_table): Define.
+	(_bfd_coff_link_hash_table_create): Declare.
+	(_bfd_coff_link_add_symbols, _bfd_coff_final_link): Declare.
+	* coffcode.h (bfd_coff_backend_data): Add fields _bfd_relsz,
+	_bfd_coff_swap_reloc_in, _bfd_coff_sym_is_global,
+	_bfd_coff_compute_section_file_positions,
+	_bfd_coff_relocate_section.
+	(bfd_coff_relsz, bfd_coff_swap_reloc_in): Define.
+	(bfd_coff_sym_is_global): Define.
+	(bfd_coff_compute_section_file_positions): Define.
+	(bfd_coff_relocate_section): Define.
+	(coff_mkobject_hook): Initialize obj_raw_syment_count and
+	obj_conv_table_size.
+	(coff_compute_section_file_positions): Set target_index of all
+	sections.  Set output_has_begun field.
+	(coff_write_object_contents): Don't set target_index; now done by
+	coff_compute_section_file_positions.  Remove obsolete handling of
+	scn_base and data_base.  Don't bother to check that target_index
+	is positive, since it always is.  Remove use of pad, which is
+	always zero.  Check obj_raw_syment_count, not bfd_get_symcount,
+	for the number of symbols, but only write them out if
+	bfd_get_symcount is non-zero.
+	(coff_slurp_symbol_table): Use obj_raw_syment_count, not
+	bfd_get_symcount for the number of symbols.  Don't set
+	obj_conv_table_size.
+	(coff_sym_is_global): New static function or macro.
+	(coff_slurp_reloc_table): Call coff_swap_reloc_in, not
+	bfd_swap_reloc_in.
+	(coff_bfd_link_hash_table_create): If coff_relocate_section is
+	defined, define as _bfd_coff_link_hash_table_create.
+	(coff_bfd_link_add_symbols): Similar change.
+	(coff_bfd_final_link): Similar change.
+	(coff_relocate_section): Define as NULL if not defined.
+	(bfd_coff_std_swap_table): Initialize new fields.
+	* coffgen.c (coff_real_object_p): Don't set obj_raw_syment_count
+	and obj_conv_table_size here.
+	(coff_count_linenumbers): Reindent.  If bfd_get_symcount is zero,
+	add up the line numbers from the sections.
+	(coff_write_symbols): Don't set bfd_get_symcount.
+	(coff_pointerize_aux): Don't pointerize a nonpositive x_endndx
+	field.
+	(coff_get_normalized_symtab): Use obj_raw_syment_count, not
+	bfd_get_symcount.
+	(coff_print_symbol): If auxp->fix_end, print x_endndx value.
+	* coffswap.h (coff_swap_reloc_in): Rename from bfd_swap_reloc_in.
+	Reindent.  Change argument type to  PTR.
+	* coff-a29k.c (coff_a29k_relocate_section): New static function.
+	(coff_relocate_section): Define.
+	* configure.in (a29kcoff_big_vec): Compile cofflink.o.
+	* coff-alpha.c (alpha_ecoff_backend_data): Initialize new fields.
+	* coff-mips.c (mips_ecoff_backend_data): Likewise.
+	* libcoff.h: Rebuilt.
+	* Makefile.in: Rebuilt dependencies.
+	(BFD32_BACKENDS): Add cofflink.o.
+	(CFILES): Add cofflink.c.
+
 Tue Sep  6 14:00:45 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* coffgen.c (coff_print_symbol, case bfd_symbol_print_all): Check
