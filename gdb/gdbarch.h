@@ -592,11 +592,11 @@ extern void set_gdbarch_register_convert_to_raw (struct gdbarch *gdbarch, gdbarc
 
 /* Default (function) for non- multi-arch platforms. */
 #if (GDB_MULTI_ARCH == 0) && !defined (POINTER_TO_ADDRESS)
-#define POINTER_TO_ADDRESS(type, buf) (unsigned_pointer_to_address (type, buf))
+#define POINTER_TO_ADDRESS(type, buf) (generic_pointer_to_address (type, buf))
 #endif
 
-typedef CORE_ADDR (gdbarch_pointer_to_address_ftype) (struct type *type, void *buf);
-extern CORE_ADDR gdbarch_pointer_to_address (struct gdbarch *gdbarch, struct type *type, void *buf);
+typedef CORE_ADDR (gdbarch_pointer_to_address_ftype) (struct type *type, char *buf);
+extern CORE_ADDR gdbarch_pointer_to_address (struct gdbarch *gdbarch, struct type *type, char *buf);
 extern void set_gdbarch_pointer_to_address (struct gdbarch *gdbarch, gdbarch_pointer_to_address_ftype *pointer_to_address);
 #if GDB_MULTI_ARCH
 #if (GDB_MULTI_ARCH > 1) || !defined (POINTER_TO_ADDRESS)
@@ -606,11 +606,11 @@ extern void set_gdbarch_pointer_to_address (struct gdbarch *gdbarch, gdbarch_poi
 
 /* Default (function) for non- multi-arch platforms. */
 #if (GDB_MULTI_ARCH == 0) && !defined (ADDRESS_TO_POINTER)
-#define ADDRESS_TO_POINTER(type, buf, addr) (unsigned_address_to_pointer (type, buf, addr))
+#define ADDRESS_TO_POINTER(type, buf, addr) (generic_address_to_pointer (type, buf, addr))
 #endif
 
-typedef void (gdbarch_address_to_pointer_ftype) (struct type *type, void *buf, CORE_ADDR addr);
-extern void gdbarch_address_to_pointer (struct gdbarch *gdbarch, struct type *type, void *buf, CORE_ADDR addr);
+typedef void (gdbarch_address_to_pointer_ftype) (struct type *type, char *buf, CORE_ADDR addr);
+extern void gdbarch_address_to_pointer (struct gdbarch *gdbarch, struct type *type, char *buf, CORE_ADDR addr);
 extern void set_gdbarch_address_to_pointer (struct gdbarch *gdbarch, gdbarch_address_to_pointer_ftype *address_to_pointer);
 #if GDB_MULTI_ARCH
 #if (GDB_MULTI_ARCH > 1) || !defined (ADDRESS_TO_POINTER)
@@ -1088,45 +1088,6 @@ extern void set_gdbarch_save_dummy_frame_tos (struct gdbarch *gdbarch, gdbarch_s
 #if GDB_MULTI_ARCH
 #if (GDB_MULTI_ARCH > 1) || !defined (SAVE_DUMMY_FRAME_TOS)
 #define SAVE_DUMMY_FRAME_TOS(sp) (gdbarch_save_dummy_frame_tos (current_gdbarch, sp))
-#endif
-#endif
-
-/* Default (value) for non- multi-arch platforms. */
-#if (GDB_MULTI_ARCH == 0) && !defined (TARGET_FLOAT_FORMAT)
-#define TARGET_FLOAT_FORMAT (default_float_format (current_gdbarch))
-#endif
-
-extern const struct floatformat * gdbarch_float_format (struct gdbarch *gdbarch);
-extern void set_gdbarch_float_format (struct gdbarch *gdbarch, const struct floatformat * float_format);
-#if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (TARGET_FLOAT_FORMAT)
-#define TARGET_FLOAT_FORMAT (gdbarch_float_format (current_gdbarch))
-#endif
-#endif
-
-/* Default (value) for non- multi-arch platforms. */
-#if (GDB_MULTI_ARCH == 0) && !defined (TARGET_DOUBLE_FORMAT)
-#define TARGET_DOUBLE_FORMAT (default_double_format (current_gdbarch))
-#endif
-
-extern const struct floatformat * gdbarch_double_format (struct gdbarch *gdbarch);
-extern void set_gdbarch_double_format (struct gdbarch *gdbarch, const struct floatformat * double_format);
-#if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (TARGET_DOUBLE_FORMAT)
-#define TARGET_DOUBLE_FORMAT (gdbarch_double_format (current_gdbarch))
-#endif
-#endif
-
-/* Default (value) for non- multi-arch platforms. */
-#if (GDB_MULTI_ARCH == 0) && !defined (TARGET_LONG_DOUBLE_FORMAT)
-#define TARGET_LONG_DOUBLE_FORMAT (&floatformat_unknown)
-#endif
-
-extern const struct floatformat * gdbarch_long_double_format (struct gdbarch *gdbarch);
-extern void set_gdbarch_long_double_format (struct gdbarch *gdbarch, const struct floatformat * long_double_format);
-#if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (TARGET_LONG_DOUBLE_FORMAT)
-#define TARGET_LONG_DOUBLE_FORMAT (gdbarch_long_double_format (current_gdbarch))
 #endif
 #endif
 

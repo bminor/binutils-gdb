@@ -50,8 +50,6 @@
 #include "language.h"
 #include "annotate.h"
 
-#include "inferior.h" /* for signed_pointer_to_address */
-
 #include <readline/readline.h>
 
 #undef XMALLOC
@@ -60,7 +58,7 @@
 /* readline defines this.  */
 #undef savestring
 
-void (*error_begin_hook) (void);
+void (*error_begin_hook) PARAMS ((void));
 
 /* Holds the last error message issued by gdb */
 
@@ -428,7 +426,7 @@ null_cleanup (void *arg)
    cmd_continuation. The new continuation will be added at the front.*/
 void
 add_continuation (continuation_hook, arg_list)
-     void (*continuation_hook) (struct continuation_arg *);
+     void (*continuation_hook) PARAMS ((struct continuation_arg *));
      struct continuation_arg *arg_list;
 {
   struct continuation *continuation_ptr;
@@ -490,7 +488,7 @@ discard_all_continuations ()
    intermediate_continuation. The new continuation will be added at the front.*/
 void
 add_intermediate_continuation (continuation_hook, arg_list)
-     void (*continuation_hook) (struct continuation_arg *);
+     void (*continuation_hook) PARAMS ((struct continuation_arg *));
      struct continuation_arg *arg_list;
 {
   struct continuation *continuation_ptr;
@@ -773,6 +771,26 @@ safe_strerror (errnum)
     }
   return (msg);
 }
+
+/* The strsignal() function can return NULL for signal values that are
+   out of range.  Provide a "safe" version that always returns a
+   printable string. */
+
+char *
+safe_strsignal (signo)
+     int signo;
+{
+  char *msg;
+  static char buf[32];
+
+  if ((msg = strsignal (signo)) == NULL)
+    {
+      sprintf (buf, "(undocumented signal %d)", signo);
+      msg = buf;
+    }
+  return (msg);
+}
+
 
 /* Print the system error message for errno, and also mention STRING
    as the file name for which the error was encountered.
@@ -1403,8 +1421,8 @@ static void printchar (int c, void (*do_fputs) (const char *, struct ui_file*), 
 static void
 printchar (c, do_fputs, do_fprintf, stream, quoter)
      int c;
-     void (*do_fputs) (const char *, struct ui_file *);
-     void (*do_fprintf) (struct ui_file *, const char *, ...);
+     void (*do_fputs) PARAMS ((const char *, struct ui_file*));
+     void (*do_fprintf) PARAMS ((struct ui_file*, const char *, ...));
      struct ui_file *stream;
      int quoter;
 {
@@ -2963,25 +2981,4 @@ phex_nz (ULONGEST l, int sizeof_l)
       break;
     }
   return str;
-}
-
-
-/* Convert to / from the hosts pointer to GDB's internal CORE_ADDR
-   using the target's conversion routines. */
-CORE_ADDR
-host_pointer_to_address (void *ptr)
-{
-  if (sizeof (ptr) != TYPE_LENGTH (builtin_type_ptr))
-    internal_error ("core_addr_to_void_ptr: bad cast");
-  return POINTER_TO_ADDRESS (builtin_type_ptr, &ptr);
-}
-
-void *
-address_to_host_pointer (CORE_ADDR addr)
-{
-  void *ptr;
-  if (sizeof (ptr) != TYPE_LENGTH (builtin_type_ptr))
-    internal_error ("core_addr_to_void_ptr: bad cast");
-  ADDRESS_TO_POINTER (builtin_type_ptr, &ptr, addr);
-  return ptr;
 }

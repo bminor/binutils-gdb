@@ -36,7 +36,6 @@
 #include "language.h"
 #include "arch-utils.h"
 
-#include "floatformat.h"
 #include "sim-d10v.h"
 
 #undef XMALLOC
@@ -1597,26 +1596,9 @@ d10v_gdbarch_init (info, arches)
   set_gdbarch_int_bit (gdbarch, 2 * TARGET_CHAR_BIT);
   set_gdbarch_long_bit (gdbarch, 4 * TARGET_CHAR_BIT);
   set_gdbarch_long_long_bit (gdbarch, 4 * TARGET_CHAR_BIT);
-  /* NOTE: The d10v as a 32 bit ``float'' and ``double''. ``long
-     double'' is 64 bits. */
   set_gdbarch_float_bit (gdbarch, 4 * TARGET_CHAR_BIT);
   set_gdbarch_double_bit (gdbarch, 4 * TARGET_CHAR_BIT);
   set_gdbarch_long_double_bit (gdbarch, 8 * TARGET_CHAR_BIT);
-  switch (info.byte_order)
-    {
-    case BIG_ENDIAN:
-      set_gdbarch_float_format (gdbarch, &floatformat_ieee_single_big);
-      set_gdbarch_double_format (gdbarch, &floatformat_ieee_single_big);
-      set_gdbarch_long_double_format (gdbarch, &floatformat_ieee_double_big);
-      break;
-    case LITTLE_ENDIAN:
-      set_gdbarch_float_format (gdbarch, &floatformat_ieee_single_little);
-      set_gdbarch_double_format (gdbarch, &floatformat_ieee_single_little);
-      set_gdbarch_long_double_format (gdbarch, &floatformat_ieee_double_little);
-      break;
-    default:
-      internal_error ("d10v_gdbarch_init: bad byte order for float format");
-    }
 
   set_gdbarch_use_generic_dummy_frames (gdbarch, 1);
   set_gdbarch_call_dummy_length (gdbarch, 0);
@@ -1682,8 +1664,8 @@ d10v_gdbarch_init (info, arches)
 }
 
 
-extern void (*target_resume_hook) (void);
-extern void (*target_wait_loop_hook) (void);
+extern void (*target_resume_hook) PARAMS ((void));
+extern void (*target_wait_loop_hook) PARAMS ((void));
 
 void
 _initialize_d10v_tdep ()

@@ -51,7 +51,7 @@ load_srec (desc, file, load_offset, maxrecsize, flags, hashmark, waitack)
      int maxrecsize;
      int flags;
      int hashmark;
-     int (*waitack) (void);
+     int (*waitack) PARAMS ((void));
 {
   bfd *abfd;
   asection *s;

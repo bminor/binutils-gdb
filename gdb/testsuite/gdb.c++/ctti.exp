@@ -1,4 +1,4 @@
-`# Copyright (C) 1998, 1999 Free Software Foundation, Inc.
+# Copyright (C) 1998, 1999 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -42,14 +42,15 @@ if [get_compiler_info ${binfile} "c++"] {
     return -1;
 }
 
+if { $gcc_compiled } then { continue }
 
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile} ${srcdir}/${subdir}/${srcfile1} ${srcdir}/${subdir}/${srcfile2} ${srcdir}/${subdir}/${srcfile3}" "${binfile}" executable {debug c++}] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
-}
+#if  { [gdb_compile "${srcdir}/${subdir}/${srcfile} ${srcdir}/${subdir}/${srcfile1} ${srcdir}/${subdir}/${srcfile2} ${srcdir}/${subdir}/${srcfile3}" "${binfile}" executable {debug c++}] != "" } {
+#     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+#}
 
-#set cmdline "$CXX_FOR_TARGET ${srcdir}/${subdir}/${srcfile} ${srcdir}/${subdir}/${srcfile1} ${srcdir}/${subdir}/${srcfile2} ${srcdir}/${subdir}/${srcfile3} -g -o ${binfile}"
+set cmdline "$CXX_FOR_TARGET ${srcdir}/${subdir}/${srcfile} ${srcdir}/${subdir}/${srcfile1} ${srcdir}/${subdir}/${srcfile2} ${srcdir}/${subdir}/${srcfile3} -g -o ${binfile}"
 
-#remote_exec build $cmdline
+remote_exec build $cmdline
 
 gdb_exit
 gdb_start

@@ -1011,7 +1011,7 @@ struct partial_symtab
     /* Pointer to function which will read in the symtab corresponding to
        this psymtab.  */
 
-    void (*read_symtab) (struct partial_symtab *);
+    void (*read_symtab) PARAMS ((struct partial_symtab *));
 
     /* Information that lets read_symtab() locate the part of the symbol table
        that this psymtab corresponds to.  This information is private to the
@@ -1059,11 +1059,10 @@ struct partial_symtab
    style, using thunks (where '$' is really CPLUS_MARKER). */
 
 #define VTBL_PREFIX_P(NAME) \
-  (((NAME)[0] == '_' \
+  ((NAME)[0] == '_' \
    && (((NAME)[1] == 'V' && (NAME)[2] == 'T') \
        || ((NAME)[1] == 'v' && (NAME)[2] == 't')) \
-   && is_cplus_marker ((NAME)[3])) || ((NAME)[0]=='_' && (NAME)[1]=='_' \
-   && (NAME)[2]=='v' && (NAME)[3]=='t' && (NAME)[4]=='_'))
+   && is_cplus_marker ((NAME)[3]))
 
 /* Macro that yields non-zero value iff NAME is the prefix for C++ destructor
    names.  Note that this macro is g++ specific (FIXME).  */
@@ -1442,6 +1441,5 @@ struct symbol_search
 extern void search_symbols (char *, namespace_enum, int, char **,
 			    struct symbol_search **);
 extern void free_search_symbols (struct symbol_search *);
-extern struct cleanup *make_cleanup_free_search_symbols (struct symbol_search *);
 
 #endif /* !defined(SYMTAB_H) */

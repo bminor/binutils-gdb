@@ -1,5 +1,5 @@
 /* Macro definitions for i386 running under NetBSD.
-   Copyright 1994, 2000 Free Software Foundation, Inc.
+   Copyright 1994 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -23,8 +23,8 @@
 
 #define HAVE_I387_REGS
 
-#include "i386/tm-i386.h"
-#include "config/tm-nbsd.h"
+#include "i386/tm-i386bsd.h"
+#include "tm-nbsd.h"
 
 extern use_struct_convention_fn i386nbsd_use_struct_convention;
 #define USE_STRUCT_CONVENTION(gcc_p, type) \
@@ -42,17 +42,5 @@ extern use_struct_convention_fn i386nbsd_use_struct_convention;
 extern int get_longjmp_target (CORE_ADDR *);
 
 #define GET_LONGJMP_TARGET(ADDR) get_longjmp_target(ADDR)
-
-
-/* Support for signal handlers.  */
-
-/* The sigtramp is above the user stack and immediately below the 
-   user area.  Using constants here allows for cross debugging. */
-
-#define SIGTRAMP_START(pc)	0xbfbfdf20
-#define SIGTRAMP_END(pc)	0xbfbfdff0
-
-/* Offset to saved PC in sigcontext, from <sys/signal.h>.  */
-#define SIGCONTEXT_PC_OFFSET 20
 
 #endif /* TM_NBSD_H */

@@ -954,7 +954,7 @@ lookup_symbol (name, block, namespace, is_a_field_of_this, symtab)
     *symtab = NULL;
   return 0;
 }
-								
+
 /* Look, in partial_symtab PST, for symbol NAME.  Check the global
    symbols if GLOBAL, the static symbols if not */
 
@@ -965,20 +965,20 @@ lookup_partial_symbol (pst, name, global, namespace)
      int global;
      namespace_enum namespace;
 {
-  struct partial_symbol *temp;
   struct partial_symbol **start, **psym;
   struct partial_symbol **top, **bottom, **center;
   int length = (global ? pst->n_global_syms : pst->n_static_syms);
   int do_linear_search = 1;
-  
+
   if (length == 0)
     {
       return (NULL);
     }
+
   start = (global ?
 	   pst->objfile->global_psymbols.list + pst->globals_offset :
 	   pst->objfile->static_psymbols.list + pst->statics_offset);
-  
+
   if (global)			/* This means we can use a binary search. */
     {
       do_linear_search = 0;
@@ -996,7 +996,9 @@ lookup_partial_symbol (pst, name, global, namespace)
 	  if (!(center < top))
 	    abort ();
 	  if (!do_linear_search
-	      && (SYMBOL_LANGUAGE (*center) == language_java))
+	      && (SYMBOL_LANGUAGE (*center) == language_cplus
+		  || SYMBOL_LANGUAGE (*center) == language_java
+	      ))
 	    {
 	      do_linear_search = 1;
 	    }
@@ -1011,15 +1013,11 @@ lookup_partial_symbol (pst, name, global, namespace)
 	}
       if (!(top == bottom))
 	abort ();
-
-      /* djb - 2000-06-03 - Use SYMBOL_MATCHES_NAME, not a strcmp, so
-	 we don't have to force a linear search on C++. Probably holds true
-	 for JAVA as well, no way to check.*/
-      while (SYMBOL_MATCHES_NAME (*top,name))
+      while (STREQ (SYMBOL_NAME (*top), name))
 	{
 	  if (SYMBOL_NAMESPACE (*top) == namespace)
 	    {
-		  return (*top);
+	      return (*top);
 	    }
 	  top++;
 	}
@@ -1029,7 +1027,7 @@ lookup_partial_symbol (pst, name, global, namespace)
      we should also do a linear search. */
 
   if (do_linear_search)
-    {			
+    {
       for (psym = start; psym < start + length; psym++)
 	{
 	  if (namespace == SYMBOL_NAMESPACE (*psym))
@@ -3566,19 +3564,6 @@ free_search_symbols (symbols)
     }
 }
 
-static void
-do_free_search_symbols_cleanup (void *symbols)
-{
-  free_search_symbols (symbols);
-}
-
-struct cleanup *
-make_cleanup_free_search_symbols (struct symbol_search *symbols)
-{
-  return make_cleanup (do_free_search_symbols_cleanup, symbols);
-}
-
-
 /* Search the symbol table for matches to the regular expression REGEXP,
    returning the results in *MATCHES.
 
@@ -3811,7 +3796,8 @@ search_symbols (regexp, kind, nfiles, files, matches)
 		  if (tail == NULL)
 		    {
 		      sr = psr;
-		      old_chain = make_cleanup_free_search_symbols (sr);
+		      old_chain = make_cleanup ((make_cleanup_func)
+						free_search_symbols, sr);
 		    }
 		  else
 		    tail->next = psr;
@@ -3855,7 +3841,8 @@ search_symbols (regexp, kind, nfiles, files, matches)
 			if (tail == NULL)
 			  {
 			    sr = psr;
-			    old_chain = make_cleanup_free_search_symbols (sr);
+			    old_chain = make_cleanup ((make_cleanup_func)
+						  free_search_symbols, &sr);
 			  }
 			else
 			  tail->next = psr;
@@ -3970,7 +3957,7 @@ symtab_symbol_info (regexp, kind, from_tty)
 
   /* must make sure that if we're interrupted, symbols gets freed */
   search_symbols (regexp, kind, 0, (char **) NULL, &symbols);
-  old_chain = make_cleanup_free_search_symbols (symbols);
+  old_chain = make_cleanup ((make_cleanup_func) free_search_symbols, symbols);
 
   printf_filtered (regexp
 		   ? "All %ss matching regular expression \"%s\":\n"
@@ -4020,7 +4007,6 @@ functions_info (regexp, from_tty)
   symtab_symbol_info (regexp, FUNCTIONS_NAMESPACE, from_tty);
 }
 
-
 static void
 types_info (regexp, from_tty)
      char *regexp;
@@ -4059,7 +4045,7 @@ rbreak_command (regexp, from_tty)
   struct cleanup *old_chain;
 
   search_symbols (regexp, FUNCTIONS_NAMESPACE, 0, (char **) NULL, &ss);
-  old_chain = make_cleanup_free_search_symbols (ss);
+  old_chain = make_cleanup ((make_cleanup_func) free_search_symbols, ss);
 
   for (p = ss; p != NULL; p = p->next)
     {
@@ -4667,7 +4653,6 @@ _initialize_symtab ()
   add_info ("functions", functions_info,
 	    "All function names, or those matching REGEXP.");
 
-  
   /* FIXME:  This command has at least the following problems:
      1.  It prints builtin types (in a very strange and confusing fashion).
      2.  It doesn't print right, e.g. with

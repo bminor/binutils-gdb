@@ -38,9 +38,6 @@ typedef struct reg gregset_t;
 typedef struct fpreg fpregset_t;
 #endif
 
-#include "gregset.h"
-
-
 /* In older BSD versions we cannot get at some of the segment
    registers.  FreeBSD for example didn't support the %fs and %gs
    registers until the 3.0 release.  We have autoconf checks for their
@@ -53,7 +50,7 @@ typedef struct fpreg fpregset_t;
 
 /* Registers we shouldn't try to store.  */
 #if !defined (CANNOT_STORE_REGISTER)
-#define CANNOT_STORE_REGISTER(regno) cannot_fetch_register (regno)
+#define CANNOT_STORE_REGISTER(regno) CANNOT_FETCH_REGISTER (regno)
 #endif
 
 /* Offset to the gregset_t location where REG is stored.  */
@@ -78,12 +75,12 @@ static int reg_offset[] =
   REG_OFFSET (r_ss),
   REG_OFFSET (r_ds),
   REG_OFFSET (r_es),
-#ifdef HAVE_STRUCT_REG_R_FS
+#ifdef HAVE_R_FS
   REG_OFFSET (r_fs),
 #else
   -1,
 #endif
-#ifdef HAVE_STRUCT_REG_R_GS
+#ifdef HAVE_R_GS
   REG_OFFSET (r_gs)
 #else
   -1
@@ -109,12 +106,16 @@ cannot_fetch_register (int regno)
 void
 supply_gregset (gregset_t *gregsetp)
 {
+  char buf[MAX_REGISTER_RAW_SIZE];
   int i;
 
   for (i = 0; i < NUM_GREGS; i++)
     {
       if (CANNOT_FETCH_REGISTER (i))
-	supply_register (i, NULL);
+	{
+	  memset (buf, 0, REGISTER_RAW_SIZE (i));
+	  supply_register (i, buf);
+	}
       else
 	supply_register (i, REG_ADDR (gregsetp, i));
     }
@@ -131,7 +132,7 @@ fill_gregset (gregset_t *gregsetp, int regno)
 
   for (i = 0; i < NUM_GREGS; i++)
     if ((regno == -1 || regno == i) && ! CANNOT_STORE_REGISTER (i))
-      memcpy (REG_ADDR (gregsetp, i), &registers[REGISTER_BYTE (i)],
+      memcpy (REG_ADDR (gregsetp, i), &registers[REGISTER_BYTE (regno)],
 	      REGISTER_RAW_SIZE (i));
 }
 
@@ -179,7 +180,7 @@ fetch_inferior_registers (int regno)
 
       supply_fpregset (&fpregs);
     }
-}
+}  
 
 /* Store register REGNO back into the inferior.  If REGNO is -1, do
    this for all registers (including the floating point registers).  */

@@ -46,7 +46,6 @@ a29k-*-vxworks*)        gdb_target=vx29k ;;
 
 alpha*-*-osf*)		gdb_target=alpha-osf1 ;;
 alpha*-*-linux*)	gdb_target=alpha-linux ;;
-alpha*-*-freebsd*)	gdb_target=fbsd ;;
 
 arc-*-*)		gdb_target=arc ;;
 
@@ -88,8 +87,6 @@ i[3456]86-*-elf*)	gdb_target=embed ;;
 i[3456]86-*-aix*)	gdb_target=i386aix ;;
 i[3456]86-*-bsd*)	gdb_target=i386bsd ;;
 i[3456]86-*-freebsd*)	gdb_target=fbsd ;;
-i[3456]86-*-netbsdelf*)	gdb_target=nbsdelf
-		configdirs="${configdirs} gdbserver" ;;
 i[3456]86-*-netbsd*)	gdb_target=nbsd 
 		configdirs="${configdirs} gdbserver" ;;
 i[3456]86-*-os9k)	gdb_target=i386os9k ;;
