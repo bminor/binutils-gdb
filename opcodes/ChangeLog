@@ -5,6 +5,24 @@ Wed Dec  9 14:57:23 1998  Doug Evans  <devans@canuck.cygnus.com>
 	* dvp-opc.c (vu_lower_opcodes): Update mtir entry.
 	(extract_ffstreg): Fix calculation of reg part of returned value.
 
+	Wed Jul 29 09:41:19 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* dvp-opc.c (vu_lower_opcodes): Allow ISW, ISWR, MFIR instructions
+	to take multiple destination (xyzw) flags.
+
+	Thu Jul 23 18:26:49 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* dvp-opc.c (vu_operands): Add UW operand type to force ".w" suffix
+	on ft operand of CLIP.
+	(insert_w): New function for same.
+	(vu_opcodes): Use "broadcast" style argument list for two-operand
+	CLIP insn.  Call UW constraint above.
+
+	Mon Jun 22 15:48:29 1998  Ian Carmichael  <iancarm@cygnus.com>
+
+	* dvp-dis.c (print_insn): Disassemble DVP_OPERAND_RELOC_11_S4 as 
+	base 10.
+
 end-sanitize-sky
 Tue Dec  8 13:56:18 1998  David Taylor  <taylor@texas.cygnus.com>
 
