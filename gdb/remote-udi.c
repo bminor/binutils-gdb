@@ -494,7 +494,7 @@ udi_wait (pid, status)
     case UDITrapped:
       printf_unfiltered("Am290*0 received vector number %d\n", StopReason >> 24);
 	  
-      switch (StopReason >> 8)
+      switch ((StopReason >> 8 ) & 0xff)
 	{
 	case 0:			/* Illegal opcode */
 	  printf_unfiltered("	(break point)\n");
@@ -1434,7 +1434,8 @@ fetch_register (regno)
   else if (regno>=FPE_REGNUM && regno<=EXO_REGNUM)  
     {
       int val = -1;
-      supply_register(160 + (regno - FPE_REGNUM),(char *) &val);
+      /*supply_register(160 + (regno - FPE_REGNUM),(char *) &val);*/
+      supply_register(regno, (char *) &val);
       return;		/* Pretend Success */
     }
   else 

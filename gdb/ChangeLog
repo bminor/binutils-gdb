@@ -1,3 +1,9 @@
+Mon Aug 21 11:49:17 1995  Kung Hsu  <kung@mexican.cygnus.com>
+
+	* remote-udi.c (udi_wait): Mask off high bits of stop reason.
+	* remote-udi.c (fetch_register): For unfetchable regs, pretend it's
+	done. Fix a bug.
+
 Mon Aug 21 00:45:17 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* Makefile.in (install): Remove "brokensed" hack, unnecessary now
