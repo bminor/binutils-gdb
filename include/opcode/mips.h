@@ -1,5 +1,5 @@
 /* mips.h.  Mips opcode list for GDB, the GNU debugger.
-   Copyright 1993 Free Software Foundation, Inc.
+   Copyright 1993, 1995 Free Software Foundation, Inc.
    Contributed by Ralph Campbell and OSF
    Commented and modified by Ian Lance Taylor, Cygnus Support
 
@@ -17,7 +17,7 @@ the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this file; see the file COPYING.  If not, write to the Free
-Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* These are bit masks and shift counts to use to access the various
    fields of an instruction.  To retrieve the X field of an
@@ -54,8 +54,12 @@ Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define OP_SH_OP		26
 #define OP_MASK_RS		0x1f
 #define OP_SH_RS		21
+#define OP_MASK_FR		0x1f
+#define OP_SH_FR		21
 #define OP_MASK_FMT		0x1f
 #define OP_SH_FMT		21
+#define OP_MASK_BCC		0x7
+#define OP_SH_BCC		18
 #define OP_MASK_CODE		0x3ff
 #define OP_SH_CODE		16
 #define OP_MASK_RT		0x1f
@@ -68,6 +72,10 @@ Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define OP_SH_RD		11
 #define OP_MASK_FS		0x1f
 #define OP_SH_FS		11
+#define OP_MASK_PREFX		0x1f
+#define OP_SH_PREFX		11
+#define OP_MASK_CCC		0x7
+#define OP_SH_CCC		8
 #define OP_MASK_SYSCALL		0xfffff
 #define OP_SH_SYSCALL		6
 #define OP_MASK_SHAMT		0x1f
@@ -127,6 +135,7 @@ struct mips_opcode
    "b" 5 bit base register (OP_*_RS)
    "c" 10 bit breakpoint code (OP_*_CODE)
    "d" 5 bit destination register specifier (OP_*_RD)
+   "h" 5 bit prefx hint (OP_*_PREFX)
    "i" 16 bit unsigned immediate (OP_*_IMMEDIATE)
    "j" 16 bit signed immediate (OP_*_DELTA)
    "k" 5 bit cache opcode in target register position (OP_*_CACHE)
@@ -145,8 +154,11 @@ struct mips_opcode
 
    Floating point instructions:
    "D" 5 bit destination register (OP_*_FD)
+   "M" 3 bit compare condition code (OP_*_CCC) (only used for mips4 and up)
+   "N" 3 bit branch condition code (OP_*_BCC) (only used for mips4 and up)
    "S" 5 bit fs source 1 register (OP_*_FS)
    "T" 5 bit ft source 2 register (OP_*_FT)
+   "R" 5 bit fr source 3 register (OP_*_FR)
    "V" 5 bit same register used as floating source and destination (OP_*_FS)
    "W" 5 bit same register used as floating target and destination (OP_*_FT)
 
@@ -186,14 +198,14 @@ struct mips_opcode
 #define INSN_READ_FPR_S             0x00000100
 /* Reads the floating point register in OP_*_FT.  */
 #define INSN_READ_FPR_T             0x00000200
+/* Reads the floating point register in OP_*_FR.  */
+#define INSN_READ_FPR_R		    0x00000400
 /* Modifies coprocessor condition code.  */
-#define INSN_WRITE_COND_CODE        0x00000400
+#define INSN_WRITE_COND_CODE        0x00000800
 /* Reads coprocessor condition code.  */
-#define INSN_READ_COND_CODE         0x00000800
+#define INSN_READ_COND_CODE         0x00001000
 /* TLB operation.  */
-#define INSN_TLB                    0x00001000
-/* RFE (return from exception) instruction.  */
-#define INSN_RFE                    0x00002000
+#define INSN_TLB                    0x00002000
 /* Reads coprocessor register other than floating point register.  */
 #define INSN_COP                    0x00004000
 /* Instruction loads value from memory, requiring delay.  */
@@ -232,6 +244,8 @@ struct mips_opcode
 #define INSN_4650		    0x30000000
 /* MIPS ISA 4 instruction (R8000).  */
 #define INSN_ISA4		    0x40000000
+/* LSI R4010 instruction.  */
+#define INSN_4010		    0x50000000
 
 /* Instruction is actually a macro.  It should be ignored by the
    disassembler, and requires special treatment by the assembler.  */
