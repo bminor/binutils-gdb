@@ -1,6 +1,6 @@
 /* Print i386 instructions for GDB, the GNU debugger.
    Copyright 1988, 1989, 1991, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2001, 2002, 2003 Free Software Foundation, Inc.
+   2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -23,6 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
  * July 1988
  *  modified by John Hassey (hassey@dg-rtp.dg.com)
  *  x86-64 support added by Jan Hubicka (jh@suse.cz)
+ *  VIA PadLock support by Michal Ludvig (mludvig@suse.cz)
  */
 
 /*
@@ -362,6 +363,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define USE_GROUPS 2
 #define USE_PREFIX_USER_TABLE 3
 #define X86_64_SPECIAL 4
+#define PADLOCK_SPECIAL 5
 
 #define FLOAT	  NULL, NULL, FLOATCODE, NULL, 0, NULL, 0
 
@@ -388,6 +390,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define GRP13	  NULL, NULL, USE_GROUPS, NULL, 20, NULL, 0
 #define GRP14	  NULL, NULL, USE_GROUPS, NULL, 21, NULL, 0
 #define GRPAMD	  NULL, NULL, USE_GROUPS, NULL, 22, NULL, 0
+#define GRPPLOCK  NULL, NULL, USE_GROUPS, NULL, 23, NULL, 0
 
 #define PREGRP0   NULL, NULL, USE_PREFIX_USER_TABLE, NULL,  0, NULL, 0
 #define PREGRP1   NULL, NULL, USE_PREFIX_USER_TABLE, NULL,  1, NULL, 0
@@ -424,6 +427,8 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define PREGRP32  NULL, NULL, USE_PREFIX_USER_TABLE, NULL, 32, NULL, 0
 
 #define X86_64_0  NULL, NULL, X86_64_SPECIAL, NULL,  0, NULL, 0
+
+#define PADLOCK_0  NULL, NULL, PADLOCK_SPECIAL, NULL,  0, NULL, 0
 
 typedef void (*op_rtn) (int bytemode, int sizeflag);
 
@@ -948,7 +953,7 @@ static const struct dis386 dis386_twobyte[] = {
   { "shldS",		Ev, Gv, Ib },
   { "shldS",		Ev, Gv, CL },
   { "(bad)",		XX, XX, XX },
-  { "(bad)",		XX, XX, XX },
+  { PADLOCK_0 },
   /* a8 */
   { "pushT",		gs, XX, XX },
   { "popT",		gs, XX, XX },
@@ -1449,6 +1454,17 @@ static const struct dis386 grps[][8] = {
     { "(bad)",	XX, XX, XX },
     { "(bad)",	XX, XX, XX },
     { "(bad)",	XX, XX, XX },
+  },
+  /* GRPPLOCK */
+  {
+    { "xstore", XX, XX, XX },
+    { "xcryptecb", XX, XX, XX },
+    { "xcryptcbc", XX, XX, XX },
+    { "(bad)",	XX, XX, XX },
+    { "xcryptcfb", XX, XX, XX },
+    { "xcryptofb", XX, XX, XX },
+    { "(bad)",	XX, XX, XX },
+    { "(bad)",	XX, XX, XX },
   }
 };
 
@@ -1690,6 +1706,19 @@ static const struct dis386 x86_64_table[][2] = {
   {
     { "arpl", Ew, Gw, XX },
     { "movs{||lq|xd}", Gv, Ed, XX },
+  },
+};
+
+static const struct dis386 padlock_table[][8] = {
+  {
+    { "xstorerng", XX, XX, XX },
+    { "xcryptecb", XX, XX, XX },
+    { "xcryptcbc", XX, XX, XX },
+    { "(bad)", XX, XX, XX },
+    { "xcryptcfb", XX, XX, XX },
+    { "xcryptofb", XX, XX, XX },
+    { "(bad)", XX, XX, XX },
+    { "(bad)", XX, XX, XX },
   },
 };
 
@@ -2189,6 +2218,12 @@ print_insn (bfd_vma pc, disassemble_info *info)
 
 	    case X86_64_SPECIAL:
 	      dp = &x86_64_table[dp->bytemode2][mode_64bit];
+	      break;
+
+	    case PADLOCK_SPECIAL:
+	      FETCH_DATA (info, codep + 1);
+	      index = (*codep++ >> 3) & 0x07;
+	      dp = &padlock_table[dp->bytemode2][index];
 	      break;
 
 	    default:

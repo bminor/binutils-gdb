@@ -1,6 +1,6 @@
 /* i386.c -- Assemble code for the Intel 80386
    Copyright 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003
+   2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -23,6 +23,7 @@
 /* Intel 80386 machine specific gas.
    Written by Eliot Dresselhaus (eliot@mgm.mit.edu).
    x86_64 support by Jan Hubicka (jh@suse.cz)
+   VIA PadLock support by Michal Ludvig (mludvig@suse.cz)
    Bugs & suggestions are completely welcome.  This is free software.
    Please help us make it better.  */
 
@@ -3123,7 +3124,6 @@ output_interseg_jump ()
   md_number_to_chars (p + size, (valueT) i.op[0].imms->X_add_number, 2);
 }
 
-
 static void
 output_insn ()
 {
@@ -3151,10 +3151,23 @@ output_insn ()
       char *p;
       unsigned char *q;
 
-      /* All opcodes on i386 have either 1 or 2 bytes.  We may use third
-	 byte for the SSE instructions to specify a prefix they require.  */
-      if (i.tm.base_opcode & 0xff0000)
-	add_prefix ((i.tm.base_opcode >> 16) & 0xff);
+      /* All opcodes on i386 have either 1 or 2 bytes, PadLock instructions
+	 have 3 bytes.  We may use one more higher byte to specify a prefix
+	 the instruction requires.  */
+      if ((i.tm.cpu_flags & CpuPadLock) != 0
+	  && (i.tm.base_opcode & 0xff000000) != 0)
+        {
+	  unsigned int prefix;
+	  prefix = (i.tm.base_opcode >> 24) & 0xff;
+
+	  if (prefix != REPE_PREFIX_OPCODE
+	      || i.prefix[LOCKREP_PREFIX] != REPE_PREFIX_OPCODE)
+	    add_prefix (prefix);
+	}
+      else
+	if ((i.tm.cpu_flags & CpuPadLock) == 0
+	    && (i.tm.base_opcode & 0xff0000) != 0)
+	  add_prefix ((i.tm.base_opcode >> 16) & 0xff);
 
       /* The prefix bytes.  */
       for (q = i.prefix;
@@ -3175,7 +3188,14 @@ output_insn ()
 	}
       else
 	{
-	  p = frag_more (2);
+	  if ((i.tm.cpu_flags & CpuPadLock) != 0)
+	    {
+	      p = frag_more (3);
+	      *p++ = (i.tm.base_opcode >> 16) & 0xff;
+	    }
+	  else
+	    p = frag_more (2);
+
 	  /* Put out high byte first: can't use md_number_to_chars!  */
 	  *p++ = (i.tm.base_opcode >> 8) & 0xff;
 	  *p = i.tm.base_opcode & 0xff;

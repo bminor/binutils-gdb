@@ -1,3 +1,9 @@
+2004-03-12  Michal Ludvig  <mludvig@suse.cz>
+
+	* config/tc-i386.c (output_insn): Handle PadLock instructions.
+	* config/tc-i386.h (CpuPadLock): New define.
+	(CpuUnknownFlags): Added CpuPadLock.
+
 2004-03-07  Andreas Schwab  <schwab@suse.de>
 
 	* doc/c-hppa.texi (HPPA Directives): Fix typo.
