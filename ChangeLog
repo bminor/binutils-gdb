@@ -1,7 +1,57 @@
+Tue May 18 15:23:19 1993  Ken Raeburn  (raeburn@cygnus.com)
+
+	* Makefile.in (DISTSTUFFDIRS): Renamed from PROTODIRS.  Add ld and
+	gprof.
+	(taz): Run "make diststuff" in those directories instead of "make
+	proto-dir".  Look for "VERSION=" only at start of line in subdir
+	Makefile.  Use "gzip -9" for compression.
+	(TEXINFO_SUPPORT, DIST_SUPPORT, BINUTILS_SUPPORT_DIRS): New vars.
+	(binutils.tar.z): New target.
+
+Mon May 17 17:01:15 1993  Ken Raeburn  (raeburn@deneb.cygnus.com)
+
+	* Makefile.in (taz): Include gpl.texinfo.
+
+Fri May 14 06:48:38 1993  Ken Raeburn  (raeburn@deneb.cygnus.com)
+
+	* Makefile.in (setup-dirs): Merged into "taz" target.
+	(taz): Only do `proto-dir' stuff if a directory is actually needed
+	for this target.
+
+Wed May 12 13:09:44 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Makefile.in (MUNCH_NM): New variable, defined to be $(NM).
+	(FLAGS_TO_PASS): Pass down MUNCH_NM.
+	(HOST_CC, HOST_PREFIX, HOST_PREFIX_1): New variables.
+	(EXTRA_GCC_FLAGS): Pass down HOST_* variables.
+	(gcc-no-fixedincludes): Correct for current gcc Makefile.
+
+Tue May 11 10:14:25 1993  Fred Fish  (fnf@cygnus.com)
+
+	* Makefile.in (make-gdb.tar.Z):  Add configure, config.guess,
+	config.sub, and move-if-change to gdb testsuite distribution
+	archive, so the testsuite can be extracted, configured, and
+	run separately from the gdb distribution.  Blow away the Chill
+	tests that require a Chill compiled executable, since GNU Chill
+	is not yet publically available.
+
+Mon May 10 17:22:26 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* test-build.mk: set environment variables in a single command,
+	instead of a list of assignments and exports
+
+	* config.guess: recognize Alpha/OSF1 systems
+
 Mon May 10 14:55:51 1993  K. Richard Pixley  (rich@rtl.cygnus.com)
 
 	* configure: Change help message to prefer --options rather than
 	  -options.
+
+Mon May 10 05:58:35 1993  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
+
+	* config.sub: Convergent Tech. "miniframe" uses m68010, sez
+	zippy@ecst.csuchico.edu.
+	* config.guess: Recognize miniframe.
 
 Sun May  9 17:47:57 1993  Rob Savoye  (rob at darkstar.cygnus.com)
 
