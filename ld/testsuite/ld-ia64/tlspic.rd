@@ -22,8 +22,8 @@ Section Headers:
   \[10\] .data +.*
   \[11\] .tdata +PROGBITS +0+13000 0+3000 0+60 00 WAT +0 +0 +4
   \[12\] .tbss +NOBITS +0+13060 0+3060 0+20 00 WAT +0 +0 +1
-  \[13\] .dynamic +DYNAMIC +0+13060 0+3060 0+130 10 +WA +3 +0 +8
-  \[14\] .got +PROGBITS +0+13190 0+3190 0+38 00 WAp +0 +0 +8
+  \[13\] .dynamic +DYNAMIC +0+13060 0+3060 0+140 10 +WA +3 +0 +8
+  \[14\] .got +PROGBITS +0+131a0 0+31a0 0+50 00 WAp +0 +0 +8
   \[15\] .IA_64.pltoff +.*
   \[16\] .sbss +.*
   \[17\] .bss +.*
@@ -40,17 +40,20 @@ There are 5 program headers, starting at offset [0-9]+
 Program Headers:
   Type +Offset +VirtAddr +PhysAddr +FileSiz +MemSiz +Flg Align
   LOAD +0x0+ 0x0+ 0x0+ 0x0+2030 0x0+2030 R E 0x10000
-  LOAD +0x0+3000 0x0+13000 0x0+13000 0x0+1e0 0x0+1e0 RW +0x10000
-  DYNAMIC +0x0+3060 0x0+13060 0x0+13060 0x0+130 0x0+130 RW +0x8
+  LOAD +0x0+3000 0x0+13000 0x0+13000 0x0+200 0x0+200 RW +0x10000
+  DYNAMIC +0x0+3060 0x0+13060 0x0+13060 0x0+140 0x0+140 RW +0x8
   TLS +0x0+3000 0x0+13000 0x0+13000 0x0+60 0x0+80 R +0x4
   IA_64_UNWIND +0x0+2018 0x0+2018 0x0+2018 0x0+18 0x0+18 R +0x8
 #...
 
-Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 3 entries:
+Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 6 entries:
  +Offset +Info +Type +Symbol's Value +Symbol's Name \+ Addend
-0+131a8 +0+18000000a7 R_IA64_DTPMOD64LSB +0+ sg1 \+ 0
-0+131b0 +0+18000000b7 R_IA64_DTPREL64LSB +0+ sg1 \+ 0
-0+131b8 +0+a7 R_IA64_DTPMOD64LSB +0+
+0+131b8 +0+18000000a7 R_IA64_DTPMOD64LSB +0+ sg1 \+ 0
+0+131c0 +0+18000000b7 R_IA64_DTPREL64LSB +0+ sg1 \+ 0
+0+131c8 +0+1b00000097 R_IA64_TPREL64LSB +0+4 sg2 \+ 0
+0+131d0 +0+a7 R_IA64_DTPMOD64LSB +0+
+0+131d8 +0+97 R_IA64_TPREL64LSB +0+44
+0+131e8 +0+97 R_IA64_TPREL64LSB +0+24
 
 Relocation section '.rela.IA_64.pltoff' at offset 0x[0-9a-f]+ contains 1 entries:
  +Offset +Info +Type +Symbol's Value +Symbol's Name \+ Addend
@@ -83,13 +86,13 @@ Symbol table '.dynsym' contains 33 entries:
  +22: 0+10 +0 TLS +GLOBAL DEFAULT +11 sg5
  +23: 0+ +0 NOTYPE +GLOBAL DEFAULT +UND __tls_get_addr
  +24: 0+ +0 TLS +GLOBAL DEFAULT +11 sg1
- +25: 0+1000 +208 FUNC +GLOBAL DEFAULT +7 fn1
+ +25: 0+1000 +272 FUNC +GLOBAL DEFAULT +7 fn1
  +26: [0-9a-f]+ +0 NOTYPE +GLOBAL DEFAULT +ABS __bss_start
  +27: 0+4 +0 TLS +GLOBAL DEFAULT +11 sg2
  +28: 0+14 +0 TLS +GLOBAL DEFAULT +11 sg6
  +29: 0+18 +0 TLS +GLOBAL DEFAULT +11 sg7
  +30: [0-9a-f]+ +0 NOTYPE +GLOBAL DEFAULT +ABS _edata
- +31: 0+13190 +0 OBJECT +GLOBAL DEFAULT +ABS _GLOBAL_OFFSET_TABLE_
+ +31: 0+131a0 +0 OBJECT +GLOBAL DEFAULT +ABS _GLOBAL_OFFSET_TABLE_
  +32: [0-9a-f]+ +0 NOTYPE +GLOBAL DEFAULT +ABS _end
 
 Symbol table '.symtab' contains 60 entries:
@@ -146,11 +149,11 @@ Symbol table '.symtab' contains 60 entries:
  +49: 0+10 +0 TLS +GLOBAL DEFAULT +11 sg5
  +50: 0+ +0 NOTYPE +GLOBAL DEFAULT +UND __tls_get_addr
  +51: 0+ +0 TLS +GLOBAL DEFAULT +11 sg1
- +52: 0+1000 +208 FUNC +GLOBAL DEFAULT +7 fn1
+ +52: 0+1000 +272 FUNC +GLOBAL DEFAULT +7 fn1
  +53: [0-9a-f]+ +0 NOTYPE +GLOBAL DEFAULT +ABS __bss_start
  +54: 0+4 +0 TLS +GLOBAL DEFAULT +11 sg2
  +55: 0+14 +0 TLS +GLOBAL DEFAULT +11 sg6
  +56: 0+18 +0 TLS +GLOBAL DEFAULT +11 sg7
  +57: [0-9a-f]+ +0 NOTYPE +GLOBAL DEFAULT +ABS _edata
- +58: 0+13190 +0 OBJECT +GLOBAL DEFAULT +ABS _GLOBAL_OFFSET_TABLE_
+ +58: 0+131a0 +0 OBJECT +GLOBAL DEFAULT +ABS _GLOBAL_OFFSET_TABLE_
  +59: [0-9a-f]+ +0 NOTYPE +GLOBAL DEFAULT +ABS _end

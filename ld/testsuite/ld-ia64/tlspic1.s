@@ -88,6 +88,25 @@ fn1:
 	add	r15 = r15, r8
 	;;
 
+	/* IE against global */
+	addl	r14 = @ltoff(@tprel(sg2#)), gp
+	;;
+	ld8	r15 = [r14]
+	;;
+	add	r14 = r15, r13
+	;;
+
+	/* IE against local and hidden */
+	addl	r14 = @ltoff(@tprel(sl2#)), gp
+	addl	r15 = @ltoff(@tprel(sh2#)), gp
+	;;
+	ld8	r14 = [r14]
+	ld8	r15 = [r15]
+	;;
+	add	r14 = r14, r13
+	add	r15 = r15, r13
+	;;
+
 	mov	ar.pfs = r34
 	mov	b0 = r33
 	br.ret.sptk.many b0

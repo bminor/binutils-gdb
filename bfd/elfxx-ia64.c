@@ -4264,13 +4264,23 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_IA64_LTOFF_DTPREL22:
 	  {
 	    int got_r_type;
+	    long dynindx = h ? h->dynindx : -1;
+	    bfd_vma r_addend = rel->r_addend;
 
 	    switch (r_type)
 	      {
 	      default:
 	      case R_IA64_LTOFF_TPREL22:
-		if (!dynamic_symbol_p && !info->shared)
-		  value -= elfNN_ia64_tprel_base (info);
+		if (!dynamic_symbol_p)
+		  {
+		    if (!info->shared)
+		      value -= elfNN_ia64_tprel_base (info);
+		    else
+		      {
+			r_addend += value - elfNN_ia64_dtprel_base (info);
+			dynindx = 0;
+		      }
+		  }
 		got_r_type = R_IA64_TPREL64LSB;
 		break;
 	      case R_IA64_LTOFF_DTPMOD22:
@@ -4285,8 +4295,7 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 		break;
 	      }
 	    dyn_i = get_dyn_sym_info (ia64_info, h, input_bfd, rel, FALSE);
-	    value = set_got_entry (input_bfd, info, dyn_i,
-				   (h ? h->dynindx : -1), rel->r_addend,
+	    value = set_got_entry (input_bfd, info, dyn_i, dynindx, r_addend,
 				   value, got_r_type);
 	    value -= gp_val;
 	    r = elfNN_ia64_install_value (output_bfd, hit_addr, value,

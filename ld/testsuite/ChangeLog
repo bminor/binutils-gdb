@@ -1,3 +1,10 @@
+2003-01-18  Jakub Jelinek  <jakub@redhat.com>
+
+	* ld-ia64/tlspic1.s: Add tests for IE in shared libraries.
+	* ld-ia64/tlspic.rd: Adjust.
+	* ld-ia64/tlspic.dd: Adjust.
+	* ld-ia64/tlspic.sd: Adjust.
+
 2003-01-16  Jakub Jelinek  <jakub@redhat.com>
 
 	* ld-ia64/ia64.exp: New.

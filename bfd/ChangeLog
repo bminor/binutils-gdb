@@ -1,3 +1,8 @@
+2003-01-18  Jakub Jelinek  <jakub@redhat.com>
+
+	* elfxx-ia64.c (elfNN_ia64_relocate_section): Handle
+	R_IA64_TPREL64[LM]SB against non-global symbol properly.
+
 2003-01-16  Jakub Jelinek  <jakub@redhat.com>
 
 	* elfxx-ia64.c (struct elfNN_ia64_link_hash_table): Add
