@@ -1,5 +1,25 @@
 2003-03-25  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbarch.sh (DEPRECATED_EXTRA_STACK_ALIGNMENT_NEEDED): Replace
+	EXTRA_STACK_ALIGNMENT_NEEDED.  Default to 0 not 1.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* config/sparc/tm-sparc.h
+	(DEPRECATED_EXTRA_STACK_ALIGNMENT_NEEDED): Define.
+	* sparc-tdep.c (sparc_gdbarch_init): Set
+	deprecated_extra_stack_alignment_needed.
+	* config/pa/tm-hppa.h (EXTRA_STACK_ALIGNMENT_NEEDED): Delete.
+	* xstormy16-tdep.c (xstormy16_gdbarch_init): Do not clear
+	extra_stack_alignment_needed.
+	* v850-tdep.c (v850_gdbarch_init): Ditto.
+	* hppa-tdep.c (hppa_gdbarch_init): Ditto.
+	* h8300-tdep.c (h8300_gdbarch_init): Ditto.
+	* d10v-tdep.c (d10v_gdbarch_init): Ditto.
+	* cris-tdep.c (cris_gdbarch_init): Ditto.
+	* m68k-tdep.c (m68k_gdbarch_init): Ditto.
+	* m68hc11-tdep.c (m68hc11_gdbarch_init): Ditto.
+	
+2003-03-25  Andrew Cagney  <cagney@redhat.com>
+
 	* gdbarch.sh (DEPRECATED_STORE_STRUCT_RETURN): Replace
 	STORE_STRUCT_RETURN.
 	* gdbarch.h, gdbarch.c: Regenerate.

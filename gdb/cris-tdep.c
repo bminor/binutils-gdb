@@ -4320,9 +4320,6 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   
-  /* No extra stack alignment needed.  Set to 1 by default.  */
-  set_gdbarch_extra_stack_alignment_needed (gdbarch, 0);
-  
   /* Helpful for backtracing and returning in a call dummy.  */
   set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
 

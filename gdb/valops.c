@@ -1599,7 +1599,10 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
      on other architectures. This is because all the alignment is
      taken care of in the above code (ifdef REG_STRUCT_HAS_ADDR) and
      in hppa_push_arguments */
-  if (EXTRA_STACK_ALIGNMENT_NEEDED)
+  /* NOTE: cagney/2003-03-24: The below code is very broken.  Given an
+     odd sized parameter the below will mis-align the stack.  As was
+     suggested back in '96, better to let PUSH_ARGUMENTS handle it.  */
+  if (DEPRECATED_EXTRA_STACK_ALIGNMENT_NEEDED)
     {
       /* MVS 11/22/96: I think at least some of this stack_align code
 	 is really broken.  Better to let PUSH_ARGUMENTS adjust the

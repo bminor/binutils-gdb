@@ -4967,7 +4967,6 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_saved_pc_after_call (gdbarch, hppa_saved_pc_after_call);
   set_gdbarch_inner_than (gdbarch, hppa_inner_than);
   set_gdbarch_stack_align (gdbarch, hppa_stack_align);
-  set_gdbarch_extra_stack_alignment_needed (gdbarch, 0);
   set_gdbarch_decr_pc_after_break (gdbarch, 0);
   set_gdbarch_register_size (gdbarch, 4);
   set_gdbarch_num_regs (gdbarch, hppa_num_regs);

@@ -116,10 +116,6 @@ extern CORE_ADDR hppa_stack_align (CORE_ADDR sp);
 #define STACK_ALIGN(sp) hppa_stack_align (sp)
 #endif
 
-#if !GDB_MULTI_ARCH
-#define EXTRA_STACK_ALIGNMENT_NEEDED 0
-#endif
-
 /* Sequence of bytes for breakpoint instruction.  */
 
 #define BREAKPOINT {0x00, 0x01, 0x00, 0x04}

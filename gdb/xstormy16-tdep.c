@@ -1114,7 +1114,6 @@ xstormy16_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pointer_to_address (gdbarch, xstormy16_pointer_to_address);
 
   set_gdbarch_stack_align (gdbarch, xstormy16_stack_align);
-  set_gdbarch_extra_stack_alignment_needed (gdbarch, 0);
 
   set_gdbarch_save_dummy_frame_tos (gdbarch, xstormy16_save_dummy_frame_tos);
 

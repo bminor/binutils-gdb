@@ -1173,7 +1173,6 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_addr_bit (gdbarch, BINWORD * TARGET_CHAR_BIT);
 
   /* set_gdbarch_stack_align (gdbarch, SOME_stack_align); */
-  set_gdbarch_extra_stack_alignment_needed (gdbarch, 0);
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
 
   return gdbarch;

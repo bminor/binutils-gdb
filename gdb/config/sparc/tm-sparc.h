@@ -756,3 +756,4 @@ extern int deferred_stores;
 
 #define TM_PRINT_INSN_MACH bfd_mach_sparc
 
+#define DEPRECATED_EXTRA_STACK_ALIGNMENT_NEEDED 1

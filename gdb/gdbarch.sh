@@ -602,7 +602,8 @@ f:2:FRAME_NUM_ARGS:int:frame_num_args:struct frame_info *frame:frame::0:0
 #
 F:2:STACK_ALIGN:CORE_ADDR:stack_align:CORE_ADDR sp:sp::0:0
 M:::CORE_ADDR:frame_align:CORE_ADDR address:address
-v:2:EXTRA_STACK_ALIGNMENT_NEEDED:int:extra_stack_alignment_needed::::0:1::0:::
+# NOTE: cagney/2003-03-24: This is better handled by PUSH_ARGUMENTS.
+v:2:DEPRECATED_EXTRA_STACK_ALIGNMENT_NEEDED:int:deprecated_extra_stack_alignment_needed::::0:0::0:::
 F:2:REG_STRUCT_HAS_ADDR:int:reg_struct_has_addr:int gcc_p, struct type *type:gcc_p, type::0:0
 # FIXME: kettenis/2003-03-08: This should be replaced by a function
 # parametrized with (at least) the regcache.

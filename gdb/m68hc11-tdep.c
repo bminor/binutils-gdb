@@ -1424,6 +1424,7 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_function_start_offset (gdbarch, 0);
   set_gdbarch_breakpoint_from_pc (gdbarch, m68hc11_breakpoint_from_pc);
   set_gdbarch_stack_align (gdbarch, m68hc11_stack_align);
+  set_gdbarch_deprecated_extra_stack_alignment_needed (gdbarch, 1);
   set_gdbarch_print_insn (gdbarch, gdb_print_insn_m68hc11);
 
   m68hc11_add_reggroups (gdbarch);

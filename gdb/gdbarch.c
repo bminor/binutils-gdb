@@ -248,7 +248,7 @@ struct gdbarch
   gdbarch_frame_num_args_ftype *frame_num_args;
   gdbarch_stack_align_ftype *stack_align;
   gdbarch_frame_align_ftype *frame_align;
-  int extra_stack_alignment_needed;
+  int deprecated_extra_stack_alignment_needed;
   gdbarch_reg_struct_has_addr_ftype *reg_struct_has_addr;
   gdbarch_save_dummy_frame_tos_ftype *save_dummy_frame_tos;
   gdbarch_unwind_dummy_id_ftype *unwind_dummy_id;
@@ -559,7 +559,6 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->frameless_function_invocation = generic_frameless_function_invocation_not;
   current_gdbarch->frame_args_address = get_frame_base;
   current_gdbarch->frame_locals_address = get_frame_base;
-  current_gdbarch->extra_stack_alignment_needed = 1;
   current_gdbarch->convert_from_func_ptr_addr = core_addr_identity;
   current_gdbarch->addr_bits_remove = core_addr_identity;
   current_gdbarch->smash_text_address = core_addr_identity;
@@ -762,7 +761,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
     fprintf_unfiltered (log, "\n\tframe_num_args");
   /* Skip verify of stack_align, has predicate */
   /* Skip verify of frame_align, has predicate */
-  /* Skip verify of extra_stack_alignment_needed, invalid_p == 0 */
+  /* Skip verify of deprecated_extra_stack_alignment_needed, invalid_p == 0 */
   /* Skip verify of reg_struct_has_addr, has predicate */
   /* Skip verify of save_dummy_frame_tos, has predicate */
   /* Skip verify of unwind_dummy_id, has predicate */
@@ -1159,6 +1158,14 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS = <0x%08lx>\n",
                         (long) current_gdbarch->deprecated_extract_struct_value_address
                         /*DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS ()*/);
+#endif
+#ifdef DEPRECATED_EXTRA_STACK_ALIGNMENT_NEEDED
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_EXTRA_STACK_ALIGNMENT_NEEDED # %s\n",
+                      XSTRING (DEPRECATED_EXTRA_STACK_ALIGNMENT_NEEDED));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_EXTRA_STACK_ALIGNMENT_NEEDED = %d\n",
+                      DEPRECATED_EXTRA_STACK_ALIGNMENT_NEEDED);
 #endif
 #ifdef DEPRECATED_FRAME_CHAIN_P
   fprintf_unfiltered (file,
@@ -1577,14 +1584,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: EXTRACT_STRUCT_VALUE_ADDRESS = <0x%08lx>\n",
                         (long) current_gdbarch->extract_struct_value_address
                         /*EXTRACT_STRUCT_VALUE_ADDRESS ()*/);
-#endif
-#ifdef EXTRA_STACK_ALIGNMENT_NEEDED
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: EXTRA_STACK_ALIGNMENT_NEEDED # %s\n",
-                      XSTRING (EXTRA_STACK_ALIGNMENT_NEEDED));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: EXTRA_STACK_ALIGNMENT_NEEDED = %d\n",
-                      EXTRA_STACK_ALIGNMENT_NEEDED);
 #endif
 #ifdef FIX_CALL_DUMMY
 #if GDB_MULTI_ARCH
@@ -5002,20 +5001,20 @@ set_gdbarch_frame_align (struct gdbarch *gdbarch,
 }
 
 int
-gdbarch_extra_stack_alignment_needed (struct gdbarch *gdbarch)
+gdbarch_deprecated_extra_stack_alignment_needed (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of extra_stack_alignment_needed, invalid_p == 0 */
+  /* Skip verify of deprecated_extra_stack_alignment_needed, invalid_p == 0 */
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_extra_stack_alignment_needed called\n");
-  return gdbarch->extra_stack_alignment_needed;
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_extra_stack_alignment_needed called\n");
+  return gdbarch->deprecated_extra_stack_alignment_needed;
 }
 
 void
-set_gdbarch_extra_stack_alignment_needed (struct gdbarch *gdbarch,
-                                          int extra_stack_alignment_needed)
+set_gdbarch_deprecated_extra_stack_alignment_needed (struct gdbarch *gdbarch,
+                                                     int deprecated_extra_stack_alignment_needed)
 {
-  gdbarch->extra_stack_alignment_needed = extra_stack_alignment_needed;
+  gdbarch->deprecated_extra_stack_alignment_needed = deprecated_extra_stack_alignment_needed;
 }
 
 int
