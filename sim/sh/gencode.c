@@ -84,6 +84,7 @@ op tab[] =
   },
 
   { "", "", "bf <bdisp8>", "10001011i8p1....",
+    "RAISE_EXCEPTION_IF_IN_DELAY_SLOT ();",
     "if (!T) {",
     "  SET_NIP (PC + 4 + (SEXT (i) * 2));",
     "  cycles += 2;",
@@ -91,6 +92,7 @@ op tab[] =
   },
 
   { "", "", "bf.s <bdisp8>", "10001111i8p1....",
+    "RAISE_EXCEPTION_IF_IN_DELAY_SLOT ();",
     "if (!T) {",
     "  SET_NIP (PC + 4 + (SEXT (i) * 2));",
     "  cycles += 2;",
@@ -98,19 +100,35 @@ op tab[] =
     "}",
   },
 
+  { "", "n", "bit32 #imm3,@(disp12,<REG_N>)", "0011nnnni8*11001",
+    "/* 32-bit logical bit-manipulation instructions.  */",
+    "RAISE_EXCEPTION_IF_IN_DELAY_SLOT ();",
+    "int word2 = RIAT (nip);",
+    "i >>= 4;	/* BOGUS: Using only three bits of 'i'.  */",
+    "/* MSB of 'i' must be zero.  */",
+    "if (i > 7)",
+    "  RAISE_EXCEPTION (SIGILL);",
+    "MA (1);",
+    "do_blog_insn (1 << i, (word2 & 0xfff) + R[n], ",
+    "              (word2 >> 12) & 0xf, memory, maskb);",
+    "SET_NIP (nip + 2);	/* Consume 2 more bytes.  */",
+  },
   { "", "", "bra <bdisp12>", "1010i12.........",
+    "RAISE_EXCEPTION_IF_IN_DELAY_SLOT ();",
     "SET_NIP (PC + 4 + (SEXT12 (i) * 2));",
     "cycles += 2;",
     "Delay_Slot (PC + 2);",
   },
 
   { "", "n", "braf <REG_N>", "0000nnnn00100011",
+    "RAISE_EXCEPTION_IF_IN_DELAY_SLOT ();",
     "SET_NIP (PC + 4 + R[n]);",
     "cycles += 2;",
     "Delay_Slot (PC + 2);",
   },
 
   { "", "", "bsr <bdisp12>", "1011i12.........",
+    "RAISE_EXCEPTION_IF_IN_DELAY_SLOT ();",
     "PR = PH2T (PC + 4);",
     "SET_NIP (PC + 4 + (SEXT12 (i) * 2));",
     "cycles += 2;",
@@ -118,6 +136,7 @@ op tab[] =
   },
 
   { "", "n", "bsrf <REG_N>", "0000nnnn00000011",
+    "RAISE_EXCEPTION_IF_IN_DELAY_SLOT ();",
     "PR = PH2T (PC) + 4;",
     "SET_NIP (PC + 4 + R[n]);",
     "cycles += 2;",
@@ -125,13 +144,187 @@ op tab[] =
   },
 
   { "", "", "bt <bdisp8>", "10001001i8p1....",
+    "RAISE_EXCEPTION_IF_IN_DELAY_SLOT ();",
     "if (T) {",
     "  SET_NIP (PC + 4 + (SEXT (i) * 2));",
     "  cycles += 2;",
     "}",
   },
+  
+  { "", "m", "bld/st #<imm>, <REG_M>", "10000111mmmmi4*1",
+    "/* MSB of 'i' is true for load, false for store.  */",
+    "if (i <= 7)",
+    "  if (T)",
+    "    R[m] |= (1 << i);",
+    "  else",
+    "    R[m] &= ~(1 << i);",
+    "else",
+    "  SET_SR_T ((R[m] & (1 << (i - 8))) != 0);",
+  },
+  { "m", "m", "bset/clr #<imm>, <REG_M>", "10000110mmmmi4*1",
+    "/* MSB of 'i' is true for set, false for clear.  */",
+    "if (i <= 7)",
+    "  R[m] &= ~(1 << i);",
+    "else",
+    "  R[m] |= (1 << (i - 8));",
+  },
+  { "n", "n", "clips.b <REG_N>", "0100nnnn10010001",
+    "if (R[n] < -128 || R[n] > 127) {",
+    "  L (n);",
+    "  SET_SR_CS (1);",
+    "  if (R[n] > 127)",
+    "    R[n] = 127;",
+    "  else if (R[n] < -128)",
+    "    R[n] = -128;",
+    "}",
+  },
+  { "n", "n", "clips.w <REG_N>", "0100nnnn10010101",
+    "if (R[n] < -32768 || R[n] > 32767) {",
+    "  L (n);",
+    "  SET_SR_CS (1);",
+    "  if (R[n] > 32767)",
+    "    R[n] = 32767;",
+    "  else if (R[n] < -32768)",
+    "    R[n] = -32768;",
+    "}",
+  },
+  { "n", "n", "clipu.b <REG_N>", "0100nnnn10000001",
+    "if (R[n] < -256 || R[n] > 255) {",
+    "  L (n);",
+    "  SET_SR_CS (1);",
+    "  R[n] = 255;",
+    "}",
+  },
+  { "n", "n", "clipu.w <REG_N>", "0100nnnn10000101",
+    "if (R[n] < -65536 || R[n] > 65535) {",
+    "  L (n);",
+    "  SET_SR_CS (1);",
+    "  R[n] = 65535;",
+    "}",
+  },
+  { "n", "0n", "divs R0,<REG_N>", "0100nnnn10010100",
+    "RAISE_EXCEPTION_IF_IN_DELAY_SLOT ();",
+    "if (R0 == 0)",
+    "  R[n] = 0x7fffffff;",
+    "else if (R0 == -1 && R[n] == 0x80000000)",
+    "  R[n] = 0x7fffffff;",
+    "else R[n] /= R0;",
+    "L (n);",
+  },
+  { "n", "0n", "divu R0,<REG_N>", "0100nnnn10000100",
+    "RAISE_EXCEPTION_IF_IN_DELAY_SLOT ();",
+    "if (R0 == 0)",
+    "  R[n] = 0xffffffff;",
+    "else (unsigned int) R[n] = (unsigned int) R[n] / (unsigned int) R0;",
+    "L (n);",
+  },
+  { "n", "0n", "mulr R0,<REG_N>", "0100nnnn10000000",
+    "R[n] = (R[n] * R0) & 0xffffffff;",
+    "L (n);",
+  },
+  { "0", "n", "ldbank @<REG_N>,R0", "0100nnnn11100101",
+    "int regn = (R[n] >> 2) & 0x1f;",
+    "int bankn = (R[n] >> 7) & 0x1ff;",
+    "if (regn > 19)",
+    "  regn = 19;	/* FIXME what should happen? */",
+    "R0 = saved_state.asregs.regstack[bankn].regs[regn];",
+    "L (0);",
+  },
+  { "", "0n", "stbank R0,@<REG_N>", "0100nnnn11100001",
+    "int regn = (R[n] >> 2) & 0x1f;",
+    "int bankn = (R[n] >> 7) & 0x1ff;",
+    "if (regn > 19)",
+    "  regn = 19;	/* FIXME what should happen? */",
+    "saved_state.asregs.regstack[bankn].regs[regn] = R0;",
+  },
+  { "", "", "resbank", "0000000001011011",
+    "RAISE_EXCEPTION_IF_IN_DELAY_SLOT ();",
+    /* FIXME: cdef all */
+    "int i;",
+    "if (BO) {	/* Bank Overflow */",
+    /* FIXME: how do we know when to reset BO?  */
+    "  for (i = 0; i <= 14; i++) {",
+    "    R[i] = RLAT (R[15]);",
+    "    MA (1);",
+    "    R[15] += 4;",
+    "  }",
+    "  PR = RLAT (R[15]);",
+    "  R[15] += 4;",
+    "  MA (1);",
+    "  GBR = RLAT (R[15]);",
+    "  R[15] += 4;",
+    "  MA (1);",
+    "  MACH = RLAT (R[15]);",
+    "  R[15] += 4;",
+    "  MA (1);",
+    "  MACL = RLAT (R[15]);",
+    "  R[15] += 4;",
+    "  MA (1);",
+    "}",
+    "else if (BANKN == 0)	/* Bank Underflow */",
+    "  RAISE_EXCEPTION (SIGILL);",	/* FIXME: what exception? */
+    "else {",
+    "  SET_BANKN (BANKN - 1);",
+    "  for (i = 0; i <= 14; i++)",
+    "    R[i] = saved_state.asregs.regstack[BANKN].regs[i];",
+    "  MACH = saved_state.asregs.regstack[BANKN].regs[15];",
+    "  PR   = saved_state.asregs.regstack[BANKN].regs[17];",
+    "  GBR  = saved_state.asregs.regstack[BANKN].regs[18];",
+    "  MACL = saved_state.asregs.regstack[BANKN].regs[19];",
+    "}",
+  },
+  { "f", "f-", "movml.l <REG_N>,@-R15", "0100nnnn11110001",
+    "/* Push Rn...R0 (if n==15, push pr and R14...R0).  */",
+    "do {",
+    "  MA (1);",
+    "  R[15] -= 4;",
+    "  if (n == 15)",
+    "    WLAT (R[15], PR);",
+    "  else",
+    "    WLAT (R[15], R[n]);",
+    "} while (n-- > 0);",    
+  },
+  { "f", "f+", "movml.l @R15+,<REG_N>", "0100nnnn11110101",
+    "/* Pop R0...Rn (if n==15, pop R0...R14 and pr).  */",
+    "int i = 0;\n",
+    "do {",
+    "  MA (1);",
+    "  if (i == 15)",
+    "    PR = RLAT (R[15]);",
+    "  else",
+    "    R[i] = RLAT (R[15]);",
+    "  R[15] += 4;",
+    "} while (i++ < n);",    
+  },
+  { "f", "f-", "movmu.l <REG_N>,@-R15", "0100nnnn11110000",
+    "/* Push pr, R14...Rn (if n==15, push pr).  */",	/* FIXME */
+    "int i = 15;\n",
+    "do {",
+    "  MA (1);",
+    "  R[15] -= 4;",
+    "  if (i == 15)",
+    "    WLAT (R[15], PR);",
+    "  else",
+    "    WLAT (R[15], R[i]);",
+    "} while (i-- > n);",    
+  },
+  { "f", "f+", "movmu.l @R15+,<REG_N>", "0100nnnn11110100",
+    "/* Pop Rn...R14, pr (if n==15, pop pr).  */",	/* FIXME */
+    "do {",
+    "  MA (1);",
+    "  if (n == 15)",
+    "    PR = RLAT (R[15]);",
+    "  else",
+    "    R[n] = RLAT (R[15]);",
+    "  R[15] += 4;",
+    "} while (n++ < 15);",    
+  },
+  { "", "", "nott", "0000000001101000",
+    "SET_SR_T (T == 0);",	
+  },
 
   { "", "", "bt.s <bdisp8>", "10001101i8p1....",
+    "RAISE_EXCEPTION_IF_IN_DELAY_SLOT ();",
     "if (T) {",
     "  SET_NIP (PC + 4 + (SEXT (i) * 2));",
     "  cycles += 2;",
@@ -297,6 +490,8 @@ op tab[] =
     "else",
     "{",
     "  double fsum = 0;",
+    "  if (saved_state.asregs.bfd_mach == bfd_mach_sh2a)",
+    "    RAISE_EXCEPTION (SIGILL);",
     "  /* FIXME: check for nans and infinities.  */",
     "  fsum += FR (v1+0) * FR (v2+0);",
     "  fsum += FR (v1+1) * FR (v2+1);",
@@ -386,6 +581,18 @@ op tab[] =
     "  SET_FI (n, RLAT (R[m]));",
     "}",
   },
+  /* sh2a */
+  { "", "n", "fmov.s @(disp12,<REG_N>), <FREG_M>", "0011nnnnmmmm0001",
+    "/* and fmov.s <FREG_N>, @(disp12,<FREG_M>)",
+    "   and mov.bwl <REG_N>, @(disp12,<REG_M>)",
+    "   and mov.bwl @(disp12,<REG_N>),<REG_M>",
+    "   and movu.bw @(disp12,<REG_N>),<REG_M>.  */",
+    "RAISE_EXCEPTION_IF_IN_DELAY_SLOT ();",
+    "int word2 = RIAT (nip);",
+    "SET_NIP (nip + 2);	/* Consume 2 more bytes.  */",
+    "MA (1);",
+    "do_long_move_insn (word2 & 0xf000, word2 & 0x0fff, m, n, &thislock);",
+  },
   /* sh2e */
   { "m", "m", "fmov.s @<REG_M>+,<FREG_N>", "1111nnnnmmmm1001",
     /* sh4 */
@@ -465,6 +672,8 @@ op tab[] =
   { "", "", "frchg", "1111101111111101",
     "if (FPSCR_PR)",
     "  RAISE_EXCEPTION (SIGILL);",
+    "else if (saved_state.asregs.bfd_mach == bfd_mach_sh2a)",
+    "  RAISE_EXCEPTION (SIGILL);",
     "else",
     "  SET_FPSCR (GET_FPSCR () ^ FPSCR_MASK_FR);",
   },
@@ -472,6 +681,8 @@ op tab[] =
   /* sh4 */
   { "", "", "fsca", "1111eeee11111101",
     "if (FPSCR_PR)",
+    "  RAISE_EXCEPTION (SIGILL);",
+    "else if (saved_state.asregs.bfd_mach == bfd_mach_sh2a)",
     "  RAISE_EXCEPTION (SIGILL);",
     "else",
     "  {",
@@ -493,6 +704,8 @@ op tab[] =
   /* sh4 */
   { "", "", "fsrra <FREG_N>", "1111nnnn01111101",
     "if (FPSCR_PR)",
+    "  RAISE_EXCEPTION (SIGILL);",
+    "else if (saved_state.asregs.bfd_mach == bfd_mach_sh2a)",
     "  RAISE_EXCEPTION (SIGILL);",
     "else",
     "  SET_FR (n, fsrra_s (FR (n)));",
@@ -525,6 +738,8 @@ op tab[] =
     "  RAISE_EXCEPTION (SIGILL);",
     "else",
     "{", 
+    "  if (saved_state.asregs.bfd_mach == bfd_mach_sh2a)",
+    "    RAISE_EXCEPTION (SIGILL);",
     "  /* FIXME not implemented.  */",
     "  printf (\"ftrv xmtrx, FV%d\\n\", v1);",
     "}", 
@@ -542,18 +757,34 @@ op tab[] =
   },
 
   { "", "n", "jmp @<REG_N>", "0100nnnn00101011",
+    "RAISE_EXCEPTION_IF_IN_DELAY_SLOT ();",
     "SET_NIP (PT2H (R[n]));",
     "cycles += 2;",
     "Delay_Slot (PC + 2);",
   },
 
   { "", "n", "jsr @<REG_N>", "0100nnnn00001011",
+    "RAISE_EXCEPTION_IF_IN_DELAY_SLOT ();",
     "PR = PH2T (PC + 4);",
     "if (~doprofile)",
     "  gotcall (PR, R[n]);",
     "SET_NIP (PT2H (R[n]));",
     "cycles += 2;",
     "Delay_Slot (PC + 2);",
+  },
+  { "", "n", "jsr/n @<REG_N>", "0100nnnn01001011",
+    "RAISE_EXCEPTION_IF_IN_DELAY_SLOT ();",
+    "PR = PH2T (PC + 2);",
+    "if (~doprofile)",
+    "  gotcall (PR, R[n]);",
+    "SET_NIP (PT2H (R[n]));",
+  },
+  { "", "", "jsr/n @@(<disp>,TBR)", "10000011i8p4....",
+    "RAISE_EXCEPTION_IF_IN_DELAY_SLOT ();",
+    "PR = PH2T (PC + 2);",
+    "if (~doprofile)",
+    "  gotcall (PR, i + TBR);",
+    "SET_NIP (PT2H (i + TBR));",
   },
 
   { "", "n", "ldc <REG_N>,<CREG_M>", "0100nnnnmmmm1110",
@@ -576,6 +807,12 @@ op tab[] =
   { "", "n", "ldc <REG_N>,SGR", "0100nnnn00111010",
     "if (SR_MD)",
     "  SGR = R[n]; /* priv mode */",
+    "else",
+    "  RAISE_EXCEPTION (SIGILL); /* user mode */",
+  },
+  { "", "n", "ldc <REG_N>,TBR", "0100nnnn01001010",
+    "if (SR_MD)",	/* FIXME? */
+    "  TBR = R[n]; /* priv mode */",
     "else",
     "  RAISE_EXCEPTION (SIGILL); /* user mode */",
   },
@@ -673,6 +910,16 @@ op tab[] =
   { "n", "", "mov #<imm>,<REG_N>", "1110nnnni8*1....",
     "R[n] = SEXT (i);",
   },
+  { "n", "", "movi20 #<imm20>,<REG_N>", "0000nnnni8*10000",
+    "RAISE_EXCEPTION_IF_IN_DELAY_SLOT ();",
+    "R[n] = ((i << 24) >> 12) | RIAT (nip);",
+    "SET_NIP (nip + 2);	/* Consume 2 more bytes.  */",
+  },
+  { "n", "", "movi20s #<imm20>,<REG_N>", "0000nnnni8*10001",
+    "RAISE_EXCEPTION_IF_IN_DELAY_SLOT ();",
+    "R[n] = ((((i & 0xf0) << 24) >> 12) | RIAT (nip)) << 8;",
+    "SET_NIP (nip + 2);	/* Consume 2 more bytes.  */",
+  },
   { "n", "m", "mov <REG_M>,<REG_N>", "0110nnnnmmmm0011",
     "R[n] = R[m];",
   },
@@ -698,6 +945,12 @@ op tab[] =
     "R[m] += 1;",
     "L (n);",
   },
+  { "0n", "n", "mov.b @-<REG_N>,R0", "0100nnnn11001011",
+    "MA (1);",
+    "R[n] -= 1;",
+    "R0 = RSBAT (R[n]);",
+    "L (0);",
+  },
   { "", "mn", "mov.b <REG_M>,@<REG_N>", "0010nnnnmmmm0000",
     "MA (1);",
     "WBAT (R[n], R[m]);",
@@ -718,6 +971,11 @@ op tab[] =
     "MA (1);",
     "R[n] -= 1;",
     "WBAT (R[n], R[m]);",
+  },
+  { "n", "n0", "mov.b R0,@<REG_N>+", "0100nnnn10001011",
+    "MA (1);",
+    "WBAT (R[n], R0);",
+    "R[n] += 1;",
   },
   { "n", "m", "mov.b @<REG_M>,<REG_N>", "0110nnnnmmmm0000",
     "MA (1);",
@@ -751,6 +1009,12 @@ op tab[] =
     "R[m] += 4;",
     "L (n);",
   },
+  { "0n", "n", "mov.l @-<REG_N>,R0", "0100nnnn11101011",
+    "MA (1);",
+    "R[n] -= 4;",
+    "R0 = RLAT (R[n]);",
+    "L (0);",
+  },
   { "n", "m", "mov.l @<REG_M>,<REG_N>", "0110nnnnmmmm0010",
     "MA (1);",
     "R[n] = RLAT (R[m]);",
@@ -772,6 +1036,11 @@ op tab[] =
     "MA (1) ;",
     "R[n] -= 4;",
     "WLAT (R[n], R[m]);",
+  },
+  { "n", "n0", "mov.l R0,@<REG_N>+", "0100nnnn10101011",
+    "MA (1) ;",
+    "WLAT (R[n], R0);",
+    "R[n] += 4;",
   },
   { "", "nm", "mov.l <REG_M>,@<REG_N>", "0010nnnnmmmm0010",
     "MA (1);",
@@ -804,6 +1073,12 @@ op tab[] =
     "R[m] += 2;",
     "L (n);",
   },
+  { "0n", "n", "mov.w @-<REG_N>,R0", "0100nnnn11011011",
+    "MA (1);",
+    "R[n] -= 2;",
+    "R0 = RSWAT (R[n]);",
+    "L (0);",
+  },
   { "n", "m", "mov.w @<REG_M>,<REG_N>", "0110nnnnmmmm0001",
     "MA (1);",
     "R[n] = RSWAT (R[m]);",
@@ -825,6 +1100,11 @@ op tab[] =
     "MA (1);",
     "R[n] -= 2;",
     "WWAT (R[n], R[m]);",
+  },
+  { "n", "0n", "mov.w R0,@<REG_N>+", "0100nnnn10011011",
+    "MA (1);",
+    "WWAT (R[n], R0);",
+    "R[n] += 2;",
   },
   { "", "nm", "mov.w <REG_M>,@<REG_N>", "0010nnnnmmmm0001",
     "MA (1);",
@@ -863,19 +1143,23 @@ op tab[] =
   { "n", "", "movt <REG_N>", "0000nnnn00101001",
     "R[n] = T;",
   },
-
+  { "", "", "movrt <REG_N>", "0000nnnn00111001",
+    "R[n] = (T == 0);",	
+  },
   { "0", "n", "movua.l @<REG_N>,R0", "0100nnnn10101001",
     "int regn = R[n];",
+    "int e = target_little_endian ? 3 : 0;",
     "MA (1);",
-    "R[0] = (RBAT (regn) << 24) + (RBAT (regn + 1) << 16) + ",
-    "  (RBAT (regn + 2) << 8) + RBAT (regn + 3);",
+    "R[0] = (RBAT (regn + (0^e)) << 24) + (RBAT (regn + (1^e)) << 16) + ",
+    "  (RBAT (regn + (2^e)) << 8) + RBAT (regn + (3^e));",
     "L (0);",
   },
   { "0n", "n", "movua.l @<REG_N>+,R0", "0100nnnn11101001",
     "int regn = R[n];",
+    "int e = target_little_endian ? 3 : 0;",
     "MA (1);",
-    "R[0] = (RBAT (regn) << 24) + (RBAT (regn + 1) << 16) + ",
-    "  (RBAT (regn + 2) << 8) + RBAT (regn + 3);",
+    "R[0] = (RBAT (regn + (0^e)) << 24) + (RBAT (regn + (1^e)) << 16) + ",
+    "  (RBAT (regn + (2^e)) << 8) + RBAT (regn + (3^e));",
     "R[n] += 4;",
     "L (0);",
   },
@@ -1002,6 +1286,7 @@ op tab[] =
     "R[15] += 4;",
     "Delay_Slot (PC + 2);",
 #else
+    "RAISE_EXCEPTION_IF_IN_DELAY_SLOT ();",
     "SET_SR (SSR);",
     "SET_NIP (PT2H (SPC));",
     "cycles += 2;",
@@ -1010,9 +1295,20 @@ op tab[] =
   },
 
   { "", "", "rts", "0000000000001011",
+    "RAISE_EXCEPTION_IF_IN_DELAY_SLOT ();",
     "SET_NIP (PT2H (PR));",
     "cycles += 2;",
     "Delay_Slot (PC + 2);",
+  },
+  { "", "", "rts/n", "0000000001101011",
+    "RAISE_EXCEPTION_IF_IN_DELAY_SLOT ();",
+    "SET_NIP (PT2H (PR));",
+  },
+  { "0", "n", "rtv/n <REG_N>", "0000nnnn01111011",
+    "RAISE_EXCEPTION_IF_IN_DELAY_SLOT ();",
+    "R0 = R[n];",
+    "L (0);",
+    "SET_NIP (PT2H (PR));",
   },
 
   /* sh4a */
@@ -1121,6 +1417,12 @@ op tab[] =
     "else",
     "  RAISE_EXCEPTION (SIGILL); /* user mode */",
   },
+  { "n", "", "stc TBR,<REG_N>", "0000nnnn01001010",
+    "if (SR_MD)",	/* FIXME? */
+    "  R[n] = TBR; /* priv mode */",
+    "else",
+    "  RAISE_EXCEPTION (SIGILL); /* user mode */",
+  },
   { "n", "n", "stc.l <CREG_M>,@-<REG_N>", "0100nnnnmmmm0011",
     "MA (1);",
     "R[n] -= 4;",
@@ -1191,6 +1493,7 @@ op tab[] =
   },
 
   { "0", "", "trapa #<imm>", "11000011i8*1....", 
+    "RAISE_EXCEPTION_IF_IN_DELAY_SLOT ();",
     "long imm = 0xff & i;",
     "if (i < 20 || i == 33 || i == 34 || i == 0xc3)",
     "  nip += trap (i, &R0, PC, memory, maskl, maskw, endianw);",
@@ -1515,8 +1818,9 @@ op movsxy_tab[] =
     "/* nop */",
   },
   { "", "", "ppi", "1111100000000000",
+    "RAISE_EXCEPTION_IF_IN_DELAY_SLOT ();",
     "ppi_insn (RIAT (nip));",
-    "nip += 2;",
+    "SET_NIP (nip + 2);",
     "iword &= 0xf7ff; goto top;",
   },
 #endif
@@ -2267,6 +2571,58 @@ gengastab ()
 
 static unsigned short table[1 << 16];
 
+static int warn_conflicts = 0;
+
+static void
+conflict_warn (val, i)
+     int val;
+     int i;
+{
+  int ix, key;
+  int j = table[val];
+
+  fprintf (stderr, "Warning: opcode table conflict: 0x%04x (idx %d && %d)\n",
+	   val, i, table[val]);
+
+  for (ix = sizeof (tab) / sizeof (tab[0]); ix >= 0; ix--)
+    if (tab[ix].index == i || tab[ix].index == j)
+      {
+	key = ((tab[ix].code[0] - '0') << 3) + 
+	  ((tab[ix].code[1] - '0') << 2) + 
+	  ((tab[ix].code[2] - '0') << 1) + 
+	  ((tab[ix].code[3] - '0'));
+
+	if (val >> 12 == key)
+	  fprintf (stderr, "  %s -- %s\n", tab[ix].code, tab[ix].name);
+      }
+
+  for (ix = sizeof (movsxy_tab) / sizeof (movsxy_tab[0]); ix >= 0; ix--)
+    if (movsxy_tab[ix].index == i || movsxy_tab[ix].index == j)
+      {
+	key = ((movsxy_tab[ix].code[0] - '0') << 3) + 
+	  ((movsxy_tab[ix].code[1] - '0') << 2) + 
+	  ((movsxy_tab[ix].code[2] - '0') << 1) + 
+	  ((movsxy_tab[ix].code[3] - '0'));
+
+	if (val >> 12 == key)
+	  fprintf (stderr, "  %s -- %s\n", 
+		   movsxy_tab[ix].code, movsxy_tab[ix].name);
+      }
+
+  for (ix = sizeof (ppi_tab) / sizeof (ppi_tab[0]); ix >= 0; ix--)
+    if (ppi_tab[ix].index == i || ppi_tab[ix].index == j)
+      {
+	key = ((ppi_tab[ix].code[0] - '0') << 3) + 
+	  ((ppi_tab[ix].code[1] - '0') << 2) + 
+	  ((ppi_tab[ix].code[2] - '0') << 1) + 
+	  ((ppi_tab[ix].code[3] - '0'));
+
+	if (val >> 12 == key)
+	  fprintf (stderr, "  %s -- %s\n", 
+		   ppi_tab[ix].code, ppi_tab[ix].name);
+      }
+}
+
 /* Take an opcode, expand all varying fields in it out and fill all the
    right entries in 'table' with the opcode index.  */
 
@@ -2278,6 +2634,8 @@ expand_opcode (val, i, s)
 {
   if (*s == 0)
     {
+      if (warn_conflicts && table[val] != 0)
+	conflict_warn (val, i);
       table[val] = i;
     }
   else
@@ -2599,6 +2957,12 @@ gensim_caselist (p)
 
 	      switch (s[1])
 		{
+		default:
+		  fprintf (stderr, 
+			   "gensim_caselist: Unknown char '%c' in %s\n",
+			   s[1], s);
+		  exit (1);
+		  break;
 		case '4':
 		  printf ("f");
 		  break;
@@ -2607,7 +2971,6 @@ gensim_caselist (p)
 		  break;
 		case '1':
 		  sextbit = 12;
-
 		  printf ("fff");
 		  break;
 		}
@@ -2615,6 +2978,14 @@ gensim_caselist (p)
 
 	      switch (s[3])
 		{
+		default:
+		  fprintf (stderr, 
+			   "gensim_caselist: Unknown char '%c' in %s\n",
+			   s[3], s);
+		  exit (1);
+		  break;
+		case '.':	/* eg. "i12." */
+		  break;
 		case '1':
 		  break;
 		case '2':
@@ -2646,6 +3017,25 @@ gensim_caselist (p)
 	char *r;
 	for (r = p->refs; *r; r++)
 	  {
+	    if (*r == 'f') printf ("      CREF (15);\n");
+	    if (*r == '-') 
+	      {
+		printf ("      {\n");
+		printf ("        int i = n;\n");
+		printf ("        do {\n");
+		printf ("          CREF (i);\n");
+		printf ("        } while (i-- > 0);\n");
+		printf ("      }\n");
+	      }
+	    if (*r == '+') 
+	      {
+		printf ("      {\n");
+		printf ("        int i = n;\n");
+		printf ("        do {\n");
+		printf ("          CREF (i);\n");
+		printf ("        } while (i++ < 14);\n");
+		printf ("      }\n");
+	      }
 	    if (*r == '0') printf ("      CREF (0);\n"); 
 	    if (*r == '8') printf ("      CREF (8);\n"); 
 	    if (*r == '9') printf ("      CREF (9);\n"); 
@@ -2669,9 +3059,28 @@ gensim_caselist (p)
 	char *r;
 	for (r = p->defs; *r; r++) 
 	  {
-	    if (*r == '0') printf("      CDEF (0);\n"); 
-	    if (*r == 'n') printf("      CDEF (n);\n"); 
-	    if (*r == 'm') printf("      CDEF (m);\n"); 
+	    if (*r == 'f') printf ("      CDEF (15);\n");
+	    if (*r == '-') 
+	      {
+		printf ("      {\n");
+		printf ("        int i = n;\n");
+		printf ("        do {\n");
+		printf ("          CDEF (i);\n");
+		printf ("        } while (i-- > 0);\n");
+		printf ("      }\n");
+	      }
+	    if (*r == '+') 
+	      {
+		printf ("      {\n");
+		printf ("        int i = n;\n");
+		printf ("        do {\n");
+		printf ("          CDEF (i);\n");
+		printf ("        } while (i++ < 14);\n");
+		printf ("      }\n");
+	      }
+	    if (*r == '0') printf ("      CDEF (0);\n"); 
+	    if (*r == 'n') printf ("      CDEF (n);\n"); 
+	    if (*r == 'm') printf ("      CDEF (m);\n"); 
 	  }
       }
 
@@ -2757,6 +3166,9 @@ expand_ppi_code (val, i, s)
       break;
     case 'g':
     case 'z':
+      if (warn_conflicts && table[val] != 0)
+	conflict_warn (val, i);
+
       /* The last four bits are disregarded for the switch table.  */
       table[val] = i;
       return;
@@ -2992,6 +3404,10 @@ main (ac, av)
   /* Now generate the requested data.  */
   if (ac > 1)
     {
+      if (ac > 2 && strcmp (av[2], "-w") == 0)
+	{
+	  warn_conflicts = 1;
+	}
       if (strcmp (av[1], "-t") == 0)
 	{
 	  gengastab ();

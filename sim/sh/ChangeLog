@@ -1,3 +1,41 @@
+2004-09-08  DJ Delorie  <dj@redhat.com>
+
+	Commited by Corinna Vinschen <vinschen@redhat.com>
+	* gencode.c (movua.l): Compensate for endianness.
+
+2004-09-08  Corinna Vinschen  <vinschen@redhat.com>
+
+	* interp.c (RAISE_EXCEPTION_IF_IN_DELAY_SLOT): New macro.
+	(in_delay_slot): New flag variable.
+	(Delay_Slot): Set in_delay_slot.
+	(sim_resume): Reset in_delay_slot after leaving code switch.
+	* gencode.c (op tab): Call RAISE_EXCEPTION_IF_IN_DELAY_SLOT for all
+	instructions not allowed in delay slots.
+
+2004-09-08  Michael Snyder  <msnyder@redhat.com>
+
+	Commited by Corinna Vinschen <vinschen@redhat.com>
+	Introduce SH2a support.
+	* interp.c: Change type of jump table to short.  Add various macros.
+	(sim_load): Save the bfd machine code.
+	(sim_create_inferior): Ditto.
+	(union saved_state_type): Add tbr, ibnr and ibcr registers.
+	Move bfd_mach to end of struct.  Add regstack pointer.
+	(init_dsp): Don't swap contents of sh_dsp_table any more.  Instead
+	use it directly in its own switch statement.  Allocate space for 512
+	register banks.
+	(do_long_move_insn): New function.
+	(do_blog_insn): Ditto.
+	(trap): Use trap #13 and trap #14 to set ibnr and ibcr.
+	* gencode.c: Move movx/movy insns into separate switch statement.
+	(op tab): Add sh2a insns.  Reject instructions that are disabled
+	on that chip.
+	(gensim_caselist): Generate default case here instead of in caller.
+	(gensim): Generate two separate switch statements.  Call
+	gensim_caselist once for each (for movsxy_tab and for tab).
+	Add tokens for r15 and multiple regs.
+	(conflict_warn, warn_conflicts): Add for debugging.
+
 2004-08-18  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* gencode.c (tab): For shad snd shld, fix result for
