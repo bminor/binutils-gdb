@@ -55,6 +55,7 @@ case "${canon}" in
   m68*-*-vxworks*)	bfd_name=m68k-aout ;;
   m68*-ericsson-*)	bfd_name=m68k-aout ;;
   m68*-netx-*)		bfd_name=m68k-aout ;;
+  m88*-*-sysv4*)	bfd_name=m88k-elf ;;
   m88k-*-*)		bfd_name=m88k-coff ;;
   mips-big-*)		bfd_name=bigmips ;;
   mips-dec-bsd*)        bfd_name=mipsdecbsd ;;
