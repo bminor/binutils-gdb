@@ -1,3 +1,12 @@
+2002-04-07  Elena Zannoni  <ezannoni@redhat.com>
+
+	* gdb.asm/asm-source.exp: Build symbolic link to arch specific
+	instructions file at run time instead of configure time.
+	Sometimes we run the test in a directory that is not the one we
+	configured in.
+	* gdb.asm/configure.in: Delete creation of symlink.
+	* gdb.asm/configure: Regenerate.
+
 2002-04-05  J. Brobecker  <brobecker@gnat.com>
 
 	* gdb.gdb/xfullpath.exp: New test, to exercise the new

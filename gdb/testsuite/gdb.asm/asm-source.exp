@@ -1,4 +1,4 @@
-#   Copyright 1998, 2000 Free Software Foundation, Inc.
+# Copyright 1998, 2000, 2002 Free Software Foundation, Inc.
 # 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -71,6 +71,10 @@ set testfile "asm-source"
 set binfile ${objdir}/${subdir}/${testfile}
 set src1 ${srcdir}/${subdir}/asmsrc1.s
 set src2 ${srcdir}/${subdir}/asmsrc2.s
+
+set insn_file ${srcdir}/${subdir}/${asm-arch}.inc
+remote_exec build "rm -f ${objdir}/${subdir}/arch.inc"
+remote_exec build "ln -s ${insn_file} ${objdir}/${subdir}/arch.inc"
 
 if { "${asm-flags}" == "" } {
     #set asm-flags "-Wa,-gstabs,-I${srcdir}/${subdir},-I${objdir}/${subdir}"
