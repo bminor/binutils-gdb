@@ -3149,10 +3149,8 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_float_bit (gdbarch, 4 * TARGET_CHAR_BIT);
   set_gdbarch_fp_regnum (gdbarch, SPARC_FP_REGNUM);
   set_gdbarch_fp0_regnum (gdbarch, SPARC_FP0_REGNUM);
-  set_gdbarch_frame_args_address (gdbarch, default_frame_address);
   set_gdbarch_frame_chain (gdbarch, sparc_frame_chain);
   set_gdbarch_frame_init_saved_regs (gdbarch, sparc_frame_init_saved_regs);
-  set_gdbarch_frame_locals_address (gdbarch, default_frame_address);
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   set_gdbarch_frame_saved_pc (gdbarch, sparc_frame_saved_pc);
   set_gdbarch_frameless_function_invocation (gdbarch, 

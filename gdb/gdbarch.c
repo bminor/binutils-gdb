@@ -556,6 +556,8 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->frame_args_skip = -1;
   current_gdbarch->frameless_function_invocation = generic_frameless_function_invocation_not;
   current_gdbarch->frame_chain_valid = generic_func_frame_chain_valid;
+  current_gdbarch->frame_args_address = default_frame_address;
+  current_gdbarch->frame_locals_address = default_frame_address;
   current_gdbarch->extra_stack_alignment_needed = 1;
   current_gdbarch->convert_from_func_ptr_addr = core_addr_identity;
   current_gdbarch->addr_bits_remove = core_addr_identity;
@@ -777,12 +779,8 @@ verify_gdbarch (struct gdbarch *gdbarch)
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->frame_saved_pc == 0))
     fprintf_unfiltered (log, "\n\tframe_saved_pc");
-  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-      && (gdbarch->frame_args_address == 0))
-    fprintf_unfiltered (log, "\n\tframe_args_address");
-  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-      && (gdbarch->frame_locals_address == 0))
-    fprintf_unfiltered (log, "\n\tframe_locals_address");
+  /* Skip verify of frame_args_address, invalid_p == 0 */
+  /* Skip verify of frame_locals_address, invalid_p == 0 */
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->saved_pc_after_call == 0))
     fprintf_unfiltered (log, "\n\tsaved_pc_after_call");

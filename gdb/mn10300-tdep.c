@@ -1179,8 +1179,6 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_pop_frame (gdbarch, mn10300_pop_frame);
   set_gdbarch_skip_prologue (gdbarch, mn10300_skip_prologue);
   set_gdbarch_frame_args_skip (gdbarch, 0);
-  set_gdbarch_frame_args_address (gdbarch, default_frame_address);
-  set_gdbarch_frame_locals_address (gdbarch, default_frame_address);
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   /* That's right, we're using the stack pointer as our frame pointer.  */
   set_gdbarch_read_fp (gdbarch, generic_target_read_sp);

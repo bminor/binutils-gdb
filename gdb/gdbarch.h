@@ -1950,6 +1950,11 @@ extern void set_gdbarch_frame_saved_pc (struct gdbarch *gdbarch, gdbarch_frame_s
 #endif
 #endif
 
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (FRAME_ARGS_ADDRESS)
+#define FRAME_ARGS_ADDRESS(fi) (default_frame_address (fi))
+#endif
+
 typedef CORE_ADDR (gdbarch_frame_args_address_ftype) (struct frame_info *fi);
 extern CORE_ADDR gdbarch_frame_args_address (struct gdbarch *gdbarch, struct frame_info *fi);
 extern void set_gdbarch_frame_args_address (struct gdbarch *gdbarch, gdbarch_frame_args_address_ftype *frame_args_address);
@@ -1960,6 +1965,11 @@ extern void set_gdbarch_frame_args_address (struct gdbarch *gdbarch, gdbarch_fra
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (FRAME_ARGS_ADDRESS)
 #define FRAME_ARGS_ADDRESS(fi) (gdbarch_frame_args_address (current_gdbarch, fi))
 #endif
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (FRAME_LOCALS_ADDRESS)
+#define FRAME_LOCALS_ADDRESS(fi) (default_frame_address (fi))
 #endif
 
 typedef CORE_ADDR (gdbarch_frame_locals_address_ftype) (struct frame_info *fi);

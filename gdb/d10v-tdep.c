@@ -1634,8 +1634,7 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_chain (gdbarch, d10v_frame_chain);
   set_gdbarch_frame_chain_valid (gdbarch, d10v_frame_chain_valid);
   set_gdbarch_frame_saved_pc (gdbarch, d10v_frame_saved_pc);
-  set_gdbarch_frame_args_address (gdbarch, default_frame_address);
-  set_gdbarch_frame_locals_address (gdbarch, default_frame_address);
+
   set_gdbarch_saved_pc_after_call (gdbarch, d10v_saved_pc_after_call);
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   set_gdbarch_stack_align (gdbarch, d10v_stack_align);

@@ -1081,8 +1081,6 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_chain (gdbarch, frv_frame_chain);
   set_gdbarch_frame_chain_valid (gdbarch, func_frame_chain_valid);
   set_gdbarch_frame_saved_pc (gdbarch, frv_frame_saved_pc);
-  set_gdbarch_frame_args_address (gdbarch, default_frame_address);
-  set_gdbarch_frame_locals_address (gdbarch, default_frame_address);
 
   set_gdbarch_frame_init_saved_regs (gdbarch, frv_frame_init_saved_regs);
 

@@ -1276,24 +1276,6 @@ cris_frame_saved_pc (struct frame_info *fi)
   return fi->extra_info->return_pc;
 }
 
-/* Return the address of the argument block for the frame described 
-   by struct frame_info.  */
-
-CORE_ADDR
-cris_frame_args_address (struct frame_info *fi)
-{
-  return FRAME_FP (fi);
-}
-
-/* Return the address of the locals block for the frame
-   described by struct frame_info.  */
-
-CORE_ADDR
-cris_frame_locals_address (struct frame_info *fi)
-{
-  return FRAME_FP (fi);
-}
-
 /* Setup the function arguments for calling a function in the inferior.  */
 
 CORE_ADDR 
@@ -4331,8 +4313,6 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_chain_valid (gdbarch, generic_file_frame_chain_valid);
 
   set_gdbarch_frame_saved_pc (gdbarch, cris_frame_saved_pc);
-  set_gdbarch_frame_args_address (gdbarch, cris_frame_args_address);
-  set_gdbarch_frame_locals_address (gdbarch, cris_frame_locals_address);
   set_gdbarch_saved_pc_after_call (gdbarch, cris_saved_pc_after_call);
 
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);

@@ -1237,8 +1237,6 @@ v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_saved_pc (gdbarch, v850_frame_saved_pc);
   set_gdbarch_skip_prologue (gdbarch, v850_skip_prologue);
   set_gdbarch_frame_chain_valid (gdbarch, generic_file_frame_chain_valid);
-  set_gdbarch_frame_args_address (gdbarch, default_frame_address);
-  set_gdbarch_frame_locals_address (gdbarch, default_frame_address);
 
   /* 
    * Miscelany

@@ -1,3 +1,27 @@
+2002-11-22  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbarch.sh (FRAME_ARGS_ADDRESS, FRAME_LOCALS_ADDRESS): Default
+	to default_frame_address.
+	* gdbarch.h, gdbarch.c: Re-generate.
+
+	* d10v-tdep.c (d10v_gdbarch_init): Do not set frame_args_address
+	or frame_locals_address to default_frame_address.
+	* m68k-tdep.c (m68k_gdbarch_init): Update.
+	* i386-tdep.c (i386_gdbarch_init): Update.
+	* frv-tdep.c (frv_gdbarch_init): Update.
+	* sh-tdep.c (sh_gdbarch_init): Update.
+	* v850-tdep.c (v850_gdbarch_init): Update.
+	* sparc-tdep.c (sparc_gdbarch_init): Update.
+	* mips-tdep.c (mips_gdbarch_init): Update.
+	* mn10300-tdep.c (mn10300_gdbarch_init): Update.
+	* x86-64-tdep.c (x86_64_gdbarch_init): Update.
+	* xstormy16-tdep.c (xstormy16_gdbarch_init): Update.
+
+	* cris-tdep.c (cris_frame_args_address): Delete function.
+	(cris_frame_locals_address): Delete function.
+	(cris_gdbarch_init): Do not set frame_args_address or
+	frame_locals_address.
+
 2002-11-22  Michael Snyder  <msnyder@redhat.com>
 
 	* thread-db.c (thread_db_load): Tell the user what's going on

@@ -1033,8 +1033,6 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* OK to default this value to 'unknown'. */
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   set_gdbarch_frame_args_skip (gdbarch, 8);
-  set_gdbarch_frame_args_address (gdbarch, default_frame_address);
-  set_gdbarch_frame_locals_address (gdbarch, default_frame_address);
 
   set_gdbarch_register_raw_size (gdbarch, m68k_register_raw_size);
   set_gdbarch_register_virtual_size (gdbarch, m68k_register_virtual_size);

@@ -4589,8 +4589,6 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frameless_function_invocation (gdbarch, frameless_look_for_prologue);
   set_gdbarch_frame_chain_valid (gdbarch, generic_file_frame_chain_valid);
   set_gdbarch_frame_saved_pc (gdbarch, sh_frame_saved_pc);
-  set_gdbarch_frame_args_address (gdbarch, default_frame_address);
-  set_gdbarch_frame_locals_address (gdbarch, default_frame_address);
   set_gdbarch_saved_pc_after_call (gdbarch, sh_saved_pc_after_call);
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);

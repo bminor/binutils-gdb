@@ -1055,8 +1055,6 @@ xstormy16_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_saved_pc (gdbarch, xstormy16_frame_saved_pc);
   set_gdbarch_skip_prologue (gdbarch, xstormy16_skip_prologue);
   set_gdbarch_frame_chain_valid (gdbarch, xstormy16_frame_chain_valid);
-  set_gdbarch_frame_args_address (gdbarch, default_frame_address);
-  set_gdbarch_frame_locals_address (gdbarch, default_frame_address);
 
   set_gdbarch_in_function_epilogue_p (gdbarch,
 				      xstormy16_in_function_epilogue_p);
