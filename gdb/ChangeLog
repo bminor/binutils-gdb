@@ -1,5 +1,14 @@
 2001-03-19  Andrew Cagney  <ac131313@redhat.com>
 
+	* defs.h (realloc): Move declaration from here.
+	* utils.c (realloc): To here.
+	* config/pa/xm-hppah.h (realloc): Delete declaration.
+	* lin-thread.c (insert_thread): Use xrealloc instead of realloc.
+	* symfile.c (add_filename_language): Ditto.
+	* event-loop.c (create_file_handler): Ditto.
+
+2001-03-19  Andrew Cagney  <ac131313@redhat.com>
+
 	* defs.h (free): Move declaration from here.
 	* utils.c (free): To here.
 	(xfree): Document as the only call to free().

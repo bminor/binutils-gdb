@@ -951,10 +951,6 @@ extern double atof (const char *);	/* X3.159-1989  4.10.1.1 */
 extern PTR malloc ();
 #endif
 
-#ifdef NEED_DECLARATION_REALLOC
-extern PTR realloc ();
-#endif
-
 #endif /* MALLOC_INCOMPATIBLE */
 
 /* Various possibilities for alloca.  */

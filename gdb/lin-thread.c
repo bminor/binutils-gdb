@@ -780,8 +780,8 @@ insert_thread (int tid, int lid, td_thr_state_e state, td_thr_type_e type)
   if (threadlist_top >= threadlist_max)
     {
       threadlist_max += THREADLIST_ALLOC;
-      threadlist      = realloc (threadlist, 
-				 threadlist_max * sizeof (threadinfo));
+      threadlist      = xrealloc (threadlist, 
+				  threadlist_max * sizeof (threadinfo));
       if (threadlist == NULL)
 	return NULL;
     }

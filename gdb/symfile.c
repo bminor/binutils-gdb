@@ -1782,8 +1782,8 @@ add_filename_language (char *ext, enum language lang)
   if (fl_table_next >= fl_table_size)
     {
       fl_table_size += 10;
-      filename_language_table = realloc (filename_language_table,
-					 fl_table_size);
+      filename_language_table = xrealloc (filename_language_table,
+					  fl_table_size);
     }
 
   filename_language_table[fl_table_next].ext = xstrdup (ext);

@@ -57,6 +57,9 @@
 #include <readline/readline.h>
 
 #ifndef MALLOC_INCOMPATIBLE
+#ifdef NEED_DECLARATION_REALLOC
+extern PTR realloc ();
+#endif
 #ifdef NEED_DECLARATION_FREE
 extern void free ();
 #endif

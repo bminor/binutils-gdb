@@ -544,8 +544,9 @@ create_file_handler (int fd, int mask, handler_func * proc, gdb_client_data clie
       gdb_notifier.num_fds++;
       if (gdb_notifier.poll_fds)
 	gdb_notifier.poll_fds =
-	  (struct pollfd *) realloc (gdb_notifier.poll_fds,
-			   (gdb_notifier.num_fds) * sizeof (struct pollfd));
+	  (struct pollfd *) xrealloc (gdb_notifier.poll_fds,
+				      (gdb_notifier.num_fds
+				       * sizeof (struct pollfd)));
       else
 	gdb_notifier.poll_fds =
 	  (struct pollfd *) xmalloc (sizeof (struct pollfd));
