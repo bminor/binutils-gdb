@@ -1,5 +1,7 @@
 Wed Sep 24 11:29:35 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* m68k-opc.c: Accept tst{b,w,l} with immediate operands on cpu32.
+
 	* m68k-opc.c: Correct movew of an immediate operand to %sr or %ccr
 	for mcf5200.
 

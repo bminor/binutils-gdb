@@ -1858,11 +1858,11 @@ TBL("tblunb", "tblunw", "tblunl", 0, 0),
 
 {"trapv",	one(0047166),	one(0177777), "", m68000up },
 
-{"tstb",	one(0045000),	one(0177700), ";b", m68020up | mcf5200 },
+{"tstb",	one(0045000),	one(0177700), ";b", m68020up|cpu32|mcf5200 },
 {"tstb",	one(0045000),	one(0177700), "@b", m68000up },
-{"tstw",	one(0045100),	one(0177700), "*w", m68020up | mcf5200 },
+{"tstw",	one(0045100),	one(0177700), "*w", m68020up|cpu32|mcf5200 },
 {"tstw",	one(0045100),	one(0177700), "@w", m68000up },
-{"tstl",	one(0045200),	one(0177700), "*l", m68020up | mcf5200 },
+{"tstl",	one(0045200),	one(0177700), "*l", m68020up|cpu32|mcf5200 },
 {"tstl",	one(0045200),	one(0177700), "@l", m68000up },
 
 {"unlk",	one(0047130),	one(0177770), "As", m68000up | mcf5200 },
