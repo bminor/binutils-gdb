@@ -1,5 +1,7 @@
 Fri Apr 30 16:50:38 1993  K. Richard Pixley  (rich@rtl.cygnus.com)
 
+	* udip2soc.c (UDIConnect): replace union wait with int.
+
 	* config/sparc/sun4sol2.mh (XM_CLIBS): add -lsocket which is
 	  required target ports which use sockets (like a29k-udi).
 

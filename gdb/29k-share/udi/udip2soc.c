@@ -305,7 +305,7 @@ UDIConnect(Config, Session)
 	  { /* if connect() fails assume TIP not yet started */
 /*------------------------------------------------------------ AF_UNIX EXEC */
 	    int	pid;
-	    union wait statusp;
+	    int statusp;
 	    char *arg0;
 
 	    arg0 = strrchr(soc_con[cnt].tip_exe,'/');
@@ -380,7 +380,7 @@ UDIConnect(Config, Session)
 	  = htons(atoi(soc_con[cnt].tip_exe));
 
     	if (connect(soc_con[cnt].dfe_sd,
-		    &soc_con[cnt].tip_sockaddr_in,
+		    (struct sockaddr *) &soc_con[cnt].tip_sockaddr_in,
 		    sizeof(soc_con[cnt].tip_sockaddr_in)))
 	  {
     	    sprintf(dfe_errmsg, "DFE-ipc ERROR, connect() call failed %s ",
