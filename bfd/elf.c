@@ -1430,6 +1430,7 @@ _bfd_elf_link_hash_table_init (table, abfd, newfunc)
   table->bucketcount = 0;
   table->needed = NULL;
   table->runpath = NULL;
+  table->loaded = NULL;
   table->hgot = NULL;
   table->stab_info = NULL;
   table->merge_info = NULL;

@@ -2315,6 +2315,20 @@ elf_link_add_object_symbols (abfd, info)
 	  }
     }
 
+  if (is_elf_hash_table (info))
+    {
+      /* Add this bfd to the loaded list.  */
+      struct elf_link_loaded_list *n;
+
+      n = ((struct elf_link_loaded_list *)
+	   bfd_alloc (abfd, sizeof (struct elf_link_loaded_list)));
+      if (n == NULL)
+	goto error_return;
+      n->abfd = abfd;
+      n->next = hash_table->loaded;
+      hash_table->loaded = n;
+    }
+
   return true;
 
  error_return:
@@ -4536,6 +4550,8 @@ static boolean elf_link_output_extsym
   PARAMS ((struct elf_link_hash_entry *, PTR));
 static boolean elf_link_sec_merge_syms
   PARAMS ((struct elf_link_hash_entry *, PTR));
+static boolean elf_link_check_versioned_symbol
+  PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
 static boolean elf_link_input_bfd
   PARAMS ((struct elf_final_link_info *, bfd *));
 static boolean elf_reloc_link_order
@@ -6042,6 +6058,137 @@ elf_link_sec_merge_syms (h, data)
   return true;
 }
 
+/* For DSOs loaded in via a DT_NEEDED entry, emulate ld.so in
+   allowing an unsatisfied unversioned symbol in the DSO to match a
+   versioned symbol that would normally require an explicit version.  */
+
+static boolean
+elf_link_check_versioned_symbol (info, h)
+     struct bfd_link_info *info;
+     struct elf_link_hash_entry *h;
+{
+  bfd *undef_bfd = h->root.u.undef.abfd;
+  struct elf_link_loaded_list *loaded;
+  Elf_External_Sym *buf;
+  Elf_External_Versym *extversym;
+
+  if ((undef_bfd->flags & DYNAMIC) == 0
+      || info->hash->creator->flavour != bfd_target_elf_flavour
+      || elf_dt_soname (h->root.u.undef.abfd) == NULL)
+    return false;
+
+  for (loaded = elf_hash_table (info)->loaded;
+       loaded != NULL;
+       loaded = loaded->next)
+    {
+      bfd *input;
+      Elf_Internal_Shdr *hdr;
+      bfd_size_type symcount;
+      bfd_size_type extsymcount;
+      bfd_size_type extsymoff;
+      Elf_Internal_Shdr *versymhdr;
+      Elf_External_Versym *ever;
+      Elf_External_Sym *esym;
+      Elf_External_Sym *esymend;
+      bfd_size_type count;
+      file_ptr pos;
+
+      input = loaded->abfd;
+
+      /* We check each DSO for a possible hidden versioned definition.  */
+      if (input == undef_bfd
+	  || (input->flags & DYNAMIC) == 0
+	  || elf_dynversym (input) == 0)
+	continue;
+
+      hdr = &elf_tdata (input)->dynsymtab_hdr;
+
+      symcount = hdr->sh_size / sizeof (Elf_External_Sym);
+      if (elf_bad_symtab (input))
+	{
+	  extsymcount = symcount;
+	  extsymoff = 0;
+	}
+      else
+	{
+	  extsymcount = symcount - hdr->sh_info;
+	  extsymoff = hdr->sh_info;
+	}
+
+      if (extsymcount == 0)
+	continue;
+
+      count = extsymcount * sizeof (Elf_External_Sym);
+      buf = (Elf_External_Sym *) bfd_malloc (count);
+      if (buf == NULL)
+	return false;
+
+      /* Read in the symbol table.  */
+      pos = hdr->sh_offset + extsymoff * sizeof (Elf_External_Sym);
+      if (bfd_seek (input, pos, SEEK_SET) != 0
+	  || bfd_bread ((PTR) buf, count, input) != count)
+	goto error_ret;
+
+      /* Read in any version definitions.  */
+      versymhdr = &elf_tdata (input)->dynversym_hdr;
+      extversym = (Elf_External_Versym *) bfd_malloc (versymhdr->sh_size);
+      if (extversym == NULL)
+	goto error_ret;
+
+      if (bfd_seek (input, versymhdr->sh_offset, SEEK_SET) != 0
+	  || (bfd_bread ((PTR) extversym, versymhdr->sh_size, input)
+	      != versymhdr->sh_size))
+	{
+	  free (extversym);
+	error_ret:
+	  free (buf);
+	  return false;
+	}
+
+      ever = extversym + extsymoff;
+      esymend = buf + extsymcount;
+      for (esym = buf; esym < esymend; esym++, ever++)
+	{
+	  const char *name;
+	  Elf_Internal_Sym sym;
+	  Elf_Internal_Versym iver;
+
+	  elf_swap_symbol_in (input, esym, NULL, &sym);
+	  if (ELF_ST_BIND (sym.st_info) == STB_LOCAL
+	      || sym.st_shndx == SHN_UNDEF)
+	    continue;
+
+	  name = bfd_elf_string_from_elf_section (input,
+						  hdr->sh_link,
+						  sym.st_name);
+	  if (strcmp (name, h->root.root.string) != 0)
+	    continue;
+
+	  _bfd_elf_swap_versym_in (input, ever, &iver);
+
+	  if ((iver.vs_vers & VERSYM_HIDDEN) == 0)
+	    {
+	      /* If we have a non-hidden versioned sym, then it should
+		 have provided a definition for the undefined sym.  */
+	      abort ();
+	    }
+
+	  if ((iver.vs_vers & VERSYM_VERSION) == 2)
+	    {
+	      /* This is the oldest (default) sym.  We can use it.  */
+	      free (extversym);
+	      free (buf);
+	      return true;
+	    }
+	}
+
+      free (extversym);
+      free (buf);
+    }
+
+  return false;
+}
+
 /* Add an external symbol to the symbol table.  This is called from
    the hash table traversal routine.  When generating a shared object,
    we go through the symbol table twice.  The first time we output
@@ -6091,7 +6238,8 @@ elf_link_output_extsym (h, data)
       && ! finfo->info->shared
       && h->root.type == bfd_link_hash_undefined
       && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_DYNAMIC) != 0
-      && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_REGULAR) == 0)
+      && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_REGULAR) == 0
+      && ! elf_link_check_versioned_symbol (finfo->info, h))
     {
       if (! ((*finfo->info->callbacks->undefined_symbol)
 	     (finfo->info, h->root.root.string, h->root.u.undef.abfd,
@@ -6264,8 +6412,8 @@ elf_link_output_extsym (h, data)
     sym.st_other ^= ELF_ST_VISIBILITY (sym.st_other);
 
   /* If this symbol should be put in the .dynsym section, then put it
-     there now.  We have already know the symbol index.  We also fill
-     in the entry in the .hash section.  */
+     there now.  We already know the symbol index.  We also fill in
+     the entry in the .hash section.  */
   if (h->dynindx != -1
       && elf_hash_table (finfo->info)->dynamic_sections_created)
     {
@@ -6959,7 +7107,7 @@ elf_link_input_bfd (finfo, input_bfd)
 			}
 
 		      /* Adjust the addend according to where the
-			 section winds up in the output section.  */ 
+			 section winds up in the output section.  */
 		      if (rela_normal)
 			irela->r_addend += sec->output_offset;
 		    }

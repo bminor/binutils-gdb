@@ -223,6 +223,12 @@ struct elf_link_local_dynamic_entry
   Elf_Internal_Sym isym;
 };
 
+struct elf_link_loaded_list
+{
+  struct elf_link_loaded_list *next;
+  bfd *abfd;
+};
+
 enum elf_link_info_type
 {
   ELF_INFO_TYPE_NONE,
@@ -297,6 +303,9 @@ struct elf_link_hash_table
 
   /* Cached start, size and alignment of PT_TLS segment.  */
   struct elf_link_tls_segment *tls_segment;
+
+  /* A linked list of BFD's loaded in the link.  */
+  struct elf_link_loaded_list *loaded;
 };
 
 /* Look up an entry in an ELF linker hash table.  */

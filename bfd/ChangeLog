@@ -1,7 +1,19 @@
+2002-06-23  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.h: Comment typo fixes.
+
+2002-06-23  H.J. Lu  <hjl@gnu.org>
+
+	* elf-bfd.h (elf_link_loaded_list): New structure.
+	(elf_link_hash_table): Add "loaded".
+	* elf.c (_bfd_elf_link_hash_table_init): Initialize "loaded".
+	* elflink.h (elf_link_check_versioned_symbol): New function.
+	(elf_link_output_extsym): Call elf_link_check_versioned_symbol.
+
 2002-06-19  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* elflink.h (size_dynamic_sections): If the target does not
-	support an ELF style has table, return true, indicating that
+	support an ELF style hash table, return true, indicating that
 	nothing needed to be done, rather than false, indicating that the
 	section's size could not be computed.
 
@@ -33,7 +45,7 @@
 2002-06-17  Tom Rix <trix@redhat.com>
 
 	* elf32-d10v.c (elf_d10v_howto_table): Change R_D10V_10_PCREL_R,
-	R_D10V_10_PCREL_L and R_D10V_18_PCREL to use 
+	R_D10V_10_PCREL_L and R_D10V_18_PCREL to use
 	complain_overflow_bitfield.
 
 2002-06-17  Alan Modra  <amodra@bigpond.net.au>
@@ -98,7 +110,7 @@
 	* coffcode.h (coff_compute_section_file_positions): Add data
 	section to AIX loader alignment check.
 
-	* coff-rs6000.c (_bfd_xcoff_mkobject): Set default text section 
+	* coff-rs6000.c (_bfd_xcoff_mkobject): Set default text section
 	alignment to 4 bytes.
 	(_bfd_xcoff_copy_private_bfd_data): Use text and data alignment
 	power accessor macro.
