@@ -4470,7 +4470,7 @@ elf_link_add_object_symbols (abfd, info)
       /* Get the alignment of a common symbol.  */
       if (sym.st_shndx == SHN_COMMON
 	  && (*sym_hash)->root.type == bfd_link_hash_common)
-	(*sym_hash)->root.u.c.alignment_power = bfd_log2 (sym.st_value);
+	(*sym_hash)->root.u.c.p->alignment_power = bfd_log2 (sym.st_value);
 
       if (info->hash->creator->flavour == bfd_target_elf_flavour)
 	{
@@ -6178,7 +6178,7 @@ elf_link_output_extsym (h, data)
     case bfd_link_hash_common:
       input_sec = bfd_com_section_ptr;
       sym.st_shndx = SHN_COMMON;
-      sym.st_value = 1 << h->root.u.c.alignment_power;
+      sym.st_value = 1 << h->root.u.c.p->alignment_power;
       break;
 
     case bfd_link_hash_indirect:

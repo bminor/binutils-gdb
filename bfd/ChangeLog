@@ -1,3 +1,20 @@
+Wed Feb  8 17:26:00 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* linker.c (generic_link_check_archive_element): Allocate common
+	symbol information structure.  Don't bother to check for common
+	symbol size overflow.
+	(_bfd_generic_link_add_one_symbol): Likewise.
+	* aoutx.h (aout_link_check_ar_symbols): Likewise.
+	* linker.c (generic_link_check_archive_element): Adjust references
+	to common symbol information for new structure.
+	(_bfd_generic_link_add_one_symbol): Likewise.
+	* aoutx.h (aout_link_check_ar_symbols): Likewise.
+	(aout_link_add_symbols): Likewise.
+	* ecoff.c (ecoff_link_add_externals): Likewise.
+	* elfcode.h (elf_link_add_object_symbols): Likewise.
+	(elf_link_output_extsym): Likewise.
+	* sunos.c (sunos_add_one_symbol): Likewise.
+
 Wed Feb  8 09:53:42 1995  Doug Evans  <dje@canuck.cygnus.com>
 
 	* elfcode.h (elf_sort_hdrs): Put SHT_NOBITS sections after !SHT_NOBITS.
