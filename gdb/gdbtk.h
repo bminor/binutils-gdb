@@ -68,7 +68,7 @@ extern int disassemble_from_exec;
 extern int running_now;
 
 /* These two control how the GUI behaves when tracing or loading
-   They are defined in gdbtk_cmds.c */
+   They are defined in gdbtk-cmds.c */
   
 extern int No_Update;
 extern int load_in_progress;

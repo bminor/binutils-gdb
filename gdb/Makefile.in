@@ -1181,17 +1181,17 @@ gdbtk.o: gdbtk.c gdbtk.h $(defs_h) $(symtab_h) $(inferior_h) $(command_h) \
 	$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) \
 		$(srcdir)/gdbtk.c -DGDBTK_LIBRARY=\"$(datadir)/gdbtcl\"
 
-gdbtk_cmds.o: gdbtk_cmds.c gdbtk.h $(defs_h) $(symtab_h) $(inferior_h) $(command_h) \
+gdbtk-cmds.o: gdbtk-cmds.c gdbtk.h $(defs_h) $(symtab_h) $(inferior_h) $(command_h) \
 	$(bfd_h) symfile.h objfiles.h target.h gdb_string.h $(tracepoint_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS) $(TIX_CFLAGS) \
 	$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) \
-		$(srcdir)/gdbtk_cmds.c -DGDBTK_LIBRARY=\"$(datadir)/gdbtcl\"
+		$(srcdir)/gdbtk-cmds.c -DGDBTK_LIBRARY=\"$(datadir)/gdbtcl\"
 
-gdbtk_hooks.o: gdbtk_hooks.c gdbtk.h $(defs_h) $(symtab_h) $(inferior_h) $(command_h) \
+gdbtk-hooks.o: gdbtk-hooks.c gdbtk.h $(defs_h) $(symtab_h) $(inferior_h) $(command_h) \
 	$(bfd_h) symfile.h objfiles.h target.h gdb_string.h $(tracepoint_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS) $(TIX_CFLAGS) \
 	$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) \
-		$(srcdir)/gdbtk_hooks.c -DGDBTK_LIBRARY=\"$(datadir)/gdbtcl\"
+		$(srcdir)/gdbtk-hooks.c -DGDBTK_LIBRARY=\"$(datadir)/gdbtcl\"
 
 tracepoint.o: tracepoint.c $(defs_h) $(symtab_h) $(frame_h) $(tracepoint_h) \
 	$(gdbtypes_h) $(expression_h) $(gdbcmd_h) $(value_h) target.h \
