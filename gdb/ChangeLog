@@ -1,5 +1,14 @@
 2002-11-09  Klee Dienes  <kdienes@apple.com>
 
+        * i387-tdep.c (i387_supply_register): When called with NULL as a
+	buffer, mark the register as not provided (to mirror the behavior
+	of supply_register).
+        (i387_supply_fxsave): Ditto.
+        (i387_supply_fsave): Ditto (inherits the behavior from
+	i387_supply_register).
+
+2002-11-09  Klee Dienes  <kdienes@apple.com>
+
 	* blockframe.c (sigtramp_saved_pc): Use
 	builtin_type_void_code_ptr, not builtin_type_void_data_ptr (we are
 	extracting the PC).  Use TYPE_LENGTH (builtin_type_void_code_ptr)

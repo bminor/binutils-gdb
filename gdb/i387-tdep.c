@@ -444,6 +444,12 @@ static int fsave_offset[] =
 void
 i387_supply_register (int regnum, char *fsave)
 {
+  if (fsave == NULL)
+    {
+      supply_register (regnum, NULL);
+      return;
+    }
+
   /* Most of the FPU control registers occupy only 16 bits in
      the fsave area.  Give those a special treatment.  */
   if (regnum >= FPC_REGNUM
@@ -564,6 +570,12 @@ i387_supply_fxsave (char *fxsave)
 
   for (i = FP0_REGNUM; i <= last_regnum; i++)
     {
+      if (fxsave == NULL)
+	{
+	  supply_register (i, NULL);
+	  continue;
+	}
+
       /* Most of the FPU control registers occupy only 16 bits in
 	 the fxsave area.  Give those a special treatment.  */
       if (i >= FPC_REGNUM && i < XMM0_REGNUM
