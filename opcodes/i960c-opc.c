@@ -438,1755 +438,6 @@ const CGEN_OPERAND i960_cgen_operand_table[MAX_OPERANDS] =
     { CGEN_OPERAND_NBOOL_ATTRS, 0|(1<<CGEN_OPERAND_PCREL_ADDR), { (1<<MACH_BASE) } }  },
 };
 
-/* Operand references.  */
-
-#define INPUT CGEN_OPERAND_INSTANCE_INPUT
-#define OUTPUT CGEN_OPERAND_INSTANCE_OUTPUT
-#define COND_REF CGEN_OPERAND_INSTANCE_COND_REF
-
-static const CGEN_OPERAND_INSTANCE fmt_mulo_ops[] = {
-  { INPUT, "src1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0, 0 },
-  { INPUT, "src2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_mulo1_ops[] = {
-  { INPUT, "lit1", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (LIT1), 0, 0 },
-  { INPUT, "src2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_mulo2_ops[] = {
-  { INPUT, "src1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0, 0 },
-  { INPUT, "lit2", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (LIT2), 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_mulo3_ops[] = {
-  { INPUT, "lit1", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (LIT1), 0, 0 },
-  { INPUT, "lit2", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (LIT2), 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_remo_ops[] = {
-  { INPUT, "src2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0, 0 },
-  { INPUT, "src1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_remo1_ops[] = {
-  { INPUT, "src2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0, 0 },
-  { INPUT, "lit1", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (LIT1), 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_remo2_ops[] = {
-  { INPUT, "lit2", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (LIT2), 0, 0 },
-  { INPUT, "src1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_remo3_ops[] = {
-  { INPUT, "lit2", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (LIT2), 0, 0 },
-  { INPUT, "lit1", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (LIT1), 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_not_ops[] = {
-  { INPUT, "src1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_not1_ops[] = {
-  { INPUT, "lit1", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (LIT1), 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_not2_ops[] = {
-  { INPUT, "src1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_not3_ops[] = {
-  { INPUT, "lit1", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (LIT1), 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_emul_ops[] = {
-  { INPUT, "src1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0, 0 },
-  { INPUT, "src2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0, 0 },
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_emul1_ops[] = {
-  { INPUT, "lit1", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (LIT1), 0, 0 },
-  { INPUT, "src2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0, 0 },
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_emul2_ops[] = {
-  { INPUT, "src1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0, 0 },
-  { INPUT, "lit2", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (LIT2), 0, 0 },
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_emul3_ops[] = {
-  { INPUT, "lit1", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (LIT1), 0, 0 },
-  { INPUT, "lit2", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (LIT2), 0, 0 },
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_movl_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "f_src1", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "src1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_src1_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_movl1_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "lit1", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (LIT1), 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_movt_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "f_src1", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "src1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_src1_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_src1_const__WI_2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_movt1_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "lit1", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (LIT1), 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_movq_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "f_src1", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "src1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_src1_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_src1_const__WI_2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_src1_const__WI_3", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_3", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_movq1_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "lit1", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (LIT1), 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_3", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_modpc_ops[] = {
-  { INPUT, "src2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_lda_offset_ops[] = {
-  { INPUT, "offset", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OFFSET), 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_lda_indirect_offset_ops[] = {
-  { INPUT, "offset", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OFFSET), 0, 0 },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_lda_indirect_ops[] = {
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_lda_indirect_index_ops[] = {
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "index", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (INDEX), 0, 0 },
-  { INPUT, "scale", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (SCALE), 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_lda_disp_ops[] = {
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_lda_indirect_disp_ops[] = {
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_lda_index_disp_ops[] = {
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "index", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (INDEX), 0, 0 },
-  { INPUT, "scale", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (SCALE), 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_lda_indirect_index_disp_ops[] = {
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "index", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (INDEX), 0, 0 },
-  { INPUT, "scale", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (SCALE), 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ld_offset_ops[] = {
-  { INPUT, "offset", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OFFSET), 0, 0 },
-  { INPUT, "h_memory_offset", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ld_indirect_offset_ops[] = {
-  { INPUT, "offset", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OFFSET), 0, 0 },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "h_memory_add__VM_offset_abase", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ld_indirect_ops[] = {
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_USI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "h_memory_abase", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ld_indirect_index_ops[] = {
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "index", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (INDEX), 0, 0 },
-  { INPUT, "scale", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (SCALE), 0, 0 },
-  { INPUT, "h_memory_add__VM_abase_mul__VM_index_sll__VM_const__WI_1_scale", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ld_disp_ops[] = {
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "h_memory_optdisp", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ld_indirect_disp_ops[] = {
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "h_memory_add__VM_optdisp_abase", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ld_index_disp_ops[] = {
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "index", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (INDEX), 0, 0 },
-  { INPUT, "scale", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (SCALE), 0, 0 },
-  { INPUT, "h_memory_add__VM_optdisp_mul__VM_index_sll__VM_const__WI_1_scale", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ld_indirect_index_disp_ops[] = {
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "index", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (INDEX), 0, 0 },
-  { INPUT, "scale", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (SCALE), 0, 0 },
-  { INPUT, "h_memory_add__VM_optdisp_add__VM_abase_mul__VM_index_sll__VM_const__WI_1_scale", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldob_offset_ops[] = {
-  { INPUT, "offset", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OFFSET), 0, 0 },
-  { INPUT, "h_memory_offset", & HW_ENT (HW_H_MEMORY), CGEN_MODE_UQI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldob_indirect_offset_ops[] = {
-  { INPUT, "offset", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OFFSET), 0, 0 },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "h_memory_add__VM_offset_abase", & HW_ENT (HW_H_MEMORY), CGEN_MODE_UQI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldob_indirect_ops[] = {
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_USI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "h_memory_abase", & HW_ENT (HW_H_MEMORY), CGEN_MODE_UQI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldob_indirect_index_ops[] = {
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "index", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (INDEX), 0, 0 },
-  { INPUT, "scale", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (SCALE), 0, 0 },
-  { INPUT, "h_memory_add__VM_abase_mul__VM_index_sll__VM_const__WI_1_scale", & HW_ENT (HW_H_MEMORY), CGEN_MODE_UQI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldob_disp_ops[] = {
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "h_memory_optdisp", & HW_ENT (HW_H_MEMORY), CGEN_MODE_UQI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldob_indirect_disp_ops[] = {
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "h_memory_add__VM_optdisp_abase", & HW_ENT (HW_H_MEMORY), CGEN_MODE_UQI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldob_index_disp_ops[] = {
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "index", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (INDEX), 0, 0 },
-  { INPUT, "scale", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (SCALE), 0, 0 },
-  { INPUT, "h_memory_add__VM_optdisp_mul__VM_index_sll__VM_const__WI_1_scale", & HW_ENT (HW_H_MEMORY), CGEN_MODE_UQI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldob_indirect_index_disp_ops[] = {
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "index", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (INDEX), 0, 0 },
-  { INPUT, "scale", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (SCALE), 0, 0 },
-  { INPUT, "h_memory_add__VM_optdisp_add__VM_abase_mul__VM_index_sll__VM_const__WI_1_scale", & HW_ENT (HW_H_MEMORY), CGEN_MODE_UQI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldos_offset_ops[] = {
-  { INPUT, "offset", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OFFSET), 0, 0 },
-  { INPUT, "h_memory_offset", & HW_ENT (HW_H_MEMORY), CGEN_MODE_UHI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldos_indirect_offset_ops[] = {
-  { INPUT, "offset", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OFFSET), 0, 0 },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "h_memory_add__VM_offset_abase", & HW_ENT (HW_H_MEMORY), CGEN_MODE_UHI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldos_indirect_ops[] = {
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_USI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "h_memory_abase", & HW_ENT (HW_H_MEMORY), CGEN_MODE_UHI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldos_indirect_index_ops[] = {
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "index", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (INDEX), 0, 0 },
-  { INPUT, "scale", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (SCALE), 0, 0 },
-  { INPUT, "h_memory_add__VM_abase_mul__VM_index_sll__VM_const__WI_1_scale", & HW_ENT (HW_H_MEMORY), CGEN_MODE_UHI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldos_disp_ops[] = {
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "h_memory_optdisp", & HW_ENT (HW_H_MEMORY), CGEN_MODE_UHI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldos_indirect_disp_ops[] = {
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "h_memory_add__VM_optdisp_abase", & HW_ENT (HW_H_MEMORY), CGEN_MODE_UHI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldos_index_disp_ops[] = {
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "index", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (INDEX), 0, 0 },
-  { INPUT, "scale", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (SCALE), 0, 0 },
-  { INPUT, "h_memory_add__VM_optdisp_mul__VM_index_sll__VM_const__WI_1_scale", & HW_ENT (HW_H_MEMORY), CGEN_MODE_UHI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldos_indirect_index_disp_ops[] = {
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "index", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (INDEX), 0, 0 },
-  { INPUT, "scale", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (SCALE), 0, 0 },
-  { INPUT, "h_memory_add__VM_optdisp_add__VM_abase_mul__VM_index_sll__VM_const__WI_1_scale", & HW_ENT (HW_H_MEMORY), CGEN_MODE_UHI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldib_offset_ops[] = {
-  { INPUT, "offset", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OFFSET), 0, 0 },
-  { INPUT, "h_memory_offset", & HW_ENT (HW_H_MEMORY), CGEN_MODE_QI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldib_indirect_offset_ops[] = {
-  { INPUT, "offset", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OFFSET), 0, 0 },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "h_memory_add__VM_offset_abase", & HW_ENT (HW_H_MEMORY), CGEN_MODE_QI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldib_indirect_ops[] = {
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_USI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "h_memory_abase", & HW_ENT (HW_H_MEMORY), CGEN_MODE_QI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldib_indirect_index_ops[] = {
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "index", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (INDEX), 0, 0 },
-  { INPUT, "scale", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (SCALE), 0, 0 },
-  { INPUT, "h_memory_add__VM_abase_mul__VM_index_sll__VM_const__WI_1_scale", & HW_ENT (HW_H_MEMORY), CGEN_MODE_QI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldib_disp_ops[] = {
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "h_memory_optdisp", & HW_ENT (HW_H_MEMORY), CGEN_MODE_QI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldib_indirect_disp_ops[] = {
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "h_memory_add__VM_optdisp_abase", & HW_ENT (HW_H_MEMORY), CGEN_MODE_QI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldib_index_disp_ops[] = {
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "index", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (INDEX), 0, 0 },
-  { INPUT, "scale", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (SCALE), 0, 0 },
-  { INPUT, "h_memory_add__VM_optdisp_mul__VM_index_sll__VM_const__WI_1_scale", & HW_ENT (HW_H_MEMORY), CGEN_MODE_QI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldib_indirect_index_disp_ops[] = {
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "index", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (INDEX), 0, 0 },
-  { INPUT, "scale", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (SCALE), 0, 0 },
-  { INPUT, "h_memory_add__VM_optdisp_add__VM_abase_mul__VM_index_sll__VM_const__WI_1_scale", & HW_ENT (HW_H_MEMORY), CGEN_MODE_QI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldis_offset_ops[] = {
-  { INPUT, "offset", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OFFSET), 0, 0 },
-  { INPUT, "h_memory_offset", & HW_ENT (HW_H_MEMORY), CGEN_MODE_HI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldis_indirect_offset_ops[] = {
-  { INPUT, "offset", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OFFSET), 0, 0 },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "h_memory_add__VM_offset_abase", & HW_ENT (HW_H_MEMORY), CGEN_MODE_HI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldis_indirect_ops[] = {
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_USI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "h_memory_abase", & HW_ENT (HW_H_MEMORY), CGEN_MODE_HI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldis_indirect_index_ops[] = {
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "index", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (INDEX), 0, 0 },
-  { INPUT, "scale", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (SCALE), 0, 0 },
-  { INPUT, "h_memory_add__VM_abase_mul__VM_index_sll__VM_const__WI_1_scale", & HW_ENT (HW_H_MEMORY), CGEN_MODE_HI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldis_disp_ops[] = {
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "h_memory_optdisp", & HW_ENT (HW_H_MEMORY), CGEN_MODE_HI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldis_indirect_disp_ops[] = {
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "h_memory_add__VM_optdisp_abase", & HW_ENT (HW_H_MEMORY), CGEN_MODE_HI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldis_index_disp_ops[] = {
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "index", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (INDEX), 0, 0 },
-  { INPUT, "scale", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (SCALE), 0, 0 },
-  { INPUT, "h_memory_add__VM_optdisp_mul__VM_index_sll__VM_const__WI_1_scale", & HW_ENT (HW_H_MEMORY), CGEN_MODE_HI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldis_indirect_index_disp_ops[] = {
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "index", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (INDEX), 0, 0 },
-  { INPUT, "scale", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (SCALE), 0, 0 },
-  { INPUT, "h_memory_add__VM_optdisp_add__VM_abase_mul__VM_index_sll__VM_const__WI_1_scale", & HW_ENT (HW_H_MEMORY), CGEN_MODE_HI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldl_offset_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "offset", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OFFSET), 0, 0 },
-  { INPUT, "h_memory_temp", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_temp_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldl_indirect_offset_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "offset", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OFFSET), 0, 0 },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "h_memory_temp", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_temp_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldl_indirect_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "h_memory_temp", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_temp_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldl_indirect_index_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "index", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (INDEX), 0, 0 },
-  { INPUT, "scale", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (SCALE), 0, 0 },
-  { INPUT, "h_memory_temp", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_temp_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldl_disp_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "h_memory_temp", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_temp_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldl_indirect_disp_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "h_memory_temp", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_temp_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldl_index_disp_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "index", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (INDEX), 0, 0 },
-  { INPUT, "scale", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (SCALE), 0, 0 },
-  { INPUT, "h_memory_temp", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_temp_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldl_indirect_index_disp_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "index", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (INDEX), 0, 0 },
-  { INPUT, "scale", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (SCALE), 0, 0 },
-  { INPUT, "h_memory_temp", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_temp_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldt_offset_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "offset", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OFFSET), 0, 0 },
-  { INPUT, "h_memory_temp", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_temp_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_temp_const__WI_8", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldt_indirect_offset_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "offset", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OFFSET), 0, 0 },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "h_memory_temp", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_temp_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_temp_const__WI_8", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldt_indirect_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "h_memory_temp", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_temp_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_temp_const__WI_8", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldt_indirect_index_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "index", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (INDEX), 0, 0 },
-  { INPUT, "scale", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (SCALE), 0, 0 },
-  { INPUT, "h_memory_temp", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_temp_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_temp_const__WI_8", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldt_disp_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "h_memory_temp", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_temp_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_temp_const__WI_8", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldt_indirect_disp_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "h_memory_temp", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_temp_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_temp_const__WI_8", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldt_index_disp_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "index", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (INDEX), 0, 0 },
-  { INPUT, "scale", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (SCALE), 0, 0 },
-  { INPUT, "h_memory_temp", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_temp_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_temp_const__WI_8", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldt_indirect_index_disp_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "index", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (INDEX), 0, 0 },
-  { INPUT, "scale", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (SCALE), 0, 0 },
-  { INPUT, "h_memory_temp", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_temp_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_temp_const__WI_8", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldq_offset_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "offset", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OFFSET), 0, 0 },
-  { INPUT, "h_memory_temp", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_temp_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_temp_const__WI_8", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_temp_const__WI_12", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_3", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldq_indirect_offset_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "offset", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OFFSET), 0, 0 },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "h_memory_temp", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_temp_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_temp_const__WI_8", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_temp_const__WI_12", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_3", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldq_indirect_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "h_memory_temp", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_temp_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_temp_const__WI_8", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_temp_const__WI_12", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_3", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldq_indirect_index_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "index", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (INDEX), 0, 0 },
-  { INPUT, "scale", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (SCALE), 0, 0 },
-  { INPUT, "h_memory_temp", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_temp_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_temp_const__WI_8", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_temp_const__WI_12", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_3", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldq_disp_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "h_memory_temp", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_temp_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_temp_const__WI_8", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_temp_const__WI_12", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_3", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldq_indirect_disp_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "h_memory_temp", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_temp_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_temp_const__WI_8", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_temp_const__WI_12", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_3", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldq_index_disp_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "index", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (INDEX), 0, 0 },
-  { INPUT, "scale", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (SCALE), 0, 0 },
-  { INPUT, "h_memory_temp", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_temp_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_temp_const__WI_8", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_temp_const__WI_12", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_3", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ldq_indirect_index_disp_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "index", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (INDEX), 0, 0 },
-  { INPUT, "scale", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (SCALE), 0, 0 },
-  { INPUT, "h_memory_temp", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_temp_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_temp_const__WI_8", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_temp_const__WI_12", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_gr_add__VM_index_of_dst_const__WI_3", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_st_offset_ops[] = {
-  { INPUT, "offset", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OFFSET), 0, 0 },
-  { INPUT, "st_src", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ST_SRC), 0, 0 },
-  { OUTPUT, "h_memory_offset", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_st_indirect_offset_ops[] = {
-  { INPUT, "offset", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OFFSET), 0, 0 },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "st_src", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ST_SRC), 0, 0 },
-  { OUTPUT, "h_memory_add__VM_offset_abase", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_st_indirect_ops[] = {
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_USI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "st_src", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ST_SRC), 0, 0 },
-  { OUTPUT, "h_memory_abase", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_st_indirect_index_ops[] = {
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "index", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (INDEX), 0, 0 },
-  { INPUT, "scale", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (SCALE), 0, 0 },
-  { INPUT, "st_src", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ST_SRC), 0, 0 },
-  { OUTPUT, "h_memory_add__VM_abase_mul__VM_index_sll__VM_const__WI_1_scale", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_st_disp_ops[] = {
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "st_src", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ST_SRC), 0, 0 },
-  { OUTPUT, "h_memory_optdisp", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_st_indirect_disp_ops[] = {
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "st_src", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ST_SRC), 0, 0 },
-  { OUTPUT, "h_memory_add__VM_optdisp_abase", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_st_index_disp_ops[] = {
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "index", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (INDEX), 0, 0 },
-  { INPUT, "scale", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (SCALE), 0, 0 },
-  { INPUT, "st_src", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ST_SRC), 0, 0 },
-  { OUTPUT, "h_memory_add__VM_optdisp_mul__VM_index_sll__VM_const__WI_1_scale", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_st_indirect_index_disp_ops[] = {
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "index", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (INDEX), 0, 0 },
-  { INPUT, "scale", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (SCALE), 0, 0 },
-  { INPUT, "st_src", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ST_SRC), 0, 0 },
-  { OUTPUT, "h_memory_add__VM_optdisp_add__VM_abase_mul__VM_index_sll__VM_const__WI_1_scale", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_stob_offset_ops[] = {
-  { INPUT, "offset", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OFFSET), 0, 0 },
-  { INPUT, "st_src", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ST_SRC), 0, 0 },
-  { OUTPUT, "h_memory_offset", & HW_ENT (HW_H_MEMORY), CGEN_MODE_QI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_stob_indirect_offset_ops[] = {
-  { INPUT, "offset", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OFFSET), 0, 0 },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "st_src", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ST_SRC), 0, 0 },
-  { OUTPUT, "h_memory_add__VM_offset_abase", & HW_ENT (HW_H_MEMORY), CGEN_MODE_QI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_stob_indirect_ops[] = {
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_USI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "st_src", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ST_SRC), 0, 0 },
-  { OUTPUT, "h_memory_abase", & HW_ENT (HW_H_MEMORY), CGEN_MODE_QI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_stob_indirect_index_ops[] = {
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "index", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (INDEX), 0, 0 },
-  { INPUT, "scale", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (SCALE), 0, 0 },
-  { INPUT, "st_src", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ST_SRC), 0, 0 },
-  { OUTPUT, "h_memory_add__VM_abase_mul__VM_index_sll__VM_const__WI_1_scale", & HW_ENT (HW_H_MEMORY), CGEN_MODE_QI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_stob_disp_ops[] = {
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "st_src", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ST_SRC), 0, 0 },
-  { OUTPUT, "h_memory_optdisp", & HW_ENT (HW_H_MEMORY), CGEN_MODE_QI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_stob_indirect_disp_ops[] = {
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "st_src", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ST_SRC), 0, 0 },
-  { OUTPUT, "h_memory_add__VM_optdisp_abase", & HW_ENT (HW_H_MEMORY), CGEN_MODE_QI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_stob_index_disp_ops[] = {
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "index", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (INDEX), 0, 0 },
-  { INPUT, "scale", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (SCALE), 0, 0 },
-  { INPUT, "st_src", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ST_SRC), 0, 0 },
-  { OUTPUT, "h_memory_add__VM_optdisp_mul__VM_index_sll__VM_const__WI_1_scale", & HW_ENT (HW_H_MEMORY), CGEN_MODE_QI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_stob_indirect_index_disp_ops[] = {
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "index", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (INDEX), 0, 0 },
-  { INPUT, "scale", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (SCALE), 0, 0 },
-  { INPUT, "st_src", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ST_SRC), 0, 0 },
-  { OUTPUT, "h_memory_add__VM_optdisp_add__VM_abase_mul__VM_index_sll__VM_const__WI_1_scale", & HW_ENT (HW_H_MEMORY), CGEN_MODE_QI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_stos_offset_ops[] = {
-  { INPUT, "offset", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OFFSET), 0, 0 },
-  { INPUT, "st_src", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ST_SRC), 0, 0 },
-  { OUTPUT, "h_memory_offset", & HW_ENT (HW_H_MEMORY), CGEN_MODE_HI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_stos_indirect_offset_ops[] = {
-  { INPUT, "offset", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OFFSET), 0, 0 },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "st_src", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ST_SRC), 0, 0 },
-  { OUTPUT, "h_memory_add__VM_offset_abase", & HW_ENT (HW_H_MEMORY), CGEN_MODE_HI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_stos_indirect_ops[] = {
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_USI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "st_src", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ST_SRC), 0, 0 },
-  { OUTPUT, "h_memory_abase", & HW_ENT (HW_H_MEMORY), CGEN_MODE_HI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_stos_indirect_index_ops[] = {
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "index", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (INDEX), 0, 0 },
-  { INPUT, "scale", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (SCALE), 0, 0 },
-  { INPUT, "st_src", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ST_SRC), 0, 0 },
-  { OUTPUT, "h_memory_add__VM_abase_mul__VM_index_sll__VM_const__WI_1_scale", & HW_ENT (HW_H_MEMORY), CGEN_MODE_HI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_stos_disp_ops[] = {
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "st_src", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ST_SRC), 0, 0 },
-  { OUTPUT, "h_memory_optdisp", & HW_ENT (HW_H_MEMORY), CGEN_MODE_HI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_stos_indirect_disp_ops[] = {
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "st_src", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ST_SRC), 0, 0 },
-  { OUTPUT, "h_memory_add__VM_optdisp_abase", & HW_ENT (HW_H_MEMORY), CGEN_MODE_HI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_stos_index_disp_ops[] = {
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "index", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (INDEX), 0, 0 },
-  { INPUT, "scale", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (SCALE), 0, 0 },
-  { INPUT, "st_src", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ST_SRC), 0, 0 },
-  { OUTPUT, "h_memory_add__VM_optdisp_mul__VM_index_sll__VM_const__WI_1_scale", & HW_ENT (HW_H_MEMORY), CGEN_MODE_HI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_stos_indirect_index_disp_ops[] = {
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "index", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (INDEX), 0, 0 },
-  { INPUT, "scale", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (SCALE), 0, 0 },
-  { INPUT, "st_src", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ST_SRC), 0, 0 },
-  { OUTPUT, "h_memory_add__VM_optdisp_add__VM_abase_mul__VM_index_sll__VM_const__WI_1_scale", & HW_ENT (HW_H_MEMORY), CGEN_MODE_HI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_stl_offset_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "offset", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OFFSET), 0, 0 },
-  { INPUT, "st_src", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ST_SRC), 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_st_src_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_offset", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_offset_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_stl_indirect_offset_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "offset", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OFFSET), 0, 0 },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "st_src", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ST_SRC), 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_st_src_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_offset_abase", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_add__VM_offset_abase_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_stl_indirect_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_USI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "st_src", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ST_SRC), 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_st_src_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_abase", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_abase_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_stl_indirect_index_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "index", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (INDEX), 0, 0 },
-  { INPUT, "scale", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (SCALE), 0, 0 },
-  { INPUT, "st_src", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ST_SRC), 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_st_src_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_abase_mul__VM_index_sll__VM_const__WI_1_scale", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_add__VM_abase_mul__VM_index_sll__VM_const__WI_1_scale_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_stl_disp_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "st_src", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ST_SRC), 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_st_src_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_optdisp", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_optdisp_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_stl_indirect_disp_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "st_src", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ST_SRC), 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_st_src_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_optdisp_abase", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_add__VM_optdisp_abase_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_stl_index_disp_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "index", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (INDEX), 0, 0 },
-  { INPUT, "scale", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (SCALE), 0, 0 },
-  { INPUT, "st_src", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ST_SRC), 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_st_src_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_optdisp_mul__VM_index_sll__VM_const__WI_1_scale", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_add__VM_optdisp_mul__VM_index_sll__VM_const__WI_1_scale_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_stl_indirect_index_disp_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "index", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (INDEX), 0, 0 },
-  { INPUT, "scale", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (SCALE), 0, 0 },
-  { INPUT, "st_src", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ST_SRC), 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_st_src_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_optdisp_add__VM_abase_mul__VM_index_sll__VM_const__WI_1_scale", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_add__VM_optdisp_add__VM_abase_mul__VM_index_sll__VM_const__WI_1_scale_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_stt_offset_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "offset", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OFFSET), 0, 0 },
-  { INPUT, "st_src", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ST_SRC), 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_st_src_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_st_src_const__WI_2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_offset", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_offset_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_offset_const__WI_8", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_stt_indirect_offset_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "offset", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OFFSET), 0, 0 },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "st_src", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ST_SRC), 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_st_src_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_st_src_const__WI_2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_offset_abase", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_add__VM_offset_abase_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_add__VM_offset_abase_const__WI_8", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_stt_indirect_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_USI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "st_src", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ST_SRC), 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_st_src_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_st_src_const__WI_2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_abase", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_abase_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_abase_const__WI_8", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_stt_indirect_index_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "index", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (INDEX), 0, 0 },
-  { INPUT, "scale", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (SCALE), 0, 0 },
-  { INPUT, "st_src", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ST_SRC), 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_st_src_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_st_src_const__WI_2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_abase_mul__VM_index_sll__VM_const__WI_1_scale", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_add__VM_abase_mul__VM_index_sll__VM_const__WI_1_scale_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_add__VM_abase_mul__VM_index_sll__VM_const__WI_1_scale_const__WI_8", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_stt_disp_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "st_src", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ST_SRC), 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_st_src_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_st_src_const__WI_2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_optdisp", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_optdisp_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_optdisp_const__WI_8", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_stt_indirect_disp_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "st_src", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ST_SRC), 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_st_src_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_st_src_const__WI_2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_optdisp_abase", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_add__VM_optdisp_abase_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_add__VM_optdisp_abase_const__WI_8", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_stt_index_disp_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "index", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (INDEX), 0, 0 },
-  { INPUT, "scale", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (SCALE), 0, 0 },
-  { INPUT, "st_src", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ST_SRC), 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_st_src_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_st_src_const__WI_2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_optdisp_mul__VM_index_sll__VM_const__WI_1_scale", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_add__VM_optdisp_mul__VM_index_sll__VM_const__WI_1_scale_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_add__VM_optdisp_mul__VM_index_sll__VM_const__WI_1_scale_const__WI_8", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_stt_indirect_index_disp_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "index", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (INDEX), 0, 0 },
-  { INPUT, "scale", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (SCALE), 0, 0 },
-  { INPUT, "st_src", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ST_SRC), 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_st_src_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_st_src_const__WI_2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_optdisp_add__VM_abase_mul__VM_index_sll__VM_const__WI_1_scale", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_add__VM_optdisp_add__VM_abase_mul__VM_index_sll__VM_const__WI_1_scale_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_add__VM_optdisp_add__VM_abase_mul__VM_index_sll__VM_const__WI_1_scale_const__WI_8", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_stq_offset_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "offset", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OFFSET), 0, 0 },
-  { INPUT, "st_src", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ST_SRC), 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_st_src_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_st_src_const__WI_2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_st_src_const__WI_3", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_offset", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_offset_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_offset_const__WI_8", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_offset_const__WI_12", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_stq_indirect_offset_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "offset", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OFFSET), 0, 0 },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "st_src", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ST_SRC), 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_st_src_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_st_src_const__WI_2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_st_src_const__WI_3", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_offset_abase", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_add__VM_offset_abase_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_add__VM_offset_abase_const__WI_8", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_add__VM_offset_abase_const__WI_12", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_stq_indirect_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_USI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "st_src", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ST_SRC), 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_st_src_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_st_src_const__WI_2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_st_src_const__WI_3", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_abase", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_abase_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_abase_const__WI_8", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_abase_const__WI_12", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_stq_indirect_index_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "index", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (INDEX), 0, 0 },
-  { INPUT, "scale", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (SCALE), 0, 0 },
-  { INPUT, "st_src", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ST_SRC), 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_st_src_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_st_src_const__WI_2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_st_src_const__WI_3", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_abase_mul__VM_index_sll__VM_const__WI_1_scale", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_add__VM_abase_mul__VM_index_sll__VM_const__WI_1_scale_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_add__VM_abase_mul__VM_index_sll__VM_const__WI_1_scale_const__WI_8", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_add__VM_abase_mul__VM_index_sll__VM_const__WI_1_scale_const__WI_12", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_stq_disp_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "st_src", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ST_SRC), 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_st_src_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_st_src_const__WI_2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_st_src_const__WI_3", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_optdisp", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_optdisp_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_optdisp_const__WI_8", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_optdisp_const__WI_12", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_stq_indirect_disp_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "st_src", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ST_SRC), 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_st_src_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_st_src_const__WI_2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_st_src_const__WI_3", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_optdisp_abase", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_add__VM_optdisp_abase_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_add__VM_optdisp_abase_const__WI_8", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_add__VM_optdisp_abase_const__WI_12", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_stq_index_disp_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "index", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (INDEX), 0, 0 },
-  { INPUT, "scale", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (SCALE), 0, 0 },
-  { INPUT, "st_src", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ST_SRC), 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_st_src_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_st_src_const__WI_2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_st_src_const__WI_3", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_optdisp_mul__VM_index_sll__VM_const__WI_1_scale", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_add__VM_optdisp_mul__VM_index_sll__VM_const__WI_1_scale_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_add__VM_optdisp_mul__VM_index_sll__VM_const__WI_1_scale_const__WI_8", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_add__VM_optdisp_mul__VM_index_sll__VM_const__WI_1_scale_const__WI_12", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_stq_indirect_index_disp_ops[] = {
-  { INPUT, "f_srcdst", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, 0, 0, COND_REF },
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "index", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (INDEX), 0, 0 },
-  { INPUT, "scale", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (SCALE), 0, 0 },
-  { INPUT, "st_src", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ST_SRC), 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_st_src_const__WI_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_st_src_const__WI_2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_gr_add__VM_index_of_st_src_const__WI_3", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_optdisp_add__VM_abase_mul__VM_index_sll__VM_const__WI_1_scale", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_add__VM_optdisp_add__VM_abase_mul__VM_index_sll__VM_const__WI_1_scale_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_add__VM_optdisp_add__VM_abase_mul__VM_index_sll__VM_const__WI_1_scale_const__WI_8", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_add__VM_optdisp_add__VM_abase_mul__VM_index_sll__VM_const__WI_1_scale_const__WI_12", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_cmpobe_reg_ops[] = {
-  { INPUT, "br_src1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (BR_SRC1), 0, 0 },
-  { INPUT, "br_src2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (BR_SRC2), 0, 0 },
-  { INPUT, "br_disp", & HW_ENT (HW_H_IADDR), CGEN_MODE_USI, & OP_ENT (BR_DISP), 0, COND_REF },
-  { OUTPUT, "pc", & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0, COND_REF },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_cmpobe_lit_ops[] = {
-  { INPUT, "br_lit1", & HW_ENT (HW_H_UINT), CGEN_MODE_SI, & OP_ENT (BR_LIT1), 0, 0 },
-  { INPUT, "br_src2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (BR_SRC2), 0, 0 },
-  { INPUT, "br_disp", & HW_ENT (HW_H_IADDR), CGEN_MODE_USI, & OP_ENT (BR_DISP), 0, COND_REF },
-  { OUTPUT, "pc", & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0, COND_REF },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_cmpobl_reg_ops[] = {
-  { INPUT, "br_src1", & HW_ENT (HW_H_GR), CGEN_MODE_USI, & OP_ENT (BR_SRC1), 0, 0 },
-  { INPUT, "br_src2", & HW_ENT (HW_H_GR), CGEN_MODE_USI, & OP_ENT (BR_SRC2), 0, 0 },
-  { INPUT, "br_disp", & HW_ENT (HW_H_IADDR), CGEN_MODE_USI, & OP_ENT (BR_DISP), 0, COND_REF },
-  { OUTPUT, "pc", & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0, COND_REF },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_cmpobl_lit_ops[] = {
-  { INPUT, "br_lit1", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (BR_LIT1), 0, 0 },
-  { INPUT, "br_src2", & HW_ENT (HW_H_GR), CGEN_MODE_USI, & OP_ENT (BR_SRC2), 0, 0 },
-  { INPUT, "br_disp", & HW_ENT (HW_H_IADDR), CGEN_MODE_USI, & OP_ENT (BR_DISP), 0, COND_REF },
-  { OUTPUT, "pc", & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0, COND_REF },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_bbc_lit_ops[] = {
-  { INPUT, "br_lit1", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (BR_LIT1), 0, 0 },
-  { INPUT, "br_src2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (BR_SRC2), 0, 0 },
-  { INPUT, "br_disp", & HW_ENT (HW_H_IADDR), CGEN_MODE_USI, & OP_ENT (BR_DISP), 0, COND_REF },
-  { OUTPUT, "pc", & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0, COND_REF },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_cmpi_ops[] = {
-  { INPUT, "src1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0, 0 },
-  { INPUT, "src2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0, 0 },
-  { OUTPUT, "h_cc_0", & HW_ENT (HW_H_CC), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_cmpi1_ops[] = {
-  { INPUT, "lit1", & HW_ENT (HW_H_UINT), CGEN_MODE_SI, & OP_ENT (LIT1), 0, 0 },
-  { INPUT, "src2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0, 0 },
-  { OUTPUT, "h_cc_0", & HW_ENT (HW_H_CC), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_cmpi2_ops[] = {
-  { INPUT, "src1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0, 0 },
-  { INPUT, "lit2", & HW_ENT (HW_H_UINT), CGEN_MODE_SI, & OP_ENT (LIT2), 0, 0 },
-  { OUTPUT, "h_cc_0", & HW_ENT (HW_H_CC), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_cmpi3_ops[] = {
-  { INPUT, "lit1", & HW_ENT (HW_H_UINT), CGEN_MODE_SI, & OP_ENT (LIT1), 0, 0 },
-  { INPUT, "lit2", & HW_ENT (HW_H_UINT), CGEN_MODE_SI, & OP_ENT (LIT2), 0, 0 },
-  { OUTPUT, "h_cc_0", & HW_ENT (HW_H_CC), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_testno_reg_ops[] = {
-  { INPUT, "h_cc_0", & HW_ENT (HW_H_CC), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "br_src1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (BR_SRC1), 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_bno_ops[] = {
-  { INPUT, "h_cc_0", & HW_ENT (HW_H_CC), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "ctrl_disp", & HW_ENT (HW_H_IADDR), CGEN_MODE_USI, & OP_ENT (CTRL_DISP), 0, COND_REF },
-  { OUTPUT, "pc", & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0, COND_REF },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_b_ops[] = {
-  { INPUT, "ctrl_disp", & HW_ENT (HW_H_IADDR), CGEN_MODE_USI, & OP_ENT (CTRL_DISP), 0, 0 },
-  { OUTPUT, "pc", & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_bx_indirect_offset_ops[] = {
-  { INPUT, "offset", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OFFSET), 0, 0 },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { OUTPUT, "pc", & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_bx_indirect_ops[] = {
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { OUTPUT, "pc", & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_bx_indirect_index_ops[] = {
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { INPUT, "index", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (INDEX), 0, 0 },
-  { INPUT, "scale", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (SCALE), 0, 0 },
-  { OUTPUT, "pc", & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_bx_disp_ops[] = {
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { OUTPUT, "pc", & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_bx_indirect_disp_ops[] = {
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { OUTPUT, "pc", & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_callx_disp_ops[] = {
-  { INPUT, "h_gr_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 1, 0 },
-  { INPUT, "pc", & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0, 0 },
-  { INPUT, "h_gr_31", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 31, 0 },
-  { INPUT, "h_gr_0", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_gr_2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 2, 0 },
-  { INPUT, "h_gr_3", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 3, 0 },
-  { INPUT, "h_gr_4", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 4, 0 },
-  { INPUT, "h_gr_5", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 5, 0 },
-  { INPUT, "h_gr_6", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 6, 0 },
-  { INPUT, "h_gr_7", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 7, 0 },
-  { INPUT, "h_gr_8", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 8, 0 },
-  { INPUT, "h_gr_9", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 9, 0 },
-  { INPUT, "h_gr_10", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 10, 0 },
-  { INPUT, "h_gr_11", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 11, 0 },
-  { INPUT, "h_gr_12", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 12, 0 },
-  { INPUT, "h_gr_13", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 13, 0 },
-  { INPUT, "h_gr_14", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 14, 0 },
-  { INPUT, "h_gr_15", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 15, 0 },
-  { INPUT, "optdisp", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OPTDISP), 0, 0 },
-  { OUTPUT, "h_gr_2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 2, 0 },
-  { OUTPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_0", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_8", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_12", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_16", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_20", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_24", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_28", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_32", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_36", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_40", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_44", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_48", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_52", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_56", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_60", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "pc", & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0, 0 },
-  { OUTPUT, "h_gr_0", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_gr_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 1, 0 },
-  { OUTPUT, "h_gr_3", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 3, 0 },
-  { OUTPUT, "h_gr_4", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 4, 0 },
-  { OUTPUT, "h_gr_5", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 5, 0 },
-  { OUTPUT, "h_gr_6", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 6, 0 },
-  { OUTPUT, "h_gr_7", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 7, 0 },
-  { OUTPUT, "h_gr_8", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 8, 0 },
-  { OUTPUT, "h_gr_9", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 9, 0 },
-  { OUTPUT, "h_gr_10", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 10, 0 },
-  { OUTPUT, "h_gr_11", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 11, 0 },
-  { OUTPUT, "h_gr_12", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 12, 0 },
-  { OUTPUT, "h_gr_13", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 13, 0 },
-  { OUTPUT, "h_gr_14", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 14, 0 },
-  { OUTPUT, "h_gr_15", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 15, 0 },
-  { OUTPUT, "h_gr_31", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 31, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_callx_indirect_ops[] = {
-  { INPUT, "h_gr_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 1, 0 },
-  { INPUT, "pc", & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0, 0 },
-  { INPUT, "h_gr_31", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 31, 0 },
-  { INPUT, "h_gr_0", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_gr_2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 2, 0 },
-  { INPUT, "h_gr_3", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 3, 0 },
-  { INPUT, "h_gr_4", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 4, 0 },
-  { INPUT, "h_gr_5", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 5, 0 },
-  { INPUT, "h_gr_6", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 6, 0 },
-  { INPUT, "h_gr_7", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 7, 0 },
-  { INPUT, "h_gr_8", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 8, 0 },
-  { INPUT, "h_gr_9", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 9, 0 },
-  { INPUT, "h_gr_10", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 10, 0 },
-  { INPUT, "h_gr_11", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 11, 0 },
-  { INPUT, "h_gr_12", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 12, 0 },
-  { INPUT, "h_gr_13", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 13, 0 },
-  { INPUT, "h_gr_14", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 14, 0 },
-  { INPUT, "h_gr_15", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 15, 0 },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { OUTPUT, "h_gr_2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 2, 0 },
-  { OUTPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_0", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_8", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_12", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_16", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_20", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_24", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_28", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_32", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_36", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_40", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_44", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_48", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_52", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_56", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_60", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "pc", & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0, 0 },
-  { OUTPUT, "h_gr_0", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_gr_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 1, 0 },
-  { OUTPUT, "h_gr_3", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 3, 0 },
-  { OUTPUT, "h_gr_4", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 4, 0 },
-  { OUTPUT, "h_gr_5", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 5, 0 },
-  { OUTPUT, "h_gr_6", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 6, 0 },
-  { OUTPUT, "h_gr_7", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 7, 0 },
-  { OUTPUT, "h_gr_8", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 8, 0 },
-  { OUTPUT, "h_gr_9", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 9, 0 },
-  { OUTPUT, "h_gr_10", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 10, 0 },
-  { OUTPUT, "h_gr_11", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 11, 0 },
-  { OUTPUT, "h_gr_12", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 12, 0 },
-  { OUTPUT, "h_gr_13", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 13, 0 },
-  { OUTPUT, "h_gr_14", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 14, 0 },
-  { OUTPUT, "h_gr_15", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 15, 0 },
-  { OUTPUT, "h_gr_31", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 31, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_callx_indirect_offset_ops[] = {
-  { INPUT, "h_gr_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 1, 0 },
-  { INPUT, "pc", & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0, 0 },
-  { INPUT, "h_gr_31", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 31, 0 },
-  { INPUT, "h_gr_0", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_gr_2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 2, 0 },
-  { INPUT, "h_gr_3", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 3, 0 },
-  { INPUT, "h_gr_4", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 4, 0 },
-  { INPUT, "h_gr_5", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 5, 0 },
-  { INPUT, "h_gr_6", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 6, 0 },
-  { INPUT, "h_gr_7", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 7, 0 },
-  { INPUT, "h_gr_8", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 8, 0 },
-  { INPUT, "h_gr_9", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 9, 0 },
-  { INPUT, "h_gr_10", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 10, 0 },
-  { INPUT, "h_gr_11", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 11, 0 },
-  { INPUT, "h_gr_12", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 12, 0 },
-  { INPUT, "h_gr_13", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 13, 0 },
-  { INPUT, "h_gr_14", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 14, 0 },
-  { INPUT, "h_gr_15", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 15, 0 },
-  { INPUT, "offset", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (OFFSET), 0, 0 },
-  { INPUT, "abase", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (ABASE), 0, 0 },
-  { OUTPUT, "h_gr_2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 2, 0 },
-  { OUTPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_0", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_8", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_12", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_16", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_20", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_24", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_28", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_32", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_36", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_40", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_44", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_48", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_52", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_56", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_60", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "pc", & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0, 0 },
-  { OUTPUT, "h_gr_0", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_gr_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 1, 0 },
-  { OUTPUT, "h_gr_3", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 3, 0 },
-  { OUTPUT, "h_gr_4", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 4, 0 },
-  { OUTPUT, "h_gr_5", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 5, 0 },
-  { OUTPUT, "h_gr_6", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 6, 0 },
-  { OUTPUT, "h_gr_7", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 7, 0 },
-  { OUTPUT, "h_gr_8", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 8, 0 },
-  { OUTPUT, "h_gr_9", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 9, 0 },
-  { OUTPUT, "h_gr_10", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 10, 0 },
-  { OUTPUT, "h_gr_11", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 11, 0 },
-  { OUTPUT, "h_gr_12", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 12, 0 },
-  { OUTPUT, "h_gr_13", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 13, 0 },
-  { OUTPUT, "h_gr_14", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 14, 0 },
-  { OUTPUT, "h_gr_15", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 15, 0 },
-  { OUTPUT, "h_gr_31", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 31, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_ret_ops[] = {
-  { INPUT, "h_gr_0", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_gr_31", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 31, 0 },
-  { INPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_0", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_4", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_8", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_12", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_16", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_20", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_24", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_28", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_32", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_36", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_40", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_44", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_48", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_52", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_56", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_memory_add__VM_reg__VM_h_gr_31_const__WI_60", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "h_gr_2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 2, 0 },
-  { OUTPUT, "h_gr_31", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 31, 0 },
-  { OUTPUT, "h_gr_0", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "h_gr_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 1, 0 },
-  { OUTPUT, "h_gr_2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 2, 0 },
-  { OUTPUT, "h_gr_3", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 3, 0 },
-  { OUTPUT, "h_gr_4", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 4, 0 },
-  { OUTPUT, "h_gr_5", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 5, 0 },
-  { OUTPUT, "h_gr_6", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 6, 0 },
-  { OUTPUT, "h_gr_7", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 7, 0 },
-  { OUTPUT, "h_gr_8", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 8, 0 },
-  { OUTPUT, "h_gr_9", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 9, 0 },
-  { OUTPUT, "h_gr_10", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 10, 0 },
-  { OUTPUT, "h_gr_11", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 11, 0 },
-  { OUTPUT, "h_gr_12", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 12, 0 },
-  { OUTPUT, "h_gr_13", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 13, 0 },
-  { OUTPUT, "h_gr_14", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 14, 0 },
-  { OUTPUT, "h_gr_15", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 15, 0 },
-  { OUTPUT, "pc", & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_calls_ops[] = {
-  { INPUT, "pc", & HW_ENT (HW_H_PC), CGEN_MODE_SI, 0, 0, 0 },
-  { INPUT, "src1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0, 0 },
-  { OUTPUT, "pc", & HW_ENT (HW_H_PC), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_fmark_ops[] = {
-  { INPUT, "pc", & HW_ENT (HW_H_PC), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "pc", & HW_ENT (HW_H_PC), CGEN_MODE_SI, 0, 0, 0 },
-  { 0 }
-};
-
-#undef INPUT
-#undef OUTPUT
-#undef COND_REF
-
 /* Instruction formats.  */
 
 #define F(f) & i960_cgen_ifld_table[CONCAT2 (I960_,f)]
@@ -2885,7 +1136,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_MULO, "mulo", "mulo",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo, { 0x70000080 },
-    (PTR) & fmt_mulo_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* mulo $lit1, $src2, $dst */
@@ -2894,7 +1145,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_MULO1, "mulo1", "mulo",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo1, { 0x70000880 },
-    (PTR) & fmt_mulo1_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* mulo $src1, $lit2, $dst */
@@ -2903,7 +1154,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_MULO2, "mulo2", "mulo",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo2, { 0x70001080 },
-    (PTR) & fmt_mulo2_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* mulo $lit1, $lit2, $dst */
@@ -2912,7 +1163,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_MULO3, "mulo3", "mulo",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo3, { 0x70001880 },
-    (PTR) & fmt_mulo3_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* remo $src1, $src2, $dst */
@@ -2921,7 +1172,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_REMO, "remo", "remo",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_remo, { 0x70000400 },
-    (PTR) & fmt_remo_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* remo $lit1, $src2, $dst */
@@ -2930,7 +1181,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_REMO1, "remo1", "remo",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_remo1, { 0x70000c00 },
-    (PTR) & fmt_remo1_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* remo $src1, $lit2, $dst */
@@ -2939,7 +1190,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_REMO2, "remo2", "remo",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_remo2, { 0x70001400 },
-    (PTR) & fmt_remo2_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* remo $lit1, $lit2, $dst */
@@ -2948,7 +1199,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_REMO3, "remo3", "remo",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_remo3, { 0x70001c00 },
-    (PTR) & fmt_remo3_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* divo $src1, $src2, $dst */
@@ -2957,7 +1208,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_DIVO, "divo", "divo",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_remo, { 0x70000580 },
-    (PTR) & fmt_remo_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* divo $lit1, $src2, $dst */
@@ -2966,7 +1217,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_DIVO1, "divo1", "divo",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_remo1, { 0x70000d80 },
-    (PTR) & fmt_remo1_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* divo $src1, $lit2, $dst */
@@ -2975,7 +1226,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_DIVO2, "divo2", "divo",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_remo2, { 0x70001580 },
-    (PTR) & fmt_remo2_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* divo $lit1, $lit2, $dst */
@@ -2984,7 +1235,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_DIVO3, "divo3", "divo",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_remo3, { 0x70001d80 },
-    (PTR) & fmt_remo3_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* remi $src1, $src2, $dst */
@@ -2993,7 +1244,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_REMI, "remi", "remi",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_remo, { 0x74000400 },
-    (PTR) & fmt_remo_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* remi $lit1, $src2, $dst */
@@ -3002,7 +1253,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_REMI1, "remi1", "remi",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_remo1, { 0x74000c00 },
-    (PTR) & fmt_remo1_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* remi $src1, $lit2, $dst */
@@ -3011,7 +1262,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_REMI2, "remi2", "remi",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_remo2, { 0x74001400 },
-    (PTR) & fmt_remo2_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* remi $lit1, $lit2, $dst */
@@ -3020,7 +1271,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_REMI3, "remi3", "remi",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_remo3, { 0x74001c00 },
-    (PTR) & fmt_remo3_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* divi $src1, $src2, $dst */
@@ -3029,7 +1280,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_DIVI, "divi", "divi",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_remo, { 0x74000580 },
-    (PTR) & fmt_remo_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* divi $lit1, $src2, $dst */
@@ -3038,7 +1289,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_DIVI1, "divi1", "divi",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_remo1, { 0x74000d80 },
-    (PTR) & fmt_remo1_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* divi $src1, $lit2, $dst */
@@ -3047,7 +1298,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_DIVI2, "divi2", "divi",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_remo2, { 0x74001580 },
-    (PTR) & fmt_remo2_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* divi $lit1, $lit2, $dst */
@@ -3056,7 +1307,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_DIVI3, "divi3", "divi",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_remo3, { 0x74001d80 },
-    (PTR) & fmt_remo3_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* addo $src1, $src2, $dst */
@@ -3065,7 +1316,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_ADDO, "addo", "addo",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo, { 0x59000000 },
-    (PTR) & fmt_mulo_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* addo $lit1, $src2, $dst */
@@ -3074,7 +1325,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_ADDO1, "addo1", "addo",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo1, { 0x59000800 },
-    (PTR) & fmt_mulo1_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* addo $src1, $lit2, $dst */
@@ -3083,7 +1334,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_ADDO2, "addo2", "addo",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo2, { 0x59001000 },
-    (PTR) & fmt_mulo2_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* addo $lit1, $lit2, $dst */
@@ -3092,7 +1343,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_ADDO3, "addo3", "addo",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo3, { 0x59001800 },
-    (PTR) & fmt_mulo3_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* subo $src1, $src2, $dst */
@@ -3101,7 +1352,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_SUBO, "subo", "subo",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_remo, { 0x59000100 },
-    (PTR) & fmt_remo_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* subo $lit1, $src2, $dst */
@@ -3110,7 +1361,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_SUBO1, "subo1", "subo",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_remo1, { 0x59000900 },
-    (PTR) & fmt_remo1_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* subo $src1, $lit2, $dst */
@@ -3119,7 +1370,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_SUBO2, "subo2", "subo",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_remo2, { 0x59001100 },
-    (PTR) & fmt_remo2_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* subo $lit1, $lit2, $dst */
@@ -3128,7 +1379,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_SUBO3, "subo3", "subo",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_remo3, { 0x59001900 },
-    (PTR) & fmt_remo3_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* notbit $src1, $src2, $dst */
@@ -3137,7 +1388,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_NOTBIT, "notbit", "notbit",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo, { 0x58000000 },
-    (PTR) & fmt_mulo_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* notbit $lit1, $src2, $dst */
@@ -3146,7 +1397,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_NOTBIT1, "notbit1", "notbit",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo1, { 0x58000800 },
-    (PTR) & fmt_mulo1_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* notbit $src1, $lit2, $dst */
@@ -3155,7 +1406,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_NOTBIT2, "notbit2", "notbit",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo2, { 0x58001000 },
-    (PTR) & fmt_mulo2_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* notbit $lit1, $lit2, $dst */
@@ -3164,7 +1415,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_NOTBIT3, "notbit3", "notbit",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo3, { 0x58001800 },
-    (PTR) & fmt_mulo3_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* and $src1, $src2, $dst */
@@ -3173,7 +1424,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_AND, "and", "and",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo, { 0x58000080 },
-    (PTR) & fmt_mulo_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* and $lit1, $src2, $dst */
@@ -3182,7 +1433,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_AND1, "and1", "and",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo1, { 0x58000880 },
-    (PTR) & fmt_mulo1_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* and $src1, $lit2, $dst */
@@ -3191,7 +1442,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_AND2, "and2", "and",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo2, { 0x58001080 },
-    (PTR) & fmt_mulo2_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* and $lit1, $lit2, $dst */
@@ -3200,7 +1451,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_AND3, "and3", "and",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo3, { 0x58001880 },
-    (PTR) & fmt_mulo3_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* andnot $src1, $src2, $dst */
@@ -3209,7 +1460,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_ANDNOT, "andnot", "andnot",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_remo, { 0x58000100 },
-    (PTR) & fmt_remo_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* andnot $lit1, $src2, $dst */
@@ -3218,7 +1469,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_ANDNOT1, "andnot1", "andnot",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_remo1, { 0x58000900 },
-    (PTR) & fmt_remo1_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* andnot $src1, $lit2, $dst */
@@ -3227,7 +1478,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_ANDNOT2, "andnot2", "andnot",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_remo2, { 0x58001100 },
-    (PTR) & fmt_remo2_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* andnot $lit1, $lit2, $dst */
@@ -3236,7 +1487,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_ANDNOT3, "andnot3", "andnot",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_remo3, { 0x58001900 },
-    (PTR) & fmt_remo3_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* setbit $src1, $src2, $dst */
@@ -3245,7 +1496,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_SETBIT, "setbit", "setbit",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo, { 0x58000180 },
-    (PTR) & fmt_mulo_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* setbit $lit1, $src2, $dst */
@@ -3254,7 +1505,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_SETBIT1, "setbit1", "setbit",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo1, { 0x58000980 },
-    (PTR) & fmt_mulo1_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* setbit $src1, $lit2, $dst */
@@ -3263,7 +1514,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_SETBIT2, "setbit2", "setbit",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo2, { 0x58001180 },
-    (PTR) & fmt_mulo2_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* setbit $lit1, $lit2, $dst */
@@ -3272,7 +1523,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_SETBIT3, "setbit3", "setbit",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo3, { 0x58001980 },
-    (PTR) & fmt_mulo3_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* notand $src1, $src2, $dst */
@@ -3281,7 +1532,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_NOTAND, "notand", "notand",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_remo, { 0x58000200 },
-    (PTR) & fmt_remo_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* notand $lit1, $src2, $dst */
@@ -3290,7 +1541,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_NOTAND1, "notand1", "notand",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_remo1, { 0x58000a00 },
-    (PTR) & fmt_remo1_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* notand $src1, $lit2, $dst */
@@ -3299,7 +1550,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_NOTAND2, "notand2", "notand",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_remo2, { 0x58001200 },
-    (PTR) & fmt_remo2_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* notand $lit1, $lit2, $dst */
@@ -3308,7 +1559,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_NOTAND3, "notand3", "notand",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_remo3, { 0x58001a00 },
-    (PTR) & fmt_remo3_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* xor $src1, $src2, $dst */
@@ -3317,7 +1568,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_XOR, "xor", "xor",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo, { 0x58000300 },
-    (PTR) & fmt_mulo_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* xor $lit1, $src2, $dst */
@@ -3326,7 +1577,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_XOR1, "xor1", "xor",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo1, { 0x58000b00 },
-    (PTR) & fmt_mulo1_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* xor $src1, $lit2, $dst */
@@ -3335,7 +1586,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_XOR2, "xor2", "xor",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo2, { 0x58001300 },
-    (PTR) & fmt_mulo2_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* xor $lit1, $lit2, $dst */
@@ -3344,7 +1595,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_XOR3, "xor3", "xor",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo3, { 0x58001b00 },
-    (PTR) & fmt_mulo3_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* or $src1, $src2, $dst */
@@ -3353,7 +1604,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_OR, "or", "or",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo, { 0x58000380 },
-    (PTR) & fmt_mulo_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* or $lit1, $src2, $dst */
@@ -3362,7 +1613,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_OR1, "or1", "or",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo1, { 0x58000b80 },
-    (PTR) & fmt_mulo1_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* or $src1, $lit2, $dst */
@@ -3371,7 +1622,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_OR2, "or2", "or",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo2, { 0x58001380 },
-    (PTR) & fmt_mulo2_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* or $lit1, $lit2, $dst */
@@ -3380,7 +1631,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_OR3, "or3", "or",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo3, { 0x58001b80 },
-    (PTR) & fmt_mulo3_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* nor $src1, $src2, $dst */
@@ -3389,7 +1640,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_NOR, "nor", "nor",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_remo, { 0x58000400 },
-    (PTR) & fmt_remo_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* nor $lit1, $src2, $dst */
@@ -3398,7 +1649,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_NOR1, "nor1", "nor",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_remo1, { 0x58000c00 },
-    (PTR) & fmt_remo1_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* nor $src1, $lit2, $dst */
@@ -3407,7 +1658,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_NOR2, "nor2", "nor",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_remo2, { 0x58001400 },
-    (PTR) & fmt_remo2_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* nor $lit1, $lit2, $dst */
@@ -3416,7 +1667,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_NOR3, "nor3", "nor",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_remo3, { 0x58001c00 },
-    (PTR) & fmt_remo3_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* not $src1, $src2, $dst */
@@ -3425,7 +1676,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_NOT, "not", "not",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_not, { 0x58000500 },
-    (PTR) & fmt_not_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* not $lit1, $src2, $dst */
@@ -3434,7 +1685,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_NOT1, "not1", "not",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_not1, { 0x58000d00 },
-    (PTR) & fmt_not1_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* not $src1, $lit2, $dst */
@@ -3443,7 +1694,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_NOT2, "not2", "not",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_not2, { 0x58001500 },
-    (PTR) & fmt_not2_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* not $lit1, $lit2, $dst */
@@ -3452,7 +1703,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_NOT3, "not3", "not",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_not3, { 0x58001d00 },
-    (PTR) & fmt_not3_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* clrbit $src1, $src2, $dst */
@@ -3461,7 +1712,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_CLRBIT, "clrbit", "clrbit",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo, { 0x58000600 },
-    (PTR) & fmt_mulo_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* clrbit $lit1, $src2, $dst */
@@ -3470,7 +1721,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_CLRBIT1, "clrbit1", "clrbit",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo1, { 0x58000e00 },
-    (PTR) & fmt_mulo1_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* clrbit $src1, $lit2, $dst */
@@ -3479,7 +1730,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_CLRBIT2, "clrbit2", "clrbit",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo2, { 0x58001600 },
-    (PTR) & fmt_mulo2_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* clrbit $lit1, $lit2, $dst */
@@ -3488,7 +1739,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_CLRBIT3, "clrbit3", "clrbit",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo3, { 0x58001e00 },
-    (PTR) & fmt_mulo3_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* shlo $src1, $src2, $dst */
@@ -3497,7 +1748,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_SHLO, "shlo", "shlo",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_remo, { 0x59000600 },
-    (PTR) & fmt_remo_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* shlo $lit1, $src2, $dst */
@@ -3506,7 +1757,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_SHLO1, "shlo1", "shlo",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_remo1, { 0x59000e00 },
-    (PTR) & fmt_remo1_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* shlo $src1, $lit2, $dst */
@@ -3515,7 +1766,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_SHLO2, "shlo2", "shlo",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_remo2, { 0x59001600 },
-    (PTR) & fmt_remo2_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* shlo $lit1, $lit2, $dst */
@@ -3524,7 +1775,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_SHLO3, "shlo3", "shlo",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_remo3, { 0x59001e00 },
-    (PTR) & fmt_remo3_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* shro $src1, $src2, $dst */
@@ -3533,7 +1784,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_SHRO, "shro", "shro",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_remo, { 0x59000400 },
-    (PTR) & fmt_remo_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* shro $lit1, $src2, $dst */
@@ -3542,7 +1793,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_SHRO1, "shro1", "shro",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_remo1, { 0x59000c00 },
-    (PTR) & fmt_remo1_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* shro $src1, $lit2, $dst */
@@ -3551,7 +1802,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_SHRO2, "shro2", "shro",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_remo2, { 0x59001400 },
-    (PTR) & fmt_remo2_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* shro $lit1, $lit2, $dst */
@@ -3560,7 +1811,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_SHRO3, "shro3", "shro",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_remo3, { 0x59001c00 },
-    (PTR) & fmt_remo3_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* shli $src1, $src2, $dst */
@@ -3569,7 +1820,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_SHLI, "shli", "shli",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_remo, { 0x59000700 },
-    (PTR) & fmt_remo_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* shli $lit1, $src2, $dst */
@@ -3578,7 +1829,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_SHLI1, "shli1", "shli",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_remo1, { 0x59000f00 },
-    (PTR) & fmt_remo1_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* shli $src1, $lit2, $dst */
@@ -3587,7 +1838,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_SHLI2, "shli2", "shli",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_remo2, { 0x59001700 },
-    (PTR) & fmt_remo2_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* shli $lit1, $lit2, $dst */
@@ -3596,7 +1847,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_SHLI3, "shli3", "shli",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_remo3, { 0x59001f00 },
-    (PTR) & fmt_remo3_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* shri $src1, $src2, $dst */
@@ -3605,7 +1856,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_SHRI, "shri", "shri",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_remo, { 0x59000580 },
-    (PTR) & fmt_remo_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* shri $lit1, $src2, $dst */
@@ -3614,7 +1865,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_SHRI1, "shri1", "shri",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_remo1, { 0x59000d80 },
-    (PTR) & fmt_remo1_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* shri $src1, $lit2, $dst */
@@ -3623,7 +1874,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_SHRI2, "shri2", "shri",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_remo2, { 0x59001580 },
-    (PTR) & fmt_remo2_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* shri $lit1, $lit2, $dst */
@@ -3632,7 +1883,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_SHRI3, "shri3", "shri",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_remo3, { 0x59001d80 },
-    (PTR) & fmt_remo3_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* emul $src1, $src2, $dst */
@@ -3641,7 +1892,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_EMUL, "emul", "emul",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_emul, { 0x67000000 },
-    (PTR) & fmt_emul_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* emul $lit1, $src2, $dst */
@@ -3650,7 +1901,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_EMUL1, "emul1", "emul",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_emul1, { 0x67000800 },
-    (PTR) & fmt_emul1_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* emul $src1, $lit2, $dst */
@@ -3659,7 +1910,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_EMUL2, "emul2", "emul",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_emul2, { 0x67001000 },
-    (PTR) & fmt_emul2_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* emul $lit1, $lit2, $dst */
@@ -3668,7 +1919,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_EMUL3, "emul3", "emul",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_emul3, { 0x67001800 },
-    (PTR) & fmt_emul3_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* mov $src1, $dst */
@@ -3677,7 +1928,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_MOV, "mov", "mov",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (DST), 0 } },
     & fmt_not2, { 0x5c001600 },
-    (PTR) & fmt_not2_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* mov $lit1, $dst */
@@ -3686,7 +1937,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_MOV1, "mov1", "mov",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (DST), 0 } },
     & fmt_not3, { 0x5c001e00 },
-    (PTR) & fmt_not3_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* movl $src1, $dst */
@@ -3695,7 +1946,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_MOVL, "movl", "movl",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (DST), 0 } },
     & fmt_movl, { 0x5d001600 },
-    (PTR) & fmt_movl_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* movl $lit1, $dst */
@@ -3704,7 +1955,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_MOVL1, "movl1", "movl",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (DST), 0 } },
     & fmt_movl1, { 0x5d001e00 },
-    (PTR) & fmt_movl1_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* movt $src1, $dst */
@@ -3713,7 +1964,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_MOVT, "movt", "movt",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (DST), 0 } },
     & fmt_movt, { 0x5e001600 },
-    (PTR) & fmt_movt_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* movt $lit1, $dst */
@@ -3722,7 +1973,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_MOVT1, "movt1", "movt",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (DST), 0 } },
     & fmt_movt1, { 0x5e001e00 },
-    (PTR) & fmt_movt1_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* movq $src1, $dst */
@@ -3731,7 +1982,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_MOVQ, "movq", "movq",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (DST), 0 } },
     & fmt_movq, { 0x5f001600 },
-    (PTR) & fmt_movq_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* movq $lit1, $dst */
@@ -3740,7 +1991,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_MOVQ1, "movq1", "movq",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (DST), 0 } },
     & fmt_movq1, { 0x5f001e00 },
-    (PTR) & fmt_movq1_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* modpc $src1, $src2, $dst */
@@ -3749,7 +2000,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_MODPC, "modpc", "modpc",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_modpc, { 0x65000280 },
-    (PTR) & fmt_modpc_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* modac $src1, $src2, $dst */
@@ -3758,7 +2009,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_MODAC, "modac", "modac",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_modpc, { 0x64000280 },
-    (PTR) & fmt_modpc_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* lda $offset, $dst */
@@ -3767,7 +2018,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDA_OFFSET, "lda-offset", "lda",
     { { MNEM, ' ', OP (OFFSET), ',', ' ', OP (DST), 0 } },
     & fmt_lda_offset, { 0x8c000000 },
-    (PTR) & fmt_lda_offset_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* lda $offset($abase), $dst */
@@ -3776,7 +2027,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDA_INDIRECT_OFFSET, "lda-indirect-offset", "lda",
     { { MNEM, ' ', OP (OFFSET), '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_lda_indirect_offset, { 0x8c002000 },
-    (PTR) & fmt_lda_indirect_offset_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* lda ($abase), $dst */
@@ -3785,7 +2036,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDA_INDIRECT, "lda-indirect", "lda",
     { { MNEM, ' ', '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_lda_indirect, { 0x8c001000 },
-    (PTR) & fmt_lda_indirect_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* lda ($abase)[$index*S$scale], $dst */
@@ -3794,7 +2045,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDA_INDIRECT_INDEX, "lda-indirect-index", "lda",
     { { MNEM, ' ', '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_lda_indirect_index, { 0x8c001c00 },
-    (PTR) & fmt_lda_indirect_index_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* lda $optdisp, $dst */
@@ -3803,7 +2054,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDA_DISP, "lda-disp", "lda",
     { { MNEM, ' ', OP (OPTDISP), ',', ' ', OP (DST), 0 } },
     & fmt_lda_disp, { 0x8c003000 },
-    (PTR) & fmt_lda_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* lda $optdisp($abase), $dst */
@@ -3812,7 +2063,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDA_INDIRECT_DISP, "lda-indirect-disp", "lda",
     { { MNEM, ' ', OP (OPTDISP), '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_lda_indirect_disp, { 0x8c003400 },
-    (PTR) & fmt_lda_indirect_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* lda $optdisp[$index*S$scale], $dst */
@@ -3821,7 +2072,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDA_INDEX_DISP, "lda-index-disp", "lda",
     { { MNEM, ' ', OP (OPTDISP), '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_lda_index_disp, { 0x8c003800 },
-    (PTR) & fmt_lda_index_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* lda $optdisp($abase)[$index*S$scale], $dst */
@@ -3830,7 +2081,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDA_INDIRECT_INDEX_DISP, "lda-indirect-index-disp", "lda",
     { { MNEM, ' ', OP (OPTDISP), '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_lda_indirect_index_disp, { 0x8c003c00 },
-    (PTR) & fmt_lda_indirect_index_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ld $offset, $dst */
@@ -3839,7 +2090,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LD_OFFSET, "ld-offset", "ld",
     { { MNEM, ' ', OP (OFFSET), ',', ' ', OP (DST), 0 } },
     & fmt_ld_offset, { 0x90000000 },
-    (PTR) & fmt_ld_offset_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ld $offset($abase), $dst */
@@ -3848,7 +2099,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LD_INDIRECT_OFFSET, "ld-indirect-offset", "ld",
     { { MNEM, ' ', OP (OFFSET), '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_ld_indirect_offset, { 0x90002000 },
-    (PTR) & fmt_ld_indirect_offset_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ld ($abase), $dst */
@@ -3857,7 +2108,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LD_INDIRECT, "ld-indirect", "ld",
     { { MNEM, ' ', '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_ld_indirect, { 0x90001000 },
-    (PTR) & fmt_ld_indirect_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ld ($abase)[$index*S$scale], $dst */
@@ -3866,7 +2117,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LD_INDIRECT_INDEX, "ld-indirect-index", "ld",
     { { MNEM, ' ', '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_ld_indirect_index, { 0x90001c00 },
-    (PTR) & fmt_ld_indirect_index_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ld $optdisp, $dst */
@@ -3875,7 +2126,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LD_DISP, "ld-disp", "ld",
     { { MNEM, ' ', OP (OPTDISP), ',', ' ', OP (DST), 0 } },
     & fmt_ld_disp, { 0x90003000 },
-    (PTR) & fmt_ld_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ld $optdisp($abase), $dst */
@@ -3884,7 +2135,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LD_INDIRECT_DISP, "ld-indirect-disp", "ld",
     { { MNEM, ' ', OP (OPTDISP), '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_ld_indirect_disp, { 0x90003400 },
-    (PTR) & fmt_ld_indirect_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ld $optdisp[$index*S$scale], $dst */
@@ -3893,7 +2144,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LD_INDEX_DISP, "ld-index-disp", "ld",
     { { MNEM, ' ', OP (OPTDISP), '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_ld_index_disp, { 0x90003800 },
-    (PTR) & fmt_ld_index_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ld $optdisp($abase)[$index*S$scale], $dst */
@@ -3902,7 +2153,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LD_INDIRECT_INDEX_DISP, "ld-indirect-index-disp", "ld",
     { { MNEM, ' ', OP (OPTDISP), '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_ld_indirect_index_disp, { 0x90003c00 },
-    (PTR) & fmt_ld_indirect_index_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldob $offset, $dst */
@@ -3911,7 +2162,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDOB_OFFSET, "ldob-offset", "ldob",
     { { MNEM, ' ', OP (OFFSET), ',', ' ', OP (DST), 0 } },
     & fmt_ldob_offset, { 0x80000000 },
-    (PTR) & fmt_ldob_offset_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldob $offset($abase), $dst */
@@ -3920,7 +2171,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDOB_INDIRECT_OFFSET, "ldob-indirect-offset", "ldob",
     { { MNEM, ' ', OP (OFFSET), '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_ldob_indirect_offset, { 0x80002000 },
-    (PTR) & fmt_ldob_indirect_offset_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldob ($abase), $dst */
@@ -3929,7 +2180,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDOB_INDIRECT, "ldob-indirect", "ldob",
     { { MNEM, ' ', '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_ldob_indirect, { 0x80001000 },
-    (PTR) & fmt_ldob_indirect_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldob ($abase)[$index*S$scale], $dst */
@@ -3938,7 +2189,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDOB_INDIRECT_INDEX, "ldob-indirect-index", "ldob",
     { { MNEM, ' ', '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_ldob_indirect_index, { 0x80001c00 },
-    (PTR) & fmt_ldob_indirect_index_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldob $optdisp, $dst */
@@ -3947,7 +2198,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDOB_DISP, "ldob-disp", "ldob",
     { { MNEM, ' ', OP (OPTDISP), ',', ' ', OP (DST), 0 } },
     & fmt_ldob_disp, { 0x80003000 },
-    (PTR) & fmt_ldob_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldob $optdisp($abase), $dst */
@@ -3956,7 +2207,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDOB_INDIRECT_DISP, "ldob-indirect-disp", "ldob",
     { { MNEM, ' ', OP (OPTDISP), '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_ldob_indirect_disp, { 0x80003400 },
-    (PTR) & fmt_ldob_indirect_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldob $optdisp[$index*S$scale], $dst */
@@ -3965,7 +2216,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDOB_INDEX_DISP, "ldob-index-disp", "ldob",
     { { MNEM, ' ', OP (OPTDISP), '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_ldob_index_disp, { 0x80003800 },
-    (PTR) & fmt_ldob_index_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldob $optdisp($abase)[$index*S$scale], $dst */
@@ -3974,7 +2225,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDOB_INDIRECT_INDEX_DISP, "ldob-indirect-index-disp", "ldob",
     { { MNEM, ' ', OP (OPTDISP), '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_ldob_indirect_index_disp, { 0x80003c00 },
-    (PTR) & fmt_ldob_indirect_index_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldos $offset, $dst */
@@ -3983,7 +2234,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDOS_OFFSET, "ldos-offset", "ldos",
     { { MNEM, ' ', OP (OFFSET), ',', ' ', OP (DST), 0 } },
     & fmt_ldos_offset, { 0x88000000 },
-    (PTR) & fmt_ldos_offset_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldos $offset($abase), $dst */
@@ -3992,7 +2243,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDOS_INDIRECT_OFFSET, "ldos-indirect-offset", "ldos",
     { { MNEM, ' ', OP (OFFSET), '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_ldos_indirect_offset, { 0x88002000 },
-    (PTR) & fmt_ldos_indirect_offset_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldos ($abase), $dst */
@@ -4001,7 +2252,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDOS_INDIRECT, "ldos-indirect", "ldos",
     { { MNEM, ' ', '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_ldos_indirect, { 0x88001000 },
-    (PTR) & fmt_ldos_indirect_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldos ($abase)[$index*S$scale], $dst */
@@ -4010,7 +2261,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDOS_INDIRECT_INDEX, "ldos-indirect-index", "ldos",
     { { MNEM, ' ', '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_ldos_indirect_index, { 0x88001c00 },
-    (PTR) & fmt_ldos_indirect_index_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldos $optdisp, $dst */
@@ -4019,7 +2270,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDOS_DISP, "ldos-disp", "ldos",
     { { MNEM, ' ', OP (OPTDISP), ',', ' ', OP (DST), 0 } },
     & fmt_ldos_disp, { 0x88003000 },
-    (PTR) & fmt_ldos_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldos $optdisp($abase), $dst */
@@ -4028,7 +2279,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDOS_INDIRECT_DISP, "ldos-indirect-disp", "ldos",
     { { MNEM, ' ', OP (OPTDISP), '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_ldos_indirect_disp, { 0x88003400 },
-    (PTR) & fmt_ldos_indirect_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldos $optdisp[$index*S$scale], $dst */
@@ -4037,7 +2288,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDOS_INDEX_DISP, "ldos-index-disp", "ldos",
     { { MNEM, ' ', OP (OPTDISP), '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_ldos_index_disp, { 0x88003800 },
-    (PTR) & fmt_ldos_index_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldos $optdisp($abase)[$index*S$scale], $dst */
@@ -4046,7 +2297,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDOS_INDIRECT_INDEX_DISP, "ldos-indirect-index-disp", "ldos",
     { { MNEM, ' ', OP (OPTDISP), '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_ldos_indirect_index_disp, { 0x88003c00 },
-    (PTR) & fmt_ldos_indirect_index_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldib $offset, $dst */
@@ -4055,7 +2306,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDIB_OFFSET, "ldib-offset", "ldib",
     { { MNEM, ' ', OP (OFFSET), ',', ' ', OP (DST), 0 } },
     & fmt_ldib_offset, { 0xc0000000 },
-    (PTR) & fmt_ldib_offset_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldib $offset($abase), $dst */
@@ -4064,7 +2315,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDIB_INDIRECT_OFFSET, "ldib-indirect-offset", "ldib",
     { { MNEM, ' ', OP (OFFSET), '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_ldib_indirect_offset, { 0xc0002000 },
-    (PTR) & fmt_ldib_indirect_offset_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldib ($abase), $dst */
@@ -4073,7 +2324,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDIB_INDIRECT, "ldib-indirect", "ldib",
     { { MNEM, ' ', '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_ldib_indirect, { 0xc0001000 },
-    (PTR) & fmt_ldib_indirect_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldib ($abase)[$index*S$scale], $dst */
@@ -4082,7 +2333,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDIB_INDIRECT_INDEX, "ldib-indirect-index", "ldib",
     { { MNEM, ' ', '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_ldib_indirect_index, { 0xc0001c00 },
-    (PTR) & fmt_ldib_indirect_index_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldib $optdisp, $dst */
@@ -4091,7 +2342,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDIB_DISP, "ldib-disp", "ldib",
     { { MNEM, ' ', OP (OPTDISP), ',', ' ', OP (DST), 0 } },
     & fmt_ldib_disp, { 0xc0003000 },
-    (PTR) & fmt_ldib_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldib $optdisp($abase), $dst */
@@ -4100,7 +2351,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDIB_INDIRECT_DISP, "ldib-indirect-disp", "ldib",
     { { MNEM, ' ', OP (OPTDISP), '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_ldib_indirect_disp, { 0xc0003400 },
-    (PTR) & fmt_ldib_indirect_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldib $optdisp[$index*S$scale], $dst */
@@ -4109,7 +2360,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDIB_INDEX_DISP, "ldib-index-disp", "ldib",
     { { MNEM, ' ', OP (OPTDISP), '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_ldib_index_disp, { 0xc0003800 },
-    (PTR) & fmt_ldib_index_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldib $optdisp($abase)[$index*S$scale], $dst */
@@ -4118,7 +2369,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDIB_INDIRECT_INDEX_DISP, "ldib-indirect-index-disp", "ldib",
     { { MNEM, ' ', OP (OPTDISP), '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_ldib_indirect_index_disp, { 0xc0003c00 },
-    (PTR) & fmt_ldib_indirect_index_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldis $offset, $dst */
@@ -4127,7 +2378,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDIS_OFFSET, "ldis-offset", "ldis",
     { { MNEM, ' ', OP (OFFSET), ',', ' ', OP (DST), 0 } },
     & fmt_ldis_offset, { 0xc8000000 },
-    (PTR) & fmt_ldis_offset_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldis $offset($abase), $dst */
@@ -4136,7 +2387,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDIS_INDIRECT_OFFSET, "ldis-indirect-offset", "ldis",
     { { MNEM, ' ', OP (OFFSET), '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_ldis_indirect_offset, { 0xc8002000 },
-    (PTR) & fmt_ldis_indirect_offset_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldis ($abase), $dst */
@@ -4145,7 +2396,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDIS_INDIRECT, "ldis-indirect", "ldis",
     { { MNEM, ' ', '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_ldis_indirect, { 0xc8001000 },
-    (PTR) & fmt_ldis_indirect_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldis ($abase)[$index*S$scale], $dst */
@@ -4154,7 +2405,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDIS_INDIRECT_INDEX, "ldis-indirect-index", "ldis",
     { { MNEM, ' ', '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_ldis_indirect_index, { 0xc8001c00 },
-    (PTR) & fmt_ldis_indirect_index_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldis $optdisp, $dst */
@@ -4163,7 +2414,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDIS_DISP, "ldis-disp", "ldis",
     { { MNEM, ' ', OP (OPTDISP), ',', ' ', OP (DST), 0 } },
     & fmt_ldis_disp, { 0xc8003000 },
-    (PTR) & fmt_ldis_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldis $optdisp($abase), $dst */
@@ -4172,7 +2423,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDIS_INDIRECT_DISP, "ldis-indirect-disp", "ldis",
     { { MNEM, ' ', OP (OPTDISP), '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_ldis_indirect_disp, { 0xc8003400 },
-    (PTR) & fmt_ldis_indirect_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldis $optdisp[$index*S$scale], $dst */
@@ -4181,7 +2432,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDIS_INDEX_DISP, "ldis-index-disp", "ldis",
     { { MNEM, ' ', OP (OPTDISP), '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_ldis_index_disp, { 0xc8003800 },
-    (PTR) & fmt_ldis_index_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldis $optdisp($abase)[$index*S$scale], $dst */
@@ -4190,7 +2441,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDIS_INDIRECT_INDEX_DISP, "ldis-indirect-index-disp", "ldis",
     { { MNEM, ' ', OP (OPTDISP), '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_ldis_indirect_index_disp, { 0xc8003c00 },
-    (PTR) & fmt_ldis_indirect_index_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldl $offset, $dst */
@@ -4199,7 +2450,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDL_OFFSET, "ldl-offset", "ldl",
     { { MNEM, ' ', OP (OFFSET), ',', ' ', OP (DST), 0 } },
     & fmt_ldl_offset, { 0x98000000 },
-    (PTR) & fmt_ldl_offset_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldl $offset($abase), $dst */
@@ -4208,7 +2459,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDL_INDIRECT_OFFSET, "ldl-indirect-offset", "ldl",
     { { MNEM, ' ', OP (OFFSET), '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_ldl_indirect_offset, { 0x98002000 },
-    (PTR) & fmt_ldl_indirect_offset_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldl ($abase), $dst */
@@ -4217,7 +2468,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDL_INDIRECT, "ldl-indirect", "ldl",
     { { MNEM, ' ', '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_ldl_indirect, { 0x98001000 },
-    (PTR) & fmt_ldl_indirect_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldl ($abase)[$index*S$scale], $dst */
@@ -4226,7 +2477,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDL_INDIRECT_INDEX, "ldl-indirect-index", "ldl",
     { { MNEM, ' ', '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_ldl_indirect_index, { 0x98001c00 },
-    (PTR) & fmt_ldl_indirect_index_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldl $optdisp, $dst */
@@ -4235,7 +2486,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDL_DISP, "ldl-disp", "ldl",
     { { MNEM, ' ', OP (OPTDISP), ',', ' ', OP (DST), 0 } },
     & fmt_ldl_disp, { 0x98003000 },
-    (PTR) & fmt_ldl_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldl $optdisp($abase), $dst */
@@ -4244,7 +2495,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDL_INDIRECT_DISP, "ldl-indirect-disp", "ldl",
     { { MNEM, ' ', OP (OPTDISP), '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_ldl_indirect_disp, { 0x98003400 },
-    (PTR) & fmt_ldl_indirect_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldl $optdisp[$index*S$scale], $dst */
@@ -4253,7 +2504,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDL_INDEX_DISP, "ldl-index-disp", "ldl",
     { { MNEM, ' ', OP (OPTDISP), '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_ldl_index_disp, { 0x98003800 },
-    (PTR) & fmt_ldl_index_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldl $optdisp($abase)[$index*S$scale], $dst */
@@ -4262,7 +2513,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDL_INDIRECT_INDEX_DISP, "ldl-indirect-index-disp", "ldl",
     { { MNEM, ' ', OP (OPTDISP), '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_ldl_indirect_index_disp, { 0x98003c00 },
-    (PTR) & fmt_ldl_indirect_index_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldt $offset, $dst */
@@ -4271,7 +2522,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDT_OFFSET, "ldt-offset", "ldt",
     { { MNEM, ' ', OP (OFFSET), ',', ' ', OP (DST), 0 } },
     & fmt_ldt_offset, { 0xa0000000 },
-    (PTR) & fmt_ldt_offset_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldt $offset($abase), $dst */
@@ -4280,7 +2531,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDT_INDIRECT_OFFSET, "ldt-indirect-offset", "ldt",
     { { MNEM, ' ', OP (OFFSET), '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_ldt_indirect_offset, { 0xa0002000 },
-    (PTR) & fmt_ldt_indirect_offset_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldt ($abase), $dst */
@@ -4289,7 +2540,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDT_INDIRECT, "ldt-indirect", "ldt",
     { { MNEM, ' ', '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_ldt_indirect, { 0xa0001000 },
-    (PTR) & fmt_ldt_indirect_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldt ($abase)[$index*S$scale], $dst */
@@ -4298,7 +2549,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDT_INDIRECT_INDEX, "ldt-indirect-index", "ldt",
     { { MNEM, ' ', '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_ldt_indirect_index, { 0xa0001c00 },
-    (PTR) & fmt_ldt_indirect_index_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldt $optdisp, $dst */
@@ -4307,7 +2558,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDT_DISP, "ldt-disp", "ldt",
     { { MNEM, ' ', OP (OPTDISP), ',', ' ', OP (DST), 0 } },
     & fmt_ldt_disp, { 0xa0003000 },
-    (PTR) & fmt_ldt_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldt $optdisp($abase), $dst */
@@ -4316,7 +2567,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDT_INDIRECT_DISP, "ldt-indirect-disp", "ldt",
     { { MNEM, ' ', OP (OPTDISP), '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_ldt_indirect_disp, { 0xa0003400 },
-    (PTR) & fmt_ldt_indirect_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldt $optdisp[$index*S$scale], $dst */
@@ -4325,7 +2576,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDT_INDEX_DISP, "ldt-index-disp", "ldt",
     { { MNEM, ' ', OP (OPTDISP), '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_ldt_index_disp, { 0xa0003800 },
-    (PTR) & fmt_ldt_index_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldt $optdisp($abase)[$index*S$scale], $dst */
@@ -4334,7 +2585,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDT_INDIRECT_INDEX_DISP, "ldt-indirect-index-disp", "ldt",
     { { MNEM, ' ', OP (OPTDISP), '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_ldt_indirect_index_disp, { 0xa0003c00 },
-    (PTR) & fmt_ldt_indirect_index_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldq $offset, $dst */
@@ -4343,7 +2594,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDQ_OFFSET, "ldq-offset", "ldq",
     { { MNEM, ' ', OP (OFFSET), ',', ' ', OP (DST), 0 } },
     & fmt_ldq_offset, { 0xb0000000 },
-    (PTR) & fmt_ldq_offset_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldq $offset($abase), $dst */
@@ -4352,7 +2603,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDQ_INDIRECT_OFFSET, "ldq-indirect-offset", "ldq",
     { { MNEM, ' ', OP (OFFSET), '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_ldq_indirect_offset, { 0xb0002000 },
-    (PTR) & fmt_ldq_indirect_offset_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldq ($abase), $dst */
@@ -4361,7 +2612,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDQ_INDIRECT, "ldq-indirect", "ldq",
     { { MNEM, ' ', '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_ldq_indirect, { 0xb0001000 },
-    (PTR) & fmt_ldq_indirect_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldq ($abase)[$index*S$scale], $dst */
@@ -4370,7 +2621,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDQ_INDIRECT_INDEX, "ldq-indirect-index", "ldq",
     { { MNEM, ' ', '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_ldq_indirect_index, { 0xb0001c00 },
-    (PTR) & fmt_ldq_indirect_index_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldq $optdisp, $dst */
@@ -4379,7 +2630,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDQ_DISP, "ldq-disp", "ldq",
     { { MNEM, ' ', OP (OPTDISP), ',', ' ', OP (DST), 0 } },
     & fmt_ldq_disp, { 0xb0003000 },
-    (PTR) & fmt_ldq_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldq $optdisp($abase), $dst */
@@ -4388,7 +2639,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDQ_INDIRECT_DISP, "ldq-indirect-disp", "ldq",
     { { MNEM, ' ', OP (OPTDISP), '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_ldq_indirect_disp, { 0xb0003400 },
-    (PTR) & fmt_ldq_indirect_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldq $optdisp[$index*S$scale], $dst */
@@ -4397,7 +2648,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDQ_INDEX_DISP, "ldq-index-disp", "ldq",
     { { MNEM, ' ', OP (OPTDISP), '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_ldq_index_disp, { 0xb0003800 },
-    (PTR) & fmt_ldq_index_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldq $optdisp($abase)[$index*S$scale], $dst */
@@ -4406,7 +2657,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_LDQ_INDIRECT_INDEX_DISP, "ldq-indirect-index-disp", "ldq",
     { { MNEM, ' ', OP (OPTDISP), '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_ldq_indirect_index_disp, { 0xb0003c00 },
-    (PTR) & fmt_ldq_indirect_index_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* st $st_src, $offset */
@@ -4415,7 +2666,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_ST_OFFSET, "st-offset", "st",
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OFFSET), 0 } },
     & fmt_st_offset, { 0x92000000 },
-    (PTR) & fmt_st_offset_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* st $st_src, $offset($abase) */
@@ -4424,7 +2675,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_ST_INDIRECT_OFFSET, "st-indirect-offset", "st",
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OFFSET), '(', OP (ABASE), ')', 0 } },
     & fmt_st_indirect_offset, { 0x92002000 },
-    (PTR) & fmt_st_indirect_offset_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* st $st_src, ($abase) */
@@ -4433,7 +2684,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_ST_INDIRECT, "st-indirect", "st",
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', '(', OP (ABASE), ')', 0 } },
     & fmt_st_indirect, { 0x92001000 },
-    (PTR) & fmt_st_indirect_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* st $st_src, ($abase)[$index*S$scale] */
@@ -4442,7 +2693,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_ST_INDIRECT_INDEX, "st-indirect-index", "st",
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', 0 } },
     & fmt_st_indirect_index, { 0x92001c00 },
-    (PTR) & fmt_st_indirect_index_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* st $st_src, $optdisp */
@@ -4451,7 +2702,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_ST_DISP, "st-disp", "st",
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OPTDISP), 0 } },
     & fmt_st_disp, { 0x92003000 },
-    (PTR) & fmt_st_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* st $st_src, $optdisp($abase) */
@@ -4460,7 +2711,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_ST_INDIRECT_DISP, "st-indirect-disp", "st",
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OPTDISP), '(', OP (ABASE), ')', 0 } },
     & fmt_st_indirect_disp, { 0x92003400 },
-    (PTR) & fmt_st_indirect_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* st $st_src, $optdisp[$index*S$scale */
@@ -4469,7 +2720,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_ST_INDEX_DISP, "st-index-disp", "st",
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OPTDISP), '[', OP (INDEX), '*', 'S', OP (SCALE), 0 } },
     & fmt_st_index_disp, { 0x92003800 },
-    (PTR) & fmt_st_index_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* st $st_src, $optdisp($abase)[$index*S$scale] */
@@ -4478,7 +2729,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_ST_INDIRECT_INDEX_DISP, "st-indirect-index-disp", "st",
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OPTDISP), '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', 0 } },
     & fmt_st_indirect_index_disp, { 0x92003c00 },
-    (PTR) & fmt_st_indirect_index_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stob $st_src, $offset */
@@ -4487,7 +2738,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_STOB_OFFSET, "stob-offset", "stob",
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OFFSET), 0 } },
     & fmt_stob_offset, { 0x82000000 },
-    (PTR) & fmt_stob_offset_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stob $st_src, $offset($abase) */
@@ -4496,7 +2747,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_STOB_INDIRECT_OFFSET, "stob-indirect-offset", "stob",
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OFFSET), '(', OP (ABASE), ')', 0 } },
     & fmt_stob_indirect_offset, { 0x82002000 },
-    (PTR) & fmt_stob_indirect_offset_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stob $st_src, ($abase) */
@@ -4505,7 +2756,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_STOB_INDIRECT, "stob-indirect", "stob",
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', '(', OP (ABASE), ')', 0 } },
     & fmt_stob_indirect, { 0x82001000 },
-    (PTR) & fmt_stob_indirect_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stob $st_src, ($abase)[$index*S$scale] */
@@ -4514,7 +2765,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_STOB_INDIRECT_INDEX, "stob-indirect-index", "stob",
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', 0 } },
     & fmt_stob_indirect_index, { 0x82001c00 },
-    (PTR) & fmt_stob_indirect_index_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stob $st_src, $optdisp */
@@ -4523,7 +2774,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_STOB_DISP, "stob-disp", "stob",
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OPTDISP), 0 } },
     & fmt_stob_disp, { 0x82003000 },
-    (PTR) & fmt_stob_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stob $st_src, $optdisp($abase) */
@@ -4532,7 +2783,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_STOB_INDIRECT_DISP, "stob-indirect-disp", "stob",
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OPTDISP), '(', OP (ABASE), ')', 0 } },
     & fmt_stob_indirect_disp, { 0x82003400 },
-    (PTR) & fmt_stob_indirect_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stob $st_src, $optdisp[$index*S$scale */
@@ -4541,7 +2792,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_STOB_INDEX_DISP, "stob-index-disp", "stob",
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OPTDISP), '[', OP (INDEX), '*', 'S', OP (SCALE), 0 } },
     & fmt_stob_index_disp, { 0x82003800 },
-    (PTR) & fmt_stob_index_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stob $st_src, $optdisp($abase)[$index*S$scale] */
@@ -4550,7 +2801,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_STOB_INDIRECT_INDEX_DISP, "stob-indirect-index-disp", "stob",
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OPTDISP), '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', 0 } },
     & fmt_stob_indirect_index_disp, { 0x82003c00 },
-    (PTR) & fmt_stob_indirect_index_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stos $st_src, $offset */
@@ -4559,7 +2810,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_STOS_OFFSET, "stos-offset", "stos",
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OFFSET), 0 } },
     & fmt_stos_offset, { 0x8a000000 },
-    (PTR) & fmt_stos_offset_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stos $st_src, $offset($abase) */
@@ -4568,7 +2819,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_STOS_INDIRECT_OFFSET, "stos-indirect-offset", "stos",
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OFFSET), '(', OP (ABASE), ')', 0 } },
     & fmt_stos_indirect_offset, { 0x8a002000 },
-    (PTR) & fmt_stos_indirect_offset_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stos $st_src, ($abase) */
@@ -4577,7 +2828,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_STOS_INDIRECT, "stos-indirect", "stos",
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', '(', OP (ABASE), ')', 0 } },
     & fmt_stos_indirect, { 0x8a001000 },
-    (PTR) & fmt_stos_indirect_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stos $st_src, ($abase)[$index*S$scale] */
@@ -4586,7 +2837,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_STOS_INDIRECT_INDEX, "stos-indirect-index", "stos",
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', 0 } },
     & fmt_stos_indirect_index, { 0x8a001c00 },
-    (PTR) & fmt_stos_indirect_index_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stos $st_src, $optdisp */
@@ -4595,7 +2846,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_STOS_DISP, "stos-disp", "stos",
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OPTDISP), 0 } },
     & fmt_stos_disp, { 0x8a003000 },
-    (PTR) & fmt_stos_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stos $st_src, $optdisp($abase) */
@@ -4604,7 +2855,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_STOS_INDIRECT_DISP, "stos-indirect-disp", "stos",
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OPTDISP), '(', OP (ABASE), ')', 0 } },
     & fmt_stos_indirect_disp, { 0x8a003400 },
-    (PTR) & fmt_stos_indirect_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stos $st_src, $optdisp[$index*S$scale */
@@ -4613,7 +2864,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_STOS_INDEX_DISP, "stos-index-disp", "stos",
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OPTDISP), '[', OP (INDEX), '*', 'S', OP (SCALE), 0 } },
     & fmt_stos_index_disp, { 0x8a003800 },
-    (PTR) & fmt_stos_index_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stos $st_src, $optdisp($abase)[$index*S$scale] */
@@ -4622,7 +2873,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_STOS_INDIRECT_INDEX_DISP, "stos-indirect-index-disp", "stos",
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OPTDISP), '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', 0 } },
     & fmt_stos_indirect_index_disp, { 0x8a003c00 },
-    (PTR) & fmt_stos_indirect_index_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stl $st_src, $offset */
@@ -4631,7 +2882,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_STL_OFFSET, "stl-offset", "stl",
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OFFSET), 0 } },
     & fmt_stl_offset, { 0x9a000000 },
-    (PTR) & fmt_stl_offset_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stl $st_src, $offset($abase) */
@@ -4640,7 +2891,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_STL_INDIRECT_OFFSET, "stl-indirect-offset", "stl",
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OFFSET), '(', OP (ABASE), ')', 0 } },
     & fmt_stl_indirect_offset, { 0x9a002000 },
-    (PTR) & fmt_stl_indirect_offset_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stl $st_src, ($abase) */
@@ -4649,7 +2900,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_STL_INDIRECT, "stl-indirect", "stl",
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', '(', OP (ABASE), ')', 0 } },
     & fmt_stl_indirect, { 0x9a001000 },
-    (PTR) & fmt_stl_indirect_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stl $st_src, ($abase)[$index*S$scale] */
@@ -4658,7 +2909,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_STL_INDIRECT_INDEX, "stl-indirect-index", "stl",
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', 0 } },
     & fmt_stl_indirect_index, { 0x9a001c00 },
-    (PTR) & fmt_stl_indirect_index_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stl $st_src, $optdisp */
@@ -4667,7 +2918,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_STL_DISP, "stl-disp", "stl",
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OPTDISP), 0 } },
     & fmt_stl_disp, { 0x9a003000 },
-    (PTR) & fmt_stl_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stl $st_src, $optdisp($abase) */
@@ -4676,7 +2927,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_STL_INDIRECT_DISP, "stl-indirect-disp", "stl",
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OPTDISP), '(', OP (ABASE), ')', 0 } },
     & fmt_stl_indirect_disp, { 0x9a003400 },
-    (PTR) & fmt_stl_indirect_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stl $st_src, $optdisp[$index*S$scale */
@@ -4685,7 +2936,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_STL_INDEX_DISP, "stl-index-disp", "stl",
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OPTDISP), '[', OP (INDEX), '*', 'S', OP (SCALE), 0 } },
     & fmt_stl_index_disp, { 0x9a003800 },
-    (PTR) & fmt_stl_index_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stl $st_src, $optdisp($abase)[$index*S$scale] */
@@ -4694,7 +2945,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_STL_INDIRECT_INDEX_DISP, "stl-indirect-index-disp", "stl",
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OPTDISP), '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', 0 } },
     & fmt_stl_indirect_index_disp, { 0x9a003c00 },
-    (PTR) & fmt_stl_indirect_index_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stt $st_src, $offset */
@@ -4703,7 +2954,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_STT_OFFSET, "stt-offset", "stt",
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OFFSET), 0 } },
     & fmt_stt_offset, { 0xa2000000 },
-    (PTR) & fmt_stt_offset_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stt $st_src, $offset($abase) */
@@ -4712,7 +2963,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_STT_INDIRECT_OFFSET, "stt-indirect-offset", "stt",
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OFFSET), '(', OP (ABASE), ')', 0 } },
     & fmt_stt_indirect_offset, { 0xa2002000 },
-    (PTR) & fmt_stt_indirect_offset_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stt $st_src, ($abase) */
@@ -4721,7 +2972,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_STT_INDIRECT, "stt-indirect", "stt",
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', '(', OP (ABASE), ')', 0 } },
     & fmt_stt_indirect, { 0xa2001000 },
-    (PTR) & fmt_stt_indirect_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stt $st_src, ($abase)[$index*S$scale] */
@@ -4730,7 +2981,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_STT_INDIRECT_INDEX, "stt-indirect-index", "stt",
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', 0 } },
     & fmt_stt_indirect_index, { 0xa2001c00 },
-    (PTR) & fmt_stt_indirect_index_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stt $st_src, $optdisp */
@@ -4739,7 +2990,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_STT_DISP, "stt-disp", "stt",
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OPTDISP), 0 } },
     & fmt_stt_disp, { 0xa2003000 },
-    (PTR) & fmt_stt_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stt $st_src, $optdisp($abase) */
@@ -4748,7 +2999,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_STT_INDIRECT_DISP, "stt-indirect-disp", "stt",
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OPTDISP), '(', OP (ABASE), ')', 0 } },
     & fmt_stt_indirect_disp, { 0xa2003400 },
-    (PTR) & fmt_stt_indirect_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stt $st_src, $optdisp[$index*S$scale */
@@ -4757,7 +3008,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_STT_INDEX_DISP, "stt-index-disp", "stt",
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OPTDISP), '[', OP (INDEX), '*', 'S', OP (SCALE), 0 } },
     & fmt_stt_index_disp, { 0xa2003800 },
-    (PTR) & fmt_stt_index_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stt $st_src, $optdisp($abase)[$index*S$scale] */
@@ -4766,7 +3017,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_STT_INDIRECT_INDEX_DISP, "stt-indirect-index-disp", "stt",
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OPTDISP), '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', 0 } },
     & fmt_stt_indirect_index_disp, { 0xa2003c00 },
-    (PTR) & fmt_stt_indirect_index_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stq $st_src, $offset */
@@ -4775,7 +3026,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_STQ_OFFSET, "stq-offset", "stq",
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OFFSET), 0 } },
     & fmt_stq_offset, { 0xb2000000 },
-    (PTR) & fmt_stq_offset_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stq $st_src, $offset($abase) */
@@ -4784,7 +3035,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_STQ_INDIRECT_OFFSET, "stq-indirect-offset", "stq",
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OFFSET), '(', OP (ABASE), ')', 0 } },
     & fmt_stq_indirect_offset, { 0xb2002000 },
-    (PTR) & fmt_stq_indirect_offset_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stq $st_src, ($abase) */
@@ -4793,7 +3044,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_STQ_INDIRECT, "stq-indirect", "stq",
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', '(', OP (ABASE), ')', 0 } },
     & fmt_stq_indirect, { 0xb2001000 },
-    (PTR) & fmt_stq_indirect_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stq $st_src, ($abase)[$index*S$scale] */
@@ -4802,7 +3053,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_STQ_INDIRECT_INDEX, "stq-indirect-index", "stq",
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', 0 } },
     & fmt_stq_indirect_index, { 0xb2001c00 },
-    (PTR) & fmt_stq_indirect_index_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stq $st_src, $optdisp */
@@ -4811,7 +3062,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_STQ_DISP, "stq-disp", "stq",
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OPTDISP), 0 } },
     & fmt_stq_disp, { 0xb2003000 },
-    (PTR) & fmt_stq_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stq $st_src, $optdisp($abase) */
@@ -4820,7 +3071,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_STQ_INDIRECT_DISP, "stq-indirect-disp", "stq",
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OPTDISP), '(', OP (ABASE), ')', 0 } },
     & fmt_stq_indirect_disp, { 0xb2003400 },
-    (PTR) & fmt_stq_indirect_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stq $st_src, $optdisp[$index*S$scale */
@@ -4829,7 +3080,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_STQ_INDEX_DISP, "stq-index-disp", "stq",
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OPTDISP), '[', OP (INDEX), '*', 'S', OP (SCALE), 0 } },
     & fmt_stq_index_disp, { 0xb2003800 },
-    (PTR) & fmt_stq_index_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stq $st_src, $optdisp($abase)[$index*S$scale] */
@@ -4838,7 +3089,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_STQ_INDIRECT_INDEX_DISP, "stq-indirect-index-disp", "stq",
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OPTDISP), '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', 0 } },
     & fmt_stq_indirect_index_disp, { 0xb2003c00 },
-    (PTR) & fmt_stq_indirect_index_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* cmpobe $br_src1, $br_src2, $br_disp */
@@ -4847,7 +3098,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_CMPOBE_REG, "cmpobe-reg", "cmpobe",
     { { MNEM, ' ', OP (BR_SRC1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobe_reg, { 0x32000000 },
-    (PTR) & fmt_cmpobe_reg_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* cmpobe $br_lit1, $br_src2, $br_disp */
@@ -4856,7 +3107,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_CMPOBE_LIT, "cmpobe-lit", "cmpobe",
     { { MNEM, ' ', OP (BR_LIT1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobe_lit, { 0x32002000 },
-    (PTR) & fmt_cmpobe_lit_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* cmpobne $br_src1, $br_src2, $br_disp */
@@ -4865,7 +3116,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_CMPOBNE_REG, "cmpobne-reg", "cmpobne",
     { { MNEM, ' ', OP (BR_SRC1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobe_reg, { 0x35000000 },
-    (PTR) & fmt_cmpobe_reg_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* cmpobne $br_lit1, $br_src2, $br_disp */
@@ -4874,7 +3125,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_CMPOBNE_LIT, "cmpobne-lit", "cmpobne",
     { { MNEM, ' ', OP (BR_LIT1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobe_lit, { 0x35002000 },
-    (PTR) & fmt_cmpobe_lit_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* cmpobl $br_src1, $br_src2, $br_disp */
@@ -4883,7 +3134,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_CMPOBL_REG, "cmpobl-reg", "cmpobl",
     { { MNEM, ' ', OP (BR_SRC1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobl_reg, { 0x34000000 },
-    (PTR) & fmt_cmpobl_reg_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* cmpobl $br_lit1, $br_src2, $br_disp */
@@ -4892,7 +3143,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_CMPOBL_LIT, "cmpobl-lit", "cmpobl",
     { { MNEM, ' ', OP (BR_LIT1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobl_lit, { 0x34002000 },
-    (PTR) & fmt_cmpobl_lit_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* cmpoble $br_src1, $br_src2, $br_disp */
@@ -4901,7 +3152,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_CMPOBLE_REG, "cmpoble-reg", "cmpoble",
     { { MNEM, ' ', OP (BR_SRC1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobl_reg, { 0x36000000 },
-    (PTR) & fmt_cmpobl_reg_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* cmpoble $br_lit1, $br_src2, $br_disp */
@@ -4910,7 +3161,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_CMPOBLE_LIT, "cmpoble-lit", "cmpoble",
     { { MNEM, ' ', OP (BR_LIT1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobl_lit, { 0x36002000 },
-    (PTR) & fmt_cmpobl_lit_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* cmpobg $br_src1, $br_src2, $br_disp */
@@ -4919,7 +3170,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_CMPOBG_REG, "cmpobg-reg", "cmpobg",
     { { MNEM, ' ', OP (BR_SRC1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobl_reg, { 0x31000000 },
-    (PTR) & fmt_cmpobl_reg_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* cmpobg $br_lit1, $br_src2, $br_disp */
@@ -4928,7 +3179,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_CMPOBG_LIT, "cmpobg-lit", "cmpobg",
     { { MNEM, ' ', OP (BR_LIT1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobl_lit, { 0x31002000 },
-    (PTR) & fmt_cmpobl_lit_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* cmpobge $br_src1, $br_src2, $br_disp */
@@ -4937,7 +3188,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_CMPOBGE_REG, "cmpobge-reg", "cmpobge",
     { { MNEM, ' ', OP (BR_SRC1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobl_reg, { 0x33000000 },
-    (PTR) & fmt_cmpobl_reg_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* cmpobge $br_lit1, $br_src2, $br_disp */
@@ -4946,7 +3197,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_CMPOBGE_LIT, "cmpobge-lit", "cmpobge",
     { { MNEM, ' ', OP (BR_LIT1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobl_lit, { 0x33002000 },
-    (PTR) & fmt_cmpobl_lit_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* cmpibe $br_src1, $br_src2, $br_disp */
@@ -4955,7 +3206,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_CMPIBE_REG, "cmpibe-reg", "cmpibe",
     { { MNEM, ' ', OP (BR_SRC1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobe_reg, { 0x3a000000 },
-    (PTR) & fmt_cmpobe_reg_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* cmpibe $br_lit1, $br_src2, $br_disp */
@@ -4964,7 +3215,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_CMPIBE_LIT, "cmpibe-lit", "cmpibe",
     { { MNEM, ' ', OP (BR_LIT1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobe_lit, { 0x3a002000 },
-    (PTR) & fmt_cmpobe_lit_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* cmpibne $br_src1, $br_src2, $br_disp */
@@ -4973,7 +3224,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_CMPIBNE_REG, "cmpibne-reg", "cmpibne",
     { { MNEM, ' ', OP (BR_SRC1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobe_reg, { 0x3d000000 },
-    (PTR) & fmt_cmpobe_reg_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* cmpibne $br_lit1, $br_src2, $br_disp */
@@ -4982,7 +3233,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_CMPIBNE_LIT, "cmpibne-lit", "cmpibne",
     { { MNEM, ' ', OP (BR_LIT1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobe_lit, { 0x3d002000 },
-    (PTR) & fmt_cmpobe_lit_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* cmpibl $br_src1, $br_src2, $br_disp */
@@ -4991,7 +3242,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_CMPIBL_REG, "cmpibl-reg", "cmpibl",
     { { MNEM, ' ', OP (BR_SRC1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobe_reg, { 0x3c000000 },
-    (PTR) & fmt_cmpobe_reg_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* cmpibl $br_lit1, $br_src2, $br_disp */
@@ -5000,7 +3251,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_CMPIBL_LIT, "cmpibl-lit", "cmpibl",
     { { MNEM, ' ', OP (BR_LIT1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobe_lit, { 0x3c002000 },
-    (PTR) & fmt_cmpobe_lit_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* cmpible $br_src1, $br_src2, $br_disp */
@@ -5009,7 +3260,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_CMPIBLE_REG, "cmpible-reg", "cmpible",
     { { MNEM, ' ', OP (BR_SRC1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobe_reg, { 0x3e000000 },
-    (PTR) & fmt_cmpobe_reg_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* cmpible $br_lit1, $br_src2, $br_disp */
@@ -5018,7 +3269,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_CMPIBLE_LIT, "cmpible-lit", "cmpible",
     { { MNEM, ' ', OP (BR_LIT1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobe_lit, { 0x3e002000 },
-    (PTR) & fmt_cmpobe_lit_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* cmpibg $br_src1, $br_src2, $br_disp */
@@ -5027,7 +3278,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_CMPIBG_REG, "cmpibg-reg", "cmpibg",
     { { MNEM, ' ', OP (BR_SRC1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobe_reg, { 0x39000000 },
-    (PTR) & fmt_cmpobe_reg_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* cmpibg $br_lit1, $br_src2, $br_disp */
@@ -5036,7 +3287,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_CMPIBG_LIT, "cmpibg-lit", "cmpibg",
     { { MNEM, ' ', OP (BR_LIT1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobe_lit, { 0x39002000 },
-    (PTR) & fmt_cmpobe_lit_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* cmpibge $br_src1, $br_src2, $br_disp */
@@ -5045,7 +3296,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_CMPIBGE_REG, "cmpibge-reg", "cmpibge",
     { { MNEM, ' ', OP (BR_SRC1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobe_reg, { 0x3b000000 },
-    (PTR) & fmt_cmpobe_reg_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* cmpibge $br_lit1, $br_src2, $br_disp */
@@ -5054,7 +3305,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_CMPIBGE_LIT, "cmpibge-lit", "cmpibge",
     { { MNEM, ' ', OP (BR_LIT1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobe_lit, { 0x3b002000 },
-    (PTR) & fmt_cmpobe_lit_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* bbc $br_src1, $br_src2, $br_disp */
@@ -5063,7 +3314,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_BBC_REG, "bbc-reg", "bbc",
     { { MNEM, ' ', OP (BR_SRC1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobe_reg, { 0x30000000 },
-    (PTR) & fmt_cmpobe_reg_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* bbc $br_lit1, $br_src2, $br_disp */
@@ -5072,7 +3323,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_BBC_LIT, "bbc-lit", "bbc",
     { { MNEM, ' ', OP (BR_LIT1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_bbc_lit, { 0x30002000 },
-    (PTR) & fmt_bbc_lit_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* bbs $br_src1, $br_src2, $br_disp */
@@ -5081,7 +3332,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_BBS_REG, "bbs-reg", "bbs",
     { { MNEM, ' ', OP (BR_SRC1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobe_reg, { 0x37000000 },
-    (PTR) & fmt_cmpobe_reg_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* bbs $br_lit1, $br_src2, $br_disp */
@@ -5090,7 +3341,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_BBS_LIT, "bbs-lit", "bbs",
     { { MNEM, ' ', OP (BR_LIT1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_bbc_lit, { 0x37002000 },
-    (PTR) & fmt_bbc_lit_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* cmpi $src1, $src2 */
@@ -5099,7 +3350,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_CMPI, "cmpi", "cmpi",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), 0 } },
     & fmt_cmpi, { 0x5a002080 },
-    (PTR) & fmt_cmpi_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* cmpi $lit1, $src2 */
@@ -5108,7 +3359,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_CMPI1, "cmpi1", "cmpi",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (SRC2), 0 } },
     & fmt_cmpi1, { 0x5a002880 },
-    (PTR) & fmt_cmpi1_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* cmpi $src1, $lit2 */
@@ -5117,7 +3368,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_CMPI2, "cmpi2", "cmpi",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (LIT2), 0 } },
     & fmt_cmpi2, { 0x5a003080 },
-    (PTR) & fmt_cmpi2_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* cmpi $lit1, $lit2 */
@@ -5126,7 +3377,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_CMPI3, "cmpi3", "cmpi",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (LIT2), 0 } },
     & fmt_cmpi3, { 0x5a003880 },
-    (PTR) & fmt_cmpi3_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* cmpo $src1, $src2 */
@@ -5135,7 +3386,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_CMPO, "cmpo", "cmpo",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), 0 } },
     & fmt_cmpi, { 0x5a002000 },
-    (PTR) & fmt_cmpi_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* cmpo $lit1, $src2 */
@@ -5144,7 +3395,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_CMPO1, "cmpo1", "cmpo",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (SRC2), 0 } },
     & fmt_cmpi1, { 0x5a002800 },
-    (PTR) & fmt_cmpi1_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* cmpo $src1, $lit2 */
@@ -5153,7 +3404,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_CMPO2, "cmpo2", "cmpo",
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (LIT2), 0 } },
     & fmt_cmpi2, { 0x5a003000 },
-    (PTR) & fmt_cmpi2_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* cmpo $lit1, $lit2 */
@@ -5162,7 +3413,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_CMPO3, "cmpo3", "cmpo",
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (LIT2), 0 } },
     & fmt_cmpi3, { 0x5a003800 },
-    (PTR) & fmt_cmpi3_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* testno $br_src1 */
@@ -5171,7 +3422,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_TESTNO_REG, "testno-reg", "testno",
     { { MNEM, ' ', OP (BR_SRC1), 0 } },
     & fmt_testno_reg, { 0x20000000 },
-    (PTR) & fmt_testno_reg_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* testg $br_src1 */
@@ -5180,7 +3431,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_TESTG_REG, "testg-reg", "testg",
     { { MNEM, ' ', OP (BR_SRC1), 0 } },
     & fmt_testno_reg, { 0x21000000 },
-    (PTR) & fmt_testno_reg_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* teste $br_src1 */
@@ -5189,7 +3440,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_TESTE_REG, "teste-reg", "teste",
     { { MNEM, ' ', OP (BR_SRC1), 0 } },
     & fmt_testno_reg, { 0x22000000 },
-    (PTR) & fmt_testno_reg_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* testge $br_src1 */
@@ -5198,7 +3449,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_TESTGE_REG, "testge-reg", "testge",
     { { MNEM, ' ', OP (BR_SRC1), 0 } },
     & fmt_testno_reg, { 0x23000000 },
-    (PTR) & fmt_testno_reg_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* testl $br_src1 */
@@ -5207,7 +3458,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_TESTL_REG, "testl-reg", "testl",
     { { MNEM, ' ', OP (BR_SRC1), 0 } },
     & fmt_testno_reg, { 0x24000000 },
-    (PTR) & fmt_testno_reg_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* testne $br_src1 */
@@ -5216,7 +3467,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_TESTNE_REG, "testne-reg", "testne",
     { { MNEM, ' ', OP (BR_SRC1), 0 } },
     & fmt_testno_reg, { 0x25000000 },
-    (PTR) & fmt_testno_reg_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* testle $br_src1 */
@@ -5225,7 +3476,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_TESTLE_REG, "testle-reg", "testle",
     { { MNEM, ' ', OP (BR_SRC1), 0 } },
     & fmt_testno_reg, { 0x26000000 },
-    (PTR) & fmt_testno_reg_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* testo $br_src1 */
@@ -5234,7 +3485,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_TESTO_REG, "testo-reg", "testo",
     { { MNEM, ' ', OP (BR_SRC1), 0 } },
     & fmt_testno_reg, { 0x27000000 },
-    (PTR) & fmt_testno_reg_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* bno $ctrl_disp */
@@ -5243,7 +3494,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_BNO, "bno", "bno",
     { { MNEM, ' ', OP (CTRL_DISP), 0 } },
     & fmt_bno, { 0x10000000 },
-    (PTR) & fmt_bno_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* bg $ctrl_disp */
@@ -5252,7 +3503,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_BG, "bg", "bg",
     { { MNEM, ' ', OP (CTRL_DISP), 0 } },
     & fmt_bno, { 0x11000000 },
-    (PTR) & fmt_bno_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* be $ctrl_disp */
@@ -5261,7 +3512,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_BE, "be", "be",
     { { MNEM, ' ', OP (CTRL_DISP), 0 } },
     & fmt_bno, { 0x12000000 },
-    (PTR) & fmt_bno_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* bge $ctrl_disp */
@@ -5270,7 +3521,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_BGE, "bge", "bge",
     { { MNEM, ' ', OP (CTRL_DISP), 0 } },
     & fmt_bno, { 0x13000000 },
-    (PTR) & fmt_bno_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* bl $ctrl_disp */
@@ -5279,7 +3530,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_BL, "bl", "bl",
     { { MNEM, ' ', OP (CTRL_DISP), 0 } },
     & fmt_bno, { 0x14000000 },
-    (PTR) & fmt_bno_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* bne $ctrl_disp */
@@ -5288,7 +3539,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_BNE, "bne", "bne",
     { { MNEM, ' ', OP (CTRL_DISP), 0 } },
     & fmt_bno, { 0x15000000 },
-    (PTR) & fmt_bno_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* ble $ctrl_disp */
@@ -5297,7 +3548,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_BLE, "ble", "ble",
     { { MNEM, ' ', OP (CTRL_DISP), 0 } },
     & fmt_bno, { 0x16000000 },
-    (PTR) & fmt_bno_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* bo $ctrl_disp */
@@ -5306,7 +3557,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_BO, "bo", "bo",
     { { MNEM, ' ', OP (CTRL_DISP), 0 } },
     & fmt_bno, { 0x17000000 },
-    (PTR) & fmt_bno_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* b $ctrl_disp */
@@ -5315,7 +3566,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_B, "b", "b",
     { { MNEM, ' ', OP (CTRL_DISP), 0 } },
     & fmt_b, { 0x8000000 },
-    (PTR) & fmt_b_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0|A(UNCOND_CTI), { (1<<MACH_BASE) } }
   },
 /* bx $offset($abase) */
@@ -5324,7 +3575,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_BX_INDIRECT_OFFSET, "bx-indirect-offset", "bx",
     { { MNEM, ' ', OP (OFFSET), '(', OP (ABASE), ')', 0 } },
     & fmt_bx_indirect_offset, { 0x84002000 },
-    (PTR) & fmt_bx_indirect_offset_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0|A(UNCOND_CTI), { (1<<MACH_BASE) } }
   },
 /* bx ($abase) */
@@ -5333,7 +3584,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_BX_INDIRECT, "bx-indirect", "bx",
     { { MNEM, ' ', '(', OP (ABASE), ')', 0 } },
     & fmt_bx_indirect, { 0x84001000 },
-    (PTR) & fmt_bx_indirect_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0|A(UNCOND_CTI), { (1<<MACH_BASE) } }
   },
 /* bx ($abase)[$index*S$scale] */
@@ -5342,7 +3593,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_BX_INDIRECT_INDEX, "bx-indirect-index", "bx",
     { { MNEM, ' ', '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', 0 } },
     & fmt_bx_indirect_index, { 0x84001c00 },
-    (PTR) & fmt_bx_indirect_index_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0|A(UNCOND_CTI), { (1<<MACH_BASE) } }
   },
 /* bx $optdisp */
@@ -5351,7 +3602,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_BX_DISP, "bx-disp", "bx",
     { { MNEM, ' ', OP (OPTDISP), 0 } },
     & fmt_bx_disp, { 0x84003000 },
-    (PTR) & fmt_bx_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0|A(UNCOND_CTI), { (1<<MACH_BASE) } }
   },
 /* bx $optdisp($abase) */
@@ -5360,7 +3611,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_BX_INDIRECT_DISP, "bx-indirect-disp", "bx",
     { { MNEM, ' ', OP (OPTDISP), '(', OP (ABASE), ')', 0 } },
     & fmt_bx_indirect_disp, { 0x84003400 },
-    (PTR) & fmt_bx_indirect_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0|A(UNCOND_CTI), { (1<<MACH_BASE) } }
   },
 /* callx $optdisp */
@@ -5369,7 +3620,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_CALLX_DISP, "callx-disp", "callx",
     { { MNEM, ' ', OP (OPTDISP), 0 } },
     & fmt_callx_disp, { 0x86003000 },
-    (PTR) & fmt_callx_disp_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0|A(UNCOND_CTI), { (1<<MACH_BASE) } }
   },
 /* callx ($abase) */
@@ -5378,7 +3629,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_CALLX_INDIRECT, "callx-indirect", "callx",
     { { MNEM, ' ', '(', OP (ABASE), ')', 0 } },
     & fmt_callx_indirect, { 0x86001000 },
-    (PTR) & fmt_callx_indirect_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0|A(UNCOND_CTI), { (1<<MACH_BASE) } }
   },
 /* callx $offset($abase) */
@@ -5387,7 +3638,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_CALLX_INDIRECT_OFFSET, "callx-indirect-offset", "callx",
     { { MNEM, ' ', OP (OFFSET), '(', OP (ABASE), ')', 0 } },
     & fmt_callx_indirect_offset, { 0x86002000 },
-    (PTR) & fmt_callx_indirect_offset_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0|A(UNCOND_CTI), { (1<<MACH_BASE) } }
   },
 /* ret */
@@ -5396,7 +3647,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_RET, "ret", "ret",
     { { MNEM, 0 } },
     & fmt_ret, { 0xa000000 },
-    (PTR) & fmt_ret_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0|A(UNCOND_CTI), { (1<<MACH_BASE) } }
   },
 /* calls $src1 */
@@ -5405,7 +3656,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_CALLS, "calls", "calls",
     { { MNEM, ' ', OP (SRC1), 0 } },
     & fmt_calls, { 0x66003000 },
-    (PTR) & fmt_calls_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0|A(UNCOND_CTI), { (1<<MACH_BASE) } }
   },
 /* fmark */
@@ -5414,7 +3665,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_FMARK, "fmark", "fmark",
     { { MNEM, 0 } },
     & fmt_fmark, { 0x66003e00 },
-    (PTR) & fmt_fmark_ops[0],
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0|A(UNCOND_CTI), { (1<<MACH_BASE) } }
   },
 /* flushreg */

@@ -1,3 +1,14 @@
+1999-01-12  Doug Evans  <devans@casey.cygnus.com>
+
+start-sanitize-cygnus
+	* Makefile.am (run-cgen): Pass options to cgen.
+	(stamp-m32r): Build operand instance table.
+	(stamp-fr30,stamp-i960c): Don't build the table.
+	* Makefile.in: Regenerate.
+	* cgen.sh: New arg `options'.  Pass to cgen.
+end-sanitize-cygnus
+	* fr30-opc.c,i960c-opc.c: Regenerate.
+
 1999-01-11  Doug Evans  <devans@casey.cygnus.com>
 
 	* fr30-opc.c: Regenerate.
