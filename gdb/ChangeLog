@@ -1,3 +1,8 @@
+2000-04-13  Nick Duffek  <nsd@cygnus.com>
+
+	* sol-thread.c (init_sol_core_ops): Initialize to_thread_alive
+	and document to_find_new_threads bug.
+
 2000-04-13  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* infrun.c (proceed, normal_stop): Change the error message about
