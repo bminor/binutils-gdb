@@ -1,6 +1,7 @@
-Tue May 14 15:02:13 PDT 1991  Roland Pesch (pesch at cygint.cygnus.com)
+Tue May 14 15:31:20 PDT 1991  Roland Pesch (pesch at cygint.cygnus.com)
 
-	* gdb.info*: added to distribution.  These are ordinary info
+	* gdbint.texinfo: added instructions on generating gdb.info* files
+	locally for release.  These are ordinary info
 	files, formatted from gdb.texinfo (via gdb-all.texinfo, see
 	Makefile)---but due to use of texinfo 2, can't count on makeinfo
 	to generate these, so we distribute them already formatted.
