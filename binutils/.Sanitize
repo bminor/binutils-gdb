@@ -31,7 +31,6 @@ NEWS
 README
 TODO
 alloca.c
-am29k-pinsn.c
 ar.1
 ar.c
 arlex.l
@@ -47,7 +46,6 @@ config
 copy.c
 filemode.c
 gmalloc.c
-i960-pinsn.c
 is-ranlib.c
 is-strip.c
 maybe-ranlib.c

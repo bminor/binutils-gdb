@@ -24,11 +24,13 @@ Do-first:
 Things-to-keep:
 ChangeLog
 Makefile.in
+a29k-dis.c
 configure.in
 dis-buf.c
 h8500-dis.c
 h8500-opc.h
 i386-dis.c
+i960-dis.c
 m68881-ext.c
 m68k-dis.c
 mips-dis.c

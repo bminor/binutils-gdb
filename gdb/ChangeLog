@@ -1,5 +1,9 @@
 Thu Apr  1 09:01:38 1993  Jim Kingdon  (kingdon@cygnus.com)
 
+	* i960-pinsn.c, a29k-pinsn.c: Much abridged, just use libopcodes.a.
+
+	* core.c (dis_asm_print_address): New function.
+
 	* core.c (dis_asm_read_memory): Reinstate 4th arg.  The prototype
 	has been fixed.
 

@@ -1,3 +1,15 @@
+Thu Apr  1 11:20:43 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* sparc-dis.c: Use fprintf_func a few places where I forgot,
+	and double percent signs a few places.
+
+	* a29k-dis.c, i960-dis.c: New, merged from gdb and binutils.
+
+	* i386-dis.c, m68k-dis.c, mips-dis.c, sparc-dis.c:
+	Use info->print_address_func not print_address.
+
+	* dis-buf.c (generic_print_address): New function.
+
 Wed Mar 31 10:07:04 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* Makefile.in: Add sparc-dis.c.
