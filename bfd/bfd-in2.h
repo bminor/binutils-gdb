@@ -2329,6 +2329,33 @@ to compensate for the borrow when the low bits are added.  */
   BFD_RELOC_FRV_GPRELHI,
   BFD_RELOC_FRV_GPRELLO,
 
+/* This is a 24bit GOT-relative reloc for the mn10300.  */
+  BFD_RELOC_MN10300_GOTOFF24,
+
+/* This is a 32bit GOT-relative reloc for the mn10300, offset by two bytes
+in the instruction.  */
+  BFD_RELOC_MN10300_GOT32,
+
+/* This is a 24bit GOT-relative reloc for the mn10300, offset by two bytes
+in the instruction.  */
+  BFD_RELOC_MN10300_GOT24,
+
+/* This is a 16bit GOT-relative reloc for the mn10300, offset by two bytes
+in the instruction.  */
+  BFD_RELOC_MN10300_GOT16,
+
+/* Copy symbol at runtime.  */
+  BFD_RELOC_MN10300_COPY,
+
+/* Create GOT entry.  */
+  BFD_RELOC_MN10300_GLOB_DAT,
+
+/* Create PLT entry.  */
+  BFD_RELOC_MN10300_JMP_SLOT,
+
+/* Adjust by program base.  */
+  BFD_RELOC_MN10300_RELATIVE,
+
 
 /* i386/elf relocations  */
   BFD_RELOC_386_GOT32,

@@ -2143,6 +2143,42 @@ ENUMDOC
   MIPS ELF relocations.
 
 COMMENT
+ENUM
+  BFD_RELOC_MN10300_GOTOFF24
+ENUMDOC
+  This is a 24bit GOT-relative reloc for the mn10300.
+ENUM
+  BFD_RELOC_MN10300_GOT32
+ENUMDOC
+  This is a 32bit GOT-relative reloc for the mn10300, offset by two bytes
+  in the instruction.
+ENUM
+  BFD_RELOC_MN10300_GOT24
+ENUMDOC
+  This is a 24bit GOT-relative reloc for the mn10300, offset by two bytes
+  in the instruction.
+ENUM
+  BFD_RELOC_MN10300_GOT16
+ENUMDOC
+  This is a 16bit GOT-relative reloc for the mn10300, offset by two bytes
+  in the instruction.
+ENUM
+  BFD_RELOC_MN10300_COPY
+ENUMDOC
+  Copy symbol at runtime.
+ENUM
+  BFD_RELOC_MN10300_GLOB_DAT
+ENUMDOC
+  Create GOT entry.
+ENUM
+  BFD_RELOC_MN10300_JMP_SLOT
+ENUMDOC
+  Create PLT entry.
+ENUM
+  BFD_RELOC_MN10300_RELATIVE
+ENUMDOC
+  Adjust by program base.
+COMMENT
 
 ENUM
   BFD_RELOC_386_GOT32

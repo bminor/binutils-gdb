@@ -1,5 +1,82 @@
 2003-07-09  Alexandre Oliva  <aoliva@redhat.com>
 
+	2002-12-12  Alexandre Oliva  <aoliva@redhat.com>
+	* elf-m10300.c (elf32_mn10300_link_hash_newfunc): Initialize
+	pcrel_relocs_copied.
+	2001-12-13  Alexandre Oliva  <aoliva@redhat.com>
+	* elf-m10300.c (ELF_DYNAMIC_INTERPRETER): Renamed from
+	ld-linux.so.2 to ld.so.1.
+	2001-10-10  Alexandre Oliva  <aoliva@redhat.com>
+	* elf-m10300.c (elf_mn10300_sizeof_plt0): New macro.
+	(_bfd_mn10300_elf_adjust_dynamic_symbol): Use it.
+	(_bfd_mn10300_elf_finish_dynamic_symbol): Likewise.
+	* elf-m10300.c (_bfd_mn10300_elf_size_dynamic_sections): Allocate
+	.rela.* section contents with bfd_zalloc.
+	2001-09-25  Alexandre Oliva  <aoliva@redhat.com>
+	* elf-m10300.c: Added declarations for functions missing them.
+	Merge some shared-library changes from the i386 back-end.  Use
+	R_MN10300_RELATIVE instead of R_MN10300_PCREL32 and
+	R_MN10300_GLOB_DAT instead of R_MN10300_32 where appropriate.
+	(struct elf32_mn10300_link_hash_entry): Remove duplicates of
+	members of elf_link_hash_entry.  Adjusted references.
+	(mn10300_elf_final_link_relocate): dynobj was already loaded
+	into a local variable, use it.
+	2001-09-21  Nick Clifton  <nickc@cambridge.redhat.com>
+	* elf-m10300.c: Add missing function prototypes.
+	2001-08-24  Alexandre Oliva  <aoliva@redhat.com>
+	* elf-m10300.c (mn10300_elf_relocate_section): Don't compute
+	relocation for dynamic relocations.
+	2001-05-16  Alexandre Oliva  <aoliva@redhat.com>
+	* reloc.c (BFD_RELOC_MN10300_GOTOFF24): New.
+	* elf-m10300.c: Introduce GOTPC16, GOTOFF24, GOTOFF16 and
+	PLT16, and rename GOTPC to GOTPC32 and GOTOFF to GOTOFF32.
+	(_bfd_mn10300_elf_create_dynamic_sections): Move creation ot PLT...
+	(_bfd_mn10300_elf_create_got_section): ... here, so that its
+	adress is already known at the time we compute relaxations.
+	(mn10300_elf_relax_section): Relax GOTPC32, GOTOFF32, GOT32
+	and PLT32 to narrower relocations.
+	* libbfd.h, bfd-in2.h: Rebuilt.
+	2001-04-12  Alexandre Oliva  <aoliva@redhat.com>
+	* reloc.c (BFD_RELOC_MN10300_GOT32, BFD_RELOC_MN10300_GOT24,
+	BFD_RELOC_MN10300_GOT16, BFD_RELOC_MN10300_COPY,
+	BFD_RELOC_MN10300_GLOB_DAT, BFD_RELOC_MN10300_JMP_SLOT,
+	BFD_RELOC_MN10300_RELATIVE): New relocs.
+	* libbfd.h, bfd-in2.h: Rebuilt.
+	* elf-m10300.c (struct elf_mn10300_pcrel_relocs_copied): New.
+	(struct elf32_mn10300_link_hash_entry): Added DSO-related
+	fields.
+	(elf_mn10300_howto): Defined new relocation types.
+	(mn10300_reloc_map): Map them.
+	(_bfd_mn10300_elf_create_got_section): New fn.
+	(mn10300_elf_check_relocs): Handle PIC relocs.
+	(mn10300_elf_final_link_relocate): Likewise.
+	(mn10300_elf_relocate_section): Handle DSOs.
+	(PLT0_ENTRY_SIZE, PLT_ENTRY_SIZE, PIC_PLT_ENTRY_SIZE): New macros.
+	(elf_mn10300_plt0_entry, elf_mn10300_plt_entry,
+	elf_mn10300_pic_plt_entry): New.
+	(elf_mn10300_sizeof_plt, elf_mn10300_plt_plt0_offset,
+	elf_mn10300_plt0_linker_offset, elf_mn10300_plt0_gotid_offset,
+	elf_mn10300_plt_temp_offset, elf_mn10300_plt_symbol_offset,
+	elf_mn10300_plt_reloc_offset: New macros.
+	(ELF_DYNAMIC_INTERPRETER): Likewise.
+	(_bfd_mn10300_elf_create_dynamic_sections): New function.
+	(_bfd_mn10300_elf_adjust_dynamic_symbol): Likewise.
+	(_bfd_mn10300_elf_discard_copies): Likewise.
+	(_bfd_mn10300_elf_size_dynamic_sections): Likewise.
+	(_bfd_mn10300_elf_finish_dynamic_symbol): Likewise.
+	(_bfd_mn10300_elf_finish_dynamic_sections): Likewise.
+	(elf_backend_can_gc_sections,
+	elf_backend_create_dynamic_sections,
+	elf_backend_adjust_dynamic_sections,
+	elf_backend_size_dynamic_sections,
+	elf_backend_finish_dynamic_symbol,
+	elf_backend_finish_dynamic_sections, elf_backend_want_got_plt,
+	elf_backend_plt_readonly, elf_backend_want_plt_sym,
+	elf_backend_got_header_size, elf_backend_plt_header_size): New
+	macros.
+
+2003-07-09  Alexandre Oliva  <aoliva@redhat.com>
+
 	2001-05-06  Alexandre Oliva  <aoliva@redhat.com>
 	* elf-m10300.c (compute_function_info): Account for AM33
 	registers in `movm' when computing stack space for `call' when
