@@ -512,7 +512,7 @@ extern int bfd_stat PARAMS ((bfd *abfd, struct stat *));
 
 #define bfd_get_symbol_leading_char(abfd) ((abfd)->xvec->symbol_leading_char)
 
-#define bfd_set_cacheable(abfd,bool) (((abfd)->cacheable = (boolean)(bool)), true)
+#define bfd_set_cacheable(abfd,bool) (((abfd)->cacheable = (boolean) (bool)), true)
 
 extern boolean bfd_record_phdr
   PARAMS ((bfd *, unsigned long, boolean, flagword, boolean, bfd_vma,

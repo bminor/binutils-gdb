@@ -833,7 +833,7 @@ DESCRIPTION
 	Instead, we want to ask questions like "is this NNN byte sized
 	object I'm about to try read from file offset YYY reasonable?"
 	As as example of where we might do this, some object formats
-	use string tables for which the first <<sizeof(long)>> bytes of the
+	use string tables for which the first <<sizeof (long)>> bytes of the
 	table contain the size of the table itself, including the size bytes.
 	If an application tries to read what it thinks is one of these
 	string tables, without some way to validate the size, and for
@@ -980,7 +980,7 @@ bfd_scan_vma (string, end, base)
   int digit;
 
   /* Let the host do it if possible.  */
-  if (sizeof(bfd_vma) <= sizeof(unsigned long))
+  if (sizeof (bfd_vma) <= sizeof (unsigned long))
     return (bfd_vma) strtoul (string, (char **) end, base);
 
   /* A negative base makes no sense, and we only need to go as high as hex.  */

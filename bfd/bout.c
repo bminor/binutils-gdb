@@ -306,22 +306,22 @@ b_out_write_object_contents (abfd)
 	}
 
       if (q > outsyms)
-	qsort (outsyms, q - outsyms, sizeof(asymbol*), b_out_symbol_cmp);
+	qsort (outsyms, q - outsyms, sizeof (asymbol*), b_out_symbol_cmp);
 
       /* Back to your regularly scheduled program.  */
 
-      if (bfd_seek (abfd, (file_ptr)(N_SYMOFF(*exec_hdr(abfd))), SEEK_SET)
+      if (bfd_seek (abfd, (file_ptr) (N_SYMOFF(*exec_hdr(abfd))), SEEK_SET)
 	  != 0)
 	return false;
 
       if (! aout_32_write_syms (abfd))
 	return false;
 
-      if (bfd_seek (abfd, (file_ptr)(N_TROFF(*exec_hdr(abfd))), SEEK_SET) != 0)
+      if (bfd_seek (abfd, (file_ptr) (N_TROFF(*exec_hdr(abfd))), SEEK_SET) != 0)
 	return false;
 
       if (!b_out_squirt_out_relocs (abfd, obj_textsec (abfd))) return false;
-      if (bfd_seek (abfd, (file_ptr)(N_DROFF(*exec_hdr(abfd))), SEEK_SET)
+      if (bfd_seek (abfd, (file_ptr) (N_DROFF(*exec_hdr(abfd))), SEEK_SET)
 	  != 0)
 	return false;
 
@@ -375,7 +375,7 @@ calljx_callback (abfd, link_info, reloc_entry, src, dst, input_section)
 
   word += value + reloc_entry->addend;
 
-  bfd_put_32(abfd, word, dst);
+  bfd_put_32 (abfd, word, dst);
   return bfd_reloc_ok;
 }
 
@@ -439,7 +439,7 @@ callj_callback (abfd, link_info, reloc_entry,  data, srcidx, dstidx,
 		      - output_addr (input_section))
 		     & BAL_MASK);
     }
-  bfd_put_32(abfd, word, (bfd_byte *) data + dstidx);
+  bfd_put_32 (abfd, word, (bfd_byte *) data + dstidx);
   return bfd_reloc_ok;
 }
 
@@ -549,7 +549,7 @@ b_out_slurp_reloc_table (abfd, asect, symbols)
   return false;
 
  doit:
-  if (bfd_seek (abfd, (file_ptr)(asect->rel_filepos),  SEEK_SET) != 0)
+  if (bfd_seek (abfd, (file_ptr) (asect->rel_filepos),  SEEK_SET) != 0)
     return false;
   count = reloc_size / sizeof (struct relocation_info);
 
@@ -944,7 +944,7 @@ b_out_set_section_contents (abfd, section, location, offset, count)
     if (! aout_32_make_sections (abfd))
       return false;
 
-    obj_textsec (abfd)->filepos = sizeof(struct internal_exec);
+    obj_textsec (abfd)->filepos = sizeof (struct internal_exec);
     obj_datasec(abfd)->filepos = obj_textsec(abfd)->filepos
                                  +  obj_textsec (abfd)->_raw_size;
 
@@ -993,7 +993,7 @@ b_out_sizeof_headers (ignore_abfd, ignore)
      bfd *ignore_abfd ATTRIBUTE_UNUSED;
      boolean ignore ATTRIBUTE_UNUSED;
 {
-  return sizeof(struct internal_exec);
+  return sizeof (struct internal_exec);
 }
 
 /************************************************************************/
@@ -1410,7 +1410,7 @@ b_out_bfd_get_relocated_section_contents (output_bfd, link_info, link_order,
 		  break;
 
 		default:
-		  abort();
+		  abort ();
 		}
 	    }
 	}

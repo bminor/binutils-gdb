@@ -10,6 +10,10 @@
 	* aoutf1.h: Likewise.
 	* aoutx.h: Likewise.
 	* archive.c: Likewise.
+	* bfd-in.h: Likewise.
+	* bfd-in2.h: Likewise.
+	* bfd.c: Likewise.
+	* bout.c: Likewise.
 
 2000-11-17  H.J. Lu  <hjl@gnu.org>
 
