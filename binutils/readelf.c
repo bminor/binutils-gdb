@@ -810,6 +810,11 @@ get_machine_flags (e_flags, e_machine)
 	default:
 	  break;
 
+        case EM_68K:
+          if (e_flags & EF_CPU32)
+            strcat (buf, ", cpu32");
+          break;
+
 	case EM_PPC:
 	  if (e_flags & EF_PPC_EMB)
 	    strcat (buf, ", emb");
@@ -1328,8 +1333,8 @@ get_data_encoding (encoding)
   switch (encoding)
     {
     case ELFDATANONE: return _("none");
-    case ELFDATA2LSB: return _("2's compilment, little endian");
-    case ELFDATA2MSB: return _("2's compilment, big endian");
+    case ELFDATA2LSB: return _("2's complement, little endian");
+    case ELFDATA2MSB: return _("2's complement, big endian");
     default:          return _("<unknown>");
     }
 }

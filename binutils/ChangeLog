@@ -1,3 +1,8 @@
+1999-05-05  Catherine Moore  <clm@cygnus.com>
+ 
+        * readelf.c (get_machine_flags):  Check for EF_CPU32.
+        (get_data_encoding): Fix typo.
+ 
 1999-04-26  Tom Tromey  <tromey@cygnus.com>
 
 	* aclocal.m4, configure: Updated for new version of libtool.
