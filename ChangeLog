@@ -1,3 +1,7 @@
+Thu Mar 31 04:55:57 1994  David J. Mackenzie  (djm@rtl.cygnus.com)
+
+	* configure: Support --silent, --quiet.
+
 Wed Mar 30 21:37:38 1994  David J. Mackenzie  (djm@rtl.cygnus.com)
 
 	* configure: Support --disable-FEATURE.
