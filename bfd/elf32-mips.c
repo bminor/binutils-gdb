@@ -84,6 +84,9 @@ static boolean mips_elf_section_processing
 static void mips_elf_symbol_processing PARAMS ((bfd *, asymbol *));
 static boolean mips_elf_read_ecoff_info
   PARAMS ((bfd *, asection *, struct ecoff_debug_info *));
+static boolean mips_elf_find_nearest_line
+  PARAMS ((bfd *, asection *, asymbol **, bfd_vma, const char **,
+	   const char **, unsigned int *));
 static struct bfd_hash_entry *mips_elf_link_hash_newfunc
   PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
 static struct bfd_link_hash_table *mips_elf_link_hash_table_create
@@ -686,6 +689,10 @@ mips_elf_got16_reloc (abfd,
    cleverly because the entries in the .lit8 and .lit4 sections can be
    merged.  */
 
+static bfd_reloc_status_type gprel16_with_gp PARAMS ((bfd *, asymbol *,
+						      arelent *, asection *,
+						      boolean, PTR, bfd_vma));
+
 static bfd_reloc_status_type
 mips_elf_gprel16_reloc (abfd,
 			reloc_entry,
@@ -703,9 +710,6 @@ mips_elf_gprel16_reloc (abfd,
      char **error_message;
 {
   boolean relocateable;
-  bfd_vma relocation;
-  unsigned long val;
-  unsigned long insn;
 
   /* If we're relocating, and this is an external symbol with no
      addend, we don't want to change anything.  We will only have an
@@ -730,6 +734,10 @@ mips_elf_gprel16_reloc (abfd,
   if (bfd_is_und_section (symbol->section)
       && relocateable == false)
     return bfd_reloc_undefined;
+
+  /* Some of the code below assumes the output bfd is ELF too.  */
+  if (output_bfd->xvec->flavour != bfd_target_elf_flavour)
+    abort ();
 
   /* We have to figure out the gp value, so that we can adjust the
      symbol value correctly.  We look up the symbol _gp in the output
@@ -783,6 +791,25 @@ mips_elf_gprel16_reloc (abfd,
 	}
     }
 
+  return gprel16_with_gp (symbol, reloc_entry, input_section, relocateable,
+			  data, elf_gp (output_bfd));
+}
+
+static bfd_reloc_status_type
+gprel16_with_gp (abfd, symbol, reloc_entry, input_section, relocateable, data,
+		 gp)
+     bfd *abfd;
+     asymbol *symbol;
+     arelent *reloc_entry;
+     asection *input_section;
+     boolean relocateable;
+     PTR data;
+     bfd_vma gp;
+{
+  bfd_vma relocation;
+  unsigned long insn;
+  unsigned long val;
+
   if (bfd_is_com_section (symbol->section))
     relocation = 0;
   else
@@ -806,7 +833,7 @@ mips_elf_gprel16_reloc (abfd,
      an external symbol.  */
   if (relocateable == false
       || (symbol->flags & BSF_SECTION_SYM) != 0)
-    val += relocation - elf_gp (output_bfd);
+    val += relocation - gp;
 
   insn = (insn &~ 0xffff) | (val & 0xffff);
   bfd_put_32 (abfd, insn, (bfd_byte *) data + reloc_entry->address);
@@ -1479,7 +1506,98 @@ mips_elf_read_ecoff_info (abfd, section, debug)
     free (debug->external_ext);
   return false;
 }
+
+/* MIPS ELF uses a special find_nearest_line routine in order the
+   handle the ECOFF debugging information.  */
 
+struct mips_elf_find_line
+{
+  struct ecoff_debug_info d;
+  struct ecoff_find_line i;
+};
+
+static boolean
+mips_elf_find_nearest_line (abfd, section, symbols, offset, filename_ptr,
+			    functionname_ptr, line_ptr)
+     bfd *abfd;
+     asection *section;
+     asymbol **symbols;
+     bfd_vma offset;
+     const char **filename_ptr;
+     const char **functionname_ptr;
+     unsigned int *line_ptr;
+{
+  asection *msec;
+
+  msec = bfd_get_section_by_name (abfd, ".mdebug");
+  if (msec != NULL)
+    {
+      struct mips_elf_find_line *fi;
+      const struct ecoff_debug_swap * const swap =
+	get_elf_backend_data (abfd)->elf_backend_ecoff_debug_swap;
+
+      fi = elf_tdata (abfd)->find_line_info;
+      if (fi == NULL)
+	{
+	  bfd_size_type external_fdr_size;
+	  char *fraw_src;
+	  char *fraw_end;
+	  struct fdr *fdr_ptr;
+
+	  fi = ((struct mips_elf_find_line *)
+		bfd_alloc (abfd, sizeof (struct mips_elf_find_line)));
+	  if (fi == NULL)
+	    {
+	      bfd_set_error (bfd_error_no_memory);
+	      return false;
+	    }
+
+	  memset (fi, 0, sizeof (struct mips_elf_find_line));
+
+	  if (! mips_elf_read_ecoff_info (abfd, msec, &fi->d))
+	    return false;
+
+	  /* Swap in the FDR information.  */
+	  fi->d.fdr = ((struct fdr *)
+		       bfd_alloc (abfd,
+				  (fi->d.symbolic_header.ifdMax *
+				   sizeof (struct fdr))));
+	  if (fi->d.fdr == NULL)
+	    {
+	      bfd_set_error (bfd_error_no_memory);
+	      return false;
+	    }
+	  external_fdr_size = swap->external_fdr_size;
+	  fdr_ptr = fi->d.fdr;
+	  fraw_src = (char *) fi->d.external_fdr;
+	  fraw_end = (fraw_src
+		      + fi->d.symbolic_header.ifdMax * external_fdr_size);
+	  for (; fraw_src < fraw_end; fraw_src += external_fdr_size, fdr_ptr++)
+	    (*swap->swap_fdr_in) (abfd, (PTR) fraw_src, fdr_ptr);
+
+	  elf_tdata (abfd)->find_line_info = fi;
+
+	  /* Note that we don't bother to ever free this information.
+             find_nearest_line is either called all the time, as in
+             objdump -l, so the information should be saved, or it is
+             rarely called, as in ld error messages, so the memory
+             wasted is unimportant.  Still, it would probably be a
+             good idea for free_cached_info to throw it away.  */
+	}
+
+      if (_bfd_ecoff_locate_line (abfd, section, offset, &fi->d, swap,
+				  &fi->i, filename_ptr, functionname_ptr,
+				  line_ptr))
+	return true;
+    }
+
+  /* Fall back on the generic ELF find_nearest_line routine.  */
+
+  return bfd_elf32_find_nearest_line (abfd, section, symbols, offset,
+				      filename_ptr, functionname_ptr,
+				      line_ptr);
+}
+
 /* The MIPS ELF linker needs additional information for each symbol in
    the global hash table.  */
 
@@ -1684,7 +1802,8 @@ mips_elf_output_extsym (h, data)
       h->esym.asym.value = 0;
       h->esym.asym.st = stGlobal;
 
-      if (h->root.root.type != bfd_link_hash_defined)
+      if (h->root.root.type != bfd_link_hash_defined
+	  && h->root.root.type != bfd_link_hash_defweak)
 	h->esym.asym.sc = scAbs;
       else
 	{
@@ -1721,7 +1840,8 @@ mips_elf_output_extsym (h, data)
 
   if (h->root.root.type == bfd_link_hash_common)
     h->esym.asym.value = h->root.root.u.c.size;
-  else if (h->root.root.type == bfd_link_hash_defined)
+  else if (h->root.root.type == bfd_link_hash_defined
+	   || h->root.root.type == bfd_link_hash_defweak)
     {
       asection *sec;
 
@@ -1829,8 +1949,12 @@ mips_elf_final_link (abfd, info)
 
 	      input_section = p->u.indirect.section;
 	      input_bfd = input_section->owner;
-	      BFD_ASSERT (input_section->_raw_size
-			  == sizeof (Elf32_External_RegInfo));
+
+	      /* The linker emulation code has probably clobbered the
+                 size to be zero bytes.  */
+	      if (input_section->_raw_size == 0)
+		input_section->_raw_size = sizeof (Elf32_External_RegInfo);
+
 	      if (! bfd_get_section_contents (input_bfd, input_section,
 					      (PTR) &ext,
 					      (file_ptr) 0,
@@ -2546,14 +2670,15 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	      indx = r_symndx - extsymoff;
 	      h = elf_sym_hashes (input_bfd)[indx];
-	      if (h->root.type == bfd_link_hash_defined)
+	      if (h->root.type == bfd_link_hash_defined
+		  || h->root.type == bfd_link_hash_defweak)
 		{
 		  sec = h->root.u.def.section;
 		  relocation = (h->root.u.def.value
 				+ sec->output_section->vma
 				+ sec->output_offset);
 		}
-	      else if (h->root.type == bfd_link_hash_weak)
+	      else if (h->root.type == bfd_link_hash_undefweak)
 		relocation = 0;
 	      else
 		{
@@ -2614,6 +2739,191 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
   return true;
 }
+
+/* This is almost identical to bfd_generic_get_... except that some
+   MIPS relocations need to be handled specially.  Sigh.  */
+static bfd_byte *
+elf32_mips_get_relocated_section_contents (abfd, link_info, link_order, data,
+					   relocateable, symbols)
+     bfd *abfd;
+     struct bfd_link_info *link_info;
+     struct bfd_link_order *link_order;
+     bfd_byte *data;
+     boolean relocateable;
+     asymbol **symbols;
+{
+  /* Get enough memory to hold the stuff */
+  bfd *input_bfd = link_order->u.indirect.section->owner;
+  asection *input_section = link_order->u.indirect.section;
+
+  long reloc_size = bfd_get_reloc_upper_bound (input_bfd, input_section);
+  arelent **reloc_vector = NULL;
+  long reloc_count;
+
+  if (reloc_size < 0)
+    goto error_return;
+
+  reloc_vector = (arelent **) malloc (reloc_size);
+  if (reloc_vector == NULL && reloc_size != 0)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      goto error_return;
+    }
+
+  /* read in the section */
+  if (!bfd_get_section_contents (input_bfd,
+				 input_section,
+				 (PTR) data,
+				 0,
+				 input_section->_raw_size))
+    goto error_return;
+
+  /* We're not relaxing the section, so just copy the size info */
+  input_section->_cooked_size = input_section->_raw_size;
+  input_section->reloc_done = true;
+
+  reloc_count = bfd_canonicalize_reloc (input_bfd,
+					input_section,
+					reloc_vector,
+					symbols);
+  if (reloc_count < 0)
+    goto error_return;
+
+  if (reloc_count > 0)
+    {
+      arelent **parent;
+      /* for mips */
+      int gp_found;
+      bfd_vma gp;
+
+      {
+	struct bfd_hash_entry *h;
+	struct bfd_link_hash_entry *lh;
+	/* Skip all this stuff if we aren't mixing formats.  */
+	if (abfd && input_bfd
+	    && abfd->xvec == input_bfd->xvec)
+	  lh = 0;
+	else
+	  {
+	    h = bfd_hash_lookup (link_info->hash, "_gp", false, false);
+	    lh = (struct bfd_link_hash_entry *) h;
+	  }
+      lookup:
+	if (lh)
+	  {
+	    switch (lh->type)
+	      {
+	      case bfd_link_hash_undefined:
+	      case bfd_link_hash_undefweak:
+	      case bfd_link_hash_common:
+		gp_found = 0;
+		break;
+	      case bfd_link_hash_defined:
+	      case bfd_link_hash_defweak:
+		gp_found = 1;
+		gp = lh->u.def.value;
+		break;
+	      case bfd_link_hash_indirect:
+	      case bfd_link_hash_warning:
+		lh = lh->u.i.link;
+		/* @@FIXME  ignoring warning for now */
+		goto lookup;
+	      case bfd_link_hash_new:
+	      default:
+		abort ();
+	      }
+	  }
+	else
+	  gp_found = 0;
+      }
+      /* end mips */
+      for (parent = reloc_vector; *parent != (arelent *) NULL;
+	   parent++)
+	{
+	  char *error_message = (char *) NULL;
+	  bfd_reloc_status_type r;
+
+	  /* Specific to MIPS: Deal with relocation types that require
+	     knowing the gp of the output bfd.  */
+	  asymbol *sym = *(*parent)->sym_ptr_ptr;
+	  if (bfd_is_abs_section (sym->section) && abfd)
+	    {
+	      /* The special_function wouldn't get called anyways.  */
+	    }
+	  else if (!gp_found)
+	    {
+	      /* The gp isn't there; let the special function code
+		 fall over on its own.  */
+	    }
+	  else if ((*parent)->howto->special_function == mips_elf_gprel16_reloc)
+	    {
+	      /* bypass special_function call */
+	      r = gprel16_with_gp (input_bfd, sym, *parent, input_section,
+				   relocateable, (PTR) data, gp);
+	      goto skip_bfd_perform_relocation;
+	    }
+	  /* end mips specific stuff */
+
+	  r = bfd_perform_relocation (input_bfd,
+				      *parent,
+				      (PTR) data,
+				      input_section,
+				      relocateable ? abfd : (bfd *) NULL,
+				      &error_message);
+	skip_bfd_perform_relocation:
+
+	  if (relocateable)
+	    {
+	      asection *os = input_section->output_section;
+
+	      /* A partial link, so keep the relocs */
+	      os->orelocation[os->reloc_count] = *parent;
+	      os->reloc_count++;
+	    }
+
+	  if (r != bfd_reloc_ok)
+	    {
+	      switch (r)
+		{
+		case bfd_reloc_undefined:
+		  if (!((*link_info->callbacks->undefined_symbol)
+			(link_info, bfd_asymbol_name (*(*parent)->sym_ptr_ptr),
+			 input_bfd, input_section, (*parent)->address)))
+		    goto error_return;
+		  break;
+		case bfd_reloc_dangerous:
+		  BFD_ASSERT (error_message != (char *) NULL);
+		  if (!((*link_info->callbacks->reloc_dangerous)
+			(link_info, error_message, input_bfd, input_section,
+			 (*parent)->address)))
+		    goto error_return;
+		  break;
+		case bfd_reloc_overflow:
+		  if (!((*link_info->callbacks->reloc_overflow)
+			(link_info, bfd_asymbol_name (*(*parent)->sym_ptr_ptr),
+			 (*parent)->howto->name, (*parent)->addend,
+			 input_bfd, input_section, (*parent)->address)))
+		    goto error_return;
+		  break;
+		case bfd_reloc_outofrange:
+		default:
+		  abort ();
+		  break;
+		}
+
+	    }
+	}
+    }
+  if (reloc_vector != NULL)
+    free (reloc_vector);
+  return data;
+
+error_return:
+  if (reloc_vector != NULL)
+    free (reloc_vector);
+  return NULL;
+}
+#define bfd_elf32_bfd_get_relocated_section_contents elf32_mips_get_relocated_section_contents
 
 /* ECOFF swapping routines.  These are used when dealing with the
    .mdebug section, which is in the ECOFF debugging format.  */
@@ -2679,6 +2989,8 @@ static const struct ecoff_debug_swap mips_elf_ecoff_debug_swap =
 #define elf_backend_final_write_processing \
 					mips_elf_final_write_processing
 #define elf_backend_ecoff_debug_swap	&mips_elf_ecoff_debug_swap
+
+#define bfd_elf32_find_nearest_line	mips_elf_find_nearest_line
 
 #define bfd_elf32_bfd_link_hash_table_create \
 					mips_elf_link_hash_table_create

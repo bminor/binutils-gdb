@@ -31,8 +31,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define bfd_elf32_get_section_contents _bfd_generic_get_section_contents
 #endif
 
+#ifndef bfd_elf32_bfd_get_relocated_section_contents
 #define bfd_elf32_bfd_get_relocated_section_contents \
  bfd_generic_get_relocated_section_contents
+#endif
 #define bfd_elf32_bfd_relax_section bfd_generic_relax_section
 #define bfd_elf32_bfd_make_debug_symbol \
   ((asymbol *(*) PARAMS ((bfd *, void *, unsigned long))) bfd_nullvoidptr)
