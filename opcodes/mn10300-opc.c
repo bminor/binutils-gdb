@@ -100,6 +100,13 @@ const struct mn10300_operand mn10300_operands[] = {
 
 #define PAREN	(SIMM16+1)
   {0, 0, MN10300_OPERAND_PAREN}, 
+
+#define DN01     (PAREN+1)
+  {2, 0, MN10300_OPERAND_DREG | MN10300_OPERAND_REPEATED},
+
+#define AN01     (DN01+1)
+  {2, 0, MN10300_OPERAND_AREG | MN10300_OPERAND_REPEATED},
+
 } ; 
 
 #define MEM(ADDR) PAREN, ADDR, PAREN 
@@ -123,11 +130,11 @@ const struct mn10300_operand mn10300_operands[] = {
    sorted by major opcode.  */
 
 const struct mn10300_opcode mn10300_opcodes[] = {
-{ "mov",	0x8000,		0xf000,		FMT_S1, {SIMM8, DN0}},
+{ "mov",	0x8000,		0xf000,		FMT_S1, {SIMM8, DN01}},
 { "mov",	0x80,		0xf0,		FMT_S0, {DM1, DN0}},
 { "mov",	0xf1e0,		0xfff0,		FMT_D0, {DM1, AN0}},
 { "mov",	0xf1d0,		0xfff0,		FMT_D0, {AM1, DN0}},
-{ "mov",	0x9000,		0xf000,		FMT_S1, {IMM8, AN0}},
+{ "mov",	0x9000,		0xf000,		FMT_S1, {IMM8, AN01}},
 { "mov",	0x90,		0xf0,		FMT_S0, {AM1, AN0}},
 { "mov",	0x3c,		0xfc,		FMT_S0, {SP, AN0}},
 { "mov",	0xf2f0,		0xfff3,		FMT_D0, {AM1, SP}},
@@ -268,11 +275,11 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 { "inc",	0x41,		0xf3,		FMT_S0, {AN1}},
 { "inc4",	0x50,		0xfc,		FMT_S0, {AN0}},
 
-{ "cmp",	0xa000,		0xf000,		FMT_S1, {SIMM8, DN0}},
+{ "cmp",	0xa000,		0xf000,		FMT_S1, {SIMM8, DN01}},
 { "cmp",	0xa0,		0xf0,		FMT_S0, {DM1, DN0}},
 { "cmp",	0xf1a0,		0xfff0,		FMT_D0, {DM1, AN0}},
 { "cmp",	0xf190,		0xfff0,		FMT_D0, {AM1, DN0}},
-{ "cmp",	0xb000,		0xf000,		FMT_S1, {IMM8, AN0}},
+{ "cmp",	0xb000,		0xf000,		FMT_S1, {IMM8, AN01}},
 { "cmp",	0xb0,		0xf0,		FMT_S0, {AM1, AN0}},
 { "cmp",	0xfac80000,	0xfffc0000,	FMT_D2, {SIMM16, DN0}},
 { "cmp",	0xfcc80000,	0xfffc0000,	FMT_D4, {IMM32, DN0}},
