@@ -1,3 +1,8 @@
+Tue Feb  3 16:12:32 1998  Gordon W. Ross (gwr@mc.com)
+
+	* infptrace.c (child_resume): Don't try to step if 
+	NO_SINGLE_STEP is defined.
+
 Mon Feb  2 19:06:13 1998  Jason Molenda  (crash@bugshack.cygnus.com)
 
 	* Makefile.in (VERSION): Bump to 4.16.2.
