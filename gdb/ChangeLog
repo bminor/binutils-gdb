@@ -1,3 +1,10 @@
+2004-06-11  Randolph Chung  <tausq@debian.org>
+
+	* infrun.c (handle_inferior_event): Handle the case when a trampoline
+	ends up in the runtime resolver, and if the trampoline has no name.
+	Rearrange the code so that all the trampoline processing happens before
+	other step-out-of-range handling.
+
 2004-06-11  Martin Hunt  <hunt@redhat.com>
 
 	* mips-tdep.c (mips_gdbarch_init): Recognize vr4120

@@ -2319,36 +2319,6 @@ process_event_stop_test:
       return;
     }
 
-  if (step_over_calls == STEP_OVER_UNDEBUGGABLE
-      && ecs->stop_func_name == NULL)
-    {
-      /* The inferior just stepped into, or returned to, an
-         undebuggable function (where there is no symbol, not even a
-         minimal symbol, corresponding to the address where the
-         inferior stopped).  Since we want to skip this kind of code,
-         we keep going until the inferior returns from this
-         function.  */
-      if (step_stop_if_no_debug)
-	{
-	  /* If we have no line number and the step-stop-if-no-debug
-	     is set, we stop the step so that the user has a chance to
-	     switch in assembly mode.  */
-	  stop_step = 1;
-	  print_stop_reason (END_STEPPING_RANGE, 0);
-	  stop_stepping (ecs);
-	  return;
-	}
-      else
-	{
-	  /* Set a breakpoint at callee's return address (the address
-	     at which the caller will resume).  */
-	  insert_step_resume_breakpoint (get_prev_frame (get_current_frame ()),
-					 ecs);
-	  keep_going (ecs);
-	  return;
-	}
-    }
-
   if (frame_id_eq (frame_unwind_id (get_current_frame ()),
                    step_frame_id))
     {
@@ -2393,6 +2363,22 @@ process_event_stop_test:
       if (real_stop_pc != 0)
 	ecs->stop_func_start = real_stop_pc;
       
+      if (IN_SOLIB_DYNSYM_RESOLVE_CODE (ecs->stop_func_start))
+	{
+	  struct symtab_and_line sr_sal;
+	  init_sal (&sr_sal);
+	  sr_sal.pc = ecs->stop_func_start;
+
+	  check_for_old_step_resume_breakpoint ();
+	  step_resume_breakpoint =
+	    set_momentary_breakpoint (sr_sal, null_frame_id, bp_step_resume);
+	  if (breakpoints_inserted)
+	    insert_breakpoints ();
+
+          keep_going (ecs);
+          return;
+	}
+
       /* If we have line number information for the function we are
 	 thinking of stepping into, step into it.
 
@@ -2428,20 +2414,6 @@ process_event_stop_test:
       return;
     }
 
-  /* We've wandered out of the step range.  */
-
-  ecs->sal = find_pc_line (stop_pc, 0);
-
-  if (step_range_end == 1)
-    {
-      /* It is stepi or nexti.  We always want to stop stepping after
-         one instruction.  */
-      stop_step = 1;
-      print_stop_reason (END_STEPPING_RANGE, 0);
-      stop_stepping (ecs);
-      return;
-    }
-
   /* If we're in the return path from a shared library trampoline,
      we want to proceed through the trampoline when stepping.  */
   if (IN_SOLIB_RETURN_TRAMPOLINE (stop_pc, ecs->stop_func_name))
@@ -2473,6 +2445,51 @@ process_event_stop_test:
 	  return;
 	}
     }
+
+  /* NOTE: tausq/2004-05-24: This if block used to be done before all
+     the trampoline processing logic, however, there are some trampolines 
+     that have no names, so we should do trampoline handling first.  */
+  if (step_over_calls == STEP_OVER_UNDEBUGGABLE
+      && ecs->stop_func_name == NULL)
+    {
+      /* The inferior just stepped into, or returned to, an
+         undebuggable function (where there is no symbol, not even a
+         minimal symbol, corresponding to the address where the
+         inferior stopped).  Since we want to skip this kind of code,
+         we keep going until the inferior returns from this
+         function.  */
+      if (step_stop_if_no_debug)
+	{
+	  /* If we have no line number and the step-stop-if-no-debug
+	     is set, we stop the step so that the user has a chance to
+	     switch in assembly mode.  */
+	  stop_step = 1;
+	  print_stop_reason (END_STEPPING_RANGE, 0);
+	  stop_stepping (ecs);
+	  return;
+	}
+      else
+	{
+	  /* Set a breakpoint at callee's return address (the address
+	     at which the caller will resume).  */
+	  insert_step_resume_breakpoint (get_prev_frame (get_current_frame ()),
+					 ecs);
+	  keep_going (ecs);
+	  return;
+	}
+    }
+
+  if (step_range_end == 1)
+    {
+      /* It is stepi or nexti.  We always want to stop stepping after
+         one instruction.  */
+      stop_step = 1;
+      print_stop_reason (END_STEPPING_RANGE, 0);
+      stop_stepping (ecs);
+      return;
+    }
+
+  ecs->sal = find_pc_line (stop_pc, 0);
 
   if (ecs->sal.line == 0)
     {
