@@ -754,13 +754,15 @@ sol_thread_prepare_to_store (void)
   procfs_ops.to_prepare_to_store ();
 }
 
+/* Transfer LEN bytes between GDB address MYADDR and target address
+   MEMADDR.  If DOWRITE is non-zero, transfer them to the target,
+   otherwise transfer them from the target.  TARGET is unused.
+
+   Returns the number of bytes transferred. */
+
 static int
-sol_thread_xfer_memory (memaddr, myaddr, len, dowrite, target)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
-     int dowrite;
-     struct target_ops *target;	/* ignored */
+sol_thread_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int dowrite,
+			struct target_ops *target)
 {
   int retval;
   struct cleanup *old_chain;

@@ -172,12 +172,10 @@ vx_write_register (int regno)
    obtain the frame pointer (lr1) contents, we must add 4 bytes.
    Note : may be we should modify init_frame_info() to get the frame pointer
    and store it into the frame_info struct rather than reading its
-   contents when FRAME_CHAIN_VALID is invoked. */
+   contents when FRAME_CHAIN_VALID is invoked.  THISFRAME is unused.  */
 
 int
-vx29k_frame_chain_valid (chain, thisframe)
-     CORE_ADDR chain;
-     struct frame_info *thisframe;	/* not used here */
+vx29k_frame_chain_valid (CORE_ADDR chain, struct frame_info *thisframe)
 {
   int fp_contents;
 

@@ -1,3 +1,9 @@
+2000-10-17  Kevin Buettner  <kevinb@redhat.com>
+
+	* remote-vx29k.c (vx29k_frame_chain_valid): Protoize.
+	* remote.c (remote_xfer_memory, remote_search): Protoize.
+	* sol-thread.c (sol_thread_xfer_memory): Protoize.
+
 2000-10-16  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 
 	* sparc-tdep.c (sparc_fix_call_dummy):  Improve comments.

@@ -3546,16 +3546,12 @@ remote_read_bytes (CORE_ADDR memaddr, char *myaddr, int len)
 /* Read or write LEN bytes from inferior memory at MEMADDR,
    transferring to or from debugger address BUFFER.  Write to inferior if
    SHOULD_WRITE is nonzero.  Returns length of data written or read; 0
-   for error.  */
+   for error.  TARGET is unused.  */
 
 /* ARGSUSED */
 static int
-remote_xfer_memory (mem_addr, buffer, mem_len, should_write, target)
-     CORE_ADDR mem_addr;
-     char *buffer;
-     int mem_len;
-     int should_write;
-     struct target_ops *target;	/* ignored */
+remote_xfer_memory (CORE_ADDR mem_addr, char *buffer, int mem_len,
+		    int should_write, struct target_ops *target)
 {
   CORE_ADDR targ_addr;
   int targ_len;
@@ -3572,17 +3568,9 @@ remote_xfer_memory (mem_addr, buffer, mem_len, should_write, target)
 /* Enable after 4.12.  */
 
 void
-remote_search (len, data, mask, startaddr, increment, lorange, hirange
-	       addr_found, data_found)
-     int len;
-     char *data;
-     char *mask;
-     CORE_ADDR startaddr;
-     int increment;
-     CORE_ADDR lorange;
-     CORE_ADDR hirange;
-     CORE_ADDR *addr_found;
-     char *data_found;
+remote_search (int len, char *data, char *mask, CORE_ADDR startaddr,
+	       int increment, CORE_ADDR lorange, CORE_ADDR hirange,
+	       CORE_ADDR *addr_found, char *data_found)
 {
   if (increment == -4 && len == 4)
     {
