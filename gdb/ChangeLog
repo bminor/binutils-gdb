@@ -1,3 +1,7 @@
+2002-12-10  GDB Administrator  <gdbadmin@sourceware.org>
+
+	* version.in: Bump to version 5.3.
+
 2002-12-10  Andrew Cagney  <ac131313@redhat.com>
 
 	* PROBLEMS: Delete reference to PR gdb/725.
