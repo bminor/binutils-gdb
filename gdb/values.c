@@ -598,9 +598,6 @@ value_as_pointer (val)
    to member which reaches here is considered to be equivalent
    to an INT (or some size).  After all, it is only an offset.  */
 
-/* FIXME:  This should be rewritten as a switch statement for speed and
-   ease of comprehension.  */
-
 LONGEST
 unpack_long (type, valaddr)
      struct type *type;

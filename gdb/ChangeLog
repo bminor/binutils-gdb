@@ -1,5 +1,8 @@
 Fri Apr  8 14:53:35 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
+	* values.c (unpack_long): Remove obsolete comment about using a
+	switch statement.
+
 	* symfile.c (symbol_file_command): Add comments about command syntax.
 
 Thu Apr  7 17:25:21 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
