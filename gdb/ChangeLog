@@ -1,3 +1,12 @@
+2001-09-21  Jiri Smid   <smid@suse.cz>
+
+	* MAINTAINERS: Add myself to the write-after-approval list.
+	* i386-nat.c (TARGET_HAS_DR_LEN_8, DR_LEN_8): Declare.
+	(i386_length_and_rw_bits, i386_handle_nonaligned_watchpoint,
+	i386_insert_watchpoint, i386_remove_watchpoint):  Add support for
+	8-byte wide watchpoints.
+	(i386_show_dr): Debug message format string change.
+
 2001-09-20  Kevin Buettner  <kevinb@redhat.com>
 
 	* solib-svr4.c (fetch_link_map_offsets): Add comment.
