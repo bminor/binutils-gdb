@@ -1,5 +1,10 @@
 2002-05-02  Pierre Muller  <muller@ics.u-strasbg.fr>
 
+	* p-typeprint.c (pascal_type_print_base): Add support
+	for TYPE_CODE_STRING and TYPE_CODE_BITSTRING.
+
+2002-05-02  Pierre Muller  <muller@ics.u-strasbg.fr>
+
 	* p-lang.c (pascal_create_fundamental_type): Use TYPE_CODE_CHAR
 	for fondamental pascal 'char' type.
 
