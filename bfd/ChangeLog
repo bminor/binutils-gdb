@@ -1,3 +1,8 @@
+Fri Oct  6 12:24:47 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config.bfd (powerpc{,le}-{elf,sysv4,eabi,solaris2}): Add NT, and
+	Mac object file formats.
+
 Fri Oct  6 12:04:02 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* coff-rs6000.c: Add full support for AIX archives.  Rewrite old
