@@ -1,3 +1,208 @@
+Thu Dec 14 18:49:34 1995  Andrew Cagney  <cagney@highland.com.au>
+
+	* lf.c (lf_print_function_type): New function.  Munges a function
+ 	type so that the prefix (eg INLINE...) is inserted after the type
+ 	but before any `*'.
+
+	* igen.c: Change to output functions using this.
+
+Wed Dec 13 23:47:00 1995  Andrew Cagney   <cagney@highland.com.au>
+
+	FIXME: Emul CHIRP does not correctly implement the find device
+ 	function.
+
+	FIXME: Emul CHIRP and device do not implement device instance
+ 	operations.
+
+Wed Dec 13 23:47:00 1995  Andrew Cagney   <cagney@highland.com.au>
+
+	* options.c (options_inline): Function to output meaningful
+        description of the INLINE options.
+
+	* configure.in (inline): Replace inline magic numbers with macro
+        names. Map 1->LOCALS_INLINE and 2->ALL_INLINE.
+
+	* inline.h, inline.c: update to use inline method.
+
+	* std-config.h (CPU_INLINE), cpu.h, inline.h, inline.c: make cpu.h
+        inline always.
+
+	* std-config.h (EVENTS_INLINE): Inline events in psim.
+
+Wed Dec 13 22:01:21 1995  Andrew Cagney   <cagney@highland.com.au>
+
+	* device_table.c (htab_sum_binary): DMA binaries to correct byte
+        within a page.
+
+Tue Dec 12 22:51:18 1995  Andrew Cagney   <cagney@highland.com.au>
+
+	* psim.c (psim_merge_device_file): Change `=' to `==', was this an
+        error?
+
+Tue Dec  5 11:56:14 1995  Andrew Cagney  <cagney@highland.com.au>
+
+	* ppc-instructions (ppc_nr_mtcrf_crs, ppc_branch_conditional_name,
+ 	ppc_function_unit_name): Simplify by declaring these arrays as
+ 	pure and simple static (instead of STATIC_MODEL).
+
+Tue Dec  5 00:45:34 1995  Andrew Cagney  <cagney@highland.com.au>
+
+	* sim_calls.c (sim_create, sim_load), main.c (main), psim.c: Pass
+        an options device into psim_create() so that options can be merged
+        into the tree.
+
+	* device.c (*add*): Change semantics so the add functions only add
+        when the new device (or property) doesn't already exist.  This
+        allows merging of options and data.
+
+Mon Dec  4 17:12:13 1995  Andrew Cagney  <cagney@highland.com.au>
+
+	* Makefile.in (BASICS_H): Didn't include basics.h in the list of
+        header files to depend on.
+
+Mon Dec  4 17:12:13 1995  Andrew Cagney  <cagney@highland.com.au>
+
+	* std-config.h: (*_MODULE): Extend the <module>_inline macro's so
+        that they also allow control over static functions.  Rewrite
+        document to reflect this.
+
+	* std-config.h: (INLINE): Simplify definition, the above and
+        earlier changes to igen.h eliminate the need to be defensive about
+        enabling the inline of static functions.
+
+	* std-config.h: (SIM_ENDIAN_INLINE, BITS_INLINE): Document limited
+        suport for inlineing of modules for all callers.  Adjust relevant
+        macro's so that DEFAULT_INLINE will enable this.
+
+	* basics.h: Re-order #includes and definitions so that c-code for
+        basic include files does not call functions delcared in later
+        #includes.
+
+	* basics.h (__attribute__), sim_callbacks.h: Move attribute macro
+        to basics.h and add hack (include <stdio.h>) to try and bring that
+        and other possible conflicting macros into scope much earler.
+
+	* sim-endian.h,c (SIM_ENDIAN_INLINE) bits.h,c (BITS_INLINE):
+        Change to use the updated inline definitions.  If enabled
+        immediatly include the corresponding c-code so that it will inline
+        for all modules.
+
+	* inline.h, inline.c (SIM_ENDIAN_INLINE, BITS_INLINE): Remove
+        these cases, moved to module specific header files.
+
+Sat Dec  2 18:37:51 1995  Andrew Cagney  <cagney@highland.com.au>
+
+	* vm.c, vm_n.c: Fix htab code.
+
+	* vm.c (vm_data_map_read_buffer): Was using EA not RA when reading
+        the data from core.
+
+	* device.c: Fix htab create code.
+
+Fri Nov 24 23:10:09 1995  Andrew Cagney  <cagney@highland.com.au>
+
+	* bits.h, bits.c (EXTRACTED): Convert to function, fix - had &&
+        instead of &.
+
+	* sim-endian.h (SWAP_N), sim-endian-n.h, sim-endian.c: How
+        embarasing - fix yet another bug in the swap code!  Simplify
+        everything by using more functions. Add host to big-endian byte
+        swapping support.
+
+Fri Nov 24 23:10:09 1995  Andrew Cagney  <cagney@highland.com.au>
+
+	* devices.h, devices.c: delete, replaced by the files
+        device_table.[ch] and device.[ch].
+	* device_tree.h, device_tree.c: ditto
+
+	* device_table.h, device_table.c: New files.  Contain a table of
+        devices.
+
+	* device.h, device.c, Makefile.in, std-config.h (DEVICE_INLINE),
+        options.c (print_options): New files.  Define the device object
+        along with any attached properties.
+
+	* device_tree.h, device_tree.c: Update to use new device object.
+        For convenience, change the printd functions into device_tree_add
+        functions.
+
+	* psim.c (create_*_tree): Use new device_tree create functions.
+
+	* corefile.h, corefile.c corefile-n.h (core_n.h): Update to use
+        the new device.h / device_table.h interface.  Rename core_n.h to
+        corefile-n.h to be consistent with other n files.
+
+	* Makefile.in (run): add corefile-n.h to dependencies for
+        corefile.
+
+	* basics.h (device_instance), device.h, device.c, device_table.h,
+        device_table.c: Add the concept of a device instance and operators
+        on these instances - corresponds to ihandle in OpenBoot speak.
+        Don't yet implement it.
+
+Tue Nov 14 12:27:08 1995  Andrew Cagney  <cagney@highland.com.au>
+
+	* emul_generic.h, emul_generic.c (emul_syscall_enter,
+ 	emul_syscall_exit): rename from emul_enter_call /
+ 	emul_exit_call. As only used by emul_do_system_call simplify
+ 	associated code.
+
+	* os_emul.h, os_emul.c, emul_generic.h: Correct and fill an
+ 	os_emul interface.
+
+	* os_emul.c, emul_bugapi.h, emul_bugapi.c, Makefile.in: Add
+ 	preliminary hooks for a kernel mode rom emulation.
+	
+	* cap.h (new), cap.c (new): Capability data base.  Some emulations
+ 	pass object identifiers (capabilities?) to/from the simulated code
+ 	(for instance the phandle in OpenBoot).  The cap object is able to
+ 	check/map between internal and external (target program)
+ 	representations of each identifier.
+	
+	* os_emul.c, emul_chirp.h, emul_chirp.c, Makefile.in: Add
+ 	preliminary hooks for a kernel mode IEEE-1275 emulation.
+
+	* cpu.h, cpu.c (cpu_create, cpu_os_emulation, cpu): Add os_emul to
+ 	list of arguments passed in when creating a cpu.  Grant access to
+ 	the element.
+
+	* std-config.h (OS_EMUL_INLINE), options.c (print_options),
+	inline.h, inline.c: New to allow control over inline of
+	corresponding code files.
+
+	* ppc-instructions (instruction_call): Add illegal instruction to
+ 	call the instruction-call emulation handler.
+	
+	* interrupts.c (system_call_interrupt): Call renamed
+        os_emul_system_call function().
+
+	* emul_netbsd.c: Update to interface to generic emulation.  Since
+        all its functions are called via a table don't worry about any
+        inline.
+
+	* emul_generic.h, emul_generic.c, spa-*(delete): Remove references
+        and code for spa, no longer to be used.
+
+	* psim.c (create_chirp_device_tree): Fill out what was previously
+        the openboot create function so that it starts to create a full
+        OpenBoot device tree.
+
+Tue Nov 28 21:48:06 1995  Andrew Cagney  <cagney@highland.com.au>
+
+	* debug.h, debug.c: pte trace is made redundant by htab trace,
+        delete it.  Add vm to list of options.  Simplify tracing output so
+        lines are not as long.
+
+Tue Nov 14 12:27:08 1995  Andrew Cagney  <cagney@highland.com.au>
+
+	* events.h, events.c (event_queue_init), psim.c (psim_init): (re)
+ 	initialize the event queue.
+
+
+
+
+
+
 Tue Nov 28 13:38:26 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* sim-endian.h: Look at WORDS_BIGENDIAN to determine if the host
@@ -1020,9 +1225,6 @@ Mon Oct 23 23:48:59 1995  Andrew Cagney  <cagney@highland.com.au>
         DEVICE_TREE_INLINE or INTERRUPTS_INLINE as none of these are on
         the instruction or data critical paths.
   	
-	* FIXME: need to set up OS_EMUL_INLINE/EMUL_GENERIC_INLINE but
- 	not on critical path.
-
 	* FIXME: devices.c/emul_netbsd.c would benefit (slightly) from
  	the inclusion of device_tree.c/emul_generic.c.
 
@@ -1064,10 +1266,6 @@ Sun Oct 22 19:27:48 1995  Andrew Cagney  <cagney@highland.com.au>
 	* NOTE: mon does not contain to count instruction loads as this
  	information is already available from the mon_issue() hook.
 
-	* FIXME: mon doesn't have access to register usage information.
-  	This is needed if the user wants to monitor things like register
- 	stalls.
-
 	* igen.c (lf_print_c_semantic), vm_n.h: Add counting code.
 
 	* psim.h, psim.c (psim_create), cpu.h, cpu.c (cpu_create): Attach
@@ -1106,9 +1304,6 @@ Wed Oct 18 23:02:20 1995  Andrew Cagney  <cagney@highland.com.au>
  	cache-rule and opcode-rule tables from macros found std-config.h.
  	Delete corresponding macro's from std-config.h.
   	
-	* FIXME: under this new igen scheme, when playing around with igen
- 	options, you'll find that depenencies don't work very well.
-
 	* igen.c (gen_itable_c, gen_itable_h), Makefile.in: code to output
  	an table of all the instructions.  Code to output a type
  	enumerating all the instructin names.
@@ -1140,9 +1335,6 @@ Mon Oct 16 00:31:20 1995  Andrew Cagney  <cagney@highland.com.au>
 	* bits.h, bits.c, idecode_expression.h (ROTL32, ROTL64): Update
  	doc in bits.h, remove dead code in bits.c, move ROTL32/ROTL64 into
  	bits.h.
-
-	* FIXME: the bits.h/bits.c macro's should be replaced with
- 	(inline) c functions.
 
 	* cpu.c(cpu_add_commas), device_tree.h, device_tree.c(scand_*):
  	Add size of buffer argument to functions writing a string into a

@@ -22,10 +22,6 @@
 #ifndef _INTERRUPTS_C_
 #define _INTERRUPTS_C_
 
-#ifndef STATIC_INLINE_INTERRUPTS
-#define STATIC_INLINE_INTERRUPTS STATIC_INLINE
-#endif
-
 #include <signal.h>
 
 #include "cpu.h"
@@ -42,7 +38,7 @@
    interrupts */
 
 
-STATIC_INLINE_INTERRUPTS msreg
+msreg STATIC_INLINE_INTERRUPTS
 interrupt_msr(msreg old_msr,
 	      msreg msr_clear,
 	      msreg msr_set)
@@ -67,7 +63,7 @@ interrupt_msr(msreg old_msr,
 }
 
 
-STATIC_INLINE_INTERRUPTS msreg
+msreg STATIC_INLINE_INTERRUPTS
 interrupt_srr1(msreg old_msr,
 	       msreg srr1_clear,
 	       msreg srr1_set)
@@ -80,7 +76,7 @@ interrupt_srr1(msreg old_msr,
 }
 
 
-STATIC_INLINE_INTERRUPTS unsigned_word
+unsigned_word STATIC_INLINE_INTERRUPTS
 interrupt_base_ea(msreg msr)
 {
   if (msr & msr_interrupt_prefix)
@@ -93,7 +89,7 @@ interrupt_base_ea(msreg msr)
 /* finish off an interrupt for the OEA model, updating all registers
    and forcing a restart of the processor */
 
-STATIC_INLINE_INTERRUPTS unsigned_word
+unsigned_word STATIC_INLINE_INTERRUPTS
 perform_oea_interrupt(cpu *processor,
 		      unsigned_word cia,
 		      unsigned_word vector_offset,
@@ -117,9 +113,9 @@ perform_oea_interrupt(cpu *processor,
 }
 
 
-INLINE_INTERRUPTS void machine_check_interrupt
-(cpu *processor,
- unsigned_word cia)
+void INLINE_INTERRUPTS
+machine_check_interrupt(cpu *processor,
+			unsigned_word cia)
 {
   switch (CURRENT_ENVIRONMENT) {
 
@@ -139,7 +135,7 @@ INLINE_INTERRUPTS void machine_check_interrupt
 }
 
 
-INLINE_INTERRUPTS void
+void INLINE_INTERRUPTS
 data_storage_interrupt(cpu *processor,
 		       unsigned_word cia,
 		       unsigned_word ea,
@@ -190,7 +186,7 @@ data_storage_interrupt(cpu *processor,
 }
 
 
-INLINE_INTERRUPTS void
+void INLINE_INTERRUPTS
 instruction_storage_interrupt(cpu *processor,
 			      unsigned_word cia,
 			      storage_interrupt_reasons reason)
@@ -204,7 +200,6 @@ instruction_storage_interrupt(cpu *processor,
 
   case OPERATING_ENVIRONMENT:
     {
-      unsigned_word nia;
       msreg srr1_set;
       switch(reason) {
       case hash_table_miss_storage_interrupt:
@@ -236,10 +231,10 @@ instruction_storage_interrupt(cpu *processor,
 
 
 
-INLINE_INTERRUPTS void alignment_interrupt
-(cpu *processor,
- unsigned_word cia,
- unsigned_word ra)
+void INLINE_INTERRUPTS
+alignment_interrupt(cpu *processor,
+		    unsigned_word cia,
+		    unsigned_word ra)
 {
   switch (CURRENT_ENVIRONMENT) {
 
@@ -263,7 +258,7 @@ INLINE_INTERRUPTS void alignment_interrupt
 
 
 
-INLINE_INTERRUPTS void
+void INLINE_INTERRUPTS
 program_interrupt(cpu *processor,
 		  unsigned_word cia,
 		  program_interrupt_reasons reason)
@@ -307,7 +302,7 @@ program_interrupt(cpu *processor,
 }
 
 
-INLINE_INTERRUPTS void
+void INLINE_INTERRUPTS
 floating_point_unavailable_interrupt(cpu *processor,
 				     unsigned_word cia)
 {
@@ -329,7 +324,7 @@ floating_point_unavailable_interrupt(cpu *processor,
 }
 
 
-INLINE_INTERRUPTS void
+void INLINE_INTERRUPTS
 system_call_interrupt(cpu *processor,
 		      unsigned_word cia)
 {
@@ -337,7 +332,7 @@ system_call_interrupt(cpu *processor,
 
   case USER_ENVIRONMENT:
   case VIRTUAL_ENVIRONMENT:
-    os_emul_call(processor, cia);
+    os_emul_system_call(processor, cia);
     cpu_restart(processor, cia+4);
 
   case OPERATING_ENVIRONMENT:
@@ -350,11 +345,11 @@ system_call_interrupt(cpu *processor,
   }
 }
 
-INLINE_INTERRUPTS void
+void INLINE_INTERRUPTS
 trace_interrupt(cpu *processor,
 		unsigned_word cia);
 
-INLINE_INTERRUPTS void
+void INLINE_INTERRUPTS
 floating_point_assist_interrupt(cpu *processor,
 				unsigned_word cia)
 {
@@ -379,7 +374,7 @@ floating_point_assist_interrupt(cpu *processor,
 
 /* handle an externally generated event */
 
-INLINE_INTERRUPTS int
+int INLINE_INTERRUPTS
 decrementer_interrupt(cpu *processor)
 {
   if (cpu_registers(processor)->msr & msr_external_interrupt_enable) {
@@ -394,7 +389,7 @@ decrementer_interrupt(cpu *processor)
   }
 }
 
-INLINE_INTERRUPTS int
+int INLINE_INTERRUPTS
 external_interrupt(cpu *processor)
 {
   if (cpu_registers(processor)->msr & msr_external_interrupt_enable) {

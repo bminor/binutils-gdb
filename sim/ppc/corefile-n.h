@@ -23,19 +23,19 @@
 #error "N must be #defined"
 #endif
 
-#undef unsigned_N
+/* NOTE: see end of file for #undef of these macros */
 #define unsigned_N XCONCAT2(unsigned_,N)
-#undef T2H_N
 #define T2H_N XCONCAT2(T2H_,N)
-#undef H2T_N
 #define H2T_N XCONCAT2(H2T_,N)
 
+#define core_map_read_N XCONCAT2(core_map_read_,N)
+#define core_map_write_N XCONCAT2(core_map_write_,N)
 
-INLINE_CORE unsigned_N
-XCONCAT2(core_map_read_,N)(core_map *map,
-			   unsigned_word addr,
-			   cpu *processor,
-			   unsigned_word cia)
+unsigned_N INLINE_CORE
+core_map_read_N(core_map *map,
+		unsigned_word addr,
+		cpu *processor,
+		unsigned_word cia)
 {
   core_mapping *mapping = core_map_find_mapping(map,
 						addr,
@@ -43,15 +43,15 @@ XCONCAT2(core_map_read_,N)(core_map *map,
 						processor,
 						cia,
 						1); /*abort*/
-  if (WITH_CALLBACK_MEMORY && mapping->reader != NULL) {
+  if (WITH_CALLBACK_MEMORY && mapping->device != NULL) {
     unsigned_N data;
-    if (mapping->reader(mapping->device,
-			&data,
-                        mapping->space,
-                        addr - mapping->base,
-                        sizeof(unsigned_N), /* nr_bytes */
-                        processor,
-                        cia) != sizeof(unsigned_N))
+    if (device_io_read_buffer(mapping->device,
+			      &data,
+			      mapping->space,
+			      addr - mapping->base,
+			      sizeof(unsigned_N), /* nr_bytes */
+			      processor,
+			      cia) != sizeof(unsigned_N))
       error("core_read_,N() reader should not fail\n");
     return T2H_N(data);
   }
@@ -61,12 +61,12 @@ XCONCAT2(core_map_read_,N)(core_map *map,
 
 
 
-INLINE_CORE void
-XCONCAT2(core_map_write_,N)(core_map *map,
-			    unsigned_word addr,
-			    unsigned_N val,
-			    cpu *processor,
-			    unsigned_word cia)
+void INLINE_CORE
+core_map_write_N(core_map *map,
+		 unsigned_word addr,
+		 unsigned_N val,
+		 cpu *processor,
+		 unsigned_word cia)
 {
   core_mapping *mapping = core_map_find_mapping(map,
 						addr,
@@ -74,18 +74,24 @@ XCONCAT2(core_map_write_,N)(core_map *map,
 						processor,
 						cia,
 						1); /*abort*/
-  if (WITH_CALLBACK_MEMORY && mapping->writer != NULL) {
+  if (WITH_CALLBACK_MEMORY && mapping->device != NULL) {
     unsigned_N data = H2T_N(val);
-    if (mapping->writer(mapping->device,
-		        &data,
-                        mapping->space,
-		        addr - mapping->base,
-		        sizeof(unsigned_N), /* nr_bytes */
-		        processor,
-		        cia) != sizeof(unsigned_N))
+    if (device_io_write_buffer(mapping->device,
+			       &data,
+			       mapping->space,
+			       addr - mapping->base,
+			       sizeof(unsigned_N), /* nr_bytes */
+			       processor,
+			       cia) != sizeof(unsigned_N))
       error("core_read_,N() writer should not fail\n");
   }
   else
     *(unsigned_N*)core_translate(mapping, addr) = H2T_N(val);
 }
 
+/* NOTE: see start of file for #define of these macros */
+#undef unsigned_N
+#undef T2H_N
+#undef H2T_N
+#undef core_map_read_N
+#undef core_map_write_N

@@ -3,56 +3,52 @@
 
 Copyright (C) 1994-1995, Andrew Cagney <cagney@highland.com.au>
 
-This directory contains the program PSIM that models the PowerPC(tm -
-IBM) architecture.  It can either be run stand alone (psim or run) or
+This directory contains the program PSIM that models the PowerPC (tm -
+IBM) architecture.  It can be run either standalone (psim or run) or
 used as part of GDB.
 
 
-KNOWN FEATURES
+KNOWN FEATURES:
 
 
-SMP: A Symetric Multi-Processor configuration is suported.  This
-includes modeling of the PowerPC load word and reserve instructions
-(if intending to use this feature you are well advised to read the the
-source code for the reservation instructions so that you are aware of
-any potential limitations in the model).  The number of processors is
-selected during startup.
+SMP: It is possible to configure this simulator so that it implements
+a restricted model of a Symetric Multi-Processor architecture.  It is
+important to note that the SMP model has limitations.  In particular,
+the PowerPC's load word and reserve (etc) instructions do not model
+the behavour defined in the Architecture manual.  People intending to
+use this feature should read the code implementing those instructions.
 
-DUAL-ENDIAN: Both little and big endian models are suported.  The
-execution of instruction sequences that switch between the two modes,
-however, is not.  The endianess is selected during startup.
+ENDIAN SUPORT: Pure big, pure little and PowerPC little endian (xor
+endian) models are suported.
 
 UIEA, VEA and OEA: The PowerPC architecture defines three levels of
 the PowerPC architecture.  This simulator, to a reasonable degree, is
 capable of modeling all three.  That is the User Instruction Set
 Architecture, the Virtual Environment Architecture and finally the
-Operating Environment Architecture.  The environment is selected
-during startup.  The OEA model is still under development.
+Operating Environment Architecture.
 
 HARDWARE DEVICE TREE: In the OEA, the model of the target machines
 hardware is built from a tree of devices (bit like Open Boot).
 Included in this is the ability to model bus hierachies and
-runtime-configurable devices (eg PCI).  The device tree used to create
-the hardware model is created during startup.  This device tree is
-still under development.
+runtime-configurable devices (eg PCI).
 
-VEA SYSTEM CALLS: In user mode, basic system calls (read, write, open,
-close ...) are emulated.  Under NetBSD (simply because that is what my
-machine at home runs) the list is more extensive.
+OS EMULATION: Suport for os/firmware emulations (system or rom-calls)
+is included.  At present limited implemtations of two emulations are
+included:NetBSD (UEA model) and OpenBoot (OEA model).
 
-PEDANTIC VEA MEMORY MODEL: This model implements the break (brk, sbrk)
-system calls.  Further, the user model has very strict memory access
-controls.  User programs can not assume that they can stray off the
-end of valid memory areas.  This model defines valid memory addresses
-in strict accordance to the executable and does not page allign their
-values.  At first this was a bug but since then has turned up several
-problems in user code so it is now described as a feature.
+PEDANTIC VEA MEMORY MODEL: In VEA/UEA NetBSD simulations, this model
+implements the break (brk, sbrk) system calls.  Further, the user
+model has very strict memory access controls.  User programs can not
+assume that they can stray off the end of valid memory areas.  This
+model defines valid memory addresses in strict accordance to the
+executable and does not page allign their values.  At first this was a
+bug but since then has turned up several problems in user code so it
+is now described as a feature.
 
-PROFILING: The simulation is able to count the number and type of
-instructions issued and the number of loads and stores.  This feature
-is still under development.
+PERFORMANCE MONITORING: This simulation is able to monitor things such
+as cpu/io read/writes and register allocation.
 
-PERFORMANCE: In its default configuration PSIM is constructed so that
+PERFORMANCE: In its default configuration PSIM is configured so that
 it will compile fast and run slow.  Through the enabling of more
 agressive compile options (and the disabling of unwanted features) the
 build can be changed to compile slow and run fast.
@@ -65,7 +61,14 @@ BUILDING PSIM:
 
 To build PSIM you will need the following:
 
-	gdb-4.15.tar.gz		From your favorite GNU ftp site
+	gdb-4.15.tar.gz		From your favorite GNU ftp site.
+				I've also tested psim-951016 with
+				gdb-4.15.1.
+
+
+	ftp://ftp.ci.com.au/pub/clayton/README.pim
+
+				This file.
 
 	ftp://ftp.ci.com.au/pub/clayton/gdb-4.15+psim-951016.diff.gz
 
@@ -90,10 +93,32 @@ To build PSIM you will need the following:
 				empty files.
 
 
-In the directory ftp.ci.com.au:pub/clayton you will also notice files
-named psim-NNNNNN.tar.gz.  Those, more recent snapshots, may or may
-not work with gdb.
+Since PSIM is still being developed, from time to time, further psim
+snap shots are occasionally made available.  These snapshots may or
+may not work with GDB-4.15.  Several of the more significant snap
+shots are:
 
+	ftp://ftp.ci.com.au/pub/clayton/psim-951215.tar.gz
+
+				A dangerous snap shot
+
+				Hopefully merges in Michael stuff
+				with mine,  adds multiple emulations
+				(OpenBoot and NetBSD),  revamps
+				inline stuff, rearanges devices so
+				that phandls and ihandles can be
+				implemented.
+
+	ftp://ftp.ci.com.au/pub/clayton/psim-951203.tar.gz
+
+				A good snapshot
+
+				This includes extensions from Michael
+				Meissner that add monitoring of the
+				PowerPC's register and bus architectures.
+
+
+Procedure:
 
 0.	A starting point
 
@@ -148,7 +173,9 @@ not work with gdb.
 5.	Install
 
 		$ make CC=gcc install
+
 	or just
+
 		$ cp gdb/gdb ~/bin/powerpc-unknown-eabisim-gdb
 		$ cp sim/ppc/run ~/bin/powerpc-unknown-eabisim-run
 
@@ -194,9 +221,9 @@ is almost never used) at:
 
 	powerpc-psim@ci.com.au
 
-If I get the ftp archive updated I post a note to that news group.  In
-addition your welcome to send bugs or problems either to me or to that
-e-mail list.
+If I get the ftp archive updated I post a note to that mailing list.
+In addition your welcome to send bugs or problems either to me or to
+that e-mail list.
 
 
 KNOWN PROBLEMS:
@@ -209,16 +236,8 @@ best.  It is intended to be functionaly correct rather than fast.
 HTAB (page) code for OEA model untested.  Some of the vm code
 instructions unimplemented.
 
-Flush instruction cache instructions do nothing.  Perhaphs they should
-(if there is an instruction cache) flush it.
-
 Lacks PowerOpen (a.k.a. XCOFF a.k.a. AIX) and NT startups.  The
 PowerOpen worked until I added the ELF one.
-
-OpenBoot and PR*P interfaces missing.  Open boot could be implemented
-by putting special instructions at the address of the OpenBoot
-callback functions.  Those instructions could than emulate OpenBoot
-behavour.
 
 Missing VEA system calls.
 
@@ -247,49 +266,3 @@ Thanks go to the following who each helped in some way.
 	Allen Briggs, Bett Koch, David Edelsohn, Gordon Irlam,
 	Michael Meissner, Bob Mercier, Richard Perini,
 	Richard Stallman, Mitchele Walker
-
-
-----------------------------------------------------------------
-
-
-Random notes on performance:
-
-
-$ cd test
-time ../psim count `expr 10000000 / 2`
-time ../psim volatile-count `expr 10000000 / 7`
-
-Where 2 and 7 are the number of instructions in the main loop.
-
-
-	611/729 - baseline
-
-Tests:
-
-	CFLAGS= -c -O2 -m486 -fomit-frame-pointer
-
-	o	different first/second level table/switch combinations
-
-		0 - use a table
-		1 - use a simple switch
-		2 - use an expanded switch
-
-i486DX4/100 - AMD
-
-	1/108/140 - switch=0/0/0,expand=2,inline=2,nia=1,cache=1
-	1/114/140 - switch=0/0/0,expand=2,inline=2,nia=1,cache=1
-	1/137/149 - switch=0/0,expand=2,inline=1,nia=1,cache=1
-	1/144/155 - switch=2/1,expand=2,inline=1,nia=1,cache=1
-	1/153/159 - switch=2/1,expand=0,inline=1,nia=1,cache=1
-	1/185/189 - switch=0/0,expand=0,inline=1,nia=1
-
-i486DX2/66
-
-	1/572/695 - switch=1/1,expand=0,inline=0
-	1/579/729 - switch=0/0,expand=0,inline=0
-	1/570/682 - switch=2/2,expand=0,inline=0
-	1/431/492 - switch=0/0,expand=0,inline=1,nia=0
-	1/271/292 - switch=2/1,expand=0,inline=1,nia=0
-	1/270/316 - switch=2/2,expand=0,inline=1,nia=0
-	1/271/281 - switch=1/1,expand=0,inline=1,nia=1
-	1/267/274 - switch=2/1,expand=0,inline=1,nia=1

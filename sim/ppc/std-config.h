@@ -19,8 +19,8 @@
     */
 
 
-#ifndef _CONFIG_H_
-#define _CONFIG_H_
+#ifndef _PSIM_CONFIG_H_
+#define _PSIM_CONFIG_H_
 
 
 /* endianness of the host/target:
@@ -292,47 +292,141 @@ extern int current_model_issue;
    GCC -O3 attempts to inline any function or procedure in scope.  The
    options below facilitate fine grained control over what is and what
    isn't made inline.  For instance it can control things down to a
-   specific modules static routines.  This control is implemented in
-   two parts.  Doing this allows the compiler to both eliminate the
-   overhead of function calls and (as a consequence) also eliminate
-   further dead code.
+   specific modules static routines.  Doing this allows the compiler
+   to both eliminate the overhead of function calls and (as a
+   consequence) also eliminate further dead code.
 
-   Experementing with CISC (x86) I've found that I can achieve an
-   order of magintude speed improvement (x3-x5).  In the case of RISC
-   (sparc) while the performance gain isn't as great it is still
-   significant.
+   On a CISC (x86) I've found that I can achieve an order of magintude
+   speed improvement (x3-x5).  In the case of RISC (sparc) while the
+   performance gain isn't as great it is still significant.
 
-   Part One - Static functions: It is possible to control how static
-   functions within each module are to be compiled.  On a per module
-   or global basis, it is possible to specify that a modules static
-   functions should be compiled inline.  This is controled by the the
-   macro's STATIC_INLINE and INLINE_STATIC_<module>.
+   Each module is controled by the macro <module>_INLINE which can
+   have the values described below
 
-   Part Two - External functions: Again it is possible to allow the
-   inlining of calls to external functions.  This is far more
-   complicated and much heaver on the compiler.  In this case, it is
-   controled by the <module>_INLINE macro's.  Where each can have a
-   value:
+       0  Do not inline any thing for the given module
 
-      0  Make a normal external call to functions in the module.
+   The following additional values are `bit fields' and can be
+   combined.
 
-      1  Include the module but to not inline functions within it.
-         This allows functions within the module to inline functions
-	 from other modules that have been included.
+      1  Include the C file for the module into the file being compiled
+         but do not make the functions within the module inline.
 
-      2  Both include the module and inline functions contained within
-         it.
+	 While of no apparent benefit, this makes it possible for the
+	 included module, when compiled to inline its calls to what
+	 would otherwize be external functions.
 
-   Finally, this is not for the faint harted.  I've seen GCC get up to
-   200mb trying to compile what this can create */
+      2  Make external functions within the module `inline'.  Thus if
+         the module is included into a file being compiled, calls to
+	 its funtions can be eliminated. 2 implies 1.
+
+      4  Make internal (static) functions within the module `inline'.
+
+   In addition to this, modules have been put into two categories.
+
+         Simple modules - eg sim-endian.h bits.h
+
+	 Because these modules are small and simple and do not have
+	 any complex interpendencies they are configured, if
+	 <module>_INLINE is so enabled, to inline themselves in all
+	 modules that include those files.
+
+	 For the default build, this is a real win as all byte
+	 conversion and bit manipulation functions are inlined.
+
+	 Complex modules - the rest
+
+	 These are all handled using the files inline.h and inline.c.
+	 psim.c includes the above which in turn include any remaining
+	 code.
+
+   IMPLEMENTATION:
+
+   The inline ability is enabled by prefixing every data / function
+   declaration and definition with one of the following:
+
+
+       INLINE_<module>
+
+       Prefix to any global function that is a candidate for being
+       inline.
+
+       values - `', `static', `static INLINE'
+
+
+       EXTERN_<module>
+      
+       Prefix to any global data structures for the module.  Global
+       functions that are not to be inlined shall also be prefixed
+       with this.
+
+       values - `', `static', `static'
+
+
+       STATIC_INLINE_<module>
+
+       Prefix to any local (static) function that is a candidate for
+       being made inline.
+
+       values - `static', `static INLINE'
+
+
+       static
+
+       Prefix all local data structures.  Local functions that are not
+       to be inlined shall also be prefixed with this.
+
+       values - `static', `static'
+
+       nb: will not work for modules that are being inlined for every
+       use (white lie).
+
+
+       extern
+       #ifndef _INLINE_C_
+       #endif
+       
+       Prefix to any declaration of a global object (function or
+       variable) that should not be inlined and should have only one
+       definition.  The #ifndef wrapper goes around the definition
+       propper to ensure that only one copy is generated.
+
+       nb: this will not work when a module is being inlined for every
+       use.
+
+
+       STATIC_<module>
+
+       Replaced by either `static' or `EXTERN_MODULE'.
+
+
+   REALITY CHECK:
+
+   This is not for the faint hearted.  I've seen GCC get up to 200mb
+   trying to compile what this can create.
+
+   Some of the modules do not yet implement the WITH_INLINE_STATIC
+   option.  Instead they use the macro STATIC_INLINE to control their
+   local function.
+
+   Because of the way that GCC parses __attribute__(), the macro's
+   need to be adjacent to the functioin name rather then at the start
+   of the line vis:
+
+   	int STATIC_INLINE_MODULE f(void);
+	void INLINE_MODULE *g(void);
+
+   */
+
+#define REVEAL_MODULE			1
+#define INLINE_MODULE			2
+#define INCLUDE_MODULE			(INLINE_MODULE | REVEAL_MODULE)
+#define INLINE_LOCALS			4
+#define ALL_INLINE			7
 
 /* Your compilers inline reserved word */
 
 #ifndef INLINE
-#if defined(__GNUC__) && defined(__OPTIMIZE__) && \
-  (DEFAULT_INLINE || SIM_ENDIAN_INLINE || BITS_INLINE || CPU_INLINE || VM_INLINE || CORE_INLINE \
-   || EVENTS_INLINE || MON_INLINE || INTERRUPTS_INLINE || REGISTERS_INLINE || DEVICE_TREE_INLINE \
-   || DEVICES_INLINE || SPREG_INLINE || SEMANTICS_INLINE || IDECODE_INLINE || MODEL_INLINE)
+#if defined(__GNUC__) && defined(__OPTIMIZE__)
 #define INLINE __inline__
 #else
 #define INLINE /*inline*/
@@ -348,29 +442,30 @@ extern int current_model_issue;
 /* Default macro to simplify control several of key the inlines */
 
 #ifndef DEFAULT_INLINE
-#define	DEFAULT_INLINE			0
+#define	DEFAULT_INLINE			INLINE_LOCALS
 #endif
 
 /* Code that converts between hosts and target byte order.  Used on
-   every memory access (instruction and data).  (See sim-endian.h for
-   additional byte swapping configuration information) */
+   every memory access (instruction and data).  See sim-endian.h for
+   additional byte swapping configuration information.  This module
+   can inline for all callers */
 
 #ifndef SIM_ENDIAN_INLINE
-#define SIM_ENDIAN_INLINE		DEFAULT_INLINE
+#define SIM_ENDIAN_INLINE		(DEFAULT_INLINE ? ALL_INLINE : 0)
 #endif
 
-/* Low level bit manipulation routines used to work around a compiler
-   bug in 2.6.3.  */
+/* Low level bit manipulation routines. This module can inline for all
+   callers */
 
 #ifndef BITS_INLINE
-#define BITS_INLINE			DEFAULT_INLINE
+#define BITS_INLINE			(DEFAULT_INLINE ? ALL_INLINE : 0)
 #endif
 
 /* Code that gives access to various CPU internals such as registers.
    Used every time an instruction is executed */
 
 #ifndef CPU_INLINE
-#define CPU_INLINE			DEFAULT_INLINE
+#define CPU_INLINE			(DEFAULT_INLINE ? ALL_INLINE : 0)
 #endif
 
 /* Code that translates between an effective and real address.  Used
@@ -391,27 +486,27 @@ extern int current_model_issue;
    Called once per instruction cycle */
 
 #ifndef EVENTS_INLINE
-#define EVENTS_INLINE			DEFAULT_INLINE
+#define EVENTS_INLINE			(DEFAULT_INLINE ? ALL_INLINE : 0)
 #endif
 
 /* Code monotoring the processors performance.  It counts events on
    every instruction cycle */
 
 #ifndef MON_INLINE
-#define MON_INLINE			DEFAULT_INLINE
+#define MON_INLINE			(DEFAULT_INLINE ? ALL_INLINE : 0)
 #endif
 
 /* Code called on the rare occasions that an interrupt occures. */
 
 #ifndef INTERRUPTS_INLINE
-#define INTERRUPTS_INLINE		0
+#define INTERRUPTS_INLINE		DEFAULT_INLINE
 #endif
 
 /* Code called on the rare occasion that either gdb or the device tree
    need to manipulate a register within a processor */
 
 #ifndef REGISTERS_INLINE
-#define REGISTERS_INLINE		0
+#define REGISTERS_INLINE		DEFAULT_INLINE
 #endif
 
 /* Code called on the rare occasion that a processor is manipulating
@@ -424,12 +519,8 @@ extern int current_model_issue;
    devices inline.  It reports the message: device_tree_find_node()
    not a leaf */
 
-#ifndef DEVICE_TREE_INLINE
-#define DEVICE_TREE_INLINE		0
-#endif
-
-#ifndef DEVICES_INLINE
-#define DEVICES_INLINE			0
+#ifndef DEVICE_INLINE
+#define DEVICE_INLINE			DEFAULT_INLINE
 #endif
 
 /* Code called whenever information on a Special Purpose Register is
@@ -452,7 +543,7 @@ extern int current_model_issue;
    inline all of their called functions */
 
 #ifndef SEMANTICS_INLINE
-#define SEMANTICS_INLINE		(DEFAULT_INLINE ? 1 : 0)
+#define SEMANTICS_INLINE		DEFAULT_INLINE
 #endif
 
 /* Code to decode an instruction. Normally called on every instruction
@@ -468,7 +559,7 @@ extern int current_model_issue;
    of the code, which is not friendly to the cache.  */
 
 #ifndef MODEL_INLINE
-#define	MODEL_INLINE			(DEFAULT_INLINE ? 1 : 0)
+#define	MODEL_INLINE			DEFAULT_INLINE
 #endif
 
 /* Code to print out what options we were compiled with.  Because this
@@ -477,7 +568,14 @@ extern int current_model_issue;
    routines will be pulled in twice.  */
 
 #ifndef OPTIONS_INLINE
-#define OPTIONS_INLINE			(DEFAULT_INLINE ? 1 : 0)
+#define OPTIONS_INLINE			DEFAULT_INLINE
 #endif
 
-#endif /* _CONFIG_H */
+/* Code to emulate os or rom compatibility.  Called on the rare
+   occasion that the OS or ROM code is being emulated. */
+
+#ifndef OS_EMUL_INLINE
+#define OS_EMUL_INLINE			0
+#endif
+
+#endif /* _PSIM_CONFIG_H */

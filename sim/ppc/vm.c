@@ -22,22 +22,12 @@
 #ifndef _VM_C_
 #define _VM_C_
 
-#ifndef STATIC_INLINE_VM
-#define STATIC_INLINE_VM STATIC_INLINE
-#endif
-
-
 #include "basics.h"
-
 #include "registers.h"
-
-#include "device_tree.h"
+#include "device.h"
 #include "corefile.h"
-
 #include "vm.h"
-
 #include "interrupts.h"
-
 #include "mon.h"
 
 /* OEA vs VEA
@@ -64,7 +54,10 @@
    structures is maintained by updating the structures at
    `synchronization' points.  Of particular note is that (at the time
    of writing) the memory data types for BAT registers are rebuilt
-   when ever the processor moves between problem and system states */
+   when ever the processor moves between problem and system states.
+
+   Unpacked values are stored in the OEA so that they correctly align
+   to where they will be needed by the PTE address. */
 
 
 /* Protection table:
@@ -145,7 +138,7 @@ enum _om_segment_tlb_constants {
 typedef struct _om_segment_tlb_entry {
   int key[nr_om_modes];
   om_access_types invalid_access; /* set to instruction if no_execute bit */
-  unsigned_word masked_virtual_segment_id;
+  unsigned_word masked_virtual_segment_id; /* aligned ready for pte addr */
 #if (WITH_TARGET_WORD_BITSIZE == 64)
   int is_valid;
   unsigned_word masked_effective_segment_id;
@@ -178,9 +171,14 @@ enum _om_page_tlb_constants {
   nr_om_page_tlb_constants
 };
 
+enum {
+  invalid_tlb_vsid = MASK(0, 63),
+};
+
 typedef struct _om_page_tlb_entry {
-  int valid;
   int protection;
+  int changed;
+  unsigned_word real_address_of_pte_1;
   unsigned_word masked_virtual_segment_id;
   unsigned_word masked_page;
   unsigned_word masked_real_page_number;
@@ -218,6 +216,9 @@ typedef struct _om_map {
 
   /* physical memory for fetching page table entries */
   core_map *physical;
+
+  /* address xor for PPC endian */
+  unsigned xor[WITH_XOR_ENDIAN];
 
 } om_map;
 
@@ -274,7 +275,7 @@ struct _vm {
 /* OEA Support procedures */
 
 
-STATIC_INLINE_VM unsigned_word
+unsigned_word STATIC_INLINE_VM
 om_segment_tlb_index(unsigned_word ea)
 {
   unsigned_word index = EXTRACTED(ea,
@@ -283,7 +284,7 @@ om_segment_tlb_index(unsigned_word ea)
   return index;
 }
 
-STATIC_INLINE_VM unsigned_word
+unsigned_word STATIC_INLINE_VM
 om_page_tlb_index(unsigned_word ea)
 {
   unsigned_word index = EXTRACTED(ea,
@@ -292,23 +293,131 @@ om_page_tlb_index(unsigned_word ea)
   return index;
 }
 
-STATIC_INLINE_VM unsigned_word
-om_masked_page(unsigned_word ea)
+unsigned_word STATIC_INLINE_VM
+om_hash_page(unsigned_word masked_vsid,
+	     unsigned_word ea)
 {
-  unsigned_word masked_page = MASKED(ea, 36, 51);
-  return masked_page;
+  unsigned_word extracted_ea = EXTRACTED(ea, 36, 51);
+#if (WITH_TARGET_WORD_BITSIZE == 32)
+  return masked_vsid ^ INSERTED32(extracted_ea, 7, 31-6);
+#endif
+#if (WITH_TARGET_WORD_BITSIZE == 64)
+  return masked_vsid ^ INSERTED64(extracted_ea, 18, 63-7);
+#endif
 }
 
-STATIC_INLINE_VM unsigned_word
-om_masked_byte(unsigned_word ea)
+unsigned_word STATIC_INLINE_VM
+om_pte_0_api(unsigned_word pte_0)
 {
-  unsigned_word masked_byte = MASKED(ea, 52, 63);
-  return masked_byte;
+#if (WITH_TARGET_WORD_BITSIZE == 32)
+  return EXTRACTED32(pte_0, 26, 31);
+#endif
+#if (WITH_TARGET_WORD_BITSIZE == 64)
+  return EXTRACTED64(pte_0, 52, 56);
+#endif
+}
+
+unsigned_word STATIC_INLINE_VM
+om_pte_0_hash(unsigned_word pte_0)
+{
+#if (WITH_TARGET_WORD_BITSIZE == 32)
+  return EXTRACTED32(pte_0, 25, 25);
+#endif
+#if (WITH_TARGET_WORD_BITSIZE == 64)
+  return EXTRACTED64(pte_0, 62, 62);
+#endif
+}
+
+int STATIC_INLINE_VM
+om_pte_0_valid(unsigned_word pte_0)
+{
+#if (WITH_TARGET_WORD_BITSIZE == 32)
+  return MASKED32(pte_0, 0, 0) != 0;
+#endif
+#if (WITH_TARGET_WORD_BITSIZE == 64)
+  return MASKED64(pte_0, 63, 63) != 0;
+#endif
+}
+
+unsigned_word STATIC_INLINE_VM
+om_ea_masked_page(unsigned_word ea)
+{
+  return MASKED(ea, 36, 51);
+}
+
+unsigned_word STATIC_INLINE_VM
+om_ea_masked_byte(unsigned_word ea)
+{
+  return MASKED(ea, 52, 63);
+}
+
+unsigned_word STATIC_INLINE_VM
+om_pte_0_masked_vsid(unsigned_word pte_0)
+{
+  return INSERTED32(EXTRACTED32(pte_0, 1, 24), 7-5, 31-6);
+}
+
+unsigned_word STATIC_INLINE_VM
+om_pte_1_pp(unsigned_word pte_1)
+{
+  return MASKED(pte_1, 62, 63); /*PP*/
+}
+
+int STATIC_INLINE_VM
+om_pte_1_referenced(unsigned_word pte_1)
+{
+  return EXTRACTED(pte_1, 55, 55);
+}
+
+int STATIC_INLINE_VM
+om_pte_1_changed(unsigned_word pte_1)
+{
+  return EXTRACTED(pte_1, 56, 56);
+}
+
+int STATIC_INLINE_VM
+om_pte_1_masked_rpn(unsigned_word pte_1)
+{
+  return MASKED(pte_1, 0, 51); /*RPN*/
+}
+
+unsigned_word STATIC_INLINE_VM
+om_ea_api(unsigned_word ea)
+{
+  return EXTRACTED(ea, 36, 41);
 }
 
 
+/* Page and Segment table read/write operators, these need to still
+   account for the PPC's XOR operation */
 
-INLINE_VM vm *
+unsigned_word STATIC_INLINE_VM
+om_read_word(om_map *map,
+	     unsigned_word ra,
+	     cpu *processor,
+	     unsigned_word cia)
+{
+  if (WITH_XOR_ENDIAN)
+    ra ^= map->xor[sizeof(instruction_word) - 1];
+  return core_map_read_word(map->physical, ra, processor, cia);
+}
+
+void STATIC_INLINE_VM
+om_write_word(om_map *map,
+	      unsigned_word ra,
+	      unsigned_word val,
+	      cpu *processor,
+	      unsigned_word cia)
+{
+  if (WITH_XOR_ENDIAN)
+    ra ^= map->xor[sizeof(instruction_word) - 1];
+  core_map_write_word(map->physical, ra, val, processor, cia);
+}
+
+
+/* Bring things into existance */
+
+vm INLINE_VM *
 vm_create(core *physical)
 {
   vm *virtual;
@@ -351,7 +460,7 @@ vm_create(core *physical)
 }
 
 
-STATIC_INLINE_VM om_bat *
+om_bat STATIC_INLINE_VM *
 om_effective_to_bat(om_map *map,
 		    unsigned_word ea)
 {
@@ -371,7 +480,7 @@ om_effective_to_bat(om_map *map,
 }
 
 
-STATIC_INLINE_VM om_segment_tlb_entry *
+om_segment_tlb_entry STATIC_INLINE_VM *
 om_effective_to_virtual(om_map *map, 
 			unsigned_word ea,
 			cpu *processor,
@@ -407,9 +516,10 @@ om_effective_to_virtual(om_map *map,
 	   segment_table_entry += sizeof_segment_table_entry) {
 	/* byte order? */
 	unsigned_word segment_table_entry_dword_0 =
-	  core_map_read_8(map->physical, segment_table_entry, processor, cia);
+	  om_read_word(map->physical, segment_table_entry, processor, cia);
 	unsigned_word segment_table_entry_dword_1 =
-	  core_map_read_8(map->physical, segment_table_entry + 8, processor, cia);
+	  om_read_word(map->physical, segment_table_entry + 8,
+		       processor, cia);
 	int is_valid = MASKED64(segment_table_entry_dword_0, 56, 56) != 0;
 	unsigned_word masked_effective_segment_id =
 	  MASKED64(segment_table_entry_dword_0, 0, 35);
@@ -430,7 +540,8 @@ om_effective_to_virtual(om_map *map,
 	     ? om_instruction_read
 	     : om_access_any);
 	  segment_tlb_entry->masked_virtual_segment_id =
-	    MASKED(segment_table_entry_dword_1, 0, 51);
+	    INSERTED64(EXTRACTED64(segment_table_entry_dword_1, 0, 51),
+		       18-13, 63-7); /* align ready for pte addr */
 	  return segment_tlb_entry;
 	}
       }
@@ -443,7 +554,7 @@ om_effective_to_virtual(om_map *map,
 
 
 
-STATIC_INLINE_VM om_page_tlb_entry *
+om_page_tlb_entry STATIC_INLINE_VM *
 om_virtual_to_real(om_map *map, 
 		   unsigned_word ea,
 		   om_segment_tlb_entry *segment_tlb_entry,
@@ -455,46 +566,69 @@ om_virtual_to_real(om_map *map,
 				       + om_page_tlb_index(ea));
 
   /* is it a tlb hit? */
-  if (page_tlb_entry->valid
-      && (page_tlb_entry->masked_virtual_segment_id ==
-	  segment_tlb_entry->masked_virtual_segment_id)
-      && (page_tlb_entry->masked_page == om_masked_page(ea))) {
-    error("fixme - it is not a hit if direction/update bits do not match\n");
+  if ((page_tlb_entry->masked_virtual_segment_id
+       == segment_tlb_entry->masked_virtual_segment_id)
+      && (page_tlb_entry->masked_page
+	  == om_ea_masked_page(ea))) {
+    TRACE(trace_vm, ("ea=0x%lx - tlb hit - tlb=0x%lx\n",
+	       (long)ea, (long)page_tlb_entry));
     return page_tlb_entry;
   }
       
   /* drats, it is a tlb miss */
   {
-    unsigned_word page_hash = (segment_tlb_entry->masked_virtual_segment_id 
-			       ^ om_masked_page(ea));
+    unsigned_word page_hash =
+      om_hash_page(segment_tlb_entry->masked_virtual_segment_id, ea);
     int current_hash;
     for (current_hash = 0; current_hash < 2; current_hash += 1) {
       unsigned_word real_address_of_pte_group =
 	(map->real_address_of_page_table
 	 | (page_hash & map->page_table_hash_mask));
-      unsigned_word real_address_of_pte;
-      for (real_address_of_pte = real_address_of_pte_group;
-	   real_address_of_pte < (real_address_of_pte_group
-				  + sizeof_pte_group);
-	   real_address_of_pte += sizeof_pte) {
-	unsigned_word pte_word_0 =
-	  core_map_read_word(map->physical,
-			     real_address_of_pte,
-			     processor, cia);
-	unsigned_word pte_word_1 =
-	  core_map_read_word(map->physical,
-			     real_address_of_pte + sizeof_pte / 2,
-			     processor, cia);
-	error("fixme - check pte hit %ld %ld\n",
-	      (long)pte_word_0,
-	      (long)pte_word_1);
-	if (1) {
-	  error("fixme - update the page_tlb\n");
-	  page_tlb_entry->valid = 1;
-	  page_tlb_entry->protection = 0;
-	  page_tlb_entry->masked_virtual_segment_id = 0;
-	  page_tlb_entry->masked_page = 0;
-	  page_tlb_entry->masked_real_page_number = 0;
+      unsigned_word real_address_of_pte_0;
+      TRACE(trace_vm,
+	    ("ea=0x%lx - htab search - pteg=0x%lx htab=0x%lx mask=0x%lx hash=0x%lx\n",
+	     (long)ea, (long)real_address_of_pte_group,
+	     map->real_address_of_page_table,
+	     map->page_table_hash_mask,
+	     page_hash));
+      for (real_address_of_pte_0 = real_address_of_pte_group;
+	   real_address_of_pte_0 < (real_address_of_pte_group
+				    + sizeof_pte_group);
+	   real_address_of_pte_0 += sizeof_pte) {
+	unsigned_word pte_0 = om_read_word(map,
+					   real_address_of_pte_0,
+					   processor, cia);
+	/* did we hit? */
+	if (om_pte_0_valid(pte_0)
+	    && (current_hash == om_pte_0_hash(pte_0))
+	    && (segment_tlb_entry->masked_virtual_segment_id
+		== om_pte_0_masked_vsid(pte_0))
+	    && (om_ea_api(ea) == om_pte_0_api(pte_0))) {
+	  unsigned_word real_address_of_pte_1 = (real_address_of_pte_0
+						 + sizeof_pte / 2);
+	  unsigned_word pte_1 = om_read_word(map,
+					     real_address_of_pte_1,
+					     processor, cia);
+	  page_tlb_entry->protection = om_pte_1_pp(pte_1);
+	  page_tlb_entry->changed = om_pte_1_changed(pte_1);
+	  page_tlb_entry->masked_virtual_segment_id = segment_tlb_entry->masked_virtual_segment_id;
+	  page_tlb_entry->masked_page = om_ea_masked_page(ea);
+	  page_tlb_entry->masked_real_page_number = om_pte_1_masked_rpn(pte_1);
+	  page_tlb_entry->real_address_of_pte_1 = real_address_of_pte_1;
+	  if (!om_pte_1_referenced(pte_1)) {
+	    om_write_word(map,
+			  real_address_of_pte_1,
+			  pte_1 | BIT(55),
+			  processor, cia);
+	    TRACE(trace_vm,
+		  ("ea=0x%lx - htab hit - set ref - tlb=0x%lx &pte1=0x%lx\n",
+		   (long)ea, page_tlb_entry, (long)real_address_of_pte_1));
+	  }
+	  else {
+	    TRACE(trace_vm,
+		  ("ea=0x%lx - htab hit - tlb=0x%lx &pte1=0x%lx\n",
+		   (long)ea, page_tlb_entry, (long)real_address_of_pte_1));
+	  }
 	  return page_tlb_entry;
 	}
       }
@@ -505,7 +639,7 @@ om_virtual_to_real(om_map *map,
 }
 
 
-static void
+void STATIC_INLINE_VM
 om_interrupt(cpu *processor,
 	     unsigned_word cia,
 	     unsigned_word ea,
@@ -529,7 +663,7 @@ om_interrupt(cpu *processor,
 }
 
 
-STATIC_INLINE_VM unsigned_word
+unsigned_word STATIC_INLINE_VM
 om_translate_effective_to_real(om_map *map,
 			       unsigned_word ea,
 			       om_access_types access,
@@ -544,9 +678,7 @@ om_translate_effective_to_real(om_map *map,
 
   if (!map->is_relocate) {
     ra = ea;
-    TRACE(trace_vm, ("%s, direct map, ea=0x%x\n",
-		     "om_translate_effective_to_real",
-		     ea));
+    TRACE(trace_vm, ("ea=0x%lx - direct map - ra=0x%lx", (long)ea, (long)ra));
     return ra;
   }
 
@@ -554,9 +686,7 @@ om_translate_effective_to_real(om_map *map,
   bat = om_effective_to_bat(map, ea);
   if (bat != NULL) {
     if (!om_valid_access[1][bat->protection_bits][access]) {
-      TRACE(trace_vm, ("%s, bat protection violation, ea=0x%x\n",
-		       "om_translate_effective_to_real",
-		       ea));
+      TRACE(trace_vm, ("ea=0x%lx - bat access violation\n", (long)ea));
       if (abort)
 	om_interrupt(processor, cia, ea, access,
 		     protection_violation_storage_interrupt);
@@ -565,9 +695,8 @@ om_translate_effective_to_real(om_map *map,
     }
 
     ra = ((ea & bat->block_length_mask) | bat->block_real_page_number);
-    TRACE(trace_vm, ("%s, bat translation, ea=0x%x, ra=0x%x\n",
-		     "om_translate_effective_to_real",
-		     ea, ra));
+    TRACE(trace_vm, ("ea=0x%lx - bat translation - ra=0x%lx\n",
+		     (long)ea, (long)ra));
     return ra;
   }
 
@@ -575,9 +704,7 @@ om_translate_effective_to_real(om_map *map,
   segment_tlb_entry = om_effective_to_virtual(map, ea, processor, cia);
 #if (WITH_TARGET_WORD_BITSIZE == 64)
   if (segment_tlb_entry == NULL) {
-    TRACE(trace_vm, ("%s, segment tlb lookup failed - ea=0x%x\n",
-		     "om_translate_effective_to_real",
-		     ea));
+    TRACE(trace_vm, ("ea=0x%lx - segment tlb miss\n", (long)ea));
     if (abort)
       om_interrupt(processor, cia, ea, access,
 		   segment_table_miss_storage_interrupt);
@@ -587,9 +714,7 @@ om_translate_effective_to_real(om_map *map,
 #endif
   /* check for invalid segment access type */
   if (segment_tlb_entry->invalid_access == access) {
-    TRACE(trace_vm, ("%s, segment tlb access invalid - ea=0x%x\n",
-		     "om_translate_effective_to_real",
-		     ea));
+    TRACE(trace_vm, ("ea=0x%lx - segment access invalid\n", (long)ea));
     if (abort)
       om_interrupt(processor, cia, ea, access,
 		   protection_violation_storage_interrupt);
@@ -602,9 +727,7 @@ om_translate_effective_to_real(om_map *map,
 				      access,
 				      processor, cia);
   if (page_tlb_entry == NULL) {
-    TRACE(trace_vm, ("%s, page tlb lookup failed - ea=0x%x\n",
-		     "om_translate_effective_to_real",
-		     ea));
+    TRACE(trace_vm, ("ea=0x%lx - page tlb miss\n", (long)ea));
     if (abort)
       om_interrupt(processor, cia, ea, access,
 		   hash_table_miss_storage_interrupt);
@@ -615,9 +738,7 @@ om_translate_effective_to_real(om_map *map,
 	[segment_tlb_entry->key[map->is_problem_state]]
 	[page_tlb_entry->protection]
 	[access])) {
-    TRACE(trace_vm, ("%s, page tlb access invalid - ea=0x%x\n",
-		     "om_translate_effective_to_real",
-		     ea));
+    TRACE(trace_vm, ("ea=0x%lx - page tlb access violation\n", (long)ea));
     if (abort)
       om_interrupt(processor, cia, ea, access,
 		   protection_violation_storage_interrupt);
@@ -625,11 +746,23 @@ om_translate_effective_to_real(om_map *map,
       return MASK(0, 63);
   }
 
-  ra = (page_tlb_entry->masked_real_page_number
-	| om_masked_byte(ea));
-  TRACE(trace_vm, ("%s, page - ea=0x%x, ra=0x%x\n",
-		   "om_translate_effective_to_real",
-		   ea, ra));
+  /* update change bit as needed */
+  if (access == om_data_write &&!page_tlb_entry->changed) {
+    unsigned_word pte_1 = om_read_word(map,
+				       page_tlb_entry->real_address_of_pte_1,
+				       processor, cia);
+    om_write_word(map,
+		  page_tlb_entry->real_address_of_pte_1,
+		  pte_1 | BIT(56),
+		  processor, cia);
+    TRACE(trace_vm, ("ea=0x%lx - set change bit - tlb=0x%lx &pte1=0x%lx\n",
+		     (long)ea, (long)page_tlb_entry,
+		     (long)page_tlb_entry->real_address_of_pte_1));
+  }
+
+  ra = (page_tlb_entry->masked_real_page_number | om_ea_masked_byte(ea));
+  TRACE(trace_vm, ("ea=0x%lx - page translation - ra=0x%lx\n",
+		   (long)ea, (long)ra));
   return ra;
 }
 
@@ -640,7 +773,7 @@ om_translate_effective_to_real(om_map *map,
 
 
 /* rebuild all the relevant bat information */
-STATIC_INLINE_VM void
+void STATIC_INLINE_VM
 om_unpack_bat(om_bat *bat,
 	      spreg ubat,
 	      spreg lbat)
@@ -660,7 +793,7 @@ om_unpack_bat(om_bat *bat,
 
 
 /* rebuild the given bat table */
-STATIC_INLINE_VM void
+void STATIC_INLINE_VM
 om_unpack_bats(om_bats *bats,
 	       spreg *raw_bats,
 	       msreg msr)
@@ -682,7 +815,7 @@ om_unpack_bats(om_bats *bats,
 
 
 #if (WITH_TARGET_WORD_BITSIZE == 32)
-STATIC_INLINE_VM void
+void STATIC_INLINE_VM
 om_unpack_sr(vm *virtual,
 	     sreg *srs,
 	     int which_sr)
@@ -709,13 +842,15 @@ om_unpack_sr(vm *virtual,
   segment_tlb_entry->invalid_access = (MASKED32(new_sr_value, 3, 3)
 				       ? om_instruction_read
 				       : om_access_any);
-  segment_tlb_entry->masked_virtual_segment_id = MASKED32(new_sr_value, 8, 31);
+  segment_tlb_entry->masked_virtual_segment_id =
+    INSERTED32(EXTRACTED32(new_sr_value, 8, 31),
+	       7-5, 31-6); /* align ready for pte address */
 }
 #endif
 
 
 #if (WITH_TARGET_WORD_BITSIZE == 32)
-STATIC_INLINE_VM void
+void STATIC_INLINE_VM
 om_unpack_srs(vm *virtual,
 	      sreg *srs)
 {
@@ -729,7 +864,7 @@ om_unpack_srs(vm *virtual,
 
 /* Rebuild all the data structures for the new context as specifed by
    the passed registers */
-INLINE_VM void
+void INLINE_VM
 vm_synchronize_context(vm *virtual,
 		       spreg *sprs,
 		       sreg *srs,
@@ -740,33 +875,32 @@ vm_synchronize_context(vm *virtual,
   int problem_state = (msr & msr_problem_state) != 0;
   int data_relocate = (msr & msr_data_relocate) != 0;
   int instruction_relocate = (msr & msr_instruction_relocate) != 0;
+  int little_endian = (msr & msr_little_endian_mode) != 0;
 
   unsigned_word page_table_hash_mask;
   unsigned_word real_address_of_page_table;
-
-
+ 
   /* update current processor mode */
   virtual->instruction_map.translation.is_relocate = instruction_relocate;
   virtual->instruction_map.translation.is_problem_state = problem_state;
   virtual->data_map.translation.is_relocate = data_relocate;
   virtual->data_map.translation.is_problem_state = problem_state;
 
-
   /* update bat registers for the new context */
   om_unpack_bats(&virtual->ibats, &sprs[spr_ibat0u], msr);
   om_unpack_bats(&virtual->dbats, &sprs[spr_dbat0u], msr);
 
-
   /* unpack SDR1 - the storage description register 1 */
 #if (WITH_TARGET_WORD_BITSIZE == 64)
-  real_address_of_page_table = EXTRACTED64(sprs[spr_sdr1], 0, 45);
-  page_table_hash_mask = MASK64(47-EXTRACTED64(sprs[spr_sdr1], 59, 63),
-				57);
+  real_address_of_page_table = MASKED64(sprs[spr_sdr1], 0, 45);
+  page_table_hash_mask = MASK64(18+28-EXTRACTED64(sprs[spr_sdr1], 59, 63),
+				63-7);
 #endif
 #if (WITH_TARGET_WORD_BITSIZE == 32)
-  real_address_of_page_table = EXTRACTED32(sprs[spr_sdr1], 0, 15);
-  page_table_hash_mask = ((EXTRACTED32(sprs[spr_sdr1], 23, 31) << (10+6))
-			  | MASK32(16, 25));
+  real_address_of_page_table = MASKED32(sprs[spr_sdr1], 0, 15);
+  page_table_hash_mask = (INSERTED32(EXTRACTED32(sprs[spr_sdr1], 23, 31),
+				     7, 7+9-1)
+			  | MASK32(7+9, 31-6));
 #endif
   virtual->instruction_map.translation.real_address_of_page_table = real_address_of_page_table;
   virtual->instruction_map.translation.page_table_hash_mask = page_table_hash_mask;
@@ -774,28 +908,52 @@ vm_synchronize_context(vm *virtual,
   virtual->data_map.translation.page_table_hash_mask = page_table_hash_mask;
 
 
-#if (WITH_TARGET_WORD_BITSIZE == 32)
   /* unpack the segment tlb registers */
+#if (WITH_TARGET_WORD_BITSIZE == 32)
   om_unpack_srs(virtual, srs);
 #endif
+ 
+  /* set up the XOR registers if the current endian mode conflicts
+     with what is in the MSR */
+  if (WITH_XOR_ENDIAN) {
+    int i = 1;
+    unsigned mask;
+    if ((little_endian && CURRENT_TARGET_BYTE_ORDER == LITTLE_ENDIAN)
+	|| (!little_endian && CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN))
+      mask = 0;
+    else
+      mask = WITH_XOR_ENDIAN - 1;
+    while (i - 1 < WITH_XOR_ENDIAN) {
+      virtual->instruction_map.translation.xor[i-1] = mask;
+      virtual->data_map.translation.xor[i-1] =  mask;
+      mask = (mask << 1) & (WITH_XOR_ENDIAN - 1);
+      i = i * 2;
+    }
+  }
+  else {
+    /* don't allow the processor to change endian modes */
+    if ((little_endian && CURRENT_TARGET_BYTE_ORDER != LITTLE_ENDIAN)
+	|| (!little_endian && CURRENT_TARGET_BYTE_ORDER != LITTLE_ENDIAN))
+      error("vm_synchronize_context() - unsuported change of byte order\n");
+  }
 }
 
 
-INLINE_VM vm_data_map *
+vm_data_map INLINE_VM *
 vm_create_data_map(vm *memory)
 {
   return &memory->data_map;
 }
 
 
-INLINE_VM vm_instruction_map *
+vm_instruction_map INLINE_VM *
 vm_create_instruction_map(vm *memory)
 {
   return &memory->instruction_map;
 }
 
 
-STATIC_INLINE_VM unsigned_word
+unsigned_word STATIC_INLINE_VM
 vm_translate(om_map *map,
 	     unsigned_word ea,
 	     om_access_types access,
@@ -818,7 +976,7 @@ vm_translate(om_map *map,
 }
 
 
-INLINE_VM unsigned_word
+unsigned_word INLINE_VM
 vm_real_data_addr(vm_data_map *map,
 		  unsigned_word ea,
 		  int is_read,
@@ -834,7 +992,7 @@ vm_real_data_addr(vm_data_map *map,
 }
 
 
-INLINE_VM unsigned_word
+unsigned_word INLINE_VM
 vm_real_instruction_addr(vm_instruction_map *map,
 			 cpu *processor,
 			 unsigned_word cia)
@@ -847,18 +1005,20 @@ vm_real_instruction_addr(vm_instruction_map *map,
 		      1); /*abort*/
 }
 
-INLINE_VM instruction_word
+instruction_word INLINE_VM
 vm_instruction_map_read(vm_instruction_map *map,
 			cpu *processor,
 			unsigned_word cia)
 {
   unsigned_word ra = vm_real_instruction_addr(map, processor, cia);
   ASSERT((cia & 0x3) == 0); /* always aligned */
+  if (WITH_XOR_ENDIAN)
+    ra ^= map->translation.xor[sizeof(instruction_word) - 1];
   return core_map_read_4(map->code, ra, processor, cia);
 }
 
 
-INLINE_VM int
+int INLINE_VM
 vm_data_map_read_buffer(vm_data_map *map,
 			void *target,
 			unsigned_word addr,
@@ -875,7 +1035,9 @@ vm_data_map_read_buffer(vm_data_map *map,
 				    0); /*dont-abort*/
     if (ra == MASK(0, 63))
       break;
-    if (core_map_read_buffer(map->read, &byte, ea, sizeof(byte))
+    if (WITH_XOR_ENDIAN)
+      ra ^= map->translation.xor[0];
+    if (core_map_read_buffer(map->read, &byte, ra, sizeof(byte))
 	!= sizeof(byte))
       break;
     ((unsigned_1*)target)[count] = T2H_1(byte);
@@ -884,7 +1046,7 @@ vm_data_map_read_buffer(vm_data_map *map,
 }
 
 
-INLINE_VM int
+int INLINE_VM
 vm_data_map_write_buffer(vm_data_map *map,
 			 const void *source,
 			 unsigned_word addr,
@@ -902,6 +1064,8 @@ vm_data_map_write_buffer(vm_data_map *map,
 				    0); /*dont-abort*/
     if (ra == MASK(0, 63))
       break;
+    if (WITH_XOR_ENDIAN)
+      ra ^= map->translation.xor[0];
     byte = T2H_1(((unsigned_1*)source)[count]);
     if (core_map_write_buffer((violate_read_only_section
 			       ? map->read
@@ -915,25 +1079,25 @@ vm_data_map_write_buffer(vm_data_map *map,
 
 /* define the read/write 1/2/4/8/word functions */
 
-#undef N
 #define N 1
 #include "vm_n.h"
-
 #undef N
+
 #define N 2
 #include "vm_n.h"
-
 #undef N
+
 #define N 4
 #include "vm_n.h"
-
 #undef N
+
 #define N 8
 #include "vm_n.h"
-
 #undef N
+
 #define N word
 #include "vm_n.h"
+#undef N
 
 
 

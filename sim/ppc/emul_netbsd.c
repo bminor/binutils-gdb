@@ -22,7 +22,12 @@
 #ifndef _EMUL_NETBSD_C_
 #define _EMUL_NETBSD_C_
 
+
+/* Note: this module is called via a table.  There is no benefit in
+   making it inline */
+
 #include "emul_generic.h"
+#include "emul_netbsd.h"
 
 #ifdef HAVE_STRING_H
 #include <string.h>
@@ -41,6 +46,8 @@
 #include <sys/param.h>
 #include <sys/time.h>
 #include <sys/resource.h>
+int getrusage();
+
 #include <sys/ioctl.h>
 #include <sys/mount.h>
 #include <sys/dirent.h>
@@ -80,6 +87,14 @@ extern int errno;
 #elif !defined(PATH_MAX)
 #define PATH_MAX 1024
 #endif
+
+
+/* NetBSD's idea of what is needed to implement emulations */
+
+struct _os_emul_data {
+  emul_syscall *syscalls;
+};
+
 
 
 STATIC_INLINE_EMUL_NETBSD void
@@ -177,7 +192,7 @@ write_direntries(unsigned_word addr,
     struct dirent *in = (struct dirent*)buf;
     ASSERT(in->d_reclen <= nbytes);
     out = (struct dirent*)zalloc(in->d_reclen);
-    bcopy(in, out, in->d_reclen);
+    memcpy(out/*dest*/, in/*src*/, in->d_reclen);
     H2T(out->d_fileno);
     H2T(out->d_reclen);
     H2T(out->d_type);
@@ -220,8 +235,8 @@ write_rusage(unsigned_word addr,
 }
 
   
-STATIC_INLINE_EMUL_NETBSD void
-do_exit(emulation *emul,
+static void
+do_exit(os_emul_data *emul,
 	unsigned call,
 	const int arg0,
 	cpu *processor,
@@ -236,8 +251,8 @@ do_exit(emulation *emul,
 }
 
 
-STATIC_INLINE_EMUL_NETBSD void
-do_read(emulation *emul,
+static void
+do_read(os_emul_data *emul,
 	unsigned call,
 	const int arg0,
 	cpu *processor,
@@ -282,8 +297,8 @@ do_read(emulation *emul,
 }
 
 
-STATIC_INLINE_EMUL_NETBSD void
-do_write(emulation *emul,
+static void
+do_write(os_emul_data *emul,
 	 unsigned call,
 	 const int arg0,
 	 cpu *processor,
@@ -321,8 +336,8 @@ do_write(emulation *emul,
 }
 
 
-STATIC_INLINE_EMUL_NETBSD void
-do_open(emulation *emul,
+static void
+do_open(os_emul_data *emul,
 	unsigned call,
 	const int arg0,
 	cpu *processor,
@@ -342,8 +357,8 @@ do_open(emulation *emul,
 }
 
 
-STATIC_INLINE_EMUL_NETBSD void
-do_close(emulation *emul,
+static void
+do_close(os_emul_data *emul,
 	 unsigned call,
 	 const int arg0,
 	 cpu *processor,
@@ -359,8 +374,8 @@ do_close(emulation *emul,
 }
 
 
-STATIC_INLINE_EMUL_NETBSD void
-do_break(emulation *emul,
+static void
+do_break(os_emul_data *emul,
 	 unsigned call,
 	 const int arg0,
 	 cpu *processor,
@@ -368,23 +383,23 @@ do_break(emulation *emul,
      /* just pass this onto the `vm' device */
 {
   psim *system = cpu_system(processor);
-  const device *vm = psim_device(system, "/vm");
+  device *vm = psim_device(system, "/vm");
 
   if (WITH_TRACE && ppc_trace[trace_os_emul])
     printf_filtered ("0x%lx", (long)cpu_registers(processor)->gpr[arg0]);
 
   SYS(break);
-  vm->callback->ioctl(vm,
-		      system,
-		      processor,
-		      cia,
-		      0, /*ioctl*/
-		      NULL); /*ioctl-data*/
+  device_ioctl(vm,
+	       system,
+	       processor,
+	       cia,
+	       0, /*ioctl*/
+	       NULL); /*ioctl-data*/
 }
 
 
-STATIC_INLINE_EMUL_NETBSD void
-do_getpid(emulation *emul,
+static void
+do_getpid(os_emul_data *emul,
 	  unsigned call,
 	  const int arg0,
 	  cpu *processor,
@@ -395,8 +410,8 @@ do_getpid(emulation *emul,
 }
 
 
-STATIC_INLINE_EMUL_NETBSD void
-do_getuid(emulation *emul,
+static void
+do_getuid(os_emul_data *emul,
 	  unsigned call,
 	  const int arg0,
 	  cpu *processor,
@@ -407,8 +422,8 @@ do_getuid(emulation *emul,
 }
 
 
-STATIC_INLINE_EMUL_NETBSD void
-do_geteuid(emulation *emul,
+static void
+do_geteuid(os_emul_data *emul,
 	   unsigned call,
 	   const int arg0,
 	   cpu *processor,
@@ -419,8 +434,8 @@ do_geteuid(emulation *emul,
 }
 
 
-STATIC_INLINE_EMUL_NETBSD void
-do_kill(emulation *emul,
+static void
+do_kill(os_emul_data *emul,
 	unsigned call,
 	const int arg0,
 	cpu *processor,
@@ -433,14 +448,14 @@ do_kill(emulation *emul,
     printf_filtered ("%d, %d", (int)pid, sig);
 
   SYS(kill);
-  printf_filtered("SYS_kill at 0x%x - more to this than just being killed\n",
-		  cia);
+  printf_filtered("SYS_kill at 0x%lx - more to this than just being killed\n",
+		  (long)cia);
   cpu_halt(processor, cia, was_signalled, sig);
 }
 
 
-STATIC_INLINE_EMUL_NETBSD void
-do_dup(emulation *emul,
+static void
+do_dup(os_emul_data *emul,
        unsigned call,
        const int arg0,
        cpu *processor,
@@ -457,8 +472,8 @@ do_dup(emulation *emul,
 }
 
 
-STATIC_INLINE_EMUL_NETBSD void
-do_getegid(emulation *emul,
+static void
+do_getegid(os_emul_data *emul,
 	   unsigned call,
 	   const int arg0,
 	   cpu *processor,
@@ -469,8 +484,8 @@ do_getegid(emulation *emul,
 }
 
 
-STATIC_INLINE_EMUL_NETBSD void
-do_getgid(emulation *emul,
+static void
+do_getgid(os_emul_data *emul,
 	  unsigned call,
 	  const int arg0,
 	  cpu *processor,
@@ -481,8 +496,8 @@ do_getgid(emulation *emul,
 }
 
 
-STATIC_INLINE_EMUL_NETBSD void
-do_sigprocmask(emulation *emul,
+static void
+do_sigprocmask(os_emul_data *emul,
 	       unsigned call,
 	       const int arg0,
 	       cpu *processor,
@@ -501,8 +516,8 @@ do_sigprocmask(emulation *emul,
 }
 
 
-STATIC_INLINE_EMUL_NETBSD void
-do_ioctl(emulation *emul,
+static void
+do_ioctl(os_emul_data *emul,
 	 unsigned call,
 	 const int arg0,
 	 cpu *processor,
@@ -515,11 +530,7 @@ do_ioctl(emulation *emul,
 #if !WITH_NetBSD_HOST
   cpu_registers(processor)->gpr[arg0] = 0; /* just succeed */
 #else
-  unsigned param_len = IOCPARM_LEN(request);
-  unsigned basecmd = IOCBASECMD(request);
-  unsigned group = IOCGROUP(request);
   unsigned dir = request & IOC_DIRMASK;
-  char *argp = NULL;
   int status;
   SYS(ioctl);
   /* what we haven't done */
@@ -536,8 +547,8 @@ do_ioctl(emulation *emul,
 }
 
 
-STATIC_INLINE_EMUL_NETBSD void
-do_umask(emulation *emul,
+static void
+do_umask(os_emul_data *emul,
 	 unsigned call,
 	 const int arg0,
 	 cpu *processor,
@@ -553,8 +564,8 @@ do_umask(emulation *emul,
 }
 
 
-STATIC_INLINE_EMUL_NETBSD void
-do_dup2(emulation *emul,
+static void
+do_dup2(os_emul_data *emul,
 	unsigned call,
 	const int arg0,
 	cpu *processor,
@@ -572,8 +583,8 @@ do_dup2(emulation *emul,
 }
 
 
-STATIC_INLINE_EMUL_NETBSD void
-do_fcntl(emulation *emul,
+static void
+do_fcntl(os_emul_data *emul,
 	 unsigned call,
 	 const int arg0,
 	 cpu *processor,
@@ -593,8 +604,8 @@ do_fcntl(emulation *emul,
 }
 
 
-STATIC_INLINE_EMUL_NETBSD void
-do_gettimeofday(emulation *emul,
+static void
+do_gettimeofday(os_emul_data *emul,
 		unsigned call,
 		const int arg0,
 		cpu *processor,
@@ -621,8 +632,8 @@ do_gettimeofday(emulation *emul,
 }
 
 
-STATIC_INLINE_EMUL_NETBSD void
-do_getrusage(emulation *emul,
+static void
+do_getrusage(os_emul_data *emul,
 	     unsigned call,
 	     const int arg0,
 	     cpu *processor,
@@ -648,8 +659,8 @@ do_getrusage(emulation *emul,
 #if !WITH_NetBSD_HOST
 #define do_fstatfs 0
 #else
-STATIC_INLINE_EMUL_NETBSD void
-do_fstatfs(emulation *emul,
+static void
+do_fstatfs(os_emul_data *emul,
 	   unsigned call,
 	   const int arg0,
 	   cpu *processor,
@@ -674,8 +685,8 @@ do_fstatfs(emulation *emul,
 #endif
 
 
-STATIC_INLINE_EMUL_NETBSD void
-do_stat(emulation *emul,
+static void
+do_stat(os_emul_data *emul,
 	unsigned call,
 	const int arg0,
 	cpu *processor,
@@ -695,8 +706,8 @@ do_stat(emulation *emul,
 }
 
 
-STATIC_INLINE_EMUL_NETBSD void
-do_fstat(emulation *emul,
+static void
+do_fstat(os_emul_data *emul,
 	 unsigned call,
 	 const int arg0,
 	 cpu *processor,
@@ -711,8 +722,8 @@ do_fstat(emulation *emul,
 }
 
 
-STATIC_INLINE_EMUL_NETBSD void
-do_lstat(emulation *emul,
+static void
+do_lstat(os_emul_data *emul,
 	 unsigned call,
 	 const int arg0,
 	 cpu *processor,
@@ -732,8 +743,8 @@ do_lstat(emulation *emul,
 #if !WITH_NetBSD_HOST
 #define do_getdirentries 0
 #else
-STATIC_INLINE_EMUL_NETBSD void
-do_getdirentries(emulation *emul,
+static void
+do_getdirentries(os_emul_data *emul,
 		 unsigned call,
 		 const int arg0,
 		 cpu *processor,
@@ -766,24 +777,25 @@ do_getdirentries(emulation *emul,
 #endif
 
 
-STATIC_INLINE_EMUL_NETBSD void
-do___syscall(emulation *emul,
+static void
+do___syscall(os_emul_data *emul,
 	     unsigned call,
 	     const int arg0,
 	     cpu *processor,
 	     unsigned_word cia)
 {
   SYS(__syscall);
-  emul_do_call(emul,
-	       cpu_registers(processor)->gpr[arg0],
-	       arg0 + 1,
-	       processor,
-	       cia);
+  emul_do_system_call(emul,
+		      emul->syscalls,
+		      cpu_registers(processor)->gpr[arg0],
+		      arg0 + 1,
+		      processor,
+		      cia);
 }
 
 
-STATIC_INLINE_EMUL_NETBSD void
-do_lseek(emulation *emul,
+static void
+do_lseek(os_emul_data *emul,
 	 unsigned call,
 	 const int arg0,
 	 cpu *processor,
@@ -803,8 +815,8 @@ do_lseek(emulation *emul,
 }
 
 
-STATIC_INLINE_EMUL_NETBSD void
-do___sysctl(emulation *emul,
+static void
+do___sysctl(os_emul_data *emul,
 	    unsigned call,
 	    const int arg0,
 	    cpu *processor,
@@ -830,7 +842,7 @@ do___sysctl(emulation *emul,
   name += sizeof(mib);
   
   /* see what to do with it ... */
-  switch (mib) {
+  switch ((int)mib) {
   case 6/*CTL_HW*/:
 #if WITH_NetBSD_HOST && (CTL_HW != 6)
 #  error "CTL_HW"
@@ -842,7 +854,7 @@ do___sysctl(emulation *emul,
 				processor,
 				cia);
     name += sizeof(mib);
-    switch (mib) {
+    switch ((int)mib) {
     case 7/*HW_PAGESIZE*/:
 #if WITH_NetBSD_HOST && (HW_PAGESIZE != 7)
 #  error "HW_PAGESIZE"
@@ -864,7 +876,7 @@ do___sysctl(emulation *emul,
     }
     break;
   default:
-    error("sysctl() name[0]=%s unknown\n", (int)mib);
+    error("sysctl() name[0]=%d unknown\n", (int)mib);
     break;
   }
   cpu_registers(processor)->gpr[3] = 0;
@@ -872,179 +884,179 @@ do___sysctl(emulation *emul,
 
 
 
-static emul_call_descriptor netbsd_descriptors[] = {
-  /* 0 */ { 0, "syscall", { 0, }, 0 },
-  /* 1 */ { do_exit, "exit", { 0, }, 0 },
-  /* 2 */ { 0, "fork", { 0, }, 0 },	  
-  /* 3 */ { do_read, "read", { 0, }, 0 },
-  /* 4 */ { do_write, "write", { 0, }, 0 },
-  /* 5 */ { do_open, "open", { 0, }, 0 },
-  /* 6 */ { do_close, "close", { 0, }, 0 },
-  /* 7 */ { 0, "wait4", { 0, }, 0 },
+static emul_syscall_descriptor netbsd_descriptors[] = {
+  /* 0 */ { 0, "syscall" },
+  /* 1 */ { do_exit, "exit" },
+  /* 2 */ { 0, "fork" },	  
+  /* 3 */ { do_read, "read" },
+  /* 4 */ { do_write, "write" },
+  /* 5 */ { do_open, "open" },
+  /* 6 */ { do_close, "close" },
+  /* 7 */ { 0, "wait4" },
   { 0, }, /* 8 is old creat */
-  /* 9 */ { 0, "link", { 0, }, 0 },
-  /* 10 */ { 0, "unlink", { 0, }, 0 },
+  /* 9 */ { 0, "link" },
+  /* 10 */ { 0, "unlink" },
   { 0, }, /* 11 is obsolete execv */
-  /* 12 */ { 0, "chdir", { 0, }, 0 },
-  /* 13 */ { 0, "fchdir", { 0, }, 0 },
-  /* 14 */ { 0, "mknod", { 0, }, 0 },
-  /* 15 */ { 0, "chmod", { 0, }, 0 },
-  /* 16 */ { 0, "chown", { 0, }, 0 },
-  /* 17 */ { do_break, "break", { 0, }, 0 },
-  /* 18 */ { 0, "getfsstat", { 0, }, 0 },
+  /* 12 */ { 0, "chdir" },
+  /* 13 */ { 0, "fchdir" },
+  /* 14 */ { 0, "mknod" },
+  /* 15 */ { 0, "chmod" },
+  /* 16 */ { 0, "chown" },
+  /* 17 */ { do_break, "break" },
+  /* 18 */ { 0, "getfsstat" },
   { 0, }, /* 19 is old lseek */
-  /* 20 */ { do_getpid, "getpid", { 0, }, 0 },
-  /* 21 */ { 0, "mount", { 0, }, 0 },
-  /* 22 */ { 0, "unmount", { 0, }, 0 },
-  /* 23 */ { 0, "setuid", { 0, }, 0 },
-  /* 24 */ { do_getuid, "getuid", { 0, }, 0 },
-  /* 25 */ { do_geteuid, "geteuid", { 0, }, 0 },
-  /* 26 */ { 0, "ptrace", { 0, }, 0 },
-  /* 27 */ { 0, "recvmsg", { 0, }, 0 },
-  /* 28 */ { 0, "sendmsg", { 0, }, 0 },
-  /* 29 */ { 0, "recvfrom", { 0, }, 0 },
-  /* 30 */ { 0, "accept", { 0, }, 0 },
-  /* 31 */ { 0, "getpeername", { 0, }, 0 },
-  /* 32 */ { 0, "getsockname", { 0, }, 0 },
-  /* 33 */ { 0, "access", { 0, }, 0 },
-  /* 34 */ { 0, "chflags", { 0, }, 0 },
-  /* 35 */ { 0, "fchflags", { 0, }, 0 },
-  /* 36 */ { 0, "sync", { 0, }, 0 },
-  /* 37 */ { do_kill, "kill", { 0, }, 0 },
+  /* 20 */ { do_getpid, "getpid" },
+  /* 21 */ { 0, "mount" },
+  /* 22 */ { 0, "unmount" },
+  /* 23 */ { 0, "setuid" },
+  /* 24 */ { do_getuid, "getuid" },
+  /* 25 */ { do_geteuid, "geteuid" },
+  /* 26 */ { 0, "ptrace" },
+  /* 27 */ { 0, "recvmsg" },
+  /* 28 */ { 0, "sendmsg" },
+  /* 29 */ { 0, "recvfrom" },
+  /* 30 */ { 0, "accept" },
+  /* 31 */ { 0, "getpeername" },
+  /* 32 */ { 0, "getsockname" },
+  /* 33 */ { 0, "access" },
+  /* 34 */ { 0, "chflags" },
+  /* 35 */ { 0, "fchflags" },
+  /* 36 */ { 0, "sync" },
+  /* 37 */ { do_kill, "kill" },
   { 0, }, /* 38 is old stat */
-  /* 39 */ { 0, "getppid", { 0, }, 0 },
+  /* 39 */ { 0, "getppid" },
   { 0, }, /* 40 is old lstat */
-  /* 41 */ { do_dup, "dup", { 0, }, 0 },
-  /* 42 */ { 0, "pipe", { 0, }, 0 },
-  /* 43 */ { do_getegid, "getegid", { 0, }, 0 },
-  /* 44 */ { 0, "profil", { 0, }, 0 },
-  /* 45 */ { 0, "ktrace", { 0, }, 0 },
-  /* 46 */ { 0, "sigaction", { 0, }, 0 },
-  /* 47 */ { do_getgid, "getgid", { 0, }, 0 },
-  /* 48 */ { do_sigprocmask, "sigprocmask", { 0, }, 0 },
-  /* 49 */ { 0, "getlogin", { 0, }, 0 },
-  /* 50 */ { 0, "setlogin", { 0, }, 0 },
-  /* 51 */ { 0, "acct", { 0, }, 0 },
-  /* 52 */ { 0, "sigpending", { 0, }, 0 },
-  /* 53 */ { 0, "sigaltstack", { 0, }, 0 },
-  /* 54 */ { do_ioctl, "ioctl", { 0, }, 0 },
-  /* 55 */ { 0, "reboot", { 0, }, 0 },
-  /* 56 */ { 0, "revoke", { 0, }, 0 },
-  /* 57 */ { 0, "symlink", { 0, }, 0 },
-  /* 58 */ { 0, "readlink", { 0, }, 0 },
-  /* 59 */ { 0, "execve", { 0, }, 0 },
-  /* 60 */ { do_umask, "umask", { 0, }, 0 },
-  /* 61 */ { 0, "chroot", { 0, }, 0 },
+  /* 41 */ { do_dup, "dup" },
+  /* 42 */ { 0, "pipe" },
+  /* 43 */ { do_getegid, "getegid" },
+  /* 44 */ { 0, "profil" },
+  /* 45 */ { 0, "ktrace" },
+  /* 46 */ { 0, "sigaction" },
+  /* 47 */ { do_getgid, "getgid" },
+  /* 48 */ { do_sigprocmask, "sigprocmask" },
+  /* 49 */ { 0, "getlogin" },
+  /* 50 */ { 0, "setlogin" },
+  /* 51 */ { 0, "acct" },
+  /* 52 */ { 0, "sigpending" },
+  /* 53 */ { 0, "sigaltstack" },
+  /* 54 */ { do_ioctl, "ioctl" },
+  /* 55 */ { 0, "reboot" },
+  /* 56 */ { 0, "revoke" },
+  /* 57 */ { 0, "symlink" },
+  /* 58 */ { 0, "readlink" },
+  /* 59 */ { 0, "execve" },
+  /* 60 */ { do_umask, "umask" },
+  /* 61 */ { 0, "chroot" },
   { 0, }, /* 62 is old fstat */
   { 0, }, /* 63 is old getkerninfo */
   { 0, }, /* 64 is old getpagesize */
-  /* 65 */ { 0, "msync", { 0, }, 0 },
-  /* 66 */ { 0, "vfork", { 0, }, 0 },
+  /* 65 */ { 0, "msync" },
+  /* 66 */ { 0, "vfork" },
   { 0, }, /* 67 is obsolete vread */
   { 0, }, /* 68 is obsolete vwrite */
-  /* 69 */ { 0, "sbrk", { 0, }, 0 },
-  /* 70 */ { 0, "sstk", { 0, }, 0 },
+  /* 69 */ { 0, "sbrk" },
+  /* 70 */ { 0, "sstk" },
   { 0, }, /* 71 is old mmap */
-  /* 72 */ { 0, "vadvise", { 0, }, 0 },
-  /* 73 */ { 0, "munmap", { 0, }, 0 },
-  /* 74 */ { 0, "mprotect", { 0, }, 0 },
-  /* 75 */ { 0, "madvise", { 0, }, 0 },
+  /* 72 */ { 0, "vadvise" },
+  /* 73 */ { 0, "munmap" },
+  /* 74 */ { 0, "mprotect" },
+  /* 75 */ { 0, "madvise" },
   { 0, }, /* 76 is obsolete vhangup */
   { 0, }, /* 77 is obsolete vlimit */
-  /* 78 */ { 0, "mincore", { 0, }, 0 },
-  /* 79 */ { 0, "getgroups", { 0, }, 0 },
-  /* 80 */ { 0, "setgroups", { 0, }, 0 },
-  /* 81 */ { 0, "getpgrp", { 0, }, 0 },
-  /* 82 */ { 0, "setpgid", { 0, }, 0 },
-  /* 83 */ { 0, "setitimer", { 0, }, 0 },
+  /* 78 */ { 0, "mincore" },
+  /* 79 */ { 0, "getgroups" },
+  /* 80 */ { 0, "setgroups" },
+  /* 81 */ { 0, "getpgrp" },
+  /* 82 */ { 0, "setpgid" },
+  /* 83 */ { 0, "setitimer" },
   { 0, }, /* 84 is old wait */
-  /* 85 */ { 0, "swapon", { 0, }, 0 },
-  /* 86 */ { 0, "getitimer", { 0, }, 0 },
+  /* 85 */ { 0, "swapon" },
+  /* 86 */ { 0, "getitimer" },
   { 0, }, /* 87 is old gethostname */
   { 0, }, /* 88 is old sethostname */
   { 0, }, /* 89 is old getdtablesize */
-  { do_dup2, "dup2", { 0, }, 0 },
+  { do_dup2, "dup2" },
   { 0, }, /* 91 */
-  /* 92 */ { do_fcntl, "fcntl", { 0, }, 0 },
-  /* 93 */ { 0, "select", { 0, }, 0 },
+  /* 92 */ { do_fcntl, "fcntl" },
+  /* 93 */ { 0, "select" },
   { 0, }, /* 94 */
-  /* 95 */ { 0, "fsync", { 0, }, 0 },
-  /* 96 */ { 0, "setpriority", { 0, }, 0 },
-  /* 97 */ { 0, "socket", { 0, }, 0 },
-  /* 98 */ { 0, "connect", { 0, }, 0 },
+  /* 95 */ { 0, "fsync" },
+  /* 96 */ { 0, "setpriority" },
+  /* 97 */ { 0, "socket" },
+  /* 98 */ { 0, "connect" },
   { 0, }, /* 99 is old accept */
-  /* 100 */ { 0, "getpriority", { 0, }, 0 },
+  /* 100 */ { 0, "getpriority" },
   { 0, }, /* 101 is old send */
   { 0, }, /* 102 is old recv */
-  /* 103 */ { 0, "sigreturn", { 0, }, 0 },
-  /* 104 */ { 0, "bind", { 0, }, 0 },
-  /* 105 */ { 0, "setsockopt", { 0, }, 0 },
-  /* 106 */ { 0, "listen", { 0, }, 0 },
+  /* 103 */ { 0, "sigreturn" },
+  /* 104 */ { 0, "bind" },
+  /* 105 */ { 0, "setsockopt" },
+  /* 106 */ { 0, "listen" },
   { 0, }, /* 107 is obsolete vtimes */
   { 0, }, /* 108 is old sigvec */
   { 0, }, /* 109 is old sigblock */
   { 0, }, /* 110 is old sigsetmask */
-  /* 111 */ { 0, "sigsuspend", { 0, }, 0 },
+  /* 111 */ { 0, "sigsuspend" },
   { 0, }, /* 112 is old sigstack */
   { 0, }, /* 113 is old recvmsg */
   { 0, }, /* 114 is old sendmsg */
-  /* - is obsolete vtrace */ { 0, "vtrace	115", { 0, }, 0 },
-  /* 116 */ { do_gettimeofday, "gettimeofday", { 0, }, 0 },
-  /* 117 */ { do_getrusage, "getrusage", { 0, }, 0 },
-  /* 118 */ { 0, "getsockopt", { 0, }, 0 },
-  /* 119 */ { 0, "resuba", { 0, }, 0 },
-  /* 120 */ { 0, "readv", { 0, }, 0 },
-  /* 121 */ { 0, "writev", { 0, }, 0 },
-  /* 122 */ { 0, "settimeofday", { 0, }, 0 },
-  /* 123 */ { 0, "fchown", { 0, }, 0 },
-  /* 124 */ { 0, "fchmod", { 0, }, 0 },
+  /* - is obsolete vtrace */ { 0, "vtrace	115" },
+  /* 116 */ { do_gettimeofday, "gettimeofday" },
+  /* 117 */ { do_getrusage, "getrusage" },
+  /* 118 */ { 0, "getsockopt" },
+  /* 119 */ { 0, "resuba" },
+  /* 120 */ { 0, "readv" },
+  /* 121 */ { 0, "writev" },
+  /* 122 */ { 0, "settimeofday" },
+  /* 123 */ { 0, "fchown" },
+  /* 124 */ { 0, "fchmod" },
   { 0, }, /* 125 is old recvfrom */
   { 0, }, /* 126 is old setreuid */
   { 0, }, /* 127 is old setregid */
-  /* 128 */ { 0, "rename", { 0, }, 0 },
+  /* 128 */ { 0, "rename" },
   { 0, }, /* 129 is old truncate */
   { 0, }, /* 130 is old ftruncate */
-  /* 131 */ { 0, "flock", { 0, }, 0 },
-  /* 132 */ { 0, "mkfifo", { 0, }, 0 },
-  /* 133 */ { 0, "sendto", { 0, }, 0 },
-  /* 134 */ { 0, "shutdown", { 0, }, 0 },
-  /* 135 */ { 0, "socketpair", { 0, }, 0 },
-  /* 136 */ { 0, "mkdir", { 0, }, 0 },
-  /* 137 */ { 0, "rmdir", { 0, }, 0 },
-  /* 138 */ { 0, "utimes", { 0, }, 0 },
+  /* 131 */ { 0, "flock" },
+  /* 132 */ { 0, "mkfifo" },
+  /* 133 */ { 0, "sendto" },
+  /* 134 */ { 0, "shutdown" },
+  /* 135 */ { 0, "socketpair" },
+  /* 136 */ { 0, "mkdir" },
+  /* 137 */ { 0, "rmdir" },
+  /* 138 */ { 0, "utimes" },
   { 0, }, /* 139 is obsolete 4.2 sigreturn */
-  /* 140 */ { 0, "adjtime", { 0, }, 0 },
+  /* 140 */ { 0, "adjtime" },
   { 0, }, /* 141 is old getpeername */
   { 0, }, /* 142 is old gethostid */
   { 0, }, /* 143 is old sethostid */
   { 0, }, /* 144 is old getrlimit */
   { 0, }, /* 145 is old setrlimit */
   { 0, }, /* 146 is old killpg */
-  /* 147 */ { 0, "setsid", { 0, }, 0 },
-  /* 148 */ { 0, "quotactl", { 0, }, 0 },
+  /* 147 */ { 0, "setsid" },
+  /* 148 */ { 0, "quotactl" },
   { 0, }, /* 149 is old quota */
   { 0, }, /* 150 is old getsockname */
   { 0, }, /* 151 */
   { 0, }, /* 152 */
   { 0, }, /* 153 */
   { 0, }, /* 154 */
-  /* 155 */ { 0, "nfssvc", { 0, }, 0 },
+  /* 155 */ { 0, "nfssvc" },
   { 0, }, /* 156 is old getdirentries */
-  /* 157 */ { 0, "statfs", { 0, }, 0 },
-  /* 158 */ { do_fstatfs, "fstatfs", { 0, }, 0 },
+  /* 157 */ { 0, "statfs" },
+  /* 158 */ { do_fstatfs, "fstatfs" },
   { 0, }, /* 159 */
   { 0, }, /* 160 */
-  /* 161 */ { 0, "getfh", { 0, }, 0 },
+  /* 161 */ { 0, "getfh" },
   { 0, }, /* 162 is old getdomainname */
   { 0, }, /* 163 is old setdomainname */
   { 0, }, /* 164 is old uname */
-  /* 165 */ { 0, "sysarch", { 0, }, 0 },
+  /* 165 */ { 0, "sysarch" },
   { 0, }, /* 166 */
   { 0, }, /* 167 */
   { 0, }, /* 168 */
-  /* 169 */ { 0, "semsys", { 0, }, 0 },
-  /* 170 */ { 0, "msgsys", { 0, }, 0 },
-  /* 171 */ { 0, "shmsys", { 0, }, 0 },
+  /* 169 */ { 0, "semsys" },
+  /* 170 */ { 0, "msgsys" },
+  /* 171 */ { 0, "shmsys" },
   { 0, }, /* 172 */
   { 0, }, /* 173 */
   { 0, }, /* 174 */
@@ -1054,30 +1066,30 @@ static emul_call_descriptor netbsd_descriptors[] = {
   { 0, }, /* 178 */
   { 0, }, /* 179 */
   { 0, }, /* 180 */
-  /* 181 */ { 0, "setgid", { 0, }, 0 },
-  /* 182 */ { 0, "setegid", { 0, }, 0 },
-  /* 183 */ { 0, "seteuid", { 0, }, 0 },
-  /* 184 */ { 0, "lfs_bmapv", { 0, }, 0 },
-  /* 185 */ { 0, "lfs_markv", { 0, }, 0 },
-  /* 186 */ { 0, "lfs_segclean", { 0, }, 0 },
-  /* 187 */ { 0, "lfs_segwait", { 0, }, 0 },
-  /* 188 */ { do_stat, "stat", { 0, }, 0 },
-  /* 189 */ { do_fstat, "fstat", { 0, }, 0 },
-  /* 190 */ { do_lstat, "lstat", { 0, }, 0 },
-  /* 191 */ { 0, "pathconf", { 0, }, 0 },
-  /* 192 */ { 0, "fpathconf", { 0, }, 0 },
+  /* 181 */ { 0, "setgid" },
+  /* 182 */ { 0, "setegid" },
+  /* 183 */ { 0, "seteuid" },
+  /* 184 */ { 0, "lfs_bmapv" },
+  /* 185 */ { 0, "lfs_markv" },
+  /* 186 */ { 0, "lfs_segclean" },
+  /* 187 */ { 0, "lfs_segwait" },
+  /* 188 */ { do_stat, "stat" },
+  /* 189 */ { do_fstat, "fstat" },
+  /* 190 */ { do_lstat, "lstat" },
+  /* 191 */ { 0, "pathconf" },
+  /* 192 */ { 0, "fpathconf" },
   { 0, }, /* 193 */
-  /* 194 */ { 0, "getrlimit", { 0, }, 0 },
-  /* 195 */ { 0, "setrlimit", { 0, }, 0 },
-  /* 196 */ { do_getdirentries, "getdirentries", { 0, }, 0 },
-  /* 197 */ { 0, "mmap", { 0, }, 0 },
-  /* 198 */ { do___syscall, "__syscall", { 0, }, 0 },
-  /* 199 */ { do_lseek, "lseek", { 0, }, 0 },
-  /* 200 */ { 0, "truncate", { 0, }, 0 },
-  /* 201 */ { 0, "ftruncate", { 0, }, 0 },
-  /* 202 */ { do___sysctl, "__sysctl", { 0, }, 0 },
-  /* 203 */ { 0, "mlock", { 0, }, 0 },
-  /* 204 */ { 0, "munlock", { 0, }, 0 },
+  /* 194 */ { 0, "getrlimit" },
+  /* 195 */ { 0, "setrlimit" },
+  /* 196 */ { do_getdirentries, "getdirentries" },
+  /* 197 */ { 0, "mmap" },
+  /* 198 */ { do___syscall, "__syscall" },
+  /* 199 */ { do_lseek, "lseek" },
+  /* 200 */ { 0, "truncate" },
+  /* 201 */ { 0, "ftruncate" },
+  /* 202 */ { do___sysctl, "__sysctl" },
+  /* 203 */ { 0, "mlock" },
+  /* 204 */ { 0, "munlock" },
 };
     
 static char *(netbsd_error_names[]) = {
@@ -1201,7 +1213,7 @@ static char *(netbsd_signal_names[]) = {
   /* 31 */ "SIGUSR2",
 };
 
-emulation emul_netbsd = {
+static emul_syscall emul_netbsd_syscalls = {
   netbsd_descriptors,
   sizeof(netbsd_descriptors) / sizeof(netbsd_descriptors[0]),
   netbsd_error_names,
@@ -1210,4 +1222,127 @@ emulation emul_netbsd = {
   sizeof(netbsd_signal_names) / sizeof(netbsd_signal_names[0]),
 };
 
-#endif /* _EMUL_NETBSD_C_ */
+
+/* NetBSD's os_emul interface, most are just passed on to the generic
+   syscall stuff */
+
+static os_emul_data *
+emul_netbsd_create(device *root,
+		   bfd *image,
+		   const char *name)
+{
+  unsigned_word top_of_stack;
+  unsigned stack_size;
+  int elf_binary;
+  os_emul_data *bsd_data;
+
+  /* check that this emulation is really for us */
+  if (name != NULL && strcmp(name, "netbsd") != 0)
+    return NULL;
+  if (image == NULL)
+    return NULL;
+
+
+  /* merge any emulation specific entries into the device tree */
+
+  /* establish a few defaults */
+  if (image->xvec->flavour == bfd_target_elf_flavour) {
+    elf_binary = 1;
+    top_of_stack = 0xe0000000;
+    stack_size =   0x00100000;
+  }
+  else {
+    elf_binary = 0;
+    top_of_stack = 0x20000000;
+    stack_size =   0x00100000;
+  }
+
+  /* options */
+  {
+    device *options = device_tree_add_found(root, "/", "options");
+    device_add_integer_property(options, "smp", 1); /* always */
+    device_add_boolean_property(options, "little-endian?",
+				!image->xvec->byteorder_big_p);
+    device_add_string_property(options, "env",
+			       (WITH_ENVIRONMENT == USER_ENVIRONMENT
+				? "user" : "virtual"));
+    device_add_boolean_property(options, "strict-alignment?",
+				(WITH_ALIGNMENT == STRICT_ALIGNMENT
+				 || !image->xvec->byteorder_big_p));
+    device_add_boolean_property(options, "floating-point?",
+				WITH_FLOATING_POINT);
+    device_add_string_property(options, "os-emul", "netbsd");
+  }
+
+  /* virtual memory - handles growth of stack/heap */
+  {
+    device *vm_node = device_tree_add_found_uw_u(root, "/", "vm",
+						 top_of_stack - stack_size,
+						 stack_size);
+    device *vm_map_binary = device_tree_add_found(vm_node, "", "map-binary");
+    device_add_null_property(vm_map_binary,
+			     bfd_get_filename(image));
+  }
+
+  /* finish the init */
+  {
+    device *init = device_tree_add_found(root, "/", "init");
+    {
+      device *init_register = device_tree_add_found(init, "", "register");
+      device_add_integer_property(init_register,
+				  "pc",
+				  bfd_get_start_address(image));
+      device_add_integer_property(init_register,
+				  "sp",
+				  top_of_stack);
+      device_add_integer_property(init_register,
+				  "msr",
+				  (image->xvec->byteorder_big_p
+				   ? 0
+				   : msr_little_endian_mode));
+    }
+    {
+      device *init_stack = device_tree_add_found(init, "", "stack");
+      device_add_null_property(init_stack,
+			       (elf_binary
+				? "elf"
+				: "xcoff"));
+    }
+  }
+
+  /* finally our emulation data */
+  bsd_data = ZALLOC(os_emul_data);
+  bsd_data->syscalls = &emul_netbsd_syscalls;
+  return bsd_data;
+}
+
+static void
+emul_netbsd_init(os_emul_data *emul_data,
+		 int nr_cpus)
+{
+  /* nothing yet */
+}
+
+static void
+emul_netbsd_system_call(cpu *processor,
+			unsigned_word cia,
+			os_emul_data *emul_data)
+{
+  emul_do_system_call(emul_data,
+		      emul_data->syscalls,
+		      cpu_registers(processor)->gpr[0],
+		      3, /*r3 contains arg0*/
+		      processor,
+		      cia);
+}
+
+const os_emul emul_netbsd = {
+  "netbsd",
+  emul_netbsd_create,
+  emul_netbsd_init,
+  emul_netbsd_system_call,
+  0, /*instruction_call*/
+  0 /*data*/
+};
+
+#endif _EMUL_NETBSD_C_

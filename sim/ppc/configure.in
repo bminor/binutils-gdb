@@ -128,15 +128,15 @@ AC_ARG_ENABLE(sim-inline,
 case "$enableval" in
   no)		sim_inline="-DDEFAULT_INLINE=0 -DINLINE=";;
   0)		sim_inline="-DDEFAULT_INLINE=0";;
-  yes | 2)	sim_inline="-DDEFAULT_INLINE=2";;
-  1)		sim_inline="-DDEFAULT_INLINE=1";;
+  yes | 2)	sim_inline="-DDEFAULT_INLINE=ALL_INLINE";;
+  1)		sim_inline="-DDEFAULT_INLINE=INLINE_LOCALS";;
   *) for x in `echo "$enableval" | sed -e "s/,/ /g"`; do
        new_flag=""
        case "$x" in
 	 *_INLINE=*)	new_flag="-D$x";;
-	 *_INLINE)	new_flag="-D$x=2";;
+	 *_INLINE)	new_flag="-D$x=ALL_INLINE";;
 	 *=*)		new_flag=`echo "$x" | sed -e "s/=/_INLINE=/" -e "s/^/-D/"`;;
-	 *)		new_flag="-D$x""_INLINE=2";;
+	 *)		new_flag="-D$x""_INLINE=ALL_INLINE";;
        esac
        if test x"$sim_inline" = x""; then
 	 sim_inline="$new_flag"
@@ -148,7 +148,7 @@ esac
 if test x"$silent" != x"yes" && test x"$sim_inline" != x""; then
   echo "Setting inline flags = $sim_inline" 6>&1
 fi],[if test x"$GCC" != ""; then
-  sim_inline="-DDEFAULT_INLINE=1"
+  sim_inline="-DDEFAULT_INLINE=INLINE_LOCALS"
   if test x"$silent" != x"yes"; then
     echo "Setting inline flags = $sim_inline" 6>&1
   fi
