@@ -76,6 +76,8 @@ gld${EMULATION_NAME}_finish ()
 	 need to adjust the stub size again.  */
       need_laying_out = 0;
 
+      lang_reset_memory_regions ();
+
       /* Resize the sections.  */
       lang_size_sections (stat_ptr->head, abs_output_section,
 			  &stat_ptr->head, 0, (bfd_vma) 0, NULL);
