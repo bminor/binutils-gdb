@@ -1,5 +1,14 @@
 2005-01-31  Jan Beulich  <jbeulich@novell.com>
 
+	* config/tc-ia64.c (parse_operands): Parse all specified operands,
+	immediately discarding (but counting) those exceeding the maximum
+	possible amount. Track whether output and input operand counts ever
+	matched, and use this to better indicate which of the operands/
+	operand types was wrong; specifically don't default to pointing to
+	the first operand.
+
+2005-01-31  Jan Beulich  <jbeulich@novell.com>
+
 	* config/tc-ia64.c (unwind): Remove proc_end (now an automatic
 	variable in dot_endp). Add body and insn. Make prologue,
 	prologue_mask, body, and insn bitfields.

@@ -1,5 +1,10 @@
 2005-01-31  Jan Beulich  <jbeulich@novell.com>
 
+	* gas/ia64/operands.[ls]: New.
+	* gas/ia64/ia64.exp: Run new test.
+
+2005-01-31  Jan Beulich  <jbeulich@novell.com>
+
 	* gas/ia64/proc.[ls]: New.
 	* gas/ia64/unwind-err.[ls]: New.
 	* gas/ia64/ia64.exp: Run new tests.

@@ -5956,11 +5956,22 @@ parse_operands (idesc)
       ++num_outputs;
     }
 
-  for (; i < NELEMS (CURR_SLOT.opnd); ++i)
+  for (; ; ++i)
     {
-      sep = parse_operand (CURR_SLOT.opnd + i);
-      if (CURR_SLOT.opnd[i].X_op == O_absent)
-	break;
+      if (i < NELEMS (CURR_SLOT.opnd)) 
+	{
+	  sep = parse_operand (CURR_SLOT.opnd + i);
+	  if (CURR_SLOT.opnd[i].X_op == O_absent)
+	    break;
+	}
+      else
+	{
+	  expressionS dummy;
+
+	  sep = parse_operand (&dummy);
+	  if (dummy.X_op == O_absent)
+	    break;
+	}
 
       ++num_operands;
 
@@ -6014,14 +6025,22 @@ parse_operands (idesc)
 	}
     }
 
-  highest_unmatched_operand = 0;
+  highest_unmatched_operand = -4;
   curr_out_of_range_pos = -1;
   error_pos = 0;
-  expected_operand = idesc->operands[0];
   for (; idesc; idesc = get_next_opcode (idesc))
     {
       if (num_outputs != idesc->num_outputs)
 	continue;		/* mismatch in # of outputs */
+      if (highest_unmatched_operand < 0)
+	highest_unmatched_operand |= 1;
+      if (num_operands > NELEMS (idesc->operands)
+	  || (num_operands < NELEMS (idesc->operands)
+	   && idesc->operands[num_operands])
+	  || (num_operands > 0 && !idesc->operands[num_operands - 1]))
+	continue;		/* mismatch in number of arguments */
+      if (highest_unmatched_operand < 0)
+	highest_unmatched_operand |= 2;
 
       CURR_SLOT.num_fixups = 0;
 
@@ -6074,10 +6093,6 @@ parse_operands (idesc)
 	  continue;
 	}
 
-      if (num_operands < NELEMS (idesc->operands)
-	  && idesc->operands[num_operands])
-	continue;		/* mismatch in number of arguments */
-
       break;
     }
   if (!idesc)
@@ -6086,6 +6101,10 @@ parse_operands (idesc)
 	as_bad ("Operand %u of `%s' should be %s",
 		error_pos + 1, mnemonic,
 		elf64_ia64_operands[expected_operand].desc);
+      else if (highest_unmatched_operand < 0 && !(highest_unmatched_operand & 1))
+	as_bad ("Wrong number of output operands");
+      else if (highest_unmatched_operand < 0 && !(highest_unmatched_operand & 2))
+	as_bad ("Wrong number of input operands");
       else
 	as_bad ("Operand mismatch");
       return 0;
