@@ -1,3 +1,10 @@
+2002-10-17  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.c++/namespace.cc: Add namespace renaming, using directives,
+	and using declarations.
+	* gdb.c++/namespace.exp: Add some xfails, including namespace
+	renaming, using directives, and using declarations.
+
 2002-10-15  David Carlton  <carlton@math.stanford.edu>
 
 	* gdb.c++/namespace.exp: Add anonymous namespace tests.

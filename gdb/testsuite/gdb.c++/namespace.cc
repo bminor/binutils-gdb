@@ -83,9 +83,57 @@ namespace
   }
 }
 
+namespace H
+{
+  int h = 14;
+}
+
+namespace I = H;
+
+namespace J
+{
+  int j = 15;
+}
+
+using namespace J;
+
+namespace K
+{
+  int k = 16;
+}
+
+namespace L
+{
+  using namespace K;
+}
+
+namespace O
+{
+  int o = 18;
+}
+
+namespace P
+{
+  using namespace O;
+}
+
+namespace Q
+{
+  using namespace P;
+}
+
+namespace R
+{
+  int r1 = 19;
+  int r2 = 20;
+}
+
+using R::r1;
+
 namespace C
 {
   int c = 1;
+  int shadow = 12;
 
   namespace
   {
@@ -115,11 +163,19 @@ namespace C
   namespace D
   {
     int cd = 3;
+    int shadow = 13;
 
     namespace E
     {
       int cde = 5;
     }
+
+    namespace M
+    {
+      int cdm = 17;
+    }
+
+    using namespace M;
 
     void marker2 (void)
     {
@@ -132,6 +188,7 @@ namespace C
       C::cc;
       cd;
       E::cde;
+      shadow;
       //E::ce;
       cX;
       F::cXf;
@@ -139,6 +196,15 @@ namespace C
       X;
       G::Xg;
       G::XgX;
+      I::h;
+      j;
+      L::k;
+      //k;
+      cdm;
+      Q::o;
+      //o;
+      r1;
+      //r2;
       return;
     }
 
