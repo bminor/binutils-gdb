@@ -267,8 +267,8 @@ target_makefile_frag=../config/${gdb_target_cpu}/gdbserve.mt
 
 files=
 links=
-rm -f cpu.c
+rm -f cpu.h
 if [ "${cpufile}" != "" ]; then
-	files="${files} ${cpufile}.c ${cpufile}.h"
-	links="${links} cpu.c cpu.h"
+	files="${files} ${cpufile}.h"
+	links="${links} cpu.h"
 fi

@@ -1,3 +1,20 @@
+Mon Aug 29 12:04:07 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* nlm/configure.in:  Stop using cpu.c.  Put it in TDEPFILES instead.
+	* config/alpha/gdbserve.mt (TDEPFILES):  Remove alpha-patch.o.
+
+	* nlm/Makefile.in:  Add rule for .S.o.
+	* nlm/aio.h:  Protect from multiple inclusions.
+	* nlm/alpha-io.S:  Remove everything we don't need.
+	* nlm/{alpha-patch.c, alpha-patch.h, alpha-uart.c, alpha-uart.h}:
+	Remove, no longer needed.
+	* nlm/alpha.c:  Merge in lots of stuff from previous files.
+	* nlm/alpha.h:  Don't #include alpha-patch.h.  Make
+	breakpoint_insn extern.
+	* Move stuff from alpha-patch.h into here.
+
+	* config/alpha/gdbserve.mt (TDEPFILES):  Get rid of alpha-uart.o.
+
 Mon Aug 29 11:34:34 1994  Jim Kingdon  (kingdon@cygnus.com)
 
 	* annotate.c (annotate_starting): Flush output.
