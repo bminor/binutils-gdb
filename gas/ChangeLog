@@ -1,5 +1,26 @@
 2002-12-13  Alan Modra  <amodra@bigpond.net.au>
 
+	* config/tc-i960.c (md_convert_frag): Add ATTRIBUTE_UNUSED to args.
+	(s_endian <ignore>): Likewise.
+	(md_undefined_symbol <name>): Likewise.
+	(tc_crawl_symbol_chain <headers>): Likewise.
+	(tc_set_bal_of_call): Likewise.
+	(tc_coff_symbol_emit_hook <symbolP>): Likewise.
+	(i960_handle_align <fragp>): Likewise.
+	(i960_validate_fix <this_segment_type>): Likewise
+	(tc_gen_reloc <section>): Likewise.
+	(tc_coff_symbol_emit_hook): Only define for OBJ_COFF.
+	(struct memS, struct regop): Forward declare.
+	(brcnt_emit, brlab_next, cobr_fmt, ctrl_fmt, emit, get_args,
+	get_cdisp, get_ispec, get_regnum, i_scan, mem_fmt, mema_to_memb,
+	parse_expr, parse_ldconst, parse_memop, parse_po, parse_regop,
+	reg_fmt, relax_cobr, s_leafproc, s_sysproc, shift_ok, syntax,
+	targ_has_sfr, targ_has_iclass, tc_bfd_fix2rtype): Prototype.
+	(md_chars_to_number, md_number_to_imm): Make static, prototype.
+	(md_number_to_field): Likewise.
+	(md_number_to_disp): Remove unused function.
+	(md_atof): Remove declaration of atof_ieee.
+	(md_apply_fix3): Correct md_number_to_imm call.
 	* config/tc-ip2k.c (md_assemble): Warning fix.
 	* config/tc-m32r.c (md_parse_option <arg>): Add ATTRIBUTE_UNUSED.
 	(fill_insn <ignore>): Likewise.
