@@ -877,7 +877,7 @@ do
 	    printf "#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (${macro}_P)\n"
 	    printf "#error \"Non multi-arch definition of ${macro}\"\n"
 	    printf "#endif\n"
-	    printf "#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (${macro}_P)\n"
+	    printf "#if !defined (${macro}_P)\n"
 	    printf "#define ${macro}_P() (gdbarch_${function}_p (current_gdbarch))\n"
 	    printf "#endif\n"
 	fi

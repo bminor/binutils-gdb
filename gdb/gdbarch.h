@@ -237,7 +237,7 @@ extern int gdbarch_read_pc_p (struct gdbarch *gdbarch);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (TARGET_READ_PC_P)
 #error "Non multi-arch definition of TARGET_READ_PC"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (TARGET_READ_PC_P)
+#if !defined (TARGET_READ_PC_P)
 #define TARGET_READ_PC_P() (gdbarch_read_pc_p (current_gdbarch))
 #endif
 
@@ -274,7 +274,7 @@ extern int gdbarch_read_sp_p (struct gdbarch *gdbarch);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (TARGET_READ_SP_P)
 #error "Non multi-arch definition of TARGET_READ_SP"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (TARGET_READ_SP_P)
+#if !defined (TARGET_READ_SP_P)
 #define TARGET_READ_SP_P() (gdbarch_read_sp_p (current_gdbarch))
 #endif
 
@@ -467,7 +467,7 @@ extern int gdbarch_deprecated_register_virtual_type_p (struct gdbarch *gdbarch);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_REGISTER_VIRTUAL_TYPE_P)
 #error "Non multi-arch definition of DEPRECATED_REGISTER_VIRTUAL_TYPE"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_REGISTER_VIRTUAL_TYPE_P)
+#if !defined (DEPRECATED_REGISTER_VIRTUAL_TYPE_P)
 #define DEPRECATED_REGISTER_VIRTUAL_TYPE_P() (gdbarch_deprecated_register_virtual_type_p (current_gdbarch))
 #endif
 
@@ -512,7 +512,7 @@ extern int gdbarch_deprecated_register_byte_p (struct gdbarch *gdbarch);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_REGISTER_BYTE_P)
 #error "Non multi-arch definition of DEPRECATED_REGISTER_BYTE"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_REGISTER_BYTE_P)
+#if !defined (DEPRECATED_REGISTER_BYTE_P)
 #define DEPRECATED_REGISTER_BYTE_P() (gdbarch_deprecated_register_byte_p (current_gdbarch))
 #endif
 
@@ -542,7 +542,7 @@ extern int gdbarch_deprecated_register_raw_size_p (struct gdbarch *gdbarch);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_REGISTER_RAW_SIZE_P)
 #error "Non multi-arch definition of DEPRECATED_REGISTER_RAW_SIZE"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_REGISTER_RAW_SIZE_P)
+#if !defined (DEPRECATED_REGISTER_RAW_SIZE_P)
 #define DEPRECATED_REGISTER_RAW_SIZE_P() (gdbarch_deprecated_register_raw_size_p (current_gdbarch))
 #endif
 
@@ -572,7 +572,7 @@ extern int gdbarch_deprecated_register_virtual_size_p (struct gdbarch *gdbarch);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_REGISTER_VIRTUAL_SIZE_P)
 #error "Non multi-arch definition of DEPRECATED_REGISTER_VIRTUAL_SIZE"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_REGISTER_VIRTUAL_SIZE_P)
+#if !defined (DEPRECATED_REGISTER_VIRTUAL_SIZE_P)
 #define DEPRECATED_REGISTER_VIRTUAL_SIZE_P() (gdbarch_deprecated_register_virtual_size_p (current_gdbarch))
 #endif
 
@@ -608,7 +608,7 @@ extern int gdbarch_deprecated_save_dummy_frame_tos_p (struct gdbarch *gdbarch);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_SAVE_DUMMY_FRAME_TOS_P)
 #error "Non multi-arch definition of DEPRECATED_SAVE_DUMMY_FRAME_TOS"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_SAVE_DUMMY_FRAME_TOS_P)
+#if !defined (DEPRECATED_SAVE_DUMMY_FRAME_TOS_P)
 #define DEPRECATED_SAVE_DUMMY_FRAME_TOS_P() (gdbarch_deprecated_save_dummy_frame_tos_p (current_gdbarch))
 #endif
 
@@ -648,7 +648,7 @@ extern int gdbarch_deprecated_target_read_fp_p (struct gdbarch *gdbarch);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_TARGET_READ_FP_P)
 #error "Non multi-arch definition of DEPRECATED_TARGET_READ_FP"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_TARGET_READ_FP_P)
+#if !defined (DEPRECATED_TARGET_READ_FP_P)
 #define DEPRECATED_TARGET_READ_FP_P() (gdbarch_deprecated_target_read_fp_p (current_gdbarch))
 #endif
 
@@ -684,7 +684,7 @@ extern int gdbarch_deprecated_push_arguments_p (struct gdbarch *gdbarch);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_PUSH_ARGUMENTS_P)
 #error "Non multi-arch definition of DEPRECATED_PUSH_ARGUMENTS"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_PUSH_ARGUMENTS_P)
+#if !defined (DEPRECATED_PUSH_ARGUMENTS_P)
 #define DEPRECATED_PUSH_ARGUMENTS_P() (gdbarch_deprecated_push_arguments_p (current_gdbarch))
 #endif
 
@@ -712,7 +712,7 @@ extern int gdbarch_deprecated_push_return_address_p (struct gdbarch *gdbarch);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_PUSH_RETURN_ADDRESS_P)
 #error "Non multi-arch definition of DEPRECATED_PUSH_RETURN_ADDRESS"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_PUSH_RETURN_ADDRESS_P)
+#if !defined (DEPRECATED_PUSH_RETURN_ADDRESS_P)
 #define DEPRECATED_PUSH_RETURN_ADDRESS_P() (gdbarch_deprecated_push_return_address_p (current_gdbarch))
 #endif
 
@@ -739,7 +739,7 @@ extern int gdbarch_deprecated_dummy_write_sp_p (struct gdbarch *gdbarch);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_DUMMY_WRITE_SP_P)
 #error "Non multi-arch definition of DEPRECATED_DUMMY_WRITE_SP"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_DUMMY_WRITE_SP_P)
+#if !defined (DEPRECATED_DUMMY_WRITE_SP_P)
 #define DEPRECATED_DUMMY_WRITE_SP_P() (gdbarch_deprecated_dummy_write_sp_p (current_gdbarch))
 #endif
 
@@ -790,7 +790,7 @@ extern int gdbarch_deprecated_do_registers_info_p (struct gdbarch *gdbarch);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_DO_REGISTERS_INFO_P)
 #error "Non multi-arch definition of DEPRECATED_DO_REGISTERS_INFO"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_DO_REGISTERS_INFO_P)
+#if !defined (DEPRECATED_DO_REGISTERS_INFO_P)
 #define DEPRECATED_DO_REGISTERS_INFO_P() (gdbarch_deprecated_do_registers_info_p (current_gdbarch))
 #endif
 
@@ -844,7 +844,7 @@ extern int gdbarch_register_bytes_ok_p (struct gdbarch *gdbarch);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (REGISTER_BYTES_OK_P)
 #error "Non multi-arch definition of REGISTER_BYTES_OK"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (REGISTER_BYTES_OK_P)
+#if !defined (REGISTER_BYTES_OK_P)
 #define REGISTER_BYTES_OK_P() (gdbarch_register_bytes_ok_p (current_gdbarch))
 #endif
 
@@ -891,7 +891,7 @@ extern int gdbarch_get_longjmp_target_p (struct gdbarch *gdbarch);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (GET_LONGJMP_TARGET_P)
 #error "Non multi-arch definition of GET_LONGJMP_TARGET"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (GET_LONGJMP_TARGET_P)
+#if !defined (GET_LONGJMP_TARGET_P)
 #define GET_LONGJMP_TARGET_P() (gdbarch_get_longjmp_target_p (current_gdbarch))
 #endif
 
@@ -916,7 +916,7 @@ extern int gdbarch_deprecated_init_frame_pc_p (struct gdbarch *gdbarch);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_INIT_FRAME_PC_P)
 #error "Non multi-arch definition of DEPRECATED_INIT_FRAME_PC"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_INIT_FRAME_PC_P)
+#if !defined (DEPRECATED_INIT_FRAME_PC_P)
 #define DEPRECATED_INIT_FRAME_PC_P() (gdbarch_deprecated_init_frame_pc_p (current_gdbarch))
 #endif
 
@@ -950,7 +950,7 @@ extern int gdbarch_deprecated_get_saved_register_p (struct gdbarch *gdbarch);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_GET_SAVED_REGISTER_P)
 #error "Non multi-arch definition of DEPRECATED_GET_SAVED_REGISTER"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_GET_SAVED_REGISTER_P)
+#if !defined (DEPRECATED_GET_SAVED_REGISTER_P)
 #define DEPRECATED_GET_SAVED_REGISTER_P() (gdbarch_deprecated_get_saved_register_p (current_gdbarch))
 #endif
 
@@ -1025,7 +1025,7 @@ extern int gdbarch_integer_to_address_p (struct gdbarch *gdbarch);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (INTEGER_TO_ADDRESS_P)
 #error "Non multi-arch definition of INTEGER_TO_ADDRESS"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (INTEGER_TO_ADDRESS_P)
+#if !defined (INTEGER_TO_ADDRESS_P)
 #define INTEGER_TO_ADDRESS_P() (gdbarch_integer_to_address_p (current_gdbarch))
 #endif
 
@@ -1050,7 +1050,7 @@ extern int gdbarch_deprecated_pop_frame_p (struct gdbarch *gdbarch);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_POP_FRAME_P)
 #error "Non multi-arch definition of DEPRECATED_POP_FRAME"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_POP_FRAME_P)
+#if !defined (DEPRECATED_POP_FRAME_P)
 #define DEPRECATED_POP_FRAME_P() (gdbarch_deprecated_pop_frame_p (current_gdbarch))
 #endif
 
@@ -1077,7 +1077,7 @@ extern int gdbarch_deprecated_store_struct_return_p (struct gdbarch *gdbarch);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_STORE_STRUCT_RETURN_P)
 #error "Non multi-arch definition of DEPRECATED_STORE_STRUCT_RETURN"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_STORE_STRUCT_RETURN_P)
+#if !defined (DEPRECATED_STORE_STRUCT_RETURN_P)
 #define DEPRECATED_STORE_STRUCT_RETURN_P() (gdbarch_deprecated_store_struct_return_p (current_gdbarch))
 #endif
 
@@ -1183,7 +1183,7 @@ extern int gdbarch_deprecated_extract_struct_value_address_p (struct gdbarch *gd
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P)
 #error "Non multi-arch definition of DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P)
+#if !defined (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P)
 #define DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P() (gdbarch_deprecated_extract_struct_value_address_p (current_gdbarch))
 #endif
 
@@ -1208,7 +1208,7 @@ extern int gdbarch_deprecated_frame_init_saved_regs_p (struct gdbarch *gdbarch);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_FRAME_INIT_SAVED_REGS_P)
 #error "Non multi-arch definition of DEPRECATED_FRAME_INIT_SAVED_REGS"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_FRAME_INIT_SAVED_REGS_P)
+#if !defined (DEPRECATED_FRAME_INIT_SAVED_REGS_P)
 #define DEPRECATED_FRAME_INIT_SAVED_REGS_P() (gdbarch_deprecated_frame_init_saved_regs_p (current_gdbarch))
 #endif
 
@@ -1233,7 +1233,7 @@ extern int gdbarch_deprecated_init_extra_frame_info_p (struct gdbarch *gdbarch);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_INIT_EXTRA_FRAME_INFO_P)
 #error "Non multi-arch definition of DEPRECATED_INIT_EXTRA_FRAME_INFO"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_INIT_EXTRA_FRAME_INFO_P)
+#if !defined (DEPRECATED_INIT_EXTRA_FRAME_INFO_P)
 #define DEPRECATED_INIT_EXTRA_FRAME_INFO_P() (gdbarch_deprecated_init_extra_frame_info_p (current_gdbarch))
 #endif
 
@@ -1349,7 +1349,7 @@ extern int gdbarch_deprecated_frameless_function_invocation_p (struct gdbarch *g
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_FRAMELESS_FUNCTION_INVOCATION_P)
 #error "Non multi-arch definition of DEPRECATED_FRAMELESS_FUNCTION_INVOCATION"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_FRAMELESS_FUNCTION_INVOCATION_P)
+#if !defined (DEPRECATED_FRAMELESS_FUNCTION_INVOCATION_P)
 #define DEPRECATED_FRAMELESS_FUNCTION_INVOCATION_P() (gdbarch_deprecated_frameless_function_invocation_p (current_gdbarch))
 #endif
 
@@ -1374,7 +1374,7 @@ extern int gdbarch_deprecated_frame_chain_p (struct gdbarch *gdbarch);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_FRAME_CHAIN_P)
 #error "Non multi-arch definition of DEPRECATED_FRAME_CHAIN"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_FRAME_CHAIN_P)
+#if !defined (DEPRECATED_FRAME_CHAIN_P)
 #define DEPRECATED_FRAME_CHAIN_P() (gdbarch_deprecated_frame_chain_p (current_gdbarch))
 #endif
 
@@ -1399,7 +1399,7 @@ extern int gdbarch_deprecated_frame_chain_valid_p (struct gdbarch *gdbarch);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_FRAME_CHAIN_VALID_P)
 #error "Non multi-arch definition of DEPRECATED_FRAME_CHAIN_VALID"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_FRAME_CHAIN_VALID_P)
+#if !defined (DEPRECATED_FRAME_CHAIN_VALID_P)
 #define DEPRECATED_FRAME_CHAIN_VALID_P() (gdbarch_deprecated_frame_chain_valid_p (current_gdbarch))
 #endif
 
@@ -1428,7 +1428,7 @@ extern int gdbarch_deprecated_frame_saved_pc_p (struct gdbarch *gdbarch);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_FRAME_SAVED_PC_P)
 #error "Non multi-arch definition of DEPRECATED_FRAME_SAVED_PC"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_FRAME_SAVED_PC_P)
+#if !defined (DEPRECATED_FRAME_SAVED_PC_P)
 #define DEPRECATED_FRAME_SAVED_PC_P() (gdbarch_deprecated_frame_saved_pc_p (current_gdbarch))
 #endif
 
@@ -1468,7 +1468,7 @@ extern int gdbarch_deprecated_frame_args_address_p (struct gdbarch *gdbarch);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_FRAME_ARGS_ADDRESS_P)
 #error "Non multi-arch definition of DEPRECATED_FRAME_ARGS_ADDRESS"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_FRAME_ARGS_ADDRESS_P)
+#if !defined (DEPRECATED_FRAME_ARGS_ADDRESS_P)
 #define DEPRECATED_FRAME_ARGS_ADDRESS_P() (gdbarch_deprecated_frame_args_address_p (current_gdbarch))
 #endif
 
@@ -1496,7 +1496,7 @@ extern int gdbarch_deprecated_frame_locals_address_p (struct gdbarch *gdbarch);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_FRAME_LOCALS_ADDRESS_P)
 #error "Non multi-arch definition of DEPRECATED_FRAME_LOCALS_ADDRESS"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_FRAME_LOCALS_ADDRESS_P)
+#if !defined (DEPRECATED_FRAME_LOCALS_ADDRESS_P)
 #define DEPRECATED_FRAME_LOCALS_ADDRESS_P() (gdbarch_deprecated_frame_locals_address_p (current_gdbarch))
 #endif
 
@@ -1521,7 +1521,7 @@ extern int gdbarch_deprecated_saved_pc_after_call_p (struct gdbarch *gdbarch);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_SAVED_PC_AFTER_CALL_P)
 #error "Non multi-arch definition of DEPRECATED_SAVED_PC_AFTER_CALL"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_SAVED_PC_AFTER_CALL_P)
+#if !defined (DEPRECATED_SAVED_PC_AFTER_CALL_P)
 #define DEPRECATED_SAVED_PC_AFTER_CALL_P() (gdbarch_deprecated_saved_pc_after_call_p (current_gdbarch))
 #endif
 
@@ -1546,7 +1546,7 @@ extern int gdbarch_frame_num_args_p (struct gdbarch *gdbarch);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (FRAME_NUM_ARGS_P)
 #error "Non multi-arch definition of FRAME_NUM_ARGS"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (FRAME_NUM_ARGS_P)
+#if !defined (FRAME_NUM_ARGS_P)
 #define FRAME_NUM_ARGS_P() (gdbarch_frame_num_args_p (current_gdbarch))
 #endif
 
@@ -1576,7 +1576,7 @@ extern int gdbarch_deprecated_stack_align_p (struct gdbarch *gdbarch);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_STACK_ALIGN_P)
 #error "Non multi-arch definition of DEPRECATED_STACK_ALIGN"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_STACK_ALIGN_P)
+#if !defined (DEPRECATED_STACK_ALIGN_P)
 #define DEPRECATED_STACK_ALIGN_P() (gdbarch_deprecated_stack_align_p (current_gdbarch))
 #endif
 
@@ -1610,7 +1610,7 @@ extern int gdbarch_deprecated_reg_struct_has_addr_p (struct gdbarch *gdbarch);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_REG_STRUCT_HAS_ADDR_P)
 #error "Non multi-arch definition of DEPRECATED_REG_STRUCT_HAS_ADDR"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_REG_STRUCT_HAS_ADDR_P)
+#if !defined (DEPRECATED_REG_STRUCT_HAS_ADDR_P)
 #define DEPRECATED_REG_STRUCT_HAS_ADDR_P() (gdbarch_deprecated_reg_struct_has_addr_p (current_gdbarch))
 #endif
 
@@ -1721,7 +1721,7 @@ extern int gdbarch_software_single_step_p (struct gdbarch *gdbarch);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (SOFTWARE_SINGLE_STEP_P)
 #error "Non multi-arch definition of SOFTWARE_SINGLE_STEP"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (SOFTWARE_SINGLE_STEP_P)
+#if !defined (SOFTWARE_SINGLE_STEP_P)
 #define SOFTWARE_SINGLE_STEP_P() (gdbarch_software_single_step_p (current_gdbarch))
 #endif
 
@@ -1877,7 +1877,7 @@ extern int gdbarch_address_class_type_flags_p (struct gdbarch *gdbarch);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (ADDRESS_CLASS_TYPE_FLAGS_P)
 #error "Non multi-arch definition of ADDRESS_CLASS_TYPE_FLAGS"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (ADDRESS_CLASS_TYPE_FLAGS_P)
+#if !defined (ADDRESS_CLASS_TYPE_FLAGS_P)
 #define ADDRESS_CLASS_TYPE_FLAGS_P() (gdbarch_address_class_type_flags_p (current_gdbarch))
 #endif
 
@@ -1922,7 +1922,7 @@ extern int gdbarch_fetch_pointer_argument_p (struct gdbarch *gdbarch);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (FETCH_POINTER_ARGUMENT_P)
 #error "Non multi-arch definition of FETCH_POINTER_ARGUMENT"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (FETCH_POINTER_ARGUMENT_P)
+#if !defined (FETCH_POINTER_ARGUMENT_P)
 #define FETCH_POINTER_ARGUMENT_P() (gdbarch_fetch_pointer_argument_p (current_gdbarch))
 #endif
 
