@@ -1,5 +1,35 @@
 2002-03-07  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
+	* interp.c (sim_hw_configure): Save the HW cpu pointer in the 
+	cpu struct.
+	(sim_hw_configure): Connect the capture input/output events.
+	* sim-main.h (_sim_cpu): New member hw_cpu.
+	(m68hc11cpu_set_oscillator): Declare.
+	(m68hc11cpu_clear_oscillator): Declare.
+	(m68hc11cpu_set_port): Declare.
+	* dv-m68hc11.c (m68hc11_options): New for oscillator commands.
+	(m68hc11cpu_ports): New input ports and output ports to reflect
+	the HC11 IOs.
+	(m68hc11_delete): Cleanup any running oscillator.
+	(attach_m68hc11_regs): Create the input oscillators.
+	(make_oscillator): New function.
+	(find_oscillator): New function.
+	(oscillator_handler): New function.
+	(reset_oscillators): New function.
+	(m68hc11cpu_port_event): Handle the new input ports.
+	(m68hc11cpu_set_oscillator): New function.
+	(m68hc11cpu_clear_oscillator): New function.
+	(get_frequency): New function.
+	(m68hc11_option_handler): New function.
+	(m68hc11cpu_set_port): New function.
+	(m68hc11cpu_io_write): Post the port output events.
+	* dv-m68hc11spi.c (set_bit_port): Use m68hc11cpu_set_port to set
+	the output port value.
+	* dv-m68hc11tim.c (m68hc11tim_port_event): Handle CAPTURE event
+	by latching the TCNT value in the register.
+
+2002-03-07  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
 	* sim-main.h (cpu_frame, cpu_frame_list): Remove.
 	(cpu_frame_reg, cpu_print_frame): Remove.
 	(cpu_m68hc11_push_uint8, cpu_m68hc11_pop_uint8): Cleanup.
