@@ -1,5 +1,10 @@
 2004-09-02  Andrew Cagney  <cagney@gnu.org>
 
+	* config/m68k/tm-st2000.h: Delete.
+	* config/m68k/st2000.mt (TM_FILE): Set to tm-m68k.h.
+	* config/sparc/fbsd.mt (TM_FILE): Delete.
+	* config/sparc/tm-fbsd.h: Delete.
+
 	* acconfig.h (GDB_MULTI_ARCH): Delete undef.
 	* defs.h (GDB_MULTI_ARCH_PARTIAL, GDB_MULTI_ARCH_TM) 
 	(GDB_MULTI_ARCH_PURE, GDB_MULTI_ARCH): Delete macros.
