@@ -33,7 +33,6 @@ Makefile.in
 NOTES
 README
 RUN
-PROBLEMS
 basics.h
 bits.c
 bits.h
