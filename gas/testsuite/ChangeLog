@@ -1,3 +1,7 @@
+Mon Nov 16 16:50:27 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* gas/fr30/allinsn.s: Fix syntax errors.
+
 Mon Nov 16 19:27:52 1998  Dave Brolley  <brolley@cygnus.com>
 
 	* gas/fr30/allinsn.s: Fixed more typos.

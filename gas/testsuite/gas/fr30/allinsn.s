@@ -203,7 +203,6 @@ ld:
 	ld @(R14, 0x1fc), r7
 	ld @(R15, 0x3c), r8
 	ld @r15+, r9
-	ld @R15+, pc
 	ld @r15+, ps
 	ld @R15+, tbr
 	ld @r15+, rp
@@ -426,9 +425,9 @@ dmov:
 	dmov @88H, r13
 	dmov r13, @54H
 	dmov @0x44, @r13+
-	dmov @R13+, @2
+	dmov @R13+, @0x2
 	dmov @2cH, @-r15
-	dmov @r15+, @38
+	dmov @r15+, @#38
 	.text
 	.global dmovh
 dmovh:
@@ -442,7 +441,7 @@ dmovb:
 	dmovb @91H, r13
 	dmovb r13, @0x53
 	dmovb @71, @r13+
-	dmovb @r13+, @0
+	dmovb @r13+, @0x0
 	.text
 	.global ldres
 ldres:
