@@ -1,4 +1,10 @@
 start-sanitize-carp start-sanitize-vr4xxx
+Thu Dec 17 02:01:58 1998  Andrew Cagney  <cagney@chook>
+
+	* gdbtypes.c (_initialize_gdbtypes): Register all builtin types
+ 	with gdbarch so that they are updated whenever the architecture is
+ 	changed.
+
 Thu Dec 17 01:58:16 1998  Andrew Cagney  <cagney@chook>
 
 	* gdbarch.h (GDB_MULTI_ARCH): New macro, default to zero.
