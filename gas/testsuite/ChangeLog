@@ -1,3 +1,7 @@
+2001-12-20  Alexandre Oliva  <aoliva@redhat.com>
+
+	* gas/sh/err-at.s: New test.
+
 2001-12-18  Hans-Peter Nilsson  <hp@axis.com>
 
 	* gas/cris/rd-dw2-10.d: Tweak for change in gas dwarf2 line number
