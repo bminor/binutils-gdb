@@ -1,3 +1,10 @@
+2004-10-11  Orjan Friberg  <orjanf@axis.com>
+
+	* gdb.threads/bp_in_thread.exp: Use runto_main and "continue" instead 
+	of "run", since the latter doesn't work with remote targets.  Adjust
+	the breakpoint numbering accordingly.
+	* gdb.threads/pthread_cond_wait.exp: Ditto.
+
 2004-10-08  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* gdb.base/overlays.exp: Update copyright years.

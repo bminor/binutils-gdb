@@ -36,13 +36,14 @@ gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
+runto_main
 
 gdb_test "break break_me" \
-    "Breakpoint 1 at .*: file .*${srcfile}, line .*" \
+    "Breakpoint 2 at .*: file .*${srcfile}, line .*" \
          "breakpoint on break_me"
 
-gdb_test "run" \
-         ".*Breakpoint 1, break_me ().*" \
+gdb_test "continue" \
+         ".*Breakpoint 2, break_me ().*" \
          "run to break_me"
 
 # 

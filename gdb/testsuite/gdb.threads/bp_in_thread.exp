@@ -35,15 +35,16 @@ gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
+runto_main
 
 gdb_test "break noreturn" \
-         "Breakpoint 1 at .*: file .*${srcfile}, line .*" \
+         "Breakpoint 2 at .*: file .*${srcfile}, line .*" \
          "breakpoint on noreturn"
 
 # Run the program and make sure GDB reports that we stopped after
 # hitting breakpoint 1 in noreturn().
 
-gdb_test "run" \
-         ".*Breakpoint 1, noreturn ().*" \
+gdb_test "continue" \
+         ".*Breakpoint 2, noreturn ().*" \
          "run to noreturn"
 
