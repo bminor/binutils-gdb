@@ -1,3 +1,34 @@
+2003-10-23  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* ia64-tdep.c: (ia64_frame_cache): Add new prev_cfm field.
+	(pseudo_regs): Add comment regarding register stack registers.
+	(ia64_alloc_frame_cache):  Initialize new prev_cfm field to 0.
+	(floatformat_valid): New static routine.
+	(floatformat_ia64_ext): Add name field and set up is_valid routine
+	to floatformat_valid().
+	(examine_prologue):  For the previous cfm, use
+	frame_unwind_register()
+	if the cfm is not stored in a register-stack register.  Save the
+	previous cfm value in the prev_cfm field.  Add debug output.
+	(ia64_frame_this_id): Use frame_id_build_special() to also register
+	the bsp.  Add debug output.
+	(ia64_sigtramp_frame_this_id): Ditto.
+	(ia64_frame_prev_register):  Look at cache saved_regs for a few more
+	registers and also add some checks for framelessness before accepting
+	current register values for fields such as return address.  For cfm,
+	use the cached prev_cfm field if available.  Add comment to explain
+	PSR logic.  Add debug output.
+	(ia64_sigtramp_frame_init_saved_regs): Save the bsp and sp addresses
+	as part of initialization.
+	(ia64_sigtramp_frame_cache): Hard-code stack size as it can't be
+	calculated.  Cache the bsp and cfm values.
+	(ia64_sigtramp_frame_prev_register): Add logic to this routine out
+	instead of using ia64_frame_prev_register() which doesn't expect most
+	registers to be saved.  The saved values for bsp and sp
+	can be taken from the cache.  Add debug output.
+	(ia64_push_dummy_call): Use frame_id_build_special() to also register
+	the bsp.
+
 2003-10-23  Jim Blandy  <jimb@redhat.com>
 
 	* osabi.c (gdbarch_init_osabi): A handler is okay if it's for an
