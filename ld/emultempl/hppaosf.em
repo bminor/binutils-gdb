@@ -40,38 +40,10 @@ extern char *ldfile_output_machine_name;
 
 extern bfd *output_bfd;
 
-
-#ifdef HPPAOSF
-
 static void hppaosf_before_parse()
 {
-  static char *env_variables[] = { "HPPALIB", "HPPABASE", 0 };
-  char **p;
-  char *env ;
-
-  for ( p = env_variables; *p; p++ ){
-    env =  (char *) getenv(*p);
-    if (env) {
-      ldfile_add_library_path(concat(env,"/lib/libbout",""));
-    }
-  }
   ldfile_output_architecture = bfd_arch_hppa;
 }
-#else
-static void hppaosf_before_parse()
-{
-  char *env ;
-  env =  getenv("HPPALIB");
-  if (env) {
-    ldfile_add_library_path(env);
-  }
-  env = getenv("HPPABASE");
-  if (env) {
-    ldfile_add_library_path(concat(env,"/lib",""));
-  }
-  ldfile_output_architecture = bfd_arch_hppa;
-}
-#endif /* HPPAOSF */
 
 static void
 hppaosf_set_output_arch()
@@ -154,6 +126,6 @@ struct ld_emulation_xfer_struct ld_hppaosf_emulation =
   before_allocation_default,
   hppaosf_get_script,
   "hppaosf",
-  "elf-big"
+  "elf32-hppa"
 };
 EOF

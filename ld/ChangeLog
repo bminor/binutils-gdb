@@ -1,3 +1,14 @@
+Tue Aug 24 18:49:40 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	From Peter Hoogenboom <hoogen@shafer.cs.utah.edu>:
+	* emultempl/hppaosf.em (ld_hppaosf_emulation): Correct name for PA
+	ELF emulation is "elf32-hppa" not "elf-big".
+	(hppaosf_before_parse): Remove unneeded processing of environment
+	variables.
+	* scripttempl/hppaosf.sc: Include .hppa_linker_stubs sections in
+	.text segment of output file.
+	* emulparams/hppaosf.sh (OUTPUT_FORMAT): Use elf32-hppa.
+
 Tue Aug 24 16:17:00 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 	* ld.h: define BYTE_SIZE, SHORT_SIZE, and LONG_SIZE which are no

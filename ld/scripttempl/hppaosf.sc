@@ -9,6 +9,7 @@ SECTIONS
   {
     ${RELOCATING+__text_start = .};
     CREATE_OBJECT_SYMBOLS
+    *(.hppa_linker_stubs)
     *(.text)
   }
   .data  ${RELOCATING+ 0x40000000 } :
