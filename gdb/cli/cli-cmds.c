@@ -1,6 +1,6 @@
 /* GDB CLI commands.
 
-   Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -20,6 +20,7 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
+#include <readline/readline.h>
 #include <readline/tilde.h>
 #include "completer.h"
 #include "target.h"	 /* For baud_rate, remote_debug and remote_timeout */
@@ -222,7 +223,7 @@ complete_command (char *arg, int from_tty)
 {
   int i;
   int argpoint;
-  char **completions;
+  char **completions, *point, *arg_prefix;
 
   dont_repeat ();
 
@@ -230,7 +231,23 @@ complete_command (char *arg, int from_tty)
     arg = "";
   argpoint = strlen (arg);
 
-  completions = complete_line (arg, arg, argpoint);
+  /* complete_line assumes that its first argument is somewhere within,
+     and except for filenames at the beginning of, the word to be completed.
+     The following crude imitation of readline's word-breaking tries to
+     accomodate this.  */
+  point = arg + argpoint;
+  while (point > arg)
+    {
+      if (strchr (rl_completer_word_break_characters, point[-1]) != 0)
+        break;
+      point--;
+    }
+
+  arg_prefix = alloca (point - arg + 1);
+  memcpy (arg_prefix, arg, point - arg);
+  arg_prefix[point - arg] = 0;
+
+  completions = complete_line (point, arg, argpoint);
 
   if (completions)
     {
@@ -246,7 +263,7 @@ complete_command (char *arg, int from_tty)
       while (item < size)
 	{
 	  int next_item;
-	  printf_unfiltered ("%s\n", completions[item]);
+	  printf_unfiltered ("%s%s\n", arg_prefix, completions[item]);
 	  next_item = item + 1;
 	  while (next_item < size
 		 && ! strcmp (completions[item], completions[next_item]))
