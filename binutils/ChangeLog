@@ -1,3 +1,14 @@
+2003-07-04  Christopher Faylor  <cgf@redhat.com>
+
+	* dlltool.c (prefix_encode): New function.  Encode temp file prefix
+	from pid.
+	(dlltmp): Pass address of pointer being alloced or suffer neverending
+	mallocs.
+	(make_one_lib_file): Allocate enough space for new longer stub names.
+	(gen_lib_file): Ditto.
+	(main): Generate the temp file prefix from the pid if prefix was not
+	specified on the command line.
+
 2003-07-04  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (get_data): Print (unsigned) hex values for size and

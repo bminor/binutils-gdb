@@ -350,7 +350,7 @@ static iheadtype *import_list = NULL;
 static char *as_name = NULL;
 static char * as_flags = "";
 
-static char *tmp_prefix = "d";
+static char *tmp_prefix;
 
 static int no_idata4;
 static int no_idata5;
@@ -440,12 +440,12 @@ char *tmp_tail_s_buf;
 char *tmp_tail_o_buf;
 char *tmp_stub_buf;
 
-#define TMP_ASM		dlltmp (tmp_asm_buf, "%sc.s")
-#define TMP_HEAD_S	dlltmp (tmp_head_s_buf, "%sh.s")
-#define TMP_HEAD_O	dlltmp (tmp_head_o_buf, "%sh.o")
-#define TMP_TAIL_S	dlltmp (tmp_tail_s_buf, "%st.s")
-#define TMP_TAIL_O	dlltmp (tmp_tail_o_buf, "%st.o")
-#define TMP_STUB	dlltmp (tmp_stub_buf, "%ss")
+#define TMP_ASM		dlltmp (&tmp_asm_buf, "%sc.s")
+#define TMP_HEAD_S	dlltmp (&tmp_head_s_buf, "%sh.s")
+#define TMP_HEAD_O	dlltmp (&tmp_head_o_buf, "%sh.o")
+#define TMP_TAIL_S	dlltmp (&tmp_tail_s_buf, "%st.s")
+#define TMP_TAIL_O	dlltmp (&tmp_tail_o_buf, "%st.o")
+#define TMP_STUB	dlltmp (&tmp_stub_buf, "%ss")
 
 /* This bit of assemly does jmp * ....  */
 static const unsigned char i386_jtab[] =
@@ -751,12 +751,29 @@ static void inform
   PARAMS ((const char *, ...));
 
 static char *
-dlltmp PARAMS ((char *buf, const char *fmt))
+prefix_encode PARAMS ((char *start, unsigned code))
 {
-  if (!buf)
-    buf = malloc (strlen (tmp_prefix) + 17);
-  sprintf (buf, fmt, tmp_prefix);
+  static char alpha[] = "abcdefghijklmnopqrstuvwxyz";
+  static char buf[32];
+  char *p;
+  strcpy (buf, start);
+  p = strchr (buf, '\0');
+  do
+    *p++ = alpha[code % sizeof (alpha)];
+  while ((code /= sizeof (alpha)) != 0);
+  *p = '\0';
   return buf;
+}
+
+static char *
+dlltmp PARAMS ((char **buf, const char *fmt))
+{
+  if (!*buf)
+    {
+      *buf = malloc (strlen (tmp_prefix) + 64);
+      sprintf (*buf, fmt, tmp_prefix);
+    }
+  return *buf;
 }
 
 static void
@@ -2348,7 +2365,7 @@ make_one_lib_file (exp, i)
       asymbol *  ptrs[NSECS + 4 + EXTRA + 1];
       flagword   applicable;
 
-      char *     outname = xmalloc (10);
+      char *     outname = xmalloc (strlen (TMP_STUB) + 10);
       int        oidx = 0;
 
 
@@ -2925,7 +2942,7 @@ gen_lib_file ()
     {
       char *name;
 
-      name = (char *) alloca (sizeof TMP_STUB + 10);
+      name = (char *) alloca (strlen (TMP_STUB) + 10);
       for (i = 0, exp = d_exports; exp; i++, exp = exp->next)
 	{
 	  sprintf (name, "%s%05d.o", TMP_STUB, i);
@@ -3420,6 +3437,9 @@ main (ac, av)
 	  break;
 	}
     }
+
+  if (!tmp_prefix)
+    tmp_prefix = prefix_encode ("d", getpid ());
 
   for (i = 0; mtable[i].type; i++)
     if (strcmp (mtable[i].type, mname) == 0)
