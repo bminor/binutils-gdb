@@ -1,3 +1,8 @@
+Wed Feb  4 13:02:32 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.am (ld_new_LDADD): Remove @LEXLIB@.
+	* Makefile.in: Rebuild.
+
 Mon Feb  2 19:34:54 1998  Steve Haworth  <steve@pm.cse.rmit.EDU.AU>
 
 	Add tms320c30 support:

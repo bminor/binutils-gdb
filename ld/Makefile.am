@@ -560,7 +560,7 @@ ez8002.c: $(srcdir)/emulparams/z8002.sh \
 ld_new_SOURCES = ldgram.y ldlex.l lexsup.c ldlang.c mri.c ldctor.c ldmain.c \
 	ldwrite.c ldexp.c ldemul.c ldver.c ldmisc.c ldfile.c ldcref.c
 ld_new_DEPENDENCIES = $(EMULATION_OFILES) $(BFDLIB) $(LIBIBERTY)
-ld_new_LDADD = $(EMULATION_OFILES) $(BFDLIB) $(LIBIBERTY) @LEXLIB@
+ld_new_LDADD = $(EMULATION_OFILES) $(BFDLIB) $(LIBIBERTY)
 
 # The generated emulation files mostly have the same dependencies.
 $(EMULATION_OFILES): ../bfd/bfd.h sysdep.h config.h $(INCDIR)/bfdlink.h \
