@@ -397,12 +397,18 @@ v:TARGET_LONG_BIT:int:long_bit::::8 * sizeof (long):4*TARGET_CHAR_BIT::0
 # Number of bits in a long long or unsigned long long for the target
 # machine.
 v:TARGET_LONG_LONG_BIT:int:long_long_bit::::8 * sizeof (LONGEST):2*TARGET_LONG_BIT::0
-# Number of bits in a float for the target machine.
+
+# The ABI default bit-size and format for "float", "double", and "long
+# double".  These bit/format pairs should eventually be combined into
+# a single object.  For the moment, just initialize them as a pair.
+
 v:TARGET_FLOAT_BIT:int:float_bit::::8 * sizeof (float):4*TARGET_CHAR_BIT::0
-# Number of bits in a double for the target machine.
+v:TARGET_FLOAT_FORMAT:const struct floatformat *:float_format::::::default_float_format (current_gdbarch)::%s:pformat (current_gdbarch->float_format)
 v:TARGET_DOUBLE_BIT:int:double_bit::::8 * sizeof (double):8*TARGET_CHAR_BIT::0
-# Number of bits in a long double for the target machine.
+v:TARGET_DOUBLE_FORMAT:const struct floatformat *:double_format::::::default_double_format (current_gdbarch)::%s:pformat (current_gdbarch->double_format)
 v:TARGET_LONG_DOUBLE_BIT:int:long_double_bit::::8 * sizeof (long double):8*TARGET_CHAR_BIT::0
+v:TARGET_LONG_DOUBLE_FORMAT:const struct floatformat *:long_double_format::::::default_double_format (current_gdbarch)::%s:pformat (current_gdbarch->long_double_format)
+
 # For most targets, a pointer on the target and its representation as an
 # address in GDB have the same size and "look the same".  For such a
 # target, you need only set TARGET_PTR_BIT / ptr_bit and TARGET_ADDR_BIT
@@ -594,9 +600,6 @@ F:=:int:deprecated_reg_struct_has_addr:int gcc_p, struct type *type:gcc_p, type
 m::int:stabs_argument_has_addr:struct type *type:type:::default_stabs_argument_has_addr::0
 v:=:int:frame_red_zone_size
 #
-v:TARGET_FLOAT_FORMAT:const struct floatformat *:float_format::::::default_float_format (current_gdbarch)::%s:(TARGET_FLOAT_FORMAT)->name
-v:TARGET_DOUBLE_FORMAT:const struct floatformat *:double_format::::::default_double_format (current_gdbarch)::%s:(TARGET_DOUBLE_FORMAT)->name
-v:TARGET_LONG_DOUBLE_FORMAT:const struct floatformat *:long_double_format::::::default_double_format (current_gdbarch)::%s:(TARGET_LONG_DOUBLE_FORMAT)->name
 m::CORE_ADDR:convert_from_func_ptr_addr:CORE_ADDR addr, struct target_ops *targ:addr, targ:::convert_from_func_ptr_addr_identity::0
 # On some machines there are bits in addresses which are not really
 # part of the address, but are used by the kernel, the hardware, etc.
@@ -1195,6 +1198,15 @@ static void alloc_gdbarch_data (struct gdbarch *);
 #define GDBARCH_DEBUG 0
 #endif
 int gdbarch_debug = GDBARCH_DEBUG;
+
+static const char *
+pformat (const struct floatformat *format)
+{
+  if (format == NULL)
+    return "(null)";
+  else
+    return  format->name;
+}
 
 EOF
 
