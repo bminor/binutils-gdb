@@ -1,3 +1,7 @@
+Thu Feb 13 12:43:29 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* xm-vaxbsd.h:  Close off comment.
+
 Thu Feb 13 07:45:19 1992  Fred Fish  (fnf at cygnus.com)
 
 	* xm-sysv4.h:  Define NEED_POSIX_SETPGID.

@@ -1,4 +1,4 @@
-/* Definitions to make GDB run on a vax under 4.2bsd.
+/* Definitions to make GDB run on a vax under 4.2bsd. */
 
 /* We have to include these files now, so that GDB will not make
    competing definitions in defs.h.  */
