@@ -1,3 +1,13 @@
+Fri Apr  4 11:42:41 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldlex.l: Recognize SQUAD.
+	* ldgram.y (length): Add SQUAD.
+	* ldlang.c (print_data_statement): Handle SQUAD.
+	(lang_size_sections, lang_do_assignments): Likewise.
+	* ldexp.c (exp_print_token): Add SQUAD to table.
+	* ldwrite.c (build_link_order): Handle SQUAD.
+	* ld.texinfo (Section Data Expressions): Document SQUAD.
+
 Thu Apr  3 13:19:40 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ldver.c (ld_program_version): Set to 2.8.1.
