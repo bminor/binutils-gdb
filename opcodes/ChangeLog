@@ -14,6 +14,18 @@
 	* Makefile.am: Rebuild dependency.
 	* Makefile.in: Rebuild.
 
+2000-06-18  Stephane Carrez  <stcarrez@worldnet.fr>
+
+	* Makefile.in, configure: regenerate
+	* disassemble.c (disassembler): Recognize ARCH_m68hc12, 
+	ARCH_m68hc11.
+	* m68hc11-dis.c (read_memory, print_insn, print_insn_m68hc12): 
+	New functions.
+	* configure.in: Recognize m68hc12 and m68hc11.
+	* m68hc11-dis.c, m68hc11-opc.c: New files for support of m68hc1x
+	* Makefile.am (CFILES, ALL_MACHINES): New files for disassembly 
+	and opcode generation for m68hc11 and m68hc12.
+
 2000-06-16  Nick Duffek  <nsd@redhat.com>
 
 	* disassemble.c (disassembler): Refer to the PowerPC 620 using
