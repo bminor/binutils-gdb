@@ -1211,11 +1211,11 @@ insn_uses_reg (ip, reg, class)
 	 because there is no instruction that sets both $f0 and $f1
 	 and requires a delay.  */
       if ((ip->insn_mo->pinfo & INSN_READ_FPR_S)
-	  && (((ip->insn_opcode >> OP_SH_FS) & OP_MASK_FS)
+	  && ((((ip->insn_opcode >> OP_SH_FS) & OP_MASK_FS) &~(unsigned)1)
 	      == (reg &~ (unsigned) 1)))
 	return 1;
       if ((ip->insn_mo->pinfo & INSN_READ_FPR_T)
-	  && (((ip->insn_opcode >> OP_SH_FT) & OP_MASK_FT)
+	  && ((((ip->insn_opcode >> OP_SH_FT) & OP_MASK_FT) &~(unsigned)1)
 	      == (reg &~ (unsigned) 1)))
 	return 1;
     }
@@ -1306,7 +1306,7 @@ mips16_mark_labels ()
 
       for (l = insn_labels; l != NULL; l = l->next)
 	{
-#ifdef S_SET_OTHER
+#ifdef OBJ_ELF
 	  if (OUTPUT_FLAVOR == bfd_target_elf_flavour)
 	    S_SET_OTHER (l->label, STO_MIPS16);
 #endif
@@ -8711,7 +8711,7 @@ md_apply_fix (fixP, valueP)
 
   /* If we aren't adjusting this fixup to be against the section
      symbol, we need to adjust the value.  */
-#ifdef S_GET_OTHER
+#ifdef OBJ_ELF
   if (fixP->fx_addsy != NULL
       && OUTPUT_FLAVOR == bfd_target_elf_flavour
       && S_GET_OTHER (fixP->fx_addsy) == STO_MIPS16)
@@ -10100,7 +10100,7 @@ mips_fix_adjustable (fixp)
     return 0;
   if (fixp->fx_addsy == NULL)
     return 1;
-#ifdef S_GET_OTHER
+#ifdef OBJ_ELF
   if (OUTPUT_FLAVOR == bfd_target_elf_flavour
       && S_GET_OTHER (fixp->fx_addsy) == STO_MIPS16
       && fixp->fx_subsy == NULL)

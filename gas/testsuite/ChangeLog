@@ -1,3 +1,11 @@
+Tue Apr 15 18:10:01 1997  Gavin Koch  <gavin@cygnus.com>
+
+	* gas/mips/{delay.d,nodelay.d}: added.
+
+Mon Apr  7 12:57:45 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* gas/m32r/allinsn.d: Update to new objdump output style.
+
 Fri Apr  4 13:19:39 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/all/float.s: Put a tab before .text, to keep the PA happy.

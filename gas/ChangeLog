@@ -1,3 +1,7 @@
+Tue Apr 15 18:11:44 1997  Gavin Koch  <gavin@cygnus.com>
+
+	* config/tc-mips.c (insn_uses_reg): Correct test for fpr pairs.
+
 Tue Apr 15 13:04:47 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (srcroot): Remove.
