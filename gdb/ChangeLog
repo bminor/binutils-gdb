@@ -1,5 +1,7 @@
 2004-08-15  Mark Kettenis  <kettenis@gnu.org>
 
+	* solib-osf.c (osf_current_sos): Remove unsused label.
+
 	* configure.in: Add <ncurses/ncurses.h> to the list of possible
 	curses headers.
 	* configure, config.in: Regenerate.	
