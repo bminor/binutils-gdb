@@ -1,3 +1,9 @@
+2003-10-24  Andrew Cagney  <cagney@redhat.com>
+
+	* osabi.c (gdbarch_init_osabi): Use info.bfd_arch_info instead of
+	arch_info.  Use warning instead of fprintf_filtered.  Do not use
+	deprecated bfd_printable_arch_mach.
+
 2003-10-26  Kevin Buettner  <kevinb@redhat.com>
 
 	* frv-tdep.c (frv_register_raw_size, frv_register_virtual_size):

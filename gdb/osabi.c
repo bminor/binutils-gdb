@@ -305,7 +305,6 @@ can_run_code_for (const struct bfd_arch_info *a, const struct bfd_arch_info *b)
 void
 gdbarch_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  const struct bfd_arch_info *arch_info = gdbarch_bfd_arch_info (gdbarch);
   struct gdb_osabi_handler *handler;
 
   if (info.osabi == GDB_OSABI_UNKNOWN)
@@ -341,20 +340,18 @@ gdbarch_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch)
          (or more generally "64-bit ISA can run code for the 32-bit
          ISA").  BFD doesn't normally consider 32-bit and 64-bit
          "compatible" so it doesn't succeed.  */
-      if (can_run_code_for (arch_info, handler->arch_info))
+      if (can_run_code_for (info.bfd_arch_info, handler->arch_info))
 	{
 	  (*handler->init_osabi) (info, gdbarch);
 	  return;
 	}
     }
 
-  fprintf_filtered
-    (gdb_stderr,
-     "A handler for the OS ABI \"%s\" is not built into this "
-     "configuration of GDB.  "
-     "Attempting to continue with the default %s settings",
-     gdbarch_osabi_name (info.osabi),
-     bfd_printable_arch_mach (arch_info->arch, arch_info->mach));
+  warning ("A handler for the OS ABI \"%s\" is not built into this "
+	   "configuration of GDB.  "
+	   "Attempting to continue with the default %s settings",
+	   gdbarch_osabi_name (info.osabi),
+	   info.bfd_arch_info->printable_name);
 }
 
 
