@@ -1,3 +1,7 @@
+2002-09-23  Mark Elbrecht  <snowball3@softhome.net>
+
+	* config.bfd: For DJGPP targets, match with any cpu and any machine.
+
 2002-09-23  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf-eh-frame.c (_bfd_elf_discard_section_eh_frame): Zero relocs
