@@ -19,7 +19,8 @@
 
 XDEPFILES= xcoffexec.o infptrace.o rs6000-xdep.o
 XM_FILE= xm-rs6000.h
-MH_CFLAGS = -bnodelcsect
+# Prevent gcc from being confused.  This actually belongs in CC...
+# MH_CFLAGS = -bnodelcsect
 
 # Because of shared libraries, we risk ending up with *two*
 # incompatible versions of malloc if we use GNU malloc ...
