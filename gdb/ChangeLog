@@ -1,3 +1,7 @@
+2000-06-08  Kevin Buettner  <kevinb@redhat.com>
+
+	* config/ia64/nm-linux.h (U_REGS_OFFSET): Define.
+
 2000-06-08  Fernando Nasser  <fnasser@cygnus.com>
 
 	* configure.in: Replace misplaced CONFIG_ADD by the correct

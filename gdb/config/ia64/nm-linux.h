@@ -41,6 +41,8 @@ extern int ia64_cannot_store_register (int regno);
 extern int ia64_register_u_addr(int, int);
 #endif /* GDBSERVER */
 
+#define U_REGS_OFFSET 0
+
 #define PTRACE_ARG3_TYPE long
 #define PTRACE_XFER_TYPE long
 
