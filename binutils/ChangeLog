@@ -1,3 +1,8 @@
+2001-05-28  Andreas Jaeger  <aj@suse.de>
+
+	* readelf.c (display_debug_frames): Fix warnings: Remove unused
+	variables, fix format strings.
+
 2001-05-28  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* objdump.c (disassemble_bytes): Remove section VMA adjustment

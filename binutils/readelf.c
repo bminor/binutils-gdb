@@ -79,37 +79,37 @@
 #include "bucomm.h"
 #include "getopt.h"
 
-char *          	program_name = "readelf";
-unsigned int    	dynamic_addr;
-bfd_size_type  		dynamic_size;
-unsigned int    	rela_addr;
-unsigned int    	rela_size;
-char *          	dynamic_strings;
+char *	program_name = "readelf";
+unsigned int	dynamic_addr;
+bfd_size_type		dynamic_size;
+unsigned int	rela_addr;
+unsigned int	rela_size;
+char *	dynamic_strings;
 char *			string_table;
 unsigned long		string_table_length;
 unsigned long           num_dynamic_syms;
-Elf_Internal_Sym * 	dynamic_symbols;
+Elf_Internal_Sym *	dynamic_symbols;
 Elf_Internal_Syminfo *	dynamic_syminfo;
-unsigned long   	dynamic_syminfo_offset;
+unsigned long	dynamic_syminfo_offset;
 unsigned int		dynamic_syminfo_nent;
-char            	program_interpreter [64];
-int             	dynamic_info[DT_JMPREL + 1];
-int             	version_info[16];
-int             	loadaddr = 0;
+char	program_interpreter [64];
+int	dynamic_info[DT_JMPREL + 1];
+int	version_info[16];
+int	loadaddr = 0;
 Elf_Internal_Ehdr       elf_header;
 Elf_Internal_Shdr *     section_headers;
 Elf_Internal_Dyn *      dynamic_segment;
-int 			show_name;
-int 			do_dynamic;
-int 			do_syms;
-int 			do_reloc;
-int 			do_sections;
-int 			do_segments;
+int			show_name;
+int			do_dynamic;
+int			do_syms;
+int			do_reloc;
+int			do_sections;
+int			do_segments;
 int			do_unwind;
-int 			do_using_dynamic;
-int 			do_header;
-int 			do_dump;
-int 			do_version;
+int			do_using_dynamic;
+int			do_header;
+int			do_dump;
+int			do_version;
 int			do_histogram;
 int			do_debugging;
 int                     do_debug_info;
@@ -153,8 +153,8 @@ static const char *       get_mips_dynamic_type       PARAMS ((unsigned long));
 static const char *       get_sparc64_dynamic_type    PARAMS ((unsigned long));
 static const char *       get_parisc_dynamic_type     PARAMS ((unsigned long));
 static const char *       get_dynamic_type            PARAMS ((unsigned long));
-static int		  slurp_rela_relocs 	      PARAMS ((FILE *, unsigned long, unsigned long, Elf_Internal_Rela **, unsigned long *));
-static int		  slurp_rel_relocs 	      PARAMS ((FILE *, unsigned long, unsigned long, Elf_Internal_Rel **, unsigned long *));
+static int		  slurp_rela_relocs	      PARAMS ((FILE *, unsigned long, unsigned long, Elf_Internal_Rela **, unsigned long *));
+static int		  slurp_rel_relocs	      PARAMS ((FILE *, unsigned long, unsigned long, Elf_Internal_Rel **, unsigned long *));
 static int                dump_relocations            PARAMS ((FILE *, unsigned long, unsigned long, Elf_Internal_Sym *, unsigned long, char *, int));
 static char *             get_file_type               PARAMS ((unsigned));
 static char *             get_machine_name            PARAMS ((unsigned));
@@ -172,7 +172,7 @@ static const char *       get_symbol_binding          PARAMS ((unsigned int));
 static const char *       get_symbol_type             PARAMS ((unsigned int));
 static const char *       get_symbol_visibility       PARAMS ((unsigned int));
 static const char *       get_symbol_index_type       PARAMS ((unsigned int));
-static const char *       get_dynamic_flags 	      PARAMS ((bfd_vma));
+static const char *       get_dynamic_flags	      PARAMS ((bfd_vma));
 static void               usage                       PARAMS ((void));
 static void               parse_args                  PARAMS ((int, char **));
 static int                process_file_header         PARAMS ((void));
@@ -200,10 +200,10 @@ static int *              get_dynamic_data            PARAMS ((FILE *, unsigned 
 static int                get_32bit_dynamic_segment   PARAMS ((FILE *));
 static int                get_64bit_dynamic_segment   PARAMS ((FILE *));
 #ifdef SUPPORT_DISASSEMBLY
-static int 	          disassemble_section         PARAMS ((Elf32_Internal_Shdr *, FILE *));
+static int	          disassemble_section         PARAMS ((Elf32_Internal_Shdr *, FILE *));
 #endif
-static int 	          dump_section                PARAMS ((Elf32_Internal_Shdr *, FILE *));
-static int 	          display_debug_section       PARAMS ((Elf32_Internal_Shdr *, FILE *));
+static int	          dump_section                PARAMS ((Elf32_Internal_Shdr *, FILE *));
+static int	          display_debug_section       PARAMS ((Elf32_Internal_Shdr *, FILE *));
 static int                display_debug_info          PARAMS ((Elf32_Internal_Shdr *, unsigned char *, FILE *));
 static int                display_debug_not_supported PARAMS ((Elf32_Internal_Shdr *, unsigned char *, FILE *));
 static int                display_debug_lines         PARAMS ((Elf32_Internal_Shdr *, unsigned char *, FILE *));
@@ -228,11 +228,11 @@ static const char *       get_elf_class               PARAMS ((unsigned char));
 static const char *       get_data_encoding           PARAMS ((unsigned char));
 static const char *       get_osabi_name              PARAMS ((unsigned char));
 static int		  guess_is_rela               PARAMS ((unsigned long));
-static char * 		  get_note_type		         PARAMS ((unsigned int));
+static char *		  get_note_type		         PARAMS ((unsigned int));
 static int		  process_note		         PARAMS ((Elf32_Internal_Note *));
 static int		  process_corefile_note_segment  PARAMS ((FILE *, bfd_vma, bfd_vma));
 static int		  process_corefile_note_segments PARAMS ((FILE *));
-static int 		  process_corefile_contents	 PARAMS ((FILE *));
+static int		  process_corefile_contents	 PARAMS ((FILE *));
 
 typedef int Elf32_Word;
 
@@ -242,13 +242,13 @@ typedef int Elf32_Word;
 #endif
 #define UNKNOWN -1
 
-#define SECTION_NAME(X) 	((X) == NULL ? "<none>" : \
+#define SECTION_NAME(X)	((X) == NULL ? "<none>" : \
 				 ((X)->sh_name >= string_table_length \
 				  ? "<corrupt>" : string_table + (X)->sh_name))
 
 #define DT_VERSIONTAGIDX(tag)	(DT_VERNEEDNUM - (tag))	/* Reverse order! */
 
-#define BYTE_GET(field) 	byte_get (field, sizeof (field))
+#define BYTE_GET(field)	byte_get (field, sizeof (field))
 
 /* If we can support a 64 bit data type then BFD64 should be defined
    and sizeof (bfd_vma) == 8.  In this case when translating from an
@@ -259,12 +259,12 @@ typedef int Elf32_Word;
    equivalent of the 8 byte wide external counterparts, and so we must
    truncate the data.  */
 #ifdef  BFD64
-#define BYTE_GET8(field) 	byte_get (field, -8)
+#define BYTE_GET8(field)	byte_get (field, -8)
 #else
-#define BYTE_GET8(field) 	byte_get (field, 8)
+#define BYTE_GET8(field)	byte_get (field, 8)
 #endif
 
-#define NUM_ELEM(array) 	(sizeof (array) / sizeof ((array)[0]))
+#define NUM_ELEM(array)	(sizeof (array) / sizeof ((array)[0]))
 
 #define GET_DATA_ALLOC(offset, size, var, type, reason)			\
   if (fseek (file, offset, SEEK_SET))					\
@@ -279,20 +279,20 @@ typedef int Elf32_Word;
     {									\
       error (_("Out of memory allocating %d bytes for %s\n"), size, reason); \
       return 0;								\
-    } 									\
- 									\
-  if (fread (var, size, 1, file) != 1) 					\
-    { 									\
-      error (_("Unable to read in %d bytes of %s\n"), size, reason); 	\
-      free (var); 							\
+    }									\
+									\
+  if (fread (var, size, 1, file) != 1)					\
+    {									\
+      error (_("Unable to read in %d bytes of %s\n"), size, reason);	\
+      free (var);							\
       var = NULL;							\
-      return 0; 							\
+      return 0;							\
     }
 
 
-#define GET_DATA(offset, var, reason) 					\
+#define GET_DATA(offset, var, reason)					\
   if (fseek (file, offset, SEEK_SET))					\
-    { 									\
+    {									\
       error (_("Unable to seek to %x for %s\n"), offset, reason);	\
       return 0;								\
     }									\
@@ -1259,32 +1259,32 @@ get_machine_name (e_machine)
 
   switch (e_machine)
     {
-    case EM_NONE:        	return _("None");
-    case EM_M32:         	return "WE32100";
-    case EM_SPARC:       	return "Sparc";
-    case EM_386:         	return "Intel 80386";
-    case EM_68K:         	return "MC68000";
-    case EM_88K:         	return "MC88000";
-    case EM_486:         	return "Intel 80486";
-    case EM_860:         	return "Intel 80860";
-    case EM_MIPS:        	return "MIPS R3000";
-    case EM_S370:        	return "IBM System/370";
-    case EM_MIPS_RS3_LE: 	return "MIPS R4000 big-endian";
+    case EM_NONE:	return _("None");
+    case EM_M32:	return "WE32100";
+    case EM_SPARC:	return "Sparc";
+    case EM_386:	return "Intel 80386";
+    case EM_68K:	return "MC68000";
+    case EM_88K:	return "MC88000";
+    case EM_486:	return "Intel 80486";
+    case EM_860:	return "Intel 80860";
+    case EM_MIPS:	return "MIPS R3000";
+    case EM_S370:	return "IBM System/370";
+    case EM_MIPS_RS3_LE:	return "MIPS R4000 big-endian";
     case EM_OLD_SPARCV9:	return "Sparc v9 (old)";
-    case EM_PARISC:      	return "HPPA";
+    case EM_PARISC:	return "HPPA";
     case EM_PPC_OLD:		return "Power PC (old)";
-    case EM_SPARC32PLUS: 	return "Sparc v8+" ;
-    case EM_960:         	return "Intel 90860";
-    case EM_PPC:         	return "PowerPC";
-    case EM_V800:         	return "NEC V800";
-    case EM_FR20:         	return "Fujitsu FR20";
-    case EM_RH32:         	return "TRW RH32";
+    case EM_SPARC32PLUS:	return "Sparc v8+" ;
+    case EM_960:	return "Intel 90860";
+    case EM_PPC:	return "PowerPC";
+    case EM_V800:	return "NEC V800";
+    case EM_FR20:	return "Fujitsu FR20";
+    case EM_RH32:	return "TRW RH32";
     case EM_MCORE:	        return "MCORE";
-    case EM_ARM:	 	return "ARM";
-    case EM_OLD_ALPHA:	 	return "Digital Alpha (old)";
-    case EM_SH:		 	return "Hitachi SH";
-    case EM_SPARCV9:     	return "Sparc v9";
-    case EM_TRICORE:    	return "Siemens Tricore";
+    case EM_ARM:		return "ARM";
+    case EM_OLD_ALPHA:		return "Digital Alpha (old)";
+    case EM_SH:			return "Hitachi SH";
+    case EM_SPARCV9:	return "Sparc v9";
+    case EM_TRICORE:	return "Siemens Tricore";
     case EM_ARC:		return "ARC";
     case EM_H8_300:		return "Hitachi H8/300";
     case EM_H8_300H:		return "Hitachi H8/300H";
@@ -1294,7 +1294,7 @@ get_machine_name (e_machine)
     case EM_MIPS_X:		return "Stanford MIPS-X";
     case EM_COLDFIRE:		return "Motorola Coldfire";
     case EM_68HC12:		return "Motorola M68HC12";
-    case EM_ALPHA:       	return "Alpha";
+    case EM_ALPHA:	return "Alpha";
     case EM_CYGNUS_D10V:        return "d10v";
     case EM_CYGNUS_D30V:        return "d30v";
     case EM_CYGNUS_ARC:		return "ARC";
@@ -1304,32 +1304,32 @@ get_machine_name (e_machine)
     case EM_CYGNUS_MN10200:	return "mn10200";
     case EM_CYGNUS_FR30:	return "Fujitsu FR30";
     case EM_PJ:                 return "picoJava";
-    case EM_MMA:      		return "Fujitsu Multimedia Accelerator";
-    case EM_PCP:      		return "Siemens PCP";
-    case EM_NCPU:     		return "Sony nCPU embedded RISC processor";
-    case EM_NDR1:     		return "Denso NDR1 microprocesspr";
-    case EM_STARCORE: 		return "Motorola Star*Core processor";
-    case EM_ME16:     		return "Toyota ME16 processor";
-    case EM_ST100:    		return "STMicroelectronics ST100 processor";
-    case EM_TINYJ:    		return "Advanced Logic Corp. TinyJ embedded processor";
-    case EM_FX66:     		return "Siemens FX66 microcontroller";
-    case EM_ST9PLUS:  		return "STMicroelectronics ST9+ 8/16 bit microcontroller";
-    case EM_ST7:      		return "STMicroelectronics ST7 8-bit microcontroller";
-    case EM_68HC16:   		return "Motorola MC68HC16 Microcontroller";
-    case EM_68HC11:   		return "Motorola MC68HC11 Microcontroller";
-    case EM_68HC08:   		return "Motorola MC68HC08 Microcontroller";
-    case EM_68HC05:   		return "Motorola MC68HC05 Microcontroller";
-    case EM_SVX:      		return "Silicon Graphics SVx";
-    case EM_ST19:     		return "STMicroelectronics ST19 8-bit microcontroller";
-    case EM_VAX:      		return "Digital VAX";
+    case EM_MMA:		return "Fujitsu Multimedia Accelerator";
+    case EM_PCP:		return "Siemens PCP";
+    case EM_NCPU:		return "Sony nCPU embedded RISC processor";
+    case EM_NDR1:		return "Denso NDR1 microprocesspr";
+    case EM_STARCORE:		return "Motorola Star*Core processor";
+    case EM_ME16:		return "Toyota ME16 processor";
+    case EM_ST100:		return "STMicroelectronics ST100 processor";
+    case EM_TINYJ:		return "Advanced Logic Corp. TinyJ embedded processor";
+    case EM_FX66:		return "Siemens FX66 microcontroller";
+    case EM_ST9PLUS:		return "STMicroelectronics ST9+ 8/16 bit microcontroller";
+    case EM_ST7:		return "STMicroelectronics ST7 8-bit microcontroller";
+    case EM_68HC16:		return "Motorola MC68HC16 Microcontroller";
+    case EM_68HC11:		return "Motorola MC68HC11 Microcontroller";
+    case EM_68HC08:		return "Motorola MC68HC08 Microcontroller";
+    case EM_68HC05:		return "Motorola MC68HC05 Microcontroller";
+    case EM_SVX:		return "Silicon Graphics SVx";
+    case EM_ST19:		return "STMicroelectronics ST19 8-bit microcontroller";
+    case EM_VAX:		return "Digital VAX";
     case EM_AVR:                return "Atmel AVR 8-bit microcontroller";
     case EM_CRIS:		return "Axis Communications 32-bit embedded processor";
-    case EM_JAVELIN:     	return "Infineon Technologies 32-bit embedded cpu";
-    case EM_FIREPATH:    	return "Element 14 64-bit DSP processor";
-    case EM_ZSP:         	return "LSI Logic's 16-bit DSP processor";
+    case EM_JAVELIN:	return "Infineon Technologies 32-bit embedded cpu";
+    case EM_FIREPATH:	return "Element 14 64-bit DSP processor";
+    case EM_ZSP:	return "LSI Logic's 16-bit DSP processor";
     case EM_MMIX:	        return "Donald Knuth's educational 64-bit processor";
-    case EM_HUANY:       	return "Harvard Universitys's machine-independent object format";
-    case EM_PRISM:       	return "SiTera Prism";
+    case EM_HUANY:	return "Harvard Universitys's machine-independent object format";
+    case EM_PRISM:	return "SiTera Prism";
     case EM_X86_64:		return "Advanced Micro Devices X86-64";
     case EM_S390_OLD:
     case EM_S390:               return "IBM S/390";
@@ -3056,8 +3056,8 @@ process_relocs (file)
   else
     {
       Elf32_Internal_Shdr *     section;
-      unsigned long 		i;
-      int           		found = 0;
+      unsigned long		i;
+      int		found = 0;
 
       for (i = 0, section = section_headers;
 	   i < elf_header.e_shnum;
@@ -3202,7 +3202,7 @@ dump_ia64_unwind (aux)
   bfd_vma addr_size;
   struct unw_table_entry * tp;
   int in_body;
-  
+
   addr_size = is_32bit_elf ? 4 : 8;
 
   for (tp = aux->table; tp < aux->table + aux->table_len; ++tp)
@@ -4520,12 +4520,12 @@ process_version_sections (file)
 	case SHT_GNU_versym:
 	  {
 	    Elf32_Internal_Shdr *       link_section;
-	    int              		total;
-	    int              		cnt;
-	    unsigned char * 		edata;
-	    unsigned short * 		data;
-	    char *           		strtab;
-	    Elf_Internal_Sym * 		symbols;
+	    int		total;
+	    int		cnt;
+	    unsigned char *		edata;
+	    unsigned short *		data;
+	    char *		strtab;
+	    Elf_Internal_Sym *		symbols;
 	    Elf32_Internal_Shdr *       string_sec;
 
 	    link_section = section_headers + section->sh_link;
@@ -7202,13 +7202,13 @@ display_debug_frames (section, start, file)
 
 	  if (do_debug_frames_interp)
 	    printf ("\n%08lx %08lx %08lx CIE \"%s\" cf=%d df=%d ra=%d\n",
-		    saved_start - section_start, length, cie_id,
+		    (unsigned long)(saved_start - section_start), length, cie_id,
 		    fc->augmentation, fc->code_factor, fc->data_factor,
 		    fc->ra);
 	  else
 	    {
 	      printf ("\n%08lx %08lx %08lx CIE\n",
-		      saved_start - section_start, length, cie_id);
+		      (unsigned long)(saved_start - section_start), length, cie_id);
 	      printf ("  Version:               %d\n", version);
 	      printf ("  Augmentation:          \"%s\"\n", fc->augmentation);
 	      printf ("  Code alignment factor: %u\n", fc->code_factor);
@@ -7235,7 +7235,7 @@ display_debug_frames (section, start, file)
 	      while (1)
 		{
 		  if (*p == 'L')
-		    *q++;
+		    q++;
 		  else if (*p == 'P')
 		    q += 1 + size_of_encoded_value (*q);
 		  else if (*p == 'R')
@@ -7255,7 +7255,6 @@ display_debug_frames (section, start, file)
 	{
 	  unsigned char *    look_for;
 	  static Frame_Chunk fde_fc;
-	  int size;
 
 	  fc = & fde_fc;
 	  memset (fc, 0, sizeof (Frame_Chunk));
@@ -7312,7 +7311,7 @@ display_debug_frames (section, start, file)
 	    }
 
 	  printf ("\n%08lx %08lx %08lx FDE cie=%08x pc=%08lx..%08lx\n",
-		  saved_start - section_start, length, cie_id, 
+		  (unsigned long)(saved_start - section_start), length, cie_id,
 		  cie->chunk_start - section_start, fc->pc_begin,
 		  fc->pc_begin + fc->pc_range);
 	  if (! do_debug_frames_interp && augmentation_data_len)
@@ -7339,13 +7338,12 @@ display_debug_frames (section, start, file)
 	  {
 	    unsigned op, opa;
 	    unsigned long reg;
-	    bfd_vma vma;
-	    
+
 	    op = * start ++;
 	    opa = op & 0x3f;
 	    if (op & 0xc0)
 	      op &= 0xc0;
-	    
+
 	    /* Warning: if you add any more cases to this switch, be
 	       sure to add them to the corresponding switch below.  */
 	    switch (op)
@@ -7412,15 +7410,15 @@ display_debug_frames (section, start, file)
 #endif
 	      case DW_CFA_GNU_args_size:
 		LEB ();
-		break;		
+		break;
 #ifndef DW_CFA_GNU_negative_offset_extended
 #define DW_CFA_GNU_negative_offset_extended 0x2f
 #endif
 	      case DW_CFA_GNU_negative_offset_extended:
-		reg = LEB (); LEB ();      
+		reg = LEB (); LEB ();
 		frame_need_space (fc, reg);
 		fc->col_type[reg] = DW_CFA_undefined;
-		
+
 	      default:
 		break;
 	      }
@@ -7460,7 +7458,7 @@ display_debug_frames (section, start, file)
 	    case DW_CFA_offset:
 	      roffs = LEB ();
 	      if (! do_debug_frames_interp)
-	        printf ("  DW_CFA_offset: r%d at cfa%+d\n",
+	        printf ("  DW_CFA_offset: r%d at cfa%+ld\n",
 			opa, roffs * fc->data_factor);
 	      fc->col_type[opa] = DW_CFA_offset;
 	      fc->col_offset[opa] = roffs * fc->data_factor;
@@ -7479,7 +7477,7 @@ display_debug_frames (section, start, file)
 	      if (do_debug_frames_interp)
 	        frame_display_row (fc, &need_col_headers, &max_regs);
 	      else
-	        printf ("  DW_CFA_set_loc: %08x\n", vma);
+	        printf ("  DW_CFA_set_loc: %08lx\n", (unsigned long)vma);
 	      fc->pc_begin = vma;
 	      break;
 
@@ -7488,7 +7486,7 @@ display_debug_frames (section, start, file)
 	      if (do_debug_frames_interp)
 	        frame_display_row (fc, &need_col_headers, &max_regs);
 	      else
-	        printf ("  DW_CFA_advance_loc1: %d to %08lx\n",
+	        printf ("  DW_CFA_advance_loc1: %ld to %08lx\n",
 		        ofs * fc->code_factor,
 			fc->pc_begin + ofs * fc->code_factor);
 	      fc->pc_begin += ofs * fc->code_factor;
@@ -7499,7 +7497,7 @@ display_debug_frames (section, start, file)
 	      if (do_debug_frames_interp)
 	        frame_display_row (fc, &need_col_headers, &max_regs);
 	      else
-	        printf ("  DW_CFA_advance_loc2: %d to %08lx\n",
+	        printf ("  DW_CFA_advance_loc2: %ld to %08lx\n",
 		        ofs * fc->code_factor,
 			fc->pc_begin + ofs * fc->code_factor);
 	      fc->pc_begin += ofs * fc->code_factor;
@@ -7510,7 +7508,7 @@ display_debug_frames (section, start, file)
 	      if (do_debug_frames_interp)
 	        frame_display_row (fc, &need_col_headers, &max_regs);
 	      else
-	        printf ("  DW_CFA_advance_loc4: %d to %08lx\n",
+	        printf ("  DW_CFA_advance_loc4: %ld to %08lx\n",
 		        ofs * fc->code_factor,
 			fc->pc_begin + ofs * fc->code_factor);
 	      fc->pc_begin += ofs * fc->code_factor;
@@ -7520,7 +7518,7 @@ display_debug_frames (section, start, file)
 	      reg = LEB ();
 	      roffs = LEB ();
 	      if (! do_debug_frames_interp)
-		printf ("  DW_CFA_offset_extended: r%d at cfa%+d\n",
+		printf ("  DW_CFA_offset_extended: r%ld at cfa%+ld\n",
 			reg, roffs * fc->data_factor);
 	      fc->col_type[reg] = DW_CFA_offset;
 	      fc->col_offset[reg] = roffs * fc->data_factor;
@@ -7529,7 +7527,7 @@ display_debug_frames (section, start, file)
 	    case DW_CFA_restore_extended:
 	      reg = LEB ();
 	      if (! do_debug_frames_interp)
-	        printf ("  DW_CFA_restore_extended: r%d\n", reg);
+	        printf ("  DW_CFA_restore_extended: r%ld\n", reg);
 	      fc->col_type[reg] = cie->col_type[reg];
 	      fc->col_offset[reg] = cie->col_offset[reg];
 	      break;
@@ -7537,7 +7535,7 @@ display_debug_frames (section, start, file)
 	    case DW_CFA_undefined:
 	      reg = LEB ();
 	      if (! do_debug_frames_interp)
-	        printf ("  DW_CFA_undefined: r%d\n", reg);
+	        printf ("  DW_CFA_undefined: r%ld\n", reg);
 	      fc->col_type[reg] = DW_CFA_undefined;
 	      fc->col_offset[reg] = 0;
 	      break;
@@ -7545,7 +7543,7 @@ display_debug_frames (section, start, file)
 	    case DW_CFA_same_value:
 	      reg = LEB ();
 	      if (! do_debug_frames_interp)
-	        printf ("  DW_CFA_same_value: r%d\n", reg);
+	        printf ("  DW_CFA_same_value: r%ld\n", reg);
 	      fc->col_type[reg] = DW_CFA_same_value;
 	      fc->col_offset[reg] = 0;
 	      break;
@@ -7554,7 +7552,7 @@ display_debug_frames (section, start, file)
 	      reg = LEB ();
 	      roffs = LEB ();
 	      if (! do_debug_frames_interp)
-	        printf ("  DW_CFA_register: r%d\n", reg);
+	        printf ("  DW_CFA_register: r%ld\n", reg);
 	      fc->col_type[reg] = DW_CFA_register;
 	      fc->col_offset[reg] = roffs;
 	      break;
@@ -7621,7 +7619,7 @@ display_debug_frames (section, start, file)
 	    case DW_CFA_GNU_args_size:
 	      ul = LEB ();
 	      if (! do_debug_frames_interp)
-	        printf ("  DW_CFA_GNU_args_size: %d\n", ul);
+	        printf ("  DW_CFA_GNU_args_size: %ld\n", ul);
 	      break;
 
 	    case DW_CFA_GNU_negative_offset_extended:
@@ -7629,7 +7627,7 @@ display_debug_frames (section, start, file)
 	      l = - LEB ();
 	      frame_need_space (fc, reg);
 	      if (! do_debug_frames_interp)
-	        printf ("  DW_CFA_GNU_negative_offset_extended: r%d at cfa%+d\n",
+	        printf ("  DW_CFA_GNU_negative_offset_extended: r%ld at cfa%+ld\n",
 			reg, l * fc->data_factor);
 	      fc->col_type[reg] = DW_CFA_offset;
 	      fc->col_offset[reg] = l * fc->data_factor;
@@ -7734,7 +7732,7 @@ display_debug_section (section, file)
 
   /* See if we know how to display the contents of this section.  */
   if (strncmp (name, ".gnu.linkonce.wi.", 17) == 0)
-    name = ".debug_info";  
+    name = ".debug_info";
 
   for (i = NUM_ELEM (debug_displays); i--;)
     if (strcmp (debug_displays[i].name, name) == 0)
@@ -7761,7 +7759,7 @@ process_section_contents (file)
      FILE * file;
 {
   Elf32_Internal_Shdr * section;
-  unsigned int  	i;
+  unsigned int	i;
 
   if (! do_dump)
     return 1;
@@ -8243,7 +8241,7 @@ process_note (pnote)
 {
   printf ("  %s\t\t0x%08lx\t%s\n",
 	  pnote->namesz ? pnote->namedata : "(NONE)",
-  	  pnote->descsz, get_note_type (pnote->type));
+	  pnote->descsz, get_note_type (pnote->type));
   return 1;
 }
 
