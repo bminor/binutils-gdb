@@ -19,8 +19,6 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#include "sparc/xm-sparc.h"
-
 #define FPU
 
 /* /usr/include/malloc.h is included by vx-share/xdr_ld, and might

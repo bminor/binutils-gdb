@@ -1,5 +1,26 @@
 2002-01-19  Andrew Cagney  <ac131313@redhat.com>
 
+	* config/mips/xm-news-mips.h: Delete file.
+	* config/mips/news-mips.mh (XM_FILE): Delete makefile variable.
+
+	* config/m88k/xm-m88k.h: Delete file.
+	* config/m88k/xm-dgux.h: Do not include xm-m88k.h.
+	* config/m88k/xm-delta88v4.h: Ditto.
+	* config/m88k/xm-delta88.h: Ditto.
+
+	* config/alpha/xm-fbsd.h: Delete file.
+	* config/alpha/fbsd.mh (XM_FILE): Delete makefile variable.
+
+	* config/sparc/xm-sparc.h: Delete file.
+	* Makefile.in (xm-sun4os4.h): Delete dependency.
+	* config/sparc/xm-sun4sol2.h: Do not include xm-sparc.h.
+	* config/sparc/xm-sun4os4.h: Ditto.
+	* config/sparc/xm-linux.h: Ditto.
+
+	* config/i386/xm-windows.h: Delete file.
+
+2002-01-19  Andrew Cagney  <ac131313@redhat.com>
+
 	* utils.c: Include <sys/param.h> for MAXPATHLEN.
 	(gdb_realpath): Use MAXPATHLEN when PATH_MAX is not defined.
 

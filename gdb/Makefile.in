@@ -932,7 +932,6 @@ tm-sun3.h tm-hp300bsd.h tm-altos.h: tm-m68k.h
 tm-hp300hpux.h tm-sun2.h tm-3b1.h: tm-m68k.h
 xm-i386-sv32.h: xm-i386.h
 tm-i386gas.h: tm-i386.h
-xm-sun4os4.h: xm-sparc.h
 tm-sun4os4.h: tm-sparc.h
 xm-vaxult.h: xm-vax.h
 xm-vaxbsd.h: xm-vax.h

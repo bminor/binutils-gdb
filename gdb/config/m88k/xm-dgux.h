@@ -19,8 +19,6 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#include "m88k/xm-m88k.h"
-
 #if !defined (USG)
 #define USG 1
 #endif

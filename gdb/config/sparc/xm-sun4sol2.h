@@ -19,10 +19,6 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-/* Most of what we know is generic to SPARC hosts.  */
-
-#include "sparc/xm-sparc.h"
-
 /* Pick up more stuff from the generic SVR4 host include file. */
 
 #include "xm-sysv4.h"
