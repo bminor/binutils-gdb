@@ -1002,7 +1002,7 @@ m68hc11cpu_io_write (struct hw *me, sim_cpu *cpu,
 
 	/* Update IO mapping.  Detach from the old address
 	   and attach to the new one.  */
-	if ((old_bank & 0xF0) != (val & 0xF0))
+	if ((old_bank & 0x0F) != (val & 0x0F))
 	  {
             struct m68hc11cpu *controller = hw_data (me);
 
@@ -1018,7 +1018,7 @@ m68hc11cpu_io_write (struct hw *me, sim_cpu *cpu,
                                controller->attach_size,
                                me);
 	  }
-	if ((old_bank & 0x0F) != (val & 0x0F))
+	if ((old_bank & 0xF0) != (val & 0xF0))
 	  {
 	    ;
 	  }
