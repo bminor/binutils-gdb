@@ -1,3 +1,7 @@
+2001-02-14  Nick Clifton  <nickc@redhat.com>
+
+	* MAINTAINERS: Add "Obvious Fix" rule.
+
 2001-02-11  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
 
 	* unwind-ia64.c: Don't use ANSI C preprocessor stringisation and string
