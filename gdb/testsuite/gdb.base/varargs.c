@@ -99,7 +99,7 @@ double find_max_double(int num_vals, double first_val, ...) {
   va_start(argp, first_val);
   x = first_val;
   if (max_val < x) max_val = x;
-  printf("find_max(%f, %f", num_vals, first_val);
+  printf("find_max(%d, %f", num_vals, first_val);
   for (i = 1; i < num_vals; i++) {
     x = va_arg(argp, double);
     if (max_val < x) max_val = x;

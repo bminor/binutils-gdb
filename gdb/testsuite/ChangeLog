@@ -1,3 +1,8 @@
+2001-02-27  Michael Snyder  <msnyder@mvstp600e.cygnus.com>
+
+	* gdb.base/varargs.c (find_max_double): Fix printf format string:
+	first arg is int not float.
+
 2001-02-22  Michael Snyder  <msnyder@mvstp600e.cygnus.com>
 
 	* gdb.base/reread.exp: Unsupported for non-native targets;
