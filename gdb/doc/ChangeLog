@@ -1,3 +1,10 @@
+Fri Aug 20 20:49:53 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabs.texinfo: When explaining the n_type of a stab, standardize
+	how we do it ('#' as a comment indicator, "36 is N_FUN" as text,
+	no tabs, use @r).
+	(Global Variables): Clean up.
+
 Tue Aug 17 15:57:27 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* stabs.texinfo (Stack Variables): Re-write.

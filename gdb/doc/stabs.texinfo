@@ -400,7 +400,7 @@ these are believed to contain no useful information.
 For example:
 
 @example
-.stabs "/cygint/s1/users/jcm/play/",100,0,0,Ltext0	; 100 is N_SO
+.stabs "/cygint/s1/users/jcm/play/",100,0,0,Ltext0     # @r{100 is N_SO}
 .stabs "hello.c",100,0,0,Ltext0
         .text
 Ltext0:
@@ -560,7 +560,7 @@ foo (int x)
 produces the stabs:
 
 @example
-.stabs "baz:f1,baz,bar",36,0,0,_baz.15		# 36 == N_FUN
+.stabs "baz:f1,baz,bar",36,0,0,_baz.15         # @r{36 is N_FUN}
 .stabs "bar:f1,bar,foo",36,0,0,_bar.12
 .stabs "foo:F1",36,0,0,_foo
 @end example
@@ -887,60 +887,46 @@ main ()
 produces the following stabs
 
 @example
-.stabs "main:F1",36,0,0,_main   # N_FUN
-.stabs "x:1",128,0,0,-12        # N_LSYM
-.stabn 192,0,0,LBB2             # N_LBRAC
-.stabn 224,0,0,LBE2             # N_RBRAC
+.stabs "main:F1",36,0,0,_main   # @r{36 is N_FUN}
+.stabs "x:1",128,0,0,-12        # @r{128 is N_LSYM}
+.stabn 192,0,0,LBB2             # @r{192 is N_LBRAC}
+.stabn 224,0,0,LBE2             # @r{224 is N_RBRAC}
 @end example
 
-@xref{Procedures} for more information on the @samp{F} symbol desciptor,
-and @ref{Block Structure} for more information on the @code{N_LBRAC} and
-@code{N_RBRAC} symbols.
+@xref{Procedures} for more information on the first stab, and @ref{Block
+Structure} for more information on the @code{N_LBRAC} and @code{N_RBRAC}
+stabs.
 
 @node Global Variables
 @section Global Variables
 
-@table @strong
-@item Directive:
-@code{.stabs}
-@item Type:
-@code{N_GSYM}
-@item Symbol Descriptor:
-@code{G}
-@end table
+A variable whose scope which is not specific to just one source file is
+represented by the @samp{G} symbol descriptor.  These stabs use the
+@code{N_GSYM} stab type.  The type information for the stab
+(@pxref{Stabs Format}) gives the type of the variable.
 
-Global variables are represented by the @code{N_GSYM} stab type.  The symbol
-descriptor, following the colon in the string field, is @samp{G}.  Following
-the @samp{G} is a type reference or type definition.  In this example it is a
-type reference to the basic C type, @code{char}.  The first source line in
-@file{example2.c},
+For example, the following source code:
   
 @example
-1  char g_foo = 'c';
+char g_foo = 'c';
 @end example
 
 @noindent
-yields the following stab.  The stab immediately precedes the code that
-allocates storage for the variable it describes.
+yields the following assembly code:
 
 @example
-@exdent @code{N_GSYM} (32): global symbol
-
-.stabs "@var{name}:
-        @var{descriptor}
-        @var{type-ref}",
-        N_GSYM, NIL, NIL, NIL
-
-21 .stabs "g_foo:G2",32,0,0,0
-22      .global _g_foo
-23      .data
-24 _g_foo:
-25      .byte 99
+.stabs "g_foo:G2",32,0,0,0     # @r{32 is N_GSYM}
+     .global _g_foo
+     .data
+_g_foo:
+     .byte 99
 @end example
 
-The address of the variable represented by the @code{N_GSYM} is not contained
-in the @code{N_GSYM} stab.  The debugger gets this information from the
-external symbol for the global variable.
+The address of the variable represented by the @code{N_GSYM} is not
+contained in the @code{N_GSYM} stab.  The debugger gets this information
+from the external symbol for the global variable.  In the example above,
+the @code{.global _g_foo} and @code{_g_foo:} lines tell the assembler to
+produce an external symbol.
 
 @node Register variables
 @section Register variables 
@@ -1027,11 +1013,11 @@ static int var_noinit;
 yield the following stabs:
 
 @example
-.stabs "var_const:S1",36,0,0,_var_const		; @r{36 = N_FUN}
+.stabs "var_const:S1",36,0,0,_var_const      # @r{36 is N_FUN}
 . . .
-.stabs "var_init:S1",38,0,0,_var_init		; @r{38 = N_STSYM}
+.stabs "var_init:S1",38,0,0,_var_init        # @r{38 is N_STSYM}
 . . .
-.stabs "var_noinit:S1",40,0,0,_var_noinit	; @r{40 = N_LCSYM}
+.stabs "var_noinit:S1",40,0,0,_var_noinit    # @r{40 is N_LCSYM}
 @end example
 
 @node Parameters
@@ -1050,8 +1036,8 @@ If the parameter is passed in a register, then the traditional way to do
 this is to provide two symbols for each argument:
 
 @example
-.stabs "arg:p1" . . .		; N_PSYM
-.stabs "arg:r1" . . .		; N_RSYM
+.stabs "arg:p1" . . .       ; N_PSYM
+.stabs "arg:r1" . . .       ; N_RSYM
 @end example
 
 Debuggers are expected to use the second one to find the value, and the
@@ -1150,8 +1136,8 @@ main (argc, argv)
 produces the stabs
 
 @example
-.stabs "main:F1",36,0,0,_main                 ; 36 is N_FUN
-.stabs "argc:p1",160,0,0,68                   ; 160 is N_PSYM
+.stabs "main:F1",36,0,0,_main                 # @r{36 is N_FUN}
+.stabs "argc:p1",160,0,0,68                   # @r{160 is N_PSYM}
 .stabs "argv:p20=*21=*2",160,0,0,72
 @end example
 
@@ -1213,7 +1199,7 @@ Often types are defined as subranges of themselves.  If the array bounds
 can fit within an @code{int}, then they are given normally.  For example:
 
 @example
-.stabs "int:t1=r1;-2147483648;2147483647;",128,0,0,0	; 128 is N_LSYM
+.stabs "int:t1=r1;-2147483648;2147483647;",128,0,0,0    # @r{128 is N_LSYM}
 .stabs "char:t2=r2;0;127;",128,0,0,0
 @end example
 
