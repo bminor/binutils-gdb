@@ -110,15 +110,9 @@ struct elf32_hppa_link_hash_table
 #include "elf32-hppa.h"
 #include "hppa_stubs.h"
 
-static bfd_reloc_status_type hppa_elf_reloc
-  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
-
 static unsigned long hppa_elf_relocate_insn
   PARAMS ((bfd *, asection *, unsigned long, unsigned long, long,
 	   long, unsigned long, unsigned long, unsigned long));
-
-static bfd_reloc_status_type hppa_elf_reloc
-  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd*, char **));
 
 static boolean hppa_elf_is_local_label_name PARAMS ((bfd *, const char *));
 
@@ -528,41 +522,6 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
     }
 
   return true;
-}
-
-/* Actually perform a relocation.  NOTE this is (mostly) superceeded
-   by elf32_hppa_bfd_final_link_relocate which is called by the new
-   fast linker.  */
-
-static bfd_reloc_status_type
-hppa_elf_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
-		error_message)
-     bfd *abfd;
-     arelent *reloc_entry;
-     asymbol *symbol_in;
-     PTR data;
-     asection *input_section;
-     bfd *output_bfd;
-     char **error_message;
-{
-  /* It is no longer valid to call hppa_elf_reloc when creating
-     a final executable.  */
-  if (output_bfd)
-    {
-      reloc_entry->address += input_section->output_offset;
-
-      /* Work around lossage in generic elf code to write relocations.
-	 (maps different section symbols into the same symbol index).  */
-      if ((symbol_in->flags & BSF_SECTION_SYM)
-	  && symbol_in->section)
-	reloc_entry->addend += symbol_in->section->output_offset;
-      return bfd_reloc_ok;
-    }
-  else
-    {
-      *error_message = (char *) _("Unsupported call to hppa_elf_reloc");
-      return bfd_reloc_notsupported;
-    }
 }
 
 /* Actually perform a relocation as part of a final link.  This can get
