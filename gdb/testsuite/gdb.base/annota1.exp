@@ -30,7 +30,7 @@ if $tracelevel then {
 # work for remote targets too) because of the different prompt we get
 # when using annotation level 2.
 #
-if ![isnative] then {
+if [is_remote target] then {
     return 0
 }
 

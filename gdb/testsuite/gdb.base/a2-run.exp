@@ -232,7 +232,7 @@ if [istarget "*-*-vxworks*"] then {
 
 # GOAL: Test that shell is being used with "run".  For remote debugging
 # targets, there is no guarantee that a "shell" (whatever that is) is used.
-if [isnative] then {
+if ![is_remote target] then {
     send_gdb "run `echo 8`\n"
     gdb_expect {
 	-re "Starting program.*40320.*$gdb_prompt $" {

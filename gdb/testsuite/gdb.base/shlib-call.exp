@@ -268,14 +268,16 @@ gdb_test "break shr1" "Breakpoint 1.*" "set bp in shared library"
 
 # FIXME: should not send "run" explicitly.  Non-portable.
 
-gdb_test "run" "Starting program:.*Breakpoint 1,.*" \
+if ![is_remote target] {
+  gdb_test "run" "Starting program:.*Breakpoint 1,.*" \
 	"run to bp in shared library"
 
-gdb_test "cont" ".*Program exited normally..*"
+  gdb_test "cont" ".*Program exited normally..*"
 
-gdb_test "run" "Starting program:.*Breakpoint 1,.*" \
+  gdb_test "run" "Starting program:.*Breakpoint 1,.*" \
 	"re-run to bp in shared library (PR's 16495, 18213)"
 
-gdb_test "cont" ".*Program exited normally..*"
+  gdb_test "cont" ".*Program exited normally..*"
+}
 
 return 0

@@ -24,8 +24,8 @@ if $tracelevel then {
     strace $tracelevel
 }
 
-# This only works for native, I think.
-if ![isnative] then {
+# Don't try this for remote targets.
+if [is_remote target] then {
     continue
 }
 

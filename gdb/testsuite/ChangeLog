@@ -1,3 +1,14 @@
+2002-02-14  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.base/a2-run.exp: Check for a remote target properly.
+	* gdb.base/annota1.exp: Likewise.
+	* gdb.base/list.exp: Likewise.
+	* gdb.base/reread.exp: Likewise.
+	* gdb.base/scope.exp: Likewise.
+	* gdb.base/shlib-call.exp: Likewise.
+	* gdb.base/term.exp: Likewise.
+	* gdb.c++/annota2.exp: Likewise.
+
 2002-02-13  Richard Earnshaw  <rearnsha@arm.com>
 
 	* gdb.base/watchpoint.exp: Restore previous timeout at end of test.

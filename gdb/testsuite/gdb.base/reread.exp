@@ -100,7 +100,7 @@ gdb_test "shell touch ${binfile}" "" ""
 
 set prms_id 0
 
-if ![isnative] {
+if [is_remote target] {
     unsupported "run to foo() second time ";
 } else {
     gdb_run_cmd
@@ -124,7 +124,7 @@ if ![isnative] {
 ### Second pass: verify that GDB checks the executable file's
 ### timestamp when the program is *restarted*, not just when it exits.
 
-if ![isnative] {
+if [is_remote target] {
     unsupported "second pass: GDB should check for changes before running"
 } else {
 

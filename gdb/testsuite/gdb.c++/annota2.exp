@@ -46,7 +46,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 # work for remote targets too) because of the different prompt we get
 # when using annotation level 2.
 #
-if ![isnative] then {
+if [is_remote target] then {
     return 0
 }
 

@@ -559,7 +559,7 @@ gdb_test "print 'scope0.c'::filelocal_ro" "= 201"
 # is responsible for clearing bss and that hasnt' happened yet.
 #
 # This is a problem for all non-native targets. -- manson
-if ![isnative] {
+if [is_remote target] {
     unsupported "print 'scope0.c'::filelocal_bss before run"
 } else {
     gdb_test "print 'scope0.c'::filelocal_bss" "= 0" \
