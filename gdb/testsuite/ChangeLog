@@ -1,5 +1,7 @@
 Thu Feb 20 13:57:01 1997  Bob Manson  <manson@charmed.cygnus.com>
 
+	* gdb.base/help.exp: Fix the syntax of a few gdb_test calls.
+
 	* gdb.base/scope.exp: Use gdb_test.
 
 	* gdb.base/ptype.exp: Don't call "gdb_exit; gdb_start" if we're
