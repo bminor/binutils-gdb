@@ -1,3 +1,10 @@
+2000-12-20  Fernando Nasser  <fnasser@redhat.com>
+
+	* complaints.c (complain): Call warning_hook if defined, instead of
+	writting to gdb_stderr.
+	(clear_complaints): Do not write anything to gdb_stderr if warning_hook
+	is defined.
+
 2000-12-19  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* sh-tdep.c (sh_print_register): Don't leave regnum 0 out of the
