@@ -1,3 +1,10 @@
+2000-06-01  J.T. Conklin  <jtc@redback.com>
+
+	* config.bfd (i[3456]86-*-netbsdelf*): New target.
+	(i[3456]86-*-netbsdaout*): New target.
+	(i[3456]86-*-netbsd*): Add bfd_elf32_i386_vec to targ_selvecs.
+	(i[3456]86-*-openbsd*): Likewise.
+
 Tue May 30 15:39:04 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* trad-core.c: From hpux-core.c, include <dirent.h> or
