@@ -75,11 +75,7 @@ void relax_segment();
  *
  * Create a fixS in obstack 'notes'.
  */
-fixS *fix_new(frag, where, size, add_symbol, sub_symbol, offset, pcrel
-#if defined(TC_SPARC) || defined(TC_A29K) || defined(NEED_FX_R_TYPE)
-	      , r_type
-#endif
-	      )
+fixS *fix_new(frag, where, size, add_symbol, sub_symbol, offset, pcrel, r_type)
 fragS *frag;		/* Which frag? */
 int where;		/* Where in that frag? */
 short int size;		/* 1, 2, or 4 usually. */
@@ -87,9 +83,7 @@ symbolS *add_symbol;	/* X_add_symbol. */
 symbolS *sub_symbol;	/* X_subtract_symbol. */
 long offset;		/* X_add_number. */
 int pcrel;		/* TRUE if PC-relative relocation. */
-#if defined(TC_SPARC) || defined(TC_A29K) || defined(NEED_FX_R_TYPE)
 int 	r_type;	/* Relocation type */
-#endif
 {
 	fixS *fixP;
 	
@@ -388,17 +382,19 @@ void write_object_file()
 					  lie->sub,
 					  lie->addnum,
 					  0, 0, 2, 0, 0);
-#elif defined(TC_SPARC) || defined(TC_A29K) || defined(NEED_FX_R_TYPE)
+#else
+# if defined(TC_SPARC) || defined(TC_A29K) || defined(NEED_FX_R_TYPE)
 			    fix_new(	lie->frag,  lie->word_goes_here - lie->frag->fr_literal,
 				    2,  lie->add,
 				    lie->sub,  lie->addnum,
 				    0,  NO_RELOC);
-#else
+# else
 			    fix_new(	lie->frag,  lie->word_goes_here - lie->frag->fr_literal,
 				    2,  lie->add,
 				    lie->sub,  lie->addnum,
 				    0,  0);
 
+# endif	/* tc_sparc|tc_a29k|need_fx_r_type */
 #endif /* TC_NS32K */
 			    /* md_number_to_chars(lie->word_goes_here,
 			       S_GET_VALUE(lie->add)
