@@ -1,5 +1,4 @@
-
-/* coff object file format
+/* coff object file format with bfd
    Copyright (C) 1989, 1990, 1991 Free Software Foundation, Inc.
 
 This file is part of GAS.
@@ -23,15 +22,22 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
  How does this releate to the rest of GAS ?
 
  Well, all the other files in gas are more or less a black box. It
- takes care of openning files, parsing command lines, stripping blanks
+ takes care of opening files, parsing command lines, stripping blanks
  etc etc. This module gets a chance to register what it wants to do by
  saying that it is interested in various pseduo ops. The other big
  change is write_object_file. This runs through all the data
  structures that gas builds, and outputs the file in the format of our
  choice.
  
-
  Hacked for BFDness by steve chamberlain
+
+ Note that this is the first implementation using BFD for coff, and
+ this is a pretty special case too - it only works at the moment for
+ the H8. Which *can't* do any relaxing during assembly - because the
+ linker has to have all the reloc info for fancy stuff later on.
+
+ When another machine is supported, relaxing will have to go back in.
+
  sac@cygnus.com
 */
 
@@ -42,11 +48,9 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 
 
-
-
 /* This vector is used to turn an internal segment into a section #
    suitable for insertion into a coff symbol table 
-*/
+ */
 
 const short seg_N_TYPE[] = { /* in: segT   out: N_TYPE bits */
 	C_ABS_SECTION,
@@ -71,6 +75,7 @@ const short seg_N_TYPE[] = { /* in: segT   out: N_TYPE bits */
 	C_PTV_SECTION,		/* SEG_PTV */
 	C_REGISTER_SECTION,	/* SEG_REGISTER */
 };
+
 
 int function_lineoff = -1;	/* Offset in line#s where the last function
 				   started (the odd entry for line #0) */
@@ -241,7 +246,7 @@ static unsigned int  DEFUN(size_section,(abfd, idx),
 {
   asection *sec;
   unsigned int size = 0;
-  fragS *frag = segment_info[idx].frag_root;
+  fragS *frag = segment_info[idx].frchainP->frch_root;
   while (frag) {
       if (frag->fr_address != size) {	
 	  printf("Out of step\n");
@@ -366,7 +371,7 @@ static void DEFUN(fill_section,(abfd, filehdr, file_cursor),
       struct internal_scnhdr *s = &( segment_info[i].scnhdr);
 	  
       if (s->s_name[0]) {
-	  fragS *frag = segment_info[i].frag_root;
+	  fragS *frag = segment_info[i].frchainP->frch_root;
 	  char *buffer =  alloca(s->s_size);
 	  s->s_scnptr = *file_cursor;
 	  s->s_paddr =  paddr;
@@ -1400,157 +1405,6 @@ char *where;
 }
 
 
-#if 0
-void obj_pre_write_hook(headers)
-object_headers *headers;
-{
-  register fixS *fixP;
-
-  /* FIXME-SOMEDAY this should be done at
-     fixup_segment time but I'm going to wait until I
-     do multiple segments.  xoxorich. */
-  unsigned int i;
-  unsigned int reloc_size = 0;
-  
-  for (i =0; i < N_SEG; i++) 
-  {
-    seg_info_type *s = &(SEG_INFO_FROM_SEG_NUMBER(i));
-    
-    if (s->real_section) 
-    {
-
-      for (fixP = s->fix_root; fixP; fixP = fixP->fx_next) {
-	  if (fixP->fx_addsy) {
-	      s->relocation_number++;
-	    }	
-	}	
-
-    }
-    headers->relocation_size += s->relocation_number * RELSZ;    
-  }
-  
-  /* filehdr */
-  H_SET_FILE_MAGIC_NUMBER(headers, FILE_HEADER_MAGIC);
-  H_SET_NUMBER_OF_SECTIONS(headers, 3); /* text+data+bss */
-#ifndef OBJ_COFF_OMIT_TIMESTAMP
-  H_SET_TIME_STAMP(headers, (long)time((long*)0));
-#else				/* OBJ_COFF_OMIT_TIMESTAMP */
-  H_SET_TIME_STAMP(headers, 0);
-#endif				/* OBJ_COFF_OMIT_TIMESTAMP */
-  H_SET_SYMBOL_TABLE_POINTER(headers, H_GET_SYMBOL_TABLE_FILE_OFFSET(headers));
-#if 0
-  printf("FILHSZ %x\n", FILHSZ);
-  printf("OBJ_COFF_AOUTHDRSZ %x\n", OBJ_COFF_AOUTHDRSZ);
-  printf("section headers %x\n", H_GET_NUMBER_OF_SECTIONS(headers)  * SCNHSZ);
-  printf("get text size %x\n", H_GET_TEXT_SIZE(headers));
-  printf("get data size %x\n", H_GET_DATA_SIZE(headers));
-  printf("get relocation size %x\n", H_GET_RELOCATION_SIZE(headers));
-  printf("get lineno size %x\n", H_GET_LINENO_SIZE(headers));
-#endif
-  /* symbol table size allready set */
-  H_SET_SIZEOF_OPTIONAL_HEADER(headers, OBJ_COFF_AOUTHDRSZ);
-  H_SET_FLAGS(headers, (text_lineno_number == 0 ? F_LNNO : 0)
-	      | headers->relocation_size ? F_RELFLG : 0
-	      | BYTE_ORDERING);
-
-  /* aouthdr */
-  /* magic number allready set */
-  H_SET_VERSION_STAMP(headers, 0);
-
-}				/* obj_pre_write_hook() */
-#endif
-/* This is a copy from aout.  All I do is neglect to actually build the symbol. */
-
-static void obj_coff_stab(what)
-int what;
-{
-	char *string;
-	expressionS e;
-	int goof = 0;	/* TRUE if we have aborted. */
-	int length;
-	int saved_type = 0;
-	long longint;
-	symbolS *symbolP = 0;
-
-	if (what == 's') {
-		string = demand_copy_C_string(&length);
-		SKIP_WHITESPACE();
-
-		if (*input_line_pointer == ',') {
-			input_line_pointer++;
-		} else {
-			as_bad("I need a comma after symbol's name");
-			goof = 1;
-		} /* better be a comma */
-	} /* skip the string */
-
-	/*
-	 * Input_line_pointer->after ','.  String->symbol name.
-	 */
-	if (!goof) {
-		if (get_absolute_expression_and_terminator(&longint) != ',') {
-			as_bad("I want a comma after the n_type expression");
-			goof = 1;
-			input_line_pointer--; /* Backup over a non-',' char. */
-		} /* on error */
-	} /* no error */
-
-	if (!goof) {
-		if (get_absolute_expression_and_terminator(&longint) != ',') {
-			as_bad("I want a comma after the n_other expression");
-			goof = 1;
-			input_line_pointer--; /* Backup over a non-',' char. */
-		} /* on error */
-	} /* no error */
-
-	if (!goof) {
-		get_absolute_expression();
-
-		if (what == 's' || what == 'n') {
-			if (*input_line_pointer != ',') {
-				as_bad("I want a comma after the n_desc expression");
-				goof = 1;
-			} else {
-				input_line_pointer++;
-			} /* on goof */
-		} /* not stabd */
-	} /* no error */
-
-	expression(&e);
-
-	if (goof) {
-		ignore_rest_of_line();
-	} else {
-		demand_empty_rest_of_line();
-	} /* on error */
-} /* obj_coff_stab() */
-
-#ifdef DEBUG
- /* for debugging */
-char *s_get_name(s)
-symbolS *s;
-{
-	return((s == NULL) ? "(NULL)" : S_GET_NAME(s));
-} /* s_get_name() */
-
-void symbol_dump() {
-	symbolS *symbolP;
-
-	for (symbolP = symbol_rootP; symbolP; symbolP = symbol_next(symbolP)) {
-		printf("%3ld: 0x%lx \"%s\" type = %ld, class = %d, segment = %d\n",
-		       symbolP->sy_number,
-		       (unsigned long) symbolP,
-		       S_GET_NAME(symbolP),
-		       (long) S_GET_DATA_TYPE(symbolP),
-		       S_GET_STORAGE_CLASS(symbolP),
-		       (int) S_GET_SEGMENT(symbolP));
-	} /* traverse symbols */
-
-	return;
-} /* symbol_dump() */
-#endif /* DEBUG */
-
-
 
 static void 
 DEFUN(do_linenos_for,(abfd, file_cursor),
@@ -1605,109 +1459,110 @@ DEFUN(do_linenos_for,(abfd, file_cursor),
  */
 
 /* end of obj-coff.c */
+/* Now we run through the list of frag chains in a segment and
+   make all the subsegment frags appear at the end of the
+   list, as if the seg 0 was extra long */
 
+static void DEFUN_VOID(remove_subsegs)
+{
+    unsigned int i;    	
+
+    for (i = SEG_E0; i < SEG_UNKNOWN; i++)
+    { 
+	frchainS *head =  segment_info[i].frchainP;
+	fragS dummy;
+	fragS * prev_frag = &dummy;
+	
+	while (head && head->frch_seg == i) 
+	{
+	    prev_frag->fr_next = head->frch_root;
+	    prev_frag = head->frch_last;
+	    head = head->frch_next;
+	}
+	prev_frag->fr_next = 0;
+    }
+}
 
 
 extern void DEFUN_VOID(write_object_file)
 {
-  int i;
-  struct frchain *frchain_ptr; 
-  struct frag *frag_ptr;
-  struct internal_filehdr filehdr;
-  struct internal_aouthdr aouthdr;
-unsigned long file_cursor;  
-  bfd *abfd;
+    int i;
+    struct frchain *frchain_ptr; 
+    struct frag *frag_ptr;
+    struct internal_filehdr filehdr;
+    struct internal_aouthdr aouthdr;
+    unsigned long file_cursor;  
+    bfd *abfd;
   
-  abfd = bfd_openw(out_file_name, TARGET_FORMAT);
+    abfd = bfd_openw(out_file_name, TARGET_FORMAT);
 
-  if (abfd == 0) {
-      as_perror ("FATAL: Can't create %s", out_file_name);
-      exit(42);
-    }
-  bfd_set_format(abfd, bfd_object);
-  bfd_set_arch_mach(abfd, bfd_arch_h8300, 0);
+    if (abfd == 0) {
+	    as_perror ("FATAL: Can't create %s", out_file_name);
+	    exit(42);
+	}
+    bfd_set_format(abfd, bfd_object);
+    bfd_set_arch_mach(abfd, bfd_arch_h8300, 0);
 
 
-  string_byte_count = 4;
+    string_byte_count = 4;
   
-  for (frchain_ptr = frchain_root;
-       frchain_ptr != (struct frchain *)NULL; 
-       frchain_ptr = frchain_ptr->frch_next) {
-      /* Run through all the sub-segments and align them up. Also close any
-	 open frags. We tack a .fill onto the end of the frag chain so
-	 that any .align's size can be worked by looking at the next
-	 frag */
+    for (frchain_ptr = frchain_root;
+	 frchain_ptr != (struct frchain *)NULL; 
+	 frchain_ptr = frchain_ptr->frch_next) {
+	    /* Run through all the sub-segments and align them up. Also close any
+	       open frags. We tack a .fill onto the end of the frag chain so
+	       that any .align's size can be worked by looking at the next
+	       frag */
 
-      subseg_new(frchain_ptr->frch_seg, frchain_ptr->frch_subseg);
-#define SUB_SEGMENT_ALIGN 2
-      frag_align(SUB_SEGMENT_ALIGN,0);
-      frag_wane(frag_now);
-      frag_now->fr_fix = 0;
-      know( frag_now->fr_next == NULL );
-    }
+	    subseg_new(frchain_ptr->frch_seg, frchain_ptr->frch_subseg);
+#define SUB_SEGMENT_ALIGN 1
+	    frag_align(SUB_SEGMENT_ALIGN,0);
+	    frag_wane(frag_now);
+	    frag_now->fr_fix = 0;
+	    know( frag_now->fr_next == NULL );
+	}
 
-  /* Now build one big frag chain for each segment, linked through
-     fr_next. */
-  for (i = SEG_E0; i < SEG_UNKNOWN; i++)
-  { 
-      
-    fragS ** prev_frag_ptr_ptr ;
-    struct frchain *next_frchain_ptr;
-  
-    /*	struct frag **head_ptr = segment_info[i].frag_root;*/
 
-    segment_info[i].frag_root =  segment_info[i].frchainP->frch_root;
-#if 0
-    /* Im not sure what this is for */
-    for (frchain_ptr = segment_info[i].frchainP->frch_root;
-	 frchain_ptr != (struct frchain *)NULL;
-	 frchain_ptr = frchain_ptr->frch_next)
-    {
-      *head_ptr = frchain_ptr;
-      head_ptr = &frchain_ptr->next;
-    }
-     
-
-#endif
-  }
+    remove_subsegs();
+    
 #if 1
-  for (i = SEG_E0; i < SEG_UNKNOWN; i++) 
-  {
-      relax_segment(segment_info[i].frag_root, i);
+    for (i = SEG_E0; i < SEG_UNKNOWN; i++) 
+    {
+	relax_segment(segment_info[i].frchainP->frch_root, i);
     }
   
-  for (i = SEG_E0; i < SEG_UNKNOWN; i++) 
-  {
-/*      fixup_segment(segment_info[i].fix_root, i);*/
-   }
+    for (i = SEG_E0; i < SEG_UNKNOWN; i++) 
+    {
+	/*      fixup_segment(segment_info[i].fix_root, i);*/
+    }
   
 #endif
 
-{
-  unsigned int addr = 0;
-  filehdr.f_nscns = 0;
-  
-  /* Find out how big the sections are */
-  for (i = SEG_E0; i < SEG_UNKNOWN; i++) 
   {
+      unsigned int addr = 0;
+      filehdr.f_nscns = 0;
+  
+      /* Find out how big the sections are */
+      for (i = SEG_E0; i < SEG_UNKNOWN; i++) 
+      {
 
-    if (segment_info[i].scnhdr.s_name[0]) 
-    {
-      filehdr.f_nscns++;
-    }
-    segment_info[i].scnhdr.s_paddr = addr;
-    if (i == SEG_E2) {
-	/* THis is a special case, we leave the size alone, which will have */
-	/* been made up from all and any lcomms seen */
+	  if (segment_info[i].scnhdr.s_name[0]) 
+	  {
+	      filehdr.f_nscns++;
+	  }
+	  segment_info[i].scnhdr.s_paddr = addr;
+	  if (i == SEG_E2) {
+		  /* THis is a special case, we leave the size alone, which will have */
+		  /* been made up from all and any lcomms seen */
 
-      }
-    else {
-	addr += size_section(abfd, i);
+	      }
+	  else {
+		  addr += size_section(abfd, i);
+	      }
       }
   }
-}
 
-  /* Turn the gas native symbol table shape into a coff symbol table */
+    /* Turn the gas native symbol table shape into a coff symbol table */
   crawl_symbols(&filehdr, abfd);
 
   file_cursor =   FILHSZ + SCNHSZ * filehdr.f_nscns ;
@@ -1748,9 +1603,10 @@ unsigned long file_cursor;
 }
 
 
-static void DEFUN(change_to_section,(name, len),
+static void DEFUN(change_to_section,(name, len, exp),
  char *name AND
- unsigned int len)
+ unsigned int len AND
+ unsigned int exp)
 {
   unsigned int i;  
   /* Find out if we've already got a section of this name etc */
@@ -1758,47 +1614,63 @@ static void DEFUN(change_to_section,(name, len),
   {
     if (strncmp(segment_info[i].scnhdr.s_name, name, len) == 0) 
     {
-      subseg_new(i, 0);  
+      subseg_new(i, exp);  
       return;
       
     }
   }
   /* No section, add one */
   strncpy(segment_info[i].scnhdr.s_name, name, 8);
-  subseg_new(i, 0);  
+  subseg_new(i, exp);  
 }
 
 static void 
 DEFUN_VOID(obj_coff_section)
 {
-  /* Strip out the section name */
-  char *section_name ;
-  char *section_name_end;
+    /* Strip out the section name */
+    char *section_name ;
+    char *section_name_end;
+    char c;
+    
+    unsigned int len;
+    unsigned int exp;
   
-  unsigned int len;
+    section_name =  input_line_pointer;
+    c =   get_symbol_end();
+    section_name_end =  input_line_pointer;
 
-  section_name =  input_line_pointer;
-  get_symbol_end();
-  section_name_end =  input_line_pointer;
-  input_line_pointer++;
+    len = section_name_end - section_name ;
+    input_line_pointer++;
+    SKIP_WHITESPACE();
+    if (c == ',')
+    {
+	exp = get_absolute_expression();
+    }
+    else if ( *input_line_pointer == ',') 
+    {
+    
+	input_line_pointer++;
+	exp = get_absolute_expression();    
+    }
+    else 
+    {
+	exp = 0;
+    }
   
-  len = section_name_end - section_name ;
-  
-
-  change_to_section(section_name, len);
+    change_to_section(section_name, len,exp);
   
 }
 
 
 static void obj_coff_text()
 {
-  change_to_section(".text",5);
+  change_to_section(".text",5, get_absolute_expression());
 }
 
 
 static void obj_coff_data()
 {
-  change_to_section(".data",5);
+  change_to_section(".data",5, get_absolute_expression());
 }
 
 void c_symbol_merge(debug, normal)
@@ -2146,39 +2018,37 @@ segT		this_segment_type; /* N_TYPE bits for segment. */
 
 void obj_coff_lcomm(void)
 {
-	char *name;
-	char c;
-	int temp;
-	char *p;
-symbolS *symbolP;
-	name = input_line_pointer;
+    char *name;
+    char c;
+    int temp;
+    char *p;
+    symbolS *symbolP;
+    name = input_line_pointer;
 
-
-
-	c = get_symbol_end();
-	p = input_line_pointer;
-	*p = c;
-	SKIP_WHITESPACE();
-	if (*input_line_pointer != ',') {
-		as_bad("Expected comma after name");
-		ignore_rest_of_line();
-		return;
+    c = get_symbol_end();
+    p = input_line_pointer;
+    *p = c;
+    SKIP_WHITESPACE();
+    if (*input_line_pointer != ',') {
+	    as_bad("Expected comma after name");
+	    ignore_rest_of_line();
+	    return;
 	}
-	if (*input_line_pointer == '\n') {
-		as_bad("Missing size expression");
-		return;
+    if (*input_line_pointer == '\n') {
+	    as_bad("Missing size expression");
+	    return;
 	}
-input_line_pointer++;
-	if ((temp = get_absolute_expression ()) < 0) {
-		as_warn("lcomm length (%d.) <0! Ignored.", temp);
-		ignore_rest_of_line();
-		return;
+    input_line_pointer++;
+    if ((temp = get_absolute_expression ()) < 0) {
+	    as_warn("lcomm length (%d.) <0! Ignored.", temp);
+	    ignore_rest_of_line();
+	    return;
 	}
-	*p = 0;
-	symbolP = symbol_find_or_make(name);
-	S_SET_VALUE(symbolP, segment_info[SEG_E2].scnhdr.s_size);
-	S_SET_SEGMENT(symbolP, SEG_E2);
-	segment_info[SEG_E2].scnhdr.s_size += temp;
-	S_SET_STORAGE_CLASS(symbolP, C_STAT);
-	demand_empty_rest_of_line();
+    *p = 0;
+    symbolP = symbol_find_or_make(name);
+    S_SET_VALUE(symbolP, segment_info[SEG_E2].scnhdr.s_size);
+    S_SET_SEGMENT(symbolP, SEG_E2);
+    segment_info[SEG_E2].scnhdr.s_size += temp;
+    S_SET_STORAGE_CLASS(symbolP, C_STAT);
+    demand_empty_rest_of_line();
 }
