@@ -177,7 +177,7 @@ static struct monitor_ops rom68k_cmds;
 static void
 init_rom68k_cmds (void)
 {
-  rom68k_cmds.flags = 0;
+  rom68k_cmds.flags = MO_PRINT_PROGRAM_OUTPUT;
   rom68k_cmds.init = rom68k_inits;	/* monitor init string */
   rom68k_cmds.cont = "go\r";
   rom68k_cmds.step = "st\r";
