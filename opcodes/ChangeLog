@@ -1,3 +1,9 @@
+2000-02-24  Nick Clifton  <nickc@cygnus.com>
+
+	* cgen-opc.c (cgen_set_signed_overflow_ok): New function.
+	(cgen_clear_signed_overflow_ok): New function.
+	(cgen_signed_overflow_ok_p): New function.
+
 2000-02-23  Andrew Haley  <aph@cygnus.com>
 
         * m32r-asm.c, m32r-desc.c, m32r-desc.h, m32r-dis.c,
