@@ -1,3 +1,10 @@
+Fri Oct 11 16:48:56 1996  Fred Fish  <fnf@cygnus.com>
+
+	* expstruct.exp (objfile2): Set and use, like other chill tests.
+	* pr-4975.exp: Ditto.
+	* pr-5646.exp: Ditto.
+	* pr-8134.exp: Ditto.
+
 Thu Sep  5 01:54:42 1996  Wilfried Moser (Alcatel)  <moser@rtl.cygnus.com>
 
 	* gch1280.exp: Enhance test case.
