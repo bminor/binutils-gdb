@@ -697,14 +697,8 @@ thread_db_new_objfile (struct objfile *objfile)
       push_target (&thread_db_ops);
       using_thread_db = 1;
 
-      /* We can only poke around if there actually is a child process.
-         If there is no child process alive, postpone the steps below
-         until one has been created.  */
-      if (proc_handle.pid != 0)
-	{
-	  enable_thread_event_reporting ();
-	  thread_db_find_new_threads ();
-	}
+      enable_thread_event_reporting ();
+      thread_db_find_new_threads ();
       break;
 
     default:
