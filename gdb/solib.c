@@ -710,6 +710,7 @@ elf_locate_base ()
   CORE_ADDR dyninfo_addr;
   char *buf;
   char *bufend;
+  int arch_size;
 
   /* Find the start address of the .dynamic section.  */
   dyninfo_sect = bfd_get_section_by_name (exec_bfd, ".dynamic");
@@ -726,56 +727,67 @@ elf_locate_base ()
   /* Find the DT_DEBUG entry in the the .dynamic section.
      For mips elf we look for DT_MIPS_RLD_MAP, mips elf apparently has
      no DT_DEBUG entries.  */
-#ifndef TARGET_ELF64
-  for (bufend = buf + dyninfo_sect_size;
-       buf < bufend;
-       buf += sizeof (Elf32_External_Dyn))
-    {
-      Elf32_External_Dyn *x_dynp = (Elf32_External_Dyn *) buf;
-      long dyn_tag;
-      CORE_ADDR dyn_ptr;
 
-      dyn_tag = bfd_h_get_32 (exec_bfd, (bfd_byte *) x_dynp->d_tag);
-      if (dyn_tag == DT_NULL)
-	break;
-      else if (dyn_tag == DT_DEBUG)
+  arch_size = bfd_elf_get_arch_size (exec_bfd);
+  if (arch_size == -1)	/* failure */
+    return 0;
+
+  if (arch_size == 32)
+    { /* 32-bit elf */
+      for (bufend = buf + dyninfo_sect_size;
+	   buf < bufend;
+	   buf += sizeof (Elf32_External_Dyn))
 	{
-	  dyn_ptr = bfd_h_get_32 (exec_bfd, (bfd_byte *) x_dynp->d_un.d_ptr);
-	  return dyn_ptr;
-	}
+	  Elf32_External_Dyn *x_dynp = (Elf32_External_Dyn *) buf;
+	  long dyn_tag;
+	  CORE_ADDR dyn_ptr;
+
+	  dyn_tag = bfd_h_get_32 (exec_bfd, (bfd_byte *) x_dynp->d_tag);
+	  if (dyn_tag == DT_NULL)
+	    break;
+	  else if (dyn_tag == DT_DEBUG)
+	    {
+	      dyn_ptr = bfd_h_get_32 (exec_bfd, 
+				      (bfd_byte *) x_dynp->d_un.d_ptr);
+	      return dyn_ptr;
+	    }
 #ifdef DT_MIPS_RLD_MAP
-      else if (dyn_tag == DT_MIPS_RLD_MAP)
-	{
-	  char pbuf[TARGET_PTR_BIT / HOST_CHAR_BIT];
+	  else if (dyn_tag == DT_MIPS_RLD_MAP)
+	    {
+	      char pbuf[TARGET_PTR_BIT / HOST_CHAR_BIT];
 
-	  /* DT_MIPS_RLD_MAP contains a pointer to the address
-	     of the dynamic link structure.  */
-	  dyn_ptr = bfd_h_get_32 (exec_bfd, (bfd_byte *) x_dynp->d_un.d_ptr);
-	  if (target_read_memory (dyn_ptr, pbuf, sizeof (pbuf)))
-	    return 0;
-	  return extract_unsigned_integer (pbuf, sizeof (pbuf));
-	}
+	      /* DT_MIPS_RLD_MAP contains a pointer to the address
+		 of the dynamic link structure.  */
+	      dyn_ptr = bfd_h_get_32 (exec_bfd, 
+				      (bfd_byte *) x_dynp->d_un.d_ptr);
+	      if (target_read_memory (dyn_ptr, pbuf, sizeof (pbuf)))
+		return 0;
+	      return extract_unsigned_integer (pbuf, sizeof (pbuf));
+	    }
 #endif
+	}
     }
-#else /* ELF64 */
-  for (bufend = buf + dyninfo_sect_size;
-       buf < bufend;
-       buf += sizeof (Elf64_External_Dyn))
+  else /* 64-bit elf */
     {
-      Elf64_External_Dyn *x_dynp = (Elf64_External_Dyn *) buf;
-      long dyn_tag;
-      CORE_ADDR dyn_ptr;
-
-      dyn_tag = bfd_h_get_64 (exec_bfd, (bfd_byte *) x_dynp->d_tag);
-      if (dyn_tag == DT_NULL)
-	break;
-      else if (dyn_tag == DT_DEBUG)
+      for (bufend = buf + dyninfo_sect_size;
+	   buf < bufend;
+	   buf += sizeof (Elf64_External_Dyn))
 	{
-	  dyn_ptr = bfd_h_get_64 (exec_bfd, (bfd_byte *) x_dynp->d_un.d_ptr);
-	  return dyn_ptr;
+	  Elf64_External_Dyn *x_dynp = (Elf64_External_Dyn *) buf;
+	  long dyn_tag;
+	  CORE_ADDR dyn_ptr;
+
+	  dyn_tag = bfd_h_get_64 (exec_bfd, (bfd_byte *) x_dynp->d_tag);
+	  if (dyn_tag == DT_NULL)
+	    break;
+	  else if (dyn_tag == DT_DEBUG)
+	    {
+	      dyn_ptr = bfd_h_get_64 (exec_bfd, 
+				      (bfd_byte *) x_dynp->d_un.d_ptr);
+	      return dyn_ptr;
+	    }
 	}
     }
-#endif
 
   /* DT_DEBUG entry not found.  */
   return 0;
@@ -1484,6 +1496,7 @@ info_sharedlibrary_command (ignore, from_tty)
   int header_done = 0;
   int addr_width;
   char *addr_fmt;
+  int arch_size;
 
   if (exec_bfd == NULL)
     {
@@ -1491,13 +1504,18 @@ info_sharedlibrary_command (ignore, from_tty)
       return;
     }
 
-#ifndef TARGET_ELF64
-  addr_width = 8 + 4;
-  addr_fmt = "08l";
-#else
-  addr_width = 16 + 4;
-  addr_fmt = "016l";
-#endif
+  arch_size = bfd_elf_get_arch_size (exec_bfd);
+  /* Default to 32-bit in case of failure (non-elf). */
+  if (arch_size == 32 || arch_size == -1)
+    {
+      addr_width = 8 + 4;
+      addr_fmt = "08l";
+    }
+  else if (arch_size == 64)
+    {
+      addr_width = 16 + 4;
+      addr_fmt = "016l";
+    }
 
   update_solib_list (from_tty, 0);
 

@@ -43,6 +43,13 @@ Thu May  4 20:54:00 2000  Andrew Cagney  <cagney@b1.cygnus.com>
  	(MIPS_NUM_ARG_REGS), config/mips/tm-mips.h (MIPS_NUM_FP_ARG_REGS):
  	Delete unused macros.
 
+2000-05-03  Michael Snyder  <msnyder@seadog.cygnus.com>
+
+	* solib.c (elf_locate_base, info_sharedlibrary_command):
+	Look at the bfd to determine if it is elf32 or elf64, rather
+	than using an ifdef.  This makes it runtime teststable and
+	multi-arch.
+
 2000-05-01  Mark Kettenis  <kettenis@gnu.org>
 
 	* infrun.c (handle_inferior_event): When doing a "next", and
