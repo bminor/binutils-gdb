@@ -1,3 +1,13 @@
+Sat Nov 14 14:50:56 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* debug.c (debug_name_type): Correct return type from false to
+	DEBUG_TYPE_NULL.
+
+Sat Nov 14 14:48:21 1998  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
+
+	* objdump.c (disassemble_data): Skip over relocs below start
+	address.
+
 Tue Nov 10 15:31:52 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* Makefile.am: Add dependency of readelf.c on elf/fr30.h
