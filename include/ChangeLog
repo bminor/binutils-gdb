@@ -1,3 +1,7 @@
+Sat Jun 18 16:09:32 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* demangle.h (cplus_demangle_opname): Declare.
+
 Thu Jun 16 15:19:03 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* bfdlink.h (struct bfd_link_info): Add new field shared.
