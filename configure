@@ -62,6 +62,7 @@ next_srcdir=
 next_target=
 next_tmpdir=
 norecursion=
+removing=
 prefix=/usr/local
 progname=
 program_prefix=
@@ -72,6 +73,7 @@ site_option=
 site_makefile_frag=
 srcdir=
 srctrigger=
+subdirs=
 target_alias=
 target_makefile_frag=
 undefinedargs=
@@ -171,6 +173,7 @@ do
 		-prefix | --prefix | --prefi | --pref | --pre)
 			next_prefix=yes
 			;;
+		-rm | --rm) removing=${arg} ;;
 		-program_prefix=* | --program_prefix=* | --program_prefi=* | --program_pref=* | --program_pre=* | --program_pr=* | --program_p=* | --program_=* | --program=* | --progra=* | --progr=* | --prog=* | --pro=*)
 			program_prefix=`echo ${arg} | sed 's/^[-a-z]*=//'`
 			program_prefixoption=${arg}
@@ -357,7 +360,7 @@ esac
 
 # default exec_prefix
 case "${exec_prefix}" in
-"") exec_prefix="$(prefix)" ;;
+"") exec_prefix="\$(prefix)" ;;
 *) ;;
 esac
 
@@ -450,116 +453,149 @@ if [ ! -r ${srcdir}/${srctrigger} ] ; then
 	exit 1
 fi
 
-# Set up the list of links to be made.
-# ${links} is the list of link names, and ${files} is the list of names to link to.
+for subdir in . ${subdirs} ; do
 
-# Make the links.
-configlinks="${links}"
-while [ -n "${files}" ] ; do
-	# set file to car of files, files to cdr of files
-	set ${files}; file=$1; shift; files=$*
-	set ${links}; link=$1; shift; links=$*
+    # ${subdir} is relative path from . to the directory we're currently
+    # configuring.
+    # ${invsubdir} is inverse of ${subdir), *with* trailing /, if needed.
+    invsubdir=`echo ${subdir}/ | sed -e 's|\./||g' -e 's|[^/]*/|../|g'`
 
-	if [ ! -r ${srcdir}/${file} ] ; then
-		echo '***' "${progname}: cannot create a link \"${link}\"," 1>&2
-		echo '***' "since the file \"${file}\" does not exist." 1>&2
-		exit 1
-	fi
-
-	${remove} -f ${link}
-	rm -f config.status
-	# Make a symlink if possible, otherwise try a hard link
-	${symbolic_link} ${srcdir}/${file} ${link} 2>/dev/null || ${hard_link} ${srcdir}/${file} ${link}
-
-	if [ ! -r ${link} ] ; then
-		echo '***' "${progname}: unable to link \"${link}\" to \"${srcdir}/${file}\"." 1>&2
-		exit 1
-	fi
-
-	case "${verbose}" in
-	"") ;;
-	*)  echo "Linked \"${link}\" to \"${srcdir}/${file}\"." ;;
-	esac
-done
-
-# Create a .gdbinit file which runs the one in srcdir
-# and tells GDB to look there for source files.
-
-if [ -r ${srcdir}/.gdbinit ] ; then
-	case ${srcdir} in
-	.)
+    ### figure out what to do with srcdir
+    case "${srcdir}" in
+	".")  # no -srcdir option.  We're building in place.
+		makesrcdir=. ;;
+	/*) # absolute path
+		makesrcdir=`echo ${srcdir}/${subdir} | sed -e 's|/\.$||'`
 		;;
-	*) cat > .gdbinit <<EOF
-# ${NO_EDIT} > .gdbinit
-dir .
-dir ${srcdir}
-source ${srcdir}/.gdbinit
-EOF
+	*) # otherwise relative
+		makesrcdir=../${srcdir}/${subdir}
 		;;
-	esac
-fi
+    esac
 
-# Install a makefile, and make it set VPATH
-# if necessary so that the sources are found.
-# Also change its value of srcdir.
-# NOTE: Makefile generation constitutes the majority of the time in configure.  Hence, this section has
-# been somewhat optimized and is perhaps a bit twisty.
+    if [ "${subdir}/" != "./" ] ; then
+	Makefile=${subdir}/Makefile
+    fi
 
-# code is order so as to try to sed the smallest input files we know.
-
-# the three makefile fragments MUST end up in the resulting Makefile in this order: target, host, and site.
-# so do these separately because I don't trust the order of sed -e expressions.
-
-# Conditionalize for this site from "Makefile.in" (or whatever it's called) into Makefile.tem
-case "${site}" in
-"") cp ${srcdir}/${Makefile_in} Makefile.tem ;;
-*)
-	site_makefile_frag=${srcdir}/config/ms-${site}
-
-	if [ -f ${site_makefile_frag} ] ; then
-		sed -e "/^####/  r ${site_makefile_frag}" ${srcdir}/${Makefile_in} \
-			> Makefile.tem
-	else
-		cp ${srcdir}/${Makefile_in} Makefile.tem
-		site_makefile_frag=
+    case "${removing}" in
+    "")
+	if [ -n "${verbose}" -o -z "${silent}" ] ; then
+	    echo Building in ${subdir}
 	fi
-	;;
-esac
-# working copy now in Makefile.tem
+	# FIXME Should this be done recursively ??? (Useful for e.g. gdbtest)
+	# Set up the list of links to be made.
+	# ${links} is the list of link names, and ${files} is the list of names to link to.
 
-# Conditionalize the makefile for this host.
-case "${host_makefile_frag}" in
-"") mv Makefile.tem ${Makefile} ;;
-*)
-	host_makefile_frag=${srcdir}/${host_makefile_frag}
-	if [ -f ${host_makefile_frag} ] ; then
-		sed -e "/^####/  r ${host_makefile_frag}" Makefile.tem > ${Makefile}
-	else
-		echo '***' Expected host makefile fragment \"${host_makefile_frag}\" 1>&2
-		echo '***' is missing in ${PWD}. 1>&2
-		mv Makefile.tem ${Makefile}
-	fi
-esac
-# working copy now in ${Makefile}
+	# Make the links.
+	configlinks="${links}"
+	while [ -n "${files}" ] ; do
+		# set file to car of files, files to cdr of files
+		set ${files}; file=$1; shift; files=$*
+		set ${links}; link=$1; shift; links=$*
 
-# Conditionalize the makefile for this target.
-case "${target_makefile_frag}" in
-"") mv ${Makefile} Makefile.tem ;;
-*)
-	target_makefile_frag=${srcdir}/${target_makefile_frag}
-	if [ -f ${target_makefile_frag} ] ; then
-		sed -e "/^####/  r ${target_makefile_frag}" ${Makefile} > Makefile.tem
-	else
-		mv ${Makefile} Makefile.tem
-		target_makefile_frag=
-	fi
-	;;
-esac
-# real copy now in Makefile.tem
+		if [ ! -r ${srcdir}/${file} ] ; then
+			echo '***' "${progname}: cannot create a link \"${link}\"," 1>&2
+			echo '***' "since the file \"${file}\" does not exist." 1>&2
+			exit 1
+		fi
 
-# prepend warning about editting, and a bunch of variables.
-cat > ${Makefile} <<EOF
+		${remove} -f ${link}
+		rm -f config.status
+		# Make a symlink if possible, otherwise try a hard link
+		${symbolic_link} ${srcdir}/${file} ${link} 2>/dev/null || ${hard_link} ${srcdir}/${file} ${link}
+
+		if [ ! -r ${link} ] ; then
+			echo '***' "${progname}: unable to link \"${link}\" to \"${srcdir}/${file}\"." 1>&2
+			exit 1
+		fi
+
+		case "${verbose}" in
+		"") ;;
+		*)  echo "Linked \"${link}\" to \"${srcdir}/${file}\"." ;;
+		esac
+	done
+
+	# Create a .gdbinit file which runs the one in srcdir
+	# and tells GDB to look there for source files.
+
+	if [ -r ${srcdir}/${subdir}/.gdbinit ] ; then
+		case ${srcdir} in
+		.)
+			;;
+		*) cat > ${subdir}/.gdbinit <<EOF
 # ${NO_EDIT}
+dir .
+dir ${makesrcdir}
+source ${makesrcdir}/.gdbinit
+EOF
+			;;
+		esac
+	fi
+
+	# Install a makefile, and make it set VPATH
+	# if necessary so that the sources are found.
+	# Also change its value of srcdir.
+	# NOTE: Makefile generation constitutes the majority of the time in configure.  Hence, this section has
+	# been somewhat optimized and is perhaps a bit twisty.
+
+	# code is order so as to try to sed the smallest input files we know.
+
+	# the three makefile fragments MUST end up in the resulting Makefile in this order: target, host, and site.
+	# so do these separately because I don't trust the order of sed -e expressions.
+
+	# Conditionalize for this site from "Makefile.in" (or whatever it's called) into Makefile.tem
+	case "${site}" in
+	"") cp ${srcdir}/${subdir}/${Makefile_in} ${subdir}/Makefile.tem ;;
+	*)
+		site_makefile_frag=${srcdir}/config/ms-${site}
+
+		if [ -f ${site_makefile_frag} ] ; then
+			sed -e "/^####/  r ${site_makefile_frag}" ${srcdir}/${subdir}/${Makefile_in} \
+				> ${subdir}/Makefile.tem
+		else
+			cp ${srcdir}/${subdir}/${Makefile_in} ${subdir}/Makefile.tem
+			site_makefile_frag=
+		fi
+		;;
+	esac
+	# working copy now in ${subdir}/Makefile.tem
+
+	# Conditionalize the makefile for this host.
+	case "${host_makefile_frag}" in
+	"") mv ${subdir}/Makefile.tem ${Makefile} ;;
+	*)
+		if [ ! -f ${host_makefile_frag} ] ; then
+			host_makefile_frag=${srcdir}/${host_makefile_frag}
+		fi
+		if [ -f ${host_makefile_frag} ] ; then
+			sed -e "/^####/  r ${host_makefile_frag}" ${subdir}/Makefile.tem > ${Makefile}
+		else
+			echo '***' Expected host makefile fragment \"${host_makefile_frag}\" 1>&2
+			echo '***' is missing in ${PWD}. 1>&2
+			mv ${subdir}/Makefile.tem ${Makefile}
+		fi
+	esac
+	# working copy now in ${Makefile}
+
+	# Conditionalize the makefile for this target.
+	case "${target_makefile_frag}" in
+	"") mv ${Makefile} ${subdir}/Makefile.tem ;;
+	*)
+		target_makefile_frag=${srcdir}/${target_makefile_frag}
+		if [ -f ${target_makefile_frag} ] ; then
+			sed -e "/^####/  r ${target_makefile_frag}" ${Makefile} > ${subdir}/Makefile.tem
+		else
+			mv ${Makefile} ${subdir}/Makefile.tem
+			target_makefile_frag=
+		fi
+		;;
+	esac
+	# real copy now in ${subdir}/Makefile.tem
+
+	# prepend warning about editting, and a bunch of variables.
+	cat > ${Makefile} <<EOF
+# ${NO_EDIT}
+VPATH = ${makesrcdir}
+links = ${configlinks}
 host_alias = ${host_alias}
 host_cpu = ${host_cpu}
 host_vendor = ${host_vendor}
@@ -568,84 +604,106 @@ target_alias = ${target_alias}
 target_cpu = ${target_cpu}
 target_vendor = ${target_vendor}
 target_os = ${target_os}
-target_makefile_frag = ${target_makefile_frag}
-host_makefile_frag = ${host_makefile_frag}
-site_makefile_frag = ${site_makefile_frag}
-links = ${configlinks}
-VPATH = ${srcdir}
 EOF
+	if [ "${target_makefile_frag}" != "" ] ; then
+	    echo target_makefile_frag = ${invsubdir}${target_makefile_frag} >>${Makefile}
+	fi 
+	if [ "${host_makefile_frag}" != "" ] ; then
+	    echo host_makefile_frag = ${invsubdir}${host_makefile_frag} >>${Makefile}
+	fi 
+	if [ "${site_makefile_frag}" != "" ] ; then
+	    echo site_makefile_frag = ${invsubdir}${site_makefile_frag} >>${Makefile}
+	fi 
 
-# fixme: this shouldn't be in configure.
-# Define macro CROSS_COMPILE in compilation if this is a cross-compiler.
-case "${host_alias}" in
-"${target_alias}")
-	tooldir="$(libdir)"
-	echo "ALL=all.internal" >> ${Makefile}
-	;;
-*)
-	echo "CROSS=-DCROSS_COMPILE" >> ${Makefile}
-	echo "ALL=all.cross" >> ${Makefile}
-	case "${program_prefix}" in
-	"")	program_prefix=${target_alias}- ;;
-	*)	;;
+	# fixme: this shouldn't be in configure.
+	# Define macro CROSS_COMPILE in compilation if this is a cross-compiler.
+	case "${host_alias}" in
+	"${target_alias}")
+		tooldir="\$(libdir)"
+		echo "ALL=all.internal" >> ${Makefile}
+		;;
+	*)
+		echo "CROSS=-DCROSS_COMPILE" >> ${Makefile}
+		echo "ALL=all.cross" >> ${Makefile}
+		case "${program_prefix}" in
+		"")	program_prefix=${target_alias}- ;;
+		*)	;;
+		esac
+
+		tooldir="\$(libdir)/${target_alias}"
+		;;
 	esac
 
-	tooldir="$(libdir)/${target_alias}"
-	;;
-esac
+	# reset prefix, exec_prefix, srcdir, SUBDIRS, NONSUBDIRS,
+	# remove any form feeds.
+	if [ -z "${subdirs}" ]; then
+	    sed -e "s:^SUBDIRS[ 	]*=.*$:SUBDIRS = ${configdirs}:" \
+		-e "s:^NONSUBDIRS[ 	]*=.*$:NONSUBDIRS = ${noconfigdirs}:" \
+		${subdir}/Makefile.tem > ${subdir}/Makefile.tem2
+	    mv ${subdir}/Makefile.tem2 ${subdir}/Makefile.tem
+	fi
+	sed -e "s:^prefix[ 	]*=.*$:prefix = ${prefix}:" \
+		-e "s:^exec_prefix[ 	]*=.*$:exec_prefix = ${exec_prefix}:" \
+		-e "s:^srcdir[ 	]*=.*$:srcdir = ${makesrcdir}:" \
+		-e "s///" \
+		-e "s:^program_prefix[ 	]*=.*$:program_prefix = ${program_prefix}:" \
+		-e "s:^tooldir[ 	]*=.*$:tooldir = ${tooldir}:" \
+		${subdir}/Makefile.tem >> ${Makefile}
+	# final copy now in ${Makefile}
 
-# reset prefix, exec_prefix, srcdir, SUBDIRS, NONSUBDIRS, remove any form
-# feeds.
-sed -e "s:^prefix[ 	]*=.*$:prefix = ${prefix}:" \
-	-e "s:^exec_prefix[ 	]*=.*$:exec_prefix = ${exec_prefix}:" \
-	-e "s:^srcdir[ 	]*=.*$:srcdir = ${srcdir}:" \
-	-e "s:^SUBDIRS[ 	]*=.*$:SUBDIRS = ${configdirs}:" \
-	-e "s:^NONSUBDIRS[ 	]*=.*$:NONSUBDIRS = ${noconfigdirs}:" \
-	-e "s///" \
-	-e "s:^program_prefix[ 	]*=.*$:program_prefix = ${program_prefix}:" \
-	-e "s:^tooldir[ 	]*=.*$:tooldir = ${tooldir}:" \
-	Makefile.tem >> ${Makefile}
-# final copy now in ${Makefile}
+	rm ${subdir}/Makefile.tem
 
-rm Makefile.tem
+	if [ -n "${verbose}" -o -z "${silent}" ] ; then
+		case "${host_makefile_frag}" in
+		"") using= ;;
+		*) using="and \"${host_makefile_frag}\"" ;;
+		esac
 
-if [ -n "${verbose}" -o -z "${silent}" ] ; then
-	case "${host_makefile_frag}" in
-	"") using= ;;
-	*) using="and \"${host_makefile_frag}\"" ;;
+		case "${target_makefile_frag}" in
+		"") ;;
+		*) using="${using} and \"${target_makefile_frag}\"" ;;
+		esac
+
+		case "${site_makefile_frag}" in
+		"") ;;
+		*) using="${using} and \"${site_makefile_frag}\"" ;;
+		esac
+
+		echo "Created \"${Makefile}\" in" ${PWD} `echo "${using}" | sed 's/and/using/'`
+	fi
+
+	. ${tmpfile}.pos
+
+	# describe the chosen configuration in config.status.
+	# Make that file a shellscript which will reestablish
+	# the same configuration.  Used in Makefiles to rebuild
+	# Makefiles.
+
+	case "${norecursion}" in
+	"") arguments="${arguments} -norecursion" ;;
+	*) ;;
 	esac
 
-	case "${target_makefile_frag}" in
-	"") ;;
-	*) using="${using} and \"${target_makefile_frag}\"" ;;
-	esac
-
-	case "${site_makefile_frag}" in
-	"") ;;
-	*) using="${using} and \"${site_makefile_frag}\"" ;;
-	esac
-
-	echo "Created \"${Makefile}\" in" ${PWD} `echo "${using}" | sed 's/and/using/'`
-fi
-
-. ${tmpfile}.pos
-
-# describe the chosen configuration in config.status.
-# Make that file a shellscript which will reestablish
-# the same configuration.  Used in Makefiles to rebuild
-# Makefiles.
-
-case "${norecursion}" in
-"") arguments="${arguments} -norecursion" ;;
-*) ;;
-esac
-
-echo "#!/bin/sh
+	if [ ${subdir} = . ] ; then
+	    echo "#!/bin/sh
 # ${NO_EDIT}
 # ${PWD} was configured as follows:
 ${progname}" ${arguments}  "
-# ${using}" > config.status
-chmod a+x config.status
+# ${using}" > ${subdir}/config.status
+	else
+	    echo "#!/bin/sh
+# ${NO_EDIT}
+# ${PWD}/${subdir} was configured as follows:
+cd ${invsubdir}
+${progname}" ${arguments}  "
+# ${using}" > ${subdir}/config.status
+	fi
+	chmod a+x ${subdir}/config.status
+	;;
+
+    *)	rm -f ${Makefile} ${subdir}/config.status ${links} ;;
+    esac
+done
 
 # If there are subdirectories, then recur. 
 if [ -z "${norecursion}" -a -n "${configdirs}" ] ; then 
@@ -694,7 +752,7 @@ if [ -z "${norecursion}" -a -n "${configdirs}" ] ; then
 ### The recursion line is here.
 			if ${recprog} -s ${host_alias} -target=${target_alias} \
 				${verbose} ${prefixoption} ${tmpdiroption} ${exec_prefixoption} \
-				${srcdiroption} ${program_prefixoption} ${site_option} ; then
+				${srcdiroption} ${program_prefixoption} ${site_option} ${removing} ; then
 				true
 			else
 				exit 1

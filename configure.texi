@@ -983,13 +983,30 @@ error message.
 @defvar{configdirs}
 Contains the names of any subdirectories where @code{configure} should
 recur.  You must usually set this in the per-invocation section of
-@file{configure.in}.  If @file{Makefile.in} contains a line starting
-with @code{SUBDIRS =}, then it will be replaced with an assignment to
-@code{SUBDIRS} using the value of @code{configdirs}.  This can be used
-to determine which directories to configure and build depending on the
-host and target configurations.
+@file{configure.in}.
+If @file{Makefile.in} contains a line starting with @code{SUBDIRS =},
+then it will be replaced with an assignment to @code{SUBDIRS} using
+the value of @code{configdirs} (if #code{subdirs} is empty).  This can
+be used to determine which directories to configure and build depending
+on the host and target configurations.
 @c Most other matching makefile/config vars use the same name.  Why not
 @c this? (FIXME).
+@c Can we get rid of SUBDIRS-substitution?  It doesn't work well with subdirs.
+Use @code{configdirs} (instead of the @code{subdirs} variable
+described below) if you want to be able to partition the
+sub-directories, or use independent Makefile fragments.
+Each sub-directory can be independent, and independently re-configured.
+@end defvar
+
+@defvar{subdirs}
+Contains the names of any subdirectories where @code{configure} should
+create a @code{Makefile} (in addition to the current directory),
+@emph{without} recursively running @code{configure}.
+Use @code{subdirs} (instead of the @code{configdirs} variable
+described above) if you want to configure all of the directories
+as a unit.  Since there is a single invocation of @code{configure}
+that configures many directories, all the directories can use the
+same Makefile fragments, and the same @code{configure.in}.
 @end defvar
 
 @defvar{host}
