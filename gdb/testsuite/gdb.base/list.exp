@@ -899,7 +899,8 @@ proc test_forward_search {} {
 
 	set timeout 30
 	verbose "Timeout is now $timeout seconds" 2
-	gdb_test "search 1234" ""
+	match_max 6000
+	gdb_test "search 1234" ".*1234.*" "search extremely long line (> 5000 chars)"
 }
 
 # Start with a fresh gdb.

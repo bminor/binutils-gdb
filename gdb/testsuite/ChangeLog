@@ -1,3 +1,8 @@
+Wed Aug  7 15:34:22 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.base/list.exp (test_forward_search): Fix to handle very
+	long source line without overflowing expect's input buffer.
+
 Wed Aug  7 12:03:25 1996  Tom Tromey  <tromey@creche.cygnus.com>
 
 	* config/slite-gdb.exp (gdb_start): Use "full_buffer", not
