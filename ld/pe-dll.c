@@ -527,7 +527,7 @@ process_def_file (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
   /* If we are not building a DLL, when there are no exports
      we do not build an export table at all.  */
   if (!pe_dll_export_everything && pe_def_file->num_exports == 0
-      && !info->shared)
+      && info->executable)
     return;
 
   /* Now, maybe export everything else the default way.  */
