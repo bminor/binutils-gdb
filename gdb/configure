@@ -3118,12 +3118,17 @@ fi
 		tixdir=../tix/unix/tk8.0
 		;;
 	   esac 
+	   if test "${TCL_SHARED_BUILD}" = "1"; then
+		TIX_LIB_EXT="${TCL_SHLIB_SUFFIX}"
+	   else
+		TIX_LIB_EXT=".a"
+	   fi
 	   if test "${TCL_LIB_VERSIONS_OK}" = "ok"; then
 		TIXLIB="-L${tixdir} -ltix${TIXVERSION}"
-		TIX_DEPS="${tixdir}/libtix${TIXVERSION}.a"
+		TIX_DEPS="${tixdir}/libtix${TIXVERSION}${TIX_LIB_EXT}"
 	   else
 		TIXLIB="-L${tixdir} -ltix`echo ${TIXVERSION} | tr -d .`"
-		TIX_DEPS="${tixdir}/libtix`echo ${TIXVERSION} | tr -d .`.a"
+		TIX_DEPS="${tixdir}/libtix`echo ${TIXVERSION} | tr -d .`${TIX_LIB_EXT}"
 	   fi
 
 	   ENABLE_GDBTK=1
@@ -3300,7 +3305,7 @@ links="${links} nm.h"
 fi
 # start-sanitize-gdbtk
 echo $ac_n "checking whether ln -s works""... $ac_c" 1>&6
-echo "configure:3304: checking whether ln -s works" >&5
+echo "configure:3309: checking whether ln -s works" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_LN_S'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -3335,19 +3340,19 @@ fi
 
 
 echo $ac_n "checking for Cygwin32 environment""... $ac_c" 1>&6
-echo "configure:3339: checking for Cygwin32 environment" >&5
+echo "configure:3344: checking for Cygwin32 environment" >&5
 if eval "test \"`echo '$''{'am_cv_cygwin32'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 3344 "configure"
+#line 3349 "configure"
 #include "confdefs.h"
 
 int main() {
 return __CYGWIN32__;
 ; return 0; }
 EOF
-if { (eval echo configure:3351: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:3356: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   am_cv_cygwin32=yes
 else
@@ -3364,19 +3369,19 @@ echo "$ac_t""$am_cv_cygwin32" 1>&6
 CYGWIN32=
 test "$am_cv_cygwin32" = yes && CYGWIN32=yes
 echo $ac_n "checking for Mingw32 environment""... $ac_c" 1>&6
-echo "configure:3368: checking for Mingw32 environment" >&5
+echo "configure:3373: checking for Mingw32 environment" >&5
 if eval "test \"`echo '$''{'am_cv_mingw32'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 3373 "configure"
+#line 3378 "configure"
 #include "confdefs.h"
 
 int main() {
 return __MINGW32__;
 ; return 0; }
 EOF
-if { (eval echo configure:3380: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:3385: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   am_cv_mingw32=yes
 else
@@ -3395,7 +3400,7 @@ test "$am_cv_mingw32" = yes && MINGW32=yes
 
 
 echo $ac_n "checking for executable suffix""... $ac_c" 1>&6
-echo "configure:3399: checking for executable suffix" >&5
+echo "configure:3404: checking for executable suffix" >&5
 if eval "test \"`echo '$''{'am_cv_exeext'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else

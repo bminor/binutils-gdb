@@ -1,3 +1,11 @@
+Wed Jan 14 16:38:44 1998  Keith Seitz  <keiths@pizza.cygnus.com>
+
+	* configure.in (--enable-gdbtk): If tcl was built with --enable-shared,
+	use TCL_SHLIB_SUFFIX to specify the suffix of the library file so that
+	we don't expect to see "libfoo.a" instead of "libfoo.{so,sl, etc}".
+
+	* configure: Regenerate.
+	
 Wed Dec 31 16:50:26 1998  Keith Seitz  (keiths@onions.cygnus.com)
  
         * gdbtk.c (gdb_actions_command): extract and save step count

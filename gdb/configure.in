@@ -359,12 +359,17 @@ if test "${enable_gdbtk}" = "yes"; then
 		tixdir=../tix/unix/tk8.0
 		;;
 	   esac 
+	   if test "${TCL_SHARED_BUILD}" = "1"; then
+		TIX_LIB_EXT="${TCL_SHLIB_SUFFIX}"
+	   else
+		TIX_LIB_EXT=".a"
+	   fi
 	   if test "${TCL_LIB_VERSIONS_OK}" = "ok"; then
 		TIXLIB="-L${tixdir} -ltix${TIXVERSION}"
-		TIX_DEPS="${tixdir}/libtix${TIXVERSION}.a"
+		TIX_DEPS="${tixdir}/libtix${TIXVERSION}${TIX_LIB_EXT}"
 	   else
 		TIXLIB="-L${tixdir} -ltix`echo ${TIXVERSION} | tr -d .`"
-		TIX_DEPS="${tixdir}/libtix`echo ${TIXVERSION} | tr -d .`.a"
+		TIX_DEPS="${tixdir}/libtix`echo ${TIXVERSION} | tr -d .`${TIX_LIB_EXT}"
 	   fi
 
 	   ENABLE_GDBTK=1
