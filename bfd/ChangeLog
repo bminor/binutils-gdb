@@ -1,3 +1,10 @@
+Mon Sep 16 12:39:36 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* srec.c (srec_scan): Accept multiple symbols on a single line.
+	From Pascal Martin <pmartin@alsys.com>.
+
+	* README: New file.
+
 Fri Sep 13 14:32:42 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* aoutf1.h (MY_bfd_merge_private_bfd_data): Define.
