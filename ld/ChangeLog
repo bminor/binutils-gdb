@@ -1,3 +1,8 @@
+Sat Nov 12 15:55:56 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* scripttempl/elf.sc: Add ENTRY(${ENTRY}), and default ${ENTRY} to
+	_start.
+
 Fri Nov 11 14:27:23 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* ld.h (args_type): Add field export_dynamic.
