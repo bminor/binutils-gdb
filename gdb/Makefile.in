@@ -232,7 +232,11 @@ FLAGS_TO_PASS = \
 
 CC_FOR_TARGET = ` \
   if [ -f $${rootme}/../gcc/xgcc ] ; then \
-    echo $${rootme}/../gcc/xgcc -B$${rootme}/../gcc/; \
+    if [ -f $${rootme}/../newlib/Makefile ] ; then \
+      echo $${rootme}/../gcc/xgcc -B$${rootme}/../gcc/ -idirafter $${rootme}/newlib/targ-include -idirafter $${rootsrc}/../newlib/libc/include -nostdinc; \
+    else \
+      echo $${rootme}/../gcc/xgcc -B$${rootme}/../gcc/; \
+    fi; \
   else \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
       echo $(CC); \
@@ -245,7 +249,11 @@ CXX = gcc
 
 CXX_FOR_TARGET = ` \
   if [ -f $${rootme}/../gcc/Makefile ] ; then \
-    echo $${rootme}/../gcc/xgcc -B$${rootme}/../gcc/; \
+    if [ -f $${rootme}/../newlib/Makefile ] ; then \
+      echo $${rootme}/../gcc/xgcc -B$${rootme}/../gcc/ -idirafter $${rootme}/newlib/targ-include -idirafter $${rootsrc}/../newlib/libc/include -nostdinc; \
+    else \
+      echo $${rootme}/../gcc/xgcc -B$${rootme}/../gcc/; \
+    fi; \
   else \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
       echo $(CXX); \
@@ -283,8 +291,8 @@ NWSOURCE = /gaunt/grossman/unsupported/Novell
 NWINCLUDES = $(NWSOURCE)/novh40
 
 LD_FOR_TARGET = ` \
-  if [ -f $${rootme}/../binutils/ld ] ; then \
-    echo $${rootme}/../binutils/ld; \
+  if [ -f $${rootme}/../ld/ld.new ] ; then \
+    echo $${rootme}/../ld/ld.new; \
   else \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
       echo $(LD); \
@@ -506,6 +514,7 @@ installcheck:
 check: force
 	@if [ -f testsuite/Makefile ]; then \
 	  rootme=`pwd`; export rootme; \
+	  rootsrc=`cd $(srcdir); pwd`; export rootsrc; \
 	  cd testsuite; \
 	  $(MAKE) $(TARGET_FLAGS_TO_PASS) check; \
 	else true; fi
@@ -589,10 +598,10 @@ gdb: $(OBS) $(TSOBS) $(ADD_DEPS) $(CDEPS) init.o
 	  init.o $(OBS) $(TSOBS) $(ADD_FILES) $(CLIBS) $(LOADLIBES)
 
 prelude.o: $(NWSOURCE)/prelude.c
-	rootme=`pwd`; export rootme; $(CC_FOR_TARGET) -g -I $(NWINCLUDES) -c $(NWSOURCE)/prelude.c
+	rootme=`pwd`; export rootme; rootsrc=`cd $(srcdir); pwd`; export rootsrc; $(CC_FOR_TARGET) -g -I $(NWINCLUDES) -c $(NWSOURCE)/prelude.c
 
 i386-nlmstub.o: $(srcdir)/i386-nlmstub.c
-	rootme=`pwd`; export rootme; $(CC_FOR_TARGET) -g -I $(NWINCLUDES) -c $(srcdir)/i386-nlmstub.c
+	rootme=`pwd`; export rootme; rootsrc=`cd $(srcdir); pwd`; export rootsrc; $(CC_FOR_TARGET) -g -I $(NWINCLUDES) -c $(srcdir)/i386-nlmstub.c
 
 nlmstub.o: prelude.o i386-nlmstub.o
 	rootme=`pwd`; export rootme; $(LD_FOR_TARGET) -r -o nlmstub.o prelude.o i386-nlmstub.o
