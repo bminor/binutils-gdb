@@ -115,9 +115,12 @@ PROTO (boolean, _bfd_dummy_core_file_matches_executable_p, (bfd *core_bfd,
 							    bfd *exec_bfd));
 PROTO (bfd_target *, _bfd_dummy_target, (bfd *abfd));
 
-PROTO (void, bfd_dont_truncate_arname, (bfd *abfd, char *filename, char *hdr));
-PROTO (void, bfd_bsd_truncate_arname, (bfd *abfd, char *filename, char *hdr));
-PROTO (void, bfd_gnu_truncate_arname, (bfd *abfd, char *filename, char *hdr));
+PROTO (void, bfd_dont_truncate_arname, (bfd *abfd, CONST char *filename,
+					char *hdr));
+PROTO (void, bfd_bsd_truncate_arname, (bfd *abfd, CONST char *filename,
+					char *hdr));
+PROTO (void, bfd_gnu_truncate_arname, (bfd *abfd, CONST char *filename,
+					char *hdr));
 
 PROTO (boolean, bsd_write_armap, (bfd *arch, unsigned int elength,
 				  struct orl *map, int orl_count, int stridx));
@@ -166,3 +169,6 @@ extern bfd *bfd_last_cache;
 #define itos(x) ((char*)(x))
 #define stoi(x) ((int)(x))
 #endif
+
+/* Generic routine for close_and_cleanup is really just bfd_true.  */
+#define	bfd_generic_close_and_cleanup	bfd_true
