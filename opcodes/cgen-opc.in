@@ -38,11 +38,76 @@ static unsigned int asm_hash_insn PARAMS ((const char *));
 static int dis_hash_insn_p PARAMS ((const CGEN_INSN *));
 static unsigned int dis_hash_insn PARAMS ((const char *, unsigned long));
 
+/* Cover function to read and properly byteswap an insn value.  */
+
+CGEN_INSN_INT
+cgen_get_insn_value (od, buf, length)
+     CGEN_OPCODE_DESC od;
+     unsigned char *buf;
+     int length;
+{
+  CGEN_INSN_INT value;
+
+  switch (length)
+    {
+    case 8:
+      value = *buf;
+      break;
+    case 16:
+      if (CGEN_OPCODE_INSN_ENDIAN (od) == CGEN_ENDIAN_BIG)
+	value = bfd_getb16 (buf);
+      else
+	value = bfd_getl16 (buf);
+      break;
+    case 32:
+      if (CGEN_OPCODE_INSN_ENDIAN (od) == CGEN_ENDIAN_BIG)
+	value = bfd_getb32 (buf);
+      else
+	value = bfd_getl32 (buf);
+      break;
+    default:
+      abort ();
+    }
+
+  return value;
+}
+
+/* Cover function to store an insn value properly byteswapped.  */
+
+void
+cgen_put_insn_value (od, buf, length, value)
+     CGEN_OPCODE_DESC od;
+     unsigned char *buf;
+     int length;
+     CGEN_INSN_INT value;
+{
+  switch (length)
+    {
+    case 8:
+      buf[0] = value;
+      break;
+    case 16:
+      if (CGEN_OPCODE_INSN_ENDIAN (od) == CGEN_ENDIAN_BIG)
+	bfd_putb16 (value, buf);
+      else
+	bfd_putl16 (value, buf);
+      break;
+    case 32:
+      if (CGEN_OPCODE_INSN_ENDIAN (od) == CGEN_ENDIAN_BIG)
+	bfd_putb32 (value, buf);
+      else
+	bfd_putl32 (value, buf);
+      break;
+    default:
+      abort ();
+    }
+}
+
 /* Look up instruction INSN_VALUE and extract its fields.
    INSN, if non-null, is the insn table entry.
    Otherwise INSN_VALUE is examined to compute it.
    LENGTH is the bit length of INSN_VALUE if known, otherwise 0.
-   0 is only valid if `insn == NULL && ! defined (CGEN_INT_INSN)'.
+   0 is only valid if `insn == NULL && ! CGEN_INT_INSN_P'.
    If INSN != NULL, LENGTH must be valid.
    ALIAS_P is non-zero if alias insns are to be included in the search.
 
@@ -53,46 +118,44 @@ const CGEN_INSN *
 @arch@_cgen_lookup_insn (od, insn, insn_value, length, fields, alias_p)
      CGEN_OPCODE_DESC od;
      const CGEN_INSN *insn;
-     cgen_insn_t insn_value;
+     CGEN_INSN_BYTES insn_value;
      int length;
      CGEN_FIELDS *fields;
      int alias_p;
 {
-  char buf[16];
+  unsigned char buf[16];
+  unsigned char *bufp;
+  unsigned int base_insn;
+#if CGEN_INT_INSN_P
+  CGEN_EXTRACT_INFO *info = NULL;
+#else
+  CGEN_EXTRACT_INFO ex_info;
+  CGEN_EXTRACT_INFO *info = &ex_info;
+#endif
+
+#if ! CGEN_INT_INSN_P
+  ex_info.dis_info = NULL;
+  ex_info.bytes = insn_value;
+  ex_info.valid = -1;
+#endif
 
   if (!insn)
     {
       const CGEN_INSN_LIST *insn_list;
 
-#ifdef CGEN_INT_INSN
-      switch (length)
-	{
-	case 8:
-	  buf[0] = insn_value;
-	  break;
-	case 16:
-	  if (CGEN_OPCODE_ENDIAN (od) == CGEN_ENDIAN_BIG)
-	    bfd_putb16 (insn_value, buf);
-	  else
-	    bfd_putl16 (insn_value, buf);
-	  break;
-	case 32:
-	  if (CGEN_OPCODE_ENDIAN (od) == CGEN_ENDIAN_BIG)
-	    bfd_putb32 (insn_value, buf);
-	  else
-	    bfd_putl32 (insn_value, buf);
-	  break;
-	default:
-	  abort ();
-	}
+#if CGEN_INT_INSN_P
+      cgen_put_insn_value (od, buf, length, insn_value);
+      bufp = buf;
+      base_insn = insn_value; /*???*/
 #else
-      abort (); /* FIXME: unfinished */
+      base_insn = cgen_get_insn_value (od, buf, length);
+      bufp = insn_value;
 #endif
 
       /* The instructions are stored in hash lists.
 	 Pick the first one and keep trying until we find the right one.  */
 
-      insn_list = CGEN_DIS_LOOKUP_INSN (od, buf, insn_value);
+      insn_list = CGEN_DIS_LOOKUP_INSN (od, bufp, base_insn);
       while (insn_list != NULL)
 	{
 	  insn = insn_list->insn;
@@ -106,7 +169,7 @@ const CGEN_INSN *
 	      if ((insn_value & CGEN_INSN_MASK (insn)) == CGEN_INSN_VALUE (insn))
 		{
 		  /* ??? 0 is passed for `pc' */
-		  int elength = (*CGEN_EXTRACT_FN (insn)) (od, insn, NULL,
+		  int elength = (*CGEN_EXTRACT_FN (insn)) (od, insn, info,
 							   insn_value, fields,
 							   (bfd_vma) 0);
 		  if (elength > 0)
@@ -133,7 +196,7 @@ const CGEN_INSN *
 	abort ();
 
       /* ??? 0 is passed for `pc' */
-      length = (*CGEN_EXTRACT_FN (insn)) (od, insn, NULL, insn_value, fields,
+      length = (*CGEN_EXTRACT_FN (insn)) (od, insn, info, insn_value, fields,
 					  (bfd_vma) 0);
       /* Sanity check: must succeed.
 	 Could relax this later if it ever proves useful.  */
@@ -185,7 +248,7 @@ const CGEN_INSN *
 @arch@_cgen_lookup_get_insn_operands (od, insn, insn_value, length, indices)
      CGEN_OPCODE_DESC od;
      const CGEN_INSN *insn;
-     cgen_insn_t insn_value;
+     CGEN_INSN_BYTES insn_value;
      int length;
      int *indices;
 {
