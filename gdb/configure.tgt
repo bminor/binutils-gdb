@@ -258,8 +258,7 @@ sparc-*-coff*)		gdb_target=sparc-em ;;
 sparc-*-elf*)		gdb_target=sparc-em ;;
 sparc-*-linux*)		gdb_target=linux ;;
 sparc-*-lynxos*)	gdb_target=sparclynx ;;
-sparc-*-netbsd* | sparc-*-openbsd*)
-			gdb_target=nbsd ;;
+sparc-*-netbsd*)	gdb_target=nbsd ;;
 sparc-*-solaris2*)	gdb_target=sun4sol2 ;;
 sparc-*-sunos4*)	gdb_target=sun4os4 ;;
 sparc-*-sunos5*)	gdb_target=sun4sol2 ;;

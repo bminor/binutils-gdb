@@ -1,5 +1,10 @@
 2002-05-12  Mark Kettenis  <kettenis@gnu.org>
 
+	* configure.tgt (sparc-*openbsd): Remove entry accidentially
+	checked in with last change.
+
+2002-05-12  Mark Kettenis  <kettenis@gnu.org>
+
 	* configure.tgt (i[3456]86-*-unixware*, i[3456]86-*-unixware2*):
 	Remove targets.  These are canonicalized to i386-*-sysv4.2uw by
 	config.sub.
