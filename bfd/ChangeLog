@@ -1,3 +1,9 @@
+1999-05-30  Philip Blundell  <philb@gnu.org>
+
+	* elf32-arm.h (elf32_arm_relocate_section): Reinstate change of
+	1993-03-25 (!!).  Take into account the bitmasks for the reloc so
+	the addend does not overflow into the rest of the word.
+
 1999-05-29  Nick Clifton  <nickc@cygnus.com>
 
 	* bfd-in.h: Amend prototype for
