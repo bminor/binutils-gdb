@@ -1,3 +1,8 @@
+2000-10-03  DJ Delorie  <dj@redhat.com>
+
+	* pe-dll.c (fill_edata): initialize entire block
+	(make_one): fill in correct section.
+
 2000-10-03  Kazu Hirata  <kazu@hxi.com>
 
 	* ldexp.c: Fix formatting.

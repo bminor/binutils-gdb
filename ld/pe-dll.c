@@ -676,7 +676,7 @@ fill_edata (abfd, info)
 
 #define ERVA(ptr) (((unsigned char *)(ptr) - edata_d) + edata_s->output_section->vma - image_base)
 
-  memset (edata_d, 0, 40);
+  memset (edata_d, 0, edata_sz);
   bfd_put_32 (abfd, now, edata_d + 4);
   if (pe_def_file->version_major != -1)
     {
@@ -1503,9 +1503,9 @@ make_one (exp, parent)
   memset (d4, 0, 4);
   if (exp->flag_noname)
     {
-      d5[0] = exp->ordinal;
-      d5[1] = exp->ordinal >> 8;
-      d5[3] = 0x80;
+      d4[0] = exp->ordinal;
+      d4[1] = exp->ordinal >> 8;
+      d4[3] = 0x80;
     }
   else
     {
