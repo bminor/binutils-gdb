@@ -1,3 +1,9 @@
+2000-11-21  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
+
+	* target.h (TARGET_SIGNAL_REALTIME_64):  Added for IRIX 6.
+	* target.c (target_signal_from_host, do_target_signal_to_host):
+	Handle TARGET_SIGNAL_REALTIME_64.
+
 2000-11-21  Kevin Buettner  <kevinb@redhat.com>
 
 	* solib.c (solib_open): Handle the case where

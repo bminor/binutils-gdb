@@ -1422,6 +1422,7 @@ static struct {
   {"SIG63", "Real-time event 63"},
   {"SIGCANCEL", "LWP internal signal"},
   {"SIG32", "Real-time event 32"},
+  {"SIG64", "Real-time event 64"},
 
 #if defined(MACH) || defined(__MACH__)
   /* Mach exceptions */
@@ -1736,6 +1737,8 @@ target_signal_from_host (int hostsig)
       if (33 <= hostsig && hostsig <= 63)
 	return (enum target_signal)
 	  (hostsig - 33 + (int) TARGET_SIGNAL_REALTIME_33);
+      else if (hostsig == 64)
+	return TARGET_SIGNAL_REALTIME_64;
       else
 	error ("GDB bug: target.c (target_signal_from_host): unrecognized real-time signal");
     }
@@ -2007,6 +2010,8 @@ do_target_signal_to_host (enum target_signal oursig,
 	  if (retsig >= SIGRTMIN && retsig <= SIGRTMAX)
 	    return retsig;
 	}
+      else if (oursig == TARGET_SIGNAL_REALTIME_64)
+	return 64;
 #endif
       *oursig_ok = 0;
       return 0;

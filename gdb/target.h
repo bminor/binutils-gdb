@@ -240,6 +240,8 @@ enum target_signal
        of the protocol.  Note that in some GDB's TARGET_SIGNAL_REALTIME_32
        is number 76.  */
     TARGET_SIGNAL_REALTIME_32,
+    /* Yet another pain, IRIX 6 has SIG64.  */
+    TARGET_SIGNAL_REALTIME_64,
 
 #if defined(MACH) || defined(__MACH__)
     /* Mach exceptions */
