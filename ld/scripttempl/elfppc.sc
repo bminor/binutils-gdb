@@ -100,36 +100,20 @@ SECTIONS
   .data1 ${RELOCATING-0} : { *(.data1) }
   ${RELOCATING+${OTHER_READWRITE_SECTIONS}}
 
-  ${RELOCATING+_GOT1_START_ = .;}
   .got1 ${RELOCATING-0} :  { *(.got1) }
-  ${RELOCATING+_GOT1_END_ = .;}
-
   .dynamic     ${RELOCATING-0} : { *(.dynamic) }
 
   /* Put .ctors and .dtors next to the .got2 section, so that the pointers
      get relocated with -mrelocatable. Also put in the .fixup pointers.  */
 
-  ${RELOCATING+_GOT2_START_ = .;}
   .got2  ${RELOCATING-0} :  { *(.got2) }
-
-  ${RELOCATING+__CTOR_LIST__ = .;}
   .ctors ${RELOCATING-0} : { *(.ctors) }
-  ${RELOCATING+__CTOR_END__ = .;}
-
-  ${RELOCATING+__DTOR_LIST__ = .;}
   .dtors ${RELOCATING-0} : { *(.dtors) }
-  ${RELOCATING+__DTOR_END__ = .;}
-
-  ${RELOCATING+_FIXUP_START_ = .;}
   .fixup ${RELOCATING-0} : { *(.fixup) }
-  ${RELOCATING+_FIXUP_END_ = .;}
-  ${RELOCATING+_GOT2_END_ = .;}
 
-  ${RELOCATING+_GOT_START_ = .;}
-  ${RELOCATING+_GLOBAL_OFFSET_TABLE_ = . + 32768;}
-  ${RELOCATING+_SDA_BASE_ = . + 32768;}
-  .got         ${RELOCATING-0} : { *(.got.plt) *(.got) }
+  .got         ${RELOCATING-0} : { *(.got) *(.got.plt) }
   ${DATA_PLT+${PLT}}
+
   /* We want the small data sections together, so single-instruction offsets
      can access them all, and initialized data all before uninitialized, so
      we can shorten the on-disk segment size.  */

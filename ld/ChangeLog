@@ -1,3 +1,9 @@
+Fri Jan  5 12:25:47 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* scripttempl/elfppc.sc: Remove support for creating special
+	labels for eabi section begin/end here.  The compiler now uses
+	crt{i,n}.o to create these symbols.
+
 Thu Jan  4 17:08:58 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.host: Change existing Linux HOSTING_CRT0 to be used
