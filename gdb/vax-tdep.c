@@ -23,6 +23,7 @@
 #include "symtab.h"
 #include "opcode/vax.h"
 #include "gdbcore.h"
+#include "regcache.h"
 #include "frame.h"
 #include "value.h"
 
@@ -234,6 +235,24 @@ vax_pop_frame (void)
   write_register (SP_REGNUM, fp);
   flush_cached_frames ();
 }
+
+/* The VAX call dummy sequence:
+
+	calls #69, @#32323232
+	bpt
+
+   It is 8 bytes long.  The address and argc are patched by
+   vax_fix_call_dummy().  */
+LONGEST vax_call_dummy_words[] = { 0x329f69fb, 0x03323232 };
+int sizeof_vax_call_dummy_words = sizeof(vax_call_dummy_words);
+
+void
+vax_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
+                    struct value **args, struct type *type, int gcc_p)
+{
+  dummy[1] = nargs;
+  store_unsigned_integer (dummy + 3, 4, fun);
+}
 
 void
 vax_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
@@ -288,7 +307,12 @@ vax_skip_prologue (CORE_ADDR pc)
   return pc;
 }
 
-
+CORE_ADDR
+vax_saved_pc_after_call (struct frame_info *frame)
+{
+  return (FRAME_SAVED_PC(frame));
+}
+
 /* Print the vax instruction at address MEMADDR in debugged memory,
    from disassembler info INFO.
    Returns length of the instruction, in bytes.  */

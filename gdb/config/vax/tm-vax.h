@@ -19,25 +19,16 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#include "regcache.h"
-
 /* Offset from address of function to start of its code.
    Zero on most machines.  */
 
 #define FUNCTION_START_OFFSET 2
 
-/* Advance PC across any function entry prologue instructions
-   to reach some "real" code.  */
-
 extern CORE_ADDR vax_skip_prologue (CORE_ADDR);
 #define SKIP_PROLOGUE(pc) (vax_skip_prologue (pc))
 
-/* Immediately after a function call, return the saved pc.
-   Can't always go through the frames for this because on some machines
-   the new frame is not set up until the new function executes
-   some instructions.  */
-
-#define SAVED_PC_AFTER_CALL(frame) FRAME_SAVED_PC(frame)
+#define SAVED_PC_AFTER_CALL(frame) vax_saved_pc_after_call ((frame))
+extern CORE_ADDR vax_saved_pc_after_call (struct frame_info *);
 
 #define TARGET_UPAGES 14
 #define TARGET_NBPG 512
@@ -177,23 +168,22 @@ extern void vax_push_dummy_frame (void);
 #define POP_FRAME vax_pop_frame()
 extern void vax_pop_frame (void);
 
-/* This sequence of words is the instructions
-   calls #69, @#32323232
-   bpt
-   Note this is 8 bytes.  */
+#define CALL_DUMMY_WORDS vax_call_dummy_words
+extern LONGEST vax_call_dummy_words[];
 
-#define CALL_DUMMY {0x329f69fb, 0x03323232}
+#define SIZEOF_CALL_DUMMY_WORDS sizeof_vax_call_dummy_words
+extern int sizeof_vax_call_dummy_words;
 
-#define CALL_DUMMY_START_OFFSET 0	/* Start execution at beginning of dummy */
+struct value;
+#define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, args, type, gcc_p) \
+  vax_fix_call_dummy ((dummyname), (pc), (fun), (nargs), (args), (type), \
+		      (gcc_p))
+extern void vax_fix_call_dummy (char *, CORE_ADDR, CORE_ADDR, int,
+                                struct value **, struct type *, int);
+
+#define CALL_DUMMY_START_OFFSET 0 /* Start execution at beginning of dummy */
 
 #define CALL_DUMMY_BREAKPOINT_OFFSET 7
-
-/* Insert the specified number of args and function address
-   into a call sequence of the above form stored at DUMMYNAME.  */
-
-#define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, args, type, gcc_p)   \
-{ *((char *) dummyname + 1) = nargs;		\
-  *(int *)((char *) dummyname + 3) = fun; }
 
 /* If vax pcc says CHAR or SHORT, it provides the correct address.  */
 

@@ -1,3 +1,17 @@
+2002-04-22  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* vax-tdep.c: Include regcache.h.
+	(vax_call_dummy_words): New.
+	(sizeof_vax_call_dummy_words): New.
+	(vax_fix_call_dummy): New function.
+	(vax_saved_pc_after_call): Ditto.
+	* config/vax/tm-vax.h: Don't include regcache.h.
+	(SAVED_PC_AFTER_CALL): Use vax_saved_pc_after_call.
+	(CALL_DUMMY): Remove.
+	(CALL_DUMMY_WORDS): Define.
+	(SIZEOF_CALL_DUMMY_WORDS): Define.
+	(FIX_CALL_DUMMY): Use vax_fix_call_dummy.
+
 2002-04-18  Michael Snyder  <msnyder@redhat.com>
 
 	* arm-tdep.h: Change regnum defines to enums for ease of debugging.
