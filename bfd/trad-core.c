@@ -147,7 +147,7 @@ trad_unix_core_file_p (abfd)
   /* Allocate both the upage and the struct core_data at once, so
      a single free() will free them both.  */
   rawptr = (struct trad_core_struct *)
-		bfd_zalloc (abfd, sizeof (struct trad_core_struct));
+		bfd_zmalloc (abfd, sizeof (struct trad_core_struct));
   if (rawptr == NULL) {
     bfd_set_error (bfd_error_no_memory);
     return 0;

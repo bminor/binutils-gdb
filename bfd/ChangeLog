@@ -1,3 +1,15 @@
+Fri Mar 18 19:12:47 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* trad-core.c (trad_unix_core_file_p): Call bfd_zmalloc not
+	bfd_zalloc for rawptr, because later on we may call free, not
+	bfd_release, on it.
+
+	* bfd.c (struct _bfd): Add cisco_core_struct to tdata union.
+	* libbfd.c (bfd_read, bfd_seek): Add comments regarding errors.
+	* cisco-core.c: New file.
+	* Makfile.in: Change accordingly.
+	* bfd-in2.h: Rebuilt.
+
 Fri Mar 18 18:13:49 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* som.h (struct som_exec_data): New structure to hold exec
