@@ -1,5 +1,6 @@
 2005-01-13  Michael Snyder  <msnyder@redhat.com>
 
+	* main.c: Whitespace tweaks.
 	* interps.c: Whitespace tweaks.
 	* infrun.c: Whitespace tweaks.
 	* infcmd.c: Whitespace tweaks.
