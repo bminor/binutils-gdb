@@ -1,5 +1,7 @@
 2003-10-11  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-tdep.h (struct regset): Declare opaque.
+
 	* gdbarch.sh (regset_from_core_section): New method.
 	(struct regset): Declare opaque.
 	* gdbarch.c, gdbarch.h: Regenerated.
