@@ -1,5 +1,10 @@
 2002-05-23  H.J. Lu <hjl@gnu.org>
 
+	* gas/mips/elf-rel.d: Skip the padding.
+	* gas/mips/elfel-rel.d: Likewise.
+
+2002-05-23  H.J. Lu <hjl@gnu.org>
+
 	* gas/all/align2.d: New.
 	* gas/all/align2.s: New.
 
