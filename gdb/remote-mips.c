@@ -2307,7 +2307,7 @@ common_breakpoint (cmd, addr, mask, flags)
 
   if (rerrflg != 0)
     {
-      if (rresponse != EINVAL)
+      if (rresponse != 22) /* invalid argument */
 	fprintf_unfiltered (stderr, "common_breakpoint (0x%x):  Got error: 0x%x\n",
 			    addr, rresponse);
       return 1;

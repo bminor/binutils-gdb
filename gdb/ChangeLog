@@ -1,3 +1,10 @@
+Tue May 28 16:15:47 1996  Geoffrey Noer  <noer@cygnus.com>
+
+	* remote-mips.c: cannot use EINVAL for breakpoint test since
+	its value varies for different hosts (e.g. go32's is 19, while
+	sunos is 22).  Changed to hardcoded 22 since that is what the
+	mips boards return.
+
 Tue May 28 11:14:58 1996  Tom Tromey  <tromey@creche.cygnus.com>
 
 	* configure: Regenerated.
