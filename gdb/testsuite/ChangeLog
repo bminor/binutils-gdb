@@ -1,3 +1,7 @@
+2004-01-18  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/local.exp: Accept correct output for gcc v3 -gstabs+.
+
 2004-01-18  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.base/fileio.exp: Add "$gdb_prompt $" anchors to patterns

@@ -25,6 +25,9 @@
 
 # This file is part of the gdb testsuite
 
+set ws "\[\r\n\t \]+"
+set nl "\[\r\n\]+"
+
 if $tracelevel then {
         strace $tracelevel
         }
@@ -220,30 +223,28 @@ gdb_expect {
   timeout             { fail "(timeout) ptype NestedInnerLocal" }
 }
 
-# gdb incorrectly interprets the NestedInnerLocal in
-# InnerLocal::NestedInnerLocal as field name instead of a type name;
-# See CLLbs14784.
+set re_class		"((struct|class) InnerLocal::NestedInnerLocal \{${ws}public:|struct InnerLocal::NestedInnerLocal \{)"
+set re_fields		"int nil;"
+set re_methods		"int nil_foo\\(int\\);"
+set re_synth_gcc_23	"InnerLocal::NestedInnerLocal & operator=\\(InnerLocal::NestedInnerLocal const ?&\\);${ws}NestedInnerLocal\\(InnerLocal::NestedInnerLocal const ?&\\);${ws}NestedInnerLocal\\(\\);"
 
-#---
-# Pattern 3:
-# FAIL
-# The comment above, about CLLbs14784, is still correct.
-#   dwarf-2
-#     gcc 2.95.3, 2.96-rh, 3.0.4, gcc-3_1-branch, HEAD
-#   stabs+
-#     gcc 2.95.3, 2.96-rh, 3.0.4, gcc-3_1-branch, HEAD
-#
-# chastain 2002-04-08
-
-send_gdb "ptype InnerLocal::NestedInnerLocal\n"
-gdb_expect {
-  -re "type = class InnerLocal::NestedInnerLocal \{\[\r\n\t \]*public:\[\r\n\t \]*int nil;\[\r\n\t \]*int nil_foo\\(int\\);\[\r\n\t \]*\}.*$gdb_prompt $" { pass "ptype InnerLocal::NestedInnerLocal" }
-  -re "type = class InnerLocal::NestedInnerLocal \{\[\r\n\t \]*public:\[\r\n\t \]*int nil;\[\r\n\t \]*NestedInnerLocal *& *operator *= *\\((main${sep}::|)InnerLocal::NestedInnerLocal const *&\\);\[\r\n\t \]*NestedInnerLocal\\((main${sep}::|)InnerLocal::NestedInnerLocal const *&\\);\[\r\n\t \]*NestedInnerLocal\\((void|)\\);\[\r\n\t \]*int nil_foo\\(int\\);\[\r\n\t \]*\}.*$gdb_prompt $" { pass "ptype InnerLocal::NestedInnerLocal" }
-  -re "There is no field named NestedInnerLocal.*$gdb_prompt $" {
-    setup_kfail "gdb/482" *-*-*
-    fail "ptype InnerLocal::NestedInnerLocal"
-  }
-  -re "No symbol .*NestedInnerLocal.* in current context.*$gdb_prompt $" { fail "ptype InnerLocal::NestedInnerLocal (bogus symbol lookup)" }
-  -re ".*$gdb_prompt $"   {  fail "ptype InnerLocal::NestedInnerLocal" }
-  timeout             { fail "(timeout) ptype InnerLocal::NestedInnerLocal" }
+set name "ptype InnerLocal::NestedInnerLocal"
+gdb_test_multiple "ptype InnerLocal::NestedInnerLocal" $name {
+    -re "type = $re_class${ws}$re_fields${ws}$re_methods$nl\}$nl$gdb_prompt $" {
+	# gcc -gdwarf-2 should produce this but does not yet
+	pass $name
+    }
+    -re "type = $re_class${ws}$re_fields${ws}$re_synth_gcc_23${ws}$re_methods${ws}$nl\}$nl$gdb_prompt $" {
+	# gcc 2.95.3 -gstabs+
+	# gcc v3 -gstabs+, abi 1
+	pass $name
+    }
+    -re "type = $re_class${ws}$re_fields${ws}$re_methods${ws}$re_synth_gcc_23${ws}$nl\}$nl$gdb_prompt $" {
+	# gcc v3 -gstabs+, abi 2
+	pass $name
+    }
+    -re "There is no field named NestedInnerLocal.*$gdb_prompt $" {
+	# gcc v3 -gdwarf-2
+	kfail "gdb/482" $name
+    }
 }
