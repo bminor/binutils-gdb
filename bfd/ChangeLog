@@ -1,7 +1,9 @@
-Tue Sep 15 08:34:40 CDT 1998  Catherine Moore  <clm@cygnus.com>
+Tue Sep 15 12:40:05 1998  Catherine Moore  <clm@cygnus.com>
 
-       * bfd-in.h: Add argument to elf_backend_get_symbol_type.
-       * bfd-in2.h: Rebuild.
+       * elf-bfd.h:  Add argument to elf_backend_get_symbol_type.
+
+Tue Sep 15 08:34:40 1998  Catherine Moore  <clm@cygnus.com>
+
        * elf.c (swap_out_syms):  Pass type to elf_backend_get_symbol_type.
        * elf32-arm.c:  Add HOWTO entries for R_ARM_GNU_VTINHERIT and
        R_ARM_GNU_VTENTRY.
