@@ -1,5 +1,10 @@
 2003-03-22  Richard Earnshaw  <rearnsha@arm.com>
 
+	* Makefile.in (elf_reloc_macros_h, elf_arm_h): Define.
+	(arm-tdep.o): Depend on elf_arm_h.
+
+2003-03-22  Richard Earnshaw  <rearnsha@arm.com>
+
 	* Makefile.in (coff_internal_h): Define.
 	(arm-tdep.o): Update dependencies.
 
