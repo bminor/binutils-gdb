@@ -16,7 +16,6 @@
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
-#include "getopt.h"
 #include "libiberty.h"
 #include "gprof.h"
 #include "search_list.h"
@@ -32,6 +31,7 @@
 #include "hist.h"
 #include "sym_ids.h"
 #include "demangle.h"
+#include "getopt.h"
 
 static void usage PARAMS ((FILE *, int)) ATTRIBUTE_NORETURN;
 int main PARAMS ((int, char **));
