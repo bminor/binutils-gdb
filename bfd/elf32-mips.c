@@ -3510,7 +3510,7 @@ _bfd_mips_elf_modify_segment_map (abfd)
 	if ((*pm)->p_type == PT_DYNAMIC)
 	  break;
       m = *pm;
-      if (IRIX_COMPAT (abfd) == ict_none)
+      if (m != NULL && IRIX_COMPAT (abfd) == ict_none)
 	{
 	  /* For a normal mips executable the permissions for the PT_DYNAMIC
 	     segment are read, write and execute. We do that here since

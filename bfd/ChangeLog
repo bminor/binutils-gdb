@@ -1,3 +1,8 @@
+2001-10-23  H.J. Lu <hjl@gnu.org>
+
+	* elf32-mips.c (_bfd_mips_elf_modify_segment_map): Check
+	m != NULL before accessing it.
+
 2001-10-23  Alan Modra  <amodra@bigpond.net.au>
 
 	* elflink.h (elf_link_input_bfd): Zero the reloc instead of doing
