@@ -826,3 +826,8 @@ build_vers_lib "vers20" vers20.c vers20 "vers20a.so vers20b.so" vers20.map vers2
 
 # Test .symver override.
 build_vers_lib "vers21" vers21.c vers21 "" vers21.map vers21.ver vers21.dsym vers21.sym
+
+# Test moving default definition from one DSO to another.
+build_vers_lib "vers22a" vers22a.c vers22a "" vers22.map vers22a.ver vers22a.dsym vers22a.sym
+build_vers_lib "vers22b" vers22b.c vers22b "" vers22.map vers22b.ver vers22b.dsym ""
+build_vers_lib "vers22" vers22.c vers22 "vers22a.so vers22b.so" "" vers22.ver vers22.dsym ""

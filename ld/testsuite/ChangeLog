@@ -1,3 +1,19 @@
+2002-08-08  H.J. Lu <hjl@gnu.org>
+
+	* ld-elfvers/vers.exp: Add vers22.
+
+	* ld-elfvers/vers22.c: New.
+	* ld-elfvers/vers22.dsym: New.
+	* ld-elfvers/vers22.map: New.
+	* ld-elfvers/vers22.ver: New.
+	* ld-elfvers/vers22a.c: New.
+	* ld-elfvers/vers22a.dsym: New.
+	* ld-elfvers/vers22a.sym: New.
+	* ld-elfvers/vers22a.ver: New.
+	* ld-elfvers/vers22b.c: New.
+	* ld-elfvers/vers22b.dsym: New.
+	* ld-elfvers/vers22b.ver: New.
+
 2002-08-07  H.J. Lu <hjl@gnu.org>
 
 	* ld-elfvers/vers.exp: Add --no-undefined-version.
