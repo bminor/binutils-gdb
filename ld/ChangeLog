@@ -1,3 +1,15 @@
+1999-05-12  Anthony Green  <green@cygnus.com>
+
+	* ldlang.c (walk_wild, walk_wild_file, walk_wild_section,
+	output_section_callback, gc_section_callback): New functions for
+	generic section walks.
+	(wild, lang_gc_wild): Use walk_wild.
+	(wild_file, lang_gc_wild_file): Deleted. Common logic moved to
+	walk_wild_file.
+	(wild_section, lang_gc_wild_section): Deleted. Common logic moved
+	to walk_fild_section.  Unique logic moved into callbacks
+	output_section_callback and gc_section_callback.
+
 1999-04-26  Tom Tromey  <tromey@cygnus.com>
 
 	* aclocal.m4, configure: Updated for new version of libtool.
