@@ -1,5 +1,8 @@
 Tue May 18 14:08:50 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* main.c (quit_command): In the "quit anyway?" message, tell the user
+	whether we are planning to detach or kill the program.
+
 	* config/vax/vaxbsd.mh: Add "NAT_FILE= nm-vax.h".
 	* config/vax/xm-vaxbsd.h: Use <sys/param.h> not <machine/limits.h>
 
