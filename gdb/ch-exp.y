@@ -291,8 +291,6 @@ yyerror PARAMS ((char *));
 %type <voidval>		value_receive_name
 %type <voidval>		expression_list
 %type <tval>		mode_argument
-%type <voidval>		upper_lower_argument
-%type <voidval>		length_argument
 %type <voidval>		array_mode_name
 %type <voidval>		string_mode_name
 %type <voidval>		variant_structure_mode_name
@@ -940,18 +938,16 @@ chill_value_built_in_routine_call :
 			  write_exp_elt_type (builtin_type_int);
 			  write_exp_elt_longcst ((LONGEST) TYPE_LENGTH ($3));
 			  write_exp_elt_opcode (OP_LONG); }
-		|	UPPER '(' upper_lower_argument ')'
-			{
-			  $$ = 0;	/* FIXME */
-			}
-		|	LOWER '(' upper_lower_argument ')'
-			{
-			  $$ = 0;	/* FIXME */
-			}
-		|	LENGTH '(' length_argument ')'
-			{
-			  $$ = 0;	/* FIXME */
-			}
+		|	LOWER '(' mode_argument ')'
+			{ write_lower_upper_value (UNOP_LOWER, $3); }
+		|	UPPER '(' mode_argument ')'
+			{ write_lower_upper_value (UNOP_UPPER, $3); }
+		|	LOWER '(' expression ')'
+			{ write_exp_elt_opcode (UNOP_LOWER); }
+		|	UPPER '(' expression ')'
+			{ write_exp_elt_opcode (UNOP_UPPER); }
+		|	LENGTH '(' expression ')'
+			{ write_exp_elt_opcode (UNOP_LENGTH); }
 		;
 
 mode_argument :		mode_name
@@ -973,22 +969,6 @@ mode_argument :		mode_name
 		;
 
 mode_name :		TYPENAME
-		;
-
-upper_lower_argument :	expression
-			{
-			  $$ = 0;	/* FIXME */
-			}
-		|	mode_name
-			{
-			  $$ = 0;	/* FIXME */
-			}
-		;
-
-length_argument :	expression
-			{
-			  $$ = 0;	/* FIXME */
-			}
 		;
 
 /* Things which still need productions... */
@@ -2016,6 +1996,20 @@ yylex ()
       }
 
     return (ILLEGAL_TOKEN);
+}
+
+void
+write_lower_upper_value (opcode, type)
+     enum exp_opcode opcode;  /* Either UNOP_LOWER or UNOP_UPPER */
+     struct type *type;
+{
+  extern LONGEST type_lower_upper ();
+  struct type *result_type;
+  LONGEST val = type_lower_upper (opcode, type, &result_type);
+  write_exp_elt_opcode (OP_LONG);
+  write_exp_elt_type (result_type);
+  write_exp_elt_longcst (val);
+  write_exp_elt_opcode (OP_LONG);
 }
 
 void

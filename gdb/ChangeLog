@@ -1,3 +1,21 @@
+Tue Jun 13 21:40:11 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* parser-defs.h (enum precedence):  Added PREC_BUILTIN_FUNCTION.
+	* expression.h (enum exp_opcode):  Added UNOP_LOWER, UNOP_UPPER,
+	UNUP_LENGTH.
+	* expprint.c (dump_expression):  Handle the new exp_opcodes.
+	(print_subexp):  Handle PREC_BUILTIN_FUNCTION.
+	(print_simple_m2_func):  Removed.
+	(print_subexp):  Remove support for Modula2 builtin functions.
+	* m2-lang.c (m2_op_print_tab):  Add support for builtin functions.
+	* ch-exp.y:  Parse LOWER, UPPER, and LENGTH builtins.
+	(write_lower_upper_value):  Convenience function for LOWER and UPPER.
+	(upper_lower_argument, length_argument):  Removed non-terminals.
+	* ch-lang.c (chill_op_print_tab):  Entries for UPPER, LOWER, LENGTH.
+	(type_lower_upper):  New function.  Calculate LOWER/UPPER of type.
+	(value_chill_length):  New function.  Calcalate LENGTH of ARRAY/STRING.
+	(evaluate_subexp_chill):  Handle UNOP_LOWER, UNOP_UPPER, UNOP_LENGTH.
+
 Mon Jun 12 12:48:13 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	Windows support bits from Steve Chamberlain <sac@slash.cygnus.com>.

@@ -253,6 +253,10 @@ static const struct op_print chill_op_print_tab[] = {
     {"NOT", UNOP_LOGICAL_NOT, PREC_PREFIX, 0},
     {"MOD", BINOP_MOD, PREC_MUL, 0},
     {"REM", BINOP_REM, PREC_MUL, 0},
+    {"SIZE",UNOP_SIZEOF, PREC_BUILTIN_FUNCTION, 0},
+    {"LOWER",UNOP_LOWER, PREC_BUILTIN_FUNCTION, 0},
+    {"UPPER",UNOP_UPPER, PREC_BUILTIN_FUNCTION, 0},
+    {"LOWER",UNOP_UPPER, PREC_BUILTIN_FUNCTION, 0},
     {":=",  BINOP_ASSIGN, PREC_ASSIGN, 1},
     {"=",   BINOP_EQUAL, PREC_EQUAL, 0},
     {"/=",  BINOP_NOTEQUAL, PREC_EQUAL, 0},
@@ -289,6 +293,87 @@ struct type ** const (chill_builtin_types[]) =
   0
 };
 
+/* Calculate LOWER or UPPER of TYPE.
+   Returns the result as an integer.
+   *RESULT_TYPE is the appropriate type for the result. */
+
+LONGEST
+type_lower_upper (op, type, result_type)
+     enum exp_opcode op;  /* Either UNOP_LOWER or UNOP_UPPER */
+     struct type *type;
+     struct type **result_type;
+{
+  LONGEST tmp;
+  *result_type = builtin_type_int;
+ retry:
+  switch (TYPE_CODE (type))
+    {
+    case TYPE_CODE_STRUCT:
+      if (chill_varying_type (type))
+	return type_lower_upper (op, TYPE_FIELD_TYPE (type, 1), result_type);
+      break;
+    case TYPE_CODE_ARRAY:
+    case TYPE_CODE_BITSTRING:
+    case TYPE_CODE_STRING:
+      type = TYPE_FIELD_TYPE (type, 0);  /* Get index type */
+
+      /* ... fall through ... */
+    case TYPE_CODE_RANGE:
+      if (TYPE_DUMMY_RANGE (type) > 0)
+	return type_lower_upper (op, TYPE_TARGET_TYPE (type), result_type);
+      *result_type = TYPE_TARGET_TYPE (type);
+      return op == UNOP_LOWER ? TYPE_LOW_BOUND (type) : TYPE_HIGH_BOUND (type);
+
+    case TYPE_CODE_ENUM:
+      *result_type = type;
+      if (TYPE_NFIELDS (type) > 0)
+	return TYPE_FIELD_BITPOS (type,
+				  op == UNOP_LOWER ? 0
+				  : TYPE_NFIELDS (type) - 1);
+
+    case TYPE_CODE_BOOL:
+      *result_type = type;
+      return op == UNOP_LOWER ? 0 : 1;
+    case TYPE_CODE_INT:
+    case TYPE_CODE_CHAR:
+      *result_type = type;
+      tmp = (LONGEST) 1 << (TARGET_CHAR_BIT * TYPE_LENGTH (type));
+      if (TYPE_UNSIGNED (type))
+	return op == UNOP_LOWER ? 0 : tmp - (LONGEST) 1;
+      tmp = tmp >> 1;
+      return op == UNOP_LOWER ? -tmp : (tmp - 1);
+    }
+  error ("unknown mode for LOWER/UPPER builtin");
+}
+
+static value_ptr
+value_chill_length (val)
+     value_ptr val;
+{
+  LONGEST tmp;
+  struct type *type = VALUE_TYPE (val);
+  struct type *ttype;
+  switch (TYPE_CODE (type))
+    {
+    case TYPE_CODE_ARRAY:
+    case TYPE_CODE_BITSTRING:
+    case TYPE_CODE_STRING:
+      tmp = type_lower_upper (UNOP_UPPER, type, &ttype)
+	- type_lower_upper (UNOP_LOWER, type, &ttype) + 1;
+      break;
+    case TYPE_CODE_STRUCT:
+      if (chill_varying_type (type))
+	{
+	  tmp = unpack_long (TYPE_FIELD_TYPE (type, 0), VALUE_CONTENTS (val));
+	  break;
+	}
+      /* ... else fall through ... */
+    default:
+      error ("bad argument to LENGTH builtin");
+    }
+  return value_from_longest (builtin_type_int, tmp);
+}
+
 static value_ptr
 evaluate_subexp_chill (expect_type, exp, pos, noside)
      struct type *expect_type;
@@ -297,10 +382,12 @@ evaluate_subexp_chill (expect_type, exp, pos, noside)
      enum noside noside;
 {
   int pc = *pos;
+  struct type *type;
   int tem, nargs;
   value_ptr arg1;
   value_ptr *argvec;
-  switch (exp->elts[*pos].opcode)
+  enum exp_opcode op = exp->elts[*pos].opcode;
+  switch (op)
     {
     case MULTI_SUBSCRIPT:
       if (noside == EVAL_SKIP || noside == EVAL_AVOID_SIDE_EFFECTS)
@@ -334,11 +421,32 @@ evaluate_subexp_chill (expect_type, exp, pos, noside)
 	  arg1 = value_subscript (arg1, index);
 	}
       return (arg1);
+
+    case UNOP_LOWER:
+    case UNOP_UPPER:
+      (*pos)++;
+      if (noside == EVAL_SKIP)
+	{
+	  (*exp->language_defn->evaluate_exp) (NULL_TYPE, exp, pos, EVAL_SKIP);
+	  goto nosideret;
+	}
+      arg1 = (*exp->language_defn->evaluate_exp) (NULL_TYPE, exp, pos,
+						  EVAL_AVOID_SIDE_EFFECTS);
+      tem = type_lower_upper (op, VALUE_TYPE (arg1), &type);
+      return value_from_longest (type, tem);
+
+    case UNOP_LENGTH:
+      (*pos)++;
+      arg1 = (*exp->language_defn->evaluate_exp) (NULL_TYPE, exp, pos, noside);
+      return value_chill_length (arg1);
+
     default:
       break;
     }
 
   return evaluate_subexp_standard (expect_type, exp, pos, noside);
+ nosideret:
+  return value_from_longest (builtin_type_long, (LONGEST) 1);
 }
 
 const struct language_defn chill_language_defn = {
