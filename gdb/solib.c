@@ -1091,6 +1091,7 @@ current_sos ()
     {
       struct so_list *new
 	= (struct so_list *) xmalloc (sizeof (struct so_list));
+      struct cleanup *old_chain = make_cleanup (free, new);
       memset (new, 0, sizeof (*new));
 
       new->lmaddr = lm;
@@ -1104,9 +1105,7 @@ current_sos ()
          does have a name, so we can no longer use a missing name to
          decide when to ignore it. */
       if (IGNORE_FIRST_LINK_MAP_ENTRY (new))
-	{
-	  free_so (new);
-	}
+	free_so (new);
       else
 	{
 	  int errcode;
@@ -1140,6 +1139,8 @@ current_sos ()
 	      link_ptr = &new->next;
 	    }
 	}
+
+      discard_cleanups (old_chain);
     }
 
   return head;
