@@ -28,6 +28,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "value.h"
 #include "frame.h"
 #include "ieee-float.h"
+#include "target.h"
 
 /* Structure of i960 extended floating point format.  */
 
