@@ -1,3 +1,43 @@
+Tue Jul 26 18:21:24 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* config/obj-coff.h: Moved common includes and TARGET_FORMAT
+	definitions together.
+	(WORKING_DOT_WORD, WARN_SIGNED_OVERFLOW_WORD,
+	OBJ_COFF_OMIT_OPTIONAL_HEADER, BFD_HEADERS, BFD) [!BFD_ASSEMBLER]:
+	Moved these definitions to the start of the file, before the
+	includes.
+	(SYMBOLS_NEED_BACKPOINTERS, OBJ_COFF_MAX_AUXENTRIES): Always
+	define these.
+	(S_GET_ZEROES): Deleted.
+	(S_SET_ZEROES): Moved to obj-coff.c.
+
+	* config/obj-coff.c (obj_coff_* psuedo-op fns): Deleted
+	forward declarations.
+	(obj_pseudo_table): Moved to one version end of file,
+	conditionalized internally.
+	(stack typedef, stack_init, stack_delete, stack_push, stack_pop,
+	tag_hash, tag_init, tag_insert, tag_find, tag_find_or_make): Moved
+	to one combined version at top of file, unconditional.  Deleted
+	forward declarations.
+	(s_get_name): Moved one copy of declarations to start of file.
+	(def_symbol_in_progress): Ditto.  Don't initialize.
+	(S_SET_ZEROES): Moved here from obj-coff.h.
+	(write_object_file): If TC_COFF_SET_MACHINE is defined, call it on
+	the file headers.
+
+	* config/obj-coff.c (seg_info_off_by_4): Now const and static.
+	(SEG_INFO_FROM_SEG_NUMBER): Unused macro deleted.
+	(previous_file_symbol, def_symbol_in_progress, symbol_externP,
+	symbol_extern_lastP, last_functionP) [!BFD_ASSEMBLER]: Don't
+	bother explicitly initializing to zero value.
+
+	* config/obj-coff.c (fixup_segment) [TC_I960]: Use SF_GET_BALNAME
+	and SF_GET_CALLNAME instead of the TC_S_IS_ versions.
+
+Fri Jul 15 15:36:51 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* subsegs.c (section_symbol): Had last change backwards.
+
 Thu Jul 14 13:21:06 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* config/atof-ns32k.c: Deleted.
