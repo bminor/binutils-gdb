@@ -986,10 +986,10 @@ Display the version number for @code{ld} and list the linker emulations
 supported.  Display which input files can and cannot be opened.  Display
 the linker script if using a default builtin script.
 
-@kindex -warn-comon
+@kindex --warn-comon
 @cindex warnings, on combining symbols
 @cindex combining symbols, warnings on
-@item -warn-common
+@item --warn-common
 Warn when a common symbol is combined with another common symbol or with
 a symbol definition.  Unix linkers allow this somewhat sloppy practice,
 but linkers on some other operating systems do not.  This option allows
@@ -1018,11 +1018,11 @@ size.  The linker turns a common symbol into a declaration, if there is
 a definition of the same variable.
 @end table
 
-The @samp{-warn-common} option can produce five kinds of warnings.  Each
-warning consists of a pair of lines: the first describes the symbol just
-encountered, and the second describes the previous symbol encountered
-with the same name.  One or both of the two symbols will be a common
-symbol.
+The @samp{--warn-common} option can produce five kinds of warnings.
+Each warning consists of a pair of lines: the first describes the symbol
+just encountered, and the second describes the previous symbol
+encountered with the same name.  One or both of the two symbols will be
+a common symbol.
 
 @enumerate
 @item
@@ -1071,14 +1071,14 @@ encountered in a different order.
 @end smallexample
 @end enumerate
 
-@kindex -warn-constructors
-@item -warn-constructors
+@kindex --warn-constructors
+@item --warn-constructors
 Warn if any global constructors are used.  This is only useful for a few
 object file formats.  For formats like COFF or ELF, the linker can not
 detect the use of global constructors.
 
-@kindex -warn-multiple-gp
-@item -warn-multiple-gp
+@kindex --warn-multiple-gp
+@item --warn-multiple-gp
 Warn if multiple global pointer values are required in the output file.
 This is only meaningful for certain processors, such as the Alpha.
 Specifically, some processors put large-valued constants in a special
@@ -1091,12 +1091,22 @@ large programs, it is often necessary to use multiple global pointer
 values in order to be able to address all possible constants.  This
 option causes a warning to be issued whenever this case occurs.
 
-@kindex -warn-once
+@kindex --warn-once
 @cindex warnings, on undefined symbols
 @cindex undefined symbols, warnings on
-@item -warn-once
+@item --warn-once
 Only warn once for each undefined symbol, rather than once per module
 which refers to it.
+
+@kindex --warn-section-align
+@cindex warnings, on section alignment
+@cindex section alignment, warnings on
+@item --warn-section-align
+Warn if the address of an output section is changed because of
+alignment.  Typically, the alignment will be set by an input section.
+The address will only be changed if it not explicitly specified; that
+is, if the @code{SECTIONS} command does not specify a start address for
+the section (@pxref{SECTIONS}).
 
 @kindex --whole-archive
 @cindex including an entire archive

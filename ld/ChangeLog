@@ -1,5 +1,14 @@
 Wed Oct  9 14:36:18 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ld.h (ld_config_type): Add warn_section_align field.
+	* lexsup.c (OPTION_WARN_SECTION_ALIGN): Define.
+	(ld_options): Add --warn-section-align.
+	(parse_args): Handle --warn-section-align.
+	* ldlang.c (lang_size_sections): If warn_section_align, warn if
+	the start of a section changes due to alignment.
+	* ld.texinfo, ld.1: Document --warn-section-align.
+	* ld.texinfo: Change some single dashes to double dashes.
+
 	* emultempl/pe.em (set_pe_subsystem): Record entry symbol for each
 	subsystem type.  Ifdef out os2 type.  Recognize a version number.
 
