@@ -56,6 +56,6 @@
 
 #define TC_COFF_FIX2RTYPE(fixP) tc_coff_fix2rtype(fixP)
 
-extern short tc_coff_fix2rtype ();
+extern short tc_coff_fix2rtype PARAMS ((struct fix *));
 
 #endif	/* OBJ_COFF */

@@ -1,5 +1,37 @@
 2002-12-13  Alan Modra  <amodra@bigpond.net.au>
 
+	* config/tc-tic30.c: #include stdarg.h or varargs.h.
+	(debug): Rewrite using VA_* macros.
+	(md_estimate_size_before_relax): Add ATTRIBUTE_UNUSED to args.
+	(md_convert_frag): Likewise.
+	(md_parse_option): Likewise.
+	(md_show_usage): Likewise.
+	(md_undefined_symbol): Likewise.
+	(tc_gen_reloc): Likewise.
+	(md_operand): Likewise.
+	(tc_aout_pre_write_hook): Delete.
+	(struct tic30_insn): Make "operands" unsigned.
+	(struct tic30_par_insn): Likewise.
+	(md_assemble): Likewise for "count", "i" and "numops".
+	(tic30_parallel_insn): Likewise for vars here.
+	(tic30_operand): Likewise.  Remove useless unsigned >= 0 comparison.
+	* config/tc-tic30.h (tc_aout_pre_write_hook): Define as empty.
+	* config/tc-tic80.c (obj_coff_section): Delete declaration.
+	(md_estimate_size_before_relax): Add ATTRIBUTE_UNUSED on args.
+	(md_undefined_symbol): Likewise.
+	(md_parse_option): Likewise.
+	(md_convert_frag): Likewise.
+	(tc_coff_symbol_emit_hook): Likewise.
+	(md_atof): Remove declaration of atof_ieee.
+	(const_overflow): Warning fixes, tidy.
+	(get_operands): Delete unused vars.
+	(internal_error_a): Adjust format string to expect a long for arg.
+	(find_opcode): Warning fixes, simplify.
+	(build_insn): Cast internal_error_a arg.
+	(md_begin): Likewise.
+	(md_apply_fix3): Likewise.
+	(md_assemble): Delete unused var.
+	* config/tc-tic80.h (tc_coff_fix2rtype): Prototype.
 	* config/tc-z8k.c (cons, obj_coff_section): Delete declarations.
 	(whatreg, parse_reg, parse_exp): Make static, prototype.
 	(checkfor, regword, regaddr, get_ctrl_operand): Prototype.
