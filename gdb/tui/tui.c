@@ -270,12 +270,10 @@ tui_rl_next_keymap (void)
 static int
 tui_rl_startup_hook ()
 {
-  rl_already_prompted = (tui_current_key_mode != tui_command_mode);
-  if (rl_already_prompted)
-    {
-      tui_set_key_mode (tui_single_key_mode);
-      tui_redisplay_readline ();
-    }
+  rl_already_prompted = 1;
+  if (tui_current_key_mode != tui_command_mode)
+    tui_set_key_mode (tui_single_key_mode);
+  tui_redisplay_readline ();
   return 0;
 }
 

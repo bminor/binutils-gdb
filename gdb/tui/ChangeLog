@@ -1,3 +1,21 @@
+2002-09-04  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* tuiIO.c (tui_putc): New function to print one character.
+	(printable_part): New function from readline/complete.c.
+	(PUTX): New macro, likewise.
+	(print_filename): New function, likewise.
+	(get_y_or_n): New function, likewise and adapted for TUI.
+	(tui_rl_display_match_list): New function from readline/complete.c
+	and writes on TUI command window.
+	(tui_setup_io): Install or remove the readline hook
+	rl_completion_display_matches_hook so that completion is written
+	directly in TUI command window instead of in the TUI pipe.
+	(tui_initialize_io): Use #ifdef TUI_USE_PIPE_FOR_READLINE for the
+	TUI redirection pipe.
+	(tui_getc): Likewise for call to tui_readline_output.
+	(tui_readline_output): Likewise for function.
+	* tui.c (tui_rl_startup_hook): Always take care of gdb prompt.
+
 2002-09-02  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* tuiWin.c (_newHeightOk): Fix compilation warnings.
