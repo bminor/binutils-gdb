@@ -368,6 +368,7 @@ gld${EMULATION_NAME}_finish (void)
       char *msg = NULL;
       char *line, *endline;
 
+      emit_stub_syms |= link_info.emitrelocations;
       if (!ppc64_elf_build_stubs (emit_stub_syms, &link_info,
 				  config.stats ? &msg : NULL))
 	einfo ("%X%P: can not build stubs: %E\n");

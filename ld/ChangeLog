@@ -1,3 +1,8 @@
+2004-09-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/ppc64elf.em (gld${EMULATION_NAME}_finish): Enable
+	--emit-stub-syms automatically when --emit-relocs.
+
 2004-09-24  Paul Brook  <paul@codeosurcery.com>
 
 	* scripttempl/elf.sc: Keep .preinit_array, .init_array and
