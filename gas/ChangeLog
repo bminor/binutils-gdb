@@ -1,3 +1,15 @@
+Tue Jun 10 11:18:09 1997  H.J. Lu  <hjl@gnu.ai.mit.edu>
+
+	* config/tc-arm.c: Add prototypes for many static functions.
+	(struct asm_opcode ): Add prototypes for parms field.
+	(struct thumb_opcode ): Likewise.
+	(fp_op2): Remove unused flags parameter.
+	(output_inst): Make static.
+	(arm_after_pass_hook): Remove unused ignore parameter.
+	* config/tc-arm.h (arm_after_pass_hook): Declare.
+	(arm_start_line_hook): Declare.
+	(arm_frob_label): Declare.
+
 Mon Jun  9 12:55:45 1997  H.J. Lu  <hjl@gnu.ai.mit.edu>
 
 	* depend.c (wrap_output): new prototype.
