@@ -1,5 +1,12 @@
 2004-01-05  Andrew Cagney  <cagney@redhat.com>
 
+	* ser-unix.c (ser_unix_async): Fix tipo, "NOTHING_SECHEDULED"
+	should be a switch case and not a label.
+	* mips-tdep.c (mips32_next_pc): Delete unused labels
+	"greater_equal_branch" and "less_zero_branch".
+	* jv-valprint.c (java_print_value_fields): Delete unused label
+	"flush_it".
+
 	* target.c (unpush_target): Only close a target that is in the
 	target stack.
 

@@ -298,9 +298,6 @@ java_print_value_fields (struct type *type, char *valaddr, CORE_ADDR address,
 	  java_print_value_fields (baseclass, base_valaddr, address + boffset,
 				   stream, format, recurse + 1, pretty);
 	  fputs_filtered (", ", stream);
-
-	flush_it:
-	  ;
 	}
 
     }

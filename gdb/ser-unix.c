@@ -1324,7 +1324,7 @@ ser_unix_async (struct serial *scb,
 	case FD_SCHEDULED:
 	  delete_file_handler (scb->fd);
 	  break;
-	NOTHING_SCHEDULED:
+	case NOTHING_SCHEDULED:
 	  break;
 	default: /* TIMER SCHEDULED */
 	  delete_timer (scb->async_state);
