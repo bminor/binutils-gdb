@@ -1,3 +1,7 @@
+Mon Nov 18 13:28:41 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* configure.in (mn10300): Build everything except gdb & libgloss.
+
 Wed Nov 13 14:59:46 1996  Per Bothner  <bothner@deneb.cygnus.com>
 
 	* config.guess:  Patch for Dansk Data Elektronik servers,
