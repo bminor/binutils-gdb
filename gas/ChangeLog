@@ -1,4 +1,9 @@
-2004-03-08  Jan Beulich  <jbeulich@novell.com>
+2005-03-08  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* doc/Makefile.am: Update as.info dependencies.
+	* aclocal.m4, Makefile.in, doc/Makefile.in: Regenerated.
+
+2005-03-08  Jan Beulich  <jbeulich@novell.com>
 
 	* doc/as.texinfo: Add sentence to indicate redefining a macro is an
 	error, and point to .purgem documentation if someone really needs

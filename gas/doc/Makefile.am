@@ -62,7 +62,7 @@ gasver.texi: Makefile
 	rm -f $@
 	echo '@set VERSION $(VERSION)' > $@
 
-as.info: $(srcdir)/as.texinfo asconfig.texi gasver.texi $(CPU_DOCS)
+$(srcdir)/as.info: $(srcdir)/as.texinfo asconfig.texi gasver.texi $(CPU_DOCS)
 as.dvi: $(srcdir)/as.texinfo asconfig.texi gasver.texi $(CPU_DOCS)
 
 # We want install to imply install-info as per GNU standards, despite the
