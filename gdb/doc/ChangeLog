@@ -1,3 +1,7 @@
+Tue Mar 23 16:03:24 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
+
+	* gdb.texinfo, gdvinv-s.texinfo: formatting improvements.
+
 Fri Mar 19 21:46:50 1993  John Gilmore  (gnu@cygnus.com)
 
 	* gdbint.texinfo:  Doc NO_MMALLOC and NO_MMALLOC_CHECK as
