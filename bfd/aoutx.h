@@ -220,6 +220,9 @@ NAME(aout,reloc_type_lookup) (abfd,code)
       case 32:
 	code = BFD_RELOC_32;
 	break;
+      case 64:
+	code = BFD_RELOC_64;
+	break;
       }
   if (ext)
     switch (code)
@@ -229,6 +232,8 @@ NAME(aout,reloc_type_lookup) (abfd,code)
 	EXT (BFD_RELOC_LO10, 11);
 	EXT (BFD_RELOC_32_PCREL_S2, 6);
 	EXT (BFD_RELOC_SPARC_WDISP22, 7);
+	EXT (BFD_RELOC_SPARC13, 10);
+	EXT (BFD_RELOC_SPARC_BASE13, 15);
       default: return (CONST struct reloc_howto_struct *) 0;
       }
   else
@@ -2737,7 +2742,18 @@ NAME(aout,find_nearest_line)
 	  if (*line_ptr && func) {
 	    CONST char *function = func->name;
 	    char *p;
-	    strncpy(buffer, function, sizeof(buffer)-1);
+
+	    /* The caller expects a symbol name.  We actually a
+	       function name, without the leading underscore.  Put the
+	       underscore back in, so that the caller gets a symbol
+	       name.  */
+	    if (bfd_get_symbol_leading_char (abfd) == '\0')
+	      strncpy (buffer, function, sizeof (buffer) - 1);
+	    else
+	      {
+		buffer[0] = bfd_get_symbol_leading_char (abfd);
+		strncpy (buffer + 1, function, sizeof (buffer) - 2);
+	      }
 	    buffer[sizeof(buffer)-1] = 0;
 	    /* Have to remove : stuff */
 	    p = strchr(buffer,':');
@@ -3317,7 +3333,7 @@ aout_link_add_symbols (abfd, info)
 
       if (! (_bfd_generic_link_add_one_symbol
 	     (info, abfd, name, flags, section, value, string, copy, false,
-	      ARCH_SIZE, (struct bfd_link_hash_entry **) sym_hash)))
+	      (struct bfd_link_hash_entry **) sym_hash)))
 	return false;
 
       if (type == (N_INDR | N_EXT) || type == N_WARNING)
@@ -3364,6 +3380,9 @@ static boolean aout_link_input_section_ext
 	   bfd_size_type rel_size, bfd_byte *contents, int *symbol_map));
 static INLINE asection *aout_reloc_index_to_section
   PARAMS ((bfd *, int));
+static boolean aout_link_reloc_link_order
+  PARAMS ((struct aout_final_link_info *, asection *,
+	   struct bfd_link_order *));
 
 /* Do the final link step.  This is called on the output BFD.  The
    INFO structure should point to a list of BFDs linked through the
@@ -3384,6 +3403,7 @@ NAME(aout,final_link) (abfd, info, callback)
   file_ptr text_end;
   register struct bfd_link_order *p;
   asection *o;
+  boolean have_link_order_relocs;
 
   aout_info.info = info;
   aout_info.output_bfd = abfd;
@@ -3416,7 +3436,13 @@ NAME(aout,final_link) (abfd, info, callback)
 	      abort ();
 	    }
 	}
+      trsize += (_bfd_count_link_order_relocs (obj_textsec (abfd)
+					       ->link_order_head)
+		 * obj_reloc_entry_size (abfd));
       exec_hdr (abfd)->a_trsize = trsize;
+      drsize += (_bfd_count_link_order_relocs (obj_datasec (abfd)
+					       ->link_order_head)
+		 * obj_reloc_entry_size (abfd));
       exec_hdr (abfd)->a_drsize = drsize;
     }
 
@@ -3472,6 +3498,7 @@ NAME(aout,final_link) (abfd, info, callback)
   for (sub = info->input_bfds; sub != (bfd *) NULL; sub = sub->link_next)
     sub->output_has_begun = false;
 
+  have_link_order_relocs = false;
   for (o = abfd->sections; o != (asection *) NULL; o = o->next)
     {
       for (p = o->link_order_head;
@@ -3492,6 +3519,12 @@ NAME(aout,final_link) (abfd, info, callback)
 		  input_bfd->output_has_begun = true;
 		}
 	    }
+	  else if (p->type == bfd_section_reloc_link_order
+		   || p->type == bfd_symbol_reloc_link_order)
+	    {
+	      /* These are handled below.  */
+	      have_link_order_relocs = true;
+	    }
 	  else
 	    {
 	      if (! _bfd_default_link_order (abfd, info, o, p))
@@ -3504,6 +3537,28 @@ NAME(aout,final_link) (abfd, info, callback)
   aout_link_hash_traverse (aout_hash_table (info),
 			   aout_link_write_other_symbol,
 			   (PTR) &aout_info);
+
+  /* Now handle any relocs we were asked to create by the linker.
+     These did not come from any input file.  We must do these after
+     we have written out all the symbols, so that we know the symbol
+     indices to use.  */
+  if (have_link_order_relocs)
+    {
+      for (o = abfd->sections; o != (asection *) NULL; o = o->next)
+	{
+	  for (p = o->link_order_head;
+	       p != (struct bfd_link_order *) NULL;
+	       p = p->next)
+	    {
+	      if (p->type == bfd_section_reloc_link_order
+		  || p->type == bfd_symbol_reloc_link_order)
+		{
+		  if (! aout_link_reloc_link_order (&aout_info, o, p))
+		    return false;
+		}
+	    }
+	}
+    }
 
   /* Update the header information.  */
   abfd->symcount = obj_aout_external_sym_count (abfd);
@@ -4680,6 +4735,214 @@ aout_link_input_section_ext (finfo, input_bfd, input_section, relocs,
 	    }
 	}
     }
+
+  return true;
+}
+
+/* Handle a link order which is supposed to generate a reloc.  */
+
+static boolean
+aout_link_reloc_link_order (finfo, o, p)
+     struct aout_final_link_info *finfo;
+     asection *o;
+     struct bfd_link_order *p;
+{
+  struct bfd_link_order_reloc *pr;
+  int r_index;
+  int r_extern;
+  const reloc_howto_type *howto;
+  file_ptr *reloff_ptr;
+  struct reloc_std_external srel;
+  struct reloc_ext_external erel;
+  PTR rel_ptr;
+
+  pr = p->u.reloc.p;
+
+  if (p->type == bfd_section_reloc_link_order)
+    {
+      r_extern = 0;
+      if (pr->u.section == &bfd_abs_section)
+	r_index = N_ABS | N_EXT;
+      else
+	{
+	  BFD_ASSERT (pr->u.section->owner == finfo->output_bfd);
+	  r_index = pr->u.section->target_index;
+	}
+    }
+  else
+    {
+      struct aout_link_hash_entry *h;
+
+      BFD_ASSERT (p->type == bfd_symbol_reloc_link_order);
+      r_extern = 1;
+      h = aout_link_hash_lookup (aout_hash_table (finfo->info),
+				 pr->u.name, false, false, true);
+      if (h != (struct aout_link_hash_entry *) NULL
+	  && h->indx == -1)
+	r_index = h->indx;
+      else
+	{
+	  if (! ((*finfo->info->callbacks->unattached_reloc)
+		 (finfo->info, pr->u.name, (bfd *) NULL,
+		  (asection *) NULL, (bfd_vma) 0)))
+	    return false;
+	  r_index = 0;
+	}
+    }
+
+  howto = bfd_reloc_type_lookup (finfo->output_bfd, pr->reloc);
+  if (howto == (const reloc_howto_type *) NULL)
+    {
+      bfd_set_error (bfd_error_bad_value);
+      return false;
+    }
+
+  if (o == obj_textsec (finfo->output_bfd))
+    reloff_ptr = &finfo->treloff;
+  else if (o == obj_datasec (finfo->output_bfd))
+    reloff_ptr = &finfo->dreloff;
+  else
+    abort ();
+
+  if (obj_reloc_entry_size (finfo->output_bfd) == RELOC_STD_SIZE)
+    {
+      int r_pcrel;
+      int r_baserel;
+      int r_jmptable;
+      int r_relative;
+      int r_length;
+
+      r_pcrel = howto->pc_relative;
+      r_baserel = (howto->type & 8) != 0;
+      r_jmptable = 0;
+      r_relative = 0;
+      r_length = howto->size;
+
+      PUT_WORD (finfo->output_bfd, p->offset, srel.r_address);
+      if (finfo->output_bfd->xvec->header_byteorder_big_p)
+	{
+	  srel.r_index[0] = r_index >> 16;
+	  srel.r_index[1] = r_index >> 8;
+	  srel.r_index[2] = r_index;
+	  srel.r_type[0] =
+	    ((r_extern ?     RELOC_STD_BITS_EXTERN_BIG : 0)
+	     | (r_pcrel ?    RELOC_STD_BITS_PCREL_BIG : 0)
+	     | (r_baserel ?  RELOC_STD_BITS_BASEREL_BIG : 0)
+	     | (r_jmptable ? RELOC_STD_BITS_JMPTABLE_BIG : 0)
+	     | (r_relative ? RELOC_STD_BITS_RELATIVE_BIG : 0)
+	     | (r_length <<  RELOC_STD_BITS_LENGTH_SH_BIG));
+	}
+      else
+	{
+	  srel.r_index[2] = r_index >> 16;
+	  srel.r_index[1] = r_index >> 8;
+	  srel.r_index[0] = r_index;
+	  srel.r_type[0] =
+	    ((r_extern ?     RELOC_STD_BITS_EXTERN_LITTLE : 0)
+	     | (r_pcrel ?    RELOC_STD_BITS_PCREL_LITTLE : 0)
+	     | (r_baserel ?  RELOC_STD_BITS_BASEREL_LITTLE : 0)
+	     | (r_jmptable ? RELOC_STD_BITS_JMPTABLE_LITTLE : 0)
+	     | (r_relative ? RELOC_STD_BITS_RELATIVE_LITTLE : 0)
+	     | (r_length <<  RELOC_STD_BITS_LENGTH_SH_LITTLE));
+	}
+
+      rel_ptr = (PTR) &srel;
+
+      /* We have to write the addend into the object file, since
+	 standard a.out relocs are in place.  It would be more
+	 reliable if we had the current contents of the file here,
+	 rather than assuming zeroes, but we can't read the file since
+	 it was opened using bfd_openw.  */
+      if (pr->addend != 0)
+	{
+	  bfd_size_type size;
+	  bfd_reloc_status_type r;
+	  bfd_byte *buf;
+	  boolean ok;
+
+	  size = bfd_get_reloc_size (howto);
+	  buf = (bfd_byte*) bfd_zmalloc (size);
+	  if (buf == (bfd_byte *) NULL)
+	    {
+	      bfd_set_error (bfd_error_no_memory);
+	      return false;
+	    }
+	  r = _bfd_relocate_contents (howto, finfo->output_bfd,
+				      pr->addend, buf);
+	  switch (r)
+	    {
+	    case bfd_reloc_ok:
+	      break;
+	    default:
+	    case bfd_reloc_outofrange:
+	      abort ();
+	    case bfd_reloc_overflow:
+	      if (! ((*finfo->info->callbacks->reloc_overflow)
+		     (finfo->info,
+		      (p->type == bfd_section_reloc_link_order
+		       ? bfd_section_name (finfo->output_bfd,
+					   pr->u.section)
+		       : pr->u.name),
+		      howto->name, pr->addend, (bfd *) NULL,
+		      (asection *) NULL, (bfd_vma) 0)))
+		{
+		  free (buf);
+		  return false;
+		}
+	      break;
+	    }
+	  ok = bfd_set_section_contents (finfo->output_bfd, o,
+					 (PTR) buf,
+					 (file_ptr) p->offset,
+					 size);
+	  free (buf);
+	  if (! ok)
+	    return false;
+	}
+    }
+  else
+    {
+      PUT_WORD (finfo->output_bfd, p->offset, erel.r_address);
+
+      if (finfo->output_bfd->xvec->header_byteorder_big_p)
+	{
+	  erel.r_index[0] = r_index >> 16;
+	  erel.r_index[1] = r_index >> 8;
+	  erel.r_index[2] = r_index;
+	  erel.r_type[0] =
+	    ((r_extern ? RELOC_EXT_BITS_EXTERN_BIG : 0)
+	     | (howto->type << RELOC_EXT_BITS_TYPE_SH_BIG));
+	}
+      else
+	{
+	  erel.r_index[2] = r_index >> 16;
+	  erel.r_index[1] = r_index >> 8;
+	  erel.r_index[0] = r_index;
+	  erel.r_type[0] =
+	    (r_extern ? RELOC_EXT_BITS_EXTERN_LITTLE : 0)
+	      | (howto->type << RELOC_EXT_BITS_TYPE_SH_LITTLE);
+	}
+
+      PUT_WORD (finfo->output_bfd, pr->addend, erel.r_addend);
+
+      rel_ptr = (PTR) &erel;
+    }
+
+  if (bfd_seek (finfo->output_bfd, *reloff_ptr, SEEK_SET) != 0
+      || (bfd_write (rel_ptr, (bfd_size_type) 1,
+		     obj_reloc_entry_size (finfo->output_bfd),
+		     finfo->output_bfd)
+	  != obj_reloc_entry_size (finfo->output_bfd)))
+    return false;
+
+  *reloff_ptr += obj_reloc_entry_size (finfo->output_bfd);
+
+  /* Assert that the relocs have not run into the symbols, and that n
+     the text relocs have not run into the data relocs.  */
+  BFD_ASSERT (*reloff_ptr <= obj_sym_filepos (finfo->output_bfd)
+	      && (reloff_ptr != &finfo->treloff
+		  || (*reloff_ptr
+		      <= obj_datasec (finfo->output_bfd)->rel_filepos)));
 
   return true;
 }

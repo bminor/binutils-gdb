@@ -1,3 +1,9 @@
+Fri Mar 25 17:10:45 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* aoutx.h (NAME(aout,find_nearest_line)): The caller expects
+	functionname_ptr to be set to a symbol name, so prepend
+	symbol_leading_char.
+
 Thu Mar 24 11:33:46 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
 	* coff-h8300.c (h8300_reloc16_extra_cases): Add relaxing info
