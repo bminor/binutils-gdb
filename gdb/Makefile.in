@@ -542,15 +542,17 @@ make-proto-gdb-1: ${TARFILES} ${TARDIRS} gdb.info
 	cd proto-gdb.dir ; for i in ${TARFILES} ; do ln -s ../$$i . ; done
 	cd proto-gdb.dir ; ln -s ../${INFOFILES} .
 	cd proto-gdb.dir ; for i in ${TARDIRS}; do \
-	  (mkdir $$i; cd $$i; \
+	  mkdir $$i; cd $$i; \
 	  ln -s ../../$$i/* .; \
 	  rm -rf SCCS CVS.adm RCS config.status; \
-	  if test -f Makefile.in; then rm Makefile; else true); done
+	  if test -f Makefile.in; then rm Makefile; else true; fi; done
 	mkdir proto-gdb.dir/config
 	cd proto-gdb.dir/config ; \
 	  for i in $(ALLCONFIG) ; do ln -s ../../$$i ../$$i ; done
 	mkdir proto-gdb.dir/vx-share proto-gdb.dir/nindy-share \
 		proto-gdb.dir/29k-share
+	mkdir proto-gdb.dir/29k-share/include proto-gdb.dir/29k-share/udi
+	mkdir proto-gdb.dir/29k-share/dfe
 	cd proto-gdb.dir/config ; \
 	  for i in $(SFILES_SUBDIR) $(NONSRC_SUBDIR) $(ALLDEPFILES_SUBDIR); \
 	    do ln -s ../../$$i ../$$i ; done

@@ -1,5 +1,8 @@
 Fri Apr 24 07:41:19 1992  Stu Grossman  (grossman at cygnus.com)
 
+	* Makefile.in (make-proto-gdb-1):  1st cut at packaging
+	29k-share/* subdirs...
+
 	* remote-udi.c (udi_insert/remove_breakpoint):  Completely
 	rewrite, only leave out the bugs.
 
