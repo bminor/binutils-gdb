@@ -1,3 +1,8 @@
+2002-05-17  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/obj-generic.c: Delete file.
+	* config/obj-generic.h: Likewise.
+
 2002-05-16  Marek Michalkiewicz  <marekm@amelek.gda.pl>
 
 	* config/tc-avr.c (mcu_types): Update for new devices.
