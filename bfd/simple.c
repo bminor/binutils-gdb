@@ -42,8 +42,14 @@ static bfd_boolean simple_dummy_reloc_dangerous
 static bfd_boolean simple_dummy_unattached_reloc
   PARAMS ((struct bfd_link_info *, const char *, bfd *, asection *, bfd_vma));
 
+static void simple_save_output_info
+  PARAMS ((bfd *, asection *, PTR));
+
+static void simple_restore_output_info
+  PARAMS ((bfd *, asection *, PTR));
+
 bfd_byte * bfd_simple_get_relocated_section_contents
-  PARAMS ((bfd *, asection *, bfd_byte *));
+  PARAMS ((bfd *, asection *, bfd_byte *, asymbol **));
 
 static bfd_boolean
 simple_dummy_warning (link_info, warning, symbol, abfd, section, address)
@@ -105,17 +111,48 @@ simple_dummy_unattached_reloc (link_info, name, abfd, section, address)
   return TRUE;
 }
 
+struct saved_output_info
+{
+  bfd_vma offset;
+  asection *section;
+};
+
+static void
+simple_save_output_info (abfd, section, ptr)
+     bfd *abfd ATTRIBUTE_UNUSED;
+     asection *section;
+     PTR ptr;
+{
+  struct saved_output_info *output_info = (struct saved_output_info *) ptr;
+  output_info[section->index].offset = section->output_offset;
+  output_info[section->index].section = section->output_section;
+  section->output_offset = 0;
+  section->output_section = section;
+}
+
+static void
+simple_restore_output_info (abfd, section, ptr)
+     bfd *abfd ATTRIBUTE_UNUSED;
+     asection *section;
+     PTR ptr;
+{
+  struct saved_output_info *output_info = (struct saved_output_info *) ptr;
+  section->output_offset = output_info[section->index].offset;
+  section->output_section = output_info[section->index].section;
+}
+
 /*
 FUNCTION
 	bfd_simple_relocate_secton
 
 SYNOPSIS
-	bfd_byte *bfd_simple_get_relocated_section_contents (bfd *abfd, asection *sec, bfd_byte *outbuf);
+	bfd_byte *bfd_simple_get_relocated_section_contents (bfd *abfd, asection *sec, bfd_byte *outbuf, asymbol **symbol_table);
 
 DESCRIPTION
-	Returns the relocated contents of section @var{sec}.  Only symbols
-	from @var{abfd} and the output offsets assigned to sections in
-	@var{abfd} are used.  The result will be stored at @var{outbuf}
+	Returns the relocated contents of section @var{sec}.  The symbols in
+	@var{symbol_table} will be used, or the symbols from @var{abfd} if
+	@var{symbol_table} is NULL.  The output offsets for all sections will
+	be temporarily reset to 0.  The result will be stored at @var{outbuf}
 	or allocated with @code{bfd_malloc} if @var{outbuf} is @code{NULL}.
 
 	Generally all sections in @var{abfd} should have their
@@ -126,17 +163,18 @@ DESCRIPTION
 */
 
 bfd_byte *
-bfd_simple_get_relocated_section_contents (abfd, sec, outbuf)
+bfd_simple_get_relocated_section_contents (abfd, sec, outbuf, symbol_table)
      bfd *abfd;
      asection *sec;
      bfd_byte *outbuf;
+     asymbol **symbol_table;
 {
   struct bfd_link_info link_info;
   struct bfd_link_order link_order;
   struct bfd_link_callbacks callbacks;
   bfd_byte *contents, *data;
   int storage_needed;
-  asymbol **symbol_table;
+  PTR saved_offsets;
 
   if (! (sec->flags & SEC_RELOC))
     {
@@ -183,11 +221,36 @@ bfd_simple_get_relocated_section_contents (abfd, sec, outbuf)
 	return NULL;
       outbuf = data;
     }
-  bfd_link_add_symbols (abfd, &link_info);
 
-  storage_needed = bfd_get_symtab_upper_bound (abfd);
-  symbol_table = (asymbol **) bfd_malloc (storage_needed);
-  bfd_canonicalize_symtab (abfd, symbol_table);
+  /* The sections in ABFD may already have output sections and offsets set.
+     Because this function is primarily for debug sections, and GCC uses the
+     knowledge that debug sections will generally have VMA 0 when emiting
+     relocations between DWARF-2 sections (which are supposed to be
+     section-relative offsets anyway), we need to reset the output offsets
+     to zero.  We also need to arrange for section->output_section->vma plus
+     section->output_offset to equal section->vma, which we do by setting
+     section->output_section to point back to section.  Save the original
+     output offset and output section to restore later.  */
+  saved_offsets = malloc (sizeof (struct saved_output_info)
+			  * abfd->section_count);
+  if (saved_offsets == NULL)
+    {
+      if (data)
+	free (data);
+      return NULL;
+    }
+  bfd_map_over_sections (abfd, simple_save_output_info, saved_offsets);
+
+  if (symbol_table == NULL)
+    {
+      bfd_link_add_symbols (abfd, &link_info);
+
+      storage_needed = bfd_get_symtab_upper_bound (abfd);
+      symbol_table = (asymbol **) bfd_malloc (storage_needed);
+      bfd_canonicalize_symtab (abfd, symbol_table);
+    }
+  else
+    storage_needed = 0;
 
   contents = bfd_get_relocated_section_contents (abfd,
 						 &link_info,
@@ -197,6 +260,12 @@ bfd_simple_get_relocated_section_contents (abfd, sec, outbuf)
 						 symbol_table);
   if (contents == NULL && data != NULL)
     free (data);
+
+  if (storage_needed != 0)
+    free (symbol_table);
+
+  bfd_map_over_sections (abfd, simple_restore_output_info, saved_offsets);
+  free (saved_offsets);
 
   /* Foul hack to prevent bfd_section_size aborts.  This flag only controls
      that macro (and the related size macros), selecting between _raw_size
@@ -208,6 +277,5 @@ bfd_simple_get_relocated_section_contents (abfd, sec, outbuf)
 
   bfd_link_hash_table_free (abfd, link_info.hash);
 
-  free (symbol_table);
   return contents;
 }

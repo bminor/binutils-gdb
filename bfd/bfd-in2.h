@@ -4385,7 +4385,7 @@ bfd_link_split_section PARAMS ((bfd *abfd, asection *sec));
 
 /* Extracted from simple.c.  */
 bfd_byte *
-bfd_simple_get_relocated_section_contents PARAMS ((bfd *abfd, asection *sec, bfd_byte *outbuf));
+bfd_simple_get_relocated_section_contents PARAMS ((bfd *abfd, asection *sec, bfd_byte *outbuf, asymbol **symbol_table));
 
 #ifdef __cplusplus
 }

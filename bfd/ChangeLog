@@ -1,3 +1,26 @@
+2003-03-31  Andreas Schwab  <schwab@suse.de>
+	    Daniel Jacobowitz  <drow@mvista.com>
+
+	* simple.c (bfd_simple_get_relocated_section_contents): Add
+	parameter symbol_table.  Optionally use it instead of the symbol
+	table from the bfd.  Save and restore output offsets and output
+	sections  around bfd_get_relocated_section_contents.  Fix a memory
+	leak.
+	(simple_save_output_info, simple_restore_output_info): New
+	functions.
+	* bfd-in2.h: Regenerate.
+	* dwarf2.c (read_abbrevs): Use
+	bfd_simple_get_relocated_section_contents instead of
+	bfd_get_section_contents.
+	(decode_line_info): Likewise.
+	(_bfd_dwarf2_find_nearest_line): Likewise.  Don't call
+	find_rela_addend.
+	(find_rela_addend): Remove.
+	* elfxx-ia64.c (elfNN_ia64_reloc): Weaken sanity check for
+	debugging sections.
+	(elfNN_ia64_hash_table_create): Create the hash table with malloc,
+	not bfd_zalloc.
+
 2003-03-31  David Heine  <dlheine@suif.stanford.edu>
 
 	* aoutx.h (aout_link_hash_table_create): Use bfd_malloc instead of
