@@ -73,12 +73,12 @@ INSTALL_TARGET = install.all
 
 all:	$(ALL)
 
-info:	cfg-paper.info
+info:	cfg-paper.info configure.info
 	rootme=`pwd` ; export rootme ; $(MAKE) subdir_do DO=info "DODIRS=$(SUBDIRS)" "MAKEINFO=$(MAKEINFO)"
 
 clean-info:
 	$(MAKE) subdir_do DO=clean-info "DODIRS=$(SUBDIRS)"
-	rm -f cfg-paper.info
+	rm -f cfg-paper.info* configure.info*
 
 cfg-paper.info: cfg-paper.texi
 	rootme=`pwd` ; export rootme ; $(MAKEINFO) -o cfg-paper.info $(srcdir)/cfg-paper.texi
@@ -87,6 +87,7 @@ configure.info: configure.texi
 	rootme=`pwd` ; export rootme ; $(MAKEINFO) -o configure.info $(srcdir)/configure.texi
 
 install-info: install-info-dirs force
+	[ -d $(infodir) ] || mkdir $(infodir)
 	$(MAKE) subdir_do DO=install-info "DODIRS=$(SUBDIRS)"
 	$(INSTALL_DATA) cfg-paper.info $(infodir)/cfg-paper.info
 	$(INSTALL_DATA) configure.info $(infodir)/configure.info
@@ -431,7 +432,8 @@ just-bison: just-libiberty force
 		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/bison$(subdir); \
 		$(MAKE) \
-			"against=$(against)" \
+			"prefix=$(prefix)" \
+			"datadir=$(datadir)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
@@ -450,7 +452,8 @@ clean-bison: force
 		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/bison$(subdir); \
 		$(MAKE) \
-			"against=$(against)" \
+			"prefix=$(prefix)" \
+			"datadir=$(datadir)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
@@ -469,7 +472,8 @@ install-bison: force
 		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/bison$(subdir); \
 		$(MAKE) \
-			"against=$(against)" \
+			"prefix=$(prefix)" \
+			"datadir=$(datadir)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
@@ -1621,24 +1625,18 @@ install-fileutils: force
 ### libg++
 .PHONY: all-libg++ just-libg++
 all-libg++: just-gas just-ld just-gcc just-make just-libg++
-# NOTE!  We have added GXX= and XTRAFLAGS to the $(MAKE) line!!!
-# and CC == GXX
-# Do not clone this one.
-just-libg++: just-make force
+just-libg++: just-gcc force
 	if [ -d $(unsubdir)/libg++ ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/libg++$(subdir); \
 		$(MAKE) \
-			GXX=`cd $(unsubdir)/..$(subdir); pwd`"/gcc/gcc -B"`cd $(unsubdir)/..$(subdir);pwd`"/gcc/" \
-			MAKE=`cd $(unsubdir)/..$(subdir); pwd`/make/make \
-			"XTRAFLAGS=-I"`cd $(unsubdir)/..$(subdir); pwd`/gcc/include\
 			"prefix=$(prefix)" \
 			"datadir=$(datadir)" \
 			"mandir=$(mandir)" \
 			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
-			CC=`cd $(unsubdir)/..$(subdir); pwd`"/gcc/gcc -B"`cd $(unsubdir)/..$(subdir);pwd`"/gcc/" \
+			"CC=$(CC)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -1654,7 +1652,6 @@ clean-libg++: force
 		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/libg++$(subdir); \
 		$(MAKE) \
-			MAKE=`cd $(unsubdir)/..$(subdir); pwd`/make/make \
 			"prefix=$(prefix)" \
 			"datadir=$(datadir)" \
 			"mandir=$(mandir)" \
@@ -1677,7 +1674,6 @@ install-libg++: force
 		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/libg++$(subdir); \
 		$(MAKE) \
-			MAKE=`cd $(unsubdir)/..$(subdir); pwd`/make/make \
 			"prefix=$(prefix)" \
 			"datadir=$(datadir)" \
 			"mandir=$(mandir)" \

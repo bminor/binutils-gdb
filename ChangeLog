@@ -1,3 +1,20 @@
+Mon Feb 24 17:08:01 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
+
+	* Makefile.in: mkdir $(infodir) on install-info.
+
+Wed Feb 19 15:41:13 1992  John Gilmore  (gnu at cygnus.com)
+
+	* configure.texi:  Explain better about .gdbinit and about
+	the environment that configure.in sections run in.
+
+Fri Feb  7 07:55:00 1992  John Gilmore  (gnu at cygnus.com)
+
+	* configure.in:  Ultrix is only a decstation if it's a MIPS.
+
+Fri Jan 31 21:54:51 1992  John Gilmore  (gnu at cygnus.com)
+
+	* README:  DOC.configure => cfg-paper.texi.
+
 Fri Jan 31 21:48:18 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* config.sub (near case $os):  Don't convert newsos* to bsd!
