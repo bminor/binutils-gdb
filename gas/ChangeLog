@@ -1,3 +1,9 @@
+2000-10-27  Nick Clifton  <nickc@redhat.com>
+
+	* configure.in (emulations): Add m68hc12.
+	* configure: Regenerate.
+	* po/gas.pot: Regenerate.
+	
 2000-10-27  Aldy Hernandez  <aldyh@redhat.com>
 
         * config/tc-arm.c (psrs): Remove lowercase versions of spsr* and

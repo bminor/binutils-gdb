@@ -123,7 +123,7 @@ changequote([,])dnl
 changequote(,)dnl
       i[456]86)		cpu_type=i386 ;;
       ia64)		cpu_type=ia64 ;;
-      m6811|m6812)	cpu_type=m68hc11 ;;
+      m6811|m6812|m68hc12) cpu_type=m68hc11 ;;
       m680[012346]0)	cpu_type=m68k ;;
 changequote([,])dnl
       m68008)		cpu_type=m68k ;;
