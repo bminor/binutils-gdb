@@ -1,3 +1,9 @@
+2005-02-01  Ben Elliston  <bje@au.ibm.com>
+ 
+	* elf-bfd.h (bfd_elf_discard_group): Remove.
+	* elf.c (bfd_elf_discard_group): Likewise.
+	* elfxx-target.h (bfd_elfNN_bfd_discard_group): Remove macro.
+
 2005-01-31  Richard Sandiford  <rsandifo@redhat.com>
 
 	* elf-bfd.h (elf_backend_data): Add elf_backend_eh_frame_address_size.

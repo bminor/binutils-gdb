@@ -664,29 +664,6 @@ bfd_elf_is_group_section (bfd *abfd ATTRIBUTE_UNUSED, const asection *sec)
   return elf_next_in_group (sec) != NULL;
 }
 
-bfd_boolean
-bfd_elf_discard_group (bfd *abfd ATTRIBUTE_UNUSED,
-		       asection *group ATTRIBUTE_UNUSED)
-{
-#if 0
-  asection *first = elf_next_in_group (group);
-  asection *s = first;
-
-  while (s != NULL)
-    {
-      s->output_section = bfd_abs_section_ptr;
-      s = elf_next_in_group (s);
-      /* These lists are circular.  */
-      if (s == first)
-	break;
-    }
-#else
-  /* FIXME: Never used. Remove it!  */
-  abort ();
-#endif
-  return TRUE;
-}
-
 /* Make a BFD section from an ELF section.  We store a pointer to the
    BFD section in the bfd_section field of the header.  */
 

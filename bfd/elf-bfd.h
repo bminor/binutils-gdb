@@ -1438,8 +1438,6 @@ extern bfd_boolean _bfd_elf_merge_sections
   (bfd *, struct bfd_link_info *);
 extern bfd_boolean bfd_elf_is_group_section
   (bfd *, const struct bfd_section *);
-extern bfd_boolean bfd_elf_discard_group
-  (bfd *, struct bfd_section *);
 extern void _bfd_elf_section_already_linked
   (bfd *, struct bfd_section *);
 extern void bfd_elf_set_group_contents
