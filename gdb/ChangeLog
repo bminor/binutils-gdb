@@ -1,3 +1,25 @@
+2003-08-29  Andrew Cagney  <cagney@redhat.com>
+
+	* config/mips/tm-embed.h (STOPPED_BY_WATCHPOINT): Delete macro.
+	(TARGET_CAN_USE_HARDWARE_WATCHPOINT): Delete macro.
+	(target_remove_watchpoint): Delete macro.
+	(target_insert_watchpoint): Delete macro.
+	(remote_mips_can_use_hardware_watchpoint): Delete declaration.
+	(remote_mips_stopped_by_watchpoint): Delete declaration.
+	(remote_mips_remove_watchpoint): Delete declaration.
+	(remote_mips_set_watchpoint): Delete declaration.
+	(TARGET_HAS_HARDWARE_WATCHPOINTS): Delete macro.
+	* remote-mips.c (_initialize_remote_mips): Set
+	"to_insert_watchpoint", "to_stopped_by_watchpoint",
+	"to_can_use_hardware_watchpoint", and "to_remove_watchpoint".
+	(mips_insert_watchpoint): Rename remote_mips_set_watchpoint.
+	(mips_remove_watchpoint): Rename remote_mips_remove_watchpoint.
+	(mips_stopped_by_watchpoint): Rename
+	remote_mips_stopped_by_watchpoint.
+	(mips_can_hardware_watchpoint): Rename
+	remote_mips_can_use_hardware_watchpoint, update function
+	signature.
+
 2003-08-29  Mark Kettenis  <kettenis@gnu.org>
 
 	* x86-64-linux-tdep.c (user_to_gdb_regmap): Remove USER_CS and

@@ -2405,7 +2405,7 @@ pmon_remove_breakpoint (CORE_ADDR addr, char *contents_cache)
    implements the TARGET_CAN_USE_HARDWARE_WATCHPOINT macro.  */
 
 int
-remote_mips_can_use_hardware_watchpoint (int cnt)
+mips_can_use_watchpoint (int type, int cnt, int othertype)
 {
   return cnt < MAX_LSI_BREAKPOINTS && strcmp (target_shortname, "lsi") == 0;
 }
@@ -2464,7 +2464,7 @@ remote_mips_remove_hw_breakpoint (CORE_ADDR addr, char *contents_cache)
    watchpoint. */
 
 int
-remote_mips_set_watchpoint (CORE_ADDR addr, int len, int type)
+mips_insert_watchpoint (CORE_ADDR addr, int len, int type)
 {
   if (set_breakpoint (addr, len, type))
     return -1;
@@ -2473,7 +2473,7 @@ remote_mips_set_watchpoint (CORE_ADDR addr, int len, int type)
 }
 
 int
-remote_mips_remove_watchpoint (CORE_ADDR addr, int len, int type)
+mips_remove_watchpoint (CORE_ADDR addr, int len, int type)
 {
   if (clear_breakpoint (addr, len, type))
     return -1;
@@ -2482,7 +2482,7 @@ remote_mips_remove_watchpoint (CORE_ADDR addr, int len, int type)
 }
 
 int
-remote_mips_stopped_by_watchpoint (void)
+mips_stopped_by_watchpoint (void)
 {
   return hit_watchpoint;
 }
@@ -3494,6 +3494,10 @@ _initialize_remote_mips (void)
   mips_ops.to_files_info = mips_files_info;
   mips_ops.to_insert_breakpoint = mips_insert_breakpoint;
   mips_ops.to_remove_breakpoint = mips_remove_breakpoint;
+  mips_ops.to_insert_watchpoint = mips_insert_watchpoint;
+  mips_ops.to_remove_watchpoint = mips_remove_watchpoint;
+  mips_ops.to_stopped_by_watchpoint = mips_stopped_by_watchpoint;
+  mips_ops.to_can_use_hw_breakpoint = mips_can_use_watchpoint;
   mips_ops.to_kill = mips_kill;
   mips_ops.to_load = mips_load;
   mips_ops.to_create_inferior = mips_create_inferior;

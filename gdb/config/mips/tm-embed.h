@@ -19,28 +19,13 @@
 
 #include "mips/tm-mips.h"
 
-/* Watchpoint support */
-
-#define TARGET_HAS_HARDWARE_WATCHPOINTS
-
-/* Use these macros for watchpoint insertion/deletion.  */
-/* type can be 0: write watch, 1: read watch, 2: access watch (read/write) */
-
-#define target_insert_watchpoint(addr, len, type) \
-	remote_mips_set_watchpoint (addr, len, type)
-int remote_mips_set_watchpoint (CORE_ADDR addr, int len, int type);
-
-#define target_remove_watchpoint(addr, len, type) \
-	remote_mips_remove_watchpoint (addr, len, type)
-int remote_mips_remove_watchpoint (CORE_ADDR addr, int len, int type);
-
 /* We need to remove watchpoints when stepping, else we hit them again! */
 
+/* FIXME: cagney/2003-08-29: The macros HAVE_STEPPABLE_WATCHPOINT,
+   HAVE_NONSTEPPABLE_WATCHPOINT, and HAVE_CONTINUABLE_WATCHPOINT need
+   to all be folded into the target vector.  Since they are being used
+   as guards for STOPPED_BY_WATCHPOINT, why not have
+   STOPPED_BY_WATCHPOINT return the type of watchpoint that the code
+   is sitting on?  */
+
 #define HAVE_NONSTEPPABLE_WATCHPOINT 1
-
-int remote_mips_stopped_by_watchpoint (void);
-#define STOPPED_BY_WATCHPOINT(w) remote_mips_stopped_by_watchpoint ()
-
-#define TARGET_CAN_USE_HARDWARE_WATCHPOINT(type, cnt, ot) \
-  remote_mips_can_use_hardware_watchpoint(cnt)
-int remote_mips_can_use_hardware_watchpoint (int cnt);
