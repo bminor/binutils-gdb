@@ -181,7 +181,7 @@ typedef struct lineno_cache_entry {
 typedef struct sec *sec_ptr;
 
 #define bfd_section_name(bfd, ptr) ((ptr)->name)
-#define bfd_section_size(bfd, ptr) ((ptr)->size)
+#define bfd_section_size(bfd, ptr) (bfd_get_section_size_before_reloc(ptr))
 #define bfd_section_vma(bfd, ptr) ((ptr)->vma)
 #define bfd_section_alignment(bfd, ptr) ((ptr)->alignment_power)
 #define bfd_get_section_flags(bfd, ptr) ((ptr)->flags)
@@ -207,10 +207,23 @@ typedef enum bfd_error {
 	      invalid_error_code} bfd_ec;
 
 extern bfd_ec bfd_error;
+struct reloc_cache_entry;
+struct bfd_seclet_struct ;
+
 
 typedef struct bfd_error_vector {
   PROTO(void,(* nonrepresentable_section ),(CONST bfd  *CONST abfd,
 					    CONST char *CONST name));
+  PROTO(void,(* undefined_symbol),(CONST struct reloc_cache_entry *rel,
+				   CONST struct bfd_seclet_struct *sec
+				   ));
+  PROTO(void, (* reloc_value_truncated),(CONST struct
+					  reloc_cache_entry *rel,
+					  struct bfd_seclet_struct *sec));
+
+  PROTO(void, (* reloc_dangerous),(CONST struct reloc_cache_entry *rel,
+				   CONST struct bfd_seclet_struct *sec));
+  
 } bfd_error_vector_type;
 
 PROTO (char *, bfd_errmsg, ());
@@ -267,7 +280,8 @@ CAT(NAME,_generic_stat_arch_elt),\
 CAT(NAME,_sizeof_headers),\
 CAT(NAME,_bfd_debug_info_start),\
 CAT(NAME,_bfd_debug_info_end),\
-CAT(NAME,_bfd_debug_info_accumulate)
+CAT(NAME,_bfd_debug_info_accumulate),\
+CAT(NAME,_bfd_get_relocated_section_contents)
 
 #define COFF_SWAP_TABLE \
  coff_swap_aux_in, coff_swap_sym_in, coff_swap_lineno_in, \
@@ -325,6 +339,8 @@ extern CONST short _bfd_host_big_endian;
 
 
 
+
+ 
 void EXFUN(bfd_init, (void));
 bfd *EXFUN(bfd_openr, (CONST char *filename, CONST char*target));
 bfd *EXFUN(bfd_fdopenr, (CONST char *filename, CONST char *target, int fd));
@@ -371,6 +387,11 @@ typedef struct sec
         the same as that passed to bfd_make_section. */
 
     CONST char *name;
+
+
+         /* Which section is it 0.nth      */
+
+   int index;                      
 
          /* The next section in the list belonging to the BFD, or NULL. */
 
@@ -455,16 +476,21 @@ typedef struct sec
 
 #define SEC_NEVER_LOAD 0x400
 
-         /* The base address of the section in the address space of the
-          target. */
+
        
    bfd_vma vma;
 
-         /* The size of the section in bytes of the loaded section. This
+         /* The size of the section in bytes, as it will be output.
            contains a value even if the section has no contents (eg, the
-           size of <<.bss>>). */
+           size of <<.bss>>). This will be filled in after relocation */
 
-   bfd_size_type size;    
+   bfd_size_type _cooked_size;    
+
+         /* The size on disk of the section in bytes originally.  Normally this
+	    value is the same as the size, but if some relaxing has
+	    been done, then this value will be bigger.  */
+
+   bfd_size_type _raw_size;    
 
          /* If this section is going to be output, then this value is the
            offset into the output section of the first byte in the input
@@ -495,10 +521,6 @@ typedef struct sec
          /* The number of relocation records in one of the above  */
 
    unsigned reloc_count;
-
-         /* Which section is it 0.nth      */
-
-   int index;                      
 
          /* Information below is back end specific - and not always used
            or updated 
@@ -536,7 +558,7 @@ typedef struct sec
 
          /* what the section number is in the target world  */
 
-   unsigned int target_index;
+   int target_index;
 
    PTR used_by_bfd;
 
@@ -549,7 +571,33 @@ typedef struct sec
 
    bfd *owner;
 
+   boolean reloc_done;
+	  /* A symbol which points at this section only */
+   struct symbol_cache_entry *symbol;  
+   struct symbol_cache_entry **symbol_ptr_ptr;
+   struct bfd_seclet_struct *seclets_head;
+   struct bfd_seclet_struct *seclets_tail;
 } asection ;
+
+
+#define BFD_ABS_SECTION_NAME "*ABS*"
+#define BFD_UND_SECTION_NAME "*UND*"
+#define BFD_COM_SECTION_NAME "*COM*"
+
+     /* the absolute section */
+ extern   asection bfd_abs_section;
+     /* Pointer to the undefined section */
+ extern   asection bfd_und_section;
+     /* Pointer to the common section */
+ extern asection bfd_com_section;
+
+ extern struct symbol_cache_entry *bfd_abs_symbol;
+ extern struct symbol_cache_entry *bfd_com_symbol;
+ extern struct symbol_cache_entry *bfd_und_symbol;
+#define bfd_get_section_size_before_reloc(section) \
+     (section->reloc_done ? (abort(),1): (section)->_raw_size)
+#define bfd_get_section_size_after_reloc(section) \
+     ((section->reloc_done) ? (section)->_cooked_size: (abort(),1))
 asection *EXFUN(bfd_get_section_by_name, (bfd *abfd, CONST char *name));
 asection *EXFUN(bfd_make_section_old_way, (bfd *, CONST char *name));
 asection * EXFUN(bfd_make_section, (bfd *, CONST char *name));
@@ -690,9 +738,6 @@ typedef struct reloc_cache_entry
         /* addend for relocation value */
   bfd_vma addend;    
 
-        /* if sym is null this is the section */
-  struct sec *section;
-
         /* Pointer to how to perform the required relocation */
   CONST struct reloc_howto_struct *howto;
 
@@ -778,16 +823,12 @@ typedef CONST struct reloc_howto_struct
 #define HOWTO_PREPARE(relocation, symbol)      \
   {                                            \
   if (symbol != (asymbol *)NULL) {             \
-    if (symbol->flags & BSF_FORT_COMM) {       \
+    if (symbol->section == &bfd_com_section) { \
       relocation = 0;                          \
     }                                          \
     else {                                     \
       relocation = symbol->value;              \
     }                                          \
-  }                                            \
-  if (symbol->section != (asection *)NULL) {   \
-    relocation += symbol->section->output_section->vma +       \
-      symbol->section->output_offset;          \
   }                                            \
 }                      
 typedef unsigned char bfd_byte;
@@ -863,11 +904,11 @@ typedef struct symbol_cache_entry
 
 	 /* The symbol is undefined. <<extern>> in <<C>>. The value has
 	   no meaning. */
-#define BSF_UNDEFINED	0x10	
+#define BSF_UNDEFINED_OBS 0x10	
 
 	 /* The symbol is common, initialized to zero; default in
 	   <<C>>. The value is the size of the object in bytes. */
-#define BSF_FORT_COMM	0x20	
+#define BSF_FORT_COMM_OBS	0x20	
 
 	 /* A normal C symbol would be one of:
 	   <<BSF_LOCAL>>, <<BSF_FORT_COMM>>,  <<BSF_UNDEFINED>> or
@@ -877,10 +918,6 @@ typedef struct symbol_cache_entry
 	   meaning. */
 #define BSF_DEBUGGING	0x40
 
-	 /* The symbol has no section attached, any value is the actual
-	   value and is not a relative offset to a section. */
-#define BSF_ABSOLUTE	0x80
-
 	 /* Used by the linker */
 #define BSF_KEEP        0x10000
 #define BSF_KEEP_G      0x80000
@@ -888,7 +925,9 @@ typedef struct symbol_cache_entry
 	 /* Unused */
 #define BSF_WEAK        0x100000
 #define BSF_CTOR        0x200000 
-#define BSF_FAKE        0x400000 
+
+        /* This symbol was created to point to a section */
+#define BSF_SECTION_SYM 0x400000 
 
 	 /* The symbol used to be a common symbol, but now it is
 	   allocated. */
@@ -921,11 +960,9 @@ typedef struct symbol_cache_entry
 
   flagword flags;
 
-	 /* A pointer to the section to which this symbol is relative,
-	   or 0 if the symbol is absolute or undefined. Note that it
-	   is not sufficient to set this location to 0 to mark a
-	   symbol as absolute - the flag <<BSF_ABSOLUTE>> must be set
-	   also. */
+	 /* A pointer to the section to which this symbol is 
+	   relative.  This will always be non NULL, there are special
+          sections for undefined and absolute symbols */
   struct sec *section;
 
 	 /* Back end special data. This is being phased out in favour
@@ -1048,13 +1085,31 @@ struct _bfd
     boolean has_armap;           
 
      /* Used by the back end to hold private data. */
-    PTR tdata;
 
+    union 
+      {
+      struct aout_data_struct *aout_data;
+      struct artdata *aout_ar_data;
+      struct _oasys_data *oasys_obj_data;
+      struct _oasys_ar_data *oasys_ar_data;
+      struct coff_tdata *coff_obj_data;
+      struct ieee_data_struct *ieee_data;
+      struct ieee_ar_data_struct *ieee_ar_data;
+      struct srec_data_struct *srec_data;
+      struct elf_obj_tdata_struct *elf_obj_data;
+      struct elf_core_tdata_struct *elf_core_data;
+      struct bout_data_struct *bout_data;
+      struct sun_core_struct *sun_core_data;
+      PTR any;
+      } tdata;
+  
      /* Used by the application to hold private data*/
     PTR usrdata;
 
      /* Where all the allocated stuff under this BFD goes */
     struct obstack memory;
+
+    asymbol **ld_symbols;
 };
 
 unsigned int EXFUN(bfd_get_reloc_upper_bound, (bfd *abfd, asection *sect));
@@ -1121,9 +1176,11 @@ long EXFUN(bfd_get_mtime, (bfd *));
 #define bfd_coff_swap_aouthdr_out(abfd, i,o) \
         BFD_SEND (abfd, _bfd_coff_swap_aouthdr_out, (abfd, i, o))
 
-symindex EXFUN(bfd_get_next_mapent, (bfd *, symindex, carsym **));
+#define bfd_get_relocated_section_contents(abfd, seclet) \
+	BFD_SEND (abfd, _bfd_get_relocated_section_contents, (abfd, seclet))
+symindex EXFUN(bfd_get_next_mapent, (bfd *, symindex previous, carsym ** sym));
 boolean EXFUN(bfd_set_archive_head, (bfd *output, bfd *new_head));
-bfd *EXFUN(bfd_get_elt_at_index, (bfd *, int));
+bfd *EXFUN(bfd_get_elt_at_index, (bfd * archive, int index));
 bfd* EXFUN(bfd_openr_next_archived_file, (bfd *archive, bfd *previous));
 CONST char *EXFUN(bfd_core_file_failing_command, (bfd *));
 int EXFUN(bfd_core_file_failing_signal, (bfd *));
@@ -1214,6 +1271,7 @@ typedef struct bfd_target
   SDEF (void, _bfd_debug_info_start, (bfd *));
   SDEF (void, _bfd_debug_info_end, (bfd *));
   SDEF (void, _bfd_debug_info_accumulate, (bfd *, struct sec  *));
+  SDEF (bfd_byte *, _bfd_get_relocated_section_contents, (bfd*,struct bfd_seclet_struct *));
   SDEF(void, _bfd_coff_swap_aux_in,(
        bfd            *abfd ,
        PTR             ext,
