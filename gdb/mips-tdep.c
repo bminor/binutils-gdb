@@ -513,6 +513,14 @@ mips_register_virtual_type (int reg)
     }
 }
 
+/* TARGET_READ_SP -- Remove useless bits from the stack pointer.  */
+
+static CORE_ADDR
+mips_read_sp (void)
+{
+  return ADDR_BITS_REMOVE (read_register (SP_REGNUM));
+}
+
 /* Should the upper word of 64-bit addresses be zeroed? */
 enum auto_boolean mask_address_var = AUTO_BOOLEAN_AUTO;
 
@@ -2294,9 +2302,11 @@ mips_frame_chain (struct frame_info *frame)
      we loop forever if we see a zero size frame.  */
   if (PROC_FRAME_REG (proc_desc) == SP_REGNUM
       && PROC_FRAME_OFFSET (proc_desc) == 0
-  /* The previous frame from a sigtramp frame might be frameless
-     and have frame size zero.  */
-      && !frame->signal_handler_caller)
+      /* The previous frame from a sigtramp frame might be frameless
+	 and have frame size zero.  */
+      && !frame->signal_handler_caller
+      /* Check if this is a call dummy frame.  */
+      && frame->pc != mips_call_dummy_address ())
     return 0;
   else
     return get_frame_pointer (frame, proc_desc);
@@ -2959,7 +2969,7 @@ mips_o32o64_push_arguments (int nargs,
   argreg = A0_REGNUM;
   float_argreg = FPA0_REGNUM;
 
-  /* the struct_return pointer occupies the first parameter-passing reg */
+  /* The struct_return pointer occupies the first parameter-passing reg.  */
   if (struct_return)
     {
       if (mips_debug)
@@ -3346,13 +3356,22 @@ mips_pop_frame (void)
   if (frame->saved_regs == NULL)
     FRAME_INIT_SAVED_REGS (frame);
   for (regnum = 0; regnum < NUM_REGS; regnum++)
-    {
-      if (regnum != SP_REGNUM && regnum != PC_REGNUM
-	  && frame->saved_regs[regnum])
-	write_register (regnum,
-			read_memory_integer (frame->saved_regs[regnum],
-					     MIPS_SAVED_REGSIZE));
-    }
+    if (regnum != SP_REGNUM && regnum != PC_REGNUM
+	&& frame->saved_regs[regnum])
+      {
+	/* Floating point registers must not be sign extended, 
+	   in case MIPS_SAVED_REGSIZE = 4 but sizeof (FP0_REGNUM) == 8.  */
+
+	if (FP0_REGNUM <= regnum && regnum < FP0_REGNUM + 32)
+	  write_register (regnum,
+			  read_memory_unsigned_integer (frame->saved_regs[regnum],
+							MIPS_SAVED_REGSIZE));
+	else
+	  write_register (regnum,
+			  read_memory_integer (frame->saved_regs[regnum],
+					       MIPS_SAVED_REGSIZE));
+      }
+
   write_register (SP_REGNUM, new_sp);
   flush_cached_frames ();
 
@@ -4079,15 +4098,28 @@ return_value_location (struct type *valtype,
       if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
 	  && len < MIPS_SAVED_REGSIZE)
 	{
-	  /* "un-left-justify" the value in the low register */
-	  lo->reg_offset = MIPS_SAVED_REGSIZE - len;
-	  lo->len = len;
+	  if ((gdbarch_tdep (current_gdbarch) -> mips_abi == MIPS_ABI_N32 
+	       || gdbarch_tdep (current_gdbarch) -> mips_abi == MIPS_ABI_N64)
+	      && (TYPE_CODE (valtype) == TYPE_CODE_STRUCT 
+		  || TYPE_CODE (valtype) == TYPE_CODE_UNION))
+	    {
+	      /* Values are already aligned in the low register.  */
+	      lo->reg_offset = 0;
+	    }
+	  else
+	    {
+	      /* "un-left-justify" the value in the low register */
+	      lo->reg_offset = MIPS_SAVED_REGSIZE - len;
+	    }
 	  hi->reg_offset = 0;
+	  lo->len = len;
 	  hi->len = 0;
 	}
       else if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
 	       && len > MIPS_SAVED_REGSIZE	/* odd-size structs */
 	       && len < MIPS_SAVED_REGSIZE * 2
+	       && gdbarch_tdep (current_gdbarch) -> mips_abi != MIPS_ABI_N32 
+	       && gdbarch_tdep (current_gdbarch) -> mips_abi != MIPS_ABI_N64
 	       && (TYPE_CODE (valtype) == TYPE_CODE_STRUCT ||
 		   TYPE_CODE (valtype) == TYPE_CODE_UNION))
 	{
@@ -4925,6 +4957,7 @@ mips_gdbarch_init (struct gdbarch_info info,
 	}
     }
 
+#undef MIPS_DEFAULT_ABI
 #ifdef MIPS_DEFAULT_ABI
   if (mips_abi == MIPS_ABI_UNKNOWN)
     mips_abi = MIPS_DEFAULT_ABI;
@@ -5170,7 +5203,7 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_read_pc (gdbarch, mips_read_pc);
   set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
   set_gdbarch_read_fp (gdbarch, generic_target_read_fp);
-  set_gdbarch_read_sp (gdbarch, generic_target_read_sp);
+  set_gdbarch_read_sp (gdbarch, mips_read_sp);
   set_gdbarch_write_sp (gdbarch, generic_target_write_sp);
 
   /* Add/remove bits from an address. The MIPS needs be careful to
