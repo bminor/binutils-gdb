@@ -1,5 +1,7 @@
 Thu Sep 23 01:05:06 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* objdump.c (usage): Mention --stabs.
+
 	* objcopy.c (copy_object): Copy all applicable file flags.
 	(copy_file): Don't copy EXEC_P specially here.
 

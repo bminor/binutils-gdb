@@ -24,18 +24,11 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <ctype.h>
 #include "dis-asm.h"
 
-#define	ELF_STAB_DISPLAY	/* This code works, but uses internal
-				   bfd and elf stuff.  Flip this define
-				   off if you need to just use generic
-				   BFD interfaces.  */
-
-#ifdef	ELF_STAB_DISPLAY
 /* Internal headers for the ELF .stab-dump code - sorry.  */
 #define	BYTES_IN_WORD	32
 #include "aout/aout64.h"
 #include "elf/internal.h"
 extern Elf_Internal_Shdr *bfd_elf_find_section();
-#endif	/* ELF_STAB_DISPLAY */
 
 extern char *xmalloc ();
 extern int fprintf PARAMS ((FILE *, CONST char *, ...));
@@ -53,7 +46,7 @@ int dump_symtab;		/* -t */
 int dump_reloc_info;		/* -r */
 int dump_ar_hdrs;		/* -a */
 int with_line_numbers;		/* -l */
-int dump_stab_section_info;	/* -stabs */
+int dump_stab_section_info;	/* --stabs */
 boolean disassemble;		/* -d */
 boolean info;			/* -i */
 char *only;			/* -j secname */
@@ -91,7 +84,7 @@ usage (stream, status)
 {
   fprintf (stream, "\
 Usage: %s [-ahifdrtxsl] [-m machine] [-j section_name] [-b bfdname]\n\
-       [--syms] [--reloc] [--header] [--version] [--help] objfile...\n\
+       [--syms] [--reloc] [--header] [--stabs] [--version] [--help] objfile...\n\
        at least one option besides -l must be given\n",
 	   program_name);
   exit (status);
@@ -104,9 +97,7 @@ static struct option long_options[]=
   {"header", no_argument, &dump_section_headers, 1},
   {"version", no_argument, &show_version,    1},
   {"help", no_argument, 0, 'H'},
-#ifdef	ELF_STAB_DISPLAY
   {"stabs", no_argument, &dump_stab_section_info, 1},
-#endif
   {0, no_argument, 0, 0}
 };
 
@@ -634,7 +625,6 @@ disassemble_data (abfd)
     }
 }
 
-#ifdef	ELF_STAB_DISPLAY
 
 /* Define a table of stab values and print-strings.  We wish the initializer
    could be a direct-mapped table, but instead we build one the first
@@ -656,14 +646,14 @@ struct stab_print stab_print[] = {
   {0, 0}
 };
 
-void dump_elf_stabs_1 ();
+void dump_stabs_1 ();
 
-/* This is a kludge for dumping the stabs section from an ELF file that
+/* This dumps the stabs section from object files that have a section that
    uses Sun stabs encoding.  It has to use some hooks into BFD because
    string table sections are not normally visible to BFD callers.  */
 
 void
-dump_elf_stabs (abfd)
+dump_stabs (abfd)
      bfd *abfd;
 {
   int i;
@@ -680,66 +670,94 @@ dump_elf_stabs (abfd)
 	strcpy (stab_name[stab_print[i].value], stab_print[i].string);
     }
 
-  if (0 != strncmp ("elf", abfd->xvec->name, 3))
-    {
-      fprintf (stderr, "%s: %s is not in ELF format.\n", program_name,
-	       abfd->filename);
-      return;
-    }
-
-  dump_elf_stabs_1 (abfd, ".stab", ".stabstr");
-  dump_elf_stabs_1 (abfd, ".stab.excl", ".stab.exclstr");
-  dump_elf_stabs_1 (abfd, ".stab.index", ".stab.indexstr");
+  dump_stabs_1 (abfd, ".stab", ".stabstr");
+  dump_stabs_1 (abfd, ".stab.excl", ".stab.exclstr");
+  dump_stabs_1 (abfd, ".stab.index", ".stab.indexstr");
 }
 
 void
-dump_elf_stabs_1 (abfd, name1, name2)
+dump_stabs_1 (abfd, name1, name2)
      bfd *abfd;
      char *name1;		/* Section name of .stab */
      char *name2;		/* Section name of its string section */
 {
   Elf_Internal_Shdr *stab_hdr, *stabstr_hdr;
+  asection *stabsect, *stabstrsect;
   char *strtab;
   struct internal_nlist *stabs, *stabs_end;
   int i;
+  int stab_size, stabstr_size;
   unsigned file_string_table_offset, next_file_string_table_offset;
+  int is_elf = (0 == strncmp ("elf", abfd->xvec->name, 3));
 
-  stab_hdr = bfd_elf_find_section (abfd, name1);
-  if (0 == stab_hdr)
+  if (is_elf)
     {
-      printf ("Contents of %s section:  none.\n\n", name1);
+      stab_hdr = bfd_elf_find_section (abfd, name1);
+    }
+  else
+    {
+      stabsect = bfd_get_section_by_name (abfd, name1);
+    }
+
+  if (is_elf ? (0 == stab_hdr) : (0 == stabsect))
+    {
+      printf ("No %s section present.\n\n", name1);
       return;
     }
 
-  stabstr_hdr = bfd_elf_find_section (abfd, name2);
-  if (0 == stabstr_hdr)
+  if (is_elf)
+    {
+      stabstr_hdr = bfd_elf_find_section (abfd, name2);
+    }
+  else
+    {
+      stabstrsect = bfd_get_section_by_name (abfd, name2);
+    }
+
+  if (is_elf ? (0 == stabstr_hdr) : (0 == stabstrsect))
     {
       fprintf (stderr, "%s: %s has no %s section.\n", program_name,
 	       abfd->filename, name2);
       return;
     }
+ 
+  stab_size    = (is_elf ? stab_hdr   ->sh_size : bfd_section_size (abfd, stabsect));
+  stabstr_size = (is_elf ? stabstr_hdr->sh_size : bfd_section_size (abfd, stabstrsect));
 
-  stabs  = (struct internal_nlist *) xmalloc (stab_hdr   ->sh_size);
-  strtab = (char *)		     xmalloc (stabstr_hdr->sh_size);
-  stabs_end = (struct internal_nlist *) (stab_hdr->sh_size + (char *)stabs);
+  stabs  = (struct internal_nlist *) xmalloc (stab_size);
+  strtab = (char *) xmalloc (stabstr_size);
+  stabs_end = (struct internal_nlist *) (stab_size + (char *) stabs);
   
-  if (bfd_seek (abfd, stab_hdr->sh_offset, SEEK_SET) < 0 ||
-      stab_hdr->sh_size != bfd_read ((PTR)stabs, stab_hdr->sh_size, 1, abfd))
+  if (is_elf) 
     {
-      fprintf (stderr, "%s: reading %s section of %s failed.\n",
-	       program_name, name1, 
-	       abfd->filename);
-      return;
+      if (bfd_seek (abfd, stab_hdr->sh_offset, SEEK_SET) < 0 ||
+	  stab_size != bfd_read ((PTR) stabs, stab_size, 1, abfd))
+	{
+	  fprintf (stderr, "%s: reading %s section of %s failed.\n",
+		   program_name, name1, 
+		   abfd->filename);
+	  return;
+	}
+    }
+  else
+    {
+      bfd_get_section_contents (abfd, stabsect, (PTR) stabs, 0, stab_size);
     }
 
-  if (bfd_seek (abfd, stabstr_hdr->sh_offset, SEEK_SET) < 0 ||
-      stabstr_hdr->sh_size != bfd_read ((PTR)strtab, stabstr_hdr->sh_size,
-					1, abfd))
+  if (is_elf) 
     {
-      fprintf (stderr, "%s: reading %s section of %s failed.\n",
-	       program_name, name2,
-	       abfd->filename);
-      return;
+      if (bfd_seek (abfd, stabstr_hdr->sh_offset, SEEK_SET) < 0 ||
+	  stabstr_size != bfd_read ((PTR) strtab, stabstr_size, 1, abfd))
+	{
+	  fprintf (stderr, "%s: reading %s section of %s failed.\n",
+		   program_name, name2,
+		   abfd->filename);
+	  return;
+	}
+    }
+  else
+    {
+      bfd_get_section_contents (abfd, stabstrsect, (PTR) strtab, 0, stabstr_size);
     }
 
 #define SWAP_SYMBOL(symp, abfd) \
@@ -784,14 +802,13 @@ dump_elf_stabs_1 (abfd, name1, name2)
       /* Now, using the possibly updated string table offset, print the
 	 string (if any) associated with this symbol.  */
 
-      if ((stabs->n_strx + file_string_table_offset) < stabstr_hdr->sh_size)
+      if ((stabs->n_strx + file_string_table_offset) < stabstr_size)
 	printf (" %s", &strtab[stabs->n_strx + file_string_table_offset]);
       else
         printf (" *");
     }
   printf ("\n\n");
 }
-#endif	/* ELF_STAB_DISPLAY */
 
 display_bfd (abfd)
      bfd *abfd;
@@ -840,10 +857,8 @@ display_bfd (abfd)
     }
   if (dump_symtab)
     dump_symbols (abfd);
-#ifdef	ELF_STAB_DISPLAY
   if (dump_stab_section_info)
-    dump_elf_stabs (abfd);
-#endif
+    dump_stabs (abfd);
   if (dump_reloc_info)
     dump_relocs (abfd);
   if (dump_section_contents)
@@ -920,27 +935,27 @@ dump_data (abfd)
 	    {
 	      printf ("Contents of section %s:\n", section->name);
 
-	      if (bfd_get_section_size_before_reloc (section) == 0)
+	      if (bfd_section_size (abfd, section) == 0)
 		continue;
-	      data = (bfd_byte *) malloc ((size_t) bfd_get_section_size_before_reloc (section));
+	      data = (bfd_byte *) malloc ((size_t) bfd_section_size (abfd, section));
 	      if (data == (bfd_byte *) NULL)
 		{
 		  fprintf (stderr, "%s: memory exhausted.\n", program_name);
 		  exit (1);
 		}
-	      datasize = bfd_get_section_size_before_reloc (section);
+	      datasize = bfd_section_size (abfd, section);
 
 
-	      bfd_get_section_contents (abfd, section, (PTR) data, 0, bfd_get_section_size_before_reloc (section));
+	      bfd_get_section_contents (abfd, section, (PTR) data, 0, bfd_section_size (abfd, section));
 
-	      for (i = 0; i < bfd_get_section_size_before_reloc (section); i += onaline)
+	      for (i = 0; i < bfd_section_size (abfd, section); i += onaline)
 		{
 		  bfd_size_type j;
 
 		  printf (" %04lx ", (unsigned long int) (i + section->vma));
 		  for (j = i; j < i + onaline; j++)
 		    {
-		      if (j < bfd_get_section_size_before_reloc (section))
+		      if (j < bfd_section_size (abfd, section))
 			printf ("%02x", (unsigned) (data[j]));
 		      else
 			printf ("  ");
@@ -951,7 +966,7 @@ dump_data (abfd)
 		  printf (" ");
 		  for (j = i; j < i + onaline; j++)
 		    {
-		      if (j >= bfd_get_section_size_before_reloc (section))
+		      if (j >= bfd_section_size (abfd, section))
 			printf (" ");
 		      else
 			printf ("%c", isprint (data[j]) ? data[j] : '.');
