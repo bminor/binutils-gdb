@@ -1,3 +1,12 @@
+
+2003-10-16  Kei Sakamoto  <sakamoto.kei@renesas.com>
+
+	* remote-m32r-sdi.c : New file, interface to m32r on-chip
+	debug interface, SDI (Scalable Debug Interface).
+	* NEWS: Mention m32r SDI protocol was supported.
+	* Makefile.in (remote-m32r-sdi.o): Add build rule.
+	* config/m32r/m32r.mt (TDEPFILES) : Add remote-m32r-sdi.o.
+
 2003-10-15  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* ia64-linux-tdep.c: Include gdbcore.h.

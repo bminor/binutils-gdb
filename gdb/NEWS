@@ -3,6 +3,10 @@
 
 *** Changes since GDB 6.0:
 
+* New debugging protocols
+
+M32R with SDI protocol				m32r-*-elf*
+
 * "set prompt-escape-char" command deleted.
 
 The command "set prompt-escape-char" has been deleted.  This command,
