@@ -28,6 +28,8 @@ astest.s
 astest2.d
 astest2.s
 ppc.exp
+simpshft.d
+simpshft.s
 
 Things-to-lose:
 
