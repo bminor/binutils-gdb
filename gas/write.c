@@ -1917,6 +1917,9 @@ write_object_file (void)
              symbols.  */
 	  if (symbol_equated_reloc_p (symp))
 	    {
+	      if (S_IS_COMMON (symp))
+		as_bad (_("`%s' can't be equated to common symbol"),
+			S_GET_NAME (symp));
 	      symbol_remove (symp, &symbol_rootP, &symbol_lastP);
 	      continue;
 	    }

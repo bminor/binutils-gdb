@@ -1,3 +1,8 @@
+2005-01-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* write.c (write_object_file): Disallow a symbol equated to
+	common symbol.
+
 2005-01-10  Inderpreet Singh <inderpreetb@noida.hcltech.com>
 
 	* tc-maxq.c: Replace constants 10 and 20 with bfd_mach_maxq10 and
