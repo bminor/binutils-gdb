@@ -1,5 +1,13 @@
 2004-12-07  Randolph Chung  <tausq@debian.org>
 
+	* hppa-tdep.c (hppa_stub_Frame_unwind_cache): Stop unwinding if 
+	unwinding from a frame with pc == 0.
+	(hppa_stub_frame_this_id): Likewise.
+	(hppa_stub_frame_prev_register): Only provide real values if the frame
+	cache is not NULL.
+
+2004-12-07  Randolph Chung  <tausq@debian.org>
+
 	* solib-som.c: New file.
 	* solib-som.h: New file.
 	* solib-pa64.c: New file.

@@ -2092,6 +2092,9 @@ hppa_stub_frame_unwind_cache (struct frame_info *next_frame,
   if (*this_cache)
     return *this_cache;
 
+  if (frame_pc_unwind (next_frame) == 0)
+    return NULL;
+
   info = FRAME_OBSTACK_ZALLOC (struct hppa_stub_unwind_cache);
   *this_cache = info;
   info->saved_regs = trad_frame_alloc_saved_regs (next_frame);
@@ -2126,7 +2129,11 @@ hppa_stub_frame_this_id (struct frame_info *next_frame,
 {
   struct hppa_stub_unwind_cache *info
     = hppa_stub_frame_unwind_cache (next_frame, this_prologue_cache);
-  *this_id = frame_id_build (info->base, frame_pc_unwind (next_frame));
+
+  if (info)
+    *this_id = frame_id_build (info->base, frame_func_unwind (next_frame));
+  else
+    *this_id = null_frame_id;
 }
 
 static void
@@ -2138,8 +2145,13 @@ hppa_stub_frame_prev_register (struct frame_info *next_frame,
 {
   struct hppa_stub_unwind_cache *info
     = hppa_stub_frame_unwind_cache (next_frame, this_prologue_cache);
-  hppa_frame_prev_register_helper (next_frame, info->saved_regs, regnum,
-		                   optimizedp, lvalp, addrp, realnump, valuep);
+
+  if (info)
+    hppa_frame_prev_register_helper (next_frame, info->saved_regs, regnum,
+				     optimizedp, lvalp, addrp, realnump, 
+				     valuep);
+  else
+    error ("Requesting registers from null frame.\n");
 }
 
 static const struct frame_unwind hppa_stub_frame_unwind = {
