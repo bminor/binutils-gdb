@@ -1,5 +1,13 @@
 Fri Jul 17 10:14:56 1992  Fred Fish  (fnf@cygnus.com)
 
+	* eval.c (evaluate_subexp):  Ask lookup_struct_elt_type to call
+	error if it fails to find a member type, rather than return NULL
+	and trigger a coredump.
+	* symtab.c (lookup_symbol, lookup_demangled_block_symbol,
+	lookup_demangled_partial_symbol,):  Ask demangle_and_match to
+	match on complete demanglings, including argument lists for member
+	functions, rather than just accepting the first demangling that
+	matches the class and function name.
 	* dwarfread.c (read_file_scope):  Pass contents of AT_comp_dir
 	to start_symtab as the directory name.
 	* dwarfread.c (completedieinfo):  Strip off any leading hostname
