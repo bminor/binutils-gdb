@@ -93,7 +93,7 @@ proc sim_run { prog sim_opts prog_opts redir options } {
 	set prog [remote_download host $prog]
 	if { $prog == "" } {
 	    error "download failed"
-	    return -1;
+	    return -1
 	}
     }
 
