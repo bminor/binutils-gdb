@@ -1,3 +1,8 @@
+Wed Jan 28 13:41:26 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf.c (_bfd_elf_close_and_cleanup): Only check the strtab if we
+	have a bfd_object.
+
 Tue Jan 27 21:43:55 1998  Richard Henderson  <rth@cygnus.com>
 
 	Sparc v9 ABI compliant PLT:
@@ -41,8 +46,8 @@ Tue Jan 27 15:06:04 1998  Nick Clifton  <nickc@cygnus.com>
 
 Tue Jan 27 12:47:27 1998  Robert Lipe  <robertl@dgii.com>
 
-	* config.bfd (i[3456]86-sco3.2v5*) ELF now the default. 
-	(i[3456]86sco3.2v5*coff) New target.
+	* config.bfd (i[3456]86-sco3.2v5*): ELF now the default. 
+	(i[3456]86sco3.2v5*coff): New target.
 
 Mon Jan 26 15:41:30 1998  Ian Lance Taylor  <ian@cygnus.com>
 

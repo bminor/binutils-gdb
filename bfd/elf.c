@@ -4236,7 +4236,11 @@ boolean
 _bfd_elf_close_and_cleanup (abfd)
      bfd *abfd;
 {
-  if (elf_shstrtab (abfd))
-    _bfd_stringtab_free (elf_shstrtab (abfd));
+  if (bfd_get_format (abfd) == bfd_object)
+    {
+      if (elf_shstrtab (abfd) != NULL)
+	_bfd_stringtab_free (elf_shstrtab (abfd));
+    }
+
   return _bfd_generic_close_and_cleanup (abfd);
 }
