@@ -1,3 +1,8 @@
+2002-08-22  Nick Clifton  <nickc@redhat.com>
+
+	* gprof.c (main): Turn off default excluded functions in FLAT
+	profile.
+
 2002-08-21  John David Anglin  <dave@hiauly1.hia.nrc.ca>
 
 	* gmon_io.c (gmon_io_read_64, gmon_io_write_64): Define only if
