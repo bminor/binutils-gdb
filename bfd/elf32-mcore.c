@@ -1,4 +1,4 @@
-/* Motorolla MCore specific support for 32-bit ELF
+/* Motorola MCore specific support for 32-bit ELF
    Copyright 1994, 1995, 1999 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -57,16 +57,16 @@ static reloc_howto_type mcore_elf_howto_raw[] =
   HOWTO (R_MCORE_NONE,		/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 1,			/* bitsize */
-	 true,			/* pc_relative */
+	 32,			/* bitsize */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield,  /* complain_on_overflow */
-	 mcore_elf_unsupported_reloc, /* special_function */
+	 NULL,                  /* special_function */
 	 "R_MCORE_NONE",	/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0,			/* dst_mask */
-	 true),			/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   /* A standard 32 bit relocation.  */
   HOWTO (R_MCORE_ADDR32,	/* type */
@@ -209,7 +209,7 @@ static reloc_howto_type mcore_elf_howto_raw[] =
 	 true,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 true)			/* pcrel_offset */
+	 false)			/* pcrel_offset */
 };
 
 #ifndef NUM_ELEM

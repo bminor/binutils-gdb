@@ -1,3 +1,7 @@
+1999-06-16  Nick Clifton  <nickc@cygnus.com>
+
+	* elf32-mcore.c (R_MCORE_RAW): Fix definition.
+
 1999-06-15  Richard Henderson  <rth@cygnus.com>
 
 	* section.c (SEC_SHORT): Define.
