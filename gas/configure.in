@@ -38,6 +38,8 @@ te_file=generic
 
 # check for architecture variants
 case ${target_cpu} in
+  armeb)	cpu_type=arm endian=big ;;
+  arm*)		cpu_tpye=arm endian=little ;;
   hppa*)	cpu_type=hppa ;;
 changequote(,)dnl
   i[45]86)	cpu_type=i386 ;;
@@ -135,7 +137,16 @@ changequote([,])dnl
       arc-*-elf*)           fmt=elf bfd_gas=yes ;;
 # end-sanitize-arc
 
+      arm-*-riscix*)	    fmt=aout targ=arm-lit
+			    emulation=riscix ;;
+      arm-*-aout)	    fmt=aout
+			    case "$endian" in
+			      big)	targ=arm-big ;;
+			      *)	targ=arm-lit ;;
+			    esac
+			    ;;
       arm-*-riscix*)        fmt=aout ;;
+      arm-*-pe)             fmt=coff targ=armcoff em=pe ;;
 
       hppa-*-*elf*)         fmt=elf em=hppa ;;
       hppa-*-lites*)        fmt=elf em=hppa ;;
@@ -167,7 +178,8 @@ changequote([,])dnl
       i386-*-mach* | i386-*-gnu*)
 			    fmt=aout em=mach bfd_gas=yes ;;
       i386-*-msdos*)        fmt=aout ;;
-
+      i386-*-pe)            fmt=coff targ=i386coff em=pe ;;
+      i386-*-*nt)           fmt=coff targ=i386coff em=pe ;;
       i960-*-bout)          fmt=bout ;;
       i960-*-coff)          fmt=coff em=ic960 targ=ic960coff ;;
       i960-*-nindy*)        fmt=bout ;;
@@ -307,14 +319,14 @@ changequote([,])dnl
 # From target name and format, produce a list of supported emulations.
 
     case ${generic_target}-${fmt} in
-      mips-*-irix5*-*)	emulation="mipsbelf mipslelf mipsbecoff mipslecoff" ;;
+      mips-*-irix5*-*)	emulation="mipsbelf mipslelf mipself mipsbecoff mipslecoff mipsecoff" ;;
       mips-*-*-ecoff)	case "$endian" in
-			big)	emulation="mipsbecoff mipslecoff" ;;
-			*)	emulation="mipslecoff mipsbecoff" ;;
+			big)	emulation="mipsbecoff mipslecoff mipsecoff" ;;
+			*)	emulation="mipslecoff mipsbecoff mipsecoff" ;;
 			esac ;;
       mips-*-*-elf)	case "$endian" in
-			big)	emulation="mipsbelf mipslelf" ;;
-			*)	emulation="mipslelf mipsbelf" ;;
+			big)	emulation="mipsbelf mipslelf mipself" ;;
+			*)	emulation="mipslelf mipsbelf mipself" ;;
 			esac ;;
     esac
 

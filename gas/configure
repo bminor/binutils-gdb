@@ -554,6 +554,8 @@ te_file=generic
 
 # check for architecture variants
 case ${target_cpu} in
+  armeb)	cpu_type=arm endian=big ;;
+  arm*)		cpu_tpye=arm endian=little ;;
   hppa*)	cpu_type=hppa ;;
   i[45]86)	cpu_type=i386 ;;
   m680[012346]0) cpu_type=m68k ;;
@@ -662,7 +664,16 @@ for this_target in $target $canon_targets ; do
       arc-*-elf*)           fmt=elf bfd_gas=yes ;;
 # end-sanitize-arc
 
+      arm-*-riscix*)	    fmt=aout targ=arm-lit
+			    emulation=riscix ;;
+      arm-*-aout)	    fmt=aout
+			    case "$endian" in
+			      big)	targ=arm-big ;;
+			      *)	targ=arm-lit ;;
+			    esac
+			    ;;
       arm-*-riscix*)        fmt=aout ;;
+      arm-*-pe)             fmt=coff targ=armcoff em=pe ;;
 
       hppa-*-*elf*)         fmt=elf em=hppa ;;
       hppa-*-lites*)        fmt=elf em=hppa ;;
@@ -694,7 +705,8 @@ for this_target in $target $canon_targets ; do
       i386-*-mach* | i386-*-gnu*)
 			    fmt=aout em=mach bfd_gas=yes ;;
       i386-*-msdos*)        fmt=aout ;;
-
+      i386-*-pe)            fmt=coff targ=i386coff em=pe ;;
+      i386-*-*nt)           fmt=coff targ=i386coff em=pe ;;
       i960-*-bout)          fmt=bout ;;
       i960-*-coff)          fmt=coff em=ic960 targ=ic960coff ;;
       i960-*-nindy*)        fmt=bout ;;
@@ -834,14 +846,14 @@ for this_target in $target $canon_targets ; do
 # From target name and format, produce a list of supported emulations.
 
     case ${generic_target}-${fmt} in
-      mips-*-irix5*-*)	emulation="mipsbelf mipslelf mipsbecoff mipslecoff" ;;
+      mips-*-irix5*-*)	emulation="mipsbelf mipslelf mipself mipsbecoff mipslecoff mipsecoff" ;;
       mips-*-*-ecoff)	case "$endian" in
-			big)	emulation="mipsbecoff mipslecoff" ;;
-			*)	emulation="mipslecoff mipsbecoff" ;;
+			big)	emulation="mipsbecoff mipslecoff mipsecoff" ;;
+			*)	emulation="mipslecoff mipsbecoff mipsecoff" ;;
 			esac ;;
       mips-*-*-elf)	case "$endian" in
-			big)	emulation="mipsbelf mipslelf" ;;
-			*)	emulation="mipslelf mipsbelf" ;;
+			big)	emulation="mipsbelf mipslelf mipself" ;;
+			*)	emulation="mipslelf mipsbelf mipself" ;;
 			esac ;;
     esac
 
@@ -1213,7 +1225,7 @@ else
   # On the NeXT, cc -E runs the code through the compiler's parser,
   # not just through cpp.
   cat > conftest.$ac_ext <<EOF
-#line 1217 "configure"
+#line 1229 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
@@ -1227,7 +1239,7 @@ else
   rm -rf conftest*
   CPP="${CC-cc} -E -traditional-cpp"
   cat > conftest.$ac_ext <<EOF
-#line 1231 "configure"
+#line 1243 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
@@ -1258,7 +1270,7 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1262 "configure"
+#line 1274 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
@@ -1310,7 +1322,7 @@ else
   ac_cv_c_cross=yes
 else
 cat > conftest.$ac_ext <<EOF
-#line 1314 "configure"
+#line 1326 "configure"
 #include "confdefs.h"
 main(){return(0);}
 EOF
@@ -1333,7 +1345,7 @@ if eval "test \"`echo '$''{'ac_cv_header_alloca_h'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1337 "configure"
+#line 1349 "configure"
 #include "confdefs.h"
 #include <alloca.h>
 int main() { return 0; }
@@ -1364,7 +1376,7 @@ if eval "test \"`echo '$''{'ac_cv_func_alloca'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1368 "configure"
+#line 1380 "configure"
 #include "confdefs.h"
 
 #ifdef __GNUC__
@@ -1422,7 +1434,7 @@ if eval "test \"`echo '$''{'ac_cv_os_cray'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1426 "configure"
+#line 1438 "configure"
 #include "confdefs.h"
 #if defined(CRAY) && ! defined(CRAY2)
 webecray
@@ -1450,7 +1462,7 @@ if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1454 "configure"
+#line 1466 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -1504,7 +1516,7 @@ else
   ac_cv_c_stack_direction=0
 else
 cat > conftest.$ac_ext <<EOF
-#line 1508 "configure"
+#line 1520 "configure"
 #include "confdefs.h"
 find_stack_direction ()
 {
@@ -1546,7 +1558,7 @@ else
   ac_cv_c_inline=no
 for ac_kw in inline __inline__ __inline; do
   cat > conftest.$ac_ext <<EOF
-#line 1550 "configure"
+#line 1562 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1585,7 +1597,7 @@ if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1589 "configure"
+#line 1601 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -1638,7 +1650,7 @@ if eval "test \"`echo '$''{'gas_cv_assert_ok'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1642 "configure"
+#line 1654 "configure"
 #include "confdefs.h"
 #include <assert.h>
 #include <stdio.h>
@@ -1695,7 +1707,7 @@ if eval "test \"`echo '$''{'gas_cv_decl_needed_malloc'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1699 "configure"
+#line 1711 "configure"
 #include "confdefs.h"
 $gas_test_headers
 int main() { return 0; }
@@ -1731,7 +1743,7 @@ if eval "test \"`echo '$''{'gas_cv_decl_needed_free'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1735 "configure"
+#line 1747 "configure"
 #include "confdefs.h"
 $gas_test_headers
 int main() { return 0; }
@@ -1770,7 +1782,7 @@ if eval "test \"`echo '$''{'gas_cv_decl_needed_errno'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1774 "configure"
+#line 1786 "configure"
 #include "confdefs.h"
 
 #ifdef HAVE_ERRNO_H

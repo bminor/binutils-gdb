@@ -6,6 +6,11 @@ Wed 31 May 17:49:18 1995  Pat Rankin  (rankin@eql.caltech.edu)
 	(vms_write_object_file (GSD symbol loop, case N_DATA)): Never
 	output symbol definitions for local numeric labels.
 
+Tue May 30 18:29:10 1995  Richard Earnshaw (rearnsha@armltd.co.uk)
+
+	* configure.in (architecture variants, cases armeb and arm*): Remove
+	spaces round assignment to endian.
+
 Tue May 30 12:31:31 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* write.c (write_object_file): Check for undefined local dollar
