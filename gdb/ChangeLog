@@ -1,5 +1,14 @@
 Thu Jul 29 12:09:46 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* value.h (COERCE_ENUM): Use COERCE_REF to coerce refs; value_ind
+	was adequate in gdb 3.5 but not now.
+
+	* valops.c (typecmp): An array in t2 matches a pointer in t1.
+
+	* valops.c (typecmp): When comparing type1& to type2, compare
+	type1 and type2 as leniently as if we were comparing type1 to
+	type2.
+
 	* cp-valprint.c (cplus_print_value): Don't dump core if the
 	baseclass doesn't have a name.
 	* values.c (vb_match): New function, which finds the virtual
