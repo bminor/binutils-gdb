@@ -1,3 +1,13 @@
+Wed Aug 29 13:37:20 2001  J"orn Rennecke <amylaar@redhat.com>
+
+	* Makefile.am (ALL_EMULATIONS): Add eh8300elf.o, eh8300elf.o and
+	eh8300self.o .
+	(eh8300elf.c, eh8300helf.c, eh8300self.c): New targets.
+	* configure.tgt (h8300-*-elf*): New case.
+	* emulparams/h8300elf.sh, emulparams/h8300helf.sh: New files.
+	* emulparams/h8300self.sh: New file.
+	* Makefile.in: Regenerated.
+
 2001-08-27  Linus Nordberg  <linus@swox.com>
 	    Alan Modra  <amodra@bigpond.net.au>
 

@@ -217,6 +217,10 @@ xscale-*-elf)		targ_emul=armelf ;;
 h8300-*-hms* | h8300-*-coff* | h8300-*-rtems*)
 			targ_emul=h8300; targ_extra_emuls="h8300h h8300s"
 			;;
+h8300-*-elf*)
+			targ_emul=h8300elf;
+			targ_extra_emuls="h8300helf h8300self"
+			;;
 h8500-*-hms* | h8500-*-coff*)
 			targ_emul=h8500
 			targ_extra_emuls="h8500s h8500b h8500m h8500c"
