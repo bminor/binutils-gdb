@@ -25,38 +25,38 @@
 #include "elf/h8.h"
 
 static reloc_howto_type *elf32_h8_reloc_type_lookup
-  PARAMS ((bfd *abfd, bfd_reloc_code_real_type code));
+  (bfd *abfd, bfd_reloc_code_real_type code);
 static void elf32_h8_info_to_howto
-  PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
+  (bfd *, arelent *, Elf_Internal_Rela *);
 static void elf32_h8_info_to_howto_rel
-  PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
+  (bfd *, arelent *, Elf_Internal_Rela *);
 static unsigned long elf32_h8_mach
-  PARAMS ((flagword));
+  (flagword);
 static void elf32_h8_final_write_processing
-  PARAMS ((bfd *, bfd_boolean));
+  (bfd *, bfd_boolean);
 static bfd_boolean elf32_h8_object_p
-  PARAMS ((bfd *));
+  (bfd *);
 static bfd_boolean elf32_h8_merge_private_bfd_data
-  PARAMS ((bfd *, bfd *));
+  (bfd *, bfd *);
 static bfd_boolean elf32_h8_relax_section
-  PARAMS ((bfd *, asection *, struct bfd_link_info *, bfd_boolean *));
+  (bfd *, asection *, struct bfd_link_info *, bfd_boolean *);
 static bfd_boolean elf32_h8_relax_delete_bytes
-  PARAMS ((bfd *, asection *, bfd_vma, int));
+  (bfd *, asection *, bfd_vma, int);
 static bfd_boolean elf32_h8_symbol_address_p
-  PARAMS ((bfd *, asection *, bfd_vma));
+  (bfd *, asection *, bfd_vma);
 static bfd_byte *elf32_h8_get_relocated_section_contents
-  PARAMS ((bfd *, struct bfd_link_info *, struct bfd_link_order *,
-	   bfd_byte *, bfd_boolean, asymbol **));
+  (bfd *, struct bfd_link_info *, struct bfd_link_order *,
+   bfd_byte *, bfd_boolean, asymbol **);
 static bfd_reloc_status_type elf32_h8_final_link_relocate
-  PARAMS ((unsigned long, bfd *, bfd *, asection *,
-	   bfd_byte *, bfd_vma, bfd_vma, bfd_vma,
-	   struct bfd_link_info *, asection *, int));
+  (unsigned long, bfd *, bfd *, asection *,
+   bfd_byte *, bfd_vma, bfd_vma, bfd_vma,
+   struct bfd_link_info *, asection *, int);
 static bfd_boolean elf32_h8_relocate_section
-  PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *,
-	   bfd_byte *, Elf_Internal_Rela *,
-	   Elf_Internal_Sym *, asection **));
+  (bfd *, struct bfd_link_info *, bfd *, asection *,
+   bfd_byte *, Elf_Internal_Rela *,
+   Elf_Internal_Sym *, asection **);
 static bfd_reloc_status_type special
-  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+  (bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **);
 
 /* This does not include any relocation information, but should be
    good enough for GDB or objdump to read the file.  */
@@ -243,9 +243,8 @@ static const struct elf_reloc_map h8_reloc_map[] = {
 
 
 static reloc_howto_type *
-elf32_h8_reloc_type_lookup (abfd, code)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     bfd_reloc_code_real_type code;
+elf32_h8_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+			    bfd_reloc_code_real_type code)
 {
   unsigned int i;
 
@@ -258,10 +257,8 @@ elf32_h8_reloc_type_lookup (abfd, code)
 }
 
 static void
-elf32_h8_info_to_howto (abfd, bfd_reloc, elf_reloc)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     arelent *bfd_reloc;
-     Elf_Internal_Rela *elf_reloc;
+elf32_h8_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED, arelent *bfd_reloc,
+			Elf_Internal_Rela *elf_reloc)
 {
   unsigned int r;
   unsigned int i;
@@ -277,10 +274,8 @@ elf32_h8_info_to_howto (abfd, bfd_reloc, elf_reloc)
 }
 
 static void
-elf32_h8_info_to_howto_rel (abfd, bfd_reloc, elf_reloc)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     arelent *bfd_reloc;
-     Elf_Internal_Rela *elf_reloc ATTRIBUTE_UNUSED;
+elf32_h8_info_to_howto_rel (bfd *abfd ATTRIBUTE_UNUSED, arelent *bfd_reloc,
+			    Elf_Internal_Rela *elf_reloc ATTRIBUTE_UNUSED)
 {
   unsigned int r;
 
@@ -294,15 +289,13 @@ elf32_h8_info_to_howto_rel (abfd, bfd_reloc, elf_reloc)
    When doing -r, we can't do any arithmetic for the pcrel stuff, because
    we support relaxing on the H8/300 series chips.  */
 static bfd_reloc_status_type
-special (abfd, reloc_entry, symbol, data, input_section, output_bfd,
-	 error_message)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     arelent *reloc_entry ATTRIBUTE_UNUSED;
-     asymbol *symbol ATTRIBUTE_UNUSED;
-     PTR data ATTRIBUTE_UNUSED;
-     asection *input_section ATTRIBUTE_UNUSED;
-     bfd *output_bfd;
-     char **error_message ATTRIBUTE_UNUSED;
+special (bfd *abfd ATTRIBUTE_UNUSED,
+	 arelent *reloc_entry ATTRIBUTE_UNUSED,
+	 asymbol *symbol ATTRIBUTE_UNUSED,
+	 PTR data ATTRIBUTE_UNUSED,
+	 asection *input_section ATTRIBUTE_UNUSED,
+	 bfd *output_bfd,
+	 char **error_message ATTRIBUTE_UNUSED)
 {
   if (output_bfd == (bfd *) NULL)
     return bfd_reloc_continue;
@@ -314,26 +307,19 @@ special (abfd, reloc_entry, symbol, data, input_section, output_bfd,
 
 /* Perform a relocation as part of a final link.  */
 static bfd_reloc_status_type
-elf32_h8_final_link_relocate (r_type, input_bfd, output_bfd,
-			      input_section, contents, offset, value,
-			      addend, info, sym_sec, is_local)
-     unsigned long r_type;
-     bfd *input_bfd;
-     bfd *output_bfd ATTRIBUTE_UNUSED;
-     asection *input_section ATTRIBUTE_UNUSED;
-     bfd_byte *contents;
-     bfd_vma offset;
-     bfd_vma value;
-     bfd_vma addend;
-     struct bfd_link_info *info ATTRIBUTE_UNUSED;
-     asection *sym_sec ATTRIBUTE_UNUSED;
-     int is_local ATTRIBUTE_UNUSED;
+elf32_h8_final_link_relocate (unsigned long r_type, bfd *input_bfd,
+			      bfd *output_bfd ATTRIBUTE_UNUSED,
+			      asection *input_section ATTRIBUTE_UNUSED,
+			      bfd_byte *contents, bfd_vma offset,
+			      bfd_vma value, bfd_vma addend,
+			      struct bfd_link_info *info ATTRIBUTE_UNUSED,
+			      asection *sym_sec ATTRIBUTE_UNUSED,
+			      int is_local ATTRIBUTE_UNUSED)
 {
   bfd_byte *hit_data = contents + offset;
 
   switch (r_type)
     {
-
     case R_H8_NONE:
       return bfd_reloc_ok;
 
@@ -411,16 +397,11 @@ elf32_h8_final_link_relocate (r_type, input_bfd, output_bfd,
 
 /* Relocate an H8 ELF section.  */
 static bfd_boolean
-elf32_h8_relocate_section (output_bfd, info, input_bfd, input_section,
-			   contents, relocs, local_syms, local_sections)
-     bfd *output_bfd;
-     struct bfd_link_info *info;
-     bfd *input_bfd;
-     asection *input_section;
-     bfd_byte *contents;
-     Elf_Internal_Rela *relocs;
-     Elf_Internal_Sym *local_syms;
-     asection **local_sections;
+elf32_h8_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
+			   bfd *input_bfd, asection *input_section,
+			   bfd_byte *contents, Elf_Internal_Rela *relocs,
+			   Elf_Internal_Sym *local_syms,
+			   asection **local_sections)
 {
   Elf_Internal_Shdr *symtab_hdr;
   struct elf_link_hash_entry **sym_hashes;
@@ -559,8 +540,7 @@ elf32_h8_relocate_section (output_bfd, info, input_bfd, input_section,
    Examine that field and return the proper BFD machine type for
    the object file.  */
 static unsigned long
-elf32_h8_mach (flags)
-     flagword flags;
+elf32_h8_mach (flagword flags)
 {
   switch (flags & EF_H8_MACH)
     {
@@ -593,9 +573,8 @@ elf32_h8_mach (flags)
    into the flags field in the object file.  */
 
 static void
-elf32_h8_final_write_processing (abfd, linker)
-     bfd *abfd;
-     bfd_boolean linker ATTRIBUTE_UNUSED;
+elf32_h8_final_write_processing (bfd *abfd,
+				 bfd_boolean linker ATTRIBUTE_UNUSED)
 {
   unsigned long val;
 
@@ -639,8 +618,7 @@ elf32_h8_final_write_processing (abfd, linker)
    record the encoded machine type found in the ELF flags.  */
 
 static bfd_boolean
-elf32_h8_object_p (abfd)
-     bfd *abfd;
+elf32_h8_object_p (bfd *abfd)
 {
   bfd_default_set_arch_mach (abfd, bfd_arch_h8300,
 			     elf32_h8_mach (elf_elfheader (abfd)->e_flags));
@@ -652,9 +630,7 @@ elf32_h8_object_p (abfd)
    time is the architecture/machine information.  */
 
 static bfd_boolean
-elf32_h8_merge_private_bfd_data (ibfd, obfd)
-     bfd *ibfd;
-     bfd *obfd;
+elf32_h8_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 {
   if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
@@ -689,11 +665,8 @@ elf32_h8_merge_private_bfd_data (ibfd, obfd)
      mov.[bwl]:24/32 ->    mov.[bwl]:16           2 bytes */
 
 static bfd_boolean
-elf32_h8_relax_section (abfd, sec, link_info, again)
-     bfd *abfd;
-     asection *sec;
-     struct bfd_link_info *link_info;
-     bfd_boolean *again;
+elf32_h8_relax_section (bfd *abfd, asection *sec,
+			struct bfd_link_info *link_info, bfd_boolean *again)
 {
   Elf_Internal_Shdr *symtab_hdr;
   Elf_Internal_Rela *internal_relocs;
@@ -1252,11 +1225,7 @@ elf32_h8_relax_section (abfd, sec, link_info, again)
 /* Delete some bytes from a section while relaxing.  */
 
 static bfd_boolean
-elf32_h8_relax_delete_bytes (abfd, sec, addr, count)
-     bfd *abfd;
-     asection *sec;
-     bfd_vma addr;
-     int count;
+elf32_h8_relax_delete_bytes (bfd *abfd, asection *sec, bfd_vma addr, int count)
 {
   Elf_Internal_Shdr *symtab_hdr;
   unsigned int sec_shndx;
@@ -1333,10 +1302,7 @@ elf32_h8_relax_delete_bytes (abfd, sec, addr, count)
 /* Return TRUE if a symbol exists at the given address, else return
    FALSE.  */
 static bfd_boolean
-elf32_h8_symbol_address_p (abfd, sec, addr)
-     bfd *abfd;
-     asection *sec;
-     bfd_vma addr;
+elf32_h8_symbol_address_p (bfd *abfd, asection *sec, bfd_vma addr)
 {
   Elf_Internal_Shdr *symtab_hdr;
   unsigned int sec_shndx;
@@ -1380,14 +1346,12 @@ elf32_h8_symbol_address_p (abfd, sec, addr)
    which uses elf32_h8_relocate_section.  */
 
 static bfd_byte *
-elf32_h8_get_relocated_section_contents (output_bfd, link_info, link_order,
-					 data, relocatable, symbols)
-     bfd *output_bfd;
-     struct bfd_link_info *link_info;
-     struct bfd_link_order *link_order;
-     bfd_byte *data;
-     bfd_boolean relocatable;
-     asymbol **symbols;
+elf32_h8_get_relocated_section_contents (bfd *output_bfd,
+					 struct bfd_link_info *link_info,
+					 struct bfd_link_order *link_order,
+					 bfd_byte *data,
+					 bfd_boolean relocatable,
+					 asymbol **symbols)
 {
   Elf_Internal_Shdr *symtab_hdr;
   asection *input_section = link_order->u.indirect.section;

@@ -24,14 +24,12 @@
 #include "libbfd.h"
 
 static bfd_boolean h8300_scan
-  PARAMS ((const struct bfd_arch_info *, const char *));
+  (const struct bfd_arch_info *, const char *);
 static const bfd_arch_info_type * compatible
-  PARAMS ((const bfd_arch_info_type *, const bfd_arch_info_type *));
+  (const bfd_arch_info_type *, const bfd_arch_info_type *);
 
 static bfd_boolean
-h8300_scan (info, string)
-     const struct bfd_arch_info *info;
-     const char *string;
+h8300_scan (const struct bfd_arch_info *info, const char *string)
 {
   if (*string != 'h' && *string != 'H')
     return FALSE;
@@ -101,9 +99,7 @@ h8300_scan (info, string)
    info structure.  */
 
 static const bfd_arch_info_type *
-compatible (in, out)
-     const bfd_arch_info_type *in;
-     const bfd_arch_info_type *out;
+compatible (const bfd_arch_info_type *in, const bfd_arch_info_type *out)
 {
   /* It's really not a good idea to mix and match modes.  */
   if (in->arch != out->arch || in->mach != out->mach)

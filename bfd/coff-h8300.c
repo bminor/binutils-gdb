@@ -61,33 +61,33 @@ struct funcvec_hash_table
 
 static struct bfd_hash_entry *
 funcvec_hash_newfunc
-  PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
+  (struct bfd_hash_entry *, struct bfd_hash_table *, const char *);
 
 static bfd_boolean
 funcvec_hash_table_init
-  PARAMS ((struct funcvec_hash_table *, bfd *,
-	   struct bfd_hash_entry *(*) (struct bfd_hash_entry *,
-				       struct bfd_hash_table *,
-				       const char *)));
+  (struct funcvec_hash_table *, bfd *,
+   struct bfd_hash_entry *(*) (struct bfd_hash_entry *,
+			       struct bfd_hash_table *,
+			       const char *));
 
 static bfd_reloc_status_type special
-  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+  (bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **);
 static int select_reloc
-  PARAMS ((reloc_howto_type *));
+  (reloc_howto_type *);
 static void rtype2howto
-  PARAMS ((arelent *, struct internal_reloc *));
+  (arelent *, struct internal_reloc *);
 static void reloc_processing
-  PARAMS ((arelent *, struct internal_reloc *, asymbol **, bfd *, asection *));
+  (arelent *, struct internal_reloc *, asymbol **, bfd *, asection *);
 static bfd_boolean h8300_symbol_address_p
-  PARAMS ((bfd *, asection *, bfd_vma));
+  (bfd *, asection *, bfd_vma);
 static int h8300_reloc16_estimate
-  PARAMS ((bfd *, asection *, arelent *, unsigned int,
-    struct bfd_link_info *));
+  (bfd *, asection *, arelent *, unsigned int,
+   struct bfd_link_info *);
 static void h8300_reloc16_extra_cases
-  PARAMS ((bfd *, struct bfd_link_info *, struct bfd_link_order *, arelent *,
-    bfd_byte *, unsigned int *, unsigned int *));
+  (bfd *, struct bfd_link_info *, struct bfd_link_order *, arelent *,
+   bfd_byte *, unsigned int *, unsigned int *);
 static bfd_boolean h8300_bfd_link_add_symbols
-  PARAMS ((bfd *, struct bfd_link_info *));
+  (bfd *, struct bfd_link_info *);
 
 /* To lookup a value in the function vector hash table.  */
 #define funcvec_hash_lookup(table, string, create, copy) \
@@ -111,8 +111,7 @@ struct h8300_coff_link_hash_table {
   struct funcvec_hash_table *funcvec_hash_table;
 };
 
-static struct bfd_link_hash_table *h8300_coff_link_hash_table_create
-  PARAMS ((bfd *));
+static struct bfd_link_hash_table *h8300_coff_link_hash_table_create (bfd *);
 
 /* Get the H8/300 COFF linker hash table from a link_info structure.  */
 
@@ -123,10 +122,9 @@ static struct bfd_link_hash_table *h8300_coff_link_hash_table_create
    a new entry is added to the funcvec hash table.  */
 
 static struct bfd_hash_entry *
-funcvec_hash_newfunc (entry, gen_table, string)
-     struct bfd_hash_entry *entry;
-     struct bfd_hash_table *gen_table;
-     const char *string;
+funcvec_hash_newfunc (struct bfd_hash_entry *entry,
+		      struct bfd_hash_table *gen_table,
+		      const char *string)
 {
   struct funcvec_hash_entry *ret;
   struct funcvec_hash_table *table;
@@ -171,12 +169,12 @@ funcvec_hash_newfunc (entry, gen_table, string)
 /* Initialize the function vector hash table.  */
 
 static bfd_boolean
-funcvec_hash_table_init (table, abfd, newfunc)
-     struct funcvec_hash_table *table;
-     bfd *abfd;
-     struct bfd_hash_entry *(*newfunc)
-       PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *,
-		const char *));
+funcvec_hash_table_init (struct funcvec_hash_table *table,
+			 bfd *abfd,
+			 struct bfd_hash_entry *(*newfunc)
+			   (struct bfd_hash_entry *,
+			    struct bfd_hash_table *,
+			    const char *))
 {
   /* Initialize our local fields, then call the generic initialization
      routine.  */
@@ -190,8 +188,7 @@ funcvec_hash_table_init (table, abfd, newfunc)
    without using static variables.  */
 
 static struct bfd_link_hash_table *
-h8300_coff_link_hash_table_create (abfd)
-     bfd *abfd;
+h8300_coff_link_hash_table_create (bfd *abfd)
 {
   struct h8300_coff_link_hash_table *ret;
   bfd_size_type amt = sizeof (struct h8300_coff_link_hash_table);
@@ -224,15 +221,13 @@ h8300_coff_link_hash_table_create (abfd)
    the addend until the final link.  */
 
 static bfd_reloc_status_type
-special (abfd, reloc_entry, symbol, data, input_section, output_bfd,
-	 error_message)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     arelent *reloc_entry ATTRIBUTE_UNUSED;
-     asymbol *symbol ATTRIBUTE_UNUSED;
-     PTR data ATTRIBUTE_UNUSED;
-     asection *input_section ATTRIBUTE_UNUSED;
-     bfd *output_bfd;
-     char **error_message ATTRIBUTE_UNUSED;
+special (bfd *abfd ATTRIBUTE_UNUSED,
+	 arelent *reloc_entry ATTRIBUTE_UNUSED,
+	 asymbol *symbol ATTRIBUTE_UNUSED,
+	 PTR data ATTRIBUTE_UNUSED,
+	 asection *input_section ATTRIBUTE_UNUSED,
+	 bfd *output_bfd,
+	 char **error_message ATTRIBUTE_UNUSED)
 {
   if (output_bfd == (bfd *) NULL)
     return bfd_reloc_continue;
@@ -294,8 +289,7 @@ static reloc_howto_type howto_table[] = {
   dst->r_stuff[1] = 'C';
 
 static int
-select_reloc (howto)
-     reloc_howto_type *howto;
+select_reloc (reloc_howto_type *howto)
 {
   return howto->type;
 }
@@ -303,9 +297,7 @@ select_reloc (howto)
 /* Code to turn a r_type into a howto ptr, uses the above howto table.  */
 
 static void
-rtype2howto (internal, dst)
-     arelent *internal;
-     struct internal_reloc *dst;
+rtype2howto (arelent *internal, struct internal_reloc *dst)
 {
   switch (dst->r_type)
     {
@@ -386,12 +378,8 @@ rtype2howto (internal, dst)
  reloc_processing (relent, reloc, symbols, abfd, section)
 
 static void
-reloc_processing (relent, reloc, symbols, abfd, section)
-     arelent *relent;
-     struct internal_reloc *reloc;
-     asymbol **symbols;
-     bfd *abfd;
-     asection *section;
+reloc_processing (arelent *relent, struct internal_reloc *reloc,
+		  asymbol **symbols, bfd *abfd, asection *section)
 {
   relent->address = reloc->r_vaddr;
   rtype2howto (relent, reloc);
@@ -410,10 +398,7 @@ reloc_processing (relent, reloc, symbols, abfd, section)
 }
 
 static bfd_boolean
-h8300_symbol_address_p (abfd, input_section, address)
-     bfd *abfd;
-     asection *input_section;
-     bfd_vma address;
+h8300_symbol_address_p (bfd *abfd, asection *input_section, bfd_vma address)
 {
   asymbol **s;
 
@@ -445,12 +430,8 @@ h8300_symbol_address_p (abfd, input_section, address)
    in the howto table.  This needs to be fixed.  */
 
 static int
-h8300_reloc16_estimate (abfd, input_section, reloc, shrink, link_info)
-     bfd *abfd;
-     asection *input_section;
-     arelent *reloc;
-     unsigned int shrink;
-     struct bfd_link_info *link_info;
+h8300_reloc16_estimate (bfd *abfd, asection *input_section, arelent *reloc,
+			unsigned int shrink, struct bfd_link_info *link_info)
 {
   bfd_vma value;
   bfd_vma dot;
@@ -676,15 +657,10 @@ h8300_reloc16_estimate (abfd, input_section, reloc, shrink, link_info)
    FIXME: Not all relocations check for overflow!  */
 
 static void
-h8300_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
-			   dst_ptr)
-     bfd *abfd;
-     struct bfd_link_info *link_info;
-     struct bfd_link_order *link_order;
-     arelent *reloc;
-     bfd_byte *data;
-     unsigned int *src_ptr;
-     unsigned int *dst_ptr;
+h8300_reloc16_extra_cases (bfd *abfd, struct bfd_link_info *link_info,
+			   struct bfd_link_order *link_order, arelent *reloc,
+			   bfd_byte *data, unsigned int *src_ptr,
+			   unsigned int *dst_ptr)
 {
   unsigned int src_address = *src_ptr;
   unsigned int dst_address = *dst_ptr;
@@ -1221,9 +1197,7 @@ h8300_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
    selected static symbols to the bfd linker hash table.  */
 
 static bfd_boolean
-h8300_bfd_link_add_symbols (abfd, info)
-     bfd *abfd;
-     struct bfd_link_info *info;
+h8300_bfd_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 {
   asection *sec;
   struct funcvec_hash_table *funcvec_hash_table;

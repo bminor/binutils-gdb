@@ -1,3 +1,10 @@
+2003-07-11  Richard Sandiford  <rsandifo@redhat.com>
+
+	* elf32-h8300.c: Convert function prototypes and definitions
+	to C90 syntax.
+	* coff-h8300.c: Likewise.
+	* cpu-h8300.c: Likewise.
+
 2003-07-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* po/SRC-POTFILES.in: Regenerate.
