@@ -1,3 +1,7 @@
+2000-12-21  Santeri Paavolainen <santtu@ssh.com>
+
+	* cgen-opc.c: Include alloca.h if HAVE_ALLOCA_H is defined.
+
 2000-12-16  Nick Clifton  <nickc@redhat.com>
 
 	* Makefile.in: Regenerate.

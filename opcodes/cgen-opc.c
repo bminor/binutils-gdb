@@ -27,6 +27,10 @@
 #include "symcat.h"
 #include "opcode/cgen.h"
 
+#ifdef HAVE_ALLOCA_H
+#include <alloca.h>
+#endif
+
 static unsigned int hash_keyword_name
   PARAMS ((const CGEN_KEYWORD *, const char *, int));
 static unsigned int hash_keyword_value
