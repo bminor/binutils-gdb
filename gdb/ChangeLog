@@ -1,5 +1,7 @@
 Mon Apr  6 15:25:03 1992  Stu Grossman  (grossman at cygnus.com)
 
+	* xm-vaxult.h:  Add decl for strdup().
+
 	* Makefile.in: Add dependancies for xm-vaxbsd.h and xm-vaxult.h
 	for xm-vax.h.
 
