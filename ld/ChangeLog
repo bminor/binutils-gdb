@@ -1,3 +1,11 @@
+Wed Nov  2 12:17:49 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* ldctor.c (ldctor_add_set_entry): Don't permit a set to be
+	composed of different object file formats.
+	(ldctor_build_sets): If the output format does not support the
+	reloc, and we are not generating a relocateable link, try getting
+	the reloc from the input format.
+
 Tue Nov  1 10:30:19 1994  J.T. Conklin  (jtc@rtl.cygnus.com)
 
 	* Makefile.in (ALL_EMULATIONS): Added em68knbsd.o.
