@@ -1,3 +1,8 @@
+Wed Jan 28 09:52:00 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-v850.c (v850_insert_operand): Display instruction when
+	an error is encountered.
+
 start-sanitize-sky
 Tue Jan 27 14:13:37 1998  Doug Evans  <devans@seba.cygnus.com>
 

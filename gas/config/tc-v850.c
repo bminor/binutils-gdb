@@ -100,13 +100,6 @@ static segT call_table_data_section = NULL;
 static segT call_table_text_section = NULL;
 /* end-sanitize-v850e */
 
-
-/* local functions */
-static unsigned long v850_insert_operand
-  PARAMS ((unsigned long insn, const struct v850_operand *operand,
-	   offsetT val, char *file, unsigned int line));
-
-
 /* fixups */
 #define MAX_INSN_FIXUPS (5)
 struct v850_fixup
@@ -115,8 +108,10 @@ struct v850_fixup
   int                      opindex;
   bfd_reloc_code_real_type reloc;
 };
-struct v850_fixup fixups[MAX_INSN_FIXUPS];
+
+struct v850_fixup fixups [MAX_INSN_FIXUPS];
 static int fc;
+
 
 void
 v850_sdata (int ignore)
@@ -1489,6 +1484,116 @@ v850_reloc_prefix (const struct v850_operand * operand)
   return BFD_RELOC_UNUSED;
 }
 
+/* Insert an operand value into an instruction.  */
+
+static unsigned long
+v850_insert_operand (insn, operand, val, file, line, str)
+     unsigned long               insn;
+     const struct v850_operand * operand;
+     offsetT                     val;
+     char *                      file;
+     unsigned int                line;
+     char *                      str;
+{
+  if (operand->insert)
+    {
+      const char * message = NULL;
+      
+      insn = operand->insert (insn, val, & message);
+      if (message != NULL)
+	{
+	  if ((operand->flags & V850_OPERAND_SIGNED)
+	      && ! warn_signed_overflows
+	      && strstr (message, "out of range") != NULL)
+	    {
+	      /* skip warning... */
+	    }
+	  else if ((operand->flags & V850_OPERAND_SIGNED) == 0
+		   && ! warn_unsigned_overflows
+		   && strstr (message, "out of range") != NULL)
+	    {
+	      /* skip warning... */
+	    }
+	  else if (str)
+	    {
+	      if (file == (char *) NULL)
+		as_warn ("%s: %s", str, message);
+	      else
+		as_warn_where (file, line, "%s: %s", str, message);
+	    }
+	  else
+	    {
+	      if (file == (char *) NULL)
+		as_warn (message);
+	      else
+		as_warn_where (file, line, message);
+	    }
+	}
+    }
+  else
+    {
+      if (operand->bits != 32)
+	{
+	  long    min, max;
+	  offsetT test;
+
+	  if ((operand->flags & V850_OPERAND_SIGNED) != 0)
+	    {
+	      if (! warn_signed_overflows)
+		max = (1 << operand->bits) - 1;
+	      else
+		max = (1 << (operand->bits - 1)) - 1;
+	      
+	      min = - (1 << (operand->bits - 1));
+	    }
+	  else
+	    {
+	      max = (1 << operand->bits) - 1;
+	      
+	      if (! warn_unsigned_overflows)
+		min = - (1 << (operand->bits - 1));
+	      else
+		min = 0;
+	    }
+	  
+	  if (val < (offsetT) min || val > (offsetT) max)
+	    {
+	      const char * err = "operand out of range (%s not between %ld and %ld)";
+	      char         buf[100];
+	      
+	      /* Restore min and mix to expected values for decimal ranges.  */
+	      if ((operand->flags & V850_OPERAND_SIGNED) && ! warn_signed_overflows)
+		max = (1 << (operand->bits - 1)) - 1;
+
+	      if (! (operand->flags & V850_OPERAND_SIGNED)
+		  && ! warn_unsigned_overflows)
+		min = 0;
+
+	      if (str)
+		{
+		  sprintf (buf, "%s: ", str);
+		  
+		  sprint_value (buf + strlen (buf), val);
+		}
+	      else
+		sprint_value (buf, val);
+	      
+	      if (file == (char *) NULL)
+		as_warn (err, buf, min, max);
+	      else
+		as_warn_where (file, line, err, buf, min, max);
+	    }
+	}
+
+      insn |= (((long) val & ((1 << operand->bits) - 1)) << operand->shift);
+    }
+  
+  return insn;
+}
+
+
+static char                 copy_of_instruction [128];
+
 void
 md_assemble (str) 
      char * str;
@@ -1510,6 +1615,9 @@ md_assemble (str)
   unsigned long             extra_data;
   char *		    saved_input_line_pointer;
 
+  
+  strncpy (copy_of_instruction, str, sizeof (copy_of_instruction) - 1);
+  
   /* Get the opcode.  */
   for (s = str; *s != '\0' && ! isspace (*s); s++)
     continue;
@@ -1518,7 +1626,7 @@ md_assemble (str)
     *s++ = '\0';
 
   /* find the first opcode with the proper name */
-  opcode = (struct v850_opcode *)hash_find (v850_hash, str);
+  opcode = (struct v850_opcode *) hash_find (v850_hash, str);
   if (opcode == NULL)
     {
       as_bad ("Unrecognized opcode: `%s'", str);
@@ -1649,7 +1757,7 @@ md_assemble (str)
 		    }
 
 		  insn = v850_insert_operand (insn, operand, ex.X_add_number,
-					      (char *) NULL, 0);
+					      (char *) NULL, 0, copy_of_instruction);
 		}
 	      else
 		{
@@ -1853,12 +1961,12 @@ md_assemble (str)
 		      goto error;
 		    }
 		  insn = v850_insert_operand (insn, operand, ex.X_add_number,
-					      (char *) NULL, 0);
+					      (char *) NULL, 0, copy_of_instruction);
 		  break;
 
 		case O_constant:
 		  insn = v850_insert_operand (insn, operand, ex.X_add_number,
-					      (char *) NULL, 0);
+					      (char *) NULL, 0, copy_of_instruction);
 		  break;
 
 		default:
@@ -2139,7 +2247,7 @@ md_apply_fix3 (fixp, valuep, seg)
 
       insn = bfd_getl32 ((unsigned char *) where);
       insn = v850_insert_operand (insn, operand, (offsetT) value,
-				  fixp->fx_file, fixp->fx_line);
+				  fixp->fx_file, fixp->fx_line, NULL);
       bfd_putl32 ((bfd_vma) insn, (unsigned char *) where);
 
       if (fixp->fx_done)
@@ -2183,99 +2291,6 @@ md_apply_fix3 (fixp, valuep, seg)
 }
 
 
-/* Insert an operand value into an instruction.  */
-
-static unsigned long
-v850_insert_operand (insn, operand, val, file, line)
-     unsigned long insn;
-     const struct v850_operand * operand;
-     offsetT val;
-     char *file;
-     unsigned int line;
-{
-  if (operand->insert)
-    {
-      const char * message = NULL;
-      
-      insn = (*operand->insert) (insn, val, & message);
-      if (message != NULL)
-	{
-	  if ((operand->flags & V850_OPERAND_SIGNED)
-	      && ! warn_signed_overflows
-	      && strstr (message, "out of range") != NULL)
-	    {
-	      /* skip warning... */
-	    }
-	  else if ((operand->flags & V850_OPERAND_SIGNED) == 0
-		   && ! warn_unsigned_overflows
-		   && strstr (message, "out of range") != NULL)
-	    {
-	      /* skip warning... */
-	    }
-	  else
-	    {
-	      if (file == (char *) NULL)
-		as_warn (message);
-	      else
-		as_warn_where (file, line, message);
-	    }
-	}
-    }
-  else
-    {
-      if (operand->bits != 32)
-	{
-	  long    min, max;
-	  offsetT test;
-
-	  if ((operand->flags & V850_OPERAND_SIGNED) != 0)
-	    {
-	      if (! warn_signed_overflows)
-		max = (1 << operand->bits) - 1;
-	      else
-		max = (1 << (operand->bits - 1)) - 1;
-	      
-	      min = - (1 << (operand->bits - 1));
-	    }
-	  else
-	    {
-	      max = (1 << operand->bits) - 1;
-	      
-	      if (! warn_unsigned_overflows)
-		min = - (1 << (operand->bits - 1));
-	      else
-		min = 0;
-	    }
-	  
-	  test = val;
-	  
-	  if (test < (offsetT) min || test > (offsetT) max)
-	    {
-	      const char * err = "operand out of range (%s not between %ld and %ld)";
-	      char         buf[100];
-	      
-	      /* Restore min and mix to expected values for decimal ranges.  */
-	      if ((operand->flags & V850_OPERAND_SIGNED) && ! warn_signed_overflows)
-		max = (1 << (operand->bits - 1)) - 1;
-
-	      if (! (operand->flags & V850_OPERAND_SIGNED)
-		  && ! warn_unsigned_overflows)
-		min = 0;
-
-	      sprint_value (buf, test);
-	      if (file == (char *) NULL)
-		as_warn (err, buf, min, max);
-	      else
-		as_warn_where (file, line, err, buf, min, max);
-	    }
-	}
-
-      insn |= (((long) val & ((1 << operand->bits) - 1)) << operand->shift);
-    }
-  
-  return insn;
-}
-
 /* Parse a cons expression.  We have to handle hi(), lo(), etc
    on the v850.  */
 void
