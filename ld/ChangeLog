@@ -1,3 +1,7 @@
+2001-01-12  Nick Clifton  <nickc@redhat.com>
+
+	* lexsup.c (parse_args): Update copyright date.
+
 2001-01-12  Philip Blundell  <pb@futuretv.com>
 
 	* configure.host: Set HOSTING_LIBS appropriately for ix86-cygwin.

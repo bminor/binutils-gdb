@@ -1,3 +1,7 @@
+2001-01-12  Nick Clifton  <nickc@redhat.com>
+
+	* version.c (print_version): Update copyright date.
+
 2001-01-11  Peter Targett  <peter.targett@arccores.com>
 
 	* readelf.c (dump_relocations): Include selection with EM_ARC.
