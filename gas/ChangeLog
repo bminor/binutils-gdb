@@ -1,3 +1,12 @@
+Wed Oct 12 11:06:11 1994  Ian Lance Taylor  (ian@cygnus.com)
+
+	* config/tc-ppc.c (ppc_fix_adjustable): Resolve symbol values
+	rather than explicitly adding the frag address.
+	* config/obj-coff.c (coff_frob_symbol): Add a zero entry to mark
+	the end of the line numbers; this replaces the zero entry which
+	used to be added by coff_add_linesym, removed Oct 7.
+	(coff_adjust_section_syms): Ignore sections with no seginfo.
+
 Wed Oct 12 01:41:37 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* Makefile.in (bootstrap, bootstrap2, bootstrap3): Create a
