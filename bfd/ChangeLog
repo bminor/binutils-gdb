@@ -1,3 +1,8 @@
+2002-09-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* aoutx.h (NAME(aout,machine_type)): Recognize bfd_mach_i386_i386
+	and bfd_mach_i386_i386_intel_syntax.
+
 2002-08-30  John David Anglin  <dave@hiauly1.hia.nrc.ca>
 
 	* bfd-in.h (align_power): Cast constants to bfd_vma type.
