@@ -1,3 +1,11 @@
+Fri Jun  4 15:47:52 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
+
+	* coffcode.h (get_index, coff_slurp_symbol_table): Fix pointer
+	casts to work on machine where sizeof(long) != sizeof(int) !=
+	sizeof(char *).
+        * coffgen.c (coff_get_normalized_symtab): Ditto.
+	* cpu-h8300.c coff-h8300.c: Support for H8/300-H.
+
 Fri Jun  4 07:49:01 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* configure.in (mips-*-ecoffl*): New target; use decstation.
