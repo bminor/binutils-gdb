@@ -1,6 +1,12 @@
+2003-05-30  Andrew Cagney  <cagney@redhat.com>
+
+	* infcall.c (call_function_by_hand): Always call
+	DEPRECATED_FIX_CALL_DUMMY, even for AT_ENTRY_POINT case.
+
 2003-05-30  Richard Henderson  <rth@redhat.com>
 
-	* alpha-tdep.c (alpha_heuristic_frame_unwind_cache): Fix loop increment.
+	* alpha-tdep.c (alpha_heuristic_frame_unwind_cache): Fix loop
+	increment.
 
 2003-05-29  Jim Blandy  <jimb@redhat.com>
 
