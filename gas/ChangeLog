@@ -1,3 +1,9 @@
+start-sanitize-sky
+Wed Feb 10 16:53:26 1999  Doug Evans  <devans@canuck.cygnus.com>
+
+	* config/tc-dvp.h (tc_symbol_chars): Define.
+
+end-sanitize-sky
 1999-02-09  Doug Evans  <devans@casey.cygnus.com>
 
 	* Makefile.am (DISTCLEANFILES): Change cgen-opc.h to cgen-desc.h.
