@@ -39,8 +39,6 @@ static unsigned StoreHalfWord (ARMul_State * state, ARMword instr,
 			       ARMword address);
 static unsigned StoreByte (ARMul_State * state, ARMword instr,
 			   ARMword address);
-static unsigned StoreDoubleWord (ARMul_State * state, ARMword instr,
-				 ARMword address);
 static void LoadMult (ARMul_State * state, ARMword address, ARMword instr,
 		      ARMword WBBase);
 static void StoreMult (ARMul_State * state, ARMword address, ARMword instr,
