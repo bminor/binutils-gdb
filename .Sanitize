@@ -43,6 +43,7 @@ emacs
 gas
 gcc
 gdb
+gdbm
 gnulib
 grep
 include
@@ -61,7 +62,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.12  1991/09/02 22:19:49  rich
+# Revision 1.13  1991/09/12 00:33:59  rich
+# add gdbm.
+#
+# Revision 1.12  1991/09/02  22:19:49  rich
 # Updated list of Sanitizable directories.
 #
 # Revision 1.11  1991/09/02  01:12:42  rich
