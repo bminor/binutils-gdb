@@ -1,3 +1,7 @@
+Wed Nov 12 12:18:08 1997  Doug Evans  <devans@canuck.cygnus.com>
+
+	* aclocal.m4 (SIM_AC_OPTION_SCACHE): Fix typo.
+
 Tue Nov 11 13:28:02 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-events.c (sim_events_process): Re-compute the time -
