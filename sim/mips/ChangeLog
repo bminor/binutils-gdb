@@ -1,3 +1,14 @@
+2002-03-02  Chris Demetriou  <cgd@broadcom.com>
+
+	* mips.igen (LL, LLD, PREF, SC, SCD, ABS.fmt, ADD.fmt, CEIL.L.fmt,
+	CEIL.W, CVT.D.fmt, CVT.L.fmt, CVT.S.fmt, CVT.W.fmt, DIV.fmt,
+	FLOOR.L.fmt, FLOOR.W.fmt, MADD.D, MADD.S, MOV.fmt, MOVtf.fmt,
+	MSUB.D, MSUB.S, MUL.fmt, NEG.fmt, NMADD.D, NMADD.S, NMSUB.D,
+	NMSUB.S, PREFX, RECIP.fmt, ROUND.L.fmt, ROUND.W.fmt, RSQRT.fmt,
+	SQRT.fmt, SUB.fmt, SWC1, SWXC1, TRUNC.L.fmt, TRUNC.W, CACHE):
+	Don't split opcode fields by hand, use the opcode field values
+	provided by igen.
+
 2002-03-01  Chris Demetriou  <cgd@broadcom.com>
 
 	* mips.igen (do_divu): Fix spacing.

@@ -1692,12 +1692,10 @@
 *vr4100:
 *vr5000:
 {
-  unsigned32 instruction = instruction_0;
-  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
-  int destreg = ((instruction >> 16) & 0x0000001F);
-  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
+  address_word base = GPR[BASE];
+  address_word offset = EXTEND16 (OFFSET);
   {
-    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word vaddr = ((unsigned64)base + offset);
     address_word paddr;
     int uncached;
     if ((vaddr & 3) != 0)
@@ -1718,7 +1716,7 @@
 	    paddr = ((paddr & ~mask) | ((paddr & mask) ^ (reverse << shift)));
 	    LoadMemory(&memval,&memval1,uncached,AccessLength_WORD,paddr,vaddr,isDATA,isREAL);
 	    byte = ((vaddr & mask) ^ (bigend << shift));
-	    GPR[destreg] = (SIGNEXTEND(((memval >> (8 * byte)) & 0xFFFFFFFF),32));
+	    GPR[RT] = (SIGNEXTEND(((memval >> (8 * byte)) & 0xFFFFFFFF),32));
 	    LLBIT = 1;
 	  }
       }
@@ -1734,13 +1732,11 @@
 *vr4100:
 *vr5000:
 {
-  unsigned32 instruction = instruction_0;
-  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
-  int destreg = ((instruction >> 16) & 0x0000001F);
-  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
+  address_word base = GPR[BASE];
+  address_word offset = EXTEND16 (OFFSET);
   check_u64 (SD_, instruction_0);
   {
-    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word vaddr = ((unsigned64)base + offset);
     address_word paddr;
     int uncached;
     if ((vaddr & 7) != 0)
@@ -1754,7 +1750,7 @@
 	    unsigned64 memval = 0;
 	    unsigned64 memval1 = 0;
 	    LoadMemory(&memval,&memval1,uncached,AccessLength_DOUBLEWORD,paddr,vaddr,isDATA,isREAL);
-	    GPR[destreg] = memval;
+	    GPR[RT] = memval;
 	    LLBIT = 1;
 	  }
       }
@@ -2104,17 +2100,15 @@
 *mipsV:
 *vr5000:
 {
-  unsigned32 instruction = instruction_0;
-  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
-  int hint = ((instruction >> 16) & 0x0000001F);
-  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
+  address_word base = GPR[BASE];
+  address_word offset = EXTEND16 (OFFSET);
   {
-    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word vaddr = ((unsigned64)base + offset);
     address_word paddr;
     int uncached;
     {
       if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
-	Prefetch(uncached,paddr,vaddr,isDATA,hint);
+	Prefetch(uncached,paddr,vaddr,isDATA,HINT);
     }
   }
 }
@@ -2235,11 +2229,10 @@
 *vr5000:
 {
   unsigned32 instruction = instruction_0;
-  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
-  signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
-  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
+  address_word base = GPR[BASE];
+  address_word offset = EXTEND16 (OFFSET);
   {
-    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word vaddr = ((unsigned64)base + offset);
     address_word paddr;
     int uncached;
     if ((vaddr & 3) != 0)
@@ -2256,12 +2249,12 @@
 	    unsigned int byte;
 	    paddr = ((paddr & ~mask) | ((paddr & mask) ^ (ReverseEndian << 2)));
 	    byte = ((vaddr & mask) ^ (BigEndianCPU << 2));
-	    memval = ((unsigned64) op2 << (8 * byte));
+	    memval = ((unsigned64) GPR[RT] << (8 * byte));
 	    if (LLBIT)
 	      {
 		StoreMemory(uncached,AccessLength_WORD,memval,memval1,paddr,vaddr,isREAL);
 	      }
-	    GPR[(instruction >> 16) & 0x0000001F] = LLBIT;
+	    GPR[RT] = LLBIT;
 	  }
       }
   }
@@ -2276,13 +2269,11 @@
 *vr4100:
 *vr5000:
 {
-  unsigned32 instruction = instruction_0;
-  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
-  signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
-  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
+  address_word base = GPR[BASE];
+  address_word offset = EXTEND16 (OFFSET);
   check_u64 (SD_, instruction_0);
   {
-    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word vaddr = ((unsigned64)base + offset);
     address_word paddr;
     int uncached;
     if ((vaddr & 7) != 0)
@@ -2295,12 +2286,12 @@
 	  {
 	    unsigned64 memval = 0;
 	    unsigned64 memval1 = 0;
-	    memval = op2;
+	    memval = GPR[RT];
 	    if (LLBIT)
 	      {
 		StoreMemory(uncached,AccessLength_DOUBLEWORD,memval,memval1,paddr,vaddr,isREAL);
 	      }
-	    GPR[(instruction >> 16) & 0x0000001F] = LLBIT;
+	    GPR[RT] = LLBIT;
 	  }
       }
   }
@@ -3058,16 +3049,13 @@
 *vr5000:
 *r3900:
 {
-  unsigned32 instruction = instruction_0;
-  int destreg = ((instruction >> 6) & 0x0000001F);
-  int fs = ((instruction >> 11) & 0x0000001F);
-  int format = ((instruction >> 21) & 0x00000007);
+  int fmt = FMT;
   check_fpu(SD_);
   {
-    if ((format != fmt_single) && (format != fmt_double))
-      SignalException(ReservedInstruction,instruction);
+    if ((fmt != fmt_single) && (fmt != fmt_double))
+      SignalException(ReservedInstruction,instruction_0);
     else
-      StoreFPR(destreg,format,AbsoluteValue(ValueFPR(fs,format),format));
+      StoreFPR(FD,fmt,AbsoluteValue(ValueFPR(FS,fmt),fmt));
   }
 }
 
@@ -3084,17 +3072,13 @@
 *vr5000:
 *r3900:
 {
-  unsigned32 instruction = instruction_0;
-  int destreg = ((instruction >> 6) & 0x0000001F);
-  int fs = ((instruction >> 11) & 0x0000001F);
-  int ft = ((instruction >> 16) & 0x0000001F);
-  int format = ((instruction >> 21) & 0x00000007);
+  int fmt = FMT;
   check_fpu(SD_);
   {
-    if ((format != fmt_single) && (format != fmt_double))
-      SignalException(ReservedInstruction, instruction);
+    if ((fmt != fmt_single) && (fmt != fmt_double))
+      SignalException(ReservedInstruction, instruction_0);
     else
-      StoreFPR(destreg,format,Add(ValueFPR(fs,format),ValueFPR(ft,format),format));
+      StoreFPR(FD,fmt,Add(ValueFPR(FS,fmt),ValueFPR(FT,fmt),fmt));
   }
 }
 
@@ -3233,16 +3217,13 @@
 *vr5000:
 *r3900:
 {
-  unsigned32 instruction = instruction_0;
-  int destreg = ((instruction >> 6) & 0x0000001F);
-  int fs = ((instruction >> 11) & 0x0000001F);
-  int format = ((instruction >> 21) & 0x00000007);
+  int fmt = FMT;
   check_fpu(SD_);
   {
-    if ((format != fmt_single) && (format != fmt_double))
-      SignalException(ReservedInstruction,instruction);
+    if ((fmt != fmt_single) && (fmt != fmt_double))
+      SignalException(ReservedInstruction,instruction_0);
     else
-      StoreFPR(destreg,fmt_long,Convert(FP_RM_TOPINF,ValueFPR(fs,format),format,fmt_long));
+      StoreFPR(FD,fmt_long,Convert(FP_RM_TOPINF,ValueFPR(FS,fmt),fmt,fmt_long));
   }
 }
 
@@ -3256,16 +3237,13 @@
 *vr5000:
 *r3900:
 {
-  unsigned32 instruction = instruction_0;
-  int destreg = ((instruction >> 6) & 0x0000001F);
-  int fs = ((instruction >> 11) & 0x0000001F);
-  int format = ((instruction >> 21) & 0x00000007);
+  int fmt = FMT;
   check_fpu(SD_);
   {
-  if ((format != fmt_single) && (format != fmt_double))
-   SignalException(ReservedInstruction,instruction);
+  if ((fmt != fmt_single) && (fmt != fmt_double))
+   SignalException(ReservedInstruction,instruction_0);
   else
-   StoreFPR(destreg,fmt_word,Convert(FP_RM_TOPINF,ValueFPR(fs,format),format,fmt_word));
+   StoreFPR(FD,fmt_word,Convert(FP_RM_TOPINF,ValueFPR(FS,fmt),fmt,fmt_word));
   }
 }
 
@@ -3359,16 +3337,13 @@
 *vr5000:
 *r3900:
 {
-  unsigned32 instruction = instruction_0;
-  int destreg = ((instruction >> 6) & 0x0000001F);
-  int fs = ((instruction >> 11) & 0x0000001F);
-  int format = ((instruction >> 21) & 0x00000007);
+  int fmt = FMT;
   check_fpu(SD_);
   {
-    if ((format == fmt_double) | 0)
-      SignalException(ReservedInstruction,instruction);
+    if ((fmt == fmt_double) | 0)
+      SignalException(ReservedInstruction,instruction_0);
     else
-      StoreFPR(destreg,fmt_double,Convert(GETRM(),ValueFPR(fs,format),format,fmt_double));
+      StoreFPR(FD,fmt_double,Convert(GETRM(),ValueFPR(FS,fmt),fmt,fmt_double));
   }
 }
 
@@ -3382,16 +3357,13 @@
 *vr5000:
 *r3900:
 {
-  unsigned32 instruction = instruction_0;
-  int destreg = ((instruction >> 6) & 0x0000001F);
-  int fs = ((instruction >> 11) & 0x0000001F);
-  int format = ((instruction >> 21) & 0x00000007);
+  int fmt = FMT;
   check_fpu(SD_);
   {
-    if ((format == fmt_long) | ((format == fmt_long) || (format == fmt_word)))
-      SignalException(ReservedInstruction,instruction);
+    if ((fmt == fmt_long) | ((fmt == fmt_long) || (fmt == fmt_word)))
+      SignalException(ReservedInstruction,instruction_0);
     else
-      StoreFPR(destreg,fmt_long,Convert(GETRM(),ValueFPR(fs,format),format,fmt_long));
+      StoreFPR(FD,fmt_long,Convert(GETRM(),ValueFPR(FS,fmt),fmt,fmt_long));
   }
 }
 
@@ -3410,16 +3382,13 @@
 *vr5000:
 *r3900:
 {
-  unsigned32 instruction = instruction_0;
-  int destreg = ((instruction >> 6) & 0x0000001F);
-  int fs = ((instruction >> 11) & 0x0000001F);
-  int format = ((instruction >> 21) & 0x00000007);
+  int fmt = FMT;
   check_fpu(SD_);
   {
-    if ((format == fmt_single) | 0)
-      SignalException(ReservedInstruction,instruction);
+    if ((fmt == fmt_single) | 0)
+      SignalException(ReservedInstruction,instruction_0);
     else
-      StoreFPR(destreg,fmt_single,Convert(GETRM(),ValueFPR(fs,format),format,fmt_single));
+      StoreFPR(FD,fmt_single,Convert(GETRM(),ValueFPR(FS,fmt),fmt,fmt_single));
   }
 }
 
@@ -3435,16 +3404,13 @@
 *vr5000:
 *r3900:
 {
-  unsigned32 instruction = instruction_0;
-  int destreg = ((instruction >> 6) & 0x0000001F);
-  int fs = ((instruction >> 11) & 0x0000001F);
-  int format = ((instruction >> 21) & 0x00000007);
+  int fmt = FMT;
   check_fpu(SD_);
   {
-    if ((format == fmt_word) | ((format == fmt_long) || (format == fmt_word)))
-      SignalException(ReservedInstruction,instruction);
+    if ((fmt == fmt_word) | ((fmt == fmt_long) || (fmt == fmt_word)))
+      SignalException(ReservedInstruction,instruction_0);
     else
-      StoreFPR(destreg,fmt_word,Convert(GETRM(),ValueFPR(fs,format),format,fmt_word));
+      StoreFPR(FD,fmt_word,Convert(GETRM(),ValueFPR(FS,fmt),fmt,fmt_word));
   }
 }
 
@@ -3460,17 +3426,13 @@
 *vr5000:
 *r3900:
 {
-  unsigned32 instruction = instruction_0;
-  int destreg = ((instruction >> 6) & 0x0000001F);
-  int fs = ((instruction >> 11) & 0x0000001F);
-  int ft = ((instruction >> 16) & 0x0000001F);
-  int format = ((instruction >> 21) & 0x00000007);
+  int fmt = FMT;
   check_fpu(SD_);
   {
-    if ((format != fmt_single) && (format != fmt_double))
-      SignalException(ReservedInstruction,instruction);
+    if ((fmt != fmt_single) && (fmt != fmt_double))
+      SignalException(ReservedInstruction,instruction_0);
     else
-      StoreFPR(destreg,format,Divide(ValueFPR(fs,format),ValueFPR(ft,format),format));
+      StoreFPR(FD,fmt,Divide(ValueFPR(FS,fmt),ValueFPR(FT,fmt),fmt));
   }
 }
 
@@ -3553,16 +3515,13 @@
 *vr5000:
 *r3900:
 {
-  unsigned32 instruction = instruction_0;
-  int destreg = ((instruction >> 6) & 0x0000001F);
-  int fs = ((instruction >> 11) & 0x0000001F);
-  int format = ((instruction >> 21) & 0x00000007);
+  int fmt = FMT;
   check_fpu(SD_);
   {
-    if ((format != fmt_single) && (format != fmt_double))
-      SignalException(ReservedInstruction,instruction);
+    if ((fmt != fmt_single) && (fmt != fmt_double))
+      SignalException(ReservedInstruction,instruction_0);
     else
-      StoreFPR(destreg,fmt_long,Convert(FP_RM_TOMINF,ValueFPR(fs,format),format,fmt_long));
+      StoreFPR(FS,fmt_long,Convert(FP_RM_TOMINF,ValueFPR(FS,fmt),fmt,fmt_long));
   }
 }
 
@@ -3577,16 +3536,13 @@
 *vr5000:
 *r3900:
 {
-  unsigned32 instruction = instruction_0;
-  int destreg = ((instruction >> 6) & 0x0000001F);
-  int fs = ((instruction >> 11) & 0x0000001F);
-  int format = ((instruction >> 21) & 0x00000007);
+  int fmt = FMT;
   check_fpu(SD_);
   {
-    if ((format != fmt_single) && (format != fmt_double))
-      SignalException(ReservedInstruction,instruction);
+    if ((fmt != fmt_single) && (fmt != fmt_double))
+      SignalException(ReservedInstruction,instruction_0);
     else
-      StoreFPR(destreg,fmt_word,Convert(FP_RM_TOMINF,ValueFPR(fs,format),format,fmt_word));
+      StoreFPR(FD,fmt_word,Convert(FP_RM_TOMINF,ValueFPR(FS,fmt),fmt,fmt_word));
   }
 }
 
@@ -3657,14 +3613,9 @@
 *mipsV:
 *vr5000:
 {
-  unsigned32 instruction = instruction_0;
-  int destreg = ((instruction >> 6) & 0x0000001F);
-  int fs = ((instruction >> 11) & 0x0000001F);
-  int ft = ((instruction >> 16) & 0x0000001F);
-  int fr = ((instruction >> 21) & 0x0000001F);
   check_fpu(SD_);
   {
-    StoreFPR(destreg,fmt_double,Add(Multiply(ValueFPR(fs,fmt_double),ValueFPR(ft,fmt_double),fmt_double),ValueFPR(fr,fmt_double),fmt_double));
+    StoreFPR(FD,fmt_double,Add(Multiply(ValueFPR(FS,fmt_double),ValueFPR(FT,fmt_double),fmt_double),ValueFPR(FR,fmt_double),fmt_double));
   }
 }
 
@@ -3675,14 +3626,9 @@
 *mipsV:
 *vr5000:
 {
-  unsigned32 instruction = instruction_0;
-  int destreg = ((instruction >> 6) & 0x0000001F);
-  int fs = ((instruction >> 11) & 0x0000001F);
-  int ft = ((instruction >> 16) & 0x0000001F);
-  int fr = ((instruction >> 21) & 0x0000001F);
   check_fpu(SD_);
   {
-    StoreFPR(destreg,fmt_single,Add(Multiply(ValueFPR(fs,fmt_single),ValueFPR(ft,fmt_single),fmt_single),ValueFPR(fr,fmt_single),fmt_single));
+    StoreFPR(FD,fmt_single,Add(Multiply(ValueFPR(FS,fmt_single),ValueFPR(FT,fmt_single),fmt_single),ValueFPR(FR,fmt_single),fmt_single));
   }
 }
 
@@ -3741,14 +3687,9 @@
 *vr5000:
 *r3900:
 {
-  unsigned32 instruction = instruction_0;
-  int destreg = ((instruction >> 6) & 0x0000001F);
-  int fs = ((instruction >> 11) & 0x0000001F);
-  int format = ((instruction >> 21) & 0x00000007);
+  int fmt = FMT;
   check_fpu(SD_);
-  {
-    StoreFPR(destreg,format,ValueFPR(fs,format));
-  }
+  StoreFPR(FD,fmt,ValueFPR(FS,fmt));
 }
 
 
@@ -3774,14 +3715,13 @@
 *mipsV:
 *vr5000:
 {
-  unsigned32 instruction = instruction_0;
-  int format = ((instruction >> 21) & 0x00000007);
+  int fmt = FMT;
   check_fpu(SD_);
   {
    if (GETFCC(CC) == TF)
-     StoreFPR (FD, format, ValueFPR (FS, format));
+     StoreFPR (FD, fmt, ValueFPR (FS, fmt));
    else
-     StoreFPR (FD, format, ValueFPR (FD, format));
+     StoreFPR (FD, fmt, ValueFPR (FD, fmt));
   }
 }
 
@@ -3828,15 +3768,8 @@
 *mipsV:
 *vr5000:
 {
-  unsigned32 instruction = instruction_0;
-  int destreg = ((instruction >> 6) & 0x0000001F);
-  int fs = ((instruction >> 11) & 0x0000001F);
-  int ft = ((instruction >> 16) & 0x0000001F);
-  int fr = ((instruction >> 21) & 0x0000001F);
   check_fpu(SD_);
-  {
-    StoreFPR(destreg,fmt_double,Sub(Multiply(ValueFPR(fs,fmt_double),ValueFPR(ft,fmt_double),fmt_double),ValueFPR(fr,fmt_double),fmt_double));
-  }
+  StoreFPR(FD,fmt_double,Sub(Multiply(ValueFPR(FS,fmt_double),ValueFPR(FT,fmt_double),fmt_double),ValueFPR(FR,fmt_double),fmt_double));
 }
 
 
@@ -3847,15 +3780,8 @@
 *mipsV:
 *vr5000:
 {
-  unsigned32 instruction = instruction_0;
-  int destreg = ((instruction >> 6) & 0x0000001F);
-  int fs = ((instruction >> 11) & 0x0000001F);
-  int ft = ((instruction >> 16) & 0x0000001F);
-  int fr = ((instruction >> 21) & 0x0000001F);
   check_fpu(SD_);
-  {
-   StoreFPR(destreg,fmt_single,Sub(Multiply(ValueFPR(fs,fmt_single),ValueFPR(ft,fmt_single),fmt_single),ValueFPR(fr,fmt_single),fmt_single));
-  }
+  StoreFPR(FD,fmt_single,Sub(Multiply(ValueFPR(FS,fmt_single),ValueFPR(FT,fmt_single),fmt_single),ValueFPR(FR,fmt_single),fmt_single));
 }
 
 
@@ -3873,17 +3799,13 @@
 *vr5000:
 *r3900:
 {
-  unsigned32 instruction = instruction_0;
-  int destreg = ((instruction >> 6) & 0x0000001F);
-  int fs = ((instruction >> 11) & 0x0000001F);
-  int ft = ((instruction >> 16) & 0x0000001F);
-  int format = ((instruction >> 21) & 0x00000007);
+  int fmt = FMT;
   check_fpu(SD_);
   {
-    if ((format != fmt_single) && (format != fmt_double))
-      SignalException(ReservedInstruction,instruction);
+    if ((fmt != fmt_single) && (fmt != fmt_double))
+      SignalException(ReservedInstruction,instruction_0);
     else
-      StoreFPR(destreg,format,Multiply(ValueFPR(fs,format),ValueFPR(ft,format),format));
+      StoreFPR(FD,fmt,Multiply(ValueFPR(FS,fmt),ValueFPR(FT,fmt),fmt));
   }
 }
 
@@ -3899,16 +3821,13 @@
 *vr5000:
 *r3900:
 {
-  unsigned32 instruction = instruction_0;
-  int destreg = ((instruction >> 6) & 0x0000001F);
-  int fs = ((instruction >> 11) & 0x0000001F);
-  int format = ((instruction >> 21) & 0x00000007);
+  int fmt = FMT;
   check_fpu(SD_);
   {
-    if ((format != fmt_single) && (format != fmt_double))
-      SignalException(ReservedInstruction,instruction);
+    if ((fmt != fmt_single) && (fmt != fmt_double))
+      SignalException(ReservedInstruction,instruction_0);
     else
-      StoreFPR(destreg,format,Negate(ValueFPR(fs,format),format));
+      StoreFPR(FD,fmt,Negate(ValueFPR(FS,fmt),fmt));
   }
 }
 
@@ -3920,15 +3839,8 @@
 *mipsV:
 *vr5000:
 {
-  unsigned32 instruction = instruction_0;
-  int destreg = ((instruction >> 6) & 0x0000001F);
-  int fs = ((instruction >> 11) & 0x0000001F);
-  int ft = ((instruction >> 16) & 0x0000001F);
-  int fr = ((instruction >> 21) & 0x0000001F);
   check_fpu(SD_);
-  {
-   StoreFPR(destreg,fmt_double,Negate(Add(Multiply(ValueFPR(fs,fmt_double),ValueFPR(ft,fmt_double),fmt_double),ValueFPR(fr,fmt_double),fmt_double),fmt_double));
-  }
+  StoreFPR(FD,fmt_double,Negate(Add(Multiply(ValueFPR(FS,fmt_double),ValueFPR(FT,fmt_double),fmt_double),ValueFPR(FR,fmt_double),fmt_double),fmt_double));
 }
 
 
@@ -3939,15 +3851,8 @@
 *mipsV:
 *vr5000:
 {
-  unsigned32 instruction = instruction_0;
-  int destreg = ((instruction >> 6) & 0x0000001F);
-  int fs = ((instruction >> 11) & 0x0000001F);
-  int ft = ((instruction >> 16) & 0x0000001F);
-  int fr = ((instruction >> 21) & 0x0000001F);
   check_fpu(SD_);
-  {
-   StoreFPR(destreg,fmt_single,Negate(Add(Multiply(ValueFPR(fs,fmt_single),ValueFPR(ft,fmt_single),fmt_single),ValueFPR(fr,fmt_single),fmt_single),fmt_single));
-  }
+  StoreFPR(FD,fmt_single,Negate(Add(Multiply(ValueFPR(FS,fmt_single),ValueFPR(FT,fmt_single),fmt_single),ValueFPR(FR,fmt_single),fmt_single),fmt_single));
 }
 
 
@@ -3958,15 +3863,8 @@
 *mipsV:
 *vr5000:
 {
-  unsigned32 instruction = instruction_0;
-  int destreg = ((instruction >> 6) & 0x0000001F);
-  int fs = ((instruction >> 11) & 0x0000001F);
-  int ft = ((instruction >> 16) & 0x0000001F);
-  int fr = ((instruction >> 21) & 0x0000001F);
   check_fpu(SD_);
-  {
-   StoreFPR(destreg,fmt_double,Negate(Sub(Multiply(ValueFPR(fs,fmt_double),ValueFPR(ft,fmt_double),fmt_double),ValueFPR(fr,fmt_double),fmt_double),fmt_double));
-  }
+  StoreFPR(FD,fmt_double,Negate(Sub(Multiply(ValueFPR(FS,fmt_double),ValueFPR(FT,fmt_double),fmt_double),ValueFPR(FR,fmt_double),fmt_double),fmt_double));
 }
 
 
@@ -3977,15 +3875,8 @@
 *mipsV:
 *vr5000:
 {
-  unsigned32 instruction = instruction_0;
-  int destreg = ((instruction >> 6) & 0x0000001F);
-  int fs = ((instruction >> 11) & 0x0000001F);
-  int ft = ((instruction >> 16) & 0x0000001F);
-  int fr = ((instruction >> 21) & 0x0000001F);
   check_fpu(SD_);
-  {
-    StoreFPR(destreg,fmt_single,Negate(Sub(Multiply(ValueFPR(fs,fmt_single),ValueFPR(ft,fmt_single),fmt_single),ValueFPR(fr,fmt_single),fmt_single),fmt_single));
-  }
+  StoreFPR(FD,fmt_single,Negate(Sub(Multiply(ValueFPR(FS,fmt_single),ValueFPR(FT,fmt_single),fmt_single),ValueFPR(FR,fmt_single),fmt_single),fmt_single));
 }
 
 
@@ -3995,16 +3886,14 @@
 *mipsV:
 *vr5000:
 {
-  unsigned32 instruction = instruction_0;
-  int fs = ((instruction >> 11) & 0x0000001F);
-  signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
-  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
+  address_word base = GPR[BASE];
+  address_word index = GPR[INDEX];
   {
-    address_word vaddr = ((unsigned64)op1 + (unsigned64)op2);
+    address_word vaddr = ((unsigned64)base + (unsigned64)index);
     address_word paddr;
     int uncached;
     if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
-      Prefetch(uncached,paddr,vaddr,isDATA,fs);
+      Prefetch(uncached,paddr,vaddr,isDATA,HINT);
   }
 }
 
@@ -4014,16 +3903,13 @@
 *mipsV:
 *vr5000:
 {
-  unsigned32 instruction = instruction_0;
-  int destreg = ((instruction >> 6) & 0x0000001F);
-  int fs = ((instruction >> 11) & 0x0000001F);
-  int format = ((instruction >> 21) & 0x00000007);
+  int fmt = FMT;
   check_fpu(SD_);
   {
-  if ((format != fmt_single) && (format != fmt_double))
-   SignalException(ReservedInstruction,instruction);
+  if ((fmt != fmt_single) && (fmt != fmt_double))
+   SignalException(ReservedInstruction,instruction_0);
   else
-   StoreFPR(destreg,format,Recip(ValueFPR(fs,format),format));
+   StoreFPR(FD,fmt,Recip(ValueFPR(FS,fmt),fmt));
   }
 }
 
@@ -4037,16 +3923,13 @@
 *vr5000:
 *r3900:
 {
-  unsigned32 instruction = instruction_0;
-  int destreg = ((instruction >> 6) & 0x0000001F);
-  int fs = ((instruction >> 11) & 0x0000001F);
-  int format = ((instruction >> 21) & 0x00000007);
+  int fmt = FMT;
   check_fpu(SD_);
   {
-    if ((format != fmt_single) && (format != fmt_double))
-      SignalException(ReservedInstruction,instruction);
+    if ((fmt != fmt_single) && (fmt != fmt_double))
+      SignalException(ReservedInstruction,instruction_0);
     else
-      StoreFPR(destreg,fmt_long,Convert(FP_RM_NEAREST,ValueFPR(fs,format),format,fmt_long));
+      StoreFPR(FD,fmt_long,Convert(FP_RM_NEAREST,ValueFPR(FS,fmt),fmt,fmt_long));
   }
 }
 
@@ -4061,16 +3944,13 @@
 *vr5000:
 *r3900:
 {
-  unsigned32 instruction = instruction_0;
-  int destreg = ((instruction >> 6) & 0x0000001F);
-  int fs = ((instruction >> 11) & 0x0000001F);
-  int format = ((instruction >> 21) & 0x00000007);
+  int fmt = FMT;
   check_fpu(SD_);
   {
-  if ((format != fmt_single) && (format != fmt_double))
-   SignalException(ReservedInstruction,instruction);
+  if ((fmt != fmt_single) && (fmt != fmt_double))
+   SignalException(ReservedInstruction,instruction_0);
   else
-   StoreFPR(destreg,fmt_word,Convert(FP_RM_NEAREST,ValueFPR(fs,format),format,fmt_word));
+   StoreFPR(FD,fmt_word,Convert(FP_RM_NEAREST,ValueFPR(FS,fmt),fmt,fmt_word));
   }
 }
 
@@ -4081,16 +3961,13 @@
 "rsqrt.%s<FMT> f<FD>, f<FS>"
 *vr5000:
 {
-  unsigned32 instruction = instruction_0;
-  int destreg = ((instruction >> 6) & 0x0000001F);
-  int fs = ((instruction >> 11) & 0x0000001F);
-  int format = ((instruction >> 21) & 0x00000007);
+  int fmt = FMT;
   check_fpu(SD_);
   {
-  if ((format != fmt_single) && (format != fmt_double))
-   SignalException(ReservedInstruction,instruction);
+  if ((fmt != fmt_single) && (fmt != fmt_double))
+   SignalException(ReservedInstruction,instruction_0);
   else
-   StoreFPR(destreg,format,Recip(SquareRoot(ValueFPR(fs,format),format),format));
+   StoreFPR(FD,fmt,Recip(SquareRoot(ValueFPR(FS,fmt),fmt),fmt));
   }
 }
 
@@ -4132,16 +4009,13 @@
 *vr5000:
 *r3900:
 {
-  unsigned32 instruction = instruction_0;
-  int destreg = ((instruction >> 6) & 0x0000001F);
-  int fs = ((instruction >> 11) & 0x0000001F);
-  int format = ((instruction >> 21) & 0x00000007);
+  int fmt = FMT;
   check_fpu(SD_);
   {
-    if ((format != fmt_single) && (format != fmt_double))
-      SignalException(ReservedInstruction,instruction);
+    if ((fmt != fmt_single) && (fmt != fmt_double))
+      SignalException(ReservedInstruction,instruction_0);
     else
-      StoreFPR(destreg,format,(SquareRoot(ValueFPR(fs,format),format)));
+      StoreFPR(FD,fmt,(SquareRoot(ValueFPR(FS,fmt),fmt)));
   }
 }
 
@@ -4157,17 +4031,13 @@
 *vr5000:
 *r3900:
 {
-  unsigned32 instruction = instruction_0;
-  int destreg = ((instruction >> 6) & 0x0000001F);
-  int fs = ((instruction >> 11) & 0x0000001F);
-  int ft = ((instruction >> 16) & 0x0000001F);
-  int format = ((instruction >> 21) & 0x00000007);
+  int fmt = FMT;
   check_fpu(SD_);
   {
-    if ((format != fmt_single) && (format != fmt_double))
-      SignalException(ReservedInstruction,instruction);
+    if ((fmt != fmt_single) && (fmt != fmt_double))
+      SignalException(ReservedInstruction,instruction_0);
     else
-      StoreFPR(destreg,format,Sub(ValueFPR(fs,format),ValueFPR(ft,format),format));
+      StoreFPR(FD,fmt,Sub(ValueFPR(FS,fmt),ValueFPR(FT,fmt),fmt));
   }
 }
 
@@ -4184,13 +4054,10 @@
 *vr5000:
 *r3900:
 {
-  unsigned32 instruction = instruction_0;
   signed_word offset = EXTEND16 (OFFSET);
-  int destreg UNUSED = ((instruction >> 16) & 0x0000001F);
-  signed_word op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
   check_fpu(SD_);
   {
-    address_word vaddr = ((uword64)op1 + offset);
+    address_word vaddr = ((uword64)GPR[BASE] + offset);
     address_word paddr;
     int uncached;
     if ((vaddr & 3) != 0)
@@ -4209,7 +4076,7 @@
 	    unsigned int byte;
 	    paddr = ((paddr & ~mask) | ((paddr & mask) ^ reverseendian));
 	    byte = ((vaddr & mask) ^ bigendiancpu);
-	    memval = (((uword64)COP_SW(((instruction >> 26) & 0x3),destreg)) << (8 * byte));
+	    memval = (((uword64)COP_SW(((instruction_0 >> 26) & 0x3),FT)) << (8 * byte));
 	    StoreMemory(uncached,AccessLength_WORD,memval,memval1,paddr,vaddr,isREAL);
 	  }
       }
@@ -4223,14 +4090,13 @@
 *mipsV:
 *vr5000:
 {
-  unsigned32 instruction = instruction_0;
-  int fs = ((instruction >> 11) & 0x0000001F);
-  signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
-  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
+
+  address_word base = GPR[BASE];
+  address_word index = GPR[INDEX];
   check_fpu(SD_);
   check_u64 (SD_, instruction_0);
   {
-   address_word vaddr = ((unsigned64)op1 + op2);
+   address_word vaddr = ((unsigned64)base + index);
    address_word paddr;
    int uncached;
    if ((vaddr & 3) != 0)
@@ -4247,7 +4113,7 @@
      unsigned int byte;
      paddr = ((paddr & ~mask) | ((paddr & mask) ^ (ReverseEndian << 2)));
      byte = ((vaddr & mask) ^ (BigEndianCPU << 2));
-     memval = (((unsigned64)COP_SW(1,fs)) << (8 * byte));
+     memval = (((unsigned64)COP_SW(1,FS)) << (8 * byte));
       {
        StoreMemory(uncached,AccessLength_WORD,memval,memval1,paddr,vaddr,isREAL);
       }
@@ -4266,16 +4132,13 @@
 *vr5000:
 *r3900:
 {
-  unsigned32 instruction = instruction_0;
-  int destreg = ((instruction >> 6) & 0x0000001F);
-  int fs = ((instruction >> 11) & 0x0000001F);
-  int format = ((instruction >> 21) & 0x00000007);
+  int fmt = FMT;
   check_fpu(SD_);
   {
-  if ((format != fmt_single) && (format != fmt_double))
-   SignalException(ReservedInstruction,instruction);
+  if ((fmt != fmt_single) && (fmt != fmt_double))
+   SignalException(ReservedInstruction,instruction_0);
   else
-   StoreFPR(destreg,fmt_long,Convert(FP_RM_TOZERO,ValueFPR(fs,format),format,fmt_long));
+   StoreFPR(FD,fmt_long,Convert(FP_RM_TOZERO,ValueFPR(FS,fmt),fmt,fmt_long));
   }
 }
 
@@ -4290,16 +4153,13 @@
 *vr5000:
 *r3900:
 {
-  unsigned32 instruction = instruction_0;
-  int destreg = ((instruction >> 6) & 0x0000001F);
-  int fs = ((instruction >> 11) & 0x0000001F);
-  int format = ((instruction >> 21) & 0x00000007);
+  int fmt = FMT;
   check_fpu(SD_);
   {
-  if ((format != fmt_single) && (format != fmt_double))
-   SignalException(ReservedInstruction,instruction);
+  if ((fmt != fmt_single) && (fmt != fmt_double))
+   SignalException(ReservedInstruction,instruction_0);
   else
-   StoreFPR(destreg,fmt_word,Convert(FP_RM_TOZERO,ValueFPR(fs,format),format,fmt_word));
+   StoreFPR(FD,fmt_word,Convert(FP_RM_TOZERO,ValueFPR(FS,fmt),fmt,fmt_word));
   }
 }
 
@@ -4371,16 +4231,14 @@
 *vr5000:
 *r3900:
 {
-  unsigned32 instruction = instruction_0;
-  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
-  int hint = ((instruction >> 16) & 0x0000001F);
-  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
+  address_word base = GPR[BASE];
+  address_word offset = EXTEND16 (OFFSET);
   {
-    address_word vaddr = (op1 + offset);
+    address_word vaddr = (base + offset);
     address_word paddr;
     int uncached;
     if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
-      CacheOp(hint,vaddr,paddr,instruction);
+      CacheOp(OP,vaddr,paddr,instruction_0);
   }
 }
 
