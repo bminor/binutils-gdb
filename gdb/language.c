@@ -1194,7 +1194,6 @@ const struct language_defn unknown_language_defn = {
   unk_lang_print_type,		/* Print a type using appropriate syntax */
   unk_lang_val_print,		/* Print a value using appropriate syntax */
   unk_lang_value_print,		/* Print a top-level value */
-  &builtin_type_error,		/* longest floating point type */
   {"",      "",    "",   ""},	/* Binary format info */
   {"0%lo",   "0",   "o",  ""},	/* Octal format info */
   {"%ld",    "",    "d",  ""},	/* Decimal format info */
@@ -1218,7 +1217,6 @@ const struct language_defn auto_language_defn = {
   unk_lang_print_type,		/* Print a type using appropriate syntax */
   unk_lang_val_print,		/* Print a value using appropriate syntax */
   unk_lang_value_print,		/* Print a top-level value */
-  &builtin_type_error,		/* longest floating point type */
   {"",      "",    "",   ""},	/* Binary format info */
   {"0%lo",   "0",   "o",  ""},	/* Octal format info */
   {"%ld",    "",    "d",  ""},	/* Decimal format info */
@@ -1241,7 +1239,6 @@ const struct language_defn local_language_defn = {
   unk_lang_print_type,		/* Print a type using appropriate syntax */
   unk_lang_val_print,		/* Print a value using appropriate syntax */
   unk_lang_value_print,		/* Print a top-level value */
-  &builtin_type_error,		/* longest floating point type */
   {"",      "",    "",   ""},	/* Binary format info */
   {"0%lo",   "0",   "o",  ""},	/* Octal format info */
   {"%ld",    "",    "d",  ""},	/* Decimal format info */

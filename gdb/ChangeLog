@@ -1,3 +1,14 @@
+Wed Aug  3 12:05:13 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* language.h (struct language_defn): Remove unused field
+	la_longest_float.
+	(longest_float): Remove, no longer used.
+	* language.c (unknown_language_defn, auto_language_defn,
+	local_language_defn): Remove init of la_longest_float field.
+	* c-lang.c (c_language_defn, cplus_language_defn,
+	asm_language_defn): Ditto.
+	* m2-lang.c (m2_language_defn): Ditto.
+
 Tue Aug  2 10:58:34 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* defs.h (bfd_read, bfd_seek): Remove declarations.

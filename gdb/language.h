@@ -149,10 +149,6 @@ struct language_defn
   int (*la_value_print) PARAMS ((struct value *, GDB_FILE *,
 				 int, enum val_prettyprint));
 
-  /* Longest floating point type */
-
-  struct type **la_longest_float;
-
   /* Base 2 (binary) formats. */
 
   struct language_format_info la_binary_format;
@@ -168,7 +164,6 @@ struct language_defn
   /* Base 16 (hexadecimal) formats */
 
   struct language_format_info la_hex_format;
-
 
   /* Table for printing expressions */
 
@@ -239,9 +234,6 @@ set_language PARAMS ((enum language));
    specific to languages.  Each of these functions is based on
    the current setting of working_lang, which the user sets
    with the "set language" command. */
-
-/* Returns some built-in types */
-#define	longest_float()		(*current_language->la_longest_float)
 
 #define create_fundamental_type(objfile,typeid) \
   (current_language->la_fund_type(objfile, typeid))

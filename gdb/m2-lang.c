@@ -407,7 +407,6 @@ const struct language_defn m2_language_defn = {
   m2_print_type,		/* Print a type using appropriate syntax */
   m2_val_print,			/* Print a value using appropriate syntax */
   c_value_print,		/* Print a top-level value */
-  &builtin_type_m2_real,	/* longest floating point type */
   {"",      "",   "",   ""},	/* Binary format info */
   {"%loB",   "",   "o",  "B"},	/* Octal format info */
   {"%ld",    "",   "d",  ""},	/* Decimal format info */
