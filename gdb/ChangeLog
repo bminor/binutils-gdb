@@ -1,3 +1,8 @@
+Tue Dec 16 11:24:30 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* remote-sim.c (gdbsim_open): Use "--architecture" instead of
+	ambigious short form.
+
 Tue Dec 16 10:29:16 1997  David Taylor  <taylor@texas.cygnus.com>
 
 	* d30v-tdep.c (d30v_frame_chain): don't or in DMEM_START to

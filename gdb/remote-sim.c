@@ -506,7 +506,7 @@ gdbsim_open (args, from_tty)
 
   len = (7 + 1 /* gdbsim */
 	 + strlen (" -E little")
-	 + strlen (" --arch=xxxxxxxxxx")
+	 + strlen (" --architecture=xxxxxxxxxx")
 	 + (args ? strlen (args) : 0)
 	 + 50) /* slack */;
   arg_buf = (char *) alloca (len);
@@ -533,7 +533,7 @@ gdbsim_open (args, from_tty)
      explicitly specified */
   if (!target_architecture_auto)
     {
-      strcat (arg_buf, " --arch=");
+      strcat (arg_buf, " --architecture=");
       strcat (arg_buf, target_architecture->printable_name);
     }
   /* finally, any explicit args */
