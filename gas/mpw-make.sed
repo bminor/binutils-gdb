@@ -18,6 +18,13 @@ LOCAL_LOADLIBES = \
 /@OPCODES_LIB@/s/@OPCODES_LIB@/::opcodes:libopcodes.o/
 /@BFDLIB@/s/@BFDLIB@/::bfd:libbfd.o/
 
+# Point at the libraries directly.
+/@OPCODES_DEP@/s/@OPCODES_DEP@/::opcodes:libopcodes.o/
+/@BFDDEP@/s/@BFDDEP@/::bfd:libbfd.o/
+
+# Don't need this.
+/@HLDFLAGS@/s/@HLDFLAGS@//
+
 /extra_objects@/s/extra_objects@/{EXTRA_OBJECTS}/
 
 /LOADLIBES/s/{LOADLIBES}/{EXTRALIBS}/
