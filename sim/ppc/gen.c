@@ -2452,11 +2452,17 @@ lf_print_c_semantic_function(lf *file,
   lf_print_c_semantic_function_header(file,
 				      instruction->file_entry->fields[insn_name],
 				      expanded_bits);
+  lf_printf(file, "{\n");
+  lf_indent(file, +2);
+  lf_printf(file, "cpu_increment_number_of_insns (processor);\n");
+
   lf_print_c_semantic(file,
 		      instruction,
 		      expanded_bits,
 		      opcodes);
 
+  lf_indent(file, -2);
+  lf_printf(file, "}\n");
 }
 
 
@@ -3002,8 +3008,6 @@ gen_idecode_c(insn_table *table, lf *file)
 	      insn_formal);
   lf_printf(file, "{\n");
   lf_indent(file, +2);
-  if (!idecode_cache)
-    lf_printf(file, "cpu_increment_number_of_insns (processor);\n");
   if (table->opcode_rule->use_switch)
     lf_print_idecode_switch(file, table);
   else

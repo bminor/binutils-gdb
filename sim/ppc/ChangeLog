@@ -1,3 +1,9 @@
+Mon Oct 16 17:34:24 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* gen.c (lf_print_c_semantic_function): Move counting # of
+	instructions here so it works with caching.
+	(gen_idecode_c): Move from here.
+
 Wed Oct 11 17:13:15 1995  Andrew Cagney  <cagney@highland.com.au>
 
 	* gen.c, ppc-instructions, psim.c: Fix code for generating
