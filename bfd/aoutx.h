@@ -1414,6 +1414,10 @@ translate_from_native_sym_flags (abfd, cache_ptr)
     case N_SETD: case N_SETD | N_EXT:
     case N_SETB: case N_SETB | N_EXT:
       {
+	/* This code is no longer needed.  It used to be used to make
+           the linker handle set symbols, but they are now handled in
+           the add_symbols routine instead.  */
+#if 0
 	asection *section;
 	arelent_chain *reloc;
 	asection *into_section;
@@ -1489,6 +1493,8 @@ translate_from_native_sym_flags (abfd, cache_ptr)
 	section->_raw_size += BYTES_IN_WORD;
 
 	reloc->relent.howto = CTOR_TABLE_RELOC_HOWTO(abfd);
+
+#endif /* 0 */
 
 	cache_ptr->symbol.flags |= BSF_CONSTRUCTOR;
       }
@@ -2351,7 +2357,8 @@ NAME(aout,squirt_out_relocs) (abfd, section)
   unsigned int count = section->reloc_count;
   size_t natsize;
 
-  if (count == 0) return true;
+  if (count == 0 || section->orelocation == NULL)
+    return true;
 
   each_size = obj_reloc_entry_size (abfd);
   natsize = each_size * count;

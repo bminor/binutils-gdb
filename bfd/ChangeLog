@@ -1,5 +1,9 @@
 Tue Apr 30 17:56:39 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* aoutx.h (translate_from_native_sym_flags): Don't create
+	SEC_CONSTRUCTOR sections.
+	* ecoff.c (ecoff_set_symbol_info): Likewise.
+
 	* elf32-mips.c (mips_elf_copy_private_bfd_data): Copy elf_gp.
 	From Don Bowman <bowman@waterloo.hp.com>.
 
