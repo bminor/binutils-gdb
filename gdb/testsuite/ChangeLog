@@ -1,3 +1,11 @@
+Wed Aug 11 12:09:32 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.t24/demangle.exp: Add tests for PR 3220.
+
+Tue Aug 10 15:49:35 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.t24/demangle.exp: Add lucid test for __vtbl__3foo__vt_cc_main_.
+
 Tue Aug 10 15:45:25 1993  Fred Fish  (fnf@deneb.cygnus.com)
 
 	* gdb.t07/watchpoint.exp:  Clear xfail with "i*86-*-*", not just
