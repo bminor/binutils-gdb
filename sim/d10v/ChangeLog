@@ -1,3 +1,29 @@
+1999-01-26  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+	* simops.c (OP_5605): Sign extend MIN32 and MAX32 before saturation
+        comparison.
+	(OP_5607): Ditto.
+	(OP_2A00): Ditto.
+	(OP_2800): Ditto.
+
+1999-01-13  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+	* simops.c (OP_1223): Sign extend MIN32 and MAX32 before saturation
+	comparison.
+
+Tue Nov 24 17:04:43 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* simops.c (sys/syscall.h): Include targ-vals.h instead.
+	(SYS_*): Replace with TARGET_SYS_*.
+
+	* Makefile.in: Add dependency on targ-vals.h.
+	(NL_TARGET): Define as NL_TARGET_d10v.
+
+Wed Sep 30 00:06:32 1998  Andrew Cagney  <cagney@amy.cygnus.com>
+
+	* interp.c (xfer_mem): Missing break, instruction memory case
+ 	flowed into unified memory case.
+
 Wed Sep 30 10:14:18 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* simops.c: If load instruction with auto increment/decrement
