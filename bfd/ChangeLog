@@ -1,5 +1,8 @@
 Fri Apr  5 12:24:13 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config.bfd: Add i[345]86-*-freebsdelf* target; from John Polstra
+	<jdp@polstra.com>.
+
 	* linker.c (link_action): For WARN_ROW/warn, use MWARN, not CYCLE,
 	to avoid crashing in bfd_hash_replace.
 
