@@ -1,3 +1,7 @@
+2002-06-16  Andrew Cagney  <ac131313@redhat.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
 2002-06-08  Andrew Cagney  <cagney@redhat.com>
 
 	* main.c: Include "gdb/callback.h" and "gdb/remote-sim.h".

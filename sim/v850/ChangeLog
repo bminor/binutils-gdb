@@ -1,3 +1,7 @@
+2002-06-16  Andrew Cagney  <ac131313@redhat.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
 2001-12-02  Andrew Cagney  <ac131313@redhat.com>
 
 	* Makefile.in (simops.h, table.c): Delete targets.
