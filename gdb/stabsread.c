@@ -1739,7 +1739,7 @@ read_type (pp, objfile)
 
   /* Size specified in a type attribute overrides any other size.  */
   if (type_size != -1)
-    TYPE_LENGTH (type) = type_size / TARGET_CHAR_BIT;
+    TYPE_LENGTH (type) = (type_size + TARGET_CHAR_BIT - 1) / TARGET_CHAR_BIT;
 
   return type;
 }

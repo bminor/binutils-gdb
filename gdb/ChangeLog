@@ -1,3 +1,7 @@
+Mon Aug  1 13:38:04 1994  Kung Hsu  (kung@mexican.cygnus.com)
+
+	* stabsread.c (read_type): Fix a bug in enum size calculation.
+
 Mon Aug  1 01:36:13 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* hppa-tdep.c (compare_unwind_entries): Add "const" to both
