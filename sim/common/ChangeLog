@@ -1,3 +1,9 @@
+2004-11-30  Richard Earnshaw  <rearnsha@arm.com>
+
+	* Make-common.in (sim-basics_h): Correct dependencies on
+	cconfig.h and tconfig.h
+	(sim-load.o): Correct typo in sim-basics_h dependency.
+
 2004-11-18  Richard Earnshaw  <rearnsha@arm.com>
 
 	* Make-common.in (sim-*_h): Add macros for all sim headers listing

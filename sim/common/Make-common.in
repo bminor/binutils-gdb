@@ -333,8 +333,8 @@ sim-base_h = $(srccom)/sim-base.h \
 		$(sim-memopt_h) \
 		$(sim-cpu_h)
 sim-basics_h = $(srccom)/sim-basics.h \
-		cconfig_h \
-		tconfig_h \
+		../common/cconfig.h \
+		tconfig.h \
 		$(sim-config_h) \
 		$(sim-inline_h) \
 		$(sim-types_h) \
@@ -506,7 +506,7 @@ sim-utils.o: $(srccom)/sim-utils.c $(sim_main_headers)
 sim-watch.o: $(srccom)/sim-watch.c $(sim_main_headers)
 	$(CC) -c $(srccom)/sim-watch.c $(ALL_CFLAGS)
 
-sim-load.o: $(srccom)/sim-load.c $(callback_h) $(sim_basics_h) $(remote_sim_h)
+sim-load.o: $(srccom)/sim-load.c $(callback_h) $(sim-basics_h) $(remote_sim_h)
 	$(CC) -c $(srccom)/sim-load.c $(ALL_CFLAGS)
 
 
