@@ -162,7 +162,9 @@ add_symbol_to_list (struct symbol *symbol, struct pending **listhead)
   
    if (SYMBOL_LANGUAGE (symbol) == language_cplus
        && !processing_has_namespace_info
-       && SYMBOL_CPLUS_DEMANGLED_NAME (symbol) != NULL)
+       && SYMBOL_CPLUS_DEMANGLED_NAME (symbol) != NULL
+       && strstr (SYMBOL_CPLUS_DEMANGLED_NAME (symbol),
+		  "(anonymous namespace)") != NULL)
      scan_for_anonymous_namespaces (symbol);
 }
 
@@ -178,10 +180,6 @@ scan_for_anonymous_namespaces (struct symbol *symbol)
 {
   const char *name = SYMBOL_CPLUS_DEMANGLED_NAME (symbol);
   const char *beginning, *end;
-
-  /* FIXME: carlton/2002-10-14: Should we do some sort of fast search
-     first to see if the substring "(anonymous namespace)" occurs in
-     name at all?  */
 
   for (beginning = name, end = cp_find_first_component (name);
        *end == ':';

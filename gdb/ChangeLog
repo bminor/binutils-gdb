@@ -1,3 +1,13 @@
+2002-10-22  David Carlton  <carlton@math.stanford.edu>
+
+	* dwarf2read.c (scan_partial_symbols): Clarify some comments.
+	* symtab.c (lookup_symbol_aux): Always call
+	lookup_symbol_aux_using to search global symtabs/psymtabs.
+	(lookup_symbol_aux_local): Add static_block argument.
+	* buildsym.c (add_symbol_to_list): Do a quick scan for "(anonymous
+	namespace)" before calling scan_for_anonymous_namespaces.
+	(scan_for_anonymous_namespaces): Delete FIXME comment.
+
 2002-10-21  David Carlton  <carlton@math.stanford.edu>
 
 	* buildsym.c (add_symbol_to_list): Expand comment.

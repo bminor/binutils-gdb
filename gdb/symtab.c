@@ -91,11 +91,13 @@ static struct symbol *lookup_symbol_aux (const char *name,
 					 int *is_a_field_of_this,
 					 struct symtab **symtab);
 
-static struct symbol *lookup_symbol_aux_local (const char *name,
-					       const char *mangled_name,
-					       const struct block *block,
-					       const namespace_enum namespace,
-					       struct symtab **symtab);
+static
+struct symbol *lookup_symbol_aux_local (const char *name,
+					const char *mangled_name,
+					const struct block *block,
+					const namespace_enum namespace,
+					struct symtab **symtab,
+					const struct block **static_block);
 
 static
 struct symbol *lookup_symbol_aux_nonlocal (int block_index,
@@ -779,11 +781,13 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
 		   int *is_a_field_of_this, struct symtab **symtab)
 {
   struct symbol *sym;
+  const struct block *static_block;
 
-  /* Search specified block and its superiors.  */
+  /* Search specified block and its superiors.  Don't search
+     STATIC_BLOCK or GLOBAL_BLOCK.  */
 
   sym = lookup_symbol_aux_local (name, mangled_name, block, namespace,
-				 symtab);
+				 symtab, &static_block);
   if (sym != NULL)
     return sym;
 
@@ -803,31 +807,34 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
 	}
     }
 
-  /* Now search all global blocks.  Do the symtab's first, then
-     check the psymtab's. If a psymtab indicates the existence
-     of the desired name as a global, then do psymtab-to-symtab
-     conversion on the fly and return the found symbol. */
+  /* If there's a static block to search, search it next.  */
 
-  sym = lookup_symbol_aux_nonlocal (GLOBAL_BLOCK, name, mangled_name,
-				    namespace, symtab);
-  if (sym != NULL)
-    return sym;
-
-  /* If we're in the C++ case, check to see if the symbol is defined
-     in a namespace accessible via a "using" declaration.  */
-
-  /* FIXME: carlton/2002-10-10: is "is_a_field_of_this" always
-     non-NULL if we're in the C++ case?  Maybe we should always do
-     this, and delete the two previous searches: this will always
-     search the global namespace, after all.  */
-
-  if (is_a_field_of_this)
+  if (static_block != NULL)
     {
-      sym = lookup_symbol_aux_using (name, mangled_name, block, namespace,
-				     symtab);
+      sym = lookup_block_symbol (static_block, name, mangled_name, namespace);
       if (sym != NULL)
 	return sym;
     }
+
+  /* Now search all global blocks.  Do the symtab's first, then
+     check the psymtab's. If a psymtab indicates the existence
+     of the desired name as a global, then do psymtab-to-symtab
+     conversion on the fly and return the found symbol.
+
+     We do this from within lookup_symbol_aux_using: that will apply
+     appropriate using directives in the C++ case.  But it works fine
+     in the non-C++ case, too.  */
+
+  /* NOTE: carlton/2002-10-22: Is it worthwhile to try to figure out
+     whether or not we're in the C++ case?  Doing
+     lookup_symbol_aux_using won't slow things down much at all in the
+     general case, though: other parts of this function are much, much
+     more expensive.  */
+
+  sym = lookup_symbol_aux_using (name, mangled_name, block, namespace,
+				 symtab);
+  if (sym != NULL)
+    return sym;
 
 #ifndef HPUXHPPA
 
@@ -886,22 +893,32 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
   return NULL;
 }
 
-/* Check to see if the symbol is defined in BLOCK or its
-   superiors.  */
+/* Check to see if the symbol is defined in BLOCK or its superiors.
+   Don't search STATIC_BLOCK or GLOBAL_BLOCK.  If we don't find a
+   match, store the address of STATIC_BLOCK in static_block.  */
 
 static struct symbol *
 lookup_symbol_aux_local (const char *name, const char *mangled_name,
 			 const struct block *block,
 			 const namespace_enum namespace,
-			 struct symtab **symtab)
+			 struct symtab **symtab,
+			 const struct block **static_block)
 {
   struct symbol *sym;
   struct objfile *objfile = NULL;
   struct blockvector *bv;
   struct block *b;
   struct symtab *s = NULL;
-  
-  while (block != 0)
+
+  /* Either no block is specified or it's a global block.  */
+
+  if (block == NULL || BLOCK_SUPERBLOCK (block) == NULL)
+    {
+      *static_block = NULL;
+      return NULL;
+    }
+
+  while (BLOCK_SUPERBLOCK (BLOCK_SUPERBLOCK (block)) != NULL)
     {
       sym = lookup_block_symbol (block, name, mangled_name, namespace);
       if (sym)
@@ -928,6 +945,9 @@ lookup_symbol_aux_local (const char *name, const char *mangled_name,
       block = BLOCK_SUPERBLOCK (block);
     }
 
+  /* We've reached the static block.  */
+
+  *static_block = block;
   return NULL;
 }
 
