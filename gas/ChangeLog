@@ -1,3 +1,7 @@
+Tue Nov 19 13:35:22 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-mn10300.c (md_assemble): Handle MN10300_OPERAND_REG_LIST.
+
 Mon Nov 18 15:26:55 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-mn10300.c (mn10300_insert_operand): Provide prototype

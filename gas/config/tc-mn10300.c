@@ -465,7 +465,7 @@ md_assemble (str)
 
 	  errmsg = NULL;
 
-	  while (*str == ' ' || *str == ',' || *str == '[' || *str == ']')
+	  while (*str == ' ' || *str == ',')
 	    ++str;
 
 	  /* Gather the operand. */
@@ -546,6 +546,76 @@ md_assemble (str)
 		}
 	      *input_line_pointer = c;
 	      goto keep_going;
+	    }
+	  else if (operand->flags & MN10300_OPERAND_REG_LIST)
+	    {
+	      unsigned int value = 0;
+	      if (*input_line_pointer != '[')
+		{
+		  input_line_pointer = hold;
+		  str = hold;
+		  goto error;
+		}
+
+	      /* Eat the '['.  */
+	      input_line_pointer++;
+	     
+	      /* A null register list can not be specified.  */
+	      if (*input_line_pointer == ']')
+		{
+		  input_line_pointer = hold;
+		  str = hold;
+		  goto error;
+		}
+
+	      while (*input_line_pointer != ']')
+		{
+		  char *start;
+		  char c;
+
+		  if (*input_line_pointer == ',')
+		    input_line_pointer++;
+
+		  start = input_line_pointer;
+		  c = get_symbol_end ();
+
+		  if (strcmp (start, "d2") == 0)
+		    {
+		      value |= 0x80;
+		      *input_line_pointer = c;
+		    }
+		  else if (strcmp (start, "d3") == 0)
+		    {
+		      value |= 0x40;
+		      *input_line_pointer = c;
+		    }
+		  else if (strcmp (start, "a2") == 0)
+		    {
+		      value |= 0x20;
+		      *input_line_pointer = c;
+		    }
+		  else if (strcmp (start, "a3") == 0)
+		    {
+		      value |= 0x10;
+		      *input_line_pointer = c;
+		    }
+		  else if (strcmp (start, "other") == 0)
+		    {
+		      value |= 0x08;
+		      *input_line_pointer = c;
+		    }
+		  else
+		    {
+		      input_line_pointer = hold;
+		      str = hold;
+		      goto error;
+		    }
+		}
+	      input_line_pointer++;
+              mn10300_insert_operand (&insn, &extension, operand,
+                                      value, (char *) NULL, 0, 0);
+	      goto keep_going;
+
 	    }
 	  else if (data_register_name (&ex))
 	    {
@@ -649,7 +719,7 @@ keep_going:
 	  str = input_line_pointer;
 	  input_line_pointer = hold;
 
-	  while (*str == ' ' || *str == ',' || *str == '[' || *str == ']')
+	  while (*str == ' ' || *str == ',')
 	    ++str;
 
 	}
