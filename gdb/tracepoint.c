@@ -1206,6 +1206,11 @@ collect_symbol (collect, sym)
     if (info_verbose)
       printf_filtered ("LOC_REG[parm] %s: ", SYMBOL_NAME (sym));
     add_register (collect, reg);
+    /* check for doubles stored in two registers */
+    /* FIXME: how about larger types stored in 3 or more regs? */
+    if (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_FLT &&
+	len > REGISTER_RAW_SIZE (reg))
+      add_register (collect, reg + 1);
     break;
   case LOC_REF_ARG:
     printf_filtered ("Sorry, don't know how to do LOC_REF_ARG yet.\n");
