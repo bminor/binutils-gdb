@@ -1901,7 +1901,7 @@ yylex ()
 	    yylval.ulval = 1;
 	    return (BOOLEAN_LITERAL);
 	}
-    if (STREQ (lexptr, "false"))
+    if (STREQ (simplename, "false"))
 	{
 	    yylval.ulval = 0;
 	    return (BOOLEAN_LITERAL);
