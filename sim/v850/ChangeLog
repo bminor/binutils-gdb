@@ -1,10 +1,11 @@
 Fri Sep 19 10:37:20 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* simops.c (condition_met): Make global.
-	* sim-main.h (TRACE_ALU_INPUT3): Define.
+
+	* sim-main.h (TRACE_ALU_INPUT3, TRACE_BRANCH0): Define.
 
 start-sanitize-v850e
-	* simops.c (OP_32007E0): Move "cmov" to v850.igen, fix.
+	* simops.c: Move "cmov", "cmov imm" to v850.igen, fix.
 
 end-sanitize-v850e
 Wed Sep 17 16:21:08 1997  Andrew Cagney  <cagney@b1.cygnus.com>

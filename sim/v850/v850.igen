@@ -121,9 +121,51 @@ rrrrr,110110,RRRRR + iiiiiiiiiiiiiiii:VI:::andi
 
 
 
+// Map condition code to a string
+:%s:::cccc:int cccc
+{
+  switch (cccc)
+    {
+    case 0xf: return "gt";
+    case 0xe: return "ge";
+    case 0x6: return "lt";
+
+    case 0x7: return "le";
+
+    case 0xb: return "h";
+    case 0x9: return "nl";
+    case 0x1: return "l";
+
+    case 0x3: return "nh";
+
+    case 0x2: return "e";
+
+    case 0xa: return "ne";
+
+    case 0x0: return "v";
+    case 0x8: return "nv";
+    case 0x4: return "n";
+    case 0xc: return "p";
+      /* case 0x1: return "c"; */
+      /* case 0x9: return "nc"; */
+      /* case 0x2: return "z"; */
+      /* case 0xa: return "nz"; */
+    case 0x5: return "r"; /* always */
+    case 0xd: return "sa";
+    }
+  return "(null)";
+}
+
+
 // Bcond
 // ddddd,1011,ddd,cccc:III:::Bcond
-// "b<cond> disp9"
+// "b%s<cccc> <disp9>"
+// {
+//   int cond = condition_met (cccc);
+//   if (cond)
+//     nia = cia + disp9;
+//   TRACE_BRANCH1 (cond);
+// }
 
 ddddd,1011,ddd,0000:III:::bv
 "bv <disp9>"
@@ -351,10 +393,11 @@ rrrrr,111111,RRRRR + wwwww,011001,cccc,0:XI:::cmov
 // start-sanitize-v850eq
 *v850eq
 // end-sanitize-v850eq
-"cmov <cccc>, r<reg1>, r<reg2>, r<reg3>"
+"cmov %s<cccc>, r<reg1>, r<reg2>, r<reg3>"
 {
-  TRACE_ALU_INPUT3 (cccc, GR[reg1], GR[reg2]);
-  GR[reg3] = condition_met (cccc) ? GR[reg1] : GR[reg2];
+  int cond = condition_met (cccc);
+  TRACE_ALU_INPUT3 (cond, GR[reg1], GR[reg2]);
+  GR[reg3] = cond ? GR[reg1] : GR[reg2];
   TRACE_ALU_RESULT (GR[reg3]);
 }
 
@@ -365,9 +408,12 @@ rrrrr,111111,iiiii + wwwww,011000,cccc,0:XII:::cmov
 // start-sanitize-v850eq
 *v850eq
 // end-sanitize-v850eq
-"cmov <cccc>, <imm5>, r<reg2>, r<reg3>"
+"cmov %s<cccc>, <imm5>, r<reg2>, r<reg3>"
 {
-  COMPAT_2 (OP_30007E0 ());
+  int cond = condition_met (cccc);
+  TRACE_ALU_INPUT3 (cond, imm5, GR[reg2]);
+  GR[reg3] = cond ? imm5 : GR[reg2];
+  TRACE_ALU_RESULT (GR[reg3]);
 }
 
 
@@ -552,10 +598,8 @@ rrrrr!0,11110,dddddd + ddddddddddddddd,0:V:::jarl
 00000000011,RRRRR:I:::jmp
 "jmp [r<reg1>]"
 {
-  SAVE_1;
-  trace_input ("jmp", OP_REG, 0);
-  nia = State.regs[ reg1 ];
-  trace_output (OP_REG);
+  nia = GR[reg1];
+  TRACE_BRANCH0 ();
 }
 
 
@@ -933,7 +977,7 @@ rrrrr,1111110,cccc + 0000001000000000:IX:::sasf
 // start-sanitize-v850eq
 *v850eq
 // end-sanitize-v850eq
-"sasf <cccc>, r<reg2>"
+"sasf %s<cccc>, r<reg2>"
 {
   COMPAT_2 (OP_20007E0 ());
 }
@@ -986,7 +1030,7 @@ rrrrr!0,000100,RRRRR:I:::satsubr
 
 // SETF
 rrrrr,1111110,cccc + 0000000000000000:IX:::setf
-"setf <cccc>, r<reg2>"
+"setf %s<cccc>, r<reg2>"
 {
   COMPAT_2 (OP_7E0 ());
 }

@@ -225,7 +225,7 @@ sim_core_write_unaligned_##LEN (STATE_CPU (simulator, 0), \
 
 
 /* compare cccc field against PSW */
-unsigned int condition_met (unsigned code);
+int condition_met (unsigned code);
 
 
 /* Debug/tracing calls */
@@ -334,6 +334,17 @@ do { \
   } \
 } while (0)
 
+#define TRACE_BRANCH0() \
+do { \
+  if (TRACE_BRANCH_P (CPU)) { \
+    trace_module = "branch"; \
+    trace_pc = cia; \
+    trace_name = itable[MY_INDEX].name; \
+    trace_num_values = 0; \
+    trace_result (1, (nia)); \
+  } \
+} while (0)
+
 #define TRACE_BRANCH1(IN1) \
 do { \
   if (TRACE_BRANCH_P (CPU)) { \
@@ -380,10 +391,13 @@ do { \
 #define trace_result(HAS_RESULT, RESULT)
 
 #define TRACE_ALU_INPUT0()
-#define TRACE_ALU_INPUT1(IN1)
-#define TRACE_ALU_INPUT2(IN1, IN2)
+#define TRACE_ALU_INPUT1(IN0)
+#define TRACE_ALU_INPUT2(IN0, IN1)
+#define TRACE_ALU_INPUT2(IN0, IN1)
+#define TRACE_ALU_INPUT2(IN0, IN1 INS2)
 #define TRACE_ALU_RESULT(RESULT)
 
+#define TRACE_BRANCH0()
 #define TRACE_BRANCH1(IN1)
 #define TRACE_BRANCH2(IN1, IN2)
 #define TRACE_BRANCH2(IN1, IN2, IN3)
