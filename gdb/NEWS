@@ -1,6 +1,18 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
+*** Changes since GDB-4.17:
+
+* GDB Remote protocol
+
+For 64 bit targets, the memory packets ("M" and "m") can now contain a
+full 64 bit address.  The class-obscure gdb command:
+	set targetaddresssize 32
+can be used to revert to the old behavour.  For existing remote stubs
+the change should not be noticed as the additional address information
+will be descarded.
+
+
 *** Changes in GDB-4.17:
 
 * New native configurations

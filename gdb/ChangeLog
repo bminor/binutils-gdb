@@ -1,3 +1,16 @@
+Wed Sep 23 18:21:03 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote.c (remote_address_masked): New function - mask address
+ 	according to REMOTE_ADDRESS_SIZE.
+	(remote_address_size): New global.
+	(hexnumstr): New function - convert arbitrary unsigned to hex.
+	(remote_write_bytes, remote_read_bytes): Use hexnumstr to
+ 	construct packet address.  Mask address when necessary.
+	(_initialize_remote): Add "set remoteaddresssize" command, set
+ 	REMOTE_ADDRESS_SIZE variable.
+
+	* NEWS: Update.
+	
 Wed Sep 23 18:08:52 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* remote.c (_initialize_remote, packet_command, print_packet):
