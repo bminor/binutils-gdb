@@ -1,3 +1,7 @@
+Mon Sep 14 20:00:04 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* config/m68k-emc.exp: New file.
+
 Fri Sep 11 13:58:02 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* gdb.c++/classes.exp: Change all regular expressions to match
