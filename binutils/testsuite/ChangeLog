@@ -1,3 +1,8 @@
+Mon Mar 27 11:27:31 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* binutils-all/objcopy.exp: Add setup_xfail for simply copy test
+	for m68*-*-vxworks*.
+
 Fri Mar 24 11:44:25 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* binutils-hppa/objdump.exp: Correct hppa*-*-* check.

@@ -26,10 +26,6 @@ if {[which $OBJCOPY] == 0} then {
 
 send_user "Version [binutil_version $OBJCOPY]"
 
-if [istarget hppa*-*-*] then {
-    # bintest.s doesn't assemble, and we don't have any other tests
-    return
-}
 
 if {![binutils_assemble $AS $srcdir$subdir/bintest.s tmpdir/bintest.o]} then {
     return
@@ -47,9 +43,17 @@ if ![string match "" $got] then {
     catch "exec cmp tmpdir/bintest.o tmpdir/copy.o" exec_output
 
     # On some systems the result of objcopy will not be identical.
+    # Usually this is just because gas isn't using bfd to write the files
+    # in the first place, and may order things a little differently.
     # Those systems should use setup_xfail here.
 
-    setup_xfail "sh-*-coff" "m68*-*-hpux*"
+    setup_xfail "sh-*-coff" "sh-*-hms"
+    setup_xfail "m68*-*-hpux*" "m68*-*-sunos*" "m68*-*-coff" "m68*-*-vxworks*"
+    setup_xfail "i*86-*-linux"
+    setup_xfail "a29k-*-udi" "a29k-*-coff"
+    setup_xfail "i960-*-vxworks5.1" "i960-*-coff"
+    setup_xfail "h8300-*-hms" "h8300-*-coff"
+    setup_xfail "hppa*-*-*"
 
     if [string match "" $exec_output] then {
 	pass "objcopy (simple copy)"
