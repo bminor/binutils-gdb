@@ -1,3 +1,8 @@
+2003-09-23  Elena Zannoni  <ezannoni@redhat.com>
+
+        * gdb.cp/annota2.exp: Make sure we can match 'Hardware watchpoint'
+        as well as 'Watchpoint'.
+
 2003-08-22  Michael Chastain  <mec@shout.net>
 
 	* gdb.cp: New directory.
