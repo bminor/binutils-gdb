@@ -81,6 +81,8 @@ symtab.c
 symtab.h
 tahoe.c
 tahoe.h
+utils.c
+utils.h
 vax.c
 vax.h
 
