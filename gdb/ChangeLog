@@ -1,3 +1,12 @@
+Tue Mar  3 17:19:08 1998  John Metzler  <jmetzler@cygnus.com>
+
+	* config/mips/tm-vr4xxx.h :  implements vr4111 as saparate from 4300
+	* config/mips/vr4xxx.tm :    implements vr4111 as separate from 4300
+	* configure.tgt:  Recognise mips64vr4111-*-elf as vr4xxx
+	* dwarfread.c(read_tag_pointer_type): Pointer sizes now come from
+	TARGET_PTR_BIT rather from sizeof(char *) on host.
+	
+
 Tue Mar  3 14:37:02 1998  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
         * alpha-nat.c (fetch_osf_core_registers):  Renamed from
