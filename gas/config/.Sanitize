@@ -38,10 +38,10 @@ hmake-i386
 ho-a29k.h
 ho-ansi.h
 ho-cygnus.h
+ho-decstation.h
 ho-generic.h
 ho-hpux.h
 ho-i386.h
-ho-pmax.h
 ho-rs6000.h
 ho-sun3.h
 ho-sun386.h
@@ -89,7 +89,7 @@ te-sco386.h
 te-sparc.h
 te-sun3.h
 te-unisoft.h
-tmake-sun3
+tmake-m68k
 vax-inst.h
 vms
 
@@ -108,7 +108,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.1  1991/05/23 17:09:03  rich
+# Revision 1.2  1991/09/02 01:03:38  rich
+# Correct a few things.
+#
+# Revision 1.1  1991/05/23  17:09:03  rich
 # Initial revision
 #
 #
