@@ -106,7 +106,7 @@ struct dummy_frame *
 cached_find_dummy_frame (struct frame_info *frame, void **cache)
 {
   if ((*cache) == NULL)
-    (*cache) = find_dummy_frame (frame->pc, frame->frame);
+    (*cache) = find_dummy_frame (frame->pc, get_frame_base (frame));
   return (*cache);
 }
 
@@ -207,7 +207,7 @@ void
 generic_push_dummy_frame (void)
 {
   struct dummy_frame *dummy_frame;
-  CORE_ADDR fp = (get_current_frame ())->frame;
+  CORE_ADDR fp = get_frame_base (get_current_frame ());
 
   /* check to see if there are stale dummy frames, 
      perhaps left over from when a longjump took us out of a 

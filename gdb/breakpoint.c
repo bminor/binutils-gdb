@@ -1704,7 +1704,7 @@ deprecated_frame_in_dummy (struct frame_info *frame)
   ALL_BREAKPOINTS (b)
   {
     if (b->type == bp_call_dummy
-	&& b->frame == frame->frame
+	&& b->frame == get_frame_base (frame)
     /* We need to check the PC as well as the frame on the sparc,
        for signals.exp in the testsuite.  */
 	&& (frame->pc
@@ -2728,7 +2728,7 @@ bpstat_stop_status (CORE_ADDR *pc, int not_a_sw_breakpoint)
       }
 
     if (b->frame &&
-       b->frame != (get_current_frame ())->frame)
+	b->frame != get_frame_base (get_current_frame ()))
       bs->stop = 0;
     else
       {
@@ -4318,7 +4318,7 @@ set_longjmp_resume_breakpoint (CORE_ADDR pc, struct frame_info *frame)
       b->address = pc;
       b->enable_state = bp_enabled;
       if (frame != NULL)
-	b->frame = frame->frame;
+	b->frame = get_frame_base (frame);
       else
 	b->frame = 0;
       check_duplicates (b);
@@ -4379,7 +4379,7 @@ set_momentary_breakpoint (struct symtab_and_line sal, struct frame_info *frame,
   b = set_raw_breakpoint (sal, type);
   b->enable_state = bp_enabled;
   b->disposition = disp_donttouch;
-  b->frame = (frame ? frame->frame : 0);
+  b->frame = (frame ? get_frame_base (frame) : 0);
 
   /* If we're debugging a multi-threaded program, then we
      want momentary breakpoints to be active in only a 
@@ -5427,7 +5427,7 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
 	  scope_breakpoint->disposition = disp_del;
 
 	  /* Only break in the proper frame (help with recursion).  */
-	  scope_breakpoint->frame = prev_frame->frame;
+	  scope_breakpoint->frame = get_frame_base (prev_frame);
 
 	  /* Set the address at which we will stop.  */
 	  scope_breakpoint->address = get_frame_pc (prev_frame);

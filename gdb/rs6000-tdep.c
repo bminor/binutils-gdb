@@ -261,7 +261,7 @@ branch_dest (int opcode, int instr, CORE_ADDR pc, CORE_ADDR safety)
 
 	      fi = get_current_frame ();
 	      if (fi != NULL)
-		dest = read_memory_addr (fi->frame + SIG_FRAME_PC_OFFSET,
+		dest = read_memory_addr (get_frame_base (fi) + SIG_FRAME_PC_OFFSET,
 					 gdbarch_tdep (current_gdbarch)->wordsize);
 	    }
 	}
@@ -958,7 +958,9 @@ rs6000_pop_frame (void)
   pc = read_pc ();
   sp = get_frame_base (frame);
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc,
+				   get_frame_base (frame),
+				   get_frame_base (frame)))
     {
       generic_pop_dummy_frame ();
       flush_cached_frames ();
@@ -1513,10 +1515,14 @@ rs6000_frame_saved_pc (struct frame_info *fi)
   int wordsize = tdep->wordsize;
 
   if ((get_frame_type (fi) == SIGTRAMP_FRAME))
-    return read_memory_addr (fi->frame + SIG_FRAME_PC_OFFSET, wordsize);
+    return read_memory_addr (get_frame_base (fi) + SIG_FRAME_PC_OFFSET,
+			     wordsize);
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
-    return deprecated_read_register_dummy (fi->pc, fi->frame, PC_REGNUM);
+  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc,
+				   get_frame_base (fi),
+				   get_frame_base (fi)))
+    return deprecated_read_register_dummy (fi->pc,
+					   get_frame_base (fi), PC_REGNUM);
 
   func_start = get_pc_function_start (fi->pc);
 
@@ -1530,8 +1536,8 @@ rs6000_frame_saved_pc (struct frame_info *fi)
   if (fdata.lr_offset == 0 && get_next_frame (fi) != NULL)
     {
       if ((get_frame_type (get_next_frame (fi)) == SIGTRAMP_FRAME))
-	return read_memory_addr (get_next_frame (fi)->frame
-				 + SIG_FRAME_LR_OFFSET,
+	return read_memory_addr ((get_frame_base (get_next_frame (fi))
+				  + SIG_FRAME_LR_OFFSET),
 				 wordsize);
       else if (DEPRECATED_PC_IN_CALL_DUMMY (get_next_frame (fi)->pc, 0, 0))
 	/* The link register wasn't saved by this frame and the next
@@ -1708,7 +1714,7 @@ frame_initial_stack_address (struct frame_info *fi)
 
   if (fdata.alloca_reg < 0)
     {
-      fi->extra_info->initial_sp = fi->frame;
+      fi->extra_info->initial_sp = get_frame_base (fi);
       return fi->extra_info->initial_sp;
     }
 
@@ -1726,7 +1732,7 @@ frame_initial_stack_address (struct frame_info *fi)
       /* NOTE: cagney/2002-04-17: At present the only time
          frame_register_read will fail is when the register isn't
          available.  If that does happen, use the frame.  */
-      fi->extra_info->initial_sp = fi->frame;
+      fi->extra_info->initial_sp = get_frame_base (fi);
   }
   return fi->extra_info->initial_sp;
 }
@@ -1746,18 +1752,20 @@ rs6000_frame_chain (struct frame_info *thisframe)
   CORE_ADDR fp, fpp, lr;
   int wordsize = gdbarch_tdep (current_gdbarch)->wordsize;
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (thisframe->pc, thisframe->frame, thisframe->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (thisframe->pc,
+				   get_frame_base (thisframe),
+				   get_frame_base (thisframe)))
     /* A dummy frame always correctly chains back to the previous
        frame.  */
-    return read_memory_addr ((thisframe)->frame, wordsize);
+    return read_memory_addr (get_frame_base (thisframe), wordsize);
 
   if (inside_entry_file (thisframe->pc) ||
       thisframe->pc == entry_point_address ())
     return 0;
 
   if ((get_frame_type (thisframe) == SIGTRAMP_FRAME))
-    fp = read_memory_addr (thisframe->frame + SIG_FRAME_FP_OFFSET,
-			      wordsize);
+    fp = read_memory_addr (get_frame_base (thisframe) + SIG_FRAME_FP_OFFSET,
+			   wordsize);
   else if (get_next_frame (thisframe) != NULL
 	   && (get_frame_type (get_next_frame (thisframe)) == SIGTRAMP_FRAME)
 	   && FRAMELESS_FUNCTION_INVOCATION (thisframe))
@@ -1765,7 +1773,7 @@ rs6000_frame_chain (struct frame_info *thisframe)
        frame pointer.  */
     fp = get_frame_base (thisframe);
   else
-    fp = read_memory_addr ((thisframe)->frame, wordsize);
+    fp = read_memory_addr (get_frame_base (thisframe), wordsize);
   return fp;
 }
 

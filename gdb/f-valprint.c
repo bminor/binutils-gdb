@@ -74,7 +74,7 @@ f77_get_dynamic_lowerbound (struct type *type, int *lower_bound)
   switch (TYPE_ARRAY_LOWER_BOUND_TYPE (type))
     {
     case BOUND_BY_VALUE_ON_STACK:
-      current_frame_addr = deprecated_selected_frame->frame;
+      current_frame_addr = get_frame_base (deprecated_selected_frame);
       if (current_frame_addr > 0)
 	{
 	  *lower_bound =
@@ -98,7 +98,7 @@ f77_get_dynamic_lowerbound (struct type *type, int *lower_bound)
       break;
 
     case BOUND_BY_REF_ON_STACK:
-      current_frame_addr = deprecated_selected_frame->frame;
+      current_frame_addr = get_frame_base (deprecated_selected_frame);
       if (current_frame_addr > 0)
 	{
 	  ptr_to_lower_bound =
@@ -132,7 +132,7 @@ f77_get_dynamic_upperbound (struct type *type, int *upper_bound)
   switch (TYPE_ARRAY_UPPER_BOUND_TYPE (type))
     {
     case BOUND_BY_VALUE_ON_STACK:
-      current_frame_addr = deprecated_selected_frame->frame;
+      current_frame_addr = get_frame_base (deprecated_selected_frame);
       if (current_frame_addr > 0)
 	{
 	  *upper_bound =
@@ -161,7 +161,7 @@ f77_get_dynamic_upperbound (struct type *type, int *upper_bound)
       break;
 
     case BOUND_BY_REF_ON_STACK:
-      current_frame_addr = deprecated_selected_frame->frame;
+      current_frame_addr = get_frame_base (deprecated_selected_frame);
       if (current_frame_addr > 0)
 	{
 	  ptr_to_upper_bound =

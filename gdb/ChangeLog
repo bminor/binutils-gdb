@@ -1,3 +1,10 @@
+2002-12-08  Andrew Cagney  <ac131313@redhat.com>
+
+	* blockframe.c: Use get_frame_base instead of directly accessing
+	the `struct frame_info' member frame.
+	* f-valprint.c, std-regs.c, rs6000-tdep.c: Ditto.
+	* stack.c, dummy-frame.c, breakpoint.c: Ditto.
+
 2002-12-08  Elena Zannoni  <ezannoni@redhat.com>
 
 	* Makefile.in (readline_h): Define.

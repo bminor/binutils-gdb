@@ -688,13 +688,13 @@ parse_frame_specification (char *frame_exp)
 	   (s)he gets.  Still, give the highest one that matches.  */
 
 	for (fid = get_current_frame ();
-	     fid && fid->frame != args[0];
+	     fid && get_frame_base (fid) != args[0];
 	     fid = get_prev_frame (fid))
 	  ;
 
 	if (fid)
 	  while ((tfid = get_prev_frame (fid)) &&
-		 (tfid->frame == args[0]))
+		 (get_frame_base (tfid) == args[0]))
 	    fid = tfid;
 
 	/* We couldn't identify the frame as an existing frame, but
@@ -797,13 +797,13 @@ frame_info (char *addr_exp, int from_tty)
     {
       printf_filtered ("Stack level %d, frame at ",
 		       frame_relative_level (deprecated_selected_frame));
-      print_address_numeric (fi->frame, 1, gdb_stdout);
+      print_address_numeric (get_frame_base (fi), 1, gdb_stdout);
       printf_filtered (":\n");
     }
   else
     {
       printf_filtered ("Stack frame at ");
-      print_address_numeric (fi->frame, 1, gdb_stdout);
+      print_address_numeric (get_frame_base (fi), 1, gdb_stdout);
       printf_filtered (":\n");
     }
   printf_filtered (" %s = ", REGISTER_NAME (PC_REGNUM));
@@ -835,7 +835,8 @@ frame_info (char *addr_exp, int from_tty)
   if (calling_frame_info)
     {
       printf_filtered (" called by frame at ");
-      print_address_numeric (calling_frame_info->frame, 1, gdb_stdout);
+      print_address_numeric (get_frame_base (calling_frame_info),
+			     1, gdb_stdout);
     }
   if (get_next_frame (fi) && calling_frame_info)
     puts_filtered (",");
@@ -843,7 +844,8 @@ frame_info (char *addr_exp, int from_tty)
   if (get_next_frame (fi))
     {
       printf_filtered (" caller of frame at ");
-      print_address_numeric (get_next_frame (fi)->frame, 1, gdb_stdout);
+      print_address_numeric (get_frame_base (get_next_frame (fi)), 1,
+			     gdb_stdout);
     }
   if (get_next_frame (fi) || calling_frame_info)
     puts_filtered ("\n");
@@ -1750,7 +1752,7 @@ return_command (char *retval_exp, int from_tty)
      a POP_FRAME.  The pc comparison makes this work even if the
      selected frame shares its fp with another frame.  */
 
-  while (selected_frame_addr != (frame = get_current_frame ())->frame
+  while (selected_frame_addr != get_frame_base (frame = get_current_frame ())
 	 || selected_frame_pc != frame->pc)
     POP_FRAME;
 

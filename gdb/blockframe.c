@@ -701,7 +701,8 @@ generic_file_frame_chain_valid (CORE_ADDR fp, struct frame_info *fi)
     return 1;			/* don't prune CALL_DUMMY frames */
   else				/* fall back to default algorithm (see frame.h) */
     return (fp != 0
-	    && (INNER_THAN (fi->frame, fp) || fi->frame == fp)
+	    && (INNER_THAN (get_frame_base (fi), fp)
+		|| get_frame_base (fi) == fp)
 	    && !inside_entry_file (frame_pc_unwind (fi)));
 }
 
@@ -713,7 +714,8 @@ generic_func_frame_chain_valid (CORE_ADDR fp, struct frame_info *fi)
     return 1;			/* don't prune CALL_DUMMY frames */
   else				/* fall back to default algorithm (see frame.h) */
     return (fp != 0
-	    && (INNER_THAN (fi->frame, fp) || fi->frame == fp)
+	    && (INNER_THAN (get_frame_base (fi), fp)
+		|| get_frame_base (fi) == fp)
 	    && !inside_main_func ((fi)->pc)
 	    && !inside_entry_func ((fi)->pc));
 }
