@@ -2195,6 +2195,12 @@ add_procedure (func)
       noproc_lineno = (lineno_list_t *) NULL;
     }
 }
+
+symbolS *
+ecoff_get_cur_proc_sym ()
+{
+  return (cur_proc_ptr ? cur_proc_ptr->sym->as_sym : NULL);
+}
 
 /* Add a new filename, and set up all of the file relative
    virtual arrays (strings, symbols, aux syms, etc.).  Record

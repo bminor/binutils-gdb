@@ -1,3 +1,11 @@
+Sat Apr 25 20:12:02 1998  Richard Henderson  <rth@cygnus.com>
+
+	* ecoff.c (ecoff_get_cur_proc_sym): New function.
+	* ecoff.h: Protoype it.
+	* config/tc-alpha.c [ELF] (s_alpha_prologue): New function.
+	[EVAX] (s_alpha_prologue): Delete.
+	(md_pseudo_table): Update.
+
 Sat Apr 25 14:00:52 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-i960.c (md_assemble): Change bp_error_msg from static
