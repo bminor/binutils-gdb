@@ -974,7 +974,7 @@ md_parse_option (c, arg)
 	ppc_cpu = PPC_OPCODE_COMMON | PPC_OPCODE_32;
       /* -many means to assemble for any architecture (PWR/PWRX/PPC).  */
       else if (strcmp (arg, "any") == 0)
-	ppc_cpu = PPC_OPCODE_ANY | PPC_OPCODE_32;
+	ppc_cpu |= PPC_OPCODE_ANY;
 
       else if (strcmp (arg, "regnames") == 0)
 	reg_names_p = TRUE;
@@ -1118,23 +1118,23 @@ ppc_set_cpu ()
   const char *default_os  = TARGET_OS;
   const char *default_cpu = TARGET_CPU;
 
-  if (ppc_cpu == 0)
+  if ((ppc_cpu & ~PPC_OPCODE_ANY) == 0)
     {
       if (ppc_obj64)
-	ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC | PPC_OPCODE_64;
+	ppc_cpu |= PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC | PPC_OPCODE_64;
       else if (strncmp (default_os, "aix", 3) == 0
 	       && default_os[3] >= '4' && default_os[3] <= '9')
-	ppc_cpu = PPC_OPCODE_COMMON | PPC_OPCODE_32;
+	ppc_cpu |= PPC_OPCODE_COMMON | PPC_OPCODE_32;
       else if (strncmp (default_os, "aix3", 4) == 0)
-	ppc_cpu = PPC_OPCODE_POWER | PPC_OPCODE_32;
+	ppc_cpu |= PPC_OPCODE_POWER | PPC_OPCODE_32;
       else if (strcmp (default_cpu, "rs6000") == 0)
-	ppc_cpu = PPC_OPCODE_POWER | PPC_OPCODE_32;
+	ppc_cpu |= PPC_OPCODE_POWER | PPC_OPCODE_32;
       else if (strncmp (default_cpu, "powerpc", 7) == 0)
 	{
 	  if (default_cpu[7] == '6' && default_cpu[8] == '4')
-	    ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC | PPC_OPCODE_64;
+	    ppc_cpu |= PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC | PPC_OPCODE_64;
 	  else
-	    ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC | PPC_OPCODE_32;
+	    ppc_cpu |= PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC | PPC_OPCODE_32;
 	}
       else
 	as_fatal (_("Unknown default cpu = %s, os = %s"),
@@ -1264,6 +1264,10 @@ md_begin ()
 	    }
 	}
     }
+
+  if ((ppc_cpu & PPC_OPCODE_ANY) != 0)
+    for (op = powerpc_opcodes; op < op_end; op++)
+      hash_insert (ppc_hash, op->name, (PTR) op);
 
   /* Insert the macros into a hash table.  */
   ppc_macro_hash = hash_new ();

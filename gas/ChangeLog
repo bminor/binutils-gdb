@@ -1,3 +1,10 @@
+2003-09-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-ppc.c (md_parse_option): Add PPC_OPCODE_ANY to existing
+	ppc_cpu selection rather than replacing.
+	(ppc_set_cpu): Ignore and preserve PPC_OPCODE_ANY in ppc_cpu.
+	(md_begin): When PPC_OPCODE_ANY, insert all opcodes in ppc_hash.
+
 2003-09-03  Robert Millan  <robertmh@gnu.org>
 
 	* configure.in: Match GNU/KFreeBSD with new kfreebsd*-gnu
