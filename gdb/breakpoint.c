@@ -749,8 +749,8 @@ insert_breakpoints (void)
 	       if so, we should set the breakpoint at the LMA address.
 	       Only if the section is currently mapped should we ALSO
 	       set a break at the VMA address. */
-	    if (overlay_debugging && b->section &&
-		section_is_overlay (b->section))
+	    if (overlay_debugging && b->section 
+		&& section_is_overlay (b->section))
 	      {
 		CORE_ADDR addr;
 
@@ -1277,8 +1277,8 @@ remove_breakpoint (struct breakpoint *b, insertion_state_t is)
 	     if so, we should remove the breakpoint at the LMA address.
 	     If that is not equal to the raw address, then we should 
 	     presumably remove the breakpoint there as well.  */
-	  if (overlay_debugging && b->section &&
-	      section_is_overlay (b->section))
+	  if (overlay_debugging && b->section 
+	      && section_is_overlay (b->section))
 	    {
 	      CORE_ADDR addr;
 
@@ -1510,9 +1510,9 @@ breakpoint_here_p (CORE_ADDR pc)
 	 || b->enable_state == bp_permanent)
 	&& b->address == pc)	/* bp is enabled and matches pc */
       {
-	if (overlay_debugging &&
-	    section_is_overlay (b->section) &&
-	    !section_is_mapped (b->section))
+	if (overlay_debugging 
+	    && section_is_overlay (b->section) 
+	    && !section_is_mapped (b->section))
 	  continue;		/* unmapped overlay -- can't be a match */
 	else if (b->enable_state == bp_permanent)
 	  return permanent_breakpoint_here;
@@ -1537,9 +1537,9 @@ breakpoint_inserted_here_p (CORE_ADDR pc)
     if (b->inserted
 	&& b->address == pc)	/* bp is inserted and matches pc */
     {
-      if (overlay_debugging &&
-	  section_is_overlay (b->section) &&
-	  !section_is_mapped (b->section))
+      if (overlay_debugging 
+	  && section_is_overlay (b->section) 
+	  && !section_is_mapped (b->section))
 	continue;		/* unmapped overlay -- can't be a match */
       else
 	return 1;
@@ -1598,9 +1598,9 @@ breakpoint_thread_match (CORE_ADDR pc, ptid_t ptid)
 	&& b->address == pc
 	&& (b->thread == -1 || b->thread == thread))
     {
-      if (overlay_debugging &&
-	  section_is_overlay (b->section) &&
-	  !section_is_mapped (b->section))
+      if (overlay_debugging 
+	  && section_is_overlay (b->section) 
+	  && !section_is_mapped (b->section))
 	continue;		/* unmapped overlay -- can't be a match */
       else
 	return 1;
@@ -2386,11 +2386,14 @@ bpstat_stop_status (CORE_ADDR *pc, int not_a_breakpoint)
 	&& b->type != bp_catch_exec
 	&& b->type != bp_catch_catch
 	&& b->type != bp_catch_throw)	/* a non-watchpoint bp */
-      if (b->address != bp_addr ||	/* address doesn't match or */
-	  (overlay_debugging &&	/* overlay doesn't match */
-	   section_is_overlay (b->section) &&
-	   !section_is_mapped (b->section)))
-	continue;
+      {
+	if (b->address != bp_addr) 	/* address doesn't match */
+	  continue;
+	if (overlay_debugging		/* unmapped overlay section */
+	    && section_is_overlay (b->section) 
+	    && !section_is_mapped (b->section))
+	  continue;
+      }
 
     if (b->type == bp_hardware_breakpoint
 	&& b->address != (*pc - DECR_PC_AFTER_HW_BREAK))
@@ -3506,29 +3509,29 @@ describe_other_breakpoints (CORE_ADDR pc, asection *section)
   register struct breakpoint *b;
 
   ALL_BREAKPOINTS (b)
-    if (b->address == pc)
-    if (overlay_debugging == 0 ||
-	b->section == section)
-      others++;
+    if (b->address == pc)	/* address match / overlay match */
+      if (!overlay_debugging || b->section == section)
+	others++;
   if (others > 0)
     {
       printf_filtered ("Note: breakpoint%s ", (others > 1) ? "s" : "");
       ALL_BREAKPOINTS (b)
-	if (b->address == pc)
-	if (overlay_debugging == 0 ||
-	    b->section == section)
-	  {
-	    others--;
-	    printf_filtered ("%d%s%s ",
-			     b->number,
-			     ((b->enable_state == bp_disabled || 
-			       b->enable_state == bp_shlib_disabled || 
-			       b->enable_state == bp_call_disabled) ? " (disabled)" 
-			      : b->enable_state == bp_permanent ? " (permanent)"
-			      : ""),
-			     (others > 1) ? "," 
-			     : ((others == 1) ? " and" : ""));
-	  }
+	if (b->address == pc)	/* address match / overlay match */
+	  if (!overlay_debugging || b->section == section)
+	    {
+	      others--;
+	      printf_filtered ("%d%s%s ",
+			       b->number,
+			       ((b->enable_state == bp_disabled || 
+				 b->enable_state == bp_shlib_disabled || 
+				 b->enable_state == bp_call_disabled) 
+				? " (disabled)" 
+				: b->enable_state == bp_permanent 
+				? " (permanent)"
+				: ""),
+			       (others > 1) ? "," 
+			       : ((others == 1) ? " and" : ""));
+	    }
       printf_filtered ("also set at pc ");
       print_address_numeric (pc, 1, gdb_stdout);
       printf_filtered (".\n");
@@ -3604,8 +3607,8 @@ check_duplicates (struct breakpoint *bpt)
     if (b->enable_state != bp_disabled
 	&& b->enable_state != bp_shlib_disabled
 	&& b->enable_state != bp_call_disabled
-	&& b->address == address
-	&& (overlay_debugging == 0 || b->section == section)
+	&& b->address == address	/* address / overlay match */
+	&& (!overlay_debugging || b->section == section)
 	&& breakpoint_address_is_meaningful (b))
     {
       /* Have we found a permanent breakpoint?  */
@@ -3643,8 +3646,8 @@ check_duplicates (struct breakpoint *bpt)
 	    if (b->enable_state != bp_disabled
 		&& b->enable_state != bp_shlib_disabled
 		&& b->enable_state != bp_call_disabled
-		&& b->address == address
-		&& (overlay_debugging == 0 || b->section == section)
+		&& b->address == address	/* address / overlay match */
+		&& (!overlay_debugging || b->section == section)
 		&& breakpoint_address_is_meaningful (b))
 	      b->duplicate = 1;
 	  }
@@ -6405,9 +6408,9 @@ clear_command (char *arg, int from_tty)
          of the same address as "sal.pc" should
          wind up being deleted. */
 
-	     && (((sal.pc && (breakpoint_chain->address == sal.pc)) &&
-		  (overlay_debugging == 0 ||
-		   breakpoint_chain->section == sal.section))
+	     && (((sal.pc && (breakpoint_chain->address == sal.pc)) 
+		  && (!overlay_debugging 
+		      || breakpoint_chain->section == sal.section))
 		 || ((default_match || (0 == sal.pc))
 		     && breakpoint_chain->source_file != NULL
 		     && sal.symtab != NULL
@@ -6422,16 +6425,14 @@ clear_command (char *arg, int from_tty)
 	}
 
       ALL_BREAKPOINTS (b)
-
 	while (b->next
 	       && b->next->type != bp_none
 	       && b->next->type != bp_watchpoint
 	       && b->next->type != bp_hardware_watchpoint
 	       && b->next->type != bp_read_watchpoint
 	       && b->next->type != bp_access_watchpoint
-	       && (((sal.pc && (b->next->address == sal.pc)) &&
-		    (overlay_debugging == 0 ||
-		     b->next->section == sal.section))
+	       && (((sal.pc && (b->next->address == sal.pc)) 
+		    && (!overlay_debugging || b->next->section == sal.section))
 		   || ((default_match || (0 == sal.pc))
 		       && b->next->source_file != NULL
 		       && sal.symtab != NULL
