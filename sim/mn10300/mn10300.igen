@@ -1387,9 +1387,6 @@
 *mn10300
 {
   //  OP_F160 ();
-  int z, c, n, v;
-  unsigned long reg1, reg2, value;
-
   PC = cia;
   genericAdd(State.regs[REG_D0 + DM1], REG_A0 + AN0);
 }

@@ -2,6 +2,7 @@
 
 #if WITH_COMMON
 #include "sim-main.h"
+#include "sim-options.h"
 #else
 #include "mn10300_sim.h"
 #endif
@@ -36,14 +37,15 @@
 
 host_callback *mn10300_callback;
 int mn10300_debug;
-static SIM_OPEN_KIND sim_kind;
-static char *myname;
 
 #if WITH_COMMON
 #else
 static void dispatch PARAMS ((uint32, uint32, int));
 static long hash PARAMS ((long));
 static void init_system PARAMS ((void));
+
+static SIM_OPEN_KIND sim_kind;
+static char *myname;
 #define MAX_HASH  127
 
 struct hash_entry
@@ -1045,7 +1047,6 @@ sim_open (kind, cb, abfd, argv)
      char **argv;
 {
   SIM_DESC sd = sim_state_alloc (kind, cb);
-  int mach;
   mn10300_callback = cb;
 
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);

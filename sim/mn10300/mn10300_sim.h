@@ -336,3 +336,11 @@ void put_half PARAMS ((uint8 *, uint16));
 void put_byte PARAMS ((uint8 *, uint8));
 
 extern uint8 *map PARAMS ((SIM_ADDR addr));
+
+void genericAdd PARAMS ((unsigned long source, unsigned long destReg));
+void genericSub PARAMS ((unsigned long source, unsigned long destReg));
+void genericCmp PARAMS ((unsigned long leftOpnd, unsigned long rightOpnd));
+void genericOr PARAMS ((unsigned long source, unsigned long destReg));
+void genericXor PARAMS ((unsigned long source, unsigned long destReg));
+void genericBtst PARAMS ((unsigned long leftOpnd, unsigned long rightOpnd));
+void do_syscall PARAMS ((void));

@@ -1,3 +1,15 @@
+Wed Mar 25 10:24:48 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (sim-options.h): Include.
+	(sim_kind, myname): Declare when not using common framework.
+
+	* mn10300_sim.h (do_syscall, generic*): Provide prototypes for
+ 	functions found in op_utils.c
+
+	* mn10300.igen (add): Discard unused variables.
+
+	* configure, config.in: Re-generate with autoconf 2.12.1.
+	
 Tue Mar 24 15:27:00 1998  Joyce Janczyn  <janczyn@cygnus.com>
 
 	Add support for --enable-sim-common option.
