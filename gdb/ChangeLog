@@ -1,3 +1,29 @@
+2002-06-15  Andrew Cagney  <ac131313@redhat.com>
+
+	* command.h (add_setshow_auto_boolean_cmd): Replace
+	add_set_auto_boolean_cmd.
+	* cli/cli-decode.c (add_setshow_auto_boolean_cmd): Replace
+	add_set_auto_boolean_cmd.
+	* cli/cli-decode.h (add_set_auto_boolean_cmd): Delete declaration.
+	* mips-tdep.c (_initialize_mips_tdep): Update ``set mips
+	mask-address'' command.
+	(show_mask_address): Add cmd parameter.
+	* remote.c (add_packet_config_cmd): Update.  Change type of
+	set_func and show_func to cmd_sfunc_ftype.
+	(_initialize_remote): Update `set remote Z-packet'
+	(show_remote_protocol_qSymbol_packet_cmd): Add cmd parameter.
+	(show_remote_protocol_e_packet_cmd): Ditto.
+	(show_remote_protocol_E_packet_cmd): Ditto.
+	(show_remote_protocol_P_packet_cmd): Ditto.
+	(show_remote_protocol_Z_software_bp_packet_cmd): Ditto.
+	(show_remote_protocol_Z_hardware_bp_packet_cmd): Ditto.
+	(show_remote_protocol_Z_write_wp_packet_cmd): Ditto.
+	(show_remote_protocol_Z_read_wp_packet_cmd): Ditto.
+	(show_remote_protocol_Z_access_wp_packet_cmd): Ditto.
+	(show_remote_protocol_Z_packet_cmd): Ditto.
+	(show_remote_protocol_binary_download_cmd): Ditto.
+	(show_remote_cmd): Pass NULL to all of above.
+
 2002-06-15  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/i386/tm-i386.h (PUSH_ARGUMENTS, STORE_STRUCT_RETURN,

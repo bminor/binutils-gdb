@@ -491,7 +491,7 @@ mips_mask_address_p (void)
 }
 
 static void
-show_mask_address (char *cmd, int from_tty)
+show_mask_address (char *cmd, int from_tty, struct cmd_list_element *c)
 {
   switch (mask_address_var)
     {
@@ -5083,13 +5083,13 @@ search.  The only need to set it is when debugging a stripped executable.",
 
   /* Allow the user to control whether the upper bits of 64-bit
      addresses should be zeroed.  */
-  c = add_set_auto_boolean_cmd ("mask-address", no_class, &mask_address_var,
-				"Set zeroing of upper 32 bits of 64-bit addresses.\n\
-Use \"on\" to enable the masking, \"off\" to disable it and \"auto\" to allow GDB to determine\n\
-the correct value.\n",
-				&setmipscmdlist);
-  add_cmd ("mask-address", no_class, show_mask_address,
-	       "Show current mask-address value", &showmipscmdlist);
+  add_setshow_auto_boolean_cmd ("mask-address", no_class, &mask_address_var, "\
+Set zeroing of upper 32 bits of 64-bit addresses.\n\
+Use \"on\" to enable the masking, \"off\" to disable it and \"auto\" to \n\
+allow GDB to determine the correct value.\n", "\
+Show zeroing of upper 32 bits of 64-bit addresses.",
+				NULL, show_mask_address,
+				&setmipscmdlist, &showmipscmdlist);
 
   /* Allow the user to control the size of 32 bit registers within the
      raw remote packet.  */

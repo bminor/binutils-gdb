@@ -223,11 +223,14 @@ extern struct cmd_list_element *add_set_enum_cmd (char *name,
 						  char *doc,
 						  struct cmd_list_element **list);
 
-extern struct cmd_list_element *add_set_auto_boolean_cmd (char *name,
-							  enum command_class class,
-							  enum auto_boolean *var,
-							  char *doc,
-							  struct cmd_list_element **list);
+extern void add_setshow_auto_boolean_cmd (char *name,
+					  enum command_class class,
+					  enum auto_boolean *var,
+					  char *set_doc, char *show_doc,
+					  cmd_sfunc_ftype *set_func,
+					  cmd_sfunc_ftype *show_func,
+					  struct cmd_list_element **set_list,
+					  struct cmd_list_element **show_list);
 
 extern void add_setshow_boolean_cmd (char *name,
 				     enum command_class class,
