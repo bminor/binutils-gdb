@@ -1,3 +1,9 @@
+2004-06-24  Mark Kettenis  <kettenis@gnu.org>
+
+	From Michael Mueller <m.mueller99@kay-mueller.de>:
+	* sparc64-tdep.c (sparc64_frame_base_address): Take BIAS into
+	account.
+
 2004-06-22  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* infrun.c (handle_inferior_event): Initialize stopped_by_watchpoint

@@ -568,8 +568,7 @@ sparc64_frame_base_address (struct frame_info *next_frame, void **this_cache)
   struct sparc_frame_cache *cache =
     sparc64_frame_cache (next_frame, this_cache);
 
-  /* ??? Should we take BIAS into account here?  */
-  return cache->base;
+  return cache->base + BIAS;
 }
 
 static const struct frame_base sparc64_frame_base =
