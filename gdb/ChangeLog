@@ -1,3 +1,8 @@
+Thu Oct 21 12:05:08 1993  Ken Raeburn  (raeburn@cygnus.com)
+
+	Patch from Jeff Law:
+	* paread.c: Fix references to "hppa" that should now be "som".
+
 Thu Oct 21 12:23:12 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* symtab.c (decode_line_1): Don't use SYMBOL_LINE for functions.

@@ -24,6 +24,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/types.h> /* For time_t, if not in time.h.  */
 #include "libbfd.h"
 #include "som.h"
+#include "libhppa.h"
 #include <syms.h>
 #include "symtab.h"
 #include "symfile.h"
@@ -119,15 +120,15 @@ pa_symtab_read (abfd, addr, objfile)
   number_of_symbols = bfd_get_symcount (abfd);
 
   buf = alloca (symsize * number_of_symbols);
-  bfd_seek (abfd, obj_sym_filepos (abfd), L_SET);
+  bfd_seek (abfd, obj_som_sym_filepos (abfd), L_SET);
   val = bfd_read (buf, symsize * number_of_symbols, 1, abfd);
   if (val != symsize * number_of_symbols)
     error ("Couldn't read symbol dictionary!");
 
-  stringtab = alloca (obj_stringtab_size (abfd));
-  bfd_seek (abfd, obj_str_filepos (abfd), L_SET);
-  val = bfd_read (stringtab, obj_stringtab_size (abfd), 1, abfd);
-  if (val != obj_stringtab_size (abfd))
+  stringtab = alloca (obj_som_stringtab_size (abfd));
+  bfd_seek (abfd, obj_som_str_filepos (abfd), L_SET);
+  val = bfd_read (stringtab, obj_som_stringtab_size (abfd), 1, abfd);
+  if (val != obj_som_stringtab_size (abfd))
     error ("Can't read in HP string table.");
 
   endbufp = buf + number_of_symbols;
@@ -214,7 +215,7 @@ pa_symtab_read (abfd, addr, objfile)
 	  continue;
 	}
 
-      if (bufp->name.n_strx > obj_stringtab_size (abfd))
+      if (bufp->name.n_strx > obj_som_stringtab_size (abfd))
 	error ("Invalid symbol data; bad HP string table offset: %d",
 	       bufp->name.n_strx);
 
@@ -504,8 +505,8 @@ pa_symfile_offsets (objfile, addr)
    file format name with an -hppa suffix?  */
 static struct sym_fns pa_sym_fns =
 {
-  "hppa",		/* sym_name: name or name prefix of BFD target type */
-  4,			/* sym_namelen: number of significant sym_name chars */
+  "som",		/* sym_name: name or name prefix of BFD target type */
+  3,			/* sym_namelen: number of significant sym_name chars */
   pa_new_init,		/* sym_new_init: init anything gbl to entire symtab */
   pa_symfile_init,	/* sym_init: read initial info, setup for sym_read() */
   pa_symfile_read,	/* sym_read: read a symbol file into symtab */
