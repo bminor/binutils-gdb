@@ -1,3 +1,7 @@
+2002-04-05  H.J. Lu  (hjl@gnu.org)
+
+	* solib-svr4.c (bkpt_names): Add "__start".
+
 2002-04-04  Andrew Cagney  <ac131313@redhat.com>
 
 	* sparc-tdep.c (sparc_push_dummy_frame): Use GDB_TARGET_IS_SPARC64
