@@ -1,3 +1,15 @@
+Fri Mar 25 17:35:49 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/tc-mips.c (append_insn): If EMBEDDED_PIC, don't swap a
+	branch with an instruction that uses $at, in case the branch is
+	later expanded.
+	(macro): If EMBEDDED_PIC, case M_JAL_A may use $at.
+	(md_pcrel_from): If not OBJ_AOUT, return 4 for an undefined symbol
+	to make it pcrel_offset.
+	(tc_gen_reloc): If not OBJ_AOUT, set the reloc addend to
+	reloc->address; another gruesome hack to get gas reloc handling to
+	do the right thing.
+
 Thu Mar 24 21:29:29 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* config/tc-alpha.c (alpha_ip): Only set GP prolog size if using

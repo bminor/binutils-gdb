@@ -1067,6 +1067,11 @@ append_insn (place, ip, address_expr, reloc_type)
 				    0))
 	      || ((pinfo & INSN_WRITE_GPR_31)
 		  && insn_uses_reg (&prev_insn, 31, 0))
+	      /* If we are generating embedded PIC code, the branch
+		 might be expanded into a sequence which uses $at, so
+		 we can't swap with an instruction which reads it.  */
+	      || (mips_pic == EMBEDDED_PIC
+		  && insn_uses_reg (&prev_insn, AT, 0))
 	      /* If the previous previous instruction has a load
 		 delay, and sets a register that the branch reads, we
 		 can not swap.  */
@@ -2613,7 +2618,12 @@ macro (ip)
 	    }
 	}
       else if (mips_pic == EMBEDDED_PIC)
-	macro_build ((char *) NULL, &icnt, &offset_expr, "bal", "p");
+	{
+	  macro_build ((char *) NULL, &icnt, &offset_expr, "bal", "p");
+	  /* The linker may expand the call to a longer sequence which
+	     uses $at, so we must break rather than return.  */
+	  break;
+	}
       else
 	abort ();
 
@@ -4917,6 +4927,11 @@ md_parse_option (argP, cntP, vecP)
   if (strcmp (*argP, "membedded-pic") == 0)
     {
       mips_pic = EMBEDDED_PIC;
+#ifdef GPOPT
+      if (g_switch_seen)
+	as_warn ("-G may not be used with embedded PIC code");
+      g_switch_value = 0x7fffffff;
+#endif
       *argP = "";
       return 1;
     }
@@ -4932,7 +4947,6 @@ md_parse_option (argP, cntP, vecP)
       if (g_switch_seen && g_switch_value != 0)
 	as_warn ("-G may not be used with SVR4 PIC code");
       g_switch_value = 0;
-      bfd_set_gp_size (stdoutput, 0);
       *argP = "";
       return 1;
     }
@@ -4947,8 +4961,8 @@ md_parse_option (argP, cntP, vecP)
 #ifdef GPOPT
   if (**argP == 'G')
     {
-      if (mips_pic == SVR4_PIC)
-	as_warn ("-G may not be used with SVR4 PIC code");
+      if (mips_pic == SVR4_PIC || mips_pic == EMBEDDED_PIC)
+	as_warn ("-G may not be used with SVR4 or embedded PIC code");
       else if ((*argP)[1] != '\0')
 	g_switch_value = atoi (*argP + 1);
       else if (*cntP)
@@ -4995,6 +5009,16 @@ long
 md_pcrel_from (fixP)
      fixS *fixP;
 {
+#ifndef OBJ_AOUT
+  if (fixP->fx_addsy != (symbolS *) NULL
+      && ! S_IS_DEFINED (fixP->fx_addsy))
+    {
+      /* This makes a branch to an undefined symbol be a branch to the
+	 current location.  */
+      return 4;
+    }
+#endif
+
   /* return the address of the delay slot */
   return fixP->fx_size + fixP->fx_where + fixP->fx_frag->fr_address;
 }
@@ -5028,6 +5052,19 @@ cons_fix_new_mips (frag, where, nbytes, exp)
 	       nbytes == 2 ? BFD_RELOC_16 : BFD_RELOC_32);
 }
 
+/* When generating embedded PIC code we must keep all PC relative
+   relocations, in case the linker has to relax a call.  */
+
+/*ARGSUSED*/
+int
+mips_force_relocation (fixp)
+     fixS *fixp;
+{
+  return mips_pic == EMBEDDED_PIC;
+}
+
+/* Apply a fixup to the object file.  */
+
 int
 md_apply_fix (fixP, valueP)
      fixS *fixP;
@@ -5040,6 +5077,9 @@ md_apply_fix (fixP, valueP)
 
   value = *valueP;
   fixP->fx_addnumber = value;	/* Remember value for tc_gen_reloc */
+
+  if (fixP->fx_addsy == NULL && ! fixP->fx_pcrel)
+    fixP->fx_done = 1;
 
   switch (fixP->fx_r_type)
     {
@@ -5054,7 +5094,7 @@ md_apply_fix (fixP, valueP)
     case BFD_RELOC_MIPS_GOT16:
     case BFD_RELOC_MIPS_GPREL32:
       /* Nothing needed to do. The value comes from the reloc entry */
-      return 1;
+      break;
 
     case BFD_RELOC_16_PCREL_S2:
       /*
@@ -5091,6 +5131,7 @@ md_apply_fix (fixP, valueP)
     default:
       internalError ();
     }
+
   return 1;
 }
 
@@ -5286,6 +5327,13 @@ s_change_sec (sec)
 #ifdef GPOPT
   segT seg;
 #endif
+
+  /* When generating embedded PIC code, we only use the .text, .lit8,
+     .sdata and .sbss sections.  We change the .data and .rdata
+     pseudo-ops to use .sdata.  */
+  if (mips_pic == EMBEDDED_PIC
+      && (sec == 'd' || sec == 'r'))
+    sec = 's';
 
   mips_emit_delays ();
   switch (sec)
@@ -5858,11 +5906,15 @@ tc_gen_reloc (section, fixp)
   if (fixp->fx_pcrel == 0)
     reloc->addend = fixp->fx_addnumber;
   else
+    {
 #ifndef OBJ_AOUT
-    reloc->addend = 0;
+      /* A gruesome hack which is a result of the gruesome gas reloc
+	 handling.  */
+      reloc->addend = reloc->address;
 #else
-    reloc->addend = -reloc->address;
+      reloc->addend = -reloc->address;
 #endif
+    }
 
   /* If this is a variant frag, we may need to adjust the existing
      reloc and generate a new one.  */
