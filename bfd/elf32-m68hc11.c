@@ -1,6 +1,6 @@
 /* Motorola 68HC11-specific support for 32-bit ELF
-   Copyright 1999, 2000 Free Software Foundation, Inc.
-   Contributed by Stephane Carrez (stcarrez@worldnet.fr)
+   Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Contributed by Stephane Carrez (stcarrez@nerim.fr)
    (Heavily copied from the D10V port by Martin Hunt (hunt@cygnus.com))
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -29,6 +29,11 @@ static reloc_howto_type *bfd_elf32_bfd_reloc_type_lookup
 PARAMS ((bfd * abfd, bfd_reloc_code_real_type code));
 static void m68hc11_info_to_howto_rel
 PARAMS ((bfd *, arelent *, Elf32_Internal_Rel *));
+
+static bfd_reloc_status_type m68hc11_elf_ignore_reloc
+PARAMS ((bfd *abfd, arelent *reloc_entry,
+         asymbol *symbol, PTR data, asection *input_section,
+         bfd *output_bfd, char **error_message));
 
 /* Use REL instead of RELA to save space */
 #define USE_REL
@@ -110,7 +115,7 @@ static reloc_howto_type elf_m68hc11_howto_table[] = {
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_M68HC11_PCREL_8",	/* name */
 	 false,			/* partial_inplace */
-	 0x0,			/* src_mask */
+	 0x00ff,		/* src_mask */
 	 0x00ff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -171,7 +176,7 @@ static reloc_howto_type elf_m68hc11_howto_table[] = {
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_M68HC11_PCREL_16",	/* name */
 	 false,			/* partial_inplace */
-	 0x0,			/* src_mask */
+	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -204,6 +209,46 @@ static reloc_howto_type elf_m68hc11_howto_table[] = {
 	 0,			/* src_mask */
 	 0,			/* dst_mask */
 	 false),		/* pcrel_offset */
+
+  EMPTY_HOWTO (11),
+  EMPTY_HOWTO (12),
+  EMPTY_HOWTO (13),
+  EMPTY_HOWTO (14),
+  EMPTY_HOWTO (15),
+  EMPTY_HOWTO (16),
+  EMPTY_HOWTO (17),
+  EMPTY_HOWTO (18),
+  EMPTY_HOWTO (19),
+  
+  /* Mark beginning of a jump instruction (any form).  */
+  HOWTO (R_M68HC11_RL_JUMP,	/* type */
+	 0,			/* rightshift */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,	/* complain_on_overflow */
+	 m68hc11_elf_ignore_reloc,	/* special_function */
+	 "R_M68HC11_RL_JUMP",	/* name */
+	 true,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0,			/* dst_mask */
+	 true),                 /* pcrel_offset */
+
+  /* Mark beginning of Gcc relaxation group instruction.  */
+  HOWTO (R_M68HC11_RL_GROUP,	/* type */
+	 0,			/* rightshift */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,	/* complain_on_overflow */
+	 m68hc11_elf_ignore_reloc,	/* special_function */
+	 "R_M68HC11_RL_GROUP",	/* name */
+	 true,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0,			/* dst_mask */
+	 true),                 /* pcrel_offset */
 };
 
 /* Map BFD reloc types to M68HC11 ELF reloc types.  */
@@ -225,9 +270,11 @@ static const struct m68hc11_reloc_map m68hc11_reloc_map[] = {
   {BFD_RELOC_32, R_M68HC11_32},
   {BFD_RELOC_M68HC11_3B, R_M68HC11_3B},
 
-  /* The following relocs are defined but they probably don't work yet.  */
   {BFD_RELOC_VTABLE_INHERIT, R_M68HC11_GNU_VTINHERIT},
   {BFD_RELOC_VTABLE_ENTRY, R_M68HC11_GNU_VTENTRY},
+
+  {BFD_RELOC_M68HC11_RL_JUMP, R_M68HC11_RL_JUMP},
+  {BFD_RELOC_M68HC11_RL_GROUP, R_M68HC11_RL_GROUP},
 };
 
 static reloc_howto_type *
@@ -246,6 +293,25 @@ bfd_elf32_bfd_reloc_type_lookup (abfd, code)
     }
 
   return NULL;
+}
+
+/* This function is used for relocs which are only used for relaxing,
+   which the linker should otherwise ignore.  */
+
+static bfd_reloc_status_type
+m68hc11_elf_ignore_reloc (abfd, reloc_entry, symbol, data, input_section,
+                          output_bfd, error_message)
+     bfd *abfd ATTRIBUTE_UNUSED;
+     arelent *reloc_entry;
+     asymbol *symbol ATTRIBUTE_UNUSED;
+     PTR data ATTRIBUTE_UNUSED;
+     asection *input_section;
+     bfd *output_bfd;
+     char **error_message ATTRIBUTE_UNUSED;
+{
+  if (output_bfd != NULL)
+    reloc_entry->address += input_section->output_offset;
+  return bfd_reloc_ok;
 }
 
 /* Set the howto pointer for an M68HC11 ELF reloc.  */
