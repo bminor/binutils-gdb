@@ -1,3 +1,8 @@
+2004-01-29  Paul N. Hilfinger  <Hilfinger@gnat.com>
+
+	* gdb.base/chng-syms.exp: New file.
+	* gdb.base/chng-syms.c: New file.
+
 2004-01-24  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* gdb.cp/local.exp: Rewrite "ptype Local".  Add "ptype l".
