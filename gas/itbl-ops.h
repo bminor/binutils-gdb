@@ -1,6 +1,4 @@
-
 /* itbl-ops.h
-
    Copyright (C) 1997  Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.

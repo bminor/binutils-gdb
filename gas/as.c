@@ -143,7 +143,7 @@ Options:\n\
 --statistics		print various measured statistics from execution\n\
 --version		print assembler version number and exit\n\
 -W			suppress warnings\n\
--t,--itbl INSTTBL	extend instruction set to include instrictions\n\
+-t,--itbl INSTTBL	extend instruction set to include instructions\n\
 			matching the specifications defined in file INSTTBL\n\
 -w			ignored\n\
 -X			ignored\n\
@@ -278,8 +278,8 @@ parse_args (pargc, pargv)
       'v',
 #endif
       'w', 'X',
-	  /* New option for extending instruction set (see also --itbl below) */
-	  't',
+      /* New option for extending instruction set (see also --itbl below) */
+      't',
       '\0'
     };
   struct option *longopts;
@@ -305,11 +305,11 @@ parse_args (pargc, pargv)
     {"defsym", required_argument, NULL, OPTION_DEFSYM},
 #define OPTION_INSTTBL (OPTION_STD_BASE + 8)
     /* New option for extending instruction set (see also -t above).
-     * The "-t file" or "--itbl file" option extends the basic set
-     * of valid instructions by reading "file", a text file containing
-     * a list of instruction formats.  The additional opcodes and their 
-     * formats are added to the built-in set of instructions, and
-     * mnemonics for new registers may also be defined.  */
+       The "-t file" or "--itbl file" option extends the basic set of
+       valid instructions by reading "file", a text file containing a
+       list of instruction formats.  The additional opcodes and their
+       formats are added to the built-in set of instructions, and
+       mnemonics for new registers may also be defined.  */
     {"itbl", required_argument, NULL, OPTION_INSTTBL}
   };
 
@@ -460,12 +460,12 @@ the GNU General Public License.  This program has absolutely no warranty.\n");
 	       information from this table gets appended onto the existing 
 	       internal table. */
 	    itbl_files->name = xstrdup (optarg);
-	    if (itbl_parse(itbl_files->name) != 0)
-	    {
-	      fprintf (stderr, "Failed to read instruction table %s\n", 
-			itbl_files->name);
-	      exit (EXIT_SUCCESS);
-	    }
+	    if (itbl_parse (itbl_files->name) != 0)
+	      {
+		fprintf (stderr, "Failed to read instruction table %s\n", 
+			 itbl_files->name);
+		exit (EXIT_SUCCESS);
+	      }
 	  }
 	  break;
 

@@ -1109,7 +1109,7 @@ md_assemble (str)
     mips16_ip (str, &insn);
   else
     {
-    mips_ip (str, &insn);
+      mips_ip (str, &insn);
       DBG(("returned from mips_ip(%s) insn_opcode = 0x%x\n", 
 		str, insn.insn_opcode));
     }
@@ -5393,7 +5393,7 @@ macro (ip)
       s = "cop3";
     copz:
       /* For now we just do C (same as Cz). */
-	macro_build ((char *) NULL, &icnt, &offset_expr, s, "C");
+      macro_build ((char *) NULL, &icnt, &offset_expr, s, "C");
       return;
 
 #ifdef LOSING_COMPILER
@@ -5407,11 +5407,11 @@ macro (ip)
          symbols, etc.
          Would it be more efficient to use mask (id) here? */
       if (itbl_have_entries 
-	  && immed_expr = itbl_assemble(ip->insn_mo->name, ""), immed_expr)
+	  && (immed_expr = itbl_assemble (ip->insn_mo->name, "")))
         {
 	  s = ip->insn_mo->name;
 	  s2 = "cop3";
-	  coproc = ITBL_DECODE_PNUM(immed_expr);;
+	  coproc = ITBL_DECODE_PNUM (immed_expr);;
 	  macro_build ((char *) NULL, &icnt, &immed_expr, s, "C");
 	  return;
         }
@@ -6077,8 +6077,8 @@ macro2 (ip)
       break;
 
     default:
-	/* FIXME: Check if this is one of the itbl macros, since they are 
-	   added dynamically. */
+      /* FIXME: Check if this is one of the itbl macros, since they
+	 are added dynamically. */
       as_bad ("Macro %s not implemented yet", ip->insn_mo->name);
       break;
     }
@@ -6603,19 +6603,20 @@ mips_ip (str, ip)
 			  int r;
 
 			  p = s+1; 	/* advance past '$' */
-			  n = itbl_get_field(&p);  /* n is name */
+			  n = itbl_get_field (&p);  /* n is name */
 
 			  /* See if this is a register defined in an 
 			     itbl entry */
-			  if (r = itbl_get_reg_val(n), r)
+			  r = itbl_get_reg_val (n);
+			  if (r)
 			    {
-			      /* Get_field advances to the start of the next 
-				 field, so we need to back rack to the end of 
-				 the last field. */
+			      /* Get_field advances to the start of
+				 the next field, so we need to back
+				 rack to the end of the last field. */
 			      if (p) 
-				s = p-1;
+				s = p - 1;
 			      else 
-				s = strchr(s,'\0');
+				s = strchr (s,'\0');
 			      regno = r;
 			    }
 			  else
@@ -6682,8 +6683,8 @@ mips_ip (str, ip)
 		    case 'D':
 		      /* Itbl operand; not yet implemented. FIXME ?? */
 		      break;
-		    /* What about all other operands like 'i',
-		       which can be specified in the opcode table? */
+		      /* What about all other operands like 'i', which
+			 can be specified in the opcode table? */
 		    }
 		  lastregno = regno;
 		  continue;
@@ -8453,7 +8454,6 @@ MIPS options:\n\
 #endif
 }
 
-
 void
 mips_init_after_args ()
 {
@@ -8461,10 +8461,9 @@ mips_init_after_args ()
     {
       /* initialize opcodes */
       bfd_mips_num_opcodes = bfd_mips_num_builtin_opcodes;
-      mips_opcodes = (struct mips_opcode*) mips_builtin_opcodes;
+      mips_opcodes = (struct mips_opcode *) mips_builtin_opcodes;
     }
 }
-
 
 long
 md_pcrel_from (fixP)
