@@ -128,53 +128,24 @@ proc test_controlled_execution {} {
 
     # mi_gdb_test cannot be used for asynchronous commands because there are
     # two prompts involved and this can lead to a race condition.
-    send_gdb "220-exec-next\n"
-    gdb_expect {
-	-re "220\\^running\r\n${mi_gdb_prompt}220\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"main\",args=\{\},file=\".*basics.c\",line=\"33\"\}\r\n$mi_gdb_prompt$" {
-	    pass "next at main"
-	}
-	timeout {
-	    fail "next at main (timeout)"
-	}
-    }
+    mi0_next_to "main" "" "basics.c" "33" "next at main"
 
     # FIXME: A string argument is not printed right; should be fixed and
     #        we should look for the right thing here.
     # NOTE: The ``\\\\\"'' is for \".
-    send_gdb "221-exec-step\n"
-    gdb_expect {
-	-re "221\\^running\r\n${mi_gdb_prompt}221\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"callee1\",args=\{\{name=\"intarg\",value=\"2\"\},\{name=\"strarg\",value=\"$hex \\\\\"A string argument\.\\\\\"\"\},\{name=\"fltarg\",value=\"3.5\"\}\},file=\".*basics.c\",line=\"27\"\}\r\n$mi_gdb_prompt$" {
-            pass "step at main"
-	}
-	timeout {
-	    fail "step at main (timeout)"
-        }
-    }
+    mi0_step_to "callee1" \
+	"\{name=\"intarg\",value=\"2\"\},\{name=\"strarg\",value=\"$hex \\\\\"A string argument\.\\\\\"\"\},\{name=\"fltarg\",value=\"3.5\"\}" \
+	"basics.c" "27" "step at main"
 
     # FIXME: A string argument is not printed right; should be fixed and
     #        we should look for the right thing here.
-    send_gdb "222-exec-step 3\n"
-    gdb_expect 30 {
-	-re "222\\^running\r\n${mi_gdb_prompt}222\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"callee4\",args=\{\},file=\".*basics.c\",line=\"8\"\}\r\n$mi_gdb_prompt$" {
-            pass "step to callee4"
-	}
-	timeout {
-	    fail "step to callee4 (timeout)"
-	}
-    }
+    mi0_run_to "exec-step 3" "end-stepping-range" "callee4" "" \
+	"basics.c" "8" "" "step to callee4"
 
     # FIXME: A string argument is not printed right; should be fixed and
     #        we should look for the right thing here.
     # NOTE: The ``.'' is part of ``gdb-result-var="$1"''
-    send_gdb "223-exec-finish\n"
-    gdb_expect 30 {
-	-re "223\\^running\r\n${mi_gdb_prompt}223\\*stopped,reason=\"function-finished\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"callee3\",args=\{.*\},file=\".*basics.c\",line=\"18\"\},gdb-result-var=\".1\",return-value=\"0\"\r\n$mi_gdb_prompt$" {
-            pass "exec-finish"
-	}
-	timeout {
-	    fail "exec-finish (timeout)"
-	}
-    }
+    mi0_finish_to "callee3" ".*" "basics.c" "18" ".1" "0" "exec-finish"
 }
 
 proc test_controlling_breakpoints {} {

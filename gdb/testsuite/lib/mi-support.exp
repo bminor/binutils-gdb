@@ -650,7 +650,7 @@ proc mi_next { test } {
     global mi_gdb_prompt
     send_gdb "220-exec-next\n"
     gdb_expect {
-	-re "220\\^running\r\n${mi_gdb_prompt}220\\*stopped,reason=\"end-stepping-range\",thread-id=\"$decimal\",frame=\{addr=\"$hex\",func=\".*\",args=\[\\\[\{].*[\\\]\}\],,file=\".*\",line=\"\[0-9\]*\"\}\r\n$mi_gdb_prompt$" {
+	-re "220\\^running\r\n${mi_gdb_prompt}220\\*stopped,reason=\"end-stepping-range\",thread-id=\"$decimal\",frame=\{addr=\"$hex\",func=\".*\",args=\[\\\[\{].*[\\\]\}\],file=\".*\",line=\"\[0-9\]*\"\}\r\n$mi_gdb_prompt$" {
 	    pass "$test"
 	    return 0
 	}
@@ -672,7 +672,7 @@ proc mi_step { test } {
     global mi_gdb_prompt
     send_gdb "220-exec-step\n"
     gdb_expect {
-	-re "220\\^running\r\n${mi_gdb_prompt}220\\*stopped,reason=\"end-stepping-range\",thread-id=\"$decimal\",frame=\{addr=\"$hex\",func=\".*\",args=\[\\\[\{\].*\[\\\]\}\],,file=\".*\",line=\"\[0-9\]*\"\}\r\n$mi_gdb_prompt$" {
+	-re "220\\^running\r\n${mi_gdb_prompt}220\\*stopped,reason=\"end-stepping-range\",thread-id=\"$decimal\",frame=\{addr=\"$hex\",func=\".*\",args=\[\\\[\{\].*\[\\\]\}\],file=\".*\",line=\"\[0-9\]*\"\}\r\n$mi_gdb_prompt$" {
 	    pass "$test"
 	    return 0
 	}
@@ -681,4 +681,96 @@ proc mi_step { test } {
 	    return -1
 	}
     }
+}
+
+# cmd should not include the number or newline (i.e. "exec-step 3", not
+# "220-exec-step 3\n"
+
+proc mi_run_to_helper { cmd reason func args file line extra test } {
+    global suppress_flag
+    if { $suppress_flag } {
+	return -1
+    }
+    global mi_gdb_prompt
+    global hex
+    global decimal
+    send_gdb "220-$cmd\n"
+    gdb_expect {
+	-re "220\\^running\r\n${mi_gdb_prompt}220\\*stopped,reason=\"$reason\",thread-id=\"$decimal\",frame=\{addr=\"$hex\",func=\"$func\",args=$args,file=\".*$file\",line=\"$line\"\}$extra\r\n$mi_gdb_prompt$" {
+	    pass "$test"
+	    return 0
+	}
+	-re "220\\^running\r\n${mi_gdb_prompt}220\\*stopped,reason=\"$reason\",thread-id=\"$decimal\",frame=\{addr=\"$hex\",func=\".*\",args=\[\\\[\{\].*\[\\\]\}\],file=\".*\",line=\"\[0-9\]*\"\}.*\r\n$mi_gdb_prompt$" {
+	    fail "$test (stopped at wrong place)"
+	    return -1
+	}
+	-re "220\\^running\r\n${mi_gdb_prompt}.*\r\n${mi_gdb_prompt}$" {
+	    fail "$test (unknown output after running)"
+	    return -1
+	}
+# Can not check for this, because of false positives after half of a running
+# prompt.
+#	-re ".*\r\n${mi_gdb_prompt}" {
+#	    fail "$test (unknown output)"
+#	    return -1
+#	}
+	timeout {
+	    fail "$test (timeout)"
+	    return -1
+	}
+    }
+}
+
+proc mi_run_to { cmd reason func args file line extra test } {
+    mi_run_to_helper "$cmd" "$reason" "$func" "\\\[$args\\\]" \
+	"$file" "$line" "$extra" "$test"
+}
+
+proc mi_next_to { func args file line test } {
+    mi_run_to "exec-next" "end-stepping-range" "$func" "$args" \
+	"$file" "$line" "" "$test"
+}
+
+proc mi_step_to { func args file line test } {
+    mi_run_to "exec-step" "end-stepping-range" "$func" "$args" \
+	"$file" "$line" "" "$test"
+}
+
+proc mi_finish_to { func args file line result ret test } {
+    mi_run_to "exec-finish" "function-finished" "$func" "$args" \
+	"$file" "$line" \
+	",gdb-result-var=\"$result\",return-value=\"$ret\"" \
+	"$test"
+}
+
+proc mi_continue_to { bkptno func args file line test } {
+    mi_run_to "exec-continue" "breakpoint-hit\",bkptno=\"$bkptno" \
+	"$func" "$args" "$file" "$line" "" "$test"
+}
+
+proc mi0_run_to { cmd reason func args file line extra test } {
+    mi_run_to_helper "$cmd" "$reason" "$func" "\{$args\}" \
+	"$file" "$line" "$extra" "$test"
+}
+
+proc mi0_next_to { func args file line test } {
+    mi0_run_to "exec-next" "end-stepping-range" "$func" "$args" \
+	"$file" "$line" "" "$test"
+}
+
+proc mi0_step_to { func args file line test } {
+    mi0_run_to "exec-step" "end-stepping-range" "$func" "$args" \
+	"$file" "$line" "" "$test"
+}
+
+proc mi0_finish_to { func args file line result ret test } {
+    mi0_run_to "exec-finish" "function-finished" "$func" "$args" \
+	"$file" "$line" \
+	",gdb-result-var=\"$result\",return-value=\"$ret\"" \
+	"$test"
+}
+
+proc mi0_continue_to { bkptno func args file line test } {
+    mi0_run_to "exec-continue" "breakpoint-hit\",bkptno=\"$bkptno" \
+	"$func" "$args" "$file" "$line" "" "$test"
 }

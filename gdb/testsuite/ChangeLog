@@ -1,3 +1,14 @@
+2001-11-11  Daniel Jacobowitz  <drow@mvista.com>
+
+	* lib/mi-support.exp: (mi_run_to_helper, mi_run_to,
+	mi_step_to, mi_next_to, mi_continue_to, mi_finish_to,
+	mi0_step_to, mi0_next_to, mi0_continue_to, mi0_finish_to,
+	mi0_run_to): New functions.
+	* gdb.mi/mi-simplerun.exp: Use them.
+	* gdb.mi/mi0-simplerun.exp: Likewise.
+	* gdb.mi/mi-var-cmd.exp: Likewise.
+	* gdb.mi/mi0-var-cmd.exp: Likewise.
+
 2001-10-27  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.mi/mi-hack-cli.exp: Remove excess newlines from test strings.
