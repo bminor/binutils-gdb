@@ -1,5 +1,9 @@
 Thu Nov 14 19:11:13 1991  Fred Fish  (fnf at cygnus.com)
 
+    	* elf.c:  Add minimal support for ELF symbol tables.  Generates
+	canonical bfd symbol tables from ELF symbol tables.  Change the
+	name of some functions from bfd_<name> to elf_<name>.
+
 	* syms.c:  Trivial fix to comment to remove a redundant "to".
 
 Wed Nov 13 17:02:01 1991  John Gilmore  (gnu at cygnus.com)
