@@ -1,3 +1,9 @@
+Mon Jan 22 16:37:59 1996  Doug Evans  <dje@charmed.cygnus.com>
+
+	* dis-asm.h (disassemble_info): New members arch, mach, endian.
+	(INIT_DISASSEMBLE_INFO): Initialize them.
+	(DISASM_RAW_INSN{,FLAG}): Define.
+
 Thu Jan 18 11:32:38 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* demangle.h (cplus_demangle_opname): Change opname parameter to

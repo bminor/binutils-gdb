@@ -40,9 +40,28 @@ typedef struct disassemble_info {
   FILE *stream;
   PTR application_data;
 
-  /* For use by the disassembler.  */
-  int flags;
+  /* Target description.  We could replace this with a pointer to the bfd,
+     but that would require one.  There currently isn't any such requirement
+     so to avoid introducing one we record these explicitly.  */
+  /* The bfd_arch value.  */
+  enum bfd_architecture arch;
+  /* The bfd_mach value.  */
+  unsigned long mach;
+  /* Endianness (for bi-endian cpus).  Mono-endian cpus can ignore this.  */
+  enum bfd_endian endian;
+
+  /* For use by the disassembler.
+     The top 16 bits are reserved for public use (and are documented here).
+     The bottom 16 bits are for the internal use of the disassembler.  */
+  unsigned long flags;
   PTR private_data;
+
+  /* Non-zero if an instruction is to be displayed in raw form (eg: hex)
+     (along with the symbolic form which is always printed).
+     ??? Not all targets support this yet and not all have the same default
+     (which they should).  */
+#define DISASM_RAW_INSN_FLAG	0x10000
+#define DISASM_RAW_INSN(INFO)	((INFO)->flags & DISASM_RAW_INSN_FLAG)
 
   /* Function used to get bytes to disassemble.  MEMADDR is the
      address of the stuff to be disassembled, MYADDR is the address to
@@ -104,10 +123,12 @@ extern int print_insn_h8300h		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_h8500		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_alpha		PARAMS ((bfd_vma, disassemble_info*));
 /* start-sanitize-arc */
-extern int print_insn_arc		PARAMS ((bfd_vma, disassemble_info*));
+extern disassembler_ftype arc_get_disassembler PARAMS ((int, int));
 /* end-sanitize-arc */
-extern int print_insn_arm		PARAMS ((bfd_vma, disassemble_info*));
+extern int print_insn_big_arm		PARAMS ((bfd_vma, disassemble_info*));
+extern int print_insn_little_arm	PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_sparc		PARAMS ((bfd_vma, disassemble_info*));
+extern int print_insn_sparc64		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_big_a29k		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_little_a29k	PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_i960		PARAMS ((bfd_vma, disassemble_info*));
@@ -138,7 +159,7 @@ extern int buffer_read_memory
 extern void perror_memory PARAMS ((int, bfd_vma, struct disassemble_info *));
 
 
-/* Just print the address is hex.  This is included for completeness even
+/* Just print the address in hex.  This is included for completeness even
    though both GDB and objdump provide their own (to print symbolic
    addresses).  */
 extern void generic_print_address
@@ -153,34 +174,10 @@ extern void generic_print_address
   (INFO).read_memory_func = buffer_read_memory, \
   (INFO).memory_error_func = perror_memory, \
   (INFO).print_address_func = generic_print_address, \
-  (INFO).insn_info_valid = 0
-
-
-
-
-/* This block of definitions is for calling the instruction decoders
-   from GDB.  */
-
-/* GDB--Like target_read_memory, but slightly different parameters.  */
-extern int
-dis_asm_read_memory PARAMS ((bfd_vma memaddr, bfd_byte *myaddr, int len,
-			     disassemble_info *info));
-
-/* GDB--Like memory_error with slightly different parameters.  */
-extern void
-dis_asm_memory_error
-  PARAMS ((int status, bfd_vma memaddr, disassemble_info *info));
-
-/* GDB--Like print_address with slightly different parameters.  */
-extern void
-dis_asm_print_address PARAMS ((bfd_vma addr, disassemble_info *info));
-
-#define GDB_INIT_DISASSEMBLE_INFO(INFO, STREAM) \
-  (INFO).fprintf_func = (fprintf_ftype)fprintf_filtered, \
-  (INFO).stream = (STREAM), \
-  (INFO).read_memory_func = dis_asm_read_memory, \
-  (INFO).memory_error_func = dis_asm_memory_error, \
-  (INFO).print_address_func = dis_asm_print_address, \
+  (INFO).arch = bfd_arch_unknown, \
+  (INFO).mach = 0, \
+  (INFO).endian = BFD_ENDIAN_BIG, \
+  (INFO).flags = 0, \
   (INFO).insn_info_valid = 0
 
 #endif /* ! defined (DIS_ASM_H) */
