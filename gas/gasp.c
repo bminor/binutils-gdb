@@ -582,6 +582,9 @@ hash_new_table (size, ptr)
 {
   ptr->size = size;
   ptr->table = (hash_entry **) xmalloc (size * (sizeof (hash_entry *)));
+  /* Fill with null-pointer, not zero-bit-pattern.  */
+  for (i = 0; i < size; i++)
+    ptr->table[i] = 0;
 }
 
 /* calculate and return the hash value of the sb at key. */
