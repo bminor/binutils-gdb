@@ -55,11 +55,13 @@ extern int (*ui_loop_hook) (int signo);
    headers in the first place since they were our own invention... */
 #ifndef _GNU_H_WINDOWS_H
 enum
-{
-  FLAG_TRACE_BIT = 0x100,
-  CONTEXT_DEBUGGER = (CONTEXT_FULL | CONTEXT_FLOATING_POINT)
-};
+  {
+    FLAG_TRACE_BIT = 0x100,
+    CONTEXT_DEBUGGER = (CONTEXT_FULL | CONTEXT_FLOATING_POINT)
+  };
 #endif
+#include <sys/procfs.h>
+#include <psapi.h>
 
 /* The string sent by cygwin when it processes a signal.
    FIXME: This should be in a cygwin include file. */
@@ -91,7 +93,8 @@ typedef struct thread_info_struct
     int suspend_count;
     CONTEXT context;
     STACKFRAME sf;
-  } thread_info;
+  }
+thread_info;
 
 static thread_info thread_head;
 
@@ -288,12 +291,12 @@ do_child_fetch_inferior_registers (int r)
   long l;
   if (r == FCS_REGNUM)
     {
-      l = *((long *)context_offset) & 0xffff;
+      l = *((long *) context_offset) & 0xffff;
       supply_register (r, (char *) &l);
     }
   else if (r == FOP_REGNUM)
     {
-      l = (*((long *)context_offset) >> 16) & ((1 << 11) - 1);
+      l = (*((long *) context_offset) >> 16) & ((1 << 11) - 1);
       supply_register (r, (char *) &l);
     }
   else if (r >= 0)
@@ -332,78 +335,79 @@ child_store_inferior_registers (int r)
   do_child_store_inferior_registers (r);
 }
 
-#include <psapi.h>
 static int psapi_loaded = 0;
 static HMODULE psapi_module_handle = NULL;
-static BOOL  WINAPI (*psapi_EnumProcessModules)(HANDLE, HMODULE*, DWORD, LPDWORD)= NULL;
-static BOOL  WINAPI (*psapi_GetModuleInformation) (HANDLE, HMODULE, LPMODULEINFO, DWORD)= NULL;
-static DWORD WINAPI (*psapi_GetModuleFileNameExA) (HANDLE, HMODULE, LPSTR, DWORD)= NULL;
+static BOOL WINAPI (*psapi_EnumProcessModules) (HANDLE, HMODULE *, DWORD, LPDWORD) = NULL;
+static BOOL WINAPI (*psapi_GetModuleInformation) (HANDLE, HMODULE, LPMODULEINFO, DWORD) = NULL;
+static DWORD WINAPI (*psapi_GetModuleFileNameExA) (HANDLE, HMODULE, LPSTR, DWORD) = NULL;
 
-int psapi_get_dll_name (DWORD BaseAddress, char *dll_name_ret)
+int 
+psapi_get_dll_name (DWORD BaseAddress, char *dll_name_ret)
 {
   DWORD len;
   MODULEINFO mi;
   int i;
-  HMODULE dh_buf [ 1 ];
-  HMODULE* DllHandle = dh_buf;
+  HMODULE dh_buf[1];
+  HMODULE *DllHandle = dh_buf;
   DWORD cbNeeded;
   BOOL ok;
 
   if (!psapi_loaded ||
-       psapi_EnumProcessModules   == NULL ||
-       psapi_GetModuleInformation == NULL ||
-       psapi_GetModuleFileNameExA == NULL)
+      psapi_EnumProcessModules == NULL ||
+      psapi_GetModuleInformation == NULL ||
+      psapi_GetModuleFileNameExA == NULL)
     {
-      if (psapi_loaded)goto failed;
+      if (psapi_loaded)
+	goto failed;
       psapi_loaded = 1;
       psapi_module_handle = LoadLibrary ("psapi.dll");
       if (!psapi_module_handle)
-        {
-          /* printf_unfiltered ("error loading psapi.dll: %u", GetLastError ());*/
-          goto failed;
-        }
-      psapi_EnumProcessModules   = GetProcAddress (psapi_module_handle, "EnumProcessModules" );
+	{
+	  /* printf_unfiltered ("error loading psapi.dll: %u", GetLastError ()); */
+	  goto failed;
+	}
+      psapi_EnumProcessModules = GetProcAddress (psapi_module_handle, "EnumProcessModules");
       psapi_GetModuleInformation = GetProcAddress (psapi_module_handle, "GetModuleInformation");
       psapi_GetModuleFileNameExA = (void *) GetProcAddress (psapi_module_handle,
-							    "GetModuleFileNameExA");
-      if (psapi_EnumProcessModules   == NULL ||
-           psapi_GetModuleInformation == NULL ||
-           psapi_GetModuleFileNameExA == NULL)
+						    "GetModuleFileNameExA");
+      if (psapi_EnumProcessModules == NULL ||
+	  psapi_GetModuleInformation == NULL ||
+	  psapi_GetModuleFileNameExA == NULL)
 	goto failed;
     }
 
   cbNeeded = 0;
   ok = (*psapi_EnumProcessModules) (current_process_handle,
-				     DllHandle,
-				     sizeof (HMODULE),
-				     &cbNeeded);
+				    DllHandle,
+				    sizeof (HMODULE),
+				    &cbNeeded);
 
   if (!ok || !cbNeeded)
     goto failed;
 
-  DllHandle = (HMODULE*) alloca (cbNeeded);
+  DllHandle = (HMODULE *) alloca (cbNeeded);
   if (!DllHandle)
     goto failed;
 
   ok = (*psapi_EnumProcessModules) (current_process_handle,
-				     DllHandle,
-				     cbNeeded,
-				     &cbNeeded);
+				    DllHandle,
+				    cbNeeded,
+				    &cbNeeded);
   if (!ok)
     goto failed;
 
   for (i = 0; i < (int) (cbNeeded / sizeof (HMODULE)); i++)
     {
       if (!(*psapi_GetModuleInformation) (current_process_handle,
-					     DllHandle [i],
-					     &mi,
-					     sizeof (mi)))
+					  DllHandle[i],
+					  &mi,
+					  sizeof (mi)))
 	error ("Can't get module info");
 
       len = (*psapi_GetModuleFileNameExA) (current_process_handle,
-					    DllHandle [i],
-					    dll_name_ret,
-					    MAX_PATH);
+					   DllHandle[i],
+					   dll_name_ret,
+					   MAX_PATH);
       if (len == 0)
 	error ("Error getting dll name: %u\n", GetLastError ());
 
@@ -444,14 +448,14 @@ safe_symbol_file_add_stub (void *argv)
 static void
 safe_symbol_file_add_cleanup (void *p)
 {
-# define sp ((struct safe_symbol_file_add_args *)p)
+#define sp ((struct safe_symbol_file_add_args *)p)
   gdb_flush (gdb_stderr);
   gdb_flush (gdb_stdout);
   ui_file_delete (gdb_stderr);
   ui_file_delete (gdb_stdout);
   gdb_stderr = sp->err;
   gdb_stdout = sp->out;
-# undef sp
+#undef sp
 }
 
 /* symbol_file_add wrapper that prevents errors from being displayed. */
@@ -489,10 +493,24 @@ struct so_stuff
   struct so_stuff *next, **last;
   DWORD load_addr;
   char name[0];
-} solib_start, *solib_end;
+}
+solib_start, *solib_end;
 
 /* Remember the maximum DLL length for printing in info dll command. */
 int max_dll_name_len;
+
+static void
+register_loaded_dll (const char *name, DWORD load_addr)
+{
+  struct so_stuff *so;
+  so = (struct so_stuff *) xmalloc (sizeof (struct so_stuff) + strlen (name) + 8 + 2);
+  so->load_addr = load_addr;
+  strcpy (so->name, name);
+
+  solib_end->next = so;
+  solib_end = so;
+  so->next = NULL;
+}
 
 /* Wait for child to do something.  Return pid of child, or -1 in case
    of error; store status through argument pointer OURSTATUS.  */
@@ -503,7 +521,6 @@ handle_load_dll (PTR dummy ATTRIBUTE_UNUSED)
   DWORD dll_name_ptr;
   DWORD done;
   char dll_buf[MAX_PATH + 1];
-  struct so_stuff *so;
   char *dll_name = NULL;
   int len;
   char *p;
@@ -511,7 +528,7 @@ handle_load_dll (PTR dummy ATTRIBUTE_UNUSED)
   dll_buf[0] = dll_buf[sizeof (dll_buf) - 1] = '\0';
 
   if (!psapi_get_dll_name ((DWORD) (event->lpBaseOfDll), dll_buf))
-    dll_buf[0] = dll_buf[sizeof(dll_buf) - 1] = '\0';
+    dll_buf[0] = dll_buf[sizeof (dll_buf) - 1] = '\0';
 
   dll_name = dll_buf;
 
@@ -579,14 +596,7 @@ handle_load_dll (PTR dummy ATTRIBUTE_UNUSED)
   while ((p = strchr (dll_name, '\\')))
     *p = '/';
 
-  so = (struct so_stuff *) xmalloc (sizeof (struct so_stuff) +  strlen (dll_name) + 8 + 2);
-  so->load_addr = (DWORD) event->lpBaseOfDll + 0x1000;
-  strcpy (so->name, dll_name);
-
-  solib_end->next = so;
-  solib_end = so;
-  so->next = NULL;
-
+  register_loaded_dll (dll_name, (DWORD) event->lpBaseOfDll + 0x1000);
   len = strlen (dll_name);
   if (len > max_dll_name_len)
     max_dll_name_len = len;
@@ -598,7 +608,7 @@ handle_load_dll (PTR dummy ATTRIBUTE_UNUSED)
 char *
 child_solib_loaded_library_pathname (int pid ATTRIBUTE_UNUSED)
 {
-  return !solib_end || !solib_end->name[0]? NULL : solib_end->name;
+  return !solib_end || !solib_end->name[0] ? NULL : solib_end->name;
 }
 
 /* Clear list of loaded DLLs. */
@@ -620,7 +630,7 @@ child_clear_solibs (void)
 
 /* Add DLL symbol information. */
 void
-child_solib_add (char *filename ATTRIBUTE_UNUSED, int from_tty ATTRIBUTE_UNUSED, struct target_ops *t ATTRIBUTE_UNUSED)
+solib_symbols_add (char *name, CORE_ADDR load_addr)
 {
   struct section_addr_info section_addrs;
 
@@ -628,13 +638,13 @@ child_solib_add (char *filename ATTRIBUTE_UNUSED, int from_tty ATTRIBUTE_UNUSED,
      the offset from 0 of the first byte in an image - because
      of the file header and the section alignment. */
 
-  if (!solib_end || !solib_end->name[0])
+  if (!name || !name[0])
     return;
 
   memset (&section_addrs, 0, sizeof (section_addrs));
   section_addrs.other[0].name = ".text";
-  section_addrs.other[0].addr = solib_end->load_addr;
-  safe_symbol_file_add (solib_end->name, 0, &section_addrs, 0, OBJF_SHARED);
+  section_addrs.other[0].addr = load_addr;
+  safe_symbol_file_add (name, 0, &section_addrs, 0, OBJF_SHARED);
 
   return;
 }
@@ -643,13 +653,23 @@ child_solib_add (char *filename ATTRIBUTE_UNUSED, int from_tty ATTRIBUTE_UNUSED,
 void
 dll_symbol_command (char *args, int from_tty ATTRIBUTE_UNUSED)
 {
+  int n;
   dont_repeat ();
-  
+
   if (args == NULL)
     error ("dll-symbols requires a file name");
 
+  n = strlen (args);
+  if (n > 4 && strcasecmp (args + n - 4, ".dll") != 0)
+    {
+      char *newargs = (char *) alloca (n + 4 + 1);
+      strcpy (newargs, args);
+      strcat (newargs, ".dll");
+      args = newargs;
+    }
+
   safe_symbol_file_add (args, 0, NULL, 0, OBJF_SHARED | OBJF_USERLOADED);
-} 
+}
 
 /* List currently loaded DLLs. */
 void
@@ -715,7 +735,7 @@ handle_exception (struct target_waitstatus *ourstatus)
     {
     case EXCEPTION_ACCESS_VIOLATION:
       DEBUG_EXCEPT (("gdb: Target exception ACCESS_VIOLATION at 0x%08lx\n",
-	       (DWORD) current_event.u.Exception.ExceptionRecord.ExceptionAddress));
+       (DWORD) current_event.u.Exception.ExceptionRecord.ExceptionAddress));
       ourstatus->value.sig = TARGET_SIGNAL_SEGV;
       last_sig = SIGSEGV;
       break;
@@ -724,41 +744,41 @@ handle_exception (struct target_waitstatus *ourstatus)
     case STATUS_FLOAT_OVERFLOW:
     case STATUS_INTEGER_DIVIDE_BY_ZERO:
       DEBUG_EXCEPT (("gdb: Target exception STACK_OVERFLOW at 0x%08lx\n",
-	       (DWORD) current_event.u.Exception.ExceptionRecord.ExceptionAddress));
+       (DWORD) current_event.u.Exception.ExceptionRecord.ExceptionAddress));
       ourstatus->value.sig = TARGET_SIGNAL_FPE;
       last_sig = SIGFPE;
       break;
     case STATUS_STACK_OVERFLOW:
       DEBUG_EXCEPT (("gdb: Target exception STACK_OVERFLOW at 0x%08lx\n",
-	       (DWORD) current_event.u.Exception.ExceptionRecord.ExceptionAddress));
+       (DWORD) current_event.u.Exception.ExceptionRecord.ExceptionAddress));
       ourstatus->value.sig = TARGET_SIGNAL_SEGV;
       break;
     case EXCEPTION_BREAKPOINT:
       DEBUG_EXCEPT (("gdb: Target exception BREAKPOINT at 0x%08lx\n",
-	       (DWORD) current_event.u.Exception.ExceptionRecord.ExceptionAddress));
+       (DWORD) current_event.u.Exception.ExceptionRecord.ExceptionAddress));
       ourstatus->value.sig = TARGET_SIGNAL_TRAP;
       break;
     case DBG_CONTROL_C:
       DEBUG_EXCEPT (("gdb: Target exception CONTROL_C at 0x%08lx\n",
-	       (DWORD) current_event.u.Exception.ExceptionRecord.ExceptionAddress));
+       (DWORD) current_event.u.Exception.ExceptionRecord.ExceptionAddress));
       ourstatus->value.sig = TARGET_SIGNAL_INT;
       last_sig = SIGINT;	/* FIXME - should check pass state */
       break;
     case EXCEPTION_SINGLE_STEP:
       DEBUG_EXCEPT (("gdb: Target exception SINGLE_STEP at 0x%08lx\n",
-	       (DWORD) current_event.u.Exception.ExceptionRecord.ExceptionAddress));
+       (DWORD) current_event.u.Exception.ExceptionRecord.ExceptionAddress));
       ourstatus->value.sig = TARGET_SIGNAL_TRAP;
       break;
     case EXCEPTION_ILLEGAL_INSTRUCTION:
       DEBUG_EXCEPT (("gdb: Target exception SINGLE_ILL at 0x%08lx\n",
-	       (DWORD) current_event.u.Exception.ExceptionRecord.ExceptionAddress));
+       (DWORD) current_event.u.Exception.ExceptionRecord.ExceptionAddress));
       ourstatus->value.sig = TARGET_SIGNAL_ILL;
       last_sig = SIGILL;
       break;
     default:
       printf_unfiltered ("gdb: unknown target exception 0x%08lx at 0x%08lx\n",
 		    current_event.u.Exception.ExceptionRecord.ExceptionCode,
-		(DWORD) current_event.u.Exception.ExceptionRecord.ExceptionAddress);
+	(DWORD) current_event.u.Exception.ExceptionRecord.ExceptionAddress);
       ourstatus->value.sig = TARGET_SIGNAL_UNKNOWN;
       break;
     }
@@ -903,7 +923,7 @@ get_child_debug_event (int pid ATTRIBUTE_UNUSED, struct target_waitstatus *ourst
 		     (unsigned) current_event.dwProcessId,
 		     (unsigned) current_event.dwThreadId,
 		     "OUTPUT_DEBUG_STRING_EVENT"));
-      if (handle_output_debug_string ( ourstatus))
+      if (handle_output_debug_string (ourstatus))
 	retval = main_thread_id;
       break;
 
@@ -920,7 +940,7 @@ get_child_debug_event (int pid ATTRIBUTE_UNUSED, struct target_waitstatus *ourst
     CHECK (child_continue (continue_status, -1));
   else
     {
-      current_thread = th ?: thread_rec (current_event.dwThreadId, TRUE);
+      current_thread = th ? : thread_rec (current_event.dwThreadId, TRUE);
       inferior_pid = retval;
     }
 
@@ -1184,7 +1204,7 @@ child_create_inferior (char *exec_file, char *allargs, char **env)
 
   do_initial_child_stuff (pi.dwProcessId);
 
-  /* child_continue (DBG_CONTINUE, -1);*/
+  /* child_continue (DBG_CONTINUE, -1); */
   proceed ((CORE_ADDR) - 1, TARGET_SIGNAL_0, 0);
 }
 
@@ -1257,7 +1277,7 @@ child_resume (int pid, int step, enum target_signal sig)
 {
   thread_info *th;
   DWORD continue_status = last_sig > 0 && last_sig < NSIG ?
-			  DBG_EXCEPTION_NOT_HANDLED : DBG_CONTINUE;
+  DBG_EXCEPTION_NOT_HANDLED : DBG_CONTINUE;
 
   last_sig = 0;
 
@@ -1360,45 +1380,46 @@ _initialize_inftarg (void)
   init_child_ops ();
 
   add_com ("dll-symbols", class_files, dll_symbol_command,
-           "Load dll library symbols from FILE.");
+	   "Load dll library symbols from FILE.");
 
+  auto_solib_add = 1;
   add_com_alias ("sharedlibrary", "dll-symbols", class_alias, 1);
 
   add_show_from_set (add_set_cmd ("new-console", class_support, var_boolean,
-		  (char *) &new_console,
-		  "Set creation of new console when creating child process.",
-		  &setlist),
-     &showlist);
+				  (char *) &new_console,
+		 "Set creation of new console when creating child process.",
+				  &setlist),
+		     &showlist);
 
   add_show_from_set (add_set_cmd ("new-group", class_support, var_boolean,
-		  (char *) &new_group,
-		  "Set creation of new group when creating child process.",
-		  &setlist),
-     &showlist);
+				  (char *) &new_group,
+		   "Set creation of new group when creating child process.",
+				  &setlist),
+		     &showlist);
 
   add_show_from_set (add_set_cmd ("debugexec", class_support, var_boolean,
-		  (char *) &debug_exec,
-		  "Set whether to display execution in child process.",
-		  &setlist),
-     &showlist);
+				  (char *) &debug_exec,
+		       "Set whether to display execution in child process.",
+				  &setlist),
+		     &showlist);
 
   add_show_from_set (add_set_cmd ("debugevents", class_support, var_boolean,
-		  (char *) &debug_events,
-		  "Set whether to display kernel events in child process.",
-		  &setlist),
-     &showlist);
+				  (char *) &debug_events,
+		   "Set whether to display kernel events in child process.",
+				  &setlist),
+		     &showlist);
 
   add_show_from_set (add_set_cmd ("debugmemory", class_support, var_boolean,
-		  (char *) &debug_memory,
-		  "Set whether to display memory accesses in child process.",
-		  &setlist),
-     &showlist);
+				  (char *) &debug_memory,
+		 "Set whether to display memory accesses in child process.",
+				  &setlist),
+		     &showlist);
 
   add_show_from_set (add_set_cmd ("debugexceptions", class_support, var_boolean,
-		  (char *) &debug_exceptions,
-		  "Set whether to display kernel exceptions in child process.",
-		  &setlist),
-     &showlist);
+				  (char *) &debug_exceptions,
+	       "Set whether to display kernel exceptions in child process.",
+				  &setlist),
+		     &showlist);
 
   add_info ("dll", info_dll_command, "Status of loaded DLLs.");
   add_info_alias ("sharedlibrary", "dll", 1);
@@ -1426,4 +1447,218 @@ cygwin_pid_to_str (int pid)
   else
     sprintf (buf, "thread %ld.0x%x", current_event.dwProcessId, pid);
   return buf;
+}
+
+static int
+core_dll_symbols_add (char *dll_name, DWORD base_addr)
+{
+  struct objfile *objfile;
+  char *objfile_basename;
+  const char *dll_basename;
+
+  if (!(dll_basename = strrchr (dll_name, '/')))
+    dll_basename = dll_name;
+  else
+    dll_basename++;
+
+  ALL_OBJFILES (objfile)
+  {
+    objfile_basename = strrchr (objfile->name, '/');
+
+    if (objfile_basename &&
+	strcmp (dll_basename, objfile_basename + 1) == 0)
+      {
+	printf_unfiltered ("%08lx:%s (symbols previously loaded)\n",
+			   base_addr, dll_name);
+	goto out;
+      }
+  }
+
+  register_loaded_dll (dll_name, base_addr + 0x1000);
+  solib_symbols_add (dll_name, (CORE_ADDR) base_addr + 0x1000);
+
+out:
+  return 1;
+}
+
+typedef struct
+{
+  struct target_ops *target;
+  bfd_vma addr;
+}
+map_code_section_args;
+
+static void
+map_single_dll_code_section (bfd * abfd, asection * sect, PTR obj)
+{
+  int old;
+  int update_coreops;
+  struct section_table *new_target_sect_ptr;
+
+  map_code_section_args *args = (map_code_section_args *) obj;
+  struct target_ops *target = args->target;
+  if (sect->flags & SEC_CODE)
+    {
+      update_coreops = core_ops.to_sections == target->to_sections;
+
+      if (target->to_sections)
+	{
+	  old = target->to_sections_end - target->to_sections;
+	  target->to_sections = (struct section_table *)
+	    xrealloc ((char *) target->to_sections,
+		      (sizeof (struct section_table)) * (1 + old));
+	}
+      else
+	{
+	  old = 0;
+	  target->to_sections = (struct section_table *)
+	    xmalloc ((sizeof (struct section_table)));
+	}
+      target->to_sections_end = target->to_sections + (1 + old);
+
+      /* Update the to_sections field in the core_ops structure
+         if needed.  */
+      if (update_coreops)
+	{
+	  core_ops.to_sections = target->to_sections;
+	  core_ops.to_sections_end = target->to_sections_end;
+	}
+      new_target_sect_ptr = target->to_sections + old;
+      new_target_sect_ptr->addr = args->addr + bfd_section_vma (abfd, sect);
+      new_target_sect_ptr->endaddr = args->addr + bfd_section_vma (abfd, sect) +
+	bfd_section_size (abfd, sect);;
+      new_target_sect_ptr->the_bfd_section = sect;
+      new_target_sect_ptr->bfd = abfd;
+    }
+}
+
+static int
+dll_code_sections_add (const char *dll_name, int base_addr, struct target_ops *target)
+{
+  bfd *dll_bfd;
+  map_code_section_args map_args;
+  asection *lowest_sect;
+  char *name;
+  if (dll_name == NULL || target == NULL)
+    return 0;
+  name = strdup (dll_name);
+  dll_bfd = bfd_openr (name, "pei-i386");
+  if (dll_bfd == NULL)
+    return 0;
+
+  if (bfd_check_format (dll_bfd, bfd_object))
+    {
+      lowest_sect = bfd_get_section_by_name (dll_bfd, ".text");
+      if (lowest_sect == NULL)
+	return 0;
+      map_args.target = target;
+      map_args.addr = base_addr - bfd_section_vma (dll_bfd, lowest_sect);
+
+      bfd_map_over_sections (dll_bfd, &map_single_dll_code_section, (PTR) (&map_args));
+    }
+
+  return 1;
+}
+
+static void
+core_section_load_dll_symbols (bfd * abfd, asection * sect, PTR obj)
+{
+  struct target_ops *target = (struct target_ops *) obj;
+
+  DWORD base_addr;
+
+  int dll_name_size;
+  char *dll_name = NULL;
+  char *buf = NULL;
+  struct win32_pstatus *pstatus;
+  char *p;
+
+  if (strncmp (sect->name, ".module", 7))
+    return;
+
+  buf = (char *) xmalloc (sect->_raw_size + 1);
+  if (!buf)
+    {
+      printf_unfiltered ("memory allocation failed for %s\n", sect->name);
+      goto out;
+    }
+  if (!bfd_get_section_contents (abfd, sect, buf, 0, sect->_raw_size))
+    goto out;
+
+  pstatus = (struct win32_pstatus *) buf;
+
+  memmove (&base_addr, &(pstatus->data.module_info.base_address), sizeof (base_addr));
+  dll_name_size = pstatus->data.module_info.module_name_size;
+  if (offsetof (struct win32_pstatus, data.module_info.module_name) + dll_name_size > sect->_raw_size)
+      goto out;
+
+  dll_name = (char *) xmalloc (dll_name_size + 1);
+  if (!dll_name)
+    {
+      printf_unfiltered ("memory allocation failed for %s\n", sect->name);
+      goto out;
+    }
+  strncpy (dll_name, pstatus->data.module_info.module_name, dll_name_size);
+
+  while ((p = strchr (dll_name, '\\')))
+    *p = '/';
+
+  if (!core_dll_symbols_add (dll_name, (DWORD) base_addr))
+    printf_unfiltered ("%s: Failed to load dll symbols.\n", dll_name);
+
+  if (!dll_code_sections_add (dll_name, (DWORD) base_addr + 0x1000, target))
+    printf_unfiltered ("%s: Failed to map dll code sections.\n", dll_name);
+
+out:
+  if (buf)
+    free (buf);
+  if (dll_name)
+    free (dll_name);
+  return;
+}
+
+void
+child_solib_add (char *filename ATTRIBUTE_UNUSED, int from_tty ATTRIBUTE_UNUSED, struct target_ops *target)
+{
+  if (core_bfd)
+    {
+      child_clear_solibs ();
+      bfd_map_over_sections (core_bfd, &core_section_load_dll_symbols, target);
+    }
+  else
+    {
+      if (solib_end && solib_end->name)
+	solib_symbols_add (solib_end->name, solib_end->load_addr);
+    }
+}
+
+static void
+fetch_elf_core_registers (char *core_reg_sect,
+			  unsigned core_reg_size,
+			  int which,
+			  CORE_ADDR reg_addr)
+{
+  int r;
+  if (core_reg_size < sizeof (CONTEXT))
+    {
+      error ("Core file register section too small (%u bytes).", core_reg_size);
+      return;
+    }
+  for (r = 0; r < NUM_REGS; r++)
+    supply_register (r, core_reg_sect + mappings[r]);
+}
+
+static struct core_fns win32_elf_core_fns =
+{
+  bfd_target_elf_flavour,
+  default_check_format,
+  default_core_sniffer,
+  fetch_elf_core_registers,
+  NULL
+};
+
+void
+_initialize_core_win32 ()
+{
+  add_core_fns (&win32_elf_core_fns);
 }

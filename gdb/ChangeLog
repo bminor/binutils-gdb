@@ -1,3 +1,28 @@
+Sun Aug 27 00:00:04 2000  Christopher Faylor <cgf@cygnus.com>
+
+	* win32-nat.c (dll_symbol_command): Tack a .dll on the end of a
+	supplied argument if it is missing an extension.
+
+2000-08-24  Egor Duda <deo@logos-m.ru>
+
+	* corelow.c: Define O_BINARY if it isn't defined.
+	(core_open): Open core file in binary mode.
+	* config/i386/tm-cygwin.h (child_clear_solibs): Rename from
+	child_clear_solib.
+	* config/i386/cygwin.mh: Add dependency from corelow.o.
+	* win32-nat.c (register_loaded_dll): New function.  Add dll to the list
+	of currently loaded dlls.
+	(handle_load_dll): Use register_loaded_dll.
+	(child_solib_add): Distinguish between active process and core targets.
+	(solib_symbols_add): Load symbols from loaded dll.
+	(core_dll_symbols_add): New function.  Load symbols from dll referenced
+	in core.
+	(core_section_load_dll_symbols): New function.
+	(dll_code_sections_add): New function.
+	(map_single_dll_code_section): New function.
+	(fetch_elf_core_registers): New function.
+	(_initialize_core_win32): New function.
+
 2000-08-26  Kevin Buettner  <kevinb@redhat.com>
 
 	* gdbserver/gdbreplay.c (main): Protoize.

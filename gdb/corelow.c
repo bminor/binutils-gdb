@@ -33,6 +33,10 @@
 #include "gdbcore.h"
 #include "gdbthread.h"
 
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
+
 /* List of all available core_fns.  On gdb startup, each core file register
    reader calls add_core_fns() to register information on each core format it
    is prepared to read. */
@@ -275,7 +279,7 @@ core_open (char *filename, int from_tty)
 
   old_chain = make_cleanup (free, filename);
 
-  scratch_chan = open (filename, write_files ? O_RDWR : O_RDONLY, 0);
+  scratch_chan = open (filename, O_BINARY | ( write_files ? O_RDWR : O_RDONLY ), 0);
   if (scratch_chan < 0)
     perror_with_name (filename);
 
