@@ -5,6 +5,9 @@ Fri Nov 17 10:41:25 1995  Philippe De Muyter  <phdm@info.ucl.ac.be>
 
 Fri Nov 17 10:02:58 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* coffcode.h (coff_pointerize_aux_hook): I960 version: don't
+	pointerize C_LEAFSTAT or C_LEAFEXT entries.
+
 	* elflink.h (NAME(bfd_elf,size_dynamic_sections)): Only create
 	DT_INIT and DT_FINI entries if the _init or _fini symbol is
 	defined or mentioned in a regular file.
