@@ -1,4 +1,14 @@
+Tue May 20 18:45:26 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coff-sh.c (sh_merge_private_data): New static function.
+	(coff_bfd_merge_private_bfd_data): Define.
+
 start-sanitize-tic80
+Mon May 19 14:46:00 1997  Mark Alexander  <marka@cygnus.com>
+
+	* coff-tic80.c: Remove unnecessary #ifdefs.
+	* config.bfd: Set targ_underscore to yes for tic80.
+
 Mon May 19 14:26:36 1997  Mark Alexander  <marka@cygnus.com>
 
 	* coff-tic80.c (NAMES_HAVE_UNDERSCORE): Define (fixes problem
