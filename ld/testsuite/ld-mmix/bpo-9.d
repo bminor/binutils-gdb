@@ -28,6 +28,5 @@ Contents of section \.init:
 Contents of section \.text:
  0010 232dfe00 232dfd00                    .*
 Contents of section \.sbss:
-Contents of section \.bss:
 Contents of section \.MMIX\.reg_contents:
  07e8 00000000 0000107c 00000000 0000a420  .*

@@ -1,3 +1,8 @@
+2003-08-16  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* ld-mmix/bpo-9.d, ld-mmix/bpo-10.d, ld-mmix/bpo-11.d: Adjust for
+	recent objdump "Contents of ..." change.
+
 2003-08-02  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* ld-sh/shared-2.d, ld-sh/textrel1.s, ld-sh/textrel2.s: New test.
