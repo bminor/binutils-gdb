@@ -146,7 +146,7 @@ fi
 
 case "${target}" in
   mips-*-*)
-    configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas//'`
+    configdirs=`echo ${configdirs} | sed -e 's/gas//'`
     ;;
   rs6000-*-*)
     configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas//;s/tk//'`

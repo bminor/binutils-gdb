@@ -1,3 +1,7 @@
+Tue Feb  2 11:45:53 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* configure.in (mips-*-*): Build ld and binutils.
+
 Mon Feb  1 12:35:41 1993  K. Richard Pixley  (rich@rtl.cygnus.com)
 
 	* configure: check return code from mkdir, print error message and
