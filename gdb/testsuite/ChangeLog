@@ -1,5 +1,12 @@
 2004-01-07  Michael Chastain  <mec.gnu@mindspring.com>
 
+	* gdb.cp/bs15503.cc: Include <iostream>, not <iostream.h>.
+	* gdb.cp/bs15503.exp: Remove hp-only restriction.  Use modern
+	boilerplate code for compiling and running the program under
+	test.  Add some string method tests.
+
+2004-01-07  Michael Chastain  <mec.gnu@mindspring.com>
+
 	* gdb.cp/bs15503.cc: Add copyright notice.
 	* gdb.cp/bs15503.exp: Adjust line number.
 
