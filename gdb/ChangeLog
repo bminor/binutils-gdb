@@ -1,5 +1,9 @@
 2001-06-09  Andrew Cagney  <ac131313@redhat.com>
 
+	* Makefile.in (gdbcmd_h): Add ui_out_h.
+	(breakpoint.o, infcmd.o, main.o, printcmd.o, stack.o): Ditto.
+	(thread.o, top.o): Ditto.
+
 	* ui-out.h (table_begin_ftype): Make string parameters constant.
 	(table_header_ftype): Ditto.
 	(field_int_ftype): Ditto.

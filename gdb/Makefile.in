@@ -588,7 +588,7 @@ value_h =	value.h $(symtab_h) $(gdbtypes_h) $(expression_h)
 breakpoint_h =	breakpoint.h $(frame_h) $(value_h)
 
 command_h =	command.h
-gdbcmd_h =	gdbcmd.h $(command_h)
+gdbcmd_h =	gdbcmd.h $(command_h) $(ui_out_h)
 call_cmds_h =	call-cmds.h
 regcache_h =	regcache.h
 
@@ -1222,7 +1222,7 @@ blockframe.o: blockframe.c $(defs_h) $(gdbcore_h) $(inferior_h) \
 
 breakpoint.o: breakpoint.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 	$(inferior_h) language.h target.h gdbthread.h $(gdb_string_h) \
-	gdb-events.h linespec.h
+	gdb-events.h linespec.h $(ui_out_h)
 
 buildsym.o: buildsym.c $(bfd_h) buildsym.h complaints.h $(defs_h) \
 	objfiles.h symfile.h $(symtab_h) $(gdb_string_h)
@@ -1569,7 +1569,8 @@ ia64-tdep.o: ia64-tdep.c $(defs_h) $(inferior_h) symfile.h $(gdbcore_h) \
 	$(INCLUDE_DIR)/elf/common.h $(regcache_h)
 
 infcmd.o: infcmd.c $(defs_h) environ.h $(gdbcmd_h) $(gdbcore_h) \
-	$(inferior_h) target.h language.h symfile.h $(gdb_string_h)
+	$(inferior_h) target.h language.h symfile.h $(gdb_string_h) \
+	$(ui_out_h)
 
 inflow.o: inflow.c $(bfd_h) $(command_h) $(defs_h) $(inferior_h) \
 	target.h terminal.h gdbthread.h $(gdb_string_h)
@@ -1652,7 +1653,7 @@ m88k-tdep.o: m88k-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h) $(regcache_h)
 mac-nat.o: mac-nat.c $(defs_h) $(gdb_string_h) $(regcache_h)
 
 main.o: main.c top.h $(defs_h) $(gdb_string_h) $(event_loop_h) \
-	symfile.h  $(gdbcore_h) $(srcdir)/tui/tui-file.h
+	symfile.h  $(gdbcore_h) $(srcdir)/tui/tui-file.h $(ui_out_h)
 
 maint.o: maint.c $(defs_h) $(gdbcmd_h) $(gdbtypes_h) $(symtab_h) language.h \
 	$(expression_h) objfiles.h symfile.h
@@ -1775,7 +1776,7 @@ ppcbug-rom.o: ppcbug-rom.c monitor.h $(bfd_h) gdb_wait.h $(defs_h) \
 
 printcmd.o: printcmd.c $(breakpoint_h) $(defs_h) $(expression_h) \
 	$(gdbcmd_h) $(gdbcore_h) $(gdbtypes_h) language.h objfiles.h \
-	symfile.h $(symtab_h) target.h $(gdb_string_h)
+	symfile.h $(symtab_h) target.h $(gdb_string_h) $(ui_out_h)
 
 # FIXME: Procfs.o gets -Wformat errors because things like pid_t don't
 # match output format strings.
@@ -1969,7 +1970,7 @@ solib-legacy.o: solib-legacy.c $(defs_h) $(gdbcore_h) solib-svr4.h
 
 source.o: source.c $(defs_h) $(expression_h) $(frame_h) $(gdbcmd_h) \
 	$(gdbcore_h) language.h objfiles.h gnu-regex.h symfile.h $(symtab_h) \
-	$(gdb_string_h) source.h completer.h linespec.h
+	$(gdb_string_h) source.h completer.h linespec.h $(ui_out_h)
 
 sparc-nat.o: sparc-nat.c $(bfd_h) $(defs_h) $(inferior_h) $(gdbcore_h) \
 	target.h $(regcache_h)
@@ -1988,7 +1989,7 @@ stabsread.o: stabsread.c $(bfd_h) $(INCLUDE_DIR)/aout/stab.def \
 	$(gdb_string_h)
 
 stack.o: stack.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) $(inferior_h) \
-	language.h target.h $(gdb_string_h)
+	language.h target.h $(gdb_string_h) $(ui_out_h)
 
 ui-file.o: ui-file.c $(defs_h) ui-file.h
 tui-file.o: $(srcdir)/tui/tui-file.c $(defs_h) $(srcdir)/tui/tui-file.h
@@ -2029,7 +2030,8 @@ tic80-tdep.o: tic80-tdep.c $(defs_h) $(regcache_h)
 target.o: target.c $(bfd_h) $(defs_h) $(gdbcmd_h) $(inferior_h) \
 	objfiles.h symfile.h target.h $(gdb_string_h) $(regcache_h)
 
-thread.o: thread.c $(defs_h) gdbthread.h $(gdbcmd_h) target.h $(regcache_h)
+thread.o: thread.c $(defs_h) gdbthread.h $(gdbcmd_h) target.h \
+	$(regcache_h) $(ui_out_h)
 
 completer.o: completer.c completer.h $(gdbtypes_h) $(symtab_h) \
 	$(defs_h) $(gdbcmd_h) $(expression_h) $(readline_headers)
@@ -2037,7 +2039,7 @@ completer.o: completer.c completer.h $(gdbtypes_h) $(symtab_h) \
 top.o: top.c top.h $(bfd_h) $(getopt_h) $(readline_headers) call-cmds.h \
 	$(defs_h) $(gdbcmd_h) $(inferior_h) language.h \
 	$(remote_utils_h) $(gdb_string_h) $(event_loop_h) $(event_top_h) \
-	completer.h $(version_h)
+	completer.h $(version_h) $(ui_out_h)
 
 typeprint.o: typeprint.c $(defs_h) $(expression_h) $(gdbcmd_h) \
 	$(gdbcore_h) $(gdbtypes_h) language.h $(symtab_h) target.h \
