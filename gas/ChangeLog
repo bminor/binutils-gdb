@@ -1,3 +1,8 @@
+Fri Feb 20 15:03:13 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-ppc.c (md_pseudo_table): Add "section".
+	(ppc_named_section): New static function.
+
 Thu Feb 19 22:25:42 1998  Richard Henderson  <rth@cygnus.com>
 
 	* tc-ppc.c (ppc_biei): Cache the last symbol we inserted
