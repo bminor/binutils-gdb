@@ -964,6 +964,35 @@ elf_link_add_object_symbols (abfd, info)
 	}
     }
 
+  /* If this is a non-traditional, non-relocateable link, try to
+     optimize the handling of the .stab/.stabstr sections.  */
+  if (! dynamic
+      && ! info->relocateable
+      && ! info->traditional_format
+      && info->hash->creator->flavour == bfd_target_elf_flavour
+      && (info->strip != strip_all && info->strip != strip_debugger))
+    {
+      asection *stab, *stabstr;
+
+      stab = bfd_get_section_by_name (abfd, ".stab");
+      if (stab != NULL)
+	{
+	  stabstr = bfd_get_section_by_name (abfd, ".stabstr");
+
+	  if (stabstr != NULL)
+	    {
+	      struct bfd_elf_section_data *secdata;
+
+	      secdata = elf_section_data (stab);
+	      if (! _bfd_link_section_stabs (abfd,
+					     &elf_hash_table (info)->stab_info,
+					     stab, stabstr,
+					     &secdata->stab_info))
+		goto error_return;
+	    }
+	}
+    }
+
   return true;
 
  error_return:
@@ -2329,6 +2358,13 @@ elf_bfd_final_link (abfd, info)
 	}
     }
 
+  /* If we have optimized stabs strings, output them.  */
+  if (elf_hash_table (info)->stab_info != NULL)
+    {
+      if (! _bfd_write_stab_strings (abfd, &elf_hash_table (info)->stab_info))
+	goto error_return;
+    }
+
   if (finfo.symstrtab != NULL)
     _bfd_stringtab_free (finfo.symstrtab);
   if (finfo.contents != NULL)
@@ -2829,7 +2865,8 @@ elf_link_input_bfd (finfo, input_bfd)
 	  continue;
 	}
 
-      if ((o->flags & SEC_HAS_CONTENTS) == 0)
+      if ((o->flags & SEC_HAS_CONTENTS) == 0
+	  || (o->_raw_size == 0 && (o->flags & SEC_RELOC) == 0))
 	continue;
 
       if ((o->flags & SEC_IN_MEMORY) != 0
@@ -3050,12 +3087,22 @@ elf_link_input_bfd (finfo, input_bfd)
 	}
 
       /* Write out the modified section contents.  */
-      if (! bfd_set_section_contents (output_bfd, o->output_section,
-				      finfo->contents, o->output_offset,
-				      (o->_cooked_size != 0
-				       ? o->_cooked_size
-				       : o->_raw_size)))
-	return false;
+      if (elf_section_data (o)->stab_info == NULL)
+	{
+	  if (! bfd_set_section_contents (output_bfd, o->output_section,
+					  finfo->contents, o->output_offset,
+					  (o->_cooked_size != 0
+					   ? o->_cooked_size
+					   : o->_raw_size)))
+	    return false;
+	}
+      else
+	{
+	  if (! _bfd_write_section_stabs (output_bfd, o,
+					  &elf_section_data (o)->stab_info,
+					  finfo->contents))
+	    return false;
+	}
     }
 
   return true;

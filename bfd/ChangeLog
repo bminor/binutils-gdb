@@ -1,5 +1,38 @@
 Mon Apr 22 15:07:24 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	Optimize linking of stabs in sections as used in ELF and COFF.
+	* stabs.c: New file.
+	* libbfd-in.h (_bfd_link_section_stabs): Declare.
+	(_bfd_write_section_stabs): Declare.
+	(_bfd_write_stab_strings): Declare.
+	* libbfd.h: Rebuild.
+	* libcoff-in.h (struct coff_section_tdata): Add stab_info field.
+	(struct coff_link_hash_table): Add stab_info field.
+	* libcoff.h: Rebuild.
+	* cofflink.c (_bfd_coff_link_hash_table_init): Initialize
+	stab_info field.
+	(coff_link_add_symbols): Call _bfd_link_section_stabs if
+	appropriate.
+	(_bfd_coff_final_link): Write out stab strings hash table.
+	(_bfd_coff_link_input_bfd): Handle optimized stabs sections.
+	* coff-ppc.c (ppc_bfd_coff_final_link): Write out stab strings
+	hash table.
+	* elf-bfd.h (struct elf_link_hash_table): Add stab_info field.
+	(struct bfd_elf_section_data): Add stab_info field.
+	* elf.c (_bfd_elf_link_hash_table_init): Initialize stab_info
+	field.
+	* elflink.h (elf_link_add_object_symbols): If appropriate, call
+	_bfd_link_section_stabs.
+	(elf_bfd_final_link): Write out stab strings hash table.
+	(elf_link_input_bfd): Handle optimized stabs sections.
+	* reloc.c (_bfd_final_link_relocate): Check address against
+	_raw_size rather than _cooked_size.
+	* Makefile.in: Rebuild dependencies.
+	(BFD_LIBS): Add stabs.o
+	(BFD_LIBS_CFILES): Add stabs.c.
+
+	* VERSION: Increment for bfdlink.h change.
+
 	* coffgen.c (coff_renumber_symbols): Correct handling of
 	BSF_NOT_AT_END common symbols.
 

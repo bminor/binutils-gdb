@@ -240,6 +240,7 @@ som.h
 sparclynx.c
 sparcnetbsd.c
 srec.c
+stabs.c
 stab-syms.c
 sunos.c
 syms.c
