@@ -1,3 +1,20 @@
+2003-07-01  Andrew Cagney  <cagney@redhat.com>
+
+	* trad-frame.h: Update comments, a -1 .addr is reserved.
+	(trad_frame_value_p, trad_frame_addr_p): Declare.
+	(trad_frame_reg_p): Declare.
+	(trad_frame_set_value): Rename trad_frame_register_value.
+	(trad_frame_set_unknown): Declare.
+	* trad-frame.c (trad_frame_realreg_p): New function.
+	(trad_frame_addr_p, trad_frame_value_p): New function.
+	(trad_frame_set_unknown): New function.
+	(trad_frame_alloc_saved_regs): Initialize .addr to -1, not zero.
+	(trad_frame_prev_register): Use trad_frame_realreg_p,
+	trad_frame_addr_p and trad_frame_value_p.
+	(trad_frame_set_value): Rename trad_frame_register_value.
+	* d10v-tdep.c (d10v_frame_unwind_cache): Use trad_frame_addr_p
+	and trad_frame_set_value.
+	
 2003-07-01  Andreas Jaeger  <aj@suse.de>
 
 	* x86-64-tdep.c (x86_64_push_arguments): Align stack to 16-byte

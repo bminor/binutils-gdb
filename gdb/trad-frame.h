@@ -28,33 +28,51 @@ struct frame_info;
    the value of REGNUM for the previous frame can be found in this
    frame.
 
-   The table is initialized with an identity encoding (ADDR == 0,
-   REALNUM == REGNUM) indicating that the value of REGNUM in the
-   previous frame can be found in register REGNUM (== REALNUM) in this
+   The table is initialized with an identity encoding (ADDR == -1,
+   REALREG == REGNUM) indicating that the value of REGNUM in the
+   previous frame can be found in register REGNUM (== REALREG) in this
    frame.
 
    The initial encoding can then be changed:
 
-   Modify ADDR (REALNUM >= 0, ADDR != 0) to indicate that the value of
-   register REGNUM in the previous frame can be found in memory at
-   ADDR in this frame.
+   Modify ADDR (REALREG >= 0, ADDR != -1) to indicate that the value
+   of register REGNUM in the previous frame can be found in memory at
+   ADDR in this frame (addr_p, !realreg_p, !value_p).
 
-   Modify REALNUM (REALNUM >= 0, ADDR == 0) to indicate that the value
-   of register REGNUM in the previous frame is found in register
-   REALNUM in this frame.
+   Modify REALREG (REALREG >= 0, ADDR == -1) to indicate that the
+   value of register REGNUM in the previous frame is found in register
+   REALREG in this frame (!addr_p, realreg_p, !value_p).
 
-   Call trad_frame_register_value (REALNUM < 0) to indicate that the
-   value of register REGNUM in the previous frame is found in ADDR.  */
+   Call trad_frame_set_value (REALREG == -1) to indicate that the
+   value of register REGNUM in the previous frame is found in ADDR
+   (!addr_p, !realreg_p, value_p).
+
+   Call trad_frame_set_unknown (REALREG == -2) to indicate that the
+   register's value is not known.  */
 
 struct trad_frame_saved_reg
 {
   LONGEST addr; /* A CORE_ADDR fits in a longest.  */
-  int realnum;
+  int realreg;
 };
 
-/* Convenience function, encode REGNUM's location in the trad-frame.  */
-void trad_frame_register_value (struct trad_frame_saved_reg this_saved_regs[],
-				int regnum, LONGEST val);
+/* Encode REGNUM value in the trad-frame.  */
+void trad_frame_set_value (struct trad_frame_saved_reg this_saved_regs[],
+			   int regnum, LONGEST val);
+
+/* Mark REGNUM as unknown.  */
+void trad_frame_set_unknown (struct trad_frame_saved_reg this_saved_regs[],
+			     int regnum);
+
+/* Convenience functions, return non-zero if the register has been
+   encoded as specified.  */
+int trad_frame_value_p (struct trad_frame_saved_reg this_saved_regs[],
+			int regnum);
+int trad_frame_addr_p (struct trad_frame_saved_reg this_saved_regs[],
+		       int regnum);
+int trad_frame_realreg_p (struct trad_frame_saved_reg this_saved_regs[],
+			  int regnum);
+
 
 /* Return a freshly allocated (and initialized) trad_frame array.  */
 struct trad_frame_saved_reg *trad_frame_alloc_saved_regs (struct frame_info *next_frame);
@@ -65,6 +83,6 @@ void trad_frame_prev_register (struct frame_info *next_frame,
 			       struct trad_frame_saved_reg this_saved_regs[],
 			       int regnum, int *optimizedp,
 			       enum lval_type *lvalp, CORE_ADDR *addrp,
-			       int *realnump, void *bufferp);
+			       int *realregp, void *bufferp);
 
 #endif
