@@ -1,4 +1,24 @@
+Tue Apr 15 13:04:47 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (srcroot): Remove.
+ 	(INSTALL): Set to @INSTALL@.
+	(INSTALL_XFORM, INSTALL_XFORM1): Remove.
+	(all, dvi): Don't set srcroot.
+	(install): Depend upon as.new, gasp.new, and installdirs.  Use
+	$(program_transform_name) directly, rather than using
+	$(INSTALL_XFORM) and $(INSTALL_XFORM1).
+	(installdirs): New target.
+	* doc/Makefile.in (INSTALL_XFORM1): Remove.
+	(install): Depend upon installdirs.  Use $(program_transform_name)
+	directly, rather than using $(INSTALL_XFORM) and
+	$(INSTALL_XFORM1).
+	(installdirs): New target.
+	(install-info-as): Run mkinstalldirs.
+	(install-info-gasp): Likewise.
+
 Mon Apr 14 11:59:08 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (INSTALL): Change install.sh to install-sh.
 
 	* symbols.c (resolve_symbol_value): Check for division by zero.
 

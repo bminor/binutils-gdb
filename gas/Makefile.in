@@ -28,7 +28,6 @@
 
 VPATH = @srcdir@
 srcdir = @srcdir@
-srcroot = $(srcdir)/..
 
 target_alias = @target_alias@
 prefix = @prefix@
@@ -57,11 +56,9 @@ VERSION=cygnus-2.8.1
 
 SHELL = /bin/sh
 
-INSTALL = $${srcroot}/install.sh -c
+INSTALL = @INSTALL@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_DATA = @INSTALL_DATA@
-INSTALL_XFORM = $(INSTALL) -t='$(program_transform_name)'
-INSTALL_XFORM1= $(INSTALL_XFORM) -b=.1
 
 DISTSTUFF= make-gas.com m68k-parse.c itbl-parse.c itbl-lex.c
 
@@ -432,12 +429,10 @@ GASPOBJS = \
 	hash.o
 
 all: .gdbinit as.new gasp.new
-	@srcroot=`cd $(srcroot); pwd`; export srcroot; \
-	(cd doc ; $(MAKE) $(FLAGS_TO_PASS) all)
+	@cd doc; $(MAKE) $(FLAGS_TO_PASS) all
 
 dvi info install-info clean-info:
-	@srcroot=`cd $(srcroot); pwd`; export srcroot; \
-	(cd doc ; $(MAKE) $(FLAGS_TO_PASS) $@)
+	@cd doc; $(MAKE) $(FLAGS_TO_PASS) $@
 
 make-gas.com: stamp-mk.com
 stamp-mk.com: vmsconf.sh Makefile
@@ -686,18 +681,18 @@ maintainer-clean realclean: clean-here
 # Entry points `install', `includes' and `uninstall'.
 
 # Copy the files into directories where they will be run.
-install:
-	srcroot=`cd $(srcroot); pwd`; export srcroot; \
-	$(INSTALL_XFORM) as.new $(bindir)/as; \
-	$(INSTALL_XFORM1) $(srcdir)/doc/as.1 $(man1dir)/as.1; \
-	test -d $(tooldir) || mkdir $(tooldir); \
-	test -d $(tooldir)/bin || mkdir $(tooldir)/bin; \
+install: as.new gasp.new installdirs
 	n=`echo as | sed '$(program_transform_name)'`; \
+	$(INSTALL_PROGRAM) as.new $(bindir)/$$n; \
+	$(INSTALL_DATA) $(srcdir)/doc/as.1 $(man1dir)/$$n.1; \
 	rm -f $(tooldir)/bin/as; \
 	ln $(bindir)/$$n $(tooldir)/bin/as >/dev/null 2>/dev/null \
 	 || $(INSTALL_PROGRAM) as.new $(tooldir)/bin/as
-	srcroot=`cd $(srcroot); pwd`; export srcroot; \
-	$(INSTALL_XFORM) gasp.new $(bindir)/gasp
+	n=`echo gasp | sed '$(program_transform_name)'`; \
+	$(INSTALL_PROGRAM) gasp.new $(bindir)/$$n
+
+installdirs:
+	$(SHELL) $(srcdir)/../mkinstalldirs $(bindir) $(man1dir) $(tooldir)/bin
 
 # Cancel installation by deleting the installed files.
 uninstall:
