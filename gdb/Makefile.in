@@ -590,6 +590,8 @@ depend: $(SOURCES) Makefile.in
 	  -e 's; $(INCLUDE_DIR)/; $(INCLUDE_DEP)/;g'  \
 	  -e 's; $(READLINE_DIR)/; $(READLINE_DEP)/;g'  \
 	  -e 's; [a-z0-9./]*bfd/; $(BFD_DEP)/;g'  \
+	  -e 's; $(BFD_DEP)/bfd\.h; ../bfd/bfd.h;g'  \
+	  -e 's; $(INCLUDE_DEP)/../bfd/bfd\.h; ../bfd/bfd.h;g'  \
 	  -e 's; \./xm.h; xm.h config.status;g'  \
 	  -e 's; \./tm.h; tm.h config.status;g'  \
 	  -e 's; \./nm.h; nm.h config.status;g'  \
@@ -832,6 +834,8 @@ copying.c: ${srcdir}/COPYING ${srcdir}/copying.awk
 
 version.c: Makefile
 	echo 'char *version = "$(VERSION)";' >version.c
+	echo 'char *host_canonical = "$(host_canonical)";' >> version.c
+	echo 'char *target_canonical = "$(target_canonical)";' >> version.c
 
 # c-exp.tab.c is generated in target dir from c-exp.y if it doesn't exist
 # in srcdir, then compiled in target dir to c-exp.tab.o.

@@ -1,5 +1,9 @@
 Wed Jun  9 12:56:58 1993  K. Richard Pixley  (rich@cygnus.com)
 
+	* Makefile.in (version.c): add host and target names to version.c.
+	* main.c (main): print three periods for the elipse.
+	  (print_gdb_version): also print configuration.
+
 	* udi/udiids.h, udi/udip2soc.c, udi/udiphcfg.h, udi/udiphunix.h,
 	  udi/udiproc.h, udi/udipt29k.h, udi/udiptcfg.h, udi/udisoc.h,
 	  udi/udr.c: Change AMD copyrights to FSF copyleft '93.
