@@ -3840,7 +3840,8 @@ som_slurp_string_table (abfd)
     }
 
   /* Allocate and read in the string table.  */
-  stringtab = bfd_zalloc (abfd, obj_som_stringtab_size (abfd));
+  stringtab = malloc (obj_som_stringtab_size (abfd));
+  bzero (stringtab, obj_som_stringtab_size (abfd));
   if (stringtab == NULL)
     {
       bfd_set_error (bfd_error_no_memory);
@@ -3947,7 +3948,8 @@ som_slurp_symbol_table (abfd)
   stringtab = obj_som_stringtab (abfd);
 
   symbase = (som_symbol_type *)
-    bfd_zalloc (abfd, symbol_count * sizeof (som_symbol_type));
+    malloc (symbol_count * sizeof (som_symbol_type));
+  bzero (symbase, symbol_count * sizeof (som_symbol_type));
   if (symbase == NULL)
     {
       bfd_set_error (bfd_error_no_memory);
@@ -4087,8 +4089,8 @@ som_slurp_symbol_table (abfd)
       sym++;
     }
 
-  /* Save our results and return success.  */
-  obj_som_symtab (abfd) = symbase;
+ /* Save our results and return success.  */
+ obj_som_symtab (abfd) = symbase;
  successful_return:
   if (buf != NULL)
     free (buf);
@@ -5964,6 +5966,7 @@ som_bfd_link_split_section (abfd, sec)
 
 #define	som_close_and_cleanup		som_bfd_free_cached_info
 
+#define som_read_ar_hdr			_bfd_generic_read_ar_hdr
 #define som_openr_next_archived_file	bfd_generic_openr_next_archived_file
 #define som_generic_stat_arch_elt	bfd_generic_stat_arch_elt
 #define som_truncate_arname		bfd_bsd_truncate_arname
