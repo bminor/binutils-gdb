@@ -715,21 +715,110 @@ proc not_implemented_yet {message} {
 #	Create the expression display window.
 #
 
+set expr_num 0
+
+proc add_expr {expr} {
+	global expr_update_list
+	global expr_num
+
+	incr expr_num
+
+	set e .expr.e${expr_num}
+
+	frame $e
+
+	checkbutton $e.update -text "      " -relief flat \
+		-variable expr_update_list($expr_num)
+	message $e.expr -text $expr -aspect 200
+	bind $e.expr <1> "update_expr $expr_num"
+	message $e.val -aspect 200
+
+	update_expr $expr_num
+
+	pack $e.update -side left -anchor nw
+	pack $e.expr $e.val -side left -expand yes -anchor w
+
+	pack $e -side top -fill x -anchor w
+}
+
+set delete_expr_flag 0
+
+# This is a krock!!!
+
+proc delete_expr {} {
+	global delete_expr_flag
+
+	if {$delete_expr_flag == 1} {
+		set delete_expr_flag 0
+		tk_butUp .expr.delete
+		bind .expr.delete <Any-Leave> {}
+	} else {
+		set delete_expr_flag 1
+		bind .expr.delete <Any-Leave> do_nothing
+		tk_butDown .expr.delete
+	}
+}
+
+proc update_expr {expr_num} {
+	global delete_expr_flag
+
+	set e .expr.e${expr_num}
+
+	if {$delete_expr_flag == 1} {
+		set delete_expr_flag 0
+		destroy $e
+		tk_butUp .expr.delete
+		tk_butLeave .expr.delete
+		bind .expr.delete <Any-Leave> {}
+		return
+	}
+
+	set expr [lindex [$e.expr configure -text] 4]
+
+	$e.val config -text [gdb_eval $expr]
+}
+
 proc create_expr_win {} {
 	toplevel .expr
 	wm minsize .expr 1 1
 	wm title .expr Expression
-	canvas .expr.c -yscrollcommand {.expr.scroll set} -cursor hand2 \
-		-borderwidth 2 -relief groove
-	scrollbar .expr.scroll -orient vertical -command {.expr.c yview}
-	entry .expr.entry -borderwidth 2 -relief groove
+	wm iconname .expr "Reg config"
 
-	pack .expr.entry -side bottom -fill x
-	pack .expr.c -side left -fill both -expand yes
-	pack .expr.scroll -side right -fill y
+	frame .expr.entryframe
 
-	.expr.c create text 100 0 -text "Text string"
-	.expr.c create rectangle 245 195 255 205 -outline black -fill white
+	entry .expr.entry -borderwidth 2 -relief sunken
+	bind .expr <Enter> {focus .expr.entry}
+	bind .expr.entry <Key-Return> {add_expr [.expr.entry get]
+					.expr.entry delete 0 end }
+
+	label .expr.entrylab -text "Expression: "
+
+	pack .expr.entrylab -in .expr.entryframe -side left
+	pack .expr.entry -in .expr.entryframe -side left -fill x -expand yes
+
+	frame .expr.buts
+
+	button .expr.delete -text Delete
+	bind .expr.delete <1> delete_expr
+
+	button .expr.close -text Close -command {destroy .expr}
+
+	pack .expr.delete -side left -fill x -expand yes -in .expr.buts
+	pack .expr.close -side right -fill x -expand yes -in .expr.buts
+
+	pack .expr.buts -side bottom -fill x
+	pack .expr.entryframe -side bottom -fill x
+
+	frame .expr.labels
+
+	label .expr.updlab -text Update
+	label .expr.exprlab -text Expression
+	label .expr.vallab -text Value
+
+	pack .expr.updlab -side left -in .expr.labels
+	pack .expr.exprlab .expr.vallab -side left -in .expr.labels -expand yes -anchor w
+
+	pack .expr.labels -side top -fill x -anchor w
 }
 
 #
@@ -745,7 +834,7 @@ proc create_expr_win {} {
 proc display_expression {expression} {
 	if ![winfo exists .expr] {create_expr_win}
 
-
+	add_expr $expression
 }
 
 #
@@ -910,7 +999,7 @@ proc create_asm_win {funcname pc} {
 
 # Actually create and do basic configuration on the text widget.
 
-	text $win -height 25 -width 88 -relief raised -borderwidth 2 \
+	text $win -height 25 -width 80 -relief raised -borderwidth 2 \
 		-setgrid true -cursor hand2 -yscrollcommand asmscrollproc
 
 # Setup all the bindings
@@ -929,7 +1018,7 @@ proc create_asm_win {funcname pc} {
 
 	set temp $current_output_win
 	set current_output_win $win
-	gdb_cmd "disassemble $pc"
+	catch "gdb_disassemble source $pc"
 	set current_output_win $temp
 
 	set numlines [$win index end]
@@ -938,9 +1027,9 @@ proc create_asm_win {funcname pc} {
 
 # Delete the first and last lines, cuz these contain useless info
 
-	$win delete 1.0 2.0
-	$win delete {end - 1 lines} end
-	decr numlines 2
+#	$win delete 1.0 2.0
+#	$win delete {end - 1 lines} end
+#	decr numlines 2
 
 # Add margins (for annotations) and note the PC for each line
 
@@ -1129,6 +1218,10 @@ proc create_asm_window {} {
 
 		build_framework .asm Assembly "*NIL*"
 
+# First, delete all the old menu entries
+
+		.asm.menubar.view.menu delete 0 last
+
 		.asm.text configure -yscrollcommand asmscrollproc
 
 		frame .asm.row1
@@ -1156,6 +1249,15 @@ proc create_asm_window {} {
 		update
 
 		update_assembly [gdb_loc]
+
+# We do this update_assembly to get the proper value of disassemble-from-exec.
+
+# exec file menu item
+		.asm.menubar.view.menu add radiobutton -label "Exec file" \
+			-variable disassemble-from-exec -value 1
+# target memory menu item
+		.asm.menubar.view.menu add radiobutton -label "Target memory" \
+			-variable disassemble-from-exec -value 0
 	}
 }
 
@@ -1629,7 +1731,7 @@ proc build_framework {win {title GDBtk} {label {}}} {
 	${win}.menubar.commands.menu add command -label Nexti \
 		-command { catch { gdb_cmd nexti } ; update_ptr }
 
-	menubutton ${win}.menubar.view -padx 12 -text View \
+	menubutton ${win}.menubar.view -padx 12 -text Options \
 		-menu ${win}.menubar.view.menu -underline 0
 
 	menu ${win}.menubar.view.menu
@@ -1654,18 +1756,12 @@ proc build_framework {win {title GDBtk} {label {}}} {
 	${win}.menubar.window.menu add separator
 	${win}.menubar.window.menu add command -label Registers \
 		-command {create_registers_window ; update_ptr}
-	${win}.menubar.window.menu add command -label Stack \
-		-command { not_implemented_yet "stack window" }
+	${win}.menubar.window.menu add command -label Expressions \
+		-command {create_expr_win ; update_ptr}
+
 	${win}.menubar.window.menu add separator
 	${win}.menubar.window.menu add command -label Files \
 		-command { not_implemented_yet "files window" }
-	${win}.menubar.window.menu add separator
-	${win}.menubar.window.menu add command -label Breakpoints \
-		-command { not_implemented_yet "breakpoints window" }
-	${win}.menubar.window.menu add command -label Signals \
-		-command { not_implemented_yet "signals window" }
-	${win}.menubar.window.menu add command -label Variables \
-		-command { not_implemented_yet "variables window" }
 
 	menubutton ${win}.menubar.help -padx 12 -text Help \
 		-menu ${win}.menubar.help.menu -underline 0
@@ -1680,12 +1776,10 @@ proc build_framework {win {title GDBtk} {label {}}} {
 
 	tk_menuBar ${win}.menubar \
 		${win}.menubar.file \
-		${win}.menubar.commands \
 		${win}.menubar.view \
 		${win}.menubar.window \
 		${win}.menubar.help
 	pack	${win}.menubar.file \
-		${win}.menubar.commands \
 		${win}.menubar.view \
 		${win}.menubar.window -side left
 	pack	${win}.menubar.help -side right
@@ -2495,4 +2589,22 @@ if {[tk colormodel .src.text] == "color"} {
 }
 
 create_command_window
+
+# Create a copyright window
+
+toplevel .c
+wm geometry .c +300+300
+wm overrideredirect .c true
+
+text .t
+set temp $current_output_win
+set current_output_win .t
+gdb_cmd "show version"
+set current_output_win $temp
+
+message .c.m -text [.t get 0.0 end] -aspect 500
+destroy .t
+pack .c.m
+bind .c.m <Leave> {destroy .c}
+
 update

@@ -35,6 +35,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "top.h"
 #include <sys/ioctl.h>
 #include <string.h>
+#include "dis-asm.h"
 
 #ifndef FIOASYNC
 #include <sys/stropts.h>
@@ -54,6 +55,17 @@ static Tcl_Interp *interp = NULL;
 static Tk_Window mainWindow = NULL;
 
 static int x_fd;		/* X network socket */
+
+/* This variable determines where memory used for disassembly is read from.
+
+   If > 0, then disassembly comes from the exec file rather than the target
+   (which might be at the other end of a slow serial link).  If == 0 then
+   disassembly comes from target.  If < 0 disassembly is automatically switched
+   to the target if it's an inferior process, otherwise the exec file is
+   used.
+ */
+
+static int disassemble_from_exec = -1;
 
 static void
 null_routine(arg)
@@ -95,6 +107,9 @@ start_saving_output ()
 static void
 finish_saving_output ()
 {
+  if (!saving_output)
+    return;
+
   saving_output = 0;
 
   Tcl_DStringFree (&stdout_buffer);
@@ -201,7 +216,7 @@ breakpoint_notify(b, action)
 		   "gdbtk_tcl_breakpoint ",
 		   action,
 		   " ", bpnum,
-		   " ", filename,
+		   " ", filename ? filename : "{}",
 		   " ", line,
 		   " ", pc,
 		   NULL);
@@ -303,6 +318,48 @@ gdb_loc (clientData, interp, argc, argv)
 
   sprintf (buf, "0x%lx", pc);
   Tcl_AppendElement (interp, buf); /* PC */
+
+  return TCL_OK;
+}
+
+/* This implements the TCL command `gdb_eval'. */
+
+static int
+gdb_eval (clientData, interp, argc, argv)
+     ClientData clientData;
+     Tcl_Interp *interp;
+     int argc;
+     char *argv[];
+{
+  struct expression *expr;
+  struct cleanup *old_chain;
+  value_ptr val;
+
+  if (argc != 2)
+    {
+      Tcl_SetResult (interp, "wrong # args", TCL_STATIC);
+      return TCL_ERROR;
+    }
+
+  expr = parse_expression (argv[1]);
+
+  old_chain = make_cleanup (free_current_contents, &expr);
+
+  val = evaluate_expression (expr);
+
+  start_saving_output ();	/* Start collecting stdout */
+
+  val_print (VALUE_TYPE (val), VALUE_CONTENTS (val), VALUE_ADDRESS (val),
+	     gdb_stdout, 0, 0, 0, 0);
+#if 0
+  value_print (val, gdb_stdout, 0, 0);
+#endif
+
+  Tcl_AppendElement (interp, get_saved_output ());
+
+  finish_saving_output ();	/* Set stdout back to normal */
+
+  do_cleanups (old_chain);
 
   return TCL_OK;
 }
@@ -608,7 +665,11 @@ call_wrapper (clientData, interp, argc, argv)
 
       finish_saving_output ();	/* Restore stdout to normal */
 
+      dis_asm_read_memory_hook = 0; /* Restore disassembly hook */
+
       gdb_flush (gdb_stderr);	/* Flush error output */
+
+      gdb_flush (gdb_stdout);	/* Sometimes error output comes here as well */
 
 /* In case of an error, we may need to force the GUI into idle mode because
    gdbtk_call_command may have bombed out while in the command routine.  */
@@ -657,7 +718,229 @@ gdb_stop (clientData, interp, argc, argv)
 
   return TCL_OK;
 }
+
+/* This implements the TCL command `gdb_disassemble'.  */
 
+static int
+gdbtk_dis_asm_read_memory (memaddr, myaddr, len, info)
+     bfd_vma memaddr;
+     bfd_byte *myaddr;
+     int len;
+     disassemble_info *info;
+{
+  extern struct target_ops exec_ops;
+  int res;
+
+  errno = 0;
+  res = xfer_memory (memaddr, myaddr, len, 0, &exec_ops);
+
+  if (res == len)
+    return 0;
+  else
+    if (errno == 0)
+      return EIO;
+    else
+      return errno;
+}
+
+/* We need a different sort of line table from the normal one cuz we can't
+   depend upon implicit line-end pc's for lines.  This is because of the
+   reordering we are about to do.  */
+
+struct my_line_entry {
+  int line;
+  CORE_ADDR start_pc;
+  CORE_ADDR end_pc;
+};
+
+static int
+compare_lines (mle1p, mle2p)
+     const PTR mle1p;
+     const PTR mle2p;
+{
+  struct my_line_entry *mle1, *mle2;
+  int val;
+
+  mle1 = (struct my_line_entry *) mle1p;
+  mle2 = (struct my_line_entry *) mle2p;
+
+  val =  mle1->line - mle2->line;
+
+  if (val != 0)
+    return val;
+
+  return mle1->start_pc - mle2->start_pc;
+}
+
+static int
+gdb_disassemble (clientData, interp, argc, argv)
+     ClientData clientData;
+     Tcl_Interp *interp;
+     int argc;
+     char *argv[];
+{
+  CORE_ADDR pc, low, high;
+  int mixed_source_and_assembly;
+
+  if (argc != 3 && argc != 4)
+    {
+      Tcl_SetResult (interp, "wrong # args", TCL_STATIC);
+      return TCL_ERROR;
+    }
+
+  if (strcmp (argv[1], "source") == 0)
+    mixed_source_and_assembly = 1;
+  else if (strcmp (argv[1], "nosource") == 0)
+    mixed_source_and_assembly = 0;
+  else
+    {
+      Tcl_SetResult (interp, "First arg must be 'source' or 'nosource'",
+		     TCL_STATIC);
+      return TCL_ERROR;
+    }
+
+  low = parse_and_eval_address (argv[2]);
+
+  if (argc == 3)
+    {
+      if (find_pc_partial_function (low, NULL, &low, &high) == 0)
+	{
+	  Tcl_SetResult (interp, "No function contains specified address",
+			 TCL_STATIC);
+	  return TCL_ERROR;
+	}
+    }
+  else
+    high = parse_and_eval_address (argv[3]);
+
+  /* If disassemble_from_exec == -1, then we use the following heuristic to
+     determine whether or not to do disassembly from target memory or from the
+     exec file:
+
+     If we're debugging a local process, read target memory, instead of the
+     exec file.  This makes disassembly of functions in shared libs work
+     correctly.
+
+     Else, we're debugging a remote process, and should disassemble from the
+     exec file for speed.  However, this is no good if the target modifies it's
+     code (for relocation, or whatever).
+   */
+
+  if (disassemble_from_exec == -1)
+    if (strcmp (target_shortname, "child") == 0
+	|| strcmp (target_shortname, "procfs") == 0)
+      disassemble_from_exec = 0; /* It's a child process, read inferior mem */
+    else
+      disassemble_from_exec = 1; /* It's remote, read the exec file */
+
+  if (disassemble_from_exec)
+    dis_asm_read_memory_hook = gdbtk_dis_asm_read_memory;
+
+  /* If just doing straight assembly, all we need to do is disassemble
+     everything between low and high.  If doing mixed source/assembly, we've
+     got a totally different path to follow.  */
+
+  if (mixed_source_and_assembly)
+    {				/* Come here for mixed source/assembly */
+      /* The idea here is to present a source-O-centric view of a function to
+	 the user.  This means that things are presented in source order, with
+	 (possibly) out of order assembly immediately following.  */
+      struct symtab *symtab;
+      struct linetable_entry *le;
+      int nlines;
+      struct my_line_entry *mle;
+      struct symtab_and_line sal;
+      int i;
+      int out_of_order;
+      int current_line;
+
+      symtab = find_pc_symtab (low); /* Assume symtab is valid for whole PC range */
+
+      if (!symtab)
+	goto assembly_only;
+
+/* First, convert the linetable to a bunch of my_line_entry's.  */
+
+      le = symtab->linetable->item;
+      nlines = symtab->linetable->nitems;
+
+      if (nlines <= 0)
+	goto assembly_only;
+
+      mle = (struct my_line_entry *) alloca (nlines * sizeof (struct my_line_entry));
+
+      out_of_order = 0;
+
+      for (i = 0; i < nlines - 1; i++)
+	{
+	  mle[i].line = le[i].line;
+	  if (le[i].line > le[i + 1].line)
+	    out_of_order = 1;
+	  mle[i].start_pc = le[i].pc;
+	  mle[i].end_pc = le[i + 1].pc;
+	}
+
+      mle[i].line = le[i].line;
+      mle[i].start_pc = le[i].pc;
+      sal = find_pc_line (le[i].pc, 0);
+      mle[i].end_pc = sal.end;
+
+/* Now, sort mle by line #s (and, then by addresses within lines). */
+
+      if (out_of_order)
+	qsort (mle, nlines, sizeof (struct my_line_entry), compare_lines);
+
+/* Scan forward until we find the start of the function.  */
+
+      for (i = 0; i < nlines; i++)
+	if (mle[i].start_pc >= low)
+	  break;
+
+/* Now, for each line entry, emit the specified lines (unless they have been
+   emitted before), followed by the assembly code for that line.  */
+
+      current_line = 0;		/* Force out first line */
+      for (;i < nlines && mle[i].start_pc < high; i++)
+	{
+	  if (mle[i].line > current_line)
+	    {
+	      if (i == nlines - 1)
+		print_source_lines (symtab, mle[i].line, INT_MAX, 0);
+	      else
+		print_source_lines (symtab, mle[i].line, mle[i + 1].line, 0);
+	      current_line = mle[i].line;
+	    }
+	  for (pc = mle[i].start_pc; pc < mle[i].end_pc; )
+	    {
+	      QUIT;
+	      fputs_unfiltered ("    ", gdb_stdout);
+	      print_address (pc, gdb_stdout);
+	      fputs_unfiltered (":\t    ", gdb_stdout);
+	      pc += print_insn (pc, gdb_stdout);
+	      fputs_unfiltered ("\n", gdb_stdout);
+	    }
+	}
+    }
+  else
+    {
+assembly_only:
+      for (pc = low; pc < high; )
+	{
+	  QUIT;
+	  fputs_unfiltered ("    ", gdb_stdout);
+	  print_address (pc, gdb_stdout);
+	  fputs_unfiltered (":\t    ", gdb_stdout);
+	  pc += print_insn (pc, gdb_stdout);
+	  fputs_unfiltered ("\n", gdb_stdout);
+	}
+    }
+
+  dis_asm_read_memory_hook = 0;
+
+  gdb_flush (gdb_stdout);
+
+  return TCL_OK;
+}
 
 static void
 tk_command (cmd, from_tty)
@@ -771,6 +1054,8 @@ gdbtk_init ()
   int i;
   struct sigaction action;
   static sigset_t nullsigmask = {0};
+  extern struct cmd_list_element *setlist;
+  extern struct cmd_list_element *showlist;
 
   old_chain = make_cleanup (cleanup_init, 0);
 
@@ -806,16 +1091,22 @@ gdbtk_init ()
 		     gdb_fetch_registers, NULL);
   Tcl_CreateCommand (interp, "gdb_changed_register_list", call_wrapper,
 		     gdb_changed_register_list, NULL);
+  Tcl_CreateCommand (interp, "gdb_disassemble", call_wrapper,
+		     gdb_disassemble, NULL);
+  Tcl_CreateCommand (interp, "gdb_eval", call_wrapper, gdb_eval, NULL);
 
-  gdbtk_filename = getenv ("GDBTK_FILENAME");
-  if (!gdbtk_filename)
-    if (access ("gdbtk.tcl", R_OK) == 0)
-      gdbtk_filename = "gdbtk.tcl";
-    else
-      gdbtk_filename = GDBTK_FILENAME;
-
-  if (Tcl_EvalFile (interp, gdbtk_filename) != TCL_OK)
-    error ("Failure reading %s: %s", gdbtk_filename, interp->result);
+  command_loop_hook = Tk_MainLoop;
+  fputs_unfiltered_hook = gdbtk_fputs;
+  print_frame_info_listing_hook = null_routine;
+  query_hook = gdbtk_query;
+  flush_hook = gdbtk_flush;
+  create_breakpoint_hook = gdbtk_create_breakpoint;
+  delete_breakpoint_hook = gdbtk_delete_breakpoint;
+  enable_breakpoint_hook = gdbtk_enable_breakpoint;
+  disable_breakpoint_hook = gdbtk_disable_breakpoint;
+  interactive_hook = gdbtk_interactive;
+  target_wait_hook = gdbtk_wait;
+  call_command_hook = gdbtk_call_command;
 
   /* Get the file descriptor for the X server */
 
@@ -841,23 +1132,32 @@ gdbtk_init ()
     perror_with_name ("gdbtk_init: ioctl I_SETSIG failed");
 #endif /* ifndef FIOASYNC */
 
-  command_loop_hook = Tk_MainLoop;
-  fputs_unfiltered_hook = gdbtk_fputs;
-  print_frame_info_listing_hook = null_routine;
-  query_hook = gdbtk_query;
-  flush_hook = gdbtk_flush;
-  create_breakpoint_hook = gdbtk_create_breakpoint;
-  delete_breakpoint_hook = gdbtk_delete_breakpoint;
-  enable_breakpoint_hook = gdbtk_enable_breakpoint;
-  disable_breakpoint_hook = gdbtk_disable_breakpoint;
-  interactive_hook = gdbtk_interactive;
-  target_wait_hook = gdbtk_wait;
-  call_command_hook = gdbtk_call_command;
-
-  discard_cleanups (old_chain);
-
   add_com ("tk", class_obscure, tk_command,
 	   "Send a command directly into tk.");
+
+#if 0
+  add_show_from_set (add_set_cmd ("disassemble-from-exec", class_support,
+				  var_boolean, (char *)&disassemble_from_exec,
+				  "Set ", &setlist),
+		     &showlist);
+#endif
+
+  Tcl_LinkVar (interp, "disassemble-from-exec", (char *)&disassemble_from_exec,
+	       TCL_LINK_INT);
+
+  /* Load up gdbtk.tcl after all the environment stuff has been setup.  */
+
+  gdbtk_filename = getenv ("GDBTK_FILENAME");
+  if (!gdbtk_filename)
+    if (access ("gdbtk.tcl", R_OK) == 0)
+      gdbtk_filename = "gdbtk.tcl";
+    else
+      gdbtk_filename = GDBTK_FILENAME;
+
+  if (Tcl_EvalFile (interp, gdbtk_filename) != TCL_OK)
+    error ("Failure reading %s: %s", gdbtk_filename, interp->result);
+
+  discard_cleanups (old_chain);
 }
 
 /* Come here during initialze_all_files () */

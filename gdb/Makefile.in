@@ -506,29 +506,31 @@ install: all install-only
 install-only:
 	transformed_name=`t='$(program_transform_name)'; \
 			  echo gdb | sed -e "s/brokensed/brokensed/" $$t` ; \
-	if test "x$$transformed_name" = x; then \
-	  transformed_name=gdb ; \
-	else \
-	  true ; \
-	fi ; \
-	$(INSTALL_PROGRAM) gdb $(bindir)/$$transformed_name ; \
-	$(INSTALL_DATA) $(srcdir)/gdb.1 $(man1dir)/$$transformed_name.1
+		if test "x$$transformed_name" = x; then \
+		  transformed_name=gdb ; \
+		else \
+		  true ; \
+		fi ; \
+		$(INSTALL_PROGRAM) gdb $(bindir)/$$transformed_name ; \
+		$(INSTALL_DATA) $(srcdir)/gdb.1 $(man1dir)/$$transformed_name.1
 	# start-sanitize-gdbtk
 	if [ x"$(ENABLE_GDBTK)" != x ] ; then \
-		$(INSTALL_DATA) $(srcdir)/gdbtk.tcl $(libdir)/gdbtk.tcl ; \
-	fi
+		  $(INSTALL_DATA) $(srcdir)/gdbtk.tcl $(libdir)/gdbtk.tcl ; \
+		else \
+		  true ; \
+		fi
 	# end-sanitize-gdbtk
 	@$(MAKE) DO=install "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS) subdir_do 
 
 uninstall: force
 	transformed_name=`t='$(program_transform_name)'; \
 			  echo gdb | sed -e "s/brokensed/brokensed/" $$t` ; \
-	if test "x$$transformed_name" = x; then \
-	  transformed_name=gdb ; \
-	else \
-	  true ; \
-	fi ; \
-	rm -f $(bindir)/$$transformed_name $(man1dir)/$$transformed_name.1
+		if test "x$$transformed_name" = x; then \
+		  transformed_name=gdb ; \
+		else \
+		  true ; \
+		fi ; \
+		rm -f $(bindir)/$$transformed_name $(man1dir)/$$transformed_name.1
 	@$(MAKE) DO=uninstall "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS) subdir_do 
 
 # We do this by grepping through sources.  If that turns out to be too slow,

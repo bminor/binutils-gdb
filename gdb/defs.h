@@ -18,8 +18,8 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#if !defined (DEFS_H)
-#define DEFS_H 1
+#ifndef DEFS_H
+#define DEFS_H
 
 #include <stdio.h>
 
@@ -836,6 +836,13 @@ extern CORE_ADDR push_word PARAMS ((CORE_ADDR, unsigned LONGEST));
 
 /* Hooks for alternate command interfaces.  */
 
+#include "dis-asm.h"		/* Get defs for disassemble_info */
+
+#ifdef __STDC__
+struct target_waitstatus;
+struct cmd_list_element;
+#endif
+
 extern void (*init_ui_hook) PARAMS ((void));
 extern void (*command_loop_hook) PARAMS ((void));
 extern void (*fputs_unfiltered_hook) PARAMS ((const char *linebuffer, FILE *stream));
@@ -848,11 +855,9 @@ extern void (*delete_breakpoint_hook) PARAMS ((struct breakpoint *bpt));
 extern void (*enable_breakpoint_hook) PARAMS ((struct breakpoint *bpt));
 extern void (*disable_breakpoint_hook) PARAMS ((struct breakpoint *bpt));
 extern void (*interactive_hook) PARAMS ((void));
-
-#ifdef __STDC__
-struct target_waitstatus;
-struct cmd_list_element;
-#endif
+extern int (*dis_asm_read_memory_hook) PARAMS ((bfd_vma memaddr,
+						bfd_byte *myaddr, int len,
+						disassemble_info *info));
 
 extern int (*target_wait_hook) PARAMS ((int pid,
 					struct target_waitstatus *status));
@@ -866,4 +871,4 @@ extern NORETURN void (*error_hook) PARAMS (());
 
 extern int use_windows;
 
-#endif /* !defined (DEFS_H) */
+#endif /* #ifndef DEFS_H */

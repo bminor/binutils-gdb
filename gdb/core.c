@@ -181,6 +181,9 @@ dis_asm_read_memory (memaddr, myaddr, len, info)
      int len;
      disassemble_info *info;
 {
+  if (dis_asm_read_memory_hook)
+    return dis_asm_read_memory_hook (memaddr, myaddr, len, info);
+
   return target_read_memory (memaddr, (char *) myaddr, len);
 }
 

@@ -1,3 +1,39 @@
+Thu Jan  5 17:38:29 1995  Stu Grossman  (grossman@cygnus.com)
+
+	* Makefile.in (install_only uninstall):  Indent for clarity
+
+	* core.c (dis_asm_read_memory):  Add call to
+	dis_asm_read_memory_hook to provide alternate way for disassembler
+	to read memory.
+
+	* defs.h:  Protect from multiple inclusion.  Add decl for
+	dis_asm_read_memory_hook.
+
+	* gdbtk.c (finish_saving_output):  Don't do anything if not saving
+	output.
+	* (breakpoint_notify):  Don't send null filename to tcl.
+	* (gdb_eval):  New tcl command to eval an expression.
+	* (gdb_disassemble):  New tcl command to do disassembly.  This
+	allows tcl code to choose between exec file and target memeory,
+	and can also do mixed source and assembly.
+	* (gdbtk_init):  Move reading of gdbtk.tcl to the end to make sure
+	that more of the environment is set up.  Also, create link between
+	gdb and tcl vars disassemble{-_}from{-_}exec.
+
+	* gdbtk.tcl:  New expression window support.
+	* Make assembly window be 80 columns wide.
+	* Use new disassembly method.  Add menu items to select
+	disassembly from exec file or target.
+	* Change View menubar item to Options.
+
+	* Get rid of Stack, Breakpoints, Signals, and Variables Windows,
+	since they don't exist yet.
+
+	* Pop up a copyright window on startup.
+
+	* top.c:  Make window startup be the default.
+	* Add dis_asm_read_memory_hook.
+
 Thu Jan  5 01:16:40 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* stabsread.c (define_symbol): Handle `a' symbol type used for
