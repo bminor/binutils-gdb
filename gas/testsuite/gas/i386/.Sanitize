@@ -28,6 +28,8 @@ Things-to-keep:
 
 all.exp
 inout.s
+pushw.l
+pushw.s
 
 Things-to-lose:
 
