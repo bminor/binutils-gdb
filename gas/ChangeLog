@@ -5,6 +5,9 @@
 
 1999-09-11  Donn Terry  <donn@interix.com>
 
+	* config/obj-coff.c (obj_coff_section): Default to setting
+	SEC_LOAD.  Don't set SEC_DATA for 'w' modifier.
+
 	* write.c (adjust_reloc_syms): Print adjusted fixup.
 
 	* expr.c (integer_constant): Correct too_many_digits calculation

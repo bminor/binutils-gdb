@@ -1233,7 +1233,7 @@ obj_coff_section (ignore)
   SKIP_WHITESPACE ();
 
   exp = 0;
-  flags = SEC_NO_FLAGS;
+  flags = SEC_LOAD;
 
   if (*input_line_pointer == ',')
     {
@@ -1251,9 +1251,9 @@ obj_coff_section (ignore)
 		{
 		case 'b': flags |= SEC_ALLOC; flags &=~ SEC_LOAD; break;
 		case 'n': flags &=~ SEC_LOAD; break;
-		case 'd':
-		case 'w': flags |= SEC_DATA; flags &=~ SEC_READONLY; break;
-		case 'x': flags |= SEC_CODE; break;
+		case 'd': flags |= SEC_DATA | SEC_LOAD; /* fall through */
+		case 'w': flags &=~ SEC_READONLY; break;
+		case 'x': flags |= SEC_CODE | SEC_LOAD; break;
 		case 'r': flags |= SEC_READONLY; break;
 		case 's': flags |= SEC_SHARED; break;
 
