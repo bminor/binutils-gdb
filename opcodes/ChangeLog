@@ -1,3 +1,22 @@
+Tue Jun 25 22:58:31 1996  Jason Molenda  (crash@godzilla.cygnus.co.jp)
+
+	* Makefile.in (bindir, libdir, datadir, mandir, infodir, includedir):
+	Use autoconf-set values.
+	(docdir, oldincludedir): Removed.
+	* configure.in (AC_PREREQ): autoconf 2.5 or higher.
+
+Fri Jun 21 13:53:36 1996  Richard Henderson  <rth@tamu.edu>
+
+	* alpha-opc.c: New file.
+	* alpha-opc.h: Remove.
+	* alpha-dis.c: Complete rewrite to use new opcode table.
+	* configure.in: For bfd_alpha_arch, use alpha-opc.o.
+	* configure: Rebuild with autoconf 2.10.
+	* Makefile.in (ALL_MACHINES): Add alpha-opc.o.
+	(alpha-dis.o): Depend upon $(INCDIR)/opcode/alpha.h, not
+	alpha-opc.h.
+	(alpha-opc.o): New target.
+
 Wed Jun 19 15:55:12 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* sparc-dis.c (print_insn_sparc): Remove unused local variable i.
