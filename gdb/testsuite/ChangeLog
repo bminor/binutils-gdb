@@ -1,5 +1,8 @@
 Mon Jul 24 23:11:55 1995  Jeff Law  (law@snake.cs.utah.edu)
 
+	* gdb.base/interrupt.exp: xfail test for calling function while
+	inferior is asleep for lynx.
+
 	* gdb.base/watchpoint.exp: Handle more cases of gdb echoing more
 	than one cr-lf	after each command.
 
