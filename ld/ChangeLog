@@ -1,3 +1,9 @@
+2002-03-28  Alan Modra  <amodra@bigpond.net.au>
+
+	* configure.host: Set up for generic hosts first, then tweak as
+	necessary in more specific targets.
+	(HOSTING_LIBS): Include libgcc_eh.a if found.
+
 2002-03-23  Andreas Jaeger  <aj@suse.de>
 
 	* emulparams/elf_x86_64.sh (COMMONPAGESIZE): Set it.
