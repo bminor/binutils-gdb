@@ -1,3 +1,7 @@
+2001-05-06  Jim Blandy  <jimb@redhat.com>
+
+	* restore.c: Make the code of caller0 correspond to its comment.
+
 2001-05-03  Michael Snyder  <msnyder@redhat.com>
 
 	* config/sid.exp (gdb_target_sid): Check for error messages.
