@@ -79,6 +79,9 @@ configdirs=`echo ${host_libs} ${host_tools} ${target_libs} ${target_tools}`
 srctrigger=move-if-change
 srcname="gnu development package"
 
+# This gets set non-empty for some net releases of packages.
+appdirs=""
+
 # per-host:
 
 # Work in distributions that contain no compiler tools, like Autoconf.
@@ -110,7 +113,7 @@ case "${host}" in
   *-sun-*)		  host_makefile_frag=config/mh-sun ;;
   *-hp-hpux*)             host_makefile_frag=config/mh-hpux ;;
   *-*-hiux*)              host_makefile_frag=config/mh-hpux ;;
-  rs6000-*-lynxos*)	  host_makefile_frag=config/mh-lynxosrs6k ;;
+  rs6000-*-lynxos*)	  host_makefile_frag=config/mh-lynxrs6k ;;
   *-*-lynxos*)	  	  host_makefile_frag=config/mh-lynxos ;;
   *-*-sysv4*)             host_makefile_frag=config/mh-sysv4 ;;
   *-*-sysv*)              host_makefile_frag=config/mh-sysv ;;
@@ -266,6 +269,12 @@ case "${target}" in
     # The GNU linker does not support shared libraries.
     noconfigdirs="$noconfigdirs ld gprof"
     ;;
+  mips*-dec-bsd*)
+    noconfigdirs="$noconfigdirs gprof"
+    ;;
+  mips*-*-bsd*)
+    noconfigdirs="$noconfigdirs gprof ld"
+    ;;
   mips*-*-*)
     noconfigdirs="$noconfigdirs gprof"
     ;;
@@ -322,6 +331,24 @@ done
 # supported by the one or two programs in a package.
 
 if [ -n "${notsupp}" ] && [ -z "${norecursion}" ]; then
+  # If $appdirs is non-empty, at least one of those directories must still
+  # be configured, or we error out.  (E.g., if the gas release supports a
+  # specified target in some subdirs but not the gas subdir, we shouldn't
+  # pretend that all is well.)
+  if [ -n "$appdirs" ]; then
+    for dir in $appdirs ; do
+      if [ -r $dir/Makefile.in ] && echo "# ${configdirs} #" | grep "${dir} " >/dev/null 2>&1 ; then
+	appdirs=""
+	break
+      fi
+    done
+    if [ -n "$appdirs" ]; then
+      echo "*** This configuration is not supported by this package." 1>&2
+      exit 1
+    fi
+  fi
+  # Okay, some application will build, or we don't care to check.  Still
+  # notify of subdirs not getting built.
   echo "*** This configuration is not supported in the following subdirectories:" 1>&2
   echo "    ${notsupp}" 1>&2
   echo "    (Any other directories should still work fine.)" 1>&2
