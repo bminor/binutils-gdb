@@ -1,3 +1,18 @@
+Mon Mar 28 12:28:30 1994  David Edelsohn  (edelsohn@npac.syr.edu)
+
+	* ppc-opc.c: Define POWER2 as short alias flag.
+	(powerpc_opcodes): Add POWER/2 opcodes lfq*, stfq*, fcir[z], and
+	fsqrt.
+
+Wed Mar 23 12:23:05 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* i960-dis.c (print_insn_i960): Don't read a second word for
+	opcodes 0, 1, 2 and 3.
+
+Wed Mar 16 15:37:58 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* configure.in: Don't build m68881-ext.o for bfd_m68k_arch.
+
 Mon Mar 14 14:53:50 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* m68881-ext.c: Removed; no longer used.
