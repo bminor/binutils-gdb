@@ -48,4 +48,8 @@ mrealloc.c
 mvalloc.c
 sbrk-sup.c
 
+# Things that are explicitly sanitized away:
+#
+# fsf.shar	- Shell archive of the original fsf sources used as base.
+
 Do-last:
