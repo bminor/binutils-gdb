@@ -1,3 +1,9 @@
+Mon Jul 26 13:22:15 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* reloc.c (bfd_perform_relocation): Handle the case of
+	complain_overflow_bitfield, rightshift > bitpos, and a negative
+	number.
+
 Mon Jul 26 14:40:10 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* elfcode.h: Reimplement segment writing.
