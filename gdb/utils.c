@@ -18,7 +18,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
-#if !defined(__GO32__) && !defined(WIN32)
+#if !defined(__GO32__) && !defined(__WIN32__)
 #include <sys/ioctl.h>
 #include <sys/param.h>
 #include <pwd.h>
@@ -1865,7 +1865,7 @@ initialize_utils ()
   
   /* These defaults will be used if we are unable to get the correct
      values from termcap.  */
-#if defined(__GO32__) || defined(WIN32)
+#if defined(__GO32__) || defined(__WIN32__)
   lines_per_page = ScreenRows();
   chars_per_line = ScreenCols();
 #else  

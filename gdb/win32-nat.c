@@ -473,7 +473,7 @@ child_create_inferior (exec_file, allargs, env)
 		       &si,
 		       &pi);
   if (!ret)
-    error ("Error creating process %s\n", exec_file);
+    error ("Error creating process %s, (error %d)\n", exec_file, GetLastError());
 
   exception_count = 0;
   event_count = 0;

@@ -2,4 +2,5 @@ MH_CFLAGS=
 XM_FILE=xm-win32.h
 TERMCAP= 
 NATDEPFILES=win32-nat.o
+XM_CLIBS=-lkernel32
 

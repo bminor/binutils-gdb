@@ -1,3 +1,12 @@
+Sat Oct 28 23:51:48 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* defs.h: Test on name __WIN32__ rather than WIN32.
+	* inflow.c (new_tty): Likewise
+	* terminal.h: Likewise.
+	* utils.c (initialize_utils): Likewise.
+	* win32-nat.c (child_create_inferiror): Print error code when failing.
+	* config/i386/win32.mh (XM_CLIBS): Need -lkernel32.
+	
 Sat Oct 28 04:52:36 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* symtab.h (enum address_class):  Add LOC_UNRESOLVED for
