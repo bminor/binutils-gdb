@@ -1,3 +1,9 @@
+2003-09-08  Daniel Jacobowitz  <drow@mvista.com>
+
+	* frame.c (deprecated_safe_get_selected_frame): New function.
+	* frame.h (deprecated_safe_get_selected_frame): Add prototype.
+	* findvar.c (read_var_value): Call it.
+
 2003-09-02  GDB Administrator  <gdbadmin@sourceware.org>
 
 	* version.in: Bump to version 5.3.91.

@@ -944,6 +944,18 @@ get_selected_frame (void)
   return deprecated_selected_frame;
 }
 
+/* This is a variant of get_selected_frame which can be called when
+   the inferior does not have a frame; in that case it will return
+   NULL instead of calling error ().  */
+
+struct frame_info *
+deprecated_safe_get_selected_frame (void)
+{
+  if (!target_has_registers || !target_has_stack || !target_has_memory)
+    return NULL;
+  return get_selected_frame ();
+}
+
 /* Select frame FI (or NULL - to invalidate the current frame).  */
 
 void
