@@ -1,3 +1,7 @@
+Fri Jun 21 17:24:48 1996  Jim Wilson  <wilson@cygnus.com>
+
+	* configure.in (mips*-sgi-irix6*): Set noconfigdirs appropriately.
+
 Thu Jun 20 16:57:40 1996  Ken Raeburn  <raeburn@cygnus.com>
 
 	* Makefile.in (taz): Handle case where tex3patch didn't even get
