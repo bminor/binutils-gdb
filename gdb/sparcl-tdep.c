@@ -27,7 +27,7 @@
 #include "regcache.h"
 #include <sys/types.h>
 
-#if (!defined(__GO32__) && !defined(_WIN32)) || defined(__CYGWIN32__)
+#if (!defined(__GO32__) && !defined(_WIN32)) || defined(__CYGWIN__)
 #define HAVE_SOCKETS
 #include <sys/time.h>
 #include <sys/socket.h>

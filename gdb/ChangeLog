@@ -1,5 +1,14 @@
 2002-06-08  Andrew Cagney  <ac131313@redhat.com>
 
+	* sparcl-tdep.c: Use __CYGWIN__ instead of __CYGWIN32__.
+	* rdi-share/serpardr.c: Ditto.
+	* rdi-share/unixcomm.c: Ditto.
+	* rdi-share/serdrv.c: Ditto.
+	* rdi-share/hostchan.h: Ditto.
+	* rdi-share/hostchan.c: Ditto.
+	* rdi-share/host.h: Ditto.
+	* rdi-share/devsw.c: Ditto.
+
 	* objfiles.h: Change type of obj_private to void pointer.
 	* pa64solib.c: Update copyright.  Don't include "assert.h", use
 	strcmp instead of STREQ, use LONGEST, do not use PTR

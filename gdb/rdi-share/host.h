@@ -29,14 +29,6 @@
 #  define offsetof(T, member)  ((char *)&(((T *)0)->member) - (char *)0)
 #endif
 
-/* If under Cygwin, provide backwards compatibility with older
-   Cygwin compilers that don't define the current cpp define. */
-#ifdef __CYGWIN32__
-#ifndef __CYGWIN__
-#define __CYGWIN__
-#endif
-#endif
-
 /* A temporary sop to older compilers */
 #if defined (__NetBSD__) || defined (unix)
 #  ifndef __unix              /* (good for long-term portability?)  */
@@ -52,7 +44,7 @@
 #endif
 #if defined(_WIN32)
 #  define COMPILING_ON_WIN32    1
-#  if !defined(__CYGWIN32__)
+#  if !defined(__CYGWIN__)
 #    define COMPILING_ON_WINDOWS  1
 #  endif
 #endif
