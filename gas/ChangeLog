@@ -1,5 +1,9 @@
 Thu Feb  5 12:39:08 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-mips.c (append_insn): Make sure that if we have a
+	fixup for an unmatched %hi reloc, it does not associated with a
+	variant frag.
+
 	* configure, Makefile.in, aclocal.m4: Rebuild with new libtool.
 	* doc/Makefile.in: Likewise.
 

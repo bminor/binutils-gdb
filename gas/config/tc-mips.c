@@ -880,7 +880,11 @@ md_begin ()
       else if (strcmp (cpu, "mips64vr4300") == 0)
         mips_cpu = 4300;
 
-      else if (strcmp (cpu, "mips64vr4100") == 0)
+      else if (strcmp (cpu, "mips64vr4100") == 0
+	       /* start-sanitize-vr4111 */
+	       || strcmp (cpu, "mips64vr4111") == 0
+               /* end-sanitize-vr4111 */
+	       )
         mips_cpu = 4100;
 
       else if (strcmp (cpu, "r4010") == 0)
@@ -2213,6 +2217,16 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 
   /* We just output an insn, so the next one doesn't have a label.  */
   mips_clear_insn_labels ();
+
+  /* We must ensure that a fixup associated with an unmatched %hi
+     reloc does not become a variant frag.  Otherwise, the
+     rearrangement of %hi relocs in frob_file may confuse
+     tc_gen_reloc.  */
+  if (unmatched_hi)
+    {
+      frag_wane (frag_now);
+      frag_new (0);
+    }
 }
 
 /* This function forgets that there was any previous instruction or
