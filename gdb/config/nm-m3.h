@@ -108,6 +108,9 @@ struct emul_stack_top {
 
 #define ATTACH_TO_THREAD attach_to_thread
 
+/* Don't do wait_for_inferior on attach.  */
+#define ATTACH_NO_WAIT
+
 /* Do Mach 3 dependent operations when ^C or a STOP is requested */
 #define DO_QUIT() mach3_quit ()
 
