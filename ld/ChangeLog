@@ -1,3 +1,9 @@
+2001-11-20  Angela Marie Thomas <angela@redhat.com>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_finish): Use NULL instead
+        of false when calling lang_size_sections.
+	(hppaelf_layout_sections_again): Likewise.
+
 2001-11-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_finish): Only emit this

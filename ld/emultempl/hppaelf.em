@@ -228,7 +228,7 @@ hppaelf_layout_sections_again ()
 
   /* Resize the sections.  */
   lang_size_sections (stat_ptr->head, abs_output_section,
-		      &stat_ptr->head, 0, (bfd_vma) 0, false);
+		      &stat_ptr->head, 0, (bfd_vma) 0, NULL);
 
   /* Redo special stuff.  */
   ldemul_after_allocation ();
