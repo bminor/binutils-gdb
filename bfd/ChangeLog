@@ -1,5 +1,8 @@
 2002-08-22  Alan Modra  <amodra@bigpond.net.au>
 
+	* configure.in: Unset is_release.
+	* configure: Regenerate.
+
 	* elf-bfd.h (struct elf_backend_data): Add struct elf_backend_data
 	param to elf_backend_copy_indirect_symbol.
 	(_bfd_elf_link_hash_copy_indirect): Likewise.
