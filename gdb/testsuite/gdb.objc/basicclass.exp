@@ -29,7 +29,7 @@ set binfile ${objdir}/${subdir}/${testfile}
 # which libraries to link in. Most of the time it uses pthread
 #
 if {[gdb_compile_objc "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [list debug ]] != "" } {
-  gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+  return -1
 }
 
 #
