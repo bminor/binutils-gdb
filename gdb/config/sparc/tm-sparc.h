@@ -187,11 +187,12 @@ extern CORE_ADDR sparc_pc_adjust PARAMS ((CORE_ADDR));
    register state, the array `registers'.  On the sparc, `registers'
    contains the ins and locals, even though they are saved on the
    stack rather than with the other registers, and this causes hair
-   and confusion in places like pop_frame.  It probably would be
+   and confusion in places like pop_frame.  It might be
    better to remove the ins and locals from `registers', make sure
    that get_saved_register can get them from the stack (even in the
    innermost frame), and make this the way to access them.  For the
-   frame pointer we would do that via TARGET_READ_FP.  */
+   frame pointer we would do that via TARGET_READ_FP.  On the other hand,
+   that is likely to be confusing or worse for flat frames.  */
 
 #define REGISTER_BYTES (32*4+32*4+8*4)
 
@@ -200,18 +201,11 @@ extern CORE_ADDR sparc_pc_adjust PARAMS ((CORE_ADDR));
 /* ?? */
 #define REGISTER_BYTE(N)  ((N)*4)
 
-/* The SPARC processor has register windows.  */
+/* We need to override GET_SAVED_REGISTER so that we can deal with the way
+   outs change into ins in different frames.  HAVE_REGISTER_WINDOWS can't
+   deal with this case and also handle flat frames at the same time.  */
 
-#define HAVE_REGISTER_WINDOWS
-
-/* Is this register part of the register window system?  A yes answer
-   implies that 1) The name of this register will not be the same in
-   other frames, and 2) This register is automatically "saved" (out
-   registers shifting into ins counts) upon subroutine calls and thus
-   there is no need to search more than one stack frame for it. */
-
-#define REGISTER_IN_WINDOW_P(regnum)	\
-  ((regnum) >= 8 && (regnum) < 32)
+#define GET_SAVED_REGISTER 1
 
 /* Number of bytes of storage in the actual machine representation
    for register N.  */
@@ -342,8 +336,12 @@ sparc_extract_struct_value_address PARAMS ((char [REGISTER_BYTES]));
 #define EXTRA_FRAME_INFO  \
   CORE_ADDR bottom;  \
   int flat;  \
+  /* Following fields only relevant for flat frames.  */ \
   CORE_ADDR pc_addr;  \
   CORE_ADDR fp_addr;  \
+  /* Add this to ->frame to get the value of the stack pointer at the */ \
+  /* time of the register saves.  */ \
+  int sp_offset;
 
 #define INIT_EXTRA_FRAME_INFO(fromleaf, fci) \
   sparc_init_extra_frame_info (fromleaf, fci)
@@ -356,8 +354,19 @@ extern void sparc_init_extra_frame_info ();
                        (fi)->pc_addr, (fi)->fp_addr); \
   }
 
+#ifdef __STDC__
+struct frame_info;
+#endif
+
 #define FRAME_CHAIN(thisframe) (sparc_frame_chain (thisframe))
-extern CORE_ADDR sparc_frame_chain ();
+extern CORE_ADDR sparc_frame_chain PARAMS ((struct frame_info *));
+
+/* INIT_EXTRA_FRAME_INFO needs the PC to detect flat frames.  */
+
+#define	INIT_FRAME_PC(fromleaf, prev) /* nothing */
+#define INIT_FRAME_PC_FIRST(fromleaf, prev) \
+  (prev)->pc = ((fromleaf) ? SAVED_PC_AFTER_CALL ((prev)->next) : \
+	      (prev)->next ? FRAME_SAVED_PC ((prev)->next) : read_pc ());
 
 /* Define other aspects of the stack frame.  */
 
@@ -397,19 +406,6 @@ extern CORE_ADDR sparc_frame_saved_pc ();
 /* Return number of bytes at start of arglist that are not really args.  */
 
 #define FRAME_ARGS_SKIP 68
-
-/* Put here the code to store, into a struct frame_saved_regs,
-   the addresses of the saved registers of frame described by FRAME_INFO.
-   The actual code is in sparc-tdep.c so we can debug it sanely.  */
-
-#define FRAME_FIND_SAVED_REGS(fi, frame_saved_regs)    	    \
-	sparc_frame_find_saved_regs ((fi), &(frame_saved_regs))
-#ifdef __STDC__
-struct frame_info;
-struct frame_saved_regs;
-#endif
-extern void sparc_frame_find_saved_regs PARAMS ((struct frame_info *,
-						 struct frame_saved_regs *));
 
 /* Things needed for making the inferior call functions.  */
 /*

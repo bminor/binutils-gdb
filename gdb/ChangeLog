@@ -1,10 +1,55 @@
+Sat Dec 17 13:23:21 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* tm-sparc.c (EXTRA_FRAME_INFO): New field sp_offset.
+	* sparc-tdep.c (sparc_init_extra_frame_info): Set it.
+	(examine_prologue, sparc_init_extra_frame_info): Use ->frame plus
+	->sp_offset to compute the address something is saved at, not
+	->bottom.
+
+	* sparc-tdep.c (get_saved_register): New function.
+	* tm-sparc.h: Define GET_SAVED_REGISTER; don't define
+	FRAME_FIND_SAVED_REGS, HAVE_REGISTER_WINDOWS or REGISTER_IN_WINDOW_P.
+	* stack.c (frame_info): Add comment about what to do if
+	FRAME_FIND_SAVED_REGS is not defined.
+
+	* sparc-tdep.c (sparc_init_extra_frame_info): Set ->frame field
+	here.  Get it right for flat frames.
+	* sparc-tdep.c (sparc_frame_chain): Instead of returning
+	meaningful value for ->frame field, just return dummy value.
+	This change is needed because the old code didn't deal with mixed
+	flat and non-flat frames.
+
+	* sparc-tdep.c (sparc_pop_frame): Write SP_REGNUM from
+	frame->frame, don't go through saved regs for this.
+
+	* sparc-tdep.c: Move guts of skip_prologue to new function
+	examine_prologue.  Check for flat prologue and set is_flat.
+	Provide the caller with the information about what is saved where
+	if desired.
+	(skip_prologue, sparc_frame_find_saved_regs): Call examine_prologue.
+
+	* sparc-tdep.c: Replace union sparc_insn_layout and anonymous
+	union in isannulled, which won't work on a little-endian host,
+	with X_* macros.
+
+	* sparc-tdep.c (sparc_frame_saved_pc): If addr == 0, the saved PC
+	is still in %o7.
+
+	* config/sparc/tm-sparc.h: Define INIT_FRAME_PC and
+	INIT_FRAME_PC_FIRST.
+	* blockframe.c (get_prev_frame_info): Modify comments regarding
+	INIT_FRAME_PC_FIRST and the sparc.
+
+	* sparc-tdep.c (single_step): Use 4 not sizeof (long) for size of
+	instruction. 
+
 Sat Dec 17 02:33:37 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* c-typeprint.c (c_type_print_base):  Use `show' of -1 to print
 	the return type of methods to avoid infinite loops with anonymous
 	types.
 	* valops.c (search_struct_field):  Handle anonymous unions.
-  
+
 	* sparc-tdep.c (sunos4_skip_trampoline_code):  New function
 	to correctly handle steps into -g compiled PIC objects in the
 	main executable.

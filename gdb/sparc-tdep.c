@@ -31,30 +31,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "gdbcore.h"
 
-/* Definition of SPARC instruction layouts.  */
-
-union sparc_insn_layout
-{
-  unsigned long int code;
-  struct
-    {
-      unsigned int op:2;
-      unsigned int rd:5;
-      unsigned int op2:3;
-      unsigned int imm22:22;
-    } sethi;
-  struct
-    {
-      unsigned int op:2;
-      unsigned int rd:5;
-      unsigned int op3:6;
-      unsigned int rs1:5;
-      unsigned int i:1;
-      unsigned int simm13:13;
-    } add;
-  int i;
-};
-
 /* From infrun.c */
 extern int stop_after_trap;
 
@@ -65,6 +41,21 @@ extern int stop_after_trap;
    so we only need send the groups that have changed.  */
 
 int deferred_stores = 0;	/* Cumulates stores we want to do eventually. */
+
+/* Macros to extract fields from sparc instructions.  */
+#define X_OP(i) (((i) >> 30) & 0x3)
+#define X_RD(i) (((i) >> 25) & 0x1f)
+#define X_A(i) (((i) >> 29) & 1)
+#define X_COND(i) (((i) >> 25) & 0xf)
+#define X_OP2(i) (((i) >> 22) & 0x7)
+#define X_IMM22(i) ((i) & 0x3fffff)
+#define X_OP3(i) (((i) >> 19) & 0x3f)
+#define X_RS1(i) (((i) >> 14) & 0x1f)
+#define X_I(i) (((i) >> 13) & 1)
+#define X_IMM13(i) ((i) & 0x1fff)
+/* Sign extension macros.  */
+#define X_SIMM13(i) ((X_IMM13 (i) ^ 0x1000) - 0x1000)
+#define X_DISP22(i) ((X_IMM22 (i) ^ 0x200000) - 0x200000)
 
 typedef enum
 {
@@ -114,7 +105,7 @@ single_step (ignore)
       /* printf_unfiltered ("set break at %x\n",next_pc); */
 
       pc = read_register (PC_REGNUM);
-      pc_instruction = read_memory_integer (pc, sizeof(pc_instruction));
+      pc_instruction = read_memory_integer (pc, 4);
       br = isannulled (pc_instruction, pc, &target);
       brknpc4 = brktrg = 0;
 
@@ -166,12 +157,27 @@ sparc_init_extra_frame_info (fromleaf, fi)
 {
   char *name;
   CORE_ADDR addr;
-  union sparc_insn_layout x;
+  int insn;
 
   fi->bottom =
     (fi->next ?
      (fi->frame == fi->next->frame ? fi->next->bottom : fi->next->frame) :
      read_register (SP_REGNUM));
+
+  /* If fi->next is NULL, then we already set ->frame by passing read_fp()
+     to create_new_frame.  */
+  if (fi->next)
+    {
+      char buf[MAX_REGISTER_RAW_SIZE];
+      int err;
+
+      /* Compute ->frame as if not flat.  If it is flat, we'll change
+	 it later.  */
+      /* FIXME: If error reading memory, should just stop backtracing, rather
+	 than error().  */
+      get_saved_register (buf, 0, 0, fi, FP_REGNUM, 0);
+      fi->frame = extract_address (buf, REGISTER_RAW_SIZE (FP_REGNUM));
+    }
 
   /* Decide whether this is a function with a ``flat register window''
      frame.  For such functions, the frame pointer is actually in %i7.  */
@@ -179,36 +185,52 @@ sparc_init_extra_frame_info (fromleaf, fi)
   if (find_pc_partial_function (fi->pc, &name, &addr, NULL))
     {
       /* See if the function starts with an add (which will be of a
-	 negative number if a flat frame) to the sp.  */
-      x.i = read_memory_integer (addr, 4);
-      if (x.add.op == 2 && x.add.rd == 14 && x.add.op3 == 0)
+	 negative number if a flat frame) to the sp.  FIXME: Does not
+	 handle large frames which will need more than one instruction
+	 to adjust the sp.  */
+      insn = read_memory_integer (addr, 4);
+      if (X_OP (insn) == 2 && X_RD (insn) == 14 && X_OP3 (insn) == 0
+	  && X_I (insn) && X_SIMM13 (insn) < 0)
 	{
+	  int offset = X_SIMM13 (insn);
+
 	  /* Then look for a save of %i7 into the frame.  */
-	  x.i = read_memory_integer (addr + 4, 4);
-	  if (x.add.op == 3
-	      && x.add.rd == 31
-	      && x.add.op3 == 4
-	      && x.add.rs1 == 14)
+	  insn = read_memory_integer (addr + 4, 4);
+	  if (X_OP (insn) == 3
+	      && X_RD (insn) == 31
+	      && X_OP3 (insn) == 4
+	      && X_RS1 (insn) == 14)
 	    {
+	      char buf[MAX_REGISTER_RAW_SIZE];
+
 	      /* We definitely have a flat frame now.  */
 	      fi->flat = 1;
+
+	      fi->sp_offset = offset;
+
 	      /* Overwrite the frame's address with the value in %i7.  */
-	      fi->frame = 
-		(fi->next ?
-		 (fi->frame == fi->next->frame ? fi->bottom : fi->frame) :
-		 read_register (I7_REGNUM));
+	      get_saved_register (buf, 0, 0, fi, I7_REGNUM, 0);
+	      fi->frame = extract_address (buf, REGISTER_RAW_SIZE (I7_REGNUM));
+
 	      /* Record where the fp got saved.  */
-	      fi->fp_addr = fi->bottom + x.add.simm13;
+	      fi->fp_addr = fi->frame + fi->sp_offset + X_SIMM13 (insn);
+
 	      /* Also try to collect where the pc got saved to.  */
 	      fi->pc_addr = 0;
-	      x.i = read_memory_integer (addr + 12, 4);
-	      if (x.add.op == 3
-		  && x.add.rd == 15
-		  && x.add.op3 == 4
-		  && x.add.rs1 == 14)
-		fi->pc_addr = fi->bottom + x.add.simm13;
+	      insn = read_memory_integer (addr + 12, 4);
+	      if (X_OP (insn) == 3
+		  && X_RD (insn) == 15
+		  && X_OP3 (insn) == 4
+		  && X_RS1 (insn) == 14)
+		fi->pc_addr = fi->frame + fi->sp_offset + X_SIMM13 (insn);
 	    }
 	}
+    }
+  if (fi->next && fi->frame == 0)
+    {
+      /* Kludge to cause init_prev_frame_info to destroy the new frame.  */
+      fi->frame = fi->next->frame;
+      fi->pc = fi->next->pc;
     }
 }
 
@@ -216,19 +238,10 @@ CORE_ADDR
 sparc_frame_chain (frame)
      struct frame_info *frame;
 {
-  char buf[MAX_REGISTER_RAW_SIZE];
-  int err;
-  CORE_ADDR addr;
-
-  if (frame->flat)
-    addr = frame->fp_addr;
-  else
-    addr = frame->frame + FRAME_SAVED_I0 +
-      REGISTER_RAW_SIZE (FP_REGNUM) * (FP_REGNUM - I0_REGNUM);
-  err = target_read_memory (addr, buf, REGISTER_RAW_SIZE (FP_REGNUM));
-  if (err)
-    return 0;
-  return extract_address (buf, REGISTER_RAW_SIZE (FP_REGNUM));
+  /* Value that will cause FRAME_CHAIN_VALID to not worry about the chain
+     value.  If it realy is zero, we detect it later in
+     sparc_init_prev_frame.  */
+  return (CORE_ADDR)1;
 }
 
 CORE_ADDR
@@ -285,6 +298,12 @@ sparc_frame_saved_pc (frame)
   else
     addr = frame->bottom + FRAME_SAVED_I0 +
       REGISTER_RAW_SIZE (I7_REGNUM) * (I7_REGNUM - I0_REGNUM);
+
+  if (addr == 0)
+    /* A flat frame leaf function might not save the PC anywhere,
+       just leave it in %o7.  */
+    return PC_ADJUST (read_register (O7_REGNUM));
+
   read_memory (addr, buf, REGISTER_RAW_SIZE (I7_REGNUM));
   return PC_ADJUST (extract_address (buf, REGISTER_RAW_SIZE (I7_REGNUM)));
 }
@@ -326,24 +345,29 @@ setup_arbitrary_frame (argc, argv)
    This routine should be more specific in its actions; making sure
    that it uses the same register in the initial prologue section.  */
 
-CORE_ADDR 
-skip_prologue (start_pc, frameless_p)
+static CORE_ADDR examine_prologue PARAMS ((CORE_ADDR, int, struct frame_info *,
+					   struct frame_saved_regs *));
+
+static CORE_ADDR 
+examine_prologue (start_pc, frameless_p, fi, saved_regs)
      CORE_ADDR start_pc;
      int frameless_p;
+     struct frame_info *fi;
+     struct frame_saved_regs *saved_regs;
 {
-  union sparc_insn_layout x;
+  int insn;
   int dest = -1;
   CORE_ADDR pc = start_pc;
   int is_flat = 0;
 
-  x.i = read_memory_integer (pc, 4);
+  insn = read_memory_integer (pc, 4);
 
   /* Recognize the `sethi' insn and record its destination.  */
-  if (x.sethi.op == 0 && x.sethi.op2 == 4)
+  if (X_OP (insn) == 0 && X_OP2 (insn) == 4)
     {
-      dest = x.sethi.rd;
+      dest = X_RD (insn);
       pc += 4;
-      x.i = read_memory_integer (pc, 4);
+      insn = read_memory_integer (pc, 4);
     }
 
   /* Recognize an add immediate value to register to either %g1 or
@@ -352,61 +376,97 @@ skip_prologue (start_pc, frameless_p)
      It doesn't check that rs1 == rd because in theory "sub %g0, 5, %g1"
      followed by "save %sp, %g1, %sp" is a valid prologue (Not that
      I imagine any compiler really does that, however).  */
-  if (x.add.op == 2 && x.add.i && (x.add.rd == 1 || x.add.rd == dest))
+  if (X_OP (insn) == 2
+      && X_I (insn)
+      && (X_RD (insn) == 1 || X_RD (insn) == dest))
     {
       pc += 4;
-      x.i = read_memory_integer (pc, 4);
+      insn = read_memory_integer (pc, 4);
     }
 
-  /* This recognizes any SAVE insn.  But why do the XOR and then
-     the compare?  That's identical to comparing against 60 (as long
-     as there isn't any sign extension).  */
-  if (x.add.op == 2 && (x.add.op3 ^ 32) == 28)
+  /* Recognize any SAVE insn.  */
+  if (X_OP (insn) == 2 && X_OP3 (insn) == 60)
     {
       pc += 4;
       if (frameless_p)			/* If the save is all we care about, */
 	return pc;			/* return before doing more work */
-      x.i = read_memory_integer (pc, 4);
+      insn = read_memory_integer (pc, 4);
     }
-  else if (x.add.op == 2 && x.add.rd == 14 && x.add.op3 == 0)
+  /* Recognize add to %sp.  */
+  else if (X_OP (insn) == 2 && X_RD (insn) == 14 && X_OP3 (insn) == 0)
     {
       pc += 4;
       if (frameless_p)			/* If the add is all we care about, */
 	return pc;			/* return before doing more work */
-      /* FIXME test that the following instructions are the right ones
-         for a flat frame */
-      x.i = read_memory_integer (pc, 4);
-      pc += 4;
-      x.i = read_memory_integer (pc, 4);
-      pc += 4;
-      x.i = read_memory_integer (pc, 4);
+      is_flat = 1;
+      insn = read_memory_integer (pc, 4);
+      /* Recognize store of frame pointer (i7).  */
+      if (X_OP (insn) == 3
+	  && X_RD (insn) == 31
+	  && X_OP3 (insn) == 4
+	  && X_RS1 (insn) == 14)
+	{
+	  pc += 4;
+	  insn = read_memory_integer (pc, 4);
+
+	  /* Recognize sub %sp, <anything>, %i7.  */
+	  if (X_OP (insn) ==  2
+	      && X_OP3 (insn) == 4
+	      && X_RS1 (insn) == 14
+	      && X_RD (insn) == 31)
+	    {
+	      pc += 4;
+	      insn = read_memory_integer (pc, 4);
+	    }
+	  else
+	    return pc;
+	}
+      else
+	return pc;
     }
   else
     /* Without a save or add instruction, it's not a prologue.  */
     return start_pc;
 
-  /* Now we need to recognize stores into the frame from the input
-     registers.  This recognizes all non alternate stores of input
-     register, into a location offset from the frame pointer.  */
-  while ((x.add.op == 3
-	  && (x.add.op3 & 0x3c) == 4 /* Store, non-alternate.  */
-	  && (x.add.rd & 0x18) == 0x18 /* Input register.  */
-	  && x.add.i		/* Immediate mode.  */
-	  && x.add.rs1 == 30	/* Off of frame pointer.  */
-	  /* Into reserved stack space.  */
-	  && x.add.simm13 >= 0x44
-	  && x.add.simm13 < 0x5b)
-	 || (is_flat
-	     && x.add.op == 3
-	     && x.add.op3 == 4
-	     && x.add.rs1 == 14
-	     ))
+  while (1)
     {
+      /* Recognize stores into the frame from the input registers.
+	 This recognizes all non alternate stores of input register,
+	 into a location offset from the frame pointer.  */
+      if ((X_OP (insn) == 3
+	   && (X_OP3 (insn) & 0x3c) == 4 /* Store, non-alternate.  */
+	   && (X_RD (insn) & 0x18) == 0x18 /* Input register.  */
+	   && X_I (insn)		/* Immediate mode.  */
+	   && X_RS1 (insn) == 30	/* Off of frame pointer.  */
+	   /* Into reserved stack space.  */
+	   && X_SIMM13 (insn) >= 0x44
+	   && X_SIMM13 (insn) < 0x5b))
+	;
+      else if (is_flat
+	       && X_OP (insn) == 3
+	       && X_OP3 (insn) == 4
+	       && X_RS1 (insn) == 14
+	       )
+	{
+	  if (saved_regs && X_I (insn))
+	    saved_regs->regs[X_RD (insn)] =
+	      fi->frame + fi->sp_offset + X_SIMM13 (insn);
+	}
+      else
+	break;
       pc += 4;
-      x.i = read_memory_integer (pc, 4);
+      insn = read_memory_integer (pc, 4);
     }
 
   return pc;
+}
+
+CORE_ADDR 
+skip_prologue (start_pc, frameless_p)
+     CORE_ADDR start_pc;
+     int frameless_p;
+{
+  return examine_prologue (start_pc, frameless_p, NULL, NULL);
 }
 
 /* Check instruction at ADDR to see if it is an annulled branch.
@@ -420,138 +480,135 @@ isannulled (instruction, addr, target)
 {
   branch_type val = not_branch;
   long int offset;		/* Must be signed for sign-extend.  */
-  union
-    {
-      unsigned long int code;
-      struct
-	{
-	  unsigned int op:2;
-	  unsigned int a:1;
-	  unsigned int cond:4;
-	  unsigned int op2:3;
-	  unsigned int disp22:22;
-	} b;
-    } insn;
 
   *target = 0;
-  insn.code = instruction;
 
-  if (insn.b.op == 0
-      && (insn.b.op2 == 2 || insn.b.op2 == 6 || insn.b.op2 == 7))
+  if (X_OP (instruction) == 0
+      && (X_OP2 (instruction) == 2
+	  || X_OP2 (instruction) == 6
+	  || X_OP2 (instruction) == 7))
     {
-      if (insn.b.cond == 8)
-	val = insn.b.a ? baa : ba;
+      if (X_COND (instruction) == 8)
+	val = X_A (instruction) ? baa : ba;
       else
-	val = insn.b.a ? bicca : bicc;
-      offset = 4 * ((int) (insn.b.disp22 << 10) >> 10);
+	val = X_A (instruction) ? bicca : bicc;
+      offset = 4 * X_DISP22 (instruction);
       *target = addr + offset;
     }
 
   return val;
 }
+
+/* Find register number REGNUM relative to FRAME and put its
+   (raw) contents in *RAW_BUFFER.  Set *OPTIMIZED if the variable
+   was optimized out (and thus can't be fetched).  If the variable
+   was fetched from memory, set *ADDRP to where it was fetched from,
+   otherwise it was fetched from a register.
 
-/* sparc_frame_find_saved_regs ()
-
-   Stores, into a struct frame_saved_regs,
-   the addresses of the saved registers of frame described by FRAME_INFO.
-   This includes special registers such as pc and fp saved in special
-   ways in the stack frame.  sp is even more special:
-   the address we return for it IS the sp for the next frame.
-
-   Note that on register window machines, we are currently making the
-   assumption that window registers are being saved somewhere in the
-   frame in which they are being used.  If they are stored in an
-   inferior frame, find_saved_register will break.
-
-   On the Sun 4, the only time all registers are saved is when
-   a dummy frame is involved.  Otherwise, the only saved registers
-   are the LOCAL and IN registers which are saved as a result
-   of the "save/restore" opcodes.  This condition is determined
-   by address rather than by value.
-
-   The "pc" is not stored in a frame on the SPARC.  (What is stored
-   is a return address minus 8.)  sparc_pop_frame knows how to
-   deal with that.  Other routines might or might not.
-
-   See tm-sparc.h (PUSH_FRAME and friends) for CRITICAL information
-   about how this works.  */
+   The argument RAW_BUFFER must point to aligned memory.  */
 
 void
-sparc_frame_find_saved_regs (fi, saved_regs_addr)
-     struct frame_info *fi;
-     struct frame_saved_regs *saved_regs_addr;
+get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
+     char *raw_buffer;
+     int *optimized;
+     CORE_ADDR *addrp;
+     struct frame_info *frame;
+     int regnum;
+     enum lval_type *lval;
 {
-  register int regnum;
-  CORE_ADDR frame_addr = FRAME_FP (fi);
+  struct frame_info *frame1;
+  CORE_ADDR addr;
 
-  if (!fi)
-    fatal ("Bad frame info struct in FRAME_FIND_SAVED_REGS");
+  if (optimized)
+    *optimized = 0;
 
-  memset (saved_regs_addr, 0, sizeof (*saved_regs_addr));
-
-  if (fi->pc >= (fi->bottom ? fi->bottom :
-		   read_register (SP_REGNUM))
-      && fi->pc <= FRAME_FP(fi))
+  addr = 0;
+  frame1 = frame->next;
+  while (frame1 != NULL)
     {
-      /* Dummy frame.  All but the window regs are in there somewhere. */
-      for (regnum = G1_REGNUM; regnum < G1_REGNUM+7; regnum++)
-	saved_regs_addr->regs[regnum] =
-	  frame_addr + (regnum - G0_REGNUM) * 4 - 0xa0;
-      for (regnum = I0_REGNUM; regnum < I0_REGNUM+8; regnum++)
-	saved_regs_addr->regs[regnum] =
-	  frame_addr + (regnum - I0_REGNUM) * 4 - 0xc0;
-      for (regnum = FP0_REGNUM; regnum < FP0_REGNUM + 32; regnum++)
-	saved_regs_addr->regs[regnum] =
-	  frame_addr + (regnum - FP0_REGNUM) * 4 - 0x80;
-      for (regnum = Y_REGNUM; regnum < NUM_REGS; regnum++)
-	saved_regs_addr->regs[regnum] =
-	  frame_addr + (regnum - Y_REGNUM) * 4 - 0xe0;
-      frame_addr = fi->bottom ?
-	fi->bottom : read_register (SP_REGNUM);
-    }
-  else if (fi->flat)
-    {
-      /* Flat register window frame.  */
-      saved_regs_addr->regs[RP_REGNUM] = fi->pc_addr;
-      saved_regs_addr->regs[I7_REGNUM] = fi->fp_addr;
-      frame_addr = fi->bottom ? fi->bottom : read_register (SP_REGNUM);
-    }
-  else
-    {
-      /* Normal frame.  Just Local and In registers */
-      frame_addr = fi->bottom ?
-	fi->bottom : read_register (SP_REGNUM);
-      for (regnum = L0_REGNUM; regnum < L0_REGNUM+8; regnum++)
-	saved_regs_addr->regs[regnum] =
-	  (frame_addr + (regnum - L0_REGNUM) * REGISTER_RAW_SIZE (L0_REGNUM)
-	   + FRAME_SAVED_L0);
-      for (regnum = I0_REGNUM; regnum < I0_REGNUM+8; regnum++)
-	saved_regs_addr->regs[regnum] =
-	  (frame_addr + (regnum - I0_REGNUM) * REGISTER_RAW_SIZE (I0_REGNUM)
-	   + FRAME_SAVED_I0);
-    }
-  if (fi->next)
-    {
-      if (fi->flat)
+      if (frame1->pc >= (frame1->bottom ? frame1->bottom :
+			 read_register (SP_REGNUM))
+	  && frame1->pc <= FRAME_FP (frame1))
 	{
-	  saved_regs_addr->regs[O7_REGNUM] = fi->pc_addr;
+	  /* Dummy frame.  All but the window regs are in there somewhere. */
+	  if (regnum >= G1_REGNUM && regnum < G1_REGNUM + 7)
+	    addr = frame1->frame + (regnum - G0_REGNUM) * 4 - 0xa0;
+	  else if (regnum >= I0_REGNUM && regnum < I0_REGNUM + 8)
+	    addr = frame1->frame + (regnum - I0_REGNUM) * 4 - 0xc0;
+	  else if (regnum >= FP0_REGNUM && regnum < FP0_REGNUM + 32)
+	    addr = frame1->frame + (regnum - FP0_REGNUM) * 4 - 0x80;
+	  else if (regnum >= Y_REGNUM && regnum < NUM_REGS)
+	    addr = frame1->frame + (regnum - Y_REGNUM) * 4 - 0xe0;
+	}
+      else if (frame1->flat)
+	{
+
+	  if (regnum == RP_REGNUM)
+	    addr = frame1->pc_addr;
+	  else if (regnum == I7_REGNUM)
+	    addr = frame1->fp_addr;
+	  else
+	    {
+	      CORE_ADDR func_start;
+	      struct frame_saved_regs regs;
+	      memset (&regs, 0, sizeof (regs));
+
+	      find_pc_partial_function (frame1->pc, NULL, &func_start, NULL);
+	      examine_prologue (func_start, 0, frame1, &regs);
+	      addr = regs.regs[regnum];
+	    }
 	}
       else
 	{
-	  /* Pull off either the next frame pointer or the stack pointer */
-	  CORE_ADDR next_next_frame_addr =
-	    (fi->next->bottom ?
-	     fi->next->bottom :
-	     read_register (SP_REGNUM));
-	  for (regnum = O0_REGNUM; regnum < O0_REGNUM+8; regnum++)
-	    saved_regs_addr->regs[regnum] =
-	      (next_next_frame_addr
-	       + (regnum - O0_REGNUM) * REGISTER_RAW_SIZE (O0_REGNUM)
-	       + FRAME_SAVED_I0);
+	  /* Normal frame.  Local and In registers are saved on stack.  */
+	  if (regnum >= I0_REGNUM && regnum < I0_REGNUM + 8)
+	    addr = (frame1->prev->bottom
+		    + (regnum - I0_REGNUM) * REGISTER_RAW_SIZE (I0_REGNUM)
+		    + FRAME_SAVED_I0);
+	  else if (regnum >= L0_REGNUM && regnum < L0_REGNUM + 8)
+	    addr = (frame1->prev->bottom
+		    + (regnum - L0_REGNUM) * REGISTER_RAW_SIZE (L0_REGNUM)
+		    + FRAME_SAVED_L0);
+	  else if (regnum >= O0_REGNUM && regnum < O0_REGNUM + 8)
+	    {
+	      /* Outs become ins.  */
+	      get_saved_register (raw_buffer, optimized, addrp, frame1,
+				  (regnum - O0_REGNUM + I0_REGNUM), lval);
+	      return;
+	    }
 	}
+      if (addr != 0)
+	break;
+      frame1 = frame1->next;
     }
-  /* Otherwise, whatever we would get from ptrace(GETREGS) is accurate */
-  saved_regs_addr->regs[SP_REGNUM] = FRAME_FP (fi);
+  if (addr != 0)
+    {
+      if (lval != NULL)
+	*lval = lval_memory;
+      if (regnum == SP_REGNUM)
+	{
+	  if (raw_buffer != NULL)
+	    {
+	      /* Put it back in target format.  */
+	      store_address (raw_buffer, REGISTER_RAW_SIZE (regnum), addr);
+	    }
+	  if (addrp != NULL)
+	    *addrp = 0;
+	  return;
+	}
+      if (raw_buffer != NULL)
+	read_memory (addr, raw_buffer, REGISTER_RAW_SIZE (regnum));
+    }
+  else
+    {
+      if (lval != NULL)
+	*lval = lval_register;
+      addr = REGISTER_BYTE (regnum);
+      if (raw_buffer != NULL)
+	read_register_gen (regnum, raw_buffer);
+    }
+  if (addrp != NULL)
+    *addrp = addr;
 }
 
 /* Push an empty stack frame, and record in it the current PC, regs, etc.
@@ -595,6 +652,124 @@ sparc_push_dummy_frame ()
   write_register (I7_REGNUM, read_pc() - 8);
 }
 
+/* sparc_frame_find_saved_regs ().  This function is here only because
+   pop_frame uses it.  Note there is an interesting corner case which
+   I think few ports of GDB get right--if you are popping a frame
+   which does not save some register that *is* saved by a more inner
+   frame (such a frame will never be a dummy frame because dummy
+   frames save all registers).  Rewriting pop_frame to use
+   get_saved_register would solve this problem and also get rid of the
+   ugly duplication between sparc_frame_find_saved_regs and
+   get_saved_register.
+
+   Stores, into a struct frame_saved_regs,
+   the addresses of the saved registers of frame described by FRAME_INFO.
+   This includes special registers such as pc and fp saved in special
+   ways in the stack frame.  sp is even more special:
+   the address we return for it IS the sp for the next frame.
+
+   Note that on register window machines, we are currently making the
+   assumption that window registers are being saved somewhere in the
+   frame in which they are being used.  If they are stored in an
+   inferior frame, find_saved_register will break.
+
+   On the Sun 4, the only time all registers are saved is when
+   a dummy frame is involved.  Otherwise, the only saved registers
+   are the LOCAL and IN registers which are saved as a result
+   of the "save/restore" opcodes.  This condition is determined
+   by address rather than by value.
+
+   The "pc" is not stored in a frame on the SPARC.  (What is stored
+   is a return address minus 8.)  sparc_pop_frame knows how to
+   deal with that.  Other routines might or might not.
+
+   See tm-sparc.h (PUSH_FRAME and friends) for CRITICAL information
+   about how this works.  */
+
+static void sparc_frame_find_saved_regs PARAMS ((struct frame_info *,
+						 struct frame_saved_regs *));
+
+static void
+sparc_frame_find_saved_regs (fi, saved_regs_addr)
+     struct frame_info *fi;
+     struct frame_saved_regs *saved_regs_addr;
+{
+  register int regnum;
+  CORE_ADDR frame_addr = FRAME_FP (fi);
+
+  if (!fi)
+    fatal ("Bad frame info struct in FRAME_FIND_SAVED_REGS");
+
+  memset (saved_regs_addr, 0, sizeof (*saved_regs_addr));
+
+  if (fi->pc >= (fi->bottom ? fi->bottom :
+		   read_register (SP_REGNUM))
+      && fi->pc <= FRAME_FP(fi))
+    {
+      /* Dummy frame.  All but the window regs are in there somewhere. */
+      for (regnum = G1_REGNUM; regnum < G1_REGNUM+7; regnum++)
+	saved_regs_addr->regs[regnum] =
+	  frame_addr + (regnum - G0_REGNUM) * 4 - 0xa0;
+      for (regnum = I0_REGNUM; regnum < I0_REGNUM+8; regnum++)
+	saved_regs_addr->regs[regnum] =
+	  frame_addr + (regnum - I0_REGNUM) * 4 - 0xc0;
+      for (regnum = FP0_REGNUM; regnum < FP0_REGNUM + 32; regnum++)
+	saved_regs_addr->regs[regnum] =
+	  frame_addr + (regnum - FP0_REGNUM) * 4 - 0x80;
+      for (regnum = Y_REGNUM; regnum < NUM_REGS; regnum++)
+	saved_regs_addr->regs[regnum] =
+	  frame_addr + (regnum - Y_REGNUM) * 4 - 0xe0;
+      frame_addr = fi->bottom ?
+	fi->bottom : read_register (SP_REGNUM);
+    }
+  else if (fi->flat)
+    {
+      CORE_ADDR func_start;
+      find_pc_partial_function (fi->pc, NULL, &func_start, NULL);
+      examine_prologue (func_start, 0, fi, saved_regs_addr);
+
+      /* Flat register window frame.  */
+      saved_regs_addr->regs[RP_REGNUM] = fi->pc_addr;
+      saved_regs_addr->regs[I7_REGNUM] = fi->fp_addr;
+    }
+  else
+    {
+      /* Normal frame.  Just Local and In registers */
+      frame_addr = fi->bottom ?
+	fi->bottom : read_register (SP_REGNUM);
+      for (regnum = L0_REGNUM; regnum < L0_REGNUM+8; regnum++)
+	saved_regs_addr->regs[regnum] =
+	  (frame_addr + (regnum - L0_REGNUM) * REGISTER_RAW_SIZE (L0_REGNUM)
+	   + FRAME_SAVED_L0);
+      for (regnum = I0_REGNUM; regnum < I0_REGNUM+8; regnum++)
+	saved_regs_addr->regs[regnum] =
+	  (frame_addr + (regnum - I0_REGNUM) * REGISTER_RAW_SIZE (I0_REGNUM)
+	   + FRAME_SAVED_I0);
+    }
+  if (fi->next)
+    {
+      if (fi->flat)
+	{
+	  saved_regs_addr->regs[O7_REGNUM] = fi->pc_addr;
+	}
+      else
+	{
+	  /* Pull off either the next frame pointer or the stack pointer */
+	  CORE_ADDR next_next_frame_addr =
+	    (fi->next->bottom ?
+	     fi->next->bottom :
+	     read_register (SP_REGNUM));
+	  for (regnum = O0_REGNUM; regnum < O0_REGNUM+8; regnum++)
+	    saved_regs_addr->regs[regnum] =
+	      (next_next_frame_addr
+	       + (regnum - O0_REGNUM) * REGISTER_RAW_SIZE (O0_REGNUM)
+	       + FRAME_SAVED_I0);
+	}
+    }
+  /* Otherwise, whatever we would get from ptrace(GETREGS) is accurate */
+  saved_regs_addr->regs[SP_REGNUM] = FRAME_FP (fi);
+}
+
 /* Discard from the stack the innermost frame, restoring all saved registers.
 
    Note that the values stored in fsr by get_frame_saved_regs are *in
@@ -618,7 +793,7 @@ sparc_pop_frame ()
   char raw_buffer[REGISTER_BYTES];
   int regnum;
 
-  get_frame_saved_regs (frame, &fsr);
+  sparc_frame_find_saved_regs (frame, &fsr);
   if (fsr.regs[FP0_REGNUM])
     {
       read_memory (fsr.regs[FP0_REGNUM], raw_buffer, 32 * 4);
@@ -650,9 +825,16 @@ sparc_pop_frame ()
       for (regnum = I0_REGNUM; regnum < I0_REGNUM + 8; ++regnum)
 	if (fsr.regs[regnum])
 	  write_register (regnum, read_memory_integer (fsr.regs[regnum], 4));
-      for (regnum = O0_REGNUM; regnum < O0_REGNUM + 8; ++regnum)
+
+      /* Handle all outs except stack pointer (o0-o5; o7).  */
+      for (regnum = O0_REGNUM; regnum < O0_REGNUM + 6; ++regnum)
 	if (fsr.regs[regnum])
 	  write_register (regnum, read_memory_integer (fsr.regs[regnum], 4));
+      if (fsr.regs[O0_REGNUM + 7])
+	write_register (O0_REGNUM + 7,
+			read_memory_integer (fsr.regs[O0_REGNUM + 7], 4));
+
+      write_register (SP_REGNUM, frame->frame, 4);
     }
   else if (fsr.regs[I0_REGNUM])
     {
@@ -690,9 +872,21 @@ sparc_pop_frame ()
 	write_register (NPC_REGNUM,
 			read_memory_integer (fsr.regs[NPC_REGNUM], 4));
     }
-  else if (frame->flat && frame->pc_addr)
+  else if (frame->flat)
     {
-      pc = PC_ADJUST ((CORE_ADDR) read_memory_integer (frame->pc_addr, 4));
+      if (frame->pc_addr)
+	pc = PC_ADJUST ((CORE_ADDR) read_memory_integer (frame->pc_addr, 4));
+      else
+	{
+	  /* I think this happens only in the innermost frame, if so then
+	     it is a complicated way of saying
+	     "pc = read_register (O7_REGNUM);".  */
+	  char buf[MAX_REGISTER_RAW_SIZE];
+	  get_saved_register (buf, 0, 0, frame, O7_REGNUM, 0);
+	  pc = PC_ADJUST (extract_address
+			  (buf, REGISTER_RAW_SIZE (O7_REGNUM)));
+	}
+
       write_register (PC_REGNUM,  pc);
       write_register (NPC_REGNUM, pc + 4);
     }
