@@ -1,3 +1,10 @@
+2002-11-13  Alan Modra  <amodra@bigpond.net.au>
+
+	Merge from mainline.
+	2002-11-07  Alan Modra  <amodra@bigpond.net.au>
+	* elf64-ppc.c: Comment typo fixes.
+	(ppc64_elf_merge_private_bfd_data): Allow BFD_ENDIAN_UNKNOWN input.
+
 2002-11-11  Nick Clifton  <nickc@redhat.com>
 	
 	Import this patch from mainline:
