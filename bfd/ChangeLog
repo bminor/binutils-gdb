@@ -1,3 +1,8 @@
+Tue Feb  7 14:21:28 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ecoffswap.h (ecoff_swap_pdr_in): Zero out intern before setting
+	any of the fields.
+
 Mon Feb  6 20:01:24 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	Sat Feb  4 14:20:24 1995  David Mosberger-Tang  <davidm@piston.cs.arizona.edu>
