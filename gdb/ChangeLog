@@ -1,5 +1,10 @@
 2003-12-16  Mark Kettenis  <kettenis@gnu.org>
 
+	* solib.h (SOLIB_CREATE_CATCH_LOAD_HOOK)
+	(SOLIB_CREATE_CATCH_UNLOAD_HOOK, SOLIB_LOADED_LIBRARY_PATHNAME)
+	(SOLIB_UNLOADED_LIBRARY_PATHNAME, SOLIB_HAVE_LOAD_EVENT)
+	(SOLIB_HAVE_UNLOAD_EVENT): Remove defines.
+
 	* blockframe.c (inside_main_func): Don't treat a zero PC specially.
 	Needed to fix PR backtrace/1476.
 
