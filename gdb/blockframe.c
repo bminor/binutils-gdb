@@ -648,7 +648,12 @@ find_pc_partial_function (pc, name, address, endaddr)
     {
       /* Need to read the symbols to get a good value for the end address.  */
       if (endaddr != NULL && !pst->readin)
-	PSYMTAB_TO_SYMTAB (pst);
+	{
+	  /* Need to get the terminal in case symbol-reading produces
+	     output.  */
+	  target_terminal_ours_for_output ();
+	  PSYMTAB_TO_SYMTAB (pst);
+	}
 
       if (pst->readin)
 	{

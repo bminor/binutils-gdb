@@ -303,6 +303,9 @@ resume (step, sig)
   DO_DEFERRED_STORES;
 #endif
 
+  /* Install inferior's terminal modes.  */
+  target_terminal_inferior ();
+
   target_resume (inferior_pid, step, sig);
   discard_cleanups (old_cleanups);
 }
@@ -390,9 +393,6 @@ The same program may be running in another process.");
 	}
       breakpoints_inserted = 1;
     }
-
-  /* Install inferior's terminal modes.  */
-  target_terminal_inferior ();
 
   if (siggnal >= 0)
     stop_signal = siggnal;

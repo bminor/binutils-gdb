@@ -1,3 +1,11 @@
+Thu Oct  7 12:56:57 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* blockframe.c (find_pc_partial_function): If we call
+	PSYMTAB_TO_SYMTAB, call target_terminal_ours_for_output first.
+	This is needed now that wait_for_inferior passes in endaddr.
+	* infrun.c: Move call to target_terminal_inferior from proceed
+	to resume.
+
 Thu Oct  7 09:22:04 1993  Stu Grossman  (grossman at cygnus.com)
 
 	* blockframe.c (find_pc_partial_function):  Fix handling for PCs
