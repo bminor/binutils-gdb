@@ -15,7 +15,7 @@ SECTIONS
 {
   .text : {
     *(.text)
-    ${RELOCATING+ _etext  =  .};
+    ${RELOCATING+ etext  =  .};
     *(.lit)
     *(.shdata)
   } ${RELOCATING+ > text}
@@ -25,14 +25,14 @@ SECTIONS
   .talias :	 { } ${RELOCATING+ > talias}
   .data  : {
     *(.data)
-    ${RELOCATING+ _edata  =  .};
+    ${RELOCATING+ edata  =  .};
   } ${RELOCATING+ > data}
   .bss   SIZEOF(.data) + ADDR(.data) :
   { 					
     ${RELOCATING+ __bss_start = .};
    *(.bss)
    *(COMMON)
-     ${RELOCATING+ _end = ALIGN(0x8)};
+     ${RELOCATING+ end = ALIGN(0x8)};
   }
   .mstack  : { } ${RELOCATING+ > mstack}
   .rstack  : { } ${RELOCATING+ > rstack}
