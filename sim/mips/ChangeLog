@@ -1,3 +1,25 @@
+Tue Mar 17 19:05:20 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* Makefile.in (MIPS_EXTRA_LIBS, SIM_EXTRA_LIBS): Added
+ 	configurable settings for stand-alone simulator.
+	
+start-sanitize-sky
+	* configure.in: Added --with-sim-gpu2 option to specify path of
+ 	sky GPU2 library.  Triggers -DSKY_GPU2 for sky-gpuif.c, and
+ 	links/compiles stand-alone simulator with this library.
+	
+	* interp.c (MEM_SIZE): Increased default sky memory size to 16MB.
+end-sanitize-sky	
+	
+	* configure.in: Added X11 search, just in case.
+	
+	* configure: Regenerated.
+
+Wed Mar 11 14:09:10 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (sim_write, sim_read, load_memory, store_memory):
+ 	Replace sim_core_*_map with read_map, write_map, exec_map resp.
+
 start-sanitize-vr4320
 Tue Mar 10 10:32:22 1998  Gavin Koch  <gavin@cygnus.com>
 
