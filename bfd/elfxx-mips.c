@@ -2561,7 +2561,6 @@ mips_elf_calculate_relocation (abfd, input_bfd, input_section, info,
     case R_MIPS_PC16:
       value = mips_elf_sign_extend (addend, 16) + symbol - p;
       overflowed_p = mips_elf_overflow_p (value, 16);
-      value = (bfd_vma) ((bfd_signed_vma) value / 4);
       break;
 
     case R_MIPS_GOT_HI16:

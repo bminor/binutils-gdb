@@ -1,5 +1,10 @@
 2002-12-12  Alexandre Oliva  <aoliva@redhat.com>
 
+	* elfxx-mips.c (mips_elf_calculate_relocation): Don't divide
+	addend by 4.
+
+2002-12-12  Alexandre Oliva  <aoliva@redhat.com>
+
 	* elfxx-mips.c (struct mips_got_entry): New.
 	(struct mips_got_info): Added got_entries field.
 	(mips_elf_got_entry_hash, mips_elf_got_entry_eq): New functions.
