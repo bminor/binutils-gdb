@@ -159,6 +159,19 @@ included in the follow-on release.
 
 --
 
+Can't build IRIX -> arm GDB.
+http://sourceware.cygnus.com/ml/gdb-patches/2000-04/msg00356.html
+
+David Whedon writes:
+> Now I'm building for an embedded arm target.  If there is a way of turning
+> remote-rdi off, I couldn't find it. It looks like it gets built by default
+> in gdb/configure.tgt(line 58) Anyway, the build dies in
+> gdb/rdi-share/unixcomm.c.  SERPORT1 et. al. never get defined because we
+> aren't one of the architectures supported.
+
+
+--
+
 		------------------------------------------------
 
 Code cleanups

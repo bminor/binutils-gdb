@@ -1,3 +1,7 @@
+Thu Apr 27 10:06:42 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* TODO: Document IRIX X ARM cross compile problems.
+
 Wed Apr 26 17:50:39 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* TODO: Document BFD automake problem.
