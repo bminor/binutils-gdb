@@ -1,3 +1,8 @@
+Thu Apr  7 15:11:11 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* dbxread.c (read_dbx_dynamic_symtab): Adjust for recent changes
+	to BFD handling of dynamic symbols.
+
 Tue Apr  5 15:29:25 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* hppa-tdep.c (hppa_fix_call_dummy): If FUN is a procedure label,

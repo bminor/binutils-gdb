@@ -843,18 +843,17 @@ read_dbx_dynamic_symtab (section_offsets, objfile)
      struct objfile *objfile;
 {
   bfd *abfd = objfile->obfd;
+  struct cleanup *back_to;
   int counter;
-  bfd_size_type dynsym_count = 0;
-  struct external_nlist *dynsyms = NULL;
-  char *dynstrs = NULL;
-  bfd_size_type dynstr_size;
-  struct external_nlist *ext_symptr;
-  bfd_byte *ext_relptr;
-  bfd_size_type dynrel_count = 0;
-  PTR dynrels = NULL;
+  long dynsym_size;
+  long dynsym_count;
+  asymbol **dynsyms;
+  asymbol **symptr;
+  arelent **relptr;
+  long dynrel_size;
+  long dynrel_count;
+  arelent **dynrels;
   CORE_ADDR sym_value;
-  bfd_vma strx;
-  char *namestring;
 
   /* Check that the symbol file has dynamic symbols that we know about.
      bfd_arch_unknown can happen if we are reading a sun3 symbol file
@@ -863,56 +862,61 @@ read_dbx_dynamic_symtab (section_offsets, objfile)
      so we ignore the dynamic symbols in this case.  */
   if (bfd_get_flavour (abfd) != bfd_target_aout_flavour
       || (bfd_get_file_flags (abfd) & DYNAMIC) == 0
-      || bfd_get_arch (abfd) == bfd_arch_unknown
-      || aout_backend_info (abfd)->read_dynamic_symbols == NULL)
+      || bfd_get_arch (abfd) == bfd_arch_unknown)
     return;
 
-  dynsym_count = ((*aout_backend_info (abfd)->read_dynamic_symbols)
-		  (abfd, &dynsyms, &dynstrs, &dynstr_size));
-  if (dynsym_count == (bfd_size_type) -1)
+  dynsym_size = bfd_get_dynamic_symtab_upper_bound (abfd);
+  if (dynsym_size < 0)
     return;
+
+  dynsyms = (asymbol **) xmalloc (dynsym_size);
+  back_to = make_cleanup (free, dynsyms);
+
+  dynsym_count = bfd_canonicalize_dynamic_symtab (abfd, dynsyms);
+  if (dynsym_count < 0)
+    {
+      do_cleanups (back_to);
+      return;
+    }
 
   /* Enter dynamic symbols into the minimal symbol table
      if this is a stripped executable.  */
   if (bfd_get_symcount (abfd) <= 0)
     {
-      ext_symptr = dynsyms;
-      for (counter = 0; counter < dynsym_count; counter++, ext_symptr++)
+      symptr = dynsyms;
+      for (counter = 0; counter < dynsym_count; counter++, symptr++)
 	{
-	  int type = bfd_h_get_8 (abfd, ext_symptr->e_type);
+	  asymbol *sym = *symptr;
+	  asection *sec;
+	  int type;
 
-	  switch (type)
+	  sym = *symptr;
+	  sym_value = sym->value;
+
+	  sec = bfd_get_section (sym);
+	  if (bfd_get_section_flags (abfd, sec) & SEC_CODE)
 	    {
-	    case N_TEXT | N_EXT:
-	      sym_value = bfd_h_get_32 (abfd, ext_symptr->e_value)
-			  + ANOFFSET (section_offsets, SECT_OFF_TEXT);
-	      break;
-
-	    case N_DATA:
-	    case N_DATA | N_EXT:
-	      sym_value = bfd_h_get_32 (abfd, ext_symptr->e_value)
-			  + ANOFFSET (section_offsets, SECT_OFF_DATA);
-	      break;
-
-	    case N_BSS:
-	    case N_BSS | N_EXT:
-	      sym_value = bfd_h_get_32 (abfd, ext_symptr->e_value)
-			  + ANOFFSET (section_offsets, SECT_OFF_BSS);
-	      break;
-
-	    default:
-	      continue;
+	      sym_value += ANOFFSET (section_offsets, SECT_OFF_TEXT);
+	      type = N_TEXT;
 	    }
-
-	  strx = bfd_h_get_32 (abfd, ext_symptr->e_strx);
-	  if (strx >= dynstr_size)
+	  else if (bfd_get_section_flags (abfd, sec) & SEC_DATA)
 	    {
-	      complain (&string_table_offset_complaint, counter);
-	      namestring = "<bad dynamic string table offset>";
+	      sym_value += ANOFFSET (section_offsets, SECT_OFF_DATA);
+	      type = N_DATA;
+	    }
+	  else if (bfd_get_section_flags (abfd, sec) & SEC_ALLOC)
+	    {
+	      sym_value += ANOFFSET (section_offsets, SECT_OFF_BSS);
+	      type = N_BSS;
 	    }
 	  else
-	    namestring = strx + dynstrs;
-	  record_minimal_symbol (namestring, sym_value, type, objfile);
+	    continue;
+
+	  if (sym->flags & BSF_GLOBAL)
+	    type |= N_EXT;
+
+	  record_minimal_symbol (bfd_asymbol_name (sym), sym_value,
+				 type, objfile);
 	}
     }
 
@@ -920,81 +924,42 @@ read_dbx_dynamic_symtab (section_offsets, objfile)
      that points to the associated slot in the procedure linkage table.
      We make a mininal symbol table entry with type mst_solib_trampoline
      at the address in the procedure linkage table.  */
-  if (aout_backend_info (abfd)->read_dynamic_relocs == NULL)
-    return;
-
-  dynrel_count = ((*aout_backend_info (abfd)->read_dynamic_relocs)
-		  (abfd, &dynrels));
-  if (dynrel_count == (bfd_size_type) -1)
-    return;
-
-  for (counter = 0, ext_relptr = (bfd_byte *) dynrels;
-       counter < dynrel_count;
-       counter++, ext_relptr += obj_reloc_entry_size (abfd))
+  dynrel_size = bfd_get_dynamic_reloc_upper_bound (abfd);
+  if (dynrel_size < 0)
     {
-      int r_index;
+      do_cleanups (back_to);
+      return;
+    }
+  
+  dynrels = (arelent **) xmalloc (dynrel_size);
+  make_cleanup (free, dynrels);
 
-      if (bfd_get_arch (abfd) == bfd_arch_sparc)
-	{
-	  struct reloc_ext_external *rptr =
-	    (struct reloc_ext_external *) ext_relptr;
-	  int r_type;
+  dynrel_count = bfd_canonicalize_dynamic_reloc (abfd, dynrels, dynsyms);
+  if (dynrel_count < 0)
+    {
+      do_cleanups (back_to);
+      return;
+    }
 
-	  r_type = (rptr->r_type[0] & RELOC_EXT_BITS_TYPE_BIG)
-		    >> RELOC_EXT_BITS_TYPE_SH_BIG;
+  for (counter = 0, relptr = dynrels;
+       counter < dynrel_count;
+       counter++, relptr++)
+    {
+      arelent *rel;
 
-	  if (r_type != RELOC_JMP_SLOT)
-	    continue;
+      /* FIXME: This probably doesn't work on a Sun3.  */
 
-	  r_index = (rptr->r_index[0] << 16)
-		    | (rptr->r_index[1] << 8)
-		    | rptr->r_index[2];
-
-	  sym_value = bfd_h_get_32 (abfd, rptr->r_address);
-	}
-      else if (bfd_get_arch (abfd) == bfd_arch_m68k)
-	{
-	  struct reloc_std_external *rptr =
-	    (struct reloc_std_external *) ext_relptr;
-
-	  if ((rptr->r_type[0] & RELOC_STD_BITS_JMPTABLE_BIG) == 0)
-	    continue;
-
-	  r_index = (rptr->r_index[0] << 16)
-		    | (rptr->r_index[1] << 8)
-		    | rptr->r_index[2];
-
-	  /* Adjust address in procedure linkage table to point to
-	     the start of the bsr instruction.  */
-	  sym_value = bfd_h_get_32 (abfd, rptr->r_address) - 2;
-	}
-      else
-	{
-	  continue;
-	}
-
-      if (r_index >= dynsym_count)
-	continue;
-      ext_symptr = dynsyms + r_index;
-      if (bfd_h_get_8 (abfd, ext_symptr->e_type) != N_EXT)
+      rel = *relptr;
+      if (rel->howto->type != RELOC_JMP_SLOT)
 	continue;
 
-      strx = bfd_h_get_32 (abfd, ext_symptr->e_strx);
-      if (strx >= dynstr_size)
-	{
-	  complain (&string_table_offset_complaint, r_index);
-	  namestring = "<bad dynamic string table offset>";
-	}
-      else
-	namestring = strx + dynstrs;
-
-      prim_record_minimal_symbol (obsavestring (namestring,
-						strlen (namestring),
-						&objfile -> symbol_obstack),
-				  sym_value,
+      prim_record_minimal_symbol (bfd_asymbol_name (*rel->sym_ptr_ptr),
+				  rel->address,
 				  mst_solib_trampoline,
 				  objfile);
     }
+
+  do_cleanups (back_to);
 }
 
 /* Given pointers to an a.out symbol table in core containing dbx
