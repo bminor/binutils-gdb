@@ -354,9 +354,8 @@ case "${target}" in
     ;;
   alpha-dec-osf*)
     # ld works, but does not support shared libraries.  emacs doesn't
-    # work.  newlib is not 64 bit ready.  I'm not sure about emacs19,
-    # fileutils or grep.
-    noconfigdirs="$noconfigdirs ld emacs emacs19 fileutils grep newlib"
+    # work.  newlib is not 64 bit ready.  I'm not sure about fileutils or grep.
+    noconfigdirs="$noconfigdirs ld emacs fileutils grep newlib"
     ;;
   alpha*-*-*)
     # newlib is not 64 bit ready

@@ -1,3 +1,7 @@
+Thu Oct  5 13:26:37 1995  Brendan Kehoe  <brendan@lisa.cygnus.com>
+
+	* configure.in: Allow configuration and build of emacs19 for the alpha.
+
 Wed Oct  4 22:05:36 1995  Jason Molenda  (crash@phydeaux.cygnus.com)
 
 	* configure.in (CC): Get ^CC, not just any old CC, from
