@@ -23,6 +23,7 @@ Do-first:
 
 Things-to-keep:
 
+elf-offset.ld
 main.c
 sh1.c
 sh2.c
@@ -32,8 +33,6 @@ sun4.dat
 xcoff.dat
 
 Things-to-lose:
-
-elf-offset.ld
 
 # The lines between the "Do-last:" line and the end of the file
 # are executed as a /bin/sh shell script after everything else is
