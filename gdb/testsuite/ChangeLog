@@ -1,3 +1,28 @@
+Tue Feb  4 21:52:17 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* config/sh.exp: New file.
+
+	* config/slite.exp: Try to connect multiple times to the board
+	before rebooting. Only send a "monitor run" if need_monitor_run
+	is set.
+
+	* gdb.base/break.exp: Don't do the "stub continue" test if
+	the target has gdb_stub set.
+
+	* gdb.base/callfuncs.exp: Increase the timeout.
+
+	* gdb.base/interrupt.exp: Don't even try to compile the testcase
+	if the target has gdb,noinferiorio set.
+
+	* gdb.base/list.exp: Increase match_max to 10000 characters.
+
+	* gdb.base/sigall.exp: Check for gdb,nosignals on the target.
+
+	* gdb.base/watchpoint.exp: Check for gdb,noinferiorio on the
+	target.
+
+	* lib/gdb.exp(gdb_run_cmd): Fix for targets that use stubs.
+
 Mon Feb  3 12:09:37 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 	* gdb.base/a1-selftest.exp: Make sure we call gdb_exit before
