@@ -1,3 +1,8 @@
+Sat Feb 17 16:33:11 1996  Fred Fish  <fnf@cyngus.com>
+
+	* Makefile.in (ch-exp.o): Add dependencies.
+	(various): Add gdb_string.h to dependencies that need it.
+
 Sat Feb 17 08:57:50 1996  Fred Fish  <fnf@cygnus.com>
 
 	* symmisc.c (print_symbol_bcache_statistics): Update description for
