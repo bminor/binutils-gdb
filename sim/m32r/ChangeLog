@@ -1,3 +1,8 @@
+Tue Jan 20 14:16:02 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* cpux.h: Fix duplicate definition of h_accums field for
+	fmt_53_sadd structure.
+
 Tue Jan 20 01:42:17 1998  Doug Evans  <devans@seba.cygnus.com>
 
 start-sanitize-m32rx
