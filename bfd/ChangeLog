@@ -1,3 +1,8 @@
+2002-12-21  Nick Clifton  <nickc@redhat.com>
+
+	* coff-arm.c (coff_arm_relocate_section): Disable WINCE workaround
+	that subtracted 8 from pc relative relocations.
+
 2002-12-20  Kazu Hirata  <kazu@cs.umass.edu>
 
 	* coff-h8300.c: Fix comment typos.

@@ -1281,8 +1281,11 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 #ifdef ARM_WINCE
       /* MS ARM-CE makes the reloc relative to the opcode's pc, not
 	 the next opcode's pc, so is off by one.  */
+#if 0 /* This appears to have been true for WINCE 2.0, but it is not
+	 true for WINCE 3.0.  */
       if (howto->pc_relative && !info->relocateable)
 	addend -= 8;
+#endif
 #endif
 
       /* If we are doing a relocateable link, then we can just ignore
