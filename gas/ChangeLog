@@ -1,10 +1,308 @@
+Wed Feb 24 04:14:07 1993  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
+
+	* doc/Makefile.in (TEXIDIR): Updated for new layout.
+
+	* config/tc-sparc.c (s_common): Add support for ELF version.
+	(tc_gen_reloc) [BFD_ASSEMBLER]: New function.
+	* config/tc-sparc.h (TARGET_ARCH, TARGET_FORMAT) [BFD_ASSEMBLER]:
+	New macros.
+	(md_convert_frag): New macro.
+
+	* config/tc-m68k.c (m68k_ip): For PC-relative addressing of a
+	symbol, fix the offset so "+2" isn't required.
+
+	* config/tc-i960.c (line_comment_chars, line_separator_chars):
+	Define as common/bss.
+	(op_hash, reg_hash, areg_hash, iclasses_seen, br_cnt): Default C
+	initializers are sufficient.
+
+	* config/obj-aout.h [BFD_ASSEMBLER]: Include libaout.h from bfd.
+	(TARGET_FORMAT) [BFD_ASSEMBLER]: Default to "a.out".
+	(S_SET_*, S_GET_*, obj_frob_symbol) [BFD_ASSEMBLER]: New macros.
+	(S_SET_TYPE) [!BFD_ASSEMBLER]: New macro.
+	* config/obj-aout.c: Use PARAMS macro for declarations.  Remove
+	"IGNORE_DEBUG" conditional, since both branches are identical.
+	Use S_SET_TYPE, S_GET_TYPE, and S_GET_DESC instead of directly
+	referencing symbol structure members.
+	(obj_aout_frob_symbol) [BFD_ASSEMBLER]: New function.
+
+	* as.h (struct frag): Reordered a couple of fields for better
+	packing.
+
+	* write.c (record_alignment) [BFD_ASSEMBLER]: Record it in the
+	section info.
+	(write_contents) [BFD_ASSEMBLER]: New function.
+	(write_object_file) [BFD_ASSEMBLER]: Always handle -R here.  Call
+	fix_new with BFD_RELOC_NONE instead of 0 or NO_RELOC.  Call
+	obj_frob_file, obj_frob_symbol, tc_frob_symbol if defined.
+	(fixup_segment): Make sure common-section symbols get treated the
+	same as undefined symbols.
+	(fix_new) [BFD_ASSEMBLER]: Argument r_type is of type
+	bfd_reloc_code_real_type.  Use seg_fix_{root,tail}P derived from
+	section info.
+	* write.h (fix_new): Update prototype.
+
+	* tc.h (md_operand, md_convert_frag, tc_headers_hook,
+	md_section_align, md_undefined_symbol): Don't provide prototypes
+	if these are defined as macros.
+	(md_convert_frag) [BFD_ASSEMBLER]: BFD version needs bfd and
+	section passed.
+
+	* symbols.c (symbol_new): Argument NAME is now pointer to const.
+	Simplified STRIP_UNDERSCORE code.  Remove assumptions about null
+	pointers in freshly allocated storage. 	[BFD_ASSEMBLER]: Get new
+	BFD symbol.
+	(colon): Display other/desc fields of redefined symbol only if
+	S_GET_OTHER and S_GET_DESC are defined.
+	(symbol_make): Argument NAME is now pointer to const.
+	(symbol_find, symbol_find_base): Likewise.
+	(S_IS_*, S_GET_*, S_SET_*) [BFD_ASSEMBLER]: New functions.
+	* symbols.h: Fix prototypes for new const arguments.  Add
+	prototypes for BFD_ASSEMBLER S_* functions.
+
+	* subsegs.c (subseg_change) [BFD_ASSEMBLER]: BFD version of code
+	for changing to an existing section.
+	(subseg_new_rest) [BFD_ASSEMBLER]: Split off from subseg_new,
+	called by subseg_new and subseg_set.
+	(subseg_new) [BFD_ASSEMBLER]: Rewritten to change to new section,
+	given section name and subseg number.
+	(subseg_set) [BFD_ASSEMBLER]: New function; change to a possibly
+	new section/subsection.
+
+	* read.c: Don't include ctype.h.
+	(cons) [BFD_ASSEMBLER]: For undefined symbols, use BFD_RELOC_32
+	for now; should be machine-dependent.
+
+	* configure.in: Accept *-*-elf and *-*-solaris* as ELF format
+	targets, forcing BFD use.
+
+Wed Feb 17 18:59:03 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* config/tc-sparc.c: Use PARAMS macro for static function
+	declarations.  Use BFD_RELOC_ macros everywhere, with
+	compatibility macros declared for non-BFD mode.
+	(struct sparc_it) [BFD_ASSEMBLER]: Use bfd_reloc_code_real_type
+	instead of enum reloc_type.
+	(emit_sparc_reloc): Commented-out function deleted.
+	(md_convert_frag): Deleted.
+	(tc_aout_pre_write_hook): Don't define for BFD_ASSEMBLER.
+	(md_apply_fix): Changed calling sequence (conditionally) for BFD
+	version.
+	* config/tc-sparc.h (md_convert_frag): New macro.
+
+	* config/obj-aout.c (obj_aout_stab): Refer to undefined_section,
+	not SEG_UNKNOWN.  Use S_SET_TYPE, S_GET_TYPE, S_GET_DESC instead
+	of referencing fields directly.
+
+	* write.c (cvt_frag_to_fill): New function; extracted from
+	write_object_file.
+	(write_object_file) [! BFD_ASSEMBLER]: Call it.
+	(relax_and_size_seg) [BFD_ASSEMBLER]: New function; relax section
+	and set its size and flags.
+
+	* struc-symbol.h (struct symbol) [BFD_ASSEMBLER]: Replace some
+	fields with BFD equivalents.  Turn on back-pointers, and add
+	target-specific fields at end.
+
+Thu Feb 11 09:20:37 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* config/obj-coffbfd.c (fill_section): Don't set vaddr here.
+	(write_object_file): Set it here instead, so that fixup_segment
+	can see the correct value.
+
+Mon Feb  8 13:56:17 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* write.c (write_object_file): Check for errors and warnings and
+	bail out before processing contents.
+	(chain_frchains_together_1): New function, does most of the work
+	of remove_subsegs.
+	(chain_frchains_together) [BFD_ASSEMBLER]: New function.
+	(remove_subsegs) [! BFD]: Call it.
+	(write_object_file) [BFD_ASSEMBLER]: Converted to use BFD
+	structures and routines.
+
+	* config/obj-elf.*: New files.
+
+	* config/mips.mt, config/rs6000.mt: Deleted.
+
+	* config/h8300.mt: Don't specify compiler here.
+
+	* config/z8k.mt: The z8k code depends on the z8k oopcode table,
+	not the h8300 one.
+	* config/tc-z8k.h: Comment fix.
+
+	* write.c: Reordered some functions for better inlining.
+	(fixup_segment): Linkrelax code is no longer conditional on
+	TC_I960.
+
+Thu Feb  4 12:45:16 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* config/{h8500.mt, tc-h8500.c, tc-h8500.h, obj-coffbfd.c,
+	obj-coffbfd.h}: support for the H8/500
+
+Wed Feb  3 19:28:18 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* config/obj-vms.h (SUB_SEGMENT_ALIGN): Define VMS version here.
+	* write.c (write_object_file): Not here.
+	(fix_new): Initialize fx_addnumber.
+
+	* listing.c: Don't include target-cpu.h explicitly, since as.h
+	includes it.
+
+Thu Jan 28 00:35:40 1993  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
+
+	* write.h [BFD_ASSEMBLER]: Don't declare next_object_file_charP,
+	*_fix_root, *_fix_tail, seg_fix_rootP, seg_fix_tailP.
+	(struct fix): Reordered fields for compactness and efficiency.
+	Converted some logical fields to 1-bit fields.
+
+	* config/obj-aout.h: Use PARAMS.
+	[BFD_ASSEMBLER]: Don't define/declare AOUT_MACHTYPE, seg_N_TYPE,
+	N_TYPE_seg, DEFAULT_MAGIC_NUMBER_FOR_OBJECT_FILE.
+
+	* read.c: Don't include listing.h; as.h includes it.  Removed
+	DONTDEF code.
+	[BFD_ASSEMBLER]: Include subsegs.h.
+	(old_buffer, new_broken_words): Default initialization is
+	sufficient.
+
+	* output-file.c [BFD_ASSEMBLER]: Include bfd.h, default TARGET_MACH
+	to 0, define stdoutput.
+	(output_file_create) [BFD_ASSEMBLER]: Call bfd_perror on failure.
+	Call bfd_set_arch_mach.
+	(output_file_close) [BFD_ASSEMBLER]: Call bfd_close, not
+	bfd_close_all_done.  Call bfd_perror on failure.
+	(output_file_append) [BFD_ASSEMBLER]: Don't define.
+
+	* config/m68kcoff.mt (LOCAL_LOADLIBES): Delete definition.
+
+	* subsegs.h (segment_info_type): Always define.  Omit field scnhdr
+	if not MANY_SEGMENTS.  Define new field bfd_section if
+	BFD_ASSEMBLER.
+	(seg_info): New macro.
+
+	* expr.c, input-scrub.c: Use PARAMS macro.  Deleted unused
+	variables, and some irrelevant comments.
+
+	* Makefile.in (ALL_CFLAGS): Include $(BFDDEF).
+	(LIBS): Include $(BFDLIB).  Don't bother with $(CLIB).
+	* configure.in:  Permit --with-bfd-assembler now, with a warning.
+	Variable need_bfd is now a boolean, as is new variable bfd_gas.
+	Set BFDDEF and BFDLIB in Makefile when appropriate.
+
+	* as.c: Removed "#ifdef DONTDEF" and "#ifdef comment" code.
+	(main): Refer to flag_always_generate_output instead of
+	flagseen['Z'].
+
+	* as.c (main) [BFD_ASSEMBLER]: Open output bfd.
+	(*_section) [BFD_ASSEMBLER]: Define them.
+	(perform_an_assembly_pass) [BFD_ASSEMBLER]: Initialize them, and
+	set section flags when appropriate.
+	* as.h (SEG_NORMAL) [BFD_ASSEMBLER]: Require that the specified
+	section is not absolute, undefined, or an assembler internal one.
+	(absolute_section, undefined_section): Always define.
+	* expr.c, read.c, symbols.c: Refer to *_section, not SEG_*; break
+	switch statements into if-else trees.
+	* symbols.c [MANY_SEGMENTS]: Deleted redundant definitions of
+	SEG_BSS and SEG_DATA.
+
+	* as.h (frag_now_fix): New macro.
+	* symbols.c (colon): Use it.
+
+Wed Jan 27 21:43:53 PST 1993  Ralph Campbell  (ralphc@pyramid.com)
+
+	* config/tc-mips.c:  Added mips support for mips-dec-bsd.
+	* config/tc-mips.h:  Added mips support for mips-dec-bsd.
+	* config/ho-mipsbsd.h:  Added mips support for mips-dec-bsd.
+	* config/mips-opcode.h:  Added mips support for mips-dec-bsd.
+	* configure.in:  Added mips support for mips-dec-bsd.
+	* atof-generic.c:  Define TRUE and FALSE if not defined.
+
+Thu Jan 21 12:48:19 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* version.c: Bumped version number to 1.93.05.
+
+Wed Jan 20 17:11:53 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* config/obj-coff.c (obj_emit_relocations): Don't use #elif.
+	(obj_emit_lineno): Don't need return at end of void function.
+	(obj_symbol_new_hook): Ditto.
+
+	* config/tc-m68k.c: Removed some unused code.
+	(tc_aout_fix_to_chars): Array nbytes_r_length is now const.
+
+	* config/tc-m68k.h (TC_COUNT_RELOC): Don't emit reloc if only
+	offset field is set.
+
+Fri Jan  8 05:44:49 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* config/tc-sparc.c (architecture_requested, warn_on_bump,
+	md_relax_table): Use default zero initialization.
+	(s_reserve): Since SEG_E2 is equivalent to SEG_BSS, just use the
+	latter, instead of selecting with preprocessor conditionals.
+
+Thu Jan  7 08:58:21 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* configure.in: recognise all sparclite variants
+
+Thu Jan  7 05:25:25 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* read.c (s_data) [!BFD_ASSEMBLER]: Fix typo in 4 Jan change --
+	accidentally changed to use subseg_change where it should have
+	been subseg_new.
+
 Tue Jan  5 08:42:16 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* expr.c (operand): If character other than comma or newline is a
 	logical end-of-line character, use the newline case.
+	From Eric Youngdale:
+	(operand): Set X_add_number field for floating-point numbers.
+	(operand): Treat zero byte as end-of-operand.
 
 	* configure.in (per-target): Look for with_bfd_assembler option.
 	For now, only accept "no", until the merge is done.
+
+	Merged changes from Eric Youngdale (youngdale@v6550c.nrl.navy.mil):
+	* as.c, flonum-konst.c, hex-value.c, input-file.c, version.c,
+	  config/obj-aout.h, config/obj-vms.c: VMS -> HO_VMS.
+	* read.c: Finish conversion to S_* macros in the VMS only
+	  parts of the program. Add "const" modifier to hex_value.
+	* as.c, read.c, symbols.c, write.c: Change "ifdef VMS" to
+	  "ifdef OBJ_VMS".
+	* expr.c: Add "const" modifier to hex_value.
+	* symbols.c: Finish conversion to S_* macros in the VMS only
+	  parts of the program.  Add "const" modifier to
+	  md_[long,short]_jump_size. Remove declaration of const_flag
+	  (which will be declared in obj-vms.h).
+	* write.c: Add "const" modifier to md_[long,short]_jump_size.
+	  Fix arguments to VMS_write_object_file.
+	* config-gas.com: New file.  Script for VMS systems to set up the
+	  configuration to build gas for VMS, and create config.status.
+	* make-gas.com: Redone to work with new scheme.
+	* obj-vms.c: Patch to fix bug where we were not correctly parsing the
+	  stabs directives.
+	* obj-vms.c:  Define macros COPY_LONG and COPY_SHORT which
+	  will swap bytes if needed on a big endian system.  Use throughout
+	  as needed.
+	* obj-vms.c (obj_aout_stab):  Add code to generate listing file.
+	* obj-vms.c (VMS_typedef_parse): Add alias to correctly handle certain
+	  types of malformed stabs.  Change parsing algorithm so that we are
+	  more certain of having all of the information that we need on hand.
+	* obj-vms.c (final_forward_reference):  New function, used to help
+	  resolve the data types of as many struct elements as possible
+	  when some part of the struct is not fully defined by the compiler.
+	* obj-vms.c (VMS_LSYM_Parse):  Correctly handle case of continuation
+	  stabs directives.
+	* obj-vms.c (VMS_write_object_file): Define all vtable psects
+	  as symbols as well in the object file.  Look for external functions
+	  that start with "__vt.", and turn them into variables, since the
+	  g++ compiler is incapable of doing this.
+	* tc-vax.c: Add '1' option for backward compatibility with older GCC
+	  versions.
+	* bignum-copy.c (bignum_copy): Fix bug where we pad with zeroes.
+	* input-scrub.c (as_where): Fix bug where as would crash if we did not
+	  have the name of the source file yet.
+	* config/ho-vms.h: define HO_VMS, not HO_VAX.
 
 Mon Jan  4 05:17:26 1993  Ken Raeburn  (raeburn@cygnus.com)
 
@@ -225,6 +523,10 @@ Thu Dec  3 01:24:07 1992  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
 
 	* xmalloc.c (error): Remove declaration; as.h takes care of it.
 
+	* doc/as.texinfo: Regrouped documentation of some command-line
+	options.  Updated options documentation for m68k.  Some minor
+	wording/punctuation changes.
+
 Mon Nov 30 11:42:11 1992  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* configure.in: Accept target OS "vms".
@@ -314,6 +616,12 @@ Mon Nov 23 11:00:16 1992  Ken Raeburn  (raeburn@cygnus.com)
 
 	* tc-m68k.c (md_assemble): Don't complain about 68000 with 68881;
 	could be doing emulation.
+
+Thu Nov 19 11:47:19 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+    
+    	z8000 documentation
+	* doc/Makefile.in, doc/all.m4, doc/as-all.texinfo, doc/as.texinfo:
+	all modified.
 
 Tue Nov 10 09:49:24 1992  Ian Lance Taylor  (ian@cygnus.com)
 
@@ -560,6 +868,9 @@ Sun Aug 30 21:24:46 1992  Ian Lance Taylor  (ian@cygnus.com)
 	* Makefile.in: map "as" through program_transform_name when
 	installing.
 
+	* doc/Makefile.in: map "as" through program_transform_name when
+	installing.
+
 Sat Aug 29 12:11:12 1992  Jim Wilson  (wilson@sphagnum.cygnus.com)
 
 	* Makefile.in (as.new): Depend on LOCAL_LOADLIBES.
@@ -655,6 +966,8 @@ Tue Aug 18 14:16:38 1992  Ian Lance Taylor  (ian@cygnus.com)
 	* Makefile.in: always create installation directories.  Removed
 	MINUS_G, set CFLAGS to default to -g, added FLAGS_TO_PASS, passed
 	FLAGS_TO_PASS to recursive makes.
+
+	* doc/Makefile.in: always create installation directories.
 
 Mon Aug 17 15:09:56 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
@@ -833,6 +1146,10 @@ Tue May 26 16:47:56 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 	* config/tc-a29k.c: lint
 	* listing.c, expr.c: patches from Andrew Smith
 
+Thu May 14 17:22:48 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
+
+	* doc/Makefile.in: use m4 rather than gm4.
+
 Mon May  4 18:56:19 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* obj-coffbfd.c: use is a synonym for section, (do_relocs_for):
@@ -882,6 +1199,8 @@ Fri Mar 13 15:45:44 1992  K. Richard Pixley  (rich@cygnus.com)
 
 	* Makefile.in: pass down MAKEINFO explicitly on info.
 
+	* doc/Makefile.in: use $(MAKEINFO) not makeinfo.
+
 Fri Mar 13 08:03:03 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* flonum-const.c: renamed flonum-konst.c to stop dos name
@@ -903,6 +1222,13 @@ Wed Mar 11 23:32:42 1992  K. Richard Pixley  (rich@cygnus.com)
 	  interface for a sparse array.  All users adjusted.
 
 	* te-sun3.h: add LOCAL_LABELS_DOLLAR.
+
+Sat Mar  7 00:06:25 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
+
+	* doc/Makefile.in: commented out line for building as-all.texinfo.
+	  This is temporary.
+
+	* doc/as.texinfo, doc/as-all.texinfo: added menu item hooks.
 
 Fri Mar  6 21:57:18 1992  K. Richard Pixley  (rich@cygnus.com)
 
@@ -931,6 +1257,10 @@ Wed Feb 26 19:26:28 1992  Steve Chamberlain  (sac at thepub.cygnus.com)
 Wed Feb 26 18:04:40 1992  K. Richard Pixley  (rich@cygnus.com)
 
 	* Makefile.in, configure.in: removed traces of namesubdir,
+	  -subdirs, $(subdir), $(unsubdir), some rcs triggers.  Forced
+	  copyrights to '92, changed some from Cygnus to FSF.
+
+	* doc/Makefile.in, doc/configure.in: removed traces of namesubdir,
 	  -subdirs, $(subdir), $(unsubdir), some rcs triggers.  Forced
 	  copyrights to '92, changed some from Cygnus to FSF.
 
