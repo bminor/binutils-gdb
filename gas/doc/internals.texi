@@ -1304,8 +1304,7 @@ the subtrahend will be resolved and @code{fx_subsy} set to @code{NULL} for
 @item TC_FORCE_RELOCATION_SUB_ABS (@var{fix})
 @cindex TC_FORCE_RELOCATION_SUB_ABS
 Like @code{TC_FORCE_RELOCATION_SUB_SAME}, but used when the subtrahend is an
-absolute symbol.  If the macro is undefined a default of
-@w{@code{(S_FORCE_RELOC ((@var{fix})->fx_subsy))}} is used.
+absolute symbol.  If the macro is undefined a default of @code{0} is used.
 
 @item TC_FORCE_RELOCATION_SUB_LOCAL (@var{fix})
 @cindex TC_FORCE_RELOCATION_SUB_LOCAL

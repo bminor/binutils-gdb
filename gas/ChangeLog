@@ -1,5 +1,10 @@
 2002-11-01  Alan Modra  <amodra@bigpond.net.au>
 
+	* write.c (TC_FORCE_RELOCATION_SUB_ABS): Default to zero.
+	(TC_FORCE_RELOCATION_SUB_LOCAL): Likewise when DIFF_EXPR_OK.
+	* doc/internals.texi (TC_FORCE_RELOCATION_SUB_ABS): Document changed
+	default.
+
 	* dep-in.sed: Fix typo.
 
 2002-10-30  Daniel Jacobowitz  <drow@mvista.com>
