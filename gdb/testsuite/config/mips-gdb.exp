@@ -107,39 +107,6 @@ proc gdb_load { arg } {
 }
 
 #
-# gdb_exit -- exit the GDB
-#
-proc gdb_exit {} {
-    global GDB
-    global GDBFLAGS
-    global verbose
-
-    set timeout 5
-    send "quit\n"
-    expect {
-	eof { 
-	    if $verbose>1 then {
-		send_user "Got EOF from $GDB\n"
-	    }
-	}
-	timeout { 
-	    if $verbose>1 then {
-		send_user "Got TIMEOUT from $GDB\n"
-	    }
-	}
-	-re "The program is running.  Quit anyway.*? (y or n) $" {
-	    send "y\n"
-	    if $verbose>1 then {
-		send_user "\t\tKilling program being debugged\n"
-	    }
-	}
-    }
-    if $verbose>1 then {
-	send_user "Quitting $GDB $GDBFLAGS\n"
-    }
-}
-
-#
 # gdb_start -- start GDB running.
 #
 proc gdb_start { } {

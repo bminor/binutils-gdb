@@ -1,6 +1,6 @@
-# Test Framework Driver
-#   Copyright (C) 1988, 1990, 1991, 1992 Free Software Foundation, Inc.
-
+# Test Framework Driver for GDB driving Universal Debug Interface on 29K
+#   Copyright 1988, 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
@@ -84,39 +84,6 @@ proc gdb_load { arg } {
 	send_log $expect_out(buffer)
     }
     return 0
-}
-
-#
-# gdb_exit -- exit the GDB
-#
-proc gdb_exit {} {
-    global GDB
-    global GDBFLAGS
-    global verbose
-
-    set timeout 5
-    send "quit\n"
-    expect {
-	eof                 { 
-	    if $verbose>1 then {
-		send_user "Got EOF from $GDB\n"
-	    }
-	}
-	timeout             { 
-	    if $verbose>1 then {
-		send_user "Got TIMEOUT from $GDB\n"
-	    }
-	}
-	-re "The program is running.  Quit anyway.*? (y or n) $"\
-	    { send "y\n"
-		if $verbose>1 then {
-		    send_user "\t\tKilling program being debugged\n"
-		}
-	    }
-    }
-    if $verbose>1 then {
-	send_user "Quitting $GDB $GDBFLAGS\n"
-    }
 }
 
 #

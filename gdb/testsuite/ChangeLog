@@ -1,3 +1,16 @@
+Wed Aug 11 19:47:27 1993  John Gilmore  (gnu@rtl.cygnus.com)
+
+	* lib/gdb.exp (gdb_exit):  Move the best version of gdb_exit
+	to here.
+	* config/{mips-gdb.exp, nind-gdb.exp, udi-gdb.exp, vx-gdb.exp}:
+	Remove various versions of gdb_exit.
+	* config/vx-gdb.exp:  Remove quit_vxgdb, change a caller to call
+	gdb_exit.
+	* config/unix-gdb.exp:  gdb_exit remains here, and should override
+	the generic version, since it's doing a lot of wierd stuff that
+	the other versions aren't.  FIXME, fold it in, or abandon this
+	version.
+
 Wed Aug 11 12:09:32 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.t24/demangle.exp: Add tests for PR 3220.
