@@ -108,7 +108,7 @@ _bfd_coff_link_hash_table_create (abfd)
 /* Create an entry in a COFF debug merge hash table.  */
 
 struct bfd_hash_entry *
-coff_debug_merge_hash_newfunc (entry, table, string)
+_bfd_coff_debug_merge_hash_newfunc (entry, table, string)
      struct bfd_hash_entry *entry;
      struct bfd_hash_table *table;
      const char *string;
@@ -663,7 +663,7 @@ _bfd_coff_final_link (abfd, info)
 	      sub = p->u.indirect.section->owner;
 	      if (! sub->output_has_begun)
 		{
-		  if (! coff_link_input_bfd (&finfo, sub))
+		  if (! _bfd_coff_link_input_bfd (&finfo, sub))
 		    goto error_return;
 		  sub->output_has_begun = true;
 		}
@@ -671,7 +671,7 @@ _bfd_coff_final_link (abfd, info)
 	  else if (p->type == bfd_section_reloc_link_order
 		   || p->type == bfd_symbol_reloc_link_order)
 	    {
-	      if (! coff_reloc_link_order (abfd, &finfo, o, p))
+	      if (! _bfd_coff_reloc_link_order (abfd, &finfo, o, p))
 		goto error_return;
 	    }
 	  else
@@ -682,7 +682,7 @@ _bfd_coff_final_link (abfd, info)
 	}
     }
 
-  /* Free up the buffers used by coff_link_input_bfd.  */
+  /* Free up the buffers used by _bfd_coff_link_input_bfd.  */
 
   coff_debug_merge_hash_table_free (&finfo.debug_merge);
   debug_merge_allocated = false;
@@ -742,12 +742,12 @@ _bfd_coff_final_link (abfd, info)
 
   /* Write out the global symbols.  */
   finfo.failed = false;
-  coff_link_hash_traverse (coff_hash_table (info), coff_write_global_sym,
+  coff_link_hash_traverse (coff_hash_table (info), _bfd_coff_write_global_sym,
 			   (PTR) &finfo);
   if (finfo.failed)
     goto error_return;
 
-  /* The outsyms buffer is used by coff_write_global_sym.  */
+  /* The outsyms buffer is used by _bfd_coff_write_global_sym.  */
   if (finfo.outsyms != NULL)
     {
       free (finfo.outsyms);
@@ -1016,7 +1016,7 @@ process_embedded_commands (output_bfd, info,  abfd)
    handles all the sections and relocations of the input file at once.  */
 
 boolean
-coff_link_input_bfd (finfo, input_bfd)
+_bfd_coff_link_input_bfd (finfo, input_bfd)
      struct coff_final_link_info *finfo;
      bfd *input_bfd;
 {
@@ -1901,7 +1901,7 @@ coff_link_input_bfd (finfo, input_bfd)
 /* Write out a global symbol.  Called via coff_link_hash_traverse.  */
 
 boolean
-coff_write_global_sym (h, data)
+_bfd_coff_write_global_sym (h, data)
      struct coff_link_hash_entry *h;
      PTR data;
 {
@@ -2032,7 +2032,7 @@ coff_write_global_sym (h, data)
 /* Handle a link order which is supposed to generate a reloc.  */
 
 boolean
-coff_reloc_link_order (output_bfd, finfo, output_section, link_order)
+_bfd_coff_reloc_link_order (output_bfd, finfo, output_section, link_order)
      bfd *output_bfd;
      struct coff_final_link_info *finfo;
      asection *output_section;

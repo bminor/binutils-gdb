@@ -302,7 +302,7 @@ extern void bfd_perform_slip PARAMS ((bfd *abfd, unsigned int slip,
 /* Functions and types in cofflink.c.  */
 
 #define STRING_SIZE_SIZE (4)
-#define POWERPC_LE_PE
+
 /* We use a hash table to merge identical enum, struct, and union
    definitions in the linker.  */
 
@@ -361,7 +361,7 @@ struct coff_debug_merge_hash_table
 /* Initialize a COFF debug merge hash table.  */
 
 #define coff_debug_merge_hash_table_init(table) \
-  (bfd_hash_table_init (&(table)->root, coff_debug_merge_hash_newfunc))
+  (bfd_hash_table_init (&(table)->root, _bfd_coff_debug_merge_hash_newfunc))
 
 /* Free a COFF debug merge hash table.  */
 
@@ -449,13 +449,13 @@ extern boolean _bfd_coff_generic_relocate_section
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
 	   struct internal_reloc *, struct internal_syment *, asection **));
 
-extern struct bfd_hash_entry *coff_debug_merge_hash_newfunc
+extern struct bfd_hash_entry *_bfd_coff_debug_merge_hash_newfunc
   PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
-extern boolean coff_write_global_sym
+extern boolean _bfd_coff_write_global_sym
   PARAMS ((struct coff_link_hash_entry *, PTR));
-extern boolean coff_link_input_bfd
+extern boolean _bfd_coff_link_input_bfd
   PARAMS ((struct coff_final_link_info *, bfd *));
-extern boolean coff_reloc_link_order
+extern boolean _bfd_coff_reloc_link_order
   PARAMS ((bfd *, struct coff_final_link_info *, asection *,
 	   struct bfd_link_order *));
 

@@ -1,3 +1,10 @@
+Mon Jan 29 14:27:24 1996  Kim Knuttila  <krk@cygnus.com>
+
+	* libcoff-in.h: aligned newly exported names with bfd naming 
+	conventions. Removed an erroneous define of POWERPC_LE_PE.
+ 	* libcoff.h: Rebuild.
+	* cofflink.c, coff-ppc.c: the above function name changes
+
 Mon Jan 29 13:06:28 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elflink.h (elf_link_add_object_symbols): Only set weakdef to a
@@ -34,7 +41,7 @@ Fri Jan 26 18:33:35 1996  Ian Lance Taylor  <ian@cygnus.com>
 	_bfd_stab_section_find_nearest_line before searching the ELF
 	symbol table.  Find the closest STT_FUNC symbol, not the last one.
 	* libcoff-in.h (coff_data_type): Add line_info field.
-	* libcoff.h: Rebuild.
+ 	* libcoff.h: Rebuild.
 	* coffgen.c (coff_find_nearest_line): Try calling
 	_bfd_stab_section_find_nearest_line before searching the COFF
 	symbol table.
