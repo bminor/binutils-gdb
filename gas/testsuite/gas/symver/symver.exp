@@ -42,7 +42,11 @@ if { ([istarget "*-*-elf*"]
     run_dump_test "symver1" 
     run_error_test "symver2" ""
     run_error_test "symver3" ""
-    run_error_test "symver4" ""
-    run_error_test "symver5" ""
+    # We have to comment out symver4 and symver5, which check the
+    # missing version name, since some tests in ld/testsuite/ld-elfvers
+    # have no version names. We cannot flag an error for the missing
+    # version name.
+#    run_error_test "symver4" ""
+#    run_error_test "symver5" ""
     run_error_test "symver6" ""
 }
