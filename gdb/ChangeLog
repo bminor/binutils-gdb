@@ -1,3 +1,7 @@
+Fri Jan 27 08:48:28 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* Makefile.in (CHILL_LIB): Define as in testsuite/Makefile.in.
+
 Thu Jan 26 18:24:41 1995  Jim Kingdon  <kingdon@deneb.cygnus.com>
 
 	* symtab.c (find_pc_line): When subtracting one to get a line
