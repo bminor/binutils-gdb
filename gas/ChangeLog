@@ -1,3 +1,9 @@
+2002-06-12  Ben Elliston  <bje@redhat.com>
+
+	* symbols.c (resolve_symbol_value): Initialise final_val.
+
+	* subsegs.c (subsegs_print_statistics): Cast frchp to void *.
+
 2002-06-11  Tom Rix  <trix@redhat.com>
 
 	* config/tc-ppc.c (ppc_subseg_align): Delete.

@@ -839,7 +839,7 @@ resolve_symbol_value (symp)
      symbolS *symp;
 {
   int resolved;
-  valueT final_val;
+  valueT final_val = 0;
   segT final_seg;
 
 #ifdef BFD_ASSEMBLER
