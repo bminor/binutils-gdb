@@ -1,3 +1,9 @@
+Tue May  9 10:58:41 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* config/tc-hppa.c (md_apply_fix): Cast *valp to an integer when
+	comparing against signed values.
+	(hppa_force_relocation): Make "distance" an integer.
+
 Tue May  9 00:47:03 1995  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
 
 	* obj.h (struct format_ops) [BFD_ASSEMBLER]: New type.
