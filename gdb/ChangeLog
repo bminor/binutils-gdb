@@ -1,5 +1,11 @@
 Mon Feb 28 12:40:46 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
+	* value.h (struct value): Add modifiable field.
+	* values.c (allocate_value, record_latest_value, value_copy): Set it.
+	(record_latest_value): Don't mess with VALUE_LVAL of value.
+	* valops.c (value_assign): Check it.  Reword existing error
+	message on not_lval.
+
 	* mips-tdep.c (mips_step_skips_delay), config/mips/tm-mips.h
 	(STEP_SKIPS_DELAY): Added.
 	* infrun.c (proceed) [STEP_SKIPS_DELAY]: Check for a breakpoint in

@@ -91,6 +91,7 @@ allocate_value (type)
   VALUE_REGNO (val) = -1;
   VALUE_LAZY (val) = 0;
   VALUE_OPTIMIZED_OUT (val) = 0;
+  val->modifiable = 1;
   return val;
 }
 
@@ -210,6 +211,7 @@ value_copy (arg)
   VALUE_BITSIZE (val) = VALUE_BITSIZE (arg);
   VALUE_REGNO (val) = VALUE_REGNO (arg);
   VALUE_LAZY (val) = VALUE_LAZY (arg);
+  val->modifiable = arg->modifiable;
   if (!VALUE_LAZY (val))
     {
       memcpy (VALUE_CONTENTS_RAW (val), VALUE_CONTENTS_RAW (arg),
@@ -262,7 +264,10 @@ record_latest_value (val)
      a value on the value history never changes.  */
   if (VALUE_LAZY (val))
     value_fetch_lazy (val);
-  VALUE_LVAL (val) = not_lval;
+  /* We preserve VALUE_LVAL so that the user can find out where it was fetched
+     from.  This is a bit dubious, because then *&$1 does not just return $1
+     but the current contents of that location.  c'est la vie...  */
+  val->modifiable = 0;
   release_value (val);
 
   /* Now we regard value_history_count as origin-one

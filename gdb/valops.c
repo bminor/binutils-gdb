@@ -289,6 +289,9 @@ value_assign (toval, fromval)
   char raw_buffer[MAX_REGISTER_RAW_SIZE];
   int use_buffer = 0;
 
+  if (!toval->modifiable)
+    error ("Left operand of assignment is not a modifiable lvalue.");
+
   COERCE_ARRAY (fromval);
   COERCE_REF (toval);
 
@@ -488,7 +491,7 @@ Can't handle bitfield which doesn't fit in a single register.");
 	
 
     default:
-      error ("Left side of = operation is not an lvalue.");
+      error ("Left operand of assignment is not an lvalue.");
     }
 
   /* Return a value just like TOVAL except with the contents of FROMVAL
@@ -1101,6 +1104,7 @@ call_function_by_hand (function, nargs, args)
 	char format[80];
 	sprintf (format, "at %s", local_hex_format ());
 	name = alloca (80);
+	/* FIXME-32x64: assumes funaddr fits in a long.  */
 	sprintf (name, format, (unsigned long) funaddr);
       }
 

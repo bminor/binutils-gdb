@@ -1,5 +1,5 @@
 /* Definitions for values of C expressions, for GDB.
-   Copyright 1986, 1987, 1989, 1992 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1992, 1993, 1994 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -47,6 +47,8 @@ struct value
     /* Type of value; either not an lval, or one of the various
        different possible kinds of lval.  */
     enum lval_type lval;
+    /* Is it modifiable?  Only relevant if lval != not_lval.  */
+    int modifiable;
     /* Location of value (if lval).  */
     union
       {
@@ -102,9 +104,7 @@ struct value
     union {
       long contents[1];
       double force_double_align;
-#ifdef CC_HAS_LONG_LONG
-      long long force_longlong_align;
-#endif
+      LONGEST force_longlong_align;
     } aligner;
 
   };
@@ -200,7 +200,7 @@ struct fn_field;
 #endif
 
 extern void
-print_address_demangle PARAMS ((CORE_ADDR, FILE *, int));
+print_address_demangle PARAMS ((CORE_ADDR, GDB_FILE *, int));
 
 extern LONGEST
 value_as_long PARAMS ((value val));
@@ -237,6 +237,8 @@ extern value value_from_register PARAMS ((struct type *type, int regnum,
 extern value value_of_variable PARAMS ((struct symbol *var, struct block *b));
 
 extern value value_of_register PARAMS ((int regnum));
+
+extern int symbol_read_needs_frame PARAMS ((struct symbol *));
 
 /* FIXME:  Assumes equivalence of "struct frame_info *" and "FRAME" */
 extern value read_var_value PARAMS ((struct symbol *var,
@@ -309,6 +311,10 @@ extern value value_from_vtable_info PARAMS ((value arg, struct type *type));
 extern value value_being_returned PARAMS ((struct type *valtype, 
 					   char retbuf[REGISTER_BYTES],
 					   int struct_return));
+
+extern value value_in PARAMS ((value element, value set));
+
+extern int value_bit_index PARAMS ((struct type *type, char *addr, int index));
 
 extern int
 using_struct_return PARAMS ((value function, CORE_ADDR funcaddr,
@@ -420,7 +426,7 @@ extern CORE_ADDR
 read_register PARAMS ((int regno));
 
 extern void
-write_register PARAMS ((int regno, long val));
+write_register PARAMS ((int regno, LONGEST val));
 
 extern void
 supply_register PARAMS ((int regno, char *val));
@@ -435,7 +441,7 @@ extern void
 modify_field PARAMS ((char *addr, LONGEST fieldval, int bitpos, int bitsize));
 
 extern void
-type_print PARAMS ((struct type *type, char *varstring, FILE *stream,
+type_print PARAMS ((struct type *type, char *varstring, GDB_FILE *stream,
 		    int show));
 
 extern char *
@@ -443,28 +449,28 @@ baseclass_addr PARAMS ((struct type *type, int index, char *valaddr,
 			value *valuep, int *errp));
 
 extern void
-print_longest PARAMS ((FILE *stream, int format, int use_local,
-		       LONGEST value));
+print_longest PARAMS ((GDB_FILE *stream, int format, int use_local,
+		       LONGEST val));
 
 extern void
-print_floating PARAMS ((char *valaddr, struct type *type, FILE *stream));
+print_floating PARAMS ((char *valaddr, struct type *type, GDB_FILE *stream));
 
 extern int
-value_print PARAMS ((value val, FILE *stream, int format,
+value_print PARAMS ((value val, GDB_FILE *stream, int format,
 		     enum val_prettyprint pretty));
 
 extern int
 val_print PARAMS ((struct type *type, char *valaddr, CORE_ADDR address,
-		   FILE *stream, int format, int deref_ref,
+		   GDB_FILE *stream, int format, int deref_ref,
 		   int recurse, enum val_prettyprint pretty));
 
 extern int
-val_print_string PARAMS ((CORE_ADDR addr, unsigned int len, FILE *stream));
+val_print_string PARAMS ((CORE_ADDR addr, unsigned int len, GDB_FILE *stream));
 
 /* FIXME:  Assumes equivalence of "struct frame_info *" and "FRAME" */
 extern void
 print_variable_value PARAMS ((struct symbol *var, struct frame_info *frame,
-			      FILE *stream));
+			      GDB_FILE *stream));
 
 extern value
 value_arg_coerce PARAMS ((value));
@@ -473,7 +479,7 @@ extern int
 check_field PARAMS ((value, const char *));
 
 extern void
-c_typedef_print PARAMS ((struct type *type, struct symbol *new, FILE *stream));
+c_typedef_print PARAMS ((struct type *type, struct symbol *new, GDB_FILE *stream));
 
 extern char *
 internalvar_name PARAMS ((struct internalvar *var));
