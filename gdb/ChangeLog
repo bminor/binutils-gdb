@@ -1,3 +1,11 @@
+Mon Feb  6 18:50:59 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* i386-tdep.c (_initialize_i386_tdep): Put void decl on separate
+        line, so init.c generation works correctly.
+start-sanitize-arc
+	* arc-tdep.c (_initialize_arc_tdep): Ditto.
+end-sanitize-arc
+
 Mon Feb  6 14:44:36 1995  Rob Savoye  <rob@darkstar.cygnus.com>
 
 	* config/mips/idt.mt: Add support for the lsi33k target.
@@ -8,6 +16,7 @@ Mon Feb  6 14:44:36 1995  Rob Savoye  <rob@darkstar.cygnus.com>
 
 start-sanitize-gdbtk
 Sun Feb  5 20:32:44 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
 	* gdbtk.c (gdb_disassemble): Deference pointer to function before
 	calling it (pre-ANSI compilers generally require this).
 end-sanitize-gdbtk

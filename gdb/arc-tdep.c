@@ -355,7 +355,8 @@ get_longjmp_target(pc)
 }
 #endif /* GET_LONGJMP_TARGET */
 
-void _initialize_arc_tdep ()
+void
+_initialize_arc_tdep ()
 {
   tm_print_insn = print_insn_arc;
 }
