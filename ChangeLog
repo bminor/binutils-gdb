@@ -1,3 +1,11 @@
+Tue Jul  6 10:39:44 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
+
+	* configure.in (target sh): Build gprof.
+
+Thu Jul  1 16:52:56 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* config.sub: change -solaris to -solaris2
+
 Thu Jul  1 15:46:16 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* configure.in: Use config/mh-riscos for mips-*-sysv*.
