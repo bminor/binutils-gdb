@@ -58,7 +58,7 @@ as a cross debugger on their platform.
 
 djgpp native		Eli Zaretskii		eliz@gnu.org
 			DJ Delorie		dj@cygnus.com
-MS Windows (N.T., CE, '00) host & native
+MS Windows (NT, CE, '00, 9x, Me) host & native
 			Chris Faylor		cgf@cygnus.com
 GNU/Linux/x86 native & host
 			Mark Kettenis		kettenis@gnu.org
