@@ -26,6 +26,7 @@ Things-to-keep:
 Makefile.in
 README
 configure.in
+gdbserver.1
 low-lynx.c
 low-sparc.c
 low-sun3.c
