@@ -1467,6 +1467,17 @@ _bfd_ecoff_get_symbol_info (abfd, symbol, ret)
   bfd_symbol_info (symbol, ret);
 }
 
+/* Return whether this is a local label.  */
+
+/*ARGSUSED*/
+boolean
+_bfd_ecoff_bfd_is_local_label (abfd, symbol)
+     bfd *abfd;
+     asymbol *symbol;
+{
+  return symbol->name[0] == '$';
+}
+
 /* Print information about an ECOFF symbol.  */
 
 void

@@ -84,6 +84,8 @@ static boolean mips_elf_section_processing
 static void mips_elf_symbol_processing PARAMS ((bfd *, asymbol *));
 static boolean mips_elf_read_ecoff_info
   PARAMS ((bfd *, asection *, struct ecoff_debug_info *));
+static boolean mips_elf_is_local_label
+  PARAMS ((bfd *, asymbol *));
 static boolean mips_elf_find_nearest_line
   PARAMS ((bfd *, asection *, asymbol **, bfd_vma, const char **,
 	   const char **, unsigned int *));
@@ -791,8 +793,8 @@ mips_elf_gprel16_reloc (abfd,
 	}
     }
 
-  return gprel16_with_gp (symbol, reloc_entry, input_section, relocateable,
-			  data, elf_gp (output_bfd));
+  return gprel16_with_gp (abfd, symbol, reloc_entry, input_section,
+			  relocateable, data, elf_gp (output_bfd));
 }
 
 static bfd_reloc_status_type
@@ -1507,6 +1509,17 @@ mips_elf_read_ecoff_info (abfd, section, debug)
   return false;
 }
 
+/* MIPS ELF local labels start with '$', not 'L'.  */
+
+/*ARGSUSED*/
+static boolean
+mips_elf_is_local_label (abfd, symbol)
+     bfd *abfd;
+     asymbol *symbol;
+{
+  return symbol->name[0] == '$';
+}
+
 /* MIPS ELF uses a special find_nearest_line routine in order the
    handle the ECOFF debugging information.  */
 
@@ -2805,7 +2818,7 @@ elf32_mips_get_relocated_section_contents (abfd, link_info, link_order, data,
 	  lh = 0;
 	else
 	  {
-	    h = bfd_hash_lookup (link_info->hash, "_gp", false, false);
+	    h = bfd_hash_lookup (&link_info->hash->table, "_gp", false, false);
 	    lh = (struct bfd_link_hash_entry *) h;
 	  }
       lookup:
@@ -2990,6 +3003,7 @@ static const struct ecoff_debug_swap mips_elf_ecoff_debug_swap =
 					mips_elf_final_write_processing
 #define elf_backend_ecoff_debug_swap	&mips_elf_ecoff_debug_swap
 
+#define bfd_elf32_bfd_is_local_label	mips_elf_is_local_label
 #define bfd_elf32_find_nearest_line	mips_elf_find_nearest_line
 
 #define bfd_elf32_bfd_link_hash_table_create \

@@ -1,5 +1,10 @@
 Wed Jul  5 10:31:47 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ecoff.c (_bfd_ecoff_bfd_is_local_label): New function.
+	* libecoff.h (_bfd_ecoff_bfd_is_local_label): Declare.
+	* elf32-mips.c (mips_elf_is_local_label): New static function.
+	(bfd_elf32_bfd_is_local_label): Define.
+
 	* configure.in: Use $ac_config_sub, not $configsub.
 	* configure: Likewise.
 
