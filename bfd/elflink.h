@@ -6123,9 +6123,9 @@ elf_link_input_bfd (finfo, input_bfd)
 	    Elf_Internal_Rela *rel, *relend;
 	    /* Run through the relocs looking for any against symbols
 	       from discarded sections and section symbols from
-	       removed link-once sections. Complain about relocs
-	       against discarded sections. Zero relocs against removed
-	       link-once sections. We should really complain if
+	       removed link-once sections.  Complain about relocs
+	       against discarded sections.  Zero relocs against removed
+	       link-once sections.  We should really complain if
 	       anything in the final link tries to use it, but
 	       DWARF-based exception handling might have an entry in
 	       .eh_frame to describe a routine in the linkonce section,
@@ -6143,16 +6143,18 @@ elf_link_input_bfd (finfo, input_bfd)
 		  {
 		    struct elf_link_hash_entry *h;
 
-		    h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+		    h = sym_hashes[r_symndx - extsymoff];
 		    while (h->root.type == bfd_link_hash_indirect
 			   || h->root.type == bfd_link_hash_warning)
 		      h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
 		    /* Complain if the definition comes from a
 		       discarded section.  */
 		    if ((h->root.type == bfd_link_hash_defined
 			 || h->root.type == bfd_link_hash_defweak)
 			&& ! bfd_is_abs_section (h->root.u.def.section)
-			&& bfd_is_abs_section (h->root.u.def.section->output_section))
+			&& bfd_is_abs_section (h->root.u.def.section
+					       ->output_section))
 		      {
 #if BFD_VERSION_DATE < 20031005
 			if ((o->flags & SEC_DEBUGGING) != 0)
@@ -6194,7 +6196,7 @@ elf_link_input_bfd (finfo, input_bfd)
 #if BFD_VERSION_DATE > 20021005
 				(*finfo->info->callbacks->warning)
 				  (finfo->info,
-				   _("warning: relocation against removed section; zeroing"),
+				   _("warning: relocation against removed section"),
 				   NULL, input_bfd, o, rel->r_offset);
 #endif
 				memset (rel, 0, sizeof (*rel));
@@ -6203,21 +6205,21 @@ elf_link_input_bfd (finfo, input_bfd)
 #endif
 			      {
 				boolean ok;
-				const char *msg =
-				  _("local symbols in discarded section");
-				char *buf
-				  = (char *) bfd_malloc
-				      (strlen (sec->name) + 3
-				       + strlen (msg));
+				const char *msg
+				  = _("local symbols in discarded section %s");
+				bfd_size_type amt
+				  = strlen (sec->name) + strlen (msg) - 1;
+				char *buf = (char *) bfd_malloc (amt);
+
 				if (buf != NULL)
-				  sprintf (buf, "%s: %s", msg,
-					   sec->name);
+				  sprintf (buf, msg, sec->name);
 				else
 				  buf = (char *) sec->name;
-				ok = (*finfo->info->callbacks->undefined_symbol)
-				       (finfo->info, buf,
-					input_bfd, o, rel->r_offset,
-					true);
+				ok = (*finfo->info->callbacks
+				      ->undefined_symbol) (finfo->info, buf,
+							   input_bfd, o,
+							   rel->r_offset,
+							   true);
 				if (buf != sec->name)
 				  free (buf);
 				if (!ok)

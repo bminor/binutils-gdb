@@ -1,6 +1,12 @@
+2001-11-07  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.h (elf_link_input_bfd <removed linkonce relocs>): Fix
+	bad symtab segfault.  Formatting and warning fixes.  Improve
+	error message for internationalisation.
+
 2001-11-06  H.J. Lu  (hjl@gnu.org)
 
-	* elflink.h (elf_link_input_bfd): Complain relocs against
+	* elflink.h (elf_link_input_bfd): Complain about relocs against
 	discarded sections.
 
 2001-11-03  Alan Modra  <amodra@bigpond.net.au>
