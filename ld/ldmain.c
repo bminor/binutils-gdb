@@ -37,6 +37,16 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "ldctor.h"
 #include "lderror.h"
 
+#include <sys/stat.h>
+#if !defined(S_ISDIR) && defined(S_IFDIR)
+#define	S_ISDIR(m) (((m) & S_IFMT) == S_IFDIR)
+#endif
+
+#include <string.h>
+
+static char *get_emulation ();
+static void set_scripts_dir ();
+
 /* IMPORTS */
 extern boolean lang_has_input_file;
 extern boolean trace_files;
@@ -125,55 +135,10 @@ main (argc, argv)
      int argc;
 {
   char *emulation;
-  int i;
 
   program_name = argv[0];
 
   bfd_init ();
-
-  /* We need to find any explicitly given emulation before we initialize the
-     state that's needed by the lex&yacc argument parser (parse_args).  */
-
-#ifdef GNU960
-  check_v960 (argc, argv);
-  emulation = "gld960";
-  for (i = 1; i < argc; i++)
-    {
-      if (!strcmp (argv[i], "-Fcoff"))
-	{
-	  emulation = "lnk960";
-	  output_flavor = BFD_COFF_FORMAT;
-	  break;
-	}
-    }
-#else
-  emulation = (char *) getenv (EMULATION_ENVIRON);
-#endif
-
-  for (i = 1; i < argc; i++)
-    {
-      if (!strncmp (argv[i], "-m", 2))
-	{
-	  if (argv[i][2] == '\0')
-	    {
-	      /* -m EMUL */
-	      if (i < argc - 1)
-		{
-		  emulation = argv[i + 1];
-		  i++;
-		}
-	      else
-		{
-		  einfo("%P%F missing argument to -m\n");
-		}
-	    }
-	  else
-	    {
-	      /* -mEMUL */
-	      emulation = &argv[i][2];
-	    }
-	}
-    }
 
   /* Initialize the data about options.  */
 
@@ -187,10 +152,7 @@ main (argc, argv)
   ldsym_init ();
   ldfile_add_arch ("");
 
-  /* Set the default directory for finding script files.
-     Libraries will be searched for here too, but we want
-     them to be, anyway.  */
-  ldfile_add_library_path (SCRIPTDIR);
+  set_scripts_dir ();
 
   config.make_executable = true;
   force_make_executable = false;
@@ -205,11 +167,8 @@ main (argc, argv)
   config.magic_demand_paged = true;
   config.text_read_only = true;
   config.make_executable = true;
-  if (emulation == (char *) NULL)
-    {
-      emulation = DEFAULT_EMULATION;
-    }
 
+  emulation = get_emulation (argc, argv);
   ldemul_choose_mode (emulation);
   default_target = ldemul_choose_target ();
   lang_init ();
@@ -301,7 +260,115 @@ main (argc, argv)
     }
 
   exit (0);
-}				/* main() */
+}
+
+/* We need to find any explicitly given emulation in order to initialize the
+   state that's needed by the lex&yacc argument parser (parse_args).  */
+
+static char *
+get_emulation (argc, argv)
+     int argc;
+     char **argv;
+{
+  char *emulation;
+  int i;
+
+#ifdef GNU960
+  check_v960 (argc, argv);
+  emulation = "gld960";
+  for (i = 1; i < argc; i++)
+    {
+      if (!strcmp (argv[i], "-Fcoff"))
+	{
+	  emulation = "lnk960";
+	  output_flavor = BFD_COFF_FORMAT;
+	  break;
+	}
+    }
+#else
+  emulation = (char *) getenv (EMULATION_ENVIRON);
+  if (emulation == NULL)
+    emulation = DEFAULT_EMULATION;
+#endif
+
+  for (i = 1; i < argc; i++)
+    {
+      if (!strncmp (argv[i], "-m", 2))
+	{
+	  if (argv[i][2] == '\0')
+	    {
+	      /* -m EMUL */
+	      if (i < argc - 1)
+		{
+		  emulation = argv[i + 1];
+		  i++;
+		}
+	      else
+		{
+		  einfo("%P%F missing argument to -m\n");
+		}
+	    }
+	  else
+	    {
+	      /* -mEMUL */
+	      emulation = &argv[i][2];
+	    }
+	}
+    }
+
+  return emulation;
+}
+
+/* If directory DIR contains an "ldscripts" subdirectory,
+   add DIR to the library search path and return true,
+   else return false.  */
+
+static boolean
+check_for_scripts_dir (dir)
+     char *dir;
+{
+  size_t dirlen;
+  char *buf;
+  struct stat s;
+  boolean res;
+
+  dirlen = strlen (dir);
+  /* sizeof counts the terminating NUL.  */
+  buf = (char *) ldmalloc (dirlen + sizeof("/ldscripts"));
+  sprintf (buf, "%s/ldscripts", dir);
+
+  res = stat (buf, &s) == 0 && S_ISDIR (s.st_mode);
+  if (res)
+    {
+      buf[dirlen] = '\0';
+      ldfile_add_library_path (buf);
+    }
+  else
+    free (buf);
+
+  return res;
+}
+
+/* Set the default directory for finding script files.
+   Libraries will be searched for here too, but that's ok.  */
+
+static void
+set_scripts_dir ()
+{
+  char *end;
+
+  if (check_for_scripts_dir (SCRIPTDIR))
+    return;			/* Good--we've been installed.  */
+
+  /* Look for "ldscripts" in the dir where our binary is.  */
+  end = strrchr (program_name, '/');
+  if (!end)
+    return;			/* Hope for the best.  */
+
+  *end = '\0';
+  check_for_scripts_dir (program_name);
+  *end = '/';
+}
 
 void
 Q_read_entry_symbols (desc, entry)

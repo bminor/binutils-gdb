@@ -2449,7 +2449,8 @@ lang_process ()
     {
       /* Read the emulation's appropriate default script.  */
       char *scriptname = ldemul_get_script ();
-      size_t size = strlen (scriptname) + 13;
+      /* sizeof counts the terminating NUL.  */
+      size_t size = strlen (scriptname) + sizeof ("-Tldscripts/");
       char *buf = (char *) ldmalloc(size);
 
       sprintf (buf, "-Tldscripts/%s", scriptname);

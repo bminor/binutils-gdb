@@ -1,3 +1,11 @@
+Mon Jul 12 11:45:48 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* ldlang.c (lang_process): Use sizeof instead of magic constant.
+
+	* ldmain.c (get_emulation, check_for_scripts_dir,
+	set_scripts_dir):  New functions.
+	(main): Call them.
+
 Mon Jul 12 10:57:03 1993  Ken Raeburn  (raeburn@deneb.cygnus.com)
 
 	* scripttempl/elf.sc: Include .init, .fini, .rodata sections.
