@@ -32,6 +32,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define LYNX_SPECIAL_FN _bfd_m68klynx_special_fn
 
 #include "bfd.h"
+#include "sysdep.h"
 
 static bfd_reloc_status_type _bfd_m68klynx_special_fn PARAMS ((bfd *abfd,
 						      arelent *reloc_entry,
