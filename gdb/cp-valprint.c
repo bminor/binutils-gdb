@@ -1,6 +1,6 @@
 /* Support for printing C++ values for GDB, the GNU debugger.
    Copyright 1986, 1988, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   2000, 2001
+   2000, 2001, 2002
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -201,6 +201,8 @@ cp_is_vtbl_ptr_type (struct type *type)
 int
 cp_is_vtbl_member (struct type *type)
 {
+  /* With older versions of g++, the vtbl field pointed to an array
+     of structures.  Nowadays it points directly to the structure. */
   if (TYPE_CODE (type) == TYPE_CODE_PTR)
     {
       type = TYPE_TARGET_TYPE (type);
@@ -214,6 +216,17 @@ cp_is_vtbl_member (struct type *type)
 	         to virtual functions. */
 	      return cp_is_vtbl_ptr_type (type);
 	    }
+	}
+      else if (TYPE_CODE (type) == TYPE_CODE_STRUCT)  /* if not using thunks */
+	{
+	  return cp_is_vtbl_ptr_type (type);
+	}
+      else if (TYPE_CODE (type) == TYPE_CODE_PTR)     /* if using thunks */
+	{
+	  /* The type name of the thunk pointer is NULL when using dwarf2.
+	     We could test for a pointer to a function, but there is
+	     no type info for the virtual table either, so it wont help.  */
+	  return cp_is_vtbl_ptr_type (type);
 	}
     }
   return 0;

@@ -1,5 +1,10 @@
 2002-03-16  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 
+	* cp-valprint.c (cp_is_vtbl_ptr_type): Handle vtbl field type
+	for gcc versions after gcc-2.8.1.
+
+2002-03-16  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
+
 	* eval.c (evaluate_subexp_standard): Fix setup of ``this'' pointer
 	for method resolution.  Restore adjustment of ``this'' pointer after
 	calling value_struct_elt, which was accidentally removed during the
