@@ -132,7 +132,7 @@ CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${BFD_LIB} ${LIBIBERTY} ${RL_LIB}
 ADD_FILES = ${REGEX} ${ALLOCA}  ${GNU_MALLOC} ${XM_ADD_FILES} ${TM_ADD_FILES}
 ADD_DEPS = ${REGEX1} ${ALLOCA1} ${GNU_MALLOC} ${XM_ADD_FILES} ${TM_ADD_FILES}
 
-VERSION = 3.99
+VERSION = 4.0
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -452,6 +452,7 @@ gdb.tar.Z: force_update
 	./configure none
 	(cd doc; $(MAKE) $(MFLAGS) rdl-apps.texinfo)
 	$(MAKE) $(MFLAGS) gdb.info
+	$(MAKE) $(MFLAGS) refcard.ps
 	$(MAKE) $(MFLAGS) gdb-$(VERSION).tar.Z
 
 gdb-$(VERSION).tar.Z: ${TARFILES} ${TARDIRS} gdb.info

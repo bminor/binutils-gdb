@@ -1,3 +1,9 @@
+Fri Aug 23 13:46:52 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	* GDB-4.0 release!
+	* Makefile.in (VERSION):  Roll to 4.0.
+	(gdb.tar.Z):  Make refcard.ps as well, for shipment.
+
 Fri Aug 23 11:46:08 1991  Roland H. Pesch  (pesch at cygint.cygnus.com)
 
 	* doc/gdb.texinfo: update, fix bugs in "Installing" appendix
