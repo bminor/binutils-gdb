@@ -1,3 +1,8 @@
+Thu Sep 24 09:20:03 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* d30v-opc.c: Add FLAG_JSR attribute to DBT, REIT, RTD, and TRAP
+	insns. 
+
 Tue Sep 22 17:55:14 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* d30v-opc.c: Add use of EITHER_BUT_PREFER_MU execution unit
