@@ -1,3 +1,8 @@
+Mon Sep  8 11:20:46 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* as.h: Don't declare alloca if it is a macro.
+	* macro.c: Likewise.
+
 start-sanitize-tx19
 Sun Sep  7 16:04:53 1997  Gavin Koch  <gavin@cygnus.com>
 
