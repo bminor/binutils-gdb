@@ -1,3 +1,7 @@
+Mon Oct 11 14:11:32 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
+
+	* config/ho-sunos.h: remove extern time declaration
+
 Mon Oct 11 16:14:43 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* messages.c (as_fatal): Do mention that it's the assembler that

@@ -53,7 +53,6 @@ extern int sscanf ();
 extern int strcmp ();
 extern int strlen ();
 extern int strncmp ();
-extern int time ();
 extern int ungetc ();
 extern int vfprintf ();
 extern int vprintf ();
