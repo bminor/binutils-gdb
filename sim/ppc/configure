@@ -2830,6 +2830,16 @@ else
   sim_devzero=""
 fi
 
+echo $ac_n "checking for common simulator directory""... $ac_c" 1>&6
+echo "configure:2835: checking for common simulator directory" >&5
+if test -e "${srcdir}/../common/callback.c"; then
+  echo "$ac_t""yes" 1>&6
+  sim_callback="callback.o targ-map.o"
+else
+  echo "$ac_t""no" 1>&6
+  sim_callback=""
+fi
+
 
 
 
@@ -2838,7 +2848,7 @@ AR=${AR-ar}
 # Extract the first word of "ranlib", so it can be a program name with args.
 set dummy ranlib; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:2842: checking for $ac_word" >&5
+echo "configure:2852: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_RANLIB'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -2863,6 +2873,7 @@ if test -n "$RANLIB"; then
 else
   echo "$ac_t""no" 1>&6
 fi
+
 
 
 
@@ -3098,6 +3109,7 @@ s%@sim_model_issue@%$sim_model_issue%g
 s%@sim_stdio@%$sim_stdio%g
 s%@sim_termio@%$sim_termio%g
 s%@sim_devzero@%$sim_devzero%g
+s%@sim_callback@%$sim_callback%g
 
 CEOF
 EOF

@@ -1,3 +1,18 @@
+Wed Jan 29 12:32:41 1997  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* configure.in (sim_callback): If the gdb is post 4.16, configure
+	callback support from the common directory.
+	* configure: Regenerate.
+
+	* Makefile.in (BUILT_SRC_WO_CONFIG): Add targ-vals.{h,def} and
+	targ-map.c.
+	(GDB_OBJ): Add callback support configured in.
+	(gentmap,targ-vals.def): Build from common directory.
+	(targ-vals.h,targ-map.c): Build by running gentmap.
+	(callback.o): Build from source in common directory.
+	(targ-map.o): Add dependency.
+	(clean): Remove gentmap.
+
 Thu Jan 23 09:07:26 1997  Andrew Cagney  <cagney@kremvax.tpgi.com.au>
 
 	* hw_trace.c (hw_trace_init_data): Delete.  The trace options need

@@ -222,7 +222,8 @@ BUILT_SRC_WO_CONFIG = \
 	support.h support.c \
 	pk.h \
 	hw.h hw.c \
-	filter_host.c
+	filter_host.c \
+	targ-vals.h targ-map.c targ-vals.def
 
 BUILT_SRC = \
 	$(BUILT_SRC_WO_CONFIG) \
@@ -298,7 +299,7 @@ LIB_OBJ = \
 	options.o
 
 
-GDB_OBJ = sim_calls.o 
+GDB_OBJ = sim_calls.o @sim_callback@
 
 HW_SRC = @sim_hw_src@
 HW_OBJ = @sim_hw_obj@
@@ -382,6 +383,30 @@ support.o: support.c support.h $(IDECODE_H) $(CPU_H)
 itable.o: itable.c itable.h
 
 mon.o: mon.c $(CPU_H)
+
+# GDB after 4.16 expects the default_callback structure to be setup.
+# As a kludge, build the common stuff here for now.
+gentmap: ../common/gentmap.c Makefile targ-vals.def
+	$(CC_FOR_BUILD) $(BUILD_FLAGS) -I. -I../common -I$(srcdir)/../common -o gentmap $< $(BUILD_LIBS)
+
+targ-vals.def: ../common/nltvals.def
+	rm -f targ-vals.def
+	ln -s $< targ-vals.def || cp $< targ-vals.def
+
+targ-vals.h: Makefile gentmap $(srcdir)/../../move-if-change
+	rm -f tmp-vals.h
+	./gentmap -h > tmp-vals.h
+	$(srcdir)/../../move-if-change tmp-vals.h targ-vals.h
+
+targ-map.c: Makefile gentmap $(srcdir)/../../move-if-change
+	rm -f tmp-map.c
+	./gentmap -c > tmp-map.c
+	$(srcdir)/../../move-if-change tmp-map.c targ-map.c
+
+callback.o: ../common/callback.c targ-vals.h
+	$(CC) -c $(STD_CFLAGS) $<
+
+targ-map.o: targ-map.c targ-vals.h
 
 # Rebuild options whenever something changes so the date/time is up to date.
 options.o: options.c $(BASICS_H) $(CPU_H) $(IDECODE_H) $(INLINE) $(LIB_SRC) $(BUILT_SRC) config.status Makefile defines.h
@@ -573,7 +598,7 @@ TAGS: $(BUILT_SRC)
 	etags $(srcdir)/*.h $(srcdir)/*.c $(BUILT_SRC)
 
 clean mostlyclean:
-	rm -f tmp-* *.[oasi] core psim run igen dgen $(BUILT_SRC_WO_CONFIG)
+	rm -f tmp-* *.[oasi] core psim run igen dgen $(BUILT_SRC_WO_CONFIG) gentmap
 
 distclean realclean: clean
 	rm -f TAGS Makefile config.cache config.status config.h defines.h stamp-h config.log
