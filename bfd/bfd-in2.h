@@ -1524,11 +1524,14 @@ enum bfd_architecture
 #define bfd_mach_mips4010              4010
 #define bfd_mach_mips4100              4100
 #define bfd_mach_mips4111              4111
+#define bfd_mach_mips4120              4120
 #define bfd_mach_mips4300              4300
 #define bfd_mach_mips4400              4400
 #define bfd_mach_mips4600              4600
 #define bfd_mach_mips4650              4650
 #define bfd_mach_mips5000              5000
+#define bfd_mach_mips5400              5400
+#define bfd_mach_mips5500              5500
 #define bfd_mach_mips6000              6000
 #define bfd_mach_mips8000              8000
 #define bfd_mach_mips10000             10000

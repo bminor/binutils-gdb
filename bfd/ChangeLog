@@ -1,3 +1,22 @@
+2002-09-30  Gavin Romig-Koch  <gavin@redhat.com>
+            Ken Raeburn  <raeburn@cygnus.com>
+            Aldy Hernandez  <aldyh@redhat.com>
+            Eric Christopher  <echristo@redhat.com>
+            Richard Sandiford  <rsandifo@redhat.com>
+
+	* archures.c (bfd_mach_mips4120, bfd_mach_mips5400): New.
+	(bfd_mach_mips5500): New.
+	* cpu-mips.c (I_mips4120, I_mips5400, I_mips5500): New.
+	(arch_info_struct): Add corresponding entries here.
+	* elfxx-mips.c (_bfd_elf_mips_mach): Handle E_MIPS_MACH_4120,
+	E_MIPS_MACH_5400 and E_MIPS_MACH_5500.
+	(_bfd_mips_elf_final_write_processing): Handle bfd_mach_mips4120,
+	bfd_mach_mips5400 and bfd_mach_mips5500.
+	(_bfd_mips_elf_mach_extends_p): New function.
+	(_bfd_mips_elf_merge_private_bfd_data): Use it to help merge
+	the EF_MIPS_MACH flags.
+	* bfd-in2.h: Regenerate.
+
 2002-09-28  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* elf32-vax.c (elf_vax_size_dynamic_section): Don't strip
