@@ -5,6 +5,8 @@ Thu Nov 20 04:11:27 1997  Geoffrey Noer  <noer@cygnus.com>
         * configure: regenerate
         * Makefile.in: pepper with EXEEXTs in appropriate places,
 	set SHELL = @SHELL@ for those lame hosts that don't have a /bin/sh
+	For some reason, EXEEXT isn't getting substututed in correctly
+	so for now, set EXEEXT to empty string
 
 Mon Nov 17 15:35:06 1997  Doug Evans  <devans@canuck.cygnus.com>
 

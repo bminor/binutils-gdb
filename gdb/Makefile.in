@@ -42,7 +42,7 @@ infodir = @infodir@
 includedir = @includedir@
 
 SHELL = @SHELL@
-EXEEXT = @EXEEXT@
+EXEEXT = # @EXEEXT@ # This isn't getting substituted in correctly :-(
 
 INSTALL = @INSTALL@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
