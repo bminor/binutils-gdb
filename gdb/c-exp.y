@@ -659,41 +659,14 @@ variable:	name_not_typename
 
 			  if (sym)
 			    {
-			      switch (SYMBOL_CLASS (sym))
+			      if (symbol_read_needs_frame (sym))
 				{
-				case LOC_REGISTER:
-				case LOC_ARG:
-				case LOC_REF_ARG:
-				case LOC_REGPARM:
-				case LOC_REGPARM_ADDR:
-				case LOC_LOCAL:
-				case LOC_LOCAL_ARG:
-				case LOC_BASEREG:
-				case LOC_BASEREG_ARG:
 				  if (innermost_block == 0 ||
 				      contained_in (block_found, 
 						    innermost_block))
 				    innermost_block = block_found;
-				case LOC_UNDEF:
-				case LOC_CONST:
-				case LOC_STATIC:
-				case LOC_TYPEDEF:
-				case LOC_LABEL:
-				case LOC_BLOCK:
-				case LOC_CONST_BYTES:
-				case LOC_OPTIMIZED_OUT:
-
-				  /* In this case the expression can
-				     be evaluated regardless of what
-				     frame we are in, so there is no
-				     need to check for the
-				     innermost_block.  These cases are
-				     listed so that gcc -Wall will
-				     report types that may not have
-				     been considered.  */
-
-				  break;
 				}
+
 			      write_exp_elt_opcode (OP_VAR_VALUE);
 			      /* We want to use the selected frame, not
 				 another more inner frame which happens to

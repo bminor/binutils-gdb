@@ -467,7 +467,7 @@ read_register (regno)
 void
 write_register (regno, val)
      int regno;
-     long val;
+     LONGEST val;
 {
   PTR buf;
   int size;
@@ -518,6 +518,45 @@ supply_register (regno, val)
 #endif
 }
 
+/* Will calling read_var_value or locate_var_value on SYM end
+   up caring what frame it is being evaluated relative to?  SYM must
+   be non-NULL.  */
+int
+symbol_read_needs_frame (sym)
+     struct symbol *sym;
+{
+  switch (SYMBOL_CLASS (sym))
+    {
+      /* All cases listed explicitly so that gcc -Wall will detect it if
+	 we failed to consider one.  */
+    case LOC_REGISTER:
+    case LOC_ARG:
+    case LOC_REF_ARG:
+    case LOC_REGPARM:
+    case LOC_REGPARM_ADDR:
+    case LOC_LOCAL:
+    case LOC_LOCAL_ARG:
+    case LOC_BASEREG:
+    case LOC_BASEREG_ARG:
+      return 1;
+
+    case LOC_UNDEF:
+    case LOC_CONST:
+    case LOC_STATIC:
+    case LOC_TYPEDEF:
+
+    case LOC_LABEL:
+      /* Getting the address of a label can be done independently of the block,
+	 even if some *uses* of that address wouldn't work so well without
+	 the right frame.  */
+
+    case LOC_BLOCK:
+    case LOC_CONST_BYTES:
+    case LOC_OPTIMIZED_OUT:
+      return 0;
+    }
+}
+
 /* Given a struct symbol for a variable,
    and a stack frame id, read the value of the variable
    and return a (pointer to a) struct value containing the value. 

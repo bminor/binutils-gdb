@@ -1,3 +1,11 @@
+Fri Oct  8 14:56:21 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* findvar.c, value.h (symbol_read_needs_frame): New function.
+	* c-exp.y, m2-exp.y: Call it instead of having our own switch on
+	the symbol's class.
+	* valops.c (value_of_variable): Use symbol_read_needs_frame to
+	decide whether we care about finding a frame.
+
 Fri Oct  8 02:34:21 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* blockframe.c (get_frame_block):  Do not adjust pc if the frame

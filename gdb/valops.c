@@ -511,7 +511,7 @@ value_of_variable (var, b)
   else
     {
       fr = block_innermost_frame (b);
-      if (fr == NULL)
+      if (fr == NULL && symbol_read_needs_frame (var))
 	{
 	  if (BLOCK_FUNCTION (b) != NULL
 	      && SYMBOL_NAME (BLOCK_FUNCTION (b)) != NULL)

@@ -599,35 +599,14 @@ variable:	NAME
 					       NULL);
 			  if (sym)
 			    {
-			      switch (sym->class)
+			      if (symbol_read_needs_frame (sym))
 				{
-				case LOC_REGISTER:
-				case LOC_ARG:
-				case LOC_LOCAL:
-				case LOC_REF_ARG:
-				case LOC_REGPARM:
-				case LOC_REGPARM_ADDR:
-				case LOC_LOCAL_ARG:
-				case LOC_BASEREG:
-				case LOC_BASEREG_ARG:
 				  if (innermost_block == 0 ||
-				      contained_in (block_found,
+				      contained_in (block_found, 
 						    innermost_block))
 				    innermost_block = block_found;
-				  break;
-
-				case LOC_UNDEF:
-				case LOC_CONST:
-				case LOC_STATIC:
-				case LOC_TYPEDEF:
-				case LOC_LABEL:	/* maybe should go above? */
-				case LOC_BLOCK:
-				case LOC_CONST_BYTES:
-				case LOC_OPTIMIZED_OUT:
-				  /* These are listed so gcc -Wall will reveal
-				     un-handled cases.  */
-				  break;
 				}
+
 			      write_exp_elt_opcode (OP_VAR_VALUE);
 			      /* We want to use the selected frame, not
 				 another more inner frame which happens to
