@@ -57,17 +57,17 @@ if {[file exists $objdir/$subdir/$binfile] && [istarget "hppa*-*-bsd*"]} then {
 	# Continue until initial set of b.
 	send "cont\n"
 	expect {
-	    -re "Continuing.*Watchpoint.*, b.*Old value = 0.*New value = 10.*$prompt $" { pass "watchpoint hit, first time" }
+	    -re "Continuing.*\[Ww\]atchpoint.*: b.*Old value = 0.*New value = 10.*$prompt $" { pass "watchpoint hit, first time" }
 	    -re ".*$prompt $" { fail "missed first watchpoint" ; return }
 	    timeout { fail "missed first watchpoint (timeout)" ; return }
 	}
 
 	# Continue inward for a few iterations
-	gdb_test "continue" "Breakpoint.* recurse \[(\]+a=9\[)\]+"
-	gdb_test "continue" "Breakpoint.* recurse \[(\]+a=8\[)\]+"
-	gdb_test "continue" "Breakpoint.* recurse \[(\]+a=7\[)\]+"
-	gdb_test "continue" "Breakpoint.* recurse \[(\]+a=6\[)\]+"
-	gdb_test "continue" "Breakpoint.* recurse \[(\]+a=5\[)\]+"
+	gdb_test "continue" "Breakpoint.* recurse \\(+a=9\\).*"
+	gdb_test "continue" "Breakpoint.* recurse \\(+a=8\\).*"
+	gdb_test "continue" "Breakpoint.* recurse \\(+a=7\\).*"
+	gdb_test "continue" "Breakpoint.* recurse \\(+a=6\\).*"
+	gdb_test "continue" "Breakpoint.* recurse \\(+a=5\\).*"
 
 	# Put a watchpoint on another instance of b
 	gdb_test "watch b" ".*\[Ww\]atchpoint \[0-9]*: b"
@@ -75,7 +75,7 @@ if {[file exists $objdir/$subdir/$binfile] && [istarget "hppa*-*-bsd*"]} then {
 	# Continue until initial set of b (second instance).
 	send "cont\n"
 	expect {
-	    -re "Continuing.*Watchpoint.*, b.*Old value = 0.*New value = 5.*$prompt $" { pass "watchpoint hit (second instance)" }
+	    -re "Continuing.*\[Ww\]atchpoint.*: b.*Old value = 0.*New value = 5.*$prompt $" { pass "watchpoint hit (second instance)" }
 	    -re ".*$prompt $" {
 		fail "missed watchpoint (second instance)"
 		return
@@ -87,15 +87,15 @@ if {[file exists $objdir/$subdir/$binfile] && [istarget "hppa*-*-bsd*"]} then {
 	}
 
 	# Continue inward for a few iterations
-	gdb_test "continue" "Breakpoint.* recurse \[(\]+a=4\[)\]+"
-	gdb_test "continue" "Breakpoint.* recurse \[(\]+a=3\[)\]+"
-	gdb_test "continue" "Breakpoint.* recurse \[(\]+a=2\[)\]+"
-	gdb_test "continue" "Breakpoint.* recurse \[(\]+a=1\[)\]+"
+	gdb_test "continue" "Breakpoint.* recurse \\(+a=4\\).*"
+	gdb_test "continue" "Breakpoint.* recurse \\(+a=3\\).*"
+	gdb_test "continue" "Breakpoint.* recurse \\(+a=2\\).*"
+	gdb_test "continue" "Breakpoint.* recurse \\(+a=1\\).*"
 
 	# Continue until second set of b (second instance).
 	send "cont\n"
 	expect {
-	    -re "Continuing.*Watchpoint.*, b.*Old value = 5.*New value = 120.*return.*$prompt $" { pass "watchpoint hit, second time (second instance)" }
+	    -re "Continuing.*\[Ww\]atchpoint.*: b.*Old value = 5.*New value = 120.*return.*$prompt $" { pass "watchpoint hit, second time (second instance)" }
 	    -re ".*$prompt $" {
 		fail "missed watchpoint, second time (second instance)"
 		return
@@ -109,7 +109,7 @@ if {[file exists $objdir/$subdir/$binfile] && [istarget "hppa*-*-bsd*"]} then {
 	# Continue again.  We should have a watchpoint go out of scope now
 	send "cont\n"
 	expect {
-	    -re "Continuing.*Watchpoint.*deleted.*recurse \[(\]+a=6\[)\]+ .*$prompt $" {pass "watchpoint deleted when leaving scope (second instance)" }
+	    -re "Continuing.*\[Ww\]atchpoint.*deleted.*recurse \[(\]+a=6\[)\]+ .*$prompt $" {pass "watchpoint deleted when leaving scope (second instance)" }
 	    -re ".*prompt $" {
 		fail "watchpoint not deleted when leaving scope (second instance)"
 		return
@@ -123,7 +123,7 @@ if {[file exists $objdir/$subdir/$binfile] && [istarget "hppa*-*-bsd*"]} then {
 	# Continue until second set of b (first instance).
 	send "cont\n"
 	expect {
-	    -re "Continuing.*Watchpoint.*b.*Old value = 10.*New value = 3628800.*return.*$prompt $" { pass "watchpoint hit, second time" }
+	    -re "Continuing.*\[Ww\]atchpoint.*b.*Old value = 10.*New value = 3628800.*return.*$prompt $" { pass "watchpoint hit, second time" }
 	    -re ".*$prompt $" {
 		fail "missed watchpoint, second time)"
 		return
@@ -137,7 +137,7 @@ if {[file exists $objdir/$subdir/$binfile] && [istarget "hppa*-*-bsd*"]} then {
 	# Continue again.  We should have a watchpoint go out of scope now
 	send "cont\n"
 	expect {
-	    -re "Continuing.*Watchpoint.*deleted.*main \[(\]+\[)\]+ .*$prompt $" {pass "watchpoint deleted when leaving scope" }
+	    -re "Continuing.*\[Ww\]atchpoint.*deleted.*main \[(\]+\[)\]+ .*$prompt $" {pass "watchpoint deleted when leaving scope" }
 	    -re ".*prompt $" {
 		fail "watchpoint not deleted when leaving scope"
 		return
@@ -151,9 +151,4 @@ if {[file exists $objdir/$subdir/$binfile] && [istarget "hppa*-*-bsd*"]} then {
 
     # Restore the preserved old timeout value.
     set timeout $timeoutsave
-}
-
-if [istarget "a29k-*-udi"] then {
-    # FIXME: If PR 2415 is fixed, this is not needed.
-    gdb_target_udi
 }
