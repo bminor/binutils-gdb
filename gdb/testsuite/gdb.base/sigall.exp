@@ -44,32 +44,12 @@ proc test_one_sig {nextsig} {
     gdb_test "b handle_$thissig" "Breakpoint \[0-9\]"
     gdb_test "b gen_$nextsig" "Breakpoint \[0-9\]"
     if $this_sig_supported then {
-	if {"$thissig" == "POLL"} then {
-	    # If SIGIO and SIGPOLL are the same signal it gets reported
-	    # as SIGIO; it is a feature for GDB to always use the "preferred"
-	    # name (the POSIX name if there is one, etc.); I suspect that is
-	    # SIGIO in this case but I'm not sure.
-	    set pattern "(POLL|IO)"
-	} else {
-	    set pattern $thissig
-	}
 	gdb_test "continue" \
-	    "Continuing.*Program received signal SIG$pattern" \
+	    "Continuing.*Program received signal SIG$thissig" \
 	    "get signal $thissig"
     }
-    if {"$thissig" == "IO"} then {
-	# SIGIO and SIGPOLL might be the same signal.
-	# If so we end up at handle_POLL because we
-	# establish the handler for SIGPOLL after SIGIO.
-	set pattern "Breakpoint.*handle_(POLL|IO)"
-    } else {
-	set pattern "Breakpoint.*handle_$thissig" 
-    }
 
-    # On the alpha we don't end up in handle_ABRT.  I don't know why.
-    if {"$thissig" != "ABRT" || ![istarget "*-*-osf*"]} then {
-	gdb_test "continue" $pattern "send signal $thissig"
-    }
+    gdb_test "continue" "Breakpoint.*handle_$thissig" "send signal $thissig"
 
     send "continue\n"
     expect {
@@ -107,13 +87,6 @@ test_one_sig CHLD
 test_one_sig TTIN
 test_one_sig TTOU
 test_one_sig IO
-
-# Set an extra breakpoint at handle_POLL, to deal with the fact that
-# SIGIO and SIGPOLL might be the same signal.
-
-gdb_test "b handle_POLL" "Breakpoint \[0-9\]" \
-    "set extra handle_POLL breakpoint"
-
 test_one_sig XCPU
 test_one_sig XFSZ
 test_one_sig VTALRM
