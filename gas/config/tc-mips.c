@@ -1423,7 +1423,6 @@ macro_build (place, counter, ep, name, fmt, va_alist)
 		  || r == BFD_RELOC_MIPS_CALL16
 		  || (ep->X_op == O_subtract
 		      && now_seg == text_section
-		      && S_GET_SEGMENT (ep->X_op_symbol) == text_section
 		      && r == BFD_RELOC_PCREL_LO16));
 	  continue;
 
@@ -1436,7 +1435,6 @@ macro_build (place, counter, ep, name, fmt, va_alist)
 			      || r == BFD_RELOC_HI16))
 		      || (ep->X_op == O_subtract
 			  && now_seg == text_section
-			  && S_GET_SEGMENT (ep->X_op_symbol) == text_section
 			  && r == BFD_RELOC_PCREL_HI16_S)));
 	  if (ep->X_op == O_constant)
 	    {
@@ -1592,67 +1590,97 @@ load_register (counter, reg, ep)
      int reg;
      expressionS *ep;
 {
-  assert (ep->X_op == O_constant);
-  if (ep->X_add_number >= -0x8000 && ep->X_add_number < 0x8000)
+  int shift;
+  expressionS hi32, lo32;
+
+  if (ep->X_op != O_big)
     {
-      /* No need to ever use daddiu here, since we are adding in
-         register $zero.  */
-      macro_build ((char *) NULL, counter, ep, "addiu", "t,r,j", reg, 0,
-		   (int) BFD_RELOC_LO16);
+      assert (ep->X_op == O_constant);
+      if (ep->X_add_number >= -0x8000 && ep->X_add_number < 0x8000)
+	{
+	  /* We can handle 16 bit signed values with an addiu to
+	     $zero.  No need to ever use daddiu here, since $zero and
+	     the result are always correct in 32 bit mode.  */
+	  macro_build ((char *) NULL, counter, ep, "addiu", "t,r,j", reg, 0,
+		       (int) BFD_RELOC_LO16);
+	  return;
+	}
+      else if (ep->X_add_number >= 0 && ep->X_add_number < 0x10000)
+	{
+	  /* We can handle 16 bit unsigned values with an ori to
+             $zero.  */
+	  macro_build ((char *) NULL, counter, ep, "ori", "t,r,i", reg, 0,
+		       (int) BFD_RELOC_LO16);
+	  return;
+	}
+      else if ((ep->X_add_number &~ (offsetT) 0x7fffffff) == 0
+	       || ((ep->X_add_number &~ (offsetT) 0x7fffffff)
+		   == ~ (offsetT) 0x7fffffff))
+	{
+	  /* 32 bit values require an lui.  */
+	  macro_build ((char *) NULL, counter, ep, "lui", "t,u", reg,
+		       (int) BFD_RELOC_HI16);
+	  if ((ep->X_add_number & 0xffff) != 0)
+	    macro_build ((char *) NULL, counter, ep, "ori", "t,r,i", reg, reg,
+			 (int) BFD_RELOC_LO16);
+	  return;
+	}
     }
-  else if (ep->X_add_number >= 0 && ep->X_add_number < 0x10000)
-    macro_build ((char *) NULL, counter, ep, "ori", "t,r,i", reg, 0,
-		 (int) BFD_RELOC_LO16);
-  else if ((ep->X_add_number &~ (offsetT) 0x7fffffff) == 0
-	   || ((ep->X_add_number &~ (offsetT) 0x7fffffff)
-	       == ~ (offsetT) 0x7fffffff))
-    {
-      macro_build ((char *) NULL, counter, ep, "lui", "t,u", reg,
-		   (int) BFD_RELOC_HI16);
-      if ((ep->X_add_number & 0xffff) != 0)
-	macro_build ((char *) NULL, counter, ep, "ori", "t,r,i", reg, reg,
-		     (int) BFD_RELOC_LO16);
-    }
-  else if (mips_isa < 3)
+
+  /* The value is larger than 32 bits.  */
+
+  if (mips_isa < 3)
     {
       as_bad ("Number larger than 32 bits");
       macro_build ((char *) NULL, counter, ep, "addiu", "t,r,j", reg, 0,
 		   (int) BFD_RELOC_LO16);
+      return;
     }
-  else
-    {
-      int shift;
-      expressionS hi32, lo32;
 
+  if (ep->X_op != O_big)
+    {
       hi32 = *ep;
       shift = 32;
       hi32.X_add_number >>= shift;
       hi32.X_add_number &= 0xffffffff;
       if ((hi32.X_add_number & 0x80000000) != 0)
 	hi32.X_add_number |= ~ (offsetT) 0xffffffff;
-      load_register (counter, reg, &hi32);
       lo32 = *ep;
       lo32.X_add_number &= 0xffffffff;
-      if ((lo32.X_add_number & 0xffff0000) == 0)
-	macro_build ((char *) NULL, counter, NULL, "dsll32", "d,w,<", reg,
-		     reg, 0);
-      else
-	{
-	  expressionS mid16;
-
-	  macro_build ((char *) NULL, counter, NULL, "dsll", "d,w,<", reg,
-		       reg, 16);
-	  mid16 = lo32;
-	  mid16.X_add_number >>= 16;
-	  macro_build ((char *) NULL, counter, &mid16, "ori", "t,r,i", reg,
-		       reg, (int) BFD_RELOC_LO16);
-	  macro_build ((char *) NULL, counter, NULL, "dsll", "d,w,<", reg,
-		       reg, 16);
-	}
-      if ((lo32.X_add_number & 0xffff) != 0)
-	macro_build ((char *) NULL, counter, &lo32, "ori", "t,r,i", reg, reg,
-		     (int) BFD_RELOC_LO16);
     }
+  else
+    {
+      assert (ep->X_add_number > 2);
+      if (ep->X_add_number == 3)
+	generic_bignum[3] = 0;
+      else if (ep->X_add_number > 4)
+	as_bad ("Number larger than 64 bits");
+      lo32.X_op = O_constant;
+      lo32.X_add_number = generic_bignum[0] + (generic_bignum[1] << 16);
+      hi32.X_op = O_constant;
+      hi32.X_add_number = generic_bignum[2] + (generic_bignum[3] << 16);
+    }
+
+  load_register (counter, reg, &hi32);
+  if ((lo32.X_add_number & 0xffff0000) == 0)
+    macro_build ((char *) NULL, counter, NULL, "dsll32", "d,w,<", reg,
+		 reg, 0);
+  else
+    {
+      expressionS mid16;
+
+      macro_build ((char *) NULL, counter, NULL, "dsll", "d,w,<", reg,
+		   reg, 16);
+      mid16 = lo32;
+      mid16.X_add_number >>= 16;
+      macro_build ((char *) NULL, counter, &mid16, "ori", "t,r,i", reg,
+		   reg, (int) BFD_RELOC_LO16);
+      macro_build ((char *) NULL, counter, NULL, "dsll", "d,w,<", reg,
+		   reg, 16);
+    }
+  if ((lo32.X_add_number & 0xffff) != 0)
+    macro_build ((char *) NULL, counter, &lo32, "ori", "t,r,i", reg, reg,
+		 (int) BFD_RELOC_LO16);
 }
 
 /* Load an address into a register.  */
@@ -1695,7 +1723,7 @@ load_address (counter, reg, ep)
 		       mips_isa < 3 ? "addiu" : "daddiu",
 		       "t,r,j", reg, GP, (int) BFD_RELOC_MIPS_GPREL);
 	  p = frag_var (rs_machine_dependent, 8, 0,
-			RELAX_ENCODE (4, 8, -4, 0, 0, mips_warn_about_macros),
+			RELAX_ENCODE (4, 8, 0, 4, 0, mips_warn_about_macros),
 			ep->X_add_symbol, (long) 0, (char *) NULL);
 	}
       macro_build_lui (p, counter, ep, reg);
@@ -2441,7 +2469,12 @@ macro (ip)
       if (mips_pic == EMBEDDED_PIC
 	  && offset_expr.X_op == O_subtract
 	  && now_seg == text_section
-	  && S_GET_SEGMENT (offset_expr.X_op_symbol) == text_section
+	  && (offset_expr.X_op_symbol->sy_value.X_op == O_constant
+	      ? S_GET_SEGMENT (offset_expr.X_op_symbol) == text_section
+	      : (offset_expr.X_op_symbol->sy_value.X_op == O_symbol
+		 && (S_GET_SEGMENT (offset_expr.X_op_symbol
+				    ->sy_value.X_add_symbol)
+		     == text_section)))
 	  && breg == 0
 	  && offset_expr.X_add_number == 0)
 	{
@@ -4494,7 +4527,8 @@ mips_ip (str, ip)
 
 	    case 'I':
 	      my_getExpression (&imm_expr, s);
-	      check_absolute_expr (ip, &imm_expr);
+	      if (imm_expr.X_op != O_big)
+		check_absolute_expr (ip, &imm_expr);
 	      s = expr_end;
 	      continue;
 
@@ -4657,11 +4691,12 @@ mips_ip (str, ip)
 			imm_reloc = BFD_RELOC_HI16;
 		    }
 		}
-	      else
+	      else if (imm_expr.X_op != O_big)
 		check_absolute_expr (ip, &imm_expr);
 	      if (*args == 'i')
 		{
-		  if (imm_expr.X_add_number < 0
+		  if (imm_expr.X_op == O_big
+		      || imm_expr.X_add_number < 0
 		      || imm_expr.X_add_number >= 0x10000)
 		    {
 		      if (insn + 1 < &mips_opcodes[NUMOPCODES] &&
@@ -4690,8 +4725,9 @@ mips_ip (str, ip)
 		    max = 0x8000;
 		  else
 		    max = 0x10000;
-		  if (imm_expr.X_add_number < -0x8000 ||
-		      imm_expr.X_add_number >= max)
+		  if (imm_expr.X_op == O_big
+		      || imm_expr.X_add_number < -0x8000
+		      || imm_expr.X_add_number >= max)
 		    {
 		      if (more)
 			break;

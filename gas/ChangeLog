@@ -1,3 +1,10 @@
+Mon Dec 19 16:53:36 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* config/tc-mips.c (load_register): Rewrite to handle O_big 64 bit
+	constants.
+	(mips_ip): Accept O_big constants in case 'I'.  Change case
+	'i'/'j' to treat an O_big constant as an out of range value.
+
 Mon Dec 19 14:15:07 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* Reduce useless symbols for ELF in an attempt to make smaller
