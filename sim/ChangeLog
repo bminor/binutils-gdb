@@ -1,3 +1,7 @@
+Thu Feb 22 11:31:50 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* Makefile.in (install): Fix type.
+
 Wed Feb 21 11:59:57 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure: Regenerate with autoconf 2.7.
