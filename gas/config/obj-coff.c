@@ -91,9 +91,11 @@ static void SA_SET_SYM_TAGNDX PARAMS ((symbolS *, symbolS *));
 static struct hash_control *tag_hash;
 static symbolS *def_symbol_in_progress;
 
+#ifndef BFD_ASSEMBLER
 static symbolS *dot_text_symbol;
 static symbolS *dot_data_symbol;
 static symbolS *dot_bss_symbol;
+#endif
 
 const pseudo_typeS obj_pseudo_table[] =
 {
@@ -521,7 +523,7 @@ obj_symbol_to_chars (where, symbolP)
 				       &symbolP->sy_symbol.ost_auxent[i],
 				       S_GET_DATA_TYPE (symbolP),
 				       S_GET_STORAGE_CLASS (symbolP),
-				       *where);
+				       i, numaux, *where);
     }
 
 #else /* BFD_HEADERS */
@@ -904,7 +906,7 @@ c_section_header (header,
 
 /* Line number handling */
 
-int line_base;
+int coff_line_base;
 
 #ifdef BFD_ASSEMBLER
 
@@ -913,7 +915,7 @@ static symbolS *line_fsym;
 
 #define in_function()		(line_fsym != 0)
 #define clear_function()	(line_fsym = 0)
-#define set_function(F)		(line_fsym = (F), add_linesym (F))
+#define set_function(F)		(line_fsym = (F), coff_add_linesym (F))
 
 #else
 
@@ -1152,8 +1154,8 @@ add_lineno (frag, offset, num)
   line_nos = new_line;
 }
 
-static void
-add_linesym (sym)
+void
+coff_add_linesym (sym)
      symbolS *sym;
 {
   if (line_nos)
@@ -1196,7 +1198,7 @@ obj_coff_ln (appline)
     if (listing)
       {
 	if (! appline)
-	  l += line_base - 1;
+	  l += coff_line_base - 1;
 	listing_source_line (l);
       }
   }
@@ -1518,11 +1520,11 @@ obj_coff_line (ignored)
     }
 
   this_base = get_absolute_expression ();
-  if (this_base > line_base)
-    line_base = this_base;
+  if (this_base > coff_line_base)
+    coff_line_base = this_base;
 
   S_SET_NUMBER_AUXILIARY (def_symbol_in_progress, 1);
-  SA_SET_SYM_LNNO (def_symbol_in_progress, line_base);
+  SA_SET_SYM_LNNO (def_symbol_in_progress, coff_line_base);
 
   demand_empty_rest_of_line ();
 }
@@ -2274,7 +2276,7 @@ coff_frob_symbol (symp, punt)
   static stack *block_stack;
 
   if (current_lineno_sym)
-    add_linesym ((symbolS *) 0);
+    coff_add_linesym ((symbolS *) 0);
 
   if (!block_stack)
     block_stack = stack_init (512, sizeof (symbolS*));

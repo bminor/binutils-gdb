@@ -37,25 +37,6 @@
 
 #ifdef TC_A29K
 #include "coff/a29k.h"
-
-/*
-  #undef RELOC
-  #undef SYMENT
-  #undef AUXENT
-  #undef LINENO
-  #undef FILHDR
-  #undef SCNHDR
-  #define RELOC struct internal_reloc
-  #define SYMENT struct internal_syment
-  #define AUXENT union internal_auxent
-  #define SCNHDR struct internal_scnhdr
-  #define LINENO struct bfd_internal_lineno
-  #define AOUTHDR struct internal_aouthdr
-  #define FILHDR struct internal_filehdr
-  #define AOUTHDRSZ sizeof(struct external_aouthdr)
-  */
-/*#define x_endndx x_endndx.l
-  #define x_tagndx x_tagndx.l*/
 #define TARGET_FORMAT "coff-a29k-big"
 extern bfd *stdoutput;
 
@@ -78,20 +59,22 @@ extern bfd *stdoutput;
 #  define TARGET_FORMAT "coff-m68k"
 #endif /* TC_M68K */
 
+#ifdef TC_PPC
+#include "coff/rs6000.h"
+#endif
+
+#ifdef TC_SPARC
+#include "coff/sparc.h"
+#ifdef TE_LYNX
+#define TARGET_FORMAT "coff-sparc-lynx"
+#else
+#define TARGET_FORMAT "coff-sparc"
+#endif
+#endif
+
 #else /* not BFD_HEADERS */
 
-#ifdef USE_NATIVE_HEADERS
-#include <filehdr.h>
-#include <aouthdr.h>
-#include <scnhdr.h>
-#include <storclass.h>
-#include <linenum.h>
-#include <syms.h>
-#include <reloc.h>
-#include <sys/types.h>
-#else /* not USE_NATIVE_HEADERS */
 #include "coff_gnu.h"
-#endif /* not USE_NATIVE_HEADERS */
 
 #endif /* not BFD_HEADERS */
 
@@ -164,13 +147,15 @@ extern const segT N_TYPE_seg[];
 
 #ifdef BFD_ASSEMBLER
 
+/* Alter the field names, for now, until we've fixed up the other
+   references to use the new name.  */
 #ifdef TC_I960
-#define I960_SYM_FIELDS		struct symbol *bal;
-#else
-#define I960_SYM_FIELDS
+#define TC_SYMFIELD_TYPE	struct symbol *
+#define sy_tc			bal
 #endif
 
-#define TARGET_SYMBOL_FIELDS	unsigned long sy_flags; I960_SYM_FIELDS
+#define OBJ_SYMFIELD_TYPE	unsigned long
+#define sy_obj			sy_flags
 
 #ifndef OBJ_COFF_MAX_AUXENTRIES
 #define OBJ_COFF_MAX_AUXENTRIES 1
@@ -250,7 +235,7 @@ obj_symbol_type;
  * True if a symbol can be multiply defined (bss symbols have this def
  * though it is bad practice)
  */
-#define S_IS_COMMON(s)		((s)->sy_symbol.ost_entry.n_scnum == 0
+#define S_IS_COMMON(s)		((s)->sy_symbol.ost_entry.n_scnum == 0 \
 				 && S_GET_VALUE (s) != 0)
 /* True if a symbol name is in the string table, i.e. its length is > 8. */
 #define S_IS_STRING(s)		(strlen(S_GET_NAME(s)) > 8 ? 1 : 0)
@@ -293,22 +278,16 @@ obj_symbol_type;
 
 #else /* BFD_ASSEMBLER */
 
-/* The data type */
-#define S_GET_DATA_TYPE(s)	(coffsymbol ((s)->bsym)->native->u.syment.n_type)
-/* The storage class */
-#define S_GET_STORAGE_CLASS(s)	(coffsymbol((s)->bsym)->native->u.syment.n_sclass)
 /* The number of auxiliary entries */
 #define S_GET_NUMBER_AUXILIARY(s)	(coffsymbol((s)->bsym)->native->u.syment.n_numaux)
-/* The data type */
-#define S_SET_DATA_TYPE(s,v)	(S_GET_DATA_TYPE (s) = (v))
-/* The storage class */
-#define S_SET_STORAGE_CLASS(s,v)	(S_GET_STORAGE_CLASS (s) = (v))
 /* The number of auxiliary entries */
 #define S_SET_NUMBER_AUXILIARY(s,v)	(S_GET_NUMBER_AUXILIARY (s) = (v))
 
 /* True if a symbol name is in the string table, i.e. its length is > 8. */
 #define S_IS_STRING(s)		(strlen(S_GET_NAME(s)) > 8 ? 1 : 0)
 
+extern int S_SET_STORAGE_CLASS PARAMS ((struct symbol *, int));
+extern int S_GET_STORAGE_CLASS PARAMS ((struct symbol *));
 
 #endif /* ! BFD_ASSEMBLER */
 
@@ -316,7 +295,7 @@ obj_symbol_type;
 /* Omit the tv related fields */
 /* Accessors */
 
-#ifdef BFD_HEADERS
+#if defined (BFD_HEADERS) || defined (BFD_ASSEMBLER)
 #define SA_GET_SYM_TAGNDX(s)	(SYM_AUXENT (s)->x_sym.x_tagndx.l)
 #else
 #define SA_GET_SYM_TAGNDX(s)	(SYM_AUXENT (s)->x_sym.x_tagndx)
@@ -566,6 +545,7 @@ object_headers;
 
 /* --------------  Line number handling ------- */
 extern int text_lineno_number;
+extern int coff_line_base;
 
 #ifndef BFD_ASSEMBLER
 /* line numbering stuff. */
@@ -585,9 +565,14 @@ extern lineno *lineno_lastP;
 extern lineno *lineno_rootP;
 #define OBJ_EMIT_LINENO(a, b, c)	obj_emit_lineno((a),(b),(c))
 
+void obj_emit_lineno PARAMS ((char **where, lineno * line, char *file_start));
+
 #endif /* not BFD_ASSEMBLER */
 
-void obj_emit_lineno PARAMS ((char **where, lineno * line, char *file_start));
+#ifdef BFD_ASSEMBLER
+#define obj_emit_lineno(WHERE,LINE,FILE_START)	abort ()
+extern void coff_add_linesym PARAMS ((struct symbol *));
+#endif
 
 /* stack stuff */
 typedef struct
@@ -607,30 +592,51 @@ char *stack_top PARAMS ((stack * st));
 stack *stack_init PARAMS ((unsigned long chunk_size,
 			   unsigned long element_size));
 void c_dot_file_symbol PARAMS ((char *filename));
-void obj_extra_stuff PARAMS ((object_headers * headers));
 void stack_delete PARAMS ((stack * st));
 
+#ifndef BFD_ASSEMBLER
+void obj_extra_stuff PARAMS ((object_headers * headers));
 #ifndef tc_headers_hook
 void tc_headers_hook PARAMS ((object_headers * headers));
+#endif
 #endif
 
 #ifndef tc_coff_symbol_emit_hook
 void tc_coff_symbol_emit_hook PARAMS ((/* symbolS * */));
 #endif
 
-#define obj_check_file_symbols coff_check_file_symbols
+extern void coff_frob_symbol PARAMS ((struct symbol *, int *));
+extern void coff_frob_file PARAMS ((void));
+#define obj_frob_symbol(S,P) 	coff_frob_symbol(S,&P)
+#define obj_frob_file()		coff_frob_file ()
 
-#ifndef BFD_ASEMBLER
-void c_section_header PARAMS ((
-#ifdef BFD_HEADERS
-			       struct internal_scnhdr *header,
+/* Forward the segment of a forwarded symbol.  */
+#ifndef TE_I386AIX
+#define obj_frob_forward_symbol(symp) \
+  (SF_GET_GET_SEGMENT (symp) \
+   ? (S_SET_SEGMENT (symp, S_GET_SEGMENT (symp->sy_value.X_add_symbol)), 0) \
+   : 0)
 #else
-			       SCNHDR * header,
+#define obj_frob_forward_symbol(symp) \
+  (SF_GET_GET_SEGMENT (symp) && S_GET_SEGMENT (symp) == SEG_UNKNOWN \
+   ? (S_SET_SEGMENT (symp, S_GET_SEGMENT (symp->sy_value.X_add_symbol)), 0) \
+   : 0)
 #endif
+
+#ifndef BFD_ASSEMBLER
+#ifdef BFD_HEADERS
+void c_section_header PARAMS ((struct internal_scnhdr *header,
 			       char *name, long core_address, long size,
 			       long data_ptr, long reloc_ptr, long lineno_ptr,
 			       long reloc_number, long lineno_number,
 			       long alignment));
+#else
+void c_section_header PARAMS ((SCNHDR * header,
+			       char *name, long core_address, long size,
+			       long data_ptr, long reloc_ptr, long lineno_ptr,
+			       long reloc_number, long lineno_number,
+			       long alignment));
+#endif
 #endif
 
 /* sanity check */
@@ -649,5 +655,7 @@ extern SCNHDR data_section_header;
 extern SCNHDR text_section_header;
 #endif
 #endif
+
+#define SEPARATE_STAB_SECTIONS
 
 /* end of obj-coff.h */
