@@ -130,6 +130,7 @@ sparc-*-lynxos*)	gdb_host=sparclynx ;;
 sparc-*-netbsd*)	gdb_host=nbsd ;;
 sparc-*-solaris2*)	gdb_host=sun4sol2 ;;
 sparc-*-sunos4*)	gdb_host=sun4os4 ;;
+sparc-*-sunos5*)	gdb_host=sun4sol2 ;;
 sparc-*-*)		gdb_host=sun4os4 ;;
 
 tahoe-*-*)		gdb_host=tahoe ;;
@@ -337,6 +338,7 @@ sparc-*-lynxos*)	gdb_target=sparclynx
 sparc-*-netbsd*)	gdb_target=nbsd ;;
 sparc-*-solaris2*)	gdb_target=sun4sol2 ;;
 sparc-*-sunos4*)	gdb_target=sun4os4 ;;
+sparc-*-sunos5*)	gdb_target=sun4sol2 ;;
 sparc-*-vxworks*)	gdb_target=vxsparc ;;
 sparc-*-*)		gdb_target=sun4os4 ;;
 sparclite*-*-*)		gdb_target=sparclite ;;

@@ -1,3 +1,7 @@
+Wed Mar 29 09:56:04 1995  Jason Molenda  (crash@phydeaux.cygnus.com)
+
+	* configure.in: sparc-*-sunos5* is same as sparc-*-solaris2*.
+
 Wed Mar 29 18:30:03 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* remote-e7000.c (why_stop): Add new kinds of strings to expect
