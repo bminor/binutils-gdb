@@ -1,3 +1,9 @@
+Tue Aug 26 17:26:51 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* acinclude.m4 (BFD_CC_FOR_BUILD): Set EXEEXT_FOR_BUILD.
+	* doc/Makefile.am (MKDOC): Use EXEEXT_FOR_BUILD, not EXEEXT.
+	* aclocal.m4, configure, Makefile.in, doc/Makefile.in: Rebuild.
+
 Mon Aug 25 16:14:34 1997  Christopher Provenzano  <proven@cygnus.com>
 
 	* configure: Rebuild with latest devo autoconf for NT support
