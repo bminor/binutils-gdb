@@ -747,7 +747,7 @@ extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
    that the INFO.BYTE_ORDER is non-zero.
 
    The INIT function shall return any of: NULL - indicating that it
-   doesn't reconize the selected architecture; an existing \`\`struct
+   doesn't recognize the selected architecture; an existing \`\`struct
    gdbarch'' from the ARCHES list - indicating that the new
    architecture is just a synonym for an earlier architecture (see
    gdbarch_list_lookup_by_info()); a newly created \`\`struct gdbarch''
@@ -1696,7 +1696,7 @@ gdbarch_register (enum bfd_architecture bfd_architecture,
 {
   struct gdbarch_registration **curr;
   const struct bfd_arch_info *bfd_arch_info;
-  /* Check that BFD reconizes this architecture */
+  /* Check that BFD recognizes this architecture */
   bfd_arch_info = bfd_lookup_arch (bfd_architecture, 0);
   if (bfd_arch_info == NULL)
     {

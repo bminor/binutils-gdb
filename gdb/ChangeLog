@@ -1,3 +1,16 @@
+2000-10-27  J.T. Conklin  <jtc@redback.com>
+
+	* arch-utils.c (set_architecture, set_architecture_from_arch_mach,
+ 	set_gdbarch_from_file): Fix spelling error.
+	* v850-tdep.c (v850_target_architecture_hook): Likewise.
+	* gdbarch.sh: Fix spelling errors in comment.
+	* gdbarch.c, gdbarch.h: Regenerate.
+
+	* ppcnbsd-nat.c (fetch_core_registers, fetch_inferior_registers,
+ 	store_inferior_registers): Support older NetBSD/powerpc systems
+ 	from before fp reg support was added.  Adapt to register number
+	changes caused when powerpc target was multi-arched.
+
 2000-10-26  David B. Anderson <davea@sgi.com>
 
 	* breakpoint.c breakpoint.h hppab-nat.c infrun.c

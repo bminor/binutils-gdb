@@ -850,7 +850,7 @@ v850_target_architecture_hook (const bfd_arch_info_type *ap)
 	}
     }
 
-  internal_error ("Architecture `%s' unreconized", ap->printable_name);
+  internal_error ("Architecture `%s' unrecognized", ap->printable_name);
 }
 
 void

@@ -441,7 +441,7 @@ set_architecture_from_arch_mach (enum bfd_architecture arch,
   if (wanted != NULL)
     set_arch (wanted, set_arch_manual);
   else
-    internal_error ("gdbarch: hardwired architecture/machine not reconized");
+    internal_error ("gdbarch: hardwired architecture/machine not recognized");
 }
 
 /* Set the architecture from a BFD (deprecated) */
@@ -500,7 +500,7 @@ set_architecture (char *ignore_args, int from_tty, struct cmd_list_element *c)
       if (gdbarch_update_p (info))
 	target_architecture_auto = 0;
       else
-	printf_unfiltered ("Architecture `%s' not reconized.\n",
+	printf_unfiltered ("Architecture `%s' not recognized.\n",
 			   set_architecture_string);
     }
   else
@@ -560,7 +560,7 @@ set_gdbarch_from_file (bfd *abfd)
       memset (&info, 0, sizeof info);
       info.abfd = abfd;
       if (! gdbarch_update_p (info))
-	error ("Architecture of file not reconized.\n");
+	error ("Architecture of file not recognized.\n");
     }
   else
     {
