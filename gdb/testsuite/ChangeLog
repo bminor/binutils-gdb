@@ -1,3 +1,8 @@
+2003-06-23  Joel Brobecker  <brobecker@gnat.com>
+
+	* gdb.base/langs.exp: Add some tests for the "minimal" language
+	support.
+
 2003-06-23  Elena Zannoni  <ezannoni@redhat.com>
 
         * gdb.objc/basicclass.exp: Return -1 if we cannot compile
