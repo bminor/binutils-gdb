@@ -1,4 +1,25 @@
 start-sanitize-tx49
+Thu Dec 11 09:23:05 1997  Gavin Koch  <gavin@cygnus.com>
+
+	* gas/mips/mips.exp: Don't run the mips16 test for tx49.
+
+end-sanitize-tx49
+start-sanitize-vr5400
+Tue Dec  9 13:19:58 1997  Jeffrey A Law  (law@cygnus.com)
+
+        * gas/mips/vr5400.d: Minor tweaks for more accurate matching.
+
+Fri Nov  7 21:32:01 1997  Ken Raeburn  <raeburn@cygnus.com>
+
+	* gas/mips/vr5400.s, gas/mips/vr5400.d: New test, for
+	VR5400-specific instructions.
+	* gas/mips/mips.exp: Run it.
+
+end-sanitize-vr5400
+	* gas/ieee-fp/x930509a.exp: Don't run IEEE FP tests for Vax
+	targets.
+
+start-sanitize-tx49
 Wed Oct 29 16:27:30 1997  Gavin Koch  <gavin@cygnus.com>
 
 	* gas/mips/mips.exp: Add tx49 configury.
