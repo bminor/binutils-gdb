@@ -139,11 +139,13 @@ extern int contained_in (struct block *, struct block *);
 
 extern struct using_direct_node *block_using (const struct block *);
 
+extern struct using_direct_node *block_all_usings (const struct block *block);
+
 extern void block_set_using (struct block *block,
 			     struct using_direct_node *using,
 			     struct obstack *obstack);
 
-extern const char *block_scope (struct block *block);
+extern const char *block_scope (const struct block *block);
 
 extern void block_set_scope (struct block *block, const char *scope,
 			     struct obstack *obstack);

@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# Just run the namespace test.
+
+runtest namespace.exp 2>&1 | grep -v "^Test Run By" > /tmp/namespaceout
+diff -u {carlton_,/tmp/}namespaceout

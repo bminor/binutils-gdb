@@ -1,3 +1,22 @@
+2002-11-14  David Carlton  <carlton@math.stanford.edu>
+
+	* Makefile.in (symtab.o): Depend on gdb_assert_h.
+	* symtab.c: #include "gdb_assert.h"
+	* Makefile.in (namespace): Add 'namespace' target.
+	* buildsym.c (finish_block): Comment out the using declarations
+	generation.
+	* block.h: Make argument to block_scope const.
+	* block.c (block_scope): Make argument const.
+	* symtab.c (lookup_symbol_aux_using): Gather usings via
+	block_all_usings.
+	(lookup_symbol_namespace): Rename from
+	lookup_symbol_aux_using_loop.
+	(lookup_symbol_aux_using_loop): New function.
+	* block.h: Declare block_all_usings.
+	* block.c (block_all_usings): New function.
+	* symtab.c (lookup_symbol_aux_nonlocal): Delete FIXME comment.
+	* buildsym.c (finish_block): Add FIXME comment.
+
 2002-11-13  David Carlton  <carlton@math.stanford.edu>
 
 	* buildsym.c (finish_block): Initialize block_scope (block) in

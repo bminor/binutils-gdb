@@ -454,6 +454,10 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 	  else
 	    {
 	      const char *current, *next;
+
+	      /* FIXME: carlton/2002-11-14: For members of classes,
+		 with this include the class name as well?  I don't
+		 think that's a problem yet, but it will be.  */
 	      
 	      for (current = name, next = cp_find_first_component (current);
 		   *next == ':';
@@ -468,8 +472,14 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 				 obsavestring (name, current - name,
 					       &objfile->symbol_obstack),
 				 &objfile->symbol_obstack);
+	      
+	      /* FIXME: carlton/2002-10-09: Until I understand the
+		 possible pitfalls of demangled names a lot better, I
+		 want to make sure I'm not running into surprises.  */
+	      gdb_assert (*next == '\0');
 	    }
 	  
+#if 0	  
 	  for (next = cp_find_first_component (name);
 	       *next == ':';
 	       /* The '+ 2' is to skip the '::'.  */
@@ -481,11 +491,7 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 						     &objfile->symbol_obstack),
 			       &objfile->symbol_obstack);
 	    }
-
-	  /* FIXME: carlton/2002-10-09: Until I understand the
-	     possible pitfalls of demangled names a lot better, I want
-	     to make sure I'm not running into surprises.  */
-	  gdb_assert (*next == '\0');
+#endif
 	}
     }
   else

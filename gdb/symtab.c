@@ -52,6 +52,7 @@
 #include <ctype.h>
 #include "cp-abi.h"
 #include "cp-support.h"
+#include "gdb_assert.h"
 
 /* Prototypes for local functions */
 
@@ -130,13 +131,21 @@ struct symbol *lookup_symbol_aux_using (const char *name,
 					struct symtab **symtab);
 
 static
-struct symbol *lookup_symbol_aux_using_loop (const char *prefix,
-					     int prefix_len,
-					     const char *rest,
-					     struct using_direct_node *using,
+struct symbol *lookup_symbol_aux_using_loop (const char *name,
 					     const char *mangled_name,
 					     namespace_enum namespace,
-					     struct symtab **symtab);
+					     struct symtab **symtab,
+					     const char *scope,
+					     int scope_len,
+					     struct using_direct_node *using);
+static
+struct symbol *lookup_symbol_namespace (const char *prefix,
+					int prefix_len,
+					const char *rest,
+					struct using_direct_node *using,
+					const char *mangled_name,
+					namespace_enum namespace,
+					struct symtab **symtab);
 
 static
 struct symbol *lookup_symbol_aux_minsyms (int block_index,
@@ -997,9 +1006,6 @@ lookup_symbol_aux_block (const char *name, const char *mangled_name,
    STATIC_BLOCK, depending on whether or not we want to search global
    symbols or static symbols.  */
 
-/* FIXME: carlton/2002-10-11: Should this also do some minsym
-   lookup?  */
-
 static struct symbol *
 lookup_symbol_aux_nonlocal (int block_index,
 			    const char *name,
@@ -1169,32 +1175,69 @@ lookup_symbol_aux_psymtabs (int block_index, const char *name,
 /* This function gathers using directives from BLOCK and its
    superblocks, and then searches for symbols in the global namespace
    by trying to apply those various using directives.  */
+
 static struct symbol *lookup_symbol_aux_using (const char *name,
 					       const char *mangled_name,
 					       const struct block *block,
 					       const namespace_enum namespace,
 					       struct symtab **symtab)
 {
-  struct using_direct_node *using = NULL;
+  struct using_direct_node *using;
+  const char *scope;
   struct symbol *sym;
 
-  while (block != NULL)
-    {
-      using = cp_copy_usings (block_using (block), using);
-      block = BLOCK_SUPERBLOCK (block);
-    }
-
-  sym = lookup_symbol_aux_using_loop ("", 0, name, using, mangled_name,
-				      namespace, symtab);
+  using = block_all_usings (block);
+  scope = block_scope (block);
+  
+  sym = lookup_symbol_aux_using_loop (name, mangled_name, namespace, symtab,
+				      scope, 0, using);
   cp_free_usings (using);
   
   return sym;
 }
 
+/* Look up NAME in the namespaces given by SCOPE and its initial
+   prefixes, applying using directives given by USING; only consider
+   prefixes that are at least as long as SCOPE_LEN, however.  Look up
+   longest prefixes first.  */
+
+static struct
+symbol *lookup_symbol_aux_using_loop (const char *name,
+				      const char *mangled_name,
+				      namespace_enum namespace,
+				      struct symtab **symtab,
+				      const char *scope,
+				      int scope_len,
+				      struct using_direct_node *using)
+{
+  if (scope[scope_len] != '\0')
+    {
+      struct symbol *sym;
+      int next_component;
+      int new_scope_len = scope_len;
+
+      /* If the current scope is followed by "::", skip past that.  */
+      if (new_scope_len != 0)
+	{
+	  gdb_assert (scope[new_scope_len] == ':');
+	  new_scope_len += 2;
+	}
+      next_component = cp_find_first_component (scope + new_scope_len) - scope;
+      sym = lookup_symbol_aux_using_loop (name, mangled_name, namespace,
+					  symtab, scope, next_component,
+					  using);
+      if (sym != NULL)
+	return sym;
+    }
+
+  return lookup_symbol_namespace (scope, scope_len, name, using,
+				  mangled_name, namespace, symtab);
+}
+
 /* This tries to look up REST in the namespace given by the initial
    substring of PREFIX of length PREFIX_LEN.
 
-   Basically, assume that we have using directives adding A to the
+   For example, assume that we have using directives adding A to the
    global namespace, adding A::inner to namespace A, and adding B to
    the global namespace.  Then, when looking up a symbol "foo", we
    want to recurse by looking up stuff in A::foo and seeing which
@@ -1216,13 +1259,13 @@ static struct symbol *lookup_symbol_aux_using (const char *name,
    for other reasons, but it will take a little while.)  */
 
 static struct symbol *
-lookup_symbol_aux_using_loop (const char *prefix,
-			      int prefix_len,
-			      const char *rest,
-			      struct using_direct_node *using,
-			      const char *mangled_name,
-			      namespace_enum namespace,
-			      struct symtab **symtab)
+lookup_symbol_namespace (const char *prefix,
+			 int prefix_len,
+			 const char *rest,
+			 struct using_direct_node *using,
+			 const char *mangled_name,
+			 namespace_enum namespace,
+			 struct symtab **symtab)
 {
   struct using_direct_node *current;
   struct symbol *sym;
@@ -1256,14 +1299,13 @@ lookup_symbol_aux_using_loop (const char *prefix,
 	      if (*new_rest == ':')
 		new_rest += 2;
 
-	      sym = lookup_symbol_aux_using_loop
-		(current->current->name,
-		 current->current->inner_length,
-		 new_rest,
-		 using,
-		 mangled_name,
-		 namespace,
-		 symtab);
+	      sym = lookup_symbol_namespace (current->current->name,
+					     current->current->inner_length,
+					     new_rest,
+					     using,
+					     mangled_name,
+					     namespace,
+					     symtab);
 	      if (sym != NULL)
 		return sym;
 	    }

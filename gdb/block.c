@@ -66,6 +66,25 @@ block_using (const struct block *block)
     return BLOCK_NAMESPACE (block)->using;
 }
 
+/* This returns the using directives associated to BLOCK and its
+   parents, if any.  The resulting structure must be freed by calling
+   cp_free_usings on it.  */
+
+struct using_direct_node *
+block_all_usings (const struct block *block)
+{
+  struct using_direct_node *using = NULL;
+
+  while (block != NULL)
+    {
+      using = cp_copy_usings (block_using (block), using);
+      block = BLOCK_SUPERBLOCK (block);
+    }
+
+  return using;
+}
+
+
 /* Set block_using (BLOCK) to USING; if needed, allocate memory via
    OBSTACK.  */
 
@@ -83,7 +102,7 @@ block_set_using (struct block *block, struct using_direct_node *using,
    superblocks looking for a scope, if necessary.  */
 
 const char *
-block_scope (struct block *block)
+block_scope (const struct block *block)
 {
   for (; block != NULL; block = BLOCK_SUPERBLOCK (block))
     {
