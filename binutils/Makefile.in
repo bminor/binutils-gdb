@@ -145,7 +145,7 @@ DEP = mkdep
 INCLUDES = -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) @HDEFINES@ -I$(srcdir)/../intl -I../intl -DLOCALEDIR="\"$(prefix)/share/locale\""
 
 HFILES = arsup.h bucomm.h budbg.h coffgrok.h debug.h nlmconv.h dlltool.h \
-	windres.h readelf.h
+	windres.h
 
 GENERATED_HFILES = arparse.h sysroff.h sysinfo.h defparse.h
 
@@ -1213,10 +1213,10 @@ rescoff.o: rescoff.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
 resbin.o: resbin.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
   windres.h
-readelf.o: readelf.c readelf.h ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+readelf.o: readelf.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/ppc.h $(INCDIR)/elf/m32r.h \
   $(INCDIR)/elf/mips.h bucomm.h config.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/getopt.h
+  $(INCDIR)/getopt.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h
 underscore.o: underscore.c
 arparse.o: arparse.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   bucomm.h config.h $(INCDIR)/fopen-same.h arsup.h

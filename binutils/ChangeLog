@@ -1,3 +1,9 @@
+Mon Jun 29 17:01:21 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* readelf.c: Use BFD Internal and External Elf structures.
+	* readelf.h: Removed - no longer needed.
+	* Makefile.in: Remove readelf.c's dependency upon readelf.h.
+
 1998-06-26  Vladimir N. Makarov  <vmakarov@cygnus.com>
 
 	* objcopy.c (strip_main): keep_specific_list == NULL as additional
