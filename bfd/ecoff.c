@@ -49,11 +49,12 @@ static boolean ecoff_slurp_symbolic_header PARAMS ((bfd *abfd));
 static boolean ecoff_set_symbol_info PARAMS ((bfd *abfd, SYMR *ecoff_sym,
 					   asymbol *asym, int ext,
 					   asymbol **indirect_ptr_ptr));
-static void ecoff_emit_aggregate PARAMS ((bfd *abfd, char *string,
+static void ecoff_emit_aggregate PARAMS ((bfd *abfd, FDR *fdr,
+					  char *string,
 					  RNDXR *rndx, long isym,
-					  CONST char *which));
-static char *ecoff_type_to_string PARAMS ((bfd *abfd, union aux_ext *aux_ptr,
-					   unsigned int indx, int bigendian));
+					  const char *which));
+static char *ecoff_type_to_string PARAMS ((bfd *abfd, FDR *fdr,
+					   unsigned int indx));
 static boolean ecoff_slurp_reloc_table PARAMS ((bfd *abfd, asection *section,
 						asymbol **symbols));
 static void ecoff_compute_section_file_positions PARAMS ((bfd *abfd));
@@ -1269,57 +1270,76 @@ ecoff_get_symtab (abfd, alocation)
 /* Write aggregate information to a string.  */
 
 static void
-ecoff_emit_aggregate (abfd, string, rndx, isym, which)
+ecoff_emit_aggregate (abfd, fdr, string, rndx, isym, which)
      bfd *abfd;
+     FDR *fdr;
      char *string;
      RNDXR *rndx;
      long isym;
-     CONST char *which;
+     const char *which;
 {
-  int ifd = rndx->rfd;
-  int indx = rndx->index;
-  int sym_base, ss_base;
-  CONST char *name;
+  const struct ecoff_debug_swap * const debug_swap =
+    &ecoff_backend (abfd)->debug_swap;
+  struct ecoff_debug_info * const debug_info = &ecoff_data (abfd)->debug_info;
+  unsigned int ifd = rndx->rfd;
+  unsigned int indx = rndx->index;
+  const char *name;
   
   if (ifd == 0xfff)
     ifd = isym;
 
-  sym_base = ecoff_data (abfd)->debug_info.fdr[ifd].isymBase;
-  ss_base  = ecoff_data (abfd)->debug_info.fdr[ifd].issBase;
-  
-  if (indx == indexNil)
-    name = "/* no name */";
+  /* An ifd of -1 is an opaque type.  An escaped index of 0 is a
+     struct return type of a procedure compiled without -g.  */
+  if (ifd == 0xffffffff
+      || (rndx->rfd == 0xfff && indx == 0))
+    name = "<undefined>";
+  else if (indx == indexNil)
+    name = "<no name>";
   else
     {
-      const struct ecoff_debug_swap * const debug_swap
-	= &ecoff_backend (abfd)->debug_swap;
       SYMR sym;
 
-      indx += sym_base;
-      (*debug_swap->swap_sym_in)
-	(abfd,
-	 ((char *) ecoff_data (abfd)->debug_info.external_sym
-	  + indx * debug_swap->external_sym_size),
-	 &sym);
-      name = ecoff_data (abfd)->debug_info.ss + ss_base + sym.iss;
+      if (debug_info->external_rfd == NULL)
+	fdr = debug_info->fdr + ifd;
+      else
+	{
+	  RFDT rfd;
+
+	  (*debug_swap->swap_rfd_in) (abfd,
+				      ((char *) debug_info->external_rfd
+				       + ((fdr->rfdBase + ifd)
+					  * debug_swap->external_rfd_size)),
+				      &rfd);
+	  fdr = debug_info->fdr + rfd;
+	}
+
+      indx += fdr->isymBase;
+
+      (*debug_swap->swap_sym_in) (abfd,
+				  ((char *) debug_info->external_sym
+				   + indx * debug_swap->external_sym_size),
+				  &sym);
+
+      name = debug_info->ss + fdr->issBase + sym.iss;
     }
 
   sprintf (string,
-	   "%s %s { ifd = %d, index = %ld }",
+	   "%s %s { ifd = %u, index = %lu }",
 	   which, name, ifd,
 	   ((long) indx
-	    + ecoff_data (abfd)->debug_info.symbolic_header.iextMax));
+	    + debug_info->symbolic_header.iextMax));
 }
 
 /* Convert the type information to string format.  */
 
 static char *
-ecoff_type_to_string (abfd, aux_ptr, indx, bigendian)
+ecoff_type_to_string (abfd, fdr, indx)
      bfd *abfd;
-     union aux_ext *aux_ptr;
+     FDR *fdr;
      unsigned int indx;
-     int bigendian;
 {
+  union aux_ext *aux_ptr;
+  int bigendian;
   AUXU u;
   struct qual {
     unsigned int  type;
@@ -1327,7 +1347,6 @@ ecoff_type_to_string (abfd, aux_ptr, indx, bigendian)
     int  high_bound;
     int  stride;
   } qualifiers[7];
-
   unsigned int basic_type;
   int i;
   static char buffer1[1024];
@@ -1335,6 +1354,9 @@ ecoff_type_to_string (abfd, aux_ptr, indx, bigendian)
   char *p1 = buffer1;
   char *p2 = buffer2;
   RNDXR rndx;
+
+  aux_ptr = ecoff_data (abfd)->debug_info.external_aux + fdr->iauxBase;
+  bigendian = fdr->fBigendian;
 
   for (i = 0; i < 7; i++)
     {
@@ -1415,7 +1437,7 @@ ecoff_type_to_string (abfd, aux_ptr, indx, bigendian)
 
     case btStruct:		/* Structure (Record) */
       ecoff_swap_rndx_in (bigendian, &aux_ptr[indx].a_rndx, &rndx);
-      ecoff_emit_aggregate (abfd, p1, &rndx,
+      ecoff_emit_aggregate (abfd, fdr, p1, &rndx,
 			    (long) AUX_GET_ISYM (bigendian, &aux_ptr[indx+1]),
 			    "struct");
       indx++;			/* skip aux words */
@@ -1427,7 +1449,7 @@ ecoff_type_to_string (abfd, aux_ptr, indx, bigendian)
 
     case btUnion:		/* Union */
       ecoff_swap_rndx_in (bigendian, &aux_ptr[indx].a_rndx, &rndx);
-      ecoff_emit_aggregate (abfd, p1, &rndx,
+      ecoff_emit_aggregate (abfd, fdr, p1, &rndx,
 			    (long) AUX_GET_ISYM (bigendian, &aux_ptr[indx+1]),
 			    "union");
       indx++;			/* skip aux words */
@@ -1439,7 +1461,7 @@ ecoff_type_to_string (abfd, aux_ptr, indx, bigendian)
 
     case btEnum:		/* Enumeration */
       ecoff_swap_rndx_in (bigendian, &aux_ptr[indx].a_rndx, &rndx);
-      ecoff_emit_aggregate (abfd, p1, &rndx,
+      ecoff_emit_aggregate (abfd, fdr, p1, &rndx,
 			    (long) AUX_GET_ISYM (bigendian, &aux_ptr[indx+1]),
 			    "enum");
       indx++;			/* skip aux words */
@@ -1720,17 +1742,19 @@ ecoff_print_symbol (abfd, filep, symbol, how)
 	if (ecoffsymbol (symbol)->fdr != NULL
 	    && ecoff_ext.asym.index != indexNil)
 	  {
+	    FDR *fdr;
 	    unsigned int indx;
 	    int bigendian;
 	    bfd_size_type sym_base;
 	    union aux_ext *aux_base;
 
+	    fdr = ecoffsymbol (symbol)->fdr;
 	    indx = ecoff_ext.asym.index;
 
 	    /* sym_base is used to map the fdr relative indices which
 	       appear in the file to the position number which we are
 	       using.  */
-	    sym_base = ecoffsymbol (symbol)->fdr->isymBase;
+	    sym_base = fdr->isymBase;
 	    if (ecoffsymbol (symbol)->local)
 	      sym_base +=
 		ecoff_data (abfd)->debug_info.symbolic_header.iextMax;
@@ -1738,11 +1762,11 @@ ecoff_print_symbol (abfd, filep, symbol, how)
 	    /* aux_base is the start of the aux entries for this file;
 	       asym.index is an offset from this.  */
 	    aux_base = (ecoff_data (abfd)->debug_info.external_aux
-			+ ecoffsymbol (symbol)->fdr->iauxBase);
+			+ fdr->iauxBase);
 
 	    /* The aux entries are stored in host byte order; the
 	       order is indicated by a bit in the fdr.  */
-	    bigendian = ecoffsymbol (symbol)->fdr->fBigendian;
+	    bigendian = fdr->fBigendian;
 
 	    /* This switch is basically from gcc/mips-tdump.c  */
 	    switch (ecoff_ext.asym.st)
@@ -1764,9 +1788,10 @@ ecoff_print_symbol (abfd, filep, symbol, how)
 			   (long) (indx + sym_base));
 		else
 		  fprintf (file, "\n      First symbol: %ld", 
-			   (long) (AUX_GET_ISYM (bigendian,
-						 &aux_base[ecoff_ext.asym.index])
-				   + sym_base));
+			   ((long)
+			    (AUX_GET_ISYM (bigendian,
+					   &aux_base[ecoff_ext.asym.index])
+			     + sym_base)));
 		break;
 
 	      case stProc:
@@ -1775,11 +1800,11 @@ ecoff_print_symbol (abfd, filep, symbol, how)
 		  ;
 		else if (ecoffsymbol (symbol)->local)
 		  fprintf (file, "\n      End+1 symbol: %-7ld   Type:  %s",
-			   (long) (AUX_GET_ISYM (bigendian,
-						 &aux_base[ecoff_ext.asym.index])
-				   + sym_base),
-			   ecoff_type_to_string (abfd, aux_base, indx + 1,
-						 bigendian));
+			   ((long)
+			    (AUX_GET_ISYM (bigendian,
+					   &aux_base[ecoff_ext.asym.index])
+			     + sym_base)),
+			   ecoff_type_to_string (abfd, fdr, indx + 1));
 		else
 		  fprintf (file, "\n      Local symbol: %ld",
 			   ((long) indx
@@ -1788,11 +1813,25 @@ ecoff_print_symbol (abfd, filep, symbol, how)
 			       ->debug_info.symbolic_header.iextMax)));
 		break;
 
+	      case stStruct:
+		fprintf (file, "\n      struct; End+1 symbol: %ld",
+			 (long) (indx + sym_base));
+		break;
+
+	      case stUnion:
+		fprintf (file, "\n      union; End+1 symbol: %ld",
+			 (long) (indx + sym_base));
+		break;
+
+	      case stEnum:
+		fprintf (file, "\n      enum; End+1 symbol: %ld",
+			 (long) (indx + sym_base));
+		break;
+
 	      default:
 		if (! ECOFF_IS_STAB (&ecoff_ext.asym))
 		  fprintf (file, "\n      Type: %s",
-			   ecoff_type_to_string (abfd, aux_base, indx,
-						 bigendian));
+			   ecoff_type_to_string (abfd, fdr, indx));
 		break;
 	      }
 	  }
