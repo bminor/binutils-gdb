@@ -1,5 +1,5 @@
 /* HPPA PA-RISC machine native support for Lites, for GDB.
-   Copyright 1995 Free Software Foundation, Inc.
+   Copyright 1995, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -26,20 +26,6 @@
 /* What a coincidence! */
 #define REGISTER_U_ADDR(addr, blockend, regno)				\
 { addr = (int)(blockend) + REGISTER_BYTE (regno);}
-
-/* This macro defines the register numbers (from REGISTER_NAMES) that
-   are effectively unavailable to the user through ptrace().  It allows
-   us to include the whole register set in REGISTER_NAMES (inorder to
-   better support remote debugging).  If it is used in
-   fetch/store_inferior_registers() gdb will not complain about I/O errors
-   on fetching these registers.  If all registers in REGISTER_NAMES
-   are available, then return false (0).  */
-
-#define CANNOT_STORE_REGISTER(regno)            \
-                   ((regno) == 0) ||     \
-                   ((regno) == PCSQ_HEAD_REGNUM) || \
-                   ((regno) >= PCSQ_TAIL_REGNUM && (regno) < IPSW_REGNUM) ||  \
-                   ((regno) > IPSW_REGNUM && (regno) < FP4_REGNUM)
 
 /* fetch_inferior_registers is in hppab-nat.c.  */
 #define FETCH_INFERIOR_REGISTERS

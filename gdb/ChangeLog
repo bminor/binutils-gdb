@@ -1,3 +1,12 @@
+2002-12-23  Daniel Jacobowitz  <drow@mvista.com>
+
+	* config/pa/nm-hppab.h: Delete duplicate CANNOT_STORE_REGISTER decl.
+	* config/pa/nm-hppao.h: Delete duplicate CANNOT_STORE_REGISTER decl.
+
+2002-12-23  Rodney Brown  <rbrown64@csc.com.au>
+
+	* config/pa/nm-hppah.h: Delete duplicate CANNOT_STORE_REGISTER decl.
+
 2002-12-23  David Carlton  <carlton@math.stanford.edu>
 
 	* symtab.c (lookup_symbol_aux): Delete 'force_return' variable.

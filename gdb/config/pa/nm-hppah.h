@@ -1,5 +1,5 @@
 /* Native support for HPPA-RISC machine running HPUX, for GDB.
-   Copyright 1991, 1992, 1994, 1996, 1998, 1999, 2000
+   Copyright 1991, 1992, 1994, 1996, 1998, 1999, 2000, 2002
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -47,20 +47,6 @@
    appropriate ptrace operator to manipulate text.  Simply reading/writing
    user space will crap out HPUX.  */
 #define NEED_TEXT_START_END 1
-
-/* This macro defines the register numbers (from REGISTER_NAMES) that
-   are effectively unavailable to the user through ptrace().  It allows
-   us to include the whole register set in REGISTER_NAMES (inorder to
-   better support remote debugging).  If it is used in
-   fetch/store_inferior_registers() gdb will not complain about I/O errors
-   on fetching these registers.  If all registers in REGISTER_NAMES
-   are available, then return false (0).  */
-
-#define CANNOT_STORE_REGISTER(regno)            \
-                   ((regno) == 0) ||     \
-                   ((regno) == PCSQ_HEAD_REGNUM) || \
-                   ((regno) >= PCSQ_TAIL_REGNUM && (regno) < IPSW_REGNUM) ||  \
-                   ((regno) > IPSW_REGNUM && (regno) < FP4_REGNUM)
 
 /* In hppah-nat.c: */
 #define FETCH_INFERIOR_REGISTERS
