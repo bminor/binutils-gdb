@@ -85,7 +85,7 @@ BFD_LIBS = \
 	archive.o archures.o bfd.o cache.o coffgen.o core.o \
 	format.o init.o libbfd.o opncls.o reloc.o \
 	section.o syms.o targets.o hash.o linker.o \
-	elf.o elflink.o srec.o binary.o tekhex.o 
+	elf.o srec.o binary.o tekhex.o 
 
 # This list is alphabetized to make it easier to keep in sync
 # with the decls and initializer in archures.c.

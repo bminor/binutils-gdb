@@ -17,6 +17,9 @@ Wed Jul  5 20:17:14 1995  Ken Raeburn  <raeburn@cygnus.com>
 	back end data.  Also clean up some "gcc -Wall" warnings regarding
 	unused or uninitialized variables.
 
+	* Makefile.in (BFD_LIBS): No, don't put elflink.o here.
+	* configure.in: Include it here whenever elf.o is specified.
+
 Wed Jul  5 10:31:47 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf32-mips.c (mips_elf_object_p): Unconditionally set
