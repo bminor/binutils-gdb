@@ -618,6 +618,9 @@ print_insn_hppa (memaddr, info)
 		  (*info->fprintf_func) (info->stream, "%d",
 				    GET_FIELD (insn, 24, 25));
 		  break;
+		case '!':
+		  (*info->fprintf_func) (info->stream, "%sar");
+		  break;
 		case 'p':
 		  (*info->fprintf_func) (info->stream, "%d",
 				    31 - GET_FIELD (insn, 22, 26));
