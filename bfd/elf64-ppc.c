@@ -156,11 +156,8 @@ static boolean ppc64_elf_finish_dynamic_sections
 /* Since .opd is an array of descriptors and each entry will end up
    with identical R_PPC64_RELATIVE relocs, there is really no need to
    propagate .opd relocs;  The dynamic linker should be taught to
-   relocate .opd without reloc entries.  FIXME: the dynamic linker
-   will need to know where and how large .opd is via a couple of new
-   DT_PPC64_* tags, or perhaps just with one reloc that specifies the
-   start of .opd via its offset and the size via its addend.  Also,
-   .opd should be trimmed of unused values.  */
+   relocate .opd without reloc entries.  FIXME: .opd should be trimmed
+   of unused values.  */
 #ifndef NO_OPD_RELOCS
 #define NO_OPD_RELOCS 0
 #endif
@@ -3128,6 +3125,13 @@ ppc64_elf_size_dynamic_sections (output_bfd, info)
 	    return false;
 	}
 
+      if (NO_OPD_RELOCS)
+	{
+	  if (!add_dynamic_entry (DT_PPC64_OPD, 0)
+	      || !add_dynamic_entry (DT_PPC64_OPDSZ, 0))
+	    return false;
+	}
+
       if (relocs)
 	{
 	  if (!add_dynamic_entry (DT_RELA, 0)
@@ -4354,6 +4358,7 @@ ppc64_elf_finish_dynamic_sections (output_bfd, info)
       for (; dyncon < dynconend; dyncon++)
 	{
 	  Elf_Internal_Dyn dyn;
+	  asection *s;
 
 	  bfd_elf64_swap_dyn_in (dynobj, dyncon, &dyn);
 
@@ -4365,6 +4370,18 @@ ppc64_elf_finish_dynamic_sections (output_bfd, info)
 	    case DT_PPC64_GLINK:
 	      dyn.d_un.d_ptr = (htab->sglink->output_section->vma
 				+ htab->sglink->output_offset);
+	      break;
+
+	    case DT_PPC64_OPD:
+	      s = bfd_get_section_by_name (output_bfd, ".opd");
+	      if (s != NULL)
+		dyn.d_un.d_ptr = s->vma;
+	      break;
+
+	    case DT_PPC64_OPDSZ:
+	      s = bfd_get_section_by_name (output_bfd, ".opd");
+	      if (s != NULL)
+		dyn.d_un.d_val = s->_raw_size;
 	      break;
 
 	    case DT_PLTGOT:

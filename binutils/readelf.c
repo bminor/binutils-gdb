@@ -1193,6 +1193,8 @@ get_ppc64_dynamic_type (type)
   switch (type)
     {
     case DT_PPC64_GLINK: return "PPC64_GLINK";
+    case DT_PPC64_OPD:   return "PPC64_OPD";
+    case DT_PPC64_OPDSZ: return "PPC64_OPDSZ";
     default:
       return NULL;
     }
