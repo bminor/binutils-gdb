@@ -1,4 +1,6 @@
-# .Sanitize for devo/sim.
+# Sanitize.in for devo.
+# $Id$
+#
 
 # Each directory to survive it's way into a release will need a file
 # like this one called "./.Sanitize".  All keyword lines must exist,
@@ -24,18 +26,45 @@ Do-first:
 Things-to-keep:
 
 ChangeLog
+COPYING
 Makefile.in
-arm
+Makefile.orig
+README.Cygnus
+README.orig
+arm.mt
+armcopro.c
+armdefs.h
+armemu.c
+armemu.h
+armfpe.h
+arminit.c
+armopts.h
+armos.c
+armos.h
+armrdi.c
+armsupp.c
+armvirt.c
+bag.c
+bag.h
+communicate.c
+communicate.h
 configure.in
-h8300
-h8500
-sh
-w65
-z8k
+dbg_conf.h
+dbg_cp.h
+dbg_hif.h
+dbg_rdi.h
+gdbhost.c
+gdbhost.h
+kid.c
+main.c
+parent.c
+run.c
+wrapper.c
 
 Things-to-lose:
 
 
 Do-last:
+
 
 # End of file.
