@@ -1461,11 +1461,8 @@ mips_mourn_inferior ()
 /* The IDT board uses an unusual breakpoint value, and sometimes gets
    confused when it sees the usual MIPS breakpoint instruction.  */
 
-#if TARGET_BYTE_ORDER == BIG_ENDIAN
-static unsigned char break_insn[] = {0, 0, 0x0a, 0x0d};
-#else
-static unsigned char break_insn[] = {0x0d, 0x0a, 0, 0};
-#endif
+#define BREAK_INSN (0x00000a0d)
+#define BREAK_INSN_SIZE (4)
 
 /* Insert a breakpoint on targets that don't have any better breakpoint
    support.  We read the contents of the target location and stash it,
@@ -1482,10 +1479,7 @@ mips_insert_breakpoint (addr, contents_cache)
 {
   int status;
 
-  return
-    mips_store_word (addr,
-		     extract_unsigned_integer (break_insn, sizeof break_insn),
-		     contents_cache);
+  return mips_store_word (addr, BREAK_INSN, contents_cache);
 }
 
 static int
@@ -1493,7 +1487,7 @@ mips_remove_breakpoint (addr, contents_cache)
      CORE_ADDR addr;
      char *contents_cache;
 {
-  return target_write_memory (addr, contents_cache, sizeof break_insn);
+  return target_write_memory (addr, contents_cache, BREAK_INSN_SIZE);
 }
 
 /* The target vector.  */
