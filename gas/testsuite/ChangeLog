@@ -1,3 +1,14 @@
+2002-06-06  John David Anglin  <dave@hiauly1.hia.nrc.ca>
+
+	* gas/hppa/basic/add.s: Set code level to 1.1.
+	* gas/hppa/basic/branch.s: Likewise.
+	* gas/hppa/basic/dcor.s: Likewise.
+	* gas/hppa/basic/logical.s: Likewise.
+	* gas/hppa/basic/shladd.s: Likewise.
+	* gas/hppa/basic/sub.s: Likewise.
+	* gas/hppa/basic/unit.s: Likewise.
+	* gas/hppa/unsorted/unsorted.exp: Return if target "*-*-linux*".
+
 2002-05-31  Chris G. Demetriou  <cgd@broadcom.com>
 
 	* gas/mips/sb1-ext-mdmx.s: New file.
