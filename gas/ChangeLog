@@ -1,3 +1,9 @@
+Mon Mar 11 18:57:12 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/atof-ieee.c (gen_to_words): Improve handling of
+	X_PRECISION numbers.  Based on patches from Andreas Schwab
+	<schwab@issan.informatik.uni-dortmund.de>.
+
 Mon Mar 11 09:59:53 1996  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	* as.h (SEG_NORMAL, SEG_LIST): Bump segment limit from 10 to 40.
