@@ -1,5 +1,8 @@
 2001-12-04  Alexandre Oliva  <aoliva@redhat.com>
 
+	* d10v-dis.c (print_operand): Disregard OPERAND_SP in register
+	predefined value.
+
 	* d10v-opc.c (RSRC_NOSP): New macro.
 	(d10v_operands): Add it.
 	(d10v_opcodes): Use RSRC_NOSP in post-decrement "st" and "st2w".

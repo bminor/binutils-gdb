@@ -123,7 +123,7 @@ print_operand (oper, insn, op, memaddr, info)
 	num += num ? OPERAND_ACC1 : OPERAND_ACC0;
       for (i = 0; i < d10v_reg_name_cnt (); i++)
 	{
-	  if (num == d10v_predefined_registers[i].value)
+	  if (num == (d10v_predefined_registers[i].value & ~ OPERAND_SP))
 	    {
 	      if (d10v_predefined_registers[i].pname)
 		(*info->fprintf_func) (info->stream, "%s",
