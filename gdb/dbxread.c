@@ -595,7 +595,8 @@ dbx_symfile_init (objfile)
   DBX_STRINGTAB_SIZE (objfile) = bfd_h_get_32 (sym_bfd, size_temp);
 #endif
 
-  if (DBX_STRINGTAB_SIZE (objfile) <= 0)
+  if (DBX_STRINGTAB_SIZE (objfile) <= 0
+      || DBX_STRINGTAB_SIZE (objfile) > bfd_get_size (sym_bfd))
     error ("ridiculous string table size (%d bytes).",
 	   DBX_STRINGTAB_SIZE (objfile));
 
@@ -603,7 +604,8 @@ dbx_symfile_init (objfile)
     (char *) obstack_alloc (&objfile -> psymbol_obstack,
 			    DBX_STRINGTAB_SIZE (objfile));
 #ifdef GDB_TARGET_IS_HPPA
-  if (HP_STRINGTAB_SIZE (objfile) <= 0)
+  if (HP_STRINGTAB_SIZE (objfile) <= 0
+      || HP_STRINGTAB_SIZE (objfile) > bfd_get_size (sym_bfd))
     error ("ridiculous string table size (%d bytes).",
 	   HP_STRINGTAB_SIZE (objfile));
 
@@ -2095,7 +2097,8 @@ elfstab_build_psymtabs (objfile, section_offsets, mainline,
   DBX_STRINGTAB_SIZE (objfile) = stabstrsize;
   DBX_SYMTAB_OFFSET  (objfile) = staboffset;
   
-  if (stabstrsize < 0)	/* FIXME:  stabstrsize is unsigned; never true! */
+  if (stabstrsize < 0	/* FIXME:  stabstrsize is unsigned; never true! */
+      || stabstrsize > bfd_get_size (sym_bfd))
     error ("ridiculous string table size: %d bytes", stabstrsize);
   DBX_STRINGTAB (objfile) = (char *)
     obstack_alloc (&objfile->psymbol_obstack, stabstrsize+1);

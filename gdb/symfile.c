@@ -440,21 +440,40 @@ syms_from_objfile (objfile, addr, mainline, verbo)
 	addr -= bfd_section_vma (objfile->obfd, lowest_sect);
     }
 
+  {
   /* Debugging check inserted for testing elimination of NAMES_HAVE_UNDERSCORE.
      Complain if the dynamic setting of NAMES_HAVE_UNDERSCORE from BFD
-     doesn't match the static setting from the GDB config files.
+     doesn't match the static setting from the GDB config files, but only
+     if we are using the first BFD target (the default target selected by
+     the same configuration that decided whether NAMES_HAVE_UNDERSCORE is
+     defined or not).  For other targets (such as when the user sets GNUTARGET
+     or we are reading a "foreign" object file), it is likely that the value
+     of bfd_get_symbol_leading_char has no relation to the value of
+     NAMES_HAVE_UNDERSCORE for the target for which this gdb was built.
+     Hack alert: the only way to currently do this with bfd is to ask it to
+     produce a list of known target names and compare the first one in the
+     list with the one for the bfd we are using.
      FIXME:  Remove this check after a round of testing.  
 						-- gnu@cygnus.com, 16dec92 */
+    char **targets = bfd_target_list ();
+    if (targets != NULL && *targets != NULL)
+      {
+	if (bfd_get_symbol_leading_char (objfile->obfd) !=
 #ifdef NAMES_HAVE_UNDERSCORE
-  if (bfd_get_symbol_leading_char(objfile->obfd) != '_')
+	    '_'
 #else
-  if (bfd_get_symbol_leading_char(objfile->obfd) != 0)
+	    0
 #endif
-    fprintf (stderr,
- "GDB internal error!  NAMES_HAVE_UNDERSCORE set wrong for %s BFD:\n%s\n",
-             objfile->obfd->xvec->name,
-             objfile->obfd->filename);
-  /* End of debugging check.  FIXME.  */
+	    && STREQ (bfd_get_target (objfile->obfd), *targets))
+	  {
+	    fprintf (stderr, "GDB internal error!  NAMES_HAVE_UNDERSCORE set wrong for %s BFD:\n%s\n",
+		     bfd_get_target (objfile->obfd),
+		     bfd_get_filename (objfile->obfd));
+	  }
+	free (targets);
+      }
+    /* End of debugging check.  FIXME.  */
+  }
 
   /* Initialize symbol reading routines for this objfile, allow complaints to
      appear for this new file, and record how verbose to be, then do the

@@ -1,3 +1,12 @@
+Sun Dec 27 17:34:15 1992  Fred Fish  (fnf@cygnus.com)
+
+	* dbxread.c (dbx_symfile_init, elfstab_build_psymtabs):
+	Call new bfd_get_size() and verify that string table is no larger
+	than the file that is supposed to contain it.
+	* symfile.c (syms_from_objfile):  Only complain about configured
+	NAMES_HAVE_UNDERSCORE differences between gdb and bfd if the
+	current target is the default BFD target.
+
 Sat Dec 26 20:51:41 1992  Fred Fish  (fnf@cygnus.com)
 
 	* solib.c (BKPT_AT_MAIN):  Change to BKPT_AT_SYMBOL.
