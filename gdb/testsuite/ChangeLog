@@ -1,3 +1,8 @@
+Sat Sep  2 06:41:26 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* gdb.base/setvar.exp:  Add new testcases for truncation when
+	assigning invalid values to bitfields.
+
 Sat Sep  2 00:17:31 1995  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.base/callfuncs.exp (do_function_calls):  Remove 
