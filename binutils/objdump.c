@@ -639,13 +639,11 @@ disassemble_data (abfd)
    could be a direct-mapped table, but instead we build one the first
    time we need it.  */
 
-#define	STAB_STRING_LENGTH	6
-
-char stab_name[256][STAB_STRING_LENGTH];
+char **stab_name;
 
 struct stab_print {
   int value;
-  char string[STAB_STRING_LENGTH];
+  char *string;
 };
 
 struct stab_print stab_print[] = {
@@ -667,16 +665,16 @@ dump_stabs (abfd)
 {
   int i;
 
-  /* Initialize stab name array if first time.  */
-  if (stab_name[0][0] == 0) 
+  /* Allocate and initialize stab name array if first time.  */
+  if (stab_name == NULL) 
     {
-      /* Fill in numeric values for all possible strings.  */
+      stab_name = (char **) xmalloc (256 * sizeof(char *));
+      /* Clear the array. */
       for (i = 0; i < 256; i++)
-	{
-	  sprintf (stab_name[i], "%d", i);
-	}
-      for (i = 0; stab_print[i].string[0]; i++)
-	strcpy (stab_name[stab_print[i].value], stab_print[i].string);
+	stab_name[i] = NULL;
+      /* Fill in the defined stabs. */
+      for (i = 0; *stab_print[i].string; i++)
+	stab_name[stab_print[i].value] = stab_print[i].string;
     }
 
   dump_stabs_1 (abfd, ".stab", ".stabstr");
@@ -794,9 +792,14 @@ dump_stabs_1 (abfd, name1, name2)
   for (i = -1; stabs < stabs_end; stabs++, i++)
     {
       SWAP_SYMBOL (stabs, abfd);
-      printf ("\n%-6d %-6s %-6d %-6d ", i,
-	      stab_name [stabs->n_type],
-	      stabs->n_other, stabs->n_desc);
+      printf ("\n%-6d ", i);
+      /* Print either the stab name, or, if unnamed, print its number
+	 again (makes consistent formatting for tools like awk). */
+      if (stab_name[stabs->n_type])
+	printf ("%-6s", stab_name[stabs->n_type]);
+      else
+	printf ("%-6d", i);
+      printf (" %-6d %-6d ", stabs->n_other, stabs->n_desc);
       printf_vma (stabs->n_value);
       printf (" %-6lu", stabs->n_strx);
 

@@ -1,3 +1,11 @@
+Mon Jan 17 13:57:25 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* objdump.c (stab_name): Allocate dynamically.
+	(stab_print): Use pointers to strings instead of char arrays.
+	(dump_stabs): Change alloc and init of arrays appropriately.	
+	(dump_stabs_1): Always decide whether to print stab_name or
+	the stab's type number, if unnamed.
+
 Fri Jan 14 14:42:48 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* objcopy.c (strip_main, copy_main): Don't clobber the input file
