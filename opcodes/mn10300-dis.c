@@ -333,24 +333,24 @@ disassemble (memaddr, info, insn, extension, size)
 		{
 		  value = ((insn >> (operand->shift + extra_shift))
 			   & ((1 << operand->bits) - 1));
-		  (*info->fprintf_func) (info->stream, "$d%d", value);
+		  (*info->fprintf_func) (info->stream, "d%d", value);
 		}
 
 	      else if ((operand->flags & MN10300_OPERAND_AREG) != 0)
 		{
 		  value = ((insn >> (operand->shift + extra_shift))
 			   & ((1 << operand->bits) - 1));
-		  (*info->fprintf_func) (info->stream, "$a%d", value);
+		  (*info->fprintf_func) (info->stream, "a%d", value);
 		}
 
 	      else if ((operand->flags & MN10300_OPERAND_SP) != 0)
-		(*info->fprintf_func) (info->stream, "$sp");
+		(*info->fprintf_func) (info->stream, "sp");
 
 	      else if ((operand->flags & MN10300_OPERAND_PSW) != 0)
-		(*info->fprintf_func) (info->stream, "$psw");
+		(*info->fprintf_func) (info->stream, "psw");
 
 	      else if ((operand->flags & MN10300_OPERAND_MDR) != 0)
-		(*info->fprintf_func) (info->stream, "$mdr");
+		(*info->fprintf_func) (info->stream, "mdr");
 
 	      else if ((operand->flags & MN10300_OPERAND_PAREN) != 0)
 		{
@@ -377,7 +377,7 @@ disassemble (memaddr, info, insn, extension, size)
 		  (*info->fprintf_func) (info->stream, "[");
 		  if (value & 0x80)
 		    {
-		      (*info->fprintf_func) (info->stream, "$d2");
+		      (*info->fprintf_func) (info->stream, "d2");
 		      comma = 1;
 		    }
 
@@ -385,7 +385,7 @@ disassemble (memaddr, info, insn, extension, size)
 		    {
 		      if (comma)
 			(*info->fprintf_func) (info->stream, ",");
-		      (*info->fprintf_func) (info->stream, "$d3");
+		      (*info->fprintf_func) (info->stream, "d3");
 		      comma = 1;
 		    }
 
@@ -393,7 +393,7 @@ disassemble (memaddr, info, insn, extension, size)
 		    {
 		      if (comma)
 			(*info->fprintf_func) (info->stream, ",");
-		      (*info->fprintf_func) (info->stream, "$a2");
+		      (*info->fprintf_func) (info->stream, "a2");
 		      comma = 1;
 		    }
 
@@ -401,7 +401,7 @@ disassemble (memaddr, info, insn, extension, size)
 		    {
 		      if (comma)
 			(*info->fprintf_func) (info->stream, ",");
-		      (*info->fprintf_func) (info->stream, "$a3");
+		      (*info->fprintf_func) (info->stream, "a3");
 		      comma = 1;
 		    }
 
@@ -409,7 +409,7 @@ disassemble (memaddr, info, insn, extension, size)
 		    {
 		      if (comma)
 			(*info->fprintf_func) (info->stream, ",");
-		      (*info->fprintf_func) (info->stream, "$other");
+		      (*info->fprintf_func) (info->stream, "other");
 		      comma = 1;
 		    }
 		  (*info->fprintf_func) (info->stream, "]");

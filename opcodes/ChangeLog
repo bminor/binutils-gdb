@@ -1,3 +1,7 @@
+Fri Dec  6 14:48:09 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10300-dis.c (disassemble): Remove '$' register prefixing.
+
 Fri Dec  6 17:34:39 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* mips16-opc.c: Change opcode for entry/exit to avoid conflicting
