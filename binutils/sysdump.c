@@ -84,27 +84,26 @@ dh (ptr, size)
 {
   int i;
   int j;
-  int span = 20;
+  int span = 16;
 
   printf ("\n************************************************************\n");
 
   for (i = 0; i < size; i += span)
     {
-      for (j = 0; j < span && j + i < size; j++)
+      for (j = 0; j < span; j++)
 	{
-	  printf ("%02x ", ptr[i + j]);
+	  if (j + i < size) 
+	    printf ("%02x ", ptr[i + j]);
+          else
+            printf ("   ");
 	}
-      printf ("\n");
-    }
 
-  for (i = 0; i < size; i += span)
-    {
       for (j = 0; j < span && j + i < size; j++)
 	{
 	  int c = ptr[i + j];
 	  if (c < 32 || c > 127)
 	    c = '.';
-	  printf (" %c ", c);
+	  printf ("%c", c);
 	}
       printf ("\n");
     }
