@@ -2706,7 +2706,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  GPR[RD] = (GPR[RS] < GPR[RT]);
+  GPR[RD] = ((signed_word) GPR[RS] < (signed_word) GPR[RT]);
 }
 
 
@@ -2727,7 +2727,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  GPR[RT] = (GPR[RS] < EXTEND16 (IMMEDIATE));
+  GPR[RT] = ((signed_word) GPR[RS] < (signed_word) EXTEND16 (IMMEDIATE));
 }
 
 
@@ -3158,7 +3158,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  if (GPR[RS] == GPR[RT])
+  if ((signed_word) GPR[RS] == (signed_word) GPR[RT])
     SignalException(Trap, instruction_0);
 }
 
@@ -3179,7 +3179,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  if (GPR[RS] == EXTEND16 (IMMEDIATE))
+  if ((signed_word) GPR[RS] == (signed_word) EXTEND16 (IMMEDIATE))
     SignalException(Trap, instruction_0);
 }
 
@@ -3200,7 +3200,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  if (GPR[RS] >= GPR[RT])
+  if ((signed_word) GPR[RS] >= (signed_word) GPR[RT])
     SignalException(Trap, instruction_0);
 }
 
@@ -3221,7 +3221,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  if (GPR[RS] >= EXTEND16 (IMMEDIATE))
+  if ((signed_word) GPR[RS] >= (signed_word) EXTEND16 (IMMEDIATE))
     SignalException(Trap, instruction_0);
 }
 
@@ -3284,7 +3284,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  if (GPR[RS] < GPR[RT])
+  if ((signed_word) GPR[RS] < (signed_word) GPR[RT])
     SignalException(Trap, instruction_0);
 }
 
@@ -3305,7 +3305,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  if (GPR[RS] < EXTEND16 (IMMEDIATE))
+  if ((signed_word) GPR[RS] < (signed_word) EXTEND16 (IMMEDIATE))
     SignalException(Trap, instruction_0);
 }
 
@@ -3368,7 +3368,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  if (GPR[RS] != GPR[RT])
+  if ((signed_word) GPR[RS] != (signed_word) GPR[RT])
     SignalException(Trap, instruction_0);
 }
 
@@ -3389,7 +3389,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  if (GPR[RS] != EXTEND16 (IMMEDIATE))
+  if ((signed_word) GPR[RS] != (signed_word) EXTEND16 (IMMEDIATE))
     SignalException(Trap, instruction_0);
 }
 
@@ -4074,7 +4074,7 @@
 
 
 110101,5.BASE,5.FT,16.OFFSET:COP1:64::LDC1
-"ldc1 f<FD>, <OFFSET>(r<BASE>)"
+"ldc1 f<FT>, <OFFSET>(r<BASE>)"
 *mipsII:
 *mipsIII:
 *mipsIV:
@@ -4086,31 +4086,18 @@
 *tx19:
 // end-sanitize-tx19
 {
-  signed_word offset UNUSED = SIGNEXTEND((t_reg)((instruction >> 0) & 0x0000FFFF),16);
-  int destreg UNUSED = ((instruction >> 16) & 0x0000001F);
-  signed_word op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  {
-    address_word vaddr = ((uword64)op1 + offset);
-    address_word paddr;
-    int uncached;
-    if ((vaddr & 7) != 0)
-      SignalExceptionAddressLoad();
-    else
-      {
-	if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
-	  {
-	    uword64 memval = 0;
-	    uword64 memval1 = 0;
-	    uword64 mask = 0x7;
-	    unsigned int shift = 4;
-	    unsigned int reverse UNUSED = (ReverseEndian ? (mask >> shift) : 0);
-	    unsigned int bigend UNUSED = (BigEndianCPU ? (mask >> shift) : 0);
-	    unsigned int byte UNUSED;
-	    LoadMemory(&memval,&memval1,uncached,AccessLength_DOUBLEWORD,paddr,vaddr,isDATA,isREAL);
-	    COP_LD(((instruction >> 26) & 0x3),destreg,memval);;
-	  }
-      }
-  }
+  address_word vaddr = GPR[BASE] + EXTEND16 (OFFSET);
+  address_word paddr;
+  int uncached;
+  if ((vaddr & 7) != 0)
+    SignalExceptionAddressLoad();
+  else
+    {
+      unsigned64 memval;
+      AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL);
+      LoadMemory(&memval,0,uncached,AccessLength_DOUBLEWORD,paddr,vaddr,isDATA,isREAL);
+      COP_LD(((instruction_0 >> 26) & 0x3),FT,memval);;
+    }
 }
 
 
@@ -4747,30 +4734,20 @@
 *tx19:
 // end-sanitize-tx19
 {
-  unsigned32 instruction = instruction_0;
-  signed_word offset UNUSED = SIGNEXTEND((t_reg)((instruction >> 0) & 0x0000FFFF),16);
-  int destreg UNUSED = ((instruction >> 16) & 0x0000001F);
-  signed_word op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  {
-    address_word vaddr = ((uword64)op1 + offset);
-    address_word paddr;
-    int uncached;
-    if ((vaddr & 7) != 0)
-      SignalExceptionAddressStore();
-    else
-      {
-	if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
-	  {
-	    uword64 memval = 0;
-	    uword64 memval1 = 0;
-	    memval = (uword64)COP_SD(((instruction >> 26) & 0x3),destreg);
-	    {
-	      StoreMemory(uncached,AccessLength_DOUBLEWORD,memval,memval1,paddr,vaddr,isREAL);
-	    }
-	  }
-      }
-  }
+  address_word vaddr = GPR[BASE] + EXTEND16 (OFFSET);
+  int uncached;
+  if ((vaddr & 7) != 0)
+    SignalExceptionAddressStore();
+  else
+    {
+      address_word paddr;
+      unsigned64 memval;
+      AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL);
+      memval = (unsigned64) COP_SD(((instruction_0 >> 26) & 0x3),FT);
+      StoreMemory(uncached,AccessLength_DOUBLEWORD,memval,0,paddr,vaddr,isREAL);
+    }
 }
+
 
 
 010011,5.RS,5.RT,vvvvv,00000001001:COP1X:64::SDXC1
