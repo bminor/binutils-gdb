@@ -1,3 +1,13 @@
+Wed Nov 16 10:31:27 1994  J.T. Conklin  (jtc@cygnus.com)
+
+	* config/powerpc/gdbserve.mt (TDEPFILES): Removed fake_aio.o
+
+	* nlm/gdbserve.c: Include <nwtypes.h> before other NetWare headers.
+	* nlm/ppc.c: Likewise. 
+
+	* nlm/ppc.c (strtol): Removed, it is provided by NetWare C Library.
+	  (StopBell): New function (stubbed out).
+
 Wed Nov 16 00:12:21 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* hppa-tdep.c (skip_trampoline_code): Handle shared library import

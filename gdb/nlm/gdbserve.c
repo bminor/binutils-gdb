@@ -72,21 +72,22 @@
 #include <time.h>
 #include <errno.h>
 
-#if defined(__netware__) && defined(__i386__)
+#ifdef __i386__
 #include <dfs.h>
 #include <conio.h>
 #include <advanced.h>
 #include <debugapi.h>
 #include <process.h>
 #else
+#include <nwtypes.h>
 #include <nwdfs.h>
 #include <nwconio.h>
 #include <nwadv.h>
 #include <nwdbgapi.h>
 #include <nwthread.h>
 #endif
-#include <aio.h>
 
+#include <aio.h>
 #include "cpu.h"
 
 

@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <time.h>
 #include <errno.h>
+
+#include <nwtypes.h>
 #include <nwdfs.h>
 #include <nwconio.h>
 #include <nwadv.h>
