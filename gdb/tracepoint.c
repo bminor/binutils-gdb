@@ -51,6 +51,34 @@ extern void (*readline_end_hook) PARAMS ((void));
 #define ISATTY(FP)	(isatty (fileno (FP)))
 #endif
 
+/* 
+   Tracepoint.c:
+
+   This module defines the following debugger commands:
+   trace            : set a tracepoint on a function, line, or address.
+   info trace       : list all debugger-defined tracepoints.
+   delete trace     : delete one or more tracepoints.
+   enable trace     : enable one or more tracepoints.
+   disable trace    : disable one or more tracepoints.
+   actions          : specify actions to be taken at a tracepoint.
+   passcount        : specify a pass count for a tracepoint.
+   tstart           : start a trace experiment.
+   tstop            : stop a trace experiment.
+   tstatus          : query the status of a trace experiment.
+   tfind            : find a trace frame in the trace buffer.
+   tdump            : print everything collected at the current tracepoint.
+   save-tracepoints : write tracepoint setup into a file.
+
+   This module defines the following user-visible debugger variables:
+   $trace_frame : sequence number of trace frame currently being debugged.
+   $trace_line  : source line of trace frame currently being debugged.
+   $trace_file  : source file of trace frame currently being debugged.
+   $tracepoint  : tracepoint number of trace frame currently being debugged.
+   */
+
+
+/* ======= Important global variables: ======= */
+
 /* Chain of all tracepoints defined.  */
 struct tracepoint *tracepoint_chain;
 
@@ -68,6 +96,31 @@ static struct symbol *traceframe_fun;
 
 /* Symtab and line for last traceframe collected */
 static struct symtab_and_line traceframe_sal;
+
+/* Tracing command lists */
+static struct cmd_list_element *tfindlist;
+static struct cmd_list_element *tracelist;
+
+/* ======= Important command functions: ======= */
+static void trace_command                 PARAMS ((char *, int));
+static void tracepoints_info              PARAMS ((char *, int));
+static void delete_trace_command          PARAMS ((char *, int));
+static void enable_trace_command          PARAMS ((char *, int));
+static void disable_trace_command         PARAMS ((char *, int));
+static void trace_pass_command            PARAMS ((char *, int));
+static void trace_actions_command         PARAMS ((char *, int));
+static void trace_start_command           PARAMS ((char *, int));
+static void trace_stop_command            PARAMS ((char *, int));
+static void trace_status_command          PARAMS ((char *, int));
+static void trace_find_command            PARAMS ((char *, int));
+static void trace_find_pc_command         PARAMS ((char *, int));
+static void trace_find_tracepoint_command PARAMS ((char *, int));
+static void trace_find_line_command       PARAMS ((char *, int));
+static void trace_find_range_command      PARAMS ((char *, int));
+static void trace_find_outside_command    PARAMS ((char *, int));
+static void tracepoint_save_command       PARAMS ((char *, int));
+static void trace_dump_command            PARAMS ((char *, int));
+
 
 /* Utility: returns true if "target remote" */
 static int
@@ -102,36 +155,6 @@ trace_error (buf)
     }
 }
 
-/* Obsolete: collect regs from a trace frame */
-static void
-trace_receive_regs (buf)
-     char *buf;
-{
-  long regno, i;
-  char regbuf[MAX_REGISTER_RAW_SIZE], *tmp, *p = buf;
-
-  while (*p)
-    {
-      regno = strtol (p, &tmp, 16);
-      if (p == tmp || *tmp++ != ':')
-	error ("tracepoint.c: malformed 'R' packet");
-      else p = tmp;
-
-      for (i = 0; i < REGISTER_RAW_SIZE (regno); i++)
-	{
-	  if (p[0] == 0 || p[1] == 0)
-	    warning ("Remote reply is too short: %s", buf);
-	  regbuf[i] = fromhex (p[0]) * 16 + fromhex (p[1]);
-	  p += 2;
-	}
-
-      if (*p++ != ';')
-	error ("tracepoint.c: malformed 'R' packet");
-
-      supply_register (regno, regbuf);
-    }
-}
-
 /* Utility: wait for reply from stub, while accepting "O" packets */
 static char *
 remote_get_noisy_reply (buf)
@@ -144,13 +167,6 @@ remote_get_noisy_reply (buf)
 	error ("Target does not support this command.");
       else if (buf[0] == 'E')
 	trace_error (buf);
-      else if (buf[0] == 'R')
-	{
-	  flush_cached_frames ();
-	  registers_changed ();
-	  select_frame (get_current_frame (), 0);
-	  trace_receive_regs (buf);
-	}
       else if (buf[0] == 'O' &&
 	       buf[1] != 'K')
 	remote_console_output (buf + 1);	/* 'O' message from stub */
@@ -334,6 +350,7 @@ set_raw_tracepoint (sal)
   return t;
 }
 
+/* Set a tracepoint according to ARG (function, linenum or *address) */
 static void
 trace_command (arg, from_tty)
      char *arg;
@@ -393,9 +410,11 @@ trace_command (arg, from_tty)
   if (sals.nelts > 1)
     {
       printf_filtered ("Multiple tracepoints were set.\n");
-      printf_filtered ("Use the \"delete\" command to delete unwanted tracepoints.\n");
+      printf_filtered ("Use 'delete trace' to delete unwanted tracepoints.\n");
     }
 }
+
+/* Print information on tracepoint number TPNUM_EXP, or all if omitted.  */
 
 static void
 tracepoints_info (tpnum_exp, from_tty)
@@ -618,6 +637,7 @@ map_args_over_tracepoints (args, from_tty, opcode)
       }
 }
 
+/* The 'enable trace' command enables tracepoints.  Not supported by all targets.  */
 static void
 enable_trace_command (args, from_tty)
      char *args;
@@ -627,6 +647,7 @@ enable_trace_command (args, from_tty)
   map_args_over_tracepoints (args, from_tty, enable);
 }
 
+/* The 'disable trace' command enables tracepoints.  Not supported by all targets.  */
 static void
 disable_trace_command (args, from_tty)
      char *args;
@@ -636,6 +657,7 @@ disable_trace_command (args, from_tty)
   map_args_over_tracepoints (args, from_tty, disable);
 }
 
+/* Remove a tracepoint (or all if no argument) */
 static void
 delete_trace_command (args, from_tty)
      char *args;
@@ -648,6 +670,12 @@ delete_trace_command (args, from_tty)
 
   map_args_over_tracepoints (args, from_tty, delete);
 }
+
+/* Set passcount for tracepoint.
+
+   First command argument is passcount, second is tracepoint number.
+   If tracepoint number omitted, apply to most recently defined.
+   Also accepts special argument "all".  */
 
 static void
 trace_pass_command (args, from_tty)
@@ -683,11 +711,24 @@ trace_pass_command (args, from_tty)
       }
 }
 
-/* ACTIONS ACTIONS ACTIONS */
+/* ACTIONS functions: */
 
-static void read_actions PARAMS((struct tracepoint *));
-static void free_actions PARAMS((struct tracepoint *));
-static int  validate_actionline PARAMS((char *, struct tracepoint *));
+/* Prototypes for action-parsing utility commands  */
+static void  read_actions PARAMS((struct tracepoint *));
+static void  free_actions PARAMS((struct tracepoint *));
+static int   validate_actionline PARAMS((char *, struct tracepoint *));
+static char *parse_and_eval_memrange PARAMS ((char *,
+					      CORE_ADDR, 
+					      long *,
+					      bfd_signed_vma *,
+					      long *));
+
+/* The three functions:
+   	collect_pseudocom, while_stepping_pseudocom, and end_pseudocom
+   are placeholders for "commands" that are actually ONLY to be used
+   within a tracepoint action list.  If the actual function is ever called,
+   it means that somebody issued the "command" at the top level,
+   which is always an error.  */
 
 static void 
 end_pseudocom (args, from_tty)
@@ -707,6 +748,7 @@ collect_pseudocom (args, from_tty)
   error ("This command can only be used in a tracepoint actions list.");
 }
 
+/* Enter a list of actions for a tracepoint.  */
 static void
 trace_actions_command (args, from_tty)
      char *args;
@@ -746,6 +788,7 @@ enum actionline_type
   STEPPING =  2,
 };
 
+/* worker function */
 static void
 read_actions (t)
      struct tracepoint *t;
@@ -819,97 +862,7 @@ read_actions (t)
   discard_cleanups (old_chain);
 }
 
-static char *
-parse_and_eval_memrange (arg, addr, typecode, offset, size)
-     char *arg;
-     CORE_ADDR addr;
-     long *typecode, *size;
-     bfd_signed_vma *offset;
-{
-  char *start = arg;
-  struct expression *exp;
-
-  if (*arg++ != '$' || *arg++ != '(')
-    error ("Internal: bad argument to validate_memrange: %s", start);
-
-  if (*arg == '$')	/* register for relative memrange? */
-    {
-      exp = parse_exp_1 (&arg, block_for_pc (addr), 1);
-      if (exp->elts[0].opcode != OP_REGISTER)
-	error ("Bad register operand for memrange: %s", start);
-      if (*arg++ != ',')
-	error ("missing comma for memrange: %s", start);
-      *typecode = exp->elts[1].longconst;
-    }
-  else
-    *typecode = 0;
-
-#if 0
-  /* While attractive, this fails for a number of reasons:
-     1) parse_and_eval_address does not deal with trailing commas,
-        close-parens etc.
-     2) There is no safeguard against the user trying to use
-        an out-of-scope variable in an address expression (for instance).
-     2.5) If you are going to allow semi-arbitrary expressions, you 
-          would need to explain which expressions are allowed, and 
-	  which are not (which would provoke endless questions).
-     3) If you are going to allow semi-arbitrary expressions in the
-        offset and size fields, then the leading "$" of a register
-	name no longer disambiguates the typecode field.
-  */
-
-  *offset = parse_and_eval_address (arg);
-  if ((arg = strchr (arg, ',')) == NULL)
-    error ("missing comma for memrange: %s", start);
-  else
-    arg++;
-
-  *size = parse_and_eval_address (arg);
-  if ((arg = strchr (arg, ')')) == NULL)
-    error ("missing close-parenthesis for memrange: %s", start);
-  else
-    arg++;
-#else
-#if 0
-  /* This, on the other hand, doesn't work because "-1" is an 
-     expression, not an OP_LONG!  Fall back to using strtol for now. */
-
-  exp = parse_exp_1 (&arg, block_for_pc (addr), 1);
-  if (exp->elts[0].opcode != OP_LONG)
-    error ("Bad offset operand for memrange: %s", start);
-  *offset = exp->elts[2].longconst;
-
-  if (*arg++ != ',')
-    error ("missing comma for memrange: %s", start);
-
-  exp = parse_exp_1 (&arg, block_for_pc (addr), 1);
-  if (exp->elts[0].opcode != OP_LONG)
-    error ("Bad size operand for memrange: %s", start);
-  *size = exp->elts[2].longconst;
-
-  if (*size <= 0)
-    error ("invalid size in memrange: %s", start);
-
-  if (*arg++ != ')')
-    error ("missing close-parenthesis for memrange: %s", start);
-#else
-  *offset = strtol (arg, &arg, 0);
-  if (*arg++ != ',')
-    error ("missing comma for memrange: %s", start);
-  *size   = strtol (arg, &arg, 0);
-  if (*size <= 0)
-    error ("invalid size in memrange: %s", start);
-  if (*arg++ != ')')
-    error ("missing close-parenthesis for memrange: %s", start);
-#endif
-#endif
-  if (info_verbose)
-    printf_filtered ("Collecting memrange: (0x%x,0x%x,0x%x)\n", 
-		     *typecode, *offset, *size);
-
-  return arg;
-}
-
+/* worker function */
 static enum actionline_type
 validate_actionline (line, t)
      char *line;
@@ -1007,6 +960,7 @@ validate_actionline (line, t)
     }
 }
 
+/* worker function */
 static void 
 free_actions (t)
      struct tracepoint *t;
@@ -1034,6 +988,101 @@ struct collection_list {
   struct memrange *list;
 } tracepoint_list, stepping_list;
 
+/* MEMRANGE functions: */
+
+/* parse a memrange spec from command input */
+static char *
+parse_and_eval_memrange (arg, addr, typecode, offset, size)
+     char *arg;
+     CORE_ADDR addr;
+     long *typecode, *size;
+     bfd_signed_vma *offset;
+{
+  char *start = arg;
+  struct expression *exp;
+
+  if (*arg++ != '$' || *arg++ != '(')
+    error ("Internal: bad argument to validate_memrange: %s", start);
+
+  if (*arg == '$')	/* register for relative memrange? */
+    {
+      exp = parse_exp_1 (&arg, block_for_pc (addr), 1);
+      if (exp->elts[0].opcode != OP_REGISTER)
+	error ("Bad register operand for memrange: %s", start);
+      if (*arg++ != ',')
+	error ("missing comma for memrange: %s", start);
+      *typecode = exp->elts[1].longconst;
+    }
+  else
+    *typecode = 0;
+
+#if 0
+  /* While attractive, this fails for a number of reasons:
+     1) parse_and_eval_address does not deal with trailing commas,
+        close-parens etc.
+     2) There is no safeguard against the user trying to use
+        an out-of-scope variable in an address expression (for instance).
+     2.5) If you are going to allow semi-arbitrary expressions, you 
+          would need to explain which expressions are allowed, and 
+	  which are not (which would provoke endless questions).
+     3) If you are going to allow semi-arbitrary expressions in the
+        offset and size fields, then the leading "$" of a register
+	name no longer disambiguates the typecode field.
+  */
+
+  *offset = parse_and_eval_address (arg);
+  if ((arg = strchr (arg, ',')) == NULL)
+    error ("missing comma for memrange: %s", start);
+  else
+    arg++;
+
+  *size = parse_and_eval_address (arg);
+  if ((arg = strchr (arg, ')')) == NULL)
+    error ("missing close-parenthesis for memrange: %s", start);
+  else
+    arg++;
+#else
+#if 0
+  /* This, on the other hand, doesn't work because "-1" is an 
+     expression, not an OP_LONG!  Fall back to using strtol for now. */
+
+  exp = parse_exp_1 (&arg, block_for_pc (addr), 1);
+  if (exp->elts[0].opcode != OP_LONG)
+    error ("Bad offset operand for memrange: %s", start);
+  *offset = exp->elts[2].longconst;
+
+  if (*arg++ != ',')
+    error ("missing comma for memrange: %s", start);
+
+  exp = parse_exp_1 (&arg, block_for_pc (addr), 1);
+  if (exp->elts[0].opcode != OP_LONG)
+    error ("Bad size operand for memrange: %s", start);
+  *size = exp->elts[2].longconst;
+
+  if (*size <= 0)
+    error ("invalid size in memrange: %s", start);
+
+  if (*arg++ != ')')
+    error ("missing close-parenthesis for memrange: %s", start);
+#else
+  *offset = strtol (arg, &arg, 0);
+  if (*arg++ != ',')
+    error ("missing comma for memrange: %s", start);
+  *size   = strtol (arg, &arg, 0);
+  if (*size <= 0)
+    error ("invalid size in memrange: %s", start);
+  if (*arg++ != ')')
+    error ("missing close-parenthesis for memrange: %s", start);
+#endif
+#endif
+  if (info_verbose)
+    printf_filtered ("Collecting memrange: (0x%x,0x%x,0x%x)\n", 
+		     *typecode, *offset, *size);
+
+  return arg;
+}
+
+/* compare memranges for qsort */
 static int
 memrange_cmp (a, b)
      struct memrange *a, *b;
@@ -1053,6 +1102,7 @@ memrange_cmp (a, b)
   return 0;
 }
 
+/* Sort the memrange list using qsort, and merge adjacent memranges */
 static void
 memrange_sortmerge (memranges)
      struct collection_list *memranges;
@@ -1081,6 +1131,7 @@ memrange_sortmerge (memranges)
     }
 }
 
+/* Add a register to a collection list */
 void
 add_register (collection, regno)
      struct collection_list *collection;
@@ -1094,6 +1145,7 @@ add_register (collection, regno)
   collection->regs_mask [regno / 8] |= 1 << (regno  % 8);
 }
 
+/* Add a memrange to a collection list */
 static void
 add_memrange (memranges, type, base, len)
      struct collection_list *memranges;
@@ -1121,6 +1173,7 @@ add_memrange (memranges, type, base, len)
     add_register (memranges, type);
 }
 
+/* Add a symbol to a collection list */
 static void
 collect_symbol (collect, sym)
      struct collection_list *collect;
@@ -1203,6 +1256,7 @@ collect_symbol (collect, sym)
   }
 }
 
+/* Add all locals (or args) symbols to collection list */
 static void
 add_local_symbols (collect, pc, type)
      struct collection_list *collect;
@@ -1253,6 +1307,7 @@ add_local_symbols (collect, pc, type)
     warning ("No %s found in scope.", type == 'L' ? "locals" : "args");
 }
 
+/* worker function */
 static void
 clear_collection_list (list)
      struct collection_list *list;
@@ -1261,6 +1316,7 @@ clear_collection_list (list)
   memset (list->regs_mask, 0, sizeof (list->regs_mask));
 }
 
+/* reduce a collection list to string form (for gdb protocol) */
 static char *
 stringify_collection_list (list, string)
      struct collection_list *list;
@@ -1308,6 +1364,7 @@ stringify_collection_list (list, string)
     return string;
 }
 
+/* render all actions into gdb protocol */
 static void
 encode_actions (t, tdp_actions, step_count, stepping_actions)
      struct tracepoint  *t;
@@ -1431,6 +1488,13 @@ encode_actions (t, tdp_actions, step_count, stepping_actions)
 
 static char target_buf[2048];
 
+/* tstart command:
+ 
+   Tell target to lear any previous trace experiment.
+   Walk the list of tracepoints, and send them (and their actions)
+   to the target.  If no errors, 
+   Tell target to start a new trace experiment.  */
+
 static void
 trace_start_command (args, from_tty)
      char *args;
@@ -1497,6 +1561,7 @@ trace_start_command (args, from_tty)
     printf_filtered ("Trace can only be run on remote targets.\n");
 }
 
+/* tstop command */
 static void
 trace_stop_command (args, from_tty)
      char *args;
@@ -1513,6 +1578,7 @@ trace_stop_command (args, from_tty)
     error ("Trace can only be run on remote targets.");
 }
 
+/* tstatus command */
 static void
 trace_status_command (args, from_tty)
      char *args;
@@ -1529,29 +1595,7 @@ trace_status_command (args, from_tty)
     error ("Trace can only be run on remote targets.");
 }
 
-static void
-trace_buff_command (args, from_tty)
-     char *args;
-     int from_tty;
-{ /* STUB_COMM NOT_IMPLEMENTED */
-  if (args == 0 || *args == 0)
-    printf_filtered ("TBUFFER command requires argument (on or off)\n");
-  else if (strcasecmp (args, "on") == 0)
-    printf_filtered ("tbuffer overflow on.\n");
-  else if (strcasecmp (args, "off") == 0)
-    printf_filtered ("tbuffer overflow off.\n");
-  else
-    printf_filtered ("TBUFFER: unknown argument (use on or off)\n");
-}
-
-static void
-trace_limit_command (args, from_tty)
-     char *args;
-     int from_tty;
-{ /* STUB_COMM NOT_IMPLEMENTED */
-  printf_filtered ("Limit it to what?\n");
-}
-
+/* Worker function for the various flavors of the tfind command */
 static void
 finish_tfind_command (reply, from_tty)
      char *reply;
@@ -1563,7 +1607,38 @@ finish_tfind_command (reply, from_tty)
     switch (*reply) {
     case 'F':
       if ((target_frameno = strtol (++reply, &reply, 16)) == -1)
-	error ("Target failed to find requested trace frame.");
+	{ 
+	  /* A request for a non-existant trace frame has failed.
+	     Our response will be different, depending on FROM_TTY:
+
+	     If FROM_TTY is true, meaning that this command was 
+	     typed interactively by the user, then give an error
+	     and DO NOT change the state of traceframe_number etc.
+
+	     However if FROM_TTY is false, meaning that we're either
+	     in a script, a loop, or a user-defined command, then 
+	     DON'T give an error, but DO change the state of
+	     traceframe_number etc. to invalid.
+
+	     The rationalle is that if you typed the command, you
+	     might just have committed a typo or something, and you'd
+	     like to NOT lose your current debugging state.  However
+	     if you're in a user-defined command or especially in a
+	     loop, then you need a way to detect that the command
+	     failed WITHOUT aborting.  This allows you to write
+	     scripts that search thru the trace buffer until the end,
+	     and then continue on to do something else.  */
+
+	  if (from_tty)
+	    error ("Target failed to find requested trace frame.");
+	  else
+	    {
+	      if (info_verbose)
+		printf_filtered ("End of trace buffer.\n");
+	      /* The following will not recurse, since it's special-cased */
+	      trace_find_command ("-1", from_tty);
+	    }
+	}
       break;
     case 'T':
       if ((target_tracept = strtol (++reply, &reply, 16)) == -1)
@@ -1604,6 +1679,7 @@ finish_tfind_command (reply, from_tty)
 	T<hexnum>	(gives the selected tracepoint number)
    */
 
+/* tfind command */
 static void
 trace_find_command (args, from_tty)
      char *args;
@@ -1668,6 +1744,7 @@ trace_find_command (args, from_tty)
     error ("Trace can only be run on remote targets.");
 }
 
+/* tfind end */
 static void
 trace_find_end_command (args, from_tty)
      char *args;
@@ -1676,6 +1753,7 @@ trace_find_end_command (args, from_tty)
   trace_find_command ("-1", from_tty);
 }
 
+/* tfind none */
 static void
 trace_find_none_command (args, from_tty)
      char *args;
@@ -1684,6 +1762,7 @@ trace_find_none_command (args, from_tty)
   trace_find_command ("-1", from_tty);
 }
 
+/* tfind start */
 static void
 trace_find_start_command (args, from_tty)
      char *args;
@@ -1692,6 +1771,7 @@ trace_find_start_command (args, from_tty)
   trace_find_command ("0", from_tty);
 }
 
+/* tfind pc command */
 static void
 trace_find_pc_command (args, from_tty)
      char *args;
@@ -1718,6 +1798,7 @@ trace_find_pc_command (args, from_tty)
     error ("Trace can only be run on remote targets.");
 }
 
+/* tfind tracepoint command */
 static void
 trace_find_tracepoint_command (args, from_tty)
      char *args;
@@ -1747,13 +1828,12 @@ trace_find_tracepoint_command (args, from_tty)
 }
 
 /* TFIND LINE command:
- *
- * This command will take a sourceline for argument, just like BREAK
- * or TRACE (ie. anything that "decode_line_1" can handle).  
- * 
- * With no argument, this command will find the next trace frame 
- * corresponding to a source line OTHER THAN THE CURRENT ONE.
- */
+ 
+   This command will take a sourceline for argument, just like BREAK
+   or TRACE (ie. anything that "decode_line_1" can handle).  
+   
+   With no argument, this command will find the next trace frame 
+   corresponding to a source line OTHER THAN THE CURRENT ONE.  */
 
 static void
 trace_find_line_command (args, from_tty)
@@ -1846,6 +1926,7 @@ trace_find_line_command (args, from_tty)
       error ("Trace can only be run on remote targets.");
 }
 
+/* tfind range command */
 static void
 trace_find_range_command (args, from_tty)
      char *args;
@@ -1887,6 +1968,7 @@ trace_find_range_command (args, from_tty)
       error ("Trace can only be run on remote targets.");
 }
 
+/* tfind outside command */
 static void
 trace_find_outside_command (args, from_tty)
      char *args;
@@ -1928,6 +2010,7 @@ trace_find_outside_command (args, from_tty)
       error ("Trace can only be run on remote targets.");
 }
 
+/* save-tracepoints command */
 static void
 tracepoint_save_command (args, from_tty)
      char *args;
@@ -1985,6 +2068,7 @@ tracepoint_save_command (args, from_tty)
   return;
 }
 
+/* info scope command: list the locals for a scope.  */
 static void
 scope_info (args, from_tty)
      char *args;
@@ -2121,6 +2205,7 @@ scope_info (args, from_tty)
 		     save_args);
 }
 
+/* worker function (cleanup) */
 static void
 replace_comma (comma)
      char *comma;
@@ -2128,6 +2213,7 @@ replace_comma (comma)
   *comma = ',';
 }
 
+/* tdump command */
 static void
 trace_dump_command (args, from_tty)
      char *args;
@@ -2224,11 +2310,7 @@ trace_dump_command (args, from_tty)
   discard_cleanups (old_cleanups);
 }
 
-
-
-static struct cmd_list_element *tfindlist;
-static struct cmd_list_element *tracelist;
-
+/* module initialization */
 void
 _initialize_tracepoint ()
 {
