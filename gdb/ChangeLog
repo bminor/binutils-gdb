@@ -1,3 +1,8 @@
+2004-11-21  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/pa/hppahpux.mh: Remove file.
+	* config/pa/hpux1020.mh: Remove file.
+
 2004-11-20  Andreas Schwab  <schwab@suse.de>
 
 	* configure.host: Set host floatformat for m68k.
