@@ -6,6 +6,10 @@ Tue Feb 24 11:01:25 1998  Doug Evans  <devans@canuck.cygnus.com>
 	(create_colon_label): New argument `sto'.  All callers updated.
 	(record_mach): New argument `force_next_p'.  All callers updated.
 	(cpu_sto): New function.
+	(UNIQUE_LABEL_PREFIX): New macro.
+	(unique_label): Use it.
+	(assemble_gif): Emit start label before mach label.
+	(s_endgif): Update.
 
 Mon Feb 23 15:55:12 1998  Doug Evans  <devans@canuck.cygnus.com>
 

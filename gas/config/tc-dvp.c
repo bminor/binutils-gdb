@@ -42,6 +42,8 @@
 #define LOCAL_LABEL_PREFIX ".L"
 /* Label prefix for end markers used in autocounts.  */
 #define END_LABEL_PREFIX ".L.end."
+/* Label to use for unique labels.  */
+#define UNIQUE_LABEL_PREFIX ".L.dvptmp."
 
 static long parse_float PARAMS ((char **, const char **));
 static symbolS * create_label PARAMS ((const char *, const char *));
@@ -566,15 +568,19 @@ assemble_gif (str)
   frag_align (4, 0, 0);
   record_alignment (now_seg, 4);
 
+  /* Insert a label so we can compute the number of quadwords when the
+     .endgif is seen.  This is put before the mach type label because gif
+     insns are followed by data and we don't want the disassembler to try
+     to disassemble them as mips insns (since it uses the st_other field)
+     of the closest label to choose the mach type and since we don't have
+     a special st_other value for "data".  */
+  gif_data_name = S_GET_NAME (create_colon_label (0, "", unique_name (NULL)));
+
   record_mach (DVP_GIF, 1);
 
   gif_insn_frag = f = frag_more (16);
   for (i = 0; i < 4; ++i)
     md_number_to_chars (f + i * 4, insn_buf[i], 4);
-
-  /* Insert a label so we can compute the number of quadwords when the
-     .endgif is seen.  */
-  gif_data_name = S_GET_NAME (create_colon_label (0, "", unique_name (NULL)));
 
   /* Record the type of the gif tag so we know how to compute nloop
      in s_endgif.  */
@@ -1556,7 +1562,7 @@ unique_name (prefix)
   char *result;
 
   if (prefix == NULL)
-    prefix = "dvptmp";
+    prefix = UNIQUE_LABEL_PREFIX;
   asprintf (&result, "%s%d", prefix, counter);
   ++counter;
   return result;
@@ -2100,10 +2106,12 @@ s_endgif (ignore)
     }
   pop_asm_state (0);
 
+  /* The -16 is because the `gif_data_name' label is emitted at the start
+     of the gif tag.  */
   if (gif_insn_type == GIF_PACKED)
-    count = eval_expr (0, 0, "(. - %s) >> 4", gif_data_name);
+    count = eval_expr (0, 0, "(. - %s - 16) >> 4", gif_data_name);
   else
-    count = eval_expr (0, 0, "(. - %s) >> 3", gif_data_name);
+    count = eval_expr (0, 0, "(. - %s - 16) >> 3", gif_data_name);
 
   if (count < 0
       || fixup_count != 0)
