@@ -845,9 +845,6 @@ command_loop (void)
 
   while (instream && !feof (instream))
     {
-#if defined(TUI)
-      extern int insert_mode;
-#endif
       if (window_hook && instream == stdin)
 	(*window_hook) (instream, get_prompt ());
 
@@ -856,22 +853,10 @@ command_loop (void)
 	reinitialize_more_filter ();
       old_chain = make_cleanup (null_cleanup, 0);
 
-#if defined(TUI)
-      /* A bit of paranoia: I want to make sure the "insert_mode" global
-       * is clear except when it is being used for command-line editing
-       * (see tuiIO.c, utils.c); otherwise normal output will
-       * get messed up in the TUI. So clear it before/after
-       * the command-line-input call. - RT
-       */
-      insert_mode = 0;
-#endif
       /* Get a command-line. This calls the readline package. */
       command = command_line_input (instream == stdin ?
 				    get_prompt () : (char *) NULL,
 				    instream == stdin, "prompt");
-#if defined(TUI)
-      insert_mode = 0;
-#endif
       if (command == 0)
 	return;
 
@@ -1748,16 +1733,6 @@ quit_force (char *args, int from_tty)
     write_history (history_filename);
 
   do_final_cleanups (ALL_CLEANUPS);	/* Do any final cleanups before exiting */
-
-#if defined(TUI)
-  /* tuiDo((TuiOpaqueFuncPtr)tuiCleanUp); */
-  /* The above does not need to be inside a tuiDo(), since
-   * it is not manipulating the curses screen, but rather,
-   * it is tearing it down.
-   */
-  if (tui_version)
-    tuiCleanUp ();
-#endif
 
   exit (exit_code);
 }

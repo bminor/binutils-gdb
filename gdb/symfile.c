@@ -1008,7 +1008,6 @@ symbol_file_command (char *args, int from_tty)
 	{
 	  error ("no symbol file name was specified");
 	}
-      TUIDO (((TuiOpaqueFuncPtr) tuiDisplayMainFunction));
       do_cleanups (cleanups);
     }
 }

@@ -1263,15 +1263,7 @@ query (char *ctlstr,...)
       wrap_here ("");
       gdb_flush (gdb_stdout);
 
-#if defined(TUI)
-      if (!tui_version || cmdWin == tuiWinWithFocus ())
-#endif
-	answer = fgetc (stdin);
-#if defined(TUI)
-      else
-	answer = (unsigned char) tuiBufferGetc ();
-
-#endif
+      answer = fgetc (stdin);
       clearerr (stdin);		/* in case of C-d */
       if (answer == EOF)	/* C-d */
 	{
@@ -1279,21 +1271,13 @@ query (char *ctlstr,...)
 	  break;
 	}
       /* Eat rest of input line, to EOF or newline */
-      if ((answer != '\n') || (tui_version && answer != '\r'))
+      if (answer != '\n')
 	do
 	  {
-#if defined(TUI)
-	    if (!tui_version || cmdWin == tuiWinWithFocus ())
-#endif
-	      ans2 = fgetc (stdin);
-#if defined(TUI)
-	    else
-	      ans2 = (unsigned char) tuiBufferGetc ();
-#endif
+            ans2 = fgetc (stdin);
 	    clearerr (stdin);
 	  }
 	while (ans2 != EOF && ans2 != '\n' && ans2 != '\r');
-      TUIDO (((TuiOpaqueFuncPtr) tui_vStartNewLines, 1));
 
       if (answer >= 'a')
 	answer -= 040;

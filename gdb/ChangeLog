@@ -1,3 +1,31 @@
+2001-07-14  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* utils.c (query): Remove tui hacks; tui must use the query_hook.
+	* top.c (command_loop): Remove tui insert_mode hacks; don't call
+	tuiCleanUp because this must be made with atexit by tui.
+	* symfile.c (symbol_file_command): Remove call to TUIDO
+	* stack.c (show_and_print_stack_frame_stub): Remove tui check;
+	not necessary when using the selected frame hooks.
+	(print_stack_frame_stub): Likewise.
+	(print_frame_info_base): Likewise.
+	(print_frame_info): Likewise.
+	(up_silently_command): Likewise.
+	(down_silently_command): Likewise.
+	(show_stack_frame): Likewise for TUIDO.
+	(select_frame): Likewise.
+	(select_and_print_frame): Likewise.
+	(stack_publish_stopped_with_no_frame): Remove.
+	(select_and_maybe_print_frame): Remove.
+	* main.c (captured_main): Remove tui_fileopen and tuiInit; tui
+	must use the initialize ui hook.
+	* infrun.c (normal_stop): Remove call to TUIDO; tui must use the
+	selected frame hooks.
+	* event-top.c (command_handler): Remove tui insert_mode hack.
+	* defs.h: Remove TUIDO; Only include tui.h.
+	* breakpoint.c (mention): Remove calls to TUIDO.
+	(delete_breakpoint): Remove tui hacks; tui must install
+	the breakpoint hooks.
+
 2001-07-14  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/i386/xm-linux.h (KERNEL_U_ADDR): Move from here...

@@ -4576,8 +4576,6 @@ mention (struct breakpoint *b)
       if (b->source_file)
 	printf_filtered (": file %s, line %d.",
 			 b->source_file, b->line_number);
-      TUIDO (((TuiOpaqueFuncPtr) tui_vAllSetHasBreakAt, b, 1));
-      TUIDO (((TuiOpaqueFuncPtr) tuiUpdateAllExecInfos));
     }
 #ifdef UI_OUT
   do_cleanups (old_chain);
@@ -6829,26 +6827,6 @@ delete_breakpoint (struct breakpoint *bpt)
     {
       b->next = bpt->next;
       break;
-    }
-
-  /* Before turning off the visuals for the bp, check to see that
-     there are no other bps at the same address. */
-  if (tui_version)
-    {
-      int clearIt;
-
-      ALL_BREAKPOINTS (b)
-      {
-	clearIt = (b->address != bpt->address);
-	if (!clearIt)
-	  break;
-      }
-
-      if (clearIt)
-	{
-	  TUIDO (((TuiOpaqueFuncPtr) tui_vAllSetHasBreakAt, bpt, 0));
-	  TUIDO (((TuiOpaqueFuncPtr) tuiUpdateAllExecInfos));
-	}
     }
 
   check_duplicates (bpt);

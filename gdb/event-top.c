@@ -478,18 +478,11 @@ command_handler (char *command)
   extern int display_time;
   extern int display_space;
 
-#if defined(TUI)
-  extern int insert_mode;
-#endif
-
   quit_flag = 0;
   if (instream == stdin && stdin_is_tty)
     reinitialize_more_filter ();
   old_chain = make_cleanup (null_cleanup, 0);
 
-#if defined(TUI)
-  insert_mode = 0;
-#endif
   /* If readline returned a NULL command, it means that the 
      connection with the terminal is gone. This happens at the
      end of a testsuite run, after Expect has hung up 

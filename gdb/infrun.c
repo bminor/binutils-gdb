@@ -3590,9 +3590,6 @@ and/or watchpoints.\n");
       select_frame (get_current_frame (), 0);
     }
 
-
-  TUIDO (((TuiOpaqueFuncPtr) tui_vCheckDataValues, selected_frame));
-
 done:
   annotate_stopped ();
 }

@@ -149,11 +149,6 @@ show_and_print_stack_frame_stub (void *args)
 {
   struct print_stack_frame_args *p = (struct print_stack_frame_args *) args;
 
-  /* Reversed order of these so tuiDo() doesn't occur
-   * in the middle of "Breakpoint 1 ... [location]" printing = RT
-   */
-  if (tui_version)
-    print_frame_info_base (p->fi, p->level, p->source, p->args);
   print_frame_info (p->fi, p->level, p->source, p->args);
 
   return 0;
@@ -167,10 +162,7 @@ print_stack_frame_stub (void *args)
 {
   struct print_stack_frame_args *p = (struct print_stack_frame_args *) args;
 
-  if (tui_version)
-    print_frame_info (p->fi, p->level, p->source, p->args);
-  else
-    print_frame_info_base (p->fi, p->level, p->source, p->args);
+  print_frame_info_base (p->fi, p->level, p->source, p->args);
   return 0;
 }
 
@@ -408,7 +400,7 @@ print_frame_info_base (struct frame_info *fi, int level, int source, int args)
 				     fi->pc);
       if (!done)
 	{
-	  if (addressprint && mid_statement && !tui_version)
+	  if (addressprint && mid_statement)
 	    {
 #ifdef UI_OUT
 	      ui_out_field_core_addr (uiout, "addr", fi->pc);
@@ -420,7 +412,7 @@ print_frame_info_base (struct frame_info *fi, int level, int source, int args)
 	    }
 	  if (print_frame_info_listing_hook)
 	    print_frame_info_listing_hook (sal.symtab, sal.line, sal.line + 1, 0);
-	  else if (!tui_version)
+	  else
 	    print_source_lines (sal.symtab, sal.line, sal.line + 1, 0);
 	}
       current_source_line = max (sal.line - lines_to_list / 2, 1);
@@ -657,33 +649,13 @@ print_frame (struct frame_info *fi,
 }
 
 
-#if 0
-void
-stack_publish_stopped_with_no_frame (void)
-{
-  TUIDO (((TuiOpaqueFuncPtr) tuiUpdateOnEnd));
-
-  return;
-}
-#endif
-
 /* Show or print the frame info.  If this is the tui, it will be shown in 
    the source display */
 void
 print_frame_info (struct frame_info *fi, register int level, int source,
 		  int args)
 {
-  if (!tui_version)
-    print_frame_info_base (fi, level, source, args);
-  else
-    {
-      if (fi && (frame_in_dummy (fi) || fi->signal_handler_caller))
-	print_frame_info_base (fi, level, source, args);
-      else
-	{
-	  TUIDO (((TuiOpaqueFuncPtr) tui_vShowFrameInfo, fi));
-	}
-    }
+  print_frame_info_base (fi, level, source, args);
 }
 
 /* Show the frame info.  If this is the tui, it will be shown in 
@@ -691,7 +663,6 @@ print_frame_info (struct frame_info *fi, register int level, int source,
 void
 show_stack_frame (struct frame_info *fi)
 {
-  TUIDO (((TuiOpaqueFuncPtr) tui_vShowFrameInfo, fi));
 }
 
 
@@ -1561,14 +1532,6 @@ select_frame (struct frame_info *fi, int level)
 	{
 	  set_language (s->language);
 	}
-      /* elz: this if here fixes the problem with the pc not being displayed
-         in the tui asm layout, with no debug symbols. The value of s 
-         would be 0 here, and select_source_symtab would abort the
-         command by calling the 'error' function */
-      if (s)
-	{
-	  TUIDO (((TuiOpaqueFuncPtr) tui_vSelectSourceSymtab, s));
-	}
     }
 }
 
@@ -1582,24 +1545,9 @@ select_and_print_frame (struct frame_info *fi, int level)
   if (fi)
     {
       print_stack_frame (fi, level, 1);
-      TUIDO (((TuiOpaqueFuncPtr) tui_vCheckDataValues, fi));
     }
 }
 
-
-/* Select frame FI, noting that its stack level is LEVEL.  Be silent if
-   not the TUI */
-#if 0
-void
-select_and_maybe_print_frame (struct frame_info *fi, int level)
-{
-  if (!tui_version)
-    select_frame (fi, level);
-  else
-    select_and_print_frame (fi, level);
-}
-#endif
-
 
 /* Store the selected frame and its level into *FRAMEP and *LEVELP.
    If there is no selected frame, *FRAMEP is set to NULL.  */
@@ -1755,8 +1703,6 @@ static void
 up_silently_command (char *count_exp, int from_tty)
 {
   up_silently_base (count_exp);
-  if (tui_version)
-    print_stack_frame (selected_frame, selected_frame_level, 1);
 }
 
 static void
@@ -1802,8 +1748,6 @@ static void
 down_silently_command (char *count_exp, int from_tty)
 {
   down_silently_base (count_exp);
-  if (tui_version)
-    print_stack_frame (selected_frame, selected_frame_level, 1);
 }
 
 static void

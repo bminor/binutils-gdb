@@ -36,12 +36,6 @@
 #include "event-loop.h"
 #include "ui-out.h"
 
-#if defined (TUI)
-/* FIXME: cagney/2000-01-31: This #include is to allow older code such
-   as that found in the TUI to continue to build. */
-#include "tui/tui-file.h"
-#endif
-
 /* If nonzero, display time usage both at startup and for each command.  */
 
 int display_time;
@@ -195,17 +189,10 @@ captured_main (void *data)
   getcwd (gdb_dirbuf, sizeof (gdb_dirbuf));
   current_directory = gdb_dirbuf;
 
-#if defined (TUI)
-  gdb_stdout = tui_fileopen (stdout);
-  gdb_stderr = tui_fileopen (stderr);
-  gdb_stdlog = gdb_stdout;	/* for moment */
-  gdb_stdtarg = gdb_stderr;	/* for moment */
-#else
   gdb_stdout = stdio_fileopen (stdout);
   gdb_stderr = stdio_fileopen (stderr);
   gdb_stdlog = gdb_stderr;	/* for moment */
   gdb_stdtarg = gdb_stderr;	/* for moment */
-#endif
 
   /* initialize error() */
   error_init ();
@@ -481,12 +468,6 @@ extern int gdbtk_test (char *);
     if (batch)
       quiet = 1;
   }
-
-#if defined(TUI)
-  /* Should this be moved to tui-top.c:_initialize_tui()? */
-  if (tui_version)
-    init_ui_hook = tuiInit;
-#endif
 
   /* Initialize all files.  Give the interpreter a chance to take
      control of the console via the init_ui_hook()) */

@@ -165,13 +165,6 @@ extern int is_cplus_marker (int);
 /* use tui interface if non-zero */
 extern int tui_version;
 
-#if defined(TUI)
-/* all invocations of TUIDO should have two sets of parens */
-#define TUIDO(x)	tuiDo x
-#else
-#define TUIDO(x)
-#endif
-
 /* enable xdb commands if set */
 extern int xdb_commands;
 
@@ -625,11 +618,6 @@ extern struct ui_file *gdb_stdtarg;
 
 #if defined(TUI)
 #include "tui.h"
-#include "tuiCommand.h"
-#include "tuiData.h"
-#include "tuiIO.h"
-#include "tuiLayout.h"
-#include "tuiWin.h"
 #endif
 
 #include "ui-file.h"
