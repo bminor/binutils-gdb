@@ -35,6 +35,8 @@ SHELL = @SHELL@
 EXEEXT = @EXEEXT@
 SUBDIRS = @subdirs@
 RPATH_ENVVAR = @RPATH_ENVVAR@
+ALL_SUBDIRS = gdb.arch gdb.asm gdb.base gdb.c++ gdb.disasm gdb.java gdb.mi \
+	gdb.threads gdb.trace $(SUBDIRS)
 
 EXPECT = `if [ -f $${rootme}/../../expect/expect ] ; then \
           echo $${rootme}/../../expect/expect ; \
@@ -145,7 +147,7 @@ subdir_do: force
 force:;
 
 subdirs:
-	for dir in ${SUBDIRS} ; \
+	for dir in ${ALL_SUBDIRS} ; \
 	do \
 		echo "$$dir:" ; \
 		if [ -d $$dir ] ; then \
@@ -157,8 +159,8 @@ subdirs:
 
 clean mostlyclean:
 	-rm -f *~ core *.o a.out xgdb *.x *.grt
-	if [ x"${SUBDIRS}" != x ] ; then \
-	    for dir in ${SUBDIRS}; \
+	if [ x"${ALL_SUBDIRS}" != x ] ; then \
+	    for dir in ${ALL_SUBDIRS}; \
 	    do \
 		    echo "$$dir:"; \
 		    if [ -d $$dir ]; then \
@@ -171,8 +173,8 @@ distclean maintainer-clean realclean: clean
 	-rm -f *~ core
 	-rm -f Makefile config.status *-init.exp
 	-rm -fr *.log summary detail *.plog *.sum *.psum site.*
-	if [ x"${SUBDIRS}" != x ] ; then \
-	    for dir in ${SUBDIRS}; \
+	if [ x"${ALL_SUBDIRS}" != x ] ; then \
+	    for dir in ${ALL_SUBDIRS}; \
 	    do \
 		    echo "$$dir:"; \
 		    if [ -d $$dir ]; then \

@@ -1,3 +1,18 @@
+2003-01-09  Daniel Jacobowitz  <drow@mvista.com>
+
+	* Makefile.in (ALL_SUBDIRS): New variable.
+	(subdirs, clean, distclean): Use it.
+	* gdb.arch/Makefile.in: Clean up Makefile.  Remove rules for
+	regenerating Makefile, since it is generated from the top level.
+	* gdb.asm/Makefile.in: Likewise.
+	* gdb.base/Makefile.in: Likewise.
+	* gdb.c++/Makefile.in: Likewise.
+	* gdb.disasm/Makefile.in: Likewise.
+	* gdb.java/Makefile.in: Likewise.
+	* gdb.mi/Makefile.in: Likewise.
+	* gdb.threads/Makefile.in: Likewise.
+	* gdb.trace/Makefile.in: Likewise.
+
 2003-01-09  David Carlton  <carlton@math.stanford.edu>
 
 	* gdb.c++/annota2.exp: KFAIL "watch triggered on a.x".
