@@ -1,3 +1,19 @@
+Tue Apr 23 10:38:41 1991  Jim Kingdon  (kingdon at cygint.cygnus.com)
+
+	* main.c (cd_command): Call dont_repeat.
+
+	* dbxread.c (read_struct_type): If const/volatile character is
+	missing, don't complain, just continue.
+
+	* dbxread.c (read_struct_type): Only try to read the fcontext if
+	it is there.  Also change "error_type " to "return error_type ".
+	values.c (value_virtual_fn_field): If there is no fcontext,
+	then do things the way GDB 3.x did.
+	valops.c (search_struct_method): Add type to value_virtual_fn_field
+	arguments.
+
+	* dbxread.c (read_struct_type): Fix typo: *pp != '\0' -> **pp != '\0'.
+
 Mon Apr 22 00:02:43 1991  Jim Kingdon  (kingdon at cygint.cygnus.com)
 
 	* printcmd.c (print_scalar_formatted): Add 't' for binary.

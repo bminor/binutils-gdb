@@ -1652,6 +1652,10 @@ cd_command (dir, from_tty)
   int len;
   int change;
 
+  /* If the new directory is absolute, repeat is a no-op; if relative,
+     repeat might be useful but is more likely to be a mistake.  */
+  dont_repeat ();
+
   if (dir == 0)
     error_no_arg ("new working directory");
 

@@ -4588,8 +4588,12 @@ read_struct_type (pp, type)
 		 D for `const volatile' member functions.  */
 	      if (**pp == 'A' || **pp == 'B' || **pp == 'C' || **pp == 'D')
 	        (*pp)++;
+#if 0
+	      /* This probably just means we're processing a file compiled
+		 with g++ version 1.  */
 	      else
 	        complain(&const_vol_complaint, **pp);
+#endif /* 0 */
 
 	      switch (*(*pp)++)
 		{
@@ -4604,14 +4608,20 @@ read_struct_type (pp, type)
 		  new_sublist->fn_field.voffset =
 		      (0x7fffffff & read_number (pp, ';')) + 1;
 
-		  /* Figure out from whence this virtual function came.
-		     It may belong to virtual function table of
-		     one of its baseclasses.  */
-		  new_sublist->fn_field.fcontext = read_type (pp);
-		  if (**pp != ';')
-		    error_type (pp);
+		  if (**pp == ';' || **pp == '\0')
+		    /* Must be g++ version 1.  */
+		    new_sublist->fn_field.fcontext = 0;
 		  else
-		    ++*pp;
+		    {
+		      /* Figure out from whence this virtual function came.
+			 It may belong to virtual function table of
+			 one of its baseclasses.  */
+		      new_sublist->fn_field.fcontext = read_type (pp);
+		      if (**pp != ';')
+			return error_type (pp);
+		      else
+			++*pp;
+		    }
 		  break;
 
 		case '?':
@@ -4629,7 +4639,7 @@ read_struct_type (pp, type)
 	      sublist = new_sublist;
 	      length++;
 	    }
-	  while (**pp != ';' && *pp != '\0');
+	  while (**pp != ';' && **pp != '\0');
 
 	  *pp += 1;
 
