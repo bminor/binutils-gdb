@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2001-02-26 17:19-0800\n"
+"POT-Creation-Date: 2001-03-06 11:39-0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -49,7 +49,7 @@ msgstr ""
 msgid "*unknown*"
 msgstr ""
 
-#: aoutx.h:3681
+#: aoutx.h:3682
 #, c-format
 msgid "%s: relocateable link from %s to %s not supported"
 msgstr ""
@@ -326,42 +326,42 @@ msgstr ""
 msgid "Warning: Clearing the interworking flag of %s due to outside request"
 msgstr ""
 
-#: coffcode.h:1080
+#: coffcode.h:1078
 #, c-format
 msgid "%s (%s): Section flag %s (0x%x) ignored"
 msgstr ""
 
-#: coffcode.h:2194
+#: coffcode.h:2192
 #, c-format
 msgid "Unrecognized TI COFF target id '0x%x'"
 msgstr ""
 
-#: coffcode.h:4252
+#: coffcode.h:4250
 #, c-format
 msgid "%s: warning: illegal symbol index %ld in line numbers"
 msgstr ""
 
-#: coffcode.h:4266
+#: coffcode.h:4264
 #, c-format
 msgid "%s: warning: duplicate line number information for `%s'"
 msgstr ""
 
-#: coffcode.h:4626
+#: coffcode.h:4624
 #, c-format
 msgid "%s: Unrecognized storage class %d for %s symbol `%s'"
 msgstr ""
 
-#: coffcode.h:4757
+#: coffcode.h:4755
 #, c-format
 msgid "warning: %s: local symbol `%s' has no section"
 msgstr ""
 
-#: coff-tic54x.c:376 coffcode.h:4868
+#: coff-tic54x.c:376 coffcode.h:4866
 #, c-format
 msgid "%s: warning: illegal symbol index %ld in relocs"
 msgstr ""
 
-#: coffcode.h:4906
+#: coffcode.h:4904
 #, c-format
 msgid "%s: illegal relocation type %d at address 0x%lx"
 msgstr ""
@@ -699,27 +699,39 @@ msgstr ""
 msgid " [Version1 EABI]"
 msgstr ""
 
-#: elf32-arm.h:2232
+#: elf32-arm.h:2232 elf32-arm.h:2243
 msgid " [sorted symbol table]"
 msgstr ""
 
-#: elf32-arm.h:2234
+#: elf32-arm.h:2234 elf32-arm.h:2245
 msgid " [unsorted symbol table]"
 msgstr ""
 
 #: elf32-arm.h:2240
+msgid " [Version2 EABI]"
+msgstr ""
+
+#: elf32-arm.h:2248
+msgid " [dynamic symbols use segment index]"
+msgstr ""
+
+#: elf32-arm.h:2251
+msgid " [mapping symbols precede others]"
+msgstr ""
+
+#: elf32-arm.h:2258
 msgid " <EABI version unrecognised>"
 msgstr ""
 
-#: elf32-arm.h:2247
+#: elf32-arm.h:2265
 msgid " [relocatable executable]"
 msgstr ""
 
-#: elf32-arm.h:2250
+#: elf32-arm.h:2268
 msgid " [has entry point]"
 msgstr ""
 
-#: elf32-arm.h:2255
+#: elf32-arm.h:2273
 msgid "<Unrecognised flag bits set>"
 msgstr ""
 

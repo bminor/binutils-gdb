@@ -1,3 +1,11 @@
+2001-03-06  Igor Shevlyakov  <igor@windriver.com>
+
+	* archures.c (bfd_default_scan): Add Coldfire CPUs.
+	* bfd-in2.h: Regenerate.
+	* cpu-m68k.c: Add Coldfire CPUs for arch table.
+	* ieee.c (ieee_write_processor): Set proper id for
+	Coldfire CPUs.
+
 2001-03-01  D.J. Barrow <djbarrow@de.ibm.com,barrow_dj@yahoo.com>
 
 	* configure.in: Add s390 target.
