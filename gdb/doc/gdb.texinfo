@@ -7816,6 +7816,24 @@ The definition of the command is made up of other @value{GDBN} command lines,
 which are given following the @code{define} command.  The end of these
 commands is marked by a line containing @code{end}.
 
+@item if
+@kindex if
+@kindex else
+Takes a single argument, which is an expression to evaluate.
+It is followed by a series of commands that are executed
+only if the expression is true (nonzero).
+There can then optionally be a line @code{else}, followed
+by a series of commands that are only executed if the expression
+was false.  The end of the list is marked by a line containing @code{end}.
+
+@item while
+@kindex while
+The syntax is similar to @code{if}:  The command takes a single argument,
+which is an expression to evaluate, and must be followed by the commands to
+execute, one per line, terminated by an @code{end}.
+The commands are executed repeatedly as long as the expression
+evaluates to true.
+
 @item document @var{commandname}
 @kindex document
 Give documentation to the user-defined command @var{commandname}.  The
@@ -7842,7 +7860,24 @@ documentation).  If no @var{commandname} is given, display the
 definitions for all user-defined commands.
 @end table
 
-User-defined commands do not take arguments.  When they are executed, the
+User-defined commands may accept up to 10 arguments separated by whitespace.
+Arguments are accessed within the user command via @code{$arg0}..@code{$arg9}.
+A trivial example:
+@smallexample
+define adder
+print $arg0 + $arg1 + $arg2
+end
+@end smallexample
+Defines the command @code{adder} which prints the sum of its three arguments.
+To execute the command use:
+@smallexample
+adder 1 2 3
+@end smallexample
+
+Note the arguments are text substitutions, so they may reference variables,
+use complex expressions, or even perform inferior function calls.
+
+When user-defined commands are executed, the
 commands of the definition are not printed.  An error in any command
 stops execution of the user-defined command.
 
