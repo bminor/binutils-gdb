@@ -33,8 +33,12 @@ prefetch.d
 prefetch.s
 rdpr.d
 rdpr.s
+set64.d
+set64.s
 splet.d
 splet.s
+splet-2.d
+splet-2.s
 synth.d
 synth.s
 synth64.d
