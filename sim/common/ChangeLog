@@ -2,6 +2,9 @@ Tue Apr 21 12:44:27 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* cgen-types.h (GETHIDI,MAKEDI): Tweak.
 
+	* cgen-ops.h (ADDCFSI): Fix.
+	(SUBCFSI): Tweak.
+
 Tue Apr 21 13:18:41 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-types.h (signed_address, unsigned_address): Define.
