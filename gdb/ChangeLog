@@ -1,3 +1,20 @@
+Tue Apr 16 17:38:23 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* corelow.c (add_to_thread_list):  Make sure reg_sect is non-null
+	before de-referencing it.  Prevents deref of NULL pointer if core
+	file lacks .reg section.
+	* defs.h:  Rename floatformat_{to from}_long_double to
+	floatformat_{to from}_doublest.  Get rid of FLOATFORMAT_{TO
+	FROM}... macros.
+	* findvar.c (extract_floating store_floating):  Change all refs to
+	FLOATFORMAT_{FROM TO}... to floatformat_{from to}_doublest.
+	* utils.c:  Change floatformat_{to from}_long_double to
+	floatformat_{to from}_doublest cuz the new routines will use
+	whatever size (double or long double) is appropriate.
+	* config/i960/tm-i960.h (REGISTER_CONVERT_TO_VIRTUAL
+	REGISTER_CONVERT_TO_RAW):  Change FLOATFORMAT... macros to
+	floatformat... routine calls.
+
 Mon Apr 15 16:34:11 1996  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* stabsread.c (read_type):  Move handling of '@' from type

@@ -171,7 +171,7 @@ extern CORE_ADDR saved_pc_after_call ();
 #define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,TYPE,FROM,TO)	\
 { \
   DOUBLEST val; \
-  FLOATFORMAT_TO_DOUBLEST (&floatformat_i960_ext, (FROM), &val); \
+  floatformat_to_doublest (&floatformat_i960_ext, (FROM), &val); \
   store_floating ((TO), TYPE_LENGTH (TYPE), val); \
 }
 
@@ -181,7 +181,7 @@ extern CORE_ADDR saved_pc_after_call ();
 #define REGISTER_CONVERT_TO_RAW(TYPE,REGNUM,FROM,TO)	\
 { \
   DOUBLEST val = extract_floating ((FROM), TYPE_LENGTH (TYPE)); \
-  FLOATFORMAT_FROM_DOUBLEST (&floatformat_i960_ext, &val, (TO)); \
+  floatformat_from_doublest (&floatformat_i960_ext, &val, (TO)); \
 }
 
 /* Return the GDB type object for the "standard" data type
