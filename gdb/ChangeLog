@@ -1,3 +1,12 @@
+2003-04-14  Andrew Cagney  <cagney@redhat.com>
+
+	* mips-tdep.c (mips_push_dummy_frame): Delete function.
+	(MASK, PUSH_FP_REGNUM, GEN_REG_SAVE_MASK): Delete macros.
+	(FLOAT_REG_SAVE_MASK, FLOAT_SINGLE_REG_SAVE_MASK): Delete macro.
+	(mips_push_register): Delete function.
+	(mips_dump_tdep): Delete references to GEN_REG_SAVE_MASK and
+	PUSH_FP_REGNUM.
+
 2003-04-14  Jim Blandy  <jimb@redhat.com>
 
 	* symmisc.c: #include "gdb_regex.h".

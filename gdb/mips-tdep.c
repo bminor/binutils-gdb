@@ -3748,111 +3748,6 @@ mips_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 }
 
 static void
-mips_push_register (CORE_ADDR * sp, int regno)
-{
-  char *buffer = alloca (MAX_REGISTER_RAW_SIZE);
-  int regsize;
-  int offset;
-  if (MIPS_SAVED_REGSIZE < REGISTER_RAW_SIZE (regno))
-    {
-      regsize = MIPS_SAVED_REGSIZE;
-      offset = (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
-		? REGISTER_RAW_SIZE (regno) - MIPS_SAVED_REGSIZE
-		: 0);
-    }
-  else
-    {
-      regsize = REGISTER_RAW_SIZE (regno);
-      offset = 0;
-    }
-  *sp -= regsize;
-  deprecated_read_register_gen (regno, buffer);
-  write_memory (*sp, buffer + offset, regsize);
-}
-
-/* MASK(i,j) == (1<<i) + (1<<(i+1)) + ... + (1<<j)). Assume i<=j<(MIPS_NUMREGS-1). */
-#define MASK(i,j) (((1 << ((j)+1))-1) ^ ((1 << (i))-1))
-
-static void
-mips_push_dummy_frame (void)
-{
-  int ireg;
-  struct linked_proc_info *link = (struct linked_proc_info *)
-  xmalloc (sizeof (struct linked_proc_info));
-  mips_extra_func_info_t proc_desc = &link->info;
-  CORE_ADDR sp = ADDR_BITS_REMOVE (read_signed_register (SP_REGNUM));
-  CORE_ADDR old_sp = sp;
-  link->next = linked_proc_desc_table;
-  linked_proc_desc_table = link;
-
-/* FIXME!   are these correct ? */
-#define PUSH_FP_REGNUM 16	/* must be a register preserved across calls */
-#define GEN_REG_SAVE_MASK MASK(1,16)|MASK(24,28)|(1<<(MIPS_NUMREGS-1))
-#define FLOAT_REG_SAVE_MASK MASK(0,19)
-#define FLOAT_SINGLE_REG_SAVE_MASK \
-  ((1<<18)|(1<<16)|(1<<14)|(1<<12)|(1<<10)|(1<<8)|(1<<6)|(1<<4)|(1<<2)|(1<<0))
-  /*
-   * The registers we must save are all those not preserved across
-   * procedure calls. Dest_Reg (see tm-mips.h) must also be saved.
-   * In addition, we must save the PC, PUSH_FP_REGNUM, MMLO/-HI
-   * and FP Control/Status registers.
-   *
-   *
-   * Dummy frame layout:
-   *  (high memory)
-   *    Saved PC
-   *    Saved MMHI, MMLO, FPC_CSR
-   *    Saved R31
-   *    Saved R28
-   *    ...
-   *    Saved R1
-   *    Saved D18 (i.e. F19, F18)
-   *    ...
-   *    Saved D0 (i.e. F1, F0)
-   *    Argument build area and stack arguments written via mips_push_arguments
-   *  (low memory)
-   */
-
-  /* Save special registers (PC, MMHI, MMLO, FPC_CSR) */
-  PROC_FRAME_REG (proc_desc) = PUSH_FP_REGNUM;
-  PROC_FRAME_OFFSET (proc_desc) = 0;
-  PROC_FRAME_ADJUST (proc_desc) = 0;
-  mips_push_register (&sp, PC_REGNUM);
-  mips_push_register (&sp, HI_REGNUM);
-  mips_push_register (&sp, LO_REGNUM);
-  mips_push_register (&sp, MIPS_FPU_TYPE == MIPS_FPU_NONE ? 0 : FCRCS_REGNUM);
-
-  /* Save general CPU registers */
-  PROC_REG_MASK (proc_desc) = GEN_REG_SAVE_MASK;
-  /* PROC_REG_OFFSET is the offset of the first saved register from FP.  */
-  PROC_REG_OFFSET (proc_desc) = sp - old_sp - MIPS_SAVED_REGSIZE;
-  for (ireg = 32; --ireg >= 0;)
-    if (PROC_REG_MASK (proc_desc) & (1 << ireg))
-      mips_push_register (&sp, ireg);
-
-  /* Save floating point registers starting with high order word */
-  PROC_FREG_MASK (proc_desc) =
-    MIPS_FPU_TYPE == MIPS_FPU_DOUBLE ? FLOAT_REG_SAVE_MASK
-    : MIPS_FPU_TYPE == MIPS_FPU_SINGLE ? FLOAT_SINGLE_REG_SAVE_MASK : 0;
-  /* PROC_FREG_OFFSET is the offset of the first saved *double* register
-     from FP.  */
-  PROC_FREG_OFFSET (proc_desc) = sp - old_sp - 8;
-  for (ireg = 32; --ireg >= 0;)
-    if (PROC_FREG_MASK (proc_desc) & (1 << ireg))
-      mips_push_register (&sp, ireg + FP0_REGNUM);
-
-  /* Update the frame pointer for the call dummy and the stack pointer.
-     Set the procedure's starting and ending addresses to point to the
-     call dummy address at the entry point.  */
-  write_register (PUSH_FP_REGNUM, old_sp);
-  write_register (SP_REGNUM, sp);
-  PROC_LOW_ADDR (proc_desc) = CALL_DUMMY_ADDRESS ();
-  PROC_HIGH_ADDR (proc_desc) = CALL_DUMMY_ADDRESS () + 4;
-  SET_PROC_DESC_IS_DUMMY (proc_desc);
-  PROC_PC_REG (proc_desc) = RA_REGNUM;
-}
-
-static void
 mips_pop_frame (void)
 {
   register int regnum;
@@ -6239,9 +6134,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
 		      "mips_dump_tdep: GDB_TARGET_IS_MIPS64 = %d\n",
 		      GDB_TARGET_IS_MIPS64);
   fprintf_unfiltered (file,
-		      "mips_dump_tdep: GEN_REG_SAVE_MASK = %d\n",
-		      GEN_REG_SAVE_MASK);
-  fprintf_unfiltered (file,
 		      "mips_dump_tdep: HAVE_NONSTEPPABLE_WATCHPOINT # %s\n",
 		      XSTRING (HAVE_NONSTEPPABLE_WATCHPOINT));
   fprintf_unfiltered (file,
@@ -6354,9 +6246,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: PS_REGNUM = %d\n",
 		      PS_REGNUM);
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: PUSH_FP_REGNUM = %d\n",
-		      PUSH_FP_REGNUM);
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: RA_REGNUM = %d\n",
 		      RA_REGNUM);
