@@ -43,6 +43,7 @@ config
 config.h
 configure.bat
 configure.in
+dep-in.sed
 emulparams
 emultempl
 genscripts.sh
