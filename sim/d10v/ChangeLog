@@ -1,3 +1,10 @@
+Wed Sep 10 22:30:24 1997  Martin M. Hunt  <hunt@cygnus.com>
+
+	* interp.c (sim_resume): Increment PC at end of rep
+	loop.
+
+	* simops.c (OP_4201): Fix rachi instruction.
+
 Thu Sep  4 17:21:23 1997  Doug Evans  <dje@seba>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.
