@@ -1,3 +1,21 @@
+2005-03-02  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* ld-mips-elf/tlsbin-o32.s, ld-mips-elf/mips-dyn.ld,
+	ld-mips-elf/tlslib-o32.got, ld-mips-elf/tlslib-o32.d,
+	ld-mips-elf/tlslib-o32.s, ld-mips-elf/mips-lib.ld,
+	ld-mips-elf/tlsbin-o32.got, ld-mips-elf/tlsdyn-o32.d,
+	ld-mips-elf/tlsdyn-o32.got, ld-mips-elf/tlsbin-o32.d,
+	ld-mips-elf/tlsdyn-o32.s, ld-mips-elf/tls-multi-got-1.got,
+	ld-mips-elf/tls-multi-got-1-1.s, ld-mips-elf/tls-multi-got-1.d,
+	ld-mips-elf/tls-multi-got-1.r, ld-mips-elf/tls-multi-got-1-2.s,
+	ld-mips-elf/tlslib-o32-ver.got, ld-mips-elf/tlslib.ver,
+	ld-mips-elf/tlslib-o32-hidden.got, ld-mips-elf/tlslib-hidden.ver,
+	ld-mips-elf/tlsdyn-o32-1.d, ld-mips-elf/tlsdyn-o32-3.got,
+	ld-mips-elf/tlsdyn-o32-2.d, ld-mips-elf/tlsdyn-o32-2.s,
+	ld-mips-elf/tlsdyn-o32-3.d, ld-mips-elf/tlsdyn-o32-1.got,
+	ld-mips-elf/tlsdyn-o32-2.got: New files.
+	* ld-mips-elf/mips-elf.exp: Run the new tests.
+
 2005-03-01  Nick Clifton  <nickc@redhat.com>
 
 	* ld-d10v/default_layout.d: Adjust expected offsets to allow for
