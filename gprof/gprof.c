@@ -330,9 +330,9 @@ getpfile(filename)
 	 *	a bunch of <from,self,count> tuples.
 	 */
     while ( fread( &arc , sizeof arc , 1 , pfile ) == 1 ) {
-      arc.raw_frompc = bfd_get_32 (abfd, &arc.raw_frompc);
-      arc.raw_selfpc = bfd_get_32 (abfd, &arc.raw_selfpc);
-      arc.raw_count = bfd_get_32 (abfd, &arc.raw_count);
+      arc.raw_frompc = bfd_get_32 (abfd, (bfd_byte *) &arc.raw_frompc);
+      arc.raw_selfpc = bfd_get_32 (abfd, (bfd_byte *) &arc.raw_selfpc);
+      arc.raw_count  = bfd_get_32 (abfd, (bfd_byte *) &arc.raw_count);
 #	ifdef DEBUG
 	    if ( debug & SAMPLEDEBUG ) {
 		printf( "[getpfile] frompc 0x%x selfpc 0x%x count %d\n" ,
@@ -359,9 +359,9 @@ openpfile(filename)
 	done();
     }
     fread(&tmp, sizeof(struct hdr), 1, pfile);
-    tmp.lowpc = (char*)bfd_get_32 (abfd, &tmp.lowpc);
-    tmp.highpc = (char*)bfd_get_32 (abfd, &tmp.highpc);
-    tmp.ncnt = bfd_get_32 (abfd, &tmp.ncnt);
+    tmp.lowpc  = (UNIT *)bfd_get_32 (abfd, (bfd_byte *) &tmp.lowpc);
+    tmp.highpc = (UNIT *)bfd_get_32 (abfd, (bfd_byte *) &tmp.highpc);
+    tmp.ncnt   =         bfd_get_32 (abfd, (bfd_byte *) &tmp.ncnt);
 
     if ( s_highpc != 0 && ( tmp.lowpc != h.lowpc ||
 	 tmp.highpc != h.highpc || tmp.ncnt != h.ncnt ) ) {
@@ -494,7 +494,7 @@ readsamples(pfile)
     }
     for (i = 0; i < nsamples; i++) {
 	fread(&sample, sizeof (UNIT), 1, pfile);
-	sample = bfd_get_16 (abfd, &sample);
+	sample = bfd_get_16 (abfd, (bfd_byte *) &sample);
 	if (feof(pfile))
 		break;
 	samples[i] += sample;

@@ -22,7 +22,6 @@ static char sccsid[] = "@(#)printgprof.c	5.7 (Berkeley) 6/1/90";
 #endif /* not lint */
 
 #include "gprof.h"
-#include "pathnames.h"
 
 printprof()
 {
@@ -78,7 +77,7 @@ flatprofheader()
 {
     
     if ( bflag ) {
-	printblurb( _PATH_FLAT_BLURB );
+	flat_blurb(stdout);
     }
     printf( "\ngranularity: each sample hit covers %d byte(s)" ,
 	    (long) scale * sizeof(UNIT) );
@@ -88,7 +87,7 @@ flatprofheader()
     } else {
 	printf( " no time accumulated\n\n" );
 	    /*
-	     *	this doesn't hurt sinc eall the numerators will be zero.
+	     *	this doesn't hurt since all the numerators will be zero.
 	     */
 	totime = 1.0;
     }
@@ -124,7 +123,7 @@ gprofheader()
 {
 
     if ( bflag ) {
-	printblurb( _PATH_CALLG_BLURB );
+	callg_blurb(stdout);
     }
     printf( "\ngranularity: each sample hit covers %d byte(s)" ,
 	    (long) scale * sizeof(UNIT) );
@@ -630,23 +629,6 @@ arccmp( thisp , thatp )
 	    return EQUALTO;
 	}
     }
-}
-
-printblurb( blurbname )
-    char	*blurbname;
-{
-    FILE	*blurbfile;
-    int		input;
-
-    blurbfile = fopen( blurbname , "r" );
-    if ( blurbfile == NULL ) {
-	perror( blurbname );
-	return;
-    }
-    while ( ( input = getc( blurbfile ) ) != EOF ) {
-	putchar( input );
-    }
-    fclose( blurbfile );
 }
 
 int
