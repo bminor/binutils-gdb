@@ -1,3 +1,8 @@
+2002-09-03  Michal Ludvig  <mludvig@suse.cz>
+
+	* x86-64-linux-tdep.c: Include gdb_string.h
+	* x86-64-linux-nat.c: Ditto.
+
 2002-09-02  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* ada-exp.y (yyname, yyrule): Remap global variables that appear

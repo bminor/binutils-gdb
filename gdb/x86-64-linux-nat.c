@@ -26,6 +26,7 @@
 #include "gdbcore.h"
 #include "regcache.h"
 #include "gdb_assert.h"
+#include "gdb_string.h"
 #include "x86-64-tdep.h"
 
 #include <sys/ptrace.h>
