@@ -1,3 +1,10 @@
+2003-02-03  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.c++/ovldbreak.exp (continue_to_bp_overloaded): Add
+	'might_kfail' arg.
+	KFAIL some of the continue_to_bp_overloaded calls, according to
+	PR c++/1025.
+
 2003-02-01  Michael Chastain  <mec@shout.net>
 
 	* gdb.base/advance.c (marker1): New marker function.
