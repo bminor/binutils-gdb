@@ -1,3 +1,9 @@
+Thu Dec 18 12:34:28 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	From Gavin Koch <gavin@cygnus.com>: mips-tdep.c
+ 	* (mips_push_arguments): For big-endian shorts and char's store at
+ 	* the correct location.
+
 Thu Dec 18 00:26:46 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* mdebugread.c (parse_partial_symbols): Delete check that symbols
