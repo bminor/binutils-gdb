@@ -119,7 +119,7 @@ proc gdb_load_timed {executable downloadsize class writesize} {
     set load_begin_time [clock clicks]
     set result [gdb_load $executable]
     set load_end_time [clock clicks]
-    if { [lindex $result 0] != "" } then {
+    if { $result != 0 } then {
 	fail "$test - loading executable"
 	return
     }

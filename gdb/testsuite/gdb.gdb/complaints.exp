@@ -49,17 +49,20 @@ proc setup_test { executable } {
     set timeout 600
     verbose "Timeout is now $timeout seconds" 2
 
+    global gdb_file_cmd_debug_info
+    set gdb_file_cmd_debug_info "unset"
+
     set result [gdb_load $executable]
     set timeout $oldtimeout
     verbose "Timeout is now $timeout seconds" 2
 
-    if { [lindex $result 0] != "" } then {
+    if { $result != 0 } then {
 	return -1
-    } else {
-        if { [lsearch -exact [lrange $result 1 end] "nodebug"] >= 0 } then {
-            untested "No debug information, skipping testcase."
-            return -1
-        }
+    }
+
+    if { $gdb_file_cmd_debug_info != "debug" } then {
+	untested "No debug information, skipping testcase."
+	return -1
     }
 
     # Set a breakpoint at main
