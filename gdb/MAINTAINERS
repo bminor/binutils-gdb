@@ -110,6 +110,7 @@ rdi/adp protocol	Fernando Nasser		fnasser@cygnus.com
 			Jim Ingham		jingham@cygnus.com
 gdbserver		Stan Shebs		shebs@apple.com
 documentation	 	Stan Shebs		shebs@apple.com
+			Eli Zaretskii		eliz@gnu.org
 testsuite	 	Stan Shebs		shebs@apple.com
 			Fernando Nasser		fnasser@cygnus.com
   hp tests (gdb.hp)	*Jimmy Guo	 adl-debugger-wdb-merge-guru@cup.hp.com

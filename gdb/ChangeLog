@@ -1,3 +1,7 @@
+Sun Apr  2 10:32:54 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* MAINTAINERS: Eli Zaretskii is a doco maintainer.
+
 Fri Mar 31 08:59:58 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdbarch-utils.h, gdbarch-utils.c: New files.
