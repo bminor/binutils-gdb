@@ -60,6 +60,7 @@ m68k)
 	apollo*)
 		case "${host_os}" in
 		sysv*)	my_host=apollov68 ;;
+		bsd*)	my_host=apollo68;; 
 		esac
 		;;
 	esac
