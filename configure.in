@@ -435,6 +435,9 @@ case "${target}" in
     # a gcc built textutils will cause the linker to hang on 'join'
     noconfigdirs="$noconfigdirs gas ld binutils gprof textutils"
     ;;
+  m68k-*-netbsd*)
+    noconfigdirs="$noconfigdirs gdb"
+    ;;
   m68k-apollo-*)
     noconfigdirs="$noconfigdirs ld binutils gprof"
     ;;

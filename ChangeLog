@@ -1,3 +1,7 @@
+Fri Sep  8 17:11:14 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* configure.in (noconfigdirs): Disable gdb on m68k-*-netbsd*.
+
 Fri Sep  8 16:46:29 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Build ld in mips*-*-bsd* case.
