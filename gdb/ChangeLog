@@ -1,3 +1,7 @@
+Sun Aug 10 19:08:26 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* utils.c (error): Fix return type for !ANSI_PROTOTYPES.
+
 Sun Aug 10 16:49:09 1997  Geoffrey Noer  <noer@cygnus.com>
 
 	* ocd.c: move ocd_write_bytes proto to ocd.h since it is used
