@@ -428,7 +428,9 @@ v:2:TARGET_CHAR_SIGNED:int:char_signed::::1:-1:1::::
 #
 f:2:TARGET_READ_PC:CORE_ADDR:read_pc:ptid_t ptid:ptid::0:generic_target_read_pc::0
 f:2:TARGET_WRITE_PC:void:write_pc:CORE_ADDR val, ptid_t ptid:val, ptid::0:generic_target_write_pc::0
-f:2:TARGET_READ_FP:CORE_ADDR:read_fp:void:::0:generic_target_read_fp::0
+# This is simply not needed.  See value_of_builtin_frame_fp_reg and
+# call_function_by_hand.
+F::DEPRECATED_TARGET_READ_FP:CORE_ADDR:deprecated_target_read_fp:void
 f:2:TARGET_READ_SP:CORE_ADDR:read_sp:void:::0:generic_target_read_sp::0
 # The dummy call frame SP should be set by push_dummy_call.
 F:2:DEPRECATED_DUMMY_WRITE_SP:void:deprecated_dummy_write_sp:CORE_ADDR val:val
@@ -451,7 +453,9 @@ v:2:NUM_PSEUDO_REGS:int:num_pseudo_regs::::0:0::0:::
 # a real register or a pseudo (computed) register or not be defined at
 # all (-1).
 v:2:SP_REGNUM:int:sp_regnum::::-1:-1::0
-v:2:FP_REGNUM:int:fp_regnum::::-1:-1::0
+# This is simply not needed.  See value_of_builtin_frame_fp_reg and
+# call_function_by_hand.
+v:2:DEPRECATED_FP_REGNUM:int:deprecated_fp_regnum::::-1:-1::0
 v:2:PC_REGNUM:int:pc_regnum::::-1:-1::0
 v:2:PS_REGNUM:int:ps_regnum::::-1:-1::0
 v:2:FP0_REGNUM:int:fp0_regnum::::0:-1::0
@@ -468,8 +472,8 @@ f:2:DWARF_REG_TO_REGNUM:int:dwarf_reg_to_regnum:int dwarf_regnr:dwarf_regnr:::no
 f:2:SDB_REG_TO_REGNUM:int:sdb_reg_to_regnum:int sdb_regnr:sdb_regnr:::no_op_reg_to_regnum::0
 f:2:DWARF2_REG_TO_REGNUM:int:dwarf2_reg_to_regnum:int dwarf2_regnr:dwarf2_regnr:::no_op_reg_to_regnum::0
 f:2:REGISTER_NAME:const char *:register_name:int regnr:regnr:::legacy_register_name::0
-v:2:REGISTER_SIZE:int:register_size::::0:-1
-v:2:REGISTER_BYTES:int:register_bytes::::0:-1
+v::REGISTER_SIZE:int:register_size
+v::REGISTER_BYTES:int:register_bytes
 f:2:REGISTER_BYTE:int:register_byte:int reg_nr:reg_nr::generic_register_byte:generic_register_byte::0
 # The methods REGISTER_VIRTUAL_TYPE, MAX_REGISTER_RAW_SIZE,
 # MAX_REGISTER_VIRTUAL_SIZE, MAX_REGISTER_RAW_SIZE,
@@ -519,10 +523,15 @@ F:2:GET_LONGJMP_TARGET:int:get_longjmp_target:CORE_ADDR *pc:pc::0:0
 # reqires that these methods be set up from the word go.  This also
 # avoids any potential problems with moving beyond multi-arch partial.
 v::DEPRECATED_USE_GENERIC_DUMMY_FRAMES:int:deprecated_use_generic_dummy_frames:::::1::0
+# Replaced by push_dummy_code.
 v::CALL_DUMMY_LOCATION:int:call_dummy_location:::::AT_ENTRY_POINT::0
+# Replaced by push_dummy_code.
 f::CALL_DUMMY_ADDRESS:CORE_ADDR:call_dummy_address:void::::entry_point_address::0
+# Replaced by push_dummy_code.
 v::CALL_DUMMY_START_OFFSET:CORE_ADDR:call_dummy_start_offset
+# Replaced by push_dummy_code.
 v::CALL_DUMMY_BREAKPOINT_OFFSET:CORE_ADDR:call_dummy_breakpoint_offset
+# Replaced by push_dummy_code.
 v::CALL_DUMMY_LENGTH:int:call_dummy_length
 # NOTE: cagney/2002-11-24: This function with predicate has a valid
 # (callable) initial value.  As a consequence, even when the predicate
@@ -530,10 +539,16 @@ v::CALL_DUMMY_LENGTH:int:call_dummy_length
 # migration process - old code, calling DEPRECATED_PC_IN_CALL_DUMMY(),
 # doesn't need to be modified.
 F::DEPRECATED_PC_IN_CALL_DUMMY:int:deprecated_pc_in_call_dummy:CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR frame_address:pc, sp, frame_address::generic_pc_in_call_dummy:generic_pc_in_call_dummy
+# Replaced by push_dummy_code.
 v::CALL_DUMMY_WORDS:LONGEST *:call_dummy_words::::0:legacy_call_dummy_words::0:0x%08lx
+# Replaced by push_dummy_code.
 v::SIZEOF_CALL_DUMMY_WORDS:int:sizeof_call_dummy_words::::0:legacy_sizeof_call_dummy_words::0
+# Replaced by push_dummy_code.
 V:2:DEPRECATED_CALL_DUMMY_STACK_ADJUST:int:deprecated_call_dummy_stack_adjust::::0
+# Replaced by push_dummy_code.
 F::FIX_CALL_DUMMY:void:fix_call_dummy:char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs, struct value **args, struct type *type, int gcc_p:dummy, pc, fun, nargs, args, type, gcc_p
+# This is a replacement for FIX_CALL_DUMMY et.al.
+M::PUSH_DUMMY_CODE:CORE_ADDR:push_dummy_code:CORE_ADDR sp, CORE_ADDR funaddr, int using_gcc, struct value **args, int nargs, struct type *value_type, CORE_ADDR *real_pc, CORE_ADDR *bp_addr:sp, funaddr, using_gcc, args, nargs, value_type, real_pc, bp_addr:
 F:2:DEPRECATED_INIT_FRAME_PC_FIRST:CORE_ADDR:deprecated_init_frame_pc_first:int fromleaf, struct frame_info *prev:fromleaf, prev
 F:2:DEPRECATED_INIT_FRAME_PC:CORE_ADDR:deprecated_init_frame_pc:int fromleaf, struct frame_info *prev:fromleaf, prev
 #
@@ -1209,22 +1224,11 @@ extern const struct bfd_arch_info *target_architecture;
 
 /* The target-system-dependent disassembler is semi-dynamic */
 
-extern int dis_asm_read_memory (bfd_vma memaddr, bfd_byte *myaddr,
-				unsigned int len, disassemble_info *info);
+/* Use gdb_disassemble, and gdbarch_print_insn instead.  */
+extern int (*deprecated_tm_print_insn) (bfd_vma, disassemble_info*);
 
-extern void dis_asm_memory_error (int status, bfd_vma memaddr,
-				  disassemble_info *info);
-
-extern void dis_asm_print_address (bfd_vma addr,
-				   disassemble_info *info);
-
-extern int (*tm_print_insn) (bfd_vma, disassemble_info*);
-extern disassemble_info tm_print_insn_info;
-#ifndef TARGET_PRINT_INSN_INFO
-#define TARGET_PRINT_INSN_INFO (&tm_print_insn_info)
-#endif
-
-
+/* Use set_gdbarch_print_insn instead.  */
+extern disassemble_info deprecated_tm_print_insn_info;
 
 /* Set the dynamic target-system-dependent parameters (architecture,
    byte-order, ...) using information found in the BFD */
@@ -2377,9 +2381,7 @@ gdbarch_update_p (struct gdbarch_info info)
 /* Disassembler */
 
 /* Pointer to the target-dependent disassembly function.  */
-int (*tm_print_insn) (bfd_vma, disassemble_info *);
-disassemble_info tm_print_insn_info;
-
+int (*deprecated_tm_print_insn) (bfd_vma, disassemble_info *);
 
 extern void _initialize_gdbarch (void);
 
@@ -2387,12 +2389,6 @@ void
 _initialize_gdbarch (void)
 {
   struct cmd_list_element *c;
-
-  INIT_DISASSEMBLE_INFO_NO_ARCH (tm_print_insn_info, gdb_stdout, (fprintf_ftype)fprintf_filtered);
-  tm_print_insn_info.flavour = bfd_target_unknown_flavour;
-  tm_print_insn_info.read_memory_func = dis_asm_read_memory;
-  tm_print_insn_info.memory_error_func = dis_asm_memory_error;
-  tm_print_insn_info.print_address_func = dis_asm_print_address;
 
   add_show_from_set (add_set_cmd ("arch",
 				  class_maintenance,

@@ -2727,7 +2727,7 @@ ENUMX
 ENUMX
   BFD_RELOC_SH_TLS_TPOFF32
 ENUMDOC
-  Renesas SH relocs.  Not all of these appear in object files.
+  Renesas / SuperH SH relocs.  Not all of these appear in object files.
 
 ENUM
   BFD_RELOC_THUMB_PCREL_BRANCH9
@@ -2854,7 +2854,7 @@ ENUMDOC
 ENUM
   BFD_RELOC_M32R_24
 ENUMDOC
-  Mitsubishi M32R relocs.
+  Renesas M32R (formerly Mitsubishi M32R) relocs.
   This is a 24 bit absolute address.
 ENUM
   BFD_RELOC_M32R_10_PCREL

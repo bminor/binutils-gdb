@@ -164,9 +164,11 @@ DESCRIPTION
 .  bfd_arch_m98k,      {* Motorola 98xxx *}
 .  bfd_arch_pyramid,   {* Pyramid Technology *}
 .  bfd_arch_h8300,     {* Renesas H8/300 (formerly Hitachi H8/300) *}
-.#define bfd_mach_h8300   1
-.#define bfd_mach_h8300h  2
-.#define bfd_mach_h8300s  3
+.#define bfd_mach_h8300    1
+.#define bfd_mach_h8300h   2
+.#define bfd_mach_h8300s   3
+.#define bfd_mach_h8300hn  4
+.#define bfd_mach_h8300sn  5
 .  bfd_arch_pdp11,     {* DEC PDP-11 *}
 .  bfd_arch_powerpc,   {* PowerPC *}
 .#define bfd_mach_ppc		32
@@ -209,7 +211,7 @@ DESCRIPTION
 .#define bfd_mach_z8001		1
 .#define bfd_mach_z8002		2
 .  bfd_arch_h8500,     {* Renesas H8/500 (formerly Hitachi H8/500) *}
-.  bfd_arch_sh,        {* Renesas SH (formerly Hitachi SH) *}
+.  bfd_arch_sh,        {* Renesas / SuperH SH (formerly Hitachi SH) *}
 .#define bfd_mach_sh            1
 .#define bfd_mach_sh2        0x20
 .#define bfd_mach_sh_dsp     0x2d
@@ -253,7 +255,7 @@ DESCRIPTION
 .#define bfd_mach_arc_6         6
 .#define bfd_mach_arc_7         7
 .#define bfd_mach_arc_8         8
-.  bfd_arch_m32r,      {* Mitsubishi M32R/D *}
+.  bfd_arch_m32r,      {* Renesas M32R (formerly Mitsubishi M32R/D) *}
 .#define bfd_mach_m32r		1 {* For backwards compatibility.  *}
 .#define bfd_mach_m32rx		'x'
 .  bfd_arch_mn10200,   {* Matsushita MN10200 *}

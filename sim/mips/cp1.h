@@ -2,7 +2,8 @@
 /* MIPS Simulator FPU (CoProcessor 1) definitions.
    Copyright (C) 1997, 1998, 2002 Free Software Foundation, Inc.
    Derived from sim-main.h contributed by Cygnus Solutions,
-   modified substially by Broadcom Corporation (SiByte).
+   modified substantially by Ed Satterthwaite of Broadcom Corporation
+   (SiByte).
 
 This file is part of GDB, the GNU debugger.
 

@@ -1,3 +1,31 @@
+2003-05-02  Elena Zannoni  <ezannoni@redhat.com>
+
+	* gdb.base/charset.exp: Update based on new behavior of set/show
+	charset commands.
+
+2003-05-01  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.asm/asm-source.exp: Check that "disassm" and "x/i" of a
+	variable do not give memory errors.
+
+2003-04-30  Adam Fedor  <fedor@gnu.org>
+
+	* Makefile.in (ALL_SUBDIRS): Add gdb.objc
+	* configure.in (AC_OUTPUT): Add gdb.objc/Makefile
+	* gdb.objc/Makefile.in, gdb.objc/basicclass.exp,
+	gdb.objc/basicclass.m: : New files
+
+	* lib/gdb.exp (gdb_compile_objc): New procedure.
+
+2003-04-27  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.base/signals.exp: Make backtrace tests more specific.
+
+2003-04-23  David Carlton  <carlton@bactrian.org>
+
+	* gdb.c++/maint.exp (test_first_component): Add tests for
+	'operator' in more locations.
+
 2003-04-16  Kevin Buettner  <kevinb@redhat.com>
 
 	* gdb.base/args.exp: Invoke gdb_load for simulator targets.

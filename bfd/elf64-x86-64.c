@@ -324,6 +324,12 @@ elf64_x86_64_grok_psinfo (abfd, note)
 
 #define ELF_DYNAMIC_INTERPRETER "/lib/ld64.so.1"
 
+/* If ELIMINATE_COPY_RELOCS is non-zero, the linker will try to avoid
+   copying dynamic variables from a shared lib into an app's dynbss
+   section, and instead use a dynamic relocation to point into the
+   shared lib.  */
+#define ELIMINATE_COPY_RELOCS 1
+
 /* The size in bytes of an entry in the global offset table.  */
 
 #define GOT_ENTRY_SIZE 8
@@ -616,7 +622,18 @@ elf64_x86_64_copy_indirect_symbol (bed, dir, ind)
       eind->tls_type = GOT_UNKNOWN;
     }
 
-  _bfd_elf_link_hash_copy_indirect (bed, dir, ind);
+  if (ELIMINATE_COPY_RELOCS
+      && ind->root.type != bfd_link_hash_indirect
+      && (dir->elf_link_hash_flags & ELF_LINK_HASH_DYNAMIC_ADJUSTED) != 0)
+    /* If called to transfer flags for a weakdef during processing
+       of elf_adjust_dynamic_symbol, don't copy ELF_LINK_NON_GOT_REF.
+       We clear it ourselves for ELIMINATE_COPY_RELOCS.  */
+    dir->elf_link_hash_flags |=
+      (ind->elf_link_hash_flags & (ELF_LINK_HASH_REF_DYNAMIC
+				   | ELF_LINK_HASH_REF_REGULAR
+				   | ELF_LINK_HASH_REF_REGULAR_NONWEAK));
+  else
+    _bfd_elf_link_hash_copy_indirect (bed, dir, ind);
 }
 
 static bfd_boolean
@@ -914,7 +931,8 @@ elf64_x86_64_check_relocs (abfd, info, sec, relocs)
 			   || h->root.type == bfd_link_hash_defweak
 			   || (h->elf_link_hash_flags
 			       & ELF_LINK_HASH_DEF_REGULAR) == 0))))
-	      || (!info->shared
+	      || (ELIMINATE_COPY_RELOCS
+		  && !info->shared
 		  && (sec->flags & SEC_ALLOC) != 0
 		  && h != NULL
 		  && (h->root.type == bfd_link_hash_defweak
@@ -1189,8 +1207,6 @@ elf64_x86_64_adjust_dynamic_symbol (info, h)
      struct elf_link_hash_entry *h;
 {
   struct elf64_x86_64_link_hash_table *htab;
-  struct elf64_x86_64_link_hash_entry * eh;
-  struct elf64_x86_64_dyn_relocs *p;
   asection *s;
   unsigned int power_of_two;
 
@@ -1235,6 +1251,10 @@ elf64_x86_64_adjust_dynamic_symbol (info, h)
 		  || h->weakdef->root.type == bfd_link_hash_defweak);
       h->root.u.def.section = h->weakdef->root.u.def.section;
       h->root.u.def.value = h->weakdef->root.u.def.value;
+      if (ELIMINATE_COPY_RELOCS || info->nocopyreloc)
+	h->elf_link_hash_flags
+	  = ((h->elf_link_hash_flags & ~ELF_LINK_NON_GOT_REF)
+	     | (h->weakdef->elf_link_hash_flags & ELF_LINK_NON_GOT_REF));
       return TRUE;
     }
 
@@ -1260,20 +1280,26 @@ elf64_x86_64_adjust_dynamic_symbol (info, h)
       return TRUE;
     }
 
-  eh = (struct elf64_x86_64_link_hash_entry *) h;
-  for (p = eh->dyn_relocs; p != NULL; p = p->next)
+  if (ELIMINATE_COPY_RELOCS)
     {
-      s = p->sec->output_section;
-      if (s != NULL && (s->flags & SEC_READONLY) != 0)
-	break;
-    }
+      struct elf64_x86_64_link_hash_entry * eh;
+      struct elf64_x86_64_dyn_relocs *p;
 
-  /* If we didn't find any dynamic relocs in read-only sections, then
-     we'll be keeping the dynamic relocs and avoiding the copy reloc.  */
-  if (p == NULL)
-    {
-      h->elf_link_hash_flags &= ~ELF_LINK_NON_GOT_REF;
-      return TRUE;
+      eh = (struct elf64_x86_64_link_hash_entry *) h;
+      for (p = eh->dyn_relocs; p != NULL; p = p->next)
+	{
+	  s = p->sec->output_section;
+	  if (s != NULL && (s->flags & SEC_READONLY) != 0)
+	    break;
+	}
+
+      /* If we didn't find any dynamic relocs in read-only sections, then
+	 we'll be keeping the dynamic relocs and avoiding the copy reloc.  */
+      if (p == NULL)
+	{
+	  h->elf_link_hash_flags &= ~ELF_LINK_NON_GOT_REF;
+	  return TRUE;
+	}
     }
 
   /* We must allocate the symbol in our .dynbss section, which will
@@ -1487,7 +1513,7 @@ allocate_dynrelocs (h, inf)
 	    }
 	}
     }
-  else
+  else if (ELIMINATE_COPY_RELOCS)
     {
       /* For the non-shared case, discard space for relocs against
 	 symbols which turn out to need copy relocs or are not
@@ -2077,7 +2103,8 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 		       && (! info->symbolic
 			   || (h->elf_link_hash_flags
 			       & ELF_LINK_HASH_DEF_REGULAR) == 0))))
-	      || (!info->shared
+	      || (ELIMINATE_COPY_RELOCS
+		  && !info->shared
 		  && h != NULL
 		  && h->dynindx != -1
 		  && (h->elf_link_hash_flags & ELF_LINK_NON_GOT_REF) == 0
@@ -2351,7 +2378,7 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 		{
 		  if (indx == 0)
 		    {
-	    	      BFD_ASSERT (! unresolved_reloc);
+		      BFD_ASSERT (! unresolved_reloc);
 		      bfd_put_64 (output_bfd,
 				  relocation - dtpoff_base (info),
 				  htab->sgot->contents + off + GOT_ENTRY_SIZE);

@@ -91,7 +91,7 @@ fetch_inferior_registers (int regno)
 
   supply_register (ZERO_REGNUM, zerobuf);
   /* Frame ptr reg must appear to be 0; it is faked by stack handling code. */
-  supply_register (FP_REGNUM, zerobuf);
+  supply_register (DEPRECATED_FP_REGNUM, zerobuf);
 }
 
 /* Store our register values back into the inferior.
@@ -108,7 +108,7 @@ store_inferior_registers (int regno)
     {
       if (regno == ZERO_REGNUM || regno == PS_REGNUM
 	  || regno == BADVADDR_REGNUM || regno == CAUSE_REGNUM
-	  || regno == FCRIR_REGNUM || regno == FP_REGNUM
+	  || regno == FCRIR_REGNUM || regno == DEPRECATED_FP_REGNUM
 	  || (regno >= FIRST_EMBED_REGNUM && regno <= LAST_EMBED_REGNUM))
 	return;
       regaddr = REGISTER_PTRACE_ADDR (regno);
@@ -210,7 +210,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
     }
   supply_register (ZERO_REGNUM, zerobuf);
   /* Frame ptr reg must appear to be 0; it is faked by stack handling code. */
-  supply_register (FP_REGNUM, zerobuf);
+  supply_register (DEPRECATED_FP_REGNUM, zerobuf);
 }
 
 /* Return the address in the core dump or inferior of register REGNO.

@@ -3706,7 +3706,7 @@ procfs_fetch_registers (int regno)
       if ((regno >= 0 && regno < FP0_REGNUM) ||
 	  regno == PC_REGNUM  ||
 	  (NPC_REGNUM >= 0 && regno == NPC_REGNUM) ||
-	  regno == FP_REGNUM  ||
+	  regno == DEPRECATED_FP_REGNUM  ||
 	  regno == SP_REGNUM)
 	return;			/* not a floating point register */
 
@@ -3780,7 +3780,7 @@ procfs_store_registers (int regno)
       if ((regno >= 0 && regno < FP0_REGNUM) ||
 	  regno == PC_REGNUM  ||
 	  (NPC_REGNUM >= 0 && regno == NPC_REGNUM) ||
-	  regno == FP_REGNUM  ||
+	  regno == DEPRECATED_FP_REGNUM  ||
 	  regno == SP_REGNUM)
 	return;			/* not a floating point register */
 

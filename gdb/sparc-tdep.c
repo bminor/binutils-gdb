@@ -51,8 +51,11 @@
 
 #if (GDB_MULTI_ARCH > 0)
 
-/* Does the target have Floating Point registers?  */
-#define SPARC_HAS_FPU     (gdbarch_tdep (current_gdbarch)->has_fpu)
+#if 0
+// OBSOLETE /* Does the target have Floating Point registers?  */
+// OBSOLETE #define SPARC_HAS_FPU     (gdbarch_tdep (current_gdbarch)->has_fpu)
+#endif
+#define SPARC_HAS_FPU 1
 /* Number of bytes devoted to Floating Point registers: */
 #define FP_REGISTER_BYTES (gdbarch_tdep (current_gdbarch)->fp_register_bytes)
 /* Highest numbered Floating Point register.  */
@@ -310,8 +313,8 @@ sparc_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 	: get_frame_base (get_next_frame (fi)))
      : read_sp ());
 
-  /* If fi->next is NULL, then we already set ->frame by passing read_fp()
-     to create_new_frame.  */
+  /* If fi->next is NULL, then we already set ->frame by passing
+     deprecated_read_fp() to create_new_frame.  */
   if (get_next_frame (fi))
     {
       char *buf;
@@ -335,7 +338,7 @@ sparc_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 	{
 	  /* Should we adjust for stack bias here? */
 	  ULONGEST tmp;
-	  frame_read_unsigned_register (fi, FP_REGNUM, &tmp);
+	  frame_read_unsigned_register (fi, DEPRECATED_FP_REGNUM, &tmp);
 	  deprecated_update_frame_base_hack (fi, tmp);
 	  if (GDB_TARGET_IS_SPARC64 && (get_frame_base (fi) & 1))
 	    deprecated_update_frame_base_hack (fi, get_frame_base (fi) + 2047);
@@ -1065,16 +1068,16 @@ sparc_push_dummy_frame (void)
       if (GDB_TARGET_IS_SPARC64)
 	{
 	  /* Target is a 64 bit SPARC.  */
-	  CORE_ADDR oldfp = read_register (FP_REGNUM);
+	  CORE_ADDR oldfp = read_register (DEPRECATED_FP_REGNUM);
 	  if (oldfp & 1)
-	    write_register (FP_REGNUM, old_sp - 2047);
+	    write_register (DEPRECATED_FP_REGNUM, old_sp - 2047);
 	  else
-	    write_register (FP_REGNUM, old_sp);
+	    write_register (DEPRECATED_FP_REGNUM, old_sp);
 	}
       else
 	{
 	  /* Target is a 32 bit SPARC.  */
-	  write_register (FP_REGNUM, old_sp);
+	  write_register (DEPRECATED_FP_REGNUM, old_sp);
 	}
       /* Set return address register for the call dummy to the current PC.  */
       write_register (I7_REGNUM, read_pc () - 8);
@@ -1084,7 +1087,7 @@ sparc_push_dummy_frame (void)
       /* The call dummy will write this value to FP before executing
          the 'save'.  This ensures that register window flushes work
          correctly in the simulator.  */
-      write_register (G0_REGNUM + 1, read_register (FP_REGNUM));
+      write_register (G0_REGNUM + 1, read_register (DEPRECATED_FP_REGNUM));
 
       /* The call dummy will write this value to FP after executing
          the 'save'. */
@@ -1096,7 +1099,7 @@ sparc_push_dummy_frame (void)
 
       /* Set the FP that the call dummy will be using after the 'save'.
          This makes backtraces from an inferior function call work properly.  */
-      write_register (FP_REGNUM, old_sp);
+      write_register (DEPRECATED_FP_REGNUM, old_sp);
     }
 }
 
@@ -2379,10 +2382,11 @@ sparc_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun,
      Adjust the call_dummy_breakpoint_offset for the bp_call_dummy breakpoint
      to the proper address in the call dummy, so that `finish' after a stop
      in a call dummy works.
-     Tweeking current_gdbarch is not an optimal solution, but the call to
-     sparc_fix_call_dummy is immediately followed by a call to run_stack_dummy,
-     which is the only function where dummy_breakpoint_offset is actually
-     used, if it is non-zero.  */
+
+     Tweeking current_gdbarch is not an optimal solution, but the call
+     to sparc_fix_call_dummy is immediately followed by a call to
+     call_function_by_hand, which is the only function where
+     dummy_breakpoint_offset is actually used, if it is non-zero.  */
   if (TYPE_CODE (value_type) == TYPE_CODE_STRUCT
        || TYPE_CODE (value_type) == TYPE_CODE_UNION)
     {
@@ -2459,8 +2463,8 @@ _initialize_sparc_tdep (void)
   /* Hook us into the gdbarch mechanism.  */
   gdbarch_register (bfd_arch_sparc, sparc_gdbarch_init, sparc_dump_tdep);
 
-  tm_print_insn = gdb_print_insn_sparc;
-  tm_print_insn_info.mach = TM_PRINT_INSN_MACH;		/* Selects sparc/sparclite */
+  deprecated_tm_print_insn = gdb_print_insn_sparc;
+  deprecated_tm_print_insn_info.mach = TM_PRINT_INSN_MACH;		/* Selects sparc/sparclite */
   /* OBSOLETE target_architecture_hook = sparc_target_architecture_hook; */
 }
 
@@ -2480,7 +2484,7 @@ sparc64_read_sp (void)
 CORE_ADDR
 sparc64_read_fp (void)
 {
-  CORE_ADDR fp = read_register (FP_REGNUM);
+  CORE_ADDR fp = read_register (DEPRECATED_FP_REGNUM);
 
   if (fp & 1)
     fp += 2047;
@@ -2934,7 +2938,7 @@ static struct type *
 sparc32_register_virtual_type (int regno)
 {
   if (regno == PC_REGNUM ||
-      regno == FP_REGNUM ||
+      regno == DEPRECATED_FP_REGNUM ||
       regno == SP_REGNUM)
     return builtin_type_unsigned_int;
   if (regno < 32)
@@ -2948,7 +2952,7 @@ static struct type *
 sparc64_register_virtual_type (int regno)
 {
   if (regno == PC_REGNUM ||
-      regno == FP_REGNUM ||
+      regno == DEPRECATED_FP_REGNUM ||
       regno == SP_REGNUM)
     return builtin_type_unsigned_long_long;
   if (regno < 32)
@@ -3161,7 +3165,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, sparc_extract_struct_value_address);
   set_gdbarch_fix_call_dummy (gdbarch, sparc_gdbarch_fix_call_dummy);
   set_gdbarch_float_bit (gdbarch, 4 * TARGET_CHAR_BIT);
-  set_gdbarch_fp_regnum (gdbarch, SPARC_FP_REGNUM);
+  set_gdbarch_deprecated_fp_regnum (gdbarch, SPARC_FP_REGNUM);
   set_gdbarch_fp0_regnum (gdbarch, SPARC_FP0_REGNUM);
   set_gdbarch_deprecated_frame_chain (gdbarch, sparc_frame_chain);
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, sparc_frame_init_saved_regs);
@@ -3220,7 +3224,15 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0x30);
       set_gdbarch_call_dummy_length (gdbarch, 0x38);
 
-      /* NOTE: cagney/2002-04-26: Based from info posted by Peter
+      /* NOTE: cagney/2003-05-01: Using the just added push_dummy_code
+	 architecture method, it is now possible to implement a
+	 generic dummy frames based inferior function call that stores
+	 the breakpoint (and struct info) on the stack.  Further, by
+	 treating a SIGSEG at a breakpoint as equivalent to a SIGTRAP
+	 it is even possible to make this work when the stack is
+	 no-execute.
+
+	 NOTE: cagney/2002-04-26: Based from info posted by Peter
 	 Schauer around Oct '99.  Briefly, due to aspects of the SPARC
 	 ABI, it isn't possible to use ON_STACK with a strictly
 	 compliant compiler.
@@ -3277,7 +3289,6 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_pc_regnum (gdbarch, SPARC32_PC_REGNUM);
       set_gdbarch_ptr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
       set_gdbarch_deprecated_push_arguments (gdbarch, sparc32_push_arguments);
-      set_gdbarch_read_fp (gdbarch, generic_target_read_fp);
       set_gdbarch_read_sp (gdbarch, generic_target_read_sp);
 
       set_gdbarch_register_byte (gdbarch, sparc32_register_byte);
@@ -3330,7 +3341,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_ptr_bit (gdbarch, 8 * TARGET_CHAR_BIT);
       set_gdbarch_deprecated_push_arguments (gdbarch, sparc64_push_arguments);
       /* NOTE different for at_entry */
-      set_gdbarch_read_fp (gdbarch, sparc64_read_fp);
+      set_gdbarch_deprecated_target_read_fp (gdbarch, sparc64_read_fp);
       set_gdbarch_read_sp (gdbarch, sparc64_read_sp);
       /* Some of the registers aren't 64 bits, but it's a lot simpler just
 	 to assume they all are (since most of them are).  */

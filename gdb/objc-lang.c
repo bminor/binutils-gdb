@@ -42,6 +42,8 @@
 #include "gdb_regex.h"
 #include "regcache.h"
 #include "block.h"
+#include "infcall.h"
+#include "valprint.h"
 
 #include <ctype.h>
 
@@ -1751,6 +1753,19 @@ _initialize_objc_language (void)
   add_com_alias ("po", "print-object", class_vars, 1);
 }
 
+#if 1
+/* Disable these functions until we put them in the gdbarch vector.  */
+static unsigned long FETCH_ARGUMENT (int i)
+{
+  internal_error (__FILE__, __LINE__, "FETCH_ARGUMENT not implemented");
+  return 0;
+}
+static CORE_ADDR CONVERT_FUNCPTR (CORE_ADDR pc)
+{
+  internal_error (__FILE__, __LINE__, "CONVERT_FUNCPTR not implemented");
+  return pc;
+}
+#else
 #if defined (__powerpc__) || defined (__ppc__)
 static unsigned long FETCH_ARGUMENT (int i)
 {
@@ -1789,6 +1804,7 @@ static CORE_ADDR CONVERT_FUNCPTR (CORE_ADDR pc)
 {
   return pc;
 }
+#endif
 #endif
 
 static void 

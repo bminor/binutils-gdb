@@ -1,5 +1,9 @@
 2003-05-04  Mark Kettenis  <kettenis@gnu.org>
 
+	Merge from mainline.
+
+2003-05-04  Mark Kettenis  <kettenis@gnu.org>
+
 	* i386-tdep.c (i386_analyze_frame_setup): Use I386_EBP_REGNUM
 	instead of FP_REGNUM.
 	(i386_unwind_dummy_id): Use I386_ESP_REGNUM instead of FP_REGNUM.

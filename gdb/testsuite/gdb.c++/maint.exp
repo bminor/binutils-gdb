@@ -63,6 +63,18 @@ proc test_first_component {} {
     test_single_component "foo(std::basic_streambuf<wchar_t,std::char_traits<wchar_t> >)"
     test_single_component "operator>(X::Y)"
 
+    # Operator names can show up in weird places.
+
+    test_single_component "int operator<< <char>()"
+    test_single_component "T<Cooperator>"
+
+    # NOTE: carlton/2003-04-23: I've only seen the first of these
+    # produced by the demangler, but I'm including two more just to be
+    # on the safe side.
+    test_single_component "int foo<&(operator<<(C, C))>()"
+    test_single_component "int foo<&operator<<(C, C)>()"
+    test_single_component "int foo<operator<<(C, C)>()"
+
     gdb_test "maint cp first_component foo::bar" "foo"
     gdb_test "maint cp first_component foo::bar::baz" "foo"
     gdb_test "maint cp first_component C<A>::bar" "C<A>"

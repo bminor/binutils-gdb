@@ -2,7 +2,7 @@
 
 # Script to compare functions and instructions used by different igen models.
 # Copyright (C) 2002 Free Software Foundation, Inc.
-# Contributed by Broadcom Corporation (SiByte).
+# Contributed by Chris Demetriou of Broadcom Corporation (SiByte).
 #
 # This file is part of GDB, the GNU debugger.
 # 

@@ -614,9 +614,24 @@ frame_info (char *addr_exp, int from_tty)
   int i, count, numregs;
   char *funname = 0;
   enum language funlang = language_unknown;
+  const char *pc_regname;
 
   if (!target_has_stack)
     error ("No stack.");
+
+  /* Name of the value returned by get_frame_pc().  Per comments, "pc"
+     is not a good name.  */
+  if (PC_REGNUM >= 0)
+    /* OK, this is weird.  The PC_REGNUM hardware register's value can
+       easily not match that of the internal value returned by
+       get_frame_pc().  */
+    pc_regname = REGISTER_NAME (PC_REGNUM);
+  else
+    /* But then, this is weird to.  Even without PC_REGNUM, an
+       architectures will often have a hardware register called "pc",
+       and that register's value, again, can easily not match
+       get_frame_pc().  */
+    pc_regname = "pc";
 
   fi = parse_frame_specification (addr_exp);
   if (fi == NULL)
@@ -680,7 +695,7 @@ frame_info (char *addr_exp, int from_tty)
       print_address_numeric (get_frame_base (fi), 1, gdb_stdout);
       printf_filtered (":\n");
     }
-  printf_filtered (" %s = ", REGISTER_NAME (PC_REGNUM));
+  printf_filtered (" %s = ", pc_regname);
   print_address_numeric (get_frame_pc (fi), 1, gdb_stdout);
 
   wrap_here ("   ");
@@ -695,7 +710,7 @@ frame_info (char *addr_exp, int from_tty)
     printf_filtered (" (%s:%d)", sal.symtab->filename, sal.line);
   puts_filtered ("; ");
   wrap_here ("    ");
-  printf_filtered ("saved %s ", REGISTER_NAME (PC_REGNUM));
+  printf_filtered ("saved %s ", pc_regname);
   print_address_numeric (frame_pc_unwind (fi), 1, gdb_stdout);
   printf_filtered ("\n");
 

@@ -28,6 +28,7 @@
 #include "inferior.h"
 #include "arch-utils.h"
 #include "gdb_string.h"
+#include "disasm.h"
 
 /* Functions declared and used only in this file */
 
@@ -163,7 +164,7 @@ mcore_dump_insn (char *commnt, CORE_ADDR pc, int insn)
     {
       printf_filtered ("MCORE:  %s %08x %08x ",
 		       commnt, (unsigned int) pc, (unsigned int) insn);
-      TARGET_PRINT_INSN (pc, &tm_print_insn_info);
+      gdb_print_insn (pc, gdb_stdout);
       printf_filtered ("\n");
     }
 }
@@ -1058,8 +1059,8 @@ mcore_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
 				   get_frame_base (fi)))
     {
-      /* We need to setup fi->frame here because run_stack_dummy gets it wrong
-         by assuming it's always FP.  */
+      /* We need to setup fi->frame here because call_function_by_hand
+         gets it wrong by assuming it's always FP.  */
       deprecated_update_frame_base_hack (fi, deprecated_read_register_dummy (get_frame_pc (fi), get_frame_base (fi), SP_REGNUM));
     }
   else
@@ -1112,7 +1113,7 @@ mcore_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_num_regs (gdbarch, MCORE_NUM_REGS);
   set_gdbarch_pc_regnum (gdbarch, 64);
   set_gdbarch_sp_regnum (gdbarch, 0);
-  set_gdbarch_fp_regnum (gdbarch, 0);
+  set_gdbarch_deprecated_fp_regnum (gdbarch, 0);
 
   /* Call Dummies:  */
 
@@ -1173,7 +1174,7 @@ _initialize_mcore_tdep (void)
 {
   extern int print_insn_mcore (bfd_vma, disassemble_info *);
   gdbarch_register (bfd_arch_mcore, mcore_gdbarch_init, mcore_dump_tdep);
-  tm_print_insn = print_insn_mcore;
+  deprecated_tm_print_insn = print_insn_mcore;
 
 #ifdef MCORE_DEBUG
   add_show_from_set (add_set_cmd ("mcoredebug", no_class,

@@ -33,6 +33,7 @@
 #include "cp-abi.h"
 #include "parser-defs.h"
 #include "block.h"
+#include "objc-lang.h"
 
 /* We share this one with symtab.c, but it is not exported widely. */
 
@@ -48,6 +49,12 @@ static void set_flags (char *arg, int *is_quoted, char **paren_pointer);
 static struct symtabs_and_lines decode_indirect (char **argptr);
 
 static char *locate_first_half (char **argptr, int *is_quote_enclosed);
+
+static struct symtabs_and_lines decode_objc (char **argptr,
+					     int funfirstline,
+					     struct symtab *file_symtab,
+					     char ***canonical,
+					     char *saved_arg);
 
 static struct symtabs_and_lines decode_compound (char **argptr,
 						 int funfirstline,
@@ -589,6 +596,7 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
   int is_quoted;
   /* Is part of *ARGPTR is enclosed in double quotes?  */
   int is_quote_enclosed;
+  int is_objc_method = 0;
   char *saved_arg = *argptr;
 
   /* Defaults have defaults.  */
@@ -613,6 +621,25 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
   /* Locate the end of the first half of the linespec.  */
 
   p = locate_first_half (argptr, &is_quote_enclosed);
+
+  /* Check if this is an Objective-C method (anything that starts with
+     a '+' or '-' and a '[').  */
+  if (*p && (p[0] == ':') && (strchr ("+-", p[1]) != NULL) 
+      && (p[2] == '['))
+    {
+      is_objc_method = 1;
+      paren_pointer  = NULL; /* Just a category name.  Ignore it.  */
+    }
+
+  /* Check if the symbol could be an Objective-C selector.  */
+
+  {
+    struct symtabs_and_lines values;
+    values = decode_objc (argptr, funfirstline, NULL,
+			  canonical, saved_arg);
+    if (values.sals != NULL)
+      return values;
+  }
 
   /* Does it look like there actually were two parts?  */
 
@@ -694,6 +721,11 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
       p = skip_quoted (*argptr);
       if (p[-1] != '\'')
 	error ("Unmatched single quote.");
+    }
+  else if (is_objc_method)
+    {
+      /* allow word separators in method names for Obj-C */
+      p = skip_quoted_chars (*argptr, NULL, "");
     }
   else if (paren_pointer != NULL)
     {
@@ -893,6 +925,13 @@ locate_first_half (char **argptr, int *is_quote_enclosed)
 	    error ("malformed template specification in command");
 	  p = temp_end;
 	}
+      /* Check for a colon and a plus or minus and a [ (which
+         indicates an Objective-C method) */
+      if (*p && (p[0] == ':') && (strchr ("+-", p[1]) != NULL) 
+	  && (p[2] == '['))
+	{
+	  break;
+	}
       /* Check for the end of the first half of the linespec.  End of
          line, a tab, a double colon or the last single colon, or a
          space.  But if enclosed in double quotes we do not break on
@@ -935,6 +974,95 @@ locate_first_half (char **argptr, int *is_quote_enclosed)
 }
 
 
+
+/* Here's where we recognise an Objective-C Selector.  An Objective C
+   selector may be implemented by more than one class, therefore it
+   may represent more than one method/function.  This gives us a
+   situation somewhat analogous to C++ overloading.  If there's more
+   than one method that could represent the selector, then use some of
+   the existing C++ code to let the user choose one.  */
+
+struct symtabs_and_lines
+decode_objc (char **argptr, int funfirstline, struct symtab *file_symtab,
+	     char ***canonical, char *saved_arg)
+{
+  struct symtabs_and_lines values;
+  struct symbol **sym_arr = NULL;
+  struct symbol *sym = NULL;
+  char *copy = NULL;
+  struct block *block = NULL;
+  int i1 = 0;
+  int i2 = 0;
+
+  values.sals = NULL;
+  values.nelts = 0;
+
+  if (file_symtab != NULL)
+    block = BLOCKVECTOR_BLOCK (BLOCKVECTOR (file_symtab), STATIC_BLOCK);
+  else
+    block = get_selected_block (0);
+    
+  copy = find_imps (file_symtab, block, *argptr, NULL, &i1, &i2); 
+    
+  if (i1 > 0)
+    {
+      sym_arr = (struct symbol **) alloca ((i1 + 1) * sizeof (struct symbol *));
+      sym_arr[i1] = 0;
+
+      copy = find_imps (file_symtab, block, *argptr, sym_arr, &i1, &i2); 
+      *argptr = copy;
+    }
+
+  /* i1 now represents the TOTAL number of matches found.
+     i2 represents how many HIGH-LEVEL (struct symbol) matches,
+     which will come first in the sym_arr array.  Any low-level
+     (minimal_symbol) matches will follow those.  */
+      
+  if (i1 == 1)
+    {
+      if (i2 > 0)
+	{
+	  /* Already a struct symbol.  */
+	  sym = sym_arr[0];
+	}
+      else
+	{
+	  sym = find_pc_function (SYMBOL_VALUE_ADDRESS (sym_arr[0]));
+	  if ((sym != NULL) && strcmp (SYMBOL_LINKAGE_NAME (sym_arr[0]), SYMBOL_LINKAGE_NAME (sym)) != 0)
+	    {
+	      warning ("debugging symbol \"%s\" does not match selector; ignoring", SYMBOL_LINKAGE_NAME (sym));
+	      sym = NULL;
+	    }
+	}
+	      
+      values.sals = (struct symtab_and_line *) xmalloc (sizeof (struct symtab_and_line));
+      values.nelts = 1;
+	      
+      if (sym && SYMBOL_CLASS (sym) == LOC_BLOCK)
+	{
+	  /* Canonicalize this, so it remains resolved for dylib loads.  */
+	  values.sals[0] = find_function_start_sal (sym, funfirstline);
+	  build_canonical_line_spec (values.sals, SYMBOL_NATURAL_NAME (sym), canonical);
+	}
+      else
+	{
+	  /* The only match was a non-debuggable symbol.  */
+	  values.sals[0].symtab = 0;
+	  values.sals[0].line = 0;
+	  values.sals[0].end = 0;
+	  values.sals[0].pc = SYMBOL_VALUE_ADDRESS (sym_arr[0]);
+	}
+      return values;
+    }
+
+  if (i1 > 1)
+    {
+      /* More than one match. The user must choose one or more.  */
+      return decode_line_2 (sym_arr, i2, funfirstline, canonical);
+    }
+
+  return values;
+}
 
 /* This handles C++ and Java compound data structures.  P should point
    at the first component separator, i.e. double-colon or period.  */

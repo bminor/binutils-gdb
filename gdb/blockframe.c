@@ -523,14 +523,14 @@ block_innermost_frame (struct block *block)
    top of the stack frame which we are checking, where "bottom" and
    "top" refer to some section of memory which contains the code for
    the call dummy.  Calls to this macro assume that the contents of
-   SP_REGNUM and FP_REGNUM (or the saved values thereof), respectively,
-   are the things to pass.
+   SP_REGNUM and DEPRECATED_FP_REGNUM (or the saved values thereof),
+   respectively, are the things to pass.
 
-   This won't work on the 29k, where SP_REGNUM and FP_REGNUM don't
-   have that meaning, but the 29k doesn't use ON_STACK.  This could be
-   fixed by generalizing this scheme, perhaps by passing in a frame
-   and adding a few fields, at least on machines which need them for
-   DEPRECATED_PC_IN_CALL_DUMMY.
+   This won't work on the 29k, where SP_REGNUM and
+   DEPRECATED_FP_REGNUM don't have that meaning, but the 29k doesn't
+   use ON_STACK.  This could be fixed by generalizing this scheme,
+   perhaps by passing in a frame and adding a few fields, at least on
+   machines which need them for DEPRECATED_PC_IN_CALL_DUMMY.
 
    Something simpler, like checking for the stack segment, doesn't work,
    since various programs (threads implementations, gcc nested function

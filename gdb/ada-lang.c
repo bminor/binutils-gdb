@@ -39,6 +39,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "ada-lang.h"
 #include "ui-out.h"
 #include "block.h"
+#include "infcall.h"
 
 struct cleanup *unresolved_names;
 

@@ -24,8 +24,8 @@
 #include "value.h"
 #include "ui-out.h"
 #include "gdb_string.h"
-
 #include "disasm.h"
+#include "gdbcore.h"
 
 /* Disassemble functions.
    FIXME: We should get rid of all the duplicate code in gdb that does
@@ -43,27 +43,26 @@ struct dis_line_entry
   CORE_ADDR end_pc;
 };
 
-/* This variable determines where memory used for disassembly is read from. */
-int gdb_disassemble_from_exec = -1;
-
-/* This is the memory_read_func for gdb_disassemble when we are
-   disassembling from the exec file. */
+/* Like target_read_memory, but slightly different parameters.  */
 static int
-gdb_dis_asm_read_memory (bfd_vma memaddr, bfd_byte * myaddr,
-			 unsigned int len, disassemble_info * info)
+dis_asm_read_memory (bfd_vma memaddr, bfd_byte *myaddr, unsigned int len,
+		     disassemble_info *info)
 {
-  extern struct target_ops exec_ops;
-  int res;
+  return target_read_memory (memaddr, (char *) myaddr, len);
+}
 
-  errno = 0;
-  res = xfer_memory (memaddr, myaddr, len, 0, 0, &exec_ops);
+/* Like memory_error with slightly different parameters.  */
+static void
+dis_asm_memory_error (int status, bfd_vma memaddr, disassemble_info *info)
+{
+  memory_error (status, memaddr);
+}
 
-  if (res == len)
-    return 0;
-  else if (errno == 0)
-    return EIO;
-  else
-    return errno;
+/* Like print_address with slightly different parameters.  */
+static void
+dis_asm_print_address (bfd_vma addr, struct disassemble_info *info)
+{
+  print_address (addr, info->stream);
 }
 
 static int
@@ -308,6 +307,32 @@ do_assembly_only (struct ui_out *uiout, disassemble_info * di,
   do_cleanups (ui_out_chain);
 }
 
+/* Initialize the disassemble info struct ready for the specified
+   stream.  */
+
+static disassemble_info
+gdb_disassemble_info (struct gdbarch *gdbarch, struct ui_file *file)
+{
+  disassemble_info di;
+  INIT_DISASSEMBLE_INFO_NO_ARCH (di, file,
+				 (fprintf_ftype) fprintf_unfiltered);
+  di.flavour = bfd_target_unknown_flavour;
+  di.memory_error_func = dis_asm_memory_error;
+  di.print_address_func = dis_asm_print_address;
+  /* NOTE: cagney/2003-04-28: The original code, from the old Insight
+     disassembler had a local optomization here.  By default it would
+     access the executable file, instead of the target memory (there
+     was a growing list of exceptions though).  Unfortunatly, the
+     heuristic was flawed.  Commands like "disassemble &variable"
+     didn't work as they relied on the access going to the target.
+     Further, it has been supperseeded by trust-read-only-sections
+     (although that should be superseeded by target_trust..._p()).  */
+  di.read_memory_func = dis_asm_read_memory;
+  di.mach = gdbarch_bfd_arch_info (gdbarch)->mach;
+  di.endian = gdbarch_byte_order (gdbarch);
+  return di;
+}
+
 void
 gdb_disassembly (struct ui_out *uiout,
 		char *file_string,
@@ -315,61 +340,13 @@ gdb_disassembly (struct ui_out *uiout,
 		int mixed_source_and_assembly,
 		int how_many, CORE_ADDR low, CORE_ADDR high)
 {
-  static disassemble_info di;
-  static int di_initialized;
+  struct ui_stream *stb = ui_out_stream_new (uiout);
+  struct cleanup *cleanups = make_cleanup_ui_out_stream_delete (stb);
+  disassemble_info di = gdb_disassemble_info (current_gdbarch, stb->stream);
   /* To collect the instruction outputted from opcodes. */
-  static struct ui_stream *stb = NULL;
   struct symtab *symtab = NULL;
   struct linetable_entry *le = NULL;
   int nlines = -1;
-
-  if (!di_initialized)
-    {
-      /* We don't add a cleanup for this, because the allocation of
-         the stream is done once only for each gdb run, and we need to
-         keep it around until the end. Hopefully there won't be any
-         errors in the init code below, that make this function bail
-         out. */
-      stb = ui_out_stream_new (uiout);
-      INIT_DISASSEMBLE_INFO_NO_ARCH (di, stb->stream,
-				     (fprintf_ftype) fprintf_unfiltered);
-      di.flavour = bfd_target_unknown_flavour;
-      di.memory_error_func = dis_asm_memory_error;
-      di.print_address_func = dis_asm_print_address;
-      di_initialized = 1;
-    }
-
-  di.mach = gdbarch_bfd_arch_info (current_gdbarch)->mach;
-  di.endian = gdbarch_byte_order (current_gdbarch);
-
-  /* If gdb_disassemble_from_exec == -1, then we use the following heuristic to
-     determine whether or not to do disassembly from target memory or from the
-     exec file:
-
-     If we're debugging a local process, read target memory, instead of the
-     exec file.  This makes disassembly of functions in shared libs work
-     correctly.  Also, read target memory if we are debugging native threads.
-
-     Else, we're debugging a remote process, and should disassemble from the
-     exec file for speed.  However, this is no good if the target modifies its
-     code (for relocation, or whatever).  */
-
-  if (gdb_disassemble_from_exec == -1)
-    {
-      if (strcmp (target_shortname, "child") == 0
-	  || strcmp (target_shortname, "procfs") == 0
-	  || strcmp (target_shortname, "vxprocess") == 0
-          || strcmp (target_shortname, "core") == 0
-	  || strstr (target_shortname, "-thread") != NULL)
-	gdb_disassemble_from_exec = 0;	/* It's a child process, read inferior mem */
-      else
-	gdb_disassemble_from_exec = 1;	/* It's remote, read the exec file */
-    }
-
-  if (gdb_disassemble_from_exec)
-    di.read_memory_func = gdb_dis_asm_read_memory;
-  else
-    di.read_memory_func = dis_asm_read_memory;
 
   /* Assume symtab is valid for whole PC range */
   symtab = find_pc_symtab (low);
@@ -389,5 +366,35 @@ gdb_disassembly (struct ui_out *uiout,
     do_mixed_source_and_assembly (uiout, &di, nlines, le, low,
 				  high, symtab, how_many, stb);
 
+  do_cleanups (cleanups);
   gdb_flush (gdb_stdout);
+}
+
+/* Print the instruction at address MEMADDR in debugged memory,
+   on STREAM.  Returns length of the instruction, in bytes.  */
+
+int
+gdb_print_insn (CORE_ADDR memaddr, struct ui_file *stream)
+{
+  disassemble_info di = gdb_disassemble_info (current_gdbarch, stream);
+  return TARGET_PRINT_INSN (memaddr, &di);
+}
+
+
+/* FIXME: cagney/2003-04-28: This global deprecated_tm_print_insn_info
+   is going away.  */
+disassemble_info deprecated_tm_print_insn_info;
+
+extern void _initialize_disasm (void);
+
+void
+_initialize_disasm (void)
+{
+  
+  INIT_DISASSEMBLE_INFO_NO_ARCH (deprecated_tm_print_insn_info, gdb_stdout,
+				 (fprintf_ftype)fprintf_filtered);
+  deprecated_tm_print_insn_info.flavour = bfd_target_unknown_flavour;
+  deprecated_tm_print_insn_info.read_memory_func = dis_asm_read_memory;
+  deprecated_tm_print_insn_info.memory_error_func = dis_asm_memory_error;
+  deprecated_tm_print_insn_info.print_address_func = dis_asm_print_address;
 }

@@ -57,16 +57,7 @@ static void first_component_command (char *arg, int from_tty);
      'foo' in an anonymous namespace gets demangled as "(anonymous
      namespace)::foo".
 
-   - And operator names can contain parentheses or angle brackets.
-     Fortunately, I _think_ that operator names can only occur in a
-     fairly restrictive set of locations (in particular, they have be
-     at depth 0, don't they?).  */
-
-/* NOTE: carlton/2003-02-21: Daniel Jacobowitz came up with an example
-   where operator names don't occur at depth 0.  Sigh.  (It involved a
-   template argument that was a pointer: I hadn't realized that was
-   possible.)  Handling such edge cases does not seem like a
-   high-priority problem to me.  */
+   - And operator names can contain parentheses or angle brackets.  */
 
 /* FIXME: carlton/2003-03-13: We have several functions here with
    overlapping functionality; can we combine them?  Also, do they
@@ -209,40 +200,14 @@ method_name_from_physname (const char *physname)
 unsigned int
 cp_find_first_component (const char *name)
 {
-  /* Names like 'operator<<' screw up the recursion, so let's
-     special-case them.  I _hope_ they can only occur at the start of
-     a component.  */
-
   unsigned int index = 0;
-
-  if (strncmp (name, "operator", LENGTH_OF_OPERATOR) == 0)
-    {
-      index += LENGTH_OF_OPERATOR;
-      while (isspace(name[index]))
-	++index;
-      switch (name[index])
-	{
-	case '<':
-	  if (name[index + 1] == '<')
-	    index += 2;
-	  else
-	    index += 1;
-	  break;
-	case '>':
-	case '-':
-	  if (name[index + 1] == '>')
-	    index += 2;
-	  else
-	    index += 1;
-	  break;
-	case '(':
-	  index += 2;
-	  break;
-	default:
-	  index += 1;
-	  break;
-	}
-    }
+  /* Operator names can show up in unexpected places.  Since these can
+     contain parentheses or angle brackets, they can screw up the
+     recursion.  But not every string 'operator' is part of an
+     operater name: e.g. you could have a variable 'cooperator'.  So
+     this variable tells us whether or not we should treat the string
+     'operator' as starting an operator.  */
+  int operator_possible = 1;
 
   for (;; ++index)
     {
@@ -261,6 +226,7 @@ cp_find_first_component (const char *name)
 	      gdb_assert (name[index] == ':');
 	      index += 2;
 	    }
+	  operator_possible = 1;
 	  break;
 	case '(':
 	  /* Similar comment as to '<'.  */
@@ -272,13 +238,63 @@ cp_find_first_component (const char *name)
 	      gdb_assert (name[index] == ':');
 	      index += 2;
 	    }
+	  operator_possible = 1;
 	  break;
 	case '>':
 	case ')':
 	case '\0':
 	case ':':
 	  return index;
+	case 'o':
+	  /* Operator names can screw up the recursion.  */
+	  if (operator_possible
+	      && strncmp (name + index, "operator", LENGTH_OF_OPERATOR) == 0)
+	    {
+	      index += LENGTH_OF_OPERATOR;
+	      while (isspace(name[index]))
+		++index;
+	      switch (name[index])
+		{
+		  /* Skip over one less than the appropriate number of
+		     characters: the for loop will skip over the last
+		     one.  */
+		case '<':
+		  if (name[index + 1] == '<')
+		    index += 1;
+		  else
+		    index += 0;
+		  break;
+		case '>':
+		case '-':
+		  if (name[index + 1] == '>')
+		    index += 1;
+		  else
+		    index += 0;
+		  break;
+		case '(':
+		  index += 1;
+		  break;
+		default:
+		  index += 0;
+		  break;
+		}
+	    }
+	  operator_possible = 0;
+	  break;
+	case ' ':
+	case ',':
+	case '.':
+	case '&':
+	case '*':
+	  /* NOTE: carlton/2003-04-18: I'm not sure what the precise
+	     set of relevant characters are here: it's necessary to
+	     include any character that can show up before 'operator'
+	     in a demangled name, and it's safe to include any
+	     character that can't be part of an identifier's name.  */
+	  operator_possible = 1;
+	  break;
 	default:
+	  operator_possible = 0;
 	  break;
 	}
     }

@@ -305,7 +305,9 @@ alpha_elf_dynamic_symbol_p (h, info)
 
   if ((info->shared && !info->symbolic)
       || ((h->elf_link_hash_flags
-	   & (ELF_LINK_HASH_DEF_DYNAMIC | ELF_LINK_HASH_REF_REGULAR))
+	   & (ELF_LINK_HASH_DEF_DYNAMIC
+	      | ELF_LINK_HASH_DEF_REGULAR
+	      | ELF_LINK_HASH_REF_REGULAR))
 	  == (ELF_LINK_HASH_DEF_DYNAMIC | ELF_LINK_HASH_REF_REGULAR)))
     return TRUE;
 

@@ -40,7 +40,7 @@
 
 #define PC_REGNUM	IA64_IP_REGNUM
 #define SP_REGNUM	IA64_GR12_REGNUM
-#define FP_REGNUM	IA64_VFP_REGNUM
+#define DEPRECATED_FP_REGNUM	IA64_VFP_REGNUM
 
 /* Total amount of space needed to store our copies of the machine's
    register state, the array `registers'.  On the ia64, all registers
