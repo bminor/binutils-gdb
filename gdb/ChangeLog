@@ -1,5 +1,9 @@
 2003-06-27  Jim Blandy  <jimb@redhat.com>
 
+	* ppc-linux-tdep.c (ppc64_call_dummy_address): New function.
+	(ppc_linux_init_abi): Set it as the gdbarch's call_dummy_address
+	method.
+
 	* ppc-linux-tdep.c (ppc64_desc_entry_point): New function.
 	(ppc64_standard_linkage_target): Use it.
 
