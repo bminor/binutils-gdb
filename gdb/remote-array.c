@@ -34,8 +34,8 @@
 #include <varargs.h>
 #endif
 #include <signal.h>
-#include "gdb_string.h"
 #include <sys/types.h>
+#include "gdb_string.h"
 #include "command.h"
 #include "serial.h"
 #include "monitor.h"
@@ -47,6 +47,7 @@ static const char hexchars[]="0123456789abcdef";
 static char *hex2mem();
 
 #define SREC_SIZE 160
+#define ARRAY_PROMPT ">> "
 
 #define SWAP_TARGET_AND_HOST(buffer,len) 				\
   do									\
@@ -399,7 +400,7 @@ static void
 expect_prompt(discard)
      int discard;
 {
-  expect (">> ", discard);
+  expect (ARRAY_PROMPT, discard);
 }
 
 /*
@@ -577,6 +578,9 @@ array_open(args, name, from_tty)
 /*  if (is_open) */
     array_close(0);
 
+  target_preopen (from_tty);
+  unpush_target (&array_ops);
+
   tmp_mips_processor_type = "lsi33k";	/* change the default from r3051 */
   mips_set_processor_type_command ("lsi33k", 0);
 
@@ -614,13 +618,15 @@ array_open(args, name, from_tty)
        because the '@' doesn't flush output like it does on the new ROMS.
      */
     printf_monitor ("@");	/* ask for the last signal */
-    expect_prompt(1);		/* See if we get a expect_prompt */   
+    expect_prompt(1);		/* See if we get a expect_prompt */
+#ifdef TEST_ARRAY		/* skip packet for testing */
     make_gdb_packet (packet, "?");	/* ask for a bogus packet */
     if (array_send_packet (packet) == 0)
       error ("Couldn't transmit packet\n");
     printf_monitor ("@\n");	/* force it to flush stdout */
    expect_prompt(1);		/* See if we get a expect_prompt */
-
+#endif
+  push_target (&array_ops);
   if (from_tty)
     printf("Remote target %s connected to %s\n", array_ops.to_shortname, dev_name);
 }
@@ -701,6 +707,8 @@ array_resume (pid, step, sig)
   }
 }
 
+#define TMPBUFSIZ 5
+
 /*
  * array_wait -- Wait until the remote machine stops, then return,
  *          storing status in status just as `wait' would.
@@ -711,6 +719,10 @@ array_wait (pid, status)
      struct target_waitstatus *status;
 {
   int old_timeout = timeout;
+  int result, i;
+  char c;
+  serial_t tty_desc;
+  serial_ttystate ttystate;
 
   debuglogs(1, "array_wait (), printing extraneous text.");
   
@@ -718,14 +730,46 @@ array_wait (pid, status)
   status->value.integer = 0;
 
   timeout = 0;		/* Don't time out -- user program is running. */
+ 
+#if !defined(__GO32__) && !defined(__MSDOS__) && !defined(__WIN32__)
+  tty_desc = SERIAL_FDOPEN (0);
+  ttystate = SERIAL_GET_TTY_STATE (tty_desc);
+  SERIAL_RAW (tty_desc);
 
-  expect_prompt(0);    /* Wait for expect_prompt, outputting extraneous text */
+  i = 0;
+  /* poll on the serial port and the keyboard. */
+  while (1) {
+    c = readchar(timeout);
+    if (c > 0) {
+      if (c == *(ARRAY_PROMPT + i)) {
+	if (++i >= strlen (ARRAY_PROMPT)) { /* matched the prompt */
+	  debuglogs (4, "array_wait(), got the expect_prompt.");
+	  break;
+	}
+      } else {		/* not the prompt */
+	i = 0;
+      }
+      fputc_unfiltered (c, gdb_stdout);
+      fflush (stdout);
+    }
+    c = SERIAL_READCHAR(tty_desc, timeout);
+    if (c > 0) {
+      SERIAL_WRITE(array_desc, &c, 1);
+      /* do this so it looks like there's keyboard echo */
+      if (c == 3)		/* exit on Control-C */
+	break;
+      fputc_unfiltered (c, gdb_stdout);
+      fflush (stdout);
+    }
+  }
+  SERIAL_SET_TTY_STATE (tty_desc, ttystate);
+#else
+  expect_prompt(1);
   debuglogs (4, "array_wait(), got the expect_prompt.");
+#endif
 
   status->kind = TARGET_WAITKIND_STOPPED;
   status->value.sig = TARGET_SIGNAL_TRAP;
-
-
 
   timeout = old_timeout;
 

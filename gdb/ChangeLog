@@ -1,3 +1,9 @@
+Thu Dec 21 19:09:20 1995  Rob Savoye  <rob@chinadoll.cygnus.com>
+
+	* remote-array.c (array_wait): Poll the keyboard along with the
+	serial port so users can tpye at the target while their
+	application is running.
+
 Thu Dec 21 11:58:52 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* Makefile.in (ppcbug-rom.o, srec.o): Add dependencies.
@@ -51,7 +57,7 @@ Wed Dec 20 10:54:41 1995  Fred Fish  <fnf@cygnus.com>
 	* symmisc.c (print_objfile_statistics): Print the per-objfile
 	internal instrumentation statistics gathered.
 	* xcoffread.c (xcoff_next_symbol_text): Now takes objfile argument.
-	
+
 Fri Dec 15 16:15:55 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* top.c (set_endian_from_file): Use new bfd_big_endian macro.
