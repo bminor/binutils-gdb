@@ -1,5 +1,9 @@
 2003-08-10  Mark Kettenis  <kettenis@gnu.org>
 
+	From Peter Schauer (Peter.Schauer@regent.e-technik.tu-muenchen.de):
+	* config/i386/nm-i386sol2.h
+	(TARGET_REGION_SIZE_OK_FOR_HW_WATCHPOINT): Define to one.
+
 	Based on a patch from Michael Elizabeth Chastain (mec@shout.net):
 	* i386-tdep.c (i386_analyze_frame_setup): Recognize more
 	instructions that GCC likes to mingle into the prologue.  Fixes
