@@ -1,3 +1,7 @@
+2003-04-03  Nick Clifton  <nickc@redhat.com>
+
+	* NEWS: Mention support for Xtensa architecture.
+
 2003-04-02  Philip Blundell  <philb@gnu.org>
 
 	* config/tc-arm.c (arm_force_relocation): Return 0 for OFFSET_IMM.

@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Added support for Xtensa architecture.
+
 * Added --with-sysroot configure switch to specify a target system root, for
   linking against a target filesystem image.
 

@@ -1,3 +1,7 @@
+2003-04-03  Nick Clifton  <nickc@redhat.com>
+
+	* NEWS: Mention support for Xtensa architecture.
+
 2003-04-02  Nick Clifton  <nickc@redhat.com>
 
 	* pe-dll.c (pe_detail_list): arm-pe targets use underscores.
