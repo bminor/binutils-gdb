@@ -1,8 +1,15 @@
+2003-04-05  Dimitrie O. Paun <dpaun@rogers.com>
+
+	* windres.c: Add -l for compatibility with wrc, and rc.
+	Use the short option as a key for long options that have
+	a synonymous short option.
+	* doc/binutils.texi: Added -l to the list of options.
+
 2003-04-03  Dimitrie O. Paun <dpaun@rogers.com>
 
-        * windres.c: Add -U for compatibility with wrc, rc, and cpp.
-        (main): Just pass the -U option down to the preprocessor.
-        * doc/binutils.texi: Added -U to the list of options.
+	* windres.c: Add -U for compatibility with wrc, rc, and cpp.
+	(main): Just pass the -U option down to the preprocessor.
+	* doc/binutils.texi: Added -U to the list of options.
 
 2003-04-01  Dimitrie O. Paun <dpaun@rogers.com>
 
@@ -16,12 +23,12 @@
 
 2003-04-01  Bob Wilson  <bob.wilson@acm.org>
 
-        * readelf.c: Include "elf/xtensa.h".
-        (guess_is_rela): Add EM_XTENSA and EM_XTENSA_OLD to list of
-        targets that use RELA relocations.
-        (dump_relocations): Call elf_xtensa_reloc_type for
-        EM_XTENSA and EM_XTENSA_OLD.
-        (get_machine_name): Handle EM_XTENSA and EM_XTENSA_OLD.
+	* readelf.c: Include "elf/xtensa.h".
+	(guess_is_rela): Add EM_XTENSA and EM_XTENSA_OLD to list of
+	targets that use RELA relocations.
+	(dump_relocations): Call elf_xtensa_reloc_type for
+	EM_XTENSA and EM_XTENSA_OLD.
+	(get_machine_name): Handle EM_XTENSA and EM_XTENSA_OLD.
 
 2003-04-01  Nick Clifton  <nickc@redhat.com>
 

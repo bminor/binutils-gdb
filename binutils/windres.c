@@ -106,22 +106,19 @@ static struct include_dir *include_dirs;
 
 /* 150 isn't special; it's just an arbitrary non-ASCII char value.  */
 
-#define OPTION_HELP		150
-#define OPTION_INCLUDE_DIR	(OPTION_HELP + 1)
-#define OPTION_LANGUAGE		(OPTION_INCLUDE_DIR + 1)
-#define OPTION_PREPROCESSOR	(OPTION_LANGUAGE + 1)
+#define OPTION_INCLUDE_DIR	150
+#define OPTION_PREPROCESSOR	(OPTION_INCLUDE_DIR + 1)
 #define OPTION_USE_TEMP_FILE	(OPTION_PREPROCESSOR + 1)
 #define OPTION_NO_USE_TEMP_FILE	(OPTION_USE_TEMP_FILE + 1)
-#define OPTION_VERSION		(OPTION_NO_USE_TEMP_FILE + 1)
-#define OPTION_YYDEBUG		(OPTION_VERSION + 1)
+#define OPTION_YYDEBUG		(OPTION_NO_USE_TEMP_FILE + 1)
 
 static const struct option long_options[] =
 {
   {"define", required_argument, 0, 'D'},
-  {"help", no_argument, 0, OPTION_HELP},
+  {"help", no_argument, 0, 'h'},
   {"include-dir", required_argument, 0, OPTION_INCLUDE_DIR},
   {"input-format", required_argument, 0, 'I'},
-  {"language", required_argument, 0, OPTION_LANGUAGE},
+  {"language", required_argument, 0, 'l'},
   {"output-format", required_argument, 0, 'O'},
   {"preprocessor", required_argument, 0, OPTION_PREPROCESSOR},
   {"target", required_argument, 0, 'F'},
@@ -129,7 +126,7 @@ static const struct option long_options[] =
   {"use-temp-file", no_argument, 0, OPTION_USE_TEMP_FILE},
   {"no-use-temp-file", no_argument, 0, OPTION_NO_USE_TEMP_FILE},
   {"verbose", no_argument, 0, 'v'},
-  {"version", no_argument, 0, OPTION_VERSION},
+  {"version", no_argument, 0, 'V'},
   {"yydebug", no_argument, 0, OPTION_YYDEBUG},
   {0, no_argument, 0, 0}
 };
@@ -815,7 +812,7 @@ main (argc, argv)
   language = 0x409;   /* LANG_ENGLISH, SUBLANG_ENGLISH_US.  */
   use_temp_file = 0;
 
-  while ((c = getopt_long (argc, argv, "i:o:I:O:F:D:U:rhHvV", long_options,
+  while ((c = getopt_long (argc, argv, "i:l:o:I:O:F:D:U:rhHvV", long_options,
 			   (int *) 0)) != EOF)
     {
       switch (c)
@@ -904,7 +901,7 @@ main (argc, argv)
 
 	  break;
 
-	case OPTION_LANGUAGE:
+	case 'l':
 	  language = strtol (optarg, (char **) NULL, 16);
 	  break;
 
@@ -924,12 +921,10 @@ main (argc, argv)
 
 	case 'h':
 	case 'H':
-	case OPTION_HELP:
 	  usage (stdout, 0);
 	  break;
 
 	case 'V':
-	case OPTION_VERSION:
 	  print_version ("windres");
 	  break;
 

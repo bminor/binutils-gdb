@@ -2626,6 +2626,7 @@ Ignored for compatibility with rc.
 Enable verbose mode.  This tells you what the preprocessor is if you
 didn't specify one.
 
+@item -l @var{val}
 @item --language @var{val}
 Specify the default language to use when reading an @code{rc} file.
 @var{val} should be a hexadecimal language code.  The low eight bits are
@@ -2642,9 +2643,11 @@ go the console).
 Use popen, not a temporary file, to read the output of the preprocessor.
 This is the default behaviour.
 
+@item -h
 @item --help
 Prints a usage summary.
 
+@item -V
 @item --version
 Prints the version number for @command{windres}.
 
