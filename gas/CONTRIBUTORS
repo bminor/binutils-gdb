@@ -18,8 +18,17 @@ the preprocessing pass, and extensive changes in messages.c,
 input-file.c, write.c.
 
 K. Richard Pixley maintained gas for a while, adding various
-enhancements and bug fixes.  [what in particular did Rich do? get
-details from rich and/or changelog]
+enhancements and many bug fixes, including merging support for several
+processors, breaking gas up to handle multiple object file format
+backends (including heavy rewrite, testing, an integration of the coff
+and b.out backends), adding configuration including heavy testing and
+verification of cross assemblers and file splits and renaming,
+converted gas to strictly ansi C including full prototypes, added
+support for m680[34]0 & cpu32, considerable work on i960 including a
+coff port (including considerable amounts of reverse engineering), a
+sparc opcode file rewrite, decstation, rs6000, and hp300hpux host
+ports, updated "know" assertions and made them work, much other
+reorganization, cleanup, and lint.
 
 Ken Raeburn currently maintains gas, and wrote the high-level BFD
 interface code to replace most of the code in format-specific I/O
