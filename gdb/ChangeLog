@@ -1,5 +1,10 @@
 2004-02-19  Fred Fish  <fnf@redhat.com>
 
+	* sh-tdep.c (sh_analyze_prologue): Eliminate useless test of
+	cache->uses_fp prior to setting it.
+
+2004-02-19  Fred Fish  <fnf@redhat.com>
+
 	Fix for PR breakpoint/1558.
 	* sh-tdep.c (IS_JSR): New macro.
 	(sh_analyze_prologue): Use IS_JSR to terminate prologue scan.

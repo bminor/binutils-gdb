@@ -482,8 +482,7 @@ sh_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
 	}
       else if (IS_MOV_SP_FP (inst))
 	{
-	  if (!cache->uses_fp)
-	    cache->uses_fp = 1;
+	  cache->uses_fp = 1;
 	  /* At this point, only allow argument register moves to other
 	     registers or argument register moves to @(X,fp) which are
 	     moving the register arguments onto the stack area allocated
