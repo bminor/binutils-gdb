@@ -1,3 +1,8 @@
+2000-05-17  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* gdb/config/djgpp/README: Fine-tune installation instructions
+        based on user reports.
+
 2000-05-15  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* Makefile.in (gdbtypes.o, varobj.o): Depend on wrapper.h.
