@@ -80,7 +80,7 @@ LITTLENUM_TYPE generic_bignum[SIZE_OF_LARGE_NUMBER + 6];
 FLONUM_TYPE generic_floating_point_number =
 {
   &generic_bignum[6],		/* low (JF: Was 0) */
-  &generic_bignum[SIZE_OF_LARGE_NUMBER + 6 - 1],	/* high JF: (added +6) */
+  &generic_bignum[SIZE_OF_LARGE_NUMBER + 6 - 1], /* high JF: (added +6) */
   0,				/* leader */
   0,				/* exponent */
   0				/* sign */
@@ -96,9 +96,8 @@ floating_constant (expressionP)
   /* floating-point constant. */
   int error_code;
 
-  error_code = atof_generic
-    (&input_line_pointer, ".", EXP_CHARS,
-     &generic_floating_point_number);
+  error_code = atof_generic (&input_line_pointer, ".", EXP_CHARS,
+			     &generic_floating_point_number);
 
   if (error_code)
     {
@@ -220,7 +219,8 @@ integer_constant (radix, expressionP)
 	  if (carry)
 	    {
 	      if (leader < generic_bignum + SIZE_OF_LARGE_NUMBER - 1)
-		{		/* room to grow a longer bignum. */
+		{
+		  /* room to grow a longer bignum. */
 		  *++leader = carry;
 		}
 	    }
@@ -229,7 +229,8 @@ integer_constant (radix, expressionP)
       /* input_line_pointer->after c. */
       know (LITTLENUM_NUMBER_OF_BITS == 16);
       if (leader < generic_bignum + 2)
-	{			/* will fit into 32 bits. */
+	{
+	  /* will fit into 32 bits. */
 	  number =
 	    ((generic_bignum[1] & LITTLENUM_MASK) << LITTLENUM_NUMBER_OF_BITS)
 	    | (generic_bignum[0] & LITTLENUM_MASK);
@@ -975,7 +976,7 @@ expr (rank, resultP)
 	  resultP->X_add_number = 0;
 	  resultP->X_unsigned = 1;
 	}
-	  
+
       op_left = op_right;
     }				/* While next operator is >= this rank. */
 
@@ -1013,7 +1014,7 @@ get_symbol_end ()
 }
 
 
-unsigned int 
+unsigned int
 get_single_number ()
 {
   expressionS exp;
