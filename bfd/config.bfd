@@ -44,6 +44,7 @@ case "${canon}" in
   i[34]86-*-netware*)	bfd_name=i386-nlm ;;
   i[34]86-*-linux*)	bfd_name=i386-linux ;;
   i[34]86-*-lynxos*)	bfd_name=i386-lynx ;;
+  i[34]86-*-gnu*)	bfd_name=i386-mach3 ;;
   i[34]86-*-mach*)	bfd_name=i386-mach3 ;;
   i[34]86-*-osf1mk*)	bfd_name=i386-mach3 ;;
   i[34]86-*-os9k)	bfd_name=i386-os9k;;
@@ -56,7 +57,7 @@ case "${canon}" in
   i960-*-bout*)		bfd_name=i960-bout ;;
   i960-*-coff*)		bfd_name=i960-coff ;;
   i960-*-nindy*)	bfd_name=i960-bout ;;
-  m68*-apollo-bsd*)	bfd_name=apollo ;;
+  m68*-apollo-*)	bfd_name=apollo ;;
   m68*-bull-sysv*)	bfd_name=u68k-coff ;;
   m68*-hp-bsd*)		bfd_name=hp300bsd ;;
   m68*-*-aout*)		bfd_name=m68k-aout ;;
