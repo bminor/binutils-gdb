@@ -367,6 +367,10 @@ static boolean do_default_excludes;
 /* Default symbols to exclude when exporting all the symbols.  */
 static const char *default_excludes = "DllMain@12,DllEntryPoint@0,impure_ptr";
 
+/* True if we should add __imp_<SYMBOL> to import libraries for backward 
+   compatibility to old Cygwin releases.  */
+static boolean create_compat_implib;
+
 static char *def_file;
 
 extern char * program_name;
@@ -1229,7 +1233,7 @@ scan_drectve_symbols (abfd)
 
   /* Search for -export: strings. The exported symbols can optionally
      have type tags (eg., -export:foo,data), so handle those as well.
-     Currently only data tag is supported. */
+     Currently only data tag is supported.  */
   p = buf;
   e = buf + size;
   while (p < e)
@@ -1267,7 +1271,7 @@ scan_drectve_symbols (abfd)
 	      char *exported_name = xstrdup (c);
 	      char *atsym = strchr (exported_name, '@');
 	      *atsym = '\0';
-	      /* Note: stdcall alias symbols can never be data. */
+	      /* Note: stdcall alias symbols can never be data.  */
 	      def_exports (exported_name, xstrdup (c), -1, 0, 0, 0);
 	    }
 	}
@@ -1879,9 +1883,9 @@ gen_exp_file ()
 	    {
 	      char *p;
 	      int l;
-	      /* We dont output as ascii 'cause there can
-	         be quote characters in the string */
-
+	      
+	      /* We don't output as ascii because there can
+	         be quote characters in the string.  */
 	      l = 0;
 	      for (p = dl->text; *p; p++)
 		{
@@ -1907,7 +1911,7 @@ gen_exp_file ()
 
 
   /* Add to the output file a way of getting to the exported names
-     without using the import library. */
+     without using the import library.  */
   if (add_indirect)
     {
       fprintf (f, "\t.section\t.rdata\n");
@@ -1917,9 +1921,11 @@ gen_exp_file ()
 	    /* We use a single underscore for MS compatibility, and a
                double underscore for backward compatibility with old
                cygwin releases.  */
-	    fprintf (f, "\t%s\t__imp_%s\n", ASM_GLOBAL, exp->name);
+	    if (create_compat_implib)
+	      fprintf (f, "\t%s\t__imp_%s\n", ASM_GLOBAL, exp->name);
 	    fprintf (f, "\t%s\t_imp__%s\n", ASM_GLOBAL, exp->name);
-	    fprintf (f, "__imp_%s:\n", exp->name);
+	    if (create_compat_implib)
+	      fprintf (f, "__imp_%s:\n", exp->name);
 	    fprintf (f, "_imp__%s:\n", exp->name);
 	    fprintf (f, "\t%s\t%s\n", ASM_LONG, exp->name);
 	  }
@@ -2178,10 +2184,12 @@ make_one_lib_file (exp, i)
       f = fopen (name, FOPEN_WT);
       fprintf (f, "\t.text\n");
       fprintf (f, "\t%s\t%s%s\n", ASM_GLOBAL, ASM_PREFIX, exp->name);
-      fprintf (f, "\t%s\t__imp_%s\n", ASM_GLOBAL, exp->name);
+      if (create_compat_implib)
+	fprintf (f, "\t%s\t__imp_%s\n", ASM_GLOBAL, exp->name);
       fprintf (f, "\t%s\t_imp__%s\n", ASM_GLOBAL, exp->name);
-      fprintf (f, "%s%s:\n\t%s\t__imp_%s\n", ASM_PREFIX,
-	       exp->name, ASM_JUMP, exp->name);
+      if (create_compat_implib)
+	fprintf (f, "%s%s:\n\t%s\t__imp_%s\n", ASM_PREFIX,
+		 exp->name, ASM_JUMP, exp->name);
 
       fprintf (f, "\t.section\t.idata$7\t%s To force loading of head\n", ASM_C);
       fprintf (f, "\t%s\t%s\n", ASM_LONG, head_label);
@@ -2190,7 +2198,8 @@ make_one_lib_file (exp, i)
       fprintf (f,"%s Import Address Table\n", ASM_C);
 
       fprintf (f, "\t.section	.idata$5\n");
-      fprintf (f, "__imp_%s:\n", exp->name);
+      if (create_compat_implib)
+	fprintf (f, "__imp_%s:\n", exp->name);
       fprintf (f, "_imp__%s:\n", exp->name);
 
       dump_iat (f, exp);
@@ -2311,13 +2320,16 @@ make_one_lib_file (exp, i)
       /* Generate imp symbols with one underscore for Microsoft
          compatibility, and with two underscores for backward
          compatibility with old versions of cygwin.  */
-      iname = bfd_make_empty_symbol(abfd);
-      iname->name = make_label ("__imp_", exp->name);
-      iname->section = secdata[IDATA5].sec;
-      iname->flags = BSF_GLOBAL;
-      iname->value = 0;
+      if (create_compat_implib)
+	{
+	  iname = bfd_make_empty_symbol (abfd);
+	  iname->name = make_label ("__imp_", exp->name);
+	  iname->section = secdata[IDATA5].sec;
+	  iname->flags = BSF_GLOBAL;
+	  iname->value = 0;
+	}
 
-      iname2 = bfd_make_empty_symbol(abfd);
+      iname2 = bfd_make_empty_symbol (abfd);
       iname2->name = make_label ("_imp__", exp->name);
       iname2->section = secdata[IDATA5].sec;
       iname2->flags = BSF_GLOBAL;
@@ -2332,7 +2344,8 @@ make_one_lib_file (exp, i)
 
 
       iname_pp = ptrs + oidx;
-      ptrs[oidx++] = iname;
+      if (create_compat_implib)
+	ptrs[oidx++] = iname;
       ptrs[oidx++] = iname2;
 
       iname_lab_pp = ptrs + oidx;
@@ -3131,6 +3144,7 @@ usage (file, status)
   fprintf (file, _("   -A --add-stdcall-alias    Add aliases without @<n>.\n"));
   fprintf (file, _("   -S --as <name>            Use <name> for assembler.\n"));
   fprintf (file, _("   -f --as-flags <flags>     Pass <flags> to the assembler.\n"));
+  fprintf (file, _("   -C --compat-implib        Create backward compatible import library.\n"));
   fprintf (file, _("   -n --no-delete            Keep temp files (repeat for extra preservation).\n"));
   fprintf (file, _("   -v --verbose              Be verbose.\n"));
   fprintf (file, _("   -V --version              Display the program version.\n"));
@@ -3175,6 +3189,7 @@ static const struct option long_options[] =
   {"as", required_argument, NULL, 'S'},
   {"as-flags", required_argument, NULL, 'f'},
   {"mcore-elf", required_argument, NULL, 'M'},
+  {"compat-implib", no_argument, NULL, 'C'},
   {NULL,0,NULL,0}
 };
 
@@ -3197,9 +3212,9 @@ main (ac, av)
 
   while ((c = getopt_long (ac, av,
 #ifdef DLLTOOL_MCORE_ELF			   
-			   "m:e:l:aD:d:z:b:xcuUkAS:f:nvVhM:L:F:",
+			   "m:e:l:aD:d:z:b:xcCuUkAS:f:nvVhM:L:F:",
 #else
-			   "m:e:l:aD:d:z:b:xcuUkAS:f:nvVh",
+			   "m:e:l:aD:d:z:b:xcCuUkAS:f:nvVh",
 #endif
 			   long_options, 0))
 	 != EOF)
@@ -3295,6 +3310,9 @@ main (ac, av)
 	  mcore_elf_linker_flags = optarg;
 	  break;
 #endif
+	case 'C':
+	  create_compat_implib = 1;
+	  break;
 	default:
 	  usage (stderr, 1);
 	  break;

@@ -1,3 +1,12 @@
+2000-01-04  Mumit Khan  <khan@xraylith.wisc.edu>
+ 
+	* dlltool.c (create_compat_implib): New variable.
+	(gen_exp_file): Use.
+	(make_one_lib_file): Use.
+	(long_options): Add --compat-implib option.
+	(usage): Handle.
+	(main): Handle.
+
 2000-01-03  Nick Clifton  <nickc@cygnus.com>
 
 	* binutils.texi: Document new, ARM specific disassembler
