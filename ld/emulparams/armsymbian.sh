@@ -1,4 +1,6 @@
 . ${srcdir}/emulparams/armelf.sh
+SCRIPT_NAME="armbpabi"
+GENERATE_COMBRELOC_SCRIPT=1
 OUTPUT_FORMAT="elf32-littlearm-symbian"
 BIG_OUTPUT_FORMAT="elf32-bigarm-symbian"
 LITTLE_OUTPUT_FORMAT="$OUTPUT_FORMAT"

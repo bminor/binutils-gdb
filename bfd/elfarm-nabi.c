@@ -936,6 +936,7 @@ elf32_arm_symbian_modify_segment_map (abfd, info)
      struct bfd_link_info *info ATTRIBUTE_UNUSED;
 {
   struct elf_segment_map *m;
+  asection *dynsec;
 
   /* The first PT_LOAD segment will have the program headers and file
      headers in it by default -- but BPABI object files should not
@@ -946,6 +947,19 @@ elf32_arm_symbian_modify_segment_map (abfd, info)
 	m->includes_filehdr = 0;
 	m->includes_phdrs = 0;
       }
+
+  /* BPABI shared libraries and executables should have a PT_DYNAMIC
+     segment.  However, because the .dynamic section is not marked
+     with SEC_LOAD, the generic ELF code will not create such a
+     segment.  */
+  dynsec = bfd_get_section_by_name (abfd, ".dynamic");
+  if (dynsec)
+    {
+      m = _bfd_elf_make_dynamic_segment (abfd, dynsec);
+      m->next = elf_tdata (abfd)->segment_map;
+      elf_tdata (abfd)->segment_map = m;
+    }
+
   return TRUE;
 }
 
@@ -969,6 +983,10 @@ elf32_arm_symbian_modify_segment_map (abfd, info)
 /* There is no .got section for BPABI objects, and hence no header.  */
 #undef elf_backend_got_header_size
 #define elf_backend_got_header_size 0
+
+/* Similarly, there is no .got.plt section.  */
+#undef elf_backend_want_got_plt
+#define elf_backend_want_got_plt 0
 
 #include "elf32-target.h"
 

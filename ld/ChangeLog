@@ -1,3 +1,8 @@
+2004-09-06  Mark Mitchell  <mark@codesourcery.com>
+
+	* emulparams/armsymbian.sh: Use armbpabi script.
+	* scripttempl/armbpabi.sc: New script.
+
 2004-09-02  Mark Mitchell  <mark@codesourcery.com>
 
 	* Makefile.am (ALL_EMULATIONS): Add earmsymbian.o.

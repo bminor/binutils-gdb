@@ -3329,6 +3329,25 @@ make_mapping (bfd *abfd,
   return m;
 }
 
+/* Create the PT_DYNAMIC segment, which includes DYNSEC.  Returns NULL
+   on failure.  */
+
+struct elf_segment_map *
+_bfd_elf_make_dynamic_segment (bfd *abfd, asection *dynsec)
+{
+  struct elf_segment_map *m;
+
+  m = bfd_zalloc (abfd, sizeof (struct elf_segment_map));
+  if (m == NULL)
+    return NULL;
+  m->next = NULL;
+  m->p_type = PT_DYNAMIC;
+  m->count = 1;
+  m->sections[0] = dynsec;
+  
+  return m;
+}
+
 /* Set up a mapping from BFD sections to program segments.  */
 
 static bfd_boolean
@@ -3566,15 +3585,9 @@ map_sections_to_segments (bfd *abfd)
   /* If there is a .dynamic section, throw in a PT_DYNAMIC segment.  */
   if (dynsec != NULL)
     {
-      amt = sizeof (struct elf_segment_map);
-      m = bfd_zalloc (abfd, amt);
+      m = _bfd_elf_make_dynamic_segment (abfd, dynsec);
       if (m == NULL)
 	goto error_return;
-      m->next = NULL;
-      m->p_type = PT_DYNAMIC;
-      m->count = 1;
-      m->sections[0] = dynsec;
-
       *pm = m;
       pm = &m->next;
     }
@@ -4215,6 +4228,22 @@ Error: First section in segment (%s) starts at 0x%x whereas the segment starts a
       if (p->p_type != PT_LOAD && m->count > 0)
 	{
 	  BFD_ASSERT (! m->includes_filehdr && ! m->includes_phdrs);
+	  /* If the section has not yet been assigned a file position,
+	     do so now.  The ARM BPABI requires that .dynamic section
+	     not be marked SEC_ALLOC because it is not part of any
+	     PT_LOAD segment, so it will not be processed above.  */
+	  if (p->p_type == PT_DYNAMIC && m->sections[0]->filepos == 0)
+	    {
+	      unsigned int i;
+	      Elf_Internal_Shdr ** const i_shdrpp = elf_elfsections (abfd);
+
+	      i = 1;
+	      while (i_shdrpp[i]->bfd_section != m->sections[0])
+		++i;
+	      off = (_bfd_elf_assign_file_position_for_section 
+		     (i_shdrpp[i], off, TRUE));
+	      p->p_filesz = m->sections[0]->size;
+	    }
 	  p->p_offset = m->sections[0]->filepos;
 	}
       if (m->count == 0)

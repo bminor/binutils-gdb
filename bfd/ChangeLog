@@ -1,3 +1,18 @@
+2004-09-06  Mark Mitchell  <mark@codesourcery.com>
+
+	* elf-bfd.h (_bfd_elf_make_dynamic_segment): Declare it.
+	* elf.c (_bfd_elf_make_dynamic_segment): New function, split out
+	from ...
+	(map_sections_to_segments): ... here.  Use it.  Assign a file
+	position to the .dynamic section if it is not loadable, but part
+	of the PT_DYNAMIC segment.
+	* elf32-arm.h (elf32_arm_finish_dynamic_sections): Use file
+	offsets, not VMAs, for the BPABI.  Do not fill in the header in
+	the .got.plt section for the BPABI.
+	* elfarm-nabi.c (elf32_arm_symbian_modify_segment_map): Add a
+	PT_DYNAMIC segment.
+	(elf_backend_want_got_plt): Define to zero for Symbian OS.
+	
 2004-09-06  Nick Clifton  <nickc@redhat.com>
 
 	* elflink.c (elf_link_add_object_symbols): Set the error code to

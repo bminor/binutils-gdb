@@ -3861,14 +3861,16 @@ elf32_arm_finish_dynamic_sections (bfd * output_bfd, struct bfd_link_info * info
   dynobj = elf_hash_table (info)->dynobj;
 
   sgot = bfd_get_section_by_name (dynobj, ".got.plt");
-  BFD_ASSERT (sgot != NULL);
+  BFD_ASSERT (elf32_arm_hash_table (info)->symbian_p || sgot != NULL);
   sdyn = bfd_get_section_by_name (dynobj, ".dynamic");
 
   if (elf_hash_table (info)->dynamic_sections_created)
     {
       asection *splt;
       Elf32_External_Dyn *dyncon, *dynconend;
+      struct elf32_arm_link_hash_table *htab;
 
+      htab = elf32_arm_hash_table (info);
       splt = bfd_get_section_by_name (dynobj, ".plt");
       BFD_ASSERT (splt != NULL && sdyn != NULL);
 
@@ -3885,9 +3887,21 @@ elf32_arm_finish_dynamic_sections (bfd * output_bfd, struct bfd_link_info * info
 
 	  switch (dyn.d_tag)
 	    {
+	      unsigned int type;
+
 	    default:
 	      break;
 
+	    case DT_HASH:
+	      name = ".hash";
+	      goto get_vma_if_bpabi;
+	    case DT_STRTAB:
+	      name = ".dynstr";
+	      goto get_vma_if_bpabi;
+	    case DT_SYMTAB:
+	      name = ".dynsym";
+	      goto get_vma_if_bpabi;
+	      
 	    case DT_PLTGOT:
 	      name = ".got";
 	      goto get_vma;
@@ -3896,8 +3910,19 @@ elf32_arm_finish_dynamic_sections (bfd * output_bfd, struct bfd_link_info * info
 	    get_vma:
 	      s = bfd_get_section_by_name (output_bfd, name);
 	      BFD_ASSERT (s != NULL);
-	      dyn.d_un.d_ptr = s->vma;
+	      if (!htab->symbian_p)
+		dyn.d_un.d_ptr = s->vma;
+	      else
+		/* In the BPABI, tags in the PT_DYNAMIC section point
+		   at the file offset, not the memory address, for the
+		   convenience of the post linker.  */
+		dyn.d_un.d_ptr = s->filepos;
 	      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
+	      break;
+
+	    get_vma_if_bpabi:
+	      if (htab->symbian_p)
+		goto get_vma;
 	      break;
 
 	    case DT_PLTRELSZ:
@@ -3906,21 +3931,60 @@ elf32_arm_finish_dynamic_sections (bfd * output_bfd, struct bfd_link_info * info
 	      dyn.d_un.d_val = s->size;
 	      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
 	      break;
-
+	      
 	    case DT_RELSZ:
-	      /* My reading of the SVR4 ABI indicates that the
-		 procedure linkage table relocs (DT_JMPREL) should be
-		 included in the overall relocs (DT_REL).  This is
-		 what Solaris does.  However, UnixWare can not handle
-		 that case.  Therefore, we override the DT_RELSZ entry
-		 here to make it not include the JMPREL relocs.  Since
-		 the linker script arranges for .rel.plt to follow all
-		 other relocation sections, we don't have to worry
-		 about changing the DT_REL entry.  */
-	      s = bfd_get_section_by_name (output_bfd, ".rel.plt");
-	      if (s != NULL)
-		dyn.d_un.d_val -= s->size;
-	      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
+	      if (!htab->symbian_p)
+		{
+		  /* My reading of the SVR4 ABI indicates that the
+		     procedure linkage table relocs (DT_JMPREL) should be
+		     included in the overall relocs (DT_REL).  This is
+		     what Solaris does.  However, UnixWare can not handle
+		     that case.  Therefore, we override the DT_RELSZ entry
+		     here to make it not include the JMPREL relocs.  Since
+		     the linker script arranges for .rel.plt to follow all
+		     other relocation sections, we don't have to worry
+		     about changing the DT_REL entry.  */
+		  s = bfd_get_section_by_name (output_bfd, ".rel.plt");
+		  if (s != NULL)
+		    dyn.d_un.d_val -= s->size;
+		  bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
+		  break;
+		}
+	      /* Fall through */
+
+	    case DT_REL:
+	    case DT_RELA:
+	    case DT_RELASZ:
+	      /* In the BPABI, the DT_REL tag must point at the file
+		 offset, not the VMA, of the first relocation
+		 section.  So, we use code similar to that in
+		 elflink.c, but do not check for SHF_ALLOC on the
+		 relcoation section, since relocations sections are
+		 never allocated under the BPABI.  The comments above
+		 about Unixware notwithstanding, we include all of the
+		 relocations here.  */
+	      if (htab->symbian_p)
+		{
+		  unsigned int i;
+		  type = ((dyn.d_tag == DT_REL || dyn.d_tag == DT_RELSZ)
+			  ? SHT_REL : SHT_RELA);
+		  dyn.d_un.d_val = 0;
+		  for (i = 1; i < elf_numsections (output_bfd); i++)
+		    {
+		      Elf_Internal_Shdr *hdr 
+			= elf_elfsections (output_bfd)[i];
+		      if (hdr->sh_type == type)
+			{
+			  if (dyn.d_tag == DT_RELSZ 
+			      || dyn.d_tag == DT_RELASZ)
+			    dyn.d_un.d_val += hdr->sh_size;
+			  else if (dyn.d_un.d_val == 0
+				   || hdr->sh_offset < dyn.d_un.d_val)
+			    dyn.d_un.d_val = hdr->sh_offset;
+			}
+		    }
+		  bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
+		}
 	      break;
 
 	      /* Set the bottom bit of DT_INIT/FINI if the
@@ -3981,19 +4045,22 @@ elf32_arm_finish_dynamic_sections (bfd * output_bfd, struct bfd_link_info * info
     }
 
   /* Fill in the first three entries in the global offset table.  */
-  if (sgot->size > 0)
+  if (sgot)
     {
-      if (sdyn == NULL)
-	bfd_put_32 (output_bfd, (bfd_vma) 0, sgot->contents);
-      else
-	bfd_put_32 (output_bfd,
-		    sdyn->output_section->vma + sdyn->output_offset,
-		    sgot->contents);
-      bfd_put_32 (output_bfd, (bfd_vma) 0, sgot->contents + 4);
-      bfd_put_32 (output_bfd, (bfd_vma) 0, sgot->contents + 8);
-    }
+      if (sgot->size > 0)
+	{
+	  if (sdyn == NULL)
+	    bfd_put_32 (output_bfd, (bfd_vma) 0, sgot->contents);
+	  else
+	    bfd_put_32 (output_bfd,
+			sdyn->output_section->vma + sdyn->output_offset,
+			sgot->contents);
+	  bfd_put_32 (output_bfd, (bfd_vma) 0, sgot->contents + 4);
+	  bfd_put_32 (output_bfd, (bfd_vma) 0, sgot->contents + 8);
+	}
 
-  elf_section_data (sgot->output_section)->this_hdr.sh_entsize = 4;
+      elf_section_data (sgot->output_section)->this_hdr.sh_entsize = 4;
+    }
 
   return TRUE;
 }
