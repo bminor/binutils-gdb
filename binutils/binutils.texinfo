@@ -554,7 +554,7 @@ relocation entries.  Using @samp{-x} is equivalent to specifying all of
 stores it in the archive.  The index lists each symbol defined by a
 member of an archive that is a relocatable object file.  
 
-You may use @code{nm -s} or @code{nm +print-armap} to list this index.
+You may use @samp{nm -s} or @samp{nm +print-armap} to list this index.
 
 An archive with such an index speeds up linking to the library, and
 allows routines in the library to call each other without regard to
