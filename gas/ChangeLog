@@ -1,3 +1,8 @@
+Tue Jun  2 13:32:22 1998  Klaus Kaempf  <kkaempf@progis.de>
+
+	* config/tc-alpha.c (s_alpha_comm): Allow alignment parameter in
+	OBJ_EVAX case.
+
 Tue Jun  2 13:11:13 1998  Pat Rankin  <rankin@eql.caltech.edu>
 
 	* config/tc-vax.c (md_create_short_jump): Fix off by two bug in

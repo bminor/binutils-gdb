@@ -3372,6 +3372,18 @@ s_alpha_comm (ignore)
   new_seg = subseg_new (xstrdup (name), 0);
 #endif
 
+#ifdef OBJ_EVAX
+  /* alignment might follow  */
+  if (*input_line_pointer == ',')
+    {
+      offsetT align;
+
+      input_line_pointer++;      
+      align = get_absolute_expression ();
+      bfd_set_section_alignment (stdoutput, new_seg, align);
+    }
+#endif
+
   if (S_IS_DEFINED (symbolP) && ! S_IS_COMMON (symbolP))
     {
       as_bad (_("Ignoring attempt to re-define symbol"));
