@@ -1,11 +1,11 @@
 2004-02-02  Fred Fish  <fnf@redhat.com>
 
 	* main.c (gdb_stdtarg): Move definition to group with other
-	gdb_stdtarg definitions.
+	gdb_stdtarg definitions and update copyright years.
 	* remote-sim.c (gdb_os_write_stderr): Write output to
 	gdb_stdtargerr stream instead of gdb_stdtarg stream.
 	(gdb_os_flush_stderr): Flush gdb_stdtargerr steam instead of
-	gdb_stderr stream.
+	gdb_stderr stream and update copyright years.
 
 2004-02-01  Daniel Jacobowitz  <drow@mvista.com>
 
