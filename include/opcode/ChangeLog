@@ -1,3 +1,17 @@
+Mon Oct 23 11:09:16 1995  James G. Smith  <jsmith@pasanda.cygnus.co.uk>
+
+	* mips.h: Added INSN_4100 flag to mark NEC VR4100 specific
+ 	instructions.
+
+Mon Oct 16 10:28:15 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* ppc.h (PPC_OPCODE_{COMMON,ANY}): New opcode flags for
+	assembler's -mcom and -many switches.
+
+Wed Oct 11 16:56:33 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* i386.h: Fix cmpxchg8b extension opcode description.
+
 Thu Oct  5 18:03:36 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	* i386.h: Add Pentium instructions wrmsr, rdtsc, rdmsr, cmpxchg8b,
