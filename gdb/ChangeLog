@@ -1,5 +1,8 @@
 2002-10-01  Alexandre Oliva  <aoliva@redhat.com>
 
+	* mips-tdep.c (mips_find_abi_section): .mdebug.abi64 is the name
+	of the section for the N64 ABI, fixed.
+
 	* config/mips/tm-irix6.h: Include solib.h.
 
 2002-10-01  Elena Zannoni  <ezannoni@redhat.com>

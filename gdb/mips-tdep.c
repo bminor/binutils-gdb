@@ -5592,7 +5592,7 @@ mips_find_abi_section (bfd *abfd, asection *sect, void *obj)
     *abip = MIPS_ABI_O32;
   else if (strcmp (name, ".mdebug.abiN32") == 0)
     *abip = MIPS_ABI_N32;
-  else if (strcmp (name, ".mdebug.abiN64") == 0)
+  else if (strcmp (name, ".mdebug.abi64") == 0)
     *abip = MIPS_ABI_N64;
   else if (strcmp (name, ".mdebug.abiO64") == 0)
     *abip = MIPS_ABI_O64;
