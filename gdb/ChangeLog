@@ -1,5 +1,7 @@
 Wed Mar 10 17:37:11 1993  Fred Fish  (fnf@cygnus.com)
 
+	* Makefile.in (VERSION):  Bump version to 4.8.2.
+
 	* main.c (source_command):  Require an explicit pathname of file
 	to source, since previous behavior of defaulting to gdb init file
 	was troublesome and undocumented.
