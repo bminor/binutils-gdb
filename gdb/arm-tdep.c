@@ -37,6 +37,8 @@
 #include "frame-unwind.h"
 #include "frame-base.h"
 #include "trad-frame.h"
+#include "objfiles.h"
+#include "dwarf2-frame.h"
 
 #include "arm-tdep.h"
 #include "gdb/sim-arm.h"
@@ -2754,6 +2756,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Add some default predicates.  */
   frame_unwind_append_sniffer (gdbarch, arm_stub_unwind_sniffer);
   frame_unwind_append_sniffer (gdbarch, arm_sigtramp_unwind_sniffer);
+  frame_unwind_append_sniffer (gdbarch, dwarf2_frame_sniffer);
   frame_unwind_append_sniffer (gdbarch, arm_prologue_unwind_sniffer);
 
   /* Now we have tuned the configuration, set a few final things,

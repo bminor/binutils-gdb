@@ -1,3 +1,9 @@
+2005-03-29  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.in (arm-tdep.o): Update dependencies.
+	* arm-tdep.c: Include "objfiles.h" and "dwarf2-frame.h".
+	(arm_gdbarch_init): Register dwarf2_frame_sniffer.
+
 2005-03-28  Joel Brobecker  <brobecker@adacore.com>
 
 	* irix5-nat.c (supply_fpregset): Fix bug that caused the FSR
