@@ -2095,7 +2095,8 @@ swap_out_syms (abfd)
 	    sym.st_size = value;
 	    /* Should retrieve this from somewhere... */
 	    sym.st_value = 16;
-	    sym.st_shndx = SHN_COMMON;
+	    sym.st_shndx = elf_section_from_bfd_section (abfd,
+							 syms[idx]->section);
 	  }
 	else
 	  {
