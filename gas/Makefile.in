@@ -294,7 +294,7 @@ gasp.new: gasp.o
 installcheck:
 	@echo No installcheck target is available yet for the GNU assembler.
 
-check: as.new
+check:
 	@(here=`pwd` ; export here ; \
 	  cd testsuite ; $(MAKE) $(FLAGS_TO_PASS) $(CHECKFLAGS) check)
 
