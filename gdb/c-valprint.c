@@ -319,6 +319,10 @@ c_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
       print_address_demangle (address, stream, demangle);
       break;
 
+    case TYPE_CODE_BOOL:
+      /* Do something at least vaguely reasonable, for example if the
+	 language is set wrong.  */
+
     case TYPE_CODE_INT:
       format = format ? format : output_format;
       if (format)

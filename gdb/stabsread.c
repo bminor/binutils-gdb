@@ -1687,8 +1687,7 @@ rs6000_builtin_type (typenum)
       rettype = init_type (TYPE_CODE_INT, 4, 0, "integer", NULL);
       break;
     case 16:
-      /* What is the proper size of this type?  */
-      rettype = init_type (TYPE_CODE_BOOL, 1, 0, "boolean", NULL);
+      rettype = init_type (TYPE_CODE_BOOL, 4, 0, "boolean", NULL);
       break;
     case 17:
       rettype = init_type (TYPE_CODE_FLT, 4, 0, "short real", NULL);
