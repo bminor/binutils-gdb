@@ -151,9 +151,10 @@ ldfile_try_open_bfd (const char *attempt,
   /* If we are searching for this file, see if the architecture is
      compatible with the output file.  If it isn't, keep searching.
      If we can't open the file as an object file, stop the search
-     here.  */
+     here.  If we are statically linking, ensure that we don't link
+     a dynamic object.  */
 
-  if (entry->search_dirs_flag)
+  if (entry->search_dirs_flag || !entry->dynamic)
     {
       bfd *check;
 
@@ -167,6 +168,7 @@ ldfile_try_open_bfd (const char *attempt,
 	  if (! bfd_check_format (check, bfd_object))
 	    {
 	      if (check == entry->the_bfd
+		  && entry->search_dirs_flag
 		  && bfd_get_error () == bfd_error_file_not_recognized
 		  && ! ldemul_unrecognized_file (entry))
 		{
@@ -260,8 +262,18 @@ ldfile_try_open_bfd (const char *attempt,
 	      return TRUE;
 	    }
 
-	  if ((bfd_arch_get_compatible (check, output_bfd,
-					command_line.accept_unknown_input_arch) == NULL)
+	  if (!entry->dynamic && (entry->the_bfd->flags & DYNAMIC) != 0)
+	    {
+	      einfo (_("%F%P: attempted static link of dynamic object `%s'\n"),
+		     attempt);
+	      bfd_close (entry->the_bfd);
+	      entry->the_bfd = NULL;
+	      return FALSE;
+	    }
+
+	  if (entry->search_dirs_flag
+	      && !bfd_arch_get_compatible (check, output_bfd,
+					   command_line.accept_unknown_input_arch)
 	      /* XCOFF archives can have 32 and 64 bit objects.  */
 	      && ! (bfd_get_flavour (check) == bfd_target_xcoff_flavour
 		    && bfd_get_flavour (output_bfd) == bfd_target_xcoff_flavour

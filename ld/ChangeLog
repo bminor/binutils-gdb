@@ -1,3 +1,9 @@
+2004-10-11  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 423
+	* ldfile.c (ldfile_try_open_bfd): Ensure dynamic objects are
+	rejected when linking statically.
+
 2004-10-08  Daniel Jacobowitz  <dan@debian.org>
 
 	* configure.tgt: Include elf_x86_64 for i[3-7]86-*-solaris2*.
@@ -24,7 +30,7 @@
 	* Makefile.in: Regenerate.
 
 2004-10-07  Jeff Baker  <jbaker@qnx.com>
-	
+
 	* lexsup.c: Handle --warn-shared-textrel option.
 	(ld_options): Restore alpha sorting of options.
 	* ldmain.c (main): Initialise warn_shared_info field to FALSE.
@@ -32,9 +38,9 @@
 	* NEWS: Added mention of --warn-shared-textrel option.
 
 2004-10-05  Tomer Levi  <Tomer.Levi@nsc.com>
- 
+
 	* emultempl/crxelf.em (disable_relaxation): Add.
- 	(crxelf_before_allocation): Enable --relax option by default.
+	(crxelf_before_allocation): Enable --relax option by default.
 	(PARSE_AND_LIST_PROLOGUE): Add OPTION_NO_RELAX.
 	(PARSE_AND_LIST_LONGOPTS, PARSE_AND_LIST_OPTIONS): Add --no-relax.
 	(PARSE_AND_LIST_ARGS_CASES): Handle OPTION_NO_RELAX.
