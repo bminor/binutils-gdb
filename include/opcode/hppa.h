@@ -428,7 +428,7 @@ static const struct pa_opcode pa_opcodes[] =
 { "fcnvfxt",    0x38018200, 0xfc1f8720, "FGJ,v"},
 { "fcmp",       0x30000400, 0xfc00e7e0, "FME,X"},
 { "fcmp",       0x38000400, 0xfc00e720, "IMJ,K"},
-{ "xmpyu",	0x38004700, 0xfc00e720, "FE,X,v"},
+{ "xmpyu",	0x38004700, 0xfc00e720, "E,X,v"},
 { "fmpyadd",	0x18000000, 0xfc000000, "H4,6,7,9,8"},
 { "fmpysub",	0x98000000, 0xfc000000, "H4,6,7,9,8"},
 { "ftest",      0x30002420, 0xffffffff, ""},

@@ -1,3 +1,8 @@
+Fri Feb  4 23:43:50 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* hppa.h (xmpyu): No floating point format specifier for the
+	xmpyu instruction.
+
 Fri Feb  4 23:36:52 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ppc.h (PPC_OPERAND_NEXT): Define.
