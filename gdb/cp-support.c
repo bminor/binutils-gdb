@@ -287,7 +287,7 @@ cp_find_first_component_aux (const char *name, int permissive)
 	case '>':
 	case ')':
 	  if (permissive)
-	      return index;
+	    return index;
 	  else
 	    {
 	      demangled_name_complaint (name);
