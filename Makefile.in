@@ -60,7 +60,7 @@ CHILLFLAGS = $(CFLAGS)
 CHILL_LIB = -lchill
 # end-sanitize-chill
 CXX = gcc
-CXXFLAGS = -g -O
+CXXFLAGS = -g
 RANLIB = ranlib
 NM = nm
 MUNCH_NM = $(NM)
@@ -75,6 +75,10 @@ BISON = `if [ -f $${rootme}/byacc/byacc ] ; \
 LEX = `if [ -f $${rootme}/flex/flex ] ; \
 	then echo $${rootme}/flex/flex ; \
 	else echo flex ; fi`
+
+M4 = `if [ -f $${rootme}/m4/m4 ] ; \
+	then echo $${rootme}/m4/m4 ; \
+	else echo m4 ; fi`
 
 MAKEINFO = `if [ -f $${rootme}/texinfo/makeinfo/makeinfo ] ; \
 	then echo $${rootme}/texinfo/makeinfo/makeinfo ; \
@@ -159,7 +163,7 @@ AS_FOR_TARGET = ` \
   fi`
 
 AR_FOR_TARGET = ` \
-  if [ -f $${rootme}/binutils/Makefile ] ; then \
+  if [ -f $${rootme}/binutils/ar ] ; then \
     echo $${rootme}/binutils/ar ; \
   else \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
@@ -170,7 +174,7 @@ AR_FOR_TARGET = ` \
   fi`
 
 RANLIB_FOR_TARGET = ` \
-  if [ -f $${rootme}/binutils/Makefile ] ; then \
+  if [ -f $${rootme}/binutils/ranlib ] ; then \
     echo $${rootme}/binutils/ranlib ; \
   else \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
@@ -203,8 +207,6 @@ XTRAFLAGS = ` \
      echo ; \
   fi`
 
-PRMS = all-prms
-
 #### host and target specific makefile fragments come in here.
 ###
 
@@ -233,10 +235,10 @@ BASE_FLAGS_TO_PASS = \
 	"INSTALL_XFORM=$(INSTALL_XFORM)" \
 	"LDFLAGS=$(LDFLAGS)" \
 	"LEX=$(LEX)" \
+	"M4=$(M4)" \
 	"MAKEINFO=$(MAKEINFO) $(MAKEINFOFLAGS)" \
 	"MUNCH_NM=$(MUNCH_NM)" \
 	"NM_FOR_TARGET=$(NM_FOR_TARGET)" \
-	"PRMS=$(PRMS)" \
 	"RANLIB_FOR_TARGET=$(RANLIB_FOR_TARGET)" \
 	"EXPECT=$(EXPECT)" \
 	"RUNTEST=$(RUNTEST)" \
@@ -335,6 +337,7 @@ ALL_MODULES = \
 	all-make \
 	all-mmalloc \
 	all-opcodes \
+	all-pagas \
 	all-patch \
 	all-prms \
 	all-rcs \
@@ -383,6 +386,7 @@ CHECK_MODULES = \
 	check-make \
 	check-mmcheckoc \
 	check-opcodes \
+	check-pagas \
 	check-patch \
 	check-prms \
 	check-rcs \
@@ -431,6 +435,7 @@ INSTALL_MODULES = \
 	install-make \
 	install-mmalloc \
 	install-opcodes \
+	install-pagas \
 	install-patch \
 	install-prms \
 	install-rcs \
@@ -454,6 +459,7 @@ INSTALL_MODULES = \
 ALL_X11_MODULES = \
 	all-emacs \
 	all-expect \
+	all-gash \
 	all-tclX \
 	all-tk
 
@@ -462,6 +468,7 @@ ALL_X11_MODULES = \
 CHECK_X11_MODULES = \
 	check-emacs \
 	check-expect \
+	check-gash \
 	check-tclX \
 	check-tk
 
@@ -470,6 +477,7 @@ CHECK_X11_MODULES = \
 INSTALL_X11_MODULES = \
 	install-emacs \
 	install-expect \
+	install-gash \
 	install-tclX \
 	install-tk
 
@@ -653,7 +661,7 @@ gcc-no-fixedincludes:
 	  mv gcc/include gcc/tmp-include 2>/dev/null; \
 	  mkdir gcc/include; \
 	  cp $(srcdir)/gcc/gsyslimits.h gcc/include/syslimits.h; \
-	  touch gcc/stmp-fixinc; \
+	  touch gcc/stmp-fixinc gcc/stmp-fixproto; \
 	  rm -f gcc/stmp-headers gcc/stmp-int-hdrs; \
 	  rootme=`pwd`; export rootme; \
 	  srcroot=`cd $(srcdir); pwd` ; export srcroot; \
@@ -817,7 +825,7 @@ install-gcc:
 	fi
 
 # This is a list of inter-dependencies among modules.
-all-autoconf:
+all-autoconf: all-m4
 all-bfd:
 all-binutils: all-libiberty all-opcodes all-bfd all-flex
 all-byacc:
@@ -834,8 +842,9 @@ all-fileutils: all-libiberty
 all-find:
 all-flex: all-libiberty all-byacc
 all-gas: all-libiberty all-opcodes all-bfd
+all-gash: all-tcl
 all-gawk:
-all-gcc: all-libiberty all-byacc all-binutils all-gas
+all-gcc: all-libiberty all-byacc all-binutils all-gas all-pagas
 all-gdb: all-libiberty all-opcodes all-bfd all-mmalloc all-readline all-glob all-byacc all-sim
 all-glob:
 all-gprof: all-libiberty all-bfd
@@ -845,12 +854,13 @@ all-hello: all-libiberty
 all-indent:
 all-ispell: all-emacs
 all-ld: all-libiberty all-bfd all-byacc all-flex
-all-libg++: all-gas all-ld all-gcc all-xiberty all-newlib all-libio
+all-libg++: all-gas all-pagas all-ld all-gcc all-xiberty all-newlib all-libio
+all-libio: all-gas all-pagas all-ld all-gcc all-xiberty all-newlib 
 all-libiberty:
 all-m4: all-libiberty
 all-make: all-libiberty
 all-mmalloc:
-all-newlib: all-binutils all-gas all-gcc
+all-newlib: all-binutils all-gas all-pagas all-gcc
 all-opcodes: all-bfd
 all-patch:
 all-prms: all-libiberty
@@ -1032,11 +1042,21 @@ make-gdb.tar.gz: $(DEVO_SUPPORT) $(GDB_SUPPORT_DIRS) gdb texinfo/texinfo.tex
 # this macro.
 SUPPORT_FILES = list-of-support-files-for-tool-in-question
 # Directories that might want `make diststuff' run.
-DISTSTUFFDIRS= ld gprof gdb libg++
+DISTSTUFFDIRS= ld gprof gdb libg++ binutils
+# Files where "byacc" (Cygnus version) should be changed to "bison -y" (FSF).
+DISTBISONFILES= binutils/Makefile.in gas/Makefile.in gdb/Makefile.in
 
 .PHONY: taz
 
 taz: $(DEVO_SUPPORT) $(SUPPORT_FILES) texinfo/texinfo.tex texinfo/gpl.texinfo
+	# Do this first so "diststuff" files get built properly.
+	for f in $(DISTBISONFILES) ; do \
+	  if [ -r $$f ]; then \
+	    sed '/^BISON *=.*$/s/.*/BISON = bison -y/' <$$f >tmp ; \
+	    mv -f tmp $$f ; \
+	  else true; fi ; \
+	done
+	#
 	./configure sun4
 	# Make links, and run "make diststuff" when needed.
 	# The `echo' for setting `p' is to convert all whitespace to spaces.
@@ -1111,7 +1131,7 @@ gas+binutils.tar.gz: $(DIST_SUPPORT) $(GASB_SUPPORT_DIRS) gas
 	$(MAKE) -f Makefile.in taz SUPPORT_FILES="$(GASB_SUPPORT_DIRS)" TOOL=gas
 
 .PHONY: libg++.tar.gz
-LIBGXX_SUPPORT_DIRS=include libiberty xiberty
+LIBGXX_SUPPORT_DIRS=include libio libiberty xiberty
 libg++.tar.gz: $(DIST_SUPPORT) libg++
 	$(MAKE) -f Makefile.in taz SUPPORT_FILES="$(LIBGXX_SUPPORT_DIRS)" TOOL=libg++
 
