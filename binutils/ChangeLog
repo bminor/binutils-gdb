@@ -1,3 +1,14 @@
+2003-06-02  Chris Demetriou  <cgd@broadcom.com>
+            Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* objcopy.c (redefine_list_append): Add an argument that
+	indicates the context from which this function is being
+	called.  Change all callers.
+	(copy_options): Add a new option, --redefine-syms.
+	(copy_usage): Document new option.
+	(copy_main): Handle the --redefine-syms option.
+	* doc/binutils.text (objcopy): Document new option.
+
 2003-05-31  Richard Henderson  <rth@redhat.com>
 
 	* readelf.c (byte_get_signed): New.

@@ -958,6 +958,7 @@ objcopy [@option{-F} @var{bfdname}|@option{--target=}@var{bfdname}]
         [@option{--change-leading-char} ] [@option{--remove-leading-char}]
         [@option{--srec-len=}@var{ival} ] [@option{--srec-forceS3}]
         [@option{--redefine-sym} @var{old}=@var{new} ]
+        [@option{--redefine-syms=}@var{filename} ]
         [@option{--weaken}]
         [@option{--keep-symbols=}@var{filename}]
         [@option{--strip-symbols=}@var{filename}]
@@ -1283,6 +1284,12 @@ creating S3-only record format.
 Change the name of a symbol @var{old}, to @var{new}.  This can be useful
 when one is trying link two things together for which you have no
 source, and there are name collisions.
+
+@item --redefine-syms=@var{filename}
+Apply @option{--redefine-sym} to each symbol pair "@var{old} @var{new}"
+listed in the file @var{filename}.  @var{filename} is simply a flat file,
+with one symbol pair per line.  Line comments may be introduced by the hash
+character.  This option may be given more than once.
 
 @item --weaken
 Change all global symbols in the file to be weak.  This can be useful
