@@ -1385,7 +1385,6 @@ ALLDEPFILES = \
 	m88k-tdep.c m88kbsd-nat.c \
 	mcore-tdep.c \
 	mips-linux-nat.c mips-linux-tdep.c \
-	mips-nat.c \
 	mips-irix-tdep.c \
 	mips-tdep.c mipsm3-nat.c mipsv4-nat.c \
 	mipsnbsd-nat.c mipsnbsd-tdep.c \
@@ -2199,7 +2198,6 @@ mips-linux-nat.o: mips-linux-nat.c $(defs_h) $(mips_tdep_h)
 mips-linux-tdep.o: mips-linux-tdep.c $(defs_h) $(gdbcore_h) $(target_h) \
 	$(solib_svr4_h) $(osabi_h) $(mips_tdep_h) $(gdb_string_h) \
 	$(gdb_assert_h) $(frame_h) $(trad_frame_h) $(tramp_frame_h)
-mips-nat.o: mips-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) $(regcache_h)
 mipsnbsd-nat.o: mipsnbsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
 	$(mipsnbsd_tdep_h)
 mipsnbsd-tdep.o: mipsnbsd-tdep.c $(defs_h) $(gdbcore_h) $(regcache_h) \

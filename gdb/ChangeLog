@@ -1,5 +1,9 @@
 2004-07-31  Mark Kettenis  <kettenis@gnu.org>
 
+	* mips-nat.c: Remove file.
+	* Makefile.in (ALLDEPFILES): Remove mips-nat.c
+	(mips-nat.o): Remove dependency.
+
 	* infptrace.c: Update copyright year.
 	(fetch_register): Pass NULL in regcache_raw_supply call instead of
 	explicitly setting the buffer to all zeroes.
