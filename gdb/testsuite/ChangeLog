@@ -1,3 +1,9 @@
+2001-08-30  Keith Seitz  <keiths@redhat.com>
+
+	* lib/gdb.exp: Move all insight-related functionality into
+	separate file.
+	* lib/insight-support.exp: New file.
+
 2001-08-29  Frank Ch. Eigler  <fche@redhat.com>
 
 	* config/sid.exp (sid_start): Never set sid verbosity; disable
