@@ -1,3 +1,10 @@
+2003-04-21  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* emulparams/m68hc11elf.sh: Use m68hc1xelf.em extra.
+	* emulparams/m68hc11elfb.sh: Likewise.
+	* emulparams/m68hc12elf.sh: Likewise.
+	* emulparams/m68hc12elfb.sh: Likewise.
+
 2003-04-19  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* emultempl/m68hc1xelf.em: New file to generate far trampolines on
