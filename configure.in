@@ -514,6 +514,7 @@ case "${target}" in
   sparclet-*-*)
     # Skip these until ready for them.
     noconfigdirs="$noconfigdirs target-libg++ target-libstdc++ target-libio target-librx"
+    ;;
   v810-*-*)
     noconfigdirs="$noconfigdirs bfd binutils gas gcc gdb ld target-libio target-libg++ target-libstdc++ opcodes"
     ;;
