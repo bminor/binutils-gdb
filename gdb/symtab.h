@@ -139,32 +139,12 @@ extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, asection *);
 #define SYMBOL_CPLUS_DEMANGLED_NAME(symbol)	\
   (symbol)->ginfo.language_specific.cplus_specific.demangled_name
 
-/* Macro that initializes the language dependent portion of a symbol
+/* Initializes the language dependent portion of a symbol
    depending upon the language for the symbol. */
-
-#define SYMBOL_INIT_LANGUAGE_SPECIFIC(symbol,language)			\
-  do {									\
-    SYMBOL_LANGUAGE (symbol) = language;				\
-    if (SYMBOL_LANGUAGE (symbol) == language_cplus			\
-	|| SYMBOL_LANGUAGE (symbol) == language_java			\
-	)								\
-      {									\
-	SYMBOL_CPLUS_DEMANGLED_NAME (symbol) = NULL;			\
-      }									\
-    else if (SYMBOL_LANGUAGE (symbol) == language_objc)			\
-      {									\
-	SYMBOL_OBJC_DEMANGLED_NAME (symbol) = NULL;			\
-      }									\
-    /* OBSOLETE else if (SYMBOL_LANGUAGE (symbol) == language_chill) */ \
-    /* OBSOLETE   { */						 	\
-    /* OBSOLETE     SYMBOL_CHILL_DEMANGLED_NAME (symbol) = NULL; */	\
-    /* OBSOLETE   } */							\
-    else								\
-      {									\
-	memset (&(symbol)->ginfo.language_specific, 0,			\
-		sizeof ((symbol)->ginfo.language_specific));		\
-      }									\
-  } while (0)
+#define SYMBOL_INIT_LANGUAGE_SPECIFIC(symbol,language) \
+  (symbol_init_language_specific (&(symbol)->ginfo, (language)))
+extern void symbol_init_language_specific (struct general_symbol_info *symbol,
+					   enum language language);
 
 #define SYMBOL_INIT_DEMANGLED_NAME(symbol,obstack) \
   (symbol_init_demangled_name (&symbol->ginfo, (obstack)))

@@ -385,6 +385,33 @@ gdb_mangle_name (struct type *type, int method_id, int signature_id)
 }
 
 
+/* Initialize the language dependent portion of a symbol
+   depending upon the language for the symbol. */
+void
+symbol_init_language_specific (struct general_symbol_info *gsymbol,
+			       enum language language)
+{
+  gsymbol->language = language;
+  if (gsymbol->language == language_cplus
+      || gsymbol->language == language_java)
+    {
+      gsymbol->language_specific.cplus_specific.demangled_name = NULL;
+    }
+  else if (gsymbol->language == language_objc)
+    {
+      gsymbol->language_specific.objc_specific.demangled_name = NULL;
+    }
+  /* OBSOLETE else if (SYMBOL_LANGUAGE (symbol) == language_chill) */
+  /* OBSOLETE   { */
+  /* OBSOLETE     SYMBOL_CHILL_DEMANGLED_NAME (symbol) = NULL; */
+  /* OBSOLETE   } */
+  else
+    {
+      memset (&gsymbol->language_specific, 0,
+	      sizeof (gsymbol->language_specific));
+    }
+}
+
 /* Initialize a symbol's mangled name.  */
 
 /* Try to initialize the demangled name for a symbol, based on the
