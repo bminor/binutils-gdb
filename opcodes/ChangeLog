@@ -1,5 +1,16 @@
 2002-11-18  Klee Dienes  <kdienes@apple.com>
 
+	* avr-dis.c: Include libiberty.h (for xmalloc).
+	(struct avr_opcodes_s): Remove 'bin_mask' field (it's
+	automatically computed in the init routine).
+	(AVR_INSN): No longer provide bin_mask field in initializer.
+	(avr_opcodes_s): Declare as const.
+	(print_insn_avr): Store the bin_mask field in a separate table
+	(allocated with xmalloc); iterate through it at the same time as
+	we iterate through the opcodes.
+
+2002-11-18  Klee Dienes  <kdienes@apple.com>
+
 	* h8300-dis.c: Include libiberty.h (for xmalloc).
 	(struct h8_instruction): New type, used to wrap h8_opcodes with a
 	length field (computed at run-time).
