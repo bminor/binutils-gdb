@@ -1,3 +1,11 @@
+Fri May 21 19:04:21 1993  Stu Grossman  (grossman@cygnus.com)
+
+	* i386lynx.c:  New module for Lynx variant of a.out.
+	* Makefile.in (BFD_BACKENDS CFILES depends):  Add i386lynx.c.
+	* gen-aout.c:  Get rid of defunct endian stuff, print out true
+	pagesize.
+	* targets.c (target_vector):  Add i386lynx_vec.
+
 Fri May 21 17:02:22 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* configure.in: Use i386-sco.mt for i[36]86-*-isc*.
