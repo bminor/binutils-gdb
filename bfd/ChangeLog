@@ -1,5 +1,8 @@
 2001-10-06  Alan Modra  <amodra@bigpond.net.au>
 
+	* bfd.c (bfd_assert): Report bfd version.
+	(_bfd_abort): Likewise.
+
 	* elflink.h (elf_link_input_bfd): Don't zero discarded link-once
 	section sym values.  Instead replace any relocs against them with
 	relocs against STN_UNDEF, which has a zero value.

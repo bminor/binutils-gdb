@@ -697,7 +697,8 @@ bfd_assert (file, line)
      const char *file;
      int line;
 {
-  (*_bfd_error_handler) (_("bfd assertion fail %s:%d"), file, line);
+  (*_bfd_error_handler) (_("BFD %s assertion fail %s:%d"),
+			 BFD_VERSION_STRING, file, line);
 }
 
 /* A more or less friendly abort message.  In libbfd.h abort is
@@ -715,12 +716,12 @@ _bfd_abort (file, line, fn)
 {
   if (fn != NULL)
     (*_bfd_error_handler)
-      (_("BFD internal error, aborting at %s line %d in %s\n"),
-       file, line, fn);
+      (_("BFD %s internal error, aborting at %s line %d in %s\n"),
+       BFD_VERSION_STRING, file, line, fn);
   else
     (*_bfd_error_handler)
-      (_("BFD internal error, aborting at %s line %d\n"),
-       file, line);
+      (_("BFD %sinternal error, aborting at %s line %d\n"),
+       BFD_VERSION_STRING, file, line);
   (*_bfd_error_handler) (_("Please report this bug.\n"));
   xexit (EXIT_FAILURE);
 }
