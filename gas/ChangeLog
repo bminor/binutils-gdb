@@ -1,3 +1,8 @@
+2000-08-17  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-arm.c (decode_shift): Allow illegal shifts by zero
+	to be recoded as logical shift lefts by zero.
+
 2000-08-16  Jim Wilson  <wilson@cygnus.com>
 
 	* config/tc-ia64.c (specify_resource, case IA64_RS_GR): Handle

@@ -2531,7 +2531,7 @@ decode_shift (str, unrestrict)
      char ** str;
      int     unrestrict;
 {
-  struct asm_shift_name * shift;
+  const struct asm_shift_name * shift;
   char * p;
   char   c;
 
@@ -2548,7 +2548,7 @@ decode_shift (str, unrestrict)
 
   c = * p;
   * p = '\0';
-  shift = (struct asm_shift_name *) hash_find (arm_shift_hsh, * str);
+  shift = (const struct asm_shift_name *) hash_find (arm_shift_hsh, * str);
   * p = c;
   
   if (shift == NULL)
@@ -2602,10 +2602,16 @@ decode_shift (str, unrestrict)
 	  || (num == 32 && shift->properties->allows_32 == 0)
 	  )
 	{
-	  /* As a special case we allow ROR #0, but we issue a message
-	     reminding the programmer that this is actually an RRX.  */
-	  if (num == 0 && shift->properties->index == SHIFT_ROR)
-	    as_tsktsk (_("ROR #0 is actually RRX"));
+	  /* As a special case we allow a shift of zero for
+	     modes that do not support it to be recoded as an
+	     logical shift left of zero (ie nothing).  We warn
+	     about this though.  */
+	  if (num == 0)
+	    {
+	      as_tsktsk (_("Shift of 0 ignored."));
+	      shift = shift_names;
+	      assert (shift->properties->index == SHIFT_LSL);
+	    }
 	  else
 	    {
 	      inst.error = _("Invalid immediate shift");
