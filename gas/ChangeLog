@@ -1,5 +1,7 @@
 Thu Apr 14 13:34:24 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* Makefile.in (de-stage1, de-stage2, de-stage3): Use rm -f.
+
 	* config/tc-mips.h (DIFF_EXPR_OK): Define.
 	* config/tc-mips.c (macro_build): Permit BFD_RELOC_PCREL_LO16 for
 	certain cases of 'i', 'j' and 'o'.  Change 'u' to take an

@@ -199,6 +199,8 @@ LINKED_HEADERS = \
 
 HEADERS = $(LINKED_HEADERS) $(REAL_HEADERS)
 
+#### host, target, and site specific Makefile frags come in here.
+
 OBJS = \
 	targ-cpu.o \
 	obj-format.o \
@@ -227,9 +229,8 @@ OBJS = \
 	listing.o \
 	ecoff.o \
 	stabs.o \
-	xmalloc.o
-
-#### host, target, and site specific Makefile frags come in here.
+	xmalloc.o \
+	$(TE_OBJS)
 
 all: as.new gasp.new
 	@srcroot=`cd $(srcroot); pwd`; export srcroot; \
@@ -299,7 +300,9 @@ config-stamp: Makefile
 	echo '#define TARGET_ALIAS     "$(target_alias)"'     >> config.new
 	echo '#define TARGET_CANONICAL "$(target_canonical)"' >> config.new
 	echo '#define GAS_VERSION      "$(VERSION)"'          >> config.new
-	echo '#$(BFDDEF) BFD_ASSEMBLER'			      >> config.new
+	if [ "$(defs)" != "" ]; then \
+	  echo '#define $(defs)'			      >> config.new ; \
+	else true; fi
 	echo '#endif /* TARGET_CPU */'			      >> config.new
 	$(srcdir)/../move-if-change config.new config.h
 	touch config-stamp
@@ -509,15 +512,15 @@ comparison: force
 	for i in $(STAGESTUFF) ; do cmp $$i $(against)/$$i ; done
 
 de-stage1: force
-	- (cd stage1 ; rm as ; mv -f * ..)
+	- (cd stage1 ; rm -f as ; mv -f * ..)
 	- rmdir stage1
 
 de-stage2: force
-	- (cd stage2 ; rm as ; mv -f * ..)
+	- (cd stage2 ; rm -f as ; mv -f * ..)
 	- rmdir stage2
 
 de-stage3: force
-	- (cd stage3 ; rm as ; mv -f * ..)
+	- (cd stage3 ; rm -f as ; mv -f * ..)
 	- rmdir stage3
 
 #In GNU Make, ignore whether `stage*' exists.
