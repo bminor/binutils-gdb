@@ -280,7 +280,7 @@ extern void pa_do_registers_info PARAMS ((int, int));
     else \
       memcpy ((VALBUF), \
 	      (char *)(REGBUF) + REGISTER_BYTE (28) + \
-	      (TYPE_LENGTH (TYPE) >= 4 ? 0 : 4 - TYPE_LENGTH (TYPE)), \
+	      (TYPE_LENGTH (TYPE) > 4 ? 8 : 4 - TYPE_LENGTH (TYPE)), \
 	      TYPE_LENGTH (TYPE)); \
   }
 

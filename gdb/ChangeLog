@@ -1,5 +1,8 @@
 Wed Aug  7 09:59:19 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* config/pa/tm-hppa.h (EXTRACT_RETURN_VALUE): Tweak for
+	structures > 4 bytes in size.
+
 	* valops.c (call_function_by_hand): Handle aligning stacks that
 	grow up correctly.
 	* config/pa/tm-hppa.h (USE_STRUCT_CONVENTION): Define.
