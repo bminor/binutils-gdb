@@ -49,4 +49,38 @@ Things-to-lose:
 
 Do-last:
 
+am33_files="ChangeLog"
+if ( echo $* | grep keep\-am33 > /dev/null ) ; then
+	for i in $am33_files ; do
+		if test ! -d $i && (grep sanitize-am33 $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Keeping am33 stuff in $i
+			fi
+		fi
+	done
+else
+	for i in $am33_files ; do
+		if test ! -d $i && (grep sanitize-am33 $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"am33\" from $i...
+			fi
+			cp $i new
+			sed '/start\-sanitize\-am33/,/end-\sanitize\-am33/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
+
+for i in * ; do
+	if test ! -d $i && (grep sanitize $i > /dev/null) ; then
+		echo '***' Some mentions of Sanitize are still left in $i! 1>&2
+	fi
+done
+
 # eof
