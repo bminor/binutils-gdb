@@ -1,3 +1,9 @@
+2003-12-02  Roland McGrath  <roland@redhat.com>
+
+	* thread-db.c (enable_thread_event): Change return type to
+	td_err_e.  Return TD_OK or error code.
+	(enable_thread_event_reporting): Update callers.
+
 2003-12-03  Ian Lance Taylor  <ian@wasabisystems.com>
 
 	* NEWS: Mention new C++ demangler code.
@@ -173,7 +179,7 @@
 	* thread-db.c (enable_thread_event): New function.  Ensure that BP
 	is a code address.
 	(enable_thread_event_reporting): Use enable_thread_event.
-	
+
 2003-11-25  Michael Snyder  <msnyder@redhat.com>
 
 	* mips-tdep.c (mips_o64_extract_return_value): Correct for
@@ -366,7 +372,7 @@
             David Mosberger  <davidm@hpl.hp.com>
 
 	* ia64-tdep.c: Include elf.h.
-	[HAVE_LIBUNWIND_IA64_H]: Include libunwind-frame.h and 
+	[HAVE_LIBUNWIND_IA64_H]: Include libunwind-frame.h and
 	libunwind-ia64.h.
 	(ia64_rse_slot_num, ia64_rse_skip_regs): New for libunwind support.
 	(ia64_gdb2uw_regnum, ia64_uw2gdb_regnum): Ditto.
@@ -379,8 +385,8 @@
 	(ia64_libunwind_frame_prev_register): Ditto.
 	(ia64_libunwind_frame_sniffer): Ditto.
 	(ia64_gdbarch_init)[HAVE_LIBUNWIND_IA64_H]: Add libunwind frame
-	sniffer.  Register libunwind functions needed by generic 
-	libunwind frame code using libunwind_frame_set_descr(). 
+	sniffer.  Register libunwind functions needed by generic
+	libunwind frame code using libunwind_frame_set_descr().
 
 2003-11-16  Daniel Jacobowitz  <drow@mvista.com>
 
@@ -421,7 +427,7 @@
 	(mips_register_name): Get the processor names from the tdep.
 	(mips_tx39_reg_names): New array.
 	(mips_generic_reg_names): Wire to a standard set of names.
-	(mips_gdbarch_init): Set "mips_processor_reg_names".	
+	(mips_gdbarch_init): Set "mips_processor_reg_names".
 	* config/mips/tm-irix5.h (MIPS_REGISTER_NAMES): Delete macro.
 	* config/mips/tm-mips.h (MIPS_REGISTER_NAMES): Delete macro.
 	* config/mips/tm-tx39.h (MIPS_REGISTER_NAMES): Delete macro.
@@ -604,14 +610,14 @@
 	* libunwind-frame.h: New file.
 	* acconfig.h (HAVE_LIBUNWIND): #undef reference added.
 	* configure.in: Add --with-libunwind option support.  Define
-	HAVE_LIBUNWIND if libunwind support selected / defaulted.  
+	HAVE_LIBUNWIND if libunwind support selected / defaulted.
 	Also check for libunwind.h and libunwind-ia64.h headers.
 	* configure: Regenerated.
 	* Makefile.in: Add support for libunwind-frame.o.
 	* config.in: Regenerated.
 
 2003-11-14  Jeff Johnston  <jjohnstn@redhat.com>
- 
+
 	* config/ia64/nm-linux.h (NATIVE_XFER_UNWIND_TABLE): New macro to
 	set up the ia64 linux native target method for getting the kernel
 	unwind table.
@@ -661,7 +667,7 @@
 	* gdbarch.h: Re-generate.
 	* remote-sim.c (gdbsim_open): Use "selected_architecture_name" and
 	"selected_byte_order".
-	
+
 2003-11-13  Andrew Cagney  <cagney@redhat.com>
 
 	* ppc-linux-tdep.c (ppc_linux_return_value): Fix parameter order.
@@ -676,40 +682,40 @@
 	(sh_sh64_register_name): Rename to sh64_register_name.
 	(sh_sh64_breakpoint_from_pc): Rename to sh64_breakpoint_from_pc.
 	(sh_sh64_register_byte): Rename to sh64_register_byte.
-	(sh_sh64_build_float_register_type): 
+	(sh_sh64_build_float_register_type):
 	Rename to sh64_build_float_register_type.
-	(sh_sh64_register_convert_to_virtual): 
+	(sh_sh64_register_convert_to_virtual):
 	Rename to sh64_register_convert_to_virtual.
-	(sh_sh64_register_convert_to_raw): 
+	(sh_sh64_register_convert_to_raw):
 	Rename to sh64_register_convert_to_raw.
 
-	* sh64-tdep.c (translate_insn_rn, is_media_pseudo, 
-	sh64_media_reg_base_num, sh64_compact_reg_base_num, 
+	* sh64-tdep.c (translate_insn_rn, is_media_pseudo,
+	sh64_media_reg_base_num, sh64_compact_reg_base_num,
 	sh64_nofp_frame_init_saved_regs, sh64_push_arguments,
-	sh64_extract_return_value, sh64_show_media_regs, 
-	sh64_show_compact_regs, sh_sh64_register_byte, sh64_register_type, 
+	sh64_extract_return_value, sh64_show_media_regs,
+	sh64_show_compact_regs, sh_sh64_register_byte, sh64_register_type,
 	sh_sh64_register_convert_to_virtual, sh_sh64_register_convert_to_raw,
-	sh64_pseudo_register_read, sh64_pseudo_register_write, 
+	sh64_pseudo_register_read, sh64_pseudo_register_write,
 	sh64_do_pseudo_register, sh_compact_print_registers_info):
 	Delete unused variable 'tdep'.
 
 	* sh64-tdep.c: Coding standard and spelling comment fixes.
 	(sh64_extract_return_value): Replace deprecated_store_floating
 	with store_typed_floating.
-	(sh_sh64_register_convert_to_raw): Replace 
+	(sh_sh64_register_convert_to_raw): Replace
 	deprecated_store_floating with store_typed_floating.
 	(sh_sh64_register_virtual_type): Convert to sh64_register_type.
 	(sh64_frame_chain, sh64_get_saved_pr, sh64_get_saved_register,
 	sh64_nofp_frame_init_saved_regs, sh64_push_arguments,
-	sh64_extract_struct_value_address, sh64_pop_frame, 
+	sh64_extract_struct_value_address, sh64_pop_frame,
 	sh64_extract_return_value, sh64_store_return_value,
-	sh_sh64_register_convert_to_virtual, sh64_pseudo_register_read, 
+	sh_sh64_register_convert_to_virtual, sh64_pseudo_register_read,
 	sh_sh64_register_convert_to_raw, sh_pseudo_register_write):
 	Replace DEPRECATED_REGISTER_RAW_SIZE with register_size.
 	Replace DEPRECATED_REGISTER_VIRTUAL_TYPE with register_type.
 	(sh64_gdbarch_init): Don't set deprecated_register_bytes,
 	deprecated_register_virtual_type, deprecated_register_raw_size,
-	deprecated_max_register_raw_size, or 
+	deprecated_max_register_raw_size, or
 	deprecated_max_register_virtual_size.  Instead, just set
 	gdbarch_register_type.
 	(sh_sh64_register_raw_size): Delete.
@@ -827,7 +833,7 @@
 	(TARGET_FLOAT_FORMAT: Pass "current_gdbarch" to default_double_format.
 	(TARGET_DOUBLE_FORMAT,TARGET_LONG_DOUBLE_FORMAT): Ditto.
 	* gdbarch.c: Re-generate.
-	
+
 	* config/s390/s390.mh (XM_FILE, XM_CLIBS): Delete macros.
 	* config/s390/nm-linux.h (KERNEL_U_ADDR): Define.
 	* config/s390/xm-linux.h: Delete file.
@@ -1182,10 +1188,10 @@
 2003-11-05  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* ia64-tdep.c (struct gdbarch_tdep): Remove os_ident field.
-	(ia64_gdbarch_init): Don't bother calculating the os.  
-	Instead use the gdbarch_info struct and look at the osabi field.  
-	Also use gdbarch_list_lookup_by_info() to look for a 
-	candidate gdbarch. 
+	(ia64_gdbarch_init): Don't bother calculating the os.
+	Instead use the gdbarch_info struct and look at the osabi field.
+	Also use gdbarch_list_lookup_by_info() to look for a
+	candidate gdbarch.
 
 2003-11-05  Kevin Buettner  <kevinb@redhat.com>
 
@@ -1238,7 +1244,7 @@
 
 2003-11-04  Michael Snyder  <msnyder@redhat.com>
 
-	* MAINTAINERS: Remove myself as owner of breakpoints and 
+	* MAINTAINERS: Remove myself as owner of breakpoints and
 	of sparc/solaris.
 
 2003-11-03  Corinna Vinschen  <vinschen@redhat.com>
@@ -1428,7 +1434,7 @@
 	* symfile.c (reread_symbols): Clear per-objfile data.
 
 2003-10-28  Jeff Johnston  <jjohnstn@redhat.com>
- 
+
 	* symfile.c (symbol_file_add_with_addrs_or_offsets): Switch to use
 	printf_unfiltered instead of printf_filtered for output messages.
 	(add_symbol_file_command): Ditto.
@@ -1599,7 +1605,7 @@
 
 	* gdbarch.sh (convert_from_func_ptr_addr): Convert to a pure
 	multi-arch method, add "targ" parameter.
-	(struct target_ops): Declare.	
+	(struct target_ops): Declare.
 	* gdbarch.h, gdbarch.c: Re-generate.
 	* Makefile.in (c-valprint.o): Update dependencies.
 	* arch-utils.h: Update copyright.
@@ -1864,8 +1870,8 @@
 	(frame_id_build_special): New prototype.
 	* frame.c (frame_id_build_special): New function.
 	(frame_id_build): Change to call frame_id_build_special().
-	(frame_id_eq): Change to also test special_addr field. 
-	(frame_id_inner): Update comment. 
+	(frame_id_eq): Change to also test special_addr field.
+	(frame_id_inner): Update comment.
 
 2003-10-17  Andrew Cagney  <cagney@redhat.com>
 
@@ -1937,7 +1943,7 @@
 	(IA64_LINUX_SIGCONTEXT_OFFSET): Magic constant removed.
 	(ia64_linux_sigcontext_register_addr): Find the address of the
 	sigcontext area stored in the sigframe instead of using
-	a magic offset constant. 
+	a magic offset constant.
 
 2003-10-15  Andrew Cagney  <cagney@redhat.com>
 
