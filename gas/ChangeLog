@@ -1,3 +1,11 @@
+Wed Feb  4 15:41:54 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-m32r.c (check_for_side_effects): New function.
+	(can_make_parallel): Add checks for instruction side effects
+	clashing with the other instruction.
+	(assemble_parallel_insn): Improve warning messages.  Return error
+	message from non-swapped instruction order.
+
 Wed Feb  4 20:00:26 1998  James G. Smith  <jsmith@teknema.demon.co.uk>
 
 	* config/tc-arm.c: Rename arm_after_pass_hook() to arm_cleanup().

@@ -382,6 +382,7 @@ md_begin ()
 /* end-sanitize-m32rx */
 }
 
+/* start-sanitize-m32rx */
 #ifdef HAVE_CPU_M32RX
 
 /* Returns non zero if the given instruction writes to a destination register.  */
@@ -469,6 +470,31 @@ check_parallel_io_clash (a, b)
   return 1;
 }
 
+/* Returns non zero iff instruction 'a' has a side effect
+   that affects the destination of instruction 'b'.  */
+static int
+check_for_side_effects (a, b)
+     m32r_insn * a;
+     m32r_insn * b;
+{
+  unsigned char syntax_field;
+  
+  if (CGEN_INSN_ATTR (a->insn, CGEN_INSN_WRITE_SRC) != WRITE_SRC_YES)
+    return 0;
+
+  if (! writes_to_dest_reg (b->insn))
+    return 0;
+
+  /* Find the source register.  */
+  syntax_field = reads_from_src_reg (a->insn, 0);
+
+  /* The st-plus and st-minus instructions have two sources,
+     only the second one has a side effect.  */
+  if (syntax_field == 128 + M32R_OPERAND_SRC1)
+    syntax_field = reads_from_src_reg (a->insn, 1); /* We know that this will be src2 */
+      
+  return get_dest_reg (b->fields) == get_src_reg (syntax_field, & a->fields);
+}
 
 /* Returns NULL if the two 16 bit insns can be executed in parallel,
    otherwise it returns a pointer to an error message explaining why not.  */
@@ -477,15 +503,33 @@ can_make_parallel (a, b)
      m32r_insn * a;
      m32r_insn * b;
 {
-/* start-sanitize-m32rx */
   PIPE_ATTR a_pipe;
   PIPE_ATTR b_pipe;
-
+  
   /* Make sure the instructions are the right length.  */
   if (   CGEN_FIELDS_BITSIZE (& a->fields) != 16
       || CGEN_FIELDS_BITSIZE (& b->fields) != 16)
     abort();
+
+  /* Make sure that the destinations are different.  */
+  if (   writes_to_dest_reg (a->insn)
+      && writes_to_dest_reg (b->insn)
+      && (get_dest_reg (a->fields) == get_dest_reg (b->fields)))
+    return "Instructions write to the same destination register.";
+
+  /* Special case:  Some instructions also modify their source register.  */
+  if (check_for_side_effects (a, b))
+    return "Destination of second instruction written to by side effect of first instruction.";
+      
+  if (check_for_side_effects (b, a))
+    return "Destination of first instruction written to by side effect of second instruction.";
   
+  /* Special case:  The branch-and-link type instructions also write to r14.  */
+  if (writes_to_dest_reg (b->insn)
+      && get_dest_reg (b->fields) == 14
+      && CGEN_INSN_ATTR (a->insn, CGEN_INSN_WRITE_LR) == WRITE_LR_YES)
+    return "Both instructions write to the link register";
+
   a_pipe = CGEN_INSN_ATTR (a->insn, CGEN_INSN_PIPE);
   b_pipe = CGEN_INSN_ATTR (b->insn, CGEN_INSN_PIPE);
 
@@ -493,17 +537,14 @@ can_make_parallel (a, b)
   if (   a_pipe == PIPE_NONE
       || b_pipe == PIPE_NONE)
     return "Instructions do not use parallel execution pipelines.";
-  
+
+  /* Leave this test for last, since it is the only test that can
+     go away if the instructions are swapped, and we want to make
+     sure that any other errors are detected before this happens.  */
   if (   a_pipe == PIPE_S
       || b_pipe == PIPE_O)
     return "Instructions share the same execution pipeline";
-
-/* end-sanitize-m32rx */
-  if (   writes_to_dest_reg (a->insn)
-      && writes_to_dest_reg (b->insn)
-      && (get_dest_reg (a->fields) == get_dest_reg (b->fields)))
-    return "Instructions write to the same destination register.";
-
+  
   return NULL;
 }
 
@@ -541,7 +582,6 @@ make_parallel (buffer)
 #endif
 
 
-/* start-sanitize-m32rx */
 static void
 assemble_parallel_insn (str, str2)
      char * str;
@@ -623,11 +663,11 @@ assemble_parallel_insn (str, str2)
      a warning message.  Similarly we assume that parallel branch and jump
      instructions are deliberate and should not  produce errors.  */
   
-  if (can_make_parallel (& first, & second) == NULL)
+  if ((errmsg = (char *) can_make_parallel (& first, & second)) == NULL)
     {
       if (warn_explicit_parallel_conflicts
 	  && (! check_parallel_io_clash (& first, & second)))
-	as_warn ("%s: output of first instruction fails to overwrite input of second instruction.", str2);
+	as_warn ("%s: output of first instruction is the same as the input of second instruction - is this intentional ?", str2);
       
       /* Get the fixups for the first instruction.  */
       cgen_swap_fixups ();
@@ -646,12 +686,12 @@ assemble_parallel_insn (str, str2)
       (void) cgen_asm_finish_insn (second.insn, second.buffer,
 				   CGEN_FIELDS_BITSIZE (& second.fields));
     }
-  else if ((errmsg = (char *) can_make_parallel (& second, & first,
-						 false, false)) == NULL)
+  /* Try swapping the instructions to see if they work that way.  */
+  else if (can_make_parallel (& second, & first, false, false) == NULL)
     {
       if (warn_explicit_parallel_conflicts
 	  && (! check_parallel_io_clash (& second, & first)))
-	as_warn ("%s: output of second instruction fails to overwrite input of first instruction.", str2);
+	as_warn ("%s: had to swap instructions to make them parallel, but the output of the second instruction is the same as the input of first instruction - is this intentional ?", str2);
       
       /* Write out the second instruction first.  */
       (void) cgen_asm_finish_insn (second.insn, second.buffer,
