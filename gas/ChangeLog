@@ -1,3 +1,11 @@
+2000-04-26  David O'Brien  <obrien@FreeBSD.org>
+
+	* doc/as.1: Fix unbalanced brackets.
+
+	* config/tc-i386.c (comment_chars): Don't use '/' as comment start if
+	TE_FreeBSD.
+	(line_comment_chars): Set to '/' if TE_FreeBSD.
+
 Tue Apr 25 11:02:02 2000  Jeffrey A Law  (law@cygnus.com)
 
 	* configure.in: Configury support for PA64 (currently disabled).
