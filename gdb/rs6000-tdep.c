@@ -299,11 +299,9 @@ void
 rs6000_software_single_step (enum target_signal signal,
 			     int insert_breakpoints_p)
 {
-#define	INSNLEN(OPCODE)	 4
-
-  static char le_breakp[] = LITTLE_BREAKPOINT;
-  static char be_breakp[] = BIG_BREAKPOINT;
-  char *breakp = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? be_breakp : le_breakp;
+  CORE_ADDR dummy;
+  int breakp_sz;
+  char *breakp = rs6000_breakpoint_from_pc (&dummy, &breakp_sz);
   int ii, insn;
   CORE_ADDR loc;
   CORE_ADDR breaks[2];
@@ -316,7 +314,7 @@ rs6000_software_single_step (enum target_signal signal,
 
       insn = read_memory_integer (loc, 4);
 
-      breaks[0] = loc + INSNLEN (insn);
+      breaks[0] = loc + breakp_sz;
       opcode = insn >> 26;
       breaks[1] = branch_dest (opcode, insn, loc, breaks[0]);
 
@@ -332,10 +330,7 @@ rs6000_software_single_step (enum target_signal signal,
 	  /* ignore invalid breakpoint. */
 	  if (breaks[ii] == -1)
 	    continue;
-
-	  read_memory (breaks[ii], stepBreaks[ii].data, 4);
-
-	  write_memory (breaks[ii], breakp, 4);
+	  target_insert_breakpoint (breaks[ii], stepBreaks[ii].data);
 	  stepBreaks[ii].address = breaks[ii];
 	}
 
@@ -346,9 +341,8 @@ rs6000_software_single_step (enum target_signal signal,
       /* remove step breakpoints. */
       for (ii = 0; ii < 2; ++ii)
 	if (stepBreaks[ii].address != 0)
-	  write_memory
-	    (stepBreaks[ii].address, stepBreaks[ii].data, 4);
-
+	  target_remove_breakpoint (stepBreaks[ii].address,
+				    stepBreaks[ii].data);
     }
   errno = 0;			/* FIXME, don't ignore errors! */
   /* What errors?  {read,write}_memory call error().  */
