@@ -852,10 +852,6 @@ extern int longest_to_int (LONGEST);
 
 extern char *savestring (const char *, size_t);
 
-extern char *msavestring (void *, const char *, size_t);
-
-extern char *mstrsave (void *, const char *);
-
 /* xmalloc(), xrealloc() and xcalloc() have already been declared in
    "libiberty.h". */
 extern void xfree (void *);

@@ -184,7 +184,7 @@ allocate_objfile (bfd *abfd, int flags)
     }
   if (abfd != NULL)
     {
-      objfile->name = mstrsave (objfile->md, bfd_get_filename (abfd));
+      objfile->name = xstrdup (bfd_get_filename (abfd));
       objfile->mtime = bfd_get_mtime (abfd);
 
       /* Build section table.  */
@@ -197,7 +197,7 @@ allocate_objfile (bfd *abfd, int flags)
     }
   else
     {
-      objfile->name = mstrsave (objfile->md, "<<anonymous objfile>>");
+      objfile->name = xstrdup ("<<anonymous objfile>>");
     }
 
   /* Initialize the section indexes for this objfile, so that we can

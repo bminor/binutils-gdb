@@ -889,7 +889,7 @@ find_and_open_source (struct objfile *objfile,
     {
       char *tmp_fullname;
       tmp_fullname = *fullname;
-      *fullname = mstrsave (objfile->md, *fullname);
+      *fullname = xstrdup (tmp_fullname);
       xfree (tmp_fullname);
     }
   return result;

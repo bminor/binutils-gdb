@@ -1168,21 +1168,6 @@ savestring (const char *ptr, size_t size)
   return p;
 }
 
-char *
-msavestring (void *md, const char *ptr, size_t size)
-{
-  char *p = (char *) xmalloc (size + 1);
-  memcpy (p, ptr, size);
-  p[size] = 0;
-  return p;
-}
-
-char *
-mstrsave (void *md, const char *ptr)
-{
-  return (msavestring (md, ptr, strlen (ptr)));
-}
-
 void
 print_spaces (int n, struct ui_file *file)
 {

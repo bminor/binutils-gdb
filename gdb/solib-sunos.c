@@ -146,7 +146,7 @@ allocate_rt_common_objfile (void)
   objfile->psymbol_cache = bcache_xmalloc ();
   objfile->macro_cache = bcache_xmalloc ();
   obstack_init (&objfile->objfile_obstack);
-  objfile->name = mstrsave (objfile->md, "rt_common");
+  objfile->name = xstrdup ("rt_common");
 
   /* Add this file onto the tail of the linked list of other such files. */
 

@@ -1,3 +1,13 @@
+2004-09-29  Mark Kettenis  <kettenis@gnu.org>
+
+	* defs.h (msavestring, mstrsave): Remove prototypes.
+	* utils.c (msavestring, mstrsave): Remove functions.
+	* objfiles.c (allocate_objfile): Use xstrdup instead of mstrsave.
+	* solib-sunos.c (allocate_rt_common_objfile): Use xstrdup instead
+	of mstrsave.
+	* source.c (find_and_open_source): Use xstrdup instead of
+	mstrsave.
+
 2004-09-30  Andrew Cagney  <cagney@gnu.org>
 
 	* inf-ptrace.c (inf_ptrace_target): Do not set to_xfer_memory.
