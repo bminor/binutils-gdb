@@ -1,3 +1,9 @@
+2003-04-26  Adam Fedor  <fedor@gnu.org>
+
+	* linespec.c (decode_objc): New function to decode ObjC calls
+	(decode_line_1): Check for ObjC calls (using decode_objc)
+	* Makefile (linespec.o): Update dependencies.
+
 2003-04-26  Daniel Jacobowitz  <drow@mvista.com>
 
 	* breakpoint.h (struct breakpoint_ops): New.
