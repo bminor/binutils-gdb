@@ -28,11 +28,11 @@ echo Sanitizing `pwd`...
 Things-to-keep:
 
 ChangeLog
-a.out.gnu.h
+aout_gnu.h
 atof-ieee.c
 atof-ns32k.c
 atof-vax.c
-coff.gnu.h
+coff_gnu.h
 cplus-dem.c
 ho-ansi.h
 ho-decstation.h
@@ -124,7 +124,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.20  1992/02/26 08:54:09  tiemann
+# Revision 1.21  1992/02/27 18:52:18  sac
+# Dos File renaming
+#
+# Revision 1.20  1992/02/26  08:54:09  tiemann
 # Keep a.out.gnu.h, not a.out.h (which no longer exists).
 #
 # Revision 1.19  1992/02/22  00:24:13  sac
