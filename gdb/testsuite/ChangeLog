@@ -1,3 +1,10 @@
+2004-01-30  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.asm/asm-source.exp: Strip -Wl, from link-flags.  Don't
+	append -static to link-flags for *-*-freebsd*, *-*netbsd* and
+	*-*solaris2*.  Remove commented out default settings for
+	asm-flags.  Replace gdb_compile with target_link.
+
 2004-01-29  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* gdb.cp/inherit.exp: Rewrite.  Use gdb_test_multiple and gdb
