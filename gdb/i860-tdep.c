@@ -25,12 +25,12 @@
 
 
 #include "defs.h"
-#include "tm-i860.h"
 #include "frame.h"
 #include "inferior.h"
 #include "obstack.h"
 #include "symtab.h"
 #include "value.h"
+#include "gdbcore.h"
 
 #include "i860-opcode.h"
 
@@ -63,12 +63,7 @@
 #include <libelf.h>
 
 
-extern int read_memory();
-extern int write_memory();
-extern int read_memory_integer();
 extern int print_insn();
-extern void bzero();
-extern void bcopy();
 
 int btdebug = 0;    /* change value to 1 to enable debugging code */
 int ansi_conformant;
