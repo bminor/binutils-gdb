@@ -32,6 +32,7 @@
 #include "gdbcore.h"
 #include "objfiles.h"
 #include "regcache.h"
+#include "regset.h"
 #include "symfile.h"
 
 #include "gdb_assert.h"

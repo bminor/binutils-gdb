@@ -1,5 +1,7 @@
 2003-10-05  Mark Kettenis  <kettenis@gnu.org>
 
+	* x86-64-tdep.c: Include "regset.h".
+
 	* i386-tdep.h (struct gdbarch_tdep): Add members gregset,
 	gregset_reg_offset, gregset_num_regs, sizeof_gregset, fpregset,
 	sizeof_fpregset.
