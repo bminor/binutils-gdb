@@ -2376,9 +2376,26 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	    outrel.r_info = ELF32_R_INFO (h->dynindx, r_type);
 	  else
 	    {
+	      int symbol;
+
 	      /* This symbol is local, or marked to become local.  */
 	      relocate = TRUE;
-	      outrel.r_info = ELF32_R_INFO (0, R_ARM_RELATIVE);
+	      if (globals->symbian_p)
+		/* On Symbian OS, the data segment and text segement
+		   can be relocated independently.  Therefore, we must
+		   indicate the segment to which this relocation is
+		   relative.  The BPABI allows us to use any symbol in
+		   the right segment; we just use the section symbol
+		   as it is convenient.  (We cannot use the symbol
+		   given by "h" directly as it will not appear in the
+		   dynamic symbol table.)  */
+		symbol = input_section->output_section->target_index;
+	      else
+		/* On SVR4-ish systems, the dynamic loader cannot
+		   relocate the text and data segments independently,
+		   so the symbol does not matter.  */
+		symbol = 0;
+	      outrel.r_info = ELF32_R_INFO (symbol, R_ARM_RELATIVE);
 	    }
 
 	  loc = sreloc->contents;

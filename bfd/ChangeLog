@@ -1,3 +1,9 @@
+2004-11-08  Mark Mitchell  <mark@codesourcery.com>
+
+	* elf32-arm.c (elf32_arm_final_link_relocate): When generating an
+	R_ARM_RELATIVE relocation for Symbian OS, mention the section
+	symbol in the relocation.
+
 2004-11-08  Inderpreet Singh   <inderpreetb@nioda.hcltech.com>
 	    Vineet Sharma      <vineets@noida.hcltech.com>
 
