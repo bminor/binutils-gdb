@@ -1,5 +1,9 @@
 2003-07-07  Joel Brobecker  <brobecker@gnat.com>
 
+        * hpread.c (hpread_psymtab_to_symtab_1): Fix compilation failure.
+
+2003-07-07  Joel Brobecker  <brobecker@gnat.com>
+
         * xcoffread.c (xcoff_psymtab_to_symtab_1): Remove call to
         sort_symtab_syms, no longer necessary.
 
