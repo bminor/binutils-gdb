@@ -8858,7 +8858,7 @@ md_apply_fix (fixP, valueP)
                  handle these cases, but it appears to do it
                  incorrectly.  */
 	      as_bad_where (fixP->fx_file, fixP->fx_line,
-			    "Relocation overflow");
+			    "Branch out of range");
 	    }
 	}
 
