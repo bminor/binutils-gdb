@@ -1,3 +1,7 @@
+Tue Mar 30 00:14:38 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* mips-pinsn.c: Add missing include of dis-asm.h.
+
 Mon Mar 29 15:03:25 1993  Fred Fish  (fnf@cygnus.com)
 
 	* Makefile.in (clean, distclean, realclean):  Recursively apply
