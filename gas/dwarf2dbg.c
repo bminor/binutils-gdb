@@ -806,7 +806,7 @@ dwarf2dbg_convert_frag (frag)
 {
   offsetT addr_diff;
 
-  addr_diff = resolve_symbol_value (frag->fr_symbol, 1);
+  addr_diff = resolve_symbol_value (frag->fr_symbol, finalize_syms);
 
   /* fr_var carries the max_chars that we created the fragment with.
      fr_subtype carries the current expected length.  We must, of

@@ -457,7 +457,7 @@ eh_frame_convert_frag (frag)
   loc4_frag = (fragS *) frag->fr_opcode;
   loc4_fix = (int) frag->fr_offset;
 
-  diff = resolve_symbol_value (frag->fr_symbol, 1);
+  diff = resolve_symbol_value (frag->fr_symbol, finalize_syms);
 
   if (frag->fr_subtype == 0)
     {

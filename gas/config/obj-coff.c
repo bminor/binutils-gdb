@@ -1972,7 +1972,7 @@ do_relocs_for (abfd, h, file_cursor)
 		      /* Turn the segment of the symbol into an offset.  */
 		      if (symbol_ptr)
 			{
-			  resolve_symbol_value (symbol_ptr, 1);
+			  resolve_symbol_value (symbol_ptr, finalize_syms);
 			  if (! symbol_ptr->sy_resolved)
 			    {
 			      char *file;
@@ -2953,7 +2953,7 @@ yank_symbols ()
 	      S_SET_SEGMENT (symbolP, SEG_E0);
 	    }			/* push data into text */
 
-	  resolve_symbol_value (symbolP, 1);
+	  resolve_symbol_value (symbolP, finalize_syms);
 
 	  if (S_GET_STORAGE_CLASS (symbolP) == C_NULL)
 	    {
@@ -4185,7 +4185,7 @@ fixup_segment (segP, this_segment_type)
       /* Make sure the symbols have been resolved; this may not have
          happened if these are expression symbols.  */
       if (add_symbolP != NULL && ! add_symbolP->sy_resolved)
-	resolve_symbol_value (add_symbolP, 1);
+	resolve_symbol_value (add_symbolP, finalize_syms);
 
       if (add_symbolP != NULL)
 	{
@@ -4215,7 +4215,7 @@ fixup_segment (segP, this_segment_type)
 	}
 
       if (sub_symbolP != NULL && ! sub_symbolP->sy_resolved)
-	resolve_symbol_value (sub_symbolP, 1);
+	resolve_symbol_value (sub_symbolP, finalize_syms);
 
       if (add_symbolP != NULL
 	  && add_symbolP->sy_mri_common)

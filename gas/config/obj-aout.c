@@ -1,5 +1,5 @@
 /* a.out object file format
-   Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1999, 2000
+   Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1999, 2000, 2001
    Free Software Foundation, Inc.
 
 This file is part of GAS, the GNU Assembler.
@@ -466,7 +466,7 @@ obj_crawl_symbol_chain (headers)
 	  S_SET_SEGMENT (symbolP, SEG_TEXT);
 	}			/* if pusing data into text */
 
-      resolve_symbol_value (symbolP, 1);
+      resolve_symbol_value (symbolP, finalize_syms);
 
       /* Skip symbols which were equated to undefined or common
 	 symbols.  */

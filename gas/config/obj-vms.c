@@ -1,5 +1,5 @@
 /* vms.c -- Write out a VAX/VMS object file
-   Copyright 1987, 1988, 1992, 1993, 1994, 1995, 1997, 1998, 2000
+   Copyright 1987, 1988, 1992, 1993, 1994, 1995, 1997, 1998, 2000, 2001
    Free Software Foundation, Inc.
 
 This file is part of GAS, the GNU Assembler.
@@ -532,7 +532,7 @@ obj_crawl_symbol_chain (headers)
   symbolPP = &symbol_rootP;	/* -> last symbol chain link.  */
   while ((symbolP = *symbolPP) != NULL)
     {
-      resolve_symbol_value (symbolP, 1);
+      resolve_symbol_value (symbolP, finalize_syms);
 
      /* OK, here is how we decide which symbols go out into the
 	brave new symtab.  Symbols that do are:

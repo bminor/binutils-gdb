@@ -1,6 +1,18 @@
 2001-03-30  Alan Modra  <alan@linuxcare.com.au>
 
 	* dwarf2dbg.c (dwarf2_directive_file): Fix warnings.
+	(dwarf2dbg_convert_frag): Pass `finalize_syms' to resolve_symbol_value.
+	* config/obj-aout.c (obj_crawl_symbol_chain): Likewise.
+	* config/obj-bout.c (obj_crawl_symbol_chain): Likewise.
+	* config/obj-coff.c (do_relocs_for): Likewise.
+	(yank_symbols): Likewise.
+	(fixup_segment): Likewise.
+	* config/tc-ppc.c (ppc_frob_symbol): Likewise.
+	(ppc_fix_adjustable): Likewise.
+	* config/tc-mips.c (md_convert_frag): Likewise.
+	* config/obj-vms.c (obj_crawl_symbol_chain): Likewise.
+	* ehopt.c (eh_frame_convert_frag): Likewise.
+	* expr.c (make_expr_symbol): Likewise.
 
 	* frags.h (struct frag): Add last_fr_address.  Reorder fields for
 	better packing.
