@@ -1,4 +1,4 @@
-# Makefile.in generated automatically by automake 1.4-p5 from Makefile.am
+# Makefile.in generated automatically by automake 1.4-p6 from Makefile.am
 
 # Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
@@ -598,7 +598,7 @@ deffilep.c ldgram.c ldlex.c
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = gtar
+TAR = tar
 GZIP_ENV = --best
 SOURCES = $(ld_new_SOURCES) $(EXTRA_ld_new_SOURCES)
 OBJECTS = $(ld_new_OBJECTS)
@@ -1080,7 +1080,7 @@ distclean-generic:
 	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
-	-test -z "ldlexldeffilephdeffilepcldgramhldgramc$(MAINTAINERCLEANFILES)" || rm -f ldlexl deffileph deffilepc ldgramh ldgramc $(MAINTAINERCLEANFILES)
+	-test -z "ldlex.cdeffilep.hdeffilep.cldgram.hldgram.c$(MAINTAINERCLEANFILES)" || rm -f ldlex.c deffilep.h deffilep.c ldgram.h ldgram.c $(MAINTAINERCLEANFILES)
 mostlyclean-am:  mostlyclean-hdr mostlyclean-noinstPROGRAMS \
 		mostlyclean-compile mostlyclean-libtool \
 		mostlyclean-aminfo mostlyclean-tags mostlyclean-generic \
@@ -2388,7 +2388,8 @@ ldlang.o: ldlang.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/libiberty.h $(INCDIR)/safe-ctype.h $(INCDIR)/obstack.h \
   $(INCDIR)/bfdlink.h ld.h $(INCDIR)/bin-bugs.h ldmain.h \
   ldexp.h ldlang.h ldgram.h ldlex.h ldmisc.h ldctor.h \
-  ldfile.h ldemul.h $(INCDIR)/fnmatch.h $(INCDIR)/demangle.h
+  ldfile.h ldemul.h $(INCDIR)/fnmatch.h $(INCDIR)/demangle.h \
+  $(INCDIR)/hashtab.h
 ldmain.o: ldmain.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h sysdep.h config.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/safe-ctype.h $(INCDIR)/libiberty.h $(INCDIR)/progress.h \
@@ -2406,8 +2407,9 @@ ldver.o: ldver.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   ldexp.h ldlang.h ldfile.h ldemul.h ldmain.h
 ldwrite.o: ldwrite.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h sysdep.h config.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/bfdlink.h $(INCDIR)/libiberty.h ld.h $(INCDIR)/bin-bugs.h \
-  ldexp.h ldlang.h ldwrite.h ldmisc.h ldgram.h ldmain.h
+  $(INCDIR)/bfdlink.h $(INCDIR)/libiberty.h $(INCDIR)/safe-ctype.h \
+  ld.h $(INCDIR)/bin-bugs.h ldexp.h ldlang.h ldwrite.h \
+  ldmisc.h ldgram.h ldmain.h
 lexsup.o: lexsup.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h sysdep.h config.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/libiberty.h $(INCDIR)/safe-ctype.h $(INCDIR)/bfdlink.h \

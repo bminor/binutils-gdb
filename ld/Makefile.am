@@ -1688,7 +1688,8 @@ ldlang.o: ldlang.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/libiberty.h $(INCDIR)/safe-ctype.h $(INCDIR)/obstack.h \
   $(INCDIR)/bfdlink.h ld.h $(INCDIR)/bin-bugs.h ldmain.h \
   ldexp.h ldlang.h ldgram.h ldlex.h ldmisc.h ldctor.h \
-  ldfile.h ldemul.h $(INCDIR)/fnmatch.h $(INCDIR)/demangle.h
+  ldfile.h ldemul.h $(INCDIR)/fnmatch.h $(INCDIR)/demangle.h \
+  $(INCDIR)/hashtab.h
 ldmain.o: ldmain.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h sysdep.h config.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/safe-ctype.h $(INCDIR)/libiberty.h $(INCDIR)/progress.h \
@@ -1706,8 +1707,9 @@ ldver.o: ldver.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   ldexp.h ldlang.h ldfile.h ldemul.h ldmain.h
 ldwrite.o: ldwrite.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h sysdep.h config.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/bfdlink.h $(INCDIR)/libiberty.h ld.h $(INCDIR)/bin-bugs.h \
-  ldexp.h ldlang.h ldwrite.h ldmisc.h ldgram.h ldmain.h
+  $(INCDIR)/bfdlink.h $(INCDIR)/libiberty.h $(INCDIR)/safe-ctype.h \
+  ld.h $(INCDIR)/bin-bugs.h ldexp.h ldlang.h ldwrite.h \
+  ldmisc.h ldgram.h ldmain.h
 lexsup.o: lexsup.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h sysdep.h config.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/libiberty.h $(INCDIR)/safe-ctype.h $(INCDIR)/bfdlink.h \

@@ -1423,17 +1423,19 @@ DEPTC_sh64_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
 DEPTC_sparc_aout = $(INCDIR)/symcat.h $(srcdir)/config/obj-aout.h \
   $(srcdir)/config/tc-sparc.h $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
-  $(INCDIR)/opcode/sparc.h
+  $(INCDIR)/opcode/sparc.h dw2gencfi.h $(INCDIR)/elf/dwarf2.h
 DEPTC_sparc_coff = $(INCDIR)/symcat.h $(srcdir)/config/obj-coff.h \
   $(srcdir)/config/tc-sparc.h $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/sparc.h $(INCDIR)/coff/external.h $(BFDDIR)/libcoff.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/safe-ctype.h subsegs.h \
-  $(INCDIR)/obstack.h $(INCDIR)/opcode/sparc.h
+  $(INCDIR)/obstack.h $(INCDIR)/opcode/sparc.h dw2gencfi.h \
+  $(INCDIR)/elf/dwarf2.h
 DEPTC_sparc_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
   $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-sparc.h \
   $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
-  $(INCDIR)/opcode/sparc.h $(INCDIR)/elf/sparc.h $(INCDIR)/elf/reloc-macros.h \
+  $(INCDIR)/opcode/sparc.h dw2gencfi.h $(INCDIR)/elf/dwarf2.h \
+  $(INCDIR)/elf/sparc.h $(INCDIR)/elf/reloc-macros.h \
   dwarf2dbg.h
 DEPTC_tahoe_aout = $(INCDIR)/symcat.h $(srcdir)/config/obj-aout.h \
   $(srcdir)/config/tc-tahoe.h $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h \
@@ -1543,7 +1545,7 @@ DEPTC_xtensa_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
   $(INCDIR)/xtensa-config.h sb.h $(INCDIR)/safe-ctype.h \
   subsegs.h $(INCDIR)/obstack.h $(srcdir)/config/xtensa-relax.h \
   $(INCDIR)/xtensa-isa.h $(srcdir)/config/xtensa-istack.h \
-  struc-symbol.h
+  dwarf2dbg.h struc-symbol.h
 DEPTC_z8k_coff = $(INCDIR)/symcat.h $(srcdir)/config/obj-coff.h \
   $(srcdir)/config/tc-z8k.h $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/z8k.h $(INCDIR)/coff/external.h $(BFDDIR)/libcoff.h \

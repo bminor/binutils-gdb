@@ -1,5 +1,10 @@
 2003-12-02  Alan Modra  <amodra@bigpond.net.au>
 
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+
+2003-12-02  Alan Modra  <amodra@bigpond.net.au>
+
 	* ldmain.c (main): Remove mpc860c0 code.
 	* lexsup.c (enum option_values): Delete OPTION_MPC860C0.
 	(ld_options): Delete mpc860c0 entry.

@@ -1,3 +1,8 @@
+2003-12-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+
 2003-11-28  Christian Groessler  <chris@groessler.org>
 
 	* z8k-dis.c: Convert to ISO C90.
@@ -20,10 +25,10 @@
 	* dis-init.c (init_disassemble_info): Initialise
 	symbol_is_valid field.
 	* dis-buf.c (generic_symbol_is_valid): New function.  Always
- 	returns TRUE.
+	returns TRUE.
 	* arm-dis.c (arm_symbol_is_valid): New function.  Return FALSE
-        for ARM ELF mapping symbols.
-        * disassemble.c (disassemble_init_for_target): Set
+	for ARM ELF mapping symbols.
+	* disassemble.c (disassemble_init_for_target): Set
 	symbol_is_valid field to arm_symbol_is_valid of the target is
 	an ARM.
 
@@ -44,7 +49,7 @@
 	* m68hc11-dis.c: Convert to ISO C90 prototypes.
 
 2003-10-21  Peter Barada  <pbarada@mail.wm.sps.mot.com>
-            Bernardo Innocenti  <bernie@develer.com>
+	    Bernardo Innocenti  <bernie@develer.com>
 
 	* m68k-dis.c: Add MCFv4/MCF5528x support.
 	* m68k-opc.c: Likewise.
@@ -104,7 +109,7 @@
 
 	* v850-dis.c (disassemble): Accept bfd_mach_v850e1.
 	* v850-opc.c (v850_opcodes): Add DBTRAP and DBRET instructions.
-	
+
 2003-09-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* ppc-dis.c (struct dis_private): New.

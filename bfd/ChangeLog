@@ -1,3 +1,8 @@
+2003-12-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+
 2003-12-01  Dmitry Semyonov  <Dmitry.Semyonov@oktet.ru>
 
 	* coffcode.h (coff_compute_section_file_positions): Set page_size
