@@ -1,5 +1,5 @@
 /* Print and select stack frames for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -16,10 +16,11 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-#include "gdb_string.h"
+
 #include "defs.h"
+#include "gdb_string.h"
 #include "value.h"
 #include "symtab.h"
 #include "gdbtypes.h"
@@ -342,6 +343,18 @@ print_frame_info (fi, level, source, args)
 	  annotate_frame_where ();
 	  wrap_here ("  ");
 	  printf_filtered (" from %s", PC_LOAD_SEGMENT (fi->pc));
+	}
+#endif
+#ifdef PC_SOLIB
+      if (!funname)
+	{
+	  char *lib = PC_SOLIB (fi->pc);
+	  if (lib)
+	    {
+	      annotate_frame_where ();
+	      wrap_here ("  ");
+	      printf_filtered (" from %s", lib);
+	    }
 	}
 #endif
       printf_filtered ("\n");
@@ -1385,6 +1398,8 @@ return_command (retval_exp, from_tty)
 
   if (from_tty)
     frame_command ("0", 1);
+  else
+    select_frame_command ("0", 0);
 }
 
 /* Gets the language of the current frame.  */

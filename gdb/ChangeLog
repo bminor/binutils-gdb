@@ -1,3 +1,43 @@
+Sat Nov 18 11:19:35 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* solib.c (solib_address): Return the name of the containing solib.
+	* solib.h (PC_SOLIB): New macro; define using solib_address.
+	* stack.c (print_frame_info) [PC_SOLIB]: If no function name, try
+	PC_SOLIB on the PC value.
+
+Sat Nov 18 04:09:31 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* annotate.c (annotate_source, annotate_frame_begin):  Issue
+	`0x' prefix for the pc value, to remain consistent with previous
+	GDB versions.
+
+	* blockframe.c (find_pc_partial_function), config/pa/tm-hppa.h:
+	Remove Sun shared library transfer hack and
+	INHIBIT_SUNSOLIB_TRANSFER_TABLE_HACK, it is obsoleted by the
+	mst_solib_trampoline minimal symbols.
+
+	* blockframe.c (inside_main_func):  Check main_func_*pc against
+	INVALID_ENTRY_*PC, not zero.
+	* symfile.c (init_entry_point_info):  Initialize ei.*pc with
+	INVALID_ENTRY_*PC.
+	* mipsread.c (mipscoff_symfile_read):  If the entry_file bounds
+	are still unknown after processing the partial symbols, then try
+	to set them from the minimal symbols.
+
+	* infcmd.c (registers_info):  Error out if selected_frame is NULL.
+	* stack.c (return_command):  Select new current frame silently if
+	not interactive.
+
+	* mipsread.c (read_alphacoff_dynamic_symtab):  Ignore additional
+	DT_MIPS_LOCAL_GOTNO and DT_MIPS_GOTSYM entries.
+
+	* irix5-nat.c (solib_create_inferior_hook):  Call solib_add only
+	if auto_solib_add_at_startup is nonzero.
+	(_initialize_solib):  Add "set auto-solib-add" command.
+	* osfsolib.c (solib_create_inferior_hook):  Call solib_add only
+	if auto_solib_add_at_startup is nonzero.
+	(_initialize_solib):  Add "set auto-solib-add" command.
+
 Wed Nov 15 17:12:04 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* utils.c: Don't include sys/ioctl.h etc if MPW is host.

@@ -50,7 +50,11 @@ solib_create_inferior_hook PARAMS((void));	/* solib.c */
 /* If we can't set a breakpoint, and it's in a shared library, just
    disable it.  */
 
-#define DISABLE_UNSETTABLE_BREAK(addr)	solib_address(addr)
+#define DISABLE_UNSETTABLE_BREAK(addr)	(solib_address(addr) != NULL)
 
-extern int
+extern char *
 solib_address PARAMS ((CORE_ADDR));		/* solib.c */
+
+/* If ADDR lies in a shared library, return its name.  */
+
+#define PC_SOLIB(addr)	solib_address (addr)
