@@ -468,19 +468,15 @@ vx_prepare_to_store (void)
 
 /* Copy LEN bytes to or from remote inferior's memory starting at MEMADDR
    to debugger memory starting at MYADDR.  WRITE is true if writing to the
-   inferior.
+   inferior.  TARGET is unused.
    Result is the number of bytes written or read (zero if error).  The
    protocol allows us to return a negative count, indicating that we can't
    handle the current address but can handle one N bytes further, but
    vxworks doesn't give us that information.  */
 
 static int
-vx_xfer_memory (memaddr, myaddr, len, write, target)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
-     int write;
-     struct target_ops *target;	/* ignored */
+vx_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
+		struct target_ops *target)
 {
   int status;
   Rptrace ptrace_in;
@@ -800,14 +796,14 @@ net_get_boot_file (char **pBootFile)
   return (status == RPC_SUCCESS) ? 0 : -1;
 }
 
-/* Fetch a list of loaded object modules from the VxWorks target.
+/* Fetch a list of loaded object modules from the VxWorks target
+   and store in PLOADTABLE.
    Returns -1 if rpc failed, 0 otherwise
    There's no way to check if the returned loadTable is correct.
    VxWorks doesn't check it.  */
 
 static int
-net_get_symbols (pLoadTable)
-     ldtabl *pLoadTable;	/* return pointer to ldtabl here */
+net_get_symbols (ldtabl *pLoadTable)
 {
   enum clnt_stat status;
 

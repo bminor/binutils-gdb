@@ -502,9 +502,7 @@ gr_create_inferior (char *execfile, char *args, char **env)
    pass non-matching data on.  */
 
 int
-gr_multi_scan (list, passthrough)
-     char *list[];
-     int passthrough;
+gr_multi_scan (char *list[], int passthrough)
 {
   char *swallowed = NULL;	/* holding area */
   char *swallowed_p = swallowed;	/* Current position in swallowed.  */

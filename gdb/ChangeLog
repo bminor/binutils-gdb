@@ -1,3 +1,9 @@
+2000-10-15  Kevin Buettner  <kevinb@redhat.com>
+
+	* remote-st.c (st2000_xfer_inferior_memory): Protoize.
+	* remote-utils.c (gr_multi_scan): Protoize.
+	* remote-vx.c (vx_xfer_memory, net_get_symbols): Protoize.
+
 2000-10-13  Fernando Nasser  <fnasser@cygnus.com>
 
 	* remote.c (putpkt_binary): Call read_frame, not getpkt. Log message.
