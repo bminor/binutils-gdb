@@ -98,8 +98,6 @@ unsigned64 Multiply PARAMS ((unsigned64 op1, unsigned64 op2, FP_formats fmt));
 unsigned64 Divide PARAMS ((unsigned64 op1, unsigned64 op2, FP_formats fmt));
 unsigned64 Recip PARAMS ((unsigned64 op, FP_formats fmt));
 unsigned64 SquareRoot PARAMS ((unsigned64 op, FP_formats fmt));
-unsigned64 Max PARAMS ((unsigned64 op1, unsigned64 op2, FP_formats fmt));
-unsigned64 Min PARAMS ((unsigned64 op1, unsigned64 op2, FP_formats fmt));
 unsigned64 convert PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, int rm, unsigned64 op, FP_formats from, FP_formats to));
 #define Convert(rm,op,from,to) \
 convert (SD, CPU, cia, rm, op, from, to)

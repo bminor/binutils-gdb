@@ -1,5 +1,10 @@
 2002-06-03  Chris Demetriou  <cgd@broadcom.com>
 
+	* cp1.c (Min, Max): Remove #if 0'd functions.
+	* sim-main.h (Min, Max): Remove.
+
+2002-06-03  Chris Demetriou  <cgd@broadcom.com>
+
 	* cp1.c: fix formatting of switch case and default labels.
 	* interp.c: Likewise.
 	* sim-main.c: Likewise.
