@@ -1,3 +1,8 @@
+2001-12-24  Tom Rix  <trix@redhat.com>
+
+	* config/powerpc/aix.mt (TDEPFILES): Add xcoffread.o to fix a build 
+	failure.
+
 2001-12-21  Tom Tromey  <tromey@redhat.com>
 
 	* configure, config.in: Rebuilt.
