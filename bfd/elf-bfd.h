@@ -625,7 +625,7 @@ struct elf_backend_data
      indices, and must set at least *FLAGS and *SEC for each processor
      dependent case; failure to do so will cause a link error.  */
   bfd_boolean (*elf_add_symbol_hook)
-    (bfd *abfd, struct bfd_link_info *info, const Elf_Internal_Sym *,
+    (bfd *abfd, struct bfd_link_info *info, Elf_Internal_Sym *,
      const char **name, flagword *flags, asection **sec, bfd_vma *value);
 
   /* If this field is not NULL, it is called by the elf_link_output_sym
@@ -1544,9 +1544,6 @@ extern bfd_boolean _bfd_elf_dynamic_symbol_p
 extern bfd_boolean _bfd_elf_symbol_refs_local_p
   (struct elf_link_hash_entry *, struct bfd_link_info *, bfd_boolean);
 
-extern bfd_boolean _bfd_elf_link_add_archive_symbols
-  (bfd *, struct bfd_link_info *);
-
 extern const bfd_target *bfd_elf32_object_p
   (bfd *);
 extern const bfd_target *bfd_elf32_core_file_p
@@ -1558,8 +1555,6 @@ extern int bfd_elf32_core_file_failing_signal
 extern bfd_boolean bfd_elf32_core_file_matches_executable_p
   (bfd *, bfd *);
 
-extern bfd_boolean bfd_elf32_bfd_link_add_symbols
-  (bfd *, struct bfd_link_info *);
 extern bfd_boolean bfd_elf32_bfd_final_link
   (bfd *, struct bfd_link_info *);
 
@@ -1593,8 +1588,6 @@ extern void bfd_elf32_write_relocs
   (bfd *, asection *, void *);
 extern bfd_boolean bfd_elf32_slurp_reloc_table
   (bfd *, asection *, asymbol **, bfd_boolean);
-extern bfd_boolean bfd_elf32_add_dynamic_entry
-  (struct bfd_link_info *, bfd_vma, bfd_vma);
 
 extern const bfd_target *bfd_elf64_object_p
   (bfd *);
@@ -1606,8 +1599,6 @@ extern int bfd_elf64_core_file_failing_signal
   (bfd *);
 extern bfd_boolean bfd_elf64_core_file_matches_executable_p
   (bfd *, bfd *);
-extern bfd_boolean bfd_elf64_bfd_link_add_symbols
-  (bfd *, struct bfd_link_info *);
 extern bfd_boolean bfd_elf64_bfd_final_link
   (bfd *, struct bfd_link_info *);
 
@@ -1641,7 +1632,10 @@ extern void bfd_elf64_write_relocs
   (bfd *, asection *, void *);
 extern bfd_boolean bfd_elf64_slurp_reloc_table
   (bfd *, asection *, asymbol **, bfd_boolean);
-extern bfd_boolean bfd_elf64_add_dynamic_entry
+
+extern bfd_boolean bfd_elf_link_add_symbols
+  (bfd *, struct bfd_link_info *);
+extern bfd_boolean _bfd_elf_add_dynamic_entry
   (struct bfd_link_info *, bfd_vma, bfd_vma);
 
 #define bfd_elf32_link_record_dynamic_symbol \
@@ -1762,12 +1756,14 @@ extern bfd_boolean _sh_elf_set_mach_from_flags
 	;								\
       else								\
 	{								\
-	  if (! info->callbacks->undefined_symbol			\
-	      (info, h->root.root.string, input_bfd,			\
-	       input_section, rel->r_offset,				\
-	       (info->unresolved_syms_in_objects == RM_GENERATE_ERROR	\
-		|| ELF_ST_VISIBILITY (h->other))			\
-	       ))							\
+	  bfd_boolean err;						\
+	  err = (info->unresolved_syms_in_objects == RM_GENERATE_ERROR	\
+		 || ELF_ST_VISIBILITY (h->other) != STV_DEFAULT);	\
+	  if (!info->callbacks->undefined_symbol (info,			\
+						  h->root.root.string,	\
+						  input_bfd,		\
+						  input_section,	\
+						  rel->r_offset, err))	\
 	    return FALSE;						\
 	  warned = TRUE;						\
 	}								\

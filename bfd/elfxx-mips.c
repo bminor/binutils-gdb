@@ -564,17 +564,8 @@ static bfd *reldyn_sorting_bfd;
    : bfd_put_32 (abfd, val, ptr))
 
 /* Add a dynamic symbol table-entry.  */
-#ifdef BFD64
 #define MIPS_ELF_ADD_DYNAMIC_ENTRY(info, tag, val)	\
-  (ABI_64_P (elf_hash_table (info)->dynobj)		\
-   ? bfd_elf64_add_dynamic_entry (info, tag, val)	\
-   : bfd_elf32_add_dynamic_entry (info, tag, val))
-#else
-#define MIPS_ELF_ADD_DYNAMIC_ENTRY(info, tag, val)	\
-  (ABI_64_P (elf_hash_table (info)->dynobj)		\
-   ? (abort (), FALSE)					\
-   : bfd_elf32_add_dynamic_entry (info, tag, val))
-#endif
+  _bfd_elf_add_dynamic_entry (info, tag, val)
 
 #define MIPS_ELF_RTYPE_TO_HOWTO(abfd, rtype, rela)			\
   (get_elf_backend_data (abfd)->elf_backend_mips_rtype_to_howto (rtype, rela))
@@ -4724,7 +4715,7 @@ _bfd_mips_elf_section_from_bfd_section (bfd *abfd ATTRIBUTE_UNUSED,
 
 bfd_boolean
 _bfd_mips_elf_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
-			       const Elf_Internal_Sym *sym, const char **namep,
+			       Elf_Internal_Sym *sym, const char **namep,
 			       flagword *flagsp ATTRIBUTE_UNUSED,
 			       asection **secp, bfd_vma *valp)
 {

@@ -1,5 +1,5 @@
 /* SuperH SH64-specific support for 32-bit ELF
-   Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -56,7 +56,7 @@ static bfd_boolean shmedia_prepare_reloc
 static int sh64_elf_get_symbol_type
   (Elf_Internal_Sym *, int);
 static bfd_boolean sh64_elf_add_symbol_hook
-  (bfd *, struct bfd_link_info *, const Elf_Internal_Sym *, const char **,
+  (bfd *, struct bfd_link_info *, Elf_Internal_Sym *, const char **,
    flagword *, asection **, bfd_vma *);
 static bfd_boolean sh64_elf_link_output_symbol_hook
   (struct bfd_link_info *, const char *, Elf_Internal_Sym *, asection *,
@@ -374,7 +374,7 @@ sh64_elf_get_symbol_type (Elf_Internal_Sym *elf_sym, int type)
 
 static bfd_boolean
 sh64_elf_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
-			  const Elf_Internal_Sym *sym, const char **namep,
+			  Elf_Internal_Sym *sym, const char **namep,
 			  flagword *flagsp ATTRIBUTE_UNUSED,
 			  asection **secp, bfd_vma *valp)
 {

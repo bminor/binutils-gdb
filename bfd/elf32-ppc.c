@@ -3470,7 +3470,7 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	 the .dynamic section.  The DT_DEBUG entry is filled in by the
 	 dynamic linker and used by the debugger.  */
 #define add_dynamic_entry(TAG, VAL) \
-  bfd_elf32_add_dynamic_entry (info, (TAG), (VAL))
+  _bfd_elf_add_dynamic_entry (info, TAG, VAL)
 
       if (info->executable)
 	{
@@ -4376,7 +4376,7 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
 static bfd_boolean
 ppc_elf_add_symbol_hook (bfd *abfd,
 			 struct bfd_link_info *info,
-			 const Elf_Internal_Sym *sym,
+			 Elf_Internal_Sym *sym,
 			 const char **namep ATTRIBUTE_UNUSED,
 			 flagword *flagsp ATTRIBUTE_UNUSED,
 			 asection **secp,

@@ -39,6 +39,10 @@ struct trad_frame_cache;
 
 /* A trampoline descriptor.  */
 
+/* Magic instruction that to mark the end of the signal trampoline
+   instruction sequence.  */
+#define TRAMP_SENTINEL_INSN ((LONGEST) -1)
+
 struct tramp_frame
 {
   /* The trampoline's entire instruction sequence.  Search for this in
@@ -47,7 +51,8 @@ struct tramp_frame
      one INSN_SIZE instruction.  It is also assumed that TRAMP[0]
      contains the first instruction of the trampoline and hence the
      address of the instruction matching TRAMP[0] is the trampoline's
-     "func" address.  */
+     "func" address.  The instruction sequence shall be terminated by
+     TRAMP_SENTINEL_INSN.  */
   int insn_size;
   ULONGEST insn[8];
   /* Initialize a trad-frame cache corresponding to the tramp-frame.

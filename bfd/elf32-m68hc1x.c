@@ -181,7 +181,7 @@ m68hc12_add_stub (const char *stub_name, asection *section,
 
 bfd_boolean
 elf32_m68hc11_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
-                               const Elf_Internal_Sym *sym,
+                               Elf_Internal_Sym *sym,
                                const char **namep ATTRIBUTE_UNUSED,
                                flagword *flagsp ATTRIBUTE_UNUSED,
                                asection **secp ATTRIBUTE_UNUSED,

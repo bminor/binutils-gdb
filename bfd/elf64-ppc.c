@@ -82,6 +82,7 @@ static bfd_reloc_status_type ppc64_elf_unhandled_reloc
 #define elf_backend_grok_psinfo		      ppc64_elf_grok_psinfo
 #define elf_backend_create_dynamic_sections   ppc64_elf_create_dynamic_sections
 #define elf_backend_copy_indirect_symbol      ppc64_elf_copy_indirect_symbol
+#define elf_backend_add_symbol_hook	      ppc64_elf_add_symbol_hook
 #define elf_backend_check_relocs	      ppc64_elf_check_relocs
 #define elf_backend_gc_mark_hook	      ppc64_elf_gc_mark_hook
 #define elf_backend_gc_sweep_hook	      ppc64_elf_gc_sweep_hook
@@ -3474,6 +3475,22 @@ ppc64_elf_mark_entry_syms (struct bfd_link_info *info)
   return TRUE;
 }
 
+/* Hack symbols defined in .opd sections to be function type.  */
+
+static bfd_boolean
+ppc64_elf_add_symbol_hook (bfd *ibfd ATTRIBUTE_UNUSED,
+			   struct bfd_link_info *info ATTRIBUTE_UNUSED,
+			   Elf_Internal_Sym *isym,
+			   const char **name ATTRIBUTE_UNUSED,
+			   flagword *flags ATTRIBUTE_UNUSED,
+			   asection **sec,
+			   bfd_vma *value ATTRIBUTE_UNUSED)
+{
+  if (strcmp (bfd_get_section_name (ibfd, *sec), ".opd") == 0)
+    isym->st_info = ELF_ST_INFO (ELF_ST_BIND (isym->st_info), STT_FUNC);
+  return TRUE;
+}
+
 static bfd_boolean
 update_local_sym_info (bfd *abfd, Elf_Internal_Shdr *symtab_hdr,
 		       unsigned long r_symndx, bfd_vma r_addend, int tls_type)
@@ -6065,7 +6082,7 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	 the .dynamic section.  The DT_DEBUG entry is filled in by the
 	 dynamic linker and used by the debugger.  */
 #define add_dynamic_entry(TAG, VAL) \
-  bfd_elf64_add_dynamic_entry (info, (TAG), (VAL))
+  _bfd_elf_add_dynamic_entry (info, TAG, VAL)
 
       if (info->executable)
 	{
