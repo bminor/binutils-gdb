@@ -1,3 +1,10 @@
+2003-09-20  Andrew Cagney  <cagney@redhat.com>
+
+	* cli/cli-script.c: Remove "register" attributes.
+	* config/pa/tm-hppa.h: Ditto.
+	* cli/cli-decode.c: Ditto.
+	* cli/cli-cmds.c: Ditto.
+
 2003-09-19  Andrew Cagney  <cagney@redhat.com>
 
 	* sparcnbsd-nat.c (getregs_supplies): Rename NPC_REGNUM to

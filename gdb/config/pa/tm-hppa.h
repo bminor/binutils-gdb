@@ -119,7 +119,7 @@ extern int hppa_instruction_nullified (void);
    specified in the calling convention doc. As far as I know, the only
    way to get the return value is to have the caller tell us where it
    told the callee to put it, rather than have the callee tell us.  */
-struct value *hppa_value_returned_from_stack (register struct type *valtype,
+struct value *hppa_value_returned_from_stack (struct type *valtype,
 					      CORE_ADDR addr);
 #define VALUE_RETURNED_FROM_STACK(valtype,addr) \
   hppa_value_returned_from_stack (valtype, addr)

@@ -1,3 +1,7 @@
+2003-09-20  Andrew Cagney  <cagney@redhat.com>
+
+	* mi-main.c (get_register): 
+
 2003-09-17  Andrew Cagney  <cagney@redhat.com>
 
 	* mi/mi-main.c: Rename REGISTER_BYTE to DEPRECATED_REGISTER_BYTE.

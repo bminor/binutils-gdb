@@ -133,7 +133,7 @@ struct cmd_list_element *
 add_cmd (char *name, enum command_class class, void (*fun) (char *, int),
 	 char *doc, struct cmd_list_element **list)
 {
-  register struct cmd_list_element *c
+  struct cmd_list_element *c
   = (struct cmd_list_element *) xmalloc (sizeof (struct cmd_list_element));
   struct cmd_list_element *p;
 
@@ -212,8 +212,8 @@ add_alias_cmd (char *name, char *oldname, enum command_class class,
 {
   /* Must do this since lookup_cmd tries to side-effect its first arg */
   char *copied_name;
-  register struct cmd_list_element *old;
-  register struct cmd_list_element *c;
+  struct cmd_list_element *old;
+  struct cmd_list_element *c;
   copied_name = (char *) alloca (strlen (oldname) + 1);
   strcpy (copied_name, oldname);
   old = lookup_cmd (&copied_name, *list, "", 1, 1);
@@ -247,7 +247,7 @@ add_prefix_cmd (char *name, enum command_class class, void (*fun) (char *, int),
 		char *prefixname, int allow_unknown,
 		struct cmd_list_element **list)
 {
-  register struct cmd_list_element *c = add_cmd (name, class, fun, doc, list);
+  struct cmd_list_element *c = add_cmd (name, class, fun, doc, list);
   c->prefixlist = prefixlist;
   c->prefixname = prefixname;
   c->allow_unknown = allow_unknown;
@@ -262,7 +262,7 @@ add_abbrev_prefix_cmd (char *name, enum command_class class,
 		       struct cmd_list_element **prefixlist, char *prefixname,
 		       int allow_unknown, struct cmd_list_element **list)
 {
-  register struct cmd_list_element *c = add_cmd (name, class, fun, doc, list);
+  struct cmd_list_element *c = add_cmd (name, class, fun, doc, list);
   c->prefixlist = prefixlist;
   c->prefixname = prefixname;
   c->allow_unknown = allow_unknown;
@@ -500,7 +500,7 @@ add_show_from_set (struct cmd_list_element *setcmd,
 void
 delete_cmd (char *name, struct cmd_list_element **list)
 {
-  register struct cmd_list_element *c;
+  struct cmd_list_element *c;
   struct cmd_list_element *p;
 
   while (*list && STREQ ((*list)->name, name))
@@ -577,7 +577,7 @@ void
 apropos_cmd (struct ui_file *stream, struct cmd_list_element *commandlist,
 			 struct re_pattern_buffer *regex, char *prefix)
 {
-  register struct cmd_list_element *c;
+  struct cmd_list_element *c;
   int returnvalue=1; /*Needed to avoid double printing*/
   /* Walk through the commands */
   for (c=commandlist;c;c=c->next)
@@ -786,7 +786,7 @@ print_doc_line (struct ui_file *stream, char *str)
 {
   static char *line_buffer = 0;
   static int line_size;
-  register char *p;
+  char *p;
 
   if (!line_buffer)
     {
@@ -830,7 +830,7 @@ void
 help_cmd_list (struct cmd_list_element *list, enum command_class class,
 	       char *prefix, int recurse, struct ui_file *stream)
 {
-  register struct cmd_list_element *c;
+  struct cmd_list_element *c;
 
   for (c = list; c; c = c->next)
     {

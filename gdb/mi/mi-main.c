@@ -555,7 +555,7 @@ get_register (int regnum, int format)
       ptr = buf + 2;
       for (j = 0; j < REGISTER_RAW_SIZE (regnum); j++)
 	{
-	  register int idx = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? j
+	  int idx = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? j
 	  : REGISTER_RAW_SIZE (regnum) - 1 - j;
 	  sprintf (ptr, "%02x", (unsigned char) raw_buffer[idx]);
 	  ptr += 2;

@@ -444,7 +444,7 @@ static void
 echo_command (char *text, int from_tty)
 {
   char *p = text;
-  register int c;
+  int c;
 
   if (text)
     while ((c = *p++) != '\0')
