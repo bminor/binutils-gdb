@@ -1,3 +1,13 @@
+1998-11-18  Doug Evans  <devans@casey.cygnus.com>
+
+	* Makefile.am (DEP): Use $(srcdir)/../mkdep.
+	(itbl-ops.o): Delete duplicate dependencies.
+	Rebuild dependencies.
+start-sanitize-fr30
+	Add fr30 dependencies.
+end-sanitize-fr30
+	* Makefile.in: Rebuild.
+
 Tue Nov 17 13:42:42 1998  Nick Clifton  <nickc@cygnus.com>
 
 start-sanitize-fr30
