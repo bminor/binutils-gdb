@@ -1,3 +1,7 @@
+Wed Jan 19 06:39:24 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* stabs.texinfo (Non-Stab Symbol Types): Mention N_SET* | N_EXT.
+
 Sun Jan 16 12:43:32 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* stabs.texinfo: Re-do stuff about C_BSTAT and move from XCOFF

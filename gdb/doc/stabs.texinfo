@@ -3032,18 +3032,23 @@ Symbol is indirected to another symbol
 Common---visible after shared library dynamic link
 
 @item 0x14 N_SETA
+@itemx 0x15 N_SETA | N_EXT
 Absolute set element
 
 @item 0x16 N_SETT
+@itemx 0x17 N_SETT | N_EXT
 Text segment set element
 
 @item 0x18 N_SETD
+@itemx 0x19 N_SETD | N_EXT
 Data segment set element
 
 @item 0x1a N_SETB
+@itemx 0x1b N_SETB | N_EXT
 BSS segment set element
 
 @item 0x1c N_SETV
+@itemx 0x1d N_SETV | N_EXT
 Pointer to set vector
 
 @item 0x1e N_WARNING
