@@ -24,7 +24,7 @@ usage() {
     echo "  AWK (awk) -- must be GNU awk"
     echo "  MAKE (make)"
     echo
-    echo " Note: Everything in <builddir>/gdb-allcross will be blown away.
+    echo " Note: Everything in <builddir>/gdb-allcross will be blown away."
     exit 1;
 }
 
