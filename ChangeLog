@@ -1,3 +1,18 @@
+	Mon Feb 12 15:33:59 1996  Christian Bauernfeind <chrisbfd@theorie3.physik.uni-erlangen.de>
+
+	* config.guess:  Support m68k-cbm-sysv4.
+
+Sat Feb 10 12:06:42 1996  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* config.guess (*:Linux:*:*): Guess m68k-unknown-linux and
+	m68k-unknown-linuxaout from linker help string.  Put quotes around
+	$ld_help_string.
+
+Thu Dec  7 09:03:24 1995  Tom Horsley  <Tom.Horsley@mail.hcsc.com>
+
+	* config.guess (powerpc-harris-powerunix): Add guess for port
+	to new target.
+
 Thu Feb  8 15:37:52 1996  Brendan Kehoe  <brendan@lisa.cygnus.com>
 
 	* config.guess (UNAME_VERSION): Recognize X4.x as an OSF version.
