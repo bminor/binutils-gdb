@@ -1,3 +1,9 @@
+Thu Jul 20 13:41:21 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* targets.c (bfd_target_vector): Since armpe and armpei have been
+	split into big- and little-endian variants, list all of them,
+	instead of the now-nonexistant armpe[i]_vec.
+
 Thu Jul 20 00:06:39 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf.c (bfd_section_from_phdr): Set lma based on p_paddr.
