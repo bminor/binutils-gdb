@@ -1,3 +1,9 @@
+2002-01-30  Daniel Jacobowitz  <drow@mvista.com>
+
+	* symtab.c (find_pc_sect_psymtab): Do not search psymtabs for
+	data symbols, since we search based on textlow and texthigh.
+	(find_pc_sect_symtab): Likewise.
+
 2002-01-30  Andrew Cagney  <ac131313@redhat.com>
 
 	* defs.h (vwarning): Declare.

@@ -355,12 +355,24 @@ find_pc_sect_psymtab (CORE_ADDR pc, asection *section)
 {
   register struct partial_symtab *pst;
   register struct objfile *objfile;
+  struct minimal_symbol *msymbol;
+
+  /* If we know that this is not a text address, return failure.  This is
+     necessary because we loop based on texthigh and textlow, which do
+     not include the data ranges.  */
+  msymbol = lookup_minimal_symbol_by_pc_section (pc, section);
+  if (msymbol
+      && (msymbol->type == mst_data
+	  || msymbol->type == mst_bss
+	  || msymbol->type == mst_abs
+	  || msymbol->type == mst_file_data
+	  || msymbol->type == mst_file_bss))
+    return NULL;
 
   ALL_PSYMTABS (objfile, pst)
   {
     if (pc >= pst->textlow && pc < pst->texthigh)
       {
-	struct minimal_symbol *msymbol;
 	struct partial_symtab *tpst;
 
 	/* An objfile that has its functions reordered might have
@@ -371,7 +383,6 @@ find_pc_sect_psymtab (CORE_ADDR pc, asection *section)
 	    section == 0)	/* can't validate section this way */
 	  return (pst);
 
-	msymbol = lookup_minimal_symbol_by_pc_section (pc, section);
 	if (msymbol == NULL)
 	  return (pst);
 
@@ -1386,6 +1397,21 @@ find_pc_sect_symtab (CORE_ADDR pc, asection *section)
   register struct partial_symtab *ps;
   register struct objfile *objfile;
   CORE_ADDR distance = 0;
+  struct minimal_symbol *msymbol;
+
+  /* If we know that this is not a text address, return failure.  This is
+     necessary because we loop based on the block's high and low code
+     addresses, which do not include the data ranges, and because
+     we call find_pc_sect_psymtab which has a similar restriction based
+     on the partial_symtab's texthigh and textlow.  */
+  msymbol = lookup_minimal_symbol_by_pc_section (pc, section);
+  if (msymbol
+      && (msymbol->type == mst_data
+	  || msymbol->type == mst_bss
+	  || msymbol->type == mst_abs
+	  || msymbol->type == mst_file_data
+	  || msymbol->type == mst_file_bss))
+    return NULL;
 
   /* Search all symtabs for the one whose file contains our address, and which
      is the smallest of all the ones containing the address.  This is designed
