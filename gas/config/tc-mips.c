@@ -10661,6 +10661,11 @@ md_apply_fix3 (fixP, valP, seg)
   valueT value;
   static int previous_fx_r_type = 0;
 
+  /* FIXME: Maybe just return for all reloc types not listed below?
+     Eric Christopher says: "This is stupid, please rewrite md_apply_fix3. */
+  if (fixP->fx_r_type == BFD_RELOC_8)
+      return;
+
   assert (fixP->fx_size == 4
 	  || fixP->fx_r_type == BFD_RELOC_16
 	  || fixP->fx_r_type == BFD_RELOC_32

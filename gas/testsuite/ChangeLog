@@ -1,3 +1,9 @@
+2002-09-12  Chris Demetriou  <cgd@broadcom.com>
+
+	* gas/mips/baddata1.s: New file.
+	* gas/mips/baddata1.l: New file.
+	* gas/mips/mips.exp: Run new test.
+
 2002-09-18  Chris Demetriou  <cgd@broadcom.com>
 
 	* gas/mips/branch-misc-1.d: New file.
