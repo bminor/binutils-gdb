@@ -1,3 +1,10 @@
+Mon Dec 15 16:08:52 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* elf32-m32r.c (m32r_elf_merge_private_bfd_data): Allow M32R
+	object files to be merged into a M32RX executable.
+
+	* archures.c: Add bfd_mach_m32r and bfd_mach_m32rx.
+
 Mon Dec 15 16:11:22 1997  Fred Fish  <fnf@cygnus.com>
 
 	* coffcode.h (ALIGN_SECTIONS_IN_FILE): Define if I960 not defined.

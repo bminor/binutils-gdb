@@ -1837,12 +1837,20 @@ m32r_elf_merge_private_bfd_data (ibfd, obfd)
 
   if ((new_flags & EF_M32R_ARCH) != (old_flags & EF_M32R_ARCH))
     {
-      _bfd_error_handler ("%s: Instruction set mismatch with previous modules",
-	     bfd_get_filename (ibfd));
+      if ((new_flags & EF_M32R_ARCH) == E_M32RX_ARCH)
+	{
+	  _bfd_error_handler ("%s: Instruction set mismatch with previous modules",
+			      bfd_get_filename (ibfd));
 #if 1
-      bfd_set_error (bfd_error_bad_value);
-      return false;
+	  bfd_set_error (bfd_error_bad_value);
+	  return false;
 #endif
+	}
+      else
+	{
+	  _bfd_error_handler ("%s: Merging M32R instructions with M32RX instructions",
+			      bfd_get_filename (ibfd));
+	}
     }
 
   return true;
