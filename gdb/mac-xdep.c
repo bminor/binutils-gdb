@@ -931,8 +931,6 @@ tilde_expand (char *str)
 
 /* Modified versions of standard I/O. */
 
-#include <stdarg.h>
-
 #undef fprintf
 
 int

@@ -1,3 +1,7 @@
+Thu Jun 22 20:21:59 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mac-xdep.c (stdarg.h): Don't include.
+
 Thu Jun 22 13:12:33 1995  Kung Hsu  <kung@mexican.cygnus.com>
 
 	* remote-nindy.c (nindy_wait): Change timeout in SERIAL_READCHAR.
