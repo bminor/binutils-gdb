@@ -5,7 +5,7 @@
 	* testsuite/ld-undefined/undefined.exp: Ditto, and include $flags
 	in ld invocations.
 	* testsuite/lib/ld-lib.exp (big_or_little_endian): Recognize -EB,
-	-eb, EL and el.
+	-eb, -EL and -el.
 	(is_endian_output_format): New function.
 	(default_ld_link): Set flags to [big_or_little_endian] only if ld
 	is being invoked such that the output format being used is of
