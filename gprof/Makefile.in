@@ -65,7 +65,7 @@ all:	diststuff $(PROG)
 	    FUNCTION=`(echo $*|sed -e 's/_bl//')`_blurb \
 	    FILE=$*.m $(srcdir)/$*.m
 
-diststuff: $(DISTSTUFF)
+diststuff: $(DISTSTUFF) info
 
 gprof.info: gprof.texi
 	$(MAKEINFO) -o gprof.info $(srcdir)/gprof.texi
@@ -100,7 +100,7 @@ gprof:	$(OBJS) $(LIBS)
 	$(CC) -o $(PROG) $(LDFLAGS) $(OBJS) $(LIBS)
 
 mostlyclean:
-	-rm -f *.o core gprof nohup.out gprof.info* \
+	-rm -f *.o core gprof nohup.out \
 	gprof.cps  gprof.fns  gprof.log  gprof.ps   gprof.tps\
 	gprof.aux  gprof.dvi  gprof.ky   gprof.pg   gprof.toc  gprof.vr\
 	gprof.cp   gprof.fn   gprof.kys  gprof.pgs  gprof.tp   gprof.vrs
@@ -109,7 +109,7 @@ clean: mostlyclean
 distclean: clean
 	-rm -f config.cache config.log config.status Makefile
 maintainer-clean realclean: distclean
-	-rm -f $(DISTSTUFF)
+	-rm -f $(DISTSTUFF) *.info*
 
 Makefile: Makefile.in config.status
 	$(SHELL) config.status
