@@ -103,6 +103,14 @@ struct symbol *lookup_symbol_aux_psymtabs (int block_index,
 					   const namespace_enum namespace,
 					   struct symtab **symtab);
 
+static
+struct symbol *lookup_symbol_aux_minsyms (const char *name,
+					  const char *mangled_name,
+					  const namespace_enum namespace,
+					  int *is_a_field_of_this,
+					  struct symtab **symtab,
+					  int *force_return);
+
 static struct symbol *find_active_alias (struct symbol *sym, CORE_ADDR addr);
 
 /* This flag is used in hppa-tdep.c, and set in hp-symtab-read.c */
@@ -786,9 +794,14 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
 		   int *is_a_field_of_this, struct symtab **symtab)
 {
   struct symbol *sym;
-  struct symtab *s = NULL;
-  struct blockvector *bv;
-  struct minimal_symbol *msymbol;
+
+  /* FIXME: carlton/2002-11-05: This variable is here so that
+     lookup_symbol_aux will sometimes return NULL after receiving a
+     NULL return value from lookup_symbol_aux_minsyms, without
+     proceeding on to the partial symtab and static variable tests.  I
+     suspect that that's a bad idea.  */
+  
+  int force_return;
 
   /* Search specified block and its superiors.  */
 
@@ -875,65 +888,14 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
      a mangled variable that is stored in one of the minimal symbol tables.
      Eventually, all global symbols might be resolved in this way.  */
 
-  if (namespace == VAR_NAMESPACE)
-    {
-      msymbol = lookup_minimal_symbol (name, NULL, NULL);
-      if (msymbol != NULL)
-	{
-	  s = find_pc_sect_symtab (SYMBOL_VALUE_ADDRESS (msymbol),
-				   SYMBOL_BFD_SECTION (msymbol));
-	  if (s != NULL)
-	    {
-	      /* This is a function which has a symtab for its address.  */
-	      bv = BLOCKVECTOR (s);
-	      block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
+  force_return = 0;
 
-              /* This call used to pass `SYMBOL_NAME (msymbol)' as the
-                 `name' argument to lookup_block_symbol.  But the name
-                 of a minimal symbol is always mangled, so that seems
-                 to be clearly the wrong thing to pass as the
-                 unmangled name.  */
-	      sym = lookup_block_symbol (block, name, mangled_name, namespace);
-	      /* We kept static functions in minimal symbol table as well as
-	         in static scope. We want to find them in the symbol table. */
-	      if (!sym)
-		{
-		  block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-		  sym = lookup_block_symbol (block, name,
-                                             mangled_name, namespace);
-		}
-
-	      /* sym == 0 if symbol was found in the minimal symbol table
-	         but not in the symtab.
-	         Return 0 to use the msymbol definition of "foo_".
-
-	         This happens for Fortran  "foo_" symbols,
-	         which are "foo" in the symtab.
-
-	         This can also happen if "asm" is used to make a
-	         regular symbol but not a debugging symbol, e.g.
-	         asm(".globl _main");
-	         asm("_main:");
-	       */
-
-	      if (symtab != NULL)
-		*symtab = s;
-	      return fixup_symbol_section (sym, s->objfile);
-	    }
-	  else if (MSYMBOL_TYPE (msymbol) != mst_text
-		   && MSYMBOL_TYPE (msymbol) != mst_file_text
-		   && !STREQ (name, SYMBOL_NAME (msymbol)))
-	    {
-	      /* This is a mangled variable, look it up by its
-	         mangled name.  */
-	      return lookup_symbol_aux (SYMBOL_NAME (msymbol), mangled_name, NULL,
-					namespace, is_a_field_of_this, symtab);
-	    }
-	  /* There are no debug symbols for this file, or we are looking
-	     for an unmangled variable.
-	     Try to find a matching static symbol below. */
-	}
-    }
+  sym = lookup_symbol_aux_minsyms (name, mangled_name,
+				   namespace, is_a_field_of_this,
+				   symtab, &force_return);
+  
+  if (sym != NULL || force_return == 1)
+    return sym;
 
 #endif
 
@@ -975,87 +937,15 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
      the static check in this case? 
    */
 
-  if (namespace == VAR_NAMESPACE)
-    {
-      msymbol = lookup_minimal_symbol (name, NULL, NULL);
-      if (msymbol != NULL)
-	{
-	  /* OK, we found a minimal symbol in spite of not
-	   * finding any symbol. There are various possible
-	   * explanations for this. One possibility is the symbol
-	   * exists in code not compiled -g. Another possibility
-	   * is that the 'psymtab' isn't doing its job.
-	   * A third possibility, related to #2, is that we were confused 
-	   * by name-mangling. For instance, maybe the psymtab isn't
-	   * doing its job because it only know about demangled
-	   * names, but we were given a mangled name...
-	   */
 
-	  /* We first use the address in the msymbol to try to
-	   * locate the appropriate symtab. Note that find_pc_symtab()
-	   * has a side-effect of doing psymtab-to-symtab expansion,
-	   * for the found symtab.
-	   */
-	  s = find_pc_symtab (SYMBOL_VALUE_ADDRESS (msymbol));
-	  if (s != NULL)
-	    {
-	      bv = BLOCKVECTOR (s);
-	      block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-              /* This call used to pass `SYMBOL_NAME (msymbol)' as the
-                 `name' argument to lookup_block_symbol.  But the name
-                 of a minimal symbol is always mangled, so that seems
-                 to be clearly the wrong thing to pass as the
-                 unmangled name.  */
-	      sym = lookup_block_symbol (block, name, mangled_name, namespace);
-	      /* We kept static functions in minimal symbol table as well as
-	         in static scope. We want to find them in the symbol table. */
-	      if (!sym)
-		{
-		  block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-		  sym = lookup_block_symbol (block, name,
-                                             mangled_name, namespace);
-		}
-	      /* If we found one, return it */
-	      if (sym)
-		{
-		  if (symtab != NULL)
-		    *symtab = s;
-		  return sym;
-		}
+  force_return = 0;
 
-	      /* If we get here with sym == 0, the symbol was 
-	         found in the minimal symbol table
-	         but not in the symtab.
-	         Fall through and return 0 to use the msymbol 
-	         definition of "foo_".
-	         (Note that outer code generally follows up a call
-	         to this routine with a call to lookup_minimal_symbol(),
-	         so a 0 return means we'll just flow into that other routine).
-
-	         This happens for Fortran  "foo_" symbols,
-	         which are "foo" in the symtab.
-
-	         This can also happen if "asm" is used to make a
-	         regular symbol but not a debugging symbol, e.g.
-	         asm(".globl _main");
-	         asm("_main:");
-	       */
-	    }
-
-	  /* If the lookup-by-address fails, try repeating the
-	   * entire lookup process with the symbol name from
-	   * the msymbol (if different from the original symbol name).
-	   */
-	  else if (MSYMBOL_TYPE (msymbol) != mst_text
-		   && MSYMBOL_TYPE (msymbol) != mst_file_text
-		   && !STREQ (name, SYMBOL_NAME (msymbol)))
-	    {
-	      return lookup_symbol_aux (SYMBOL_NAME (msymbol), mangled_name,
-					NULL, namespace, is_a_field_of_this,
-					symtab);
-	    }
-	}
-    }
+  sym = lookup_symbol_aux_minsyms (name, mangled_name,
+				   namespace, is_a_field_of_this,
+				   symtab, &force_return);
+  
+  if (sym != NULL || force_return == 1)
+    return sym;
 
 #endif
 
@@ -1198,6 +1088,130 @@ lookup_symbol_aux_psymtabs (int block_index, const char *name,
 	return fixup_symbol_section (sym, objfile);
       }
   }
+
+  return NULL;
+}
+
+/* Check for the possibility of the symbol being a function or a
+   mangled variable that is stored in one of the minimal symbol
+   tables.  Eventually, all global symbols might be resolved in this
+   way.  */
+
+static struct symbol *
+lookup_symbol_aux_minsyms (const char *name,
+			   const char *mangled_name,
+			   const namespace_enum namespace,
+			   int *is_a_field_of_this,
+			   struct symtab **symtab,
+			   int *force_return)
+{
+  struct symbol *sym;
+  struct blockvector *bv;
+  const struct block *block;
+  struct minimal_symbol *msymbol;
+  struct symtab *s;
+
+  if (namespace == VAR_NAMESPACE)
+    {
+      msymbol = lookup_minimal_symbol (name, NULL, NULL);
+
+      if (msymbol != NULL)
+	{
+	  /* OK, we found a minimal symbol in spite of not finding any
+	     symbol. There are various possible explanations for
+	     this. One possibility is the symbol exists in code not
+	     compiled -g. Another possibility is that the 'psymtab'
+	     isn't doing its job.  A third possibility, related to #2,
+	     is that we were confused by name-mangling. For instance,
+	     maybe the psymtab isn't doing its job because it only
+	     know about demangled names, but we were given a mangled
+	     name...  */
+
+	  /* We first use the address in the msymbol to try to locate
+	     the appropriate symtab. Note that find_pc_sect_symtab()
+	     has a side-effect of doing psymtab-to-symtab expansion,
+	     for the found symtab.  */
+	  s = find_pc_sect_symtab (SYMBOL_VALUE_ADDRESS (msymbol),
+				   SYMBOL_BFD_SECTION (msymbol));
+	  if (s != NULL)
+	    {
+	      /* This is a function which has a symtab for its address.  */
+	      bv = BLOCKVECTOR (s);
+	      block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
+
+	      /* This call used to pass `SYMBOL_NAME (msymbol)' as the
+	         `name' argument to lookup_block_symbol.  But the name
+	         of a minimal symbol is always mangled, so that seems
+	         to be clearly the wrong thing to pass as the
+	         unmangled name.  */
+	      sym =
+		lookup_block_symbol (block, name, mangled_name, namespace);
+	      /* We kept static functions in minimal symbol table as well as
+	         in static scope. We want to find them in the symbol table. */
+	      if (!sym)
+		{
+		  block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
+		  sym = lookup_block_symbol (block, name,
+					     mangled_name, namespace);
+		}
+
+	      /* NOTE: carlton/2002-12-04: The following comment was
+		 taken from a time when two versions of this function
+		 were part of the body of lookup_symbol_aux: this
+		 comment was taken from the version of the function
+		 that was #ifdef HPUXHPPA, and the comment was right
+		 before the 'return NULL' part of lookup_symbol_aux.
+		 (Hence the "Fall through and return 0" comment.)
+		 Elena did some digging into the situation for
+		 Fortran, and she reports:
+
+		 "I asked around (thanks to Jeff Knaggs), and I think
+		 the story for Fortran goes like this:
+
+		 "Apparently, in older Fortrans, '_' was not part of
+		 the user namespace.  g77 attached a final '_' to
+		 procedure names as the exported symbols for linkage
+		 (foo_) , but the symbols went in the debug info just
+		 like 'foo'. The rationale behind this is not
+		 completely clear, and maybe it was done to other
+		 symbols as well, not just procedures."  */
+
+	      /* If we get here with sym == 0, the symbol was 
+	         found in the minimal symbol table
+	         but not in the symtab.
+	         Fall through and return 0 to use the msymbol 
+	         definition of "foo_".
+	         (Note that outer code generally follows up a call
+	         to this routine with a call to lookup_minimal_symbol(),
+	         so a 0 return means we'll just flow into that other routine).
+
+	         This happens for Fortran  "foo_" symbols,
+	         which are "foo" in the symtab.
+
+	         This can also happen if "asm" is used to make a
+	         regular symbol but not a debugging symbol, e.g.
+	         asm(".globl _main");
+	         asm("_main:");
+	       */
+
+	      if (symtab != NULL && sym != NULL)
+		*symtab = s;
+	      *force_return = 1;
+	      return fixup_symbol_section (sym, s->objfile);
+	    }
+	  else if (MSYMBOL_TYPE (msymbol) != mst_text
+		   && MSYMBOL_TYPE (msymbol) != mst_file_text
+		   && !STREQ (name, SYMBOL_NAME (msymbol)))
+	    {
+	      /* This is a mangled variable, look it up by its
+	         mangled name.  */
+	      *force_return = 1;
+	      return lookup_symbol_aux (SYMBOL_NAME (msymbol), mangled_name,
+					NULL, namespace, is_a_field_of_this,
+					symtab);
+	    }
+	}
+    }
 
   return NULL;
 }

@@ -1,3 +1,9 @@
+2002-12-04  David Carlton  <carlton@math.stanford.edu>
+
+	* symtab.c (lookup_symbol_aux): Move minsym code into a separate
+	function.
+	(lookup_symbol_aux_minsyms): New function.
+
 2002-12-04  J. Brobecker  <brobecker@gnat.com>
 
 	* pa64solib.c: s/boolean/int/. Fixes a build failure on hppa64-hpux.
