@@ -24,8 +24,6 @@
 
 #define GDB_MULTI_ARCH GDB_MULTI_ARCH_PARTIAL
 
-#include "regcache.h"
-
 /* FIXME: kettenis/2000-06-12: These do not belong here.  */
 extern void print_387_control_word (unsigned int);
 extern void print_387_status_word (unsigned int);
