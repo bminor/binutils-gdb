@@ -1,3 +1,8 @@
+Mon Jul 24 07:46:02 CDT 2000  Clinton Popetz  <cpopetz@cygnus.com>
+
+	* gdb.java/configure.in (AC_INIT): Use jmisc.exp.
+	* gdb.java/configure: Rebuild.
+
 Sun Jul 23 21:42:34 2000  Anthony Green  <green@redhat.com>
 
 	* gdb.java/jv-exp.exp: New file.

@@ -1,7 +1,7 @@
 dnl Process this file file with autoconf to produce a configure script.
 
 AC_PREREQ(2.5)
-AC_INIT(javamisc.exp)
+AC_INIT(jmisc.exp)
 
 CC=${CC-cc}
 AC_SUBST(CC)
