@@ -26,7 +26,8 @@ echo Sanitizing `pwd`...
 # with rm -rf.
 
 Things-to-keep:
-
+i386aout.c
+i386aout.sc
 ChangeLog
 Makefile.in
 config
@@ -85,7 +86,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.18  1991/10/12 06:43:01  bothner
+# Revision 1.19  1991/11/04 00:46:44  steve
+# 	 i386 aout changes from Bob Kukura
+#
+# Revision 1.18  1991/10/12  06:43:01  bothner
 # Fixed typo.
 #
 # Revision 1.17  1991/10/11  19:31:38  steve
