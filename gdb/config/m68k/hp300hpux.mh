@@ -11,5 +11,3 @@ NATDEPFILES= infptrace.o inftarg.o fork-child.o hp300ux-nat.o
 SYSV_DEFINE=-DSYSV
 REGEX=regex.o
 REGEX1=regex.o
-ALLOCA=alloca.o
-ALLOCA1=alloca.o
