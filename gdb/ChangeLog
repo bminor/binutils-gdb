@@ -1,3 +1,8 @@
+Thu Aug  4 16:26:06 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
+
+	* remote.c (read_frame): Calculate run length encoded checksum correctly.
+	* config/sh/stub.c: New file.
+
 Thu Aug  4 14:34:12 1994  Stu Grossman  (grossman@cygnus.com)
 
 	* target.c (find_default_run_target):  Make sure to_can_run is set

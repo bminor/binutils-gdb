@@ -126,10 +126,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 					remote target.
 
 	Responses can be run-length encoded to save space.  A '*' means that
-	the next two characters are hex digits giving a repeat count which
+	the next character is an ASCII encoding giving a repeat count which
 	stands for that many repititions of the character preceding the '*'.
-	Note that this means that responses cannot contain '*'.  Example:
-	"0*03" means the same as "0000".  */
+	The encoding is n+29, yielding a printable character where n >=3 
+	(which is where rle starts to win).  Don't use an n > 126.
+
+	So 
+	"0* " means the same as "0000".  */
 
 #include "defs.h"
 #include <string.h>
@@ -1254,6 +1257,7 @@ read_frame (buf)
 	    return 0;
 	  }
 	case '*':		/* Run length encoding */
+	  csum += c;
 	  c = readchar (remote_timeout);
 	  csum += c;
 	  c = c - ' ' + 3;	/* Compute repeat count */
@@ -1269,8 +1273,8 @@ read_frame (buf)
 	  printf_filtered ("Repeat count %d too large for buffer: ", c);
 	  puts_filtered (buf);
 	  puts_filtered ("\n");
-
 	  return 0;
+
 	default:
 	  if (bp < buf + PBUFSIZ - 1)
 	    {
