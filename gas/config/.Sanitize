@@ -61,6 +61,7 @@ m68k.mt
 m68kcoff.mt
 m88k-opcode.h
 m88k.patches
+m88kcoff.mt
 mips-big.mt
 mips-lit.mt
 obj-aout.c
