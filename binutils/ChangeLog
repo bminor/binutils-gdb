@@ -1,3 +1,14 @@
+2003-12-23  Ralf Baechle  <ralf@gnu.org>
+	    Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
+
+	* objcopy.c (bfd_flags_to_set, bfd_flags_to_clear): New variables
+	to handle flags for tweaking.
+	(copy_options): New options: impure, pure, readonly-text,
+	writable-text.
+	(copy_usage, copy_object, command_line_switch): Handle the new
+	options.
+	* doc/binutils.texi: Document the new options.
+
 2003-12-22  Jakub Jelinek  <jakub@redhat.com>
 
 	* objdump.c (disassemble_bytes): Subtract rel_offset from printed

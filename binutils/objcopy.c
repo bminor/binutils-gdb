@@ -148,6 +148,10 @@ static bfd_vma pad_to;
 /* Use alternate machine code?  */
 static int use_alt_mach_code = 0;
 
+/* Output BFD flags user wants to set or clear */
+static flagword bfd_flags_to_set;
+static flagword bfd_flags_to_clear;
+
 /* List of sections to add.  */
 struct section_add
 {
@@ -237,7 +241,11 @@ enum command_line_switch
     OPTION_PREFIX_ALLOC_SECTIONS,
     OPTION_FORMATS_INFO,
     OPTION_ADD_GNU_DEBUGLINK,
-    OPTION_ONLY_KEEP_DEBUG
+    OPTION_ONLY_KEEP_DEBUG,
+    OPTION_READONLY_TEXT,
+    OPTION_WRITABLE_TEXT,
+    OPTION_PURE,
+    OPTION_IMPURE
   };
 
 /* Options to handle if running as "strip".  */
@@ -295,6 +303,7 @@ static struct option copy_options[] =
   {"format", required_argument, 0, 'F'}, /* Obsolete */
   {"gap-fill", required_argument, 0, OPTION_GAP_FILL},
   {"help", no_argument, 0, 'h'},
+  {"impure", no_argument, 0, OPTION_IMPURE},
   {"info", no_argument, 0, OPTION_FORMATS_INFO},
   {"input-format", required_argument, 0, 'I'}, /* Obsolete */
   {"input-target", required_argument, 0, 'I'},
@@ -316,6 +325,8 @@ static struct option copy_options[] =
   {"prefix-sections", required_argument, 0, OPTION_PREFIX_SECTIONS},
   {"prefix-alloc-sections", required_argument, 0, OPTION_PREFIX_ALLOC_SECTIONS},
   {"preserve-dates", no_argument, 0, 'p'},
+  {"pure", no_argument, 0, OPTION_PURE},
+  {"readonly-text", no_argument, 0, OPTION_READONLY_TEXT},
   {"redefine-sym", required_argument, 0, OPTION_REDEFINE_SYM},
   {"redefine-syms", required_argument, 0, OPTION_REDEFINE_SYMS},
   {"remove-leading-char", no_argument, 0, OPTION_REMOVE_LEADING_CHAR},
@@ -337,6 +348,7 @@ static struct option copy_options[] =
   {"weaken-symbol", required_argument, 0, 'W'},
   {"weaken-symbols", required_argument, 0, OPTION_WEAKEN_SYMBOLS},
   {"wildcard", no_argument, 0, 'w'},
+  {"writable-text", no_argument, 0, OPTION_WRITABLE_TEXT},
   {0, no_argument, 0, 0}
 };
 
@@ -434,6 +446,10 @@ copy_usage (FILE *stream, int exit_status)
      --keep-global-symbols <file>  -G for all symbols listed in <file>\n\
      --weaken-symbols <file>       -W for all symbols listed in <file>\n\
      --alt-machine-code <index>    Use alternate machine code for output\n\
+     --writable-text               Mark the output text as writable\n\
+     --readonly-text               Make the output text write protected\n\
+     --pure                        Mark the output file as demand paged\n\
+     --impure                      Mark the output file as impure\n\
      --prefix-symbols <prefix>     Add <prefix> to start of every symbol name\n\
      --prefix-sections <prefix>    Add <prefix> to start of every section name\n\
      --prefix-alloc-sections <prefix>\n\
@@ -1127,10 +1143,15 @@ copy_object (bfd *ibfd, bfd *obfd)
      need to be set for a core file.  */
   if (bfd_get_format (obfd) != bfd_core)
     {
+      flagword flags;
+
+      flags = bfd_get_file_flags (ibfd);
+      flags |= bfd_flags_to_set;
+      flags &= ~bfd_flags_to_clear;
+      flags &= bfd_applicable_file_flags (obfd);
+
       if (!bfd_set_start_address (obfd, start)
-	  || !bfd_set_file_flags (obfd,
-				  (bfd_get_file_flags (ibfd)
-				   & bfd_applicable_file_flags (obfd))))
+	  || !bfd_set_file_flags (obfd, flags))
 	RETURN_NONFATAL (bfd_get_filename (ibfd));
     }
 
@@ -2782,6 +2803,26 @@ copy_main (int argc, char *argv[])
 
 	case OPTION_PREFIX_ALLOC_SECTIONS:
 	  prefix_alloc_sections_string = optarg;
+	  break;
+
+	case OPTION_READONLY_TEXT:
+	  bfd_flags_to_set |= WP_TEXT;
+	  bfd_flags_to_clear &= ~WP_TEXT;
+	  break;
+
+	case OPTION_WRITABLE_TEXT:
+	  bfd_flags_to_clear |= WP_TEXT;
+	  bfd_flags_to_set &= ~WP_TEXT;
+	  break;
+
+	case OPTION_PURE:
+	  bfd_flags_to_set |= D_PAGED;
+	  bfd_flags_to_clear &= ~D_PAGED;
+	  break;
+
+	case OPTION_IMPURE:
+	  bfd_flags_to_clear |= D_PAGED;
+	  bfd_flags_to_set &= ~D_PAGED;
 	  break;
 
 	case 0:

@@ -976,6 +976,10 @@ objcopy [@option{-F} @var{bfdname}|@option{--target=}@var{bfdname}]
         [@option{--prefix-alloc-sections=}@var{string}]
         [@option{--add-gnu-debuglink=}@var{path-to-file}]
         [@option{--only-keep-debug}]
+        [@option{--writable-text}]
+        [@option{--readonly-text}]
+        [@option{--pure}]
+        [@option{--impure}]
         [@option{-v}|@option{--verbose}]
         [@option{-V}|@option{--version}]  
         [@option{--help}] [@option{--info}]
@@ -1356,6 +1360,22 @@ If the output architecture has alternate machine codes, use the
 a machine is assigned an official code and the tool-chain adopts the 
 new code, but other applications still depend on the original code
 being used.
+
+@item --writable-text
+Mark the output text as writable.  This option isn't meaningful for all
+object file formats.
+
+@item --readonly-text
+Make the output text write protected.  This option isn't meaningful for all
+object file formats.
+
+@item --pure
+Mark the output file as demand paged.  This option isn't meaningful for all
+object file formats.
+
+@item --impure
+Mark the output file as impure.  This option isn't meaningful for all
+object file formats.
 
 @item --prefix-symbols=@var{string}
 Prefix all symbols in the output file with @var{string}.
