@@ -47,9 +47,6 @@ f:void:tracepoint_create:int number:number
 f:void:tracepoint_delete:int number:number
 f:void:tracepoint_modify:int number:number
 f:void:architecture_changed:void
-f:void:target_changed:void
-f:void:selected_frame_level_changed:int level:level
-f:void:selected_thread_changed:int thread_num:thread_num
 EOF
   grep -v '^#'
 }

@@ -1,3 +1,12 @@
+2004-04-30  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb-events.sh (selected_thread_changed)
+	(selected_frame_level_changed, target_changed): Delete.
+	* gdb-events.h, gdb-events.c: Re-generate.
+	* valops.c (value_assign): Update.
+	* stack.c (select_frame_command, up_silently_base)
+	(down_silently_base): Update.
+
 2004-04-29  Andrew Cagney  <cagney@redhat.com>
 
 	* mips-tdep.c (mips_register_type): Re-write, handle 32-bit ABI

@@ -1703,8 +1703,6 @@ select_frame_command (char *level_exp, int from_tty)
   frame = parse_frame_specification (level_exp);
 
   select_frame (frame);
-  if (level != frame_relative_level (deprecated_selected_frame))
-    selected_frame_level_changed_event (frame_relative_level (deprecated_selected_frame));
 }
 
 /* The "frame" command.  With no arg, print selected frame briefly.
@@ -1747,7 +1745,6 @@ up_silently_base (char *count_exp)
   if (count1 != 0 && count_exp == 0)
     error ("Initial frame selected; you cannot go up.");
   select_frame (fi);
-  selected_frame_level_changed_event (frame_relative_level (deprecated_selected_frame));
 }
 
 static void
@@ -1791,7 +1788,6 @@ down_silently_base (char *count_exp)
     }
 
   select_frame (frame);
-  selected_frame_level_changed_event (frame_relative_level (deprecated_selected_frame));
 }
 
 static void
