@@ -48,9 +48,10 @@ INSTALL = @INSTALL@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_DATA = @INSTALL_DATA@
 
-AR = ar
+AR = @AR@
 AR_FLAGS = qv
 RANLIB = @RANLIB@
+AWK = @AWK@
 
 # Flags that describe where you can find the termcap library.
 # This can be overridden in the host Makefile fragment file.
@@ -587,6 +588,7 @@ init.c: $(OBS) $(TSOBS)
 	    -e '/udip2soc.o/d' \
 	    -e '/udi2go32.o/d' \
 	    -e '/version.o/d' \
+	    -e '/^[a-z0-9A-Z_]*_[SU].o/d' \
 	    -e '/[a-z0-9A-Z_]*-exp.tab.o/d' \
 	    -e 's/\.o/.c/'` ; \
 	  case $$filename in \

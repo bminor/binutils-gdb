@@ -1,3 +1,18 @@
+Thu Apr 11 21:28:02 1996  Fred Fish  <fnf@cygnus.com>
+
+	From: Miles Bader  <miles@gnu.ai.mit.edu>
+	* configure.in (AC_CHECK_HEADERS): check for endian.h.
+	Use AC_CHECK_TOOL to find AR & RANLIB.  Add AC_PROG_AWK.
+	Add host & target cases for i[345]86-*-gnu*.
+	* config.in: Regenerate with autoheader.
+	* configure: Regenerate with autoconf.
+	* Makefile.in (AR, AWK): Set from corresponding autoconf substs.
+	(init.c): Don't scan mig-generated files.
+	* defs.h (endian.h): Include if HAVE_ENDIAN_H defined.
+	* config/nm-m3.h (ATTACH_NO_WAIT): Define.
+	* infcmd.c (attach_command): Use "#ifndef ATTACH_NO_WAIT"
+ 	rather than "#ifndef MACH".
+
 Thu Apr 11 18:49:42 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* remote.c (remotewritesize): New GDB variable, controls size
@@ -53,7 +68,7 @@ Tue Apr  9 01:23:05 1996  Wilfried Moser (Alcatel)  <moser@rtl.cygnus.com>
 	* valops.c (value_slice): Use lowbound instead of lowerbound for
 	call to slice_range_type to get correct bounds.
 
-Mon Apr  8 12:53:56 1996  Fred Fish  <fnf@phydeaux.cygnus.com>
+Mon Apr  8 12:53:56 1996  Fred Fish  <fnf@cygnus.com>
 
 	* Makefile.in (scm-exp.o, scm-lang.o, scm-valprint.o): Add targets and
 	dependencies.

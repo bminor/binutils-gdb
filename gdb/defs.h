@@ -706,6 +706,10 @@ extern char *strerror ();
 
 /* HOST_BYTE_ORDER must be defined to one of these.  */
 
+#ifdef HAVE_ENDIAN_H
+#include <endian.h>
+#endif
+
 #if !defined (BIG_ENDIAN)
 #define BIG_ENDIAN 4321
 #endif
