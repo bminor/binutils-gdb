@@ -91,6 +91,9 @@ static enum sparc_opcode_arch_val warn_after_architecture;
    has been used in -64.  */
 static int no_undeclared_regs;
 
+/* Non-zero if we should try to relax jumps and calls.  */
+static int sparc_relax;
+
 /* Non-zero if we are generating PIC code.  */
 int sparc_pic_code;
 
@@ -415,6 +418,10 @@ struct option md_longopts[] = {
 #define OPTION_UNDECLARED_REGS (OPTION_MD_BASE + 13)
   {"undeclared-regs", no_argument, NULL, OPTION_UNDECLARED_REGS},
 #endif
+#define OPTION_RELAX (OPTION_MD_BASE + 14)
+  {"relax", no_argument, NULL, OPTION_RELAX},
+#define OPTION_NO_RELAX (OPTION_MD_BASE + 15)
+  {"no-relax", no_argument, NULL, OPTION_NO_RELAX},
   {NULL, no_argument, NULL, 0}
 };
 size_t md_longopts_size = sizeof(md_longopts);
@@ -574,6 +581,14 @@ md_parse_option (c, arg)
       break;
 #endif
 
+    case OPTION_RELAX:
+      sparc_relax = 1;
+      break;
+
+    case OPTION_NO_RELAX:
+      sparc_relax = 0;
+      break;
+
     default:
       return 0;
     }
@@ -605,7 +620,9 @@ md_show_usage (stream)
 			specify variant of SPARC architecture\n\
 -bump			warn when assembler switches architectures\n\
 -sparc			ignored\n\
---enforce-aligned-data	force .long, etc., to be aligned correctly\n"));
+--enforce-aligned-data	force .long, etc., to be aligned correctly\n\
+-relax			relax jumps and branches (default)\n\
+-no-relax		avoid changing any jumps and branches\n"));
 #ifdef OBJ_AOUT
   fprintf (stream, _("\
 -k			generate PIC\n"));
@@ -2915,7 +2932,91 @@ md_apply_fix3 (fixP, value, segment)
 	      || fixP->fx_addsy == NULL
 	      || symbol_section_p (fixP->fx_addsy))
 	    ++val;
+
 	  insn |= val & 0x3fffffff;
+
+	  /* See if we have a delay slot */
+	  if (sparc_relax && fixP->fx_where + 8 <= fixP->fx_frag->fr_fix)
+	    {
+#define G0		0
+#define O7		15
+#define XCC		(2 << 20)
+#define COND(x)		(((x)&0xf)<<25)
+#define CONDA		COND(0x8)
+#define INSN_BPA	(F2(0,1) | CONDA | BPRED | XCC)
+#define INSN_BA		(F2(0,2) | CONDA)
+#define INSN_OR		F3(2, 0x2, 0)
+#define INSN_NOP	F2(0,4)
+
+	      long delay;
+
+	      /* If the instruction is a call with either:
+		 restore
+		 arithmetic instruction with rd == %o7
+		 where rs1 != %o7 and rs2 if it is register != %o7
+		 then we can optimize if the call destination is near
+		 by changing the call into a branch always.  */
+	      if (INSN_BIG_ENDIAN)
+		delay = bfd_getb32 ((unsigned char *) buf + 4);
+	      else
+		delay = bfd_getl32 ((unsigned char *) buf + 4);
+	      if ((insn & OP(~0)) != OP(1) || (delay & OP(~0)) != OP(2))
+		break;
+	      if ((delay & OP3(~0)) != OP3(0x3d) /* restore */
+		  && ((delay & OP3(0x28)) != 0 /* arithmetic */
+		      || ((delay & RD(~0)) != RD(O7))))
+		break;
+	      if ((delay & RS1(~0)) == RS1(O7)
+		  || ((delay & F3I(~0)) == 0
+		      && (delay & RS2(~0)) == RS2(O7)))
+		break;
+	      /* Ensure the branch will fit into simm22.  */
+	      if ((val & 0x3fe00000)
+		  && (val & 0x3fe00000) != 0x3fe00000)
+		break;
+	      /* Check if the arch is v9 and branch will fit
+		 into simm19.  */
+	      if (((val & 0x3c0000) == 0
+		   || (val & 0x3c0000) == 0x3c0000)
+		  && (sparc_arch_size == 64
+		      || current_architecture >= SPARC_OPCODE_ARCH_V9))
+		/* ba,pt %xcc */
+		insn = INSN_BPA | (val & 0x7ffff);
+	      else
+		/* ba */
+		insn = INSN_BA | (val & 0x3fffff);
+	      if (fixP->fx_where >= 4
+		  && ((delay & (0xffffffff ^ RS1(~0)))
+		      == (INSN_OR | RD(O7) | RS2(G0))))
+		{
+		  long setter;
+		  int reg;
+
+		  if (INSN_BIG_ENDIAN)
+		    setter = bfd_getb32 ((unsigned char *) buf - 4);
+		  else
+		    setter = bfd_getl32 ((unsigned char *) buf - 4);
+		  if ((setter & (0xffffffff ^ RD(~0)))
+		       != (INSN_OR | RS1(O7) | RS2(G0)))
+		    break;
+		  /* The sequence was
+		     or %o7, %g0, %rN
+		     call foo
+		     or %rN, %g0, %o7
+
+		     If call foo was replaced with ba, replace
+		     or %rN, %g0, %o7 with nop.  */
+		  reg = (delay & RS1(~0)) >> 14;
+		  if (reg != ((setter & RD(~0)) >> 25)
+		      || reg == G0 || reg == O7)
+		    break;
+
+		  if (INSN_BIG_ENDIAN)
+		    bfd_putb32 (INSN_NOP, (unsigned char *) buf + 4);
+		  else
+		    bfd_putl32 (INSN_NOP, (unsigned char *) buf + 4);
+		}
+	    }
 	  break;
 
 	case BFD_RELOC_SPARC_11:

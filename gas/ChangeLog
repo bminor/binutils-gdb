@@ -1,3 +1,10 @@
+2000-05-26  Jakub Jelinek  <jakub@redhat.com>
+
+	* config/tc-sparc.c (sparc_relax): New.
+	(md_longopts): Add -relax and -no-relax options.
+	(md_parse_options, md_show_usage): Likewise.
+	(md_apply_fix3): Optimize tail call into branch always if possible.
+
 Thu May  4 15:27:07 2000  Donald Lindsay  <dlindsay@cygnus.com>
 
 	* config/tc-d10v.c (write_2_short, parallel_ok, md_assemble,
