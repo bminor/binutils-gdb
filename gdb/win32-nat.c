@@ -327,8 +327,8 @@ handle_load_dll (char *eventp)
 			     &done);
 	}
 
-
-      dos_path_to_unix_path (dll_name, unix_dll_name);
+      /* FIXME: Can we delete this call?  */
+      cygwin32_conv_to_posix_path (dll_name, unix_dll_name);
 
       /* FIXME!! It would be nice to define one symbol which pointed to the 
          front of the dll if we can't find any symbols. */
@@ -630,7 +630,7 @@ child_create_inferior (exec_file, allargs, env)
   memset (&si, 0, sizeof (si));
   si.cb = sizeof (si);
 
-  unix_path_to_dos_path (exec_file, real_path);
+  cygwin32_conv_to_win32_path (exec_file, real_path);
 
   flags = DEBUG_ONLY_THIS_PROCESS; 
 
@@ -651,24 +651,17 @@ child_create_inferior (exec_file, allargs, env)
   {
     /* This code use to assume all env vars were file names and would
        translate them all to win32 style.  That obviously doesn't work in the
-       general case.  The current rule is that the user either works solely
-       with win32 style path names or with posix style path names and that
-       all env vars are already set up appropriately.  At any rate it is
-       wrong for us to willy-nilly change them.
-
-       However, we need to handle PATH because we're about to call
-       CreateProcess and it uses PATH to find DLL's.  Fortunately PATH
-       has a well-defined value in both posix and win32 environments.
-       cygwin.dll will change it back to posix style if necessary.  If we're
-       working with win32 style path names, we don't need to do anything at
-       all.  */
+       general case.  The current rule is that we only translate PATH.
+       We need to handle PATH because we're about to call CreateProcess and
+       it uses PATH to find DLL's.  Fortunately PATH has a well-defined value
+       in both posix and win32 environments.  cygwin.dll will change it back
+       to posix style if necessary.  */
 
     static const char *conv_path_names[] =
       {
 	"PATH=",
 	0
       };
-    int posix_rules_p = sysconf (_SC_PATH_RULES) == _PATH_RULES_POSIX;
 
     /* CreateProcess takes the environment list as a null terminated set of
        strings (i.e. two nulls terminate the list).  */
@@ -676,24 +669,22 @@ child_create_inferior (exec_file, allargs, env)
     /* Get total size for env strings.  */
     for (envlen = 0, i = 0; env[i] && *env[i]; i++)
       {
-	if (posix_rules_p)
-	  {
-	    int j, len;
+	int j, len;
 
-	    for (j = 0; conv_path_names[j]; j++)
+	for (j = 0; conv_path_names[j]; j++)
+	  {
+	    len = strlen (conv_path_names[j]);
+	    if (strncmp (conv_path_names[j], env[i], len) == 0)
 	      {
-		len = strlen (conv_path_names[j]);
-		if (strncmp (conv_path_names[j], env[i], len) == 0)
-		  {
-		    envlen += len
-		      + cygwin32_posix_to_win32_path_list_buf_size (env[i] + len);
-		    break;
-		  }
+		if (cygwin32_posix_path_list_p (env[i] + len))
+		  envlen += len
+		    + cygwin32_posix_to_win32_path_list_buf_size (env[i] + len);
+		else
+		  envlen += strlen (env[i]) + 1;
+		break;
 	      }
-	    if (conv_path_names[j] == NULL)
-	      envlen += strlen (env[i]) + 1;
 	  }
-	else
+	if (conv_path_names[j] == NULL)
 	  envlen += strlen (env[i]) + 1;
       }
 
@@ -702,25 +693,26 @@ child_create_inferior (exec_file, allargs, env)
     /* Copy env strings into new buffer.  */
     for (temp = winenv, i = 0; env[i] && *env[i]; i++) 
       {
-	if (posix_rules_p)
-	  {
-	    int j, len;
+	int j, len;
 
-	    for (j = 0; conv_path_names[j]; j++)
+	for (j = 0; conv_path_names[j]; j++)
+	  {
+	    len = strlen (conv_path_names[j]);
+	    if (strncmp (conv_path_names[j], env[i], len) == 0)
 	      {
-		len = strlen (conv_path_names[j]);
-		if (strncmp (conv_path_names[j], env[i], len) == 0)
+		if (cygwin32_posix_path_list_p (env[i] + len))
 		  {
 		    memcpy (temp, env[i], len);
 		    cygwin32_posix_to_win32_path_list (env[i] + len, temp + len);
-		    break;
 		  }
+		else
+		  strcpy (temp, env[i]);
+		break;
 	      }
-	    if (conv_path_names[j] == NULL)
-	      strcpy (temp, env[i]);
 	  }
-	else
+	if (conv_path_names[j] == NULL)
 	  strcpy (temp, env[i]);
+
 	temp += strlen (temp) + 1;
       }
 

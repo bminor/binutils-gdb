@@ -1,3 +1,10 @@
+Mon Jul 15 16:55:48 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* win32-nat.c (handle_load_dll): dos_path_to_unix_path renamed to
+	cygwin32_conv_to_posix_path.
+	(child_create_inferior): unix_path_to_dos_path renamed to
+	cygwin32_conv_to_win32_path.  Rewrite code to translate PATH.
+
 Mon Jul 15 16:44:05 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* defs.h printcmd.c:  Create global disassemble_info structure
