@@ -342,6 +342,7 @@ static struct serial_ops tcp_ops =
   tcp_noflush_set_tty_state,
   tcp_setbaudrate,
   tcp_setstopbits,
+  tcp_return_0,	/* wait for output to drain */
 };
 
 void

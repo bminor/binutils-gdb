@@ -1,3 +1,19 @@
+Fri Mar  6 13:10:27 1998  Fred Fish  <fnf@cygnus.com>
+
+	* utils.c (quit): Call SERIAL_DRAIN_OUTPUT rather than
+ 	SERIAL_FLUSH_OUTPUT.
+	* serial.h (struct serial_ops): Add drain_output, pointer to
+ 	function that waits for output to drain.
+	(SERIAL_DRAIN_OUTPUT): Macro to wait for output to drain.
+	* ser-unix.c (hardwire_drain_output): New function and prototype.
+
+	* ser-unix.c (hardwire_ops): Add entry for drain_output function.
+	* ser-tcp.c (tcp_ops): Ditto.
+	* ser-ocd.c (ocd_ops): Ditto.
+	* ser-mac.c (mac_ops): Ditto.
+	* ser-go32.c (dos_ops): Ditto.
+	* ser-e7kpc.c (e7000pc_ops): Ditto.
+
 Thu Mar  5 16:07:41 1998  Michael Snyder  (msnyder@cleaver.cygnus.com)
 
 	* sparcl-tdep.c: fix #endif comments

@@ -77,6 +77,7 @@ static int hardwire_set_tty_state PARAMS ((serial_t scb, serial_ttystate state))
 static int hardwire_noflush_set_tty_state PARAMS ((serial_t, serial_ttystate,
 						   serial_ttystate));
 static void hardwire_print_tty_state PARAMS ((serial_t, serial_ttystate));
+static int hardwire_drain_output PARAMS ((serial_t));
 static int hardwire_flush_output PARAMS ((serial_t));
 static int hardwire_flush_input PARAMS ((serial_t));
 static int hardwire_send_break PARAMS ((serial_t));
@@ -273,6 +274,38 @@ hardwire_print_tty_state (scb, ttystate)
 
   printf_filtered ("lmode:  0x%x\n", state->lmode);
 #endif
+}
+
+/* Wait for the output to drain away, as opposed to flushing (discarding) it */
+
+static int
+hardwire_drain_output (scb)
+     serial_t scb;
+{
+#ifdef HAVE_TERMIOS
+  return tcdrain (scb->fd);
+#endif
+
+#ifdef HAVE_TERMIO
+  return ioctl (scb->fd, TCSBRK, 1);
+#endif
+
+#ifdef HAVE_SGTTY
+  /* Get the current state and then restore it using TIOCSETP,
+     which should cause the output to drain and pending input
+     to be discarded. */
+  {
+    struct hardwire_ttystate state;
+    if (get_tty_state (scb, &state))
+      {
+	return (-1);
+      }
+    else
+      {
+	return (ioctl (scb->fd, TIOCSETP, &state.sgttyb));
+      }
+  }
+#endif  
 }
 
 static int
@@ -727,6 +760,7 @@ static struct serial_ops hardwire_ops =
   hardwire_noflush_set_tty_state,
   hardwire_setbaudrate,
   hardwire_setstopbits,
+  hardwire_drain_output,	/* wait for output to drain */
 };
 
 void

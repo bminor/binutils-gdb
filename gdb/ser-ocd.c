@@ -197,6 +197,7 @@ static struct serial_ops ocd_ops =
   ocd_print_tty_state,
   ocd_noflush_set_tty_state,
   ocd_setbaudrate,
+  ocd_noop,		/* wait for output to drain */
 };
 
 void

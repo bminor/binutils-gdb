@@ -453,6 +453,7 @@ static struct serial_ops e7000pc_ops =
   e7000pc_print_tty_state,
   e7000pc_noflush_set_tty_state,
   e7000pc_setbaudrate,
+  e7000pc_noop,			/* wait for output to drain */
 };
 
 void

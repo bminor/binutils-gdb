@@ -352,6 +352,7 @@ static struct serial_ops mac_ops =
   mac_noflush_set_tty_state,
   mac_set_baud_rate,
   mac_set_stop_bits,
+  mac_noop,			/* wait for output to drain */
 };
 
 void
