@@ -80,7 +80,7 @@ struct so_list
     struct load_module_desc pa64_solib_desc;
     struct section_table *sections;
     struct section_table *sections_end;
-    boolean loaded;
+    int loaded;
   };
 
 static struct so_list *so_list_head;
@@ -111,8 +111,8 @@ typedef struct
     CORE_ADDR dld_flags_addr;
     LONGEST dld_flags;
     sec_ptr dyninfo_sect;
-    boolean have_read_dld_descriptor;
-    boolean is_valid;
+    int have_read_dld_descriptor;
+    int is_valid;
     CORE_ADDR load_map;
     CORE_ADDR load_map_addr;
     struct load_module_desc dld_desc;
@@ -127,11 +127,11 @@ static void pa64_solib_sharedlibrary_command (char *, int);
 
 static void *pa64_target_read_memory (void *, CORE_ADDR, size_t, int);
 
-static boolean read_dld_descriptor (struct target_ops *, int readsyms);
+static int read_dld_descriptor (struct target_ops *, int readsyms);
 
-static boolean read_dynamic_info (asection *, dld_cache_t *);
+static int read_dynamic_info (asection *, dld_cache_t *);
 
-static void add_to_solist (boolean, char *, int, struct load_module_desc *,
+static void add_to_solist (int, char *, int, struct load_module_desc *,
 			   CORE_ADDR, struct target_ops *);
 
 /* When examining the shared library for debugging information we have to
@@ -935,7 +935,7 @@ so_lib_thread_start_addr (struct so_list *so)
    descriptor.  If the library is archive bound, then return zero, else
    return nonzero.  */
 
-static boolean
+static int
 read_dld_descriptor (struct target_ops *target, int readsyms)
 {
   char *dll_path;
@@ -1004,7 +1004,7 @@ read_dld_descriptor (struct target_ops *target, int readsyms)
    which is stored in dld_cache.  The routine elf_locate_base in solib.c 
    was used as a model for this.  */
 
-static boolean
+static int
 read_dynamic_info (asection *dyninfo_sect, dld_cache_t *dld_cache_p)
 {
   char *buf;
@@ -1102,7 +1102,7 @@ pa64_target_read_memory (void *buffer, CORE_ADDR ptr, size_t bufsiz, int ident)
    be read from the inferior process at the address load_module_desc_addr.  */
 
 static void
-add_to_solist (boolean from_tty, char *dll_path, int readsyms,
+add_to_solist (int from_tty, char *dll_path, int readsyms,
 	       struct load_module_desc *load_module_desc_p,
 	       CORE_ADDR load_module_desc_addr, struct target_ops *target)
 {

@@ -1,5 +1,9 @@
 2002-12-04  J. Brobecker  <brobecker@gnat.com>
 
+	* pa64solib.c: s/boolean/int/. Fixes a build failure on hppa64-hpux.
+
+2002-12-04  J. Brobecker  <brobecker@gnat.com>
+
 	* config/pa/tm-hppah.h (PC_IN_SIGTRAMP): Renamed from IN_SIGTRAMP,
 	which is an obsolete macro name.
 
