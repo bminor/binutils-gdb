@@ -1,5 +1,8 @@
 Wed Nov 20 18:35:56 1991  John Gilmore  (gnu at cygnus.com)
 
+	* Remove gdb/hp-include.  Support for HP a.out oddities should be
+	in BFD, not in GDB.  Move gdb/hp-include/a.out.h to include/a.out.hp.h.
+
 	* infptrace.c, tm-sun386.h:  Cashier <a.out.gnu.h>, remove refs.
 
 	* configure.in, xconfig, tconfig, Makefile.in, doc/gdbint.texinfo:
