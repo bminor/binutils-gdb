@@ -1,3 +1,8 @@
+Thu Jun  9 06:52:29 1994  Bill Cox  (bill@rtl.cygnus.com)
+
+	* Makefile.in (check): Delete ld.new dependency so that a regression
+	  test doesn't trigger a rebuild of the linker.	
+
 Thu Jun  9 00:17:20 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ldlang.c (map_input_to_output_sections): For lang_address, call
