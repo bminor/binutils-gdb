@@ -1,3 +1,13 @@
+Mon Jan 15 18:14:14 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* binutils-all/objcopy.exp: Use the lma, not the vma, when testing
+	address adjustments.
+
+Fri Dec 15 16:31:55 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* binutils-all/objdump.exp: Update objdump -i test for current
+	objdump output.
+
 Mon Nov 27 15:15:09 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* binutils-all/objcopy.exp: Correct fail calls to always use the
