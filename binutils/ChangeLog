@@ -1,5 +1,9 @@
 2004-12-08  Ben Elliston  <bje@au.ibm.com>
 
+	* arlex.l: Fix formatting.
+
+2004-12-08  Ben Elliston  <bje@au.ibm.com>
+
 	* doc/Makefile.am (config.texi): Emit a @set UPDATED command to
 	config.texi whose value is the current month and year.
 	* doc/Makefile.in: Rebuild.
