@@ -46,11 +46,6 @@ extern char *parse_method (char *method, char *type,
 			   char **class, char **category, 
 			   char **selector);
 
-extern void find_methods (struct symtab *symtab, char type, 
-			  const char *class, const char *category, 
-			  const char *selector, struct symbol **syms, 
-			  unsigned int *nsym, unsigned int *ndebug);
-
 extern char *find_imps (struct symtab *symtab, struct block *block,
 			char *method, struct symbol **syms, 
 			unsigned int *nsym, unsigned int *ndebug);

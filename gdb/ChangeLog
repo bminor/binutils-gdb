@@ -1,5 +1,6 @@
 2003-02-20  Adam Fedor  <fedor@gnu.org>
 
+	* objc-lang.h (find_methods): Remove declaration.
         * objc-lang.c (find_methods): Make static.
 
 2003-02-20  Christopher Faylor  <cgf@redhat.com>
