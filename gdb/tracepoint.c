@@ -33,6 +33,7 @@
 #include "remote.h"
 #include "linespec.h"
 #include "regcache.h"
+#include "gdb-events.h"
 
 #include "ax.h"
 #include "ax-gdb.h"
@@ -574,11 +575,13 @@ tracepoint_operation (struct tracepoint *t, int from_tty,
       t->enabled = enabled;
       if (modify_tracepoint_hook)
 	modify_tracepoint_hook (t);
+      tracepoint_modify_event (t->number);
       break;
     case disable_op:
       t->enabled = disabled;
       if (modify_tracepoint_hook)
 	modify_tracepoint_hook (t);
+      tracepoint_modify_event (t->number);
       break;
     case delete_op:
       if (tracepoint_chain == t)
@@ -587,6 +590,7 @@ tracepoint_operation (struct tracepoint *t, int from_tty,
       ALL_TRACEPOINTS (t2)
 	if (t2->next == t)
 	{
+	  tracepoint_delete_event (t2->number);
 	  t2->next = t->next;
 	  break;
 	}
@@ -742,6 +746,7 @@ trace_pass_command (char *args, int from_tty)
 		t2->pass_count = count;
 		if (modify_tracepoint_hook)
 		  modify_tracepoint_hook (t2);
+		tracepoint_modify_event (t2->number);
 		if (from_tty)
 		  printf_filtered ("Setting tracepoint %d's passcount to %d\n",
 				   t2->number, count);
