@@ -1,3 +1,8 @@
+Wed Mar 22 18:36:05 1995  Kung Hsu  <kung@mexican.cygnus.com>
+
+	* config/mt-slite: add LIBS and -nostdlib.
+	* config/slite-gdb.exp: add this new file to support sparclite target.
+
 Tue Mar 21 21:41:04 1995  Doug Evans  <dje@canuck.cygnus.com>
 
 	* config/vx-gdb.exp (gdb_load): Update test of vxworks_ld return code.
