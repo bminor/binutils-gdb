@@ -98,7 +98,6 @@ while( $inputline = <INFILE> )
   }
   elsif ( $inputline =~ /^\@/ )      # A line starts with "@" is a read only test request
   {
-      print ("glorp\n");
       &perform_test_read_only;
   }
   else   # ignore this input
@@ -276,15 +275,15 @@ sub perform_test_read_only {
   #column[1] is the address;
   #column[2] is the byte-indicator, which can be 4 or 8;
 
-  if ( $column[2] =~ /^4/ )      # This is a 4-byte data address
-  {     $d_type = "long "; }
+  if ( $columns[2] =~ /^4/ )      # This is a 4-byte data address
+  {     $d_type = " "; }
   else {
         $d_type = "long long ";  # assuming the input is "8"
   }
 
   print OUTFILE ("\n{\n");
   print OUTFILE ("  volatile ".$d_type."int* test_add = \(".$d_type."int *\)".$columns[1].";\n");
-  print OUTFILE ("  long long int test64_data = \(long long\) \( *test_add \);\n");
+  print OUTFILE ("  ".$d_type."int test_data = *test_add;\n");
   print OUTFILE ("}\n");
 
 }
