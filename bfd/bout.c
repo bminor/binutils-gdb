@@ -522,11 +522,11 @@ b_out_slurp_reloc_table (abfd, asect, symbols)
     cache_ptr->howto = 0;
     if (abfd->xvec->header_byteorder_big_p) 
     {
-      symnum = (raw[4] << 16) | (raw[5] << 8) | raw[6];
+      symnum = ((int) raw[4] << 16) | ((int) raw[5] << 8) | (int) raw[6];
     } 
     else
     {
-      symnum = (raw[6] << 16) | (raw[5] << 8) | raw[4];
+      symnum = ((int) raw[6] << 16) | ((int) raw[5] << 8) | (int) raw[4];
     }
 
     if (raw[7] & extern_mask) 

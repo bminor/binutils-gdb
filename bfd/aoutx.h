@@ -252,7 +252,7 @@ DESCRIPTION
 	byte stream memory image, into the internal exec_header
 	structure.
 
-EXAMPLE
+SYNOPSIS
 	void aout_<size>_swap_exec_header_in,
            (bfd *abfd,
             struct external_exec *raw_bytes,
@@ -291,7 +291,7 @@ DESCRIPTION
 	Swaps the information in an internal exec header structure
 	into the supplied buffer ready for writing to disk.
 
-EXAMPLE
+SYNOPSIS
 	void aout_<size>_swap_exec_header_out
 	  (bfd *abfd,
 	   struct internal_exec *execp,
@@ -329,7 +329,7 @@ DESCRIPTION
 	environments "finish up" function just before returning, to
 	handle any last-minute setup.  
 
-EXAMPLE
+SYNOPSIS
 	bfd_target *aout_<size>_some_aout_object_p
 	 (bfd *abfd,
 	  bfd_target *(*callback_to_real_object_p)());
@@ -505,7 +505,7 @@ FUNCTION
 DESCRIPTION
 	This routine initializes a BFD for use with a.out files.
 
-EXAMPLE
+SYNOPSIS
 	boolean aout_<size>_mkobject, (bfd *);
 */
 
@@ -557,7 +557,7 @@ DESCRIPTION
 	If the architecture is understood, machine type 0 (default)
 	should always be understood.  
 
-EXAMPLE
+SYNOPSIS
 	enum machine_type  aout_<size>_machine_type
 	 (enum bfd_architecture arch,
 	  unsigned long machine));
@@ -612,7 +612,7 @@ DESCRIPTION
 	values supplied. Verifies that the format can support the
 	architecture required.
 
-EXAMPLE
+SYNOPSIS
 	boolean aout_<size>_set_arch_mach,
 	 (bfd *,
 	  enum bfd_architecture,
@@ -875,13 +875,13 @@ DEFUN (NAME (aout,adjust_sizes_and_vmas), (abfd, text_size, text_end),
 
 /*
 FUNCTION
-	aout_<size>new_section_hook
+	aout_<size>_new_section_hook
   
 DESCRIPTION
 	Called by the BFD in response to a @code{bfd_make_section}
 	request.
 
-EXAMPLE
+SYNOPSIS
         boolean aout_<size>_new_section_hook,
 	   (bfd *abfd,
 	    asection *newsect));
@@ -1263,7 +1263,7 @@ DEFUN(NAME(aout,make_empty_symbol),(abfd),
   aout_symbol_type  *new =
     (aout_symbol_type *)bfd_zalloc (abfd, sizeof (aout_symbol_type));
   new->symbol.the_bfd = abfd;
-    
+
   return &new->symbol;
 }
 
@@ -1370,7 +1370,7 @@ DEFUN(NAME(aout,write_syms),(abfd),
 	PUT_WORD  (abfd, 0, (unsigned char *)nsp.e_strx);
       }
       
-      if (g->the_bfd->xvec->flavour == abfd->xvec->flavour) 
+      if (bfd_asymbol_flavour(g) == abfd->xvec->flavour) 
 	  {
 	    bfd_h_put_16(abfd, aout_symbol(g)->desc,  nsp.e_desc);
 	    bfd_h_put_8(abfd, aout_symbol(g)->other,  nsp.e_other);
@@ -1656,16 +1656,16 @@ DEFUN(NAME(aout,swap_ext_reloc_in), (abfd, bytes, cache_ptr, symbols),
 
   /* now the fun stuff */
   if (abfd->xvec->header_byteorder_big_p != false) {
-    r_index =  (bytes->r_index[0] << 16)
-	     | (bytes->r_index[1] << 8)
-	     |  bytes->r_index[2];
+    r_index = (  ((int) bytes->r_index[0] << 16)
+	       | ((int) bytes->r_index[1] << 8)
+	       |  (int) bytes->r_index[2]);
     r_extern = (0 != (bytes->r_type[0] & RELOC_EXT_BITS_EXTERN_BIG));
     r_type   =       (bytes->r_type[0] & RELOC_EXT_BITS_TYPE_BIG)
 				      >> RELOC_EXT_BITS_TYPE_SH_BIG;
   } else {
-    r_index =  (bytes->r_index[2] << 16)
-	     | (bytes->r_index[1] << 8)
-	     |  bytes->r_index[0];
+    r_index = (  ((int) bytes->r_index[2] << 16)
+	       | ((int) bytes->r_index[1] << 8)
+	       |  (int) bytes->r_index[0]);
     r_extern = (0 != (bytes->r_type[0] & RELOC_EXT_BITS_EXTERN_LITTLE));
     r_type   =       (bytes->r_type[0] & RELOC_EXT_BITS_TYPE_LITTLE)
 				      >> RELOC_EXT_BITS_TYPE_SH_LITTLE;
@@ -1693,9 +1693,9 @@ DEFUN(NAME(aout,swap_std_reloc_in), (abfd, bytes, cache_ptr, symbols),
 
   /* now the fun stuff */
   if (abfd->xvec->header_byteorder_big_p != false) {
-    r_index =  (bytes->r_index[0] << 16)
-      | (bytes->r_index[1] << 8)
-	|  bytes->r_index[2];
+    r_index = (  ((int) bytes->r_index[0] << 16)
+	       | ((int) bytes->r_index[1] << 8)
+	       |  (int) bytes->r_index[2]);
     r_extern  = (0 != (bytes->r_type[0] & RELOC_STD_BITS_EXTERN_BIG));
     r_pcrel   = (0 != (bytes->r_type[0] & RELOC_STD_BITS_PCREL_BIG));
     r_baserel = (0 != (bytes->r_type[0] & RELOC_STD_BITS_BASEREL_BIG));
@@ -1704,9 +1704,9 @@ DEFUN(NAME(aout,swap_std_reloc_in), (abfd, bytes, cache_ptr, symbols),
     r_length  =       (bytes->r_type[0] & RELOC_STD_BITS_LENGTH_BIG) 
       			>> RELOC_STD_BITS_LENGTH_SH_BIG;
   } else {
-    r_index =  (bytes->r_index[2] << 16)
-      | (bytes->r_index[1] << 8)
-	|  bytes->r_index[0];
+    r_index = (  ((int) bytes->r_index[2] << 16)
+	       | ((int) bytes->r_index[1] << 8)
+	       |  (int) bytes->r_index[0]);
     r_extern  = (0 != (bytes->r_type[0] & RELOC_STD_BITS_EXTERN_LITTLE));
     r_pcrel   = (0 != (bytes->r_type[0] & RELOC_STD_BITS_PCREL_LITTLE));
     r_baserel = (0 != (bytes->r_type[0] & RELOC_STD_BITS_BASEREL_LITTLE));
@@ -1985,7 +1985,7 @@ DEFUN(NAME(aout,print_symbol),(ignore_abfd, afile, symbol, how),
       if (section_code == '?')
 	{
 	  int type_code = aout_symbol(symbol)->type  & 0xff;
-	  char *stab_name = aout_stab_name(type_code);
+	  CONST char *stab_name = aout_stab_name(type_code);
 	  char buf[10];
 	  if (stab_name == NULL)
 	    {
