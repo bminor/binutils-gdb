@@ -1,3 +1,8 @@
+2004-12-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* read.c (ALIGN_LIMIT): Define, increasing limit for BFD_ASSEMBLER.
+	(s_align): Use it.
+
 2004-11-30  Tero Niemela  <tero_niemela@yahoo.com>
 
 	* Makefile.am: Change LOCALEDIR to $(datadir)/share.
@@ -5,12 +10,12 @@
 
 2004-11-29  Tomer Levi  <Tomer.Levi@nsc.com>
 
-	* config/tc-crx.c: Major code cleanup. Remove unused variables and functions,
-	give functions a meaningful name, add comments.
-	(check_range): New function - Replace operand size calculation 
+	* config/tc-crx.c: Major code cleanup. Remove unused variables and
+	functions, give functions a meaningful name, add comments.
+	(check_range): New function - Replace operand size calculation
 	with range checking.
 	(assemble_insn): Update Algorithm, improve error issuing.
-	(enum op_err): New - Operand error (for issuing operand error messages).
+	(enum op_err): New.
 	(process_label_constant): Bug fix regarding COP_BRANCH_INS relocation
 	handling.
 

@@ -1195,10 +1195,16 @@ do_align (int n, char *fill, int len, int max)
    fill pattern.  BYTES_P is non-zero if the alignment value should be
    interpreted as the byte boundary, rather than the power of 2.  */
 
+#ifdef BFD_ASSEMBLER
+#define ALIGN_LIMIT (stdoutput->arch_info->bits_per_address - 1)
+#else
+#define ALIGN_LIMIT 15
+#endif
+
 static void
 s_align (int arg, int bytes_p)
 {
-  register unsigned int align;
+  unsigned int align;
   char *stop = NULL;
   char stopc;
   offsetT fill = 0;
@@ -1237,9 +1243,9 @@ s_align (int arg, int bytes_p)
 	}
     }
 
-  if (align > 15)
+  if (align > ALIGN_LIMIT)
     {
-      align = 15;
+      align = ALIGN_LIMIT;
       as_warn (_("alignment too large: %u assumed"), align);
     }
 
