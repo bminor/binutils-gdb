@@ -20,9 +20,15 @@ m88kbcs | sysv* | irix*)
 
 aix*)
 	host_makefile_frag=config/hm-sysv
-	case "${host_arch}" in
+	case "${host_cpu}" in
 	rs6000)	files=sysdep-aix.h
 	esac
+	;;
+esac
+
+case "${host_vendor}" in
+sco* )
+	host_makefile_frag=config/hm-sco
 	;;
 esac
 
