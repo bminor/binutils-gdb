@@ -1,3 +1,8 @@
+2001-11-19  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* doc/c-mmix.texi: Use texinfo 4 features.
+	(MMIX-mmixal): Fix typo.
+
 2001-11-17  Hans-Peter Nilsson  <hp@axis.com>
 
 	* config/tc-cris.c (md_apply_fix3): Cast value, not pointer, in
