@@ -79,6 +79,9 @@ maintainer works with the native maintainer when resolving API issues.
 
 	fr30		Deleted.
 
+	frv		--target=frv-elf ,-Werror
+			Maintenance only
+
 	h8300		--target=h8300hms ,-Werror
 			Maintenance only
 

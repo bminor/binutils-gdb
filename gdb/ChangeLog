@@ -1,5 +1,9 @@
 2003-09-10  Kevin Buettner  <kevinb@redhat.com>
 
+	* MAINTAINERS (frv): New ISA entry.
+
+2003-09-10  Kevin Buettner  <kevinb@redhat.com>
+
 	* frv-tdep.c (dis-asm.h): Include.
 	* Makefile.in (frv-tdep.o): Update dependencies.
 
