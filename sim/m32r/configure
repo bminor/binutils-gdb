@@ -4835,7 +4835,8 @@ done
 
    fi
    if test "${ac_cv_func_stpcpy}" = "yes"; then
-     cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define HAVE_STPCPY 1
 _ACEOF
 
@@ -4897,7 +4898,8 @@ fi
 echo "$as_me:$LINENO: result: $am_cv_val_LC_MESSAGES" >&5
 echo "${ECHO_T}$am_cv_val_LC_MESSAGES" >&6
     if test $am_cv_val_LC_MESSAGES = yes; then
-      cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define HAVE_LC_MESSAGES 1
 _ACEOF
 
@@ -4919,10 +4921,6 @@ echo "${ECHO_T}$USE_NLS" >&6
     USE_INCLUDED_LIBINTL=no
 
         if test "$USE_NLS" = "yes"; then
-      cat >>confdefs.h <<\_ACEOF
-#define ENABLE_NLS 1
-_ACEOF
-
       echo "$as_me:$LINENO: checking whether included gettext is requested" >&5
 echo $ECHO_N "checking whether included gettext is requested... $ECHO_C" >&6
 
@@ -4940,7 +4938,7 @@ echo "${ECHO_T}$nls_cv_force_use_gnu_gettext" >&6
       if test "$nls_cv_force_use_gnu_gettext" != "yes"; then
                         		nls_cv_header_intl=
 	nls_cv_header_libgt=
-	CATOBJEXT=NONE
+	CATOBJEXT=
 
 	if test "${ac_cv_header_libintl_h+set}" = set; then
   echo "$as_me:$LINENO: checking for libintl.h" >&5
@@ -5261,7 +5259,8 @@ fi
 
 	   if test "$gt_cv_func_gettext_libc" = "yes" \
 	      || test "$gt_cv_func_gettext_libintl" = "yes"; then
-	      cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define HAVE_GETTEXT 1
 _ACEOF
 
@@ -5537,8 +5536,10 @@ fi
 
 
 
-        if test "$CATOBJEXT" = "NONE"; then
-	  	  	  nls_cv_use_gnu_gettext=yes
+        if test x"$CATOBJEXT" = x && test -d $srcdir/../intl; then
+	  # Neither gettext nor catgets in included in the C library.
+	  # Fall back on GNU gettext library (assuming it is present).
+	  nls_cv_use_gnu_gettext=yes
         fi
       fi
 
@@ -5709,6 +5710,13 @@ echo "${ECHO_T}found xgettext programs is not GNU xgettext; ignore it" >&6
 
 
 
+    if test "x$CATOBJEXT" != "x"; then
+
+cat >>confdefs.h <<\_ACEOF
+#define ENABLE_NLS 1
+_ACEOF
+
+    fi
 
 
    if test "x$CATOBJEXT" != "x"; then
@@ -5910,7 +5918,7 @@ fi
       l=
 
 
-            if test -d $srcdir/po; then
+            if test -f $srcdir/po/POTFILES.in; then
       test -d po || mkdir po
       if test "x$srcdir" != "x."; then
 	 if test "x`echo $srcdir | sed 's@/.*@@'`" = "x"; then

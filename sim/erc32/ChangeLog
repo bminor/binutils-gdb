@@ -1,3 +1,7 @@
+2005-03-23  Mark Kettenis  <kettenis@gnu.org>
+
+	* configure: Regenerate.
+
 2005-03-07  Jerome Guitton  <guitton@gnat.com>
 
 	* sim/erc32/float.c (set_fsr): Do not use deprecated multi-line

@@ -1,3 +1,7 @@
+2005-03-23  Mark Kettenis  <kettenis@gnu.org>
+
+	* configure: Regenerate.
+
 2005-02-21  Corinna Vinschen  <vinschen@redhat.com>
 
 	* iq2000.c: Eliminate need to include gdb/sim-iq2000.h.

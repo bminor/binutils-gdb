@@ -1,3 +1,10 @@
+2005-03-23  Mark Kettenis  <kettenis@gnu.org>
+
+	* aclocal.m4 Include ../../gettext.m4.
+	(CY_WITH_NLS, CY_GNU_GETTEXT, AM_PATH_PROG_WITH_TEST)
+	(AM_LC_MESSAGES): Remove.
+	* configure: Regenerate.
+
 2005-02-28  Jim Blandy  <jimb@redhat.com>
 
 	* aclocal.m4 (SIM_AC_OPTION_WARNINGS): Don't include
