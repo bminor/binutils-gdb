@@ -1,3 +1,8 @@
+Thu Nov  9 14:04:05 1995  Raymond Jou  (rjou@mexican.cygnus.com)
+
+	* mpw-config.in: Add variable with names of SIOW libraries.
+	* mpw-make.sed: Add an action to build SIOWgdb.
+
 Wed Nov  8 19:25:22 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-make.sed: Edit @ENABLE_CFLAGS@ out, mpw-configure can

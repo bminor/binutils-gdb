@@ -136,3 +136,15 @@ readline_headers =\
 / subdir_do/s/{MAKE}/null-command/
 
 /^config.status \\Option-f/,/^$/d
+
+# Add an action to build SIOWgdb.
+$a\
+SIOWgdb \\Option-f {OBS} {TSOBS} {ADD_DEPS} {CDEPS} "{o}"init.c.o\
+	Delete -i -y SIOWgdb\
+	{CC_LD} {INTERNAL_LDFLAGS} -t 'APPL' -c 'gdb ' -o SIOWgdb{PROG_EXT} "{o}"init.c.o {OBS} {TSOBS} {ADD_FILES} {CLIBS} {SIOW_LIB} {LOADLIBES} {EXTRALIBS}\
+	{MAKEPEF} SIOWgdb{PROG_EXT} -o SIOWgdb -ft 'APPL' -fc 'gdb ' {MAKEPEF_FLAGS} \
+	{REZ} -o SIOWgdb {RIncludes}siow.r -append -d __kPrefSize=5000 -d __kMinSize=2000 -d APPNAME='"'SIOWgdb'"' \
+	{REZ} "{s}"mac-gdb.r -o SIOWgdb -append -d VERSION_STRING='"'{version}'"'\
+
+
+
