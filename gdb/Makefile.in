@@ -166,7 +166,7 @@ ADD_FILES = ${REGEX} ${ALLOCA}  ${XM_ADD_FILES} ${TM_ADD_FILES} \
 ADD_DEPS = ${REGEX1} ${ALLOCA1} ${XM_ADD_FILES} ${TM_ADD_FILES} \
 	${NAT_ADD_FILES}
 
-VERSION = 4.8.6
+VERSION = 4.9.1
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -297,7 +297,8 @@ SFILES = ${srcdir}/blockframe.c ${srcdir}/breakpoint.c ${srcdir}/buildsym.c \
 # Files that are not source code, but need to go into gdb-$(VERSION).tar.Z.
 NONSRC = ${srcdir}/Makefile.in ${srcdir}/depend ${srcdir}/alldeps.mak \
 	${srcdir}/munch ${srcdir}/configure.in \
-	${srcdir}/ChangeLog ${srcdir}/ChangeLog-9091 ${srcdir}/ChangeLog-3.x \
+	${srcdir}/ChangeLog ${srcdir}/ChangeLog-9091 ${srcdir}/ChangeLog-92 \
+	${srcdir}/ChangeLog-3.x \
 	${srcdir}/gdb.1 ${srcdir}/refcard.ps ${srcdir}/README ${srcdir}/TODO \
 	TAGS ${srcdir}/NEWS ${srcdir}/Projects ${srcdir}/.gdbinit \
 	${srcdir}/COPYING $(YYFILES) ${srcdir}/copying.c \
