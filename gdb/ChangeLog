@@ -1,3 +1,9 @@
+2000-05-21  Mark Kettenis  <kettenis@gnu.org>
+
+	* i387-tdep.c (print_i387_value): Cast &value to (char *) in
+	pointer arithmetic.  Fixes a bug which manifested itself on
+	FreeBSD.
+
 2000-05-17  Andrew Cagney  <cagney@sourceware.cygnus.com>
 
 	* GDB 5.0 released.

@@ -176,7 +176,8 @@ print_i387_value (char *raw)
     {
       /* Copy straight over, but take care of the padding.  */
       memcpy (&value, raw, FPU_REG_RAW_SIZE);
-      memset (&value + FPU_REG_RAW_SIZE, 0, sizeof (value) - FPU_REG_RAW_SIZE);
+      memset ((char *) &value + FPU_REG_RAW_SIZE, 0,
+	      sizeof (value) - FPU_REG_RAW_SIZE);
     }
   else
 #endif
