@@ -318,21 +318,18 @@ remove_subsegs (head, seg, root, last)
 
 #endif /* BFD */
 
+#ifdef BFD_ASSEMBLER
 static void
-cvt_frag_to_fill (x, fragP)
-#ifdef BFD_ASSEMBLER
-     segT x;
-#else
-     object_headers *x;
-#endif
+cvt_frag_to_fill (sec, fragP)
+     segT sec;
      fragS *fragP;
-{
-#ifdef BFD_ASSEMBLER
-  segT sec = x;
 #else
-  object_headers *headers = x;
+static void
+cvt_frag_to_fill (headers, fragP)
+     object_headers *headers;
+     fragS *fragP;
 #endif
-
+{
   switch (fragP->fr_type)
     {
     case rs_align:
@@ -560,8 +557,6 @@ write_relocs (abfd, sec, xxx)
      char *xxx;
 {
   segment_info_type *seginfo = seg_info (sec);
-  unsigned long offset = 0;
-  fragS *frags;
   int i, n;
   arelent **relocs;
   fixS *fixp;
@@ -703,9 +698,6 @@ write_contents (abfd, sec, xxx)
   segment_info_type *seginfo = seg_info (sec);
   unsigned long offset = 0;
   fragS *frags;
-  int i, n;
-  arelent **relocs;
-  fixS *fixp;
 
   /* Write out the frags.  */
   if (! (bfd_get_section_flags (abfd, sec) & SEC_HAS_CONTENTS))
@@ -875,7 +867,9 @@ void
 write_object_file ()
 {
   register struct frchain *frchainP;	/* Track along all frchains. */
+#if ! defined (BFD_ASSEMBLER) || ! defined (WORKING_DOT_WORD)
   register fragS *fragP;	/* Track along all frags. */
+#endif
 #if !defined (BFD_ASSEMBLER) && !defined (OBJ_VMS)
   long object_file_size;
 #endif
@@ -1270,8 +1264,6 @@ write_object_file ()
 
       for (symp = symbol_rootP; symp; symp = symbol_next (symp))
 	{
-	  int keep = 0;
-
 	  if (! symp->sy_resolved)
 	    {
 	      if (symp->sy_value.X_op == O_constant)
@@ -1299,16 +1291,21 @@ write_object_file ()
 		  segment_name (symp->bsym->section));
 #endif
 	  {
-	    int punt = 0;
 #ifdef obj_frob_symbol
-	    obj_frob_symbol (symp, punt);
-	    if (punt)
-	      goto punt_it;
+	    {
+	      int punt = 0;
+	      obj_frob_symbol (symp, punt);
+	      if (punt)
+		goto punt_it;
+	    }
 #endif
 #ifdef tc_frob_symbol
-	    tc_frob_symbol (symp, punt);
-	    if (punt)
-	      goto punt_it;
+	    {
+	      int punt = 0;
+	      tc_frob_symbol (symp, punt);
+	      if (punt)
+		goto punt_it;
+	    }
 #endif
 	  }
 	  /* If we don't want to keep this symbol, splice it out of the
@@ -1316,7 +1313,9 @@ write_object_file ()
 	  if (S_IS_LOCAL (symp))
 	    {
 	      symbolS *prev, *next;
+#if defined (obj_frob_symbol) || defined (tc_frob_symbol)
 	    punt_it:
+#endif
 	      prev = symbol_previous (symp);
 	      next = symbol_next (symp);
 #ifdef DEBUG_SYMS
@@ -1952,8 +1951,8 @@ fixup_segment (fixP, this_segment_type)
 	      {
 		char buf[50];
 		sprint_value (buf, fragP->fr_address + where);
-		as_bad ("Value of %d too large for field of %d bytes at %s",
-			add_number, size, buf);
+		as_bad ("Value of %ld too large for field of %d bytes at %s",
+			(long) add_number, size, buf);
 	      }			/* generic error checking */
 #ifdef WARN_SIGNED_OVERFLOW_WORD
 	    /* Warn if a .word value is too large when treated as a signed

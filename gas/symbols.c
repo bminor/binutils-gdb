@@ -17,7 +17,7 @@
    along with GAS; see the file COPYING.  If not, write to
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* #define DEBUG_SYMS /* to debug symbol list maintenance */
+/* #define DEBUG_SYMS / * to debug symbol list maintenance */
 
 #include <ctype.h>
 
@@ -281,10 +281,10 @@ colon (sym_name)		/* just seen "x:" - rattle symbols & frags */
 			    S_GET_OTHER (symbolP), S_GET_DESC (symbolP),
 			    (long) S_GET_VALUE (symbolP));
 #else
-		  as_fatal ("Symbol \"%s\" is already defined as \"%s\"/%d.",
+		  as_fatal ("Symbol \"%s\" is already defined as \"%s\"/%ld.",
 			    sym_name,
 			    segment_name (S_GET_SEGMENT (symbolP)),
-			    S_GET_VALUE (symbolP));
+			    (long) S_GET_VALUE (symbolP));
 #endif
 		}
 	    }			/* if the undefined symbol has no value */

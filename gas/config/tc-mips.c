@@ -2943,8 +2943,8 @@ mips_ip (str, ip)
 	      check_absolute_expr (ip, &imm_expr);
 	      if ((unsigned long) imm_expr.X_add_number > 31)
 		{
-		  as_warn ("Improper shift amount (%d)",
-			   imm_expr.X_add_number);
+		  as_warn ("Improper shift amount (%ld)",
+			   (long) imm_expr.X_add_number);
 		  imm_expr.X_add_number = imm_expr.X_add_number % 32;
 		}
 	      ip->insn_opcode |= imm_expr.X_add_number << 6;
@@ -2956,7 +2956,8 @@ mips_ip (str, ip)
 	      my_getExpression (&imm_expr, s);
 	      check_absolute_expr (ip, &imm_expr);
 	      if ((unsigned) imm_expr.X_add_number > 1023)
-		as_warn ("Illegal break code (%d)", imm_expr.X_add_number);
+		as_warn ("Illegal break code (%ld)",
+			 (long) imm_expr.X_add_number);
 	      ip->insn_opcode |= imm_expr.X_add_number << 16;
 	      imm_expr.X_op = O_absent;
 	      s = expr_end;
@@ -2966,7 +2967,8 @@ mips_ip (str, ip)
 	      my_getExpression (&imm_expr, s);
 	      check_absolute_expr (ip, &imm_expr);
 	      if ((unsigned) imm_expr.X_add_number > 0xfffff)
-		as_warn ("Illegal syscall code (%d)", imm_expr.X_add_number);
+		as_warn ("Illegal syscall code (%ld)",
+			 (long) imm_expr.X_add_number);
 	      ip->insn_opcode |= imm_expr.X_add_number << 6;
 	      imm_expr.X_op = O_absent;
 	      s = expr_end;
@@ -2977,8 +2979,8 @@ mips_ip (str, ip)
 	      check_absolute_expr (ip, &imm_expr);
               if ((unsigned long) imm_expr.X_add_number >= (1<<25))
 		{
-                  as_warn ("Coproccesor code > 25 bits (%d)",
-			   imm_expr.X_add_number);
+                  as_warn ("Coproccesor code > 25 bits (%ld)",
+			   (long) imm_expr.X_add_number);
                   imm_expr.X_add_number &= ((1<<25) - 1);
 		}
               ip->insn_opcode |= imm_expr.X_add_number;
@@ -3811,7 +3813,7 @@ md_apply_fix (fixP, valueP)
        * the current segment).
        */
       if (value & 0x3)
-	as_warn ("Branch to odd address (%x)", value);
+	as_warn ("Branch to odd address (%lx)", value);
       value >>= 2;
       if ((value & ~0xFFFF) && (value & ~0xFFFF) != (-1 & ~0xFFFF))
 	as_bad ("Relocation overflow");

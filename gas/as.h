@@ -84,8 +84,8 @@
 
 #define BAD_CASE(val) \
 { \
-      as_fatal("Case value %d unexpected at line %d of file \"%s\"\n", \
-	       val, __LINE__, __FILE__); \
+      as_fatal("Case value %ld unexpected at line %d of file \"%s\"\n", \
+	       (long) val, __LINE__, __FILE__); \
 	   }
 
 
@@ -140,35 +140,6 @@ typedef addressT valueT;
 /* subsegs.c     Sub-segments. Also, segment(=expression type)s.*/
 
 #ifndef BFD_ASSEMBLER
-/*
- * This table describes the use of segments as EXPRESSION types.
- *
- *	X_seg	X_add_symbol  X_subtract_symbol	X_add_number
- * SEG_ABSENT						no (legal) expression
- * SEG_PASS1						no (defined) "
- * SEG_BIG					*	> 32 bits const.
- * SEG_ABSOLUTE				     	0
- * SEG_DATA		*		     	0
- * SEG_TEXT		*			0
- * SEG_BSS		*			0
- * SEG_UNKNOWN		*			0
- * SEG_DIFFERENCE	0		*	0
- * SEG_REGISTER					*
- *
- * The blank fields MUST be 0, and are nugatory.
- * The '0' fields MAY be 0. The '*' fields MAY NOT be 0.
- *
- * SEG_BIG: X_add_number is < 0 if the result is in
- *	generic_floating_point_number.  The value is -'c' where c is the
- *	character that introduced the constant.  e.g. "0f6.9" will have  -'f'
- *	as a X_add_number value.
- *	X_add_number > 0 is a count of how many littlenums it took to
- *	represent a bignum.
- * SEG_DIFFERENCE:
- * If segments of both symbols are known, they are the same segment.
- * X_add_symbol != X_sub_symbol (then we just cancel them, => SEG_ABSOLUTE).
- */
-
 
 #ifdef MANY_SEGMENTS
 #include "bfd.h"
@@ -189,13 +160,10 @@ typedef enum _segT
     SEG_ABSOLUTE = 0,
     SEG_LIST,
     SEG_UNKNOWN,
-    SEG_ABSENT,			/* Mythical Segment (absent): NO expression seen. */
-    SEG_PASS1,			/* Mythical Segment: Need another pass. */
     SEG_GOOF,			/* Only happens if AS has a logic error. */
     /* Invented so we don't crash printing */
     /* error message involving weird segment. */
-    SEG_BIG,			/* Bigger than 32 bits constant. */
-    SEG_DIFFERENCE,		/* Mythical Segment: absolute difference. */
+    SEG_EXPR,			/* Intermediate expression values. */
     SEG_DEBUG,			/* Debug segment */
     SEG_NTV,			/* Transfert vector preload segment */
     SEG_PTV,			/* Transfert vector postload segment */
@@ -207,11 +175,8 @@ typedef enum _segT
 typedef asection *segT;
 #define SEG_NORMAL(SEG)		((SEG) != absolute_section	\
 				 && (SEG) != undefined_section	\
-				 && (SEG) != big_section	\
 				 && (SEG) != reg_section	\
-				 && (SEG) != pass1_section	\
-				 && (SEG) != diff_section	\
-				 && (SEG) != absent_section)
+				 && (SEG) != expr_section)
 #endif
 typedef int subsegT;
 
@@ -233,18 +198,14 @@ extern int section_alignment[];
 #endif
 
 #ifdef BFD_ASSEMBLER
-extern segT big_section, reg_section, pass1_section;
-extern segT diff_section, absent_section;
+extern segT reg_section, expr_section;
 /* Shouldn't these be eliminated someday?  */
 extern segT text_section, data_section, bss_section;
 #define absolute_section	(&bfd_abs_section)
 #define undefined_section	(&bfd_und_section)
 #else
-#define big_section		SEG_BIG
 #define reg_section		SEG_REGISTER
-#define pass1_section		SEG_PASS1
-#define diff_section		SEG_DIFFERENCE
-#define absent_section		SEG_ABSENT
+#define expr_section		SEG_EXPR
 #define text_section		SEG_TEXT
 #define data_section		SEG_DATA
 #define bss_section		SEG_BSS

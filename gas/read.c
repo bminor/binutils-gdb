@@ -159,7 +159,6 @@ int new_broken_words;
 
 static char *demand_copy_string PARAMS ((int *lenP));
 int is_it_end_of_statement PARAMS ((void));
-unsigned int next_char_of_string PARAMS ((void));
 static segT get_segmented_expression PARAMS ((expressionS *expP));
 static segT get_known_segmented_expression PARAMS ((expressionS * expP));
 static void grow_bignum PARAMS ((void));
@@ -187,7 +186,7 @@ read_begin ()
 
   /* Use machine dependent syntax */
   for (p = line_separator_chars; *p; p++)
-    is_end_of_line[*p] = 1;
+    is_end_of_line[(unsigned char) *p] = 1;
   /* Use more.  FIXME-SOMEDAY. */
 }
 
@@ -329,13 +328,13 @@ pobegin ()
   return;
 }				/* pobegin() */
 
-#define HANDLE_CONDITIONAL_ASSEMBLY()	\
-  if (ignore_input ())					\
-    {							\
-      while (! is_end_of_line[*input_line_pointer++])	\
-	if (input_line_pointer == buffer_limit)		\
-	  break;					\
-      continue;						\
+#define HANDLE_CONDITIONAL_ASSEMBLY()					\
+  if (ignore_input ())							\
+    {									\
+      while (! is_end_of_line[(unsigned char) *input_line_pointer++])	\
+	if (input_line_pointer == buffer_limit)				\
+	  break;							\
+      continue;								\
     }
 
 
@@ -520,7 +519,7 @@ read_a_source_file (name)
 		      /* WARNING: c has char, which may be end-of-line. */
 		      /* Also: input_line_pointer->`\0` where c was. */
 		      *input_line_pointer = c;
-		      while (!is_end_of_line[*input_line_pointer]
+		      while (!is_end_of_line[(unsigned char) *input_line_pointer]
 #ifdef TC_EOL_IN_INSN
 			     || TC_EOL_IN_INSN (input_line_pointer)
 #endif
@@ -544,7 +543,7 @@ read_a_source_file (name)
 	    }			/* if (is_name_beginner(c) */
 
 
-	  if (is_end_of_line[c])
+	  if (is_end_of_line[(unsigned char) c])
 	    {
 	      continue;
 	    }			/* empty statement */
@@ -726,7 +725,7 @@ s_align_bytes (arg)
   unsigned int i = 0;
   unsigned long max_alignment = 1 << 15;
 
-  if (is_end_of_line[*input_line_pointer])
+  if (is_end_of_line[(unsigned char) *input_line_pointer])
     temp = arg;			/* Default value from pseudo-op table */
   else
     temp = get_absolute_expression ();
@@ -808,7 +807,7 @@ s_comm ()
   register char *name;
   register char c;
   register char *p;
-  valueT temp;
+  offsetT temp;
   register symbolS *symbolP;
 
   name = input_line_pointer;
@@ -826,7 +825,7 @@ s_comm ()
   input_line_pointer++;		/* skip ',' */
   if ((temp = get_absolute_expression ()) < 0)
     {
-      as_warn (".COMMon length (%d.) <0! Ignored.", temp);
+      as_warn (".COMMon length (%ld.) <0! Ignored.", (long) temp);
       ignore_rest_of_line ();
       return;
     }
@@ -841,15 +840,15 @@ s_comm ()
     }
   if (S_GET_VALUE (symbolP))
     {
-      if (S_GET_VALUE (symbolP) != temp)
-	as_bad ("Length of .comm \"%s\" is already %d. Not changed to %d.",
+      if (S_GET_VALUE (symbolP) != (valueT) temp)
+	as_bad ("Length of .comm \"%s\" is already %ld. Not changed to %ld.",
 		S_GET_NAME (symbolP),
-		S_GET_VALUE (symbolP),
-		temp);
+		(long) S_GET_VALUE (symbolP),
+		(long) temp);
     }
   else
     {
-      S_SET_VALUE (symbolP, temp);
+      S_SET_VALUE (symbolP, (valueT) temp);
       S_SET_EXTERNAL (symbolP);
     }
 #ifdef OBJ_VMS
@@ -1410,7 +1409,7 @@ void
 demand_empty_rest_of_line ()
 {
   SKIP_WHITESPACE ();
-  if (is_end_of_line[*input_line_pointer])
+  if (is_end_of_line[(unsigned char) *input_line_pointer])
     {
       input_line_pointer++;
     }
@@ -1424,7 +1423,7 @@ demand_empty_rest_of_line ()
 void
 ignore_rest_of_line ()		/* For suspect lines: gives warning. */
 {
-  if (!is_end_of_line[*input_line_pointer])
+  if (!is_end_of_line[(unsigned char) *input_line_pointer])
     {
       if (isprint (*input_line_pointer))
 	as_bad ("Rest of line ignored. First ignored character is `%c'.",
@@ -1433,13 +1432,13 @@ ignore_rest_of_line ()		/* For suspect lines: gives warning. */
 	as_bad ("Rest of line ignored. First ignored character valued 0x%x.",
 		*input_line_pointer);
       while (input_line_pointer < buffer_limit
-	     && !is_end_of_line[*input_line_pointer])
+	     && !is_end_of_line[(unsigned char) *input_line_pointer])
 	{
 	  input_line_pointer++;
 	}
     }
   input_line_pointer++;		/* Return pointing just after end-of-line. */
-  know (is_end_of_line[input_line_pointer[-1]]);
+  know (is_end_of_line[(unsigned char) input_line_pointer[-1]]);
 }
 
 /*
@@ -1699,7 +1698,7 @@ emit_expr (exp, nbytes)
       use = get & unmask;
       if ((get & mask) != 0 && (get & mask) != mask)
 	{		/* Leading bits contain both 0s & 1s. */
-	  as_warn ("Value 0x%x truncated to 0x%x.", get, use);
+	  as_warn ("Value 0x%lx truncated to 0x%lx.", get, use);
 	}
       md_number_to_chars (p, use, nbytes);	/* put bytes in right order. */
     }
@@ -2047,12 +2046,14 @@ big_cons (nbytes)
        * mysterious zero constants: which is what they get when
        * they completely omit digits.
        */
-      if (hex_value[c] >= radix)
+      if (hex_value[(unsigned char) c] >= radix)
 	{
 	  as_bad ("Missing digits. 0 assumed.");
 	}
       bignum_high = bignum_low - 1;	/* Start constant with 0 chars. */
-      for (; (digit = hex_value[c]) < radix; c = *++input_line_pointer)
+      for (;
+	   (digit = hex_value[(unsigned char) c]) < radix;
+	   c = *++input_line_pointer)
 	{
 	  /* Multiply existing number by radix, then add digit. */
 	  carry = digit;
@@ -2428,7 +2429,7 @@ get_known_segmented_expression (expP)
   return (retval);
 }				/* get_known_segmented_expression() */
 
-/* static */ long		/* JF was static, but can't be if the MD pseudos are to use it */
+offsetT
 get_absolute_expression ()
 {
   expressionS exp;
@@ -2447,7 +2448,8 @@ char				/* return terminator */
 get_absolute_expression_and_terminator (val_pointer)
      long *val_pointer;		/* return value of expression */
 {
-  *val_pointer = get_absolute_expression ();
+  /* FIXME: val_pointer should probably be offsetT *.  */
+  *val_pointer = (long) get_absolute_expression ();
   return (*input_line_pointer++);
 }
 
@@ -2536,7 +2538,7 @@ int
 is_it_end_of_statement ()
 {
   SKIP_WHITESPACE ();
-  return (is_end_of_line[*input_line_pointer]);
+  return (is_end_of_line[(unsigned char) *input_line_pointer]);
 }				/* is_it_end_of_statement() */
 
 void 
@@ -2643,7 +2645,7 @@ void
 s_ignore (arg)
      int arg;
 {
-  while (!is_end_of_line[*input_line_pointer])
+  while (!is_end_of_line[(unsigned char) *input_line_pointer])
     {
       ++input_line_pointer;
     }
@@ -2699,6 +2701,8 @@ change_to_section (name, len, exp)
  * Build a string dictionary entry for a .stabX symbol.
  * The symbol is added to the .<secname>str section.
  */
+
+#ifdef SEPARATE_STAB_SECTIONS
 
 static unsigned int
 get_stab_string_offset (string, secname)
@@ -2777,6 +2781,8 @@ get_stab_string_offset (string, secname)
   return old_gdb_string_index;
 }
 
+#endif /* SEPARATE_STAB_SECTIONS */
+
 /* This can handle different kinds of stabs (s,n,d) and different
    kinds of stab sections. */
 
@@ -2792,15 +2798,15 @@ s_stab_generic (what, secname)
   int saved_type = 0;
   int length;
   int goof = 0;
-  int seg_is_new = 0;
   long longint;
   segT saved_seg = now_seg;
   segT seg;
   subsegT saved_subseg = now_subseg;
   subsegT subseg;
-  int offset;
   int valu;
-  char *toP;
+#ifdef SEPARATE_STAB_SECTIONS
+  int seg_is_new = 0;
+#endif
 
   valu = ((char *) obstack_next_free (&frags)) - frag_now->fr_literal;
 
@@ -2947,13 +2953,17 @@ s_stab_generic (what, secname)
 #endif
 
 #ifdef SEPARATE_STAB_SECTIONS
-  change_to_section(secname, strlen(secname), 0);
-  toP = frag_more (8);
-  /* the string index portion of the stab */
-  md_number_to_chars (toP, (valueT) S_GET_OFFSET_2(symbol), 4);
-  md_number_to_chars (toP + 4, (valueT) S_GET_TYPE(symbol), 1);
-  md_number_to_chars (toP + 5, (valueT) S_GET_OTHER(symbol), 1);
-  md_number_to_chars (toP + 6, (valueT) S_GET_DESC(symbol), 2);
+  {
+    char *toP;
+
+    change_to_section(secname, strlen(secname), 0);
+    toP = frag_more (8);
+    /* the string index portion of the stab */
+    md_number_to_chars (toP, (valueT) S_GET_OFFSET_2(symbol), 4);
+    md_number_to_chars (toP + 4, (valueT) S_GET_TYPE(symbol), 1);
+    md_number_to_chars (toP + 5, (valueT) S_GET_OTHER(symbol), 1);
+    md_number_to_chars (toP + 6, (valueT) S_GET_DESC(symbol), 2);
+  }
 #endif
 
 #ifdef SEPARATE_STAB_SECTIONS

@@ -36,8 +36,10 @@ extern char *input_line_pointer;/* -> char we are parsing now. */
 #define	LEX_NAME	(1)	/* may continue a name */
 #define LEX_BEGIN_NAME	(2)	/* may begin a name */
 
-#define is_name_beginner(c)     ( lex_type[c] & LEX_BEGIN_NAME )
-#define is_part_of_name(c)      ( lex_type[c] & LEX_NAME       )
+#define is_name_beginner(c) \
+  ( lex_type[(unsigned char) (c)] & LEX_BEGIN_NAME )
+#define is_part_of_name(c) \
+  ( lex_type[(unsigned char) (c)] & LEX_NAME       )
 
 #ifndef is_a_char
 #define CHAR_MASK	(0xff)
@@ -55,7 +57,8 @@ extern const char line_separator_chars[];
 
 char *demand_copy_C_string PARAMS ((int *len_pointer));
 char get_absolute_expression_and_terminator PARAMS ((long *val_pointer));
-long get_absolute_expression PARAMS ((void));
+offsetT get_absolute_expression PARAMS ((void));
+unsigned int next_char_of_string PARAMS ((void));
 void add_include_dir PARAMS ((char *path));
 void big_cons PARAMS ((int nbytes));
 void cons PARAMS ((unsigned int nbytes));

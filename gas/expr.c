@@ -150,32 +150,41 @@ integer_constant (radix, expressionP)
      number we are looking for is expected to be positive, but if it
      fits into 32 bits as an unsigned number, we let it be a 32-bit
      number.  The cavalier approach is for speed in ordinary cases. */
+  /* This has been extended for 64 bits.  We blindly assume that if
+     you're compiling in 64-bit mode, the target is a 64-bit machine.
+     This should be cleaned up.  */
+
+#ifdef BFD64
+#define valuesize 64
+#else /* includes non-bfd case, mostly */
+#define valuesize 32
+#endif
 
   switch (radix)
     {
-
     case 2:
       maxdig = 2;
-      too_many_digits = 33;
+      too_many_digits = valuesize + 1;
       break;
     case 8:
       maxdig = radix = 8;
-      too_many_digits = 11;
+      too_many_digits = (valuesize + 2) / 3;
       break;
     case 16:
-
-
       maxdig = radix = 16;
-      too_many_digits = 9;
+      too_many_digits = (valuesize + 3) / 4;
       break;
     case 10:
       maxdig = radix = 10;
-      too_many_digits = 11;
+      too_many_digits = (valuesize + 12) / 4; /* very rough */
     }
+#undef valuesize
   c = *input_line_pointer;
   input_line_pointer++;
   digit_2 = input_line_pointer;
-  for (number = 0; (digit = hex_value[c]) < maxdig; c = *input_line_pointer++)
+  for (number = 0;
+       (digit = hex_value[(unsigned char) c]) < maxdig;
+       c = *input_line_pointer++)
     {
       number = number * radix + digit;
     }
@@ -197,7 +206,9 @@ integer_constant (radix, expressionP)
       /* we could just use digit_2, but lets be mnemonic. */
       input_line_pointer = --digit_2;	/*->1st digit. */
       c = *input_line_pointer++;
-      for (; (carry = hex_value[c]) < maxdig; c = *input_line_pointer++)
+      for (;
+	   (carry = hex_value[(unsigned char) c]) < maxdig;
+	   c = *input_line_pointer++)
 	{
 	  for (pointer = generic_bignum;
 	       pointer <= leader;
@@ -381,7 +392,7 @@ operand (expressionP)
   char c;
   symbolS *symbolP;	/* points to symbol */
   char *name;		/* points to name of symbol */
-  segT retval = absolute_section;
+  segT segment;
 
   /* digits, assume it is a bignum. */
 
@@ -517,7 +528,7 @@ operand (expressionP)
 
     case '(':
       /* didn't begin with digit & not a name */
-      retval = expression (expressionP);
+      segment = expression (expressionP);
       /* Expression() will pass trailing whitespace */
       if (*input_line_pointer++ != ')')
 	{
@@ -525,7 +536,7 @@ operand (expressionP)
 	  input_line_pointer--;
 	}
       /* here with input_line_pointer->char after "(...)" */
-      return retval;
+      return segment;
 
     case '\'':
       /* Warning: to conform to other people's assemblers NO ESCAPEMENT is
@@ -536,15 +547,12 @@ operand (expressionP)
       break;
 
     case '+':
-      retval = operand (expressionP);
+      (void) operand (expressionP);
       break;
 
     case '~':
     case '-':
       {
-	/* When computing - foo, ignore the segment of foo.  It has
-	   nothing to do with the segment of the result, which is
-	   ill-defined.  */
 	operand (expressionP);
 	if (expressionP->X_op == O_constant)
 	  {
@@ -594,7 +602,6 @@ operand (expressionP)
 	  expressionP->X_op = O_symbol;
 	  expressionP->X_add_symbol = symbolP;
 	  expressionP->X_add_number = 0;
-	  retval = now_seg;
 	  break;
 	}
       else
@@ -612,7 +619,7 @@ operand (expressionP)
       break;
 
     default:
-      if (is_end_of_line[c])
+      if (is_end_of_line[(unsigned char) c])
 	goto eol;
       if (is_name_beginner (c))	/* here if did not begin with a digit */
 	{
@@ -627,13 +634,13 @@ operand (expressionP)
 
 	  /* If we have an absolute symbol or a reg, then we know its
 	     value now.  */
-	  retval = S_GET_SEGMENT (symbolP);
-	  if (retval == absolute_section)
+	  segment = S_GET_SEGMENT (symbolP);
+	  if (segment == absolute_section)
 	    {
 	      expressionP->X_op = O_constant;
 	      expressionP->X_add_number = S_GET_VALUE (symbolP);
 	    }
-	  else if (retval == reg_section)
+	  else if (segment == reg_section)
 	    {
 	      expressionP->X_op = O_register;
 	      expressionP->X_add_number = S_GET_VALUE (symbolP);
@@ -661,7 +668,16 @@ operand (expressionP)
   clean_up_expression (expressionP);
   SKIP_WHITESPACE ();		/*->1st char after operand. */
   know (*input_line_pointer != ' ');
-  return expressionP->X_op == O_constant ? absolute_section : retval;
+
+  switch (expressionP->X_op)
+    {
+    default:
+      return absolute_section;
+    case O_symbol:
+      return S_GET_SEGMENT (expressionP->X_add_symbol);
+    case O_register:
+      return reg_section;
+    }
 }				/* operand() */
 
 /* Internal. Simplify a struct expression for use by expr() */
@@ -820,7 +836,7 @@ expr (rank, resultP)
   know (*input_line_pointer != ' ');	/* Operand() gobbles spaces. */
 
   c_left = *input_line_pointer;	/* Potential operator character. */
-  op_left = op_encoding[c_left];
+  op_left = op_encoding[(unsigned char) c_left];
   while (op_left != O_illegal && op_rank[(int) op_left] > rank)
     {
       segT rightseg;
@@ -842,14 +858,19 @@ expr (rank, resultP)
 
       know (*input_line_pointer != ' ');
 
-      if (! SEG_NORMAL (retval))
+      if (retval == undefined_section)
+	{
+	  if (SEG_NORMAL (rightseg))
+	    retval = rightseg;
+	}
+      else if (! SEG_NORMAL (retval))
 	retval = rightseg;
       else if (SEG_NORMAL (rightseg)
 	       && retval != rightseg)
 	as_bad ("operation combines symbols in different segments");
 
       c_right = *input_line_pointer;
-      op_right = op_encoding[c_right];
+      op_right = op_encoding[(unsigned char) c_right];
       if (*input_line_pointer == c_right && (c_right == '<' || c_right == '>'))
 	++input_line_pointer;
 

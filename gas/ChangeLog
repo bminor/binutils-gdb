@@ -1,3 +1,60 @@
+Fri Sep 10 11:22:08 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/obj-elf.h (S_SET_SIZE): Actually set the size.
+
+	Gcc lint.
+	* app.c (do_scrub_begin), as.c (main), expr.c (integer_constant,
+	operand, expr), read.c (read_begin, HANDLE_CONDITIONAL_ASSEMBLY,
+	read_a_source_file, s_align_bytes, demand_empty_rest_of_line,
+	ignore_rest_of_line, big_cons, is_it_end_of_statement, s_ignore),
+	read.h (is_name_beginner, is_part_of_name), config/obj-elf.c
+	(obj_elf_section), config/tc-i386.c (parse_register),
+	config/tc-sparc.c (isoctal, s_proc): Cast char
+	array indices to unsigned char.
+	* as.c: Include output-file.h for prototypes.  Comment out unused
+	function got_sig.
+	* Makefile.in (as.o): Depend on output-file.h.
+	* as.h (BAD_CASE): Cast val argument to long, and use %ld.
+	* cond.c (ignore_input): Removed unused local variable ptr.
+	* frags.h: Add prototype for frag_init.
+	* listing.c (list_symbol_table): Cast sprintf argument to unsigned
+	long and use %lx.  Print name of segment rather than address of
+	structure.
+	* read.h: Change get_absolute_expression prototype to return
+	offsetT.  Add prototype for next_char_of_string.
+	* read.c: Remove prototype for next_char_of_string.
+	(s_comm): Change temp from valueT to offsetT.  Cast to long when
+	printing and use %ld (only for error messages anyhow).
+	(emit_expr): Use %lx when printing longs.
+	(get_absolute_expression): Return offsetT, not long.
+	(get_stab_string_offset): Comment out unless
+	SEPARATE_STAB_SECTIONS.
+	(s_stab_generic): Remove unused offset.  Define seg_is_new only
+	if SEPARATE_STAB_SECTIONS.  Use toP only in local block.
+	* symbols.c: Remove nested comment.
+	(colon): Use %ld and cast to long in error message.
+	* write.c (cvt_frag_to_fill): Change first argument name depending
+	on BFD_ASSEMBLER.
+	(write_relocs): Remove unused offset, frags.
+	(write_contents): Remove unused i, n, relocs, fixp.
+	(write_object_file): Define fragP only if not BFD_ASSEMBLER or not
+	WORKING_DOT_WORD.  Remove unused keep.  Only declare punt and
+	punt_it if they will be used.
+	(fixup_segment): Cast to long and use %ld in error message.
+	* config/obj-aout.h: Remove nested comment.  Add prototype for
+	obj_aout_frob_symbol.
+	* config/obj-ecoff.c (add_string): Make len unsigned long.
+	(obj_ecoff_stab): Use %lu in error message.
+	* config/obj-elf.c (obj_elf_common): Comment out unused label
+	allocate_bss.
+	(obj_elf_frob_symbol): Return 0 (currently broken).
+	* config/tc-hppa.h: Remove declarations of functions declared in
+	read.h.
+	* config/tc-mips.c (mips_ip, md_apply_fix): Cast to long and use
+	%ld in error messages.
+	* config/tc-sparc.c (getExpression): Rewrite condition to avoid
+	empty conditional body.
+
 Thu Sep  9 17:10:00 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	Changes from Jeff Law:

@@ -27,6 +27,7 @@
 #include "coff/symconst.h"
 #include "coff/ecoff.h"
 #include "aout/stab_gnu.h"
+#include "../bfd/libcoff.h"
 #include "../bfd/libecoff.h"
 
 #include <ctype.h>
@@ -1624,7 +1625,7 @@ add_string (vp, hash_tbl, str, ret_hash)
      const char *str;			/* string */
      shash_t **ret_hash;		/* return hash pointer */
 {
-  register unsigned int len = strlen (str);
+  register unsigned long len = strlen (str);
   register shash_t *hash_ptr;
 
   if (len >= PAGE_USIZE)
@@ -1813,20 +1814,20 @@ add_ecoff_symbol (str, type, storage, sym_value, value, indx)
 	     Also, tie the external pointer back to the function begin symbol.  */
 	  if (begin_type != st_File && begin_type != st_Block)
 	    {
-	      symint_t type;
-	      varray_t *vp = &cur_file_ptr->aux_syms;
+	      symint_t ty;
+	      varray_t *svp = &cur_file_ptr->aux_syms;
 
 	      pscope->lsym->ecoff_sym.index = add_aux_sym_symint (0);
 	      pscope->lsym->index_ptr =
-		&vp->last->datum->aux[vp->objects_last_page - 1];
-	      type = add_aux_sym_tir (&last_func_type_info,
-				      hash_no,
-				      &cur_file_ptr->thash_head[0]);
+		&svp->last->datum->aux[svp->objects_last_page - 1];
+	      ty = add_aux_sym_tir (&last_func_type_info,
+				    hash_no,
+				    &cur_file_ptr->thash_head[0]);
 /*
 	      if (last_func_sym_value != (symbolS *) NULL)
 		{
 		  last_func_sym_value->ifd = cur_file_ptr->file_index;
-		  last_func_sym_value->index = type;
+		  last_func_sym_value->index = ty;
 		}
  */
 	    }
@@ -2521,7 +2522,7 @@ obj_ecoff_bend (ignore)
 static char *coff_sym_name;
 static type_info_t coff_type;
 static sc_t coff_storage_class;
-static st_t coff_symbol_type;
+static st_t coff_symbol_typ;
 static int coff_is_function;
 static char *coff_tag;
 static long coff_value;	/* FIXME: Might be 64 bits.  */
@@ -2556,7 +2557,7 @@ obj_ecoff_def (ignore)
       strcpy (coff_sym_name, name);
       coff_type = type_info_init;
       coff_storage_class = sc_Nil;
-      coff_symbol_type = st_Nil;
+      coff_symbol_typ = st_Nil;
       coff_is_function = 0;
       coff_tag = (char *) NULL;
       coff_value = 0;
@@ -2638,7 +2639,7 @@ obj_ecoff_scl (ignore)
 
   val = get_absolute_expression ();
 
-  coff_symbol_type = map_coff_sym_type[val];
+  coff_symbol_typ = map_coff_sym_type[val];
   coff_storage_class = map_coff_storage[val];
 
   demand_empty_rest_of_line ();
@@ -2855,7 +2856,7 @@ obj_ecoff_endef (ignore)
      that are not in COFF, such as short data, etc.  */
   if (coff_sym_value != (symbolS *) NULL)
     {
-      coff_symbol_type = st_Nil;
+      coff_symbol_typ = st_Nil;
       coff_storage_class = sc_Nil;
     }
 
@@ -2893,7 +2894,7 @@ obj_ecoff_endef (ignore)
 				  / coff_type.dimensions[i + 1]);
 	}
     }
-  else if (coff_symbol_type == st_Member
+  else if (coff_symbol_typ == st_Member
 	   && coff_type.num_sizes - coff_type.extra_sizes == 1)
     {
       /* Is this a bitfield?  This is indicated by a structure memeber
@@ -2903,7 +2904,7 @@ obj_ecoff_endef (ignore)
 
   /* Except for enumeration members & begin/ending of scopes, put the
      type word in the aux. symbol table.  */
-  if (coff_symbol_type == st_Block || coff_symbol_type == st_End)
+  if (coff_symbol_typ == st_Block || coff_symbol_typ == st_End)
     indx = 0;
   else if (coff_inside_enumeration)
     indx = cur_file_ptr->void_type;
@@ -2936,7 +2937,7 @@ obj_ecoff_endef (ignore)
     }
 
   /* Do any last minute adjustments that are necessary.  */
-  switch (coff_symbol_type)
+  switch (coff_symbol_typ)
     {
     default:
       break;
@@ -2980,14 +2981,14 @@ obj_ecoff_endef (ignore)
 
   /* Add the symbol.  */
   sym = add_ecoff_symbol (name,
-			  coff_symbol_type,
+			  coff_symbol_typ,
 			  coff_storage_class,
 			  coff_sym_value,
 			  coff_value,
 			  indx);
 
   /* deal with struct, union, and enum tags.  */
-  if (coff_symbol_type == st_Block)
+  if (coff_symbol_typ == st_Block)
     {
       /* Create or update the tag information.  */
       tag_t *tag_ptr = get_tag (name,
@@ -3432,7 +3433,7 @@ obj_ecoff_stab (type)
       dummy_symr.index = code;
       if (dummy_symr.index != code)
 	{
-	  as_warn ("Line number (%d) for .stab%c directive cannot fit in index field (20 bits)",
+	  as_warn ("Line number (%lu) for .stab%c directive cannot fit in index field (20 bits)",
 		   code, type);
 	  demand_empty_rest_of_line ();
 	  return;
@@ -4165,16 +4166,16 @@ ecoff_build_procs (buf, bufend, offset)
 	       proc_link != (vlinks_t *) NULL;
 	       proc_link = proc_link->next)
 	    {
-	      int proc_cnt;
+	      int prc_cnt;
 	      proc_t *proc_ptr;
 	      proc_t *proc_end;
 
 	      if (proc_link->next == (vlinks_t *) NULL)
-		proc_cnt = fil_ptr->procs.objects_last_page;
+		prc_cnt = fil_ptr->procs.objects_last_page;
 	      else
-		proc_cnt = fil_ptr->procs.objects_per_page;
+		prc_cnt = fil_ptr->procs.objects_per_page;
 	      proc_ptr = proc_link->datum->proc;
-	      proc_end = proc_ptr + proc_cnt;
+	      proc_end = proc_ptr + prc_cnt;
 	      for (; proc_ptr < proc_end; proc_ptr++)
 		{
 		  symbolS *adr_sym;

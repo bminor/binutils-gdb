@@ -50,7 +50,8 @@
 #define S_GET_TYPE(S)                   (elf_symbol((S)->bsym)->type)
 #define S_GET_DESC(S)                   (elf_symbol((S)->bsym)->desc)
 
-#define S_SET_SIZE(S,V)	     (elf_symbol((S)->bsym)->internal_elf_sym.st_size)
+#define S_SET_SIZE(S,V) \
+  (elf_symbol((S)->bsym)->internal_elf_sym.st_size = (V))
 
 extern asection *gdb_section;
 

@@ -95,7 +95,6 @@ const pseudo_typeS md_pseudo_table[] =
 #endif
 /* end-sanitize-v9 */
 #ifdef OBJ_ELF
-  {"local", s_local, 0},
   /* these are specific to sparc/svr4 */
   {"pushsection", obj_elf_section, 0},
   {"popsection", obj_elf_previous, 0},
@@ -139,7 +138,7 @@ const char FLT_CHARS[] = "rRsSfFdDxXpP";
    */
 
 static unsigned char octal[256];
-#define isoctal(c)  octal[c]
+#define isoctal(c)  octal[(unsigned char) (c)]
 static unsigned char toHex[256];
 
 struct sparc_it
@@ -177,7 +176,9 @@ static int special_case;
  * sort of like s_lcomm
  *
  */
+#ifndef OBJ_ELF
 static int max_alignment = 15;
+#endif
 
 static void
 s_reserve ()
@@ -241,12 +242,14 @@ s_reserve ()
 	}
 
       align = get_absolute_expression ();
+#ifndef OBJ_ELF
       if (align > max_alignment)
 	{
 	  align = max_alignment;
 	  as_warn ("Alignment too large: %d. assumed.", align);
 	}
-      else if (align < 0)
+#endif
+      if (align < 0)
 	{
 	  align = 0;
 	  as_warn ("Alignment negative. 0 assumed.");
@@ -309,37 +312,6 @@ s_reserve ()
 
   demand_empty_rest_of_line ();
 }
-
-#ifdef OBJ_ELF
-/* Currently used only by Solaris 2.  */
-void 
-s_local ()
-{
-  char *name;
-  int c;
-  symbolS *symbolP;
-
-  do
-    {
-      name = input_line_pointer;
-      c = get_symbol_end ();
-      symbolP = symbol_find_or_make (name);
-      *input_line_pointer = c;
-      SKIP_WHITESPACE ();
-      S_CLEAR_EXTERNAL (symbolP);
-      symbolP->local = 1;
-      if (c == ',')
-	{
-	  input_line_pointer++;
-	  SKIP_WHITESPACE ();
-	  if (*input_line_pointer == '\n')
-	    c = '\n';
-	}
-    }
-  while (c == ',');
-  demand_empty_rest_of_line ();
-}
-#endif
 
 static void
 s_common ()
@@ -406,12 +378,14 @@ s_common ()
   if (*input_line_pointer != '"')
     {
       temp = get_absolute_expression ();
+#ifndef OBJ_ELF
       if (temp > max_alignment)
 	{
 	  temp = max_alignment;
 	  as_warn ("Common alignment too large: %d. assumed", temp);
 	}
-      else if (temp < 0)
+#endif
+      if (temp < 0)
 	{
 	  temp = 0;
 	  as_warn ("Common alignment negative; 0 assumed");
@@ -536,9 +510,7 @@ s_data1 ()
 static void
 s_proc ()
 {
-  extern char is_end_of_line[];
-
-  while (!is_end_of_line[*input_line_pointer])
+  while (!is_end_of_line[(unsigned char) *input_line_pointer])
     {
       ++input_line_pointer;
     }
@@ -1793,13 +1765,11 @@ getExpression (str)
   save_in = input_line_pointer;
   input_line_pointer = str;
   seg = expression (&the_insn.exp);
-  if (seg == absolute_section
-      || seg == text_section
-      || seg == data_section
-      || seg == bss_section
-      || seg == undefined_section)
-    /* ok */;
-  else
+  if (seg != absolute_section
+      && seg != text_section
+      && seg != data_section
+      && seg != bss_section
+      && seg != undefined_section)
     {
       the_insn.error = "bad segment";
       expr_end = input_line_pointer;
@@ -1957,6 +1927,11 @@ md_apply_fix (fixP, value)
 
   switch (fixP->fx_r_type)
     {
+
+    case BFD_RELOC_16:
+      buf[0] = val >> 8;
+      buf[1] = val;
+      break;
 
     case BFD_RELOC_32:
       buf[0] = val >> 24;
@@ -2172,6 +2147,7 @@ tc_gen_reloc (section, fixp)
 
   switch (fixp->fx_r_type)
     {
+    case BFD_RELOC_16:
     case BFD_RELOC_32:
     case BFD_RELOC_HI22:
     case BFD_RELOC_LO10:

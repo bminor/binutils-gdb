@@ -1,9 +1,5 @@
-/* Copyright (C) 1987, 1990, 1991, 1992 Free Software Foundation, Inc.
-
-   Modified by Allen Wirfs-Brock, Instantiations Inc 2/90
-   */
 /* This is the Assembler Pre-Processor
-   Copyright (C) 1987 Free Software Foundation, Inc.
+   Copyright (C) 1987, 1990, 1991, 1992 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -21,6 +17,7 @@
    along with GAS; see the file COPYING.  If not, write to
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+/* Modified by Allen Wirfs-Brock, Instantiations Inc 2/90 */
 /* App, the assembler pre-processor.  This pre-processor strips out excess
    spaces, turns single-quoted characters into a decimal constant, and turns
    # <number> <filename> <garbage> into a .line <number>\n.file <filename>
@@ -70,7 +67,9 @@ do_scrub_begin ()
   lex['\n'] = LEX_IS_NEWLINE;
   lex[';'] = LEX_IS_LINE_SEPARATOR;
   lex['"'] = LEX_IS_STRINGQUOTE;
+#ifndef TC_HPPA
   lex['\''] = LEX_IS_ONECHAR_QUOTE;
+#endif
   lex[':'] = LEX_IS_COLON;
 
 
@@ -84,22 +83,22 @@ do_scrub_begin ()
 	   is a comment char, then it isn't a line separator.  */
   for (p = symbol_chars; *p; ++p)
     {
-      lex[*p] = LEX_IS_SYMBOL_COMPONENT;
+      lex[(unsigned char) *p] = LEX_IS_SYMBOL_COMPONENT;
     }				/* declare symbol characters */
 
   for (p = comment_chars; *p; p++)
     {
-      lex[*p] = LEX_IS_COMMENT_START;
+      lex[(unsigned char) *p] = LEX_IS_COMMENT_START;
     }				/* declare comment chars */
 
   for (p = line_comment_chars; *p; p++)
     {
-      lex[*p] = LEX_IS_LINE_COMMENT_START;
+      lex[(unsigned char) *p] = LEX_IS_LINE_COMMENT_START;
     }				/* declare line comment chars */
 
   for (p = line_separator_chars; *p; p++)
     {
-      lex[*p] = LEX_IS_LINE_SEPARATOR;
+      lex[(unsigned char) *p] = LEX_IS_LINE_SEPARATOR;
     }				/* declare line separators */
 
   /* Only allow slash-star comments if slash is not in use */
@@ -180,7 +179,7 @@ app_push ()
   saved->state = state;
   saved->old_state = old_state;
   saved->out_string = out_string;
-  memcpy (out_buf, saved->out_buf, sizeof (out_buf));
+  memcpy (saved->out_buf, out_buf, sizeof (out_buf));
   saved->add_newlines = add_newlines;
   saved->scrub_string = scrub_string;
   saved->scrub_last_string = scrub_last_string;
@@ -200,7 +199,7 @@ app_pop (arg)
   state = saved->state;
   old_state = saved->old_state;
   out_string = saved->out_string;
-  memcpy (saved->out_buf, out_buf, sizeof (out_buf));
+  memcpy (out_buf, saved->out_buf, sizeof (out_buf));
   add_newlines = saved->add_newlines;
   scrub_string = saved->scrub_string;
   scrub_last_string = saved->scrub_last_string;
@@ -317,6 +316,7 @@ do_scrub_next_char (get, unget)
 	    {
 	      while (ch != EOF && ch != '\n')
 		ch = (*get) ();
+	      state = 0;
 	      return ch;
 	    }
 	}
@@ -359,6 +359,9 @@ do_scrub_next_char (get, unget)
 
 	case '"':
 	case '\\':
+#ifdef TC_HPPA
+	case 'x':	/* '\\x' introduces escaped sequences on the PA */
+#endif
 	case 'b':
 	case 'f':
 	case 'n':

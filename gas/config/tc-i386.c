@@ -316,6 +316,9 @@ const pseudo_typeS md_pseudo_table[] =
   {"value", cons, 2},
   {"noopt", s_ignore, 0},
   {"optim", s_ignore, 0},
+#ifdef OBJ_ELF
+  {"zero", s_space, 0},
+#endif
   {0, 0, 0}
 };
 
@@ -2384,7 +2387,7 @@ parse_register (reg_string)
   s++;				/* skip REGISTER_PREFIX */
   for (p = reg_name_given; is_register_char (*s); p++, s++)
     {
-      *p = register_chars[*s];
+      *p = register_chars[(unsigned char) *s];
       if (p >= reg_name_given + MAX_REG_NAME_SIZE)
 	return (reg_entry *) 0;
     }

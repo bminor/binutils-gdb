@@ -156,7 +156,7 @@ obj_elf_common ()
 	  char *p;
 	  int align;
 
-	allocate_bss:
+	/* allocate_bss: */
 	  old_sec = now_seg;
 	  old_subsec = now_subseg;
 	  align = temp;
@@ -358,7 +358,7 @@ obj_elf_section (xxx)
 #undef CHECK
 
       p = input_line_pointer;
-      while (!is_end_of_line[*p] && *p != 0 && *p != ',')
+      while (!is_end_of_line[(unsigned char) *p] && *p != 0 && *p != ',')
 	p++;
       *p = 0;
       oldp = *p;
@@ -470,6 +470,8 @@ obj_elf_frob_symbol (sym, punt)
 	 relevant.  */
   return obj_elf_write_symbol_p (sym);
 #endif
+ /* FIXME: Just return 0 until is fixed.  */
+ return 0;
 }
 
 static void
