@@ -1,3 +1,10 @@
+Tue Nov 10 13:37:36 1998  Felix Lee  <flee@cygnus.com>
+
+	* acinclude.m4 (BFD_HAVE_SYS_PROCFS_TYPE,
+ 	BFD_HAVE_SYS_PROCFS_TYPE_MEMBER): didn't define macro when value
+ 	was cached.
+	* aclocal.m4, configure: regenerated.
+	
 Tue Nov 10 14:31:01 1998  Catherine Moore  <clm@cygnus.com>
 
         * elf32-d10v.c (reloc_type):  Add R_D10V_GNU_VTINHERIT and
