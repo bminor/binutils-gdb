@@ -1,3 +1,8 @@
+2004-10-03  Daniel Jacobowitz  <dan@debian.org>
+
+	* dwarf2read.c (read_subrange_type): Add comment for variable
+	sized arrays.
+
 2004-10-03  Paul Hilfinger  <hilfingr@nile.gnat.com>
 
 	* Makefile.in (.l.c): Modify rule for compatibility with recent

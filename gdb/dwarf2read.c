@@ -4610,6 +4610,9 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
       low = 1;
     }
 
+  /* FIXME: For variable sized arrays either of these could be
+     a variable rather than a constant value.  We'll allow it,
+     but we don't know how to handle it.  */
   attr = dwarf2_attr (die, DW_AT_lower_bound, cu);
   if (attr)
     low = dwarf2_get_attr_constant_value (attr, 0);
