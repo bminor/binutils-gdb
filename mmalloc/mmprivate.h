@@ -28,7 +28,7 @@ Boston, MA 02111-1307, USA.
 
 #include "mmalloc.h"
 
-#ifdef	__STDC__
+#ifdef	STDC_HEADERS
 #  include <limits.h>
 #  ifndef NULL
 #    define NULL (void *) 0

@@ -1,3 +1,11 @@
+Sat Nov  4 19:10:13 1995  Jason Molenda  (crash@phydeaux.cygnus.com)
+
+	* configure.in: add AC_HEADER_STDC check.
+
+	* mmalloc.h: check if STDC_HEADERS instead of __STDC__.
+
+	* mmprivate.h: check if STDC_HEADERS instead of __STDC__.
+
 Tue Oct 24 13:17:44 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mmprivate.h: Remove declarations (PTR, etc) that are already
