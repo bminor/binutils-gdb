@@ -1,3 +1,9 @@
+Wed Mar 20 16:56:15 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldmain.c (add_wrap): New function.
+	* ldmain.h (add_wrap): Declare.
+	* lexsup.c (parse_args): Call add_wrap.
+
 Tue Mar 19 16:44:20 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* configure.host (sparc*-*-solaris2* host): Accept any sparc variant.
