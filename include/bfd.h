@@ -758,7 +758,7 @@ typedef CONST struct reloc_howto_struct
         /*  The size of the item to be relocated - 0, is one byte, 1 is 2
            bytes, 3 is four bytes.  A -ve value indicates that the
 	    result is to be subtracted from the data*/
-  unsigned int size;
+  int size;
 
         /*  Now obsolete */
   unsigned int bitsize;

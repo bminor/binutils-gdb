@@ -1,3 +1,13 @@
+Thu Sep  3 09:10:50 1992  Stu Grossman  (grossman at cygnus.com)
+
+
+Sun Aug 30 17:50:27 1992  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* demangle.h:  New file, moved from ../gdb.  Made independent
+	of gdb.  Allow demangling style option to be passed as a
+	parameter to cplus_demangle(), but using the
+	current_demangling_style global as the default.
+
 Sat Aug 29 10:07:55 1992  Fred Fish  (fnf@cygnus.com)
 
 	* obstack.h:  Merge comment change from current FSF version.
