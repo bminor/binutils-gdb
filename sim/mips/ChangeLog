@@ -1,3 +1,10 @@
+Tue Feb  4 13:33:30 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* Makefile.in (@COMMON_MAKEFILE_FRAG): Use
+	COMMON_{PRE,POST}_CONFIG_FRAG instead.
+	* configure.in: sinclude ../common/aclocal.m4.
+	* configure: Regenerated.
+
 Fri Jan 31 11:11:45 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure: Rebuild after change to aclocal.m4.

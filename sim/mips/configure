@@ -1101,12 +1101,12 @@ else
   sim_link_files=../common/tconfig.in
 fi
 
+# targ-vals.def points to the libc macro description file.
 case "${target}" in
-*-*-*)
-	sim_link_files="${sim_link_files} ../common/nltvals.def"
-	sim_link_links="${sim_link_links} targ-vals.def"
-	;;
+*-*-*) TARG_VALS_DEF=../common/nltvals.def ;;
 esac
+sim_link_files="${sim_link_files} ${TARG_VALS_DEF}"
+sim_link_links="${sim_link_links} targ-vals.def"
 
 
 
@@ -1325,179 +1325,7 @@ done
 
 
 
-
-COMMON_MAKEFILE_FRAG=makefile-temp-$$
-cat > $COMMON_MAKEFILE_FRAG <<EOF
-VPATH = ${srcdir}
-srcdir = ${srcdir}
-srcroot = \$(srcdir)/../..
-
-prefix = ${prefix}
-exec_prefix = ${exec_prefix}
-
-host_alias = ${host_alias}
-target_alias = ${target_alias}
-program_transform_name = ${program_transform_name}
-bindir = ${bindir}
-
-libdir = ${libdir}
-tooldir = \$(libdir)/\$(target_alias)
-
-datadir = ${datadir}
-mandir = ${mandir}
-man1dir = \$(mandir)/man1
-infodir = ${infodir}
-includedir = ${includedir}
-
-SHELL = /bin/sh
-
-INSTALL = \$(srcroot)/install.sh -c
-INSTALL_PROGRAM = ${INSTALL_PROGRAM}
-INSTALL_DATA = ${INSTALL_DATA}
-INSTALL_XFORM = \$(INSTALL) -t='\$(program_transform_name)'
-INSTALL_XFORM1= \$(INSTALL_XFORM) -b=.1
-
-CC = ${CC}
-CC_FOR_BUILD = ${CC_FOR_BUILD}
-CFLAGS = ${CFLAGS}
-SIM_CFLAGS = ${sim_cflags}
-SIM_DEBUG = ${sim_debug}
-SIM_TRACE = ${sim_trace}
-SIM_BSWAP = ${sim_bswap}
-
-HDEFINES = ${HDEFINES}
-TDEFINES =
-
-AR = ${AR}
-AR_FLAGS = rc
-RANLIB = ${RANLIB}
-MAKEINFO = makeinfo
-
-# Each simulator's Makefile.in defines one or more of these variables
-# as necessary.  The SIM_AC_OUTPUT macro then inserts those values
-# at '## Config'.
-
-# List of object files, less common parts.
-#SIM_OBJS =
-# List of flags to always pass to \$(CC).
-#SIM_EXTRA_CFLAGS =
-# List of extra libraries to link with.
-#SIM_EXTRA_LIBS =
-# List of extra program dependencies.
-#SIM_EXTRA_LIBDEPS =
-# Dependency of 'all' to build any extra files.
-#SIM_EXTRA_ALL =
-# Dependency of 'install' to install any extra files.
-#SIM_EXTRA_INSTALL =
-# Dependency of 'clean' to clean any extra files.
-#SIM_EXTRA_CLEAN =
-
-CONFIG_CFLAGS = ${DEFS} \$(SIM_CFLAGS) \$(SIM_DEBUG) \$(SIM_TRACE) \$(SIM_BSWAP) \
-  \$(SIM_EXTRA_CFLAGS) \$(HDEFINES) \$(TDEFINES)
-CSEARCH = -I. -I\$(srcdir) -I../common -I\$(srcdir)/../common \
-  -I../../include -I\$(srcroot)/include \
-  -I../../bfd -I\$(srcroot)/bfd -I\$(srcroot)/gdb \
-  -I../../opcodes -I\$(srcroot)/opcodes
-ALL_CFLAGS = \$(CONFIG_CFLAGS) \$(CSEARCH) \$(CFLAGS)
-BUILD_CFLAGS = -g -O \$(CSEARCH)
-
-.NOEXPORT:
-MAKEOVERRIDES=
-
-LIBIBERTY_LIB = ../../libiberty/libiberty.a
-BFD_LIB = ../../bfd/libbfd.a
-OPCODES_LIB = ../../opcodes/libopcodes.a
-CONFIG_LIBS = ${LIBS}
-LIBDEPS = \$(BFD_LIB) \$(OPCODES_LIB) \$(LIBIBERTY_LIB) \
-	\$(SIM_EXTRA_LIBDEPS)
-EXTRA_LIBS = \$(BFD_LIB) \$(OPCODES_LIB) \$(LIBIBERTY_LIB) \
-	\$(CONFIG_LIBS) \$(SIM_EXTRA_LIBS)
-
-LIB_OBJS = callback.o targ-map.o \$(SIM_OBJS)
-
-all: run libsim.a \$(SIM_EXTRA_ALL)
-
-libsim.a: \$(LIB_OBJS)
-	rm -f libsim.a
-	\$(AR) \$(ARFLAGS) libsim.a \$(LIB_OBJS)
-	\$(RANLIB) libsim.a
-
-run: run.o libsim.a \$(LIBDEPS)
-	\$(CC) \$(ALL_CFLAGS) -o run \
-	  run.o libsim.a \$(EXTRA_LIBS)
-
-run.o: \$(srcdir)/../common/run.c config.h tconfig.h \
-	  \$(srcroot)/include/callback.h
-	\$(CC) -c \$(srcdir)/../common/run.c \$(ALL_CFLAGS)
-
-callback.o: \$(srcdir)/../common/callback.c config.h tconfig.h \
-	  \$(srcroot)/include/callback.h targ-vals.h
-	\$(CC) -c \$(srcdir)/../common/callback.c \$(ALL_CFLAGS)
-
-gentmap: \$(srcdir)/../common/gentmap.c targ-vals.def
-	\$(CC_FOR_BUILD) \$(srcdir)/../common/gentmap.c -o gentmap \$(BUILD_CFLAGS) -I\$(srcdir)/../common
-
-targ-vals.h: gentmap
-	rm -f targ-vals.h
-	./gentmap -h >targ-vals.h
-
-targ-map.c: gentmap
-	rm -f targ-map.c
-	./gentmap -c >targ-map.c
-
-install: install-common \$(SIM_EXTRA_INSTALL)
-
-install-common:
-	\$(INSTALL_XFORM) run \$(bindir)/run
-
-check:
-
-info:
-clean-info:
-install-info:
-
-tags etags: TAGS
-
-TAGS: force
-	etags *.c *.h
-
-clean: \$(SIM_EXTRA_CLEAN)
-	rm -f *.[oa] *~ core gentmap targ-map.c targ-vals.h 
-	rm -f run libsim.a
-
-distclean mostlyclean maintainer-clean realclean: clean
-	rm -f TAGS
-	rm -f Makefile config.cache config.log config.status
-	rm -f tconfig.h config.h stamp-h targ-vals.def
-
-.c.o:
-	\$(CC) -c \$(ALL_CFLAGS) \$<
-
-# Dummy target to force execution of dependent targets.
-force:
-
-Makefile: Makefile.in config.status
-	CONFIG_HEADERS= \$(SHELL) ./config.status
-
-config.status: configure
-	\$(SHELL) ./config.status --recheck
-
-config.h: stamp-h ; @true
-stamp-h: config.in config.status
-	CONFIG_FILES= CONFIG_HEADERS=config.h:config.in \$(SHELL) ./config.status
-
-# We can't add dependencies to configure because it causes too much trouble
-# to end users if configure's timestamp is out of sync.
-.PHONY: run-autoconf
-run-autoconf:
-	cd \$(srcdir) && autoconf -l ../common
-EOF
-
-
-
-
-
- trap '' 1 2 15
+trap '' 1 2 15
 cat > confcache <<\EOF
 # This file is a shell script that caches the results of configure
 # tests run on this system so they can be shared between configure
@@ -1598,7 +1426,7 @@ done
 ac_given_srcdir=$srcdir
 ac_given_INSTALL="$INSTALL"
 
-trap 'rm -fr `echo "Makefile config.h:config.in" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
+trap 'rm -fr `echo "Makefile.sim:Makefile.in Make-common.sim:../common/Make-common.in config.h:config.in" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
 EOF
 cat >> $CONFIG_STATUS <<EOF
 
@@ -1656,8 +1484,6 @@ s%@sim_trace@%$sim_trace%g
 s%@sim_bswap@%$sim_bswap%g
 s%@SIMCONF@%$SIMCONF%g
 s%@CPP@%$CPP%g
-/@COMMON_MAKEFILE_FRAG@/r $COMMON_MAKEFILE_FRAG
-s%@COMMON_MAKEFILE_FRAG@%%g
 
 CEOF
 EOF
@@ -1699,7 +1525,7 @@ EOF
 
 cat >> $CONFIG_STATUS <<EOF
 
-CONFIG_FILES=\${CONFIG_FILES-"Makefile"}
+CONFIG_FILES=\${CONFIG_FILES-"Makefile.sim:Makefile.in Make-common.sim:../common/Make-common.in"}
 EOF
 cat >> $CONFIG_STATUS <<\EOF
 for ac_file in .. $CONFIG_FILES; do if test "x$ac_file" != x..; then
@@ -1915,16 +1741,23 @@ cat >> $CONFIG_STATUS <<EOF
 
 EOF
 cat >> $CONFIG_STATUS <<\EOF
-
+case "x$CONFIG_FILES" in xMakefile*)
+   echo "Merging Makefile.sim+Make-common.sim into Makefile ..."
+   rm -f Makesim1.tmp Makesim2.tmp Makefile
+   sed -n -e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ p' <Make-common.sim >Makesim1.tmp
+   sed -n -e '/^## COMMON_POST_/,/^## End COMMON_POST_/ p' <Make-common.sim >Makesim2.tmp
+   sed -e '/^## COMMON_PRE_/ r Makesim1.tmp' \
+	-e '/^## COMMON_POST_/ r Makesim2.tmp' \
+	<Makefile.sim >Makefile
+   rm -f Makefile.sim Make-common.sim Makesim1.tmp Makesim2.tmp
+   ;;
+ esac
  case "x$CONFIG_HEADERS" in xconfig.h:config.in) echo > stamp-h ;; esac
- 
+
 exit 0
 EOF
 chmod +x $CONFIG_STATUS
 rm -fr confdefs* $ac_clean_files
 test "$no_create" = yes || ${CONFIG_SHELL-/bin/sh} $CONFIG_STATUS || exit 1
-
-
-rm $COMMON_MAKEFILE_FRAG
 
 
