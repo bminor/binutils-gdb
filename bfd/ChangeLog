@@ -1,5 +1,20 @@
 2002-01-30  Nick Clifton  <nickc@cambridge.redhat.com>
 
+	* doc/proto.str (ENUMDOC): Place two spaces between the end of 
+	the text and the closing comment marker.
+
+	* archures.c: Tidy up formatting of embedded comments.
+	* bfd.c: Tidy up formatting of embedded comments.
+        * bfd-in.h: Fix formatting of comments.
+	* reloc.c: Tidy up formatting of ordinary & embedded comments.
+	* section.c: Tidy up formatting of embedded comments.
+	* syms.c: Tidy up formatting of embedded comments.
+	* targets.c: Tidy up formatting of embedded comments.
+
+	* bfd-in2.h: Regenerate.
+
+2002-01-30  Nick Clifton  <nickc@cambridge.redhat.com>
+
 	* vms-tir.c (cmd_name): New function.
 	(tir_cmd_name): New function.
 	(etir_sta, etir_sto, etir_opr, etir_stc): Use cmd_name().
