@@ -973,27 +973,17 @@ get_prev_frame (struct frame_info *next_frame)
   prev_frame->unwind = frame_unwind_find_by_pc (current_gdbarch,
 						prev_frame->pc);
 
-  /* Now figure out how to initialize this new frame.  Perhaphs one
-     day, this will too, be selected by set_unwind_by_pc().  */
-  if (prev_frame->type != DUMMY_FRAME)
-    {
-      /* A dummy frame doesn't need to unwind the frame ID because the
-	 frame ID comes from the previous frame.  The other frames do
-	 though.  True?  */
-#if 0
-      /* Oops, the frame doesn't chain.  Treat this as the last frame.  */
-      prev_frame->id = frame_id_unwind (next_frame);
-      if (!frame_id_p (prev_frame->id))
-	return NULL;
-#else      
-      /* FIXME: cagney/2002-12-18: Instead of this hack, should just
-	 save the frame ID directly.  */
-      struct frame_id id = frame_id_unwind (next_frame);
-      if (!frame_id_p (id))
-	return NULL;
-      prev_frame->frame = id.base;
-#endif
-    }
+  /* FIXME: cagney/2003-01-13: A dummy frame doesn't need to unwind
+     the frame ID because the frame ID comes from the previous frame.
+     The other frames do though.  True?  */
+  {
+    /* FIXME: cagney/2002-12-18: Instead of this hack, should just
+       save the frame ID directly.  */
+    struct frame_id id = frame_id_unwind (next_frame);
+    if (!frame_id_p (id))
+      return NULL;
+    prev_frame->frame = id.base;
+  }
 
   /* Link it in.  */
   next_frame->prev = prev_frame;
@@ -1077,8 +1067,14 @@ find_frame_sal (struct frame_info *frame, struct symtab_and_line *sal)
 CORE_ADDR
 get_frame_base (struct frame_info *fi)
 {
+#if 1
+  /* FIXME: cagney/2003-01-13: Should be using the frame base obtained
+     by unwinding the previous frame.  */
+  return fi->frame;
+#else
   struct frame_id id = frame_id_unwind (fi->next);
   return id.base;
+#endif
 }
 
 /* Level of the selected frame: 0 for innermost, 1 for its caller, ...

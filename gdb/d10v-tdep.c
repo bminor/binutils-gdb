@@ -459,7 +459,7 @@ d10v_store_return_value (struct type *type, struct regcache *regcache,
     {
       bfd_byte tmp[2];
       tmp[1] = *(bfd_byte *)valbuf;
-      regcache_cooked_write (regcache, RET1_REGNUM, tmp);
+      regcache_cooked_write (regcache, D10V_RET1_REGNUM, tmp);
     }
   else
     {
@@ -471,7 +471,7 @@ d10v_store_return_value (struct type *type, struct regcache *regcache,
          out any dangling byte at the end of the buffer.  */
       for (reg = 0; (reg * 2) + 1 < TYPE_LENGTH (type); reg++)
 	{
-	  regcache_cooked_write (regcache, RET1_REGNUM + reg,
+	  regcache_cooked_write (regcache, D10V_RET1_REGNUM + reg,
 				 (bfd_byte *) valbuf + reg * 2);
 	}
       /* Write out any dangling byte at the end of the buffer.  */
@@ -489,8 +489,8 @@ static CORE_ADDR
 d10v_extract_struct_value_address (struct regcache *regcache)
 {
   ULONGEST addr;
-  regcache_cooked_read_unsigned (regcache, ARG1_REGNUM, &addr);
-  return (addr | DMEM_START);
+  regcache_cooked_read_unsigned (regcache, D10V_ARG1_REGNUM, &addr);
+  return (addr | D10V_DMEM_START);
 }
 
 static CORE_ADDR
@@ -1093,7 +1093,7 @@ d10v_extract_return_value (struct type *type, struct regcache *regcache,
   if (TYPE_LENGTH (type) == 1)
     {
       ULONGEST c;
-      regcache_cooked_read_unsigned (regcache, RET1_REGNUM, &c);
+      regcache_cooked_read_unsigned (regcache, D10V_RET1_REGNUM, &c);
       store_unsigned_integer (valbuf, 1, c);
     }
   else
@@ -1103,11 +1103,11 @@ d10v_extract_return_value (struct type *type, struct regcache *regcache,
 	 remaining bytes in remaining registers. Interestingly, when
 	 such values are passed in, the last byte is in the most
 	 significant byte of that same register - wierd. */
-      int reg = RET1_REGNUM;
+      int reg = D10V_RET1_REGNUM;
       int off = 0;
       if (TYPE_LENGTH (type) & 1)
 	{
-	  regcache_cooked_read_part (regcache, RET1_REGNUM, 1, 1,
+	  regcache_cooked_read_part (regcache, D10V_RET1_REGNUM, 1, 1,
 				     (bfd_byte *)valbuf + off);
 	  off++;
 	  reg++;
@@ -1115,7 +1115,7 @@ d10v_extract_return_value (struct type *type, struct regcache *regcache,
       /* Transfer the remaining registers.  */
       for (; off < TYPE_LENGTH (type); reg++, off += 2)
 	{
-	  regcache_cooked_read (regcache, RET1_REGNUM + reg,
+	  regcache_cooked_read (regcache, D10V_RET1_REGNUM + reg,
 				(bfd_byte *) valbuf + off);
 	}
     }

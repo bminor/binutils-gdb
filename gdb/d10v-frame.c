@@ -311,7 +311,7 @@ saved_regs_unwinder (struct frame_info *frame,
 	  if (bufferp != NULL)
 	    {
 	      /* Read the value in from memory.  */
-	      read_memory (get_frame_saved_regs (frame)[regnum], bufferp,
+	      read_memory (saved_regs[regnum], bufferp,
 			   REGISTER_RAW_SIZE (regnum));
 	    }
 	}

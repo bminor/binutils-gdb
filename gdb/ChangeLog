@@ -1,3 +1,21 @@
+2003-01-19  Andrew Cagney  <ac131313@redhat.com>
+
+	* d10v-frame.c: Use D10V_RET1_REGNUM.
+	(saved_regs_unwinder): Don't use get_frame_saved_regs.
+	* frame.c (get_prev_frame): Always initialize frame.frame.
+	(get_frame_base): Return frame.frame.
+
+2003-01-13  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbarch.sh (FRAME_INIT_SAVED_REGS): Change to function with
+	predicate.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* stack.c (frame_info): Only initialize the saved registers when
+	FRAME_INIT_SAVED_REGS_P.
+	* frame.c (frame_saved_regs_register_unwind): Assert
+	FRAME_INIT_SAVED_REGS_P.
+	(deprecated_generic_get_saved_register): Ditto.
+
 2003-01-13  Andrew Cagney  <ac131313@redhat.com>
 
 	* d10v-tdep.c: Include "d10v-tdep.h".  Update to use D10V_
