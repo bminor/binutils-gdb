@@ -1936,29 +1936,29 @@ typedef CORE_ADDR (gdbarch_frame_align_ftype) (struct gdbarch *gdbarch, CORE_ADD
 extern CORE_ADDR gdbarch_frame_align (struct gdbarch *gdbarch, CORE_ADDR address);
 extern void set_gdbarch_frame_align (struct gdbarch *gdbarch, gdbarch_frame_align_ftype *frame_align);
 
-#if defined (REG_STRUCT_HAS_ADDR)
-/* Legacy for systems yet to multi-arch REG_STRUCT_HAS_ADDR */
-#if !defined (REG_STRUCT_HAS_ADDR_P)
-#define REG_STRUCT_HAS_ADDR_P() (1)
+#if defined (DEPRECATED_REG_STRUCT_HAS_ADDR)
+/* Legacy for systems yet to multi-arch DEPRECATED_REG_STRUCT_HAS_ADDR */
+#if !defined (DEPRECATED_REG_STRUCT_HAS_ADDR_P)
+#define DEPRECATED_REG_STRUCT_HAS_ADDR_P() (1)
 #endif
 #endif
 
-extern int gdbarch_reg_struct_has_addr_p (struct gdbarch *gdbarch);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (REG_STRUCT_HAS_ADDR_P)
-#error "Non multi-arch definition of REG_STRUCT_HAS_ADDR"
+extern int gdbarch_deprecated_reg_struct_has_addr_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_REG_STRUCT_HAS_ADDR_P)
+#error "Non multi-arch definition of DEPRECATED_REG_STRUCT_HAS_ADDR"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (REG_STRUCT_HAS_ADDR_P)
-#define REG_STRUCT_HAS_ADDR_P() (gdbarch_reg_struct_has_addr_p (current_gdbarch))
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_REG_STRUCT_HAS_ADDR_P)
+#define DEPRECATED_REG_STRUCT_HAS_ADDR_P() (gdbarch_deprecated_reg_struct_has_addr_p (current_gdbarch))
 #endif
 
-typedef int (gdbarch_reg_struct_has_addr_ftype) (int gcc_p, struct type *type);
-extern int gdbarch_reg_struct_has_addr (struct gdbarch *gdbarch, int gcc_p, struct type *type);
-extern void set_gdbarch_reg_struct_has_addr (struct gdbarch *gdbarch, gdbarch_reg_struct_has_addr_ftype *reg_struct_has_addr);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (REG_STRUCT_HAS_ADDR)
-#error "Non multi-arch definition of REG_STRUCT_HAS_ADDR"
+typedef int (gdbarch_deprecated_reg_struct_has_addr_ftype) (int gcc_p, struct type *type);
+extern int gdbarch_deprecated_reg_struct_has_addr (struct gdbarch *gdbarch, int gcc_p, struct type *type);
+extern void set_gdbarch_deprecated_reg_struct_has_addr (struct gdbarch *gdbarch, gdbarch_deprecated_reg_struct_has_addr_ftype *deprecated_reg_struct_has_addr);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_REG_STRUCT_HAS_ADDR)
+#error "Non multi-arch definition of DEPRECATED_REG_STRUCT_HAS_ADDR"
 #endif
-#if !defined (REG_STRUCT_HAS_ADDR)
-#define REG_STRUCT_HAS_ADDR(gcc_p, type) (gdbarch_reg_struct_has_addr (current_gdbarch, gcc_p, type))
+#if !defined (DEPRECATED_REG_STRUCT_HAS_ADDR)
+#define DEPRECATED_REG_STRUCT_HAS_ADDR(gcc_p, type) (gdbarch_deprecated_reg_struct_has_addr (current_gdbarch, gcc_p, type))
 #endif
 
 extern int gdbarch_frame_red_zone_size (struct gdbarch *gdbarch);
@@ -2036,7 +2036,7 @@ extern void set_gdbarch_addr_bits_remove (struct gdbarch *gdbarch, gdbarch_addr_
 #define ADDR_BITS_REMOVE(addr) (gdbarch_addr_bits_remove (current_gdbarch, addr))
 #endif
 
-/* It is not at all clear why SMASH_TEXT_ADDRESS is not folded into
+/* It is not at all clear why SMASH_TEXT_ADDRESS is not folded into 
    ADDR_BITS_REMOVE. */
 
 typedef CORE_ADDR (gdbarch_smash_text_address_ftype) (CORE_ADDR addr);
@@ -2330,7 +2330,7 @@ typedef int (gdbarch_register_reggroup_p_ftype) (struct gdbarch *gdbarch, int re
 extern int gdbarch_register_reggroup_p (struct gdbarch *gdbarch, int regnum, struct reggroup *reggroup);
 extern void set_gdbarch_register_reggroup_p (struct gdbarch *gdbarch, gdbarch_register_reggroup_p_ftype *register_reggroup_p);
 
-/* Fetch the pointer to the ith function argument. */
+/* Fetch the pointer to the ith function argument.   */
 
 #if defined (FETCH_POINTER_ARGUMENT)
 /* Legacy for systems yet to multi-arch FETCH_POINTER_ARGUMENT */

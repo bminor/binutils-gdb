@@ -237,7 +237,7 @@ struct gdbarch
   gdbarch_frame_num_args_ftype *frame_num_args;
   gdbarch_deprecated_stack_align_ftype *deprecated_stack_align;
   gdbarch_frame_align_ftype *frame_align;
-  gdbarch_reg_struct_has_addr_ftype *reg_struct_has_addr;
+  gdbarch_deprecated_reg_struct_has_addr_ftype *deprecated_reg_struct_has_addr;
   int frame_red_zone_size;
   int parm_boundary;
   const struct floatformat * float_format;
@@ -405,7 +405,7 @@ struct gdbarch startup_gdbarch =
   0,  /* frame_num_args */
   0,  /* deprecated_stack_align */
   0,  /* frame_align */
-  0,  /* reg_struct_has_addr */
+  0,  /* deprecated_reg_struct_has_addr */
   0,  /* frame_red_zone_size */
   0,  /* parm_boundary */
   0,  /* float_format */
@@ -729,7 +729,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of frame_num_args, has predicate */
   /* Skip verify of deprecated_stack_align, has predicate */
   /* Skip verify of frame_align, has predicate */
-  /* Skip verify of reg_struct_has_addr, has predicate */
+  /* Skip verify of deprecated_reg_struct_has_addr, has predicate */
   if (gdbarch->float_format == 0)
     gdbarch->float_format = default_float_format (gdbarch);
   if (gdbarch->double_format == 0)
@@ -1498,6 +1498,25 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: DEPRECATED_REGISTER_SIZE = %d\n",
                       DEPRECATED_REGISTER_SIZE);
 #endif
+#ifdef DEPRECATED_REG_STRUCT_HAS_ADDR_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_REG_STRUCT_HAS_ADDR_P()",
+                      XSTRING (DEPRECATED_REG_STRUCT_HAS_ADDR_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_REG_STRUCT_HAS_ADDR_P() = %d\n",
+                      DEPRECATED_REG_STRUCT_HAS_ADDR_P ());
+#endif
+#ifdef DEPRECATED_REG_STRUCT_HAS_ADDR
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_REG_STRUCT_HAS_ADDR(gcc_p, type)",
+                      XSTRING (DEPRECATED_REG_STRUCT_HAS_ADDR (gcc_p, type)));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_REG_STRUCT_HAS_ADDR = <0x%08lx>\n",
+                      (long) current_gdbarch->deprecated_reg_struct_has_addr
+                      /*DEPRECATED_REG_STRUCT_HAS_ADDR ()*/);
+#endif
 #ifdef DEPRECATED_SAVED_PC_AFTER_CALL_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -2107,25 +2126,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: REGISTER_VIRTUAL_TYPE = <0x%08lx>\n",
                       (long) current_gdbarch->deprecated_register_virtual_type
                       /*REGISTER_VIRTUAL_TYPE ()*/);
-#endif
-#ifdef REG_STRUCT_HAS_ADDR_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "REG_STRUCT_HAS_ADDR_P()",
-                      XSTRING (REG_STRUCT_HAS_ADDR_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: REG_STRUCT_HAS_ADDR_P() = %d\n",
-                      REG_STRUCT_HAS_ADDR_P ());
-#endif
-#ifdef REG_STRUCT_HAS_ADDR
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "REG_STRUCT_HAS_ADDR(gcc_p, type)",
-                      XSTRING (REG_STRUCT_HAS_ADDR (gcc_p, type)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: REG_STRUCT_HAS_ADDR = <0x%08lx>\n",
-                      (long) current_gdbarch->reg_struct_has_addr
-                      /*REG_STRUCT_HAS_ADDR ()*/);
 #endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: remote_translate_xfer_address = 0x%08lx\n",
@@ -4907,27 +4907,27 @@ set_gdbarch_frame_align (struct gdbarch *gdbarch,
 }
 
 int
-gdbarch_reg_struct_has_addr_p (struct gdbarch *gdbarch)
+gdbarch_deprecated_reg_struct_has_addr_p (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  return gdbarch->reg_struct_has_addr != NULL;
+  return gdbarch->deprecated_reg_struct_has_addr != NULL;
 }
 
 int
-gdbarch_reg_struct_has_addr (struct gdbarch *gdbarch, int gcc_p, struct type *type)
+gdbarch_deprecated_reg_struct_has_addr (struct gdbarch *gdbarch, int gcc_p, struct type *type)
 {
   gdb_assert (gdbarch != NULL);
-  gdb_assert (gdbarch->reg_struct_has_addr != NULL);
+  gdb_assert (gdbarch->deprecated_reg_struct_has_addr != NULL);
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_reg_struct_has_addr called\n");
-  return gdbarch->reg_struct_has_addr (gcc_p, type);
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_reg_struct_has_addr called\n");
+  return gdbarch->deprecated_reg_struct_has_addr (gcc_p, type);
 }
 
 void
-set_gdbarch_reg_struct_has_addr (struct gdbarch *gdbarch,
-                                 gdbarch_reg_struct_has_addr_ftype reg_struct_has_addr)
+set_gdbarch_deprecated_reg_struct_has_addr (struct gdbarch *gdbarch,
+                                            gdbarch_deprecated_reg_struct_has_addr_ftype deprecated_reg_struct_has_addr)
 {
-  gdbarch->reg_struct_has_addr = reg_struct_has_addr;
+  gdbarch->deprecated_reg_struct_has_addr = deprecated_reg_struct_has_addr;
 }
 
 int
