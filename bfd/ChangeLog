@@ -1,3 +1,7 @@
+Mon Jul  5 16:48:11 1993  Doug Evans  (dje@canuck.cygnus.com)
+
+	* cpu-h8300.c (h8300_scan): Fix parsing of architecture string.
+
 Fri Jul  2 18:27:00 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* Makefile.in (clean): Remove bfd.h and stmp-bfd.h.
