@@ -61,6 +61,9 @@ code on the hardware.
 #include "engine.c"
 #undef SIM_MANIFESTS
 
+/* This variable holds the GDB view of the target endianness: */
+extern int target_byte_order;
+
 /* The following reserved instruction value is used when a simulator
    trap is required. NOTE: Care must be taken, since this value may be
    used in later revisions of the MIPS ISA. */
@@ -405,7 +408,7 @@ unsigned int pipeline_ticks = 0;
 #define simEXCEPTION    (1 << 26) /* 0 = no exception; 1 = exception has occurred */
 #define simEXIT         (1 << 27) /* 0 = do nothing; 1 = run-time exit() processing */
 
-unsigned int state = (0 | simBE); /* big-endian simulator by default */
+unsigned int state = 0;
 unsigned int rcexit = 0; /* _exit() reason code holder */
 
 #define DELAYSLOT()     {\
@@ -447,6 +450,19 @@ ut_reg profile_maxpc;
 int profile_shift = 0; /* address shift amount */
 #endif /* PROFILE */
 
+/* The following are used to provide shortcuts to the required version
+   of host<->target copying. This avoids run-time conditionals, which
+   would slow the simulator throughput. */
+typedef unsigned int (*fnptr_read_word) PARAMS((unsigned char *memory));
+typedef unsigned int (*fnptr_swap_word) PARAMS((unsigned int data));
+typedef uword64 (*fnptr_read_long) PARAMS((unsigned char *memory));
+typedef uword64 (*fnptr_swap_long) PARAMS((uword64 data));
+
+fnptr_read_word host_read_word;
+fnptr_read_long host_read_long;
+fnptr_swap_word host_swap_word;
+fnptr_swap_long host_swap_long;
+
 /*---------------------------------------------------------------------------*/
 /*-- GDB simulator interface ------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
@@ -459,10 +475,12 @@ static void StoreMemory PARAMS((int CCA,int AccessLength,uword64 MemElem,uword64
 static uword64 LoadMemory PARAMS((int CCA,int AccessLength,uword64 pAddr,uword64 vAddr,int IorD,int raw));
 static void SignalException PARAMS((int exception,...));
 static void simulate PARAMS((void));
-static long getnum(char *value);
-extern void sim_size(unsigned int newsize);
-extern void sim_set_profile(int frequency);
-static unsigned int power2(unsigned int value);
+static long getnum PARAMS((char *value));
+extern void sim_size PARAMS((unsigned int newsize));
+extern void sim_set_profile PARAMS((int frequency));
+static unsigned int power2 PARAMS((unsigned int value));
+
+/*---------------------------------------------------------------------------*/
 
 void
 sim_open (args)
@@ -1056,9 +1074,9 @@ sim_store_register (rn,memory)
    callback->printf_filtered(callback,"Warning: Invalid register width for %d (register store ignored)\n",rn);
   else {
     if (register_widths[rn] == 32)
-     registers[rn] = *((unsigned int *)memory);
+     registers[rn] = host_read_word(memory);
     else
-     registers[rn] = *((uword64 *)memory);
+     registers[rn] = host_read_long(memory);
   }
 
   return;
@@ -1077,9 +1095,9 @@ sim_fetch_register (rn,memory)
    callback->printf_filtered(callback,"Warning: Invalid register width for %d (register fetch ignored)\n",rn);
   else {
     if (register_widths[rn] == 32)
-     *((unsigned int *)memory) = (registers[rn] & 0xFFFFFFFF);
+     *((unsigned int *)memory) = host_swap_word(registers[rn] & 0xFFFFFFFF);
     else /* 64bit register */
-     *((uword64 *)memory) = registers[rn];
+     *((uword64 *)memory) = host_swap_long(registers[rn]);
   }
   return;
 }
@@ -1722,6 +1740,95 @@ void dotrace(tracefh,type,address,width,comment)
 #endif /* TRACE */
 
 /*---------------------------------------------------------------------------*/
+/*-- host<->target transfers ------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
+/* The following routines allow conditionals to be avoided during the
+   simulation, at the cost of increasing the image and source size. */
+
+static unsigned int
+xfer_direct_word(memory)
+     unsigned char *memory;
+{
+  return *((unsigned int *)memory);
+}
+
+static uword64
+xfer_direct_long(memory)
+     unsigned char *memory;
+{
+  return *((uword64 *)memory);
+}
+
+static unsigned int
+swap_direct_word(data)
+     unsigned int data;
+{
+  return data;
+}
+
+static uword64
+swap_direct_long(data)
+     uword64 data;
+{
+  return data;
+}
+
+static unsigned int
+xfer_big_word(memory)
+     unsigned char *memory;
+{
+  return ((memory[0] << 24) | (memory[1] << 16) | (memory[2] << 8) | memory[3]);
+}
+
+static uword64
+xfer_big_long(memory)
+     unsigned char *memory;
+{
+  return (((uword64)memory[0] << 56) | ((uword64)memory[1] << 48)
+          | ((uword64)memory[2] << 40) | ((uword64)memory[3] << 32)
+          | (memory[4] << 24) | (memory[5] << 16) | (memory[6] << 8) | memory[7]);
+}
+
+static unsigned int
+xfer_little_word(memory)
+     unsigned char *memory;
+{
+  return ((memory[3] << 24) | (memory[2] << 16) | (memory[1] << 8) | memory[0]);
+}
+
+static uword64
+xfer_little_long(memory)
+     unsigned char *memory;
+{
+  return (((uword64)memory[7] << 56) | ((uword64)memory[6] << 48)
+          | ((uword64)memory[5] << 40) | ((uword64)memory[4] << 32)
+          | (memory[3] << 24) | (memory[2] << 16) | (memory[1] << 8) | memory[0]);
+}
+
+static unsigned int
+swap_word(data)
+     unsigned int data;
+{
+  unsigned int result;
+  result = data ^ ((data << 16) | (data >> 16));
+  result &= ~0x00FF0000;
+  data = (data << 24) | (data >> 8);
+  return data ^ (result >> 8);
+}
+
+static uword64
+swap_long(data)
+     uword64 data;
+{
+  unsigned int tmphi = WORD64HI(data);
+  unsigned int tmplo = WORD64LO(data);
+  tmphi = swap_word(tmphi);
+  tmplo = swap_word(tmplo);
+  /* Now swap the HI and LO parts */
+  return SET64LO(tmphi) | SET64HI(tmplo);
+}
+
+/*---------------------------------------------------------------------------*/
 /*-- simulator engine -------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
@@ -1761,6 +1868,35 @@ ColdReset()
      fpr_state[rn] = fmt_uninterpreted;
   }
 #endif /* HASFPU */
+
+  /* In reality this check should be performed at various points
+     within the simulation, since it is possible to change the
+     endianness of user programs. However, we perform the check here
+     to ensure that the start-of-day values agree: */
+  state |= (BigEndianCPU ? simBE : 0);
+  if ((target_byte_order == 1234) != !(state & simBE)) {
+    fprintf(stderr,"ColdReset: GDB (%s) and simulator (%s) do not agree on target endianness\n",
+            target_byte_order == 1234 ? "little" : "big",
+            state & simBE ? "big" : "little");
+    exit(1);
+  }
+
+  if ((state & simHOSTBE) == (state & simBE)) {
+    host_read_word = xfer_direct_word;
+    host_read_long = xfer_direct_long;
+    host_swap_word = swap_direct_word;
+    host_swap_long = swap_direct_long;
+  } else if (state & simHOSTBE) {
+    host_read_word = xfer_little_word;
+    host_read_long = xfer_little_long;
+    host_swap_word = swap_word;
+    host_swap_long = swap_long;
+  } else { /* HOST little-endian */
+    host_read_word = xfer_big_word;
+    host_read_long = xfer_big_long;
+    host_swap_word = swap_word;
+    host_swap_long = swap_long;
+  }
 
   return;
 }
@@ -3440,9 +3576,6 @@ simulate ()
 #ifdef DEBUG
     callback->printf_filtered(callback,"DBG: fetched 0x%08X from PC = 0x%08X%08X\n",instruction,WORD64HI(PC),WORD64LO(PC));
 #endif /* DEBUG */
-
-/*DBG*/    if (instruction == 0x46200005) /* ABS.D */
-/*DBG*/      callback->printf_filtered(callback,"DBG: ABS.D (0x%08X) instruction\n",instruction);
 
 #if !defined(FASTSIM) || defined(PROFILE)
     instruction_fetches++;
