@@ -1900,15 +1900,6 @@ extern void set_gdbarch_frame_red_zone_size (struct gdbarch *gdbarch, int frame_
 #define FRAME_RED_ZONE_SIZE (gdbarch_frame_red_zone_size (current_gdbarch))
 #endif
 
-extern int gdbarch_parm_boundary (struct gdbarch *gdbarch);
-extern void set_gdbarch_parm_boundary (struct gdbarch *gdbarch, int parm_boundary);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (PARM_BOUNDARY)
-#error "Non multi-arch definition of PARM_BOUNDARY"
-#endif
-#if !defined (PARM_BOUNDARY)
-#define PARM_BOUNDARY (gdbarch_parm_boundary (current_gdbarch))
-#endif
-
 extern const struct floatformat * gdbarch_float_format (struct gdbarch *gdbarch);
 extern void set_gdbarch_float_format (struct gdbarch *gdbarch, const struct floatformat * float_format);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (TARGET_FLOAT_FORMAT)

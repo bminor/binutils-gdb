@@ -673,7 +673,6 @@ M:::CORE_ADDR:frame_align:CORE_ADDR address:address
 F:2:DEPRECATED_REG_STRUCT_HAS_ADDR:int:deprecated_reg_struct_has_addr:int gcc_p, struct type *type:gcc_p, type
 m:::int:stabs_argument_has_addr:struct type *type:type:::default_stabs_argument_has_addr::0
 v::FRAME_RED_ZONE_SIZE:int:frame_red_zone_size
-v:2:PARM_BOUNDARY:int:parm_boundary
 #
 v:2:TARGET_FLOAT_FORMAT:const struct floatformat *:float_format::::::default_float_format (current_gdbarch)::%s:(TARGET_FLOAT_FORMAT)->name
 v:2:TARGET_DOUBLE_FORMAT:const struct floatformat *:double_format::::::default_double_format (current_gdbarch)::%s:(TARGET_DOUBLE_FORMAT)->name

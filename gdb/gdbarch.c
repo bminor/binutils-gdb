@@ -229,7 +229,6 @@ struct gdbarch
   gdbarch_deprecated_reg_struct_has_addr_ftype *deprecated_reg_struct_has_addr;
   gdbarch_stabs_argument_has_addr_ftype *stabs_argument_has_addr;
   int frame_red_zone_size;
-  int parm_boundary;
   const struct floatformat * float_format;
   const struct floatformat * double_format;
   const struct floatformat * long_double_format;
@@ -390,7 +389,6 @@ struct gdbarch startup_gdbarch =
   0,  /* deprecated_reg_struct_has_addr */
   default_stabs_argument_has_addr,  /* stabs_argument_has_addr */
   0,  /* frame_red_zone_size */
-  0,  /* parm_boundary */
   0,  /* float_format */
   0,  /* double_format */
   0,  /* long_double_format */
@@ -1874,14 +1872,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: NUM_REGS = %d\n",
                       NUM_REGS);
-#endif
-#ifdef PARM_BOUNDARY
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: PARM_BOUNDARY # %s\n",
-                      XSTRING (PARM_BOUNDARY));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: PARM_BOUNDARY = %d\n",
-                      PARM_BOUNDARY);
 #endif
 #ifdef PC_REGNUM
   fprintf_unfiltered (file,
@@ -4671,22 +4661,6 @@ set_gdbarch_frame_red_zone_size (struct gdbarch *gdbarch,
                                  int frame_red_zone_size)
 {
   gdbarch->frame_red_zone_size = frame_red_zone_size;
-}
-
-int
-gdbarch_parm_boundary (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_parm_boundary called\n");
-  return gdbarch->parm_boundary;
-}
-
-void
-set_gdbarch_parm_boundary (struct gdbarch *gdbarch,
-                           int parm_boundary)
-{
-  gdbarch->parm_boundary = parm_boundary;
 }
 
 const struct floatformat *

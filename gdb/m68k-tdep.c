@@ -1107,7 +1107,6 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Stack grows down. */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
-  set_gdbarch_parm_boundary (gdbarch, 32);
 
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
   set_gdbarch_decr_pc_after_break (gdbarch, 2);

@@ -1,3 +1,11 @@
+2004-05-05  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh (PARM_BOUNDARY): Delete.
+	gdbarch.h, gdbarch.c: Re-generate.
+	* valops.c (PARM_BOUNDARY): Delete macro.
+	(value_push): Delete PARM_BOUNDARY code.
+	* m68k-tdep.c (m68k_gdbarch_init): Do not set parm_boundary.
+
 2004-05-04  Jim Blandy  <jimb@redhat.com>
 
 	* ppc-linux-nat.c (fetch_ppc_registers, store_ppc_registers):
