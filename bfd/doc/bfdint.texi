@@ -25,6 +25,7 @@ The initial version of this document was written by Ian Lance Taylor
 @menu
 * BFD glossary::		BFD glossary
 * BFD guidelines::		BFD programming guidelines
+* BFD target vector::		BFD target vector
 * BFD generated files::		BFD generated files
 * BFD multiple compilations::	Files compiled multiple times in BFD
 * BFD relocation handling::	BFD relocation handling
@@ -186,6 +187,645 @@ Some warnings are OK, like the absence of certain function declarations
 which may or may not be declared in system header files.  Warnings about
 ambiguous expressions and the like should always be fixed.
 @end itemize
+
+@node BFD target vector
+@section BFD target vector
+@cindex bfd target vector
+@cindex target vector in bfd
+
+BFD supports multiple object file formats by using the @dfn{target
+vector}.  This is simply a set of function pointers which implement
+behaviour that is specific to a particular object file format.
+
+In this section I list all of the entries in the target vector and
+describe what they do.
+
+@menu
+* BFD target vector miscellaneous::	Miscellaneous constants
+* BFD target vector swap::		Swapping functions
+* BFD target vector format::		Format type dependent functions
+* BFD_JUMP_TABLE macros::		BFD_JUMP_TABLE macros
+* BFD target vector generic::		Generic functions
+* BFD target vector copy::		Copy functions
+* BFD target vector core::		Core file support functions
+* BFD target vector archive::		Archive functions
+* BFD target vector symbols::		Symbol table functions
+* BFD target vector relocs::		Relocation support
+* BFD target vector write::		Output functions
+* BFD target vector link::		Linker functions
+* BFD target vector dynamic::		Dynamic linking information functions
+@end menu
+
+@node BFD target vector miscellaneous
+@subsection Miscellaneous constants
+
+The target vector starts with a set of constants.
+
+@table @samp
+@item name
+The name of the target vector.  This is an arbitrary string.  This is
+how the target vector is named in command line options for tools which
+use BFD, such as the @samp{-oformat} linker option.
+
+@item flavour
+A general description of the type of target.  The following flavours are
+currently defined:
+@table @samp
+@item bfd_target_unknown_flavour
+Undefined or unknown.
+@item bfd_target_aout_flavour
+a.out.
+@item bfd_target_coff_flavour
+COFF.
+@item bfd_target_ecoff_flavour
+ECOFF.
+@item bfd_target_elf_flavour
+ELF.
+@item bfd_target_ieee_flavour
+IEEE-695.
+@item bfd_target_nlm_flavour
+NLM.
+@item bfd_target_oasys_flavour
+OASYS.
+@item bfd_target_tekhex_flavour
+Tektronix hex format.
+@item bfd_target_srec_flavour
+Motorola S-record format.
+@item bfd_target_ihex_flavour
+Intel hex format.
+@item bfd_target_som_flavour
+SOM (used on HP/UX).
+@item bfd_target_os9k_flavour
+os9000.
+@item bfd_target_versados_flavour
+VERSAdos.
+@item bfd_target_msdos_flavour
+MS-DOS.
+@item bfd_target_evax_flavour
+openVMS.
+@end table
+
+@item byteorder
+The byte order of data in the object file.  One of
+@samp{BFD_ENDIAN_BIG}, @samp{BFD_ENDIAN_LITTLE}, or
+@samp{BFD_ENDIAN_UNKNOWN}.  The latter would be used for a format such
+as S-records which do not record the architecture of the data.
+
+@item header_byteorder
+The byte order of header information in the object file.  Normally the
+same as the @samp{byteorder} field, but there are certain cases where it
+may be different.
+
+@item object_flags
+Flags which may appear in the @samp{flags} field of a BFD with this
+format.
+
+@item section_flags
+Flags which may appear in the @samp{flags} field of a section within a
+BFD with this format.
+
+@item symbol_leading_char
+A character which the C compiler normally puts before a symbol.  For
+example, an a.out compiler will typically generate the symbol
+@samp{_foo} for a function named @samp{foo} in the C source, in which
+case this field would be @samp{_}.  If there is no such character, this
+field will be @samp{0}.
+
+@item ar_pad_char
+The padding character to use at the end of an archive name.  Normally
+@samp{/}.
+
+@item ar_max_namelen
+The maximum length of a short name in an archive.  Normally @samp{14}.
+
+@item backend_data
+A pointer to constant backend data.  This is used by backends to store
+whatever additional information they need to distinguish similar target
+vectors which use the same sets of functions.
+@end table
+
+@node BFD target vector swap
+@subsection Swapping functions
+
+Every target vector has fuction pointers used for swapping information
+in and out of the target representation.  There are two sets of
+functions: one for data information, and one for header information.
+Each set has three sizes: 64-bit, 32-bit, and 16-bit.  Each size has
+three actual functions: put, get unsigned, and get signed.
+
+These 18 functions are used to convert data between the host and target
+representations.
+
+@node BFD target vector format
+@subsection Format type dependent functions
+
+Every target vector has three arrays of function pointers which are
+indexed by the BFD format type.  The BFD format types are as follows:
+@table @samp
+@item bfd_unknown
+Unknown format.  Not used for anything useful.
+@item bfd_object
+Object file.
+@item bfd_archive
+Archive file.
+@item bfd_core
+Core file.
+@end table
+
+The three arrays of function pointers are as follows:
+@table @samp
+@item bfd_check_format
+Check whether the BFD is of a particular format (object file, archive
+file, or core file) corresponding to this target vector.  This is called
+by the @samp{bfd_check_format} function when examining an existing BFD.
+If the BFD matches the desired format, this function will initialize any
+format specific information such as the @samp{tdata} field of the BFD.
+This function must be called before any other BFD target vector function
+on a file opened for reading.
+
+@item bfd_set_format
+Set the format of a BFD which was created for output.  This is called by
+the @samp{bfd_set_format} function after creating the BFD with a
+function such as @samp{bfd_openw}.  This function will initialize format
+specific information required to write out an object file or whatever of
+the given format.  This function must be called before any other BFD
+target vector function on a file opened for writing.
+
+@item bfd_write_contents
+Write out the contents of the BFD in the given format.  This is called
+by @samp{bfd_close} function for a BFD opened for writing.  This really
+should not be an array selected by format type, as the
+@samp{bfd_set_format} function provides all the required information.
+In fact, BFD will fail if a different format is used when calling
+through the @samp{bfd_set_format} and the @samp{bfd_write_contents}
+arrays; fortunately, since @samp{bfd_close} gets it right, this is a
+difficult error to make.
+@end table
+
+@node BFD_JUMP_TABLE macros
+@subsection @samp{BFD_JUMP_TABLE} macros
+@cindex @samp{BFD_JUMP_TABLE}
+
+Most target vectors are defined using @samp{BFD_JUMP_TABLE} macros.
+These macros take a single argument, which is a prefix applied to a set
+of functions.  The macros are then used to initialize the fields in the
+target vector.
+
+For example, the @samp{BFD_JUMP_TABLE_RELOCS} macro defines three
+functions: @samp{_get_reloc_upper_bound}, @samp{_canonicalize_reloc},
+and @samp{_bfd_reloc_type_lookup}.  A reference like
+@samp{BFD_JUMP_TABLE_RELOCS (foo)} will expand into three functions
+prefixed with @samp{foo}: @samp{foo_get_reloc_upper_found}, etc.  The
+@samp{BFD_JUMP_TABLE_RELOCS} macro will be placed such that those three
+functions initialize the appropriate fields in the BFD target vector.
+
+This is done because it turns out that many different target vectors can
+shared certain classes of functions.  For example, archives are similar
+on most platforms, so most target vectors can use the same archive
+functions.  Those target vectors all use @samp{BFD_JUMP_TABLE_ARCHIVE}
+with the same argument, calling a set of functions which is defined in
+@file{archive.c}.
+
+Each of the @samp{BFD_JUMP_TABLE} macros is mentioned below along with
+the description of the function pointers which it defines.  The function
+pointers will be described using the name without the prefix which the
+@samp{BFD_JUMP_TABLE} macro defines.  This name is normally the same as
+the name of the field in the target vector structure.  Any differences
+will be noted.
+
+@node BFD target vector generic
+@subsection Generic functions
+@cindex @samp{BFD_JUMP_TABLE_GENERIC}
+
+The @samp{BFD_JUMP_TABLE_GENERIC} macro is used for some catch all
+functions which don't easily fit into other categories.
+
+@table @samp
+@item _close_and_cleanup
+Free any target specific information associated with the BFD.  This is
+called when any BFD is closed (the @samp{bfd_write_contents} function
+mentioned earlier is only called for a BFD opened for writing).  Most
+targets use @samp{bfd_alloc} to allocate all target specific
+information, and therefore don't have to do anything in this function.
+This function pointer is typically set to
+@samp{_bfd_generic_close_and_cleanup}, which simply returns true.
+
+@item _bfd_free_cached_info
+Free any cached information associated with the BFD which can be
+recreated later if necessary.  This is used to reduce the memory
+consumption required by programs using BFD.  This is normally called via
+the @samp{bfd_free_cached_info} macro.  It is used by the default
+archive routines when computing the archive map.  Most targets do not
+do anything special for this entry point, and just set it to
+@samp{_bfd_generic_free_cached_info}, which simply returns true.
+
+@item _new_section_hook
+This is called from @samp{bfd_make_section_anyway} whenever a new
+section is created.  Most targets use it to initialize section specific
+information.  This function is called whether or not the section
+corresponds to an actual section in an actual BFD.
+
+@item _get_section_contents
+Get the contents of a section.  This is called from
+@samp{bfd_get_section_contents}.  Most targets set this to
+@samp{_bfd_generic_get_section_contents}, which does a @samp{bfd_seek}
+based on the section's @samp{filepos} field and a @samp{bfd_read}.  The
+corresponding field in the target vector is named
+@samp{_bfd_get_section_contents}.
+
+@item _get_section_contents_in_window
+Set a @samp{bfd_window} to hold the contents of a section.  This is
+called from @samp{bfd_get_section_contents_in_window}.  The
+@samp{bfd_window} idea never really caught in, and I don't think this is
+ever called.  Pretty much all targets implement this as
+@samp{bfd_generic_get_section_contents_in_window}, which uses
+@samp{bfd_get_section_contents} to do the right thing.  The
+corresponding field in the target vector is named
+@samp{_bfd_get_section_contents_in_window}.
+@end table
+
+@node BFD target vector copy
+@subsection Copy functions
+@cindex @samp{BFD_JUMP_TABLE_COPY}
+
+The @samp{BFD_JUMP_TABLE_COPY} macro is used for functions which are
+called when copying BFDs, and for a couple of functions which deal with
+internal BFD information.
+
+@table @samp
+@item _bfd_copy_private_bfd_data
+This is called when copying a BFD, via @samp{bfd_copy_private_bfd_data}.
+If the input and output BFDs have the same format, this will copy any
+private information over.  This is called after all the section contents
+have been written to the output file.  Only a few targets do anything in
+this function.
+
+@item _bfd_merge_private_bfd_data
+This is called when linking, via @samp{bfd_merge_private_bfd_data}.  It
+gives the backend linker code a chance to set any special flags in the
+output file based on the contents of the input file.  Only a few targets
+do anything in this function.
+
+@item _bfd_copy_private_section_data
+This is similar to @samp{_bfd_copy_private_bfd_data}, but it is called
+for each section, via @samp{bfd_copy_private_section_data}.  This
+function is called before any section contents have been written.  Only
+a few targets do anything in this function.
+
+@item _bfd_copy_private_symbol_data
+This is called via @samp{bfd_copy_private_symbol_data}, but I don't
+think anything actually calls it.  If it were defined, it could be used
+to copy private symbol data from one BFD to another.  However, most BFDs
+store extra symbol information by allocating space which is larger than
+the @samp{asymbol} structure and storing private information in the
+extra space.  Since @samp{objcopy} and other programs copy symbol
+information by copying pointers to @samp{asymbol} structures, the
+private symbol information is automatically copied as well.  Most
+targets do not do anything in this function.
+
+@item _bfd_set_private_flags
+This is called via @samp{bfd_set_private_flags}.  It is basically a hook
+for the assembler to set magic information.  For example, the PowerPC
+ELF assembler uses it to set flags which appear in the e_flags field of
+the ELF header.  Most targets do not do anything in this function.
+
+@item _bfd_print_private_bfd_data
+This is called by @samp{objdump} when the @samp{-p} option is used.  It
+is called via @samp{bfd_print_private_data}.  It prints any interesting
+information about the BFD which can not be otherwise represented by BFD
+and thus can not be printed by @samp{objdump}.  Most targets do not do
+anything in this function.
+@end table
+
+@node BFD target vector core
+@subsection Core file support functions
+@cindex @samp{BFD_JUMP_TABLE_CORE}
+
+The @samp{BFD_JUMP_TABLE_CORE} macro is used for functions which deal
+with core files.  Obviously, these functions only do something
+interesting for targets which have core file support.
+
+@table @samp
+@item _core_file_failing_command
+Given a core file, this returns the command which was run to produce the
+core file.
+
+@item _core_file_failing_signal
+Given a core file, this returns the signal number which produced the
+core file.
+
+@item _core_file_matches_executable_p
+Given a core file and a BFD for an executable, this returns whether the
+core file was generated by the executable.
+@end table
+
+@node BFD target vector archive
+@subsection Archive functions
+@cindex @samp{BFD_JUMP_TABLE_ARCHIVE}
+
+The @samp{BFD_JUMP_TABLE_ARCHIVE} macro is used for functions which deal
+with archive files.  Most targets use COFF style archive files
+(including ELF targets), and these use @samp{_bfd_archive_coff} as the
+argument to @samp{BFD_JUMP_TABLE_ARCHIVE}.  Some targets use BSD/a.out
+style archives, and these use @samp{_bfd_archive_bsd}.  (The main
+difference between BSD and COFF archives is the format of the archive
+symbol table).  Targets with no archive support use
+@samp{_bfd_noarchive}.  Finally, a few targets have unusual archive
+handling.
+
+@table @samp
+@item _slurp_armap
+Read in the archive symbol table, storing it in private BFD data.  This
+is normally called from the archive @samp{check_format} routine.  The
+corresponding field in the target vector is named
+@samp{_bfd_slurp_armap}.
+
+@item _slurp_extended_name_table
+Read in the extended name table from the archive, if there is one,
+storing it in private BFD data.  This is normally called from the
+archive @samp{check_format} routine.  The corresponding field in the
+target vector is named @samp{_bfd_slurp_extended_name_table}.
+
+@item construct_extended_name_table
+Build and return an extended name table if one is needed to write out
+the archive.  This also adjusts the archive headers to refer to the
+extended name table appropriately.  This is normally called from the
+archive @samp{write_contents} routine.  The corresponding field in the
+target vector is named @samp{_bfd_construct_extended_name_table}.
+
+@item _truncate_arname
+This copies a file name into an archive header, truncating it as
+required.  It is normally called from the archive @samp{write_contents}
+routine.  This function is more interesting in targets which do not
+support extended name tables, but I think the GNU @samp{ar} program
+always uses extended name tables anyhow.  The corresponding field in the
+target vector is named @samp{_bfd_truncate_arname}.
+
+@item _write_armap
+Write out the archive symbol table using calls to @samp{bfd_write}.
+This is normally called from the archive @samp{write_contents} routine.
+The corresponding field in the target vector is named @samp{write_armap}
+(no leading underscore).
+
+@item _read_ar_hdr
+Read and parse an archive header.  This handles expanding the archive
+header name into the real file name using the extended name table.  This
+is called by routines which read the archive symbol table or the archive
+itself.  The corresponding field in the target vector is named
+@samp{_bfd_read_ar_hdr_fn}.
+
+@item _openr_next_archived_file
+Given an archive and a BFD representing a file stored within the
+archive, return a BFD for the next file in the archive.  This is called
+via @samp{bfd_openr_next_archived_file}.  The corresponding field in the
+target vector is named @samp{openr_next_archived_file} (no leading
+underscore).
+
+@item _get_elt_at_index
+Given an archive and an index, return a BFD for the file in the archive
+corresponding to that entry in the archive symbol table.  This is called
+via @samp{bfd_get_elt_at_index}.  The corresponding field in the target
+vector is named @samp{_bfd_get_elt_at_index}.
+
+@item _generic_stat_arch_elt
+Do a stat on an element of an archive, returning information read from
+the archive header (modification time, uid, gid, file mode, size).  This
+is called via @samp{bfd_stat_arch_elt}.  The corresponding field in the
+target vector is named @samp{_bfd_stat_arch_elt}.
+
+@item _update_armap_timestamp
+After the entire contents of an archive have been written out, update
+the timestamp of the archive symbol table to be newer than that of the
+file.  This is required for a.out style archives.  This is normally
+called by the archive @samp{write_contents} routine.  The corresponding
+field in the target vector is named @samp{_bfd_update_armap_timestamp}.
+@end table
+
+@node BFD target vector symbols
+@subsection Symbol table functions
+@cindex @samp{BFD_JUMP_TABLE_SYMBOLS}
+
+The @samp{BFD_JUMP_TABLE_SYMBOLS} macro is used for functions which deal
+with symbols.
+
+@table @samp
+@item _get_symtab_upper_bound
+Return a sensible upper bound on the amount of memory which will be
+required to read the symbol table.  In practice most targets return the
+amount of memory required to hold @samp{asymbol} pointers for all the
+symbols plus a trailing @samp{NULL} entry, and store the actual symbol
+information in BFD private data.  This is called via
+@samp{bfd_get_symtab_upper_bound}.  The corresponding field in the
+target vector is named @samp{_bfd_get_symtab_upper_bound}.
+
+@item _get_symtab
+Read in the symbol table.  This is called via
+@samp{bfd_canonicalize_symtab}.  The corresponding field in the target
+vector is named @samp{_bfd_canonicalize_symtab}.
+
+@item _make_empty_symbol
+Create an empty symbol for the BFD.  This is needed because most targets
+store extra information with each symbol by allocating a structure
+larger than an @samp{asymbol} and storing the extra information at the
+end.  This function will allocate the right amount of memory, and return
+what looks like a pointer to an empty @samp{asymbol}.  This is called
+via @samp{bfd_make_empty_symbol}.  The corresponding field in the target
+vector is named @samp{_bfd_make_empty_symbol}.
+
+@item _print_symbol
+Print information about the symbol.  This is called via
+@samp{bfd_print_symbol}.  One of the arguments indicates what sort of
+information should be printed:
+@table @samp
+@item bfd_print_symbol_name
+Just print the symbol name.
+@item bfd_print_symbol_more
+Print the symbol name and some interesting flags.  I don't think
+anything actually uses this.
+@item bfd_print_symbol_all
+Print all information about the symbol.  This is used by @samp{objdump}
+when run with the @samp{-t} option.
+@end table
+The corresponding field in the target vector is named
+@samp{_bfd_print_symbol}.
+
+@item _get_symbol_info
+Return a standard set of information about the symbol.  This is called
+via @samp{bfd_symbol_info}.  The corresponding field in the target
+vector is named @samp{_bfd_get_symbol_info}.
+
+@item _bfd_is_local_label_name
+Return whether the given string would normally represent the name of a
+local label.  This is called via @samp{bfd_is_local_label} and
+@samp{bfd_is_local_label_name}.  Local labels are normally discarded by
+the assembler.  In the linker, this defines the difference between the
+@samp{-x} and @samp{-X} options.
+
+@item _get_lineno
+Return line number information for a symbol.  This is only meaningful
+for a COFF target.  This is called when writing out COFF line numbers.
+
+@item _find_nearest_line
+Given an address within a section, use the debugging information to find
+the matching file name, function name, and line number, if any.  This is
+called via @samp{bfd_find_nearest_line}.  The corresponding field in the
+target vector is named @samp{_bfd_find_nearest_line}.
+
+@item _bfd_make_debug_symbol
+Make a debugging symbol.  This is only meaningful for a COFF target,
+where it simply returns a symbol which will be placed in the
+@samp{N_DEBUG} section when it is written out.  This is called via
+@samp{bfd_make_debug_symbol}.
+
+@item _read_minisymbols
+Minisymbols are used to reduce the memory requirements of programs like
+@samp{nm}.  A minisymbol is a cookie pointing to internal symbol
+information which the caller can use to extract complete symbol
+information.  This permits BFD to not convert all the symbols into
+generic form, but to instead convert them one at a time.  This is called
+via @samp{bfd_read_minisymbols}.  Most targets do not implement this,
+and just use generic support which is based on using standard
+@samp{asymbol} structures.
+
+@item _minisymbol_to_symbol
+Convert a minisymbol to a standard @samp{asymbol}.  This is called via
+@samp{bfd_minisymbol_to_symbol}.
+@end table
+
+@node BFD target vector relocs
+@subsection Relocation support
+@cindex @samp{BFD_JUMP_TABLE_RELOCS}
+
+The @samp{BFD_JUMP_TABLE_RELOCS} macro is used for functions which deal
+with relocations.
+
+@table @samp
+@item _get_reloc_upper_bound
+Return a sensible upper bound on the amount of memory which will be
+required to read the relocations for a section.  In practice most
+targets return the amount of memory required to hold @samp{arelent}
+pointers for all the relocations plus a trailing @samp{NULL} entry, and
+store the actual relocation information in BFD private data.  This is
+called via @samp{bfd_get_reloc_upper_bound}.
+
+@item _canonicalize_reloc
+Return the relocation information for a section.  This is called via
+@samp{bfd_canonicalize_reloc}.  The corresponding field in the target
+vector is named @samp{_bfd_canonicalize_reloc}.
+
+@item _bfd_reloc_type_lookup
+Given a relocation code, return the corresponding howto structure
+(@pxref{BFD relocation codes}).  This is called via
+@samp{bfd_reloc_type_lookup}.  The corresponding field in the target
+vector is named @samp{reloc_type_lookup}.
+@end table
+
+@node BFD target vector write
+@subsection Output functions
+@cindex @samp{BFD_JUMP_TABLE_WRITE}
+
+The @samp{BFD_JUMP_TABLE_WRITE} macro is used for functions which deal
+with writing out a BFD.
+
+@table @samp
+@item _set_arch_mach
+Set the architecture and machine number for a BFD.  This is called via
+@samp{bfd_set_arch_mach}.  Most targets implement this by calling
+@samp{bfd_default_set_arch_mach}.  The corresponding field in the target
+vector is named @samp{_bfd_set_arch_mach}.
+
+@item _set_section_contents
+Write out the contents of a section.  This is called via
+@samp{bfd_set_section_contents}.  The corresponding field in the target
+vector is named @samp{_bfd_set_section_contents}.
+@end table
+
+@node BFD target vector link
+@subsection Linker functions
+@cindex @samp{BFD_JUMP_TABLE_LINK}
+
+The @samp{BFD_JUMP_TABLE_LINK} macro is used for functions called by the
+linker.
+
+@table @samp
+@item _sizeof_headers
+Return the size of the header information required for a BFD.  This is
+used to implement the @samp{SIZEOF_HEADERS} linker script function.  It
+is normally used to align the first section at an efficient position on
+the page.  This is called via @samp{bfd_sizeof_headers}.  The
+corresponding field in the target vector is named
+@samp{_bfd_sizeof_headers}.
+
+@item _bfd_get_relocated_section_contents
+Read the contents of a section and apply the relocation information.
+This handles both a final link and a relocateable link; in the latter
+case, it adjust the relocation information as well.  This is called via
+@samp{bfd_get_relocated_section_contents}.  Most targets implement it by
+calling @samp{bfd_generic_get_relocated_section_contents}.
+
+@item _bfd_relax_section
+Try to use relaxation to shrink the size of a section.  This is called
+by the linker when the @samp{-relax} option is used.  This is called via
+@samp{bfd_relax_section}.  Most targets do not support any sort of
+relaxation.
+
+@item _bfd_link_hash_table_create
+Create the symbol hash table to use for the linker.  This linker hook
+permits the backend to control the size and information of the elements
+in the linker symbol hash table.  This is called via
+@samp{bfd_link_hash_table_create}.
+
+@item _bfd_link_add_symbols
+Given an object file or an archive, add all symbols into the linker
+symbol hash table.  Use callbacks to the linker to include archive
+elements in the link.  This is called via @samp{bfd_link_add_symbols}.
+
+@item _bfd_final_link
+Finish the linking process.  The linker calls this hook after all of the
+input files have been read, when it is ready to finish the link and
+generate the output file.  This is called via @samp{bfd_final_link}.
+
+@item _bfd_link_split_section
+I don't know what this is for.  Nothing seems to call it.  The only
+non-trivial definition is in @file{som.c}.
+@end table
+
+@node BFD target vector dynamic
+@subsection Dynamic linking information functions
+@cindex @samp{BFD_JUMP_TABLE_DYNAMIC}
+
+The @samp{BFD_JUMP_TABLE_DYNAMIC} macro is used for functions which read
+dynamic linking information.
+
+@table @samp
+@item _get_dynamic_symtab_upper_bound
+Return a sensible upper bound on the amount of memory which will be
+required to read the dynamic symbol table.  In practice most targets
+return the amount of memory required to hold @samp{asymbol} pointers for
+all the symbols plus a trailing @samp{NULL} entry, and store the actual
+symbol information in BFD private data.  This is called via
+@samp{bfd_get_dynamic_symtab_upper_bound}.  The corresponding field in
+the target vector is named @samp{_bfd_get_dynamic_symtab_upper_bound}.
+
+@item _canonicalize_dynamic_symtab
+Read the dynamic symbol table.  This is called via
+@samp{bfd_canonicalize_dynamic_symtab}.  The corresponding field in the
+target vector is named @samp{_bfd_canonicalize_dynamic_symtab}.
+
+@item _get_dynamic_reloc_upper_bound
+Return a sensible upper bound on the amount of memory which will be
+required to read the dynamic relocations.  In practice most targets
+return the amount of memory required to hold @samp{arelent} pointers for
+all the relocations plus a trailing @samp{NULL} entry, and store the
+actual relocation information in BFD private data.  This is called via
+@samp{bfd_get_dynamic_reloc_upper_bound}.  The corresponding field in
+the target vector is named @samp{_bfd_get_dynamic_reloc_upper_bound}.
+
+@item _canonicalize_dynamic_reloc
+Read the dynamic relocations.  This is called via
+@samp{bfd_canonicalize_dynamic_reloc}.  The corresponding field in the
+target vector is named @samp{_bfd_canonicalize_dynamic_reloc}.
+@end table
 
 @node BFD generated files
 @section BFD generated files
