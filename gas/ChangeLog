@@ -1,3 +1,9 @@
+Wed Oct 12 18:48:39 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* symbols.c (resolve_symbol_value, case O_symbol): Undo last
+	change; it breaks the rs6000 support, and doesn't seem to be
+	needed.
+
 Wed Oct 12 11:56:50 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
 
 	* config/tc-i386.h,te-netbsd532.h (TARGET_FORMAT): Changed to
