@@ -114,8 +114,9 @@ write_opcodes ()
       else
 	size = 7;
 
-      printf ("  { 0x%x,0x%x,OP_%X,%d,",
-	      opcode->opcode, opcode->mask, opcode->opcode, size);
+      printf ("  { 0x%x,0x%x,OP_%X,%d,%d,",
+	      opcode->opcode, opcode->mask, opcode->opcode,
+	      size, opcode->format);
       
       Opcodes[curop++] = opcode->opcode;
 
@@ -158,5 +159,5 @@ write_opcodes ()
 
       printf ("}},\n");
     }
-  printf ("{ 0,0,NULL,0,0,{0,0,0,0,0,0}},\n};\n");
+  printf ("{ 0,0,NULL,0,0,0,{0,0,0,0,0,0}},\n};\n");
 }
