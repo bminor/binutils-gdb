@@ -1,3 +1,44 @@
+2002-06-06  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-bfd.h (struct elf_size_info <swap_symbol_in>): Function args
+	are "const PTR", not "const PTR *".
+	(bfd_elf32_swap_symbol_in): Likewise.
+	(bfd_elf64_swap_symbol_in): Likewise.
+	* elfcode.h (elf_swap_symbol_in): Change input args to const PTR.
+	(elf_slurp_symbol_table): Adjust call to elf_swap_symbol_in.
+	* elflink.h (elf_link_is_defined_archive_symbol): Likewise.
+	(elf_link_add_object_symbols): Likewise.
+	(elf_link_record_local_dynamic_symbol): Likewise.
+	(elf_link_input_bfd): Likewise.
+	(elf_gc_mark): Likewise.
+	(elf_reloc_symbol_deleted_p): Likewise.
+	* elf-m10200.c (mn10200_elf_relax_section): Likewise.
+	(mn10200_elf_relax_delete_bytes): Likewise.
+	(mn10200_elf_symbol_address_p): Likewise.
+	(mn10200_elf_get_relocated_section_contents): Likewise.
+	* elf-m10300.c (mn10300_elf_relax_section): Likewise.
+	(mn10300_elf_relax_section): Likewise.
+	(mn10300_elf_relax_delete_bytes): Likewise.
+	(mn10300_elf_symbol_address_p): Likewise.
+	(mn10300_elf_get_relocated_section_contents): Likewise.
+	* elf32-h8300.c (elf32_h8_relax_section): Likewise.
+	(elf32_h8_relax_delete_bytes): Likewise.
+	(elf32_h8_symbol_address_p): Likewise.
+	(elf32_h8_get_relocated_section_contents): Likewise.
+	* elf32-hppa.c (get_local_syms): Likewise.
+	* elf32-m68k.c (bfd_m68k_elf32_create_embedded_relocs): Likewise.
+	* elf32-mips.c (bfd_mips_elf32_create_embedded_relocs): Likewise.
+	* elf32-sh.c (sh_elf_relax_section): Likewise.
+	(sh_elf_relax_delete_bytes): Likewise.
+	(sh_elf_get_relocated_section_contents): Likewise.
+	* elf32-xstormy16.c (xstormy16_elf_relax_section): Likewise.
+	* elf64-alpha.c (elf64_alpha_relax_section): Likewise.
+	* elf64-hppa.c (elf64_hppa_check_relocs): Likewise.
+	* elf64-mmix.c (mmix_elf_relax_section): Likewise.
+	* elf64-ppc.c (get_local_syms): Likewise.
+	* elf64-sh64.c (sh_elf64_get_relocated_section_contents): Likewise.
+	* elfxx-ia64.c (elfNN_ia64_relax_section): Likewise.
+
 Wed Jun  5 20:43:27 2002  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* config.bfd (sh64l*-*-elf*, shl*-*-elf*): New configurations.

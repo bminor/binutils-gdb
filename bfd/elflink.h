@@ -237,7 +237,7 @@ elf_link_is_defined_archive_symbol (abfd, symdef)
       Elf_Internal_Sym sym;
       const char * name;
 
-      elf_swap_symbol_in (abfd, (const PTR *) esym, (const PTR *) shndx, &sym);
+      elf_swap_symbol_in (abfd, (const PTR) esym, (const PTR) shndx, &sym);
 
       name = bfd_elf_string_from_elf_section (abfd, hdr->sh_link, sym.st_name);
       if (name == (const char *) NULL)
@@ -1666,7 +1666,7 @@ elf_link_add_object_symbols (abfd, info)
 
       override = false;
 
-      elf_swap_symbol_in (abfd, (const PTR *) esym, (const PTR *) shndx, &sym);
+      elf_swap_symbol_in (abfd, (const PTR) esym, (const PTR) shndx, &sym);
 
       flags = BSF_NO_FLAGS;
       sec = NULL;
@@ -2556,7 +2556,7 @@ elf_link_record_local_dynamic_symbol (info, input_bfd, input_indx)
 	  || bfd_bread ((PTR) shndx, amt, input_bfd) != amt)
 	return false;
     }
-  elf_swap_symbol_in (input_bfd, (const PTR *) &esym, (const PTR *) shndx,
+  elf_swap_symbol_in (input_bfd, (const PTR) &esym, (const PTR) shndx,
 		      &entry->isym);
 
   name = (bfd_elf_string_from_elf_section
@@ -6522,7 +6522,7 @@ elf_link_input_bfd (finfo, input_bfd)
       const char *name;
       Elf_Internal_Sym osym;
 
-      elf_swap_symbol_in (input_bfd, (const PTR *) esym, (const PTR *) shndx,
+      elf_swap_symbol_in (input_bfd, (const PTR) esym, (const PTR) shndx,
 			  isym);
       *pindex = -1;
 
@@ -7672,8 +7672,8 @@ elf_gc_mark (info, sec, gc_mark_hook)
 	    {
 	      locshndx = locsym_shndx + (locsym_shndx ? r_symndx : 0);
 	      elf_swap_symbol_in (input_bfd,
-				  (const PTR *) (locsyms + r_symndx),
-				  (const PTR *) locshndx,
+				  (const PTR) (locsyms + r_symndx),
+				  (const PTR) locshndx,
 				  &s);
 	      if (ELF_ST_BIND (s.st_info) == STB_LOCAL)
 		rsec = (*gc_mark_hook) (sec->owner, info, rel, NULL, &s);
@@ -7692,8 +7692,8 @@ elf_gc_mark (info, sec, gc_mark_hook)
 	    {
 	      locshndx = locsym_shndx + (locsym_shndx ? r_symndx : 0);
 	      elf_swap_symbol_in (input_bfd,
-				  (const PTR *) (locsyms + r_symndx),
-				  (const PTR *) locshndx,
+				  (const PTR) (locsyms + r_symndx),
+				  (const PTR) locshndx,
 				  &s);
 	      rsec = (*gc_mark_hook) (sec->owner, info, rel, NULL, &s);
 	    }
@@ -8287,8 +8287,8 @@ elf_reloc_symbol_deleted_p (offset, cookie)
 	  lshndx = (Elf_External_Sym_Shndx *) rcookie->locsym_shndx;
 	  if (lshndx != NULL)
 	    lshndx += r_symndx;
-	  elf_swap_symbol_in (rcookie->abfd, (const PTR *) lsym,
-			      (const PTR *) lshndx, &isym);
+	  elf_swap_symbol_in (rcookie->abfd, (const PTR) lsym,
+			      (const PTR) lshndx, &isym);
 	}
 
       if (r_symndx >= rcookie->locsymcount

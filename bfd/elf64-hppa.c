@@ -682,8 +682,8 @@ elf64_hppa_check_relocs (abfd, info, sec, relocs)
 	   i < symtab_hdr->sh_info;
 	   i++, esym++, isym++, shndx = (shndx != NULL ? shndx + 1 : NULL))
 	{
-	  bfd_elf64_swap_symbol_in (abfd, (const PTR *) esym,
-				    (const PTR *) shndx, isym);
+	  bfd_elf64_swap_symbol_in (abfd, (const PTR) esym, (const PTR) shndx,
+				    isym);
 	  if (isym->st_shndx > highest_shndx)
 	    highest_shndx = isym->st_shndx;
 	}

@@ -938,8 +938,8 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 			  esym = extsyms + r_index;
 			  shndx = shndx_buf + (shndx_buf ? r_index : 0);
 			  bfd_elf32_swap_symbol_in (input_bfd,
-						    (const PTR *) esym,
-						    (const PTR *) shndx,
+						    (const PTR) esym,
+						    (const PTR) shndx,
 						    &isym);
 
 			  if (isym.st_shndx == SHN_UNDEF)
@@ -1030,8 +1030,8 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 		    {
 		      Elf_Internal_Sym isym;
 
-		      bfd_elf32_swap_symbol_in (input_bfd, (const PTR *) esym,
-						(const PTR *) shndx, &isym);
+		      bfd_elf32_swap_symbol_in (input_bfd, (const PTR) esym,
+						(const PTR) shndx, &isym);
 		      if (isym.st_shndx == sec_shndx
 			  && ELF_ST_TYPE (isym.st_info) == STT_FUNC)
 			{
@@ -1257,8 +1257,8 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 		  struct elf_link_hash_table *elftab;
 		  bfd_size_type amt;
 
-		  bfd_elf32_swap_symbol_in (input_bfd, (const PTR *) esym,
-					    (const PTR *) shndx, &isym);
+		  bfd_elf32_swap_symbol_in (input_bfd, (const PTR) esym,
+					    (const PTR) shndx, &isym);
 
 		  if (isym.st_shndx != sec_shndx)
 		    continue;
@@ -1555,8 +1555,8 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 	  /* A local symbol.  */
 	  esym = extsyms + ELF32_R_SYM (irel->r_info);
 	  shndx = shndx_buf + (shndx_buf ? ELF32_R_SYM (irel->r_info) : 0);
-	  bfd_elf32_swap_symbol_in (abfd, (const PTR *) esym,
-				    (const PTR *) shndx, &isym);
+	  bfd_elf32_swap_symbol_in (abfd, (const PTR) esym,
+				    (const PTR) shndx, &isym);
 
 	  if (isym.st_shndx == SHN_UNDEF)
 	    sym_sec = bfd_und_section_ptr;
@@ -2679,7 +2679,7 @@ mn10300_elf_relax_delete_bytes (abfd, sec, addr, count)
       Elf_Internal_Sym isym;
       Elf_External_Sym_Shndx dummy;
 
-      bfd_elf32_swap_symbol_in (abfd, (const PTR *) esym, (const PTR *) shndx,
+      bfd_elf32_swap_symbol_in (abfd, (const PTR) esym, (const PTR) shndx,
 				&isym);
 
       if (isym.st_shndx == sec_shndx
@@ -2741,7 +2741,7 @@ mn10300_elf_symbol_address_p (abfd, sec, addr)
     {
       Elf_Internal_Sym isym;
 
-      bfd_elf32_swap_symbol_in (abfd, (const PTR *) esym, (const PTR *) shndx,
+      bfd_elf32_swap_symbol_in (abfd, (const PTR) esym, (const PTR) shndx,
 				&isym);
 
       if (isym.st_shndx == sec_shndx
@@ -2864,8 +2864,8 @@ mn10300_elf_get_relocated_section_contents (output_bfd, link_info, link_order,
 	{
 	  asection *isec;
 
-	  bfd_elf32_swap_symbol_in (input_bfd, (const PTR *) esym,
-				    (const PTR *) shndx, isymp);
+	  bfd_elf32_swap_symbol_in (input_bfd, (const PTR) esym,
+				    (const PTR) shndx, isymp);
 
 	  if (isymp->st_shndx == SHN_UNDEF)
 	    isec = bfd_und_section_ptr;

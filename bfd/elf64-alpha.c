@@ -2172,8 +2172,8 @@ elf64_alpha_relax_section (abfd, sec, link_info, again)
 
 	  esym = extsyms + ELF64_R_SYM (irel->r_info);
 	  shndx = shndx_buf + (shndx_buf ? ELF64_R_SYM (irel->r_info) : 0);
-	  bfd_elf64_swap_symbol_in (abfd, (const PTR *) esym,
-				    (const PTR *) shndx, &isym);
+	  bfd_elf64_swap_symbol_in (abfd, (const PTR) esym, (const PTR) shndx,
+				    &isym);
 	  if (isym.st_shndx == SHN_UNDEF)
 	    continue;
 	  else if (isym.st_shndx == SHN_ABS)

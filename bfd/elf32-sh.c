@@ -2067,8 +2067,8 @@ sh_elf_relax_section (abfd, sec, link_info, again)
 
 	  esym = extsyms + ELF32_R_SYM (irelfn->r_info);
 	  shndx = shndx_buf + (shndx_buf ? ELF32_R_SYM (irelfn->r_info) : 0);
-	  bfd_elf32_swap_symbol_in (abfd, (const PTR *) esym,
-				    (const PTR *) shndx, &isym);
+	  bfd_elf32_swap_symbol_in (abfd, (const PTR) esym, (const PTR) shndx,
+				    &isym);
 
 	  if (isym.st_shndx
 	      != (unsigned int) _bfd_elf_section_from_bfd_section (abfd, sec))
@@ -2448,8 +2448,8 @@ sh_elf_relax_delete_bytes (abfd, sec, addr, count)
 	    {
 	      esym = extsyms + ELF32_R_SYM (irel->r_info);
 	      shndx = shndx_buf + (shndx_buf ? ELF32_R_SYM (irel->r_info) : 0);
-	      bfd_elf32_swap_symbol_in (abfd, (const PTR *) esym,
-					(const PTR *) shndx, &sym);
+	      bfd_elf32_swap_symbol_in (abfd, (const PTR) esym,
+					(const PTR) shndx, &sym);
 
 	      if (sym.st_shndx == sec_shndx
 		  && (sym.st_value <= addr
@@ -2712,8 +2712,8 @@ sh_elf_relax_delete_bytes (abfd, sec, addr, count)
 
 	  esym = extsyms + ELF32_R_SYM (irelscan->r_info);
 	  shndx = shndx_buf + (shndx_buf ? ELF32_R_SYM (irelscan->r_info) : 0);
-	  bfd_elf32_swap_symbol_in (abfd, (const PTR *) esym,
-				    (const PTR *) shndx, &sym);
+	  bfd_elf32_swap_symbol_in (abfd, (const PTR) esym, (const PTR) shndx,
+				    &sym);
 
 	  if (sym.st_shndx == sec_shndx
 	      && (sym.st_value <= addr
@@ -2760,7 +2760,7 @@ sh_elf_relax_delete_bytes (abfd, sec, addr, count)
       Elf_Internal_Sym isym;
       Elf_External_Sym_Shndx dummy;
 
-      bfd_elf32_swap_symbol_in (abfd, (const PTR *) esym, (const PTR *) shndx,
+      bfd_elf32_swap_symbol_in (abfd, (const PTR) esym, (const PTR) shndx,
 				&isym);
 
       if (isym.st_shndx == sec_shndx
@@ -4928,8 +4928,8 @@ sh_elf_get_relocated_section_contents (output_bfd, link_info, link_order,
 	{
 	  asection *isec;
 
-	  bfd_elf32_swap_symbol_in (input_bfd, (const PTR *) esym,
-				    (const PTR *) shndx, isymp);
+	  bfd_elf32_swap_symbol_in (input_bfd, (const PTR) esym,
+				    (const PTR) shndx, isymp);
 
 	  if (isymp->st_shndx == SHN_UNDEF)
 	    isec = bfd_und_section_ptr;

@@ -205,8 +205,8 @@ static char *elf_symbol_flags PARAMS ((flagword));
 void
 elf_swap_symbol_in (abfd, psrc, pshn, dst)
      bfd *abfd;
-     const PTR *psrc;
-     const PTR *pshn;
+     const PTR psrc;
+     const PTR pshn;
      Elf_Internal_Sym *dst;
 {
   const Elf_External_Sym *src = (const Elf_External_Sym *) psrc;
@@ -1244,8 +1244,8 @@ elf_slurp_symbol_table (abfd, symptrs, dynamic)
       /* Skip first symbol, which is a null dummy.  */
       for (i = 1; i < symcount; i++)
 	{
-	  elf_swap_symbol_in (abfd, (const PTR *) (x_symp + i),
-			      (const PTR *) (x_shndx + (x_shndx ? i : 0)),
+	  elf_swap_symbol_in (abfd, (const PTR) (x_symp + i),
+			      (const PTR) (x_shndx + (x_shndx ? i : 0)),
 			      &i_sym);
 	  memcpy (&sym->internal_elf_sym, &i_sym, sizeof (Elf_Internal_Sym));
 #ifdef ELF_KEEP_EXTSYM

@@ -2827,8 +2827,8 @@ get_local_syms (output_bfd, input_bfd, info)
 	     isym = local_syms, shndx = shndx_buf;
 	   esym < end_sy;
 	   esym++, isym++, shndx = (shndx ? shndx + 1 : NULL))
-	bfd_elf32_swap_symbol_in (input_bfd, (const PTR *) esym,
-				  (const PTR *) shndx, isym);
+	bfd_elf32_swap_symbol_in (input_bfd, (const PTR) esym,
+				  (const PTR) shndx, isym);
 
       /* Now we can free the external symbols.  */
       free (shndx_buf);

@@ -654,8 +654,8 @@ xstormy16_elf_relax_section (dynobj, splt, info, again)
 	  shndx = shndx_buf;
 	  if (shndx != NULL)
 	    shndx += idx;
-	  bfd_elf32_swap_symbol_in (ibfd, (const PTR *) (extsyms + idx),
-				    (const PTR *) shndx, &isym);
+	  bfd_elf32_swap_symbol_in (ibfd, (const PTR) (extsyms + idx),
+				    (const PTR) shndx, &isym);
 	  if (isym.st_shndx == SHN_UNDEF)
 	    continue;
 	  else if (isym.st_shndx == SHN_ABS)

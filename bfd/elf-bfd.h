@@ -354,7 +354,7 @@ struct elf_size_info {
   void (*write_relocs)
     PARAMS ((bfd *, asection *, PTR));
   void (*swap_symbol_in)
-    PARAMS ((bfd *, const PTR *, const PTR *, Elf_Internal_Sym *));
+    PARAMS ((bfd *, const PTR, const PTR, Elf_Internal_Sym *));
   void (*swap_symbol_out)
     PARAMS ((bfd *, const Elf_Internal_Sym *, PTR, PTR));
   boolean (*slurp_reloc_table)
@@ -1443,7 +1443,7 @@ extern boolean bfd_elf32_bfd_final_link
   PARAMS ((bfd *, struct bfd_link_info *));
 
 extern void bfd_elf32_swap_symbol_in
-  PARAMS ((bfd *, const PTR *, const PTR *, Elf_Internal_Sym *));
+  PARAMS ((bfd *, const PTR, const PTR, Elf_Internal_Sym *));
 extern void bfd_elf32_swap_symbol_out
   PARAMS ((bfd *, const Elf_Internal_Sym *, PTR, PTR));
 extern void bfd_elf32_swap_reloc_in
@@ -1495,7 +1495,7 @@ extern boolean bfd_elf64_bfd_final_link
   PARAMS ((bfd *, struct bfd_link_info *));
 
 extern void bfd_elf64_swap_symbol_in
-  PARAMS ((bfd *, const PTR *, const PTR *, Elf_Internal_Sym *));
+  PARAMS ((bfd *, const PTR, const PTR, Elf_Internal_Sym *));
 extern void bfd_elf64_swap_symbol_out
   PARAMS ((bfd *, const Elf_Internal_Sym *, PTR, PTR));
 extern void bfd_elf64_swap_reloc_in
