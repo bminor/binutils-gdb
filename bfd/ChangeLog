@@ -1,3 +1,9 @@
+2001-08-24  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elf-m10300.c (mn10300_elf_relocate_section): Test the right
+	`type' field in the hash entry when deciding whether to follow a
+	link.
+
 2001-08-24  Jakub Jelinek  <jakub@redhat.com>
 
 	* elflink.h (elf_link_sort_cmp1): Sort RELATIVE relocs first, not
