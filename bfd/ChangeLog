@@ -1,3 +1,12 @@
+Mon Apr 18 14:27:17 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* som.c (som_prep_headers): Get the space's number from the
+	backend private section data rather than target_index.
+	(bfd_som_set_section_attributes): Store the space's number
+	in the backend private section data rather than target_index.
+
+	* som.h (som_copyable_section_data_struct): Add space_number.
+
 Fri Apr 15 12:22:07 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* coff-a29k.c (reloc_processing): Always set the address of a
