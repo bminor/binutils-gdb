@@ -1,3 +1,7 @@
+2000-09-08  Kevin Buettner  <kevinb@redhat.com>
+
+	* infptrace.c, infttrace.c (child_xfer_memory): Protoize.
+
 2000-09-07  J.T. Conklin  <jtc@redback.com>
 
 	* config/i386/nbsd.mt (TDEPFILES): Add i386nbsd-tdep.o.

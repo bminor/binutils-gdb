@@ -502,7 +502,7 @@ store_inferior_registers (int regno)
 
 /* Copy LEN bytes to or from inferior's memory starting at MEMADDR
    to debugger memory starting at MYADDR.   Copy to inferior if
-   WRITE is nonzero.
+   WRITE is nonzero.  TARGET is ignored.
 
    Returns the length copied, which is either the LEN argument or zero.
    This xfer function does not do partial moves, since child_ops
@@ -510,12 +510,8 @@ store_inferior_registers (int regno)
    anyway.  */
 
 int
-child_xfer_memory (memaddr, myaddr, len, write, target)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
-     int write;
-     struct target_ops *target;	/* ignored */
+child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
+		   struct target_ops *target)
 {
   register int i;
   /* Round starting address down to longword boundary.  */
