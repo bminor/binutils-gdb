@@ -1,3 +1,8 @@
+2003-09-30  Bob Wilson  <bob.wilson@acm.org>
+
+	* xtensa-dis.c (fetch_data): Remove numBytes parameter.
+	(print_insn_xtensa): Fix call to fetch_data.
+
 2003-09-30  Chris Demetriou  <cgd@broadcom.com>
 
 	* mips-dis.c (mips_arch_choices): Add entry for "mips64r2"
