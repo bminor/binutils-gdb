@@ -11,7 +11,9 @@ ARCH=alpha
 MACHINE=
 GENERATE_SHLIB_SCRIPT=yes
 DATA_PLT=
-NOP=0x2ffe0000		# unop
+# Note that the number is always big-endian, thus we have to 
+# reverse the digit string.
+NOP=0x0000fe2f1f04ff47		# unop; nop
 
 OTHER_READONLY_SECTIONS="
   .reginfo      ${RELOCATING-0} : { *(.reginfo) }"
