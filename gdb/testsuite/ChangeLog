@@ -1,3 +1,14 @@
+2002-11-22  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.base/step-line.exp: Check that GDB can handle filenames that
+	appear in the line number info, but not in the preprocessor macro
+	info.
+
+	* lib/gdb.exp (gdb_internal_error_regexp): New variable.
+	(gdb_internal_error_resync): New procedure.
+        (gdb_test): If the command results in an internal error,
+        answer GDB's questions until we get back to a prompt.
+
 2002-11-21  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.base/maint.exp (help maint dump-me): Update with typo fix.
