@@ -1,3 +1,7 @@
+2002-11-20  Alan Modra  <amodra@bigpond.net.au>
+
+	* emulparams/elf64ppc.sh (DATA_ADDR): Don't define.
+
 2002-10-30  Daniel Jacobowitz  <drow@mvista.com>
 
 	* ld.1: Regenerated.
