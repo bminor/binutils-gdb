@@ -62,6 +62,7 @@ glob
 gprof
 grep
 groff
+guess-systype
 h8300sim
 include
 ispell
