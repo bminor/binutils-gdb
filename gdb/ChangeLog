@@ -1,5 +1,11 @@
 2003-04-23  Andrew Cagney  <cagney@redhat.com>
 
+	* infcall.c (call_function_by_hand): Move variables "start_sp",
+	"dummy", "sizeof_dummy1" and "dummy1" and corresponding dummy call
+	code to ON_STACK switch branch.
+	
+2003-04-23  Andrew Cagney  <cagney@redhat.com>
+
 	* infcall.c (call_function_by_hand): Make declaration of "i",
 	"sal", "bpt" and "old_sp" more local to their use.  Delete #if
 	lint.
