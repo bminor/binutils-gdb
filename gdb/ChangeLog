@@ -1,3 +1,9 @@
+2001-08-02  Corinna Vinschen  <vinschen@redhat.com>
+
+	* MAINTAINERS: Add myself to the write-after-approval list.
+	* ser-tcp.c (tcp_open): Use `localhost' as default host if no
+	hostname is given.
+
 2001-08-01  Andrew Cagney  <ac131313@redhat.com>
 
 	* doublest.h (store_floating, floatformat_to_doublest): Make IN

@@ -63,6 +63,9 @@ tcp_open (struct serial *scb, const char *name)
   hostname[tmp] = '\000';	/* Tie off host name */
   port = atoi (port_str + 1);
 
+  if (!hostname[0])
+    strcpy (hostname, "localhost");
+
   hostent = gethostbyname (hostname);
 
   if (!hostent)
