@@ -1,3 +1,9 @@
+2000-02-27  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* Makefile.am (stamp-lib): Use $(LIBTOOL) --config to get the
+	name of the libtool directory.
+	* Makefile.in: Rebuild.
+
 Fri Feb 25 18:39:26 2000  Rodney Brown (RodneyBrown@pmsc.com)
 
 	* som.c (SOM_HOWTO): Define.

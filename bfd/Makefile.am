@@ -480,8 +480,9 @@ noinst_LIBRARIES = libbfd.a
 libbfd_a_SOURCES =
 
 stamp-lib: libbfd.la
-	if [ -f .libs/libbfd.a ]; then \
-	  cp .libs/libbfd.a libbfd.tmp; \
+	libtooldir=`$(LIBTOOL) --config | sed -n -e 's/^objdir=//p'`; \
+	if [ -f $$libtooldir/libbfd.a ]; then \
+	  cp $$libtooldir/libbfd.a libbfd.tmp; \
 	  $(SHELL) $(srcdir)/../move-if-change libbfd.tmp libbfd.a; \
 	else true; fi
 	touch stamp-lib

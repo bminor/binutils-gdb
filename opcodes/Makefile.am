@@ -169,8 +169,9 @@ libopcodes_la_LDFLAGS = -release $(VERSION) @WIN32LDFLAGS@
 noinst_LIBRARIES = libopcodes.a
 
 stamp-lib: libopcodes.la
-	if [ -f .libs/libopcodes.a ]; then \
-	  cp .libs/libopcodes.a libopcodes.tmp; \
+	libtooldir=`$(LIBTOOL) --config | sed -n -e 's/^objdir=//p'`; \
+	if [ -f $$libtooldir/libopcodes.a ]; then \
+	  cp $$libtooldir/libopcodes.a libopcodes.tmp; \
 	  $(SHELL) $(srcdir)/../move-if-change libopcodes.tmp libopcodes.a; \
 	else true; fi
 	touch stamp-lib

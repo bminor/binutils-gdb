@@ -1,3 +1,9 @@
+2000-02-27  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* Makefile.am (stamp-lib): Use $(LIBTOOL) --config to get the
+	name of the libtool directory.
+	* Makefile.in: Rebuild.
+
 2000-02-24  Nick Clifton  <nickc@cygnus.com>
 
 	* cgen-opc.c (cgen_set_signed_overflow_ok): New function.
