@@ -1979,6 +1979,7 @@ yylex ()
 	      case LOC_UNDEF:
 	      case LOC_TYPEDEF:
 	      case LOC_CONST_BYTES:
+	      case LOC_OPTIMIZED_OUT:
 		error ("Symbol \"%s\" names no location.", simplename);
 		break;
 	      }

@@ -228,14 +228,14 @@ build_section_table (some_bfd, start, end)
 
   count = bfd_count_sections (some_bfd);
   if (count == 0)
-    abort();	/* return 1? */
+    fatal ("aborting");	/* return 1? */
   if (*start)
     free (*start);
   *start = (struct section_table *) xmalloc (count * sizeof (**start));
   *end = *start;
   bfd_map_over_sections (some_bfd, add_to_section_table, (char *)end);
   if (*end > *start + count)
-    abort();
+    fatal ("aborting");
   /* We could realloc the table, but it probably loses for most files.  */
   return 0;
 }
@@ -644,7 +644,7 @@ xfer_memory (memaddr, myaddr, len, write, target)
   boolean (*xfer_fn) PARAMS ((bfd *, sec_ptr, PTR, file_ptr, bfd_size_type));
 
   if (len <= 0)
-    abort();
+    fatal ("aborting");
 
   memend = memaddr + len;
   xfer_fn = write? bfd_set_section_contents: bfd_get_section_contents;

@@ -1,3 +1,24 @@
+Fri Apr  2 08:23:14 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* xcoffexec.c: Call fatal() not abort().
+
+	* stabsread.c (patch_block_stabs): If stab & no symbol, make
+	a LOC_OPTIMIZED_OUT symbol.
+	symtab.h (enum address_class): Add LOC_OPTIMIZED_OUT.
+	findvar.c (read_var_value), printcmd.c (address_info),
+	symmisc.c (print_{,partial_}symbol), c-exp.y (variable),
+	m2-exp.y (yylex): Deal with it.
+	**** start-sanitize-chill ****
+	ch-exp.y (yylex): Deal with it.
+	**** end-sanitize-chill ****
+
+Thu Apr  1 18:43:02 1993  Stu Grossman  (grossman@cygnus.com)
+
+	* findvar.c (value_from_register):  H8500 specific, check to see
+	if we are looking at short pointer.  If so, skip crock.
+	* h8500-tdep.c (h8500_frame_chain):  Mask down value from
+	read_memory_integer() to avoid getting messed up by sign extension.
+
 Thu Apr  1 16:44:41 1993  K. Richard Pixley  (rich@rtl.cygnus.com)
 
 	* sparc-tdep.c (in_solib_trampoline), symfile.c (find_pc_section):

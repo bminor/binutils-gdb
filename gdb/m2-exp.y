@@ -617,6 +617,7 @@ variable:	NAME
 				case LOC_LABEL:	/* maybe should go above? */
 				case LOC_BLOCK:
 				case LOC_CONST_BYTES:
+				case LOC_OPTIMIZED_OUT:
 				  /* These are listed so gcc -Wall will reveal
 				     un-handled cases.  */
 				  break;

@@ -671,6 +671,7 @@ variable:	name_not_typename
 				case LOC_LABEL:
 				case LOC_BLOCK:
 				case LOC_CONST_BYTES:
+				case LOC_OPTIMIZED_OUT:
 
 				  /* In this case the expression can
 				     be evaluated regardless of what

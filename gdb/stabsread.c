@@ -382,9 +382,32 @@ patch_block_stabs (symbols, stabs, objfile)
 	  sym = find_symbol_in_list (symbols, name, pp-name);
 	  if (!sym)
 	    {
-#ifndef IBM6000_TARGET
-	      printf ("ERROR! stab symbol not found!\n");	/* FIXME */
-#endif
+	      /* On xcoff, if a global is defined and never referenced,
+		 ld will remove it from the executable.  There is then
+		 a N_GSYM stab for it, but no regular (C_EXT) symbol.  */
+	      sym = (struct symbol *)
+		obstack_alloc (&objfile->symbol_obstack,
+			       sizeof (struct symbol));
+
+	      memset (sym, 0, sizeof (struct symbol));
+	      SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
+	      SYMBOL_CLASS (sym) = LOC_OPTIMIZED_OUT;
+	      SYMBOL_NAME (sym) =
+		obstack_copy0 (&objfile->symbol_obstack, name, pp - name);
+	      pp += 2;
+	      if (*(pp-1) == 'F' || *(pp-1) == 'f')
+		{
+		  /* I don't think the linker does this with functions,
+		     so as far as I know this is never executed.
+		     But it doesn't hurt to check.  */
+		  SYMBOL_TYPE (sym) =
+		    lookup_function_type (read_type (&pp, objfile));
+		}
+	      else
+		{
+		  SYMBOL_TYPE (sym) = read_type (&pp, objfile);
+		}
+	      add_symbol_to_list (sym, &global_symbols);
 	    }
 	  else
 	    {
