@@ -1580,9 +1580,10 @@ upgrade_type(tpp, tq, ax, bigend)
    The procedure's code ends at BOUND */
 
 static void
-parse_procedure(pr, bound)
+parse_procedure(pr, bound, have_stabs)
 	PDR *pr;
 	int bound;
+	int have_stabs;
 {
 	struct symbol *s, *i;
 	SYMR *sh = (SYMR*)pr->isym;
@@ -1599,8 +1600,11 @@ parse_procedure(pr, bound)
 	}
 	else {
 	    sh_name = (char*)sh->iss;
-	    s = mylookup_symbol(sh_name, top_stack->cur_block,
-				VAR_NAMESPACE, LOC_BLOCK);
+	    if (have_stabs)
+		s = lookup_symbol(sh_name, NULL, VAR_NAMESPACE, 0, NULL);
+	    else
+		s = mylookup_symbol(sh_name, top_stack->cur_block,
+				    VAR_NAMESPACE, LOC_BLOCK);
 	}
 	if (s != 0) {
 		b = SYMBOL_BLOCK_VALUE(s);
@@ -2314,6 +2318,10 @@ psymtab_to_symtab_1(pst, filename)
 	SYMR *sh;
 	PDR *pr;
 	
+	/* BOUND is the highest core address of this file's procedures */
+	int bound =  cur_fd == cur_hdr->ifdMax - 1 ? cur_hdr->cbDnOffset
+	    : fh[1].adr;
+
 	/* Parse local symbols first */
 	
 	if (have_stabs) {
@@ -2330,6 +2338,20 @@ psymtab_to_symtab_1(pst, filename)
 		    int type_code = MIPS_UNMARK_STAB(sh->index);
 		    process_one_symbol (type_code, 0, valu, name, /*FIXME*/ 0,
 					pst->objfile);
+		    if (type_code == N_FUN) {
+			/* Make up special symbol to contain
+			   procedure specific info */
+			struct mips_extra_func_info *e =
+			  (struct mips_extra_func_info *)
+			    obstack_alloc(&current_objfile->symbol_obstack,
+					  sizeof(struct mips_extra_func_info));
+			struct symbol *s = new_symbol(".gdbinfo.");
+			SYMBOL_NAMESPACE(s) = LABEL_NAMESPACE;
+			SYMBOL_CLASS(s) = LOC_CONST;
+			SYMBOL_TYPE(s) = builtin_type_void;
+			SYMBOL_VALUE(s) = (int)e;
+			add_symbol_to_list (s, &local_symbols);
+		    }
 		}
 		else if (sh->st == stLabel && sh->index != indexNil) {
 		    /* Handle encoded stab line number. */
@@ -2339,33 +2361,27 @@ psymtab_to_symtab_1(pst, filename)
 	    st = end_symtab (pst->texthigh, 0, 0, pst->objfile);
 	}
 	else {
-	    /* BOUND is the highest core address of this file's procedures */
-	    int bound =  cur_fd == cur_hdr->ifdMax - 1 ? cur_hdr->cbDnOffset
-		: fh[1].adr;
 	    for (cur_sdx = 0; cur_sdx < fh->csym; ) {
 		sh = (SYMR *) (fh->isymBase) + cur_sdx;
 		cur_sdx += parse_symbol(sh, (union aux_ent *)fh->iauxBase,
 					fh->fBigendian);
 	    }
 
-	    /* Procedures next, note we need to look-ahead to
-	       find out where the procedure's code ends */
-
-	    if (fh->cpd > 0)
-	      for (i = 0; i < fh->cpd-1; i++) {
-		pr = (PDR *) (IPDFIRST(cur_hdr, fh)) + i;
-		parse_procedure(pr, pr[1].adr);	/* next proc up */
-	      }
-	    if (fh->cpd) {
-		pr = (PDR *) (IPDFIRST(cur_hdr, fh)) + i;
-		parse_procedure(pr, bound);	/* next file up */
-	    }
 	    /* Linenumbers. At the end, check if we can save memory */
 	    parse_lines(fh, lines);
 	    if (lines->nitems < fh->cline)
 		lines = shrink_linetable(lines);
 	}
 
+	/* Procedures next, note we need to look-ahead to
+	   find out where the procedure's code ends */
+
+	for (i = 0; i <= fh->cpd-1; i++) {
+	    pr = (PDR *) (IPDFIRST(cur_hdr, fh)) + i;
+	    parse_procedure(pr,
+			    i < fh->cpd-1 ? pr[1].adr : bound,
+			    have_stabs);
+	}
     }
     if (!have_stabs) {
 	EXTR **ext_ptr;
