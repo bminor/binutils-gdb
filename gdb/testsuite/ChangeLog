@@ -1,3 +1,8 @@
+2003-11-10  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.base/fileio.exp: Drop tests for nointerrupts and noinferiorio.
+	Don't run tests if nofileio flag is given.
+
 2003-11-07  Elena Zannoni  <ezannoni@redhat.com>
 
 	* gdb.cp/annota3.exp: Make sure we can match 'Hardware watchpoint'
