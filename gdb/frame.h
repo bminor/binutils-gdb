@@ -175,7 +175,7 @@ extern void fprint_frame_id (struct ui_file *file, struct frame_id id);
    CLI (selected using `up', `down', ...).  The frames are created
    on-demand (via get_prev_frame()) and then held in a frame cache.  */
 /* FIXME: cagney/2002-11-28: Er, there is a lie here.  If you do the
-   sequence: `thread 1; up; thread 2; thread 1' you loose thread 1's
+   sequence: `thread 1; up; thread 2; thread 1' you lose thread 1's
    selected frame.  At present GDB only tracks the selected frame of
    the current thread.  But be warned, that might change.  */
 /* FIXME: cagney/2002-11-14: At any time, only one thread's selected
@@ -193,11 +193,11 @@ extern struct frame_info *get_current_frame (void);
 
    FIXME: cagney/2002-11-28: The only difference between
    flush_cached_frames() and reinit_frame_cache() is that the latter
-   explicitly sets the selected frame back to the current frame there
+   explicitly sets the selected frame back to the current frame -- there
    isn't any real difference (except that one delays the selection of
    a new frame).  Code can instead simply rely on get_selected_frame()
-   to reinit's the selected frame as needed.  As for invalidating the
-   cache, there should be two methods one that reverts the thread's
+   to reinit the selected frame as needed.  As for invalidating the
+   cache, there should be two methods: one that reverts the thread's
    selected frame back to current frame (for when the inferior
    resumes) and one that does not (for when the user modifies the
    target invalidating the frame cache).  */
@@ -234,7 +234,7 @@ extern struct frame_info *frame_find_by_id (struct frame_id id);
    This replaced: frame->pc; */
 extern CORE_ADDR get_frame_pc (struct frame_info *);
 
-/* An address (not necessarily alligned to an instruction boundary)
+/* An address (not necessarily aligned to an instruction boundary)
    that falls within THIS frame's code block.
 
    When a function call is the last statement in a block, the return
@@ -267,8 +267,8 @@ extern CORE_ADDR get_frame_func (struct frame_info *fi);
    attributes that are determined by the PC.  Note that for a normal
    frame, the PC refers to the resume address after the return, and
    not the call instruction.  In such a case, the address is adjusted
-   so that it (approximatly) identifies the call site (and not return
-   site).
+   so that it (approximately) identifies the call site (and not the
+   return site).
 
    NOTE: cagney/2002-11-28: The frame cache could be used to cache the
    computed value.  Working on the assumption that the bottle-neck is
@@ -471,7 +471,7 @@ extern int safe_frame_unwind_memory (struct frame_info *this_frame,
 extern struct gdbarch *get_frame_arch (struct frame_info *this_frame);
 
 
-/* Values for the source flag to be used in print_frame_info_base(). */
+/* Values for the source flag to be used in print_frame_info_base().  */
 enum print_what
   { 
     /* Print only the source line, like in stepi. */
@@ -488,7 +488,7 @@ enum print_what
 /* Allocate additional space for appendices to a struct frame_info.
    NOTE: Much of GDB's code works on the assumption that the allocated
    saved_regs[] array is the size specified below.  If you try to make
-   that array smaller, GDB will happily walk off its end. */
+   that array smaller, GDB will happily walk off its end.  */
 
 #ifdef SIZEOF_FRAME_SAVED_REGS
 #error "SIZEOF_FRAME_SAVED_REGS can not be re-defined"
@@ -507,7 +507,7 @@ extern void *frame_obstack_zalloc (unsigned long size);
 /* If legacy_frame_chain_valid() returns zero it means that the given
    frame is the outermost one and has no caller.
 
-   This method has been superseeded by the per-architecture
+   This method has been superseded by the per-architecture
    frame_unwind_pc() (returns 0 to indicate an invalid return address)
    and per-frame this_id() (returns a NULL frame ID to indicate an
    invalid frame).  */
@@ -531,7 +531,7 @@ extern struct block *get_frame_block (struct frame_info *,
    Should it look at the most recently specified SAL?  If the target
    has no state, should this function try to extract a block from the
    most recently selected SAL?  That way `list foo' would give it some
-   sort of reference point.  Then again, perhaphs that would confuse
+   sort of reference point.  Then again, perhaps that would confuse
    things.
 
    Calls to this function can be broken down into two categories: Code
@@ -541,7 +541,7 @@ extern struct block *get_frame_block (struct frame_info *,
 
    The latter can be eliminated by correctly parameterizing the code,
    the former though is more interesting.  Per the "address" command,
-   it occures in the CLI code and makes it possible for commands to
+   it occurs in the CLI code and makes it possible for commands to
    work, even when the inferior has no state.  */
 
 extern struct block *get_selected_block (CORE_ADDR *addr_in_block);
@@ -567,7 +567,7 @@ extern void show_frame_info (struct frame_info *, int, int, int);
 
 extern struct frame_info *block_innermost_frame (struct block *);
 
-/* NOTE: cagney/2002-09-13: There is no need for this function.   */
+/* NOTE: cagney/2002-09-13: There is no need for this function.  */
 extern CORE_ADDR deprecated_read_register_dummy (CORE_ADDR pc,
 						 CORE_ADDR fp, int);
 extern void generic_push_dummy_frame (void);
@@ -577,7 +577,7 @@ extern int deprecated_pc_in_call_dummy (CORE_ADDR pc, CORE_ADDR sp,
 					CORE_ADDR fp);
 
 /* NOTE: cagney/2002-06-26: Targets should no longer use this
-   function.  Instead, the contents of a dummy frames registers can be
+   function.  Instead, the contents of a dummy frame register can be
    obtained by applying: frame_register_unwind to the dummy frame; or
    frame_register_unwind() to the next outer frame.  */
 
@@ -624,11 +624,11 @@ extern void return_command (char *, int);
    Unfortunately, it isn't that easy.
 
    The relevant code needs to be audited to determine if it is
-   possible (or pratical) to instead pass the applicable frame in as a
+   possible (or practical) to instead pass the applicable frame in as a
    parameter.  For instance, DEPRECATED_DO_REGISTERS_INFO() relied on
    the deprecated_selected_frame global, while its replacement,
    PRINT_REGISTERS_INFO(), is parameterized with the selected frame.
-   The only real exceptions occure at the edge (in the CLI code) where
+   The only real exceptions occur at the edge (in the CLI code) where
    user commands need to pick up the selected frame before proceeding.
 
    This is important.  GDB is trying to stamp out the hack:
