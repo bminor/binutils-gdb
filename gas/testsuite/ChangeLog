@@ -1,3 +1,9 @@
+Wed Nov 20 11:31:41 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/mn10300/other.s: Update for correct syntax on a
+	few instructions (those with register lists).
+	* gas/mn10300/basic.exp: Corresponding changes.
+
 Tue Nov 19 13:36:57 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/mn10300/movm.s: Update for correct syntax.
