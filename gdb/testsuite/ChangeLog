@@ -1,3 +1,13 @@
+2002-09-29  Andrew Cagney  <ac131313@redhat.com>
+
+	* mi0-basics.exp, mi0-break.exp, mi0-console.exp: Delete.
+	* mi0-disassemble.exp, mi0-eval.exp: Delete.
+	* mi0-hack-cli.exp, mi0-read-memory.exp: Delete.
+	* mi0-regs.exp, mi0-return.exp, mi0-simplerun.exp: Delete.
+	* mi0-stack.exp, mi0-stepi.exp, mi0-until.exp: Delete.
+	* mi0-var-block.exp, mi0-var-child.exp: Delete.
+	* mi0-var-cmd.exp, mi0-var-display.exp, mi0-watch.exp: Delete.
+	
 2002-09-27  Kevin Buettner  <kevinb@redhat.com>
 
 	* gdb.base/annota1.exp (info break): Make directory components of
