@@ -1,5 +1,10 @@
 2002-05-30  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* config/djgpp/fnchange.lst: Add ns32knbsd-nat.c, ns32knbsd-tdep.c,
+	ppcnbsd-nat.c, ppcnbsd-tdep.c, sparcnbsd-nat.c, and sparcnbsd-tdep.c.
+
+2002-05-30  Jason Thorpe  <thorpej@wasabisystems.com>
+
 	* Makefile.in (ALLDEPFILES): Add sparc64nbsd-nat.c,
 	sparcnbsd-nat.c, and sparcnbsd-tdep.c.
 	(sparc64nbsd-nat.o)
