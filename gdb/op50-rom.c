@@ -22,9 +22,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbcore.h"
 #include "target.h"
 #include "monitor.h"
+#include "serial.h"
 
-void op50n_open();
-void monitor_open();
+static void op50n_open PARAMS ((char *args, int from_tty));
 
 /*
  * this array of registers need to match the indexes used by GDB. The
@@ -32,24 +32,17 @@ void monitor_open();
  * different strings than GDB does, and doesn't support all the
  * registers either. So, typing "info reg sp" becomes a "r30".
  */
-static char *op50n_regnames[] = {
-  "r0",  "r1",  "r2",  "r3",  "r4",  "r5",  "r6",
-  "r7",  "r8",  "r9",  "r10", "r11", "r12", "r13",
-  "r14", "r15", "r16", "r17", "r18", "r19", "r20",
-  "r21", "r22", "r23", "r24", "r25", "r26", "r27",
-  "r28", "r29", "r30", "r31", "cr11","p",   "",
-  "",    "",    "cr15", "cr19", "cr20",    "cr21", "cr22",
-  "",    "",    "",    "",    "",       "", "",
-  "",    "",    "cr0", "cr8", "cr9", "cr10","cr12",    "cr13",
-  "cr24",    "cr25",    "cr26",    "",    "",    "",    "",
-  "",    "",    "",    "",    "",       "",       "",    "",
-  "",    "",    "",    "",    "",       "",       "",    "",
-  "",    "",    "",    "",    "",       "",       "",    "",
-  "",    "",    "",    "",    "",       "",       "",    "",
-  "",    "",    "",    "",    "",       "",       "",    "",
-  "",    "",    "",    "",    "",       "",       "",    "",
-  "",    "",    "",    "",    "",       "",       "",    "",
-  "",    "",    "",    "",    "",       "",       "",    ""
+
+static char *op50n_regnames[NUM_REGS] =
+{
+  "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
+  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
+  "r16", "r17", "r18", "r19", "r20", "r21", "r22", "r23",
+  "r24", "r25", "r26", "r27", "r28", "r29", "r30", "r31",
+  "cr11", "p", NULL, NULL, NULL, "cr15", "cr19", "cr20",
+  "cr21", "cr22", NULL, NULL, NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, "cr0", "cr8", "cr9", "cr10","cr12",
+  "cr13", "cr24", "cr25", "cr26",
 };
 
 /*
@@ -58,98 +51,73 @@ static char *op50n_regnames[] = {
  * strings. We also need a CR or LF on the end.
  */
 
-static struct target_ops op50n_ops =
-{
-  "op50n",
-  "Oki's debug monitor for the Op50n Eval board",
+static struct target_ops op50n_ops;
 
-  "Debug on a Oki OP50N eval board.\n\
-Specify the serial device it is connected to (e.g. /dev/ttya).",
-  op50n_open,
-  monitor_close, 
-  NULL,
-  monitor_detach,
-  monitor_resume,
-  monitor_wait,
-  monitor_fetch_register,
-  monitor_store_register,
-  monitor_prepare_to_store,
-  monitor_xfer_inferior_memory,
-  monitor_files_info,
-  monitor_insert_breakpoint,
-  monitor_remove_breakpoint,	/* Breakpoints */
-  0,
-  0,
-  0,
-  0,
-  0,				/* Terminal handling */
-  monitor_kill,
-  monitor_load,			/* load */
-  0,				/* lookup_symbol */
-  monitor_create_inferior,
-  monitor_mourn_inferior,
-  0,				/* can_run */
-  0, 				/* notice_signals */
-  0,				/* to_stop */
-  process_stratum,
-  0,				/* next */
-  1,
-  1,
-  1,
-  1,
-  1,				/* all mem, mem, stack, regs, exec */
-  0,
-  0,				/* Section pointers */
-  OPS_MAGIC,			/* Always the last thing */
-};
-
-static char *op50n_loadtype[] = {"none", "srec", "default", NULL};
+static char *op50n_loadtypes[] = {"none", "srec", "default", NULL};
 static char *op50n_loadprotos[] = {"none", NULL};
+
+static char *op50n_inits[] = {"\003.\n", NULL};
 
 static struct monitor_ops op50n_cmds =
 {
-  1,					/* 1 for ASCII, 0 for binary */
-  "\003.\n",				/* monitor init string */
-  "g %x\n",				/* execute or usually GO command */
-  "g\n",				/* continue command */
-  "t\n",				/* single step */
-  "b %x\n",				/* set a breakpoint */
-  "bx %x\n",				/* clear a breakpoint */
-  0,					/* 0 for number, 1 for address */
+  0,				/* flags */
+  op50n_inits,			/* Init strings */
+  "g\n",			/* continue command */
+  "t\n",			/* single step */
+  NULL,				/* Interrupt char */
+  "b %x\n",			/* set a breakpoint */
+  "bx %x\n",			/* clear a breakpoint */
+  NULL,				/* clear all breakpoints */
+  NULL,				/* memory fill cmd */
   {
-    "sx %x %x;.\n",			/* set memory */
-    "",					/* delimiter  */
-    "",					/* the result */
+    "sx %x %x;.\n",		/* setmem.cmdb (addr, value) */
+    NULL,			/* setmem.cmdw (addr, value) */
+    NULL,			/* setmem.cmdl (addr, value) */
+    NULL,			/* setmem.cmdll (addr, value) */
+    NULL,			/* setreg.resp_delim */
+    NULL,			/* setreg.term */
+    NULL,			/* setreg.term_cmd */
   },
   {
-    "sx %x\n",				/* get memory */
-    ": ",				/* delimiter */
-    " ",				/* the result */
+    "sx %x\n",			/* getmem.cmdb (addr, value) */
+    NULL,			/* getmem.cmdw (addr, value) */
+    NULL,			/* getmem.cmdl (addr, value) */
+    NULL,			/* getmem.cmdll (addr, value) */
+    ": ",			/* getmem.resp_delim */
+    NULL,			/* getmem.term */
+    NULL,			/* getmem.term_cmd */
   },
   {
-    "x %s %x\n",			/* set a register */
-    "",				        /* delimiter between registers */
-    "",					/* the result */
+    "x %s %x\n",		/* setreg.cmd (name, value) */
+    NULL,			/* setreg.resp_delim */
+    NULL,			/* setreg.term */
+    NULL,			/* setreg.term_cmd */
   },
   {
-    "x %s\n",				/* get a register */
-    "=",				/* delimiter between registers */
-    "",					/* the result */
+    "x %s\n",			/* getreg.cmd (name) */
+    "=",			/* getreg.resp_delim */
+    NULL,			/* getreg.term */
+    NULL,			/* getreg.term_cmd */
   },
-  "r 0\n",				/* download command */
-  "#",					/* monitor command prompt */
-  " ",					/* end-of-command delimitor */
-  ".\n",				/* optional command terminator */
-  &op50n_ops,				/* target operations */
+  NULL,				/* dump_registers */
+  NULL,				/* register_pattern */
+  NULL,				/* supply_register */
+  "r 0\n",			/* download command */
+  NULL,				/* load response */
+  "#",				/* monitor command prompt */
+  NULL,				/* end-of-command delimitor */
+  NULL,				/* optional command terminator */
+  &op50n_ops,			/* target operations */
   op50n_loadtypes,		/* loadtypes */
   op50n_loadprotos,		/* loadprotos */
   "2400,4800,9600,19200,exta,38400,extb", /* supported baud rates */
   SERIAL_1_STOPBITS,		/* number of stop bits */
-  op50n_regnames
-};
+  op50n_regnames,		/* register names */
+  MONITOR_OPS_MAGIC		/* magic */
+  };
 
-void
-op50n_open(args, from_tty)
+static void
+op50n_open (args, from_tty)
      char *args;
      int from_tty;
 {
@@ -159,10 +127,13 @@ op50n_open(args, from_tty)
 void
 _initialize_op50n ()
 {
-  add_target (&op50n_ops);
+  init_monitor_ops (&op50n_ops);
 
-  /* this is the default, since it's that's how the board comes up after
-     power cycle. It can then be changed using set remotebaud
-   */
-  baud_rate = 9600;
+  op50n_ops.to_shortname = "op50n";
+  op50n_ops.to_longname = "Oki's debug monitor for the Op50n Eval board";
+  op50n_ops.to_doc = "Debug on a Oki OP50N eval board.\n\
+Specify the serial device it is connected to (e.g. /dev/ttya).";
+  op50n_ops.to_open = op50n_open;
+
+  add_target (&op50n_ops);
 }

@@ -125,6 +125,7 @@ struct monitor_ops
 #define MO_NEED_REGDUMP_AFTER_CONT 0x4 /* If set, then monitor doesn't auto-
 					  matically supply register dump when
 					  coming back after a continue.  */
+#define MO_GETMEM_NEEDS_RANGE 0x8 /* getmem needs start addr and end addr */
 
 extern struct monitor_ops        *current_monitor;
 
