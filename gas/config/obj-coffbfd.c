@@ -41,6 +41,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "subsegs.h"
 #include "frags.h"
 #include "../bfd/libbfd.h"
+#include "../bfd/libcoff.h"
 
 
 #define MIN(a,b) ((a) < (b)? (a) : (b))
