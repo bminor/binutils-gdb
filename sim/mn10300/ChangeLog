@@ -1,3 +1,9 @@
+Thu Mar 26 10:11:01 1998  Stu Grossman  <grossman@bhuna.cygnus.co.uk>
+
+	* Makefile.in (tmp-igen):  Prefix all usage of move-if-change
+	script with $(SHELL) to make NT native builds happy.
+	* configure:  Regenerate because of change to ../common/aclocal.m4.
+	
 Thu Mar 26 11:22:31 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure.in: Make --enable-sim-common the default.
