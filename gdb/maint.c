@@ -692,7 +692,7 @@ maintenance_set_profile_cmd (char *args, int from_tty, struct cmd_list_element *
 static void
 maintenance_set_profile_cmd (char *args, int from_tty, struct cmd_list_element *c)
 {
-  warning ("Profiling support is not available on this system.");
+  error ("Profiling support is not available on this system.");
 }
 #endif
 

@@ -1,5 +1,10 @@
 2003-01-27  Daniel Jacobowitz  <drow@mvista.com>
 
+	* maint.c [! (HAVE_MONSTARTUP && HAVE__MCLEANUP)]
+	(maintenance_set_profile_cmd): Use error () instead of warning ().
+
+2003-01-27  Daniel Jacobowitz  <drow@mvista.com>
+
 	* configure.in: Check that -pg works if using --enable-profiling.
 	Check for monstartup and _mcleanup regardless of --enable-profiling.
 	* maint.c: Check for monstartup and _mcleanup before using them.
