@@ -294,6 +294,8 @@ static int mips_32bitmode = 0;
         && mips_pic != EMBEDDED_PIC))
 
 #define HAVE_64BIT_ADDRESSES (! HAVE_32BIT_ADDRESSES)
+#define HAVE_64BIT_ADDRESS_CONSTANTS (HAVE_64BIT_ADDRESSES \
+				      || HAVE_64BIT_GPRS)
 
 /* Return true if the given CPU supports the MIPS16 ASE.  */
 #define CPU_HAS_MIPS16(cpu)						\
@@ -5845,9 +5847,10 @@ macro (ip)
 	     probably attempt to generate 64-bit constants more
 	     efficiently in general.
 	   */
-	  if (HAVE_64BIT_ADDRESSES
-	      && !(offset_expr.X_op == O_constant
-		   && IS_SEXT_32BIT_NUM (offset_expr.X_add_number + 0x8000)))
+	  if ((offset_expr.X_op != O_constant && HAVE_64BIT_ADDRESSES)
+	      || (offset_expr.X_op == O_constant
+		  && !IS_SEXT_32BIT_NUM (offset_expr.X_add_number)
+		  && HAVE_64BIT_ADDRESS_CONSTANTS))
 	    {
 	      p = NULL;
 
@@ -5894,6 +5897,9 @@ macro (ip)
 
 	      return;
 	    }
+	  else if (offset_expr.X_op == O_constant
+		   && !IS_SEXT_32BIT_NUM (offset_expr.X_add_number))
+	    as_bad (_("load/store address overflow (max 32 bits)"));
 
 	  if (breg == 0)
 	    {
