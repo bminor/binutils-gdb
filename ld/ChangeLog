@@ -1,3 +1,10 @@
+start-sanitize-v850
+Fri Aug 30 22:30:30 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* emulparms/v850.sh: Entry symbol is "_start", tweak
+	ctor/dtor support.
+
+end-sanitize-v850
 Fri Aug 30 18:32:31 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.tgt (sh-*-elf*): New target.
