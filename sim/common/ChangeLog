@@ -1,3 +1,10 @@
+Mon May  5 14:08:34 1997  Mike Meissner  <meissner@cygnus.com>
+
+	* sim-trace.h (__attribute__): Define as nothing if not GNU C or
+	GNU C doesn't support __attributes__.
+	({trace,debug}_printf): Add attribute's so -Wformat can check the
+	format strings.
+
 Mon May  5 11:16:12 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-config.h (FORCED_ALIGNMENT): New alignment option -

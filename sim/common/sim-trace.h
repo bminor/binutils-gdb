@@ -23,6 +23,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef SIM_TRACE_H
 #define SIM_TRACE_H
 
+#ifndef __attribute__
+#if !defined(__GNUC__) || (__GNUC__ < 2) || (__GNUC__ == 2 && __GNU_MINOR__ < 7)
+#define __attribute__(attr)
+#endif
+#endif
+
 /* Maximum number of traceable entities.  */
 #ifndef MAX_TRACE_VALUES
 #define MAX_TRACE_VALUES 12
@@ -105,7 +111,8 @@ struct _sim_cpu;
 /* Non-zero if "--trace-fpu" specified for CPU. */
 #define TRACE_FPU_P(cpu) TRACE_P (cpu, TRACE_FPU_IDX)
 
-extern void trace_printf PARAMS ((SIM_DESC, sim_cpu *, const char *, ...));
+extern void trace_printf PARAMS ((SIM_DESC, sim_cpu *, const char *, ...))
+     __attribute__((format (printf, 3, 4)));
 
 /* Debug support.
    This is included here because there isn't enough of it to justify
@@ -119,6 +126,7 @@ extern void trace_printf PARAMS ((SIM_DESC, sim_cpu *, const char *, ...));
 /* Non-zero if "--debug-insn" specified.  */
 #define DEBUG_INSN_P(cpu) DEBUG_P (cpu, DEBUG_INSN_IDX)
 
-extern void debug_printf PARAMS ((struct _sim_cpu *, const char *, ...));
+extern void debug_printf PARAMS ((struct _sim_cpu *, const char *, ...))
+     __attribute__((format (printf, 2, 3)));
 
 #endif /* SIM_TRACE_H */
