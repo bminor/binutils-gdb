@@ -315,6 +315,13 @@ alpha_register_convertible (int regno)
 {
   return (regno >= FP0_REGNUM && regno <= FP0_REGNUM + 31);
 }
+
+struct type *
+alpha_register_virtual_type (int regno)
+{
+  return ((regno >= FP0_REGNUM && regno < (FP0_REGNUM+31))
+	  ? builtin_type_double : builtin_type_long);
+}
 
 
 /* Guaranteed to set frame->saved_regs to some values (it never leaves it
@@ -414,6 +421,13 @@ alpha_frame_init_saved_regs (struct frame_info *fi)
   if (fi->saved_regs == NULL)
     alpha_find_saved_regs (fi);
   fi->saved_regs[SP_REGNUM] = fi->frame;
+}
+
+void
+alpha_init_frame_pc_first (int fromleaf, struct frame_info *prev)
+{
+  prev->pc = (fromleaf ? SAVED_PC_AFTER_CALL (prev->next) :
+	      prev->next ? FRAME_SAVED_PC (prev->next) : read_pc ());
 }
 
 static CORE_ADDR
@@ -1479,11 +1493,37 @@ alpha_call_dummy_address (void)
     return SYMBOL_VALUE_ADDRESS (sym) + 4;
 }
 
+void
+alpha_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
+                      struct value **args, struct type *type, int gcc_p)
+{
+  CORE_ADDR bp_address = CALL_DUMMY_ADDRESS ();
+
+  if (bp_address == 0)
+    error ("no place to put call");
+  write_register (RA_REGNUM, bp_address);
+  write_register (T12_REGNUM, fun);
+}
+
 int
 alpha_use_struct_convention (int gcc_p, struct type *type)
 {
   /* Structures are returned by ref in extra arg0.  */
   return 1;
+}
+
+void
+alpha_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
+{
+  /* Store the address of the place in which to copy the structure the
+     subroutine will return.  Handled by alpha_push_arguments.  */
+}
+
+CORE_ADDR
+alpha_extract_struct_value_address (char *regbuf)
+{
+  return (extract_address (regbuf + REGISTER_BYTE (V0_REGNUM),
+			   REGISTER_RAW_SIZE (V0_REGNUM)));
 }
 
 /* alpha_software_single_step() is called just before we want to resume

@@ -195,14 +195,15 @@ alpha_register_convert_to_raw (struct type *, int, char *, char *);
 /* Return the GDB type object for the "standard" data type
    of data in register N.  */
 
-#define REGISTER_VIRTUAL_TYPE(N) \
-	(((N) >= FP0_REGNUM && (N) < FP0_REGNUM+31)  \
-	 ? builtin_type_double : builtin_type_long) \
+#define REGISTER_VIRTUAL_TYPE(N) alpha_register_virtual_type ((N))
+extern struct type * alpha_register_virtual_type (int);
 
 /* Store the address of the place in which to copy the structure the
    subroutine will return.  Handled by alpha_push_arguments.  */
 
-#define STORE_STRUCT_RETURN(addr, sp)
+#define STORE_STRUCT_RETURN(addr, sp) \
+  alpha_store_struct_return ((addr), (sp))
+extern void alpha_store_struct_return (CORE_ADDR, CORE_ADDR);
 /**/
 
 /* Extract from an array REGBUF containing the (raw) register state
@@ -229,8 +230,8 @@ extern void alpha_store_return_value (struct type *, char *);
    on it.  */
 
 #define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
-  (extract_address (REGBUF + REGISTER_BYTE (V0_REGNUM), \
-		    REGISTER_RAW_SIZE (V0_REGNUM)))
+  alpha_extract_struct_value_address (REGBUF)
+extern CORE_ADDR alpha_extract_struct_value_address (char *);
 
 /* Structures are returned by ref in extra arg0 */
 #define USE_STRUCT_CONVENTION(gcc_p, type) \
@@ -346,23 +347,20 @@ extern CORE_ADDR alpha_call_dummy_address (void);
    We only have to set RA_REGNUM to the dummy breakpoint address
    and T12_REGNUM (the `procedure value register') to the function address.  */
 
-#define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, args, type, gcc_p)    \
-{									\
-  CORE_ADDR bp_address = CALL_DUMMY_ADDRESS ();			\
-  if (bp_address == 0)							\
-    error ("no place to put call");					\
-  write_register (RA_REGNUM, bp_address);				\
-  write_register (T12_REGNUM, fun);					\
-}
+#define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, args, type, gcc_p) \
+  alpha_fix_call_dummy ((dummyname), (pc), (fun), (nargs), (args), \
+			(type), (gcc_p))
+extern void alpha_fix_call_dummy (char *, CORE_ADDR, CORE_ADDR, int,
+                                  struct value **, struct type *, int);
 
 /* There's a mess in stack frame creation.  See comments in blockframe.c
    near reference to INIT_FRAME_PC_FIRST.  */
 
-#define	INIT_FRAME_PC(fromleaf, prev)	/* nada */
+#define INIT_FRAME_PC(fromleaf, prev) init_frame_pc_noop ((fromleaf), (prev))
 
 #define INIT_FRAME_PC_FIRST(fromleaf, prev) \
-  (prev)->pc = ((fromleaf) ? SAVED_PC_AFTER_CALL ((prev)->next) : \
-	      (prev)->next ? FRAME_SAVED_PC ((prev)->next) : read_pc ());
+  alpha_init_frame_pc_first ((fromleaf), (prev))
+extern void alpha_init_frame_pc_first (int, struct frame_info *);
 
 /* Special symbol found in blocks associated with routines.  We can hang
    alpha_extra_func_info_t's off of this.  */

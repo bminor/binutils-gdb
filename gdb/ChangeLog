@@ -1,3 +1,19 @@
+2002-01-19  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* alpha-tdep.c (alpha_register_virtual_type): New function.
+	(alpha_init_frame_pc_first): Ditto.
+	(alpha_fix_call_dummy): Ditto.
+	(alpha_store_struct_return): Ditto.
+	(alpha_extract_struct_value_address): Ditto.
+	* config/alpha/tm-alpha.h (REGISTER_VIRTUAL_TYPE): Use
+	alpha_register_virtual_type.
+	(STORE_STRUCT_RETURN): Use alpha_store_struct_return.
+	(EXTRACT_STRUCT_VALUE_ADDRESS): Use
+	alpha_extract_struct_value_address.
+	(FIX_CALL_DUMMY): Use alpha_fix_call_dummy.
+	(INIT_FRAME_PC): Use init_frame_pc_noop.
+	(INIT_FRAME_PC_FIRST): Use alpha_init_frame_pc_first.
+
 2002-01-19  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386gnu-nat.c: Include "i386-tdep.h".
