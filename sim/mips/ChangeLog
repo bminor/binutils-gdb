@@ -1,5 +1,16 @@
 2002-02-28  Chris Demetriou  <cgd@broadcom.com>
 
+	* mips.igen (LWXC1): Mark with filter "64,f", rather than just "32".
+	(MOVtf, MxC1, MxC1, DMxC1, DMxC1, CxC1, CxC1, SQRT.fmt, MOV.fmt, 
+	NEG.fmt, ROUND.L.fmt, TRUNC.L.fmt, CEIL.L.fmt, FLOOR.L.fmt, 
+	ROUND.W.fmt, TRUNC.W, CEIL.W, FLOOR.W.fmt, RECIP.fmt, RSQRT.fmt, 
+	CVT.S.fmt, CVT.D.fmt, CVT.W.fmt, CVT.L.fmt, MOVtf.fmt, C.cond.fmta, 
+	C.cond.fmtb, SUB.fmt, MUL.fmt, DIV.fmt, MOVZ.fmt, MOVN.fmt, LDXC1, 
+	SWXC1, SDXC1, MSUB.D, MSUB.S, NMADD.S, NMADD.D, NMSUB.S, NMSUB.D, 
+	LWC1, SWC1): Add "f" to filter, since these are FP instructions.
+
+2002-02-28  Chris Demetriou  <cgd@broadcom.com>
+
 	* mips.igen (DSRA32, DSRAV): Fix order of arguments in
 	instruction-printing string.
 	(LWU): Use '64' as the filter flag.
