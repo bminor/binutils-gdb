@@ -47,9 +47,15 @@ unsigned long strtoul ();
 static void set_default_dirlist PARAMS ((char *dirlist_ptr));
 static void set_section_start PARAMS ((char *sect, char *valstr));
 
-/* WINDOWS_NT; declare additional functions */
-static void set_subsystem PARAMS ((char *subsystem_type));
-static void set_stack_heap PARAMS ((char *valstr, boolean for_heap));
+/* PE format; declare additional functions */
+static void set_pe_subsystem PARAMS ((void));
+static void set_pe_stack_heap PARAMS ((bfd_link_pe_info_dval *reserve,
+				    bfd_link_pe_info_dval *commit));
+static void set_pe_value PARAMS ((bfd_link_pe_info_dval *val));
+
+/* PE info; passed to bfd if any pe options set. */
+static bfd_link_pe_info pe_info;
+
 
 void
 parse_args (argc, argv)
@@ -90,10 +96,8 @@ parse_args (argc, argv)
 #define OPTION_SHARED			(OPTION_RPATH + 1)
 #define OPTION_SONAME			(OPTION_SHARED + 1)
 #define OPTION_SORT_COMMON		(OPTION_SONAME + 1)
-#define OPTION_STACK                    (OPTION_SORT_COMMON + 1) /*WINDOWS_NT*/
-#define OPTION_STATS			(OPTION_STACK + 1)
-#define OPTION_SUBSYSTEM                (OPTION_STATS + 1) /* WINDOWS_NT */
-#define OPTION_SYMBOLIC			(OPTION_SUBSYSTEM + 1)
+#define OPTION_STATS			(OPTION_SORT_COMMON + 1)
+#define OPTION_SYMBOLIC			(OPTION_STATS + 1)
 #define OPTION_TBSS			(OPTION_SYMBOLIC + 1)
 #define OPTION_TDATA			(OPTION_TBSS + 1)
 #define OPTION_TTEXT			(OPTION_TDATA + 1)
@@ -107,8 +111,24 @@ parse_args (argc, argv)
 #define OPTION_SPLIT_BY_RELOC		(OPTION_WARN_ONCE + 1)
 #define OPTION_SPLIT_BY_FILE 	    	(OPTION_SPLIT_BY_RELOC + 1)
 #define OPTION_WHOLE_ARCHIVE		(OPTION_SPLIT_BY_FILE + 1)
+
+/* Used for setting flags in the PE header. */
 #define OPTION_BASE_FILE		(OPTION_WHOLE_ARCHIVE + 1)
+#define OPTION_DLL			(OPTION_BASE_FILE + 1)
+#define OPTION_FILE_ALIGNMENT		(OPTION_DLL + 1)
+#define OPTION_IMAGE_BASE		(OPTION_FILE_ALIGNMENT + 1)
+#define OPTION_MAJOR_IMAGE_VERSION	(OPTION_IMAGE_BASE + 1)
+#define OPTION_MAJOR_OS_VERSION		(OPTION_MAJOR_IMAGE_VERSION + 1)
+#define OPTION_MAJOR_SUBSYSTEM_VERSION	(OPTION_MAJOR_OS_VERSION + 1)
+#define OPTION_MINOR_IMAGE_VERSION	(OPTION_MAJOR_SUBSYSTEM_VERSION + 1)
+#define OPTION_MINOR_OS_VERSION		(OPTION_MINOR_IMAGE_VERSION + 1)
+#define OPTION_MINOR_SUBSYSTEM_VERSION	(OPTION_MINOR_OS_VERSION + 1)
+#define OPTION_SECTION_ALIGNMENT	(OPTION_MINOR_SUBSYSTEM_VERSION + 1)
+#define OPTION_STACK                    (OPTION_SECTION_ALIGNMENT + 1)
+#define OPTION_SUBSYSTEM                (OPTION_STACK + 1)
+
   static struct option longopts[] = {
+  /* Sorted alphabeticaly, except for the PE options grouped at the end. */
     {"Bdynamic", no_argument, NULL, OPTION_CALL_SHARED},
     {"Bstatic", no_argument, NULL, OPTION_NON_SHARED},
     {"Bsymbolic", no_argument, NULL, OPTION_SYMBOLIC},
@@ -126,7 +146,6 @@ parse_args (argc, argv)
     {"end-group", no_argument, NULL, ')'},
     {"export-dynamic", no_argument, NULL, OPTION_EXPORT_DYNAMIC},
     {"format", required_argument, NULL, 'b'},
-    {"heap", required_argument, NULL, OPTION_HEAP}, /* WINDOWS_NT */
     {"help", no_argument, NULL, OPTION_HELP},
     {"Map", required_argument, NULL, OPTION_MAP},
     {"no-keep-memory", no_argument, NULL, OPTION_NO_KEEP_MEMORY},
@@ -143,11 +162,9 @@ parse_args (argc, argv)
     {"soname", required_argument, NULL, OPTION_SONAME},
     {"sort-common", no_argument, NULL, OPTION_SORT_COMMON},
     {"sort_common", no_argument, NULL, OPTION_SORT_COMMON},
-    {"stack", required_argument, NULL, OPTION_STACK}, /* WINDOWS_NT */
     {"start-group", no_argument, NULL, '('},
     {"stats", no_argument, NULL, OPTION_STATS},
     {"static", no_argument, NULL, OPTION_NON_SHARED},
-    {"subsystem", required_argument, NULL, OPTION_SUBSYSTEM}, /* WINDOWS_NT */
     {"Tbss", required_argument, NULL, OPTION_TBSS},
     {"Tdata", required_argument, NULL, OPTION_TDATA},
     {"Ttext", required_argument, NULL, OPTION_TTEXT},
@@ -161,7 +178,23 @@ parse_args (argc, argv)
     {"split-by-reloc", required_argument, NULL, OPTION_SPLIT_BY_RELOC},
     {"split-by-file", no_argument, NULL, OPTION_SPLIT_BY_FILE},
     {"whole-archive", no_argument, NULL, OPTION_WHOLE_ARCHIVE},
+
+  /* PE options */
     {"base-file", required_argument, NULL, OPTION_BASE_FILE},
+    {"dll", no_argument, NULL, OPTION_DLL},
+    {"file-alignment", required_argument, NULL, OPTION_FILE_ALIGNMENT},
+    {"heap", required_argument, NULL, OPTION_HEAP}, 
+    {"image-base", required_argument, NULL, OPTION_IMAGE_BASE}, 
+    {"major-image-version", required_argument, NULL, OPTION_MAJOR_IMAGE_VERSION},
+    {"major-os-version", required_argument, NULL, OPTION_MAJOR_OS_VERSION},
+    {"major-subsystem-version", required_argument, NULL, OPTION_MAJOR_SUBSYSTEM_VERSION},
+    {"minor-image-version", required_argument, NULL, OPTION_MINOR_IMAGE_VERSION},
+    {"minor-os-version", required_argument, NULL, OPTION_MINOR_OS_VERSION},
+    {"minor-subsystem-version", required_argument, NULL, OPTION_MINOR_SUBSYSTEM_VERSION},
+    {"section-alignment", required_argument, NULL, OPTION_SECTION_ALIGNMENT},
+    {"stack", required_argument, NULL, OPTION_STACK},
+    {"subsystem", required_argument, NULL, OPTION_SUBSYSTEM},
+      
     {NULL, no_argument, NULL, 0}
   };
 
@@ -271,10 +304,6 @@ parse_args (argc, argv)
 	  break;
 	case 'g':
 	  /* Ignore.  */
-	  break;
-	case OPTION_HEAP:  /* WINDOWS_NT */
-	  link_info.stack_heap_parameters.heap_defined = true;
-	  set_stack_heap (optarg, true);
 	  break;
 	case OPTION_HELP:
 	  help ();
@@ -389,15 +418,8 @@ parse_args (argc, argv)
 	case OPTION_SORT_COMMON:
 	  config.sort_common = true;
 	  break;
-	case OPTION_STACK:  /* WINDOWS_NT */
-	  link_info.stack_heap_parameters.stack_defined = true;
-	  set_stack_heap (optarg, false);
-	  break;
 	case OPTION_STATS:
 	  config.stats = true;
-	  break;
-	case OPTION_SUBSYSTEM:  /* WINDOWS_NT */
-	  set_subsystem (optarg);
 	  break;
 	case OPTION_SYMBOLIC:
 	  link_info.symbolic = true;
@@ -461,15 +483,6 @@ parse_args (argc, argv)
 	case OPTION_WHOLE_ARCHIVE:
 	  whole_archive = true;
 	  break;
-	case OPTION_BASE_FILE:
-	  link_info.base_file = (PTR) fopen (optarg,"w");
-	  if (link_info.base_file == NULL)
-	    {
-	      fprintf (stderr, "%s: Can't open base file %s\n",
-		       program_name, optarg);
-	      xexit (1);
-	    }
-	  break;
 	case 'X':
 	  link_info.discard = discard_l;
 	  break;
@@ -515,6 +528,60 @@ parse_args (argc, argv)
 	  lang_leave_group ();
 	  ingroup = 0;
 	  break;
+
+
+
+	case OPTION_BASE_FILE:
+	  link_info.base_file = (PTR) fopen (optarg,"w");
+	  if (link_info.base_file == NULL)
+	    {
+	      fprintf (stderr, "%s: Can't open base file %s\n",
+		       program_name, optarg);
+	      xexit (1);
+	    }
+	  break;
+
+	  /* PE options */
+	case OPTION_HEAP: 
+	  set_pe_stack_heap (&pe_info.heap_reserve,  &pe_info.heap_commit);
+	  break;
+	case OPTION_STACK: 
+	  set_pe_stack_heap (&pe_info.stack_reserve,  &pe_info.stack_commit);
+	  break;
+	case OPTION_SUBSYSTEM:
+	  set_pe_subsystem ();
+	  break;
+	case OPTION_MAJOR_OS_VERSION:
+	  set_pe_value (&pe_info.major_os_version);
+	  break;
+	case OPTION_MINOR_OS_VERSION:
+	  set_pe_value (&pe_info.minor_os_version);
+	  break;
+	case OPTION_MAJOR_SUBSYSTEM_VERSION:
+	  set_pe_value (&pe_info.major_subsystem_version);
+	  break;
+	case OPTION_MINOR_SUBSYSTEM_VERSION:
+	  set_pe_value (&pe_info.minor_subsystem_version);
+	  break;
+	case OPTION_MAJOR_IMAGE_VERSION:
+	  set_pe_value (&pe_info.major_image_version);
+	  break;
+	case OPTION_MINOR_IMAGE_VERSION:
+	  set_pe_value (&pe_info.minor_image_version);
+	  break;
+	case OPTION_FILE_ALIGNMENT:
+	  set_pe_value (&pe_info.file_alignment);
+	  break;
+	case OPTION_SECTION_ALIGNMENT:
+	  set_pe_value (&pe_info.section_alignment);
+	  break;
+	case OPTION_DLL:
+	  pe_info.dll.defined = 1;
+	  pe_info.dll.value = 1;
+	  break;
+	case OPTION_IMAGE_BASE:
+	  set_pe_value (&pe_info.image_base);
+	  break;
 	}
     }
 
@@ -555,79 +622,76 @@ set_section_start (sect, valstr)
     einfo ("%P%F: invalid hex number `%s'\n", valstr);
   lang_section_start (sect, exp_intop (val));
 }
-
-/* WINDOWS_NT; added routines to get the subsystem type, heap and/or stack
+
+/* PE/WIN32; added routines to get the subsystem type, heap and/or stack
    parameters which may be input from the command line */
-static void
-set_subsystem (subsystem_type)
-  char *subsystem_type;
-{
-  if (strcmp (subsystem_type, "native") == 0)
-    {
-      link_info.subsystem = native;
-    }
-  else if (strcmp (subsystem_type, "windows") == 0)
-    {
-      link_info.subsystem = windows;
-    }
-  else if (strcmp (subsystem_type, "console") == 0)
-    {
-      link_info.subsystem = console;
-    }
-  else if (strcmp (subsystem_type, "os2") == 0)
-    {
-      link_info.subsystem = os2;
-    }
-  else if (strcmp (subsystem_type, "posix") == 0)
-    {
-      link_info.subsystem = posix;
-    }
-  else
-    einfo ("%P%F: invalid subsystem type `%s'\n", subsystem_type);
 
+static void
+set_pe_subsystem ()
+{
+  int i;
+  static struct 
+    {
+      char *name ;
+      int value;
+    }
+  v[] =
+    {
+      {"native", BFD_PE_NATIVE},
+      {"windows",BFD_PE_WINDOWS},
+      {"console",BFD_PE_CONSOLE},
+      {"os2",BFD_PE_OS2},
+      {"posix", BFD_PE_POSIX},
+      {0,0}
+    };
+
+  for (i = 0; v[i].name; i++)
+    {
+      if (!strcmp (optarg, v[i].name)) 
+	{
+	  link_info.pe_info = &pe_info;	  
+	  pe_info.subsystem.value = v[i].value;
+	  pe_info.subsystem.defined = 1;
+	  return;
+	}
+    }
+  einfo ("%P%F: invalid subsystem type `%s'\n", optarg);
+}
+
+static void 
+set_pe_value (ptr)
+     bfd_link_pe_info_dval *ptr;
+{
+  char *end;
+  ptr->value = strtoul (optarg, &end, 16);
+  if (end == optarg)
+    {
+      einfo ("%P%F: invalid hex number for PE parameter '%s'\n", optarg);
+    }
+
+  optarg = end;
+  ptr->defined = 1;
+  link_info.pe_info = &pe_info;
 }
 
 static void
-set_stack_heap (valstr, for_heap)
-  char *valstr;
-  boolean for_heap;
+set_pe_stack_heap (reserve, commit)
+     bfd_link_pe_info_dval *reserve;
+     bfd_link_pe_info_dval *commit;
 {
-  char *begin_commit, *end;
-  bfd_vma reserve = 0;
-  bfd_vma commit  = 0;
+  char *begin_commit;
+  char *end;
 
-  /* There may be two values passed in to the -stack or -heap switches like
-     this:
-       -stack 0x10000,0x100
-     where the first parameter is the stack (or heap) reserve and the second
-     is commit.  The second parameter is optional. */
-
-  /* get the reserve value */
-  reserve = strtoul (valstr, &begin_commit, 16);
-
-  if (strcmp (valstr, begin_commit) == 0)  
-    /* the reserve value couldn't be read */
-    einfo ("%P%F: invalid hex number for reserve[,commit] '%s'\n", valstr); 
-  else if (strcmp (begin_commit, "\0") != 0)  /* check for a commit value */
+  set_pe_value (reserve);
+  if (*optarg == ',')
     {
-     begin_commit += 1;  /* increment begin_commit to point past ',' */
-     commit = strtoul (begin_commit, &end, 16);
-     if (strcmp (end, begin_commit) == 0)
-       einfo ("%P%F: invalid hex number for commit '%s'\n", begin_commit);
+      optarg++;
+      set_pe_value (commit);
     }
-   
-  if (for_heap)
-   {
-    link_info.stack_heap_parameters.heap_reserve = reserve;     
-    link_info.stack_heap_parameters.heap_commit  = commit;     
-   }
-  else
-   {
-    link_info.stack_heap_parameters.stack_reserve = reserve;     
-    link_info.stack_heap_parameters.stack_commit  = commit;     
-   }
-
-#if DUMP_INFO
-  printf ("reserve = %8x  commit = %8x\n", reserve, commit);
-#endif
+  else if (*optarg)
+    {
+      einfo ("%P%F: strange hex info for PE parameter '%s'\n", optarg);
+    }
 }
+
+
