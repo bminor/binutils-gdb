@@ -29,7 +29,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <string.h>
 
 #ifndef DEMANGLING_STYLE
-# define DEMANGLING_STYLE AUTO_DEMANGLING_STYLE_STRING
+# define DEMANGLING_STYLE GNU_DEMANGLING_STYLE_STRING
 #endif
 
 /* The current demangling style in affect.  Global so that the demangler

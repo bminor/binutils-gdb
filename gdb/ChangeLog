@@ -1,3 +1,10 @@
+Tue Jul 14 19:26:54 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* Makefile.in, demangle.c:  Change default demangling style to
+	gnu.
+	* Makefile.in:  Update version to 4.6 !!!
+	* README, WHATS.NEW:  Update for 4.6.
+
 Tue Jul 14 16:59:46 1992  Ken Raeburn  (raeburn@cygnus.com)
 
 	* i960-tdep.c (frame_args_address): If arg pointer can't be found,
@@ -7,6 +14,8 @@ Tue Jul 14 16:59:46 1992  Ken Raeburn  (raeburn@cygnus.com)
 	nodes as base classes.
 
 Tue Jul 14 00:12:30 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* alldeps.mak, depend:  Update.
 
 	* xcoffread.c:  Add decl for section_offset to keep prototype happy.
 

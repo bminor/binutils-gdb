@@ -11,6 +11,92 @@ names and member function names, and can do command completion on such names
 single quotes.  Examples are 'func (int, long)' and 'obj::operator==(obj&)'.
 Make use of command completion, it is your friend.
 
+GDB also now accepts a variety of C++ mangled symbol formats.  They are
+the GNU g++ style, the Cfront (ARM) style, and the Lucid (lcc) style.
+You can tell GDB which format to use by doing a 'set demangle-style {gnu,
+lucid, cfront, auto}'.  'gnu' is the default.  Do a 'set demangle-style foo'
+for the list of formats.
+
+ * G++ symbol mangling problem
+
+Recent versions of gcc have a bug in how they emit debugging information for
+C++ methods (when using dbx-style stabs).  The file 'gcc.patch' (in this
+directory) can be applied to gcc to fix the problem.  Alternatively, if you
+can't fix gcc, you can #define GCC_MANGLE_BUG when compling gdb/symtab.c. The
+usual symptom is difficulty with setting breakpoints on methods.  GDB complains
+about the method being non-existent.  (We believe that version 2.2.2 of GCC has
+this problem.)
+
+ * New 'maintenance' command
+
+All of the commands related to hacking GDB internals have been moved out of
+the main command set, and now live behind the 'maintenance' command.  This
+can also be abbreviated as 'mt'.  The following changes were made:
+
+	dump-me ->		maintenance dump-me
+	info all-breakpoints ->	maintenance info breakpoints
+	printmsyms ->		maintenance print msyms
+	printobjfiles ->	maintenance print objfiles
+	printpsyms ->		maintenance print psymbols
+	printsyms ->		maintenance print symbols
+
+The following commands are new:
+
+	maintenance demangle	Call internal GDB demangler routine to
+				demangle a C++ link name and prints the result.
+	maintenance print type	Print a type chain for a given symbol
+
+ * Change to .gdbinit file processing
+
+We now read the $HOME/.gdbinit file before processing the argv arguments
+(e.g. reading symbol files or core files).  This allows global parameters to
+be set, which will apply during the symbol reading.  The ./.gdbinit is still
+read after argv processing.
+
+ * New hosts supported
+
+Solaris-2.0 !!!				sparc-sun-solaris2  or  sun4sol2
+
+Linux support				i386-unknown-linux  or  linux
+
+We are also including code to support the HP/PA running BSD and HPUX.  This
+is almost guaranteed not to work, as we didn't have time to test or build it
+for this release.  We are including it so that the more adventurous (or
+masochistic) of you can play with it.  We also had major problems with the
+fact that the compiler that we got from HP doesn't support the -g option.
+It costs extra.
+
+ * New targets supported
+
+Hitachi H8/300				h8300-hitachi-hms  or  h8300hms
+
+ * More smarts about finding #include files
+
+GDB now remembers the compilation directory for all include files, and for
+all files from which C is generated (like yacc and lex sources).  This
+greatly improves GDB's ability to find yacc/lex sources, and include files,
+especially if you are debugging your program from a directory different from
+the one that contains your sources.
+
+We also fixed a bug which caused difficulty with listing and setting
+breakpoints in include files which contain C code.  (In the past, you had to
+try twice in order to list an include file that you hadn't looked at before.)
+
+ * Interesting infernals change
+
+GDB now deals with arbitrary numbers of sections, where the symbols for each
+section must be relocated relative to that section's landing place in the
+target's address space.  This work was needed to support ELF with embedded
+stabs used by Solaris-2.0.
+
+ * Bug fixes (of course!)
+
+There have been loads of fixes for the following things:
+	mips, rs6000, 29k/udi, m68k, g++, type handling, elf/dwarf, m88k,
+	i960, stabs, DOS(GO32), procfs, etc...
+
+See the ChangeLog for details.
+
 *** Changes in GDB-4.5:
 
  * New machines supported (host and target)
