@@ -409,7 +409,8 @@ struct target_ops gdbsim_ops =
   gdbsim_prepare_to_store,
   gdbsim_xfer_inferior_memory, 
   gdbsim_files_info,
-  0, 0,				/* Breakpoints */
+  memory_insert_breakpoint,
+  memory_remove_breakpoint,
   0, 0, 0, 0, 0,		/* Terminal handling */
   gdbsim_kill,			/* kill */
   gdbsim_load,			/* load */

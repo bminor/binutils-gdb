@@ -1,3 +1,8 @@
+Wed Aug 10 15:57:43 1994  Doug Evans  (dje@canuck.cygnus.com)
+
+	* remote-sim.c (gdbsim_ops): Set `to_insert_breakpoint' and
+	`to_remove_breakpoint' fields.
+
 Wed Aug 10 15:46:03 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* infcmd.c (run_command): Remove comment suggesting using
