@@ -11,10 +11,14 @@
 strip \- Discard symbols from object files.
 
 .SH SYNOPSIS
+.hy 0
+.na
+.TP
 .B strip
-.RB "[\|" "\-F \fIbfdname\fP" | \-\-target=\fIbfdname\fP "\|]"
-.RB "[\|" "\-I \fIbfdname\fP" | \-\-input\-target=\fIbfdname\fP "\|]"
-.RB "[\|" "\-O \fIbfdname\fP" | \-\-output\-target=\fIbfdname\fP "\|]"
+.RB "[\|" \-F \fIbfdname\fP\ |\ \-\-target=\fIbfdname\fP "\|]"
+.RB "[\|" \-I \fIbfdname\fP\ |\ \-\-input\-target=\fIbfdname\fP "\|]"
+.RB "[\|" \-O \fIbfdname\fP\ |\ \-\-output\-target=\fIbfdname\fP "\|]"
+.RB "[\|" \-R \fIsectionname\fP\ |\ \-\-remove\-section=\fIsectionname\fP "\|]"
 .RB "[\|" \-s | \-\-strip\-all "\|]"
 .RB "[\|" \-S | -g | \-\-strip\-debug "\|]"
 .RB "[\|" \-x | \-\-discard\-all "\|]"
@@ -64,6 +68,14 @@ code format \fIbfdname\fP.
 .TP
 .B "\-\-output\-target=\fIbfdname"
 Replace \fIobjfile\fP with a file in the output format \fIbfdname\fP.
+
+.TP
+.B "\-R \fIsectionname\fP"
+.TP
+.B "\-\-remove\-section=\fIsectionname"
+Remove the named section from the file.  This option may be given more
+than once.  Note that using this option inappropriately may make the
+object file unusable.
 
 .TP
 .B \-s

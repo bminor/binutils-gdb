@@ -18,6 +18,7 @@ objcopy \- copy and translate object files
 .RB "[\|" \-F\ \fIbfdname\fB\ |\ \-\-target=\fIbfdname\fR "\|]" 
 .RB "[\|" \-I\ \fIbfdname\fB\ |\ \-\-input\-target=\fIbfdname\fR "\|]" 
 .RB "[\|" \-O\ \fIbfdname\fB\ |\ \-\-output\-target=\fIbfdname\fR "\|]" 
+.RB "[\|" \-R\ \fIsectionname\fB\ |\ \-\-remove\-section=\fIsectionname\fR "\|]"
 .RB "[\|" \-S\ |\ \-\-strip\-all\fR "\|]" 
 .RB "[\|" \-g\ |\ \-\-strip\-debug\fR "\|]" 
 .RB "[\|" \-x\ |\ \-\-discard\-all\fR "\|]" 
@@ -73,6 +74,11 @@ Use
 .I bfdname
 as the object format for both the input and the output file; i.e.
 simply transfer data from source to destination with no translation.
+.TP
+.B \-R \fIsectionname\fR, \fB\-\-remove-section=\fIsectionname
+Remove the named section from the file.  This option may be given more
+than once.  Note that using this option inappropriately may make the
+output file unusable.
 .TP
 .B \-S\fR, \fB\-\-strip\-all
 Do not copy relocation and symbol information from the source file.

@@ -1,3 +1,15 @@
+Thu Aug 11 14:55:57 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	Add support for removing named sections to objcopy and strip.
+	* objcopy.c (struct section_list): Define.
+	(remove_sections): New static variable.
+	(strip_options, copy_options): Add remove-section.
+	(copy_usage, strip_usage): Mention -R and --remove-section.
+	(setup_section): If section is in remove_sections list, ignore it.
+	(copy_section): Likewise.
+	(strip_main, copy_main): Handle -R.
+	* binutils.texi, objcopy.1, strip.1: Document new options.
+
 Wed Aug 10 10:19:55 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* nlmconv.c (powerpc_mangle_relocs): Rename symvalue to sym_value,

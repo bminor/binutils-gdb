@@ -741,6 +741,7 @@ objcopy [ -F @var{bfdname} | --target=@var{bfdname} ]
         [ -x | --discard-all ]  [ -X | --discard-locals ]
         [ -b @var{byte} | --byte=@var{byte} ]
         [ -i @var{interleave} | --interleave=@var{interleave} ]
+        [ -R @var{sectionname} | --remove-section=@var{sectionname} ]
         [ -v | --verbose ] [ -V | --version ]  [ --help ]
         @var{infile} [@var{outfile}]
 @end smallexample
@@ -780,6 +781,12 @@ Write the output file using the object format @var{bfdname}.
 Use @var{bfdname} as the object format for both the input and the output
 file; i.e., simply transfer data from source to destination with no
 translation.  @xref{Target Selection}, for more information.
+
+@item -R @var{sectionname}
+@itemx --remove-section=@var{sectionname}
+Remove any section named @var{sectionname} from the output file.  This
+option may be given more than once.  Note that using this option
+inappropriately may make the output file unusable.
 
 @item -S
 @itemx --strip-all
@@ -1208,6 +1215,7 @@ strip [ -F @var{bfdname} | --target=@var{bfdname} | --target=@var{bfdname} ]
       [ -O @var{bfdname} | --output-target=@var{bfdname} ]
       [ -s | --strip-all ] [ -S | -g | --strip-debug ]
       [ -x | --discard-all ] [ -X | --discard-locals ]
+      [ -R @var{sectionname} | --remove-section=@var{sectionname} ]
       [ -v | --verbose ]  [ -V | --version ]  [ --help ]
       @var{objfile}@dots{}
 @end smallexample
@@ -1239,6 +1247,12 @@ code format @var{bfdname}.
 @itemx --output-target=@var{bfdname}
 Replace @var{objfile} with a file in the output format @var{bfdname}.
 @xref{Target Selection}, for more information.
+
+@item -R @var{sectionname}
+@itemx --remove-section=@var{sectionname}
+Remove any section named @var{sectionname} from the output file.  This
+option may be given more than once.  Note that using this option
+inappropriately may make the output file unusable.
 
 @item -s
 @itemx --strip-all
