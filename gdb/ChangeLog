@@ -2,6 +2,9 @@
 
 	* mips-tdep.c (MSYMBOL_IS_SPECIAL): Replace macro with function.
 	(MSYMBOL_SIZE): Replace macro with function.
+	(DEFAULT_MIPS_TYPE): Delete unused macro.
+	* config/mips/tm-mips.h (DEFAULT_MIPS_TYPE): Delete unused macro.
+	* config/mips/tm-embed.h (DEFAULT_MIPS_TYPE): Delete unused macro.
 
 2002-08-21  Jim Blandy  <jimb@redhat.com>
 

@@ -46,11 +46,6 @@ struct value;
 #define GDB_TARGET_UNMASK_DISAS_PC(addr) MAKE_MIPS16_ADDR(addr)
 #endif
 
-/* The name of the usual type of MIPS processor that is in the target
-   system.  */
-
-#define DEFAULT_MIPS_TYPE "generic"
-
 /* Return non-zero if PC points to an instruction which will cause a step
    to execute both the instruction at PC and an instruction at PC+4.  */
 extern int mips_step_skips_delay (CORE_ADDR);
