@@ -8,25 +8,12 @@ AC_ARG_PROGRAM
 
 . ${srcdir}/../../bfd/configure.host
 
-# Set up to make a link between the host's include file and "sysdep.h".
-files="../../bfd/hosts/${my_host}.h"
-if test ! -f ${srcdir}/${files} ; then
-	files=../../bfd/hosts/std-host.h
-	AC_MSG_WARN(arm sim has no specific support for host ${host} -- using std-host)
-fi
-AC_LINK_FILES($files, sysdep.h)
-
-if test -f ${srcdir}/../../bfd/config/${my_host}.mh; then
-	host_makefile_frag=../../bfd/config/${my_host}.mh
-else
-	host_makefile_frag=/dev/null
-fi
-
-frags=
-if test $host_makefile_frag != /dev/null; then
-	frags="$frags $host_makefile_frag"
-fi
-AC_SUBST_FILE(host_makefile_frag)
-AC_SUBST(frags)
+AC_PROG_CC
+AC_SUBST(CFLAGS)
+AC_SUBST(HDEFINES)
+AR=${AR-ar}
+AC_SUBST(AR)
+AC_PROG_RANLIB
+AC_PROG_INSTALL
 
 AC_OUTPUT(Makefile)

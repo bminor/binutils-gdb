@@ -14,7 +14,7 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 VPATH = @srcdir@
 srcdir = @srcdir@
@@ -47,24 +47,23 @@ docdir = $(datadir)/doc
 
 SHELL = /bin/sh
 
-# FIXME: use autoconf's AC_PROG_INSTALL
-INSTALL = $(srcroot)/install.sh -c
-INSTALL_PROGRAM = $(INSTALL)
-INSTALL_DATA = $(INSTALL)
-INSTALL_XFORM = $(INSTALL) -t='$(program_transform_name)'
-INSTALL_XFORM1= $(INSTALL_XFORM) -b=.1
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA = @INSTALL_DATA@
 
-AR = ar
+AR = @AR@
 AR_FLAGS = rc
-CFLAGS = -g
-BISON = bison
+CC = @CC@
+CFLAGS = @CFLAGS@
 MAKEINFO = makeinfo
-RANLIB = ranlib
+RANLIB = @RANLIB@
+
+HDEFINES = @HDEFINES@
+TDEFINES =
 
 .NOEXPORT:
 MAKEOVERRIDES=
 
-CC_FOR_BUILD = cc
 X=xstuff.o
 XL=-lX11
 X=
@@ -73,10 +72,6 @@ XL=
 INCDIR = $(srcdir)/../../include 
 CSEARCH = -I. -I$(srcdir)  -I../../include  -I../../bfd -I$(INCDIR) -I$(srcdir)/../../bfd -I$(srcdir)/../../gdb
 DEP = mkdep
-
-#### Makefile fragments come in here.
-# @host_makefile_frag@
-###
 
 ARMOBJ=armcopro.o armemu26.o armemu32.o arminit.o armos.o  armsupp.o armvirt.o bag.o
 OUROBJ=wrapper.o 
@@ -131,6 +126,7 @@ TAGS: force
 
 clean:
 	rm -f *.[oa] *~ core *.E *.p *.ip aout-params.h gen-aout
+	rm -f run libsim.a
 
 distclean mostlyclean realclean: clean
 	rm -f TAGS
@@ -156,7 +152,7 @@ install-man: run.1
 	$(INSTALL_XFORM1) $(srcdir)/run.1 $(man1dir)/run.1
 
 
-Makefile: Makefile.in @frags@
+Makefile: Makefile.in
 	$(SHELL) ./config.status
 
 config.status: configure

@@ -1,4 +1,25 @@
+Thu Sep  7 12:00:17 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	(Try to) Update to new bfd autoconf scheme.
+	* run.c: Don't include sysdep.h.
+	* Makefile.in (INSTALL{,_PROGRAM,_DATA}): Use autoconf computed value.
+	(CC, CFLAGS, AR, RANLIB): Likewise.
+	(HDEFINES, TDEFINES): Define.
+	(CC_FOR_BUILD): Delete.
+	(host_makefile_frag): Delete.
+	(Makefile): Don't depend on frags.
+	* configure.in (sysdep.h): Don't create symlink.
+	(host_makefile_frag, frags): Deleted.
+	(CC, CFLAGS, AR, RANLIB, INSTALL): Compute values.
+	* configure: Regenerated.
+
+Thu Aug  3 10:45:37 1995  Fred Fish  <fnf@cygnus.com>
+
+	* Update all FSF addresses except those in COPYING* files.
+
 Wed Jul  5 16:15:54 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* Makefile.in (clean): Remove run, libsim.a.
 
  	* Makefile.in, configure.in: converted to autoconf.
 	* configure: New file, generated with autconf 2.4.
