@@ -1,5 +1,9 @@
 2003-01-14  Daniel Jacobowitz  <drow@mvista.com>
 
+	* gdb.c++/virtfunc.exp: Remove fixed XFAIL.
+
+2003-01-14  Daniel Jacobowitz  <drow@mvista.com>
+
 	* gdb.threads/killed.exp: Use KFAIL for gdb/568.
 
 2003-01-14  Daniel Jacobowitz  <drow@mvista.com>
