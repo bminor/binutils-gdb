@@ -1,3 +1,8 @@
+2003-02-02  Mark Kettenis  <kettenis@gnu.org>
+
+	* stack.c (print_frame_info): Restore call to annotate_frame_begin
+	lost in the previous patch.
+
 2003-02-01  Andrew Cagney  <ac131313@redhat.com>
 
 	From 2002-11-09 Jason Molenda (jason-cl@molenda.com)

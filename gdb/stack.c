@@ -203,6 +203,8 @@ print_frame_info (struct frame_info *fi, int level, int source, int args)
       struct cleanup *uiout_cleanup
 	= make_cleanup_ui_out_tuple_begin_end (uiout, "frame");
 
+      annotate_frame_begin (level == -1 ? 0 : level, get_frame_pc (fi));
+
       /* Do this regardless of SOURCE because we don't have any source
          to list for this frame.  */
       if (level >= 0)
@@ -216,7 +218,7 @@ print_frame_info (struct frame_info *fi, int level, int source, int args)
           ui_out_field_core_addr (uiout, "addr", fi->pc);
           annotate_frame_address_end ();
         }
-      
+
       if (get_frame_type (fi) == DUMMY_FRAME)
         {
           annotate_function_call ();
