@@ -378,15 +378,17 @@ inferior_h =	inferior.h $(breakpoint_h)
 
 # Header files that need to have srcdir added.
 
-HFILES_NO_SRCDIR = buildsym.h call-cmds.h coff-solib.h defs.h environ.h \
+HFILES_NO_SRCDIR = buildsym.h call-cmds.h coff-solib.h defs.h dst.h environ.h \
 	$(gdbcmd_h) \
 	$(gdbcore_h) gdb-stabs.h $(inferior_h) language.h minimon.h monitor.h \
 	objfiles.h parser-defs.h partial-stab.h serial.h signals.h solib.h \
 	symfile.h stabsread.h target.h terminal.h typeprint.h xcoffsolib.h \
 	c-lang.h ch-lang.h m2-lang.h complaints.h ns32k-opcode.h valprint.h \
 	config/m68k/tm-m68k.h config/pa/tm-hppa.h config/i960/tm-i960.h \
-	config/sparc/tm-sparc.h config/tm-sunos.h config/tm-sysv4.h \
-	config/m68k/xm-m68k.h config/sparc/xm-sparc.h config/xm-sysv4.h \
+	config/sparc/tm-sparc.h config/tm-lynx.h config/tm-sunos.h \
+	config/tm-sysv4.h \
+	config/m68k/xm-m68k.h config/sparc/xm-sparc.h \
+	config/xm-lynx.h config/xm-sysv4.h \
 	config/vax/xm-vax.h config/nm-m3.h config/nm-trash.h \
 	29k-share/udi/udiids.h 29k-share/udi_soc nindy-share/b.out.h \
 	nindy-share/block_io.h nindy-share/coff.h \
@@ -866,19 +868,20 @@ unexport CHILLFLAGS CHILL_LIB CHILL_FOR_TARGET :
 # why they are separate from the lists of files above.
 
 ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
+	29k-share/udi/udi2go32.c \
 	a29k-pinsn.c a29k-tdep.c a68v-nat.c alpha-nat.c alpha-tdep.c \
 	altos-xdep.c arm-convert.s \
 	arm-pinsn.c arm-tdep.c arm-xdep.c coff-solib.c convex-pinsn.c \
 	convex-tdep.c \
 	convex-xdep.c core-svr4.c coredep.c corelow.c dcache.c delta68-nat.c \
-	dpx2-nat.c exec.c fork-child.c \
+	dpx2-nat.c dstread.c exec.c fork-child.c \
 	go32-xdep.c gould-pinsn.c gould-xdep.c h8300-tdep.c h8500-tdep.c \
 	hp300ux-nat.c hppa-pinsn.c hppa-tdep.c hppab-nat.c hppah-nat.c \
 	i386-pinsn.c i386-tdep.c i386b-nat.c i386mach-nat.c i386v-nat.c \
 	i386aix-nat.c i386m3-nat.c i386v4-nat.c i386ly-tdep.c \
 	i387-tdep.c \
 	i960-pinsn.c i960-tdep.c \
-	infptrace.c inftarg.c irix4-nat.c isi-xdep.c \
+	infptrace.c inftarg.c irix4-nat.c irix5-nat.c isi-xdep.c \
 	lynx-nat.c m3-nat.c \
 	m68k-pinsn.c m68k-tdep.c \
 	m88k-nat.c m88k-pinsn.c m88k-tdep.c mips-nat.c mips-pinsn.c \
@@ -887,7 +890,7 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	nindy-share/ttyflush.c nindy-tdep.c \
 	ns32k-pinsn.c ns32km3-nat.c osfsolib.c \
 	paread.c procfs.c pyr-pinsn.c pyr-tdep.c pyr-xdep.c \
-	remote-adapt.c remote-bug.c remote-eb.c remote-es.c \
+	remote-adapt.c remote-bug.c remote-e7000.c remote-eb.c remote-es.c \
 	remote-hms.c remote-mips.c \
 	remote-mm.c remote-mon.c remote-nindy.c remote-sim.c \
 	remote-st.c remote-utils.c dcache.c \
@@ -931,12 +934,15 @@ ALLPARAM = config/a29k/nm-ultra3.h config/a29k/tm-a29k.h \
 	config/m68k/nm-apollo68v.h config/m68k/nm-delta68.h \
 	config/m68k/nm-dpx2.h config/m68k/nm-hp300bsd.h \
 	config/m68k/nm-hp300hpux.h config/m68k/nm-news.h \
+	config/m68k/nm-m68klynx.h \
 	config/m68k/nm-sun2.h \
 	config/m68k/nm-sun3.h config/m68k/tm-3b1.h config/m68k/tm-altos.h \
+	config/m68k/tm-apollo68b.h \
 	config/m68k/tm-amix.h config/m68k/tm-delta68.h \
 	config/m68k/tm-dpx2.h config/m68k/tm-es1800.h \
 	config/m68k/tm-hp300bsd.h config/m68k/tm-hp300hpux.h \
-	config/m68k/tm-isi.h config/m68k/tm-m68k-em.h \
+	config/m68k/tm-isi.h config/m68k/tm-m68klynx.h \
+	config/m68k/tm-m68k-em.h \
 	config/m68k/tm-monitor.h \
 	config/m68k/tm-news.h config/m68k/tm-os68k.h config/m68k/tm-st2000.h \
 	config/m68k/tm-sun2.h config/m68k/tm-sun2os4.h config/m68k/tm-sun3.h \
@@ -945,7 +951,8 @@ ALLPARAM = config/a29k/nm-ultra3.h config/a29k/tm-a29k.h \
 	config/m68k/xm-apollo68b.h config/m68k/xm-apollo68v.h \
 	config/m68k/xm-delta68.h config/m68k/xm-dpx2.h \
 	config/m68k/xm-hp300bsd.h config/m68k/xm-hp300hpux.h \
-	config/m68k/xm-isi.h config/m68k/xm-news.h config/m68k/xm-news1000.h \
+	config/m68k/xm-isi.h config/m68k/xm-m68klynx.h \
+	config/m68k/xm-news.h config/m68k/xm-news1000.h \
 	config/m68k/xm-sun2.h config/m68k/xm-sun3.h config/m68k/xm-sun3os4.h \
 	config/m88k/nm-delta88v4.h config/m88k/nm-m88k.h \
 	config/m88k/tm-delta88.h \
@@ -953,11 +960,15 @@ ALLPARAM = config/a29k/nm-ultra3.h config/a29k/tm-a29k.h \
 	config/m88k/xm-delta88.h config/m88k/xm-delta88v4.h \
 	config/m88k/xm-dgux.h config/m88k/xm-m88k.h \
 	config/mips/nm-irix3.h \
-	config/mips/nm-irix4.h config/mips/nm-mips.h config/mips/nm-riscos.h \
+	config/mips/nm-irix4.h config/mips/irix5.h \
+	config/mips/nm-mips.h config/mips/nm-riscos.h \
 	config/mips/nm-news-mips.h config/mips/tm-bigmips.h \
-	config/mips/tm-irix3.h config/mips/tm-mips.h config/mips/tm-mipsm3.h \
+	config/mips/tm-idt.h config/mips/tm-idtl.h \
+	config/mips/tm-irix3.h config/mips/tm-irix5.h \
+	config/mips/tm-mips.h config/mips/tm-mipsm3.h \
 	config/mips/xm-irix3.h \
-	config/mips/xm-irix4.h config/mips/xm-makeva.h config/mips/xm-mips.h \
+	config/mips/xm-irix4.h config/mips/xm-irix5.h \
+	config/mips/xm-makeva.h config/mips/xm-mips.h \
 	config/mips/xm-mipsm3.h \
 	config/mips/xm-riscos.h config/mips/xm-news-mips.h \
 	config/nm-lynx.h config/nm-sysv4.h \
@@ -973,9 +984,11 @@ ALLPARAM = config/a29k/nm-ultra3.h config/a29k/tm-a29k.h \
 	config/pyr/tm-pyr.h \
 	config/pyr/xm-pyr.h config/romp/xm-rtbsd.h config/rs6000/nm-rs6000.h \
 	config/rs6000/tm-rs6000.h config/rs6000/xm-rs6000.h config/sh/tm-sh.h \
-	config/sparc/nm-sun4os4.h config/sparc/tm-sparclite.h \
+	config/sparc/nm-sun4os4.h config/sparc/nm-sparclynx.h \
+	config/sparc/tm-sparclite.h config/sparc/tm-sparclynx.h \
 	config/sparc/tm-spc-em.h config/sparc/tm-sun4os4.h \
 	config/sparc/tm-sun4sol2.h config/sparc/tm-vxsparc.h \
+	config/sparc/xm-sparclynx.h \
 	config/sparc/xm-sun4os4.h config/sparc/xm-sun4sol2.h \
 	config/tahoe/tm-tahoe.h config/tahoe/xm-tahoe.h config/vax/nm-vax.h \
 	config/vax/tm-vax.h config/vax/xm-vaxbsd.h config/vax/xm-vaxult.h \
@@ -984,6 +997,7 @@ ALLPARAM = config/a29k/nm-ultra3.h config/a29k/tm-a29k.h \
 ALLCONFIG = config/a29k/a29k-kern.mt config/a29k/a29k-udi.mt \
 	config/a29k/a29k.mt config/a29k/ultra3.mh config/a29k/ultra3.mt \
 	config/alpha/alpha-osf1.mh config/alpha/alpha-osf1.mt \
+	config/alpha/alpha-nw.mt \
 	config/arm/arm.mh config/arm/arm.mt config/convex/convex.mh \
 	config/convex/convex.mt config/gould/np1.mh config/gould/np1.mt \
 	config/gould/pn.mh config/gould/pn.mt config/h8300/h8300hms.mt \
@@ -1003,6 +1017,7 @@ ALLCONFIG = config/a29k/a29k-kern.mt config/a29k/a29k-udi.mt \
 	config/i960/nindy960.mt config/i960/vxworks960.mt config/m68k/3b1.mh \
 	config/m68k/3b1.mt config/m68k/altos.mh config/m68k/altos.mt \
 	config/m68k/amix.mh config/m68k/amix.mt config/m68k/apollo68b.mh \
+	config/m68k/apollo68b.mt \
 	config/m68k/apollo68v.mh config/m68k/delta68.mh \
 	config/m68k/delta68.mt config/m68k/dpx2.mh config/m68k/dpx2.mt \
 	config/m68k/es1800.mt config/m68k/hp300bsd.mh \
@@ -1021,6 +1036,7 @@ ALLCONFIG = config/a29k/a29k-kern.mt config/a29k/a29k-udi.mt \
 	config/mips/bigmips.mt config/mips/decstation.mh \
 	config/mips/decstation.mt config/mips/idt.mt config/mips/idtl.mt \
 	config/mips/irix3.mh config/mips/irix3.mt config/mips/irix4.mh \
+	config/mips/irix5.mh config/mips/irix5.mt \
 	config/mips/littlemips.mh config/mips/littlemips.mt \
 	config/mips/mipsm3.mh config/mips/mipsm3.mt \
 	config/mips/news-mips.mh config/mips/riscos.mh \
