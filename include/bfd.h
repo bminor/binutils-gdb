@@ -290,7 +290,9 @@ CAT(NAME,_bfd_debug_info_end),\
 CAT(NAME,_bfd_debug_info_accumulate),\
 CAT(NAME,_bfd_get_relocated_section_contents),\
 CAT(NAME,_bfd_relax_section),\
-CAT(NAME,_bfd_seclet_link)
+CAT(NAME,_bfd_seclet_link),\
+CAT(NAME,_bfd_reloc_type_lookup),\
+CAT(NAME,_bfd_make_debug_symbol)
 
 #define COFF_SWAP_TABLE (PTR) &bfd_coff_std_swap_table
 
