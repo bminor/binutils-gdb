@@ -1,3 +1,10 @@
+2002-08-22  Keith Seitz  <keiths@redhat.com>
+
+	* breakpoint.c (internal_breakpoint_number): Revert 2002-06-18 change.
+	(create_internal_breakpoint): Likewise.
+	(watch_command_1): Use create_internal_breakpoint to create
+	the watchpoint scope breakpoint.
+
 2002-08-21  Keith Seitz  <keiths@redhat.com>
 
 	* gdb-events.sh: Replace register_update with target-changed event.

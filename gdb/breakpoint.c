@@ -253,9 +253,6 @@ struct breakpoint *breakpoint_chain;
 
 int breakpoint_count;
 
-/* Internal breakpoint number */
-static int internal_breakpoint_number = -1;
-
 /* Pointer to current exception event record */
 static struct exception_event_record *current_exception_event;
 
@@ -3809,6 +3806,7 @@ make_breakpoint_permanent (struct breakpoint *b)
 static struct breakpoint *
 create_internal_breakpoint (CORE_ADDR address, enum bptype type)
 {
+  static int internal_breakpoint_number = -1;
   struct symtab_and_line sal;
   struct breakpoint *b;
 
@@ -5331,15 +5329,8 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
       if (prev_frame)
 	{
 	  struct breakpoint *scope_breakpoint;
-	  struct symtab_and_line scope_sal;
-
-	  INIT_SAL (&scope_sal);	/* initialize to zeroes */
-	  scope_sal.pc = get_frame_pc (prev_frame);
-	  scope_sal.section = find_pc_overlay (scope_sal.pc);
-
-	  scope_breakpoint = set_raw_breakpoint (scope_sal,
-	                                         bp_watchpoint_scope);
-	  scope_breakpoint->number = internal_breakpoint_number--;
+	  scope_breakpoint = create_internal_breakpoint (get_frame_pc (prev_frame),
+							 bp_watchpoint_scope);
 
 	  scope_breakpoint->enable_state = bp_enabled;
 
