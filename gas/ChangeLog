@@ -1,3 +1,10 @@
+2004-11-10  Bob Wilson  <bob.wilson@acm.org>
+
+	* config/tc-xtensa.c (update_next_frag_state): Always add a NOP if
+	relaxing at the end of a loop.  Don't mark frags as UNREACHABLE or
+	MAYBE_UNREACHABLE.
+	(relax_frag_immed): Update call to update_next_frag_state.
+
 2004-11-10  Alan Modra  <amodra@bigpond.net.au>
 
 	* obj.h (struct format_ops <app_file>): Add int param.

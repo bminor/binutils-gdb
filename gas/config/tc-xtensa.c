@@ -4535,7 +4535,7 @@ next_frag_format_size (const fragS *fragP)
    switch its state so it will instantiate a NOP.  */
 
 static void
-update_next_frag_state (fragS *fragP, bfd_boolean unreachable)
+update_next_frag_state (fragS *fragP)
 {
   fragS *next_fragP = fragP->fr_next;
   fragS *new_target = NULL;
@@ -4563,36 +4563,17 @@ update_next_frag_state (fragS *fragP, bfd_boolean unreachable)
 	      && (new_target->fr_subtype == RELAX_MAYBE_DESIRE_ALIGN
 		  || new_target->fr_subtype == RELAX_DESIRE_ALIGN));
     }
-  if (unreachable)
-    {
-      if (align_targets)
-	{
-	  next_fragP->fr_subtype = RELAX_UNREACHABLE;
-	  next_fragP->tc_frag_data.is_unreachable = TRUE;
-	  new_target->fr_subtype = RELAX_DESIRE_ALIGN;
-	  new_target->tc_frag_data.is_branch_target = TRUE;
-	}
-      while (next_fragP && next_fragP->fr_fix == 0)
-	{
-	  if (next_fragP->fr_type == rs_machine_dependent
-	      && next_fragP->fr_subtype == RELAX_LOOP_END)
-	    {
-	      next_fragP->fr_subtype = RELAX_LOOP_END_ADD_NOP;
-	      return;
-	    }
 
-	  next_fragP = next_fragP->fr_next;
-	}
-    }
-  else
+  while (next_fragP && next_fragP->fr_fix == 0)
     {
-      if (align_targets)
+      if (next_fragP->fr_type == rs_machine_dependent
+	  && next_fragP->fr_subtype == RELAX_LOOP_END)
 	{
-	  next_fragP->fr_subtype = RELAX_MAYBE_UNREACHABLE;
-	  next_fragP->tc_frag_data.is_unreachable = FALSE;
-	  new_target->fr_subtype = RELAX_MAYBE_DESIRE_ALIGN;
-	  new_target->tc_frag_data.is_branch_target = FALSE;
+	  next_fragP->fr_subtype = RELAX_LOOP_END_ADD_NOP;
+	  return;
 	}
+
+      next_fragP = next_fragP->fr_next;
     }
 }
 
@@ -9115,13 +9096,8 @@ relax_frag_immed (segT segP,
 	}
     }
 
-  /* FIXME: When a negatable branch expands and then contracts in a
-     subsequent pass, update_next_frag_state correctly updates the
-     type of the frag to RELAX_MAYBE_UNREACHABLE, but it doesn't undo
-     any expansion relax_frag_for_align may have expected it to.  For
-     now, change back to only call it when the branch expands.  */
   if (negatable_branch && istack.ninsn > 1)
-    update_next_frag_state (fragP, FALSE /* istack.ninsn > 1 */);      
+    update_next_frag_state (fragP);
 
   return this_text_diff;
 }
