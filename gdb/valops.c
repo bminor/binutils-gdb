@@ -1354,8 +1354,9 @@ search_struct_field (char *name, struct value *arg1, int offset,
  * conventions.  */
 
 void
-find_rt_vbase_offset (struct type *type, struct type *basetype, char *valaddr,
-		      int offset, int *boffset_p, int *skip_p)
+find_rt_vbase_offset (struct type *type, struct type *basetype,
+		      const bfd_byte *valaddr, int offset, int *boffset_p,
+		      int *skip_p)
 {
   int boffset;			/* offset of virtual base */
   int index;			/* displacement to use in virtual table */

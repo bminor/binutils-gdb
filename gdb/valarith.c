@@ -1367,7 +1367,7 @@ value_complement (struct value *arg1)
    Return -1 if out of range, -2 other error. */
 
 int
-value_bit_index (struct type *type, char *valaddr, int index)
+value_bit_index (struct type *type, const bfd_byte *valaddr, int index)
 {
   LONGEST low_bound, high_bound;
   LONGEST word;

@@ -1,5 +1,11 @@
 2005-01-28  Andrew Cagney  <cagney@gnu.org>
 
+	* value.h (value_bit_index, print_floating)
+	(find_rt_vbase_offset): Make buffer a const bfd_byte.
+	* valprint.c (print_floating): Update.
+	* valarith.c (value_bit_index): Update.
+	* valops.c (find_rt_vbase_offset): Update.
+
 	* valprint.h (print_octal_chars, print_char_chars)
 	(print_hex_chars, print_decimal_chars, print_binary_chars): Make
 	buffer a const bfd_byte.

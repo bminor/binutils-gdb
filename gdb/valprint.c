@@ -284,7 +284,8 @@ longest_to_int (LONGEST arg)
    TYPE_CODE_FLT), pointed to in GDB by VALADDR, on STREAM.  */
 
 void
-print_floating (char *valaddr, struct type *type, struct ui_file *stream)
+print_floating (const bfd_byte *valaddr, struct type *type,
+		struct ui_file *stream)
 {
   DOUBLEST doub;
   int inv;

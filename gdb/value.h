@@ -382,7 +382,8 @@ extern struct value *register_value_being_returned (struct type *valtype,
 
 extern struct value *value_in (struct value *element, struct value *set);
 
-extern int value_bit_index (struct type *type, char *addr, int index);
+extern int value_bit_index (struct type *type, const bfd_byte *addr,
+			    int index);
 
 extern int using_struct_return (struct type *value_type, int gcc_p);
 
@@ -466,7 +467,7 @@ extern char *baseclass_addr (struct type *type, int index, char *valaddr,
 extern void print_longest (struct ui_file *stream, int format,
 			   int use_local, LONGEST val);
 
-extern void print_floating (char *valaddr, struct type *type,
+extern void print_floating (const bfd_byte *valaddr, struct type *type,
 			    struct ui_file *stream);
 
 extern int value_print (struct value *val, struct ui_file *stream, int format,
@@ -515,8 +516,8 @@ extern struct value *value_slice (struct value *, int, int);
 extern struct value *value_literal_complex (struct value *, struct value *,
 					    struct type *);
 
-extern void find_rt_vbase_offset (struct type *, struct type *, char *, int,
-				  int *, int *);
+extern void find_rt_vbase_offset (struct type *, struct type *,
+				  const bfd_byte *, int, int *, int *);
 
 extern struct value *find_function_in_inferior (const char *);
 
