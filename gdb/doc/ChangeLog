@@ -1,7 +1,7 @@
 2000-02-15  Kevin Buettner  <kevinb@redhat.com>
 
 	* agentexpr.texi: Fix wording regarding Intel's IA-64
-	architecture.
+	architecture.  [From Jim Wilson.]
 
 2000-01-16  Tom Tromey  <tromey@cygnus.com>
 
