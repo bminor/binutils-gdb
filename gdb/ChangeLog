@@ -1,3 +1,8 @@
+Sat May  8 01:39:30 1993  (pes@regent.e-technik.tu-muenchen.de)
+
+	* coffread.c (read_coff_symtab): Don't fclose stream as it is no
+	longer opened twice.
+
 Thu May  6 21:08:55 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* solib.c (clear_solib): Don't close bfd if it is NULL.
