@@ -1,3 +1,8 @@
+2003-08-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elfxx-ia64.c (elfNN_ia64_finish_dynamic_symbol): Use
+	ElfNN_External_Rela instead of Elf64_External_Rela.
+
 2003-08-01  Nick Clifton  <nickc@redhat.com>
 
 	* config.bfd: Add code to catch obsolete configurations and warn

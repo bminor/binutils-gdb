@@ -4523,7 +4523,7 @@ elfNN_ia64_finish_dynamic_symbol (output_bfd, info, h, sym)
 
       loc = ia64_info->rel_pltoff_sec->contents;
       loc += ((ia64_info->rel_pltoff_sec->reloc_count + index)
-	      * sizeof (Elf64_External_Rela));
+	      * sizeof (ElfNN_External_Rela));
       bfd_elfNN_swap_reloca_out (output_bfd, &outrel, loc);
     }
 
