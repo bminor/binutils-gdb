@@ -27,6 +27,21 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifndef _ELF_MIPS_H
 #define _ELF_MIPS_H
 
+/* Relocation types.  */
+#define R_MIPS_NONE	0
+#define R_MIPS_16	1
+#define R_MIPS_32	2
+#define R_MIPS_REL32	3
+#define R_MIPS_26	4
+#define R_MIPS_HI16	5
+#define R_MIPS_LO16	6
+#define R_MIPS_GPREL16	7
+#define R_MIPS_LITERAL	8
+#define R_MIPS_GOT16	9
+#define R_MIPS_PC16	10
+#define R_MIPS_CALL16	11
+#define R_MIPS_GPREL32	12
+
 /* Processor specific flags for the ELF header e_flags field.  */
 
 /* At least one .noreorder directive appears in the source.  */
@@ -135,6 +150,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* Section contains register usage information.  */
 #define SHT_MIPS_REGINFO	0x70000006
 
+/* ??? */
+#define SHT_MIPS_PACKAGE	0x70000007
+
+/* ??? */
+#define SHT_MIPS_PACKSYM	0x70000008
+
+/* ??? */
+#define SHT_MIPS_RELD		0x70000009
+
 /* Section contains interface information.  */
 #define SHT_MIPS_IFACE		0x7000000b
 
@@ -144,14 +168,84 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* Section contains miscellaneous options.  */
 #define SHT_MIPS_OPTIONS	0x7000000d
 
+/* ??? */
+#define SHT_MIPS_SHDR		0x70000010
+
+/* ??? */
+#define SHT_MIPS_FDESC		0x70000011
+
+/* ??? */
+#define SHT_MIPS_EXTSYM		0x70000012
+
+/* ??? */
+#define SHT_MIPS_DENSE		0x70000013
+
+/* ??? */
+#define SHT_MIPS_PDESC		0x70000014
+
+/* ??? */
+#define SHT_MIPS_LOCSYM		0x70000015
+
+/* ??? */
+#define SHT_MIPS_AUXSYM		0x70000016
+
+/* ??? */
+#define SHT_MIPS_OPTSYM		0x70000017
+
+/* ??? */
+#define SHT_MIPS_LOCSTR		0x70000018
+
+/* ??? */
+#define SHT_MIPS_LINE		0x70000019
+
+/* ??? */
+#define SHT_MIPS_RFDESC		0x7000001a
+
+/* ??? */
+#define SHT_MIPS_DELTASYM	0x7000001b
+
+/* ??? */
+#define SHT_MIPS_DELTAINST	0x7000001c
+
+/* ??? */
+#define SHT_MIPS_DELTACLASS	0x7000001d
+
 /* DWARF debugging section.  */
 #define SHT_MIPS_DWARF		0x7000001e
 
-/* I'm not sure what this is, but it appears on Irix 6.  */
+/* ??? */
+#define SHT_MIPS_DELTADECL	0x7000001f
+
+/* List of libraries the binary depends on.  Includes a time stamp, version
+   number.  */
 #define SHT_MIPS_SYMBOL_LIB	0x70000020
 
 /* Events section.  */
 #define SHT_MIPS_EVENTS		0x70000021
+
+/* ??? */
+#define SHT_MIPS_TRANSLATE	0x70000022
+
+/* ??? */
+#define SHT_MIPS_PIXIE		0x70000023
+
+/* ??? */
+#define SHT_MIPS_XLATE		0x70000024
+
+/* ??? */
+#define SHT_MIPS_XLATE_DEBUG	0x70000025
+
+/* ??? */
+#define SHT_MIPS_WHIRL		0x70000026
+
+/* ??? */
+#define SHT_MIPS_EH_REGION	0x70000027
+
+/* ??? */
+#define SHT_MIPS_XLATE_OLD	0x70000028
+
+/* ??? */
+#define SHT_MIPS_PDR_EXCEPTION	0x70000029
 
 /* start-sanitize-sky */
 /* The VU overlay table.  */
@@ -181,6 +275,16 @@ typedef struct
   /* Flags.  */
   unsigned long l_flags;
 } Elf32_Lib;
+
+/* The external version of Elf32_Lib.  */
+typedef struct
+{
+  unsigned char l_name[4];
+  unsigned char l_time_stamp[4];
+  unsigned char l_checksum[4];
+  unsigned char l_version[4];
+  unsigned char l_flags[4];
+} Elf32_External_Lib;
 
 /* The l_flags field of an Elf32_Lib structure may contain the
    following flags.  */
@@ -608,7 +712,28 @@ extern void bfd_mips_elf_swap_options_out
 /* Section padding information.  */
 #define ODK_PAD		3
 
-/* In the 32 bit ABI, an ODK_REGINFO option is just a Elf32_Reginfo
+/* Hardware workarounds performed.  */
+#define ODK_HWPATCH	4
+
+/* Fill value used by the linker.  */
+#define ODK_FILL	5
+
+/* Reserved space for desktop tools.  */
+#define ODK_TAGS	6
+
+/* Hardware workarounds, AND bits when merging.  */
+#define ODK_HWAND	7
+
+/* Hardware workarounds, OR bits when merging.  */
+#define ODK_HWOR	8
+
+/* GP group to use for text/data sections.  */
+#define ODK_GP_GROUP	9
+
+/* ID information.  */
+#define ODK_IDENT	10
+
+/* In the 32 bit ABI, an ODK_REGINFO option is just a Elf32_RegInfo
    structure.  In the 64 bit ABI, it is the following structure.  The
    info field of the options header is not used.  */
 
@@ -641,6 +766,40 @@ extern void bfd_mips_elf64_swap_reginfo_in
   PARAMS ((bfd *, const Elf64_External_RegInfo *, Elf64_Internal_RegInfo *));
 extern void bfd_mips_elf64_swap_reginfo_out
   PARAMS ((bfd *, const Elf64_Internal_RegInfo *, Elf64_External_RegInfo *));
+
+/* Masks for the info work of an ODK_EXCEPTIONS descriptor.  */
+#define OEX_FPU_MIN	0x1f	/* FPEs which must be enabled.  */
+#define OEX_FPU_MAX	0x1f00	/* FPEs which may be enabled.  */
+#define OEX_PAGE0	0x10000	/* Page zero must be mapped.  */
+#define OEX_SMM		0x20000	/* Force sequential memory mode.  */
+#define OEX_FPDBUG	0x40000	/* Force floating-point debug mode.  */
+#define OEX_DISMISS	0x80000	/* Dismiss invalid address faults.  */
+
+/* Masks of the FP exceptions for OEX_FPU_MIN and OEX_FPU_MAX.  */
+#define OEX_FPU_INVAL	0x10	/* Invalid operation exception.  */
+#define OEX_FPU_DIV0	0x08	/* Division by zero exception.  */
+#define OEX_FPU_OFLO	0x04	/* Overflow exception.  */
+#define OEX_FPU_UFLO	0x02	/* Underflow exception.  */
+#define OEX_FPU_INEX	0x01	/* Inexact exception.  */
+
+/* Masks for the info word of an ODK_PAD descriptor.  */
+#define OPAD_PREFIX	0x01
+#define OPAD_POSTFIX	0x02
+#define OPAD_SYMBOL	0x04
+
+/* Masks for the info word of an ODK_HWPATCH descriptor.  */
+#define OHW_R4KEOP	0x01	/* R4000 end-of-page patch.  */
+#define OHW_R8KPFETCH	0x02	/* May need R8000 prefetch patch.  */
+#define OHW_R5KEOP	0x04	/* R5000 end-of-page patch.  */
+#define OHW_R5KCVTL	0x08	/* R5000 cvt.[ds].l bug (clean == 1).  */
+
+/* Masks for the info word of an ODK_IDENT/ODK_GP_GROUP descriptor.  */
+#define OGP_GROUP	0x0000ffff	/* GP group number.  */
+#define OGP_SELF	0xffff0000	/* Self-contained GP groups.  */
+
+/* Masks for the info word of an ODK_HWAND/ODK_HWOR descriptor.  */
+#define OHWA0_R4KEOP_CHECKED	0x00000001
+#define OHWA0_R4KEOP_CLEAN	0x00000002
 
 /* start-sanitize-sky */
 /* The vu overlay table is an array of this.  */
