@@ -1064,6 +1064,9 @@ char *term_forward_char;
 /* How to go up a line. */
 char *term_up;
 
+/* True if we have funny auto-line-wrap ("am" and "xn"). */
+int term_xn;
+
 /* A visible bell, if the terminal can be made to flash the screen. */
 char *visible_bell;
 
@@ -1146,7 +1149,10 @@ _rl_set_screen_size (tty, ignore_env)
   set_lines_and_columns (screenheight, screenwidth);
 #endif
 
-  screenwidth--;
+  /* If we don't have xn (most modern terminals do),
+     don't use the last column. */
+  if (!term_xn)
+    screenwidth--;
 }
 
 init_terminal_io (terminal_name)
@@ -1169,7 +1175,7 @@ init_terminal_io (terminal_name)
 #if defined (HACK_TERMCAP_MOTION)
   term_forward_char = (char *)NULL;
 #endif
-  terminal_can_insert = 0;
+  terminal_can_insert = term_xn = 0;
   return;
 #else /* !__GO32__ */
   char *term, *buffer;
@@ -1202,7 +1208,7 @@ init_terminal_io (terminal_name)
 #if defined (HACK_TERMCAP_MOTION)
       term_forward_char = (char *)NULL;
 #endif
-      terminal_can_insert = 0;
+      terminal_can_insert = term_xn = 0;
       return;
     }
 
@@ -1228,6 +1234,8 @@ init_terminal_io (terminal_name)
     tty = 0;
 
   screenwidth = screenheight = 0;
+
+  term_xn = tgetflag ("am", &buffer) && tgetflag ("xn", &buffer);
 
   _rl_set_screen_size (tty, 0);
 
