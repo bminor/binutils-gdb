@@ -1,3 +1,9 @@
+2003-04-28  Chris Demetriou  <cgd@broadcom.com>
+
+	* configure.in (mips-*-*n*bsd*): Replace with...
+	(mips-*-netbsd*, mips-*-openbsd*): These.
+	* configure: Regenerate.
+
 2003-04-28  H.J. Lu <hjl@gnu.org>
 
 	* config/tc-hppa.c (hppa_symbol_chars): New.

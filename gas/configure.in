@@ -373,7 +373,8 @@ changequote([,])dnl
       mips-*-sysv4*MP* | mips-*-gnu*)	fmt=elf em=tmips ;;
       mips-*-sysv*)			fmt=ecoff ;;
       mips-*-elf* | mips-*-rtems*)	fmt=elf ;;
-      mips-*-*n*bsd*)			fmt=elf ;;
+      mips-*-netbsd*)			fmt=elf ;;
+      mips-*-openbsd*)			fmt=elf ;;
       mips-*-vxworks*)			fmt=elf ;;
 
       mmix-*-*)				fmt=elf ;;
