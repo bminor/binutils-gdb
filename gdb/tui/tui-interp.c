@@ -31,6 +31,9 @@
 #include "tui/tui.h"
 #include "tui/tuiIO.h"
 
+/* Set to 1 when the TUI mode must be activated when we first start gdb.  */
+static int tui_start_enabled = 0;
+
 /* Cleanup the tui before exiting.  */
 
 static void
@@ -61,13 +64,15 @@ static int
 tui_resume (void *data)
 {
   gdb_setup_readline ();
-  tui_enable ();
+  if (tui_start_enabled)
+    tui_enable ();
   return 1;
 }
 
 static int
 tui_suspend (void *data)
 {
+  tui_start_enabled = tui_active;
   tui_disable ();
   return 1;
 }
@@ -177,4 +182,12 @@ _initialize_tui_interp (void)
   /* Create a default uiout builder for the TUI. */
   tui_out = tui_out_new (gdb_stdout);
   interp_add (interp_new ("tui", NULL, tui_out, &procs));
+  if (interpreter_p && strcmp (interpreter_p, "tui") == 0)
+    tui_start_enabled = 1;
+
+  if (interpreter_p && strcmp (interpreter_p, INTERP_CONSOLE) == 0)
+    {
+      xfree (interpreter_p);
+      interpreter_p = xstrdup ("tui");
+    }
 }
