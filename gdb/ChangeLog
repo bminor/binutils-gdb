@@ -1,3 +1,15 @@
+2003-01-02  Mark Kettenis  <kettenis@gnu.org>
+
+	* configure.in: Move code that provides the --enable-tui option
+	before the "Checks for libraries" section.  Polish the code
+	somewhat and set need_curses to yes if we build the TUI.  Rewrite
+	code that looks for a library providing termcap functionality to
+	match more closely what's done in the Readline library, and move
+	it into to the "Checks for libraries" section.
+	* configure: Regenerated.
+	* Makefile.in (TERMCAP): Remove variable.
+	* config/i386/go32.mh (TERMCAP): Remove variable.
+
 2003-01-02  Andrew Cagney  <ac131313@redhat.com>
 
 	* MAINTAINERS: Mention gdb_mbuild.sh.
