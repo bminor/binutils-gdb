@@ -7671,6 +7671,8 @@ tc_gen_reloc (section, fixp)
 	case BFD_RELOC_16_PCREL:
 	case BFD_RELOC_32_PCREL:
 	case BFD_RELOC_16_PCREL_S2:
+	case BFD_RELOC_PCREL_HI16_S:
+	case BFD_RELOC_PCREL_LO16:
 	  break;
 	default:
 	  as_bad_where (fixp->fx_file, fixp->fx_line,
