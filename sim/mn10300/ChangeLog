@@ -1,3 +1,28 @@
+Tue May 20 17:51:30 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* interp.c: Replace all references to load_mem and store_mem
+	with references to load_byte, load_half, load_3_byte, load_word
+	and store_byte, store_half, store_3_byte, store_word.
+	(INLINE): Delete definition.
+	(load_mem_big): Likewise.
+	(max_mem): Make it global.
+	(dispatch): Make this function inline.
+	(load_mem, store_mem): Delete functions.
+	* mn10300_sim.h (INLINE): Define.
+	(RLW): Delete unused definition.
+	(load_mem, store_mem): Delete declarations.
+	(load_mem_big): New definition.
+	(load_byte, load_half, load_3_byte, load_word): New functions.
+	(store_byte, store_half, store_3_byte, store_word): New functions.
+	* simops.c:  Replace all references to load_mem and store_mem
+	with references to load_byte, load_half, load_3_byte, load_word
+	and store_byte, store_half, store_3_byte, store_word.
+
+Tue May 20 10:21:51 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (sim_open): Add callback to arguments.
+	(sim_set_callbacks): Delete SIM_DESC argument.
+
 Mon May 19 13:54:22 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* interp.c (dispatch): Make this an inline function.

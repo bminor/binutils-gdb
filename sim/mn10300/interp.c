@@ -4,14 +4,6 @@
 
 #include "mn10300_sim.h"
 
-#ifndef INLINE
-#ifdef __GNUC__
-#define INLINE inline
-#else
-#define INLINE
-#endif
-#endif
-
 host_callback *mn10300_callback;
 int mn10300_debug;
 static SIM_OPEN_KIND sim_kind;
@@ -234,62 +226,6 @@ put_word (addr, data)
   a[3] = (data >> 24) & 0xff;
 }
 
-uint32
-load_mem (addr, len)
-     SIM_ADDR addr;
-     int len;
-{
-  uint8 *p = addr + State.mem;
-
-  if (addr > max_mem)
-    abort ();
-
-  switch (len)
-    {
-    case 1:
-      return p[0];
-    case 2:
-      return p[1] << 8 | p[0];
-    case 3:
-      return p[2] << 16 | p[1] << 8 | p[0];
-    case 4:
-      return p[3] << 24 | p[2] << 16 | p[1] << 8 | p[0];
-    default:
-      abort ();
-    }
-}
-
-void
-store_mem (addr, len, data)
-     SIM_ADDR addr;
-     int len;
-     uint32 data;
-{
-  uint8 *p = addr + State.mem;
-
-  if (addr > max_mem)
-    abort ();
-
-  switch (len)
-    {
-    case 1:
-      p[0] = data;
-      return;
-    case 2:
-      p[0] = data;
-      p[1] = data >> 8;
-      return;
-    case 4:
-      p[0] = data;
-      p[1] = data >> 8;
-      p[2] = data >> 16;
-      p[3] = data >> 24;
-      return;
-    default:
-      abort ();
-    }
-}
-
 void
 sim_size (power)
      int power;
@@ -326,7 +262,7 @@ sim_write (sd, addr, buffer, size)
   init_system ();
 
   for (i = 0; i < size; i++)
-    store_mem (addr + i, 1, buffer[i]);
+    store_byte (addr + i, buffer[i]);
 
   return size;
 }
@@ -348,14 +284,17 @@ compare_simops (arg1, arg2)
 }
 
 SIM_DESC
-sim_open (kind,argv)
+sim_open (kind,cb,argv)
      SIM_OPEN_KIND kind;
+     host_callback *cb;
      char **argv;
 {
   struct simops *s;
   struct hash_entry *h;
   char **p;
   int i;
+
+  mn10300_callback = cb;
 
   /* Sort the opcode array from smallest opcode to largest.
      This will generally improve simulator performance as the smaller
@@ -749,9 +688,9 @@ sim_resume (sd, step, siggnal)
 	  case 0x3a:
 	  case 0x3b:
 	  case 0xcc:
-	    insn = load_mem (PC, 1);
+	    insn = load_byte (PC);
 	    insn <<= 16;
-	    insn |= load_mem (PC + 1, 2);
+	    insn |= load_half (PC + 1);
 	    extension = 0;
 	    dispatch (insn, extension, 3);
 	    break;
@@ -777,7 +716,7 @@ sim_resume (sd, step, siggnal)
 	      {
 		insn = inst;
 		insn <<= 16;
-		insn |= load_mem (PC + 2, 2);
+		insn |= load_half (PC + 2);
 		extension = 0;
 	      }
 	    dispatch (insn, extension, 4);
@@ -785,18 +724,18 @@ sim_resume (sd, step, siggnal)
 
 	  /* Five byte insns.  */
 	  case 0xcd:
-	    insn = load_mem (PC, 1);
+	    insn = load_byte (PC);
 	    insn <<= 24;
-	    insn |= (load_mem (PC + 1, 2) << 8);
-	    insn |= load_mem (PC + 3, 1);
-	    extension = load_mem (PC + 4, 1);
+	    insn |= (load_half (PC + 1) << 8);
+	    insn |= load_byte (PC + 3);
+	    extension = load_byte (PC + 4);
 	    dispatch (insn, extension, 5);
 	    break;
 
 	  case 0xdc:
-	    insn = load_mem (PC, 1);
+	    insn = load_byte (PC);
 	    insn <<= 24;
-	    extension = load_mem (PC + 1, 4);
+	    extension = load_word (PC + 1);
 	    insn |= (extension & 0xffffff00) >> 8;
 	    extension &= 0xff;
 	    dispatch (insn, extension, 5);
@@ -806,29 +745,29 @@ sim_resume (sd, step, siggnal)
 	  case 0xfc:
 	  case 0xfd:
 	    insn = (inst << 16);
-	    extension = load_mem (PC + 2, 4);
+	    extension = load_word (PC + 2);
 	    insn |= ((extension & 0xffff0000) >> 16);
 	    extension &= 0xffff;
 	    dispatch (insn, extension, 6);
 	    break;
 	    
 	  case 0xdd:
-	    insn = load_mem (PC, 1) << 24;
-	    extension = load_mem (PC + 1, 4);
+	    insn = load_byte (PC) << 24;
+	    extension = load_word (PC + 1);
 	    insn |= ((extension >> 8) & 0xffffff);
 	    extension = (extension & 0xff) << 16;
-	    extension |= load_mem (PC + 5, 1) << 8;
-	    extension |= load_mem (PC + 6, 1);
+	    extension |= load_byte (PC + 5) << 8;
+	    extension |= load_byte (PC + 6);
 	    dispatch (insn, extension, 7);
 	    break;
 
 	  case 0xfe:
 	    insn = inst << 16;
-	    extension = load_mem (PC + 2, 4);
+	    extension = load_word (PC + 2);
 	    insn |= ((extension >> 16) & 0xffff);
 	    extension <<= 8;
 	    extension &= 0xffff00;
-	    extension |= load_mem (PC + 6, 1);
+	    extension |= load_byte (PC + 6);
 	    dispatch (insn, extension, 7);
 	    break;
 
@@ -898,8 +837,7 @@ sim_kill (sd)
 }
 
 void
-sim_set_callbacks (sd, p)
-     SIM_DESC sd;
+sim_set_callbacks (p)
      host_callback *p;
 {
   mn10300_callback = p;
@@ -949,7 +887,7 @@ sim_read (sd, addr, buffer, size)
 {
   int i;
   for (i = 0; i < size; i++)
-    buffer[i] = load_mem (addr + i, 1);
+    buffer[i] = load_byte (addr + i);
 
   return size;
 } 
