@@ -494,27 +494,31 @@ legacy_value_to_register (struct type *type, int regnum,
 }
 
 static int
-next_cooked_register (struct gdbarch *gdbarch, int regnum)
+next_raw_register (struct gdbarch *gdbarch, int regnum)
 {
   if (regnum < 0)
     return 0;
   regnum++;
-  if (regnum
-      >= (gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch)))
+  if (regnum >= gdbarch_num_regs (gdbarch))
     return -1;
   return regnum;
 }
 
+/* By default, iterate over just the raw register space.  This should
+   be the most common case.  A platform that, for some reason, needs
+   to save registers in the range [NUM_REGS
+   .. NUM_REGS+NUM_PSEUDO_REGS) can handle things locally.  */
+
 int
 default_next_cooked_register_to_save (struct gdbarch *gdbarch, int regnum)
 {
-  return next_cooked_register (gdbarch, regnum);
+  return next_raw_register (gdbarch, regnum);
 }
 
 int
 default_next_cooked_register_to_restore (struct gdbarch *gdbarch, int regnum)
 {
-  return next_cooked_register (gdbarch, regnum);
+  return next_raw_register (gdbarch, regnum);
 }
 
 /* Functions to manipulate the endianness of the target.  */

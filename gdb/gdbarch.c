@@ -64,7 +64,7 @@
 #include "gdb_assert.h"
 #include "gdb_string.h"
 #include "gdb-events.h"
-#include "reggroup.h"
+#include "reggroups.h"
 
 /* Static function declarations */
 

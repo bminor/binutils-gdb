@@ -1,5 +1,11 @@
 2002-08-26  Andrew Cagney  <ac131313@redhat.com>
 
+	* arch-utils.c (next_raw_register): Rename next_cooked_register.
+	(default_next_cooked_register_to_save): Use.
+	(default_next_cooked_register_to_restore): Use.
+
+2002-08-26  Andrew Cagney  <ac131313@redhat.com>
+
 	* i386-tdep.c: Include "reggroups.h".
 	(i386_register_reggroup_p): New function.
 	(i386_add_reggroups, i386_init_reggroups): New function.
