@@ -41,12 +41,23 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
     addr = (int) &((struct user *)0)->u_pcb.pcb_fpregs.fpf_fpiar;	\
 }
 
-/* We can attach to processes using ptrace.  */
+/* This is a hack.  This is only a hack.  Were this a common source file,
+   rather than a config file specific to BSD on HP 68k's, you would have
+   been instructed to clean this up.  As it is, clean it up if FSF's 
+   HP's-running-ancient-BSD ever go away.  */
+
+#include <errno.h>
+#ifdef	EPROCUNAVAIL
+  /* BSD 4.4 alpha or better */
+
+  /* We can attach to processes using ptrace.  */
 
 #define	ATTACH_DETACH
 #define	PTRACE_ATTACH	10
 #define	PTRACE_DETACH	11
 
-/* The third argument of ptrace is declared as this type.  */
+  /* The third argument of ptrace is declared as this type.  */
 
 #define	PTRACE_ARG3_TYPE	caddr_t
+#endif
+

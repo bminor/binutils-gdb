@@ -1,3 +1,8 @@
+Thu Feb 18 16:13:28 1993  K. Richard Pixley  (rich@rtl.cygnus.com)
+
+	* nm-hp300bsd.h (PTRACE_ARG3_TYPE): FSF's hp300's have int* not
+	  caddr_t.
+
 Thu Feb 18 04:10:06 1993  John Gilmore  (gnu@cygnus.com)
 
 	* c-lang.c (c_printstr):  Bugfix for length==0 case.
