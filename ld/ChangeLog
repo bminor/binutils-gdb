@@ -1,3 +1,7 @@
+2003-02-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/ppc64elf.em: Add "no-tls-optimize" option and support code.
+
 2003-02-07  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* hppaelf.em (group_size): Change default to -1.

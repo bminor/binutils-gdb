@@ -41,6 +41,9 @@ static bfd_signed_vma group_size = 1;
 /* Whether to add ".foo" entries for each "foo" in a version script.  */
 static int dotsyms = 1;
 
+/* Whether to run tls optimization.  */
+static int notlsopt = 0;
+
 static void ppc_create_output_section_statements
   PARAMS ((void));
 static void ppc_after_open
@@ -101,20 +104,23 @@ ppc_before_allocation ()
       return;
     }
 
-  /* Size the sections.  This is premature, but we want to know the
-     TLS segment layout so that certain optimizations can be done.  */
-  lang_size_sections (stat_ptr->head, abs_output_section,
-		      &stat_ptr->head, 0, (bfd_vma) 0, NULL);
-
-  if (!ppc64_elf_tls_optimize (output_bfd, &link_info))
+  if (ppc64_elf_tls_setup (output_bfd, &link_info) && !notlsopt)
     {
-      einfo ("%X%P: TLS problem %E\n");
-      return;
+      /* Size the sections.  This is premature, but we want to know the
+	 TLS segment layout so that certain optimizations can be done.  */
+      lang_size_sections (stat_ptr->head, abs_output_section,
+			  &stat_ptr->head, 0, (bfd_vma) 0, NULL);
+
+      if (!ppc64_elf_tls_optimize (output_bfd, &link_info))
+	{
+	  einfo ("%X%P: TLS problem %E\n");
+	  return;
+	}
+
+      lang_reset_memory_regions ();
     }
 
   gld${EMULATION_NAME}_before_allocation ();
-
-  lang_reset_memory_regions ();
 }
 
 struct hook_stub_info
@@ -457,6 +463,7 @@ PARSE_AND_LIST_PROLOGUE='
 #define OPTION_STUBGROUP_SIZE		301
 #define OPTION_DOTSYMS			(OPTION_STUBGROUP_SIZE + 1)
 #define OPTION_NO_DOTSYMS		(OPTION_DOTSYMS + 1)
+#define OPTION_NO_TLS_OPT		(OPTION_NO_DOTSYMS + 1)
 '
 
 # The options are repeated below so that no abbreviations are allowed.
@@ -468,6 +475,8 @@ PARSE_AND_LIST_LONGOPTS='
   { "dotsyms", no_argument, NULL, OPTION_DOTSYMS },
   { "no-dotsyms", no_argument, NULL, OPTION_NO_DOTSYMS },
   { "no-dotsyms", no_argument, NULL, OPTION_NO_DOTSYMS },
+  { "no-tls-optimize", no_argument, NULL, OPTION_NO_TLS_OPT },
+  { "no-tls-optimize", no_argument, NULL, OPTION_NO_TLS_OPT },
 '
 
 PARSE_AND_LIST_OPTIONS='
@@ -489,6 +498,9 @@ PARSE_AND_LIST_OPTIONS='
   fprintf (file, _("\
   --no-dotsyms          Don'\''t do anything special in version scripts.\n"
 		   ));
+  fprintf (file, _("\
+  --no-tls-optimize     Don'\''t try to optimize TLS accesses.\n"
+		   ));
 '
 
 PARSE_AND_LIST_ARGS_CASES='
@@ -502,15 +514,15 @@ PARSE_AND_LIST_ARGS_CASES='
       break;
 
     case OPTION_DOTSYMS:
-      {
-	dotsyms = 1;
-      }
+      dotsyms = 1;
       break;
 
     case OPTION_NO_DOTSYMS:
-      {
-	dotsyms = 0;
-      }
+      dotsyms = 0;
+      break;
+
+    case OPTION_NO_TLS_OPT:
+      notlsopt = 1;
       break;
 '
 
