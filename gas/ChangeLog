@@ -1,3 +1,11 @@
+Thu Feb 20 13:56:00 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-arm.c (fix_new_arm): Use make_expr_symbol to handle a
+	complex expression.
+
+	* symbols.c (resolve_symbol_value): If both left and right
+	operands are undefined, warn about both of them.
+
 Wed Feb 19 00:53:28 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	Based on patches from Eric Youngdale <eric@andante.jic.com>:
