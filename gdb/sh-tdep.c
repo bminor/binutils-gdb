@@ -41,6 +41,8 @@
 #include "regcache.h"
 #include "doublest.h"
 
+#include "sh-tdep.h"
+
 #include "elf-bfd.h"
 #include "solib-svr4.h"
 

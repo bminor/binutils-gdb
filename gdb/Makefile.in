@@ -649,6 +649,7 @@ remote_h =	remote.h
 remote_utils_h =  remote-utils.h $(target_h)
 ser_unix_h =	ser-unix.h
 serial_h =	serial.h
+sh_tdep_h =	sh-tdep.h
 solist_h =	solist.h
 source_h =	source.h
 stabsread_h =	stabsread.h
@@ -2052,11 +2053,11 @@ serial.o: serial.c $(defs_h) $(serial_h) $(gdb_string_h)
 sh-tdep.o: sh-tdep.c $(bfd_h) $(dis_asm_h) \
 	$(srcdir)/../opcodes/sh-opc.h $(defs_h) $(expression_h) $(frame_h) \
 	$(gdbcmd_h) $(gdbtypes_h) $(symtab_h) $(value_h) $(arch_utils_h) \
-	$(regcache_h) $(doublest_h)
+	$(regcache_h) $(doublest_h) $(sh_tdep_h)
 
 sh3-rom.o: sh3-rom.c $(monitor_h) $(bfd_h) $(gdb_wait_h) $(defs_h) $(gdbcmd_h) \
 	$(inferior_h) $(target_h) $(serial_h) $(terminal_h) $(arch_utils_h) \
-	$(regcache_h)
+	$(regcache_h) $(sh_tdep_h)
 
 signals.o: signals/signals.c $(defs_h) $(target_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $<

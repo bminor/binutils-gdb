@@ -25,6 +25,7 @@
 #include "value.h"
 
 #include "nbsd-tdep.h"
+#include "sh-tdep.h"
 #include "shnbsd-tdep.h"
 
 /* Convert an r0-r15 register number into an offset into a ptrace

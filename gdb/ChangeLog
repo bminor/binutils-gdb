@@ -1,3 +1,13 @@
+2002-05-17  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* Makefile.in (sh_tdep_h): Define and use.
+	* config/sh/tm-sh.h (sh_osabi, sh_abi, gdbarch_tdep,
+	register enum): Move to...
+	* * sh-tdep.h: ...here.
+	* sh-tdep.c: Include sh-tdep.h.
+	* sh3-rom.c: Likewise.
+	* shnbsd-tdep.c: Likewise.
+
 2002-05-16  Michael Snyder  <msnyder@redhat.com>
 
 	* arm-tdep.c: Spelling fix in comment.
