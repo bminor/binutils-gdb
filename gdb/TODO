@@ -443,18 +443,9 @@ while continuing  execution of the subprocess.  Useful when you are
 debugging servers and you want to dodge out and initiate a connection
 to a server running under gdb.
 
-Work out and implement a reasonably general mechanism for multi-threaded
-processies.  There are parts of one implemented in convex-dep.c, if
-you want an example.
-
 Add stab information to allow reasonable debugging of inline functions
 (possibly they should show up on a stack backtrace?  With a note
 indicating that they weren't "real"?).
-
-Implement support for specifying arbitrary locations of stack frames
-(in practice, this usually requires specification of both the top and
-bottom of the stack frame (fp and sp), since you *must* retrieve the
-pc that was saved in the innermost frame).
 
 Modify the naked "until" command to step until past the current source
 line, rather than past the current pc value.  This is tricky simply
@@ -474,22 +465,6 @@ Modify all of the disassemblers to use printf_filtered to get correct
 more filtering.
 
 Modify gdb to work correctly with Pascal.
-
-Rewrite macros that handle frame chaining and frameless functions.
-They should be able to tell the difference between start, main, and a
-frameless function called from main.
-
-Work out what information would need to be included in an executable
-by the compiler to allow gdb to debug functions which do not have a
-frame pointer.  Modify gdb and gcc to do this.
-
-When `attached' to a program (via either OS support or remote
-debugging), gdb should arrange to catch signals which the terminal
-might send, as it is unlikely that the program will be able to notice
-them.  SIGINT and SIGTSTP are obvious examples.
-
-Arrange for list_command not to use decode_line_1 and thus not require
-symbols to be read in simply to read a source file.
 
 Add a command for searching memory, a la adb.  It specifies size,
 mask, value, start address.  ADB searches until it finds it or hits
