@@ -1,3 +1,14 @@
+Fri Nov 25 21:26:02 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* tm-hppa.h (skip_trampoline_code): Add extern decl.
+	* hppa-tdep.c (hppa_pop_frame): Silently restart the inferior and
+	allow it to execute any return path trampoline code.  Stop the
+	inferior and give the user control when the trampoline has
+	finished executing.
+	(in_solib_call_trampoline): Handle export stubs which also perform
+	parameter relocations.
+	(in_solib_return_trampoline): Likewise.
+
 Fri Nov 25 13:37:10 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* coffread.c, symfile.h (coff_getfilename):  Make it static again.

@@ -1153,7 +1153,7 @@ int
 hppa_pop_frame ()
 {
   register struct frame_info *frame = get_current_frame ();
-  register CORE_ADDR fp;
+  register CORE_ADDR fp, npc, target_pc;
   register int regnum;
   struct frame_saved_regs fsr;
   double freg_buffer;
@@ -1187,12 +1187,16 @@ hppa_pop_frame ()
 
   /* If the PC was explicitly saved, then just restore it.  */
   if (fsr.regs[PCOQ_TAIL_REGNUM])
-    write_register (PCOQ_TAIL_REGNUM,
-                    read_memory_integer (fsr.regs[PCOQ_TAIL_REGNUM], 4));
-
+    {
+      npc = read_memory_integer (fsr.regs[PCOQ_TAIL_REGNUM], 4);
+      write_register (PCOQ_TAIL_REGNUM, npc);
+    }
   /* Else use the value in %rp to set the new PC.  */
   else 
-    target_write_pc (read_register (RP_REGNUM), 0);
+    {
+      npc = read_register (RP_REGNUM);
+      target_write_pc (npc, 0);
+    }
 
   write_register (FP_REGNUM, read_memory_integer (fp, 4));
 
@@ -1201,6 +1205,35 @@ hppa_pop_frame ()
   else
     write_register (SP_REGNUM, fp);
 
+  /* The PC we just restored may be inside a return trampoline.  If so
+     we want to restart the inferior and run it through the trampoline.
+
+     Do this by setting a momentary breakpoint at the location the
+     trampoline returns to.  */
+  target_pc = SKIP_TRAMPOLINE_CODE (npc & ~0x3) & ~0x3;
+  if (target_pc)
+    {
+      struct symtab_and_line sal;
+      struct breakpoint *breakpoint;
+      struct cleanup *old_chain;
+
+      /* Set up our breakpoint.   Set it to be silent as the MI code
+	 for "return_command" will print the frame we returned to.  */
+      sal = find_pc_line (target_pc, 0);
+      sal.pc = target_pc;
+      breakpoint = set_momentary_breakpoint (sal, NULL, bp_finish);
+      breakpoint->silent = 1;
+
+      /* So we can clean things up.  */
+      old_chain = make_cleanup (delete_breakpoint, breakpoint);
+
+      /* Start up the inferior.  */
+      proceed_to_finish = 1;
+      proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 0);
+
+      /* Perform our cleanups.  */
+      do_cleanups (old_chain);
+    }
   flush_cached_frames ();
 }
 
@@ -1631,24 +1664,10 @@ in_solib_call_trampoline (pc, name)
   if (u->stub_type == IMPORT)
     return 1;
 
-  if (u->stub_type == EXPORT)
-    {
-      /* The linker may group many EXPORT stubs into one unwind entry.  So
-	 lookup the minimal symbol and use that as the beginning of this
-	 particular stub.  */
-      minsym = lookup_minimal_symbol_by_pc (pc);
-      if (minsym == NULL)
-	return 0;
-
-      /* Export stubs have distinct call and return paths.  The first
-	 two instructions are the call path, following four are the
-	 return path.  */
-      return (pc >= SYMBOL_VALUE (minsym) && pc < SYMBOL_VALUE (minsym) + 8);
-    }
-
   /* Parameter relocation stubs always have a call path and may have a
      return path.  */
-  if (u->stub_type == PARAMETER_RELOCATION)
+  if (u->stub_type == PARAMETER_RELOCATION
+      || u->stub_type == EXPORT)
     {
       CORE_ADDR addr;
 
@@ -1661,10 +1680,11 @@ in_solib_call_trampoline (pc, name)
 	  insn = read_memory_integer (addr, 4);
 
 	  /* Does it look like a bl?  If so then it's the call path, if
-	     we find a bv first, then we're on the return path.  */
+	     we find a bv or be first, then we're on the return path.  */
 	  if ((insn & 0xfc00e000) == 0xe8000000)
 	    return 1;
-	  else if ((insn & 0xfc00e001) == 0xe800c000)
+	  else if ((insn & 0xfc00e001) == 0xe800c000
+		   || (insn & 0xfc000000) == 0xe0000000)
 	    return 0;
 	}
 
@@ -1706,25 +1726,10 @@ in_solib_return_trampoline (pc, name)
   if (u->stub_type == IMPORT)
     return 1;
 
-  if (u->stub_type == EXPORT)
-    {
-      /* The linker may group many EXPORT stubs into one unwind entry.  So
-	 lookup the minimal symbol and use that as the beginning of this
-	 particular stub.  */
-      minsym = lookup_minimal_symbol_by_pc (pc);
-      if (minsym == NULL)
-	return 0;
-
-      /* Export stubs have distinct call and return paths.  The first
-	 two instructions are the call path, following four are the
-	 return path.  */
-      return (pc >= SYMBOL_VALUE (minsym) + 8
-	      && pc < SYMBOL_VALUE (minsym) + 20);
-    }
-
   /* Parameter relocation stubs always have a call path and may have a
      return path.  */
-  if (u->stub_type == PARAMETER_RELOCATION)
+  if (u->stub_type == PARAMETER_RELOCATION
+      || u->stub_type == EXPORT)
     {
       CORE_ADDR addr;
 
@@ -1737,10 +1742,11 @@ in_solib_return_trampoline (pc, name)
 	  insn = read_memory_integer (addr, 4);
 
 	  /* Does it look like a bl?  If so then it's the call path, if
-	     we find a bv first, then we're on the return path.  */
+	     we find a bv or be first, then we're on the return path.  */
 	  if ((insn & 0xfc00e000) == 0xe8000000)
 	    return 0;
-	  else if ((insn & 0xfc00e001) == 0xe800c000)
+	  else if ((insn & 0xfc00e001) == 0xe800c000
+		   || (insn & 0xfc000000) == 0xe0000000)
 	    return 1;
 	}
 
