@@ -680,13 +680,10 @@ handle_exception (T_StackFrame *old_frame)
   else
     {
       sigval = computeSignal (frame->ExceptionNumber);
-      remcomOutBuffer[0] = 'N';
+      remcomOutBuffer[0] = 'S';
       remcomOutBuffer[1] =  hexchars[sigval >> 4];
       remcomOutBuffer[2] =  hexchars[sigval % 16];
-      sprintf (remcomOutBuffer + 3, "%x;%x;%x",
-	       handle->LDCodeImageOffset,
-	       handle->LDDataImageOffset,
-	       handle->LDDataImageOffset + handle->LDDataImageLength);
+      remcomOutBuffer[3] = 0;
     }
 
   if (! putpacket(remcomOutBuffer))
@@ -709,13 +706,10 @@ handle_exception (T_StackFrame *old_frame)
 	{
 	case '?':
 	  sigval = computeSignal (frame->ExceptionNumber);
-	  remcomOutBuffer[0] = 'N';
+	  remcomOutBuffer[0] = 'S';
 	  remcomOutBuffer[1] =  hexchars[sigval >> 4];
 	  remcomOutBuffer[2] =  hexchars[sigval % 16];
-	  sprintf (remcomOutBuffer + 3, "%x;%x;%x",
-		   handle->LDCodeImageOffset,
-		   handle->LDDataImageOffset,
-		   handle->LDDataImageOffset + handle->LDDataImageLength);
+	  remcomOutBuffer[3] = 0;
 	  break;
 	case 'd':
 	  remote_debug = !(remote_debug); /* toggle debug flag */
@@ -811,6 +805,18 @@ handle_exception (T_StackFrame *old_frame)
 	  KillMe (handle);
 	  ResumeThread (mainthread);
 	  return RETURN_TO_PROGRAM;
+
+	case 'q':		/* Query message */
+	  if (strcmp (&remcomInBuffer[1], "Offsets") == 0)
+	    {
+	      sprintf (remcomOutBuffer, "Text=%x;Data=%x;Bss=%x",
+		       handle->LDCodeImageOffset,
+		       handle->LDDataImageOffset,
+		       handle->LDDataImageOffset + handle->LDDataImageLength);
+	    }
+	  else
+	    sprintf (remcomOutBuffer, "E04, Unknown query %s", &remcomInBuffer[1]);
+	  break;
 	}
 
       /* reply to the request */
