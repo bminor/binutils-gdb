@@ -26,11 +26,13 @@ if [istarget "i*86-*-*"] then {
     run_dump_test "prefix"
     run_dump_test "amd"
     run_dump_test "katmai"
+    run_dump_test "jump"
 
-    # The reloc and white tests require support for 8 and 16 bit
-    # relocs, so we only run them for ELF and COFF targets.
+    # These tests require support for 8 and 16 bit relocs,
+    # so we only run them for ELF and COFF targets.
     if {[istarget "*-*-elf*"] || [istarget "*-*-linux*"] || [istarget "*-*-coff*"]} then {
 	run_dump_test "reloc"
+	run_dump_test "jump16"
 	run_list_test "white" "-al --listing-lhs-width=3"
     }
 }

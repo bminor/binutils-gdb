@@ -1,3 +1,12 @@
+2000-01-21  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* gas/i386/general.{s,l}: Move 16 bit jmp and call tests from here
+	* gas/i386/jump16.{s,d}: To here.
+	* gas/i386/jump.{s,d}: New files.  Duplicate 32 bit jmp and call
+	tests in general.s so that objdump is exercised.
+
+	* gas/i386/i386.exp: Call new tests.
+
 2000-01-15  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* gas/i386/general.{s,l}: Add jmp and call tests for .code16gcc,

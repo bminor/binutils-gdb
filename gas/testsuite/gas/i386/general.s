@@ -155,64 +155,6 @@
 	leal	-1760(%ebp),%ebx
 	movl	%eax,140(%esp)
 
-.extern xxx
-	jmp	1b
-	jmp	xxx
-	jmp	*xxx
-	jmp	xxx(,1)
-	jmp	*%edi
-	jmp	%edi
-	jmp	*(%edi)
-	jmp	(%edi)
-	ljmp	*xxx(%edi)
-	ljmp	xxx(%edi)
-	ljmp	*xxx
-	ljmp	xxx(,1)
-	ljmp	$0x1234,$xxx
-
-	call	1b
-	call	xxx
-	call	*xxx
-	call	xxx(,1)
-	call	*%edi
-	call	%edi
-	call	*(%edi)
-	call	(%edi)
-	lcall	*xxx(%edi)
-	lcall	xxx(%edi)
-	lcall	*xxx
-	lcall	xxx(,1)
-	lcall	$0x1234,$xxx
-
-.code16
-	jmp	1b
-	jmp	xxx
-	jmp	*xxx
-	jmp	xxx(,1)
-	jmp	*%di
-	jmp	%di
-	jmp	*(%di)
-	jmp	(%di)
-	ljmp	*xxx(%di)
-	ljmp	xxx(%di)
-	ljmp	*xxx
-	ljmp	xxx(,1)
-	ljmp	$0x1234,$xxx
-
-	call	1b
-	call	xxx
-	call	*xxx
-	call	xxx(,1)
-	call	*%di
-	call	%di
-	call	*(%di)
-	call	(%di)
-	lcall	*xxx(%di)
-	lcall	xxx(%di)
-	lcall	*xxx
-	lcall	xxx(,1)
-	lcall	$0x1234,$xxx
-
 .code32
 	jmp	1b
 	jmp	xxx
