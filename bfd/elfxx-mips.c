@@ -408,6 +408,7 @@ static asection * mips_elf_rel_dyn_section PARAMS ((bfd *, bfd_boolean));
 static asection * mips_elf_got_section PARAMS ((bfd *, bfd_boolean));
 static struct mips_got_info *mips_elf_got_info
   PARAMS ((bfd *, asection **));
+static long mips_elf_get_global_gotsym_index PARAMS ((bfd *abfd));
 static bfd_vma mips_elf_local_got_index
   PARAMS ((bfd *, bfd *, struct bfd_link_info *, bfd_vma));
 static bfd_vma mips_elf_global_got_index
@@ -1705,6 +1706,29 @@ mips_elf_got_info (abfd, sgotp)
     *sgotp = (sgot->flags & SEC_EXCLUDE) == 0 ? sgot : NULL;
 
   return g;
+}
+
+/* Obtain the lowest dynamic index of a symbol that was assigned a
+   global GOT entry.  */
+static long
+mips_elf_get_global_gotsym_index (abfd)
+     bfd *abfd;
+{
+  asection *sgot;
+  struct mips_got_info *g;
+
+  if (abfd == NULL)
+    return 0;
+  
+  sgot = mips_elf_got_section (abfd, TRUE);
+  if (sgot == NULL || mips_elf_section_data (sgot) == NULL)
+    return 0;
+  
+  g = mips_elf_section_data (sgot)->u.got_info;
+  if (g == NULL || g->global_gotsym == NULL)
+    return 0;
+    
+  return g->global_gotsym->dynindx;
 }
 
 /* Returns the GOT offset at which the indicated address can be found.
@@ -3197,9 +3221,12 @@ mips_elf_calculate_relocation (abfd, input_bfd, input_section, info,
   switch (r_type)
     {
     case R_MIPS_GOT_PAGE:
-      /* If we didn't create a dynamic index for this symbol, it can
-	 be regarded as local.  */
-      if (local_p || ! h || h->root.dynindx < 0)
+      /* If this symbol got a global GOT entry, we have to decay
+	 GOT_PAGE/GOT_OFST to GOT_DISP/addend.  */
+      if (local_p || ! h
+	  || (h->root.dynindx
+	      < mips_elf_get_global_gotsym_index (elf_hash_table (info)
+						  ->dynobj)))
 	break;
       /* Fall through.  */
 

@@ -1,3 +1,9 @@
+2003-04-11  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elfxx-mips.c (mips_elf_get_global_gotsym_index): New.
+	(mips_elf_calculate_relocation): Decay GOT_PAGE/GOT_OFST to
+	GOT_DISP/addend only if the symbol got a global GOT entry.
+
 2003-04-10  Alexandre Oliva  <aoliva@redhat.com>
 
 	* elfxx-mips.c (mips_elf_calculate_relocation): Decay
