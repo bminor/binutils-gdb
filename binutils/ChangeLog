@@ -1,8 +1,24 @@
+Wed Oct  8 21:19:11 1997  Richard Henderson  <rth@cygnus.com>
+
+	* objcopy.c (keep_specific_list, privatize_specific_list,
+	weaken_specific_list): New variables.
+	(keep_symbols): Removed.
+	(add_specific_symbol): New function from the carcas of
+	add_strip_symbol.  Takes a list as an argument.
+	(is_specified_symbol): Likewise from is_strip_symbol.
+	(filter_symbols): Honor the new privatize and weaken lists.
+	Optimize bfd_asymbol_name handling.
+	(copy_object, copy_options, copy_usage): Add privatize-symbol &
+	weaken-symbol options.
+
+	* objcopy.1, binutils.texi: Update docs.
+
 Sun Oct  5 09:05:44 1997  Frank Ch. Eigler  <fche@cygnus.com>
 
-	* objdump.c (disassemble_data): Add "0x" prefix for 
-	symbol-offsets in disassembly.  Make "--prefix-addresses"
-	disassembly adjust to mixed-length instructions.
+	* objdump.c (disassemble_data): Make "--prefix-addresses"
+ 	disassembly adjust to mixed-length instructions.
+	(objdump_print_addr_with_sym): Add "0x" prefix for hexadecimal
+ 	symbol-offsets in disassembly.
 
 Fri Oct  3 12:04:25 1997  Ian Lance Taylor  <ian@cygnus.com>
 

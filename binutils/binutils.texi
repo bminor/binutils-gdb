@@ -816,6 +816,8 @@ objcopy [ -F @var{bfdname} | --target=@var{bfdname} ]
         [ -S | --strip-all ]  [ -g | --strip-debug ]
         [ -K @var{symbolname} | --keep-symbol=@var{symbolname} ]
         [ -N @var{symbolname} | --strip-symbol=@var{symbolname} ]
+        [ -P @var{symbolname} | --privatize-symbol=@var{symbolname} ]
+        [ -W @var{symbolname} | --weaken-symbol=@var{symbolname} ]
         [ -x | --discard-all ]  [ -X | --discard-locals ]
         [ -b @var{byte} | --byte=@var{byte} ]
         [ -i @var{interleave} | --interleave=@var{interleave} ]
@@ -910,8 +912,16 @@ be given more than once.
 @item -N @var{symbolname}
 @itemx --strip-symbol=@var{symbolname}
 Do not copy symbol @var{symbolname} from the source file.  This option
-may be given more than once, and may be combined with strip options
-other than @code{-K}.
+may be given more than once.
+
+@item -P @var{symbolname}
+@itemx --privatize-symbol=@var{symbolname}
+Make symbol @var{symbolname} local to the file, so that it is not
+visible externally.  This option may be given more than once.
+
+@item -W @var{symbolname}
+@itemx --weaken-symbol=@var{symbolname}
+Make symbol @var{symbolname} weak. This option may be given more than once.
 
 @item -x
 @itemx --discard-all
