@@ -1,13 +1,18 @@
+2003-04-24  Eric Christopher  <echristo@redhat.com>
+
+	* config/tc-mips.c (nopic_need_relax): Revert previous
+	change.
+
 2003-04-24 Dhananjay Deshpande <dhananjayd@kpitcummins.com>
 
 	* config/tc-h8300.h (DWARF2_LINE_MIN_INSN_LENGTH): New
-	* config/tc-h8300.c (dwarf2dbg.h): Include 
+	* config/tc-h8300.c (dwarf2dbg.h): Include
 	(md_pseudo_table): Handle .loc and .file
 	(md_assemble): Call dwarf2_emit_insn if BFD_ASSEMBLER.
 	* Makefile.am: Add dependency on dwarf2dbg.h for h8300 targets.
 	* Makefile.in: Regenerate.
 
-2003-04-24 Dhananjay Deshpande <dhananjayd@kpitcummins.com> 
+2003-04-24 Dhananjay Deshpande <dhananjayd@kpitcummins.com>
 
 	* config/tc-h8300.c (Nmode, h8300hnmode, h8300snmode): New.
 	(md_pseudo_table): Add h8300hn, h8300sn.
@@ -145,9 +150,9 @@
 
 	* config/tc-m68hc11.c (M6811_OP_CALL_ADDR): New internal define.
 	(M6811_OP_PAGE_ADDR): New internal define.
-	(get_operand): New modifier %page and %addr to obtain page and 
+	(get_operand): New modifier %page and %addr to obtain page and
 	address part of a far-function.
-	(fixup8): Use BFD_RELOC_M68HC11_PAGE for a %page modifier; don't 
+	(fixup8): Use BFD_RELOC_M68HC11_PAGE for a %page modifier; don't
 	complain on overflow for the BFD_RELOC_M68HC11_PAGE and truncation
 	relocs.
 	(fixup16): Use BFD_RELOC_M68HC11_LO16 for a %addr modifier.

@@ -3942,7 +3942,7 @@ load_address (counter, reg, ep, used_at)
       if (HAVE_NEWABI)
 	{
 	  frag_grow (12);
-	  
+
 	  if (ep->X_add_number)
 	    {
 	      frag_now->tc_frag_data.tc_fr_offset =
@@ -4018,7 +4018,7 @@ load_address (counter, reg, ep, used_at)
 	   lw		$reg,<sym>($gp)		(BFD_RELOC_MIPS_GOT16)
 	   nop
 	   addiu	$reg,$reg,<sym>		(BFD_RELOC_LO16)
-	 If there is a constant, it must be added in after.  
+	 If there is a constant, it must be added in after.
 
 	 In the NewABI, for local symbols, with or without offsets, we want:
 	   lw		$reg,<sym>($gp)		(BFD_RELOC_MIPS_GOT_PAGE)
@@ -5598,7 +5598,7 @@ macro (ip)
 			    RELAX_ENCODE (12, 8, 0, 4, 0,
 					  mips_opts.warn_about_macros),
 			    offset_expr.X_add_symbol, 0, NULL);
-	    }	      
+	    }
 	  else if (expr1.X_add_number >= -0x8000
 		   && expr1.X_add_number < 0x8000)
 	    {
@@ -5838,7 +5838,7 @@ macro (ip)
 			       "t,r,j", tempreg, tempreg,
 			       (int) BFD_RELOC_MIPS_GOT_OFST);
 		}
-	      
+
 	      macro_build_jalr (icnt, &offset_expr);
 	    }
 	  else
@@ -6524,7 +6524,7 @@ macro (ip)
 			 "d,v,t", tempreg, tempreg, breg);
 	  macro_build ((char *) NULL, &icnt, &expr1, s, fmt, treg,
 		       (int) BFD_RELOC_LO16, tempreg);
-	  
+
 	  offset_expr.X_add_number = expr1.X_add_number;
 	  p = frag_var (rs_machine_dependent, 12 + bregsz, 0,
 			RELAX_ENCODE (16 + bregsz, 8 + bregsz,
@@ -12253,7 +12253,7 @@ s_change_section (ignore)
 #ifdef OBJ_ELF
   char *section_name;
   char c;
-  char next_c;
+  char next_c = 0;
   int section_type;
   int section_flag;
   int section_entry_size;
@@ -13246,7 +13246,6 @@ nopic_need_relax (sym, before_relaxing)
 	      || strcmp (symname, "_gp_disp") == 0))
 	change = 1;
       else if ((! S_IS_DEFINED (sym) || S_IS_COMMON (sym))
-	       && !S_IS_EXTERN (sym)
 	       && (0
 #ifndef NO_ECOFF_DEBUGGING
 		   || (symbol_get_obj (sym)->ecoff_extern_size != 0
