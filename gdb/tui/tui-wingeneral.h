@@ -1,5 +1,8 @@
 /* General window behavior.
-   Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+
+   Copyright 1998, 1999, 2000, 2001, 2002, 2004 Free Software
+   Foundation, Inc.
+
    Contributed by Hewlett-Packard Company.
 
    This file is part of GDB.
@@ -19,31 +22,31 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#ifndef TUI_GENERAL_WIN_H
-#define TUI_GENERAL_WIN_H
+#ifndef TUI_WINGENERAL_H
+#define TUI_WINGENERAL_H
 
-/*
-   ** Functions
- */
-extern void unhighlightWin (TuiWinInfoPtr);
-extern void makeVisible (TuiGenWinInfoPtr, int);
-extern void makeAllVisible (int);
-extern void makeWindow (TuiGenWinInfoPtr, int);
-extern TuiWinInfoPtr copyWin (TuiWinInfoPtr);
-extern void boxWin (TuiGenWinInfoPtr, int);
-extern void highlightWin (TuiWinInfoPtr);
-extern void checkAndDisplayHighlightIfNeeded (TuiWinInfoPtr);
-extern void refreshAll (TuiWinInfoPtr *);
-extern void tuiDelwin (WINDOW * window);
-extern void tuiRefreshWin (TuiGenWinInfoPtr);
+struct tui_win_info;
+struct tui_gen_win_info;
+
+extern void tui_unhighlight_win (struct tui_win_info *);
+extern void tui_make_visible (struct tui_gen_win_info *);
+extern void tui_make_invisible (struct tui_gen_win_info *);
+extern void tui_make_all_visible (void);
+extern void tui_make_all_invisible (void);
+extern void tui_make_window (struct tui_gen_win_info *, int);
+extern struct tui_win_info *tui_copy_win (struct tui_win_info *);
+extern void tui_box_win (struct tui_gen_win_info *, int);
+extern void tui_highlight_win (struct tui_win_info *);
+extern void tui_check_and_display_highlight_if_needed (struct tui_win_info *);
+extern void tui_refresh_all (struct tui_win_info * *);
+extern void tui_delete_win (WINDOW * window);
+extern void tui_refresh_win (struct tui_gen_win_info *);
 
 /*
    ** Macros
  */
-#define    m_beVisible(winInfo)   makeVisible((TuiGenWinInfoPtr)(winInfo), TRUE)
+#define    m_beVisible(winInfo)   makeVisible((struct tui_gen_win_info *)(winInfo), TRUE)
 #define    m_beInvisible(winInfo) \
-                            makeVisible((TuiGenWinInfoPtr)(winInfo), FALSE)
-#define    m_allBeVisible()       makeAllVisible(TRUE)
-#define m_allBeInvisible()        makeAllVisible(FALSE)
+                            makeVisible((struct tui_gen_win_info *)(winInfo), FALSE)
 
-#endif /*TUI_GENERAL_WIN_H */
+#endif

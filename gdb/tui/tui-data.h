@@ -32,7 +32,7 @@
 #endif
 
 /* Generic window information */
-     typedef struct _TuiGenWinInfo
+     typedef struct tui_gen_win_info
        {
 	 WINDOW *handle;	/* window handle */
 	 TuiWinType type;	/* type of window */

@@ -39,12 +39,10 @@
 /***********************
 ** PUBLIC FUNCTIONS
 ***********************/
-/*
-   ** tuiRefreshWin()
-   **        Refresh the window
- */
+
+/* Refresh the window.   */
 void
-tuiRefreshWin (TuiGenWinInfoPtr winInfo)
+tui_refresh_win (TuiGenWinInfoPtr winInfo)
 {
   if (winInfo->type == DATA_WIN && winInfo->contentSize > 0)
     {
@@ -72,21 +70,18 @@ tuiRefreshWin (TuiGenWinInfoPtr winInfo)
     }
 
   return;
-}				/* tuiRefreshWin */
+}
 
 
-/*
-   ** tuiDelwin()
-   **        Function to delete the curses window, checking for null
- */
+/* Function to delete the curses window, checking for NULL.   */
 void
-tuiDelwin (WINDOW * window)
+tui_delete_win (WINDOW * window)
 {
   if (window != (WINDOW *) NULL)
     delwin (window);
 
   return;
-}				/* tuiDelwin */
+}
 
 
 /* Draw a border arround the window.  */
@@ -116,11 +111,8 @@ boxWin (TuiGenWinInfoPtr winInfo, int highlightFlag)
 }
 
 
-/*
-   ** unhighlightWin().
- */
 void
-unhighlightWin (TuiWinInfoPtr winInfo)
+tui_unhighlight_win (TuiWinInfoPtr winInfo)
 {
   if (m_winPtrNotNull (winInfo) && winInfo->generic.handle != (WINDOW *) NULL)
     {
@@ -128,14 +120,11 @@ unhighlightWin (TuiWinInfoPtr winInfo)
       wrefresh (winInfo->generic.handle);
       m_setWinHighlightOff (winInfo);
     }
-}				/* unhighlightWin */
+}
 
 
-/*
-   ** highlightWin().
- */
 void
-highlightWin (TuiWinInfoPtr winInfo)
+tui_highlight_win (TuiWinInfoPtr winInfo)
 {
   if (m_winPtrNotNull (winInfo) &&
       winInfo->canHighlight && winInfo->generic.handle != (WINDOW *) NULL)
@@ -144,32 +133,25 @@ highlightWin (TuiWinInfoPtr winInfo)
       wrefresh (winInfo->generic.handle);
       m_setWinHighlightOn (winInfo);
     }
-}				/* highlightWin */
+}
 
-
-/*
-   ** checkAndDisplayHighlightIfNecessay
- */
 void
-checkAndDisplayHighlightIfNeeded (TuiWinInfoPtr winInfo)
+tui_check_and_display_highlight_if_needed (TuiWinInfoPtr winInfo)
 {
   if (m_winPtrNotNull (winInfo) && winInfo->generic.type != CMD_WIN)
     {
       if (winInfo->isHighlighted)
-	highlightWin (winInfo);
+	tui_highlight_win (winInfo);
       else
-	unhighlightWin (winInfo);
+	tui_unhighlight_win (winInfo);
 
     }
   return;
-}				/* checkAndDisplayHighlightIfNeeded */
+}
 
 
-/*
-   ** makeWindow().
- */
 void
-makeWindow (TuiGenWinInfoPtr winInfo, int boxIt)
+tui_make_window (TuiGenWinInfoPtr winInfo, int boxIt)
 {
   WINDOW *handle;
 
@@ -188,47 +170,53 @@ makeWindow (TuiGenWinInfoPtr winInfo, int boxIt)
 }
 
 
-/*
-   ** makeVisible().
-   **        We can't really make windows visible, or invisible.  So we
-   **        have to delete the entire window when making it visible,
-   **        and create it again when making it visible.
- */
-void
-makeVisible (TuiGenWinInfoPtr winInfo, int visible)
+/* We can't really make windows visible, or invisible.  So we have to
+   delete the entire window when making it visible, and create it
+   again when making it visible.  */
+static void
+make_visible (struct tui_gen_win_info *win_info, int visible)
 {
   /* Don't tear down/recreate command window */
-  if (winInfo->type == CMD_WIN)
+  if (win_info->type == CMD_WIN)
     return;
 
   if (visible)
     {
-      if (!winInfo->isVisible)
+      if (!win_info->isVisible)
 	{
-	  makeWindow (
-		       winInfo,
-	   (winInfo->type != CMD_WIN && !m_winIsAuxillary (winInfo->type)));
-	  winInfo->isVisible = TRUE;
+	  tui_make_window (win_info,
+			   (win_info->type != CMD_WIN
+			    && !m_winIsAuxillary (win_info->type)));
+	  win_info->isVisible = TRUE;
 	}
     }
   else if (!visible &&
-	   winInfo->isVisible && winInfo->handle != (WINDOW *) NULL)
+	   win_info->isVisible && win_info->handle != (WINDOW *) NULL)
     {
-      winInfo->isVisible = FALSE;
-      tuiDelwin (winInfo->handle);
-      winInfo->handle = (WINDOW *) NULL;
+      win_info->isVisible = FALSE;
+      tui_delete_win (win_info->handle);
+      win_info->handle = (WINDOW *) NULL;
     }
 
   return;
-}				/* makeVisible */
+}
 
-
-/*
-   ** makeAllVisible().
-   **        Makes all windows invisible (except the command and locator windows)
- */
 void
-makeAllVisible (int visible)
+tui_make_visible (struct tui_gen_win_info *win_info)
+{
+  make_visible (win_info, 1);
+}
+
+void
+tui_make_invisible (struct tui_gen_win_info *win_info)
+{
+  make_visible (win_info, 0);
+}
+
+
+/* Makes all windows invisible (except the command and locator windows).   */
+static void
+make_all_visible (int visible)
 {
   int i;
 
@@ -238,21 +226,31 @@ makeAllVisible (int visible)
 	  ((winList[i])->generic.type) != CMD_WIN)
 	{
 	  if (m_winIsSourceType ((winList[i])->generic.type))
-	    makeVisible ((winList[i])->detail.sourceInfo.executionInfo,
-			 visible);
-	  makeVisible ((TuiGenWinInfoPtr) winList[i], visible);
+	    make_visible ((winList[i])->detail.sourceInfo.executionInfo,
+			  visible);
+	  make_visible ((TuiGenWinInfoPtr) winList[i], visible);
 	}
     }
 
   return;
-}				/* makeAllVisible */
+}
 
-/*
-   ** refreshAll().
-   **        Function to refresh all the windows currently displayed
- */
 void
-refreshAll (TuiWinInfoPtr * list)
+tui_make_all_visible (void)
+{
+  make_all_visible (1);
+}
+
+void
+tui_make_all_invisible (void)
+{
+  make_all_visible (0);
+}
+
+/* Function to refresh all the windows currently displayed.  */
+
+void
+tui_refresh_all (TuiWinInfoPtr * list)
 {
   TuiWinType type;
   TuiGenWinInfoPtr locator = locatorWinInfoPtr ();
@@ -264,16 +262,16 @@ refreshAll (TuiWinInfoPtr * list)
 	  if (type == SRC_WIN || type == DISASSEM_WIN)
 	    {
 	      touchwin (list[type]->detail.sourceInfo.executionInfo->handle);
-	      tuiRefreshWin (list[type]->detail.sourceInfo.executionInfo);
+	      tui_refresh_win (list[type]->detail.sourceInfo.executionInfo);
 	    }
 	  touchwin (list[type]->generic.handle);
-	  tuiRefreshWin (&list[type]->generic);
+	  tui_refresh_win (&list[type]->generic);
 	}
     }
   if (locator->isVisible)
     {
       touchwin (locator->handle);
-      tuiRefreshWin (locator);
+      tui_refresh_win (locator);
     }
 
   return;

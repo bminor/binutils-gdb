@@ -773,7 +773,7 @@ tuiDelWindow (TuiWinInfoPtr winInfo)
       genericWin = locatorWinInfoPtr ();
       if (genericWin != (TuiGenWinInfoPtr) NULL)
 	{
-	  tuiDelwin (genericWin->handle);
+	  tui_delete_win (genericWin->handle);
 	  genericWin->handle = (WINDOW *) NULL;
 	  genericWin->isVisible = FALSE;
 	}
@@ -785,7 +785,7 @@ tuiDelWindow (TuiWinInfoPtr winInfo)
       genericWin = winInfo->detail.sourceInfo.executionInfo;
       if (genericWin != (TuiGenWinInfoPtr) NULL)
 	{
-	  tuiDelwin (genericWin->handle);
+	  tui_delete_win (genericWin->handle);
 	  genericWin->handle = (WINDOW *) NULL;
 	  genericWin->isVisible = FALSE;
 	}
@@ -804,7 +804,7 @@ tuiDelWindow (TuiWinInfoPtr winInfo)
     }
   if (winInfo->generic.handle != (WINDOW *) NULL)
     {
-      tuiDelwin (winInfo->generic.handle);
+      tui_delete_win (winInfo->generic.handle);
       winInfo->generic.handle = (WINDOW *) NULL;
       winInfo->generic.isVisible = FALSE;
     }
@@ -826,7 +826,7 @@ freeWindow (TuiWinInfoPtr winInfo)
       genericWin = locatorWinInfoPtr ();
       if (genericWin != (TuiGenWinInfoPtr) NULL)
 	{
-	  tuiDelwin (genericWin->handle);
+	  tui_delete_win (genericWin->handle);
 	  genericWin->handle = (WINDOW *) NULL;
 	}
       freeWinContent (genericWin);
@@ -838,7 +838,7 @@ freeWindow (TuiWinInfoPtr winInfo)
       genericWin = winInfo->detail.sourceInfo.executionInfo;
       if (genericWin != (TuiGenWinInfoPtr) NULL)
 	{
-	  tuiDelwin (genericWin->handle);
+	  tui_delete_win (genericWin->handle);
 	  genericWin->handle = (WINDOW *) NULL;
 	  freeWinContent (genericWin);
 	}
@@ -871,7 +871,7 @@ freeWindow (TuiWinInfoPtr winInfo)
     }
   if (winInfo->generic.handle != (WINDOW *) NULL)
     {
-      tuiDelwin (winInfo->generic.handle);
+      tui_delete_win (winInfo->generic.handle);
       winInfo->generic.handle = (WINDOW *) NULL;
       freeWinContent (&winInfo->generic);
     }
@@ -938,7 +938,7 @@ tuiDelDataWindows (TuiWinContent content, int contentSize)
 
       if (genericWin != (TuiGenWinInfoPtr) NULL)
 	{
-	  tuiDelwin (genericWin->handle);
+	  tui_delete_win (genericWin->handle);
 	  genericWin->handle = (WINDOW *) NULL;
 	  genericWin->isVisible = FALSE;
 	}
@@ -963,7 +963,7 @@ freeDataContent (TuiWinContent content, int contentSize)
 
       if (genericWin != (TuiGenWinInfoPtr) NULL)
 	{
-	  tuiDelwin (genericWin->handle);
+	  tui_delete_win (genericWin->handle);
 	  genericWin->handle = (WINDOW *) NULL;
 	  freeWinContent (genericWin);
 	}

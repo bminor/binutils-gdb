@@ -1,3 +1,32 @@
+2004-02-06  Andrew Cagney  <cagney@redhat.com>
+
+	* tui/tui-wingeneral.h: Update copyright.
+	(m_allBeVisible): Delete macro.
+	(m_allBeInvisible): Delete macro.	
+	(struct tui_gen_win_info): Declare.
+	(struct tui_win_info): Declare.
+	(tui_unhighlight_win): Rename unhighlightWin.
+	(tui_make_visible, tui_make_invisible): Replace makeVisible.
+	(tui_make_all_visible, tui_make_all_invisible): Replace makeAllVisible.
+	(tui_make_window): Rename makeWindow.
+	(tui_copy_win): Rename copyWin.
+	(tui_box_win): Rename boxWin.
+	(tui_highlight_win): Rename highlightWin.
+	(tui_check_and_display_highlight_if_needed): Rename
+	checkAndDisplayHighlightIfNeeded.
+	(tui_refresh_all): Rename refreshAll.
+	(tui_delete_win): Rename tuiDelwin.
+	(tui_refresh_win): Rename tuiRefreshWin.
+	* tui/tui-wingeneral.c (make_visible): Rename makeVisible.
+	(tui_make_visible, tui_make_invisible): New functions.
+	(tui_make_all_visible, tui_make_all_invisible): New functions.
+	(make_all_visible): Rename makeAllVisible.
+	* tui/tui-winsource.c, tui/tui-windata.c: Update references.
+	* tui/tui-data.c, tui/tui-winsource.c: Update references.
+	* tui/tui-windata.c, tui/tui-win.c: Update references.
+	* tui/tui-regs.c, tui/tui-layout.c: Update references.
+	* tui/tui-data.h (struct tui_gen_win_info): Rename _TuiGenWinInfo.
+
 2004-02-06  Mark Kettenis  <kettenis@gnu.org>
 
 	* proc-api.c (write_with_trace): Initialize local variable to

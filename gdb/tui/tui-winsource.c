@@ -233,7 +233,7 @@ tui_erase_source_content (TuiWinInfoPtr winInfo, int displayPrompt)
   if (winInfo->generic.handle != (WINDOW *) NULL)
     {
       werase (winInfo->generic.handle);
-      checkAndDisplayHighlightIfNeeded (winInfo);
+      tui_check_and_display_highlight_if_needed (winInfo);
       if (displayPrompt == EMPTY_SOURCE_PROMPT)
 	{
 	  char *noSrcStr;
@@ -258,7 +258,7 @@ tui_erase_source_content (TuiWinInfoPtr winInfo, int displayPrompt)
 
 	  tui_set_source_content_nil (winInfo, noSrcStr);
 	}
-      tuiRefreshWin (&winInfo->generic);
+      tui_refresh_win (&winInfo->generic);
     }
   return;
 }				/* tuiEraseSourceContent */
@@ -302,8 +302,8 @@ tui_show_source_content (TuiWinInfoPtr winInfo)
   else
     tui_erase_source_content (winInfo, TRUE);
 
-  checkAndDisplayHighlightIfNeeded (winInfo);
-  tuiRefreshWin (&winInfo->generic);
+  tui_check_and_display_highlight_if_needed (winInfo);
+  tui_refresh_win (&winInfo->generic);
   winInfo->generic.contentInUse = TRUE;
 }
 
@@ -370,7 +370,7 @@ tui_set_is_exec_point_at (TuiLineOrAddress l, TuiWinInfoPtr winInfo)
       i++;
     }
   if (changed)
-    tuiRefreshWin (&winInfo->generic);
+    tui_refresh_win (&winInfo->generic);
 }
 
 /* Update the execution windows to show the active breakpoints.
@@ -528,14 +528,14 @@ tuiShowExecInfoContent (TuiWinInfoPtr winInfo)
   int curLine;
 
   werase (execInfo->handle);
-  tuiRefreshWin (execInfo);
+  tui_refresh_win (execInfo);
   for (curLine = 1; (curLine <= execInfo->contentSize); curLine++)
     mvwaddstr (execInfo->handle,
 	       curLine,
 	       0,
 	       ((TuiWinElementPtr)
 		execInfo->content[curLine - 1])->whichElement.simpleString);
-  tuiRefreshWin (execInfo);
+  tui_refresh_win (execInfo);
   execInfo->contentInUse = TRUE;
 
   return;
@@ -548,7 +548,7 @@ tui_erase_exec_info_content (TuiWinInfoPtr winInfo)
   TuiGenWinInfoPtr execInfo = winInfo->detail.sourceInfo.executionInfo;
 
   werase (execInfo->handle);
-  tuiRefreshWin (execInfo);
+  tui_refresh_win (execInfo);
 
   return;
 }

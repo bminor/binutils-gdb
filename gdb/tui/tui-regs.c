@@ -338,7 +338,7 @@ tui_display_registers_from (int startElementNo)
 		    itemWinWidth + 2 : itemWinWidth + 1;
 		  dataItemWin->origin.x = (itemWinWidth * j) + 1;
 		  dataItemWin->origin.y = curY;
-		  makeWindow (dataItemWin, DONT_BOX_WINDOW);
+		  tui_make_window (dataItemWin, DONT_BOX_WINDOW);
                   scrollok (dataItemWin->handle, FALSE);
 		}
               touchwin (dataItemWin->handle);
@@ -941,7 +941,7 @@ _tuiDisplayRegister (int regNum,
 
       if (dataElementPtr->highlight)
 	wstandend (winInfo->handle);
-      tuiRefreshWin (winInfo);
+      tui_refresh_win (winInfo);
     }
   return;
 }				/* _tuiDisplayRegister */

@@ -436,10 +436,10 @@ tuiSetWinFocusTo (TuiWinInfoPtr winInfo)
 
       if (m_winPtrNotNull (winWithFocus) &&
 	  winWithFocus->generic.type != CMD_WIN)
-	unhighlightWin (winWithFocus);
+	tui_unhighlight_win (winWithFocus);
       tuiSetWinWithFocus (winInfo);
       if (winInfo->generic.type != CMD_WIN)
-	highlightWin (winInfo);
+	tui_highlight_win (winInfo);
     }
 
   return;
@@ -593,7 +593,7 @@ tuiRefreshAll (void)
   TuiWinType type;
 
   clearok (curscr, TRUE);
-  refreshAll (winList);
+  tui_refresh_all (winList);
   for (type = SRC_WIN; type < MAX_MAJOR_WINDOWS; type++)
     {
       if (winList[type] && winList[type]->generic.isVisible)
@@ -603,7 +603,7 @@ tuiRefreshAll (void)
 	    case SRC_WIN:
 	    case DISASSEM_WIN:
 	      tui_show_source_content (winList[type]);
-	      checkAndDisplayHighlightIfNeeded (winList[type]);
+	      tui_check_and_display_highlight_if_needed (winList[type]);
 	      tui_erase_exec_info_content (winList[type]);
 	      tui_update_exec_info (winList[type]);
 	      break;
@@ -1308,8 +1308,7 @@ _makeInvisibleAndSetNewHeight (TuiWinInfoPtr winInfo, int height)
   int i;
   TuiGenWinInfoPtr genWinInfo;
 
-
-  m_beInvisible (&winInfo->generic);
+  tui_make_invisible (&winInfo->generic);
   winInfo->generic.height = height;
   if (height > 1)
     winInfo->generic.viewportHeight = height - 1;
@@ -1324,7 +1323,7 @@ _makeInvisibleAndSetNewHeight (TuiWinInfoPtr winInfo, int height)
     case SRC_WIN:
     case DISASSEM_WIN:
       genWinInfo = winInfo->detail.sourceInfo.executionInfo;
-      m_beInvisible (genWinInfo);
+      tui_make_invisible (genWinInfo);
       genWinInfo->height = height;
       genWinInfo->origin.y = winInfo->generic.origin.y;
       if (height > 1)
@@ -1337,7 +1336,7 @@ _makeInvisibleAndSetNewHeight (TuiWinInfoPtr winInfo, int height)
       if (m_hasLocator (winInfo))
 	{
 	  genWinInfo = locatorWinInfoPtr ();
-	  m_beInvisible (genWinInfo);
+	  tui_make_invisible (genWinInfo);
 	  genWinInfo->origin.y = winInfo->generic.origin.y + height;
 	}
       break;
@@ -1347,7 +1346,7 @@ _makeInvisibleAndSetNewHeight (TuiWinInfoPtr winInfo, int height)
 	{
 	  genWinInfo = (TuiGenWinInfoPtr) & ((TuiWinElementPtr)
 		      winInfo->generic.content[i])->whichElement.dataWindow;
-	  tuiDelwin (genWinInfo->handle);
+	  tui_delete_win (genWinInfo->handle);
 	  genWinInfo->handle = (WINDOW *) NULL;
 	}
       break;
@@ -1368,14 +1367,14 @@ _makeVisibleWithNewHeight (TuiWinInfoPtr winInfo)
 {
   struct symtab *s;
 
-  m_beVisible (&winInfo->generic);
-  checkAndDisplayHighlightIfNeeded (winInfo);
+  tui_make_visible (&winInfo->generic);
+  tui_check_and_display_highlight_if_needed (winInfo);
   switch (winInfo->generic.type)
     {
     case SRC_WIN:
     case DISASSEM_WIN:
       freeWinContent (winInfo->detail.sourceInfo.executionInfo);
-      m_beVisible (winInfo->detail.sourceInfo.executionInfo);
+      tui_make_visible (winInfo->detail.sourceInfo.executionInfo);
       if (winInfo->generic.content != (OpaquePtr) NULL)
 	{
 	  TuiLineOrAddress lineOrAddr;
@@ -1408,7 +1407,7 @@ _makeVisibleWithNewHeight (TuiWinInfoPtr winInfo)
 	}
       if (m_hasLocator (winInfo))
 	{
-	  m_beVisible (locatorWinInfoPtr ());
+	  tui_make_visible (locatorWinInfoPtr ());
 	  tui_show_locator_content ();
 	}
       break;

@@ -112,7 +112,7 @@ tuiDeleteDataContentWindows (void)
     {
       dataItemWinPtr = &((TuiWinContent)
 		      dataWin->generic.content)[i]->whichElement.dataWindow;
-      tuiDelwin (dataItemWinPtr->handle);
+      tui_delete_win (dataItemWinPtr->handle);
       dataItemWinPtr->handle = (WINDOW *) NULL;
       dataItemWinPtr->isVisible = FALSE;
     }
@@ -125,7 +125,7 @@ void
 tuiEraseDataContent (char *prompt)
 {
   werase (dataWin->generic.handle);
-  checkAndDisplayHighlightIfNeeded (dataWin);
+  tui_check_and_display_highlight_if_needed (dataWin);
   if (prompt != (char *) NULL)
     {
       int halfWidth = (dataWin->generic.width - 2) / 2;
@@ -160,7 +160,7 @@ tuiDisplayAllData (void)
     {
       tuiEraseDataContent ((char *) NULL);
       tuiDeleteDataContentWindows ();
-      checkAndDisplayHighlightIfNeeded (dataWin);
+      tui_check_and_display_highlight_if_needed (dataWin);
       tui_display_registers_from (0);
       /*
          ** Then display the other data
@@ -188,7 +188,7 @@ tuiDisplayDataFromLine (int lineNo)
   if (lineNo < 0)
     _lineNo = 0;
 
-  checkAndDisplayHighlightIfNeeded (dataWin);
+  tui_check_and_display_highlight_if_needed (dataWin);
 
   /* there is no general data, force regs to display (if there are any) */
   if (dataWin->detail.dataDisplayInfo.dataContentCount <= 0)

@@ -96,13 +96,13 @@ showLayout (TuiLayoutType layout)
       if (layout == SRC_DATA_COMMAND || layout == DISASSEM_DATA_COMMAND)
 	{
 	  _showData (layout);
-	  refreshAll (winList);
+	  tui_refresh_all (winList);
 	}
       else
 	{
 	  /* First make the current layout be invisible */
-	  m_allBeInvisible ();
-	  m_beInvisible (locatorWinInfoPtr ());
+	  tui_make_all_invisible ();
+	  tui_make_invisible (locatorWinInfoPtr ());
 
 	  switch (layout)
 	    {
@@ -791,8 +791,8 @@ _showSourceDisassemCommand (void)
 			   3,
 			   0,
 			   0);
-	  m_beVisible (srcWin);
-	  m_beVisible (srcWin->detail.sourceInfo.executionInfo);
+	  tui_make_visible (&srcWin->generic);
+	  tui_make_visible (srcWin->detail.sourceInfo.executionInfo);
 	  srcWin->detail.sourceInfo.hasLocator = FALSE;;
 	}
       if (m_winPtrNotNull (srcWin))
@@ -834,14 +834,14 @@ _showSourceDisassemCommand (void)
 			       0,
 			       srcHeight - 1);
 	      disassemWin->canHighlight = TRUE;
-	      m_beVisible (disassemWin);
-	      m_beVisible (disassemWin->detail.sourceInfo.executionInfo);
+	      tui_make_visible (&disassemWin->generic);
+	      tui_make_visible (disassemWin->detail.sourceInfo.executionInfo);
 	    }
 	  if (m_winPtrNotNull (disassemWin))
 	    {
 	      srcWin->detail.sourceInfo.hasLocator = FALSE;
 	      disassemWin->detail.sourceInfo.hasLocator = TRUE;
-	      m_beVisible (locator);
+	      tui_make_visible (locator);
 	      tui_show_locator_content ();
 	      tui_show_source_content (disassemWin);
 
@@ -858,10 +858,10 @@ _showSourceDisassemCommand (void)
 				   0,
 				   cmdWin->generic.origin.y);
 		  cmdWin->canHighlight = FALSE;
-		  m_beVisible (cmdWin);
+		  tui_make_visible (&cmdWin->generic);
 		}
 	      if (m_winPtrNotNull (cmdWin))
-		tuiRefreshWin (&cmdWin->generic);
+		tui_refresh_win (&cmdWin->generic);
 	    }
 	}
       setCurrentLayoutTo (SRC_DISASSEM_COMMAND);
@@ -886,8 +886,8 @@ _showData (TuiLayoutType newLayout)
 
   dataHeight = totalHeight / 2;
   srcHeight = totalHeight - dataHeight;
-  m_allBeInvisible ();
-  m_beInvisible (locator);
+  tui_make_all_invisible ();
+  tui_make_invisible (locator);
   _makeDataWindow (&dataWin, dataHeight, 0);
   dataWin->canHighlight = TRUE;
   if (newLayout == SRC_DATA_COMMAND)
@@ -922,8 +922,8 @@ _showData (TuiLayoutType newLayout)
 		       3,
 		       0,
 		       dataHeight - 1);
-      m_beVisible (winList[winType]);
-      m_beVisible (winList[winType]->detail.sourceInfo.executionInfo);
+      tui_make_visible (&winList[winType]->generic);
+      tui_make_visible (winList[winType]->detail.sourceInfo.executionInfo);
       _initGenWinInfo (locator,
 		       LOCATOR_WIN,
 		       2 /* 1 */ ,
@@ -932,7 +932,7 @@ _showData (TuiLayoutType newLayout)
 		       totalHeight - 1);
     }
   winList[winType]->detail.sourceInfo.hasLocator = TRUE;
-  m_beVisible (locator);
+  tui_make_visible (locator);
   tui_show_locator_content ();
   addToSourceWindows (winList[winType]);
   setCurrentLayoutTo (newLayout);
@@ -998,7 +998,7 @@ _initAndMakeWin (Opaque * winInfoPtr, TuiWinType winType,
 	  else
 	    ((TuiWinInfoPtr) opaqueWinInfo)->canHighlight = TRUE;
 	}
-      makeWindow (generic, boxIt);
+      tui_make_window (generic, boxIt);
     }
   *winInfoPtr = opaqueWinInfo;
 }
@@ -1106,20 +1106,20 @@ _showSourceOrDisassemAndCommand (TuiLayoutType layoutType)
 			   0,
 			   0);
 	  (*winInfoPtr)->canHighlight = TRUE;
-	  m_beVisible (*winInfoPtr);
-	  m_beVisible ((*winInfoPtr)->detail.sourceInfo.executionInfo);
+	  tui_make_visible (&(*winInfoPtr)->generic);
+	  tui_make_visible ((*winInfoPtr)->detail.sourceInfo.executionInfo);
 	}
       if (m_winPtrNotNull (*winInfoPtr))
 	{
 	  (*winInfoPtr)->detail.sourceInfo.hasLocator = TRUE;
-	  m_beVisible (locator);
+	  tui_make_visible (locator);
 	  tui_show_locator_content ();
 	  tui_show_source_content (*winInfoPtr);
 
 	  if (m_winPtrIsNull (cmdWin))
 	    {
 	      _makeCommandWindow (&cmdWin, cmdHeight, srcHeight);
-	      tuiRefreshWin (&cmdWin->generic);
+	      tui_refresh_win (&cmdWin->generic);
 	    }
 	  else
 	    {
@@ -1130,7 +1130,7 @@ _showSourceOrDisassemAndCommand (TuiLayoutType layoutType)
 			       cmdWin->generic.origin.x,
 			       cmdWin->generic.origin.y);
 	      cmdWin->canHighlight = FALSE;
-	      m_beVisible (cmdWin);
+	      tui_make_visible (&cmdWin->generic);
 	    }
 	}
       setCurrentLayoutTo (layoutType);
