@@ -1,3 +1,13 @@
+2001-07-31  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/i386/xm-i386.h: New file.
+	* config/i386/xm-fbsd.h: Removed.
+	* config/i386/xm-linux.h: Removed.
+	* config/i386/fbsd.mh: Reorganize a bit.
+	(XM_FILE): Set to xm-i386.h instead of xm-fbsd.h.
+	* config/i386/linux.mh (XM_FILE): Set to xm-i386.h insread of
+	xm-linux.h.
+
 2001-07-30  Jim Blandy  <jimb@redhat.com>
 
 	* dwarf2read.c (dwarf2_build_psymtabs_hard): Doc fix.

@@ -1,5 +1,5 @@
-/* Host-dependent definitions for FreeBSD/i386.
-   Copyright 2000 Free Software Foundation, Inc.
+/* Host-dependent definitions for i386.
+   Copyright 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -18,11 +18,17 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#ifndef XM_FBSD_H
-#define XM_FBSD_H
+#ifndef XM_I386_H
+#define XM_I386_H
 
+#include "floatformat.h"
+
+/* FIXME: kettenis/2001-07-29: Get rid of HOST_BYTE_ORDER when Andrew
+   has erradicated it from the sources.  */
 #define HOST_BYTE_ORDER LITTLE_ENDIAN
 
+#define HOST_FLOAT_FORMAT &floatformat_ieee_single_little
+#define HOST_DOUBLE_FORMAT &floatformat_ieee_double_little
 #define HOST_LONG_DOUBLE_FORMAT &floatformat_i387_ext
 
-#endif /* XM_FBSD_H */
+#endif /* XM_386_H */
