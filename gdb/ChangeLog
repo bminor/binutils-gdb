@@ -1,3 +1,8 @@
+Wed Apr  7 11:22:43 1993  Fred Fish  (fnf@cygnus.com)
+
+	* sparclite/Makefile.in:  Add dummy mostlyclean, clean,
+	distclean, and realclean targets.
+
 Wed Apr  7 10:11:22 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* symfile.h: Change NULL->'\0' in comment (that wasn't a typo).
