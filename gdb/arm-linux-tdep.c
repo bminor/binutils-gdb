@@ -19,7 +19,8 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
-#include "symtab.h"
+#include "target.h"
+#include "value.h"
 #include "gdbtypes.h"
 
 #ifdef GET_LONGJMP_TARGET
