@@ -41,11 +41,11 @@ app.c
 as.c
 as.h
 atof-generic.c
-atof-targ.c
 bignum-copy.c
 bignum.h
 cond.c
 config
+config.sub
 configure
 configure.in
 debug.c
@@ -91,7 +91,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.1  1991/05/23 17:18:12  rich
+# Revision 1.2  1991/09/02 01:05:04  rich
+# Correcting some things.
+#
+# Revision 1.1  1991/05/23  17:18:12  rich
 # Initial revision
 #
 #
