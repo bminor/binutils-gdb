@@ -487,7 +487,9 @@ else
 fi
 
 if ( echo $* | grep lose\-gdbtk > /dev/null ) ; then
-	echo Catering to RMS by removing traces of \"gdbtk\"...
+	if [ -n "${verbose}" ] ; then
+		echo Catering to RMS by removing traces of \"gdbtk\"...
+	fi
 	for i in * ; do
 		if test ! -d $i && (grep sanitize-gdbtk $i > /dev/null) ; then
 			if [ -n "${verbose}" ] ; then
@@ -496,7 +498,9 @@ if ( echo $* | grep lose\-gdbtk > /dev/null ) ; then
 			cp $i new
 			sed '/start\-sanitize\-gdbtk/,/end-\sanitize\-gdbtk/d' < $i > new
 			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-				echo Caching $i in .Recover...
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
 				mv $i .Recover
 			fi
 			mv new $i
@@ -512,7 +516,9 @@ if ( echo $* | grep lose\-gdbtk > /dev/null ) ; then
 	fi
 	mv new Makefile.in
 else
-	echo Leaving \"gdbtk\" in the sources...
+	if [ -n "${verbose}" ] ; then
+		echo Leaving \"gdbtk\" in the sources...
+	fi
 	for i in * ; do
 		if test ! -d $i && (grep sanitize-gdbtk $i > /dev/null) ; then
 			if [ -n "${verbose}" ] ; then
@@ -521,7 +527,9 @@ else
 			cp $i new
 			sed -e '/start\-sanitize\-gdbtk/d' -e '/end\-sanitize\-gdbtk/d' < $i > new
 			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-				echo Caching $i in .Recover...
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
 				mv $i .Recover
 			fi
 			mv new $i
