@@ -4671,13 +4671,22 @@ parse_section_name ()
   int len;
 
   SKIP_WHITESPACE ();
-  if (*input_line_pointer != '"')
+  if (*input_line_pointer == '"')
+      name = demand_copy_C_string (&len);
+  else
     {
-      as_bad ("Missing section name");
-      ignore_rest_of_line ();
-      return 0;
+      char *start = input_line_pointer;
+      char c = get_symbol_end ();
+
+      if (input_line_pointer == start)
+	{
+	  as_bad ("Missing section name");
+	  ignore_rest_of_line ();
+	  return 0;
+	}
+      name = obstack_copy (&notes, start, input_line_pointer - start + 1);
+      *input_line_pointer = c;
     }
-  name = demand_copy_C_string (&len);
   if (!name)
     {
       ignore_rest_of_line ();
@@ -4704,6 +4713,7 @@ dot_xdata (size)
 
   md.keep_pending_output = 1;
   set_section (name);
+  obstack_free (&notes, name);
   cons (size);
   obj_elf_previous (0);
   md.keep_pending_output = 0;
@@ -4758,6 +4768,7 @@ dot_xfloat_cons (kind)
 
   md.keep_pending_output = 1;
   set_section (name);
+  obstack_free (&notes, name);
   stmt_float_cons (kind);
   obj_elf_previous (0);
   md.keep_pending_output = 0;
@@ -4773,6 +4784,7 @@ dot_xstringer (zero)
 
   md.keep_pending_output = 1;
   set_section (name);
+  obstack_free (&notes, name);
   stringer (zero);
   obj_elf_previous (0);
   md.keep_pending_output = 0;
@@ -4789,6 +4801,7 @@ dot_xdata_ua (size)
 
   md.keep_pending_output = 1;
   set_section (name);
+  obstack_free (&notes, name);
   md.auto_align = 0;
   cons (size);
   md.auto_align = saved_auto_align;
@@ -4807,6 +4820,7 @@ dot_xfloat_cons_ua (kind)
 
   md.keep_pending_output = 1;
   set_section (name);
+  obstack_free (&notes, name);
   md.auto_align = 0;
   stmt_float_cons (kind);
   md.auto_align = saved_auto_align;
@@ -5232,6 +5246,7 @@ const pseudo_typeS md_pseudo_table[] =
     { "xdata2", dot_xdata, 2 },
     { "xdata4", dot_xdata, 4 },
     { "xdata8", dot_xdata, 8 },
+    { "xdata16", dot_xdata, 16 },
     { "xreal4", dot_xfloat_cons, 'f' },
     { "xreal8", dot_xfloat_cons, 'd' },
     { "xreal10", dot_xfloat_cons, 'x' },
@@ -5243,6 +5258,7 @@ const pseudo_typeS md_pseudo_table[] =
     { "xdata2.ua", dot_xdata_ua, 2 },
     { "xdata4.ua", dot_xdata_ua, 4 },
     { "xdata8.ua", dot_xdata_ua, 8 },
+    { "xdata16.ua", dot_xdata_ua, 16 },
     { "xreal4.ua", dot_xfloat_cons_ua, 'f' },
     { "xreal8.ua", dot_xfloat_cons_ua, 'd' },
     { "xreal10.ua", dot_xfloat_cons_ua, 'x' },

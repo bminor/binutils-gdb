@@ -1,3 +1,14 @@
+2005-02-11  Jan Beulich  <jbeulich@novell.com>
+
+	* config/tc-ia64.c (parse_section_name): Handle non-quoted first
+	argument.
+	(dot_xdata): Free section name after use.
+	(dot_float_cons): Likewise.
+	(dot_xstringer): Likewise.
+	(dot_xdata_ua): Likewise.
+	(dot_float_cons_ua): Likewise.
+	(md_pseudo_table): Add xdata16 and xdata16.ua.
+
 2005-02-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* doc/all.texi: Add IA64.
