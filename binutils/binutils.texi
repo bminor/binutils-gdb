@@ -56,6 +56,7 @@ into another language, under the above conditions for modified versions.
 @sp 1
 @subtitle May 1993
 @author Roland H. Pesch
+@author Jeffrey M. Osier
 @author Cygnus Support
 @page
 
@@ -1273,8 +1274,17 @@ c++filt @var{option} @var{symbol}
 @chapter nlmconv
 
 @code{nlmconv} converts a relocatable object file into a NetWare
-Loadable Module.  @code{nlmconv} currently only works with @samp{i386}
-object files in @code{coff}, @sc{elf}, or @code{a.out} format.
+Loadable Module.  @code{nlmconv} currently works with @samp{i386} object
+files in @code{coff}, @sc{elf}, or @code{a.out} format, and @sc{SPARC}
+object files in @sc{elf}, or @code{a.out} format@footnote{
+@code{nlmconv} should work with any @samp{i386} or @sc{sparc} object
+format in the Binary File Descriptor library.  It has only been tested
+with the above formats.}.
+
+@quotation
+@emph{Warning:} @code{nlmconv} is not always built as part of the binary
+utilities, since it is only useful for NLM targets.
+@end quotation
 
 @smallexample
 nlmconv [ -I @var{format} | --input-format=@var{format} ]
