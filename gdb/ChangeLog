@@ -1,3 +1,7 @@
+Mon Apr  5 20:48:54 1993  Stu Grossman  (grossman@cygnus.com)
+
+	* config/h8500/tm-h8500.h:  Clean up brain damage found by GCC.
+
 Fri Apr  2 08:23:14 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* xcoffread.c (xcoff_symfile_offsets): Use 0 not addr for offsets.
