@@ -1,3 +1,8 @@
+Thu Nov 17 14:29:13 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* archive.c (_bfd_write_archive_contents): Round up the archive
+	header size of the extended name table to an even number.
+
 Wed Nov 16 16:08:06 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* coff-sh.c: Deleted some code that was commented out or inside
