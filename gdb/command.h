@@ -115,7 +115,7 @@ struct cmd_list_element
 	void (*sfunc) (char *args, int from_tty, struct cmd_list_element * c);
       }
     function;
-#define NO_FUNCTION ((void (*) PARAMS((char *args, int from_tty))) 0)
+#define NO_FUNCTION ((void (*) (char *args, int from_tty)) 0)
 
     /* Documentation of this command (or help topic).
        First line is brief documentation; remaining lines form, with it,

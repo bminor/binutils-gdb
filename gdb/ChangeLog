@@ -1,3 +1,8 @@
+2000-06-08  Kevin Buettner  <kevinb@redhat.com>
+
+	* command.h, monitor.h: Eliminate use of PARAMS from these
+	files.
+
 2000-06-08  Fernando Nasser  <fnasser@cygnus.com>
 
 	* config/i386/tm-embed.h: New file.  Specific for embedded targets
