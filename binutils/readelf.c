@@ -1073,12 +1073,17 @@ get_dynamic_type (type)
     case DT_PLTPADSZ:	return "PLTPADSZ";
     case DT_MOVEENT:	return "MOVEENT";
     case DT_MOVESZ:	return "MOVESZ";
-    case DT_FEATURE_1:	return "FEATURE_1";
+    case DT_FEATURE:	return "FEATURE";
     case DT_POSFLAG_1:	return "POSFLAG_1";
     case DT_SYMINSZ:	return "SYMINSZ";
     case DT_SYMINENT:	return "SYMINENT"; /* aka VALRNGHI */
 
     case DT_ADDRRNGLO:  return "ADDRRNGLO";
+    case DT_CONFIG:	return "CONFIG";
+    case DT_DEPAUDIT:	return "DEPAUDIT";
+    case DT_AUDIT:	return "AUDIT";
+    case DT_PLTPAD:	return "PLTPAD";
+    case DT_MOVETAB:	return "MOVETAB";
     case DT_SYMINFO:	return "SYMINFO"; /* aka ADDRRNGHI */
 
     case DT_VERSYM:	return "VERSYM";
@@ -1094,6 +1099,10 @@ get_dynamic_type (type)
     case DT_AUXILIARY:	return "AUXILARY";
     case DT_USED:	return "USED";
     case DT_FILTER:	return "FILTER";
+
+#if DT_CHECKSUM != 0
+    case DT_CHECKSUM:	return "CHECKSUM";
+#endif
 
     default:
       if ((type >= DT_LOPROC) && (type <= DT_HIPROC))
@@ -3341,7 +3350,7 @@ process_dynamic_segment (file)
 	    }
 	  break;
 
-	case DT_FEATURE_1:
+	case DT_FEATURE:
 	  if (do_dynamic)
 	    {
 	      printf (_("Flags:"));
@@ -3354,6 +3363,11 @@ process_dynamic_segment (file)
 		    {
 		      printf (" PARINIT");
 		      val ^= DTF_1_PARINIT;
+		    }
+		  if (val & DTF_1_CONFEXP)
+		    {
+		      printf (" CONFEXP");
+		      val ^= DTF_1_CONFEXP;
 		    }
 		  if (val != 0)
 		    printf (" %lx", val);
@@ -3451,6 +3465,21 @@ process_dynamic_segment (file)
 		    {
 		      printf (" INTERPOSE");
 		      val ^= DF_1_INTERPOSE;
+		    }
+		  if (val & DF_1_NODEPLIB)
+		    {
+		      printf (" NODEPLIB");
+		      val ^= DF_1_NODEPLIB;
+		    }
+		  if (val & DF_1_NODUMP)
+		    {
+		      printf (" NODUMP");
+		      val ^= DF_1_NODUMP;
+		    }
+		  if (val & DF_1_CONLFAT)
+		    {
+		      printf (" CONLFAT");
+		      val ^= DF_1_CONLFAT;
 		    }
 		  if (val != 0)
 		    printf (" %lx", val);

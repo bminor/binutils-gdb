@@ -1,3 +1,14 @@
+2000-07-19  H.J. Lu  <hjl@gnu.org>
+
+	* readelf.c (get_dynamic_type): Change DT_FEATURE_1 to
+	DT_FEATURE.
+	(process_dynamic_segment): Likewise.
+
+	* readelf.c (get_dynamic_type): Handle DT_CONFIG, DT_DEPAUDIT,
+	DT_AUDIT, DT_PLTPAD, DT_MOVETAB and DT_CHECKSUM.
+	(process_dynamic_segment): Handle DTF_1_CONFEXP, DF_1_NODEPLIB,
+	DF_1_NODUMP and DF_1_CONLFAT.
+
 2000-07-18  Nick Clifton  <nickc@cygnus.com>
 
 	* binutils.texi (readelf): Fix spelling typo.
