@@ -29,9 +29,4 @@
 
 #include "ns32k/tm-ns32k.h"
 
-/* Saved Pc.  Get it from sigcontext if within sigtramp.  */
-
-/* Offset to saved PC in sigcontext, from <machine/signal.h>.  */
-#define SIGCONTEXT_PC_OFFSET 20
-
 #endif /* TM_NBSD_H */

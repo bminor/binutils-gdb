@@ -37,9 +37,4 @@
 #define SIGTRAMP_START(pc)	0xfdbfdfc0
 #define SIGTRAMP_END(pc)	0xfdbfe000
 
-/* Saved Pc.  Get it from sigcontext if within sigtramp.  */
-
-/* Offset to saved PC in sigcontext, from <sys/signal.h>.  */
-#define SIGCONTEXT_PC_OFFSET 20
-
 #endif /* ifndef TM_I386BSD_H */

@@ -22,9 +22,6 @@
 #ifndef TM_NBSD_H
 #define TM_NBSD_H
 
-/* Saved Pc.  Get it from sigcontext if within sigtramp.  */
-#define SIGCONTEXT_PC_OFFSET 8
-
 #include "mips/tm-mips.h"
 #include "solib.h"
 

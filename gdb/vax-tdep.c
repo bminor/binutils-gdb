@@ -141,9 +141,10 @@ vax_sigtramp_saved_pc (struct frame_info *frame)
     sigcontext_addr = read_memory_typed_address
       (read_register (SP_REGNUM) + sigcontext_offs, builtin_type_void_data_ptr);
 
-  /* Don't cause a memory_error when accessing sigcontext in case the stack
+  /* Offset to saved PC in sigcontext, from <sys/signal.h>.  Don't
+     cause a memory_error when accessing sigcontext in case the stack
      layout has changed or the stack is corrupt.  */
-  target_read_memory (sigcontext_addr + SIGCONTEXT_PC_OFFSET, buf, ptrbytes);
+  target_read_memory (sigcontext_addr + 12, buf, ptrbytes);
   return extract_typed_address (buf, builtin_type_void_func_ptr);
 }
 

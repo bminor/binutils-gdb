@@ -26,9 +26,6 @@
 
 #include "config/tm-linux.h"
 
-/* Offset to saved PC in sigcontext structure, from <asm/sigcontext.h> */
-#define SIGCONTEXT_PC_OFFSET	(sizeof(unsigned long) * 18)
-
 /* We've multi-arched this.  */
 #undef IN_SOLIB_CALL_TRAMPOLINE
 
