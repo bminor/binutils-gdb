@@ -1,3 +1,10 @@
+2004-01-12  Ian Lance Taylor  <ian@wasabisystems.com>
+
+	* stabs.c (parse_stab_argtypes): Handle g++ ABI version 3 names.
+	(stab_demangle_argtypes): Likewise.
+	(stab_demangle_v3_argtypes): New static function.
+	(stab_demangle_v3_arg): New static function.
+
 2004-01-12  Nick Clifton  <nickc@redhat.com>
 
 	* objcopy.c (copy_object): Make the function boolean, returning

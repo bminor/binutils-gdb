@@ -201,6 +201,11 @@ static debug_type stab_find_tagged_type
   (void *, struct stab_handle *, const char *, int, enum debug_type_kind);
 static debug_type *stab_demangle_argtypes
   (void *, struct stab_handle *, const char *, bfd_boolean *, unsigned int);
+static debug_type *stab_demangle_v3_argtypes
+  (void *, struct stab_handle *, const char *, bfd_boolean *);
+static debug_type stab_demangle_v3_arg
+  (void *, struct stab_handle *, struct demangle_component *, debug_type,
+   bfd_boolean *);
 
 /* Save a string in memory.  */
 
@@ -2814,6 +2819,7 @@ parse_stab_argtypes (void *dhandle, struct stab_handle *info,
   bfd_boolean is_full_physname_constructor;
   bfd_boolean is_constructor;
   bfd_boolean is_destructor;
+  bfd_boolean is_v3;
   debug_type *args;
   bfd_boolean varargs;
   unsigned int physname_len = 0;
@@ -2833,8 +2839,9 @@ parse_stab_argtypes (void *dhandle, struct stab_handle *info,
 		    && (argtypes[1] == '$' || argtypes[1] == '.')
 		    && argtypes[2] == '_')
 		   || strncmp (argtypes, "__dt", 4) == 0);
+  is_v3 = argtypes[0] == '_' && argtypes[1] == 'Z';
 
-  if (is_destructor || is_full_physname_constructor)
+  if (is_destructor || is_full_physname_constructor || is_v3)
     *pphysname = argtypes;
   else
     {
@@ -3696,6 +3703,10 @@ stab_demangle_argtypes (void *dhandle, struct stab_handle *info,
 			unsigned int physname_len)
 {
   struct stab_demangle_info minfo;
+
+  /* Check for the g++ V3 ABI.  */
+  if (physname[0] == '_' && physname[1] == 'Z')
+    return stab_demangle_v3_argtypes (dhandle, info, physname, pvarargs);
 
   minfo.dhandle = dhandle;
   minfo.info = info;
@@ -5044,4 +5055,295 @@ stab_demangle_remember_type (struct stab_demangle_info *minfo,
   ++minfo->typestring_count;
 
   return TRUE;
+}
+
+/* Demangle names encoded using the g++ V3 ABI.  The newer versions of
+   g++ which use this ABI do not encode ordinary method argument types
+   in a mangled name; they simply output the argument types.  However,
+   for a static method, g++ simply outputs the return type and the
+   physical name.  So in that case we need to demangle the name here.
+   Here PHYSNAME is the physical name of the function, and we set the
+   variable pointed at by PVARARGS to indicate whether this function
+   is varargs.  This returns NULL, or a NULL terminated array of
+   argument types.  */
+
+static debug_type *
+stab_demangle_v3_argtypes (void *dhandle, struct stab_handle *info,
+			   const char *physname, bfd_boolean *pvarargs)
+{
+  struct demangle_component *dc;
+  void *mem;
+  unsigned int alloc, count;
+  debug_type *pargs;
+
+  dc = cplus_demangle_v3_components (physname, DMGL_PARAMS | DMGL_ANSI, &mem);
+  if (dc == NULL)
+    {
+      stab_bad_demangle (physname);
+      return NULL;
+    }
+
+  /* We expect to see TYPED_NAME, and the right subtree describes the
+     function type.  */
+  if (dc->type != DEMANGLE_COMPONENT_TYPED_NAME
+      || dc->u.s_binary.right->type != DEMANGLE_COMPONENT_FUNCTION_TYPE)
+    {
+      fprintf (stderr, _("Demangled name is not a function\n"));
+      free (mem);
+      return NULL;
+    }
+
+  alloc = 10;
+  pargs = (debug_type *) xmalloc (alloc * sizeof *pargs);
+  *pvarargs = FALSE;
+
+  count = 0;
+
+  for (dc = dc->u.s_binary.right->u.s_binary.right;
+       dc != NULL;
+       dc = dc->u.s_binary.right)
+    {
+      debug_type arg;
+      bfd_boolean varargs;
+
+      if (dc->type != DEMANGLE_COMPONENT_ARGLIST)
+	{
+	  fprintf (stderr, _("Unexpected type in demangle tree\n"));
+	  free (mem);
+	  return NULL;
+	}
+
+      arg = stab_demangle_v3_arg (dhandle, info, dc->u.s_binary.left,
+				  NULL, &varargs);
+      if (arg == NULL)
+	{
+	  if (varargs)
+	    {
+	      *pvarargs = TRUE;
+	      continue;
+	    }
+	  free (mem);
+	  return NULL;
+	}
+
+      if (count + 1 >= alloc)
+	{
+	  alloc += 10;
+	  pargs = (debug_type *) xrealloc (pargs, alloc * sizeof *pargs);
+	}
+
+      pargs[count] = arg;
+      ++count;
+    }
+
+  pargs[count] = DEBUG_TYPE_NULL;
+
+  free (mem);
+
+  return pargs;
+}
+
+/* Convert a struct demangle_component tree describing an argument
+   type into a debug_type.  */
+
+static debug_type
+stab_demangle_v3_arg (void *dhandle, struct stab_handle *info,
+		      struct demangle_component *dc, debug_type context,
+		      bfd_boolean *pvarargs)
+{
+  debug_type dt;
+
+  if (pvarargs != NULL)
+    *pvarargs = FALSE;
+
+  switch (dc->type)
+    {
+      /* FIXME: These are demangle component types which we probably
+	 need to handle one way or another.  */
+    case DEMANGLE_COMPONENT_LOCAL_NAME:
+    case DEMANGLE_COMPONENT_TYPED_NAME:
+    case DEMANGLE_COMPONENT_TEMPLATE_PARAM:
+    case DEMANGLE_COMPONENT_CTOR:
+    case DEMANGLE_COMPONENT_DTOR:
+    case DEMANGLE_COMPONENT_JAVA_CLASS:
+    case DEMANGLE_COMPONENT_RESTRICT_THIS:
+    case DEMANGLE_COMPONENT_VOLATILE_THIS:
+    case DEMANGLE_COMPONENT_CONST_THIS:
+    case DEMANGLE_COMPONENT_VENDOR_TYPE_QUAL:
+    case DEMANGLE_COMPONENT_COMPLEX:
+    case DEMANGLE_COMPONENT_IMAGINARY:
+    case DEMANGLE_COMPONENT_VENDOR_TYPE:
+    case DEMANGLE_COMPONENT_FUNCTION_TYPE:
+    case DEMANGLE_COMPONENT_ARRAY_TYPE:
+    case DEMANGLE_COMPONENT_PTRMEM_TYPE:
+    case DEMANGLE_COMPONENT_ARGLIST:
+    default:
+      fprintf (stderr, _("Unrecognized demangle component\n"));
+      return NULL;
+
+    case DEMANGLE_COMPONENT_NAME:
+      if (context != NULL)
+	{
+	  const debug_field *fields;
+
+	  fields = debug_get_fields (dhandle, context);
+	  if (fields != NULL)
+	    {
+	      /* Try to find this type by looking through the context
+		 class.  */
+	      for (; *fields != DEBUG_FIELD_NULL; fields++)
+		{
+		  debug_type ft;
+		  const char *dn;
+
+		  ft = debug_get_field_type (dhandle, *fields);
+		  if (ft == NULL)
+		    return NULL;
+		  dn = debug_get_type_name (dhandle, ft);
+		  if (dn != NULL
+		      && (int) strlen (dn) == dc->u.s_name.len
+		      && strncmp (dn, dc->u.s_name.s, dc->u.s_name.len) == 0)
+		    return ft;
+		}
+	    }
+	}
+      return stab_find_tagged_type (dhandle, info, dc->u.s_name.s,
+				    dc->u.s_name.len, DEBUG_KIND_ILLEGAL);
+
+    case DEMANGLE_COMPONENT_QUAL_NAME:
+      context = stab_demangle_v3_arg (dhandle, info, dc->u.s_binary.left,
+				      context, NULL);
+      if (context == NULL)
+	return NULL;
+      return stab_demangle_v3_arg (dhandle, info, dc->u.s_binary.right,
+				   context, NULL);
+
+    case DEMANGLE_COMPONENT_TEMPLATE:
+      {
+	char *p;
+	size_t alc;
+
+	/* We print this component to get a class name which we can
+	   use.  FIXME: This probably won't work if the template uses
+	   template parameters which refer to an outer template.  */
+	p = cplus_demangle_print (DMGL_PARAMS | DMGL_ANSI, dc, 20, &alc);
+	if (p == NULL)
+	  {
+	    fprintf (stderr, _("Failed to print demangled template\n"));
+	    return NULL;
+	  }
+	dt = stab_find_tagged_type (dhandle, info, p, strlen (p),
+				    DEBUG_KIND_CLASS);
+	free (p);
+	return dt;
+      }
+
+    case DEMANGLE_COMPONENT_SUB_STD:
+      return stab_find_tagged_type (dhandle, info, dc->u.s_string.string,
+				    dc->u.s_string.len, DEBUG_KIND_ILLEGAL);
+
+    case DEMANGLE_COMPONENT_RESTRICT:
+    case DEMANGLE_COMPONENT_VOLATILE:
+    case DEMANGLE_COMPONENT_CONST:
+    case DEMANGLE_COMPONENT_POINTER:
+    case DEMANGLE_COMPONENT_REFERENCE:
+      dt = stab_demangle_v3_arg (dhandle, info, dc->u.s_binary.left, NULL,
+				 NULL);
+      if (dt == NULL)
+	return NULL;
+
+      switch (dc->type)
+	{
+	default:
+	  abort ();
+	case DEMANGLE_COMPONENT_RESTRICT:
+	  /* FIXME: We have no way to represent restrict.  */
+	  return dt;
+	case DEMANGLE_COMPONENT_VOLATILE:
+	  return debug_make_volatile_type (dhandle, dt);
+	case DEMANGLE_COMPONENT_CONST:
+	  return debug_make_const_type (dhandle, dt);
+	case DEMANGLE_COMPONENT_POINTER:
+	  return debug_make_pointer_type (dhandle, dt);
+	case DEMANGLE_COMPONENT_REFERENCE:
+	  return debug_make_reference_type (dhandle, dt);
+	}
+
+    case DEMANGLE_COMPONENT_BUILTIN_TYPE:
+      {
+	char *p;
+	size_t alc;
+	debug_type ret;
+
+	/* We print this component in order to find out the type name.
+	   FIXME: Should we instead expose the
+	   demangle_builtin_type_info structure?  */
+	p = cplus_demangle_print (DMGL_PARAMS | DMGL_ANSI, dc, 20, &alc);
+	if (p == NULL)
+	  {
+	    fprintf (stderr, _("Couldn't get demangled builtin type\n"));
+	    return NULL;
+	  }
+
+	/* The mangling is based on the type, but does not itself
+	   indicate what the sizes are.  So we have to guess.  */
+	if (strcmp (p, "signed char") == 0)
+	  ret = debug_make_int_type (dhandle, 1, FALSE);
+	else if (strcmp (p, "bool") == 0)
+	  ret = debug_make_bool_type (dhandle, 1);
+	else if (strcmp (p, "char") == 0)
+	  ret = debug_make_int_type (dhandle, 1, FALSE);
+	else if (strcmp (p, "double") == 0)
+	  ret = debug_make_float_type (dhandle, 8);
+	else if (strcmp (p, "long double") == 0)
+	  ret = debug_make_float_type (dhandle, 8);
+	else if (strcmp (p, "float") == 0)
+	  ret = debug_make_float_type (dhandle, 4);
+	else if (strcmp (p, "__float128") == 0)
+	  ret = debug_make_float_type (dhandle, 16);
+	else if (strcmp (p, "unsigned char") == 0)
+	  ret = debug_make_int_type (dhandle, 1, TRUE);
+	else if (strcmp (p, "int") == 0)
+	  ret = debug_make_int_type (dhandle, 4, FALSE);
+	else if (strcmp (p, "unsigned int") == 0)
+	  ret = debug_make_int_type (dhandle, 4, TRUE);
+	else if (strcmp (p, "long") == 0)
+	  ret = debug_make_int_type (dhandle, 4, FALSE);
+	else if (strcmp (p, "unsigned long") == 0)
+	  ret = debug_make_int_type (dhandle, 4, TRUE);
+	else if (strcmp (p, "__int128") == 0)
+	  ret = debug_make_int_type (dhandle, 16, FALSE);
+	else if (strcmp (p, "unsigned __int128") == 0)
+	  ret = debug_make_int_type (dhandle, 16, TRUE);
+	else if (strcmp (p, "short") == 0)
+	  ret = debug_make_int_type (dhandle, 2, FALSE);
+	else if (strcmp (p, "unsigned short") == 0)
+	  ret = debug_make_int_type (dhandle, 2, TRUE);
+	else if (strcmp (p, "void") == 0)
+	  ret = debug_make_void_type (dhandle);
+	else if (strcmp (p, "wchar_t") == 0)
+	  ret = debug_make_int_type (dhandle, 4, TRUE);
+	else if (strcmp (p, "long long") == 0)
+	  ret = debug_make_int_type (dhandle, 8, FALSE);
+	else if (strcmp (p, "unsigned long long") == 0)
+	  ret = debug_make_int_type (dhandle, 8, TRUE);
+	else if (strcmp (p, "...") == 0)
+	  {
+	    if (pvarargs == NULL)
+	      fprintf (stderr, _("Unexpected demangled varargs\n"));
+	    else
+	      *pvarargs = TRUE;
+	    ret = NULL;
+	  }
+	else
+	  {
+	    fprintf (stderr, _("Unrecognized demangled builtin type\n"));
+	    ret = NULL;
+	  }
+
+	free (p);
+
+	return ret;
+      }
+    }
 }
