@@ -1,3 +1,14 @@
+Thu Feb 12 14:10:44 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* lexsup.c (help): Update bug-gnu-utils address.
+	* ld.texinfo (Bug Reporting): Likewise.
+
+Tue Feb 10 18:05:56 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldlang.c (lang_size_sections): Warn if some memory regions were
+	defined, but a loadable section is going into the default memory
+	region.
+
 Tue Feb 10 16:17:20 1998  H.J. Lu  <hjl@gnu.org>
 
 	* ldlex.l (V_IDENTIFIER): Allow '.' as symbol prefix.
