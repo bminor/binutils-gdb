@@ -4259,6 +4259,27 @@ read_and_display_attr (attribute, form, data, pointer_size)
 	default:                     printf ("(Unknown: %x)", uvalue); break;
 	}
       break;
+
+    case DW_AT_encoding:
+      switch (uvalue)
+	{
+	case DW_ATE_void:            printf ("(void)"); break;
+	case DW_ATE_address:         printf ("(machine address)"); break;
+	case DW_ATE_boolean:         printf ("(boolean)"); break;
+	case DW_ATE_complex_float:   printf ("(complex float)"); break;
+	case DW_ATE_float:           printf ("(float)"); break;
+	case DW_ATE_signed:          printf ("(signed)"); break;
+	case DW_ATE_signed_char:     printf ("(signed char)"); break;
+	case DW_ATE_unsigned:        printf ("(unsigned)"); break;
+	case DW_ATE_unsigned_char:   printf ("(unsigned char)"); break;
+	default:
+	  if (uvalue >= DW_ATE_lo_user
+	      && uvalue <= DW_ATE_hi_user)
+	    printf ("(user defined type)");
+	  else
+	    printf ("(unknown type)");
+	  break;
+	}
       
     default:
       break;

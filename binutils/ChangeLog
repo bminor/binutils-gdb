@@ -1,5 +1,8 @@
 1999-02-02  Nick Clifton  <nickc@cygnus.com>
 
+	* readelf.c (read_and_display_attr): Add display of basic type
+	encodings. 
+
 	* binutils.texi: Fixed bug in readefl documentation.
 
 Mon Feb  1 12:38:01 1999  Catherine Moore  <clm@cygnus.com>
