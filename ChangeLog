@@ -1,3 +1,9 @@
+start-sanitize-d30v
+Sat Nov  8 14:42:59 1997  Michael Meissner  <meissner@cygnus.com>
+
+	* configure.in (d30v-*-*): Configure target-libgloss on the D30V.
+
+end-sanitize-d30v
 Fri Nov  7 10:34:09 1997  Rob Savoye  <rob@darkstar.cygnus.com>
 
 	* include/libiberty.h: Add extern "C" { so it can be used with C++
