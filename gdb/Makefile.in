@@ -2032,10 +2032,10 @@ m68knbsd-nat.o: m68knbsd-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) \
 m68knbsd-tdep.o: m68knbsd-tdep.c $(defs_h) $(gdbtypes_h) $(regcache_h)
 m68k-stub.o: m68k-stub.c
 m68k-tdep.o: m68k-tdep.c $(defs_h) $(dwarf2_frame_h) $(frame_h) \
-	$(frame_base_h) $(frame_unwind_h) $(symtab_h) $(gdbcore_h) \
-	$(value_h) $(gdb_string_h) $(gdb_assert_h) $(inferior_h) \
-	$(regcache_h) $(arch_utils_h) $(osabi_h) $(dis_asm_h) $(m68k_tdep_h) \
-	$(gregset_h)
+	$(frame_base_h) $(frame_unwind_h) $(floatformat_h) $(symtab_h)\
+	$(gdbcore_h) $(value_h) $(gdb_string_h) $(gdb_assert_h)	\
+	$(inferior_h) $(regcache_h) $(arch_utils_h) $(osabi_h) $(dis_asm_h) \
+	$(m68k_tdep_h) $(gregset_h)
 macrocmd.o: macrocmd.c $(defs_h) $(macrotab_h) $(macroexp_h) $(macroscope_h) \
 	$(command_h) $(gdbcmd_h)
 macroexp.o: macroexp.c $(defs_h) $(gdb_obstack_h) $(bcache_h) $(macrotab_h) \

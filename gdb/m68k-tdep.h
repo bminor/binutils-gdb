@@ -67,9 +67,17 @@ struct gdbarch_tdep
   /* The size of each entry in the jump buffer.  */
   size_t jb_elt_size;
 
+  /* Register in which the address to store a structure value is
+     passed to a function.  */
+  int struct_value_regnum;
+
   /* Convention for returning structures.  */
   enum struct_return struct_return;
 };
+
+/* Initialize a SVR4 architecture variant.  */
+extern void m68k_svr4_init_abi (struct gdbarch_info, struct gdbarch *);
+
 
 /* Functions exported from m68kbsd-tdep.c.  */
 

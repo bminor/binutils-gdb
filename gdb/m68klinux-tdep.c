@@ -1,7 +1,7 @@
 /* Motorola m68k target-dependent support for GNU/Linux.
 
-   Copyright 1996, 1998, 2000, 2001, 2002, 2003 Free Software Foundation,
-   Inc.
+   Copyright 1996, 1998, 2000, 2001, 2002, 2003, 2004
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -275,108 +275,6 @@ m68k_linux_sigtramp_frame_sniffer (struct frame_info *next_frame)
   return NULL;
 }
 
-/* Extract from an array REGBUF containing the (raw) register state, a
-   function return value of TYPE, and copy that, in virtual format,
-   into VALBUF.  */
-
-static void
-m68k_linux_extract_return_value (struct type *type, struct regcache *regcache,
-				 void *valbuf)
-{
-  int len = TYPE_LENGTH (type);
-  char buf[M68K_MAX_REGISTER_SIZE];
-
-  if (TYPE_CODE (type) == TYPE_CODE_STRUCT
-      && TYPE_NFIELDS (type) == 1)
-    {
-      m68k_linux_extract_return_value (TYPE_FIELD_TYPE (type, 0), regcache,
-				       valbuf);
-      return;
-    }
-
-  if (TYPE_CODE (type) == TYPE_CODE_FLT)
-    {
-      regcache_raw_read (regcache, M68K_FP0_REGNUM, buf);
-      convert_typed_floating (buf, builtin_type_m68881_ext, valbuf, type);
-    }
-  else if (TYPE_CODE (type) == TYPE_CODE_PTR)
-    regcache_raw_read (regcache, M68K_A0_REGNUM, valbuf);
-  else
-    {
-      if (len <= 4)
-	{
-	  regcache_raw_read (regcache, M68K_D0_REGNUM, buf);
-	  memcpy (valbuf, buf + (4 - len), len);
-	}
-      else if (len <= 8)
-	{
-	  regcache_raw_read (regcache, M68K_D0_REGNUM, buf);
-	  memcpy (valbuf, buf + (8 - len), len - 4);
-	  regcache_raw_read (regcache, M68K_D1_REGNUM,
-			     (char *) valbuf + (len - 4));
-	}
-      else
-	internal_error (__FILE__, __LINE__,
-			"Cannot extract return value of %d bytes long.", len);
-    }
-}
-
-/* Write into the appropriate registers a function return value stored
-   in VALBUF of type TYPE, given in virtual format.  */
-
-static void
-m68k_linux_store_return_value (struct type *type, struct regcache *regcache,
-			       const void *valbuf)
-{
-  int len = TYPE_LENGTH (type);
-
-  if (TYPE_CODE (type) == TYPE_CODE_STRUCT
-      && TYPE_NFIELDS (type) == 1)
-    {
-      m68k_linux_store_return_value (TYPE_FIELD_TYPE (type, 0), regcache,
-				     valbuf);
-      return;
-    }
-
-  if (TYPE_CODE (type) == TYPE_CODE_FLT)
-    {
-      char buf[M68K_MAX_REGISTER_SIZE];
-      convert_typed_floating (valbuf, type, buf, builtin_type_m68881_ext);
-      regcache_raw_write (regcache, M68K_FP0_REGNUM, buf);
-    }
-  else if (TYPE_CODE (type) == TYPE_CODE_PTR)
-    regcache_raw_write (regcache, M68K_A0_REGNUM, valbuf);
-  else
-    {
-      if (len <= 4)
-	regcache_raw_write_part (regcache, M68K_D0_REGNUM,
-				 4 - len, len, valbuf);
-      else if (len <= 8)
-	{
-	  regcache_raw_write_part (regcache, M68K_D1_REGNUM, 8 - len,
-				   len - 4, valbuf);
-	  regcache_raw_write (regcache, M68K_D0_REGNUM,
-			      (char *) valbuf + (len - 4));
-	}
-      else
-	internal_error (__FILE__, __LINE__,
-			"Cannot store return value of %d bytes long.", len);
-    }
-}
-
-/* Extract from an array REGBUF containing the (raw) register state
-   the address in which a function should return its structure value,
-   as a CORE_ADDR.  */
-
-static CORE_ADDR
-m68k_linux_extract_struct_value_address (struct regcache *regcache)
-{
-  char buf[4];
-
-  regcache_cooked_read (regcache, M68K_A0_REGNUM, buf);
-  return extract_unsigned_integer (buf, 4);
-}
-
 static void
 m68k_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -384,11 +282,15 @@ m68k_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   tdep->jb_pc = M68K_LINUX_JB_PC;
   tdep->jb_elt_size = M68K_LINUX_JB_ELEMENT_SIZE;
-  tdep->struct_return = reg_struct_return;
 
-  set_gdbarch_extract_return_value (gdbarch, m68k_linux_extract_return_value);
-  set_gdbarch_store_return_value (gdbarch, m68k_linux_store_return_value);
-  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, m68k_linux_extract_struct_value_address);
+  /* GNU/Linux uses a calling convention that's similar to SVR4.  It
+     returns integer values in %d0/%di, pointer values in %a0 and
+     floating values in %fp0, just like SVR4, but uses %a1 to pass the
+     address to store a structure value.  It also returns small
+     structures in registers instead of memory.  */
+  m68k_svr4_init_abi (info, gdbarch);
+  tdep->struct_value_regnum = M68K_A1_REGNUM;
+  tdep->struct_return = reg_struct_return;
 
   frame_unwind_append_sniffer (gdbarch, m68k_linux_sigtramp_frame_sniffer);
 

@@ -1,3 +1,36 @@
+2004-05-03  Mark Kettenis  <kettenis@gnu.org>
+
+	* m68k-tdep.h (struct gdbarch_tdep): Add member
+	struct_value_regnum.
+	(m68k_svr4_init_abi): New prototype.
+	* m68k-tdep.c: Include "floatformat.h".  Add comment about all the
+	different calling conventions.
+	(m68k_extract_return_value): Remove code dealing with single-field
+	structs.
+	(m68k_store_return_value): Remove code dealing with single-field
+	structs.  Correctly store return values of 5, 6, 7 or 8 bytes.
+	(m68k_extract_struct_value_address): Remove function.
+	(m68k_svr4_extract_return_value,m68k_svr4_store_return_value)
+	(m68k_reg_struct_return_p, m68k_return_value)
+	(m68k_svr4_return_value): New functions.
+	(m68k_use_struct_convention): Remove function.
+	(m68k_push_dummy_call): Use new struct_value_regnum member of
+	`struct gdbarch_tdep' instead of hardcoded register number to
+	store STRUCT_ADDR.
+	(m68k_svr4_init_abi): New function.
+	(m68k_gdbarch_init): Don't set extract_return_value,
+	store_return_values, deprecated_extract_struct_value_address and
+	use_struct_convention.  Set return_value instead.  Initialize new
+	struct_value_regnum member of `struct gdbarch_tdep'.
+	* m68klinux-tdep.c: Update copyright year.
+	(m68k_linux_extract_return_value, m68k_linux_store_return_value)
+	(m68k_linux_extract_struct_value_address): Remove function.
+	(m68k_linux_init_abi): Don't set extract_return_value,
+	store_return_values, deprecated_extract_struct_value_address and
+	use_struct_convention.  Call m68k_svr4_init_abi but override the
+	new struct_value_regnum member of `struct gdbarch_tdep'.
+	* Makefile.in (m68k-tdep.o): Update dependencies.
+
 2004-05-03  J. Brobecker  <brobecker@gnat.com>
 
 	* dwarf2read.c (line_header): Add new included_p field in
