@@ -59,14 +59,6 @@ struct frame_extra_info
   int f_offset;
 };
 
-#if 0
-#ifdef _WIN32_WCE
-char **sh_register_names = sh3_reg_names;
-#else
-char **sh_register_names = sh_generic_reg_names;
-#endif
-#endif
-
 static char *
 sh_generic_register_name (int reg_nr)
 {

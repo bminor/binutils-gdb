@@ -1,3 +1,13 @@
+2001-05-09  Elena Zannoni  <ezannoni@redhat.com>
+
+	* sh3-rom.c (_initialize_sh3_rom): Get rid of specific _WINDOWS
+ 	conditional for help with connections through parallel ports,
+ 	given that the actual code for downloading through a parallel port
+ 	is not conditionalized.
+
+	* sh-tdep.c: Remove WIN32_WCE conditional. The wince sh target is
+ 	unmaintaned, and probably on its way to obsolescence.
+	
 2001-05-09  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-tdep.c (i386_frame_saved_pc): New function.
