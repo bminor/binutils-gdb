@@ -2741,8 +2741,7 @@ bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid, int stopped_by_watchpoint)
 	struct value *v;
 	int found = 0;
 
-	addr = target_stopped_data_address ();
-	if (addr == 0)
+	if (!target_stopped_data_address (&current_target, &addr))
 	  continue;
 	for (v = b->val_chain; v; v = v->next)
 	  {

@@ -1,3 +1,35 @@
+2004-10-08  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* target.h (to_stopped_data_address): Change prototype to
+	take a CORE_ADDR pointer and return an int.
+	* target.c (update_current_target): Change to_stopped_data_address
+	to match new prototype.
+	(debug_to_stopped_data_address): Change appropriately.
+	* breakpoint.c (bpstat_stop_status): Change call to
+	target_stopped_data_address to use new prototype.
+	* frv-tdep.c (frv_have_stopped_data_address): New function.
+	(frv_stopped_data_address): Change to new prototype and
+	functionality.
+	* ia64-linux-nat.c (ia64_stopped_data_address): Change to new
+	prototype and functionality.
+	(ia64_stopped_by_watchpoint): New function.
+	* i386-nat.c (i386_stopped_data_address): Change to new
+	prototype and functionality.
+	(i386_stopped_by_watchpoint): New function.
+	* remote.c (remote_stopped_data_address): Change to new prototype
+	and functionality.
+	* remote-m32r-sdi.c (m32r_stopped_data_address): Ditto.
+	* config/frv/tm-frv.h (frv_stopped_data_address): Change prototype.
+	(STOPPED_BY_WATCHPOINT): Change to use frv_have_stopped_data_address.
+	* config/i386/nm-i386.h (STOPPED_BY_WATCHPOINT): Change to use
+	new i386_stopped_by_watchpoint function.
+	(i386_stopped_by_watchpoint): New prototype.
+	(i386_stoppped_data_address): Change to new prototype.
+	* config/ia64/nm-linux.h (STOPPED_BY_WATCHPOINT): Change to use
+	new ia64_stopped_by_watchpoint function.
+	(ia64_stopped_by_watchpoint): New prototype.
+	(ia64_stopped_data_address): Ditto.
+
 2004-10-08  Paul Hilfinger  <Hilfinger@gnat.com>
 
 	* ada-typeprint.c (ada_print_type): Use int_string for printing

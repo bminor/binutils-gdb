@@ -341,7 +341,7 @@ struct target_ops
     int (*to_insert_watchpoint) (CORE_ADDR, int, int);
     int (*to_stopped_by_watchpoint) (void);
     int to_have_continuable_watchpoint;
-    CORE_ADDR (*to_stopped_data_address) (void);
+    int (*to_stopped_data_address) (struct target_ops *, CORE_ADDR *);
     int (*to_region_size_ok_for_hw_watchpoint) (int);
     void (*to_terminal_init) (void);
     void (*to_terminal_inferior) (void);
@@ -1067,9 +1067,14 @@ extern void (*deprecated_target_new_objfile_hook) (struct objfile *);
      (*current_target.to_remove_hw_breakpoint) (addr, save)
 #endif
 
+extern int target_stopped_data_address_p (struct target_ops *);
+
 #ifndef target_stopped_data_address
-#define target_stopped_data_address() \
-    (*current_target.to_stopped_data_address) ()
+#define target_stopped_data_address(target, x) \
+    (*target.to_stopped_data_address) (target, x)
+#else
+/* Horrible hack to get around existing macros :-(.  */
+#define target_stopped_data_address_p(CURRENT_TARGET) (1)
 #endif
 
 /* This will only be defined by a target that supports catching vfork events,

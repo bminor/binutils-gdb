@@ -636,12 +636,13 @@ ia64_linux_remove_watchpoint (ptid_t ptid, CORE_ADDR addr, int len)
   return -1;
 }
 
-CORE_ADDR
-ia64_linux_stopped_by_watchpoint (ptid_t ptid)
+int
+ia64_linux_stopped_data_address (CORE_ADDR *addr_p)
 {
   CORE_ADDR psr;
   int tid;
   struct siginfo siginfo;
+  ptid_t ptid = inferior_ptid;
 
   tid = TIDGET(ptid);
   if (tid == 0)
@@ -659,7 +660,15 @@ ia64_linux_stopped_by_watchpoint (ptid_t ptid)
                            for the next instruction */
   write_register_pid (IA64_PSR_REGNUM, psr, ptid);
 
-  return (CORE_ADDR) siginfo.si_addr;
+  *addr_p = (CORE_ADDR)siginfo.si_addr;
+  return 1;
+}
+
+int
+ia64_linux_stopped_by_watchpoint (void)
+{
+  CORE_ADDR addr;
+  return ia64_linux_stopped_data_address (&addr);
 }
 
 LONGEST 

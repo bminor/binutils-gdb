@@ -58,8 +58,12 @@ extern int ia64_cannot_store_register (int regno);
 #define HAVE_STEPPABLE_WATCHPOINT 1
 
 #define STOPPED_BY_WATCHPOINT(W) \
-  ia64_linux_stopped_by_watchpoint (inferior_ptid)
-extern CORE_ADDR ia64_linux_stopped_by_watchpoint (ptid_t ptid);
+  ia64_linux_stopped_by_watchpoint ()
+extern int ia64_linux_stopped_by_watchpoint ();
+
+#define target_stopped_data_address(target, x) \
+  ia64_linux_stopped_data_address(x)
+extern int ia64_linux_stopped_data_address (CORE_ADDR *addr_p);
 
 #define target_insert_watchpoint(addr, len, type) \
   ia64_linux_insert_watchpoint (inferior_ptid, addr, len, type)

@@ -127,7 +127,7 @@ static int debug_to_remove_watchpoint (CORE_ADDR, int, int);
 
 static int debug_to_stopped_by_watchpoint (void);
 
-static CORE_ADDR debug_to_stopped_data_address (void);
+static int debug_to_stopped_data_address (struct target_ops *, CORE_ADDR *);
 
 static int debug_to_region_size_ok_for_hw_watchpoint (int);
 
@@ -524,7 +524,7 @@ update_current_target (void)
 	    (int (*) (void))
 	    return_zero);
   de_fault (to_stopped_data_address,
-	    (CORE_ADDR (*) (void))
+	    (int (*) (struct target_ops *, CORE_ADDR *))
 	    return_zero);
   de_fault (to_region_size_ok_for_hw_watchpoint,
 	    default_region_size_ok_for_hw_watchpoint);
@@ -1010,6 +1010,19 @@ target_write_memory (CORE_ADDR memaddr, char *myaddr, int len)
   else
     return target_xfer_memory (memaddr, myaddr, len, 1);
 }
+
+#ifndef target_stopped_data_address_p
+int
+target_stopped_data_address_p (struct target_ops *target)
+{
+  if (target->to_stopped_data_address == return_zero
+      || (target->to_stopped_data_address == debug_to_stopped_data_address
+	  && debug_target.to_stopped_data_address == return_zero))
+    return 0;
+  else
+    return 1;
+}
+#endif
 
 static int trust_readonly = 0;
 
@@ -2069,16 +2082,17 @@ debug_to_stopped_by_watchpoint (void)
   return retval;
 }
 
-static CORE_ADDR
-debug_to_stopped_data_address (void)
+static int
+debug_to_stopped_data_address (struct target_ops *target, CORE_ADDR *addr)
 {
-  CORE_ADDR retval;
+  int retval;
 
-  retval = debug_target.to_stopped_data_address ();
+  retval = debug_target.to_stopped_data_address (target, addr);
 
   fprintf_unfiltered (gdb_stdlog,
-		      "target_stopped_data_address () = 0x%lx\n",
-		      (unsigned long) retval);
+		      "target_stopped_data_address ([0x%lx]) = %ld\n",
+		      (unsigned long)*addr,
+		      (unsigned long)retval);
   return retval;
 }
 

@@ -564,14 +564,16 @@ i386_region_ok_for_watchpoint (CORE_ADDR addr, int len)
   return nregs <= DR_NADDR ? 1 : 0;
 }
 
-/* If the inferior has some watchpoint that triggered, return the
-   address associated with that watchpoint.  Otherwise, return zero.  */
+/* If the inferior has some watchpoint that triggered, set the
+   address associated with that watchpoint and return non-zero.  
+   Otherwise, return zero.  */
 
-CORE_ADDR
-i386_stopped_data_address (void)
+int
+i386_stopped_data_address (CORE_ADDR *addr_p)
 {
   CORE_ADDR addr = 0;
   int i;
+  int rc = 0;
 
   dr_status_mirror = I386_DR_LOW_GET_STATUS ();
 
@@ -586,6 +588,7 @@ i386_stopped_data_address (void)
 	  && I386_DR_GET_RW_LEN (i) != 0)
 	{
 	  addr = dr_mirror[i];
+	  rc = 1;
 	  if (maint_show_dr)
 	    i386_show_dr ("watchpoint_hit", addr, -1, hw_write);
 	}
@@ -593,7 +596,16 @@ i386_stopped_data_address (void)
   if (maint_show_dr && addr == 0)
     i386_show_dr ("stopped_data_addr", 0, 0, hw_write);
 
-  return addr;
+  if (rc)
+    *addr_p = addr;
+  return rc;
+}
+
+int
+i386_stopped_by_watchpoint (void)
+{
+  CORE_ADDR addr = 0;
+  return i386_stopped_data_address (&addr);
 }
 
 /* Return non-zero if the inferior has some break/watchpoint that
