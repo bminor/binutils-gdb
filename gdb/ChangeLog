@@ -1,8 +1,6 @@
 Wed Feb  3 14:48:08 1993  John Gilmore  (gnu@cygnus.com)
 
 	* Makefile.in (VERSION):  Roll to 4.7.5.
-	(gdb.info):  Ignore error from makeinfo (FIXME), since makeinfo
-	isn't quite up to date to handle gdb.texi.
 
 Tue Feb  2 20:47:42 1993  John Gilmore  (gnu@cygnus.com)
 

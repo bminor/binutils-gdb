@@ -664,7 +664,7 @@ gdb.dvi:
 
 # GDB MANUAL: info file
 gdb.info:
-	-( cd ./doc; $(MAKE) gdb.info $(FLAGS_TO_PASS) )
+	( cd ./doc; $(MAKE) gdb.info $(FLAGS_TO_PASS) )
 	mv ./doc/gdb.info* .
 
 # Make copying.c from COPYING
