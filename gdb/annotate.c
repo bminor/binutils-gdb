@@ -535,7 +535,6 @@ _initialize_annotate ()
   if (annotation_level > 1)
     {
       delete_breakpoint_hook = breakpoint_changed;
-      enable_breakpoint_hook = breakpoint_changed;
-      disable_breakpoint_hook = breakpoint_changed;
+      modify_breakpoint_hook = breakpoint_changed;
     }
 }

@@ -395,8 +395,7 @@ void (*flush_hook) PARAMS ((FILE *stream));
 
 void (*create_breakpoint_hook) PARAMS ((struct breakpoint *bpt));
 void (*delete_breakpoint_hook) PARAMS ((struct breakpoint *bpt));
-void (*enable_breakpoint_hook) PARAMS ((struct breakpoint *bpt));
-void (*disable_breakpoint_hook) PARAMS ((struct breakpoint *bpt));
+void (*modify_breakpoint_hook) PARAMS ((struct breakpoint *bpt));
 
 /* Called during long calculations to allow GUI to repair window damage, and to
    check for stop buttons, etc... */

@@ -38,17 +38,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/ioctl.h>
 #include <string.h>
 #include "dis-asm.h"
+#include <stdio.h>
+#include "gdbcmd.h"
 
 #ifndef FIOASYNC
 #include <sys/stropts.h>
 #endif
-
-/* Non-zero means that we're doing the gdbtk interface. */
-int gdbtk = 0;
-
-/* Non-zero means we are reloading breakpoints, etc from the
-   Gdbtk kernel, and we should suppress various messages */
-static int gdbtk_reloading = 0;
 
 /* Handle for TCL interpreter */
 static Tcl_Interp *interp = NULL;
@@ -91,66 +86,17 @@ null_routine(arg)
 
 /* Dynamic string header for stdout. */
 
-static Tcl_DString stdout_buffer;
-
-/* Use this to collect stdout output that will be returned as the result of a
-   tcl command.  */
-
-static int saving_output = 0;
-
-static void
-start_saving_output ()
-{
-  saving_output = 1;
-}
-
-#define get_saved_output() (Tcl_DStringValue (&stdout_buffer))
-
-static void
-finish_saving_output ()
-{
-  if (!saving_output)
-    return;
-
-  saving_output = 0;
-
-  Tcl_DStringFree (&stdout_buffer);
-}
+static Tcl_DString *result_ptr;
 
-/* This routine redirects the output of fputs_unfiltered so that
-   the user can see what's going on in his debugger window. */
-
-static void
-flush_holdbuf ()
-{
-  char *s, *argv[1];
-
-  /* We use Tcl_Merge to quote braces and funny characters as necessary. */
-
-  argv[0] = Tcl_DStringValue (&stdout_buffer);
-  s = Tcl_Merge (1, argv);
-
-  Tcl_DStringFree (&stdout_buffer);
-
-  Tcl_VarEval (interp, "gdbtk_tcl_fputs ", s, NULL);
-
-  free (s);
-}
-
 static void
 gdbtk_flush (stream)
      FILE *stream;
 {
-  if (stream != gdb_stdout || saving_output)
-    return;
-
-  /* Flush output from C to tcl land.  */
-
-  flush_holdbuf ();
-
+#if 0
   /* Force immediate screen update */
 
   Tcl_VarEval (interp, "gdbtk_tcl_flush", NULL);
+#endif
 }
 
 static void
@@ -158,21 +104,20 @@ gdbtk_fputs (ptr, stream)
      const char *ptr;
      FILE *stream;
 {
-  int len;
-
-  if (stream != gdb_stdout)
+  if (result_ptr)
+    Tcl_DStringAppend (result_ptr, ptr, -1);
+  else
     {
-      Tcl_VarEval (interp, "gdbtk_tcl_fputs_error ", "{", ptr, "}", NULL);
-      return;
+      Tcl_DString str;
+
+      Tcl_DStringInit (&str);
+
+      Tcl_DStringAppend (&str, "gdbtk_tcl_fputs", -1);
+      Tcl_DStringAppendElement (&str, ptr);
+
+      Tcl_Eval (interp, Tcl_DStringValue (&str));
+      Tcl_DStringFree (&str);
     }
-
-  Tcl_DStringAppend (&stdout_buffer, ptr, -1);
-
-  if (saving_output)
-    return;
-
-  if (Tcl_DStringLength (&stdout_buffer) > 1000)
-    flush_holdbuf ();
 }
 
 static int
@@ -185,7 +130,7 @@ gdbtk_query (args)
 
   query = va_arg (args, char *);
 
-  vsprintf(buf, query, args);
+  vsprintf (buf, query, args);
   Tcl_VarEval (interp, "gdbtk_tcl_query ", "{", buf, "}", NULL);
 
   val = atol (interp->result);
@@ -193,35 +138,117 @@ gdbtk_query (args)
 }
 
 static void
-breakpoint_notify(b, action)
-     struct breakpoint *b;
-     const char *action;
+dsprintf_append_element (va_alist)
+     va_dcl
 {
-  struct symbol *sym;
-  char bpnum[50], line[50], pc[50];
+  va_list args;
+  Tcl_DString *dsp;
+  char *format;
+  char buf[1024];
+
+  va_start (args);
+
+  dsp = va_arg (args, Tcl_DString *);
+  format = va_arg (args, char *);
+
+  vsprintf (buf, format, args);
+
+  Tcl_DStringAppendElement (dsp, buf);
+}
+
+static int
+gdb_get_breakpoint_list (clientData, interp, argc, argv)
+     ClientData clientData;
+     Tcl_Interp *interp;
+     int argc;
+     char *argv[];
+{
+  struct breakpoint *b;
+  extern struct breakpoint *breakpoint_chain;
+
+  if (argc != 1)
+    error ("wrong # args");
+
+  for (b = breakpoint_chain; b; b = b->next)
+    if (b->type == bp_breakpoint)
+      dsprintf_append_element (result_ptr, "%d", b->number);
+
+  return TCL_OK;
+}
+
+static int
+gdb_get_breakpoint_info (clientData, interp, argc, argv)
+     ClientData clientData;
+     Tcl_Interp *interp;
+     int argc;
+     char *argv[];
+{
   struct symtab_and_line sal;
-  char *filename;
-  int v;
+  static char *bptypes[] = {"breakpoint", "hardware breakpoint", "until",
+			      "finish", "watchpoint", "hardware watchpoint",
+			      "read watchpoint", "access watchpoint",
+			      "longjmp", "longjmp resume", "step resume",
+			      "through sigtramp", "watchpoint scope",
+			      "call dummy" };
+  static char *bpdisp[] = {"delete", "disable", "donttouch"};
+  struct command_line *cmd;
+  int bpnum;
+  struct breakpoint *b;
+  extern struct breakpoint *breakpoint_chain;
+
+  if (argc != 2)
+    error ("wrong # args");
+
+  bpnum = atoi (argv[1]);
+
+  for (b = breakpoint_chain; b; b = b->next)
+    if (b->number == bpnum)
+      break;
+
+  if (!b)
+    error ("Breakpoint #%d does not exist", bpnum);
 
   if (b->type != bp_breakpoint)
     return;
 
   sal = find_pc_line (b->address, 0);
 
-  filename = symtab_to_filename (sal.symtab);
+  Tcl_DStringAppendElement (result_ptr, symtab_to_filename (sal.symtab));
+  dsprintf_append_element (result_ptr, "%d", sal.line);
+  dsprintf_append_element (result_ptr, "0x%lx", b->address);
+  Tcl_DStringAppendElement (result_ptr, bptypes[b->type]);
+  Tcl_DStringAppendElement (result_ptr, b->enable == enabled ? "1" : "0");
+  Tcl_DStringAppendElement (result_ptr, bpdisp[b->disposition]);
+  dsprintf_append_element (result_ptr, "%d", b->silent);
+  dsprintf_append_element (result_ptr, "%d", b->ignore_count);
 
-  sprintf (bpnum, "%d", b->number);
-  sprintf (line, "%d", sal.line);
-  sprintf (pc, "0x%lx", b->address);
- 
-  v = Tcl_VarEval (interp,
-		   "gdbtk_tcl_breakpoint ",
-		   action,
-		   " ", bpnum,
-		   " ", filename ? filename : "{}",
-		   " ", line,
-		   " ", pc,
-		   NULL);
+  Tcl_DStringStartSublist (result_ptr);
+  for (cmd = b->commands; cmd; cmd = cmd->next)
+    Tcl_DStringAppendElement (result_ptr, cmd->line);
+  Tcl_DStringEndSublist (result_ptr);
+
+  Tcl_DStringAppendElement (result_ptr, b->cond_string);
+
+  dsprintf_append_element (result_ptr, "%d", b->thread);
+  dsprintf_append_element (result_ptr, "%d", b->hit_count);
+
+  return TCL_OK;
+}
+
+static void
+breakpoint_notify(b, action)
+     struct breakpoint *b;
+     const char *action;
+{
+  char buf[100];
+  int v;
+
+  if (b->type != bp_breakpoint)
+    return;
+
+  sprintf (buf, "gdbtk_tcl_breakpoint %s %d", action, b->number);
+
+  v = Tcl_Eval (interp, buf);
 
   if (v != TCL_OK)
     {
@@ -234,28 +261,21 @@ static void
 gdbtk_create_breakpoint(b)
      struct breakpoint *b;
 {
-  breakpoint_notify(b, "create");
+  breakpoint_notify (b, "create");
 }
 
 static void
 gdbtk_delete_breakpoint(b)
      struct breakpoint *b;
 {
-  breakpoint_notify(b, "delete");
+  breakpoint_notify (b, "delete");
 }
 
 static void
-gdbtk_enable_breakpoint(b)
+gdbtk_modify_breakpoint(b)
      struct breakpoint *b;
 {
-  breakpoint_notify(b, "enable");
-}
-
-static void
-gdbtk_disable_breakpoint(b)
-     struct breakpoint *b;
-{
-  breakpoint_notify(b, "disable");
+  breakpoint_notify (b, "modify");
 }
 
 /* This implements the TCL command `gdb_loc', which returns a list consisting
@@ -291,35 +311,29 @@ gdb_loc (clientData, interp, argc, argv)
       free (sals.sals);
 
       if (sals.nelts != 1)
-	{
-	  Tcl_SetResult (interp, "Ambiguous line spec", TCL_STATIC);
-	  return TCL_ERROR;
-	}
+	error ("Ambiguous line spec");
 
       pc = sal.pc;
     }
   else
-    {
-      Tcl_SetResult (interp, "wrong # args", TCL_STATIC);
-      return TCL_ERROR;
-    }
+    error ("wrong # args");
 
   if (sal.symtab)
-    Tcl_AppendElement (interp, sal.symtab->filename);
+    Tcl_DStringAppendElement (result_ptr, sal.symtab->filename);
   else
-    Tcl_AppendElement (interp, "");
+    Tcl_DStringAppendElement (result_ptr, "");
 
   find_pc_partial_function (pc, &funcname, NULL, NULL);
-  Tcl_AppendElement (interp, funcname);
+  Tcl_DStringAppendElement (result_ptr, funcname);
 
   filename = symtab_to_filename (sal.symtab);
-  Tcl_AppendElement (interp, filename);
+  Tcl_DStringAppendElement (result_ptr, filename);
 
   sprintf (buf, "%d", sal.line);
-  Tcl_AppendElement (interp, buf); /* line number */
+  Tcl_DStringAppendElement (result_ptr, buf); /* line number */
 
   sprintf (buf, "0x%lx", pc);
-  Tcl_AppendElement (interp, buf); /* PC */
+  Tcl_DStringAppendElement (result_ptr, buf); /* PC */
 
   return TCL_OK;
 }
@@ -338,10 +352,7 @@ gdb_eval (clientData, interp, argc, argv)
   value_ptr val;
 
   if (argc != 2)
-    {
-      Tcl_SetResult (interp, "wrong # args", TCL_STATIC);
-      return TCL_ERROR;
-    }
+    error ("wrong # args");
 
   expr = parse_expression (argv[1]);
 
@@ -349,17 +360,8 @@ gdb_eval (clientData, interp, argc, argv)
 
   val = evaluate_expression (expr);
 
-  start_saving_output ();	/* Start collecting stdout */
-
   val_print (VALUE_TYPE (val), VALUE_CONTENTS (val), VALUE_ADDRESS (val),
 	     gdb_stdout, 0, 0, 0, 0);
-#if 0
-  value_print (val, gdb_stdout, 0, 0);
-#endif
-
-  Tcl_AppendElement (interp, get_saved_output ());
-
-  finish_saving_output ();	/* Set stdout back to normal */
 
   do_cleanups (old_chain);
 
@@ -383,25 +385,19 @@ gdb_sourcelines (clientData, interp, argc, argv)
   char buf[100];
 
   if (argc != 2)
-    {
-      Tcl_SetResult (interp, "wrong # args", TCL_STATIC);
-      return TCL_ERROR;
-    }
+    error ("wrong # args");
 
   symtab = lookup_symtab (argv[1]);
 
   if (!symtab)
-    {
-      Tcl_SetResult (interp, "No such file", TCL_STATIC);
-      return TCL_ERROR;
-    }
+    error ("No such file");
 
   /* If there's no linetable, or no entries, then we are done. */
 
   if (!symtab->linetable
       || symtab->linetable->nitems == 0)
     {
-      Tcl_AppendElement (interp, "");
+      Tcl_DStringAppendElement (result_ptr, "");
       return TCL_OK;
     }
 
@@ -417,7 +413,7 @@ gdb_sourcelines (clientData, interp, argc, argv)
 	continue;
 
       sprintf (buf, "%d", le->line);
-      Tcl_AppendElement (interp, buf);
+      Tcl_DStringAppendElement (result_ptr, buf);
     }
 
   return TCL_OK;
@@ -427,7 +423,7 @@ static int
 map_arg_registers (argc, argv, func, argp)
      int argc;
      char *argv[];
-     int (*func) PARAMS ((int regnum, void *argp));
+     void (*func) PARAMS ((int regnum, void *argp));
      void *argp;
 {
   int regnum;
@@ -461,22 +457,18 @@ map_arg_registers (argc, argv, func, argp)
 	  && *reg_names[regnum] != '\000')
 	func (regnum, argp);
       else
-	{
-	  Tcl_SetResult (interp, "bad register number", TCL_STATIC);
-
-	  return TCL_ERROR;
-	}
+	error ("bad register number");
     }
 
   return TCL_OK;
 }
 
-static int
+static void
 get_register_name (regnum, argp)
      int regnum;
      void *argp;		/* Ignored */
 {
-  Tcl_AppendElement (interp, reg_names[regnum]);
+  Tcl_DStringAppendElement (result_ptr, reg_names[regnum]);
 }
 
 /* This implements the TCL command `gdb_regnames', which returns a list of
@@ -507,8 +499,9 @@ gdb_regnames (clientData, interp, argc, argv)
 #define INVALID_FLOAT(x, y) (0 != 0)
 #endif
 
-static int
+static void
 get_register (regnum, fp)
+     int regnum;
      void *fp;
 {
   char raw_buffer[MAX_REGISTER_RAW_SIZE];
@@ -517,11 +510,9 @@ get_register (regnum, fp)
 
   if (read_relative_register_raw_bytes (regnum, raw_buffer))
     {
-      Tcl_AppendElement (interp, "Optimized out");
+      Tcl_DStringAppendElement (result_ptr, "Optimized out");
       return;
     }
-
-  start_saving_output ();	/* Start collecting stdout */
 
   /* Convert raw data to virtual format if necessary.  */
 
@@ -536,9 +527,7 @@ get_register (regnum, fp)
   val_print (REGISTER_VIRTUAL_TYPE (regnum), virtual_buffer, 0,
 	     gdb_stdout, format, 1, 0, Val_pretty_default);
 
-  Tcl_AppendElement (interp, get_saved_output ());
-
-  finish_saving_output ();	/* Set stdout back to normal */
+  Tcl_DStringAppend (result_ptr, " ", -1);
 }
 
 static int
@@ -551,10 +540,7 @@ gdb_fetch_registers (clientData, interp, argc, argv)
   int format;
 
   if (argc < 2)
-    {
-      Tcl_SetResult (interp, "wrong # args", TCL_STATIC);
-      return TCL_ERROR;
-    }
+    error ("wrong # args");
 
   argc--;
   argv++;
@@ -570,8 +556,9 @@ gdb_fetch_registers (clientData, interp, argc, argv)
 
 static char old_regs[REGISTER_BYTES];
 
-static int
+static void
 register_changed_p (regnum, argp)
+     int regnum;
      void *argp;		/* Ignored */
 {
   char raw_buffer[MAX_REGISTER_RAW_SIZE];
@@ -590,7 +577,7 @@ register_changed_p (regnum, argp)
 	  REGISTER_RAW_SIZE (regnum));
 
   sprintf (buf, "%d", regnum);
-  Tcl_AppendElement (interp, buf);
+  Tcl_DStringAppendElement (result_ptr, buf);
 }
 
 static int
@@ -600,8 +587,6 @@ gdb_changed_register_list (clientData, interp, argc, argv)
      int argc;
      char *argv[];
 {
-  int format;
-
   argc--;
   argv++;
 
@@ -619,18 +604,11 @@ gdb_cmd (clientData, interp, argc, argv)
      char *argv[];
 {
   if (argc != 2)
-    {
-      Tcl_SetResult (interp, "wrong # args", TCL_STATIC);
-      return TCL_ERROR;
-    }
+    error ("wrong # args");
 
   execute_command (argv[1], 1);
 
   bpstat_do_actions (&stop_bpstat);
-
-  /* Drain all buffered command output */
-
-  gdb_flush (gdb_stdout);
 
   return TCL_OK;
 }
@@ -653,6 +631,11 @@ call_wrapper (clientData, interp, argc, argv)
   struct cleanup *saved_cleanup_chain;
   Tcl_CmdProc *func;
   jmp_buf saved_error_return;
+  Tcl_DString result, *old_result_ptr;
+
+  Tcl_DStringInit (&result);
+  old_result_ptr = result_ptr;
+  result_ptr = &result;
 
   func = (Tcl_CmdProc *)clientData;
   memcpy (saved_error_return, error_return, sizeof (jmp_buf));
@@ -664,8 +647,6 @@ call_wrapper (clientData, interp, argc, argv)
   else
     {
       val = TCL_ERROR;		/* Flag an error for TCL */
-
-      finish_saving_output ();	/* Restore stdout to normal */
 
       gdb_flush (gdb_stderr);	/* Flush error output */
 
@@ -683,6 +664,9 @@ call_wrapper (clientData, interp, argc, argv)
 
   memcpy (error_return, saved_error_return, sizeof (jmp_buf));
 
+  Tcl_DStringResult (interp, &result);
+  result_ptr = old_result_ptr;
+
   return val;
 }
 
@@ -693,16 +677,15 @@ gdb_listfiles (clientData, interp, argc, argv)
      int argc;
      char *argv[];
 {
-  int val;
   struct objfile *objfile;
   struct partial_symtab *psymtab;
   struct symtab *symtab;
 
   ALL_PSYMTABS (objfile, psymtab)
-    Tcl_AppendElement (interp, psymtab->filename);
+    Tcl_DStringAppendElement (result_ptr, psymtab->filename);
 
   ALL_SYMTABS (objfile, symtab)
-    Tcl_AppendElement (interp, symtab->filename);
+    Tcl_DStringAppendElement (result_ptr, symtab->filename);
 
   return TCL_OK;
 }
@@ -793,32 +776,21 @@ gdb_disassemble (clientData, interp, argc, argv)
     };
 
   if (argc != 3 && argc != 4)
-    {
-      Tcl_SetResult (interp, "wrong # args", TCL_STATIC);
-      return TCL_ERROR;
-    }
+    error ("wrong # args");
 
   if (strcmp (argv[1], "source") == 0)
     mixed_source_and_assembly = 1;
   else if (strcmp (argv[1], "nosource") == 0)
     mixed_source_and_assembly = 0;
   else
-    {
-      Tcl_SetResult (interp, "First arg must be 'source' or 'nosource'",
-		     TCL_STATIC);
-      return TCL_ERROR;
-    }
+    error ("First arg must be 'source' or 'nosource'");
 
   low = parse_and_eval_address (argv[2]);
 
   if (argc == 3)
     {
       if (find_pc_partial_function (low, NULL, &low, &high) == 0)
-	{
-	  Tcl_SetResult (interp, "No function contains specified address",
-			 TCL_STATIC);
-	  return TCL_ERROR;
-	}
+	error ("No function contains specified address");
     }
   else
     high = parse_and_eval_address (argv[3]);
@@ -1086,8 +1058,6 @@ gdbtk_init ()
   int i;
   struct sigaction action;
   static sigset_t nullsigmask = {0};
-  extern struct cmd_list_element *setlist;
-  extern struct cmd_list_element *showlist;
 
   old_chain = make_cleanup (cleanup_init, 0);
 
@@ -1097,8 +1067,6 @@ gdbtk_init ()
 
   if (!interp)
     error ("Tcl_CreateInterp failed");
-
-  Tcl_DStringInit (&stdout_buffer); /* Setup stdout buffer */
 
   mainWindow = Tk_CreateMainWindow (interp, NULL, "gdb", "Gdb");
 
@@ -1126,6 +1094,10 @@ gdbtk_init ()
   Tcl_CreateCommand (interp, "gdb_disassemble", call_wrapper,
 		     gdb_disassemble, NULL);
   Tcl_CreateCommand (interp, "gdb_eval", call_wrapper, gdb_eval, NULL);
+  Tcl_CreateCommand (interp, "gdb_get_breakpoint_list", call_wrapper,
+		     gdb_get_breakpoint_list, NULL);
+  Tcl_CreateCommand (interp, "gdb_get_breakpoint_info", call_wrapper,
+		     gdb_get_breakpoint_info, NULL);
 
   command_loop_hook = Tk_MainLoop;
   print_frame_info_listing_hook = null_routine;
@@ -1133,8 +1105,7 @@ gdbtk_init ()
   flush_hook = gdbtk_flush;
   create_breakpoint_hook = gdbtk_create_breakpoint;
   delete_breakpoint_hook = gdbtk_delete_breakpoint;
-  enable_breakpoint_hook = gdbtk_enable_breakpoint;
-  disable_breakpoint_hook = gdbtk_disable_breakpoint;
+  modify_breakpoint_hook = gdbtk_modify_breakpoint;
   interactive_hook = gdbtk_interactive;
   target_wait_hook = gdbtk_wait;
   call_command_hook = gdbtk_call_command;
@@ -1166,13 +1137,6 @@ gdbtk_init ()
   add_com ("tk", class_obscure, tk_command,
 	   "Send a command directly into tk.");
 
-#if 0
-  add_show_from_set (add_set_cmd ("disassemble-from-exec", class_support,
-				  var_boolean, (char *)&disassemble_from_exec,
-				  "Set ", &setlist),
-		     &showlist);
-#endif
-
   Tcl_LinkVar (interp, "disassemble-from-exec", (char *)&disassemble_from_exec,
 	       TCL_LINK_INT);
 
@@ -1192,8 +1156,6 @@ gdbtk_init ()
 
   if (Tcl_EvalFile (interp, gdbtk_filename) != TCL_OK)
     {
-      char *err;
-
       fputs_unfiltered_hook = NULL; /* Force errors to stdout/stderr */
 
       fprintf_unfiltered (stderr, "%s:%d: %s\n", gdbtk_filename,

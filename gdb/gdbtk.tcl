@@ -26,7 +26,6 @@ set current_label {}
 set screen_height 0
 set screen_top 0
 set screen_bot 0
-set current_output_win .cmd.text
 set cfunc NIL
 set line_numbers 1
 set breakpoint_file(-1) {[garbage]}
@@ -65,10 +64,8 @@ if [info exists env(EDITOR)] then {
 #
 
 proc gdbtk_tcl_fputs {arg} {
-	global current_output_win
-
-	$current_output_win insert end "$arg"
-	$current_output_win yview -pickplace end
+	.cmd.text insert end "$arg"
+	.cmd.text yview -pickplace end
 }
 
 proc gdbtk_tcl_fputs_error {arg} {
@@ -87,9 +84,7 @@ proc gdbtk_tcl_fputs_error {arg} {
 #
 
 proc gdbtk_tcl_flush {} {
-	global current_output_win
-
-	$current_output_win yview -pickplace end
+	.cmd.text yview -pickplace end
 	update idletasks
 }
 
@@ -149,16 +144,177 @@ proc gdbtk_tcl_end_variable_annotation {} {
 #	of:
 #		create		- Notify of breakpoint creation
 #		delete		- Notify of breakpoint deletion
-#		enable		- Notify of breakpoint enabling
-#		disable		- Notify of breakpoint disabling
-#
-#	All actions take the same set of arguments:  BPNUM is the breakpoint
-#	number,  FILE is the source file and LINE is the line number, and PC is
-#	the pc of the affected breakpoint.
+#		modify		- Notify of breakpoint modification
 #
 
-proc gdbtk_tcl_breakpoint {action bpnum file line pc} {
+# file line pc type enabled disposition silent ignore_count commands cond_string thread hit_count
+
+proc gdbtk_tcl_breakpoint {action bpnum} {
+	set bpinfo [gdb_get_breakpoint_info $bpnum]
+	set file [lindex $bpinfo 0]
+	set line [lindex $bpinfo 1]
+	set pc [lindex $bpinfo 2]
+	set enable [lindex $bpinfo 4]
+
+	if {$action == "modify"} {
+		if {$enable == "enabled"} {
+			set action enable
+		} else {
+			set action disable
+		}
+	}
+
 	${action}_breakpoint $bpnum $file $line $pc
+}
+
+proc create_breakpoints_window {} {
+	global bpframe_lasty
+
+	if [winfo exists .breakpoints] {raise .breakpoints ; return}
+
+	build_framework .breakpoints "Breakpoints" ""
+
+# First, delete all the old view menu entries
+
+	.breakpoints.menubar.view.menu delete 0 last
+
+# Get rid of label
+
+	destroy .breakpoints.label
+
+# Replace text with a canvas and fix the scrollbars
+
+	destroy .breakpoints.text
+	canvas .breakpoints.c -relief sunken -bd 2 \
+		-cursor hand2 -yscrollcommand {.breakpoints.scroll set}
+	.breakpoints.scroll configure -command {.breakpoints.c yview}
+	scrollbar .breakpoints.scrollx -orient horizontal \
+		-command {.breakpoints.c xview} -relief sunken
+
+	pack .breakpoints.scrollx -side bottom -fill x -in .breakpoints.info
+	pack .breakpoints.c -side left -expand yes -fill both \
+		-in .breakpoints.info
+
+	set bpframe_lasty 0
+
+# Create a frame for each breakpoint
+
+	foreach bpnum [gdb_get_breakpoint_list] {
+		add_breakpoint_frame $bpnum
+	}
+}
+
+# Create a frame for bpnum in the .breakpoints canvas
+
+proc add_breakpoint_frame bpnum {
+	global bpframe_lasty
+
+	if ![winfo exists .breakpoints] return
+
+	set bpinfo [gdb_get_breakpoint_info $bpnum]
+
+	set file [lindex $bpinfo 0]
+	set line [lindex $bpinfo 1]
+	set pc [lindex $bpinfo 2]
+	set type [lindex $bpinfo 3]
+	set enabled [lindex $bpinfo 4]
+	set disposition [lindex $bpinfo 5]
+	set silent [lindex $bpinfo 6]
+	set ignore_count [lindex $bpinfo 7]
+	set commands [lindex $bpinfo 8]
+	set cond [lindex $bpinfo 9]
+	set thread [lindex $bpinfo 10]
+	set hit_count [lindex $bpinfo 11]
+
+	set f .breakpoints.c.$bpnum
+
+	if ![winfo exists $f] {
+		frame $f -relief sunken -bd 2
+
+		label $f.id -text "#$bpnum     $file:$line    ($pc)" \
+			-relief flat -bd 2 -anchor w
+		label $f.hit_count -text "Hit count: $hit_count" -relief flat \
+			-bd 2 -anchor w
+
+		frame $f.thread
+		label $f.thread.label -text "Thread: " -relief flat -bd 2 \
+			-width 11 -anchor w
+		entry $f.thread.entry -bd 2 -relief sunken -width 10
+		$f.thread.entry insert end $thread
+		pack $f.thread.label -side left
+		pack $f.thread.entry -side left -fill x
+
+		frame $f.cond
+		label $f.cond.label -text "Condition: " -relief flat -bd 2 \
+			-width 11 -anchor w
+		entry $f.cond.entry -bd 2 -relief sunken
+		$f.cond.entry insert end $cond
+		pack $f.cond.label -side left
+		pack $f.cond.entry -side left -fill x -expand yes
+
+		frame $f.ignore_count
+		label $f.ignore_count.label -text "Ignore count: " \
+			-relief flat -bd 2 -width 11 -anchor w
+		entry $f.ignore_count.entry -bd 2 -relief sunken -width 10
+		$f.ignore_count.entry insert end $ignore_count
+		pack $f.ignore_count.label -side left
+		pack $f.ignore_count.entry -side left -fill x
+
+		frame $f.disps
+
+		checkbutton $f.disps.enabled -text "Enabled " \
+			-variable enabled -anchor w -relief flat
+
+		radiobutton $f.disps.delete -text Delete \
+			-variable disposition -anchor w -relief flat
+
+		radiobutton $f.disps.disable -text Disable \
+			-variable disposition -anchor w -relief flat
+
+		radiobutton $f.disps.donttouch -text "Leave alone" \
+				 -variable disposition -anchor w -relief flat
+
+		pack  $f.disps.delete $f.disps.disable $f.disps.donttouch \
+			-side left -anchor w
+		pack $f.disps.enabled -side right -anchor e
+		text $f.commands -relief sunken -bd 2 -setgrid true \
+			-cursor hand2 -height 3 -width 30
+
+		foreach line $commands {
+				$f.commands insert end "${line}\n"
+		}
+
+		pack $f.id -side top -anchor nw -fill x
+		pack $f.hit_count $f.cond $f.thread $f.ignore_count $f.disps \
+				$f.commands -side top -fill x -anchor nw
+	}
+
+	set tag [.breakpoints.c create window 0 $bpframe_lasty -window $f -anchor nw]
+	update
+	set bbox [.breakpoints.c bbox $tag]
+
+	set bpframe_lasty [lindex $bbox 3]
+}
+
+# Delete a breakpoint frame
+
+proc delete_breakpoint_frame bpnum {
+	global bpframe_lasty
+
+	if ![winfo exists .breakpoints] return
+
+# First, clear the canvas
+
+	.breakpoints.c delete all
+
+# Now, repopulate it with all but the doomed breakpoint
+
+	set bpframe_lasty 0
+	foreach bp [gdb_get_breakpoint_list] {
+		if {$bp != $bpnum} {
+			add_breakpoint_frame $bp
+		}
+	}
 }
 
 proc asm_win_name {funcname} {
@@ -219,6 +375,10 @@ proc create_breakpoint {bpnum file line pc} {
 	if [winfo exists $win] {
 		insert_breakpoint_tag $win [pc_to_line $pclist($cfunc) $pc]
 	}
+
+# Update the breakpoints window
+
+	add_breakpoint_frame $bpnum
 }
 
 #
@@ -282,6 +442,8 @@ proc delete_breakpoint {bpnum file line pc} {
 			}
 		}
 	}
+
+	delete_breakpoint_frame $bpnum
 }
 
 #
@@ -389,51 +551,51 @@ proc delete_breakpoint_tag {win line} {
 
 proc gdbtk_tcl_busy {} {
 	if [winfo exists .src] {
-		catch {.src.start configure -state disabled}
-		catch {.src.stop configure -state normal}
-		catch {.src.step configure -state disabled}
-		catch {.src.next configure -state disabled}
-		catch {.src.continue configure -state disabled}
-		catch {.src.finish configure -state disabled}
-		catch {.src.up configure -state disabled}
-		catch {.src.down configure -state disabled}
-		catch {.src.bottom configure -state disabled}
+		.src.start configure -state disabled
+		.src.stop configure -state normal
+		.src.step configure -state disabled
+		.src.next configure -state disabled
+		.src.continue configure -state disabled
+		.src.finish configure -state disabled
+		.src.up configure -state disabled
+		.src.down configure -state disabled
+		.src.bottom configure -state disabled
 	}
 	if [winfo exists .asm] {
-		catch {.asm.stepi configure -state disabled}
-		catch {.asm.nexti configure -state disabled}
-		catch {.asm.continue configure -state disabled}
-		catch {.asm.finish configure -state disabled}
-		catch {.asm.up configure -state disabled}
-		catch {.asm.down configure -state disabled}
-		catch {.asm.bottom configure -state disabled}
-		catch {.asm.close configure -state disabled}
+		.asm.stepi configure -state disabled
+		.asm.nexti configure -state disabled
+		.asm.continue configure -state disabled
+		.asm.finish configure -state disabled
+		.asm.up configure -state disabled
+		.asm.down configure -state disabled
+		.asm.bottom configure -state disabled
 	}
+	return
 }
 
 proc gdbtk_tcl_idle {} {
 	if [winfo exists .src] {
-		catch {.src.start configure -state normal}
-		catch {.src.stop configure -state disabled}
-		catch {.src.step configure -state normal}
-		catch {.src.next configure -state normal}
-		catch {.src.continue configure -state normal}
-		catch {.src.finish configure -state normal}
-		catch {.src.up configure -state normal}
-		catch {.src.down configure -state normal}
-		catch {.src.bottom configure -state normal}
+		.src.start configure -state normal
+		.src.stop configure -state disabled
+		.src.step configure -state normal
+		.src.next configure -state normal
+		.src.continue configure -state normal
+		.src.finish configure -state normal
+		.src.up configure -state normal
+		.src.down configure -state normal
+		.src.bottom configure -state normal
 	}
 
 	if [winfo exists .asm] {
-		catch {.asm.stepi configure -state normal}
-		catch {.asm.nexti configure -state normal}
-		catch {.asm.continue configure -state normal}
-		catch {.asm.finish configure -state normal}
-		catch {.asm.up configure -state normal}
-		catch {.asm.down configure -state normal}
-		catch {.asm.bottom configure -state normal}
-		catch {.asm.close configure -state normal}
+		.asm.stepi configure -state normal
+		.asm.nexti configure -state normal
+		.asm.continue configure -state normal
+		.asm.finish configure -state normal
+		.asm.up configure -state normal
+		.asm.down configure -state normal
+		.asm.bottom configure -state normal
 	}
+	return
 }
 
 #
@@ -498,6 +660,17 @@ menu .file_popup -cursor hand2
 .file_popup add separator
 .file_popup add command -label "Edit" -command {exec $editor +$selected_line $selected_file &}
 .file_popup add command -label "Set breakpoint" -command {gdb_cmd "break $selected_file:$selected_line"}
+
+# Use this procedure to get the GDB core to execute the string `cmd'.  This is
+# a wrapper around gdb_cmd, which will catch errors, and send output to the
+# command window.  It will also cause all of the other windows to be updated.
+
+proc interactive_cmd {cmd} {
+	catch {gdb_cmd "$cmd"} result
+	.cmd.text insert end $result
+	.cmd.text yview -pickplace end
+	update_ptr
+}
 
 #
 # Bindings:
@@ -730,7 +903,7 @@ proc not_implemented_yet {message} {
 ##
 # Local procedure:
 #
-#	create_expr_win - Create expression display window
+#	create_expr_window - Create expression display window
 #
 # Description:
 #
@@ -818,7 +991,7 @@ proc update_exprs {} {
 	}
 }
 
-proc create_expr_win {} {
+proc create_expr_window {} {
 
 	if [winfo exists .expr] {raise .expr ; return}
 
@@ -875,7 +1048,7 @@ proc create_expr_win {} {
 #
 
 proc display_expression {expression} {
-	create_expr_win
+	create_expr_window
 
 	add_expr $expression
 }
@@ -915,7 +1088,7 @@ proc create_file_win {filename debug_file} {
 # File can't be read.  Put error message into .src.nofile window and return.
 
 		catch {destroy .src.nofile}
-		text .src.nofile -height 25 -width 88 -relief raised \
+		text .src.nofile -height 25 -width 88 -relief sunken \
 			-borderwidth 2 -yscrollcommand textscrollproc \
 			-setgrid true -cursor hand2
 		.src.nofile insert 0.0 $fh
@@ -927,22 +1100,21 @@ proc create_file_win {filename debug_file} {
 
 # Actually create and do basic configuration on the text widget.
 
-	text $win -height 25 -width 88 -relief raised -borderwidth 2 \
+	text $win -height 25 -width 88 -relief sunken -borderwidth 2 \
 		-yscrollcommand textscrollproc -setgrid true -cursor hand2
 
 # Setup all the bindings
 
 	bind $win <Enter> {focus %W}
-#	bind $win <1> {listing_window_button_1 %W %X %Y %x %y}
 	bind $win <1> do_nothing
 	bind $win <B1-Motion> do_nothing
 
-	bind $win n {catch {gdb_cmd next} ; update_ptr}
-	bind $win s {catch {gdb_cmd step} ; update_ptr}
-	bind $win c {catch {gdb_cmd continue} ; update_ptr}
-	bind $win f {catch {gdb_cmd finish} ; update_ptr}
-	bind $win u {catch {gdb_cmd up} ; update_ptr}
-	bind $win d {catch {gdb_cmd down} ; update_ptr}
+	bind $win n {interactive_cmd next}
+	bind $win s {interactive_cmd step}
+	bind $win c {interactive_cmd continue}
+	bind $win f {interactive_cmd finish}
+	bind $win u {interactive_cmd up}
+	bind $win d {interactive_cmd down}
 
 	$win delete 0.0 end
 	$win insert 0.0 [read $fh]
@@ -972,7 +1144,7 @@ proc create_file_win {filename debug_file} {
 		$win tag add margin $i.0 $i.8
 		}
 
-#	$win tag bind margin <1> {listing_window_button_1 %W %X %Y %x %y}
+	$win tag bind margin <1> {listing_window_button_1 %W %X %Y %x %y}
 	$win tag bind source <1> {
 		%W mark set anchor "@%x,%y wordstart"
 		set last [%W index "@%x,%y wordend"]
@@ -1032,7 +1204,6 @@ proc create_file_win {filename debug_file} {
 proc create_asm_win {funcname pc} {
 	global breakpoint_file
 	global breakpoint_line
-	global current_output_win
 	global pclist
 	global disassemble_with_source
 
@@ -1043,7 +1214,7 @@ proc create_asm_win {funcname pc} {
 
 # Actually create and do basic configuration on the text widget.
 
-	text $win -height 25 -width 80 -relief raised -borderwidth 2 \
+	text $win -height 25 -width 80 -relief sunken -borderwidth 2 \
 		-setgrid true -cursor hand2 -yscrollcommand asmscrollproc
 
 # Setup all the bindings
@@ -1051,19 +1222,16 @@ proc create_asm_win {funcname pc} {
 	bind $win <Enter> {focus %W}
 	bind $win <1> {asm_window_button_1 %W %X %Y %x %y}
 	bind $win <B1-Motion> do_nothing
-	bind $win n {catch {gdb_cmd nexti} ; update_ptr}
-	bind $win s {catch {gdb_cmd stepi} ; update_ptr}
-	bind $win c {catch {gdb_cmd continue} ; update_ptr}
-	bind $win f {catch {gdb_cmd finish} ; update_ptr}
-	bind $win u {catch {gdb_cmd up} ; update_ptr}
-	bind $win d {catch {gdb_cmd down} ; update_ptr}
+	bind $win n {interactive_cmd nexti}
+	bind $win s {interactive_cmd stepi}
+	bind $win c {interactive_cmd continue}
+	bind $win f {interactive_cmd finish}
+	bind $win u {interactive_cmd up}
+	bind $win d {interactive_cmd down}
 
 # Disassemble the code, and read it into the new text widget
 
-	set temp $current_output_win
-	set current_output_win $win
-	catch "gdb_disassemble $disassemble_with_source $pc"
-	set current_output_win $temp
+	$win insert end [gdb_disassemble $disassemble_with_source $pc]
 
 	set numlines [$win index end]
 	set numlines [lindex [split $numlines .] 0]
@@ -1272,18 +1440,18 @@ proc create_asm_window {} {
 	frame .asm.row2
 
 	button .asm.stepi -width 6 -text Stepi \
-		-command {catch {gdb_cmd stepi} ; update_ptr}
+		-command {interactive_cmd stepi}
 	button .asm.nexti -width 6 -text Nexti \
-		-command {catch {gdb_cmd nexti} ; update_ptr}
+		-command {interactive_cmd nexti}
 	button .asm.continue -width 6 -text Cont \
-		-command {catch {gdb_cmd continue} ; update_ptr}
+		-command {interactive_cmd continue}
 	button .asm.finish -width 6 -text Finish \
-		-command {catch {gdb_cmd finish} ; update_ptr}
-	button .asm.up -width 6 -text Up -command {catch {gdb_cmd up} ; update_ptr}
+		-command {interactive_cmd finish}
+	button .asm.up -width 6 -text Up -command {interactive_cmd up}
 	button .asm.down -width 6 -text Down \
-		-command {catch {gdb_cmd down} ; update_ptr}
+		-command {interactive_cmd down}
 	button .asm.bottom -width 6 -text Bottom \
-		-command {catch {gdb_cmd {frame 0}} ; update_ptr}
+		-command {interactive_cmd {frame 0}}
 
 	pack .asm.stepi .asm.continue .asm.up .asm.bottom -side left -padx 3 -pady 5 -in .asm.row1
 	pack .asm.nexti .asm.finish .asm.down -side left -padx 3 -pady 5 -in .asm.row2
@@ -1691,6 +1859,9 @@ proc update_ptr {} {
 	if [winfo exists .expr] {
 		update_exprs
 	}
+	if [winfo exists .autocmd] {
+		update_autocmd
+	}
 }
 
 # Make toplevel window disappear
@@ -1703,10 +1874,10 @@ proc files_command {} {
 	wm minsize .files_window 1 1
 #	wm overrideredirect .files_window true
 	listbox .files_window.list -geometry 30x20 -setgrid true \
-		-yscrollcommand {.files_window.scroll set} -relief raised \
+		-yscrollcommand {.files_window.scroll set} -relief sunken \
 		-borderwidth 2
 	scrollbar .files_window.scroll -orient vertical \
-		-command {.files_window.list yview}
+		-command {.files_window.list yview} -relief sunken
 	button .files_window.close -text Close -command {destroy .files_window}
 	tk_listboxSingleSelect .files_window.list
 
@@ -1789,25 +1960,25 @@ proc build_framework {win {title GDBtk} {label {}}} {
 		-command "destroy ${win}"
 	${win}.menubar.file.menu add separator
 	${win}.menubar.file.menu add command -label Quit \
-		-command { catch { gdb_cmd quit } }
+		-command {interactive_cmd quit}
 
 	menubutton ${win}.menubar.commands -padx 12 -text Commands \
 		-menu ${win}.menubar.commands.menu -underline 0
 
 	menu ${win}.menubar.commands.menu
 	${win}.menubar.commands.menu add command -label Run \
-		-command { catch  {gdb_cmd run } ; update_ptr }
+		-command {interactive_cmd run}
 	${win}.menubar.commands.menu add command -label Step \
-		-command { catch { gdb_cmd step } ; update_ptr }
+		-command {interactive_cmd step}
 	${win}.menubar.commands.menu add command -label Next \
-		-command { catch { gdb_cmd next } ; update_ptr }
+		-command {interactive_cmd next}
 	${win}.menubar.commands.menu add command -label Continue \
-		-command { catch { gdb_cmd continue } ; update_ptr }
+		-command {interactive_cmd continue}
 	${win}.menubar.commands.menu add separator
 	${win}.menubar.commands.menu add command -label Stepi \
-		-command { catch { gdb_cmd stepi } ; update_ptr }
+		-command {interactive_cmd stepi}
 	${win}.menubar.commands.menu add command -label Nexti \
-		-command { catch { gdb_cmd nexti } ; update_ptr }
+		-command {interactive_cmd nexti}
 
 	menubutton ${win}.menubar.view -padx 12 -text Options \
 		-menu ${win}.menubar.view.menu -underline 0
@@ -1828,14 +1999,18 @@ proc build_framework {win {title GDBtk} {label {}}} {
 		-command create_command_window
 	${win}.menubar.window.menu add separator
 	${win}.menubar.window.menu add command -label Source \
-		-command {create_source_window ; update_ptr}
+		-command create_source_window
 	${win}.menubar.window.menu add command -label Assembly \
-		-command {create_asm_window ; update_ptr}
+		-command create_asm_window
 	${win}.menubar.window.menu add separator
 	${win}.menubar.window.menu add command -label Registers \
-		-command {create_registers_window ; update_ptr}
+		-command create_registers_window
 	${win}.menubar.window.menu add command -label Expressions \
-		-command {create_expr_win ; update_ptr}
+		-command create_expr_window
+	${win}.menubar.window.menu add command -label "Auto Command" \
+		-command create_autocmd_window
+#	${win}.menubar.window.menu add command -label Breakpoints \
+#		-command create_breakpoints_window
 
 #	${win}.menubar.window.menu add separator
 #	${win}.menubar.window.menu add command -label Files \
@@ -1863,13 +2038,14 @@ proc build_framework {win {title GDBtk} {label {}}} {
 	pack	${win}.menubar.help -side right
 
 	frame ${win}.info
-	text ${win}.text -height 25 -width 80 -relief raised -borderwidth 2 \
+	text ${win}.text -height 25 -width 80 -relief sunken -borderwidth 2 \
 		-setgrid true -cursor hand2 -yscrollcommand "${win}.scroll set"
 
 	set ${win}.label $label
-	label ${win}.label -textvariable ${win}.label -borderwidth 2 -relief raised
+	label ${win}.label -textvariable ${win}.label -borderwidth 2 -relief sunken
 
-	scrollbar ${win}.scroll -orient vertical -command "${win}.text yview"
+	scrollbar ${win}.scroll -orient vertical -command "${win}.text yview" \
+		-relief sunken
 
 	pack ${win}.label -side bottom -fill x -in ${win}.info
 	pack ${win}.scroll -side right -fill y -in ${win}.info
@@ -1911,26 +2087,25 @@ proc create_source_window {} {
 	frame .src.row2
 
 	button .src.start -width 6 -text Start -command \
-		{catch {gdb_cmd {break main}}
-		 catch {gdb_cmd {enable delete $bpnum}}
-		 catch {gdb_cmd run}
-		 update_ptr }
+		{interactive_cmd {break main}
+		 interactive_cmd {enable delete $bpnum}
+		 interactive_cmd run }
 	button .src.stop -width 6 -text Stop -fg red -activeforeground red \
 		-state disabled -command gdb_stop
 	button .src.step -width 6 -text Step \
-		-command {catch {gdb_cmd step} ; update_ptr}
+		-command {interactive_cmd step}
 	button .src.next -width 6 -text Next \
-		-command {catch {gdb_cmd next} ; update_ptr}
+		-command {interactive_cmd next}
 	button .src.continue -width 6 -text Cont \
-		-command {catch {gdb_cmd continue} ; update_ptr}
+		-command {interactive_cmd continue}
 	button .src.finish -width 6 -text Finish \
-		-command {catch {gdb_cmd finish} ; update_ptr}
+		-command {interactive_cmd finish}
 	button .src.up -width 6 -text Up \
-		-command {catch {gdb_cmd up} ; update_ptr}
+		-command {interactive_cmd up}
 	button .src.down -width 6 -text Down \
-		-command {catch {gdb_cmd down} ; update_ptr}
+		-command {interactive_cmd down}
 	button .src.bottom -width 6 -text Bottom \
-		-command {catch {gdb_cmd {frame 0}} ; update_ptr}
+		-command {interactive_cmd {frame 0}}
 
 	pack .src.start .src.step .src.continue .src.up .src.bottom \
 		-side left -padx 3 -pady 5 -in .src.row1
@@ -1948,6 +2123,50 @@ proc create_source_window {} {
 				    set screen_height [lindex $args 1]
 				    set screen_top [lindex $args 2]
 				    set screen_bot [lindex $args 3]}
+}
+
+proc update_autocmd {} {
+	global .autocmd.label
+	global accumulate_output
+
+	catch {gdb_cmd "${.autocmd.label}"} result
+	if !$accumulate_output { .autocmd.text delete 0.0 end }
+	.autocmd.text insert end $result
+	.autocmd.text yview -pickplace end
+}
+
+proc create_autocmd_window {} {
+	global .autocmd.label
+
+	if [winfo exists .autocmd] {raise .autocmd ; return}
+
+	build_framework .autocmd "Auto Command" ""
+
+# First, delete all the old view menu entries
+
+	.autocmd.menubar.view.menu delete 0 last
+
+# Accumulate output option
+
+	.autocmd.menubar.view.menu add checkbutton \
+		-variable accumulate_output \
+		-label "Accumulate output" -onvalue 1 -offvalue 0
+
+# Now, create entry widget with label
+
+	frame .autocmd.entryframe
+
+	entry .autocmd.entry -borderwidth 2 -relief sunken
+	bind .autocmd <Enter> {focus .autocmd.entry}
+	bind .autocmd.entry <Key-Return> {set .autocmd.label [.autocmd.entry get]
+					  .autocmd.entry delete 0 end }
+
+	label .autocmd.entrylab -text "Command: "
+
+	pack .autocmd.entrylab -in .autocmd.entryframe -side left
+	pack .autocmd.entry -in .autocmd.entryframe -side left -fill x -expand yes
+
+	pack .autocmd.entryframe -side bottom -fill x -before .autocmd.info
 }
 
 proc create_command_window {} {
@@ -1978,10 +2197,13 @@ proc create_command_window {} {
 		global command_line
 
 		%W insert end \n
-		%W yview -pickplace end
-		catch "gdb_cmd [list $command_line]"
+		interactive_cmd $command_line
+
+#		%W yview -pickplace end
+#		catch "gdb_cmd [list $command_line]" result
+#		%W insert end $result
 		set command_line {}
-		update_ptr
+#		update_ptr
 		%W insert end "(gdb) "
 		%W yview -pickplace end
 		}
@@ -2682,23 +2904,16 @@ create_command_window
 
 # Create a copyright window
 
+update
 toplevel .c
 wm geometry .c +300+300
 wm overrideredirect .c true
 
-text .t
-set temp $current_output_win
-set current_output_win .t
-gdb_cmd "show version"
-set current_output_win $temp
-
-message .c.m -text [.t get 0.0 end] -aspect 500 -relief raised
-destroy .t
+message .c.m -text [gdb_cmd "show version"] -aspect 500 -relief raised
 pack .c.m
 bind .c.m <Leave> {destroy .c}
+update
 
 if [file exists ~/.gdbtkinit] {
 	source ~/.gdbtkinit
 }
-
-update
