@@ -1,3 +1,32 @@
+Thu Sep  7 10:48:26 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldexp.c (exp_fold_tree): Don't warn about moving the location
+	counter backward in the absolute section.
+
+Wed Sep  6 14:42:11 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Rewrite to use autoconf.
+	* configure.host: New file.
+	* configure.tgt: New file.
+	* aclocal.m4: New file.
+	* configure: New file, built by autoconf.
+	* acconfig.h: New file.
+	* config.h.in: New file, built by autoheader.
+	* sysdep.h: New file.
+	* ld.h: Incorporate old contents of config.h.
+	* config.h: Remove.
+	* Makefile.in: Various changes for new configure script.  Also:
+	(CC_FOR_BUILD): Remove.
+	(ldmain.o): Don't bother to ensure that EMUL is non-empty.
+	(dep.sed): Use @SRCDIR@, not @srcdir@.
+	* dep-in.sed: Use @SRCDIR@, not @srcdir@.
+	* genscripts.sh: Create ldscripts if it does not exist.
+	* ldemul.c, lexsup.c, mpw-emipsidt.c: Don't include "config.h".
+	* mpw-esh.c, emultemp/*.em: Likewise.
+	* ldmain.c: Likewise.  Include <ctype.h>.  Don't try to set
+	HAVE_SBRK here.
+	* config/*.mt, config/*.mh: Remove.
+
 Tue Sep  5 14:55:24 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	* configure.in: Treat ns32k-pc532-ux* like ns32k-pc532-mach*, and
