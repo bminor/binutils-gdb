@@ -3,6 +3,15 @@
 
 *** Changes since GDB-4.17:
 
+* New native configurations
+
+M68K Linux					m68*-*-linux*
+
+* New targets
+
+Fujitsu FR30					fr30-*-elf*
+Mitsubishi D30V					d30v-*-*
+
 * GDB Remote protocol
 
 For 64 bit targets, the memory packets ("M" and "m") can now contain a
@@ -10,7 +19,7 @@ full 64 bit address.  The class-obscure gdb command:
 	set targetaddresssize 32
 can be used to revert to the old behavour.  For existing remote stubs
 the change should not be noticed as the additional address information
-will be descarded.
+will be discarded.
 
 
 *** Changes in GDB-4.17:

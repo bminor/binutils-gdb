@@ -1,3 +1,7 @@
+Tue Dec  8 16:49:24 1998  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* NEWS: Add mentions of newly-added configurations.
+
 1998-12-08  Philippe De Muyter  <phdm@macqel.be>
 
         * config/xm-aix4.h (SIGWINCH_HANDLER): Function `aix_resize_window'
