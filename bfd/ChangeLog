@@ -1,5 +1,7 @@
 2002-02-25  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf64-hppa.h: Update copyright date.
+
 	* elf64-ppc.c (ppc64_elf_check_relocs): Warning fix.
 	(ppc64_elf_relocate_section): Don't generate power4 style branch
 	hints for *_BRTAKEN and *_BRNTAKEN relocs.
