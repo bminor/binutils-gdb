@@ -43,7 +43,6 @@ pretex.m4
 psrc.sed
 refcard.tex
 sparc.m4
-threecol.tex
 vax.m4
 
 Do-last:
@@ -53,7 +52,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 2.10  1992/02/01 00:41:18  grossman
+# Revision 2.11  1992/02/01 02:22:07  grossman
+# threecol.tex no longer exists.
+#
+# Revision 2.10  1992/02/01  00:41:18  grossman
 # Distribute lpsrc.sed, remove rc-*.
 #
 # Revision 2.9  1992/01/18  00:44:04  grossman
