@@ -1,3 +1,17 @@
+Tue May 14 15:02:13 PDT 1991  Roland Pesch (pesch at cygint.cygnus.com)
+
+	* gdb.info*: added to distribution.  These are ordinary info
+	files, formatted from gdb.texinfo (via gdb-all.texinfo, see
+	Makefile)---but due to use of texinfo 2, can't count on makeinfo
+	to generate these, so we distribute them already formatted.
+
+	* gdb.texinfo: included full Info node and menu crud (as generated
+	by C-u M-x texinfo-master-menu using the texinfo-2 elisp code).
+
+	* Makefile: updated "gdb.dvi" target to use M4 preprocessor;
+	put in comments-for-future gdb.info target (one day makeinfo will
+	work again).
+
 Tue May 14 13:51:36 PDT 1991  Roland Pesch (pesch at cygint.cygnus.com)
 
 	* gdb.texinfo: Updated to include new or old undocumented

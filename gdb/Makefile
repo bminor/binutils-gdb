@@ -272,6 +272,9 @@ YACC=bison -y
 # YACC=yacc
 SHELL=/bin/sh
 MAKE=make
+# We need either GNU m4 or SysV m4; Berkeley/Sun don't have quite enough.
+#M4=gm4
+M4=/usr/5bin/m4
 
 # Set this up with gcc if you have gnu ld and the loader will print out
 # line numbers for undefinded refs.
@@ -634,6 +637,7 @@ clean:
 	rm -f init.c init.o version.c
 	rm -f gdb core gdb.tar gdb.tar.Z make.log
 	rm -f gdb[0-9]
+	rm -f gdb.dvi gdb-all*
 	cd readline ; make clean
 
 distclean: clean expread.tab.c TAGS
@@ -646,10 +650,21 @@ realclean: clean
 	rm -f tm.h xm.h config.status
 	rm -f Makefile
 
-gdb.dvi : gdb.texinfo
-	tex gdb.texinfo
-	texindex gdb.??
-	tex gdb.texinfo
+gdb-all.texinfo: gdb.texinfo
+	${M4} pretex.m4 none.m4 all.m4 gdb.texinfo >gdb-all.texinfo
+
+gdb.dvi : gdb-all.texinfo
+	tex gdb-all.texinfo
+	texindex gdb-all.??
+	tex gdb-all.texinfo
+	mv gdb-all.dvi gdb.dvi
+	rm -f gdb-all.?? gdb-all.???
+
+# This should work eventually, but we're using texinfo2, and many makeinfo's 
+# can't cope with all the markup.  In the meantime, we distribute the info
+# files as formatted by the elisp texinfo2 code.
+#gdb.info: gdb-all.texinfo
+#	makeinfo gdb-all.texinfo
 
 # Make copying.c from COPYING
 copying.c : COPYING copying.awk
