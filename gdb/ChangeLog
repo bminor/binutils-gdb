@@ -1,3 +1,8 @@
+2001-03-14  Keith Seitz  <keiths@cygnus.com>
+
+	* linespec.c (decode_line_1): Skip argptr over a leading
+	double quote. Prevents alloc of 0 bytes and memcpy of -1 bytes.
+
 2001-03-14  Kevin Buettner  <kevinb@redhat.com>
 
 	* config/djgpp/fnchange.lst (ia64-aix-nat.c): Add entry.

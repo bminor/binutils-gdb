@@ -612,10 +612,10 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
 
   s = NULL;
   p = *argptr;
-  if (p[0] == '"')
+  if (**argptr == '"')
     {
       is_quote_enclosed = 1;
-      p++;
+      (*argptr)++;
     }
   else
     is_quote_enclosed = 0;
