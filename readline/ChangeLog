@@ -1,3 +1,18 @@
+Thu Feb 24 04:13:53 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* Merge in changes from bash-1.13.5. Merge changes from glob/tilde.c
+	into tilde.c and use it. Add system function declarations where
+	necessary. Check for __GO32__, not _GO32_ consistently.
+	* Makefile.in:  Update dependencies.
+	* rltty.c:  Include <sys/file.h> to match include file setup
+	in readline.c for rldefs.h. Otherwise we get inconsistent
+	TTY_DRIVER definitions in readline.c and rltty.c.
+	* bind.c, complete.c:  Do not include <sys/types.h>, it is already
+	included via sysdep.h, which causes problems if <sys/types.h> has
+	no multiple inclusion protection.
+	* readline.c (_rl_set_screen_size):  Reestablish test for
+	TIOCGWINSZ_BROKEN.
+
 Fri Feb 18 08:56:35 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* Makefile.in: Add search.o rule for Sun make.
