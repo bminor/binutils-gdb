@@ -9,6 +9,7 @@
 	(mips_elf64_perform_relocation): Likewise.
 
 2001-12-17  Alan Modra  <amodra@bigpond.net.au>
+
 	Support for more than 64k ELF sections.
 	* elf-bfd.h (elf_size_info <swap_symbol_out>): Add shndx param.
 	(bfd_elf32_swap_symbol_in): Likewise.
