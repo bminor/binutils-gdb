@@ -1,3 +1,14 @@
+2001-05-29  Andreas Jaeger  <aj@suse.de>
+
+	* elf64-x86-64.c (elf64_x86_64_check_relocs): Handle R_X86_64_64.
+	(elf64_x86_64_relocate_section): Likewise.
+
+2001-05-28  Andreas Jaeger  <aj@suse.de>
+
+	* elf64-x86-64.c (elf64_86_64_size_info): Remove, we can use the
+	generic version since we want a hashsize of 4.
+	(elf_backend_size_info): Likewise.
+
 2001-05-28  Nicolas Pitre <nico@cam.org>
 
 	* elf32-arm.h: Fix PLT generation for big endian ARM.
