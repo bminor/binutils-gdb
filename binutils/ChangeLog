@@ -1,3 +1,21 @@
+Tue Apr 28 19:14:34 1998  Tom Tromey  <tromey@cygnus.com>
+
+	* addr2line.c (main): Conditionally call setlocale.
+	* windres.c (main): Likewise.
+	* sysdump.c (main): Likewise.
+	* strings.c (main): Likewise.
+	* srconv.c (main): Likewise.
+	* size.c (main): Likewise.
+	* objdump.c (main): Likewise.
+	* objcopy.c (main): Likewise.
+	* nm.c (main): Likewise.
+	* nlmconv.c (main): Likewise.
+	* dlltool.c (main): Likewise.
+	* coffdump.c (main): Likewise.
+	* ar.c (main): Likewise.
+	* bucomm.h: Include <locale.h> if HAVE_LOCALE_H.
+	(LC_MESSAGES): Now can be defined even when ENABLE_NLS.
+
 Tue Apr 28 10:33:07 1998  Bill Moyer  <ttk@cygnus.com>
 
 	Add support for IMPORTS:
