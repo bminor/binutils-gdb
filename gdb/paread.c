@@ -105,7 +105,8 @@ pa_symtab_read (abfd, addr, objfile)
   unsigned int i;
   int val;
   char *stringtab;
-  struct symbol_dictionary_record *buf, *bufp;
+  struct symbol_dictionary_record *buf, *bufp, *endbufp;
+  char *symname;
   CONST int symsize = sizeof (struct symbol_dictionary_record);
 
   number_of_symbols = bfd_get_symcount (abfd);
@@ -121,41 +122,90 @@ pa_symtab_read (abfd, addr, objfile)
   val = bfd_read (stringtab, obj_stringtab_size (abfd), 1, abfd);
   if (val != obj_stringtab_size (abfd))
     error ("Can't read in HP string table.");
-  
-  for (i = 0, bufp = buf; i < number_of_symbols; i++, bufp++)
+
+  endbufp = buf + number_of_symbols;
+  for (bufp = buf; bufp < endbufp; ++bufp)
     {
       enum minimal_symbol_type ms_type;
 
       QUIT;
 
-      if (bufp->symbol_scope != SS_UNIVERSAL)
-	continue;
+      switch (bufp->symbol_scope)
+	{
+	case SS_UNIVERSAL:
+	  switch (bufp->symbol_type)
+	    {
+	    case ST_SYM_EXT:
+	    case ST_ARG_EXT:
+	      continue;
 
-      switch (bufp->symbol_type)
-        {
-        case ST_SYM_EXT:
-        case ST_ARG_EXT:
-          continue;
-        case ST_CODE:
-        case ST_PRI_PROG:
-        case ST_SEC_PROG:
-        case ST_ENTRY:
-        case ST_MILLICODE:
-          ms_type = mst_text;
-          bufp->symbol_value &= ~0x3; /* clear out permission bits */
-          break;
-        case ST_DATA:
-          ms_type = mst_data;
-          break;
-        default:
-          continue;
-        }
+	    case ST_CODE:
+	    case ST_PRI_PROG:
+	    case ST_SEC_PROG:
+	    case ST_ENTRY:
+	    case ST_MILLICODE:
+	      symname = bufp->name.n_strx + stringtab;
+	      ms_type = mst_text;
+	      bufp->symbol_value &= ~0x3; /* clear out permission bits */
+	      break;
+	    case ST_DATA:
+	      symname = bufp->name.n_strx + stringtab;
+	      ms_type = mst_data;
+	      break;
+	    default:
+	      continue;
+	    }
+	  break;
+
+	case SS_GLOBAL:
+	case SS_LOCAL:
+	  switch (bufp->symbol_type)
+	    {
+	    case ST_SYM_EXT:
+	    case ST_ARG_EXT:
+	      continue;
+
+	    case ST_CODE:
+	      symname = bufp->name.n_strx + stringtab;
+	      /* GAS leaves symbols with the prefixes "LS$", "LBB$",
+		 and "LBE$" in .o files after assembling.  And thus
+		 they appear in the final executable.  This can
+		 cause problems if these special symbols have the
+		 same value as real symbols.  So ignore them.  Is this
+		 meant as a feature, or is it just a GAS bug?  */
+	      if (*symname == 'L'
+		  && (symname[2] == '$' && symname[1] == 'S'
+		      || (symname[3] == '$' && symname[1] == 'B'
+			  && (symname[2] == 'B' || symname[2] == 'E'))))
+		continue;
+	      ms_type = mst_file_text;
+	      bufp->symbol_value &= ~0x3; /* clear out permission bits */
+	      break;
+
+	    case ST_PRI_PROG:
+	    case ST_SEC_PROG:
+	    case ST_ENTRY:
+	    case ST_MILLICODE:
+	      symname = bufp->name.n_strx + stringtab;
+	      ms_type = mst_file_text;
+	      bufp->symbol_value &= ~0x3; /* clear out permission bits */
+	      break;
+	    case ST_DATA:
+	      symname = bufp->name.n_strx + stringtab;
+	      ms_type = mst_file_data;
+	      break;
+	    default:
+	      continue;
+	    }
+	default:
+	  continue;
+	}
 
       if (bufp->name.n_strx > obj_stringtab_size (abfd))
 	error ("Invalid symbol data; bad HP string table offset: %d",
 	       bufp->name.n_strx);
 
-      record_minimal_symbol (bufp->name.n_strx + stringtab,
+      record_minimal_symbol (symname,
 			     bufp->symbol_value, ms_type, 
 			     objfile);
     }
