@@ -1,5 +1,6 @@
 /* Print mips instructions for GDB, the GNU debugger, or for objdump.
-   Copyright (c) 1989, 91-97, 1998 Free Software Foundation, Inc.
+   Copyright (c) 1989, 91, 92, 93, 94, 95, 96, 97, 98, 99, 2000
+   Free Software Foundation, Inc.
    Contributed by Nobuyuki Hikichi(hikichi@sra.co.jp).
 
 This file is part of GDB, GAS, and the GNU binutils.
@@ -132,7 +133,8 @@ print_insn_arg (d, l, pc, info)
 
     case 'a':
       (*info->print_address_func)
-	(((pc & 0xF0000000) | (((l >> OP_SH_TARGET) & OP_MASK_TARGET) << 2)),
+	(((pc & ~ (bfd_vma) 0x0fffffff)
+	  | (((l >> OP_SH_TARGET) & OP_MASK_TARGET) << 2)),
 	 info);
       break;
 

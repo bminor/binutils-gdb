@@ -1,3 +1,8 @@
+2000-05-11  Ulf Carlsson  <ulfc@engr.sgi.com>
+
+	* mips-dis.c (print_insn_arg): Don't mask top 32 bits of 64-bit
+	target addresses for 'jal' and 'j'.
+
 2000-05-10  Geoff Keating  <geoffk@cygnus.com>
 
 	* ppc-opc.c (powerpc_opcodes): Make the predicted-branch opcodes
