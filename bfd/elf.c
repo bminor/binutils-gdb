@@ -2583,8 +2583,10 @@ _bfd_elf_section_from_bfd_section (abfd, asect)
   return -1;
 }
 
-/* given a symbol, return the bfd index for that symbol.  */
- int
+/* Given a BFD symbol, return the index in the ELF symbol table, or -1
+   on error.  */
+
+int
 _bfd_elf_symbol_from_bfd_symbol (abfd, asym_ptr_ptr)
      bfd *abfd;
      struct symbol_cache_entry **asym_ptr_ptr;
@@ -2613,13 +2615,24 @@ _bfd_elf_symbol_from_bfd_symbol (abfd, asym_ptr_ptr)
     }
 
   idx = asym_ptr->udata.i;
-  BFD_ASSERT (idx != 0);
+
+  if (idx == 0)
+    {
+      /* This case can occur when using --strip-symbol on a symbol
+         which is used in a relocation entry.  */
+      (*_bfd_error_handler)
+	("%s: symbol `%s' required but not present",
+	 bfd_get_filename (abfd), bfd_asymbol_name (asym_ptr));
+      bfd_set_error (bfd_error_no_symbols);
+      return -1;
+    }
 
 #if DEBUG & 4
   {
     fprintf (stderr,
 	     "elf_symbol_from_bfd_symbol 0x%.8lx, name = %s, sym num = %d, flags = 0x%.8lx%s\n",
-     (long) asym_ptr, asym_ptr->name, idx, flags, elf_symbol_flags (flags));
+	     (long) asym_ptr, asym_ptr->name, idx, flags,
+	     elf_symbol_flags (flags));
     fflush (stderr);
   }
 #endif

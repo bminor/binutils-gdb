@@ -1,3 +1,10 @@
+Mon Mar  4 12:49:16 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf.c (_bfd_elf_symbol_from_bfd_symbol): Print a useful error
+	message rather than calling BFD_ASSERT.
+	* elfcode.h (write_relocs): Check return value of
+	_bfd_elf_symbol_from_bfd_symbol.
+
 Fri Mar  1 09:42:59 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* elf32-ppc.c (ppc_elf_add_symbol_hook): Don't set SEC_LOAD flag
