@@ -287,6 +287,10 @@ bfd_h8_disassemble (addr, info, mode)
 			  }
 			else if (x & (IMM|KBIT|DBIT))
 			  {
+			    /* Bletch.  For shal #2,er0 and friends.  */
+			    if (*(args+1) & SRC_IN_DST)
+			      abs = 2;
+
 			    fprintf (stream, "#0x%x", (unsigned) abs);
 			  }
 			else if (x & REG)

@@ -1,5 +1,8 @@
 Thu Jul 11 11:58:44 1996  Jeffrey A Law  (law@cygnus.com)
-	
+
+	* h8300-dis.c (bfd_h8_disassemble): "abs" is implicitly two
+	if the next arg is marked with SRC_IN_DST.  Gross.
+
 	* h8300-dis.c (bfd_h8_disassemble): Print "exr" when
 	we're looking for and find EXR.
 
