@@ -1,3 +1,7 @@
+2004-01-02  Albert Bartoszko  <albar@nt.kegel.com.pl>
+
+	* gas/msp430/opcode.s: Add test for an 'add' instruction which
+	looks similar to an 'rla' instruction.
 
 For older changes see ChangeLog-9303
 
