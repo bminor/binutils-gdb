@@ -1,3 +1,23 @@
+Tue Jul 27 12:36:49 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* breakpoint.c (breakpoint_1):  Walk the breakpoint chain to decide if
+	we have breakpoints or watchpoints as we might have to ignore internal
+	breakpoints.
+
+	Fix gdb core dumps after `file newfile' commands.
+	* symtab.h, symfile.c (clear_symtab_users):  New routine which
+	unconditionally clears symtab users. clear_symtab_users_once
+	commented out as it was a noop anyway.
+	* objfiles.c (free_objfile):  Don't call clear_symtab_users_once.
+	* objfiles.c (free_all_objfiles), symfile.c (new_symfile_objfile),
+	xcoffexec.c (exec_close):  Call clear_symtab_users if necessary.
+	* symfile.c (syms_from_objfile):  Install cleanups for errors during
+	symbol reading.
+	* coffread.c, dbxread.c, mipsread.c, xcoffread.c (*_symfile_read):
+	Lint cleanup code, call do_cleanups explicitly.
+	* symfile.c (symbol_file_add):  Call new_symfile_objfile and
+	reinit_frame_cache _after_ the new symbols are read in.
+
 Tue Jul 27 01:57:01 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* mipsread.c (parse_type):  Do not set tag name for compiler

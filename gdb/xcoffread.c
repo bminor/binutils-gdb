@@ -185,6 +185,9 @@ static int
 init_lineno PARAMS ((bfd *, file_ptr, int));
 
 static void
+free_linetab PARAMS ((void));
+
+static void
 find_linenos PARAMS ((bfd *, sec_ptr, PTR));
 
 static void
@@ -1817,6 +1820,8 @@ init_lineno (abfd, offset, size)
 {
   int val;
 
+  free_linetab ();
+
   if (bfd_seek(abfd, offset, L_SET) < 0)
     return -1;
 
@@ -1828,8 +1833,15 @@ init_lineno (abfd, offset, size)
 
   linetab_offset = offset;
   linetab_size = size;
-  make_cleanup (free, linetab);	/* Be sure it gets de-allocated. */
   return 0;
+}
+
+static void
+free_linetab ()
+{
+  if (linetab)
+    free (linetab);
+  linetab = NULL;
 }
 
 /* dbx allows the text of a symbol name to be continued into the
@@ -1996,6 +2008,7 @@ xcoff_symfile_read (objfile, section_offset, mainline)
   bfd *abfd;
   struct coff_symfile_info *info;
   char *name;
+  struct cleanup *back_to = make_cleanup (null_cleanup, 0);
 
   info = (struct coff_symfile_info *) objfile -> sym_private;
   symfile_bfd = abfd = objfile->obfd;
@@ -2015,6 +2028,7 @@ xcoff_symfile_read (objfile, section_offset, mainline)
       && info->max_lineno_offset > info->min_lineno_offset) {
 
     /* only read in the line # table if one exists */
+    make_cleanup (free_linetab, 0);
     val = init_lineno(abfd, info->min_lineno_offset,
 	(int) (info->max_lineno_offset - info->min_lineno_offset));
 
@@ -2066,6 +2080,8 @@ xcoff_symfile_read (objfile, section_offset, mainline)
      minimal symbols for this objfile. */
 
   install_minimal_symbols (objfile);
+
+  do_cleanups (back_to);
 }
 
 /* XCOFF-specific parsing routine for section offsets.  */

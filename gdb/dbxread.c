@@ -497,6 +497,7 @@ dbx_symfile_read (objfile, section_offsets, mainline)
 {
   bfd *sym_bfd;
   int val;
+  struct cleanup *back_to;
 
   sym_bfd = objfile->obfd;
   val = bfd_seek (objfile->obfd, DBX_SYMTAB_OFFSET (objfile), SEEK_SET);
@@ -511,7 +512,7 @@ dbx_symfile_read (objfile, section_offsets, mainline)
   symbol_table_offset = DBX_SYMTAB_OFFSET (objfile);
 
   pending_blocks = 0;
-  make_cleanup (really_free_pendings, 0);
+  back_to = make_cleanup (really_free_pendings, 0);
 
   init_minimal_symbol_collection ();
   make_cleanup (discard_minimal_symbols, 0);
@@ -533,6 +534,8 @@ dbx_symfile_read (objfile, section_offsets, mainline)
     printf_filtered ("(no debugging symbols found)...");
     wrap_here ("");
   }
+
+  do_cleanups (back_to);
 }
 
 /* Initialize anything that needs initializing when a completely new
@@ -856,7 +859,7 @@ read_dbx_symtab (section_offsets, objfile, text_addr, text_size)
   int nsl;
   int past_first_source_file = 0;
   CORE_ADDR last_o_file_start = 0;
-  struct cleanup *old_chain;
+  struct cleanup *back_to;
   bfd *abfd;
 
   /* End of the text segment of the executable file.  */
@@ -894,11 +897,9 @@ read_dbx_symtab (section_offsets, objfile, text_addr, text_size)
     (struct partial_symtab **) alloca (dependencies_allocated *
 				       sizeof (struct partial_symtab *));
 
-  old_chain = make_cleanup (free_objfile, objfile);
-
   /* Init bincl list */
   init_bincl_list (20, objfile);
-  make_cleanup (free_bincl_list, objfile);
+  back_to = make_cleanup (free_bincl_list, objfile);
 
   last_source_file = NULL;
 
@@ -984,8 +985,7 @@ read_dbx_symtab (section_offsets, objfile, text_addr, text_size)
 		   dependency_list, dependencies_used);
     }
 
-  free_bincl_list (objfile);
-  discard_cleanups (old_chain);
+  do_cleanups (back_to);
 }
 
 /* Allocate and partially fill a partial symtab.  It will be

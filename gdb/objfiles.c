@@ -336,7 +336,6 @@ free_objfile (objfile)
      is unknown, but we play it safe for now and keep each action until
      it is shown to be no longer needed. */
      
-  clear_symtab_users_once ();
 #if defined (CLEAR_SOLIB)
   CLEAR_SOLIB ();
 #endif
@@ -384,7 +383,7 @@ free_objfile (objfile)
 }
 
 
-/* Free all the object files at once.  */
+/* Free all the object files at once and clean up their users.  */
 
 void
 free_all_objfiles ()
@@ -395,6 +394,7 @@ free_all_objfiles ()
     {
       free_objfile (objfile);
     }
+  clear_symtab_users ();
 }
 
 /* Relocate OBJFILE to NEW_OFFSETS.  There should be OBJFILE->NUM_SECTIONS

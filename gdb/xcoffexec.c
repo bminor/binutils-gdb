@@ -81,6 +81,7 @@ exec_close(quitting)
 {
   register struct vmap *vp, *nxt;
   struct objfile *obj;
+  int need_symtab_cleanup = 0;
   
   for (nxt = vmap; vp = nxt; )
     {
@@ -90,7 +91,10 @@ exec_close(quitting)
 	 free_objfile() will do proper cleanup of objfile *and* bfd. */
 		   
       if (vp->objfile)
-	free_objfile (vp->objfile);
+	{
+	  free_objfile (vp->objfile);
+	  need_symtab_cleanup = 1;
+	}
       else
 	bfd_close(vp->bfd);
 
@@ -111,6 +115,9 @@ exec_close(quitting)
     exec_ops.to_sections = NULL;
     exec_ops.to_sections_end = NULL;
   }
+
+  if (need_symtab_cleanup)
+    clear_symtab_users ();
 }
 
 /*
