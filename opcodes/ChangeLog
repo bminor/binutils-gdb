@@ -1,3 +1,13 @@
+Fri Nov 15 13:43:19 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10300-opc.c (mn10300_opcodes): Demand parens around
+	register argument is calls and jmp instructions.
+
+Thu Nov  7 00:26:05 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10300-opc.c (mn10300_opcodes): Use DN01 for putx and
+	getx operand.  Fix opcode for mulqu imm,dn.
+
 Wed Nov  6 13:42:32 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* mn10300-opc.c (mn10300_operands): Hijack "bits" field

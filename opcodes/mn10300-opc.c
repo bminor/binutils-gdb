@@ -402,13 +402,13 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 { "lcc",	0xd6,		0xff,		FMT_S0, {UNUSED}},
 { "setlb",	0xdb,		0xff,	 	FMT_S0, {UNUSED}},
 
-{ "jmp",	0xf0f4,		0xfffc,		FMT_D0, {AN0}},
+{ "jmp",	0xf0f4,		0xfffc,		FMT_D0, {PAREN,AN0,PAREN}},
 { "jmp",	0xcc0000,	0xff0000,	FMT_S2, {IMM16}},
 { "jmp",	0xdc000000,	0xff000000,	FMT_S4, {IMM32_HIGH24}},
 { "call",	0xcd000000,	0xff000000,	FMT_S4, {D16_SHIFT,IMM8,IMM8E}},
 { "call",	0xdd000000,	0xff000000,	FMT_S6,
 					{IMM32_HIGH24_LOWSHIFT16,IMM8E_SHIFT8,IMM8E}},
-{ "calls",	0xf0f0,		0xfffc,		FMT_D0, {AN0}},
+{ "calls",	0xf0f0,		0xfffc,		FMT_D0, {PAREN,AN0,PAREN}},
 { "calls",	0xfaff0000,	0xffff0000,	FMT_D2, {IMM16}},
 { "calls",	0xfcff0000,	0xffff0000,	FMT_D4, {IMM32}},
 
