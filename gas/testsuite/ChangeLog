@@ -1,4 +1,5 @@
 2004-11-04 Jan Beulich <jbeulich@novell.com>
+
 	* gas/i386/i386.exp: Execute new tests intelbad and intelok.
 	* gas/i386/intelbad.[sl]: New test to check for various things not
 	permitted in Intel mode.
