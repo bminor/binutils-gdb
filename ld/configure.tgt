@@ -464,7 +464,7 @@ powerpc*-*-linux*)
 	case "${targ}" in
 	*64*)	targ_emul=elf64ppc
 		targ_extra_emuls="elf32ppclinux elf32ppc elf32ppcsim"
-		targ_extra_libpath=elf32ppclinux
+		targ_extra_libpath="elf32ppclinux elf32ppc"
 		tdir_elf32ppc=`echo "${targ_alias}" | sed -e 's/64//'`
 		tdir_elf32ppclinux=$tdir_elf32ppc
 		tdir_elf32ppcsim=$tdir_elf32ppc ;;
@@ -473,6 +473,7 @@ powerpc*-*-linux*)
 		targ_extra_libpath=elf32ppc
 		if test "${want64}" = "true"; then
 		  targ_extra_emuls="$targ_extra_emuls elf64ppc"
+		  targ_extra_libpath="$targ_extra_libpath elf64ppc"
 		fi
 		;;
 	esac ;;

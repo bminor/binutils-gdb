@@ -1,3 +1,9 @@
+2003-04-01  Jakub Jelinek  <jakub@redhat.com>
+
+	* configure.tgt (powerpc*-*-linux*): Add elf32ppc to ppc64
+	targ_extra_libpath.  Add elf64ppc to ppc targ_extra_libpath
+	if --enable-64-bit-bfd.
+
 2003-04-01  Nick Clifton  <nickc@redhat.com>
 
 	* emulparams/armelf.sh (OTHER_READONLY_SECTIONS): Change name of
