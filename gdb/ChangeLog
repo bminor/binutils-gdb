@@ -1,3 +1,9 @@
+Tue Sep 22 17:13:19 1992  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* tm-i960.h (ext_format_i960): Add top-level declaration.
+	(REGISTER_CONVERT_TO_{VIRTUAL,RAW}): Don't declare it in nested
+	blocks, else Sun4 compiler complains.
+
 Tue Sep 22 00:43:51 1992  John Gilmore  (gnu@cygnus.com)
 
 	* mips-pinsn.c (print_insn_arg, case 'B'):  Disassemble `break'
