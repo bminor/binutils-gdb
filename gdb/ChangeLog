@@ -1,5 +1,8 @@
 2003-01-04  Mark Kettenis  <kettenis@gnu.org>
 
+	* configure.in: Don't set and AC_SUBST SUBDIRS.
+	* configure: Regenerated.
+
 	* configure.in: Remove code dealing with shared libraries.
 	* Makefile.in: Remove HLDFLAGS and HLDENV.
 	* configure: Regenerated.

@@ -1247,8 +1247,6 @@ if test "x$target" = "x$host"; then
 fi
 
 AC_CONFIG_SUBDIRS($configdirs)
-SUBDIRS=$subdirs
-AC_SUBST(SUBDIRS)
 
 # If hostfile (XM_FILE) and/or targetfile (TM_FILE) and/or nativefile
 # (NAT_FILE) is not set in config/*/*.m[ht] files, we link to an empty
