@@ -192,7 +192,11 @@ proc readelf_test { options binary_file regexp_file xfails } {
 
     set target_machine ""
     if [istarget "mips*-*-*"] then {
-      set target_machine mips
+	if { [istarget mips*el-*-*] || [istarget "mips*-*-*linux*"] } then {
+	    set target_machine tmips
+	} else {
+	    set target_machine mips
+	}
     }
 
     if { $target_machine != "" && [file exists $srcdir/$subdir/$regexp_file-$readelf_size-$target_machine] } then {

@@ -1,3 +1,12 @@
+2001-05-25  H.J. Lu  <hjl@gnu.org>
+
+	* binutils-all/readelf.exp (readelf_test): Set target_machine
+	to tmips for traditional mips.
+
+	* binutils-all/readelf.s: Support traditional mips.
+
+	* binutils-all/readelf.ss-tmips: New for traditional mips.
+
 2001-05-25  Alan Modra  <amodra@one.net.au>
 
 	* binutils-all/readelf.exp: Replace linuxoldld with linux*oldld
