@@ -95,7 +95,7 @@ tcp_open(scb, name)
   memcpy (&sockaddr.sin_addr.s_addr, hostent->h_addr,
 	  sizeof (struct in_addr));
 
-  if (connect (scb->fd, &sockaddr, sizeof(sockaddr)))
+  if (connect (scb->fd, (struct sockaddr *) &sockaddr, sizeof(sockaddr)))
     {
       close(scb->fd);
       scb->fd = -1;

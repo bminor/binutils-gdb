@@ -1,3 +1,13 @@
+Thu Dec 22 09:27:16 1994  Jim Kingdon  <kingdon@deneb.cygnus.com>
+
+	* ser-tcp.c (tcp_open): Cast to struct sockaddr when passing to
+	function which expects that.
+
+Thu Dec 22 13:25:33 1994  J.T. Conklin  (jtc@rtl.cygnus.com)
+
+	* nlm/gdbserve.c, nlm/ppc.c, nlm/ppc.h: Don't try to use
+	  ALTERNATE_MEM_FUNCS.
+
 Wed Dec 21 14:00:26 1994  Rob Savoye  <rob@darkstar.cygnus.com>
 
 	* monitor.c: Now supports xmodem as a remoteloadprotocol.
