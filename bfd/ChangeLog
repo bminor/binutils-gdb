@@ -1,5 +1,7 @@
 Wed Jun 22 10:52:47 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* elfcode.h (elf_get_reloc_upper_bound): Correct.
+
 	* aout64.c (BMAGIC, QMAGIC): Define if not already defined.  From
 	Peter Schauer <pes@regent.e-technik.tu-muenchen.de>.
 
