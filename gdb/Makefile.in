@@ -1552,7 +1552,7 @@ i386-linux-tdep.o: i386-linux-tdep.c $(defs_h) $(gdbcore_h) $(frame_h) \
 i386v4-nat.o: i386v4-nat.c $(defs_h) $(regcache_h)
 
 i387-tdep.o: i387-tdep.c $(floatformat_h) $(defs_h) $(gdbcore_h) \
-	$(inferior_h) language.h $(regcache_h) $(doublest_h)
+	$(inferior_h) language.h $(regcache_h) $(doublest_h) i386-tdep.h
 
 i960-tdep.o: i960-tdep.c $(floatformat_h) $(defs_h) $(expression_h) \
 	$(frame_h) $(gdbtypes_h) $(symtab_h) $(value_h) $(gdbcore_h) \
@@ -2076,6 +2076,15 @@ values.o: values.c $(defs_h) $(expression_h) $(frame_h) $(gdbcmd_h) \
 vax-tdep.o: vax-tdep.c $(OP_INCLUDE)/vax.h $(defs_h) $(symtab_h)
 
 w65-tdep.o : w65-tdep.c $(gdbcore_h) $(regcache_h)
+
+x86-64-linux-tdep.o : x86-64-linux-tdep.c $(defs_h) $(inferior_h) $(gdbcore_h) \
+	$(regcache_h) x86-64-tdep.h i386-tdep.h
+
+x86-64-tdep.o : x86-64-tdep.c $(defs_h) $(inferior_h) $(gdbcore_h) $(gdbcmd_h) \
+	$(arch_utils_h) $(regcache_h) $(symfile_h) x86-64-tdep.h i386-tdep.h
+
+x86-64-linux-tdep.o : x86-64-linux-tdep.c $(defs_h) $(inferior_h) $(gdbcore_h) \
+	$(regcache_h) i387-nat.h x86-64-tdep.h i386-tdep.h
 
 win32-nat.o: win32-nat.c $(gdbcmd_h) $(gdbcore_h) $(inferior_h) $(defs_h) \
 	$(gdb_string_h) $(regcache_h) $(completer_h)

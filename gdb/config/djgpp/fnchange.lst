@@ -202,6 +202,8 @@
 @V@/gdb/testsuite/gdb.mi/mi0-var-display.exp @V@/gdb/testsuite/gdb.mi/mi0vardisplay.exp
 @V@/gdb/tui/tuiSourceWin.c @V@/gdb/tui/tuiWinSource.c
 @V@/gdb/tui/tuiSourceWin.h @V@/gdb/tui/tuiWinSource.h
+@V@/gdb/x86-64-linux-tdep.c @V@/gdb/x8664-ltdep.c
+@V@/gdb/x86-64-linux-nat.c @V@/gdb/x8664-lnat.c
 @V@/intl/intlh.inst.in @V@/intl/intlh_inst.in
 @V@/intl/po2tbl.sed.in @V@/intl/po2tblsed.in
 @V@/itcl/itcl/itclConfig.sh.in @V@/itcl/itcl/itclConfig.sh-in
