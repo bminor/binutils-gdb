@@ -1,3 +1,7 @@
+2003-04-14  Elena Zannoni  <ezannoni@redhat.com>
+
+	* s390-nat.c: Include asm/types.h for addr_t.
+
 2003-04-14  Corinna Vinschen  <vinschen@redhat.com>
 
 	* cp-valprint.c (cp_print_class_method): Call unpack_pointer() with
