@@ -52,7 +52,7 @@ into another language, under the above conditions for modified versions.
 @titlepage
 @finalout
 @title The GNU Binary Utilities
-@subtitle Version 2.01
+@subtitle Version 2.2
 @sp 1
 @subtitle April 1993
 @author Roland H. Pesch
@@ -87,7 +87,7 @@ into another language, under the above conditions for modified versions.
 
 @cindex version
 This brief manual contains preliminary documentation for the GNU binary
-utilities (collectively version 2.1): 
+utilities (collectively version 2.2): 
 
 @iftex
 @table @code
@@ -123,6 +123,7 @@ Discard symbols
 * ranlib::                      Generate index to archive contents
 * size::                        List section sizes and total size
 * strip::                       Discard symbols
+* c++filt::			Filter to demangle encoded C++ symbols
 * Index::                       
 @end menu
 
@@ -965,7 +966,7 @@ on listing available formats.
 Display the version number of @code{size}.
 @end table
 
-@node strip, Index, size, Top
+@node strip, c++filt, size, Top
 @chapter strip
 
 @kindex strip
@@ -1035,7 +1036,35 @@ Verbose output: list all object files modified.  In the case of
 archives, @samp{strip -v} lists all members of the archive.
 @end table
 
-@node Index,  , strip, Top
+@node c++filt, Index, strip, Top
+@chapter c++filt
+
+@kindex c++filt
+@cindex demangling C++ symbols
+
+The C++ language provides function overloading, which means that
+the user can write many function with the same name (but taking
+different kinds of parameters).  So that the linker can keep these
+overloaded functions from clashing, all C++ function names are
+encoded ("mangled") into a funny-looking low-level assembly label.
+The @code{c++filt} program does the inverse mapping:  It decodes
+("demangles") low-level names into user-level names.
+
+When @code{c++filt} is used as a filter (which is usually the case),
+it reads from standard input.  Every alphanumeric word (consisting
+of letters, digits, underscores, dollars, or periods) seen in the
+input is a potential label.  If the label decodes into a C++ name.
+the C++ name will replace the low-level name in the output.
+
+A typical use of @code{c++filt} is to pipe the output of @code{nm}
+though it.
+
+Note that on some systems, both the C and C++ compilers prepend
+an underscore in front of every name.  (I.e. the C name @code{foo}
+gets the low-level name @code{_foo}.)  On such systems, @code{c++filt}
+will remove any initial underscore of a potential label.
+
+@node Index,  , c++filt, Top
 @unnumbered Index
 
 @printindex cp
