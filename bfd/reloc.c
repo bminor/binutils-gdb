@@ -444,126 +444,111 @@ DEFUN(bfd_perform_relocation,(abfd,
   symbol = *( reloc_entry->sym_ptr_ptr);
   if ((symbol->section == &bfd_abs_section) 
       && output_bfd != (bfd *)NULL) 
-  {
-    reloc_entry->address += input_section->output_offset;
-       
-    return bfd_reloc_ok;
-       
-  }
+    {
+      reloc_entry->address += input_section->output_offset;
+      return bfd_reloc_ok;
+    }
 
-  if ((symbol->section == &bfd_und_section) && output_bfd == (bfd *)NULL) {
+  if ((symbol->section == &bfd_und_section) && output_bfd == (bfd *)NULL)
     flag = bfd_reloc_undefined;
-  }
 
-  if (howto->special_function) {
-    bfd_reloc_status_type cont;
-    cont = howto->special_function(abfd,
-				   reloc_entry,
-				   symbol,
-				   data,
-				   input_section,
-				   output_bfd);
-    if (cont != bfd_reloc_continue) return cont;
-  }
+  /* If there is a function supplied to handle this relocation type,
+     call it.  It'll return `bfd_reloc_continue' if further processing
+     can be done.  */
+  if (howto->special_function)
+    {
+      bfd_reloc_status_type cont;
+      cont = howto->special_function (abfd, reloc_entry, symbol, data,
+				      input_section, output_bfd);
+      if (cont != bfd_reloc_continue)
+	return cont;
+    }
 
-  /* 
-    Work out which section the relocation is targetted at and the
-    initial relocation command value.
-    */
+  /* Is the address of the relocation really within the section?  */
+  if (reloc_entry->address > input_section->_cooked_size)
+    return bfd_reloc_outofrange;
 
+  /* Work out which section the relocation is targetted at and the
+     initial relocation command value.  */
 
-  if (bfd_is_com_section (symbol->section)) {
+  /* Get symbol value.  (Common symbols are special.)  */
+  if (bfd_is_com_section (symbol->section))
     relocation = 0;
-  }
-  else {
+  else
     relocation = symbol->value;
-  }
 
 
   reloc_target_output_section = symbol->section->output_section;
 
-  if (output_bfd && howto->partial_inplace==false) {
+  /* Convert input-section-relative symbol value to absolute.  */
+  if (output_bfd && howto->partial_inplace==false)
     output_base = 0;
-  }
-  else {
+  else
     output_base = reloc_target_output_section->vma;
-
-  }
 
   relocation += output_base + symbol->section->output_offset;
 
+  /* Add in supplied addend.  */
   relocation += reloc_entry->addend;
 
-  if(reloc_entry->address > input_section->_cooked_size)
-  {
-    return bfd_reloc_outofrange;
-  }
-          
-
   if (howto->pc_relative == true)
-  {
-    /*
-      Anything which started out as pc relative should end up that
-      way too. 
-      
-      There are two ways we can see a pcrel instruction. Sometimes
-      the pcrel displacement has been partially calculated, it
-      includes the distance from the start of the section to the
-      instruction in it (e.g., sun3), and sometimes the field is
-      totally blank - e.g., m88kbcs.
-      */
+    {
+      /* Anything which started out as pc relative should end up that
+	 way too. 
 
-        
-    relocation -= 
-     input_section->output_section->vma + input_section->output_offset;
+	 There are two ways we can see a pcrel instruction. Sometimes
+	 the pcrel displacement has been partially calculated, it
+	 includes the distance from the start of the section to the
+	 instruction in it (e.g., sun3), and sometimes the field is
+	 totally blank - e.g., m88kbcs.  */
 
-    if (howto->pcrel_offset == true) {
-      relocation -= reloc_entry->address;
+      relocation -= 
+	input_section->output_section->vma + input_section->output_offset;
+
+      if (howto->pcrel_offset == true)
+	relocation -= reloc_entry->address;
     }
-  }
 
   if (output_bfd!= (bfd *)NULL) 
-  {
-    if ( howto->partial_inplace == false)  
     {
-      /*
-	This is a partial relocation, and we want to apply the relocation
-	to the reloc entry rather than the raw data. Modify the reloc
-	inplace to reflect what we now know.
-	*/
-      reloc_entry->addend = relocation  ;
-      reloc_entry->address +=  input_section->output_offset;
-      return flag;
-    }
-    else 
-    {
-      /* This is a partial relocation, but inplace, so modify the
-	 reloc record a bit. 
-	 
-	 If we've relocated with a symbol with a section, change
-	 into a ref to  the section belonging to the symbol
-	 */
-
-      reloc_entry->address += input_section->output_offset;
-
-      if (abfd->xvec->flavour == bfd_target_coff_flavour) 
-      {
-	relocation -= reloc_entry->addend;
-	reloc_entry->addend = 0;
-      }
+      if ( howto->partial_inplace == false)  
+	{
+	  /* This is a partial relocation, and we want to apply the relocation
+	     to the reloc entry rather than the raw data. Modify the reloc
+	     inplace to reflect what we now know.  */
+	  reloc_entry->addend = relocation;
+	  reloc_entry->address +=  input_section->output_offset;
+	  return flag;
+	}
       else
-      {
-	reloc_entry->addend = relocation  ;
-      }
-    }
-  }
-  else 
-  {
-    reloc_entry->addend = 0;
-  }
-  
+	{
+	  /* This is a partial relocation, but inplace, so modify the
+	     reloc record a bit. 
 
-  if (howto->complain_on_overflow && howto->pc_relative) 
+	     If we've relocated with a symbol with a section, change
+	     into a ref to the section belonging to the symbol.  */
+
+	  reloc_entry->address += input_section->output_offset;
+
+	  /* WTF?? */
+	  if (abfd->xvec->flavour == bfd_target_coff_flavour) 
+	    {
+	      relocation -= reloc_entry->addend;
+	      reloc_entry->addend = 0;
+	    }
+	  else
+	    {
+	      reloc_entry->addend = relocation;
+	    }
+	}
+    }
+  else 
+    {
+      reloc_entry->addend = 0;
+    }
+
+
+  if (howto->complain_on_overflow && howto->pc_relative)
     {
       /* We can detect overflow safely here */
 
@@ -744,7 +729,6 @@ CODE_FRAGMENT
 .  BFD_RELOC_SPARC_WDISP22,
 .  BFD_RELOC_SPARC22,
 .  BFD_RELOC_SPARC13,
-.  BFD_RELOC_SPARC_BASE13,
 .  BFD_RELOC_SPARC_GOT10,
 .  BFD_RELOC_SPARC_GOT13,
 .  BFD_RELOC_SPARC_GOT22,
@@ -758,10 +742,10 @@ CODE_FRAGMENT
 .  BFD_RELOC_SPARC_UA32,
 .
 .  {* this one is a.out specific? *}
+.  BFD_RELOC_SPARC_BASE13,
 .  BFD_RELOC_SPARC_BASE22,
 .
 .  {* start-sanitize-v9 *}
-.  BFD_RELOC_SPARC_WDISP19,
 .  BFD_RELOC_SPARC_10,
 .  BFD_RELOC_SPARC_11,
 .#define  BFD_RELOC_SPARC_64 BFD_RELOC_64
@@ -773,9 +757,11 @@ CODE_FRAGMENT
 .  BFD_RELOC_SPARC_PC_HM10,
 .  BFD_RELOC_SPARC_PC_LM22,
 .  BFD_RELOC_SPARC_WDISP16,
+.  BFD_RELOC_SPARC_WDISP19,
 .  BFD_RELOC_SPARC_GLOB_JMP,
 .  BFD_RELOC_SPARC_LO7,
 .  {* end-sanitize-v9 *}
+.
 .       {* Bits 27..2 of the relocation address shifted right 2 bits;
 .         simple reloc otherwise.  *}
 .  BFD_RELOC_MIPS_JMP,
