@@ -1,3 +1,9 @@
+Mon Nov  7 17:25:18 1994  Bill Cox  (bill@cirdan.cygnus.com)
+
+	* build-all.mk: Add Ericsson targets to sun4 and solaris
+	  hosts.  Add  BNR's sun4 target to solaris host, so their
+	  build-from-source will be tested in-house first.
+
 Sat Nov  5 15:44:00 1994  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* configure.in (target_libs):  Include libstdc++ again.

@@ -110,6 +110,14 @@ ifeq ($(canonhost),rs6000-lynx-lynxos)
 canonhost := rs6000-lynx
 endif
 
+#
+# The following TARGETS variable settings probably ought to
+# be made automatically from the 
+# /s1/cygnus/progressive/host-target-pairs.tbl file, using
+# the /s1/cygnus/progressive/targets script.  But, be sure
+# that the native is spelled 'native'.
+#
+
 ifeq ($(canonhost),sparc-sun-sunos4.1.3)
 TARGETS = $(NATIVE) \
 	i386-go32 	\
@@ -124,7 +132,9 @@ TARGETS = $(NATIVE) \
 	sh-hms 		\
 	sparc-aout	sparc-lynx	sparc-vxworks	\
 	sparclite-aout  sparclite-vxworks \
-	sparclite-coff  z8k-coff
+	sparclite-coff  z8k-coff \
+	OSE68000 OSE68k
+# The OSE68000 and OSE68k targets are for Ericsson only.
 GCC = gcc -O2 -pipe
 all: all-cygnus
 endif
@@ -143,7 +153,13 @@ TARGETS = $(NATIVE) \
 	i960-vxworks5.0 i960-vxworks5.1 \
 	m68k-aout	m68k-coff 	m68k-vxworks \
 	mipsel-idt-ecoff sparc-lynx \
-	sparclite-aout sparclite-coff m88k-coff z8k-coff
+	sparclite-aout sparclite-coff m88k-coff z8k-coff \
+	OSE68000 OSE68k \
+	sparc-sun-sunos4.1.3
+# The latter assures that BNR's special build (which they now
+# do for themselves from sources) hasn't developed bit-rot.
+# The OSE68000 and OSE68k targets are for Ericsson only.
+
 CC = cc -Xs
 GCC = gcc -O2 -pipe
 all: all-cygnus
