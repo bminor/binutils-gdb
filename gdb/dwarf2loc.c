@@ -1,5 +1,7 @@
 /* DWARF 2 location expression support for GDB.
-   Copyright 2003 Free Software Foundation, Inc.
+
+   Copyright 2003, 2005 Free Software Foundation, Inc.
+
    Contributed by Daniel Jacobowitz, MontaVista Software, Inc.
 
    This file is part of GDB.
@@ -214,7 +216,7 @@ dwarf2_evaluate_loc_desc (struct symbol *var, struct frame_info *frame,
     {
       retval = allocate_value (SYMBOL_TYPE (var));
       VALUE_LVAL (retval) = not_lval;
-      VALUE_OPTIMIZED_OUT (retval) = 1;
+      set_value_optimized_out (retval, 1);
     }
 
   baton.frame = frame;

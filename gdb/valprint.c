@@ -164,7 +164,7 @@ value_print (struct value *val, struct ui_file *stream, int format,
       printf_filtered ("<address of value unknown>");
       return 0;
     }
-  if (VALUE_OPTIMIZED_OUT (val))
+  if (value_optimized_out (val))
     {
       printf_filtered ("<value optimized out>");
       return 0;

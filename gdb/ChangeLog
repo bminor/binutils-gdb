@@ -1,5 +1,10 @@
 2005-02-06  Andrew Cagney  <cagney@gnu.org>
 
+	* value.h (VALUE_OPTIMIZED_OUT): Delete.
+	(value_optimized_out, set_value_optimized_out): Declare.
+	* value.c (set_value_optimized_out, value_optimized_out): Define.
+	* valprint.c, findvar.c, dwarf2loc.c: Update.
+
 	* value.c (value_contents, value_contents_writeable): New
 	functions.
 	* value.h (VALUE_CONTENTS): Delete macro.

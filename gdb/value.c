@@ -96,7 +96,7 @@ allocate_value (struct type *type)
   val->bitsize = 0;
   VALUE_REGNUM (val) = -1;
   val->lazy = 0;
-  VALUE_OPTIMIZED_OUT (val) = 0;
+  val->optimized_out = 0;
   VALUE_EMBEDDED_OFFSET (val) = 0;
   VALUE_POINTED_TO_OFFSET (val) = 0;
   val->modifiable = 1;
@@ -193,6 +193,17 @@ value_contents_writeable (struct value *value)
   return value->aligner.contents;
 }
 
+int
+value_optimized_out (struct value *value)
+{
+  return value->optimized_out;
+}
+
+void
+set_value_optimized_out (struct value *value, int val)
+{
+  value->optimized_out = val;
+}
 
 /* Return a mark in the value chain.  All values allocated after the
    mark is obtained (except for those released) are subject to being freed
@@ -297,7 +308,7 @@ value_copy (struct value *arg)
   VALUE_FRAME_ID (val) = VALUE_FRAME_ID (arg);
   VALUE_REGNUM (val) = VALUE_REGNUM (arg);
   val->lazy = arg->lazy;
-  VALUE_OPTIMIZED_OUT (val) = VALUE_OPTIMIZED_OUT (arg);
+  val->optimized_out = arg->optimized_out;
   VALUE_EMBEDDED_OFFSET (val) = VALUE_EMBEDDED_OFFSET (arg);
   VALUE_POINTED_TO_OFFSET (val) = VALUE_POINTED_TO_OFFSET (arg);
   val->modifiable = arg->modifiable;

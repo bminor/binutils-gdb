@@ -287,7 +287,7 @@ value_of_register (int regnum, struct frame_info *frame)
   VALUE_LVAL (reg_val) = lval;
   VALUE_ADDRESS (reg_val) = addr;
   VALUE_REGNUM (reg_val) = regnum;
-  VALUE_OPTIMIZED_OUT (reg_val) = optim;
+  set_value_optimized_out (reg_val, optim);
   VALUE_FRAME_ID (reg_val) = get_frame_id (frame);
   return reg_val;
 }
@@ -576,7 +576,7 @@ addresses have not been bound by the dynamic loader. Try again when executable i
 
     case LOC_OPTIMIZED_OUT:
       VALUE_LVAL (v) = not_lval;
-      VALUE_OPTIMIZED_OUT (v) = 1;
+      set_value_optimized_out (v, 1);
       return v;
 
     default:
@@ -701,7 +701,7 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
 	  VALUE_REGNUM (v) = regnum;
 	}
       
-      VALUE_OPTIMIZED_OUT (v) = optimized;
+      set_value_optimized_out (v, optimized);
       
       /* Any structure stored in more than one register will always be
          an integral number of registers.  Otherwise, you need to do

@@ -213,7 +213,8 @@ extern int value_fetch_lazy (struct value *val);
 #define VALUE_INTERNALVAR(val) (val)->location.internalvar
 #define VALUE_FRAME_ID(val) ((val)->frame_id)
 #define VALUE_REGNUM(val) (val)->regnum
-#define VALUE_OPTIMIZED_OUT(val) ((val)->optimized_out)
+extern int value_optimized_out (struct value *value);
+extern void set_value_optimized_out (struct value *value, int val);
 #define VALUE_EMBEDDED_OFFSET(val) ((val)->embedded_offset)
 #define VALUE_POINTED_TO_OFFSET(val) ((val)->pointed_to_offset)
 
