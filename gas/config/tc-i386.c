@@ -4780,8 +4780,9 @@ tc_gen_reloc (section, fixp)
 	  switch (fixp->fx_size)
 	    {
 	    default:
-	      as_bad (_("can not do %d byte pc-relative relocation"),
-		      fixp->fx_size);
+	      as_bad_where (fixp->fx_file, fixp->fx_line,
+			    _("can not do %d byte pc-relative relocation"),
+			    fixp->fx_size);
 	      code = BFD_RELOC_32_PCREL;
 	      break;
 	    case 1: code = BFD_RELOC_8_PCREL;  break;
@@ -4794,7 +4795,9 @@ tc_gen_reloc (section, fixp)
 	  switch (fixp->fx_size)
 	    {
 	    default:
-	      as_bad (_("can not do %d byte relocation"), fixp->fx_size);
+	      as_bad_where (fixp->fx_file, fixp->fx_line,
+			    _("can not do %d byte relocation"),
+			    fixp->fx_size);
 	      code = BFD_RELOC_32;
 	      break;
 	    case 1: code = BFD_RELOC_8;  break;

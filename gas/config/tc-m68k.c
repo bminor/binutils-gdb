@@ -900,8 +900,9 @@ tc_gen_reloc (section, fixp)
   if (fixp->fx_tcbit)
     {
       if (fixp->fx_addsy)
-	as_bad (_("Unable to produce reloc against symbol '%s'"),
-		S_GET_NAME (fixp->fx_addsy));
+	as_bad_where (fixp->fx_file, fixp->fx_line,
+		      _("Unable to produce reloc against symbol '%s'"),
+		      S_GET_NAME (fixp->fx_addsy));
       return NULL;
     }
 
@@ -4374,7 +4375,8 @@ md_convert_frag_1 (fragP)
     case TAB (BRANCHBW, BYTE):
       know (issbyte (disp));
       if (disp == 0)
-	as_bad (_("short branch with zero offset: use :w"));
+	as_bad_where (fragP->fr_file, fragP->fr_line,
+		      _("short branch with zero offset: use :w"));
       fixP = fix_new (fragP, fragP->fr_fix - 1, 1, fragP->fr_symbol,
 		      fragP->fr_offset, 1, RELAX_RELOC_PC8);
       fixP->fx_pcrel_adjust = -1;

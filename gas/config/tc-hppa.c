@@ -1153,6 +1153,20 @@ static struct default_space_dict pa_def_spaces[] =
       } \
   }
 
+/* Variant of CHECK_FIELD for use in md_apply_fix and other places where
+   the current file and line number are not valid.  */
+
+#define CHECK_FIELD_WHERE(FIELD, HIGH, LOW, FILENAME, LINE) \
+  { \
+    if ((FIELD) > (HIGH) || (FIELD) < (LOW)) \
+      { \
+        as_bad_where ((FILENAME), (LINE), \
+		      _("Field out of range [%d..%d] (%d)."), (LOW), (HIGH), \
+		      (int) (FIELD));\
+        break; \
+      } \
+  }
+
 /* Simple alignment checking for FIELD againt ALIGN (a power of two).
    IGNORE is used to suppress the error message.  */
 
@@ -4055,7 +4069,7 @@ tc_gen_reloc (section, fixp)
 
   if (codes == NULL)
     {
-      as_bad (_("Cannot handle fixup at %s:%d"), fixp->fx_file, fixp->fx_line);
+      as_bad_where (fixp->fx_file, fixp->fx_line, _("Cannot handle fixup"));
       abort ();
     }
 
@@ -4426,8 +4440,9 @@ md_apply_fix (fixP, valp)
   hppa_fixP = (struct hppa_fix_struct *) fixP->tc_fix_data;
   if (hppa_fixP == NULL)
     {
-      printf (_("no hppa_fixup entry for fixup type 0x%x at %s:%d"),
-	      fixP->fx_r_type, fixP->fx_file, fixP->fx_line);
+      as_bad_where (fixP->fx_file, fixP->fx_line,
+		    _("no hppa_fixup entry for fixup type 0x%x"),
+		    fixP->fx_r_type);
       return 0;
     }
 
@@ -4493,14 +4508,16 @@ md_apply_fix (fixP, valp)
   switch (fmt)
     {
     case 10:
-      CHECK_FIELD (new_val, 8191, -8192, 0);
+      CHECK_FIELD_WHERE (new_val, 8191, -8192,
+			 fixP->fx_file, fixP->fx_line);
       val = new_val;
 
       insn = (insn & ~ 0x3ff1) | (((val & 0x1ff8) << 1)
 				  | ((val & 0x2000) >> 13));
       break;
     case -11:
-      CHECK_FIELD (new_val, 8191, -8192, 0);
+      CHECK_FIELD_WHERE (new_val, 8191, -8192,
+			 fixP->fx_file, fixP->fx_line);
       val = new_val;
 
       insn = (insn & ~ 0x3ff9) | (((val & 0x1ffc) << 1)
@@ -4508,7 +4525,8 @@ md_apply_fix (fixP, valp)
       break;
       /* Handle all opcodes with the 'j' operand type.  */
     case 14:
-      CHECK_FIELD (new_val, 8191, -8192, 0);
+      CHECK_FIELD_WHERE (new_val, 8191, -8192,
+			 fixP->fx_file, fixP->fx_line);
       val = new_val;
 
       insn = ((insn & ~ 0x3fff) | low_sign_unext (val, 14));
@@ -4516,7 +4534,8 @@ md_apply_fix (fixP, valp)
 
       /* Handle all opcodes with the 'k' operand type.  */
     case 21:
-      CHECK_FIELD (new_val, 1048575, -1048576, 0);
+      CHECK_FIELD_WHERE (new_val, 1048575, -1048576,
+			 fixP->fx_file, fixP->fx_line);
       val = new_val;
 
       insn = (insn & ~ 0x1fffff) | re_assemble_21 (val);
@@ -4524,7 +4543,8 @@ md_apply_fix (fixP, valp)
 
       /* Handle all the opcodes with the 'i' operand type.  */
     case 11:
-      CHECK_FIELD (new_val, 1023, -1024, 0);
+      CHECK_FIELD_WHERE (new_val, 1023, -1024,
+			 fixP->fx_file, fixP->fx_line);
       val = new_val;
 
       insn = (insn & ~ 0x7ff) | low_sign_unext (val, 11);
@@ -4532,7 +4552,8 @@ md_apply_fix (fixP, valp)
 
       /* Handle all the opcodes with the 'w' operand type.  */
     case 12:
-      CHECK_FIELD (new_val - 8, 8191, -8192, 0);
+      CHECK_FIELD_WHERE (new_val - 8, 8191, -8192,
+			 fixP->fx_file, fixP->fx_line);
       val = new_val - 8;
 
       insn = (insn & ~ 0x1ffd) | re_assemble_12 (val >> 2);
@@ -4547,9 +4568,11 @@ md_apply_fix (fixP, valp)
 	   range target, then we want to complain.  */
 	if (fixP->fx_r_type == (int) R_HPPA_PCREL_CALL
 	    && (insn & 0xffe00000) == 0xe8000000)
-	  CHECK_FIELD (distance - 8, 262143, -262144, 0);
+	  CHECK_FIELD_WHERE (distance - 8, 262143, -262144,
+			     fixP->fx_file, fixP->fx_line);
 
-	CHECK_FIELD (new_val - 8, 262143, -262144, 0);
+	CHECK_FIELD_WHERE (new_val - 8, 262143, -262144,
+			   fixP->fx_file, fixP->fx_line);
 	val = new_val - 8;
 
 	insn = (insn & ~ 0x1f1ffd) | re_assemble_17 (val >> 2);
@@ -4564,9 +4587,11 @@ md_apply_fix (fixP, valp)
 	   range target, then we want to complain.  */
 	if (fixP->fx_r_type == (int) R_HPPA_PCREL_CALL
 	    && (insn & 0xffe00000) == 0xe8000000)
-	  CHECK_FIELD (distance - 8, 8388607, -8388608, 0);
+	  CHECK_FIELD_WHERE (distance - 8, 8388607, -8388608,
+			     fixP->fx_file, fixP->fx_line);
 
-	CHECK_FIELD (new_val - 8, 8388607, -8388608, 0);
+	CHECK_FIELD_WHERE (new_val - 8, 8388607, -8388608,
+			   fixP->fx_file, fixP->fx_line);
 	val = new_val - 8;
 
 	insn = (insn & ~ 0x3ff1ffd) | re_assemble_22 (val >> 2);
@@ -4593,7 +4618,8 @@ md_apply_fix (fixP, valp)
       break;
 
     default:
-      as_bad (_("Unknown relocation encountered in md_apply_fix."));
+      as_bad_where (fixP->fx_file, fixP->fx_line,
+		    _("Unknown relocation encountered in md_apply_fix."));
       return 0;
     }
 

@@ -1,3 +1,14 @@
+2001-06-21  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-hppa.c (CHECK_FIELD_WHERE): Define.
+	(md_apply_fix): Use it here.  Replace printf with equivalent
+	as_bad_where.
+	(tc_gen_reloc): Use as_bad_where instead of as_bad.
+	(md_apply_fix): Here too.
+	* config/tc-i386.c (tc_gen_reloc): Use as_bad_where instead of as_bad.
+	* config/tc-m68k.c (tc_gen_reloc): Likewise.
+	(md_convert_frag_1): Likewise.
+
 2000-06-20  Tom Rix <trix@redhat.com>
 
 	* config/tc-ppc.c (ppc_comm): Change default alignment to 4 bytes.
