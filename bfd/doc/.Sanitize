@@ -15,8 +15,6 @@
 
 Do-first:
 
-echo Sanitizing `pwd`.
-
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -24,6 +22,7 @@ echo Sanitizing `pwd`.
 # with rm -rf.
 
 Things-to-keep:
+
 Makefile.in
 bfd.texinfo
 configure.in
@@ -31,24 +30,7 @@ chew.c
 proto.str
 doc.str
 ChangeLog
+
 Do-last:
-
-echo Done in `pwd`.
-
-# $Log$
-# Revision 1.4  1991/12/08 01:04:31  sac
-# 	* chew.c: Much modified
-# 	* proto.str, doc.str: New files for extracting to product
-# 	prototypes and documents respectively.
-#
-# Revision 1.3  1991/12/01  01:16:55  sac
-# Now reflect the new documentation order
-#
-# Revision 1.2  1991/11/15  03:29:15  bothner
-# Add Makefile.in, configure.in.  Remove Makefile.
-#
-# Revision 1.1  1991/08/23  09:06:52  gnu
-# Initial revision
-#
 
 # End of file.
