@@ -4,6 +4,9 @@
 	with either ``GNU/Linux'' or ``Linux kernel''.  Update copyright.
 	* m68klinux-nat.c, sparc-linux-nat.c, x86-64-linux-nat.c: Ditto.
 	* x86-64-linux-tdep.c, gregset.h, gdb_wait.h: Ditto.
+	* ia64-linux-nat.c, infrun.c, linux-proc.c: Ditto.
+	* proc-service.c, i386-linux-tdep.c, ppc-linux-tdep.c: Ditto.
+	* s390-tdep.c: Ditto.
 	Fix PR gdb/378.
 	
 2002-02-23  Andrew Cagney  <ac131313@redhat.com>

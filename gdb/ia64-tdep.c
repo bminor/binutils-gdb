@@ -1,6 +1,6 @@
 /* Target-dependent code for the IA-64 for GDB, the GNU debugger.
-   Copyright 1999, 2000, 2001
-   Free Software Foundation, Inc.
+
+   Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1990,7 +1990,7 @@ ia64_pop_frame_regular (struct frame_info *frame)
      size of the frame and the size of the locals (both wrt the
      frame that we're going back to).  This seems kind of strange,
      especially since it seems like we ought to be subtracting the
-     size of the locals... and we should; but the linux kernel
+     size of the locals... and we should; but the Linux kernel
      wants bsp to be set at the end of all used registers.  It's
      likely that this code will need to be revised to accomodate
      other operating systems. */
@@ -2072,10 +2072,11 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     {
       os_ident = elf_elfheader (info.abfd)->e_ident[EI_OSABI];
 
-      /* If os_ident is 0, it is not necessarily the case that we're on a
-         SYSV system.  (ELFOSABI_NONE is defined to be 0.) GNU/Linux uses
-	 a note section to record OS/ABI info, but leaves e_ident[EI_OSABI]
-	 zero.  So we have to check for note sections too. */
+      /* If os_ident is 0, it is not necessarily the case that we're
+         on a SYSV system.  (ELFOSABI_NONE is defined to be 0.)
+         GNU/Linux uses a note section to record OS/ABI info, but
+         leaves e_ident[EI_OSABI] zero.  So we have to check for note
+         sections too. */
       if (os_ident == 0)
 	{
 	  bfd_map_over_sections (info.abfd,
@@ -2112,12 +2113,13 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   else
     tdep->sigcontext_register_address = 0;
 
-  /* We know that Linux won't have to resort to the native_find_global_pointer
-     hackery.  But that's the only one we know about so far, so if
-     native_find_global_pointer is set to something non-zero, then use
-     it.  Otherwise fall back to using generic_elf_find_global_pointer.  
-     This arrangement should (in theory) allow us to cross debug Linux
-     binaries from an AIX machine.  */
+  /* We know that GNU/Linux won't have to resort to the
+     native_find_global_pointer hackery.  But that's the only one we
+     know about so far, so if native_find_global_pointer is set to
+     something non-zero, then use it.  Otherwise fall back to using
+     generic_elf_find_global_pointer.  This arrangement should (in
+     theory) allow us to cross debug GNU/Linux binaries from an AIX
+     machine.  */
   if (os_ident == ELFOSABI_LINUX)
     tdep->find_global_pointer = generic_elf_find_global_pointer;
   else if (native_find_global_pointer != 0)

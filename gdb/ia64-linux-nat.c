@@ -1,5 +1,7 @@
-/* Functions specific to running gdb native on IA-64 running Linux.
-   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
+/* Functions specific to running gdb native on IA-64 running
+   GNU/Linux.
+
+   Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

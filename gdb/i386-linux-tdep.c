@@ -1,5 +1,6 @@
-/* Target-dependent code for Linux running on i386's, for GDB.
-   Copyright 2000, 2001 Free Software Foundation, Inc.
+/* Target-dependent code for GNU/Linux running on i386's, for GDB.
+
+   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -67,12 +68,12 @@ i386_linux_register_raw_size (int reg)
 
 /* Recognizing signal handler frames.  */
 
-/* Linux has two flavors of signals.  Normal signal handlers, and
+/* GNU/Linux has two flavors of signals.  Normal signal handlers, and
    "realtime" (RT) signals.  The RT signals can provide additional
    information to the signal handler if the SA_SIGINFO flag is set
    when establishing a signal handler using `sigaction'.  It is not
-   unlikely that future versions of Linux will support SA_SIGINFO for
-   normal signals too.  */
+   unlikely that future versions of GNU/Linux will support SA_SIGINFO
+   for normal signals too.  */
 
 /* When the i386 Linux kernel calls a signal handler and the
    SA_RESTORER flag isn't set, the return address points to a bit of
@@ -221,7 +222,7 @@ i386_linux_rt_sigtramp_start (CORE_ADDR pc)
   return pc;
 }
 
-/* Return whether PC is in a Linux sigtramp routine.  */
+/* Return whether PC is in a GNU/Linux sigtramp routine.  */
 
 int
 i386_linux_in_sigtramp (CORE_ADDR pc, char *name)
@@ -233,8 +234,8 @@ i386_linux_in_sigtramp (CORE_ADDR pc, char *name)
 	  || i386_linux_rt_sigtramp_start (pc) != 0);
 }
 
-/* Assuming FRAME is for a Linux sigtramp routine, return the address
-   of the associated sigcontext structure.  */
+/* Assuming FRAME is for a GNU/Linux sigtramp routine, return the
+   address of the associated sigcontext structure.  */
 
 CORE_ADDR
 i386_linux_sigcontext_addr (struct frame_info *frame)
@@ -285,8 +286,8 @@ i386_linux_sigcontext_addr (struct frame_info *frame)
 /* Offset to saved PC in sigcontext, from <asm/sigcontext.h>.  */
 #define LINUX_SIGCONTEXT_PC_OFFSET (56)
 
-/* Assuming FRAME is for a Linux sigtramp routine, return the saved
-   program counter.  */
+/* Assuming FRAME is for a GNU/Linux sigtramp routine, return the
+   saved program counter.  */
 
 static CORE_ADDR
 i386_linux_sigtramp_saved_pc (struct frame_info *frame)
@@ -299,8 +300,8 @@ i386_linux_sigtramp_saved_pc (struct frame_info *frame)
 /* Offset to saved SP in sigcontext, from <asm/sigcontext.h>.  */
 #define LINUX_SIGCONTEXT_SP_OFFSET (28)
 
-/* Assuming FRAME is for a Linux sigtramp routine, return the saved
-   stack pointer.  */
+/* Assuming FRAME is for a GNU/Linux sigtramp routine, return the
+   saved stack pointer.  */
 
 static CORE_ADDR
 i386_linux_sigtramp_saved_sp (struct frame_info *frame)
@@ -448,7 +449,7 @@ skip_hurd_resolver (CORE_ADDR pc)
      It's kind of gross to do all these checks every time we're
      called, since they don't change once the executable has gotten
      started.  But this is only a temporary hack --- upcoming versions
-     of Linux will provide a portable, efficient interface for
+     of GNU/Linux will provide a portable, efficient interface for
      debugging programs that use shared libraries.  */
 
   struct objfile *objfile;
@@ -488,11 +489,12 @@ i386_linux_skip_solib_resolver (CORE_ADDR pc)
 }
 
 /* Fetch (and possibly build) an appropriate link_map_offsets
-   structure for native Linux/x86 targets using the struct offsets
+   structure for native GNU/Linux x86 targets using the struct offsets
    defined in link.h (but without actual reference to that file).
 
-   This makes it possible to access Linux/x86 shared libraries from a
-   GDB that was not built on an Linux/x86 host (for cross debugging).  */
+   This makes it possible to access GNU/Linux x86 shared libraries
+   from a GDB that was not built on an GNU/Linux x86 host (for cross
+   debugging).  */
 
 struct link_map_offsets *
 i386_linux_svr4_fetch_link_map_offsets (void)

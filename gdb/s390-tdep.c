@@ -1,5 +1,7 @@
 /* Target-dependent code for GDB, the GNU debugger.
-   Copyright 2001 Free Software Foundation, Inc.
+
+   Copyright 2001, 2002 Free Software Foundation, Inc.
+
    Contributed by D.J. Barrow (djbarrow@de.ibm.com,barrow_dj@yahoo.com)
    for IBM Deutschland Entwicklung GmbH, IBM Corporation.
 
@@ -1354,7 +1356,7 @@ is_float_like (struct type *type)
 
 /* Return non-zero if TYPE is considered a `DOUBLE_OR_FLOAT', as
    defined by the parameter passing conventions described in the
-   "Linux for S/390 ELF Application Binary Interface Supplement".
+   "GNU/Linux for S/390 ELF Application Binary Interface Supplement".
    Otherwise, return zero.  */
 static int
 is_double_or_float (struct type *type)
@@ -1366,8 +1368,9 @@ is_double_or_float (struct type *type)
 
 
 /* Return non-zero if TYPE is considered a `SIMPLE_ARG', as defined by
-   the parameter passing conventions described in the "Linux for S/390
-   ELF Application Binary Interface Supplement".  Return zero otherwise.  */
+   the parameter passing conventions described in the "GNU/Linux for
+   S/390 ELF Application Binary Interface Supplement".  Return zero
+   otherwise.  */
 static int
 is_simple_arg (struct type *type)
 {
@@ -1415,8 +1418,9 @@ extend_simple_arg (struct value *arg)
 
 
 /* Return non-zero if TYPE is a `DOUBLE_ARG', as defined by the
-   parameter passing conventions described in the "Linux for S/390 ELF
-   Application Binary Interface Supplement".  Return zero otherwise.  */
+   parameter passing conventions described in the "GNU/Linux for S/390
+   ELF Application Binary Interface Supplement".  Return zero
+   otherwise.  */
 static int
 is_double_arg (struct type *type)
 {
@@ -1487,8 +1491,8 @@ alignment_of (struct type *type)
 
 
 /* Put the actual parameter values pointed to by ARGS[0..NARGS-1] in
-   place to be passed to a function, as specified by the "Linux for
-   S/390 ELF Application Binary Interface Supplement".
+   place to be passed to a function, as specified by the "GNU/Linux
+   for S/390 ELF Application Binary Interface Supplement".
 
    SP is the current stack pointer.  We must put arguments, links,
    padding, etc. whereever they belong, and return the new stack

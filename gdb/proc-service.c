@@ -1,5 +1,6 @@
 /* <proc_service.h> implementation.
-   Copyright 1999, 2000 Free Software Foundation, Inc.
+
+   Copyright 1999, 2000, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -294,8 +295,8 @@ ps_lsetfpregs (gdb_ps_prochandle_t ph, lwpid_t lwpid,
   return PS_OK;
 }
 
-/* Return overall process id of the target PH.
-   Special for Linux -- not used on Solaris.  */
+/* Return overall process id of the target PH.  Special for GNU/Linux
+   -- not used on Solaris.  */
 
 pid_t
 ps_getpid (gdb_ps_prochandle_t ph)

@@ -1,4 +1,5 @@
-/* Target-struct-independent code to start (run) and stop an inferior process.
+/* Target-struct-independent code to start (run) and stop an inferior
+   process.
 
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
    1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002 Free Software
@@ -142,12 +143,12 @@ static int may_follow_exec = MAY_FOLLOW_EXEC;
    The simple approach is to single-step until control leaves the
    dynamic linker.
 
-   However, on some systems (e.g., Red Hat Linux 5.2) the dynamic
-   linker calls functions in the shared C library, so you can't tell
-   from the PC alone whether the dynamic linker is still running.  In
-   this case, we use a step-resume breakpoint to get us past the
-   dynamic linker, as if we were using "next" to step over a function
-   call.
+   However, on some systems (e.g., Red Hat's 5.2 distribution) the
+   dynamic linker calls functions in the shared C library, so you
+   can't tell from the PC alone whether the dynamic linker is still
+   running.  In this case, we use a step-resume breakpoint to get us
+   past the dynamic linker, as if we were using "next" to step over a
+   function call.
 
    IN_SOLIB_DYNSYM_RESOLVE_CODE says whether we're in the dynamic
    linker code or not.  Normally, this means we single-step.  However,

@@ -1,4 +1,5 @@
-/* Linux-specific methods for using the /proc file system.
+/* GNU/Linux specific methods for using the /proc file system.
+
    Copyright 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.

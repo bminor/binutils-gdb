@@ -1,7 +1,7 @@
 /* Target-dependent code for GDB, the GNU debugger.
 
-   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   2000, 2001 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996,
+   1997, 2000, 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -36,7 +36,7 @@
 #include "ppc-tdep.h"
 
 /* The following two instructions are used in the signal trampoline
-   code on linux/ppc */
+   code on GNU/Linux PPC.  */
 #define INSTR_LI_R0_0x7777	0x38007777
 #define INSTR_SC		0x44000002
 
@@ -105,11 +105,11 @@ static int ppc_linux_at_sigtramp_return_path (CORE_ADDR pc);
 
 /* Determine if pc is in a signal trampoline...
 
-   Ha!  That's not what this does at all.  wait_for_inferior in infrun.c
-   calls IN_SIGTRAMP in order to detect entry into a signal trampoline
-   just after delivery of a signal.  But on linux, signal trampolines
-   are used for the return path only.  The kernel sets things up so that
-   the signal handler is called directly.
+   Ha!  That's not what this does at all.  wait_for_inferior in
+   infrun.c calls IN_SIGTRAMP in order to detect entry into a signal
+   trampoline just after delivery of a signal.  But on GNU/Linux,
+   signal trampolines are used for the return path only.  The kernel
+   sets things up so that the signal handler is called directly.
 
    If we use in_sigtramp2() in place of in_sigtramp() (see below)
    we'll (often) end up with stop_pc in the trampoline and prev_pc in
@@ -773,11 +773,12 @@ ppc_linux_memory_remove_breakpoint (CORE_ADDR addr, char *contents_cache)
 }
 
 /* Fetch (and possibly build) an appropriate link_map_offsets
-   structure for Linux/PPC targets using the struct offsets
+   structure for GNU/Linux PPC targets using the struct offsets
    defined in link.h (but without actual reference to that file).
 
-   This makes it possible to access Linux/PPC shared libraries from a
-   GDB that was not built on an Linux/PPC host (for cross debugging).  */
+   This makes it possible to access GNU/Linux PPC shared libraries
+   from a GDB that was not built on an GNU/Linux PPC host (for cross
+   debugging).  */
 
 struct link_map_offsets *
 ppc_linux_svr4_fetch_link_map_offsets (void)

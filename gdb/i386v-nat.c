@@ -1,6 +1,7 @@
 /* Intel 386 native support for SYSV systems (pre-SVR4).
-   Copyright 1988, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999,
-   2000 Free Software Foundation, Inc.
+
+   Copyright 1988, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1998,
+   1999, 2000, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -46,12 +47,11 @@
 #include <fcntl.h>
 
 
-/* FIXME: The following used to be just "#include <sys/debugreg.h>", but
- * the the Linux 2.1.x kernel and glibc 2.0.x are not in sync; including
- * <sys/debugreg.h> will result in an error.  With luck, these losers
- * will get their act together and we can trash this hack in the near future.
- * --jsm 1998-10-21
- */
+/* FIXME: 1998-10-21/jsm: The following used to be just "#include
+   <sys/debugreg.h>", but the the Linux kernel (version 2.1.x) and
+   glibc 2.0.x are not in sync; including <sys/debugreg.h> will result
+   in an error.  With luck, these losers will get their act together
+   and we can trash this hack in the near future.  */
 
 #ifdef TARGET_HAS_HARDWARE_WATCHPOINTS
 #ifdef HAVE_ASM_DEBUGREG_H
