@@ -4431,7 +4431,7 @@ remote_insert_hw_breakpoint (CORE_ADDR addr, int len)
   
   addr = remote_address_masked (addr);
   p += hexnumstr (p, (ULONGEST) addr);
-  *p = '\0';
+  sprintf (p, ",%x", len);
 
   putpkt (buf);
   getpkt (buf, PBUFSIZ, 0);
@@ -4467,7 +4467,7 @@ remote_remove_hw_breakpoint (CORE_ADDR addr, int len)
   
   addr = remote_address_masked (addr);
   p += hexnumstr (p, (ULONGEST) addr);
-  *p = '\0';
+  sprintf (p, ",%x", len);
 
   putpkt(buf);
   getpkt (buf, PBUFSIZ, 0);
