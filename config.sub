@@ -102,10 +102,6 @@ case $os in
 		os=
 		basic_machine=$1
 		;;
-	-apple*)					# CYGNUS LOCAL
-		os=
-		basic_machine=$1
-		;;
 	-scout)						# CYGNUS LOCAL
 		;;
 	-wrs)						# CYGNUS LOCAL
@@ -184,6 +180,14 @@ case $basic_machine in
 	mips64vr5000 | mips64vr5000el) # CYGNUS LOCAL ian/vr5000
 		basic_machine=$basic_machine-unknown
 		;;
+# CYGNUS LOCAL law
+	mn10300)
+		basic_machine=$basic_machine-unknown
+		;;
+	mn10200)
+		basic_machine=$basic_machine-unknown
+		;;
+# END CYGNUS LOCAL
 # start-sanitize-v850
 	v850)				# CYGNUS LOCAL jtc/v850
 		basic_machine=$basic_machine-unknown
