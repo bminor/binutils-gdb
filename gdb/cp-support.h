@@ -1,5 +1,5 @@
 /* Helper routines for C++ support in GDB.
-   Copyright 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2002, 2003, 2004 Free Software Foundation, Inc.
 
    Contributed by MontaVista Software.
    Namespace support contributed by David Carlton.
@@ -35,6 +35,8 @@ struct obstack;
 struct block;
 struct objfile;
 struct type;
+struct d_comp;
+struct d_info;
 
 /* This struct is designed to store data from using directives.  It
    says that names from namespace INNER should be visible within
@@ -51,6 +53,8 @@ struct using_direct
 
 
 /* Functions from cp-support.c.  */
+
+extern char *cp_canonicalize_string (const char *string);
 
 extern char *class_name_from_physname (const char *physname);
 
@@ -107,6 +111,18 @@ extern struct type *cp_lookup_nested_type (struct type *parent_type,
 
 extern void cp_check_possible_namespace_symbols (const char *name,
 						 struct objfile *objfile);
+
+/* Functions from cp-names.y.  */
+
+extern struct d_comp *demangled_name_to_comp (const char *demangled_name,
+					      struct d_info **di_p);
+
+extern struct d_comp *mangled_name_to_comp (const char *mangled_name,
+					    int options,
+					    struct d_info **di_p,
+					    char **demangled_p);
+
+extern char *cp_comp_to_string (struct d_comp *result, int estimated_len);
 
 /* The list of "maint cplus" commands.  */
 

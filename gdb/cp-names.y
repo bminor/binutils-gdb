@@ -43,8 +43,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define IN_GDB
 #include "cp-demangle.h"
 
-#include "cp-names.h"
-
 static const char *lexptr, *prev_lexptr;
 
 static struct d_comp *d_qualify (struct d_comp *, int, int);
@@ -2005,7 +2003,7 @@ symbol_end (const char *lexptr)
   return p;
 }
 
-static char *
+char *
 cp_comp_to_string (struct d_comp *result, int estimated_len)
 {
   char *str, *prefix = NULL, *buf;
@@ -2036,26 +2034,57 @@ cp_comp_to_string (struct d_comp *result, int estimated_len)
   return (buf);
 }
 
-/* Return the canonicalized form of STRING, or NULL if STRING can not be
-   parsed.  */
+/* Convert a demangled name to a d_comp tree.  *DI_P is set to the
+   struct d_info that should be freed when finished with the tree.  */
 
-char *
-cp_canonicalize_string (const char *string)
+struct d_comp *
+demangled_name_to_comp (const char *demangled_name, struct d_info **di_p)
 {
-  int len = strlen (string);
-  char *ret;
+  int len = strlen (demangled_name);
 
   len = len + len / 8;
+  lexptr = demangled_name;
 
-  lexptr = string;
   di = cp_v3_d_init_info_alloc (NULL, DMGL_PARAMS | DMGL_ANSI, len);
+
   if (yyparse () || result == NULL)
+    {
+      cp_v3_d_free_info (di);
+      return NULL;
+    }
+
+  *di_p = di;
+  return result;
+}
+
+/* Convert a mangled name to a d_comp tree.  *DI_P is set to the
+   struct d_info that should be freed when finished with the tree.
+   DEMANGLED_P is set to the char * that should be freed when finished
+   with the tree.  OPTIONS will be passed to the demangler.
+   
+   This could be done much more efficiently for v3 mangled names by exposing
+   d_demangle from the demangler.  */
+
+struct d_comp *
+mangled_name_to_comp (const char *mangled_name, int options,
+		      struct d_info **di_p, char **demangled_p)
+{
+  char *demangled_name = cplus_demangle (mangled_name, options);
+  int len;
+  struct d_comp *ret;
+
+  if (demangled_name == NULL)
     return NULL;
+  
+  ret = demangled_name_to_comp (demangled_name, di_p);
 
-  ret = cp_comp_to_string (result, len);
+  if (ret == NULL)
+    {
+      free (demangled_name);
+      return NULL;
+    }
 
-  cp_v3_d_free_info (di);
-
+  *demangled_p = demangled_name;
   return ret;
 }
 

@@ -1,3 +1,23 @@
+2003-01-04  Daniel Jacobowitz  <drow@mvista.com>
+
+	* Makefile.in (cp_names_h): Remove.
+	(cp_demangle_h): New.
+	(cp-names.tab.o, cp-names-main.tab.o): Use $(cp_demangle_h) and
+	remove $(cp_names_h).
+	(cp-support.o): Use $(cp_demangle_h).
+	* cp-names.y: Don't include cp-names.h.
+	(cp_comp_to_string): Export.
+	(cp_canonicalize_string): Move to cp-support.c.
+	(demangled_name_to_comp, mangled_name_to_comp): New functions.
+	* cp-support.c: Include "cp-demangle.h".
+	(cp_canonicalize_string): New function, moved from cp-names.y and
+	updated.
+	(class_name_from_physname, method_name_from_physname): Rewritten.
+	(find_last_component): Removed.
+	* cp-support.h: Add new opaque types and prototypes.
+	* dwarf2read.c: Don't include cp-names.h.
+	* cp-names.h: Remove file.
+
 2004-01-04  Daniel Jacobowitz  <drow@mvista.com>
 
 	* Makefile.in (cp-names.tab.o, cp-names-main.tab.o, test-cpnames):
