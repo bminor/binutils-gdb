@@ -1,4 +1,18 @@
+Thu Aug 12 11:24:42 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* ecoff.h: Moved MIPS reloc definitions from here...
+	* mips.h: to here.
+
 Tue Aug  3 11:17:53 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* alpha.h: Corrected external symbolic debugging structures to
+	match actual usage.
+	* internal.h (internal_filehdr, internal_aouthdr,
+	internal_scnhdr): Changed type of some fields to bfd_vma so they
+	can hold 64 bits.
+	* sym.h (HDRR, FDR, PDR, EXTR): Likewise.
+	(PDR): Added new fields found on Alpha.
+	* symconst.h (magicSym2): Define; new value found on Alpha.
 
 	* ecoff.h: New file.
 	* alpha.h, mips.h: Moved common information into ecoff.h.  Moved
