@@ -1,3 +1,13 @@
+Thu Sep 17 03:49:59 1992  John Gilmore  (gnu@cygnus.com)
+
+	* utils.c (prompt_for_continue):  Reinitialize more-counts
+	before printing anything, and again afterward.  Fix comments.
+	(vfprintf_filtered):  Eliminate static buffer; use auto buffer,
+	or alloca() if needed.
+
+	* rs6000-xdep.c:  Use correct conditional (IBM6000_TARGET) to
+	detect native versus cross-host.
+
 Wed Sep 16 21:57:14 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* m68k-tdep.c (sun3_saved_pc_after_call):  Only do trap check for

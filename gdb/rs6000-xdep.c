@@ -23,7 +23,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symtab.h"
 #include "target.h"
 
-#ifdef RS6000_TARGET
+#ifdef IBM6000_TARGET
 
 #include <sys/param.h>
 #include <sys/dir.h>
@@ -253,7 +253,7 @@ exec_one_dummy_insn ()
 }
 
 
-#else /* RS6000_TARGET */
+#else /* IBM6000_TARGET */
 
 /* FIXME: Kludge this til we separate host vs. target vs. native code. */
 
@@ -278,4 +278,4 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
 {
 }
 
-#endif /* RS6000_TARGET */
+#endif /* IBM6000_TARGET */

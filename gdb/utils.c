@@ -900,17 +900,29 @@ set_width_command (args, from_tty, c)
   wrap_pointer = wrap_buffer;	/* Start it at the beginning */
 }
 
+/* Wait, so the user can read what's on the screen.  Prompt the user
+   to continue by pressing RETURN.  */
+
 static void
 prompt_for_continue ()
 {
   char *ignore;
 
+  /* We must do this *before* we call gdb_readline, else it will eventually
+     call us -- thinking that we're trying to print beyond the end of the 
+     screen.  */
+  reinitialize_more_filter ();
+
   immediate_quit++;
   ignore = gdb_readline ("---Type <return> to continue---");
   if (ignore)
     free (ignore);
-  chars_printed = lines_printed = 0;
   immediate_quit--;
+
+  /* Now we have to do this again, so that GDB will know that it doesn't
+     need to save the ---Type <return>--- line at the top of the screen.  */
+  reinitialize_more_filter ();
+
   dont_repeat ();		/* Forget prev cmd -- CR won't repeat it. */
 }
 
@@ -1151,7 +1163,7 @@ fputs_demangled (linebuffer, stream, arg_mode)
 
 /* Print a variable number of ARGS using format FORMAT.  If this
    information is going to put the amount written (since the last call
-   to INITIALIZE_MORE_FILTER or the last page break) over the page size,
+   to REINITIALIZE_MORE_FILTER or the last page break) over the page size,
    print out a pause message and do a gdb_readline to get the users
    permision to continue.
 
@@ -1172,35 +1184,25 @@ fputs_demangled (linebuffer, stream, arg_mode)
    (since prompt_for_continue may do so) so this routine should not be
    called when cleanups are not in place.  */
 
+#define	MIN_LINEBUF	255
+
 void
 vfprintf_filtered (stream, format, args)
      FILE *stream;
      char *format;
      va_list args;
 {
-  static char *linebuffer = (char *) 0;
-  static int line_size;
+  char line_buf[MIN_LINEBUF+10];
+  char *linebuffer = line_buf;
   int format_length;
 
   format_length = strlen (format);
 
-  /* Allocated linebuffer for the first time.  */
-  if (!linebuffer)
-    {
-      linebuffer = (char *) xmalloc (255);
-      line_size = 255;
-    }
-
   /* Reallocate buffer to a larger size if this is necessary.  */
-  if (format_length * 2 > line_size)
+  if (format_length * 2 > MIN_LINEBUF)
     {
-      line_size = format_length * 2;
-
-      /* You don't have to copy.  */
-      free (linebuffer);
-      linebuffer = (char *) xmalloc (line_size);
+      linebuffer = alloca (10 + format_length * 2);
     }
-
 
   /* This won't blow up if the restrictions described above are
      followed.   */
