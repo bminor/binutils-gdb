@@ -1,5 +1,7 @@
 Tue Jun 29 09:22:29 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* gdb.t06/{twice.{c,exp},Makefile.in}: New test.
+
 	* gdb.t10/Makefile.in (clean): Remove $(EXECUTABLES) too.
 
 Mon Jun 28 11:25:59 1993  Fred Fish  (fnf@cygnus.com)
