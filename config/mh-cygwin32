@@ -4,3 +4,5 @@ MAKEINFOFLAGS=--no-split
 
 # This does some sort of DOS specific installation, I guess.
 INSTALL_DOSREL=install-dosrel
+
+CFLAGS=-D_WIN32

@@ -1,3 +1,8 @@
+Sun Aug 11 20:51:50 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* config/mh-cygwin32 (CFLAGS):  Define _WIN32 to be compatible
+	with normal Windows compilation environment.
+
 Thu Aug  8 12:18:59 1996  Klaus Kaempf  <kkaempf@progis.de>
 
 	* make-all.com: Run config-a-gas.
