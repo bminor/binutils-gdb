@@ -35,12 +35,25 @@ called `gdb-5.0', which contains:
   config-ml.in  gdb           missing        mpw-install
   config.guess  include       mkinstalldirs  opcodes
 
-To build GDB, you can just do:
+You can build GDB right in the source directory:
 
 	cd gdb-5.0
 	./configure
 	make
 	cp gdb/gdb /usr/local/bin/gdb	(or wherever you want)
+
+However, we recommend that an empty directory be used instead.
+This way you do not clutter your source tree with binary files
+and will be able to create different builds with different 
+configuration options.
+
+You can build GDB in any empty build directory:
+
+     
+     mkdir build
+     cd build
+     <full path to your sources>/gdb-5.0/configure
+     make
 
 (Building GDB with DJGPP tools for MS-DOS/MS-Windows is slightly
 different; see the file gdb-5.0/gdb/config/djgpp/README for details.)
