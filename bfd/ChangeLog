@@ -1,3 +1,11 @@
+Mon Sep 12 11:43:08 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* ctor.c: Remove; obsolete.
+	* Makefile.in: Rebuild dependencies.
+	(BFD_LIBS): Remove ctor.o.
+	(CFILES): Remove ctor.c.
+	* libbfd.h: Rebuild.
+
 Mon Sep 12 01:58:47 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* elf32-hppa.c (elf32_hppa_relocate_section): If there was a link

@@ -105,7 +105,6 @@ cpu-sparc.c
 cpu-vax.c
 cpu-we32k.c
 cpu-z8k.c
-ctor.c
 demo64.c
 dep-in.sed
 doc
