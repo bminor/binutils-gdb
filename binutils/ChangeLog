@@ -1,3 +1,9 @@
+2000-05-13  Alan Modra  <alan@linuxcare.com.au>
+
+	* bucomm.h (gettext, dgettext, dcgettext, textdomain,
+	bindtextdomain): Replace defines with those from intl/libgettext.h
+	to quieten gcc warnings.
+
 2000-05-12  H.J. Lu  <hjl@gnu.org>
 
 	* nlmconv.c (temp_filename): Removed.

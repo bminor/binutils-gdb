@@ -33,12 +33,11 @@
 #  define N_(String) (String)
 # endif
 #else
-/* Stubs that do something close enough.  */
-# define textdomain(String) (String)
-# define gettext(String) (String)
-# define dgettext(Domain,Message) (Message)
-# define dcgettext(Domain,Message,Type) (Message)
-# define bindtextdomain(Domain,Directory) (Domain)
+# define gettext(Msgid) (Msgid)
+# define dgettext(Domainname, Msgid) (Msgid)
+# define dcgettext(Domainname, Msgid, Category) (Msgid)
+# define textdomain(Domainname) while (0) /* nothing */
+# define bindtextdomain(Domainname, Dirname) while (0) /* nothing */
 # define _(String) (String)
 # define N_(String) (String)
 #endif

@@ -1,5 +1,9 @@
 2000-05-13  Alan Modra  <alan@linuxcare.com.au>
 
+	* asintl.h (gettext, dgettext, dcgettext, textdomain,
+	bindtextdomain): Replace defines with those from intl/libgettext.h
+	to quieten gcc warnings.
+
 	* NEWS: Mention x86 .arch and -q.
 
 	* config/tc-i386.c (quiet_warnings): New.
