@@ -499,7 +499,10 @@ static void
 close_input_stream ()
 {
   if (cpp_pipe != NULL)
-    pclose (cpp_pipe);
+    {
+      pclose (cpp_pipe);
+      cpp_pipe = NULL;
+    }
   
   if (istream_type == ISTREAM_FILE)
     {
