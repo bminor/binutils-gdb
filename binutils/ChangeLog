@@ -1,3 +1,8 @@
+Tue Dec  8 16:29:43 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* objdump.1: Fix typo (-d to -D).  From Nokubi Hirotaka
+	<hnokubi@yyy.or.jp>.
+
 Sun Dec  6 13:28:09 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* objdump.c (SFILE): Add size field.
