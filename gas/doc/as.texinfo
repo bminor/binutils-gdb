@@ -33,6 +33,9 @@ except that the section entitled ``GNU General Public License'' may be
 included in a translation approved by the author instead of in the
 original English.
 @end ifinfo
+@tex
+@finalout
+@end tex
 
 @setchapternewpage odd
 @c if m680x0
@@ -42,7 +45,6 @@ original English.
 @settitle Using GNU as (AMD 29K)
 @c fi am29k
 @titlepage
-@finalout
 @title{Using GNU as}
 @subtitle{The GNU Assembler}
 @c if m680x0
@@ -435,9 +437,6 @@ program in one pass of the source file.  This has a subtle impact on the
 
 @node Command Line, Input Files, GNU Assembler, Overview
 @section Command Line
-@example
-as [ options @dots{} ] [ file1 @dots{} ]
-@end example
 
 After the program name @code{as}, the command line may contain
 options and file names.  Options may be in any order, and may be
@@ -551,10 +550,17 @@ file_name:@b{NNN}:Warning Message Text
 @noindent(where @b{NNN} is a line number).  If a logical file name has
 been given (@pxref{App-File}) it is used for the filename, otherwise the
 name of the current input file is used.  If a logical line number was
-given (@pxref{Line}) then it is used to calculate the number printed,
+given 
+@c if not am29k
+@c (@pxref{Line}) 
+@c fi not am29k
+@c if am29k
+(@pxref{Ln})
+@c fi am29k
+then it is used to calculate the number printed,
 otherwise the actual line in the current source file is printed.  The
 message text is intended to be self explanatory (in the grand Unix
-tradition).
+tradition). @refill
 
 Error messages have the format
 @example
@@ -564,12 +570,14 @@ The file name and line number are derived as for warning
 messages.  The actual message text may be rather less explanatory
 because many of them aren't supposed to happen.
 
+@group
 @node Options,  , Errors, Overview
 @section Options 
 @subsection @code{-D}
 This option has no effect whatsoever, but it is accepted to make it more
 likely that scripts written for other assemblers will also work with
 GNU @code{as}.
+@end group
 
 @subsection Work Faster: @code{-f} 
 @samp{-f} should only be used when assembling programs written by a
@@ -1538,9 +1546,9 @@ systems.
 @tex
 \vskip 1pc
 \halign{#\quad&#\cr
-\ibox{3cm}{7}\ibox{4cm}{4}\ibox{1cm}{0}&bit numbers\cr
+\ibox{3cm}{7}\ibox{4cm}{4}\ibox{1.1cm}{0}&bit numbers\cr
 \boxit{3cm}{{\tt N\_STAB} bits}\boxit{4cm}{{\tt N\_TYPE}
-bits}\boxit{1cm}{\tt N\_EXT}\cr
+bits}\boxit{1.1cm}{\tt N\_EXT}\cr
 \hfill {\bf Type} byte\hfill\cr
 }
 @end tex
