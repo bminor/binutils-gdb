@@ -1,3 +1,8 @@
+Fri Dec 15 07:51:34 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* dlltool.c (fill_ordinals): Start from 1 if no other instructions
+	given.
+
 Tue Dec 12 12:05:21 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (clean): Remove $(DEMANGLER_PROG).1.  From Ronald
