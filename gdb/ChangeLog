@@ -1,3 +1,14 @@
+2001-05-11  Kevin Buettner  <kevinb@redhat.com>
+
+	* breakpoint.c (set_raw_breakpoint): Add new parameter
+	representing the breakpoint's type.  Adjust all callers.
+	(create_longjmp_breakpoint, create_temp_exception_breakpoint)
+	(create_thread_event_breakpoint): Don't test for zero return
+	value from set_raw_breakpoint().  It can never be zero.
+	(create_exception_catchpoint, watch_command_1): Move logic
+	which calculates the breakpoint type prior to the call to
+	set_raw_breakpoint().
+
 2001-05-11  Fernando Nasser  <fnasser@redhat.com>
 
 	* ser-unix.c (rate_to_code): Issue warning if baud rate is invalid.

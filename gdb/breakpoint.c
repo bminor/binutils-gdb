@@ -91,7 +91,7 @@ static void break_command_1 (char *, int, int);
 
 static void mention (struct breakpoint *);
 
-struct breakpoint *set_raw_breakpoint (struct symtab_and_line);
+struct breakpoint *set_raw_breakpoint (struct symtab_and_line, enum bptype);
 
 static void check_duplicates (struct breakpoint *);
 
@@ -3806,18 +3806,23 @@ check_duplicates (struct breakpoint *bpt)
     }
 }
 
-/* Low level routine to set a breakpoint.
-   Takes as args the three things that every breakpoint must have.
-   Returns the breakpoint object so caller can set other things.
-   Does not set the breakpoint number!
-   Does not print anything.
+/* set_raw_breakpoint() is a low level routine for allocating and
+   partially initializing a breakpoint of type BPTYPE.  The newly
+   created breakpoint's address, section, source file name, and line
+   number are provided by SAL.  The newly created and partially
+   initialized breakpoint is added to the breakpoint chain and
+   is also returned as the value of this function.
 
-   ==> This routine should not be called if there is a chance of later
-   error(); otherwise it leaves a bogus breakpoint on the chain.  Validate
-   your arguments BEFORE calling this routine!  */
+   It is expected that the caller will complete the initialization of
+   the newly created breakpoint struct as well as output any status
+   information regarding the creation of a new breakpoint.  In
+   particular, set_raw_breakpoint() does NOT set the breakpoint
+   number!  Care should be taken to not allow an error() to occur
+   prior to completing the initialization of the breakpoint.  If this
+   should happen, a bogus breakpoint will be left on the chain.  */
 
 struct breakpoint *
-set_raw_breakpoint (struct symtab_and_line sal)
+set_raw_breakpoint (struct symtab_and_line sal, enum bptype bptype)
 {
   register struct breakpoint *b, *b1;
 
@@ -3830,6 +3835,7 @@ set_raw_breakpoint (struct symtab_and_line sal)
     b->source_file = savestring (sal.symtab->filename,
 				 strlen (sal.symtab->filename));
   b->section = sal.section;
+  b->type = bptype;
   b->language = current_language->la_language;
   b->input_radix = input_radix;
   b->thread = -1;
@@ -3898,11 +3904,9 @@ create_longjmp_breakpoint (char *func_name)
 	return;
     }
   sal.section = find_pc_overlay (sal.pc);
-  b = set_raw_breakpoint (sal);
-  if (!b)
-    return;
+  b = set_raw_breakpoint (sal,
+                          func_name != NULL ? bp_longjmp : bp_longjmp_resume);
 
-  b->type = func_name != NULL ? bp_longjmp : bp_longjmp_resume;
   b->disposition = donttouch;
   b->enable = disabled;
   b->silent = 1;
@@ -3954,13 +3958,10 @@ create_thread_event_breakpoint (CORE_ADDR address)
   INIT_SAL (&sal);		/* initialize to zeroes */
   sal.pc = address;
   sal.section = find_pc_overlay (sal.pc);
-  if ((b = set_raw_breakpoint (sal)) == NULL)
-    return NULL;
+  b = set_raw_breakpoint (sal, bp_thread_event);
   
   b->number = internal_breakpoint_number--;
   b->disposition = donttouch;
-  b->type = bp_thread_event;	/* XXX: do we need a new type? 
-				   bp_thread_event */
   b->enable = enabled;
   /* addr_string has to be used or breakpoint_re_set will delete me.  */
   sprintf (addr_string, "*0x%s", paddr (b->address));
@@ -3999,10 +4000,9 @@ create_solib_event_breakpoint (CORE_ADDR address)
   INIT_SAL (&sal);		/* initialize to zeroes */
   sal.pc = address;
   sal.section = find_pc_overlay (sal.pc);
-  b = set_raw_breakpoint (sal);
+  b = set_raw_breakpoint (sal, bp_shlib_event);
   b->number = internal_breakpoint_number--;
   b->disposition = donttouch;
-  b->type = bp_shlib_event;
 
   return b;
 }
@@ -4110,7 +4110,7 @@ solib_load_unload_1 (char *hookname, int tempflag, char *dll_pathname,
   if (canonical != (char **) NULL)
     discard_cleanups (canonical_strings_chain);
 
-  b = set_raw_breakpoint (sals.sals[0]);
+  b = set_raw_breakpoint (sals.sals[0], bp_kind);
   set_breakpoint_count (breakpoint_count + 1);
   b->number = breakpoint_count;
   b->cond = NULL;
@@ -4133,7 +4133,6 @@ solib_load_unload_1 (char *hookname, int tempflag, char *dll_pathname,
       b->dll_pathname = (char *) xmalloc (strlen (dll_pathname) + 1);
       strcpy (b->dll_pathname, dll_pathname);
     }
-  b->type = bp_kind;
 
   mention (b);
   do_cleanups (old_chain);
@@ -4168,7 +4167,7 @@ create_fork_vfork_event_catchpoint (int tempflag, char *cond_string,
   sal.symtab = NULL;
   sal.line = 0;
 
-  b = set_raw_breakpoint (sal);
+  b = set_raw_breakpoint (sal, bp_kind);
   set_breakpoint_count (breakpoint_count + 1);
   b->number = breakpoint_count;
   b->cond = NULL;
@@ -4179,8 +4178,6 @@ create_fork_vfork_event_catchpoint (int tempflag, char *cond_string,
   b->enable = enabled;
   b->disposition = tempflag ? del : donttouch;
   b->forked_inferior_pid = 0;
-
-  b->type = bp_kind;
 
   mention (b);
 }
@@ -4209,7 +4206,7 @@ create_exec_event_catchpoint (int tempflag, char *cond_string)
   sal.symtab = NULL;
   sal.line = 0;
 
-  b = set_raw_breakpoint (sal);
+  b = set_raw_breakpoint (sal, bp_catch_exec);
   set_breakpoint_count (breakpoint_count + 1);
   b->number = breakpoint_count;
   b->cond = NULL;
@@ -4219,8 +4216,6 @@ create_exec_event_catchpoint (int tempflag, char *cond_string)
   b->addr_string = NULL;
   b->enable = enabled;
   b->disposition = tempflag ? del : donttouch;
-
-  b->type = bp_catch_exec;
 
   mention (b);
 }
@@ -4338,8 +4333,7 @@ set_momentary_breakpoint (struct symtab_and_line sal, struct frame_info *frame,
 			  enum bptype type)
 {
   register struct breakpoint *b;
-  b = set_raw_breakpoint (sal);
-  b->type = type;
+  b = set_raw_breakpoint (sal, type);
   b->enable = enabled;
   b->disposition = donttouch;
   b->frame = (frame ? frame->frame : 0);
@@ -4563,10 +4557,9 @@ create_breakpoints (struct symtabs_and_lines sals, char **addr_string,
 	if (from_tty)
 	  describe_other_breakpoints (sal.pc, sal.section);
 	
-	b = set_raw_breakpoint (sal);
+	b = set_raw_breakpoint (sal, type);
 	set_breakpoint_count (breakpoint_count + 1);
 	b->number = breakpoint_count;
-	b->type = type;
 	b->cond = cond[i];
 	b->thread = thread;
 	b->addr_string = addr_string[i];
@@ -5366,8 +5359,13 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
     }
 #endif /* HPUXHPPA */
 
+  /* Change the type of breakpoint to an ordinary watchpoint if a hardware
+     watchpoint could not be set.  */
+  if (!mem_cnt || target_resources_ok <= 0)
+    bp_type = bp_watchpoint;
+
   /* Now set up the breakpoint.  */
-  b = set_raw_breakpoint (sal);
+  b = set_raw_breakpoint (sal, bp_type);
   set_breakpoint_count (breakpoint_count + 1);
   b->number = breakpoint_count;
   b->disposition = donttouch;
@@ -5390,11 +5388,6 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
   else
     b->watchpoint_frame = (CORE_ADDR) 0;
 
-  if (mem_cnt && target_resources_ok > 0)
-    b->type = bp_type;
-  else
-    b->type = bp_watchpoint;
-
   /* If the expression is "local", then set up a "watchpoint scope"
      breakpoint at the point where we've left the scope of the watchpoint
      expression.  */
@@ -5409,11 +5402,11 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
 	  scope_sal.pc = get_frame_pc (prev_frame);
 	  scope_sal.section = find_pc_overlay (scope_sal.pc);
 
-	  scope_breakpoint = set_raw_breakpoint (scope_sal);
+	  scope_breakpoint = set_raw_breakpoint (scope_sal,
+	                                         bp_watchpoint_scope);
 	  set_breakpoint_count (breakpoint_count + 1);
 	  scope_breakpoint->number = breakpoint_count;
 
-	  scope_breakpoint->type = bp_watchpoint_scope;
 	  scope_breakpoint->enable = enabled;
 
 	  /* Automatically delete the breakpoint when it hits.  */
@@ -6143,11 +6136,24 @@ create_exception_catchpoint (int tempflag, char *cond_string,
 {
   struct breakpoint *b;
   int thread = -1;		/* All threads. */
+  enum bptype bptype;
 
   if (!sal)			/* no exception support? */
     return;
 
-  b = set_raw_breakpoint (*sal);
+  switch (ex_event)
+    {
+    case EX_EVENT_THROW:
+      bptype = bp_catch_throw;
+      break;
+    case EX_EVENT_CATCH:
+      bptype = bp_catch_catch;
+      break;
+    default:			/* error condition */
+      error ("Internal error -- invalid catchpoint kind");
+    }
+
+  b = set_raw_breakpoint (*sal, bptype);
   set_breakpoint_count (breakpoint_count + 1);
   b->number = breakpoint_count;
   b->cond = NULL;
@@ -6157,19 +6163,6 @@ create_exception_catchpoint (int tempflag, char *cond_string,
   b->addr_string = NULL;
   b->enable = enabled;
   b->disposition = tempflag ? del : donttouch;
-  switch (ex_event)
-    {
-    case EX_EVENT_THROW:
-      b->type = bp_catch_throw;
-      break;
-    case EX_EVENT_CATCH:
-      b->type = bp_catch_catch;
-      break;
-    default:			/* error condition */
-      b->type = bp_none;
-      b->enable = disabled;
-      error ("Internal error -- invalid catchpoint kind");
-    }
   mention (b);
 }
 
@@ -6322,16 +6315,14 @@ handle_gnu_4_16_catch_command (char *arg, int tempflag, int from_tty)
       if (from_tty)
 	describe_other_breakpoints (sal.pc, sal.section);
 
-      b = set_raw_breakpoint (sal);
-      set_breakpoint_count (breakpoint_count + 1);
-      b->number = breakpoint_count;
-
       /* Important -- this is an ordinary breakpoint.  For platforms
 	 with callback support for exceptions,
 	 create_exception_catchpoint() will create special bp types
 	 (bp_catch_catch and bp_catch_throw), and there is code in
 	 insert_breakpoints() and elsewhere that depends on that. */
-      b->type = bp_breakpoint;	
+      b = set_raw_breakpoint (sal, bp_breakpoint);
+      set_breakpoint_count (breakpoint_count + 1);
+      b->number = breakpoint_count;
 
       b->cond = cond;
       b->enable = enabled;
@@ -6362,11 +6353,8 @@ create_temp_exception_breakpoint (CORE_ADDR pc)
   sal.symtab = NULL;
   sal.line = 0;
 
-  b = set_raw_breakpoint (sal);
-  if (!b)
-    error ("Internal error -- couldn't set temp exception breakpoint");
+  b = set_raw_breakpoint (sal, bp_breakpoint);
 
-  b->type = bp_breakpoint;
   b->disposition = del;
   b->enable = enabled;
   b->silent = 1;
@@ -6502,10 +6490,9 @@ struct breakpoint *
 set_breakpoint_sal (struct symtab_and_line sal)
 {
   struct breakpoint *b;
-  b = set_raw_breakpoint (sal);
+  b = set_raw_breakpoint (sal, bp_breakpoint);
   set_breakpoint_count (breakpoint_count + 1);
   b->number = breakpoint_count;
-  b->type = bp_breakpoint;
   b->cond = 0;
   b->thread = -1;
   return b;
