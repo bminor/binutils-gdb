@@ -1,3 +1,31 @@
+Fri Feb 27 18:26:16 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* sim-base.h (sim_cpu_base): New members name, options.
+	(sim_cpu_lookup): Add prototype.
+	* sim-module.c (sim_pre_argv_init): Provide default names for cpus.
+	* sim-options.h (DECLARE_OPTION_HANDLER): New argument `cpu'.
+	(sim_add_option_table): Update prototype.
+	* sim-options.c (sim_add_option_table): New argument `cpu'.
+	(standard_option_handler,standard_install): Update.
+	(sim_parse_args): Handle cpu specific options.
+	(print_help): New static function.
+	(sim_print_help): Call it.  Print cpu specific options.
+	(find_match): New static function.
+	(sim_args_command): Call it.  Handle cpu specific options.
+	* sim-utils.c (sim_cpu_lookup): New function.
+	* sim-memopt.c (memory_option_handler): Update.
+	(sim_memopt_install): Update.
+	* sim-model.c (model_option_handler): Update.
+	(model_install): Update.
+	* sim-profile.c (profile_option_handler): Update.
+	(profile_install): Update.
+	* sim-trace.c (trace_option_handler): Update.
+	(trace_install): Update.
+	* sim-watch.c (watchpoint_option_handler): Update.
+	(sim_watchpoint_install): Update.
+	* cgen-scache.c (scache_option_handler): Update.
+	(scache_install): Update.
+
 Wed Feb 25 11:00:26 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* Make-common.in (check): Run `make check' in testsuite dir.

@@ -42,9 +42,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
    This is intended to be called by modules in their `install' handler.  */
 
 SIM_RC
-sim_add_option_table (sd, table)
-     SIM_DESC sd;
-     const OPTION *table;
+sim_add_option_table (SIM_DESC sd, sim_cpu *cpu, const OPTION *table)
 {
   struct option_list *ol = ((struct option_list *)
 			    xmalloc (sizeof (struct option_list)));
@@ -52,9 +50,19 @@ sim_add_option_table (sd, table)
   /* Note: The list is constructed in the reverse order we're called so
      later calls will override earlier ones (in case that ever happens).
      This is the intended behaviour.  */
-  ol->next = STATE_OPTIONS (sd);
-  ol->options = table;
-  STATE_OPTIONS (sd) = ol;
+
+  if (cpu)
+    {
+      ol->next = CPU_OPTIONS (cpu);
+      ol->options = table;
+      CPU_OPTIONS (cpu) = ol;
+    }
+  else
+    {
+      ol->next = STATE_OPTIONS (sd);
+      ol->options = table;
+      STATE_OPTIONS (sd) = ol;
+    }
 
   return SIM_RC_OK;
 }
@@ -178,11 +186,8 @@ static const OPTION standard_options[] =
 };
 
 static SIM_RC
-standard_option_handler (sd, opt, arg, is_command)
-     SIM_DESC sd;
-     int opt;
-     char *arg;
-     int is_command;
+standard_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
+			 char *arg, int is_command)
 {
   int i,n;
 
@@ -375,7 +380,7 @@ standard_option_handler (sd, opt, arg, is_command)
 	const char **lp;
 	if (list == NULL)
 	  abort ();
-	sim_io_printf (sd, "Valid architectures:");
+	sim_io_printf (sd, "Possible architectures:");
 	for (lp = list; *lp != NULL; lp++)
 	  sim_io_printf (sd, " %s", *lp);
 	sim_io_printf (sd, "\n");
@@ -406,7 +411,7 @@ SIM_RC
 standard_install (SIM_DESC sd)
 {
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
-  if (sim_add_option_table (sd, standard_options) != SIM_RC_OK)
+  if (sim_add_option_table (sd, NULL, standard_options) != SIM_RC_OK)
     return SIM_RC_FAIL;
   return SIM_RC_OK;
 }
@@ -453,7 +458,7 @@ sim_parse_args (sd, argv)
      SIM_DESC sd;
      char **argv;
 {
-  int i, argc, num_opts;
+  int c, i, argc, num_opts;
   char *p, *short_options;
   /* The `val' option struct entry is dynamically assigned for options that
      only come in the long form.  ORIG_VAL is used to get the original value
@@ -463,6 +468,7 @@ sim_parse_args (sd, argv)
   const struct option_list *ol;
   const OPTION *opt;
   OPTION_HANDLER **handlers;
+  sim_cpu **opt_cpu;
 
   /* Count the number of arguments.  */
   for (argc = 0; argv[argc] != NULL; ++argc)
@@ -473,22 +479,30 @@ sim_parse_args (sd, argv)
   for (ol = STATE_OPTIONS (sd); ol != NULL; ol = ol->next)
     for (opt = ol->options; OPTION_VALID_P (opt); ++opt)
       ++num_opts;
+  for (i = 0; i < MAX_NR_PROCESSORS; ++i)
+    for (ol = CPU_OPTIONS (STATE_CPU (sd, i)); ol != NULL; ol = ol->next)
+      for (opt = ol->options; OPTION_VALID_P (opt); ++opt)
+	++num_opts;
 
   /* Initialize duplicate argument checker.  */
   (void) dup_arg_p (NULL);
 
   /* Build the option table for getopt.  */
+
   long_options = NZALLOC (struct option, num_opts + 1);
   lp = long_options;
   short_options = NZALLOC (char, num_opts * 3 + 1);
   p = short_options;
   handlers = NZALLOC (OPTION_HANDLER *, OPTION_START + num_opts);
   orig_val = NZALLOC (int, OPTION_START + num_opts);
+  opt_cpu = NZALLOC (sim_cpu *, OPTION_START + num_opts);
+
   /* Set '+' as first char so argument permutation isn't done.  This
      is done to stop getopt_long returning options that appear after
      the target program.  Such options should be passed unchanged into
      the program image. */
   *p++ = '+';
+
   for (i = OPTION_START, ol = STATE_OPTIONS (sd); ol != NULL; ol = ol->next)
     for (opt = ol->options; OPTION_VALID_P (opt); ++opt)
       {
@@ -514,14 +528,51 @@ sim_parse_args (sd, argv)
 	    lp->val = i++;
 	    handlers[lp->val] = opt->handler;
 	    orig_val[lp->val] = opt->opt.val;
+	    opt_cpu[lp->val] = NULL;
 	    ++lp;
 	  }
       }
+
+  for (c = 0; c < MAX_NR_PROCESSORS; ++c)
+    {
+      sim_cpu *cpu = STATE_CPU (sd, c);
+      for (ol = CPU_OPTIONS (cpu); ol != NULL; ol = ol->next)
+	for (opt = ol->options; OPTION_VALID_P (opt); ++opt)
+	  {
+#if 0 /* Each option is prepended with --<cpuname>- so this greatly cuts down
+	 on the need for dup_arg_p checking.  Maybe in the future it'll be
+	 needed so this is just commented out, and not deleted.  */
+	    if (dup_arg_p (opt->opt.name))
+	      continue;
+#endif
+	    /* Don't allow short versions of cpu specific options for now.  */
+	    if (opt->shortopt != 0)
+	      {
+		sim_io_eprintf (sd, "internal error, short cpu specific option");
+		return SIM_RC_FAIL;
+	      }
+	    if (opt->opt.name != NULL)
+	      {
+		*lp = opt->opt;
+		/* Prepend --<cpuname>- to the option.  */
+		asprintf (&lp->name, "%s-%s", CPU_NAME (cpu), lp->name);
+		/* Dynamically assign `val' numbers for long options. */
+		lp->val = i++;
+		handlers[lp->val] = opt->handler;
+		orig_val[lp->val] = opt->opt.val;
+		opt_cpu[lp->val] = cpu;
+		++lp;
+	      }
+	  }
+    }
+	    
+  /* Terminate the short and long option lists.  */
   *p = 0;
   lp->name = NULL;
 
   /* Ensure getopt is initialized.  */
   optind = 0;
+
   while (1)
     {
       int longind, optc;
@@ -536,36 +587,21 @@ sim_parse_args (sd, argv)
       if (optc == '?')
 	return SIM_RC_FAIL;
 
-      if ((*handlers[optc]) (sd, orig_val[optc], optarg, 0/*!is_command*/) == SIM_RC_FAIL)
+      if ((*handlers[optc]) (sd, opt_cpu[optc], orig_val[optc], optarg, 0/*!is_command*/) == SIM_RC_FAIL)
 	return SIM_RC_FAIL;
     }
 
   return SIM_RC_OK;
 }
 
-/* Print help messages for the options.  */
+/* Utility of sim_print_help to print a list of option tables.  */
 
-void
-sim_print_help (sd, is_command)
-     SIM_DESC sd;
-     int is_command;
+static void
+print_help (SIM_DESC sd, sim_cpu *cpu, const struct option_list *ol, int is_command)
 {
-  const struct option_list *ol;
   const OPTION *opt;
 
-  if (STATE_OPEN_KIND (sd) == SIM_OPEN_STANDALONE)
-    sim_io_printf (sd, "Usage: %s [options] program [program args]\n",
-		   STATE_MY_NAME (sd));
-
-  /* Initialize duplicate argument checker.  */
-  (void) dup_arg_p (NULL);
-
-  if (STATE_OPEN_KIND (sd) == SIM_OPEN_STANDALONE)
-    sim_io_printf (sd, "Options:\n");
-  else
-    sim_io_printf (sd, "Commands:\n");
-
-  for (ol = STATE_OPTIONS (sd); ol != NULL; ol = ol->next)
+  for ( ; ol != NULL; ol = ol->next)
     for (opt = ol->options; OPTION_VALID_P (opt); ++opt)
       {
 	const int indent = 30;
@@ -621,15 +657,18 @@ sim_print_help (sd, is_command)
 	do
 	  {
 	    const char *name;
+	    const char *cpu_prefix = cpu ? CPU_NAME (cpu) : NULL;
 	    if (o->doc_name != NULL)
 	      name = o->doc_name;
 	    else
 	      name = o->opt.name;
 	    if (name != NULL)
 	      {
-		sim_io_printf (sd, "%s%s%s",
+		sim_io_printf (sd, "%s%s%s%s%s",
 			       comma ? ", " : "",
 			       is_command ? "" : "--",
+			       cpu ? cpu_prefix : "",
+			       cpu ? "-" : "",
 			       name);
 		len += ((comma ? 2 : 0)
 			+ (is_command ? 0 : 2)
@@ -679,8 +718,45 @@ sim_print_help (sd, is_command)
 	  sim_io_printf (sd, "%s\n", chp);
 	}
       }
+}
 
+/* Print help messages for the options.  */
+
+void
+sim_print_help (sd, is_command)
+     SIM_DESC sd;
+     int is_command;
+{
+  if (STATE_OPEN_KIND (sd) == SIM_OPEN_STANDALONE)
+    sim_io_printf (sd, "Usage: %s [options] program [program args]\n",
+		   STATE_MY_NAME (sd));
+
+  /* Initialize duplicate argument checker.  */
+  (void) dup_arg_p (NULL);
+
+  if (STATE_OPEN_KIND (sd) == SIM_OPEN_STANDALONE)
+    sim_io_printf (sd, "Options:\n");
+  else
+    sim_io_printf (sd, "Commands:\n");
+
+  print_help (sd, NULL, STATE_OPTIONS (sd), is_command);
   sim_io_printf (sd, "\n");
+
+  /* Print cpu-specific options.  */
+  {
+    int i;
+
+    for (i = 0; i < MAX_NR_PROCESSORS; ++i)
+      {
+	sim_cpu *cpu = STATE_CPU (sd, i);
+	if (CPU_OPTIONS (cpu) == NULL)
+	  continue;
+	sim_io_printf (sd, "CPU %s specific options:\n", CPU_NAME (cpu));
+	print_help (sd, cpu, CPU_OPTIONS (cpu), is_command);
+	sim_io_printf (sd, "\n");
+      }
+  }
+
   sim_io_printf (sd, "Note: Depending on the simulator configuration some %ss\n",
 		 STATE_OPEN_KIND (sd) == SIM_OPEN_STANDALONE ? "option" : "command");
   sim_io_printf (sd, "      may not be applicable\n");
@@ -693,13 +769,69 @@ sim_print_help (sd, is_command)
     }
 }
 
+/* Utility of sim_args_command to find the closest match for a command.
+   Commands that have "-" in them can be specified as separate words.
+   e.g. sim memory-region 0x800000,0x4000
+   or   sim memory region 0x800000,0x4000
+   If CPU is non-null, use its option table list, otherwise use the main one.
+   *PARGI is where to start looking in ARGV.  It is updated to point past
+   the found option.  */
 
+static const OPTION *
+find_match (SIM_DESC sd, sim_cpu *cpu, char *argv[], int *pargi)
+{
+  const struct option_list *ol;
+  const OPTION *opt;
+  /* most recent option match */
+  const OPTION *matching_opt = NULL;
+  int matching_argi = -1;
 
+  if (cpu)
+    ol = CPU_OPTIONS (cpu);
+  else
+    ol = STATE_OPTIONS (sd);
+
+  /* Skip passed elements specified by *PARGI.  */
+  argv += *pargi;
+
+  for ( ; ol != NULL; ol = ol->next)
+    for (opt = ol->options; OPTION_VALID_P (opt); ++opt)
+      {
+	int argi = 0;
+	const char *name = opt->opt.name;
+	if (name == NULL)
+	  continue;
+	while (strncmp (name, argv [argi], strlen (argv [argi])) == 0)
+	  {
+	    name = &name [strlen (argv[argi])];
+	    if (name [0] == '-')
+	      {
+		/* leading match ...<a-b-c>-d-e-f - continue search */
+		name ++; /* skip `-' */
+		argi ++;
+		continue;
+	      }
+	    else if (name [0] == '\0')
+	      {
+		/* exact match ...<a-b-c-d-e-f> - better than before? */
+		if (argi > matching_argi)
+		  {
+		    matching_argi = argi;
+		    matching_opt = opt;
+		  }
+		break;
+	      }
+	    else
+	      break;
+	  }
+      }
+
+  *pargi = matching_argi;
+  return matching_opt;
+}
 
 SIM_RC
-sim_args_command (sd, cmd)
-     SIM_DESC sd;
-     char *cmd;
+sim_args_command (SIM_DESC sd, char *cmd)
 {
   /* something to do? */
   if (cmd == NULL)
@@ -715,52 +847,54 @@ sim_args_command (sd, cmd)
     }
   else
     {
-      /* user specified <opt> form? */
-      const struct option_list *ol;
-      const OPTION *opt;
       char **argv = buildargv (cmd);
-      /* most recent option match */
       const OPTION *matching_opt = NULL;
-      int matching_argi = -1;
-      if (argv [0] != NULL)
-	for (ol = STATE_OPTIONS (sd); ol != NULL; ol = ol->next)
-	  for (opt = ol->options; OPTION_VALID_P (opt); ++opt)
-	    {
-	      int argi = 0;
-	      const char *name = opt->opt.name;
-	      if (name == NULL)
-		continue;
-	      while (strncmp (name, argv [argi], strlen (argv [argi])) == 0)
-		{
-		  name = &name [strlen (argv[argi])];
-		  if (name [0] == '-')
-		    {
-		      /* leading match ...<a-b-c>-d-e-f - continue search */
-		      name ++; /* skip `-' */
-		      argi ++;
-		      continue;
-		    }
-		  else if (name [0] == '\0')
-		    {
-		      /* exact match ...<a-b-c-d-e-f> - better than before? */
-		      if (argi > matching_argi)
-			{
-			  matching_argi = argi;
-			  matching_opt = opt;
-			}
-		      break;
-		    }
-		  else
-		    break;
-		}
-	    }
+      int matching_argi;
+      sim_cpu *cpu;
+      int argi = 0;
+
+      if (argv [0] == NULL)
+	return;
+
+      /* First check for a cpu selector.  */
+      {
+	char *cpu_name = xstrdup (argv[0]);
+	char *hyphen = strchr (cpu_name, '-');
+	if (hyphen)
+	  *hyphen = 0;
+	cpu = sim_cpu_lookup (sd, cpu_name);
+	if (cpu)
+	  {
+	    /* If <cpuname>-<command>, point argv[0] at <command>.  */
+	    if (hyphen)
+	      {
+		matching_argi = 0;
+		argv[0] += hyphen - cpu_name + 1;
+	      }
+	    else
+	      matching_argi = 1;
+	    matching_opt = find_match (sd, cpu, argv, &matching_argi);
+	    /* If hyphen found restore argv[0].  */
+	    if (hyphen)
+	      argv[0] -= hyphen - cpu_name + 1;
+	  }
+	free (cpu_name);
+      }
+
+      /* If that failed, try the main table.  */
+      if (matching_opt == NULL)
+	{
+	  matching_argi = 0;
+	  matching_opt = find_match (sd, NULL, argv, &matching_argi);
+	}
+
       if (matching_opt != NULL)
 	{
 	  switch (matching_opt->opt.has_arg)
 	    {
 	    case no_argument:
 	      if (argv [matching_argi + 1] == NULL)
-		matching_opt->handler (sd, matching_opt->opt.val,
+		matching_opt->handler (sd, cpu, matching_opt->opt.val,
 				       NULL, 1/*is_command*/);
 	      else
 		sim_io_eprintf (sd, "Command `%s' takes no arguments\n",
@@ -768,10 +902,10 @@ sim_args_command (sd, cmd)
 	      break;
 	    case optional_argument:
 	      if (argv [matching_argi + 1] == NULL)
-		matching_opt->handler (sd, matching_opt->opt.val,
+		matching_opt->handler (sd, cpu, matching_opt->opt.val,
 				       NULL, 1/*is_command*/);
 	      else if (argv [matching_argi + 2] == NULL)
-		matching_opt->handler (sd, matching_opt->opt.val,
+		matching_opt->handler (sd, cpu, matching_opt->opt.val,
 				       argv [matching_argi + 1], 1/*is_command*/);
 	      else
 		sim_io_eprintf (sd, "Command `%s' requires no more than one argument\n",
@@ -782,14 +916,17 @@ sim_args_command (sd, cmd)
 		sim_io_eprintf (sd, "Command `%s' requires an argument\n",
 				matching_opt->opt.name);
 	      else if (argv [matching_argi + 2] == NULL)
-		matching_opt->handler (sd, matching_opt->opt.val,
+		matching_opt->handler (sd, cpu, matching_opt->opt.val,
 				       argv [matching_argi + 1], 1/*is_command*/);
 	      else
 		sim_io_eprintf (sd, "Command `%s' requires only one argument\n",
 				matching_opt->opt.name);
 	    }
+	  freeargv (argv);
 	  return SIM_RC_OK;
 	}
+
+      freeargv (argv);
     }
       
   /* didn't find anything that remotly matched */

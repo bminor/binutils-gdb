@@ -28,9 +28,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
      #include "sim-basics.h"
      typedef address_word sim_cia;
+     /-* If `sim_cia' is not an integral value (e.g. a struct), define
+         CIA_ADDR to return the integral value.  *-/
+     /-* #define CIA_ADDR(cia) (...) *-/
      #include "sim-base.h"
    
-   finally, two data types ``struct _sim_cpu' and ``struct sim_state'
+   finally, two data types `struct _sim_cpu' and `struct sim_state'
    are defined:
 
      struct _sim_cpu {
@@ -147,13 +150,6 @@ typedef struct {
   MODULE_SUSPEND_LIST *suspend_list;
 #define STATE_SUSPEND_LIST(sd) ((sd)->base.suspend_list)
 
-#ifdef SIM_HAVE_MODEL
-  /* ??? This might be more appropriate in sim_cpu.  */
-  /* Machine tables for this cpu.  See sim-model.h.  */
-  const MODEL *model;
-#define STATE_MODEL(sd) ((sd)->base.model)
-#endif
-
   /* Supported options.  */
   struct option_list *options;
 #define STATE_OPTIONS(sd) ((sd)->base.options)
@@ -195,13 +191,11 @@ typedef struct {
   SIM_ADDR start_addr;
 #define STATE_START_ADDR(sd) ((sd)->base.start_addr)
 
-#if WITH_SCACHE
   /* Size of the simulator's cache, if any.
      This is not the target's cache.  It is the cache the simulator uses
      to process instructions.  */
   unsigned int scache_size;
 #define STATE_SCACHE_SIZE(sd) ((sd)->base.scache_size)
-#endif
 
   /* FIXME: Move to top level sim_state struct (as some struct)?  */
 #ifdef SIM_HAVE_FLATMEM
@@ -254,6 +248,14 @@ typedef struct {
   SIM_DESC state;
 #define CPU_STATE(cpu) ((cpu)->base.state)
 
+  /* The name of the cpu.  */
+  const char *name;
+#define CPU_NAME(cpu) ((cpu)->base.name)
+
+  /* Options specific to this cpu.  */
+  struct option_list *options;
+#define CPU_OPTIONS(cpu) ((cpu)->base.options)
+
   /* Processor specific core data */
   sim_cpu_core core;
 #define CPU_CORE(cpu) (& (cpu)->base.core)
@@ -286,12 +288,24 @@ typedef struct {
   PROFILE_DATA profile_data;
 #define CPU_PROFILE_DATA(cpu) (& (cpu)->base.profile_data)
 
+#ifdef SIM_HAVE_MODEL
+  /* Machine tables for this cpu.  See sim-model.h.  */
+  const MACH *mach;
+#define CPU_MACH(cpu) ((cpu)->base.mach)
+  /* The selected model.  */
+  const MODEL *model;
+#define CPU_MODEL(cpu) ((cpu)->base.model)
+#endif
+
 } sim_cpu_base;
 
 
 /* Functions for allocating/freeing a sim_state.  */
 SIM_DESC sim_state_alloc PARAMS ((SIM_OPEN_KIND kind, host_callback *callback));
 void sim_state_free PARAMS ((SIM_DESC));
+
+/* Return a pointer to the cpu data for CPU_NAME, or NULL if not found.  */
+sim_cpu *sim_cpu_lookup (SIM_DESC sd, const char *cpu_name);
 
 
 #endif /* SIM_BASE_H */

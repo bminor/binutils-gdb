@@ -103,6 +103,7 @@ static const OPTION profile_options[] = {
 
 static SIM_RC
 profile_option_handler (SIM_DESC sd,
+			sim_cpu *cpu,
 			int opt,
 			char *arg,
 			int is_command)
@@ -938,7 +939,7 @@ profile_install (SIM_DESC sd)
   int i;
 
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
-  sim_add_option_table (sd, profile_options);
+  sim_add_option_table (sd, NULL, profile_options);
   for (i = 0; i < MAX_NR_PROCESSORS; ++i)
     memset (CPU_PROFILE_DATA (STATE_CPU (sd, i)), 0,
 	    sizeof (* CPU_PROFILE_DATA (STATE_CPU (sd, i))));

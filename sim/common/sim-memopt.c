@@ -180,11 +180,8 @@ parse_addr (char *chp,
 
 
 static SIM_RC
-memory_option_handler (sd, opt, arg, is_command)
-     SIM_DESC sd;
-     int opt;
-     char *arg;
-     int is_command;
+memory_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
+		       char *arg, int is_command)
 {
   switch (opt)
     {
@@ -252,14 +249,15 @@ memory_option_handler (sd, opt, arg, is_command)
 	chp = parse_size (chp + 1, &nr_bytes, &modulo);
 	/* try to attach/insert the main record */
 	entry = do_memopt_add (sd, level, space, addr, nr_bytes, modulo,
-			       &STATE_MEMOPT (sd), zalloc (nr_bytes));
+			       &STATE_MEMOPT (sd),
+			       zalloc (modulo ? modulo : nr_bytes));
 	/* now attach all the aliases */
 	while (*chp == ',')
 	  {
 	    int a_level = level;
 	    int a_space = space;
 	    address_word a_addr = addr;
-	    chp = parse_addr (chp, &a_level, &a_space, &a_addr);
+	    chp = parse_addr (chp + 1, &a_level, &a_space, &a_addr);
 	    do_memopt_add (sd, a_level, a_space, a_addr, nr_bytes, modulo,
 			   &entry->alias, entry->buffer);
 	  }
@@ -320,8 +318,7 @@ memory_option_handler (sd, opt, arg, is_command)
 	      sim_io_printf (sd, " alias ");
 	    if (entry->space != 0)
 	      sim_io_printf (sd, "0x%lx:", (long) entry->space);
-	    sim_io_printf (sd, "0x%08lx",
-			   (long) entry->addr);
+	    sim_io_printf (sd, "0x%08lx", (long) entry->addr);
 	    if (entry->level != 0)
 	      sim_io_printf (sd, "@0x%lx", (long) entry->level);
 	    sim_io_printf (sd, ",0x%lx",
@@ -334,7 +331,7 @@ memory_option_handler (sd, opt, arg, is_command)
 	      {
 		if (alias->space != 0)
 		  sim_io_printf (sd, "0x%lx:", (long) alias->space);
-		sim_io_printf (sd, ",0x%08lx", alias->addr);
+		sim_io_printf (sd, ",0x%08lx", (long) alias->addr);
 		if (alias->level != 0)
 		  sim_io_printf (sd, "@0x%lx", (long) alias->level);
 	      }
@@ -366,7 +363,7 @@ SIM_RC
 sim_memopt_install (SIM_DESC sd)
 {
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
-  sim_add_option_table (sd, memory_options);
+  sim_add_option_table (sd, NULL, memory_options);
   sim_module_add_uninstall_fn (sd, sim_memory_uninstall);
   sim_module_add_init_fn (sd, sim_memory_init);
   return SIM_RC_OK;

@@ -1,5 +1,5 @@
 /* Miscellaneous simulator utilities.
-   Copyright (C) 1997 Free Software Foundation, Inc.
+   Copyright (C) 1997, 1998 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 This file is part of GDB, the GNU debugger.
@@ -76,7 +76,6 @@ SIM_DESC
 sim_state_alloc (SIM_OPEN_KIND kind,
 		 host_callback *callback)
 {
-  int cpu_nr;
   SIM_DESC sd = ZALLOC (struct sim_state);
 
   STATE_MAGIC (sd) = SIM_MAGIC_NUMBER;
@@ -84,15 +83,19 @@ sim_state_alloc (SIM_OPEN_KIND kind,
   STATE_OPEN_KIND (sd) = kind;
 
 #if 0
-  /* Initialize the back link from the cpu struct to the state struct.  */
-  /* ??? I can envision a design where the state struct contains an array
-     of pointers to cpu structs, rather than an array of structs themselves.
-     Implementing this is trickier as one may not know what to allocate until
-     one has parsed the args.  Parsing the args twice wouldn't be unreasonable,
-     IMHO.  If the state struct ever does contain an array of pointers then we
-     can't do this here.  */
-  for (cpu_nr = 0; cpu_nr < MAX_NR_PROCESSORS; cpu_nr++)
-    CPU_STATE (STATE_CPU (sd, cpu_nr)) = sd;
+  {
+    int cpu_nr;
+
+    /* Initialize the back link from the cpu struct to the state struct.  */
+    /* ??? I can envision a design where the state struct contains an array
+       of pointers to cpu structs, rather than an array of structs themselves.
+       Implementing this is trickier as one may not know what to allocate until
+       one has parsed the args.  Parsing the args twice wouldn't be unreasonable,
+       IMHO.  If the state struct ever does contain an array of pointers then we
+       can't do this here.  */
+    for (cpu_nr = 0; cpu_nr < MAX_NR_PROCESSORS; cpu_nr++)
+      CPU_STATE (STATE_CPU (sd, cpu_nr)) = sd;
+  }
 #endif
 
 #ifdef SIM_STATE_INIT
@@ -114,6 +117,19 @@ sim_state_free (SIM_DESC sd)
 #endif
 
   zfree (sd);
+}
+
+/* Return a pointer to the cpu data for CPU_NAME, or NULL if not found.  */
+
+sim_cpu *
+sim_cpu_lookup (SIM_DESC sd, const char *cpu_name)
+{
+  int i;
+
+  for (i = 0; i < MAX_NR_PROCESSORS; ++i)
+    if (strcmp (cpu_name, CPU_NAME (STATE_CPU (sd, i))) == 0)
+      return STATE_CPU (sd, i);
+  return NULL;
 }
 
 /* Turn VALUE into a string with commas.  */
