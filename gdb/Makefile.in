@@ -1261,10 +1261,10 @@ fork-child.o: fork-child.c gdb_wait.h $(defs_h) $(gdbcore_h) \
 
 all-gdbtk:
 	if test "$(LN_S)" = "ln -s" -a ! -d gdbtcl/images ; then \
-	  echo linking $srcdir/gdbtk/library to gdbtcl ; \
-	  $(LN_S) $srcdir/gdbtk/library gdbtcl ; \
+	  echo linking ${srcdir}/gdbtk/library to gdbtcl ; \
+	  $(LN_S) ${srcdir}/gdbtk/library gdbtcl ; \
 	else \
-	  echo Warning: Unable to link $srcdir/gdbtk/library to gdbtcl. ; \
+	  echo Warning: Unable to link ${srcdir}/gdbtk/library to gdbtcl. ; \
 	  echo "         " You will need to do a ; \
 	  echo "         " make install before you are able to run the GUI. ; \
 	fi

@@ -1,3 +1,7 @@
+Sat Mar  4 04:08:58 2000  Alexandre Oliva  <oliva@lsd.ic.unicamp.br>
+
+	* Makefile.in (all-gdbtk): Fix $srcdir to ${srcdir}.
+
 Sat Mar  4 17:23:06 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* MAINTAINERS: Frank Ch. Eigler and Andrew Cagney co-ordinate the
