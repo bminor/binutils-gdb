@@ -1,5 +1,5 @@
 /* Tcl/Tk interface routines.
-   Copyright 1994, 1995, 1996, 1997 Free Software Foundation, Inc.
+   Copyright 1994, 1995, 1996, 1997, 1998 Free Software Foundation, Inc.
 
    Written by Stu Grossman <grossman@cygnus.com> of Cygnus Support.
 
@@ -151,7 +151,9 @@ static char *find_file_in_dir PARAMS ((char *));
 static int gdb_get_tracepoint_list PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST objv[]));
 static void gdbtk_create_tracepoint PARAMS ((struct tracepoint *));
 static void gdbtk_delete_tracepoint PARAMS ((struct tracepoint *));
+static void gdbtk_modify_tracepoint PARAMS ((struct tracepoint *));
 static void tracepoint_notify PARAMS ((struct tracepoint *, const char *));
+static void gdbtk_print_frame_info PARAMS ((struct symtab *, int, int, int));
 void gdbtk_pre_add_symbol PARAMS ((char *));
 void gdbtk_post_add_symbol PARAMS ((void));
 
@@ -2077,8 +2079,7 @@ gdbtk_init ( argv0 )
                         gdb_get_tracepoint_list, NULL, NULL);
   
   command_loop_hook = tk_command_loop;
-  print_frame_info_listing_hook =
-    (void (*) PARAMS ((struct symtab *, int, int, int))) null_routine;
+  print_frame_info_listing_hook = gdbtk_print_frame_info;
   query_hook = gdbtk_query;
   flush_hook = gdbtk_flush;
   create_breakpoint_hook = gdbtk_create_breakpoint;
@@ -2095,6 +2096,7 @@ gdbtk_init ( argv0 )
   post_add_symbol_hook  = gdbtk_post_add_symbol;
   create_tracepoint_hook = gdbtk_create_tracepoint;
   delete_tracepoint_hook = gdbtk_delete_tracepoint;
+  modify_tracepoint_hook = gdbtk_modify_tracepoint;
 
 #ifndef WINNT
   /* Get the file descriptor for the X server */
@@ -2611,6 +2613,13 @@ gdbtk_delete_tracepoint (tp)
 }
 
 static void
+gdbtk_modify_tracepoint (tp)
+  struct tracepoint *tp;
+{
+  tracepoint_notify (tp, "modify");
+}
+
+static void
 tracepoint_notify(tp, action)
      struct tracepoint *tp;
      const char *action;
@@ -2708,13 +2717,9 @@ gdb_actions_command (clientData, interp, objc, objv)
     }
 
   /* Free any existing actions */
-  for (temp = tp->actions; temp != NULL; temp = next)
-    {
-      next = temp->next;
-      if (temp->action)
-        free (temp->action);
-      free (temp);
-    }
+  if (tp->actions != NULL)
+    free_actions (tp);
+
   step_count = 0;
 
   Tcl_ListObjGetElements (interp, objv[2], &nactions, &actions);
@@ -2920,6 +2925,16 @@ TclDebug (va_alist)
   Tcl_Eval (interp, buf);
 }
 
+static void
+gdbtk_print_frame_info (s, line, stopline, noerror)
+  struct symtab *s;
+  int line;
+  int stopline;
+  int noerror;
+{
+  current_source_symtab = s;
+  current_source_line = line;
+}
 
 /* Come here during initialize_all_files () */
 

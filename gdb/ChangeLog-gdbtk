@@ -1,3 +1,10 @@
+Tue Feb 10 17:50:37 1998  Keith Seitz  <keiths@onions.cygnus.com>
+
+	* gdbtk.c (gdbtk_modify_tracepoint): Define new tracepoint modification hook.
+	(gdbtk_print_frame_info): Define this hook so that current_source_symtab
+	is set properly.
+	(gdb_actions_command): Use free_actions () from tracepoint.c/h.
+	
 Mon Jan 26 11:37:55 1998  Keith Seitz  <keiths@onions.cygnus.com>
 
 	* gdbtk.c (gdb_actions_command): Make note of next action

@@ -1,3 +1,16 @@
+Tue Feb 10 17:50:37 1998  Keith Seitz  <keiths@onions.cygnus.com>
+
+	* tracepoint.c (tracepoint_operation): Call the modify_tracepoint_hook
+	if it exists.
+	Remove static declaration of free_actions.
+
+	* tracepoint.h: Add declaration of free_actions.
+		
+Tue Feb 10 12:17:13 1998  Fred Fish  <fnf@cygnus.com>
+
+	* symtab.c (decode_line_1): Revert change that mistakenly
+	removed assignment of sals[0].pc field.
+
 Mon Feb 10 12:37:47 1998  Philippe De Muyter  <phdm@macqel.be>
 
         * m68k/tm-delta68.h (EXTRACT_RETURN_VALUE): Type argument for

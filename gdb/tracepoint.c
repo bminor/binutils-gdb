@@ -517,8 +517,6 @@ enum tracepoint_opcode
   delete
 };
 
-static void  free_actions PARAMS((struct tracepoint *));
-
 /* This function implements enable, disable and delete. */
 static void
 tracepoint_operation (t, from_tty, opcode)
@@ -531,9 +529,13 @@ tracepoint_operation (t, from_tty, opcode)
   switch (opcode) {
   case enable:
     t->enabled = enabled;
+    if (modify_tracepoint_hook)
+      modify_tracepoint_hook (t);
     break;
   case disable:
     t->enabled = disabled;
+    if (modify_tracepoint_hook)
+      modify_tracepoint_hook (t);
     break;
   case delete:
     if (tracepoint_chain == t)
@@ -1005,7 +1007,7 @@ validate_actionline (line, t)
 }
 
 /* worker function */
-static void 
+void 
 free_actions (t)
      struct tracepoint *t;
 {

@@ -98,8 +98,10 @@ extern struct tracepoint *tracepoint_chain;
 
 void (*create_tracepoint_hook) PARAMS ((struct tracepoint *));
 void (*delete_tracepoint_hook) PARAMS ((struct tracepoint *));
+void (*modify_tracepoint_hook) PARAMS ((struct tracepoint *));
 
 struct tracepoint *get_tracepoint_by_number PARAMS ((char **));
+void  free_actions PARAMS((struct tracepoint *));
 
 /* Walk the following statement or block through all tracepoints.
    ALL_TRACEPOINTS_SAFE does so even if the statment deletes the current
