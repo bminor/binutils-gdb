@@ -1,3 +1,8 @@
+2001-10-24  Richard Henderson  <rth@redhat.com>
+
+	* peXXigen.c (_bfd_XX_print_private_bfd_data_common): Copy
+	timestamp to time_t for ctime.
+
 2001-10-24  Hans-Peter Nilsson  <hp@axis.com>
 
 	* elf32-cris.c (cris_reloc_type_lookup): Change loop to use
