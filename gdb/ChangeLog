@@ -2994,7 +2994,7 @@
 	(handle_inferior_event): Inline calls to
 	handle_step_into_function.
 
-2004-05-14  Jerome Guitton  <guitton@rome.act-europe.fr>
+2004-05-14  Jerome Guitton  <guitton@gnat.com>
 
 	* rs6000-nat.c: Fix a comment.
 
@@ -4178,7 +4178,7 @@
 
 	* ChangeLog-2002: Fix year in one of the ChangeLog entries.
 
-2004-04-23  Jerome Guitton  <guitton@gnat.fr>
+2004-04-23  Jerome Guitton  <guitton@gnat.com>
 
 	* rs6000-tdep.c (rs6000_extract_return_value): When extracting a float,
 	use convert_typed_floating to get the appropriate format.
