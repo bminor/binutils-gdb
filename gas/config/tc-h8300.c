@@ -52,10 +52,10 @@ static void h8300sxmode (int);
 static void h8300sxnmode (int);
 static void pint (int);
 
-static int Hmode;
-static int Smode;
-static int Nmode;
-static int SXmode;
+int Hmode;
+int Smode;
+int Nmode;
+int SXmode;
 
 #define PSIZE (Hmode && !Nmode ? L_32 : L_16)
 

@@ -1,3 +1,10 @@
+2003-11-23  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* config/tc-h8300.c (Hmode): Make it global.
+	(Smode): Likewise.
+	(Nmode): Likewise.
+	(SXmode): Likewise.
+
 2003-11-22  Kazu Hirata  <kazu@cs.umass.edu>
 
 	* ehopt.c: Convert to ISO-C.
