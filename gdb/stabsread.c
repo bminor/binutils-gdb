@@ -88,7 +88,7 @@ static struct type *
 read_enum_type PARAMS ((char **, struct type *, struct objfile *));
 
 static struct type *
-rs6000_builtin_type PARAMS ((char **pp));
+rs6000_builtin_type PARAMS ((int));
 
 static int
 read_member_functions PARAMS ((struct field_info *, char **, struct type *,
@@ -187,7 +187,7 @@ struct complaint unrecognized_cplus_name_complaint =
   {"Unknown C++ symbol name `%s'", 0, 0};
 
 struct complaint rs6000_builtin_complaint =
-  {"Unknown builtin type -%d", 0, 0};
+  {"Unknown builtin type %d", 0, 0};
 
 struct complaint stabs_general_complaint =
   {"%s", 0, 0};
@@ -261,6 +261,19 @@ dbx_lookup_type (typenums)
 
   if (filenum == 0)
     {
+      if (index < 0)
+	{
+	  /* Caller wants address of address of type.  We think
+	     that negative (rs6k builtin) types will never appear as
+	     "lvalues", (nor should they), so we stuff the real type
+	     pointer into a temp, and return its address.  If referenced,
+	     this will do the right thing.  */
+	  static struct type *temp_type;
+
+	  temp_type = rs6000_builtin_type(index);
+	  return &temp_type;
+	}
+
       /* Type is defined outside of header files.
 	 Find it in this object file's type vector.  */
       if (index >= type_vector_length)
@@ -1167,9 +1180,6 @@ read_type (pp, objfile)
       }
 
     case '-':				/* RS/6000 built-in type */
-      type = rs6000_builtin_type (pp);
-      goto after_digits;
-
     case '0':
     case '1':
     case '2':
@@ -1184,9 +1194,6 @@ read_type (pp, objfile)
       (*pp)--;
       read_type_number (pp, xtypenums);
       type = *dbx_lookup_type (xtypenums);
-      /* fall through */
-
-    after_digits:
       if (type == 0)
 	type = lookup_fundamental_type (objfile, FT_VOID);
       if (typenums[0] != -1)
@@ -1342,15 +1349,11 @@ read_type (pp, objfile)
    Return the proper type node for a given builtin type number. */
 
 static struct type *
-rs6000_builtin_type (pp)
-     char **pp;
+rs6000_builtin_type (typenum)
+  int typenum;
 {
-  int typenums[2];
-
-  read_type_number (pp, typenums);
-
   /* default types are defined in dbxstclass.h. */
-  switch ( typenums[1] ) {
+  switch (-typenum) {
   case 1: 
     return lookup_fundamental_type (current_objfile, FT_INTEGER);
   case 2: 
@@ -1391,7 +1394,7 @@ rs6000_builtin_type (pp)
     /* requires builtin `real' */
     return lookup_fundamental_type (current_objfile, FT_FLOAT);
   default:
-    complain (rs6000_builtin_complaint, typenums[1]);
+    complain (rs6000_builtin_complaint, typenum);
     return NULL;
   }
 }
