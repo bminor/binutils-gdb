@@ -38,7 +38,7 @@ To build the package, you will need the DJGPP development environment
 (GCC, header files, and the libraries), and also DJGPP ports of the
 following tools:
 
-	- GNU Make 3.78.1 or later
+	- GNU Make 3.79.1 or later
 	- Bash 2.03 or later
 	- GNU Sed
 	- GNU Fileutils
@@ -62,7 +62,7 @@ and `utod' utilities which are part of the basic DJGPP development kit
 If you download the source distribution from one of the DJGPP sites,
 just unzip it while preserving the directory structure (I suggest to
 use unzip32.exe available with the rest of DJGPP), and proceed to the
-section "How to build" below.
+section "How to build", below.
 
 Source distributions downloaded from one of the GNU FTP sites need
 some more work to unpack.  First, you MUST use the `djunpack' batch
@@ -75,23 +75,24 @@ distribution includes a file `gdb/config/djgpp/fnchange.lst' with the
 necessary mappings.  So you need first to retrieve that batch file,
 and then invoke it to unpack the distribution.  Here's how:
 
- djtar -x -p -o gdb-5.0/djunpack.bat gdb-5.0.tar.gz > djunpack.bat
- djunpack gdb-5.0.tar.gz
+ djtar -x -p -o gdb-5.1/djunpack.bat gdb-5.1.tar.gz > djunpack.bat
+ djunpack gdb-5.1.tar.gz
 
 (The name of the distribution archive and the leading directory of the
 path to `djunpack.bat' in the distribution will be different for
-versions of GDB other than 5.0.)
+versions of GDB other than 5.1.)
 
 If the argument to `djunpack.bat' include leading directories, it MUST
 be given with the DOS-style backslashes; Unix-style forward slashes
 will NOT work.
 
-If the distribution comes as a .tar.bz2 archive, you need to unpack it
-as follows:
+If the distribution comes as a .tar.bz2 archive, and your version of
+`djtar' doesn't support bzip2 decompression, you need to unpack it as
+follows:
 
- bnzip2 gdb-5.0.tar.bz2
- djtar -x -p -o gdb-5.0/djunpack.bat gdb-5.0.tar > djunpack.bat
- djunpack gdb-5.0.tar
+ bnzip2 gdb-5.1.tar.bz2
+ djtar -x -p -o gdb-5.1/djunpack.bat gdb-5.1.tar > djunpack.bat
+ djunpack gdb-5.1.tar
 
 
 3. How to build
@@ -105,7 +106,7 @@ invoke Make:
 
 To build a package downloaded from a GNU FTP site, you will need o
 configure it first.  You will also need to configure it if you want to
-change the configuration options (e.g., compile with support for the
+change the configuration options (e.g., compile without support for the
 GDBMI interface).  To configure GDB, type this command:
 
 		sh ./gdb/config/djgpp/djconfig.sh
@@ -117,8 +118,8 @@ recursively configures all the subdirectories.
 
 You may pass optional switches to djconfig.sh.  It accepts all the
 switches accepted by the original GDB configure script.  These
-switches are described in the file gdb/README, and their full list be
-displayed by running the following command:
+switches are described in the file gdb/README, and their full list can
+be displayed by running the following command:
 
 		sh ./gdb/configure --help
 
@@ -126,13 +127,13 @@ NOTE: if you *do* use optional command-line switches, you MUST pass
 to the script the name of the directory where GDB sources are
 unpacked--even if you are building GDB in-place!  For example:
 
-	sh ./gdb/config/djgpp/djconfig.sh . --enable-gdbmi
+	sh ./gdb/config/djgpp/djconfig.sh . --disable-gdbmi
 
 It is also possible to build GDB in a directory that is different from
 the one where the sources were unpacked.  In that case, you have to
 pass the source directory as the first argument to the script:
 
-	sh ./gdb/config/djgpp/djconfig.sh d:/gnu/gdb-5.0
+	sh ./gdb/config/djgpp/djconfig.sh d:/gnu/gdb-5.1
 
 You MUST use forward slashes in the first argument.
 

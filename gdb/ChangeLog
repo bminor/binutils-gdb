@@ -1,3 +1,7 @@
+2001-10-21  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* config/djgpp/README: Fix a typo and tweak for GDB 5.1.
+
 2001-10-20  Andrew Cagney  <ac131313@redhat.com>
 
 	* alpha-nat.c: Include <alpha/coreregs.h> instead of
