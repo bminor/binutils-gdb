@@ -1,5 +1,10 @@
 2001-02-07  Andrew Cagney  <ac131313@redhat.com>
 
+	From Mark Kettenis <kettenis@gnu.org>:
+	* event-top.h [!STOP_SIGNAL]: #include <signal.h>.
+
+2001-02-07  Andrew Cagney  <ac131313@redhat.com>
+
 	* remote-sim.c (dump_mem): Cleanup printf format argument.
 	* MAINTAINERS: Update, mn10300-elf now builds.
 

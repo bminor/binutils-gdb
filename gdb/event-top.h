@@ -1,5 +1,5 @@
 /* Definitions used by GDB event-top.c.
-   Copyright 1999 Free Software Foundation, Inc.
+   Copyright 1999, 2001 Free Software Foundation, Inc.
    Written by Elena Zannoni <ezannoni@cygnus.com> of Cygnus Solutions.
 
    This file is part of GDB.
@@ -78,6 +78,7 @@ extern void set_async_prompt (char *args, int from_tty, struct cmd_list_element 
 
 /* Signal to catch ^Z typed while reading a command: SIGTSTP or SIGCONT.  */
 #ifndef STOP_SIGNAL
+#include <signal.h>
 #ifdef SIGTSTP
 #define STOP_SIGNAL SIGTSTP
 extern void handle_stop_sig (int sig);
