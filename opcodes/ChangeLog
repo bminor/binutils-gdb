@@ -1,4 +1,10 @@
 start-sanitize-sky
+Wed Feb 18 15:46:46 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* dvp-dis.c (print_vu): Handle loi insns.
+	(print_insn): Likewise.
+	* dvp-opc.c (vu_lower_opcodes): Add "loi".
+
 Tue Feb 17 18:48:25 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* dvp-opc.c (parse_vfreg): Dest spec is optional.
