@@ -22,7 +22,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 extern char *line;
 extern int linesize;
 extern FILE *instream;
-extern char dirbuf[1024];
+extern char gdb_dirbuf[1024];
 extern int inhibit_gdbinit;
 extern int epoch_interface;
 extern char gdbinit[];

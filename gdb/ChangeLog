@@ -1,3 +1,9 @@
+Wed Jun 22 16:54:15 1994  Fred Fish  (fnf@cygnus.com)
+
+	* energize-patches, main.c (main), top.c (gdb_init, pwd_command),
+	top.h: Change all occurances of dirbuf to gdb_dirbuf.  Collides
+	with global variable of same name in libnsl.so on UnixWare.
+
 Wed Jun 22 14:40:52 1994  Kung Hsu  (kung@mexican.cygnus.com)
 
 	* symtab.c (decode_line_1): fix a bug in dealing with '<>'

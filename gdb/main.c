@@ -123,8 +123,8 @@ main (argc, argv)
   line[0] = '\0';		/* Terminate saved (now empty) cmd line */
   instream = stdin;
 
-  getcwd (dirbuf, sizeof (dirbuf));
-  current_directory = dirbuf;
+  getcwd (gdb_dirbuf, sizeof (gdb_dirbuf));
+  current_directory = gdb_dirbuf;
 
   /* Parse arguments and options.  */
   {

@@ -253,7 +253,7 @@ FILE *instream;
 char *current_directory;
 
 /* The directory name is actually stored here (usually).  */
-char dirbuf[1024];
+char gdb_dirbuf[1024];
 
 /* Function to call before reading a command, if nonzero.
    The function receives two args: an input stream,
@@ -484,8 +484,8 @@ gdb_init ()
 {
   /* Run the init function of each source file */
 
-  getcwd (dirbuf, sizeof (dirbuf));
-  current_directory = dirbuf;
+  getcwd (gdb_dirbuf, sizeof (gdb_dirbuf));
+  current_directory = gdb_dirbuf;
 
   init_cmd_lists ();	/* This needs to be done first */
   initialize_all_files ();
@@ -1878,11 +1878,11 @@ pwd_command (args, from_tty)
      int from_tty;
 {
   if (args) error ("The \"pwd\" command does not take an argument: %s", args);
-  getcwd (dirbuf, sizeof (dirbuf));
+  getcwd (gdb_dirbuf, sizeof (gdb_dirbuf));
 
-  if (!STREQ (dirbuf, current_directory))
+  if (!STREQ (gdb_dirbuf, current_directory))
     printf_unfiltered ("Working directory %s\n (canonically %s).\n",
-	    current_directory, dirbuf);
+	    current_directory, gdb_dirbuf);
   else
     printf_unfiltered ("Working directory %s.\n", current_directory);
 }

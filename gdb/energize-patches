@@ -932,22 +932,22 @@
   
 ***************
 *** 1920,1929 ****
-    getcwd (dirbuf, sizeof (dirbuf));
+    getcwd (gdb_dirbuf, sizeof (gdb_dirbuf));
   
-    if (strcmp (dirbuf, current_directory))
+    if (strcmp (gdb_dirbuf, current_directory))
 !     printf ("Working directory %s\n (canonically %s).\n",
-  	    current_directory, dirbuf);
+  	    current_directory, gdb_dirbuf);
     else
 !     printf ("Working directory %s.\n", current_directory);
   }
   
   static void
 --- 1931,1940 ----
-    getcwd (dirbuf, sizeof (dirbuf));
+    getcwd (gdb_dirbuf, sizeof (gdb_dirbuf));
   
-    if (strcmp (dirbuf, current_directory))
+    if (strcmp (gdb_dirbuf, current_directory))
 !     printf_filtered ("Working directory %s\n (canonically %s).\n",
-  	    current_directory, dirbuf);
+  	    current_directory, gdb_dirbuf);
     else
 !     printf_filtered ("Working directory %s.\n", current_directory);
   }
