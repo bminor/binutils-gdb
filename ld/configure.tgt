@@ -76,7 +76,9 @@ sparcv9-*-solaris2* | sparc64-*-solaris2*)
 			;;
 sparc*-*-solaris2*)	targ_emul=elf32_sparc ;;
 sparc*-wrs-vxworks*)	targ_emul=sparcaout ;;
-sparc*-*-rtems*)	targ_emul=sparcaout ;;
+sparc*-*-rtemsaout*)    targ_emul=sparcaout ;;
+sparc*-*-rtemself*)     targ_emul=elf32_sparc ;;
+sparc*-*-rtems*)        targ_emul=elf32_sparc ;;
 i860-stardent-sysv4* | i860-stardent-elf*)
 			targ_emul=elf32_i860 ;;
 i960-wrs-vxworks5.0*)	targ_emul=gld960 ;;
@@ -167,6 +169,7 @@ arm-*-aout | armel-*-aout) targ_emul=armaoutl ;;
 armeb-*-aout)		targ_emul=armaoutb ;;
 arm-*-coff)		targ_emul=armcoff ;;
 arm-*-netbsd*)		targ_emul=armnbsd ;;
+arm-*-rtems*)		targ_emul=armelf ;;
 arm-*-elf)		targ_emul=armelf ;;
 arm-*-oabi)		targ_emul=armelf_oabi ;;
 arm*-*-linux-gnu*)	targ_emul=armelf_linux; targ_extra_emuls="armelf_linux26 armelf" ;;
@@ -184,7 +187,7 @@ thumb-*-pe)		targ_emul=armpe ;
 			targ_extra_ofiles="deffilep.o pe-dll.o" ;;
 xscale-*-coff)		targ_emul=armcoff ;;
 xscale-*-elf)		targ_emul=armelf ;;
-h8300-*-hms* | h8300-*-coff*)
+h8300-*-hms* | h8300-*-coff* | h8300-*-rtems*)
 			targ_emul=h8300; targ_extra_emuls="h8300h h8300s"
 			;;
 h8500-*-hms* | h8500-*-coff*)

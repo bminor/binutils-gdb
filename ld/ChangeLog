@@ -1,3 +1,10 @@
+2000-12-01      Joel Sherrill <joel@OARcorp.com>
+
+        * configure.tgt (arm-*-rtems*, a29k-*rtems*, h8300-*-rtems*):
+	New targets.
+	(sparc*-*-rtemself*, sparc*-*-rtemsaout*): New targets.
+	(sparc*-*-rtems*): Switched from a.out to ELF.
+
 2000-11-30  Jan Hubicka  <jh@suse.cz>
 
 	* Makefile.am (ALL_EMULATIONS): Add eelf_x86_64.o
