@@ -77,7 +77,7 @@ static void obj_elf_ident PARAMS ((int));
 static void obj_elf_weak PARAMS ((int));
 static void obj_elf_local PARAMS ((int));
 static void obj_elf_visibility PARAMS ((int));
-static void obj_elf_change_section
+void obj_elf_change_section
   PARAMS ((const char *, int, int, int, const char *, int, int));
 static int obj_elf_parse_section_letters PARAMS ((char *, size_t));
 static int obj_elf_section_word PARAMS ((char *, size_t));
@@ -664,7 +664,7 @@ static struct special_section const special_sections[] =
   { NULL,	0,		0				}
 };
 
-static void
+void
 obj_elf_change_section (name, type, attr, entsize, group_name, linkonce, push)
      const char *name;
      int type;

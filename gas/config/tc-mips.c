@@ -744,6 +744,7 @@ static symbolS *get_symbol PARAMS ((void));
 static void mips_align PARAMS ((int to, int fill, symbolS *label));
 static void s_align PARAMS ((int));
 static void s_change_sec PARAMS ((int));
+static void s_change_section PARAMS ((int));
 static void s_cons PARAMS ((int));
 static void s_float_cons PARAMS ((int));
 static void s_mips_globl PARAMS ((int));
@@ -883,6 +884,7 @@ static const pseudo_typeS mips_pseudo_table[] =
   {"long", s_cons, 2},
   {"octa", s_cons, 4},
   {"quad", s_cons, 3},
+  {"section", s_change_section, 0},
   {"short", s_cons, 1},
   {"single", s_float_cons, 'f'},
   {"stabn", s_mips_stab, 'n'},
@@ -11246,6 +11248,61 @@ s_change_sec (sec)
     }
 
   auto_align = 1;
+}
+  
+void
+s_change_section (ignore)
+     int ignore ATTRIBUTE_UNUSED;
+{
+  expressionS rep_exp;
+  
+  char *section_name;
+  char c;
+  char *next_c;
+  char *p;
+  int section_type;
+  int section_flag;
+  int section_entry_size;
+  int section_alignment;
+  int log = -1;
+  flagword flags;
+  
+  section_name = input_line_pointer;
+  c = get_symbol_end ();
+  next_c = input_line_pointer + 1;
+  /* just after name is now '\0' */
+  p = input_line_pointer;
+
+  /* Do we have .section Name<,"flags">  */
+  if (c == '\n' || (c == ',' && *next_c == '"') || c == '"')
+    {
+      *p = c;
+      input_line_pointer = section_name;
+      obj_elf_section (ignore);
+      return;
+    }
+  input_line_pointer++;
+
+  /* Do we have .section Name<,type><,flag><,entry_size><,alignment>  */
+  if (c == ',')
+    section_type = get_absolute_expression ();
+  else
+    section_type = 0;
+  if (*input_line_pointer++ == ',')
+    section_flag = get_absolute_expression ();
+  else
+    section_flag = 0;
+  if (*input_line_pointer++ == ',')
+    section_entry_size = get_absolute_expression ();
+  else
+    section_entry_size = 0;
+  if (*input_line_pointer++ == ',')
+    section_alignment = get_absolute_expression ();
+  else
+    section_alignment = 0;
+
+  obj_elf_change_section (section_name, section_type, section_flag,
+			  section_entry_size, 0, 0, 0);
 }
 
 void

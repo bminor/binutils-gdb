@@ -1,3 +1,9 @@
+2002-08-17  Stan Cox  <scox@redhat.com>
+
+	* config/obj-elf.c (obj_elf_change_section): Make non-static.
+	config/tc-mips.c (s_change_section): New function to support
+	IRIX .section pseudo-op.
+
 2002-08-16  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-v850.c (md_assemble): Fix assembling of "callt 0x3f".
