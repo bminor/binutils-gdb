@@ -1,3 +1,18 @@
+Fri Nov 15 13:57:42 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/mn10300/other.s: Put parens around register
+	argument in calls and jmp instructions.
+
+Wed Nov 13 13:16:04 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/h8300/ffxx1.d: Update for recent disassembler changes.
+
+Mon Nov 11 16:03:24 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/hppa/reloc/reloc.exp: Pass "--prefix-addresses" to objdump
+	as needed.
+	* gas/hppa/unsorted/unsorted.exp: Likewise.
+
 Thu Nov  7 00:27:52 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/mn10300/basic.exp: Check opcode insertion for
