@@ -1,3 +1,8 @@
+2000-08-28  Jim Wilson  <wilson@cygnus.com>
+
+	* ia64-dis.c (print_insn_ia64): Add failed label after ia64_free_opcode
+	call.  Change last goto to use failed instead of done.
+
 2000-08-28  Dave Brolley  <brolley@redhat.com>
 
 	* cgen-ibld.in (cgen_put_insn_int_value): New function.

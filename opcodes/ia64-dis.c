@@ -262,11 +262,12 @@ print_insn_ia64 (bfd_vma memaddr, struct disassemble_info *info)
 
  done:
   ia64_free_opcode (idesc);
+ failed:
   if (slotnum == 2)
     retval += 16 - 3*slot_multiplier;
   return retval;
 
  decoding_failed:
   (*info->fprintf_func) (info->stream, "      data8 %#011llx", insn);
-  goto done;
+  goto failed;
 }
