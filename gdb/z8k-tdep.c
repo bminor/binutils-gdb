@@ -1,5 +1,5 @@
 /* Target-machine dependent code for Zilog Z8000, for GDB.
-   Copyright (C) 1992,1993 Free Software Foundation, Inc.
+   Copyright (C) 1992, 1993, 1994 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -29,6 +29,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbcmd.h"
 #include "gdbtypes.h"
 #include "dis-asm.h"
+
 /* Return the saved PC from this frame.
 
    If the frame has a memory copy of SRP_REGNUM, use that.  If not,
@@ -36,9 +37,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 CORE_ADDR
 frame_saved_pc (frame)
-     FRAME frame;
+     struct frame_info *frame;
 {
-  return (read_memory_pointer (frame->frame + (BIG ? 4 : 2)));
+  return read_memory_pointer (frame->frame + (BIG ? 4 : 2));
 }
 
 #define IS_PUSHL(x) (BIG ? ((x & 0xfff0) == 0x91e0):((x & 0xfff0) == 0x91F0))
@@ -147,24 +148,24 @@ addr_bits_remove (x)
   return x & PTR_MASK;
 }
 
+int
 read_memory_pointer (x)
      CORE_ADDR x;
 {
-
   return read_memory_integer (ADDR_BITS_REMOVE (x), BIG ? 4 : 2);
 }
 
-FRAME_ADDR
+CORE_ADDR
 frame_chain (thisframe)
-     FRAME thisframe;
+     struct frame_info *thisframe;
 {
   if (thisframe->prev == 0)
     {
       /* This is the top of the stack, let's get the sp for real */
     }
-  if (!inside_entry_file ((thisframe)->pc))
+  if (!inside_entry_file (thisframe->pc))
     {
-      return read_memory_pointer ((thisframe)->frame);
+      return read_memory_pointer (thisframe->frame);
     }
   return 0;
 }
@@ -210,7 +211,7 @@ print_insn (memaddr, stream)
 {
   disassemble_info info;
 
-  GDB_INIT_DISASSEMBLE_INFO(info, stream);
+  GDB_INIT_DISASSEMBLE_INFO (info, stream);
 
   if (BIG)
     {
@@ -268,7 +269,7 @@ frame_find_saved_regs (fip, fsrp)
   pc = skip_adjust (get_pc_function_start (fip->pc), &locals);
 
   {
-    adr = fip->frame - locals;
+    adr = FRAME_FP (fip) - locals;
     for (i = 0; i < 8; i++)
       {
 	int word = read_memory_short (pc);
@@ -304,41 +305,42 @@ saved_pc_after_call ()
 }
 
 
-extract_return_value(type, regbuf, valbuf)
-struct type *type;
-char *regbuf;
-char *valbuf;
+extract_return_value (type, regbuf, valbuf)
+     struct type *type;
+     char *regbuf;
+     char *valbuf;
 {
   int b;
-  int len = TYPE_LENGTH(type);
+  int len = TYPE_LENGTH (type);
 
-  for (b = 0; b < len; b += 2) {
-    int todo = len - b;
-    if (todo > 2)
-      todo = 2;
-    memcpy(valbuf + b, regbuf + b, todo);
-  }
-}
-
-void
-write_return_value(type, valbuf)
-struct type *type;
-char *valbuf;
-{
-  int reg;
-  int len;
-  for (len = 0; len <  TYPE_LENGTH(type); len += 2)
+  for (b = 0; b < len; b += 2)
     {
-      write_register_bytes(REGISTER_BYTE(len /2  + 2), valbuf + len, 2);
+      int todo = len - b;
+
+      if (todo > 2)
+	todo = 2;
+      memcpy (valbuf + b, regbuf + b, todo);
     }
 }
 
 void
-store_struct_return(addr, sp)
-CORE_ADDR addr;
-CORE_ADDR sp;
+write_return_value (type, valbuf)
+     struct type *type;
+     char *valbuf;
 {
-  write_register(2, addr);
+  int reg;
+  int len;
+
+  for (len = 0; len < TYPE_LENGTH (type); len += 2)
+    write_register_bytes (REGISTER_BYTE (len / 2  + 2), valbuf + len, 2);
+}
+
+void
+store_struct_return (addr, sp)
+     CORE_ADDR addr;
+     CORE_ADDR sp;
+{
+  write_register (2, addr);
 }
 
 
@@ -427,9 +429,7 @@ unsegmented_command (args, from_tty)
      int from_tty;
 {
   z8k_set_pointer_size (16);
-
 }
-
 
 static void
 set_memory (args, from_tty)

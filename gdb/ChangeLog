@@ -1,3 +1,25 @@
+Thu Nov  3 15:19:17 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	Replace useless FRAME, FRAME_ADDR types with struct frame_info *
+	and CORE_ADDR, respectively.
+	* frame.h (FRAME, FRAME_INFO_ID, FRAME_ADDR): Remove.
+	* blockframe.c (get_frame_info): Remove.
+	* a29k-tdep.c, alpha-tdep.c, blockframe.c, breakpoint.c,
+	breakpoint.h, energize.c, findvar.c, gdbtk.c, gould-pinsn.c,
+	h8300-tdep.c, h8500-tdep.c, hppa-tdep.c, i386-tdep.c, i960-tdep.c,
+	infcmd.c, inferior.h, infrun.c, m68k-tdep.c, m88k-tdep.c,
+	mips-tdep.c, nindy-tdep.c, printcmd.c, pyr-tdep.c, rs6000-tdep.c,
+	sh-tdep.c, sparc-tdep.c, stack.c, valops.c, z8k-tdep.c,
+	config/a29k/tm-a29k.h, config/alpha/tm-alpha.h,
+	config/gould/tm-pn.h, config/h8300/tm-h8300.h,
+	config/h8500/tm-h8500.h, config/mips/tm-mips.h,
+	config/ns32k/tm-merlin.h, config/ns32k/tm-umax.h,
+	config/pyr/tm-pyr.h, config/sparc/tm-sparc.h): Replace FRAME with
+	struct frame_info * everywhere, replace FRAME_ADDR with CORE_ADDR,
+	rename variables consistently (using `frame' or `fi'), remove
+	calls to get_frame_info and FRAME_INFO_ID, remove comments about
+	FRAME and FRAME_ADDR cruftiness.
+
 Thu Nov  3 14:25:24 1994  Stu Grossman  (grossman@cygnus.com)
 
 	* corelow.c, exec.c, inftarg.c, m3-nat.c, op50-rom.c, procfs.c,

@@ -19,9 +19,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* Miscellaneous i80960-dependent routines.
-   Most are called from macros defined in "tm-i960.h".  */
-
 #include "defs.h"
 #include "symtab.h"
 #include "value.h"
@@ -125,7 +122,7 @@ static CORE_ADDR
 examine_prologue (ip, limit, frame_addr, fsr)
      register CORE_ADDR ip;
      register CORE_ADDR limit;
-     FRAME_ADDR frame_addr;
+     CORE_ADDR frame_addr;
      struct frame_saved_regs *fsr;
 {
   register CORE_ADDR next_ip;
@@ -298,7 +295,7 @@ skip_prologue (ip)
   sal = find_pc_line (ip, 0);
   limit = (sal.end) ? sal.end : 0xffffffff;
 
-  return (examine_prologue (ip, limit, (FRAME_ADDR) 0, &saved_regs_dummy));
+  return (examine_prologue (ip, limit, (CORE_ADDR) 0, &saved_regs_dummy));
 }
 
 /* Put here the code to store, into a struct frame_saved_regs,
@@ -384,7 +381,6 @@ CORE_ADDR
 frame_args_address (fi, must_be_correct)
      struct frame_info *fi;
 {
-  register FRAME frame;
   struct frame_saved_regs fsr;
   CORE_ADDR ap;
 
@@ -392,20 +388,20 @@ frame_args_address (fi, must_be_correct)
      the saved value.  If the frame is current and we are being sloppy,
      return the value of g14.  Otherwise, return zero.  */
 
-  frame = FRAME_INFO_ID (fi);
   get_frame_saved_regs (fi, &fsr);
   if (fsr.regs[G14_REGNUM])
     ap = read_memory_integer (fsr.regs[G14_REGNUM],4);
-  else {
-    if (must_be_correct)
-      return 0;			/* Don't cache this result */
-    if (get_next_frame (frame))
-      ap = 0;
-    else
-      ap = read_register (G14_REGNUM);
-    if (ap == 0)
-      ap = fi->frame;
-  }
+  else
+    {
+      if (must_be_correct)
+	return 0;			/* Don't cache this result */
+      if (get_next_frame (fi))
+	ap = 0;
+      else
+	ap = read_register (G14_REGNUM);
+      if (ap == 0)
+	ap = fi->frame;
+    }
   fi->arg_pointer = ap;		/* Cache it for next time */
   return ap;
 }
@@ -417,7 +413,6 @@ CORE_ADDR
 frame_struct_result_address (fi)
      struct frame_info *fi;
 {
-  register FRAME frame;
   struct frame_saved_regs fsr;
   CORE_ADDR ap;
 
@@ -429,16 +424,17 @@ frame_struct_result_address (fi)
      the function prologue, and only use the current value if we have
      no saved value and are at TOS?   -- gnu@cygnus.com */
 
-  frame = FRAME_INFO_ID (fi);
-  if (get_next_frame (frame)) {
-    get_frame_saved_regs (fi, &fsr);
-    if (fsr.regs[G13_REGNUM])
-      ap = read_memory_integer (fsr.regs[G13_REGNUM],4);
-    else
-      ap = 0;
-  } else {
+  if (get_next_frame (fi))
+    {
+      get_frame_saved_regs (fi, &fsr);
+      if (fsr.regs[G13_REGNUM])
+	ap = read_memory_integer (fsr.regs[G13_REGNUM],4);
+      else
+	ap = 0;
+    }
+  else
     ap = read_register (G13_REGNUM);
-  }
+
   return ap;
 }
 
@@ -507,16 +503,15 @@ leafproc_return (ip)
 
 CORE_ADDR
 saved_pc_after_call (frame)
-     FRAME frame;
+     struct frame_info *frame;
 {
   CORE_ADDR saved_pc;
-  CORE_ADDR get_frame_pc ();
 
   saved_pc = leafproc_return (get_frame_pc (frame));
   if (!saved_pc)
     saved_pc = FRAME_SAVED_PC (frame);
 
-  return (saved_pc);
+  return saved_pc;
 }
 
 /* Discard from the stack the innermost frame,
@@ -531,7 +526,7 @@ pop_frame ()
   struct frame_saved_regs fsr;
   char local_regs_buf[16 * 4];
 
-  current_fi = get_frame_info (get_current_frame ());
+  current_fi = get_current_frame ();
 
   /* First, undo what the hardware does when we return.
      If this is a non-leaf procedure, restore local registers from
@@ -542,7 +537,7 @@ pop_frame ()
   if (!leaf_return_addr)
     {
       /* Non-leaf procedure.  Restore local registers, incl IP.  */
-      prev_fi = get_frame_info (get_prev_frame (FRAME_INFO_ID (current_fi)));
+      prev_fi = get_prev_frame (current_fi);
       read_memory (prev_fi->frame, local_regs_buf, sizeof (local_regs_buf));
       write_register_bytes (REGISTER_BYTE (R0_REGNUM), local_regs_buf, 
 		            sizeof (local_regs_buf));
@@ -585,15 +580,15 @@ i960_fault_to_signal (fault)
     case 3: return TARGET_SIGNAL_FPE; /* arithmetic fault */
     case 4: return TARGET_SIGNAL_FPE; /* floating point fault */
 
-       /* constraint fault.  This appears not to distinguish between
-	  a range constraint fault (which should be SIGFPE) and a privileged
-	  fault (which should be SIGILL).  */
+      /* constraint fault.  This appears not to distinguish between
+	 a range constraint fault (which should be SIGFPE) and a privileged
+	 fault (which should be SIGILL).  */
     case 5: return TARGET_SIGNAL_ILL;
 
     case 6: return TARGET_SIGNAL_SEGV; /* virtual memory fault */
 
-       /* protection fault.  This is for an out-of-range argument to
-	  "calls".  I guess it also could be SIGILL. */
+      /* protection fault.  This is for an out-of-range argument to
+	 "calls".  I guess it also could be SIGILL. */
     case 7: return TARGET_SIGNAL_SEGV;
 
     case 8: return TARGET_SIGNAL_BUS; /* machine fault */

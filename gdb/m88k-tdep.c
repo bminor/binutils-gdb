@@ -1,5 +1,5 @@
 /* Target-machine dependent code for Motorola 88000 series, for GDB.
-   Copyright (C) 1988, 1990, 1991 Free Software Foundation, Inc.
+   Copyright (C) 1988, 1990, 1991, 1994 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -22,7 +22,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "inferior.h"
 #include "value.h"
 #include "gdbcore.h"
-
 #include "symtab.h"
 #include "setjmp.h"
 #include "value.h"
@@ -32,8 +31,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 void frame_find_saved_regs ();
 
-/* is this target an m88110?  Otherwise assume m88100.  This has
-   relevance for the ways in which we screw with instruction pointers.  */ 
+/* Is this target an m88110?  Otherwise assume m88100.  This has
+   relevance for the ways in which we screw with instruction pointers.  */
+
 int target_is_m88110 = 0;
 
 /* Given a GDB frame, determine the address of the calling function's frame.
@@ -43,9 +43,9 @@ int target_is_m88110 = 0;
    For us, the frame address is its stack pointer value, so we look up
    the function prologue to determine the caller's sp value, and return it.  */
 
-FRAME_ADDR
+CORE_ADDR
 frame_chain (thisframe)
-     FRAME thisframe;
+     struct frame_info *thisframe;
 {
 
   frame_find_saved_regs (thisframe, (struct frame_saved_regs *) 0);
@@ -60,7 +60,7 @@ frame_chain (thisframe)
 
 int
 frameless_function_invocation (frame)
-     FRAME frame;
+     struct frame_info *frame;
 {
 
   frame_find_saved_regs (frame, (struct frame_saved_regs *) 0);
@@ -74,13 +74,13 @@ frameless_function_invocation (frame)
 }
 
 void
-init_extra_frame_info (fromleaf, fi)
+init_extra_frame_info (fromleaf, frame)
      int fromleaf;
-     struct frame_info *fi;
+     struct frame_info *frame;
 {
-  fi->fsr = 0;			/* Not yet allocated */
-  fi->args_pointer = 0;		/* Unknown */
-  fi->locals_pointer = 0;	/* Unknown */
+  frame->fsr = 0;			/* Not yet allocated */
+  frame->args_pointer = 0;		/* Unknown */
+  frame->locals_pointer = 0;	/* Unknown */
 }
 
 /* Examine an m88k function prologue, recording the addresses at which
@@ -204,14 +204,15 @@ next_insn (memaddr, pword1)
 /* Read a register from frames called by us (or from the hardware regs).  */
 
 static int
-read_next_frame_reg(fi, regno)
-     FRAME fi;
+read_next_frame_reg(frame, regno)
+     struct frame_info *frame;
      int regno;
 {
-  for (; fi; fi = fi->next) {
-      if (regno == SP_REGNUM) return fi->frame;
-      else if (fi->fsr->regs[regno])
-	return read_memory_integer(fi->fsr->regs[regno], 4);
+  for (; frame; frame = frame->next) {
+      if (regno == SP_REGNUM)
+	return FRAME_FP (frame);
+      else if (frame->fsr->regs[regno])
+	return read_memory_integer(frame->fsr->regs[regno], 4);
   }
   return read_register(regno);
 }
@@ -229,7 +230,7 @@ static CORE_ADDR
 examine_prologue (ip, limit, frame_sp, fsr, fi)
      register CORE_ADDR ip;
      register CORE_ADDR limit;
-     FRAME_ADDR frame_sp;
+     CORE_ADDR frame_sp;
      struct frame_saved_regs *fsr;
      struct frame_info *fi;
 {
@@ -395,7 +396,7 @@ skip_prologue (ip)
   sal = find_pc_line (ip, 0);
   limit = (sal.end) ? sal.end : 0xffffffff;
 
-  return (examine_prologue (ip, limit, (FRAME_ADDR) 0, &saved_regs_dummy,
+  return (examine_prologue (ip, limit, (CORE_ADDR) 0, &saved_regs_dummy,
 			    (struct frame_info *)0 ));
 }
 
@@ -502,7 +503,7 @@ frame_args_address (fi)
 
 CORE_ADDR
 frame_saved_pc (frame)
-     FRAME frame;
+     struct frame_info *frame;
 {
   return read_next_frame_reg(frame, SRP_REGNUM);
 }
@@ -559,17 +560,15 @@ m88k_push_dummy_frame()
 void
 pop_frame ()
 {
-  register FRAME frame = get_current_frame ();
+  register struct frame_info *frame = get_current_frame ();
   register CORE_ADDR fp;
   register int regnum;
   struct frame_saved_regs fsr;
-  struct frame_info *fi;
 
-  fi = get_frame_info (frame);
-  fp = fi -> frame;
-  get_frame_saved_regs (fi, &fsr);
+  fp = FRAME_FP (frame);
+  get_frame_saved_regs (frame, &fsr);
 
-  if (PC_IN_CALL_DUMMY (read_pc(), read_register(SP_REGNUM), FRAME_FP(fi)))
+  if (PC_IN_CALL_DUMMY (read_pc (), read_register (SP_REGNUM), FRAME_FP (fi)))
     {
       /* FIXME: I think get_frame_saved_regs should be handling this so
 	 that we can deal with the saved registers properly (e.g. frame
@@ -605,7 +604,7 @@ pop_frame ()
 	  if (fsr.regs[regnum])
 	      write_register (regnum,
 			      read_memory_integer (fsr.regs[regnum], 4));
-      write_pc(frame_saved_pc(frame));
+      write_pc (frame_saved_pc (frame));
     }
   reinit_frame_cache ();
 }

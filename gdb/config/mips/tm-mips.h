@@ -34,6 +34,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Floating point is IEEE compliant */
 #define IEEE_FLOAT
 
+extern int mips_processor_id;
+
 /* Some MIPS boards are provided both with and without a floating
    point coprocessor; we provide a user settable variable to tell gdb
    whether there is one or not.  */
@@ -251,7 +253,7 @@ extern int in_sigtramp PARAMS ((CORE_ADDR, char *));
 /* FRAME_CHAIN takes a frame's nominal address
    and produces the frame's chain-pointer. */
 
-#define FRAME_CHAIN(thisframe) (FRAME_ADDR)mips_frame_chain(thisframe)
+#define FRAME_CHAIN(thisframe) (CORE_ADDR) mips_frame_chain (thisframe)
 
 /* Define other aspects of the stack frame.  */
 
@@ -452,8 +454,6 @@ typedef struct mips_extra_func_info {
    but there is nothing we can do about that).  */
 
 #define SETUP_ARBITRARY_FRAME(argc, argv) setup_arbitrary_frame (argc, argv)
-/* FIXME:  Depends on equivalence between FRAME and "struct frame_info *",
-   and equivalence between CORE_ADDR and FRAME_ADDR. */
 extern struct frame_info *setup_arbitrary_frame PARAMS ((int, CORE_ADDR *));
 
 /* Convert a dbx stab register number (from `r' declaration) to a gdb REGNUM */

@@ -36,23 +36,19 @@ extern struct obstack frame_cache_obstack;
 
 /* Forward declarations.  */
 
-static CORE_ADDR
-read_next_frame_reg PARAMS ((FRAME, int));
+static CORE_ADDR read_next_frame_reg PARAMS ((struct frame_info *, int));
 
-static CORE_ADDR
-heuristic_proc_start PARAMS ((CORE_ADDR));
+static CORE_ADDR heuristic_proc_start PARAMS ((CORE_ADDR));
 
-static alpha_extra_func_info_t
-heuristic_proc_desc PARAMS ((CORE_ADDR, CORE_ADDR, FRAME));
+static alpha_extra_func_info_t heuristic_proc_desc PARAMS ((CORE_ADDR,
+							    CORE_ADDR,
+							    struct frame_info *));
 
-static alpha_extra_func_info_t
-find_proc_desc PARAMS ((CORE_ADDR, FRAME));
+static alpha_extra_func_info_t find_proc_desc PARAMS ((CORE_ADDR, struct frame_info *));
 
-static int
-alpha_in_lenient_prologue PARAMS ((CORE_ADDR, CORE_ADDR));
+static int alpha_in_lenient_prologue PARAMS ((CORE_ADDR, CORE_ADDR));
 
-static void
-reinit_frame_cache_sfunc PARAMS ((char *, int, struct cmd_list_element *));
+static void reinit_frame_cache_sfunc PARAMS ((char *, int, struct cmd_list_element *));
 
 static CORE_ADDR after_prologue PARAMS ((CORE_ADDR pc,
 					 alpha_extra_func_info_t proc_desc));
@@ -135,8 +131,8 @@ struct linked_proc_info
    NULL).  */
 
 void
-alpha_find_saved_regs (fci)
-     FRAME fci;
+alpha_find_saved_regs (frame)
+     struct frame_info *frame;
 {
   int ireg;
   CORE_ADDR reg_position;
@@ -144,11 +140,11 @@ alpha_find_saved_regs (fci)
   alpha_extra_func_info_t proc_desc;
   int returnreg;
 
-  fci->saved_regs = (struct frame_saved_regs *)
+  frame->saved_regs = (struct frame_saved_regs *)
     obstack_alloc (&frame_cache_obstack, sizeof(struct frame_saved_regs));
-  memset (fci->saved_regs, 0, sizeof (struct frame_saved_regs));
+  memset (frame->saved_regs, 0, sizeof (struct frame_saved_regs));
 
-  proc_desc = fci->proc_desc;
+  proc_desc = frame->proc_desc;
   if (proc_desc == NULL)
     /* I'm not sure how/whether this can happen.  Normally when we can't
        find a proc_desc, we "synthesize" one using heuristic_proc_desc
@@ -158,7 +154,7 @@ alpha_find_saved_regs (fci)
   /* Fill in the offsets for the registers which gen_mask says
      were saved.  */
 
-  reg_position = fci->frame + PROC_REG_OFFSET (proc_desc);
+  reg_position = frame->frame + PROC_REG_OFFSET (proc_desc);
   mask = PROC_REG_MASK (proc_desc);
 
   returnreg = PROC_PC_REG (proc_desc);
@@ -167,7 +163,7 @@ alpha_find_saved_regs (fci)
      register number.  */
   if (mask & (1 << returnreg))
     {
-      fci->saved_regs->regs[returnreg] = reg_position;
+      frame->saved_regs->regs[returnreg] = reg_position;
       reg_position += 8;
       mask &= ~(1 << returnreg); /* Clear bit for RA so we
 				    don't save again later. */
@@ -176,29 +172,29 @@ alpha_find_saved_regs (fci)
   for (ireg = 0; ireg <= 31 ; ++ireg)
     if (mask & (1 << ireg))
       {
-	fci->saved_regs->regs[ireg] = reg_position;
+	frame->saved_regs->regs[ireg] = reg_position;
 	reg_position += 8;
       }
 
   /* Fill in the offsets for the registers which float_mask says
      were saved.  */
 
-  reg_position = fci->frame + PROC_FREG_OFFSET (proc_desc);
+  reg_position = frame->frame + PROC_FREG_OFFSET (proc_desc);
   mask = PROC_FREG_MASK (proc_desc);
 
   for (ireg = 0; ireg <= 31 ; ++ireg)
     if (mask & (1 << ireg))
       {
-	fci->saved_regs->regs[FP0_REGNUM+ireg] = reg_position;
+	frame->saved_regs->regs[FP0_REGNUM+ireg] = reg_position;
 	reg_position += 8;
       }
 
-  fci->saved_regs->regs[PC_REGNUM] = fci->saved_regs->regs[returnreg];
+  frame->saved_regs->regs[PC_REGNUM] = frame->saved_regs->regs[returnreg];
 }
 
 static CORE_ADDR
 read_next_frame_reg(fi, regno)
-     FRAME fi;
+     struct frame_info *fi;
      int regno;
 {
   /* If it is the frame for sigtramp we have a pointer to the sigcontext
@@ -239,7 +235,7 @@ read_next_frame_reg(fi, regno)
 
 CORE_ADDR
 alpha_frame_saved_pc(frame)
-     FRAME frame;
+     struct frame_info *frame;
 {
   alpha_extra_func_info_t proc_desc = frame->proc_desc;
   /* We have to get the saved pc from the sigcontext
@@ -255,7 +251,7 @@ alpha_frame_saved_pc(frame)
 
 CORE_ADDR
 alpha_saved_pc_after_call (frame)
-     FRAME frame;
+     struct frame_info *frame;
 {
   alpha_extra_func_info_t proc_desc = find_proc_desc (frame->pc, frame->next);
   int pcreg = proc_desc ? PROC_PC_REG (proc_desc) : RA_REGNUM;
@@ -327,7 +323,7 @@ Otherwise, you told GDB there was a function where there isn't one, or\n\
 static alpha_extra_func_info_t
 heuristic_proc_desc(start_pc, limit_pc, next_frame)
     CORE_ADDR start_pc, limit_pc;
-    FRAME next_frame;
+    struct frame_info *next_frame;
 {
     CORE_ADDR sp = read_next_frame_reg (next_frame, SP_REGNUM);
     CORE_ADDR cur_pc;
@@ -337,9 +333,9 @@ heuristic_proc_desc(start_pc, limit_pc, next_frame)
 
     if (start_pc == 0)
       return NULL;
-    memset(&temp_proc_desc, '\0', sizeof(temp_proc_desc));
-    memset(&temp_saved_regs, '\0', sizeof(struct frame_saved_regs));
-    PROC_LOW_ADDR(&temp_proc_desc) = start_pc;
+    memset (&temp_proc_desc, '\0', sizeof(temp_proc_desc));
+    memset (&temp_saved_regs, '\0', sizeof(struct frame_saved_regs));
+    PROC_LOW_ADDR (&temp_proc_desc) = start_pc;
 
     if (start_pc + 200 < limit_pc)
       limit_pc = start_pc + 200;
@@ -436,9 +432,9 @@ in_prologue (pc, proc_desc)
 }
 
 static alpha_extra_func_info_t
-find_proc_desc(pc, next_frame)
+find_proc_desc (pc, next_frame)
     CORE_ADDR pc;
-    FRAME next_frame;
+    struct frame_info *next_frame;
 {
   alpha_extra_func_info_t proc_desc;
   struct block *b;
@@ -536,9 +532,9 @@ find_proc_desc(pc, next_frame)
 
 alpha_extra_func_info_t cached_proc_desc;
 
-FRAME_ADDR
+CORE_ADDR
 alpha_frame_chain(frame)
-    FRAME frame;
+    struct frame_info *frame;
 {
     alpha_extra_func_info_t proc_desc;
     CORE_ADDR saved_pc = FRAME_SAVED_PC(frame);
@@ -555,7 +551,7 @@ alpha_frame_chain(frame)
     /* Fetch the frame pointer for a dummy frame from the procedure
        descriptor.  */
     if (PROC_DESC_IS_DUMMY(proc_desc))
-      return (FRAME_ADDR) PROC_DUMMY_FRAME(proc_desc);
+      return (CORE_ADDR) PROC_DUMMY_FRAME(proc_desc);
 
     /* If no frame pointer and frame size is zero, we must be at end
        of stack (or otherwise hosed).  If we don't check frame size,
@@ -582,45 +578,45 @@ alpha_frame_chain(frame)
 }
 
 void
-init_extra_frame_info(fci)
-     struct frame_info *fci;
+init_extra_frame_info (frame)
+     struct frame_info *frame;
 {
   /* Use proc_desc calculated in frame_chain */
   alpha_extra_func_info_t proc_desc =
-    fci->next ? cached_proc_desc : find_proc_desc(fci->pc, fci->next);
+    frame->next ? cached_proc_desc : find_proc_desc(frame->pc, frame->next);
 
-  fci->saved_regs = NULL;
-  fci->proc_desc =
+  frame->saved_regs = NULL;
+  frame->proc_desc =
     proc_desc == &temp_proc_desc ? 0 : proc_desc;
   if (proc_desc)
     {
       /* Get the locals offset from the procedure descriptor, it is valid
 	 even if we are in the middle of the prologue.  */
-      fci->localoff = PROC_LOCALOFF(proc_desc);
+      frame->localoff = PROC_LOCALOFF(proc_desc);
 
       /* Fixup frame-pointer - only needed for top frame */
 
       /* Fetch the frame pointer for a dummy frame from the procedure
 	 descriptor.  */
       if (PROC_DESC_IS_DUMMY(proc_desc))
-	fci->frame = (FRAME_ADDR) PROC_DUMMY_FRAME(proc_desc);
+	frame->frame = (CORE_ADDR) PROC_DUMMY_FRAME(proc_desc);
 
       /* This may not be quite right, if proc has a real frame register.
 	 Get the value of the frame relative sp, procedure might have been
 	 interrupted by a signal at it's very start.  */
-      else if (fci->pc == PROC_LOW_ADDR (proc_desc) && !PROC_DESC_IS_DUMMY (proc_desc))
-	fci->frame = read_next_frame_reg (fci->next, SP_REGNUM);
+      else if (frame->pc == PROC_LOW_ADDR (proc_desc) && !PROC_DESC_IS_DUMMY (proc_desc))
+	frame->frame = read_next_frame_reg (frame->next, SP_REGNUM);
       else
-	fci->frame = read_next_frame_reg (fci->next, PROC_FRAME_REG (proc_desc))
-			+ PROC_FRAME_OFFSET (proc_desc);
+	frame->frame = read_next_frame_reg (frame->next, PROC_FRAME_REG (proc_desc))
+	  + PROC_FRAME_OFFSET (proc_desc);
 
       if (proc_desc == &temp_proc_desc)
 	{
-	  fci->saved_regs = (struct frame_saved_regs*)
+	  frame->saved_regs = (struct frame_saved_regs*)
 	    obstack_alloc (&frame_cache_obstack,
 			   sizeof (struct frame_saved_regs));
-	  *fci->saved_regs = temp_saved_regs;
-	  fci->saved_regs->regs[PC_REGNUM] = fci->saved_regs->regs[RA_REGNUM];
+	  *frame->saved_regs = temp_saved_regs;
+	  frame->saved_regs->regs[PC_REGNUM] = frame->saved_regs->regs[RA_REGNUM];
 	}
     }
 }
@@ -640,10 +636,10 @@ init_extra_frame_info(fci)
    cache.  This allows the rest of info frame to extract the important
    arguments without difficulty.  */
 
-FRAME
+struct frame_info *
 setup_arbitrary_frame (argc, argv)
      int argc;
-     FRAME_ADDR *argv;
+     CORE_ADDR *argv;
 {
   if (argc != 2)
     error ("ALPHA frame specifications require two arguments: sp and pc");
@@ -847,7 +843,7 @@ void
 alpha_pop_frame()
 {
   register int regnum;
-  FRAME frame = get_current_frame ();
+  struct frame_info *frame = get_current_frame ();
   CORE_ADDR new_sp = frame->frame;
 
   alpha_extra_func_info_t proc_desc = frame->proc_desc;
@@ -1056,6 +1052,7 @@ alpha_register_convert_to_raw (valtype, regnum, virtual_buffer, raw_buffer)
 
 /* Given a return value in `regbuf' with a type `valtype', 
    extract and copy its value into `valbuf'.  */
+
 void
 alpha_extract_return_value (valtype, regbuf, valbuf)
     struct type *valtype;
@@ -1071,6 +1068,7 @@ alpha_extract_return_value (valtype, regbuf, valbuf)
 
 /* Given a return value in `regbuf' with a type `valtype', 
    write its value into the appropriate register.  */
+
 void
 alpha_store_return_value (valtype, valbuf)
     struct type *valtype;
@@ -1102,6 +1100,7 @@ print_insn (memaddr, stream)
 
 /* Just like reinit_frame_cache, but with the right arguments to be
    callable as an sfunc.  */
+
 static void
 reinit_frame_cache_sfunc (args, from_tty, c)
      char *args;

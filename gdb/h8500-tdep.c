@@ -1,5 +1,5 @@
 /* Target-machine dependent code for Hitachi H8/500, for GDB.
-   Copyright (C) 1993 Free Software Foundation, Inc.
+   Copyright (C) 1993, 1994 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -121,9 +121,9 @@ print_insn (memaddr, stream)
    For us, the frame address is its stack pointer value, so we look up
    the function prologue to determine the caller's sp value, and return it.  */
 
-FRAME_ADDR
+CORE_ADDR
 h8500_frame_chain (thisframe)
-     FRAME thisframe;
+     struct frame_info *thisframe;
 {
   if (!inside_entry_file (thisframe->pc))
     return (read_memory_integer (FRAME_FP (thisframe), PTR_SIZE));
@@ -166,9 +166,9 @@ NEXT_PROLOGUE_INSN (addr, lim, pword1)
 
 CORE_ADDR
 frame_saved_pc (frame)
-     FRAME frame;
+     struct frame_info *frame;
 {
-  return read_memory_integer ((frame)->frame + 2, PTR_SIZE);
+  return read_memory_integer (FRAME_FP (frame) + 2, PTR_SIZE);
 }
 
 CORE_ADDR
@@ -193,19 +193,14 @@ h8300_pop_frame ()
 {
   unsigned regnum;
   struct frame_saved_regs fsr;
-  struct frame_info *fi;
+  struct frame_info *frame = get_current_frame ();
 
-  FRAME frame = get_current_frame ();
-
-  fi = get_frame_info (frame);
-  get_frame_saved_regs (fi, &fsr);
+  get_frame_saved_regs (frame, &fsr);
 
   for (regnum = 0; regnum < 8; regnum++)
     {
       if (fsr.regs[regnum])
-	{
 	  write_register (regnum, read_memory_short (fsr.regs[regnum]));
-	}
 
       flush_cached_frames ();
     }

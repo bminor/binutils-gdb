@@ -179,6 +179,9 @@ extern CORE_ADDR h8300_skip_prologue ();
    However, if FRAME_CHAIN_VALID returns zero,
    it means the given frame is the outermost one and has no caller.  */
 
+#define FRAME_CHAIN(FRAME) h8300_frame_chain(FRAME)
+CORE_ADDR h8300_frame_chain PARAMS ((struct frame_info *));
+
 /* In the case of the H8/300, the frame's nominal address
    is the address of a 2-byte word containing the calling frame's address.  */
 

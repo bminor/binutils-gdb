@@ -1,6 +1,6 @@
-/* Machine-dependent code which would otherwise be in inflow.c and core.c,
-   for GDB, the GNU debugger.  This code is for the HP PA-RISC cpu.
-   Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+/* Target-dependent code for the HP PA architecture, for GDB.
+   Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1994
+   Free Software Foundation, Inc.
 
    Contributed by the Center for Software Science at the
    University of Utah (pa-gdb-bugs@cs.utah.edu).
@@ -56,18 +56,29 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symfile.h"
 #include "objfiles.h"
 
-static int restore_pc_queue PARAMS ((struct frame_saved_regs *fsr));
-static int hppa_alignof PARAMS ((struct type *arg));
-CORE_ADDR frame_saved_pc PARAMS ((FRAME frame));
+static int restore_pc_queue PARAMS ((struct frame_saved_regs *));
+
+static int hppa_alignof PARAMS ((struct type *));
+
+CORE_ADDR frame_saved_pc PARAMS ((struct frame_info *));
+
 static int prologue_inst_adjust_sp PARAMS ((unsigned long));
+
 static int is_branch PARAMS ((unsigned long));
+
 static int inst_saves_gr PARAMS ((unsigned long));
+
 static int inst_saves_fr PARAMS ((unsigned long));
+
 static int pc_in_interrupt_handler PARAMS ((CORE_ADDR));
+
 static int pc_in_linker_stub PARAMS ((CORE_ADDR));
-static int compare_unwind_entries PARAMS ((const struct unwind_table_entry *,   
+
+static int compare_unwind_entries PARAMS ((const struct unwind_table_entry *,
 					   const struct unwind_table_entry *));
+
 static void read_unwind_info PARAMS ((struct objfile *));
+
 static void internalize_unwinds PARAMS ((struct objfile *,
 					 struct unwind_table_entry *,
 					 asection *, unsigned int,
@@ -704,7 +715,7 @@ rp_saved (pc)
 
 int
 frameless_function_invocation (frame)
-     FRAME frame;
+     struct frame_info *frame;
 {
   struct unwind_table_entry *u;
 
@@ -718,7 +729,7 @@ frameless_function_invocation (frame)
 
 CORE_ADDR
 saved_pc_after_call (frame)
-     FRAME frame;
+     struct frame_info *frame;
 {
   int ret_regnum;
   CORE_ADDR pc;
@@ -738,7 +749,7 @@ saved_pc_after_call (frame)
 
 CORE_ADDR
 frame_saved_pc (frame)
-     FRAME frame;
+     struct frame_info *frame;
 {
   CORE_ADDR pc = get_frame_pc (frame);
   struct unwind_table_entry *u;
@@ -772,11 +783,9 @@ frame_saved_pc (frame)
 	  && (frame->next->signal_handler_caller
 	      || pc_in_interrupt_handler (frame->next->pc)))
 	{
-	  struct frame_info *fi;
 	  struct frame_saved_regs saved_regs;
 
-	  fi = get_frame_info (frame->next);
-	  get_frame_saved_regs (fi, &saved_regs);
+	  get_frame_saved_regs (frame, &saved_regs);
 	  if (read_memory_integer (saved_regs.regs[FLAGS_REGNUM], 4) & 0x2)
 	    pc = read_memory_integer (saved_regs.regs[31], 4) & ~0x3;
 	  else
@@ -799,11 +808,9 @@ restart:
 	  && (frame->next->signal_handler_caller
 	      || pc_in_interrupt_handler (frame->next->pc)))
 	{
-	  struct frame_info *fi;
 	  struct frame_saved_regs saved_regs;
 
-	  fi = get_frame_info (frame->next);
-	  get_frame_saved_regs (fi, &saved_regs);
+	  get_frame_saved_regs (frame->next, &saved_regs);
 	  if (read_memory_integer (saved_regs.regs[FLAGS_REGNUM], 4) & 0x2)
 	    pc = read_memory_integer (saved_regs.regs[31], 4) & ~0x3;
 	  else
@@ -885,9 +892,8 @@ init_extra_frame_info (fromleaf, frame)
    This may involve searching through prologues for several functions
    at boundaries where GCC calls HP C code, or where code which has
    a frame pointer calls code without a frame pointer.  */
-  
 
-FRAME_ADDR
+CORE_ADDR
 frame_chain (frame)
      struct frame_info *frame;
 {
@@ -975,11 +981,9 @@ frame_chain (frame)
       /* %r3 was saved somewhere in the stack.  Dig it out.  */
       else 
 	{
-	  struct frame_info *fi;
 	  struct frame_saved_regs saved_regs;
 
-	  fi = get_frame_info (frame);
-	  get_frame_saved_regs (fi, &saved_regs);
+	  get_frame_saved_regs (frame, &saved_regs);
 	  return read_memory_integer (saved_regs.regs[FP_REGNUM], 4);
 	}
     }
@@ -997,13 +1001,13 @@ frame_chain (frame)
 
 int
 frame_chain_valid (chain, thisframe)
-     FRAME_ADDR chain;
-     FRAME thisframe;
+     CORE_ADDR chain;
+     struct frame_info *thisframe;
 {
   struct minimal_symbol *msym_us;
   struct minimal_symbol *msym_start;
   struct unwind_table_entry *u, *next_u = NULL;
-  FRAME next;
+  struct frame_info *next;
 
   if (!chain)
     return 0;
@@ -1126,16 +1130,14 @@ find_dummy_frame_regs (frame, frame_saved_regs)
 int
 hppa_pop_frame ()
 {
-  register FRAME frame = get_current_frame ();
+  register struct frame_info *frame = get_current_frame ();
   register CORE_ADDR fp;
   register int regnum;
   struct frame_saved_regs fsr;
-  struct frame_info *fi;
   double freg_buffer;
 
-  fi = get_frame_info (frame);
-  fp = fi->frame;
-  get_frame_saved_regs (fi, &fsr);
+  fp = FRAME_FP (frame);
+  get_frame_saved_regs (frame, &fsr);
 
 #ifndef NO_PC_SPACE_QUEUE_RESTORE
   if (fsr.regs[IPSW_REGNUM])    /* Restoring a call dummy frame */
@@ -1398,6 +1400,7 @@ hppa_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
 
 /* Get the PC from %r31 if currently in a syscall.  Also mask out privilege
    bits.  */
+
 CORE_ADDR
 target_read_pc (pid)
      int pid;
@@ -1411,6 +1414,7 @@ target_read_pc (pid)
 
 /* Write out the PC.  If currently in a syscall, then also write the new
    PC value into %r31.  */
+
 void
 target_write_pc (v, pid)
      CORE_ADDR v;
@@ -1597,7 +1601,7 @@ skip_trampoline_code (pc, name)
     }
 
   /* Addresses passed to dyncall may *NOT* be the actual address
-     of the funtion.  So we may have to do something special.  */
+     of the function.  So we may have to do something special.  */
   if (pc == dyncall)
     {
       pc = (CORE_ADDR) read_register (22);
@@ -2016,7 +2020,7 @@ skip_prologue (pc)
 
 void
 hppa_frame_find_saved_regs (frame_info, frame_saved_regs)
-     struct frame_info *frame_info;
+     struct frame_info *frame;
      struct frame_saved_regs *frame_saved_regs;
 {
   CORE_ADDR pc;
@@ -2033,38 +2037,38 @@ hppa_frame_find_saved_regs (frame_info, frame_saved_regs)
      examine the dummy code to determine locations of saved registers;
      instead, let find_dummy_frame_regs fill in the correct offsets
      for the saved registers.  */
-  if ((frame_info->pc >= frame_info->frame
-       && frame_info->pc <= (frame_info->frame + CALL_DUMMY_LENGTH
+  if ((frame->pc >= frame->frame
+       && frame->pc <= (frame->frame + CALL_DUMMY_LENGTH
 			     + 32 * 4 + (NUM_REGS - FP0_REGNUM) * 8
 			     + 6 * 4)))
-    find_dummy_frame_regs (frame_info, frame_saved_regs);
+    find_dummy_frame_regs (frame, frame_saved_regs);
 
   /* Interrupt handlers are special too.  They lay out the register
      state in the exact same order as the register numbers in GDB.  */
-  if (pc_in_interrupt_handler (frame_info->pc))
+  if (pc_in_interrupt_handler (frame->pc))
     {
       for (i = 0; i < NUM_REGS; i++)
 	{
 	  /* SP is a little special.  */
 	  if (i == SP_REGNUM)
 	    frame_saved_regs->regs[SP_REGNUM]
-	      = read_memory_integer (frame_info->frame + SP_REGNUM * 4, 4);
+	      = read_memory_integer (frame->frame + SP_REGNUM * 4, 4);
 	  else
-	    frame_saved_regs->regs[i] = frame_info->frame + i * 4;
+	    frame_saved_regs->regs[i] = frame->frame + i * 4;
 	}
       return;
     }
 
   /* Handle signal handler callers.  */
-  if (frame_info->signal_handler_caller)
+  if (frame->signal_handler_caller)
     {
-      FRAME_FIND_SAVED_REGS_IN_SIGTRAMP (frame_info, frame_saved_regs);
+      FRAME_FIND_SAVED_REGS_IN_SIGTRAMP (frame, frame_saved_regs);
       return;
     }
 
   /* Get the starting address of the function referred to by the PC
-     saved in frame_info.  */
-  pc = get_pc_function_start (frame_info->pc);
+     saved in frame.  */
+  pc = get_pc_function_start (frame->pc);
 
   /* Yow! */
   u = find_unwind_entry (pc);
@@ -2097,7 +2101,7 @@ hppa_frame_find_saved_regs (frame_info, frame_saved_regs)
   /* The frame always represents the value of %sp at entry to the
      current function (and is thus equivalent to the "saved" stack
      pointer.  */
-  frame_saved_regs->regs[SP_REGNUM] = frame_info->frame;
+  frame_saved_regs->regs[SP_REGNUM] = frame->frame;
 
   /* Loop until we find everything of interest or hit a branch.
 
@@ -2129,7 +2133,7 @@ hppa_frame_find_saved_regs (frame_info, frame_saved_regs)
       if (inst == 0x6bc23fd9)
 	{
 	  save_rp = 0;
-	  frame_saved_regs->regs[RP_REGNUM] = frame_info->frame - 20;
+	  frame_saved_regs->regs[RP_REGNUM] = frame->frame - 20;
 	}
 
       /* Just note that we found the save of SP into the stack.  The
@@ -2147,16 +2151,16 @@ hppa_frame_find_saved_regs (frame_info, frame_saved_regs)
 	  /* stwm with a positive displacement is a *post modify*.  */
 	  if ((inst >> 26) == 0x1b
 	      && extract_14 (inst) >= 0)
-	    frame_saved_regs->regs[reg] = frame_info->frame;
+	    frame_saved_regs->regs[reg] = frame->frame;
 	  else
 	    {
 	      /* Handle code with and without frame pointers.  */
 	      if (u->Save_SP)
 		frame_saved_regs->regs[reg]
-		  = frame_info->frame + extract_14 (inst);
+		  = frame->frame + extract_14 (inst);
 	      else
 		frame_saved_regs->regs[reg]
-		  = frame_info->frame + (u->Total_frame_size << 3)
+		  = frame->frame + (u->Total_frame_size << 3)
 		    + extract_14 (inst);
 	    }
 	}
@@ -2188,13 +2192,13 @@ hppa_frame_find_saved_regs (frame_info, frame_saved_regs)
 	      /* 1st HP CC FP register store.  After this instruction
 		 we've set enough state that the GCC and HPCC code are
 		 both handled in the same manner.  */
-	      frame_saved_regs->regs[reg + FP4_REGNUM + 4] = frame_info->frame;
+	      frame_saved_regs->regs[reg + FP4_REGNUM + 4] = frame->frame;
 	      fp_loc = 8;
 	    }
 	  else
 	    {
 	      frame_saved_regs->regs[reg + FP0_REGNUM + 4]
-		= frame_info->frame + fp_loc;
+		= frame->frame + fp_loc;
 	      fp_loc += 8;
 	    }
 	}

@@ -84,7 +84,7 @@ pyr_do_registers_info (regnum, fpregs)
 /*** Debugging editions of various macros from m-pyr.h ****/
 
 CORE_ADDR frame_locals_address (frame)
-    FRAME frame;
+    struct frame_info *frame;
 {
   register int addr = find_saved_register (frame,CFP_REGNUM);
   register int result = read_memory_integer (addr, 4);
@@ -109,7 +109,7 @@ CORE_ADDR frame_locals_address (frame)
 }
 
 CORE_ADDR frame_args_addr (frame)
-    FRAME frame;
+    struct frame_info *frame;
 {
   register int addr = find_saved_register (frame,CFP_REGNUM);
   register int result = read_memory_integer (addr, 4);

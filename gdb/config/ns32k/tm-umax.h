@@ -329,14 +329,13 @@ extern CORE_ADDR ns32k_get_enter_addr ();
 /* Discard from the stack the innermost frame, restoring all registers.  */
 
 #define POP_FRAME  \
-{ register FRAME frame = get_current_frame ();			 \
+{ register struct frame_info *frame = get_current_frame ();	 \
   register CORE_ADDR fp;					 \
   register int regnum;						 \
   struct frame_saved_regs fsr;					 \
   struct frame_info *fi;						 \
-  fi = get_frame_info (frame);					 \
-  fp = fi->frame;						 \
-  get_frame_saved_regs (fi, &fsr);				 \
+  fp = frame->frame;						 \
+  get_frame_saved_regs (frame, &fsr);				 \
   for (regnum = 0; regnum < 8; regnum++)			 \
     if (fsr.regs[regnum])					 \
       write_register (regnum, read_memory_integer (fsr.regs[regnum], 4)); \

@@ -713,6 +713,4 @@ extern enum a29k_processor_types {
    "frame" or "info frame" command.  */
 
 #define SETUP_ARBITRARY_FRAME(argc, argv) setup_arbitrary_frame (argc, argv)
-/* FIXME:  Depends on equivalence between FRAME and "struct frame_info *",
-   and equivalence between CORE_ADDR and FRAME_ADDR. */
-extern struct frame_info *setup_arbitrary_frame PARAMS ((int, CORE_ADDR *));
+extern struct frame_info *setup_arbitrary_frame PARAMS ((int, FRAME_ADDR *));

@@ -455,11 +455,11 @@ pop_frame ()
 {
   CORE_ADDR pc, lr, sp, prev_sp;		/* %pc, %lr, %sp */
   struct aix_framedata fdata;
-  FRAME fr = get_current_frame ();
+  struct frame_info *frame = get_current_frame ();
   int addr, ii;
 
   pc = read_pc ();
-  sp = FRAME_FP (fr);
+  sp = FRAME_FP (frame);
 
   if (stop_stack_dummy && dummy_frame_count) {
     pop_dummy_frame ();
@@ -492,13 +492,13 @@ pop_frame ()
   addr = prev_sp - fdata.offset;
 
   if (fdata.saved_gpr != -1)
-    for (ii=fdata.saved_gpr; ii <= 31; ++ii) {
+    for (ii = fdata.saved_gpr; ii <= 31; ++ii) {
       read_memory (addr, &registers [REGISTER_BYTE (ii)], 4);
       addr += 4;
     }
 
   if (fdata.saved_fpr != -1)
-    for (ii=fdata.saved_fpr; ii <= 31; ++ii) {
+    for (ii = fdata.saved_fpr; ii <= 31; ++ii) {
       read_memory (addr, &registers [REGISTER_BYTE (ii+FP0_REGNUM)], 8);
       addr += 8;
   }
@@ -1090,11 +1090,11 @@ frame_initial_stack_address (fi)
   return fi->initial_sp = read_register (fdata.alloca_reg);     
 }
 
-FRAME_ADDR
+CORE_ADDR
 rs6000_frame_chain (thisframe)
      struct frame_info *thisframe;
 {
-  FRAME_ADDR fp;
+  CORE_ADDR fp;
   if (inside_entry_file ((thisframe)->pc))
     return 0;
   if (thisframe->signal_handler_caller)

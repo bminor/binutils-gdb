@@ -328,7 +328,7 @@ sparc_extract_struct_value_address PARAMS ((char [REGISTER_BYTES]));
    stack frames are allocated in different segments (e.g. some on a
    stack, some on a heap in the data segment).  */
 
-#define EXTRA_FRAME_INFO	FRAME_ADDR bottom;
+#define EXTRA_FRAME_INFO	CORE_ADDR bottom;
 #define INIT_EXTRA_FRAME_INFO(fromleaf, fci)  \
   (fci)->bottom =					\
    ((fci)->next ?					\
@@ -579,8 +579,6 @@ extern void single_step PARAMS ((int));
    "frame" or "info frame" command.  */
 
 #define SETUP_ARBITRARY_FRAME(argc, argv) setup_arbitrary_frame (argc, argv)
-/* FIXME:  Depends on equivalence between FRAME and "struct frame_info *",
-   and equivalence between CORE_ADDR and FRAME_ADDR. */
 extern struct frame_info *setup_arbitrary_frame PARAMS ((int, CORE_ADDR *));
 
 /* To print every pair of float registers as a double, we use this hook.  */

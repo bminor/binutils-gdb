@@ -32,9 +32,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "dis-asm.h"
 #include "../opcodes/sh-opc.h"
 
-
-
-
 /* Prologue looks like
    [mov.l	<regs>,@-r15]...
    [sts.l	pr,@-r15]
@@ -56,7 +53,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 CORE_ADDR
 sh_skip_prologue (start_pc)
      CORE_ADDR start_pc;
-
 {
   int w;
 
@@ -84,7 +80,9 @@ print_insn (memaddr, stream)
      GDB_FILE *stream;
 {
   disassemble_info info;
+
   GDB_INIT_DISASSEMBLE_INFO (info, stream);
+
   return print_insn_sh (memaddr, &info);
 }
 
@@ -95,12 +93,12 @@ print_insn (memaddr, stream)
    For us, the frame address is its stack pointer value, so we look up
    the function prologue to determine the caller's sp value, and return it.  */
 
-FRAME_ADDR
-sh_frame_chain (thisframe)
-     FRAME thisframe;
+CORE_ADDR
+sh_frame_chain (frame)
+     struct frame_info *frame;
 {
-  if (!inside_entry_file (thisframe->pc))
-    return (read_memory_integer (FRAME_FP (thisframe) + thisframe->f_offset, 4));
+  if (!inside_entry_file (frame->pc))
+    return read_memory_integer (FRAME_FP (frame) + frame->f_offset, 4);
   else
     return 0;
 }
@@ -254,15 +252,13 @@ init_extra_frame_info (fromleaf, fi)
 void
 pop_frame ()
 {
-  register FRAME frame = get_current_frame ();
+  register struct frame_info *frame = get_current_frame ();
   register CORE_ADDR fp;
   register int regnum;
   struct frame_saved_regs fsr;
-  struct frame_info *fi;
 
-  fi = get_frame_info (frame);
-  fp = fi->frame;
-  get_frame_saved_regs (fi, &fsr);
+  fp = FRAME_FP (frame);
+  get_frame_saved_regs (frame, &fsr);
 
   /* Copy regs from where they were saved in the frame */
   for (regnum = 0; regnum < NUM_REGS; regnum++)
@@ -279,10 +275,11 @@ pop_frame ()
 }
 
 /* Print the registers in a form similar to the E7000 */
+
 static void
 show_regs (args, from_tty)
-char *args;
-int from_tty;
+     char *args;
+     int from_tty;
 {
   printf_filtered("PC=%08x SR=%08x PR=%08x MACH=%08x MACHL=%08x\n",
 		  read_register(PC_REGNUM),

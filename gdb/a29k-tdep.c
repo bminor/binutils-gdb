@@ -41,6 +41,7 @@ extern CORE_ADDR text_start;	/* FIXME, kludge... */
 static CORE_ADDR rstack_high_address = UINT_MAX;
 
 /* Structure to hold cached info about function prologues.  */
+
 struct prologue_info
 {
   CORE_ADDR pc;			/* First addr after fn prologue */
@@ -66,6 +67,7 @@ struct prologue_info
 
    If MFP_USED is non-NULL, *MFP_USED is set to nonzero if a memory
    frame pointer is being used.  */
+
 CORE_ADDR
 examine_prologue (pc, rsize, msize, mfp_used)
      CORE_ADDR pc;
@@ -325,9 +327,9 @@ CORE_ADDR
 skip_prologue (pc)
      CORE_ADDR pc;
 {
-  return examine_prologue (pc, (unsigned *)NULL, (unsigned *)NULL,
-			   (int *)NULL);
+  return examine_prologue (pc, NULL, NULL, NULL);
 }
+
 /*
  * Examine the one or two word tag at the beginning of a function.
  * The tag word is expect to be at 'p', if it is not there, we fail
@@ -337,11 +339,12 @@ skip_prologue (pc)
  * convention today (1/15/92).
  * msize is return in bytes.
  */
+
 static int	/* 0/1 - failure/success of finding the tag word  */
-examine_tag(p, is_trans, argcount, msize, mfp_used)
+examine_tag (p, is_trans, argcount, msize, mfp_used)
      CORE_ADDR p;
      int *is_trans;
-     int   *argcount;
+     int *argcount;
      unsigned *msize;
      int *mfp_used;
 {
@@ -371,17 +374,18 @@ examine_tag(p, is_trans, argcount, msize, mfp_used)
     *argcount = (tag1 >> 16) & 0x1f;
   if (mfp_used)
     *mfp_used = ((tag1 & (1<<22)) ? 1 : 0); 
-  return(1);
+  return 1;
 }
 
 /* Initialize the frame.  In addition to setting "extra" frame info,
    we also set ->frame because we use it in a nonstandard way, and ->pc
    because we need to know it to get the other stuff.  See the diagram
    of stacks and the frame cache in tm-a29k.h for more detail.  */
+
 static void
-init_frame_info (innermost_frame, fci)
+init_frame_info (innermost_frame, frame)
      int innermost_frame;
-     struct frame_info *fci;
+     struct frame_info *frame;
 {
   CORE_ADDR p;
   long insn;
@@ -390,12 +394,12 @@ init_frame_info (innermost_frame, fci)
   int mfp_used, trans;
   struct symbol *func;
 
-  p = fci->pc;
+  p = frame->pc;
 
   if (innermost_frame)
-    fci->frame = read_register (GR1_REGNUM);
+    frame->frame = read_register (GR1_REGNUM);
   else
-    fci->frame = fci->next->frame + fci->next->rsize;
+    frame->frame = frame->next->frame + frame->next->rsize;
   
 #if CALL_DUMMY_LOCATION == ON_STACK
   This wont work;
@@ -403,14 +407,14 @@ init_frame_info (innermost_frame, fci)
   if (PC_IN_CALL_DUMMY (p, 0, 0))
 #endif
     {
-      fci->rsize = DUMMY_FRAME_RSIZE;
+      frame->rsize = DUMMY_FRAME_RSIZE;
       /* This doesn't matter since we never try to get locals or args
 	 from a dummy frame.  */
-      fci->msize = 0;
+      frame->msize = 0;
       /* Dummy frames always use a memory frame pointer.  */
-      fci->saved_msp = 
-	read_register_stack_integer (fci->frame + DUMMY_FRAME_RSIZE - 4, 4);
-      fci->flags |= (TRANSPARENT|MFP_USED);
+      frame->saved_msp = 
+	read_register_stack_integer (frame->frame + DUMMY_FRAME_RSIZE - 4, 4);
+      frame->flags |= (TRANSPARENT|MFP_USED);
       return;
     }
     
@@ -440,10 +444,10 @@ init_frame_info (innermost_frame, fci)
 	{
 	  /* Couldn't find the trace-back tag.
 	     Something strange is going on.  */
-	  fci->saved_msp = 0;
-	  fci->rsize = 0;
-	  fci->msize = 0;
-	  fci->flags = TRANSPARENT;
+	  frame->saved_msp = 0;
+	  frame->rsize = 0;
+	  frame->msize = 0;
+	  frame->flags = TRANSPARENT;
 	  return;
 	}
       else
@@ -463,35 +467,35 @@ init_frame_info (innermost_frame, fci)
   else 						/* No tag try prologue */
       examine_prologue (p, &rsize, &msize, &mfp_used);
 
-  fci->rsize = rsize;
-  fci->msize = msize;
-  fci->flags = 0;
+  frame->rsize = rsize;
+  frame->msize = msize;
+  frame->flags = 0;
   if (mfp_used)
-  	fci->flags |= MFP_USED;
+  	frame->flags |= MFP_USED;
   if (trans)
-  	fci->flags |= TRANSPARENT;
+  	frame->flags |= TRANSPARENT;
   if (innermost_frame)
     {
-      fci->saved_msp = read_register (MSP_REGNUM) + msize;
+      frame->saved_msp = read_register (MSP_REGNUM) + msize;
     }
   else
     {
       if (mfp_used)
-  	 fci->saved_msp =
-	      read_register_stack_integer (fci->frame + rsize - 4, 4);
+  	 frame->saved_msp =
+	      read_register_stack_integer (frame->frame + rsize - 4, 4);
       else
-  	    fci->saved_msp = fci->next->saved_msp + msize;
+  	    frame->saved_msp = frame->next->saved_msp + msize;
     }
 }
 
 void
-init_extra_frame_info (fci)
-     struct frame_info *fci;
+init_extra_frame_info (frame)
+     struct frame_info *frame;
 {
-  if (fci->next == 0)
+  if (frame->next == 0)
     /* Assume innermost frame.  May produce strange results for "info frame"
        but there isn't any way to tell the difference.  */
-    init_frame_info (1, fci);
+    init_frame_info (1, frame);
   else {
       /* We're in get_prev_frame_info.
          Take care of everything in init_frame_pc.  */
@@ -500,13 +504,13 @@ init_extra_frame_info (fci)
 }
 
 void
-init_frame_pc (fromleaf, fci)
+init_frame_pc (fromleaf, frame)
      int fromleaf;
-     struct frame_info *fci;
+     struct frame_info *frame;
 {
-  fci->pc = (fromleaf ? SAVED_PC_AFTER_CALL (fci->next) :
-	     fci->next ? FRAME_SAVED_PC (fci->next) : read_pc ());
-  init_frame_info (fromleaf, fci);
+  frame->pc = (fromleaf ? SAVED_PC_AFTER_CALL (frame->next) :
+	     frame->next ? FRAME_SAVED_PC (frame->next) : read_pc ());
+  init_frame_info (fromleaf, frame);
 }
 
 /* Local variables (i.e. LOC_LOCAL) are on the memory stack, with their
@@ -649,12 +653,13 @@ write_register_stack (memaddr, myaddr, actual_mem_addr)
    otherwise it was fetched from a register.
 
    The argument RAW_BUFFER must point to aligned memory.  */
+
 void
 get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lvalp)
      char *raw_buffer;
      int *optimized;
      CORE_ADDR *addrp;
-     FRAME frame;
+     struct frame_info *frame;
      int regnum;
      enum lval_type *lvalp;
 {
@@ -665,8 +670,6 @@ get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lvalp)
   if (frame == 0)
     return;
 
-  fi = get_frame_info (frame);
-
   /* Once something has a register number, it doesn't get optimized out.  */
   if (optimized != NULL)
     *optimized = 0;
@@ -674,7 +677,7 @@ get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lvalp)
     {
       if (raw_buffer != NULL)
 	{
-	  store_address (raw_buffer, REGISTER_RAW_SIZE (regnum), fi->frame);
+	  store_address (raw_buffer, REGISTER_RAW_SIZE (regnum), frame->frame);
 	}
       if (lvalp != NULL)
 	*lvalp = not_lval;
@@ -684,7 +687,7 @@ get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lvalp)
     {
       if (raw_buffer != NULL)
 	{
-	  store_address (raw_buffer, REGISTER_RAW_SIZE (regnum), fi->pc);
+	  store_address (raw_buffer, REGISTER_RAW_SIZE (regnum), frame->pc);
 	}
 
       /* Not sure we have to do this.  */
@@ -697,10 +700,10 @@ get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lvalp)
     {
       if (raw_buffer != NULL)
 	{
-	  if (fi->next != NULL)
+	  if (frame->next != NULL)
 	    {
 	      store_address (raw_buffer, REGISTER_RAW_SIZE (regnum),
-			     fi->next->saved_msp);
+			     frame->next->saved_msp);
 	    }
 	  else
 	    read_register_gen (MSP_REGNUM, raw_buffer);
@@ -723,7 +726,7 @@ get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lvalp)
       return;
     }
       
-  addr = fi->frame + (regnum - LR0_REGNUM) * 4;
+  addr = frame->frame + (regnum - LR0_REGNUM) * 4;
   if (raw_buffer != NULL)
     read_register_stack (addr, raw_buffer, &addr, &lval);
   if (lvalp != NULL)
@@ -739,9 +742,8 @@ get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lvalp)
 void
 pop_frame ()
 {
-  FRAME frame = get_current_frame ();					      
-  struct frame_info *fi = get_frame_info (frame);			      
-  CORE_ADDR rfb = read_register (RFB_REGNUM);				      
+  struct frame_info *frame = get_current_frame ();
+  CORE_ADDR rfb = read_register (RFB_REGNUM);		      
   CORE_ADDR gr1 = fi->frame + fi->rsize;
   CORE_ADDR lr1;							      
   CORE_ADDR original_lr0;
@@ -751,7 +753,7 @@ pop_frame ()
   /* If popping a dummy frame, need to restore registers.  */
   if (PC_IN_CALL_DUMMY (read_register (PC_REGNUM),
 			read_register (SP_REGNUM),
-			FRAME_FP (fi)))
+			FRAME_FP (frame)))
     {
       int lrnum = LR0_REGNUM + DUMMY_ARG/4;
       for (i = 0; i < DUMMY_SAVE_SR128; ++i)
@@ -769,7 +771,7 @@ pop_frame ()
     }
 
   /* Restore the memory stack pointer.  */
-  write_register (MSP_REGNUM, fi->saved_msp);				      
+  write_register (MSP_REGNUM, frame->saved_msp);
   /* Restore the register stack pointer.  */				      
   write_register (GR1_REGNUM, gr1);
 
@@ -784,7 +786,8 @@ pop_frame ()
       /* Fill.  */							      
       int num_bytes = lr1 - rfb;
       int i;								      
-      long word;							      
+      long word;
+						      
       write_register (RAB_REGNUM, read_register (RAB_REGNUM) + num_bytes);  
       write_register (RFB_REGNUM, lr1);				      
       for (i = 0; i < num_bytes; i += 4)				      
@@ -874,36 +877,34 @@ push_dummy_frame ()
    three values (FP, PC, and MSP), we really need all three to do a
    good job.  */
 
-FRAME
+struct frame_info *
 setup_arbitrary_frame (argc, argv)
      int argc;
-     FRAME_ADDR *argv;
+     CORE_ADDR *argv;
 {
-  FRAME fid;
+  struct frame_info *frame;
 
   if (argc != 3)
     error ("AMD 29k frame specifications require three arguments: rsp pc msp");
 
-  fid = create_new_frame (argv[0], argv[1]);
+  frame = create_new_frame (argv[0], argv[1]);
 
-  if (!fid)
+  if (!frame)
     fatal ("internal: create_new_frame returned invalid frame id");
   
   /* Creating a new frame munges the `frame' value from the current
      GR1, so we restore it again here.  FIXME, untangle all this
      29K frame stuff...  */
-  fid->frame = argv[0];
+  frame->frame = argv[0];
 
   /* Our MSP is in argv[2].  It'd be intelligent if we could just
      save this value in the FRAME.  But the way it's set up (FIXME),
      we must save our caller's MSP.  We compute that by adding our
      memory stack frame size to our MSP.  */
-  fid->saved_msp = argv[2] + fid->msize;
+  frame->saved_msp = argv[2] + frame->msize;
 
-  return fid;
+  return frame;
 }
-
-
 
 enum a29k_processor_types processor_type = a29k_unknown;
 

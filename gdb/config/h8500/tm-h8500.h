@@ -217,7 +217,7 @@ struct type *h8500_register_virtual_type PARAMS ((int regno));
    
    */
 
-CORE_ADDR h8500_frame_chain (/* FRAME thisframe */);
+CORE_ADDR h8500_frame_chain PARAMS ((struct frame_info *));
 
 #define INIT_EXTRA_FRAME_INFO(fromleaf, fci)  ;
 /*       (fci)->frame |= read_register(SEG_T_REGNUM) << 16;*/
