@@ -284,13 +284,14 @@ extern DOUBLEST value_as_double (struct value *val);
 
 extern CORE_ADDR value_as_address (struct value *val);
 
-extern LONGEST unpack_long (struct type *type, char *valaddr);
+extern LONGEST unpack_long (struct type *type, const char *valaddr);
 
-extern DOUBLEST unpack_double (struct type *type, char *valaddr, int *invp);
+extern DOUBLEST unpack_double (struct type *type, const char *valaddr,
+			       int *invp);
 
-extern CORE_ADDR unpack_pointer (struct type *type, char *valaddr);
+extern CORE_ADDR unpack_pointer (struct type *type, const char *valaddr);
 
-extern LONGEST unpack_field_as_long (struct type *type, char *valaddr,
+extern LONGEST unpack_field_as_long (struct type *type, const char *valaddr,
 				     int fieldno);
 
 extern struct value *value_from_longest (struct type *type, LONGEST num);

@@ -185,11 +185,12 @@ extern CORE_ADDR read_fp (void);
 
 extern CORE_ADDR generic_target_read_fp (void);
 
-extern CORE_ADDR unsigned_pointer_to_address (struct type *type, void *buf);
+extern CORE_ADDR unsigned_pointer_to_address (struct type *type, const void *buf);
 
 extern void unsigned_address_to_pointer (struct type *type, void *buf,
 					 CORE_ADDR addr);
-extern CORE_ADDR signed_pointer_to_address (struct type *type, void *buf);
+extern CORE_ADDR signed_pointer_to_address (struct type *type,
+					    const void *buf);
 extern void address_to_signed_pointer (struct type *type, void *buf,
 				       CORE_ADDR addr);
 

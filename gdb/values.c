@@ -679,7 +679,7 @@ value_as_address (struct value *val)
    to an INT (or some size).  After all, it is only an offset.  */
 
 LONGEST
-unpack_long (struct type *type, char *valaddr)
+unpack_long (struct type *type, const char *valaddr)
 {
   register enum type_code code = TYPE_CODE (type);
   register int len = TYPE_LENGTH (type);
@@ -728,7 +728,7 @@ unpack_long (struct type *type, char *valaddr)
    format, result is in host format.  */
 
 DOUBLEST
-unpack_double (struct type *type, char *valaddr, int *invp)
+unpack_double (struct type *type, const char *valaddr, int *invp)
 {
   enum type_code code;
   int len;
@@ -785,7 +785,7 @@ unpack_double (struct type *type, char *valaddr, int *invp)
    to an INT (or some size).  After all, it is only an offset.  */
 
 CORE_ADDR
-unpack_pointer (struct type *type, char *valaddr)
+unpack_pointer (struct type *type, const char *valaddr)
 {
   /* Assume a CORE_ADDR can fit in a LONGEST (for now).  Not sure
      whether we want this to be true eventually.  */
@@ -1038,7 +1038,7 @@ value_fn_field (struct value **arg1p, struct fn_field *f, int j, struct type *ty
    If the field is signed, we also do sign extension. */
 
 LONGEST
-unpack_field_as_long (struct type *type, char *valaddr, int fieldno)
+unpack_field_as_long (struct type *type, const char *valaddr, int fieldno)
 {
   ULONGEST val;
   ULONGEST valmask;

@@ -1428,8 +1428,8 @@ extern void set_gdbarch_value_to_register (struct gdbarch *gdbarch, gdbarch_valu
 #define POINTER_TO_ADDRESS(type, buf) (unsigned_pointer_to_address (type, buf))
 #endif
 
-typedef CORE_ADDR (gdbarch_pointer_to_address_ftype) (struct type *type, void *buf);
-extern CORE_ADDR gdbarch_pointer_to_address (struct gdbarch *gdbarch, struct type *type, void *buf);
+typedef CORE_ADDR (gdbarch_pointer_to_address_ftype) (struct type *type, const void *buf);
+extern CORE_ADDR gdbarch_pointer_to_address (struct gdbarch *gdbarch, struct type *type, const void *buf);
 extern void set_gdbarch_pointer_to_address (struct gdbarch *gdbarch, gdbarch_pointer_to_address_ftype *pointer_to_address);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (POINTER_TO_ADDRESS)
 #error "Non multi-arch definition of POINTER_TO_ADDRESS"

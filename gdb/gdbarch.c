@@ -4025,7 +4025,7 @@ set_gdbarch_value_to_register (struct gdbarch *gdbarch,
 }
 
 CORE_ADDR
-gdbarch_pointer_to_address (struct gdbarch *gdbarch, struct type *type, void *buf)
+gdbarch_pointer_to_address (struct gdbarch *gdbarch, struct type *type, const void *buf)
 {
   gdb_assert (gdbarch != NULL);
   if (gdbarch->pointer_to_address == 0)

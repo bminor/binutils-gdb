@@ -322,7 +322,7 @@ avr_address_to_pointer (struct type *type, void *buf, CORE_ADDR addr)
 }
 
 static CORE_ADDR
-avr_pointer_to_address (struct type *type, void *buf)
+avr_pointer_to_address (struct type *type, const void *buf)
 {
   CORE_ADDR addr = extract_address (buf, TYPE_LENGTH (type));
 

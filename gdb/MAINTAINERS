@@ -62,11 +62,10 @@ maintainer works with the native maintainer when resolving API issues.
 
 	arc		Deleted.
 
-	arm		--target=arm-elf ,
+	arm		--target=arm-elf ,-Werror
 			Fernando Nasser		fnasser@redhat.com
 			Scott Bambrough		scottb@netwinder.org
 			Richard Earnshaw	rearnsha@arm.com
-			Not multi-arch
 
 	avr		--target=avr ,-Werror
 			Theodore A. Roth	troth@verinet.com

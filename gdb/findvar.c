@@ -115,7 +115,7 @@ That operation is not available on integers of more than %d bytes.",
    function returns 1 and sets *PVAL.  Otherwise it returns 0.  */
 
 int
-extract_long_unsigned_integer (void *addr, int orig_len, LONGEST *pval)
+extract_long_unsigned_integer (const void *addr, int orig_len, LONGEST *pval)
 {
   char *p, *first_addr;
   int len;
@@ -173,7 +173,7 @@ extract_long_unsigned_integer (void *addr, int orig_len, LONGEST *pval)
    else based on POINTER_TO_ADDRESS.  */
 
 CORE_ADDR
-extract_address (void *addr, int len)
+extract_address (const void *addr, int len)
 {
   /* Assume a CORE_ADDR can fit in a LONGEST (for now).  Not sure
      whether we want this to be true eventually.  */
@@ -184,7 +184,7 @@ extract_address (void *addr, int len)
 /* Treat the bytes at BUF as a pointer of type TYPE, and return the
    address it represents.  */
 CORE_ADDR
-extract_typed_address (void *buf, struct type *type)
+extract_typed_address (const void *buf, struct type *type)
 {
   if (TYPE_CODE (type) != TYPE_CODE_PTR
       && TYPE_CODE (type) != TYPE_CODE_REF)
@@ -347,13 +347,13 @@ value_of_register (int regnum, struct frame_info *frame)
 /* Given a pointer of type TYPE in target form in BUF, return the
    address it represents.  */
 CORE_ADDR
-unsigned_pointer_to_address (struct type *type, void *buf)
+unsigned_pointer_to_address (struct type *type, const void *buf)
 {
   return extract_address (buf, TYPE_LENGTH (type));
 }
 
 CORE_ADDR
-signed_pointer_to_address (struct type *type, void *buf)
+signed_pointer_to_address (struct type *type, const void *buf)
 {
   return extract_signed_integer (buf, TYPE_LENGTH (type));
 }

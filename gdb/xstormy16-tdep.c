@@ -958,7 +958,7 @@ xstormy16_in_solib_call_trampoline (CORE_ADDR pc, char *name)
 }
 
 static CORE_ADDR
-xstormy16_pointer_to_address (struct type *type, void *buf)
+xstormy16_pointer_to_address (struct type *type, const void *buf)
 {
   enum type_code target = TYPE_CODE (TYPE_TARGET_TYPE (type));
   CORE_ADDR addr = extract_address (buf, TYPE_LENGTH (type));

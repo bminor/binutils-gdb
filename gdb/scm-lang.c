@@ -87,7 +87,7 @@ scm_get_field (LONGEST svalue, int index)
    or Boolean (CONTEXT == TYPE_CODE_BOOL).  */
 
 LONGEST
-scm_unpack (struct type *type, char *valaddr, enum type_code context)
+scm_unpack (struct type *type, const char *valaddr, enum type_code context)
 {
   if (is_scmvalue_type (type))
     {

@@ -1,3 +1,30 @@
+2003-01-06  Andrew Cagney  <cagney@redhat.com>
+
+	* MAINTAINERS (Target Instruction Set Architectures): Update
+	arm-elf.  Can be built with -Werror, has been multiarched.
+
+	* value.h (unpack_long): Make buffer parameter constant.
+	(unpack_double, unpack_pointer, unpack_field_as_long): Ditto.
+	* scm-lang.h (scm_parse): Ditto.
+	* defs.h (extract_typed_address, extract_address): Ditto.
+	(extract_long_unsigned_integer): Ditto.
+	* inferior.h (unsigned_pointer_to_address): Ditto.
+	(signed_pointer_to_address): Ditto.
+	* gdbarch.sh (POINTER_TO_ADDRESS): Ditto.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* findvar.c (extract_long_unsigned_integer): Update.
+	(extract_address): Update.
+	(extract_typed_address): Update.
+	(unsigned_pointer_to_address): Update.
+	* values.c (unpack_long): Update.
+	(unpack_double): Update.
+	(unpack_pointer): Update.
+	(unpack_field_as_long): Update.
+	* d10v-tdep.c (d10v_pointer_to_address): Update.
+	* avr-tdep.c (avr_pointer_to_address): Update.
+	* scm-lang.c (scm_unpack): Update.
+	* findvar.c (signed_pointer_to_address): Update.
+
 2003-01-06  Michal Ludvig  <mludvig@suse.cz>
 
 	* x86-64-linux-nat.c (i386_sse_regnum_p): Deleted. Not needed anymore 
