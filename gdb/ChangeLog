@@ -1,3 +1,7 @@
+Mon Jul 12 17:46:35 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* a29k-tdep.c (read_register_stack): Make val static.
+
 Mon Jul 12 14:10:48 1993  Doug Evans  (dje@canuck.cygnus.com)
 
 	* config/h8300/tm-h8300.h (REGISTER_CONVERTIBLE): Change value to 0.

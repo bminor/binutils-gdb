@@ -520,7 +520,7 @@ read_register_stack (memaddr, myaddr, actual_mem_addr, lval)
   if (memaddr >= rstack_high_address) 
     {
       /* a bogus value */
-      char val[] = {~0, ~0, ~0, ~0};
+      static char val[] = {~0, ~0, ~0, ~0};
       /* It's in a local register, but off the end of the stack.  */
       int regnum = (memaddr - rsp) / 4 + LR0_REGNUM;
       if (myaddr != NULL)
