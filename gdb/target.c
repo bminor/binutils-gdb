@@ -1268,20 +1268,12 @@ target_preopen (int from_tty)
 void
 target_detach (char *args, int from_tty)
 {
-  /* Handle any optimized stores to the inferior.  */
-#ifdef DO_DEFERRED_STORES
-  DO_DEFERRED_STORES;
-#endif
   (current_target.to_detach) (args, from_tty);
 }
 
 void
 target_disconnect (char *args, int from_tty)
 {
-  /* Handle any optimized stores to the inferior.  */
-#ifdef DO_DEFERRED_STORES
-  DO_DEFERRED_STORES;
-#endif
   (current_target.to_disconnect) (args, from_tty);
 }
 

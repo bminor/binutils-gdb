@@ -572,11 +572,6 @@ resume (int step, enum target_signal sig)
       singlestep_ptid = inferior_ptid;
     }
 
-  /* Handle any optimized stores to the inferior NOW...  */
-#ifdef DO_DEFERRED_STORES
-  DO_DEFERRED_STORES;
-#endif
-
   /* If there were any forks/vforks/execs that were caught and are
      now to be followed, then do so.  */
   switch (pending_follow.kind)
