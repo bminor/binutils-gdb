@@ -103,9 +103,6 @@
    to explicitly deallocate that memory when gdb calls exit. */
 #undef MMCHECK_FORCE
 
-/* Define if you want to use the full-screen terminal user interface.  */
-#undef TUI
-
 /* Define if <proc_service.h> on solaris uses int instead of
    size_t, and assorted other type changes. */
 #undef PROC_SERVICE_IS_OLD
@@ -278,6 +275,9 @@
 
 /* Define if you have the <sys/select.h> header file.  */
 #undef HAVE_SYS_SELECT_H
+
+/* Define if you have the <sys/user.h> header file.  */
+#undef HAVE_SYS_USER_H
 
 /* Define if you have the <sys/wait.h> header file.  */
 #undef HAVE_SYS_WAIT_H
