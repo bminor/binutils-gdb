@@ -1,5 +1,8 @@
 2002-05-10  Jim Blandy  <jimb@redhat.com>
 
+	* gdb.base/printcmds.exp: Don't xfail the ptype command.  This is
+	a bug.
+
 	* gdb.base/printcmds.exp (test_integer_literals_rejected):
 	Recognize more detailed error message produced by the macro
 	expander's lexical analyzer.
