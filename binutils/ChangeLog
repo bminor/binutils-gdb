@@ -1,3 +1,8 @@
+2001-01-31  Steve deRosier  <sderosier@vari-lite.com>
+
+	* ieee.c (ieee_add_bb11): Don't check for backslashes
+	unless HAVE_DOS_BASED_FILE_SYSTEM is defined.
+
 2001-01-24  Mark Elbrecht  <snowball3@bigfoot.com>
 
 	* ieee.c: Update copyright.
