@@ -1,5 +1,14 @@
 Thu Feb 12 14:06:59 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	Based on patches from Ross Harvey <ross@teraflop.com>:
+	* macro.c (ISSEP): Only treat '<' and '>' as separator characters
+	if macro_alternate or macro_mri.
+	(getstring): Remove support for byte constants between < and >.
+	(get_any_string): '<' only starts a string if macro_alternate or
+	macro_mri.
+	(macro_expand_body): Permit keyword parameters following
+	positional parameters.
+
 	NetBSD patches from Gordon W. Ross <gwr@mc.com>:
 	* configure.in (alpha*-*-netbsd*): New target.
 	* config/te-nbsd.h (LOCAL_LABELS_FB): Define.
