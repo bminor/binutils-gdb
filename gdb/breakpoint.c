@@ -2429,8 +2429,7 @@ bpstat_stop_status (CORE_ADDR *pc, int not_a_sw_breakpoint)
      trace/singlestep trap event, we would not want to subtract
      DECR_PC_AFTER_BREAK from the PC. */
 
-  bp_addr = *pc - (not_a_sw_breakpoint && !SOFTWARE_SINGLE_STEP_P () ? 
-                   0 : DECR_PC_AFTER_BREAK);
+  bp_addr = *pc - (not_a_sw_breakpoint ? 0 : DECR_PC_AFTER_BREAK);
 
   ALL_BREAKPOINTS_SAFE (b, temp)
   {

@@ -1408,6 +1408,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 {
   CORE_ADDR tmp;
   int stepped_after_stopped_by_watchpoint;
+  int sw_single_step_trap_p = 0;
 
   /* Cache the last pid/waitstatus. */
   target_last_wait_ptid = ecs->ptid;
@@ -1888,6 +1889,18 @@ handle_inferior_event (struct execution_control_state *ecs)
 	}
       else if (SOFTWARE_SINGLE_STEP_P () && singlestep_breakpoints_inserted_p)
         {
+          /* Readjust the stop_pc as it is off by DECR_PC_AFTER_BREAK
+             compared to the value it would have if the system stepping
+             capability was used. This allows the rest of the code in
+             this function to use this address without having to worry
+             whether software single step is in use or not.  */
+          if (DECR_PC_AFTER_BREAK)
+            {
+              stop_pc -= DECR_PC_AFTER_BREAK;
+              write_pc_pid (stop_pc, ecs->ptid);
+            }
+
+          sw_single_step_trap_p = 1;
           ecs->random_signal = 0;
         }
     }
@@ -2111,14 +2124,16 @@ handle_inferior_event (struct execution_control_state *ecs)
               (&stop_pc,
                /* Pass TRUE if our reason for stopping is something other
                   than hitting a breakpoint.  We do this by checking that
+                  either we detected earlier a software single step trap or
                   1) stepping is going on and 2) we didn't hit a breakpoint
                   in a signal handler without an intervening stop in
                   sigtramp, which is detected by a new stack pointer value
                   below any usual function calling stack adjustments.  */
-               (currently_stepping (ecs)
-                && prev_pc != stop_pc - DECR_PC_AFTER_BREAK
-                && !(step_range_end
-                     && INNER_THAN (read_sp (), (step_sp - 16)))));
+               sw_single_step_trap_p
+               || (currently_stepping (ecs)
+                   && prev_pc != stop_pc - DECR_PC_AFTER_BREAK
+                   && !(step_range_end
+                        && INNER_THAN (read_sp (), (step_sp - 16)))));
 	  /* Following in case break condition called a
 	     function.  */
 	  stop_print_frame = 1;

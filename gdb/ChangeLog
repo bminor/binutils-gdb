@@ -1,5 +1,24 @@
 2002-08-16  Joel Brobecker  <brobecker@gnat.com>
 
+	* alpha-osf1-tdep.c (alpha_osf1_init_abi): Unfortunately,
+	procfs appears to be broken when debugging on multi-processor
+	machines. So enable software single stepping in order to avoid
+	using the procfs interface to do next/step operations, using
+	internal breakpoints instead.
+
+	* infrun.c (handle_inferior_event): Readjust the stop_pc by
+	DECR_PC_AFTER_BREAK when hitting a single step breakpoint, to
+	make this pc address equal to the value it would have if the
+	system stepping capability was used. Also set a new flag used
+	to ensure that we don't readjust the PC one more time later.
+
+	* breakpoint.c (bpstat_stop_status): Do not adjust the PC
+	address by DECR_PC_AFTER_BREAK when software single step is
+	in use for this architecture, as this has already been taken
+	care of in handle_inferior_event().
+
+2002-08-16  Joel Brobecker  <brobecker@gnat.com>
+
 	* infrun.c (handle_inferior_event): Minor reformatting, to make
 	a rather long condition expression easier to read.
 
