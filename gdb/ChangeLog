@@ -4,7 +4,7 @@ Tue Nov 28 15:25:28 1995  Doug Evans  <dje@canuck.cygnus.com>
 	(CC_FOR_TARGET, CXX_FOR_TARGET): Use it to find target libraries.
 	* configure.in (X_CFLAGS): Fix typo.
 	(target_subdir): Set to "${target_alias}/" if cross.
-	* configure.in: Regenerated.
+	* configure: Regenerated.
 
 	* dbxread.c (dbx_symfile_read): Set block_address_function_relative
 	for `pe' format files.
