@@ -853,10 +853,8 @@ do
 	printf "#if (GDB_MULTI_ARCH ${gt_level}) && defined (${macro})\n"
 	printf "#error \"Non multi-arch definition of ${macro}\"\n"
 	printf "#endif\n"
-	printf "#if GDB_MULTI_ARCH\n"
-	printf "#if (GDB_MULTI_ARCH ${gt_level}) || !defined (${macro})\n"
+	printf "#if !defined (${macro})\n"
 	printf "#define ${macro} (gdbarch_${function} (current_gdbarch))\n"
-	printf "#endif\n"
 	printf "#endif\n"
     fi
 done
@@ -924,18 +922,9 @@ do
 	printf "#if (GDB_MULTI_ARCH ${gt_level}) && defined (${macro})\n"
 	printf "#error \"Non multi-arch definition of ${macro}\"\n"
 	printf "#endif\n"
-	if test "${level}" = ""
-	then
-	    printf "#if !defined (${macro})\n"
-	    printf "#define ${macro} (gdbarch_${function} (current_gdbarch))\n"
-	    printf "#endif\n"
-	else
-	    printf "#if GDB_MULTI_ARCH\n"
-	    printf "#if (GDB_MULTI_ARCH ${gt_level}) || !defined (${macro})\n"
-	    printf "#define ${macro} (gdbarch_${function} (current_gdbarch))\n"
-	    printf "#endif\n"
-	    printf "#endif\n"
-	fi
+	printf "#if !defined (${macro})\n"
+	printf "#define ${macro} (gdbarch_${function} (current_gdbarch))\n"
+	printf "#endif\n"
     fi
     if class_is_function_p
     then
@@ -982,8 +971,16 @@ do
 	    printf "#if (GDB_MULTI_ARCH ${gt_level}) && defined (${macro})\n"
 	    printf "#error \"Non multi-arch definition of ${macro}\"\n"
 	    printf "#endif\n"
-	    printf "#if GDB_MULTI_ARCH\n"
-	    printf "#if (GDB_MULTI_ARCH ${gt_level}) || !defined (${macro})\n"
+	    if [ "x${actual}" = "x" ]
+	    then
+		d="#define ${macro}() (gdbarch_${function} (current_gdbarch))"
+	    elif [ "x${actual}" = "x-" ]
+	    then
+		d="#define ${macro} (gdbarch_${function} (current_gdbarch))"
+	    else
+		d="#define ${macro}(${actual}) (gdbarch_${function} (current_gdbarch, ${actual}))"
+	    fi
+	    printf "#if !defined (${macro})\n"
 	    if [ "x${actual}" = "x" ]
 	    then
 		printf "#define ${macro}() (gdbarch_${function} (current_gdbarch))\n"
@@ -993,7 +990,6 @@ do
 	    else
 		printf "#define ${macro}(${actual}) (gdbarch_${function} (current_gdbarch, ${actual}))\n"
 	    fi
-	    printf "#endif\n"
 	    printf "#endif\n"
 	fi
     fi

@@ -1,3 +1,9 @@
+2003-05-30  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh: Regardless of the multi-arch level, always define
+	the macro when not already defined.
+	* gdbarch.h, gdbarch.c: Re-generate.
+
 2003-05-30  Richard Henderson  <rth@redhat.com>
 
 	* alpha-mdebug-tdep.c (alpha_mdebug_frame_p): Reject prologues.
