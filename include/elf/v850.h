@@ -55,7 +55,6 @@ enum reloc_type
 {
   R_V850_NONE = 0,
   R_V850_9_PCREL,
-  R_V850_16_PCREL,
   R_V850_22_PCREL,
   R_V850_HI16_S,
   R_V850_HI16,
