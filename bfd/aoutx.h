@@ -51,40 +51,28 @@ DESCRIPTION
 	As an example, this is what goes on to make the back end for a
 	sun4, from aout32.c 
 
-EXAMPLE
-
-   #define ARCH_SIZE 32
-   #include "aoutx.h"
-
-DESCRIPTION
+|	#define ARCH_SIZE 32
+|	#include "aoutx.h"
 
 	Which exports names:
 
-EXAMPLE
-    ...
-   aout_32_canonicalize_reloc
-   aout_32_find_nearest_line
-   aout_32_get_lineno
-   aout_32_get_reloc_upper_bound
-     ...
-
-DESCRIPTION
+|	...
+|	aout_32_canonicalize_reloc
+|	aout_32_find_nearest_line
+|	aout_32_get_lineno
+|	aout_32_get_reloc_upper_bound
+|	...
 
 	from sunos.c
 
-EXAMPLE
-    #define ARCH 32
-    #define TARGET_NAME "a.out-sunos-big"
-    #define VECNAME    sunos_big_vec
-    #include "aoutf1.h"
-DESCRIPTION
+|	#define ARCH 32
+|	#define TARGET_NAME "a.out-sunos-big"
+|	#define VECNAME    sunos_big_vec
+|	#include "aoutf1.h"
 
 	requires all the names from aout32.c, and produces the jump vector
 
-EXAMPLE
-    sunos_big_vec
-
-DESCRIPTION
+|	sunos_big_vec
 
 	The file host-aout.c is a special case.  It is for a large set
 	of hosts that use ``more or less standard'' a.out files, and
@@ -98,29 +86,24 @@ DESCRIPTION
 
 	When porting it to run on a new system, you must supply:
 
-EXAMPLE
-        HOST_PAGE_SIZE
-        HOST_SEGMENT_SIZE
-        HOST_MACHINE_ARCH       (optional)
-        HOST_MACHINE_MACHINE    (optional)
-        HOST_TEXT_START_ADDR
-        HOST_STACK_END_ADDR
+|        HOST_PAGE_SIZE
+|        HOST_SEGMENT_SIZE
+|        HOST_MACHINE_ARCH       (optional)
+|        HOST_MACHINE_MACHINE    (optional)
+|        HOST_TEXT_START_ADDR
+|        HOST_STACK_END_ADDR
 
-DESCRIPTION
-
-	in the file ../include/sys/h-XXX.h (for your host).  These
-	values, plus the structures and macros defined in <a.out.h> on
+	in the file <<../include/sys/h-XXX.h>> (for your host).  These
+	values, plus the structures and macros defined in <<a.out.h>> on
 	your host system, will produce a BFD target that will access
 	ordinary a.out files on your host. To configure a new machine
-	to use host-aout.c, specify: 
+	to use <<host-aout.c>., specify: 
 
-EXAMPLE
-	TDEFAULTS = -DDEFAULT_VECTOR=host_aout_big_vec
-	TDEPFILES= host-aout.o trad-core.o
+|	TDEFAULTS = -DDEFAULT_VECTOR=host_aout_big_vec
+|	TDEPFILES= host-aout.o trad-core.o
 
-DESCIPTION
-	in the config/mt-XXX file, and modify configure.in to use the
-	mt-XXX file (by setting "bfd_target=XXX") when your
+	in the <<config/mt-XXX>> file, and modify configure.in to use the
+	<<mt-XXX>> file (by setting "<<bfd_target=XXX>>") when your
 	configuration is selected.
 
 */
@@ -341,11 +324,6 @@ DEFUN(NAME(aout,some_aout_object_p),(abfd, execp, callback_to_real_object_p),
 
   obj_aout_symbols (abfd) = (aout_symbol_type *)NULL;
   bfd_get_symcount (abfd) = execp->a_syms / sizeof (struct external_nlist);
-
-  /* Set the default architecture and machine type.  These can be
-     overridden in the callback routine.  */
-
-  bfd_default_set_arch_mach(abfd, bfd_arch_unknown, 0);
 
   /* The default relocation entry size is that of traditional V7 Unix.  */
   obj_reloc_entry_size (abfd) = RELOC_STD_SIZE;
@@ -603,32 +581,34 @@ EXAMPLE
 	    asection *newsect));
 */
 boolean
-  DEFUN(NAME(aout,new_section_hook),(abfd, newsect),
+DEFUN(NAME(aout,new_section_hook),(abfd, newsect),
 	bfd *abfd AND
 	asection *newsect)
 {
-  /* align to double at least */
-  newsect->alignment_power = 3;
+    /* align to double at least */
+    newsect->alignment_power = bfd_get_arch_info(abfd)->section_align_power;
+
     
-  if (bfd_get_format (abfd) == bfd_object) {
-    if (obj_textsec(abfd) == NULL && !strcmp(newsect->name, ".text")) {
-      obj_textsec(abfd)= newsect;
-      return true;
-    }
+    if (bfd_get_format (abfd) == bfd_object) 
+    {
+	if (obj_textsec(abfd) == NULL && !strcmp(newsect->name, ".text")) {
+		obj_textsec(abfd)= newsect;
+		return true;
+	    }
       
-    if (obj_datasec(abfd) == NULL && !strcmp(newsect->name, ".data")) {
-      obj_datasec(abfd) = newsect;
-      return true;
-    }
+	if (obj_datasec(abfd) == NULL && !strcmp(newsect->name, ".data")) {
+		obj_datasec(abfd) = newsect;
+		return true;
+	    }
       
-    if (obj_bsssec(abfd) == NULL && !strcmp(newsect->name, ".bss")) {
-      obj_bsssec(abfd) = newsect;
-      return true;
+	if (obj_bsssec(abfd) == NULL && !strcmp(newsect->name, ".bss")) {
+		obj_bsssec(abfd) = newsect;
+		return true;
+	    }
     }
-  }
     
-  /* We allow more than three sections internally */
-  return true;
+    /* We allow more than three sections internally */
+    return true;
 }
 
 boolean
@@ -640,8 +620,6 @@ boolean
 	bfd_size_type count)
 {
   file_ptr text_end;
-  bfd_size_type text_header_size; /* exec_bytes_size if if included in 
-      text size. */
   bfd_size_type text_size;
   if (abfd->output_has_begun == false)
       {				/* set by bfd.c handler */
@@ -1136,7 +1114,7 @@ unsigned int
 DEFUN(NAME(aout,get_symtab),(abfd, location),
       bfd *abfd AND
       asymbol **location)
-  {
+{
     unsigned int counter = 0;
     aout_symbol_type *symbase;
     
@@ -1146,7 +1124,7 @@ DEFUN(NAME(aout,get_symtab),(abfd, location),
       *(location++) = (asymbol *)( symbase++);
     *location++ =0;
     return bfd_get_symcount(abfd);
-  }
+}
 
 
 /* Standard reloc stuff */
@@ -1157,7 +1135,7 @@ DEFUN(NAME(aout,swap_std_reloc_out),(abfd, g, natptr),
       bfd *abfd AND
       arelent *g AND
       struct reloc_std_external *natptr)
-  {
+{
     int r_index;
     int r_extern;
     unsigned int r_length;
@@ -1238,7 +1216,7 @@ DEFUN(NAME(aout,swap_std_reloc_out),(abfd, g, natptr),
 		| (r_relative?  RELOC_STD_BITS_RELATIVE_LITTLE: 0)
 		  | (r_length <<  RELOC_STD_BITS_LENGTH_SH_LITTLE);
     }
-  }
+}
 
 
 /* Extended stuff */
@@ -1249,7 +1227,7 @@ DEFUN(NAME(aout,swap_ext_reloc_out),(abfd, g, natptr),
       bfd *abfd AND
       arelent *g AND
       register struct reloc_ext_external *natptr)
-  {
+{
     int r_index;
     int r_extern;
     unsigned int r_type;
@@ -1259,7 +1237,7 @@ DEFUN(NAME(aout,swap_ext_reloc_out),(abfd, g, natptr),
     
     /* Find a type in the output format which matches the input howto - 
       at the moment we assume input format == output format FIXME!! */
-    r_type = (enum reloc_type) g->howto->type;
+    r_type = (unsigned int) g->howto->type;
     
     r_addend = g->addend;	/* Start here, see how it goes */
 
@@ -1750,6 +1728,10 @@ DEFUN(NAME(aout,find_nearest_line),(abfd,
   asymbol **p;
   static  char buffer[100];
   static  char filename_buffer[200];
+  char *directory_name = NULL;
+  char *main_file_name = NULL;
+  char *current_file_name = NULL;
+  char *line_file_name = NULL; /* Value of current_file_name at line number. */
   bfd_vma high_line_vma = ~0;
   bfd_vma low_func_vma = 0;
   asymbol *func = 0;
@@ -1762,7 +1744,7 @@ DEFUN(NAME(aout,find_nearest_line),(abfd,
     next:
       switch (q->type){
       case N_SO:
-	*filename_ptr = q->symbol.name;
+	main_file_name = current_file_name = q->symbol.name;
 	/* Look ahead to next symbol to check if that too is an N_SO. */
 	p++;
 	if (*p == NULL)
@@ -1772,19 +1754,15 @@ DEFUN(NAME(aout,find_nearest_line),(abfd,
 	  goto next;
 
 	/* Found a second N_SO  First is directory; second is filename. */
-	if (q->symbol.name[0] == '/')
-	  *filename_ptr = q->symbol.name;
-	else
-	  {
-	    sprintf(filename_buffer, "%.140s%.50s",
-		    *filename_ptr, q->symbol.name);
-	    *filename_ptr = filename_buffer;
-	  }
-	
-	if (obj_textsec(abfd) != section) {
-	  return true;
-	}
+	directory_name = current_file_name;
+	main_file_name = current_file_name = q->symbol.name;
+	if (obj_textsec(abfd) != section)
+	  goto done;
 	break;
+      case N_SOL:
+	current_file_name = q->symbol.name;
+	break;
+
       case N_SLINE:
 
       case N_DSLINE:
@@ -1794,6 +1772,7 @@ DEFUN(NAME(aout,find_nearest_line),(abfd,
 	    q->symbol.value < high_line_vma) {
 	  *line_ptr = q->desc;
 	  high_line_vma = q->symbol.value;
+	  line_file_name = current_file_name;
 	}
 	break;
       case N_FUN:
@@ -1813,7 +1792,7 @@ DEFUN(NAME(aout,find_nearest_line),(abfd,
 	    p = strchr(buffer,':');
 	    if (p != NULL) { *p = '\0'; }
 	    *functionname_ptr = buffer;
-	    return true;
+	    goto done;
 
 	  }
 	}
@@ -1821,7 +1800,19 @@ DEFUN(NAME(aout,find_nearest_line),(abfd,
       }
     }
   }
-  
+
+ done:
+  if (*line_ptr)
+    main_file_name = line_file_name;
+  if (main_file_name) {
+      if (main_file_name[0] == '/' || directory_name == NULL)
+	  *filename_ptr = main_file_name;
+      else {
+	  sprintf(filename_buffer, "%.140s%.50s",
+		  directory_name, main_file_name);
+	  *filename_ptr = filename_buffer;
+      }
+  }
   return true;
 
 }

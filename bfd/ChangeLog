@@ -1,3 +1,14 @@
+Fri Jan 10 14:33:32 1992  Per Bothner  (bothner at cygnus.com)
+
+	* aoutx.h (NAME(aout,find_nearest_line)):  Recognize N_SOL
+	symbols, so that we can emit the correct file name even
+	if it's an include file.
+
+Thu Jan  2 16:43:34 1992  John Gilmore  (gnu at cygnus.com)
+
+	* coff-i960.c:  Add COFF_SWAP_TABLE to little_vec as well as big_vec.
+	(Reported by john@labtam.labtam.oz.au (John Carey)).
+
 Wed Jan  1 04:23:06 1992  Fred Fish  (fnf at cygnus.com)
 
 	* elf.c:  Change all '#if HAVE_PROCFS' to '#ifdef HAVE_PROCFS'.
