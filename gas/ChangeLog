@@ -1,3 +1,8 @@
+Thu Jul  4 10:11:33 1996  James G. Smith  <jsmith@cygnus.co.uk>
+
+	* config/tc-mips.c (mips_ip): Only perform range check when
+ 	dealing with O_constant expressions.
+
 Wed Jul  3 15:02:21 1996  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* m68k-parse.h (m68k_register): Add new coldfile control
