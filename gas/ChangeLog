@@ -1,5 +1,7 @@
 Tue Jun 10 11:18:09 1997  H.J. Lu  <hjl@gnu.ai.mit.edu>
 
+	* config/tc-arm.c (md_apply_fix3): Make temp unsigned long.
+
 	* config/tc-arm.c (arm_adjust_symtab): Only set storage classes if
 	OBJ_COFF.
 
