@@ -1,3 +1,9 @@
+Thu May 18 10:52:14 2000  Jeffrey A Law  (law@cygnus.com)
+
+	* configure.in (hppa-*-hpux11*): If the cpu is hppa*64*, then
+	build PA64 ELF tools.
+	* configure: Rebuilt.
+
 2000-05-17  Alan Modra  <alan@linuxcare.com.au>
 
 	* Makefile.am: Regenerate dependencies.
