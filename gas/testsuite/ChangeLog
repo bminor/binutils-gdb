@@ -1,3 +1,7 @@
+2005-03-10  Aldy Hernandez  <aldyh@redhat.com>
+
+        * gas/ppc/e500.d: Fix encoding of efscfd.
+
 2004-10-06  Aldy Hernandez  <aldyh@redhat.com>
 
 	* gas/ppc/e500.s: Add double-precision instructions.

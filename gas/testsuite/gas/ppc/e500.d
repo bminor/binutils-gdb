@@ -19,7 +19,7 @@ Disassembly of section \.text:
   24:	7c 00 04 4c 	bbelr
   28:	7d 00 83 a6 	mtspefscr r8
   2c:	7d 20 82 a6 	mfspefscr r9
-  30:	10 a4 02 cf 	efscfd  r5,r4
+  30:	10 a0 22 cf 	efscfd  r5,r4
   34:	10 a4 02 e4 	efdabs  r5,r4
   38:	10 a4 02 e5 	efdnabs r5,r4
   3c:	10 a4 02 e6 	efdneg  r5,r4
