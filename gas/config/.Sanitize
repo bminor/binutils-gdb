@@ -39,6 +39,12 @@ else
 	lose_these_too="${tic80_files} ${lose_these_too}"
 fi
 
+if ( echo $* | grep keep\-v850 > /dev/null ) ; then
+	keep_these_too="tc-v850.c tc-v850.h ${keep_these_too}"
+else
+	lose_these_too="tc-v850.c tc-v850.h ${lose_these_too}"
+fi
+
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -133,8 +139,6 @@ tc-vax.c
 tc-vax.h
 tc-w65.c
 tc-w65.h
-tc-v850.c
-tc-v850.h
 tc-z8k.c
 tc-z8k.h
 te-386bsd.h

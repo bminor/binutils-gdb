@@ -74,6 +74,12 @@ else
 	fi
 fi
 
+if ( echo $* | grep keep\-v850 > /dev/null ) ; then
+	keep_these_too="v850-tdep.c v850ice.c ${keep_these_too}"
+else
+	lose_these_too="v850-tdep.c v850ice.c ${lose_these_too}"
+fi
+
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -412,8 +418,6 @@ value.h
 values.c
 vax-tdep.c
 vx-share
-v850ice.c
-v850-tdep.c
 w65-tdep.c
 w89k-rom.c
 win32-nat.c

@@ -43,6 +43,12 @@ else
 	fi
 fi
 
+if ( echo $* | grep keep\-v850 > /dev/null ) ; then
+	keep_these_too="v850 ${keep_these_too}"
+else
+	lose_these_too="v850 ${lose_these_too}"
+fi
+
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -94,7 +100,6 @@ xm-lynx.h
 xm-mpw.h
 xm-nbsd.h
 xm-sysv4.h
-v850
 w65
 z8k
 

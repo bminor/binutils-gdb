@@ -31,6 +31,12 @@ else
 	lose_these_too="${tic80_files} ${lose_these_too}"
 fi
 
+if ( echo $* | grep keep\-v850 > /dev/null ) ; then
+	keep_these_too="v850-opc.c v850-dis.c ${keep_these_too}"
+else
+	lose_these_too="v850-opc.c v850-dis.c ${lose_these_too}"
+fi
+
 
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
@@ -99,8 +105,6 @@ stamp-h.in
 sysdep.h
 w65-dis.c
 w65-opc.h
-v850-opc.c
-v850-dis.c
 z8k-dis.c
 z8k-opc.h
 z8kgen.c

@@ -31,6 +31,12 @@ else
 	lose_these_too="${tic80_files} ${lose_these_too}"
 fi
 
+if ( echo $* | grep keep\-v850 > /dev/null ) ; then
+	keep_these_too="cpu-v850.c elf32-v850.c ${keep_these_too}"
+else
+	lose_these_too="cpu-v850.c elf32-v850.c ${lose_these_too}"
+fi
+
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -137,7 +143,6 @@ cpu-sparc.c
 cpu-vax.c
 cpu-we32k.c
 cpu-w65.c
-cpu-v850.c
 cpu-z8k.c
 demo64.c
 dep-in.sed
@@ -158,7 +163,6 @@ elf32-m32r.c
 elf32-m68k.c
 elf32-m88k.c
 elf32-mips.c
-elf32-v850.c
 elf-m10200.c
 elf-m10300.c
 elf32-ppc.c

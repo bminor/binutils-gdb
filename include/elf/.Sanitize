@@ -22,6 +22,12 @@ Do-first:
 # called.  Directories not listed will be removed in their entirety
 # with rm -rf.
 
+if ( echo $* | grep keep\-v850 > /dev/null ) ; then
+	keep_these_too="v850.h ${keep_these_too}"
+else
+	lose_these_too="v850.h ${lose_these_too}"
+fi
+
 Things-to-keep:
 
 ChangeLog
@@ -37,7 +43,6 @@ m32r.h
 mips.h
 ppc.h
 sparc.h
-v850.h
 
 Things-to-lose:
 
