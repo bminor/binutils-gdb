@@ -1,5 +1,8 @@
 Mon Apr 22 00:02:43 1991  Jim Kingdon  (kingdon at cygint.cygnus.com)
 
+	* sparc-tdep.c (skip_prologue): Don't skip anything unless there
+	is a "save" instruction in there somewhere.
+
 	* symfile.c (symbol_file_add): Add comment.
 	solib.c (solib_add): Don't malloc name passed to symbol_file_add.
 
