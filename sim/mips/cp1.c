@@ -71,13 +71,28 @@ with this program; if not, write to the Free Software Foundation, Inc.,
       siiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii
         s =  1bit  = sign
         i = 63bits = integer
+
+   PAIRED SINGLE precision floating:
+      seeeeeeeefffffffffffffffffffffffseeeeeeeefffffffffffffffffffffff
+      |         upper                ||         lower                |
+        s =  1bit  = sign
+        e =  8bits = exponent
+        f = 23bits = fraction
+    Note: upper = [63..32], lower = [31..0]
  */
+
+/* Extract packed single values:  */
+#define FP_PS_upper(v) (((v) >> 32) & (unsigned)0xFFFFFFFF)
+#define FP_PS_lower(v) ((v) & (unsigned)0xFFFFFFFF)
+#define FP_PS_cat(u,l) (((unsigned64)((u) & (unsigned)0xFFFFFFFF) << 32) \
+                        | (unsigned64)((l) & 0xFFFFFFFF))
 
 /* Explicit QNaN values.  */
 #define FPQNaN_SINGLE   (0x7FBFFFFF)
 #define FPQNaN_WORD     (0x7FFFFFFF)
 #define FPQNaN_DOUBLE   (UNSIGNED64 (0x7FF7FFFFFFFFFFFF))
 #define FPQNaN_LONG     (UNSIGNED64 (0x7FFFFFFFFFFFFFFF))
+#define FPQNaN_PS       (FP_PS_cat (FPQNaN_SINGLE, FPQNaN_SINGLE))
 
 static const char *fpu_format_name (FP_formats fmt);
 #ifdef DEBUG
@@ -131,6 +146,7 @@ value_fpr (sim_cpu *cpu,
 	case fmt_double:  value = FPQNaN_DOUBLE;  break;
 	case fmt_word:    value = FPQNaN_WORD;    break;
 	case fmt_long:    value = FPQNaN_LONG;    break;
+	case fmt_ps:      value = FPQNaN_PS;      break;
 	default:          err = -1;               break;
 	}
     }
@@ -146,6 +162,7 @@ value_fpr (sim_cpu *cpu,
 	case fmt_uninterpreted:
 	case fmt_double:
 	case fmt_long:
+	case fmt_ps:
 	  value = FGR[fpr];
 	  break;
 
@@ -181,6 +198,10 @@ value_fpr (sim_cpu *cpu,
 	    {
 	      SignalException (ReservedInstruction, 0);
 	    }
+	  break;
+
+	case fmt_ps:
+	  SignalException (ReservedInstruction, 0);
 	  break;
 
 	default:
@@ -237,6 +258,7 @@ store_fpr (sim_cpu *cpu,
 	case fmt_uninterpreted:
 	case fmt_double:
 	case fmt_long:
+	case fmt_ps:
 	  FGR[fpr] = value;
 	  FPR_STATE[fpr] = fmt;
 	  break;
@@ -278,6 +300,11 @@ store_fpr (sim_cpu *cpu,
 	      FPR_STATE[fpr + 1] = fmt_unknown;
 	      SignalException (ReservedInstruction, 0);
 	    }
+	  break;
+
+	case fmt_ps:
+	  FPR_STATE[fpr] = fmt_unknown;
+	  SignalException (ReservedInstruction, 0);
 	  break;
 
 	default:
@@ -567,6 +594,18 @@ fp_cmp(sim_cpu *cpu,
 	SETFCC (cc, result);
 	break;
       }
+    case fmt_ps:
+      {
+	int result0, result1;
+	status  = fp_test(FP_PS_lower (op1), FP_PS_lower (op2), fmt_single,
+			  abs, cond, &result0);
+	status |= fp_test(FP_PS_upper (op1), FP_PS_upper (op2), fmt_single,
+			  abs, cond, &result1);
+	update_fcsr (cpu, cia, status);
+	SETFCC (cc, result0);
+	SETFCC (cc+1, result1);
+	break;
+      }
     default:
       sim_io_eprintf (SD, "Bad switch\n");
       abort ();
@@ -611,6 +650,20 @@ fp_unary(sim_cpu *cpu,
 	status |= sim_fpu_round_64 (&ans, round, denorm);
 	sim_fpu_to64 (&res, &ans);
 	result = res;
+	break;
+      }
+    case fmt_ps:
+      {
+	int status_u = 0, status_l = 0;
+	unsigned32 res_u, res_l;
+	sim_fpu_32to (&wop, FP_PS_upper(op));
+	status_u |= (*sim_fpu_op) (&ans, &wop);
+	sim_fpu_to32 (&res_u, &ans);
+	sim_fpu_32to (&wop, FP_PS_lower(op));
+	status_l |= (*sim_fpu_op) (&ans, &wop);
+	sim_fpu_to32 (&res_l, &ans);
+	result = FP_PS_cat(res_u, res_l);
+	status = status_u | status_l;
 	break;
       }
     default:
@@ -661,6 +714,22 @@ fp_binary(sim_cpu *cpu,
 	status |= sim_fpu_round_64 (&ans, round, denorm);
 	sim_fpu_to64 (&res, &ans);
 	result = res;
+	break;
+      }
+    case fmt_ps:
+      {
+	int status_u = 0, status_l = 0;
+	unsigned32 res_u, res_l;
+	sim_fpu_32to (&wop1, FP_PS_upper(op1));
+	sim_fpu_32to (&wop2, FP_PS_upper(op2));
+	status_u |= (*sim_fpu_op) (&ans, &wop1, &wop2);
+	sim_fpu_to32 (&res_u, &ans);
+	sim_fpu_32to (&wop1, FP_PS_lower(op1));
+	sim_fpu_32to (&wop2, FP_PS_lower(op2));
+	status_l |= (*sim_fpu_op) (&ans, &wop1, &wop2);
+	sim_fpu_to32 (&res_l, &ans);
+	result = FP_PS_cat(res_u, res_l);
+	status = status_u | status_l;
 	break;
       }
     default:
@@ -784,6 +853,20 @@ fp_mac(sim_cpu *cpu,
       status = inner_mac(sim_fpu_op, op1, op2, op3, scale,
 			 negate, fmt, round, denorm, &result);
       break;
+    case fmt_ps:
+      {
+	int status_u, status_l;
+	unsigned64 result_u, result_l;
+	status_u = inner_mac(sim_fpu_op, FP_PS_upper(op1), FP_PS_upper(op2),
+			     FP_PS_upper(op3), scale, negate, fmt_single,
+			     round, denorm, &result_u);
+	status_l = inner_mac(sim_fpu_op, FP_PS_lower(op1), FP_PS_lower(op2),
+			     FP_PS_lower(op3), scale, negate, fmt_single,
+			     round, denorm, &result_l);
+	result = FP_PS_cat(result_u, result_l);
+	status = status_u | status_l;
+	break;
+      }
     default:
       sim_io_eprintf (SD, "Bad switch\n");
       abort ();
@@ -863,6 +946,18 @@ fp_inv_sqrt(sim_cpu *cpu,
     case fmt_double:
       status = inner_rsqrt (op1, fmt, round, denorm, &result);
       break;
+    case fmt_ps:
+      {
+	int status_u, status_l;
+	unsigned64 result_u, result_l;
+	status_u = inner_rsqrt (FP_PS_upper(op1), fmt_single, round, denorm,
+				&result_u);
+	status_l = inner_rsqrt (FP_PS_lower(op1), fmt_single, round, denorm,
+				&result_l);
+	result = FP_PS_cat(result_u, result_l);
+	status = status_u | status_l;
+	break;
+      }
     default:
       sim_io_eprintf (SD, "Bad switch\n");
       abort ();
@@ -1044,8 +1139,8 @@ convert (sim_cpu *cpu,
   /* The value WOP is converted to the destination format, rounding
      using mode RM. When the destination is a fixed-point format, then
      a source value of Infinity, NaN or one which would round to an
-     integer outside the fixed point range then an IEEE Invalid
-     Operation condition is raised.  */
+     integer outside the fixed point range then an IEEE Invalid Operation
+     condition is raised.  Not used if destination format is PS.  */
   switch (to)
     {
     case fmt_single:
@@ -1080,6 +1175,114 @@ convert (sim_cpu *cpu,
   return result64;
 }
 
+unsigned64
+ps_lower(sim_cpu *cpu,
+         address_word cia,
+         unsigned64 op)
+{
+  return FP_PS_lower (op);
+}
+
+unsigned64
+ps_upper(sim_cpu *cpu,
+         address_word cia,
+         unsigned64 op)
+{
+  return FP_PS_upper(op);
+}
+
+unsigned64
+pack_ps(sim_cpu *cpu,
+        address_word cia,
+        unsigned64 op1,
+        unsigned64 op2,
+        FP_formats fmt)
+{
+  unsigned64 result = 0;
+
+  /* The registers must specify FPRs valid for operands of type
+     "fmt". If they are not valid, the result is undefined. */
+
+  /* The format type should already have been checked: */
+  switch (fmt)
+    {
+    case fmt_single:
+      {
+	sim_fpu wop;
+	unsigned32 res_u, res_l;
+	sim_fpu_32to (&wop, op1);
+	sim_fpu_to32 (&res_u, &wop);
+	sim_fpu_32to (&wop, op2);
+	sim_fpu_to32 (&res_l, &wop);
+	result = FP_PS_cat(res_u, res_l);
+	break;
+      }
+    default:
+      sim_io_eprintf (SD, "Bad switch\n");
+      abort ();
+    }
+
+  return result;
+}
+
+unsigned64
+convert_ps (sim_cpu *cpu,
+            address_word cia,
+            int rm,
+            unsigned64 op,
+            FP_formats from,
+            FP_formats to)
+{
+  sim_fpu wop_u, wop_l;
+  sim_fpu_round round = rounding_mode (rm);
+  sim_fpu_denorm denorm = denorm_mode (cpu);
+  unsigned32 res_u, res_l;
+  unsigned64 result;
+  sim_fpu_status status_u = 0, status_l = 0;
+
+  /* As convert, but used only for paired values (formats PS, PW) */
+
+  /* Convert the input to sim_fpu internal format */
+  switch (from)
+    {
+    case fmt_word:   /* fmt_pw */
+      sim_fpu_i32to (&wop_u, (op >> 32) & (unsigned)0xFFFFFFFF, round);
+      sim_fpu_i32to (&wop_l, op & (unsigned)0xFFFFFFFF, round);
+      break;
+    case fmt_ps:
+      sim_fpu_32to (&wop_u, FP_PS_upper(op));
+      sim_fpu_32to (&wop_l, FP_PS_lower(op));
+      break;
+    default:
+      sim_io_eprintf (SD, "Bad switch\n");
+      abort ();
+    }
+
+  /* Convert sim_fpu format into the output */
+  switch (to)
+    {
+    case fmt_word:   /* fmt_pw */
+      status_u |= sim_fpu_to32i (&res_u, &wop_u, round);
+      status_l |= sim_fpu_to32i (&res_l, &wop_l, round);
+      result = (((unsigned64)res_u) << 32) | (unsigned64)res_l;
+      break;
+    case fmt_ps:
+      status_u |= sim_fpu_round_32 (&wop_u, 0, round);
+      status_l |= sim_fpu_round_32 (&wop_l, 0, round);
+      sim_fpu_to32 (&res_u, &wop_u);
+      sim_fpu_to32 (&res_l, &wop_l);
+      result = FP_PS_cat(res_u, res_l);
+      break;
+    default:
+      result = 0;
+      sim_io_eprintf (SD, "Bad switch\n");
+      abort ();
+    }
+
+  update_fcsr (cpu, cia, status_u | status_l);
+  return result;
+}
+
 static const char *
 fpu_format_name (FP_formats fmt)
 {
@@ -1093,6 +1296,8 @@ fpu_format_name (FP_formats fmt)
       return "word";
     case fmt_long:
       return "long";
+    case fmt_ps:
+      return "ps";
     case fmt_unknown:
       return "<unknown>";
     case fmt_uninterpreted:

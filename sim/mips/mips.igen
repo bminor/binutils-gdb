@@ -3522,6 +3522,7 @@
     case fmt_double: return "d";
     case fmt_word: return "w";
     case fmt_long: return "l";
+    case fmt_ps: return "ps";
     default: return "?";
     }
 }
@@ -3610,13 +3611,9 @@
 *mipsV:
 *mips64:
 {
-#if 0 /* XXX FIXME: FP code doesn't yet support paired single ops.  */
   if ((fmt != fmt_single) && (fmt != fmt_double)
       && (fmt != fmt_ps || (UserMode && (SR & (status_UX|status_PX)) == 0)))
     SignalException (ReservedInstruction, insn);
-#else
-  check_fmt (SD_, fmt, insn);
-#endif
 }
 
 
@@ -3683,6 +3680,32 @@
   StoreFPR (FD, fmt, Add (ValueFPR (FS, fmt), ValueFPR (FT, fmt), fmt));
 }
 
+
+010011,5.RS,5.FT,5.FS,5.FD,011,110:COP1X:64,f::ALNV.PS
+"alnv.ps f<FD>, f<FS>, f<FT>, r<RS>"
+*mipsV:
+*mips64:
+{
+  unsigned64 fs;
+  unsigned64 ft;
+  unsigned64 fd;
+  check_fpu (SD_);
+  check_u64 (SD_, instruction_0);
+  fs = ValueFPR (FS, fmt_ps);
+  if ((GPR[RS] & 0x3) != 0)
+    Unpredictable ();
+  if ((GPR[RS] & 0x4) == 0)
+    fd = fs;
+  else
+    {
+      ft = ValueFPR (FT, fmt_ps);
+      if (BigEndianCPU)
+	fd = PackPS (PSLower (fs), PSUpper (ft));
+      else
+	fd = PackPS (PSLower (ft), PSUpper (fs));
+    }
+  StoreFPR (FD, fmt_ps, fd);
+}
 
 
 // BC1F
@@ -3946,10 +3969,22 @@
 }
 
 
+010001,10,000,5.FT,5.FS,5.FD,100110:COP1:64,f::CVT.PS.S
+"cvt.ps.s f<FD>, f<FS>, f<FT>"
+*mipsV:
+*mips64:
+{
+  check_fpu (SD_);
+  check_u64 (SD_, instruction_0);
+  StoreFPR (FD, fmt_ps, PackPS (ValueFPR (FS, fmt_single),
+				ValueFPR (FT, fmt_single)));
+}
+
+
 //
 // FIXME: Does not correctly differentiate between mips*
 //
-010001,10,3.FMT,00000,5.FS,5.FD,100000:COP1:32,f::CVT.S.fmt
+010001,10,3.FMT!6,00000,5.FS,5.FD,100000:COP1:32,f::CVT.S.fmt
 "cvt.s.%s<FMT> f<FD>, f<FS>"
 *mipsI:
 *mipsII:
@@ -3968,6 +4003,28 @@
     SignalException (ReservedInstruction, instruction_0);
   StoreFPR (FD, fmt_single, Convert (GETRM (), ValueFPR (FS, fmt), fmt,
 	    fmt_single));
+}
+
+
+010001,10,110,00000,5.FS,5.FD,101000:COP1:64,f::CVT.S.PL
+"cvt.s.pl f<FD>, f<FS>"
+*mipsV:
+*mips64:
+{
+  check_fpu (SD_);
+  check_u64 (SD_, instruction_0);
+  StoreFPR (FD, fmt_single, PSLower (ValueFPR (FS, fmt_ps)));
+}
+
+
+010001,10,110,00000,5.FS,5.FD,100000:COP1:64,f::CVT.S.PU
+"cvt.s.pu f<FD>, f<FS>"
+*mipsV:
+*mips64:
+{
+  check_fpu (SD_);
+  check_u64 (SD_, instruction_0);
+  StoreFPR (FD, fmt_single, PSUpper (ValueFPR (FS, fmt_ps)));
 }
 
 
@@ -4284,12 +4341,22 @@
 {
   int fmt = FMT;
   check_fpu (SD_);
-  {
-   if (GETFCC(CC) == TF)
-     StoreFPR (FD, fmt, ValueFPR (FS, fmt));
-   else
-     StoreFPR (FD, fmt, ValueFPR (FD, fmt));
-  }
+  if (fmt != fmt_ps)
+    {
+      if (GETFCC(CC) == TF)
+	StoreFPR (FD, fmt, ValueFPR (FS, fmt));
+      else
+	StoreFPR (FD, fmt, ValueFPR (FD, fmt));   /* set fmt */
+    }
+  else
+    {
+      unsigned64 fd;
+      fd = PackPS (PSUpper (ValueFPR ((GETFCC (CC+1) == TF) ? FS : FD,
+				      fmt_ps)),
+		   PSLower (ValueFPR ((GETFCC (CC+0) == TF) ? FS : FD,
+				      fmt_ps)));
+      StoreFPR (FD, fmt_ps, fd);
+    }
 }
 
 
@@ -4449,6 +4516,30 @@
 }
 
 
+010001,10,110,5.FT,5.FS,5.FD,101100:COP1:64,f::PLL.PS
+"pll.ps f<FD>, f<FS>, f<FT>"
+*mipsV:
+*mips64:
+{
+  check_fpu (SD_);
+  check_u64 (SD_, instruction_0);
+  StoreFPR (FD, fmt_ps, PackPS (PSLower (ValueFPR (FS, fmt_ps)),
+				PSLower (ValueFPR (FT, fmt_ps))));
+}
+
+
+010001,10,110,5.FT,5.FS,5.FD,101101:COP1:64,f::PLU.PS
+"plu.ps f<FD>, f<FS>, f<FT>"
+*mipsV:
+*mips64:
+{
+  check_fpu (SD_);
+  check_u64 (SD_, instruction_0);
+  StoreFPR (FD, fmt_ps, PackPS (PSLower (ValueFPR (FS, fmt_ps)),
+				PSUpper (ValueFPR (FT, fmt_ps))));
+}
+
+
 010011,5.BASE,5.INDEX,5.HINT,00000,001111:COP1X:64::PREFX
 "prefx <HINT>, r<INDEX>(r<BASE>)"
 *mipsIV:
@@ -4466,6 +4557,31 @@
       Prefetch(uncached,paddr,vaddr,isDATA,HINT);
   }
 }
+
+
+010001,10,110,5.FT,5.FS,5.FD,101110:COP1:64,f::PUL.PS
+"pul.ps f<FD>, f<FS>, f<FT>"
+*mipsV:
+*mips64:
+{
+  check_fpu (SD_);
+  check_u64 (SD_, instruction_0);
+  StoreFPR (FD, fmt_ps, PackPS (PSUpper (ValueFPR (FS, fmt_ps)),
+				PSLower (ValueFPR (FT, fmt_ps))));
+}
+
+
+010001,10,110,5.FT,5.FS,5.FD,101111:COP1:64,f::PUU.PS
+"puu.ps f<FD>, f<FS>, f<FT>"
+*mipsV:
+*mips64:
+{
+  check_fpu (SD_);
+  check_u64 (SD_, instruction_0);
+  StoreFPR (FD, fmt_ps, PackPS (PSUpper (ValueFPR (FS, fmt_ps)),
+				PSUpper (ValueFPR (FT, fmt_ps))));
+}
+
 
 010001,10,3.FMT,00000,5.FS,5.FD,010101:COP1:32,f::RECIP.fmt
 "recip.%s<FMT> f<FD>, f<FS>"

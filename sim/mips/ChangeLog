@@ -1,3 +1,21 @@
+2002-06-13  Chris Demetriou  <cgd@broadcom.com>
+
+	* cp1.c (FP_PS_upper, FP_PS_lower, FP_PS_cat, FPQNaN_PS): New macros.
+	(value_fpr, store_fpr, fp_cmp, fp_unary, fp_binary, fp_mac)
+	(fp_inv_sqrt, fpu_format_name): Add paired-single support.
+	(convert): Note that this function is not used for paired-single
+	format conversions.
+	(ps_lower, ps_upper, pack_ps, convert_ps): New functions.
+	* mips.igen (FMT, MOVtf.fmt): Add paired-single support.
+	(check_fmt_p): Enable paired-single support.
+	(ALNV.PS, CVT.PS.S, CVT.S.PL, CVT.S.PU, PLL.PS, PLU.PS, PUL.PS)
+	(PUU.PS): New instructions.
+	(CVT.S.fmt): Don't use this instruction for paired-single format
+	destinations.
+	* sim-main.h (FP_formats): New value 'fmt_ps.'
+	(ps_lower, ps_upper, pack_ps, convert_ps): New prototypes.
+	(PSLower, PSUpper, PackPS, ConvertPS): New macros.
+
 2002-06-12  Chris Demetriou  <cgd@broadcom.com>
 
 	* mips.igen: Fix formatting of function calls in

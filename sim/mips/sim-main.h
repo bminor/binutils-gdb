@@ -73,6 +73,7 @@ typedef enum {
  fmt_double  = 1,
  fmt_word    = 4,
  fmt_long    = 5,
+ fmt_ps      = 6,
  /* The following are well outside the normal acceptable format
     range, and are used in the register status vector. */
  fmt_unknown       = 0x10000000,
@@ -674,6 +675,12 @@ unsigned64 value_fpr (SIM_STATE, int fpr, FP_formats);
 #define ValueFPR(FPR,FMT) value_fpr (SIM_ARGS, (FPR), (FMT))
 void store_fpr (SIM_STATE, int fpr, FP_formats fmt, unsigned64 value);
 #define StoreFPR(FPR,FMT,VALUE) store_fpr (SIM_ARGS, (FPR), (FMT), (VALUE))
+unsigned64 ps_lower (SIM_STATE, unsigned64 op);
+#define PSLower(op) ps_lower (SIM_ARGS, op)
+unsigned64 ps_upper (SIM_STATE, unsigned64 op);
+#define PSUpper(op) ps_upper (SIM_ARGS, op)
+unsigned64 pack_ps (SIM_STATE, unsigned64 op1, unsigned64 op2, FP_formats from);
+#define PackPS(op1,op2) pack_ps (SIM_ARGS, op1, op2, fmt_single)
 
 
 /* FCR access.  */
@@ -720,6 +727,9 @@ unsigned64 fp_nmsub (SIM_STATE, unsigned64 op1, unsigned64 op2,
 #define NegMultiplySub(op1,op2,op3,fmt) fp_nmsub(SIM_ARGS, op1, op2, op3, fmt)
 unsigned64 convert (SIM_STATE, int rm, unsigned64 op, FP_formats from, FP_formats to);
 #define Convert(rm,op,from,to) convert (SIM_ARGS, rm, op, from, to)
+unsigned64 convert_ps (SIM_STATE, int rm, unsigned64 op, FP_formats from,
+		       FP_formats to);
+#define ConvertPS(rm,op,from,to) convert_ps (SIM_ARGS, rm, op, from, to)
 
 
 /* MDMX access.  */
