@@ -973,7 +973,9 @@ copy_object (ibfd, obfd)
 
   /* Copy architecture of input file to output file.  */
   if (!bfd_set_arch_mach (obfd, bfd_get_arch (ibfd),
-			  bfd_get_mach (ibfd)))
+			  bfd_get_mach (ibfd))
+      && (ibfd->target_defaulted
+	  || bfd_get_arch (ibfd) != bfd_get_arch (obfd)))
     non_fatal (_("Warning: Output file cannot represent architecture %s"),
 	       bfd_printable_arch_mach (bfd_get_arch (ibfd),
 					bfd_get_mach (ibfd)));
