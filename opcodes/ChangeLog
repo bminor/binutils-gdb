@@ -12,6 +12,15 @@ Wed Nov  4 18:46:47 1998  Dave Brolley  <brolley@cygnus.com>
 	* po/POTFILES.in: Regenerated
 	* po/opcodes.pot: Regenerated
 
+start-sanitize-m32rx
+Mon Nov  2 20:08:03 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* m32r-opc.c (m32r_cgen_insn_table_entries): Add FILL_SLOT attribute
+	to bcl8,bncl8 entries.
+	(macro_insn_table_entries): Add FILL_SLOT attribute
+	to bcl8r,bncl8r entries.
+
+end-sanitize-m32rx
 Mon Nov  2 15:05:33 1998  Geoffrey Noer  <noer@cygnus.com>
 
         * configure.in: detect cygwin* instead of cygwin32*
