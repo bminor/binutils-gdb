@@ -455,13 +455,11 @@ do
     bfd_elf32_littlemips_vec) 	tb="$tb elf32-mips.o elf32.o $elf ecofflink.o" ;;
     bfd_elf64_littlemips_vec) 	tb="$tb elf64-mips.o elf64.o elf32-mips.o elf32.o $elf ecofflink.o"
 				target64=true ;;
-# start-sanitize-m32r
     bfd_elf32_m32r_vec)		tb="$tb elf32-m32r.o elf32.o $elf" ;;
-# end-sanitize-m32r
     bfd_elf32_m68k_vec)		tb="$tb elf32-m68k.o elf32.o $elf" ;;
     bfd_elf32_m88k_vec)		tb="$tb elf32-m88k.o elf32.o $elf" ;;
-    bfd_elf32_mn10200_vec)	tb="$tb elf32-mn10200.o elf32.o $elf" ;;
-    bfd_elf32_mn10300_vec)	tb="$tb elf32-mn10300.o elf32.o $elf" ;;
+    bfd_elf32_mn10200_vec)	tb="$tb elf-m10200.o elf32.o $elf" ;;
+    bfd_elf32_mn10300_vec)	tb="$tb elf-m10300.o elf32.o $elf" ;;
     bfd_elf32_powerpc_vec)	tb="$tb elf32-ppc.o elf32.o $elf" ;;
     bfd_elf32_powerpcle_vec)	tb="$tb elf32-ppc.o elf32.o $elf" ;;
     bfd_elf32_sh_vec)		tb="$tb elf32-sh.o elf32.o $elf coff-sh.o" ;;
@@ -539,6 +537,7 @@ do
     shlcoff_vec)		tb="$tb coff-sh.o cofflink.o" ;;
     som_vec)			tb="$tb som.o" ;;
     sparcle_aout_vec)		tb="$tb aout-sparcle.o aout32.o" ;;
+    sparclinux_vec)		tb="$tb sparclinux.o aout32.o stab-syms.o" ;;
     sparclynx_aout_vec)		tb="$tb sparclynx.o lynx-core.o aout32.o" ;;
     sparclynx_coff_vec)		tb="$tb cf-sparclynx.o lynx-core.o" ;;
     sparcnetbsd_vec)		tb="$tb sparcnetbsd.o aout32.o" ;;
@@ -561,7 +560,9 @@ do
 done
 
 # Target architecture .o files.
-ta=`echo $selarchs | sed -e s/bfd_/cpu-/g -e s/_arch/.o/g`
+# A couple of CPUs use shorter file names to avoid problems on DOS
+# filesystems.
+ta=`echo $selarchs | sed -e s/bfd_/cpu-/g -e s/_arch/.o/g -e s/mn10200/m10200/ -e s/mn10300/m10300/`
 
 # Weed out duplicate .o files.
 f=""

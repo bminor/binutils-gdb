@@ -1,5 +1,9 @@
 Fri Apr  4 11:37:15 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* configure.in: Update file names for bfd_elf32_mn10[23]00_vec.
+	Correct CPU file names for mn10[23]00.
+	* configure: Rebuild.
+
 	* bfd.c (bfd_record_phdr): Cast count to size_t before
 	subtraction.
 
