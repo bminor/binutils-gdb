@@ -1,5 +1,5 @@
 /* Macro definitions for PowerPC running under NetBSD.
-   Copyright 2000 Free Software Foundation, Inc.
+   Copyright 2000, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -22,5 +22,9 @@
 #define TM_NBSD_H
 
 #include "powerpc/tm-ppc-eabi.h"
+
+/* We _want_ the SVR4 section offset calculations (see syms_from_objfile()
+   in symfile.c).  */
+#undef IBM6000_TARGET
 
 #endif /* TM_NBSD_H */
