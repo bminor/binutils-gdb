@@ -1,3 +1,12 @@
+2001-02-20  H.J. Lu  <hjl@gnu.org>
+
+	* Makefile.am (ia64-ic.tbl): Remove the target.
+	(ia64-raw.tbl): Likewise.
+	(ia64-waw.tbl): Likewise.
+	(ia64-war.tbl): Likewise.
+	(ia64-asmtab.c): Generate it in the source directory.
+	* Makefile.in: Regenerated.
+
 2001-02-18  lars brinkhoff  <lars@nocrew.org>
 
         * Makefile.am: Add PDP-11 target.

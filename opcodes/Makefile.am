@@ -277,16 +277,6 @@ $(srcdir)/fr30-desc.h $(srcdir)/fr30-desc.c $(srcdir)/fr30-opc.h $(srcdir)/fr30-
 stamp-fr30: $(CGENDEPS) $(CGENDIR)/fr30.cpu $(CGENDIR)/fr30.opc
 	$(MAKE) run-cgen arch=fr30 prefix=fr30 options= extrafiles=
 
-
-ia64-ic.tbl: $(srcdir)/ia64-ic.tbl
-	$(LN_S) -f $(srcdir)/ia64-ic.tbl
-ia64-raw.tbl: $(srcdir)/ia64-raw.tbl
-	$(LN_S) -f $(srcdir)/ia64-raw.tbl
-ia64-waw.tbl: $(srcdir)/ia64-waw.tbl
-	$(LN_S) -f $(srcdir)/ia64-waw.tbl
-ia64-war.tbl: $(srcdir)/ia64-war.tbl
-	$(LN_S) -f $(srcdir)/ia64-war.tbl
-
 ia64-gen: ia64-gen.o
 	$(LINK) ia64-gen.o $(LIBIBERTY)
 
@@ -294,7 +284,7 @@ ia64-gen.o: ia64-gen.c ia64-opc.c ia64-opc-a.c ia64-opc-b.c ia64-opc-f.c \
   ia64-opc-i.c ia64-opc-m.c ia64-opc-d.c ia64-opc.h
 
 ia64-asmtab.c: @MAINT@ ia64-gen ia64-ic.tbl ia64-raw.tbl ia64-waw.tbl ia64-war.tbl
-	./ia64-gen > $(srcdir)/ia64-asmtab.c
+	here=`pwd`; cd $(srcdir); $$here/ia64-gen > ia64-asmtab.c
 
 # This dependency stuff is copied from BFD.
 
