@@ -2,26 +2,22 @@
 @c @tex
 @c \special{twoside}
 @c @end tex
-_if__(_ALL_ARCH__)
+_if__(_GENERIC__)
 @setfilename as.info
-_fi__(_ALL_ARCH__)
-_if__(_AMD29K__ && !_ALL_ARCH__)
+_fi__(_GENERIC__)
+_if__(_AMD29K__ && !_GENERIC__)
 @setfilename as-29k.info
-_fi__(_AMD29K__ && !_ALL_ARCH__)
-_if__(_I960__ && !_ALL_ARCH__)
+_fi__(_AMD29K__ && !_GENERIC__)
+_if__(_I960__ && !_GENERIC__)
 @setfilename as-960.info
-_fi__(_I960__ && !_ALL_ARCH__)
-_if__(_M680X0__ && !_ALL_ARCH__)
+_fi__(_I960__ && !_GENERIC__)
+_if__(_M680X0__ && !_GENERIC__)
 @setfilename as-m680x0.info
-_fi__(_M680X0__ && !_ALL_ARCH__)
-@c
-@c NOTE: this manual is marked up for preprocessing with a collection
-@c of m4 macros called "pretex.m4".  If you see <_if__> and <_fi__>
-@c scattered around the source, you have the full source before
-@c preprocessing; if you don't, you have the source configured for
-@c _HOST__ architectures (and you can of course get the full source,
-@c with all configurations, from wherever you got this).
+_fi__(_M680X0__ && !_GENERIC__)
 _if__(0)
+
+NOTE: this manual is marked up for preprocessing with a collection
+of m4 macros called "pretex.m4".  
 
 THIS IS THE FULL SOURCE.  The full source needs to be run through m4
 before either tex- or info- formatting: for example,
@@ -59,28 +55,32 @@ one.
 Permission is granted to copy and distribute translations of this manual
 into another language, under the above conditions for modified versions,
 except that the section entitled ``GNU General Public License'' may be
-included in a translation approved by the author instead of in the
-original English.
+included in a translation approved by the Free Software Foundation
+instead of in the original English.
 @end ifinfo
 @iftex
 @finalout
-@end iftex
 @smallbook
+@end iftex
 @setchapternewpage odd
-_if__(_ALL_ARCH__)
+_if__(_GENERIC__)
 @settitle Using _AS__
-_fi__(_ALL_ARCH__)
-_if__(!_ALL_ARCH__)
+_fi__(_GENERIC__)
+_if__(!_GENERIC__)
 @settitle Using _AS__ (_HOST__)
-_fi__(!_ALL_ARCH__)
+_fi__(!_GENERIC__)
 @titlepage
 @title{Using _AS__}
 @subtitle{The GNU Assembler}
-_if__(!_ALL_ARCH__)
+_if__(!_GENERIC__)
 @subtitle{for the _HOST__ family}
-_fi__(!_ALL_ARCH__)
+_fi__(!_GENERIC__)
 @sp 1
 @subtitle March 1991
+@sp 1
+@c pesch@cygnus.com
+@subtitle edited by Roland Pesch
+@subtitle for Cygnus Support
 @sp 13
 The Free Software Foundation Inc.  thanks The Nice Computer
 Company of Australia for loaning Dean Elsner to write the
@@ -90,8 +90,6 @@ distracting the boss while they got some work
 done.
 @sp 3
 @author{Dean Elsner, Jay Fenlason & friends}
-@author{revised by Roland Pesch for Cygnus Support}
-@c pesch@cygnus.com
 @page
 @tex
 \def\$#1${{#1}}  % Kluge: collect RCS revision info without $...$
@@ -126,26 +124,26 @@ one.
 Permission is granted to copy and distribute translations of this manual
 into another language, under the above conditions for modified versions,
 except that the section entitled ``GNU General Public License'' may be
-included in a translation approved by the author instead of in the
-original English.
+included in a translation approved by the Free Software Foundation
+instead of in the original English.
 @end titlepage
 @page
 @node Top,,,
 @ifinfo
 This file is a user guide to the GNU assembler @code{_AS__}.
-_if__(!_ALL_ARCH__)
+_if__(!_GENERIC__)
 This version of the file describes @code{_AS__} configured to generate
 code for _HOST__ architectures.
-_fi__(!_ALL_ARCH__)
+_fi__(!_GENERIC__)
 @end ifinfo
 @node Overview,,,
 @chapter Overview
 @iftex
 This manual is a user guide to the GNU assembler @code{_AS__}.
-_if__(!_ALL_ARCH__)
+_if__(!_GENERIC__)
 This version of the manual describes @code{_AS__} configured to generate
 code for _HOST__ architectures.
-_fi__(!_ALL_ARCH__)
+_fi__(!_GENERIC__)
 @end iftex
 
 @node Invoking,,,
@@ -186,12 +184,12 @@ other assemblers; it has no effect on @code{_AS__}.
 Add @var{path} to the search list for @code{.include} directives
 
 @item -k
-_if__(_AMD29K__ || _I960__)
+_if__((!_GENERIC__) && (_AMD29K__ || _I960__))
 This option is accepted but has no effect on the _HOST__ family.
-_fi__(_AMD29K__ || _I960__)
-_if__(!(_AMD29K__||_I960__))
-Issue warnings when difference tables altered for long displacements
-_fi__(!(_AMD29K__||_I960__))
+_fi__((!_GENERIC__) && (_AMD29K__ || _I960__))
+_if__(_GENERIC__)
+Issue warnings when difference tables altered for long displacements.
+_fi__(_GENERIC__)
 
 @item -L
 Keep (in symbol table) local symbols, starting with @samp{L}
@@ -236,14 +234,14 @@ This document is intended to describe what you need to know to use
 notation for symbols, constants, and expressions; the directives that
 @code{_AS__} understands; and of course how to invoke @code{_AS__}.
 
-_if__(!_ALL_ARCH__)
+_if__(!_GENERIC__)
 We also cover special features in the _HOST__
 configuration of @code{_AS__}, including assembler directives.
-_fi__(!_ALL_ARCH__)
-_if__(_ALL_ARCH__)
+_fi__(!_GENERIC__)
+_if__(_GENERIC__)
 This document also describes some of the machine-dependent features of
 various flavors of the assembler.
-_fi__(_ALL_ARCH__)
+_fi__(_GENERIC__)
 _if__(_INTERNALS__)
 This document also describes how the assembler works internally, and
 provides some information that may be useful to people attempting to
@@ -287,10 +285,10 @@ computer-readable series of instructions.  Different versions of
 @node GNU Assembler,,,
 @section _AS__, the GNU Assembler
 GNU @code{as} is really a family of assemblers.  
-_if__(!_ALL_ARCH__)
+_if__(!_GENERIC__)
 This manual describes @samp{_AS__}, a member of that family which is
 configured for the _HOST__ architectures.
-_fi__(!_ALL_ARCH__)
+_fi__(!_GENERIC__)
 If you use (or have used) the GNU assembler on another architecture, you
 should find a fairly similar environment.  Each version has much in
 common with the others, including object file formats, most assembler
@@ -303,11 +301,11 @@ assembler would.
 _if__(_VAX__)
 Any exceptions are documented explicitly (@pxref{_MACH_DEP__}).
 _fi__(_VAX__)
-_if__(_ALL_ARCH__||_M680X0__)
+_if__(_GENERIC__||_M680X0__)
 This doesn't mean @code{_AS__} always uses the same syntax as another
 assembler for the same architecture; for example, we know of several
 incompatible versions of 680x0 assembly language syntax.
-_fi__(_ALL_ARCH__||_M680X0__)
+_fi__(_GENERIC__||_M680X0__)
 
 Unlike older assemblers, @code{_AS__} is designed to assemble a source
 program in one pass of the source file.  This has a subtle impact on the
@@ -317,7 +315,7 @@ program in one pass of the source file.  This has a subtle impact on the
 @section Object File Formats
 The GNU assembler can be configured to produce several alternative
 object file formats.  
-_if__(!_ALL_ARCH__)
+_if__(!_GENERIC__)
 _if__(!_I960__)
 @code{_AS__} is configured to produce @code{a.out} format object
 files.@refill
@@ -326,7 +324,7 @@ _if__(_I960__)
 @code{_AS__} can be configured to produce either @code{b.out} or COFF
 format object files.
 _fi__(_I960__)
-_fi__(!_ALL_ARCH__)
+_fi__(!_GENERIC__)
 
 @node Command Line,,,
 @section Command Line
@@ -436,7 +434,8 @@ Warning messages have the format
 @smallexample
 file_name:@b{NNN}:Warning Message Text
 @end smallexample
-@noindent(where @b{NNN} is a line number).  If a logical file name has
+@noindent
+(where @b{NNN} is a line number).  If a logical file name has
 been given (@pxref{App-File}) it is used for the filename, otherwise the
 name of the current input file is used.  If a logical line number was
 given
@@ -463,7 +462,12 @@ because many of them aren't supposed to happen.
 @section Options
 This section describes command-line options available in @emph{all}
 versions of the GNU assembler; @pxref{_MACH_DEP__}, for options specific
+_if__(!_GENERIC__)
 to the _HOST__.
+_fi__(!_GENERIC__)
+_if__(_GENERIC__)
+to particular machine architectures.
+_fi__(_GENERIC__)
 
 @subsection @code{-D}
 This option has no effect whatsoever, but it is accepted to make it more
@@ -490,21 +494,21 @@ in the same order as they were specified (left to right) on the command
 line.
 
 @subsection Difference Tables: @code{-k}
-_if__(_AMD29K__ || _I960__)
+_if__((!_GENERIC__) && (_AMD29K__ || _I960__))
 On the _HOST__ family, this option is allowed, but has no effect.  It is
 permitted for compatibility with the GNU assembler on other platforms,
 where it can be used to warn when the assembler alters the machine code
 generated for @samp{.word} directives in difference tables.  The _HOST__
 family does not have the addressing limitations that sometimes lead to this
 alteration on other platforms.
-_fi__(_AMD29K__ || _I960__)
+_fi__((!_GENERIC__) && (_AMD29K__ || _I960__))
 
-_if__(! (_AMD29K__ || _I960__) )
+_if__(_GENERIC__ || (! _AMD29K__ || _I960__ ))
 @code{_AS__} sometimes alters the code emitted for directives of the form
 @samp{.word @var{sym1}-@var{sym2}}; @pxref{Word}.
 You can use the @samp{-k} option if you want a warning issued when this
 is done.
-_fi__(! (_AMD29K__ || _I960__) )
+_fi__(_GENERIC__ || (! _AMD29K__ || _I960__ ))
 
 @subsection Include Local Labels: @code{-L}
 Labels beginning with @samp{L} (upper case only) are called @dfn{local
@@ -618,9 +622,12 @@ This means you may not nest these comments.
 
 Anything from the @dfn{line comment} character to the next newline
 is considered a comment and is ignored.  The line comment character is
-_if__(_VAX__ || _I960__)
-@samp{#} on the _HOST__;
-_fi__(_VAX__ || _I960__)
+_if__(_VAX__)
+@samp{#} on the Vax;
+_fi__(_VAX__)
+_if__(_I960__)
+@samp{#} on the i960;
+_fi__(_I960__)
 _if__(_M680X0__)
 @samp{|} on the 680x0;
 _fi__(_M680X0__)
@@ -628,12 +635,13 @@ _if__(_AMD29K__)
 @samp{;} for the AMD 29K family;
 _fi__(_AMD29K__)
 @pxref{_MACH_DEP__}.  @refill
+@c FIXME: fill in SPARC line comment char
 
-_if__(_ALL_ARCH__)
+_if__(_GENERIC__)
 On some machines there are two different line comment characters.  One
 will only begin a comment if it is the first non-whitespace character on
 a line, while the other will always begin a comment.
-_fi__(_ALL_ARCH__)
+_fi__(_GENERIC__)
 
 To be compatible with past assemblers a special interpretation is
 given to lines that begin with @samp{#}.  Following the @samp{#} an
@@ -699,12 +707,12 @@ symbol begins with a dot @samp{.} then the statement is an assembler
 directive: typically valid for any computer.  If the symbol begins with
 a letter the statement is an assembly language @dfn{instruction}: it
 will assemble into a machine language instruction.  
-_if__(_ALL_ARCH__)
+_if__(_GENERIC__)
 Different versions of @code{_AS__} for different computers will
 recognize different instructions.  In fact, the same symbol may
 represent a different instruction in a different computer's assembly
 language.@refill
-_fi__(_ALL_ARCH__)
+_fi__(_GENERIC__)
 
 A label is a symbol immediately followed by a colon (@code{:}).
 Whitespace before a label or after a colon is permitted, but you may not
@@ -867,20 +875,30 @@ A flonum is written by writing (in order)
 @item
 The digit @samp{0}.
 @item
+_if__(_GENERIC__)
+A letter, to tell @code{_AS__} the rest of the number is a flonum.  @kbd{e}
+is recommended.  Case is not important.
+@ignore
+@c FIXME: verify if flonum syntax really this vague for most cases
+  (Any otherwise illegal letter
+will work here, but that might be changed.  Vax BSD 4.2 assembler seems
+to allow any of @samp{defghDEFGH}.)
+@end ignore
+_fi__(_GENERIC__)
 _if__(_AMD29K__)
+_if__(_GENERIC__)
+On the AMD 29K architecture, the letter must be:
+_fi__(_GENERIC__)
 One of the letters @samp{DFPRSX} (in upper or lower case), to tell
 @code{_AS__} the rest of the number is a flonum.
 _fi__(_AMD29K__)
 _if__(_I960__)
+_if__(_GENERIC__)
+On the Intel 960 architecture, the letter must be:
+_fi__(_GENERIC__)
 One of the letters @samp{DFT} (in upper or lower case), to tell
 @code{_AS__} the rest of the number is a flonum.
 _fi__(_I960__)
-_if__(!(_AMD29K__||_I960__))
-A letter, to tell @code{_AS__} the rest of the number is a flonum.  @kbd{e}
-is recommended.  Case is not important.  (Any otherwise illegal letter
-will work here, but that might be changed.  Vax BSD 4.2 assembler seems
-to allow any of @samp{defghDEFGH}.)
-_fi__(!(_AMD29K__||_I960__))
 @item
 An optional sign: either @samp{+} or @samp{-}.
 @item
@@ -925,9 +943,9 @@ the first will act as a mask; @code{_AS__} will bitwise-and it with the
 second value.
 
 The resulting number is then packed
-_if__(_ALL_ARCH__)
+_if__(_GENERIC__)
 (in host-dependent byte order)
-_fi__(_ALL_ARCH__)
+_fi__(_GENERIC__)
 into a field whose width depends on which assembler directive has the
 bit-field as its argument.  Overflow (a result from the bitwise and
 requiring more binary digits to represent) is not an error; instead,
@@ -1201,11 +1219,11 @@ output.
 Subsegments are optional.  If you don't use subsegments, everything
 will be stored in subsegment number zero.
 
-_if__(!(_AMD29K__||_I960__))
+_if__(_GENERIC__)
 Each subsegment is zero-padded up to a multiple of four bytes.
 (Subsegments may be padded a different amount on different flavors
 of @code{_AS__}.)
-_fi__(!(_AMD29K__||_I960__))
+_fi__(_GENERIC__)
 _if__(_I960__)
 @c Rich Pixley says padding here depends on target obj code format; that
 @c doesn't seem particularly useful to say without further elaboration,
@@ -1419,9 +1437,14 @@ format depends on the object-code output format in use.
 
 _if__(_AOUT__||_BOUT__)
 @node a.out Symbols,,,
+_if__(_BOUT__)
 @subsection Symbol Attributes: @code{a.out}, @code{b.out}
 These symbol attributes appear only when @code{_AS__} is configured for
 one of the Berkeley-descended object output formats.
+_fi__(_BOUT__)
+_if__(!_BOUT__)
+@subsection Symbol Attributes: @code{a.out}
+_fi__(!_BOUT__)
 
 @node Symbol Desc, Symbol Other, Symbol Type, Symbol Attributes
 @subsubsection Descriptor
@@ -1730,14 +1753,14 @@ _fi__(_COFF__)
 @section @code{.double @var{flonums}}
 @code{.double} expects zero or more flonums, separated by commas.  It
 assembles floating point numbers.
-_if__(_ALL_ARCH__)
+_if__(_GENERIC__)
 The exact kind of floating point numbers emitted depends on how
 @code{_AS__} is configured.  @xref{_MACH_DEP__}.
-_fi__(_ALL_ARCH__)
-_if__(_AMD29K__ || _I960__)
+_fi__(_GENERIC__)
+_if__((!_GENERIC__) && (_AMD29K__ || _I960__))
 On the _HOST__ family @samp{.double} emits 64-bit floating-point numbers
 in IEEE format.
-_fi__(_AMD29K__ || _I960__)
+_fi__((!_GENERIC__) && (_AMD29K__ || _I960__))
 
 @node Else,,,
 @section @code{.else}
@@ -1820,15 +1843,15 @@ assumed zero.  If the first comma and following tokens are absent,
 @section @code{.float @var{flonums}}
 This directive assembles zero or more flonums, separated by commas.  It
 has the same effect as @code{.single}.
-_if__(_ALL_ARCH__)
+_if__(_GENERIC__)
 The exact kind of floating point numbers emitted depends on how
 @code{_AS__} is configured.
 @xref{_MACH_DEP__}.
-_fi__(_ALL_ARCH__)
-_if__(_AMD29K__ || _I960__)
+_fi__(_GENERIC__)
+_if__((!_GENERIC__) && (_AMD29K__ || _I960__))
 On the _HOST__ family, @code{.float} emits 32-bit floating point numbers
 in IEEE format.
-_fi__(_AMD29K__ || _I960__)
+_fi__((!_GENERIC__) && (_AMD29K__ || _I960__))
 
 @node Global, Ident, Float, Pseudo Ops
 @section @code{.global @var{symbol}}, @code{.globl @var{symbol}}
@@ -1852,13 +1875,13 @@ compatibility with other assemblers.
 This expects zero or more @var{expressions}, and emits
 a 16 bit number for each.
 
-_if__(_ALL_ARCH__)
+_if__(_GENERIC__)
 This directive is a synonym for @samp{.short}; depending on the target
 architecture, it may also be a synonym for @samp{.word}.
-_fi__(_ALL_ARCH__)
-_if__( (_AMD29K__ || _I960__) && !_ALL_ARCH__ )
+_fi__(_GENERIC__)
+_if__( (_AMD29K__ || _I960__) && !_GENERIC__ )
 This directive is a synonym for @samp{.short}.
-_fi__( (_AMD29K__ || _I960__) && !_ALL_ARCH__ )
+_fi__( (_AMD29K__ || _I960__) && !_GENERIC__ )
 
 _if__(_AOUT__||_BOUT__||_COFF__)
 @node Ident, If, Global, Pseudo Ops
@@ -2103,26 +2126,26 @@ file is the last value stored into it.
 
 @node Short, Single, Set, Pseudo Ops
 @section @code{.short @var{expressions}}
-_if__(! (_SPARC__ || _AMD29K__ || _I960__) )
+_if__(_GENERIC__ && (! (_SPARC__ || _AMD29K__ || _I960__) ))
 @code{.short} is the same as @samp{.word}.  @xref{Word}.
-_fi__(! (_SPARC__ || _AMD29K__ || _I960__) )
-_if__(_SPARC__ || _AMD29K__ || _I960__)
+_fi__(_GENERIC__ && (! (_SPARC__ || _AMD29K__ || _I960__) ))
+_if__((!_GENERIC__) && (_SPARC__ || _AMD29K__ || _I960__))
 This expects zero or more @var{expressions}, and emits
 a 16 bit number for each.
-_fi__(_SPARC__ || _AMD29K__ || _I960__)
+_fi__((!_GENERIC__) && (_SPARC__ || _AMD29K__ || _I960__))
 
 @node Single,,,
 @section @code{.single @var{flonums}}
 This directive assembles zero or more flonums, separated by commas.  It
 has the same effect as @code{.float}.
-_if__(_ALL_ARCH__)
+_if__(_GENERIC__)
 The exact kind of floating point numbers emitted depends on how
 @code{_AS__} is configured.  @xref{_MACH_DEP__}.
-_fi__(_ALL_ARCH__)
-_if__(_AMD29K__ || _I960__)
+_fi__(_GENERIC__)
+_if__((!_GENERIC__) && (_AMD29K__ || _I960__ || _SPARC__))
 On the _HOST__ family, @code{.single} emits 32-bit floating point
 numbers in IEEE format.
-_fi__(_AMD29K__ || _I960__)
+_fi__((!_GENERIC__) && (_AMD29K__ || _I960__ || _SPARC__))
 
 _if__(_COFF__)
 @node Size,,,
@@ -2153,7 +2176,7 @@ AMD 29K assemblers.
 
 @quotation
 @emph{Warning:} In other versions of the GNU assembler, the directive
-@code{.space} has the effect of @code{.block}  @xref{Machine Directives}.
+@code{.space} has the effect of @code{.block}  @xref{_MACH_DEP__}.
 @end quotation
 _fi__(_AMD29K__)
 
@@ -2265,22 +2288,24 @@ _fi__(_COFF__)
 @section @code{.word @var{expressions}}
 This directive expects zero or more @var{expressions}, of any segment,
 separated by commas.
-_if__(_SPARC__ || _AMD29K__ || _I960__)
+_if__((!_GENERIC__) && (_SPARC__ || _AMD29K__ || _I960__))
 For each expression, @code{_AS__} emits a 32-bit number.
-_fi__(_SPARC__ || _AMD29K__ || _I960__)
-_if__(! (_SPARC__ || _AMD29K__ || _I960__) )
+_fi__((!_GENERIC__) && (_SPARC__ || _AMD29K__ || _I960__))
+_if__((!_GENERIC__) && (! (_SPARC__ || _AMD29K__ || _I960__) ))
 For each expression, @code{_AS__} emits a 16-bit number.
-_fi__(! (_SPARC__ || _AMD29K__ || _I960__) )
+_fi__((!_GENERIC__) && (! (_SPARC__ || _AMD29K__ || _I960__) ))
 
-_if__(_ALL_ARCH__)
-The byte order of the expression depends on what kind of computer will
-run the program.
-_fi__(_ALL_ARCH__)
+_if__(_GENERIC__) 
+The size of the number emitted, and its byte order,
+depends on what kind of computer will run the program.
+_fi__(_GENERIC__)
 
 @c on these boxes the "special treatment to support compilers" doesn't
 @c happen---32-bit addressability, period; no long/short jumps.
-_if__(! (_AMD29K__ || _I960__) )
-@subsection Special Treatment to support Compilers
+_if__(_GENERIC__ || (! (_AMD29K__ || _I960__) ))
+@quotation
+@emph{Warning: Special Treatment to support Compilers}
+@end quotation
 
 In order to assemble compiler output into something that will work,
 @code{_AS__} will occasionlly do strange things to @samp{.word} directives.
@@ -2309,7 +2334,7 @@ _if__(_INTERNALS__)
 @samp{-DWORKING_DOT_WORD} option.} This feature is likely to confuse
 assembly language programmers.
 _fi__(_INTERNALS__)
-_fi__(! (_AMD29K__ || _I960__) )
+_fi__(_GENERIC__ || (! (_AMD29K__ || _I960__) ))
 
 @node Deprecated, _MACH_DEP__, Word, Pseudo Ops
 @section Deprecated Directives
@@ -2322,13 +2347,13 @@ They are included for compatibility with older assemblers.
 @end table
 
 @node _MACH_DEP__,,,
-_if__(_ALL_ARCH__)
+_if__(_GENERIC__)
 @chapter Machine Dependent Features
-_fi__(_ALL_ARCH__)
+_fi__(_GENERIC__)
 _if__(_VAX__)
 @group
-_CHAPSEC__(0+_ALL_ARCH__) VAX Dependent Features
-_CHAPSEC__(1+_ALL_ARCH__) Options
+_CHAPSEC__(0+_GENERIC__) VAX Dependent Features
+_CHAPSEC__(1+_GENERIC__) Options
 
 The Vax version of @code{_AS__} accepts any of the following options,
 gives a warning message that the option was ignored and proceeds.
@@ -2382,7 +2407,7 @@ option also insertes some code following the @samp{_main}
 symbol so that the object file will be compatible with Vax-11
 "C".
 
-_CHAPSEC__(1+_ALL_ARCH__) Floating Point
+_CHAPSEC__(1+_GENERIC__) Floating Point
 Conversion of flonums to floating point is correct, and
 compatible with previous assemblers.  Rounding is
 towards zero if the remainder is exactly half the least significant bit.
@@ -2397,7 +2422,7 @@ boundary case.
 The @code{.float} directive produces @code{f} format numbers.
 The @code{.double} directive produces @code{d} format numbers.
 
-_CHAPSEC__(1+_ALL_ARCH__) Machine Directives
+_CHAPSEC__(1+_GENERIC__) Vax Machine Directives
 The Vax version of the assembler supports four directives for
 generating Vax floating point constants.  They are described in the
 table below.
@@ -2421,14 +2446,14 @@ assembles Vax @code{h} format 128-bit floating point constants.
 
 @end table
 
-_CHAPSEC__(1+_ALL_ARCH__) Opcodes
+_CHAPSEC__(1+_GENERIC__) Opcodes
 All DEC mnemonics are supported.  Beware that @code{case@dots{}}
 instructions have exactly 3 operands.  The dispatch table that
 follows the @code{case@dots{}} instruction should be made with
 @code{.word} statements.  This is compatible with all unix
 assemblers we know of.
 
-_CHAPSEC__(1+_ALL_ARCH__) Branch Improvement
+_CHAPSEC__(1+_GENERIC__) Branch Improvement
 Certain pseudo opcodes are permitted.  They are for branch
 instructions.  They expand to the shortest branch instruction that
 will reach the target.  Generally these mnemonics are made by
@@ -2469,9 +2494,9 @@ Unconditional branch.
 @item (byte displacement)
 @kbd{b@var{COND} @dots{}}
 @item (word displacement)
-@kbd{b@var{UNCOND} foo ; brw @dots{} ; foo:}
+@kbd{b@var{NOTCOND} foo ; brw @dots{} ; foo:}
 @item (long displacement)
-@kbd{b@var{UNCOND} foo ; jmp @dots{} ; foo:}
+@kbd{b@var{NOTCOND} foo ; jmp @dots{} ; foo:}
 @end table
 @item jacb@var{X}
 @var{X} may be one of @code{b d f g h l w}.
@@ -2479,7 +2504,12 @@ Unconditional branch.
 @item (word displacement)
 @kbd{@var{OPCODE} @dots{}}
 @item (long displacement)
-@kbd{@var{OPCODE} @dots{}, foo ; brb bar ; foo: jmp @dots{} ; bar:}
+@example
+@var{OPCODE} @dots{}, foo ; 
+brb bar ; 
+foo: jmp @dots{} ; 
+bar:
+@end example
 @end table
 @item jaob@var{YYY}
 @var{YYY} may be one of @code{lss leq}.
@@ -2489,9 +2519,19 @@ Unconditional branch.
 @item (byte displacement)
 @kbd{@var{OPCODE} @dots{}}
 @item (word displacement)
-@kbd{@var{OPCODE} @dots{}, foo ; brb bar ; foo: brw @var{destination} ; bar:}
+@example
+@var{OPCODE} @dots{}, foo ; 
+brb bar ; 
+foo: brw @var{destination} ; 
+bar:
+@end example
 @item (long displacement)
-@kbd{@var{OPCODE} @dots{}, foo ; brb bar ; foo: jmp @var{destination} ; bar: }
+@example
+@var{OPCODE} @dots{}, foo ; 
+brb bar ; 
+foo: jmp @var{destination} ; 
+bar: 
+@end example
 @end table
 @item aobleq
 @itemx aoblss
@@ -2501,13 +2541,23 @@ Unconditional branch.
 @item (byte displacement)
 @kbd{@var{OPCODE} @dots{}}
 @item (word displacement)
-@kbd{@var{OPCODE} @dots{}, foo ; brb bar ; foo: brw @var{destination} ; bar:}
+@example
+@var{OPCODE} @dots{}, foo ; 
+brb bar ; 
+foo: brw @var{destination} ; 
+bar:
+@end example
 @item (long displacement)
-@kbd{@var{OPCODE} @dots{}, foo ; brb bar ; foo: jmp @var{destination} ; bar:}
+@example
+@var{OPCODE} @dots{}, foo ; 
+brb bar ; 
+foo: jmp @var{destination} ; 
+bar:
+@end example
 @end table
 @end table
 
-_CHAPSEC__(1+_ALL_ARCH__) operands
+_CHAPSEC__(1+_GENERIC__) operands
 The immediate character is @samp{$} for Unix compatibility, not
 @samp{#} as DEC writes it.
 
@@ -2534,23 +2584,24 @@ separated.
 @c in operands, but I forget what it is.  It is
 @c a syntax clash because () is used as an address mode
 @c and to encapsulate sub-expressions.
-_CHAPSEC__(1+_ALL_ARCH__) Not Supported
+_CHAPSEC__(1+_GENERIC__) Not Supported
 Vax bit fields can not be assembled with @code{_AS__}.  Someone
 can add the required code if they really need it.
+
 _fi__(_VAX__)
 _if__(_AMD29K__)
 @group
-_CHAPSEC__(0+_ALL_ARCH__) AMD 29K Dependent Features
+_CHAPSEC__(0+_GENERIC__) AMD 29K Dependent Features
 @node AMD29K Options, AMD29K Syntax, _MACH_DEP__, _MACH_DEP__
-_CHAPSEC__(1+_ALL_ARCH__) Options
+_CHAPSEC__(1+_GENERIC__) Options
 @code{_AS__} has no additional command-line options for the AMD
 29K family.
 @end group
 
 @node AMD29K Syntax, AMD29K Floating Point, AMD29K Options, _MACH_DEP__
 @group
-_CHAPSEC__(1+_ALL_ARCH__) Syntax
-_CHAPSEC__(2+_ALL_ARCH__) Special Characters
+_CHAPSEC__(1+_GENERIC__) Syntax
+_CHAPSEC__(2+_GENERIC__) Special Characters
 @samp{;} is the line comment character.
 
 @samp{@@} can be used instead of a newline to separate statements.
@@ -2559,7 +2610,7 @@ The character @samp{?} is permitted in identifiers (but may not begin
 an identifier).
 @end group
 
-_CHAPSEC__(2+_ALL_ARCH__) Register Names
+_CHAPSEC__(2+_GENERIC__) Register Names
 General-purpose registers are represented by predefined symbols of the
 form @samp{GR@var{nnn}} (for global registers) or @samp{LR@var{nnn}}
 (for local registers), where @var{nnn} represents a number between
@@ -2598,30 +2649,30 @@ These unprotected special-purpose register names are also recognized:
 @end smallexample
 
 @node AMD29K Floating Point, AMD29K Directives, AMD29K Syntax, _MACH_DEP__
-_CHAPSEC__(1+_ALL_ARCH__) Floating Point
+_CHAPSEC__(1+_GENERIC__) Floating Point
 The AMD 29K family uses IEEE floating-point numbers.
 
 @group
 @node AMD29K Directives, AMD29K Opcodes, AMD29K Floating Point, _MACH_DEP__
-_CHAPSEC__(1+_ALL_ARCH__) Machine Directives
+_CHAPSEC__(1+_GENERIC__) AMD 29K Machine Directives
 
-@node block, cputype, AMD29K Directives, AMD29K Directives
-_CHAPSEC__(2+_ALL_ARCH__) @code{.block @var{size} , @var{fill}}
+@table @code
+@item .block @var{size} , @var{fill}
 This directive emits @var{size} bytes, each of value @var{fill}.  Both
 @var{size} and @var{fill} are absolute expressions.  If the comma
 and @var{fill} are omitted, @var{fill} is assumed to be zero.
 
 In other versions of the GNU assembler, this directive is called
 @samp{.space}.
+@end table
 @end group
 
-@node cputype, file, block, Machine Directives
-_CHAPSEC__(2+_ALL_ARCH__) @code{.cputype}
+@table @code
+@item .cputype
 This directive is ignored; it is accepted for compatibility with other
 AMD 29K assemblers.
 
-@node file, hword, cputype, Machine Directives
-_CHAPSEC__(2+_ALL_ARCH__) @code{.file}
+@item .file
 This directive is ignored; it is accepted for compatibility with other
 AMD 29K assemblers.
 
@@ -2630,29 +2681,25 @@ AMD 29K assemblers.
 used for the directive called @code{.app-file} in the AMD 29K support.
 @end quotation
 
-@node line, reg, hword, Machine Directives
-_CHAPSEC__(2+_ALL_ARCH__) @code{.line}
+@item .line
 This directive is ignored; it is accepted for compatibility with other
 AMD 29K assemblers.
 
-@node reg, sect, line, Machine Directives
-_CHAPSEC__(2+_ALL_ARCH__) @code{.reg @var{symbol}, @var{expression}}
+@item .reg @var{symbol}, @var{expression}
 @code{.reg} has the same effect as @code{.lsym}; @pxref{Lsym}.
 
-@node sect, use, reg, Machine Directives
-_CHAPSEC__(2+_ALL_ARCH__) @code{.sect}
+@item .sect
 This directive is ignored; it is accepted for compatibility with other
 AMD 29K assemblers.
 
-@node use,  , sect, Machine Directives
-_CHAPSEC__(2+_ALL_ARCH__) @code{.use @var{segment name}}
+@item .use @var{segment name}
 Establishes the segment and subsegment for the following code;
 @var{segment name} may be one of @code{.text}, @code{.data},
 @code{.data1}, or @code{.lit}.  With one of the first three @var{segment
 name} options, @samp{.use} is equivalent to the machine directive
 @var{segment name}; the remaining case, @samp{.use .lit}, is the same as
 @samp{.data 200}.
-
+@end table
 
 @node AMD29K Opcodes, , AMD29K Directives, _MACH_DEP__
 @section Opcodes
@@ -2664,9 +2711,9 @@ User's Manual}, Advanced Micro Devices, Inc.
 
 _fi__(_AMD29K__)
 _if__(_I960__)
-_CHAPSEC__(0+_ALL_ARCH__) Intel 80960 Dependent Features
+_CHAPSEC__(0+_GENERIC__) Intel 80960 Dependent Features
 @node Options-i960,,,
-_CHAPSEC__(1+_ALL_ARCH__) Command-line Options
+_CHAPSEC__(1+_GENERIC__) Command-line Options
 @table @code
 
 @item -ACA | -ACA_A | -ACB | -ACC | -AKA | -AKB | -AKC | -AMC
@@ -2756,31 +2803,31 @@ displacement size), regardless of whether you use @samp{-norelax}.
 @end table
 
 @node Floating Point-i960,,,
-_CHAPSEC__(1+_ALL_ARCH__) Floating Point
+_CHAPSEC__(1+_GENERIC__) Floating Point
 @code{_AS__} generates IEEE floating-point numbers for the directives
 @samp{.float}, @samp{.double}, @samp{extended}, and @samp{.single}.
 
 @group
 @node Directives-i960,,,
-_CHAPSEC__(1+_ALL_ARCH__) Machine Directives
+_CHAPSEC__(1+_GENERIC__) i960 Machine Directives
 
-@node bss-i960,,,
-_CHAPSEC__(2+_ALL_ARCH__) @code{.bss @var{symbol}, @var{length}, @var{align}}
+@table @code
+@item .bss @var{symbol}, @var{length}, @var{align}
 Reserve @var{length} bytes in the bss segment for a local @var{symbol},
 aligned to the power of two specified by @var{align}.  @var{length} and
 @var{align} must be positive absolute expressions.  This directive
 differs from @samp{.lcomm} only in that it permits you to specify
 an alignment.  @xref{Lcomm}.
+@end table
 @end group
 
-@node extended-i960,,,
-_CHAPSEC__(2+_ALL_ARCH__) @code{.extended @var{flonums}}
+@table @code
+@item .extended @var{flonums}
 @code{.extended} expects zero or more flonums, separated by commas; for
 each flonum, @samp{.extended} emits an IEEE extended-format (80-bit)
 floating-point number.
 
-@node leafproc-i960,,,
-_CHAPSEC__(2+_ALL_ARCH__) @code{.leafproc @var{call-lab}, @var{bal-lab}}
+@item .leafproc @var{call-lab}, @var{bal-lab}
 You can use the @samp{.leafproc} directive in conjunction with the
 optimized @code{callj} instruction to enable faster calls of leaf
 procedures.  If a procedure is known to call no other procedures, you
@@ -2799,8 +2846,7 @@ needed later to choose between converting the @samp{callj} into a
 two arguments are identical, the single argument is assumed to be the
 @code{bal} entry point.
 
-@node sysproc-i960,,,
-_CHAPSEC__(2+_ALL_ARCH__) @code{.sysproc @var{name}, @var{index}}
+@item .sysproc @var{name}, @var{index}
 The @samp{.sysproc} directive defines a name for a system procedure.
 After you define it using @samp{.sysproc}, you can use @var{name} to
 refer to the system procedure identified by @var{index} when calling
@@ -2808,9 +2854,10 @@ procedures with the optimized call instruction @samp{callj}.
 
 Both arguments are required; @var{index} must be between 0 and 31
 (inclusive).
+@end table
 
 @node Opcodes for i960,,,
-_CHAPSEC__(1+_ALL_ARCH__) i960 Opcodes
+_CHAPSEC__(1+_GENERIC__) i960 Opcodes
 All Intel 960 machine instructions are supported; @pxref{Options-i960}
 for a discussion of selecting the instruction subset for a particular
 960 architecture.@refill
@@ -2820,7 +2867,7 @@ instruction: @samp{callj}, and Compare-and-Branch or Compare-and-Jump
 instructions with target displacements larger than 13 bits.
 
 @node callj-i960
-_CHAPSEC__(2+_ALL_ARCH__) @code{callj}
+_CHAPSEC__(2+_GENERIC__) @code{callj}
 You can write @code{callj} to have the assembler or the linker determine
 the most appropriate form of subroutine call: @samp{call},
 @samp{bal}, or @samp{calls}.  If the assembly source contains
@@ -2830,7 +2877,7 @@ defining the operand---then @code{_AS__} will translate the
 for the linker to resolve.
 
 @node Compare-and-branch-i960
-_CHAPSEC__(2+_ALL_ARCH__) Compare-and-Branch
+_CHAPSEC__(2+_GENERIC__) Compare-and-Branch
 
 The 960 architectures provide combined Compare-and-Branch instructions
 that permit you to store the branch target in the lower 13 bits of the
@@ -2847,6 +2894,7 @@ expanded if necessary; the ``Branch'' instructions are expanded when
 necessary @emph{unless} you specify @code{-norelax}---in which case
 @code{_AS__} gives an error instead.
 
+@group
 These are the Compare-and-Branch instructions, their ``Jump'' variants,
 and the instruction pairs they may expand into:
 
@@ -2895,12 +2943,13 @@ and the instruction pairs they may expand into:
     cmpoble&   cmpojle&       cmpo; ble\cr
     cmpobne&   cmpojne&       cmpo; bne\cr}
 @end tex
+@end group
 
 _fi__(_I960__)
 _if__(_M680X0__)
 @group
-_CHAPSEC__(0+_ALL_ARCH__) M680x0 Dependent Features
-_CHAPSEC__(1+_ALL_ARCH__) M680x0 Options
+_CHAPSEC__(0+_GENERIC__) M680x0 Dependent Features
+_CHAPSEC__(1+_GENERIC__) M680x0 Options
 The Motorola 680x0 version of @code{_AS__} has two machine dependent options.
 One shortens undefined references from 32 to 16 bits, while the
 other is used to tell @code{_AS__} what kind of machine it is
@@ -2926,7 +2975,7 @@ MC68000 or MC68010 microprocessors.  You can give @code{_AS__} the options
 @samp{-m68020}, and @samp{-mc68020} to tell it what processor is the
 target.
 
-_CHAPSEC__(1+_ALL_ARCH__) Syntax
+_CHAPSEC__(1+_GENERIC__) Syntax
 
 The 680x0 version of @code{_AS__} uses syntax similar to the Sun assembler.
 Size modifiers are appended directly to the end of the opcode without an
@@ -2968,14 +3017,17 @@ The following addressing modes are understood:
 
 @item Index
 @samp{@var{apc}@@(@var{digits},@var{register}:@var{size}:@var{scale})}
+
 or @samp{@var{apc}@@(@var{register}:@var{size}:@var{scale})}
 
 @item Postindex
 @samp{@var{apc}@@(@var{digits})@@(@var{digits},@var{register}:@var{size}:@var{scale})}
+
 or @samp{@var{apc}@@(@var{digits})@@(@var{register}:@var{size}:@var{scale})}
 
 @item Preindex
 @samp{@var{apc}@@(@var{digits},@var{register}:@var{size}:@var{scale})@@(@var{digits})}
+
 or @samp{@var{apc}@@(@var{register}:@var{size}:@var{scale})@@(@var{digits})}
 
 @item Memory Indirect
@@ -2991,7 +3043,7 @@ by @samp{:b}, @samp{:w}, or @samp{:l}.
 @end ignore
 @end table
 
-_CHAPSEC__(1+_ALL_ARCH__) Floating Point
+_CHAPSEC__(1+_GENERIC__) Floating Point
 The floating point code is not too well tested, and may have
 subtle bugs in it.
 
@@ -3012,7 +3064,7 @@ immediate operands to floating-point instructions.  Adding a
 directive to create extended precision numbers would not be
 hard, but it has not yet seemed necessary.
 
-_CHAPSEC__(1+_ALL_ARCH__) Machine Directives
+_CHAPSEC__(1+_GENERIC__) 680x0 Machine Directives
 In order to be compatible with the Sun assembler the 680x0 assembler
 understands the following directives.
 @table @code
@@ -3027,7 +3079,7 @@ This directive is identical to a @code{.align 1} directive.
 This directive is identical to a @code{.space} directive.
 @end table
 
-_CHAPSEC__(1+_ALL_ARCH__) Opcodes
+_CHAPSEC__(1+_GENERIC__) Opcodes
 @c pesch@cygnus.com: I don't see any point in the following
 @c                   paragraph.  Bugs are bugs; how does saying this
 @c                   help anyone?
@@ -3037,7 +3089,7 @@ fixed).  More bugs may exist.  Be careful when using obscure
 instructions.
 @end ignore
 
-_CHAPSEC__(2+_ALL_ARCH__) Branch Improvement
+_CHAPSEC__(2+_GENERIC__) Branch Improvement
 
 Certain pseudo opcodes are permitted for branch instructions.
 They expand to the shortest branch instruction that will reach the
@@ -3131,11 +3183,12 @@ when it encounters @samp{fj@var{XX} foo}.
 
 @end table
 
-_CHAPSEC__(2+_ALL_ARCH__) Special Characters
+_CHAPSEC__(2+_GENERIC__) Special Characters
 The immediate character is @samp{#} for Sun compatibility.  The
 line-comment character is @samp{|}.  If a @samp{#} appears at the
 beginning of a line, it is treated as a comment unless it looks like
 @samp{# line file}, in which case it is treated normally.
+
 _fi__(_M680X0__)
 @c pesch@cygnus.com: conditionalize on something other than 0 when filled in.
 _if__(0)
@@ -3157,24 +3210,28 @@ The 32x32 uses IEEE floating point numbers, but @code{_AS__} will only
 create single or double precision values.  I don't know if the 32x32
 understands extended precision numbers.
 
-@subsection Machine Directives
+@subsection 32x32 Machine Directives
 The 32x32 has no machine dependent directives.
+
 _fi__(0)
 _if__(_SPARC__)
-@c fixme (sparc): Fill in "syntax" section!
-_CHAPSEC__(0+_ALL_ARCH__) SPARC Dependent Features
-@section Sparc
+@group
+_CHAPSEC__(0+_GENERIC__) SPARC Dependent Features
 @subsection Options
 The sparc has no machine dependent options.
+@end group
 
+@ignore
+@c FIXME: (sparc) Fill in "syntax" section!
 @subsection syntax
 I don't know anything about Sparc syntax.  Someone who does
 will have to write this section.
+@end ignore
 
 @subsection Floating Point
 The Sparc uses ieee floating-point numbers.
 
-@subsection Machine Directives
+@subsection Sparc Machine Directives
 The Sparc version of @code{_AS__} supports the following additional
 machine directives:
 
@@ -3212,13 +3269,14 @@ On the Sparc, the .word directive produces 32 bit values,
 instead of the 16 bit values it produces on every other machine.
 
 @end table
+
 _fi__(_SPARC__)
 _if__(_I80386__)
-_CHAPSEC__(0+_ALL_ARCH__) 80386 Dependent Features
-_CHAPSEC__(1+_ALL_ARCH__) Options
+_CHAPSEC__(0+_GENERIC__) 80386 Dependent Features
+_CHAPSEC__(1+_GENERIC__) Options
 The 80386 has no machine dependent options.
 
-_CHAPSEC__(1+_ALL_ARCH__) AT&T Syntax versus Intel Syntax
+_CHAPSEC__(1+_GENERIC__) AT&T Syntax versus Intel Syntax
 In order to maintain compatibility with the output of @code{_GCC__},
 @code{_AS__} supports AT&T System V/386 assembler syntax.  This is quite
 different from Intel syntax.  We mention these differences because
@@ -3261,7 +3319,7 @@ The AT&T assembler does not provide support for multiple segment
 programs.  Unix style systems expect all programs to be single segments.
 @end itemize
 
-_CHAPSEC__(1+_ALL_ARCH__) Opcode Naming
+_CHAPSEC__(1+_GENERIC__) Opcode Naming
 Opcode names are suffixed with one character modifiers which specify the
 size of operands.  The letters @samp{b}, @samp{w}, and @samp{l} specify
 byte, word, and long operands.  If no suffix is specified by an
@@ -3305,7 +3363,7 @@ Far call/jump instructions are @samp{lcall} and @samp{ljmp} in
 AT&T syntax, but are @samp{call far} and @samp{jump far} in Intel
 convention.
 
-_CHAPSEC__(1+_ALL_ARCH__) Register Naming
+_CHAPSEC__(1+_GENERIC__) Register Naming
 Register operands are always prefixes with @samp{%}.  The 80386 registers
 consist of
 @itemize @bullet
@@ -3346,7 +3404,7 @@ the 8 floating point register stack @samp{%st} or equivalently
 @samp{%st(4)}, @samp{%st(5)}, @samp{%st(6)}, and @samp{%st(7)}.
 @end itemize
 
-_CHAPSEC__(1+_ALL_ARCH__) Opcode Prefixes
+_CHAPSEC__(1+_GENERIC__) Opcode Prefixes
 Opcode prefixes are used to modify the following opcode.  They are used
 to repeat string instructions, to provide segment overrides, to perform
 bus lock operations, and to give operand and address size (16-bit
@@ -3388,7 +3446,7 @@ The @samp{rep}, @samp{repe}, and @samp{repne} prefixes are added
 to string instructions to make them repeat @samp{%ecx} times.
 @end itemize
 
-_CHAPSEC__(1+_ALL_ARCH__) Memory References
+_CHAPSEC__(1+_GENERIC__) Memory References
 An Intel syntax indirect memory reference of the form
 @smallexample
 @var{segment}:[@var{base} + @var{index}*@var{scale} + @var{disp}]
@@ -3443,7 +3501,7 @@ Any instruction that has a memory operand @emph{must} specify its size (byte,
 word, or long) with an opcode suffix (@samp{b}, @samp{w}, or @samp{l},
 respectively).
 
-_CHAPSEC__(1+_ALL_ARCH__) Handling of Jump Instructions
+_CHAPSEC__(1+_GENERIC__) Handling of Jump Instructions
 Jump instructions are always optimized to use the smallest possible
 displacements.  This is accomplished by using byte (8-bit) displacement
 jumps whenever the target is sufficiently close.  If a byte displacement
@@ -3465,7 +3523,7 @@ cx_zero: jmp foo
 cx_nonzero:
 @end smallexample
 
-_CHAPSEC__(1+_ALL_ARCH__) Floating Point
+_CHAPSEC__(1+_GENERIC__) Floating Point
 All 80387 floating point types except packed BCD are supported.
 (BCD support may be added without much difficulty).  These data
 types are 16-, 32-, and 64- bit integers, and single (32-bit),
@@ -3504,7 +3562,7 @@ of the @samp{fn@dots{}} instructions.  For example, @samp{fsave} and
 instructions are made equivalent to @samp{f@dots{}} instructions.  If
 @samp{fwait} is desired it must be explicitly coded.
 
-_CHAPSEC__(1+_ALL_ARCH__) Notes
+_CHAPSEC__(1+_GENERIC__) Notes
 There is some trickery concerning the @samp{mul} and @samp{imul}
 instructions that deserves mention.  The 16-, 32-, and 64-bit expanding
 multiplies (base opcode @samp{0xf6}; extension 4 for @samp{mul} and 5
@@ -3519,6 +3577,7 @@ is an immediate mode expression and the second operand is a register.
 This is just a shorthand, so that, multiplying @samp{%eax} by 69, for
 example, can be done with @samp{imul $69, %eax} rather than @samp{imul
 $69, %eax, %eax}.
+
 _fi__(_I80386__)
 _if__(0)
 @c pesch@cygnus.com: we ignore the following chapters, since internals are
