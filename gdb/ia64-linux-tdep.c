@@ -21,6 +21,7 @@
 
 #include "defs.h"
 #include "arch-utils.h"
+#include "gdbcore.h"
 
 /* The sigtramp code is in a non-readable (executable-only) region
    of memory called the ``gate page''.  The addresses in question
@@ -47,40 +48,47 @@ ia64_linux_in_sigtramp (CORE_ADDR pc, char *func_name)
 CORE_ADDR
 ia64_linux_sigcontext_register_address (CORE_ADDR sp, int regno)
 {
+  char buf[8];
+  CORE_ADDR sigcontext_addr = 0;
+
+  /* The address of the sigcontext area is found at offset 16 in the sigframe.  */
+  read_memory (sp + 16, buf, 8);
+  sigcontext_addr = extract_unsigned_integer (buf, 8);
+
   if (IA64_GR0_REGNUM <= regno && regno <= IA64_GR31_REGNUM)
-    return sp + IA64_LINUX_SIGCONTEXT_OFFSET + 200 + 8 * (regno - IA64_GR0_REGNUM);
+    return sigcontext_addr + 200 + 8 * (regno - IA64_GR0_REGNUM);
   else if (IA64_BR0_REGNUM <= regno && regno <= IA64_BR7_REGNUM)
-    return sp + IA64_LINUX_SIGCONTEXT_OFFSET + 136 + 8 * (regno - IA64_BR0_REGNUM);
+    return sigcontext_addr + 136 + 8 * (regno - IA64_BR0_REGNUM);
   else if (IA64_FR0_REGNUM <= regno && regno <= IA64_FR127_REGNUM)
-    return sp + IA64_LINUX_SIGCONTEXT_OFFSET + 464 + 16 * (regno - IA64_FR0_REGNUM);
+    return sigcontext_addr + 464 + 16 * (regno - IA64_FR0_REGNUM);
   else
     switch (regno)
       {
       case IA64_IP_REGNUM :
-	return sp + IA64_LINUX_SIGCONTEXT_OFFSET + 40;
+	return sigcontext_addr + 40;
       case IA64_CFM_REGNUM :
-	return sp + IA64_LINUX_SIGCONTEXT_OFFSET + 48;
+	return sigcontext_addr + 48;
       case IA64_PSR_REGNUM :
-	return sp + IA64_LINUX_SIGCONTEXT_OFFSET + 56;		/* user mask only */
+	return sigcontext_addr + 56;		/* user mask only */
       /* sc_ar_rsc is provided, from which we could compute bspstore, but
 	 I don't think it's worth it.  Anyway, if we want it, it's at offset
 	 64 */
       case IA64_BSP_REGNUM :
-	return sp + IA64_LINUX_SIGCONTEXT_OFFSET + 72;
+	return sigcontext_addr + 72;
       case IA64_RNAT_REGNUM :
-	return sp + IA64_LINUX_SIGCONTEXT_OFFSET + 80;
+	return sigcontext_addr + 80;
       case IA64_CCV_REGNUM :
-	return sp + IA64_LINUX_SIGCONTEXT_OFFSET + 88;
+	return sigcontext_addr + 88;
       case IA64_UNAT_REGNUM :
-	return sp + IA64_LINUX_SIGCONTEXT_OFFSET + 96;
+	return sigcontext_addr + 96;
       case IA64_FPSR_REGNUM :
-	return sp + IA64_LINUX_SIGCONTEXT_OFFSET + 104;
+	return sigcontext_addr + 104;
       case IA64_PFS_REGNUM :
-	return sp + IA64_LINUX_SIGCONTEXT_OFFSET + 112;
+	return sigcontext_addr + 112;
       case IA64_LC_REGNUM :
-	return sp + IA64_LINUX_SIGCONTEXT_OFFSET + 120;
+	return sigcontext_addr + 120;
       case IA64_PR_REGNUM :
-	return sp + IA64_LINUX_SIGCONTEXT_OFFSET + 128;
+	return sigcontext_addr + 128;
       default :
 	return 0;
       }

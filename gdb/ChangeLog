@@ -1,3 +1,11 @@
+2003-10-15  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* ia64-linux-tdep.c: Include gdbcore.h.
+	(IA64_LINUX_SIGCONTEXT_OFFSET): Magic constant removed.
+	(ia64_linux_sigcontext_register_addr): Find the address of the
+	sigcontext area stored in the sigframe instead of using
+	a magic offset constant. 
+
 2003-10-15  Andrew Cagney  <cagney@redhat.com>
 
 	* remote.c (remote_search): Delete function.
