@@ -1,3 +1,8 @@
+Thu Jul  2 15:57:58 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* breakpoint.c (resolve_sal_pc): Accept absence of innermost
+	Lexical block for breakpoint resolution.
+
 Thu Jul 2 10:22:00 1998  Dawn Perchik  <dawn@cygnus.com>
 
 	* mdebugread.c (parse_partial_symbols): Go ahead and read the .mdebug
