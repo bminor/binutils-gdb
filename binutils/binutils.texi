@@ -2900,7 +2900,7 @@ individuals in the file @file{etc/SERVICE} in the @sc{gnu} Emacs
 distribution.
 
 In any event, we also recommend that you send bug reports for the binary
-utilities to @samp{bug-gnu-utils@@gnu.org}.
+utilities to @samp{bug-binutils@@gnu.org}.
 
 The fundamental principle of reporting bugs usefully is this:
 @strong{report all the facts}.  If you are not sure whether to state a
@@ -2961,7 +2961,7 @@ A complete input file, or set of input files, that will reproduce the
 bug.  If the utility is reading an object file or files, then it is
 generally most helpful to send the actual object files, uuencoded if
 necessary to get them through the mail system.  Note that
-@samp{bug-gnu-utils@@gnu.org} is a mailing list, so you should avoid
+@samp{bug-binutils@@gnu.org} is a mailing list, so you should avoid
 sending very large files to it.  Making the files available for
 anonymous FTP is OK.
 
