@@ -1,3 +1,8 @@
+Sat May 14 09:09:19 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* aoutx.h (add_to_stringtab): Use BFD_ASSERT not assert.  This
+	avoids __eprintf troubles.
+
 Fri May 13 10:51:21 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* bout.c (b_out_bfd_reloc_type_lookup): Handle BFD_RELOC_CTOR.

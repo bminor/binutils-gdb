@@ -121,7 +121,6 @@ DESCRIPTION
 #define KEEPIT flags
 #define KEEPITTYPE int
 
-#include <assert.h>
 #include <string.h>		/* For strchr and friends */
 #include "bfd.h"
 #include <sysdep.h>
@@ -198,6 +197,29 @@ HOWTO( 7,	       0,  4, 	64, true,  0, complain_overflow_signed,  0,"DISP64",	tr
 { -1 },
 HOWTO( 9,	       0,  1,   16, false, 0, complain_overflow_bitfield,0,"BASE16",	false,0xffffffff,0xffffffff, false),
 HOWTO(10,	       0,  2,   32, false, 0, complain_overflow_bitfield,0,"BASE32",	false,0xffffffff,0xffffffff, false),
+{ -1 },
+{ -1 },
+{ -1 },
+{ -1 },
+{ -1 },
+  HOWTO(16,	       0,  2,	 0, false, 0, complain_overflow_bitfield,0,"JMP_TABLE", false,         0,0x00000000, false),
+{ -1 },
+{ -1 },
+{ -1 },
+{ -1 },
+{ -1 },
+{ -1 },
+{ -1 },
+{ -1 }, { -1 }, { -1 }, { -1 }, { -1 }, { -1 }, { -1 }, { -1 },
+  HOWTO(32,	       0,  2,	 0, false, 0, complain_overflow_bitfield,0,"RELATIVE",  false,         0,0x00000000, false),
+{ -1 },
+{ -1 },
+{ -1 },
+{ -1 },
+{ -1 },
+{ -1 },
+{ -1 },
+  HOWTO(40,	       0,  2,	 0, false, 0, complain_overflow_bitfield,0,"BASEREL",   false,         0,0x00000000, false),
 };
 
 #define TABLE_SIZE(TABLE)	(sizeof(TABLE)/sizeof(TABLE[0]))
@@ -1902,17 +1924,17 @@ add_to_stringtab (abfd, str, tab)
   entry->count = 1;
 #endif
 
-  assert (*tab->end == 0);
+  BFD_ASSERT (*tab->end == 0);
   *(tab->end) = entry;
   tab->end = &entry->next_to_output;
-  assert (*tab->end == 0);
+  BFD_ASSERT (*tab->end == 0);
 
   {
     tab->index += len + 1;
     if (len == 0)
       tab->empty_string_index = entry->index;
   }
-  assert (*ep == 0);
+  BFD_ASSERT (*ep == 0);
   *ep = entry;
   return entry->index;
 }
@@ -2084,9 +2106,8 @@ NAME(aout,swap_std_reloc_out) (abfd, g, natptr)
   r_pcrel  = (int) g->howto->pc_relative; /* Relative to PC? */
   /* XXX This relies on relocs coming from a.out files.  */
   r_baserel = (g->howto->type & 8) != 0;
-  /* r_jmptable, r_relative???  FIXME-soon */
-  r_jmptable = 0;
-  r_relative = 0;
+  r_jmptable = (g->howto->type & 16) != 0;
+  r_relative = (g->howto->type & 32) != 0;
 
 #if 0
   /* For a standard reloc, the addend is in the object file.  */
@@ -2349,13 +2370,11 @@ NAME(aout,swap_std_reloc_in) (abfd, bytes, cache_ptr, symbols)
       			>> RELOC_STD_BITS_LENGTH_SH_LITTLE;
   }
 
-  howto_idx = r_length + 4 * r_pcrel + 8 * r_baserel;
+  howto_idx = r_length + 4 * r_pcrel + 8 * r_baserel
+	      + 16 * r_jmptable + 32 * r_relative;
   BFD_ASSERT (howto_idx < TABLE_SIZE (howto_table_std));
   cache_ptr->howto =  howto_table_std + howto_idx;
   BFD_ASSERT (cache_ptr->howto->type != -1);
-  BFD_ASSERT (r_jmptable == 0);
-  BFD_ASSERT (r_relative == 0);
-  /* FIXME-soon:  Roll jmptable, relative bits into howto setting */
 
   MOVE_ADDRESS(0);
 }
@@ -4203,10 +4222,9 @@ aout_link_input_section_std (finfo, input_bfd, input_section, relocs,
 		       >> RELOC_STD_BITS_LENGTH_SH_LITTLE);
 	}
 
-      howto_idx = r_length + 4 * r_pcrel + 8 * r_baserel;
+      howto_idx = r_length + 4 * r_pcrel + 8 * r_baserel
+		  + 16 * r_jmptable + 32 * r_relative;
       BFD_ASSERT (howto_idx < TABLE_SIZE (howto_table_std));
-      BFD_ASSERT (r_jmptable == 0);
-      BFD_ASSERT (r_relative == 0);
 
       if (relocateable)
 	{
@@ -4773,8 +4791,8 @@ aout_link_reloc_link_order (finfo, o, p)
 
       r_pcrel = howto->pc_relative;
       r_baserel = (howto->type & 8) != 0;
-      r_jmptable = 0;
-      r_relative = 0;
+      r_jmptable = (howto->type & 16) != 0;
+      r_relative = (howto->type & 32) != 0;
       r_length = howto->size;
 
       PUT_WORD (finfo->output_bfd, p->offset, srel.r_address);
