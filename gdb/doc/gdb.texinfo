@@ -80,8 +80,8 @@ _fi__(!_GENERIC__)
 @c @subtitle Third Edition---_GDBN__ version 4.0
 @subtitle _GDBN__ version 4.0
 @subtitle May 1991
-@author{Richard M. Stallman @hfill Free Software Foundation}
-@author{Roland H. Pesch @hfill Cygnus Support}
+@author{Richard M. Stallman@qquad @hfill Free Software Foundation}
+@author{Roland H. Pesch@qquad @hfill Cygnus Support}
 @page
 
 @tex
@@ -757,6 +757,8 @@ _if__(_I960__)
 @node i960-Nindy Remote, EB29K Remote, Mode Options, Starting _GDBN__
 @subsection _GDBN__ with a Remote i960 (Nindy)
 
+@cindex Nindy
+@cindex i960
 @dfn{Nindy} is a ROM Monitor program for Intel 960 target systems.  When
 _GDBN__ is configured to control a remote Intel 960 using Nindy, you can
 tell _GDBN__ how to connect to the 960 in several ways:
@@ -855,7 +857,6 @@ _if__(_AMD29K__)
 
 @cindex EB29K board
 @cindex running 29K programs
-@cindex 29K
 
 To use _GDBN__ from a Unix system to run programs on AMD's EB29K
 board in a PC, you must first connect a serial cable between the PC
@@ -1025,6 +1026,7 @@ _fi__(_AMD29K__)
 _if__(_VXWORKS__)
 @node VxWorks Remote,  , EB29K Remote, Starting _GDBN__
 @subsection _GDBN__ and VxWorks
+@cindex VxWorks
 _GDBN__ enables developers to spawn and debug tasks running on networked
 VxWorks targets from a Unix host.  Already-running tasks spawned from
 the VxWorks shell can also be debugged.  _GDBN__ uses code that runs on
@@ -1036,6 +1038,7 @@ on the VxWorks target.  These routines are included in the VxWorks library
 @file{rdb.a} and are incorporated into the system image when source-level
 debugging is enabled in the VxWorks configuration.
 
+@kindex{INCLUDE_RDB}
 Defining @code{INCLUDE_RDB} in the VxWorks configuration file
 @file{configAll.h} includes the RDB interface routines and spawns the
 source debugging task @code{tRdbTask} when VxWorks is booted.  For more
@@ -1096,6 +1099,7 @@ again.
 @node VxWorks download, VxWorks attach, VxWorks connection, VxWorks Remote
 @subsubsection VxWorks Download
 
+@cindex download to VxWorks
 If you have connected to the VxWorks target and you want to debug an
 object that has not yet been loaded, you can use the _GDBN__ @code{load}
 command to download a file from UNIX to VxWorks incrementally.  The
@@ -1136,6 +1140,7 @@ table.)
 @node VxWorks attach,  , VxWorks download, VxWorks Remote
 @subsubsection Running Tasks
 
+@cindex running VxWorks tasks
 You can also attach to an existing task using the @code{attach} command as
 follows:
 
@@ -2495,8 +2500,7 @@ example, in the following excerpt from a debugging session, the @code{f}
 #0  main (argc=4, argv=0xf7fffae8) at m4.c:206
 206		    expand_input();
 (_GDBP__) until
-blah
-195		for ( ; argc > 0; NEXTARG) {
+195		for ( ; argc > 0; NEXTARG) @{
 @end example
 
 In this case, (as for any C @code{for}-loop), the loop-step expression
@@ -3167,23 +3171,23 @@ a range of addresses as machine instructions.
 @kindex info line
 Print the starting and ending addresses of the compiled code for
 source line @var{linespec}.  You can specify source lines in any of the
-ways understood by the @code{break} command (@pxref{Set Breaks}).
+ways understood by the @code{list} command (@pxref{List}).
 @end table
 
 For example, we can use @code{info line} to inquire on where the object
 code for the first line of function @code{m4_changequote} lies:
-@example
+@smallexample
 (_GDBP__) info line m4_changecom
 Line 895 of "builtin.c" starts at pc 0x634c and ends at 0x6350.
-@end example
+@end smallexample
 
 @noindent
 We can also inquire (using @code{*@var{addr}} as the form for
 @var{linespec}) what source line covers a particular address:
-@example
+@smallexample
 (_GDBP__) info line *0x63ff
 Line 926 of "builtin.c" starts at pc 0x63e4 and ends at 0x6404.
-@end example
+@end smallexample
 
 @kindex $_
 After @code{info line}, the default address for the @code{x}
@@ -3207,7 +3211,7 @@ exclusive) to be dumped.
 We can use @code{disassemble} to inspect the object code
 range shown in the last @code{info line} example:
 
-@example
+@smallexample
 (_GDBP__) disas 0x63e4 0x6404
 Dump of assembler code from 0x63e4 to 0x6404:
 0x63e4 <builtin_init+5340>:	ble 0x63f8 <builtin_init+5360>
@@ -3221,7 +3225,7 @@ Dump of assembler code from 0x63e4 to 0x6404:
 End of assembler dump.
 (_GDBP__) 
 
-@end example
+@end smallexample
 
 @node Data, Symbols, Source, Top
 @chapter Examining Data
@@ -3708,11 +3712,12 @@ traces, structure values, pointer values, breakpoints, and so forth,
 even when it also displays the contents of those addresses.  The default
 is on.  For example, this is what a stack frame display looks like, with
 @code{set print address on}:
-@example
+@smallexample
 (_GDBP__) f
-#0  set_quotes (lq=0x34c78 "<<", rq=0x34c88 ">>") at input.c:530
+#0  set_quotes (lq=0x34c78 "<<", rq=0x34c88 ">>") 
+    at input.c:530
 530	    if (lquote != def_lquote)
-@end example
+@end smallexample
 
 @item set print address off
 Do not print addresses when displaying their contents.  For example,
@@ -4275,8 +4280,6 @@ Write a complete dump of the debugger's symbol data into the
 file @var{filename}.
 @end table
 
-@c FIXME: RMS comments not yet considered below this point
-@c ......................................................................
 @node Altering, _GDBN__ Files, Symbols, Top
 @chapter Altering Execution
 
@@ -4329,7 +4332,24 @@ expression is evaluated only for its effects.
 If the beginning of the argument string of the @code{set} command
 appears identical to a @code{set} subcommand, use the @code{set
 variable} command instead of just @code{set}.  This command is identical
-to @code{set} except for its lack of subcommands.
+to @code{set} except for its lack of subcommands.  For example, a
+program might well have a variable @code{width}---which leads to
+an error if we try to set a new value with just @samp{set width=13}, as
+we might if @code{set width} didn't happen to be a _GDBN__ command:
+@example
+(_GDBP__) whatis width
+type = double
+(_GDBP__) p width
+$4 = 13
+(_GDBP__) set width=47
+Invalid syntax in expression.
+@end example
+@noindent
+The invalid expression, of course, is @samp{=47}.  What we can do in
+order to actually set our program's variable @code{width} is 
+@example
+(_GDBP__) set var width=47
+@end example
 
 _GDBN__ allows more implicit conversions in assignments than C does; you can
 freely store an integer value into a pointer variable or vice versa, and
@@ -4359,14 +4379,15 @@ it stopped, with the @code{continue} command.  You can instead continue at
 an address of your own choosing, with the following commands:
 
 @table @code
-@item jump @var{linenum}
+@item jump @var{linespec}
 @kindex jump
-Resume execution at line number @var{linenum}.  Execution will stop
-immediately if there is a breakpoint there.
+Resume execution at line @var{linespec}.  Execution will stop
+immediately if there is a breakpoint there.  @xref{List} for a
+description of the different forms of @var{linespec}.
 
 The @code{jump} command does not change the current stack frame, or
 the stack pointer, or the contents of any memory location or any
-register other than the program counter.  If line @var{linenum} is in
+register other than the program counter.  If line @var{linespec} is in
 a different function from the one currently executing, the results may
 be bizarre if the two functions expect different patterns of arguments or
 of local variables.  For this reason, the @code{jump} command requests
@@ -4394,7 +4415,7 @@ address 0x485, rather than at the address where the program stopped.
 
 The most common occasion to use the @code{jump} command is to back up,
 perhaps with more breakpoints set, over a portion of a program that has
-already executed.
+already executed, in order to examine its execution in more detail.
 
 @group
 @node Signaling, Returning, Jumping, Altering
@@ -4422,17 +4443,19 @@ after executing the command.
 
 @table @code
 @item return
+@itemx return @var{expression}
 @cindex returning from a function
 @kindex return
 You can cancel execution of a function call with the @code{return}
-command.
+command.  If you give an
+@var{expression} argument, its value is used as the function's return
+value. 
 @end table
 
-This command abandons execution of a function.  When you use
-@code{return}, _GDBN__ discards the selected stack frame (and all frames
-within it).  You can think of this as making the discarded frame return
-prematurely.  If you wish to specify a value to be returned, give that
-value as the argument to @code{return}.
+When you use @code{return}, _GDBN__ discards the selected stack frame
+(and all frames within it).  You can think of this as making the
+discarded frame return prematurely.  If you wish to specify a value to
+be returned, give that value as the argument to @code{return}.
 
 This pops the selected stack frame (@pxref{Selection}), and any other
 frames inside of it, leaving its caller as the innermost remaining
@@ -4495,7 +4518,7 @@ symbols and for the contents of pure memory.  It is also the program
 executed when you use the @code{run} command.  If you do not specify a
 directory and the file is not found in _GDBN__'s working directory,
 
-_GDBN__ will use the environment variable @code{PATH} as a list of
+_GDBN__ uses the environment variable @code{PATH} as a list of
 directories to search, just as the shell does when looking for a program
 to run.  You can change the value of this variable, for both _GDBN__ and
 your program, using the @code{path} command.
@@ -4589,6 +4612,7 @@ current target system as well as adding its symbols in _GDBN__.
 _fi__(_VXWORKS__)
 
 _if__(_I960__)
+@cindex download to Nindy-960
 With the Nindy interface to an Intel 960 board, @code{load} will
 download @var{filename} to the 960 as well as adding its symbols in
 _GDBN__. 
@@ -4654,7 +4678,8 @@ Load symbols for all shared libraries.
 @itemx info sharedlibrary
 @kindex info sharedlibrary
 @kindex info share
-Print the names of the shared libraries which are currently loaded.
+Print the names of the shared libraries which you have loaded with the
+@code{sharedlibrary} command.
 @end table
 
 @code{sharedlibrary} does not repeat automatically when you press
@@ -4724,10 +4749,10 @@ _GDBN__ circumvents the problem by considering the symbol to have the
 name @code{foo}, which may cause other problems if many symbols end up
 with this name.
 
-@item unknown symbol type @code{0x@var{NN}}
+@item unknown symbol type @code{0x@var{nn}}
 
 The symbol information contains new data types that _GDBN__ does not yet
-know how to read.  @code{0x@var{NN}} is the symbol type of the misunderstood
+know how to read.  @code{0x@var{nn}} is the symbol type of the misunderstood
 information, in hexadecimal.  
 
 _GDBN__ circumvents the error by ignoring this symbol information.  This
@@ -4737,14 +4762,16 @@ debugging it, you can debug @code{_GDBP__} with itself, breakpoint on
 @code{complain}, then go up to the function @code{read_dbx_symtab} and
 examine @code{*bufp} to see the symbol.
 
-@c @item stub type has NULL name
-@c 
-@c FIXME, Mike Tiemann needs to write about what this means.
+@item stub type has NULL name
+_GDBN__ could not find the full definition for a struct or class. 
 
-@item const/volatile indicator missing, got 'X'
+@ignore
+@c this is #if 0'd in dbxread.c as of (at least!) 17 may 1991
+@item const/volatile indicator missing, got '@var{X}'
 
-The symbol information for a C++ type is missing some information that
-the compiler should have output for it.
+The symbol information for a C++ member function is missing some
+information that the compiler should have output for it.
+@end ignore
 
 @item C++ type mismatch between compiler and debugger
 
@@ -4788,7 +4815,6 @@ without abandoning your work on a core file.
 More than one target can potentially respond to a request.  In
 particular, when you access memory _GDBN__ will examine the three strata of
 targets until it finds a target that can handle that particular address.
-
 Strata are always examined in a fixed order: first a process if there is
 one, then a core file if there is one, and finally an executable file if
 there is one of those.
@@ -4846,7 +4872,7 @@ A core dump file.  @samp{target core @var{filename}} is the same as
 @kindex target remote
 Remote serial target in _GDBN__-specific protocol.  The argument @var{dev}
 specifies what serial device to use for the connection (e.g.
-@code{/dev/ttya}). @xref{Remote}.
+@file{/dev/ttya}). @xref{Remote}.
 
 _if__(_AMD29K__)
 @item target amd-eb @var{dev} @var{speed} @var{PROG}
@@ -4893,20 +4919,22 @@ _fi__(_GENERIC__)
 
 If you are trying to debug a program running on a machine that can't run
 _GDBN__ in the usual way, it is often useful to use remote debugging.  For
-example, you might be debugging an operating system kernel, or debugging
+example, you might use remote debugging on an operating system kernel, or on
 a small system which does not have a general purpose operating system
 powerful enough to run a full-featured debugger.  
 
 Some configurations of _GDBN__ have special serial or TCP/IP interfaces
 to make this work with particular debugging targets.  In addition,
 _GDBN__ comes with a generic serial protocol (specific to _GDBN__, but
-not specific to any particular target system) which you can adapt.
+not specific to any particular target system) which you can use if you
+write the remote stubs---the code that will run on the remote system to
+communicate with _GDBN__.
 
 To use the _GDBN__ remote serial protocol, the program to be debugged on
-the remote machine needs to contain a debugging device driver which
-talks to _GDBN__ over the serial line.  Several sample remote debugging
-drivers are distributed with _GDBN__; see the @file{README} file in the
-_GDBN__ distribution for more information.
+the remote machine needs to contain a debugging stub which talks to
+_GDBN__ over the serial line.  Several working remote stubs are
+distributed with _GDBN__; see the @file{README} file in the _GDBN__
+distribution for more information.
 
 For details of this communication protocol, see the comments in the
 _GDBN__ source file @file{remote.c}.
@@ -4964,8 +4992,8 @@ _GDBN__ indicates its readiness to read a command by printing a string
 called the @dfn{prompt}.  This string is normally @samp{(_GDBP__)}.  You
 can change the prompt string with the @code{set prompt} command.  For
 instance, when debugging _GDBN__ with _GDBN__, it is useful to change
-the prompt in one of the _GDBN__<>s so that you tell which one you are
-talking to.
+the prompt in one of the _GDBN__<>s so that you can always tell which
+one you are talking to.
 
 @table @code
 @item set prompt @var{newprompt}
@@ -4988,8 +5016,7 @@ substitution, and a storage and recall of command history across
 debugging sessions.
 
 You may control the behavior of command line editing in _GDBN__ with the
-command @code{set}.  You may check the status of any of these settings
-with the command @code{show}.
+command @code{set}.  
 
 @table @code
 @kindex set editing
@@ -5200,9 +5227,8 @@ Displays whether @code{set verbose} is on or off.
 
 By default, if _GDBN__ encounters bugs in the symbol table of an object file,
 it prints a single message about each type of problem it finds, then 
-shuts up.  You can suppress these messages, or allow more than one such
+shuts up (@pxref{Symbol Errors}).  You can suppress these messages, or allow more than one such
 message to be printed if you want to see how frequent the problems are.
-@xref{Symbol Errors}.
 
 @table @code
 @kindex set complaints
@@ -5221,7 +5247,6 @@ By default, _GDBN__ is cautious, and asks what sometimes seem to be a
 lot of stupid questions to confirm certain commands.  For example, if
 you try to run a program which is already running:
 @example
-
 (_GDBP__) run
 The program being debugged has been started already.
 Start it from the beginning? (y or n) 
@@ -5249,7 +5274,7 @@ Displays state of confirmation requests.
 @node Sequences, Emacs, Controlling _GDBN__, Top
 @chapter Canned Sequences of Commands
 
-Aside from breakpoint commands (@pxref{Break Commands}),_GDBN__ provides two
+Aside from breakpoint commands (@pxref{Break Commands}), _GDBN__ provides two
 ways to store sequences of commands for execution as a unit:
 user-defined commands and command files.
 
@@ -5327,8 +5352,9 @@ When you start _GDBN__, it automatically executes commands from its
 @dfn{init files}.  These are files named @file{_GDBINIT__}.  _GDBN__
 reads the init file (if any) in your home directory and then the init
 file (if any) in the current working directory.  (The init files are not
-executed if the @samp{-nx} option is given.)  You can also request the
-execution of a command file with the @code{source} command:
+executed if you use the @samp{-nx} option; @pxref{Mode Options}.)  You
+can also request the execution of a command file with the @code{source}
+command:
 
 @table @code
 @item source @var{filename}
@@ -5362,7 +5388,7 @@ want.
 Print @var{text}.  Nonprinting characters can be included in @var{text}
 using C escape sequences, such as @samp{\n} to print a newline.  @b{No
 newline will be printed unless you specify one.} In addition to the
-standard C escape sequences a backslash followed by a space stands for a
+standard C escape sequences, a backslash followed by a space stands for a
 space.  This is useful for outputting a string with spaces at the
 beginning or the end, since leading and trailing spaces are otherwise
 trimmed from all arguments.  Thus, to print @samp{@ and foo =@ }, use the
@@ -5482,7 +5508,7 @@ switch to debugging a program in some other location, from an existing
 _GDBN__ buffer in Emacs.
 @end quotation
 
-By default, @kbd{M-x gdb} calls the program called ``@code{gdb}''.  If
+By default, @kbd{M-x gdb} calls the program called @file{gdb}.  If
 you need to call _GDBN__ by a different name (for example, if you keep
 several configurations around, with different names) you can set the
 Emacs variable @code{gdb-command-name}; for example,
@@ -5523,19 +5549,19 @@ Execute until exit from the selected stack frame, like the _GDBN__
 @code{finish} command.
 
 @item M-c
-@c C-c C-p in emacs 19
-Continue execution of the program, like the _GDBN__ @code{continue} command.
+Continue execution of the program, like the _GDBN__ @code{continue}
+command.  @emph{Warning:} In Emacs v19, this command is @kbd{C-c C-p}.
 
 @item M-u
-@c C-c C-u in emacs 19
 Go up the number of frames indicated by the numeric argument
 (@pxref{Arguments, , Numeric Arguments, emacs, The GNU Emacs Manual}),
-like the _GDBN__ @code{up} command.@refill
+like the _GDBN__ @code{up} command.  @emph{Warning:} In Emacs v19, this
+command is @kbd{C-c C-u}.@refill
 
 @item M-d
-@c C-c C-d in emacs 19
 Go down the number of frames indicated by the numeric argument, like the
-_GDBN__ @code{down} command.
+_GDBN__ @code{down} command.  @emph{Warning:} In Emacs v19, this command
+is @kbd{C-c C-d}.
 
 @item C-x &
 Read the number where the cursor is positioned, and insert it at the end
@@ -5553,15 +5579,16 @@ list.  If the list element is a string, the number to be inserted is
 formatted using the Emacs function @code{format}; otherwise the number
 is passed as an argument to the corresponding list element.
 
-@item M-x gdb-display-frame
-Explicitly request display of the source code surrounding the current
-frame location, in another window.  _GDBN__ does this display automatically;
-but if, for example, you accidentally kill the buffer where it is
-displayed, this command is a way of getting it back.
 @end table
 
 In any source file, the Emacs command @kbd{C-x SPC} (@code{gdb-break})
 tells _GDBN__ to set a breakpoint on the source line point is on.
+
+If you accidentally delete the source-display buffer, an easy way to get
+it back is to type the command @code{f} in the _GDBN__ buffer, to
+request a frame display; when you run under Emacs, this will recreate
+the source buffer if necessary to show you the context of the current
+frame.
 
 The source files displayed in Emacs are in ordinary Emacs buffers
 which are visiting the source files in the usual way.  You can edit
@@ -5661,7 +5688,7 @@ The mailing list @samp{bug-gdb} has a newsgroup which serves as a
 repeater.  The mailing list and the newsgroup carry exactly the same
 messages.  Often people think of posting bug reports to the newsgroup
 instead of mailing them.  This appears to work, but it has one problem
-which can be crucial: a newsgroup posting does not contain a mail path
+which can be crucial: a newsgroup posting often lacks a mail path
 back to the sender.  Thus, if we need to ask for more information, we
 may be unable to reach you.  For this reason, it is better to send bug
 reports to the mailing list.
@@ -5722,7 +5749,7 @@ observe the bug.  For example, did you use @samp{-O}?  To guarantee
 you won't omit something important, list them all.
 
 If we were to try to guess the arguments, we would probably guess wrong
-and then we would not encounter the bug.
+and then we might not encounter the bug.
 
 @item
 The type of machine you are using, and the operating system name and
@@ -5732,9 +5759,10 @@ version number.
 A description of what behavior you observe that you believe is
 incorrect.  For example, ``It gets a fatal signal.''
 
-Of course, if the bug is that _GDBN__ gets a fatal signal, then we
-will certainly notice it.  But if the bug is incorrect output, we might
-not notice unless it is glaringly wrong.
+Of course, if the bug is that _GDBN__ gets a fatal signal, then we will
+certainly notice it.  But if the bug is incorrect output, we might not
+notice unless it is glaringly wrong.  We are human, after all.  You
+might as well not give us a chance to make a mistake.
 
 Even if the problem you experience is a fatal signal, you should still
 say so explicitly.  Suppose something strange is going on, such as,
