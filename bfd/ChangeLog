@@ -13,17 +13,16 @@
 	* archures.c: Add support for or32.
 	* targets.c: Add support for or32.
 	* bfd-in2.h: Regenerate.
-	* coffcode.h (coff_set_arch_mach_hook, coff_set_flags, 
+	* coffcode.h (coff_set_arch_mach_hook, coff_set_flags,
 	coff_write_object_contents): Add support for or32.
 	* config.bfd: Add target.
 	* configure.in: Add support for or32.
 	* configure: Regenerate.
 	* Makefile.am: Add support for or32.
 	* Makefile.in: Regenerate.
-	* doc/Makefile.in: Regenerate.
 	* po/SRC-POTFILES.in: Add or32 files.
 	* po/bfd.pot: Regenerate.
-	
+
 2002-01-31  Nick Clifton  <nickc@cambridge.redhat.com>
 	    Don Lindsay  <lindsayd@cisco.com>
 
@@ -48,12 +47,9 @@
 
 2002-01-30  Nick Clifton  <nickc@cambridge.redhat.com>
 
-	* doc/proto.str (ENUMDOC): Place two spaces between the end of 
-	the text and the closing comment marker.
-
 	* archures.c: Tidy up formatting of embedded comments.
 	* bfd.c: Tidy up formatting of embedded comments.
-        * bfd-in.h: Fix formatting of comments.
+	* bfd-in.h: Fix formatting of comments.
 	* reloc.c: Tidy up formatting of ordinary & embedded comments.
 	* section.c: Tidy up formatting of embedded comments.
 	* syms.c: Tidy up formatting of embedded comments.
@@ -68,7 +64,7 @@
 	(etir_sta, etir_sto, etir_opr, etir_stc): Use cmd_name().
 	(tir_opr, tir_ctl, tir_cmd): use tir_cmd_name().
 	Fix formatting.
-	
+
 	* peXXigen.c (pe_print_idata): Rearrange message to aid in
 	translation.
 	(pe_print_pdata):  Rearrange message to aid in translation.
@@ -88,7 +84,7 @@
 
 	* elf32-arm.h (elf32_arm_merge_private_bfd_data): Fix typo.
 
-2002-30-01  Philipp Thomas  <pthomas@suse.de>
+2002-01-30  Philipp Thomas  <pthomas@suse.de>
 
 	* coff-arm.c, elf32-elf.h: Unify messages.
 
@@ -111,7 +107,7 @@
 	ELF_LINK_NON_ELF so that they can stay weak.
 
 2002-01-29  Chris Demetriou  <cgd@broadcom.com>
-            Mitch Lichtenberg  <mpl@broadcom.com>
+	    Mitch Lichtenberg  <mpl@broadcom.com>
 
 	* bfd-in.h (bfd_mips_elf32_create_embedded_relocs): New prototype.
 	* elf32-mips.c (bfd_mips_elf32_create_embedded_relocs): New function
@@ -159,9 +155,6 @@
 	* configure.in <64-bit configuration>: If using gcc, check and
 	emit error for egcs-1.1.2.
 	* configure: Regenerate.
-
-	* doc/Makefile.am (install): Depend on install-info.
-	* doc/Makefile.in: Regenerate.
 
 2002-01-26  Egor Duda  <deo@logos-m.ru>
 
