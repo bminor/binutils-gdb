@@ -1,3 +1,9 @@
+Mon May  1 15:37:58 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	From 2000-04-28 Andreas Jaeger  <aj@suse.de>:
+	* gdb.c++/templates.cc: Properly check for GCC version number.
+	* lib/compiler.cc: Likewise
+
 2000-04-26  Michael Snyder  <msnyder@seadog.cygnus.com>
 
 	* gdb.base/call-ar-st.exp: Bail out if target is sparclet.
