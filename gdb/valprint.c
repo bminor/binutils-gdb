@@ -414,13 +414,10 @@ print_longest (struct ui_file *stream, int format, int use_local,
 
 #if 0
 void
-strcat_longest (format, use_local, val_long, buf, buflen)
-     int format;
-     int use_local;
-     LONGEST val_long;
-     char *buf;
-     int buflen;		/* ignored, for now */
+strcat_longest (int format, int use_local, LONGEST val_long, char *buf,
+		int buflen)
 {
+/* FIXME: Use buflen to avoid buffer overflow.  */
 #if defined (CC_HAS_LONG_LONG) && !defined (PRINTF_HAS_LONG_LONG)
   long vtop, vbot;
 

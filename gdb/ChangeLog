@@ -1,5 +1,10 @@
 2000-11-07  Kevin Buettner  <kevinb@redhat.com>
 
+	* valops.c (typecmp): Protoize.
+	* valprint.c (strcat_longest): Protoize.
+
+2000-11-07  Kevin Buettner  <kevinb@redhat.com>
+
 	* ia64-tdep.c (native_find_global_pointer):  New global variable.
 	(struct gdbarch_tdep): Add member find_global_pointer.
 	(ia64_gdbarch_init): Initialize find_global_pointer member.  Also,

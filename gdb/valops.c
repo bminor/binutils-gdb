@@ -1937,10 +1937,7 @@ value_bitstring (char *ptr, int len)
    requested operation is type secure, shouldn't we?  FIXME.  */
 
 static int
-typecmp (staticp, t1, t2)
-     int staticp;
-     struct type *t1[];
-     value_ptr t2[];
+typecmp (int staticp, struct type *t1[], value_ptr t2[])
 {
   int i;
 
