@@ -1,3 +1,8 @@
+Thu Oct 26 11:45:03 1995  Richard Earnshaw (rearnsha@armltd.co.uk)
+
+	* tc-arm.c (do_ldst): Assemble ldr/str r0, [r1] as a pre-increment
+	instruction.
+
 Wed Oct 25 11:59:24 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* Makefile.in (diststuff):  Also make info.
