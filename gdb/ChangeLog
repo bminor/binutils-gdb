@@ -5,6 +5,8 @@
 	(dwarf2_build_frame_info): Corrected handling of eh_frame.
 	(dwarf2_build_frame_info): Add offset to fde->initial_location 
 	so that frames of shared libraries are mapped correctly.
+	(execute_stack_op): Change type of 'result' from ULONGEST to
+	CORE_ADDR.
 	
 2002-05-22  Jason Thorpe  <thorpej@wasabisystems.com>
 

@@ -875,7 +875,8 @@ execute_stack_op (struct objfile *objfile,
   while (op_ptr < op_end)
     {
       enum dwarf_location_atom op = *op_ptr++;
-      ULONGEST result, reg;
+      CORE_ADDR result;
+      ULONGEST reg;
       LONGEST offset;
 
       switch (op)
