@@ -2535,7 +2535,7 @@ void OP_CD000000 (insn, extension)
   unsigned long mask;
 
   sp = State.regs[REG_SP];
-  next_pc = State.regs[REG_PC] + 2;
+  next_pc = State.regs[REG_PC] + 5;
   State.mem[sp] = next_pc & 0xff;
   State.mem[sp+1] = (next_pc & 0xff00) >> 8;
   State.mem[sp+2] = (next_pc & 0xff0000) >> 16;
@@ -2601,7 +2601,7 @@ void OP_DD000000 (insn, extension)
   unsigned long mask;
 
   sp = State.regs[REG_SP];
-  next_pc = State.regs[REG_PC] + 2;
+  next_pc = State.regs[REG_PC] + 7;
   State.mem[sp] = next_pc & 0xff;
   State.mem[sp+1] = (next_pc & 0xff00) >> 8;
   State.mem[sp+2] = (next_pc & 0xff0000) >> 16;
