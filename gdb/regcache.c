@@ -391,7 +391,14 @@ read_register_bytes (int inregbyte, char *myaddr, int inlen)
 	FETCH_PSEUDO_REGISTER (regno);
 
       if (!register_valid[regno])
-	error ("read_register_bytes:  Couldn't update register %d.", regno);
+	{
+	  /* Sometimes pseudoregs are never marked valid, so that they 
+	     will be fetched every time (it can be complicated to know
+	     if a pseudoreg is valid, while "fetching" them can be cheap). 
+	     */
+	  if (regno < NUM_REGS)
+	    error ("read_register_bytes:  Couldn't update register %d.", regno);
+	}
     }
 
   if (myaddr != NULL)

@@ -1,3 +1,12 @@
+2000-11-16  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* regcache.c (read_register_bytes): Failing to set register_valid
+	is not necessarily an error, if the register is a pseudo-register.
+	Some pseudo-registers are never marked as valid, so that they will
+	be read anew every time.  Determining if a pseudo-register is valid
+	(or should be marked invalid) may be difficult, whereas just 
+	recomputing it may be cheap.
+
 Thu Nov 16 09:47:57 2000  David Taylor  <taylor@redhat.com>
 
 	* tracepoint.c (trace_find_tracepoint_command): Replace call to
