@@ -48,12 +48,14 @@ z8000.m4
 
 Do-last:
 
-echo Done in `pwd`.
 
 #
 #
 # $Log$
-# Revision 1.6  1992/12/08 09:39:03  raeburn
+# Revision 1.7  1993/02/13 10:12:26  zoo
+# removing excess verbosity
+#
+# Revision 1.6  1992/12/08  09:39:03  raeburn
 # as-m680x0.texinfo does not exist
 #
 # Revision 1.5  1992/11/19  19:48:43  sac

@@ -17,7 +17,6 @@
 
 Do-first:
 
-echo Sanitizing `pwd`...
 
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
@@ -128,12 +127,14 @@ z8ksim.sh
 
 Do-last:
 
-echo Done in `pwd`.
 
 #
 #
 # $Log$
-# Revision 1.49  1993/02/03 17:11:08  ian
+# Revision 1.50  1993/02/13 10:15:14  zoo
+# removing excess verbosity
+#
+# Revision 1.49  1993/02/03  17:11:08  ian
 # Keep forgetting those .Sanitize files.
 #
 # Revision 1.48  1993/01/22  22:30:34  ian

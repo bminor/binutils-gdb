@@ -17,7 +17,6 @@
 
 Do-first:
 
-echo Sanitizing `pwd`...
 
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
@@ -104,12 +103,14 @@ else
 	fi
 fi
 
-echo Done in `pwd`.
 
 #
 #
 # $Log$
-# Revision 1.14  1993/01/08 14:40:59  raeburn
+# Revision 1.15  1993/02/13 10:12:16  zoo
+# removing excess verbosity
+#
+# Revision 1.14  1993/01/08  14:40:59  raeburn
 # keep config-gas.com.
 # if purging v9, discard ChangeLog.v9, keep otherwise.
 #

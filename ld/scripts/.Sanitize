@@ -29,5 +29,4 @@ isc-sysv3.2.sc
 
 Do-last:
 
-echo Done in `pwd`.
 # End of file.
