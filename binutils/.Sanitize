@@ -50,6 +50,7 @@ is-ranlib.c
 is-strip.c
 maybe-ranlib.c
 maybe-strip.c
+nlmconv.1
 nlmconv.c
 nlmconv.h
 nlmheader.y
