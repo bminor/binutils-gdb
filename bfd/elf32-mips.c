@@ -6735,7 +6735,8 @@ mips_elf_calculate_relocation (abfd,
   /* Calls from 16-bit code to 32-bit code and vice versa require the
      special jalx instruction.  */
   *require_jalxp = (!info->relocateable
-		    && ((r_type == R_MIPS16_26) != target_is_16_bit_code_p));
+		    && (((r_type == R_MIPS16_26) != target_is_16_bit_code_p
+			 || ((r_type == R_MIPS_26) == target_is_16_bit_code_p))));
 
   local_p = mips_elf_local_relocation_p (input_bfd, relocation,
 					 local_sections, true);
@@ -6790,6 +6791,7 @@ mips_elf_calculate_relocation (abfd,
 
     case R_MIPS_HI16:
     case R_MIPS_LO16:
+    case R_MIPS16_GPREL:
     case R_MIPS_GPREL16:
     case R_MIPS_GPREL32:
     case R_MIPS_LITERAL:
@@ -9758,7 +9760,7 @@ _bfd_elf32_mips_discard_info (abfd, cookie, info)
   cookie->rel = cookie->rels;
   cookie->relend =
     cookie->rels + o->reloc_count * bed->s->int_rels_per_ext_rel;
-      
+
   for (i = 0, skip = 0; i < o->_raw_size; i ++)
     {
       if (_bfd_elf32_reloc_symbol_deleted_p (i * PDR_SIZE, cookie))

@@ -1,6 +1,12 @@
+2002-01-16  Eric Christopher  <echristo@redhat.com>
+
+	* elf32-mips.c (mips_elf_calculate_relocation): Set require_jalxp
+	on R_MIPS_26 and target is 16bit. Add R_MIPS16_GPREL to list of
+	relocations requiring gp0 and gp.
+
 2002-01-16  Richard Earnshaw  <rearnsha@arm.com>
 
-	* elf32-arm.h (elf32_arm_merge_private_bfd_data): Handle 
+	* elf32-arm.h (elf32_arm_merge_private_bfd_data): Handle
 	EF_ARM_VFP_FLOAT.
 	(elf32_arm_print_private_bfd_data): Likewise.
 
@@ -87,13 +93,14 @@
 	(xstormy16_reloc_type_lookup): Use 'table' field to locate correct
 	howto entry.
 
+>>>>>>> 1.1263
 2002-01-10  Michael Snyder  <msnyder@redhat.com>
 
 	* elf.c (elfcore_write_prstatus): Use long instead of pid_t;
 	(elfcore_write_pstatus): Use long instead of pid_t;
 	* elf-bfd.h: Change prototypes to use long instead of pid_t;
 
-2002-01-09  Jason Thorpe  <thorpej@wasabisystems.com> 
+2002-01-09  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* elf.c: Update copyright years.
 	(elfcore_grok_netbsd_note): Use NT_NETBSDCORE_PROCINFO
@@ -129,7 +136,7 @@
 	* configure: Regenerate.
 	* elf32-sh-nbsd.c: New file.
 	* targets.c: Update copyright years.
-	(_bfd_target_vector): Add bfd_elf32_shlnbsd_vec and 
+	(_bfd_target_vector): Add bfd_elf32_shlnbsd_vec and
 	bfd_elf32_shnbsd_vec.
 
 2002-01-07  Aldy Hernandez  <aldyh@redhat.com>
