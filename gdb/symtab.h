@@ -1345,8 +1345,10 @@ extern struct symtabs_and_lines decode_line_spec (char *, int);
 
 extern struct symtabs_and_lines decode_line_spec_1 (char *, int);
 
-extern struct symtabs_and_lines
-decode_line_1 (char **, int, struct symtab *, int, char ***);
+/* From linespec.c */
+
+extern struct symtabs_and_lines decode_line_1 (char **,
+                                          int, struct symtab *, int, char ***);
 
 /* Symmisc.c */
 
@@ -1389,6 +1391,10 @@ extern struct symbol **make_symbol_overload_list (struct symbol *);
 /* symtab.c */
 
 extern struct partial_symtab *find_main_psymtab (void);
+
+extern struct symtab *find_line_symtab (struct symtab *, int, int *, int *);
+
+extern struct symtab_and_line find_function_start_sal (struct symbol *sym, int);
 
 /* blockframe.c */
 

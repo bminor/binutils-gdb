@@ -1,3 +1,13 @@
+2000-11-10  Fernando Nasser  <fnasser@totem.toronto.redhat.com>
+
+	* symtab.c (decode_line_1, total_number_of_methods, find_methods,
+	build_command_line_spec, find_toplevel_char, decode_line_2):
+	Move to linespec.c.
+	* linespec.c: New file. Routines that handle linespecs, formerly
+	in symtab.c.
+	* symtab.h: Export find_line_symtab and find_function_start_sal,
+	* Makefile.in: Add linespec.c.
+
 2000-11-10  Christopher Faylor <cgf@cygnus.com>
 
 	* inferior.h (step_over_calls_kind): New enum to clarify values in

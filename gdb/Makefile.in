@@ -492,7 +492,7 @@ SFILES = ax-general.c ax-gdb.c bcache.c blockframe.c breakpoint.c \
 	p-exp.y p-lang.c p-typeprint.c p-valprint.c parse.c \
 	printcmd.c remote.c remote-nrom.c scm-exp.c scm-lang.c \
 	scm-valprint.c source.c stabsread.c stack.c symfile.c \
-	symmisc.c symtab.c target.c thread.c top.c tracepoint.c \
+	symmisc.c symtab.c linespec.c target.c thread.c top.c tracepoint.c \
 	typeprint.c utils.c valarith.c valops.c valprint.c values.c \
 	serial.c ser-unix.c mdebugread.c os9kread.c \
 	tui/tui.c tui/tui.h tui/tuiCommand.c tui/tuiCommand.h \
@@ -621,7 +621,7 @@ TAGFILES_WITH_SRCDIR = $(HFILES_WITH_SRCDIR)
 
 COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o regcache.o \
 	source.o values.o eval.o valops.o valarith.o valprint.o printcmd.o \
-	symtab.o symfile.o symmisc.o infcmd.o infrun.o command.o \
+	symtab.o symfile.o symmisc.o linespec.o infcmd.o infrun.o command.o \
 	expprint.o environ.o stack.o thread.o \
 	event-loop.o event-top.o inf-loop.o \
 	gdbarch.o arch-utils.o gdbtypes.o copying.o $(DEPFILES) \
@@ -1898,6 +1898,9 @@ symtab.o: symtab.c call-cmds.h $(defs_h) $(expression_h) $(frame_h) \
 	$(gdbcmd_h) $(gdbcore_h) $(gdbtypes_h) language.h objfiles.h \
 	gnu-regex.h symfile.h $(symtab_h) target.h $(value_h) \
 	gdb_string.h
+
+linespec.o: linespec.c $(defs_h) $(gdbcmd_h) $(gdbtypes_h) objfiles.h \
+	symfile.h $(symtab_h) $(INCLUDE_DIR)/demangle.h inferior.h
 
 # OBSOLETE tahoe-tdep.o: tahoe-tdep.c $(OP_INCLUDE)/tahoe.h $(defs_h) \
 # OBSOLETE	$(symtab_h)
