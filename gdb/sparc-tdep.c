@@ -855,10 +855,20 @@ sparc_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
 	    addr = frame1->frame + (regnum - G0_REGNUM) * SPARC_INTREG_SIZE
 	      - (FP_REGISTER_BYTES + 8 * SPARC_INTREG_SIZE);
 	  else if (regnum >= I0_REGNUM && regnum < I0_REGNUM + 8)
+	    /* NOTE: cagney/2002-05-04: The call to get_prev_frame()
+               is safe/cheap - there will always be a prev frame.
+               This is because frame1 is initialized to frame->next
+               (frame1->prev == frame) and is then advanced towards
+               the innermost (next) frame.  */
 	    addr = (get_prev_frame (frame1)->extra_info->bottom
 		    + (regnum - I0_REGNUM) * SPARC_INTREG_SIZE
 		    + FRAME_SAVED_I0);
 	  else if (regnum >= L0_REGNUM && regnum < L0_REGNUM + 8)
+	    /* NOTE: cagney/2002-05-04: The call to get_prev_frame()
+               is safe/cheap - there will always be a prev frame.
+               This is because frame1 is initialized to frame->next
+               (frame1->prev == frame) and is then advanced towards
+               the innermost (next) frame.  */
 	    addr = (get_prev_frame (frame1)->extra_info->bottom
 		    + (regnum - L0_REGNUM) * SPARC_INTREG_SIZE
 		    + FRAME_SAVED_L0);

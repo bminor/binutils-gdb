@@ -1,5 +1,10 @@
 2002-05-04  Andrew Cagney  <ac131313@redhat.com>
 
+	* sparc-tdep.c (sparc_get_saved_register): Comment why
+	get_prev_frame call is safe.
+
+2002-05-04  Andrew Cagney  <ac131313@redhat.com>
+
 	* frame.h (select_frame): Delete level parameter.
 	* stack.c (select_frame): Update.  Use frame_relative_level to
 	obtain the frame's level.
