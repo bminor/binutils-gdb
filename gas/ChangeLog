@@ -1,3 +1,48 @@
+Mon Jan  4 05:17:26 1993  Ken Raeburn  (raeburn@cygnus.com)
+
+	* read.c (s_data): Always use "data_section", since it'll map to
+	SEG_DATA or SEG_E1 if needed.
+	(s_lcomm): Likewise with bss_section.
+	(s_fill): Use memset, not bzero.
+
+Thu Dec 31 04:29:27 1992  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
+
+	* read.c: Deleted some code under "#ifdef DONTDEF" that was for
+	handling GDB symbol table data.
+
+	* config/obj-aout.h (segment_name): Delete definition.
+	(seg_name): Delete declaration.
+	* config/obj-bout.h (segment_name, seg_name): Ditto.
+	* config/obj-vms.h (segment_name, seg_name): Ditto.
+	* config/obj-coff.h (segment_name): Ditto.
+	* config/obj-coffbfd.h (segment_name): Ditto.
+
+	* Changes for BFD_ASSEMBLER:
+	* obj.h (obj_crawl_symbol_chain): Declare only if not
+	BFD_ASSEMBLER.
+	(obj_header_append, obj_pre_write_hook): Ditto.
+	* as.h (stdoutput): New var, defined only if BFD_ASSEMBLER.
+	(segT) [BFD_ASSEMBLER]: New typedef for "asection *".
+	(segment_name) If BFD_ASSEMBLER, look up BFD section name;
+	otherwise, use seg_name array.
+	(seg_name): Declare only if not BFD_ASSEMBLER.
+	(section_alignment): Declare only if not BFD_ASSEMBLER.
+	(big_section, reg_section, pass1_section, diff_section,
+	absent_section, text_section, data_section, bss_section): If
+	BFD_ASSEMBLER, declare as variables; otherwise, declare as macros,
+	mapping to segT enum values.
+	(tc_aout_fix_to_chars, next_object_file_charP): Force parse errors
+	if these are used or defined, if BFD_ASSEMBLER.
+	(subseg_set, subseg_new) [BFD_ASSEMBLER]: Functionality of old
+	subseg_new split into two functions.
+	(SEG_NORMAL): For BFD_ASSEMBLER, always return true, for now.
+
+	* as.h (volatile): Don't define if already defined.
+	(had_errors, had_warnings): Provide prototypes for ANSI C even if
+	NO_STDARG.
+	(as_bad, as_fatal, as_tsktsk, as_warn): For GNU C version 2,
+	declare with format attribute for -Wformat checking.
+
 Wed Dec 30 10:18:57 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* app.c, config/tc-*.c: Don't include read.h, since it is already
@@ -738,26 +783,6 @@ Tue Jun  9 07:54:54 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 	68010 bxx into a bra+6 jmpxx, put the bytes of the jmp opcode into
 	the right place. (s_bss): Don't put .bss stuff into SEG_DATA, put
 	it into SEG_BSS
-
-Thu Jun  4 11:59:13 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
-
-	* expr.c(expr): allow SEG_REGISTER in expressions.
-	* read.c(pseudo_set): register expressions can be the source of a
-	set.
-	* subsegs.c (subseg_new): Now -R forces all changes to SEG_DATA to
-	goto SEG_TEXT (if a.out)
-	* write.c (write_object_file): If a.out don't use the old way for
-	-R.
-	* config/obj-a.out (s_sect): complain if the user tries to use a
-	subsegment with a value which might interfere with out -R hackery.
-	* config/tc-m68k.c (m68k_reg_parse): lookup names in symbol table
-	rather than use ugly if tree. (init_regtable): insert register
-	names into symbol table.
-
-Tue Jun  2 16:47:09 1992  Steve Chamberlain (sac@cygnus.com)
-
-	* write.c (write_object_file): keep the fix_tail clean, which
-	fixes a bug in -R where relocations were being lost.
 
 Thu Jun  4 11:59:13 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
