@@ -1647,6 +1647,14 @@ setup_sections (abfd, file_hdr)
       if (!space_asect)
 	goto error_return;
 
+       if (space.is_loadable == 0)
+	space_asect->flags |= SEC_DEBUGGING;
+
+      /* Set up all the attributes for the space.  */
+      bfd_som_set_section_attributes (space_asect, space.is_defined,
+				      space.is_private, space.sort_key,
+				      space.space_number);
+
       /* Now, read in the first subspace for this space */
       if (bfd_seek (abfd, file_hdr->subspace_location
 		    + space.subspace_index * sizeof subspace,
@@ -1695,6 +1703,12 @@ setup_sections (abfd, file_hdr)
 	  if (!subspace_asect)
 	    goto error_return;
 
+	  /* Store private information about the section.  */
+	  bfd_som_set_subsection_attributes (subspace_asect, space_asect,
+					     subspace.access_control_bits,
+					     subspace.sort_key,
+					     subspace.quadrant);
+
 	  /* Keep an easy mapping between subspaces and sections.  */
 	  som_section_data (subspace_asect)->subspace_index 
 	    = total_subspaces++;
@@ -1734,8 +1748,12 @@ setup_sections (abfd, file_hdr)
 	    subspace_asect->flags |= SEC_IS_COMMON;
 	  else if (subspace.subspace_length > 0)
 	    subspace_asect->flags |= SEC_HAS_CONTENTS;
+
 	  if (subspace.is_loadable)
 	    subspace_asect->flags |= SEC_ALLOC | SEC_LOAD;
+	  else
+	    subspace_asect->flags |= SEC_DEBUGGING;
+
 	  if (subspace.code_only)
 	    subspace_asect->flags |= SEC_CODE;
 

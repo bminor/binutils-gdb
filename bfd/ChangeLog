@@ -1,5 +1,8 @@
 Mon Mar 14 11:41:23 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* som (setup_sections): Set SEC_DEBUGGING and the section attributes
+	for spaces and subspaces.
+
 	* som.c (som_bfd_count_ar_symbols): Fix typo.
 
 	* som.c (som_object_setup): Set EXEC_P, D_PAGED, WP_TEXT, and
