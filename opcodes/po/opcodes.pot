@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2001-02-18 14:44-0800\n"
+"POT-Creation-Date: 2001-03-06 12:07-0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -64,7 +64,7 @@ msgstr ""
 msgid "unrecognized keyword/register name"
 msgstr ""
 
-#: cgen-asm.c:332 fr30-ibld.c:232 m32r-ibld.c:232
+#: cgen-asm.c:332 fr30-ibld.c:172 m32r-ibld.c:172
 #, c-format
 msgid "operand out of range (%ld not between %ld and %ld)"
 msgstr ""
@@ -96,8 +96,8 @@ msgid "Unrecognized field %d while parsing.\n"
 msgstr ""
 
 #. We couldn't parse it.
-#: fr30-asm.c:369 fr30-asm.c:373 fr30-asm.c:449 m32r-asm.c:377 m32r-asm.c:381
-#: m32r-asm.c:457
+#: fr30-asm.c:369 fr30-asm.c:373 fr30-asm.c:458 fr30-asm.c:552 m32r-asm.c:377
+#: m32r-asm.c:381 m32r-asm.c:466 m32r-asm.c:560
 msgid "unrecognized instruction"
 msgstr ""
 
@@ -106,16 +106,21 @@ msgstr ""
 msgid "syntax error (expected char `%c', found `%c')"
 msgstr ""
 
-#: fr30-asm.c:443 m32r-asm.c:451
+#: fr30-asm.c:424 m32r-asm.c:432
+#, c-format
+msgid "syntax error (expected char `%c', found end of instruction)"
+msgstr ""
+
+#: fr30-asm.c:452 m32r-asm.c:460
 msgid "junk at end of line"
 msgstr ""
 
-#: fr30-asm.c:551 m32r-asm.c:559
+#: fr30-asm.c:563 m32r-asm.c:571
 #, c-format
 msgid "bad instruction `%.50s...'"
 msgstr ""
 
-#: fr30-asm.c:554 m32r-asm.c:562
+#: fr30-asm.c:566 m32r-asm.c:574
 #, c-format
 msgid "bad instruction `%.50s'"
 msgstr ""
@@ -130,37 +135,37 @@ msgstr ""
 msgid "Unrecognized field %d while printing insn.\n"
 msgstr ""
 
-#: fr30-ibld.c:216 m32r-ibld.c:216
+#: fr30-ibld.c:156 m32r-ibld.c:156
 #, c-format
 msgid "operand out of range (%lu not between 0 and %lu)"
 msgstr ""
 
-#: fr30-ibld.c:790 m32r-ibld.c:719
+#: fr30-ibld.c:702 m32r-ibld.c:631
 #, c-format
 msgid "Unrecognized field %d while building insn.\n"
 msgstr ""
 
-#: fr30-ibld.c:994 m32r-ibld.c:849
+#: fr30-ibld.c:906 m32r-ibld.c:761
 #, c-format
 msgid "Unrecognized field %d while decoding insn.\n"
 msgstr ""
 
-#: fr30-ibld.c:1138 m32r-ibld.c:954
+#: fr30-ibld.c:1050 m32r-ibld.c:866
 #, c-format
 msgid "Unrecognized field %d while getting int operand.\n"
 msgstr ""
 
-#: fr30-ibld.c:1267 m32r-ibld.c:1044
+#: fr30-ibld.c:1179 m32r-ibld.c:956
 #, c-format
 msgid "Unrecognized field %d while getting vma operand.\n"
 msgstr ""
 
-#: fr30-ibld.c:1396 m32r-ibld.c:1137
+#: fr30-ibld.c:1308 m32r-ibld.c:1049
 #, c-format
 msgid "Unrecognized field %d while setting int operand.\n"
 msgstr ""
 
-#: fr30-ibld.c:1518 m32r-ibld.c:1223
+#: fr30-ibld.c:1430 m32r-ibld.c:1135
 #, c-format
 msgid "Unrecognized field %d while setting vma operand.\n"
 msgstr ""
@@ -205,12 +210,12 @@ msgstr ""
 msgid "unknown\t0x%04x"
 msgstr ""
 
-#: m68k-dis.c:412
+#: m68k-dis.c:429
 #, c-format
 msgid "<internal error in opcode table: %s %s>\n"
 msgstr ""
 
-#: m68k-dis.c:990
+#: m68k-dis.c:1007
 #, c-format
 msgid "<function code %d>"
 msgstr ""
