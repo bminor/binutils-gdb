@@ -6,13 +6,13 @@
 call_test:
 	call	_foo		; 24-bit reloc
 	call	_foo,1		; 16-bit reloc, immediate page specification
-	call	_foo,foo_page	; 16-bit reloc and 8-bit page reloc
+	call	_foo,%page(foo_page)	; 16-bit reloc and 8-bit page reloc
 	call	0,x,3		; 8-bit page reloc
 	call	4,y,12
 	call	7,sp,13
-	call	12,x,foo_page	; 8-bit page reloc
-	call	4,y,foo_page
-	call	7,sp,foo_page
+	call	12,x,%page(foo_page)	; 8-bit page reloc
+	call	4,y,%page(foo_page)
+	call	7,sp,%page(foo_page)
 	call	[d,x]		; No reloc
 	ldab	[32767,sp]
 	call	[2048,sp]	; No reloc

@@ -62,4 +62,8 @@ Disassembly of section .text:
 [	]+58: R_M68HC11_LO8	\.text
 0+0059 <L1\+0x2> andb	#0
 [	]+5a: R_M68HC11_HI8	\.text
-0+005b <L1\+0x4> rts
+0+5b <L1\+0x4> ldab	#0
+[	]+5c: R_M68HC11_PAGE	test2
+0+5d <L1\+0x6> ldy	#0+ <_start>
+[	]+5f: R_M68HC11_LO16	test2
+0+61 <L1\+0xa> rts

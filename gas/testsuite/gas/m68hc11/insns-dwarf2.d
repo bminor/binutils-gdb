@@ -107,5 +107,9 @@ L1:
   57:	84 17       	anda	#23
 	andb #%hi\(test2\)
   59:	c4 00       	andb	#0
+	ldab #%page\(test2\)	; Check that the relocs are against symbol
+  5b:	c6 00       	ldab	#0
+	ldy  #%addr\(test2\)	; otherwise linker relaxation fails
+  5d:	18 ce 00 00 	ldy	#0 <_start>
 	rts
-  5b:	39          	rts
+  61:	39          	rts

@@ -1,3 +1,10 @@
+2003-04-05  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* gas/m68hc11/insns.s: Add %page and %addr checks.
+	* gas/m68hc11/insns12.s: Likewise.
+	* gas/m68hc11/insns-dwarf2.d: Update.
+	* gas/m68hc11/insns.d: Update.
+
 2003-04-04  Chris Demetriou  <cgd@broadcom.com>
 
 	* gas/mips/mips5.d: New test.
