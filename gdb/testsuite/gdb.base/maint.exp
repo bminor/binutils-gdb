@@ -415,32 +415,13 @@ gdb_expect {
 
 send_gdb "maint info breakpoints\n"
 gdb_expect {
-    -re "Num\[ \t\]+Type\[ \t\]+Disp\[ \t\]+Enb\[ \t\]+Address\[ \t\]+What\r\n1\[ \t\]+breakpoint\[ \t\]+keep\[ \t\]+y\[ \t\]+$hex in main at.*break.c:75\r\n\[ \t\]+breakpoint already hit 1 time\r\n.*$gdb_prompt $"\
-				{ pass "maint info breakpoints" }
-    -re ".*$gdb_prompt $"       { fail "maint info breakpoints" }
-    timeout			{ fail "(timeout) maint info breakpoints" }
+	-re "Num\[ \t\]+Type\[ \t\]+Disp\[ \t\]+Enb\[ \t\]+Address\[ \t\]+What\r\n1\[ \t\]+breakpoint\[ \t\]+keep\[ \t\]+y\[ \t\]+$hex in main at.*break.c:75\r\n\[ \t\]+breakpoint already hit 1 time\r\n.*$gdb_prompt $"\
+		{ pass "maint info breakpoints" }
+	-re "Num\[ \t\]+Type\[ \t\]+Disp\[ \t\]+Enb\[ \t\]+Address\[ \t\]+What\r\n1\[ \t\]+breakpoint\[ \t\]+keep\[ \t\]+y\[ \t\]+$hex in main at.*break.c:75\r\n\[ \t\]+breakpoint already hit 1 time\r\n-1\[ \t\]+shlib events\[ \t\]+keep\[ \t\]+y\[ \t\]+$hex.*breakpoint already hit.*$gdb_prompt $"\
+		{ pass "maint info breakpoints (with shlib events)" }
+	-re ".*$gdb_prompt $"       { fail "maint info breakpoints" }
+	timeout         { fail "(timeout) maint info breakpoints" }
 }
-
-# Try it again, and check for shlib event info.  Not supported everywhere.
-if {! ([istarget "hppa*-*-hpux*"] 
-       || [istarget "*-*-linux*"]
-       || [istarget "*-*-solaris*"])} then {
-    setup_xfail "*-*-*"
-}
-send_gdb "maint info breakpoints\n"
-gdb_expect  {
-        -re "Num\[ \t\]+Type\[ \t\]+Disp\[ \t\]+Enb\[ \t\]+Address\[ \t\]+What\r\n1\[ \t\]+breakpoint\[ \t\]+keep\[ \t\]+y\[ \t\]+$hex in main at.*break.c:75\r\n\[ \t\]+breakpoint already hit 1 time\r\n.*$gdb_prompt $"\
-                        { pass "maint info breakpoints" }
-    -re "Num\[ \t\]+Type\[ \t\]+Disp\[ \t\]+Enb\[ \t\]+Address\[ \t\]+What\r\n1\[ \t\]+breakpoint\[ \t\]+keep\[ \t\]+y\[ \t\]+$hex in main at.*break.c:75\r\n\[ \t\]+breakpoint already hit 1 time\r\n-1\[ \t\]+shlib events\[ \t\]+keep\[ \t\]+y\[ \t\]+$hex.*breakpoint already hit.*$gdb_prompt $"\
-	    { pass "maint info breakpoints: shlib events" }
-    -re ".*$gdb_prompt $" {
-	fail "maint info breakpoints: shlib events"
-    }
-    timeout {
-	fail "(timeout) maint info breakpoints: shlib events"
-    }
-}
-
 
 send_gdb "maint print\n"
 gdb_expect  {
