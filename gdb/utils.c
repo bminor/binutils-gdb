@@ -29,7 +29,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "signals.h"
 #include "gdbcmd.h"
+#include "serial.h"
+#if 0
+/* No longer needed, I suspect.  */
 #include "terminal.h"
+#endif
 #include "bfd.h"
 #include "target.h"
 #include "demangle.h"
@@ -70,8 +74,16 @@ static struct cleanup *cleanup_chain;
 
 int quit_flag;
 
-/* Nonzero means quit immediately if Control-C is typed now,
-   rather than waiting until QUIT is executed.  */
+/* Nonzero means quit immediately if Control-C is typed now, rather
+   than waiting until QUIT is executed.  Be careful in setting this;
+   code which executes with immediate_quit set has to be very careful
+   about being able to deal with being interrupted at any time.  It is
+   almost always better to use QUIT; the only exception I can think of
+   is being able to quit out of a system call (using EINTR loses if
+   the SIGINT happens between the previous QUIT and the system call).
+   To immediately quit in the case in which a SIGINT happens between
+   the previous QUIT and setting immediate_quit (desirable anytime we
+   expect to block), call QUIT after setting immediate_quit.  */
 
 int immediate_quit;
 
@@ -258,7 +270,7 @@ error (va_alist)
   vfprintf_filtered (stderr, string, args);
   fprintf_filtered (stderr, "\n");
   va_end (args);
-  return_to_top_level ();
+  return_to_top_level (RETURN_ERROR);
 }
 
 /* Print an error message and exit reporting failure.
@@ -401,22 +413,28 @@ print_sys_errmsg (string, errcode)
 void
 quit ()
 {
+  serial_t stdout_serial = serial_fdopen (1);
+
   target_terminal_ours ();
   wrap_here ((char *)0);		/* Force out any pending output */
-#if !defined(__GO32__)
-#ifdef HAVE_TERMIO
-  ioctl (fileno (stdout), TCFLSH, 1);
-#else /* not HAVE_TERMIO */
-  ioctl (fileno (stdout), TIOCFLUSH, 0);
-#endif /* not HAVE_TERMIO */
-#ifdef TIOCGPGRP
-  error ("Quit");
-#else
-  error ("Quit (expect signal %d when inferior is resumed)", SIGINT);
-#endif /* TIOCGPGRP */
-#else
-  error ("Quit");
-#endif
+
+  SERIAL_FLUSH_OUTPUT (stdout_serial);
+
+  SERIAL_UN_FDOPEN (stdout_serial);
+
+  /* Don't use *_filtered; we don't want to prompt the user to continue.  */
+  if (error_pre_print)
+    fprintf (stderr, error_pre_print);
+
+  if (job_control
+      /* If there is no terminal switching for this target, then we can't
+	 possibly get screwed by the lack of job control.  */
+      || current_target->to_terminal_ours == NULL)
+    fprintf (stderr, "Quit\n");
+  else
+    fprintf (stderr,
+	     "Quit (expect signal SIGINT when the program is resumed)\n");
+  return_to_top_level (RETURN_QUIT);
 }
 
 
@@ -899,17 +917,22 @@ static unsigned int lines_printed, chars_printed;
    spit it out and forget about the wrap_here().  If we see another
    wrap_here(), we spit it out and remember the newer one.  If we see
    the end of the line, we spit out a newline, the indent, and then
-   the buffered output.
+   the buffered output.  */
 
-   wrap_column is the column number on the screen where wrap_buffer begins.
-     When wrap_column is zero, wrapping is not in effect.
-   wrap_buffer is malloc'd with chars_per_line+2 bytes. 
-     When wrap_buffer[0] is null, the buffer is empty.
-   wrap_pointer points into it at the next character to fill.
-   wrap_indent is the string that should be used as indentation if the
-     wrap occurs.  */
+/* Malloc'd buffer with chars_per_line+2 bytes.  Contains characters which
+   are waiting to be output (they have already been counted in chars_printed).
+   When wrap_buffer[0] is null, the buffer is empty.  */
+static char *wrap_buffer;
 
-static char *wrap_buffer, *wrap_pointer, *wrap_indent;
+/* Pointer in wrap_buffer to the next character to fill.  */
+static char *wrap_pointer;
+
+/* String to indent by if the wrap occurs.  Must not be NULL if wrap_column
+   is non-zero.  */
+static char *wrap_indent;
+
+/* Column number on the screen where wrap_buffer begins, or 0 if wrapping
+   is not in effect.  */
 static int wrap_column;
 
 /* ARGSUSED */
@@ -943,9 +966,24 @@ prompt_for_continue ()
   reinitialize_more_filter ();
 
   immediate_quit++;
-  ignore = gdb_readline ("---Type <return> to continue---");
+  /* On a real operating system, the user can quit with SIGINT.
+     But not on GO32.
+
+     'q' is provided on all systems so users don't have to change habits
+     from system to system, and because telling them what to do in
+     the prompt is more user-friendly than expecting them to think of
+     SIGINT.  */
+  ignore =
+    gdb_readline ("---Type <return> to continue, or q <return> to quit---");
   if (ignore)
-    free (ignore);
+    {
+      char *p = ignore;
+      while (*p == ' ' || *p == '\t')
+	++p;
+      if (p[0] == 'q')
+	request_quit (SIGINT);
+      free (ignore);
+    }
   immediate_quit--;
 
   /* Now we have to do this again, so that GDB will know that it doesn't
@@ -966,7 +1004,7 @@ reinitialize_more_filter ()
 
 /* Indicate that if the next sequence of characters overflows the line,
    a newline should be inserted here rather than when it hits the end. 
-   If INDENT is nonzero, it is a string to be printed to indent the
+   If INDENT is non-null, it is a string to be printed to indent the
    wrapped part on the next line.  INDENT must remain accessible until
    the next call to wrap_here() or until a newline is printed through
    fputs_filtered().
@@ -978,12 +1016,16 @@ reinitialize_more_filter ()
    we must not wrap words, but should still keep track of newlines
    that were explicitly printed.
 
-   INDENT should not contain tabs, as that
-   will mess up the char count on the next line.  FIXME.  */
+   INDENT should not contain tabs, as that will mess up the char count
+   on the next line.  FIXME.
+
+   This routine is guaranteed to force out any output which has been
+   squirreled away in the wrap_buffer, so wrap_here ((char *)0) can be
+   used to force out output from the wrap_buffer.  */
 
 void
 wrap_here(indent)
-  char *indent;
+     char *indent;
 {
   if (wrap_buffer[0])
     {
@@ -999,13 +1041,17 @@ wrap_here(indent)
   else if (chars_printed >= chars_per_line)
     {
       puts_filtered ("\n");
-      puts_filtered (indent);
+      if (indent != NULL)
+	puts_filtered (indent);
       wrap_column = 0;
     }
   else
     {
       wrap_column = chars_printed;
-      wrap_indent = indent;
+      if (indent == NULL)
+	wrap_indent = "";
+      else
+	wrap_indent = indent;
     }
 }
 
@@ -1106,8 +1152,7 @@ fputs_filtered (linebuffer, stream)
 	      /* Now output indentation and wrapped string */
 	      if (wrap_column)
 		{
-		  if (wrap_indent)
-		    fputs (wrap_indent, stream);
+		  fputs (wrap_indent, stream);
 		  *wrap_pointer = '\0';		/* Null-terminate saved stuff */
 		  fputs (wrap_buffer, stream);	/* and eject it */
 		  /* FIXME, this strlen is what prevents wrap_indent from
