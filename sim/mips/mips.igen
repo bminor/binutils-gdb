@@ -3035,6 +3035,46 @@
     }
 }
 
+
+// Helpers:
+//
+// Check that the given FPU format is usable, and signal a
+// ReservedInstruction exception if not.
+//
+
+// check_fmt checks that the format is single or double.
+:function:::void:check_fmt:int fmt, instruction_word insn
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
+*mipsV:
+*vr4100:
+*vr5000:
+*r3900:
+{
+  if ((fmt != fmt_single) && (fmt != fmt_double))
+    SignalException (ReservedInstruction, insn);
+}
+
+// check_fmt_p checks that the format is single, double, or paired single.
+:function:::void:check_fmt_p:int fmt, instruction_word insn
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
+*mipsV:
+*vr4100:
+*vr5000:
+*r3900:
+{
+  /* None of these ISAs support Paired Single, so just fall back to
+     the single/double check.  */
+  /* XXX FIXME: not true for mipsV, but we don't support .ps insns yet.  */
+  check_fmt (SD_, fmt, insn);
+}
+
+
 // Helper:
 //
 // Check that the FPU is currently usable, and signal a CoProcessorUnusable
@@ -3071,12 +3111,8 @@
 {
   int fmt = FMT;
   check_fpu (SD_);
-  {
-    if ((fmt != fmt_single) && (fmt != fmt_double))
-      SignalException(ReservedInstruction,instruction_0);
-    else
-      StoreFPR(FD,fmt,AbsoluteValue(ValueFPR(FS,fmt),fmt));
-  }
+  check_fmt_p (SD_, fmt, instruction_0);
+  StoreFPR(FD,fmt,AbsoluteValue(ValueFPR(FS,fmt),fmt));
 }
 
 
@@ -3094,12 +3130,8 @@
 {
   int fmt = FMT;
   check_fpu (SD_);
-  {
-    if ((fmt != fmt_single) && (fmt != fmt_double))
-      SignalException(ReservedInstruction, instruction_0);
-    else
-      StoreFPR(FD,fmt,Add(ValueFPR(FS,fmt),ValueFPR(FT,fmt),fmt));
-  }
+  check_fmt_p (SD_, fmt, instruction_0);
+  StoreFPR(FD,fmt,Add(ValueFPR(FS,fmt),ValueFPR(FT,fmt),fmt));
 }
 
 
@@ -3170,38 +3202,33 @@
 
 :function:::void:do_c_cond_fmt:int fmt, int ft, int fs, int cc, int cond, instruction_word insn
 {
-  if ((fmt != fmt_single) && (fmt != fmt_double))
-    SignalException (ReservedInstruction, insn);
+  int less;
+  int equal;
+  int unordered;
+  int condition;
+  unsigned64 ofs = ValueFPR (fs, fmt);
+  unsigned64 oft = ValueFPR (ft, fmt);
+  if (NaN (ofs, fmt) || NaN (oft, fmt))
+    {
+      if (FCSR & FP_ENABLE (IO))
+	{
+	  FCSR |= FP_CAUSE (IO);
+	  SignalExceptionFPE ();
+	}
+      less = 0;
+      equal = 0;
+      unordered = 1;
+    }
   else
     {
-      int less;
-      int equal;
-      int unordered;
-      int condition;
-      unsigned64 ofs = ValueFPR (fs, fmt);
-      unsigned64 oft = ValueFPR (ft, fmt);
-      if (NaN (ofs, fmt) || NaN (oft, fmt))
-	{
-	  if (FCSR & FP_ENABLE (IO))
-	    {
-	      FCSR |= FP_CAUSE (IO);
-	      SignalExceptionFPE ();
-	    }
-	  less = 0;
-	  equal = 0;
-	  unordered = 1;
-	}
-      else
-	{
-	  less = Less (ofs, oft, fmt);
-	  equal = Equal (ofs, oft, fmt);
-	  unordered = 0;
-	}
-      condition = (((cond & (1 << 2)) && less)
-		   || ((cond & (1 << 1)) && equal)
-		   || ((cond & (1 << 0)) && unordered));
-      SETFCC (cc, condition);
+      less = Less (ofs, oft, fmt);
+      equal = Equal (ofs, oft, fmt);
+      unordered = 0;
     }
+  condition = (((cond & (1 << 2)) && less)
+	       || ((cond & (1 << 1)) && equal)
+	       || ((cond & (1 << 0)) && unordered));
+  SETFCC (cc, condition);
 }
 
 010001,10,3.FMT,5.FT,5.FS,3.0,00,11,4.COND:COP1:32,f::C.cond.fmta
@@ -3210,8 +3237,10 @@
 *mipsII:
 *mipsIII:
 {
+  int fmt = FMT;
   check_fpu (SD_);
-  do_c_cond_fmt (SD_, FMT, FT, FS, 0, COND, instruction_0);
+  check_fmt_p (SD_, fmt, instruction_0);
+  do_c_cond_fmt (SD_, fmt, FT, FS, 0, COND, instruction_0);
 }
 
 010001,10,3.FMT,5.FT,5.FS,3.CC,00,11,4.COND:COP1:32,f::C.cond.fmtb
@@ -3223,8 +3252,10 @@
 *vr5000:
 *r3900:
 {
+  int fmt = FMT;
   check_fpu (SD_);
-  do_c_cond_fmt (SD_, FMT, FT, FS, CC, COND, instruction_0);
+  check_fmt_p (SD_, fmt, instruction_0);
+  do_c_cond_fmt (SD_, fmt, FT, FS, CC, COND, instruction_0);
 }
 
 
@@ -3239,12 +3270,8 @@
 {
   int fmt = FMT;
   check_fpu (SD_);
-  {
-    if ((fmt != fmt_single) && (fmt != fmt_double))
-      SignalException(ReservedInstruction,instruction_0);
-    else
-      StoreFPR(FD,fmt_long,Convert(FP_RM_TOPINF,ValueFPR(FS,fmt),fmt,fmt_long));
-  }
+  check_fmt (SD_, fmt, instruction_0);
+  StoreFPR(FD,fmt_long,Convert(FP_RM_TOPINF,ValueFPR(FS,fmt),fmt,fmt_long));
 }
 
 
@@ -3259,12 +3286,8 @@
 {
   int fmt = FMT;
   check_fpu (SD_);
-  {
-  if ((fmt != fmt_single) && (fmt != fmt_double))
-   SignalException(ReservedInstruction,instruction_0);
-  else
-   StoreFPR(FD,fmt_word,Convert(FP_RM_TOPINF,ValueFPR(FS,fmt),fmt,fmt_word));
-  }
+  check_fmt (SD_, fmt, instruction_0);
+  StoreFPR(FD,fmt_word,Convert(FP_RM_TOPINF,ValueFPR(FS,fmt),fmt,fmt_word));
 }
 
 
@@ -3448,12 +3471,8 @@
 {
   int fmt = FMT;
   check_fpu (SD_);
-  {
-    if ((fmt != fmt_single) && (fmt != fmt_double))
-      SignalException(ReservedInstruction,instruction_0);
-    else
-      StoreFPR(FD,fmt,Divide(ValueFPR(FS,fmt),ValueFPR(FT,fmt),fmt));
-  }
+  check_fmt (SD_, fmt, instruction_0);
+  StoreFPR(FD,fmt,Divide(ValueFPR(FS,fmt),ValueFPR(FT,fmt),fmt));
 }
 
 
@@ -3537,12 +3556,8 @@
 {
   int fmt = FMT;
   check_fpu (SD_);
-  {
-    if ((fmt != fmt_single) && (fmt != fmt_double))
-      SignalException(ReservedInstruction,instruction_0);
-    else
-      StoreFPR(FD,fmt_long,Convert(FP_RM_TOMINF,ValueFPR(FS,fmt),fmt,fmt_long));
-  }
+  check_fmt (SD_, fmt, instruction_0);
+  StoreFPR(FD,fmt_long,Convert(FP_RM_TOMINF,ValueFPR(FS,fmt),fmt,fmt_long));
 }
 
 
@@ -3558,12 +3573,8 @@
 {
   int fmt = FMT;
   check_fpu (SD_);
-  {
-    if ((fmt != fmt_single) && (fmt != fmt_double))
-      SignalException(ReservedInstruction,instruction_0);
-    else
-      StoreFPR(FD,fmt_word,Convert(FP_RM_TOMINF,ValueFPR(FS,fmt),fmt,fmt_word));
-  }
+  check_fmt (SD_, fmt, instruction_0);
+  StoreFPR(FD,fmt_word,Convert(FP_RM_TOMINF,ValueFPR(FS,fmt),fmt,fmt_word));
 }
 
 
@@ -3709,6 +3720,7 @@
 {
   int fmt = FMT;
   check_fpu (SD_);
+  check_fmt_p (SD_, fmt, instruction_0);
   StoreFPR(FD,fmt,ValueFPR(FS,fmt));
 }
 
@@ -3821,12 +3833,8 @@
 {
   int fmt = FMT;
   check_fpu (SD_);
-  {
-    if ((fmt != fmt_single) && (fmt != fmt_double))
-      SignalException(ReservedInstruction,instruction_0);
-    else
-      StoreFPR(FD,fmt,Multiply(ValueFPR(FS,fmt),ValueFPR(FT,fmt),fmt));
-  }
+  check_fmt_p (SD_, fmt, instruction_0);
+  StoreFPR(FD,fmt,Multiply(ValueFPR(FS,fmt),ValueFPR(FT,fmt),fmt));
 }
 
 
@@ -3843,12 +3851,8 @@
 {
   int fmt = FMT;
   check_fpu (SD_);
-  {
-    if ((fmt != fmt_single) && (fmt != fmt_double))
-      SignalException(ReservedInstruction,instruction_0);
-    else
-      StoreFPR(FD,fmt,Negate(ValueFPR(FS,fmt),fmt));
-  }
+  check_fmt_p (SD_, fmt, instruction_0);
+  StoreFPR(FD,fmt,Negate(ValueFPR(FS,fmt),fmt));
 }
 
 
@@ -3925,12 +3929,8 @@
 {
   int fmt = FMT;
   check_fpu (SD_);
-  {
-  if ((fmt != fmt_single) && (fmt != fmt_double))
-   SignalException(ReservedInstruction,instruction_0);
-  else
-   StoreFPR(FD,fmt,Recip(ValueFPR(FS,fmt),fmt));
-  }
+  check_fmt (SD_, fmt, instruction_0);
+  StoreFPR(FD,fmt,Recip(ValueFPR(FS,fmt),fmt));
 }
 
 
@@ -3945,12 +3945,8 @@
 {
   int fmt = FMT;
   check_fpu (SD_);
-  {
-    if ((fmt != fmt_single) && (fmt != fmt_double))
-      SignalException(ReservedInstruction,instruction_0);
-    else
-      StoreFPR(FD,fmt_long,Convert(FP_RM_NEAREST,ValueFPR(FS,fmt),fmt,fmt_long));
-  }
+  check_fmt (SD_, fmt, instruction_0);
+  StoreFPR(FD,fmt_long,Convert(FP_RM_NEAREST,ValueFPR(FS,fmt),fmt,fmt_long));
 }
 
 
@@ -3966,12 +3962,8 @@
 {
   int fmt = FMT;
   check_fpu (SD_);
-  {
-  if ((fmt != fmt_single) && (fmt != fmt_double))
-   SignalException(ReservedInstruction,instruction_0);
-  else
-   StoreFPR(FD,fmt_word,Convert(FP_RM_NEAREST,ValueFPR(FS,fmt),fmt,fmt_word));
-  }
+  check_fmt (SD_, fmt, instruction_0);
+  StoreFPR(FD,fmt_word,Convert(FP_RM_NEAREST,ValueFPR(FS,fmt),fmt,fmt_word));
 }
 
 
@@ -3983,12 +3975,8 @@
 {
   int fmt = FMT;
   check_fpu (SD_);
-  {
-  if ((fmt != fmt_single) && (fmt != fmt_double))
-   SignalException(ReservedInstruction,instruction_0);
-  else
-   StoreFPR(FD,fmt,Recip(SquareRoot(ValueFPR(FS,fmt),fmt),fmt));
-  }
+  check_fmt (SD_, fmt, instruction_0);
+  StoreFPR(FD,fmt,Recip(SquareRoot(ValueFPR(FS,fmt),fmt),fmt));
 }
 
 
@@ -4031,12 +4019,8 @@
 {
   int fmt = FMT;
   check_fpu (SD_);
-  {
-    if ((fmt != fmt_single) && (fmt != fmt_double))
-      SignalException(ReservedInstruction,instruction_0);
-    else
-      StoreFPR(FD,fmt,(SquareRoot(ValueFPR(FS,fmt),fmt)));
-  }
+  check_fmt (SD_, fmt, instruction_0);
+  StoreFPR(FD,fmt,(SquareRoot(ValueFPR(FS,fmt),fmt)));
 }
 
 
@@ -4053,12 +4037,8 @@
 {
   int fmt = FMT;
   check_fpu (SD_);
-  {
-    if ((fmt != fmt_single) && (fmt != fmt_double))
-      SignalException(ReservedInstruction,instruction_0);
-    else
-      StoreFPR(FD,fmt,Sub(ValueFPR(FS,fmt),ValueFPR(FT,fmt),fmt));
-  }
+  check_fmt_p (SD_, fmt, instruction_0);
+  StoreFPR(FD,fmt,Sub(ValueFPR(FS,fmt),ValueFPR(FT,fmt),fmt));
 }
 
 
@@ -4155,12 +4135,8 @@
 {
   int fmt = FMT;
   check_fpu (SD_);
-  {
-  if ((fmt != fmt_single) && (fmt != fmt_double))
-   SignalException(ReservedInstruction,instruction_0);
-  else
-   StoreFPR(FD,fmt_long,Convert(FP_RM_TOZERO,ValueFPR(FS,fmt),fmt,fmt_long));
-  }
+  check_fmt (SD_, fmt, instruction_0);
+  StoreFPR(FD,fmt_long,Convert(FP_RM_TOZERO,ValueFPR(FS,fmt),fmt,fmt_long));
 }
 
 
@@ -4176,12 +4152,8 @@
 {
   int fmt = FMT;
   check_fpu (SD_);
-  {
-  if ((fmt != fmt_single) && (fmt != fmt_double))
-   SignalException(ReservedInstruction,instruction_0);
-  else
-   StoreFPR(FD,fmt_word,Convert(FP_RM_TOZERO,ValueFPR(FS,fmt),fmt,fmt_word));
-  }
+  check_fmt (SD_, fmt, instruction_0);
+  StoreFPR(FD,fmt_word,Convert(FP_RM_TOZERO,ValueFPR(FS,fmt),fmt,fmt_word));
 }
 
 

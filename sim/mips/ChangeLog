@@ -1,3 +1,14 @@
+2002-02-04  Chris Demetriou  <cgd@broadcom.com>
+
+	* mips.igen (check_fmt, check_fmt_p): New functions to check
+	whether specific floating point formats are usable.
+	(ABS.fmt, ADD.fmt, CEIL.L.fmt, CEIL.W, DIV.fmt, FLOOR.L.fmt)
+	(FLOOR.W.fmt, MOV.fmt, MUL.fmt, NEG.fmt, RECIP.fmt, ROUND.L.fmt)
+	(ROUND.W.fmt, RSQRT.fmt, SQRT.fmt, SUB.fmt, TRUNC.L.fmt, TRUNC.W):
+	Use the new functions.
+	(do_c_cond_fmt): Remove format checks...
+	(C.cond.fmta, C.cond.fmtb): And move them into all callers.
+
 2002-02-03  Chris Demetriou  <cgd@broadcom.com>
 
 	* mips.igen: Fix formatting of check_fpu calls.
