@@ -27,6 +27,7 @@ Things-to-keep:
 README
 generic.em
 gld960.em
+gld960c.em
 hppaelf.em
 lnk960.em
 m88kbcs.em
