@@ -479,7 +479,7 @@ gdb_loc (clientData, interp, argc, argv)
 
   dsprintf_append_element (result_ptr, "%d", sal.line); /* line number */
 
-  dsprintf_append_element (result_ptr, "0x%lx", pc); /* PC */
+  dsprintf_append_element (result_ptr, "0x%s", paddr_nz(pc)); /* PC */
 
   return TCL_OK;
 }
