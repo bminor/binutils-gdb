@@ -759,6 +759,8 @@ styp_to_sec_flags (abfd, hdr, name, section)
       if (_bfd_coff_get_external_symbols (abfd))
 	{
 	  bfd_byte *esymstart, *esym, *esymend;
+	  int seen_state = 0;
+	  char *target_name;
 
 	  esymstart = esym = (bfd_byte *) obj_coff_external_syms (abfd);
 	  esymend = esym + obj_raw_syment_count (abfd) * SYMESZ;
@@ -778,122 +780,204 @@ styp_to_sec_flags (abfd, hdr, name, section)
 		  abort ();
 		}
 
-	      /* The MS documentation is vague, but it appears to
-		 require that n_sclass be C_STAT for both entries;
-		 However, the Alpha compiler uses C_EXT for the one
-		 with the "real" name, at least for string-pooled
-		 constants.  */
-	      if (isym.n_scnum == section->target_index
-		  && (isym.n_sclass == C_STAT || isym.n_sclass == C_EXT)
-		  && isym.n_type == T_NULL
-		  && isym.n_value == 0)
+	      if (isym.n_scnum == section->target_index)
 		{
-		  /* The first TWO entries with the section # are both
-		     of interest to us.  The first one is the "section
+		  /* According to the MSVC documentation, the first
+		     TWO entries with the section # are both of
+		     interest to us.  The first one is the "section
 		     symbol" (section name).  The second is the comdat
-		     symbol name.  'value' must be zero for it to
-		     apply.  Here, we've found a qualifying entry; we
-		     distinguish the first from the second by numaux
-		     (which should be 0 for the second).  FIXME: We
-		     should use the first one first rather than
-		     counting on numaux.  */
-		  if (isym.n_numaux == 1)
+		     symbol name.  Here, we've found the first
+		     qualifying entry; we distinguish it from the
+		     second with a state flag.
+
+		     In the case of gas-generated (at least until that
+		     is fixed) .o files, it isn't necessarily the
+		     second one.  It may be some other later symbol.
+
+		     Since gas also doesn't follow MS conventions and
+		     emits the section similar to .text$<name>, where
+		     <something> is the name we're looking for, we
+		     distinguish the two as follows:
+
+		     If the section name is simply a section name (no
+		     $) we presume it's MS-generated, and look at
+		     precisely the second symbol for the comdat name.
+		     If the section name has a $, we assume it's
+		     gas-generated, and look for <something> (whatever
+		     follows the $) as the comdat symbol.  */
+
+		  /* All 3 branches use this */
+		  symname = _bfd_coff_internal_syment_name (abfd, &isym, buf);
+
+		  if (symname == NULL)
+		    abort ();
+
+		  switch (seen_state)
 		    {
-		      union internal_auxent aux;
+		    case 0:
+		      {
+			/* The first time we've seen the symbol.  */
+			union internal_auxent aux;
 
-		      symname = _bfd_coff_internal_syment_name (abfd, &isym,
-								buf);
-		      if (symname == NULL)
-			abort ();
+			seen_state = 1;
 
-		      if (strcmp (name, symname) != 0)
-			abort ();
+			/* If it isn't the stuff we're expecting, die;
+			   The MS documentation is vague, but it
+			   appears that the second entry serves BOTH
+			   as the comdat symbol and the defining
+			   symbol record (either C_STAT or C_EXT,
+			   possibly with an aux entry with debug
+			   information if it's a function.)  It
+			   appears the only way to find the second one
+			   is to count.  (On Intel, they appear to be
+			   adjacent, but on Alpha, they have been
+			   found separated.)
 
-		      /* This is the section symbol.  */
+			   Here, we think we've found the first one,
+			   but there's some checking we can do to be
+			   sure.  */
 
-		      bfd_coff_swap_aux_in (abfd, (PTR) (esym + SYMESZ),
-					    isym.n_type, isym.n_sclass,
-					    0, isym.n_numaux, (PTR) &aux);
+			if (! (isym.n_sclass == C_STAT
+			       && isym.n_type == T_NULL
+			       && isym.n_value == 0))
+			  abort ();
 
-		      /* FIXME: Microsoft uses NODUPLICATES and
-			 ASSOCIATIVE, but gnu uses ANY and SAME_SIZE.
-			 Unfortunately, gnu doesn't do the comdat
-			 symbols right.  So, until we can fix it to do
-			 the right thing, we are temporarily disabling
-			 comdats for the MS types (they're used in
-			 DLLs and C++, but we don't support *their*
-			 C++ libraries anyway - DJ.  */
+			/* FIXME LATER: MSVC generates section names
+			   like .text for comdats.  Gas generates
+			   names like .text$foo__Fv (in the case of a
+			   function).  See comment above for more.  */
 
-		      switch (aux.x_scn.x_comdat)
-			{
-			case IMAGE_COMDAT_SELECT_NODUPLICATES:
-#ifdef STRICT_PE_FORMAT
-			  sec_flags |= SEC_LINK_DUPLICATES_ONE_ONLY;
+			if (strcmp (name, symname) != 0)
+			  abort ();
+  
+			/* This is the section symbol.  */
+
+			bfd_coff_swap_aux_in (abfd, (PTR) (esym + SYMESZ),
+					      isym.n_type, isym.n_sclass,
+					      0, isym.n_numaux, (PTR) &aux);
+
+			target_name = strchr (name, '$');
+			if (target_name != NULL)
+			  {
+			    /* Gas mode.  */
+			    seen_state = 2;
+			    /* Skip the `$'.  */
+			    target_name += 1;
+			  }
+
+			/* FIXME: Microsoft uses NODUPLICATES and
+			   ASSOCIATIVE, but gnu uses ANY and
+			   SAME_SIZE.  Unfortunately, gnu doesn't do
+			   the comdat symbols right.  So, until we can
+			   fix it to do the right thing, we are
+			   temporarily disabling comdats for the MS
+			   types (they're used in DLLs and C++, but we
+			   don't support *their* C++ libraries anyway
+			   - DJ.  */
+
+			/* Cygwin does not follow the MS style, and
+			   uses ANY and SAME_SIZE where NODUPLICATES
+			   and ASSOCIATIVE should be used.  For
+			   Interix, we just do the right thing up
+			   front.  */
+
+			switch (aux.x_scn.x_comdat)
+			  {
+			  case IMAGE_COMDAT_SELECT_NODUPLICATES:
+#ifdef STRICT_PE_FORMAT 
+			    sec_flags |= SEC_LINK_DUPLICATES_ONE_ONLY;
 #else
-			  sec_flags &= ~SEC_LINK_ONCE;
+			    sec_flags &= ~SEC_LINK_ONCE;
 #endif
-			  break;
+			    break;
 
-			case IMAGE_COMDAT_SELECT_ANY:
-			  sec_flags |= SEC_LINK_DUPLICATES_DISCARD;
-			  break;
+			  case IMAGE_COMDAT_SELECT_ANY:
+			    sec_flags |= SEC_LINK_DUPLICATES_DISCARD;
+			    break;
 
-			case IMAGE_COMDAT_SELECT_SAME_SIZE:
-			  sec_flags |= SEC_LINK_DUPLICATES_SAME_SIZE;
-			  break;
+			  case IMAGE_COMDAT_SELECT_SAME_SIZE:
+			    sec_flags |= SEC_LINK_DUPLICATES_SAME_SIZE;
+			    break;
 
-			case IMAGE_COMDAT_SELECT_EXACT_MATCH:
-			  /* Not yet fully implemented in the linker.  */
-			  sec_flags |= SEC_LINK_DUPLICATES_SAME_CONTENTS;
-			  break;
+			  case IMAGE_COMDAT_SELECT_EXACT_MATCH:
+			    /* Not yet fully implemented ??? */
+			    sec_flags |= SEC_LINK_DUPLICATES_SAME_CONTENTS;
+			    break;
 
-			case IMAGE_COMDAT_SELECT_ASSOCIATIVE:
+			  /* debug$S gets this case; other
+                             implications ??? */
+
+			  /* There may be no symbol... we'll search
+			     the whole table... Is this the right
+			     place to play this game? Or should we do
+			     it when reading it in.  */
+			  case IMAGE_COMDAT_SELECT_ASSOCIATIVE:
 #ifdef STRICT_PE_FORMAT
-			  /* FIXME: This is not currently implemented.  */
-			  sec_flags |= SEC_LINK_DUPLICATES_DISCARD;
+			    /* FIXME: This is not currently implemented.  */
+			    sec_flags |= SEC_LINK_DUPLICATES_DISCARD;
 #else
-			  sec_flags &= ~SEC_LINK_ONCE;
+			    sec_flags &= ~SEC_LINK_ONCE;
 #endif
-			  break;
+			    break;
 
-			default:
-			  /* FIXME: Shouldn't this be at least a
-                             warning?  */
-			  sec_flags |= SEC_LINK_DUPLICATES_DISCARD;
-			  break;
-			}
-		    }
-		  else 
-		    {
-		      char *newname;
-
-		      /* This should be the the second symbol with the
-			 section #.  It is the actual symbol name.
-			 Intel puts the two adjacent, but Alpha (at
-			 least) spreads them out.  */
-
-		      section->comdat =
-			bfd_alloc (abfd, sizeof (struct bfd_comdat_info));
-		      if (section->comdat == NULL)
-			abort ();
-		      section->comdat->symbol = (esym - esymstart) / SYMESZ;
-		      symname = _bfd_coff_internal_syment_name (abfd, &isym,
-								buf);
-		      if (symname == NULL)
-			abort ();
-
-		      newname = bfd_alloc (abfd, strlen (symname) + 1);
-		      if (newname == NULL)
-			abort ();
-		      strcpy (newname, symname);
-		      section->comdat->name = newname;
-
+			  default:  /* 0 means "no symbol" */
+			    /* debug$F gets this case; other
+                               implications ??? */
+			    sec_flags |= SEC_LINK_DUPLICATES_DISCARD;
+			    break;
+			  }
+	 	      }
 		      break;
+
+		    case 2:
+		      /* Gas mode: the first matching on partial name.  */
+
+#ifndef TARGET_UNDERSCORE
+#define TARGET_UNDERSCORE 0
+#endif
+		      /* Is this the name we're looking for? */
+		      if (strcmp (target_name, 
+				  symname + (TARGET_UNDERSCORE ? 1 : 0)) != 0)
+			{
+			    /* Not the name we're looking for */
+	                    esym += (isym.n_numaux + 1) * SYMESZ;
+			    continue;
+			}
+		      /* Fall through.  */
+		    case 1: 
+		      /* MSVC mode: the lexically second symbol (or
+			 drop through from the above).  */
+		      {
+		        char *newname;
+
+			/* This must the the second symbol with the
+			   section #.  It is the actual symbol name.
+			   Intel puts the two adjacent, but Alpha (at
+			   least) spreads them out.  */
+
+		        section->comdat = 
+			  bfd_alloc (abfd, sizeof (struct bfd_comdat_info));
+		        if (section->comdat == NULL)
+		          abort ();
+		        section->comdat->symbol =
+			  (esym - esymstart) / SYMESZ;
+
+		        newname = bfd_alloc (abfd, strlen (symname) + 1);
+		        if (newname == NULL)
+		          abort ();
+
+		        strcpy (newname, symname);
+		        section->comdat->name = newname;
+
+		      }
+
+		      goto breakloop;
 		    }
 		}
 
 	      esym += (isym.n_numaux + 1) * SYMESZ;
 	    }
+	  breakloop:
 	}
     }
 

@@ -1,5 +1,8 @@
 1999-09-13  Donn Terry  <donn@interix.com>
 
+	* coffcode.h (styp_to_sec_flags): Further refinement of COMDAT
+	handling to support both GNU and MS objects.
+
 	* coffcode.h (coff_write_object_contents): Don't check reloc_count
 	when determining whether to set F_RELFLG.
 
