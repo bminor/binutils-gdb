@@ -1,3 +1,8 @@
+2004-04-19  Joel Brobecker  <brobecker@gnat.com>
+
+	* dwarf2read.c (dwarf2_flag_true_p): New function.
+	(die_is_declaration): Use the function above. Add some comments.
+
 2004-04-19  Mark Kettenis  <kettenis@gnu.org>
 
 	* sparcnbsd-tdep.c (_initialize_sparnbsd_tdep): Specify

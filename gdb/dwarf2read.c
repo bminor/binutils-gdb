@@ -732,6 +732,9 @@ static void set_cu_language (unsigned int, struct dwarf2_cu *);
 static struct attribute *dwarf2_attr (struct die_info *, unsigned int,
 				      struct dwarf2_cu *);
 
+static int dwarf2_flag_true_p (struct die_info *die, unsigned name,
+                               struct dwarf2_cu *cu);
+
 static int die_is_declaration (struct die_info *, struct dwarf2_cu *cu);
 
 static struct die_info *die_specification (struct die_info *die,
@@ -5549,11 +5552,30 @@ dwarf2_attr (struct die_info *die, unsigned int name, struct dwarf2_cu *cu)
   return NULL;
 }
 
+/* Return non-zero iff the attribute NAME is defined for the given DIE,
+   and holds a non-zero value.  This function should only be used for
+   DW_FORM_flag attributes.  */
+
+static int
+dwarf2_flag_true_p (struct die_info *die, unsigned name, struct dwarf2_cu *cu)
+{
+  struct attribute *attr = dwarf2_attr (die, name, cu);
+
+  return (attr && DW_UNSND (attr));
+}
+
 static int
 die_is_declaration (struct die_info *die, struct dwarf2_cu *cu)
 {
-  return (dwarf2_attr (die, DW_AT_declaration, cu)
-	  && ! dwarf2_attr (die, DW_AT_specification, cu));
+  /* A DIE is a declaration if it has a DW_AT_declaration attribute
+     which value is non-zero.  However, we have to be careful with
+     DIEs having a DW_AT_specification attribute, because dwarf2_attr()
+     (via dwarf2_flag_true_p) follows this attribute.  So we may
+     end up accidently finding a declaration attribute that belongs
+     to a different DIE referenced by the specification attribute,
+     even though the given DIE does not have a declaration attribute.  */
+  return (dwarf2_flag_true_p (die, DW_AT_declaration, cu)
+	  && dwarf2_attr (die, DW_AT_specification, cu) == NULL);
 }
 
 /* Return the die giving the specification for DIE, if there is
