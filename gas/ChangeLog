@@ -1,3 +1,8 @@
+Thu Aug 22 10:20:30 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ecoff.c (ecoff_directive_endef): Avoid a division by zero error
+	if an array dimension is not known.
+
 start-sanitize-d10v
 Thu Aug 22 10:50:00 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
