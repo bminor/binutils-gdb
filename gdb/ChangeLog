@@ -1,3 +1,10 @@
+2003-10-06  Mark Kettenis  <kettenis@gnu.org>
+
+	* x86-64-tdep.c (x86_64_store_return_value): Don't use
+	DEPRECATED_REGISTER_RAW_SIZE.  Use symbolic names for register
+	names for return values.  This fixes a bug since we looked at %rbx
+	instead of %rdx.
+
 2003-10-05  Mark Kettenis  <kettenis@gnu.org>
 
 	* x86-64-tdep.c: Include "regset.h".

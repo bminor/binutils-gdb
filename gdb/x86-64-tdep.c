@@ -796,8 +796,8 @@ x86_64_store_return_value (struct type *type, struct regcache *regcache,
   /* XXX: What about complex floating point types?  */
   else
     {
-      int low_size = DEPRECATED_REGISTER_RAW_SIZE (0);
-      int high_size = DEPRECATED_REGISTER_RAW_SIZE (1);
+      int low_size = register_size (current_gdbarch, X86_64_RAX_REGNUM);
+      int high_size = register_size (current_gdbarch, X86_64_RDX_REGNUM);
 
       if (len <= low_size)
         regcache_cooked_write_part (regcache, 0, 0, len, valbuf);
