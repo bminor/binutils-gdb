@@ -1,3 +1,9 @@
+2003-06-18  Hans-Peter Nilsson  <hp@axis.com>
+
+	* elf32-cris.c (cris_elf_relocate_section) <case
+	R_CRIS_32_GOTREL>: When building a program, don't complain about a
+	symbol from a normal object or an undefined weak symbol.
+
 2003-06-18  Alan Modra  <amodra@bigpond.net.au>
 
 	* elflink.h (elf_gc_record_vtentry): Revert last change.  Correct
