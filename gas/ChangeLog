@@ -1,3 +1,22 @@
+2004-04-22  Bruno De Bus <bdebus@elis.ugent.be>
+
+	* config/tc-arm.h (enum mstate): Move here, add MAP_UNDEFINED
+	state.
+	(TC_SEGMENT_INFO_TYPE): Define to enum mstate.
+	* config/tc-arm.c (enum mstate): Delete from here.
+	(mapping_state): Remove the static mapstate variable and instead
+	store the state in the segment.  This allows a per-section mapping
+	state.  Handle and ignore MAP_UNDEFINED states.
+	(arm_elf_change_section): Get the current mapping state from the
+	new section.
+	(s_ltorg): Set the mapping state to MAP_DATA.
+	(arm_cleanup): Use arm_elf_change_section to get the mapping state
+	for each pool as it is emitted.
+
+2004-04-22  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-arm.h: Formatting tidy ups.
+
 2004-04-20  Chris Demetriou  <cgd@broadcom.com>
 
 	* NEWS: Note that MIPS -membedded-pic option is deprecated.
