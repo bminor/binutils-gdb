@@ -1,5 +1,11 @@
 Thu Aug  4 10:26:36 1994  Stu Grossman  (grossman@rtl.cygnus.com)
 
+	* target.c (add_target):  Don't call clean_target on target
+	vectors anymore.
+	* (unpush_target):  Test for to_close being set before calling.
+	* (target_xfer_memory, target_info):  Check for to_has_memory
+	before playing with memory.
+
 	* remote.c (remote_open):  Set inferior_pid to make kill command
 	happy.
 	* inflow.c (kill_command):  Revert change of Aug 2.  Use

@@ -154,7 +154,7 @@ add_target (t)
 		    target_struct_allocsize * sizeof (*target_structs));
     }
   target_structs[target_struct_size++] = t;
-  cleanup_target (t);
+/*  cleanup_target (t);*/
 
   if (targetlist == NULL)
     add_prefix_cmd ("target", class_run, target_command,
@@ -445,7 +445,8 @@ unpush_target (t)
 {
   struct target_stack_item *cur, *prev;
 
-  t->to_close (0);		/* Let it clean up */
+  if (t->to_close)
+    t->to_close (0);		/* Let it clean up */
 
   /* Look for the specified target.  Note that we assume that a target
      can only occur once in the target stack. */
@@ -668,6 +669,8 @@ target_xfer_memory (memaddr, myaddr, len, write)
       for (item = target_stack; item; item = item->next)
 	{
 	  t = item->target_ops;
+	  if (!t->to_has_memory)
+	    continue;
 
 	  res = t->to_xfer_memory (memaddr, myaddr, curlen, write, t);
 	  if (res > 0)
@@ -717,6 +720,9 @@ target_info (args, from_tty)
   for (item = target_stack; item; item = item->next)
     {
       t = item->target_ops;
+
+      if (!t->to_has_memory)
+	continue;
 
       if ((int)(t->to_stratum) <= (int)dummy_stratum)
 	continue;
