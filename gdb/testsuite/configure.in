@@ -54,6 +54,8 @@ if test "${shared}" = "true"; then
 fi
 AC_SUBST(RPATH_ENVVAR)
 # End stuff to support --enable-shared
+# Start stuff to support --enable-gdbtk
+# start-sanitize-gdbtk
 AC_ARG_ENABLE(gdbtk,
 [  --enable-gdbtk ],
 [case "${enableval}" in
@@ -84,9 +86,8 @@ case "$host" in
 if test "${enable_gdbtk}" = "yes"; then
     configdirs="${configdirs} gdb.gdbtk"
 fi
-# End stuff to suppot --enable-shared
-# start-sanitize-gdbtk
-# Begin stuff to support --enable-gdbtk
+# End stuff to support --enable-shared
+# end-sanitize-gdbtk
 
 # configure the subdirectories too
 AC_CONFIG_SUBDIRS($configdirs)
