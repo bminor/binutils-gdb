@@ -1,3 +1,11 @@
+Fri Mar 11 00:34:59 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* sunos.c (sunos_read_dynamic_info):  Assume that dynamic info
+	is always located at the start of the data section to allow
+	recovery of the dynamic info from a stripped executable.
+	* ecoff.c (ecoff_styp_to_sec_flags):  Handle STYP_PDATA, STYP_XDATA
+	and STYP_COMMENT.
+
 Wed Mar  9 17:17:53 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* libbfd-in.h: Remove alloca cruft.  It was missing some necessary

@@ -96,32 +96,17 @@ sunos_read_dynamic_info (abfd)
   info->dynrel = NULL;
   obj_aout_dynamic_info (abfd) = (PTR) info;
 
-  /* We look for the __DYNAMIC symbol to locate the dynamic linking
-     information.  It should be the first symbol if it is defined.  If
-     we can't find it, don't sweat it.  */
-  if ((abfd->flags & DYNAMIC) == 0
-      || bfd_get_symcount (abfd) <= 0
-      || bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET) != 0
-      || (bfd_read ((PTR) &dynsym, 1, EXTERNAL_NLIST_SIZE, abfd)
-	  != EXTERNAL_NLIST_SIZE)
-      || ((dynsym.e_type[0] & N_TYPE) != N_DATA
-	  && (dynsym.e_type[0] & N_TYPE) != N_TEXT)
-      || bfd_seek (abfd,
-		   obj_str_filepos (abfd) + GET_WORD (abfd, dynsym.e_strx),
-		   SEEK_SET) != 0
-      || bfd_read ((PTR) buf, 1, sizeof buf, abfd) != sizeof buf
-      || buf[sizeof buf - 1] != '\0'
-      || strcmp (buf, "__DYNAMIC") != 0)
+  /* This code used to look for the __DYNAMIC symbol to locate the dynamic
+     linking information.
+     However this inhibits recovering the dynamic symbols from a
+     stripped object file, so blindly assume that the dynamic linking
+     information is located at the start of the data section.
+     We could verify this assumption later by looking through the dynamic
+     symbols for the __DYNAMIC symbol.  */
+  if ((abfd->flags & DYNAMIC) == 0)
     return true;
-
-  if ((dynsym.e_type[0] & N_TYPE) == N_DATA)
-    dynsec = obj_datasec (abfd);
-  else
-    dynsec = obj_textsec (abfd);
-  if (! bfd_get_section_contents (abfd, dynsec, (PTR) &dyninfo,
-				  (GET_WORD (abfd, dynsym.e_value)
-				   - bfd_get_section_vma (abfd, dynsec)),
-				  sizeof dyninfo))
+  if (! bfd_get_section_contents (abfd, obj_datasec (abfd), (PTR) &dyninfo,
+				  (file_ptr) 0, sizeof dyninfo))
     return true;
 
   dynver = GET_WORD (abfd, dyninfo.ld_version);
