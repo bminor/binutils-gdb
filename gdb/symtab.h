@@ -469,7 +469,8 @@ enum address_class
   /* Value is in specified register.  Just like LOC_REGPARM except the
      register holds the address of the argument instead of the argument
      itself. This is currently used for the passing of structs and unions
-     on sparc and hppa.  */
+     on sparc and hppa.  It is also used for call by reference where the
+     address is in a register, at least by mipsread.c.  */
 
   LOC_REGPARM_ADDR,
 
@@ -617,6 +618,23 @@ struct linetable_entry
   int line;
   CORE_ADDR pc;
 };
+
+/* The order of entries in the linetable is significant.
+
+   It should generally be in ascending line number order.  Line table
+   entries for a function at lines 10-40 should come before entries
+   for a function at lines 50-70.
+
+   A for statement looks like this
+
+   	10	0x100	- for the init/test part of a for stmt.
+   	20	0x200
+   	30	0x300
+   	10	0x400	- for the increment part of a for stmt.
+
+   FIXME: this description is incomplete.  coffread.c is said to get
+   the linetable order wrong (would arrange_linenos from xcoffread.c
+   work for normal COFF too?).  */
 
 struct linetable
 {
@@ -1041,8 +1059,10 @@ symbol_file_add PARAMS ((char *, int, CORE_ADDR, int, int, int));
 
 /* source.c */
 
+extern int frame_file_full_name; /* in stack.c */
+
 extern int
-identify_source_line PARAMS ((struct symtab *, int, int));
+identify_source_line PARAMS ((struct symtab *, int, int, CORE_ADDR));
 
 extern void
 print_source_lines PARAMS ((struct symtab *, int, int, int));

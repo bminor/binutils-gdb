@@ -1,3 +1,12 @@
+Tue May 25 20:44:24 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* source.c (line_info): If --fullname, display the source.
+	(identify_source_line), callers: Take pc as argument, rather than
+	assuming innermost frame (emacs doesn't use this, so no one ever
+	noticed).
+	* symtab.h: Declare frame_file_full_name.
+	* main.c: Don't.
+
 Tue May 25 15:30:43 1993  Brendan Kehoe  (brendan@lisa.cygnus.com)
 
 	* breakpoint.c (catch_command_1): Fix typo in error msg.

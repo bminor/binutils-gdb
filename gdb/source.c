@@ -106,13 +106,13 @@ static int last_line_listed;
 static int first_line_listed;
 
 
-/* Set the source file default for the "list" command, specifying a
-   symtab.  Sigh.  Behavior specification: If it is called with a
-   non-zero argument, that is the symtab to select.  If it is not,
-   first lookup "main"; if it exists, use the symtab and line it
-   defines.  If not, take the last symtab in the symtab lists (if it
-   exists) or the last symtab in the psymtab lists (if *it* exists).  If
-   none of this works, report an error.   */
+/* Set the source file default for the "list" command to be S.
+
+   If S is NULL, and we don't have a default, find one.  This
+   should only be called when the user actually tries to use the
+   default, since we produce an error if we can't find a reasonable
+   default.  Also, since this can cause symbols to be read, doing it
+   before we need to would make things slower than necessary.  */
 
 void
 select_source_symtab (s)
@@ -130,6 +130,9 @@ select_source_symtab (s)
       current_source_line = 1;
       return;
     }
+
+  if (current_source_symtab)
+    return;
 
   /* Make the default place to list be the function `main'
      if one exists.  */
@@ -188,9 +191,6 @@ select_source_symtab (s)
 	  current_source_symtab = PSYMTAB_TO_SYMTAB (cs_pst);
 	}
     }
-
-  if (current_source_symtab)
-    return;
 
   error ("Can't find a default source file");
 }
@@ -437,8 +437,13 @@ source_info (ignore, from_tty)
 
 /* Open a file named STRING, searching path PATH (dir names sep by colons)
    using mode MODE and protection bits PROT in the calls to open.
+
    If TRY_CWD_FIRST, try to open ./STRING before searching PATH.
-   (ie pretend the first element of PATH is ".")
+   (ie pretend the first element of PATH is ".").  This also indicates
+   that a slash in STRING disables searching of the path (this is
+   so that "exec-file ./foo" or "symbol-file ./foo" insures that you
+   get that particular version of foo or an error message).
+
    If FILENAMED_OPENED is non-null, set it to a newly allocated string naming
    the actual file opened (this string will always start with a "/".  We
    have to take special pains to avoid doubling the "/" between the directory
@@ -468,17 +473,17 @@ openp (path, try_cwd_first, string, mode, prot, filename_opened)
   if (!path)
     path = ".";
 
-  /* ./foo => foo */
-  while (string[0] == '.' && string[1] == '/')
-    string += 2;
-
   if (try_cwd_first || string[0] == '/')
     {
       filename = string;
       fd = open (filename, mode, prot);
-      if (fd >= 0 || string[0] == '/')
+      if (fd >= 0 || string[0] == '/' || strchr (string, '/'))
 	goto done;
     }
+
+  /* ./foo => foo */
+  while (string[0] == '.' && string[1] == '/')
+    string += 2;
 
   alloclen = strlen (path) + strlen (string) + 2;
   filename = (char *) alloca (alloclen);
@@ -773,10 +778,11 @@ get_filename_and_charpos (s, fullname)
    Return 1 if successful, 0 if could not find the file.  */
 
 int
-identify_source_line (s, line, mid_statement)
+identify_source_line (s, line, mid_statement, pc)
      struct symtab *s;
      int line;
      int mid_statement;
+     CORE_ADDR pc;
 {
   if (s->line_charpos == 0)
     get_filename_and_charpos (s, (char **)NULL);
@@ -787,7 +793,7 @@ identify_source_line (s, line, mid_statement)
   printf ("\032\032%s:%d:%d:%s:0x%x\n", s->fullname,
 	  line, s->line_charpos[line - 1],
 	  mid_statement ? "middle" : "beg",
-	  get_frame_pc (get_current_frame()));
+	  pc);
   current_source_line = line;
   first_line_listed = line;
   last_line_listed = line;
@@ -841,7 +847,7 @@ print_source_lines (s, line, stopline, noerror)
       perror_with_name (s->filename);
     }
 
-  stream = fdopen (desc, "r");
+  stream = fdopen (desc, FOPEN_RT);
   clearerr (stream);
 
   while (nlines-- > 0)
@@ -1110,6 +1116,11 @@ line_info (arg, from_tty)
 	  set_next_address (start_pc);
 	  /* Repeating "info line" should do the following line.  */
 	  last_line_listed = sal.line + 1;
+
+	  /* If this is the only line, show the source code.  If it could
+	     not find the file, don't do anything special.  */
+	  if (frame_file_full_name && sals.nelts == 1)
+	    identify_source_line (sal.symtab, sal.line, 0, start_pc);
 	}
       else
 	printf_filtered ("Line number %d is out of range for \"%s\".\n",
@@ -1159,7 +1170,7 @@ forward_search_command (regex, from_tty)
       perror_with_name (current_source_symtab->filename);
     }
 
-  stream = fdopen (desc, "r");
+  stream = fdopen (desc, FOPEN_RT);
   clearerr (stream);
   while (1) {
 /* FIXME!!!  We walk right off the end of buf if we get a long line!!! */
@@ -1231,7 +1242,7 @@ reverse_search_command (regex, from_tty)
       perror_with_name (current_source_symtab->filename);
     }
 
-  stream = fdopen (desc, "r");
+  stream = fdopen (desc, FOPEN_RT);
   clearerr (stream);
   while (line > 1)
     {
