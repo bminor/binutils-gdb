@@ -29,8 +29,16 @@ esac])dnl
 
 # host-specific stuff:
 
+. ${srcdir}/../bfd/configure.host
+
 AC_PROG_CC
+AC_SUBST(CFLAGS)
+AC_SUBST(HDEFINES)
+AR=${AR-ar}
+AC_SUBST(AR)
 AC_PROG_RANLIB
+AC_PROG_INSTALL
+
 AC_CHECK_HEADERS(string.h strings.h)
 
 AC_CONFIG_AUX_DIR(`cd $srcdir/..;pwd`)
@@ -42,18 +50,6 @@ if test -z "$host" ; then
     AC_MSG_ERROR(Unrecognized host system type; please check config.sub.)
 fi
 AC_ARG_PROGRAM
-
-. ${srcdir}/../bfd/configure.host
-
-if test -f ${srcdir}/../bfd/config/${my_host}.mh ; then
-	host_makefile_frag=${srcdir}/../bfd/config/${my_host}.mh
-	frags=${host_makefile_frag}
-else
-	host_makefile_frag=/dev/null
-	frags=
-fi
-AC_SUBST_FILE(host_makefile_frag)
-AC_SUBST(frags)
 
 # target-specific stuff:
 

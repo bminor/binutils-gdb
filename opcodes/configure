@@ -434,7 +434,7 @@ fi
 . ${srcdir}/../bfd/configure.host
 
 echo $ac_n "checking for CC""... $ac_c" 1>&6
-test -z "$CC" && CC=`egrep '^CC *=' ../Makefile | tail -1 | sed 's/^CC *= *//'`
+test -z "$CC" && test -r ../Makefile && CC=`egrep '^CC *=' ../Makefile | tail -1 | sed 's/^CC *= *//'`
 test -z "$CC" && CC=cc
 echo "$ac_t""setting CC to $CC" 1>&6
 
@@ -458,6 +458,7 @@ else
   test "${CFLAGS+set}" = set || CFLAGS="-g"
 fi
 rm -f conftest*
+
 
 
 AR=${AR-ar}
@@ -577,7 +578,7 @@ else
   # On the NeXT, cc -E runs the code through the compiler's parser,
   # not just through cpp.
   cat > conftest.$ac_ext <<EOF
-#line 581 "configure"
+#line 582 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
@@ -591,7 +592,7 @@ else
   rm -rf conftest*
   CPP="${CC-cc} -E -traditional-cpp"
   cat > conftest.$ac_ext <<EOF
-#line 595 "configure"
+#line 596 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
@@ -624,7 +625,7 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 628 "configure"
+#line 629 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
@@ -989,6 +990,7 @@ s%@exec_prefix@%$exec_prefix%g
 s%@prefix@%$prefix%g
 s%@program_transform_name@%$program_transform_name%g
 s%@CC@%$CC%g
+s%@HDEFINES@%$HDEFINES%g
 s%@AR@%$AR%g
 s%@RANLIB@%$RANLIB%g
 s%@INSTALL_PROGRAM@%$INSTALL_PROGRAM%g
