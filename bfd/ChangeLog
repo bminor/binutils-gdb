@@ -1,5 +1,8 @@
 Sat Apr 19 22:50:14 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elf32-i386.c (elf_i386_check_relocs): Only count PC relative
+	relocs.  From Jamie Lokier <jamie@rebellion.co.uk>.
+
 	* coffcode.h (coff_compute_section_file_positions): Force the
 	potential last byte in the file to be written out when
 	COFF_IMAGE_WITH_PE.
