@@ -1,3 +1,7 @@
+2005-03-16  Nick Clifton  <nickc@redhat.com>
+
+	* ecoff.c: Convert to ISO C90 formatting.
+
 2005-03-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-ppc.c: Divide file into general and linker specific
