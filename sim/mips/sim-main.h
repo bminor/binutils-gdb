@@ -56,15 +56,6 @@ typedef unsigned64 uword64;
 #define WORD64(h,l)     ((word64)((SET64HI(h)|SET64LO(l))))
 #define UWORD64(h,l)     (SET64HI(h)|SET64LO(l))
 
-/* Sign-extend the given value (e) as a value (b) bits long. We cannot
-   assume the HI32bits of the operand are zero, so we must perform a
-   mask to ensure we can use the simple subtraction to sign-extend. */
-#define SIGNEXTEND(e,b) \
- ((unsigned_word) \
-  (((e) & ((uword64) 1 << ((b) - 1))) \
-   ? (((e) & (((uword64) 1 << (b)) - 1)) - ((uword64)1 << (b))) \
-   : ((e) & (((((uword64) 1 << ((b) - 1)) - 1) << 1) | 1))))
-
 /* Check if a value will fit within a halfword: */
 #define NOTHALFWORDVALUE(v) ((((((uword64)(v)>>16) == 0) && !((v) & ((unsigned)1 << 15))) || (((((uword64)(v)>>32) == 0xFFFFFFFF) && ((((uword64)(v)>>16) & 0xFFFF) == 0xFFFF)) && ((v) & ((unsigned)1 << 15)))) ? (1 == 0) : (1 == 1))
 
