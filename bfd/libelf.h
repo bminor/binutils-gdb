@@ -257,6 +257,12 @@ struct elf_backend_data
 	     const Elf_Internal_Sym *, const char **name,
 	     flagword *flags, asection **sec, bfd_vma *value));
 
+  /* If this field is not NULL, it is called by the elf_link_output_sym
+     phase of a link for each symbol which will appear in the object file.  */
+  boolean (*elf_backend_link_output_symbol_hook)
+    PARAMS ((bfd *, struct bfd_link_info *info, const char *,
+	     Elf_Internal_Sym *, asection *));
+
   /* The CREATE_DYNAMIC_SECTIONS function is called by the ELF backend
      linker the first time it encounters a dynamic object in the link.
      This function must create any sections required for dynamic
@@ -349,11 +355,13 @@ struct elf_backend_data
 
   /* A function to do any beginning processing needed for the ELF file
      before building the ELF headers and computing file positions.  */
-  void (*elf_backend_begin_write_processing) PARAMS ((bfd *));
+  void (*elf_backend_begin_write_processing)
+    PARAMS ((bfd *, struct bfd_link_info *));
 
   /* A function to do any final processing needed for the ELF file
      before writing it out.  */
-  void (*elf_backend_final_write_processing) PARAMS ((bfd *));
+  void (*elf_backend_final_write_processing)
+    PARAMS ((bfd *, struct bfd_link_info *));
 
   /* The swapping table to use when dealing with ECOFF information.
      Used for the MIPS ELF .mdebug section.  */

@@ -118,6 +118,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #ifndef elf_backend_add_symbol_hook
 #define elf_backend_add_symbol_hook	0
 #endif
+#ifndef elf_backend_link_output_symbol_hook
+#define elf_backend_link_output_symbol_hook 0
+#endif
 #ifndef elf_backend_create_dynamic_sections
 #define elf_backend_create_dynamic_sections 0
 #endif
@@ -169,6 +172,7 @@ static CONST struct elf_backend_data elf64_bed =
   elf_backend_fake_sections,
   elf_backend_section_from_bfd_section,
   elf_backend_add_symbol_hook,
+  elf_backend_link_output_symbol_hook,
   elf_backend_create_dynamic_sections,
   elf_backend_adjust_dynamic_symbol,
   elf_backend_size_dynamic_sections,
