@@ -1,5 +1,5 @@
 /* Intel 386 stuff.
-   Copyright (C) 1988, 1989 Free Software Foundation, Inc.
+   Copyright (C) 1988, 1989, 1991 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -22,6 +22,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "param.h"
 #include "frame.h"
 #include "inferior.h"
+#include "language.h"
 #include "gdbcore.h"
 
 #ifdef USG
@@ -39,6 +40,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/stat.h>
 
 #include <sys/reg.h>
+#include "ieee-float.h"
+
+extern void print_387_control_word ();		/* i387-tdep.h */
+extern void print_387_status_word ();
+
+extern struct ext_format ext_format_i387;
 
 /* this table must line up with REGISTER_NAMES in m-i386.h */
 /* symbols like 'EAX' come from <sys/reg.h> */
@@ -74,68 +81,6 @@ i386_register_u_addr (blockend, regnum)
   
 }
 
-/* This is broken for cross debugging.  Possible solutions are:
-
-1.  Don't worry about whether the thing compiles for cross-debugging.
-Go ahead and call them from i386-tdep.c.
-1a.  Same thing but use some macros in xm-i386.h so that gdb will
-compile for cross-debugging but just give an error (or some such behavior)
-when you attempt to convert floats.
-
-2.  Write a portable (in the sense of running on any machine; it would
-always be for i387 floating-point formats) extended<->double converter
-(which just deals with the values as arrays of char).
-
-3.  Assume the host machine has *some* IEEE chip.  However, IEEE does
-not standardize formats for extended floats (387 is 10 bytes, 68881 is
-12 bytes), so this won't work.  */
-
-i387_to_double (from, to)
-     char *from;
-     char *to;
-{
-  long *lp;
-  /* push extended mode on 387 stack, then pop in double mode
-   *
-   * first, set exception masks so no error is generated -
-   * number will be rounded to inf or 0, if necessary 
-   */
-  asm ("pushl %eax"); 		/* grab a stack slot */
-  asm ("fstcw (%esp)");		/* get 387 control word */
-  asm ("movl (%esp),%eax");	/* save old value */
-  asm ("orl $0x3f,%eax");		/* mask all exceptions */
-  asm ("pushl %eax");
-  asm ("fldcw (%esp)");		/* load new value into 387 */
-  
-  asm ("movl 8(%ebp),%eax");
-  asm ("fldt (%eax)");		/* push extended number on 387 stack */
-  asm ("fwait");
-  asm ("movl 12(%ebp),%eax");
-  asm ("fstpl (%eax)");		/* pop double */
-  asm ("fwait");
-  
-  asm ("popl %eax");		/* flush modified control word */
-  asm ("fnclex");			/* clear exceptions */
-  asm ("fldcw (%esp)");		/* restore original control word */
-  asm ("popl %eax");		/* flush saved copy */
-}
-
-double_to_i387 (from, to)
-     char *from;
-     char *to;
-{
-  /* push double mode on 387 stack, then pop in extended mode
-   * no errors are possible because every 64-bit pattern
-   * can be converted to an extended
-   */
-  asm ("movl 8(%ebp),%eax");
-  asm ("fldl (%eax)");
-  asm ("fwait");
-  asm ("movl 12(%ebp),%eax");
-  asm ("fstpt (%eax)");
-  asm ("fwait");
-}
-
 struct env387 
 {
   unsigned short control;
@@ -152,69 +97,6 @@ struct env387
   unsigned short r3;
   unsigned char regs[8][10];
 };
-
-static
-print_387_control_word (control)
-unsigned short control;
-{
-  printf ("control 0x%04x: ", control);
-  printf ("compute to ");
-  switch ((control >> 8) & 3) 
-    {
-    case 0: printf ("24 bits; "); break;
-    case 1: printf ("(bad); "); break;
-    case 2: printf ("53 bits; "); break;
-    case 3: printf ("64 bits; "); break;
-    }
-  printf ("round ");
-  switch ((control >> 10) & 3) 
-    {
-    case 0: printf ("NEAREST; "); break;
-    case 1: printf ("DOWN; "); break;
-    case 2: printf ("UP; "); break;
-    case 3: printf ("CHOP; "); break;
-    }
-  if (control & 0x3f) 
-    {
-      printf ("mask:");
-      if (control & 0x0001) printf (" INVALID");
-      if (control & 0x0002) printf (" DENORM");
-      if (control & 0x0004) printf (" DIVZ");
-      if (control & 0x0008) printf (" OVERF");
-      if (control & 0x0010) printf (" UNDERF");
-      if (control & 0x0020) printf (" LOS");
-      printf (";");
-    }
-  printf ("\n");
-  if (control & 0xe080) printf ("warning: reserved bits on 0x%x\n",
-				control & 0xe080);
-}
-
-static
-print_387_status_word (status)
-     unsigned short status;
-{
-  printf ("status 0x%04x: ", status);
-  if (status & 0xff) 
-    {
-      printf ("exceptions:");
-      if (status & 0x0001) printf (" INVALID");
-      if (status & 0x0002) printf (" DENORM");
-      if (status & 0x0004) printf (" DIVZ");
-      if (status & 0x0008) printf (" OVERF");
-      if (status & 0x0010) printf (" UNDERF");
-      if (status & 0x0020) printf (" LOS");
-      if (status & 0x0040) printf (" FPSTACK");
-      printf ("; ");
-    }
-  printf ("flags: %d%d%d%d; ",
-	  (status & 0x4000) != 0,
-	  (status & 0x0400) != 0,
-	  (status & 0x0200) != 0,
-	  (status & 0x0100) != 0);
-  
-  printf ("top %d\n", (status >> 11) & 7);
-}
 
 static
 print_387_status (status, ep)
@@ -244,9 +126,11 @@ print_387_status (status, ep)
   
   print_387_control_word (ep->control);
   printf ("last exception: ");
-  printf ("opcode 0x%x; ", ep->opcode);
-  printf ("pc 0x%x:0x%x; ", ep->code_seg, ep->eip);
-  printf ("operand 0x%x:0x%x\n", ep->operand_seg, ep->operand);
+  printf ("opcode %s; ", local_hex_string(ep->opcode));
+  printf ("pc %s:", local_hex_string(ep->code_seg));
+  printf ("%s; ", local_hex_string(ep->eip));
+  printf ("operand %s", local_hex_string(ep->operand_seg));
+  printf (":%s\n", local_hex_string(ep->operand));
   
   top = (ep->status >> 11) & 7;
   
@@ -267,17 +151,18 @@ print_387_status (status, ep)
       for (i = 9; i >= 0; i--)
 	printf ("%02x", ep->regs[fpreg][i]);
       
-      i387_to_double (ep->regs[fpreg], (char *)&val);
+      ieee_extended_to_double (&ext_format_i387, (char *)ep->regs[fpreg],
+			       &val);
       printf ("  %g\n", val);
     }
   if (ep->r0)
-    printf ("warning: reserved0 is 0x%x\n", ep->r0);
+    printf ("warning: reserved0 is %s\n", local_hex_string(ep->r0));
   if (ep->r1)
-    printf ("warning: reserved1 is 0x%x\n", ep->r1);
+    printf ("warning: reserved1 is %s\n", local_hex_string(ep->r1));
   if (ep->r2)
-    printf ("warning: reserved2 is 0x%x\n", ep->r2);
+    printf ("warning: reserved2 is %s\n", local_hex_string(ep->r2));
   if (ep->r3)
-    printf ("warning: reserved3 is 0x%x\n", ep->r3);
+    printf ("warning: reserved3 is %s\n", local_hex_string(ep->r3));
 }
 
 #ifndef U_FPSTATE
@@ -354,4 +239,3 @@ i386_float_info ()
   fpstatep = (struct fpstate *)(buf + skip);
   print_387_status (fpstatep->status, (struct env387 *)fpstatep->state);
 }
-

@@ -17,7 +17,8 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* many 387-specific items of use taken from i386-dep.c */
+/* FIXME, some 387-specific items of use taken from i387-tdep.c -- ought to be
+   merged back in. */
 
 #include <stdio.h>
 #include "defs.h"
@@ -34,12 +35,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/stat.h>
 #include "gdbcore.h"
 #include <fcntl.h>
-
-static long i386_get_frame_setup ();
-static i386_follow_jump ();
-
 #include <sgtty.h>
 #define TERMINAL struct sgttyb
+
+extern void print_387_control_word ();
+extern void print_387_status_word ();
+extern void i387_to_double (from, to);
 
 store_inferior_registers(regno)
 int regno;
@@ -244,73 +245,10 @@ printf("u.u_tsize= %#x, u.u_dsize= %#x, u.u_ssize= %#x, stack_off= %#x\n",
     printf ("No core file now.\n");
 }
 
-/* from i386-dep.c */
-static
-print_387_control_word (control)
-unsigned short control;
-{
-  printf ("control 0x%04x: ", control);
-  printf ("compute to ");
-  switch ((control >> 8) & 3) 
-    {
-    case 0: printf ("24 bits; "); break;
-    case 1: printf ("(bad); "); break;
-    case 2: printf ("53 bits; "); break;
-    case 3: printf ("64 bits; "); break;
-    }
-  printf ("round ");
-  switch ((control >> 10) & 3) 
-    {
-    case 0: printf ("NEAREST; "); break;
-    case 1: printf ("DOWN; "); break;
-    case 2: printf ("UP; "); break;
-    case 3: printf ("CHOP; "); break;
-    }
-  if (control & 0x3f) 
-    {
-      printf ("mask:");
-      if (control & 0x0001) printf (" INVALID");
-      if (control & 0x0002) printf (" DENORM");
-      if (control & 0x0004) printf (" DIVZ");
-      if (control & 0x0008) printf (" OVERF");
-      if (control & 0x0010) printf (" UNDERF");
-      if (control & 0x0020) printf (" LOS");
-      printf (";");
-    }
-  printf ("\n");
-  if (control & 0xe080) printf ("warning: reserved bits on 0x%x\n",
-				control & 0xe080);
-}
-
-static
-print_387_status_word (status)
-     unsigned short status;
-{
-  printf ("status %#04x: ", status);
-  if (status & 0xff) {
-      printf ("exceptions:");	/* exception names match <machine/fpu.h> */
-      if (status & 0x0001) printf (" FLTINV");
-      if (status & 0x0002) printf (" FLTDEN");
-      if (status & 0x0004) printf (" FLTDIV");
-      if (status & 0x0008) printf (" FLTOVF");
-      if (status & 0x0010) printf (" FLTUND");
-      if (status & 0x0020) printf (" FLTPRE");
-      if (status & 0x0040) printf (" FLTSTK");
-      printf ("; ");
-    }
-  printf ("flags: %d%d%d%d; ",
-	  (status & 0x4000) != 0,
-	  (status & 0x0400) != 0,
-	  (status & 0x0200) != 0,
-	  (status & 0x0100) != 0);
-  
-  printf ("top %d\n", (status >> 11) & 7);
-}
-
+/* FIXME:  This should be merged with i387-tdep.c as well. */
 static
 print_fpu_status(ep)
 struct pt_regset ep;
-
 {
     int i;
     int bothstatus;
@@ -487,7 +425,6 @@ struct pt_regset ep;
 }
 
 i386_float_info ()
-
 {
     char ubuf[UPAGES*NBPG];
     struct pt_regset regset;
@@ -508,50 +445,4 @@ i386_float_info ()
     }
     print_fpu_status(regset);
     print_fpa_status(regset);
-}
-
-i387_to_double (from, to)
-     char *from;
-     char *to;
-{
-  long *lp;
-  /* push extended mode on 387 stack, then pop in double mode
-   *
-   * first, set exception masks so no error is generated -
-   * number will be rounded to inf or 0, if necessary 
-   */
-  asm ("pushl %eax"); 		/* grab a stack slot */
-  asm ("fstcw (%esp)");		/* get 387 control word */
-  asm ("movl (%esp),%eax");	/* save old value */
-  asm ("orl $0x3f,%eax");		/* mask all exceptions */
-  asm ("pushl %eax");
-  asm ("fldcw (%esp)");		/* load new value into 387 */
-  
-  asm ("movl 8(%ebp),%eax");
-  asm ("fldt (%eax)");		/* push extended number on 387 stack */
-  asm ("fwait");
-  asm ("movl 12(%ebp),%eax");
-  asm ("fstpl (%eax)");		/* pop double */
-  asm ("fwait");
-  
-  asm ("popl %eax");		/* flush modified control word */
-  asm ("fnclex");			/* clear exceptions */
-  asm ("fldcw (%esp)");		/* restore original control word */
-  asm ("popl %eax");		/* flush saved copy */
-}
-
-double_to_i387 (from, to)
-     char *from;
-     char *to;
-{
-  /* push double mode on 387 stack, then pop in extended mode
-   * no errors are possible because every 64-bit pattern
-   * can be converted to an extended
-   */
-  asm ("movl 8(%ebp),%eax");
-  asm ("fldl (%eax)");
-  asm ("fwait");
-  asm ("movl 12(%ebp),%eax");
-  asm ("fstpt (%eax)");
-  asm ("fwait");
 }
