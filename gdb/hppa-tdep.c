@@ -36,12 +36,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/param.h>
 #include <sys/dir.h>
 #include <signal.h>
-#include <sys/ioctl.h>
 
 #ifdef COFF_ENCAPSULATE
 #include "a.out.encap.h"
 #else
-#include <a.out.h>
 #endif
 #ifndef N_SET_MAGIC
 #define N_SET_MAGIC(exec, val) ((exec).a_magic = (val))
@@ -50,7 +48,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /*#include <sys/user.h>		After a.out.h  */
 #include <sys/file.h>
 #include <sys/stat.h>
-#include <machine/psl.h>
 #include "wait.h"
 
 #include "gdbcore.h"
