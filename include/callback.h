@@ -106,4 +106,8 @@ extern target_defs_map open_map[];
 extern int host_to_target_errno PARAMS ((int));
 extern int target_to_host_open PARAMS ((int));
 
+/* Cover functions to the vprintf callbacks.  */
+extern void cb_printf PARAMS ((host_callback *, const char *, ...));
+extern void cb_eprintf PARAMS ((host_callback *, const char *, ...));
+
 #endif

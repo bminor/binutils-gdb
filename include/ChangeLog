@@ -1,3 +1,15 @@
+Thu Aug 14 12:54:07 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* callback.h (cb_printf, cb_eprintf): Declare.
+
+Fri Aug  8 16:43:56 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* dis-asm.h (arc_get_disassembler): Declare.
+
+Wed Jul 30 11:39:50 1997  Per Bothner  <bothner@deneb.cygnus.com>
+
+	* demangle.h (DMGL_JAVA):  New option to request Java demangling.
+
 Tue Jul 22 17:59:54 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* libiberty.h (PEXECUTE_*): Define.
@@ -408,28 +420,10 @@ Thu May  4 14:36:42 1995  Jason Merrill  <jason@phydeaux.cygnus.com>
 
 	* demangle.h: Don't include ansidecl.h if IN_GCC.
 
-start-sanitize-arc
-Tue Mar  7 21:01:54 1995  Doug Evans  <dje@chestnut.cygnus.com>
-
-	* dis-asm.h (arc_get_disassembler): New argument `int big_p'.
-end-sanitize-arc
-
 Tue Feb 21 00:37:28 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* hp-symtab.h: Don't use bitfield enumerations, the HP C compiler
 	does not handle them correctly.
-
-start-sanitize-arc
-Fri Feb 17 12:40:12 1995  Doug Evans  <dje@cygnus.com>
-
-	* dis-asm.h (arc_get_disassembler): Change argument to int.
-	All callers updated.
-
-Thu Feb  9 19:45:05 1995  Doug Evans  <dje@canuck.cygnus.com>
-
-	* dis-asm.h (print_insn_arc): Deleted.
-	(arc_get_disassembler): Declare.
-end-sanitize-arc
 
 Thu Feb  9 14:20:27 1995  Ian Lance Taylor  <ian@cygnus.com>
 
@@ -472,13 +466,6 @@ Fri Jan  6 17:44:14 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 Wed Dec 14 13:08:43 1994  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* progress.h: New file, empty definitions for progress macros.
-
-start-sanitize-arc
-Tue Nov 29 17:38:20 1994  Doug Evans  <dje@canuck.cygnus.com>
-
-	* dis-asm.h (print_insn_arc): Declare.
-	* elf/common.h (EM_CYGNUS_ARC): Define.
-end-sanitize-arc
 
 Fri Nov 25 00:14:05 1994  Jeff Law  (law@snake.cs.utah.edu)
 
