@@ -1,3 +1,7 @@
+2003-09-08  Michael Chastain  <mec@shout.net>
+
+	* gdb.base/gdb1250.c: Rename 'gamma' to 'my_gamma'.
+
 2003-09-07  Michael Chastain  <mec@shout.net>
 
 	* gdb.cp/classes.exp: Accommodate both 'syntax error' and
