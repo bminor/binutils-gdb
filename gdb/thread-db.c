@@ -482,9 +482,9 @@ thread_db_new_objfile (struct objfile *objfile)
 {
   td_err_e err;
 
- /* Don't attempt to use thread_db on targets which can not run
-    (core files).  */
- if (objfile == NULL || !target_has_execution)
+  /* Don't attempt to use thread_db on targets which can not run
+     (core files).  */
+  if (objfile == NULL || !target_has_execution)
     {
       /* All symbols have been discarded.  If the thread_db target is
          active, deactivate it now.  */

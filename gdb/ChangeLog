@@ -1,5 +1,7 @@
 2002-01-07  Michael Snyder  <msnyder@redhat.com>
 
+	* thread-db.c (thread_db_new_objfile): Indendation fix.
+
 	* infptrace.c (GDB_MAX_ALLOCA): New define.
 	(child_xfer_memory): Use xmalloc/xfree instead of alloca if the
 	size of the buffer exceeds GDB_MAX_ALLOCA (default 1 megabyte, 
