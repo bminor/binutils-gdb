@@ -137,6 +137,7 @@ te-ic960.h
 te-linux.h
 te-lynx.h
 te-mach.h
+te-macos.h
 te-multi.h
 te-nbsd.h
 te-nbsd532.h
