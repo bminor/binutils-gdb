@@ -1,3 +1,9 @@
+2002-10-22  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/obj-elf.c (special_sections): Use correct types for init
+	array sections.
+	(obj_elf_change_section): Don't mess with init array section type.
+
 2002-10-21  Richard Sandiford  <rsandifo@redhat.com>
 
 	* config/tc-mips.c (mips_need_elf_addend_fixup): Return true

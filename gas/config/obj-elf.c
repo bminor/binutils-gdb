@@ -617,27 +617,9 @@ static struct special_section const special_sections[] =
   { ".tbss",	SHT_NOBITS,	SHF_ALLOC + SHF_WRITE + SHF_TLS	},
   { ".tdata",	SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE + SHF_TLS	},
   { ".text",	SHT_PROGBITS,	SHF_ALLOC + SHF_EXECINSTR	},
-#if 0
-  /* FIXME: The current gcc, as of 2002-03-03, will emit
-
-	.section .init_array,"aw",@progbits
-
-     for __attribute__ ((section (".init_array"))). "@progbits" marks
-     the incorrect section type. For now, we make them with
-     SHT_PROGBITS. BFD will fix the section type. Gcc should be changed
-     to emit
-
-	.section .init_array
-
-   */
   { ".init_array",SHT_INIT_ARRAY, SHF_ALLOC + SHF_WRITE         },
   { ".fini_array",SHT_FINI_ARRAY, SHF_ALLOC + SHF_WRITE         },
   { ".preinit_array",SHT_PREINIT_ARRAY, SHF_ALLOC + SHF_WRITE   },
-#else
-  { ".init_array",SHT_PROGBITS, SHF_ALLOC + SHF_WRITE         },
-  { ".fini_array",SHT_PROGBITS, SHF_ALLOC + SHF_WRITE         },
-  { ".preinit_array",SHT_PROGBITS, SHF_ALLOC + SHF_WRITE   },
-#endif
 
 #ifdef ELF_TC_SPECIAL_SECTIONS
   ELF_TC_SPECIAL_SECTIONS
@@ -707,7 +689,16 @@ obj_elf_change_section (name, type, attr, entsize, group_name, linkonce, push)
 	  type = special_sections[i].type;
 	else if (type != special_sections[i].type)
 	  {
-	    if (old_sec == NULL)
+	    if (old_sec == NULL
+		/* FIXME: gcc, as of 2002-10-22, will emit
+
+		   .section .init_array,"aw",@progbits
+
+		   for __attribute__ ((section (".init_array"))).
+		   "@progbits" is incorrect.  */
+		&& special_sections[i].type != SHT_INIT_ARRAY
+		&& special_sections[i].type != SHT_FINI_ARRAY
+		&& special_sections[i].type != SHT_PREINIT_ARRAY)
 	      {
 		as_warn (_("setting incorrect section type for %s"), name);
 	      }
