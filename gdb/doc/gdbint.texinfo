@@ -1640,6 +1640,18 @@ library in which breakpoints cannot be set and so should be disabled.
 @item DO_REGISTERS_INFO
 If defined, use this to print the value of a register or all registers.
 
+@item DWARF_REG_TO_REGNUM
+Convert DWARF register number into @value{GDBN} regnum.  If not defined,
+no conversion will be performed.
+
+@item DWARF2_REG_TO_REGNUM
+Convert DWARF2 register number into @value{GDBN} regnum.  If not
+defined, no conversion will be performed.
+
+@item ECOFF_REG_TO_REGNUM
+Convert ECOFF register number into @value{GDBN} regnum.  If not defined,
+no conversion will be performed.
+
 @item END_OF_TEXT_DEFAULT
 This is an expression that should designate the end of the text section
 (? FIXME ?)
