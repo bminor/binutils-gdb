@@ -5122,29 +5122,19 @@ procfs_thread_alive (ptid_t ptid)
   return 1;
 }
 
-/*
- * Function: target_pid_to_str
- *
- * Return a string to be used to identify the thread in
- * the "info threads" display.
- */
+/* Convert PTID to a string.  Returns the string in a static buffer.  */
 
 char *
 procfs_pid_to_str (ptid_t ptid)
 {
   static char buf[80];
-  int proc, thread;
-  procinfo *pi;
 
-  proc    = PIDGET (ptid);
-  thread  = TIDGET (ptid);
-  pi      = find_procinfo (proc, thread);
-
-  if (thread == 0)
-    sprintf (buf, "Process %d", proc);
+  if (TIDGET (ptid) == 0)
+    sprintf (buf, "process %d", PIDGET (ptid));
   else
-    sprintf (buf, "LWP %d", thread);
-  return &buf[0];
+    sprintf (buf, "LWP %d", TIDGET (ptid));
+
+  return buf;
 }
 
 /*

@@ -1,5 +1,8 @@
 2004-08-08  Mark Kettenis  <kettenis@gnu.org>
 
+	* procfs.c (procfs_pid_to_str): Remove redundant and unused
+	variables.  Incapitalized "process".
+
 	* configure.in: Add cursesX to the list of possible curses libs.
 	Add cursesX.h to the list of possible curses headers. 
 	* configure, config.in: Regenerate.	
