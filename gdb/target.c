@@ -840,6 +840,89 @@ target_section_by_addr (struct target_ops *target, CORE_ADDR addr)
   return NULL;
 }
 
+/* Return non-zero when the target vector has supplied an xfer_partial
+   method and it, rather than xfer_memory, should be used.  */
+static int
+target_xfer_partial_p (void)
+{
+  return (target_stack != NULL
+	  && target_stack->to_xfer_partial != default_xfer_partial);
+}
+
+/* Attempt a transfer all LEN bytes starting at OFFSET between the
+   inferior's KIND:ANNEX space and GDB's READBUF/WRITEBUF buffer.  If
+   the transfer succeeds, return zero, otherwize the host ERRNO is
+   returned.
+
+   The inferior is formed from several layers.  In the case of
+   corefiles, inf-corefile is layered above inf-exec and a request for
+   text (corefiles do not include text pages) will be first sent to
+   the core-stratum, fail, and then sent to the object-file where it
+   will succeed.
+
+   NOTE: cagney/2004-09-30:
+
+   The old code tried to use four separate mechanisms for mapping an
+   object:offset:len tuple onto an inferior and its address space: the
+   target stack; the inferior's TO_SECTIONS; solib's SO_LIST;
+   overlays.
+
+   This is stupid.
+
+   The code below is instead using a single mechanism (currently
+   strata).  If that mechanism proves insufficient then re-factor it
+   implementing another singluar mechanism (for instance, a generic
+   object:annex onto inferior:object:annex say).  */
+
+static int
+xfer_using_stratum (enum target_object object, const char *annex,
+		    CORE_ADDR memaddr, int len, void *readbuf,
+		    const void *writebuf)
+{
+  LONGEST xfered;
+  struct target_ops *target;
+
+  /* Always successful.  */
+  if (len == 0)
+    return 0;
+  /* Never successful.  */
+  if (target_stack == NULL)
+    return EIO;
+
+  target = target_stack;
+  while (1)
+    {
+      xfered = target->to_xfer_partial (target, object, annex,
+					readbuf, writebuf, memaddr, len);
+      if (xfered > 0)
+	{
+	  /* The partial xfer succeeded, update the counts, check that
+	     the xfer hasn't finished and if it hasn't set things up
+	     for the next round.  */
+	  len -= xfered;
+	  if (len <= 0)
+	    return 0;
+	  target = target_stack;
+	}
+      else if (xfered < 0)
+	{
+	  /* Something totally screwed up, abandon the attempt to
+	     xfer.  */
+	  if (errno)
+	    return errno;
+	  else
+	    return EIO;
+	}
+      else
+	{
+	  /* This "stratum" didn't work, try the next one down.  */
+	  target = target->beneath;
+	  if (target == NULL)
+	    return EIO;
+	}
+    }
+}
+
 /* Read LEN bytes of target memory at address MEMADDR, placing the results in
    GDB's memory at MYADDR.  Returns either 0 for success or an errno value
    if any error occurs.
@@ -853,13 +936,21 @@ target_section_by_addr (struct target_ops *target, CORE_ADDR addr)
 int
 target_read_memory (CORE_ADDR memaddr, char *myaddr, int len)
 {
-  return target_xfer_memory (memaddr, myaddr, len, 0);
+  if (target_xfer_partial_p ())
+    return xfer_using_stratum (TARGET_OBJECT_MEMORY, NULL,
+			       memaddr, len, myaddr, NULL);
+  else
+    return target_xfer_memory (memaddr, myaddr, len, 0);
 }
 
 int
 target_write_memory (CORE_ADDR memaddr, char *myaddr, int len)
 {
-  return target_xfer_memory (memaddr, myaddr, len, 1);
+  if (target_xfer_partial_p ())
+    return xfer_using_stratum (TARGET_OBJECT_MEMORY, NULL,
+			       memaddr, len, NULL, myaddr);
+  else
+    return target_xfer_memory (memaddr, myaddr, len, 1);
 }
 
 static int trust_readonly = 0;
@@ -1065,13 +1156,23 @@ target_xfer_memory_partial (CORE_ADDR memaddr, char *myaddr, int len,
 int
 target_read_memory_partial (CORE_ADDR memaddr, char *buf, int len, int *err)
 {
-  return target_xfer_memory_partial (memaddr, buf, len, 0, err);
+  if (target_xfer_partial_p ())
+    return target_stack->to_xfer_partial (target_stack,
+					  TARGET_OBJECT_MEMORY, NULL,
+					  buf, NULL, memaddr, len);
+  else
+    return target_xfer_memory_partial (memaddr, buf, len, 0, err);
 }
 
 int
 target_write_memory_partial (CORE_ADDR memaddr, char *buf, int len, int *err)
 {
-  return target_xfer_memory_partial (memaddr, buf, len, 1, err);
+  if (target_xfer_partial_p ())
+    return target_stack->to_xfer_partial (target_stack,
+					  TARGET_OBJECT_MEMORY, NULL,
+					  NULL, buf, memaddr, len);
+  else
+    return target_xfer_memory_partial (memaddr, buf, len, 1, err);
 }
 
 /* More generic transfers.  */

@@ -742,7 +742,6 @@ inf_ptrace_target (void)
   t->to_resume = inf_ptrace_resume;
   t->to_wait = inf_ptrace_wait;
   t->to_prepare_to_store = inf_ptrace_prepare_to_store;
-  t->to_xfer_memory = inf_ptrace_xfer_memory;
   t->to_xfer_partial = inf_ptrace_xfer_partial;
   t->to_files_info = inf_ptrace_files_info;
   t->to_kill = inf_ptrace_kill_inferior;

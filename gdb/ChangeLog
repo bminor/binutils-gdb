@@ -1,5 +1,14 @@
 2004-09-30  Andrew Cagney  <cagney@gnu.org>
 
+	* inf-ptrace.c (inf_ptrace_target): Do not set to_xfer_memory.
+	(inf_ptrace_xfer_memory): Delete.
+	* target.c (target_xfer_partial_p, xfer_using_stratum): New.
+	(target_read_memory, target_write_memory): Use xfer_using_stratum
+	when target_xfer_partial_p.
+	(debug_target): Move to start of file.
+	(target_read_memory_partial, target_write_memory_partial): Use
+	to_xfer_partial when target_xfer_partial_p.
+
 	* inf-ptrace.c (inf_ptrace_xfer_partial): Replace call to
 	inf_ptrace_xfer_memory with equivalent code.
 	* inftarg.c (child_xfer_partial): When performing a write, pass
