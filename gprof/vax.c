@@ -53,15 +53,17 @@ enum opermodes
   };
 typedef enum opermodes operandenum;
 
-#if 0
+/* *INDENT-OFF* */
 /* Here to document only.  We can't use this when cross compiling as
-   the bitfield layout might not be the same as native.  */
-struct modebyte
-  {
-    unsigned int regfield:4;
-    unsigned int modefield:4;
-  };
-#endif
+   the bitfield layout might not be the same as native.
+
+   struct modebyte
+     {
+       unsigned int regfield:4;
+       unsigned int modefield:4;
+     };
+*/
+/* *INDENT-ON* */
 
 /*
  * A symbol to be the child of indirect calls:

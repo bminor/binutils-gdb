@@ -1,3 +1,7 @@
+2005-01-21  Ben Elliston  <bje@au.ibm.com>
+
+	* gmon.h, alpha.c, vax.c: Remove #if 0'd chunks.
+
 2004-11-30  Tero Niemela  <tero_niemela@yahoo.com>
 
 	* Makefile.am: Change LOCALEDIR to $(datadir)/share.

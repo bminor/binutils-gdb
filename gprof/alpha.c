@@ -45,36 +45,38 @@
 #define Jxx_FUNC_RET		2
 #define Jxx_FUNC_JSR_COROUTINE	3
 
-#if 0
+/* *INDENT-OFF* */
 /* Here to document only.  We can't use this when cross compiling as
-   the bitfield layout might not be the same as native.  */
-typedef union
-  {
-    struct
-      {
-	unsigned other:26;
-	unsigned op_code:6;
-      }
-    a;				/* any format */
-    struct
-      {
-	int disp:21;
-	unsigned ra:5;
-	unsigned op_code:6;
-      }
-    b;				/* branch format */
-    struct
-      {
-	int hint:14;
-	unsigned func:2;
-	unsigned rb:5;
-	unsigned ra:5;
-	unsigned op_code:6;
-      }
-    j;				/* jump format */
-  }
-alpha_Instruction;
-#endif
+   the bitfield layout might not be the same as native.
+
+   typedef union
+     {
+       struct
+         {
+	   unsigned other:26;
+	   unsigned op_code:6;
+         }
+       a;				-- any format
+       struct
+         {
+	   int disp:21;
+	   unsigned ra:5;
+	   unsigned op_code:6;
+         }
+       b;				-- branch format
+       struct
+         {
+	   int hint:14;
+	   unsigned func:2;
+	   unsigned rb:5;
+	   unsigned ra:5;
+	   unsigned op_code:6;
+         }
+       j;				-- jump format
+     }
+    alpha_Instruction;
+*/
+/* *INDENT-ON* */
 
 static Sym indirect_child;
 
