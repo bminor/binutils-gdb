@@ -463,9 +463,6 @@ f:=:const char *:register_name:int regnr:regnr
 M::struct type *:register_type:int reg_nr:reg_nr
 # REGISTER_TYPE is a direct replacement for DEPRECATED_REGISTER_VIRTUAL_TYPE.
 F:=:struct type *:deprecated_register_virtual_type:int reg_nr:reg_nr
-# DEPRECATED_REGISTER_BYTES can be deleted.  The value is computed
-# from REGISTER_TYPE.
-v:=:int:deprecated_register_bytes
 # If the value returned by DEPRECATED_REGISTER_BYTE agrees with the
 # register offsets computed using just REGISTER_TYPE, this can be
 # deleted.  See: maint print registers.  NOTE: cagney/2002-05-02: This

@@ -2850,9 +2850,6 @@ sh64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* The number of real registers is the same whether we are in 
      ISA16(compact) or ISA32(media).  */
   set_gdbarch_num_regs (gdbarch, SIM_SH64_NR_REGS);
-  set_gdbarch_deprecated_register_bytes (gdbarch,
-					 ((SIM_SH64_NR_FP_REGS + 1) * 4)
-					 + (SIM_SH64_NR_REGS - SIM_SH64_NR_FP_REGS -1) * 8);
 
   set_gdbarch_register_name (gdbarch, sh64_register_name);
   set_gdbarch_register_type (gdbarch, sh64_register_type);

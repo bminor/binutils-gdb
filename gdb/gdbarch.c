@@ -146,7 +146,6 @@ struct gdbarch
   gdbarch_register_name_ftype *register_name;
   gdbarch_register_type_ftype *register_type;
   gdbarch_deprecated_register_virtual_type_ftype *deprecated_register_virtual_type;
-  int deprecated_register_bytes;
   gdbarch_deprecated_register_byte_ftype *deprecated_register_byte;
   gdbarch_deprecated_register_raw_size_ftype *deprecated_register_raw_size;
   gdbarch_deprecated_register_virtual_size_ftype *deprecated_register_virtual_size;
@@ -291,7 +290,6 @@ struct gdbarch startup_gdbarch =
   0,  /* register_name */
   0,  /* register_type */
   0,  /* deprecated_register_virtual_type */
-  0,  /* deprecated_register_bytes */
   generic_register_byte,  /* deprecated_register_byte */
   generic_register_size,  /* deprecated_register_raw_size */
   generic_register_size,  /* deprecated_register_virtual_size */
@@ -1198,14 +1196,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: deprecated_register_byte = <0x%lx>\n",
                       (long) current_gdbarch->deprecated_register_byte);
-#ifdef DEPRECATED_REGISTER_BYTES
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_REGISTER_BYTES # %s\n",
-                      XSTRING (DEPRECATED_REGISTER_BYTES));
-#endif
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: deprecated_register_bytes = %s\n",
-                      paddr_d (current_gdbarch->deprecated_register_bytes));
 #ifdef DEPRECATED_REGISTER_RAW_SIZE_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -2618,22 +2608,6 @@ set_gdbarch_deprecated_register_virtual_type (struct gdbarch *gdbarch,
                                               gdbarch_deprecated_register_virtual_type_ftype deprecated_register_virtual_type)
 {
   gdbarch->deprecated_register_virtual_type = deprecated_register_virtual_type;
-}
-
-int
-gdbarch_deprecated_register_bytes (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_register_bytes called\n");
-  return gdbarch->deprecated_register_bytes;
-}
-
-void
-set_gdbarch_deprecated_register_bytes (struct gdbarch *gdbarch,
-                                       int deprecated_register_bytes)
-{
-  gdbarch->deprecated_register_bytes = deprecated_register_bytes;
 }
 
 int

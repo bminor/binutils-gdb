@@ -481,18 +481,6 @@ extern void set_gdbarch_deprecated_register_virtual_type (struct gdbarch *gdbarc
 #define DEPRECATED_REGISTER_VIRTUAL_TYPE(reg_nr) (gdbarch_deprecated_register_virtual_type (current_gdbarch, reg_nr))
 #endif
 
-/* DEPRECATED_REGISTER_BYTES can be deleted.  The value is computed
-   from REGISTER_TYPE. */
-
-extern int gdbarch_deprecated_register_bytes (struct gdbarch *gdbarch);
-extern void set_gdbarch_deprecated_register_bytes (struct gdbarch *gdbarch, int deprecated_register_bytes);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_REGISTER_BYTES)
-#error "Non multi-arch definition of DEPRECATED_REGISTER_BYTES"
-#endif
-#if !defined (DEPRECATED_REGISTER_BYTES)
-#define DEPRECATED_REGISTER_BYTES (gdbarch_deprecated_register_bytes (current_gdbarch))
-#endif
-
 /* If the value returned by DEPRECATED_REGISTER_BYTE agrees with the
    register offsets computed using just REGISTER_TYPE, this can be
    deleted.  See: maint print registers.  NOTE: cagney/2002-05-02: This

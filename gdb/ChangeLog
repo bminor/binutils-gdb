@@ -1,5 +1,24 @@
 2004-08-02  Andrew Cagney  <cagney@gnu.org>
 
+	* gdbarch.sh (deprecated_register_bytes): Delete.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* regcache.c (deprecated_register_bytes): New function.
+	* regcache.h (deprecated_register_bytes): Declare.
+	* xstormy16-tdep.c (xstormy16_gdbarch_init): Update.
+	* v850-tdep.c (v850_gdbarch_init): Update.
+	* sh64-tdep.c (sh64_gdbarch_init): Update.
+	* ns32k-tdep.c (ns32k_gdbarch_init_32082): Update.
+	* mn10300-tdep.c (mn10300_gdbarch_init): Update.
+	* mcore-tdep.c (mcore_gdbarch_init): Update.
+	* cris-tdep.c (cris_gdbarch_init): Update.
+	* arm-tdep.c (arm_gdbarch_init): Update.
+	* remote.c (init_remote_state): Update.
+	* remote-vx.c (vx_prepare_to_store): Update.
+	* remote-sds.c (sds_fetch_registers, sds_prepare_to_store): Update.
+	* irix5-nat.c (fetch_core_registers): Update.
+	* cris-tdep.c (cris_register_bytes_ok): Update.
+	* config/nm-gnu.h (CHILD_PREPARE_TO_STORE): Update.
+
 	* mips-tdep.c (mips_gdbarch_init, mips_insn16_frame_cache)
 	(mips_insn16_frame_this_id, mips_insn16_frame_prev_register)
 	(mips_insn16_frame_unwind, mips_insn16_frame_sniffer)

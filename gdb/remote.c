@@ -250,8 +250,8 @@ init_remote_state (struct gdbarch *gdbarch)
   int regnum;
   struct remote_state *rs = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct remote_state);
 
-  if (DEPRECATED_REGISTER_BYTES != 0)
-    rs->sizeof_g_packet = DEPRECATED_REGISTER_BYTES;
+  if (deprecated_register_bytes () != 0)
+    rs->sizeof_g_packet = deprecated_register_bytes ();
   else
     rs->sizeof_g_packet = 0;
 
@@ -268,7 +268,7 @@ init_remote_state (struct gdbarch *gdbarch)
       /* ...name = REGISTER_NAME (regnum); */
 
       /* Compute packet size by accumulating the size of all registers. */
-      if (DEPRECATED_REGISTER_BYTES == 0)
+      if (deprecated_register_bytes () == 0)
         rs->sizeof_g_packet += register_size (current_gdbarch, regnum);
     }
 

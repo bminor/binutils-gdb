@@ -1290,7 +1290,6 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_num_regs (gdbarch, num_regs);
   set_gdbarch_register_name (gdbarch, register_name);
   set_gdbarch_deprecated_register_size (gdbarch, 4);
-  set_gdbarch_deprecated_register_bytes (gdbarch, num_regs * gdbarch_deprecated_register_size (gdbarch));
   set_gdbarch_deprecated_register_raw_size (gdbarch, mn10300_register_raw_size);
   set_gdbarch_deprecated_register_byte (gdbarch, mn10300_register_byte);
   set_gdbarch_deprecated_register_virtual_size (gdbarch, mn10300_register_virtual_size);

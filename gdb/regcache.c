@@ -943,6 +943,14 @@ register_offset_hack (struct gdbarch *gdbarch, int regnum)
   return descr->register_offset[regnum];
 }
 
+/* Hack to keep code using register_bytes working.  */
+
+int
+deprecated_register_bytes (void)
+{
+  return current_regcache->descr->sizeof_raw_registers;
+}
+
 /* Return the contents of register REGNUM as an unsigned integer.  */
 
 ULONGEST

@@ -210,7 +210,7 @@ static void
 fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
 		      int which, CORE_ADDR reg_addr)
 {
-  if (core_reg_size == DEPRECATED_REGISTER_BYTES)
+  if (core_reg_size == deprecated_register_bytes ())
     {
       memcpy ((char *) deprecated_registers, core_reg_sect, core_reg_size);
     }

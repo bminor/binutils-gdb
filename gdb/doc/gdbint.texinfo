@@ -3626,14 +3626,6 @@ reserved for that breakpoint, and @var{real_pc} set to @var{funaddr}.
 This method replaces @code{CALL_DUMMY_LOCATION},
 @code{DEPRECATED_REGISTER_SIZE}.
 
-@item DEPRECATED_REGISTER_BYTES
-@findex DEPRECATED_REGISTER_BYTES
-The total amount of space needed to store @value{GDBN}'s copy of the
-machine's register state.
-
-This is no longer needed.  @value{GDBN} instead computes the size of the
-register buffer at run-time.
-
 @item REGISTER_NAME(@var{i})
 @findex REGISTER_NAME
 Return the name of register @var{i} as a string.  May return @code{NULL}

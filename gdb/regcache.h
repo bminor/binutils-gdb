@@ -113,6 +113,10 @@ extern void regcache_raw_collect (const struct regcache *regcache,
 
 extern int register_offset_hack (struct gdbarch *gdbarch, int regnum);
 
+/* Similar.  The total number of bytes occupied by a regcache.  */
+
+extern int deprecated_register_bytes (void );
+
 
 /* The type of a register.  This function is slightly more efficient
    then its gdbarch vector counterpart since it returns a precomputed
