@@ -1,3 +1,41 @@
+1999-02-01  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	Allow PPC users to select which PPC/RS6000 variant they're debugging
+	at run-time.  At the moment, the only thing this affects is the
+	set of registers visible.
+	* config/rs6000/tm-rs6000.h (REGISTER_NAME): Define this as a call
+	to the function rs6000_register_name.
+	(rs6000_register_name): Include extern decl.
+	(NUM_REGS): Bump to 183.  What's the right way to do this?
+	(FIRST_UISA_SP_REGNUM, LAST_UISA_SP_REGNUM): Renamed from
+	FIRST_SP_REGNUM, LAST_SP_REGNUM.
+	(REGISTER_BYTES): Recompute this.
+	* rs6000-tdep.c: Renamed all uses of FIRST_SP_REGNUM and
+	LAST_SP_REGNUM to FIRST_UISA_SP_REGNUM and LAST_UISA_SP_REGNUM, with
+	some concomitant formatting changes.
+	#include "gdbcmd.h", so we can define commands here.
+	(struct variant): New structure.
+	(COMMON_UISA_REG_NAMES, PPC_UISA_SPR_NAMES, PPC_SEGMENT_REG_NAMES,
+	PPC_32_OEA_SPR_NAMES, num_registers): New macros. 
+	(register_names_rs6000, register_names_uisa, register_names_403,
+ 	register_names_403GC, register_names_505, register_names_860,
+ 	register_names_601, register_names_602, register_names_603,
+ 	register_names_604, register_names_750, variants): New variables.
+	(rs6000_register_name, install_variant, find_variant_by_name,
+	install_variant_by_name, list_variants, show_current_variant,
+	set_processor, show_processor): New functions.
+	(_initialize_rs6000_tdep): Define new commands `set processor' and
+	`show processor', and call install_variant_by_name to set the
+	default variant.
+	* rs6000-nat.c: Renamed all uses of FIRST_SP_REGNUM and
+	LAST_SP_REGNUM to FIRST_UISA_SP_REGNUM and LAST_UISA_SP_REGNUM, with
+	some concomitant formatting changes.
+	* configure.in: Accept the `--with-cpu' flag, to specify a default
+	processor variant.
+	* acconfig.h: Provide a blurb for TARGET_CPU_DEFAULT, which is set
+	by configure's `--with-cpu' flag.
+	* config.in, configure: Regenerated.
+
 Sun Jan 31 15:24:24 1999  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* buildsym.h, buildsym.c: Convert to ANSI-only.
