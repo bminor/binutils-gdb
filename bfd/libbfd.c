@@ -897,7 +897,7 @@ read_signed_leb128 (bfd *abfd ATTRIBUTE_UNUSED,
 		    unsigned int * bytes_read_ptr)
 {
   bfd_vma result;
-  int shift;
+  unsigned shift;
   int num_read;
   unsigned char byte;
 

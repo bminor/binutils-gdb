@@ -1,5 +1,8 @@
 2005-02-11  Nick Clifton  <nickc@redhat.com>
 
+	* libbfd.c (read_signed_leb128): Use an unsigned type for 'shift'
+	to avoid a compile time warning.
+
 	* coff-alpha.c (alpha_adjust_reloc_in): Remove redundant test from
 	BFD_ASSERT.
 
