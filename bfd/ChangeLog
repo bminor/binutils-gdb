@@ -1,3 +1,10 @@
+Fri Sep  4 13:54:23 1998  David Miller  <davem@dm.cobaltmicro.com>
+
+	* elf32-sparc.c (elf32_sparc_relocate_section): Properly adjust
+	the addend of a dynamic relocation referencing a section.
+	* elf64-sparc.c (sparc64_elf_relocate_section): Likewise.
+	(sparc64_elf_finish_dynamic_symbol): Fix the PLT relocation offset.
+
 Thu Sep  3 17:28:50 1998  Richard Henderson  <rth@cygnus.com>
 
 	* elflink.h (bfd_elfNN_size_dynamic_sections): Verify that the
