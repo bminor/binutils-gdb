@@ -393,13 +393,13 @@ get_prev_frame (struct frame_info *next_frame)
     obstack_alloc (&frame_cache_obstack,
 		   sizeof (struct frame_info));
 
-  prev->saved_regs = NULL;
+  /* Zero all fields by default.  */
+  memset (prev, 0, sizeof (struct frame_info);
+
   if (next_frame)
     next_frame->prev = prev;
   prev->next = next_frame;
-  prev->prev = (struct frame_info *) 0;
   prev->frame = address;
-  prev->signal_handler_caller = 0;
 
 /* This change should not be needed, FIXME!  We should
    determine whether any targets *need* INIT_FRAME_PC to happen

@@ -1,3 +1,8 @@
+2000-12-11  Michael Snyder  <msnyder@mvstp600e.cygnus.com>
+
+	* blockframe.c (get_prev_frame): Zero all fields of prev by
+	default using memset (instead of one at a time).
+
 2000-12-11  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* sh-tdep.c (sh_extract_struct_value_address): For consistancy,
