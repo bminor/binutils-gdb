@@ -314,6 +314,9 @@ sim_open (kind, cb, abfd, argv)
 		   K1BASE, K0SIZE,
 		   MEM_SIZE, /* actual size */
 		   K0BASE);
+#ifdef TARGET_SKY
+  sim_do_command (sd, "memory region 0x00000000,0x00100000"); /* 1M */
+#endif
 
   device_init(sd);
 
