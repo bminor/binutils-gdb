@@ -1,3 +1,10 @@
+Thu Jul  9 12:09:57 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* config/tc-m68k.c (tc_m68k_fix_adjustable): Don't adjust vtable
+	relocs.
+	(md_apply_fix_2): Force the symbol of the vtable reloc to be
+	weak.
+
 Thu Jul  9 11:31:54 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* doc/Makefile.am (MAINTAINERCLEANFILES): Define.
