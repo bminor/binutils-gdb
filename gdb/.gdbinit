@@ -23,4 +23,3 @@ printf "0x%-8x 0x%-8x %6d %s\n", $obj, $obj->obfd, \
   $obj->minimal_symbol_count, $obj->name
 set var $obj = $obj->next
 end
-end

@@ -1,5 +1,7 @@
 Wed Oct 12 18:02:17 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
+ 	* .gdbinit: Remove excess `end'.
+
 	* exec.c: Merge in RS6000 support from xcoffexec.c.
 	(symfile.h, objfiles.h, xcoffsolib.h): Include.
 	(vmap): New global variable.
