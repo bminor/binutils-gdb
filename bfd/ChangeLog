@@ -1,3 +1,11 @@
+Tue Aug  2 10:43:21 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* libbfd-in.h: Move declarations of bfd_read, bfd_write, bfd_seek,
+	bfd_tell, bfd_flush, and bfd_stat from here...
+	* bfd-in.h: ...to here, to make them visible to programs which
+	know more about the object file format than BFD does.
+	* libbfd.h, bfd-in2.h: Rebuilt.
+
 Mon Aug  1 17:55:53 1994  Fred Fish  (fnf@cygnus.com)
 
 	* ptrace-core.c (ptrace_unix_core_file_p):  Convert zalloc usage
