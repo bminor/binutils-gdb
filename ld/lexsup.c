@@ -19,6 +19,7 @@ the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307
 
 #include "bfd.h"
 #include "sysdep.h"
+#include "libiberty.h"
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
@@ -56,7 +57,8 @@ int parsing_defsym = 0;
 
 #define OPTION_ASSERT			150
 #define OPTION_CALL_SHARED		(OPTION_ASSERT + 1)
-#define OPTION_DEFSYM			(OPTION_CALL_SHARED + 1)
+#define OPTION_CREF			(OPTION_CALL_SHARED + 1)
+#define OPTION_DEFSYM			(OPTION_CREF + 1)
 #define OPTION_DYNAMIC_LINKER		(OPTION_DEFSYM + 1)
 #define OPTION_EB			(OPTION_DYNAMIC_LINKER + 1)
 #define OPTION_EL			(OPTION_EB + 1)
@@ -94,6 +96,7 @@ int parsing_defsym = 0;
 #define OPTION_SPLIT_BY_FILE 	    	(OPTION_SPLIT_BY_RELOC + 1)
 #define OPTION_WHOLE_ARCHIVE		(OPTION_SPLIT_BY_FILE + 1)
 #define OPTION_WRAP			(OPTION_WHOLE_ARCHIVE + 1)
+#define OPTION_FORCE_EXE_SUFFIX		(OPTION_WRAP + 1)
 
 /* The long options.  This structure is used for both the option
    parsing and the help text.  */
@@ -218,6 +221,8 @@ static const struct ld_option ld_options[] =
       '\0', NULL, NULL, ONE_DASH },
   { {"Bsymbolic", no_argument, NULL, OPTION_SYMBOLIC},
       '\0', NULL, "Bind global references locally", ONE_DASH },
+  { {"cref", no_argument, NULL, OPTION_CREF},
+      '\0', NULL, "Output cross reference table", TWO_DASHES },
   { {"defsym", required_argument, NULL, OPTION_DEFSYM},
       '\0', "SYMBOL=EXPRESSION", "Define a symbol", TWO_DASHES },
   { {"dynamic-linker", required_argument, NULL, OPTION_DYNAMIC_LINKER},
@@ -228,6 +233,8 @@ static const struct ld_option ld_options[] =
       '\0', NULL, "Link little-endian objects", ONE_DASH },
   { {"embedded-relocs", no_argument, NULL, OPTION_EMBEDDED_RELOCS},
       '\0', NULL, "Generate embedded relocs", TWO_DASHES},
+  { {"force-exe-suffix", no_argument, NULL, OPTION_FORCE_EXE_SUFFIX},
+      '\0', NULL, "Force generation of file with .exe suffix", TWO_DASHES},
   { {"help", no_argument, NULL, OPTION_HELP},
       '\0', NULL, "Print option help", TWO_DASHES },
   { {"Map", required_argument, NULL, OPTION_MAP},
@@ -281,7 +288,7 @@ static const struct ld_option ld_options[] =
       '\0', NULL, "Build global constructor/destructor tables", ONE_DASH },
   { {"verbose", no_argument, NULL, OPTION_VERBOSE},
       '\0', NULL, "Output lots of information during link", TWO_DASHES },
-  { {"dll-verbose", no_argument, NULL, OPTION_VERSION}, /* Linux.  */
+  { {"dll-verbose", no_argument, NULL, OPTION_VERBOSE}, /* Linux.  */
       '\0', NULL, NULL, NO_HELP },
   { {"warn-common", no_argument, NULL, OPTION_WARN_COMMON},
       '\0', NULL, "Warn about duplicate common symbols", TWO_DASHES },
@@ -429,6 +436,10 @@ parse_args (argc, argv)
 	case OPTION_NON_SHARED:
 	  config.dynamic_link = false;
 	  break;
+	case OPTION_CREF:
+	  command_line.cref = true;
+	  link_info.notice_all = true;
+	  break;
 	case 'd':
 	  command_line.force_common_definition = true;
 	  break;
@@ -462,6 +473,9 @@ parse_args (argc, argv)
 	  break;
 	case 'F':
 	  /* Ignore.  */
+	  break;
+	case OPTION_FORCE_EXE_SUFFIX:
+	  command_line.force_exe_suffix = true;
 	  break;
 	case 'G':
 	  {
@@ -656,8 +670,23 @@ parse_args (argc, argv)
 	  version_printed = true;
 	  break;
 	case OPTION_VERSION:
-	  ldversion (0);
-	  version_printed = true;
+	  /* This output is intended to follow the GNU standards document.  */
+	  printf ("GNU ld %s\n", ld_program_version);
+	  printf ("Copyright 1996 Free Software Foundation, Inc.\n");
+	  printf ("\
+This program is free software; you may redistribute it under the terms of\n\
+the GNU General Public License.  This program has absolutely no warranty.\n");
+	  {
+	    ld_emulation_xfer_type **ptr = ld_emulations;
+    
+	    printf ("  Supported emulations:\n");
+	    while (*ptr) 
+	      {
+		printf ("   %s\n", (*ptr)->emulation_name);
+		ptr++;
+	      }
+	  }
+	  xexit (0);
 	  break;
 	case OPTION_WARN_COMMON:
 	  config.warn_common = true;
@@ -686,7 +715,7 @@ parse_args (argc, argv)
 	case 'Y':
 	  if (strncmp (optarg, "P,", 2) == 0)
 	    optarg += 2;
-	  default_dirlist = optarg;
+	  default_dirlist = xstrdup (optarg);
 	  break;
 	case 'y':
 	  add_ysym (optarg);
@@ -749,12 +778,11 @@ set_default_dirlist (dirlist_ptr)
     {
       p = strchr (dirlist_ptr, ':');
       if (p != NULL)
-	*p = 0;
-      if (*dirlist_ptr)
+	*p = '\0';
+      if (*dirlist_ptr != '\0')
 	ldfile_add_library_path (dirlist_ptr, true);
       if (p == NULL)
 	break;
-      *p = ':';
       dirlist_ptr = p + 1;
     }
 }
@@ -866,4 +894,5 @@ help ()
   printf ("%s: supported emulations: ", program_name);
   ldemul_list_emulations (stdout);
   printf ("\n");
+  printf ("\nReport bugs to bug-gnu-utils@prep.ai.mit.edu\n");
 }

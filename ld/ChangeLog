@@ -1,11 +1,21 @@
+Tue Oct  1 15:50:34 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldver.c (ld_program_version): New variable.
+	(ldversion): Use it.
+	* ldver.h (ld_program_version): Declare.
+	* lexsup.c (ld_options): Handle --dll-verbose like --verbose, not
+	--version.  Change --version handling to match current GNU
+	standards.
+	(help): Print bug report address.
+
 start-sanitize-m32r
 Mon Sep 30 12:14:43 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* Makefile.in (em32relf.c): Add rule for.
 	* configure.tgt (m32r-*-*): Recognize.
 	* emulparams/m32relf.sh: New file.
-end-sanitize-m32r
 
+end-sanitize-m32r
 Thu Sep 26 13:58:47 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-make.sed: Add symbolic doublequoting to ldmain compile edit.
