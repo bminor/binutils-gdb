@@ -1,5 +1,9 @@
 2003-08-29  Mark Kettenis  <kettenis@gnu.org>
 
+	* configure.in: Remove redundant AC_MSG_RESULT in check for
+	uintptr_t in stdint.h.
+	* configure: Regenerated.
+
 	* amd64-nat.h (struct regcache): Add opaque declaration.
 
 	* i386-linux-tdep.h (I386_LINUX_NUM_REGS): New define.

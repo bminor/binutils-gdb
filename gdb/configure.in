@@ -526,7 +526,6 @@ AC_CACHE_CHECK([for uintptr_t in stdint.h], gdb_cv_have_uintptr_t,
     [uintptr_t foo = 0;],
     gdb_cv_have_uintptr_t=yes,
     gdb_cv_have_uintptr_t=no)])
-AC_MSG_RESULT($gdb_cv_have_uintptr_t)
 if test $gdb_cv_have_uintptr_t = yes; then
   AC_DEFINE(HAVE_UINTPTR_T, 1, [Define if <stdint.h> provides the uintptr_t type.])
 fi
