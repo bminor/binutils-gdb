@@ -3250,6 +3250,33 @@ elf_fix_symbol_flags (h, eif)
       h->plt.offset = (bfd_vma) -1;
     }
 
+  /* If this is a weak defined symbol in a dynamic object, and we know
+     the real definition in the dynamic object, copy interesting flags
+     over to the real definition.  */
+  if (h->weakdef != NULL)
+    {
+      struct elf_link_hash_entry *weakdef;
+
+      BFD_ASSERT (h->root.type == bfd_link_hash_defined
+		  || h->root.type == bfd_link_hash_defweak);
+      weakdef = h->weakdef;
+      BFD_ASSERT (weakdef->root.type == bfd_link_hash_defined
+		  || weakdef->root.type == bfd_link_hash_defweak);
+      BFD_ASSERT (weakdef->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC);
+
+      /* If the real definition is defined by a regular object file,
+	 don't do anything special.  See the longer description in
+	 elf_adjust_dynamic_symbol, below.  */
+      if ((weakdef->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0)
+	h->weakdef = NULL;
+      else
+	weakdef->elf_link_hash_flags |=
+	  (h->elf_link_hash_flags
+	   & (ELF_LINK_HASH_REF_REGULAR
+	      | ELF_LINK_HASH_REF_REGULAR_NONWEAK
+	      | ELF_LINK_NON_GOT_REF));
+    }
+
   return true;
 }
 
@@ -3332,33 +3359,14 @@ elf_adjust_dynamic_symbol (h, data)
 
   if (h->weakdef != NULL)
     {
-      struct elf_link_hash_entry *weakdef;
+      /* If we get to this point, we know there is an implicit
+	 reference by a regular object file via the weak symbol H.
+	 FIXME: Is this really true?  What if the traversal finds
+	 H->WEAKDEF before it finds H?  */
+      h->weakdef->elf_link_hash_flags |= ELF_LINK_HASH_REF_REGULAR;
 
-      BFD_ASSERT (h->root.type == bfd_link_hash_defined
-		  || h->root.type == bfd_link_hash_defweak);
-      weakdef = h->weakdef;
-      BFD_ASSERT (weakdef->root.type == bfd_link_hash_defined
-		  || weakdef->root.type == bfd_link_hash_defweak);
-      BFD_ASSERT (weakdef->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC);
-      if ((weakdef->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0)
-	{
-	  /* This symbol is defined by a regular object file, so we
-	     will not do anything special.  Clear weakdef for the
-	     convenience of the processor backend.  */
-	  h->weakdef = NULL;
-	}
-      else
-	{
-	  /* There is an implicit reference by a regular object file
-	     via the weak symbol.  */
-	  weakdef->elf_link_hash_flags |=
-	    (ELF_LINK_HASH_REF_REGULAR
-	     | (h->elf_link_hash_flags
-		& (ELF_LINK_HASH_REF_REGULAR_NONWEAK
-		   | ELF_LINK_NON_GOT_REF)));
-	  if (! elf_adjust_dynamic_symbol (weakdef, (PTR) eif))
-	    return false;
-	}
+      if (! elf_adjust_dynamic_symbol (h->weakdef, (PTR) eif))
+	return false;
     }
 
   /* If a symbol has no type and no size and does not require a PLT

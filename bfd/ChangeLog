@@ -1,3 +1,8 @@
+1999-09-10  Ian Lance Taylor  <ian@zembu.com>
+
+	* elflink.h (elf_fix_symbol_flags): Move weakdef handling here...
+	(elf_adjust_dynamic_symbol): ...from here.
+
 Wed Sep  8 17:56:11 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* elf-hppa.h (elf_hppa_howto_table); There is no DIR64WR, DIR64DR
