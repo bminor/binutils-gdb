@@ -1,3 +1,9 @@
+2001-12-06  Jim Blandy  <jimb@redhat.com>
+
+	* config/s390/nm-linux.h: Watchpoints are either continuable or
+ 	steppable, not both.  The S/390 has continuable watchpoints, so
+ 	delete the #definition of HAVE_STEPPABLE_WATCHPOINT.
+
 2001-12-04  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* go32-nat.c (go32_fetch_registers): Remove call to register_buffer
