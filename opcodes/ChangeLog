@@ -1,4 +1,8 @@
 start-sanitize-d10v
+Thu Jul 25 15:24:17 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* d10v-dis.c (dis_long): Handle unknown opcodes.
+
 Thu Jul 25 12:08:09 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* d10v-opc.c: Changes to support signed and unsigned numbers.
