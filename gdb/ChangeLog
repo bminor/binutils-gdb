@@ -1,6 +1,6 @@
 Fri Mar  3 17:42:48 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
-	* valops.c (value_cast):  Cehck for cast to array type *before*
+	* valops.c (value_cast):  Check for cast to array type *before*
 	we coerce array to pointer (in case arg2 is already array).
 
 	* valops.c (call_function_by_hand):  Set using_gcc to 2 if using
