@@ -1,3 +1,8 @@
+2002-05-13  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* stabs.c (s_stab_generic): Fix grammatical error in warning
+	message.
+
 2002-05-11  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* stabs.c (s_stab_generic): Warn about a description field that is

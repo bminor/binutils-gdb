@@ -245,7 +245,7 @@ s_stab_generic (what, stab_secname, stabstr_secname)
     /* This could happen for example with a source file with a huge
        number of lines.  The only cure is to use a different debug
        format, probably DWARF.  */
-    as_warn (_(".stab%c: description field '%x' too big, maybe you could a different debug format"),
+    as_warn (_(".stab%c: description field '%x' too big, try a different debug format"),
 	     what, desc);
     
   if (what == 's' || what == 'n')
