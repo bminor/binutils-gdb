@@ -8,6 +8,7 @@
 	* pe-sh.c: Likewise.
 	* pei-mips.c: Likewise.
 	* pei-sh.c: Likewise.
+	* peicode.h: Likewise.
 	* ppcboot.c: Likewise.
 	* ptrace-core.c: Likewise.
 
