@@ -1411,20 +1411,20 @@ proc create_registers_window {} {
 	.reg.menubar.view.menu delete 0 last
 
 # Hex menu item
-	.reg.menubar.view.menu add radiobutton -variable reg_format \
-		-label Hex -value x -command {update_registers all}
+	.reg.menubar.view.menu add radiobutton -label Hex \
+		-command {set reg_format x ; update_registers all}
 
 # Decimal menu item
-	.reg.menubar.view.menu add radiobutton -variable reg_format \
-		-label Decimal -value d -command {update_registers all}
+	.reg.menubar.view.menu add radiobutton -label Decimal \
+		-command {set reg_format d ; update_registers all}
 
 # Octal menu item
-	.reg.menubar.view.menu add radiobutton -variable reg_format \
-		-label Octal -value o -command {update_registers all}
+	.reg.menubar.view.menu add radiobutton -label Octal \
+		-command {set reg_format o ; update_registers all}
 
 # Natural menu item
-	.reg.menubar.view.menu add radiobutton -variable reg_format \
-		-label Natural -value {} -command {update_registers all}
+	.reg.menubar.view.menu add radiobutton -label Natural \
+		-command {set reg_format {} ; update_registers all}
 
 # Config menu item
 	.reg.menubar.view.menu add separator
