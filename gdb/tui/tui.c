@@ -137,8 +137,8 @@ tui_rl_change_windows (int notused1, int notused2)
 
   if (tui_active)
     {
-      TuiLayoutType new_layout;
-      TuiRegisterDisplayType regs_type = TUI_UNDEFINED_REGS;
+      enum tui_layout_type new_layout;
+      enum tui_register_display_type regs_type = TUI_UNDEFINED_REGS;
 
       new_layout = tui_current_layout ();
 
@@ -185,8 +185,8 @@ tui_rl_delete_other_windows (int notused1, int notused2)
 
   if (tui_active)
     {
-      TuiLayoutType new_layout;
-      TuiRegisterDisplayType regs_type = TUI_UNDEFINED_REGS;
+      enum tui_layout_type new_layout;
+      enum tui_register_display_type regs_type = TUI_UNDEFINED_REGS;
 
       new_layout = tui_current_layout ();
 
@@ -215,7 +215,7 @@ tui_rl_delete_other_windows (int notused1, int notused2)
 static int
 tui_rl_other_window (int count, int key)
 {
-  TuiWinInfoPtr winInfo;
+  struct tui_win_info * winInfo;
 
   if (!tui_active)
     tui_rl_switch_mode (0/*notused*/, 0/*notused*/);

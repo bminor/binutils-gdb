@@ -61,9 +61,9 @@ tuiFirstDataItemDisplayed (void)
 
   for (i = 0; (i < dataWin->generic.contentSize && elementNo < 0); i++)
     {
-      TuiGenWinInfoPtr dataItemWin;
+      struct tui_gen_win_info * dataItemWin;
 
-      dataItemWin = &((TuiWinContent)
+      dataItemWin = &((tui_win_content)
 		      dataWin->generic.content)[i]->whichElement.dataWindow;
       if (dataItemWin->handle != (WINDOW *) NULL && dataItemWin->isVisible)
 	elementNo = i;
@@ -106,11 +106,11 @@ void
 tuiDeleteDataContentWindows (void)
 {
   int i;
-  TuiGenWinInfoPtr dataItemWinPtr;
+  struct tui_gen_win_info * dataItemWinPtr;
 
   for (i = 0; (i < dataWin->generic.contentSize); i++)
     {
-      dataItemWinPtr = &((TuiWinContent)
+      dataItemWinPtr = &((tui_win_content)
 		      dataWin->generic.content)[i]->whichElement.dataWindow;
       tui_delete_win (dataItemWinPtr->handle);
       dataItemWinPtr->handle = (WINDOW *) NULL;
@@ -161,7 +161,7 @@ tui_display_all_data (void)
          ** Then display the other data
        */
       if (dataWin->detail.dataDisplayInfo.dataContent !=
-	  (TuiWinContent) NULL &&
+	  (tui_win_content) NULL &&
 	  dataWin->detail.dataDisplayInfo.dataContentCount > 0)
 	{
 	}
@@ -275,12 +275,12 @@ tui_check_data_values (struct frame_info *frame)
 	{
 #ifdef LATER
 	  TuiDataElementPtr dataElementPtr;
-	  TuiGenWinInfoPtr dataItemWinPtr;
+	  struct tui_gen_win_info * dataItemWinPtr;
 	  Opaque newValue;
 
 	  dataItemPtr = &dataWin->detail.dataDisplayInfo.
 	    dataContent[i]->whichElement.dataWindow;
-	  dataElementPtr = &((TuiWinContent)
+	  dataElementPtr = &((tui_win_content)
 			     dataItemWinPtr->content)[0]->whichElement.data;
 	  if value
 	    has changed (dataElementPtr, frame, &newValue)
@@ -296,7 +296,7 @@ tui_check_data_values (struct frame_info *frame)
 
 /* Scroll the data window vertically forward or backward.   */
 void
-tui_vertical_data_scroll (TuiScrollDirection scrollDirection, int numToScroll)
+tui_vertical_data_scroll (enum tui_scroll_direction scrollDirection, int numToScroll)
 {
   int firstElementNo;
   int firstLine = (-1);

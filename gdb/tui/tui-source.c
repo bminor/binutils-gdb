@@ -93,8 +93,8 @@ tui_set_source_content (struct symtab *s, int lineNo, int noerror)
 	      else
 		{
 		  register int offset, curLineNo, curLine, curLen, threshold;
-		  TuiGenWinInfoPtr locator = tui_locator_win_info_ptr ();
-                  TuiSourceInfoPtr src = &srcWin->detail.sourceInfo;
+		  struct tui_gen_win_info * locator = tui_locator_win_info_ptr ();
+                  struct tui_source_info * src = &srcWin->detail.sourceInfo;
 
                   if (srcWin->generic.title)
                     xfree (srcWin->generic.title);
@@ -117,14 +117,14 @@ tui_set_source_content (struct symtab *s, int lineNo, int noerror)
 					   (threshold + 1) * sizeof (char));
 		  while (curLine < nlines)
 		    {
-		      TuiWinElementPtr element = (TuiWinElementPtr)
+		      struct tui_win_element * element = (struct tui_win_element *)
 		      srcWin->generic.content[curLine];
 
 		      /* get the first character in the line */
 		      c = fgetc (stream);
 
 		      if (offset == 0)
-			srcLine = ((TuiWinElementPtr)
+			srcLine = ((struct tui_win_element *)
 				   srcWin->generic.content[
 					curLine])->whichElement.source.line;
 		      /* Init the line with the line number */
@@ -145,10 +145,10 @@ tui_set_source_content (struct symtab *s, int lineNo, int noerror)
 		      element->whichElement.source.lineOrAddr.lineNo =
 			curLineNo;
 		      element->whichElement.source.isExecPoint =
-			(strcmp (((TuiWinElementPtr)
+			(strcmp (((struct tui_win_element *)
 			locator->content[0])->whichElement.locator.fileName,
 				 s->filename) == 0
-			 && curLineNo == ((TuiWinElementPtr)
+			 && curLineNo == ((struct tui_win_element *)
 			 locator->content[0])->whichElement.locator.lineNo);
 		      if (c != EOF)
 			{
@@ -203,11 +203,11 @@ tui_set_source_content (struct symtab *s, int lineNo, int noerror)
 			}
 		      /* Now copy the line taking the offset into account */
 		      if (strlen (srcLine) > offset)
-			strcpy (((TuiWinElementPtr) srcWin->generic.content[
+			strcpy (((struct tui_win_element *) srcWin->generic.content[
 					curLine])->whichElement.source.line,
 				&srcLine[offset]);
 		      else
-			((TuiWinElementPtr)
+			((struct tui_win_element *)
 			 srcWin->generic.content[
 			  curLine])->whichElement.source.line[0] = (char) 0;
 		      curLine++;
@@ -233,7 +233,7 @@ tui_set_source_content (struct symtab *s, int lineNo, int noerror)
    files cannot be accessed.  */
 
 void
-tui_set_source_content_nil (TuiWinInfoPtr winInfo, char *warning_string)
+tui_set_source_content_nil (struct tui_win_info * winInfo, char *warning_string)
 {
   int lineWidth;
   int nLines;
@@ -250,8 +250,8 @@ tui_set_source_content_nil (TuiWinInfoPtr winInfo, char *warning_string)
          to null: i.e. the line number is 0, there is no bp,
          it is not where the program is stopped */
 
-      TuiWinElementPtr element =
-      (TuiWinElementPtr) winInfo->generic.content[curr_line];
+      struct tui_win_element * element =
+      (struct tui_win_element *) winInfo->generic.content[curr_line];
       element->whichElement.source.lineOrAddr.lineNo = 0;
       element->whichElement.source.isExecPoint = FALSE;
       element->whichElement.source.hasBreak = FALSE;
@@ -300,7 +300,7 @@ tui_set_source_content_nil (TuiWinInfoPtr winInfo, char *warning_string)
 /* Function to display source in the source window.  This function
    initializes the horizontal scroll to 0.  */
 void
-tui_show_symtab_source (struct symtab *s, TuiLineOrAddress line, int noerror)
+tui_show_symtab_source (struct symtab *s, union tui_line_or_address line, int noerror)
 {
   srcWin->detail.sourceInfo.horizontalOffset = 0;
   tui_update_source_window_as_is (srcWin, s, line, noerror);
@@ -313,21 +313,21 @@ int
 tui_source_is_displayed (char *fname)
 {
   return (srcWin->generic.contentInUse &&
-	  (strcmp (((TuiWinElementPtr) (tui_locator_win_info_ptr ())->
+	  (strcmp (((struct tui_win_element *) (tui_locator_win_info_ptr ())->
 		  content[0])->whichElement.locator.fileName, fname) == 0));
 }
 
 
 /* Scroll the source forward or backward vertically.  */
 void
-tui_vertical_source_scroll (TuiScrollDirection scrollDirection,
+tui_vertical_source_scroll (enum tui_scroll_direction scrollDirection,
 			    int numToScroll)
 {
   if (srcWin->generic.content != (OpaquePtr) NULL)
     {
-      TuiLineOrAddress l;
+      union tui_line_or_address l;
       struct symtab *s;
-      TuiWinContent content = (TuiWinContent) srcWin->generic.content;
+      tui_win_content content = (tui_win_content) srcWin->generic.content;
       struct symtab_and_line cursal = get_current_source_symtab_and_line ();
 
       if (cursal.symtab == (struct symtab *) NULL)

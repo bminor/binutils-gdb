@@ -66,7 +66,7 @@ static void tui_update_command (char *, int);
    can on this single line: target name, process number, current
    function, current line, current PC, SingleKey mode.  */
 static char*
-tui_make_status_line (TuiLocatorElement* loc)
+tui_make_status_line (struct tui_locator_element* loc)
 {
   char* string;
   char line_buf[50], *pname;
@@ -249,15 +249,15 @@ void
 tui_show_locator_content (void)
 {
   char *string;
-  TuiGenWinInfoPtr locator;
+  struct tui_gen_win_info * locator;
 
   locator = tui_locator_win_info_ptr ();
 
   if (m_genWinPtrNotNull (locator) && locator->handle != (WINDOW *) NULL)
     {
-      TuiWinElementPtr element;
+      struct tui_win_element * element;
 
-      element = (TuiWinElementPtr) locator->content[0];
+      element = (struct tui_win_element *) locator->content[0];
 
       string = tui_make_status_line (&element->whichElement.locator);
       wmove (locator->handle, 0, 0);
@@ -277,8 +277,8 @@ tui_show_locator_content (void)
 static void
 tui_set_locator_filename (const char *filename)
 {
-  TuiGenWinInfoPtr locator = tui_locator_win_info_ptr ();
-  TuiLocatorElementPtr element;
+  struct tui_gen_win_info * locator = tui_locator_win_info_ptr ();
+  struct tui_locator_element * element;
 
   if (locator->content[0] == (Opaque) NULL)
     {
@@ -286,7 +286,7 @@ tui_set_locator_filename (const char *filename)
       return;
     }
 
-  element = &((TuiWinElementPtr) locator->content[0])->whichElement.locator;
+  element = &((struct tui_win_element *) locator->content[0])->whichElement.locator;
   element->fileName[0] = 0;
   strcat_to_buf (element->fileName, MAX_LOCATOR_ELEMENT_LEN, filename);
 }
@@ -296,8 +296,8 @@ static void
 tui_set_locator_info (const char *filename, const char *procname, int lineno,
                       CORE_ADDR addr)
 {
-  TuiGenWinInfoPtr locator = tui_locator_win_info_ptr ();
-  TuiLocatorElementPtr element;
+  struct tui_gen_win_info * locator = tui_locator_win_info_ptr ();
+  struct tui_locator_element * element;
 
   /* Allocate the locator content if necessary.  */
   if (locator->contentSize <= 0)
@@ -306,7 +306,7 @@ tui_set_locator_info (const char *filename, const char *procname, int lineno,
       locator->contentSize = 1;
     }
 
-  element = &((TuiWinElementPtr) locator->content[0])->whichElement.locator;
+  element = &((struct tui_win_element *) locator->content[0])->whichElement.locator;
   element->procName[0] = (char) 0;
   strcat_to_buf (element->procName, MAX_LOCATOR_ELEMENT_LEN, procname);
   element->lineNo = lineno;
@@ -326,14 +326,14 @@ tui_update_locator_filename (const char *filename)
 void
 tui_show_frame_info (struct frame_info *fi)
 {
-  TuiWinInfoPtr winInfo;
+  struct tui_win_info * winInfo;
   register int i;
 
   if (fi)
     {
       register int startLine, i;
       CORE_ADDR low;
-      TuiGenWinInfoPtr locator = tui_locator_win_info_ptr ();
+      struct tui_gen_win_info * locator = tui_locator_win_info_ptr ();
       int sourceAlreadyDisplayed;
       struct symtab_and_line sal;
 
@@ -349,10 +349,10 @@ tui_show_frame_info (struct frame_info *fi)
       startLine = 0;
       for (i = 0; i < (tui_source_windows ())->count; i++)
 	{
-	  TuiWhichElement *item;
-	  winInfo = (TuiWinInfoPtr) (tui_source_windows ())->list[i];
+	  union tui_which_element *item;
+	  winInfo = (struct tui_win_info *) (tui_source_windows ())->list[i];
 
-	  item = &((TuiWinElementPtr) locator->content[0])->whichElement;
+	  item = &((struct tui_win_element *) locator->content[0])->whichElement;
 	  if (winInfo == srcWin)
 	    {
 	      startLine = (item->locator.lineNo -
@@ -371,7 +371,7 @@ tui_show_frame_info (struct frame_info *fi)
 
 	  if (winInfo == srcWin)
 	    {
-	      TuiLineOrAddress l;
+	      union tui_line_or_address l;
 	      l.lineNo = startLine;
 	      if (!(sourceAlreadyDisplayed
 		    && tui_line_is_displayed (item->locator.lineNo, winInfo, TRUE)))
@@ -386,7 +386,7 @@ tui_show_frame_info (struct frame_info *fi)
 	    {
 	      if (winInfo == disassemWin)
 		{
-		  TuiLineOrAddress a;
+		  union tui_line_or_address a;
 		  a.addr = low;
 		  if (!tui_addr_is_displayed (item->locator.addr, winInfo, TRUE))
 		    tui_update_source_window (winInfo, sal.symtab, a, TRUE);
@@ -406,7 +406,7 @@ tui_show_frame_info (struct frame_info *fi)
       tui_show_locator_content ();
       for (i = 0; i < (tui_source_windows ())->count; i++)
 	{
-	  winInfo = (TuiWinInfoPtr) (tui_source_windows ())->list[i];
+	  winInfo = (struct tui_win_info *) (tui_source_windows ())->list[i];
 	  tui_clear_source_content (winInfo, EMPTY_SOURCE_PROMPT);
 	  tui_update_exec_info (winInfo);
 	}

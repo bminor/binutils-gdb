@@ -50,26 +50,26 @@
 /*******************************
 ** Static Local Decls
 ********************************/
-static void showLayout (TuiLayoutType);
-static void _initGenWinInfo (TuiGenWinInfoPtr, TuiWinType, int, int, int, int);
+static void showLayout (enum tui_layout_type);
+static void _initGenWinInfo (struct tui_gen_win_info *, TuiWinType, int, int, int, int);
 static void _initAndMakeWin (Opaque *, TuiWinType, int, int, int, int, int);
-static void _showSourceOrDisassemAndCommand (TuiLayoutType);
-static void _makeSourceOrDisassemWindow (TuiWinInfoPtr *, TuiWinType, int, int);
-static void _makeCommandWindow (TuiWinInfoPtr *, int, int);
-static void _makeSourceWindow (TuiWinInfoPtr *, int, int);
-static void _makeDisassemWindow (TuiWinInfoPtr *, int, int);
-static void _makeDataWindow (TuiWinInfoPtr *, int, int);
+static void _showSourceOrDisassemAndCommand (enum tui_layout_type);
+static void _makeSourceOrDisassemWindow (struct tui_win_info * *, TuiWinType, int, int);
+static void _makeCommandWindow (struct tui_win_info * *, int, int);
+static void _makeSourceWindow (struct tui_win_info * *, int, int);
+static void _makeDisassemWindow (struct tui_win_info * *, int, int);
+static void _makeDataWindow (struct tui_win_info * *, int, int);
 static void _showSourceCommand (void);
 static void _showDisassemCommand (void);
 static void _showSourceDisassemCommand (void);
-static void _showData (TuiLayoutType);
-static TuiLayoutType _nextLayout (void);
-static TuiLayoutType _prevLayout (void);
+static void _showData (enum tui_layout_type);
+static enum tui_layout_type _nextLayout (void);
+static enum tui_layout_type _prevLayout (void);
 static void _tuiLayout_command (char *, int);
 static void _tuiToggleLayout_command (char *, int);
 static void _tuiToggleSplitLayout_command (char *, int);
 static CORE_ADDR _extractDisplayStartAddr (void);
-static void _tuiHandleXDBLayout (TuiLayoutDefPtr);
+static void _tuiHandleXDBLayout (struct tui_layout_def *);
 
 
 /***************************************
@@ -80,9 +80,9 @@ static void _tuiHandleXDBLayout (TuiLayoutDefPtr);
 
 /* Show the screen layout defined.  */
 static void
-showLayout (TuiLayoutType layout)
+showLayout (enum tui_layout_type layout)
 {
-  TuiLayoutType curLayout = tui_current_layout ();
+  enum tui_layout_type curLayout = tui_current_layout ();
 
   if (layout != curLayout)
     {
@@ -141,11 +141,12 @@ tui_set_layout (enum tui_layout_type layoutType,
 
   if (layoutType != UNDEFINED_LAYOUT || regsDisplayType != TUI_UNDEFINED_REGS)
     {
-      TuiLayoutType curLayout = tui_current_layout (), newLayout = UNDEFINED_LAYOUT;
+      enum tui_layout_type curLayout = tui_current_layout (), newLayout = UNDEFINED_LAYOUT;
       int regsPopulate = FALSE;
       CORE_ADDR addr = _extractDisplayStartAddr ();
-      TuiWinInfoPtr newWinWithFocus = (TuiWinInfoPtr) NULL, winWithFocus = tui_win_with_focus ();
-      TuiLayoutDefPtr layoutDef = tui_layout_def ();
+      struct tui_win_info * newWinWithFocus = (struct tui_win_info *) NULL;
+      struct tui_win_info * winWithFocus = tui_win_with_focus ();
+      struct tui_layout_def * layoutDef = tui_layout_def ();
 
 
       if (layoutType == UNDEFINED_LAYOUT &&
@@ -238,7 +239,7 @@ tui_set_layout (enum tui_layout_type layoutType,
 		      break;
 		    }
 		}
-	      if (newWinWithFocus != (TuiWinInfoPtr) NULL)
+	      if (newWinWithFocus != (struct tui_win_info *) NULL)
 		tui_set_win_focus_to (newWinWithFocus);
 	      /*
 	         ** Now update the window content
@@ -271,7 +272,7 @@ tui_set_layout (enum tui_layout_type layoutType,
 void
 tui_add_win_to_layout (enum tui_win_type type)
 {
-  TuiLayoutType curLayout = tui_current_layout ();
+  enum tui_layout_type curLayout = tui_current_layout ();
 
   switch (type)
     {
@@ -324,11 +325,11 @@ tui_add_win_to_layout (enum tui_win_type type)
    **        type and the layout.
  */
 int
-tuiDefaultWinHeight (TuiWinType type, TuiLayoutType layout)
+tuiDefaultWinHeight (TuiWinType type, enum tui_layout_type layout)
 {
   int h;
 
-  if (winList[type] != (TuiWinInfoPtr) NULL)
+  if (winList[type] != (struct tui_win_info *) NULL)
     h = winList[type]->generic.height;
   else
     {
@@ -430,9 +431,9 @@ tui_set_layout_for_display_command (const char *layoutName)
     {
       register int i;
       register char *bufPtr;
-      TuiLayoutType newLayout = UNDEFINED_LAYOUT;
-      TuiRegisterDisplayType dpyType = TUI_UNDEFINED_REGS;
-      TuiLayoutType curLayout = tui_current_layout ();
+      enum tui_layout_type newLayout = UNDEFINED_LAYOUT;
+      enum tui_register_display_type dpyType = TUI_UNDEFINED_REGS;
+      enum tui_layout_type curLayout = tui_current_layout ();
 
       bufPtr = (char *) xstrdup (layoutName);
       for (i = 0; (i < strlen (layoutName)); i++)
@@ -527,7 +528,7 @@ tui_set_layout_for_display_command (const char *layoutName)
 static CORE_ADDR
 _extractDisplayStartAddr (void)
 {
-  TuiLayoutType curLayout = tui_current_layout ();
+  enum tui_layout_type curLayout = tui_current_layout ();
   CORE_ADDR addr;
   CORE_ADDR pc;
   struct symtab_and_line cursal = get_current_source_symtab_and_line ();
@@ -556,7 +557,7 @@ _extractDisplayStartAddr (void)
 
 
 static void
-_tuiHandleXDBLayout (TuiLayoutDefPtr layoutDef)
+_tuiHandleXDBLayout (struct tui_layout_def * layoutDef)
 {
   if (layoutDef->split)
     {
@@ -579,7 +580,7 @@ _tuiHandleXDBLayout (TuiLayoutDefPtr layoutDef)
 static void
 _tuiToggleLayout_command (char *arg, int fromTTY)
 {
-  TuiLayoutDefPtr layoutDef = tui_layout_def ();
+  struct tui_layout_def * layoutDef = tui_layout_def ();
 
   /* Make sure the curses mode is enabled.  */
   tui_enable ();
@@ -597,7 +598,7 @@ _tuiToggleLayout_command (char *arg, int fromTTY)
 static void
 _tuiToggleSplitLayout_command (char *arg, int fromTTY)
 {
-  TuiLayoutDefPtr layoutDef = tui_layout_def ();
+  struct tui_layout_def * layoutDef = tui_layout_def ();
 
   /* Make sure the curses mode is enabled.  */
   tui_enable ();
@@ -623,10 +624,10 @@ _tuiLayout_command (char *arg, int fromTTY)
    ** _nextLayout().
    **        Answer the previous layout to cycle to.
  */
-static TuiLayoutType
+static enum tui_layout_type
 _nextLayout (void)
 {
-  TuiLayoutType newLayout;
+  enum tui_layout_type newLayout;
 
   newLayout = tui_current_layout ();
   if (newLayout == UNDEFINED_LAYOUT)
@@ -646,10 +647,10 @@ _nextLayout (void)
    ** _prevLayout().
    **        Answer the next layout to cycle to.
  */
-static TuiLayoutType
+static enum tui_layout_type
 _prevLayout (void)
 {
-  TuiLayoutType newLayout;
+  enum tui_layout_type newLayout;
 
   newLayout = tui_current_layout ();
   if (newLayout == SRC_COMMAND)
@@ -670,7 +671,7 @@ _prevLayout (void)
    ** _makeCommandWindow().
  */
 static void
-_makeCommandWindow (TuiWinInfoPtr * winInfoPtr, int height, int originY)
+_makeCommandWindow (struct tui_win_info * * winInfoPtr, int height, int originY)
 {
   _initAndMakeWin ((Opaque *) winInfoPtr,
 		   CMD_WIN,
@@ -690,7 +691,7 @@ _makeCommandWindow (TuiWinInfoPtr * winInfoPtr, int height, int originY)
    ** _makeSourceWindow().
  */
 static void
-_makeSourceWindow (TuiWinInfoPtr * winInfoPtr, int height, int originY)
+_makeSourceWindow (struct tui_win_info * * winInfoPtr, int height, int originY)
 {
   _makeSourceOrDisassemWindow (winInfoPtr, SRC_WIN, height, originY);
 
@@ -702,7 +703,7 @@ _makeSourceWindow (TuiWinInfoPtr * winInfoPtr, int height, int originY)
    ** _makeDisassemWindow().
  */
 static void
-_makeDisassemWindow (TuiWinInfoPtr * winInfoPtr, int height, int originY)
+_makeDisassemWindow (struct tui_win_info * * winInfoPtr, int height, int originY)
 {
   _makeSourceOrDisassemWindow (winInfoPtr, DISASSEM_WIN, height, originY);
 
@@ -714,7 +715,7 @@ _makeDisassemWindow (TuiWinInfoPtr * winInfoPtr, int height, int originY)
    ** _makeDataWindow().
  */
 static void
-_makeDataWindow (TuiWinInfoPtr * winInfoPtr, int height, int originY)
+_makeDataWindow (struct tui_win_info * * winInfoPtr, int height, int originY)
 {
   _initAndMakeWin ((Opaque *) winInfoPtr,
 		   DATA_WIN,
@@ -797,7 +798,7 @@ _showSourceDisassemCommand (void)
 	}
       if (m_winPtrNotNull (srcWin))
 	{
-	  TuiGenWinInfoPtr locator = tui_locator_win_info_ptr ();
+	  struct tui_gen_win_info * locator = tui_locator_win_info_ptr ();
 
 	  tui_show_source_content (srcWin);
 	  if (m_winPtrIsNull (disassemWin))
@@ -876,12 +877,12 @@ _showSourceDisassemCommand (void)
    **        Show the Source/Data/Command or the Dissassembly/Data/Command layout
  */
 static void
-_showData (TuiLayoutType newLayout)
+_showData (enum tui_layout_type newLayout)
 {
   int totalHeight = (tui_term_height () - cmdWin->generic.height);
   int srcHeight, dataHeight;
   TuiWinType winType;
-  TuiGenWinInfoPtr locator = tui_locator_win_info_ptr ();
+  struct tui_gen_win_info * locator = tui_locator_win_info_ptr ();
 
 
   dataHeight = totalHeight / 2;
@@ -944,7 +945,7 @@ _showData (TuiLayoutType newLayout)
    ** _initGenWinInfo().
  */
 static void
-_initGenWinInfo (TuiGenWinInfoPtr winInfo, TuiWinType type,
+_initGenWinInfo (struct tui_gen_win_info * winInfo, TuiWinType type,
                  int height, int width, int originX, int originY)
 {
   int h = height;
@@ -974,7 +975,7 @@ _initAndMakeWin (Opaque * winInfoPtr, TuiWinType winType,
                  int height, int width, int originX, int originY, int boxIt)
 {
   Opaque opaqueWinInfo = *winInfoPtr;
-  TuiGenWinInfoPtr generic;
+  struct tui_gen_win_info * generic;
 
   if (opaqueWinInfo == (Opaque) NULL)
     {
@@ -984,9 +985,9 @@ _initAndMakeWin (Opaque * winInfoPtr, TuiWinType winType,
 	opaqueWinInfo = (Opaque) tui_alloc_win_info (winType);
     }
   if (m_winIsAuxillary (winType))
-    generic = (TuiGenWinInfoPtr) opaqueWinInfo;
+    generic = (struct tui_gen_win_info *) opaqueWinInfo;
   else
-    generic = &((TuiWinInfoPtr) opaqueWinInfo)->generic;
+    generic = &((struct tui_win_info *) opaqueWinInfo)->generic;
 
   if (opaqueWinInfo != (Opaque) NULL)
     {
@@ -994,9 +995,9 @@ _initAndMakeWin (Opaque * winInfoPtr, TuiWinType winType,
       if (!m_winIsAuxillary (winType))
 	{
 	  if (generic->type == CMD_WIN)
-	    ((TuiWinInfoPtr) opaqueWinInfo)->canHighlight = FALSE;
+	    ((struct tui_win_info *) opaqueWinInfo)->canHighlight = FALSE;
 	  else
-	    ((TuiWinInfoPtr) opaqueWinInfo)->canHighlight = TRUE;
+	    ((struct tui_win_info *) opaqueWinInfo)->canHighlight = TRUE;
 	}
       tui_make_window (generic, boxIt);
     }
@@ -1008,10 +1009,10 @@ _initAndMakeWin (Opaque * winInfoPtr, TuiWinType winType,
    ** _makeSourceOrDisassemWindow().
  */
 static void
-_makeSourceOrDisassemWindow (TuiWinInfoPtr * winInfoPtr, TuiWinType type,
+_makeSourceOrDisassemWindow (struct tui_win_info * * winInfoPtr, TuiWinType type,
                              int height, int originY)
 {
-  TuiGenWinInfoPtr executionInfo = (TuiGenWinInfoPtr) NULL;
+  struct tui_gen_win_info * executionInfo = (struct tui_gen_win_info *) NULL;
 
   /*
      ** Create the exeuction info window.
@@ -1049,13 +1050,13 @@ _makeSourceOrDisassemWindow (TuiWinInfoPtr * winInfoPtr, TuiWinType type,
    **        Show the Source/Command or the Disassem layout
  */
 static void
-_showSourceOrDisassemAndCommand (TuiLayoutType layoutType)
+_showSourceOrDisassemAndCommand (enum tui_layout_type layoutType)
 {
   if (tui_current_layout () != layoutType)
     {
-      TuiWinInfoPtr *winInfoPtr;
+      struct tui_win_info * *winInfoPtr;
       int srcHeight, cmdHeight;
-      TuiGenWinInfoPtr locator = tui_locator_win_info_ptr ();
+      struct tui_gen_win_info * locator = tui_locator_win_info_ptr ();
 
       if (m_winPtrNotNull (cmdWin))
 	cmdHeight = cmdWin->generic.height;

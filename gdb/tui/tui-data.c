@@ -39,21 +39,21 @@
 /****************************
 ** GLOBAL DECLARATIONS
 ****************************/
-TuiWinInfoPtr winList[MAX_MAJOR_WINDOWS];
+struct tui_win_info *(winList[MAX_MAJOR_WINDOWS]);
 
 /***************************
 ** Private data
 ****************************/
-static TuiLayoutType _currentLayout = UNDEFINED_LAYOUT;
+static enum tui_layout_type _currentLayout = UNDEFINED_LAYOUT;
 static int _termHeight, _termWidth;
-static TuiGenWinInfo _locator;
-static TuiGenWinInfo _execInfo[2];
-static TuiWinInfoPtr _srcWinList[2];
-static TuiList _sourceWindows =
+static struct tui_gen_win_info _locator;
+static struct tui_gen_win_info _execInfo[2];
+static struct tui_win_info * _srcWinList[2];
+static struct tui_list _sourceWindows =
 {(OpaqueList) _srcWinList, 0};
 static int _defaultTabLen = DEFAULT_TAB_LEN;
-static TuiWinInfoPtr _winWithFocus = (TuiWinInfoPtr) NULL;
-static TuiLayoutDef _layoutDef =
+static struct tui_win_info * _winWithFocus = (struct tui_win_info *) NULL;
+static struct tui_layout_def _layoutDef =
 {SRC_WIN,			/* displayMode */
  FALSE,				/* split */
  TUI_UNDEFINED_REGS,		/* regsDisplayType */
@@ -64,8 +64,8 @@ static int _winResized = FALSE;
 /*********************************
 ** Static function forward decls
 **********************************/
-static void freeContent (TuiWinContent, int, TuiWinType);
-static void freeContentElements (TuiWinContent, int, TuiWinType);
+static void freeContent (tui_win_content, int, TuiWinType);
+static void freeContentElements (tui_win_content, int, TuiWinType);
 
 
 
@@ -94,7 +94,7 @@ tui_set_win_resized_to (int resized)
 
 
 /* Answer a pointer to the current layout definition.   */
-TuiLayoutDefPtr
+struct tui_layout_def *
 tui_layout_def (void)
 {
   return &_layoutDef;
@@ -102,7 +102,7 @@ tui_layout_def (void)
 
 
 /* Answer the window with the logical focus.    */
-TuiWinInfoPtr
+struct tui_win_info *
 tui_win_with_focus (void)
 {
   return _winWithFocus;
@@ -111,7 +111,7 @@ tui_win_with_focus (void)
 
 /* Set the window that has the logical focus.   */
 void
-tui_set_win_with_focus (TuiWinInfoPtr winInfo)
+tui_set_win_with_focus (struct tui_win_info * winInfo)
 {
   _winWithFocus = winInfo;
 }
@@ -139,7 +139,7 @@ tui_set_default_tab_len (int len)
    **        one source window (either source or disassembly), but both can
    **        be displayed at the same time.
  */
-TuiListPtr
+struct tui_list *
 tui_source_windows (void)
 {
   return &_sourceWindows;
@@ -165,7 +165,7 @@ tui_clear_source_windows_detail (void)
   int i;
 
   for (i = 0; i < (tui_source_windows ())->count; i++)
-    tui_clear_win_detail ((TuiWinInfoPtr) (tui_source_windows ())->list[i]);
+    tui_clear_win_detail ((struct tui_win_info *) (tui_source_windows ())->list[i]);
 }
 
 
@@ -173,7 +173,7 @@ tui_clear_source_windows_detail (void)
    one source window (either source or disassembly), but both can be
    displayed at the same time.  */
 void
-tui_add_to_source_windows (TuiWinInfoPtr winInfo)
+tui_add_to_source_windows (struct tui_win_info * winInfo)
 {
   if (_sourceWindows.count < 2)
     _sourceWindows.list[_sourceWindows.count++] = (Opaque) winInfo;
@@ -182,7 +182,7 @@ tui_add_to_source_windows (TuiWinInfoPtr winInfo)
 
 /* Clear the pertinant detail in the windows.   */
 void
-tui_clear_win_detail (TuiWinInfoPtr winInfo)
+tui_clear_win_detail (struct tui_win_info * winInfo)
 {
   if (m_winPtrNotNull (winInfo))
     {
@@ -199,10 +199,10 @@ tui_clear_win_detail (TuiWinInfoPtr winInfo)
 	  break;
 	case DATA_WIN:
 	  winInfo->detail.dataDisplayInfo.dataContent =
-	    (TuiWinContent) NULL;
+	    (tui_win_content) NULL;
 	  winInfo->detail.dataDisplayInfo.dataContentCount = 0;
 	  winInfo->detail.dataDisplayInfo.regsContent =
-	    (TuiWinContent) NULL;
+	    (tui_win_content) NULL;
 	  winInfo->detail.dataDisplayInfo.regsContentCount = 0;
 	  winInfo->detail.dataDisplayInfo.regsDisplayType =
 	    TUI_UNDEFINED_REGS;
@@ -222,7 +222,7 @@ tui_clear_win_detail (TuiWinInfoPtr winInfo)
    ** sourceExecInfoPtr().
    **        Accessor for the source execution info ptr.
  */
-TuiGenWinInfoPtr
+struct tui_gen_win_info *
 tui_source_exec_info_win_ptr (void)
 {
   return &_execInfo[0];
@@ -233,7 +233,7 @@ tui_source_exec_info_win_ptr (void)
    ** disassemExecInfoPtr().
    **        Accessor for the disassem execution info ptr.
  */
-TuiGenWinInfoPtr
+struct tui_gen_win_info *
 tui_disassem_exec_info_win_ptr (void)
 {
   return &_execInfo[1];
@@ -242,11 +242,11 @@ tui_disassem_exec_info_win_ptr (void)
 
 /* Accessor for the locator win info.  Answers a pointer to the static
    locator win info struct.  */
-TuiGenWinInfoPtr
+struct tui_gen_win_info *
 tui_locator_win_info_ptr (void)
 {
   return &_locator;
-}				/* locatorWinInfoPtr */
+}
 
 
 /* Accessor for the termHeight.  */
@@ -282,7 +282,7 @@ tui_set_term_width_to (int w)
 
 
 /* Accessor for the current layout.   */
-TuiLayoutType
+enum tui_layout_type
 tui_current_layout (void)
 {
   return _currentLayout;
@@ -291,7 +291,7 @@ tui_current_layout (void)
 
 /* Mutator for the current layout.  */
 void
-tui_set_current_layout_to (TuiLayoutType newLayout)
+tui_set_current_layout_to (enum tui_layout_type newLayout)
 {
   _currentLayout = newLayout;
 }
@@ -302,7 +302,7 @@ tui_set_current_layout_to (TuiLayoutType newLayout)
    **        Set the origin of the window
  */
 void
-setGenWinOrigin (TuiGenWinInfoPtr winInfo, int x, int y)
+setGenWinOrigin (struct tui_gen_win_info * winInfo, int x, int y)
 {
   winInfo->origin.x = x;
   winInfo->origin.y = y;
@@ -318,11 +318,11 @@ setGenWinOrigin (TuiGenWinInfoPtr winInfo, int x, int y)
 
 /* Answer the next window in the list, cycling back to the top if
    necessary.  */
-TuiWinInfoPtr
-tui_next_win (TuiWinInfoPtr curWin)
+struct tui_win_info *
+tui_next_win (struct tui_win_info * curWin)
 {
   TuiWinType type = curWin->generic.type;
-  TuiWinInfoPtr nextWin = (TuiWinInfoPtr) NULL;
+  struct tui_win_info * nextWin = (struct tui_win_info *) NULL;
 
   if (curWin->generic.type == CMD_WIN)
     type = SRC_WIN;
@@ -347,11 +347,11 @@ tui_next_win (TuiWinInfoPtr curWin)
 
 /* Answer the prev window in the list, cycling back to the bottom if
    necessary.  */
-TuiWinInfoPtr
-tui_prev_win (TuiWinInfoPtr curWin)
+struct tui_win_info *
+tui_prev_win (struct tui_win_info * curWin)
 {
   TuiWinType type = curWin->generic.type;
-  TuiWinInfoPtr prev = (TuiWinInfoPtr) NULL;
+  struct tui_win_info * prev = (struct tui_win_info *) NULL;
 
   if (curWin->generic.type == SRC_WIN)
     type = CMD_WIN;
@@ -375,10 +375,10 @@ tui_prev_win (TuiWinInfoPtr curWin)
 
 
 /* Answer the window represented by name.    */
-TuiWinInfoPtr
+struct tui_win_info *
 tui_partial_win_by_name (char *name)
 {
-  TuiWinInfoPtr winInfo = (TuiWinInfoPtr) NULL;
+  struct tui_win_info * winInfo = (struct tui_win_info *) NULL;
 
   if (name != (char *) NULL)
     {
@@ -406,7 +406,7 @@ tui_partial_win_by_name (char *name)
    **      Answer the name of the window
  */
 char *
-tui_win_name (TuiGenWinInfoPtr winInfo)
+tui_win_name (struct tui_gen_win_info * winInfo)
 {
   char *name = (char *) NULL;
 
@@ -442,13 +442,13 @@ tui_initialize_static_data (void)
 }
 
 
-TuiGenWinInfoPtr
+struct tui_gen_win_info *
 tui_alloc_generic_win_info (void)
 {
-  TuiGenWinInfoPtr win;
+  struct tui_gen_win_info * win;
 
-  if ((win = (TuiGenWinInfoPtr) xmalloc (
-		     sizeof (TuiGenWinInfoPtr))) != (TuiGenWinInfoPtr) NULL)
+  if ((win = (struct tui_gen_win_info *) xmalloc (
+		     sizeof (struct tui_gen_win_info *))) != (struct tui_gen_win_info *) NULL)
     tui_init_generic_part (win);
 
   return win;
@@ -459,7 +459,7 @@ tui_alloc_generic_win_info (void)
    ** initGenericPart().
  */
 void
-tui_init_generic_part (TuiGenWinInfoPtr win)
+tui_init_generic_part (struct tui_gen_win_info * win)
 {
   win->width =
     win->height =
@@ -480,7 +480,7 @@ tui_init_generic_part (TuiGenWinInfoPtr win)
    ** initContentElement().
  */
 void
-initContentElement (TuiWinElementPtr element, TuiWinType type)
+initContentElement (struct tui_win_element * element, TuiWinType type)
 {
   element->highlight = FALSE;
   switch (type)
@@ -495,9 +495,9 @@ initContentElement (TuiWinElementPtr element, TuiWinType type)
     case DATA_WIN:
       tui_init_generic_part (&element->whichElement.dataWindow);
       element->whichElement.dataWindow.type = DATA_ITEM_WIN;
-      ((TuiGenWinInfoPtr) & element->whichElement.dataWindow)->content =
+      ((struct tui_gen_win_info *) & element->whichElement.dataWindow)->content =
 	(OpaquePtr) tui_alloc_content (1, DATA_ITEM_WIN);
-      ((TuiGenWinInfoPtr)
+      ((struct tui_gen_win_info *)
        & element->whichElement.dataWindow)->contentSize = 1;
       break;
     case CMD_WIN:
@@ -530,7 +530,7 @@ initContentElement (TuiWinElementPtr element, TuiWinType type)
    ** initWinInfo().
  */
 void
-initWinInfo (TuiWinInfoPtr winInfo)
+initWinInfo (struct tui_win_info * winInfo)
 {
   tui_init_generic_part (&winInfo->generic);
   winInfo->canHighlight =
@@ -539,16 +539,16 @@ initWinInfo (TuiWinInfoPtr winInfo)
     {
     case SRC_WIN:
     case DISASSEM_WIN:
-      winInfo->detail.sourceInfo.executionInfo = (TuiGenWinInfoPtr) NULL;
+      winInfo->detail.sourceInfo.executionInfo = (struct tui_gen_win_info *) NULL;
       winInfo->detail.sourceInfo.hasLocator = FALSE;
       winInfo->detail.sourceInfo.horizontalOffset = 0;
       winInfo->detail.sourceInfo.startLineOrAddr.addr = 0;
       winInfo->detail.sourceInfo.filename = 0;
       break;
     case DATA_WIN:
-      winInfo->detail.dataDisplayInfo.dataContent = (TuiWinContent) NULL;
+      winInfo->detail.dataDisplayInfo.dataContent = (tui_win_content) NULL;
       winInfo->detail.dataDisplayInfo.dataContentCount = 0;
-      winInfo->detail.dataDisplayInfo.regsContent = (TuiWinContent) NULL;
+      winInfo->detail.dataDisplayInfo.regsContent = (tui_win_content) NULL;
       winInfo->detail.dataDisplayInfo.regsContentCount = 0;
       winInfo->detail.dataDisplayInfo.regsDisplayType =
 	TUI_UNDEFINED_REGS;
@@ -568,12 +568,12 @@ initWinInfo (TuiWinInfoPtr winInfo)
 }				/* initWinInfo */
 
 
-TuiWinInfoPtr
+struct tui_win_info *
 tui_alloc_win_info (TuiWinType type)
 {
-  TuiWinInfoPtr winInfo = (TuiWinInfoPtr) NULL;
+  struct tui_win_info * winInfo = (struct tui_win_info *) NULL;
 
-  winInfo = (TuiWinInfoPtr) xmalloc (sizeof (TuiWinInfo));
+  winInfo = (struct tui_win_info *) xmalloc (sizeof (struct tui_win_info));
   if (m_winPtrNotNull (winInfo))
     {
       winInfo->generic.type = type;
@@ -588,15 +588,15 @@ tui_alloc_win_info (TuiWinType type)
    ** allocContent().
    **        Allocates the content and elements in a block.
  */
-TuiWinContent
+tui_win_content
 tui_alloc_content (int numElements, TuiWinType type)
 {
-  TuiWinContent content = (TuiWinContent) NULL;
+  tui_win_content content = (tui_win_content) NULL;
   char *elementBlockPtr = (char *) NULL;
   int i;
 
-  if ((content = (TuiWinContent)
-  xmalloc (sizeof (TuiWinElementPtr) * numElements)) != (TuiWinContent) NULL)
+  if ((content = (tui_win_content)
+  xmalloc (sizeof (struct tui_win_element *) * numElements)) != (tui_win_content) NULL)
     {				/*
 				   ** All windows, except the data window, can allocate the elements
 				   ** in a chunk.  The data window cannot because items can be
@@ -605,19 +605,19 @@ tui_alloc_content (int numElements, TuiWinType type)
       if (type != DATA_WIN)
 	{
 	  if ((elementBlockPtr = (char *)
-	   xmalloc (sizeof (TuiWinElement) * numElements)) != (char *) NULL)
+	   xmalloc (sizeof (struct tui_win_element) * numElements)) != (char *) NULL)
 	    {
 	      for (i = 0; i < numElements; i++)
 		{
-		  content[i] = (TuiWinElementPtr) elementBlockPtr;
+		  content[i] = (struct tui_win_element *) elementBlockPtr;
 		  initContentElement (content[i], type);
-		  elementBlockPtr += sizeof (TuiWinElement);
+		  elementBlockPtr += sizeof (struct tui_win_element);
 		}
 	    }
 	  else
 	    {
 	      tuiFree ((char *) content);
-	      content = (TuiWinContent) NULL;
+	      content = (tui_win_content) NULL;
 	    }
 	}
     }
@@ -632,9 +632,9 @@ tui_alloc_content (int numElements, TuiWinType type)
    there is a memory allocation error, in which case, (-1) is
    returned.  */
 int
-tui_add_content_elements (TuiGenWinInfoPtr winInfo, int numElements)
+tui_add_content_elements (struct tui_gen_win_info * winInfo, int numElements)
 {
-  TuiWinElementPtr elementPtr;
+  struct tui_win_element * elementPtr;
   int i, indexStart;
 
   if (winInfo->content == (OpaquePtr) NULL)
@@ -648,8 +648,8 @@ tui_add_content_elements (TuiGenWinInfoPtr winInfo, int numElements)
     {
       for (i = indexStart; (i < numElements + indexStart); i++)
 	{
-	  if ((elementPtr = (TuiWinElementPtr)
-	       xmalloc (sizeof (TuiWinElement))) != (TuiWinElementPtr) NULL)
+	  if ((elementPtr = (struct tui_win_element *)
+	       xmalloc (sizeof (struct tui_win_element))) != (struct tui_win_element *) NULL)
 	    {
 	      winInfo->content[i] = (Opaque) elementPtr;
 	      initContentElement (elementPtr, winInfo->type);
@@ -667,16 +667,16 @@ tui_add_content_elements (TuiGenWinInfoPtr winInfo, int numElements)
 /* Delete all curses windows associated with winInfo, leaving everything
    else intact.  */
 void
-tuiDelWindow (TuiWinInfoPtr winInfo)
+tuiDelWindow (struct tui_win_info * winInfo)
 {
-  TuiGenWinInfoPtr genericWin;
+  struct tui_gen_win_info * genericWin;
 
   switch (winInfo->generic.type)
     {
     case SRC_WIN:
     case DISASSEM_WIN:
       genericWin = tui_locator_win_info_ptr ();
-      if (genericWin != (TuiGenWinInfoPtr) NULL)
+      if (genericWin != (struct tui_gen_win_info *) NULL)
 	{
 	  tui_delete_win (genericWin->handle);
 	  genericWin->handle = (WINDOW *) NULL;
@@ -688,7 +688,7 @@ tuiDelWindow (TuiWinInfoPtr winInfo)
           winInfo->detail.sourceInfo.filename = 0;
         }
       genericWin = winInfo->detail.sourceInfo.executionInfo;
-      if (genericWin != (TuiGenWinInfoPtr) NULL)
+      if (genericWin != (struct tui_gen_win_info *) NULL)
 	{
 	  tui_delete_win (genericWin->handle);
 	  genericWin->handle = (WINDOW *) NULL;
@@ -717,16 +717,16 @@ tuiDelWindow (TuiWinInfoPtr winInfo)
 
 
 void
-tui_free_window (TuiWinInfoPtr winInfo)
+tui_free_window (struct tui_win_info * winInfo)
 {
-  TuiGenWinInfoPtr genericWin;
+  struct tui_gen_win_info * genericWin;
 
   switch (winInfo->generic.type)
     {
     case SRC_WIN:
     case DISASSEM_WIN:
       genericWin = tui_locator_win_info_ptr ();
-      if (genericWin != (TuiGenWinInfoPtr) NULL)
+      if (genericWin != (struct tui_gen_win_info *) NULL)
 	{
 	  tui_delete_win (genericWin->handle);
 	  genericWin->handle = (WINDOW *) NULL;
@@ -738,7 +738,7 @@ tui_free_window (TuiWinInfoPtr winInfo)
           winInfo->detail.sourceInfo.filename = 0;
         }
       genericWin = winInfo->detail.sourceInfo.executionInfo;
-      if (genericWin != (TuiGenWinInfoPtr) NULL)
+      if (genericWin != (struct tui_gen_win_info *) NULL)
 	{
 	  tui_delete_win (genericWin->handle);
 	  genericWin->handle = (WINDOW *) NULL;
@@ -751,12 +751,12 @@ tui_free_window (TuiWinInfoPtr winInfo)
 	  tui_free_data_content (winInfo->detail.dataDisplayInfo.regsContent,
 				 winInfo->detail.dataDisplayInfo.regsContentCount);
 	  winInfo->detail.dataDisplayInfo.regsContent =
-	    (TuiWinContent) NULL;
+	    (tui_win_content) NULL;
 	  winInfo->detail.dataDisplayInfo.regsContentCount = 0;
 	  tui_free_data_content (winInfo->detail.dataDisplayInfo.dataContent,
 				 winInfo->detail.dataDisplayInfo.dataContentCount);
 	  winInfo->detail.dataDisplayInfo.dataContent =
-	    (TuiWinContent) NULL;
+	    (tui_win_content) NULL;
 	  winInfo->detail.dataDisplayInfo.dataContentCount = 0;
 	  winInfo->detail.dataDisplayInfo.regsDisplayType =
 	    TUI_UNDEFINED_REGS;
@@ -788,7 +788,7 @@ tui_free_all_source_wins_content (void)
 
   for (i = 0; i < (tui_source_windows ())->count; i++)
     {
-      TuiWinInfoPtr winInfo = (TuiWinInfoPtr) (tui_source_windows ())->list[i];
+      struct tui_win_info * winInfo = (struct tui_win_info *) (tui_source_windows ())->list[i];
 
       if (m_winPtrNotNull (winInfo))
 	{
@@ -800,11 +800,11 @@ tui_free_all_source_wins_content (void)
 
 
 void
-tui_free_win_content (TuiGenWinInfoPtr winInfo)
+tui_free_win_content (struct tui_gen_win_info * winInfo)
 {
   if (winInfo->content != (OpaquePtr) NULL)
     {
-      freeContent ((TuiWinContent) winInfo->content,
+      freeContent ((tui_win_content) winInfo->content,
 		   winInfo->contentSize,
 		   winInfo->type);
       winInfo->content = (OpaquePtr) NULL;
@@ -816,19 +816,19 @@ tui_free_win_content (TuiGenWinInfoPtr winInfo)
 
 
 void
-tui_del_data_windows (TuiWinContent content, int contentSize)
+tui_del_data_windows (tui_win_content content, int contentSize)
 {
   int i;
 
   /*
-     ** Remember that data window content elements are of type TuiGenWinInfoPtr,
+     ** Remember that data window content elements are of type struct tui_gen_win_info *,
      ** each of which whose single element is a data element.
    */
   for (i = 0; i < contentSize; i++)
     {
-      TuiGenWinInfoPtr genericWin = &content[i]->whichElement.dataWindow;
+      struct tui_gen_win_info * genericWin = &content[i]->whichElement.dataWindow;
 
-      if (genericWin != (TuiGenWinInfoPtr) NULL)
+      if (genericWin != (struct tui_gen_win_info *) NULL)
 	{
 	  tui_delete_win (genericWin->handle);
 	  genericWin->handle = (WINDOW *) NULL;
@@ -839,19 +839,19 @@ tui_del_data_windows (TuiWinContent content, int contentSize)
 
 
 void
-tui_free_data_content (TuiWinContent content, int contentSize)
+tui_free_data_content (tui_win_content content, int contentSize)
 {
   int i;
 
   /*
-     ** Remember that data window content elements are of type TuiGenWinInfoPtr,
+     ** Remember that data window content elements are of type struct tui_gen_win_info *,
      ** each of which whose single element is a data element.
    */
   for (i = 0; i < contentSize; i++)
     {
-      TuiGenWinInfoPtr genericWin = &content[i]->whichElement.dataWindow;
+      struct tui_gen_win_info * genericWin = &content[i]->whichElement.dataWindow;
 
-      if (genericWin != (TuiGenWinInfoPtr) NULL)
+      if (genericWin != (struct tui_gen_win_info *) NULL)
 	{
 	  tui_delete_win (genericWin->handle);
 	  genericWin->handle = (WINDOW *) NULL;
@@ -875,9 +875,9 @@ tui_free_data_content (TuiWinContent content, int contentSize)
    ** freeContent().
  */
 static void
-freeContent (TuiWinContent content, int contentSize, TuiWinType winType)
+freeContent (tui_win_content content, int contentSize, TuiWinType winType)
 {
-  if (content != (TuiWinContent) NULL)
+  if (content != (tui_win_content) NULL)
     {
       freeContentElements (content, contentSize, winType);
       tuiFree ((char *) content);
@@ -891,9 +891,9 @@ freeContent (TuiWinContent content, int contentSize, TuiWinType winType)
    ** freeContentElements().
  */
 static void
-freeContentElements (TuiWinContent content, int contentSize, TuiWinType type)
+freeContentElements (tui_win_content content, int contentSize, TuiWinType type)
 {
-  if (content != (TuiWinContent) NULL)
+  if (content != (tui_win_content) NULL)
     {
       int i;
 
@@ -907,10 +907,10 @@ freeContentElements (TuiWinContent content, int contentSize, TuiWinType type)
 	{
 	  for (i = 0; i < contentSize; i++)
 	    {
-	      TuiWinElementPtr element;
+	      struct tui_win_element * element;
 
 	      element = content[i];
-	      if (element != (TuiWinElementPtr) NULL)
+	      if (element != (struct tui_win_element *) NULL)
 		{
 		  switch (type)
 		    {

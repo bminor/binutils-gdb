@@ -42,7 +42,7 @@
 
 /* Refresh the window.   */
 void
-tui_refresh_win (TuiGenWinInfoPtr winInfo)
+tui_refresh_win (struct tui_gen_win_info * winInfo)
 {
   if (winInfo->type == DATA_WIN && winInfo->contentSize > 0)
     {
@@ -50,9 +50,9 @@ tui_refresh_win (TuiGenWinInfoPtr winInfo)
 
       for (i = 0; (i < winInfo->contentSize); i++)
 	{
-	  TuiGenWinInfoPtr dataItemWinPtr;
+	  struct tui_gen_win_info * dataItemWinPtr;
 
-	  dataItemWinPtr = &((TuiWinContent)
+	  dataItemWinPtr = &((tui_win_content)
 			     winInfo->content)[i]->whichElement.dataWindow;
 	  if (m_genWinPtrNotNull (dataItemWinPtr) &&
 	      dataItemWinPtr->handle != (WINDOW *) NULL)
@@ -86,7 +86,7 @@ tui_delete_win (WINDOW * window)
 
 /* Draw a border arround the window.  */
 void
-boxWin (TuiGenWinInfoPtr winInfo, int highlightFlag)
+boxWin (struct tui_gen_win_info * winInfo, int highlightFlag)
 {
   if (winInfo && winInfo->handle)
     {
@@ -112,11 +112,11 @@ boxWin (TuiGenWinInfoPtr winInfo, int highlightFlag)
 
 
 void
-tui_unhighlight_win (TuiWinInfoPtr winInfo)
+tui_unhighlight_win (struct tui_win_info * winInfo)
 {
   if (m_winPtrNotNull (winInfo) && winInfo->generic.handle != (WINDOW *) NULL)
     {
-      boxWin ((TuiGenWinInfoPtr) winInfo, NO_HILITE);
+      boxWin ((struct tui_gen_win_info *) winInfo, NO_HILITE);
       wrefresh (winInfo->generic.handle);
       m_setWinHighlightOff (winInfo);
     }
@@ -124,19 +124,19 @@ tui_unhighlight_win (TuiWinInfoPtr winInfo)
 
 
 void
-tui_highlight_win (TuiWinInfoPtr winInfo)
+tui_highlight_win (struct tui_win_info * winInfo)
 {
   if (m_winPtrNotNull (winInfo) &&
       winInfo->canHighlight && winInfo->generic.handle != (WINDOW *) NULL)
     {
-      boxWin ((TuiGenWinInfoPtr) winInfo, HILITE);
+      boxWin ((struct tui_gen_win_info *) winInfo, HILITE);
       wrefresh (winInfo->generic.handle);
       m_setWinHighlightOn (winInfo);
     }
 }
 
 void
-tui_check_and_display_highlight_if_needed (TuiWinInfoPtr winInfo)
+tui_check_and_display_highlight_if_needed (struct tui_win_info * winInfo)
 {
   if (m_winPtrNotNull (winInfo) && winInfo->generic.type != CMD_WIN)
     {
@@ -151,7 +151,7 @@ tui_check_and_display_highlight_if_needed (TuiWinInfoPtr winInfo)
 
 
 void
-tui_make_window (TuiGenWinInfoPtr winInfo, int boxIt)
+tui_make_window (struct tui_gen_win_info * winInfo, int boxIt)
 {
   WINDOW *handle;
 
@@ -228,7 +228,7 @@ make_all_visible (int visible)
 	  if (m_winIsSourceType ((winList[i])->generic.type))
 	    make_visible ((winList[i])->detail.sourceInfo.executionInfo,
 			  visible);
-	  make_visible ((TuiGenWinInfoPtr) winList[i], visible);
+	  make_visible ((struct tui_gen_win_info *) winList[i], visible);
 	}
     }
 
@@ -250,10 +250,10 @@ tui_make_all_invisible (void)
 /* Function to refresh all the windows currently displayed.  */
 
 void
-tui_refresh_all (TuiWinInfoPtr * list)
+tui_refresh_all (struct tui_win_info * * list)
 {
   TuiWinType type;
-  TuiGenWinInfoPtr locator = tui_locator_win_info_ptr ();
+  struct tui_gen_win_info * locator = tui_locator_win_info_ptr ();
 
   for (type = SRC_WIN; (type < MAX_MAJOR_WINDOWS); type++)
     {

@@ -180,7 +180,7 @@ tui_set_disassem_content (CORE_ADDR pc)
   register int offset = disassemWin->detail.sourceInfo.horizontalOffset;
   register int lineWidth, maxLines;
   CORE_ADDR cur_pc;
-  TuiGenWinInfoPtr locator = tui_locator_win_info_ptr ();
+  struct tui_gen_win_info * locator = tui_locator_win_info_ptr ();
   int tab_len = tui_default_tab_len ();
   struct tui_asm_line* lines;
   int insn_pos;
@@ -196,7 +196,7 @@ tui_set_disassem_content (CORE_ADDR pc)
 
   disassemWin->detail.sourceInfo.startLineOrAddr.addr = pc;
   cur_pc = (CORE_ADDR)
-    (((TuiWinElementPtr) locator->content[0])->whichElement.locator.addr);
+    (((struct tui_win_element *) locator->content[0])->whichElement.locator.addr);
 
   maxLines = disassemWin->generic.height - 2;	/* account for hilite */
 
@@ -231,11 +231,11 @@ tui_set_disassem_content (CORE_ADDR pc)
   /* Now construct each line */
   for (i = 0; i < maxLines; i++)
     {
-      TuiWinElementPtr element;
-      TuiSourceElement* src;
+      struct tui_win_element * element;
+      struct tui_source_element* src;
       int curLen;
 
-      element = (TuiWinElementPtr) disassemWin->generic.content[i];
+      element = (struct tui_win_element *) disassemWin->generic.content[i];
       src = &element->whichElement.source;
       strcpy (line, lines[i].addr_string);
       curLen = strlen (line);
@@ -275,8 +275,8 @@ void
 tui_show_disassem (CORE_ADDR startAddr)
 {
   struct symtab *s = find_pc_symtab (startAddr);
-  TuiWinInfoPtr winWithFocus = tui_win_with_focus ();
-  TuiLineOrAddress val;
+  struct tui_win_info * winWithFocus = tui_win_with_focus ();
+  union tui_line_or_address val;
 
   val.addr = startAddr;
   tui_add_win_to_layout (DISASSEM_WIN);
@@ -301,7 +301,7 @@ tui_show_disassem_and_update_source (CORE_ADDR startAddr)
   tui_show_disassem (startAddr);
   if (tui_current_layout () == SRC_DISASSEM_COMMAND)
     {
-      TuiLineOrAddress val;
+      union tui_line_or_address val;
 
       /*
          ** Update what is in the source window if it is displayed too,
@@ -325,12 +325,12 @@ tui_show_disassem_and_update_source (CORE_ADDR startAddr)
 CORE_ADDR
 tui_get_begin_asm_address (void)
 {
-  TuiGenWinInfoPtr locator;
-  TuiLocatorElementPtr element;
+  struct tui_gen_win_info * locator;
+  struct tui_locator_element * element;
   CORE_ADDR addr;
 
   locator = tui_locator_win_info_ptr ();
-  element = &((TuiWinElementPtr) locator->content[0])->whichElement.locator;
+  element = &((struct tui_win_element *) locator->content[0])->whichElement.locator;
 
   if (element->addr == 0)
     {
@@ -380,13 +380,13 @@ tui_vertical_disassem_scroll (enum tui_scroll_direction scrollDirection,
   if (disassemWin->generic.content != (OpaquePtr) NULL)
     {
       CORE_ADDR pc;
-      TuiWinContent content;
+      tui_win_content content;
       struct symtab *s;
-      TuiLineOrAddress val;
+      union tui_line_or_address val;
       int maxLines, dir;
       struct symtab_and_line cursal = get_current_source_symtab_and_line ();
 
-      content = (TuiWinContent) disassemWin->generic.content;
+      content = (tui_win_content) disassemWin->generic.content;
       if (cursal.symtab == (struct symtab *) NULL)
 	s = find_pc_symtab (get_frame_pc (deprecated_selected_frame));
       else

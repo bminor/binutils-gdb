@@ -1,3 +1,31 @@
+2004-02-07  Andrew Cagney  <cagney@redhat.com>
+
+	* tui/tui-data.h (tui_win_element): Rename TuiWinElement.
+	(tui_exec_info_content): Rename TuiExecInfoContent.
+	(TuiGenWinInfo, TuiGenWinInfoPtr): Delete definitions.
+	(TuiWinInfo, TuiWinInfoPtr): Ditto.
+	(TuiScrollDirection, TuiScrollDirectionPtr): Ditto.
+	(TuiList, TuiListPtr): Ditto.
+	(TuiLayoutType, TuiLayoutTypePtr): Ditto.
+	(TuiDataType, TuiDataTypePtr): Ditto.
+	(TuiRegisterDisplayType, TuiRegisterDisplayTypePtr): Ditto.
+	(TuiLineOrAddress, TuiLineOrAddressPtr): Ditto.
+	(TuiLayoutDef, TuiLayoutDefPtr): Ditto.
+	(TuiSourceElement, TuiSourceElementPtr): Ditto.
+	(TuiDataElement, TuiDataElementPtr): Ditto.
+	(TuiWinElement, TuiWinElementPtr): Ditto.
+	(TuiDataInfo, TuiDataInfoPtr): Ditto.
+	(TuiCommandElement, TuiCommandElementPtr): Ditto.
+	(TuiLocatorElement, TuiLocatorElementPtr): Ditto.
+	(TuiWhichElement, TuiWhichElementPtr): Ditto.
+	(TuiSourceInfo, TuiSourceInfoPtr): Ditto.
+	(TuiCommandInfo, TuiCommandInfoPtr): Ditto.
+	* tui/tui-command.c, tui/tui-data.c: Update references.
+	* tui/tui-data.h, tui/tui-disasm.c, tui/tui-layout.c: Ditto.
+	* tui/tui-regs.c, tui/tui-source.c, tui/tui-stack.c: Ditto.
+	* tui/tui-win.c, tui/tui-windata.c, tui/tui-wingeneral.c: Ditto.
+	* tui/tui-winsource.c, tui/tui.c: Ditto.
+	
 2004-02-07  Mark Kettenis  <kettenis@gnu.org>
 
 	* dwarf2-frame.h: Update copyright.

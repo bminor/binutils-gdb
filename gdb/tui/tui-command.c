@@ -52,7 +52,7 @@
 unsigned int
 tui_dispatch_ctrl_char (unsigned int ch)
 {
-  TuiWinInfoPtr winInfo = tui_win_with_focus ();
+  struct tui_win_info * winInfo = tui_win_with_focus ();
   WINDOW *w = cmdWin->generic.handle;
 
   /*
@@ -60,7 +60,7 @@ tui_dispatch_ctrl_char (unsigned int ch)
      ** assume it is the command window; in this case, pass the
      ** character on through and do nothing here.
    */
-  if (winInfo == (TuiWinInfoPtr) NULL || winInfo == cmdWin)
+  if (winInfo == (struct tui_win_info *) NULL || winInfo == cmdWin)
     return ch;
   else
     {
