@@ -758,7 +758,13 @@ record_currthread (currthread)
   if (!in_thread_list (currthread))
     {
       add_thread (currthread);
+#ifdef UI_OUT
+      ui_out_text (uiout, "[New ");
+      ui_out_text (uiout, target_pid_to_str (currthread));
+      ui_out_text (uiout, "]\n");
+#else
       printf_filtered ("[New %s]\n", target_pid_to_str (currthread));
+#endif
     }
 }
 

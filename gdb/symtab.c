@@ -4031,6 +4031,15 @@ methods_info (regexp)
 #endif /* 0 */
 
 /* Breakpoint all functions matching regular expression. */
+#ifdef UI_OUT
+void
+rbreak_command_wrapper (regexp, from_tty)
+     char *regexp;
+     int from_tty;
+{
+  rbreak_command (regexp, from_tty);
+}
+#endif
 static void
 rbreak_command (regexp, from_tty)
      char *regexp;

@@ -32,6 +32,7 @@
 
 #include "gdb_string.h"
 #include "event-loop.h"
+#include "ui-out.h"
 #if defined (TUI) || defined (GDBTK)
 /* FIXME: cagney/2000-01-31: This #include is to allow older code such
    as that found in the TUI to continue to build. */
@@ -254,6 +255,9 @@ captured_main (void *data)
       {"command", required_argument, 0, 'x'},
       {"version", no_argument, &print_version, 1},
       {"x", required_argument, 0, 'x'},
+      {"ui", required_argument, 0, 'i'},
+      {"interpreter", required_argument, 0, 'i'},
+      {"i", required_argument, 0, 'i'},
       {"directory", required_argument, 0, 'd'},
       {"d", required_argument, 0, 'd'},
       {"cd", required_argument, 0, 11},
@@ -737,6 +741,10 @@ Options:\n\n\
   --exec=EXECFILE    Use EXECFILE as the executable.\n\
   --fullname         Output information used by emacs-GDB interface.\n\
   --help             Print this message.\n\
+", stream);
+  fputs_unfiltered ("\
+  --interpreter=INTERP\n\
+                     Select a specific interpreter / user interface\n\
 ", stream);
   fputs_unfiltered ("\
   --mapped           Use mapped symbol files if supported on this system.\n\

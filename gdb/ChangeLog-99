@@ -1,3 +1,10 @@
+Sun Dec 19 18:56:38 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* breakpoint.c (mention): Delete ui-out breakpoint code.  Mention
+ 	calls breakpoint_create_event and that, eventually, calls
+ 	gdb_breakpoint_query which displays the breakpoint details.
+	(hbreak_command_wrapper, thbreak_command_wrapper): Delete.
+
 Wed Dec 29 17:41:11 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* breakpoint.c (create_breakpoints, parse_breapoint_sals,
@@ -69,7 +76,6 @@ Wed Dec 29 17:41:11 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 	(target_remove_watchpoint): ditto.
 	(TARGET_REGION_SIZE_OK_FOR_HW_WATCHPOINT) define always true.
 	* config/mips/nm-irix4.h: ditto.
-	
 	
 1999-12-21  Jim Blandy  <jimb@cygnus.com>
 
@@ -458,6 +464,22 @@ Sat Dec 11 17:52:03 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 	* breakpoint.c (print_one_breakpoint): New function.  Move
  	breakpoint print code to here.
 	(breakpoint_1): From here.
+	(print_one_breakpoint): Merge in ui-out code.
+	(print_one_breakpoint): Add local variabls ``stb'' and
+ 	``old_chain''.
+	(breakpoint_1): Use print_one_breakpoint when UI.
+	(print_one_breakpoint): Print breakpoint type when UI.
+	(breakpoint_1): Merge UI out code into non UI function.
+
+	* ui-out.c (make_cleanup_ui_out_stream_delete): New function. Wrap
+ 	make_cleanup.
+	(do_stream_delete): New function.  Wrap ui_out_stream_delete.
+	* ui-out.h (make_cleanup_ui_out_stream_delete): Declare.
+
+Sat Dec 11 00:12:41 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* breakpoint.c (breakpoint_1): Clone breakpoint_1 creating UI
+ 	and non-UI versions.
 
 Mon Dec  6 20:31:28 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
@@ -616,6 +638,11 @@ Fri Dec  3 17:38:06 1999  Andrew Cagney  <cagney@b1.cygnus.com>
   	Return size of packet or -1.
 	(getpkt): Update.  Pass in PBUFSIZ.
 
+1999-12-02  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* breakpoint.c (print_it_typical): Print reason for stopping in
+ 	case of bp_until.
+
 Thu Dec  2 17:14:53 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* ser-pipe.c: Include <string.h> for memset().
@@ -636,6 +663,11 @@ Thu Dec  2 17:14:53 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 	* value.h (struct value): Doc fixes.
 
 	* valops.c (value_assign): Clarify error message.
+
+1999-12-01  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* stack.c (return_command_wrapper): New function, to export
+ 	return_command().
 
 1999-12-01  Christopher Faylor  <cgf@cygnus.com>
 
@@ -743,6 +775,10 @@ Thu Dec  2 17:14:53 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 	
 1999-11-29  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
+	* infrun.c (print_stop_reason): Don't print end of stepping reason
+ 	if we are in the middle of a multistep command (same condition as
+ 	in normal_stop).
+	
 	* breakpoint.c (bpstat_stop_status): Don't decrease hit_count
 	in case of a wp that has not changed.
 
@@ -792,6 +828,14 @@ Wed Nov 24 17:07:28 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 	* Makefile.in (init.c): Add SUBDIR_INIT_FILES so that sub
  	directories can hook in extra init files.
 
+Wed Nov 24 11:41:01 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* ui-out.h (field_string_ftype, ui_out_field_string): Make string
+ 	parameter const.
+	* cli-out.c (cli_field_string): Update.
+	* ui-out.c (uo_field_string, ui_out_field_string,
+ 	default_field_string): Update.
+
 1999-11-23  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* defs.h (show_load_progress): Export.
@@ -799,6 +843,8 @@ Wed Nov 24 17:07:28 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 	* symfile.c (show_load_progress): New hook for download.
 	(generic_load): Collect total size of executable to load. 
 	Call progress hook when downloading.
+        Add output for ui case.
+	(print_transfer_performance): Add output for ui case.
 
 Thu Nov 18 11:54:24 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
@@ -812,6 +858,10 @@ Wed Nov 17 17:01:06 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 1999-11-22  Jim Blandy  <jimb@cygnus.com>
 
 	* Makefile.in (i386-tdep.o): Update list of dependencies.
+
+1999-11-22  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* stack.c (print_frame_info_base): Adjust output for stepi/nexti case.
 
 1999-11-22  Jim Blandy  <jimb@cygnus.com>
 
@@ -847,6 +897,10 @@ Thu Nov 18 18:12:48 1999  Andrew Cagney  <cagney@b1.cygnus.com>
  	(captured_main), go32-nat.c (go32_create_inferior), exec.c
  	(exec_file_attach), corefile.c (core_file_command,
  	reopen_exec_file): Replace strdup with xstrdup.
+
+	* varobj.c (varobj_gen_name, c_name_of_child, c_value_of_variable,
+ 	cplus_value_of_variable): Replace strdup with xstrdup.
+	* ui-out.c (ui_out_table_begin): Ditto.
 
 Mon Nov 22 12:02:47 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
@@ -967,6 +1021,20 @@ Wed Nov 17 17:40:30 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* remote-rdi.c: Fix indentation accordingly to GNU standards.
 
+1999-11-11  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* breakpoint.h: Export {watch, awatch, rwatch}_command_wrapper().
+
+	* breakpoint.c (print_it_typical): Add output for bp_watchpoint,
+ 	bp_hardware_watchpoint, read_watchpoint, access_watchpoint cases.
+	(watchpoint_check): Add output for when the watchpoint goes out of
+ 	scope.
+	(mention): Add output for bp_watchpoint, bp_hardware_watchpoint,
+ 	read_watchpoint, access_watchpointcases.  Move end of list to end
+ 	of function.
+	({watch, awatch, rwatch}_command_wrapper): New functions, to
+ 	export {watch, awatch, rwatch}_command().
+
 Thu Oct 28 00:28:51 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* d10v-tdep.c (d10v_gdbarch_init): Make the d10v:ts3 the default.
@@ -1058,6 +1126,8 @@ Wed Nov 10 16:47:06 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* corefile.c (memory_error): Use mem_fileopen instead of
  	tui_sfileopen.  Don't call error_begin.
+	* varobj.c (c_value_of_variable): Use mem_fileopen () and
+ 	gdb_file_xstrdup() instead of strdup and tui_sfileopen.
 	* remote-sim.c (gdb_os_error): Rewrite using verror. Don't call
  	error_begin.
 
@@ -1065,6 +1135,8 @@ Wed Nov 10 14:21:43 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* defs.h (gdb_file_xstrdup): New function.
 	* utils.c (gdb_file_xstrdup, do_gdb_file_xstrdup): Implement.
+	* ui-out.c (ui_out_stream_new): Simplify, XMALLOC doesn't return
+ 	if malloc failed.  Use mem_fileopen and gdb_file_xstrdup.
 
 1999-11-09  Stan Shebs  <shebs@andros.cygnus.com>
 
@@ -1117,6 +1189,18 @@ Tue Nov  9 15:33:43 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* utils.c (floatformat_to_doublest): Fix conversion of denormals.
 
+1999-11-08  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* breakpoint.c (hbreak_command_wrapper): New function, to export
+ 	hbreak_command.
+	(thbreak_command_wrapper): New function, to export thbreak_command.
+
+	* symtab.c (rbreak_command_wrapper): New function, to export
+ 	rbreak_command.
+
+	* breakpoint.h (hbreak_command_wrapper, thbreak_command_wrapper,
+ 	rbreak_command_wrapper): Export.
+
 Mon Nov  8 20:14:13 1999  Andrew Cagney  <cagney@amy.cygnus.com>
 
 	* remote.c (get_memory_read_packet_size): For moment limit read
@@ -1131,6 +1215,9 @@ Mon Nov  8 20:14:13 1999  Andrew Cagney  <cagney@amy.cygnus.com>
 Mon Nov  8 18:18:07 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* defs.h, utils.c (gdb_file_deallocate): Delete.
+	* varobj.c (varobj_get_type, c_value_of_variable): Use
+ 	make_cleanup_gdb_file_delete.
+	* ui-out.c (ui_out_stream_delete): Use gdb_file_delete.
 	* corefile.c (memory_error): Use make_cleanup_gdb_file_delete.
 
 	* defs.h, utils.c (gdb_file_init_astring): Delete.
@@ -1139,6 +1226,8 @@ Mon Nov  8 18:18:07 1999  Andrew Cagney  <cagney@b1.cygnus.com>
  	gdb_file_get_strbuf.
 	(tui_file_adjust_strbuf): Rename gdb_file_adjust_strbuf.
 	* utils.c (error_stream, error_last_message): Update.
+	* varobj.c (varobj_get_type, c_value_of_variable): Update.
+	* ui-out.c (ui_out_field_stream): Update.
 	
 Mon Nov  8 16:28:00 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
@@ -1226,6 +1315,10 @@ Sun Nov  7 18:09:54 1999  Andrew Cagney  <cagney@b1.cygnus.com>
  	(procfs_thread_alive): Remove unused variables, conditionalize
  	vars declarations to eliminate compiler warnings.
 
+1999-11-05  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* infcmd.c (print_return_value): Add output for UI.
+
 Fri Nov  5 16:32:04 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* inferior.h (CALL_DUMMY_ADDRESS, CALL_DUMMY_START_OFFSET,
@@ -1267,8 +1360,18 @@ Fri Nov  5 16:32:04 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 1999-11-04  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
+	* breakpoint.c (print_it_typical): Print reason for stopping in
+ 	case of bp_finish.
+
+1999-11-04  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
 	* infrun.c (handle_inferior_event): Add calls to print_stop_reason()
 	for end of stepping range cases.
+	(print_stop_reason): Add output for END_STEPPING_RANGE, EXITED,
+ 	SIGNAL_EXITED, SIGNAL_RECEIVED cases.
+
+	* breakpoint.c (print_it_typical): Add printing of stop reason for
+ 	bp_breakpoint case.
 	
 Thu Nov  4 17:46:36 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
@@ -1466,6 +1569,11 @@ Thu Nov  4 17:36:27 1999  Andrew Cagney  <cagney@b1.cygnus.com>
         be unreliable above 9600), and the EPI Jeeni seems to run at
         38.4K.
 
+1999-11-01  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* stack.c (print_frame_info_base): Do not change printing of stack
+ 	frame info if not running with our interpreter.
+
 1999-11-01  Fernando Nasser  <fnasser@totem.to.cygnus.com>
 
 	From Grant Edwards <grante@visi.com>:
@@ -1532,6 +1640,16 @@ Thu Nov  4 17:36:27 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 1999-10-28  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* infcmd.c: Fix typo.
+
+1999-10-28  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* stack.c (select_frame_command_wrapper): Fix typo.
+
+	* infcmd.c (interrupt_target_command_wrapper): Wrapper to allow use of
+ 	static interrupt_target_command outside of file.
+
+	* stack.c (select_frame_command_wrapper): Wrapper to allow use of
+ 	static select_frame_command outside of file.
 
 1999-10-28  Jim Blandy  <jimb@cygnus.com>
 
@@ -1618,6 +1736,14 @@ Thu Nov  4 17:36:27 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 	* arm-tdep.c (THUMB_BE_BREAKPOINT): Change to 0xbebe.
 	(THUMB_LE_BREAKPOINT): Change to 0xbebe.
 
+1999-10-25  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* stack.c (print_frame_info_base): Don't print the arguments
+ 	during a backtrace.
+	* stack.c (print_frame_info_base): When setting source to 0, save
+ 	and restore old value. Do this only if source is greater than
+ 	zero.
+
 Mon Oct 25 18:22:06 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* remote.c: Document future of compare_sections_command.
@@ -1643,6 +1769,12 @@ Sat Oct 23 16:39:34 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 	* top.c (gdb_init): Call initialize_current_architecture.
 	* gdbarch.h (initialize_current_architecture): Declare.
 	* gdbarch.c (initialize_current_architecture): New function.
+
+1999-10-22  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* stack.c (print_frame_info_base): Check for value of source
+ 	parameter equal to 2, and print address anyway.  Set source to 0
+ 	later, to avoid printing file & line info again.
 
 1999-10-21  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
@@ -1690,6 +1822,9 @@ Sat Oct 23 16:39:34 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 	following J. T. Conklin's suggestions.
 
 1999-10-18  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* stack.c (print_frame_info_base): Add printing of list
+	begin and end.
 
 	* breakpoint.h: Change return type of field print_it of struct
  	bpstats to enumeration print_stop_action.
@@ -2160,6 +2295,13 @@ Thu Oct  7 19:24:05 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 1999-10-04  Fernando Nasser  <fnasser@totem.to.cygnus.com>
 
+	* varobj.c (varobj_get_type): Call tui_sfileopen() instead of
+	deprecated gdb_file_init_astream().
+	(c_value_of_variable): Ditto.
+	* ui-out.c (ui_out_stream_new): Ditto.
+
+1999-10-04  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
 	* utils.c (tui_sfileopen): New function.  Replaces
 	gdb_file_init_astring().
 	* defs.h: Add prototype for the above.
@@ -2402,6 +2544,7 @@ Wed Sep 29 21:27:16 1999  Jeffrey A Law  (law@cygnus.com)
 	* remote-sim.c (gdbsim_create_inferior): Ditto.
 	* target.c (target_link): Ditto.
 	* win32-nat.c (child_create_inferior): Ditto.
+	* varobj.c (varobj_create, new_root_variable): Ditto.
 
 Thu Sep 30 10:36:19 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
@@ -2737,12 +2880,28 @@ Thu Sep 23 20:48:22 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 	than stdout, so they don't get mixed into the result stream from
 	commands. 
 
+1999-09-23  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* varobj.c (varobj_set_value): Fix handling of baseclasses and
+	correct the behavior when it is not a baseclass (both cases were
+	dumping core).
+
+1999-09-23  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* varobj.c (varobj_update): Fix setting of child error field.
+
 1999-09-23  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* event-loop.c (poll_timers): Use correct timeval field names,
  	when setting the notifier timeouts, in case of select() used.
 	(gdb_wait_for_event): Pass a pointer to the timeout structure to
  	select(), not the structure.
+
+1999-09-23  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* varobj.c (varobj_gen_name): Dynamically allocate variable object
+	name string.
+	(varobj_update): Fix creation of result list.
 
 Wed Sep 22 10:35:32 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
@@ -2760,6 +2919,27 @@ Wed Sep 22 10:35:32 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 	* procfs.c (init_procinfo): move fltset initialization to caller.
 	(do_attach, create_procinfo): initialize fltset.
 
+1999-09-22  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* varobj.c (_initialize_varobj): Rename varobjdebug to debugvarobj
+	to avoid conflict with "set var".
+
+1999-09-22  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* varobj.c (varobj_get_type, c_value_of_variable): Remove
+	dependency on ui_out.[ch].
+
+1999-09-22  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* varobj.c (varobj_update): Fix order in which changed variables
+	are reported to match that of the old code.
+
+1999-09-22  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* varobj.c (type_changeable): Fix for testsuite case 2.12.  Do not
+	report as changed a structure when one of it's children has changed.
+	(get_type, get_type_deref): Remove uneeded initialization.
+
 1999-09-22  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* event-loop.c, event-top.c, event-loop.h: Rerun indent.
@@ -2768,6 +2948,18 @@ Wed Sep 22 10:35:32 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* m32r-stub.c (handle_exception): Fix typo in patch of 1999-08-26.
 
+1999-09-21  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* varobj.c (_initialize_varobj): Add set/show for varobjdebug.
+	(uninstall_variable): Test for varobjdebug before printing trace
+	and send it to gdb_stdlog.
+
+1999-09-21  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* varobj.c (c_type_of_child): Fix missing break, improve comment
+	and add warning.
+	(c_number_of_children): Add comment.
+
 Tue Sep 21 14:55:29 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	From 1999-08-20 J.T. Conklin  <jtc@redback.com>:
@@ -2775,9 +2967,53 @@ Tue Sep 21 14:55:29 1999  Andrew Cagney  <cagney@b1.cygnus.com>
  	inline as is done for the standard encoding.
 	(remote_cisco_expand): Removed.
 
+1999-09-20  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* varobj.c (varobj_update): Test for illegal invocation for
+	non-root variable object.
+
+1999-09-20  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* varobj.c (my_value_equal): Style. Eliminate side-effects.
+	(varobj_update): Adjust calls to reflect the above change.
+
+1999-09-20  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* varobj.c (c_value_of_variable): Fix return value for struct
+	members when parent is a invalid pointer.
+
 1999-09-20  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* event-loop.c: Include <sys/time.h>.
+
+1999-09-20  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* varobj.c (cplus_number_of_children): Coding style improvement.
+	(cplus_value_of_child): Ditto.
+
+1999-09-20  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* varobj.c (c_name_of_child): Add missing default clause in switch
+	statement.
+	(c_type_of_child): Ditto.
+	(varobj_set_value): Test for NULL type.
+
+1999-09-20  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* varobj.c (varobj_set_value): Wrap call to evaluate_expression.
+
+1999-09-20  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* varobj.c (format_string[]): Remove unused variable(s).
+	(varobj_set_value): Ditto.
+	(c_value_of_root): Ditto.
+	(cplus_value_of_child): Ditto.
+
+1999-09-20  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* varobj.c: Add missing header file include.
+	(new_variable, new_root_variable): Fix prototype and header.
+	(_initialize_varobj): Add prototype.
 
 1999-09-20  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
@@ -2827,6 +3063,10 @@ Mon Sep 20 17:00:06 1999  Andrew Cagney  <cagney@b1.cygnus.com>
  	of ``cleanup_sigint_signal_handler''.
 	* Makefile.in (infrun.o): Add dependency on remote.h.
 
+Mon Sep 20 16:15:29 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* ui-out.h (ui_out_test_flags): Add missing declaration.
+
 Mon Sep 20 13:41:04 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* kod.c (ecos_kod_open, ecos_kod_request, ecos_kod_close,
@@ -2849,6 +3089,11 @@ Mon Sep 20 12:13:27 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 	* breakpoint.c (until_break_command_continuation): Add
  	declaration.  Make static.
 	* event-top.c (rl_callback_read_char_wrapper): Ditto.
+
+Mon Sep 20 10:54:19 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* Makefile.in (varobj.o): Disable warnings. Currently
+ 	work-in-progress.
 
 Fri Sep 17 19:28:17 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
@@ -2935,6 +3180,10 @@ Sat Sep 18 07:13:03 1999  Jeffrey A Law  (law@cygnus.com)
 	* hppa-tdep.c (in_solib_call_trampoline): Handle PA64 shared library
 	trampolines.
 
+1999-09-17  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* wrapper.h: Add missing define brackets.
+
 1999-09-17  Jim Blandy  <jimb@zwingli.cygnus.com>
 
 	* breakpoint.c (permanent_breakpoint_here_p): Delete.
@@ -2956,6 +3205,24 @@ Sat Sep 18 07:13:03 1999  Jeffrey A Law  (law@cygnus.com)
 	all integral scalar arguments smaller than eight bytes to a full
 	register width; pad aggregates smaller than eight bytes on the
 	right.
+
+1999-09-17  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* Makefile.in: Add entries for varobj.[cho] and wrapper.[cho].
+
+1999-09-17  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* varobj.h: New file. GDB variable objects API.
+	* varobj.c: New file. Implementation of the GDB variable objects
+	API.
+
+1999-09-17  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* wrapper.h: New file. Longjump free calls to gdb internal
+	routines.
+	* wrapper.c (gdb_evaluate_expression, wrap_evaluate_expression,
+	gdb_value_fetch_lazy, wrap_value_fetch_lazy, gdb_value_equal,
+	wrap_value_equal, gdb_value_ind, wrap_value_ind): New functions.
 
 Thu Sep 16 17:33:35 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
@@ -3101,8 +3368,6 @@ Tue Sep 14 14:34:28 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* defs.h (continuation): Make this a typedef.
 
-	* Makefile.in (gdbtk.o, gdbtk-cmds.o): Depend on $(top_h).
-
 	* Makefile.in (i386-linux-nat.o): Depend on symfile.h, not
 	$(symfile_h); the latter has no definition.
 
@@ -3146,8 +3411,6 @@ Tue Sep 14 14:34:28 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 	__dld_break, which contains the permanent breakpoint, when interesting
 	things happen.	Tell GDB that the breakpoint in __dld_break is
 	permanent.
-	* gdbtk-cmds.c (gdb_get_breakpoint_info): Report a permanent
-	breakpoint as enabled.
 	* infrun.c (SKIP_PERMANENT_BREAKPOINT): Provide default	definition.
 	(default_skip_permanent_breakpoint): New function.
 	(resume): If we're trying to resume at a permanent breakpoint, use
@@ -3318,6 +3581,12 @@ Mon Sep 13 17:51:28 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* remote.c (_initialize_remote): Fix the specification of the
 	"remote" prefix to set and show commands.
+
+1999-09-09  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* command.c (print_doc_line): Update to use ui_out.
+	(do_setshow_command): Ditto.
+	(cmd_show_list): Ditto.
 
 1999-09-09  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
@@ -4564,6 +4833,14 @@ Sun Aug  8 12:06:47 1999  Fred Fish  <fnf@cygnus.com>
 	Also move Z packet support OUTSIDE of REMOTE_BREAKPOINT ifdef,
 	since this is not set for all targets that support the Z packet.
 
+Sun Aug  8 17:24:09 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* ui-out.c (ui_out_table_begin, ui_out_table_body,
+ 	ui_out_table_end, ui_out_table_header, ui_out_list_begin,
+ 	ui_out_list_end, ui_out_stream_new, verify_field_proper_position,
+ 	verify_field_alignment): Replace incorrect calls to error with
+ 	calls to internal_error.
+
 Fri Aug  6 17:17:28 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* defs.h (fatal): Delete declaration.
@@ -4786,6 +5063,14 @@ Wed Aug  4 10:42:58 1999  Fred Fish  <fnf@cygnus.com>
 	an array of 5 internal_auxent to leave room for bfd to
 	write n_numaux entries.  Change code to use the first one.
 
+Wed Aug  4 19:58:15 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* ui-out.h (cli_out_new): Move declaration from here.
+	* cli-out.h: To here. New file.
+	* Makefile.in (ui-out.o): Add missing dependencies.
+	(cli-out.o): Ditto.
+	* top.c, cli-out.c: #include "cli-out.h".
+
 1999-08-02  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* c-valprint.c (c_val_print): When printing decimal equivalent
@@ -4979,6 +5264,10 @@ Mon Jul 26 17:13:39 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* NEWS: Mention the new configs.
 
+1999-07-15  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* ui-out.c (struct ui_out): Remove deprecated fields.
+
 1999-07-15  Fernando Nasser  <fnasser@cygnus.com>
 
 	* target.c (target_preopen): Prevent query when not from_tty.
@@ -4987,6 +5276,16 @@ Mon Jul 26 17:13:39 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 1999-07-15  Fernando Nasser  <fnasser@cygnus.com>
 
 	* event-loop.c: Fix typo in comment.
+
+1999-07-15  Fernando Nasser  <fnasser@cygnus.com>
+
+	* breakpoint.c (breakpoint_1): Fix output when no breakpoins are
+	found.
+
+1999-07-15  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* event-top.c (display_gdb_prompt): Don't do anything if we are
+ 	running under the interpreter.
 
 Wed Jul 14 17:29:31 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
@@ -5416,6 +5715,11 @@ Wed Jun 30 15:45:48 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* main.c: Turn on async by default by setting async_p to 1.
 
+Wed Jun 23 20:39:24 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* main.c (main): Recognize --ui.  Will eventually replace
+ 	--interpreter.
+	
 Wed Jun 23 15:44:39 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	From Jimmy Guo <guo@cup.hp.com>:
@@ -5488,6 +5792,22 @@ Wed Jun 23 15:30:46 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 	is NULL, call find_proc_desc so we know how to restore
 	the registers.
 
+1999-06-16  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* cli-out.c (cli_out_new): Add flags argument to ui-out-new call.
+	* source.c (print_source_lines_base): Test for ui_source_list flag
+	and use ui_out for file and line output.
+	* ui-out.c (struct ui_out): Add flags field to struct and to default
+	initialization.
+	(ui_out_set_flags): New function.  Handle flags.
+	(ui_out_clear_flags): New function. Ditto.
+	(ui_out_test_flags): New function. Ditto.
+	(ui_out_new): Add flags parameter.
+	* ui-out.h: Add flags argument to ui_out_new declaration.
+	Add declarations for ui_out_*_flags functions.
+	(enum ui_flags): New enum. Defines ui_out flags.
+	* top.c (gdb_init): Fix misspelling typo.
+
 1999-06-15  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* event-top.c (start_event_loop): call get_prompt.
@@ -5514,6 +5834,7 @@ Wed Jun 23 15:30:46 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 	(read_command_lines): rename "prompt" to prompt_arg for clarity.
 	(stop_sig): call get_prompt instead of reading prompt string directly.
 	(command_loop): ditto.
+	(simplified_command_loop): ditto.
 	(gdb_prompt_escape): New variable.  Esc char for prompt parameters.
 	(get_prompt_1): New function, workhorse for get_prompt.
 	(get_prompt): Completely rewrite.  Add functionality for a 
@@ -5546,6 +5867,10 @@ Sun Jun 13 10:44:13 1999  Andrew Cagney  <cagney@b1.cygnus.com>
   	Please examine your test suite output carefully, and report any
  	problems to me.
 
+1999-06-11  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* top.c (gdb_init): Add pre-processor test for UI_OUT.
+
 1999-06-11  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* event-top.c (setup_event_loop): Change name to start_event_loop.
@@ -5570,6 +5895,57 @@ Fri Jun 11 18:34:33 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 	(tui_file_rewind, tui_file_put): New functions.
 	(tui_file_new): Add rewind and put.
 
+	* cli-out.c (cli_spaces): Replace gdb_stdout with data->stream.
+	(cli_text, cli_message, cli_flush, out_field_fmt,
+ 	field_separator): Ditto.
+
+Fri Jun 11 16:08:37 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* cli-out.c (cli_out_new): Replace init_cli_out,
+	* top.c (gdb_init): Call cli_out_new.
+	* main.c (main): Delete call to set_ui_out_impl.
+
+	* ui-out.h (set_ui_out_impl, cli_ui_out_impl), ui-out.c: Delete.
+	(cli_out_new): Add declaration.  Will move later.
+
+	* ui-out.c (ui_out_new, ui_out_data), ui-out.h: New functions.
+ 	(struct ui_out): Add field data.
+	(ui_out_new): Replace init_ui_out_state.
+	
+	* ui-out.c (XMALLOC): Define.
+	(ui_out_stream_new, append_header_to_list): Use XMALLOC instead of
+ 	xmalloc.
+	* cli-out.c (XMALLOC): Define.
+
+Fri Jun 11 10:31:29 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* ui-out.c (ui_out_field_int, ui_out_field_skip,
+ 	ui_out_field_fmt): Rewrite statements to remove infix operators.
+
+	* ui-out.c (get_curr_header, verify_field_proper_position,
+ 	verify_field_alignment, init_ui_out_state, set_ui_out_impl,
+ 	append_header_to_list): Add explicit ui_out parameter.
+	(struct ui_out): Move the local variables ``table_flag'',
+ 	``body_flag'', ``table_columns'', ``table_id'', ``list_flat'',
+ 	``field_count'', ``headerfirst'', ``headerlast'', ``headercurr''
+ 	into this struct.
+	(typedef ui_out_hdr): Delete.
+	(struct ui_out_hdr): Rename struct _ui_out_hdr.
+	(ui_out_table_begin, ui_out_table_end, ui_out_table_body,
+ 	ui_out_table_header, ui_out_field_int, ui_out_list_begin,
+ 	ui_out_table_end, ui_out_list_end, ui_out_field_skip,
+ 	ui_out_table_body, ui_out_list_begin, ui_out_list_end,
+ 	ui_out_field_string, ui_out_field_fmt, init_ui_out_state,
+ 	verify_field_proper_position, verify_field_alignment,
+ 	clear_header_list, append_header_to_list, _initialize_ui_out):
+ 	Update.
+	
+	* ui-out.h (typedef streambuf): Delete.
+	(struct _streambuf): Rename to struct ui_stream.
+	* breakpoint.c (breakpoint_1), stack.c (print_frame_info_base),
+ 	printcmd.c (print_frame_args): Rename streambuf to struct
+ 	ui_stream.
+	
 Fri Jun 11 15:10:32 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* d10v-tdep.c (d10v_push_arguments): Fix order of arguments passed
@@ -5697,6 +6073,14 @@ Thu Jun 10 20:04:02 1999  Andrew Cagney  <cagney@b1.cygnus.com>
  	mn10300-tdep.c: New function.
 	* config/mn10300/tm-mn10300.h (SAVED_PC_AFTER_CALL): Update.
 
+Wed Jun  9 16:42:16 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* top.h, top.c (simplified_command_loop): Make global.
+
+	* main.c (main): Delete call to call_interp_loop. Interpreters
+ 	hook in using command_loop_hook.
+	* top.c (call_interp_loop): Delete function.
+	
 1999-06-10  Keith Seitz  <keiths@cygnus.com>
 
 	* mcore-rom.c (picobug_dumpregs): Return a value. Any value, it
@@ -5868,6 +6252,13 @@ Fri Jun  4 17:10:36 1999  Andrew Cagney  <cagney@b1.cygnus.com>
  	FP_REGNUM, PC_REGNUM, NUM_REGS, REGISTER_NAME.
 	* d10v-tdep.c, config/d10v/tm-d10v.h: Update.
 	
+1999-06-03  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* printcmd.c (print_frame_args): Convert some of the output to use
+	ui_out.
+	* stack.c (print_frame_info_base): Adjust the call to the above
+	function.
+
 1999-06-03  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* thread.c: eliminate the target_thread_vector (functionality
@@ -6090,6 +6481,21 @@ Tue Jun  1 10:45:24 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 1999-05-31  Fernando Nasser  <fnasser@totem.to.cygnus.com>
 
+	* breakpoint.c (print_it_normal): Convertion of part of the output
+	to use ui-out.
+	(mention): Same as above.
+	* infcmd.c (run_command): Same.
+	* source.c (print_source_lines_base): Same.
+	* stack.c (print_frame_info_base): Same.
+
+1999-05-31  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* breakpoint.c (breakpoint_1): Fix names of fields on ui_out
+	produced output.
+	* ui-out.h: Cosmetic change.
+
+1999-05-31  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
 	* stack.c (print_args_stub): Add missing stream parameter.
 
 Mon May 31 15:50:08 1999  Andrew Cagney  <cagney@b1.cygnus.com>
@@ -6097,6 +6503,21 @@ Mon May 31 15:50:08 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 	Fri May 28 16:51:00 1999  Martin Dorey  <martin.dorey@madge.com>:
         * valops.c, value.h (default_push_arguments): Fix order of
  	parameters to match PUSH_ARGUMENTS arguments.
+
+1999-05-28  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* top.c (print_command_lines): Simplified script format for
+	non-console output.
+
+1999-05-28  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* top.c (print_command_lines): Fixed printing of if clauses.
+	* breakpoint.c (breakpoint_1): Adjust call to the above.
+	* top.c (show_user_1): Same as above.
+
+1999-05-27  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* top.c (call_interp_loop): Correct build problem with UI_OUT defined.
 
 Thu May 27 11:42:55 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
@@ -6167,6 +6588,14 @@ Wed May 26 13:51:25 1999  Andrew Cagney  <cagney@b1.cygnus.com>
  	gdb_file_get_strbuf, gdb_file_adjust_strbuf, tui_file_flush):
  	Verify ts_magic.
 
+1999-05-25  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* top.c (print_command_lines): New function, fix bug in printing
+	while commands and uses ui_out.
+	* gdbcmd.c: Add prototype for the above.
+	* breakpoint.c (breakpoint_1): Fix breakpoint script printing.
+	* command.c (show_user_1): Fix user command script printing.
+
 1999-05-25  Jim Blandy  <jimb@zwingli.cygnus.com>
 
  	* breakpoint.c (insert_breakpoints, remove_breakpoint,
@@ -6217,6 +6646,9 @@ Tue May 25 13:01:43 1999  Andrew Cagney  <cagney@amy.cygnus.com>
 	* main.c (gdb_init): Move declaration from here.
 	* top.h: To here.
 	
+	* main.c (call_interp_loop): Move declaration from here.
+	* top.h: To here.
+
 	* defs.h (init_page_info): Add declaration.
 
 	* top.c (initialize_utils): Move declaration from here.
@@ -6293,6 +6725,8 @@ Mon May 24 16:16:29 1999  Andrew Cagney  <cagney@amy.cygnus.com>
  	demangle.c (_initialize_demangler), maint.c
  	(_initialize_maint_cmds), language.c (_initialize_language): Add
  	external declaration.
+	* ui-out.c (_initialize_ui_out), cli-out.c (_initialize_cli_out):
+	Ditto.
 
 Mon May 24 10:04:56 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
@@ -6406,6 +6840,34 @@ Fri May 21 11:23:54 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* rs6000-tdep.c (rs6000_push_arguments): Rename push_arguments.
 
+1999-05-21  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* breakpoint.c (breakpoint_1): Added ui_out output code but still
+	uses old code by default.
+
+1999-05-21  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* Makefile.in: Added ui-ou files.
+	* main.c (main): Install cli_out by default.
+	* ui-out.c (ui_out_table_begin): Use saved table id.
+
+1999-05-21  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* ui-out.h: Export implementation vectors so they can be
+	installed in main.c and top.c.
+
+1999-05-21  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* ui-out.h: New file. Defines the ui_out API.
+	* ui-out.c: New file. Implements the ui_out API abstraction only.
+	* cli-out.c: New file. Implements low-level ui-out primitives for
+	CLI-based interaction.
+
+1999-05-20  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* top.c (simplified_command_loop): Reformat using GNU style.
+	(call_interp_loop): Ditto.
+	
 Thu May 20 12:18:28 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* blockframe.c (get_prev_frame): Remove #ifdef around test for
@@ -6436,6 +6898,18 @@ Thu May 20 12:18:28 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 	* event-top.c: Ditto.
 	* event-loop.c: Ditto.
 	* main.c: Ditto.
+	
+1999-05-20  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* top.c (simplified_command_loop): New function.  It is just a
+ 	bare minimal command_loop.
+	(call_interp_loop): New function. Call the correct version of the
+ 	command loop, with the appropriate input reading function,
+ 	depending on which interpreter gdb was invoked with.
+	
+	* main.c (main): Recognize and handle the new command line option
+ 	--interpreter. If an interpreter is specified, call the appropriate
+	command handling function.
 	
 1999-05-19  Keith Seitz  <keiths@cygnus.com>
 

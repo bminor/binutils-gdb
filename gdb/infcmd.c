@@ -34,6 +34,9 @@
 #include "language.h"
 #include "symfile.h"
 #include "objfiles.h"
+#ifdef UI_OUT
+#include "ui-out.h"
+#endif
 #include "event-top.h"
 #include "parser-defs.h"
 
@@ -317,6 +320,16 @@ Start it from the beginning? "))
 
   if (from_tty)
     {
+#ifdef UI_OUT
+      ui_out_field_string (uiout, NULL, "Starting program");
+      ui_out_text (uiout, ": ");
+      if (exec_file)
+	ui_out_field_string (uiout, "execfile", exec_file);
+      ui_out_spaces (uiout, 1);
+      ui_out_field_string (uiout, "infargs", inferior_args);
+      ui_out_text (uiout, "\n");
+      ui_out_flush (uiout);
+#else
       puts_filtered ("Starting program: ");
       if (exec_file)
 	puts_filtered (exec_file);
@@ -324,6 +337,7 @@ Start it from the beginning? "))
       puts_filtered (inferior_args);
       puts_filtered ("\n");
       gdb_flush (gdb_stdout);
+#endif
     }
 
   target_create_inferior (exec_file, inferior_args,
@@ -1030,13 +1044,26 @@ static void
 print_return_value (int structure_return, struct type *value_type)
 {
   register value_ptr value;
+#ifdef UI_OUT
+  static struct ui_stream *stb = NULL;
+#endif /* UI_OUT */
 
   if (!structure_return)
     {
       value = value_being_returned (value_type, stop_registers, structure_return);
+#ifdef UI_OUT
+      stb = ui_out_stream_new (uiout);
+      ui_out_text (uiout, "Value returned is ");
+      ui_out_field_fmt (uiout, "gdb-result-var", "$%d", record_latest_value (value));
+      ui_out_text (uiout, "= ");
+      value_print (value, stb->stream, 0, Val_no_prettyprint);
+      ui_out_field_stream (uiout, "return-value", stb);
+      ui_out_text (uiout, "\n");
+#else /* UI_OUT */
       printf_filtered ("Value returned is $%d = ", record_latest_value (value));
       value_print (value, gdb_stdout, 0, Val_no_prettyprint);
       printf_filtered ("\n");
+#endif /* UI_OUT */
     }
   else
     {
@@ -1045,13 +1072,30 @@ print_return_value (int structure_return, struct type *value_type)
 	 initiate the call, as opposed to the call_function_by_hand case */
 #ifdef VALUE_RETURNED_FROM_STACK
       value = 0;
+#ifdef UI_OUT
+      ui_out_text (uiout, "Value returned has type: ");
+      ui_out_field_string (uiout, "return-type", TYPE_NAME (value_type));
+      ui_out_text (uiout, ".");
+      ui_out_text (uiout, " Cannot determine contents\n");
+#else /* UI_OUT */
       printf_filtered ("Value returned has type: %s.", TYPE_NAME (value_type));
       printf_filtered (" Cannot determine contents\n");
+#endif /* UI_OUT */
 #else
       value = value_being_returned (value_type, stop_registers, structure_return);
+#ifdef UI_OUT
+      stb = ui_out_stream_new (uiout);
+      ui_out_text (uiout, "Value returned is ");
+      ui_out_field_fmt (uiout, "gdb-result-var", "$%d", record_latest_value (value));
+      ui_out_text (uiout, "= ");
+      value_print (value, stb->stream, 0, Val_no_prettyprint);
+      ui_out_field_stream (uiout, "return-value", stb);
+      ui_out_text (uiout, "\n");
+#else
       printf_filtered ("Value returned is $%d = ", record_latest_value (value));
       value_print (value, gdb_stdout, 0, Val_no_prettyprint);
       printf_filtered ("\n");
+#endif
 #endif
     }
 }
@@ -1760,6 +1804,15 @@ detach_command (args, from_tty)
 
 /* Stop the execution of the target while running in async mode, in
    the backgound. */
+#ifdef UI_OUT
+void
+interrupt_target_command_wrapper (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  interrupt_target_command (args, from_tty);
+}
+#endif
 static void
 interrupt_target_command (args, from_tty)
      char *args;

@@ -34,6 +34,8 @@ extern void cd_command PARAMS ((char *, int));
 extern void read_command_file PARAMS ((FILE *));
 extern void init_history PARAMS ((void));
 extern void command_loop PARAMS ((void));
+extern void simplified_command_loop PARAMS ((char *(*read_input_func) (char *),
+			       void (*execute_command_func) (char *, int)));
 extern int quit_confirm PARAMS ((void));
 extern void quit_force PARAMS ((char *, int));
 extern void quit_command PARAMS ((char *, int));

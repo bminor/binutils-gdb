@@ -551,6 +551,12 @@ extern void breakpoint_clear_ignore_counts PARAMS ((void));
 
 extern void break_command PARAMS ((char *, int));
 
+extern void hbreak_command_wrapper PARAMS ((char *, int));
+extern void thbreak_command_wrapper PARAMS ((char *, int));
+extern void rbreak_command_wrapper PARAMS ((char *, int));
+extern void watch_command_wrapper PARAMS ((char *, int));
+extern void awatch_command_wrapper PARAMS ((char *, int));
+extern void rwatch_command_wrapper PARAMS ((char *, int));
 extern void tbreak_command PARAMS ((char *, int));
 
 extern int insert_breakpoints PARAMS ((void));

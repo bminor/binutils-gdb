@@ -1299,9 +1299,14 @@ generic_load (char *args, int from_tty)
 
 	      /* Is this really necessary?  I guess it gives the user something
 	         to look at during a long download.  */
+#ifdef UI_OUT
+	      ui_out_message (uiout, 0, "Loading section %s, size 0x%s lma 0x%s\n",
+			   sect_name, paddr_nz (size), paddr_nz (lma));
+#else
 	      fprintf_unfiltered (gdb_stdout,
 				  "Loading section %s, size 0x%s lma 0x%s\n",
 				  sect_name, paddr_nz (size), paddr_nz (lma));
+#endif
 
 	      bfd_get_section_contents (loadfile_bfd, s, buffer, 0, size);
 
@@ -1364,9 +1369,18 @@ generic_load (char *args, int from_tty)
   {
     CORE_ADDR entry;
     entry = bfd_get_start_address (loadfile_bfd);
+#ifdef UI_OUT
+   ui_out_text (uiout, "Start address ");
+   ui_out_field_fmt (uiout, "address", "0x%s" , paddr_nz (entry));
+   ui_out_text (uiout, ", load size ");
+   ui_out_field_fmt (uiout, "load-size", "%ld" , data_count);
+   ui_out_text (uiout, "\n");
+
+#else
     fprintf_unfiltered (gdb_stdout,
 			"Start address 0x%s , load size %ld\n",
 			paddr_nz (entry), data_count);
+#endif
     /* We were doing this in remote-mips.c, I suspect it is right
        for other targets too.  */
     write_pc (entry);
@@ -1404,6 +1418,27 @@ print_transfer_performance (struct ui_file *stream,
 			    unsigned long write_count,
 			    unsigned long time_count)
 {
+#ifdef UI_OUT
+  ui_out_text (uiout, "Transfer rate: ");
+  if (time_count > 0)
+    {
+      ui_out_field_fmt (uiout, "transfer-rate", "%ld", 
+			(data_count * 8) / time_count);
+      ui_out_text (uiout, " bits/sec");
+    }
+  else
+    {
+      ui_out_field_fmt (uiout, "transferred-bits", "%ld", (data_count * 8));
+      ui_out_text (uiout, " bits in <1 sec");    
+    }
+  if (write_count > 0)
+    {
+      ui_out_text (uiout, ", ");
+      ui_out_field_fmt (uiout, "write-rate", "%ld", data_count / write_count);
+      ui_out_text (uiout, " bytes/write");
+    }
+  ui_out_text (uiout, ".\n");
+#else
   fprintf_unfiltered (stream, "Transfer rate: ");
   if (time_count > 0)
     fprintf_unfiltered (stream, "%ld bits/sec", (data_count * 8) / time_count);
@@ -1412,6 +1447,7 @@ print_transfer_performance (struct ui_file *stream,
   if (write_count > 0)
     fprintf_unfiltered (stream, ", %ld bytes/write", data_count / write_count);
   fprintf_unfiltered (stream, ".\n");
+#endif
 }
 
 /* This function allows the addition of incrementally linked object files.

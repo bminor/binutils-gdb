@@ -20,6 +20,9 @@
 #define GDBCMD_H 1
 
 #include "command.h"
+#ifdef UI_OUT
+#include "ui-out.h"
+#endif
 
 /* Chain containing all defined commands.  */
 
@@ -108,6 +111,10 @@ execute_control_command PARAMS ((struct command_line *));
 
 extern void print_command_line (struct command_line *, unsigned int,
 				struct ui_file *);
+#ifdef UI_OUT
+extern void print_command_lines PARAMS ((struct ui_out *,
+				      struct command_line *, unsigned int));
+#endif
 
 extern char **noop_completer PARAMS ((char *, char *));
 

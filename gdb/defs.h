@@ -1113,6 +1113,7 @@ extern CORE_ADDR push_word (CORE_ADDR, ULONGEST);
 extern int watchdog;
 
 /* Hooks for alternate command interfaces.  */
+
 struct target_waitstatus;
 struct cmd_list_element;
 
@@ -1270,4 +1271,10 @@ enum gdb_rc gdb_breakpoint (char *address, char *condition,
 			    int thread, int ignore_count);
 enum gdb_rc gdb_thread_select (/* output object */ char *tidstr);
 
+#ifdef UI_OUT
+/* Print a list of known thread ids. */
+enum gdb_rc gdb_list_thread_ids (/* output object */);
+
+/* Switch thread and print notification. */
+#endif
 #endif /* #ifndef DEFS_H */

@@ -142,6 +142,9 @@ test_i "stepi to next line" "stepi" \
 test_i "stepi into function" "stepi" \
        ".*${decimal}.*callee.*STEPI" \
        ".*callee \\(\\) at .*step-test\\.c" 
+test_i "stepi to function first line" "stepi" \
+       ".*int callee\\(\\) .*\\{" \
+       ".*myglob.*" 
 # Have to be careful here, if the finish does not work, 
 # then we may run to the end of the program, which
 # will cause erroneous failures in the rest of the tests
@@ -178,7 +181,7 @@ gdb_expect {
     return
   }
   timeout {
-    fail "stepi: finish call"
+    fail "stepi: finish call (timeout)"
     return
   }
 }

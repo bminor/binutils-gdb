@@ -103,6 +103,24 @@ struct frame_extra_info
     int framereg;
   };
 
+#define SWAP_TARGET_AND_HOST(buffer,len) 				\
+  do									\
+    {									\
+      if (TARGET_BYTE_ORDER != HOST_BYTE_ORDER)				\
+	{								\
+	  char tmp;							\
+	  char *p = (char *)(buffer);					\
+	  char *q = ((char *)(buffer)) + len - 1;		   	\
+	  for (; p < q; p++, q--)				 	\
+	    {								\
+	      tmp = *q;							\
+	      *q = *p;							\
+	      *p = tmp;							\
+	    }								\
+	}								\
+    }									\
+  while (0)
+
 /* Will a function return an aggregate type in memory or in a
    register?  Return 0 if an aggregate type can be returned in a
    register, 1 if it must be returned in memory.  */
@@ -252,8 +270,9 @@ int
 arm_pc_is_thumb_dummy (bfd_vma memaddr)
 {
   CORE_ADDR sp = read_sp ();
+  CORE_ADDR fp = read_fp ();
 
-  if (PC_IN_CALL_DUMMY (memaddr, sp, sp + 64))
+  if (PC_IN_CALL_DUMMY (memaddr, sp, fp))
     return caller_is_thumb;
   else
     return 0;
@@ -1227,10 +1246,22 @@ arm_push_arguments (int nargs, value_ptr * args, CORE_ADDR sp,
          calling the function.  */
       if (TYPE_CODE_FLT == typecode && REGISTER_SIZE == len)
 	{
-	  float f = *(float *) val;
-	  dbl_arg = f;
-	  val = (char *) &dbl_arg;
+	  float f;
+	  double d;
+	  char * bufo = (char *) &d;
+	  char * bufd = (char *) &dbl_arg;
+
 	  len = sizeof (double);
+	  f = *(float *) val;
+	  SWAP_TARGET_AND_HOST (&f, sizeof (float));  /* adjust endianess */
+	  d = f;
+	  /* We must revert the longwords so they get loaded into the
+	     the right registers. */
+	  memcpy (bufd, bufo + len / 2, len / 2);
+	  SWAP_TARGET_AND_HOST (bufd, len / 2);  /* adjust endianess */
+	  memcpy (bufd + len / 2, bufo, len / 2);
+	  SWAP_TARGET_AND_HOST (bufd + len / 2, len / 2); /* adjust endianess */
+	  val = (char *) &dbl_arg;
 	}
 #if 1
       /* I don't know why this code was disable. The only logical use
@@ -1279,18 +1310,42 @@ arm_push_arguments (int nargs, value_ptr * args, CORE_ADDR sp,
 void
 arm_pop_frame (void)
 {
-  struct frame_info *frame = get_current_frame ();
   int regnum;
-  CORE_ADDR old_SP;
+  struct frame_info *frame = get_current_frame ();
 
-  old_SP = read_register (frame->framereg);
-  for (regnum = 0; regnum < NUM_REGS; regnum++)
-    if (frame->fsr.regs[regnum] != 0)
-      write_register (regnum,
+  if (!PC_IN_CALL_DUMMY(frame->pc, frame->frame, read_fp()))
+    {
+      CORE_ADDR old_SP;
+
+      old_SP = read_register (frame->framereg);
+      for (regnum = 0; regnum < NUM_REGS; regnum++)
+        if (frame->fsr.regs[regnum] != 0)
+          write_register (regnum,
 		      read_memory_integer (frame->fsr.regs[regnum], 4));
 
-  write_register (PC_REGNUM, FRAME_SAVED_PC (frame));
-  write_register (SP_REGNUM, old_SP);
+      write_register (PC_REGNUM, FRAME_SAVED_PC (frame));
+      write_register (SP_REGNUM, old_SP);
+    }
+  else
+    {
+      CORE_ADDR sp;
+
+      sp = read_register (FP_REGNUM);
+      sp -= sizeof(CORE_ADDR); /* we don't care about this first word */
+
+      write_register (PC_REGNUM, read_memory_integer (sp, 4));
+      sp -= sizeof(CORE_ADDR);
+      write_register (SP_REGNUM, read_memory_integer (sp, 4));
+      sp -= sizeof(CORE_ADDR);
+      write_register (FP_REGNUM, read_memory_integer (sp, 4));
+      sp -= sizeof(CORE_ADDR);
+
+      for (regnum = 10; regnum >= 0; regnum--)
+        {
+          write_register (regnum, read_memory_integer (sp, 4));
+          sp -= sizeof(CORE_ADDR);
+        }
+    }
 
   flush_cached_frames ();
 }

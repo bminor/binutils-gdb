@@ -35,6 +35,9 @@
 #include "annotate.h"
 #include "symfile.h"		/* for overlay functions */
 #include "objfiles.h"		/* ditto */
+#ifdef UI_OUT
+#include "ui-out.h"
+#endif
 
 extern int asm_demangle;	/* Whether to demangle syms in asm printouts */
 extern int addressprint;	/* Whether to print hex addresses in HLL " */
@@ -1777,6 +1780,13 @@ print_frame_args (func, fi, num, stream)
   int arg_size;
   /* Number of ints of arguments that we have printed so far.  */
   int args_printed = 0;
+#ifdef UI_OUT
+  struct cleanup *old_chain;
+  struct ui_stream *stb;
+
+  stb = ui_out_stream_new (uiout);
+  old_chain = make_cleanup ((make_cleanup_func) ui_out_stream_delete, stb);
+#endif /* UI_OUT */
 
   if (func)
     {
@@ -1881,6 +1891,21 @@ print_frame_args (func, fi, num, stream)
 	    sym = nsym;
 	}
 
+#ifdef UI_OUT
+      /* Print the current arg.  */
+      if (!first)
+	ui_out_text (uiout, ", ");
+      ui_out_wrap_hint (uiout, "    ");
+
+      annotate_arg_begin ();
+
+      ui_out_list_begin (uiout, NULL);
+      fprintf_symbol_filtered (stb->stream, SYMBOL_SOURCE_NAME (sym),
+			    SYMBOL_LANGUAGE (sym), DMGL_PARAMS | DMGL_ANSI);
+      ui_out_field_stream (uiout, "name", stb);
+      annotate_arg_name_end ();
+      ui_out_text (uiout, "=");
+#else
       /* Print the current arg.  */
       if (!first)
 	fprintf_filtered (stream, ", ");
@@ -1892,6 +1917,7 @@ print_frame_args (func, fi, num, stream)
 			    SYMBOL_LANGUAGE (sym), DMGL_PARAMS | DMGL_ANSI);
       annotate_arg_name_end ();
       fputs_filtered ("=", stream);
+#endif
 
       /* Avoid value_print because it will deref ref parameters.  We just
          want to print their addresses.  Print ??? for args whose address
@@ -1907,12 +1933,24 @@ print_frame_args (func, fi, num, stream)
 	  if (GDB_TARGET_IS_D10V
 	      && SYMBOL_CLASS (sym) == LOC_REGPARM && TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_PTR)
 	    TYPE_LENGTH (VALUE_TYPE (val)) = 2;
+#ifdef UI_OUT
+	  val_print (VALUE_TYPE (val), VALUE_CONTENTS (val), 0,
+		     VALUE_ADDRESS (val),
+		     stb->stream, 0, 0, 2, Val_no_prettyprint);
+	  ui_out_field_stream (uiout, "value", stb);
+	}
+      else
+	ui_out_text (uiout, "???");
+
+      ui_out_list_end (uiout);
+#else
 	  val_print (VALUE_TYPE (val), VALUE_CONTENTS (val), 0,
 		     VALUE_ADDRESS (val),
 		     stream, 0, 0, 2, Val_no_prettyprint);
 	}
       else
 	fputs_filtered ("???", stream);
+#endif
 
       annotate_arg_end ();
 
@@ -1933,6 +1971,9 @@ print_frame_args (func, fi, num, stream)
       print_frame_nameless_args (fi, start, num - args_printed,
 				 first, stream);
     }
+#ifdef UI_OUT
+  do_cleanups (old_chain);
+#endif /* no UI_OUT */
 }
 
 /* Print nameless args on STREAM.

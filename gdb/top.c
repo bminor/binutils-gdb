@@ -50,6 +50,10 @@
 #include "gdb_string.h"
 #include "gdb_stat.h"
 #include <ctype.h>
+#ifdef UI_OUT
+#include "ui-out.h"
+#include "cli-out.h"
+#endif
 
 /* Prototypes for local functions */
 
@@ -774,8 +778,11 @@ gdb_init (argv0)
   set_language (language_c);
   expected_language = current_language;		/* don't warn about the change.  */
 
-  /* All the interpreters should have had a look at things by now.
-     Initialize the selected interpreter. */
+#ifdef UI_OUT
+  /* Install the default UI */
+  uiout = cli_out_new (gdb_stdout);
+#endif
+
   if (init_ui_hook)
     init_ui_hook (argv0);
 }
@@ -835,6 +842,97 @@ get_command_line (type, arg)
 }
 
 /* Recursively print a command (including full control structures).  */
+#ifdef UI_OUT
+void
+print_command_lines (uiout, cmd, depth)
+     struct ui_out *uiout;
+     struct command_line *cmd;
+     unsigned int depth;
+{
+  struct command_line *list;
+
+  list = cmd;
+  while (list)
+    {
+
+      if (depth)
+	ui_out_spaces (uiout, 2 * depth);
+
+      /* A simple command, print it and continue.  */
+      if (list->control_type == simple_control)
+	{
+	  ui_out_field_string (uiout, NULL, list->line);
+	  ui_out_text (uiout, "\n");
+	  list = list->next;
+	  continue;
+	}
+
+      /* loop_continue to jump to the start of a while loop, print it
+         and continue. */
+      if (list->control_type == continue_control)
+	{
+	  ui_out_field_string (uiout, NULL, "loop_continue");
+	  ui_out_text (uiout, "\n");
+	  list = list->next;
+	  continue;
+	}
+
+      /* loop_break to break out of a while loop, print it and continue.  */
+      if (list->control_type == break_control)
+	{
+	  ui_out_field_string (uiout, NULL, "loop_break");
+	  ui_out_text (uiout, "\n");
+	  list = list->next;
+	  continue;
+	}
+
+      /* A while command.  Recursively print its subcommands and continue.  */
+      if (list->control_type == while_control)
+	{
+	  ui_out_text (uiout, "while ");
+	  ui_out_field_fmt (uiout, NULL, "while %s", list->line);
+	  ui_out_text (uiout, "\n");
+	  print_command_lines (uiout, *list->body_list, depth + 1);
+	  ui_out_field_string (uiout, NULL, "end");
+	  if (depth)
+	    ui_out_spaces (uiout, 2 * depth);
+	  ui_out_text (uiout, "end\n");
+	  list = list->next;
+	  continue;
+	}
+
+      /* An if command.  Recursively print both arms before continueing.  */
+      if (list->control_type == if_control)
+	{
+	  ui_out_text (uiout, "if ");
+	  ui_out_field_fmt (uiout, NULL, "if %s", list->line);
+	  ui_out_text (uiout, "\n");
+	  /* The true arm. */
+	  print_command_lines (uiout, list->body_list[0], depth + 1);
+
+	  /* Show the false arm if it exists.  */
+	  if (list->body_count == 2)
+	    {
+	      if (depth)
+		ui_out_spaces (uiout, 2 * depth);
+	      ui_out_field_string (uiout, NULL, "else");
+	      ui_out_text (uiout, "else\n");
+	      print_command_lines (uiout, list->body_list[1], depth + 1);
+	    }
+
+	  ui_out_field_string (uiout, NULL, "end");
+	  if (depth)
+	    ui_out_spaces (uiout, 2 * depth);
+	  ui_out_text (uiout, "end\n");
+	  list = list->next;
+	  continue;
+	}
+
+      /* ignore illegal command type and try next */
+      list = list->next;
+    }				/* while (list) */
+}
+#else
 void
 print_command_line (cmd, depth, stream)
      struct command_line *cmd;
@@ -915,6 +1013,7 @@ print_command_line (cmd, depth, stream)
       fputs_filtered ("end\n", stream);
     }
 }
+#endif
 
 /* Execute the command in CMD.  */
 
@@ -1514,6 +1613,41 @@ command_loop ()
     }
 }
 
+/* Read commands from `instream' and execute them until end of file or
+   error reading instream. This command loop doesnt care about any
+   such things as displaying time and space usage. If the user asks
+   for those, they won't work. */
+void
+simplified_command_loop (read_input_func, execute_command_func)
+     char *(*read_input_func) (char *);
+     void (*execute_command_func) (char *, int);
+{
+  struct cleanup *old_chain;
+  char *command;
+  int stdin_is_tty = ISATTY (stdin);
+
+  while (instream && !feof (instream))
+    {
+      quit_flag = 0;
+      if (instream == stdin && stdin_is_tty)
+	reinitialize_more_filter ();
+      old_chain = make_cleanup ((make_cleanup_func) command_loop_marker, 0);
+
+      /* Get a command-line. */
+      command = (*read_input_func) (instream == stdin ?
+				    get_prompt () : (char *) NULL);
+
+      if (command == 0)
+	return;
+
+      (*execute_command_func) (command, instream == stdin);
+
+      /* Do any commands attached to breakpoint we stopped at.  */
+      bpstat_do_actions (&stop_bpstat);
+
+      do_cleanups (old_chain);
+    }
+}
 
 /* Commands call this if they do not want to be repeated by null lines.  */
 
@@ -2975,7 +3109,12 @@ print_gdb_version (stream)
      program to parse, and is just canonical program name and version
      number, which starts after last space. */
 
+#ifdef UI_OUT
+  /* Print it console style until a format is defined */
+  fprintf_filtered (stream, "GNU gdb %s (UI_OUT)\n", version);
+#else
   fprintf_filtered (stream, "GNU gdb %s\n", version);
+#endif
 
   /* Second line is a copyright notice. */
 

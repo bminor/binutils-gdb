@@ -38,6 +38,9 @@
 #include "objfiles.h"
 #include "annotate.h"
 #include "gdbtypes.h"
+#ifdef UI_OUT
+#include "ui-out.h"
+#endif
 
 #ifdef CRLF_SOURCE_FILES
 
@@ -1011,6 +1014,11 @@ print_source_lines_base (s, line, stopline, noerror)
   current_source_line = line;
   first_line_listed = line;
 
+#ifdef UI_OUT
+  /* If printing of source lines is disabled, just print file and line number */
+  if (ui_out_test_flags (uiout, ui_source_list))
+    {
+#endif
       /* Only prints "No such file or directory" once */
       if ((s != last_source_visited) || (!last_source_error))
 	{
@@ -1022,6 +1030,14 @@ print_source_lines_base (s, line, stopline, noerror)
 	  desc = last_source_error;
 	  noerror = 1;
 	}
+#ifdef UI_OUT
+    }
+  else
+    {
+      desc = -1;
+      noerror = 1;
+    }
+#endif
 
   if (desc < 0)
     {
@@ -1034,7 +1050,14 @@ print_source_lines_base (s, line, stopline, noerror)
 	  print_sys_errmsg (name, errno);
 	}
       else
+#ifdef UI_OUT
+	ui_out_field_int (uiout, "line", line);
+      ui_out_text (uiout, "\tin ");
+      ui_out_field_string (uiout, "file", s->filename);
+      ui_out_text (uiout, "\n");
+#else
 	printf_filtered ("%d\tin %s\n", line, s->filename);
+#endif
 
       return;
     }
@@ -1062,6 +1085,44 @@ print_source_lines_base (s, line, stopline, noerror)
 
   while (nlines-- > 0)
     {
+#ifdef UI_OUT
+      char buf[20];
+
+      c = fgetc (stream);
+      if (c == EOF)
+	break;
+      last_line_listed = current_source_line;
+      sprintf (buf, "%d\t", current_source_line++);
+      ui_out_text (uiout, buf);
+      do
+	{
+	  if (c < 040 && c != '\t' && c != '\n' && c != '\r')
+	    {
+	      sprintf (buf, "^%c", c + 0100);
+	      ui_out_text (uiout, buf);
+	    }
+	  else if (c == 0177)
+	    ui_out_text (uiout, "^?");
+#ifdef CRLF_SOURCE_FILES
+	  else if (c == '\r')
+	    {
+	      /* Skip a \r character, but only before a \n.  */
+	      int c1 = fgetc (stream);
+
+	      if (c1 != '\n')
+		printf_filtered ("^%c", c + 0100);
+	      if (c1 != EOF)
+		ungetc (c1, stream);
+	    }
+#endif
+	  else
+	    {
+	      sprintf (buf, "%c", c);
+	      ui_out_text (uiout, buf);
+	    }
+	}
+      while (c != '\n' && (c = fgetc (stream)) >= 0);
+#else
       c = fgetc (stream);
       if (c == EOF)
 	break;
@@ -1083,6 +1144,7 @@ print_source_lines_base (s, line, stopline, noerror)
 	    printf_filtered ("%c", c);
 	}
       while (c != '\n' && (c = fgetc (stream)) >= 0);
+#endif
     }
 
   fclose (stream);

@@ -1,9 +1,24 @@
+2000-02-02  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* arm-tdep.c (arm_push_arguments): Fix passing of floating point
+	arguments on dummy frames.
+
+2000-02-02  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* arm-tdep.c (arm_pc_is_thumb_dummy): Account for large dummy frames.
+	(arm_pop_frame): Account fr dummy frames (as opposed to real ones).
+
 2000-02-01  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* remote.c (getpkt_sane): New function. It is the old getpkt(),
  	which now returns a timeout indication.
 	(getpkt): New function. Wrapper for getpkt_sane(), so that return
  	value can still be ignored.
+
+Tue Feb  1 18:47:31 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* top.c (print_gdb_version): Print ``UI_OUT'' when configured with
+ 	UI_OUT.
 
 Tue Feb  1 00:17:12 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
@@ -29,6 +44,7 @@ Tue Feb  1 00:17:12 2000  Andrew Cagney  <cagney@b1.cygnus.com>
  	target.c, target.h, top.c, top.h, typeprint.c, typeprint.h,
  	utils.c, v850ice.c, valprint.c, valprint.h, value.h,
  	config/pa/tm-hppa.h: Update.
+	* cli-out.c, cli-out.h, ui-out.c, ui-out.h, varobj.c: Update.
 
 2000-01-31  Jason Molenda  (jsm@bugshack.cygnus.com)
 
@@ -116,6 +132,10 @@ Mon Jan 31 17:14:52 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* remote-rdi.c (arm_rdi_mourn_inferior): Make sure breakpoints
 	are reinserted for another run.
+
+2000-01-27  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* cli-out.c (cli_filed_string): Test for NULL string.
 
 2000-01-27  Fernando Nasser  <fnasser@totem.to.cygnus.com>
 
@@ -274,6 +294,11 @@ Thu Jan 13 23:34:17 EST 2000  Nicholas Duffek <nsd@cygnus.com>
  	current thread, safely from within catch_errors().
 	(gdb_thread_select): New function. Switch threads safely.
 	(thread_command): Use gdb_thread_select().
+	Include ui-out.h.
+	(do_captured_list_thread_ids): New function.
+	(gdb_list_thread_ids): New function.
+
+	* defs.h (gdb_thread_select, gdb_list_thread_ids): Export.
 
 2000-01-11  Christopher Faylor <cgf@cygnus.com>
 
@@ -329,6 +354,10 @@ Thu Jan 13 23:34:17 EST 2000  Nicholas Duffek <nsd@cygnus.com>
 	(proc_modify_flag): add support for PR_KLC (kill on last close).
 	(proc_[un]set_kill_on_last_close): new functions.
 	
+2000-01-07  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* infrun.c (normal_stop): Print out thread id when we stop.
+
 2000-01-06  Fernando Nasser  <fnasser@totem.to.cygnus.com>
 
 	* remote.c (remote_open_1): Fix message so it does not imply a

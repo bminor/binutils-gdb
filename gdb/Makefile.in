@@ -229,7 +229,7 @@ CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE) \
 ADD_FILES = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(REGEX1) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 
-VERSION = 20000201
+VERSION = 20000202
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -388,6 +388,8 @@ SFILES = ax-general.c ax-gdb.c bcache.c blockframe.c breakpoint.c \
 	findvar.c gdbarch.c gdbtypes.c \
 	inf-loop.c infcmd.c inflow.c infrun.c language.c \
 	kod.c kod-cisco.c \
+	ui-out.c cli-out.c \
+	varobj.c wrapper.c \
 	jv-exp.y jv-lang.c jv-valprint.c jv-typeprint.c \
 	m2-exp.y m2-lang.c m2-typeprint.c m2-valprint.c main.c maint.c \
 	mem-break.c minsyms.c mipsread.c nlmread.c objfiles.c parse.c \
@@ -464,6 +466,8 @@ event_top_h = 	event-top.h
 inf_loop_h =  	inf-loop.h
 remote_h =	remote.h
 version_h = 	version.h
+ui_out_h =      ui-out.h
+cli_out_h =	cli-out.h
 
 # Header files that need to have srcdir added.  Note that in the cases
 # where we use a macro like $(gdbcmd_h), things are carefully arranged
@@ -529,6 +533,8 @@ COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o stack.o thread.o \
 	dbxread.o coffread.o elfread.o \
 	dwarfread.o dwarf2read.o mipsread.o stabsread.o corefile.o \
 	c-lang.o ch-exp.o ch-lang.o f-lang.o \
+	ui-out.o cli-out.o \
+	varobj.o wrapper.o \
 	jv-lang.o jv-valprint.o jv-typeprint.o \
 	m2-lang.o \
 	scm-exp.o scm-lang.o scm-valprint.o complaints.o typeprint.o \
@@ -1728,5 +1734,12 @@ m2-exp.tab.o: m2-exp.tab.c $(defs_h) $(expression_h) $(gdbtypes_h) \
 	$(bfd_h) objfiles.h symfile.h
 
 gdb-events.o: gdb-events.c gdb-events.h $(defs_h) $(gdbcmd_h)
+
+ui-out.o: ui-out.c $(defs_h) $(ui_out_h) expression.h language.h
+cli-out.o: cli-out.c $(defs_h) $(ui_out_h) $(cli_out_h)
+varobj.o: varobj.c $(defs_h) $(frame_h) $(value_h) \
+	$(language_h) valprint.h varobj.h
+	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) $<
+wrapper.o: wrapper.c $(defs_h) $(frame_h) $(value_h) wrapper.h
 
 ### end of the gdb Makefile.in.

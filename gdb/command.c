@@ -22,6 +22,9 @@
 #include "value.h"
 #include <ctype.h>
 #include "gdb_string.h"
+#ifdef UI_OUT
+#include "ui-out.h"
+#endif
 
 #if HAVE_SYS_WAIT_H
 #include <sys/wait.h>
@@ -520,7 +523,11 @@ print_doc_line (stream, str)
   line_buffer[p - str] = '\0';
   if (islower (line_buffer[0]))
     line_buffer[0] = toupper (line_buffer[0]);
+#ifdef UI_OUT
+  ui_out_text (uiout, line_buffer);
+#else
   fputs_filtered (line_buffer, stream);
+#endif
 }
 
 /*
@@ -1363,9 +1370,73 @@ do_setshow_command (arg, from_tty, c)
     }
   else if (c->type == show_cmd)
     {
+#ifdef UI_OUT
+      struct cleanup *old_chain;
+      struct ui_stream *stb;
+      int quote;
+
+      stb = ui_out_stream_new (uiout);
+      old_chain = make_cleanup ((make_cleanup_func) ui_out_stream_delete, stb);
+#endif /* UI_OUT */
+
       /* Print doc minus "show" at start.  */
       print_doc_line (gdb_stdout, c->doc + 5);
 
+#ifdef UI_OUT
+      ui_out_text (uiout, " is ");
+      ui_out_wrap_hint (uiout, "    ");
+      quote = 0;
+      switch (c->var_type)
+	{
+	case var_string:
+	  {
+	    unsigned char *p;
+
+	    if (*(unsigned char **) c->var)
+	      fputstr_filtered (*(unsigned char **) c->var, '"', stb->stream);
+	    quote = 1;
+	  }
+	  break;
+	case var_string_noescape:
+	case var_filename:
+	case var_enum:
+	  if (*(char **) c->var)
+	    fputs_filtered (*(char **) c->var, stb->stream);
+	  quote = 1;
+	  break;
+	case var_boolean:
+	  fputs_filtered (*(int *) c->var ? "on" : "off", stb->stream);
+	  break;
+	case var_uinteger:
+	  if (*(unsigned int *) c->var == UINT_MAX)
+	    {
+	      fputs_filtered ("unlimited", stb->stream);
+	      break;
+	    }
+	  /* else fall through */
+	case var_zinteger:
+	  fprintf_filtered (stb->stream, "%u", *(unsigned int *) c->var);
+	  break;
+	case var_integer:
+	  if (*(int *) c->var == INT_MAX)
+	    {
+	      fputs_filtered ("unlimited", stb->stream);
+	    }
+	  else
+	    fprintf_filtered (stb->stream, "%d", *(int *) c->var);
+	  break;
+
+	default:
+	  error ("gdb internal error: bad var_type in do_setshow_command");
+	}
+      if (quote)
+	ui_out_text (uiout, "\"");
+      ui_out_field_stream (uiout, "value", stb);
+      if (quote)
+	ui_out_text (uiout, "\"");
+      ui_out_text (uiout, ".\n");
+      do_cleanups (old_chain);
+#else
       fputs_filtered (" is ", gdb_stdout);
       wrap_here ("    ");
       switch (c->var_type)
@@ -1412,6 +1483,7 @@ do_setshow_command (arg, from_tty, c)
 	  error ("gdb internal error: bad var_type in do_setshow_command");
 	}
       fputs_filtered (".\n", gdb_stdout);
+#endif
     }
   else
     error ("gdb internal error: bad cmd_type in do_setshow_command");
@@ -1428,10 +1500,31 @@ cmd_show_list (list, from_tty, prefix)
      int from_tty;
      char *prefix;
 {
+#ifdef UI_OUT
+  ui_out_list_begin (uiout, "showlist");
+#endif
   for (; list != NULL; list = list->next)
     {
       /* If we find a prefix, run its list, prefixing our output by its
          prefix (with "show " skipped).  */
+#ifdef UI_OUT
+      if (list->prefixlist && !list->abbrev_flag)
+	{
+	  ui_out_list_begin (uiout, "optionlist");
+	  ui_out_field_string (uiout, "prefix", list->prefixname + 5);
+	  cmd_show_list (*list->prefixlist, from_tty, list->prefixname + 5);
+	  ui_out_list_end (uiout);
+	}
+      if (list->type == show_cmd)
+	{
+	  ui_out_list_begin (uiout, "option");
+	  ui_out_text (uiout, prefix);
+	  ui_out_field_string (uiout, "name", list->name);
+	  ui_out_text (uiout, ":  ");
+	  do_setshow_command ((char *) NULL, from_tty, list);
+	  ui_out_list_end (uiout);
+	}
+#else
       if (list->prefixlist && !list->abbrev_flag)
 	cmd_show_list (*list->prefixlist, from_tty, list->prefixname + 5);
       if (list->type == show_cmd)
@@ -1441,7 +1534,11 @@ cmd_show_list (list, from_tty, prefix)
 	  fputs_filtered (":  ", gdb_stdout);
 	  do_setshow_command ((char *) NULL, from_tty, list);
 	}
+#endif
     }
+#ifdef UI_OUT
+  ui_out_list_end (uiout);
+#endif
 }
 
 /* ARGSUSED */
@@ -1541,12 +1638,17 @@ show_user_1 (c, stream)
   fputs_filtered (c->name, stream);
   fputs_filtered (":\n", stream);
 
+#ifdef UI_OUT
+  print_command_lines (uiout, cmdlines, 1);
+  fputs_filtered ("\n", stream);
+#else
   while (cmdlines)
     {
       print_command_line (cmdlines, 4, stream);
       cmdlines = cmdlines->next;
     }
   fputs_filtered ("\n", stream);
+#endif
 }
 
 /* ARGSUSED */

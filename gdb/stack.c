@@ -36,6 +36,9 @@
 #include "annotate.h"
 #include "symfile.h"
 #include "objfiles.h"
+#ifdef UI_OUT
+#include "ui-out.h"
+#endif
 
 /* Prototypes for exported functions. */
 
@@ -429,8 +432,13 @@ print_frame_info_base (fi, level, source, args)
 	{
 	  if (addressprint && mid_statement && !tui_version)
 	    {
+#ifdef UI_OUT
+	      ui_out_field_core_addr (uiout, "addr", fi->pc);
+	      ui_out_text (uiout, "\t");
+#else
 	      print_address_numeric (fi->pc, 1, gdb_stdout);
 	      printf_filtered ("\t");
+#endif
 	    }
 	  if (print_frame_info_listing_hook)
 	    print_frame_info_listing_hook (sal.symtab, sal.line, sal.line + 1, 0);
@@ -458,6 +466,13 @@ print_frame (struct frame_info *fi,
   struct symbol *func;
   register char *funname = 0;
   enum language funlang = language_unknown;
+#ifdef UI_OUT
+  struct ui_stream *stb;
+  struct cleanup *old_chain;
+
+  stb = ui_out_stream_new (uiout);
+  old_chain = make_cleanup ((make_cleanup_func) ui_out_stream_delete, stb);
+#endif /* UI_OUT */
 
   func = find_pc_function (fi->pc);
   if (func)
@@ -536,37 +551,87 @@ print_frame (struct frame_info *fi,
 
   annotate_frame_begin (level == -1 ? 0 : level, fi->pc);
 
+#ifdef UI_OUT
+  ui_out_list_begin (uiout, "frame");
+#endif
 
   if (level >= 0)
-  printf_filtered ("#%-2d ", level);
+    {
+#ifdef UI_OUT
+      ui_out_text (uiout, "#");
+      ui_out_field_fmt (uiout, "level", "%-2d", level);
+      ui_out_spaces (uiout, 1);
+#else
+      printf_filtered ("#%-2d ", level);
+#endif
+    }
   if (addressprint)
     if (fi->pc != sal.pc || !sal.symtab || source == LOC_AND_ADDRESS)
       {
 	annotate_frame_address ();
+#ifdef UI_OUT
+	ui_out_field_core_addr (uiout, "addr", fi->pc);
+	annotate_frame_address_end ();
+	ui_out_text (uiout, " in ");
+#else
 	print_address_numeric (fi->pc, 1, gdb_stdout);
 	annotate_frame_address_end ();
 	printf_filtered (" in ");
+#endif
       }
   annotate_frame_function_name ();
+#ifdef UI_OUT
+  fprintf_symbol_filtered (stb->stream, funname ? funname : "??", funlang,
+			   DMGL_ANSI);
+  ui_out_field_stream (uiout, "func", stb);
+  ui_out_wrap_hint (uiout, "   ");
+#else
   fprintf_symbol_filtered (gdb_stdout, funname ? funname : "??", funlang,
 			   DMGL_ANSI);
   wrap_here ("   ");
+#endif
   annotate_frame_args ();
       
+#ifdef UI_OUT
+  ui_out_text (uiout, " (");
+#else
   fputs_filtered (" (", gdb_stdout);
+#endif
   if (args)
     {
       struct print_args_args args;
       args.fi = fi;
       args.func = func;
       args.stream = gdb_stdout;
+#ifdef UI_OUT
+      ui_out_list_begin (uiout, "args");
       catch_errors (print_args_stub, &args, "", RETURN_MASK_ALL);
+      /* FIXME: args must be a list. If one argument is a string it will
+		 have " that will not be properly escaped.  */
+      ui_out_list_end (uiout);
+#else
+      catch_errors (print_args_stub, &args, "", RETURN_MASK_ALL);
+#endif
       QUIT;
     }
+#ifdef UI_OUT
+  ui_out_text (uiout, ")");
+#else
   printf_filtered (")");
+#endif
   if (sal.symtab && sal.symtab->filename)
     {
       annotate_frame_source_begin ();
+#ifdef UI_OUT
+      ui_out_wrap_hint (uiout, "   ");
+      ui_out_text (uiout, " at ");
+      annotate_frame_source_file ();
+      ui_out_field_string (uiout, "file", sal.symtab->filename);
+      annotate_frame_source_file_end ();
+      ui_out_text (uiout, ":");
+      annotate_frame_source_line ();
+      ui_out_field_int (uiout, "line", sal.line);
+#else
       wrap_here ("   ");
       printf_filtered (" at ");
       annotate_frame_source_file ();
@@ -575,6 +640,7 @@ print_frame (struct frame_info *fi,
       printf_filtered (":");
       annotate_frame_source_line ();
       printf_filtered ("%d", sal.line);
+#endif
       annotate_frame_source_end ();
     }
 
@@ -585,8 +651,14 @@ print_frame (struct frame_info *fi,
   if (!funname)
     {
       annotate_frame_where ();
+#ifdef UI_OUT
+      ui_out_wrap_hint (uiout, "  ");
+      ui_out_text (uiout, " from ");
+      ui_out_field_string (uiout, "from", PC_LOAD_SEGMENT (fi->pc));
+#else
       wrap_here ("  ");
       printf_filtered (" from %s", PC_LOAD_SEGMENT (fi->pc));
+#endif
     }
 #endif /* PC_LOAD_SEGMENT */
 
@@ -597,13 +669,25 @@ print_frame (struct frame_info *fi,
       if (lib)
 	{
 	  annotate_frame_where ();
+#ifdef UI_OUT
+	  ui_out_wrap_hint (uiout, "  ");
+	  ui_out_text (uiout, " from ");
+	  ui_out_field_string (uiout, "from", lib);
+#else
 	  wrap_here ("  ");
 	  printf_filtered (" from %s", lib);
+#endif
 	}
     }
 #endif /* PC_SOLIB */
 
+#ifdef UI_OUT
+  ui_out_list_end (uiout);
+  ui_out_text (uiout, "\n");
+  do_cleanups (old_chain);
+#else
   printf_filtered ("\n");
+#endif
 }
 
 
@@ -1649,6 +1733,15 @@ find_relative_frame (frame, level_offset_ptr)
    frame expressions. */
 
 /* ARGSUSED */
+#ifdef UI_OUT
+void
+select_frame_command_wrapper (level_exp, from_tty)
+     char *level_exp;
+     int from_tty;
+{
+  select_frame_command (level_exp, from_tty);
+}
+#endif
 static void
 select_frame_command (level_exp, from_tty)
      char *level_exp;
@@ -1798,6 +1891,15 @@ down_command (count_exp, from_tty)
   show_and_print_stack_frame (selected_frame, selected_frame_level, 1);
 }
 
+#ifdef UI_OUT
+void
+return_command_wrapper (retval_exp, from_tty)
+     char *retval_exp;
+     int from_tty;
+{
+  return_command (retval_exp, from_tty);
+}
+#endif
 static void
 return_command (retval_exp, from_tty)
      char *retval_exp;

@@ -1441,7 +1441,13 @@ handle_inferior_event (struct execution_control_state *ecs)
       {
 	add_thread (ecs->pid);
 
+#ifdef UI_OUT
+	ui_out_text (uiout, "[New ");
+	ui_out_text (uiout, target_pid_or_tid_to_str (ecs->pid));
+	ui_out_text (uiout, "]\n");
+#else
 	printf_filtered ("[New %s]\n", target_pid_or_tid_to_str (ecs->pid));
+#endif
 
 #if 0
 	/* NOTE: This block is ONLY meant to be invoked in case of a
@@ -3223,6 +3229,19 @@ print_stop_reason (enum inferior_stop_reason stop_reason, int stop_info)
       break;
     case SIGNAL_EXITED:
       /* The inferior was terminated by a signal. */
+#ifdef UI_OUT
+      annotate_signalled ();
+      ui_out_text (uiout, "\nProgram terminated with signal ");
+      annotate_signal_name ();
+      ui_out_field_string (uiout, "signal-name", target_signal_to_name (stop_info));
+      annotate_signal_name_end ();
+      ui_out_text (uiout, ", ");
+      annotate_signal_string ();
+      ui_out_field_string (uiout, "signal-meaning", target_signal_to_string (stop_info));
+      annotate_signal_string_end ();
+      ui_out_text (uiout, ".\n");
+      ui_out_text (uiout, "The program no longer exists.\n");
+#else
       annotate_signalled ();
       printf_filtered ("\nProgram terminated with signal ");
       annotate_signal_name ();
@@ -3236,19 +3255,46 @@ print_stop_reason (enum inferior_stop_reason stop_reason, int stop_info)
 
       printf_filtered ("The program no longer exists.\n");
       gdb_flush (gdb_stdout);
+#endif
       break;
     case EXITED:
       /* The inferior program is finished. */
+#ifdef UI_OUT
+      annotate_exited (stop_info);
+      if (stop_info)
+	{
+	  ui_out_text (uiout, "\nProgram exited with code ");
+	  ui_out_field_fmt (uiout, "exit-code", "0%o", (unsigned int) stop_info);
+	  ui_out_text (uiout, ".\n");
+	}
+      else
+	{
+	  ui_out_text (uiout, "\nProgram exited normally.\n");
+	}
+#else
       annotate_exited (stop_info);
       if (stop_info)
 	printf_filtered ("\nProgram exited with code 0%o.\n",
 			 (unsigned int) stop_info);
       else
 	printf_filtered ("\nProgram exited normally.\n");
+#endif
       break;
     case SIGNAL_RECEIVED:
       /* Signal received. The signal table tells us to print about
          it. */
+#ifdef UI_OUT
+      annotate_signal ();
+      ui_out_text (uiout, "\nProgram received signal ");
+      annotate_signal_name ();
+      ui_out_field_string (uiout, "signal-name", target_signal_to_name (stop_info));
+      annotate_signal_name_end ();
+      ui_out_text (uiout, ", ");
+      annotate_signal_string ();
+      ui_out_field_string (uiout, "signal-meaning", target_signal_to_string (stop_info));
+      annotate_signal_string_end ();
+      ui_out_text (uiout, ".\n");
+#else
       annotate_signal ();
       printf_filtered ("\nProgram received signal ");
       annotate_signal_name ();
@@ -3260,6 +3306,7 @@ print_stop_reason (enum inferior_stop_reason stop_reason, int stop_info)
       annotate_signal_string_end ();
       printf_filtered (".\n");
       gdb_flush (gdb_stdout);      
+#endif
       break;
     default:
       internal_error ("print_stop_reason: unrecognized enum value");

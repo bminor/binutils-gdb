@@ -35,6 +35,9 @@
 #include <ctype.h>
 #include <sys/types.h>
 #include <signal.h>
+#ifdef UI_OUT
+#include "ui-out.h"
+#endif
 
 /*#include "lynxos-core.h" */
 
@@ -250,6 +253,37 @@ in_thread_list (pid)
 
   return 0;			/* Never heard of 'im */
 }
+#ifdef UI_OUT
+/* Print a list of thread ids currently known, and the total number of
+   threads. To be used from within catch_errors. */
+static int 
+do_captured_list_thread_ids (void *arg)
+{
+  struct thread_info *tp;
+  int num = 0;
+
+  ui_out_list_begin (uiout, "thread-ids");
+
+  for (tp = thread_list; tp; tp = tp->next)
+    {
+      num++;
+      ui_out_field_int (uiout, "thread-id", tp->num);
+    }
+
+  ui_out_list_end (uiout);
+  ui_out_field_int (uiout, "number-of-threads", num);
+  return GDB_RC_OK;
+}
+
+/* Official gdblib interface function to get a list of thread ids and
+   the total number. */
+enum gdb_rc
+gdb_list_thread_ids (/* output object */)
+{
+  return catch_errors (do_captured_list_thread_ids, NULL,
+		       NULL, RETURN_MASK_ALL);
+}
+#endif
 
 /* Load infrun state for the thread PID.  */
 
@@ -633,15 +667,31 @@ do_captured_thread_select (void *tidstr)
 
   tp = find_thread_id (num);
 
+#ifdef UI_OUT
+  if (!tp)
+    error ("Thread ID %d not known.", num);
+#else
   if (!tp)
     error ("Thread ID %d not known.  Use the \"info threads\" command to\n\
 see the IDs of currently known threads.", num);
+#endif
 
   if (!thread_alive (tp))
     error ("Thread ID %d has terminated.\n", num);
 
   switch_to_thread (tp->pid);
 
+#ifdef UI_OUT
+  ui_out_text (uiout, "[Switching to thread ");
+  ui_out_field_int (uiout, "new-thread-id", pid_to_thread_id (inferior_pid));
+  ui_out_text (uiout, " (");
+#if defined(HPUXHPPA)
+  ui_out_text (uiout, target_tid_to_str (inferior_pid));
+#else
+  ui_out_text (uiout, target_pid_to_str (inferior_pid));
+#endif
+  ui_out_text (uiout, ")]");
+#else /* UI_OUT */
   printf_filtered ("[Switching to thread %d (%s)]\n",
 		   pid_to_thread_id (inferior_pid),
 #if defined(HPUXHPPA)
@@ -650,6 +700,7 @@ see the IDs of currently known threads.", num);
 		   target_pid_to_str (inferior_pid)
 #endif
     );
+#endif /* UI_OUT */
 
   print_stack_frame (selected_frame, selected_frame_level, 1);
   return GDB_RC_OK;
