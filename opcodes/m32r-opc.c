@@ -2420,7 +2420,7 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
     { 1, 1, 1, 1 },
     "satb", "satb",
     { MNEM, ' ', OP (DR), ',', OP (SR), 0 },
-    { 32, 32, 0xf0f0ffff }, 0x80600100,
+    { 32, 32, 0xf0f0ffff }, 0x80600300,
     & fmt_74_satb_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32RX), PIPE_NONE } }
   },
@@ -2442,7 +2442,7 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
     { 1, 1, 1, 1 },
     "sat", "sat",
     { MNEM, ' ', OP (DR), ',', OP (SR), 0 },
-    { 32, 32, 0xf0f0ffff }, 0x80000000,
+    { 32, 32, 0xf0f0ffff }, 0x80600000,
     & fmt_75_sat_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32RX), PIPE_NONE } }
   },

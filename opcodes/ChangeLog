@@ -1,3 +1,9 @@
+start-sanitize-m32rx
+Thu Apr  2 16:44:23 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* m32r-opc.c: Fix bit patterns for SAT and SATB.
+
+end-sanitize-m32rx
 Wed Apr  1 16:20:27 1998  Ian Dall  <Ian.Dall@dsto.defence.gov.au>
 
         * ns32k-dis.c (bit_extract_simple): New function to extract bits
