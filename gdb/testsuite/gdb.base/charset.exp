@@ -200,7 +200,6 @@ gdb_expect {
 
     -re "\\.\r\n$gdb_prompt $" {
 	#set host_charset_list $expect_out(1,string)
-	set charsets($expect_out(1,string)) 1
 	pass "capture valid host charsets"
     }
 
