@@ -291,11 +291,32 @@ OP_58F ()
     State.pc += 2;
 }
 
+/* jmp [reg1] */
 void
-OP_660 ()
+OP_60 ()
 {
+  /* interp.c will bump this by +2, so correct for it here.  */
+  State.pc = State.regs[OP[0]] - 2;
 }
 
+/* jarl disp22, reg */
+void
+OP_780 ()
+{
+  unsigned int op0, opc;
+  int temp;
+
+  temp = OP[0];
+  temp = (temp << 10) >> 10;
+  op0 = temp;
+  opc = State.pc;
+
+  State.pc += temp;
+
+  /* Gross.  jarl X,r0 is really jr and doesn't save its result.  */
+  if (OP[1] != 0)
+    State.regs[OP[1]] = opc + 4;
+}
 
 /* add reg, reg */
 void
@@ -642,17 +663,7 @@ OP_10720 ()
 }
 
 void
-OP_780 ()
-{
-}
-
-void
 OP_720 ()
-{
-}
-
-void
-OP_60 ()
 {
 }
 
@@ -1091,6 +1102,11 @@ OP_400 ()
 
 void
 OP_700 ()
+{
+}
+
+void
+OP_660 ()
 {
 }
 
