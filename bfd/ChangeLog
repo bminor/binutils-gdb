@@ -1,3 +1,10 @@
+Fri Nov 29 12:16:51 1991  Per Bothner  (bothner at cygnus.com)
+
+	* syms.c (bfd_decode_symclass):  Return 'A'
+	for symbols that are both absolute and global.
+	* archive.c (bfd_special_undocumented_glue):  Return NULL
+	if bfd_ar_hdr_from_filesystem returns NULL.
+
 Tue Nov 26 09:10:55 1991  Steve Chamberlain  (sac at cygnus.com)
 
 	* Makefile.in: added coff-h8300
@@ -12,9 +19,6 @@ Tue Nov 26 09:10:55 1991  Steve Chamberlain  (sac at cygnus.com)
 	* coffcode.h: Started to change the way machine dependencies are
 	handled, from the nest of #ifdefs to macros defined in the
 	including coff-<foo>.c
-
-
-
 
 Fri Nov 22 08:11:42 1991  John Gilmore  (gnu at cygnus.com)
 

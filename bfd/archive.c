@@ -827,8 +827,10 @@ DEFUN(bfd_special_undocumented_glue, (abfd, filename),
       bfd *abfd AND
       char *filename)
 {
-
-  return (struct ar_hdr *) bfd_ar_hdr_from_filesystem (abfd, filename) -> arch_header;
+  struct areltdata *ar_elt = bfd_ar_hdr_from_filesystem (abfd, filename);
+  if (ar_elt == NULL)
+      return NULL;
+  return (struct ar_hdr *) ar_elt->arch_header;
 }
 
 
@@ -1076,80 +1078,87 @@ compute_and_write_armap (arch, elength)
      bfd *arch;
      unsigned int elength;
 {
-  bfd *current;
-  file_ptr elt_no = 0;
-  struct orl *map;
-  int orl_max = 15000;		/* fine initial default */
-  int orl_count = 0;
-  int stridx = 0;		/* string index */
+    bfd *current;
+    file_ptr elt_no = 0;
+    struct orl *map;
+    int orl_max = 15000;	/* fine initial default */
+    int orl_count = 0;
+    int stridx = 0;		/* string index */
 
-  /* Dunno if this is the best place for this info... */
-  if (elength != 0) elength += sizeof (struct ar_hdr);
-  elength += elength %2 ;
+    /* Dunno if this is the best place for this info... */
+    if (elength != 0) elength += sizeof (struct ar_hdr);
+    elength += elength %2 ;
 
-  map = (struct orl *) bfd_zalloc (arch,orl_max * sizeof (struct orl));
-  if (map == NULL) {
-    bfd_error = no_memory;
-    return false;
-  }
+    map = (struct orl *) bfd_zalloc (arch,orl_max * sizeof (struct orl));
+    if (map == NULL) {
+	    bfd_error = no_memory;
+	    return false;
+	}
 
-  /* Map over each element */
-  for (current = arch->archive_head;
-       current != (bfd *)NULL;
-       current = current->next, elt_no++) 
-      {
+    /* Drop all the files called __.SYMDEF, we're going to make our
+       own */
+    while (arch->archive_head   &&
+	   strcmp(arch->archive_head->filename,"__.SYMDEF") == 0) 
+    {
+	arch->archive_head = arch->archive_head->next;
+    }
+    /* Map over each element */
+    for (current = arch->archive_head;
+	 current != (bfd *)NULL;
+	 current = current->next, elt_no++) 
+    {
 	if ((bfd_check_format (current, bfd_object) == true)
 	    && ((bfd_get_file_flags (current) & HAS_SYMS))) {
-	  asymbol **syms;
-	  unsigned int storage;
-	  unsigned int symcount;
-	  unsigned int src_count;
+		asymbol **syms;
+		unsigned int storage;
+		unsigned int symcount;
+		unsigned int src_count;
 
-	  storage = get_symtab_upper_bound (current);
-	  if (storage != 0) {
+		storage = get_symtab_upper_bound (current);
+		if (storage != 0) {
 
-	    syms = (asymbol **) bfd_zalloc (arch,storage);
-	    if (syms == NULL) {
-	      bfd_error = no_memory; /* FIXME -- memory leak */
-	      return false;
-	    }
-	    symcount = bfd_canonicalize_symtab (current, syms);
+			syms = (asymbol **) bfd_zalloc (arch,storage);
+			if (syms == NULL) {
+				bfd_error = no_memory; /* FIXME -- memory leak */
+				return false;
+			    }
+			symcount = bfd_canonicalize_symtab (current, syms);
 
 
-	    /* Now map over all the symbols, picking out the ones we want */
-	    for (src_count = 0; src_count <symcount; src_count++) {
-	      flagword flags = (syms[src_count])->flags;
-	      if ((flags & BSF_GLOBAL) ||
-		  (flags & BSF_FORT_COMM)) {
+			/* Now map over all the symbols, picking out the ones we want */
+			for (src_count = 0; src_count <symcount; src_count++) {
+				flagword flags = (syms[src_count])->flags;
+				if ((flags & BSF_GLOBAL) ||
+				    (flags & BSF_FORT_COMM)) {
 
-		/* This symbol will go into the archive header */
-		if (orl_count == orl_max) 
-		    {
-		      orl_max *= 2;
-		      map = (struct orl *) bfd_realloc (arch, (char *) map,
-						    orl_max * sizeof (struct orl));
+					/* This symbol will go into the archive header */
+					if (orl_count == orl_max) 
+					{
+					    orl_max *= 2;
+					    map = (struct orl *) bfd_realloc (arch, (char *) map,
+									      orl_max * sizeof (struct orl));
+					}
+
+					(map[orl_count]).name = (char **) &((syms[src_count])->name);
+					(map[orl_count]).pos = (file_ptr) current;
+					(map[orl_count]).namidx = stridx;
+
+					stridx += strlen ((syms[src_count])->name) + 1;
+					++orl_count;
+				    }
+			    }
 		    }
-
-		(map[orl_count]).name = (char **) &((syms[src_count])->name);
-		(map[orl_count]).pos = (file_ptr) current;
-		(map[orl_count]).namidx = stridx;
-
-		stridx += strlen ((syms[src_count])->name) + 1;
-		++orl_count;
-	      }
 	    }
-	  }
+    }
+    /* OK, now we have collected all the data, let's write them out */
+    if (!BFD_SEND (arch, write_armap,
+		   (arch, elength, map, orl_count, stridx))) {
+
+	    return false;
 	}
-      }
-  /* OK, now we have collected all the data, let's write them out */
-  if (!BFD_SEND (arch, write_armap,
-		 (arch, elength, map, orl_count, stridx))) {
-
-    return false;
-  }
 
 
-  return true;
+    return true;
 }
 
 boolean
@@ -1157,7 +1166,7 @@ bsd_write_armap (arch, elength, map, orl_count, stridx)
      bfd *arch;
      unsigned int elength;
      struct orl *map;
-     int orl_count;
+     unsigned int orl_count;
      int stridx;
 {
   unsigned int ranlibsize = orl_count * sizeof (struct ranlib);

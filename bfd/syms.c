@@ -383,16 +383,10 @@ asymbol *symbol)
 {
   flagword flags = symbol->flags;
   
-#if 0
-  if ((symbol->value == 0) && (symbol->section != NULL))
-    /* Huh?  All section names don't begin with "." */
-    return (symbol->section->name)[1];
-#endif
-
   if (flags & BSF_FORT_COMM) return 'C';
   if (flags & BSF_UNDEFINED) return 'U';
-  if (flags & BSF_ABSOLUTE)  return 'a';
-
+  if (flags & BSF_ABSOLUTE)
+       return (flags & BSF_GLOBAL) ? 'A' : 'a';
  
    if ( flags & (BSF_GLOBAL|BSF_LOCAL) ) {
      if (symbol->section == (asection *)NULL)
