@@ -104,11 +104,13 @@ foreach testitem $seltests {
     }
 
     # V850 targets need libgcc.a
+    # FIXME: This does not work with installed toolchains!
     if [istarget v850*-*-elf] {
 	set objfile "$objfile -L ../gcc -lgcc"
     }
 
     # ARM targets need libgcc.a in THUMB mode so that __call_via_r3 is provided
+    # FIXME: This does not work with installed toolchains!
     if {[istarget arm-*-*] || [istarget xscale-*-*]} {
 	set objfile "$objfile -L ../gcc -lgcc"
     }
