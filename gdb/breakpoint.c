@@ -4328,7 +4328,7 @@ solib_load_unload_1 (char *hookname, int tempflag, char *dll_pathname,
   int thread = -1;		/* All threads. */
 
   /* Set a breakpoint on the specified hook. */
-  sals = decode_line_1 (&hookname, 1, (struct symtab *) NULL, 0, &canonical);
+  sals = decode_line_1 (&hookname, 1, (struct symtab *) NULL, 0, &canonical, NULL);
   addr_end = hookname;
 
   if (sals.nelts == 0)
@@ -4845,9 +4845,9 @@ parse_breakpoint_sals (char **address,
  	      || ((strchr ("+-", (*address)[0]) != NULL)
  		  && ((*address)[1] != '['))))
 	*sals = decode_line_1 (address, 1, default_breakpoint_symtab,
-			       default_breakpoint_line, addr_string);
+			       default_breakpoint_line, addr_string, NULL);
       else
-	*sals = decode_line_1 (address, 1, (struct symtab *) NULL, 0, addr_string);
+	*sals = decode_line_1 (address, 1, (struct symtab *) NULL, 0, addr_string, NULL);
     }
   /* For any SAL that didn't have a canonical string, fill one in. */
   if (sals->nelts > 0 && *addr_string == NULL)
@@ -5293,7 +5293,7 @@ break_at_finish_command_1 (char *arg, int flag, int from_tty)
 
   beg_addr_string = addr_string;
   sals = decode_line_1 (&addr_string, 1, (struct symtab *) NULL, 0,
-			(char ***) NULL);
+			(char ***) NULL, NULL);
 
   xfree (beg_addr_string);
   old_chain = make_cleanup (xfree, sals.sals);
@@ -5810,10 +5810,10 @@ until_break_command (char *arg, int from_tty, int anywhere)
 
   if (default_breakpoint_valid)
     sals = decode_line_1 (&arg, 1, default_breakpoint_symtab,
-			  default_breakpoint_line, (char ***) NULL);
+			  default_breakpoint_line, (char ***) NULL, NULL);
   else
     sals = decode_line_1 (&arg, 1, (struct symtab *) NULL, 
-			  0, (char ***) NULL);
+			  0, (char ***) NULL, NULL);
 
   if (sals.nelts != 1)
     error ("Couldn't get information on specified line.");
@@ -6273,7 +6273,7 @@ handle_gnu_v3_exceptions (int tempflag, char *cond_string,
     trigger_func_name = xstrdup ("__cxa_throw");
 
   nameptr = trigger_func_name;
-  sals = decode_line_1 (&nameptr, 1, NULL, 0, NULL);
+  sals = decode_line_1 (&nameptr, 1, NULL, 0, NULL, NULL);
   if (sals.nelts == 0)
     {
       xfree (trigger_func_name);
@@ -6980,7 +6980,7 @@ breakpoint_re_set_one (void *bint)
       set_language (b->language);
       input_radix = b->input_radix;
       s = b->addr_string;
-      sals = decode_line_1 (&s, 1, (struct symtab *) NULL, 0, (char ***) NULL);
+      sals = decode_line_1 (&s, 1, (struct symtab *) NULL, 0, (char ***) NULL, NULL);
       for (i = 0; i < sals.nelts; i++)
 	{
 	  resolve_sal_pc (&sals.sals[i]);
@@ -7516,10 +7516,10 @@ decode_line_spec_1 (char *string, int funfirstline)
     sals = decode_line_1 (&string, funfirstline,
 			  default_breakpoint_symtab,
 			  default_breakpoint_line,
-			  (char ***) NULL);
+			  (char ***) NULL, NULL);
   else
     sals = decode_line_1 (&string, funfirstline,
-			  (struct symtab *) NULL, 0, (char ***) NULL);
+			  (struct symtab *) NULL, 0, (char ***) NULL, NULL);
   if (*string)
     error ("Junk at end of line specification: %s", string);
   return sals;
