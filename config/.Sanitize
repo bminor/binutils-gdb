@@ -40,13 +40,6 @@ mh-sun3
 mh-sysv
 mh-sysv4
 mh-vaxult2
-mt-a29k
-mt-ebmon29k
-mt-os68k
-mt-ose68000
-mt-ose68k
-mt-vxworks68
-mt-vxworks960
 
 Do-last:
 
