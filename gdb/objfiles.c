@@ -650,6 +650,9 @@ objfile_relocate (objfile, new_offsets)
       objfile->ei.main_func_lowpc  += ANOFFSET (delta, SECT_OFF_TEXT);
       objfile->ei.main_func_highpc += ANOFFSET (delta, SECT_OFF_TEXT);
     }
+
+  /* Relocate breakpoints as necessary, after things are relocated. */
+  breakpoint_re_set ();
 }
 
 /* Many places in gdb want to test just to see if we have any partial

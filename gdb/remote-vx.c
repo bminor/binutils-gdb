@@ -715,9 +715,6 @@ vx_add_symbols (name, from_tty, text_addr, data_addr, bss_addr)
   ANOFFSET (offs, SECT_OFF_DATA) = data_addr - ss.data_start;
   ANOFFSET (offs, SECT_OFF_BSS) = bss_addr - ss.bss_start;
   objfile_relocate (objfile, offs);
-
-  /* Need to do this *after* things are relocated.  */
-  breakpoint_re_set ();
 }
 
 /* This function allows the addition of incrementally linked object files.  */
