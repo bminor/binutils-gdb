@@ -802,11 +802,40 @@ load_symbols (entry, place)
      add_symbols entry point will call ldlang_add_file, via the
      add_archive_element callback, for each element of the archive
      which is used.  */
-  if (bfd_get_format (entry->the_bfd) == bfd_object)
+  switch (bfd_get_format (entry->the_bfd))
     {
+    default:
+      break;
+
+    case bfd_object:
       ldlang_add_file (entry);
       if (trace_files || trace_file_tries)
 	info_msg ("%I\n", entry);
+      break;
+
+    case bfd_archive:
+      if (whole_archive)
+	{
+	  bfd *member = bfd_openr_next_archived_file (entry->the_bfd,
+						      (bfd *) NULL);
+	  while (member != NULL)
+	    {
+	      if (! bfd_check_format (member, bfd_object))
+		einfo ("%F%B: object %B in archive is not object\n",
+		       entry->the_bfd, member);
+	      if (! ((*link_info.callbacks->add_archive_element)
+		     (&link_info, member, "-whole-archive")))
+		abort ();
+	      if (! bfd_link_add_symbols (member, &link_info))
+		einfo ("%F%B: could not read symbols: %E\n", member);
+	      member = bfd_openr_next_archived_file (entry->the_bfd,
+						     member);
+	    }
+
+	  entry->loaded = true;
+
+	  return;
+	}
     }
 
   if (! bfd_link_add_symbols (entry->the_bfd, &link_info))
@@ -2188,7 +2217,8 @@ lang_finish ()
 }
 
 /* Check that the architecture of all the input files is compatible
-   with the output file.  */
+   with the output file.  Also call the backend to let it do any
+   other checking that is needed.  */
 
 static void
 lang_check ()
@@ -2208,6 +2238,9 @@ lang_check ()
 	einfo ("%P: warning: %s architecture of input file `%B' is incompatible with %s output\n",
 	       bfd_printable_name (input_bfd), input_bfd,
 	       bfd_printable_name (output_bfd));
+
+      else
+	bfd_merge_private_bfd_data (input_bfd, output_bfd);
     }
 }
 
@@ -2249,14 +2282,14 @@ lang_one_common (h, info)
     return true;
 
   size = h->u.c.size;
-  power_of_two = h->u.c.alignment_power;
+  power_of_two = h->u.c.p->alignment_power;
 
   if (config.sort_common
       && power_of_two < *(unsigned int *) info
       && *(unsigned int *) info < 4)
     return true;
 
-  section = h->u.c.section;
+  section = h->u.c.p->section;
 
   /* Increase the size of the section.  */
   section->_raw_size = ALIGN_N (section->_raw_size,

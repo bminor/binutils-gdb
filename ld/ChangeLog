@@ -1,3 +1,12 @@
+Sat Mar 18 01:49:14 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldlang.c (load_symbols): An empty is archive is OK.
+
+Fri Mar 17 16:15:31 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* ldmain.c (progress.h): Include.
+	(main): Call START_PROGRESS and END_PROGRESS.
+
 Thu Mar 16 17:17:33 1995  Michael Meissner  <meissner@cygnus.com>
 
 	* scripttempl/elfppc.sc: Move _GOT2_END_ after the .ctors and
