@@ -1,3 +1,8 @@
+2003-08-12  Andrew Cagney  <cagney@redhat.com>
+
+	* frame.c (deprecated_frame_xmalloc): Use XMALLOC, instead of
+	FRAME_OBSTACK_ZALLOC.
+
 2003-08-10  Mark Kettenis  <kettenis@gnu.org>
 
 	* frame.c (_initialize_frame): Add missing backslash.

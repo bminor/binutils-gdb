@@ -2306,7 +2306,8 @@ deprecated_set_frame_context (struct frame_info *fi,
 struct frame_info *
 deprecated_frame_xmalloc (void)
 {
-  struct frame_info *frame = FRAME_OBSTACK_ZALLOC (struct frame_info);
+  struct frame_info *frame = XMALLOC (struct frame_info);
+  memset (frame, 0, sizeof (*frame));
   frame->this_id.p = 1;
   return frame;
 }
