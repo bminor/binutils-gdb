@@ -2722,7 +2722,8 @@ floatformat_from_doublest (fmt, from, to)
   unsigned char *uto = (unsigned char *) to;
 
   memcpy (&dfrom, from, sizeof (dfrom));
-  memset (uto, 0, fmt->totalsize / FLOATFORMAT_CHAR_BIT);
+  memset (uto, 0, (fmt->totalsize + FLOATFORMAT_CHAR_BIT - 1) 
+                    / FLOATFORMAT_CHAR_BIT);
   if (dfrom == 0)
     return;			/* Result is zero */
   if (dfrom != dfrom)		/* Result is NaN */
@@ -2771,7 +2772,7 @@ floatformat_from_doublest (fmt, from, to)
       mant_bits = mant_bits_left < 32 ? mant_bits_left : 32;
 
       mant *= 4294967296.0;
-      mant_long = (unsigned long) mant;
+      mant_long = ((unsigned long) mant) & 0xffffffffL;
       mant -= mant_long;
 
       /* If the integer bit is implicit, then we need to discard it.
@@ -2782,6 +2783,7 @@ floatformat_from_doublest (fmt, from, to)
 	  && fmt->intbit == floatformat_intbit_no)
 	{
 	  mant_long <<= 1;
+	  mant_long &= 0xffffffffL;
 	  mant_bits -= 1;
 	}
 

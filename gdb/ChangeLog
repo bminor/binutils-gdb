@@ -1,3 +1,11 @@
+2000-03-20  Kevin Buettner  <kevinb@redhat.com>
+
+	* utils.c (floatformat_from_doublest): Don't assume that a long
+	will be exactly 32 bits in length.  Also...  make sure space
+	that we're writing the float to is completely initialized to
+	zeroes, even when the number of bits in the float is not
+	evenly divisible by FLOATFORMAT_CHAR_BIT.
+
 2000-03-20  Jim Blandy  <jimb@redhat.com>
 
 	* i386-linux-nat.c: No need to #include "frame.h" any more.
