@@ -1,3 +1,8 @@
+1998-07-22  Ulrich Drepper  <drepper@cygnus.com>
+
+	* readelf.c: Consistantly use elf_ prefix for *_reloc_type
+	functions.
+
 Wed Jul 22 16:29:12 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* readelf.c (dump_relocations): Add dumps of HPPA and ARC

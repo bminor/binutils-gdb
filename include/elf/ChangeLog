@@ -1,9 +1,13 @@
+1998-07-22  Ulrich Drepper  <drepper@cygnus.com>
+
+	* ppc.h: Define enum as elf_ppc_reloc_type.
+
 Wed Jul 22 16:22:11 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* reloc-macros.h: New file.  Provides relocation macros:
 	START_RELOC_NUMBERS, RELOC_NUMBER, FAKE_RELOC, EMPTY_RELOC and
 	END_RELOC_NUMBERS used by other elf header files.
-	
+
 	* alpha.h: Use reloc-macros.h.
 	* arc.h: Use reloc-macros.h.
 	* arm.h: Use reloc-macros.h.
