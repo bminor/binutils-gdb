@@ -422,7 +422,7 @@ ldfile_add_arch (name)
 
 void
 ldfile_add_arch (in_name)
-     CONST char *in_name;
+     const char *in_name;
 {
   char *name = xstrdup (in_name);
   search_arch_type *new =
@@ -447,7 +447,7 @@ ldfile_add_arch (in_name)
 
 void
 ldfile_set_output_arch (string)
-     CONST char *string;
+     const char *string;
 {
   const bfd_arch_info_type *arch = bfd_scan_arch (string);
 

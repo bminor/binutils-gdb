@@ -75,7 +75,7 @@ exp_print_token (code, infix_p)
      token_code_type code;
      int infix_p;
 {
-  static CONST struct
+  static const struct
   {
     token_code_type code;
     char * name;
@@ -852,7 +852,7 @@ exp_unop (code, child)
 etree_type *
 exp_nameop (code, name)
      int code;
-     CONST char *name;
+     const char *name;
 {
   etree_type value, *new;
   etree_value_type r;
@@ -875,7 +875,7 @@ exp_nameop (code, name)
 etree_type *
 exp_assop (code, dst, src)
      int code;
-     CONST char *dst;
+     const char *dst;
      etree_type *src;
 {
   etree_type value, *new;

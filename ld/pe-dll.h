@@ -1,5 +1,5 @@
 /* pe-dll.h: Header file for routines used to build Windows DLLs.
-   Copyright 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2002 Free Software Foundation, Inc.
 
    This file is part of GLD, the Gnu Linker.
 
@@ -47,7 +47,7 @@ extern void pe_dll_fill_sections PARAMS ((bfd *, struct bfd_link_info *));
 extern void pe_exe_fill_sections PARAMS ((bfd *, struct bfd_link_info *));
 
 extern void pe_walk_relocs_of_symbol PARAMS ((struct bfd_link_info * info,
-					      CONST char *name,
+					      const char *name,
 					      int (*cb) (arelent *, asection *)));
 
 extern void pe_create_import_fixup PARAMS ((arelent * rel));

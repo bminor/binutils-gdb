@@ -1,3 +1,12 @@
+2002-06-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldexp.c: Replace CONST with const.
+	* ldfile.c: Likewise.
+	* ldfile.h: Likewise.
+	* ldlex.l: Likewise.
+	* mri.c: Likewise.
+	* pe-dll.h: Likewise.
+
 2002-06-07  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/ppc64elf.em (new_vers_pattern): Warning fix.

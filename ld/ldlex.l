@@ -478,7 +478,7 @@ lex_push_file (file, name)
 
 static YY_BUFFER_STATE 
 yy_create_string_buffer (string, size)
-     CONST char *string;
+     const char *string;
      size_t size;
 {
   YY_BUFFER_STATE b;
@@ -520,7 +520,7 @@ yy_create_string_buffer (string, size)
 
 void
 lex_redirect (string)
-     CONST char *string;
+     const char *string;
 {
   YY_BUFFER_STATE tmp;
 
