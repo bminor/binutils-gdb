@@ -1,5 +1,10 @@
 Wed Jul  7 14:30:00 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* infcmd.c (run_stack_dummy): New argument name.
+	Change error message in (another) attempt to make it comprehensible.
+	* valops.c (call_function_by_hand): Pass name to run_stack_dummy.
+	* symtab.h: Declare demangle and asm_demangle since macros use them.
+
 	* eval.c (evaluate_subexp): Add comment about calling a member
 	function of a variable in a register.
 

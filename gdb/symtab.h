@@ -214,6 +214,10 @@ extern int demangle;	/* We reference it, so go ahead and declare it. */
    ? SYMBOL_DEMANGLED_NAME (symbol)					\
    : SYMBOL_NAME (symbol))
 
+/* From utils.c.  */
+extern int demangle;
+extern int asm_demangle;
+
 /* Macro that tests a symbol for a match against a specified name string.
    First test the unencoded name, then looks for and test a C++ encoded
    name if it exists.  Note that whitespace is ignored while attempting to
@@ -372,7 +376,8 @@ struct block
 
   int nsyms;
 
-  /* The symbols.  */
+  /* The symbols.  If some of them are arguments, then they must be
+     in the order in which we would like to print them.  */
 
   struct symbol *sym[1];
 };
@@ -385,9 +390,12 @@ struct block
 #define BLOCK_SUPERBLOCK(bl)	(bl)->superblock
 #define BLOCK_GCC_COMPILED(bl)	(bl)->gcc_compile_flag
 
-/* Nonzero if symbols of block BL should be sorted alphabetically.  */
+/* Nonzero if symbols of block BL should be sorted alphabetically.
+   Don't sort a block which corresponds to a function.  If we did the
+   sorting would have to preserve the order of the symbols for the
+   arguments.  */
 
-#define BLOCK_SHOULD_SORT(bl) ((bl)->nsyms >= 40)
+#define BLOCK_SHOULD_SORT(bl) ((bl)->nsyms >= 40 && BLOCK_FUNCTION (bl) == NULL)
 
 
 /* Represent one symbol name; a variable, constant, function or typedef.  */

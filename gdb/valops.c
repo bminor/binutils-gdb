@@ -26,6 +26,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbcore.h"
 #include "target.h"
 #include "demangle.h"
+#include "language.h"
 
 #include <errno.h>
 
@@ -111,7 +112,7 @@ allocate_space_in_inferior (len)
 /* Cast value ARG2 to type TYPE and return as a value.
    More general than a C cast: accepts any two types of the same length,
    and if ARG2 is an lvalue it can be cast into anything at all.  */
-/* In C++, casts may change pointer representations.  */
+/* In C++, casts may change pointer or object representations.  */
 
 value
 value_cast (type, arg2)
@@ -132,6 +133,21 @@ value_cast (type, arg2)
   scalar = (code2 == TYPE_CODE_INT || code2 == TYPE_CODE_FLT
 	    || code2 == TYPE_CODE_ENUM);
 
+  if (   code1 == TYPE_CODE_STRUCT
+      && code2 == TYPE_CODE_STRUCT
+      && TYPE_NAME (type) != 0)
+    {
+      /* Look in the type of the source to see if it contains the
+	 type of the target as a superclass.  If so, we'll need to
+	 offset the object in addition to changing its type.  */
+      value v = search_struct_field (type_name_no_tag (type),
+				     arg2, 0, VALUE_TYPE (arg2), 1);
+      if (v)
+	{
+	  VALUE_TYPE (v) = type;
+	  return v;
+	}
+    }
   if (code1 == TYPE_CODE_FLT && scalar)
     return value_from_double (type, value_as_double (arg2));
   else if ((code1 == TYPE_CODE_INT || code1 == TYPE_CODE_ENUM)
@@ -345,8 +361,19 @@ value_assign (toval, fromval)
 	write_register_bytes (VALUE_ADDRESS (toval) + VALUE_OFFSET (toval),
 			      raw_buffer, use_buffer);
       else
-	write_register_bytes (VALUE_ADDRESS (toval) + VALUE_OFFSET (toval),
-			      VALUE_CONTENTS (fromval), TYPE_LENGTH (type));
+        {
+	  /* Do any conversion necessary when storing this type to more
+	     than one register.  */
+#ifdef REGISTER_CONVERT_FROM_TYPE
+	  memcpy (raw_buffer, VALUE_CONTENTS (fromval), TYPE_LENGTH (type));
+	  REGISTER_CONVERT_FROM_TYPE(VALUE_REGNO (toval), type, raw_buffer);
+	  write_register_bytes (VALUE_ADDRESS (toval) + VALUE_OFFSET (toval),
+				raw_buffer, TYPE_LENGTH (type));
+#else
+	  write_register_bytes (VALUE_ADDRESS (toval) + VALUE_OFFSET (toval),
+			        VALUE_CONTENTS (fromval), TYPE_LENGTH (type));
+#endif
+	}
       break;
 
     case lval_reg_frame_relative:
@@ -801,7 +828,7 @@ call_function_by_hand (function, nargs, args)
      they are saved on the stack in the inferior.  */
   PUSH_DUMMY_FRAME;
 
-  old_sp = sp = read_register (SP_REGNUM);
+  old_sp = sp = read_sp ();
 
 #if 1 INNER_THAN 2		/* Stack grows down */
   sp -= sizeof dummy;
@@ -974,16 +1001,42 @@ call_function_by_hand (function, nargs, args)
      might fool with it.  On SPARC, this write also stores the register
      window into the right place in the new stack frame, which otherwise
      wouldn't happen.  (See write_inferior_registers in sparc-xdep.c.)  */
-  write_register (SP_REGNUM, sp);
+  write_sp (sp);
 
   /* Figure out the value returned by the function.  */
   {
     char retbuf[REGISTER_BYTES];
+    char *name;
+    struct symbol *symbol;
+
+    name = NULL;
+    symbol = find_pc_function (funaddr);
+    if (symbol)
+      {
+	name = SYMBOL_SOURCE_NAME (symbol);
+      }
+    else
+      {
+	/* Try the minimal symbols.  */
+	struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (funaddr);
+
+	if (msymbol)
+	  {
+	    name = SYMBOL_SOURCE_NAME (msymbol);
+	  }
+      }
+    if (name == NULL)
+      {
+	char format[80];
+	sprintf (format, "at %s", local_hex_format ());
+	name = alloca (80);
+	sprintf (name, format, funaddr);
+      }
 
     /* Execute the stack dummy routine, calling FUNCTION.
        When it is done, discard the empty frame
        after storing the contents of all regs into retbuf.  */
-    run_stack_dummy (real_pc + CALL_DUMMY_START_OFFSET, retbuf);
+    run_stack_dummy (name, real_pc + CALL_DUMMY_START_OFFSET, retbuf);
 
     do_cleanups (old_chain);
 
@@ -1192,8 +1245,10 @@ search_struct_field (name, arg1, offset, type, looking_for_baseclass)
     {
       value v;
       /* If we are looking for baseclasses, this is what we get when we
-	 hit them.  */
+	 hit them.  But it could happen that the base part's member name
+	 is not yet filled in.  */
       int found_baseclass = (looking_for_baseclass
+			     && TYPE_BASECLASS_NAME (type, i) != NULL
 			     && STREQ (name, TYPE_BASECLASS_NAME (type, i)));
 
       if (BASETYPE_VIA_VIRTUAL (type, i))

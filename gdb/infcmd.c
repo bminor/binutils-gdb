@@ -530,14 +530,19 @@ signal_command (signum_exp, from_tty)
    The dummy's frame is automatically popped whenever that break is hit.
    If that is the first time the program stops, run_stack_dummy
    returns to its caller with that frame already gone.
-   Otherwise, the caller never gets returned to.  */
+   Otherwise, the caller never gets returned to.
+
+   NAME is a string to print to identify the function which we are calling.
+   It is not guaranteed to be the name of a function, it could be something
+   like "at 0x4370" if a name can't be found for the function.  */
 
 /* DEBUG HOOK:  4 => return instead of letting the stack dummy run.  */
 
 static int stack_dummy_testing = 0;
 
 void
-run_stack_dummy (addr, buffer)
+run_stack_dummy (name, addr, buffer)
+     char *name;
      CORE_ADDR addr;
      char buffer[REGISTER_BYTES];
 {
@@ -553,10 +558,16 @@ run_stack_dummy (addr, buffer)
 
   if (!stop_stack_dummy)
     /* This used to say
-       "Cannot continue previously requested operation".  */
+       "The expression which contained the function call has been discarded."
+       It is a hard concept to explain in a few words.  Ideally, GDB would
+       be able to resume evaluation of the expression when the function
+       finally is done executing.  Perhaps someday this will be implemented
+       (it would not be easy).  */
     error ("\
 The program being debugged stopped while in a function called from GDB.\n\
-The expression which contained the function call has been discarded.");
+When the function (%s) is done executing, GDB will silently\n\
+stop (instead of continuing to evaluate the expression containing\n\
+the function call).", name);
 
   /* On return, the stack dummy has been popped already.  */
 
