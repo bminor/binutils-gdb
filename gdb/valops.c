@@ -3358,7 +3358,7 @@ value_rtti_type (v, full, top, using_enc)
 	we'd waste a bunch of time figuring out we already know the type.
         Besides, we don't care about the type, just the actual pointer
       */
-      if (VALUE_ADDRESS(value_field(v,TYPE_VPTR_FIELDNO(known_type))) == NULL)
+      if (VALUE_ADDRESS (value_field (v, TYPE_VPTR_FIELDNO (known_type))) == 0)
 	return NULL;
 
       /*

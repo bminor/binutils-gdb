@@ -1,3 +1,8 @@
+Sun Apr  9 22:54:29 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* valops.c (value_rtti_type): Compare VALUE_ADDRESS with ``0'' not
+ 	NULL. Macro returns a CORE_ADDR.
+
 2000-04-08  Jim Blandy  <jimb@redhat.com>
 
 	* dwarf2read.c: Revert Andrew Cagney's change of Dec 15, 1997.
