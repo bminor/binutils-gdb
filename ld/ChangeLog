@@ -1,3 +1,7 @@
+Thu Mar 30 13:09:46 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld.texinfo, ld.1: Document the -no-keep-memory option.
+
 Mon Mar 27 11:10:08 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ldmain.c (main): Revert patch of March 10, since the SVR4 linker

@@ -71,6 +71,7 @@ ld \- the GNU linker
 \&\|] 
 .RB "[\|" \-n | \-N "\|]" 
 .RB "[\|" \-noinhibit-exec "\|]" 
+.RB "[\|" \-no\-keep\-memory "\|]" 
 .RB "[\|" "\-oformat\ "\c
 .I output-format\c
 \&\|] 
@@ -602,6 +603,14 @@ if possible.
 Normally, the linker will not produce an output file if it encounters
 errors during the link process.  With this flag, you can specify that
 you wish the output file retained even after non-fatal errors.
+
+.TP
+.B \-no\-keep\-memory
+The linker normally optimizes for speed over memory usage by caching
+the symbol tables of input files in memory.  This option tells the
+linker to instead optimize for memory usage, by rereading the symbol
+tables as necessary.  This may be required if the linker runs out of
+memory space while linking a large executable.
 
 .TP
 .BI "\-o " "output"\c
