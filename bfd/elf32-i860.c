@@ -166,8 +166,8 @@ static reloc_howto_type elf32_i860_howto_table [] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_860_PC16",		/* name */
 	 false,			/* partial_inplace */
-	 0xffff,		/* src_mask */
-	 0xffff,		/* dst_mask */
+	 0x1f07ff,		/* src_mask */
+	 0x1f07ff,		/* dst_mask */
 	 true),		        /* pcrel_offset */
 
   HOWTO (R_860_LOW0,	        /* type */
@@ -222,8 +222,8 @@ static reloc_howto_type elf32_i860_howto_table [] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_860_SPLIT1",	/* name */
 	 false,			/* partial_inplace */
-	 0x1f07ff,		/* src_mask */
-	 0x1f07ff,		/* dst_mask */
+	 0x1f07fe,		/* src_mask */
+	 0x1f07fe,		/* dst_mask */
 	 false),	        /* pcrel_offset */
 
   HOWTO (R_860_LOW2,	        /* type */
@@ -250,8 +250,8 @@ static reloc_howto_type elf32_i860_howto_table [] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_860_SPLIT2",	/* name */
 	 false,			/* partial_inplace */
-	 0x1f07ff,		/* src_mask */
-	 0x1f07ff,		/* dst_mask */
+	 0x1f07fc,		/* src_mask */
+	 0x1f07fc,		/* dst_mask */
 	 false),	        /* pcrel_offset */
 
   HOWTO (R_860_LOW3,	        /* type */

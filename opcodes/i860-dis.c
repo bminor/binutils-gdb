@@ -44,7 +44,7 @@ static const char *const crnames[] =
 
 /* Prototypes.  */
 static int sign_ext		PARAMS((unsigned int, int)); 
-static void print_br_address	PARAMS((disassemble_info *, bfd_vma, int));
+static void print_br_address	PARAMS((disassemble_info *, bfd_vma, long));
 
 
 /* True if opcode is xor, xorh, and, andh, or, orh, andnot, andnoth.  */
@@ -75,10 +75,10 @@ static void
 print_br_address (info, memaddr, val)
      disassemble_info *info;
      bfd_vma memaddr;
-     int val;
+     long val;
 {
 
-  int adj = memaddr + 4 + (val << 2);
+  long adj = (long)memaddr + 4 + (val << 2);
 
   (*info->fprintf_func) (info->stream, "0x%08x", adj);
 	    
