@@ -1,0 +1,8 @@
+# Host: Intel 386 running System V
+XDEPFILES= infptrace.o coredep.o i386-xdep.o i387-tdep.o
+XM_FILE= xm-linux.h
+XM_CLIBS=
+TERMLIB=
+SYSV_DEFINE=-DSYSV
+REGEX=regex.o
+REGEX1=regex.o
