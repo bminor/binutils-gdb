@@ -1,5 +1,11 @@
 Mon May 31 11:36:08 1993  Jim Kingdon  (kingdon@cygnus.com)
 
+	* gdb.t00/teststrategy.exp: Remove xgdb before trying the copy.
+
+	* gdb.stabs/wierd.def: Type attributes must be preceded by number=.
+	* gdb.stabs/wierd.exp: Remove xfails for type attributes.  Also
+	don't end command passed to gdb_test with newline.
+
 	* gdb.t13/{Makefile.in,gdbme.c,bitfields.exp}: If we #defined the
 	signed keyword away, don't expect signed bitfields to be signed.
 
