@@ -19,11 +19,14 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
+#include "gdb_string.h"
 #include "inferior.h"
 #include "symfile.h"		/* for entry_point_address */
 #include "gdbcore.h"
 #include "arch-utils.h"
 #include "regcache.h"
+#include "frame.h"
+#include "trad-frame.h"
 
 extern void _initialize_frv_tdep (void);
 
@@ -37,6 +40,7 @@ static gdbarch_deprecated_extract_struct_value_address_ftype frv_extract_struct_
 static gdbarch_frameless_function_invocation_ftype frv_frameless_function_invocation;
 static gdbarch_deprecated_push_arguments_ftype frv_push_arguments;
 static gdbarch_deprecated_saved_pc_after_call_ftype frv_saved_pc_after_call;
+static void frv_frame_init_saved_regs (struct frame_info *frame);
 
 static void frv_pop_frame_regular (struct frame_info *frame);
 
@@ -92,6 +96,9 @@ struct frame_extra_info
     /* Non-zero if we've saved our return address on the stack yet.
        Zero if it's still sitting in the link register.  */
     int lr_saved_on_stack;
+
+    /* Table indicating the location of each and every register.  */
+    struct trad_frame_saved_reg *saved_regs;
   };
 
 
@@ -271,12 +278,16 @@ static CORE_ADDR
 frv_frame_chain (struct frame_info *frame)
 {
   CORE_ADDR saved_fp_addr;
+  struct frame_extra_info *extra_info =
+    get_frame_extra_info (frame);
 
-  if (frame->saved_regs && frame->saved_regs[fp_regnum] != 0)
-    saved_fp_addr = frame->saved_regs[fp_regnum];
+  if (extra_info &&
+      extra_info->saved_regs && 
+      extra_info->saved_regs[fp_regnum].addr != 0)
+    saved_fp_addr = extra_info->saved_regs[fp_regnum].addr;
   else
     /* Just assume it was saved in the usual place.  */
-    saved_fp_addr = frame->frame;
+    saved_fp_addr = get_frame_base (frame);
 
   return read_memory_integer (saved_fp_addr, 4);
 }
@@ -284,28 +295,32 @@ frv_frame_chain (struct frame_info *frame)
 static CORE_ADDR
 frv_frame_saved_pc (struct frame_info *frame)
 {
+  struct frame_extra_info *extra_info =
+    get_frame_extra_info (frame);
+
   frv_frame_init_saved_regs (frame);
 
   /* Perhaps the prologue analyzer recorded where it was stored.
      (As of 14 Oct 2001, it never does.)  */
-  if (frame->saved_regs && frame->saved_regs[pc_regnum] != 0)
-    return read_memory_integer (frame->saved_regs[pc_regnum], 4);
+  if (extra_info && extra_info->saved_regs && 
+      extra_info->saved_regs[pc_regnum].addr != 0)
+    return read_memory_integer (extra_info->saved_regs[pc_regnum].addr, 4);
 
   /* If the prologue analyzer tells us the link register was saved on
      the stack, get it from there.  */
-  if (frame->extra_info->lr_saved_on_stack)
-    return read_memory_integer (frame->frame + 8, 4);
+  if (extra_info->lr_saved_on_stack)
+    return read_memory_integer (get_frame_base (frame) + 8, 4);
 
   /* Otherwise, it's still in LR.
      However, if FRAME isn't the youngest frame, this is kind of
      suspicious --- if this frame called somebody else, then its LR
      has certainly been overwritten.  */
-  if (! frame->next)
+  if (! get_next_frame (frame))
     return read_register (lr_regnum);
 
   /* By default, assume it's saved in the standard place, relative to
      the frame pointer.  */
-  return read_memory_integer (frame->frame + 8, 4);
+  return read_memory_integer (get_frame_base (frame) + 8, 4);
 }
 
 
@@ -390,7 +405,7 @@ frv_analyze_prologue (CORE_ADDR pc, struct frame_info *frame)
 
   memset (gr_saved, 0, sizeof (gr_saved));
 
-  while (! frame || pc < frame->pc)
+  while (! frame || pc < get_frame_pc (frame))
     {
       LONGEST op = read_memory_integer (pc, 4);
 
@@ -658,7 +673,10 @@ frv_analyze_prologue (CORE_ADDR pc, struct frame_info *frame)
 
   if (frame)
     {
-      frame->extra_info->lr_saved_on_stack = lr_saved_on_stack;
+      struct frame_extra_info *extra_info = 
+	get_frame_extra_info (frame);
+
+      extra_info->lr_saved_on_stack = lr_saved_on_stack;
 
       /* If we know the relationship between the stack and frame
          pointers, record the addresses of the registers we noticed.
@@ -667,14 +685,17 @@ frv_analyze_prologue (CORE_ADDR pc, struct frame_info *frame)
          their addresses relative to the FP.  */
       if (fp_set)
         {
+	  struct trad_frame_saved_reg *saved_regs;
           int i;
 
+	  saved_regs = extra_info->saved_regs;
           for (i = 0; i < 64; i++)
             if (gr_saved[i])
-              frame->saved_regs[i] = (frame->frame
-                                      - fp_offset + gr_sp_offset[i]);
+	      trad_frame_set_value (saved_regs, i, 
+			            get_frame_base (frame) - fp_offset 
+				    + gr_sp_offset[i]);
 
-          frame->extra_info->fp_to_callers_sp_offset = framesize - fp_offset;
+          extra_info->fp_to_callers_sp_offset = framesize - fp_offset;
         }
     }
 
@@ -716,18 +737,23 @@ frv_skip_prologue (CORE_ADDR pc)
 static void
 frv_frame_init_saved_regs (struct frame_info *frame)
 {
-  if (frame->saved_regs)
+  struct frame_extra_info *extra_info =
+    get_frame_extra_info (frame);
+
+  if (extra_info && extra_info->saved_regs)
     return;
 
-  frame_saved_regs_zalloc (frame);
-  frame->saved_regs[fp_regnum] = frame->frame;
+  extra_info->saved_regs = trad_frame_alloc_saved_regs (frame);
+  trad_frame_set_value (extra_info->saved_regs,
+			fp_regnum, get_frame_base (frame));
 
   /* Find the beginning of this function, so we can analyze its
      prologue.  */     
   {
     CORE_ADDR func_addr, func_end;
 
-    if (find_pc_partial_function (frame->pc, NULL, &func_addr, &func_end))
+    if (find_pc_partial_function (get_frame_pc (frame), 
+				  NULL, &func_addr, &func_end))
       frv_analyze_prologue (func_addr, frame);
   }
 }
@@ -744,7 +770,8 @@ frv_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 static CORE_ADDR
 frv_extract_struct_value_address (char *regbuf)
 {
-  return extract_unsigned_integer (regbuf + frv_register_byte (struct_return_regnum),
+  return extract_unsigned_integer (regbuf + 
+				   frv_register_byte (struct_return_regnum),
 				   4);
 }
 
@@ -769,9 +796,12 @@ frv_saved_pc_after_call (struct frame_info *frame)
 static void
 frv_init_extra_frame_info (int fromleaf, struct frame_info *frame)
 {
-  frame_extra_info_zalloc (frame, sizeof (struct frame_extra_info));
-  frame->extra_info->fp_to_callers_sp_offset = 0;
-  frame->extra_info->lr_saved_on_stack = 0;
+  struct frame_extra_info *extra_info =
+    frame_extra_info_zalloc (frame, sizeof (struct frame_extra_info));
+
+  extra_info->fp_to_callers_sp_offset = 0;
+  extra_info->lr_saved_on_stack = 0;
+  extra_info->saved_regs = trad_frame_alloc_saved_regs (frame);
 }
 
 #define ROUND_UP(n,a) (((n)+(a)-1) & ~((a)-1))
@@ -897,25 +927,29 @@ frv_pop_frame (void)
 static void
 frv_pop_frame_regular (struct frame_info *frame)
 {
+  struct frame_extra_info *extra_info;
+  struct trad_frame_saved_reg *saved_regs;
+
   CORE_ADDR fp;
   int regno;
 
-  fp = frame->frame;
+  fp = get_frame_base (frame);
 
   frv_frame_init_saved_regs (frame);
-
+  extra_info = get_frame_extra_info (frame);
+  saved_regs = extra_info->saved_regs;
   write_register (pc_regnum, frv_frame_saved_pc (frame));
   for (regno = 0; regno < frv_num_regs; ++regno)
     {
-      if (frame->saved_regs[regno]
+      if (extra_info->saved_regs[regno].addr
 	  && regno != pc_regnum
 	  && regno != sp_regnum)
 	{
 	  write_register (regno,
-			  read_memory_integer (frame->saved_regs[regno], 4));
+			  read_memory_integer (saved_regs[regno].addr, 4));
 	}
     }
-  write_register (sp_regnum, fp + frame->extra_info->fp_to_callers_sp_offset);
+  write_register (sp_regnum, fp + extra_info->fp_to_callers_sp_offset);
   flush_cached_frames ();
 }
 
