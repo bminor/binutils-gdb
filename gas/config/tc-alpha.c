@@ -1139,12 +1139,12 @@ md_pcrel_from (fixP)
   valueT addr = fixP->fx_where + fixP->fx_frag->fr_address;
   switch (fixP->fx_r_type)
     {
-    case BFD_RELOC_ALPHA_GPDISP:
-    case BFD_RELOC_ALPHA_GPDISP_HI16:
-    case BFD_RELOC_ALPHA_GPDISP_LO16:
-      return addr;
+    case BFD_RELOC_23_PCREL_S2:
+    case BFD_RELOC_ALPHA_HINT:
+    case BFD_RELOC_ALPHA_BRSGP:
+      return addr + 4;
     default:
-      return fixP->fx_size + addr;
+      return addr;
     }
 }
 
@@ -1500,10 +1500,6 @@ alpha_force_relocation (f)
     case BFD_RELOC_ALPHA_TPREL_LO16:
     case BFD_RELOC_ALPHA_TPREL16:
       return 1;
-
-    case BFD_RELOC_23_PCREL_S2:
-    case BFD_RELOC_ALPHA_HINT:
-      return 0;
 
     default:
       break;

@@ -1,3 +1,9 @@
+2002-09-19  Richard Henderson  <rth@redhat.com>
+
+	* gas/alpha/elf-reloc-7.s: New.
+	* gas/alpha/elf-reloc-7.d: New.
+	* gas/alpha/alpha.exp: Run it.
+
 2002-09-18  Chris Demetriou  <cgd@broadcom.com>
 
 	* gas/mips/mips-abi32-pic2.s: New file.

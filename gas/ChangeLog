@@ -1,3 +1,9 @@
+2002-09-19  Richard Henderson  <rth@redhat.com>
+
+	* config/tc-alpha.c (md_pcrel_from): Only adjust special for
+	branch type relocs.
+	(alpha_force_relocation): Don't special-case branch type relocs.
+
 2002-09-19  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-m68k.c (select_control_regs): Handle situation where
