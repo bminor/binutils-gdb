@@ -1,3 +1,7 @@
+2005-01-29  Baurzhan Ismagulov  <ibr@radix50.net>
+
+	* MAINTAINERS: Add myself to "Write After Approval".
+
 2005-01-29  Mark Kettenis  <kettenis@gnu.org>
 
 	* configure.ac: Remove extra check for ranlib.
