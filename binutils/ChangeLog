@@ -1,3 +1,13 @@
+Fri May  7 13:57:50 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Makefile.in (RUNTEST): Define.
+	(FLAGS_TO_PASS): Pass down RUNTEST.
+
+Tue May  4 10:06:50 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Makefile.in (DEMANGLER_PROG): Name it c++filt.
+	(PROG): Also build and install COPY_PROG.
+
 Mon May  3 19:11:48 1993  Per Bothner  (bothner@cygnus.com)
 
 	* Makefile.in:  Change definition of $(tooldir) to match FSF.
