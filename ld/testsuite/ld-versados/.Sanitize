@@ -26,12 +26,12 @@ Things-to-keep:
 t1-1.ro
 t1-2.ro
 t1.ld
-t1.out.ok
+t1.outok
 t2-1.ro
 t2-2.ro
 t2-3.ro
 t2.ld
-t2.out.ok
+t2.outok
 versados.exp
 
 Things-to-lose:
