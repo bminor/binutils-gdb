@@ -78,12 +78,12 @@ INSTALL_TARGET = install.all
 all:	$(ALL)
 
 info:	cfg-paper.info configure.info
-	rootme=`pwd` ; export rootme ; $(MAKE) subdir_do DO=info "DODIRS=$(SUBDIRS)" "MAKEINFO=$(MAKEINFO)"
+	@rootme=`pwd` ; export rootme ; $(MAKE) subdir_do DO=info "DODIRS=$(SUBDIRS)" "MAKEINFO=$(MAKEINFO)"
 
-check:; rootme=`pwd` ; export rootme ; $(MAKE) subdir_do DO=check \
+check:; @rootme=`pwd` ; export rootme ; $(MAKE) subdir_do DO=check \
 	"DODIRS=`echo $(SUBDIRS) | sed -e \"s/libg\+\+//\"" \
 	"MAKEINFO=$(MAKEINFO)"
-	if [ -d libg++ ] ; then \
+	@if [ -d libg++ ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd libg++ ; \
 		 $(MAKE) check "CC=$${rootme}/gcc/gcc \
@@ -92,7 +92,7 @@ check:; rootme=`pwd` ; export rootme ; $(MAKE) subdir_do DO=check \
 		
 
 clean-info:
-	$(MAKE) subdir_do DO=clean-info "DODIRS=$(SUBDIRS)"
+	@$(MAKE) subdir_do DO=clean-info "DODIRS=$(SUBDIRS)"
 	rm -f cfg-paper.info* configure.info*
 
 cfg-paper.info: cfg-paper.texi
@@ -103,10 +103,10 @@ configure.info: configure.texi
 
 install-info: install-info-dirs force
 	[ -d $(infodir) ] || mkdir $(infodir)
-	$(MAKE) subdir_do DO=install-info "DODIRS=$(SUBDIRS)"
+	@$(MAKE) subdir_do DO=install-info "DODIRS=$(SUBDIRS)"
 	$(INSTALL_DATA) cfg-paper.info $(infodir)/cfg-paper.info
 	$(INSTALL_DATA) configure.info $(infodir)/configure.info
-	$(MAKE) dir.info install-dir.info
+	@$(MAKE) dir.info install-dir.info
 
 install-dir.info:
 	$(INSTALL_DATA) dir.info $(infodir)/dir.info
@@ -1927,7 +1927,7 @@ all.xclib:	all.normal
 	fi
 
 subdir_do:
-	for i in $(DODIRS); do \
+	@for i in $(DODIRS); do \
 		if [ -f ./$$i/localenv ] ; then \
 			if (rootme=`pwd` ; export rootme ; cd ./$$i; \
 				$(MAKE) \

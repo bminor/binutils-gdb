@@ -1,3 +1,7 @@
+Fri Apr 24 15:51:51 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* Makefile.in: don't print subdir_do or recursion lines.
+
 Wed Apr 22 18:06:55 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
 
 	* configure: test for and move config.status pieces from
