@@ -1,3 +1,28 @@
+Fri Oct 25 18:59:32 1991  Per Bothner  (bothner at cygnus.com)
+
+	Various fixes to improve g++ debugging.
+	* symtab.h:  Add is_const and is_volatile flags for each method.
+	These are bit fields - take their space from voffset,
+	which shrinks to 30 bits.  Since voffset is now a bitfield,
+	make it unsigned for portability.  This changes its interpretation
+	slightly:  Static methods now have voffset 1 instead of -1,
+	and virtual offsets start at 2, not 1.
+	* symtab.c:  Renamed gdb_mangle_typename to gdb_mangle_name,
+	since it now returns an entire magled method name, not just
+	the type part.  This avoids some duplication.
+	It also allows us to correctly mangle const and volatile
+	methods (using the new is_const and is_volatile bit fields
+	mentioned above).
+	* valprint.c (type_print_base), values.c (check_stub_method):
+	Simplify by using new gdb_mangle_name.
+	* values.c (value_headof):  Fix to correctly handle single
+	inheritance (actually two fixes, either of which suffices).
+	* dbxread.c (read_struct_type):  Handle const and volatile
+	method specifiers.
+	* dbxread.c (read_struct_type):  Yet one more place where
+	we must handle '\\' continuations.
+	* valprint.c (vtbl_ptr_name): Add final '\0'.
+
 Fri Oct 25 16:06:38 1991  Stu Grossman  (grossman at cygnus.com)
 
 	* tm-sparc.h, tm-68k.h (EXTRACT_RETURN_VALUE):  fix output of

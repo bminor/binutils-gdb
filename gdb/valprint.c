@@ -409,7 +409,7 @@ is_vtbl_ptr_type(type)
 {
   char *typename = TYPE_NAME(type);
   static const char vtbl_ptr_name[] =
-    { CPLUS_MARKER,'v','t','b','l','_','p','t','r','_','t','y','p','e' };
+    { CPLUS_MARKER,'v','t','b','l','_','p','t','r','_','t','y','p','e', 0 };
 
   return (typename != NULL && !strcmp(typename, vtbl_ptr_name));
 }
@@ -1718,18 +1718,9 @@ type_print_base (type, stream, show, level)
 		  if (TYPE_FLAGS (TYPE_FN_FIELD_TYPE (f, j)) & TYPE_FLAG_STUB)
 		    {
 		      /* Build something we can demangle.  */
-		      char *strchr (), *gdb_mangle_typename ();
-		      char *inner_name = gdb_mangle_typename (type);
-		      char *mangled_name
-			= (char *)xmalloc (strlen (TYPE_FN_FIELDLIST_NAME (type, i))
-					  + strlen (inner_name)
-					  + strlen (TYPE_FN_FIELD_PHYSNAME (f, j))
-					  + 1);
-		      char *demangled_name, *cplus_demangle ();
-		      strcpy (mangled_name, TYPE_FN_FIELDLIST_NAME (type, i));
-		      strcat (mangled_name, inner_name);
-		      strcat (mangled_name, TYPE_FN_FIELD_PHYSNAME (f, j));
-		      demangled_name = cplus_demangle (mangled_name, 1);
+		      char *strchr (), *gdb_mangle_name (), *cplus_demangle ();
+		      char *mangled_name = gdb_mangle_name (type, i, j);
+		      char *demangled_name = cplus_demangle (mangled_name, 1);
 		      if (demangled_name == 0)
 			fprintf_filtered (stream, " <badly mangled name %s>",
 			    mangled_name);

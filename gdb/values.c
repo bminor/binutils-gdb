@@ -29,7 +29,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbcmd.h"
 
 extern char *cplus_demangle ();
-extern char *cplus_mangle_opname ();
 
 /* The value-history records all the values printed
    by print commands during this session.  Each chunk
@@ -995,7 +994,6 @@ value_headof (arg, btype, dtype)
   struct symbol *sym;
   CORE_ADDR pc_for_sym;
   char *demangled_name;
-
   btype = TYPE_VPTR_BASETYPE (dtype);
   check_stub_type (btype);
   if (btype != dtype)
@@ -1006,7 +1004,7 @@ value_headof (arg, btype, dtype)
 
   /* Check that VTBL looks like it points to a virtual function table.  */
   i = find_pc_misc_function (VALUE_ADDRESS (vtbl));
-  if (i < 0 || ! VTBL_PREFIX_P (misc_function_vector[i].name))
+  if (i < 0 || ! VTBL_PREFIX_P (demangled_name = misc_function_vector[i].name))
     {
       /* If we expected to find a vtable, but did not, let the user
 	 know that we aren't happy, but don't throw an error.
@@ -1026,27 +1024,40 @@ value_headof (arg, btype, dtype)
       entry = value_subscript (vtbl, value_from_longest (builtin_type_int, 
 						      (LONGEST) i));
       offset = longest_to_int (value_as_long (value_field (entry, 0)));
-      if (offset < best_offset)
+      /* If we use '<=' we can handle single inheritance
+       * where all offsets are zero - just use the first entry found. */
+      if (offset <= best_offset)
 	{
 	  best_offset = offset;
 	  best_entry = entry;
 	}
     }
-  if (best_entry == 0)
-    return arg;
-
   /* Move the pointer according to BEST_ENTRY's offset, and figure
      out what type we should return as the new pointer.  */
-  pc_for_sym = value_as_pointer (value_field (best_entry, 2));
-  sym = find_pc_function (pc_for_sym);
-  demangled_name = cplus_demangle (SYMBOL_NAME (sym), -1);
-  *(strchr (demangled_name, ':')) = '\0';
+  if (best_entry == 0)
+    {
+      /* An alternative method (which should no longer be necessary).
+       * But we leave it in for future use, when we will hopefully
+       * have optimizes the vtable to use thunks instead of offsets. */
+      /* Use the name of vtable itself to extract a base type. */
+      demangled_name += 4;  /* Skip _vt$ prefix. */
+    }
+  else
+    {
+      pc_for_sym = value_as_pointer (value_field (best_entry, 2));
+      sym = find_pc_function (pc_for_sym);
+      demangled_name = cplus_demangle (SYMBOL_NAME (sym), -1);
+      *(strchr (demangled_name, ':')) = '\0';
+    }
   sym = lookup_symbol (demangled_name, 0, VAR_NAMESPACE, 0, 0);
   if (sym == 0)
     error ("could not find type declaration for `%s'", SYMBOL_NAME (sym));
-  free (demangled_name);
-  arg = value_add (value_cast (builtin_type_int, arg),
-		   value_field (best_entry, 0));
+  if (best_entry)
+    {
+      free (demangled_name);
+      arg = value_add (value_cast (builtin_type_int, arg),
+		       value_field (best_entry, 0));
+    }
   VALUE_TYPE (arg) = lookup_pointer_type (SYMBOL_TYPE (sym));
   return arg;
 }
@@ -1241,40 +1252,13 @@ check_stub_method (type, i, j)
      struct type *type;
      int i, j;
 {
-  extern char *gdb_mangle_typename (), *strchr ();
+  extern char *gdb_mangle_name (), *strchr ();
   struct fn_field *f = TYPE_FN_FIELDLIST1 (type, i);
-  char *field_name = TYPE_FN_FIELDLIST_NAME (type, i);
-  char *inner_name = gdb_mangle_typename (type);
-  int mangled_name_len = (strlen (field_name)
-			  + strlen (inner_name)
-			  + strlen (TYPE_FN_FIELD_PHYSNAME (f, j))
-			  + 1);
-  char *mangled_name;
-  char *demangled_name;
+  char *mangled_name = gdb_mangle_name (type, i, j);
+  char *demangled_name = cplus_demangle (mangled_name, 0);
   char *argtypetext, *p;
   int depth = 0, argcount = 1;
   struct type **argtypes;
-
-  if (OPNAME_PREFIX_P (field_name))
-    {
-      char *opname = cplus_mangle_opname (field_name + 3);
-      if (opname == NULL)
-	error ("No mangling for \"%s\"", field_name);
-      mangled_name_len += strlen (opname);
-      mangled_name = (char *)xmalloc (mangled_name_len);
-
-      strncpy (mangled_name, field_name, 3);
-      mangled_name[3] = '\0';
-      strcat (mangled_name, opname);
-    }
-  else
-    {
-      mangled_name = (char *)xmalloc (mangled_name_len);
-      strcpy (mangled_name, TYPE_FN_FIELDLIST_NAME (type, i));
-    }
-  strcat (mangled_name, inner_name);
-  strcat (mangled_name, TYPE_FN_FIELD_PHYSNAME (f, j));
-  demangled_name = cplus_demangle (mangled_name, 0);
 
   /* Now, read in the parameters that define this type.  */
   argtypetext = strchr (demangled_name, '(') + 1;

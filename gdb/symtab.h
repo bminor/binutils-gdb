@@ -247,10 +247,12 @@ struct type
 	  /* For virtual functions.   */
 	  /* First baseclass that defines this virtual function.   */
 	  struct type *fcontext;
+	  unsigned int is_const : 1;
+	  unsigned int is_volatile : 1;
 	  /* Index into that baseclass's virtual function table,
-	     minus 1; else if static: VOFFSET_STATIC; else: 0.  */
-	  int voffset;
-#	  define VOFFSET_STATIC (-1)
+	     minus 2; else if static: VOFFSET_STATIC; else: 0.  */
+	  unsigned long voffset : 30;
+#	  define VOFFSET_STATIC 1
 	} *fn_fields;
 
       B_TYPE *private_fn_field_bits;
@@ -729,9 +731,9 @@ int current_source_line;
 #define TYPE_FN_FIELD_TYPE(thistype, n) (thistype)[n].type
 #define TYPE_FN_FIELD_ARGS(thistype, n) TYPE_ARG_TYPES ((thistype)[n].type)
 #define TYPE_FN_FIELD_PHYSNAME(thistype, n) (thistype)[n].physname
-#define TYPE_FN_FIELD_VIRTUAL_P(thistype, n) ((thistype)[n].voffset > 0)
+#define TYPE_FN_FIELD_VIRTUAL_P(thistype, n) ((thistype)[n].voffset > 1)
 #define TYPE_FN_FIELD_STATIC_P(thistype, n) ((thistype)[n].voffset == VOFFSET_STATIC)
-#define TYPE_FN_FIELD_VOFFSET(thistype, n) ((thistype)[n].voffset-1)
+#define TYPE_FN_FIELD_VOFFSET(thistype, n) ((thistype)[n].voffset-2)
 #define TYPE_FN_FIELD_FCONTEXT(thistype, n) ((thistype)[n].fcontext)
 
 #define TYPE_FN_PRIVATE_BITS(thistype) (thistype).private_fn_field_bits

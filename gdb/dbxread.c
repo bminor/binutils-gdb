@@ -4628,21 +4628,33 @@ read_struct_type (pp, type)
 	      *pp = p + 1;
 	      new_sublist->visibility = *(*pp)++ - '0';
 	      if (**pp == '\\') *pp = next_symbol_text ();
-	      /* FIXME-tiemann: need to add const/volatile info
-		 to the methods.  For now, just skip the char.
-		 In future, here's what we need to implement:
-
-		 A for normal functions.
-		 B for `const' member functions.
-		 C for `volatile' member functions.
-		 D for `const volatile' member functions.  */
-	      if (**pp == 'A' || **pp == 'B' || **pp == 'C' || **pp == 'D')
-	        (*pp)++;
-
-	      /* This probably just means we're processing a file compiled
-		 with g++ version 1.  */
-	      else
-	        complain(&const_vol_complaint, **pp);
+	      switch (**pp)
+		{
+		case 'A': /* Normal functions. */
+		  new_sublist->fn_field.is_const = 0;
+		  new_sublist->fn_field.is_volatile = 0;
+	          (*pp)++;
+		  break;
+		case 'B': /* `const' member functions. */
+		  new_sublist->fn_field.is_const = 1;
+		  new_sublist->fn_field.is_volatile = 0;
+	          (*pp)++;
+		  break;
+		case 'C': /* `volatile' member function. */
+		  new_sublist->fn_field.is_const = 0;
+		  new_sublist->fn_field.is_volatile = 1;
+	          (*pp)++;
+		  break;
+		case 'D': /* `const volatile' member function. */
+		  new_sublist->fn_field.is_const = 1;
+		  new_sublist->fn_field.is_volatile = 1;
+	          (*pp)++;
+		  break;
+		default:
+		  /* This probably just means we're processing a file compiled
+		     with g++ version 1.  */
+		  complain(&const_vol_complaint, **pp);
+		}
 
 	      switch (*(*pp)++)
 		{
@@ -4655,7 +4667,7 @@ read_struct_type (pp, type)
 		     the sign bit out, and usable as a valid index into
 		     the array.  Remove the sign bit here.  */
 		  new_sublist->fn_field.voffset =
-		      (0x7fffffff & read_number (pp, ';')) + 1;
+		      (0x7fffffff & read_number (pp, ';')) + 2;
 
 		  if (**pp == '\\') *pp = next_symbol_text ();
 
@@ -4697,6 +4709,7 @@ read_struct_type (pp, type)
 	      new_sublist->next = sublist;
 	      sublist = new_sublist;
 	      length++;
+	      if (**pp == '\\') *pp = next_symbol_text ();
 	    }
 	  while (**pp != ';' && **pp != '\0');
 

@@ -41,6 +41,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 extern char *getenv ();
 
 extern char *cplus_demangle ();
+extern char *cplus_mangle_opname ();
 extern struct value *value_of_this ();
 extern void break_command ();
 extern void select_source_symtab ();
@@ -224,31 +225,52 @@ check_stub_type(type)
 
 /* Demangle a GDB method stub type.  */
 char *
-gdb_mangle_typename (type)
+gdb_mangle_name (type, i, j)
      struct type *type;
+     int i, j;
 {
-  static struct type *last_type;
-  static char *mangled_typename;
+  int mangled_name_len;
+  char *mangled_name;
+  struct fn_field *f = TYPE_FN_FIELDLIST1 (type, i);
+  struct fn_field *method = &f[j];
+  char *field_name = TYPE_FN_FIELDLIST_NAME (type, i);
 
-  if (type != last_type)
+  /* Need a new type prefix.  */
+  char *strchr ();
+  char *const_prefix = method->is_const ? "C" : "";
+  char *volatile_prefix = method->is_volatile ? "V" : "";
+  char *newname = type_name_no_tag (type);
+  char buf[20];
+  int len = strlen (newname);
+
+  sprintf (buf, "__%s%s%d", const_prefix, volatile_prefix, len);
+  mangled_name_len = (strlen (field_name)
+			  + strlen (buf) + len
+			  + strlen (TYPE_FN_FIELD_PHYSNAME (f, j))
+			  + 1);
+
+  if (OPNAME_PREFIX_P (field_name))
     {
-      /* Need a new type prefix.  */
-      char *strchr ();
-      char *newname = type_name_no_tag (type);
-      char buf[20];
-      int len;
+      char *opname = cplus_mangle_opname (field_name + 3);
+      if (opname == NULL)
+	error ("No mangling for \"%s\"", field_name);
+      mangled_name_len += strlen (opname);
+      mangled_name = (char *)xmalloc (mangled_name_len);
 
-      if (mangled_typename)
-	free (mangled_typename);
-
-      len = strlen (newname);
-      sprintf (buf, "__%d", len);
-      mangled_typename = (char *)xmalloc (strlen (buf) + len + 1);
-      strcpy (mangled_typename, buf);
-      strcat (mangled_typename, newname);
-      /* Now we have built "__#newname".  */
+      strncpy (mangled_name, field_name, 3);
+      mangled_name[3] = '\0';
+      strcat (mangled_name, opname);
     }
-  return mangled_typename;
+  else
+    {
+      mangled_name = (char *)xmalloc (mangled_name_len);
+      strcpy (mangled_name, TYPE_FN_FIELDLIST_NAME (type, i));
+    }
+  strcat (mangled_name, buf);
+  strcat (mangled_name, newname);
+  strcat (mangled_name, TYPE_FN_FIELD_PHYSNAME (f, j));
+
+  return mangled_name;
 }
 
 /* Lookup a primitive type named NAME. 
