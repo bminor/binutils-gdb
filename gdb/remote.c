@@ -1812,4 +1812,9 @@ _initialize_remote ()
 {
   add_target (&remote_ops);
   add_target (&extended_remote_ops);
+
+  add_show_from_set (add_set_cmd ("remotetimeout", no_class,
+				  var_integer, (char *)&remote_timeout,
+				  "Set timeout value for remote read.\n", &setlist),
+		     &showlist);
 }

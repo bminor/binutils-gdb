@@ -1,9 +1,15 @@
+Fri Jan 12 13:11:42 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	From Wilfried Moser <wilfried.moser@aut.alcatel.at>:
+	* remote.c (remotetimeout): New GDB variable, use to set the
+	remote timeout for reading.
+
 Fri Jan 12 07:14:27 1996  Fred Fish  <fnf@cirdan.cygnus.com>
 
 	* lynx-nat.c, irix4-nat.c, sparc-nat.c: Include gdbcore.h
 	to get "struct core_fns" defined.
 	* Makefile.in (lynx-nat.o, irix4-nat.o, sparc-nat.o):
- 	Are dependant upon gdbcore_h.
+ 	Are dependent upon gdbcore_h.
 
 Thu Jan 11 23:13:24 1996  Per Bothner  <bothner@cygnus.com>
 
@@ -141,7 +147,8 @@ Tue Jan  9 09:33:53 1996  Jeffrey A Law  (law@cygnus.com)
 
 Tue Jan  9 04:44:47 1996  Wilfried Moser (Alcatel)  <moser@rtl.cygnus.com>
 
-	* ch-exp.c (parse_primval): in case ARRAY: Add missing FORWARD_TOKEN ().
+	* ch-exp.c (parse_primval): In case ARRAY, add missing
+	FORWARD_TOKEN ().
 
 Mon Jan  8 13:29:34 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
