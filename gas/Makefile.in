@@ -510,17 +510,17 @@ bootstrap3: force
 stage1: force
 	-mkdir stage1
 	-mv $(STAGESTUFF) stage1
-	(cd stage1 ; ln as.new as)
+	if [ ! -f stage1/as ] ; then (cd stage1 ; ln as.new as) ; fi
 
 stage2: force
 	-mkdir stage2
 	-mv $(STAGESTUFF) stage2
-	(cd stage2 ; ln as.new as)
+	if [ ! -f stage2/as ] ; then (cd stage2 ; ln as.new as) ; fi
 
 stage3: force
 	-mkdir stage3
 	-mv $(STAGESTUFF) stage3
-	(cd stage3 ; ln as.new as)
+	if [ ! -f stage3/as ] ; then (cd stage3 ; ln as.new as) ; fi
 
 against=stage2
 
