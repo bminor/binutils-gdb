@@ -1,3 +1,8 @@
+Mon Jun  6 10:57:28 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* libbfd-in.h: Add warning that libbfd.h is a generated file.
+	* libbfd.h: Rebuilt.
+
 Sun Jun  5 15:02:30 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	Changes to support ELF strip and objcopy on dynamically linked
