@@ -1,3 +1,12 @@
+2002-04-07  Elena Zannoni  <ezannoni@redhat.com>
+
+        * mi-cmd-disas.c (dump_insns): New function.
+        (do_mixed_source_and_assembly): New function.
+        (do_assembly_only): New function.
+        (do_disassembly): New function.
+        (mi_cmd_disassemble): Rewrite using smaller, more modular
+        functions.
+
 2002-04-05  Jim Blandy  <jimb@redhat.com>
 
 	* mi-cmd-stack.c (list_args_or_locals): Pass new arg to
