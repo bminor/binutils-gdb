@@ -4,15 +4,15 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: binutils 2.11\n"
+"Project-Id-Version: binutils 2.12-pre020121\n"
 "POT-Creation-Date: 2002-01-17 13:58+0000\n"
-"PO-Revision-Date: 2001-09-20 08:39EEST\n"
+"PO-Revision-Date: 2002-02-04 21:49EET\n"
 "Last-Translator: Deniz Akkus Kanca <deniz@arayan.com>\n"
 "Language-Team: Turkish <gnu-tr-u12a@lists.sourceforge.net>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=ISO-8859-9\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: KBabel 0.9.1\n"
+"X-Generator: KBabel 0.9.5\n"
 
 #: addr2line.c:73
 #, c-format
@@ -25,17 +25,14 @@ msgstr ""
 "       [--target=bfd_adý]                            hedef\n"
 "       [-e uygulama] [--exe=uygulama] \n"
 "       [--demangle[=tarz]]                           düzeltme tarzý\n"
-"       [--basenames]                                 temel isimler       [--"
-"functions] [adres adres ...]\n"
-"             iþlevler\n"
+"       [--basenames]                                 temel isimler\n"
+"       [--functions] [adres adres ...]               iþlevler\n"
 
 #: addr2line.c:80 ar.c:289 nlmconv.c:1121 objcopy.c:423 objcopy.c:455
 #: readelf.c:2181 size.c:91 strings.c:655 windres.c:737
 #, c-format
 msgid "Report bugs to %s\n"
-msgstr ""
-"Yazýlým hatalarýný %s adresine, çeviri hatalarýný <gnu-tr-u12a@lists."
-"sourceforge.net> adresine gönderin\n"
+msgstr "Yazýlým hatalarýný %s adresine, çeviri hatalarýný <gnu-tr-u12a@lists.sourceforge.net> adresine gönderin\n"
 
 #: addr2line.c:240
 #, c-format
@@ -54,12 +51,8 @@ msgstr "arþivde %s girdisi yok\n"
 
 #: ar.c:254
 #, c-format
-msgid ""
-"Usage: %s [-X32_64] [-]{dmpqrstx}[abcfilNoPsSuvV] [member-name] [count] "
-"archive-file file...\n"
-msgstr ""
-"Kullaným: %s [-X32_64] [-]{dmpqrstx}[abcfilNoPsSuvV] [üye-adý] [sayý] arþiv-"
-"dosyasý dosya...\n"
+msgid "Usage: %s [-X32_64] [-]{dmpqrstx}[abcfilNoPsSuvV] [member-name] [count] archive-file file...\n"
+msgstr "Kullaným: %s [-X32_64] [-]{dmpqrstx}[abcfilNoPsSuvV] [üye-adý] [sayý] arþiv-dosyasý dosya...\n"
 
 #: ar.c:257
 #, c-format
@@ -87,11 +80,8 @@ msgid "  q[f]         - quick append file(s) to the archive\n"
 msgstr "  q[f]         - dosya(larý) arþivin sonuna çabucak ekler\n"
 
 #: ar.c:263
-msgid ""
-"  r[ab][f][u]  - replace existing or insert new file(s) into the archive\n"
-msgstr ""
-"  r[ab][f][u]  - arþivde olan bir dosyanýn yerine yenisi koyar veya arþive "
-"yeni dosya(lar) ekler\n"
+msgid "  r[ab][f][u]  - replace existing or insert new file(s) into the archive\n"
+msgstr "  r[ab][f][u]  - arþivde olan bir dosyanýn yerine yenisi koyar veya arþive yeni dosya(lar) ekler\n"
 
 #: ar.c:264
 msgid "  t            - display contents of archive\n"
@@ -111,8 +101,7 @@ msgstr "  [a]          - dosyalarý [üye-adý]'ndan sonra ekler\n"
 
 #: ar.c:268
 msgid "  [b]          - put file(s) before [member-name] (same as [i])\n"
-msgstr ""
-"  [b]          - dosya(larý) [üye-adý]'ndan önce ekler ([i] ile ayný)\n"
+msgstr "  [b]          - dosya(larý) [üye-adý]'ndan önce ekler ([i] ile ayný)\n"
 
 #: ar.c:269
 msgid "  [N]          - use instance [count] of name\n"
@@ -131,12 +120,8 @@ msgid "  [o]          - preserve original dates\n"
 msgstr "  [o]          - orjinal zaman damgalarýný korur\n"
 
 #: ar.c:273
-msgid ""
-"  [u]          - only replace files that are newer than current archive "
-"contents\n"
-msgstr ""
-"  [u]          - yalnýzca þimdiki arþiv içeriðinden daha yeni olan dosyalarý "
-"deðiþtirir\n"
+msgid "  [u]          - only replace files that are newer than current archive contents\n"
+msgstr "  [u]          - yalnýzca þimdiki arþiv içeriðinden daha yeni olan dosyalarý deðiþtirir\n"
 
 #: ar.c:274
 msgid " generic modifiers:\n"
@@ -144,8 +129,7 @@ msgstr " genel deðiþtiriciler:\n"
 
 #: ar.c:275
 msgid "  [c]          - do not warn if the library had to be created\n"
-msgstr ""
-"  [c]          - eðer kitaplýk oluþturulmak zorunda kalýnýrsa, uyarý vermez\n"
+msgstr "  [c]          - eðer kitaplýk oluþturulmak zorunda kalýnýrsa, uyarý vermez\n"
 
 #: ar.c:276
 msgid "  [s]          - create an archive index (cf. ranlib)\n"
@@ -209,14 +193,8 @@ msgstr "%s üzerinde iç durumlama hatasý"
 
 #: ar.c:834
 #, c-format
-msgid ""
-"\n"
-"<member %s>\n"
-"\n"
-msgstr ""
-"\n"
-"<üye %s>\n"
-"\n"
+msgid "\n<member %s>\n\n"
+msgstr "\n<üye %s>\n\n"
 
 #: ar.c:850 ar.c:918
 #, c-format
@@ -328,14 +306,13 @@ msgid "%s: supported targets:"
 msgstr "%s: desteklenen hedefler:"
 
 #: bucomm.c:153
-#, fuzzy
 msgid "Supported architectures:"
-msgstr "Desteklenen hedefler:"
+msgstr "Desteklenen platformlar:"
 
 #: bucomm.c:155
-#, fuzzy, c-format
+#, c-format
 msgid "%s: supported architectures:"
-msgstr "%s: desteklenen hedefler:"
+msgstr "%s: desteklenen platformlar:"
 
 #: bucomm.c:262
 #, c-format
@@ -350,8 +327,7 @@ msgstr "#satýrlar %d "
 #: coffdump.c:468 sysdump.c:740
 #, c-format
 msgid "%s: Print a human readable interpretation of a SYSROFF object file\n"
-msgstr ""
-"%s: SYSROFF nesne dosyasýný insan tarafýndan okunabilir biçemde yazdýrýr\n"
+msgstr "%s: SYSROFF nesne dosyasýný insan tarafýndan okunabilir biçemde yazdýrýr\n"
 
 #: coffdump.c:531 srconv.c:2029 sysdump.c:799
 msgid "no input file specified"
@@ -636,19 +612,12 @@ msgstr "Kullaným %s <seçenekler> <nesne-dosyalarý>\n"
 #. xgetext:c-format
 #: dlltool.c:3140
 #, c-format
-msgid ""
-"   -m --machine <machine>    Create as DLL for <machine>.  [default: %s]\n"
-msgstr ""
-"   -m --machine <makina>    <makina> için DLL olarak oluþtur.  [öntanýmlý: %"
-"s]\n"
+msgid "   -m --machine <machine>    Create as DLL for <machine>.  [default: %s]\n"
+msgstr "   -m --machine <makina>    <makina> için DLL olarak oluþtur.  [öntanýmlý: %s]\n"
 
 #: dlltool.c:3141
-msgid ""
-"        possible <machine>: arm[_interwork], i386, mcore[-elf]{-le|-be}, "
-"ppc, thumb\n"
-msgstr ""
-"        tanýmlý <makina>: arm[_interwork], i386, mcore[-elf]{-le|-be}, ppc, "
-"thumb\n"
+msgid "        possible <machine>: arm[_interwork], i386, mcore[-elf]{-le|-be}, ppc, thumb\n"
+msgstr "        tanýmlý <makina>: arm[_interwork], i386, mcore[-elf]{-le|-be}, ppc, thumb\n"
 
 #: dlltool.c:3142
 msgid "   -e --output-exp <outname> Generate an export file.\n"
@@ -660,14 +629,11 @@ msgstr "   -l --output-lib <çýktýadý> Arayüz kitaplýðý oluþturur.\n"
 
 #: dlltool.c:3144
 msgid "   -a --add-indirect         Add dll indirects to export file.\n"
-msgstr ""
-"   -a --add-indirect         Ýhraç dosyasýna dll yönlendirmelerini ekler.\n"
+msgstr "   -a --add-indirect         Ýhraç dosyasýna dll yönlendirmelerini ekler.\n"
 
 #: dlltool.c:3145
-msgid ""
-"   -D --dllname <name>       Name of input dll to put into interface lib.\n"
-msgstr ""
-"   -D --dllname <isim>       Arayüz kitaplýðýna eklenecek girdi dll adý.\n"
+msgid "   -D --dllname <name>       Name of input dll to put into interface lib.\n"
+msgstr "   -D --dllname <isim>       Arayüz kitaplýðýna eklenecek girdi dll adý.\n"
 
 #: dlltool.c:3146
 msgid "   -d --input-def <deffile>  Name of .def file to be read in.\n"
@@ -675,8 +641,7 @@ msgstr "   -d --input-def <taným_dosyasý>  Okunacak .def dosyasýnýn adý.\n"
 
 #: dlltool.c:3147
 msgid "   -z --output-def <deffile> Name of .def file to be created.\n"
-msgstr ""
-"   -z --output-def <taným_dosyasý> Oluþturulacak .def dosyasýnýn adý.\n"
+msgstr "   -z --output-def <taným_dosyasý> Oluþturulacak .def dosyasýnýn adý.\n"
 
 #: dlltool.c:3148
 msgid "      --export-all-symbols   Export all symbols to .def\n"
@@ -684,8 +649,7 @@ msgstr "      --export-all-symbols   Bütün sembolleri .def'e ihraç eder\n"
 
 #: dlltool.c:3149
 msgid "      --no-export-all-symbols  Only export listed symbols\n"
-msgstr ""
-"      --no-export-all-symbols  Yalnýzca listelenmiþ sembolleri ihraç eder\n"
+msgstr "      --no-export-all-symbols  Yalnýzca listelenmiþ sembolleri ihraç eder\n"
 
 #: dlltool.c:3150
 msgid "      --exclude-symbols <list> Don't export <list>\n"
@@ -693,15 +657,11 @@ msgstr "      --exclude-symbols <liste>  <liste>'yi ihraç etmez\n"
 
 #: dlltool.c:3151
 msgid "      --no-default-excludes  Clear default exclude symbols\n"
-msgstr ""
-"      --no-default-excludes  Öntanýmlý ihraç edilmeyecek sembol listesini "
-"boþaltýr\n"
+msgstr "      --no-default-excludes  Öntanýmlý ihraç edilmeyecek sembol listesini boþaltýr\n"
 
 #: dlltool.c:3152
 msgid "   -b --base-file <basefile> Read linker generated base file.\n"
-msgstr ""
-"   -b --base-file <temel_dosyasý> Baðlayýcýnýn oluþturduðu temel dosyayý "
-"okur.\n"
+msgstr "   -b --base-file <temel_dosyasý> Baðlayýcýnýn oluþturduðu temel dosyayý okur.\n"
 
 #: dlltool.c:3153
 msgid "   -x --no-idata4            Don't generate idata$4 section.\n"
@@ -712,17 +672,12 @@ msgid "   -c --no-idata5            Don't generate idata$5 section.\n"
 msgstr "   -c --no-idata5            idata$5 bölümü oluþturmaz.\n"
 
 #: dlltool.c:3155
-msgid ""
-"   -U --add-underscore       Add underscores to symbols in interface "
-"library.\n"
-msgstr ""
-"   -U --add-underscore       Arayüz kitaplýðýndaki sembollere alt-tire "
-"ekler.\n"
+msgid "   -U --add-underscore       Add underscores to symbols in interface library.\n"
+msgstr "   -U --add-underscore       Arayüz kitaplýðýndaki sembollere alt-tire ekler.\n"
 
 #: dlltool.c:3156
 msgid "   -k --kill-at              Kill @<n> from exported names.\n"
-msgstr ""
-"   -k --kill-at              Ýhraç edilmiþ isimlerden @<n>'da öldürür.\n"
+msgstr "   -k --kill-at              Ýhraç edilmiþ isimlerden @<n>'da öldürür.\n"
 
 #: dlltool.c:3157
 msgid "   -A --add-stdcall-alias    Add aliases without @<n>.\n"
@@ -737,18 +692,12 @@ msgid "   -f --as-flags <flags>     Pass <flags> to the assembler.\n"
 msgstr "   -f --as-flags <seçenekler>     Üreticiye <seçenekler>i geçirir.\n"
 
 #: dlltool.c:3160
-msgid ""
-"   -C --compat-implib        Create backward compatible import library.\n"
-msgstr ""
-"   -C --compat-implib        Geçmiþe uyumlu ithal kitaplýðý oluþturur.\n"
+msgid "   -C --compat-implib        Create backward compatible import library.\n"
+msgstr "   -C --compat-implib        Geçmiþe uyumlu ithal kitaplýðý oluþturur.\n"
 
 #: dlltool.c:3161
-msgid ""
-"   -n --no-delete            Keep temp files (repeat for extra "
-"preservation).\n"
-msgstr ""
-"   -n --no-delete            Geçici dosyalarý tutar (daha da koruyucu olmasý "
-"için tekrarlanabilir).\n"
+msgid "   -n --no-delete            Keep temp files (repeat for extra preservation).\n"
+msgstr "   -n --no-delete            Geçici dosyalarý tutar (daha da koruyucu olmasý için tekrarlanabilir).\n"
 
 #: dlltool.c:3162
 msgid "   -v --verbose              Be verbose.\n"
@@ -763,11 +712,8 @@ msgid "   -h --help                 Display this information.\n"
 msgstr "   -h --help                 Bu yardýmý gösterir.\n"
 
 #: dlltool.c:3166
-msgid ""
-"   -M --mcore-elf <outname>  Process mcore-elf object files into <outname>.\n"
-msgstr ""
-"   -M --mcore-elf <çýktý_adý>  mcore-elf nesne dosyalarýný <çýktý_adý>'na "
-"iþler.\n"
+msgid "   -M --mcore-elf <outname>  Process mcore-elf object files into <outname>.\n"
+msgstr "   -M --mcore-elf <çýktý_adý>  mcore-elf nesne dosyalarýný <çýktý_adý>'na iþler.\n"
 
 #: dlltool.c:3167
 msgid "   -L --linker <name>        Use <name> as the linker.\n"
@@ -775,8 +721,7 @@ msgstr "   -L --linker <isim>        Baðlayýcý olarak <isim> kullanýr.\n"
 
 #: dlltool.c:3168
 msgid "   -F --linker-flags <flags> Pass <flags> to the linker.\n"
-msgstr ""
-"   -F --linker-flags <seçenekler>  <seçenekler>i baðlayýcýya geçirir.\n"
+msgstr "   -F --linker-flags <seçenekler>  <seçenekler>i baðlayýcýya geçirir.\n"
 
 #: dlltool.c:3315
 #, c-format
@@ -859,8 +804,7 @@ msgstr "   --driver-name <sürücü>  \"gcc\"ye öntanýmlý\n"
 
 #: dllwrap.c:527
 msgid "   --driver-flags <flags> Override default ld flags\n"
-msgstr ""
-"   --driver-flags <seçenekler>  Öntanýmlý ld seçeneklerinin yerine geçer\n"
+msgstr "   --driver-flags <seçenekler>  Öntanýmlý ld seçeneklerinin yerine geçer\n"
 
 #: dllwrap.c:528
 msgid "   --dlltool-name <dlltool> Defaults to \"dlltool\"\n"
@@ -876,8 +820,7 @@ msgstr "   --image-base <temel>    Ýmaj temel adresini belirtir\n"
 
 #: dllwrap.c:531
 msgid "   --target <machine>     i386-cygwin32 or i386-mingw32\n"
-msgstr ""
-"   --target <makina>      hedef makina, i386-cygwin32 veya i386-mingw32\n"
+msgstr "   --target <makina>      hedef makina, i386-cygwin32 veya i386-mingw32\n"
 
 #: dllwrap.c:532
 msgid "   --dry-run              Show what needs to be run\n"
@@ -905,8 +848,7 @@ msgstr "   --output-lib <çýktý_adý> Girdi kitaplýðý oluþturur.\n"
 
 #: dllwrap.c:538
 msgid "   --add-indirect         Add dll indirects to export file.\n"
-msgstr ""
-"   --add-indirect         Dll yönlendirmelerini ihraç dosyasýna ekler.\n"
+msgstr "   --add-indirect         Dll yönlendirmelerini ihraç dosyasýna ekler.\n"
 
 #: dllwrap.c:539
 msgid "   --dllname <name>       Name of input dll to put into output lib.\n"
@@ -926,13 +868,11 @@ msgstr "   --export-all-symbols     Bütün sembolleri .def'e ihraç eder\n"
 
 #: dllwrap.c:543
 msgid "   --no-export-all-symbols  Only export .drectve symbols\n"
-msgstr ""
-"   --no-export-all-symbols  Yalnýzca .drectve sembollerini ihraç eder\n"
+msgstr "   --no-export-all-symbols  Yalnýzca .drectve sembollerini ihraç eder\n"
 
 #: dllwrap.c:544
 msgid "   --exclude-symbols <list> Exclude <list> from .def\n"
-msgstr ""
-"   --exclude-symbols <liste> <liste>deki sembolleri .def'e ihraç etmez\n"
+msgstr "   --exclude-symbols <liste> <liste>deki sembolleri .def'e ihraç etmez\n"
 
 #: dllwrap.c:545
 msgid "   --no-default-excludes    Zap default exclude symbols\n"
@@ -940,9 +880,7 @@ msgstr "   --no-default-excludes    Dýþlanacak sembol öntanýmlarýný boþaltýr\n"
 
 #: dllwrap.c:546
 msgid "   --base-file <basefile> Read linker generated base file\n"
-msgstr ""
-"   --base-file <temel_dosya> Baðlayýcý tarafýndan oluþturulan temel dosyayý "
-"okur\n"
+msgstr "   --base-file <temel_dosya> Baðlayýcý tarafýndan oluþturulan temel dosyayý okur\n"
 
 #: dllwrap.c:547
 msgid "   --no-idata4           Don't generate idata$4 section\n"
@@ -978,16 +916,15 @@ msgstr "  Kalanlar dil sürücüsüne deðiþtirilmeksizin geçirilir\n"
 
 #: dllwrap.c:824
 msgid "Must provide at least one of -o or --dllname options"
-msgstr ""
-"-o veya --dllname (dll adý) seçeneklerinin en azýndan bir tanesi "
-"belirtilmelidir"
+msgstr "-o veya --dllname (dll adý) seçeneklerinin en azýndan bir tanesi belirtilmelidir"
 
 #: dllwrap.c:852
-#, fuzzy
 msgid ""
 "no export definition file provided.\n"
 "Creating one, but that may not be what you want"
-msgstr "bir tane oluþturuluyor fakat istediðiniz bu olmayabilir"
+msgstr ""
+"ihraç taným dosyasý verilmemiþ.\n"
+"Bir tane oluþturuluyor fakat istediðiniz bu olmayabilir"
 
 #: dllwrap.c:1014
 #, c-format
@@ -1448,18 +1385,14 @@ msgid ""
 "  -a, --debug-syms       Display debugger-only symbols\n"
 "  -A, --print-file-name  Print name of the input file before every symbol\n"
 "  -B                     Same as --format=bsd\n"
-"  -C, --demangle[=STYLE] Decode low-level symbol names into user-level "
-"names\n"
-"                          The STYLE, if specified, can be `auto' (the "
-"default),\n"
-"                          `gnu', 'lucid', 'arm', 'hp', 'edg' or 'gnu-new-"
-"abi'\n"
+"  -C, --demangle[=STYLE] Decode low-level symbol names into user-level names\n"
+"                          The STYLE, if specified, can be `auto' (the default),\n"
+"                          `gnu', 'lucid', 'arm', 'hp', 'edg' or 'gnu-new-abi'\n"
 "      --no-demangle      Do not demangle low-level symbol names\n"
 "  -D, --dynamic          Display dynamic symbols instead of normal symbols\n"
 "      --defined-only     Display only defined symbols\n"
 "  -e                     (ignored)\n"
-"  -f, --format=FORMAT    Use the output format FORMAT.  FORMAT can be "
-"`bsd',\n"
+"  -f, --format=FORMAT    Use the output format FORMAT.  FORMAT can be `bsd',\n"
 "                           `sysv' or `posix'.  The default is `bsd'\n"
 "  -g, --extern-only      Display only external symbols\n"
 "  -h, --help             Display this information\n"
@@ -1483,31 +1416,25 @@ msgstr ""
 "  -a, --debug-syms       Yalnýzca hata ayýklamaya dair sembolleri gösterir\n"
 "  -A, --print-file-name  Her sembolden önce girdi dosyasýnýn adýný yazdýrýr\n"
 "  -B                     --format=bsd ile ayný\n"
-"  -C, --demangle[=TARZ]  Alt düzey sembol adlarýný kullanýcý seviyesinde "
-"adlara çevirir\n"
+"  -C, --demangle[=TARZ]  Alt düzey sembol adlarýný kullanýcý seviyesinde adlara çevirir\n"
 "                         TARZ, eðer belirtilirse, 'auto' (öntanýmlý),\n"
-"                          `gnu', 'lucid', 'arm', 'hp', 'edg' veya 'gnu-new-"
-"abi' olabilir\n"
+"                          `gnu', 'lucid', 'arm', 'hp', 'edg' veya 'gnu-new-abi' olabilir\n"
 "      --no-demangle      Alt düzey sembol adlarýný çevirmez\n"
-"  -D, --dynamic          Normal semboller yerine dinamik sembolleri "
-"gösterir\n"
+"  -D, --dynamic          Normal semboller yerine dinamik sembolleri gösterir\n"
 "      --defined-only     Yalnýzca tanýmlanmýþ sembolleri gösterir\n"
 "  -e                     (yoksayýlýr)\n"
-"  -f, --format=BÝÇEM     Çýktý biçemi için BÝÇEM'i kullanýr. BÝÇEM, "
-"'bsd' (öntanýmlý),\n"
+"  -f, --format=BÝÇEM     Çýktý biçemi için BÝÇEM'i kullanýr. BÝÇEM, 'bsd' (öntanýmlý),\n"
 "                           `sysv' veya `posix' olabilir\n"
 "  -g, --extern-only      Yalnýzca harici sembolleri gösterir\n"
 "  -h, --help             Bu bilgiyi gösterir\n"
-"  -l, --line-numbers     Hata ayýklama bilgisini kullanarak her sembol için "
-"bir\n"
+"  -l, --line-numbers     Hata ayýklama bilgisini kullanarak her sembol için bir\n"
 "                         satýr numarasý ve dosya adý bulur.\n"
 "  -n, --numeric-sort     Sembolleri adres numarasýna göre sýralar\n"
 "  -o                     -A ile ayný\n"
 "  -p, --no-sort          Sembolleri sýralamaz\n"
 "  -P, --portability      --format=posix ile ayný\n"
 "  -r, --reverse-sort     Ters sýralar\n"
-"  -s, --print-armap      Arþiv üyelerinden gelen semboller için endeks "
-"içerir\n"
+"  -s, --print-armap      Arþiv üyelerinden gelen semboller için endeks içerir\n"
 "      --size-sort        Sembolleri büyüklüðe göre sýralar\n"
 "  -t, --radix=RADIX      Sembol deðerlerini yazdýrmak için RADIX kullanýr\n"
 "      --target=BFD_ADI   Hedef nesne biçemini BFD_ADI olarak belirler\n"
@@ -1544,157 +1471,92 @@ msgstr "veri büyüklüðü %ld"
 
 #: nm.c:1340
 #, c-format
-msgid ""
-"\n"
-"\n"
-"Undefined symbols from %s:\n"
-"\n"
-msgstr ""
-"\n"
-"\n"
-"%s'de tanýmlanmamýþ semboller:\n"
-"\n"
+msgid "\n\nUndefined symbols from %s:\n\n"
+msgstr "\n\n%s'de tanýmlanmamýþ semboller:\n\n"
 
 #: nm.c:1342
 #, c-format
-msgid ""
-"\n"
-"\n"
-"Symbols from %s:\n"
-"\n"
-msgstr ""
-"\n"
-"\n"
-"%s'de semboller:\n"
-"\n"
+msgid "\n\nSymbols from %s:\n\n"
+msgstr "\n\n%s'de semboller:\n\n"
 
 #: nm.c:1343 nm.c:1397
-msgid ""
-"Name                  Value   Class        Type         Size   Line  "
-"Section\n"
-"\n"
+msgid "Name                  Value   Class        Type         Size   Line  Section\n\n"
 msgstr ""
-"Name                  Value   Class        Type         Size   Line  "
-"Section\n"
+"Name                  Value   Class        Type         Size   Line  Section\n"
 "\n"
 "Ýsim                  Deðer   Sýnýf        Tip          Boy    Satýr Bölüm\n"
 "\n"
 
 #: nm.c:1394
 #, c-format
-msgid ""
-"\n"
-"\n"
-"Undefined symbols from %s[%s]:\n"
-"\n"
-msgstr ""
-"\n"
-"\n"
-"%s[%s]'de tanýmlanmamýþ semboller:\n"
-"\n"
+msgid "\n\nUndefined symbols from %s[%s]:\n\n"
+msgstr "\n\n%s[%s]'de tanýmlanmamýþ semboller:\n\n"
 
 #: nm.c:1396
 #, c-format
-msgid ""
-"\n"
-"\n"
-"Symbols from %s[%s]:\n"
-"\n"
-msgstr ""
-"\n"
-"\n"
-"%s[%s]'de semboller:\n"
-"\n"
+msgid "\n\nSymbols from %s[%s]:\n\n"
+msgstr "\n\n%s[%s]'de semboller:\n\n"
 
 #: nm.c:1564
-msgid ""
-"\n"
-"Archive index:\n"
-msgstr ""
-"\n"
-"Arþiv endeksi:\n"
+msgid "\nArchive index:\n"
+msgstr "\nArþiv endeksi:\n"
 
 #: objcopy.c:363
-#, fuzzy, c-format
+#, c-format
 msgid "Usage: %s <options> in-file [out-file]\n"
 msgstr "Kullaným: %s <seçenekler> girdi-dosyasý [çýktý-dosyasý]\n"
 
 #: objcopy.c:364 objcopy.c:433
-#, fuzzy
 msgid " The options are:\n"
 msgstr "  Seçenekler:\n"
 
 #: objcopy.c:365
-#, fuzzy
 msgid ""
 "  -I --input-target <bfdname>      Assume input file is in format <bfdname>\n"
-"  -O --output-target <bfdname>     Create an output file in format "
-"<bfdname>\n"
-"  -B --binary-architecture <arch>  Set arch of output file, when input is "
-"binary\n"
-"  -F --target <bfdname>            Set both input and output format to "
-"<bfdname>\n"
-"     --debugging                   Convert debugging information, if "
-"possible\n"
-"  -p --preserve-dates              Copy modified/access timestamps to the "
-"output\n"
+"  -O --output-target <bfdname>     Create an output file in format <bfdname>\n"
+"  -B --binary-architecture <arch>  Set arch of output file, when input is binary\n"
+"  -F --target <bfdname>            Set both input and output format to <bfdname>\n"
+"     --debugging                   Convert debugging information, if possible\n"
+"  -p --preserve-dates              Copy modified/access timestamps to the output\n"
 "  -j --only-section <name>         Only copy section <name> into the output\n"
 "  -R --remove-section <name>       Remove section <name> from the output\n"
-"  -S --strip-all                   Remove all symbol and relocation "
-"information\n"
+"  -S --strip-all                   Remove all symbol and relocation information\n"
 "  -g --strip-debug                 Remove all debugging symbols\n"
-"     --strip-unneeded              Remove all symbols not needed by "
-"relocations\n"
+"     --strip-unneeded              Remove all symbols not needed by relocations\n"
 "  -N --strip-symbol <name>         Do not copy symbol <name>\n"
 "  -K --keep-symbol <name>          Only copy symbol <name>\n"
-"  -L --localize-symbol <name>      Force symbol <name> to be marked as a "
-"local\n"
+"  -L --localize-symbol <name>      Force symbol <name> to be marked as a local\n"
 "  -G --keep-global-symbol <name>   Localize all symbols except <name>\n"
-"  -W --weaken-symbol <name>        Force symbol <name> to be marked as a "
-"weak\n"
-"     --weaken                      Force all global symbols to be marked as "
-"weak\n"
+"  -W --weaken-symbol <name>        Force symbol <name> to be marked as a weak\n"
+"     --weaken                      Force all global symbols to be marked as weak\n"
 "  -x --discard-all                 Remove all non-global symbols\n"
 "  -X --discard-locals              Remove any compiler-generated symbols\n"
-"  -i --interleave <number>         Only copy one out of every <number> "
-"bytes\n"
-"  -b --byte <num>                  Select byte <num> in every interleaved "
-"block\n"
+"  -i --interleave <number>         Only copy one out of every <number> bytes\n"
+"  -b --byte <num>                  Select byte <num> in every interleaved block\n"
 "     --gap-fill <val>              Fill gaps between sections with <val>\n"
-"     --pad-to <addr>               Pad the last section up to address "
-"<addr>\n"
+"     --pad-to <addr>               Pad the last section up to address <addr>\n"
 "     --set-start <addr>            Set the start address to <addr>\n"
 "    {--change-start|--adjust-start} <incr>\n"
 "                                   Add <incr> to the start address\n"
 "    {--change-addresses|--adjust-vma} <incr>\n"
-"                                   Add <incr> to LMA, VMA and start "
-"addresses\n"
+"                                   Add <incr> to LMA, VMA and start addresses\n"
 "    {--change-section-address|--adjust-section-vma} <name>{=|+|-}<val>\n"
-"                                   Change LMA and VMA of section <name> by "
-"<val>\n"
+"                                   Change LMA and VMA of section <name> by <val>\n"
 "     --change-section-lma <name>{=|+|-}<val>\n"
-"                                   Change the LMA of section <name> by "
-"<val>\n"
+"                                   Change the LMA of section <name> by <val>\n"
 "     --change-section-vma <name>{=|+|-}<val>\n"
-"                                   Change the VMA of section <name> by "
-"<val>\n"
+"                                   Change the VMA of section <name> by <val>\n"
 "    {--[no-]change-warnings|--[no-]adjust-warnings}\n"
 "                                   Warn if a named section does not exist\n"
 "     --set-section-flags <name>=<flags>\n"
-"                                   Set section <name>'s properties to "
-"<flags>\n"
-"     --add-section <name>=<file>   Add section <name> found in <file> to "
-"output\n"
+"                                   Set section <name>'s properties to <flags>\n"
+"     --add-section <name>=<file>   Add section <name> found in <file> to output\n"
 "     --rename-section <old>=<new>[,<flags>] Rename section <old> to <new>\n"
-"     --change-leading-char         Force output format's leading character "
-"style\n"
-"     --remove-leading-char         Remove leading character from global "
-"symbols\n"
+"     --change-leading-char         Force output format's leading character style\n"
+"     --remove-leading-char         Remove leading character from global symbols\n"
 "     --redefine-sym <old>=<new>    Redefine symbol name <old> to <new>\n"
-"     --srec-len <number>           Restrict the length of generated "
-"Srecords\n"
-"     --srec-forceS3                Restrict the type of generated Srecords "
-"to S3\n"
+"     --srec-len <number>           Restrict the length of generated Srecords\n"
+"     --srec-forceS3                Restrict the type of generated Srecords to S3\n"
 "     --strip-symbols <file>        -N for all symbols listed in <file>\n"
 "     --keep-symbols <file>         -K for all symbols listed in <file>\n"
 "     --localize-symbols <file>     -L for all symbols listed in <file>\n"
@@ -1705,102 +1567,103 @@ msgid ""
 "  -V --version                     Display this program's version number\n"
 "  -h --help                        Display this output\n"
 msgstr ""
-"  -I --input-target <bfd_adý>      Girdi dosyasýnýn <bfd_adý> biçeminde "
-"olduðunu varsayar\n"
-"  -O --output-target <bfd_adý>     Çýktý dosyasýný <bfd_adý> biçeminde "
-"oluþturur\n"
-"  -F --target <bfd_adý>            Hem girdi, hem de çýktý biçemini "
-"<bfd_adý> olarak atar\n"
-"     --debugging                   Mümkün olduðu kadar hata ayýklama "
-"bilgisini dönüþtürür\n"
-"  -p --preserve-dates              Çýktýya deðiþim/eriþim zaman damgalarýný "
-"kopyalar\n"
-"  -j --only-section <isim>         Çýktýya yalnýzca <isim> bölümünü "
-"kopyalar\n"
+"  -I --input-target <bfd_adý>      Girdi dosyasýnýn <bfd_adý> biçeminde\n"
+"                                   olduðunu varsayar\n"
+"  -O --output-target <bfd_adý>     Çýktý dosyasýný <bfd_adý> biçeminde\n"
+"                                   oluþturur\n"
+"  -B --binary-architecture <plat>  Girdi ikilik biçeminde olduðu zaman çýktý\n"
+"                                   dosyasýnýn platformunu belirler.\n"
+"  -F --target <bfd_adý>            Hem girdi, hem de çýktý biçemini <bfd_adý>\n"
+"                                   olarak atar\n"
+"     --debugging                   Mümkün olduðu kadar hata ayýklama\n"
+"                                   bilgisini dönüþtürür\n"
+"  -p --preserve-dates              Çýktýya deðiþim/eriþim zaman damgalarýný\n"
+"                                   kopyalar\n"
+"  -j --only-section <isim>         Çýktýya yalnýzca <isim> bölümünü kopyalar\n"
 "  -R --remove-section <isim>       Çýktýdan <isim> bölümünü çýkarýr\n"
-"  -S --strip-all                   Bütün sembol ve yer deðiþtirme bilgisini "
-"siler\n"
+"  -S --strip-all                   Bütün sembol ve yer deðiþtirme bilgisini\n"
+"                                   siler\n"
 "  -g --strip-debug                 Bütün hata ayýklama sembollerini siler\n"
-"     --strip-unneeded              Yer deðiþtirmeler için gerekmeyen bütün "
-"sembolleri siler\n"
+"     --strip-unneeded              Yer deðiþtirmeler için gerekmeyen bütün\n"
+"                                   sembolleri siler\n"
 "  -N --strip-symbol <isim>         <isim> sembolünü kopyalamaz\n"
 "  -K --keep-symbol <isim>          Yalnýzca <isim> sembolünü kopyalar\n"
-"  -L --localize-symbol <isim>      <isim> sembolünün yerel olarak "
-"tanýmlanmasýný saðlar\n"
-"  -W --weaken-symbol <isim>        <isim> sembolünün zayýf olarak "
-"tanýmlanmasýný saðlar\n"
-"     --weaken                      Bütün evrensel sembollerin zayýf olarak "
-"tanýmlanmasýný saðlar\n"
+"  -L --localize-symbol <isim>      <isim> sembolünün yerel olarak\n"
+"                                   tanýmlanmasýný saðlar\n"
+"  -G --keep-global-symbol <isim>   <isim> haricindeki bütün sembolleri\n"
+"                                   yerelleþtirir.\n"
+"  -W --weaken-symbol <isim>        <isim> sembolünün zayýf olarak\n"
+"                                   tanýmlanmasýný saðlar\n"
+"     --weaken                      Bütün evrensel sembollerin zayýf olarak\n"
+"                                   tanýmlanmasýný saðlar\n"
 "  -x --discard-all                 Evrensel olmayan bütün sembolleri siler\n"
-"  -X --discard-locals              Derleyici tarafýndan oluþturulan bütün "
-"sembolleri siler\n"
-"  -i --interleave <sayý>           Her <sayý> bayttan yalnýz birini "
-"kopyalar\n"
-"  -b --byte <sayý>                 Her serpiþtirilmiþ bloktan <sayý> "
-"numaralý baytý seçer\n"
-"     --gap-fill <deðer>            Bölümler arasý boþluklarý <deðer> ile "
-"doldurur\n"
-"     --pad-to <adres>              Son bölümü <adres>e kadar boþlukla "
-"doldurur\n"
-"     --set-start <adres>           Baþlangýç adresini <adres> olarak "
-"belirtir\n"
+"  -X --discard-locals              Derleyici tarafýndan oluþturulan bütün\n"
+"                                   sembolleri siler\n"
+"  -i --interleave <sayý>           Her <sayý> bayttan yalnýz birini kopyalar\n"
+"  -b --byte <sayý>                 Her serpiþtirilmiþ bloktan <sayý> numaralý\n"
+"                                   baytý seçer\n"
+"     --gap-fill <deðer>            Bölümler arasý boþluklarý <deðer> ile\n"
+"                                   doldurur\n"
+"     --pad-to <adres>              Son bölümü <adres>e kadar boþlukla doldurur\n"
+"     --set-start <adres>           Baþlangýç adresini <adres> olarak belirtir\n"
 "    {--change-start|--adjust-start} <basamak>\n"
 "                                   Baþlangýç adresine <basamak> ekler\n"
 "    {--change-addresses|--adjust-vma} <basamak>\n"
-"                                   LMA, VMA ve baþlangýç adreslerine "
-"<basamak> ekler\n"
+"                                   LMA, VMA ve baþlangýç adreslerine <basamak>\n"
+"                                   ekler\n"
 "    {--change-section-address|--adjust-section-vma} <isim>{=|+|-}<deðer>\n"
-"                                   <isim> bölümünün LMA ve VMA'sýný <deðer> "
-"kadar deðiþtirir\n"
+"                                   <isim> bölümünün LMA ve VMA'sýný <deðer>\n"
+"                                   kadar deðiþtirir\n"
 "     --change-section-lma <isim>{=|+|-}<deðer>\n"
-"                                   <isim> bölümünün LMA'sýný <deðer> kadar "
-"deðiþtirir\n"
+"                                   <isim> bölümünün LMA'sýný <deðer> kadar\n"
+"                                   deðiþtirir\n"
 "     --change-section-vma <isim>{=|+|-}<deðer>\n"
-"                                   <isim> bölümünün VMA'sýný <deðer> kadar "
-"deðiþtirir\n"
+"                                   <isim> bölümünün VMA'sýný <deðer> kadar\n"
+"                                   deðiþtirir\n"
 "    {--[no-]change-warnings|--[no-]adjust-warnings}\n"
-"                                   Eðer isimli bir bölüm yok ise uyarý "
-"verir\n"
+"                                   Eðer isimli bir bölüm yok ise uyarý verir\n"
 "     --set-section-flags <isim>=<seçenekler>\n"
-"                                   <isim> bölümünün özniteliklerini "
-"<seçenekler>e ayarlar\n"
-"     --add-section <isim>=<dosya>  <dosya> içinde bulunan <isim> bölümünü "
-"çýktýya ekler\n"
-"     --change-leading-char         Çýktý biçeminin baþlangýç karakter tipini "
-"deðiþtiri\n"
-"     --remove-leading-char         Evrensel sembollerden baþlangýç "
-"karakterini çýkarýr\n"
-"     --redefine-sym <eski>=<yeni>  <eski> isimli sembolü <yeni> isimli "
-"olarak yeniden tanýmlar\n"
-"     --srec-len <sayý>             Oluþturulan S kayýtlarýnýn boyutunu "
-"kýsýtlar\n"
-"     --srec-forceS3                Oluþturulan S kayýtlarý tipini S3 olarak "
-"kýsýtlar\n"
-"  -v --verbose                     Deðiþtirilen tüm nesne dosyalarýný "
-"listeler\n"
+"                                   <isim> bölümünün özniteliklerini\n"
+"                                   <seçenekler>e ayarlar\n"
+"     --add-section <isim>=<dosya>  <dosya> içinde bulunan <isim> bölümünü\n"
+"                                   çýktýya ekler\n"
+"     --rename-section <eski>=<yeni>[,<bayrak>] <eski> bölümünü <yeni> olarak\n"
+"                                   yeniden adlandýrýr\n"
+"     --change-leading-char         Çýktý biçeminin baþlangýç karakter tipini\n"
+"                                   deðiþtirir\n"
+"     --remove-leading-char         Evrensel sembollerden baþlangýç\n"
+"                                   karakterini çýkarýr\n"
+"     --redefine-sym <eski>=<yeni>  <eski> isimli sembolü <yeni> isimli olarak\n"
+"                                   yeniden tanýmlar\n"
+"     --srec-len <sayý>             Oluþturulan S kayýtlarýnýn boyutunu\n"
+"                                   kýsýtlar\n"
+"     --srec-forceS3                Oluþturulan S kayýtlarý tipini S3 olarak\n"
+"                                   kýsýtlar\n"
+"     --strip-symbols <dosya>       <dosya>daki bütün semboller için -N uygular\n"
+"     --keep-symbols <dosya>        <dosya>daki bütün semboller için -K uygular\n"
+"     --localize-symbols <dosya>    <dosya>daki bütün semboller için -L uygular\n"
+"     --keep-global-symbols <dosya> <dosya>daki bütün semboller için -G uygular\n"
+"     --weaken-symbols <dosya>      <dosya>daki bütün semboller için -W uygular\n"
+"     --alt-machine-code <indeks>   Çýktý için alternatif makina kodu kullanýr\n"
+"  -v --verbose                     Deðiþtirilen tüm nesne dosyalarýný listeler\n"
 "  -V --version                     Bu yazýlýmýn sürüm bilgilerini gösterir\n"
 "  -h --help                        Bu çýktýyý gösterir\n"
 
 #: objcopy.c:432
-#, fuzzy, c-format
+#, c-format
 msgid "Usage: %s <options> in-file(s)\n"
 msgstr "Kullaným: %s <seçenekler> girdi-dosya(larý)\n"
 
 #: objcopy.c:434
 msgid ""
 "  -I --input-target <bfdname>      Assume input file is in format <bfdname>\n"
-"  -O --output-target <bfdname>     Create an output file in format "
-"<bfdname>\n"
-"  -F --target <bfdname>            Set both input and output format to "
-"<bfdname>\n"
-"  -p --preserve-dates              Copy modified/access timestamps to the "
-"output\n"
+"  -O --output-target <bfdname>     Create an output file in format <bfdname>\n"
+"  -F --target <bfdname>            Set both input and output format to <bfdname>\n"
+"  -p --preserve-dates              Copy modified/access timestamps to the output\n"
 "  -R --remove-section <name>       Remove section <name> from the output\n"
-"  -s --strip-all                   Remove all symbol and relocation "
-"information\n"
+"  -s --strip-all                   Remove all symbol and relocation information\n"
 "  -g -S --strip-debug              Remove all debugging symbols\n"
-"     --strip-unneeded              Remove all symbols not needed by "
-"relocations\n"
+"     --strip-unneeded              Remove all symbols not needed by relocations\n"
 "  -N --strip-symbol <name>         Do not copy symbol <name>\n"
 "  -K --keep-symbol <name>          Only copy symbol <name>\n"
 "  -x --discard-all                 Remove all non-global symbols\n"
@@ -1810,31 +1673,22 @@ msgid ""
 "  -h --help                        Display this output\n"
 "  -o <file>                        Place stripped output into <file>\n"
 msgstr ""
-"  -I --input-target <bfd_adý>      Girdi dosyasýnýn <bfd_adý> biçeminde "
-"olduðunu varsayar\n"
-"  -O --output-target <bfd_adý>     Çýktý dosyasýný <bfd_adý> biçeminde "
-"oluþturur\n"
-"  -F --target <bfd_adý>            Girdi ve çýktý biçemlerini <bfd_adý> "
-"olarak atar\n"
-"  -p --preserve-dates              Çýktýya deðiþim/eriþim zaman damgalarýný "
-"kopyalar\n"
+"  -I --input-target <bfd_adý>      Girdi dosyasýnýn <bfd_adý> biçeminde olduðunu varsayar\n"
+"  -O --output-target <bfd_adý>     Çýktý dosyasýný <bfd_adý> biçeminde oluþturur\n"
+"  -F --target <bfd_adý>            Girdi ve çýktý biçemlerini <bfd_adý> olarak atar\n"
+"  -p --preserve-dates              Çýktýya deðiþim/eriþim zaman damgalarýný kopyalar\n"
 "  -R --remove-section <isim>       Çýktýdan <isim> bölümünü çýkarýr\n"
-"  -s --strip-all                   Bütün sembol ve yer deðiþtirme bilgisini "
-"siler\n"
+"  -s --strip-all                   Bütün sembol ve yer deðiþtirme bilgisini siler\n"
 "  -g -S --strip-debug              Bütün hata ayýklama sembollerini siler\n"
-"     --strip-unneeded              Yer deðiþtirmeler için gerekmeyen bütün "
-"sembolleri siler\n"
+"     --strip-unneeded              Yer deðiþtirmeler için gerekmeyen bütün sembolleri siler\n"
 "  -N --strip-symbol <isim>         <isim> sembolünü kopyalamaz\n"
 "  -K --keep-symbol <isim>          Yalnýzca <isim> sembolünü kopyalar\n"
 "  -x --discard-all                 Evrensel olmayan bütün sembolleri siler\n"
-"  -X --discard-locals              Derleyici tarafýndan oluþturulan bütün "
-"sembolleri siler\n"
-"  -v --verbose                     Deðiþtirilen tüm nesne dosyalarýný "
-"listeler\n"
+"  -X --discard-locals              Derleyici tarafýndan oluþturulan bütün sembolleri siler\n"
+"  -v --verbose                     Deðiþtirilen tüm nesne dosyalarýný listeler\n"
 "  -V --version                     Bu yazýlýmýn sürüm bilgilerini gösterir\n"
 "  -h --help                        Bu çýktýyý gösterir\n"
-"  -o <dosya>                       Sembolleri silinmiþ çýktýyý <dosya>ya "
-"yerleþtirir\n"
+"  -o <dosya>                       Sembolleri silinmiþ çýktýyý <dosya>ya yerleþtirir\n"
 
 #: objcopy.c:504
 #, c-format
@@ -1864,7 +1718,7 @@ msgstr "%s: fread baþarýsýz"
 #: objcopy.c:665
 #, c-format
 msgid "Ignoring rubbish found on line %d of %s"
-msgstr ""
+msgstr "%2$s içinde %1$d satýrýnda bulunan bozukluk yoksayýldý"
 
 #: objcopy.c:886
 #, c-format
@@ -1877,9 +1731,8 @@ msgid "%s: Symbol \"%s\" is target of more than one redefinition"
 msgstr "%s: \"%s\" sembolü birden fazla yeniden tanýmlamanýn hedefi"
 
 #: objcopy.c:943
-#, fuzzy
 msgid "Unable to change endianness of input file(s)"
-msgstr "Dosyanýn sonuna kadar aranamadý\n"
+msgstr "Girdi dosyanýn küçük/büyük sonluluðu deðiþtirilemedi"
 
 #: objcopy.c:951
 #, c-format
@@ -1913,7 +1766,7 @@ msgstr "%s: özel BFD verisi kopyalanýrken hata: %s"
 
 #: objcopy.c:1265
 msgid "unknown alternate machine code, ignored"
-msgstr ""
+msgstr "bilinmeyen alternatif makina kodu, yoksayýldý"
 
 #: objcopy.c:1295
 #, c-format
@@ -1921,9 +1774,9 @@ msgid "cannot mkdir %s for archive copying (error: %s)"
 msgstr "arþiv kopyalamasý için mkdir %s baþarýlý olamadý (hata: %s)"
 
 #: objcopy.c:1466
-#, fuzzy, c-format
+#, c-format
 msgid "Multiple renames of section %s"
-msgstr "%s bölümünün içeriði:\n"
+msgstr "%s bölümünde birden fazla yeniden isimleme"
 
 #: objcopy.c:1550
 msgid "making"
@@ -1999,28 +1852,26 @@ msgid "Warning: truncating gap-fill from 0x%s to 0x%x"
 msgstr "Uyarý: dolgu, 0x%s'dan 0x%x'ya kýrpýldý"
 
 #: objcopy.c:2494
-#, fuzzy
 msgid "alternate machine code index must be positive"
-msgstr "serpiþtirme pozitif olmalý"
+msgstr "alternatif makina kodu indeksi pozitif olmalý"
 
 #: objcopy.c:2512
 msgid "byte number must be less than interleave"
 msgstr "bayt numarasý serpiþtirmeden daha küçük olmalý"
 
 #: objcopy.c:2539
-#, fuzzy, c-format
+#, c-format
 msgid "architecture %s unknown"
-msgstr "mimari: %s,"
+msgstr "%s platformu bilinmiyor"
 
 #: objcopy.c:2543
-msgid ""
-"Warning: input target 'binary' required for binary architecture parameter."
-msgstr ""
+msgid "Warning: input target 'binary' required for binary architecture parameter."
+msgstr "Uyarý: ikilik platform parametresi için ikilik (`binary') girdi hedefi gerekli."
 
 #: objcopy.c:2544
 #, c-format
 msgid " Argument %s ignored"
-msgstr ""
+msgstr " %s argümaný yoksayýldý"
 
 #: objcopy.c:2550
 #, c-format
@@ -2042,136 +1893,93 @@ msgid "Display information from object FILE.\n"
 msgstr "Nesne DOSYA'sýndan bilgi gösterir.\n"
 
 #: objdump.c:166
-msgid ""
-"\n"
-" At least one of the following switches must be given:\n"
-msgstr ""
-"\n"
-" En azýndan aþaðýdaki seçeneklerin biri verilmelidir:\n"
+msgid "\n At least one of the following switches must be given:\n"
+msgstr "\n En azýndan aþaðýdaki seçeneklerin biri verilmelidir:\n"
 
 #: objdump.c:167
 msgid ""
 "  -a, --archive-headers    Display archive header information\n"
 "  -f, --file-headers       Display the contents of the overall file header\n"
-"  -p, --private-headers    Display object format specific file header "
-"contents\n"
+"  -p, --private-headers    Display object format specific file header contents\n"
 "  -h, --[section-]headers  Display the contents of the section headers\n"
 "  -x, --all-headers        Display the contents of all headers\n"
-"  -d, --disassemble        Display assembler contents of executable "
-"sections\n"
+"  -d, --disassemble        Display assembler contents of executable sections\n"
 "  -D, --disassemble-all    Display assembler contents of all sections\n"
 "  -S, --source             Intermix source code with disassembly\n"
-"  -s, --full-contents      Display the full contents of all sections "
-"requested\n"
+"  -s, --full-contents      Display the full contents of all sections requested\n"
 "  -g, --debugging          Display debug information in object file\n"
 "  -G, --stabs              Display (in raw form) any STABS info in the file\n"
 "  -t, --syms               Display the contents of the symbol table(s)\n"
 "  -T, --dynamic-syms       Display the contents of the dynamic symbol table\n"
 "  -r, --reloc              Display the relocation entries in the file\n"
-"  -R, --dynamic-reloc      Display the dynamic relocation entries in the "
-"file\n"
+"  -R, --dynamic-reloc      Display the dynamic relocation entries in the file\n"
 "  -V, --version            Display this program's version number\n"
 "  -i, --info               List object formats and architectures supported\n"
 "  -H, --help               Display this information\n"
 msgstr ""
 "  -a, --archive-headers    Arþiv baþlýk bilgilerini gösterir\n"
 "  -f, --file-headers       Dosya baþlýk bilgilerini gösterir\n"
-"  -p, --private-headers    Nesne biçemine özgü dosya baþlýk bilgilerini "
-"gösterir\n"
+"  -p, --private-headers    Nesne biçemine özgü dosya baþlýk bilgilerini gösterir\n"
 "  -h, --[section-]headers  Bölüm baþlýklarýný gösterir\n"
 "  -x, --all-headers        Bütün baþlýklarý gösterir\n"
 "  -d, --disassemble        Uygulama bölümlerinin üretici içeriðini gösterir\n"
 "  -D, --disassemble-all    Bütün bölümlerin üretici içeriklerini gösterir\n"
-"  -S, --source             Üretici içerikleri ile kaynak kodunu bir arada "
-"gösterir\n"
-"  -s, --full-contents      Ýstenen bütün bölümlerin bütün içeriðini "
-"gösterir\n"
-"  -g, --debugging          Nesne dosyasýndaki hata ayýklama bilgilerini "
-"gösterir\n"
-"  -G, --stabs              Dosyadaki STABS bilgisini (ham hali ile) "
-"gösterir\n"
+"  -S, --source             Üretici içerikleri ile kaynak kodunu bir arada gösterir\n"
+"  -s, --full-contents      Ýstenen bütün bölümlerin bütün içeriðini gösterir\n"
+"  -g, --debugging          Nesne dosyasýndaki hata ayýklama bilgilerini gösterir\n"
+"  -G, --stabs              Dosyadaki STABS bilgisini (ham hali ile) gösterir\n"
 "  -t, --syms               Sembol tablolarýnýn içeriðini gösterir\n"
 "  -T, --dynamic-syms       Dinamik sembol tablolarýnýn içeriðini gösterir\n"
 "  -r, --reloc              Dosyadaki yer deðiþtirme girdilerini gösterir\n"
-"  -R, --dynamic-reloc      Dosyadaki dinamik yer deðiþtirme bilgilerini "
-"gösterir\n"
+"  -R, --dynamic-reloc      Dosyadaki dinamik yer deðiþtirme bilgilerini gösterir\n"
 "  -V, --version            Bu yazýlýmýn sürüm bilgilerini gösterir\n"
 "  -i, --info               Desteklenen biçem ve mimarileri gösterir\n"
 "  -H, --help               Bu bilgiyi gösterir\n"
 
 #: objdump.c:189
-msgid ""
-"\n"
-" The following switches are optional:\n"
-msgstr ""
-"\n"
-" Aþaðýdaki seçenekler isteðe baðlý:\n"
+msgid "\n The following switches are optional:\n"
+msgstr "\n Aþaðýdaki seçenekler isteðe baðlý:\n"
 
 #: objdump.c:190
 msgid ""
-"  -b, --target=BFDNAME           Specify the target object format as "
-"BFDNAME\n"
+"  -b, --target=BFDNAME           Specify the target object format as BFDNAME\n"
 "  -m, --architecture=MACHINE     Specify the target architecture as MACHINE\n"
 "  -j, --section=NAME             Only display information for section NAME\n"
 "  -M, --disassembler-options=OPT Pass text OPT on to the disassembler\n"
-"  -EB --endian=big               Assume big endian format when "
-"disassembling\n"
-"  -EL --endian=little            Assume little endian format when "
-"disassembling\n"
-"      --file-start-context       Include context from start of file (with -"
-"S)\n"
-"  -l, --line-numbers             Include line numbers and filenames in "
-"output\n"
+"  -EB --endian=big               Assume big endian format when disassembling\n"
+"  -EL --endian=little            Assume little endian format when disassembling\n"
+"      --file-start-context       Include context from start of file (with -S)\n"
+"  -l, --line-numbers             Include line numbers and filenames in output\n"
 "  -C, --demangle[=STYLE]         Decode mangled/processed symbol names\n"
-"                                  The STYLE, if specified, can be `auto', "
-"'gnu',\n"
-"                                  'lucid', 'arm', 'hp', 'edg', or 'gnu-new-"
-"abi'\n"
+"                                  The STYLE, if specified, can be `auto', 'gnu',\n"
+"                                  'lucid', 'arm', 'hp', 'edg', or 'gnu-new-abi'\n"
 "  -w, --wide                     Format output for more than 80 columns\n"
-"  -z, --disassemble-zeroes       Do not skip blocks of zeroes when "
-"disassembling\n"
+"  -z, --disassemble-zeroes       Do not skip blocks of zeroes when disassembling\n"
 "      --start-address=ADDR       Only process data whoes address is >= ADDR\n"
 "      --stop-address=ADDR        Only process data whoes address is <= ADDR\n"
-"      --prefix-addresses         Print complete address alongside "
-"disassembly\n"
+"      --prefix-addresses         Print complete address alongside disassembly\n"
 "      --[no-]show-raw-insn       Display hex alongside symbolic disassembly\n"
-"      --adjust-vma=OFFSET        Add OFFSET to all displayed section "
-"addresses\n"
+"      --adjust-vma=OFFSET        Add OFFSET to all displayed section addresses\n"
 "\n"
 msgstr ""
-"  -b, --target=BFD_ADI           Hedef nesne biçemini BFD_ADI olarak "
-"belirtir\n"
+"  -b, --target=BFD_ADI           Hedef nesne biçemini BFD_ADI olarak belirtir\n"
 "  -m, --architecture=MAKÝNA      Hedef mimariyi MAKÝNA olarak belirtir\n"
 "  -j, --section=ÝSÝM             Yalnýzca ÝSÝM bölümü için bilgi gösterir\n"
-"  -M, --disassembler-options=SEÇ Karþýt-çeviriciye metin SEÇeneklerini "
-"geçirir\n"
-"  -EB --endian=big               Karþýt-çevirim esnasýnda big-endian "
-"biçemini varsayar\n"
-"  -EL --endian=little            Karþýt-çevirim esnasýnda little-endian "
-"biçemini varsayar\n"
-"      --file-start-context       Dosyanýn baþlangýcýndan itibaren baðlamý "
-"içerir (-S ile)\n"
-"  -l, --line-numbers             Çýktýda dosya isimleri ve satýr numaralarý "
-"gösterir\n"
-"  -C, --demangle[=TARZ]          Karýþtýrýlmýþ/iþlenmiþ sembol isimlerini "
-"çözümler\n"
+"  -M, --disassembler-options=SEÇ Karþýt-çeviriciye metin SEÇeneklerini geçirir\n"
+"  -EB --endian=big               Karþýt-çevirim esnasýnda big-endian biçemini varsayar\n"
+"  -EL --endian=little            Karþýt-çevirim esnasýnda little-endian biçemini varsayar\n"
+"      --file-start-context       Dosyanýn baþlangýcýndan itibaren baðlamý içerir (-S ile)\n"
+"  -l, --line-numbers             Çýktýda dosya isimleri ve satýr numaralarý gösterir\n"
+"  -C, --demangle[=TARZ]          Karýþtýrýlmýþ/iþlenmiþ sembol isimlerini çözümler\n"
 "                                  Tarz, eðer belirtilmiþse, `auto', 'gnu',\n"
-"                                  'lucid', 'arm', 'hp', 'edg', veya 'gnu-new-"
-"abi' olabilir\n"
-"  -w, --wide                     Çýktýyý 80 sütundan daha geniþ olarak "
-"biçemler\n"
-"  -z, --disassemble-zeroes       Karþýt-çevirim esnasýnda sýfýr bloklarýný "
-"atlamaz\n"
-"      --start-address=ADRES      Yalnýzca adresi >= ADRES olan verileri "
-"iþler\n"
-"      --stop-address=ADRES       Yalnýzca adresi <= ADRES olan verileri "
-"iþler\n"
-"      --prefix-addresses         Tam adresi karþýt çevirim ile birlikte "
-"yazdýrýr\n"
-"      --[no-]show-raw-insn       Onaltýlýk bilgi ile sembolik karþýt-çevrimi "
-"birlikte yazdýrýr\n"
-"      --adjust-vma=BASAMAK       Bütün gösterilen bölüm adreslerine BASAMAK "
-"ekler\n"
+"                                  'lucid', 'arm', 'hp', 'edg', veya 'gnu-new-abi' olabilir\n"
+"  -w, --wide                     Çýktýyý 80 sütundan daha geniþ olarak biçemler\n"
+"  -z, --disassemble-zeroes       Karþýt-çevirim esnasýnda sýfýr bloklarýný atlamaz\n"
+"      --start-address=ADRES      Yalnýzca adresi >= ADRES olan verileri iþler\n"
+"      --stop-address=ADRES       Yalnýzca adresi <= ADRES olan verileri iþler\n"
+"      --prefix-addresses         Tam adresi karþýt çevirim ile birlikte yazdýrýr\n"
+"      --[no-]show-raw-insn       Onaltýlýk bilgi ile sembolik karþýt-çevrimi birlikte yazdýrýr\n"
+"      --adjust-vma=BASAMAK       Bütün gösterilen bölüm adreslerine BASAMAK ekler\n"
 "\n"
 
 #: objdump.c:359
@@ -2183,12 +1991,8 @@ msgid "Idx Name          Size      VMA       LMA       File off  Algn"
 msgstr "Idx Adý           Boy       VMA       LMA       Dosya of  Hiza"
 
 #: objdump.c:364
-msgid ""
-"Idx Name          Size      VMA               LMA               File off  "
-"Algn"
-msgstr ""
-"Idx Adý           Boy       VMA               LMA               Dosya of  "
-"Hiza"
+msgid "Idx Name          Size      VMA               LMA               File off  Algn"
+msgstr "Idx Adý           Boy       VMA               LMA               Dosya of  Hiza"
 
 #: objdump.c:368
 msgid "  Flags"
@@ -2225,12 +2029,8 @@ msgstr "%s bölümünün karþýt çevrimi:\n"
 
 #: objdump.c:1828
 #, c-format
-msgid ""
-"No %s section present\n"
-"\n"
-msgstr ""
-"%s bölümü yok\n"
-"\n"
+msgid "No %s section present\n\n"
+msgstr "%s bölümü yok\n\n"
 
 #: objdump.c:1835
 #, c-format
@@ -2249,12 +2049,8 @@ msgstr "%2$s'nin %1$s bölümünün okunmasý baþarýsýz: %3$s\n"
 
 #: objdump.c:1904
 #, c-format
-msgid ""
-"Contents of %s section:\n"
-"\n"
-msgstr ""
-"%s bölümünün içeriði:\n"
-"\n"
+msgid "Contents of %s section:\n\n"
+msgstr "%s bölümünün içeriði:\n\n"
 
 #: objdump.c:2004
 #, c-format
@@ -2267,21 +2063,13 @@ msgid "flags 0x%08x:\n"
 msgstr "seçenekler 0x%08x:\n"
 
 #: objdump.c:2020
-msgid ""
-"\n"
-"start address 0x"
-msgstr ""
-"\n"
-"baþlangýç adresi 0x"
+msgid "\nstart address 0x"
+msgstr "\nbaþlangýç adresi 0x"
 
 #: objdump.c:2052
 #, c-format
-msgid ""
-"\n"
-"%s:     file format %s\n"
-msgstr ""
-"\n"
-"%s:     %s dosya biçemi\n"
+msgid "\n%s:     file format %s\n"
+msgstr "\n%s:     %s dosya biçemi\n"
 
 #: objdump.c:2094
 #, c-format
@@ -2382,41 +2170,27 @@ msgstr "Bu makina mimarisi üzerinde yer deðiþtirmeler konusunda bilgi yok\n"
 
 #: readelf.c:682 readelf.c:711 readelf.c:757 readelf.c:784
 msgid "relocs"
-msgstr ""
+msgstr "yerdeðiþimler"
 
 #: readelf.c:693 readelf.c:722 readelf.c:767 readelf.c:794
 msgid "out of memory parsing relocs"
 msgstr "yer deðiþtirmeleri tararken bellek tükendi"
 
 #: readelf.c:845
-#, fuzzy
-msgid ""
-" Offset     Info    Type            Symbol's Value  Symbol's Name          "
-"Addend\n"
-msgstr ""
-"  Basamak   Bilgi Tip             Sembol Deðeri   Sembol Adý             "
-"Sonekleme\n"
+msgid " Offset     Info    Type            Symbol's Value  Symbol's Name          Addend\n"
+msgstr " Görece     Bilgi   Tür             Sembol Deðeri   Sembol Adý             Sonekleme\n"
 
 #: readelf.c:848
-#, fuzzy
 msgid " Offset     Info    Type            Symbol's Value  Symbol's Name\n"
-msgstr "  Basamak   Bilgi Tip             Sembol Deðeri   Sembol Adý\n"
+msgstr " Görece     Bilgi   Tür             Sembol Deðeri   Sembol Adý\n"
 
 #: readelf.c:854
-#, fuzzy
-msgid ""
-"    Offset             Info            Type               Symbol's Value   "
-"Symbol's Name           Addend\n"
-msgstr ""
-"  Basamak   Bilgi Tip             Sembol Deðeri   Sembol Adý             "
-"Sonekleme\n"
+msgid "    Offset             Info            Type               Symbol's Value   Symbol's Name           Addend\n"
+msgstr "    Görece             Bilgi           Tür                Sembol Deðeri    Sembol Adý              Sonekleme\n"
 
 #: readelf.c:857
-#, fuzzy
-msgid ""
-"    Offset             Info            Type               Symbol's Value   "
-"Symbol's Name\n"
-msgstr "  Basamak   Bilgi Tip             Sembol Deðeri   Sembol Adý\n"
+msgid "    Offset             Info            Type               Symbol's Value   Symbol's Name\n"
+msgstr "    Görece             Bilgi           Tür                Sembol Deðeri    Sembol Adý\n"
 
 #: readelf.c:1061 readelf.c:1063
 #, c-format
@@ -2528,13 +2302,11 @@ msgstr "  -n veya --notes             (Eðer varsa) core notlarýný gösterir\n"
 
 #: readelf.c:2163
 msgid "  -r or --relocs            Display the relocations (if present)\n"
-msgstr ""
-"  -r veya --relocs            (Eðer varsa) yer deðiþtirmeleri gösterir\n"
+msgstr "  -r veya --relocs            (Eðer varsa) yer deðiþtirmeleri gösterir\n"
 
 #: readelf.c:2164
-#, fuzzy
 msgid "  -u or --unwind            Display the unwind info (if present)\n"
-msgstr "  -n veya --notes             (Eðer varsa) core notlarýný gösterir\n"
+msgstr "  -u veya --unwind             (Eðer varsa) geri alma bilgisini gösterir\n"
 
 #: readelf.c:2165
 msgid "  -d or --dynamic           Display the dynamic segment (if present)\n"
@@ -2542,23 +2314,15 @@ msgstr "  -d veya --dynamic           (Eðer varsa) dinamik bölümü gösterir\n"
 
 #: readelf.c:2166
 msgid "  -V or --version-info      Display the version sections (if present)\n"
-msgstr ""
-"  -V veya --version-info      (Eðer varsa) sürüm bölümlerini gösterir\n"
+msgstr "  -V veya --version-info      (Eðer varsa) sürüm bölümlerini gösterir\n"
 
 #: readelf.c:2167
-msgid ""
-"  -A or --arch-specific     Display architecture specific information (if "
-"any).\n"
-msgstr ""
-"  -A veya --arch-specific     (Eðer varsa) mimariye özel bilgiyi gösterir.\n"
+msgid "  -A or --arch-specific     Display architecture specific information (if any).\n"
+msgstr "  -A veya --arch-specific     (Eðer varsa) mimariye özel bilgiyi gösterir.\n"
 
 #: readelf.c:2168
-msgid ""
-"  -D or --use-dynamic       Use the dynamic section info when displaying "
-"symbols\n"
-msgstr ""
-"  -D veya --use-dynamic       Sembolleri gösterirken dinamik bölüm bilgisini "
-"kullanýr\n"
+msgid "  -D or --use-dynamic       Use the dynamic section info when displaying symbols\n"
+msgstr "  -D veya --use-dynamic       Sembolleri gösterirken dinamik bölüm bilgisini kullanýr\n"
 
 #: readelf.c:2169
 msgid "  -x <number> or --hex-dump=<number>\n"
@@ -2569,45 +2333,32 @@ msgid "                            Dump the contents of section <number>\n"
 msgstr "                            <sayý> bölümünün içeriðini gösterir\n"
 
 #: readelf.c:2171
-#, fuzzy
-msgid ""
-"  -w[liaprmfs] or --debug-dump[=line,=info,=abbrev,=pubnames,=ranges,=macro,"
-"=frames,=str]\n"
-msgstr ""
-"  -w[liaprf] veya --debug-dump[=line,=info,=abbrev,=pubnames,=ranges,"
-"=frames]\n"
+msgid "  -w[liaprmfs] or --debug-dump[=line,=info,=abbrev,=pubnames,=ranges,=macro,=frames,=str]\n"
+msgstr "  -w[liaprmfs] veya --debug-dump[=line,=info,=abbrev,=pubnames,=ranges,=macro,=frames,=str]\n"
 
 #: readelf.c:2172
-msgid ""
-"                            Display the contents of DWARF2 debug sections\n"
-msgstr ""
-"                            DWARF2 hata ayýklama bölümlerinin içeriðini "
-"gösterir\n"
+msgid "                            Display the contents of DWARF2 debug sections\n"
+msgstr "                            DWARF2 hata ayýklama bölümlerinin içeriðini gösterir\n"
 
 #: readelf.c:2174
 msgid "  -i <number> or --instruction-dump=<number>\n"
 msgstr "  -i <sayý> veya --instruction-dump=<sayý>\n"
 
 #: readelf.c:2175
-msgid ""
-"                            Disassemble the contents of section <number>\n"
-msgstr ""
-"                            <sayý> bölümünün içeriðini karþýt-çevirir\n"
+msgid "                            Disassemble the contents of section <number>\n"
+msgstr "                            <sayý> bölümünün içeriðini karþýt-çevirir\n"
 
 #: readelf.c:2177
 msgid "  -I or --histogram         Display histogram of bucket list lengths\n"
-msgstr ""
-"  -I veya --histogram         Küme liste uzunluðu geçmiþ grafiðini gösterir\n"
+msgstr "  -I veya --histogram         Küme liste uzunluðu geçmiþ grafiðini gösterir\n"
 
 #: readelf.c:2178
 msgid "  -v or --version           Display the version number of readelf\n"
 msgstr "  -v veya --version           readelf'in sürüm numarasýný gösterir\n"
 
 #: readelf.c:2179
-msgid ""
-"  -W or --wide              Don't split lines or truncate symbols to fit "
-"into 80 columns\n"
-msgstr ""
+msgid "  -W or --wide              Don't split lines or truncate symbols to fit into 80 columns\n"
+msgstr "  -W veya --wide            80 sütuna sýðdýrmak için satýrlarý bölmez veya kesmez\n"
 
 #: readelf.c:2180
 msgid "  -H or --help              Display this information\n"
@@ -2709,12 +2460,8 @@ msgid "  Entry point address:               "
 msgstr "  Girdi noktasý adresi:               "
 
 #: readelf.c:2512
-msgid ""
-"\n"
-"  Start of program headers:          "
-msgstr ""
-"\n"
-"  Yazýlým baþlýklarý baþlangýcý:          "
+msgid "\n  Start of program headers:          "
+msgstr "\n  Yazýlým baþlýklarý baþlangýcý:          "
 
 #: readelf.c:2514
 msgid ""
@@ -2754,38 +2501,27 @@ msgid "  Size of section headers:           %ld (bytes)\n"
 msgstr "  Bölüm baþlýk boyu:           %ld (bayt)\n"
 
 #: readelf.c:2529
-#, fuzzy, c-format
+#, c-format
 msgid "  Number of section headers:         %ld"
-msgstr "  Bölüm baþlýklarý sayýsý:         %ld\n"
+msgstr "  Bölüm baþlýklarý sayýsý:         %ld"
 
 #: readelf.c:2534
-#, fuzzy, c-format
+#, c-format
 msgid "  Section header string table index: %ld"
-msgstr "  Bölüm baþlýðý dizge tablo endeksi: %ld\n"
+msgstr "  Bölüm baþlýðý dizge tablo endeksi: %ld"
 
 #: readelf.c:2568 readelf.c:2604
-#, fuzzy
 msgid "program headers"
-msgstr ""
-"\n"
-"Yazýlým Baþlýðý%s:\n"
+msgstr "Yazýlým Baþlýklarý"
 
 #: readelf.c:2638
-msgid ""
-"\n"
-"There are no program headers in this file.\n"
-msgstr ""
-"\n"
-"Bu dosyada yazýlým baþlýðý yok.\n"
+msgid "\nThere are no program headers in this file.\n"
+msgstr "\nBu dosyada yazýlým baþlýðý yok.\n"
 
 #: readelf.c:2644
 #, c-format
-msgid ""
-"\n"
-"Elf file type is %s\n"
-msgstr ""
-"\n"
-"Elf dosya tipi: %s\n"
+msgid "\nElf file type is %s\n"
+msgstr "\nElf dosya tipi: %s\n"
 
 #: readelf.c:2645
 msgid "Entry point "
@@ -2793,12 +2529,8 @@ msgstr "Giriþ noktasý "
 
 #: readelf.c:2647
 #, c-format
-msgid ""
-"\n"
-"There are %d program headers, starting at offset "
-msgstr ""
-"\n"
-"%d adet yazýlým baþlýðý var, göreli konumdan baþlanýyor"
+msgid "\nThere are %d program headers, starting at offset "
+msgstr "\n%d adet yazýlým baþlýðý var, göreli konumdan baþlanýyor"
 
 #: readelf.c:2658 readelf.c:2883 readelf.c:2929 readelf.c:2992 readelf.c:3059
 #: readelf.c:4087 readelf.c:4130 readelf.c:4310 readelf.c:5246 readelf.c:5260
@@ -2808,26 +2540,16 @@ msgstr "Bellek tükendi\n"
 
 #: readelf.c:2676
 #, c-format
-msgid ""
-"\n"
-"Program Header%s:\n"
-msgstr ""
-"\n"
-"Yazýlým Baþlýðý%s:\n"
+msgid "\nProgram Header%s:\n"
+msgstr "\nYazýlým Baþlýðý%s:\n"
 
 #: readelf.c:2680
-msgid ""
-"  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align\n"
-msgstr ""
-"  Tip            Basamak  SanalAdr   GerçAdrs   DosyaBoyBelBoy  Seç Hiza\n"
+msgid "  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align\n"
+msgstr "  Tip            Basamak  SanalAdr   GerçAdrs   DosyaBoyBelBoy  Seç Hiza\n"
 
 #: readelf.c:2683
-#, fuzzy
-msgid ""
-"  Type           Offset   VirtAddr           PhysAddr           FileSiz  "
-"MemSiz   Flg Align\n"
-msgstr ""
-"  Tip            Basamak  SanalAdr   GerçAdrs   DosyaBoyBelBoy  Seç Hiza\n"
+msgid "  Type           Offset   VirtAddr           PhysAddr           FileSiz  MemSiz   Flg Align\n"
+msgstr "  Tür            Görece   SanalAdr           GerçAdrs          DosyaBoy  BelBoy   Seç Hiza\n"
 
 #: readelf.c:2687
 msgid "  Type           Offset             VirtAddr           PhysAddr\n"
@@ -2847,48 +2569,32 @@ msgstr "Yazýlým yorumlayýcýsý adý bulunamadý\n"
 
 #: readelf.c:2804
 #, c-format
-msgid ""
-"\n"
-"      [Requesting program interpreter: %s]"
-msgstr ""
-"\n"
-"      [Yazýlým yorumlayýcýsý isteniyor: %s]"
+msgid "\n      [Requesting program interpreter: %s]"
+msgstr "\n      [Yazýlým yorumlayýcýsý isteniyor: %s]"
 
 #: readelf.c:2822
-msgid ""
-"\n"
-" Section to Segment mapping:\n"
-msgstr ""
-"\n"
-" Bölümden parçaya eþleþme:\n"
+msgid "\n Section to Segment mapping:\n"
+msgstr "\n Bölümden parçaya eþleþme:\n"
 
 #: readelf.c:2823
 msgid "  Segment Sections...\n"
 msgstr "  Parça Bölümleri...\n"
 
 #: readelf.c:2874 readelf.c:2920
-#, fuzzy
 msgid "section headers"
-msgstr ""
-"\n"
-"Bölüm Baþlýðý%s:\n"
+msgstr "Bölüm Baþlýklarý"
 
 #: readelf.c:2968 readelf.c:3035
-#, fuzzy
 msgid "symbols"
-msgstr "%s: sembol yok"
+msgstr "semboller"
 
 #: readelf.c:2979 readelf.c:3046
 msgid "symtab shndx"
-msgstr ""
+msgstr "symtab shndx"
 
 #: readelf.c:3147
-msgid ""
-"\n"
-"There are no sections in this file.\n"
-msgstr ""
-"\n"
-"Bu dosyada bölüm yok.\n"
+msgid "\nThere are no sections in this file.\n"
+msgstr "\nBu dosyada bölüm yok.\n"
 
 #: readelf.c:3153
 #, c-format
@@ -2896,9 +2602,8 @@ msgid "There are %d section headers, starting at offset 0x%lx:\n"
 msgstr "%d adet bölüm baþlýðý mevcut, göreli konum 0x%lx'dan baþlanýyor:\n"
 
 #: readelf.c:3170 readelf.c:3479 readelf.c:3826 readelf.c:5397
-#, fuzzy
 msgid "string table"
-msgstr "dizgetablosu dizgesi"
+msgstr "dizge tablosu"
 
 #: readelf.c:3191
 msgid "File contains multiple dynamic symbol tables\n"
@@ -2910,38 +2615,24 @@ msgstr "Dosyada birden fazla dinamik dizge tablosu var\n"
 
 #: readelf.c:3209
 msgid "dynamic strings"
-msgstr ""
+msgstr "dinamik dizgeler"
 
 #: readelf.c:3215
-#, fuzzy
 msgid "File contains multiple symtab shndx tables\n"
-msgstr "Dosyada birden fazla dinamik dizge tablosu var\n"
+msgstr "Dosyada birden fazla symtab shndx tablosu var\n"
 
 #: readelf.c:3250
 #, c-format
-msgid ""
-"\n"
-"Section Header%s:\n"
-msgstr ""
-"\n"
-"Bölüm Baþlýðý%s:\n"
+msgid "\nSection Header%s:\n"
+msgstr "\nBölüm Baþlýðý%s:\n"
 
 #: readelf.c:3254
-msgid ""
-"  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk "
-"Inf Al\n"
-msgstr ""
-"  [Nr] Ýsim              Tip             Adres    Bas    Boy    ES Seç Lk "
-"Inf Al\n"
+msgid "  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al\n"
+msgstr "  [Nr] Ýsim              Tip             Adres    Bas    Boy    ES Seç Lk Inf Al\n"
 
 #: readelf.c:3257
-#, fuzzy
-msgid ""
-"  [Nr] Name              Type            Address          Off    Size   ES "
-"Flg Lk Inf Al\n"
-msgstr ""
-"  [Nr] Ýsim              Tip             Adres    Bas    Boy    ES Seç Lk "
-"Inf Al\n"
+msgid "  [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al\n"
+msgstr "  [Nr] Ýsim              Tür             Adres           Görece  Boy    ES Seç Lk Inf Al\n"
 
 #: readelf.c:3260
 msgid "  [Nr] Name              Type             Address           Offset\n"
@@ -2958,31 +2649,23 @@ msgid ""
 "  I (info), L (link order), G (group), x (unknown)\n"
 "  O (extra OS processing required) o (OS specific), p (processor specific)\n"
 msgstr ""
+"Seçenekler:\n"
+"  W (yazdýrýr), A (ayýrýr), X (uygular), M (birleþtirir), S (dizgeler)\n"
+"  I (bilgi), L (bað sýrasý), G (grup), x (bilinmeyen)\n"
+"  O (daha fazla OS iþlemesi gerekli) o (OS'e özgü), p (iþlemciye özgü)\n"
 
 #: readelf.c:3417
 #, c-format
-msgid ""
-"\n"
-"Relocation section at offset 0x%lx contains %ld bytes:\n"
-msgstr ""
-"\n"
-"Göreli konum 0x%lx'da yer deðiþtirme bölümü %ld bayt içeriyor:\n"
+msgid "\nRelocation section at offset 0x%lx contains %ld bytes:\n"
+msgstr "\nGöreli konum 0x%lx'da yer deðiþtirme bölümü %ld bayt içeriyor:\n"
 
 #: readelf.c:3424
-msgid ""
-"\n"
-"There are no dynamic relocations in this file.\n"
-msgstr ""
-"\n"
-"Bu dosyada dinamik yer deðiþtirmeler yok.\n"
+msgid "\nThere are no dynamic relocations in this file.\n"
+msgstr "\nBu dosyada dinamik yer deðiþtirmeler yok.\n"
 
 #: readelf.c:3451
-msgid ""
-"\n"
-"Relocation section "
-msgstr ""
-"\n"
-"Yer deðiþtirme bölümü "
+msgid "\nRelocation section "
+msgstr "\nYer deðiþtirme bölümü "
 
 #: readelf.c:3458 readelf.c:3905
 #, c-format
@@ -2990,66 +2673,46 @@ msgid " at offset 0x%lx contains %lu entries:\n"
 msgstr "göreli konum 0x%lx %lu girdi içeriyor:\n"
 
 #: readelf.c:3496
-msgid ""
-"\n"
-"There are no relocations in this file.\n"
-msgstr ""
-"\n"
-"Bu dosyada yer deðiþtirmeler yok.\n"
+msgid "\nThere are no relocations in this file.\n"
+msgstr "\nBu dosyada yer deðiþtirmeler yok.\n"
 
 #: readelf.c:3692
-#, fuzzy
 msgid "unwind table"
-msgstr "tanýmlanmamýþ C++ vtablosu"
+msgstr "geri alma tablosu"
 
 #: readelf.c:3743 readelf.c:3755 readelf.c:7608 readelf.c:7619
-#, fuzzy, c-format
+#, c-format
 msgid "Skipping unexpected symbol type %u\n"
-msgstr "beklenmeyen sürüm tipi %d"
+msgstr "beklenmeyen sembol türü %u atlanýyor\n"
 
 #: readelf.c:3763
-#, fuzzy, c-format
+#, c-format
 msgid "Skipping unexpected relocation type %s\n"
-msgstr "beklenmeyen sürüm tipi %d"
+msgstr "beklenmeyen yerdeðiþim türü %s atlanýyor\n"
 
 #: readelf.c:3808 readelf.c:3833
-#, fuzzy
-msgid ""
-"\n"
-"There are no unwind sections in this file.\n"
-msgstr ""
-"\n"
-"Bu dosyada bölüm yok.\n"
+msgid "\nThere are no unwind sections in this file.\n"
+msgstr "\nBu dosyada geri alma bölümü yok.\n"
 
 #: readelf.c:3884
-msgid ""
-"\n"
-"Could not find unwind info section for "
-msgstr ""
+msgid "\nCould not find unwind info section for "
+msgstr "\nGeri alma bilgi bölümü bulunamadý "
 
 #: readelf.c:3896
 msgid "unwind info"
-msgstr ""
+msgstr "geri alma bilgisi"
 
 #: readelf.c:3898
-#, fuzzy
-msgid ""
-"\n"
-"Unwind section "
-msgstr "bilinmeyen bölüm"
+msgid "\nUnwind section "
+msgstr "\nGeri alma bölümü "
 
 #: readelf.c:4071 readelf.c:4114
-#, fuzzy
 msgid "dynamic segment"
-msgstr "bir dinamik parçadan fazla\n"
+msgstr "dinamik bölüm"
 
 #: readelf.c:4183
-msgid ""
-"\n"
-"There is no dynamic segment in this file.\n"
-msgstr ""
-"\n"
-"Bu dosyada dinamik parça yok.\n"
+msgid "\nThere is no dynamic segment in this file.\n"
+msgstr "\nBu dosyada dinamik parça yok.\n"
 
 #: readelf.c:4217
 msgid "Unable to seek to end of file!"
@@ -3068,23 +2731,17 @@ msgid "Unable to determine the length of the dynamic string table\n"
 msgstr "Dinamik dizge tablosunun uzunluðu belirlenemedi\n"
 
 #: readelf.c:4269
-#, fuzzy
 msgid "dynamic string table"
-msgstr "geçersiz dizge uzunluðu"
+msgstr "dinamik dizge tablosu"
 
 #: readelf.c:4303
-#, fuzzy
 msgid "symbol information"
-msgstr "dialogex yazýtipi bilgisi"
+msgstr "sembol bilgisi"
 
 #: readelf.c:4327
 #, c-format
-msgid ""
-"\n"
-"Dynamic segment at offset 0x%x contains %ld entries:\n"
-msgstr ""
-"\n"
-"Göreli konum 0x%x'deki dinamik parça %ld girdi içeriyor:\n"
+msgid "\nDynamic segment at offset 0x%x contains %ld entries:\n"
+msgstr "\nGöreli konum 0x%x'deki dinamik parça %ld girdi içeriyor:\n"
 
 #: readelf.c:4330
 msgid "  Tag        Type                         Name/Value\n"
@@ -3149,12 +2806,8 @@ msgstr "Gereksiz nesne: [%s]\n"
 
 #: readelf.c:4746
 #, c-format
-msgid ""
-"\n"
-"Version definition section '%s' contains %ld entries:\n"
-msgstr ""
-"\n"
-"Sürüm tanýmý bölümü '%s' %ld girdi içeriyor:\n"
+msgid "\nVersion definition section '%s' contains %ld entries:\n"
+msgstr "\nSürüm tanýmý bölümü '%s' %ld girdi içeriyor:\n"
 
 #: readelf.c:4749
 msgid "  Addr: 0x"
@@ -3166,9 +2819,8 @@ msgid "  Offset: %#08lx  Link: %lx (%s)\n"
 msgstr "  Basamak: %#08lx  Bað: %lx (%s)\n"
 
 #: readelf.c:4758
-#, fuzzy
 msgid "version definition section"
-msgstr "Tanýmlar iþleniyor"
+msgstr "sürüm tanýmý bölümü"
 
 #: readelf.c:4784
 #, c-format
@@ -3202,12 +2854,8 @@ msgstr "  %#06x: Üst %d, isim endeksi: %ld\n"
 
 #: readelf.c:4837
 #, c-format
-msgid ""
-"\n"
-"Version needs section '%s' contains %ld entries:\n"
-msgstr ""
-"\n"
-"Sürüm gereksinimleri bölümü '%s' %ld girdi içeriyor:\n"
+msgid "\nVersion needs section '%s' contains %ld entries:\n"
+msgstr "\nSürüm gereksinimleri bölümü '%s' %ld girdi içeriyor:\n"
 
 #: readelf.c:4840
 msgid " Addr: 0x"
@@ -3219,9 +2867,8 @@ msgid "  Offset: %#08lx  Link to section: %ld (%s)\n"
 msgstr "  Basamak: %#08lx  Bölüme bað: %ld (%s)\n"
 
 #: readelf.c:4848
-#, fuzzy
 msgid "version need section"
-msgstr "paylaþýmlý bölüm"
+msgstr "Sürüm Gereksinim Bölüm"
 
 #: readelf.c:4870
 #, c-format
@@ -3259,18 +2906,13 @@ msgid "  Flags: %s  Version: %d\n"
 msgstr "  Seçenekler: %s  Sürüm: %d\n"
 
 #: readelf.c:4937
-#, fuzzy
 msgid "version string table"
-msgstr "dizgenin beklenmeyen sürümü"
+msgstr "Sürüm Dizge Tablo"
 
 #: readelf.c:4941
 #, c-format
-msgid ""
-"\n"
-"Version symbols section '%s' contains %d entries:\n"
-msgstr ""
-"\n"
-"Sürüm sembolleri bölümü '%s' %d girdi içeriyor:\n"
+msgid "\nVersion symbols section '%s' contains %d entries:\n"
+msgstr "\nSürüm sembolleri bölümü '%s' %d girdi içeriyor:\n"
 
 #: readelf.c:4944
 msgid " Addr: "
@@ -3278,7 +2920,7 @@ msgstr " Adres: "
 
 #: readelf.c:4954
 msgid "version symbol data"
-msgstr ""
+msgstr "Sürüm Sembol Veri"
 
 #: readelf.c:4981
 msgid "   0 (*local*)    "
@@ -3289,30 +2931,24 @@ msgid "   1 (*global*)   "
 msgstr "   1 (*evrensel*)   "
 
 #: readelf.c:5020 readelf.c:5454
-#, fuzzy
 msgid "version need"
-msgstr "sürüm deðiþken bilgisi"
+msgstr "Sürüm Gereksinim"
 
 #: readelf.c:5030
 msgid "version need aux (2)"
-msgstr ""
+msgstr "Sürüm Gereksinim Yardýmcý (2)"
 
 #: readelf.c:5071 readelf.c:5516
-#, fuzzy
 msgid "version def"
-msgstr "deðiþken dosya bilgi sürümü"
+msgstr "sürüm tanýmý"
 
 #: readelf.c:5090 readelf.c:5531
 msgid "version def aux"
-msgstr ""
+msgstr "Sürüm yardýmcý tanýmý"
 
 #: readelf.c:5121
-msgid ""
-"\n"
-"No version information found in this file.\n"
-msgstr ""
-"\n"
-"Bu dosyada sürüm bilgisi yok.\n"
+msgid "\nNo version information found in this file.\n"
+msgstr "\nBu dosyada sürüm bilgisi yok.\n"
 
 #: readelf.c:5139 readelf.c:5174
 #, c-format
@@ -3346,12 +2982,8 @@ msgid "Failed to read in number of chains\n"
 msgstr "Zincir sayýsý okunamadý\n"
 
 #: readelf.c:5326
-msgid ""
-"\n"
-"Symbol table for image:\n"
-msgstr ""
-"\n"
-"Ýmaj için sembol tablosu:\n"
+msgid "\nSymbol table for image:\n"
+msgstr "\nÝmaj için sembol tablosu:\n"
 
 #: readelf.c:5328
 msgid "  Num Buc:    Value  Size   Type   Bind Vis      Ndx Name\n"
@@ -3363,12 +2995,8 @@ msgstr "  Küme Num:   Deðer          Boy    Tip    Bað  Gör      Ndx Ýsim\n"
 
 #: readelf.c:5375
 #, c-format
-msgid ""
-"\n"
-"Symbol table '%s' contains %lu entries:\n"
-msgstr ""
-"\n"
-"'%s' sembol tablosu %lu girdi içeriyor:\n"
+msgid "\nSymbol table '%s' contains %lu entries:\n"
+msgstr "\n'%s' sembol tablosu %lu girdi içeriyor:\n"
 
 #: readelf.c:5379
 msgid "   Num:    Value  Size Type    Bind   Vis      Ndx Name\n"
@@ -3379,34 +3007,25 @@ msgid "   Num:    Value          Size Type    Bind   Vis      Ndx Name\n"
 msgstr "   Num:    Deðer          Boy  Tip     Bað    Gör      Ndx Ýsim\n"
 
 #: readelf.c:5427
-#, fuzzy
 msgid "version data"
-msgstr "sürüm deðiþken bilgisi"
+msgstr "sürüm verisi"
 
 #: readelf.c:5467
 msgid "version need aux (3)"
-msgstr ""
+msgstr "Sürüm Gereksinim Yardýmcý (3)"
 
 #: readelf.c:5492
 msgid "bad dynamic symbol"
 msgstr "hatalý dinamik sembol"
 
 #: readelf.c:5554
-msgid ""
-"\n"
-"Dynamic symbol information is not available for displaying symbols.\n"
-msgstr ""
-"\n"
-"Dinamik sembolleri göstermek için dinamik sembol bilgisi mevcut deðil.\n"
+msgid "\nDynamic symbol information is not available for displaying symbols.\n"
+msgstr "\nDinamik sembolleri göstermek için dinamik sembol bilgisi mevcut deðil.\n"
 
 #: readelf.c:5566
 #, c-format
-msgid ""
-"\n"
-"Histogram for bucket list length (total of %d buckets):\n"
-msgstr ""
-"\n"
-"Küme liste boyu (toplam %d küme) geçmiþ grafiði:\n"
+msgid "\nHistogram for bucket list length (total of %d buckets):\n"
+msgstr "\nKüme liste boyu (toplam %d küme) geçmiþ grafiði:\n"
 
 #: readelf.c:5568
 #, c-format
@@ -3421,12 +3040,8 @@ msgstr "Bellek yetersiz"
 
 #: readelf.c:5641
 #, c-format
-msgid ""
-"\n"
-"Dynamic info segment at offset 0x%lx contains %d entries:\n"
-msgstr ""
-"\n"
-"Göreli konum 0x%lx'de yer alan dinamik bilgi parçasý %d girdi içeriyor:\n"
+msgid "\nDynamic info segment at offset 0x%lx contains %d entries:\n"
+msgstr "\nGöreli konum 0x%lx'de yer alan dinamik bilgi parçasý %d girdi içeriyor:\n"
 
 #: readelf.c:5644
 msgid " Num: Name                           BoundTo     Flags\n"
@@ -3434,40 +3049,26 @@ msgstr " Num: Ýsim                           Baðlý       Seçenekler\n"
 
 #: readelf.c:5696
 #, c-format
-msgid ""
-"\n"
-"Assembly dump of section %s\n"
-msgstr ""
-"\n"
-"%s bölümünün üretici dökümü\n"
+msgid "\nAssembly dump of section %s\n"
+msgstr "\n%s bölümünün üretici dökümü\n"
 
 #: readelf.c:5719
 #, c-format
-msgid ""
-"\n"
-"Section '%s' has no data to dump.\n"
-msgstr ""
-"\n"
-"'%s' bölümünde dökülecek veri yok.\n"
+msgid "\nSection '%s' has no data to dump.\n"
+msgstr "\n'%s' bölümünde dökülecek veri yok.\n"
 
 #: readelf.c:5724
 #, c-format
-msgid ""
-"\n"
-"Hex dump of section '%s':\n"
-msgstr ""
-"\n"
-"'%s' bölümünün onaltýlýk dökümü:\n"
+msgid "\nHex dump of section '%s':\n"
+msgstr "\n'%s' bölümünün onaltýlýk dökümü:\n"
 
 #: readelf.c:5729
-#, fuzzy
 msgid "section data"
-msgstr "bölüm seçeneklerini atar"
+msgstr "bölüm verisi"
 
 #: readelf.c:5878
-#, fuzzy
 msgid "badly formed extended line op encountered!\n"
-msgstr "hatalý oluþturulmuþ uzun satýr iþlevi bulundu!"
+msgstr "hatalý oluþturulmuþ uzun satýr iþlevi bulundu!\n"
 
 #: readelf.c:5885
 #, c-format
@@ -3475,12 +3076,8 @@ msgid "  Extended opcode %d: "
 msgstr "  Ek opkod %d: "
 
 #: readelf.c:5890
-msgid ""
-"End of Sequence\n"
-"\n"
-msgstr ""
-"Dizi Sonu\n"
-"\n"
+msgid "End of Sequence\n\n"
+msgstr "Dizi Sonu\n\n"
 
 #: readelf.c:5896
 #, c-format
@@ -3508,12 +3105,8 @@ msgstr "%lu\t"
 
 #: readelf.c:5912
 #, c-format
-msgid ""
-"%s\n"
-"\n"
-msgstr ""
-"%s\n"
-"\n"
+msgid "%s\n\n"
+msgstr "%s\n\n"
 
 #: readelf.c:5916
 #, c-format
@@ -3522,19 +3115,12 @@ msgstr "TANIMSIZ: uzunluk %d\n"
 
 #: readelf.c:5942
 #, c-format
-msgid ""
-"\n"
-"Dump of debug contents of section %s:\n"
-"\n"
-msgstr ""
-"\n"
-"%s bölümünün hata ayýklama içeriði dökümü:\n"
-"\n"
+msgid "\nDump of debug contents of section %s:\n\n"
+msgstr "\n%s bölümünün hata ayýklama içeriði dökümü:\n\n"
 
 #: readelf.c:5954
-#, fuzzy
 msgid "64-bit DWARF line info is not supported yet.\n"
-msgstr "Þimdilik yalnýzca DWARF sürüm 2 satýr bilgisi destekleniyor.\n"
+msgstr "64 bitlik DWARF satýr bilgisi henüz desteklenmiyor.\n"
 
 #: readelf.c:5961
 msgid "The line info appears to be corrupt - the section is too small\n"
@@ -3555,7 +3141,7 @@ msgid "  DWARF Version:               %d\n"
 msgstr "  DWARF Sürümü:                %d\n"
 
 #: readelf.c:5986
-#, fuzzy, c-format
+#, c-format
 msgid "  Prologue Length:             %d\n"
 msgstr "  Giriþ Uzunluðu:              %d\n"
 
@@ -3585,12 +3171,8 @@ msgid "  Opcode Base:                 %d\n"
 msgstr "  Opkod Temeli:                 %d\n"
 
 #: readelf.c:6000
-msgid ""
-"\n"
-" Opcodes:\n"
-msgstr ""
-"\n"
-" Opkodlar:\n"
+msgid "\n Opcodes:\n"
+msgstr "\n Opkodlar:\n"
 
 #: readelf.c:6003
 #, c-format
@@ -3598,20 +3180,12 @@ msgid "  Opcode %d has %d args\n"
 msgstr "  %d opkodunun %d seçeneði var\n"
 
 #: readelf.c:6009
-msgid ""
-"\n"
-" The Directory Table is empty.\n"
-msgstr ""
-"\n"
-" Dizin Tablosu boþ.\n"
+msgid "\n The Directory Table is empty.\n"
+msgstr "\n Dizin Tablosu boþ.\n"
 
 #: readelf.c:6012
-msgid ""
-"\n"
-" The Directory Table:\n"
-msgstr ""
-"\n"
-" Dizin Tablosu:\n"
+msgid "\n The Directory Table:\n"
+msgstr "\n Dizin Tablosu:\n"
 
 #: readelf.c:6016
 #, c-format
@@ -3619,20 +3193,12 @@ msgid "  %s\n"
 msgstr "  %s\n"
 
 #: readelf.c:6027
-msgid ""
-"\n"
-" The File Name Table is empty.\n"
-msgstr ""
-"\n"
-" Dosya Adý Tablosu boþ.\n"
+msgid "\n The File Name Table is empty.\n"
+msgstr "\n Dosya Adý Tablosu boþ.\n"
 
 #: readelf.c:6030
-msgid ""
-"\n"
-" The File Name Table:\n"
-msgstr ""
-"\n"
-" Dosya Adý Tablosu:\n"
+msgid "\n The File Name Table:\n"
+msgstr "\n Dosya Adý Tablosu:\n"
 
 #: readelf.c:6038
 #, c-format
@@ -3646,12 +3212,8 @@ msgstr "%s\n"
 
 #. Now display the statements.
 #: readelf.c:6057
-msgid ""
-"\n"
-" Line Number Statements:\n"
-msgstr ""
-"\n"
-" Satýr Numarasý Deyimleri:\n"
+msgid "\n Line Number Statements:\n"
+msgstr "\n Satýr Numarasý Deyimleri:\n"
 
 #: readelf.c:6073
 #, c-format
@@ -3707,37 +3269,31 @@ msgid "  Advance PC by fixed size amount %d to 0x%lx\n"
 msgstr "  PC'yi 0x%2$lx'e kadar %1$d ilerletir\n"
 
 #: readelf.c:6151
-#, fuzzy
 msgid "  Set prologue_end to true\n"
-msgstr "  Sütunu %d olarak atar\n"
+msgstr "  Prologue_end'i doðru (true) olarak atar\n"
 
 #: readelf.c:6155
 msgid "  Set epilogue_begin to true\n"
-msgstr ""
+msgstr "  Epilogue_begin'i doðru (true) olarak atar\n"
 
 #: readelf.c:6161
-#, fuzzy, c-format
+#, c-format
 msgid "  Set ISA to %d\n"
-msgstr "  Sütunu %d olarak atar\n"
+msgstr "  ISA'yý %d olarak atar\n"
 
 #: readelf.c:6165
 #, c-format
 msgid "  Unknown opcode %d with operands: "
-msgstr ""
+msgstr "  Bilinmeyen %d opkodu ve iþlenenleri: "
 
 #: readelf.c:6197 readelf.c:6658 readelf.c:6730
 #, c-format
-msgid ""
-"Contents of the %s section:\n"
-"\n"
-msgstr ""
-"%s bölümünün içeriði:\n"
-"\n"
+msgid "Contents of the %s section:\n\n"
+msgstr "%s bölümünün içeriði:\n\n"
 
 #: readelf.c:6216
-#, fuzzy
 msgid "64-bit DWARF pubnames are not supported yet.\n"
-msgstr "Þimdilik yalnýz DWARF 2 genel isimleri destekleniyor\n"
+msgstr "64 bitlik DWARF genel isimleri henüz desteklenmiyor\n"
 
 #: readelf.c:6226
 msgid "Only DWARF 2 pubnames are currently supported\n"
@@ -3764,12 +3320,8 @@ msgid "  Size of area in .debug_info section: %ld\n"
 msgstr ".debug_info bölümünde alan büyüklüðü: %ld\n"
 
 #: readelf.c:6242
-msgid ""
-"\n"
-"    Offset\tName\n"
-msgstr ""
-"\n"
-"    Basamak\tÝsim\n"
+msgid "\n    Offset\tName\n"
+msgstr "\n    Basamak\tÝsim\n"
 
 #: readelf.c:6333
 #, c-format
@@ -3789,26 +3341,26 @@ msgstr "Bilinmeyen FORM deðeri: %lx"
 #: readelf.c:6679
 #, c-format
 msgid " DW_MACINFO_start_file - lineno: %d filenum: %d\n"
-msgstr ""
+msgstr " DW_MACINFO_start_file - satýr no: %d dosya no: %d\n"
 
 #: readelf.c:6684
 msgid " DW_MACINFO_end_file\n"
-msgstr ""
+msgstr " DW_MACINFO_end_file\n"
 
 #: readelf.c:6692
 #, c-format
 msgid " DW_MACINFO_define - lineno : %d macro : %s\n"
-msgstr ""
+msgstr " DW_MACINFO_define - satýr no : %d makro : %s\n"
 
 #: readelf.c:6700
 #, c-format
 msgid " DW_MACINFO_undef - lineno : %d macro : %s\n"
-msgstr ""
+msgstr " DW_MACINFO_undef - satýr no : %d makro : %s\n"
 
 #: readelf.c:6711
 #, c-format
 msgid " DW_MACINFO_vendor_ext - constant : %d string : %s\n"
-msgstr ""
+msgstr " DW_MACINFO_vendor_ext - sabit : %d dizge : %s\n"
 
 #: readelf.c:6739
 msgid "  Number TAG\n"
@@ -3846,46 +3398,34 @@ msgid "(Unknown location op)"
 msgstr "(Bilinmeyen yer yönergesi)"
 
 #: readelf.c:7137
-#, fuzzy
 msgid "debug_str section data"
-msgstr "bölüm seçeneklerini atar"
+msgstr "debug_str bölüm verisi"
 
 #: readelf.c:7156
-#, fuzzy
 msgid "<no .debug_str section>"
-msgstr "%s: kaynak bölümü yok"
+msgstr "<.debug_str bölümü yok>"
 
 #: readelf.c:7159
 msgid "<offset is too big>"
-msgstr ""
+msgstr "<görece fazla büyük>"
 
 #: readelf.c:7179
-#, fuzzy
-msgid ""
-"\n"
-"The .debug_str section is empty.\n"
-msgstr ""
-"\n"
-" Dizin Tablosu boþ.\n"
+msgid "\nThe .debug_str section is empty.\n"
+msgstr "\n.debug_str bölümü boþ.\n"
 
 #: readelf.c:7183
-#, fuzzy
-msgid ""
-"Contents of the .debug_str section:\n"
-"\n"
-msgstr ""
-"%s bölümünün içeriði:\n"
-"\n"
+msgid "Contents of the .debug_str section:\n\n"
+msgstr ".debug_str bölümünün içeriði:\n\n"
 
 #: readelf.c:7354
 #, c-format
 msgid " (indirect string, offset: 0x%lx): "
-msgstr ""
+msgstr " (dolaylý dizge, görece: 0x%lx): "
 
 #: readelf.c:7363
-#, fuzzy, c-format
+#, c-format
 msgid "Unrecognised form: %d\n"
-msgstr "Bilinmeyen form: %d"
+msgstr "Bilinmeyen form: %d\n"
 
 #: readelf.c:7376
 msgid "(not inlined)"
@@ -3910,17 +3450,12 @@ msgstr "  (Bilinmeyen inline öznitelik deðeri: %lx)"
 
 #: readelf.c:7545 readelf.c:7746
 #, c-format
-msgid ""
-"The section %s contains:\n"
-"\n"
-msgstr ""
-"%s bölümü içeriyor:\n"
-"\n"
+msgid "The section %s contains:\n\n"
+msgstr "%s bölümü içeriyor:\n\n"
 
 #: readelf.c:7568
-#, fuzzy
 msgid "64-bit DWARF debug info is not supported yet.\n"
-msgstr "Þimdilik yalnýzca DWARF Sürüm 2 hata ayýklama bilgisi destekleniyor.\n"
+msgstr "64 bitlik DWARF hata ayýklama bilgisi henüz desteklenmiyor.\n"
 
 #: readelf.c:7637
 #, c-format
@@ -3956,9 +3491,8 @@ msgid "Unable to locate .debug_abbrev section!\n"
 msgstr ".debug_abbrev bölümü bulunamadý!\n"
 
 #: readelf.c:7672
-#, fuzzy
 msgid "debug_abbrev section data"
-msgstr ".debug_abbrev bölümü bulunamadý!\n"
+msgstr "debug_abbrev bölüm verisi"
 
 #: readelf.c:7709
 #, c-format
@@ -3966,14 +3500,13 @@ msgid "Unable to locate entry %lu in the abbreviation table\n"
 msgstr "Kýsaltma tablosunda %lu girdisi bulunamadý\n"
 
 #: readelf.c:7714
-#, fuzzy, c-format
+#, c-format
 msgid " <%d><%lx>: Abbrev Number: %lu (%s)\n"
-msgstr " <%d><%x>: Kýsaltma Numarasý: %lu (%s)\n"
+msgstr " <%d><%lx>: Kýsaltma Numarasý: %lu (%s)\n"
 
 #: readelf.c:7767
-#, fuzzy
 msgid "64-bit DWARF aranges are not supported yet.\n"
-msgstr "Þimdilik yalnýzca DWARF 2 a-aralýklarý destekleniyor.\n"
+msgstr "64 bitlik DWARF a-aralýklarý henüz desteklenmiyor.\n"
 
 #: readelf.c:7773
 msgid "Only DWARF 2 aranges are currently supported.\n"
@@ -4005,12 +3538,8 @@ msgid "  Segment Size:             %d\n"
 msgstr "  Parça Boyu:             %d\n"
 
 #: readelf.c:7783
-msgid ""
-"\n"
-"    Address  Length\n"
-msgstr ""
-"\n"
-"    Adres  Uzunluk\n"
+msgid "\n    Address  Length\n"
+msgstr "\n    Adres  Uzunluk\n"
 
 #: readelf.c:7965
 #, c-format
@@ -4018,30 +3547,22 @@ msgid "The section %s contains:\n"
 msgstr "%s bölümü içeriyor:\n"
 
 #: readelf.c:7988
-#, fuzzy
 msgid "64-bit DWARF format frames are not supported yet.\n"
-msgstr "Þimdilik yalnýzca DWARF 2 a-aralýklarý destekleniyor.\n"
+msgstr "64 bitlik DWARF biçem çerçeveleri henüz desteklenmiyor.\n"
 
 #: readelf.c:8499
 #, c-format
 msgid "Displaying the debug contents of section %s is not yet supported.\n"
-msgstr ""
-"%s bölümünün hata ayýklama içerik bilgilerini göstermek henüz "
-"desteklenmiyor.\n"
+msgstr "%s bölümünün hata ayýklama içerik bilgilerini göstermek henüz desteklenmiyor.\n"
 
 #: readelf.c:8565
 #, c-format
-msgid ""
-"\n"
-"Section '%s' has no debugging data.\n"
-msgstr ""
-"\n"
-"'%s' bölümünde hata ayýklama bilgisi yok.\n"
+msgid "\nSection '%s' has no debugging data.\n"
+msgstr "\n'%s' bölümünde hata ayýklama bilgisi yok.\n"
 
 #: readelf.c:8570 readelf.c:8632
-#, fuzzy
 msgid "debug section data"
-msgstr "bölüm seçeneklerini atar"
+msgstr "hata ayýklama bölüm verisi"
 
 #: readelf.c:8586
 #, c-format
@@ -4054,20 +3575,16 @@ msgstr "Bazý bölümler dökülmedi çünkü mevcut deðiller!\n"
 
 #: readelf.c:8733
 msgid "liblist"
-msgstr ""
+msgstr "liblist"
 
 #: readelf.c:8818
 msgid "options"
-msgstr ""
+msgstr "seçenekler"
 
 #: readelf.c:8849
 #, c-format
-msgid ""
-"\n"
-"Section '%s' contains %d entries:\n"
-msgstr ""
-"\n"
-"'%s' bölümü %d girdi içeriyor:\n"
+msgid "\nSection '%s' contains %d entries:\n"
+msgstr "\n'%s' bölümü %d girdi içeriyor:\n"
 
 #: readelf.c:9010
 msgid "conflict list with without table"
@@ -4075,16 +3592,12 @@ msgstr "tablolu ve tablosuz çeliþki listesi"
 
 #: readelf.c:9028 readelf.c:9044
 msgid "conflict"
-msgstr ""
+msgstr "çakýþma"
 
 #: readelf.c:9054
-#, fuzzy, c-format
-msgid ""
-"\n"
-"Section '.conflict' contains %ld entries:\n"
-msgstr ""
-"\n"
-"'.conflict' bölümü %d girdi içeriyor:\n"
+#, c-format
+msgid "\nSection '.conflict' contains %ld entries:\n"
+msgstr "\n'.conflict' bölümü %ld girdi içeriyor:\n"
 
 #: readelf.c:9056
 msgid "  Num:    Index       Value  Name"
@@ -4141,38 +3654,30 @@ msgstr "Bilinmeyen not tipi: (0x%08x)"
 
 #. NetBSD core "procinfo" structure.
 #: readelf.c:9109
-#, fuzzy
 msgid "NetBSD procinfo structure"
-msgstr "NT_PSINFO (psinfo yapýsý)"
+msgstr "NetBSD procinfo yapýsý"
 
 #: readelf.c:9136 readelf.c:9150
-#, fuzzy
 msgid "PT_GETREGS (reg structure)"
-msgstr "NT_PRXFPREG (user_xfpregs yapýsý)"
+msgstr "PT_GETREGS (yazmaç yapýsý)"
 
 #: readelf.c:9138 readelf.c:9152
-#, fuzzy
 msgid "PT_GETFPREGS (fpreg structure)"
-msgstr "NT_PRXFPREG (user_xfpregs yapýsý)"
+msgstr "PT_GETFPREGS (kayan nokta yazmaç yapýsý)"
 
 #: readelf.c:9158
 #, c-format
 msgid "PT_FIRSTMACH+%d"
-msgstr ""
+msgstr "PT_FIRSTMACH+%d"
 
 #: readelf.c:9212
-#, fuzzy
 msgid "notes"
-msgstr "yok"
+msgstr "notlar"
 
 #: readelf.c:9218
 #, c-format
-msgid ""
-"\n"
-"Notes at offset 0x%08lx with length 0x%08lx:\n"
-msgstr ""
-"\n"
-"0x%08lx göreli konumunda, 0x%08lx uzunluðunda notlar:\n"
+msgid "\nNotes at offset 0x%08lx with length 0x%08lx:\n"
+msgstr "\n0x%08lx göreli konumunda, 0x%08lx uzunluðunda notlar:\n"
 
 #: readelf.c:9220
 msgid "  Owner\t\tData size\tDescription\n"
@@ -4183,11 +3688,12 @@ msgid "No note segments present in the core file.\n"
 msgstr "Core dosyasýnda not parçalarý yok.\n"
 
 #: readelf.c:9409
-#, fuzzy
 msgid ""
 "This instance of readelf has been built without support for a\n"
 "64 bit data type and so it cannot read 64 bit ELF files.\n"
-msgstr "Bu readelf, bunlarýn desteði olmaksýzýn derlenmiþtir:\n"
+msgstr ""
+"Bu readelf, 64 bitlik veri türü desteði olmaksýzýn derlenmiþtir ve\n"
+"64 bitlik ELF dosyalarýný okuyamaz.\n"
 
 #: readelf.c:9452
 #, c-format
@@ -4206,12 +3712,8 @@ msgstr "%s: Dosya baþlýðý okunamadý\n"
 
 #: readelf.c:9479
 #, c-format
-msgid ""
-"\n"
-"File: %s\n"
-msgstr ""
-"\n"
-"Dosya: %s\n"
+msgid "\nFile: %s\n"
+msgstr "\nDosya: %s\n"
 
 #: rename.c:131
 #, c-format
@@ -4748,21 +4250,20 @@ msgid "invalid integer argument %s"
 msgstr "geçersiz tamsayý argümaný %s"
 
 #: strings.c:648
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Usage: %s [-afov] [-n min-len] [-min-len] [-t {o,x,d}] [-e {s,b,l,B,L}]\n"
 "       [-] [--all] [--print-file-name] [--bytes=min-len] [--radix={o,x,d}]\n"
-"       [--target=bfdname] [--encoding {s,b,l,B,L}] [--help] [--version] "
-"file...\n"
+"       [--target=bfdname] [--encoding {s,b,l,B,L}] [--help] [--version] file...\n"
 msgstr ""
 "Kullaným: %s [-afov] [-n min-uzun] [-min-len]              En az uzunluk\n"
-"       [-t {o,x,d}] [-]\n"
+"       [-t {o,x,d}] [-e {s,b,l,B,L}] [-]\n"
 "       [--all]                                             Hepsi\n"
-"       [--print-file-name]                                 Dosya adýný "
-"yazdýrýr\n"
+"       [--print-file-name]                                 Dosya adýný yazdýrýr\n"
 "       [--bytes=min-uzun]                                  En az bayt\n"
 "       [--radix={o,x,d}]\n"
 "       [--target=bfd_adý]                                  Hedef\n"
+"       [--encoding {s,b,l,B,L}]                            Kodlama\n"
 "       [--help]                                            Yardým\n"
 "       [--version]                                         Sürüm bilgisi\n"
 "       dosya...                                            \n"
@@ -4778,17 +4279,15 @@ msgid "cannot open input file %s"
 msgstr "%s girdi dosyasý açýlamadý"
 
 #: version.c:35
-#, fuzzy
 msgid "Copyright 2001 Free Software Foundation, Inc.\n"
-msgstr "Copyright 1997, 98, 99, 2000 Free Software Foundation, Inc.\n"
+msgstr "Telif Hakký (c) 2001 Free Software Foundation, Inc.\n"
 
 #: version.c:36
 msgid ""
 "This program is free software; you may redistribute it under the terms of\n"
 "the GNU General Public License.  This program has absolutely no warranty.\n"
 msgstr ""
-"Bu, bir serbest yazýlýmdýr; GNU Genel Kamu Lisansý koþullarý altýnda "
-"deðiþiklik \n"
+"Bu, bir serbest yazýlýmdýr; GNU Genel Kamu Lisansý koþullarý altýnda deðiþiklik \n"
 "yapabilir ve/veya yeniden daðýtabilirsiniz. \n"
 "Bu yazýlýmýn herhangi bir garantisi yoktur.\n"
 
@@ -4863,21 +4362,18 @@ msgstr ""
 "  -O BÝÇEM, --output-format BÝÇEM\n"
 "                                Çýktý biçemini belirtir\n"
 "  -F HEDEF, --target HEDEF      COFF hedefini belirtir\n"
-"  --preprocessor YAZILIM        rc dosyasýný öniþlemek için kullanýlacak "
-"yazýlým\n"
+"  --preprocessor YAZILIM        rc dosyasýný öniþlemek için kullanýlacak yazýlým\n"
 "  --include-dir DÝZÝN           rc dosyasý öniþlenirken dizini dahil et\n"
 "  -DSYM[=DEÐER], --define SYM[=DEÐER]\n"
 "                                rc dosyasý öniþlenirken SYM'i tanýmlar\n"
 "  -v                            Açýklamalý - ne yapýldýðýný anlatýr\n"
 "  --language DEÐER              rc dosyasý okunurken dili belirtir\n"
-"  --use-temp-file               Öniþlemci çýktýsýný okumak için popen "
-"yerine                                 geçici dosya kullanýr\n"
+"  --use-temp-file               Öniþlemci çýktýsýný okumak için popen yerine                                 geçici dosya kullanýr\n"
 "  --no-use-temp-file            (öntanýmlý) popen kullanýr\n"
 
 #: windres.c:725
 msgid "  --yydebug                   Turn on parser debugging\n"
-msgstr ""
-"  --yydebug                   Tarayýcýda hata ayýklamayý etkinleþtirir\n"
+msgstr "  --yydebug                   Tarayýcýda hata ayýklamayý etkinleþtirir\n"
 
 #: windres.c:728
 msgid ""
@@ -4893,8 +4389,7 @@ msgid ""
 "extension if not specified.  A single file name is an input file.\n"
 "No input-file is stdin, default rc.  No output-file is stdout, default rc.\n"
 msgstr ""
-"BÝÇEM rc, res, veya coff deðerlerinden biri olup, eðer belirtilmezse dosya "
-"ismi sonekinden bulunur. Tek bir dosya ismi bir girdi dosyasý kabul edilir\n"
+"BÝÇEM rc, res, veya coff deðerlerinden biri olup, eðer belirtilmezse dosya ismi sonekinden bulunur. Tek bir dosya ismi bir girdi dosyasý kabul edilir\n"
 "Girdi dosya ismi verilmezse standart girdi, öntanýmlý rc okunur. \n"
 "Çýktý dosya ismi verilmezse standart çýktý, öntanýmlý rc okunur.\n"
 
@@ -4916,83 +4411,3 @@ msgstr "stab_int_type: hatalý boy %u"
 #, c-format
 msgid "%s: warning: unknown size for field `%s' in struct"
 msgstr "%s: uyarý: Yapý içinde `%s' alaný için bilinmeyen boy"
-
-#~ msgid "GNU %s version %s\n"
-#~ msgstr "GNU %s sürüm %s\n"
-
-#~ msgid "no export definition file provided"
-#~ msgstr "ihraç taným dosyasý verilmemiþ"
-
-#~ msgid " The switches are:\n"
-#~ msgstr " Seçenekler:\n"
-
-#~ msgid "Unable to seek to start of %s at %x\n"
-#~ msgstr "%s'in baþlangýcý %x'de aranamadý\n"
-
-#~ msgid "Unable to read data at %x for %s\n"
-#~ msgstr "%2$s için %1$x'deki veri okunamadý\n"
-
-#~ msgid "ELF32"
-#~ msgstr "ELF32"
-
-#~ msgid "ELF64"
-#~ msgstr "ELF64"
-
-#~ msgid "UNIX - System V"
-#~ msgstr "UNIX - System V"
-
-#~ msgid "UNIX - HP-UX"
-#~ msgstr "UNIX - HP-UX"
-
-#~ msgid "UNIX - NetBSD"
-#~ msgstr "UNIX - NetBSD"
-
-#~ msgid "UNIX - Linux"
-#~ msgstr "UNIX - Linux"
-
-#~ msgid "GNU/Hurd"
-#~ msgstr "GNU/Hurd"
-
-#~ msgid "UNIX - Solaris"
-#~ msgstr "UNIX - Solaris"
-
-#~ msgid "UNIX - AIX"
-#~ msgstr "UNIX - AIX"
-
-#~ msgid "UNIX - IRIX"
-#~ msgstr "UNIX - IRIX"
-
-#~ msgid "UNIX - FreeBSD"
-#~ msgstr "UNIX - FreeBSD"
-
-#~ msgid "UNIX - TRU64"
-#~ msgstr "UNIX - TRU64"
-
-#~ msgid "Novell - Modesto"
-#~ msgstr "Novell - Modesto"
-
-#~ msgid "UNIX - OpenBSD"
-#~ msgstr "UNIX - OpenBSD"
-
-#~ msgid "ARM"
-#~ msgstr "ARM"
-
-#~ msgid "Key to Flags:\n"
-#~ msgstr "Seçeneklere Anahtar:\n"
-
-#~ msgid "  W (write), A (alloc), X (execute), M (merge), S (strings)\n"
-#~ msgstr "  W (yaz), A (ayýr), X (çalýþtýr), M (birleþtir) S (dizgeler)\n"
-
-#~ msgid "  I (info), L (link order), G (group), x (unknown)\n"
-#~ msgstr "  I (bilgi), L (bað sýrasý), G (grup), x (bilinmeyen)\n"
-
-#~ msgid ""
-#~ "  O (extra OS processing required) o (OS specific), p (processor "
-#~ "specific)\n"
-#~ msgstr "  O (fazla ÝS iþlemi gerekli) o (ÝS'e özel), p (iþlemciye özel)\n"
-
-#~ msgid "Unable to handle FORM: %d"
-#~ msgstr "FORM iþlenemedi: %d"
-
-#~ msgid "64 bit data type and so it cannot read 64 bit ELF files.\n"
-#~ msgstr "64 bit veri tipi dolayýsýyla 64 bit ELF dosyasý okunamaz.\n"
