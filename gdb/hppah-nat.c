@@ -98,7 +98,7 @@ store_inferior_registers (int regno)
       /* Floating-point registers come from the ss_fpblock area.  */
       else if (regno >= FP0_REGNUM)
 	addr = (HPPAH_OFFSETOF (save_state_t, ss_fpblock) 
-		+ (REGISTER_BYTE (regno) - REGISTER_BYTE (FP0_REGNUM)));
+		+ (DEPRECATED_REGISTER_BYTE (regno) - DEPRECATED_REGISTER_BYTE (FP0_REGNUM)));
 
       /* Wide registers come from the ss_wide area.
 	 I think it's more PC to test (ss_flags & SS_WIDEREGS) to select
@@ -107,13 +107,13 @@ store_inferior_registers (int regno)
 	 every register reference.  Bleah.  */
       else if (len == 8)
 	addr = (HPPAH_OFFSETOF (save_state_t, ss_wide) 
-		+ REGISTER_BYTE (regno));
+		+ DEPRECATED_REGISTER_BYTE (regno));
 
       /* Narrow registers come from the ss_narrow area.  Note that
 	 ss_narrow starts with gr1, not gr0.  */
       else if (len == 4)
 	addr = (HPPAH_OFFSETOF (save_state_t, ss_narrow)
-		+ (REGISTER_BYTE (regno) - REGISTER_BYTE (1)));
+		+ (DEPRECATED_REGISTER_BYTE (regno) - DEPRECATED_REGISTER_BYTE (1)));
       else
 	internal_error (__FILE__, __LINE__,
 			"hppah-nat.c (write_register): unexpected register size");
@@ -128,7 +128,7 @@ store_inferior_registers (int regno)
 	{
 	  CORE_ADDR temp;
 
-	  temp = *(CORE_ADDR *)&deprecated_registers[REGISTER_BYTE (regno)];
+	  temp = *(CORE_ADDR *)&deprecated_registers[DEPRECATED_REGISTER_BYTE (regno)];
 
 	  /* Set the priv level (stored in the low two bits of the PC.  */
 	  temp |= 0x3;
@@ -153,7 +153,7 @@ store_inferior_registers (int regno)
 	 the high part of IPSW.  What will it take for HP to catch a
 	 clue about building sensible interfaces?  */
      if (regno == IPSW_REGNUM && len == 8)
-	*(int *)&deprecated_registers[REGISTER_BYTE (regno)] = 0;
+	*(int *)&deprecated_registers[DEPRECATED_REGISTER_BYTE (regno)] = 0;
 #endif
 
       for (i = 0; i < len; i += sizeof (int))
@@ -161,7 +161,7 @@ store_inferior_registers (int regno)
 	  errno = 0;
 	  call_ptrace (PT_WUREGS, PIDGET (inferior_ptid),
 	               (PTRACE_ARG3_TYPE) addr + i,
-		       *(int *) &deprecated_registers[REGISTER_BYTE (regno) + i]);
+		       *(int *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (regno) + i]);
 	  if (errno != 0)
 	    {
 	      /* Warning, not error, in case we are attached; sometimes
@@ -216,7 +216,7 @@ fetch_register (int regno)
   /* Floating-point registers come from the ss_fpblock area.  */
   else if (regno >= FP0_REGNUM)
     addr = (HPPAH_OFFSETOF (save_state_t, ss_fpblock) 
-	    + (REGISTER_BYTE (regno) - REGISTER_BYTE (FP0_REGNUM)));
+	    + (DEPRECATED_REGISTER_BYTE (regno) - DEPRECATED_REGISTER_BYTE (FP0_REGNUM)));
 
   /* Wide registers come from the ss_wide area.
      I think it's more PC to test (ss_flags & SS_WIDEREGS) to select
@@ -225,13 +225,13 @@ fetch_register (int regno)
      every register reference.  Bleah.  */
   else if (len == 8)
     addr = (HPPAH_OFFSETOF (save_state_t, ss_wide) 
-	    + REGISTER_BYTE (regno));
+	    + DEPRECATED_REGISTER_BYTE (regno));
 
   /* Narrow registers come from the ss_narrow area.  Note that
      ss_narrow starts with gr1, not gr0.  */
   else if (len == 4)
     addr = (HPPAH_OFFSETOF (save_state_t, ss_narrow)
-	    + (REGISTER_BYTE (regno) - REGISTER_BYTE (1)));
+	    + (DEPRECATED_REGISTER_BYTE (regno) - DEPRECATED_REGISTER_BYTE (1)));
 
   else
     internal_error (__FILE__, __LINE__,

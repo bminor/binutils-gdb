@@ -1,3 +1,65 @@
+2003-09-17  Jim Blandy  <jimb@redhat.com>
+
+	* Makefile.in (dis_asm_h): Note that this #includes "bfd.h".
+
+2003-09-17  Andrew Cagney  <cagney@redhat.com>
+
+	* ppcnbsd-tdep.c (ppcnbsd_use_struct_convention): New function.
+	(ppcnbsd_init_abi): Set "use_struct_convention" to
+	"ppcnbsd_use_struct_convention".
+
+2003-09-17  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdbarch.sh (DEPRECATED_REG_STRUCT_HAS_ADDR): Add comment.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	(stabs_argument_has_addr): New architecture method.
+	* arch-utils.h (default_stabs_argument_has_addr): New prototype.
+	* arch-utils.c: Include "buildsym.h".
+	(default_stabs_argument_has_addr): New function.
+	* stabsread.c (define_symbol): Use stabs_argument_has_addr
+	instead of DEPRECATED_REG_STRUCT_HAS_ADDR.
+
+2003-09-17  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh (DEPRECATED_NPC_REGNUM): Deprecate NPC_REGNUM.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* core-sol2.c, hppa-tdep.c, lynx-nat.c, procfs.c: Update.
+	* regcache.c, remote-vxsparc.c, sparc-linux-nat.c: Update.
+	* sparc-nat.c, sparc-tdep.c, sparc64-tdep.c: Update.
+	* sparcnbsd-tdep.c: Update.
+	
+2003-09-17  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh (DEPRECATED_REGISTER_BYTE): Rename REGISTER_BYTE.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* arm-linux-tdep.c, core-sol2.c, cris-tdep.c: Update.
+	* d10v-tdep.c, frame.c: Update.
+	* hppa-tdep.c, hppab-nat.c, hppah-nat.c, hppam3-nat.c: Update.
+	* hpux-thread.c, i386gnu-nat.c, ia64-aix-nat.c: Update.
+	* ia64-linux-nat.c, irix5-nat.c, lynx-nat.c, m68knbsd-nat.c: Update.
+	* mcore-tdep.c, mips-linux-tdep.c, mips-tdep.c: Update.
+	* mipsv4-nat.c, mn10300-tdep.c, ns32k-tdep.c: Update.
+	* ns32knbsd-nat.c, ppc-bdm.c, regcache.c, remote-sds.c: Update.
+	* remote-vx68.c, remote-vxmips.c, remote-vxsparc.c: Update.
+	* remote.c, rs6000-tdep.c, s390-tdep.c, sh64-tdep.c: Update.
+	* sparc-nat.c, sparc-tdep.c, sun3-nat.c, v850-tdep.c: Update.
+	* v850ice.c, vax-tdep.c, xstormy16-tdep.c: Update.
+	* config/m68k/tm-cisco.h, config/m68k/tm-delta68.h: Update.
+	* config/pa/nm-hppah.h: Update.
+
+2003-09-16  Andrew Cagney  <cagney@redhat.com>
+
+	* ppc-linux-tdep.c (ppc_linux_init_abi): Set the 32 bit
+	"use_struct_convention" to "ppc_linux_use_struct_convention".
+	(ppc_linux_use_struct_convention): New function.
+	* rs6000-tdep.c (rs6000_use_struct_convention): New function.
+	(rs6000_gdbarch_init): For AIX, set "use_struct_convention" to
+	"rs6000_use_struct_convention".
+	* ppc-tdep.h (ppc_sysv_abi_broken_use_struct_convention): Delete
+	declaration.
+	* ppc-sysv-tdep.c (ppc_sysv_abi_broken_use_struct_convention):
+	Delete function.
+
 2003-09-16  Andrew Cagney  <cagney@redhat.com>
 
 	* buildsym.c: Remove more occurances of "register".

@@ -952,7 +952,7 @@ mcore_use_struct_convention (int gcc_p, struct type *type)
 static CORE_ADDR
 mcore_extract_struct_value_address (char *regbuf)
 {
-  return extract_unsigned_integer (regbuf + REGISTER_BYTE (FIRST_ARGREG), DEPRECATED_REGISTER_SIZE);
+  return extract_unsigned_integer (regbuf + DEPRECATED_REGISTER_BYTE (FIRST_ARGREG), DEPRECATED_REGISTER_SIZE);
 }
 
 /* Given a function which returns a value of type TYPE, extract the
@@ -965,7 +965,7 @@ mcore_extract_return_value (struct type *type, char *regbuf, char *valbuf)
   /* Copy the return value (starting) in RETVAL_REGNUM to VALBUF. */
   /* Only getting the first byte! if len = 1, we need the last byte of
      the register, not the first. */
-  memcpy (valbuf, regbuf + REGISTER_BYTE (RETVAL_REGNUM) +
+  memcpy (valbuf, regbuf + DEPRECATED_REGISTER_BYTE (RETVAL_REGNUM) +
   (TYPE_LENGTH (type) < 4 ? 4 - TYPE_LENGTH (type) : 0), TYPE_LENGTH (type));
 }
 
@@ -991,11 +991,11 @@ mcore_store_return_value (struct type *type, char *valbuf)
 
   /* Return value fits into registers. */
   return_size = (value_size + DEPRECATED_REGISTER_SIZE - 1) & ~(DEPRECATED_REGISTER_SIZE - 1);
-  offset = REGISTER_BYTE (RETVAL_REGNUM) + (return_size - value_size);
+  offset = DEPRECATED_REGISTER_BYTE (RETVAL_REGNUM) + (return_size - value_size);
   zeros = alloca (return_size);
   memset (zeros, 0, return_size);
 
-  deprecated_write_register_bytes (REGISTER_BYTE (RETVAL_REGNUM), zeros,
+  deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (RETVAL_REGNUM), zeros,
 				   return_size);
   deprecated_write_register_bytes (offset, valbuf, value_size);
 }

@@ -654,7 +654,7 @@ mips_register_raw_size (int regnum)
 	 NOTE: cagney/2003-06-15: This is so bogus.  The register's
 	 raw size is changing according to the ABI
 	 (FP_REGISTER_DOUBLE).  Also, GDB's protocol is defined by a
-	 combination of REGISTER_RAW_SIZE and REGISTER_BYTE.  */
+	 combination of REGISTER_RAW_SIZE and DEPRECATED_REGISTER_BYTE.  */
       if (mips64_transfers_32bit_regs_p)
 	return REGISTER_VIRTUAL_SIZE (regnum);
       else if (regnum >= FP0_REGNUM && regnum < FP0_REGNUM + 32
@@ -4742,12 +4742,12 @@ mips_eabi_extract_return_value (struct type *valtype,
   return_value_location (valtype, &hi, &lo);
 
   memcpy (valbuf + lo.buf_offset,
-	  regbuf + REGISTER_BYTE (lo.reg) + lo.reg_offset,
+	  regbuf + DEPRECATED_REGISTER_BYTE (lo.reg) + lo.reg_offset,
 	  lo.len);
 
   if (hi.len > 0)
     memcpy (valbuf + hi.buf_offset,
-	    regbuf + REGISTER_BYTE (hi.reg) + hi.reg_offset,
+	    regbuf + DEPRECATED_REGISTER_BYTE (hi.reg) + hi.reg_offset,
 	    hi.len);
 }
 
@@ -4761,12 +4761,12 @@ mips_o64_extract_return_value (struct type *valtype,
   return_value_location (valtype, &hi, &lo);
 
   memcpy (valbuf + lo.buf_offset,
-	  regbuf + REGISTER_BYTE (lo.reg) + lo.reg_offset,
+	  regbuf + DEPRECATED_REGISTER_BYTE (lo.reg) + lo.reg_offset,
 	  lo.len);
 
   if (hi.len > 0)
     memcpy (valbuf + hi.buf_offset,
-	    regbuf + REGISTER_BYTE (hi.reg) + hi.reg_offset,
+	    regbuf + DEPRECATED_REGISTER_BYTE (hi.reg) + hi.reg_offset,
 	    hi.len);
 }
 
@@ -4783,14 +4783,14 @@ mips_eabi_store_return_value (struct type *valtype, char *valbuf)
 
   memset (raw_buffer, 0, sizeof (raw_buffer));
   memcpy (raw_buffer + lo.reg_offset, valbuf + lo.buf_offset, lo.len);
-  deprecated_write_register_bytes (REGISTER_BYTE (lo.reg), raw_buffer,
+  deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (lo.reg), raw_buffer,
 				   REGISTER_RAW_SIZE (lo.reg));
 
   if (hi.len > 0)
     {
       memset (raw_buffer, 0, sizeof (raw_buffer));
       memcpy (raw_buffer + hi.reg_offset, valbuf + hi.buf_offset, hi.len);
-      deprecated_write_register_bytes (REGISTER_BYTE (hi.reg), raw_buffer,
+      deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (hi.reg), raw_buffer,
 				       REGISTER_RAW_SIZE (hi.reg));
     }
 }
@@ -4805,14 +4805,14 @@ mips_o64_store_return_value (struct type *valtype, char *valbuf)
 
   memset (raw_buffer, 0, sizeof (raw_buffer));
   memcpy (raw_buffer + lo.reg_offset, valbuf + lo.buf_offset, lo.len);
-  deprecated_write_register_bytes (REGISTER_BYTE (lo.reg), raw_buffer,
+  deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (lo.reg), raw_buffer,
 				   REGISTER_RAW_SIZE (lo.reg));
 
   if (hi.len > 0)
     {
       memset (raw_buffer, 0, sizeof (raw_buffer));
       memcpy (raw_buffer + hi.reg_offset, valbuf + hi.buf_offset, hi.len);
-      deprecated_write_register_bytes (REGISTER_BYTE (hi.reg), raw_buffer,
+      deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (hi.reg), raw_buffer,
 				       REGISTER_RAW_SIZE (hi.reg));
     }
 }

@@ -329,20 +329,6 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
   return sp;
 }
 
-/* Until November 2001, gcc was not complying to the SYSV ABI for 
-   returning structures less than or equal to 8 bytes in size.  It was
-   returning everything in memory.  When this was corrected, it wasn't
-   fixed for native platforms.  */
-int     
-ppc_sysv_abi_broken_use_struct_convention (int gcc_p, struct type *value_type)
-{  
-  if ((TYPE_LENGTH (value_type) == 16 || TYPE_LENGTH (value_type) == 8)
-      && TYPE_VECTOR (value_type))
-    return 0;                            
-
-  return generic_use_struct_convention (gcc_p, value_type);
-}
-
 /* Structures 8 bytes or less long are returned in the r3 & r4
    registers, according to the SYSV ABI. */
 int

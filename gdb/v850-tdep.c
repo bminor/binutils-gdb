@@ -1065,7 +1065,7 @@ v850_extract_return_value (struct type *type, char *regbuf, char *valbuf)
       /* Scalar return values of <= 8 bytes are returned in 
          E_V0_REGNUM to E_V1_REGNUM. */
       memcpy (valbuf,
-	      &regbuf[REGISTER_BYTE (E_V0_REGNUM)],
+	      &regbuf[DEPRECATED_REGISTER_BYTE (E_V0_REGNUM)],
 	      TYPE_LENGTH (type));
     }
   else
@@ -1073,7 +1073,7 @@ v850_extract_return_value (struct type *type, char *regbuf, char *valbuf)
       /* Aggregates and return values > 8 bytes are returned in memory,
          pointed to by R6. */
       return_buffer =
-	extract_unsigned_integer (regbuf + REGISTER_BYTE (E_V0_REGNUM),
+	extract_unsigned_integer (regbuf + DEPRECATED_REGISTER_BYTE (E_V0_REGNUM),
 				  REGISTER_RAW_SIZE (E_V0_REGNUM));
 
       read_memory (return_buffer, valbuf, TYPE_LENGTH (type));
@@ -1101,7 +1101,7 @@ v850_store_return_value (struct type *type, char *valbuf)
   CORE_ADDR return_buffer;
 
   if (!v850_use_struct_convention (0, type))
-    deprecated_write_register_bytes (REGISTER_BYTE (E_V0_REGNUM), valbuf,
+    deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (E_V0_REGNUM), valbuf,
 				     TYPE_LENGTH (type));
   else
     {

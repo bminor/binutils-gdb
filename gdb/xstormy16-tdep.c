@@ -221,7 +221,7 @@ xstormy16_extract_return_value (struct type *type, char *regbuf, char *valbuf)
       /* Scalar return values of <= 12 bytes are returned in 
          E_1ST_ARG_REGNUM to E_LST_ARG_REGNUM. */
       memcpy (valbuf,
-	      &regbuf[REGISTER_BYTE (E_1ST_ARG_REGNUM)] + offset,
+	      &regbuf[DEPRECATED_REGISTER_BYTE (E_1ST_ARG_REGNUM)] + offset,
 	      TYPE_LENGTH (type));
     }
   else
@@ -229,7 +229,7 @@ xstormy16_extract_return_value (struct type *type, char *regbuf, char *valbuf)
       /* Aggregates and return values > 12 bytes are returned in memory,
          pointed to by R2. */
       return_buffer =
-	extract_unsigned_integer (regbuf + REGISTER_BYTE (E_PTR_RET_REGNUM),
+	extract_unsigned_integer (regbuf + DEPRECATED_REGISTER_BYTE (E_PTR_RET_REGNUM),
 				  REGISTER_RAW_SIZE (E_PTR_RET_REGNUM));
 
       read_memory (return_buffer, valbuf, TYPE_LENGTH (type));
@@ -393,7 +393,7 @@ xstormy16_store_return_value (struct type *type, char *valbuf)
     }
   else if (xstormy16_type_is_scalar (type) &&
 	   TYPE_LENGTH (type) <= E_MAX_RETTYPE_SIZE_IN_REGS)
-    deprecated_write_register_bytes (REGISTER_BYTE (E_1ST_ARG_REGNUM),
+    deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (E_1ST_ARG_REGNUM),
 				     valbuf, TYPE_LENGTH (type));
   else
     {

@@ -1292,7 +1292,7 @@ sh64_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
 	  if (raw_buffer)
 	    memcpy (raw_buffer,
 		    (deprecated_generic_find_dummy_frame (get_frame_pc (frame), get_frame_base (frame))
-		     + REGISTER_BYTE (regnum)),
+		     + DEPRECATED_REGISTER_BYTE (regnum)),
 		    REGISTER_RAW_SIZE (regnum));
 	  return;
 	}
@@ -1343,7 +1343,7 @@ sh64_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
   if (lval)			/* found it in a live register */
     *lval = lval_register;
   if (addrp)
-    *addrp = REGISTER_BYTE (live_regnum);
+    *addrp = DEPRECATED_REGISTER_BYTE (live_regnum);
   if (raw_buffer)
     deprecated_read_register_gen (live_regnum, raw_buffer);
 }
@@ -1351,7 +1351,7 @@ sh64_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
 static CORE_ADDR
 sh64_extract_struct_value_address (char *regbuf)
 {
-  return (extract_unsigned_integer ((regbuf + REGISTER_BYTE (STRUCT_RETURN_REGNUM)), 
+  return (extract_unsigned_integer ((regbuf + DEPRECATED_REGISTER_BYTE (STRUCT_RETURN_REGNUM)), 
 				    REGISTER_RAW_SIZE (STRUCT_RETURN_REGNUM)));
 }
 
@@ -1673,7 +1673,7 @@ sh64_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 	{
 	  /* Return value stored in FP0_REGNUM */
 	  return_register = FP0_REGNUM;
-	  offset = REGISTER_BYTE (return_register);
+	  offset = DEPRECATED_REGISTER_BYTE (return_register);
 	  memcpy (valbuf, (char *) regbuf + offset, len); 
 	}
       else if (len == 8)
@@ -1682,7 +1682,7 @@ sh64_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 	  DOUBLEST val;
 
 	  return_register = DR0_REGNUM;
-	  offset = REGISTER_BYTE (return_register);
+	  offset = DEPRECATED_REGISTER_BYTE (return_register);
 	  
 	  if (TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE)
 	    floatformat_to_doublest (&floatformat_ieee_double_littlebyte_bigword,
@@ -1701,10 +1701,10 @@ sh64_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 	     at the most significant end. */
 	  return_register = DEFAULT_RETURN_REGNUM;
 	  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
-	    offset = REGISTER_BYTE (return_register) +
+	    offset = DEPRECATED_REGISTER_BYTE (return_register) +
 	      REGISTER_RAW_SIZE (return_register) - len;
 	  else
-	    offset = REGISTER_BYTE (return_register);
+	    offset = DEPRECATED_REGISTER_BYTE (return_register);
 	  memcpy (valbuf, (char *) regbuf + offset, len);
 	}
       else

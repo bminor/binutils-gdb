@@ -499,7 +499,7 @@ sds_fetch_registers (int regno)
   /* (should warn about reply too short) */
 
   for (i = 0; i < NUM_REGS; i++)
-    supply_register (i, &regs[REGISTER_BYTE (i)]);
+    supply_register (i, &regs[DEPRECATED_REGISTER_BYTE (i)]);
 }
 
 /* Prepare to store registers.  Since we may send them all, we have to

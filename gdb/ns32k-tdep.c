@@ -483,7 +483,7 @@ static void
 ns32k_extract_return_value (struct type *valtype, char *regbuf, char *valbuf)
 {
   memcpy (valbuf,
-          regbuf + REGISTER_BYTE (TYPE_CODE (valtype) == TYPE_CODE_FLT ?
+          regbuf + DEPRECATED_REGISTER_BYTE (TYPE_CODE (valtype) == TYPE_CODE_FLT ?
 				  FP0_REGNUM : 0), TYPE_LENGTH (valtype));
 }
 
@@ -498,7 +498,7 @@ ns32k_store_return_value (struct type *valtype, char *valbuf)
 static CORE_ADDR
 ns32k_extract_struct_value_address (char *regbuf)
 {
-  return (extract_unsigned_integer (regbuf + REGISTER_BYTE (0), REGISTER_RAW_SIZE (0)));
+  return (extract_unsigned_integer (regbuf + DEPRECATED_REGISTER_BYTE (0), REGISTER_RAW_SIZE (0)));
 }
 
 void

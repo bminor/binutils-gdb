@@ -1356,7 +1356,7 @@ sparc64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Register numbers of various important registers.  */
   set_gdbarch_sp_regnum (gdbarch, SPARC_SP_REGNUM); /* %sp */
   set_gdbarch_pc_regnum (gdbarch, SPARC64_PC_REGNUM); /* %pc */
-  set_gdbarch_npc_regnum (gdbarch, SPARC64_NPC_REGNUM);
+  set_gdbarch_deprecated_npc_regnum (gdbarch, SPARC64_NPC_REGNUM);
   set_gdbarch_fp0_regnum (gdbarch, SPARC_F0_REGNUM); /* %f0 */
 
   /* Call dummy code.  */

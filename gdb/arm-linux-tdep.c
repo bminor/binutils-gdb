@@ -86,7 +86,7 @@ arm_linux_extract_return_value (struct type *type,
 
   int regnum = ((TYPE_CODE_FLT == TYPE_CODE (type))
 		? ARM_F0_REGNUM : ARM_A1_REGNUM);
-  memcpy (valbuf, &regbuf[REGISTER_BYTE (regnum)], TYPE_LENGTH (type));
+  memcpy (valbuf, &regbuf[DEPRECATED_REGISTER_BYTE (regnum)], TYPE_LENGTH (type));
 }
 
 /* Note: ScottB

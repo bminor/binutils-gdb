@@ -1,3 +1,7 @@
+2003-09-17  Andrew Cagney  <cagney@redhat.com>
+
+	* mi/mi-main.c: Rename REGISTER_BYTE to DEPRECATED_REGISTER_BYTE.
+
 2003-09-10  Elena Zannoni  <ezannoni@redhat.com>
 
 	* mi-main.c (mi_setup_architecture_data): Don't use

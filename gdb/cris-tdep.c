@@ -972,7 +972,7 @@ cris_abi_original_store_return_value (struct type *type, char *valbuf)
   int len = TYPE_LENGTH (type);
   
   if (len <= DEPRECATED_REGISTER_SIZE) 
-    deprecated_write_register_bytes (REGISTER_BYTE (RET_REGNUM), valbuf, len);
+    deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (RET_REGNUM), valbuf, len);
   else
     internal_error (__FILE__, __LINE__, "cris_abi_original_store_return_value: type length too large.");
 }
@@ -987,8 +987,8 @@ cris_abi_v2_store_return_value (struct type *type, char *valbuf)
   if (len <= 2 * DEPRECATED_REGISTER_SIZE)
     {
       /* Note that this works since R10 and R11 are consecutive registers.  */
-      deprecated_write_register_bytes (REGISTER_BYTE (RET_REGNUM), valbuf,
-				       len);
+      deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (RET_REGNUM),
+				       valbuf, len);
     }
   else
     internal_error (__FILE__, __LINE__, "cris_abi_v2_store_return_value: type length too large.");
@@ -1058,7 +1058,7 @@ cris_abi_original_extract_return_value (struct type *type, char *regbuf,
   int len = TYPE_LENGTH (type);
   
   if (len <= DEPRECATED_REGISTER_SIZE)
-    memcpy (valbuf, regbuf + REGISTER_BYTE (RET_REGNUM), len);
+    memcpy (valbuf, regbuf + DEPRECATED_REGISTER_BYTE (RET_REGNUM), len);
   else
     internal_error (__FILE__, __LINE__, "cris_abi_original_extract_return_value: type length too large");
 }
@@ -1072,7 +1072,7 @@ cris_abi_v2_extract_return_value (struct type *type, char *regbuf,
   int len = TYPE_LENGTH (type);
   
   if (len <= 2 * DEPRECATED_REGISTER_SIZE)
-    memcpy (valbuf, regbuf + REGISTER_BYTE (RET_REGNUM), len);
+    memcpy (valbuf, regbuf + DEPRECATED_REGISTER_BYTE (RET_REGNUM), len);
   else
     internal_error (__FILE__, __LINE__, "cris_abi_v2_extract_return_value: type length too large");
 }

@@ -1,3 +1,9 @@
+2003-09-18  Andreas Schwab  <schwab@suse.de>
+
+	* simple.c (bfd_simple_get_relocated_section_contents): Use
+	_bfd_generic_link_hash_table_create instead of
+	bfd_link_hash_table_create.
+
 2003-09-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elfxx-ia64.c (elfNN_ia64_special_sections): Mark all sections

@@ -1633,7 +1633,7 @@ hppa_push_dummy_frame (void)
 
   for (regnum = FP0_REGNUM; regnum < NUM_REGS; regnum++)
     {
-      deprecated_read_register_bytes (REGISTER_BYTE (regnum),
+      deprecated_read_register_bytes (DEPRECATED_REGISTER_BYTE (regnum),
 				      (char *) &freg_buffer, 8);
       sp = push_bytes (sp, (char *) &freg_buffer, 8);
     }
@@ -1714,7 +1714,7 @@ hppa_pop_frame (void)
     if (fsr[regnum])
       {
 	read_memory (fsr[regnum], (char *) &freg_buffer, 8);
-	deprecated_write_register_bytes (REGISTER_BYTE (regnum),
+	deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (regnum),
 					 (char *) &freg_buffer, 8);
       }
 
@@ -2630,7 +2630,7 @@ hppa_target_write_pc (CORE_ADDR v, ptid_t ptid)
     write_register_pid (31, v | 0x3, ptid);
 
   write_register_pid (PC_REGNUM, v, ptid);
-  write_register_pid (NPC_REGNUM, v + 4, ptid);
+  write_register_pid (DEPRECATED_NPC_REGNUM, v + 4, ptid);
 }
 
 /* return the alignment of a type in bytes. Structures have the maximum
@@ -2679,7 +2679,8 @@ pa_do_registers_info (int regnum, int fpregs)
   /* Make a copy of gdb's save area (may cause actual
      reads from the target). */
   for (i = 0; i < NUM_REGS; i++)
-    frame_register_read (deprecated_selected_frame, i, raw_regs + REGISTER_BYTE (i));
+    frame_register_read (deprecated_selected_frame, i,
+			 raw_regs + DEPRECATED_REGISTER_BYTE (i));
 
   if (regnum == -1)
     pa_print_registers (raw_regs, regnum, fpregs);
@@ -2723,7 +2724,8 @@ pa_do_strcat_registers_info (int regnum, int fpregs, struct ui_file *stream,
   /* Make a copy of gdb's save area (may cause actual
      reads from the target). */
   for (i = 0; i < NUM_REGS; i++)
-    frame_register_read (deprecated_selected_frame, i, raw_regs + REGISTER_BYTE (i));
+    frame_register_read (deprecated_selected_frame, i,
+			 raw_regs + DEPRECATED_REGISTER_BYTE (i));
 
   if (regnum == -1)
     pa_strcat_registers (raw_regs, regnum, fpregs, stream);
@@ -2792,7 +2794,7 @@ pa_register_look_aside (char *raw_regs, int regnum, long *raw_val)
 
   if (!is_pa_2)
     {
-      raw_val[1] = *(long *) (raw_regs + REGISTER_BYTE (regnum));
+      raw_val[1] = *(long *) (raw_regs + DEPRECATED_REGISTER_BYTE (regnum));
       return;
     }
 
@@ -4816,13 +4818,13 @@ hppa32_store_return_value (struct type *type, char *valbuf)
 
      If its a float value, then we also store it into the floating
      point registers.  */
-  deprecated_write_register_bytes (REGISTER_BYTE (28)
+  deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (28)
 				   + (TYPE_LENGTH (type) > 4
 				      ? (8 - TYPE_LENGTH (type))
 				      : (4 - TYPE_LENGTH (type))),
 				   valbuf, TYPE_LENGTH (type));
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
-    deprecated_write_register_bytes (REGISTER_BYTE (FP4_REGNUM),
+    deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (FP4_REGNUM),
 				     valbuf, TYPE_LENGTH (type));
 }
 
@@ -4833,22 +4835,22 @@ hppa64_store_return_value (struct type *type, char *valbuf)
 {
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
     deprecated_write_register_bytes
-      (REGISTER_BYTE (FP4_REGNUM)
+      (DEPRECATED_REGISTER_BYTE (FP4_REGNUM)
         + DEPRECATED_REGISTER_SIZE - TYPE_LENGTH (type),
        valbuf, TYPE_LENGTH (type));
   else if (is_integral_type(type))
     deprecated_write_register_bytes
-      (REGISTER_BYTE (28)
+      (DEPRECATED_REGISTER_BYTE (28)
         + DEPRECATED_REGISTER_SIZE - TYPE_LENGTH (type),
        valbuf, TYPE_LENGTH (type));
   else if (TYPE_LENGTH (type) <= 8)
     deprecated_write_register_bytes
-      (REGISTER_BYTE (28),valbuf, TYPE_LENGTH (type));
+      (DEPRECATED_REGISTER_BYTE (28),valbuf, TYPE_LENGTH (type));
   else if (TYPE_LENGTH (type) <= 16)
     {
-      deprecated_write_register_bytes (REGISTER_BYTE (28),valbuf, 8);
+      deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (28),valbuf, 8);
       deprecated_write_register_bytes
-        (REGISTER_BYTE (29), valbuf + 8, TYPE_LENGTH (type) - 8);
+        (DEPRECATED_REGISTER_BYTE (29), valbuf + 8, TYPE_LENGTH (type) - 8);
     }
 }
 
@@ -4863,11 +4865,11 @@ void
 hppa32_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 {
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
-    memcpy (valbuf, regbuf + REGISTER_BYTE (FP4_REGNUM), TYPE_LENGTH (type));
+    memcpy (valbuf, regbuf + DEPRECATED_REGISTER_BYTE (FP4_REGNUM), TYPE_LENGTH (type));
   else
     memcpy (valbuf,
 	    (regbuf
-	     + REGISTER_BYTE (28)
+	     + DEPRECATED_REGISTER_BYTE (28)
 	     + (TYPE_LENGTH (type) > 4
 		? (8 - TYPE_LENGTH (type))
 		: (4 - TYPE_LENGTH (type)))),
@@ -4885,20 +4887,22 @@ hppa64_extract_return_value (struct type *type, char *regbuf, char *valbuf)
          Aggregates upto 128 bits are in r28 and r29, right padded.  */ 
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
     memcpy (valbuf,
-            regbuf + REGISTER_BYTE (FP4_REGNUM)
+            regbuf + DEPRECATED_REGISTER_BYTE (FP4_REGNUM)
              + DEPRECATED_REGISTER_SIZE - TYPE_LENGTH (type),
             TYPE_LENGTH (type));
   else if (is_integral_type(type))
     memcpy (valbuf,
-            regbuf + REGISTER_BYTE (28)
+            regbuf + DEPRECATED_REGISTER_BYTE (28)
              + DEPRECATED_REGISTER_SIZE - TYPE_LENGTH (type),
             TYPE_LENGTH (type));
   else if (TYPE_LENGTH (type) <= 8)
-    memcpy (valbuf, regbuf + REGISTER_BYTE (28), TYPE_LENGTH (type));
+    memcpy (valbuf, regbuf + DEPRECATED_REGISTER_BYTE (28),
+	    TYPE_LENGTH (type));
   else if (TYPE_LENGTH (type) <= 16)
     {
-      memcpy (valbuf, regbuf + REGISTER_BYTE (28), 8);
-      memcpy (valbuf + 8, regbuf + REGISTER_BYTE (29), TYPE_LENGTH (type) - 8);
+      memcpy (valbuf, regbuf + DEPRECATED_REGISTER_BYTE (28), 8);
+      memcpy (valbuf + 8, regbuf + DEPRECATED_REGISTER_BYTE (29),
+	      TYPE_LENGTH (type) - 8);
     }
 }
 
@@ -5036,7 +5040,7 @@ hppa_extract_struct_value_address (char *regbuf)
      the address size is equal to the size of an int* _on the host_...
      One possible implementation that crossed my mind is to use
      extract_address.  */
-  return (*(int *)(regbuf + REGISTER_BYTE (28)));
+  return (*(int *)(regbuf + DEPRECATED_REGISTER_BYTE (28)));
 }
 
 /* Return True if REGNUM is not a register available to the user
@@ -5174,7 +5178,7 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_sp_regnum (gdbarch, 30);
   set_gdbarch_fp0_regnum (gdbarch, 64);
   set_gdbarch_pc_regnum (gdbarch, PCOQ_HEAD_REGNUM);
-  set_gdbarch_npc_regnum (gdbarch, PCOQ_TAIL_REGNUM);
+  set_gdbarch_deprecated_npc_regnum (gdbarch, PCOQ_TAIL_REGNUM);
   set_gdbarch_deprecated_register_raw_size (gdbarch, hppa_register_raw_size);
   set_gdbarch_deprecated_register_byte (gdbarch, hppa_register_byte);
   set_gdbarch_deprecated_register_virtual_size (gdbarch, hppa_register_raw_size);

@@ -1054,7 +1054,7 @@ rs6000_pop_frame (void)
       addr = prev_sp + fdata.gpr_offset;
       for (ii = fdata.saved_gpr; ii <= 31; ++ii)
 	{
-	  read_memory (addr, &deprecated_registers[REGISTER_BYTE (ii)],
+	  read_memory (addr, &deprecated_registers[DEPRECATED_REGISTER_BYTE (ii)],
 		       wordsize);
 	  addr += wordsize;
 	}
@@ -1065,7 +1065,7 @@ rs6000_pop_frame (void)
       addr = prev_sp + fdata.fpr_offset;
       for (ii = fdata.saved_fpr; ii <= 31; ++ii)
 	{
-	  read_memory (addr, &deprecated_registers[REGISTER_BYTE (ii + FP0_REGNUM)], 8);
+	  read_memory (addr, &deprecated_registers[DEPRECATED_REGISTER_BYTE (ii + FP0_REGNUM)], 8);
 	  addr += 8;
 	}
     }
@@ -1171,7 +1171,7 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 	    printf_unfiltered (
 				"Fatal Error: a floating point parameter #%d with a size > 8 is found!\n", argno);
 
-	  memcpy (&deprecated_registers[REGISTER_BYTE (FP0_REGNUM + 1 + f_argno)],
+	  memcpy (&deprecated_registers[DEPRECATED_REGISTER_BYTE (FP0_REGNUM + 1 + f_argno)],
 		  VALUE_CONTENTS (arg),
 		  len);
 	  ++f_argno;
@@ -1183,9 +1183,9 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 	  /* Argument takes more than one register.  */
 	  while (argbytes < len)
 	    {
-	      memset (&deprecated_registers[REGISTER_BYTE (ii + 3)], 0,
+	      memset (&deprecated_registers[DEPRECATED_REGISTER_BYTE (ii + 3)], 0,
 		      reg_size);
-	      memcpy (&deprecated_registers[REGISTER_BYTE (ii + 3)],
+	      memcpy (&deprecated_registers[DEPRECATED_REGISTER_BYTE (ii + 3)],
 		      ((char *) VALUE_CONTENTS (arg)) + argbytes,
 		      (len - argbytes) > reg_size
 		        ? reg_size : len - argbytes);
@@ -1201,8 +1201,8 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 	{
 	  /* Argument can fit in one register.  No problem.  */
 	  int adj = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? reg_size - len : 0;
-	  memset (&deprecated_registers[REGISTER_BYTE (ii + 3)], 0, reg_size);
-	  memcpy ((char *)&deprecated_registers[REGISTER_BYTE (ii + 3)] + adj, 
+	  memset (&deprecated_registers[DEPRECATED_REGISTER_BYTE (ii + 3)], 0, reg_size);
+	  memcpy ((char *)&deprecated_registers[DEPRECATED_REGISTER_BYTE (ii + 3)] + adj, 
 	          VALUE_CONTENTS (arg), len);
 	}
       ++argno;
@@ -1276,7 +1276,7 @@ ran_out_of_registers_for_arguments:
 		printf_unfiltered (
 				    "Fatal Error: a floating point parameter #%d with a size > 8 is found!\n", argno);
 
-	      memcpy (&deprecated_registers[REGISTER_BYTE (FP0_REGNUM + 1 + f_argno)],
+	      memcpy (&deprecated_registers[DEPRECATED_REGISTER_BYTE (FP0_REGNUM + 1 + f_argno)],
 		      VALUE_CONTENTS (arg),
 		      len);
 	      ++f_argno;
@@ -1372,6 +1372,18 @@ e500_extract_return_value (struct type *valtype, struct regcache *regbuf, void *
     }
 }
 
+/* PowerOpen always puts structures in memory.  Vectors, which were
+   added later, do get returned in a register though.  */
+
+static int     
+rs6000_use_struct_convention (int gcc_p, struct type *value_type)
+{  
+  if ((TYPE_LENGTH (value_type) == 16 || TYPE_LENGTH (value_type) == 8)
+      && TYPE_VECTOR (value_type))
+    return 0;                            
+  return 1;
+}
+
 static void
 rs6000_extract_return_value (struct type *valtype, char *regbuf, char *valbuf)
 {
@@ -1389,11 +1401,11 @@ rs6000_extract_return_value (struct type *valtype, char *regbuf, char *valbuf)
 
       if (TYPE_LENGTH (valtype) > 4)	/* this is a double */
 	memcpy (valbuf,
-		&regbuf[REGISTER_BYTE (FP0_REGNUM + 1)],
+		&regbuf[DEPRECATED_REGISTER_BYTE (FP0_REGNUM + 1)],
 		TYPE_LENGTH (valtype));
       else
 	{			/* float */
-	  memcpy (&dd, &regbuf[REGISTER_BYTE (FP0_REGNUM + 1)], 8);
+	  memcpy (&dd, &regbuf[DEPRECATED_REGISTER_BYTE (FP0_REGNUM + 1)], 8);
 	  ff = (float) dd;
 	  memcpy (valbuf, &ff, sizeof (float));
 	}
@@ -1402,7 +1414,7 @@ rs6000_extract_return_value (struct type *valtype, char *regbuf, char *valbuf)
            && TYPE_LENGTH (valtype) == 16
            && TYPE_VECTOR (valtype))
     {
-      memcpy (valbuf, regbuf + REGISTER_BYTE (tdep->ppc_vr0_regnum + 2),
+      memcpy (valbuf, regbuf + DEPRECATED_REGISTER_BYTE (tdep->ppc_vr0_regnum + 2),
 	      TYPE_LENGTH (valtype));
     }
   else
@@ -1413,7 +1425,7 @@ rs6000_extract_return_value (struct type *valtype, char *regbuf, char *valbuf)
 	offset = REGISTER_RAW_SIZE (3) - TYPE_LENGTH (valtype);
 
       memcpy (valbuf,
-	      regbuf + REGISTER_BYTE (3) + offset,
+	      regbuf + DEPRECATED_REGISTER_BYTE (3) + offset,
 	      TYPE_LENGTH (valtype));
     }
 }
@@ -2069,18 +2081,18 @@ rs6000_store_return_value (struct type *type, char *valbuf)
        Say a double_double_double type could be returned in
        FPR1/FPR2/FPR3 triple.  */
 
-    deprecated_write_register_bytes (REGISTER_BYTE (FP0_REGNUM + 1), valbuf,
+    deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (FP0_REGNUM + 1), valbuf,
 				     TYPE_LENGTH (type));
   else if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
     {
       if (TYPE_LENGTH (type) == 16
           && TYPE_VECTOR (type))
-	deprecated_write_register_bytes (REGISTER_BYTE (tdep->ppc_vr0_regnum + 2),
+	deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (tdep->ppc_vr0_regnum + 2),
 					 valbuf, TYPE_LENGTH (type));
     }
   else
     /* Everything else is returned in GPR3 and up.  */
-    deprecated_write_register_bytes (REGISTER_BYTE (gdbarch_tdep (current_gdbarch)->ppc_gp0_regnum + 3),
+    deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (gdbarch_tdep (current_gdbarch)->ppc_gp0_regnum + 3),
 				     valbuf, TYPE_LENGTH (type));
 }
 
@@ -2957,7 +2969,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     				       ppc_sysv_abi_use_struct_convention);
   else
     set_gdbarch_use_struct_convention (gdbarch,
-				       generic_use_struct_convention);
+				       rs6000_use_struct_convention);
 
   set_gdbarch_frameless_function_invocation (gdbarch,
                                          rs6000_frameless_function_invocation);

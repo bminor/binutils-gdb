@@ -903,7 +903,7 @@ s390_get_signal_frame_info (struct frame_info *fi)
       /* We're definitely backtracing from a signal handler.  */
       CORE_ADDR *saved_regs = get_frame_saved_regs (fi);
       CORE_ADDR save_reg_addr = (get_frame_extra_info (next_frame)->sigcontext
-                                 + REGISTER_BYTE (S390_GP0_REGNUM));
+                                 + DEPRECATED_REGISTER_BYTE (S390_GP0_REGNUM));
       int reg;
 
       for (reg = 0; reg < S390_NUM_GPRS; reg++)
@@ -1662,8 +1662,7 @@ s390_is_sigreturn (CORE_ADDR pc, struct frame_info *sighandler_fi,
 	      *sigcaller_pc =
 		ADDR_BITS_REMOVE ((CORE_ADDR)
 				  read_memory_integer (temp_sregs +
-						       REGISTER_BYTE
-						       (S390_PC_REGNUM),
+						       DEPRECATED_REGISTER_BYTE (S390_PC_REGNUM),
 						       S390_PSW_ADDR_SIZE));
 	    }
 	}
@@ -1833,7 +1832,7 @@ s390_frame_chain (struct frame_info *thisframe)
 	{
 	  /* read sigregs,regs.gprs[11 or 15] */
 	  prev_fp = read_memory_integer (sregs +
-					 REGISTER_BYTE (S390_GP0_REGNUM +
+					 DEPRECATED_REGISTER_BYTE (S390_GP0_REGNUM +
 							(prev_fextra_info.
 							 frame_pointer_saved_pc
 							 ? 11 : 15)),
@@ -1886,7 +1885,7 @@ s390_extract_return_value (struct type *valtype, char *regbuf, char *valbuf)
   int len = TYPE_LENGTH (valtype);
 
   if (TYPE_CODE (valtype) == TYPE_CODE_FLT)
-    memcpy (valbuf, &regbuf[REGISTER_BYTE (S390_FP0_REGNUM)], len);
+    memcpy (valbuf, &regbuf[DEPRECATED_REGISTER_BYTE (S390_FP0_REGNUM)], len);
   else
     {
       int offset = 0;
@@ -1894,7 +1893,7 @@ s390_extract_return_value (struct type *valtype, char *regbuf, char *valbuf)
       if (TYPE_LENGTH (valtype) < S390_GPR_SIZE)
 	offset = S390_GPR_SIZE - TYPE_LENGTH (valtype);
       memcpy (valbuf,
-	      regbuf + REGISTER_BYTE (S390_GP0_REGNUM + 2) + offset,
+	      regbuf + DEPRECATED_REGISTER_BYTE (S390_GP0_REGNUM + 2) + offset,
 	      TYPE_LENGTH (valtype));
     }
 }
@@ -1945,7 +1944,7 @@ s390_store_return_value (struct type *valtype, char *valbuf)
     {
       if (TYPE_LENGTH (valtype) == 4
           || TYPE_LENGTH (valtype) == 8)
-        deprecated_write_register_bytes (REGISTER_BYTE (S390_FP0_REGNUM),
+        deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (S390_FP0_REGNUM),
 					 valbuf, TYPE_LENGTH (valtype));
       else
         error ("GDB is unable to return `long double' values "
@@ -1956,7 +1955,7 @@ s390_store_return_value (struct type *valtype, char *valbuf)
       value =
 	s390_promote_integer_argument (valtype, valbuf, reg_buff, &arglen);
       /* Everything else is returned in GPR2 and up. */
-      deprecated_write_register_bytes (REGISTER_BYTE (S390_GP0_REGNUM + 2),
+      deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (S390_GP0_REGNUM + 2),
 				       value, arglen);
     }
 }
@@ -2363,7 +2362,7 @@ s390_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
           {
             /* When we store a single-precision value in an FP register,
                it occupies the leftmost bits.  */
-            deprecated_write_register_bytes (REGISTER_BYTE (S390_FP0_REGNUM + fr),
+            deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (S390_FP0_REGNUM + fr),
 					     VALUE_CONTENTS (arg),
 					     TYPE_LENGTH (type));
             fr += 2;

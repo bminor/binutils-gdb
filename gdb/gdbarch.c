@@ -142,7 +142,7 @@ struct gdbarch
   int pc_regnum;
   int ps_regnum;
   int fp0_regnum;
-  int npc_regnum;
+  int deprecated_npc_regnum;
   gdbarch_stab_reg_to_regnum_ftype *stab_reg_to_regnum;
   gdbarch_ecoff_reg_to_regnum_ftype *ecoff_reg_to_regnum;
   gdbarch_dwarf_reg_to_regnum_ftype *dwarf_reg_to_regnum;
@@ -238,6 +238,7 @@ struct gdbarch
   gdbarch_deprecated_stack_align_ftype *deprecated_stack_align;
   gdbarch_frame_align_ftype *frame_align;
   gdbarch_deprecated_reg_struct_has_addr_ftype *deprecated_reg_struct_has_addr;
+  gdbarch_stabs_argument_has_addr_ftype *stabs_argument_has_addr;
   int frame_red_zone_size;
   int parm_boundary;
   const struct floatformat * float_format;
@@ -310,7 +311,7 @@ struct gdbarch startup_gdbarch =
   -1,  /* pc_regnum */
   -1,  /* ps_regnum */
   0,  /* fp0_regnum */
-  0,  /* npc_regnum */
+  0,  /* deprecated_npc_regnum */
   0,  /* stab_reg_to_regnum */
   0,  /* ecoff_reg_to_regnum */
   0,  /* dwarf_reg_to_regnum */
@@ -406,6 +407,7 @@ struct gdbarch startup_gdbarch =
   0,  /* deprecated_stack_align */
   0,  /* frame_align */
   0,  /* deprecated_reg_struct_has_addr */
+  default_stabs_argument_has_addr,  /* stabs_argument_has_addr */
   0,  /* frame_red_zone_size */
   0,  /* parm_boundary */
   0,  /* float_format */
@@ -501,7 +503,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->pc_regnum = -1;
   current_gdbarch->ps_regnum = -1;
   current_gdbarch->fp0_regnum = -1;
-  current_gdbarch->npc_regnum = -1;
+  current_gdbarch->deprecated_npc_regnum = -1;
   current_gdbarch->stab_reg_to_regnum = no_op_reg_to_regnum;
   current_gdbarch->ecoff_reg_to_regnum = no_op_reg_to_regnum;
   current_gdbarch->dwarf_reg_to_regnum = no_op_reg_to_regnum;
@@ -540,6 +542,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->frameless_function_invocation = generic_frameless_function_invocation_not;
   current_gdbarch->deprecated_frame_args_address = get_frame_base;
   current_gdbarch->deprecated_frame_locals_address = get_frame_base;
+  current_gdbarch->stabs_argument_has_addr = default_stabs_argument_has_addr;
   current_gdbarch->convert_from_func_ptr_addr = core_addr_identity;
   current_gdbarch->addr_bits_remove = core_addr_identity;
   current_gdbarch->smash_text_address = core_addr_identity;
@@ -632,7 +635,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of pc_regnum, invalid_p == 0 */
   /* Skip verify of ps_regnum, invalid_p == 0 */
   /* Skip verify of fp0_regnum, invalid_p == 0 */
-  /* Skip verify of npc_regnum, invalid_p == 0 */
+  /* Skip verify of deprecated_npc_regnum, invalid_p == 0 */
   /* Skip verify of stab_reg_to_regnum, invalid_p == 0 */
   /* Skip verify of ecoff_reg_to_regnum, invalid_p == 0 */
   /* Skip verify of dwarf_reg_to_regnum, invalid_p == 0 */
@@ -730,6 +733,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of deprecated_stack_align, has predicate */
   /* Skip verify of frame_align, has predicate */
   /* Skip verify of deprecated_reg_struct_has_addr, has predicate */
+  /* Skip verify of stabs_argument_has_addr, invalid_p == 0 */
   if (gdbarch->float_format == 0)
     gdbarch->float_format = default_float_format (gdbarch);
   if (gdbarch->double_format == 0)
@@ -797,6 +801,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: register_reggroup_p = 0x%08lx\n",
                       (long) current_gdbarch->register_reggroup_p);
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: stabs_argument_has_addr = 0x%08lx\n",
+                      (long) current_gdbarch->stabs_argument_has_addr);
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_pseudo_register_read_p() = %d\n",
                       gdbarch_pseudo_register_read_p (current_gdbarch));
@@ -1357,6 +1364,14 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE = %d\n",
                       DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE);
 #endif
+#ifdef DEPRECATED_NPC_REGNUM
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_NPC_REGNUM # %s\n",
+                      XSTRING (DEPRECATED_NPC_REGNUM));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_NPC_REGNUM = %d\n",
+                      DEPRECATED_NPC_REGNUM);
+#endif
 #ifdef DEPRECATED_PC_IN_CALL_DUMMY_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -1451,6 +1466,25 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: DEPRECATED_PUSH_RETURN_ADDRESS = <0x%08lx>\n",
                       (long) current_gdbarch->deprecated_push_return_address
                       /*DEPRECATED_PUSH_RETURN_ADDRESS ()*/);
+#endif
+#ifdef DEPRECATED_REGISTER_BYTE_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_REGISTER_BYTE_P()",
+                      XSTRING (DEPRECATED_REGISTER_BYTE_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_REGISTER_BYTE_P() = %d\n",
+                      DEPRECATED_REGISTER_BYTE_P ());
+#endif
+#ifdef DEPRECATED_REGISTER_BYTE
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_REGISTER_BYTE(reg_nr)",
+                      XSTRING (DEPRECATED_REGISTER_BYTE (reg_nr)));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_REGISTER_BYTE = <0x%08lx>\n",
+                      (long) current_gdbarch->deprecated_register_byte
+                      /*DEPRECATED_REGISTER_BYTE ()*/);
 #endif
 #ifdef DEPRECATED_REGISTER_BYTES
   fprintf_unfiltered (file,
@@ -1891,14 +1925,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: NAME_OF_MALLOC = %s\n",
                       NAME_OF_MALLOC);
 #endif
-#ifdef NPC_REGNUM
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: NPC_REGNUM # %s\n",
-                      XSTRING (NPC_REGNUM));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: NPC_REGNUM = %d\n",
-                      NPC_REGNUM);
-#endif
 #ifdef NUM_PSEUDO_REGS
   fprintf_unfiltered (file,
                       "gdbarch_dump: NUM_PSEUDO_REGS # %s\n",
@@ -1996,25 +2022,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: push_dummy_code = 0x%08lx\n",
                       (long) current_gdbarch->push_dummy_code);
-#ifdef REGISTER_BYTE_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "REGISTER_BYTE_P()",
-                      XSTRING (REGISTER_BYTE_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: REGISTER_BYTE_P() = %d\n",
-                      REGISTER_BYTE_P ());
-#endif
-#ifdef REGISTER_BYTE
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "REGISTER_BYTE(reg_nr)",
-                      XSTRING (REGISTER_BYTE (reg_nr)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: REGISTER_BYTE = <0x%08lx>\n",
-                      (long) current_gdbarch->deprecated_register_byte
-                      /*REGISTER_BYTE ()*/);
-#endif
 #ifdef REGISTER_BYTES_OK_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -2971,20 +2978,20 @@ set_gdbarch_fp0_regnum (struct gdbarch *gdbarch,
 }
 
 int
-gdbarch_npc_regnum (struct gdbarch *gdbarch)
+gdbarch_deprecated_npc_regnum (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of npc_regnum, invalid_p == 0 */
+  /* Skip verify of deprecated_npc_regnum, invalid_p == 0 */
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_npc_regnum called\n");
-  return gdbarch->npc_regnum;
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_npc_regnum called\n");
+  return gdbarch->deprecated_npc_regnum;
 }
 
 void
-set_gdbarch_npc_regnum (struct gdbarch *gdbarch,
-                        int npc_regnum)
+set_gdbarch_deprecated_npc_regnum (struct gdbarch *gdbarch,
+                                   int deprecated_npc_regnum)
 {
-  gdbarch->npc_regnum = npc_regnum;
+  gdbarch->deprecated_npc_regnum = deprecated_npc_regnum;
 }
 
 int
@@ -4928,6 +4935,23 @@ set_gdbarch_deprecated_reg_struct_has_addr (struct gdbarch *gdbarch,
                                             gdbarch_deprecated_reg_struct_has_addr_ftype deprecated_reg_struct_has_addr)
 {
   gdbarch->deprecated_reg_struct_has_addr = deprecated_reg_struct_has_addr;
+}
+
+int
+gdbarch_stabs_argument_has_addr (struct gdbarch *gdbarch, struct type *type)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->stabs_argument_has_addr != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_stabs_argument_has_addr called\n");
+  return gdbarch->stabs_argument_has_addr (gdbarch, type);
+}
+
+void
+set_gdbarch_stabs_argument_has_addr (struct gdbarch *gdbarch,
+                                     gdbarch_stabs_argument_has_addr_ftype stabs_argument_has_addr)
+{
+  gdbarch->stabs_argument_has_addr = stabs_argument_has_addr;
 }
 
 int

@@ -374,13 +374,16 @@ extern void set_gdbarch_fp0_regnum (struct gdbarch *gdbarch, int fp0_regnum);
 #define FP0_REGNUM (gdbarch_fp0_regnum (current_gdbarch))
 #endif
 
-extern int gdbarch_npc_regnum (struct gdbarch *gdbarch);
-extern void set_gdbarch_npc_regnum (struct gdbarch *gdbarch, int npc_regnum);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (NPC_REGNUM)
-#error "Non multi-arch definition of NPC_REGNUM"
+/* Replace DEPRECATED_NPC_REGNUM with an implementation of WRITE_PC
+   that updates PC, NPC and even NNPC. */
+
+extern int gdbarch_deprecated_npc_regnum (struct gdbarch *gdbarch);
+extern void set_gdbarch_deprecated_npc_regnum (struct gdbarch *gdbarch, int deprecated_npc_regnum);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_NPC_REGNUM)
+#error "Non multi-arch definition of DEPRECATED_NPC_REGNUM"
 #endif
-#if !defined (NPC_REGNUM)
-#define NPC_REGNUM (gdbarch_npc_regnum (current_gdbarch))
+#if !defined (DEPRECATED_NPC_REGNUM)
+#define DEPRECATED_NPC_REGNUM (gdbarch_deprecated_npc_regnum (current_gdbarch))
 #endif
 
 /* Convert stab register number (from `r' declaration) to a gdb REGNUM. */
@@ -508,29 +511,29 @@ extern void set_gdbarch_deprecated_register_bytes (struct gdbarch *gdbarch, int 
    function works.  This simplifies the migration process - old code,
    calling DEPRECATED_REGISTER_BYTE, doesn't need to be modified. */
 
-#if defined (REGISTER_BYTE)
-/* Legacy for systems yet to multi-arch REGISTER_BYTE */
-#if !defined (REGISTER_BYTE_P)
-#define REGISTER_BYTE_P() (1)
+#if defined (DEPRECATED_REGISTER_BYTE)
+/* Legacy for systems yet to multi-arch DEPRECATED_REGISTER_BYTE */
+#if !defined (DEPRECATED_REGISTER_BYTE_P)
+#define DEPRECATED_REGISTER_BYTE_P() (1)
 #endif
 #endif
 
 extern int gdbarch_deprecated_register_byte_p (struct gdbarch *gdbarch);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (REGISTER_BYTE_P)
-#error "Non multi-arch definition of REGISTER_BYTE"
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_REGISTER_BYTE_P)
+#error "Non multi-arch definition of DEPRECATED_REGISTER_BYTE"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (REGISTER_BYTE_P)
-#define REGISTER_BYTE_P() (gdbarch_deprecated_register_byte_p (current_gdbarch))
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_REGISTER_BYTE_P)
+#define DEPRECATED_REGISTER_BYTE_P() (gdbarch_deprecated_register_byte_p (current_gdbarch))
 #endif
 
 typedef int (gdbarch_deprecated_register_byte_ftype) (int reg_nr);
 extern int gdbarch_deprecated_register_byte (struct gdbarch *gdbarch, int reg_nr);
 extern void set_gdbarch_deprecated_register_byte (struct gdbarch *gdbarch, gdbarch_deprecated_register_byte_ftype *deprecated_register_byte);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (REGISTER_BYTE)
-#error "Non multi-arch definition of REGISTER_BYTE"
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_REGISTER_BYTE)
+#error "Non multi-arch definition of DEPRECATED_REGISTER_BYTE"
 #endif
-#if !defined (REGISTER_BYTE)
-#define REGISTER_BYTE(reg_nr) (gdbarch_deprecated_register_byte (current_gdbarch, reg_nr))
+#if !defined (DEPRECATED_REGISTER_BYTE)
+#define DEPRECATED_REGISTER_BYTE(reg_nr) (gdbarch_deprecated_register_byte (current_gdbarch, reg_nr))
 #endif
 
 /* If all registers have identical raw and virtual sizes and those
@@ -1936,6 +1939,9 @@ typedef CORE_ADDR (gdbarch_frame_align_ftype) (struct gdbarch *gdbarch, CORE_ADD
 extern CORE_ADDR gdbarch_frame_align (struct gdbarch *gdbarch, CORE_ADDR address);
 extern void set_gdbarch_frame_align (struct gdbarch *gdbarch, gdbarch_frame_align_ftype *frame_align);
 
+/* DEPRECATED_REG_STRUCT_HAS_ADDR has been replaced by
+   stabs_argument_has_addr. */
+
 #if defined (DEPRECATED_REG_STRUCT_HAS_ADDR)
 /* Legacy for systems yet to multi-arch DEPRECATED_REG_STRUCT_HAS_ADDR */
 #if !defined (DEPRECATED_REG_STRUCT_HAS_ADDR_P)
@@ -1960,6 +1966,10 @@ extern void set_gdbarch_deprecated_reg_struct_has_addr (struct gdbarch *gdbarch,
 #if !defined (DEPRECATED_REG_STRUCT_HAS_ADDR)
 #define DEPRECATED_REG_STRUCT_HAS_ADDR(gcc_p, type) (gdbarch_deprecated_reg_struct_has_addr (current_gdbarch, gcc_p, type))
 #endif
+
+typedef int (gdbarch_stabs_argument_has_addr_ftype) (struct gdbarch *gdbarch, struct type *type);
+extern int gdbarch_stabs_argument_has_addr (struct gdbarch *gdbarch, struct type *type);
+extern void set_gdbarch_stabs_argument_has_addr (struct gdbarch *gdbarch, gdbarch_stabs_argument_has_addr_ftype *stabs_argument_has_addr);
 
 extern int gdbarch_frame_red_zone_size (struct gdbarch *gdbarch);
 extern void set_gdbarch_frame_red_zone_size (struct gdbarch *gdbarch, int frame_red_zone_size);

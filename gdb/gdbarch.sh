@@ -453,7 +453,9 @@ v:2:SP_REGNUM:int:sp_regnum::::-1:-1::0
 v:2:PC_REGNUM:int:pc_regnum::::-1:-1::0
 v:2:PS_REGNUM:int:ps_regnum::::-1:-1::0
 v:2:FP0_REGNUM:int:fp0_regnum::::0:-1::0
-v:2:NPC_REGNUM:int:npc_regnum::::0:-1::0
+# Replace DEPRECATED_NPC_REGNUM with an implementation of WRITE_PC
+# that updates PC, NPC and even NNPC.
+v:2:DEPRECATED_NPC_REGNUM:int:deprecated_npc_regnum::::0:-1::0
 # Convert stab register number (from \`r\' declaration) to a gdb REGNUM.
 f:2:STAB_REG_TO_REGNUM:int:stab_reg_to_regnum:int stab_regnr:stab_regnr:::no_op_reg_to_regnum::0
 # Provide a default mapping from a ecoff register number to a gdb REGNUM.
@@ -481,7 +483,7 @@ v::DEPRECATED_REGISTER_BYTES:int:deprecated_register_bytes
 # consequence, even when the predicate is false, the corresponding
 # function works.  This simplifies the migration process - old code,
 # calling DEPRECATED_REGISTER_BYTE, doesn't need to be modified.
-F::REGISTER_BYTE:int:deprecated_register_byte:int reg_nr:reg_nr::generic_register_byte:generic_register_byte
+F::DEPRECATED_REGISTER_BYTE:int:deprecated_register_byte:int reg_nr:reg_nr::generic_register_byte:generic_register_byte
 # If all registers have identical raw and virtual sizes and those
 # sizes agree with the value computed from REGISTER_TYPE,
 # DEPRECATED_REGISTER_RAW_SIZE can be deleted.  See: maint print
@@ -646,7 +648,10 @@ F:2:FRAME_NUM_ARGS:int:frame_num_args:struct frame_info *frame:frame
 # alignment.
 F:2:DEPRECATED_STACK_ALIGN:CORE_ADDR:deprecated_stack_align:CORE_ADDR sp:sp
 M:::CORE_ADDR:frame_align:CORE_ADDR address:address
+# DEPRECATED_REG_STRUCT_HAS_ADDR has been replaced by
+# stabs_argument_has_addr.
 F:2:DEPRECATED_REG_STRUCT_HAS_ADDR:int:deprecated_reg_struct_has_addr:int gcc_p, struct type *type:gcc_p, type
+m:::int:stabs_argument_has_addr:struct type *type:type:::default_stabs_argument_has_addr::0
 v::FRAME_RED_ZONE_SIZE:int:frame_red_zone_size
 v:2:PARM_BOUNDARY:int:parm_boundary
 #
