@@ -203,9 +203,9 @@ DESCRIPTION
 .  {* Entries for byte swapping for data. These are different from the
 .     other entry points, since they don't take a BFD asthe first argument.
 .     Certain other handlers could do the same.  *}
-.  bfd_vma        (*bfd_getx64) (const void *);
-.  bfd_signed_vma (*bfd_getx_signed_64) (const void *);
-.  void           (*bfd_putx64) (bfd_vma, void *);
+.  bfd_uint64_t   (*bfd_getx64) (const void *);
+.  bfd_int64_t    (*bfd_getx_signed_64) (const void *);
+.  void           (*bfd_putx64) (bfd_uint64_t, void *);
 .  bfd_vma        (*bfd_getx32) (const void *);
 .  bfd_signed_vma (*bfd_getx_signed_32) (const void *);
 .  void           (*bfd_putx32) (bfd_vma, void *);
@@ -214,9 +214,9 @@ DESCRIPTION
 .  void           (*bfd_putx16) (bfd_vma, void *);
 .
 .  {* Byte swapping for the headers.  *}
-.  bfd_vma        (*bfd_h_getx64) (const void *);
-.  bfd_signed_vma (*bfd_h_getx_signed_64) (const void *);
-.  void           (*bfd_h_putx64) (bfd_vma, void *);
+.  bfd_uint64_t   (*bfd_h_getx64) (const void *);
+.  bfd_int64_t    (*bfd_h_getx_signed_64) (const void *);
+.  void           (*bfd_h_putx64) (bfd_uint64_t, void *);
 .  bfd_vma        (*bfd_h_getx32) (const void *);
 .  bfd_signed_vma (*bfd_h_getx_signed_32) (const void *);
 .  void           (*bfd_h_putx32) (bfd_vma, void *);

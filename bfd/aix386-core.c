@@ -225,6 +225,9 @@ swap_abort ()
 #define	NO_GET ((bfd_vma (*) (const void *)) swap_abort)
 #define	NO_PUT ((void (*) (bfd_vma, void *)) swap_abort)
 #define	NO_GETS ((bfd_signed_vma (*) (const void *)) swap_abort)
+#define	NO_GET64 ((bfd_uint64_t (*) (const void *)) swap_abort)
+#define	NO_PUT64 ((void (*) (bfd_uint64_t, void *)) swap_abort)
+#define	NO_GETS64 ((bfd_int64_t (*) (const void *)) swap_abort)
 
 const bfd_target aix386_core_vec = {
   "aix386-core",
@@ -239,10 +242,10 @@ const bfd_target aix386_core_vec = {
   0,				/* leading underscore */
   ' ',				/* ar_pad_char */
   16,				/* ar_max_namelen */
-  NO_GET, NO_GETS, NO_PUT,
+  NO_GET64, NO_GETS64, NO_PUT64,
   NO_GET, NO_GETS, NO_PUT,
   NO_GET, NO_GETS, NO_PUT,	/* data */
-  NO_GET, NO_GETS, NO_PUT,
+  NO_GET64, NO_GETS64, NO_PUT64,
   NO_GET, NO_GETS, NO_PUT,
   NO_GET, NO_GETS, NO_PUT,	/* hdrs */
 

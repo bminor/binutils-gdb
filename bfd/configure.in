@@ -133,6 +133,7 @@ AC_COMPILE_CHECK_SIZEOF(long)
 if test "x${ac_cv_sizeof_long}" = "x8"; then
   host64=true
   HOST_64BIT_TYPE="long"
+  HOST_U_64BIT_TYPE="unsigned long"
 elif test "x${ac_cv_sizeof_long_long}" = "x8"; then
   HOST_64BIT_TYPE="long long"
   HOST_U_64BIT_TYPE="unsigned long long"
@@ -140,7 +141,8 @@ fi
 
 if test "x${HOST_64BIT_TYPE}" = "xlong"; then
   BFD_HOST_64BIT_LONG=1
-elif test "x${HOST_64BIT_TYPE}" != "x"; then
+fi
+if test "x${HOST_64BIT_TYPE}" != "x"; then
   BFD_HOST_64_BIT_DEFINED=1
   BFD_HOST_64_BIT=${HOST_64BIT_TYPE}
   BFD_HOST_U_64_BIT=${HOST_U_64BIT_TYPE}
