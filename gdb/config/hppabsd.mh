@@ -1,0 +1,3 @@
+# Host: Hewlett-Packard PA-RISC machine, running BSD
+XDEPFILES= hppabsd-xdep.o hppa-coredep.o
+XM_FILE= xm-hppabsd.h
