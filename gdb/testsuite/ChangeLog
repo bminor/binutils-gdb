@@ -1,3 +1,8 @@
+2004-07-30  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.base/asm-source.exp: Properly convert target board
+	debug flags from gcc format to binutils format.
+
 2004-07-28  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.arch/i386-prologue.exp: Remove KFAIL of "backtrace in

@@ -77,11 +77,11 @@ switch -glob -- [istarget] {
     }
     "m6811-*-*" {
         set asm-arch m68hc11
-        set asm-flags "-mshort-double -m68hc11 -gdwarf2 --no-warn -I${srcdir}/${subdir} -I${objdir}/${subdir}"
+        set asm-flags "-mshort-double -m68hc11 -gdwarf-2 --no-warn -I${srcdir}/${subdir} -I${objdir}/${subdir}"
     }
     "m6812-*-*" {
         set asm-arch m68hc11
-        set asm-flags "-mshort-double -m68hc12 -gdwarf2 --no-warn -I${srcdir}/${subdir} -I${objdir}/${subdir}"
+        set asm-flags "-mshort-double -m68hc12 -gdwarf-2 --no-warn -I${srcdir}/${subdir} -I${objdir}/${subdir}"
     }
     "mips*-*" {
         set asm-arch mips
@@ -173,15 +173,30 @@ if { "${asm-flags}" == "" } {
     set debug-flags "-gstabs"
 }
 
-# Allow the target board to override the debug flags
+# Allow the target board to override the debug flags.
 if { [board_info $dest exists debug_flags] } then {
     set debug-flags "[board_info $dest debug_flags]"
 }
 
-# The GNU assembler does not support STABS+
-if { ${debug-flags} == "-gstabs+" } then {
-    set debug-flags "-gstabs"
-}
+# The debug flags are in the format that gcc expects:
+# "-gdwarf-2", "-gstabs+", or "-gstabs".  To be compatible with the
+# other languages in the test suite, we accept this input format.
+# So the user can run the test suite with:
+#
+#   runtest --target_board unix/gdb:debug_flags=-gdwarf-2
+#   make check RUNTESTFLAGS="--target_board unix/gdb:debug_flags=-gdwarf-2"
+#
+# However, the GNU assembler has different spellings than gcc.
+# So I adjust the debug flags here.
+
+# The GNU assembler spells "dwarf-2" as "dwarf2".
+regsub "--" "-gdwarf-2" "${debug-flags}" "-gdwarf2" debug-flags
+
+# The GNU assembler before 2.15 did not support "stabs+".
+regsub "--" "-gstabs\[+\]" "${debug-flags}" "-gstabs" debug-flags
+
+# The GNU assembler does not support level options like "-g2" or "-g3".
+regsub "--" "-g\[0-9\]" "${debug-flags}" "" debug-flags
 
 if {[target_assemble ${srcdir}/${subdir}/${srcfile1} asmsrc1.o "${asm-flags} ${debug-flags}"] != ""} then {
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
