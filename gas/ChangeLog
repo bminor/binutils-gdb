@@ -1,3 +1,7 @@
+Wed Apr  2 12:24:10 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-mips.c (mips16_macro): Handle M_DMUL and M_MUL.
+
 Tue Apr  1 18:29:47 1997  Jim Wilson  <wilson@cygnus.com>
 
 	* config/tc-mips.c (md_begin): Don't set interlocks for 4100.

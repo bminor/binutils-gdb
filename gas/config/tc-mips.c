@@ -6221,6 +6221,15 @@ mips16_macro (ip)
       macro_build ((char *) NULL, &icnt, NULL, s2, "x", zreg);
       break;
 
+    case M_DMUL:
+      dbl = 1;
+    case M_MUL:
+      macro_build ((char *) NULL, &icnt, NULL,
+		   dbl ? "dmultu" : "multu",
+		   "x,y", xreg, yreg);
+      macro_build ((char *) NULL, &icnt, NULL, "mflo", "x", zreg);
+      return;
+
     case M_DSUBU_I:
       dbl = 1;
       goto do_subu;
