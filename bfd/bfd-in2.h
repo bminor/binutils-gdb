@@ -2955,6 +2955,7 @@ short offset into 11 bits.  */
   BFD_RELOC_MMIX_PUSHJ_1,
   BFD_RELOC_MMIX_PUSHJ_2,
   BFD_RELOC_MMIX_PUSHJ_3,
+  BFD_RELOC_MMIX_PUSHJ_STUBBABLE,
 
 /* These are relocations for the JMP instruction.  */
   BFD_RELOC_MMIX_JMP,

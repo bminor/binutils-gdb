@@ -1,5 +1,29 @@
 2003-10-18  Hans-Peter Nilsson  <hp@bitrange.com>
 
+	Support linker relaxation of new R_MMIX_PUSHJ_STUBBABLE relocs.
+	* elf64-mmix.c (MAX_PUSHJ_STUB_SIZE): New macro.
+	(struct _mmix_elf_section_data): New member pjs.
+	(mmix_set_relaxable_size, mmix_elf_get_section_contents): New
+	functions.
+	(elf_mmix_howto_table): New entry for R_MMIX_PUSHJ_STUBBABLE.
+	(mmix_reloc_map): Ditto.
+	(mmix_elf_relocate_section): Handle R_MMIX_PUSHJ_STUBBABLE.
+	(mmix_final_link_relocate, mmix_elf_check_common_relocs): Ditto.
+	(mmix_elf_perform_relocation): Ditto.  Don't mark parameter addr
+	unused.
+	(mmix_elf_check_relocs): Move early return to after
+	mmix_elf_check_common_relocs call.
+	(mmix_elf_symbol_processing): Fix cut-and-pasto in head comment.
+	(_bfd_mmix_before_linker_allocation): Rename from
+	_bfd_mmix_prepare_linker_allocated_gregs.  All referers changed.
+	Arrange to set the initial relaxable size of sections.
+	(_bfd_mmix_after_linker_allocation): Rename from
+	_bfd_mmix_finalize_linker_allocated_gregs.
+	(mmix_elf_relax_section): Relax a R_MMIX_PUSHJ_STUBBABLE reloc.
+	(bfd_elf64_get_section_contents): Define.
+	* reloc.c: Add ENUMX for BFD_RELOC_MMIX_PUSHJ_STUBBABLE.
+	* libbfd.h, bfd-in2.h: Regenerate.
+
 	* reloc.c (bfd_generic_relax_section): Default-set
 	section->_cooked_size here.
 	(bfd_generic_get_relocated_section_contents): Don't set it here.
