@@ -54,6 +54,7 @@ news.mt
 news1000.mh
 nm-apollo68b.h
 nm-apollo68v.h
+nm-delta68.h
 nm-dpx2.h
 nm-hp300bsd.h
 nm-hp300hpux.h
