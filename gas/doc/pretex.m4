@@ -1,4 +1,8 @@
 divert(-1)				-*-Text-*-
+` Copyright (c) 1991 Free Software Foundation, Inc.'
+` This file defines and documents the M4 macros used '
+`      to preprocess some GNU manuals'
+` $Id$'
 
 I. INTRODUCTION
 
@@ -53,7 +57,7 @@ files mentioned are as follows:
 		the lines in "none.m4", but of course the second
 		argument to _define__ is <1> rather than <0>.
 
-		This is also a convenient place to define any macros
+		This is also a convenient place to _define__ any macros
 		that you want to expand to different text for
 		different configurations---for example, the name of
 		the program being described.
@@ -69,7 +73,7 @@ Handling" in the "Implementation" section below.
 B. WHAT GOES IN THE PRE-TEXINFO SOURCE
 
 For the most part, the text of your book.  In addition, you can
-include text that is included only conditionally, using the macros
+have text that is included only conditionally, using the macros
 _if__ and _fi__ defined below.  They BOTH take an argument!  This is
 primarily meant for readability (so a human can more easily see what
 conditional end matches what conditional beginning), but the argument
@@ -92,7 +96,7 @@ different configurations:
     _fi__(_AMD29K__ && !_ALL_ARCH__) 
 
 Note that you can use Boolean expressions in the arguments; the
-expression language is that of the builtin m4 macro "eval", described
+expression language is that of the built-in m4 macro `eval', described
 in the m4 manual.
 
 IV. IMPLEMENTATION
@@ -115,10 +119,13 @@ _ppf__(`decr')
 _ppf__(`define')
 _ppf__(`defn')
 _ppf__(`divert')
+_ppf__(`divnum')
 _ppf__(`dnl')
 _ppf__(`dumpdef')
 _ppf__(`errprint')
+_ppf__(`esyscmd')
 _ppf__(`eval')
+_ppf__(`format')
 _ppf__(`ifdef')
 _ppf__(`ifelse')
 _ppf__(`include')
@@ -128,8 +135,10 @@ _ppf__(`len')
 _ppf__(`m4exit')
 _ppf__(`m4wrap')
 _ppf__(`maketemp')
+_ppf__(`patsubst')
 _ppf__(`popdef')
 _ppf__(`pushdef')
+_ppf__(`regexp')
 _ppf__(`shift')
 _ppf__(`sinclude')
 _ppf__(`substr')
@@ -140,6 +149,7 @@ _ppf__(`traceon')
 _ppf__(`translit')
 _ppf__(`undefine')
 _ppf__(`undivert')
+_ppf__(`unix')
 
 B. QUOTE HANDLING.
 
@@ -198,15 +208,21 @@ all conditionals within it.  The counter _IF_FS__ is used to
 implement this; kindly avoid redefining it directly.
 
 _define__(<_IF_FS__>,<0>)
+
+NOTE: The definitions for our "pushf" and "popf" macros use eval
+rather than incr and decr, because GNU m4 (0.75) tries to call eval
+for us when we say "incr" or "decr"---but doesn't notice we've changed
+eval's name.
+
 _define__(
 	<_pushf__>,
 	<_define__(<_IF_FS__>,
-		_incr__(_IF_FS__))>)
+		_eval__((_IF_FS__)+1))>)
 _define__(
 	<_popf__>,
 	<_ifelse__(0,_IF_FS__,
 			<<>_dnl__<>>,
-			<_define__(<_IF_FS__>,_decr__(_IF_FS__))>)>)
+			<_define__(<_IF_FS__>,_eval__((_IF_FS__)-1))>)>)
 
 _define__(
 	<_if__>,
