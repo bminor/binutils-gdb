@@ -1,5 +1,11 @@
 Tue Mar 22 13:09:44 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* coff-mips.c (mips_howto_table): Add entry for new MIPS_R_PCREL16
+	reloc, used in embedded PIC code.
+	(mips_adjust_reloc_in): Change sanity check to permit new reloc.
+	(mips_bfd_reloc_type_lookup): Turn BFD_RELOC_16_PCREL_S2 into
+	MIPS_R_PCREL16.
+
 	* elf32-mips.c (mips_elf_final_link): Account for link_order
 	relocs when allocating space for relocations.  Set SEC_RELOC flag
 	for any section which has relocs.  Handle link_order relocs in
