@@ -37,10 +37,10 @@ enum op_types {
   OP_POSTDEC,
   OP_POSTINC,
   OP_PREDEC,
+  OP_R0,
+  OP_R1,
   OP_R2,
-  OP_R3,
-  OP_R4,
-  OP_R2R3
+  OP_R0R1
 };
 
 
@@ -252,10 +252,10 @@ trace_input_func (name, in1, in2, in3)
       switch (in[i])
 	{
 	case OP_VOID:
+	case OP_R0:
+	case OP_R1:
 	case OP_R2:
-	case OP_R3:
-	case OP_R4:
-	case OP_R2R3:
+	case OP_R0R1:
 	  break;
 
 	case OP_REG:
@@ -452,26 +452,26 @@ trace_input_func (name, in1, in2, in3)
 						 (uint16)State.regs[OP[++i]]);
 	      break;
 
+	    case OP_R0:
+	      (*d10v_callback->printf_filtered) (d10v_callback, "%*s0x%.4x", SIZE_VALUES-6, "",
+						 (uint16)State.regs[0]);
+	      break;
+
+	    case OP_R1:
+	      (*d10v_callback->printf_filtered) (d10v_callback, "%*s0x%.4x", SIZE_VALUES-6, "",
+						 (uint16)State.regs[1]);
+	      break;
+
 	    case OP_R2:
 	      (*d10v_callback->printf_filtered) (d10v_callback, "%*s0x%.4x", SIZE_VALUES-6, "",
 						 (uint16)State.regs[2]);
 	      break;
 
-	    case OP_R3:
+	    case OP_R0R1:
 	      (*d10v_callback->printf_filtered) (d10v_callback, "%*s0x%.4x", SIZE_VALUES-6, "",
-						 (uint16)State.regs[3]);
-	      break;
-
-	    case OP_R4:
+						 (uint16)State.regs[0]);
 	      (*d10v_callback->printf_filtered) (d10v_callback, "%*s0x%.4x", SIZE_VALUES-6, "",
-						 (uint16)State.regs[4]);
-	      break;
-
-	    case OP_R2R3:
-	      (*d10v_callback->printf_filtered) (d10v_callback, "%*s0x%.4x", SIZE_VALUES-6, "",
-						 (uint16)State.regs[2]);
-	      (*d10v_callback->printf_filtered) (d10v_callback, "%*s0x%.4x", SIZE_VALUES-6, "",
-						 (uint16)State.regs[3]);
+						 (uint16)State.regs[1]);
 	      i++;
 	      break;
 	    }
@@ -543,15 +543,15 @@ trace_output_func (result)
 					     State.F0 != 0, State.F1 != 0, State.C != 0);
 	  break;
 
-	case OP_R2:
+	case OP_R0:
 	  (*d10v_callback->printf_filtered) (d10v_callback, " :: %*s0x%.4x F0=%d F1=%d C=%d\n", SIZE_VALUES-6, "",
-					     (uint16)State.regs[2],
+					     (uint16)State.regs[0],
 					     State.F0 != 0, State.F1 != 0, State.C != 0);
 	  break;
 
-	case OP_R2R3:
+	case OP_R0R1:
 	  (*d10v_callback->printf_filtered) (d10v_callback, " :: %*s0x%.4x%.4x F0=%d F1=%d C=%d\n", SIZE_VALUES-10, "",
-					     (uint16)State.regs[2], (uint16)State.regs[3],
+					     (uint16)State.regs[0], (uint16)State.regs[1],
 					     State.F0 != 0, State.F1 != 0, State.C != 0);
 	  break;
 	}
@@ -829,7 +829,7 @@ OP_C01 ()
 void
 OP_4900 ()
 {
-  trace_input ("bl.s", OP_CONSTANT8, OP_R2, OP_R3);
+  trace_input ("bl.s", OP_CONSTANT8, OP_R0, OP_R1);
   State.regs[13] = PC+1;
   JMP( PC + SEXT8 (OP[0]));
   trace_output (OP_VOID);
@@ -839,7 +839,7 @@ OP_4900 ()
 void
 OP_24800000 ()
 {
-  trace_input ("bl.l", OP_CONSTANT16, OP_R2, OP_R3);
+  trace_input ("bl.l", OP_CONSTANT16, OP_R0, OP_R1);
   State.regs[13] = PC+1;
   JMP (PC + OP[0]);
   trace_output (OP_VOID);
@@ -1217,7 +1217,7 @@ OP_15002A02 ()
 void
 OP_4D00 ()
 {
-  trace_input ("jl", OP_REG, OP_R2, OP_R3);
+  trace_input ("jl", OP_REG, OP_R0, OP_R1);
   State.regs[13] = PC+1;
   JMP (State.regs[OP[0]]);
   trace_output (OP_VOID);
@@ -1228,8 +1228,8 @@ void
 OP_4C00 ()
 {
   trace_input ("jmp", OP_REG,
-	       (OP[0] == 13) ? OP_R2 : OP_VOID,
-	       (OP[0] == 13) ? OP_R3 : OP_VOID);
+	       (OP[0] == 13) ? OP_R0 : OP_VOID,
+	       (OP[0] == 13) ? OP_R1 : OP_VOID);
 
   JMP (State.regs[OP[0]]);
   trace_output (OP_VOID);
@@ -2062,8 +2062,8 @@ void
 OP_5F40 ()
 {
   trace_input ("rte", OP_VOID, OP_VOID, OP_VOID);
-  PC = BPC;
   move_to_cr (PSW_CR, BPSW);
+  JMP(BPC);
   trace_output (OP_VOID);
 }
 
@@ -2666,17 +2666,17 @@ OP_5F00 ()
 
 /* Registers passed to trap 0 */
 
-#define FUNC   State.regs[6]	/* function number */
-#define PARM1  State.regs[2]	/* optional parm 1 */
-#define PARM2  State.regs[3]	/* optional parm 2 */
-#define PARM3  State.regs[4]	/* optional parm 3 */
-#define PARM4  State.regs[5]	/* optional parm 3 */
+#define FUNC   State.regs[4]	/* function number */
+#define PARM1  State.regs[0]	/* optional parm 1 */
+#define PARM2  State.regs[1]	/* optional parm 2 */
+#define PARM3  State.regs[2]	/* optional parm 3 */
+#define PARM4  State.regs[3]	/* optional parm 3 */
 
 /* Registers set by trap 0 */
 
-#define RETVAL State.regs[2]		/* return value */
-#define RETVAL_HIGH State.regs[2]	/* return value */
-#define RETVAL_LOW  State.regs[3]	/* return value */
+#define RETVAL State.regs[0]		/* return value */
+#define RETVAL_HIGH State.regs[0]	/* return value */
+#define RETVAL_LOW  State.regs[1]	/* return value */
 #define RETERR State.regs[4]		/* return error code */
 
 /* Turn a pointer in a register into a pointer into real memory. */
@@ -2689,13 +2689,13 @@ OP_5F00 ()
 	  case SYS_fork:
 	    RETVAL = fork ();
 	    trace_input ("<fork>", OP_VOID, OP_VOID, OP_VOID);
-	    trace_output (OP_R2);
+	    trace_output (OP_R0);
 	    break;
 
 	  case SYS_getpid:
 	    trace_input ("<getpid>", OP_VOID, OP_VOID, OP_VOID);
 	    RETVAL = getpid ();
-	    trace_output (OP_R2);
+	    trace_output (OP_R0);
 	    break;
 
 	  case SYS_kill:
@@ -2821,7 +2821,7 @@ OP_5F00 ()
 		else
 		  {
 		    RETVAL = kill (PARM1, PARM2);
-		    trace_output (OP_R2);
+		    trace_output (OP_R0);
 		  }
 	      }
 	    break;
@@ -2829,15 +2829,15 @@ OP_5F00 ()
 	  case SYS_execve:
 	    RETVAL = execve (MEMPTR (PARM1), (char **) MEMPTR (PARM2),
 			     (char **)MEMPTR (PARM3));
-	    trace_input ("<execve>", OP_R2, OP_R3, OP_R4);
-	    trace_output (OP_R2);
+	    trace_input ("<execve>", OP_R0, OP_R1, OP_R2);
+	    trace_output (OP_R0);
 	    break;
 
 #ifdef SYS_execv
 	  case SYS_execv:
 	    RETVAL = execve (MEMPTR (PARM1), (char **) MEMPTR (PARM2), NULL);
-	    trace_input ("<execv>", OP_R2, OP_R3, OP_VOID);
-	    trace_output (OP_R2);
+	    trace_input ("<execv>", OP_R0, OP_R1, OP_VOID);
+	    trace_output (OP_R0);
 	    break;
 #endif
 
@@ -2851,8 +2851,8 @@ OP_5F00 ()
 	      SW (buf, host_fd[0]);
 	      buf += sizeof(uint16);
 	      SW (buf, host_fd[1]);
-	      trace_input ("<pipe>", OP_R2, OP_VOID, OP_VOID);
-	      trace_output (OP_R2);
+	      trace_input ("<pipe>", OP_R0, OP_VOID, OP_VOID);
+	      trace_output (OP_R0);
 	    }
 	  break;
 
@@ -2864,8 +2864,8 @@ OP_5F00 ()
 	      RETVAL = wait (&status);
 	      if (PARM1)
 		SW (PARM1, status);
-	      trace_input ("<wait>", OP_R2, OP_VOID, OP_VOID);
-	      trace_output (OP_R2);
+	      trace_input ("<wait>", OP_R0, OP_VOID, OP_VOID);
+	      trace_output (OP_R0);
 	    }
 	  break;
 #endif
@@ -2873,7 +2873,7 @@ OP_5F00 ()
 	  case SYS_getpid:
 	    trace_input ("<getpid>", OP_VOID, OP_VOID, OP_VOID);
 	    RETVAL = 1;
-	    trace_output (OP_R2);
+	    trace_output (OP_R0);
 	    break;
 
 	  case SYS_kill:
@@ -2886,8 +2886,8 @@ OP_5F00 ()
 	  case SYS_read:
 	    RETVAL = d10v_callback->read (d10v_callback, PARM1, MEMPTR (PARM2),
 					  PARM3);
-	    trace_input ("<read>", OP_R2, OP_R3, OP_R4);
-	    trace_output (OP_R2);
+	    trace_input ("<read>", OP_R0, OP_R1, OP_R2);
+	    trace_output (OP_R0);
 	    break;
 
 	  case SYS_write:
@@ -2897,8 +2897,8 @@ OP_5F00 ()
 	    else
 	      RETVAL = (int)d10v_callback->write (d10v_callback, PARM1,
 						  MEMPTR (PARM2), PARM3);
-	    trace_input ("<write>", OP_R2, OP_R3, OP_R4);
-	    trace_output (OP_R2);
+	    trace_input ("<write>", OP_R0, OP_R1, OP_R2);
+	    trace_output (OP_R0);
 	    break;
 
 	  case SYS_lseek:
@@ -2909,27 +2909,27 @@ OP_5F00 ()
 	      RETVAL_HIGH = ret >> 16;
 	      RETVAL_LOW  = ret & 0xffff;
 	    }
-	    trace_input ("<lseek>", OP_R2, OP_R3, OP_R4);
-	    trace_output (OP_R2R3);
+	    trace_input ("<lseek>", OP_R0, OP_R1, OP_R2);
+	    trace_output (OP_R0R1);
 	    break;
 
 	  case SYS_close:
 	    RETVAL = d10v_callback->close (d10v_callback, PARM1);
-	    trace_input ("<close>", OP_R2, OP_VOID, OP_VOID);
-	    trace_output (OP_R2);
+	    trace_input ("<close>", OP_R0, OP_VOID, OP_VOID);
+	    trace_output (OP_R0);
 	    break;
 
 	  case SYS_open:
 	    RETVAL = d10v_callback->open (d10v_callback, MEMPTR (PARM1), PARM2);
-	    trace_input ("<open>", OP_R2, OP_R3, OP_R4);
-	    trace_output (OP_R2);
-	    trace_input ("<open>", OP_R2, OP_R3, OP_R4);
-	    trace_output (OP_R2);
+	    trace_input ("<open>", OP_R0, OP_R1, OP_R2);
+	    trace_output (OP_R0);
+	    trace_input ("<open>", OP_R0, OP_R1, OP_R2);
+	    trace_output (OP_R0);
 	    break;
 
 	  case SYS_exit:
 	    State.exception = SIG_D10V_EXIT;
-	    trace_input ("<exit>", OP_R2, OP_VOID, OP_VOID);
+	    trace_input ("<exit>", OP_R0, OP_VOID, OP_VOID);
 	    trace_output (OP_VOID);
 	    break;
 
@@ -2958,20 +2958,20 @@ OP_5F00 ()
 	      SLW (buf+28, host_stat.st_mtime);
 	      SLW (buf+36, host_stat.st_ctime);
 	    }
-	    trace_input ("<stat>", OP_R2, OP_R3, OP_VOID);
-	    trace_output (OP_R2);
+	    trace_input ("<stat>", OP_R0, OP_R1, OP_VOID);
+	    trace_output (OP_R0);
 	    break;
 
 	  case SYS_chown:
 	    RETVAL = chown (MEMPTR (PARM1), PARM2, PARM3);
-	    trace_input ("<chown>", OP_R2, OP_R3, OP_R4);
-	    trace_output (OP_R2);
+	    trace_input ("<chown>", OP_R0, OP_R1, OP_R2);
+	    trace_output (OP_R0);
 	    break;
 
 	  case SYS_chmod:
 	    RETVAL = chmod (MEMPTR (PARM1), PARM2);
-	    trace_input ("<chmod>", OP_R2, OP_R3, OP_R4);
-	    trace_output (OP_R2);
+	    trace_input ("<chmod>", OP_R0, OP_R1, OP_R2);
+	    trace_output (OP_R0);
 	    break;
 
 #ifdef SYS_utime
@@ -2979,8 +2979,8 @@ OP_5F00 ()
 	    /* Cast the second argument to void *, to avoid type mismatch
 	       if a prototype is present.  */
 	    RETVAL = utime (MEMPTR (PARM1), (void *) MEMPTR (PARM2));
-	    trace_input ("<utime>", OP_R2, OP_R3, OP_R4);
-	    trace_output (OP_R2);
+	    trace_input ("<utime>", OP_R0, OP_R1, OP_R2);
+	    trace_output (OP_R0);
 	    break;
 #endif
 
@@ -2991,8 +2991,8 @@ OP_5F00 ()
 	      RETVAL_HIGH = ret >> 16;
 	      RETVAL_LOW  = ret & 0xffff;
 	    }
-	    trace_input ("<time>", OP_R2, OP_R3, OP_R4);
-	    trace_output (OP_R2R3);
+	    trace_input ("<time>", OP_R0, OP_R1, OP_R2);
+	    trace_output (OP_R0R1);
 	    break;
 #endif
 	    

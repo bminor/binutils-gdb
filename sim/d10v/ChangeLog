@@ -1,3 +1,13 @@
+Thu Jan 22 17:54:01 1998  Michael Meissner  <meissner@cygnus.com>
+
+	* simops.c (op_types): New ABI, args are r0..r3, system call # is
+	in r4.
+	(trace_{in,out}put_func): Ditto.
+	(OP_4900): Ditto.
+	(OP_24800000): Ditto.
+	(OP_4D00): Ditto.
+	(OP_5F00): Ditto.
+
 Thu Jan 22 14:30:36 1998  Fred Fish  <fnf@cygnus.com>
 
 	* interp.c (UMEM_SEGMENTS): New define, set to 128.
