@@ -1549,9 +1549,9 @@ path_command (char *dirname, int from_tty)
 #ifdef REGISTER_NAMES
 char *gdb_register_names[] = REGISTER_NAMES;
 #endif
-/* Print out the machine register regnum. If regnum is -1,
-   print all registers (fpregs == 1) or all non-float registers
-   (fpregs == 0).
+/* Print out the machine register regnum. If regnum is -1, print all
+   registers (all == 1) or all non-float and non-vector registers (all
+   == 0).
 
    For most machines, having all_registers_info() print the
    register(s) one per line is good enough. If a different format
@@ -1561,7 +1561,7 @@ char *gdb_register_names[] = REGISTER_NAMES;
    to provide that format.  */
 
 void
-do_registers_info (int regnum, int fpregs)
+do_registers_info (int regnum, int print_all)
 {
   register int i;
   int numregs = NUM_REGS + NUM_PSEUDO_REGS;
@@ -1570,11 +1570,17 @@ do_registers_info (int regnum, int fpregs)
 
   for (i = 0; i < numregs; i++)
     {
-      /* Decide between printing all regs, nonfloat regs, or specific reg.  */
+      /* Decide between printing all regs, non-float / vector regs, or
+         specific reg.  */
       if (regnum == -1)
 	{
-	  if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (i)) == TYPE_CODE_FLT && !fpregs)
-	    continue;
+	  if (!print_all)
+	    {
+	      if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (i)) == TYPE_CODE_FLT)
+		continue;
+	      if (TYPE_VECTOR (REGISTER_VIRTUAL_TYPE (i)))
+		continue;
+	    }
 	}
       else
 	{
