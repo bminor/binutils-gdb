@@ -1107,7 +1107,7 @@ struct gdb_ext_thread_info
 
 #define BUF_THREAD_ID_SIZE (OPAQUETHREADBYTES*2)
 
-char *unpack_varlen_hex (char *buff, int *result);
+char *unpack_varlen_hex (char *buff, ULONGEST *result);
 
 static char *unpack_nibble (char *buf, int *val);
 
@@ -1228,7 +1228,7 @@ stub_unpack_int (char *buff, int fieldlength)
 
 char *
 unpack_varlen_hex (char *buff,	/* packet to parse */
-		   int *result)
+		   ULONGEST *result)
 {
   int nibble;
   int retval = 0;
@@ -3007,7 +3007,7 @@ remote_wait (ptid_t ptid, struct target_waitstatus *status)
 {
   struct remote_state *rs = get_remote_state ();
   unsigned char *buf = alloca (rs->remote_packet_size);
-  int thread_num = -1;
+  ULONGEST thread_num = -1;
 
   status->kind = TARGET_WAITKIND_EXITED;
   status->value.integer = 0;
@@ -3221,7 +3221,7 @@ remote_async_wait (ptid_t ptid, struct target_waitstatus *status)
 {
   struct remote_state *rs = get_remote_state ();
   unsigned char *buf = alloca (rs->remote_packet_size);
-  int thread_num = -1;
+  ULONGEST thread_num = -1;
 
   status->kind = TARGET_WAITKIND_EXITED;
   status->value.integer = 0;

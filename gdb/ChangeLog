@@ -1,3 +1,9 @@
+2002-08-08  Grace Sainsbury  <graces@redhat.com>
+
+	* remote.c (remote_wait, remote_async_wait): Change thread_num
+	ULONGEST.
+	* (unpack_varlen_hex): Change result prameter to ULONGEST *.
+
 2002-08-08  Andrew Cagney  <ac131313@redhat.com>
 
 	* configure.tgt: Replace powerpc-*-sysv*, powerpc-*-elf*,
