@@ -1015,11 +1015,12 @@ static void
 child_attach (char *args, int from_tty)
 {
   BOOL ok;
-  DWORD pid = strtoul (args, 0, 0);
+  DWORD pid;
 
   if (!args)
     error_no_arg ("process-id to attach");
 
+  pid = strtoul (args, 0, 0);
   ok = DebugActiveProcess (pid);
 
   if (!ok)

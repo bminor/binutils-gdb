@@ -1,3 +1,8 @@
+2001-03-17  Michael Chastain  <chastain@redhat.com>
+
+	* win32-nat.c (child_attach): check args for NULL before passing
+	to strtoul.  This fixes PR gdb/43.
+
 2001-03-17  Mark Kettenis  <kettenis@gnu.org>
 
 	* i387-nat.h: Doc Fix.
