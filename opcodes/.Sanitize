@@ -40,6 +40,7 @@ m68881-ext.c
 m68k-dis.c
 m88k-dis.c
 mips-dis.c
+mips-opc.c
 sh-opc.h
 sh-dis.c
 sparc-dis.c
