@@ -1,3 +1,8 @@
+2000-04-20  Jason Eckhardt  <jle@redhat.com>
+
+	* config/tc-d10v.h (tc_frob_label): Update the symbol's frag
+	since frag_now can change after d10v_cleanup is called.
+
 2001-04-16  David O'Brien  <obrien@FreeBSD.org>
 
 	* configure.in: Add the em type for FreeBSD targets.
