@@ -1,6 +1,0 @@
-******** t1.amp
-!
-
-!	test for eof in middle of line
-	test for eof in middle of line
-!	.END
