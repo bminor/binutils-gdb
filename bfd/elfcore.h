@@ -122,15 +122,13 @@ elf_core_file_p (abfd)
       goto wrong;
     }
 
-  /* Give abfd an elf_obj_tdata.  */
-  amt = sizeof (struct elf_obj_tdata);
-  preserve.marker = bfd_zalloc (abfd, amt);
-  if (preserve.marker == NULL)
-    goto fail;
   if (!bfd_preserve_save (abfd, &preserve))
     goto fail;
 
-  elf_tdata (abfd) = preserve.marker;
+  /* Give abfd an elf_obj_tdata.  */
+  if (! (*abfd->xvec->_bfd_set_format[bfd_core]) (abfd))
+    goto fail;
+  preserve.marker = elf_tdata (abfd);
 
   /* Swap in the rest of the header, now that we have the byte order.  */
   i_ehdrp = elf_elfheader (abfd);

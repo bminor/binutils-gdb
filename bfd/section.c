@@ -705,8 +705,6 @@ bfd_section_hash_newfunc (struct bfd_hash_entry *entry,
 
 /* Initializes a new section.  NEWSECT->NAME is already set.  */
 
-static asection *bfd_section_init PARAMS ((bfd *, asection *));
-
 static asection *
 bfd_section_init (bfd *abfd, asection *newsect)
 {

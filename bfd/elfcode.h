@@ -570,17 +570,15 @@ elf_object_p (abfd)
       goto got_wrong_format_error;
     }
 
-  /* Allocate an instance of the elf_obj_tdata structure and hook it up to
-     the tdata pointer in the bfd.  */
-
-  amt = sizeof (struct elf_obj_tdata);
-  preserve.marker = bfd_zalloc (abfd, amt);
-  if (preserve.marker == NULL)
-    goto got_no_match;
   if (!bfd_preserve_save (abfd, &preserve))
     goto got_no_match;
 
-  elf_tdata (abfd) = preserve.marker;
+  /* Allocate an instance of the elf_obj_tdata structure and hook it up to
+     the tdata pointer in the bfd.  */
+
+  if (! (*abfd->xvec->_bfd_set_format[bfd_object]) (abfd))
+    goto got_no_match;
+  preserve.marker = elf_tdata (abfd);
 
   /* Now that we know the byte order, swap in the rest of the header */
   i_ehdrp = elf_elfheader (abfd);

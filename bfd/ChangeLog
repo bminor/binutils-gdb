@@ -1,5 +1,11 @@
 2003-07-08  Alan Modra  <amodra@bigpond.net.au>
 
+	* elfcode.h (elf_object_p): Allocate tdata via _bfd_set_format.
+	* elfcore.h (elf_core_file_p): Likewise.
+	* section.c (bfd_section_init): Remove prototype.
+
+2003-07-08  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf-bfd.h (struct elf_link_hash_entry): Remove linker_section_pointer
 	field.
 	(enum elf_linker_section_enum): Delete.
