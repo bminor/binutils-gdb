@@ -1,3 +1,8 @@
+2003-05-29  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.base/corefile.exp: Find corefiles on Linux, which names them
+	'core.PID'.
+
 2003-05-22  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.base/corefile.exp: Tolerate stuff after argument parens in
