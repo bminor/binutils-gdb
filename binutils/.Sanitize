@@ -39,6 +39,7 @@ binutils.texi
 bucomm.c
 bucomm.h
 configure.in
+configdos.bat
 copy.c
 cplus-dem.c
 filemode.c
@@ -47,6 +48,7 @@ i960-pinsn.c
 is-ranlib.c
 is-strip.c
 m68k-pinsn.c
+makefile.dos
 maybe-ranlib.c
 maybe-strip.c
 nm.1
@@ -71,7 +73,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.12  1991/12/08 01:13:54  sac
+# Revision 1.13  1991/12/12 03:18:12  sac
+# Added configdos.bat, makefile.dos
+#
+# Revision 1.12  1991/12/08  01:13:54  sac
 # 	* bucomm.h: created to hold prototypes of bucomm.c
 # 	* objdump.h: created to hold prototyes of objdump.c
 # 	* am29k-pinsn.c: include objdump.h
