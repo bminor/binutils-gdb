@@ -64,7 +64,7 @@ static const bfd_target *           pe_object_p
 #define TOC_SECTION_NAME ".private.toc"
 
 /* The main body of code is in coffcode.h.  */
-#define COFF_DEFAULT_SECTION_ALIGNMENT_POWER (3)
+#define COFF_DEFAULT_SECTION_ALIGNMENT_POWER 2
 
 /* In case we're on a 32-bit machine, construct a 64-bit "-1" value
    from smaller values.  Start with zero, widen, *then* decrement.  */
