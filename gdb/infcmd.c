@@ -1049,7 +1049,7 @@ print_return_value (int structure_return, struct type *value_type)
       stb = ui_out_stream_new (uiout);
       ui_out_text (uiout, "Value returned is ");
       ui_out_field_fmt (uiout, "gdb-result-var", "$%d", record_latest_value (value));
-      ui_out_text (uiout, "= ");
+      ui_out_text (uiout, " = ");
       value_print (value, stb->stream, 0, Val_no_prettyprint);
       ui_out_field_stream (uiout, "return-value", stb);
       ui_out_text (uiout, "\n");

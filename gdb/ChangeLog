@@ -1,3 +1,8 @@
+2001-01-18  Mark Kettenis  <kettenis@gnu.org>
+
+	* infcmd.c (print_return_value): Restore another space lost by
+	switch to UIOUT. ``$NN='' should be ``$NN =''.
+
 Fri Jan 19 02:31:40 2001  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* target.h (TARGET_REGION_SIZE_OK_FOR_HW_WATCHPOINT)
