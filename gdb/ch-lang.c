@@ -521,7 +521,7 @@ evaluate_subexp_chill (expect_type, exp, pos, noside)
 	{
 	case TYPE_CODE_PTR:
 	  type = check_typedef (TYPE_TARGET_TYPE (type));
-	  if (!type || TYPE_CODE (type) || TYPE_CODE_FUNC)
+	  if (!type || TYPE_CODE (type) != TYPE_CODE_FUNC)
 	    error ("reference value used as function");
 	  /* ... fall through ... */
 	case TYPE_CODE_FUNC:

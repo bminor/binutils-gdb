@@ -1,3 +1,11 @@
+Sat Mar 23 12:14:02 1996  Fred Fish  <fnf@cygnus.com>
+
+	* ch-lang.c (evaluate_subexp_chill): Fix typo.
+
+Thu Mar 21 08:27:19 1996  Fred Fish  <fnf@cygnus.com>
+
+	* Makefile.in (VERSION): Bump version to 4.15.3
+
 Thu Mar 21 10:56:41 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config.in: Rename from config.h.in.
