@@ -2,6 +2,7 @@
 #define scounix
 
 /* Local labels start with a period.  */
-#define DOT_LABEL_PREFIX
-
+#define LOCAL_LABEL(name) (name[0] == '.' \
+                           && (name[1] == 'L' || name[1] == '.'))
+#define FAKE_LABEL_NAME ".L0\001"
 /* end of te-sco386.h */
