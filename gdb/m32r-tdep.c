@@ -418,7 +418,7 @@ m32r_init_extra_frame_info (struct frame_info *fi)
     }
 }
 
-/* Function: mn10300_virtual_frame_pointer
+/* Function: m32r_virtual_frame_pointer
    Return the register that the function uses for a frame pointer, 
    plus any necessary offset to be applied to the register before
    any frame pointer offsets.  */
