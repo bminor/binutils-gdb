@@ -94,6 +94,19 @@ implement virtual base classes.  gcc 2.x generated just one object code
 function with a hidden parameter, but gcc 3.x conforms to a multi-vendor
 ABI for C++ which requires multiple object code functions.
 
+*** Signal handlers
+
+On many systems an attempt to single-step a system-call instruction
+results in two or more instructions being executed (the system-call,
+and one or more instructions following).
+
+When attempting to single-step through a signal trampoline, this
+problem may result the program unintentionally running to completion,
+or re-execute the faulting instruction, or even corrupting the program
+counter.
+
+Ref: PR breakpoints/1702.
+
 *** Stack backtraces
 
 GDB's core code base has been updated to use a new backtrace

@@ -36,8 +36,9 @@ of sa_sigaction signal trampolines; backtrace from a NULL pointer
 call; backtrace through a signal trampoline; step into and out of
 signal handlers; and single-stepping in the signal trampoline.
 
-These fixes were tested on i386 GNU/Linux systems that include a 2.4
-kernel.
+Please note that kernel bugs are a limiting factor here.  These
+features have been shown to work on an s390 GNU/Linux system that
+include a 2.6.8-rc1 kernel.  Ref PR breakpoints/1702.
 
 * Cygwin support for DWARF 2 added.
 
