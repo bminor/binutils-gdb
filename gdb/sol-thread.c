@@ -62,6 +62,8 @@
 #include "regcache.h"
 #include "symfile.h"
 
+#include "gdb_string.h"
+
 extern struct target_ops sol_thread_ops;	/* Forward declaration */
 extern struct target_ops sol_core_ops;	/* Forward declaration */
 
