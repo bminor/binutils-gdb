@@ -102,6 +102,7 @@
 #define FPU_VFP_EXT_V1xD 0x10000000	/* Base VFP instruction set.  */
 #define FPU_VFP_EXT_V1	 0x08000000	/* Double-precision insns.    */
 #define FPU_VFP_EXT_V2	 0x04000000	/* ARM10E VFPr1.	      */
+#define FPU_MAVERICK	 0x02000000	/* Cirrus Maverick.	      */
 #define FPU_NONE	 0
 
 #define FPU_ARCH_FPE	 FPU_FPA_EXT_V1
@@ -111,6 +112,15 @@
 #define FPU_ARCH_VFP_V1xD (FPU_VFP_EXT_V1xD | FPU_VFP_EXT_NONE)
 #define FPU_ARCH_VFP_V1   (FPU_ARCH_VFP_V1xD | FPU_VFP_EXT_V1)
 #define FPU_ARCH_VFP_V2	  (FPU_ARCH_VFP_V1 | FPU_VFP_EXT_V2)
+
+#define FPU_ARCH_MAVERICK  FPU_MAVERICK
+
+enum arm_float_abi
+{
+  ARM_FLOAT_ABI_HARD,
+  ARM_FLOAT_ABI_SOFTFP,
+  ARM_FLOAT_ABI_SOFT
+};
 
 /* Types of processor to assemble for.  */
 #define ARM_1		ARM_ARCH_V1
@@ -178,6 +188,7 @@ static int mcpu_fpu_opt = -1;
 static int march_cpu_opt = -1;
 static int march_fpu_opt = -1;
 static int mfpu_opt = -1;
+static int mfloat_abi_opt = -1;
 
 /* This array holds the chars that always start a comment.  If the
    pre-processor is disabled, these aren't very useful.  */
@@ -2536,6 +2547,7 @@ static int arm_parse_extension PARAMS ((char *, int *));
 static int arm_parse_cpu PARAMS ((char *));
 static int arm_parse_arch PARAMS ((char *));
 static int arm_parse_fpu PARAMS ((char *));
+static int arm_parse_float_abi PARAMS ((char *));
 #if 0 /* Suppressed - for now.  */
 #if defined OBJ_COFF || defined OBJ_ELF
 static void arm_add_note PARAMS ((const char *, const char *, unsigned int));
@@ -11652,17 +11664,28 @@ md_begin ()
     if (uses_apcs_float)   flags |= F_APCS_FLOAT;
     if (pic_code)          flags |= F_PIC;
     if ((cpu_variant & FPU_ANY) == FPU_NONE
-	|| (cpu_variant & FPU_ANY) == FPU_ARCH_VFP) /* VFP layout only.  */
-      flags |= F_SOFT_FLOAT;
+	 || (cpu_variant & FPU_ANY) == FPU_ARCH_VFP) /* VFP layout only.  */
+      {
+	flags |= F_SOFT_FLOAT;
+      }
+    switch (mfloat_abi_opt)
+      {
+      case ARM_FLOAT_ABI_SOFT:
+      case ARM_FLOAT_ABI_SOFTFP:
+	flags |= F_SOFT_FLOAT;
+	break;
+
+      case ARM_FLOAT_ABI_HARD:
+	if (flags & F_SOFT_FLOAT)
+	  as_bad (_("hard-float conflicts with specified fpu"));
+	break;
+      }
     /* Using VFP conventions (even if soft-float).  */
     if (cpu_variant & FPU_VFP_EXT_NONE) flags |= F_VFP_FLOAT;
 
 #if defined OBJ_ELF
-    if (cpu_variant & ARM_CEXT_MAVERICK)
-      {
-	flags &= ~ F_SOFT_FLOAT;
+    if (cpu_variant & FPU_ARCH_MAVERICK)
 	flags |= EF_ARM_MAVERICK_FLOAT;
-      }
 #endif
 
     bfd_set_private_flags (stdoutput, flags);
@@ -13281,7 +13304,7 @@ static struct arm_cpu_option_table arm_cpus[] =
   {"iwmmxt",		ARM_ARCH_IWMMXT, FPU_ARCH_VFP_V2},
   {"i80200",		ARM_ARCH_XSCALE, FPU_ARCH_VFP_V2},
   /* Maverick */
-  {"ep9312",		ARM_ARCH_V4T | ARM_CEXT_MAVERICK, FPU_NONE},
+  {"ep9312",		ARM_ARCH_V4T | ARM_CEXT_MAVERICK, FPU_ARCH_MAVERICK},
   {NULL, 0, 0}
 };
 
@@ -13362,6 +13385,21 @@ static struct arm_fpu_option_table arm_fpus[] =
   {"arm1020t",		FPU_ARCH_VFP_V1},
   {"arm1020e",		FPU_ARCH_VFP_V2},
   {"arm1136jfs",	FPU_ARCH_VFP_V2},
+  {"maverick",		FPU_ARCH_MAVERICK},
+  {NULL, 0}
+};
+
+struct arm_float_abi_option_table
+{
+  char *name;
+  int value;
+};
+
+static struct arm_float_abi_option_table arm_float_abis[] =
+{
+  {"hard",	ARM_FLOAT_ABI_HARD},
+  {"softfp",	ARM_FLOAT_ABI_SOFTFP},
+  {"soft",	ARM_FLOAT_ABI_SOFT},
   {NULL, 0}
 };
 
@@ -13511,6 +13549,23 @@ arm_parse_fpu (str)
   return 0;
 }
 
+static int
+arm_parse_float_abi (str)
+     char * str;
+{
+  struct arm_float_abi_option_table *opt;
+
+  for (opt = arm_float_abis; opt->name != NULL; opt++)
+    if (strcmp (opt->name, str) == 0)
+      {
+	mfloat_abi_opt = opt->value;
+	return 1;
+      }
+
+  as_bad (_("unknown floating point abi `%s'\n"), str);
+  return 0;
+}
+
 struct arm_long_option_table arm_long_opts[] =
 {
   {"mcpu=", N_("<cpu name>\t  assemble for CPU <cpu name>"),
@@ -13519,6 +13574,8 @@ struct arm_long_option_table arm_long_opts[] =
    arm_parse_arch, NULL},
   {"mfpu=", N_("<fpu name>\t  assemble for FPU architecture <fpu name>"),
    arm_parse_fpu, NULL},
+  {"mfloat-abi=", N_("<abi>\t  assemble for floating point ABI <abi>"),
+   arm_parse_float_abi, NULL},
   {NULL, NULL, 0, NULL}
 };
 

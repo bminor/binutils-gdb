@@ -1,3 +1,19 @@
+2003-12-10  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (FPU_MAVERICK): Define.
+	(FPU_ARCH_MAVERICK): Define.
+	(arm_float_abi): Define.
+	(mfloat_abi_opt): New variable.
+	(md_begin): Use them.
+	(arm_opts): Add msoft-float and mhard-float.
+	(arm_cpus): Use FPU_ARCH_MAVERICK.
+	(arm_fpus): Add maverick.
+	(arm_float_abis): Add.
+	(arm_parse_float_abi): New function.
+	(arm_long_options): Add mfloat-abi.
+	* doc/as.texinfo: Document -mfloat-abi=.
+	* doc/c-arm.text: Ditto. Menution -fpu=maverick.
+
 2003-12-09  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (do_umaal): Fix typo.

@@ -297,7 +297,8 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 @c Don't document the deprecated options
    [@b{-mcpu}=@var{processor}[+@var{extension}@dots{}]]
    [@b{-march}=@var{architecture}[+@var{extension}@dots{}]]
-   [@b{-mfpu}=@var{floating-point-fromat}]
+   [@b{-mfpu}=@var{floating-point-format}]
+   [@b{-mfloat-abi}=@var{abi}]
    [@b{-mthumb}]
    [@b{-EB}|@b{-EL}]
    [@b{-mapcs-32}|@b{-mapcs-26}|@b{-mapcs-float}|
@@ -635,6 +636,8 @@ Specify which ARM processor variant is the target.
 Specify which ARM architecture variant is used by the target.
 @item -mfpu=@var{floating-point-format}
 Select which Floating Point architecture is the target.
+@item -mfloat-abi=@var{abi}
+Select which floating point ABI is in use.
 @item -mthumb
 Enable Thumb only instruction decoding.
 @item -mapcs-32 | -mapcs-26 | -mapcs-float | -mapcs-reentrant | -moabi
