@@ -25,6 +25,11 @@ Wed Oct  2 15:46:45 1996  Klaus Kaempf  <kkaempf@progis.de>
 
 Wed Oct  2 12:02:02 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* freebsd.h (N_GET_MAGIC_NET): Don't use ntohl.
+	(N_GETMID_NET, N_GETFLAG_NET): Likewise.
+	(NO_SWAP_MAGIC): Don't define.
+	(SWAP_MAGIC): Define.
+
 	* cofflink.c (_bfd_coff_link_input_bfd): Don't crash if there is
 	no hash table entry for a global symbol.
 
