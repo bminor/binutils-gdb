@@ -1284,27 +1284,22 @@ check_stub_method (type, i, j)
 
   if (*p != ')')			/* () means no args, skip while */
     {
+      depth = 0;
       while (*p)
 	{
+	  if (depth <= 0 && (*p == ',' || *p == ')'))
+	    {
+	      argtypes[argcount] =
+		  parse_and_eval_type (argtypetext, p - argtypetext);
+	      argcount += 1;
+	      argtypetext = p + 1;
+	    }
+
 	  if (*p == '(')
 	    depth += 1;
 	  else if (*p == ')')
 	    depth -= 1;
 
-	  if (depth <= 0 && (*p == ',' || *p == ')'))
-	    {
-	      char *tmp = (char *)alloca (p - argtypetext + 4);
-	      value val;
-	      tmp[0] = '(';
-	      bcopy (argtypetext, tmp+1, p - argtypetext);
-	      tmp[p-argtypetext+1] = ')';
-	      tmp[p-argtypetext+2] = '0';
-	      tmp[p-argtypetext+3] = '\0';
-	      val = parse_and_eval (tmp);
-	      argtypes[argcount] = VALUE_TYPE (val);
-	      argcount += 1;
-	      argtypetext = p + 1;
-	    }
 	  p += 1;
 	}
     }

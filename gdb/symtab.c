@@ -1270,6 +1270,18 @@ lookup_partial_symbol (pst, name, global, namespace)
   return (struct partial_symbol *) 0;
 }
 
+/* Find the psymtab containing main(). */
+
+struct partial_symtab *
+find_main_psymtab ()
+{
+  register struct partial_symtab *pst;
+  for (pst = partial_symtab_list; pst; pst = pst->next)
+    if (lookup_partial_symbol (pst, "main", 1, VAR_NAMESPACE))
+	return pst;
+  return NULL;
+}
+
 /* Look for a symbol in block BLOCK.  */
 
 struct symbol *
@@ -1930,7 +1942,6 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
     }
   while (p[0] == ' ' || p[0] == '\t') p++;
 
-  q = operator_chars (*argptr, &q1);
   if (p[0] == ':')
     {
 
@@ -2043,7 +2054,12 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
 		    }
 		  else
 		    tmp = copy;
-		  error ("that class does not have any method named %s", tmp);
+		  if (tmp[0] == '~')
+		    error ("The class `%s' does not have destructor defined",
+			   sym_class->name);
+		  else
+		    error ("The class %s does not have any method named %s",
+			   sym_class->name, tmp);
 		}
 	    }
 	  else

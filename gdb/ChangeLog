@@ -1,3 +1,27 @@
+Tue Nov 12 13:43:26 1991  Per Bothner  (bothner at cygnus.com)
+
+	* symtab.c (decode_line_1):  Remove spurious call to operator_chars.
+
+	Allow setting breakpoints on C++ destructors.
+	* valops.c (destructor_name_p):  Don't check TYPE_HAS_DESTRUCTOR,
+	since it lies.  Rely on callers to catch missing destructors.
+	* symtab.c (decode_line_1):  For example (see above), here.
+	* buildsym.c, symtab.h:  Remove TYPE_FLAGS_HAS{CON,DE}STRUCTOR
+	flags since they are no longer used.
+
+	Fixes to support C++ methods with functional parameters.
+	* c-exp.y (func_mod rule):  Allow (and ignore) list of parameter
+	types in a function type.
+	* eval.c (parse_and_eval_type), value.h:  New function,
+	parse_and_eval_type, is based on old code from check_stub_method.
+	But don't actually evaluate the cast, since that calls
+	value_cast(), whcih may fail.  Just extract the type
+	from the parsed expression.
+	* values.c (check_stub_method):  While looping through the
+	arguments, adjust depth *after* parameter has been handled.
+	Replace call and setup of parse_and_eval with new function
+	parse_and_eval_type.
+
 Tue Nov 12 09:40:07 1991  Fred Fish  (fnf at cygnus.com)
 
 	* utils.c, rem-multi.shar:  Remove fixed arg count version of

@@ -771,6 +771,8 @@ array_mod:	'[' ']'
 
 func_mod:	'(' ')'
 			{ $$ = 0; }
+	|	'(' nonempty_typelist ')'
+			{ free ($2); $$ = 0; }
 	;
 
 type	:	ptype

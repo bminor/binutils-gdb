@@ -2383,20 +2383,10 @@ read_struct_type (pp, type)
     {
       *pp += 1;
 
-      if (**pp == '=')
+      if (**pp == '=' || **pp == '+' || **pp == '-')
 	{
-	  TYPE_FLAGS (type)
-	    |= TYPE_FLAG_HAS_CONSTRUCTOR | TYPE_FLAG_HAS_DESTRUCTOR;
-	  *pp += 1;
-	}
-      else if (**pp == '+')
-	{
-	  TYPE_FLAGS (type) |= TYPE_FLAG_HAS_CONSTRUCTOR;
-	  *pp += 1;
-	}
-      else if (**pp == '-')
-	{
-	  TYPE_FLAGS (type) |= TYPE_FLAG_HAS_DESTRUCTOR;
+	  /* Obsolete flags that used to indicate the presence
+	     of constructors and/or destructors. */
 	  *pp += 1;
 	}
 
