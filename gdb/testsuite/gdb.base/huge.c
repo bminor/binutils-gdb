@@ -2,6 +2,8 @@
  * Test GDB's ability to read a very large data object from target memory.
  */
 
+#include <string.h>
+
 /* A value that will produce a target data object large enough to
    crash GDB.  0x200000 is big enough on GNU/Linux, other systems may
    need a larger number.  */

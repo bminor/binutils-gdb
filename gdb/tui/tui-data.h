@@ -116,7 +116,7 @@ TuiList, *TuiListPtr;
 
 
 /* The kinds of layouts available */
-typedef enum
+typedef enum tui_layout_type
   {
     SRC_COMMAND,
     DISASSEM_COMMAND,

@@ -279,7 +279,7 @@ tui_show_disassem (CORE_ADDR startAddr)
   TuiLineOrAddress val;
 
   val.addr = startAddr;
-  tuiAddWinToLayout (DISASSEM_WIN);
+  tui_add_win_to_layout (DISASSEM_WIN);
   tuiUpdateSourceWindow (disassemWin, s, val, FALSE);
   /*
      ** if the focus was in the src win, put it in the asm win, if the
@@ -364,7 +364,7 @@ tuiGetLowDisassemblyAddress (CORE_ADDR low, CORE_ADDR pc)
 
   /* Determine where to start the disassembly so that the pc is about in the
      middle of the viewport.  */
-  pos = tuiDefaultWinViewportHeight (DISASSEM_WIN, DISASSEM_COMMAND) / 2;
+  pos = tui_default_win_viewport_height (DISASSEM_WIN, DISASSEM_COMMAND) / 2;
   pc = tui_find_disassembly_address (pc, -pos);
 
   if (pc < low)

@@ -289,6 +289,7 @@ proc run_sim_test { name requested_machs } {
 	    if { "$opts(xerror)" == "no" } {
 		if [string match $opts(output) $output] {
 		    pass "$mach $testname"
+		    file delete ${name}.o ${name}.x
 		} else {
 		    verbose -log "output:  $output" 3
 		    verbose -log "pattern: $opts(output)" 3
@@ -304,6 +305,7 @@ proc run_sim_test { name requested_machs } {
 	    } else {
 		if [string match $opts(output) $output] {
 		    pass "$mach $testname"
+		    file delete ${name}.o ${name}.x
 		} else {
 		    verbose -log "output:  $output" 3
 		    verbose -log "pattern: $opts(output)" 3

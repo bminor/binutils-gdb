@@ -1,3 +1,40 @@
+2004-01-24  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* lib/compiler.c: Add hp_cc_compiler and hp_aCC_compiler.
+	* lib/compiler.cc: Likewise.
+	* lib/gdb.exp (get_compiler_info): Always call gdb_compile to
+	get the right preprocessor.  Eval the output directly.  Remove
+	special tests for hp_cc_compiler and hp_aCC_compiler.  Remove
+	hp_f77_compiler and hp_f90_compiler completely.
+	(gdb_preprocess): Delete.
+	(get_compiler): Delete.
+
+2004-01-24  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/charset.c, gdb.base/dump.c, gdb.base/huge.c: Include
+	<string.h>.
+
+2004-01-24  Nick Roberts  <nick@nick.uklinux.net>
+
+	* gdb.mi/mi-stack.exp: Update copyright.
+
+2004-01-23  David Carlton  <carlton@kealia.com>
+
+	* gdb.cp/rtti.exp: Don't include full path in ${srcfile}.  Add
+	test for cp_lookup_transparent_type.
+	* gdb.cp/rtti1.cc: Update copyright.  Add n2::func and refer_to;
+	call them.
+
+2004-01-23  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.mi/mi-var-child.exp: Update copyright year.  Move new test
+	after -var-update.
+
+2004-01-23  David Carlton  <carlton@kealia.com>
+
+	* gdb.cp/namespace.cc (C::ensureRefs): New.
+	* gdb.cp/namespace1.cc (C::ensureOtherRefs): New.
+
 2004-01-20  Nick Roberts  <nick@nick.uklinux.net>
 
 	* gdb.mi/mi-stack.exp (test_stack_locals_listing): Test for

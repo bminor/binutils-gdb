@@ -1918,6 +1918,7 @@ reread_symbols (void)
 	      objfile->symtabs = NULL;
 	      objfile->psymtabs = NULL;
 	      objfile->free_psymtabs = NULL;
+	      objfile->cp_namespace_symtab = NULL;
 	      objfile->msymbols = NULL;
 	      objfile->sym_private = NULL;
 	      objfile->minimal_symbol_count = 0;

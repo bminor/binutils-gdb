@@ -64,7 +64,7 @@ extern void strcat_to_buf (char *, int, const char *);
 TuiStatus, *TuiStatusPtr;
 
 /* Types of windows */
-     typedef enum
+typedef enum tui_win_type
        {
 	 SRC_WIN = 0,
 	 DISASSEM_WIN,
@@ -138,7 +138,7 @@ extern void tui_show_source (const char *file, int line);
 extern struct ui_out *tui_out_new (struct ui_file *stream);
 
 /* tuiLayout.c */
-extern TuiStatus tui_set_layout (const char *);
+extern enum tui_status tui_set_layout_for_display_command (const char *name);
 
 /* tuiSourceWin.c */
 extern void tuiUpdateAllExecInfos (void);

@@ -128,17 +128,14 @@ showLayout (TuiLayoutType layout)
 }
 
 
-/*
-   ** tuiSetLayout()
-   **    Function to set the layout to SRC_COMMAND, DISASSEM_COMMAND,
-   **    SRC_DISASSEM_COMMAND, SRC_DATA_COMMAND, or DISASSEM_DATA_COMMAND.
-   **    If the layout is SRC_DATA_COMMAND, DISASSEM_DATA_COMMAND, or
-   **    UNDEFINED_LAYOUT, then the data window is populated according
-   **    to regsDisplayType.
- */
-TuiStatus
-tuiSetLayout (TuiLayoutType layoutType,
-              TuiRegisterDisplayType regsDisplayType)
+/* Function to set the layout to SRC_COMMAND, DISASSEM_COMMAND,
+   SRC_DISASSEM_COMMAND, SRC_DATA_COMMAND, or DISASSEM_DATA_COMMAND.
+   If the layout is SRC_DATA_COMMAND, DISASSEM_DATA_COMMAND, or
+   UNDEFINED_LAYOUT, then the data window is populated according to
+   regsDisplayType.  */
+enum tui_status
+tui_set_layout (enum tui_layout_type layoutType,
+		enum tui_register_display_type regsDisplayType)
 {
   TuiStatus status = TUI_SUCCESS;
 
@@ -268,14 +265,11 @@ tuiSetLayout (TuiLayoutType layoutType,
   return status;
 }
 
-/*
-   ** tuiAddWinToLayout().
-   **        Add the specified window to the layout in a logical way.
-   **        This means setting up the most logical layout given the
-   **        window to be added.
- */
+/* Add the specified window to the layout in a logical way.  This
+   means setting up the most logical layout given the window to be
+   added.  */
 void
-tuiAddWinToLayout (TuiWinType type)
+tui_add_win_to_layout (enum tui_win_type type)
 {
   TuiLayoutType curLayout = currentLayout ();
 
@@ -365,14 +359,12 @@ tuiDefaultWinHeight (TuiWinType type, TuiLayoutType layout)
 }				/* tuiDefaultWinHeight */
 
 
-/*
-   ** tuiDefaultWinViewportHeight().
-   **        Answer the height of a window.  If it hasn't been created yet,
-   **        answer what the height of a window would be based upon its
-   **        type and the layout.
- */
+/* Answer the height of a window.  If it hasn't been created yet,
+   answer what the height of a window would be based upon its type and
+   the layout.  */
 int
-tuiDefaultWinViewportHeight (TuiWinType type, TuiLayoutType layout)
+tui_default_win_viewport_height (enum tui_win_type type,
+				 enum tui_layout_type layout)
 {
   int h;
 
@@ -430,7 +422,7 @@ Source/Disassembly/Command layouts.\n");
    **        $REGS, $GREGS, $FREGS, $SREGS.
  */
 TuiStatus
-tui_set_layout (const char *layoutName)
+tui_set_layout_for_display_command (const char *layoutName)
 {
   TuiStatus status = TUI_SUCCESS;
 
@@ -522,7 +514,7 @@ tui_set_layout (const char *layoutName)
 	    status = TUI_FAILURE;
 	  xfree (bufPtr);
 
-	  tuiSetLayout (newLayout, dpyType);
+	  tui_set_layout (newLayout, dpyType);
 	}
     }
   else
@@ -568,15 +560,15 @@ _tuiHandleXDBLayout (TuiLayoutDefPtr layoutDef)
 {
   if (layoutDef->split)
     {
-      tuiSetLayout (SRC_DISASSEM_COMMAND, TUI_UNDEFINED_REGS);
+      tui_set_layout (SRC_DISASSEM_COMMAND, TUI_UNDEFINED_REGS);
       tuiSetWinFocusTo (winList[layoutDef->displayMode]);
     }
   else
     {
       if (layoutDef->displayMode == SRC_WIN)
-	tuiSetLayout (SRC_COMMAND, TUI_UNDEFINED_REGS);
+	tui_set_layout (SRC_COMMAND, TUI_UNDEFINED_REGS);
       else
-	tuiSetLayout (DISASSEM_DATA_COMMAND, layoutDef->regsDisplayType);
+	tui_set_layout (DISASSEM_DATA_COMMAND, layoutDef->regsDisplayType);
     }
 
 
@@ -622,7 +614,7 @@ _tuiLayout_command (char *arg, int fromTTY)
   tui_enable ();
 
   /* Switch to the selected layout.  */
-  if (tui_set_layout (arg) != TUI_SUCCESS)
+  if (tui_set_layout_for_display_command (arg) != TUI_SUCCESS)
     warning ("Invalid layout specified.\n%s", LAYOUT_USAGE);
 
 }

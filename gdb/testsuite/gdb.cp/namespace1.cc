@@ -24,6 +24,12 @@ namespace C
     int z;
   };
 
+  void ensureOtherRefs () {
+    // NOTE (2004-04-23, carlton): This function is here only to make
+    // sure that GCC 3.4 outputs debug info for this class.
+    static OtherFileClass *c = new OtherFileClass();
+  }
+
   namespace {
     int cXOtherFile = 29;
   };

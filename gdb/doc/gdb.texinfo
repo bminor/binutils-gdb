@@ -10632,9 +10632,7 @@ configuration of @value{GDBN}; use @code{help target} to list them.
 
 @node KOD
 @section Kernel Object Display
-
 @cindex kernel object display
-@cindex kernel object
 @cindex KOD
 
 Some targets support kernel object display.  Using this facility,
@@ -10643,6 +10641,7 @@ and can display information about operating system-level objects such as
 mutexes and other synchronization objects.  Exactly which objects can be
 displayed is determined on a per-OS basis.
 
+@kindex set os
 Use the @code{set os} command to set the operating system.  This tells
 @value{GDBN} which kernel object display module to initialize:
 
@@ -10650,11 +10649,17 @@ Use the @code{set os} command to set the operating system.  This tells
 (@value{GDBP}) set os cisco
 @end smallexample
 
+@kindex show os
+The associated command @code{show os} displays the operating system
+set with the @code{set os} command; if no operating system has been
+set, @code{show os} will display an empty string @samp{""}.
+
 If @code{set os} succeeds, @value{GDBN} will display some information
 about the operating system, and will create a new @code{info} command
 which can be used to query the target.  The @code{info} command is named
 after the operating system:
 
+@kindex info cisco
 @smallexample
 (@value{GDBP}) info cisco
 List of Cisco Kernel Objects
@@ -10665,8 +10670,10 @@ any        Any and all objects
 Further subcommands can be used to query about particular objects known
 by the kernel.
 
-There is currently no way to determine whether a given operating system
-is supported other than to try it.
+There is currently no way to determine whether a given operating
+system is supported other than to try setting it with @kbd{set os
+@var{name}}, where @var{name} is the name of the operating system you
+want to try.
 
 
 @node Remote Debugging

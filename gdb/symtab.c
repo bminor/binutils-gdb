@@ -1,7 +1,7 @@
 /* Symbol table lookup for the GNU debugger, GDB.
 
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -1480,15 +1480,23 @@ lookup_partial_symbol (struct partial_symtab *pst, const char *name,
 }
 
 /* Look up a type named NAME in the struct_domain.  The type returned
-   must not be opaque -- i.e., must have at least one field defined
-
-   This code was modelled on lookup_symbol -- the parts not relevant to looking
-   up types were just left out.  In particular it's assumed here that types
-   are available in struct_domain and only at file-static or global blocks. */
-
+   must not be opaque -- i.e., must have at least one field
+   defined.  */
 
 struct type *
 lookup_transparent_type (const char *name)
+{
+  return current_language->la_lookup_transparent_type (name);
+}
+
+/* The standard implementation of lookup_transparent_type.  This code
+   was modeled on lookup_symbol -- the parts not relevant to looking
+   up types were just left out.  In particular it's assumed here that
+   types are available in struct_domain and only at file-static or
+   global blocks.  */
+
+struct type *
+basic_lookup_transparent_type (const char *name)
 {
   struct symbol *sym;
   struct symtab *s = NULL;

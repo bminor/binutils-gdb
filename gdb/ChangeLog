@@ -1,3 +1,186 @@
+2004-01-25  Mark Kettenis  <kettenis@gnu.org>
+
+	* infcmd.c (print_return_value): Plug memory leak; delete
+	ui_stream object.  Rename argument `structure_return' to
+	`struct_return'.
+
+2004-01-25  Mark Kettenis  <kettenis@gnu.org>
+
+	* infcmd.c (print_return_value): Wrap long lines.
+	(finish_command_continuation, finish_command): Remove unused
+	variable `funcaddr'.  Fix some coding-standards problems.
+
+	* sparc-tdep.c (sparc_regset_from_core_section): Check whether
+	SECT_SIZE is large enough, not wheter it's exactly the right size.
+	(sparc32_gdbarch_init): Initialize TDEP->sizeof_gregset and
+	TDEP->fpregset to zero.
+
+	* sparcnbsd-tdep.c (sparc32nbsd_supply_gregset): Also supply the
+	floating-point registers for traditional NetBSD core files.
+	(sparc32nbsd_init_abi): Initialize TDEP->sizeof_gregset and
+	TDEP->sizeof_fpregset here.
+
+2004-01-25  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparc-tdep.h (sparc32nbsd_sigcontext_saved_regs): New prototype.
+	* sparcnbsd-tdep.c (sparc32nbsd_sigcontext_saved_regs): New
+	function with code split out from
+	sparc32nbsd_sigcontext_frame_cache.
+	(sparc32nbsd_sigcontext_frame_cache): Use
+	sparc32nbsd_sigcontext_saved_regs.
+	(_initialize_sparc32nbsd_tdep): Don't register OS ABI handler for
+	OpenBSD.
+	* sparcobsd-tdep.c: New file.
+	* Makefile.in (ALLDEPFILES): Add sparcobsd-tdep.c.
+	(sparcobsd-tdep.o): New dependency.
+	* configure.tgt (sparc-*-openbsd*): Set gdb_target to obsd.
+	* config/sparc/obsd.mt: New file.
+
+	* sparc-tdep.c (sparc32_gdbarch_init): Don't require
+	TDEP->fpregset to be initialized to enable core file register
+	sets.
+
+2004-01-24  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparc64-tdep.h (struct frame_info, struct trad_frame_saved_reg):
+	Add opaque declarations.
+	(sparc64nbsd_sigcontext_saved_regs): New prototype.
+	* sparc64nbsd-tdep.c (sparc64nbsd_sigcontext_saved_regs): New
+	function with code split out from
+	sparc64nbsd_sigcontext_frame_cache.
+	(sparc64nbsd_sigcontext_frame_cache): Use
+	sparc64nbsd_sigcontext_saved_regs.
+	(_initialize_sparc64nbsd_tdep): Don't register OS ABI handler for
+	OpenBSD.
+	* sparc64obsd-tdep.c: New file.
+	* Makefile.in (ALLDEPFILES): Add sparc64obsd-tdep.c.
+	(sparc64obsd-tdep.o): New dependency.
+	* configure.tgt (sparc64-*-openbsd*): Set gdb_target to obsd64 and
+	gdb_osabi to GDB_OSABI_OPENBSD_ELF.
+	* config/sparc/obsd64.mt: New file.
+
+	* sparc-tdep.c (sparc_fetch_instruction): Return zero if we can't
+	read the instruction at PC.
+
+	* sparcnbsd-tdep.c (GDB_OSABI_NETBSD_CORE): Define, based on the
+	value of GDB_OSABI_DEFAULT.
+	(sparcnbsd_core_osabi_sniffer): Return GDB_OSABI_NETBSD_CORE
+	instead of GDB_OSABI_NETBSD_AOUT.
+
+2004-01-24  Nick Roberts  <nick@nick.uklinux.net>
+
+	* mi/mi-cmd-stack.c, mi/mi-cmd-var.c, mi/mi-cmds.h: Update
+	copyright.
+
+2004-01-23  Andrew Cagney  <cagney@redhat.com>
+
+	* printcmd.c (display_command): Replace tui_set_display call with
+	tui_set_layout_for_display_command.
+	* tui/tui.h (enum tui_win_type): Define.
+	(tui_set_layout): Delete declaration.
+	(tui_set_layout_for_display_command): Rename set_tui_layout.
+	* tui/tui-data.h (enum tui_layout_type): Define.
+	* tui/tui-layout.h: Update copyright.  Include "tui-data.h" and
+	"tui.h".
+	(tui_add_win_to_layout): Rename tuiAddWinToLayout.
+	(tui_default_win_height): Rename tuiDefaultWinHeight.
+	(tui_default_win_viewport_height): Rename
+	tuiDefaultWinViewportHeight.
+	(tui_set_layout): RenametuiSetLayout.
+	* tui/tui-layout.c: Update references.
+	* tui/tui.c: Update references.
+	* tui/tui-disasm.c: Update references.
+
+2004-01-23  David Carlton  <carlton@kealia.com>
+
+	Partial workaround for PR c++/1511:
+	* cp-namespace.c: Include frame.h.
+	(cp_lookup_transparent_type): New
+	(cp_lookup_transparent_type_loop): New.
+	* cp-support.h: Declare cp_lookup_transparent_type.
+	* symtab.c (basic_lookup_transparent_type): Renamed from
+	lookup_transparent_type.
+	(lookup_transparent_type): Replace old body by a call to
+	current_language->la_lookup_transparent_type.
+	* symtab.h: Update copyright.  Declare
+	basic_lookup_transparent_type.
+	* language.h: Update copyright.
+	(struct language_defn): Add la_lookup_transparent_type.
+	* language.c: Update copyright.
+	(unknown_language_defn): Add basic_lookup_transparent_type.
+	(auto_language_defn): Add basic_lookup_transparent_type.
+	(local_language_defn): Add basic_lookup_transparent_type.
+	* ada-lang.c: Update copyright.
+	(ada_language_defn): Add basic_lookup_transparent_type.
+	* c-lang.c: Update copyright.
+	(c_language_defn): Add basic_lookup_transparent_type.
+	(cplus_language_defn): Add basic_lookup_transparent_type.
+	(asm_language_defn): Add basic_lookup_transparent_type.
+	(minimal_language_defn): Add basic_lookup_transparent_type.
+	* f-lang.c: Update copyright.
+	(f_language_defn): Add basic_lookup_transparent_type.
+	* jv-lang.c: Update copyright.
+	(java_language_defn): Add basic_lookup_transparent_type.
+	* m2-lang.c: Update copyright.
+	(m2_language_defn): Add basic_lookup_transparent_type.
+	* objc-lang.c: Update copyright.
+	(objc_language_defn): Add basic_lookup_transparent_type.
+	* p-lang.c: Update copyright.
+	(p_language_defn): Add basic_lookup_transparent_type.
+	* scm-lang.c: Update copyright.
+	(scm_language_defn): Add basic_lookup_transparent_type.
+	* Makefile.in (cp-namespace.o): Depend on frame.h.
+
+2004-01-23  David Carlton  <carlton@kealia.com>
+
+	Patch for PR c++/1520:
+	* dwarf2read.c (read_func_scope): Set processing_current_prefix
+	properly if we have a specification die.
+	(determine_prefix_aux): Rename from determine_prefix.
+	(determine_prefix): Like the old determine_prefix, but never
+	returns NULL.
+
+2004-01-23  Theodore A. Roth  <troth@openavr.org>
+
+	* avr-tdep.c: Update copyright.
+	(avr_iaddr_p): Delete unused function.
+	(avr_saddr_p): Delete unused function.
+
+2004-01-23  David Carlton  <carlton@kealia.com>
+
+	* symfile.c (reread_symbols): Clear objfile->cp_namespace_symtab.
+	Fix for PR symtab/1534.
+
+2004-01-23  Mark Kettenis  <kettenis@gnu.org>
+
+	* NEWS (New native configurations): Mention OpenBSD/sparc and
+	OpenBSD/sparc64.
+	* configure.tgt: Add sparc-*-openbsd* and sparc64-*-openbsd*.
+	* configure.host: Likewise.
+	* sparcnbsd-tdep.c (_initialize_sparnbsd_tdep): Register OS ABI
+	handler for OpenBSD.
+	* sparc64nbsd-tdep.c (_initialize_sparc64nbsd_tdep): Likewise.
+
+2004-01-22  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparcnbsd-tdep.c (sparcnbsd_core_osabi_sniffer): New function.
+	(_initialize_sparnbsd_tdep): Register sparcnbsd_core_osabi_sniffer.
+
+	* ser-pipe.c (pipe_open): Use proper null pointer in execl call.
+	* cli/cli-cmds.c (shell_escape): Likewise.
+
+	* osabi.c (generic_elf_osabi_sniff_abi_tag_sections): Recognize
+	OpenBSD .note.openbsd.ident sections.
+
+2004-01-22  David Carlton  <carlton@kealia.com>
+
+	* dwarf2read.c (psymtab_to_symtab_1): Calculate lowpc, highpc via
+	get_scope_pc_bounds.
+	(read_file_scope): Ditto.
+	(get_scope_pc_bounds): New function, produced by extracting code
+	from the above two functions, consolidating it, and adding support
+	for DW_TAG_namespace.
+
 2004-01-22  Mark Kettenis  <kettenis@gnu.org>
 
 	* osabi.c (MAX_NOTESZ): New define.

@@ -96,7 +96,9 @@ sparc_fetch_instruction (CORE_ADDR pc)
   unsigned long insn;
   int i;
 
-  read_memory (pc, buf, sizeof (buf));
+  /* If we can't read the instruction at PC, return zero.  */
+  if (target_read_memory (pc, buf, sizeof (buf)))
+    return 0;
 
   insn = 0;
   for (i = 0; i < sizeof (buf); i++)
@@ -1028,10 +1030,10 @@ sparc_regset_from_core_section (struct gdbarch *gdbarch,
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  if (strcmp (sect_name, ".reg") == 0 && sect_size == tdep->sizeof_gregset)
+  if (strcmp (sect_name, ".reg") == 0 && sect_size >= tdep->sizeof_gregset)
     return tdep->gregset;
 
-  if (strcmp (sect_name, ".reg2") == 0 && sect_size == tdep->sizeof_fpregset)
+  if (strcmp (sect_name, ".reg2") == 0 && sect_size >= tdep->sizeof_fpregset)
     return tdep->fpregset;
 
   return NULL;
@@ -1056,9 +1058,9 @@ sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->pc_regnum = SPARC32_PC_REGNUM;
   tdep->npc_regnum = SPARC32_NPC_REGNUM;
   tdep->gregset = NULL;
-  tdep->sizeof_gregset = 20 * 4;
+  tdep->sizeof_gregset = 0;
   tdep->fpregset = NULL;
-  tdep->sizeof_fpregset = 33 * 4;
+  tdep->sizeof_fpregset = 0;
   tdep->plt_entry_size = 0;
 
   set_gdbarch_long_double_bit (gdbarch, 128);
@@ -1111,7 +1113,7 @@ sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   frame_unwind_append_sniffer (gdbarch, sparc32_frame_sniffer);
 
   /* If we have register sets, enable the generic core file support.  */
-  if (tdep->gregset && tdep->fpregset)
+  if (tdep->gregset)
     set_gdbarch_regset_from_core_section (gdbarch,
 					  sparc_regset_from_core_section);
 

@@ -1,3 +1,12 @@
+2004-01-26  Chris Demetriou  <cgd@broadcom.com>
+
+	* sim/mips: New directory.  Tests for the MIPS simulator.
+
+2004-01-23  Ben Elliston  <bje@wasabisystems.com>
+
+	* lib/sim-defs.exp (run_sim_test): Delete the .o and .x files if a
+	test passes.
+
 2003-10-10  Dave Brolley  <brolley@redhat.com>
 
 	* sim/frv/testutils.inc (or_gr_immed): New macro.
