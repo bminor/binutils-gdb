@@ -895,6 +895,9 @@ file to another.  @code{objcopy} uses the @sc{gnu} @sc{bfd} Library to
 read and write the object files.  It can write the destination object
 file in a format different from that of the source object file.  The
 exact behavior of @code{objcopy} is controlled by command-line options.
+Note that @code{objcopy} should be able to copy a fully linked file
+between any two formats. However, copying a relocatable object file
+between any two formats may not work as expected.
 
 @code{objcopy} creates temporary files to do its translations and
 deletes them afterward.  @code{objcopy} uses @sc{bfd} to do all its
