@@ -27,10 +27,30 @@ typedef unsigned_4 quadword[4];
 
 /* SCEI memory mapping information */
 
-#define PKE0_REGISTER_WINDOW_START 0x10000800
-#define PKE1_REGISTER_WINDOW_START 0x10000A00
-#define PKE0_FIFO_ADDR             0x10008000
-#define PKE1_FIFO_ADDR             0x10008010
+#define PKE0_REGISTER_WINDOW_START 0x10003800
+#define PKE1_REGISTER_WINDOW_START 0x10003C00
+#define PKE0_FIFO_ADDR             0x10004000
+#define PKE1_FIFO_ADDR             0x10005000
+
+
+/* and now a few definitions that rightfully belong elsewhere */ 
+#ifdef PKE_DEBUG
+
+/* VU PC pseudo-registers */ /* omitted from 1998-01-22 e-mail plans */
+#define VU0_PC_START 0x20025000
+#define VU1_PC_START 0x20026000
+
+/* VU source-addr tracking tables */ /* changed from 1998-01-22 e-mail plans */
+#define VU0_MEM0_SRCADDR_START 0x21000000
+#define VU0_MEM1_SRCADDR_START 0x21004000
+#define VU1_MEM0_SRCADDR_START 0x21008000
+#define VU1_MEM1_SRCADDR_START 0x2100C000
+
+/* GPUIF STAT register */
+#define GPUIF_REG_STAT_APATH_E 11
+#define GPUIF_REG_STAT_APATH_B 10
+
+#endif /* PKE_DEBUG */
 
 
 /* Quadword indices of PKE registers.  Actual registers sit at bottom
@@ -189,6 +209,10 @@ typedef unsigned_4 quadword[4];
 #define PKE_REG_MODE_MDE_E 1
 #define PKE_REG_MODE_MDE_B 0
 
+/* NUM register */
+#define PKE_REG_NUM_NUM_E 9
+#define PKE_REG_NUM_NUM_B 0
+
 /* MARK register */
 #define PKE_REG_MARK_MARK_E 15
 #define PKE_REG_MARK_MARK_B 0
@@ -262,34 +286,10 @@ typedef unsigned_4 quadword[4];
 ((((me)->regs[PKE_REG_MASK][0]) >> (8*(row) + 2*(col))) & 0x03)
 
 
-/* and now a few definitions that rightfully belong elsewhere */ 
-#ifdef PKE_DEBUG
-
-/* GPUIF addresses */
-#define GPUIF_PATH3_FIFO_ADDR  0x10008020    /* data from CORE        */
-#define GPUIF_PATH1_FIFO_ADDR  0x10008030    /* data from VU1         */ 
-#define GPUIF_PATH2_FIFO_ADDR  0x10008040    /* data from PKE1        */
-
-/* VU STAT register */
-#define VU_REG_STAT_VGW_E 4
-#define VU_REG_STAT_VGW_B 4
-#define VU_REG_STAT_VBS_E 0
-#define VU_REG_STAT_VBS_B 0
-
-/* VU PC pseudo-registers */ /* omitted from 1998-01-22 e-mail plans */
-#define VU0_PC_START 0x20025000
-#define VU1_PC_START 0x20026000
-
-/* VU source-addr tracking tables */ /* changed from 1998-01-22 e-mail plans */
-#define VU0_MEM0_SRCADDR_START 0x21000000
-#define VU0_MEM1_SRCADDR_START 0x21004000
-#define VU1_MEM0_SRCADDR_START 0x21008000
-#define VU1_MEM1_SRCADDR_START 0x2100C000
-
-#endif /* PKE_DEBUG */
 
 
-/* operations  */
+/* operations - replace with those in sim-bits.h when convenient */
+
 /* unsigned 32-bit mask of given width */
 #define BIT_MASK(width) (width == 31 ? 0xffffffff : (((unsigned_4)1) << (width+1)) - 1)
 /* e.g.: BIT_MASK(4) = 00011111 */
@@ -354,8 +354,12 @@ struct pke_device
   int pke_number;
   int flags;
 
-  /* quadword registers */
+  /* quadword registers: data in [0] word only */
   quadword regs[PKE_NUM_REGS];
+
+  /* write buffer for FIFO address */
+  quadword fifo_qw_in_progress;
+  int fifo_qw_done; /* bitfield */
 
   /* FIFO */
   struct fifo_quadword* fifo;
@@ -372,8 +376,8 @@ struct pke_device
 
 /* Flags for PKE.flags */
 
-#define PKE_FLAG_NONE 0
-/* none at present */
+#define PKE_FLAG_NONE        0x00
+#define PKE_FLAG_PENDING_PSS 0x01 /* PSS bit written-to; set STAT:PSS after current instruction */
 
 
 #endif /* H_PKE_H */

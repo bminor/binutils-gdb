@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include "sky-pke.h"
 #include "sky-dma.h"
+#include "sim-bits.h"
 #include "sim-assert.h"
 #include "sky-vu0.h"
 #include "sky-vu1.h"
@@ -26,6 +27,8 @@ static int pke_io_write_buffer(device*, const void*, int, address_word,
 static void pke_issue(struct pke_device*);
 static void pke_pc_advance(struct pke_device*, int num_words);
 static unsigned_4* pke_pc_operand(struct pke_device*, int operand_num);
+static unsigned_4 pke_pc_operand_bits(struct pke_device*, int bit_offset,
+				      int bit_width, unsigned_4* sourceaddr);
 static struct fifo_quadword* pke_pc_fifo(struct pke_device*, int operand_num, 
 					 unsigned_4** operand);
 static int pke_track_write(struct pke_device*, const void* src, int len,
@@ -67,6 +70,7 @@ struct pke_device pke0_device =
   { "pke0", &pke_io_read_buffer, &pke_io_write_buffer }, /* device */
   0, 0,        /* ID, flags */
   {},          /* regs */
+  {}, 0,      /* FIFO write buffer */
   NULL, 0, 0, NULL,  /* FIFO */
   0, 0            /* pc */
 };
@@ -77,6 +81,7 @@ struct pke_device pke1_device =
   { "pke1", &pke_io_read_buffer, &pke_io_write_buffer }, /* device */
   1, 0,        /* ID, flags */
   {},          /* regs */
+  {}, 0,       /* FIFO write buffer */
   NULL, 0, 0, NULL, /* FIFO */
   0, 0         /* pc */
 };
@@ -334,12 +339,12 @@ pke_io_write_buffer(device *me_,
 	      PKE_REG_MASK_SET(me, STAT, INT, 0);
 	      PKE_REG_MASK_SET(me, STAT, ER0, 0);
 	      PKE_REG_MASK_SET(me, STAT, ER1, 0);
+	      me->flags &= ~PKE_FLAG_PENDING_PSS;
 	      /* will allow resumption of possible stalled instruction */
 	    }
 	  if(BIT_MASK_GET(input[0], 2, 2)) /* STP bit */
 	    {
-	      /* XXX: how to safely abort "currently executing" (=> stalled) instruction? */
-	      PKE_REG_MASK_SET(me, STAT, PSS, 1);
+	      me->flags |= PKE_FLAG_PENDING_PSS;
 	    }
 	  if(BIT_MASK_GET(input[0], 1, 1)) /* FBK bit */
 	    {
@@ -351,8 +356,9 @@ pke_io_write_buffer(device *me_,
                  prevents re-execution attempt of possible stalled
                  instruction */
 	      me->fifo_num_elements = me->fifo_pc;
-	      /* clear registers */
+	      /* clear registers, flag, other state */
 	      memset(me->regs, 0, sizeof(me->regs));
+	      me->fifo_qw_done = 0;
 	      me->flags = 0;
 	      me->qw_pc = 0;
 	    }
@@ -424,10 +430,22 @@ pke_io_write_buffer(device *me_,
     {
       /* FIFO */
       struct fifo_quadword* fqw;
+      int fifo_byte = ADDR_OFFSET_QW(addr);      /* find byte-offset inside fifo quadword */
+      int i;
 
-      /* assert transfer size == 128 bits */
-      if(nr_bytes != sizeof(quadword))
-	return 0;
+      /* collect potentially-partial quadword in write buffer */
+      memcpy(((unsigned_1*)& me->fifo_qw_in_progress) + fifo_byte, src, nr_bytes);
+      /* mark bytes written */
+      for(i = fifo_byte; i < fifo_byte + nr_bytes; i++)
+	BIT_MASK_SET(me->fifo_qw_done, i, i, 1);
+
+      /* return if quadword not quite written yet */
+      if(BIT_MASK_GET(me->fifo_qw_done, 0, sizeof(quadword)-1) !=
+	 BIT_MASK_BTW(0, sizeof(quadword)))
+	return nr_bytes;
+
+      /* all done - process quadword after clearing flag */
+      BIT_MASK_SET(me->fifo_qw_done, 0, sizeof(quadword)-1, 0);
 
       /* ensure FIFO has enough elements */
       if(me->fifo_num_elements == me->fifo_buffer_size)
@@ -448,7 +466,7 @@ pke_io_write_buffer(device *me_,
 
       /* add new quadword at end of FIFO */
       fqw = & me->fifo[me->fifo_num_elements];
-      memcpy((void*) fqw->data, src, nr_bytes);
+      memcpy((void*) fqw->data, me->fifo_qw_in_progress, sizeof(quadword));
       sim_read(CPU_STATE(cpu),
 	       (SIM_ADDR) (me->pke_number == 0 ? DMA_D0_SRCADDR : DMA_D1_SRCADDR),
 	       (void*) & fqw->source_address,
@@ -485,9 +503,17 @@ pke_issue(struct pke_device* me)
 
   /* 1 -- test go / no-go for PKE execution */
 
+  /* switch on STAT:PSS if PSS-pending and in idle state */
+  if((PKE_REG_MASK_GET(me, STAT, PPS) == PKE_REG_STAT_PPS_IDLE) &&
+     (me->flags & PKE_FLAG_PENDING_PSS) != 0)
+    {
+      me->flags &= ~PKE_FLAG_PENDING_PSS;
+      PKE_REG_MASK_SET(me, STAT, PSS, 1);
+    }
+
   /* check for stall/halt control bits */
-  if(PKE_REG_MASK_GET(me, STAT, PSS) || /* XXX: PSS may be a special case */
-     PKE_REG_MASK_GET(me, STAT, PFS) ||
+  if(PKE_REG_MASK_GET(me, STAT, PFS) ||
+     PKE_REG_MASK_GET(me, STAT, PSS) || /* note special treatment below */
      /* PEW bit not a reason to keep stalling - it's re-checked below */
      /* PGW bit not a reason to keep stalling - it's re-checked below */
      /* maskable stall controls: ER0, ER1, PIS */
@@ -498,7 +524,6 @@ pke_issue(struct pke_device* me)
       /* try again next cycle; no state change */
       return;
     }
-  /* XXX: handle PSS by *skipping* instruction? */
 
   /* confirm availability of new quadword of PKE instructions */
   if(me->fifo_num_elements <= me->fifo_pc)
@@ -531,7 +556,7 @@ pke_issue(struct pke_device* me)
     {
       /* set INT flag in STAT register */
       PKE_REG_MASK_SET(me, STAT, INT, 1);
-      /* XXX: send interrupt to R5900? */
+      /* XXX: how to send interrupt to R5900? */
     }
 
   /* decoding */
@@ -580,7 +605,7 @@ pke_issue(struct pke_device* me)
     pke_code_directhl(me, fw);
   else if(IS_PKE_CMD(cmd, UNPACK))
     pke_code_unpack(me, fw);
-  /* ... other commands ... */
+  /* ... no other commands ... */
   else
     pke_code_error(me, fw);
 }
@@ -705,6 +730,31 @@ pke_pc_operand(struct pke_device* me, int operand_num)
 }
 
 
+/* Return a bit-field extract of given operand# in FIFO, and its
+   source-addr.  `bit_offset' starts at 0, referring to LSB after PKE
+   instruction word.  Width must be >0, <=32.  Assume FIFO is full
+   enough.  Skip over DMA tags, but mark them as an error (ER0). */
+
+unsigned_4
+pke_pc_operand_bits(struct pke_device* me, int bit_offset, int bit_width, unsigned_4* source_addr)
+{
+  unsigned_4* word = NULL;
+  unsigned_4 value;
+  struct fifo_quadword* fifo_operand;
+
+  /* find operand word with bitfield */
+  fifo_operand = pke_pc_fifo(me, (bit_offset / 32) + 1, &word);
+  ASSERT(word != 0);
+
+  /* extract bitfield from word */
+  value = BIT_MASK_GET(*word, bit_offset % 32, bit_width);
+
+  /* extract source addr from fifo word */
+  *source_addr = fifo_operand->source_address;
+
+  return value;
+}
+
 
 
 
@@ -747,30 +797,38 @@ pke_check_stall(struct pke_device* me, enum pke_check_target what)
 {
   int any_stall = 0;
 
-  /* read VU status word - commonly used */
-  unsigned_4 vu_stat;
+  /* read GPUIF status word - commonly used */
+  unsigned_4 gpuif_stat;
   sim_read(NULL,
-	   (SIM_ADDR) (me->pke_number == 0 ? VPE0_STAT : VPE1_STAT),
-	   (void*) & vu_stat,
+	   (SIM_ADDR) (GIF_REG_STAT),
+	   (void*) & gpuif_stat,
 	   sizeof(unsigned_4));
 
   /* perform checks */
   if(what == chk_vu)
     {
-      /* check if VBS bit is set, i.e., VU is busy */
-      if(BIT_MASK_GET(vu_stat, VU_REG_STAT_VBS_B, VU_REG_STAT_VBS_E) == 1)
+      ASSERT(0);
+      /* XXX: have to check COP2 control register VBS0 / VBS1 bits */
+    }
+  else if(what == chk_path1) /* VU -> GPUIF */
+    {
+      if(BIT_MASK_GET(gpuif_stat, GPUIF_REG_STAT_APATH_B, GPUIF_REG_STAT_APATH_E) == 1)
 	any_stall = 1;
     }
-  else if(what == chk_path1)
+  else if(what == chk_path2) /* PKE -> GPUIF */
     {
-      /* only valid on PKE1 */
-      /* check if VGW bit is set, i.e., PATH1 is busy */
-      if(BIT_MASK_GET(vu_stat, VU_REG_STAT_VGW_B, VU_REG_STAT_VGW_E) == 1)
+      if(BIT_MASK_GET(gpuif_stat, GPUIF_REG_STAT_APATH_B, GPUIF_REG_STAT_APATH_E) == 2)
+	any_stall = 1;
+    }
+  else if(what == chk_path3) /* DMA -> GPUIF */
+    {
+      if(BIT_MASK_GET(gpuif_stat, GPUIF_REG_STAT_APATH_B, GPUIF_REG_STAT_APATH_E) == 3)
 	any_stall = 1;
     }
   else
     {
-      ASSERT(0); /* XXX: not done yet */
+      /* invalid what */
+      ASSERT(0);
     }
 
   /* any stall reasons? */
@@ -889,7 +947,7 @@ void
 pke_code_mskpath3(struct pke_device* me, unsigned_4 pkecode)
 {
   ASSERT(0);
-  /* XXX: cannot handle this one yet */
+  /* XXX: no easy interface toward GPUIF for this purpose */
 }
 
 
@@ -1030,7 +1088,7 @@ pke_code_pkemscal(struct pke_device* me, unsigned_4 pkecode)
 	pke_flip_dbf(me);
 
       /* compute new PC for VU */
-      vu_pc = BIT_MASK_GET(imm, 0, 15); /* XXX: all bits significant? */
+      vu_pc = BIT_MASK_GET(imm, 0, 15);
       /* write new PC; callback function gets VU running */
       sim_write(NULL,
 		(SIM_ADDR) (me->pke_number == 0 ? VU0_PC_START : VU1_PC_START),
@@ -1127,7 +1185,7 @@ pke_code_pkemscalf(struct pke_device* me, unsigned_4 pkecode)
 	pke_flip_dbf(me);
 
       /* compute new PC for VU */
-      vu_pc = BIT_MASK_GET(imm, 0, 15); /* XXX: all bits significant? */
+      vu_pc = BIT_MASK_GET(imm, 0, 15);
       /* write new PC; callback function gets VU running */
       sim_write(NULL,
 		(SIM_ADDR) (me->pke_number == 0 ? VU0_PC_START : VU1_PC_START),
@@ -1152,8 +1210,16 @@ pke_code_stmask(struct pke_device* me, unsigned_4 pkecode)
     {
       /* "transferring" operand */
       PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_XFER);
+
+      /* set NUM */
+      PKE_REG_MASK_SET(me, NUM, NUM, 1);
+
       /* fill the register */
       PKE_REG_MASK_SET(me, MASK, MASK, *mask);
+
+      /* set NUM */
+      PKE_REG_MASK_SET(me, NUM, NUM, 0);
+
       /* done */
       PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_IDLE);
       pke_pc_advance(me, 1);
@@ -1179,12 +1245,18 @@ pke_code_strow(struct pke_device* me, unsigned_4 pkecode)
       /* "transferring" operand */
       PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_XFER);
       
+      /* set NUM */
+      PKE_REG_MASK_SET(me, NUM, NUM, 1);
+
       /* copy ROW registers: must all exist if 4th operand exists */
       me->regs[PKE_REG_R0][0] = * pke_pc_operand(me, 1);
       me->regs[PKE_REG_R1][0] = * pke_pc_operand(me, 2);
       me->regs[PKE_REG_R2][0] = * pke_pc_operand(me, 3);
       me->regs[PKE_REG_R3][0] = * pke_pc_operand(me, 4);
       
+      /* set NUM */
+      PKE_REG_MASK_SET(me, NUM, NUM, 0);
+
       /* done */
       PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_IDLE);
       pke_pc_advance(me, 5);
@@ -1210,12 +1282,18 @@ pke_code_stcol(struct pke_device* me, unsigned_4 pkecode)
       /* "transferring" operand */
       PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_XFER);
       
+      /* set NUM */
+      PKE_REG_MASK_SET(me, NUM, NUM, 1);
+
       /* copy COL registers: must all exist if 4th operand exists */
       me->regs[PKE_REG_C0][0] = * pke_pc_operand(me, 1);
       me->regs[PKE_REG_C1][0] = * pke_pc_operand(me, 2);
       me->regs[PKE_REG_C2][0] = * pke_pc_operand(me, 3);
       me->regs[PKE_REG_C3][0] = * pke_pc_operand(me, 4);
       
+      /* set NUM */
+      PKE_REG_MASK_SET(me, NUM, NUM, 0);
+
       /* done */
       PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_IDLE);
       pke_pc_advance(me, 5);
@@ -1244,15 +1322,7 @@ pke_code_mpg(struct pke_device* me, unsigned_4 pkecode)
   if(last_mpg_word != NULL)
     {
       /* perform implied FLUSHE */
-      /* read VU status word */
-      unsigned_4 vu_stat;
-      sim_read(NULL,
-	       (SIM_ADDR) (me->pke_number == 0 ? VPE0_STAT : VPE1_STAT),
-	       (void*) & vu_stat,
-	       sizeof(unsigned_4));
-      
-      /* check if VBS bit is clear, i.e., VU is idle */
-      if(BIT_MASK_GET(vu_stat, VU_REG_STAT_VBS_B, VU_REG_STAT_VBS_E) == 0)
+      if(pke_check_stall(me, chk_vu))
 	{
 	  /* VU idle */
 	  int i;
@@ -1268,10 +1338,10 @@ pke_code_mpg(struct pke_device* me, unsigned_4 pkecode)
 	      unsigned_4* operand;
 	      struct fifo_quadword* fq = pke_pc_fifo(me, num, & operand);
 	      
+	      /* set NUM */
+	      PKE_REG_MASK_SET(me, NUM, NUM, (num*2 - i) / 2);
+	      
 	      /* imm: in 64-bit units for MPG instruction */
-	      
-	      /* XXX: set NUM */
-	      
 	      /* VU*_MEM0 : instruction memory */
 	      vu_addr_base = (me->pke_number == 0) ?
 		VU0_MEM0_WINDOW_START : VU0_MEM0_WINDOW_START;
@@ -1292,6 +1362,9 @@ pke_code_mpg(struct pke_device* me, unsigned_4 pkecode)
 			(void*) & fq->source_address,
 			sizeof(unsigned_4));
 	    } /* VU xfer loop */
+
+	  /* check NUM */
+	  ASSERT(PKE_REG_MASK_GET(me, NUM, NUM) == 0);
 	  
 	  /* done */
 	  PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_IDLE);
@@ -1346,7 +1419,7 @@ pke_code_direct(struct pke_device* me, unsigned_4 pkecode)
 	  /* write to GPUIF FIFO only with full word */
 	  if(i%4 == 3)
 	    {
-	      address_word gpuif_fifo = GPUIF_PATH2_FIFO_ADDR+(i/4);
+	      address_word gpuif_fifo = GIF_PATH2_FIFO_ADDR+(i/4);
 	      pke_track_write(me, fifo_data, sizeof(quadword),
 			      (SIM_ADDR) gpuif_fifo, fq->source_address);
 	    } /* write collected quadword */
@@ -1380,13 +1453,14 @@ pke_code_unpack(struct pke_device* me, unsigned_4 pkecode)
   int imm = BIT_MASK_GET(pkecode, PKE_OPCODE_IMM_B, PKE_OPCODE_IMM_E);
   int cmd = BIT_MASK_GET(pkecode, PKE_OPCODE_CMD_B, PKE_OPCODE_CMD_E);
   int num = BIT_MASK_GET(pkecode, PKE_OPCODE_NUM_B, PKE_OPCODE_NUM_E);
-
-  short vn = BIT_MASK_GET(cmd, 2, 3);
+  short vn = BIT_MASK_GET(cmd, 2, 3); /* unpack shape controls */
   short vl = BIT_MASK_GET(cmd, 0, 1);
-  short vnvl = BIT_MASK_GET(cmd, 0, 3);
   int m = BIT_MASK_GET(cmd, 4, 4);
-  short cl = PKE_REG_MASK_GET(me, CYCLE, CL);
+  short cl = PKE_REG_MASK_GET(me, CYCLE, CL); /* cycle controls */
   short wl = PKE_REG_MASK_GET(me, CYCLE, WL);
+  int r = BIT_MASK_GET(imm, 15, 15); /* indicator bits in imm value */
+  int sx = BIT_MASK_GET(imm, 14, 14);
+
   int n, num_operands;
   unsigned_4* last_operand_word;
   
@@ -1405,38 +1479,40 @@ pke_code_unpack(struct pke_device* me, unsigned_4 pkecode)
   if(last_operand_word != NULL)
     {
       address_word vu_addr_base;
-      int operand_num, vector_num;
+      int vector_num;
       
       /* "transferring" operand */
       PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_XFER);
       
       /* don't check whether VU is idle */
-      
+
+      /* compute VU address base */
       if(me->pke_number == 0)
 	vu_addr_base = VU0_MEM1_WINDOW_START + BIT_MASK_GET(imm, 0, 9);
       else
 	{
 	  vu_addr_base = VU1_MEM1_WINDOW_START + BIT_MASK_GET(imm, 0, 9);
-	  if(BIT_MASK_GET(imm, 15, 15)) /* fetch R flag from imm word */
-	    vu_addr_base += PKE_REG_MASK_GET(me, TOPS, TOPS);
+	  if(r) vu_addr_base += PKE_REG_MASK_GET(me, TOPS, TOPS);
 	}
-      
-      /* XXX: vu_addr overflow check */
-      
+
+      /* set NUM */
+      PKE_REG_MASK_SET(me, NUM, NUM, num);
+
       /* transfer given number of vectors */
-      operand_num = 1; /* word index into instruction stream: 1..num_operands */
-      vector_num = 0;  /* vector number being processed: 0..num-1 */
-      while(operand_num <= num_operands)
+      vector_num = 0;  /* output vector number being processed */
+      do
 	{
 	  quadword vu_old_data;
 	  quadword vu_new_data;
 	  quadword unpacked_data;
 	  address_word vu_addr;
-	  struct fifo_quadword* fq;
+	  unsigned_4 source_addr = 0;
 	  int i;
 	  
-	  /* XXX: set NUM */
-	  
+	  /* decrement NUM */
+	  PKE_REG_MASK_SET(me, NUM, NUM,
+			   PKE_REG_MASK_GET(me, NUM, NUM) - 1);
+	      
 	  /* compute VU destination address, as bytes in R5900 memory */
 	  if(cl >= wl)
 	    {
@@ -1446,12 +1522,11 @@ pke_code_unpack(struct pke_device* me, unsigned_4 pkecode)
 	    }
 	  else
 	    vu_addr = vu_addr_base + 16*vector_num;
+
+	  /* XXX: can vu_addr overflow? */
 	  
 	  /* read old VU data word at address */
 	  sim_read(NULL, (SIM_ADDR) vu_addr, (void*) & vu_old_data, sizeof(vu_old_data));
-	  
-	  /* Let sourceaddr track the first operand */
-	  fq = pke_pc_fifo(me, operand_num, NULL);
 	  
 	  /* For cyclic unpack, next operand quadword may come from instruction stream
 	     or be zero. */
@@ -1463,78 +1538,51 @@ pke_code_unpack(struct pke_device* me, unsigned_4 pkecode)
 	    }
 	  else
 	    {
-	      /* compute unpacked words from instruction stream */
-	      switch(vnvl)
+	      /* compute packed vector dimensions */
+	      int vectorbits, unitbits;
+
+	      if(vl < 3) /* PKE_UNPACK_*_{32,16,8} */
 		{
-		case PKE_UNPACK_S_32:
-		case PKE_UNPACK_V2_32:
-		case PKE_UNPACK_V3_32:
-		case PKE_UNPACK_V4_32:
-		  /* copy (vn+1) 32-bit values */
-		  for(i = 0; i < vn+1; i++)
-		    {
-		      unsigned_4* operand = pke_pc_operand(me, operand_num);
-		      unpacked_data[i] = *operand;
-		      operand_num ++;
-		    }
-		  break;
-		  
-		case PKE_UNPACK_S_16:
-		case PKE_UNPACK_V2_16:
-		case PKE_UNPACK_V3_16:
-		case PKE_UNPACK_V4_16:
-		  /* copy (vn+1) 16-bit values, packed two-per-word */
-		  for(i=0; i<vn+1; i+=2)
-		    {
-		      unsigned_4* operand = pke_pc_operand(me, operand_num);
-		      unpacked_data[i] = BIT_MASK_GET_SX(*operand, 0, 15, 31);
-		      unpacked_data[i+1] = BIT_MASK_GET_SX(*operand, 16, 31, 31);
-		      operand_num ++;
-		    }
-		  break;
-		  
-		case PKE_UNPACK_S_8:
-		case PKE_UNPACK_V2_8:
-		case PKE_UNPACK_V3_8:
-		case PKE_UNPACK_V4_8:
-		  /* copy (vn+1) 8-bit values, packed four-per-word */
-		  for(i=0; i<vn+1; i+=4)
-		    {
-		      unsigned_4* operand = pke_pc_operand(me, operand_num);
-		      unpacked_data[i] = BIT_MASK_GET_SX(*operand, 0, 7, 31);
-		      unpacked_data[i+1] = BIT_MASK_GET_SX(*operand, 8, 15, 31);
-		      unpacked_data[i+2] = BIT_MASK_GET_SX(*operand, 16, 23, 31);
-		      unpacked_data[i+3] = BIT_MASK_GET_SX(*operand, 24, 31, 31);
-		      operand_num ++;
-		    }
-		  break;
-		  
-		case PKE_UNPACK_V4_5:
-		  /* copy four 1/5/5/5-bit values, packed into a sixteen-bit */
-		  for(i=0; i<vn+1; i+=4)
-		    {
-		      unsigned_4* operand = pke_pc_operand(me, operand_num);
-		      unpacked_data[i] = BIT_MASK_GET_SX(*operand, 0, 4, 31);
-		      unpacked_data[i+1] = BIT_MASK_GET_SX(*operand, 5, 9, 31);
-		      unpacked_data[i+2] = BIT_MASK_GET_SX(*operand, 10, 14, 31);
-		      unpacked_data[i+3] = BIT_MASK_GET_SX(*operand, 15, 15, 31);
-		      operand_num ++;
-		    }
-		  break;
-
-		  /* XXX: handle multiple rows of data in same word */ 
-		  /* clue: increment operand_num less frequently */
-
-		default: /* bad UNPACK code */
-		  {
-		    /* treat as illegal instruction */
-		    pke_code_error(me, pkecode);
-		    return;
-		  }		  
+		  unitbits = (32 >> vl);
+		  vectorbits = unitbits * (vn+1);
 		}
-	    }
+	      else if(vl == 3 && vn == 3) /* PKE_UNPACK_V4_5 */
+		{
+		  unitbits = 5;
+		  vectorbits = 16;
+		}
+	      else /* illegal unpack variant */
+		{
+		  /* treat as illegal instruction */
+		  pke_code_error(me, pkecode);
+		  return;
+		}
+	      
+	      /* loop over columns */
+	      for(i=0; i<=vn; i++)
+		{
+		  unsigned_4 operand;
+
+		  /* offset in bits in current operand word */
+		  int bitoffset =
+		    (vector_num * vectorbits) + (i * unitbits); /* # of bits from PKEcode */
+
+		  /* last unit of V4_5 is only one bit wide */
+		  if(vl == 3 && vn == 3 && i == 3) /* PKE_UNPACK_V4_5 */
+		    unitbits = 1;
+
+		  /* fetch bitfield operand */
+		  operand = pke_pc_operand_bits(me, bitoffset, unitbits, & source_addr);
+
+		  /* selectively sign-extend; not for V4_5 1-bit value */
+		  if(sx && unitbits > 0)
+		    unpacked_data[i] = SEXT32(operand, unitbits-1);
+		  else
+		    unpacked_data[i] = operand;
+		}
+	    } /* unpack word from instruction operand */
 	  
-	  /* compute replacement word - function of vn, vl, mask */
+	  /* compute replacement word */
 	  if(m) /* use mask register? */
 	    {
 	      /* compute index into mask register for this word */
@@ -1577,9 +1625,9 @@ pke_code_unpack(struct pke_device* me, unsigned_4 pkecode)
 		    }
 		  
 		  /* copy masked value for column */
-		  memcpy(& vu_new_data[i], masked_value, sizeof(unsigned_4));
+		  vu_new_data[i] = *masked_value;
 		} /* loop over columns */
-	    }
+	    } /* mask */
 	  else
 	    {
 	      /* no mask - just copy over entire unpacked quadword */
@@ -1611,11 +1659,12 @@ pke_code_unpack(struct pke_device* me, unsigned_4 pkecode)
 
 	  /* write replacement word */
 	  pke_track_write(me, vu_new_data, sizeof(vu_new_data),
-			  (SIM_ADDR) vu_addr, fq->source_address);
+			  (SIM_ADDR) vu_addr, source_addr);
 
 	  /* next vector please */
 	  vector_num ++;
 	} /* vector transfer loop */
+      while(PKE_REG_MASK_GET(me, NUM, NUM) > 0);
 
       /* done */
       PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_IDLE);
