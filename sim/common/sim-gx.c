@@ -115,7 +115,7 @@ sim_gx_compiled_block_dispose(sim_gx_compiled_block* gx)
 
   strcpy(la_name, gx->object_name);
   strcpy(strstr(la_name, ".so.0"), ".la");
-  sprintf(compile_command, "gxtool --mode=uninstall rm -f %s", la_name);
+  sprintf(compile_command, "gxtool --silent --mode=uninstall rm -f %s", la_name);
 
   rc = system(compile_command);
   if(rc != 0)
