@@ -16,7 +16,7 @@
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to the Free
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-   02111-1307, USA. */
+   02111-1307, USA.  */
 
 #include "as.h"
 
@@ -107,7 +107,7 @@ identify (file)
 
 static int warning_count;	/* Count of number of warnings issued */
 
-int 
+int
 had_warnings ()
 {
   return (warning_count);
@@ -118,12 +118,11 @@ had_warnings ()
 
 static int error_count;
 
-int 
+int
 had_errors ()
 {
   return (error_count);
 }
-
 
 /* Print the current location to stderr.  */
 
@@ -145,9 +144,9 @@ as_show_where ()
  * Like perror(3), but with more info.
  */
 
-void 
+void
 as_perror (gripe, filename)
-     const char *gripe;		/* Unpunctuated error theme. */
+     const char *gripe;		/* Unpunctuated error theme.  */
      const char *filename;
 {
   const char *errtxt;
@@ -176,7 +175,7 @@ as_perror (gripe, filename)
  */
 
 #ifdef USE_STDARG
-void 
+void
 as_tsktsk (const char *format,...)
 {
   va_list args;
@@ -188,7 +187,7 @@ as_tsktsk (const char *format,...)
   (void) putc ('\n', stderr);
 }				/* as_tsktsk() */
 #else
-void 
+void
 as_tsktsk (format, va_alist)
      const char *format;
      va_dcl
@@ -237,7 +236,7 @@ as_warn_internal (file, line, buffer)
  */
 
 #ifdef USE_STDARG
-void 
+void
 as_warn (const char *format,...)
 {
   va_list args;
@@ -253,7 +252,7 @@ as_warn (const char *format,...)
 }				/* as_warn() */
 #else
 /*VARARGS1 */
-void 
+void
 as_warn (format, va_alist)
      const char *format;
      va_dcl
@@ -276,7 +275,7 @@ as_warn (format, va_alist)
    to handle the varargs correctly and portably.  */
 
 #ifdef USE_STDARG
-void 
+void
 as_warn_where (char *file, unsigned int line, const char *format,...)
 {
   va_list args;
@@ -292,7 +291,7 @@ as_warn_where (char *file, unsigned int line, const char *format,...)
 }				/* as_warn() */
 #else
 /*VARARGS1 */
-void 
+void
 as_warn_where (file, line, format, va_alist)
      char *file;
      unsigned int line;
@@ -346,7 +345,7 @@ as_bad_internal (file, line, buffer)
  */
 
 #ifdef USE_STDARG
-void 
+void
 as_bad (const char *format,...)
 {
   va_list args;
@@ -361,7 +360,7 @@ as_bad (const char *format,...)
 
 #else
 /*VARARGS1 */
-void 
+void
 as_bad (format, va_alist)
      const char *format;
      va_dcl
@@ -382,7 +381,7 @@ as_bad (format, va_alist)
    to handle the varargs correctly and portably.  */
 
 #ifdef USE_STDARG
-void 
+void
 as_bad_where (char *file, unsigned int line, const char *format,...)
 {
   va_list args;
@@ -397,7 +396,7 @@ as_bad_where (char *file, unsigned int line, const char *format,...)
 
 #else
 /*VARARGS1 */
-void 
+void
 as_bad_where (file, line, format, va_alist)
      char *file;
      unsigned int line;
@@ -425,7 +424,7 @@ as_bad_where (file, line, format, va_alist)
  */
 
 #ifdef USE_STDARG
-void 
+void
 as_fatal (const char *format,...)
 {
   va_list args;
@@ -440,7 +439,7 @@ as_fatal (const char *format,...)
 }				/* as_fatal() */
 #else
 /*VARARGS1*/
-void 
+void
 as_fatal (format, va_alist)
      char *format;
      va_dcl

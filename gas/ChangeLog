@@ -1,3 +1,9 @@
+2000-09-09  Kazu Hirata  <kazu@hxi.com>
+
+	* input-file.c: Fix formatting.
+	* itbl-ops.c: Likewise.
+	* messages.c: Likewise.
+
 2000-09-08  Philip Blundell  <philb@gnu.org>
 
 	* config/tc-arm.c (md_apply_fix3): Correct handling of ADRL when

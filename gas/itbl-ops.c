@@ -128,12 +128,11 @@ struct itbl_field
     struct itbl_field *next;	/* next field in list */
   };
 
-
 /* These structures define the instructions and registers for a processor.
  * If the type is an instruction, the structure defines the format of an
  * instruction where the fields are the list of operands.
  * The flags field below uses the same values as those defined in the
- * gnu assembler and are machine specific. */
+ * gnu assembler and are machine specific.  */
 struct itbl_entry
   {
     e_processor processor;	/* processor number */
@@ -145,7 +144,6 @@ struct itbl_entry
     struct itbl_field *fields;	/* list of operand definitions (if any) */
     struct itbl_entry *next;	/* next entry */
   };
-
 
 /* local data and structures */
 
@@ -163,30 +161,28 @@ static struct itbl_entry *entries[e_nprocs][e_ntypes] =
 static unsigned long build_opcode PARAMS ((struct itbl_entry *e));
 static e_type get_type PARAMS ((int yytype));
 static e_processor get_processor PARAMS ((int yyproc));
-static struct itbl_entry **get_entries PARAMS ((e_processor processor, 
+static struct itbl_entry **get_entries PARAMS ((e_processor processor,
 						e_type type));
-static struct itbl_entry *find_entry_byname PARAMS ((e_processor processor, 
+static struct itbl_entry *find_entry_byname PARAMS ((e_processor processor,
 					e_type type, char *name));
-static struct itbl_entry *find_entry_byval PARAMS ((e_processor processor, 
+static struct itbl_entry *find_entry_byval PARAMS ((e_processor processor,
 			e_type type, unsigned long val, struct itbl_range *r));
-static struct itbl_entry *alloc_entry PARAMS ((e_processor processor, 
+static struct itbl_entry *alloc_entry PARAMS ((e_processor processor,
 		e_type type, char *name, unsigned long value));
-static unsigned long apply_range PARAMS ((unsigned long value, 
+static unsigned long apply_range PARAMS ((unsigned long value,
 						struct itbl_range r));
-static unsigned long extract_range PARAMS ((unsigned long value, 
+static unsigned long extract_range PARAMS ((unsigned long value,
 						struct itbl_range r));
-static struct itbl_field *alloc_field PARAMS ((e_type type, int sbit, 
+static struct itbl_field *alloc_field PARAMS ((e_type type, int sbit,
 					int ebit, unsigned long flags));
-
 
 /*======================================================================*/
 /* Interfaces to the parser */
 
-
 /* Open the table and use lex and yacc to parse the entries.
  * Return 1 for failure; 0 for success.  */
 
-int 
+int
 itbl_parse (char *insntbl)
 {
   extern FILE *yyin;
@@ -213,7 +209,7 @@ struct itbl_entry *
 itbl_add_reg (int yyprocessor, int yytype, char *regname,
 	      int regnum)
 {
-#if 0				
+#if 0
 #include "as.h"
 #include "symbols.h"
   /* Since register names don't have a prefix, we put them in the symbol table so
@@ -256,7 +252,7 @@ itbl_add_operand (struct itbl_entry *e, int yytype, int sbit,
   struct itbl_field *f, **last_f;
   if (!e)
     return 0;
-  /* Add to end of fields' list. */
+  /* Add to end of fields' list.  */
   f = alloc_field (get_type (yytype), sbit, ebit, flags);
   if (f)
     {
@@ -269,7 +265,6 @@ itbl_add_operand (struct itbl_entry *e, int yytype, int sbit,
   return f;
 }
 
-
 /*======================================================================*/
 /* Interfaces for assembler and disassembler */
 
@@ -279,7 +274,7 @@ itbl_add_operand (struct itbl_entry *e, int yytype, int sbit,
 static void append_insns_as_macros (void);
 
 /* initialize for gas */
-void 
+void
 itbl_init (void)
 {
   struct itbl_entry *e, **es;
@@ -291,7 +286,7 @@ itbl_init (void)
 
   /* Since register names don't have a prefix, put them in the symbol table so
      they can't be used as symbols.  This simplifies argument parsing as
-     we can let gas parse registers for us. */
+     we can let gas parse registers for us.  */
   /* Use symbol_create instead of symbol_new so we don't try to
      output registers into the object file's symbol table.  */
 
@@ -308,16 +303,15 @@ itbl_init (void)
   append_insns_as_macros ();
 }
 
-
-/* Append insns to opcodes table and increase number of opcodes 
- * Structure of opcodes table: 
+/* Append insns to opcodes table and increase number of opcodes
+ * Structure of opcodes table:
  * struct itbl_opcode
  * {
  *   const char *name;
- *   const char *args; 		- string describing the arguments.  
- *   unsigned long match; 	- opcode, or ISA level if pinfo=INSN_MACRO 
- *   unsigned long mask; 	- opcode mask, or macro id if pinfo=INSN_MACRO 
- *   unsigned long pinfo; 	- insn flags, or INSN_MACRO 
+ *   const char *args; 		- string describing the arguments.
+ *   unsigned long match; 	- opcode, or ISA level if pinfo=INSN_MACRO
+ *   unsigned long mask; 	- opcode mask, or macro id if pinfo=INSN_MACRO
+ *   unsigned long pinfo; 	- insn flags, or INSN_MACRO
  * };
  * examples:
  *	{"li",      "t,i",  0x34000000, 0xffe00000, WR_t    },
@@ -325,7 +319,7 @@ itbl_init (void)
  */
 
 static char *form_args (struct itbl_entry *e);
-static void 
+static void
 append_insns_as_macros (void)
 {
   struct ITBL_OPCODE_STRUCT *new_opcodes, *o;
@@ -352,7 +346,7 @@ append_insns_as_macros (void)
   ASSERT (new_size > size);
 
   /* FIXME since ITBL_OPCODES culd be a static table,
-		we can't realloc or delete the old memory. */
+		we can't realloc or delete the old memory.  */
   new_opcodes = (struct ITBL_OPCODE_STRUCT *) malloc (new_size);
   if (!new_opcodes)
     {
@@ -363,7 +357,7 @@ append_insns_as_macros (void)
     memcpy (new_opcodes, ITBL_OPCODES, size);
 
   /* FIXME! some NUMOPCODES are calculated expressions.
-		These need to be changed before itbls can be supported. */
+		These need to be changed before itbls can be supported.  */
 
   id = ITBL_NUM_MACROS;		/* begin the next macro id after the last */
   o = &new_opcodes[ITBL_NUM_OPCODES];	/* append macro to opcodes list */
@@ -407,7 +401,7 @@ append_insns_as_macros (void)
 		Don't free name though, since name is being used by the new
 		opcodes table.
 
-		Eventually, we should also free the new opcodes table itself 
+		Eventually, we should also free the new opcodes table itself
 		on exit.
 	*/
 }
@@ -453,7 +447,6 @@ form_args (struct itbl_entry *e)
   return s;
 }
 #endif /* !STAND_ALONE */
-
 
 /* Get processor's register name from val */
 
@@ -501,13 +494,12 @@ itbl_get_val (e_processor processor, e_type type, char *name,
   return 1;
 }
 
-
 /* Assemble instruction "name" with operands "s".
  * name - name of instruction
  * s - operands
  * returns - long word for assembled instruction */
 
-unsigned long 
+unsigned long
 itbl_assemble (char *name, char *s)
 {
   unsigned long opcode;
@@ -531,7 +523,7 @@ itbl_assemble (char *name, char *s)
   opcode = build_opcode (e);
 
   /* parse opcode's args (if any) */
-  for (f = e->fields; f; f = f->next)	/* for each arg, ... */
+  for (f = e->fields; f; f = f->next)	/* for each arg, ...  */
     {
       struct itbl_entry *r;
       unsigned long value;
@@ -573,7 +565,7 @@ itbl_assemble (char *name, char *s)
 			*/
 	  /* If not a symbol, fall thru to IMMED */
 	case e_immed:
-	  if (*n == '0' && *(n + 1) == 'x')	/* hex begins 0x... */
+	  if (*n == '0' && *(n + 1) == 'x')	/* hex begins 0x...  */
 	    {
 	      n += 2;
 	      value = strtol (n, 0, 16);
@@ -603,7 +595,7 @@ itbl_assemble (char *name, char *s)
  * returns - 1 if succeeded; 0 if failed
  */
 
-int 
+int
 itbl_disassemble (char *s, unsigned long insn)
 {
   e_processor processor;
@@ -621,7 +613,7 @@ itbl_disassemble (char *s, unsigned long insn)
   strcpy (s, e->name);
 
   /* parse insn's args (if any) */
-  for (f = e->fields; f; f = f->next)	/* for each arg, ... */
+  for (f = e->fields; f; f = f->next)	/* for each arg, ...  */
     {
       struct itbl_entry *r;
       unsigned long value;
@@ -670,7 +662,7 @@ itbl_disassemble (char *s, unsigned long insn)
 
 /* Calculate instruction's opcode and function values from entry */
 
-static unsigned long 
+static unsigned long
 build_opcode (struct itbl_entry *e)
 {
   unsigned long opcode;
@@ -691,7 +683,7 @@ build_opcode (struct itbl_entry *e)
  * mask: 0x01f00000.
  */
 
-static unsigned long 
+static unsigned long
 apply_range (unsigned long rval, struct itbl_range r)
 {
   unsigned long mask;
@@ -715,7 +707,7 @@ apply_range (unsigned long rval, struct itbl_range r)
 /* Calculate relative value given the absolute value and bit position range
  * within the instruction.  */
 
-static unsigned long 
+static unsigned long
 extract_range (unsigned long aval, struct itbl_range r)
 {
   unsigned long mask;
@@ -772,7 +764,7 @@ find_entry_byname (e_processor processor,
   struct itbl_entry *e, **es;
 
   es = get_entries (processor, type);
-  for (e = *es; e; e = e->next)	/* for each entry, ... */
+  for (e = *es; e; e = e->next)	/* for each entry, ...  */
     {
       if (!strcmp (e->name, n))
 	return e;
@@ -794,7 +786,7 @@ find_entry_byval (e_processor processor, e_type type,
   unsigned long eval;
 
   es = get_entries (processor, type);
-  for (e = *es; e; e = e->next)	/* for each entry, ... */
+  for (e = *es; e; e = e->next)	/* for each entry, ...  */
     {
       if (processor != e->processor)
 	continue;
@@ -804,7 +796,7 @@ find_entry_byval (e_processor processor, e_type type,
 	 * This could cause ambiguities.
 	 * For operands, we get an extracted value and a range.
 	 */
-      /* if range is 0, mask val against the range of the compared entry. */
+      /* if range is 0, mask val against the range of the compared entry.  */
       if (r == 0)		/* if no range passed, must be whole 32-bits
 			 * so create 32-bit value from entry's range */
 	{
@@ -825,7 +817,7 @@ find_entry_byval (e_processor processor, e_type type,
   return 0;
 }
 
-/* Return a pointer to the list of entries for a given processor and type. */
+/* Return a pointer to the list of entries for a given processor and type.  */
 
 static struct itbl_entry **
 get_entries (e_processor processor, e_type type)
@@ -833,9 +825,9 @@ get_entries (e_processor processor, e_type type)
   return &entries[processor][type];
 }
 
-/* Return an integral value for the processor passed from yyparse. */
+/* Return an integral value for the processor passed from yyparse.  */
 
-static e_processor 
+static e_processor
 get_processor (int yyproc)
 {
   /* translate from yacc's processor to enum */
@@ -844,9 +836,9 @@ get_processor (int yyproc)
   return e_invproc;		/* error; invalid processor */
 }
 
-/* Return an integral value for the entry type passed from yyparse. */
+/* Return an integral value for the entry type passed from yyparse.  */
 
-static e_type 
+static e_type
 get_type (int yytype)
 {
   switch (yytype)
@@ -868,7 +860,6 @@ get_type (int yytype)
       return e_invtype;		/* error; invalid type */
     }
 }
-
 
 /* Allocate and initialize an entry */
 
