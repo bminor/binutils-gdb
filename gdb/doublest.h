@@ -1,8 +1,8 @@
 /* Floating point definitions for GDB.
 
    Copyright 1986, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001, 2003 Free Software Foundation,
-   Inc.
+   1996, 1997, 1998, 1999, 2000, 2001, 2003, 2005 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -59,9 +59,11 @@ extern void floatformat_to_doublest (const struct floatformat *,
 extern void floatformat_from_doublest (const struct floatformat *,
 				       const DOUBLEST *in, void *out);
 
-extern int floatformat_is_negative (const struct floatformat *, char *);
-extern int floatformat_is_nan (const struct floatformat *, char *);
-extern char *floatformat_mantissa (const struct floatformat *, char *);
+extern int floatformat_is_negative (const struct floatformat *,
+				    const bfd_byte *);
+extern int floatformat_is_nan (const struct floatformat *, const bfd_byte *);
+extern const char *floatformat_mantissa (const struct floatformat *,
+					 const bfd_byte *);
 
 /* These functions have been replaced by extract_typed_floating and
    store_typed_floating.

@@ -1,7 +1,7 @@
 /* Floating point routines for GDB, the GNU debugger.
 
    Copyright 1986, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001, 2003, 2004 Free Software
+   1996, 1997, 1998, 1999, 2000, 2001, 2003, 2004, 2005 Free Software
    Foundation, Inc.
 
    This file is part of GDB.
@@ -44,14 +44,10 @@
    can convert to doublest will need.  */
 #define FLOATFORMAT_LARGEST_BYTES 16
 
-static unsigned long get_field (unsigned char *,
-				enum floatformat_byteorders,
-				unsigned int, unsigned int, unsigned int);
-
 /* Extract a field which starts at START and is LEN bytes long.  DATA and
    TOTAL_LEN are the thing we are extracting it from, in byteorder ORDER.  */
 static unsigned long
-get_field (unsigned char *data, enum floatformat_byteorders order,
+get_field (const bfd_byte *data, enum floatformat_byteorders order,
 	   unsigned int total_len, unsigned int start, unsigned int len)
 {
   unsigned long result;
@@ -475,9 +471,9 @@ convert_doublest_to_floatformat (CONST struct floatformat *fmt,
    format is described by FMT) is negative.  */
 
 int
-floatformat_is_negative (const struct floatformat *fmt, char *val)
+floatformat_is_negative (const struct floatformat *fmt,
+			 const bfd_byte *uval)
 {
-  unsigned char *uval = (unsigned char *) val;
   enum floatformat_byteorders order;
   unsigned char newfrom[FLOATFORMAT_LARGEST_BYTES];
   
@@ -496,9 +492,9 @@ floatformat_is_negative (const struct floatformat *fmt, char *val)
 /* Check if VAL is "not a number" (NaN) for FMT.  */
 
 int
-floatformat_is_nan (const struct floatformat *fmt, char *val)
+floatformat_is_nan (const struct floatformat *fmt,
+		    const bfd_byte *uval)
 {
-  unsigned char *uval = (unsigned char *) val;
   long exponent;
   unsigned long mant;
   unsigned int mant_bits, mant_off;
@@ -552,8 +548,9 @@ floatformat_is_nan (const struct floatformat *fmt, char *val)
    point number whose format is described by FMT) into a hexadecimal
    and store it in a static string.  Return a pointer to that string.  */
 
-char *
-floatformat_mantissa (const struct floatformat *fmt, char *val)
+const char *
+floatformat_mantissa (const struct floatformat *fmt,
+		      const bfd_byte *val)
 {
   unsigned char *uval = (unsigned char *) val;
   unsigned long mant;

@@ -1,3 +1,9 @@
+2005-01-28  Andrew Cagney  <cagney@gnu.org>
+
+	* doublest.c (floatformat_is_negative, floatformat_is_nan)
+	(floatformat_mantissa, get_field): Make the buffer a const
+	bfd_byte, simplify.
+
 2005-01-27  Andrew Cagney  <cagney@gnu.org>
 
 	* value.h (struct value): Change type of contents to bfd_byte.
