@@ -1,6 +1,4 @@
 #!/bin/sh
-set -e
-
 #
 # install - install a program, script, or datafile
 # This comes from X11R5; it is not part of GNU.

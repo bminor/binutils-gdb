@@ -1,5 +1,8 @@
 Thu Nov  4 10:49:01 1993  Per Bothner  (bothner@kalessin.cygnus.com)
 
+	* install.sh:  Remove 'set -e'.  It makes any conditionals
+	in the script useless.
+
 	* config.guess: Automatically recognize arm-acorn-riscix
 	Patch from Richard Earnshaw (rwe11@cl.cam.ac.uk).
 
