@@ -72,6 +72,9 @@ extern int kernel_u_size PARAMS ((void));
 #define CANNOT_FETCH_REGISTER(regno) ((regno) >= NUM_GREGS)
 #define CANNOT_STORE_REGISTER(regno) CANNOT_FETCH_REGISTER (regno)
 
+/* Override child_resume in `infptrace.c'.  */
+#define CHILD_RESUME
+
 extern CORE_ADDR
   i386_stopped_by_watchpoint PARAMS ((int));
 extern int

@@ -951,6 +951,91 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
 }
 
 
+/* The instruction for a Linux system call is:
+       int $0x80
+   or 0xcd 0x80.  */
+
+static const unsigned char linux_syscall[] = { 0xcd, 0x80 };
+
+#define LINUX_SYSCALL_LEN (sizeof linux_syscall)
+
+/* The system call number is stored in the %eax register.  */
+#define LINUX_SYSCALL_REGNUM 0	/* %eax */
+
+/* We are specifically interested in the sigreturn and rt_sigreturn
+   system calls.  */
+
+#ifndef SYS_sigreturn
+#define SYS_sigreturn		0x77
+#endif
+#ifndef SYS_rt_sigreturn
+#define SYS_rt_sigreturn	0xad
+#endif
+
+/* Offset to saved processor flags, from <asm/sigcontext.h>.  */
+#define LINUX_SIGCONTEXT_EFLAGS_OFFSET (64)
+
+/* Resume execution of the inferior process.
+   If STEP is nonzero, single-step it.
+   If SIGNAL is nonzero, give it that signal.  */
+
+void
+child_resume (int pid, int step, enum target_signal signal)
+{
+  int request = PTRACE_CONT;
+
+  if (pid == -1)
+    /* Resume all threads.  */
+    /* I think this only gets used in the non-threaded case, where "resume
+       all threads" and "resume inferior_pid" are the same.  */
+    pid = inferior_pid;
+
+  if (step)
+    {
+      CORE_ADDR pc = read_pc_pid (pid);
+      unsigned char buf[LINUX_SYSCALL_LEN];
+
+      request = PTRACE_SINGLESTEP;
+
+      /* Returning from a signal trampoline is done by calling a
+         special system call (sigreturn or rt_sigreturn, see
+         i386-linux-tdep.c for more information).  This system call
+         restores the registers that were saved when the signal was
+         raised, including %eflags.  That means that single-stepping
+         won't work.  Instead, we'll have to modify the signal context
+         that's about to be restored, and set the trace flag there.  */
+
+      /* First check if PC is at a system call.  */
+      if (read_memory_nobpt (pc, (char *) buf, LINUX_SYSCALL_LEN) == 0
+	  && memcmp (buf, linux_syscall, LINUX_SYSCALL_LEN) == 0)
+	{
+	  int syscall = read_register_pid (LINUX_SYSCALL_REGNUM, pid);
+
+	  /* Then check the system call number.  */
+	  if (syscall == SYS_sigreturn || syscall == SYS_rt_sigreturn)
+	    {
+	      CORE_ADDR sp = read_register (SP_REGNUM);
+	      CORE_ADDR addr = sp;
+	      unsigned long int eflags;
+	      
+	      if (syscall == SYS_rt_sigreturn)
+		addr = read_memory_integer (sp + 8, 4) + 20;
+
+	      /* Set the trace flag in the context that's about to be
+                 restored.  */
+	      addr += LINUX_SIGCONTEXT_EFLAGS_OFFSET;
+	      read_memory (addr, (char *) &eflags, 4);
+	      eflags |= 0x0100;
+	      write_memory (addr, (char *) &eflags, 4);
+	    }
+	}
+    }
+
+  if (ptrace (request, pid, 0, target_signal_to_host (signal)) == -1)
+    perror_with_name ("ptrace");
+}
+
+
 /* Calling functions in shared libraries.  */
 /* FIXME: kettenis/2000-03-05: Doesn't this belong in a
    target-dependent file?  The function
