@@ -1874,6 +1874,9 @@ init_type (enum type_code code, int length, int flags, char *name,
 
   /* C++ fancies.  */
 
+  if (name && strcmp (name, "char") == 0)
+    TYPE_FLAGS (type) |= TYPE_FLAG_NOSIGN;
+
   if (code == TYPE_CODE_STRUCT || code == TYPE_CODE_UNION)
     {
       INIT_CPLUS_SPECIFIC (type);
@@ -2441,6 +2444,43 @@ rank_function (struct type **parms, int nparms, struct type **args, int nargs)
   return bv;
 }
 
+/* Compare the names of two integer types, assuming that any sign
+   qualifiers have been checked already.  We do it this way because
+   there may be an "int" in the name of one of the types.  */
+
+static int
+integer_types_same_name_p (const char *first, const char *second)
+{
+  int first_p, second_p;
+
+  /* If both are shorts, return 1; if neither is a short, keep checking.  */
+  first_p = (strstr (first, "short") != NULL);
+  second_p = (strstr (second, "short") != NULL);
+  if (first_p && second_p)
+    return 1;
+  if (first_p || second_p)
+    return 0;
+
+  /* Likewise for long.  */
+  first_p = (strstr (first, "long") != NULL);
+  second_p = (strstr (second, "long") != NULL);
+  if (first_p && second_p)
+    return 1;
+  if (first_p || second_p)
+    return 0;
+
+  /* Likewise for char.  */
+  first_p = (strstr (first, "char") != NULL);
+  second_p = (strstr (second, "char") != NULL);
+  if (first_p && second_p)
+    return 1;
+  if (first_p || second_p)
+    return 0;
+
+  /* They must both be ints.  */
+  return 1;
+}
+
 /* Compare one type (PARM) for compatibility with another (ARG).
  * PARM is intended to be the parameter type of a function; and
  * ARG is the supplied argument's type.  This function tests if
@@ -2557,16 +2597,19 @@ rank_one_type (struct type *parm, struct type *arg)
 		{
 		  if (TYPE_UNSIGNED (arg))
 		    {
-		      if (!strcmp_iw (TYPE_NAME (parm), TYPE_NAME (arg)))
-			return 0;	/* unsigned int -> unsigned int, or unsigned long -> unsigned long */
-		      else if (!strcmp_iw (TYPE_NAME (arg), "int") && !strcmp_iw (TYPE_NAME (parm), "long"))
+		      /* unsigned int -> unsigned int, or unsigned long -> unsigned long */
+		      if (integer_types_same_name_p (TYPE_NAME (parm), TYPE_NAME (arg)))
+			return 0;
+		      else if (integer_types_same_name_p (TYPE_NAME (arg), "int")
+			       && integer_types_same_name_p (TYPE_NAME (parm), "long"))
 			return INTEGER_PROMOTION_BADNESS;	/* unsigned int -> unsigned long */
 		      else
 			return INTEGER_COERCION_BADNESS;	/* unsigned long -> unsigned int */
 		    }
 		  else
 		    {
-		      if (!strcmp_iw (TYPE_NAME (arg), "long") && !strcmp_iw (TYPE_NAME (parm), "int"))
+		      if (integer_types_same_name_p (TYPE_NAME (arg), "long")
+			  && integer_types_same_name_p (TYPE_NAME (parm), "int"))
 			return INTEGER_COERCION_BADNESS;	/* signed long -> unsigned int */
 		      else
 			return INTEGER_CONVERSION_BADNESS;	/* signed int/long -> unsigned int/long */
@@ -2574,9 +2617,10 @@ rank_one_type (struct type *parm, struct type *arg)
 		}
 	      else if (!TYPE_NOSIGN (arg) && !TYPE_UNSIGNED (arg))
 		{
-		  if (!strcmp_iw (TYPE_NAME (parm), TYPE_NAME (arg)))
+		  if (integer_types_same_name_p (TYPE_NAME (parm), TYPE_NAME (arg)))
 		    return 0;
-		  else if (!strcmp_iw (TYPE_NAME (arg), "int") && !strcmp_iw (TYPE_NAME (parm), "long"))
+		  else if (integer_types_same_name_p (TYPE_NAME (arg), "int")
+			   && integer_types_same_name_p (TYPE_NAME (parm), "long"))
 		    return INTEGER_PROMOTION_BADNESS;
 		  else
 		    return INTEGER_COERCION_BADNESS;

@@ -1,5 +1,13 @@
 2003-01-13  Daniel Jacobowitz  <drow@mvista.com>
 
+	Fix PR gdb/872.
+	* gdbtypes.c (init_type): Mark "char" as TYPE_FLAG_NOSIGN.
+	(integer_types_same_name_p): New function.
+	(rank_one_type): Use it.
+	* stabsread.c (read_range_type): Mark "char" as TYPE_FLAG_NOSIGN.
+
+2003-01-13  Daniel Jacobowitz  <drow@mvista.com>
+
 	* Makefile.in (TARGET_SYSTEM_ROOT, TARGET_SYSTEM_ROOT_DEFINE): New
 	variables.
 	(main.o): Custom rule which uses $(TARGET_SYSTEM_ROOT_DEFINE).

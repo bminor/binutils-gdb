@@ -4930,7 +4930,7 @@ read_range_type (char **pp, int typenums[2], struct objfile *objfile)
   /* Special case: char is defined (Who knows why) as a subrange of
      itself with range 0-127.  */
   else if (self_subrange && n2 == 0 && n3 == 127)
-    return init_type (TYPE_CODE_INT, 1, 0, NULL, objfile);
+    return init_type (TYPE_CODE_INT, 1, TYPE_FLAG_NOSIGN, NULL, objfile);
 
   /* We used to do this only for subrange of self or subrange of int.  */
   else if (n2 == 0)
