@@ -1,3 +1,8 @@
+Wed Jun 24 23:17:12 1998  Mark Alexander  <marka@cygnus.com>
+
+	* mn10200-tdep.c (mn10200_analyze_prologue): Fix calculation
+	of jsr target address.
+
 Tue Jun 23 19:37:46 1998  Mark Alexander  <marka@cygnus.com>
 
 	* config/mn10200/tm-mn10200.h (SAVED_PC_AFTER_CALL):  Don't

@@ -328,7 +328,7 @@ mn10200_analyze_prologue (fi, pc)
 	}
       
       /* Get the PC this instruction will branch to.  */
-      temp = (extract_signed_integer (buf, 2) + addr) & 0xffffff;
+      temp = (extract_signed_integer (buf, 2) + addr + 3) & 0xffffff;
 
       /* Get the name of the function at the target address.  */
       status = find_pc_partial_function (temp, &name, NULL, NULL);
@@ -369,7 +369,7 @@ mn10200_analyze_prologue (fi, pc)
 	}
       
       /* Get the PC this instruction will branch to.  */
-      temp = (extract_signed_integer (buf, 3) + addr) & 0xffffff;
+      temp = (extract_signed_integer (buf, 3) + addr + 5) & 0xffffff;
 
       /* Get the name of the function at the target address.  */
       status = find_pc_partial_function (temp, &name, NULL, NULL);
