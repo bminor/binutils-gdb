@@ -5,19 +5,19 @@ SECTIONS
     { 
 	${GLD_STYLE+ CREATE_OBJECT_SYMBOLS}
 	*(.text) 
-	${RELOCATING+ _etext = .}
+	${RELOCATING+ _etext = .};
     }  
     .data :
     { 
  	*(.data) 
-	${RELOCATING+ _edata = .}
+	${RELOCATING+ _edata = .};
     }  
     .bss :
     { 
-	${RELOCATING+ _bss_start = .}
+	${RELOCATING+ _bss_start = .};
 	*(.bss)	 
 	*(COMMON) 
-	${RELOCATING+ _end = .}
+	${RELOCATING+ _end = .};
     } 
 } 
 EOF

@@ -22,8 +22,8 @@ SECTIONS
   {
    *(.bss)
    *(COMMON)
-   ${RELOCATING+_end = .}
-   ${RELOCATING+__end = .}
+   ${RELOCATING+_end = . };
+   ${RELOCATING+__end = . };
   }
 }
 EOF

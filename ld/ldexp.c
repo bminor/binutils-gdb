@@ -50,7 +50,7 @@ extern ld_config_type config;
 
 extern lang_input_statement_type *script_file;
 extern unsigned int defined_global_sym_count;
-
+  extern lang_output_section_statement_type *abs_output_section;
 extern bfd_vma print_dot;
 
 
@@ -121,21 +121,20 @@ static void
 DEFUN(make_abs,(ptr),
       etree_value_type *ptr)
 {
-  if (ptr->section != (lang_output_section_statement_type *)NULL) {
     asection *s = ptr->section->bfd_section;
     ptr->value += s->vma;
-    ptr->section = (lang_output_section_statement_type *)NULL;
-  }
-
+    ptr->section = abs_output_section;
 }
 
 static
 DEFUN(etree_value_type new_abs,(value),
       bfd_vma value)
 {
+
+  
   etree_value_type new;
   new.valid = true;
-  new.section = (lang_output_section_statement_type *)NULL;
+  new.section = abs_output_section;
   new.value = value;
   return new;
 }
@@ -189,9 +188,9 @@ DEFUN(etree_value_type
   new.valid = true;
   new.value = value;
   new.section = section;
-  if (new.section != (lang_output_section_statement_type *)NULL) {
+
     new.value -= section->bfd_section->vma;
-  }
+
   return new;
 }
 
@@ -216,8 +215,8 @@ DEFUN(fold_binary,(tree, current_section, allocation_done, dot, dotp),
 	/* If values are from different sections, or this is an */
 	/* absolute expression, make both source args absolute */
       if (result.section !=  other.section ||
-	  current_section == (lang_output_section_statement_type *)NULL) {
-
+	  current_section == abs_output_section) 
+      {
 	make_abs(&result);
 	make_abs(&other);
       }
@@ -230,13 +229,13 @@ DEFUN(fold_binary,(tree, current_section, allocation_done, dot, dotp),
 	  if (other.value == 0) {
 	    einfo("%F%S % by zero\n");
 	  }
-	  result.value %= other.value;
+	  result.value = (int)result.value % (int)other.value;
 	  break;
 	case '/':
 	  if (other.value == 0) {
 	    einfo("%F%S / by zero\n");
 	  }
-	  result.value /= other.value;
+	  result.value = (int)result.value / (int) other.value;
 	  break;
 #define BOP(x,y) case x : result.value = result.value y other.value;break;
 	  BOP('+',+);
@@ -320,11 +319,14 @@ DEFUN(fold_name, (tree, current_section, allocation_done, dot),
 
 	      if (sdefp) {
 		asymbol *sdef = *sdefp;
+#if 0
 		if (sdef->section == (asection *)NULL) {
 		  /* This is an absolute symbol */
 		  result = new_abs(sdef->value);
 		}
-		else {
+		else
+#endif
+ {
 		  lang_output_section_statement_type *os =
 		    lang_output_section_statement_lookup(
 							 sdef->section->output_section->name);
@@ -334,8 +336,8 @@ DEFUN(fold_name, (tree, current_section, allocation_done, dot),
 		  if (sdef->the_bfd->usrdata && 
 		      ((lang_input_statement_type*)(sdef->the_bfd->usrdata))->just_syms_flag == true) 
 		      {
-			result = new_abs(sdef->value + (sdef->section ?
-							sdef->section->vma : 0));
+			result = new_abs(sdef->value +sdef->section->vma);
+
 		      }
 		  else {
 		    result = new_rel(sdef->value + sdef->section->output_offset, os);
@@ -519,36 +521,19 @@ DEFUN(exp_fold_tree,(tree, current_section, allocation_done,
 	      else 
 	      {
 		def_ptr = (asymbol **)ldmalloc((bfd_size_type)(sizeof(asymbol **)));
-		def = (asymbol
-		       *)bfd_make_empty_symbol(script_file->the_bfd);
+		def = (asymbol   *)bfd_make_empty_symbol(script_file->the_bfd);
 
 		  
-		  
+		def->flags = 0;
+		
+		sy->sdefs_chain = def_ptr;
 		*def_ptr = def;
 	      }
 
 	      def->value = result.value;
-	      if (result.section !=
-		  (lang_output_section_statement_type  *)NULL) {
-		  if (current_section !=
-		      (lang_output_section_statement_type *)NULL) {
-		  
+
 		      def->section = result.section->bfd_section;
 		      def->flags = BSF_GLOBAL | BSF_EXPORT;
-		    }
-		  else {
-		      /* Force to absolute */
-		      def->value += result.section->bfd_section->vma;
-		      def->section = &bfd_abs_section;
-		      def->flags = BSF_GLOBAL | BSF_EXPORT ;
-		    }
-
-
-		}
-	      else {
-		  def->section = &bfd_abs_section;
-		  def->flags = BSF_GLOBAL | BSF_EXPORT ;
-		}
 
 
 	      def->udata = (PTR)NULL;
@@ -597,7 +582,8 @@ DEFUN(exp_binop,(code, lhs, rhs),
   value.binary.lhs = lhs;
   value.binary.rhs = rhs;
   value.type.node_class = etree_binary;
-  r = exp_fold_tree_no_dot(&value,  (lang_output_section_statement_type *)NULL,
+  r = exp_fold_tree_no_dot(&value,
+			   abs_output_section,
 			   lang_first_phase_enum );
   if (r.valid)
     {
@@ -669,8 +655,9 @@ DEFUN(exp_nameop,(code, name),
   value.name.type.node_class = etree_name;
 
 
-  r = exp_fold_tree_no_dot(&value,(lang_output_section_statement_type *)NULL,
-		lang_first_phase_enum);
+  r = exp_fold_tree_no_dot(&value,
+			   (lang_output_section_statement_type *)NULL,
+			   lang_first_phase_enum);
   if (r.valid) {
     return exp_intop(r.value);
   }

@@ -87,7 +87,7 @@ boolean ldgram_had_equals = false;
   char *name;
   int token;
   union etree_union *etree;
-  asection *section;
+struct sec *section;
   struct lang_output_section_statement_struct *output_section_statement;
   union  lang_statement_union **statement_ptr;
   int lineno;
@@ -142,7 +142,7 @@ boolean ldgram_had_equals = false;
 %token <name> OPTION_l OPTION_L  OPTION_T OPTION_Aarch OPTION_Tfile  OPTION_Texp
 %token OPTION_Ur 
 %token ORIGIN FILL OPTION_g
-%token LENGTH    CREATE_OBJECT_SYMBOLS INPUT OUTPUT  CONSTRUCTORS
+%token LENGTH    CREATE_OBJECT_SYMBOLS INPUT OUTPUT  CONSTRUCTORS 
 %type <token> assign_op 
 
 %type <name>  filename
@@ -153,13 +153,11 @@ ld_config_type config;
 
 %%
 
-
-
 file:	command_line  { lang_final(); };
-
 
 filename:
   NAME;
+
 
 command_line:
 		command_line command_line_option
@@ -175,12 +173,12 @@ command_line_option:
         |	OPTION_Bstatic { }
 	|	OPTION_v
 			{	
-			ldversion();
+			ldversion(0);
 			option_v = true;
 			}
 	|	OPTION_V
 			{	
-			ldversion();
+			ldversion(1);
 			option_v = true;
 			}
 	|	OPTION_t {
@@ -361,7 +359,7 @@ ifile_p1:
 	|	low_level_library
 	|	floating_point_support
 	|	statement_anywhere
-        |	 ';'
+        |	';'
 	|	TARGET_K '(' NAME ')'
 		{ lang_add_target($3); }
 	|	SEARCH_DIR '(' filename ')'
@@ -392,12 +390,13 @@ input_list:
 	;
 
 sections:
-		SECTIONS '{'sec_or_group_p1  '}' 
+		SECTIONS  '{'sec_or_group_p1  '}' 
 	;
 
 sec_or_group_p1:
 		sec_or_group_p1 section
 	|	sec_or_group_p1 statement_anywhere
+	|	sec_or_group_p1 
 	|
 	;
 
@@ -439,10 +438,11 @@ input_section_spec:
 
 statement:
 		statement assignment end
+        |	statement ';'
+        |	statement 
 	|	statement CREATE_OBJECT_SYMBOLS
 		{
  		  lang_add_attribute(lang_object_symbols_statement_enum); }
-        |	statement ';'
         |	statement CONSTRUCTORS
 		{
  		  lang_add_attribute(lang_constructors_statement_enum); }
@@ -506,7 +506,7 @@ assign_op:
 
 	;
 
-end:	';' | ','
+end:	';' | ',' 
 	;
 
 
@@ -528,7 +528,7 @@ opt_comma:
 
 
 memory:
-		MEMORY '{' memory_spec memory_spec_list '}'
+		MEMORY  '{'  memory_spec memory_spec_list '}'
 	;
 
 memory_spec_list:
@@ -613,7 +613,7 @@ floating_point_support:
 exp	:
 		'-' exp    %prec UNARY
 			{ $$ = exp_unop('-', $2); }
-	|	'(' exp ')'
+	|	'('  exp   ')'
 			{ $$ = $2; }
 	|	NEXT '(' exp ')' %prec UNARY
 			{ $$ = exp_unop($1,$3); }
@@ -702,14 +702,7 @@ opt_type:
   	|    { $$ = SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS; }
 	;
 
-opt_things: 
-	{
-
-	}
-	;
-
-
-
+opt_things:  ;
 
 
 opt_exp:
@@ -719,7 +712,7 @@ opt_exp:
 	;
 
 opt_block:
-		BLOCK '(' exp ')'
+		BLOCK   '('   exp ')'
 		{ $$ = exp_get_value_int($3,
 					 1L,
 					 "block",
@@ -729,7 +722,7 @@ opt_block:
 	;
   
 memspec_opt:
-		'>' NAME
+		'>'   NAME
 		{ $$ = $2; }
 	|	{ $$ = "*default*"; }
 	;

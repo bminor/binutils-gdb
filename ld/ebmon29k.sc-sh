@@ -6,7 +6,7 @@ SECTIONS {
   .text ${RELOCATING+${TEXT_START_ADDR}} : 
     {
 	*(.text);
-	${RELOCATING+_etext = .}
+	${RELOCATING+_etext = .};
     }
   data ${RELOCATING+0x80002000} :
     {
@@ -21,7 +21,7 @@ SECTIONS {
     { 
 	*(COMMON) 	
 	*(.bss);
-	${RELOCATING+_end = .;}
+	${RELOCATING+_end = .};
     } 
 }
 EOF
