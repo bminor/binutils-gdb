@@ -61,6 +61,7 @@ t-lwl.s
 t-lwr.s
 t-macros.i
 t-mtsa.s
+t-mult1.s
 t-pabsh.s
 t-pabsw.s
 t-paddb.s
@@ -70,6 +71,7 @@ t-paddsw.s
 t-paddub.s
 t-padduh.s
 t-padduw.s
+t-padsbh.s
 t-pcpyh.s
 t-pdivbw.s
 t-pdivuw.s
