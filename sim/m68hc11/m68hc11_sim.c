@@ -27,6 +27,7 @@ enum {
   OPTION_CPU_RESET = OPTION_START,
   OPTION_EMUL_OS,
   OPTION_CPU_CONFIG,
+  OPTION_CPU_BOOTSTRAP,
   OPTION_CPU_MODE
 };
 
@@ -44,6 +45,10 @@ static const OPTION cpu_options[] =
 
   { {"cpu-config", required_argument, NULL, OPTION_CPU_CONFIG },
       '\0', NULL, "Specify the initial CPU configuration register",
+      cpu_option_handler },
+
+  { {"bootstrap", no_argument, NULL, OPTION_CPU_BOOTSTRAP },
+      '\0', NULL, "Start the processing in bootstrap mode",
       cpu_option_handler },
 
   { {NULL, no_argument, NULL, 0}, '\0', NULL, NULL, NULL }
@@ -77,7 +82,11 @@ cpu_option_handler (SIM_DESC sd, sim_cpu *cpu,
       else
         cpu->cpu_use_local_config = 0;
       break;
-      
+
+    case OPTION_CPU_BOOTSTRAP:
+       cpu->cpu_start_mode = "bootstrap";
+       break;
+
     case OPTION_CPU_MODE:
       break;
     }
@@ -1049,7 +1058,8 @@ cpu_info (SIM_DESC sd, sim_cpu *cpu)
 {
   sim_io_printf (sd, "CPU info:\n");
   sim_io_printf (sd, "  Absolute cycle: %s\n",
-                 cycle_to_string (cpu, cpu->cpu_absolute_cycle));
+                 cycle_to_string (cpu, cpu->cpu_absolute_cycle,
+                                  PRINT_TIME | PRINT_CYCLE));
   
   sim_io_printf (sd, "  Syscall emulation: %s\n",
                  cpu->cpu_emul_syscall ? "yes, via 0xcd <n>" : "no");

@@ -25,7 +25,7 @@
 #include "sim-main.h"
 #include "hw-main.h"
 #include "sim-assert.h"
-
+#include <limits.h>
 
 /* DEVICE
 
@@ -250,7 +250,9 @@ m68hc11tim_timer_event (struct hw *me, void *data)
   unsigned mask;
   unsigned flags;
   unsigned long tcnt_internal;
-  unsigned long tcnt;
+  unsigned long tcnt, tcnt_prev;
+  signed64 tcnt_insn_end;
+  signed64 tcnt_insn_start;
   int i;
   sim_events *events;
   
@@ -289,11 +291,8 @@ m68hc11tim_timer_event (struct hw *me, void *data)
       break;
 
     case OVERFLOW_EVENT:
-      /* Compute the 68HC11 internal free running counter.
-         There may be 'nr_ticks_to_process' pending cycles that are
-         not (yet) taken into account by 'sim_events_time'.  */
-      tcnt_internal = sim_events_time (sd) - controller->tcnt_adjust;
-      tcnt_internal += events->nr_ticks_to_process;
+      /* Compute the 68HC11 internal free running counter.  */
+      tcnt_internal = (cpu->cpu_absolute_cycle - controller->tcnt_adjust);
 
       /* We must take into account the prescaler that comes
          before the counter (it's a power of 2).  */
@@ -316,22 +315,22 @@ m68hc11tim_timer_event (struct hw *me, void *data)
       break;
 
     case COMPARE_EVENT:
-      eventp = &controller->cmp_timer_event;
+      /* Compute value of TCNT register (64-bit precision) at beginning
+         and end of instruction.  */
+      tcnt_insn_end = (cpu->cpu_absolute_cycle - controller->tcnt_adjust);
+      tcnt_insn_start = (tcnt_insn_end - cpu->cpu_current_cycle);
 
-      /* Compute the 68HC11 internal free running counter.
-         There may be 'nr_ticks_to_process' pending cycles that are
-         not (yet) taken into account by 'sim_events_time'.  */
-      events = STATE_EVENTS (sd);
-      tcnt_internal = sim_events_time (sd) - controller->tcnt_adjust;
-      tcnt_internal += events->nr_ticks_to_process;
+      /* TCNT value at beginning of current instruction.  */
+      tcnt_prev = (tcnt_insn_start / controller->clock_prescaler) & 0x0ffff;
+
+      /* TCNT value at end of current instruction.  */
+      tcnt = (tcnt_insn_end / controller->clock_prescaler) & 0x0ffff;
 
       /* We must take into account the prescaler that comes
          before the counter (it's a power of 2).  */
+      tcnt_internal = tcnt_insn_end;
       tcnt_internal &= 0x0ffff * controller->clock_prescaler;
 
-      /* Get current visible TCNT register value.  */
-      tcnt = tcnt_internal / controller->clock_prescaler;
-      
       flags = cpu->ios[M6811_TMSK1];
       mask  = 0x80;
       delay = 65536 * controller->clock_prescaler;
@@ -342,12 +341,28 @@ m68hc11tim_timer_event (struct hw *me, void *data)
       for (i = M6811_TOC1; i <= M6811_TOC5; i += 2, mask >>= 1)
         {
           unsigned long compare;
-          
-          compare = (cpu->ios[i] << 8) + cpu->ios[i+1];
-          if (compare == tcnt && (flags & mask))
+
+          compare = (cpu->ios[i] << 8) + cpu->ios[i + 1];
+
+          /* See if compare is reached; handle wrap arround.  */
+          if ((compare >= tcnt_prev && compare <= tcnt && tcnt_prev < tcnt)
+              || (compare >= tcnt_prev && tcnt_prev > tcnt)
+              || (compare < tcnt && tcnt_prev > tcnt))
             {
+              unsigned dt;
+
+              if (compare > tcnt)
+                dt = 0x10000 - compare - tcnt;
+              else
+                dt = tcnt - compare;
+
               cpu->ios[M6811_TFLG1] |= mask;
-              check_interrupt++;
+
+              /* Raise interrupt now at the correct CPU cycle so that
+                 we can find the interrupt latency.  */
+              cpu->cpu_absolute_cycle -= dt;
+              interrupts_update_pending (&cpu->cpu_interrupts);
+              cpu->cpu_absolute_cycle += dt;
             }
 
           /* Compute how many times for the next match.
@@ -359,14 +374,18 @@ m68hc11tim_timer_event (struct hw *me, void *data)
           else
             compare = compare - tcnt_internal
               + 65536 * controller->clock_prescaler;
-          
+
           if (compare < delay)
             delay = compare;
         }
 
       /* Deactivate the compare timer if no output compare is enabled.  */
-      if ((flags & 0xF0) == 0)
+      if ((flags & 0xF8) == 0)
         delay = 0;
+      else
+        delay += events->nr_ticks_to_process;
+
+      eventp = &controller->cmp_timer_event;
       break;
 
     default:
@@ -457,22 +476,35 @@ to_realtime (sim_cpu *cpu, signed64 t)
 }
 
 const char*
-cycle_to_string (sim_cpu *cpu, signed64 t)
+cycle_to_string (sim_cpu *cpu, signed64 t, int flags)
 {
-  double dt;
-  char tbuf[32];
+  char time_buf[32];
+  char cycle_buf[32];
   static char buf[64];
 
-  dt = to_realtime (cpu, t);
-  if (dt < 0.001)
-    sprintf (tbuf, "(%3.1f us)", dt * 1000000.0);
-  else if (dt < 1.0)
-    sprintf (tbuf, "(%3.1f ms)", dt * 1000.0);
-  else
-    sprintf (tbuf, "(%3.1f s)", dt);
+  time_buf[0] = 0;
+  cycle_buf[0] = 0;
+  if (flags & PRINT_TIME)
+    {
+      double dt;
 
-  sprintf (buf, "%llu cycle%s %10.10s", t,
-             (t > 1 ? "s" : ""), tbuf);
+      dt = to_realtime (cpu, t);
+      if (dt < 0.001)
+        sprintf (time_buf, " (%3.1f us)", dt * 1000000.0);
+      else if (dt < 1.0)
+        sprintf (time_buf, " (%3.1f ms)", dt * 1000.0);
+      else
+        sprintf (time_buf, " (%3.1f s)", dt);
+    }
+
+  if (flags & PRINT_CYCLE)
+    sprintf (cycle_buf, " cycle%s",
+             (t > 1 ? "s" : ""));
+
+  if (t < LONG_MAX)
+    sprintf (buf, "%9lu%s%s", (unsigned long) t, cycle_buf, time_buf);
+  else
+    sprintf (buf, "%llu%s%s", t, cycle_buf, time_buf);
   return buf;
 }
 
@@ -496,7 +528,7 @@ m68hc11tim_print_timer (struct hw *me, const char *name,
 
       t  = hw_event_remain_time (me, event);
       sim_io_printf (sd, "  Next %s interrupt in %s\n",
-                     name, cycle_to_string (cpu, t));
+                     name, cycle_to_string (cpu, t, PRINT_TIME | PRINT_CYCLE));
     }
 }
 
@@ -643,7 +675,7 @@ m68hc11tim_io_read_buffer (struct hw *me,
           break;
         }
       *((unsigned8*) dest) = val;
-      dest++;
+      dest = (char*) dest + 1;
       base++;
       nr_bytes--;
       cnt++;
@@ -754,6 +786,7 @@ m68hc11tim_io_write_buffer (struct hw *me,
         case M6811_TMSK1:
           cpu->ios[M6811_TMSK1] = val;
           interrupts_update_pending (&cpu->cpu_interrupts);
+          reset_compare = 1;
           break;
 
         case M6811_TFLG1:
@@ -770,7 +803,7 @@ m68hc11tim_io_write_buffer (struct hw *me,
           cpu->ios[base] = val;
           reset_compare = 1;
           break;
-      
+
         case M6811_TCTL1:
         case M6811_TCTL2:
           cpu->ios[base] = val;
@@ -784,7 +817,7 @@ m68hc11tim_io_write_buffer (struct hw *me,
       base++;
       nr_bytes--;
       cnt++;
-      source++;
+      source = (char*) source + 1;
     }
 
   /* Re-compute the next timer compare event.  */
