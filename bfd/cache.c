@@ -366,6 +366,8 @@ bfd_cache_close_all ()
 
   while (bfd_last_cache != NULL)
     ret &= bfd_cache_close (bfd_last_cache);
+
+  return ret;
 }
 
 /*
