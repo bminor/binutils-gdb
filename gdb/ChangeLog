@@ -1,3 +1,16 @@
+Tue Aug  3 15:34:57 1993  Fred Fish  (fnf@cygnus.com)
+
+	* Makefile.in (ALLCONFIG):  Add config/i386/i386nw.mt,
+	config/m68k/delta68.mh, config/m68k/delta68.mt,
+	config/m68k/dpx2.mh, config/m68k/dpx2.mt, config/mips/riscos.mh,
+	config/mips/news-mips.mh.
+	* Makefile.in (ALLPARAM):  Add config/i386/nm-symmetry.h,
+	config/i386/tm-i386nw.h, config/m68k/nm-delta68.h,
+	config/m68k/tm-delta68.h, config/m68k/xm-delta68.h,
+	config/m68k/nm-dpx2.h, config/m68k/tm-dpx2.h,
+	config/m68k/xm-dpx2.h, config/mips/xm-makeva.h.
+	* Makefile.in (ALLDEPFILES):  Add dpx2-nat.c.
+
 Tue Aug  3 12:02:09 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* mipsread.c: Updated for BFD ECOFF changes.  Now gets the
