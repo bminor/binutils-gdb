@@ -1,5 +1,5 @@
 /* nm.c -- Describe symbol table of a rel file.
-   Copyright 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000
+   Copyright 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000, 2001
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -1473,13 +1473,11 @@ print_symbol_info_bsd (info, abfd)
 {
   if (bfd_is_undefined_symclass (info->type))
     {
-      printf ("%*s",
 #ifdef BFD64
-	      16,
+      printf ("%*s", 16, "");
 #else
-	      8,
+      printf ("%*s", 8, "");
 #endif
-	      "");
     }
   else
     print_value (info->value);
