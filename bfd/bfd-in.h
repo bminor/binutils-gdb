@@ -89,7 +89,7 @@ typedef struct _bfd bfd;
 /* Yup, SVR4 has a "typedef enum boolean" in <sys/types.h>  -fnf */
 /* It gets worse if the host also defines a true/false enum... -sts */
 /* And even worse if your compiler has built-in boolean types... -law */
-#if defined (__GNUG__) && (__GNUC_MINOR__ > 5)
+#if defined (__GNUG__) && (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 6))
 #define TRUE_FALSE_ALREADY_DEFINED
 #endif
 #ifdef MPW

@@ -1,3 +1,7 @@
+2000-04-29  Andreas Jaeger  <aj@suse.de>
+
+	* as.h: Correctly check GCC version.
+
 Mon Apr 24 15:21:11 2000  Clinton Popetz  <cpopetz@cygnus.com>
 
 	* as.c (parse_args): Allow md_parse_option to override -a listing

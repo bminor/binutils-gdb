@@ -1,3 +1,11 @@
+2000-04-29  Andreas Jaeger  <aj@suse.de>
+
+	* libbfd-in.h: Correctly check GCC version.
+	* bfd-in.h: Likewise.
+	* libhppa.h: Likewise.
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Regenerate.
+
 Fri Apr 28 14:58:37 2000  Clinton Popetz  <cpopetz@cygnus.com>
 
 	* Makefile.am (BFD64_BACKENDS, BFD64_BACKENDS_CFILES): Add
