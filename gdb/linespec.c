@@ -483,11 +483,18 @@ decode_line_2 (struct symbol *sym_arr[], int nelts, int funfirstline,
       if (sym_arr[i] && SYMBOL_CLASS (sym_arr[i]) == LOC_BLOCK)
 	{
 	  values.sals[i] = find_function_start_sal (sym_arr[i], funfirstline);
-	  printf_unfiltered ("[%d] %s at %s:%d\n",
-			     (i + 2),
-			     SYMBOL_PRINT_NAME (sym_arr[i]),
-			     values.sals[i].symtab->filename,
-			     values.sals[i].line);
+	  if (values.sals[i].symtab)
+	    printf_unfiltered ("[%d] %s at %s:%d\n",
+			       (i + 2),
+			       SYMBOL_PRINT_NAME (sym_arr[i]),
+			       values.sals[i].symtab->filename,
+			       values.sals[i].line);
+	  else
+	    printf_unfiltered ("[%d] %s at ?FILE:%d [No symtab? Probably broken debug info...]\n",
+			       (i + 2),
+			       SYMBOL_PRINT_NAME (sym_arr[i]),
+			       values.sals[i].line);
+
 	}
       else
 	printf_unfiltered ("?HERE\n");
