@@ -1,3 +1,10 @@
+2004-09-17  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.in: Regenerate.
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+	* po/gprof.pot: Regenerate.
+
 2004-07-13  Ben Elliston  <bje@au.ibm.com>
 
 	* gprof.c (main): For line-by-line profiling, there is no need to
