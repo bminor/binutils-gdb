@@ -3,7 +3,7 @@
 			K. Richard Pixley
 			Cygnus Support
 
-		 Last Mod 19 Jul 1991 by gnu@cygnus.com
+		 Last Mod Tue Aug 6 22:16:14 PDT 1991, by rich@cygint.cygnus.com
 
 INTRO
 -----
@@ -108,20 +108,20 @@ Configuration Time Options:
     structure, the intermediate pieces used in the build process must
     be kept separate.
 
-	./configure sun4 +forcesubdirs +notation=postfix
-	./configure sun3 +forcesubdirs +notation=infix
+	./configure sun4 +subdirs +notation=postfix
+	./configure sun3 +subdirs +notation=infix
 
     will create subdirectories for the intermediate pieces of the sun4
     and sun3 configurations.  This is necessary as previous systems
     were only capable of one configuration at a time.  A second
     configuration overwrote the first.  We've chosen to retain this
-    behaviour so the "+forcesubdirs" configuration option is necessary
+    behaviour so the "+subdirs" configuration option is necessary
     to get the new behaviour.  The order of the arguments doesn't
     matter.  There should be exactly one argument without a leading
     '+' sign and that argument will be assumed to be the host name.
 
     From here on the examples will assume that you want to build the
-    tools "in place" and won't show the "+forcesubdirs" option, but
+    tools "in place" and won't show the "+subdirs" option, but
     remember that it is available.
 
     In order to actually install the program, the configuration system
@@ -523,7 +523,7 @@ directory.
   hostname and target is targetname.  If a previous configuration
   existed, it will be overwritten.
 
-* "./configure +forcesubdirs hostname +target=targetname" creates a
+* "./configure +subdirs hostname +target=targetname" creates a
   subdirectories Host-hostname and Host-hostname/Target-targetname and
   configures Host-hostname/Target-targetname.  For now, makes should
   be done from Host-hostname/Target-targetname.  "./configure +f name"
