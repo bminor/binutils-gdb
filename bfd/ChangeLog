@@ -1,3 +1,10 @@
+2003-07-24  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* elf32-sh.c (sh_elf_adjust_dynamic_symbol): Use SYMBOL_CALLS_LOCAL.
+	(allocate_dynrelocs): Likewise.
+	(sh_elf_relocate_section): Likewise. Use SYMBOL_REFERENCES_LOCAL.
+	(sh_elf_finish_dynamic_symbol): Use SYMBOL_REFERENCES_LOCAL.
+
 2003-07-24  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Updated French translation.

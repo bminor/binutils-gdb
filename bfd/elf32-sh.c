@@ -3915,11 +3915,9 @@ sh_elf_adjust_dynamic_symbol (info, h)
       || (h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) != 0)
     {
       if (h->plt.refcount <= 0
-	  || (! info->shared
-	      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) == 0
-	      && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_DYNAMIC) == 0
-	      && h->root.type != bfd_link_hash_undefweak
-	      && h->root.type != bfd_link_hash_undefined))
+	  || SYMBOL_CALLS_LOCAL (info, h)
+	  || (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
+	      && h->root.type == bfd_link_hash_undefweak))
 	{
 	  /* This case can occur if we saw a PLT reloc in an input
 	     file, but the symbol was never referred to by a dynamic
@@ -4224,9 +4222,7 @@ allocate_dynrelocs (h, inf)
 
   if (info->shared)
     {
-      if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0
-	  && ((h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0
-	      || info->symbolic))
+      if (SYMBOL_CALLS_LOCAL (info, h))
 	{
 	  struct elf_sh_dyn_relocs **pp;
 
@@ -4908,11 +4904,7 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      && r_symndx != 0
 	      && (input_section->flags & SEC_ALLOC) != 0
 	      && (r_type != R_SH_REL32
-		  || (h != NULL
-		      && h->dynindx != -1
-		      && (! info->symbolic
-			  || (h->elf_link_hash_flags
-			      & ELF_LINK_HASH_DEF_REGULAR) == 0))))
+		  || !SYMBOL_CALLS_LOCAL (info, h)))
 	    {
 	      Elf_Internal_Rela outrel;
 	      bfd_byte *loc;
@@ -5071,9 +5063,7 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      dyn = htab->root.dynamic_sections_created;
 	      if (! WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info->shared, h)
 		  || (info->shared
-		      && (info->symbolic || h->dynindx == -1
-			  || (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL))
-		      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR))
+		      && SYMBOL_REFERENCES_LOCAL (info, h))
 		  || (ELF_ST_VISIBILITY (h->other)
 		      && h->root.type == bfd_link_hash_undefweak))
 		{
@@ -6963,10 +6953,7 @@ sh_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 	 The entry in the global offset table will already have been
 	 initialized in the relocate_section function.  */
       if (info->shared
-	  && (info->symbolic
-	      || h->dynindx == -1
-	      || (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL))
-	  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR))
+	  && SYMBOL_REFERENCES_LOCAL (info, h))
 	{
 	  rel.r_info = ELF32_R_INFO (0, R_SH_RELATIVE);
 	  rel.r_addend = (h->root.u.def.value
@@ -7014,10 +7001,7 @@ sh_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 	   The entry in the global offset table will already have been
 	   initialized in the relocate_section function.  */
 	if (info->shared
-	    && (info->symbolic
-		|| h->dynindx == -1
-		|| (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL))
-	    && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR))
+	    && SYMBOL_REFERENCES_LOCAL (info, h))
 	  {
 	    rel.r_info = ELF32_R_INFO (0, R_SH_RELATIVE);
 	    rel.r_addend = (h->root.u.def.value
