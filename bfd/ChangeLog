@@ -1,3 +1,7 @@
+2001-01-21  Kazu Hirata  <kazu@hxi.com>
+
+	* coff-a29k.c: Fix formatting.
+
 2001-01-19  H.J. Lu  <hjl@gnu.org>
 
 	* elf32-i386.c (elf_i386_check_relocs): Report files with bad
