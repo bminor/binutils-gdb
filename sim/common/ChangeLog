@@ -1,3 +1,9 @@
+Fri Jan 23 14:20:54 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* Make-common.in (stamp-tvals): New rule.
+	(targ-vals.h,targ-map.c): Depend on it.
+	(clean): Remove stamp-tvals.
+
 Tue Jan 20 21:35:13 1998  Michael Meissner  <meissner@cygnus.com>
 
 	* sim-utils.c (sim_state_alloc): #if 0 variable that is only used
