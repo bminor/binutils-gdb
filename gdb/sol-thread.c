@@ -122,14 +122,14 @@ static void init_sol_core_ops PARAMS ((void));
 /* Default definitions: These must be defined in tm.h 
    if they are to be shared with a process module such as procfs.  */
 
-#define THREAD_FLAG            0x80000000
-#define is_thread(ARG)         (((ARG) & THREAD_FLAG) != 0)
-#define is_lwp(ARG)            (((ARG) & THREAD_FLAG) == 0)
-#define GET_LWP(PID)           TIDGET (PID)
-#define GET_THREAD(PID)        (((PID) >> 16) & 0x7fff)
-#define BUILD_LWP(TID, PID)    ((TID) << 16 | (PID))
+#define THREAD_FLAG		0x80000000
+#define is_thread(ARG)		(((ARG) & THREAD_FLAG) != 0)
+#define is_lwp(ARG)		(((ARG) & THREAD_FLAG) == 0)
+#define GET_LWP(PID)		TIDGET (PID)
+#define GET_THREAD(PID)		TIDGET (PID)
+#define BUILD_LWP(TID, PID)	MERGEPID (PID, TID)
 
-#define BUILD_THREAD(THREAD_ID, PID) (THREAD_FLAG | BUILD_LWP (THREAD_ID, PID))
+#define BUILD_THREAD(TID, PID)	(MERGEPID (PID, TID) | THREAD_FLAG)
 
 /* Pointers to routines from lithread_db resolved by dlopen() */
 
@@ -1327,6 +1327,12 @@ ps_lgetLDT (gdb_ps_prochandle_t ph, lwpid_t lwpid,
   /* NOTE: only used on Solaris, therefore OK to refer to procfs.c */
   extern struct ssd *procfs_find_LDT_entry (int);
   struct ssd *ret;
+
+  /* FIXME: can't I get the process ID from the prochandle or something?
+   */
+
+  if (inferior_pid <= 0 || lwpid <= 0)
+    return PS_BADLID;
 
   ret = procfs_find_LDT_entry (BUILD_LWP (lwpid, PIDGET (inferior_pid)));
   if (ret)

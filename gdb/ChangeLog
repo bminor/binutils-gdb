@@ -1,3 +1,20 @@
+2000-04-06  Michael Snyder  <msnyder@cygnus.com>
+
+	* sol-thread.c (GET_LWP, GET_THREAD, BUILD_LWP, BUILD_THREAD):
+	Change to rely on PIDGET etc.
+	* config/i386/nm-i386sol2.h (TARGET_HAS_WATCHPOINTS, 
+	TARGET_CAN_USE_HARDWARE_WATCHPOINT, HAVE_CONTINUABLE_WATCHPOINT,
+	STOPPED_BY_WATCHPOINT, target_[insert/remove]_watchpoint):
+	define.  Allow target to use procfs hardware watchpoints.
+	* config/sparc/nm-sun4sol2.h: ditto.
+	* config/i386/tm-i386sol2.h (PIDGET, TIDGET, MERGEPID): modify
+	definitions to use 16 bits for the pid, 15 bits for the tid, and
+	1 bit for the flag.
+	* config/sparc/tm-sun4sol2.h: ditto.
+	(SOFTWARE_SINGLE_STEP, SOFTWARE_SINGLE_STEP_P): undefine.
+	* testsuite/gdb.threads/pthreads.exp (all_threads_running): Allow
+	for more than 15 thread increments.
+
 2000-04-06  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* top.c (filename_completer): Set subsequent_name to 1 early on,

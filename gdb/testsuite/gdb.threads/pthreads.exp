@@ -113,7 +113,7 @@ proc all_threads_running {} {
     # been called 15 times.  This should be plenty of time to allow
     # every thread to run at least once, since each thread sleeps for
     # one second between calls to common_routine.
-    gdb_test "tbreak common_routine if hits == 15" ""
+    gdb_test "tbreak common_routine if hits >= 15" ""
 
     # Start all the threads running again and wait for the inferior
     # to stop.  Since no other breakpoints are set at this time
@@ -135,9 +135,16 @@ proc all_threads_running {} {
     # Check that we stopped when we actually expected to stop, by
     # verifying that there have been 15 previous hits.
 
+    # NOTE: Because of synchronization behavior, it is possible for
+    # more than one thread to increment "hits" between one breakpoint
+    # trap and the next.  So stopping after 16 or 17 hits should be
+    # considered acceptable.
+
     send_gdb "p common_routine::hits\n"
     gdb_expect {
 	-re ".*= 15\r\n$gdb_prompt $" {}
+	-re ".*= 16\r\n$gdb_prompt $" {}
+	-re ".*= 17\r\n$gdb_prompt $" {}
 	default {
 	    fail "stopped before calling common_routine 15 times"
 	    return 0
