@@ -209,6 +209,7 @@ static const CGEN_ATTR_ENTRY MACH_attr[] =
 const CGEN_ATTR_TABLE fr30_cgen_hardware_attr_table[] =
 {
   { "CACHE-ADDR", NULL },
+  { "FUN-ACCESS", NULL },
   { "PC", NULL },
   { "PROFILE", NULL },
   { 0, 0 }
@@ -288,7 +289,7 @@ CGEN_KEYWORD fr30_cgen_opval_h_dr =
 
 CGEN_KEYWORD_ENTRY fr30_cgen_opval_h_ps_entries[] = 
 {
-  { "ps", 1 }
+  { "ps", 0 }
 };
 
 CGEN_KEYWORD fr30_cgen_opval_h_ps = 
@@ -299,7 +300,7 @@ CGEN_KEYWORD fr30_cgen_opval_h_ps =
 
 CGEN_KEYWORD_ENTRY fr30_cgen_opval_h_r13_entries[] = 
 {
-  { "r13", 13 }
+  { "r13", 0 }
 };
 
 CGEN_KEYWORD fr30_cgen_opval_h_r13 = 
@@ -310,7 +311,7 @@ CGEN_KEYWORD fr30_cgen_opval_h_r13 =
 
 CGEN_KEYWORD_ENTRY fr30_cgen_opval_h_r14_entries[] = 
 {
-  { "r14", 14 }
+  { "r14", 0 }
 };
 
 CGEN_KEYWORD fr30_cgen_opval_h_r14 = 
@@ -321,7 +322,7 @@ CGEN_KEYWORD fr30_cgen_opval_h_r14 =
 
 CGEN_KEYWORD_ENTRY fr30_cgen_opval_h_r15_entries[] = 
 {
-  { "r15", 15 }
+  { "r15", 0 }
 };
 
 CGEN_KEYWORD fr30_cgen_opval_h_r15 = 
@@ -344,7 +345,7 @@ static const CGEN_HW_ENTRY fr30_cgen_hw_entries[] =
   { HW_H_IADDR, & HW_ENT (HW_H_IADDR + 1), "h-iaddr", CGEN_ASM_KEYWORD, (PTR) 0, { 0, 0, { 0 } } },
   { HW_H_GR, & HW_ENT (HW_H_GR + 1), "h-gr", CGEN_ASM_KEYWORD, (PTR) & fr30_cgen_opval_h_gr, { 0, 0|(1<<CGEN_HW_CACHE_ADDR)|(1<<CGEN_HW_PROFILE), { 0 } } },
   { HW_H_DR, & HW_ENT (HW_H_DR + 1), "h-dr", CGEN_ASM_KEYWORD, (PTR) & fr30_cgen_opval_h_dr, { 0, 0, { 0 } } },
-  { HW_H_PS, & HW_ENT (HW_H_PS + 1), "h-ps", CGEN_ASM_KEYWORD, (PTR) & fr30_cgen_opval_h_ps, { 0, 0, { 0 } } },
+  { HW_H_PS, & HW_ENT (HW_H_PS + 1), "h-ps", CGEN_ASM_KEYWORD, (PTR) & fr30_cgen_opval_h_ps, { 0, 0|(1<<CGEN_HW_FUN_ACCESS), { 0 } } },
   { HW_H_R13, & HW_ENT (HW_H_R13 + 1), "h-r13", CGEN_ASM_KEYWORD, (PTR) & fr30_cgen_opval_h_r13, { 0, 0, { 0 } } },
   { HW_H_R14, & HW_ENT (HW_H_R14 + 1), "h-r14", CGEN_ASM_KEYWORD, (PTR) & fr30_cgen_opval_h_r14, { 0, 0, { 0 } } },
   { HW_H_R15, & HW_ENT (HW_H_R15 + 1), "h-r15", CGEN_ASM_KEYWORD, (PTR) & fr30_cgen_opval_h_r15, { 0, 0, { 0 } } },
@@ -352,6 +353,8 @@ static const CGEN_HW_ENTRY fr30_cgen_hw_entries[] =
   { HW_H_ZBIT, & HW_ENT (HW_H_ZBIT + 1), "h-zbit", CGEN_ASM_KEYWORD, (PTR) 0, { 0, 0, { 0 } } },
   { HW_H_VBIT, & HW_ENT (HW_H_VBIT + 1), "h-vbit", CGEN_ASM_KEYWORD, (PTR) 0, { 0, 0, { 0 } } },
   { HW_H_CBIT, & HW_ENT (HW_H_CBIT + 1), "h-cbit", CGEN_ASM_KEYWORD, (PTR) 0, { 0, 0, { 0 } } },
+  { HW_H_IBIT, & HW_ENT (HW_H_IBIT + 1), "h-ibit", CGEN_ASM_KEYWORD, (PTR) 0, { 0, 0, { 0 } } },
+  { HW_H_SBIT, & HW_ENT (HW_H_SBIT + 1), "h-sbit", CGEN_ASM_KEYWORD, (PTR) 0, { 0, 0, { 0 } } },
   { 0 }
 };
 
@@ -440,17 +443,23 @@ const CGEN_OPERAND fr30_cgen_operand_table[MAX_OPERANDS] =
 /* cc: condition codes */
   { "cc", & HW_ENT (HW_H_UINT), 4, 4,
     { 0, 0|(1<<CGEN_OPERAND_UNSIGNED), { 0 } }  },
-/* nbit: negative bit */
+/* nbit: negative  bit */
   { "nbit", & HW_ENT (HW_H_NBIT), 0, 0,
     { 0, 0|(1<<CGEN_OPERAND_SEM_ONLY), { 0 } }  },
-/* vbit: overflow bit */
+/* vbit: overflow  bit */
   { "vbit", & HW_ENT (HW_H_VBIT), 0, 0,
     { 0, 0|(1<<CGEN_OPERAND_SEM_ONLY), { 0 } }  },
-/* zbit: zero     bit */
+/* zbit: zero      bit */
   { "zbit", & HW_ENT (HW_H_ZBIT), 0, 0,
     { 0, 0|(1<<CGEN_OPERAND_SEM_ONLY), { 0 } }  },
-/* cbit: carry    bit */
+/* cbit: carry     bit */
   { "cbit", & HW_ENT (HW_H_CBIT), 0, 0,
+    { 0, 0|(1<<CGEN_OPERAND_SEM_ONLY), { 0 } }  },
+/* ibit: interrupt bit */
+  { "ibit", & HW_ENT (HW_H_IBIT), 0, 0,
+    { 0, 0|(1<<CGEN_OPERAND_SEM_ONLY), { 0 } }  },
+/* sbit: stack     bit */
+  { "sbit", & HW_ENT (HW_H_SBIT), 0, 0,
     { 0, 0|(1<<CGEN_OPERAND_SEM_ONLY), { 0 } }  },
 };
 
@@ -598,6 +607,38 @@ static const CGEN_OPERAND_INSTANCE fmt_andb_ops[] = {
 static const CGEN_OPERAND_INSTANCE fmt_ldi32_ops[] = {
   { INPUT, "i32", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (I32), 0, 0 },
   { OUTPUT, "Ri", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RI), 0, 0 },
+  { 0 }
+};
+
+static const CGEN_OPERAND_INSTANCE fmt_mov2dr_ops[] = {
+  { INPUT, "Ri", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RI), 0, 0 },
+  { OUTPUT, "Rs1", & HW_ENT (HW_H_DR), CGEN_MODE_USI, & OP_ENT (RS1), 0, 0 },
+  { 0 }
+};
+
+static const CGEN_OPERAND_INSTANCE fmt_int_ops[] = {
+  { INPUT, "h_dr_2", & HW_ENT (HW_H_DR), CGEN_MODE_USI, 0, 2, 0 },
+  { INPUT, "ps", & HW_ENT (HW_H_PS), CGEN_MODE_USI, 0, 0, 0 },
+  { INPUT, "pc", & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0, 0 },
+  { INPUT, "u8", & HW_ENT (HW_H_UINT), CGEN_MODE_SI, & OP_ENT (U8), 0, 0 },
+  { OUTPUT, "h_dr_2", & HW_ENT (HW_H_DR), CGEN_MODE_USI, 0, 2, 0 },
+  { OUTPUT, "h_memory_reg__VM_h_dr_2", & HW_ENT (HW_H_MEMORY), CGEN_MODE_USI, 0, 0, 0 },
+  { OUTPUT, "ibit", & HW_ENT (HW_H_IBIT), CGEN_MODE_BI, 0, 0, 0 },
+  { OUTPUT, "sbit", & HW_ENT (HW_H_SBIT), CGEN_MODE_BI, 0, 0, 0 },
+  { OUTPUT, "pc", & HW_ENT (HW_H_PC), CGEN_MODE_SI, 0, 0, 0 },
+  { 0 }
+};
+
+static const CGEN_OPERAND_INSTANCE fmt_reti_ops[] = {
+  { INPUT, "sbit", & HW_ENT (HW_H_SBIT), CGEN_MODE_BI, 0, 0, 0 },
+  { INPUT, "h_dr_2", & HW_ENT (HW_H_DR), CGEN_MODE_USI, 0, 2, COND_REF },
+  { INPUT, "h_memory_reg__VM_h_dr_2", & HW_ENT (HW_H_MEMORY), CGEN_MODE_USI, 0, 0, COND_REF },
+  { INPUT, "h_dr_3", & HW_ENT (HW_H_DR), CGEN_MODE_USI, 0, 3, COND_REF },
+  { INPUT, "h_memory_reg__VM_h_dr_3", & HW_ENT (HW_H_MEMORY), CGEN_MODE_USI, 0, 0, COND_REF },
+  { OUTPUT, "pc", & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0, COND_REF },
+  { OUTPUT, "h_dr_2", & HW_ENT (HW_H_DR), CGEN_MODE_USI, 0, 2, COND_REF },
+  { OUTPUT, "ps", & HW_ENT (HW_H_PS), CGEN_MODE_USI, 0, 0, COND_REF },
+  { OUTPUT, "h_dr_3", & HW_ENT (HW_H_DR), CGEN_MODE_USI, 0, 3, COND_REF },
   { 0 }
 };
 
@@ -1372,7 +1413,7 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     FR30_INSN_MOV2DR, "mov2dr", "mov",
     { { MNEM, ' ', OP (RI), ',', OP (RS1), 0 } },
     { 16, 16, 0xff00 }, 0xb300,
-    (PTR) 0,
+    (PTR) & fmt_mov2dr_ops[0],
     { 0, 0, { 0 } }
   },
 /* mov $Ri,$ps */
@@ -1462,8 +1503,8 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     FR30_INSN_INT, "int", "int",
     { { MNEM, ' ', OP (U8), 0 } },
     { 16, 16, 0xff00 }, 0x1f00,
-    (PTR) 0,
-    { 0, 0, { 0 } }
+    (PTR) & fmt_int_ops[0],
+    { 0, 0|A(UNCOND_CTI), { 0 } }
   },
 /* inte */
   {
@@ -1480,8 +1521,8 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     FR30_INSN_RETI, "reti", "reti",
     { { MNEM, 0 } },
     { 16, 16, 0xffff }, 0x9730,
-    (PTR) 0,
-    { 0, 0, { 0 } }
+    (PTR) & fmt_reti_ops[0],
+    { 0, 0|A(COND_CTI)|A(COND_CTI), { 0 } }
   },
 /* bra $label9 */
   {

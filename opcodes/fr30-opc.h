@@ -115,22 +115,22 @@ typedef enum h_dr {
 
 /* Enum declaration for program status.  */
 typedef enum h_ps {
-  H_PS_PS = 1
+  H_PS_PS
 } H_PS;
 
 /* Enum declaration for General Register 13 explicitely required.  */
 typedef enum h_r13 {
-  H_R13_R13 = 13
+  H_R13_R13
 } H_R13;
 
 /* Enum declaration for General Register 14 explicitely required.  */
 typedef enum h_r14 {
-  H_R14_R14 = 14
+  H_R14_R14
 } H_R14;
 
 /* Enum declaration for General Register 15 explicitely required.  */
 typedef enum h_r15 {
-  H_R15_R15 = 15
+  H_R15_R15
 } H_R15;
 
 /* Enum declaration for fr30 operand types.  */
@@ -142,7 +142,8 @@ typedef enum cgen_operand_type {
  , FR30_OPERAND_DISP10, FR30_OPERAND_S10, FR30_OPERAND_U10, FR30_OPERAND_I32
  , FR30_OPERAND_DIR8, FR30_OPERAND_DIR9, FR30_OPERAND_DIR10, FR30_OPERAND_LABEL9
  , FR30_OPERAND_LABEL12, FR30_OPERAND_CC, FR30_OPERAND_NBIT, FR30_OPERAND_VBIT
- , FR30_OPERAND_ZBIT, FR30_OPERAND_CBIT, FR30_OPERAND_MAX
+ , FR30_OPERAND_ZBIT, FR30_OPERAND_CBIT, FR30_OPERAND_IBIT, FR30_OPERAND_SBIT
+ , FR30_OPERAND_MAX
 } CGEN_OPERAND_TYPE;
 
 /* Non-boolean attributes.  */
@@ -159,13 +160,13 @@ typedef enum mach_attr {
 #define MAX_OPERANDS ((int) FR30_OPERAND_MAX)
 
 /* Maximum number of operands referenced by any insn.  */
-#define MAX_OPERAND_INSTANCES 8
+#define MAX_OPERAND_INSTANCES 9
 
 /* Hardware, operand and instruction attribute indices.  */
 
 /* Enum declaration for cgen_hw attrs.  */
 typedef enum cgen_hw_attr {
-  CGEN_HW_CACHE_ADDR, CGEN_HW_PC, CGEN_HW_PROFILE
+  CGEN_HW_CACHE_ADDR, CGEN_HW_FUN_ACCESS, CGEN_HW_PC, CGEN_HW_PROFILE
 } CGEN_HW_ATTR;
 
 /* Number of non-boolean elements in cgen_hw.  */
@@ -287,7 +288,7 @@ typedef enum hw_type {
  , HW_H_ADDR, HW_H_IADDR, HW_H_GR, HW_H_DR
  , HW_H_PS, HW_H_R13, HW_H_R14, HW_H_R15
  , HW_H_NBIT, HW_H_ZBIT, HW_H_VBIT, HW_H_CBIT
- , HW_MAX
+ , HW_H_IBIT, HW_H_SBIT, HW_MAX
 } HW_TYPE;
 
 #define MAX_HW ((int) HW_MAX)
