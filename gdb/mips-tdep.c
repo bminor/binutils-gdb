@@ -2468,9 +2468,13 @@ static void
 mips_init_extra_frame_info (int fromleaf, struct frame_info *fci)
 {
   int regnum;
+  mips_extra_func_info_t proc_desc;
+
+  if (get_frame_type (fci) == DUMMY_FRAME)
+    return;
 
   /* Use proc_desc calculated in frame_chain */
-  mips_extra_func_info_t proc_desc =
+  proc_desc =
     get_next_frame (fci)
     ? cached_proc_desc
     : find_proc_desc (get_frame_pc (fci), get_next_frame (fci), 1);

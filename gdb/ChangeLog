@@ -1,3 +1,8 @@
+2003-01-28  Kevin Buettner  <kevinb@redhat.com>
+
+	* mips-tdep.c (mips_init_extra_frame_info): Return early for
+	dummy frames.
+
 2003-01-27  Andrew Cagney  <ac131313@redhat.com>
 
 	* sentinel-frame.h, sentinel-frame.c: New files.
