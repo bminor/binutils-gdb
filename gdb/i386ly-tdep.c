@@ -32,7 +32,7 @@ i386lynx_saved_pc_after_call (frame)
      struct frame_info *frame;
 {
   char opcode[7];
-  static const char call_inst[] = {0x9a, 0, 0, 0, 0, 8, 0}; /* lcall 0x8,0x0 */
+  static const unsigned char call_inst[] = {0x9a, 0, 0, 0, 0, 8, 0}; /* lcall 0x8,0x0 */
 
   read_memory (frame->pc - 7, opcode, 7);
   if (memcmp (opcode, call_inst, 7) == 0)
