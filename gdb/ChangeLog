@@ -1,3 +1,7 @@
+2003-09-09  Nick Clifton  <nickc@redhat.com>
+
+	* v850-tdep.c (v850_processor_type_table): Add bfd_mach_v850e1.
+
 2003-09-04  Andrew Cagney  <cagney@redhat.com>
 
 	* avr-tdep.c: Include "dis-asm.h".

@@ -175,6 +175,10 @@ v850_processor_type_table[] =
   }
   ,
   {
+    v850e_reg_names, bfd_mach_v850e1
+  }
+  ,
+  {
     NULL, 0
   }
 };
