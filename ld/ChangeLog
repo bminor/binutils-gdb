@@ -1,3 +1,29 @@
+1998-12-27  Ulrich Drepper  <drepper@cygnus.com>
+
+	* lexsup.c (parse_args, case OPTION_RPATH): Avoid adding duplicate
+	elements to rpath.
+
+Thu Dec 10 11:12:28 1998  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
+
+	* Makefile.am (ALL_EMULATIONS): Remove pe-dll.o and deffilep.o.
+	(ALL_EMUL_EXTRA_OFILES): New variable.  Put them here instead.
+	* configure.in: Set EMUL_EXTRA_OFILES to $(ALL_EMUL_EXTRA_OFILES)
+	if configuring with all targets.
+	* configure, Makefile.in, aclocal.m4: Rebuild.
+
+	* emultempl/pe.em (pe_enable_stdcall_fixup): Make static.
+	(pe_dll_do_default_excludes): Removed, unused.
+	(pe_def_file, pe_dll_export_everything, pe_dll_kill_ats,
+	pe_dll_stdcall_aliases): Don't initialize them, this file may be
+	compiled more than once.
+	* pe-dll.c (pe_def_file, pe_dll_export_everything,
+	pe_dll_do_default_excludes, pe_dll_kill_ats,
+	pe_dll_stdcall_aliases): Define and initialize them here instead.
+	(generate_reloc): Fix allocation of reloc_addresses array to use
+	bfd_vma instead of unsigned long.  Fix element size in qsort call.
+	(reloc_sort): Compare pointers to bfd_vma instead of unsigned
+	long.
+
 Mon Dec  7 21:10:09 1998  J.J. van der Heijden  <j.j.vanderheijden@student.utwente.nl>
 
 	* configure.tgt (i[3456]86-*-mingw32*): Add cygwin target specific
