@@ -100,7 +100,9 @@ enum hppa_reloc_field_selector_type
     R_HPPA_RPSEL = 0xe,
     R_HPPA_TSEL = 0xf,
     R_HPPA_LTSEL = 0x10,
-    R_HPPA_RTSEL = 0x11
+    R_HPPA_RTSEL = 0x11,
+    R_HPPA_LTPSEL = 0x12,
+    R_HPPA_RTPSEL = 0x13
   };
 
 /* /usr/include/reloc.h defines these to constants.  We want to use
@@ -153,7 +155,9 @@ enum hppa_reloc_field_selector_type_alt
     e_rpsel = R_HPPA_RPSEL,
     e_tsel = R_HPPA_TSEL,
     e_ltsel = R_HPPA_LTSEL,
-    e_rtsel = R_HPPA_RTSEL
+    e_rtsel = R_HPPA_RTSEL,
+    e_ltpsel = R_HPPA_LTPSEL,
+    e_rtpsel = R_HPPA_RTPSEL
   };
 
 enum hppa_reloc_expr_type

@@ -1,5 +1,8 @@
 Wed Aug  4 18:08:07 1999  Jeffrey A Law  (law@cygnus.com)
 
+	* libhppa.h (R_HPPA_LTPSEL, R_HPPA_RTPSEL): New field selectors
+	(e_ltpsel, e_rtpsel): Similarly.
+
 	* elf-hppa.h (_bfd_elf_hppa_gen_reloc_type): Handle 21bit e_ltpsel
 	and 14bit ertpsel.  Handle 64bit psel.
 
