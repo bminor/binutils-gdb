@@ -1,3 +1,8 @@
+Mon Aug  1 15:50:44 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* scripttempl/mips.sc: Redo script to set . outside of sections
+	and not bother to explicitly specify section addresses.
+
 Tue Jul 26 11:02:35 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* scripttempl/elf.sc: Copy several more relocation sections into
