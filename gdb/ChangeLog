@@ -1,3 +1,10 @@
+2004-02-29  Andrew Cagney  <cagney@redhat.com>
+
+	* rs6000-tdep.c (rs6000_init_frame_pc_first): New function.
+	(rs6000_gdbarch_init): Set deprecated_init_frame_pc_first.
+	* config/rs6000/tm-rs6000.h (DEPRECATED_INIT_FRAME_PC_FIRST):
+	Delete macro.
+
 2004-02-29  Daniel Jacobowitz  <drow@mvista.com>
 
 	* inflow.c (terminal_inferior): Don't give up the terminal if we
