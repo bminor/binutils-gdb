@@ -502,4 +502,7 @@ extern CORE_ADDR skip_language_trampoline (CORE_ADDR pc);
 extern char *language_demangle (const struct language_defn *current_language, 
 				const char *mangled, int options);
 
+/* Splitting strings into words.  */
+extern char *default_word_break_characters (void);
+
 #endif /* defined (LANGUAGE_H) */

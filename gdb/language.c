@@ -1176,6 +1176,15 @@ language_demangle (const struct language_defn *current_language,
   return NULL;
 }
 
+/* Return the default string containing the list of characters
+   delimiting words.  This is a reasonable default value that
+   most languages should be able to use.  */
+
+char *
+default_word_break_characters (void)
+{
+  return " \t\n!@#$%^&*()+=|~`}{[]\"';:?/>.<,-";
+}
 
 /* Define the language that is no language.  */
 

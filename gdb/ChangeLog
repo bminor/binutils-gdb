@@ -1,3 +1,8 @@
+2003-10-06  J. Brobecker  <brobecker@gnat.com>
+
+	* language.h (default_word_break_characters): Add prototype.
+	* language.c (default_word_break_characters): New function.
+
 2003-10-06  Andreas Schwab  <schwab@suse.de>
 
 	* i386-tdep.c (i386_analyze_frame_setup): Also handle xorl/subl
