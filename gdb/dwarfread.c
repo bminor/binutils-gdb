@@ -212,6 +212,7 @@ static int diecount;	/* Approximate count of dies for compilation unit */
 static struct dieinfo *curdie;	/* For warnings and such */
 
 static char *dbbase;	/* Base pointer to dwarf info */
+static int dbsize;	/* Size of dwarf info in bytes */
 static int dbroff;	/* Relative offset from start of .debug section */
 static char *lnbase;	/* Base pointer to line section */
 static int isreg;	/* Kludge to identify register variables */
@@ -499,7 +500,7 @@ SYNOPSIS
 
 	void dwarf_build_psymtabs (int desc, char *filename, 
 	     struct section_offsets *section_offsets,
-	     int mainline, unsigned int dbfoff, unsigned int dbsize,
+	     int mainline, unsigned int dbfoff, unsigned int dbfsize,
 	     unsigned int lnoffset, unsigned int lnsize,
 	     struct objfile *objfile)
 
@@ -523,14 +524,14 @@ RETURNS
  */
 
 void
-dwarf_build_psymtabs (desc, filename, section_offsets, mainline, dbfoff, dbsize,
+dwarf_build_psymtabs (desc, filename, section_offsets, mainline, dbfoff, dbfsize,
 		      lnoffset, lnsize, objfile)
      int desc;
      char *filename;
      struct section_offsets *section_offsets;
      int mainline;
      unsigned int dbfoff;
-     unsigned int dbsize;
+     unsigned int dbfsize;
      unsigned int lnoffset;
      unsigned int lnsize;
      struct objfile *objfile;
@@ -538,6 +539,7 @@ dwarf_build_psymtabs (desc, filename, section_offsets, mainline, dbfoff, dbsize,
   struct cleanup *back_to;
   
   current_objfile = objfile;
+  dbsize = dbfsize;
   dbbase = xmalloc (dbsize);
   dbroff = 0;
   if ((lseek (desc, dbfoff, 0) != dbfoff) ||
@@ -2092,13 +2094,14 @@ read_ofile_symtab (pst)
      unit, seek to the location in the file, and read in all the DIE's. */
 
   diecount = 0;
-  dbbase = xmalloc (DBLENGTH(pst));
+  dbsize = DBLENGTH (pst);
+  dbbase = xmalloc (dbsize);
   dbroff = DBROFF(pst);
   foffset = DBFOFF(pst) + dbroff;
   base_section_offsets = pst->section_offsets;
   baseaddr = ANOFFSET (pst->section_offsets, 0);
   if (bfd_seek (abfd, foffset, 0) ||
-      (bfd_read (dbbase, DBLENGTH(pst), 1, abfd) != DBLENGTH(pst)))
+      (bfd_read (dbbase, dbsize, 1, abfd) != dbsize))
     {
       free (dbbase);
       error ("can't read DWARF data");
@@ -2131,7 +2134,7 @@ read_ofile_symtab (pst)
       make_cleanup (free, lnbase);
     }
 
-  process_dies (dbbase, dbbase + DBLENGTH(pst), pst -> objfile);
+  process_dies (dbbase, dbbase + dbsize, pst -> objfile);
   do_cleanups (back_to);
   current_objfile = NULL;
   return (pst -> objfile -> symtabs);
@@ -3294,6 +3297,12 @@ NOTES
 	that if a padding DIE is used for alignment and the amount needed is
 	less than SIZEOF_DIE_LENGTH, then the padding DIE has to be big
 	enough to align to the next alignment boundry.
+
+	We do some basic sanity checking here, such as verifying that the
+	length of the die would not cause it to overrun the recorded end of
+	the buffer holding the DIE info.  If we find a DIE that is either
+	too small or too large, we force it's length to zero which should
+	cause the caller to take appropriate action.
  */
 
 static void
@@ -3308,9 +3317,11 @@ basicdieinfo (dip, diep, objfile)
   dip -> die_ref = dbroff + (diep - dbbase);
   dip -> die_length = target_to_host (diep, SIZEOF_DIE_LENGTH, GET_UNSIGNED,
 				      objfile);
-  if (dip -> die_length < SIZEOF_DIE_LENGTH)
+  if ((dip -> die_length < SIZEOF_DIE_LENGTH) ||
+      ((diep + dip -> die_length) > (dbbase + dbsize)))
     {
       dwarfwarn ("malformed DIE, bad length (%d bytes)", dip -> die_length);
+      dip -> die_length = 0;
     }
   else if (dip -> die_length < (SIZEOF_DIE_LENGTH + SIZEOF_DIE_TAG))
     {
