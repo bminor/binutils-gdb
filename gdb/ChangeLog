@@ -1,3 +1,68 @@
+Sun Nov 15 09:22:09 1992  Fred Fish  (fnf@cygnus.com)
+
+	* Makefile.in (SFILES_MAINDIR):  Add ch-exp.y.
+	* Makefile.in (YYFILES):  Add ch-exp.tab.c.
+	* Makefile.in (YYOBJ):  Add ch-exp.tab.o.
+	* Makefile.in (saber_gdb):  Add unload of ch-exp.y and load
+	of ch-exp.tab.c.
+	* Makefile.in (distclean):  Add target ch-exp.tab.c.
+	* Makefile.in (realclean):  Add rm of ch-exp.tab.c.
+	* Makefile.in (c-exp.tab.c, m2-exp.tab.c):  Add dependency on
+	Makefile since it contains sed patterns used in generation.
+	Add sed pattern to also delete #include of any malloc.h.
+	* Makefile.in (ch-exp.tab.o, ch-exp.tab.c):  New targets.
+	* ch-exp.y:  New expression parser, for GNU-Chill.
+	* c-exp.y, expr.c, expression.h, language.c, m2-exp.y,
+	parser-defs.h, valarith.c, valops.c, value.h:  Remap macros and
+	function names to conform to K&R terminology with respect to
+	logical and bitwise operators:
+	UNOP_ZEROP => UNOP_LOGICAL_NOT
+	UNOP_LOGNOT => UNOP_COMPLEMENT
+	BINOP_LOGAND => BINOP_BITWISE_AND
+	BINOP_LOGXOR => BINOP_BITWISE_XOR
+	BINOP_LOGIOR => BINOP_BITWISE_IOR
+	BINOP_AND => BINOP_LOGICAL_AND
+	BINOP_OR => BINOP_LOGICAL_OR
+	PREC_OR => PREC_LOGICAL_OR
+	PREC_AND => PREC_LOGICAL_AND
+	PREC_LOGIOR => PREC_BITWISE_IOR
+	PREC_LOGXOR => PREC_BITWISE_XOR
+	PREC_LOGAND => PREC_BITWISE_AND
+	value_zerop() => value_logical_not()
+	value_lognot() => value_complement()
+	* c-exp.y (c_op_print_tab):  Add explicit empty terminator.
+	* m2-exp.y (m2_op_print_tab):  Add explicit empty terminator.
+	* defs.h (enum language):  Add language_chill.
+	* dwarfread.c (set_cu_language):  Add LANG_CHILL case and make
+	LANG_MODULA2 a recognized language.
+	* eval.c (evaluate_subexp):  Add OP_BOOL case.
+	* expprint.c (print_subexp):  Add OP_BOOL case.	
+	* gdbtypes.h (enum_typecode):  Note TYPE_CODE_BOOL used for 
+	Chill as well as Modula-2.
+	* gdbtypes.y (builtin_type_chill_bool, builtin_type_chill_long,
+	builtin_type_chill_ulong, builtin_type_chill_real):  Add.
+	* i387-tdep.c (sys/dir.h):  Remove, appears to be unnecessary
+	and is nonexistant in some SVR4 based systems.
+	* language.c (DEFAULT_ALLOCSIZE):  Change from 3 => 4.
+	* language.c (set_language_command):  Add chill.
+	* language.c (binop_result_type, integral_type, character_type,
+	boolean_type, structured_type, value_true, binop_type_check):
+	Add language_chill cases.
+	* language.h (_LANG_chill):  Define.
+	* m2-exp.y (number_sign, modblock):  Make static, #ifdef out
+	unused modblock.
+	* m2-exp.y (ANDAND):  Rename to LOGICAL_AND.
+	* source.c (source_info):  Fix minor nits, print "1 line" rather
+	than "1 lines", and "language is <lang>".
+	* symfile.c (deduce_language_from_filename):  Recognize the
+	filename extensions ".chill", ".c186", and ".c286" for Chill.
+	* valarith.c (value_binop):  Handle TYPE_CODE_BOOL as well
+	as TYPE_CODE_INT and TYPE_CODE_FLOAT.
+	* valprint.c (val_print):  Print TYPE_CODE_BOOL type values as
+	"TRUE" or "FALSE".
+	* valprint.c (typedef_print):  Add case for language_chill.
+	* values.c (value_from_longest):  Handle TYPE_CODE_BOOL.
+
 Fri Nov 13 20:24:10 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* infcmd.c (step_over_calls):  Improve comments.

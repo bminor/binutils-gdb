@@ -112,7 +112,7 @@ const struct language_defn *expected_language;
 static const struct language_defn **languages;
 static unsigned languages_size;
 static unsigned languages_allocsize;
-#define	DEFAULT_ALLOCSIZE 3
+#define	DEFAULT_ALLOCSIZE 4
 
 /* The "set language/type/range" commands all put stuff in these
    buffers.  This is to make them work as set/show commands.  The
@@ -165,6 +165,7 @@ set_language_command (ignore, from_tty)
 local or auto    Automatic setting based on source file\n\
 c                Use the C language\n\
 c++              Use the C++ language\n\
+chill            Use the Chill language\n\
 modula-2         Use the Modula-2 language\n");
     /* Restore the silly string. */
     set_language(current_language->la_language);
@@ -457,6 +458,8 @@ binop_result_type(v1,v2)
 	 not needed. */
       return l1 > l2 ? VALUE_TYPE(v1) : VALUE_TYPE(v2);
       break;
+    case language_chill:
+      error ("Missing Chill support in function binop_result_check.");/*FIXME*/
    }
    abort();
    return (struct type *)0;	/* For lint */
@@ -605,6 +608,8 @@ integral_type (type)
 	 (TYPE_CODE(type) != TYPE_CODE_ENUM) ? 0 : 1;
    case language_m2:
       return TYPE_CODE(type) != TYPE_CODE_INT ? 0 : 1;
+   case language_chill:
+      error ("Missing Chill support in function integral_type.");  /*FIXME*/
    default:
       error ("Language not supported.");
    }
@@ -640,6 +645,8 @@ character_type (type)
       return (TYPE_CODE(type) == TYPE_CODE_INT) &&
 	 TYPE_LENGTH(type) == sizeof(char)
 	 ? 1 : 0;
+   case language_chill:
+      error ("Missing Chill support in function character_type.");  /*FIXME*/
    default:
       return (0);
    }
@@ -652,6 +659,7 @@ boolean_type (type)
 {
    switch(current_language->la_language)
    {
+   case language_chill:
    case language_m2:
       return TYPE_CODE(type) != TYPE_CODE_BOOL ? 0 : 1;
 
@@ -696,6 +704,8 @@ structured_type(type)
       return (TYPE_CODE(type) == TYPE_CODE_STRUCT) ||
 	 (TYPE_CODE(type) == TYPE_CODE_SET) ||
 	    (TYPE_CODE(type) == TYPE_CODE_ARRAY);
+   case language_chill:
+      error ("Missing Chill support in function structured_type.");  /*FIXME*/
    default:
       return (0);
    }
@@ -717,7 +727,7 @@ value_true(val)
 
   case language_c:
   case language_cplus:
-    return !value_zerop (val);
+    return !value_logical_not (val);
 
   case language_m2:
     type = VALUE_TYPE(val);
@@ -739,6 +749,9 @@ value_true(val)
     else
       return 0;		/* BOOLEAN with value FALSE */
     break;
+
+  case language_chill:
+    error ("Missing Chill support in function value_type.");  /*FIXME*/
 
   default:
     error ("Language not supported.");
@@ -786,8 +799,8 @@ binop_type_check(arg1,arg2,op)
 	 type_op_error ("Arguments to %s must be of the same type.",op);
       break;
 
-   case BINOP_AND:
-   case BINOP_OR:
+   case BINOP_LOGICAL_AND:
+   case BINOP_LOGICAL_OR:
       if (!boolean_type(t1) || !boolean_type(t2))
 	 type_op_error ("Arguments to %s must be of boolean type.",op);
       break;
@@ -839,7 +852,7 @@ binop_type_check(arg1,arg2,op)
 
    /* Unary checks -- arg2 is null */
 
-   case UNOP_ZEROP:
+   case UNOP_LOGICAL_NOT:
       if (!boolean_type(t1))
 	 type_op_error ("Argument to %s must be of boolean type.",op);
       break;
@@ -900,6 +913,12 @@ binop_type_check(arg1,arg2,op)
 	    break;
 	 }
 #endif
+
+#ifdef _LANG_chill
+       case language_chill:
+	 error ("Missing Chill support in function binop_type_check.");/*FIXME*/
+#endif
+
       }
    }
 }

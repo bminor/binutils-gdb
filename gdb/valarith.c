@@ -134,8 +134,7 @@ value_subscripted_rvalue (array, idx)
     error ("no such vector element");
 
   v = allocate_value (elt_type);
-  (void) memcpy (VALUE_CONTENTS (v), VALUE_CONTENTS (array) + elt_offs,
-		 elt_size);
+  memcpy (VALUE_CONTENTS (v), VALUE_CONTENTS (array) + elt_offs, elt_size);
 
   if (VALUE_LVAL (array) == lval_internalvar)
     VALUE_LVAL (v) = lval_internalvar_component;
@@ -225,32 +224,32 @@ value_x_binop (arg1, arg2, op, otherop)
   ptr = tstr+8;
   switch (op)
     {
-    case BINOP_ADD:	strcpy(ptr,"+"); break;
-    case BINOP_SUB:	strcpy(ptr,"-"); break;
-    case BINOP_MUL:	strcpy(ptr,"*"); break;
-    case BINOP_DIV:	strcpy(ptr,"/"); break;
-    case BINOP_REM:	strcpy(ptr,"%"); break;
-    case BINOP_LSH:	strcpy(ptr,"<<"); break;
-    case BINOP_RSH:	strcpy(ptr,">>"); break;
-    case BINOP_LOGAND:	strcpy(ptr,"&"); break;
-    case BINOP_LOGIOR:	strcpy(ptr,"|"); break;
-    case BINOP_LOGXOR:	strcpy(ptr,"^"); break;
-    case BINOP_AND:	strcpy(ptr,"&&"); break;
-    case BINOP_OR:	strcpy(ptr,"||"); break;
-    case BINOP_MIN:	strcpy(ptr,"<?"); break;
-    case BINOP_MAX:	strcpy(ptr,">?"); break;
-    case BINOP_ASSIGN:	strcpy(ptr,"="); break;
+    case BINOP_ADD:		strcpy(ptr,"+"); break;
+    case BINOP_SUB:		strcpy(ptr,"-"); break;
+    case BINOP_MUL:		strcpy(ptr,"*"); break;
+    case BINOP_DIV:		strcpy(ptr,"/"); break;
+    case BINOP_REM:		strcpy(ptr,"%"); break;
+    case BINOP_LSH:		strcpy(ptr,"<<"); break;
+    case BINOP_RSH:		strcpy(ptr,">>"); break;
+    case BINOP_BITWISE_AND:	strcpy(ptr,"&"); break;
+    case BINOP_BITWISE_IOR:	strcpy(ptr,"|"); break;
+    case BINOP_BITWISE_XOR:	strcpy(ptr,"^"); break;
+    case BINOP_LOGICAL_AND:	strcpy(ptr,"&&"); break;
+    case BINOP_LOGICAL_OR:	strcpy(ptr,"||"); break;
+    case BINOP_MIN:		strcpy(ptr,"<?"); break;
+    case BINOP_MAX:		strcpy(ptr,">?"); break;
+    case BINOP_ASSIGN:		strcpy(ptr,"="); break;
     case BINOP_ASSIGN_MODIFY:	
       switch (otherop)
 	{
-	case BINOP_ADD:      strcpy(ptr,"+="); break;
-	case BINOP_SUB:      strcpy(ptr,"-="); break;
-	case BINOP_MUL:      strcpy(ptr,"*="); break;
-	case BINOP_DIV:      strcpy(ptr,"/="); break;
-	case BINOP_REM:      strcpy(ptr,"%="); break;
-	case BINOP_LOGAND:   strcpy(ptr,"&="); break;
-	case BINOP_LOGIOR:   strcpy(ptr,"|="); break;
-	case BINOP_LOGXOR:   strcpy(ptr,"^="); break;
+	case BINOP_ADD:		strcpy(ptr,"+="); break;
+	case BINOP_SUB:		strcpy(ptr,"-="); break;
+	case BINOP_MUL:		strcpy(ptr,"*="); break;
+	case BINOP_DIV:		strcpy(ptr,"/="); break;
+	case BINOP_REM:		strcpy(ptr,"%="); break;
+	case BINOP_BITWISE_AND:	strcpy(ptr,"&="); break;
+	case BINOP_BITWISE_IOR:	strcpy(ptr,"|="); break;
+	case BINOP_BITWISE_XOR:	strcpy(ptr,"^="); break;
 	default:
 	  error ("Invalid binary operation specified.");
 	}
@@ -318,9 +317,9 @@ value_x_unop (arg1, op)
     case UNOP_PREDECREMENT:	strcpy(ptr,"++"); break;
     case UNOP_POSTINCREMENT:	strcpy(ptr,"++"); break;
     case UNOP_POSTDECREMENT:	strcpy(ptr,"++"); break;
-    case UNOP_ZEROP:	strcpy(ptr,"!"); break;
-    case UNOP_LOGNOT:	strcpy(ptr,"~"); break;
-    case UNOP_NEG:	strcpy(ptr,"-"); break;
+    case UNOP_LOGICAL_NOT:	strcpy(ptr,"!"); break;
+    case UNOP_COMPLEMENT:	strcpy(ptr,"~"); break;
+    case UNOP_NEG:		strcpy(ptr,"-"); break;
     default:
       error ("Invalid binary operation specified.");
     }
@@ -354,12 +353,16 @@ value_binop (arg1, arg2, op)
 
   if ((TYPE_CODE (VALUE_TYPE (arg1)) != TYPE_CODE_FLT
        &&
-       TYPE_CODE (VALUE_TYPE (arg1)) != TYPE_CODE_INT)
+       TYPE_CODE (VALUE_TYPE (arg1)) != TYPE_CODE_INT
+       &&
+       TYPE_CODE (VALUE_TYPE (arg1)) != TYPE_CODE_BOOL)
       ||
       (TYPE_CODE (VALUE_TYPE (arg2)) != TYPE_CODE_FLT
        &&
-       TYPE_CODE (VALUE_TYPE (arg2)) != TYPE_CODE_INT))
-    error ("Argument to arithmetic operation not a number.");
+       TYPE_CODE (VALUE_TYPE (arg2)) != TYPE_CODE_INT
+       &&
+       TYPE_CODE (VALUE_TYPE (arg2)) != TYPE_CODE_BOOL))
+    error ("Argument to arithmetic operation not a number or boolean.");
 
   if (TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_FLT
       ||
@@ -394,8 +397,39 @@ value_binop (arg1, arg2, op)
       SWAP_TARGET_AND_HOST (&v, sizeof (v));
       *(double *) VALUE_CONTENTS_RAW (val) = v;
     }
+  else if (TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_BOOL
+	   &&
+	   TYPE_CODE (VALUE_TYPE (arg2)) == TYPE_CODE_BOOL)
+      {
+	  LONGEST v1, v2, v;
+	  v1 = value_as_long (arg1);
+	  v2 = value_as_long (arg2);
+	  
+	  switch (op)
+	    {
+	    case BINOP_BITWISE_AND:
+	      v = v1 & v2;
+	      break;
+	      
+	    case BINOP_BITWISE_IOR:
+	      v = v1 | v2;
+	      break;
+	      
+	    case BINOP_BITWISE_XOR:
+	      v = v1 ^ v2;
+	      break;
+	      
+	    default:
+	      error ("Invalid operation on booleans.");
+	    }
+	  
+	  val = allocate_value (builtin_type_chill_bool);
+	  SWAP_TARGET_AND_HOST (&v, sizeof (v));
+	  *(LONGEST *) VALUE_CONTENTS_RAW (val) = v;
+      }
   else
     /* Integral operations here.  */
+    /* FIXME:  Also mixed integral/booleans, with result an integer. */
     {
       /* Should we promote to unsigned longest?  */
       if ((TYPE_UNSIGNED (VALUE_TYPE (arg1))
@@ -437,23 +471,23 @@ value_binop (arg1, arg2, op)
 	      v = v1 >> v2;
 	      break;
 	      
-	    case BINOP_LOGAND:
+	    case BINOP_BITWISE_AND:
 	      v = v1 & v2;
 	      break;
 	      
-	    case BINOP_LOGIOR:
+	    case BINOP_BITWISE_IOR:
 	      v = v1 | v2;
 	      break;
 	      
-	    case BINOP_LOGXOR:
+	    case BINOP_BITWISE_XOR:
 	      v = v1 ^ v2;
 	      break;
 	      
-	    case BINOP_AND:
+	    case BINOP_LOGICAL_AND:
 	      v = v1 && v2;
 	      break;
 	      
-	    case BINOP_OR:
+	    case BINOP_LOGICAL_OR:
 	      v = v1 || v2;
 	      break;
 	      
@@ -509,23 +543,23 @@ value_binop (arg1, arg2, op)
 	      v = v1 >> v2;
 	      break;
 	      
-	    case BINOP_LOGAND:
+	    case BINOP_BITWISE_AND:
 	      v = v1 & v2;
 	      break;
 	      
-	    case BINOP_LOGIOR:
+	    case BINOP_BITWISE_IOR:
 	      v = v1 | v2;
 	      break;
 	      
-	    case BINOP_LOGXOR:
+	    case BINOP_BITWISE_XOR:
 	      v = v1 ^ v2;
 	      break;
 	      
-	    case BINOP_AND:
+	    case BINOP_LOGICAL_AND:
 	      v = v1 && v2;
 	      break;
 	      
-	    case BINOP_OR:
+	    case BINOP_LOGICAL_OR:
 	      v = v1 || v2;
 	      break;
 	      
@@ -553,7 +587,7 @@ value_binop (arg1, arg2, op)
 /* Simulate the C operator ! -- return 1 if ARG1 contains zero.  */
 
 int
-value_zerop (arg1)
+value_logical_not (arg1)
      value arg1;
 {
   register int len;
@@ -696,7 +730,7 @@ value_neg (arg1)
 }
 
 value
-value_lognot (arg1)
+value_complement (arg1)
      register value arg1;
 {
   COERCE_ENUM (arg1);

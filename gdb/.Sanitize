@@ -52,6 +52,7 @@ buildsym.c
 buildsym.h
 c-exp.y
 call-cmds.h
+ch-exp.y
 coffread.c
 command.c
 command.h

@@ -1384,7 +1384,7 @@ value_from_longest (type, num)
      integers, and that all pointers have the same form.  */
   if (code == TYPE_CODE_INT  || code == TYPE_CODE_ENUM || 
       code == TYPE_CODE_CHAR || code == TYPE_CODE_PTR ||
-      code == TYPE_CODE_REF)
+      code == TYPE_CODE_REF  || code == TYPE_CODE_BOOL)
     {
       if (len == sizeof (char))
 	* (char *) VALUE_CONTENTS_RAW (val) = num;

@@ -105,11 +105,13 @@ int
 yyparse PARAMS ((void));
 
 /* The sign of the number being parsed. */
-int number_sign = 1;
+static int number_sign = 1;
 
 /* The block that the module specified by the qualifer on an identifer is
    contained in, */
-struct block *modblock=0;
+#if 0
+static struct block *modblock=0;
+#endif
 
 /* #define	YYDEBUG	1 */
 %}
@@ -174,7 +176,7 @@ struct block *modblock=0;
 %nonassoc ASSIGN
 %left '<' '>' LEQ GEQ '=' NOTEQUAL '#' IN
 %left OROR
-%left ANDAND '&'
+%left LOGICAL_AND '&'
 %left '@'
 %left '+' '-'
 %left '*' '/' DIV MOD
@@ -217,7 +219,7 @@ exp	:	'+' exp    %prec UNARY
 	;
 
 exp	:	not_exp exp %prec UNARY
-			{ write_exp_elt_opcode (UNOP_ZEROP); }
+			{ write_exp_elt_opcode (UNOP_LOGICAL_NOT); }
 	;
 
 not_exp	:	NOT
@@ -444,16 +446,12 @@ exp	:	exp '>' exp
 			{ write_exp_elt_opcode (BINOP_GTR); }
 	;
 
-exp	:	exp ANDAND exp
-			{ write_exp_elt_opcode (BINOP_AND); }
-	;
-
-exp	:	exp '&'	exp
-			{ write_exp_elt_opcode (BINOP_AND); }
+exp	:	exp LOGICAL_AND exp
+			{ write_exp_elt_opcode (BINOP_LOGICAL_AND); }
 	;
 
 exp	:	exp OROR exp
-			{ write_exp_elt_opcode (BINOP_OR); }
+			{ write_exp_elt_opcode (BINOP_LOGICAL_OR); }
 	;
 
 exp	:	exp ASSIGN exp
@@ -813,7 +811,7 @@ static struct keyword keytab[] =
 {
     {"OR" ,   OROR	 },
     {"IN",    IN         },/* Note space after IN */
-    {"AND",   ANDAND     },
+    {"AND",   LOGICAL_AND},
     {"ABS",   ABS	 },
     {"CHR",   CHR	 },
     {"DEC",   DEC	 },
@@ -1189,9 +1187,9 @@ const static struct op_print m2_op_print_tab[] = {
     {"DIV", BINOP_INTDIV, PREC_MUL, 0},
     {"MOD", BINOP_REM, PREC_MUL, 0},
     {":=",  BINOP_ASSIGN, PREC_ASSIGN, 1},
-    {"OR",  BINOP_OR, PREC_OR, 0},
-    {"AND", BINOP_AND, PREC_AND, 0},
-    {"NOT", UNOP_ZEROP, PREC_PREFIX, 0},
+    {"OR",  BINOP_LOGICAL_OR, PREC_LOGICAL_OR, 0},
+    {"AND", BINOP_LOGICAL_AND, PREC_LOGICAL_AND, 0},
+    {"NOT", UNOP_LOGICAL_NOT, PREC_PREFIX, 0},
     {"=",   BINOP_EQUAL, PREC_EQUAL, 0},
     {"<>",  BINOP_NOTEQUAL, PREC_EQUAL, 0},
     {"<=",  BINOP_LEQ, PREC_ORDER, 0},
@@ -1200,6 +1198,7 @@ const static struct op_print m2_op_print_tab[] = {
     {"<",   BINOP_LESS, PREC_ORDER, 0},
     {"^",   UNOP_IND, PREC_PREFIX, 0},
     {"@",   BINOP_REPEAT, PREC_REPEAT, 0},
+    {NULL,  0, 0, 0}
 };
 
 /* The built-in types of Modula-2.  */

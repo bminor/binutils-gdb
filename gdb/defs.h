@@ -47,8 +47,11 @@ quit PARAMS ((void));
 
 #define QUIT { if (quit_flag) quit (); }
 
-/* Notes on classes: class_alias is for alias commands which are not
-   abbreviations of the original command.  */
+/* Command classes are top-level categories into which commands are broken
+   down for "help" purposes.  
+   Notes on classes: class_alias is for alias commands which are not
+   abbreviations of the original command.  class-pseudo is for commands
+   which are not really commands nor help topics ("stop").  */
 
 enum command_class
 {
@@ -57,7 +60,8 @@ enum command_class
   /* Classes of commands */
   no_class = -1, class_run = 0, class_vars, class_stack,
   class_files, class_support, class_info, class_breakpoint,
-  class_alias, class_obscure, class_user, class_maintenance
+  class_alias, class_obscure, class_user, class_maintenance,
+  class_pseudo
 };
 
 /* the cleanup list records things that have to be undone
@@ -338,6 +342,7 @@ enum language
    language_auto,		/* Placeholder for automatic setting */
    language_c, 			/* C */
    language_cplus, 		/* C++ */
+   language_chill,		/* Chill */
    language_m2			/* Modula-2 */
 };
 
@@ -367,6 +372,11 @@ local_hex_string_custom PARAMS ((int, char *));	/* language.c */
    xm-*.h files, built by the `configure' script.  */
 
 #include "xm.h"
+
+/* Native machine support.  This will be a symlink to one of the
+   nm-*.h files, built by the `configure' script.  */
+
+#include "nm.h"
 
 /* If the xm.h file did not define the mode string used to open the
    files, assume that binary files are opened the same way as text
@@ -810,7 +820,5 @@ push_word ();
 #ifndef MAINTENANCE_CMDS
 #define MAINTENANCE_CMDS 1
 #endif
-
-#include "energize.h"
 
 #endif /* !defined (DEFS_H) */

@@ -628,6 +628,7 @@ cplus_val_print (type, valaddr, stream, format, recurse, pretty, dont_print)
 	  obstack_ptr_grow (&dont_print_obstack, TYPE_BASECLASS (type, i));
 	}
 
+      /* Fix to use baseclass_offset instead. FIXME */
       baddr = baseclass_addr (type, i, valaddr, 0, &err);
       if (err == 0 && baddr == 0)
 	error ("could not find virtual baseclass `%s'\n",
@@ -867,8 +868,9 @@ val_print (type, valaddr, address, stream, format, deref_ref, recurse, pretty)
 
 	  addr = unpack_pointer (lookup_pointer_type (builtin_type_void),
 				valaddr);
-	  if (addr < 128)			/* FIXME!  What is this 128? */
+	  if (METHOD_PTR_IS_VIRTUAL(addr))
 	    {
+	      int offset = METHOD_PTR_TO_VOFFSET(addr);
 	      len = TYPE_NFN_FIELDS (domain);
 	      for (i = 0; i < len; i++)
 		{
@@ -878,9 +880,9 @@ val_print (type, valaddr, address, stream, format, deref_ref, recurse, pretty)
 		  for (j = 0; j < len2; j++)
 		    {
 		      QUIT;
-		      if (TYPE_FN_FIELD_VOFFSET (f, j) == addr)
+		      if (TYPE_FN_FIELD_VOFFSET (f, j) == offset)
 			{
-			  kind = "virtual";
+			  kind = "virtual ";
 			  goto common;
 			}
 		    }
@@ -1283,6 +1285,11 @@ val_print (type, valaddr, address, stream, format, deref_ref, recurse, pretty)
       fprintf_filtered (stream, "<range type>");
       break;
 
+    case TYPE_CODE_BOOL:
+      val = unpack_long (builtin_type_chill_bool, valaddr);
+      fprintf_filtered (stream, val ? "TRUE" : "FALSE");
+      break;
+
     default:
       error ("Invalid type code in symbol table.");
     }
@@ -1323,6 +1330,10 @@ typedef_print (type, new, stream)
 	 fprintf_filtered(stream, "<builtin> = ");
       type_print(type,"",stream,0);
       break;
+#endif
+#ifdef _LANG_chill
+   case language_chill:
+      error("Missing Chill support in function typedef_print."); /*FIXME*/
 #endif
    default:
       error("Language not supported.");
@@ -1862,8 +1873,13 @@ type_print_base (type, stream, show, level)
 	      fprintf_filtered (stream, ";\n");
 	    }
 
-	  /* C++: print out the methods */
+	  /* If there are both fields and methods, put a space between. */
 	  len = TYPE_NFN_FIELDS (type);
+	  if (len && section_type != s_none)
+	     fprintf_filtered (stream, "\n");
+
+	  /* C++: print out the methods */
+
 	  for (i = 0; i < len; i++)
 	    {
 	      struct fn_field *f = TYPE_FN_FIELDLIST1 (type, i);

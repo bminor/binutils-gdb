@@ -29,7 +29,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #endif
 
 #include <sys/param.h>
-#include <sys/dir.h>
 #include <signal.h>
 #include <sys/user.h>
 #include <sys/ioctl.h>

@@ -234,11 +234,11 @@ exp	:	'-' exp    %prec UNARY
 	;
 
 exp	:	'!' exp    %prec UNARY
-			{ write_exp_elt_opcode (UNOP_ZEROP); }
+			{ write_exp_elt_opcode (UNOP_LOGICAL_NOT); }
 	;
 
 exp	:	'~' exp    %prec UNARY
-			{ write_exp_elt_opcode (UNOP_LOGNOT); }
+			{ write_exp_elt_opcode (UNOP_COMPLEMENT); }
 	;
 
 exp	:	INCREMENT exp    %prec UNARY
@@ -396,23 +396,23 @@ exp	:	exp '>' exp
 	;
 
 exp	:	exp '&' exp
-			{ write_exp_elt_opcode (BINOP_LOGAND); }
+			{ write_exp_elt_opcode (BINOP_BITWISE_AND); }
 	;
 
 exp	:	exp '^' exp
-			{ write_exp_elt_opcode (BINOP_LOGXOR); }
+			{ write_exp_elt_opcode (BINOP_BITWISE_XOR); }
 	;
 
 exp	:	exp '|' exp
-			{ write_exp_elt_opcode (BINOP_LOGIOR); }
+			{ write_exp_elt_opcode (BINOP_BITWISE_IOR); }
 	;
 
 exp	:	exp ANDAND exp
-			{ write_exp_elt_opcode (BINOP_AND); }
+			{ write_exp_elt_opcode (BINOP_LOGICAL_AND); }
 	;
 
 exp	:	exp OROR exp
-			{ write_exp_elt_opcode (BINOP_OR); }
+			{ write_exp_elt_opcode (BINOP_LOGICAL_OR); }
 	;
 
 exp	:	exp '?' exp ':' exp	%prec '?'
@@ -1057,9 +1057,9 @@ const static struct token tokentab2[] =
     {"*=", ASSIGN_MODIFY, BINOP_MUL},
     {"/=", ASSIGN_MODIFY, BINOP_DIV},
     {"%=", ASSIGN_MODIFY, BINOP_REM},
-    {"|=", ASSIGN_MODIFY, BINOP_LOGIOR},
-    {"&=", ASSIGN_MODIFY, BINOP_LOGAND},
-    {"^=", ASSIGN_MODIFY, BINOP_LOGXOR},
+    {"|=", ASSIGN_MODIFY, BINOP_BITWISE_IOR},
+    {"&=", ASSIGN_MODIFY, BINOP_BITWISE_AND},
+    {"^=", ASSIGN_MODIFY, BINOP_BITWISE_XOR},
     {"++", INCREMENT, BINOP_END},
     {"--", DECREMENT, BINOP_END},
     {"->", ARROW, BINOP_END},
@@ -1478,11 +1478,11 @@ const static struct op_print c_op_print_tab[] =
   {
     {",",  BINOP_COMMA, PREC_COMMA, 0},
     {"=",  BINOP_ASSIGN, PREC_ASSIGN, 1},
-    {"||", BINOP_OR, PREC_OR, 0},
-    {"&&", BINOP_AND, PREC_AND, 0},
-    {"|",  BINOP_LOGIOR, PREC_LOGIOR, 0},
-    {"&",  BINOP_LOGAND, PREC_LOGAND, 0},
-    {"^",  BINOP_LOGXOR, PREC_LOGXOR, 0},
+    {"||", BINOP_LOGICAL_OR, PREC_LOGICAL_OR, 0},
+    {"&&", BINOP_LOGICAL_AND, PREC_LOGICAL_AND, 0},
+    {"|",  BINOP_BITWISE_IOR, PREC_BITWISE_IOR, 0},
+    {"^",  BINOP_BITWISE_XOR, PREC_BITWISE_XOR, 0},
+    {"&",  BINOP_BITWISE_AND, PREC_BITWISE_AND, 0},
     {"==", BINOP_EQUAL, PREC_EQUAL, 0},
     {"!=", BINOP_NOTEQUAL, PREC_EQUAL, 0},
     {"<=", BINOP_LEQ, PREC_ORDER, 0},
@@ -1498,8 +1498,8 @@ const static struct op_print c_op_print_tab[] =
     {"%",  BINOP_REM, PREC_MUL, 0},
     {"@",  BINOP_REPEAT, PREC_REPEAT, 0},
     {"-",  UNOP_NEG, PREC_PREFIX, 0},
-    {"!",  UNOP_ZEROP, PREC_PREFIX, 0},
-    {"~",  UNOP_LOGNOT, PREC_PREFIX, 0},
+    {"!",  UNOP_LOGICAL_NOT, PREC_PREFIX, 0},
+    {"~",  UNOP_COMPLEMENT, PREC_PREFIX, 0},
     {"*",  UNOP_IND, PREC_PREFIX, 0},
     {"&",  UNOP_ADDR, PREC_PREFIX, 0},
     {"sizeof ", UNOP_SIZEOF, PREC_PREFIX, 0},
@@ -1507,6 +1507,7 @@ const static struct op_print c_op_print_tab[] =
     {"--", UNOP_PREDECREMENT, PREC_PREFIX, 0},
     /* C++  */
     {"::", BINOP_SCOPE, PREC_PREFIX, 0},
+    {NULL, 0, 0, 0}
 };
 
 /* These variables point to the objects

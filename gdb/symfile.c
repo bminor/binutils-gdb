@@ -29,6 +29,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "objfiles.h"
 #include "gdbcmd.h"
 #include "breakpoint.h"
+#include "language.h"
 
 #include <obstack.h>
 #include <assert.h>
@@ -48,6 +49,9 @@ int readnow_symbol_files;		/* Read full symbols immediately */
 extern int info_verbose;
 
 /* Functions this file defines */
+
+static void
+set_initial_language PARAMS ((void));
 
 static void
 load_command PARAMS ((char *, int));
@@ -643,7 +647,7 @@ symbol_file_command (args, from_tty)
       current_source_line = 0;
       if (from_tty)
 	{
-	  printf_filtered ("No symbol file now.\n");
+	  printf ("No symbol file now.\n");
 	}
     }
   else
@@ -681,8 +685,42 @@ symbol_file_command (args, from_tty)
       else
 	{
 	  symbol_file_add (name, from_tty, (CORE_ADDR)0, 1, mapped, readnow);
+	  set_initial_language ();
 	}
       do_cleanups (cleanups);
+    }
+}
+
+/* Set the initial language.
+
+   A better solution would be to record the language in the psymtab when reading
+   partial symbols, and then use it (if known) to set the language.  This would
+   be a win for formats that encode the language in an easily discoverable place,
+   such as DWARF.  For stabs, we can jump through hoops looking for specially
+   named symbols or try to intuit the language from the specific type of stabs
+   we find, but we can't do that until later when we read in full symbols.
+   FIXME.  */
+
+static void
+set_initial_language ()
+{
+  struct partial_symtab *pst;
+  enum language lang = language_unknown;  	
+
+  pst = find_main_psymtab ();
+  if (pst != NULL)
+    {
+      if (pst -> filename != NULL)
+	{
+	  lang = deduce_language_from_filename (pst -> filename);
+        }
+      if (lang == language_unknown)
+	{
+	    /* Make C the default language */
+	    lang = language_c;
+	}
+      set_language (lang);
+      expected_language = current_language;	/* Don't warn the user */
     }
 }
 
@@ -720,6 +758,7 @@ symfile_bfd_open (name)
       error ("\"%s\": can't open to read symbols: %s.", name,
 	     bfd_errmsg (bfd_error));
     }
+  sym_bfd->cacheable = true;
 
   if (!bfd_check_format (sym_bfd, bfd_object))
     {
@@ -1013,6 +1052,8 @@ deduce_language_from_filename (filename)
      return language_c;
   else if(!strcmp(c,".cc") || !strcmp(c,".C"))
      return language_cplus;
+  else if(!strcmp(c,".chill") || !strcmp(c,".c186") || !strcmp(c,".c286"))
+     return language_chill;
 
   return language_unknown;		/* default */
 }
@@ -1128,7 +1169,7 @@ clear_symtab_users_once ()
     return;
   clear_symtab_users_done = clear_symtab_users_queued;
 
-  printf_filtered ("Resetting debugger state after updating old symbol tables\n");
+  printf ("Resetting debugger state after updating old symbol tables\n");
 
   /* Someday, we should do better than this, by only blowing away
      the things that really need to be blown.  */

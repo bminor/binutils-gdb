@@ -32,6 +32,7 @@ struct value;
 /* #include "lang_def.h" */
 #define	_LANG_c
 #define	_LANG_m2
+#define	_LANG_chill
 
 /* range_mode ==
    range_mode_auto:   range_check set automatically to default of language.

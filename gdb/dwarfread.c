@@ -486,13 +486,18 @@ set_cu_language (dip)
       case LANG_C_PLUS_PLUS:
 	cu_language = language_cplus;
 	break;
+      case LANG_CHILL:
+	cu_language = language_chill;
+	break;
+      case LANG_MODULA2:
+	cu_language = language_m2;
+	break;
       case LANG_ADA83:
       case LANG_COBOL74:
       case LANG_COBOL85:
       case LANG_FORTRAN77:
       case LANG_FORTRAN90:
       case LANG_PASCAL83:
-      case LANG_MODULA2:
       default:
 	cu_language = language_unknown;
 	break;

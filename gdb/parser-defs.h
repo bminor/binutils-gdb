@@ -175,9 +175,9 @@ int comma_terminates;
    they are used as the "surrounding precedence" to force
    various kinds of things to be parenthesized.  */
 enum precedence
-{ PREC_NULL, PREC_COMMA, PREC_ABOVE_COMMA, PREC_ASSIGN, PREC_OR, PREC_AND,
-  PREC_LOGIOR, PREC_LOGAND, PREC_LOGXOR, PREC_EQUAL, PREC_ORDER,
-  PREC_SHIFT, PREC_ADD, PREC_MUL, PREC_REPEAT,
+{ PREC_NULL, PREC_COMMA, PREC_ABOVE_COMMA, PREC_ASSIGN, PREC_LOGICAL_OR,
+  PREC_LOGICAL_AND, PREC_BITWISE_IOR, PREC_BITWISE_AND, PREC_BITWISE_XOR,
+  PREC_EQUAL, PREC_ORDER, PREC_SHIFT, PREC_ADD, PREC_MUL, PREC_REPEAT,
   PREC_HYPER, PREC_PREFIX, PREC_SUFFIX };
 
 /* Table mapping opcodes into strings for printing operators

@@ -80,7 +80,7 @@ enum type_code
 
   /* Modula-2 */
   TYPE_CODE_CHAR,		/* *real* character type */
-  TYPE_CODE_BOOL		/* Builtin Modula-2 BOOLEAN */
+  TYPE_CODE_BOOL		/* Builtin Modula-2/Chill BOOLEAN */
 };
 
 /* For now allow source to use TYPE_CODE_CLASS for C++ classes, as an
@@ -488,6 +488,13 @@ extern struct type *builtin_type_m2_int;
 extern struct type *builtin_type_m2_card;
 extern struct type *builtin_type_m2_real;
 extern struct type *builtin_type_m2_bool;
+
+/* Chill types */
+
+extern struct type *builtin_type_chill_bool;
+extern struct type *builtin_type_chill_long;
+extern struct type *builtin_type_chill_ulong;
+extern struct type *builtin_type_chill_real;
 
 /* LONG_LONG is defined if the host has "long long".  */
 

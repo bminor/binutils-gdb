@@ -237,6 +237,11 @@ evaluate_subexp (expect_type, exp, pos, noside)
       (*pos) += 2;
       return value_of_register (longest_to_int (exp->elts[pc + 1].longconst));
 
+    case OP_BOOL:
+      (*pos) += 2;
+      return value_from_longest (builtin_type_chill_bool,
+				 exp->elts[pc + 1].longconst);
+
     case OP_INTERNALVAR:
       (*pos) += 2;
       return value_of_internalvar (exp->elts[pc + 1].internalvar);
@@ -252,7 +257,7 @@ evaluate_subexp (expect_type, exp, pos, noside)
     case TERNOP_COND:
       /* Skip third and second args to evaluate the first one.  */
       arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
-      if (value_zerop (arg1))
+      if (value_logical_not (arg1))
 	{
 	  evaluate_subexp (NULL_TYPE, exp, pos, EVAL_SKIP);
 	  return evaluate_subexp (NULL_TYPE, exp, pos, noside);
@@ -342,9 +347,8 @@ evaluate_subexp (expect_type, exp, pos, noside)
 	  nargs = longest_to_int (exp->elts[pc + 1].longconst) + 1;
 	  /* First, evaluate the structure into arg2 */
 	  pc2 = (*pos)++;
-	  /* type = exp->elts[pc2 + 1].type; */
-	  tem2 = strlen (&exp->elts[pc2 + 2].string);
-	  *pos += 3 + (tem2 + sizeof (union exp_element)) / sizeof (union exp_element);
+	  tem2 = strlen (&exp->elts[pc2 + 1].string);
+	  *pos += 2 + (tem2 + sizeof (union exp_element)) / sizeof (union exp_element);
 	  if (noside == EVAL_SKIP)
 	    goto nosideret;
 
@@ -377,13 +381,9 @@ evaluate_subexp (expect_type, exp, pos, noside)
 	  int static_memfuncp;
 	  value temp = arg2;
 
-	  /* argvec[0] gets the method;
-	     argvec[1] gets the 'this' pointer (unless static) (from arg2);
-	     the remaining args go into the rest of argvec. */
-
 	  argvec[1] = arg2;
 	  argvec[0] =
-	    value_struct_elt (&temp, argvec+1, &exp->elts[pc2 + 2].string,
+	    value_struct_elt (&temp, argvec+1, &exp->elts[pc2 + 1].string,
 			      &static_memfuncp,
 			      op == STRUCTOP_STRUCT
 			      ? "structure" : "structure pointer");
@@ -428,50 +428,40 @@ evaluate_subexp (expect_type, exp, pos, noside)
       return call_function_by_hand (argvec[0], nargs, argvec + 1);
 
     case STRUCTOP_STRUCT:
-      tem = strlen (&exp->elts[pc + 2].string);
-      (*pos) += 3 + ((tem + sizeof (union exp_element))
+      tem = strlen (&exp->elts[pc + 1].string);
+      (*pos) += 2 + ((tem + sizeof (union exp_element))
 		     / sizeof (union exp_element));
       arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
-      if (TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_PTR)
-	goto handle_structop_ptr;
-      type = exp->elts[pc + 1].type;
-      if (type)
-	arg1 = value_ind (value_cast (lookup_pointer_type (type),
-				      value_addr (arg1)));
       if (noside == EVAL_SKIP)
 	goto nosideret;
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
 	return value_zero (lookup_struct_elt_type (VALUE_TYPE (arg1),
-						   &exp->elts[pc + 2].string,
+						   &exp->elts[pc + 1].string,
 						   0),
 			   lval_memory);
       else
 	{
 	  value temp = arg1;
-	  return value_struct_elt (&temp, (value *)0, &exp->elts[pc + 2].string,
+	  return value_struct_elt (&temp, (value *)0, &exp->elts[pc + 1].string,
 				   (int *) 0, "structure");
 	}
 
     case STRUCTOP_PTR:
-      tem = strlen (&exp->elts[pc + 2].string);
-      (*pos) += 3 + (tem + sizeof (union exp_element)) / sizeof (union exp_element);
+      tem = strlen (&exp->elts[pc + 1].string);
+      (*pos) += 2 + (tem + sizeof (union exp_element)) / sizeof (union exp_element);
       arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
-    handle_structop_ptr:
-      type = exp->elts[pc + 1].type;
-      if (type)
-	arg1 = value_cast (lookup_pointer_type (type), arg1);
       if (noside == EVAL_SKIP)
 	goto nosideret;
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
 	return value_zero (lookup_struct_elt_type (TYPE_TARGET_TYPE
 						   (VALUE_TYPE (arg1)),
-						   &exp->elts[pc + 2].string,
+						   &exp->elts[pc + 1].string,
 						   0),
 			   lval_memory);
       else
 	{
 	  value temp = arg1;
-	  return value_struct_elt (&temp, (value *)0, &exp->elts[pc + 2].string,
+	  return value_struct_elt (&temp, (value *)0, &exp->elts[pc + 1].string,
 				   (int *) 0, "structure pointer");
 	}
 
@@ -552,9 +542,9 @@ evaluate_subexp (expect_type, exp, pos, noside)
     case BINOP_REM:
     case BINOP_LSH:
     case BINOP_RSH:
-    case BINOP_LOGAND:
-    case BINOP_LOGIOR:
-    case BINOP_LOGXOR:
+    case BINOP_BITWISE_AND:
+    case BINOP_BITWISE_IOR:
+    case BINOP_BITWISE_XOR:
       arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
       arg2 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
       if (noside == EVAL_SKIP)
@@ -592,7 +582,7 @@ evaluate_subexp (expect_type, exp, pos, noside)
       else
 	return value_subscript (arg1, arg2);
       
-    case BINOP_AND:
+    case BINOP_LOGICAL_AND:
       arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
       if (noside == EVAL_SKIP)
 	{
@@ -611,14 +601,14 @@ evaluate_subexp (expect_type, exp, pos, noside)
 	}
       else
 	{
-	  tem = value_zerop (arg1);
+	  tem = value_logical_not (arg1);
 	  arg2 = evaluate_subexp (NULL_TYPE, exp, pos,
 				  (tem ? EVAL_SKIP : noside));
 	  return value_from_longest (builtin_type_int,
-				  (LONGEST) (!tem && !value_zerop (arg2)));
+				  (LONGEST) (!tem && !value_logical_not (arg2)));
 	}
 
-    case BINOP_OR:
+    case BINOP_LOGICAL_OR:
       arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
       if (noside == EVAL_SKIP)
 	{
@@ -637,11 +627,11 @@ evaluate_subexp (expect_type, exp, pos, noside)
 	}
       else
 	{
-	  tem = value_zerop (arg1);
+	  tem = value_logical_not (arg1);
 	  arg2 = evaluate_subexp (NULL_TYPE, exp, pos,
 				  (!tem ? EVAL_SKIP : noside));
 	  return value_from_longest (builtin_type_int,
-				  (LONGEST) (!tem || !value_zerop (arg2)));
+				  (LONGEST) (!tem || !value_logical_not (arg2)));
 	}
 
     case BINOP_EQUAL:
@@ -760,19 +750,19 @@ evaluate_subexp (expect_type, exp, pos, noside)
       else
 	return value_neg (arg1);
 
-    case UNOP_LOGNOT:
+    case UNOP_COMPLEMENT:
       /* C++: check for and handle destructor names.  */
       op = exp->elts[*pos].opcode;
 
       arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
       if (noside == EVAL_SKIP)
 	goto nosideret;
-      if (unop_user_defined_p (UNOP_LOGNOT, arg1))
-	return value_x_unop (arg1, UNOP_LOGNOT);
+      if (unop_user_defined_p (UNOP_COMPLEMENT, arg1))
+	return value_x_unop (arg1, UNOP_COMPLEMENT);
       else
-	return value_lognot (arg1);
+	return value_complement (arg1);
 
-    case UNOP_ZEROP:
+    case UNOP_LOGICAL_NOT:
       arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
       if (noside == EVAL_SKIP)
 	goto nosideret;
@@ -780,7 +770,7 @@ evaluate_subexp (expect_type, exp, pos, noside)
 	return value_x_unop (arg1, op);
       else
 	return value_from_longest (builtin_type_int,
-				(LONGEST) value_zerop (arg1));
+				   (LONGEST) value_logical_not (arg1));
 
     case UNOP_IND:
       if (expect_type && TYPE_CODE (expect_type) == TYPE_CODE_PTR)
