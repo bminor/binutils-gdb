@@ -162,13 +162,12 @@ gmon_io.o: gmon_io.c gprof.h $(BFDDIR)/sysdep.h $(INCDIR)/ansidecl.h \
   search_list.h source.h symtab.h cg_arcs.h basic_blocks.h \
   corefile.h call_graph.h gmon_io.h gmon_out.h gmon.h \
   hertz.h hist.h $(INCDIR)/libiberty.h
-gprof.o: gprof.c $(INCDIR)/getopt.h $(INCDIR)/libiberty.h \
-  $(INCDIR)/ansidecl.h gprof.h $(BFDDIR)/sysdep.h ../bfd/config.h \
-  $(INCDIR)/fopen-same.h $(INCDIR)/filenames.h ../bfd/bfd.h \
-  $(INCDIR)/symcat.h gconfig.h $(INCDIR)/bin-bugs.h search_list.h \
-  source.h symtab.h basic_blocks.h call_graph.h cg_arcs.h \
-  cg_print.h corefile.h gmon_io.h hertz.h hist.h sym_ids.h \
-  $(INCDIR)/demangle.h
+gprof.o: gprof.c $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h \
+  gprof.h $(BFDDIR)/sysdep.h ../bfd/config.h $(INCDIR)/fopen-same.h \
+  $(INCDIR)/filenames.h ../bfd/bfd.h $(INCDIR)/symcat.h \
+  gconfig.h $(INCDIR)/bin-bugs.h search_list.h source.h \
+  symtab.h basic_blocks.h call_graph.h cg_arcs.h cg_print.h \
+  corefile.h gmon_io.h hertz.h hist.h sym_ids.h $(INCDIR)/demangle.h
 hertz.o: hertz.c gprof.h $(BFDDIR)/sysdep.h $(INCDIR)/ansidecl.h \
   ../bfd/config.h $(INCDIR)/fopen-same.h $(INCDIR)/filenames.h \
   ../bfd/bfd.h $(INCDIR)/symcat.h gconfig.h $(INCDIR)/bin-bugs.h \
