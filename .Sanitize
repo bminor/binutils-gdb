@@ -23,6 +23,7 @@ Do-first:
 
 Things-to-keep:
 
+.cvsignore
 CYGNUS
 ChangeLog
 Makefile.in
@@ -69,6 +70,7 @@ rcs
 readline
 send_pr
 standards.texi
+test-build.mk
 texinfo
 tgas
 
