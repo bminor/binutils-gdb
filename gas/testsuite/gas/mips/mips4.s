@@ -16,14 +16,14 @@ text_label:
 	movf.d	$f4,$f6,$fcc0
 	movf.s	$f4,$f6,$fcc0
 	movn	$4,$6,$6
-	movn.d	$f4,$f5,$6
-	movn.s	$f4,$f5,$6
+	movn.d	$f4,$f6,$6
+	movn.s	$f4,$f6,$6
 	movt	$4,$5,$fcc4
 	movt.d	$f4,$f6,$fcc0
 	movt.s	$f4,$f6,$fcc0
 	movz	$4,$6,$6
-	movz.d	$f4,$f5,$6
-	movz.s	$f4,$f5,$6
+	movz.d	$f4,$f6,$6
+	movz.s	$f4,$f6,$6
 	msub.d	$f0,$f2,$f4,$f6
 	msub.s	$f0,$f2,$f4,$f6
 	nmadd.d	$f0,$f2,$f4,$f6

@@ -44,8 +44,8 @@ Disassembly of section .text:
 0+00090 <stuff\+0x90> dclo	v1,a0
 0+00094 <stuff\+0x94> clz	v1,a0
 0+00098 <stuff\+0x98> dclz	v1,a0
-0+0009c <stuff\+0x9c> luxc1	\$f1,a0\(v0\)
-0+000a0 <stuff\+0xa0> suxc1	\$f1,a0\(v0\)
+0+0009c <stuff\+0x9c> luxc1	\$f0,a0\(v0\)
+0+000a0 <stuff\+0xa0> suxc1	\$f2,a0\(v0\)
 0+000a4 <stuff\+0xa4> tlbp
 0+000a8 <stuff\+0xa8> tlbr
 	\.\.\.

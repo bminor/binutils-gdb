@@ -1,3 +1,26 @@
+2003-05-19  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* gas/mips/mips.exp: mips-*-linux-*, mipsel-*-linux-* use only 32-bit
+	register width by default. Add them to addr32 and exclude offending
+	testcases.
+	* gas/mips/delay.s: Avoid odd floating point registers.
+	* gas/mips/delay.d: Likewise.
+	* gas/mips/nodelay.d: Likewise.
+	* gas/mips/mips4.s: Likewise.
+	* gas/mips/mips4.d: Likewise.
+	* gas/mips/mips5.s: Likewise.
+	* gas/mips/mips5.d: Likewise.
+	* gas/mips/vr5400.s: Likewise.
+	* gas/mips/vr5400.d: Likewise.
+	* gas/mips/vr5500.s: Likewise.
+	* gas/mips/vr5500.d: Likewise.
+	* gas/mips/elf_e_flags2.d: Allow different expansions of the move
+	macro.
+	* gas/mips/elf_e_flags3.d: Likewise.
+	* gas/mips/elf_e_flags4.d: Likewise.
+	* gas/mips/uld2-eb.d: Likewise.
+	* gas/mips/uld2-el.d: Likewise.
+
 2003-05-16  Kelley Cook  <kelleycook@wideopenwest.com>
 
 	* lib/gas-defs.exp: Accept i[3-7]86 variants.

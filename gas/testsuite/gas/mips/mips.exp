@@ -391,7 +391,7 @@ if { [istarget mips*-*-*] } then {
     set aout [expr [istarget *-*-bsd*] || [istarget *-*-openbsd*] ]
     set ilocks [istarget mipstx39*-*-*]
     set gpr_ilocks [expr [istarget mipstx39*-*-*]]
-    set addr32 [expr [istarget mipstx39*-*-*]]
+    set addr32 [expr [istarget mipstx39*-*-*] || [istarget mips-*-linux*] || [istarget mipsel-*-linux*]]
     set has_newabi [expr [istarget *-*-irix6*] || [istarget mips64*-*-linux*]]
 
     if { [istarget "mips*-*-*linux*"] } then {
@@ -430,7 +430,9 @@ if { [istarget mips*-*-*] } then {
     } else {
 	run_dump_test "div"
     }
-    run_dump_test_arches "dli"		[mips_arch_list_matching mips3]
+    if { !$addr32 } {
+	run_dump_test_arches "dli"		[mips_arch_list_matching mips3]
+    }
     if $elf {
 	run_dump_test_arches "elf-jal"	[mips_arch_list_matching mips1]
     } else {
@@ -559,12 +561,14 @@ if { [istarget mips*-*-*] } then {
 
     run_dump_test_arches "mips64"	[mips_arch_list_matching mips64]
 
-    run_dump_test "mips64-mips3d"
-    run_dump_test_arches "mips64-mips3d-incl" [mips_arch_list_matching mips3d]
+    if { !$addr32 } {
+	run_dump_test "mips64-mips3d"
+	run_dump_test_arches "mips64-mips3d-incl" [mips_arch_list_matching mips3d]
 
-    run_dump_test "mips64-mdmx"
-    run_dump_test "sb1-ext-mdmx"
-    run_dump_test "sb1-ext-ps"
+	run_dump_test "mips64-mdmx"
+	run_dump_test "sb1-ext-mdmx"
+	run_dump_test "sb1-ext-ps"
+    }
 
     run_dump_test "relax"
 
