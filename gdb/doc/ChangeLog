@@ -1,3 +1,10 @@
+2003-03-04  Andrew Cagney  <cagney@redhat.com>
+
+	2003-02-27  Andrew Cagney  <cagney@redhat.com>
+	* gdbint.texinfo (Target Architecture Definition): Document
+	unwind_dummy_id.  Cross reference unwind_dummy_id and
+	SAVE_DUMMY_FRAME_TOS.
+
 2003-03-02  Daniel Jacobowitz  <drow@mvista.com>
 
 	* Makefile.in (distclean): Remove config.log.

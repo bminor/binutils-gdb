@@ -2458,6 +2458,12 @@ extern void set_gdbarch_save_dummy_frame_tos (struct gdbarch *gdbarch, gdbarch_s
 #endif
 #endif
 
+extern int gdbarch_unwind_dummy_id_p (struct gdbarch *gdbarch);
+
+typedef struct frame_id (gdbarch_unwind_dummy_id_ftype) (struct gdbarch *gdbarch, struct frame_info *info);
+extern struct frame_id gdbarch_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *info);
+extern void set_gdbarch_unwind_dummy_id (struct gdbarch *gdbarch, gdbarch_unwind_dummy_id_ftype *unwind_dummy_id);
+
 extern int gdbarch_parm_boundary (struct gdbarch *gdbarch);
 extern void set_gdbarch_parm_boundary (struct gdbarch *gdbarch, int parm_boundary);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (PARM_BOUNDARY)

@@ -1,5 +1,37 @@
 2003-03-04  Andrew Cagney  <cagney@redhat.com>
 
+	* d10v-tdep.c (struct d10v_unwind_cache): Add field "r11_addr",
+	change type of "next_addr" to LONGEST.  Delete member "frameless".
+	(prologue_find_regs): Parse "st rn, @r11", save r11's offset.
+	(d10v_frame_unwind_cache): Compute both the frame base and the
+	previous stack pointer.  Store the previous SP's value in the
+	saved_regs array.
+	(d10v_frame_id_unwind): Remove commented out code.  Check for
+	circular stack.
+	(saved_regs_unwinder): When SP_REGNUM, extract the value from the
+	saved_regs array.
+	(d10v_unwind_dummy_id): New function.
+	(d10v_gdbarch_init): Initialize d10v_unwind_dummy_id and
+	save_dummy_frame_tos.
+	(struct frame_extra_info): Delete.
+	(saved_regs_unwind): New function.
+	(d10v_frame_pop): Update to match current code.
+	(d10v_frame_register_unwind): Don't unwind LR_REGNUM.  Unwind the
+	PC_REGNUM by returning the saved LR_REGNUM.
+	* frame.c (get_prev_frame): Store this frame's ID in the next
+	frame's unwound ID cache.
+	(deprecated_update_frame_pc_hack): Update the cached value in NEXT
+	as well.
+
+	2003-02-27  Andrew Cagney  <cagney@redhat.com>
+	* frame.c (get_prev_frame): Rewrite the frame ID unwind code to
+	use unwind_dummy_id when available.
+	* gdbarch.sh (get_dummy_frame_id): New multi-arch method with
+	predicate.
+	* gdbarch.h, gdbarch.c: Regneerate.
+	
+2003-03-04  Andrew Cagney  <cagney@redhat.com>
+
 	* d10v-tdep.c (d10v_frame_unwind_cache): Update to work with
 	NEXT_FRAME and THIS_CACHE.
 	(d10v_frame_pc_unwind): Ditto.
