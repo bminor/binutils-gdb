@@ -178,6 +178,7 @@ Copyright (C) 1988-2000 Free Software Foundation, Inc.
 * Stack::                       Examining the stack
 * Source::                      Examining source files
 * Data::                        Examining data
+* Tracepoints::                 Debugging remote targets non-intrusively
 
 * Languages::                   Using @value{GDBN} with different languages
 
@@ -188,8 +189,10 @@ Copyright (C) 1988-2000 Free Software Foundation, Inc.
 * Configurations::              Configuration-specific information
 * Controlling GDB::             Controlling @value{GDBN}
 * Sequences::                   Canned sequences of commands
+* TUI::                         @value{GDBN} Text User Interface
 * Emacs::                       Using @value{GDBN} under @sc{gnu} Emacs
 * Annotations::                 @value{GDBN}'s annotation interface.
+* GDB/MI::                      @value{GDBN}'s Machine Interface.
 
 * GDB Bugs::                    Reporting bugs in @value{GDBN}
 * Formatting Documentation::    How to format and print @value{GDBN} documentation
