@@ -1,4 +1,25 @@
+Fri May 21 10:51:19 1993  David J. Mackenzie  (djm@rtl.cygnus.com)
+
+	* ar.c: Improve error messages.
+
+	* nm.c (main): Handle long options that just set a flag.
+
+	* nm.c (main), ar.c (do_show_version), objcopy.c (main), size.c
+	(main): Exit after printing the version number, per the GNU coding
+	standards.
+
+Mon May 17 13:20:25 1993  Per Bothner  (bothner@cygnus.com)
+
+	* README, Makefile.in:  Minor updates for 2.2.
+
 Fri May 14 11:12:26 1993  Per Bothner  (bothner@cygnus.com)
+
+	* Makefile.in (underscore.c):  Automatically generate
+	(using nm) a file with the variable prepends_underscore.
+	* Makefile.in (c++filt):  Link underscore.o with cplus-dem.o
+	so that initial underscores get removed iff appropriate.
+	* binutils.texi:  Preliminary documentation for c++filt.
+	* Makefile.in, binutils.texi:  Set to version 2.2.
 
 	* NEWS:  Mention copy->objcopy renaming and new c++filt program.
 
