@@ -1,5 +1,15 @@
 2001-10-29  Corinna Vinschen  <vinschen@redhat.com>
 
+	* gdb.base/call-ar-st.c (print_double_array): Match for loop
+	with new double_array size.
+	(main): Change storage class of all local variables to static.
+	Reduce size of double_array to 9.
+	* gdb.base/call-ar-st.exp:  Increase timeout value.
+	Change expected output for double array to match new size in
+	call-ar-st.c.
+
+2001-10-29  Corinna Vinschen  <vinschen@redhat.com>
+
 	* gdb.base/ending-run.exp: Create identical output when passing
 	`step to end of run' case.  Add regular expression branch satisfying
 	Stormy16 target.  

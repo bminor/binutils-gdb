@@ -231,7 +231,7 @@ void print_double_array (array_d)
 
   printf("array_d :\n");
   printf("=========\n\n");
-  for (index = 0; index < 100; index++) {
+  for (index = 0; index < 9; index++) {
       printf("%f  ", array_d[index]); 
       if ((index%8) == 0) printf("\n");
   }
@@ -1147,48 +1147,48 @@ int main ()  {
 
   /* variables for array and enumerated type testing
    */
-  char     char_array[121];
-  double   double_array[100];
-  float    float_array[15];
-  int      integer_array[50]; 
-  int      index;
-  id_int   student_id = 23;
-  colors   my_shirt = YELLOW;
+  static char     char_array[121];
+  static double   double_array[9];
+  static float    float_array[15];
+  static int      integer_array[50]; 
+  static int      index;
+  static id_int   student_id = 23;
+  static colors   my_shirt = YELLOW;
     
   /* variables for large structure testing
    */
-  int number = 10;
-  struct array_rep_info_t *list1;
-  struct array_rep_info_t *list2;
-  struct array_rep_info_t *list3;
-  struct array_rep_info_t *list4;
+  static int number = 10;
+  static struct array_rep_info_t *list1;
+  static struct array_rep_info_t *list2;
+  static struct array_rep_info_t *list3;
+  static struct array_rep_info_t *list4;
 
   /* variables for testing a very long argument list
    */
-   double                    a;
-   double                    b;
-   int                       c;
-   int                       d;
-   int                       e;
-   int                       f;
+   static double                    a;
+   static double                    b;
+   static int                       c;
+   static int                       d;
+   static int                       e;
+   static int                       f;
 
   /* variables for testing a small structures and a very long argument list
    */
-   struct small_rep_info_t  *struct1;
-   struct small_rep_info_t  *struct2;
-   struct small_rep_info_t  *struct3;
-   struct small_rep_info_t  *struct4;
-   struct bit_flags_t       *flags;
-   struct bit_flags_combo_t *flags_combo;
-   struct three_char_t      *three_char;
-   struct five_char_t       *five_char;
-   struct int_char_combo_t  *int_char_combo;
-   struct one_double_t      *d1;
-   struct one_double_t      *d2;
-   struct one_double_t      *d3;
-   struct two_floats_t      *f1;
-   struct two_floats_t      *f2;
-   struct two_floats_t      *f3;
+   static struct small_rep_info_t  *struct1;
+   static struct small_rep_info_t  *struct2;
+   static struct small_rep_info_t  *struct3;
+   static struct small_rep_info_t  *struct4;
+   static struct bit_flags_t       *flags;
+   static struct bit_flags_combo_t *flags_combo;
+   static struct three_char_t      *three_char;
+   static struct five_char_t       *five_char;
+   static struct int_char_combo_t  *int_char_combo;
+   static struct one_double_t      *d1;
+   static struct one_double_t      *d2;
+   static struct one_double_t      *d3;
+   static struct two_floats_t      *f1;
+   static struct two_floats_t      *f2;
+   static struct two_floats_t      *f3;
 
   /* Initialize arrays
    */
@@ -1198,7 +1198,7 @@ int main ()  {
   }
   char_array[120] = '\0';
 
-  for (index = 0; index < 100; index++) {
+  for (index = 0; index < 9; index++) {
       double_array[index] = index*23.4567;
   }
 
