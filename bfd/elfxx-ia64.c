@@ -1781,6 +1781,8 @@ elfNN_ia64_create_dynamic_sections (abfd, info)
   {
     flagword flags = bfd_get_section_flags (abfd, ia64_info->got_sec);
     bfd_set_section_flags (abfd, ia64_info->got_sec, SEC_SMALL_DATA | flags);
+    /* The .got section is always aligned at 8 bytes.  */
+    bfd_set_section_alignment (abfd, ia64_info->got_sec, 3);
   }
 
   if (!get_pltoff (abfd, info, ia64_info))

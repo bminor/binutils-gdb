@@ -1,3 +1,8 @@
+2003-08-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elfxx-ia64.c (elfNN_ia64_create_dynamic_sections): Align the
+	.got section at 8 bytes.
+
 2003-08-21  Nick Clifton  <nickc@redhat.com>
 
 	* cofflink.c: Update to ISO C90 and tidy up formatting.
