@@ -54,7 +54,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "coff/rs6000.h"	/* FIXME, raw file-format guts of xcoff */
 
 /* For interface with stabsread.c.  */
-#include "stab_gnu.h"
+#include "aout/stab_gnu.h"
 
 /* Define this if you want gdb to ignore typdef stabs. This was needed for
    one of Transarc, to reduce the size of the symbol table. Types won't be

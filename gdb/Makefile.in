@@ -599,7 +599,6 @@ depend: $(SOURCES) Makefile.in
 	  -e 'g' \
 	  -e '/:.*\.tab\.c/d' \
 	  -e 's/.*:\(.*\.c\).*/	$${CC} -c $${INTERNAL_CFLAGS} \1/' \
-	  -e 's;$${srcdir}/xcoffexec.c;-I$${BFD_DIR} &;' \
 	  -e 's;$${srcdir}/xcoffread.c;-I$${BFD_DIR} &;' \
 	  -e 's;$${srcdir}/stabsread.c;-I$${BFD_DIR} &;' \
 	  -e 's;$${srcdir}/dwarfread.c;-I$${BFD_DIR} &;' \
@@ -871,6 +870,11 @@ m2-exp.tab.c: $(srcdir)/m2-exp.y $(srcdir)/Makefile.in
 # output of dependency information.  For now, just punt.  (FIXME)
 paread.o: ${srcdir}/paread.c
 	${CC} -c ${INTERNAL_CFLAGS} -I$(BFD_DIR) ${srcdir}/paread.c
+# Used on RS6000 native.
+# This rule fails to get automatically generated in depend if
+# sys/ldr.h does not exist.  (FIXME)
+xcoffexec.o: ${srcdir}/xcoffexec.c
+	${CC} -c ${INTERNAL_CFLAGS} -I${BFD_DIR} ${srcdir}/xcoffexec.c
 
 lint: $(LINTFILES)
 	$(LINT) $(INCLUDE_CFLAGS) $(LINTFLAGS) $(LINTFILES) \
