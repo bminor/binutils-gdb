@@ -734,7 +734,7 @@ child_attach (args, from_tty)
   target_terminal_inferior ();
   wait_for_inferior ();
 #ifdef SOLIB_ADD
-  solib_add (NULL, 0);
+  SOLIB_ADD ((char *)0, from_tty, (struct target_ops *)0);
 #endif
   normal_stop ();
 #endif  /* ATTACH_DETACH */
@@ -1410,19 +1410,24 @@ Further execution is probably impossible.\n");
     return;
 
   /* Select innermost stack frame except on return from a stack dummy routine,
-     or if the program has exited.  */
+     or if the program has exited.  Print it without a level number if
+     we have changed functions or hit a breakpoint.  Print source line
+     if we have one.  */
   if (!stop_stack_dummy)
     {
       select_frame (get_current_frame (), 0);
 
       if (stop_print_frame)
 	{
-	  int source_only = bpstat_print (stop_bpstat);
-	  print_sel_frame
-	    (source_only
-	     || (stop_step
+	  int source_only;
+
+	  source_only = bpstat_print (stop_bpstat);
+	  source_only = source_only ||
+	        (   stop_step
 		 && step_frame_address == stop_frame_address
-		 && step_start_function == find_pc_function (stop_pc)));
+		 && step_start_function == find_pc_function (stop_pc));
+
+          print_stack_frame (selected_frame, -1, source_only? -1: 1);
 
 	  /* Display the auto-display expressions.  */
 	  do_displays ();
