@@ -1,5 +1,10 @@
 2001-07-23  Elena Zannoni  <ezannoni@redhat.com>
 
+	* config/powerpc/aix.mh (MH_LDFLAGS): Don't set these, the Gnu linker
+	doesn't understand them.
+
+2001-07-23  Elena Zannoni  <ezannoni@redhat.com>
+
 	* memattr.c (mem_info_command): Reformat output to look more like
 	'info break' output.
 	(_initialize_mem): Improve help.

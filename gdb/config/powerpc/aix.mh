@@ -12,4 +12,6 @@ NATDEPFILES= fork-child.o infptrace.o inftarg.o corelow.o rs6000-nat.o \
 # MH_CFLAGS = -bnodelcsect
 
 # gdb is too big for all of its external symbols to fit in a small TOC
-MH_LDFLAGS = -Wl,-bbigtoc
+# It looks like the GNU linker doesn't understand the -bbigtoc switch.
+# This switch may be needed for some vendor compilers.
+# MH_LDFLAGS = -Wl,-bbigtoc
