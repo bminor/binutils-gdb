@@ -17,12 +17,6 @@
 
 
 
-/* Alias symbol. Any reference to this will turn into into one to the
-   next symbol in the table
-*/
-
-__define_stab (N_INDR, 0x0b, "INDR")
-
 /* Warning symbol. The text gives a warning message, the next symbol
    in the table will be undefined. When the symbol is referenced, the
    message is printed.

@@ -174,6 +174,8 @@ struct internal_nlist {
 #define N_TYPE  0x1e
 #define N_STAB 	0xe0
 
+#define N_INDR 0x0a
+
 /* The following symbols refer to set elements.
    All the N_SET[ATDB] symbols with the same name form one set.
    Space is allocated for the set in the text section, and each set
