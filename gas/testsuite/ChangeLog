@@ -1,3 +1,8 @@
+2001-07-23  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/i386/opcode.d: Tweak lgdt for 2001-07-18 change.
+	* gas/i386/intel.d: Likewise.
+
 2001-07-16  Philip Blundell  <philb@gnu.org>
 
 	* gas/arm/arm7t.d, gas/arm/inst.d: Tweak expected output for
