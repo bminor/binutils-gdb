@@ -1,3 +1,9 @@
+2000-12-19  Nick Clifton  <nickc@redhat.com>
+
+	* dlltool.c: Add missing support for arm-epoc-pe.
+	* configure.in: Add missing support for arm-epoc-pe.
+	* configure: Regenerate.
+
 2000-12-15  Nick Clifton  <nickc@redhat.com>
 
 	* MAINTAINERS: Add Diego Novillo as a maintainer for the Intel

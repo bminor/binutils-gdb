@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2000-12-12 12:49-0800\n"
+"POT-Creation-Date: 2000-12-19 14:20-0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -428,325 +428,325 @@ msgstr ""
 msgid "debug_write_type: illegal type encountered"
 msgstr ""
 
-#: dlltool.c:732 dlltool.c:756 dlltool.c:781
+#: dlltool.c:737 dlltool.c:762 dlltool.c:788
 #, c-format
 msgid "Internal error: Unknown machine type: %d"
 msgstr ""
 
-#: dlltool.c:818
+#: dlltool.c:825
 #, c-format
 msgid "Can't open def file: %s"
 msgstr ""
 
-#: dlltool.c:823
+#: dlltool.c:830
 #, c-format
 msgid "Processing def file: %s"
 msgstr ""
 
-#: dlltool.c:827
+#: dlltool.c:834
 msgid "Processed def file"
 msgstr ""
 
-#: dlltool.c:852
+#: dlltool.c:859
 #, c-format
 msgid "Syntax error in def file %s:%d"
 msgstr ""
 
-#: dlltool.c:885
+#: dlltool.c:892
 #, c-format
 msgid "NAME: %s base: %x"
 msgstr ""
 
-#: dlltool.c:888 dlltool.c:907
+#: dlltool.c:895 dlltool.c:914
 msgid "Can't have LIBRARY and NAME"
 msgstr ""
 
-#: dlltool.c:904
+#: dlltool.c:911
 #, c-format
 msgid "LIBRARY: %s base: %x"
 msgstr ""
 
-#: dlltool.c:1162 resrc.c:271
+#: dlltool.c:1169 resrc.c:271
 #, c-format
 msgid "wait: %s"
 msgstr ""
 
-#: dlltool.c:1167 dllwrap.c:456 resrc.c:276
+#: dlltool.c:1174 dllwrap.c:456 resrc.c:276
 #, c-format
 msgid "subprocess got fatal signal %d"
 msgstr ""
 
-#: dlltool.c:1173 dllwrap.c:463 resrc.c:283
+#: dlltool.c:1180 dllwrap.c:463 resrc.c:283
 #, c-format
 msgid "%s exited with status %d"
 msgstr ""
 
-#: dlltool.c:1205
+#: dlltool.c:1212
 #, c-format
 msgid "Sucking in info from %s section in %s"
 msgstr ""
 
-#: dlltool.c:1329
+#: dlltool.c:1336
 #, c-format
 msgid "Excluding symbol: %s"
 msgstr ""
 
-#: dlltool.c:1424 dlltool.c:1435 nm.c:946 nm.c:957 objdump.c:443 objdump.c:460
+#: dlltool.c:1431 dlltool.c:1442 nm.c:946 nm.c:957 objdump.c:443 objdump.c:460
 #, c-format
 msgid "%s: no symbols"
 msgstr ""
 
 #. FIXME: we ought to read in and block out the base relocations
-#: dlltool.c:1462
+#: dlltool.c:1469
 #, c-format
 msgid "Done reading %s"
 msgstr ""
 
-#: dlltool.c:1473
+#: dlltool.c:1480
 #, c-format
 msgid "Unable to open object file: %s"
 msgstr ""
 
-#: dlltool.c:1476
+#: dlltool.c:1483
 #, c-format
 msgid "Scanning object file %s"
 msgstr ""
 
-#: dlltool.c:1491
+#: dlltool.c:1498
 #, c-format
 msgid "Cannot produce mcore-elf dll from archive file: %s"
 msgstr ""
 
-#: dlltool.c:1583
+#: dlltool.c:1590
 msgid "Adding exports to output file"
 msgstr ""
 
-#: dlltool.c:1628
+#: dlltool.c:1635
 msgid "Added exports to output file"
 msgstr ""
 
-#: dlltool.c:1752
+#: dlltool.c:1759
 #, c-format
 msgid "Generating export file: %s"
 msgstr ""
 
-#: dlltool.c:1757
+#: dlltool.c:1764
 #, c-format
 msgid "Unable to open temporary assembler file: %s"
 msgstr ""
 
-#: dlltool.c:1760
+#: dlltool.c:1767
 #, c-format
 msgid "Opened temporary file: %s"
 msgstr ""
 
-#: dlltool.c:1974
+#: dlltool.c:1981
 msgid "Generated exports file"
 msgstr ""
 
-#: dlltool.c:2229
+#: dlltool.c:2236
 #, c-format
 msgid "bfd_open failed open stub file: %s"
 msgstr ""
 
-#: dlltool.c:2232
+#: dlltool.c:2239
 #, c-format
 msgid "Creating stub file: %s"
 msgstr ""
 
-#: dlltool.c:2619
+#: dlltool.c:2626
 #, c-format
 msgid "failed to open temporary head file: %s"
 msgstr ""
 
-#: dlltool.c:2678
+#: dlltool.c:2685
 #, c-format
 msgid "failed to open temporary tail file: %s"
 msgstr ""
 
-#: dlltool.c:2746
+#: dlltool.c:2753
 #, c-format
 msgid "Can't open .lib file: %s"
 msgstr ""
 
-#: dlltool.c:2749
+#: dlltool.c:2756
 #, c-format
 msgid "Creating library file: %s"
 msgstr ""
 
-#: dlltool.c:2808
+#: dlltool.c:2815
 #, c-format
 msgid "cannot delete %s: %s"
 msgstr ""
 
-#: dlltool.c:2812
+#: dlltool.c:2819
 msgid "Created lib file"
 msgstr ""
 
-#: dlltool.c:2917
+#: dlltool.c:2924
 #, c-format
 msgid "Warning, ignoring duplicate EXPORT %s %d,%d"
 msgstr ""
 
-#: dlltool.c:2923
+#: dlltool.c:2930
 #, c-format
 msgid "Error, duplicate EXPORT with oridinals: %s"
 msgstr ""
 
-#: dlltool.c:3050
+#: dlltool.c:3057
 msgid "Processing definitions"
 msgstr ""
 
-#: dlltool.c:3088
+#: dlltool.c:3095
 msgid "Processed definitions"
 msgstr ""
 
 #. xgetext:c-format
-#: dlltool.c:3099 dllwrap.c:520
+#: dlltool.c:3106 dllwrap.c:520
 #, c-format
 msgid "Usage %s <options> <object-files>\n"
 msgstr ""
 
 #. xgetext:c-format
-#: dlltool.c:3101
+#: dlltool.c:3108
 #, c-format
 msgid ""
 "   -m --machine <machine>    Create as DLL for <machine>.  [default: %s]\n"
 msgstr ""
 
-#: dlltool.c:3102
+#: dlltool.c:3109
 msgid ""
 "        possible <machine>: arm[_interwork], i386, mcore[-elf]{-le|-be}, "
 "ppc, thumb\n"
 msgstr ""
 
-#: dlltool.c:3103
+#: dlltool.c:3110
 msgid "   -e --output-exp <outname> Generate an export file.\n"
 msgstr ""
 
-#: dlltool.c:3104
+#: dlltool.c:3111
 msgid "   -l --output-lib <outname> Generate an interface library.\n"
 msgstr ""
 
-#: dlltool.c:3105
+#: dlltool.c:3112
 msgid "   -a --add-indirect         Add dll indirects to export file.\n"
 msgstr ""
 
-#: dlltool.c:3106
+#: dlltool.c:3113
 msgid ""
 "   -D --dllname <name>       Name of input dll to put into interface lib.\n"
 msgstr ""
 
-#: dlltool.c:3107
+#: dlltool.c:3114
 msgid "   -d --input-def <deffile>  Name of .def file to be read in.\n"
 msgstr ""
 
-#: dlltool.c:3108
+#: dlltool.c:3115
 msgid "   -z --output-def <deffile> Name of .def file to be created.\n"
 msgstr ""
 
-#: dlltool.c:3109
+#: dlltool.c:3116
 msgid "      --export-all-symbols   Export all symbols to .def\n"
 msgstr ""
 
-#: dlltool.c:3110
+#: dlltool.c:3117
 msgid "      --no-export-all-symbols  Only export listed symbols\n"
 msgstr ""
 
-#: dlltool.c:3111
+#: dlltool.c:3118
 msgid "      --exclude-symbols <list> Don't export <list>\n"
 msgstr ""
 
-#: dlltool.c:3112
+#: dlltool.c:3119
 msgid "      --no-default-excludes  Clear default exclude symbols\n"
 msgstr ""
 
-#: dlltool.c:3113
+#: dlltool.c:3120
 msgid "   -b --base-file <basefile> Read linker generated base file.\n"
 msgstr ""
 
-#: dlltool.c:3114
+#: dlltool.c:3121
 msgid "   -x --no-idata4            Don't generate idata$4 section.\n"
 msgstr ""
 
-#: dlltool.c:3115
+#: dlltool.c:3122
 msgid "   -c --no-idata5            Don't generate idata$5 section.\n"
 msgstr ""
 
-#: dlltool.c:3116
+#: dlltool.c:3123
 msgid ""
 "   -U --add-underscore       Add underscores to symbols in interface "
 "library.\n"
 msgstr ""
 
-#: dlltool.c:3117
+#: dlltool.c:3124
 msgid "   -k --kill-at              Kill @<n> from exported names.\n"
 msgstr ""
 
-#: dlltool.c:3118
+#: dlltool.c:3125
 msgid "   -A --add-stdcall-alias    Add aliases without @<n>.\n"
 msgstr ""
 
-#: dlltool.c:3119
+#: dlltool.c:3126
 msgid "   -S --as <name>            Use <name> for assembler.\n"
 msgstr ""
 
-#: dlltool.c:3120
+#: dlltool.c:3127
 msgid "   -f --as-flags <flags>     Pass <flags> to the assembler.\n"
 msgstr ""
 
-#: dlltool.c:3121
+#: dlltool.c:3128
 msgid ""
 "   -C --compat-implib        Create backward compatible import library.\n"
 msgstr ""
 
-#: dlltool.c:3122
+#: dlltool.c:3129
 msgid ""
 "   -n --no-delete            Keep temp files (repeat for extra "
 "preservation).\n"
 msgstr ""
 
-#: dlltool.c:3123
+#: dlltool.c:3130
 msgid "   -v --verbose              Be verbose.\n"
 msgstr ""
 
-#: dlltool.c:3124
+#: dlltool.c:3131
 msgid "   -V --version              Display the program version.\n"
 msgstr ""
 
-#: dlltool.c:3125
+#: dlltool.c:3132
 msgid "   -h --help                 Display this information.\n"
 msgstr ""
 
-#: dlltool.c:3127
+#: dlltool.c:3134
 msgid ""
 "   -M --mcore-elf <outname>  Process mcore-elf object files into <outname>.\n"
 msgstr ""
 
-#: dlltool.c:3128
+#: dlltool.c:3135
 msgid "   -L --linker <name>        Use <name> as the linker.\n"
 msgstr ""
 
-#: dlltool.c:3129
+#: dlltool.c:3136
 msgid "   -F --linker-flags <flags> Pass <flags> to the linker.\n"
 msgstr ""
 
-#: dlltool.c:3273
+#: dlltool.c:3280
 #, c-format
 msgid "Unable to open base-file: %s"
 msgstr ""
 
-#: dlltool.c:3302
+#: dlltool.c:3309
 #, c-format
 msgid "Machine '%s' not supported"
 msgstr ""
 
-#: dlltool.c:3405 dllwrap.c:241
+#: dlltool.c:3412 dllwrap.c:241
 #, c-format
 msgid "Tried file: %s"
 msgstr ""
 
-#: dlltool.c:3412 dllwrap.c:248
+#: dlltool.c:3419 dllwrap.c:248
 #, c-format
 msgid "Using file: %s"
 msgstr ""
