@@ -1,3 +1,8 @@
+Wed Apr 19 13:06:55 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* Makefile.in (distclean): Delete tui/Makefile.
+	* TODO: Add deletion of tui/Makefile.in to list.
+	
 2000-04-17  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* symfile.h (struct section_addr_info ): Remove fields for special

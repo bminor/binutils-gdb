@@ -359,6 +359,15 @@ http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00831.html
 
 --
 
+Eliminate gdb/tui/Makefile.in.
+Cleanup configury support for optional sub-directories.
+
+Check how GCC handles multiple front ends for an example of how things
+could work.  A tentative first step is to rationalize things so that
+all sub directories are handled in a fashion similar to gdb/mi.
+
+--
+
 General Wish List
 =================
 
