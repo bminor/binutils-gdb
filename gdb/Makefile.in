@@ -2247,7 +2247,7 @@ x86-64-tdep.o : x86-64-tdep.c $(defs_h) $(inferior_h) $(gdbcore_h) $(gdbcmd_h) \
 	$(dwarf2cfi_h) $(gdb_assert_h)
 
 x86-64-linux-nat.o : x86-64-linux-nat.c $(defs_h) $(inferior_h) \
-	$(gdbcore_h) $(regcache_h) i387-tdep.h $(gdb_assert_h) x86-64-tdep.h \
+	$(gdbcore_h) $(regcache_h) $(gdb_assert_h) x86-64-tdep.h \
 	i386-tdep.h
 
 win32-nat.o: win32-nat.c $(gdbcmd_h) $(gdbcore_h) $(inferior_h) $(defs_h) \

@@ -2,6 +2,7 @@
 
 	* config/sparc/tm-sp64linux.h: Make the rest of #endif
 	line a comment.
+	* Makefile.in (x86-64-linux-nat.o): Remove dependency on i387-tdep.h
 
 2002-07-17  Jim Blandy  <jimb@redhat.com>
 
