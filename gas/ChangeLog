@@ -1,5 +1,7 @@
 Thu Jan 13 16:15:15 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
+	* struc-symbol.h (struct symbol): Make all bitfields unsigned.
+
 	* config/tc-i960.c (i960_validate_fix): Added argument
 	add_symbolPP.  Indirect through it to get "add_symbolP".
 	* config/tc-i960.h (i960_validate_fix): Supply prototype.
