@@ -46,6 +46,7 @@ mipsv4.mt
 news-mips.mh
 nm-irix3.h
 nm-irix4.h
+nm-irix5.h
 nm-mips.h
 nm-news-mips.h
 nm-riscos.h
