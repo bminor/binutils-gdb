@@ -67,6 +67,20 @@
 # The resource file is called mac-ld.r.
 /{LD_PROG}.r/s/{LD_PROG}\.r/mac-ld.r/
 
+/^install \\Option-f /,/^$/c\
+install \\Option-f  all install-only\
+\
+install-only \\Option-f\
+	If "`Exists "{prefix}"`" == ""\
+		Echo "{prefix}" does not exist, cannot install anything\
+		Exit 1\
+	End If\
+	If "`Exists "{bindir}"`" == ""\
+		NewFolder "{bindir}"\
+	End If\
+	Duplicate -y :ld.new "{bindir}"ld\
+
+
 # Remove dependency rebuilding crud.
 /^.dep /,/# .PHONY /d
 
