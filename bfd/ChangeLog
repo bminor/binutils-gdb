@@ -1,3 +1,8 @@
+Tue Oct 24 10:25:01 1995  Jeffrey A Law  (law@cygnus.com)
+
+	* hppabsd-core.c (make_bfd_asection): Initialize asect->filepos
+	correctly.  Don't initialize asect->vma.
+
 Fri Oct 20 13:23:48 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	* opncls.c (_bfd_new_bfd): If _bfd_chunksize wasn't preset, use
