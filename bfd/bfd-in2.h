@@ -315,7 +315,8 @@ typedef struct bfd_section *sec_ptr;
 #define bfd_get_section_lma(bfd, ptr) ((ptr)->lma + 0)
 #define bfd_get_section_alignment(bfd, ptr) ((ptr)->alignment_power + 0)
 #define bfd_section_name(bfd, ptr) ((ptr)->name)
-#define bfd_section_size(bfd, ptr) (bfd_get_section_size_before_reloc(ptr))
+#define bfd_section_size(bfd, ptr) ((ptr)->_raw_size)
+#define bfd_get_section_size(ptr) ((ptr)->_raw_size)
 #define bfd_section_vma(bfd, ptr) ((ptr)->vma)
 #define bfd_section_lma(bfd, ptr) ((ptr)->lma)
 #define bfd_section_alignment(bfd, ptr) ((ptr)->alignment_power)
@@ -1210,9 +1211,6 @@ typedef struct bfd_section
   /* See the vma field.  */
   unsigned int user_set_vma : 1;
 
-  /* Whether relocations have been processed.  */
-  unsigned int reloc_done : 1;
-
   /* A mark flag used by some of the linker backends.  */
   unsigned int linker_mark : 1;
 
@@ -1240,21 +1238,18 @@ typedef struct bfd_section
   unsigned int use_rela_p:1;
 
   /* Bits used by various backends.  */
-  unsigned int has_tls_reloc:1;
 
-  /* Nonzero if this section needs the relax finalize pass.  */
-  unsigned int need_finalize_relax:1;
+  /* Nonzero if this section has TLS related relocations.  */
+  unsigned int has_tls_reloc:1;
 
   /* Nonzero if this section has a gp reloc.  */
   unsigned int has_gp_reloc:1;
 
-  /* Unused bits.  */
-  unsigned int flag13:1;
-  unsigned int flag14:1;
-  unsigned int flag15:1;
-  unsigned int flag16:4;
-  unsigned int flag20:4;
-  unsigned int flag24:8;
+  /* Nonzero if this section needs the relax finalize pass.  */
+  unsigned int need_finalize_relax:1;
+
+  /* Whether relocations have been processed.  */
+  unsigned int reloc_done : 1;
 
   /* End of internal packed boolean fields.  */
 
@@ -1403,11 +1398,6 @@ extern const struct bfd_symbol * const bfd_abs_symbol;
 extern const struct bfd_symbol * const bfd_com_symbol;
 extern const struct bfd_symbol * const bfd_und_symbol;
 extern const struct bfd_symbol * const bfd_ind_symbol;
-#define bfd_get_section_size_before_reloc(section) \
-     ((section)->_raw_size)
-#define bfd_get_section_size_after_reloc(section) \
-     ((section)->reloc_done ? (section)->_cooked_size \
-                            : (abort (), (bfd_size_type) 1))
 
 /* Macros to handle insertion and deletion of a bfd's sections.  These
    only handle the list pointers, ie. do not adjust section_count,

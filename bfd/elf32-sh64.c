@@ -620,8 +620,6 @@ sh64_find_section_for_address (bfd *abfd ATTRIBUTE_UNUSED,
   if (fsec_datap->addr < vma)
     return;
 
-  /* FIXME: section->reloc_done isn't set properly; a generic buglet
-     preventing us from using bfd_get_section_size_after_reloc.  */
   size
     = section->_cooked_size ? section->_cooked_size : section->_raw_size;
 

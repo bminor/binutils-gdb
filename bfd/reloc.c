@@ -4292,8 +4292,6 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
      this function is called.  We do not want to clobber the _cooked_size
      they computed.  */
 
-  input_section->reloc_done = TRUE;
-
   reloc_count = bfd_canonicalize_reloc (input_bfd,
 					input_section,
 					reloc_vector,

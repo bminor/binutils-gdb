@@ -1,6 +1,6 @@
 /* Support for the generic parts of COFF, for BFD.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003
+   2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -1537,7 +1537,7 @@ build_debug_section (abfd)
       return NULL;
     }
 
-  sec_size = bfd_get_section_size_before_reloc (sect);
+  sec_size = bfd_get_section_size (sect);
   debug_section = (PTR) bfd_alloc (abfd, sec_size);
   if (debug_section == NULL)
     return NULL;

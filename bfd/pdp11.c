@@ -1,5 +1,5 @@
 /* BFD back-end for PDP-11 a.out binaries.
-   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -2314,7 +2314,7 @@ NAME(aout,squirt_out_relocs) (abfd, section)
     return TRUE;
 #endif
 
-  natsize = bfd_get_section_size_before_reloc (section);
+  natsize = bfd_get_section_size (section);
   native = (unsigned char *) bfd_zalloc (abfd, natsize);
   if (!native)
     return FALSE;

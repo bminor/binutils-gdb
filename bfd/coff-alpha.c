@@ -784,7 +784,6 @@ alpha_ecoff_get_relocated_section_contents (abfd, link_info, link_order,
 
   /* The section size is not going to change.  */
   input_section->_cooked_size = input_section->_raw_size;
-  input_section->reloc_done = TRUE;
 
   reloc_count = bfd_canonicalize_reloc (input_bfd, input_section,
 					reloc_vector, symbols);

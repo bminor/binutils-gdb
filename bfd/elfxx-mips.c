@@ -7919,7 +7919,6 @@ _bfd_elf_mips_get_relocated_section_contents
 
   /* We're not relaxing the section, so just copy the size info */
   input_section->_cooked_size = input_section->_raw_size;
-  input_section->reloc_done = TRUE;
 
   reloc_count = bfd_canonicalize_reloc (input_bfd,
 					input_section,

@@ -2296,12 +2296,11 @@ mmix_elf_final_link (abfd, info)
 /* We need to include the maximum size of PUSHJ-stubs in the initial
    section size.  This is expected to shrink during linker relaxation.
 
-   You might think that we should set *only* _cooked_size, but that won't
-   work: section contents allocation will be using _raw_size in mixed
-   format linking and not enough storage will be allocated.  FIXME: That's
-   a major bug, including the name bfd_get_section_size_before_reloc; it
-   should be bfd_get_section_size_before_relax.  The relaxation functions
-   set _cooked size.  Relaxation happens before relocation.  All functions
+   You might think that we should set *only* _cooked_size, but that
+   won't work: section contents allocation will be using _raw_size in
+   mixed format linking and not enough storage will be allocated.
+   FIXME: That's a major bug.  The relaxation functions set _cooked
+   size.  Relaxation happens before relocation.  All functions
    *after relaxation* should be using _cooked size.  */
 
 static void

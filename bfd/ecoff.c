@@ -1,6 +1,6 @@
 /* Generic ECOFF (Extended-COFF) routines.
    Copyright 1990, 1991, 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2001,
-   2002, 2003 Free Software Foundation, Inc.
+   2002, 2003, 2004 Free Software Foundation, Inc.
    Original version by Per Bothner.
    Full support added by Ian Lance Taylor, ian@cygnus.com.
 
@@ -77,16 +77,14 @@ static unsigned int ecoff_armap_hash
 
 static asection bfd_debug_section =
 {
-  /* name,   id,  index, next, flags, user_set_vma, reloc_done,    */
-  "*DEBUG*", 0,   0,     NULL, 0,     0,            0,
+  /* name,   id,  index, next, flags, user_set_vma,                */
+  "*DEBUG*", 0,   0,     NULL, 0,     0,
   /* linker_mark, linker_has_input, gc_mark, segment_mark,         */
      0,           0,                0,       0,
-  /* sec_info_type, use_rela_p, has_tls_reloc,                     */
-     0,		    0,		0,
-  /* need_finalize_relax, has_gp_reloc,                            */
+  /* sec_info_type, use_rela_p, has_tls_reloc, has_gp_reloc,       */
+     0,		    0,		0,	       0,
+  /* need_finalize_relax, reloc_done,                              */
      0,			  0,
-  /* flag13, flag14, flag15, flag16, flag20, flag24,               */
-     0,      0,      0,      0,      0,	     0,
   /* vma, lma, _cooked_size, _raw_size,                            */
      0,   0,   0,            0,
   /* output_offset, output_section, alignment_power,               */
@@ -2550,7 +2548,7 @@ _bfd_ecoff_write_object_contents (abfd)
 	section.s_vaddr = vma;
 
       section.s_paddr = current->lma;
-      section.s_size = bfd_get_section_size_before_reloc (current);
+      section.s_size = bfd_get_section_size (current);
 
       /* If this section is unloadable then the scnptr will be 0.  */
       if ((current->flags & (SEC_LOAD | SEC_HAS_CONTENTS)) == 0)
@@ -2601,7 +2599,7 @@ _bfd_ecoff_write_object_contents (abfd)
 	  || (section.s_flags & STYP_ECOFF_FINI) != 0
 	  || section.s_flags == STYP_RCONST)
 	{
-	  text_size += bfd_get_section_size_before_reloc (current);
+	  text_size += bfd_get_section_size (current);
 	  if (! set_text_start || text_start > vma)
 	    {
 	      text_start = vma;
@@ -2617,7 +2615,7 @@ _bfd_ecoff_write_object_contents (abfd)
 	       || section.s_flags == STYP_XDATA
 	       || (section.s_flags & STYP_GOT) != 0)
 	{
-	  data_size += bfd_get_section_size_before_reloc (current);
+	  data_size += bfd_get_section_size (current);
 	  if (! set_data_start || data_start > vma)
 	    {
 	      data_start = vma;
@@ -2626,7 +2624,7 @@ _bfd_ecoff_write_object_contents (abfd)
 	}
       else if ((section.s_flags & STYP_BSS) != 0
 	       || (section.s_flags & STYP_SBSS) != 0)
-	bss_size += bfd_get_section_size_before_reloc (current);
+	bss_size += bfd_get_section_size (current);
       else if (section.s_flags == 0
 	       || (section.s_flags & STYP_ECOFF_LIB) != 0
 	       || section.s_flags == STYP_COMMENT)

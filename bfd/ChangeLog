@@ -1,3 +1,33 @@
+2004-06-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* section.c (struct sec): Remove usused flags.  Reorganize a little.
+	(bfd_get_section_size_before_reloc): Delete.
+	(bfd_get_section_size_after_reloc): Delete.
+	(STD_SECTION): Update.
+	(bfd_get_section_size_now): Delete.
+	(bfd_set_section_contents): Don't referece reloc_done.
+	(bfd_get_section_contents): Remove reloc_done comment.
+	* bout.c (b_out_bfd_get_relocated_section_contents): Don't set
+	reloc_done.
+	* coff-alpha.c (alpha_ecoff_get_relocated_section_contents): Likewise.
+	* ecoff.c (bfd_debug_section): Update initializer.
+	* elfxx-mips.c (_bfd_elf_mips_get_relocated_section_contents): Ditto.
+	* reloc.c (bfd_generic_get_relocated_section_contents): Likewise.
+	* bfd-in.h (bfd_section_size): Expand.
+	(bfd_get_section_size): New macro.
+	* bfd-in2.h: Regenerate.
+	* coff64-rs6000.c (xcoff64_write_object_contents): Replace
+	bfd_get_section_size_before_reloc with bfd_get_section_size.
+	* coffcode.h (coff_write_object_contents): Likewise.
+	* coffgen.c (build_debug_section): Likewise.
+	* dwarf1.c (parse_line_table): Likewise.
+	(_bfd_dwarf1_find_nearest_line): Likewise.
+	* ecoff.c (_bfd_ecoff_write_object_contents): Likewise.
+	* i386msdos.c (msdos_write_object_contents): Likewise.
+	* pdp11.c (squirt_out_relocs): Likewise.
+	* elf32-sh64.c (sh64_find_section_for_address): Remove comment.
+	* elf64-mmix.c (mmix_elf_final_link): Update comment.
+
 2004-06-14  Chris Demetriou  <cgd@broadcom.com>
 
 	* elf32-mips.c (elf_mips_gnu_pcrel32): Add (undoing 2004-04-24

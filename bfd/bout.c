@@ -1328,8 +1328,6 @@ b_out_bfd_get_relocated_section_contents (output_bfd, link_info, link_order,
   if (reloc_vector == NULL && reloc_size != 0)
     goto error_return;
 
-  input_section->reloc_done = 1;
-
   /* Read in the section.  */
   BFD_ASSERT (bfd_get_section_contents (input_bfd,
 					input_section,

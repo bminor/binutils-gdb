@@ -965,19 +965,19 @@ xcoff64_write_object_contents (abfd)
 
   if (text_sec)
     {
-      internal_a.tsize = bfd_get_section_size_before_reloc (text_sec);
+      internal_a.tsize = bfd_get_section_size (text_sec);
       internal_a.text_start = internal_a.tsize ? text_sec->vma : 0;
     }
 
   if (data_sec)
     {
-      internal_a.dsize = bfd_get_section_size_before_reloc (data_sec);
+      internal_a.dsize = bfd_get_section_size (data_sec);
       internal_a.data_start = internal_a.dsize ? data_sec->vma : 0;
     }
 
   if (bss_sec)
     {
-      internal_a.bsize = bfd_get_section_size_before_reloc (bss_sec);
+      internal_a.bsize = bfd_get_section_size (bss_sec);
       if (internal_a.bsize && bss_sec->vma < internal_a.data_start)
 	internal_a.data_start = bss_sec->vma;
     }

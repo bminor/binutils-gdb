@@ -364,9 +364,6 @@ CODE_FRAGMENT
 .  {* See the vma field.  *}
 .  unsigned int user_set_vma : 1;
 .
-.  {* Whether relocations have been processed.  *}
-.  unsigned int reloc_done : 1;
-.
 .  {* A mark flag used by some of the linker backends.  *}
 .  unsigned int linker_mark : 1;
 .
@@ -394,21 +391,18 @@ CODE_FRAGMENT
 .  unsigned int use_rela_p:1;
 .
 .  {* Bits used by various backends.  *}
-.  unsigned int has_tls_reloc:1;
 .
-.  {* Nonzero if this section needs the relax finalize pass.  *}
-.  unsigned int need_finalize_relax:1;
+.  {* Nonzero if this section has TLS related relocations.  *}
+.  unsigned int has_tls_reloc:1;
 .
 .  {* Nonzero if this section has a gp reloc.  *}
 .  unsigned int has_gp_reloc:1;
 .
-.  {* Unused bits.  *}
-.  unsigned int flag13:1;
-.  unsigned int flag14:1;
-.  unsigned int flag15:1;
-.  unsigned int flag16:4;
-.  unsigned int flag20:4;
-.  unsigned int flag24:8;
+.  {* Nonzero if this section needs the relax finalize pass.  *}
+.  unsigned int need_finalize_relax:1;
+.
+.  {* Whether relocations have been processed.  *}
+.  unsigned int reloc_done : 1;
 .
 .  {* End of internal packed boolean fields.  *}
 .
@@ -557,11 +551,6 @@ CODE_FRAGMENT
 .extern const struct bfd_symbol * const bfd_com_symbol;
 .extern const struct bfd_symbol * const bfd_und_symbol;
 .extern const struct bfd_symbol * const bfd_ind_symbol;
-.#define bfd_get_section_size_before_reloc(section) \
-.     ((section)->_raw_size)
-.#define bfd_get_section_size_after_reloc(section) \
-.     ((section)->reloc_done ? (section)->_cooked_size \
-.                            : (abort (), (bfd_size_type) 1))
 .
 .{* Macros to handle insertion and deletion of a bfd's sections.  These
 .   only handle the list pointers, ie. do not adjust section_count,
@@ -616,20 +605,17 @@ static const asymbol global_syms[] =
 #define STD_SECTION(SEC, FLAGS, SYM, NAME, IDX)				\
   const asymbol * const SYM = (asymbol *) &global_syms[IDX]; 		\
   asection SEC = 							\
-    /* name, id,  index, next, flags, user_set_vma, reloc_done,      */	\
-    { NAME,  IDX, 0,     NULL, FLAGS, 0,            0,			\
+    /* name, id,  index, next, flags, user_set_vma,                  */	\
+    { NAME,  IDX, 0,     NULL, FLAGS, 0,				\
 									\
     /* linker_mark, linker_has_input, gc_mark, segment_mark,         */	\
        0,           0,                1,       0,			\
 									\
-    /* sec_info_type, use_rela_p, has_tls_reloc,                     */ \
-       0,	      0,	  0,					\
+    /* sec_info_type, use_rela_p, has_tls_reloc, has_gp_reloc,       */ \
+       0,	      0,	  0,		 0,			\
 									\
-    /* need_finalize_relax, has_gp_reloc,                            */ \
+    /* need_finalize_relax, reloc_done,                              */ \
        0,		    0,						\
-									\
-    /* flag13, flag14, flag15, flag16, flag20, flag24,               */ \
-       0,      0,      0,      0,      0,      0,			\
 									\
     /* vma, lma, _cooked_size, _raw_size,                            */	\
        0,   0,   0,            0,					\
@@ -1243,11 +1229,6 @@ DESCRIPTION
 
 */
 
-#define bfd_get_section_size_now(abfd, sec) \
-  (sec->reloc_done \
-   ? bfd_get_section_size_after_reloc (sec) \
-   : bfd_get_section_size_before_reloc (sec))
-
 bfd_boolean
 bfd_set_section_contents (bfd *abfd,
 			  sec_ptr section,
@@ -1263,7 +1244,7 @@ bfd_set_section_contents (bfd *abfd,
       return FALSE;
     }
 
-  sz = bfd_get_section_size_now (abfd, section);
+  sz = section->_cooked_size != 0 ? section->_cooked_size : section->_raw_size;
   if ((bfd_size_type) offset > sz
       || count > sz
       || offset + count > sz
@@ -1343,8 +1324,6 @@ bfd_get_section_contents (bfd *abfd,
       return TRUE;
     }
 
-  /* Even if reloc_done is TRUE, this function reads unrelocated
-     contents, so we want the raw size.  */
   sz = section->_raw_size;
   if ((bfd_size_type) offset > sz
       || count > sz
