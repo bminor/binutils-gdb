@@ -1,7 +1,8 @@
 # Host: Intel 386 running Mach3
 
-XDEPFILES= os-mach3.o i386mach3-xdep.o i387-tdep.o coredep.o
-XM_FILE= xm-i386mach3.h
+XDEPFILES= os-mach3.o i387-tdep.o coredep.o
+NATDEPFILES= i386m3-nat.o
+XM_FILE= xm-i386m3.h
 
 # Don't use the mmalloc library in Mach 3.
 MMALLOC_LIB = 
