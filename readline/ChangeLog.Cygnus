@@ -1,3 +1,7 @@
+2001-07-20  Andrew Cagney  <ac131313@redhat.com>
+
+	* support/config.guess: Update using ../config.sub.
+
 2001-07-16  Andrew Cagney  <ac131313@redhat.com>
 
 	* support/config.sub: Update using ../config.sub.
