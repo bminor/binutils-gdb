@@ -184,13 +184,16 @@ main (argc, argv)
   ldemul_before_parse ();
   lang_has_input_file = false;
   parse_args (argc, argv);
+
+  if (config.relocateable_output && command_line.relax) 
+  {
+      einfo ("%P%F: -relax and -r may not be used together\n");
+  }
   lang_final ();
 
   if (trace_files)
     {
-
       info ("%P: mode %s\n", emulation);
-
     }
   if (lang_has_input_file == false)
     {
@@ -236,43 +239,34 @@ main (argc, argv)
     }
 
   if (config.relocateable_output)
+    output_bfd->flags &= ~EXEC_P;
+  else
+    output_bfd->flags |= EXEC_P;
+
+  ldwrite ();
+
+  /* Even if we're producing relocateable output, some non-fatal errors should
+     be reported in the exit status.  (What non-fatal errors, if any, do we
+     want to ignore for relocateable output?)  */
+
+  if (config.make_executable == false && force_make_executable == false)
     {
-      output_bfd->flags &= ~EXEC_P;
+      if (trace_files == true)
+	{
+	  einfo ("%P: Link errors found, deleting executable `%s'\n",
+		 output_filename);
+	}
 
-      ldwrite ();
-      bfd_close (output_bfd);
+      if (output_bfd->iostream)
+	fclose ((FILE *) (output_bfd->iostream));
+
+      unlink (output_filename);
+      exit (1);
     }
-
   else
     {
-
-      output_bfd->flags |= EXEC_P;
-
-      ldwrite ();
-
-
-      if (config.make_executable == false && force_make_executable == false)
-	{
-
-	  if (trace_files == true)
-	    {
-	      einfo ("%P: Link errors found, deleting executable `%s'\n",
-		     output_filename);
-	    }
-
-	  if (output_bfd->iostream)
-	    fclose ((FILE *) (output_bfd->iostream));
-
-	  unlink (output_filename);
-	  exit (1);
-	}
-      else
-	{
-	  bfd_close (output_bfd);
-	}
+      bfd_close (output_bfd);
     }
-
-
 
   exit (0);
 }				/* main() */
@@ -836,39 +830,46 @@ linear_library (entry)
       more_to_do = false;
       while (archive)
 	{
+	  /* Don't check this file if it's already been read in
+	     once */
+
+	  if (!archive->usrdata ||
+	     ! ((lang_input_statement_type *)(archive->usrdata))->loaded)
+	  {
 #ifdef GNU960
-	  if (gnu960_check_format (archive, bfd_object))
+	    if (gnu960_check_format (archive, bfd_object))
 #else
-	  if (bfd_check_format (archive, bfd_object))
+	     if (bfd_check_format (archive, bfd_object))
 #endif
-	    {
-	      register struct lang_input_statement_struct *subentry;
+	     {
+	       register struct lang_input_statement_struct *subentry;
 
-	      subentry = decode_library_subfile (entry,
-						 archive);
+	       subentry = decode_library_subfile (entry,
+						  archive);
 
-	      archive->usrdata = (PTR) subentry;
-	      if (!subentry)
+	       archive->usrdata = (PTR) subentry;
+	       if (!subentry)
 		return;
-	      if (subentry->loaded == false)
-		{
-		  Q_read_entry_symbols (archive, subentry);
+	       if (subentry->loaded == false)
+	       {
+		 Q_read_entry_symbols (archive, subentry);
 
-		  if (subfile_wanted_p (subentry) == true)
-		    {
-		      Q_enter_file_symbols (subentry);
+		 if (subfile_wanted_p (subentry) == true)
+		 {
+		   Q_enter_file_symbols (subentry);
 
-		      if (prev)
-			prev->chain = subentry;
-		      else
-			entry->subfiles = subentry;
-		      prev = subentry;
+		   if (prev)
+		    prev->chain = subentry;
+		   else
+		    entry->subfiles = subentry;
+		   prev = subentry;
 
-		      more_to_do = true;
-		      subentry->loaded = true;
-		    }
-		}
-	    }
+		   more_to_do = true;
+		   subentry->loaded = true;
+		 }
+	       }
+	     }
+	  }
 	  archive = bfd_openr_next_archived_file (entry->the_bfd, archive);
 
 	}
