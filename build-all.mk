@@ -49,7 +49,7 @@ NATIVE  = native
 
 GCC	 = gcc -O 
 CFLAGS	 = -g
-CXXFLAGS = -g -O
+CXXFLAGS = -g -O -fexternal-templates
 MAKEINFOFLAGS =
 
 log	= 1>$(canonhost)-build-log 2>&1
@@ -100,7 +100,10 @@ endif
 ifeq ($(canonhost),m68k-lynx-lynxos)
 canonhost := m68k-lynx
 endif
-ifeq ($(canonhost),rs6000-lynx-lynxos2.2.2)
+ifeq ($(canonhost),sparc-lynx-lynxos)
+canonhost := sparc-lynx
+endif
+ifeq ($(canonhost),rs6000-lynx-lynxos)
 canonhost := rs6000-lynx
 endif
 
@@ -268,6 +271,13 @@ all-cygnus:
 	@echo build started at `date`
 	[ -d $(INSTALLDIR) ] || mkdir $(INSTALLDIR)
 	-rm -f $(ROOTING)/$(RELEASE_TAG) && ln -s $(INSTALLDIR) $(ROOTING)/$(RELEASE_TAG) 
+#
+#       The following line to be used during regular progressive builds
+#       to help developers test, but should be commented out for final
+#       progressive build.
+#
+#       -rm -f $(ROOTING)/progressive-beta && ln -s $(RELEASE_TAG) $(ROOTING)/progres
+sive-beta
 	@for i in $(TARGETS) ; do \
 	  if [ "$$i" = "native" ] ; then \
             if [ ! -f $(canonhost)-stamp-3stage-done ] ; then \
@@ -295,8 +305,8 @@ all-cygnus:
 native:
 	@echo build started at `date`
 	[ -d $(INSTALLDIR) ] || mkdir $(INSTALLDIR)
-	rm -f $(ROOTING)/$(RELEASE_TAG)
-	ln -s $(INSTALLDIR) $(ROOTING)/$(RELEASE_TAG) 
+	-rm -f $(ROOTING)/$(RELEASE_TAG) && ln -s $(INSTALLDIR) $(ROOTING)/$(RELEASE_TAG)
+#	-rm -f $(ROOTING)/progressive-beta && ln -s $(RELEASE_TAG) $(ROOTING)/progressive-beta
 	$(MAKE) -f test-build.mk $(FLAGS_TO_PASS) $(canonhost)-stamp-3stage-done $(log)
 	@echo done at `date`
 
