@@ -4,9 +4,8 @@
 @setfilename as.info
 @settitle Using as
 @setchapternewpage odd
-@input smpklug.texi
-@smallbook
-@cropmarks
+@c @smallbook
+@c @cropmarks
 @c %**end of header
 
 @ifinfo
