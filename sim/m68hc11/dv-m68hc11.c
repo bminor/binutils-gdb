@@ -1,5 +1,5 @@
 /*  dv-m68hc11.c -- CPU 68HC11&68HC12 as a device.
-    Copyright (C) 1999, 2000 Free Software Foundation, Inc.
+    Copyright (C) 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
     Written by Stephane Carrez (stcarrez@worldnet.fr)
     (From a driver model Contributed by Cygnus Solutions.)
     
@@ -21,7 +21,10 @@
 
 
 #include "sim-main.h"
+#include "sim-hw.h"
 #include "hw-main.h"
+#include "sim-options.h"
+#include <limits.h>
 
 /* DEVICE
 
@@ -62,9 +65,25 @@
         Deliver a non-maskable interrupt to the processor.
 
 
+   set-port-a (input)
+   set-port-c (input)
+   set-pord-d (input)
+
+        Allow an external device to set the value of port A, C or D inputs.
+
+
    cpu-reset (output)
 
         Event generated after the CPU performs a reset.
+
+
+   port-a (output)
+   port-b (output)
+   port-c (output)
+   port-d (output)
+
+        Event generated when the value of the output port A, B, C or D
+	changes.
 
 
    BUGS
@@ -74,8 +93,47 @@
 
    */
 
+enum
+{
+  OPTION_OSC_SET = OPTION_START,
+  OPTION_OSC_CLEAR,
+  OPTION_OSC_INFO
+};
 
+static DECLARE_OPTION_HANDLER (m68hc11_option_handler);
 
+static const OPTION m68hc11_options[] =
+{
+  { {"osc-set", required_argument, NULL, OPTION_OSC_SET },
+      '\0', "BIT,FREQ", "Set the oscillator on input port BIT",
+      m68hc11_option_handler },
+  { {"osc-clear", required_argument, NULL, OPTION_OSC_CLEAR },
+      '\0', "BIT", "Clear oscillator on input port BIT",
+      m68hc11_option_handler },
+  { {"osc-info", no_argument, NULL, OPTION_OSC_INFO },
+      '\0', NULL, "Print information about current input oscillators",
+      m68hc11_option_handler },
+  
+  { {NULL, no_argument, NULL, 0}, '\0', NULL, NULL, NULL }
+};
+
+struct input_osc
+{
+  signed64         on_time;
+  signed64         off_time;
+  signed64         repeat;
+  struct hw_event *event;
+  const char      *name;
+  uint8            mask;
+  uint8            value;
+  uint16           addr;
+};
+
+#define NR_PORT_A_OSC (4)
+#define NR_PORT_B_OSC (0)
+#define NR_PORT_C_OSC (8)
+#define NR_PORT_D_OSC (6)
+#define NR_OSC (NR_PORT_A_OSC + NR_PORT_B_OSC + NR_PORT_C_OSC + NR_PORT_D_OSC)
 struct m68hc11cpu {
   /* Pending interrupts for delivery by event handler.  */
   int              pending_reset;
@@ -85,6 +143,8 @@ struct m68hc11cpu {
   unsigned_word    attach_address;
   int              attach_size;
   int              attach_space;
+  int              last_oscillator;
+  struct input_osc oscillators[NR_OSC];
 };
 
 
@@ -95,7 +155,15 @@ enum {
   RESET_PORT,
   NMI_PORT,
   IRQ_PORT,
-  CPU_RESET_PORT
+  CPU_RESET_PORT,
+  SET_PORT_A,
+  SET_PORT_C,
+  SET_PORT_D,
+  PORT_A,
+  PORT_B,
+  PORT_C,
+  PORT_D,
+  CAPTURE
 };
 
 
@@ -106,8 +174,21 @@ static const struct hw_port_descriptor m68hc11cpu_ports[] = {
   { "nmi",       NMI_PORT,       0, input_port, },
   { "irq",       IRQ_PORT,       0, input_port, },
 
+  { "set-port-a", SET_PORT_A,    0, input_port, },
+  { "set-port-c", SET_PORT_C,    0, input_port, },
+  { "set-port-d", SET_PORT_D,    0, input_port, },
+
   /* Events generated for connection to other devices.  */
   { "cpu-reset", CPU_RESET_PORT, 0, output_port, },
+
+  /* Events generated when the corresponding port is
+     changed by the program.  */
+  { "port-a",    PORT_A,         0, output_port, },
+  { "port-b",    PORT_B,         0, output_port, },
+  { "port-c",    PORT_C,         0, output_port, },
+  { "port-d",    PORT_D,         0, output_port, },
+
+  { "capture",   CAPTURE,        0, output_port, },
 
   { NULL, },
 };
@@ -121,6 +202,11 @@ static hw_ioctl_method m68hc11_ioctl;
 
 static hw_port_event_method m68hc11cpu_port_event;
 
+static void make_oscillator (struct m68hc11cpu *controller,
+                             const char *id, uint16 addr, uint8 mask);
+static struct input_osc *find_oscillator (struct m68hc11cpu *controller,
+                                          const char *id);
+static void reset_oscillators (struct hw *me);
 
 static void
 dv_m6811_attach_address_callback (struct hw *me,
@@ -180,6 +266,7 @@ m68hc11_delete (struct hw* me)
   
   controller = hw_data (me);
 
+  reset_oscillators (me);
   hw_detach_address (me, M6811_IO_LEVEL,
 		     controller->attach_space,
 		     controller->attach_address,
@@ -242,6 +329,37 @@ attach_m68hc11_regs (struct hw *me,
     cpu->cpu_mode = 0;
   else
     cpu->cpu_mode = M6811_MDA;
+
+  controller->last_oscillator = 0;
+
+  /* Create oscillators for input port A.  */
+  make_oscillator (controller, "A7", M6811_PORTA, 0x80);
+  make_oscillator (controller, "A2", M6811_PORTA, 0x04);
+  make_oscillator (controller, "A1", M6811_PORTA, 0x02);
+  make_oscillator (controller, "A0", M6811_PORTA, 0x01);
+
+  /* port B is output only.  */
+
+  /* Create oscillators for input port C.  */
+  make_oscillator (controller, "C0", M6811_PORTC, 0x01);
+  make_oscillator (controller, "C1", M6811_PORTC, 0x02);
+  make_oscillator (controller, "C2", M6811_PORTC, 0x04);
+  make_oscillator (controller, "C3", M6811_PORTC, 0x08);
+  make_oscillator (controller, "C4", M6811_PORTC, 0x10);
+  make_oscillator (controller, "C5", M6811_PORTC, 0x20);
+  make_oscillator (controller, "C6", M6811_PORTC, 0x40);
+  make_oscillator (controller, "C7", M6811_PORTC, 0x80);
+
+  /* Create oscillators for input port D.  */
+  make_oscillator (controller, "D0", M6811_PORTD, 0x01);
+  make_oscillator (controller, "D1", M6811_PORTD, 0x02);
+  make_oscillator (controller, "D2", M6811_PORTD, 0x04);
+  make_oscillator (controller, "D3", M6811_PORTD, 0x08);
+  make_oscillator (controller, "D4", M6811_PORTD, 0x10);
+  make_oscillator (controller, "D5", M6811_PORTD, 0x20);
+
+  /* Add oscillator commands.  */
+  sim_add_option_table (sd, 0, m68hc11_options);
 }
 
 static void
@@ -279,7 +397,86 @@ deliver_m68hc11cpu_interrupt (struct hw *me, void *data)
 {
 }
 
+static void
+make_oscillator (struct m68hc11cpu *controller, const char *name,
+                 uint16 addr, uint8 mask)
+{
+  struct input_osc *osc;
 
+  if (controller->last_oscillator >= NR_OSC)
+    hw_abort (0, "Too many oscillators");
+
+  osc = &controller->oscillators[controller->last_oscillator];
+  osc->name = name;
+  osc->addr = addr;
+  osc->mask = mask;
+  controller->last_oscillator++;
+}
+
+/* Find the oscillator given the input port name.  */
+static struct input_osc *
+find_oscillator (struct m68hc11cpu *controller, const char *name)
+{
+  int i;
+
+  for (i = 0; i < controller->last_oscillator; i++)
+    if (strcasecmp (controller->oscillators[i].name, name) == 0)
+      return &controller->oscillators[i];
+
+  return 0;
+}
+
+static void
+oscillator_handler (struct hw *me, void *data)
+{
+  struct input_osc *osc = (struct input_osc*) data;
+  SIM_DESC sd;
+  sim_cpu *cpu;
+  signed64 dt;
+  uint8 val;
+
+  sd = hw_system (me);
+  cpu = STATE_CPU (sd, 0);
+
+  /* Change the input bit.  */
+  osc->value ^= osc->mask;
+  val = cpu->ios[osc->addr] & ~osc->mask;
+  val |= osc->value;
+  m68hc11cpu_set_port (me, cpu, osc->addr, val);
+
+  /* Setup event to toggle the bit.  */
+  if (osc->value)
+    dt = osc->on_time;
+  else
+    dt = osc->off_time;
+
+  if (dt && --osc->repeat >= 0)
+    {
+      sim_events *events = STATE_EVENTS (sd);
+
+      dt += events->nr_ticks_to_process;
+      osc->event = hw_event_queue_schedule (me, dt, oscillator_handler, osc);
+    }
+  else
+    osc->event = 0;
+}
+
+static void
+reset_oscillators (struct hw *me)
+{
+  struct m68hc11cpu *controller = hw_data (me);
+  int i;
+
+  for (i = 0; i < controller->last_oscillator; i++)
+    {
+      if (controller->oscillators[i].event)
+        {
+          hw_event_queue_deschedule (me, controller->oscillators[i].event);
+          controller->oscillators[i].event = 0;
+        }
+    }
+}
+      
 static void
 m68hc11cpu_port_event (struct hw *me,
                        int my_port,
@@ -304,6 +501,7 @@ m68hc11cpu_port_event (struct hw *me,
          - Restart the cpu for the reset (get the CPU mode from the
            CONFIG register that gets initialized by EEPROM device).  */
       cpu_reset (cpu);
+      reset_oscillators (me);
       hw_port_event (me, CPU_RESET_PORT, 1);
       cpu_restart (cpu);
       break;
@@ -321,7 +519,19 @@ m68hc11cpu_port_event (struct hw *me,
 	controller->pending_level = level;
       HW_TRACE ((me, "port-in level=%d", level));
       break;
+
+    case SET_PORT_A:
+      m68hc11cpu_set_port (me, cpu, M6811_PORTA, level);
+      break;
       
+    case SET_PORT_C:
+      m68hc11cpu_set_port (me, cpu, M6811_PORTC, level);
+      break;
+
+    case SET_PORT_D:
+      m68hc11cpu_set_port (me, cpu, M6811_PORTD, level);
+      break;
+
     default:
       hw_abort (me, "bad switch");
       break;
@@ -411,6 +621,180 @@ m68hc11_ioctl (struct hw *me,
   return 0;
 }
 
+/* Setup an oscillator on an input port.
+
+   TON represents the time in seconds that the input port should be set to 1.
+   TOFF is the time in seconds for the input port to be set to 0.
+
+   The oscillator frequency is therefore 1 / (ton + toff).
+
+   REPEAT indicates the number of 1 <-> 0 transitions until the oscillator
+   stops.  */
+int
+m68hc11cpu_set_oscillator (SIM_DESC sd, const char *port,
+                           double ton, double toff, signed64 repeat)
+{
+  sim_cpu *cpu;
+  struct input_osc *osc;
+  double f;
+
+  cpu = STATE_CPU (sd, 0);
+
+  /* Find oscillator that corresponds to the input port.  */
+  osc = find_oscillator (hw_data (cpu->hw_cpu), port);
+  if (osc == 0)
+    return -1;
+
+  /* Compute the ON time in cpu cycles.  */
+  f = (double) (cpu->cpu_frequency) * ton;
+  osc->on_time = (signed64) (f / 4.0);
+  if (osc->on_time < 1)
+    osc->on_time = 1;
+
+  /* Compute the OFF time in cpu cycles.  */
+  f = (double) (cpu->cpu_frequency) * toff;
+  osc->off_time = (signed64) (f / 4.0);
+  if (osc->off_time < 1)
+    osc->off_time = 1;
+
+  osc->repeat = repeat;
+  if (osc->event)
+    hw_event_queue_deschedule (cpu->hw_cpu, osc->event);
+
+  osc->event = hw_event_queue_schedule (cpu->hw_cpu,
+                                        osc->value ? osc->on_time
+                                        : osc->off_time,
+                                        oscillator_handler, osc);
+  return 0;
+}
+
+/* Clear the oscillator.  */
+int
+m68hc11cpu_clear_oscillator (SIM_DESC sd, const char *port)
+{
+  sim_cpu *cpu;
+  struct input_osc *osc;
+
+  cpu = STATE_CPU (sd, 0);
+  osc = find_oscillator (hw_data (cpu->hw_cpu), port);
+  if (osc == 0)
+    return -1;
+
+  if (osc->event)
+    hw_event_queue_deschedule (cpu->hw_cpu, osc->event);
+  osc->event = 0;
+  osc->repeat = 0;
+  return 0;
+}
+
+static int
+get_frequency (const char *s, double *f)
+{
+  char *p;
+  
+  *f = strtod (s, &p);
+  if (s == p)
+    return -1;
+
+  if (*p)
+    {
+      if (strcasecmp (p, "khz") == 0)
+        *f = *f * 1000.0;
+      else if (strcasecmp (p, "mhz") == 0)
+        *f = *f  * 1000000.0;
+      else if (strcasecmp (p, "hz") != 0)
+        return -1;
+    }
+  return 0;
+}
+
+static SIM_RC
+m68hc11_option_handler (SIM_DESC sd, sim_cpu *cpu,
+                        int opt, char *arg, int is_command)
+{
+  struct m68hc11cpu *controller;
+  double f;
+  char *p;
+  int i;
+  int title_printed = 0;
+  
+  if (cpu == 0)
+    cpu = STATE_CPU (sd, 0);
+
+  controller = hw_data (cpu->hw_cpu);
+  switch (opt)
+    {
+    case OPTION_OSC_SET:
+      p = strchr (arg, ',');
+      if (p)
+        *p++ = 0;
+
+      if (p == 0)
+        sim_io_eprintf (sd, "No frequency specified\n");
+      else if (get_frequency (p, &f) < 0 || f < 1.0e-8)
+        sim_io_eprintf (sd, "Invalid frequency: '%s'\n", p);
+      else if (m68hc11cpu_set_oscillator (sd, arg,
+                                          1.0 / (f * 2.0),
+                                          1.0 / (f * 2.0), LONG_MAX))
+        sim_io_eprintf (sd, "Invalid input port: '%s'\n", arg);
+      break;
+
+    case OPTION_OSC_CLEAR:
+      if (m68hc11cpu_clear_oscillator (sd, arg) != 0)
+        sim_io_eprintf (sd, "Invalid input port: '%s'\n", arg);
+      break;
+
+    case OPTION_OSC_INFO:
+      for (i = 0; i < controller->last_oscillator; i++)
+        {
+          signed64 t;
+          struct input_osc *osc;
+
+          osc = &controller->oscillators[i];
+          if (osc->event)
+            {
+              double f;
+              int cur_value;
+              int next_value;
+              char freq[32];
+
+              if (title_printed == 0)
+                {
+                  title_printed = 1;
+                  sim_io_printf (sd, " PORT  Frequency   Current"
+                                 "    Next    Transition time\n");
+                }
+
+              f = (double) (osc->on_time + osc->off_time);
+              f = (double) (cpu->cpu_frequency / 4) / f;
+              t = hw_event_remain_time (cpu->hw_cpu, osc->event);
+
+              if (f > 10000.0)
+                sprintf (freq, "%6.2f", f / 1000.0);
+              else
+                sprintf (freq, "%6.2f", f);
+              cur_value = osc->value ? 1 : 0;
+              next_value = osc->value ? 0 : 1;
+              if (f > 10000.0)
+                sim_io_printf (sd, " %4.4s  %8.8s khz"
+                               "      %d       %d    %35.35s\n",
+                               osc->name, freq,
+                               cur_value, next_value,
+                               cycle_to_string (cpu, t));
+              else
+                sim_io_printf (sd, " %4.4s  %8.8s hz "
+                               "      %d       %d    %35.35s\n",
+                               osc->name, freq,
+                               cur_value, next_value,
+                               cycle_to_string (cpu, t));
+            }
+        }
+      break;      
+    }
+
+  return SIM_RC_OK;
+}
+
 /* generic read/write */
 
 static unsigned
@@ -428,7 +812,7 @@ m68hc11cpu_io_read_buffer (struct hw *me,
   
   HW_TRACE ((me, "read 0x%08lx %d", (long) base, (int) nr_bytes));
 
-  sd  = hw_system (me); 
+  sd  = hw_system (me);
   cpu = STATE_CPU (sd, 0);
 
   /* Handle reads for the sub-devices.  */
@@ -452,6 +836,110 @@ m68hc11cpu_io_read_buffer (struct hw *me,
   return byte;
 }     
 
+void
+m68hc11cpu_set_port (struct hw *me, sim_cpu *cpu,
+                     unsigned addr, uint8 val)
+{
+  uint8 mask;
+  uint8 delta;
+  int check_interrupts = 0;
+  int i;
+  
+  switch (addr)
+    {
+    case M6811_PORTA:
+      if (cpu->ios[M6811_PACTL] & M6811_DDRA7)
+        mask = 3;
+      else
+        mask = 0x83;
+
+      val = val & mask;
+      val |= cpu->ios[M6811_PORTA] & ~mask;
+      delta = val ^ cpu->ios[M6811_PORTA];
+      cpu->ios[M6811_PORTA] = val;
+      if (delta & 0x80)
+        {
+          /* Pulse accumulator is enabled.  */
+          if ((cpu->ios[M6811_PACTL] & M6811_PAEN)
+              && !(cpu->ios[M6811_PACTL] & M6811_PAMOD))
+            {
+              int inc;
+
+              /* Increment event counter according to rising/falling edge.  */
+              if (cpu->ios[M6811_PACTL] & M6811_PEDGE)
+                inc = (val & 0x80) ? 1 : 0;
+              else
+                inc = (val & 0x80) ? 0 : 1;
+
+              cpu->ios[M6811_PACNT] += inc;
+
+              /* Event counter overflowed.  */
+              if (inc && cpu->ios[M6811_PACNT] == 0)
+                {
+                  cpu->ios[M6811_TFLG2] |= M6811_PAOVI;
+                  check_interrupts = 1;
+                }
+            }
+        }
+
+      /* Scan IC3, IC2 and IC1.  Bit number is 3 - i.  */
+      for (i = 0; i < 3; i++)
+        {
+          uint8 mask = (1 << i);
+          
+          if (delta & mask)
+            {
+              uint8 edge;
+              int captured;
+
+              edge = cpu->ios[M6811_TCTL2];
+              edge = (edge >> (2 * i)) & 0x3;
+              switch (edge)
+                {
+                case 0:
+                  captured = 0;
+                  break;
+                case 1:
+                  captured = (val & mask) != 0;
+                  break;
+                case 2:
+                  captured = (val & mask) == 0;
+                  break;
+                default:
+                  captured = 1;
+                  break;
+                }
+              if (captured)
+                {
+                  cpu->ios[M6811_TFLG1] |= (1 << i);
+                  hw_port_event (me, CAPTURE, M6811_TIC1 + 3 - i);
+                  check_interrupts = 1;
+                }
+            }
+        }
+      break;
+
+    case M6811_PORTC:
+      mask = cpu->ios[M6811_DDRC];
+      val = val & mask;
+      val |= cpu->ios[M6811_PORTC] & ~mask;
+      cpu->ios[M6811_PORTC] = val;
+      break;
+
+    case M6811_PORTD:
+      mask = cpu->ios[M6811_DDRD];
+      val = val & mask;
+      val |= cpu->ios[M6811_PORTD] & ~mask;
+      cpu->ios[M6811_PORTD] = val;
+      break;
+
+    default:
+      break;
+    }
+
+  if (check_interrupts)
+    interrupts_update_pending (&cpu->cpu_interrupts);
+}
 
 static void
 m68hc11cpu_io_write (struct hw *me, sim_cpu *cpu,
@@ -460,15 +948,18 @@ m68hc11cpu_io_write (struct hw *me, sim_cpu *cpu,
   switch (addr)
     {
     case M6811_PORTA:
+      hw_port_event (me, PORT_A, val);
       break;
 
     case M6811_PIOC:
       break;
 
     case M6811_PORTC:
+      hw_port_event (me, PORT_C, val);
       break;
 
     case M6811_PORTB:
+      hw_port_event (me, PORT_B, val);
       break;
 
     case M6811_PORTCL:
@@ -478,6 +969,7 @@ m68hc11cpu_io_write (struct hw *me, sim_cpu *cpu,
       break;
 
     case M6811_PORTD:
+      hw_port_event (me, PORT_D, val);
       break;
 
     case M6811_DDRD:

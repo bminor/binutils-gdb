@@ -204,7 +204,9 @@ struct _sim_cpu {
   uint8                 cpu_use_local_config;
   
   uint8                 ios[MAX_PORTS];
-  
+
+  struct hw            *hw_cpu;
+
   /* ... base type ... */
   sim_cpu_base base;
 };
@@ -529,6 +531,13 @@ extern void sim_memory_error (sim_cpu *cpu, SIM_SIGNAL excep,
 extern void emul_os (int op, sim_cpu *cpu);
 extern void cpu_interp_m6811 (sim_cpu *cpu);
 extern void cpu_interp_m6812 (sim_cpu *cpu);
+
+extern int m68hc11cpu_set_oscillator (SIM_DESC sd, const char *port,
+				      double ton, double toff,
+				      signed64 repeat);
+extern int m68hc11cpu_clear_oscillator (SIM_DESC sd, const char *port);
+extern void m68hc11cpu_set_port (struct hw *me, sim_cpu *cpu,
+				 unsigned addr, uint8 val);
 
 /* The current state of the processor; registers, memory, etc.  */
 

@@ -1,5 +1,5 @@
 /*  dv-m68hc11tim.c -- Simulation of the 68HC11 timer devices.
-    Copyright (C) 1999, 2000 Free Software Foundation, Inc.
+    Copyright (C) 1999, 2000, 2002 Free Software Foundation, Inc.
     Written by Stephane Carrez (stcarrez@worldnet.fr)
     (From a driver model Contributed by Cygnus Solutions.)
 
@@ -50,6 +50,12 @@
         Reset the timer device.  This port must be connected to
         the cpu-reset output port.
 
+   capture (input)
+
+        Input capture.  This port must be connected to the input
+        captures.  It latches the current TCNT free running counter
+        into one of the three input capture registers.
+
    */
 
 
@@ -58,13 +64,15 @@
 
 enum
 {
-  RESET_PORT
+  RESET_PORT,
+  CAPTURE
 };
 
 
 static const struct hw_port_descriptor m68hc11tim_ports[] = 
 {
-  { "reset", RESET_PORT, 0, input_port, },
+  { "reset",   RESET_PORT, 0, input_port, },
+  { "capture", CAPTURE,    0, input_port, },
   { NULL, },
 };
 
@@ -137,7 +145,6 @@ m68hc11tim_finish (struct hw *me)
 }
 
 
-
 /* An event arrives on an interrupt port.  */
 
 static void
@@ -151,7 +158,8 @@ m68hc11tim_port_event (struct hw *me,
   struct m68hc11tim *controller;
   sim_cpu *cpu;
   unsigned8 val;
-  
+  unsigned16 tcnt;
+
   controller = hw_data (me);
   sd         = hw_system (me);
   cpu        = STATE_CPU (sd, 0);
@@ -196,6 +204,24 @@ m68hc11tim_port_event (struct hw *me,
                                     (unsigned_word) M6811_PACTL, 1);
         break;
       }
+
+    case CAPTURE:
+      tcnt = (uint16) ((cpu->cpu_absolute_cycle - controller->tcnt_adjust)
+                       / controller->clock_prescaler);
+      switch (level)
+        {
+        case M6811_TIC1:
+        case M6811_TIC2:
+        case M6811_TIC3:
+          cpu->ios[level] = tcnt >> 8;
+          cpu->ios[level + 1] = tcnt;
+          break;
+
+        default:
+          hw_abort (me, "Invalid event parameter %d", level);
+          break;
+        }
+      break;
 
     default:
       hw_abort (me, "Event on unknown port %d", my_port);

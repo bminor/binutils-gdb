@@ -208,6 +208,7 @@ sim_hw_configure (SIM_DESC sd)
 	  /* M68hc11 Timer configuration. */
 	  sim_hw_parse (sd, "/m68hc11/m68hc11tim/reg 0x1b 0x5");
 	  sim_hw_parse (sd, "/m68hc11 > cpu-reset reset /m68hc11/m68hc11tim");
+          sim_hw_parse (sd, "/m68hc11 > capture capture /m68hc11/m68hc11tim");
 	}
 
       /* Create the SPI device.  */
@@ -229,6 +230,7 @@ sim_hw_configure (SIM_DESC sd)
 	  sim_hw_parse (sd, "/m68hc11/m68hc11eepr/reg 0xb000 512");
 	  sim_hw_parse (sd, "/m68hc11 > cpu-reset reset /m68hc11/m68hc11eepr");
 	}
+      cpu->hw_cpu = sim_hw_parse (sd, "/m68hc11");
     }
   else
     {
@@ -281,6 +283,8 @@ sim_hw_configure (SIM_DESC sd)
 	  sim_hw_parse (sd, "/m68hc12/m68hc12eepr/reg 0x0800 2048");
 	  sim_hw_parse (sd, "/m68hc12 > cpu-reset reset /m68hc12/m68hc12eepr");
 	}
+
+      cpu->hw_cpu = sim_hw_parse (sd, "/m68hc12");
     }
   return 0;
 }

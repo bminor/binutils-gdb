@@ -1,5 +1,5 @@
 /*  dv-m68hc11spi.c -- Simulation of the 68HC11 SPI
-    Copyright (C) 2000 Free Software Foundation, Inc.
+    Copyright (C) 2000, 2002 Free Software Foundation, Inc.
     Written by Stephane Carrez (stcarrez@worldnet.fr)
     (From a driver model Contributed by Cygnus Solutions.)
 
@@ -192,14 +192,16 @@ m68hc11spi_port_event (struct hw *me,
 static void
 set_bit_port (struct hw *me, sim_cpu *cpu, int port, int mask, int value)
 {
-  /* TODO: Post an event to inform other devices that pin 'port' changes.
-     This has only a sense if we provide some device that is logically
-     connected to these pin ports (SCLK and MOSI) and that handles
-     the SPI protocol.  */
+  uint8 val;
+  
   if (value)
-    cpu->ios[port] |= mask;
+    val = cpu->ios[port] | mask;
   else
-    cpu->ios[port] &= ~mask;
+    val = cpu->ios[port] & ~mask;
+
+  /* Set the new value and post an event to inform other devices
+     that pin 'port' changed.  */
+  m68hc11cpu_set_port (me, cpu, port, val);
 }
 
 
