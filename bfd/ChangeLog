@@ -1,8 +1,13 @@
+2004-08-01  Thiemo Seufer  <seufer@csv.ica.uni-stuttgart.de>
+
+	* elfxx-mips.c (mips_elf_calculate_relocation): Test only for
+	the dynamic link symbol actually in use.
+
 2004-08-01  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* elf32-m68hc1x.c (elf32_m68hc11_size_stubs): Handle bfd_link_hash_new
 
-2004-07-31  Joel Brobecker <brobecker@gnat.com>
+2004-07-31  Joel Brobecker  <brobecker@gnat.com>
 	    Thiemo Seufer  <seufer@csv.ica.uni-stuttgart.de>
 
 	* elfxx-mips.c (_bfd_mips_elf_symbol_processing): Handle
