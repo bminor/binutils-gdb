@@ -1,5 +1,9 @@
 2005-03-02  Alan Modra  <amodra@bigpond.net.au>
 
+	* symbols.c (fb_label_name): Fix silly thinko in last change.
+
+2005-03-02  Alan Modra  <amodra@bigpond.net.au>
+
 	* expr.c (integer_constant): Remove TARGET_WORD_SIZE hack.
 	* config/tc-m68k.h (TARGET_WORD_SIZE): Delete.
 
