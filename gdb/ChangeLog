@@ -1,5 +1,10 @@
 2000-12-19  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
+	* sh-tdep.c (sh_print_register): Don't leave regnum 0 out of the
+        non-pseudo-regs group.
+
+2000-12-19  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
 	* sh-tdep.c (sh_gdbarch_init): Move setting of breakpoint_from_pc
 	to before switch statement.
 	

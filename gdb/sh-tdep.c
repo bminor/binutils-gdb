@@ -1747,7 +1747,7 @@ sh_print_register (int regnum)
   if (regnum < 0 || regnum >= NUM_REGS + NUM_PSEUDO_REGS)
     internal_error ("Invalid register number %d\n", regnum);
 
-  else if (regnum > 0 && regnum < NUM_REGS)
+  else if (regnum >= 0 && regnum < NUM_REGS)
     {
       if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (regnum)) == TYPE_CODE_FLT)
 	sh_do_fp_register (regnum);	/* FP regs */
