@@ -559,7 +559,7 @@ install-info: binutils.info
 	  dir=$(srcdir) ; \
 	fi ; \
 	for i in `cd $$dir; echo binutils.info*` ; do \
-		$(INSTALL_DATA) $$i $(infodir)/$$i ; \
+		$(INSTALL_DATA) $$dir/$$i $(infodir)/$$i ; \
 	done
 
 clean-info:

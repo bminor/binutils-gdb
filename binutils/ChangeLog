@@ -1,3 +1,17 @@
+Thu Nov  3 19:04:34 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* Makefile.in (install-info): Install info files from whatever
+	directory they were found in.
+
+	Patch from DJ Delorie:
+	* configure.bat: do c++filt -> cxxfilt right
+
+	* sysinfo.y: Include system header files early, so any potential
+	declaration of abort() occurs before its use.
+
+	* strings.c (strings_file): Try opening the file in binary mode
+	first.
+
 Wed Nov  2 15:44:13 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* ar.c (main): Treat ar qs like ar rs.
