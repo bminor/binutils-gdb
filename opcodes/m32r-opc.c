@@ -158,7 +158,8 @@ m32r_cgen_get_insn_operands (insn, fields, indices)
       if (op == NULL)
 	indices[i] = CGEN_OPERAND_INSTANCE_INDEX (opinst);
       else
-	indices[i] = m32r_cgen_get_int_operand (CGEN_OPERAND_INDEX (op), fields);
+	indices[i] = m32r_cgen_get_int_operand (CGEN_OPERAND_INDEX (op),
+						  fields);
     }
 }
 
