@@ -1,3 +1,7 @@
+2002-10-07  Mark Elbrecht  <snowball3@softhome.net>
+
+	* cofflink.c (mark_relocs): Don't mark relocations in excluded sections.
+
 2002-10-07  Alan Modra  <amodra@bigpond.net.au>
 
 	* elflink.h (elf_link_input_bfd): Remove BFD_VERSION_DATE dependent
