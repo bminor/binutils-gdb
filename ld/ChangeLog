@@ -1,3 +1,10 @@
+Thu Sep  5 15:24:12 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldlang.c (section_already_linked): Accept a lang_input_statement
+	as the PTR argument.  If the file is symbols only, discard all
+	input sections.
+	(ldlang_add_file): Pass entry to bfd_map_over_sections.
+
 Wed Sep  4 15:53:43 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.tgt (alpha-*-gnu*): New target.  From Fila Kolodny
