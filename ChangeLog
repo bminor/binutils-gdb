@@ -1,8 +1,6 @@
 Thu Apr  1 08:25:42 1993  Ian Lance Taylor  (ian@cygnus.com)
 
-	* configure.in: Build gas for mips-*-*.  If configuring gas and/or
-	ld, and the source directories exist, assume -with-gnu-as and/or
-	-with-gnu-ld.
+	* configure.in: Build gas for mips-*-*.
 
 Wed Mar 31 21:20:58 1993  K. Richard Pixley  (rich@rtl.cygnus.com)
 
