@@ -762,9 +762,13 @@ sunos4_set_section_contents (abfd, section, location, offset, count)
 	      return false;
 	    }
 
-	  obj_textsec (abfd)->filepos = sizeof(struct exec);
-	  obj_datasec(abfd)->filepos = obj_textsec (abfd)->filepos 
-				     + obj_textsec (abfd)->size;
+	obj_textsec(abfd)->filepos = sizeof(struct exec);
+	obj_textsec(abfd)->size = align_power(obj_textsec(abfd)->size,
+					      obj_textsec(abfd)->alignment_power);
+	obj_datasec(abfd)->filepos = obj_textsec (abfd)->filepos  + obj_textsec (abfd)->size;
+	obj_datasec(abfd)->size = align_power(obj_datasec(abfd)->size,
+					      obj_datasec(abfd)->alignment_power);
+
       }
   /* regardless, once we know what we're doing, we might as well get going */
   if (section != obj_bsssec(abfd)) {
