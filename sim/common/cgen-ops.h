@@ -364,6 +364,14 @@ SUBWORDSFSI (SF in)
   return x.out;
 }
 
+SEMOPS_INLINE DI
+SUBWORDDFDI (DF in)
+{
+  union { DF in; DI out; } x;
+  x.in = in;
+  return x.out;
+}
+
 SEMOPS_INLINE UQI
 SUBWORDDIUQI (DI in, int byte)
 {
@@ -456,6 +464,7 @@ QI SUBWORDSIQI (SI);
 HI SUBWORDSIHI (HI);
 SI SUBWORDSFSI (SF);
 SF SUBWORDSISF (SI);
+DI SUBWORDDFDI (DF);
 DF SUBWORDDIDF (DI);
 QI SUBWORDDIQI (DI, int);
 HI SUBWORDDIHI (DI, int);
