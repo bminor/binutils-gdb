@@ -1203,29 +1203,32 @@ gld${EMULATION_NAME}_place_orphan (file, s)
 	}
       place->section = &snew->next;	/* Save the end of this list.  */
 
-      /* We try to put the output statements in some sort of
-	 reasonable order here, because they determine the final load
-	 addresses of the orphan sections.  */
-      if (place->stmt == NULL)
+      if (add.head != NULL)
 	{
-	  /* Put the new statement list right at the head.  */
-	  *add.tail = place->os->header.next;
-	  place->os->header.next = add.head;
-	}
-      else
-	{
-	  /* Put it after the last orphan statement we added.  */
-	  *add.tail = *place->stmt;
-	  *place->stmt = add.head;
-	}
+	  /* We try to put the output statements in some sort of
+	     reasonable order here, because they determine the final
+	     load addresses of the orphan sections.  */
+	  if (place->stmt == NULL)
+	    {
+	      /* Put the new statement list right at the head.  */
+	      *add.tail = place->os->header.next;
+	      place->os->header.next = add.head;
+	    }
+	  else
+	    {
+	      /* Put it after the last orphan statement we added.  */
+	      *add.tail = *place->stmt;
+	      *place->stmt = add.head;
+	    }
 
-      /* Fix the global list pointer if we happened to tack our new
-	 list at the tail.  */
-      if (*old->tail == add.head)
-	old->tail = add.tail;
+	  /* Fix the global list pointer if we happened to tack our
+	     new list at the tail.  */
+	  if (*old->tail == add.head)
+	    old->tail = add.tail;
 
-      /* Save the end of this list.  */
-      place->stmt = add.tail;
+	  /* Save the end of this list.  */
+	  place->stmt = add.tail;
+	}
     }
 
   return true;
