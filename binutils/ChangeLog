@@ -1,3 +1,19 @@
+Tue May 30 14:24:15 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* Makefile.in: Delete lines with lots of #### because four or more
+	indicate a point for makefile fragment substitution.
+
+Tue May  9 17:17:05 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* configure.in: Don't build nlmconv on PowerPC eabi any more, it
+	is not needed.
+
+Thu Apr 27 20:21:24 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* Makefile.in (EXPECT): Define.
+	(RUNTEST): Use one in source tree if present.
+	(check): Set `rootme' for $(EXPECT).
+
 Wed Apr 26 18:26:21 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	* srconv.c (main): Add support for -n option which disables
