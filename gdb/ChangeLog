@@ -1,5 +1,10 @@
 2003-01-19  Andrew Cagney  <ac131313@redhat.com>
 
+	* MAINTAINERS: Replace `Blanket Write Privs' with `Global
+	Maintainers'.  Update `Various Maintainers'.
+
+2003-01-19  Andrew Cagney  <ac131313@redhat.com>
+
 	* frame.c (frame_saved_regs_pop): Assert POP_FRAME_P.
 	* gdbarch.sh (POP_FRAME): Change to function with predicate.
 	Suppress actual parameters when `-'.

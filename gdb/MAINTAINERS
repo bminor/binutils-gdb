@@ -1,7 +1,7 @@
 			GDB Maintainers
 
 
-			Blanket Write Privs
+			Global Maintainers
 			   (alphabetic)
 
 Jim Blandy			jimb@redhat.com
@@ -24,7 +24,7 @@ Note individuals who maintain parts of the debugger need approval to
 check in changes outside of the immediate domain that they maintain.
 
 If there is no maintainer for a given domain then the responsibility
-falls to the head maintainer.
+falls to a global maintainer.
 
 If there are several maintainers for a given domain then
 responsibility falls to the first maintainer.  The first maintainer is
