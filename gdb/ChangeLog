@@ -1,5 +1,8 @@
 Sat Nov 21 17:15:40 1998  Philippe De Muyter  <phdm@macqel.be>
 
+	* breakpoint.c (bpstat_stop_status): Do not increment hit_count
+	of breakpoint if condition is not true. 
+
 	* coffread.c (coff_symtab_read): Discard C_LABEL's that are not
 	function entry points, to avoid getting them in the stack dump
 	instead of the actual function.

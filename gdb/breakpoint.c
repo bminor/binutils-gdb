@@ -39,147 +39,106 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "symfile.h"
 #include "objfiles.h"
 
-/* local function prototypes */
+/* Prototypes for local functions. */
 
-static void
-catch_command_1 PARAMS ((char *, int, int));
+static void catch_command_1 PARAMS ((char *, int, int));
 
-static void
-enable_delete_command PARAMS ((char *, int));
+static void enable_delete_command PARAMS ((char *, int));
 
-static void
-enable_delete_breakpoint PARAMS ((struct breakpoint *));
+static void enable_delete_breakpoint PARAMS ((struct breakpoint *));
 
-static void
-enable_once_command PARAMS ((char *, int));
+static void enable_once_command PARAMS ((char *, int));
 
-static void
-enable_once_breakpoint PARAMS ((struct breakpoint *));
+static void enable_once_breakpoint PARAMS ((struct breakpoint *));
 
-static void
-disable_command PARAMS ((char *, int));
+static void disable_command PARAMS ((char *, int));
 
-static void
-enable_command PARAMS ((char *, int));
+static void enable_command PARAMS ((char *, int));
 
-static void
-map_breakpoint_numbers PARAMS ((char *,	void (*)(struct breakpoint *)));
+static void map_breakpoint_numbers PARAMS ((char *, 
+                                           void (*)(struct breakpoint *)));
 
-static void
-ignore_command PARAMS ((char *, int));
+static void ignore_command PARAMS ((char *, int));
 
-static int
-breakpoint_re_set_one PARAMS ((char *));
+static int breakpoint_re_set_one PARAMS ((char *));
 
-void
-delete_command PARAMS ((char *, int));
+static void clear_command PARAMS ((char *, int));
 
-static void
-clear_command PARAMS ((char *, int));
+static void catch_command PARAMS ((char *, int));
 
-static void
-catch_command PARAMS ((char *, int));
+static struct symtabs_and_lines get_catch_sals PARAMS ((int));
 
-static struct symtabs_and_lines
-get_catch_sals PARAMS ((int));
+static void watch_command PARAMS ((char *, int));
 
-static void
-watch_command PARAMS ((char *, int));
+static int can_use_hardware_watchpoint PARAMS ((struct value *));
 
-static int
-can_use_hardware_watchpoint PARAMS ((struct value *));
+static void tbreak_command PARAMS ((char *, int));
 
-static void
-tbreak_command PARAMS ((char *, int));
+static void break_command_1 PARAMS ((char *, int, int));
 
-static void
-break_command_1 PARAMS ((char *, int, int));
+static void mention PARAMS ((struct breakpoint *));
 
-static void
-mention PARAMS ((struct breakpoint *));
+struct breakpoint *set_raw_breakpoint PARAMS ((struct symtab_and_line));
 
-struct breakpoint *
-set_raw_breakpoint PARAMS ((struct symtab_and_line));
+static void check_duplicates PARAMS ((CORE_ADDR, asection *));
 
-static void
-check_duplicates PARAMS ((CORE_ADDR, asection *));
+static void describe_other_breakpoints PARAMS ((CORE_ADDR, asection *));
 
-static void
-describe_other_breakpoints PARAMS ((CORE_ADDR, asection *));
+static void breakpoints_info PARAMS ((char *, int));
 
-static void
-breakpoints_info PARAMS ((char *, int));
+static void breakpoint_1 PARAMS ((int, int));
 
-static void
-breakpoint_1 PARAMS ((int, int));
+static bpstat bpstat_alloc PARAMS ((struct breakpoint *, bpstat));
 
-static bpstat
-bpstat_alloc PARAMS ((struct breakpoint *, bpstat));
+static int breakpoint_cond_eval PARAMS ((char *));
 
-static int
-breakpoint_cond_eval PARAMS ((char *));
+static void cleanup_executing_breakpoints PARAMS ((PTR));
 
-static void
-cleanup_executing_breakpoints PARAMS ((PTR));
+static void commands_command PARAMS ((char *, int));
 
-static void
-commands_command PARAMS ((char *, int));
+static void condition_command PARAMS ((char *, int));
 
-static void
-condition_command PARAMS ((char *, int));
+static int get_number PARAMS ((char **));
 
-static int
-get_number PARAMS ((char **));
+static int remove_breakpoint PARAMS ((struct breakpoint *));
 
-void
-set_breakpoint_count PARAMS ((int));
+static int print_it_normal PARAMS ((bpstat));
 
-static int
-remove_breakpoint PARAMS ((struct breakpoint *));
+static int watchpoint_check PARAMS ((char *));
 
-static int
-print_it_normal PARAMS ((bpstat));
+static int print_it_done PARAMS ((bpstat));
 
-static int
-watchpoint_check PARAMS ((char *));
+static int print_it_noop PARAMS ((bpstat));
 
-static int
-print_it_done PARAMS ((bpstat));
-
-static int
-print_it_noop PARAMS ((bpstat));
-
-static void
-maintenance_info_breakpoints PARAMS ((char *, int));
+static void maintenance_info_breakpoints PARAMS ((char *, int));
 
 #ifdef GET_LONGJMP_TARGET
-static void
-create_longjmp_breakpoint PARAMS ((char *));
+static void create_longjmp_breakpoint PARAMS ((char *));
 #endif
 
-static int
-hw_breakpoint_used_count PARAMS ((void));
+static int hw_breakpoint_used_count PARAMS ((void));
 
-static int
-hw_watchpoint_used_count PARAMS ((enum bptype, int *));
+static int hw_watchpoint_used_count PARAMS ((enum bptype, int *));
 
-static void
-hbreak_command PARAMS ((char *, int));
+static void hbreak_command PARAMS ((char *, int));
 
-static void
-thbreak_command PARAMS ((char *, int));
+static void thbreak_command PARAMS ((char *, int));
 
-static void
-watch_command_1 PARAMS ((char *, int, int));
+static void watch_command_1 PARAMS ((char *, int, int));
 
-static void
-rwatch_command PARAMS ((char *, int));
+static void rwatch_command PARAMS ((char *, int));
 
-static void
-awatch_command PARAMS ((char *, int));
+static void awatch_command PARAMS ((char *, int));
 
-static void
-do_enable_breakpoint PARAMS ((struct breakpoint *, enum bpdisp));
+static void do_enable_breakpoint PARAMS ((struct breakpoint *, enum bpdisp));
+
+/* Prototypes for exported functions. */
+
+void delete_command PARAMS ((char *, int));
+
+void _initialize_breakpoint PARAMS ((void));
+
+void set_breakpoint_count PARAMS ((int));
 
 extern int addressprint;		/* Print machine addresses? */
 
@@ -1447,7 +1406,8 @@ bpstat_stop_status (pc, not_a_breakpoint)
 	      /* Don't stop.  */
 	      bs->print_it = print_it_noop;
 	      bs->stop = 0;
-	      --(b->hit_count);  /* don't consider this a hit */
+	      /* Don't consider this a hit.  */
+	      --(b->hit_count);
 	      continue;
 	    default:
 	      /* Can't happen.  */
@@ -1536,6 +1496,8 @@ bpstat_stop_status (pc, not_a_breakpoint)
 	  if (b->cond && value_is_zero)
 	    {
 	      bs->stop = 0;
+	      /* Don't consider this a hit.  */
+	      --(b->hit_count);
 	    }
 	  else if (b->ignore_count > 0)
 	    {
