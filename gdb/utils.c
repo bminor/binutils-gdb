@@ -1047,6 +1047,9 @@ prompt_for_continue ()
   char *ignore;
   char cont_prompt[120];
 
+  if (annotation_level > 1)
+    printf_unfiltered ("\n\032\032pre-prompt-for-continue\n");
+
   strcpy (cont_prompt,
 	  "---Type <return> to continue, or q <return> to quit---");
   if (annotation_level > 1)
@@ -1069,6 +1072,10 @@ prompt_for_continue ()
      whereas control-C to gdb_readline will cause the user to get dumped
      out to DOS.  */
   ignore = readline (cont_prompt);
+
+  if (annotation_level > 1)
+    printf_unfiltered ("\n\032\032post-prompt-for-continue\n");
+
   if (ignore)
     {
       char *p = ignore;
