@@ -43,7 +43,7 @@ static boolean elf32_d10v_relocate_section
 	   asection **));
 
 /* Use REL instead of RELA to save space.  */
-#define USE_REL
+#define USE_REL	1
 
 static reloc_howto_type elf_d10v_howto_table[] =
   {

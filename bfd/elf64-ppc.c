@@ -3166,6 +3166,7 @@ func_desc_adjust (h, inf)
 	{
 	  bfd *abfd;
 	  asymbol *newsym;
+	  struct bfd_link_hash_entry *bh;
 
 	  abfd = h->root.u.undef.abfd;
 	  newsym = bfd_make_empty_symbol (abfd);
@@ -3176,13 +3177,14 @@ func_desc_adjust (h, inf)
 	  if (h->root.type == bfd_link_hash_undefweak)
 	    newsym->flags |= BSF_WEAK;
 
+	  bh = &fdh->root;
 	  if ( !(_bfd_generic_link_add_one_symbol
 		 (info, abfd, newsym->name, newsym->flags,
-		  newsym->section, newsym->value, NULL, false, false,
-		  (struct bfd_link_hash_entry **) &fdh)))
+		  newsym->section, newsym->value, NULL, false, false, &bh)))
 	    {
 	      return false;
 	    }
+	  fdh = (struct elf_link_hash_entry *) bh;
 	  fdh->elf_link_hash_flags &= ~ELF_LINK_NON_ELF;
 	}
 
@@ -3675,12 +3677,16 @@ edit_opd (obfd, info)
 	      break;
 	    }
 
-	  if (sym_sec->output_section == bfd_abs_section_ptr)
-	    {
-	      /* OK, we've found a function that's excluded from the
-		 link.  */
-	      need_edit = true;
-	    }
+	  /* opd entries are always for functions defined in the
+	     current input bfd.  If the symbol isn't defined in the
+	     input bfd, then we won't be using the function in this
+	     bfd;  It must be defined in a linkonce section in another
+	     bfd, or is weak.  It's also possible that we are
+	     discarding the function due to a linker script /DISCARD/,
+	     which we test for via the output_section.  */
+	  if (sym_sec->owner != ibfd
+	      || sym_sec->output_section == bfd_abs_section_ptr)
+	    need_edit = true;
 
 	  offset += 24;
 	}
@@ -3754,10 +3760,11 @@ edit_opd (obfd, info)
 							      sym->st_shndx);
 		    }
 
-		  skip = sym_sec->output_section == bfd_abs_section_ptr;
+		  skip = (sym_sec->owner != ibfd
+			  || sym_sec->output_section == bfd_abs_section_ptr);
 		  if (skip)
 		    {
-		      if (h != NULL)
+		      if (h != NULL && sym_sec->owner == ibfd)
 			{
 			  /* Arrange for the function descriptor sym
 			     to be dropped.  */
@@ -3797,8 +3804,7 @@ edit_opd (obfd, info)
 			     for the function descriptor sym which we
 			     don't have at the moment.  So keep an
 			     array of adjustments.  */ 
-			  adjust[(rel->r_offset + wptr - rptr) / 24]
-			    = wptr - rptr;
+			  adjust[rel->r_offset / 24] = wptr - rptr;
 			}
 
 		      if (wptr != rptr)
@@ -5161,6 +5167,7 @@ ppc64_elf_build_stubs (info)
 	    }
 	  bfd_put_32 (htab->sglink->owner,
 		      B_DOT | ((htab->sglink->contents - p) & 0x3fffffc), p);
+	  indx++;
 	  p += 4;
 	}
       htab->sglink->_cooked_size = p - htab->sglink->contents;

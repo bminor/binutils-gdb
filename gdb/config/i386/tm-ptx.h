@@ -30,7 +30,7 @@
 #include <sys/reg.h>
 
 #ifdef SEQUENT_PTX4
-#include "i386/tm-i386v4.h"
+#include "i386/tm-i386.h"
 #else /* !SEQUENT_PTX4 */
 #include "i386/tm-i386.h"
 #endif

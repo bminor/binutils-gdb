@@ -5557,13 +5557,13 @@ your machine.
 @kindex info registers
 @item info registers
 Print the names and values of all registers except floating-point
-registers (in the selected stack frame).
+and vector registers (in the selected stack frame).
 
 @kindex info all-registers
 @cindex floating point registers
 @item info all-registers
 Print the names and values of all registers, including floating-point
-registers.
+and vector registers (in the selected stack frame).
 
 @item info registers @var{regname} @dots{}
 Print the @dfn{relativized} value of each specified register @var{regname}.

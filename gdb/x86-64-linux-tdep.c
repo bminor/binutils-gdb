@@ -35,8 +35,10 @@
 #define LINUX_SIGTRAMP_OFFSET1 (7)
 
 static const unsigned char linux_sigtramp_code[] = {
-  LINUX_SIGTRAMP_INSN0, 0xc7, 0xc0, 0x89, 0x00, 0x00, 0x00,	/*  mov $0x89,%rax */
-  LINUX_SIGTRAMP_INSN1, 0x05	/* syscall */
+  /*  mov $__NR_rt_sigreturn,%rax */
+  LINUX_SIGTRAMP_INSN0, 0xc7, 0xc0, 0x0f, 0x00, 0x00, 0x00,
+  /* syscall */
+  LINUX_SIGTRAMP_INSN1, 0x05
 };
 
 #define LINUX_SIGTRAMP_LEN (sizeof linux_sigtramp_code)
@@ -68,17 +70,22 @@ x86_64_linux_sigtramp_start (CORE_ADDR pc)
   return pc;
 }
 
-#define LINUX_SIGINFO_SIZE 128
+#define LINUX_SIGINFO_SIZE 0
 
 /* Offset to struct sigcontext in ucontext, from <asm/ucontext.h>.  */
-#define LINUX_UCONTEXT_SIGCONTEXT_OFFSET (36)
+#define LINUX_UCONTEXT_SIGCONTEXT_OFFSET 40
+
+/* Offset to saved PC in sigcontext, from <asm/sigcontext.h>.  */
+#define LINUX_SIGCONTEXT_PC_OFFSET 128
+#define LINUX_SIGCONTEXT_FP_OFFSET 120
 
 /* Assuming FRAME is for a GNU/Linux sigtramp routine, return the
    address of the associated sigcontext structure.  */
-CORE_ADDR
+static CORE_ADDR
 x86_64_linux_sigcontext_addr (struct frame_info *frame)
 {
   CORE_ADDR pc;
+  ULONGEST rsp;
 
   pc = x86_64_linux_sigtramp_start (frame->pc);
   if (pc)
@@ -92,8 +99,8 @@ x86_64_linux_sigcontext_addr (struct frame_info *frame)
 
 
       /* This is the top frame. */
-      return read_register (SP_REGNUM) + LINUX_SIGINFO_SIZE +
-	LINUX_UCONTEXT_SIGCONTEXT_OFFSET;
+      rsp = read_register (SP_REGNUM);
+      return rsp + LINUX_SIGINFO_SIZE + LINUX_UCONTEXT_SIGCONTEXT_OFFSET;
 
     }
 
@@ -101,13 +108,10 @@ x86_64_linux_sigcontext_addr (struct frame_info *frame)
   return 0;
 }
 
-/* Offset to saved PC in sigcontext, from <asm/sigcontext.h>.  */
-#define LINUX_SIGCONTEXT_PC_OFFSET (136)
-
 /* Assuming FRAME is for a GNU/Linux sigtramp routine, return the
    saved program counter.  */
 
-CORE_ADDR
+static CORE_ADDR
 x86_64_linux_sigtramp_saved_pc (struct frame_info *frame)
 {
   CORE_ADDR addr;
@@ -134,4 +138,60 @@ x86_64_linux_frame_saved_pc (struct frame_info *frame)
   if (frame->signal_handler_caller)
     return x86_64_linux_sigtramp_saved_pc (frame);
   return cfi_get_ra (frame);
+}
+
+/* Return whether PC is in a GNU/Linux sigtramp routine.  */
+
+int
+x86_64_linux_in_sigtramp (CORE_ADDR pc, char *name)
+{
+  if (name)
+    return STREQ ("__restore_rt", name);
+
+  return (x86_64_linux_sigtramp_start (pc) != 0);
+}
+
+CORE_ADDR
+x86_64_linux_frame_chain (struct frame_info *fi)
+{
+  ULONGEST addr;
+  CORE_ADDR fp, pc;
+
+  if (!fi->signal_handler_caller)
+    {
+      fp = cfi_frame_chain (fi);
+      if (fp)
+	return fp;
+      else
+	addr = fi->frame;
+    }
+  else
+    addr = fi->next->frame;
+
+  addr += LINUX_SIGINFO_SIZE + LINUX_UCONTEXT_SIGCONTEXT_OFFSET;
+
+  fp = read_memory_integer (addr + LINUX_SIGCONTEXT_FP_OFFSET, 8) + 8;
+
+  return fp;
+}
+
+void
+x86_64_init_frame_pc (int fromleaf, struct frame_info *fi)
+{
+  CORE_ADDR addr;
+
+  if (fi->next && fi->next->signal_handler_caller)
+    {
+      addr = fi->next->next->frame
+	+ LINUX_SIGINFO_SIZE + LINUX_UCONTEXT_SIGCONTEXT_OFFSET;
+      fi->pc = read_memory_integer (addr + LINUX_SIGCONTEXT_PC_OFFSET, 8);
+    }
+  else
+    cfi_init_frame_pc (fromleaf, fi);
+}
+
+void
+x86_64_init_extra_frame_info (int fromleaf, struct frame_info *fi)
+{
+  cfi_init_extra_frame_info (fromleaf, fi);
 }

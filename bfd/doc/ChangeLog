@@ -1,3 +1,11 @@
+2002-10-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.in: Regenerate.
+
+2002-10-11  Daniel Jacobowitz  <drow@mvista.com>
+
+	* Makefile.in: Regenerated.
+
 2002-08-29  John David Anglin  <dave@hiauly1.hia.nrc.ca>
 
 	* chew.c (paramstuff, outputdots, perform, bang and usage): Remove

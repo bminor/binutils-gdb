@@ -27,11 +27,6 @@
 
 #define TEXT_SEGMENT_BASE	0x10000000
 
-/* AIX's assembler doesn't grok dollar signs in identifiers.
-   So we use dots instead.  This item must be coordinated with G++. */
-#undef CPLUS_MARKER
-#define CPLUS_MARKER '.'
-
 /* Return whether PC in function NAME is in code that should be skipped when
    single-stepping.  */
 
