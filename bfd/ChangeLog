@@ -1,3 +1,8 @@
+2000-09-01  Alan Modra  <alan@linuxcare.com.au>
+
+	* elf32-i386.c (elf_i386_finish_dynamic_symbol): Revert 2000-08-27
+	change.
+
 Thu Aug 31 22:49:30 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
 
 	* elf32-sh.c (sh_elf_merge_private_data): If ibfd's elf header flags

@@ -1884,9 +1884,7 @@ elf_i386_finish_dynamic_symbol (output_bfd, info, h, sym)
       ++srel->reloc_count;
     }
 
-  if ((h->elf_link_hash_flags & (ELF_LINK_HASH_NEEDS_COPY
-				 | ELF_LINK_FORCED_LOCAL))
-      == ELF_LINK_HASH_NEEDS_COPY)
+  if ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_COPY) != 0)
     {
       asection *s;
       Elf_Internal_Rel rel;
