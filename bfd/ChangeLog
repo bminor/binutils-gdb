@@ -1,3 +1,8 @@
+2003-12-19  Danny Smith  <dannysmith@users.sourceforge.net>
+
+	* coffcode.h (styp_to_sec_flags): Don't treat .reloc section
+	as SEC_DEBUGGING.
+
 2003-12-18  Richard Sandiford  <rsandifo@redhat.com>
 
 	* elf32-mips.c (elf_mips_howto_table_rel): Replace all uses of
