@@ -201,27 +201,6 @@ de-stage3: force
 	-(cd stage3 ; mv -f * ..)
 	-rmdir stage3
 
-# The "least clean" level of cleaning.  Get rid of files which are
-# automatically generated files that are just intermediate files,
-# 
-mostlyclean:
-	rm -f gdb.mm gdb.ms gdb.me links2roff
-	rm -f *.aux *.cp* *.fn* *.ky* *.log *.pg* *.toc *.tp* *.vr*
-	rm -f sedref.dvi sedref.tex tmp.sed
-
-clean: mostlyclean
-	rm -f gdb-cfg.texi
-
-distclean: clean
-	rm -f Makefile config.status
-
-# GDBvn.texi, the dvi files, the info files, and the postscript files, 
-# are all part of the distribution, so it should not be removed by
-# "clean" or "distclean".  Use maintainer-clean to remove them.
-
-maintainer-clean realclean: distclean
-	rm -f GDBvn.texi *.info* *.dvi *.ps *.html *.pdf
-
 # GDB QUICK REFERENCE (dvi output)
 refcard.dvi : refcard.tex $(REFEDITS)
 	echo > tmp.sed
@@ -264,6 +243,9 @@ gdb-cfg.texi: ${srcdir}/${DOC_CONFIG}-cfg.texi
 #   VPATH will often tell make not to bother building it, because the one
 #   in the srcdir is up to date.  (if not, then make should build one here).
 
+# Clean these up before each run.  Avoids a catch 22 with not being
+# able to re-generate these files (to fix a corruption) because these
+# files contain a corruption.
 GDB_TEX_TMPS = gdb.aux gdb.cp* gdb.fn* gdb.ky* gdb.log gdb.pg* gdb.toc \
 	gdb.tp* gdb.vr*
 
@@ -275,7 +257,6 @@ gdb.dvi: ${GDB_DOC_FILES}
 		cp $(srcdir)/GDBvn.texi . ; else true; fi
 	rm -f $(GDB_TEX_TMPS)
 	$(SET_TEXINPUTS) $(TEXI2DVI) $(srcdir)/gdb.texinfo
-	rm -f $(GDB_TEX_TMPS)
 
 gdb.ps: gdb.dvi
 	$(DVIPS) -o $@ $?
@@ -287,7 +268,6 @@ gdb.pdf: ${GDB_DOC_FILES}
 		cp $(srcdir)/GDBvn.texi . ; else true; fi
 	rm -f $(GDB_TEX_TMPS)
 	$(SET_TEXINPUTS) $(TEXI2DVI) --pdf $(srcdir)/gdb.texinfo
-	rm -f $(GDB_TEX_TMPS)
 
 # GDB MANUAL: info file
 gdb.info: ${GDB_DOC_FILES}
@@ -369,6 +349,9 @@ gdb.mm: $(GDB_DOC_FILES) links2roff
 gdb_toc.html: ${GDB_DOC_FILES}
 	$(MAKEHTML) $(MAKEHTMLFLAGS) -I ${READLINE_DIR} -I ${GDBMI_DIR} -I $(srcdir) $(srcdir)/gdb.texinfo
 
+# Clean these up before each run.  Avoids a catch 22 with not being
+# able to re-generate these files (to fix a corruption) because these
+# files contain a corruption.
 GDBINT_TEX_TMPS = gdbint.aux gdbint.cp* gdbint.fn* gdbint.ky* \
 	gdbint.log gdbint.pg* gdbint.toc gdbint.tp* gdbint.vr*
 
@@ -376,7 +359,6 @@ GDBINT_TEX_TMPS = gdbint.aux gdbint.cp* gdbint.fn* gdbint.ky* \
 gdbint.dvi: $(GDBINT_DOC_FILES)
 	rm -f $(GDBINT_TEX_TMPS)
 	$(SET_TEXINPUTS) $(TEXI2DVI) $(srcdir)/gdbint.texinfo
-	rm -f $(GDBINT_TEX_TMPS)
 
 gdbint.ps : gdbint.dvi
 	$(DVIPS) -o $@ $?
@@ -384,7 +366,6 @@ gdbint.ps : gdbint.dvi
 gdbint.pdf: $(GDBINT_DOC_FILES)
 	rm -f $(GDBINT_TEX_TMPS)
 	$(SET_TEXINPUTS) $(TEXI2DVI) --pdf $(srcdir)/gdbint.texinfo
-	rm -f $(GDBINT_TEX_TMPS)
 
 # GDB INTERNALS MANUAL: info file
 
@@ -404,6 +385,9 @@ stabs.info: $(STABS_DOC_FILES)
 stabs_toc.html: $(STABS_DOC_FILES)
 	$(MAKEHTML) $(MAKEHTMLFLAGS) $(srcdir)/stabs.texinfo
 
+# Clean these up before each run.  Avoids a catch 22 with not being
+# able to re-generate these files (to fix a corruption) because these
+# files contain a corruption.
 STABS_TEX_TMPS = stabs.aux stabs.cp* stabs.fn* stabs.ky* \
 	stabs.log stabs.pg* stabs.toc stabs.tp* stabs.vr*
 
@@ -411,7 +395,6 @@ STABS_TEX_TMPS = stabs.aux stabs.cp* stabs.fn* stabs.ky* \
 stabs.dvi : $(STABS_DOC_FILES)
 	rm -f $(STABS_TEX_TMPS)
 	$(SET_TEXINPUTS) $(TEXI2DVI) $(srcdir)/stabs.texinfo
-	rm -f $(STABS_TEX_TMPS)
 
 stabs.ps: stabs.dvi
 	$(DVIPS) -o $@ $?
@@ -419,9 +402,33 @@ stabs.ps: stabs.dvi
 stabs.pdf: $(STABS_DOC_FILES)
 	rm -f $(STABS_TEX_TMPS)
 	$(SET_TEXINPUTS) $(TEXI2DVI) --pdf $(srcdir)/stabs.texinfo
-	rm -f $(STABS_TEX_TMPS)
 
 force:
 
 Makefile: Makefile.in $(host_makefile_frag) $(target_makefile_frag) config.status
 	$(SHELL) ./config.status
+
+
+# The "least clean" level of cleaning.  Get rid of files which are
+# automatically generated files that are just intermediate files,
+
+mostlyclean:
+	rm -f gdb.mm gdb.ms gdb.me links2roff
+	rm -f $(GDB_TEX_TMPS)
+	rm -f $(GDBINT_TEX_TMPS)
+	rm -f $(STABS_TEX_TMPS)
+	rm -f sedref.dvi sedref.tex tmp.sed
+
+clean: mostlyclean
+	rm -f gdb-cfg.texi
+
+distclean: clean
+	rm -f Makefile config.status
+
+# GDBvn.texi, the dvi files, the info files, and the postscript files, 
+# are all part of the distribution, so it should not be removed by
+# "clean" or "distclean".  Use maintainer-clean to remove them.
+
+maintainer-clean realclean: distclean
+	rm -f GDBvn.texi *.info* *.dvi *.ps *.html *.pdf
+
