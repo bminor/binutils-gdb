@@ -1,3 +1,8 @@
+Wed Apr  7 18:43:09 1993  Stu Grossman  (grossman@cygnus.com)
+
+	* infcmd.c (read_pc):  Make sure that we read PC_REGNUM when not
+	in a system call!
+
 Wed Apr  7 15:52:11 1993  Stu Grossman  (grossman@cygnus.com)
 
 	* configure.in:  Only configure sparclite subdir when target_cpu
