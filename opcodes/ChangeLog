@@ -1,3 +1,10 @@
+Wed Apr  1 16:20:27 1998  Ian Dall  <Ian.Dall@dsto.defence.gov.au>
+
+        * ns32k-dis.c (bit_extract_simple): New function to extract bits
+        from an arbitrary valid buffer instead of fetching them on demand
+        using fetch_data().                                            
+        (invalid_float): use bit_extract_simple() instead of bit_extract().
+
 start-sanitize-m32rx
 Wed Apr  1 14:57:54 1998  Nick Clifton  <nickc@cygnus.com>
 
