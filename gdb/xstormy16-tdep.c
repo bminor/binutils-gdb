@@ -414,6 +414,8 @@ xstormy16_skip_prologue (CORE_ADDR pc)
       struct symbol *sym;
       struct xstormy16_frame_cache cache;
 
+      memset (&cache, 0, sizeof cache);
+
       /* Don't trust line number debug info in frameless functions. */
       CORE_ADDR plg_end = xstormy16_analyze_prologue (func_addr, func_end,
 						      &cache, NULL);

@@ -1,3 +1,8 @@
+2004-12-15  Kevin Buettner  <kevinb@redhat.com>
+
+	* xstormy16-tdep.c (xstormy16_skip_prologue): Clear/initialize the
+	frame cache.
+
 2004-12-14  Randolph Chung  <tausq@debian.org>
 
 	* hppa-tdep.c (hppa_in_function_epilogue_p): New function.
