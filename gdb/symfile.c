@@ -518,33 +518,49 @@ default_symfile_offsets (objfile, addrs)
      struct section_addr_info *addrs;
 {
   int i;
+  asection *sect = NULL;
 
   objfile->num_sections = SECT_OFF_MAX;
   objfile->section_offsets = (struct section_offsets *)
     obstack_alloc (&objfile->psymbol_obstack, SIZEOF_SECTION_OFFSETS);
   memset (objfile->section_offsets, 0, SIZEOF_SECTION_OFFSETS);
 
-  /* Now calculate offsets for other sections. */
+  /* Now calculate offsets for section that were specified by the
+     caller. */
   for (i = 0; i < MAX_SECTIONS && addrs->other[i].name; i++)
     {
       struct other_sections *osp ;
 
       osp = &addrs->other[i] ;
-      if (addrs->other[i].addr == 0)
+      if (osp->addr == 0)
   	continue;
-#if 0
-      if (strcmp (".text", osp->name) == 0)
-	SECT_OFF_TEXT = osp->sectindex ;
-      else if (strcmp (".data", osp->name) == 0)
-	SECT_OFF_DATA = osp->sectindex ;
-      else if (strcmp (".bss", osp->name) == 0)
-	SECT_OFF_BSS =  osp->sectindex ;
-#endif
+
       /* Record all sections in offsets */
+      /* The section_offsets in the objfile are here filled in using
+         the BFD index. */
       ANOFFSET (objfile->section_offsets, osp->sectindex) = osp->addr;
     }
-}
 
+  /* Remember the bfd indexes for the .text, .data, .bss and
+     .rodata sections. */
+
+  sect = bfd_get_section_by_name (objfile->obfd, ".text");
+  if (sect) 
+    objfile->sect_index_text = sect->index;
+
+  sect = bfd_get_section_by_name (objfile->obfd, ".data");
+  if (sect) 
+    objfile->sect_index_data = sect->index;
+
+  sect = bfd_get_section_by_name (objfile->obfd, ".bss");
+  if (sect) 
+    objfile->sect_index_bss = sect->index;
+
+  sect = bfd_get_section_by_name (objfile->obfd, ".rodata");
+  if (sect) 
+    objfile->sect_index_rodata = sect->index;
+
+}
 
 /* Process a symbol file, as either the main file or as a dynamically
    loaded file.
@@ -631,12 +647,12 @@ syms_from_objfile (objfile, addrs, mainline, verbo)
       if (lower_sect == NULL)
 	warning ("no loadable sections found in added symbol-file %s",
 		 objfile->name);
-      else if ((bfd_get_section_flags (objfile->obfd, lower_sect) & SEC_CODE)
-	       == 0)
-	warning ("Lowest section in %s is %s at %s",
-		 objfile->name,
-		 bfd_section_name (objfile->obfd, lower_sect),
-		 paddr (bfd_section_vma (objfile->obfd, lower_sect)));
+      else 
+	if ((bfd_get_section_flags (objfile->obfd, lower_sect) & SEC_CODE) == 0)
+	  warning ("Lowest section in %s is %s at %s",
+		   objfile->name,
+		   bfd_section_name (objfile->obfd, lower_sect),
+		   paddr (bfd_section_vma (objfile->obfd, lower_sect)));
       if (lower_sect != NULL)
  	lower_offset = bfd_section_vma (objfile->obfd, lower_sect);
       else

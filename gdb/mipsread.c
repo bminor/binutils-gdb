@@ -402,7 +402,7 @@ read_alphacoff_dynamic_symtab (section_offsets, objfile)
 		ms_type = mst_text;
 	      else
 		ms_type = mst_file_text;
-	      sym_value += ANOFFSET (section_offsets, SECT_OFF_TEXT);
+	      sym_value += ANOFFSET (section_offsets, SECT_OFF_TEXT (objfile));
 	    }
 	  else if (sym_shndx == SHN_MIPS_DATA)
 	    {
@@ -410,7 +410,7 @@ read_alphacoff_dynamic_symtab (section_offsets, objfile)
 		ms_type = mst_data;
 	      else
 		ms_type = mst_file_data;
-	      sym_value += ANOFFSET (section_offsets, SECT_OFF_DATA);
+	      sym_value += ANOFFSET (section_offsets, SECT_OFF_DATA (objfile));
 	    }
 	  else if (sym_shndx == SHN_MIPS_ACOMMON)
 	    {
@@ -418,7 +418,7 @@ read_alphacoff_dynamic_symtab (section_offsets, objfile)
 		ms_type = mst_bss;
 	      else
 		ms_type = mst_file_bss;
-	      sym_value += ANOFFSET (section_offsets, SECT_OFF_BSS);
+	      sym_value += ANOFFSET (section_offsets, SECT_OFF_BSS (objfile));
 	    }
 	  else if (sym_shndx == SHN_ABS)
 	    {

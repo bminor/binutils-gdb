@@ -357,9 +357,9 @@ vmap_symtab (vp)
 
   /* The symbols in the object file are linked to the VMA of the section,
      relocate them VMA relative.  */
-  ANOFFSET (new_offsets, SECT_OFF_TEXT) = vp->tstart - vp->tvma;
-  ANOFFSET (new_offsets, SECT_OFF_DATA) = vp->dstart - vp->dvma;
-  ANOFFSET (new_offsets, SECT_OFF_BSS) = vp->dstart - vp->dvma;
+  ANOFFSET (new_offsets, SECT_OFF_TEXT (objfile)) = vp->tstart - vp->tvma;
+  ANOFFSET (new_offsets, SECT_OFF_DATA (objfile)) = vp->dstart - vp->dvma;
+  ANOFFSET (new_offsets, SECT_OFF_BSS (objfile)) = vp->dstart - vp->dvma;
 
   objfile_relocate (objfile, new_offsets);
 }

@@ -609,15 +609,15 @@ prim_record_minimal_symbol (name, address, ms_type, objfile)
     case mst_text:
     case mst_file_text:
     case mst_solib_trampoline:
-      section = SECT_OFF_TEXT;
+      section = SECT_OFF_TEXT (objfile);
       break;
     case mst_data:
     case mst_file_data:
-      section = SECT_OFF_DATA;
+      section = SECT_OFF_DATA (objfile);
       break;
     case mst_bss:
     case mst_file_bss:
-      section = SECT_OFF_BSS;
+      section = SECT_OFF_BSS (objfile);
       break;
     default:
       section = -1;

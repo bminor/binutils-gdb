@@ -372,6 +372,18 @@ struct objfile
     struct section_offsets *section_offsets;
     int num_sections;
 
+    /* Indexes in the section_offsets array. These are initialized by the
+       *_symfile_offsets() family of functions (som_symfile_offsets,
+       xcoff_symfile_offsets, default_symfile_offsets). In theory they
+       should correspond to the section indexes used by bfd for the
+       current objfile. The exception to this for the time being is the
+       SOM version. */
+
+    int sect_index_text;
+    int sect_index_data;
+    int sect_index_bss;
+    int sect_index_rodata;
+
     /* These pointers are used to locate the section table, which
        among other things, is used to map pc addresses into sections.
        SECTIONS points to the first entry in the table, and
@@ -583,5 +595,21 @@ is_in_import_list PARAMS ((char *, struct objfile *));
 #define ALL_OBJSECTIONS(objfile, osect)		\
   ALL_OBJFILES (objfile)			\
     ALL_OBJFILE_OSECTIONS (objfile, osect)
+
+#define SECT_OFF_DATA(objfile) \
+     ((objfile->sect_index_data == -1) ? \
+      (internal_error ("sect_index_data not initialized"), -1) : objfile->sect_index_data)
+
+#define SECT_OFF_RODATA(objfile) \
+     ((objfile->sect_index_rodata == -1) ? \
+      (internal_error ("sect_index_rodata not initialized"), -1) : objfile->sect_index_rodata)
+
+#define SECT_OFF_TEXT(objfile) \
+     ((objfile->sect_index_text == -1) ? \
+      (internal_error ("sect_index_text not initialized"), -1) : objfile->sect_index_text)
+
+#define SECT_OFF_BSS(objfile) \
+     ((objfile->sect_index_bss == -1) ? \
+      (internal_error ("sect_index_bss not initialized"), -1) : objfile->sect_index_bss)
 
 #endif /* !defined (OBJFILES_H) */

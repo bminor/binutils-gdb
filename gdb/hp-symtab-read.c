@@ -2823,8 +2823,8 @@ hpread_process_one_debug_symbol (dn_bufp, name, section_offsets, objfile,
   unsigned long desc;
   int type;
   CORE_ADDR valu;
-  int offset = ANOFFSET (section_offsets, SECT_OFF_TEXT);
-  int data_offset = ANOFFSET (section_offsets, SECT_OFF_DATA);
+  int offset = ANOFFSET (section_offsets, SECT_OFF_TEXT (objfile));
+  int data_offset = ANOFFSET (section_offsets, SECT_OFF_DATA (objfile));
   union dnttentry *dn_temp;
   dnttpointer hp_type;
   struct symbol *sym;

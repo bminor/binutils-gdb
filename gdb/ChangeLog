@@ -1,3 +1,30 @@
+Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+        * objfiles.h (SECT_OFF_DATA, SECT_OFF_TEXT, SECT_OFF_BSS,
+        SECT_OFF_RODATA): Define as functions of OBJFILE.  Add
+        sect_index_text, sect_index_data, sect_index_rodata,
+        sect_index_bss to objfile structure.
+        * gdb-stabs.h (SECT_OFF_DATA, SECT_OFF_TEXT, SECT_OFF_BSS,
+        SECT_OFF_RODATA): Remove.
+        * objfiles.c (allocate_objfile): Initialize
+        sect_index_{text,data,bss,rodata} to -1, for error detection.
+
+        * symfile.c (default_symfile_offsets): Initialize
+        sect_index_{text,data,bss,rodata} from bfd information.
+        * xcoffread.c (xcoff_symfile_offsets): Ditto.
+        * somread.c (som_symfile_offsets): Initialize
+        sect_index_{text,data,bss,rodata}.
+
+        * coffread.c, dbxread.c, elfread.c, hp-psymtab-read.c,
+        hp-symtab-read.c, hpread.c, mdebugread.c, minsyms.c,
+        mipsread.c, objfiles.c, os9kread.c, pa64solib.c, partial-stab.h,
+        remote-os9k.c, remote-vx.c, remote.c, rs6000-nat.c, somsolib.c,
+        stabsread.c, symfile.c, xcoffread.c:
+        Update use of SECT_OFF_{TEXT,DATA,BSS,RODATA} to depend on the
+        current objfile.
+
+        * xcoffread.c: Add new field objfile to find_targ_sec_arg.
+
 Thu May  4 20:54:00 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* config/mips/tm-mipsv4.h (Dest_Reg), config/mips/tm-irix5.h

@@ -514,8 +514,8 @@ rombug_wait (pid, status)
 	new_symfile_objfile (obj_sec->objfile, 1, 0);
       offs = (struct section_offsets *) alloca (SIZEOF_SECTION_OFFSETS);
       memcpy (offs, symfile_objfile->section_offsets, SIZEOF_SECTION_OFFSETS);
-      ANOFFSET (offs, SECT_OFF_DATA) = addr;
-      ANOFFSET (offs, SECT_OFF_BSS) = addr;
+      ANOFFSET (offs, SECT_OFF_DATA (symfile_objfile)) = addr;
+      ANOFFSET (offs, SECT_OFF_BSS (symfile_objfile)) = addr;
 
       objfile_relocate (symfile_objfile, offs);
     }

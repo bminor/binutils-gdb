@@ -355,13 +355,13 @@ som_solib_load_symbols (so, name, from_tty, text_addr, target)
     {
       if (p->the_bfd_section->flags & SEC_CODE)
 	{
-	  p->addr += ANOFFSET (so->objfile->section_offsets, SECT_OFF_TEXT);
-	  p->endaddr += ANOFFSET (so->objfile->section_offsets, SECT_OFF_TEXT);
+	  p->addr += ANOFFSET (so->objfile->section_offsets, SECT_OFF_TEXT (so->objfile));
+	  p->endaddr += ANOFFSET (so->objfile->section_offsets, SECT_OFF_TEXT (so->objfile));
 	}
       else if (p->the_bfd_section->flags & SEC_DATA)
 	{
-	  p->addr += ANOFFSET (so->objfile->section_offsets, SECT_OFF_DATA);
-	  p->endaddr += ANOFFSET (so->objfile->section_offsets, SECT_OFF_DATA);
+	  p->addr += ANOFFSET (so->objfile->section_offsets, SECT_OFF_DATA (so->objfile));
+	  p->endaddr += ANOFFSET (so->objfile->section_offsets, SECT_OFF_DATA (so->objfile));
 	}
     }
 
@@ -1407,11 +1407,11 @@ som_solib_section_offsets (objfile, offsets)
 	  asection *private_section;
 
 	  /* The text offset is easy.  */
-	  ANOFFSET (offsets, SECT_OFF_TEXT)
+	  ANOFFSET (offsets, SECT_OFF_TEXT (objfile))
 	    = (so_list->som_solib.text_addr
 	       - so_list->som_solib.text_link_addr);
-	  ANOFFSET (offsets, SECT_OFF_RODATA)
-	    = ANOFFSET (offsets, SECT_OFF_TEXT);
+	  ANOFFSET (offsets, SECT_OFF_RODATA (objfile))
+	    = ANOFFSET (offsets, SECT_OFF_TEXT (objfile));
 
 	  /* We should look at presumed_dp in the SOM header, but
 	     that's not easily available.  This should be OK though.  */
@@ -1420,14 +1420,14 @@ som_solib_section_offsets (objfile, offsets)
 	  if (!private_section)
 	    {
 	      warning ("Unable to find $PRIVATE$ in shared library!");
-	      ANOFFSET (offsets, SECT_OFF_DATA) = 0;
-	      ANOFFSET (offsets, SECT_OFF_BSS) = 0;
+	      ANOFFSET (offsets, SECT_OFF_DATA (objfile)) = 0;
+	      ANOFFSET (offsets, SECT_OFF_BSS (objfile)) = 0;
 	      return 1;
 	    }
-	  ANOFFSET (offsets, SECT_OFF_DATA)
+	  ANOFFSET (offsets, SECT_OFF_DATA (objfile))
 	    = (so_list->som_solib.data_start - private_section->vma);
-	  ANOFFSET (offsets, SECT_OFF_BSS)
-	    = ANOFFSET (offsets, SECT_OFF_DATA);
+	  ANOFFSET (offsets, SECT_OFF_BSS (objfile))
+	    = ANOFFSET (offsets, SECT_OFF_DATA (objfile));
 	  return 1;
 	}
       so_list = so_list->next;

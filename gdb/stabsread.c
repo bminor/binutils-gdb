@@ -1351,13 +1351,13 @@ define_symbol (valu, string, desc, type, objfile)
   switch (type & N_TYPE)
     {
     case N_TEXT:
-      SYMBOL_SECTION (sym) = SECT_OFF_TEXT;
+      SYMBOL_SECTION (sym) = SECT_OFF_TEXT (objfile);
       break;
     case N_DATA:
-      SYMBOL_SECTION (sym) = SECT_OFF_DATA;
+      SYMBOL_SECTION (sym) = SECT_OFF_DATA (objfile);
       break;
     case N_BSS:
-      SYMBOL_SECTION (sym) = SECT_OFF_BSS;
+      SYMBOL_SECTION (sym) = SECT_OFF_BSS (objfile);
       break;
     }
 

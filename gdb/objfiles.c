@@ -305,6 +305,14 @@ allocate_objfile (abfd, flags)
 	}
     }
 
+  /* Initialize the section indexes for this objfile, so that we can
+     later detect if they are used w/o being properly assigned to. */
+
+    objfile->sect_index_text = -1;
+    objfile->sect_index_data = -1;
+    objfile->sect_index_bss = -1;
+    objfile->sect_index_rodata = -1;
+
   /* Add this file onto the tail of the linked list of other such files. */
 
   objfile->next = NULL;
@@ -591,8 +599,8 @@ objfile_relocate (objfile, new_offsets)
 
     ALL_OBJFILE_PSYMTABS (objfile, p)
     {
-      p->textlow += ANOFFSET (delta, SECT_OFF_TEXT);
-      p->texthigh += ANOFFSET (delta, SECT_OFF_TEXT);
+      p->textlow += ANOFFSET (delta, SECT_OFF_TEXT (objfile));
+      p->texthigh += ANOFFSET (delta, SECT_OFF_TEXT (objfile));
     }
   }
 
@@ -643,41 +651,41 @@ objfile_relocate (objfile, new_offsets)
 
 	if (flags & SEC_CODE)
 	  {
-	    s->addr += ANOFFSET (delta, SECT_OFF_TEXT);
-	    s->endaddr += ANOFFSET (delta, SECT_OFF_TEXT);
+	    s->addr += ANOFFSET (delta, SECT_OFF_TEXT (objfile));
+	    s->endaddr += ANOFFSET (delta, SECT_OFF_TEXT (objfile));
 	  }
 	else if (flags & (SEC_DATA | SEC_LOAD))
 	  {
-	    s->addr += ANOFFSET (delta, SECT_OFF_DATA);
-	    s->endaddr += ANOFFSET (delta, SECT_OFF_DATA);
+	    s->addr += ANOFFSET (delta, SECT_OFF_DATA (objfile));
+	    s->endaddr += ANOFFSET (delta, SECT_OFF_DATA (objfile));
 	  }
 	else if (flags & SEC_ALLOC)
 	  {
-	    s->addr += ANOFFSET (delta, SECT_OFF_BSS);
-	    s->endaddr += ANOFFSET (delta, SECT_OFF_BSS);
+	    s->addr += ANOFFSET (delta, SECT_OFF_BSS (objfile));
+	    s->endaddr += ANOFFSET (delta, SECT_OFF_BSS (objfile));
 	  }
       }
   }
 
   if (objfile->ei.entry_point != ~(CORE_ADDR) 0)
-    objfile->ei.entry_point += ANOFFSET (delta, SECT_OFF_TEXT);
+    objfile->ei.entry_point += ANOFFSET (delta, SECT_OFF_TEXT (objfile));
 
   if (objfile->ei.entry_func_lowpc != INVALID_ENTRY_LOWPC)
     {
-      objfile->ei.entry_func_lowpc += ANOFFSET (delta, SECT_OFF_TEXT);
-      objfile->ei.entry_func_highpc += ANOFFSET (delta, SECT_OFF_TEXT);
+      objfile->ei.entry_func_lowpc += ANOFFSET (delta, SECT_OFF_TEXT (objfile));
+      objfile->ei.entry_func_highpc += ANOFFSET (delta, SECT_OFF_TEXT (objfile));
     }
 
   if (objfile->ei.entry_file_lowpc != INVALID_ENTRY_LOWPC)
     {
-      objfile->ei.entry_file_lowpc += ANOFFSET (delta, SECT_OFF_TEXT);
-      objfile->ei.entry_file_highpc += ANOFFSET (delta, SECT_OFF_TEXT);
+      objfile->ei.entry_file_lowpc += ANOFFSET (delta, SECT_OFF_TEXT (objfile));
+      objfile->ei.entry_file_highpc += ANOFFSET (delta, SECT_OFF_TEXT (objfile));
     }
 
   if (objfile->ei.main_func_lowpc != INVALID_ENTRY_LOWPC)
     {
-      objfile->ei.main_func_lowpc += ANOFFSET (delta, SECT_OFF_TEXT);
-      objfile->ei.main_func_highpc += ANOFFSET (delta, SECT_OFF_TEXT);
+      objfile->ei.main_func_lowpc += ANOFFSET (delta, SECT_OFF_TEXT (objfile));
+      objfile->ei.main_func_highpc += ANOFFSET (delta, SECT_OFF_TEXT (objfile));
     }
 
   /* Relocate breakpoints as necessary, after things are relocated. */

@@ -471,10 +471,24 @@ som_symfile_offsets (objfile, addrs)
   objfile->section_offsets = (struct section_offsets *)
     obstack_alloc (&objfile->psymbol_obstack, SIZEOF_SECTION_OFFSETS);
 
+  /* FIXME: ezannoni 2000-04-20 The section names in SOM are not
+     .text, .data, etc, but $TEXT$, $DATA$,... We should initialize
+     SET_OFF_* from bfd. (See default_symfile_offsets()). But I don't
+     know the correspondence between SOM sections and GDB's idea of
+     section names. So for now we default to what is was before these
+     changes.*/
+  objfile->sect_index_text = 0;
+  objfile->sect_index_data = 1;
+  objfile->sect_index_bss = 2;
+  objfile->sect_index_rodata = 3;
+
   /* First see if we're a shared library.  If so, get the section
      offsets from the library, else get them from addrs.  */
   if (!som_solib_section_offsets (objfile, objfile->section_offsets))
     {
+      /* Note: Here is OK to compare with ".text" because this is the
+         name that gdb itself gives to that section, not the SOM
+         name. */
       for (i = 0; i < SECT_OFF_MAX && addrs->other[i].name; i++)
 	if (strcmp (addrs->other[i].name, ".text") == 0)
 	  break;

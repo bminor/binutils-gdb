@@ -28,15 +28,6 @@
 #if !defined (GDBSTABS_H)
 #define GDBSTABS_H
 
-/* Offsets in the psymtab's section_offsets array for various kinds of
-   stabs symbols.  Every psymtab built from stabs will have these offsets
-   filled in by these guidelines, so that when actually reading symbols, the
-   proper offset can simply be selected and added to the symbol value.  */
-
-#define	SECT_OFF_TEXT	0
-#define	SECT_OFF_DATA	1
-#define	SECT_OFF_BSS	2
-#define	SECT_OFF_RODATA	3
 #define	SECT_OFF_MAX	40	/* Count of possible values */
 
 /* The stab_section_info chain remembers info from the ELF symbol table,

@@ -328,9 +328,9 @@ pa64_solib_load_symbols (so, name, from_tty, text_addr, target)
       return;
     }
 
-  ANOFFSET (so->objfile->section_offsets, SECT_OFF_TEXT)
+  ANOFFSET (so->objfile->section_offsets, SECT_OFF_TEXT (so->objfile))
     = so->pa64_solib_desc.text_base;
-  ANOFFSET (so->objfile->section_offsets, SECT_OFF_DATA)
+  ANOFFSET (so->objfile->section_offsets, SECT_OFF_DATA (so->objfile))
     = so->pa64_solib_desc.data_base;
 
   /* Relocate all the sections based on where they got loaded.  */
@@ -338,13 +338,13 @@ pa64_solib_load_symbols (so, name, from_tty, text_addr, target)
     {
       if (p->the_bfd_section->flags & SEC_CODE)
 	{
-	  p->addr += ANOFFSET (so->objfile->section_offsets, SECT_OFF_TEXT);
-	  p->endaddr += ANOFFSET (so->objfile->section_offsets, SECT_OFF_TEXT);
+	  p->addr += ANOFFSET (so->objfile->section_offsets, SECT_OFF_TEXT (so->objfile));
+	  p->endaddr += ANOFFSET (so->objfile->section_offsets, SECT_OFF_TEXT (so->objfile));
 	}
       else if (p->the_bfd_section->flags & SEC_DATA)
 	{
-	  p->addr += ANOFFSET (so->objfile->section_offsets, SECT_OFF_DATA);
-	  p->endaddr += ANOFFSET (so->objfile->section_offsets, SECT_OFF_DATA);
+	  p->addr += ANOFFSET (so->objfile->section_offsets, SECT_OFF_DATA (so->objfile));
+	  p->endaddr += ANOFFSET (so->objfile->section_offsets, SECT_OFF_DATA (so->objfile));
 	}
     }
 
