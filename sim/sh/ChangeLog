@@ -1,3 +1,8 @@
+2004-08-18  J"orn Rennecke <joern.rennecke@superh.com>
+
+	* gencode.c (tab): For shad snd shld, fix result for
+	(op1 < 0 && shift_amount == 0).
+
 2004-02-02  Michael Snyder  <msnyder@redhat.com>
 
 	* gencode.c (movua.l): Set thislock to 0, not n.

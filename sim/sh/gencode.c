@@ -1054,7 +1054,7 @@ op tab[] =
   },
 
   { "n", "mn", "shad <REG_M>,<REG_N>", "0100nnnnmmmm1100",
-    "R[n] = (R[m] < 0) ? (R[n] >> ((-R[m])&0x1f)) : (R[n] << (R[m] & 0x1f));",
+    "R[n] = (R[m] < 0) ? (R[m]&0x1f ? R[n] >> ((-R[m])&0x1f) : R[n] >> 31) : (R[n] << (R[m] & 0x1f));",
   },
 
   { "n", "n", "shal <REG_N>", "0100nnnn00100000",
@@ -1068,7 +1068,7 @@ op tab[] =
   },
 
   { "n", "mn", "shld <REG_M>,<REG_N>", "0100nnnnmmmm1101",
-    "R[n] = (R[m] < 0) ? (UR[n] >> ((-R[m])&0x1f)): (R[n] << (R[m] & 0x1f));",
+    "R[n] = (R[m] < 0) ? (R[m]&0x1f ? UR[n] >> ((-R[m])&0x1f) : 0): (R[n] << (R[m] & 0x1f));",
   },
 
   { "n", "n", "shll <REG_N>", "0100nnnn00000000",
