@@ -1,3 +1,8 @@
+Tue Oct 19 15:13:56 1993  Ken Raeburn  (raeburn@rtl.cygnus.com)
+
+	* configure.in: Accept alpha-dec-osf1*, not just -osf1, since
+	config.guess will produce a full version number.
+
 Tue Oct 19 15:58:01 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* configure.in: Build linker and binutils for alpha-dec-osf1.
@@ -38,7 +43,7 @@ Mon Oct  4 16:15:09 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
 	if gas and ld are in the source tree and are in ${configdirs}.
 	If ${use_gnu_as} or ${use_gnu_ld} are 'no', then don't set the
 	the --with options (but still pass them down on the command line,
-	if they were explicitly specified).  
+	if they were explicitly specified).
 
 Fri Sep 24 19:11:13 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
 
@@ -306,7 +311,7 @@ Mon Jun  7 11:40:11 1993  Brendan Kehoe  (brendan@lisa.cygnus.com)
 Fri Jun  4 13:30:42 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* Makefile.in: install gcc, do installation of $(INSTALL_MODULES)
-	with $(FLAGS_TO_PASS) on the command line 
+	with $(FLAGS_TO_PASS) on the command line
 
 	* config.sub: Recognize lynx and lynxos
 
@@ -327,7 +332,7 @@ Thu Jun  3 00:27:06 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 Wed Jun  2 18:19:16 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* Makefile.in (install-no-fixedincludes):  install gcc last, so
-	that rebuilds that might happen during 'make install' don't get 
+	that rebuilds that might happen during 'make install' don't get
 	bogus gcc include files
 
 Wed Jun  2 16:14:10 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
@@ -400,7 +405,7 @@ Thu May 20 14:33:48 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 	* Makefile.in: added the vault-install target
 
 	* configure.in: actually use the Sun3 makefile fragment that's in
-	config, also added the release dir to configdirs	
+	config, also added the release dir to configdirs
 
 Thu May 20 14:19:18 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
@@ -915,7 +920,7 @@ Sat Jan 23 13:49:40 1993  Per Bothner  (bothner@cygnus.com)
 Thu Jan 21 12:20:55 1993  Per Bothner  (bothner@cygnus.com)
 
 	* guess-systype:  Patches from John Eaton <jwe@che.utexas.edu>:
-	+ Add Convex, Cray/Unicos, and Encore/Multimax support. 
+	+ Add Convex, Cray/Unicos, and Encore/Multimax support.
 	+ Execute ./dummy instead of assuming . is in PATH.
 
 Tue Jan 19 17:18:06 1993  Per Bothner  (bothner@cygnus.com)
@@ -964,7 +969,7 @@ Tue Jan  5 07:55:12 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 Sun Jan  3 15:15:09 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
 
-	* Makefile.in: added h8300sim 
+	* Makefile.in: added h8300sim
 
 Tue Dec 29 15:06:00 1992  Ian Lance Taylor  (ian@cygnus.com)
 
@@ -1011,7 +1016,7 @@ Tue Dec 15 00:34:32 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* configure.in: split the configdirs list into 4 categories (native
 	v. cross, library v. tool) and handle the cross-only and native-
-	only in more reasonable (and correct!) way.  
+	only in more reasonable (and correct!) way.
 
 Mon Dec 14 17:04:22 1992  Stu Grossman  (grossman at cygnus.com)
 
@@ -1020,8 +1025,8 @@ Mon Dec 14 17:04:22 1992  Stu Grossman  (grossman at cygnus.com)
 
 Sun Dec 13 00:37:26 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
-	* Makefile.in: extensive cleanup::  removed all of the explicit 
-	clean-* targets, collapsed many wrappers around subdir_do into 
+	* Makefile.in: extensive cleanup::  removed all of the explicit
+	clean-* targets, collapsed many wrappers around subdir_do into
 	one, added additional targets to satisfy standards.texi, deleted
 	some old targets, some changes for consistency
 
@@ -1052,7 +1057,7 @@ Mon Nov 30 14:54:34 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* config/mh-solaris: rework standard X location to use
 	$OPENWINHOME, if defined.
-	
+
 	* config/mh-sun: handle X11 include locations
 
 	* config/mh-decstation: define NeedFunctionPrototypes to 0, to
@@ -1351,7 +1356,7 @@ Mon Jul 20 11:02:09 1992  D. V. Henkel-Wallace  (gumby@cygnus.com)
 Sun Jul 19 17:49:02 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* configure.in: rearrange the parts that remove programs from
-	configdirs, based now on HOST==TARGET or by canonical triple.  
+	configdirs, based now on HOST==TARGET or by canonical triple.
 
 Fri Jul 17 22:52:49 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
 
@@ -1760,7 +1765,7 @@ Sat Jan 18 17:45:11 1992  Stu Grossman  (grossman at cygnus.com)
 
 Sat Jan 18 17:03:21 1992  Fred Fish  (fnf at cygnus.com)
 
-	* config.sub:  Add stratus configuration frags.  Also 
+	* config.sub:  Add stratus configuration frags.  Also
 	submitted to FSF.
 
 Sat Jan 18 15:35:29 1992  Stu Grossman  (grossman at cygnus.com)
@@ -1872,7 +1877,7 @@ Fri Dec  6 00:22:08 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
 
 	* configure: added PWD as a stand in for `pwd` (for speed). use
 	  elif wherever possible.  make -srcdir work without -objdir.
-	  -objdir= commented out. 
+	  -objdir= commented out.
 
 Thu Dec  5 22:46:52 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
 

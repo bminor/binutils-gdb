@@ -165,7 +165,7 @@ fi
 # complain if the target or host isn't supported.
 
 case "${host}" in
-  alpha-dec-osf1)
+  alpha-dec-osf1*)
     configdirs=`echo ${configdirs} | sed -e 's/gdb//'`
     ;;
   i[34]86-*-go32)
@@ -179,7 +179,7 @@ case "${host}" in
 esac
 
 case "${target}" in
-  alpha-dec-osf1)
+  alpha-dec-osf1*)
     configdirs=`echo ${configdirs} | sed -e 's/gas //'`
     configdirs=`echo ${configdirs} | sed -e 's/gdb//;s/emacs//;s/fileutils//'`
     configdirs=`echo ${configdirs} | sed -e 's/grep//;s/libg++//;s/libio//'`
