@@ -1,3 +1,10 @@
+2004-01-12  Elena Zannoni  <ezannoni@redhat.com>
+
+	* gdb.base/sepdebug.exp: New file.
+	* gdb.base/sepdebug.c: New file.
+	* lib/gdb.exp (separate_debug_filename): New procedure.
+	(gdb_gnu_strip_debug): New procedure.
+
 2004-01-12  Andrew Cagney  <cagney@redhat.com>
 
 	* gdb.mi/ChangeLog: Delete file.  Renamed to ...
