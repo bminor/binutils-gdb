@@ -1,4 +1,11 @@
 start-sanitize-v850 
+Fri Jan  3 11:32:51 1997  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* v850.h (V850_OTHER_{TDA_BYTE,ERROR}): New bits for the st_other
+	field.
+	(SHN_V850_*): Remove v850 specific section indexes, which are not
+	needed.
+
 Thu Jan  2 19:30:23 1997  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* v850.h: New file, provide V850 specific definitions. 

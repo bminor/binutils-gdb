@@ -24,19 +24,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifndef _ELF_V850_H
 #define _ELF_V850_H
 
-/* Flags for the other field */
+/* Flags for the st_other field */
 #define V850_OTHER_SDA		0x01	/* symbol had SDA relocations */
 #define V850_OTHER_ZDA		0x02	/* symbol had ZDA relocations */
 #define V850_OTHER_TDA		0x04	/* symbol had TDA relocations */
-
-/* Processor specific section indices.  These sections do not actually
-   exist.  Symbols with a st_shndx field corresponding to one of these
-   values have a special meaning.  */
-
-/* Defined and allocated common symbol.  Value is virtual address.  If
-   relocated, alignment must be preserved.  */
-#define SHN_V850_SCOMMON	0xff00	/* common referenced by sdaoff(label)[gp] */
-#define SHN_V850_ZCOMMON	0xff01	/* common referenced by zdaoff(label)[r0] */
-#define SHN_V850_TCOMMON	0xff02	/* common referenced by tdaoff(label)[ep] */
+#define V850_OTHER_TDA_BYTE	0x08	/* symbol had TDA byte relocations */
+#define V850_OTHER_ERROR	0x80	/* symbol had an error reported */
 
 #endif /* _ELF_V850_H */
