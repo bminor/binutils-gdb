@@ -187,11 +187,7 @@ int attach_flag;
 #define AFTER_TEXT_END 3
 
 #if !defined (CALL_DUMMY_LOCATION)
-#if defined (CANNOT_EXECUTE_STACK)
-#define CALL_DUMMY_LOCATION BEFORE_TEXT_END
-#else /* Can execute stack.  */
 #define CALL_DUMMY_LOCATION ON_STACK
-#endif /* Can execute stack.  */
 #endif /* No CALL_DUMMY_LOCATION.  */
 
 /* Are we in a call dummy?  The code below which allows DECR_PC_AFTER_BREAK

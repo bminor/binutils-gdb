@@ -302,9 +302,6 @@ extern struct value *value_of_trapped_internalvar ();
 
 /* Pcc occaisionally puts an SO where there should be an SOL.   */
 #define PCC_SOL_BROKEN
-
-/* Cannot execute with pc on the stack.  */
-#define CANNOT_EXECUTE_STACK
 
 /* Describe the pointer in each stack frame to the previous stack frame
    (its caller).  */
@@ -329,6 +326,11 @@ extern struct value *value_of_trapped_internalvar ();
 #define FRAME_CHAIN_COMBINE(chain, thisframe) (chain)
 
 /* Define other aspects of the stack frame.  */
+
+/* We need the boundaries of the text in the exec file, as a kludge,
+   for FRAMELESS_FUNCTION_INVOCATION and CALL_DUMMY_LOCATION. */
+
+#define	NEED_TEXT_START_END
 
 /* A macro that tells us whether the function invocation represented
    by FI does not have a frame on the stack associated with it.  If it
@@ -450,6 +452,8 @@ extern struct value *value_of_trapped_internalvar ();
 }
 
 /* Things needed for making the inferior call functions.  */
+
+#define	CALL_DUMMY_LOCATION	BEFORE_TEXT_END
 
 /* Push an empty stack frame, to record the current PC, etc.  */
 

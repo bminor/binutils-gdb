@@ -344,10 +344,10 @@ CORE_ADDR skip_prologue ();
    macros, it doesn't really matter exactly how we
    do it.  However, note that FRAME_FP is used in two ways in GDB:
    (1) as a "magic cookie" which uniquely identifies frames (even over
-   calls to the inferior), (2) (in PC_IN_CALL_DUMMY [!CANNOT_EXECUTE_STACK])
+   calls to the inferior), (2) (in PC_IN_CALL_DUMMY [ON_STACK])
    as the value of SP_REGNUM before the dummy frame was pushed.  These
-   two meanings would be incompatible for the 29k if we didn't define
-   CANNOT_EXECUTE_STACK (but we do, so don't worry about it).
+   two meanings would be incompatible for the 29k if we defined
+   CALL_DUMMY_LOCATION == ON_STACK (but we don't, so don't worry about it).
    Also note that "lr1" below, while called a frame pointer
    in the user's guide, has only one function:  To determine whether
    registers need to be filled in the function epilogue.
@@ -645,11 +645,17 @@ extern void pop_frame ();
     STUFF_I16((char *)dummyname + CONST_INSN + 4, fun >> 16);\
   }
 
-/* At least our 29k board has separate data & instruction memories and can't
-   execute the data memory.  Also, there should be space after text_end;
+/* 29k architecture has separate data & instruction memories -- wired to
+   different pins on the chip -- and can't execute the data memory.
+   Also, there should be space after text_end;
    we won't get a SIGSEGV or scribble on data space.  */
 
 #define CALL_DUMMY_LOCATION AFTER_TEXT_END
+
+/* Because of this, we need (as a kludge) to know the addresses of the
+   text section.  */
+
+#define	NEED_TEXT_START_END
 
 /* How to translate register numbers in the .stab's into gdb's internal register
    numbers.  We don't translate them, but we warn if an invalid register

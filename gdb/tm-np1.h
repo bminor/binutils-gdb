@@ -387,7 +387,8 @@ extern struct type *builtin_type_np1_vector;
 
 /* Things needed for making the inferior call functions.  */
 
-#define CANNOT_EXECUTE_STACK
+#define CALL_DUMMY_LOCATION	BEFORE_TEXT_END
+#define	NEED_TEXT_START_END
 
 /* Push an empty stack frame, to record the current PC, etc.  */
 
