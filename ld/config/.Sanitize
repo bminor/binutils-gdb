@@ -35,6 +35,7 @@ h-dgux
 h-sun3
 h-i386v
 h-m68kv
+h-news
 t-i386v
 t-m68kv
 h-sun4
@@ -42,6 +43,7 @@ h-dec3100
 t-sun4
 t-m88k-bcs
 t-coff-a29k
+t-news
 Do-last:
 
 echo Done in `pwd`.
@@ -49,7 +51,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.6  1991/09/19 21:03:09  steve
+# Revision 1.7  1991/09/27 20:20:01  bothner
+# Added {h,t}-news
+#
+# Revision 1.6  1991/09/19  21:03:09  steve
 # Support for 386 and 68k machines
 #
 # Revision 1.5  1991/09/03  21:04:24  steve
