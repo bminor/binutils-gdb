@@ -69,6 +69,9 @@ static boolean elf_hppa_unmark_useless_dynamic_symbols
 static boolean elf_hppa_remark_useless_dynamic_symbols
   PARAMS ((struct elf_link_hash_entry *, PTR));
 
+static void elf_hppa_record_segment_addrs
+  PARAMS ((bfd *, asection *, PTR));
+
 /* ELF/PA relocation howto entries.  */
 
 static reloc_howto_type elf_hppa_howto_table[ELF_HOWTO_TABLE_SIZE] =
@@ -810,6 +813,30 @@ elf_hppa_remark_useless_dynamic_symbols (h, data)
   return true;
 }
 
+/* Record the lowest address for the data and text segments.  */
+static void
+elf_hppa_record_segment_addrs (abfd, section, data)
+     bfd *abfd ATTRIBUTE_UNUSED;
+     asection *section;
+     PTR data;
+{
+  struct elf64_hppa_link_hash_table *hppa_info;
+  bfd_vma value;
+ 
+  hppa_info = (struct elf64_hppa_link_hash_table *)data;
+
+  value = section->vma - section->filepos;
+
+  if ((section->flags & (SEC_ALLOC | SEC_LOAD | SEC_READONLY)
+       == (SEC_ALLOC | SEC_LOAD | SEC_READONLY))
+      && value < hppa_info->text_segment_base)
+    hppa_info->text_segment_base = value;
+  else if ((section->flags & (SEC_ALLOC | SEC_LOAD | SEC_READONLY)
+       == (SEC_ALLOC | SEC_LOAD))
+      && value < hppa_info->data_segment_base)
+    hppa_info->data_segment_base = value;
+}
+
 /* Called after we have seen all the input files/sections, but before
    final symbol resolution and section placement has been determined.
 
@@ -851,6 +878,12 @@ elf_hppa_final_link (abfd, info)
       gp->root.u.def.value = 0;
       _bfd_set_gp_value (abfd, gp_val);
     }
+
+  /* We need to know the base of the text and data segments so that we
+     can perform SEGREL relocations.  We will recore the base addresses
+     when we encounter the first SEGREL relocation.  */
+  elf64_hppa_hash_table (info)->text_segment_base = (bfd_vma)-1;
+  elf64_hppa_hash_table (info)->data_segment_base = (bfd_vma)-1;
 
   /* HP's shared libraries have references to symbols that are not
      defined anywhere.  The generic ELF BFD linker code will complaim
@@ -1096,13 +1129,6 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
   struct elf64_hppa_link_hash_table *hppa_info = elf64_hppa_hash_table (info);
 
   insn = bfd_get_32 (input_bfd, hit_data);
-
-/* For reference here a quick summary of the relocations found in the
-   HPUX 11.00 PA64 .o and .a files, but not yet implemented.  This is mostly
-   a guide to help prioritize what relocation support is worked on first.
-   The list will be deleted eventually.
-
-   27210 R_PARISC_SEGREL32  */
 
   switch (r_type)
     {
@@ -1534,7 +1560,34 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
       return bfd_reloc_ok;
 
     case R_PARISC_SEGREL32:
-      return bfd_reloc_ok;
+    case R_PARISC_SEGREL64:
+      {
+	/* If this is the first SEGREL relocation, then initialize
+	   the segment base values.  */
+	if (hppa_info->text_segment_base == (bfd_vma) -1)
+	  bfd_map_over_sections (output_bfd, elf_hppa_record_segment_addrs,
+				 elf64_hppa_hash_table (info));
+
+	/* VALUE holds the absolute address.  We want to include the
+	   addend, then turn it into a segment relative address.
+
+	   The segment is derived from SYM_SEC.  We assume that there are
+	   only two segments of note in the resulting executable/shlib.
+	   A readonly segment (.text) and a readwrite segment (.data).  */
+	value += addend;
+
+	if (sym_sec->flags & SEC_CODE)
+	  value -= hppa_info->text_segment_base;
+	else
+	  value -= hppa_info->data_segment_base;
+
+	if (r_type == R_PARISC_SEGREL32)
+	  bfd_put_32 (input_bfd, value, hit_data);
+	else
+	  bfd_put_64 (input_bfd, value, hit_data);
+        return bfd_reloc_ok;
+      }
+      
 
     /* Something we don't know how to handle.  */
     default:

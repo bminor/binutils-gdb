@@ -1,5 +1,10 @@
 Mon Sep 13 20:01:47 1999  Jeffrey A Law  (law@cygnus.com)
 
+	* elf-hppa.h (elf_hppa_record_segment_addrs): New function.
+	(elf_hppa_final_link): Initialize text_segment_base and
+	data_segment_base.
+	(elf_hppa_final_link_relocate): Handle SEGREL relocations.
+
 	* elf-hppa.h (elf_hppa_final_link): Remove unused variables.
 	(elf_hppa_final_link_relocate): Likewise.
 	(elf_hppa_relocate_insn): Likewise.
