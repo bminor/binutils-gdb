@@ -1,7 +1,7 @@
 1999-11-01  Nick Clifton  <nickc@cygnus.com>
 
 	* binutils-all/objcopy.exp: Expect simple objcopy test for fail
-	for COFF based ARM ports.
+	for COFF based ARM and Thumb ports.
 
 Tue Sep 14 00:28:17 1999  Jeffrey A Law  (law@cygnus.com)
 
