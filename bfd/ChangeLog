@@ -1,3 +1,19 @@
+Thu Nov  9 08:40:23 1995  Kim Knuttila  <krk@cygnus.com>
+
+	* coff-ppc.c (ppc_coff_link_hash_entry): new types for hashing
+	(ppc_coff_link_hash_table): new types for hashing
+	(ppc_coff_link_hash_newfunc): hash entry constructor
+	(ppc_coff_link_hash_table_init): hash table initializer
+	(ppc_coff_link_hash_table_create): hash table constructor
+	(ppc_record_toc_entry): changed references to hash table
+	(coff_ppc_relocate_section): changed references to hash table
+
+	* libcoff-in.h (coff_link_hash_entry): removed toc_offset
+	* libcoff.h: Rebuild
+
+	* cofflink.c (_bfd_coff_link_hash_newfunc): removed toc_offset init
+	(coff_link_add_symbols): removed toc_offset init
+
 Thu Nov  9 04:00:38 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	* Makefile.in (.dep1): Make sure the file mkdep is to write exists
