@@ -1107,6 +1107,7 @@ struct _bfd
       struct ieee_data_struct *ieee_data;
       struct ieee_ar_data_struct *ieee_ar_data;
       struct srec_data_struct *srec_data;
+      struct tekhex_data_struct *tekhex_data;
       struct elf_obj_tdata_struct *elf_obj_data;
       struct elf_core_tdata_struct *elf_core_data;
       struct bout_data_struct *bout_data;
@@ -1219,6 +1220,7 @@ typedef struct bfd_target
     bfd_target_elf_flavour,
     bfd_target_ieee_flavour,
     bfd_target_oasys_flavour,
+    bfd_target_tekhex_flavour,
     bfd_target_srec_flavour} flavour;
   boolean byteorder_big_p;
   boolean header_byteorder_big_p;
