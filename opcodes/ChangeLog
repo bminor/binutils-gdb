@@ -1,3 +1,10 @@
+Wed Jun 25 15:25:57 1997  Felix Lee  <flee@cirdan.cygnus.com>
+
+	* ppc-opc.c (extract_nsi): make unsigned expression signed before
+ 	negating it.
+	(UNUSED): remove one level of parens, so MSVC doesn't choke on
+ 	nesting depth when all the macros are expanded.
+	
 Tue Jun 17 17:02:17 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* sparc-opc.c: The fcmp v9a instructions take an integer register
