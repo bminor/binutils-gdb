@@ -14,7 +14,7 @@ The section .eh_frame contains:
   DW_CFA_remember_state
   DW_CFA_restore_state
 #...
-00000028 00000010 0000002c FDE cie=00000000 pc=.*
+00000028 0000001[04] 0000002c FDE cie=00000000 pc=.*
   DW_CFA_remember_state
   DW_CFA_restore_state
 #pass

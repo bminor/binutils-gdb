@@ -1,3 +1,7 @@
+2004-10-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/cfi/cfi-common-4.d: Correct for 64 bit targets.
+
 2004-10-07  Bob Wilson  <bob.wilson@acm.org>
 
 	* gas/xtensa/all.exp: Adjust expected error message for j_too_far.
