@@ -1,3 +1,12 @@
+2004-07-27  Andrew Cagney  <cagney@gnu.org>
+
+	* gdbtypes.h (struct builtin_type): Declare.
+	(builtin_type): Declare.
+	* d10v-tdep.c (d10v_register_type): Use builtin_type.
+	* gdbtypes.c (_initialize_gdbtypes): Register gdbtypes_post_init.
+	(gdbtypes_post_init): New function.
+	(builtin_type): New function.
+
 2004-07-27  Kei Sakamoto  <sakamoto.kei@renesas.com>
 
 	* remote-m32r-sdi.c: Fix breakpoint bug.

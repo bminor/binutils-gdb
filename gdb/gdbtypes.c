@@ -3360,12 +3360,199 @@ build_gdbtypes (void)
 	       "__bfd_vma", (struct objfile *) NULL);
 }
 
+static struct gdbarch_data *gdbtypes_data;
+
+const struct builtin_type *
+builtin_type (struct gdbarch *gdbarch)
+{
+  return gdbarch_data (gdbarch, gdbtypes_data);
+}
+
+static void *
+gdbtypes_post_init (struct gdbarch *gdbarch)
+{
+  struct builtin_type *builtin_type
+    = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct builtin_type);
+
+  builtin_type->builtin_void =
+    init_type (TYPE_CODE_VOID, 1,
+	       0,
+	       "void", (struct objfile *) NULL);
+  builtin_type->builtin_char =
+    init_type (TYPE_CODE_INT, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
+	       (TYPE_FLAG_NOSIGN
+                | (TARGET_CHAR_SIGNED ? 0 : TYPE_FLAG_UNSIGNED)),
+	       "char", (struct objfile *) NULL);
+  builtin_type->true_char =
+    init_type (TYPE_CODE_CHAR, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
+	       0,
+	       "true character", (struct objfile *) NULL);
+  builtin_type->builtin_signed_char =
+    init_type (TYPE_CODE_INT, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
+	       0,
+	       "signed char", (struct objfile *) NULL);
+  builtin_type->builtin_unsigned_char =
+    init_type (TYPE_CODE_INT, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
+	       TYPE_FLAG_UNSIGNED,
+	       "unsigned char", (struct objfile *) NULL);
+  builtin_type->builtin_short =
+    init_type (TYPE_CODE_INT, TARGET_SHORT_BIT / TARGET_CHAR_BIT,
+	       0,
+	       "short", (struct objfile *) NULL);
+  builtin_type->builtin_unsigned_short =
+    init_type (TYPE_CODE_INT, TARGET_SHORT_BIT / TARGET_CHAR_BIT,
+	       TYPE_FLAG_UNSIGNED,
+	       "unsigned short", (struct objfile *) NULL);
+  builtin_type->builtin_int =
+    init_type (TYPE_CODE_INT, TARGET_INT_BIT / TARGET_CHAR_BIT,
+	       0,
+	       "int", (struct objfile *) NULL);
+  builtin_type->builtin_unsigned_int =
+    init_type (TYPE_CODE_INT, TARGET_INT_BIT / TARGET_CHAR_BIT,
+	       TYPE_FLAG_UNSIGNED,
+	       "unsigned int", (struct objfile *) NULL);
+  builtin_type->builtin_long =
+    init_type (TYPE_CODE_INT, TARGET_LONG_BIT / TARGET_CHAR_BIT,
+	       0,
+	       "long", (struct objfile *) NULL);
+  builtin_type->builtin_unsigned_long =
+    init_type (TYPE_CODE_INT, TARGET_LONG_BIT / TARGET_CHAR_BIT,
+	       TYPE_FLAG_UNSIGNED,
+	       "unsigned long", (struct objfile *) NULL);
+  builtin_type->builtin_long_long =
+    init_type (TYPE_CODE_INT, TARGET_LONG_LONG_BIT / TARGET_CHAR_BIT,
+	       0,
+	       "long long", (struct objfile *) NULL);
+  builtin_type->builtin_unsigned_long_long =
+    init_type (TYPE_CODE_INT, TARGET_LONG_LONG_BIT / TARGET_CHAR_BIT,
+	       TYPE_FLAG_UNSIGNED,
+	       "unsigned long long", (struct objfile *) NULL);
+  builtin_type->builtin_float =
+    init_type (TYPE_CODE_FLT, TARGET_FLOAT_BIT / TARGET_CHAR_BIT,
+	       0,
+	       "float", (struct objfile *) NULL);
+  TYPE_FLOATFORMAT (builtin_type->builtin_float) = TARGET_FLOAT_FORMAT;
+  builtin_type->builtin_double =
+    init_type (TYPE_CODE_FLT, TARGET_DOUBLE_BIT / TARGET_CHAR_BIT,
+	       0,
+	       "double", (struct objfile *) NULL);
+  TYPE_FLOATFORMAT (builtin_type->builtin_double) = TARGET_DOUBLE_FORMAT;
+  builtin_type->builtin_long_double =
+    init_type (TYPE_CODE_FLT, TARGET_LONG_DOUBLE_BIT / TARGET_CHAR_BIT,
+	       0,
+	       "long double", (struct objfile *) NULL);
+  TYPE_FLOATFORMAT (builtin_type->builtin_long_double) = TARGET_LONG_DOUBLE_FORMAT;
+  builtin_type->builtin_complex =
+    init_type (TYPE_CODE_COMPLEX, 2 * TARGET_FLOAT_BIT / TARGET_CHAR_BIT,
+	       0,
+	       "complex", (struct objfile *) NULL);
+  TYPE_TARGET_TYPE (builtin_type->builtin_complex) = builtin_type->builtin_float;
+  builtin_type->builtin_double_complex =
+    init_type (TYPE_CODE_COMPLEX, 2 * TARGET_DOUBLE_BIT / TARGET_CHAR_BIT,
+	       0,
+	       "double complex", (struct objfile *) NULL);
+  TYPE_TARGET_TYPE (builtin_type->builtin_double_complex) = builtin_type->builtin_double;
+  builtin_type->builtin_string =
+    init_type (TYPE_CODE_STRING, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
+	       0,
+	       "string", (struct objfile *) NULL);
+  builtin_type->builtin_int0 =
+    init_type (TYPE_CODE_INT, 0 / 8,
+	       0,
+	       "int0_t", (struct objfile *) NULL);
+  builtin_type->builtin_int8 =
+    init_type (TYPE_CODE_INT, 8 / 8,
+	       0,
+	       "int8_t", (struct objfile *) NULL);
+  builtin_type->builtin_uint8 =
+    init_type (TYPE_CODE_INT, 8 / 8,
+	       TYPE_FLAG_UNSIGNED,
+	       "uint8_t", (struct objfile *) NULL);
+  builtin_type->builtin_int16 =
+    init_type (TYPE_CODE_INT, 16 / 8,
+	       0,
+	       "int16_t", (struct objfile *) NULL);
+  builtin_type->builtin_uint16 =
+    init_type (TYPE_CODE_INT, 16 / 8,
+	       TYPE_FLAG_UNSIGNED,
+	       "uint16_t", (struct objfile *) NULL);
+  builtin_type->builtin_int32 =
+    init_type (TYPE_CODE_INT, 32 / 8,
+	       0,
+	       "int32_t", (struct objfile *) NULL);
+  builtin_type->builtin_uint32 =
+    init_type (TYPE_CODE_INT, 32 / 8,
+	       TYPE_FLAG_UNSIGNED,
+	       "uint32_t", (struct objfile *) NULL);
+  builtin_type->builtin_int64 =
+    init_type (TYPE_CODE_INT, 64 / 8,
+	       0,
+	       "int64_t", (struct objfile *) NULL);
+  builtin_type->builtin_uint64 =
+    init_type (TYPE_CODE_INT, 64 / 8,
+	       TYPE_FLAG_UNSIGNED,
+	       "uint64_t", (struct objfile *) NULL);
+  builtin_type->builtin_int128 =
+    init_type (TYPE_CODE_INT, 128 / 8,
+	       0,
+	       "int128_t", (struct objfile *) NULL);
+  builtin_type->builtin_uint128 =
+    init_type (TYPE_CODE_INT, 128 / 8,
+	       TYPE_FLAG_UNSIGNED,
+	       "uint128_t", (struct objfile *) NULL);
+  builtin_type->builtin_bool =
+    init_type (TYPE_CODE_BOOL, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
+	       0,
+	       "bool", (struct objfile *) NULL);
+
+  /* Pointer/Address types. */
+
+  /* NOTE: on some targets, addresses and pointers are not necessarily
+     the same --- for example, on the D10V, pointers are 16 bits long,
+     but addresses are 32 bits long.  See doc/gdbint.texinfo,
+     ``Pointers Are Not Always Addresses''.
+
+     The upshot is:
+     - gdb's `struct type' always describes the target's
+       representation.
+     - gdb's `struct value' objects should always hold values in
+       target form.
+     - gdb's CORE_ADDR values are addresses in the unified virtual
+       address space that the assembler and linker work with.  Thus,
+       since target_read_memory takes a CORE_ADDR as an argument, it
+       can access any memory on the target, even if the processor has
+       separate code and data address spaces.
+
+     So, for example:
+     - If v is a value holding a D10V code pointer, its contents are
+       in target form: a big-endian address left-shifted two bits.
+     - If p is a D10V pointer type, TYPE_LENGTH (p) == 2, just as
+       sizeof (void *) == 2 on the target.
+
+     In this context, builtin_type->CORE_ADDR is a bit odd: it's a
+     target type for a value the target will never see.  It's only
+     used to hold the values of (typeless) linker symbols, which are
+     indeed in the unified virtual address space.  */
+  builtin_type->builtin_data_ptr
+    = make_pointer_type (builtin_type->builtin_void, NULL);
+  builtin_type->builtin_func_ptr
+    = lookup_pointer_type (lookup_function_type (builtin_type->builtin_void));
+  builtin_type->builtin_core_addr =
+    init_type (TYPE_CODE_INT, TARGET_ADDR_BIT / 8,
+	       TYPE_FLAG_UNSIGNED,
+	       "__CORE_ADDR", (struct objfile *) NULL);
+
+  return builtin_type;
+}
+
 extern void _initialize_gdbtypes (void);
 void
 _initialize_gdbtypes (void)
 {
   struct cmd_list_element *c;
   build_gdbtypes ();
+
+  gdbtypes_data = gdbarch_data_register_post_init (gdbtypes_post_init);
 
   /* FIXME - For the moment, handle types by swapping them in and out.
      Should be using the per-architecture data-pointer and a large

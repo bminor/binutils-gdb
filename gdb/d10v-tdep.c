@@ -282,14 +282,14 @@ static struct type *
 d10v_register_type (struct gdbarch *gdbarch, int reg_nr)
 {
   if (reg_nr == D10V_PC_REGNUM)
-    return builtin_type_void_func_ptr;
+    return builtin_type (gdbarch)->builtin_func_ptr;
   if (reg_nr == D10V_SP_REGNUM || reg_nr == D10V_FP_REGNUM)
-    return builtin_type_void_data_ptr;
+    return builtin_type (gdbarch)->builtin_data_ptr;
   else if (reg_nr >= a0_regnum (gdbarch)
 	   && reg_nr < (a0_regnum (gdbarch) + NR_A_REGS))
-    return builtin_type_int64;
+    return builtin_type (gdbarch)->builtin_int64;
   else
-    return builtin_type_int16;
+    return builtin_type (gdbarch)->builtin_int16;
 }
 
 static int

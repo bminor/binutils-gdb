@@ -923,7 +923,77 @@ extern void allocate_cplus_struct_type (struct type *);
                                   (TYPE_NFIELDS (thistype) == 0)                     && \
                                   (TYPE_CPLUS_SPECIFIC (thistype) && (TYPE_NFN_FIELDS (thistype) == 0)))
 
+struct builtin_type
+{
+  /* Address/pointer types.  */
 
+  /* `pointer to data' type.  Some target platforms use an implicitly
+     {sign,zero} -extended 32-bit ABI pointer on a 64-bit ISA.  */
+  struct type *builtin_data_ptr;
+
+  /* `pointer to function (returning void)' type.  Harvard
+     architectures mean that ABI function and code pointers are not
+     interconvertible.  Similarly, since ANSI, C standards have
+     explicitly said that pointers to functions and pointers to data
+     are not interconvertible --- that is, you can't cast a function
+     pointer to void * and back, and expect to get the same value.
+     However, all function pointer types are interconvertible, so void
+     (*) () can server as a generic function pointer.  */
+  struct type *builtin_func_ptr;
+
+  /* The target CPU's address type.  This is the ISA address size.  */
+  struct type *builtin_core_addr;
+
+  /* Integral types.  */
+
+  /* Explicit sizes.  These are assumed to be 2's complement and in
+     the architecture's byte order.  The "int0" is for when an ISA
+     needs to describe a register that has no size.  The naming schema
+     is based on C9X <intypes.h>.  */
+  /* FIXME: cagney/2004-07-26: As with floating-point, there should be
+     explicit big, little and little-byte-big-word endian types that
+     exist outside of the architecture vector.  */
+  struct type *builtin_int0;
+  struct type *builtin_int8;
+  struct type *builtin_uint8;
+  struct type *builtin_int16;
+  struct type *builtin_uint16;
+  struct type *builtin_int32;
+  struct type *builtin_uint32;
+  struct type *builtin_int64;
+  struct type *builtin_uint64;
+  struct type *builtin_int128;
+  struct type *builtin_uint128;
+
+  /* We use this for the '/c' print format, because c_char is just a
+     one-byte integral type, which languages less laid back than C
+     will print as ... well, a one-byte integral type.  */
+  struct type *true_char;
+
+  /* Implicit size/sign (based on the the architecture's ABI).  */
+  struct type *builtin_void;
+  struct type *builtin_char;
+  struct type *builtin_short;
+  struct type *builtin_int;
+  struct type *builtin_long;
+  struct type *builtin_signed_char;
+  struct type *builtin_unsigned_char;
+  struct type *builtin_unsigned_short;
+  struct type *builtin_unsigned_int;
+  struct type *builtin_unsigned_long;
+  struct type *builtin_float;
+  struct type *builtin_double;
+  struct type *builtin_long_double;
+  struct type *builtin_complex;
+  struct type *builtin_double_complex;
+  struct type *builtin_string;
+  struct type *builtin_bool;
+  struct type *builtin_long_long;
+  struct type *builtin_unsigned_long_long;
+};
+
+/* Return the type table for the specified architecture.  */
+extern const struct builtin_type *builtin_type (struct gdbarch *gdbarch);
 
 /* Implicit sizes */
 extern struct type *builtin_type_void;
@@ -1156,8 +1226,6 @@ extern void check_stub_method_group (struct type *, int);
 extern struct type *lookup_primitive_typename (char *);
 
 extern char *gdb_mangle_name (struct type *, int, int);
-
-extern struct type *builtin_type (char **);
 
 extern struct type *lookup_typename (char *, struct block *, int);
 
