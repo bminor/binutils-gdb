@@ -1,6 +1,6 @@
 # Support routines for LD testsuite.
-#   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
-#   Free Software Foundation, Inc.
+#   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
+#    2004, 2005 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -413,6 +413,36 @@ proc is_elf64 { binary_file } {
 	return 1
     }
 
+    return 0
+}
+
+#
+# is_aout_format
+#	true if the object format is known to be aout
+proc is_aout_format {} {
+    if { [istarget *-*-*\[ab\]out*] \
+	     || [istarget *-*-linux*oldld*] \
+	     || [istarget *-*-msdos*] \
+	     || [istarget arm-*-netbsd] \
+	     || [istarget i?86-*-netbsd] \
+	     || [istarget i?86-*-mach*] \
+	     || [istarget i?86-*-vsta] \
+	     || [istarget pdp11-*-*] \
+	     || [istarget m68*-ericsson-ose] \
+	     || [istarget m68k-hp-bsd*] \
+	     || [istarget m68*-*-hpux*] \
+	     || [istarget m68*-*-netbsd] \
+	     || [istarget m68*-*-netbsd*4k*] \
+	     || [istarget m68k-sony-*] \
+	     || [istarget m68*-sun-sunos\[34\]*] \
+	     || [istarget m68*-wrs-vxworks*] \
+	     || [istarget ns32k-*-*] \
+	     || [istarget sparc*-*-netbsd] \
+	     || [istarget sparc-sun-sunos4*] \
+	     || [istarget vax-dec-ultrix*] \
+	     || [istarget vax-*-netbsd] } {
+	return 1
+    }
     return 0
 }
 

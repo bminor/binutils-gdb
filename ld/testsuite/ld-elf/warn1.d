@@ -1,7 +1,7 @@
 #source: start.s
 #source: symbol1ref.s
 #source: symbol1w.s
-#ld: 
+#ld: -Ttext 0x1000
 #warning: ^[^\\n]*\): warning: witty one-liner$
 #readelf: -s
 #notarget: "sparc64-*-solaris2*" "sparcv9-*-solaris2*"

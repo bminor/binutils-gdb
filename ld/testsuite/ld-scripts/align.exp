@@ -35,6 +35,8 @@ if ![ld_simple_link $ld tmpdir/align "-T $srcdir/$subdir/align.t tmpdir/align.o"
     pass $testname
 }
 
-run_dump_test align2a
-run_dump_test align2b
+if ![is_aout_format] {
+    run_dump_test align2a
+    run_dump_test align2b
+}
 run_dump_test align2c
