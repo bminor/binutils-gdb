@@ -1,3 +1,7 @@
+2004-02-25  Fred Fish  <fnf@redhat.com>
+
+	* config/tc-iq2000.c: Add missing \n\ in multiline string literal.
+
 2004-02-20  James E Wilson  <wilson@specifixinc.com>
 
 	* config/tc-ia64.c (slot_index): New arg before_relax.  Use instead of

@@ -1,5 +1,5 @@
 /* tc-iq2000.c -- Assembler for the Sitera IQ2000.
-   Copyright (C) 2003 Free Software Foundation.
+   Copyright (C) 2003, 2004 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -357,7 +357,7 @@ static const char * li_expn    = "\n\
  ori \\rt,%0,\\imm\n\
  .elseif (\\imm & 0xffff0000 == 0xffff0000)\n\
  addi \\rt,%0,\\imm\n\
- .elseif (\\imm & 0x0000ffff == 0)
+ .elseif (\\imm & 0x0000ffff == 0)\n\
  lui \\rt,%uhi(\\imm)\n\
  .else\n\
  lui \\rt,%uhi(\\imm)\n\
