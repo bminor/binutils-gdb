@@ -1,3 +1,51 @@
+2003-03-07  David Carlton  <carlton@math.stanford.edu>
+
+	* symtab.c (lookup_partial_symbol): Replace uses of
+	SYMBOL_MATCHES_NATURAL_NAME by equivalent uses of
+	SYMBOL_NATURAL_NAME, strcmp_iw.
+	* symtab.h (SYMBOL_MATCHES_NATURAL_NAME): Delete.
+	* minsyms.c (lookup_minimal_symbol_linkage): Make static.
+	(lookup_minimal_symbol_natural): Ditto.
+	(lookup_minimal_symbol): Only search on linkage names; rename
+	first argument to 'linkage_name'.
+	(lookup_minimal_symbol_linkage): Delete.
+	(lookup_minimal_symbol_natural): Delete.
+	(add_minsym_to_demangled_hash_table): Go back to using
+	SYMBOL_DEMANGLED_NAME instead of SYMBOL_NATURAL_NAME.
+	(lookup_minimal_symbol_aux): Don't use
+	SYMBOL_MATCHES_NATURAL_NAME: do a strcmp_iw on
+	SYMBOL_DEMANGLED_NAME instead.  Add comment.
+	(build_minimal_symbol_hash_tables): Go back to only adding to
+	demangled has table if SYMBOL_DEMANGLED_NAME is non-NULL.
+	* symtab.h: Delete declarations for lookup_minimal_symbol_linkage
+	and lookup_minimal_symbol_natural.
+	* valops.c (find_function_in_inferior): Use lookup_symbol_linkage
+	instead of lookup_symbol.  Change comment.
+	* remote.c (remote_check_symbols): Use
+	lookup_minimal_symbol_linkage_or_natural instead of
+	lookup_minimal_symbol, but add FIXME comment as well.
+	* objc-lang.c: Ditto.
+	* c-exp.y: Use lookup_minimal_symbol_linkage_or_natural instead of
+	lookup_minimal_symbol.
+	* p-exp.y: Ditto.
+	* objc-exp.y: Ditto.
+	* m2-exp.y: Ditto.
+	* jv-exp.y (push_expression_name): Ditto.
+	* f-exp.y: Ditto.
+	* printcmd.c (address_info): Ditto.
+	* symtab.h: Declare lookup_minimal_symbol_linkage_or_natural.
+	* minsyms.c (lookup_minimal_symbol_linkage_or_natural): New.
+	* ax-gdb.c (gen_var_ref): Use SYMBOL_LINKAGE_NAME instead of
+	DEPRECATED_SYMBOL_NAME.
+	* tracepoint.c (scope_info): Ditto.
+	* symtab.c (find_pc_sect_line): Ditto.
+	* stabsread.c (define_symbol): Ditto.
+	* sol-thread.c (info_cb): Ditto.
+	* printcmd.c (address_info): Ditto.
+	* hppa-tdep.c (hppa_fix_call_dummy): Ditto.
+	(hppa_in_solib_call_trampoline): Ditto.
+	* findvar.c (read_var_value): Ditto.
+
 2003-03-06  David Carlton  <carlton@math.stanford.edu>
 
 	* minsyms.c (add_minsym_to_hash_table): Use SYMBOL_LINKAGE_NAME.

@@ -1446,7 +1446,11 @@ char *find_imps (struct symtab *symtab, struct block *block,
       }
 
     if (sym == NULL)
-      msym = lookup_minimal_symbol (selector, 0, 0);
+      {
+	/* FIXME: carlton/2003-03-07: I don't know what SELECTOR looks
+	   like: is it a linkage name or a natural name?  I'll accept
+	   natural names for now, to be on the safe side.  */
+      msym = lookup_minimal_symbol_linkage_or_natural (selector);
 
     if (msym != NULL) 
       {

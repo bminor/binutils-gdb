@@ -1801,13 +1801,13 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       SYMBOL_CLASS (sym) = LOC_STATIC;
       SYMBOL_VALUE_ADDRESS (sym) = valu;
 #ifdef STATIC_TRANSFORM_NAME
-      if (IS_STATIC_TRANSFORM_NAME (DEPRECATED_SYMBOL_NAME (sym)))
+      if (IS_STATIC_TRANSFORM_NAME (SYMBOL_LINKAGE_NAME (sym)))
 	{
 	  struct minimal_symbol *msym;
-	  msym = lookup_minimal_symbol (DEPRECATED_SYMBOL_NAME (sym), NULL, objfile);
+	  msym = lookup_minimal_symbol (SYMBOL_LINKAGE_NAME (sym), NULL, objfile);
 	  if (msym != NULL)
 	    {
-	      DEPRECATED_SYMBOL_NAME (sym) = STATIC_TRANSFORM_NAME (DEPRECATED_SYMBOL_NAME (sym));
+	      SYMBOL_LINKAGE_NAME (sym) = STATIC_TRANSFORM_NAME (SYMBOL_LINKAGE_NAME (sym));
 	      SYMBOL_VALUE_ADDRESS (sym) = SYMBOL_VALUE_ADDRESS (msym);
 	    }
 	}
@@ -1959,10 +1959,10 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       if (IS_STATIC_TRANSFORM_NAME (DEPRECATED_SYMBOL_NAME (sym)))
 	{
 	  struct minimal_symbol *msym;
-	  msym = lookup_minimal_symbol (DEPRECATED_SYMBOL_NAME (sym), NULL, objfile);
+	  msym = lookup_minimal_symbol (SYMBOL_LINKAGE_NAME (sym), NULL, objfile);
 	  if (msym != NULL)
 	    {
-	      DEPRECATED_SYMBOL_NAME (sym) = STATIC_TRANSFORM_NAME (DEPRECATED_SYMBOL_NAME (sym));
+	      SYMBOL_LINKAGE_NAME (sym) = STATIC_TRANSFORM_NAME (SYMBOL_LINKAGE_NAME (sym));
 	      SYMBOL_VALUE_ADDRESS (sym) = SYMBOL_VALUE_ADDRESS (msym);
 	    }
 	}

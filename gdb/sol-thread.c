@@ -1476,7 +1476,7 @@ info_cb (const td_thrhandle_t *th, void *s)
 	  struct minimal_symbol *msym;
 	  msym = lookup_minimal_symbol_by_pc (ti.ti_startfunc);
 	  if (msym)
-	    printf_filtered ("   startfunc: %s\n", DEPRECATED_SYMBOL_NAME (msym));
+	    printf_filtered ("   startfunc: %s\n", SYMBOL_LINKAGE_NAME (msym));
 	  else
 	    printf_filtered ("   startfunc: 0x%s\n", paddr (ti.ti_startfunc));
 	}

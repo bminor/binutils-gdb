@@ -2227,7 +2227,10 @@ remote_check_symbols (struct objfile *objfile)
       tmp = &reply[8];
       end = hex2bin (tmp, msg, strlen (tmp) / 2);
       msg[end] = '\0';
-      sym = lookup_minimal_symbol (msg, NULL, NULL);
+      /* FIXME: carlton/2003-03-07: I have no idea if natural names
+	 are allowed here; allowing them is safest.  Somebody else
+	 should look at this.  */
+      sym = lookup_minimal_symbol_linkage_or_natural (msg);
       if (sym == NULL)
 	sprintf (msg, "qSymbol::%s", &reply[8]);
       else

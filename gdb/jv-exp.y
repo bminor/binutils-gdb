@@ -1405,7 +1405,7 @@ push_expression_name (name)
     {
       struct minimal_symbol *msymbol;
 
-      msymbol = lookup_minimal_symbol (tmp, NULL, NULL);
+      msymbol = lookup_minimal_symbol_linkage_or_natural (tmp);
       if (msymbol != NULL)
 	{
 	  write_exp_msymbol (msymbol,

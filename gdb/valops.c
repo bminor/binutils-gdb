@@ -161,13 +161,14 @@ int unwind_on_signal_p = 0;
 static int coerce_float_to_double;
 
 
-/* Find the address of function name NAME in the inferior.  */
+/* Find the address of function whose linkage name is NAME in the
+   inferior.  */
 
 struct value *
 find_function_in_inferior (const char *name)
 {
   register struct symbol *sym;
-  sym = lookup_symbol (name, 0, VAR_NAMESPACE, 0, NULL);
+  sym = lookup_symbol_linkage (name);
   if (sym != NULL)
     {
       if (SYMBOL_CLASS (sym) != LOC_BLOCK)

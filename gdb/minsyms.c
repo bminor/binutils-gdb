@@ -76,6 +76,16 @@ static int msym_bunch_index;
 
 static int msym_count;
 
+static struct minimal_symbol *lookup_minimal_symbol_linkage (const char *name,
+							     const char *sfile,
+							     struct objfile
+							     *objf);
+
+static struct minimal_symbol *lookup_minimal_symbol_natural (const char *name,
+							     const char *sfile,
+							     struct objfile
+							     *objf);
+
 static struct minimal_symbol *lookup_minimal_symbol_aux (const char *name,
 							 int linkage,
 							 const char *sfile,
@@ -134,7 +144,7 @@ add_minsym_to_demangled_hash_table (struct minimal_symbol *sym,
   if (sym->demangled_hash_next == NULL)
     {
       unsigned int hash
-	= (msymbol_hash_iw (SYMBOL_NATURAL_NAME (sym))
+	= (msymbol_hash_iw (SYMBOL_DEMANGLED_NAME (sym))
 	   % MINIMAL_SYMBOL_HASH_SIZE);
       sym->demangled_hash_next = table[hash];
       table[hash] = sym;
@@ -143,58 +153,66 @@ add_minsym_to_demangled_hash_table (struct minimal_symbol *sym,
 
 
 /* Look through all the current minimal symbol tables and find the
-   first minimal symbol that matches NAME.  If OBJF is non-NULL, limit
-   the search to that objfile.  If SFILE is non-NULL, the only file-scope
-   symbols considered will be from that source file (global symbols are
-   still preferred).  Returns a pointer to the minimal symbol that
-   matches, or NULL if no match is found.
+   first minimal symbol whose linkage name is LINKAGE_NAME.  If OBJF
+   is non-NULL, limit the search to that objfile.  If SFILE is
+   non-NULL, the only file-scope symbols considered will be from that
+   source file (global symbols are still preferred).  Returns a
+   pointer to the minimal symbol that matches, or NULL if no match is
+   found.
 
    Note:  One instance where there may be duplicate minimal symbols with
    the same name is when the symbol tables for a shared library and the
    symbol tables for an executable contain global symbols with the same
-   names (the dynamic linker deals with the duplication).
+   names (the dynamic linker deals with the duplication).  */
 
-   This function first searches for matches via linkage names; if it
-   doesn't find a match there, it then searches via natural names.  */
+/* NOTE: carlton/2003-03-07: This function used to match on natural
+   names as well; if you want that behavior, call
+   lookup_minimal_symbol_linkage_or_natural.  */
 
 struct minimal_symbol *
-lookup_minimal_symbol (register const char *name, const char *sfile,
+lookup_minimal_symbol (register const char *linkage_name, const char *sfile,
 		       struct objfile *objf)
+{
+  return lookup_minimal_symbol_aux (linkage_name, 1, sfile, objf);
+}
+
+/* Search for a minimal symbol named NAME.  Search for that name as
+   either a linkage name or a natural name.  */
+
+/* NOTE: carlton/2003-03-07: I normally strongly dislike functions
+   that accept either linkage names or natural names, but I'm making
+   an exception here: callers of this function derive NAME from user
+   input, and do so in situations where using a linkage name might be
+   necessary as a workaround for some of GDB's C++ bugs.  */
+
+/* NOTE: carlton/2003-03-07: This never searches on all natural names
+   at once: it searches on linkage names via strcmp, and on demangled
+   names via strcmp_iw.  However, for natural names that turn out to
+   be linkage names of minimal symbols, using strcmp in place of
+   strcmp_iw is safe.  (You have to be more careful if the name isn't
+   associated to a minimal symbol: see PR gdb/33.)  */
+
+struct minimal_symbol *
+lookup_minimal_symbol_linkage_or_natural (const char *name)
 {
   struct minimal_symbol *msymbol;
 
-  msymbol = lookup_minimal_symbol_linkage (name, sfile, objf);
+  msymbol = lookup_minimal_symbol_aux (name, 1, NULL, NULL);
 
   if (msymbol != NULL)
     return msymbol;
   else
-    return lookup_minimal_symbol_natural (name, sfile, objf);
-}
-
-/* Search for a minimal symbol via linkage names; args are as in
-   lookup_minimal_symbol.  */
-
-struct minimal_symbol *
-lookup_minimal_symbol_linkage (const char *name, const char *sfile,
-			       struct objfile *objf)
-{
-  return lookup_minimal_symbol_aux (name, 1, sfile, objf);
-}
-
-/* Search for a minimal symbol via natural names; args are as in
-   lookup_minimal_symbol.  */
-
-struct minimal_symbol *
-lookup_minimal_symbol_natural (const char *name, const char *sfile,
-			       struct objfile *objf)
-{
-  return lookup_minimal_symbol_aux (name, 0, sfile, objf);
+    return lookup_minimal_symbol_aux (name, 0, NULL, NULL);
 }
 
 /* Helper function for lookup_minimal_symbol and friends, which only
    searches for matches via linkage names or natural names but not
    both.  Args are in lookup_minimal_symbol; if LINKAGE is non-zero,
-   search in linkage names, if zero, search in natural names.  */
+   search in linkage names via strcmp, and if zero, search in
+   demangled names via strcmp_iw.  */
+
+/* NOTE: carlton/2003-03-07: If non-zero, it really only searches in
+   demangled names, not in all natural names.  Be careful.  */
 
 static struct minimal_symbol *
 lookup_minimal_symbol_aux (const char *name, int linkage,
@@ -237,7 +255,7 @@ lookup_minimal_symbol_aux (const char *name, int linkage,
 	    {
 	      if (linkage
 		  ? strcmp (SYMBOL_LINKAGE_NAME (msymbol), name) == 0
-		  : SYMBOL_MATCHES_NATURAL_NAME (msymbol, name))
+		  : strcmp_iw (SYMBOL_DEMANGLED_NAME (msymbol), name) == 0)
 		{
 		  switch (MSYMBOL_TYPE (msymbol))
 		    {
@@ -845,8 +863,9 @@ build_minimal_symbol_hash_tables (struct objfile *objfile)
       add_minsym_to_hash_table (msym, objfile->msymbol_hash);
 
       msym->demangled_hash_next = 0;
-      add_minsym_to_demangled_hash_table (msym,
-					  objfile->msymbol_demangled_hash);
+      if (SYMBOL_DEMANGLED_NAME (msym) != NULL)
+	add_minsym_to_demangled_hash_table (msym,
+					    objfile->msymbol_demangled_hash);
     }
 }
 

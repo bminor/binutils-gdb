@@ -621,7 +621,7 @@ variable:	NAME
 			      register char *arg = copy_name ($1);
 
 			      msymbol =
-				lookup_minimal_symbol (arg, NULL, NULL);
+				lookup_minimal_symbol_linkage_or_natural (arg);
 			      if (msymbol != NULL)
 				{
 				  write_exp_msymbol

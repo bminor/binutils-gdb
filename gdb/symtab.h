@@ -211,14 +211,6 @@ extern const char *symbol_demangled_name (const struct general_symbol_info
 #define SYMBOL_PRINT_NAME(symbol)					\
   (demangle ? SYMBOL_NATURAL_NAME (symbol) : SYMBOL_LINKAGE_NAME (symbol))
 
-/* Macro that tests a symbol for a match against a specified name
-   string.  It tests against SYMBOL_NATURAL_NAME, and it ignores
-   whitespace and trailing parentheses.  (See strcmp_iw for details
-   about its behavior.)  */
-
-#define SYMBOL_MATCHES_NATURAL_NAME(symbol, name)			\
-  (strcmp_iw (SYMBOL_NATURAL_NAME (symbol), (name)) == 0)
-
 /* Define a simple structure used to hold some very basic information about
    all defined global symbols (text, data, bss, abs, etc).  The only required
    information is the general_symbol_info.
@@ -1124,13 +1116,8 @@ extern struct minimal_symbol *lookup_minimal_symbol (const char *,
 						     const char *,
 						     struct objfile *);
 
-extern struct minimal_symbol *lookup_minimal_symbol_linkage (const char *,
-							     const char *,
-							     struct objfile *);
-
-extern struct minimal_symbol *lookup_minimal_symbol_natural (const char *,
-							     const char *,
-							     struct objfile *);
+extern struct
+minimal_symbol *lookup_minimal_symbol_linkage_or_natural (const char *);
 
 extern struct minimal_symbol *lookup_minimal_symbol_text (const char *,
 							  const char *,

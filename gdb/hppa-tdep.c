@@ -2234,10 +2234,10 @@ hppa_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
 	  {
 	    stub_symbol
 	      = lookup_minimal_symbol_solib_trampoline
-	      (DEPRECATED_SYMBOL_NAME (funsymbol), NULL, objfile);
+	      (SYMBOL_LINKAGE_NAME (funsymbol), NULL, objfile);
 
 	    if (!stub_symbol)
-	      stub_symbol = lookup_minimal_symbol (DEPRECATED_SYMBOL_NAME (funsymbol),
+	      stub_symbol = lookup_minimal_symbol (SYMBOL_LINKAGE_NAME (funsymbol),
 						   NULL, objfile);
 
 	    /* Found a symbol with the right name.  */
@@ -3014,7 +3014,7 @@ hppa_in_solib_call_trampoline (CORE_ADDR pc, char *name)
     return 1;
 
   minsym = lookup_minimal_symbol_by_pc (pc);
-  if (minsym && strcmp (DEPRECATED_SYMBOL_NAME (minsym), ".stub") == 0)
+  if (minsym && strcmp (SYMBOL_LINKAGE_NAME (minsym), ".stub") == 0)
     return 1;
 
   /* Get the unwind descriptor corresponding to PC, return zero
@@ -3352,7 +3352,7 @@ hppa_skip_trampoline_code (CORE_ADDR pc)
 	      return orig_pc == pc ? 0 : pc & ~0x3;
 	    }
 
-	  libsym = lookup_minimal_symbol (DEPRECATED_SYMBOL_NAME (stubsym), NULL, NULL);
+	  libsym = lookup_minimal_symbol (SYMBOL_LINKAGE_NAME (stubsym), NULL, NULL);
 	  if (libsym == NULL)
 	    {
 	      warning ("Unable to find library symbol for %s\n",

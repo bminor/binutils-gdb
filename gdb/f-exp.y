@@ -479,7 +479,7 @@ variable:	name_not_typename
 			      register char *arg = copy_name ($1.stoken);
 
 			      msymbol =
-				lookup_minimal_symbol (arg, NULL, NULL);
+				lookup_minimal_symbol_linkage_or_natural (arg);
 			      if (msymbol != NULL)
 				{
 				  write_exp_msymbol (msymbol,
