@@ -199,11 +199,11 @@ static bfd_reloc_status_type aoutarm_fix_pcrel_26_done
   (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
 static bfd_reloc_status_type aoutarm_fix_pcrel_26
   (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
-static bfd_reloc_status_type coff_thumb_pcrel_9
-  (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
 static bfd_reloc_status_type coff_thumb_pcrel_12
   (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
 #ifndef ARM_WINCE
+static bfd_reloc_status_type coff_thumb_pcrel_9
+  (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
 static bfd_reloc_status_type coff_thumb_pcrel_23
   (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
 #endif
