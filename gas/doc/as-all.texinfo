@@ -1,5 +1,5 @@
 \input texinfo @c                               -*-Texinfo-*-
-@c  Copyright (c) 1991 1992 Free Software Foundation, Inc.
+@c  Copyright (c) 1991 1992 1993 Free Software Foundation, Inc.
 @c %**start of header 
 @setfilename as.info
 @settitle Using as
@@ -23,7 +23,7 @@ END-INFO-DIR-ENTRY
 @ifinfo
 This file documents the GNU Assembler "as".
 
-Copyright (C) 1991, 1992 Free Software Foundation, Inc.
+Copyright (C) 1991, 1992, 1993 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -54,7 +54,7 @@ instead of in the original English.
 @title Using as
 @subtitle The GNU Assembler
 @sp 1
-@subtitle November 1992
+@subtitle March 1993
 @sp 1
 @sp 13
 The Free Software Foundation Inc.  thanks The Nice Computer
@@ -68,11 +68,8 @@ done.
 @c edited by: pesch@cygnus.com
 @page
 @tex
-\def\$#1${{#1}}  % Kluge: collect RCS revision info without $...$
-\xdef\manvers{\$Revision$}  % For use in headers, footers too
 {\parskip=0pt
-\hfill {\it Using {\tt as}} \manvers\par
-\hfill \TeX{}info \texinfoversion\par
+\hfill {\it Using {\tt as}}\par
 \hfill Edited by Roland Pesch for Cygnus Support\par
 }
 %"boxit" macro for figures:
@@ -84,7 +81,7 @@ done.
 @end tex
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1991, 1992 Free Software Foundation, Inc.
+Copyright @copyright{} 1991, 1992, 1993 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -142,7 +139,7 @@ Here is a brief summary of how to invoke @code{as}.  For details,
    [ -I @var{path} ] [ -K ] [ -L ]
    [ -o @var{objfile} ] [ -R ] [ -v ] [ -w ]
 @c am29k has no machine-dependent assembler options
-@c h8/300 has no machine-dependent assembler options
+@c h8/300 and 500 have no machine-dependent assembler options
 @c Z8000 has no machine-dependent assembler options
 @c see md_parse_option in tc-i960.c
    [ -ACA | -ACA_A | -ACB | -ACC | -AKA | -AKB | -AKC | -AMC ]
@@ -152,9 +149,16 @@ Here is a brief summary of how to invoke @code{as}.  For details,
 @end smallexample
 
 @table @code
-@item -a | -al | -as
-Turn on assembly listings; @samp{-al}, listing only, @samp{-as}, symbols
-only, @samp{-a}, everything.
+@item -a[dhlns]
+Turn on listings;
+@samp{-ad}, omit debugging pseudo-ops from listing,
+@samp{-ah}, include high-level source,
+@samp{-al}, assembly listing,
+@samp{-an}, no forms processing,
+@samp{-as}, symbols.  These options may be combined; @emph{e.g.},
+@samp{-aln} for assembly listing without forms processing.
+By itself, @samp{-a} defaults to @samp{-ahls} --- that is, all listings
+turned on.
 
 @item -D
 This option is accepted only for script compatibility with calls to
@@ -487,26 +491,73 @@ This chapter describes command-line options available in @emph{all}
 versions of the GNU assembler; @pxref{Machine Dependent}, for options specific
 to particular machine architectures.
 
-@section Enable Listings: @code{-a}, @code{-al}, @code{-as}
+If you are invoking @code{as} via the GNU C compiler (version 2), you
+can use the @samp{-Wa} option to pass arguments through to the
+assembler.  The assembler arguments must be separated from each other
+(and the @samp{-Wa}) by commas.  For example:
+
+@smallexample
+gcc -c -g -O -Wa,-alh,-L file.c
+@end smallexample
+
+will cause a listing to be emitted to standard output with high-level
+and assembly source.
+
+Many compiler command-line options, such as @samp{-R} and many
+machine-specific options, will be automatically be passed to the
+assembler by the compiler, so usually you do not need to use this
+@samp{-Wa} mechanism.
+
+@menu
+* a::             -a[dhlns] enable listings
+* D::             -D for compatibility
+* f::             -f to work faster
+* I::             -I for .include search path
+* K::             -K for difference tables
+* L::             -L to retain local labels
+* o::             -o to name the object file
+* R::             -R to join data and text sections
+* v::             -v to announce version
+* W::             -W to suppress warnings
+@end menu
+
+@node a
+@section Enable Listings: @code{-a[dhlns]}
 
 @kindex -a
+@kindex -ad
+@kindex -ah
 @kindex -al
+@kindex -an
 @kindex -as
 @cindex listings, enabling
 @cindex assembly listings, enabling
-These options enable listing output from the assembler.  @samp{-a} by
-itself requests all listing output; @samp{-al} requests only the
-output-program listing, and @samp{-as} requests only a symbol table
-listing.  
+
+These options enable listing output from the assembler.  By itself,
+@samp{-a} requests high-level, assembly, and symbols listing.
+Other letters may be used to select specific options for the list:
+@samp{-ah} requests a high-level language listing,
+@samp{-al} requests an output-program assembly listing, and
+@samp{-as} requests a symbol table listing.
+High-level listings require that a compiler debugging option like
+@samp{-g} be used, and that assembly listings (@samp{-al}) be requested
+also.
+
+The @samp{-ad} option may be used to omit debugging pseudo-ops from the
+listing.
 
 Once you have specified one of these options, you can further control
 listing output and its appearance using the directives @code{.list},
 @code{.nolist}, @code{.psize}, @code{.eject}, @code{.title}, and
 @code{.sbttl}.
-
+The @samp{-an} option turns off all forms processing.
 If you do not request listing output with one of the @samp{-a} options, the
 listing-control directives have no effect.
 
+The letters after @samp{-a} may be combined into one option,
+@emph{e.g.}, @samp{-aln}.
+
+@node D
 @section @code{-D}
 
 @kindex -D
@@ -514,6 +565,7 @@ This option has no effect whatsoever, but it is accepted to make it more
 likely that scripts written for other assemblers will also work with
 @code{as}.
 
+@node f
 @section Work Faster: @code{-f}
 
 @kindex -f
@@ -530,6 +582,7 @@ contain comments, for example), @code{as} will not work correctly if
 @samp{-f} is used.
 @end quotation
 
+@node I
 @section @code{.include} search path: @code{-I} @var{path}
 
 @kindex -I @var{path}
@@ -544,6 +597,7 @@ working directory is always searched first; after that, @code{as}
 searches any @samp{-I} directories in the same order as they were
 specified (left to right) on the command line.
 
+@node K
 @section Difference Tables: @code{-K}
 
 @kindex -K
@@ -555,6 +609,7 @@ specified (left to right) on the command line.
 You can use the @samp{-K} option if you want a warning issued when this
 is done.
 
+@node L
 @section Include Local Labels: @code{-L}
 
 @kindex -L
@@ -570,6 +625,7 @@ This option tells @code{as} to retain those @samp{L@dots{}} symbols
 in the object file.  Usually if you do this you also tell the linker
 @code{ld} to preserve symbols whose names begin with @samp{L}.
 
+@node o
 @section Name the Object File: @code{-o}
 
 @kindex -o
@@ -585,6 +641,7 @@ takes exactly one filename) to give the object file a different name.
 Whatever the object file is called, @code{as} will overwrite any
 existing file of the same name.
 
+@node R
 @section Join Data and Text Sections: @code{-R}
 
 @kindex -R
@@ -608,6 +665,7 @@ When @code{as} is configured for COFF output,
 this option is only useful if you use sections named @samp{.text} and
 @samp{.data}.  
 
+@node v
 @section Announce Version: @code{-v}
 
 @kindex -v
@@ -618,6 +676,7 @@ You can find out what version of as is running by including the
 option @samp{-v} (which you can also spell as @samp{-version}) on the
 command line.
 
+@node W
 @section Suppress Warnings: @code{-W}
 
 @kindex -W
@@ -727,6 +786,7 @@ is considered a comment and is ignored.  The line comment character is
 @samp{|} on the 680x0;
 @samp{;} for the AMD 29K family;
 @samp{;} for the H8/300 family;
+@samp{!} for the H8/500 family;
 @samp{!} for the Z8000;
 see @ref{Machine Dependent}.  @refill
 @c FIXME What about i386, m88k, i860?
@@ -761,7 +821,6 @@ of @code{as}.
 @cindex characters used in symbols
 A @dfn{symbol} is one or more characters chosen from the set of all
 letters (both upper and lower case), digits and 
-the two characters @samp{_.}
 On most machines, you can also use @code{$} in symbol names; exceptions
 are noted in @ref{Machine Dependent}.  
 No symbol may begin with a digit.  Case is significant.
@@ -1065,7 +1124,7 @@ A letter, to tell @code{as} the rest of the number is a flonum.
 will work here, but that might be changed.  Vax BSD 4.2 assembler seems
 to allow any of @samp{defghDEFGH}.)
 @end ignore
-On the AMD 29K and H8/300 architectures, the letter must be:
+On the AMD 29K, H8/300, and H8/500 architectures, the letter must be:
 One of the letters @samp{DFPRSX} (in upper or lower case).
 On the Intel 960 architecture, the letter must be:
 One of the letters @samp{DFT} (in upper or lower case).
@@ -1135,8 +1194,8 @@ within them.  Such a rigid unit is called a @emph{section}.  Assigning
 run-time addresses to sections is called @dfn{relocation}.  It includes
 the task of adjusting mentions of object-file addresses so they refer to
 the proper run-time addresses.
-For the H8/300, @code{as} pads sections if needed to ensure they end
-on a word (sixteen bit) boundary.
+For the H8/300 and H8/500, @code{as} pads sections if needed to
+ensure they end on a word (sixteen bit) boundary.
 
 @cindex standard @code{as} sections
 An object file written by @code{as} has at least three sections, any
@@ -1516,15 +1575,13 @@ directive.  @xref{Set,,@code{.set}}.
 
 @cindex symbol names
 @cindex names, symbol
-Symbol names begin with a letter or with one of 
-@samp{_.}
-(On most machines, you can also use @code{$} in symbol names; exceptions
-are noted in @ref{Machine Dependent}.)
-That character may be followed by any string of digits, letters,
-dollar signs (unless otherwise noted in @ref{Machine Dependent}), 
-and underscores.
-Case of letters is significant:
-@code{foo} is a different symbol name than @code{Foo}.
+Symbol names begin with a letter or with one of @samp{._}.  On most
+machines, you can also use @code{$} in symbol names; exceptions are
+noted in @ref{Machine Dependent}.  That character may be followed by any
+string of digits, letters, dollar signs (unless otherwise noted in
+@ref{Machine Dependent}), and underscores.
+Case of letters is significant: @code{foo} is a different symbol name
+than @code{Foo}.
 
 For the AMD 29K family, @samp{?} is also allowed in the
 body of a symbol name, though not at its beginning.
@@ -1912,6 +1969,7 @@ The rest of the name is letters, usually in lower case.
 
 This chapter discusses directives present regardless of the target
 machine configuration for the GNU assembler.  
+@xref{Machine Dependent} for additional directives.
 
 @menu
 * Abort::                       @code{.abort}
@@ -2802,6 +2860,7 @@ subject, see the hardware manufacturer's manual.
 * Vax-Dependent::               VAX Dependent Features
 * AMD29K-Dependent::            AMD 29K Dependent Features
 * H8/300-Dependent::            Hitachi H8/300 Dependent Features
+* H8/500-Dependent::            Hitachi H8/500 Dependent Features
 * i960-Dependent::              Intel 80960 Dependent Features
 * M68K-Dependent::              M680x0 Dependent Features
 * Sparc-Dependent::             SPARC Dependent Features
@@ -3430,6 +3489,7 @@ The following table summarizes the opcodes and their arguments:
 @page
 @smallexample
 @group
+         @i{Legend:}
             Rs   @r{source register}     
             Rd   @r{destination register}
             imm  @r{immediate data}      
@@ -3537,6 +3597,368 @@ mov.w  r0,@@foo
 If you use the size suffixes, @code{as} will issue a warning if
 there's a mismatch between the suffix and the register size.
 
+@node H8/500-Dependent
+@section H8/500 Dependent Features
+
+@cindex H8/500 support
+@menu
+* H8/500 Options::              Options
+* H8/500 Syntax::               Syntax
+* H8/500 Floating Point::       Floating Point
+* H8/500 Directives::           H8/500 Machine Directives
+* H8/500 Opcodes::              Opcodes
+@end menu
+
+@node H8/500 Options
+@subsection Options
+
+@cindex H8/500 options (none)
+@cindex options, H8/500 (none)
+@code{as} has no additional command-line options for the Hitachi 
+H8/500 family.
+
+@node H8/500 Syntax
+@subsection Syntax
+
+@menu
+* H8/500-Chars::                Special Characters
+* H8/500-Regs::                 Register Names
+* H8/500-Addressing::           Addressing Modes
+@end menu
+
+@node H8/500-Chars
+@subsubsection Special Characters
+
+@cindex line comment character, H8/500
+@cindex H8/500 line comment character
+@samp{!} is the line comment character.
+
+@cindex line separator, H8/500
+@cindex statement separator, H8/500
+@cindex H8/500 line separator
+@samp{;} can be used instead of a newline to separate statements.
+
+@cindex symbol names, @samp{$} in
+@cindex @code{$} in symbol names
+Since @samp{$} has no special meaning, you may use it in symbol names.
+
+@node H8/500-Regs
+@subsubsection Register Names
+
+@cindex H8/500 registers
+@cindex registers, H8/500
+You can use the predefined symbols @samp{r0}, @samp{r1}, @samp{r2},
+@samp{r3}, @samp{r4}, @samp{r5}, @samp{r6}, and @samp{r7} to refer to
+the H8/500 registers.
+
+The H8/500 also has these control registers:
+
+@table @code
+@item cp
+code pointer
+
+@item dp
+data pointer
+
+@item bp
+base pointer
+
+@item tp
+stack top pointer
+
+@item ep
+extra pointer
+
+@item sr
+status register
+
+@item ccr
+condition code register
+@end table
+
+All registers are 16 bits long.  To represent 32 bit numbers, use two
+adjacent registers; for distant memory addresses, use one of the segment
+pointers (@code{cp} for the program counter; @code{dp} for
+@code{r0}--@code{r3}; @code{ep} for @code{r4} and @code{r5}; and
+@code{tp} for @code{r6} and @code{r7}.
+
+@node H8/500-Addressing
+@subsubsection Addressing Modes
+
+@cindex addressing modes, H8/500
+@cindex H8/500 addressing modes
+as understands the following addressing modes for the H8/500:
+@table @code
+@item R@var{n}
+Register direct
+
+@item @@R@var{n}
+Register indirect
+
+@item @@(d:8, R@var{n})
+Register indirect with 8 bit signed displacement
+
+@item @@(d:16, R@var{n})
+Register indirect with 16 bit signed displacement
+
+@item @@-R@var{n}
+Register indirect with pre-decrement
+
+@item @@R@var{n}+
+Register indirect with post-increment
+
+@item @@@var{aa}:8
+8 bit absolute address
+
+@item @@@var{aa}:16
+16 bit absolute address
+
+@item #@var{xx}:8
+8 bit immediate
+
+@item #@var{xx}:16
+16 bit immediate
+@end table
+
+@node H8/500 Floating Point
+@subsection Floating Point
+
+@cindex floating point, H8/500 (@sc{ieee})
+@cindex H8/500 floating point (@sc{ieee})
+The H8/500 family uses @sc{ieee} floating-point numbers.
+
+@node H8/500 Directives
+@subsection H8/500 Machine Directives
+
+@cindex H8/500 machine directives (none)
+@cindex machine directives, H8/500 (none)
+@cindex @code{word} directive, H8/500
+@cindex @code{int} directive, H8/500
+@code{as} has no machine-dependent directives for the H8/500.
+However, on this platform the @samp{.int} and @samp{.word} directives
+generate 16-bit numbers.
+
+@node H8/500 Opcodes
+@subsection Opcodes
+
+@cindex H8/500 opcode summary
+@cindex opcode summary, H8/500
+@cindex mnemonics, H8/500
+@cindex instruction summary, H8/500
+For detailed information on the H8/500 machine instruction set, see
+@cite{H8/500 Series Programming Manual} (Hitachi M21T001).
+
+@code{as} implements all the standard H8/500 opcodes.  No additional
+pseudo-instructions are needed on this family.  
+
+The following summary of H8/500 opcodes uses this notation to classify
+the allowable operands:
+
+@table @var
+@item abs@r{nn}
+(@var{abs8}, @var{abs16}, @var{abs24}): nn-bit absolute address
+
+@item crb
+@code{ccr}, @code{br}, @code{ep}, @code{dp}, @code{tp}, @code{dp}
+
+@item disp8
+Eight-bit displacement
+
+@item ea
+@code{rn}, @code{@@rn}, @code{@@(d:8, rn)}, @code{@@(d:16, rn)},@*
+@code{@@-rn}, @code{@@rn+}, @code{@@aa:8}, @code{@@aa:16},@*
+@code{#xx:8}, @code{#xx:16}
+
+@item ea_mem
+@code{@@rn}, @code{@@(d:8, rn)}, @code{@@(d:16, rn)},@*
+@code{@@-rn}, @code{@@rn+}, @code{@@aa:8}, @code{@@aa:16}
+
+@item ea_noimm
+@code{rn}, @code{@@rn}, @code{@@(d:8, rn)}, @code{@@(d:16, rn)},@*
+@code{@@-rn}, @code{@@rn+}, @code{@@aa:8}, @code{@@aa:16}
+
+@item @t{fp}
+@code{r6}
+
+@item imm@r{nn}
+(@var{imm4}, @var{imm8}, @var{imm16}): nn-bit immediate data
+
+@item pcrel@r{nn}
+(@var{pcrel8}, @var{pcrel16}): nn-bit address, interpreted as offset
+from program counter
+
+@item qim
+@code{-2}, @code{-1}, @code{1}, @code{2}
+
+@item rd
+Any register
+
+@item rs
+A register (distinct from @var{rd}, if both used in the same schema)
+
+@item rlist
+A comma-separated list of registers in parentheses; register ranges
+@code{@var{rd}-@var{rs}} are allowed.  @samp{(r0-r2,r5)} is an
+@var{rlist} equivalent to @samp{(r0,r1,r2,r5)}.
+
+@item @t{sp}
+Stack pointer (@code{r7})
+
+@item @t{sr}
+Status register
+
+@item sz
+Size; @samp{.b} or @samp{.w}.  May be omitted, with default @samp{.w}
+@end table
+
+@noindent
+Here is a summary of the opcodes and their arguments:
+
+@example
+ldc[.b] @var{ea},@var{crb}
+ldc[.w] @var{ea},sr
+add[:q]@var{sz} @var{qim},@var{ea_noimm}
+add[:g]@var{sz} @var{ea},@var{rd}
+adds@var{sz} @var{ea},@var{rd}
+addx@var{sz} @var{ea},@var{rd}
+and@var{sz} @var{ea},@var{rd}
+andc[.b] @var{imm8},@var{crb}
+andc[.w] @var{imm16},sr
+bpt
+bra[.w] @var{pcrel16}
+bra[.b] @var{pcrel8}
+bt[.w] @var{pcrel16}
+bt[.b] @var{pcrel8}
+brn[.w] @var{pcrel16}
+brn[.b] @var{pcrel8}
+bf[.w] @var{pcrel16}
+bf[.b] @var{pcrel8}
+bhi[.w] @var{pcrel16}
+bhi[.b] @var{pcrel8}
+bls[.w] @var{pcrel16}
+bls[.b] @var{pcrel8}
+bcc[.w] @var{pcrel16}
+bcc[.b] @var{pcrel8}
+bhs[.w] @var{pcrel16}
+bhs[.b] @var{pcrel8}
+bcs[.w] @var{pcrel16}
+bcs[.b] @var{pcrel8}
+blo[.w] @var{pcrel16}
+blo[.b] @var{pcrel8}
+bne[.w] @var{pcrel16}
+bne[.b] @var{pcrel8}
+beq[.w] @var{pcrel16}
+beq[.b] @var{pcrel8}
+bvc[.w] @var{pcrel16}
+bvc[.b] @var{pcrel8}
+bvs[.w] @var{pcrel16}
+bvs[.b] @var{pcrel8}
+bpl[.w] @var{pcrel16}
+bpl[.b] @var{pcrel8}
+bmi[.w] @var{pcrel16}
+bmi[.b] @var{pcrel8}
+bge[.w] @var{pcrel16}
+bge[.b] @var{pcrel8}
+blt[.w] @var{pcrel16}
+blt[.b] @var{pcrel8}
+bgt[.w] @var{pcrel16}
+bgt[.b] @var{pcrel8}
+ble[.w] @var{pcrel16}
+ble[.b] @var{pcrel8}
+bclr@var{sz} @var{imm4},@var{ea_noimm}
+bclr@var{sz} @var{rs},@var{ea_noimm}
+bnot@var{sz} @var{imm4},@var{ea_noimm}
+bnot@var{sz} @var{rs},@var{ea_noimm}
+bset@var{sz} @var{imm4},@var{ea_noimm}
+bset@var{sz} @var{rs},@var{ea_noimm}
+bsr[.b] @var{pcrel8}
+bsr[.w] @var{pcrel16}
+btst@var{sz} @var{imm4},@var{ea_noimm}
+btst@var{sz} @var{rs},@var{ea_noimm}
+clr@var{sz} @var{ea}
+cmp[:e][.b] @var{imm8},@var{rd}
+cmp[:i][.w] @var{imm16},@var{rd}
+cmp[:g].b @var{imm8},@var{ea_noimm}
+cmp[:g][.w] @var{imm16},@var{ea_noimm}
+cmp[:g]@var{sz} @var{ea},@var{rd}
+dadd @var{rs},@var{rd}
+divxu@var{sz} @var{ea},@var{rd}
+dsub @var{rs},@var{rd}
+exts[.b] @var{rd}
+extu[.b] @var{rd}
+jmp @@@var{rd}
+jmp @@(@var{imm8},@var{rd})
+jmp @@(@var{imm16},@var{rd})
+jmp @var{abs16}
+jsr @@@var{rd}
+jsr @@(@var{imm8},@var{rd})
+jsr @@(@var{imm16},@var{rd})
+jsr @var{abs16}
+ldm @@sp+,(@var{rlist})
+link fp,@var{imm8}
+link fp,@var{imm16}
+mov[:e][.b] @var{imm8},@var{rd}
+mov[:i][.w] @var{imm16},@var{rd}
+mov[:l][.w] @var{abs8},@var{rd}
+mov[:l].b @var{abs8},@var{rd}
+mov[:s][.w] @var{rs},@var{abs8}
+mov[:s].b @var{rs},@var{abs8}
+mov[:f][.w] @@(@var{disp8},fp),@var{rd}
+mov[:f][.w] @var{rs},@@(@var{disp8},fp)
+mov[:f].b @@(@var{disp8},fp),@var{rd}
+mov[:f].b @var{rs},@@(@var{disp8},fp)
+mov[:g]@var{sz} @var{rs},@var{ea_mem}
+mov[:g]@var{sz} @var{ea},@var{rd}
+mov[:g][.b] @var{imm8},@var{ea_mem}
+mov[:g][.w] @var{imm16},@var{ea_mem}
+movfpe[.b] @var{ea},@var{rd}
+movtpe[.b] @var{rs},@var{ea_noimm}
+mulxu@var{sz} @var{ea},@var{rd}
+neg@var{sz} @var{ea}
+nop
+not@var{sz} @var{ea}
+or@var{sz} @var{ea},@var{rd}
+orc[.b] @var{imm8},@var{crb}
+orc[.w] @var{imm16},sr
+pjmp @var{abs24}
+pjmp @@@var{rd}
+pjsr @var{abs24}
+pjsr @@@var{rd}
+prtd @var{imm8}
+prtd @var{imm16}
+prts
+rotl@var{sz} @var{ea}
+rotr@var{sz} @var{ea}
+rotxl@var{sz} @var{ea}
+rotxr@var{sz} @var{ea}
+rtd @var{imm8}
+rtd @var{imm16}
+rts
+scb/f @var{rs},@var{pcrel8}
+scb/ne @var{rs},@var{pcrel8}
+scb/eq @var{rs},@var{pcrel8}
+shal@var{sz} @var{ea}
+shar@var{sz} @var{ea}
+shll@var{sz} @var{ea}
+shlr@var{sz} @var{ea}
+sleep
+stc[.b] @var{crb},@var{ea_noimm}
+stc[.w] sr,@var{ea_noimm}
+stm (@var{rlist}),@@-sp
+sub@var{sz} @var{ea},@var{rd}
+subs@var{sz} @var{ea},@var{rd}
+subx@var{sz} @var{ea},@var{rd}
+swap[.b] @var{rd}
+tas[.b] @var{ea}
+trapa @var{imm4}
+trap/vs
+tst@var{sz} @var{ea}
+unlk fp
+xch[.w] @var{rs},@var{rd}
+xor@var{sz} @var{ea},@var{rd}
+xorc.b @var{imm8},@var{crb}
+xorc.w @var{imm16},sr
+@end example
 @node i960-Dependent
 @section Intel 80960 Dependent Features
 
@@ -5389,6 +5811,5 @@ Public License instead of this License.
 
 @printindex cp
 
-@summarycontents
 @contents
 @bye
