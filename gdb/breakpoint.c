@@ -665,10 +665,11 @@ insert_breakpoints ()
               /* Bp set, now make sure callbacks are enabled */ 
               args.kind = b->type == bp_catch_catch ? EX_EVENT_CATCH : EX_EVENT_THROW;
               args.enable = 1;
-              sal = catch_errors ((int (*) PARAMS ((char *))) 
-				  cover_target_enable_exception_callback,
-                                  (char *) &args,
-                                  message, RETURN_MASK_ALL);
+              sal = (struct symtab_and_line *)
+		catch_errors ((int (*) PARAMS ((char *)))
+			      cover_target_enable_exception_callback,
+			      (char *) &args,
+			      message, RETURN_MASK_ALL);
               if (sal && (sal != (struct symtab_and_line *) -1))
                 {
                   b->inserted = 1;
