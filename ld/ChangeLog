@@ -1,3 +1,23 @@
+2002-02-19  David O'Brien  <obrien@FreeBSD.org>
+
+	* Makefile.am: Add new files earmelf_fbsd, eelf32ppc_fbsd,
+	eelf_i386_fbsd, eelf64_ia64_fbsd, eelf_x86_64_fbsd, eelf64_sparc_fbsd,
+	and eelf64alpha_fbsd.
+	* Makefile.in: Regenerate.
+	* configure.tgt(sparc64-*-freebsd, ia64-*-freebsd, i[3456]86-*-freebsd,
+	x86_64-*-freebsd, arm-*-freebsd, alpha*-*-freebsd, powerpc-*-freebsd):
+	use a FreeBSD-specific emulation rather than the psABI one.
+	* emulparams/elf_fbsd.sh (ELF_INTERPRETER_NAME): Set appropriate value
+	for all FreeBSD ELF systems.
+	* emulparams/armelf_fbsd.sh: Bridge elf_fbsd.sh and the "native" psABI
+	emulation.
+	* emulparams/elf32ppc_fbsd.sh: Likewise.
+	* emulparams/elf64_ia64_fbsd.sh: Likewise.
+	* emulparams/elf64_sparc_fbsd.sh: Likewise.
+	* emulparams/elf64alpha_fbsd.sh: Likewise.
+	* emulparams/elf_i386_fbsd.sh: Likewise.
+	* emulparams/elf_x86_64_fbsd.sh: Likewise.
+
 2002-02-15  Richard Henderson  <rth@redhat.com>
 
 	* emulparams/elf64alpha.sh (NOP): Adjust for little-endian definition.
