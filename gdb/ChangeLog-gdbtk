@@ -1,10 +1,20 @@
+Thu May 21 13:56:24 1998  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+       
+	* gdbtk.c: reinserted the changes that were accidentally deleted:
+	(_initialize_gdbtk): Use correct device names in
+	cygwin-specific call (cosmetic change). 
+        (gdbtk_ignorable_warning): removed va_list parameter,
+	which was unused.
+        (_initialize_gdbtk): add cygwin32 specific code to
+	allow `gdb -nw' to work when specified specified from a windows
+	console-mode command line.
+
 Wed May 13 11:12:58 1998  James Ingham  <jingham@leda.cygnus.com>
 
 	* gdbtk.c: Fixed a goof in the definition of the gdb_get_args &
 	gdb_get_locals Tcl commands.  Moved the previous ChangeLog entry
 	from ChangeLog to ChangeLog-gdbtk (here)...
 	
-
 Tue May 12 13:29:20 1998  Jeff Holcomb  <jeffh@cygnus.com>
 
 	* Makefile.in (install-only): Add images/icons.txt and
@@ -17,7 +27,7 @@ Tue May 12 12:03:16 1998  James Ingham  <jingham@leda.cygnus.com>
 	catch_errors.  This is just a bandaid while I rewrite the
 	string-based commands to use the object format.
 
-	Tue May  5 09:30:25 1998  Christopher Faylor <cgf@cygnus.com>
+Tue May  5 09:30:25 1998  Christopher Faylor <cgf@cygnus.com>
 
 	* gdbtk.c (_initialize_gdbtk): Use correct device names in
 	cygwin-specific call (cosmetic change). 
@@ -30,6 +40,12 @@ Wed Apr 29 15:53:16 1998  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 Thu Apr 23 19:01:05 1998  Keith Seitz  <keiths@onions.cygnus.com>
 
 	* Makefile.in (install-only): Install help files.
+
+Wed Apr 22 21:17:35 1998  Christopher Faylor <cgf@cygnus.com>
+
+	* gdbtk.c (_initialize_gdbtk): add cygwin32 specific code to
+	allow `gdb -nw' to work when specified specified from a windows
+	console-mode command line.
 
 Wed Apr 15 11:23:53 1998  Stan Shebs  <shebs@andros.cygnus.com>
 

@@ -98,7 +98,7 @@ static void gdbtk_flush PARAMS ((FILE *));
 static void gdbtk_fputs PARAMS ((const char *, FILE *));
 static int gdbtk_query PARAMS ((const char *, va_list));
 static void gdbtk_warning PARAMS ((const char *, va_list));
-static void gdbtk_ignorable_warning PARAMS ((const char *, va_list));
+static void gdbtk_ignorable_warning PARAMS ((const char *));
 static char *gdbtk_readline PARAMS ((char *));
 static void gdbtk_init PARAMS ((char *));
 static void tk_command_loop PARAMS ((void));
@@ -329,14 +329,13 @@ gdbtk_warning (warning, args)
 }
 
 static void
-gdbtk_ignorable_warning (warning, args)
+gdbtk_ignorable_warning (warning)
      const char *warning;
-     va_list args;
 {
   char buf[200], *merge[2];
   char *command;
 
-  vsprintf (buf, warning, args);
+  sprintf (buf, warning);
   merge[0] = "gdbtk_tcl_ignorable_warning";
   merge[1] = buf;
   command = Tcl_Merge (2, merge);
@@ -3260,7 +3259,7 @@ gdb_loadfile (clientData, interp, objc, objv)
       mtime = bfd_get_mtime(exec_bfd);
  
   if (mtime && mtime < st.st_mtime)
-     gdbtk_ignorable_warning("Source file is more recent than executable.\n", (va_list)0);
+     gdbtk_ignorable_warning("Source file is more recent than executable.\n");
 
 
   /* Source linenumbers don't appear to be in order, and a sort is */
@@ -3456,4 +3455,31 @@ _initialize_gdbtk ()
 
       init_ui_hook = gdbtk_init;
     }
+#ifdef __CYGWIN32__
+  else
+    {
+      DWORD ft = GetFileType (GetStdHandle (STD_INPUT_HANDLE));
+      void cygwin32_attach_handle_to_fd (char *, int, HANDLE, int, int);
+
+      switch (ft)
+	{
+	  case FILE_TYPE_DISK:
+	  case FILE_TYPE_CHAR:
+	  case FILE_TYPE_PIPE:
+	    break;
+	  default:
+	    AllocConsole();
+	    cygwin32_attach_handle_to_fd ("/dev/conin", 0,
+					  GetStdHandle (STD_INPUT_HANDLE),
+					  1, GENERIC_READ);
+	    cygwin32_attach_handle_to_fd ("/dev/conout", 1,
+					  GetStdHandle (STD_OUTPUT_HANDLE),
+					  0, GENERIC_WRITE);
+	    cygwin32_attach_handle_to_fd ("/dev/conout", 2,
+					  GetStdHandle (STD_ERROR_HANDLE),
+					  0, GENERIC_WRITE);
+	    break;
+	}
+    }
+#endif
 }
