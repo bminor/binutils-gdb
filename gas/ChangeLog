@@ -1,3 +1,7 @@
+2001-06-06  Tracy Kuhrt <Tracy.Kuhrt@microchip.com>
+
+	* as.c (parse_args): Correct option name "listing-lhs-width2".
+
 2001-06-05  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* symbols.c (S_SET_EXTERNAL): Do not override a section symbol's

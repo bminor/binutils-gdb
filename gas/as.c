@@ -402,7 +402,7 @@ parse_args (pargc, pargv)
 #define OPTION_LISTING_LHS_WIDTH (OPTION_STD_BASE + 9)
     {"listing-lhs-width", required_argument, NULL, OPTION_LISTING_LHS_WIDTH},
 #define OPTION_LISTING_LHS_WIDTH2 (OPTION_STD_BASE + 10)
-    {"listing-lhs-width", required_argument, NULL, OPTION_LISTING_LHS_WIDTH2},
+    {"listing-lhs-width2", required_argument, NULL, OPTION_LISTING_LHS_WIDTH2},
 #define OPTION_LISTING_RHS_WIDTH (OPTION_STD_BASE + 11)
     {"listing-rhs-width", required_argument, NULL, OPTION_LISTING_RHS_WIDTH},
 #define OPTION_LISTING_CONT_LINES (OPTION_STD_BASE + 12)
