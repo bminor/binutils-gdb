@@ -21,8 +21,7 @@ Tue Nov 26 11:53:12 1996  Ian Lance Taylor  <ian@cygnus.com>
 	(main): Remove unused variable this_option_optind.  Change
 	``*loptarg++'' to ``loptarg++''.
 	(my_strtoul): Parenthesize && within ||.
-	* interp.c (sim_trace): If tracefh is NULL, set it to stderr.
-	(LoadMemory): Accept a halfword pAddr if vAddr is odd.
+	* interp.c (LoadMemory): Accept a halfword pAddr if vAddr is odd.
 	(simulate): If PC is odd, fetch a 16 bit instruction, and
 	increment PC by 2 rather than 4.
 	* configure.in: Add case for mips16*-*-*.
