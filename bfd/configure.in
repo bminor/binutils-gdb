@@ -414,6 +414,7 @@ do
     a_out_adobe_vec)		tb="$tb aout-adobe.lo aout32.lo" ;;
     armcoff_little_vec)		tb="$tb coff-arm.lo cofflink.lo " ;;
     armcoff_big_vec)		tb="$tb coff-arm.lo cofflink.lo " ;;
+    armnetbsd_vec)		tb="$tb armnetbsd.lo aout32.lo" ;;
     armpe_little_vec)		tb="$tb pe-arm.lo cofflink.lo " ;;
     armpe_big_vec)		tb="$tb pe-arm.lo cofflink.lo " ;;
     armpei_little_vec)		tb="$tb pei-arm.lo cofflink.lo " ;;

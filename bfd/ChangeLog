@@ -1,3 +1,20 @@
+1999-08-24  Nick Clifton  <nickc@cygnus.com>
+
+	From a patch submitted by Roland McGrath  <roland@baalperazim.frob.com>
+
+	* config.bfd (arm-*-netbsd*): New target.
+	* configure.in (armnetbsd_vec): New target vector.
+	* configure: Regenerate
+	* targets.c (bfd_target_vector): Add &armnetbsd_vec.
+
+	* Makefile.am (BFD32_BACKENDS): Add armnetbsd.lo.
+	(ALL_MACHINES_CFILES): Add armnetbsd.c.
+	(armnetbsd.lo): New rule with deps.
+	* Makefile.in: Regenerate.
+	
+	* armnetbsd.c: New file:  Definitions specific to arm-netbsd
+	target. 
+
 Tue Aug 24 00:25:58 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* som.c (som_slurp_symbol_table): Fix typo in comment.
