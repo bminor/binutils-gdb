@@ -1,3 +1,9 @@
+Thu Apr 17 11:10:54 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	From Gordon W. Ross <gwr@mc.com>:
+	* aoutf1.h (MY_entry_is_text_address): Define if not defined.
+	(sunos4_aout_backend): Use MY_entry_is_text_address.
+
 start-sanitize-d30v
 Wed Apr 16 12:43:32 1997  Martin Hunt  <hunt@cygnus.com>
 
