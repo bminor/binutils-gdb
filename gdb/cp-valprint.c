@@ -411,7 +411,7 @@ cplus_print_value (type, valaddr, stream, format, recurse, pretty, dont_print)
       if (err != 0)
 	{
 	  fprintf_filtered (stream, "<invalid address ");
-	  print_address_numeric ((CORE_ADDR) baddr, stream);
+	  print_address_numeric ((CORE_ADDR) baddr, 1, stream);
 	  fprintf_filtered (stream, ">");
 	}
       else

@@ -824,8 +824,8 @@ remote_write_bytes (memaddr, myaddr, len)
   int i;
   char *p;
 
-  /* FIXME-32x64: Need a version of print_address_numeric which doesn't
-     set use_local (and also puts the result in a buffer like sprintf).  */
+  /* FIXME-32x64: Need a version of print_address_numeric which puts the
+     result in a buffer like sprintf.  */
   sprintf (buf, "M%lx,%x:", (unsigned long) memaddr, len);
 
   /* We send target system values byte by byte, in increasing byte addresses,
@@ -875,8 +875,8 @@ remote_read_bytes (memaddr, myaddr, len)
   if (len > PBUFSIZ / 2 - 1)
     abort ();
 
-  /* FIXME-32x64: Need a version of print_address_numeric which doesn't
-     set use_local (and also puts the result in a buffer like sprintf).  */
+  /* FIXME-32x64: Need a version of print_address_numeric which puts the
+     result in a buffer like sprintf.  */
   sprintf (buf, "m%lx,%x", (unsigned long) memaddr, len);
   putpkt (buf);
   getpkt (buf, 0);

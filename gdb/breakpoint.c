@@ -1648,7 +1648,7 @@ breakpoint_1 (bnum, allflag)
 	      printf_filtered ("\n\032\032field 6\n");
 
 	    printf_filtered ("\tstop only in stack frame at ");
-	    print_address_numeric (b->frame, gdb_stdout);
+	    print_address_numeric (b->frame, 1, gdb_stdout);
 	    printf_filtered ("\n");
 	  }
 
@@ -1760,7 +1760,7 @@ describe_other_breakpoints (pc)
 	       (others > 1) ? "," : ((others == 1) ? " and" : ""));
 	  }
       printf_filtered ("also set at pc ");
-      print_address_numeric (pc, gdb_stdout);
+      print_address_numeric (pc, 1, gdb_stdout);
       printf_filtered (".\n");
     }
 }
@@ -2001,7 +2001,7 @@ mention (b)
       break;
     case bp_breakpoint:
       printf_filtered ("Breakpoint %d at ", b->number);
-      print_address_numeric (b->address, gdb_stdout);
+      print_address_numeric (b->address, 1, gdb_stdout);
       if (b->source_file)
 	printf_filtered (": file %s, line %d.",
 			 b->source_file, b->line_number);

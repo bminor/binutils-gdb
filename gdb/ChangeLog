@@ -1,5 +1,13 @@
 Wed May  4 06:56:03 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* valprint.c (print_longest): Clarify comment about use_local.
+	* printcmd.c, defs.h (print_address_numeric), callers in
+	symmisc.c, symfile.c, stack.c, source.c, remote.c, infcmd.c,
+	cp-valprint.c, core.c, ch-valprint.c, c-valprint.c, breakpoint.c,
+	exec.c: New argument use_local.
+	* source.c (identify_source_line): Use filtered output.  Use
+	print_address_numeric. 
+
 	* core.c (memory_error), symtab.c (cplusplus_hint, decode_line_1),
 	language.c (type_error, range_error): Use filtered output.
 	* utils.c (error_begin): Update comment to tell people to use

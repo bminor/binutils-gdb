@@ -172,7 +172,7 @@ c_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 
 	  if (addressprint && format != 's')
 	    {
-	      print_address_numeric (addr, stream);
+	      print_address_numeric (addr, 1, stream);
 	    }
 
 	  /* For a pointer to char or unsigned char, also print the string
@@ -255,7 +255,7 @@ c_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 	  fprintf_filtered (stream, "@");
 	  print_address_numeric
 	    (extract_address (valaddr,
-			      TARGET_PTR_BIT / HOST_CHAR_BIT), stream);
+			      TARGET_PTR_BIT / HOST_CHAR_BIT), 1, stream);
 	  if (deref_ref)
 	    fputs_filtered (": ", stream);
         }

@@ -613,10 +613,12 @@ print_address_symbolic (addr, stream, do_demangle, leadin)
   fputs_filtered (">", stream);
 }
 
-/* Print address ADDR on STREAM.  */
+/* Print address ADDR on STREAM.  USE_LOCAL means the same thing as for
+   print_longest.  */
 void
-print_address_numeric (addr, stream)
+print_address_numeric (addr, use_local, stream)
      CORE_ADDR addr;
+     int use_local;
      GDB_FILE *stream;
 {
   /* This assumes a CORE_ADDR can fit in a LONGEST.  Probably a safe
@@ -634,7 +636,7 @@ print_address (addr, stream)
      CORE_ADDR addr;
      GDB_FILE *stream;
 {
-  print_address_numeric (addr, stream);
+  print_address_numeric (addr, 1, stream);
   print_address_symbolic (addr, stream, asm_demangle, " ");
 }
 
@@ -655,7 +657,7 @@ print_address_demangle (addr, stream, do_demangle)
     }
   else if (addressprint)
     {
-      print_address_numeric (addr, stream);
+      print_address_numeric (addr, 1, stream);
       print_address_symbolic (addr, stream, do_demangle, " ");
     }
   else
@@ -983,7 +985,8 @@ address_info (exp, from_tty)
 	  fprintf_symbol_filtered (gdb_stdout, exp,
 				   current_language->la_language, DMGL_ANSI);
 	  printf_filtered ("\" is at ");
-	  print_address_numeric (SYMBOL_VALUE_ADDRESS (msymbol), gdb_stdout);
+	  print_address_numeric (SYMBOL_VALUE_ADDRESS (msymbol), 1,
+				 gdb_stdout);
 	  printf_filtered (" in a file compiled without debugging.\n");
 	}
       else
@@ -1007,7 +1010,7 @@ address_info (exp, from_tty)
 
     case LOC_LABEL:
       printf_filtered ("a label at address ");
-      print_address_numeric (SYMBOL_VALUE_ADDRESS (sym), gdb_stdout);
+      print_address_numeric (SYMBOL_VALUE_ADDRESS (sym), 1, gdb_stdout);
       break;
 
     case LOC_REGISTER:
@@ -1016,7 +1019,7 @@ address_info (exp, from_tty)
 
     case LOC_STATIC:
       printf_filtered ("static storage at address ");
-      print_address_numeric (SYMBOL_VALUE_ADDRESS (sym), gdb_stdout);
+      print_address_numeric (SYMBOL_VALUE_ADDRESS (sym), 1, gdb_stdout);
       break;
 
     case LOC_REGPARM:
@@ -1059,7 +1062,7 @@ address_info (exp, from_tty)
 
     case LOC_BLOCK:
       printf_filtered ("a function at address ");
-      print_address_numeric (BLOCK_START (SYMBOL_BLOCK_VALUE (sym)),
+      print_address_numeric (BLOCK_START (SYMBOL_BLOCK_VALUE (sym)), 1,
 			     gdb_stdout);
       break;
 
@@ -2075,9 +2078,9 @@ disassemble_command (arg, from_tty)
   else
     {
       printf_filtered ("from ");
-      print_address_numeric (low, gdb_stdout);
+      print_address_numeric (low, 1, gdb_stdout);
       printf_filtered (" to ");
-      print_address_numeric (high, gdb_stdout);
+      print_address_numeric (high, 1, gdb_stdout);
       printf_filtered (":\n");
     }
 

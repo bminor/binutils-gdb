@@ -101,10 +101,13 @@ FRAME selected_frame;
 
 int selected_frame_level;
 
-/* Nonzero means print the full filename and linenumber
-   when a frame is printed, and do so in a format programs can parse.  */
+/* Zero means do things normally; we are interacting directly with the
+   user.  One means print the full filename and linenumber when a
+   frame is printed, and do so in a format emacs18/emacs19.22 can
+   parse.  Two means print similar annotations, but in many more
+   cases and in a slightly different syntax.  */
 
-int frame_file_full_name = 0;
+int annotation_level = 0;
 
 
 struct print_stack_frame_args {
@@ -255,9 +258,14 @@ print_frame_info (fi, level, source, args)
 	  && (SYMBOL_VALUE_ADDRESS (msymbol) 
 	      > BLOCK_START (SYMBOL_BLOCK_VALUE (func))))
 	{
+#if 0
+	  /* There is no particular reason to think the line number
+	     information is wrong.  Someone might have just put in
+	     a label with asm() but left the line numbers alone.  */
 	  /* In this case we have no way of knowing the source file
 	     and line number, so don't print them.  */
 	  sal.symtab = 0;
+#endif
 	  /* We also don't know anything about the function besides
 	     its address and name.  */
 	  func = 0;
@@ -287,7 +295,7 @@ print_frame_info (fi, level, source, args)
       if (addressprint)
 	if (fi->pc != sal.pc || !sal.symtab)
 	  {
-	    print_address_numeric (fi->pc, gdb_stdout);
+	    print_address_numeric (fi->pc, 1, gdb_stdout);
 	    printf_filtered (" in ");
 	  }
       fprintf_symbol_filtered (gdb_stdout, funname ? funname : "??", funlang,
@@ -324,14 +332,14 @@ print_frame_info (fi, level, source, args)
     {
       int done = 0;
       int mid_statement = source < 0 && fi->pc != sal.pc;
-      if (frame_file_full_name)
+      if (annotation_level)
 	done = identify_source_line (sal.symtab, sal.line, mid_statement,
 				     fi->pc);
       if (!done)
 	{
 	  if (addressprint && mid_statement)
 	    {
-	      print_address_numeric (fi->pc, gdb_stdout);
+	      print_address_numeric (fi->pc, 1, gdb_stdout);
 	      printf_filtered ("\t");
 	    }
 	  print_source_lines (sal.symtab, sal.line, sal.line + 1, 0);
@@ -402,6 +410,22 @@ parse_frame_specification (frame_exp)
 	  /* find_relative_frame was successful */
 	  return fid;
 
+	/* If SETUP_ARBITRARY_FRAME is defined, then frame specifications
+	   take at least 2 addresses.  It is important to detect this case
+	   here so that "frame 100" does not give a confusing error message
+	   like "frame specification requires two addresses".  This of course
+	   does not solve the "frame 100" problem for machines on which
+	   a frame specification can be made with one address.  To solve
+	   that, we need a new syntax for a specifying a frame by address.
+	   I think the cleanest syntax is $frame(0x45) ($frame(0x23,0x45) for
+	   two args, etc.), but people might think that is too much typing,
+	   so I guess *0x23,0x45 would be a possible alternative (commas
+	   really should be used instead of spaces to delimit; using spaces
+	   normally works in an expression).  */
+#ifdef SETUP_ARBITRARY_FRAME
+	error ("No frame %d", args[0]);
+#endif
+
 	/* If (s)he specifies the frame with an address, he deserves what
 	   (s)he gets.  Still, give the highest one that matches.  */
 
@@ -416,9 +440,7 @@ parse_frame_specification (frame_exp)
 	    fid = tfid;
 	  
 	/* We couldn't identify the frame as an existing frame, but
-	   perhaps we can create one with a single argument.
-	   Fall through to default case; it's up to SETUP_ARBITRARY_FRAME
-	   to complain if it doesn't like a single arg.  */
+	   perhaps we can create one with a single argument.  */
       }
 
      default:
@@ -498,18 +520,18 @@ frame_info (addr_exp, from_tty)
   if (!addr_exp && selected_frame_level >= 0)
     {
       printf_filtered ("Stack level %d, frame at ", selected_frame_level);
-      print_address_numeric (FRAME_FP(frame), gdb_stdout);
+      print_address_numeric (FRAME_FP(frame), 1, gdb_stdout);
       printf_filtered (":\n");
     }
   else
     {
       printf_filtered ("Stack frame at ");
-      print_address_numeric (FRAME_FP(frame), gdb_stdout);
+      print_address_numeric (FRAME_FP(frame), 1, gdb_stdout);
       printf_filtered (":\n");
     }
   printf_filtered (" %s = ",
 		   reg_names[PC_REGNUM]);
-  print_address_numeric (fi->pc, gdb_stdout);
+  print_address_numeric (fi->pc, 1, gdb_stdout);
 
   wrap_here ("   ");
   if (funname)
@@ -524,7 +546,7 @@ frame_info (addr_exp, from_tty)
   puts_filtered ("; ");
   wrap_here ("    ");
   printf_filtered ("saved %s ", reg_names[PC_REGNUM]);
-  print_address_numeric (FRAME_SAVED_PC (frame), gdb_stdout);
+  print_address_numeric (FRAME_SAVED_PC (frame), 1, gdb_stdout);
   printf_filtered ("\n");
 
   {
@@ -539,7 +561,7 @@ frame_info (addr_exp, from_tty)
   if (calling_frame)
     {
       printf_filtered (" called by frame at ");
-      print_address_numeric (FRAME_FP (calling_frame), gdb_stdout);
+      print_address_numeric (FRAME_FP (calling_frame), 1, gdb_stdout);
     }
   if (fi->next && calling_frame)
     puts_filtered (",");
@@ -547,7 +569,7 @@ frame_info (addr_exp, from_tty)
   if (fi->next)
     {
       printf_filtered (" caller of frame at ");
-      print_address_numeric (fi->next->frame, gdb_stdout);
+      print_address_numeric (fi->next->frame, 1, gdb_stdout);
     }
   if (fi->next || calling_frame)
     puts_filtered ("\n");
@@ -569,7 +591,7 @@ frame_info (addr_exp, from_tty)
     else
       {
 	printf_filtered (" Arglist at ");
-	print_address_numeric (arg_list, gdb_stdout);
+	print_address_numeric (arg_list, 1, gdb_stdout);
 	printf_filtered (",");
 
 	FRAME_NUM_ARGS (numargs, fi);
@@ -594,7 +616,7 @@ frame_info (addr_exp, from_tty)
     else
       {
 	printf_filtered (" Locals at ");
-	print_address_numeric (arg_list, gdb_stdout);
+	print_address_numeric (arg_list, 1, gdb_stdout);
 	printf_filtered (",");
       }
   }
@@ -604,7 +626,7 @@ frame_info (addr_exp, from_tty)
   /* The sp is special; what's returned isn't the save address, but
      actually the value of the previous frame's sp.  */
   printf_filtered (" Previous frame's sp is ");
-  print_address_numeric (fsr.regs[SP_REGNUM], gdb_stdout);
+  print_address_numeric (fsr.regs[SP_REGNUM], 1, gdb_stdout);
   printf_filtered ("\n");
   count = 0;
   for (i = 0; i < NUM_REGS; i++)
@@ -616,7 +638,7 @@ frame_info (addr_exp, from_tty)
 	  puts_filtered (",");
 	wrap_here (" ");
 	printf_filtered (" %s at ", reg_names[i]);
-	print_address_numeric (fsr.regs[i], gdb_stdout);
+	print_address_numeric (fsr.regs[i], 1, gdb_stdout);
 	count++;
       }
   if (count)
@@ -826,7 +848,7 @@ print_block_frame_labels (b, have_default, stream)
 	  if (addressprint)
 	    {
 	      fprintf_filtered (stream, " ");
-	      print_address_numeric (SYMBOL_VALUE_ADDRESS (sym), stream);
+	      print_address_numeric (SYMBOL_VALUE_ADDRESS (sym), 1, stream);
 	    }
 	  fprintf_filtered (stream, " in file %s, line %d\n",
 			    sal.symtab->filename, sal.line);
@@ -1272,7 +1294,7 @@ return_command (retval_exp, from_tty)
   FRAME_ADDR selected_frame_addr;
   CORE_ADDR selected_frame_pc;
   FRAME frame;
-  value return_value = NULL;
+  value_ptr return_value = NULL;
 
   if (selected_frame == NULL)
     error ("No selected frame.");

@@ -144,7 +144,7 @@ memory_error (status, memaddr)
 	 was out of bounds. */
       error_begin ();
       printf_filtered ("Cannot access memory at address ");
-      print_address_numeric (memaddr, gdb_stdout);
+      print_address_numeric (memaddr, 1, gdb_stdout);
       printf_filtered (".\n");
       return_to_top_level (RETURN_ERROR);
     }
@@ -152,7 +152,7 @@ memory_error (status, memaddr)
     {
       error_begin ();
       printf_filtered ("Error accessing memory address ");
-      print_address_numeric (memaddr, gdb_stdout);
+      print_address_numeric (memaddr, 1, gdb_stdout);
       printf_filtered (": %s.\n",
 			 safe_strerror (status));
       return_to_top_level (RETURN_ERROR);
