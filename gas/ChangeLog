@@ -1,3 +1,7 @@
+2001-10-08  Aldy Hernandez  <aldyh@redhat.com>
+
+	* doc/arm/c-arm.texi (ARM Options): Add arm9e documentation.
+
 2001-10-08  Tom Rix <trix@redhat.com>
 
 	* config/tc-ppc (ppc_bf, ppc_biei) : Set first .bi lineno value to 

@@ -34,9 +34,13 @@
 @cindex @code{-marm} command line option, ARM
 @item -marm@code{[2|250|3|6|60|600|610|620|7|7m|7d|7dm|7di|7dmi|70|700|700i|710|710c|7100|7500|7500fe|7tdmi|8|810|9|9tdmi|920|strongarm|strongarm110|strongarm1100]}
 @itemx -mxscale
+@itemx -marm9e
 This option specifies the target processor.  The assembler will issue an
 error message if an attempt is made to assemble an instruction which
 will not execute on the target processor.
+
+The option @code{-marm9e} specifies that the target processor is the
+Cirrus ARM processor with the Maverick DSP co-processor.
 
 @cindex @code{-marmv} command line option, ARM
 @item -marmv@code{[2|2a|3|3m|4|4t|5|5t|5te]}
