@@ -1,3 +1,7 @@
+2004-01-12  Alan Modra  <amodra@bigpond.net.au>
+
+	* dwarf2.c: Convert to C90, remove unneeded casts and prototypes.
+
 2004-01-11  Kazu Hirata  <kazu@cs.umass.edu>
 
 	* elf32-h8300.c: Fix formatting.
