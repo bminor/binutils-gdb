@@ -168,12 +168,7 @@ read_begin ()
 
 /* set up pseudo-op tables */
 
-struct hash_control *po_hash = NULL; /* use before set up: NULL->address error */
-
-#ifdef DONTDEF
-void s_gdbline (), s_gdblinetab ();
-void s_gdbbeg (), s_gdbblock (), s_gdbend (), s_gdbsym ();
-#endif
+struct hash_control *po_hash;
 
 static const pseudo_typeS potable[] =
 {
@@ -334,12 +329,6 @@ read_a_source_file (name)
   register int temp;
   /* register struct frag * fragP; JF unused *//* a frag we just made */
   pseudo_typeS *pop;
-#ifdef DONTDEF
-  void gdb_block_beg ();
-  void gdb_block_position ();
-  void gdb_block_end ();
-  void gdb_symbols_fixup ();
-#endif
 
   buffer = input_scrub_new_file (name);
 
@@ -828,11 +817,7 @@ s_data ()
   register int temp;
 
   temp = get_absolute_expression ();
-#ifdef MANY_SEGMENTS
-  subseg_new (SEG_E1, (subsegT) temp);
-#else
-  subseg_new (SEG_DATA, (subsegT) temp);
-#endif
+  subseg_set (data_section, (subsegT) temp);
 
 #ifdef VMS
   const_flag = 0;
@@ -877,9 +862,7 @@ s_fill ()
 	  temp_fill = get_absolute_expression ();
 	}
     }
-  /*
-	 * This is to be compatible with BSD 4.2 AS, not for any rational reason.
-	 */
+  /* This is to be compatible with BSD 4.2 AS, not for any rational reason.  */
 #define BSD_FILL_SIZE_CROCK_8 (8)
   if (temp_size > BSD_FILL_SIZE_CROCK_8)
     {
@@ -900,138 +883,24 @@ s_fill ()
   if (temp_size && !need_pass_2)
     {
       p = frag_var (rs_fill, (int) temp_size, (int) temp_size, (relax_substateT) 0, (symbolS *) 0, temp_repeat, (char *) 0);
-      bzero (p, (int) temp_size);
-      /*
- * The magic number BSD_FILL_SIZE_CROCK_4 is from BSD 4.2 VAX flavoured AS.
- * The following bizzare behaviour is to be compatible with above.
- * I guess they tried to take up to 8 bytes from a 4-byte expression
- * and they forgot to sign extend. Un*x Sux.
- */
+      memset (p, 0, (int) temp_size);
+      /* The magic number BSD_FILL_SIZE_CROCK_4 is from BSD 4.2 VAX
+       * flavoured AS.  The following bizzare behaviour is to be
+       * compatible with above.  I guess they tried to take up to 8
+       * bytes from a 4-byte expression and they forgot to sign
+       * extend. Un*x Sux. */
 #define BSD_FILL_SIZE_CROCK_4 (4)
-      md_number_to_chars (p, temp_fill, temp_size > BSD_FILL_SIZE_CROCK_4 ? BSD_FILL_SIZE_CROCK_4 : (int) temp_size);
-      /*
- * Note: .fill (),0 emits no frag (since we are asked to .fill 0 bytes)
- * but emits no error message because it seems a legal thing to do.
- * It is a degenerate case of .fill but could be emitted by a compiler.
- */
+      md_number_to_chars (p, temp_fill,
+			  (temp_size > BSD_FILL_SIZE_CROCK_4
+			   ? BSD_FILL_SIZE_CROCK_4
+			   : (int) temp_size));
+      /* Note: .fill (),0 emits no frag (since we are asked to .fill 0 bytes)
+       * but emits no error message because it seems a legal thing to do.
+       * It is a degenerate case of .fill but could be emitted by a compiler.
+       */
     }
   demand_empty_rest_of_line ();
 }
-
-#ifdef DONTDEF
-void
-s_gdbbeg ()
-{
-  register int temp;
-
-  temp = get_absolute_expression ();
-  if (temp < 0)
-    as_warn ("Block number <0. Ignored.");
-  else if (flagseen['G'])
-    gdb_block_beg ((long) temp, frag_now, (long) (obstack_next_free (&frags) - frag_now->fr_literal));
-  demand_empty_rest_of_line ();
-}
-
-void
-s_gdbblock ()
-{
-  register int position;
-  int temp;
-
-  if (get_absolute_expression_and_terminator (&temp) != ',')
-    {
-      as_bad ("expected comma before position in .gdbblock");
-      --input_line_pointer;
-      ignore_rest_of_line ();
-      return;
-    }
-  position = get_absolute_expression ();
-  if (flagseen['G'])
-    gdb_block_position ((long) temp, (long) position);
-  demand_empty_rest_of_line ();
-}
-
-void
-s_gdbend ()
-{
-  register int temp;
-
-  temp = get_absolute_expression ();
-  if (temp < 0)
-    as_warn ("Block number <0. Ignored.");
-  else if (flagseen['G'])
-    gdb_block_end ((long) temp, frag_now, (long) (obstack_next_free (&frags) - frag_now->fr_literal));
-  demand_empty_rest_of_line ();
-}
-
-void
-s_gdbsym ()
-{
-  register char *name, *p;
-  register char c;
-  register symbolS *symbolP;
-  register int temp;
-
-  name = input_line_pointer;
-  c = get_symbol_end ();
-  p = input_line_pointer;
-  symbolP = symbol_find_or_make (name);
-  *p = c;
-  SKIP_WHITESPACE ();
-  if (*input_line_pointer != ',')
-    {
-      as_bad ("Expected comma after name");
-      ignore_rest_of_line ();
-      return;
-    }
-  input_line_pointer++;
-  if ((temp = get_absolute_expression ()) < 0)
-    {
-      as_bad ("Bad GDB symbol file offset (%d.) <0! Ignored.", temp);
-      ignore_rest_of_line ();
-      return;
-    }
-  if (flagseen['G'])
-    gdb_symbols_fixup (symbolP, (long) temp);
-  demand_empty_rest_of_line ();
-}
-
-void
-s_gdbline ()
-{
-  int file_number, lineno;
-
-  if (get_absolute_expression_and_terminator (&file_number) != ',')
-    {
-      as_bad ("expected comman after filenum in .gdbline");
-      ignore_rest_of_line ();
-      return;
-    }
-  lineno = get_absolute_expression ();
-  if (flagseen['G'])
-    gdb_line (file_number, lineno);
-  demand_empty_rest_of_line ();
-}
-
-
-void
-s_gdblinetab ()
-{
-  int file_number, offset;
-
-  if (get_absolute_expression_and_terminator (&file_number) != ',')
-    {
-      as_bad ("expected comma after filenum in .gdblinetab");
-      ignore_rest_of_line ();
-      return;
-    }
-  offset = get_absolute_expression ();
-  if (flagseen['G'])
-    gdb_line_tab (file_number, offset);
-  demand_empty_rest_of_line ();
-}
-
-#endif
 
 void 
 s_globl ()
@@ -1062,10 +931,9 @@ s_globl ()
 
 void 
 s_lcomm (needs_align)
-     int needs_align;		/* 1 if this was a ".bss" directive, which may require
-			 *	a 3rd argument (alignment).
-			 * 0 if it was an ".lcomm" (2 args only)
-			 */
+     /* 1 if this was a ".bss" directive, which may require a 3rd argument
+	(alignment); 0 if it was an ".lcomm" (2 args only)  */
+     int needs_align;
 {
   register char *name;
   register char c;
@@ -1130,12 +998,7 @@ s_lcomm (needs_align)
 	  align = 0;
 	  as_warn ("Alignment negative. 0 assumed.");
 	}
-#ifdef MANY_SEGMENTS
-#define SEG_BSS SEG_E2
-      record_alignment (SEG_E2, align);
-#else
-      record_alignment (SEG_BSS, align);
-#endif
+      record_alignment (bss_section, align);
     }				/* if needs align */
 
   *p = 0;
@@ -1147,19 +1010,19 @@ s_lcomm (needs_align)
        S_GET_OTHER (symbolP) == 0 &&
        S_GET_DESC (symbolP) == 0 &&
 #endif /* OBJ_AOUT or OBJ_BOUT */
-       (S_GET_SEGMENT (symbolP) == SEG_BSS
+       (S_GET_SEGMENT (symbolP) == bss_section
 	|| (!S_IS_DEFINED (symbolP) && S_GET_VALUE (symbolP) == 0)))
     {
       char *p;
       segT current_seg = now_seg;
       subsegT current_subseg = now_subseg;
 
-      subseg_new (SEG_BSS, 1);
+      subseg_new (bss_section, 1);
 
       if (align)
 	frag_align (align, 0);
 					/* detach from old frag	*/
-      if (S_GET_SEGMENT (symbolP) == SEG_BSS)
+      if (S_GET_SEGMENT (symbolP) == bss_section)
 	symbolP->sy_frag->fr_symbol = NULL;
 
       symbolP->sy_frag = frag_now;
@@ -1167,13 +1030,12 @@ s_lcomm (needs_align)
 		    temp, (char *)0);
       *p = 0;
 
-      S_SET_SEGMENT (symbolP, SEG_BSS);
+      S_SET_SEGMENT (symbolP, bss_section);
 
 #ifdef OBJ_COFF
       /* The symbol may already have been created with a preceding
-		 * ".globl" directive -- be careful not to step on storage
-		 * class in that case.  Otherwise, set it to static.
-		 */
+         ".globl" directive -- be careful not to step on storage class
+         in that case.  Otherwise, set it to static. */
       if (S_GET_STORAGE_CLASS (symbolP) != C_EXT)
 	{
 	  S_SET_STORAGE_CLASS (symbolP, C_STAT);
@@ -1245,19 +1107,18 @@ s_lsym ()
   *p = 0;
   symbolP = symbol_find_or_make (name);
 
-  /* FIXME-SOON I pulled a (&& symbolP->sy_other == 0
-	   && symbolP->sy_desc == 0) out of this test
-	   because coff doesn't have those fields, and I
-	   can't see when they'd ever be tripped.  I don't
-	   think I understand why they were here so I may
-	   have introduced a bug. As recently as 1.37 didn't
-	   have this test anyway.  xoxorich. */
+  /* FIXME-SOON I pulled a (&& symbolP->sy_other == 0 &&
+     symbolP->sy_desc == 0) out of this test because coff doesn't have
+     those fields, and I can't see when they'd ever be tripped.  I
+     don't think I understand why they were here so I may have
+     introduced a bug. As recently as 1.37 didn't have this test
+     anyway.  xoxorich. */
 
   if (S_GET_SEGMENT (symbolP) == SEG_UNKNOWN
       && S_GET_VALUE (symbolP) == 0)
     {
-      /* The name might be an undefined .global symbol; be
-		   sure to keep the "external" bit. */
+      /* The name might be an undefined .global symbol; be sure to
+	 keep the "external" bit. */
       S_SET_SEGMENT (symbolP, segment);
       S_SET_VALUE (symbolP, (valueT) (exp.X_add_number));
     }
@@ -1320,10 +1181,10 @@ s_set ()
   register symbolS *symbolP;
 
   /*
-	 * Especial apologies for the random logic:
-	 * this just grew, and could be parsed much more simply!
-	 * Dean in haste.
-	 */
+   * Especial apologies for the random logic:
+   * this just grew, and could be parsed much more simply!
+   * Dean in haste.
+   */
   name = input_line_pointer;
   delim = get_symbol_end ();
   end_name = input_line_pointer;
