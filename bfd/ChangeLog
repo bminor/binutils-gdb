@@ -1,3 +1,10 @@
+2003-03-01  Alan Modra  <amodra@bigpond.net.au>
+
+	* bfd-in.h (_bfd): Don't define.
+	* bfd.c: Rename occurrences of "struct _bfd" to "struct bfd".
+	* syms.c: Likewise.
+	* bfd-in2.h: Regenerate.
+
 2003-02-27  Richard Henderson  <rth@redhat.com>
 
 	* elfxx-ia64.c (struct elfNN_ia64_dyn_sym_info): Add want_gotx;

@@ -65,7 +65,7 @@ CODE_FRAGMENT
 .
 .  {* The caching routines use these to maintain a
 .     least-recently-used list of BFDs.  *}
-.  struct _bfd *lru_prev, *lru_next;
+.  struct bfd *lru_prev, *lru_next;
 .
 .  {* When a file is closed by the caching routines, BFD retains
 .     state information on the file here...  *}
@@ -139,13 +139,13 @@ CODE_FRAGMENT
 .
 .  {* Stuff only useful for archives.  *}
 .  PTR arelt_data;
-.  struct _bfd *my_archive;     {* The containing archive BFD.  *}
-.  struct _bfd *next;           {* The next BFD in the archive.  *}
-.  struct _bfd *archive_head;   {* The first BFD in the archive.  *}
+.  struct bfd *my_archive;      {* The containing archive BFD.  *}
+.  struct bfd *next;            {* The next BFD in the archive.  *}
+.  struct bfd *archive_head;    {* The first BFD in the archive.  *}
 .  bfd_boolean has_armap;
 .
 .  {* A chain of BFD structures involved in a link.  *}
-.  struct _bfd *link_next;
+.  struct bfd *link_next;
 .
 .  {* A field used by _bfd_generic_link_add_archive_symbols.  This will
 .     be used only for archive elements.  *}

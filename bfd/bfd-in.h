@@ -70,9 +70,6 @@ extern "C" {
 
 /* Forward declaration.  */
 typedef struct bfd bfd;
-/* For backward compatibility.  Keep code that was using "struct
-   _bfd" working.  */
-#define _bfd bfd
 
 /* Boolean type used in bfd.  Too many systems define their own
    versions of "boolean" for us to safely typedef a "boolean" of

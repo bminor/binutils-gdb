@@ -192,7 +192,7 @@ CODE_FRAGMENT
 .     instead, except that some symbols point to the global sections
 .     bfd_{abs,com,und}_section.  This could be fixed by making
 .     these globals be per-bfd (or per-target-flavor).  FIXME.  *}
-.  struct _bfd *the_bfd; {* Use bfd_asymbol_bfd(sym) to access this field.  *}
+.  struct bfd *the_bfd; {* Use bfd_asymbol_bfd(sym) to access this field.  *}
 .
 .  {* The text of the symbol. The name is left alone, and not copied; the
 .     application may not alter it.  *}
