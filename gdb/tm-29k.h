@@ -91,7 +91,7 @@ CORE_ADDR skip_prologue ();
    This is often the number of bytes in BREAKPOINT
    but not always.  */
 
-#define DECR_PC_AFTER_BREAK 4
+#define DECR_PC_AFTER_BREAK 0
 
 /* Nonzero if instruction at PC is a return instruction.
    On the 29k, this is a "jmpi l0" instruction.  */
