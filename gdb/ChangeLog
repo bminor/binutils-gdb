@@ -3,7 +3,7 @@ Fri Nov  3 12:30:43 1995  Fred Fish  <fnf@cygnus.com>
 	* Makefile.in (COMMON_OBS): Use corefile.o rather than core.o
 	* core.c:  Rename to corefile.c.
 	* config/pyr/tm-pyr.h, umax-xdep.c, sun386-nat.c, pyr-xdep.c,
-	* Makefile.in (SFILES), gould-xdep.c, coredep.c, armtdep.c,
+	Makefile.in (SFILES), gould-xdep.c, coredep.c, armtdep.c,
  	arm-xdep.c, altos-xdep.c: Change core.c references to corefile.c.
 
  	From Graham Stoney <greyham@research.canon.oz.au>.
