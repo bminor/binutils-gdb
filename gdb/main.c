@@ -49,12 +49,6 @@ int display_time;
 
 int display_space;
 
-/* Whether this is the async version or not.  The async version is
-   invoked on the command line with the -nw --async options.  In this
-   version, the usual command_loop is substituted by and event loop which
-   processes UI events asynchronously. */
-int event_loop_p = 1;
-
 /* The selected interpreter.  This will be used as a set command
    variable, so it should always be malloc'ed - since
    do_setshow_command will free it. */
@@ -253,8 +247,6 @@ captured_main (void *data)
     };
     static struct option long_options[] =
     {
-      {"async", no_argument, &event_loop_p, 1},
-      {"noasync", no_argument, &event_loop_p, 0},
 #if defined(TUI)
       {"tui", no_argument, 0, OPT_TUI},
 #endif

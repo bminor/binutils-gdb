@@ -1,5 +1,13 @@
 2004-07-16  Andrew Cagney  <cagney@gnu.org>
 
+	* defs.h (event_loop_p): Replace variable declaration with macro,
+	always 1.
+	* main.c (captured_main): Delete options "-async" and "-noasync".
+	(event_loop_p): Delete variable.
+	* NEWS: Mention that "-async" and "-noasync" were removed.
+
+2004-07-16  Andrew Cagney  <cagney@gnu.org>
+
 	* remote-m32r-sdi.c: Re-indent.
 
 2004-07-16  Jim Blandy  <jimb@redhat.com>

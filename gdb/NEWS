@@ -3,6 +3,11 @@
 
 *** Changes since GDB 6.1:
 
+* "-async" and "-noasync" options removed.
+
+Support for the broken "-noasync" option has been removed (it caused
+GDB to dump core).
+
 * New ``start'' command.
 
 This command runs the program until the begining of the main procedure.
