@@ -112,6 +112,9 @@ static void
 display_bfd PARAMS ((bfd *abfd));
 
 static void
+objdump_print_value PARAMS ((bfd_vma, FILE *));
+
+static void
 objdump_print_address PARAMS ((bfd_vma, struct disassemble_info *));
 
 static void
@@ -232,6 +235,7 @@ slurp_symtab (abfd)
   if (!(bfd_get_file_flags (abfd) & HAS_SYMS))
     {
       printf ("No symbols in \"%s\".\n", bfd_get_filename (abfd));
+      symcount = 0;
       return NULL;
     }
 
@@ -268,6 +272,7 @@ slurp_dynamic_symtab (abfd)
 	{
 	  fprintf (stderr, "%s: %s: not a dynamic object\n",
 		   program_name, bfd_get_filename (abfd));
+	  dynsymcount = 0;
 	  return NULL;
 	}
 
@@ -403,6 +408,22 @@ compare_relocs (ap, bp)
     return 0;
 }
 
+/* Print VMA to STREAM with no leading zeroes.  */
+
+static void
+objdump_print_value (vma, stream)
+     bfd_vma vma;
+     FILE *stream;
+{
+  char buf[30];
+  char *p;
+
+  sprintf_vma (buf, vma);
+  for (p = buf; *p == '0'; ++p)
+    ;
+  fprintf (stream, "%s", p);
+}
+
 /* Print VMA symbolically to INFO if possible.  */
 
 static void
@@ -504,7 +525,7 @@ objdump_print_address (vma, info)
 	    || ((aux->abfd->flags & HAS_RELOC) != 0
 		&& vma >= bfd_get_section_vma (aux->abfd, aux->sec)
 		&& vma < (bfd_get_section_vma (aux->abfd, aux->sec)
-			  + bfd_get_section_size_before_reloc (aux->sec)))))
+			  + bfd_section_size (aux->abfd, aux->sec)))))
       {
 	for (i = thisplace + 1; i < sorted_symcount; i++)
 	  {
@@ -539,25 +560,47 @@ objdump_print_address (vma, info)
 		  }
 	      }
 	  }
+
+	if (sorted_syms[thisplace]->section != aux->sec
+	    && (aux->require_sec
+		|| ((aux->abfd->flags & HAS_RELOC) != 0
+		    && vma >= bfd_get_section_vma (aux->abfd, aux->sec)
+		    && vma < (bfd_get_section_vma (aux->abfd, aux->sec)
+			      + bfd_section_size (aux->abfd, aux->sec)))))
+	  {
+	    bfd_vma secaddr;
+
+	    fprintf (info->stream, " <%s",
+		     bfd_get_section_name (aux->abfd, aux->sec));
+	    secaddr = bfd_get_section_vma (aux->abfd, aux->sec);
+	    if (vma < secaddr)
+	      {
+		fprintf (info->stream, "-");
+		objdump_print_value (secaddr - vma, info->stream);
+	      }
+	    else if (vma > secaddr)
+	      {
+		fprintf (info->stream, "+");
+		objdump_print_value (vma - secaddr, info->stream);
+	      }
+	    fprintf (info->stream, ">");
+	    return;
+	  }
       }
   }
 
   fprintf (info->stream, " <%s", sorted_syms[thisplace]->name);
   if (bfd_asymbol_value (sorted_syms[thisplace]) > vma)
     {
-      char buf[30], *p = buf;
-      sprintf_vma (buf, bfd_asymbol_value (sorted_syms[thisplace]) - vma);
-      while (*p == '0')
-	p++;
-      fprintf (info->stream, "-%s", p);
+      fprintf (info->stream, "-");
+      objdump_print_value (bfd_asymbol_value (sorted_syms[thisplace]) - vma,
+			   info->stream);
     }
   else if (vma > bfd_asymbol_value (sorted_syms[thisplace]))
     {
-      char buf[30], *p = buf;
-      sprintf_vma (buf, vma - bfd_asymbol_value (sorted_syms[thisplace]));
-      while (*p == '0')
-	p++;
-      fprintf (info->stream, "+%s", p);
+      fprintf (info->stream, "+");
+      objdump_print_value (vma - bfd_asymbol_value (sorted_syms[thisplace]),
+			   info->stream);
     }
   fprintf (info->stream, ">");
 }
@@ -980,6 +1023,7 @@ disassemble_data (abfd)
       if (relbuf != NULL)
 	free (relbuf);
     }
+  free (sorted_syms);
 }
 
 
@@ -1276,6 +1320,16 @@ display_bfd (abfd)
     dump_data (abfd);
   if (disassemble)
     disassemble_data (abfd);
+  if (syms)
+    {
+      free (syms);
+      syms = NULL;
+    }
+  if (dynsyms)
+    {
+      free (dynsyms);
+      dynsyms = NULL;
+    }
 }
 
 static void
@@ -1479,11 +1533,11 @@ dump_relocs (abfd)
       else if ((a->flags & SEC_RELOC) == 0)
 	continue;
 
-      printf ("RELOCATION RECORDS FOR [%s]:", a->name);
-
       relsize = bfd_get_reloc_upper_bound (abfd, a);
       if (relsize < 0)
 	bfd_fatal (bfd_get_filename (abfd));
+
+      printf ("RELOCATION RECORDS FOR [%s]:", a->name);
 
       if (relsize == 0)
 	{
@@ -1518,11 +1572,11 @@ dump_dynamic_relocs (abfd)
   arelent **relpp;
   long relcount;
 
-  printf ("DYNAMIC RELOCATION RECORDS");
-
   relsize = bfd_get_dynamic_reloc_upper_bound (abfd);
   if (relsize < 0)
     bfd_fatal (bfd_get_filename (abfd));
+
+  printf ("DYNAMIC RELOCATION RECORDS");
 
   if (relsize == 0)
     {

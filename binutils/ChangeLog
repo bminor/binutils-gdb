@@ -1,3 +1,10 @@
+Mon Oct 30 14:24:18 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* objdump.c (objdump_print_value): New static function.
+	(objdump_print_address): Use it.  If we need the right section for
+	the symbol, and we can't find it, print an offset from the section
+	rather than using a symbol from some other section.
+
 Thu Oct 26 10:23:14 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* dlltool.c (no_idata4, no_idata5): New.
