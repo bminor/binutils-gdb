@@ -31,7 +31,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
  Hacked for BFDness by steve chamberlain
 
- This object module now supports the Hitachi H8/300 and the AMD 29k
+ This object module now supports the Hitachi H8/{3|5}00 and the AMD 29k
 
  sac@cygnus.com
 */
@@ -1887,7 +1887,7 @@ DEFUN_VOID (write_object_file)
 
   H_SET_STRING_SIZE (&headers, string_byte_count);
 
-#if !defined(TC_H8300) && !defined(TC_Z8K)
+#if !defined(TC_H8300) && !defined(TC_Z8K) 
   for (i = SEG_E0; i < SEG_UNKNOWN; i++)
     {
       fixup_mdeps (segment_info[i].frchainP->frch_root, &headers, i);

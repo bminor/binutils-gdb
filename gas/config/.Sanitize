@@ -36,6 +36,7 @@ coff_gnu.h
 cplus-dem.c
 ebmon29k.mt
 h8300.mt
+h8500.mt
 h8300hds.mt
 ho-ansi.h
 ho-decstation.h
@@ -84,6 +85,8 @@ tc-generic.c
 tc-generic.h
 tc-h8300.c
 tc-h8300.h
+tc-h8500.c
+tc-h8500.h
 tc-i386.c
 tc-i386.h
 tc-i860.c
@@ -139,7 +142,11 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.31  1992/12/30 20:34:14  ian
+# Revision 1.32  1993/02/04 20:47:35  sac
+# 	* config/{h8500.mt, tc-h8500.c, tc-h8500.h, obj-coffbfd.c,
+# 	obj-coffbfd.h}: support for the H8/500
+#
+# Revision 1.31  1992/12/30  20:34:14  ian
 # Wed Dec 30 10:18:57 1992  Ian Lance Taylor  (ian@cygnus.com)
 #
 # 	* app.c, config/tc-*.c: Don't include read.h, since it is already
