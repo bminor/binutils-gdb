@@ -82,6 +82,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #undef SIOCSPGRP
 #endif
 
+extern int Tktable_Init PARAMS ((Tcl_Interp *interp)); 
+
 static int No_Update = 0;
 static int load_in_progress = 0;
 static int in_fputs = 0;
@@ -2244,6 +2246,11 @@ gdbtk_init ( argv0 )
   if (Tix_Init(interp) != TCL_OK)
     error ("Tix_Init failed: %s", interp->result);
 
+  if (Tktable_Init(interp) != TCL_OK)
+    error ("Tktable_Init failed: %s", interp->result);
+  Tcl_StaticPackage(interp, "Tktable", Tktable_Init,
+		    (Tcl_PackageInitProc *) NULL);  
+  
 #ifdef __CYGWIN32__
   if (ide_create_messagebox_command (interp) != TCL_OK)
     error ("messagebox command initialization failed");

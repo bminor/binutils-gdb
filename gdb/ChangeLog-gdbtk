@@ -1,3 +1,7 @@
+Thu Jun  4 18:31:53 1998  Martin M. Hunt  <hunt@cygnus.com>
+
+	* gdbtk.c (gdbtk_init): Initialize tkTable.
+
 Thu Jun  4 10:15:03 1998  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* gdbtk.c: merged:
