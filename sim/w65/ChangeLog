@@ -1,0 +1,6 @@
+Tue Feb 28 17:31:36 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Use ../../bfd/hosts/std-host.h if specific
+	host unavailable.
+
+	* Started ChangeLog.

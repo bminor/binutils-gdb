@@ -25,6 +25,7 @@ Do-first:
 
 Things-to-keep:
 
+ChangeLog
 Makefile.in
 configure.in
 interp.c
