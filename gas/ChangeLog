@@ -1,3 +1,8 @@
+2005-03-18  C Jaiprakash  <cjaiprakash@noida.hcltech.com>
+
+	* config/tc-m68k.c (m68k_elf_final_processing): Set file specific
+	flag for coldfire v4e.
+
 2005-03-17  Bob Wilson  <bob.wilson@acm.org>
 
 	* config/tc-xtensa.c (xg_apply_tentative_value): Rename to

@@ -7447,6 +7447,8 @@ void
 m68k_elf_final_processing (void)
 {
   /* Set file-specific flags if this is a cpu32 processor.  */
+  if (arch_coldfire_fpu (current_architecture))
+    elf_elfheader (stdoutput)->e_flags |= EF_CFV4E;
   if (cpu_of_arch (current_architecture) & cpu32)
     elf_elfheader (stdoutput)->e_flags |= EF_CPU32;
   else if ((cpu_of_arch (current_architecture) & m68000up)

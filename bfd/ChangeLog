@@ -1,3 +1,9 @@
+2005-03-18  C Jaiprakash  <cjaiprakash@noida.hcltech.com>
+
+	* elf32-m68k.c (elf_cfv4e_plt0_entry): plt entry for coldfire v4e. 
+	(elf_m68k_adjust_dynamic_symbol,elf_m68k_finish_dynamic_symbol,
+	 elf_m68k_finish_dynamic_sections): Use it.
+
 2005-03-17  Paul Brook <paul@codesourcery.com>
 	    Dan Jacobowitz <dan@codesourcery.com>
 	    Mark Mitchell  <mark@codesourcery.com>
