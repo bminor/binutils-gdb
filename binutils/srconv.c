@@ -26,12 +26,12 @@
 
    All debugging information is preserved */
 
-#include <bfd.h>
+#include "bfd.h"
 #include "bucomm.h"
 #include "sysroff.h"
 #include "coffgrok.h"
-#include <libiberty.h>
-#include <getopt.h>
+#include "libiberty.h"
+#include "getopt.h"
 
 #include "coff/internal.h"
 #include "../bfd/libcoff.h"

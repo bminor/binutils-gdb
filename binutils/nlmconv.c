@@ -37,12 +37,12 @@
 #include "bucomm.h"
 #include "safe-ctype.h"
 
-#include <ansidecl.h>
+#include "ansidecl.h"
 #include <time.h>
 #include <sys/stat.h>
 #include <sys/file.h>
 #include <assert.h>
-#include <getopt.h>
+#include "getopt.h"
 
 /* Internal BFD NLM header.  */
 #include "libnlm.h"

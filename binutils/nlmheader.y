@@ -27,7 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    This implementation is based on the description in the NetWare Tool
    Maker Specification manual, edition 1.0.  */
 
-#include <ansidecl.h>
+#include "ansidecl.h"
 #include <stdio.h>
 #include "safe-ctype.h"
 #include "bfd.h"

@@ -19,7 +19,7 @@
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-#include <ansidecl.h>
+#include "ansidecl.h"
 
 /* This is the header file for the windres program.  It defines
    structures and declares functions used within the program.  */

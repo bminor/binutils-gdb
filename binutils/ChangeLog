@@ -1,3 +1,17 @@
+2002-05-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* arlex.l: Use #include "" instead of <> for local header files.
+	* coffdump.c: Likewise.
+	* coffgrok.c: Likewise.
+	* nlmconv.c: Likewise.
+	* nlmheader.y: Likewise.
+	* srconv.c: Likewise.
+	* strings.c: Likewise.
+	* sysdump.c: Likewise.
+	* unwind-ia64.h: Likewise.
+	* windres.h: Likewise.
+	* winduni.h: Likewise.
+
 2002-05-24  Tom Rix  <trix@redhat.com>
 
 	* MAINTAINERS: Add self as the d10v maintainer.
