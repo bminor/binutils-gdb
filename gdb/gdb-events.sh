@@ -535,6 +535,7 @@ void _initialize_gdb_events (void);
 void
 _initialize_gdb_events (void)
 {
+struct cmd_list_element *c;
 #if WITH_GDB_EVENTS
 EOF
 function_list | while eval read $read
@@ -547,13 +548,21 @@ do
 done
 cat <<EOF
 #endif
-  add_show_from_set (add_set_cmd ("eventdebug",
+  c=add_set_cmd ("eventdebug",
                                   class_maintenance,
                                   var_zinteger,
                                   (char *)&gdb_events_debug,
                                   "Set event debugging.\n\\
-When non-zero, event/notify debugging is enabled.", &setlist),
-                     &showlist);
+When non-zero, event/notify debugging is enabled.", &setlist);
+  deprecate_cmd(c,"set debug event");
+  deprecate_cmd(add_show_from_set(c,&showlist),"show debug event");
+  add_show_from_set (add_set_cmd("event",
+  				 class_maintenance,
+				 var_zinteger,
+				 (char *)&gdb_events_debug,
+				 "Set event debugging.\n\\
+When non-zero, event/notify debugging is enabled.", &setdebuglist),&showdebuglist);
+
 }
 EOF
 
