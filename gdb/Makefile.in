@@ -168,8 +168,8 @@ install: $(INSTALL_TARGET) $(srcdir)/configure.man
 	$(INSTALL_DATA) $(srcdir)/configure.man $(man1dir)/configure.1
 
 
-install.all: install-dirs install-autoconf install-libiberty \
-	install-mmalloc install-texinfo install-bfd install-binutils \
+install.all: install-dirs install-autoconf install-texinfo \
+	install-mmalloc install-libiberty install-bfd install-binutils \
 	install-bison install-byacc install-flex install-ld \
 	install-gas install-gcc install-gprof install-libgcc \
 	install-readline install-glob install-gdb install-make \
