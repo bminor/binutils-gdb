@@ -1,5 +1,6 @@
 \input texinfo
 @setfilename _GDBP__.info
+@c $Id$
 @c
 @c NOTE: this manual is marked up for preprocessing with a collection
 @c of m4 macros called "pretex.m4".  If you see <_if__> and <_fi__>
@@ -77,9 +78,9 @@ _fi__(!_GENERIC__)
 @c Maybe crank this up to "Fourth Edition" when released at FSF
 @c @subtitle Third Edition---_GDBN__ version 4.0
 @subtitle _GDBN__ version 4.0
-@subtitle April 1991
-@author{Richard M. Stallman}
-@author{Roland H. Pesch --- Cygnus Support}
+@subtitle May 1991
+@author{Richard M. Stallman @hfill Free Software Foundation}
+@author{Roland H. Pesch @hfill Cygnus Support}
 @page
 
 @tex
@@ -919,9 +920,13 @@ _fi__(_VXWORKS__)
 @node Leaving _GDBN__,,,
 @section Leaving _GDBN__
 @cindex exiting _GDBN__
+@table @code
+@item quit
 @kindex quit
+@kindex q
 To exit _GDBN__, use the @samp{quit} command (abbreviated @samp{q}), or type
 an end-of-file character (usually @kbd{C-d}).  
+@end table
 
 @cindex interrupt
 An interrupt (often @kbd{C-c}) will not exit from _GDBN__, but rather
@@ -1003,8 +1008,10 @@ command @samp{help}.
 
 @table @code
 @item help
-Used with no arguments, @samp{help} displays a short list of named
-categories of commands:
+@itemx h
+@kindex h
+You can use @code{help} (abbreviated @code{h}) with no arguments to
+display a short list of named categories of commands:
 @smallexample
 (_GDBP__) help
 List of classes of commands:
@@ -1059,13 +1066,15 @@ appropriate context.  The listings under ``@code{info}'' and under
 @c FIXME...the 'aux' file with a pageno the xref can't find it.  
 
 @table @code
-@kindex info
 @item info
-This command is for describing the state of your program; for example,
-it can list the arguments given to your program (@samp{info args}), the
-registers currently in use (@samp{info registers}), or the breakpoints
-you've set (@samp{info breakpoints}).  You can get a complete list of
-the @code{info} sub-commands with @samp{help info}.
+@kindex info
+@kindex i
+This command (abbreviated @code{i}) is for describing the state of your
+program; for example, it can list the arguments given to your program
+(@samp{info args}), the registers currently in use (@samp{info
+registers}), or the breakpoints you've set (@samp{info breakpoints}).
+You can get a complete list of the @code{info} sub-commands with
+@samp{help info}.
 
 @kindex show
 @item show
@@ -1160,8 +1169,11 @@ option or use shorter file names.  Alternatively, use a version of GNU
 @section Starting your Program
 @cindex starting
 @cindex running
+@table @code
+@item run
+@itemx r
 @kindex run
-To start your program under _GDBN__, use the @samp{run} command.  
+Use the @samp{run} command to start your program under _GDBN__.
 _if__(_VXWORKS__)
 Except on VxWorks, you
 _fi__(_VXWORKS__)
@@ -1171,6 +1183,7 @@ _fi__(!_VXWORKS__)
 must first specify the program name with an argument to _GDBN__
 (@pxref{Invocation}), or using the @samp{file} or @samp{exec-file}
 command (@pxref{Files}).@refill
+@end table
 
 On targets that support processes, @samp{run} creates an inferior
 process and makes that process run your program.  On other targets,
@@ -1272,6 +1285,11 @@ front, so it will be searched sooner.  You can use the string
 This command will not repeat if you press @key{RET} a second time after
 using it once.
 
+@item show paths
+@kindex info paths
+Display the list of search paths for executables (the @code{PATH}
+environment variable).
+
 @item show environment @var{varname}
 @kindex show environment
 Print the value of environment variable @var{varname} to be given to
@@ -1341,8 +1359,18 @@ Print _GDBN__'s working directory.
 @cindex i/o
 @cindex terminal
 @cindex controlling terminal
-By default, the program you run under _GDBN__ does input and output to the same
-terminal that _GDBN__ uses.
+By default, the program you run under _GDBN__ does input and output to
+the same terminal that _GDBN__ uses.  _GDBN__ switches the terminal to
+its own terminal modes to interact with you, but it records the terminal
+modes your program was using and switches back to them when you continue
+running your program.
+
+@table @code
+@item info terminal
+@kindex info terminal
+Displays _GDBN__'s recorded information about the terminal modes your
+program is using.
+@end table
 
 You can redirect the program's input and/or output using shell
 redirection with the @samp{run} command.  For example,
@@ -1411,6 +1439,8 @@ continue; you can modify storage.  If you would rather the process
 continue running, you may use the @samp{continue} command after
 attaching _GDBN__ to the process.
 
+@table @code
+@item detach
 @kindex detach
 When you have finished debugging the attached process, you can use the
 @samp{detach} command to release it from _GDBN__'s control.  Detaching
@@ -1419,11 +1449,12 @@ that process and _GDBN__ become completely independent once more, and you
 are ready to @samp{attach} another process or start one with @samp{run}.
 @samp{detach} will not repeat if you press @key{RET} again after using
 it once.
+@end table
 
 If you exit _GDBN__ or use the @samp{run} command while you have an attached
 process, you kill that process.  By default, you will be asked for
 confirmation if you try to do either of these things; you can control
-whether or not this happens by using the @samp{set caution} command
+whether or not this happens by using the @samp{set confirm} command
 (@pxref{Messages/Warnings}).
 
 @group
@@ -1461,6 +1492,19 @@ principal purpose of using a debugger is so that you can stop it before
 that point; or so that if the program runs into trouble you can
 investigate and find out why.
 
+Inside _GDBN__, your program may stop for any of several reasons, such
+as a signal, a breakpoint, or reaching a new line after a _GDBN__
+command such as @code{step}.  Usually, the messages shown by _GDBN__
+provide ample explanation of the status of your program---but you can
+also explicitly request this information at any time.
+
+@table @code
+@item info program
+@kindex info program
+Display information about the status of your program: whether it is
+running or not, what process it is, and why it stopped.
+@end table
+
 @node Breakpoints,,,
 @section Breakpoints
 
@@ -1482,7 +1526,7 @@ enable it again.
 @subsection Setting Breakpoints
 
 @kindex break
-@kindex watch
+@kindex b
 Breakpoints are set with the @samp{break} command (abbreviated @samp{b}).
 
 You have several ways to say where the breakpoint should go.
@@ -1594,8 +1638,8 @@ releases of _GDBN__ will use such hardware if it is available.
 @item watch @var{expr}
 Set a watchpoint for an expression.
 
-@kindex info watch
-@item info watch
+@kindex info watchpoints
+@item info watchpoints
 This command prints a list of watchpoints. 
 @end table
 
@@ -1612,7 +1656,7 @@ given point in time.
 @item catch @var{exceptions}
 @kindex catch
 
-Breakpoints can be set at active exception handlers by using the
+You can set breakpoints at active exception handlers by using the
 @samp{catch} command.  @var{exceptions} is a list of names of exceptions
 to catch.
 @end table
@@ -1702,10 +1746,12 @@ Delete any breakpoints set at or within the code of the specified line.
 @item delete breakpoints @var{bnums}@dots{}
 @itemx delete @var{bnums}@dots{}
 @itemx delete
-@kindex delete breakpoints
+@cindex delete breakpoints
 @kindex delete
+@kindex d
 Delete the breakpoints of the numbers specified as arguments.  If no
-argument is specified, delete all breakpoints.
+argument is specified, delete all breakpoints.  You can abbreviate this
+command as @samp{d}.
 @end table
 
 @node Disabling,,,
@@ -1748,10 +1794,12 @@ You can use the following commands to enable or disable a breakpoint:
 @itemx disable
 @kindex disable breakpoints
 @kindex disable
+@kindex dis
 Disable the specified breakpoints---or all breakpoints, if none are
 listed.  A disabled breakpoint has no effect but is not forgotten.  All
 options such as ignore-counts, conditions and commands are remembered in
-case the breakpoint is enabled again later.
+case the breakpoint is enabled again later.  You may abbreviate
+@code{disable} as @code{dis}.
 
 @item enable breakpoints @var{bnums}@dots{}
 @itemx enable @var{bnums}@dots{}
@@ -1950,6 +1998,7 @@ cont
 end
 @end example
 
+@cindex lost output
 One deficiency in the operation of automatically continuing breakpoints
 under Unix appears when your program uses raw mode for the terminal.
 _GDBN__ switches back to its own terminal modes (not raw) before executing
@@ -2014,6 +2063,7 @@ stepping command specifies.
 @table @code
 @item step
 @kindex step
+@kindex s
 Continue running the program until control reaches a different source
 line, then stop it and return control to the debugger.  This command is
 abbreviated @samp{s}.
@@ -2030,6 +2080,7 @@ breakpoint is reached or a signal not related to stepping occurs before
 
 @item next
 @kindex next
+@kindex n
 Continue to the next source line in the current stack frame.  Similar to
 @samp{step}, but any function calls appearing within the line of code
 are executed without stopping.  Execution stops when control reaches a
@@ -2054,6 +2105,8 @@ Contrast this with the @samp{return} command (@pxref{Returning}).
 
 @item until
 @kindex until
+@item u
+@kindex u
 Continue running until a source line past the current line, in the
 current stack frame, is reached.  This command is used to avoid single
 stepping through a loop more than once.  It is like the @samp{next}
@@ -2084,6 +2137,7 @@ instruction stepping, and hence is slower than @samp{until} with an
 argument.
 
 @item until @var{location}
+@item u @var{location}
 Continue running the program until either the specified location is
 reached, or the current (innermost) stack frame returns.  @var{location}
 is any of the forms of argument acceptable to @samp{break} (@pxref{Set
@@ -2186,8 +2240,8 @@ but to stop the program immediately whenever an error signal happens.
 You can change these settings with the @samp{handle} command.
 
 @table @code
-@item info signal
-@kindex info signal
+@item info signals
+@kindex info signals
 Print a table of all the kinds of signals and how _GDBN__ has been told to
 handle each one.  You can use this to see the signal numbers of all
 the defined types of signals.
@@ -2349,8 +2403,9 @@ Similar, but print only the outermost @var{n} frames.
 
 @kindex where
 @kindex info stack
-The names @samp{where} and @samp{info stack} are additional aliases
-for @samp{backtrace}.
+@kindex info s
+The names @code{where} and @code{info stack} (abbreviated @code{info s})
+are additional aliases for @code{backtrace}.
 
 Each line in the backtrace shows the frame number and the function name.
 The program counter value is also shown---unless you use @samp{set
@@ -2409,9 +2464,11 @@ that have existed longer.  @var{n} defaults to one.
 
 @item down @var{n}
 @kindex down
+@kindex do
 Move @var{n} frames down the stack.  For positive numbers @var{n}, this
 advances toward the innermost frame, to lower frame numbers, to frames
-that were created more recently.  @var{n} defaults to one.
+that were created more recently.  @var{n} defaults to one.  You may
+abbreviate @code{down} as @code{do}.
 @end table
 
 All of these commands end by printing some information on the frame that
@@ -2457,6 +2514,8 @@ argument, this command is used to select a stack frame (@pxref{Selection}).
 
 @item info frame
 @kindex info frame
+@itemx info f
+@kindex info f
 This command prints a verbose description of the selected stack frame,
 including the address of the frame, the addresses of the next frame down
 (called by this frame) and the next frame up (caller of this frame),
@@ -2467,6 +2526,7 @@ something has gone wrong that has made the stack format fail to fit
 the usual conventions.
 
 @item info frame @var{addr}
+@itemx info f @var{addr}
 Print a verbose description of the frame at address @var{addr},
 without selecting that frame.  The selected frame remains unchanged by
 this command.
@@ -2613,22 +2673,27 @@ Specifies the line containing the program address @var{address}.
 @node Search,,,
 @section Searching Source Files
 @cindex searching
-@kindex search
-@kindex forward-search
 @kindex reverse-search
 
 There are two commands for searching through the current source file for a
 regular expression.
 
+@table @code
+@item forward-search @var{regexp}
+@itemx search @var{regexp}
+@kindex search
+@kindex forward-search
 The command @samp{forward-search @var{regexp}} checks each line, starting
 with the one following the last line listed, for a match for @var{regexp}.
 It lists the line that is found.  You can abbreviate the command name
 as @samp{fo}.  The synonym @samp{search @var{regexp}} is also supported.
 
+@item reverse-search @var{regexp}
 The command @samp{reverse-search @var{regexp}} checks each line, starting
 with the one before the last line listed and going backward, for a match
 for @var{regexp}.  It lists the line that is found.  You can abbreviate
 this command as @samp{rev}.
+@end table
 
 @node Source Path,,,
 @section Specifying Source Directories
@@ -2717,6 +2782,7 @@ convenience variable @code{$_} (@pxref{Convenience Vars}).
 @kindex disasm
 @item disassemble
 @itemx disasm
+@c FIXME: "disasm" isn't currently in GDB.  Should it be?
 This specialized command is provided to dump a range of memory as
 machine instructions.  The default memory range is the function
 surrounding the program counter of the selected frame.  A single
@@ -2909,6 +2975,10 @@ Print as integer in unsigned decimal.
 
 @item o
 Print as integer in octal.
+
+@item t
+Print as integer in binary.  The letter @samp{t} stands for ``two'', as
+in base two.
 
 @item a
 Print as an address, both absolute in hex and as an offset from the
@@ -3179,19 +3249,24 @@ display expression once again.
 @cindex format options
 @cindex print settings
 _GDBN__ provides the following ways to control how arrays, structures,
-and symbols are printed.
+and symbols are printed.  
+
+@noindent
+These settings are useful for debugging programs in any language:
 
 @table @code
-@item set array-max @var{number-of-elements}
-@kindex set array-max
-If _GDBN__ is printing a large array, it will stop printing after it has
-printed the number of elements set by the @samp{set array-max} command.
-This limit also applies to the display of strings.
+@item set print address
+@item set print address on
+@kindex set print address
+_GDBN__ will print memory addresses in stack traces, structure values, pointer
+values, breakpoints, etc.  The default is on.
 
-@item show array-max
-@kindex show array-max
-Display the number of elements of a large array that _GDBN__ will print
-before losing patience.
+@item set print address off
+Do not print addresses.
+
+@item show print address
+@kindex show print address
+Show whether or not addresses are to be printed.
 
 @item set print array
 @itemx set print array on
@@ -3207,53 +3282,16 @@ Return to compressed format for arrays.
 Show whether compressed or pretty format is selected for displaying
 arrays. 
 
-@item set print demangle 
-@itemx set print demangle on 
-@kindex set print demangle
-Print C++ names in their source form rather than in the mangled form
-in which they are passed to the assembler and linker for type-safe linkage.
-The default is on.
+@item set print elements @var{number-of-elements}
+@kindex set print elements
+If _GDBN__ is printing a large array, it will stop printing after it has
+printed the number of elements set by the @samp{set print elements} command.
+This limit also applies to the display of strings.
 
-@item show print demangle
-@kindex show print demangle
-Show whether C++ names will be printed in mangled or demangled form.
-
-@item set print asm-demangle 
-@itemx set print asm-demangle on 
-@kindex set print asm-demangle
-Print C++ names in their source form rather than their mangled form, even
-in assembler code printouts such as instruction disassemblies.
-The default is off.
-
-@item show print asm-demangle
-@kindex show print asm-demangle
-Show whether C++ names in assembly listings will be printed in mangled
-or demangled form.
-
-@item set print vtbl 
-@itemx set print vtbl on 
-@kindex set print vtbl
-Pretty print C++ virtual function tables.  The default is off.
-
-@item set print vtbl off
-Do not pretty print C++ virtual function tables.
-
-@item show print vtbl
-@kindex show print vtbl
-Show whether C++ virtual function tables are pretty printed, or not.
-
-@item set print address
-@item set print address on
-@kindex set print address
-_GDBN__ will print memory addresses in stack traces, structure values, pointer
-values, breakpoints, etc.  The default is on.
-
-@item set print address off
-Do not print addresses.
-
-@item show print address
-@kindex show print address
-Show whether or not addresses are to be printed.
+@item show print elements
+@kindex show print elements
+Display the number of elements of a large array that _GDBN__ will print
+before losing patience.
 
 @item set print pretty on
 @kindex set print pretty
@@ -3285,6 +3323,19 @@ This is the default format.
 @item show print pretty
 @kindex show print pretty
 Show which format _GDBN__ will use to print structures.
+
+@item set print sevenbit-strings on
+Print using only seven-bit characters; if this option is set, 
+_GDBN__ will display any eight-bit characters (in strings or character
+values) using the notation @code{\}@var{nnn}.  For example, @kbd{M-a} is
+displayed as @code{\341}.
+
+@item set print sevenbit-strings off
+Print using either seven-bit or eight-bit characters, as required.  This
+is the default.
+
+@item show print sevenbit-strings
+Show whether or not _GDBN__ will print only seven-bit characters.
 
 @item set print union on
 @kindex set print union
@@ -3330,6 +3381,62 @@ and with @samp{set print union off} in effect it would print
 @smallexample
 $1 = @{it = Tree, form = @{...@}@}
 @end smallexample
+@end table
+
+@noindent
+These settings are of interest when debugging C++ programs:
+
+@table @code
+@item set print demangle 
+@itemx set print demangle on 
+@kindex set print demangle
+Print C++ names in their source form rather than in the mangled form
+in which they are passed to the assembler and linker for type-safe linkage.
+The default is on.
+
+@item show print demangle
+@kindex show print demangle
+Show whether C++ names will be printed in mangled or demangled form.
+
+@item set print asm-demangle 
+@itemx set print asm-demangle on 
+@kindex set print asm-demangle
+Print C++ names in their source form rather than their mangled form, even
+in assembler code printouts such as instruction disassemblies.
+The default is off.
+
+@item show print asm-demangle
+@kindex show print asm-demangle
+Show whether C++ names in assembly listings will be printed in mangled
+or demangled form.
+
+@item set print object
+@itemx set print object on
+@kindex set print object
+When displaying a pointer to an object, identify the @emph{actual}
+(derived) type of the object rather than the @emph{declared} type, using
+the virtual function table.
+
+@item set print object off
+Display only the declared type of objects, without reference to the
+virtual function table.  This is the default setting.
+
+@item show print object
+@kindex show print object
+Show whether actual, or declared, object types will be displayed.
+
+@item set print vtbl 
+@itemx set print vtbl on 
+@kindex set print vtbl
+Pretty print C++ virtual function tables.  The default is off.
+
+@item set print vtbl off
+Do not pretty print C++ virtual function tables.
+
+@item show print vtbl
+@kindex show print vtbl
+Show whether C++ virtual function tables are pretty printed, or not.
+
 @end table
 
 @node Value History,,,
@@ -3555,6 +3662,24 @@ not allowed when other stack frames are selected.  (To pop entire frames
 off the stack, regardless of machine architecture, use @samp{return};
 @pxref{Returning}.)
 
+@node Floating Point Hardware,,,
+@section Floating Point Hardware
+@cindex floating point
+Depending on the host machine architecture, _GDBN__ may be able to give
+you more information about the status of the floating point hardware.
+
+@table @code
+@item info float
+@kindex info float
+If available, provides hardware-dependent information about the floating
+point unit.  The exact contents and layout vary depending on the
+floating point chip.
+@end table
+@c FIXME: this is a cop-out.  Try to get examples, explanations.  Only
+@c FIXME...supported currently on arm's and 386's.  Mark properly with 
+@c FIXME... m4 macros to isolate general statements from hardware-dep, 
+@c FIXME... at that point.
+
 @node Symbols,,,
 @chapter Examining the Symbol Table
 
@@ -3615,10 +3740,32 @@ type = struct complex {
 }
 @end example
 
+@item info types @var{regexp}
+@itemx info types
+@kindex info types 
+Print a brief description of all types whose name matches @var{regexp}
+(or all types in your program, if you supply no argument).  Each
+complete typename is matched as though it were a complete line; thus,
+@samp{i type value} gives information on all types in your program whose
+name includes the string @samp{value}, but @samp{i type ^value$} gives
+information only on types whose complete name is @samp{value}.
+
+This command differs from @code{ptype} in two ways: first, like
+@code{whatis}, it does not print a detailed description; second, it
+lists all source files where a type is defined.
+
+@item info source
+@kindex info source
+Show the name of the current source file---that is, the source file for
+the function containing the current point of execution.
+
 @item info sources
 @kindex info sources
-Print the names of all source files in the program for which there
-is debugging information.
+Print the names of all source files in the program for which there is
+debugging information, organized into two lists: those for which symbols
+have been read in, and those for which symbols will be read in on
+demand.
+@c FIXME: above passive AND awkward!
 
 @item info functions
 @kindex info functions
@@ -4183,8 +4330,8 @@ with, process numbers, and baud rates.
 The @samp{target} command will not repeat if you press @key{RET} again
 after executing the command.
 
-@item help targets
-@kindex help targets
+@item help target
+@kindex help target
 Displays the names of all targets available.  To display targets
 currently selected, use either @samp{info target} or @samp{info files}
 (@pxref{Files}).
@@ -4353,9 +4500,9 @@ Show whether command line editing is enabled.
 @section Command History
 @cindex history substitution
 @cindex history file
-@kindex set history file
-@item set history file @var{filename}
-Set the name of the _GDBN__ command history file to @var{filename}.  This is
+@kindex set history filename
+@item set history filename @var{fname}
+Set the name of the _GDBN__ command history file to @var{fname}.  This is
 the file from which _GDBN__ will read an initial command history
 list or to which it will write this list when it exits.  This list is
 accessed through history expansion or through the history
@@ -4363,14 +4510,14 @@ command editing characters listed below.  This file defaults to the
 value of the environment variable @code{GDBHISTFILE}, or to
 @file{./.gdb_history} if this variable is not set.
 
-@cindex history write
-@kindex set history write
-@item set history write
-@itemx set history write on
+@cindex history save
+@kindex set history save
+@item set history save
+@itemx set history save on
 Record command history in a file, whose name may be specified with the
-@samp{set history file} command.  By default, this option is disabled.
+@samp{set history filename} command.  By default, this option is disabled.
 
-@item set history write off
+@item set history save off
 Stop recording command history in a file.
 
 @cindex history size
@@ -4416,8 +4563,8 @@ or @samp{vi} may wish to read it.
 @group
 @kindex show history
 @item show history
-@itemx show history file
-@itemx show history write
+@itemx show history filename
+@itemx show history save
 @itemx show history size
 @itemx show history expansion
 These commands display the state of the _GDBN__ history parameters.
@@ -4561,9 +4708,9 @@ complaints from being suppressed.
 Displays how many symbol complaints _GDBN__ is permitted to produce.
 @end table
 
-By default, _GDBN__ is cautious, and asks what sometimes seem to be a lot of
-stupid questions.  For example, if you try to run a program which is
-already running:
+By default, _GDBN__ is cautious, and asks what sometimes seem to be a
+lot of stupid questions to confirm certain commands.  For example, if
+you try to run a program which is already running:
 @example
 
 (_GDBP__) run
@@ -4575,18 +4722,19 @@ If you're willing to unflinchingly face the consequences of your own
 commands, you can disable this ``feature'':
 
 @table @code
-@kindex set caution
+@kindex set confirm
 @cindex flinching
+@cindex confirmation
 @cindex stupid questions
-@item set caution off
-Disables cautious questions.
+@item set confirm off
+Disables confirmation requests.
 
-@item set caution on
-Enables cautious questions (the default).
+@item set confirm on
+Enables confirmation requests (the default).
 
-@item show caution
-@kindex show caution
-Displays state of cautious questions.
+@item show confirm
+@kindex show confirm
+Displays state of confirmation requests.
 @end table
 
 @node Sequences,,,
@@ -4626,6 +4774,18 @@ the documentation you have specified.
 You may use the @samp{document} command again to change the
 documentation of a command.  Redefining the command with @samp{define}
 does not change the documentation.
+
+@item help user-defined
+@kindex help user-defined
+List all user-defined commands, with the first line of the documentation
+(if any) for each.
+
+@item info user
+@itemx info user @var{commandname}
+@kindex info user
+Display the GDB commands used to define @var{commandname} (but not its
+documentation).  If no @var{commandname} is given, display the
+definitions for all user-defined commands.
 @end table
 
 User-defined commands do not take arguments.  When they are executed, the

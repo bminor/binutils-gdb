@@ -1,3 +1,13 @@
+Tue May 14 13:51:36 PDT 1991  Roland Pesch (pesch at cygint.cygnus.com)
+
+	* gdb.texinfo: Updated to include new or old undocumented
+	commands, at least the following (perhaps some others I forgot to
+	record): info f, info float, info path, info program, info s, info
+	set, info source, info terminal, info types, info user, set/show
+	print object.  
+	Also covered all recent GDB command renames for v4.
+
+
 Mon May 13 14:57:46 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
 	* mipsread.c:  Rather than keeping count of how many symtabs
