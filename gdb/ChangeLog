@@ -1,3 +1,9 @@
+2003-06-29  Andrew Cagney  <cagney@redhat.com>
+
+	* remote.c (remote_wait): Call error, and not warning, when the
+	packet is corrupt.
+	(remote_async_wait): Ditto.
+
 2003-06-29  Daniel Jacobowitz  <drow@mvista.com>
 
 	* sparc-tdep.c (sparc_y_regnum): Make external again.

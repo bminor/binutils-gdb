@@ -3024,14 +3024,12 @@ Packet: '%s'\n",
 		    p = p1;
 
 		    if (*p++ != ':')
-		      warning ("Malformed packet(b) (missing colon): %s\n\
-Packet: '%s'\n",
-			       p, buf);
+		      error ("Malformed packet(b) (missing colon): %s\nPacket: '%s'\n",
+			     p, buf);
 
 		    if (reg == NULL)
-		      warning ("Remote sent bad register number %s: %s\n\
-Packet: '%s'\n",
-			       phex_nz (pnum, 0), p, buf);
+		      error ("Remote sent bad register number %s: %s\nPacket: '%s'\n",
+			     phex_nz (pnum, 0), p, buf);
 
 		    fieldsize = hex2bin (p, regs, REGISTER_RAW_SIZE (reg->regnum));
 		    p += 2 * fieldsize;
@@ -3041,10 +3039,7 @@ Packet: '%s'\n",
 		  }
 
 		if (*p++ != ';')
-		  {
-		    warning ("Remote register badly formatted: %s", buf);
-		    warning ("            here: %s", p);
-		  }
+		  error ("Remote register badly formatted: %s\nhere: %s", buf, p);
 	      }
 	  }
 	  /* fall through */
@@ -3247,9 +3242,8 @@ remote_async_wait (ptid_t ptid, struct target_waitstatus *status)
 		  {
 		    p1 = (unsigned char *) strchr (p, ':');
 		    if (p1 == NULL)
-		      warning ("Malformed packet(a) (missing colon): %s\n\
-Packet: '%s'\n",
-			       p, buf);
+		      error ("Malformed packet(a) (missing colon): %s\nPacket: '%s'\n",
+			     p, buf);
 		    if (strncmp (p, "thread", p1 - p) == 0)
 		      {
 			p_temp = unpack_varlen_hex (++p1, &thread_num);
@@ -3278,14 +3272,12 @@ Packet: '%s'\n",
 		    struct packet_reg *reg = packet_reg_from_pnum (rs, pnum);
 		    p = p1;
 		    if (*p++ != ':')
-		      warning ("Malformed packet(b) (missing colon): %s\n\
-Packet: '%s'\n",
-			       p, buf);
+		      error ("Malformed packet(b) (missing colon): %s\nPacket: '%s'\n",
+			     p, buf);
 
 		    if (reg == NULL)
-		      warning ("Remote sent bad register number %ld: %s\n\
-Packet: '%s'\n",
-			       pnum, p, buf);
+		      error ("Remote sent bad register number %ld: %s\nPacket: '%s'\n",
+			     pnum, p, buf);
 
 		    fieldsize = hex2bin (p, regs, REGISTER_RAW_SIZE (reg->regnum));
 		    p += 2 * fieldsize;
@@ -3295,10 +3287,7 @@ Packet: '%s'\n",
 		  }
 
 		if (*p++ != ';')
-		  {
-		    warning ("Remote register badly formatted: %s", buf);
-		    warning ("            here: %s", p);
-		  }
+		  error ("Remote register badly formatted: %s\nhere:", buf, p);
 	      }
 	  }
 	  /* fall through */
