@@ -68,8 +68,8 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <stdio.h>
 #include <assert.h>
 
-#define obstack_chunk_alloc	((void *(*) ()) xmalloc)
-#define obstack_chunk_free	((void (*) ()) xfree)
+#define obstack_chunk_alloc	xmalloc
+#define obstack_chunk_free	xfree
 
 #define BAD_CASE(value)							\
 {									\
@@ -140,11 +140,22 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
  * X_add_symbol != X_sub_symbol (then we just cancel them, => SEG_ABSOLUTE).
  */
 
+#ifdef MANY_SEGMENTS
+#define SEG_NORMAL(x) ((x) >= SEG_E0 && (x) <= SEG_E9)
+#else
+#define SEG_NORMAL(x) ((x) == SEG_TEXT || (x) == SEG_DATA || (x) == SEG_BSS)
+#endif
+
 typedef enum _segT {
 	SEG_ABSOLUTE = 0,
+#ifdef MANY_SEGMENTS
+	/* For the moment, we allow only 10 extra segments to be specified by the user */
+	SEG_E0,	SEG_E1,SEG_E2,SEG_E3,SEG_E4,SEG_E5,SEG_E6,SEG_E7,SEG_E8,SEG_E9,
+#else
 	SEG_TEXT,
 	SEG_DATA,
 	SEG_BSS,
+#endif
 	SEG_UNKNOWN,
 	SEG_ABSENT,		/* Mythical Segment (absent): NO expression seen. */
 	SEG_PASS1,		/* Mythical Segment: Need another pass. */
@@ -298,7 +309,6 @@ void as_warn();
 
 char *app_push(void);
 char *atof_ieee(char *str, int what_kind, LITTLENUM_TYPE *words);
-char *decode_local_label_name(char *s);
 char *input_scrub_include_file(char *filename, char *position);
 char *input_scrub_new_file(char *filename);
 char *input_scrub_next_buffer(char **bufp);
@@ -336,7 +346,6 @@ void subsegs_begin(void);
 
 char *app_push();
 char *atof_ieee();
-char *decode_local_label_name()
 char *input_scrub_include_file();
 char *input_scrub_new_file();
 char *input_scrub_next_buffer();
@@ -396,3 +405,4 @@ void subsegs_begin();
  */
 
 /* end: as.h */
+
