@@ -1,3 +1,8 @@
+2004-04-25  Mark Kettenis  <kettenis@gnu.org>
+
+	* stack.c (return_command): Use CHECK_TYPEDEF on the return type.
+	Fixes PR tdep/1623 and PR tdep/1624.
+
 2004-04-24  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* xmodem.h, xmodem.c: Remove files.
