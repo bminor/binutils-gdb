@@ -6,6 +6,11 @@ Sun Mar 20 15:21:57 1994  Doug Evans  (dje@cygnus.com)
 start-sanitize-v9
 	* sp64-tdep.c (target_ptr_bit, set_target_ptr_bit): Deleted,
 	can no longer set this at run time.
+	* config/sparc/sp64.mt (SIMFILES): Use remote-sim.o now.
+	(TM_CLIBS): Define to -lm, the simulator uses the sqrt() function.
+	* config/sparc/tm-sp64.h (FPS_REGNUM, CPS_REGNUM): Define (so
+	sparc-tdep.c compiles).
+	(TARGET_PTR_BIT): Must be a constant now, fix at 64.
 end-sanitize-v9
 
 Sat Mar 19 08:51:12 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
