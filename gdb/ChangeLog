@@ -1,7 +1,19 @@
 Fri Jun 12 18:54:40 1992  John Gilmore  (gnu at cygnus.com)
 
+	* buildsym.h:  Add processing_acc_compilation flag.
+	* buildsym.c (read_sun_builtin_type, read_sun_floating_type):  New.
+	(define_symbol):  Skip arg types in function entries.  Resolve
+	overloaded 'P' which acc uses for prototypes of functions called
+	by this file.
+	(read_type: 'b', 'r'):  Handle Solaris2 builtin types.
+
+	* minsyms.c (prim_record_minimal_symbol_and_info):  Hack to
+	save size of ELF symbols.  FIXME.
+	* tm-sun4os5.h:  Rename to tm-sun4sol2.h.  Update defines for Sol2.
+	* xm-sun4os5.h:  Rename to xm-sun4sol2.h.  Hack more defines.
+
 	* configure.in:  Solaris config is sparc-sun-solaris2.
-	* config/sun4os5.m[ht]:  Rename to config/sun4sol2.m[ht].
+	* config/sun4os5.m[ht]:  Rename to config/sun4sol2.m[ht]; new xm, tm.
 
 Fri Jun 12 12:49:43 1992  Fred Fish  (fnf@cygnus.com)
 

@@ -74,6 +74,9 @@ EXTERN struct subfile *current_subfile;
 
 EXTERN unsigned char processing_gcc_compilation;
 
+/* When set, we are processing a .o file compiled by sun acc */
+EXTERN unsigned char processing_acc_compilation;
+
 /* Count symbols as they are processed, for error messages.  */
 
 EXTERN unsigned int symnum;

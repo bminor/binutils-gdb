@@ -263,6 +263,32 @@ prim_record_minimal_symbol (name, address, ms_type)
   msym_count++;
 }
 
+void
+prim_record_minimal_symbol_and_info (name, address, ms_type, info)
+     const char *name;
+     CORE_ADDR address;
+     enum minimal_symbol_type ms_type;
+     char *info;
+{
+  register struct msym_bunch *new;
+
+  if (msym_bunch_index == BUNCH_SIZE)
+    {
+      new = (struct msym_bunch *) xmalloc (sizeof (struct msym_bunch));
+      msym_bunch_index = 0;
+      new -> next = msym_bunch;
+      msym_bunch = new;
+    }
+  msym_bunch -> contents[msym_bunch_index].name = (char *) name;
+  msym_bunch -> contents[msym_bunch_index].address = address;
+  msym_bunch -> contents[msym_bunch_index].info = NULL;
+  msym_bunch -> contents[msym_bunch_index].type = ms_type;
+    /* FIXME:  This info, if it remains, needs its own field.  */
+  msym_bunch -> contents[msym_bunch_index].info = info;  /* FIXME! */
+  msym_bunch_index++;
+  msym_count++;
+}
+
 /* Compare two minimal symbols by address and return a signed result based
    on unsigned comparisons, so that we sort into unsigned numeric order.  */
 

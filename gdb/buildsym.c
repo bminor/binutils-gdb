@@ -1,5 +1,6 @@
 /* Build symbol tables in GDB's internal format.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992
+             Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -65,6 +66,12 @@ cleanup_undefined_types PARAMS ((void));
 
 static struct type *
 read_range_type PARAMS ((char **, int [2], struct objfile *));
+
+static struct type *
+read_sun_builtin_type PARAMS ((char **, int [2], struct objfile *));
+
+static struct type *
+read_sun_floating_type PARAMS ((char **, int [2], struct objfile *));
 
 static struct type *
 read_enum_type PARAMS ((char **, struct type *, struct objfile *));
@@ -1269,11 +1276,24 @@ define_symbol (valu, string, desc, type, objfile)
 
       type_read = read_type (&p, objfile);
 
+      if ((deftype == 'F' || deftype == 'f') && *p == ';') {
+	/* Sun acc puts declared types of aguments here.  We don't care
+	   about their actual types (FIXME -- we should remember the whole
+	   function prototype), but the list
+	   may define some new types that we have to remember, so we must
+	   scan them now.  */
+        while (*p == ';') {
+          p++;
+          read_type (&p);
+	}
+      }
+
       if ((deftype == 'F' || deftype == 'f')
 	  && TYPE_CODE (type_read) != TYPE_CODE_FUNC)
       {
 #if 0
 /* This code doesn't work -- it needs to realloc and can't.  */
+/* Attempt to set up to record a function prototype... */
 	struct type *new = (struct type *)
 	  obstack_alloc (&objfile -> type_obstack,
 			 sizeof (struct type));
@@ -1417,6 +1437,13 @@ define_symbol (valu, string, desc, type, objfile)
 
     case 'P':
       /* Parameter which is in a register.  */
+
+      /* acc seems to use P to delare the types of functions that
+         are called by this file.  gdb is not prepared to deal
+         with this extra information.  */
+      if (processing_acc_compilation)
+	break;
+
       SYMBOL_CLASS (sym) = LOC_REGPARM;
       SYMBOL_VALUE (sym) = STAB_REG_TO_REGNUM (valu);
       if (SYMBOL_VALUE (sym) >= NUM_REGS)
@@ -1979,6 +2006,18 @@ read_type (pp, objfile)
 	*dbx_lookup_type (typenums) = type;
       break;
 
+    case 'b':				/* Sun ACC builtin int type */
+      type = read_sun_builtin_type (pp, typenums, objfile);
+      if (typenums[0] != -1)
+	*dbx_lookup_type (typenums) = type;
+      break;
+
+    case 'R':				/* Sun ACC builtin float type */
+      type = read_sun_floating_type (pp, typenums, objfile);
+      if (typenums[0] != -1)
+	*dbx_lookup_type (typenums) = type;
+      break;
+    
     case 'e':				/* Enumeration type */
       type = dbx_alloc_type (typenums, objfile);
       type = read_enum_type (pp, type, objfile);
@@ -2927,6 +2966,110 @@ read_enum_type (pp, type, objfile)
 #endif
 
   return type;
+}
+
+/* this is for the initial typedefs in every file (for int, long, etc) */
+static struct type *
+read_sun_builtin_type (pp, typenums, objfile)
+     char **pp;
+     int typenums[2];
+     struct objfile *objfile;
+{
+  int nbits;
+  int signed_type;
+
+  switch (**pp) {
+  case 's':
+    signed_type = 1;
+    break;
+  case 'u':
+    signed_type = 0;
+    break;
+  default:
+    return error_type (pp);
+  }
+  (*pp)++;
+
+  /* The first number appears to be the number of bytes occupied
+     by this type, except that unsigned short is 4 instead of 2.
+     Since this information is redundant with the third number,
+     we will ignore it.  */
+  read_number (pp, ';');
+
+  /* The second number is always 0, so ignore it too. */
+  read_number (pp, ';');
+
+  /* The third number is the number of bits for this type. */
+  nbits = read_number (pp, 0);
+
+  /* FIXME.  Here we should just be able to make a type of the right
+     number of bits and signedness.  FIXME.  */
+
+  if (nbits == TARGET_LONG_LONG_BIT)
+    return (lookup_fundamental_type (objfile,
+		 signed_type? FT_LONG_LONG: FT_UNSIGNED_LONG_LONG));
+  
+  if (nbits == TARGET_INT_BIT) {
+    /* FIXME -- the only way to distinguish `int' from `long'
+       is to look at its name!  */
+    if (signed_type) {
+      if (long_kludge_name && long_kludge_name[0] == 'l' /* long */)
+	return lookup_fundamental_type (objfile, FT_LONG);
+      else
+	return lookup_fundamental_type (objfile, FT_INTEGER);
+    } else {
+      if (long_kludge_name
+	  && ((long_kludge_name[0] == 'u' /* unsigned */ &&
+	       long_kludge_name[9] == 'l' /* long */)
+	      || (long_kludge_name[0] == 'l' /* long unsigned */)))
+	return lookup_fundamental_type (objfile, FT_UNSIGNED_LONG);
+      else
+	return lookup_fundamental_type (objfile, FT_UNSIGNED_INTEGER);
+    }
+  }
+    
+  if (nbits == TARGET_SHORT_BIT)
+    return (lookup_fundamental_type (objfile,
+		 signed_type? FT_SHORT: FT_UNSIGNED_SHORT));
+  
+  if (nbits == TARGET_CHAR_BIT)
+    return (lookup_fundamental_type (objfile,
+		 signed_type? FT_CHAR: FT_UNSIGNED_CHAR));
+  
+  if (nbits == 0)
+    return lookup_fundamental_type (objfile, FT_VOID);
+  
+  return error_type (pp);
+}
+
+static struct type *
+read_sun_floating_type (pp, typenums, objfile)
+     char **pp;
+     int typenums[2];
+     struct objfile *objfile;
+{
+  int nbytes;
+
+  /* The first number has more details about the type, for example
+     FN_COMPLEX.  See the sun stab.h.  */
+  read_number (pp, ';');
+
+  /* The second number is the number of bytes occupied by this type */
+  nbytes = read_number (pp, ';');
+
+  if (**pp != 0)
+    return error_type (pp);
+
+  if (nbytes == TARGET_FLOAT_BIT / TARGET_CHAR_BIT)
+    return lookup_fundamental_type (objfile, FT_FLOAT);
+
+  if (nbytes == TARGET_DOUBLE_BIT / TARGET_CHAR_BIT)
+    return lookup_fundamental_type (objfile, FT_DBL_PREC_FLOAT);
+
+  if (nbytes == TARGET_LONG_DOUBLE_BIT / TARGET_CHAR_BIT)
+    return lookup_fundamental_type (objfile, FT_EXT_PREC_FLOAT);
+
+  return error_type (pp);
 }
 
 /* Read a number from the string pointed to by *PP.

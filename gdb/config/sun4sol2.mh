@@ -1,6 +1,6 @@
 # Host: Sun 4 or Sparcstation, running Solaris 2
 XDEPFILES= procfs.o
-XM_FILE= xm-sun4os5.h
+XM_FILE= xm-sun4sol2.h
 SYSV_DEFINE=-DSYSV
 REGEX=regex.o
 REGEX1=regex.o
