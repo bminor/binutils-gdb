@@ -1,3 +1,10 @@
+Fri Aug 14 14:20:38 1992  Per Bothner  (bothner@cygnus.com)
+
+	* m68k.h:  Merged m68kmri.h and m68k.h (using the former as a
+	base).  Also cleaned up duplicates, re-ordered instructions for
+	the sake of dis-assembling (so aliases come after standard names).
+	* m68kmri.h: Now just defines some macros, and #includes m68k.h.
+
 Wed Aug 12 16:38:15 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* m68kmri.h: added various opcodes. Moved jbxx to bxxes. Filled in
