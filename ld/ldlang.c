@@ -2672,8 +2672,8 @@ lang_check_section_addresses ()
 	     overlapping VMAs but they must have distinct LMAs.  */
 	  s_start  = bfd_section_lma (output_bfd, s);
 	  os_start = bfd_section_lma (output_bfd, os);
-	  s_end    = s_start  + bfd_section_size (output_bfd, s) - 1;
-	  os_end   = os_start + bfd_section_size (output_bfd, os) - 1;
+	  s_end    = s_start  + bfd_section_size (output_bfd, s) / opb - 1;
+	  os_end   = os_start + bfd_section_size (output_bfd, os) / opb - 1;
 	  
 	  /* Look for an overlap.  */
 	  if ((s_end < os_start) || (s_start > os_end))
@@ -2906,6 +2906,8 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 
 	    switch (s->data_statement.type)
 	      {
+              default:
+                abort();
 	      case QUAD:
 	      case SQUAD:
 		size = QUAD_SIZE;
@@ -3150,6 +3152,8 @@ lang_do_assignments (s, output_section_statement, fill, dot)
             int size;
             switch (s->data_statement.type)
               {
+              default:
+                abort();
               case QUAD:
               case SQUAD:
                 size = QUAD_SIZE;
