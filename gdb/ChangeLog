@@ -1,3 +1,11 @@
+start-sanitize-v850
+Wed Oct 16 01:53:43 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* v850-tdep.c (v850_push_arguments):  Use symbolic names for arg
+	registers.
+	* config/v850/tm-v850.h:  Change FP to 29.  Define arg regs.
+
+end-sanitize-v850
 Tue Oct 15 16:30:07 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* Makefile.in (init.c):  Don't use -s option with grep.  It means
@@ -22,6 +30,7 @@ start-sanitize-v850
 	* v850-tdep.c:  Add support for function calling.  Fix some
 	problems with debugging code w/o debug symbols.
 	* config/v850/tm-v850.h:  Ditto.
+
 end-sanitize-v850
 Tue Oct 15 18:19:42 1996  Ian Lance Taylor  <ian@cygnus.com>
 

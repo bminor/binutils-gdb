@@ -26,7 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 { "r0", "r1", "r2", "sp", "gp", "r5", "r6", "r7", \
   "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15", \
   "r16", "r17", "r18", "r19", "r20", "r21", "r22", "r23", \
-  "r24", "r25", "r26", "r27", "r28", "r29", "ep", "r31", \
+  "r24", "r25", "r26", "r27", "r28", "fp", "ep", "r31", \
     \
   "eipc", "eipsw", "fepc", "fepsw", "ecr", "psw", "sr6", "sr7", \
   "sr8", "sr9", "sr10", "sr11", "sr12", "sr13", "sr14", "sr15", \
@@ -40,9 +40,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define MAX_REGISTER_RAW_SIZE 4
 
 #define SP_REGNUM 3
-#define FP_REGNUM 2
+#define ARG0_REGNUM 6
+#define ARGLAST_REGNUM 9
 #define V0_REGNUM 10
 #define V1_REGNUM 11
+#define FP_REGNUM 29
 #define RP_REGNUM 31
 #define PC_REGNUM 64
 

@@ -343,7 +343,7 @@ v850_push_arguments (nargs, args, sp, struct_return, struct_addr)
   int argreg;
   int argnum;
 
-  argreg = 6;
+  argreg = ARG0_REGNUM;
 
   if (struct_return)
     {
@@ -371,7 +371,7 @@ v850_push_arguments (nargs, args, sp, struct_return, struct_addr)
 	}
 
       while (len > 0)
-	if  (argreg <= 9)
+	if  (argreg <= ARGLAST_REGNUM)
 	  {
 	    CORE_ADDR regval;
 
