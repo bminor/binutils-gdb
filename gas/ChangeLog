@@ -1,3 +1,7 @@
+2003-11-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-ppc.h (TC_FORCE_RELOCATION): Only define for ELF and XCOFF.
+
 2003-10-31  Christian Groessler  <chris@groessler.org>
 
 	* config/tc-i860.c (md_pcrel_from): Fix typo in comment.
