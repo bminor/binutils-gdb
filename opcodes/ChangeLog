@@ -1,3 +1,8 @@
+2002-09-20  Nick Clifton  <nickc@redhat.com>
+
+	* ppc-opc.c (CRFD, CRFS): Add PPC_OPERAND_CR flag so that cr
+	register names are accepted.
+
 2002-09-17  Svein E. Seldal  <Svein.Seldal@solidas.com>
 
 	* tic4x-dis.c: Add function declarations and ATTRIBUTE_UNUSED.

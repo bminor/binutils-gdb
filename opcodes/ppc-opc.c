@@ -257,11 +257,11 @@ const struct powerpc_operand powerpc_operands[] =
 
   /* The CRFD field in an X form instruction.  */
 #define CRFD CRB + 1
-  { 3, 23, 0, 0, 0 },
+  { 3, 23, 0, 0, PPC_OPERAND_CR },
 
   /* The CRFS field in an X form instruction.  */
 #define CRFS CRFD + 1
-  { 3, 0, 0, 0, 0 },
+  { 3, 0, 0, 0, PPC_OPERAND_CR },
 
   /* The CT field in an X form instruction.  */
 #define CT CRFS + 1
