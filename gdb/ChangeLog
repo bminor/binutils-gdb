@@ -1,3 +1,8 @@
+Mon Jun 12 12:22:05 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* Makefile.in (distclean, realclean): Remove config.cache and
+	  config.log.
+
 Mon Jun 12 00:21:59 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* somsolib.c: Include gdb-stabs.h.
