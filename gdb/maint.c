@@ -291,9 +291,9 @@ print_bfd_flags (flagword flags)
 }
 
 static void
-print_section_info (const char *name, flagword flags, 
-		    CORE_ADDR addr, CORE_ADDR endaddr, 
-		    unsigned long filepos)
+maint_print_section_info (const char *name, flagword flags, 
+			  CORE_ADDR addr, CORE_ADDR endaddr, 
+			  unsigned long filepos)
 {
   /* FIXME-32x64: Need print_address_numeric with field width.  */
   printf_filtered ("    0x%s", paddr (addr));
@@ -321,7 +321,7 @@ print_bfd_section_info (bfd *abfd,
 
       addr = bfd_section_vma (abfd, asect);
       endaddr = addr + bfd_section_size (abfd, asect);
-      print_section_info (name, flags, addr, endaddr, asect->filepos);
+      maint_print_section_info (name, flags, addr, endaddr, asect->filepos);
     }
 }
 
@@ -337,7 +337,7 @@ print_objfile_section_info (bfd *abfd,
       || match_substring (string, name)
       || match_bfd_flags (string, flags))
     {
-      print_section_info (name, flags, asect->addr, asect->endaddr, 
+      maint_print_section_info (name, flags, asect->addr, asect->endaddr, 
 			  asect->the_bfd_section->filepos);
     }
 }

@@ -23,6 +23,8 @@
 #if !defined (INFERIOR_H)
 #define INFERIOR_H 1
 
+struct gdbarch;
+
 /* For bpstat.  */
 #include "breakpoint.h"
 

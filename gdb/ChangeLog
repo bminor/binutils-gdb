@@ -1,3 +1,11 @@
+2002-04-10  Andrew Cagney  <ac131313@redhat.com>
+
+	* maint.c (maint_print_section_info): Rename print_section_info.
+	(print_bfd_section_info, print_objfile_section_info): Update.
+	* inferior.h (struct gdbarch): Add opaque declaration.
+	* gdbarch.sh: Add include of "inferior.h" to gdbarch.sh.
+	* gdbarch.h: Regenerate.
+
 2002-04-10  Michal Ludvig  <mludvig@suse.cz>
 
 	* x86-64-linux-nat.c (child_resume, child_xfer_memory): Delete.
