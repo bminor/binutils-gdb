@@ -284,7 +284,7 @@ case $basic_machine in
 		;;
 	next)
 		basic_machine=m68k-next
-		os=-mach
+		os=-bsd
 		;;
 	hp9k3[2-9][0-9])
 		basic_machine=m68k-hp
@@ -462,6 +462,11 @@ case $basic_machine in
 		basic_machine=m68k-none
 		os=-os68k
 		;;
+	sparclite)
+		basic_machine=sparclite-fujitsu
+		os=-none
+		;;
+
 	none)
 		basic_machine=none-none
 		os=-none
@@ -501,7 +506,7 @@ case $os in
 	# First accept the basic system types.
 	# The portable systems comes first.
 	# Each alternative must end in a *, to match a version number.
-	-bsd* | -sysv* | -mach* | -minix* | -genix* | -ultrix* \
+	-bsd* | -sysv* | -mach* | -minix* | -genix* | -ultrix* | -aout \
 	      | -vms* | -sco* | -esix* | -isc* | -aix* | -sunos* | -hpux* \
 	      | -unos* | -osf* | -v88r* | -luna* | -dgux* | -solari* | -sym* \
 	      | -newsos | -amigados* | -msdos* | -none* | -os68k* | -irix* \

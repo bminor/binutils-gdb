@@ -1,3 +1,12 @@
+Wed May 27 23:18:52 1992  Michael Tiemann  (tiemann@rtl.cygnus.com)
+
+	* config.sub ($os): Add -aout.
+
+Fri May 22 14:00:02 1992  Per Bothner  (bothner@cygnus.com)
+
+	* configure:  If host_makefile_frag is absolute, don't
+	prefix ${invsubdir} (relevant to libg++ auto-configure).
+
 Thu May 21 18:00:09 1992  Michael Tiemann  (tiemann@rtl.cygnus.com)
 
 	* Makefile.in (tooldir): Define it.
