@@ -1,3 +1,12 @@
+Tue Nov 21 13:03:57 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coffgen.c (coff_renumber_symbols): Sort common symbols with
+	global symbols.
+
+	* coffcode.h (coff_compute_section_file_positions): Only pad the
+	previous section to force file alignment when creating an
+	executable.
+
 Mon Nov 20 14:54:09 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* coffcode.h (coff_compute_section_file_positions): If

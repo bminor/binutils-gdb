@@ -634,16 +634,18 @@ coff_renumber_symbols (bfd_ptr, first_undef)
     for (i = 0; i < symbol_count; i++)
       if ((symbol_ptr_ptr[i]->flags & BSF_NOT_AT_END) != 0
 	  || (!bfd_is_und_section (symbol_ptr_ptr[i]->section)
+	      && !bfd_is_com_section (symbol_ptr_ptr[i]->section)
 	      && ((symbol_ptr_ptr[i]->flags & (BSF_GLOBAL | BSF_FUNCTION))
 		  != BSF_GLOBAL)))
 	*newsyms++ = symbol_ptr_ptr[i];
 
     for (i = 0; i < symbol_count; i++)
       if (!bfd_is_und_section (symbol_ptr_ptr[i]->section)
-	  && ((symbol_ptr_ptr[i]->flags & (BSF_GLOBAL
-					   | BSF_NOT_AT_END
-					   | BSF_FUNCTION))
-	      == BSF_GLOBAL))
+	  && (bfd_is_com_section (symbol_ptr_ptr[i]->section)
+	      || ((symbol_ptr_ptr[i]->flags & (BSF_GLOBAL
+					       | BSF_NOT_AT_END
+					       | BSF_FUNCTION))
+		  == BSF_GLOBAL)))
 	*newsyms++ = symbol_ptr_ptr[i];
 
     *first_undef = newsyms - bfd_ptr->outsymbols;
