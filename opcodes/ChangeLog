@@ -1,3 +1,9 @@
+Tue Jun  2 15:06:46 1998  Geoff Keating  <geoffk@ozemail.com.au>
+
+	* ppc-opc.c (powerpc_macros): Support shifts and rotates of size
+	0; produce error message for shifts of size 32 (or 64 for 64-bit
+	shifts), because the hardware doesn't support them.
+
 start-sanitize-r5900
 Mon Jun  1 10:27:26 1998  Jeffrey A Law  (law@cygnus.com)
 
