@@ -228,12 +228,12 @@ static autofilter_entry_type autofilter_symbollist[] =
 /* Do not specify library suffix explicitly, to allow for dllized versions.  */
 static autofilter_entry_type autofilter_liblist[] =
 {
-  { "libgcc.", 7 },
-  { "libstdc++.", 10 },
-  { "libmingw32.", 11 },
-  { "libg2c.", 7 },
-  { "libsupc++.", 10 },
-  { "libobjc.", 8 },
+  { "libgcc", 6 },
+  { "libstdc++", 9 },
+  { "libmingw32", 10 },
+  { "libg2c", 6 },
+  { "libsupc++", 9 },
+  { "libobjc", 7 },
   { NULL, 0 }
 };
 

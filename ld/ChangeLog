@@ -1,3 +1,8 @@
+2002-11-11  Charles Wilson  <cwilson@ece.gatech.edu>
+
+	* pe-dll.c (autofilter_liblist): Generalize library names to catch more
+	creative library naming instances like, e.g., libstdc++-2.a.
+
 2002-11-06  Alexandre Oliva  <aoliva@redhat.com>
 
 	* emulparams/elf32btsmipn32.sh (TEXT_DYNAMIC): Define.
