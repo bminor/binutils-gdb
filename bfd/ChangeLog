@@ -1,3 +1,8 @@
+Wed Mar 24 02:05:10 1993  david d `zoo' zuhn  (zoo at poseidon.cygnus.com)
+
+	* Makefile.in: fix rule for dvi and info, so that the recursive
+	makes does the right thing, instead of always info
+
 Wed Mar 24 02:56:44 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* libbfd.c (bfd_seek): Disable optimized handling for archives and
