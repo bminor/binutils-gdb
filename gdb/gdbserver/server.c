@@ -75,6 +75,16 @@ handle_query (char *own_buf)
 
 static int attached;
 
+static void
+gdbserver_usage (void)
+{
+  error ("Usage:\tgdbserver COMM PROG [ARGS ...]\n"
+	 "\tgdbserver COMM --attach PID\n"
+	 "\n"
+	 "COMM may either be a tty device (for serial debugging), or \n"
+	 "HOST:PORT to listen for a TCP connection.\n");
+}
+
 int
 main (int argc, char *argv[])
 {
@@ -110,8 +120,7 @@ main (int argc, char *argv[])
     }
 
   if (argc < 3 || bad_attach)
-    error ("Usage:\tgdbserver tty prog [args ...]\n"
-		 "\tgdbserver tty --attach pid");
+    gdbserver_usage();
 
   initialize_low ();
 
