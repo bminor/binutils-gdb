@@ -1,3 +1,11 @@
+Sat Feb  5 05:27:05 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* value.h (print_longest):  Rename "value" to "val" in prototype
+	declaration because some compilers don't like arguments whose
+	names are the same as types.
+	* remote.c (remote_xfer_memory):  Cast "myaddr" to unsigned char *
+	before passing it to remote_*_bytes.
+
 Fri Feb  4 15:53:18 1994  Steve Chamberlain  (sac@cygnus.com)
 
 	* h8500-tdep.c (saved_pc_after_call): The size of the
