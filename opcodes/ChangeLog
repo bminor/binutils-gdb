@@ -1,4 +1,18 @@
+Thu Aug 13 16:23:04 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ppc-opc.c (powerpc_operands): Omit parens around additions in
+	operand name macros.
+
 Wed Aug 12 14:00:38 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+start-sanitize-coldfire
+	* m68k-opc.c: Correct divsl, divul, remsl, and remul for
+	ColdFire, as below for mulsl and mulul.
+
+end-sanitize-coldfire
+	From Peter Jeremy <peter.jeremy@auss2.alcatel.com.au>:
+	* m68k-opc.c: Correct mulsl and mulul to use q rather than D, a,
+	+, -, and d for ColdFire.
 
 	From Peter Thiemann <thiemann@informatik.uni-tuebingen.de>:
 	* ppc-opc.c (insert_mbe): Handle wrapping bitmasks.
