@@ -2706,6 +2706,14 @@ pa_ip (str)
 		break;
 	      continue;
 
+	    /* Handle ,pop completer for new syntax branches.  */
+	    case 'B':
+	      if (*s == ',' && strcasecmp (s + 1, "pop") == 0)
+		s += 4;
+	      else
+		break;
+	      continue;
+
 	    /* Handle ,%r2 completer for new syntax branches.  */
 	    case 'L':
 	      if (*s == ',' && strcasecmp (s + 1, "%r2") == 0)
