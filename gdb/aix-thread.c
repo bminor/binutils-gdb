@@ -926,7 +926,7 @@ aix_thread_attach (char *args, int from_tty)
 static void
 aix_thread_detach (char *args, int from_tty)
 {
-  pd_deactivate ();
+  pd_disable ();
   base_target.to_detach (args, from_tty);
 }
 
