@@ -1,6 +1,6 @@
 Tue Feb  2 12:18:06 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
 
-	* gdb.texinfo: fix capitalization in pointers to node "Output Formats"
+	* gdb.texinfo, gdbinv-s.texi: miscellaneous stylistic cleanups
 
 Mon Feb  1 15:35:47 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
 

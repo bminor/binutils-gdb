@@ -339,7 +339,7 @@ remotedebug} will show you its current state.
 
 @ifset Icmlx
 @node i960-Nindy Remote
-@subsection @value{GDBN} with a Remote i960 (Nindy)
+@subsection @value{GDBN} with a remote i960 (Nindy)
 
 @cindex Nindy
 @cindex i960
@@ -357,7 +357,7 @@ By responding to a prompt on startup;
 
 @item
 By using the @code{target} command at any point during your @value{GDBN}
-session.  @xref{Target Commands, ,Commands for Managing Targets}.
+session.  @xref{Target Commands, ,Commands for managing targets}.
 
 @end itemize
 
@@ -383,7 +383,7 @@ Respond to the prompt with whatever suffix (after @samp{/dev/tty})
 identifies the serial port you want to use.  You can, if you choose,
 simply start up with no Nindy connection by responding to the prompt
 with an empty line.  If you do this and later wish to attach to Nindy,
-use @code{target} (@pxref{Target Commands, ,Commands for Managing Targets}).
+use @code{target} (@pxref{Target Commands, ,Commands for managing targets}).
 
 @node Nindy Options
 @subsubsection Options for Nindy
@@ -429,7 +429,7 @@ port.
 
 @c @group
 @node Nindy Reset
-@subsubsection Nindy Reset Command
+@subsubsection Nindy reset command
 
 @table @code
 @item reset
@@ -444,7 +444,7 @@ a break is detected.
 
 @ifset AMDxxixK
 @node EB29K Remote
-@subsection @value{GDBN} with a Remote EB29K
+@subsection @value{GDBN} with a remote EB29K
 
 @cindex EB29K board
 @cindex running 29K programs
@@ -462,7 +462,7 @@ you've hooked the cable between the PC's @file{COM1} port and
 @end menu
 
 @node Comms (EB29K)
-@subsubsection Communications Setup
+@subsubsection Communications setup
 
 The next step is to set up the PC's port, by doing something like this
 in DOS on the PC:
@@ -617,7 +617,7 @@ Type @code{CTTY con} to return command input to the main DOS console,
 and type @kbd{~.} to leave @code{tip} or @code{cu}.
 
 @node Remote Log
-@subsubsection Remote Log
+@subsubsection Remote log
 @kindex eb.log
 @cindex log file for EB29K
 
@@ -741,7 +741,7 @@ Attaching remote machine across net... Success!
 @value{GDBN} will then attempt to read the symbol tables of any object modules
 loaded into the VxWorks target since it was last booted.  @value{GDBN} locates
 these files by searching the directories listed in the command search
-path (@pxref{Environment, ,Your Program's Environment}); if it fails
+path (@pxref{Environment, ,Your program's environment}); if it fails
 to find an object file, it will display a message such as:
 
 @example
@@ -754,7 +754,7 @@ you should add the appropriate directory to the search path, with the
 again.
 
 @node VxWorks Download
-@subsubsection VxWorks Download
+@subsubsection VxWorks download
 
 @cindex download to VxWorks
 If you have connected to the VxWorks target and you want to debug an
@@ -795,7 +795,7 @@ debugger data structures that reference the target system's symbol
 table.)
 
 @node VxWorks Attach
-@subsubsection Running Tasks
+@subsubsection Running tasks
 
 @cindex running VxWorks tasks
 You can also attach to an existing task using the @code{attach} command as
@@ -896,7 +896,7 @@ program's sections, and a @samp{*} for each 2K of data downloaded.  (If
 you want to refresh @value{GDBN} data on symbols or on the executable file
 without downloading, use the @value{GDBN} commands @code{file} or
 @code{symbol-file}.  These commands, and @code{load} itself, are
-described in @ref{Files,,Commands to Specify Files}.)
+described in @ref{Files,,Commands to specify files}.)
 
 @smallexample
 (eg-C:\H8300\TEST) @value{GDBP} t.x
@@ -943,7 +943,7 @@ H8/300 board as a ``normal exit'' of your program.
 
 @ifset ZviiiK
 @node Z8000 Simulator
-@subsection @value{GDBN} and its Zilog Z8000 Simulator
+@subsection @value{GDBN} and its Zilog Z8000 simulator
 
 @cindex simulator, Z8000
 @cindex Zilog Z8000 simulator
