@@ -19,18 +19,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <stdio.h>
 
-static void uerror(char *s)
+int
+sigsetmask (mask)
+     int mask;
 {
-  fprintf_unfiltered(gdb_stderr, "Fatal: %s!\n");
-  exit(1);
-}
-
-sigsetmask()
-{
+  return 0;
 }
 
 void
-strlwr(str)
+strlwr (str)
      char *str;
 {
   for (; *str; str++)

@@ -1,3 +1,9 @@
+Wed Jan 12 14:44:45 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* go32-xdep.c: Remove unused function uerror.
+	(sigsetmask): Declare return type.  Declare argument (to match the
+	way it is called).  Explicitly return 0.
+
 Wed Jan 12 01:44:25 1994  John Gilmore  (gnu@cygnus.com)
 
 	* symtab.h (struct symbol, general_symbol_info, minimal_symbol,
