@@ -1,6 +1,14 @@
+Thu May 20 14:33:48 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* configure.in: actually use the Sun3 makefile fragment that's in config/
+
 Thu May 20 14:19:18 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* Makefile.in (taz): Fix modes on stuff in $(TOOL) dir also.
+
+Tue May 18 20:26:41 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* configure.in: remove some program from Alpha targetted toolchains
 
 Tue May 18 15:23:19 1993  Ken Raeburn  (raeburn@cygnus.com)
 

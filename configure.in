@@ -99,6 +99,7 @@ case "${host}" in
   *-ibm-aix*)             host_makefile_frag=config/mh-aix ;;
   *-bull-bosx*)           host_makefile_frag=config/mh-aix ;;
   *-sun-solaris2*)        host_makefile_frag=config/mh-solaris ;;
+  m68k-sun-*)		  host_makefile_frag=config/mh-sun3 ;;
   *-sun-*)		  host_makefile_frag=config/mh-sun ;;
   *-hp-hpux)              host_makefile_frag=config/mh-hpux ;;
   *-*-sysv4*)             host_makefile_frag=config/mh-sysv4 ;;
@@ -148,6 +149,9 @@ fi
 # exist yet.
 
 case "${host}" in
+  alpha-dec-osf1)
+    configdirs=`echo ${configdirs} | sed -e 's/gdb/'`
+    ;;
   i[34]86-*-go32)
     configdirs=`echo ${configdirs} | sed -e 's/tcl//;s/expect//;s/deja-gnu//'`
     configdirs=`echo ${configdirs} | sed -e 's/make//;s/texinfo//'`
@@ -158,6 +162,11 @@ case "${host}" in
 esac
 
 case "${target}" in
+  alpha-dec-osf1)
+    configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas//'`
+    configdirs=`echo ${configdirs} | sed -e 's/gdb//;s/emacs//;s/fileutils//'`
+    configdirs=`echo ${configdirs} | sed -e 's/grep//;s/libg++//'`
+    ;;	
   rs6000-*-*)
     configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas//'`
     ;;
