@@ -55,7 +55,7 @@ te_file=generic
 canon_targets=""
 if test -n "$enable_targets" ; then
   for t in `echo $enable_targets | sed 's/,/ /g'`; do
-    result=`$ac_config_sub $t 2>/dev/null`
+    result=`${CONFIG_SHELL-/bin/sh} $ac_config_sub $t 2>/dev/null`
     if test -n "$result" ; then
       canon_targets="$canon_targets $result"
 #    else
@@ -303,8 +303,10 @@ changequote([,])dnl
 # start-sanitize-tic80
       tic80-*-*)	    fmt=coff targ=tic80coff;;
 # end-sanitize-tic80
+# start-sanitize-v850
       v850-*-*)		    fmt=elf bfd_gas=yes ;;
 
+# end-sanitize-v850
       vax-*-bsd* | vax-*-ultrix*)
 			    fmt=aout ;;
       vax-*-vms)            fmt=vms ;;
