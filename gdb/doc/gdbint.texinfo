@@ -2251,10 +2251,6 @@ of functions to indicate that they never return.  The default is already
 set correctly if compiling with GCC.  This will almost never need to be
 defined.
 
-@item NO_SIGINTERRUPT
-@findex siginterrupt
-Define this to indicate that @code{siginterrupt} is not available.
-
 @item SEEK_CUR
 @itemx SEEK_SET
 Define these to appropriate value for the system @code{lseek}, if not already

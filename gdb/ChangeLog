@@ -1,3 +1,9 @@
+2004-04-04  Andrew Cagney  <cagney@redhat.com>
+
+	* config/vax/xm-vax.h (FAULT_CODE_ORIGIN, INIT_STACK): Delete.
+	* config/alpha/xm-alphaosf.h (NO_SIGINTERRUPT): Delete.
+	* config/alpha/xm-alphalinux.h (NO_SIGINTERRUPT): Delete.
+
 2004-04-03  Jim Blandy  <jimb@redhat.com>
 
 	* MAINTAINERS: Chris Faylor has changed employers; add him to

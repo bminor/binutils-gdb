@@ -1,3 +1,8 @@
+2004-04-04  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Host Definition): Delete reference to
+	NO_SIGINTERRUPT.
+
 2004-04-02  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbint.texinfo (Target Architecture Definition): Delete
