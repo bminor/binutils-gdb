@@ -424,9 +424,9 @@ case "${target}" in
     ;;
   alpha-dec-osf*)
     # ld works, but does not support shared libraries.  emacs doesn't
-    # work.  newlib is not 64 bit ready.  I'm not sure about fileutils or grep.
+    # work.  newlib is not 64 bit ready.  I'm not sure about fileutils.
     # gas doesn't generate exception information.
-    noconfigdirs="$noconfigdirs gas ld emacs fileutils grep target-newlib target-libgloss"
+    noconfigdirs="$noconfigdirs gas ld emacs fileutils target-newlib target-libgloss"
     ;;
   alpha*-*-*vms*)
     noconfigdirs="$noconfigdirs gdb ld target-newlib target-libgloss"
