@@ -28,6 +28,8 @@ Make-common.in
 Makefile.in
 aclocal.m4
 callback.c
+cgen-mem.h
+cgen-ops.h
 cgen-scache.c
 cgen-scache.h
 cgen-sim.h
@@ -40,6 +42,7 @@ configure.in
 configure
 gdbinit.in
 genmloop.sh
+gennltvals.sh
 gentmap.c
 gentvals.sh
 nltvals.def
@@ -99,6 +102,7 @@ sim-utils.h
 sim-watch.c
 sim-watch.h
 sim-xcat.h
+syscall.c
 tconfig.in
 
 Things-to-lose:

@@ -1,6 +1,6 @@
-/* Host callback routines for GDB.
+/* Remote target callback routines.
    Copyright 1995, 1996, 1997 Free Software Foundation, Inc.
-   Contributed by Cygnus Support.
+   Contributed by Cygnus Solutions.
 
    This file is part of GDB.
 
@@ -15,8 +15,8 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   along with GAS; see the file COPYING.  If not, write to the Free Software
+   Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* This file provides a standard way for targets to talk to the host OS
    level.  */
@@ -34,9 +34,18 @@
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
+#ifdef HAVE_STRING_H
+#include <string.h>
+#else
+#ifdef HAVE_STRINGS_H
+#include <strings.h>
+#endif
+#endif
 #include <errno.h>
 #include <fcntl.h>
 #include <time.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include "callback.h"
 #include "targ-vals.h"
 
@@ -49,6 +58,10 @@
    sim-utils.h.  */
 void sim_cb_printf PARAMS ((host_callback *, const char *, ...));
 void sim_cb_eprintf PARAMS ((host_callback *, const char *, ...));
+
+extern CB_TARGET_DEFS_MAP cb_init_syscall_map[];
+extern CB_TARGET_DEFS_MAP cb_init_errno_map[];
+extern CB_TARGET_DEFS_MAP cb_init_open_map[];
 
 extern int system PARAMS ((const char *));
 
@@ -76,6 +89,7 @@ static void os_error PARAMS ((host_callback *, const char *, ...));
 static int fdmap PARAMS ((host_callback *, int));
 static int fdbad PARAMS ((host_callback *, int));
 static int wrap PARAMS ((host_callback *, int));
+static int enosys PARAMS ((host_callback *, int));
 
 /* Set the callback copy of errno from what we see now.  */
 
@@ -86,6 +100,21 @@ wrap (p, val)
 {
   p->last_errno = errno;
   return val;
+}
+
+/* Return a value indicating the system call isn't present.  */
+
+static int
+enosys (p, result)
+     host_callback *p;
+     int result;
+{
+#ifdef ENOSYS
+  p->last_errno = ENOSYS;
+#else
+  p->last_errno = EINVAL;
+#endif
+  return result;
 }
 
 /* Make sure the FD provided is ok.  If not, return non-zero
@@ -130,15 +159,15 @@ os_close (p, fd)
 }
 
 
-/* taken from gdb/util.c - should be in a library */
+/* taken from gdb/util.c:notice_quit() - should be in a library */
 
 
-#if defined(__GO32__) || defined (_WIN32)
+#if defined(__GO32__) || defined (_MSC_VER)
 static int
 os_poll_quit (p)
      host_callback *p;
 {
-#ifndef _MSC_VER
+#if defined(__GO32__)
   int kbhit ();
   int getkey ();
   if (kbhit ())
@@ -157,25 +186,26 @@ os_poll_quit (p)
 	  sim_cb_eprintf (p, "CTRL-A to quit, CTRL-B to quit harder\n");
 	}
     }
-#else /* !_MSC_VER */
+#endif
+#if defined (_MSC_VER)
   /* NB - this will not compile! */
   int k = win32pollquit();
   if (k == 1)
     return 1;
   else if (k == 2)
     return 1;
-#endif /* !_MSC_VER */
+#endif
   return 0;
 }
 #else
 #define os_poll_quit 0
-#endif /* defined(__GO32__) || defined(_WIN32) */
+#endif /* defined(__GO32__) || defined(_MSC_VER) */
 
 static int 
 os_get_errno (p)
      host_callback *p;
 {
-  return host_to_target_errno (p->last_errno);
+  return cb_host_to_target_errno (p, p->last_errno);
 }
 
 
@@ -221,7 +251,7 @@ os_open (p, name, flags)
     {
       if (!p->fdopen[i])
 	{
-	  int f = open (name, target_to_host_open (flags), 0644);
+	  int f = open (name, cb_target_to_host_open (p, flags), 0644);
 	  if (f < 0)
 	    {
 	      p->last_errno = errno;
@@ -269,11 +299,24 @@ os_write (p, fd, buf, len)
      int len;
 {
   int result;
+  int real_fd;
 
   result = fdbad (p, fd);
   if (result)
     return result;
-  result = wrap (p, write (fdmap (p, fd), buf, len));
+  real_fd = fdmap (p, fd);
+  switch (real_fd)
+    {
+    default:
+      result = wrap (p, write (real_fd, buf, len));
+      break;
+    case 1:
+      result = p->write_stdout (p, buf, len);
+      break;
+    case 2:
+      result = p->write_stderr (p, buf, len);
+      break;
+    }
   return result;
 }
 
@@ -344,6 +387,23 @@ os_unlink (p, f1)
   return wrap (p, unlink (f1));
 }
 
+static int
+os_stat (p, file, buf)
+     host_callback *p;
+     const char *file;
+     PTR buf;
+{
+  return wrap (p, stat (file, buf));
+}
+
+static int
+os_fstat (p, fd, buf)
+     host_callback *p;
+     int fd;
+     PTR buf;
+{
+  return wrap (p, fstat (fd, buf));
+}
 
 static int
 os_shutdown (p)
@@ -361,17 +421,23 @@ os_shutdown (p)
 }
 
 static int
-os_init(p)
+os_init (p)
      host_callback *p;
 {
   int i;
+
   os_shutdown (p);
-  for (i= 0; i < 3; i++)
+  for (i = 0; i < 3; i++)
     {
       p->fdmap[i] = i;
       p->fdopen[i] = 1;
       p->alwaysopen[i] = 1;
     }
+
+  p->syscall_map = cb_init_syscall_map;
+  p->errno_map = cb_init_errno_map;
+  p->open_map = cb_init_open_map;
+
   return 1;
 }
 
@@ -475,12 +541,15 @@ host_callback default_callback =
   os_write_stderr,
   os_flush_stderr,
 
+  os_stat,
+  os_fstat,
+
   os_poll_quit,
 
   os_shutdown,
   os_init,
 
-  os_printf_filtered,  /* depreciated */
+  os_printf_filtered,  /* deprecated */
 
   os_vprintf_filtered,
   os_evprintf_filtered,
@@ -492,24 +561,92 @@ host_callback default_callback =
   { 0, },	/* fdopen */
   { 0, },	/* alwaysopen */
 
+  0, /* syscall_map */
+  0, /* errno_map */
+  0, /* open_map */
+  0, /* signal_map */
+  0, /* stat_map */
+	
   HOST_CALLBACK_MAGIC,
 };
 
-/* FIXME: Need to add hooks so target can tweak as necessary.  */
+/* Read in a file describing the target's system call values.
+   This allows simulators, etc. to support arbitrary libraries
+   without having to be recompiled.
+   E.g. maybe someone will want to use something other than newlib.
 
-/* FIXME: struct stat conversion is missing.  */
+   If an error occurs, the existing mapping is not changed.  */
+
+CB_RC
+cb_read_target_syscall_maps (cb, file)
+     host_callback *cb;
+     const char *file;
+{
+  CB_TARGET_DEFS_MAP *syscall_map, *errno_map, *open_map, *signal_map;
+  const char *stat_map;
+  FILE *f;
+
+  if ((f = fopen (file, "r")) == NULL)
+    return CB_RC_ACCESS;
+
+  /* ... read in and parse file ... */
+
+  fclose (f);
+  return CB_RC_NO_MEM; /* FIXME:wip */
+
+  /* Free storage allocated for any existing maps.  */
+  if (cb->syscall_map)
+    free (cb->syscall_map);
+  if (cb->errno_map)
+    free (cb->errno_map);
+  if (cb->open_map)
+    free (cb->open_map);
+  if (cb->signal_map)
+    free (cb->signal_map);
+  if (cb->stat_map)
+    free ((PTR) cb->stat_map);
+
+  cb->syscall_map = syscall_map;
+  cb->errno_map = errno_map;
+  cb->open_map = open_map;
+  cb->signal_map = signal_map;
+  cb->stat_map = stat_map;
+
+  return CB_RC_OK;
+}
+
+/* Translate the target's version of a syscall number to the host's.
+   This isn't actually the host's version, rather a canonical form.
+   ??? Perhaps this should be renamed to ..._canon_syscall.  */
+
+int
+cb_target_to_host_syscall (cb, target_val)
+     host_callback *cb;
+     int target_val;
+{
+  CB_TARGET_DEFS_MAP *m;
+
+  for (m = &cb->syscall_map[0]; m->target_val != -1; ++m)
+    if (m->target_val == target_val)
+      return m->host_val;
+
+  return -1;
+}
 
 /* FIXME: sort tables if large.
    Alternatively, an obvious improvement for errno conversion is
    to machine generate a function with a large switch().  */
 
+/* Translate the host's version of errno to the target's.  */
+
 int
-host_to_target_errno (host_val)
+cb_host_to_target_errno (cb, host_val)
+     host_callback *cb;
      int host_val;
 {
-  target_defs_map *m;
+  CB_TARGET_DEFS_MAP *m;
 
-  for (m = &errno_map[0]; m->host_val; ++m)
+  for (m = &cb->errno_map[0]; m->host_val; ++m)
     if (m->host_val == host_val)
       return m->target_val;
 
@@ -525,13 +662,14 @@ host_to_target_errno (host_val)
    to machine generate this function.  */
 
 int
-target_to_host_open (target_val)
+cb_target_to_host_open (cb, target_val)
+     host_callback *cb;
      int target_val;
 {
   int host_val = 0;
-  target_defs_map *m;
+  CB_TARGET_DEFS_MAP *m;
 
-  for (m = &open_map[0]; m->host_val != -1; ++m)
+  for (m = &cb->open_map[0]; m->host_val != -1; ++m)
     {
       switch (m->target_val)
 	{
@@ -557,6 +695,83 @@ target_to_host_open (target_val)
     }
 
   return host_val;
+}
+
+/* Utility for cb_host_to_target_stat to store values in the target's
+   stat struct.  */
+
+static void
+store (p, size, val, big_p)
+     char *p;
+     int size;
+     long val; /* ??? must be as big as target word size */
+     int big_p;
+{
+  if (big_p)
+    {
+      p += size;
+      while (size-- > 0)
+	{
+	  *--p = val;
+	  val >>= 8;
+	}
+    }
+  else
+    {
+      while (size-- > 0)
+	{
+	  *p++ = val;
+	  val >>= 8;
+	}
+    }
+}
+
+/* Translate a host's stat struct into a target's.
+
+   BIG_P is non-zero if the target is big-endian.
+   The result is the size of the target's stat struct.  */
+
+int
+cb_host_to_target_stat (cb, hs, ts, big_p)
+     host_callback *cb;
+     const struct stat *hs;
+     PTR ts;
+     int big_p;
+{
+  const char *m = cb->stat_map;
+  char *p = ts;
+
+  while (m)
+    {
+      char *q = strchr (m, ',');
+      int size;
+
+      /* FIXME: Use sscanf? */
+      if (q == NULL)
+	{
+	  /* FIXME: print error message */
+	  return;
+	}
+      size = atoi (q + 1);
+      if (size == 0)
+	{
+	  /* FIXME: print error message */
+	  return;
+	}
+
+      if (strncmp (m, "st_dev", q - m) == 0)
+	store (p, size, hs->st_dev, big_p);
+      else if (strncmp (m, "st_ino", q - m) == 0)
+	store (p, size, hs->st_ino, big_p);
+      /* FIXME:wip */
+      else
+	store (p, size, 0, big_p); /* unsupported field, store 0 */
+
+      p += size;
+      m = strchr (q, ':');
+      if (m)
+	++m;
+    }
 }
 
 /* Cover functions to the vfprintf callbacks.

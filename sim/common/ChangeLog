@@ -1,3 +1,56 @@
+Mon Nov 17 14:15:31 1997  Doug Evans  <devans@seba.cygnus.com>
+
+	* Make-common.in (DEP, COMMON_DEP_CFLAGS): Define.
+	(LIB_OBJS): Add syscall.o.
+	(gentmap): Pass $(NL_TARGET) to $(CC).
+	(syscall.o): Add rule for.
+	(sim_main_headers): Add $(SIM_EXTRA_DEPS).
+	(sim-bits.o): Depend on $(sim-n-bits_h).
+	(sim-load.o): Depend on callback.h.
+
+	* Make-common.in (cgen-*.o): Update dependencies, mem-ops.h renamed to
+	cgen-mem.h, sem-ops.h renamed to cgen-ops.h.
+	* cgen-mem.h, cgen-ops.h: New files.
+
+	* aclocal.m4 (--enable-sim-scache): Pass -DWITH_SCACHE=0 for "=no".
+
+	* Makefile.in (nltvals.def): Depend on gennltvals.sh.
+	Rewrite build rule.
+	* callback.c: #include string.h or strings.h.
+	#include sys/types.h and sys/stat.h.
+	(cb_init_syscall_map,cb_init_errno_map,cb_init_open_map): Declare.
+	(enosys): New function.
+	(os_get_errno,os_open): Update.
+	(os_stat,os_fstat): New functions.
+	(os_init): Initialize syscall_map, errno_map, open_map.
+	(default_callback): Add entries for os_stat, os_fstat, syscall_map,
+	errno_map, open_map, signal_map, stat_map.
+	(cb_read_target_syscall_maps): New function.
+	(cb_target_to_host_syscall): New function.
+	(cb_host_to_target_errno): Renamed from host_to_target_errno.
+	(cb_target_to_host_open): Renamed from target_to_host_open.
+	(store): New function.
+	(cb_host_to_target_stat): New function.
+	* syscall.c: New file.
+	* gentmap.c (sys_tdefs): New global.
+	(gen_targ_vals_h): Output target syscall numbers.
+	(gen_targ_map_c): Update.  Output target syscall translation map.
+	* gentvals.sh: New first argument `target'.  Preface table with
+	#ifdef NL_TARGET_$target if non-null target passed.
+	* gennltvals.sh: New file.
+	* nltvals.def: Regenerated.
+
+Fri Nov 14 11:33:34 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-n-core.h (sim_core_read_unaligned_N): Return static
+ 	sim_core_dummy_M.
+	(sim_core_dummy_M): Declare.
+	
+Wed Nov 12 18:16:15 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-core.c (sim_core_signal): Print the address of the
+ 	instruction.
+
 Thu Nov 13 11:49:41 1997  Doug Evans  <devans@seba.cygnus.com>
 
 	* sim-base.h (sim_state_base): Move `magic' to end of struct.
