@@ -1,3 +1,8 @@
+2004-11-14  Richard Sandiford  <rsandifo@redhat.com>
+
+	* elf-eh-frame.c (_bfd_elf_discard_section_eh_frame): Deal with
+	composite relocations against the personality data.
+
 2004-11-13  Paul Brook  <paul@codesourcery.com>
 
 	* bfd/elf32-arm.c (elf32_arm_final_link_relocate): Resolve

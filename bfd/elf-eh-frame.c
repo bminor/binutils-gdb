@@ -498,7 +498,10 @@ _bfd_elf_discard_section_eh_frame
 
 			      cie.personality = h;
 			    }
-			  cookie->rel++;
+			  /* Cope with MIPS-style composite relocations.  */
+			  do
+			    cookie->rel++;
+			  while (GET_RELOC (buf) != NULL);
 			}
 		      buf += per_width;
 		    }
