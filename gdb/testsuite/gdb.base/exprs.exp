@@ -238,11 +238,11 @@ test_expr "set variable v_unsigned_long = 0" "print (void*)v_unsigned_long" "\\$
 #
 send_gdb "print sizeof (long long) > sizeof (long)\n"
 gdb_expect {
-    -re "\\$\[0-9\]* = $true" {
+    -re "\\$\[0-9\]* = $true.*$gdb_prompt" {
 	set ok 1
 	pass "sizeof (long long) > sizeof (long) (true)"
     }
-    -re "\\$\[0-9\]* = $false" {
+    -re "\\$\[0-9\]* = $false.*$gdb_prompt" {
 	set ok 0
 	pass "sizeof (long long) > sizeof (long) (false)"
     }
