@@ -809,9 +809,9 @@ find_pc_sect_partial_function (CORE_ADDR pc, asection *section, char **name,
 
   mapped_pc = overlay_mapped_address (pc, section);
 
-  if (mapped_pc >= cache_pc_function_low &&
-      mapped_pc < cache_pc_function_high &&
-      section == cache_pc_function_section)
+  if (mapped_pc >= cache_pc_function_low
+      && mapped_pc < cache_pc_function_high
+      && section == cache_pc_function_section)
     goto return_cached_value;
 
   /* If sigtramp is in the u area, it counts as a function (especially
@@ -917,7 +917,7 @@ find_pc_sect_partial_function (CORE_ADDR pc, asection *section, char **name,
   for (i = 1; SYMBOL_NAME (msymbol + i) != NULL; i++)
     {
       if (SYMBOL_VALUE_ADDRESS (msymbol + i) != SYMBOL_VALUE_ADDRESS (msymbol)
-	&& SYMBOL_BFD_SECTION (msymbol + i) == SYMBOL_BFD_SECTION (msymbol))
+	  && SYMBOL_BFD_SECTION (msymbol + i) == SYMBOL_BFD_SECTION (msymbol))
 	break;
     }
 
@@ -929,7 +929,7 @@ find_pc_sect_partial_function (CORE_ADDR pc, asection *section, char **name,
        So the end address is the end of the section.  */
     cache_pc_function_high = osect->endaddr;
 
-return_cached_value:
+ return_cached_value:
 
   if (address)
     {
@@ -948,8 +948,8 @@ return_cached_value:
 	{
 	  /* Because the high address is actually beyond the end of
 	     the function (and therefore possibly beyond the end of
-	     the overlay), we must actually convert (high - 1)
-	     and then add one to that. */
+	     the overlay), we must actually convert (high - 1) and
+	     then add one to that. */
 
 	  *endaddr = 1 + overlay_unmapped_address (cache_pc_function_high - 1,
 						   section);
@@ -961,7 +961,7 @@ return_cached_value:
   return 1;
 }
 
-/* Backward compatibility, no section argument */
+/* Backward compatibility, no section argument.  */
 
 int
 find_pc_partial_function (CORE_ADDR pc, char **name, CORE_ADDR *address,
