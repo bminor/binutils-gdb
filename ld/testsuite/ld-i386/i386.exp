@@ -19,7 +19,10 @@
 # Test i386 linking; all types of relocs.  This tests the assembler and
 # tools like objdump as well as the linker.
 
-if ![istarget i?86-*-*] {
+if { !([istarget "i?86-*-elf*"]		
+       || ([istarget "i?86-*-linux*"]
+	   && ![istarget "*-*-*aout*"]
+	   && ![istarget "*-*-*oldld*"])) } {
     return
 }
 

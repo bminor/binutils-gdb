@@ -1,3 +1,7 @@
+2002-09-20  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-i386/i386.exp: Only run tests on ELF targets.
+
 2002-09-19  Jakub Jelinek  <jakub@redhat.com>
 
 	* ld-i386/i386.exp: New.
