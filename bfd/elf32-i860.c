@@ -1,5 +1,7 @@
 /* Intel 860 specific support for 32-bit ELF
-   Copyright 1993 Free Software Foundation, Inc.
+   Copyright 1993, 2000 Free Software Foundation, Inc.
+
+   Full i860 support added by Jason Eckhardt <jle@cygnus.com>.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -25,10 +27,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define bfd_elf32_bfd_reloc_type_lookup	bfd_default_reloc_type_lookup
 #define elf_info_to_howto		_bfd_elf_no_info_to_howto
 
-#define TARGET_BIG_SYM	 bfd_elf32_i860_vec
-#define TARGET_BIG_NAME  "elf32-i860"
+#define TARGET_BIG_SYM		bfd_elf32_i860_vec
+#define TARGET_BIG_NAME		"elf32-i860"
+#define TARGET_LITTLE_SYM	bfd_elf32_i860_little_vec
+#define TARGET_LITTLE_NAME	"elf32-i860-little"
 #define ELF_ARCH	 bfd_arch_i860
 #define ELF_MACHINE_CODE EM_860
-#define ELF_MAXPAGESIZE  1 /* FIXME: This number is wrong,  It should be the page size in bytes.  */
+#define ELF_MAXPAGESIZE  4096	/* Page size in bytes.  */
 
 #include "elf32-target.h"

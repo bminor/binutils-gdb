@@ -33,6 +33,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define ARCH_hppa
 #define ARCH_i370
 #define ARCH_i386
+#define ARCH_i860
 #define ARCH_i960
 #define ARCH_ia64
 #define ARCH_fr30
@@ -150,6 +151,11 @@ disassembler (abfd)
         disassemble = print_insn_i386_intel;
       else
         disassemble = print_insn_i386_att;
+      break;
+#endif
+#ifdef ARCH_i860
+    case bfd_arch_i860:
+      disassemble = print_insn_i860;
       break;
 #endif
 #ifdef ARCH_i960

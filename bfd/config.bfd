@@ -389,6 +389,10 @@ case "${targ}" in
   i860-*-mach3* | i860-*-osf1* | i860-*-coff*)
     targ_defvec=i860coff_vec
     ;;
+  i860-stardent-sysv4* | i860-stardent-elf*)
+    targ_defvec=bfd_elf32_i860_little_vec
+    targ_selvecs="bfd_elf32_i860_vec bfd_elf32_i860_little_vec"
+    ;;
   i860-*-sysv4* | i860-*-elf*)
     targ_defvec=bfd_elf32_i860_vec
     ;;
