@@ -528,12 +528,39 @@ type information.
 For any of the above symbol descriptors, after the symbol descriptor and
 the type information, there is optionally a comma, followed by the name
 of the procedure, followed by a comma, followed by a name specifying the
-scope.  The first name is local to the scope specified.  I assume then
-that the name of the symbol (before the @samp{:}), if specified, is some
-sort of global name.  I assume the name specifying the scope is the name
-of a function specifying that scope.  This feature is an AIX extension,
-and this information is based on the manual; I haven't actually tried
-it.
+scope.  The first name is local to the scope specified, and seems to be
+redundant with the name of the symbol (before the @samp{:}).  The name
+specifying the scope is the name of a procedure specifying that scope.
+This feature is used by @sc{gcc}, and presumably Pascal, Modula-2, etc.,
+compilers, for nested functions.
+
+If procedures are nested more than one level deep, only the immediately
+containing scope is specified, for example:
+
+@example
+int
+foo (int x)
+@{
+  int bar (int y)
+    @{
+      int baz (int z)
+	@{
+	  return x + y + z;
+	@}
+      return baz (x + 2 * y);
+    @}
+  return x + bar (3 * x);
+@}
+@end example
+
+@noindent
+produces the stabs:
+
+@example
+.stabs "baz:f1,baz,bar",36,0,0,_baz.15		# 36 == N_FUN
+.stabs "bar:f1,bar,foo",36,0,0,_bar.12
+.stabs "foo:F1",36,0,0,_foo
+@end example
 
 The stab representing a procedure is located immediately following the
 code of the procedure.  This stab is in turn directly followed by a
