@@ -584,7 +584,7 @@
 
   PC = cia;
   dstreg = translate_rreg (SD_, RN0);
-  State.regs[dstreg] += 4;
+  genericAdd (4, dstreg);
 }
 
 // 1111 1001 1101 1000 Rm Rn; cmp Rm,Rn
