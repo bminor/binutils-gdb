@@ -640,6 +640,23 @@ enum float_operation
 #define RAIDX   31
 #define RA      (REGISTERS[RAIDX])
 
+  /* While space is allocated in the main registers arrray for some of
+     the COP0 registers, that space isn't sufficient.  Unknown COP0
+     registers overflow into the array below */
+
+#define NR_COP0_GPR	32
+  unsigned_word cop0_gpr[NR_COP0_GPR];
+#define COP0_GPR	((CPU)->cop0_gpr)
+  /* start-sanitize-r5900 */
+#define NR_COP0_BP	8
+  unsigned_word cop0_bp[NR_COP0_BP];
+#define COP0_BP	((CPU)->cop0_bp)
+#define NR_COP0_P 64
+  unsigned_word cop0_p[NR_COP0_P];
+#define COP0_P	((CPU)->cop0_p)
+  /* end-sanitize-r5900 */
+
+
   /* Keep the current format state for each register: */
   FP_formats fpr_state[32];
 #define FPR_STATE ((CPU)->fpr_state)
@@ -665,6 +682,24 @@ enum float_operation
   hilo_history lo_history;
 #define LOHISTORY (&(CPU)->lo_history)
 
+  /* start-sanitize-branchbug4011 */
+#if 1
+  int branchbug4011_option;
+#define BRANCHBUG4011_OPTION ((CPU)->branchbug4011_option)
+  address_word branchbug4011_last_target;
+#define BRANCHBUG4011_LAST_TARGET ((CPU)->branchbug4011_last_target)
+  address_word branchbug4011_last_cia;
+#define BRANCHBUG4011_LAST_CIA ((CPU)->branchbug4011_last_cia)
+
+#define check_branch_bug() (check_4011_branch_bug (_SD))
+#define mark_branch_bug(TARGET) (mark_4011_branch_bug (_SD,TARGET))
+#else
+  /* end-sanitize-branchbug4011 */
+#define check_branch_bug() 
+#define mark_branch_bug(TARGET) 
+  /* start-sanitize-branchbug4011 */
+#endif
+  /* end-sanitize-branchbug4011 */
   /* start-sanitize-r5900 */
   sim_r5900_cpu r5900;
 
@@ -737,6 +772,7 @@ struct sim_state {
 #define ksu_unknown      (0x3)
 
 #define status_IE	 (1 <<  0)      /* Interrupt enable */
+#define status_EIE	 (1 << 16)      /* Enable Interrupt Enable */
 #define status_EXL	 (1 <<  1)	/* Exception level */
 #define status_RE        (1 << 25)      /* Reverse Endian in user mode */
 #define status_FR        (1 << 26)      /* enables MIPS III additional FP registers */
@@ -855,6 +891,8 @@ struct sim_state {
 #define BREAKPOINT_INSTRUCTION  (0x0005000d)
 #define BREAKPOINT_INSTRUCTION2 (0x0000014d)
 
+
+void interrupt_event (SIM_DESC sd, void *data);
 
 void signal_exception (SIM_DESC sd, sim_cpu *cpu, address_word cia, int exception, ...);
 #define SignalException(exc,instruction)     signal_exception (SD, CPU, cia, (exc), (instruction))
@@ -975,7 +1013,7 @@ INLINE_SIM_MAIN (unsigned16) ifetch16 PARAMS ((SIM_DESC sd, sim_cpu *cpu, addres
 #define IMEM16_IMMED(CIA,NR) ifetch16 (SD, CPU, (CIA), ((CIA) & ~1) + 2 * (NR))
 
 void dotrace PARAMS ((SIM_DESC sd, sim_cpu *cpu, FILE *tracefh, int type, SIM_ADDR address, int width, char *comment, ...));
-FILE *tracefh;
+extern FILE *tracefh;
 
 INLINE_SIM_MAIN (void) pending_tick PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia));
 

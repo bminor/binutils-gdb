@@ -300,7 +300,33 @@ else
 	done
 fi
 
-
+branchbug4011_files="interp.c mips.igen sim-main.h ChangeLog"
+if ( echo $* | grep keep\-branchbug4011 > /dev/null ) ; then
+	for i in $branchbug4011_files ; do
+		if test ! -d $i && (grep sanitize-branchbug4011 $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Keeping branchbug4011 stuff in $i
+			fi
+		fi
+	done
+else
+	for i in $branchbug4011_files ; do
+		if test -r $i && (grep sanitize-branchbug4011 $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"branchbug4011\" from $i...
+			fi
+			cp $i new
+			sed '/start\-sanitize\-branchbug4011/,/end\-sanitize\-branchbug4011/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
 
 never_files="ChangeLog configure configure.in interp.c gencode.c mips.igen mips.dc"
 
