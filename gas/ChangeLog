@@ -1,3 +1,9 @@
+Tue Aug 29 19:42:58 1995  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* config/tc-m68k.c (m68k_ip) [case POST/PRE/BASE]: Fix typo when
+ 	looking at outer displacement.  Don't set the postindex bit if the
+ 	index suppress bit is set (for memory indirect addressing mode).
+
 Thu Aug 31 06:49:37 1995  Doug Evans  <dje@canuck.cygnus.com>
 
 	* config/tc-arm.c (tc_gen_reloc): Delete duplicated code.
