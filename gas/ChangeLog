@@ -1,3 +1,9 @@
+2004-10-08  Linus Nielsen Feltzing  <linus@haxx.se>
+
+	* config/m68k-parse.h (enum m68k_register): New control register,
+	MBAR2 (for MCF5249)
+	* config/tc-m68k.c: Correct control register set for MCF5249.
+
 2004-10-07  Bob Wilson  <bob.wilson@acm.org>
 
 	* config/tc-xtensa.c (absolute_literals_supported): New global flag.

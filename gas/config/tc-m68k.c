@@ -178,6 +178,10 @@ static const enum m68k_register mcf_control_regs[] = {
   RAMBAR0, RAMBAR1, MBAR,
   0
 };
+static const enum m68k_register mcf5249_control_regs[] = {
+  CACR, ACR0, ACR1, VBR, RAMBAR0, RAMBAR1, MBAR, MBAR2,
+  0
+};
 static const enum m68k_register mcf528x_control_regs[] = {
   CACR, ACR0, ACR1, VBR, FLASHBAR, RAMBAR,
   0
@@ -2989,6 +2993,7 @@ m68k_ip (char *instring)
               tmpreg = 0xC0D;
               break;
             case MBAR0:
+            case MBAR2:
             case SECMBAR:
               tmpreg = 0xC0E;
               break;
@@ -3754,6 +3759,8 @@ static const struct init_entry init_table[] =
 
   { "flashbar", FLASHBAR }, 	/* mcf528x registers.  */
   { "rambar",   RAMBAR },  	/* mcf528x registers.  */
+
+  { "mbar2",    MBAR2 },  	/* mcf5249 registers.  */
   /* End of control registers.  */
 
   { "ac", AC },
@@ -4341,10 +4348,12 @@ select_control_regs (void)
       break;
     case mcf5200:
     case mcf5206e:
-    case mcf5249:
     case mcf5307:
     case mcf5407:
       control_regs = mcf_control_regs;
+      break;
+    case mcf5249:
+      control_regs = mcf5249_control_regs;
       break;
     case mcf528x:
     case mcf521x:

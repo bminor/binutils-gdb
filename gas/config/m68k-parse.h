@@ -124,6 +124,7 @@ enum m68k_register
   MBAR0, MBAR1,			/* mcfv4e added these.  */
   ACR0, ACR1, ACR2, ACR3,       /* mcf5200 added these.  */
   FLASHBAR, RAMBAR,  		/* mcf528x added these.  */
+  MBAR2,  		        /* mcf5249 added this.  */
   MBAR,
 #define last_movec_reg MBAR
   /* End of movec ordering constraints.  */
