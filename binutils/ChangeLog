@@ -1,3 +1,7 @@
+2005-02-10  Ian Lance Taylor  <ian@airs.com>
+
+	* MAINTAINERS: Update my e-mail address.
+
 2005-02-10  Mark Mitchell  <mark@codesourcery.com>
 
 	* MAINTAINERS: Add Paul Brook and Mark Mitchell as ARM (Symbian)
