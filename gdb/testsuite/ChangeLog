@@ -1,8 +1,25 @@
+Fri Apr 10 22:38:12 1998 Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+        * gdb.base/help.exp:  Clean up `help set args' and `help show args'
+        tests.                                                             
+        * gdb.base/interrupt.exp:  Add "i*86-*-solaris2*" xfail for calling
+        function when asleep.                                              
+        * gdb.base/signals.exp:  Add "i*86-*-solaris2*" xfails. Add comment
+        for i*86 Linux and SVR4 signal handling problems.                  
+        Remove linux xfail for `next to handler in signals_tests_1', fixed 
+        by recent infrun.c change.                                         
+        Limit backtrace to 10 frames to avoid timeout problems with infinite
+        stack backtraces.                                                   
+        Adjust expect pattern in `handle all print' test to match Apr 28 1997
+        target.[ch] change.
+
 Tue Mar 31 00:40:32 1998  Bob Manson  <manson@charmed.cygnus.com>
 
 	* lib/gdb.exp(gdb_test): Send multiline commands one at a time; wait
 	for a newline from gdb before continuing.
 	(default_gdb_exit): Just look for y or n.
+	(gdb_test): Detect abnormal exit from GDB running on DOS; if
+	it does, fail the rests of the tests in the file.
 
 Tue Mar 24 22:44:52 1998  Bob Manson  <manson@charmed.cygnus.com>
 
