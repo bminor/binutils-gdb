@@ -1,3 +1,21 @@
+Thu Feb 12 14:13:46 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* addr2line.c (usage): Update bug-gnu-utils address.
+	* ar.c (usage): Likewise.
+	* nlmconv.c (show_usage): Likewise.
+	* nm.c (usage): Likewise.
+	* objcopy.c (copy_usage): Likewise.
+	(strip_usage): Likewise.
+	* objdump.c (usage): Likewise.
+	* size.c (usage): Likewise.
+	* strings.c (usage): Likewise.
+	* windres.c (usage): Likewise.
+	* binutils.texi (Bug Reporting): Likewise.
+
+Sat Feb  7 15:36:24 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure, aclocal.m4: Rebuild with new libtool.
+
 Thu Feb  5 12:21:13 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure, Makefile.in, aclocal.m4: Rebuild with new libtool.

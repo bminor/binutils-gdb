@@ -13,7 +13,7 @@ END-INFO-DIR-ENTRY
 @end ifinfo
 
 @ifinfo
-Copyright @copyright{} 1991, 92, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
+Copyright @copyright{} 1991, 92, 93, 94, 95, 96, 97, 1998 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -41,7 +41,7 @@ into another language, under the above conditions for modified versions.
 @c This file documents the GNU binary utilities "ar", "ld", "objcopy",
 @c  "objdump", "nm", "size", "strings", "strip", and "ranlib".
 @c
-@c Copyright (C) 1991, 92, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
+@c Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 1998 Free Software Foundation, Inc.
 @c 
 @c This text may be freely distributed under the terms of the GNU
 @c General Public License.
@@ -66,7 +66,7 @@ into another language, under the above conditions for modified versions.
 @end tex
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1991, 92, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
+Copyright @copyright{} 1991, 92, 93, 94, 95, 96, 97, 1998 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -2308,7 +2308,7 @@ individuals in the file @file{etc/SERVICE} in the @sc{gnu} Emacs
 distribution.
 
 In any event, we also recommend that you send bug reports for the binary
-utilities to @samp{bug-gnu-utils@@prep.ai.mit.edu}.
+utilities to @samp{bug-gnu-utils@@gnu.org}.
 
 The fundamental principle of reporting bugs usefully is this:
 @strong{report all the facts}.  If you are not sure whether to state a

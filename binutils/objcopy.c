@@ -1,5 +1,6 @@
 /* objcopy.c -- copy object file from input to output, optionally massaging it.
-   Copyright (C) 1991, 92, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
+   Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 1998
+   Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -15,7 +16,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA.  */
 
 #include "bfd.h"
 #include "progress.h"
@@ -307,7 +309,7 @@ Usage: %s [-vVSpgxX] [-I bfdname] [-O bfdname] [-F bfdname] [-b byte]\n\
        [--verbose] [--version] [--help] in-file [out-file]\n");
   list_supported_targets (program_name, stream);
   if (exit_status == 0)
-    fprintf (stream, "Report bugs to bug-gnu-utils@prep.ai.mit.edu\n");
+    fprintf (stream, "Report bugs to bug-gnu-utils@gnu.org\n");
   exit (exit_status);
 }
 
@@ -326,7 +328,7 @@ Usage: %s [-vVsSpgxX] [-I bfdname] [-O bfdname] [-F bfdname] [-R section]\n\
 	   program_name);
   list_supported_targets (program_name, stream);
   if (exit_status == 0)
-    fprintf (stream, "Report bugs to bug-gnu-utils@prep.ai.mit.edu\n");
+    fprintf (stream, "Report bugs to bug-gnu-utils@gnu.org\n");
   exit (exit_status);
 }
 
@@ -936,7 +938,11 @@ copy_archive (ibfd, obfd, output_target)
   char *dir = make_tempname (bfd_get_filename (obfd));
 
   /* Make a temp directory to hold the contents.  */
+#if defined (_WIN32) && !defined (__CYGWIN32__)
+  if (mkdir (dir) != 0)
+#else
   if (mkdir (dir, 0700) != 0)
+#endif
     {
       fatal ("cannot mkdir %s for archive copying (error: %s)",
 	     dir, strerror (errno));
@@ -1289,7 +1295,7 @@ copy_section (ibfd, isection, obfdarg)
 	}
       free (memhunk);
     }
-  else if (p->set_flags && (p->flags & SEC_HAS_CONTENTS) != 0)
+  else if (p != NULL && p->set_flags && (p->flags & SEC_HAS_CONTENTS) != 0)
     {
       PTR memhunk = (PTR) xmalloc ((unsigned) size);
 
@@ -1554,6 +1560,24 @@ smart_rename (from, to)
   if (lstat (to, &s))
     return -1;
 
+#if defined (_WIN32) && !defined (__CYGWIN32__)
+  /* Win32, unlike unix, will not erase `to' in `rename(from, to)' but
+     fail instead.  Also, chown is not present.  */
+
+  if (stat (to, &s) == 0)
+    remove (to);
+
+  ret = rename (from, to);
+  if (ret != 0)
+    {
+      /* We have to clean up here. */
+      int saved = errno;
+      fprintf (stderr, "%s: %s: ", program_name, to);
+      errno = saved;
+      perror ("rename");
+      unlink (from);
+    }
+#else
   /* Use rename only if TO is not a symbolic link and has
      only one hard link.  */
   if (!S_ISLNK (s.st_mode) && s.st_nlink == 1)
@@ -1598,6 +1622,8 @@ smart_rename (from, to)
 	}
       unlink (from);
     }
+#endif /* _WIN32 && !__CYGWIN32__ */
+
   return ret;
 }
 
