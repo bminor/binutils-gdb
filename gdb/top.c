@@ -3179,8 +3179,9 @@ show_version (char *args, int from_tty)
 static int gdb_prompt_escape;
 
 static int
-get_prompt_1 (char *formatted_prompt)
+get_prompt_1 (void *data)
 {
+  char *formatted_prompt = data;
   char *local_prompt;
 
   if (event_loop_p)

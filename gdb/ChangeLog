@@ -1,3 +1,12 @@
+Tue Aug  1 14:50:55 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* top.c (get_prompt_1), tracepoint.c (replace_comma): Update
+ 	function signatures so that they match catch_errors and
+ 	make_cleanup callbacks.
+
+	* tracepoint.c (encode_actions): Fix arguments passed to
+ 	stringify_collection_list.
+
 2000-07-31  Kevin Buettner  <kevinb@redhat.com>
 
 	* ppc-tdep.h: New file.

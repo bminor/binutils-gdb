@@ -1625,8 +1625,8 @@ encode_actions (struct tracepoint *t, char ***tdp_actions,
   memrange_sortmerge (&tracepoint_list);
   memrange_sortmerge (&stepping_list);
 
-  *tdp_actions = stringify_collection_list (&tracepoint_list, &tdp_buff);
-  *stepping_actions = stringify_collection_list (&stepping_list, &step_buff);
+  *tdp_actions = stringify_collection_list (&tracepoint_list, tdp_buff);
+  *stepping_actions = stringify_collection_list (&stepping_list, step_buff);
 }
 
 static void
@@ -2445,8 +2445,9 @@ scope_info (char *args, int from_tty)
 
 /* worker function (cleanup) */
 static void
-replace_comma (char *comma)
+replace_comma (void *data)
 {
+  char *comma = data;
   *comma = ',';
 }
 
