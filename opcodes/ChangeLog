@@ -1,3 +1,10 @@
+2001-03-22  Ben Elliston  <bje@redhat.com>
+
+	* cgen-asm.in (@arch@_cgen_assemble_insn): Move tmp_errmsg
+	declaration inside CGEN_VERBOSE_ASSEMBLER_ERRORS conditional.
+	* cgen-ibld.in (put_insn_int_value): Mark cd parameter as unused
+	to allay a compiler warning.
+
 2001-03-22  Alan Modra  <alan@linuxcare.com.au>
 
 	* i386-dis.c (dis386_twobyte_att): Add entries for paddq, psubq.

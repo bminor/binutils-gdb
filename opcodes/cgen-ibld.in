@@ -265,7 +265,7 @@ insert_insn_normal (cd, insn, fields, buffer, pc)
 
 static void
 put_insn_int_value (cd, buf, length, insn_length, value)
-     CGEN_CPU_DESC cd;
+     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
      CGEN_INSN_BYTES_PTR buf;
      int length;
      int insn_length;
