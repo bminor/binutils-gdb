@@ -82,6 +82,21 @@ that at link stage can be contracted.  (Though linker relaxation isn't yet
 implemented in @code{@value{LD}}.)  The option @samp{-x} also imples
 @samp{--linker-allocated-gregs}.
 
+@cindex @samp{--no-pushj-stubs} command line option, MMIX
+@cindex @samp{--no-stubs} command line option, MMIX
+If instruction expansion is enabled, @code{@value{AS}} can expand a
+@samp{PUSHJ} instruction into a series of instructions.  The shortest
+expansion is to not expand it, but just mark the call as redirectable to a
+stub, which @code{@value{LD}} creates at link-time, but only if the
+original @samp{PUSHJ} instruction is found not to reach the target.  The
+stub consists of the necessary instructions to form a jump to the target.
+This happens if @code{@value{AS}} can assert that the @samp{PUSHJ}
+instruction can reach such a stub.  The option @samp{--no-pushj-stubs}
+disables this shorter expansion, and the longer series of instructions is
+then created at assembly-time.  The option @samp{--no-stubs} is a synonym,
+intended for compatibility with future releases, where generation of stubs
+for other instructions may be implemented.
+
 @cindex @samp{--linker-allocated-gregs} command line option, MMIX
 Usually a two-operand-expression (@pxref{GREG-base}) without a matching
 @samp{GREG} directive is treated as an error by @code{@value{AS}}.  When

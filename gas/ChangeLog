@@ -1,3 +1,27 @@
+2003-10-18  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	Generate BFD_RELOC_MMIX_PUSHJ_STUBBABLE for PUSHJ when possible.
+	* doc/c-mmix.texi (MMIX-Opts): Document --no-pushj-stubs and
+	--no-stubs.
+	* config/tc-mmix.c: Include limits.h.  Expand on mmix_relax_table
+	comment.
+	(expand_op, mmix_next_semicolon_is_eoln): Fix head comment.
+	(pushj_stubs): New variable.
+	(OPTION_NOPUSHJSTUBS, STATE_PUSHJSTUB, PUSHJSTUB_MIN)
+	(PUSHJSTUB_MAX): New macros.
+	(md_longopts): New options "--no-pushj-stubs" and synonym
+	"--no-stubs".
+	(mmix_relax_table): Handle new entry for STATE_PUSHJSTUB.
+	(md_parse_option): Handle OPTION_NOPUSHJSTUBS.
+	(md_estimate_size_before_relax): Modify STATE_PUSHJ state for
+	PUSHJ stub relaxation.
+	(md_convert_frag): Handle STATE_PUSHJSTUB.
+	(md_apply_fix3): Handle BFD_RELOC_MMIX_PUSHJ_STUBBABLE.
+	(tc_gen_reloc): Ditto.
+	(mmix_md_relax_frag): Handle PUSHJ stub relaxation.
+	* config/tc-mmix.h (TC_SEGMENT_INFO_TYPE): Define.
+	(struct mmix_segment_info_type): New.
+
 2003-10-17  Paul Dale  <pauli@snapgear.com>
 	    Bernardo Innocenti  <bernie@develer.com>
 
