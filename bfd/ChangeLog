@@ -1,5 +1,11 @@
 Wed Jun 15 01:34:07 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* elfcode.h (NAME(bfd_elf,size_dynamic_sections)): Add sinterpptr
+	argument, and set it to the .interp section.
+	* bfd-in.h (bfd_elf32_size_dynamic_sections): Update prototype.
+	(bfd_elf64_size_dynamic_sections): Likewise.
+	* bfd-in2.h: Rebuilt.
+
 	* coff-sparc.c (SWAP_OUT_RELOC_EXTRA): Define to clear the r_spare
 	field of the reloc rather than letting it be garbage.
 

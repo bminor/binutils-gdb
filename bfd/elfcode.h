@@ -1278,17 +1278,6 @@ assign_section_numbers (abfd)
 
   section_number = 1;
 
-  t->shstrtab_section = section_number++;
-  elf_elfheader (abfd)->e_shstrndx = t->shstrtab_section;
-  t->shstrtab_hdr.sh_size = elf_shstrtab (abfd)->length;
-  t->shstrtab_hdr.contents = (PTR) elf_shstrtab (abfd)->tab;
-
-  if (abfd->symcount > 0)
-    {
-      t->symtab_section = section_number++;
-      t->strtab_section = section_number++;
-    }
-
   for (sec = abfd->sections; sec; sec = sec->next)
     {
       struct bfd_elf_section_data *d = elf_section_data (sec);
@@ -1298,6 +1287,17 @@ assign_section_numbers (abfd)
 	d->rel_idx = 0;
       else
 	d->rel_idx = section_number++;
+    }
+
+  t->shstrtab_section = section_number++;
+  elf_elfheader (abfd)->e_shstrndx = t->shstrtab_section;
+  t->shstrtab_hdr.sh_size = elf_shstrtab (abfd)->length;
+  t->shstrtab_hdr.contents = (PTR) elf_shstrtab (abfd)->tab;
+
+  if (abfd->symcount > 0)
+    {
+      t->symtab_section = section_number++;
+      t->strtab_section = section_number++;
     }
 
   elf_elfheader (abfd)->e_shnum = section_number;
@@ -4735,9 +4735,10 @@ static const size_t elf_buckets[] =
    addresses of the various sections.  */
 
 boolean
-NAME(bfd_elf,size_dynamic_sections) (output_bfd, info)
+NAME(bfd_elf,size_dynamic_sections) (output_bfd, info, sinterpptr)
      bfd *output_bfd;
      struct bfd_link_info *info;
+     asection **sinterpptr;
 {
   bfd *dynobj;
   size_t dynsymcount;
@@ -4747,6 +4748,8 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, info)
   size_t bucketcount;
   struct elf_backend_data *bed;
 
+  *sinterpptr = NULL;
+
   dynobj = elf_hash_table (info)->dynobj;
   dynsymcount = elf_hash_table (info)->dynsymcount;
 
@@ -4754,6 +4757,9 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, info)
      do here.  */
   if (dynobj == NULL)
     return true;
+
+  *sinterpptr = bfd_get_section_by_name (dynobj, ".interp");
+  BFD_ASSERT (*sinterpptr != NULL);
 
   /* Set the size of the .dynsym and .hash sections.  We counted the
      number of dynamic symbols in elf_link_add_object_symbols.  We

@@ -532,9 +532,9 @@ extern boolean bfd_elf32_record_link_assignment
 extern boolean bfd_elf64_record_link_assignment
   PARAMS ((bfd *, struct bfd_link_info *, const char *));
 extern boolean bfd_elf32_size_dynamic_sections
-  PARAMS ((bfd *, struct bfd_link_info *));
+  PARAMS ((bfd *, struct bfd_link_info *, struct sec **));
 extern boolean bfd_elf64_size_dynamic_sections
-  PARAMS ((bfd *, struct bfd_link_info *));
+  PARAMS ((bfd *, struct bfd_link_info *, struct sec **));
 
 /* SunOS shared library support routines for the linker.  */
 
