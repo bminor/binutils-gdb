@@ -1,3 +1,11 @@
+Fri Mar  5 17:16:26 1993  K. Richard Pixley  (rich@rtl.cygnus.com)
+
+	* configure.in: accept mips-sgi-irix4* for irix4.
+
+Fri Mar  5 07:49:48 1993  Steve Chamberlain  (sac@lisa.cygnus.com)
+
+	* z8k-tdep.c (print_register_hook): Lint.
+
 Thu Mar  4 17:42:03 1993  John Gilmore  (gnu@cygnus.com)
 
 	Lint fixes from Paul Eggert (eggert@twinsun.com):

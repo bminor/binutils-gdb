@@ -57,7 +57,7 @@ m88k-*-*)		gdb_host=m88k ;;
 mips-dec-*)		gdb_host=decstation ;;
 mips-little-*)		gdb_host=littlemips ;;
 mips-sgi-irix3)		gdb_host=irix3 ;;
-mips-sgi-irix4)		gdb_host=irix4 ;;
+mips-sgi-irix4*)	gdb_host=irix4 ;;
 mips-sony-*)		gdb_host=bigmips ;;
 
 none-*-*)		gdb_host=none ;;
