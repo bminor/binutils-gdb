@@ -27,6 +27,8 @@ asi.d
 asi.s
 membar.d
 membar.s
+mismatch.exp
+mism-1.s
 prefetch.d
 prefetch.s
 rdpr.d
