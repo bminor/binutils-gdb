@@ -1,5 +1,8 @@
 Tue Feb 28 12:53:09 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elfcode.h (elf_sort_hdrs): Sort empty sections before non-empty
+	sections, if they have the same VMA.
+
 	* config.bfd (i[345]86-*-linuxelf*): New target.  Use i386-lelf.
 	(i[345]86-*-gnuelf*): New target.  Use i386-gelf.
 	* config/i386-lelf.mt: New file.
