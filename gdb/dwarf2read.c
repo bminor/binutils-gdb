@@ -793,6 +793,10 @@ static void read_lexical_block_scope (struct die_info *, struct dwarf2_cu *);
 static int dwarf2_get_pc_bounds (struct die_info *,
 				 CORE_ADDR *, CORE_ADDR *, struct dwarf2_cu *);
 
+static void get_scope_pc_bounds (struct die_info *,
+				 CORE_ADDR *, CORE_ADDR *,
+				 struct dwarf2_cu *);
+
 static void dwarf2_add_field (struct field_info *, struct die_info *,
 			      struct dwarf2_cu *);
 
@@ -1874,30 +1878,11 @@ psymtab_to_symtab_1 (struct partial_symtab *pst)
   /* Do line number decoding in read_file_scope () */
   process_die (dies, &cu);
 
-  if (!dwarf2_get_pc_bounds (dies, &lowpc, &highpc, &cu))
-    {
-      /* Some compilers don't define a DW_AT_high_pc attribute for
-         the compilation unit.   If the DW_AT_high_pc is missing,
-         synthesize it, by scanning the DIE's below the compilation unit.  */
-      highpc = 0;
-      if (dies->child != NULL)
-	{
-	  child_die = dies->child;
-	  while (child_die && child_die->tag)
-	    {
-	      if (child_die->tag == DW_TAG_subprogram)
-		{
-		  CORE_ADDR low, high;
+  /* Some compilers don't define a DW_AT_high_pc attribute for the
+     compilation unit.  If the DW_AT_high_pc is missing, synthesize
+     it, by scanning the DIE's below the compilation unit.  */
+  get_scope_pc_bounds (dies, &lowpc, &highpc, &cu);
 
-		  if (dwarf2_get_pc_bounds (child_die, &low, &high, &cu))
-		    {
-		      highpc = max (highpc, high);
-		    }
-		}
-	      child_die = sibling_die (child_die);
-	    }
-	}
-    }
   symtab = end_symtab (highpc + baseaddr, objfile, SECT_OFF_TEXT (objfile));
 
   /* Set symtab language to language from DW_AT_language.
@@ -2029,27 +2014,7 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
   bfd *abfd = objfile->obfd;
   struct line_header *line_header = 0;
 
-  if (!dwarf2_get_pc_bounds (die, &lowpc, &highpc, cu))
-    {
-      if (die->child != NULL)
-	{
-	  child_die = die->child;
-	  while (child_die && child_die->tag)
-	    {
-	      if (child_die->tag == DW_TAG_subprogram)
-		{
-		  CORE_ADDR low, high;
-
-		  if (dwarf2_get_pc_bounds (child_die, &low, &high, cu))
-		    {
-		      lowpc = min (lowpc, low);
-		      highpc = max (highpc, high);
-		    }
-		}
-	      child_die = sibling_die (child_die);
-	    }
-	}
-    }
+  get_scope_pc_bounds (die, &lowpc, &highpc, cu);
 
   /* If we didn't find a lowpc, set it to highpc to avoid complaints
      from finish_block.  */
@@ -2438,6 +2403,68 @@ dwarf2_get_pc_bounds (struct die_info *die, CORE_ADDR *lowpc,
   *lowpc = low;
   *highpc = high;
   return ret;
+}
+
+/* Get the low and high pc's represented by the scope DIE, and store
+   them in *LOWPC and *HIGHPC.  If the correct values can't be
+   determined, set *LOWPC to -1 and *HIGHPC to 0.  */
+
+static void
+get_scope_pc_bounds (struct die_info *die,
+		     CORE_ADDR *lowpc, CORE_ADDR *highpc,
+		     struct dwarf2_cu *cu)
+{
+  CORE_ADDR best_low = (CORE_ADDR) -1;
+  CORE_ADDR best_high = (CORE_ADDR) 0;
+  CORE_ADDR current_low, current_high;
+
+  if (dwarf2_get_pc_bounds (die, &current_low, &current_high, cu))
+    {
+      best_low = current_low;
+      best_high = current_high;
+    }
+  else
+    {
+      struct die_info *child = die->child;
+
+      while (child && child->tag)
+	{
+	  switch (child->tag) {
+	  case DW_TAG_subprogram:
+	    if (dwarf2_get_pc_bounds (child, &current_low, &current_high, cu))
+	      {
+		best_low = min (best_low, current_low);
+		best_high = max (best_high, current_high);
+	      }
+	    break;
+	  case DW_TAG_namespace:
+	    /* FIXME: carlton/2004-01-16: Should we do this for
+	       DW_TAG_class_type/DW_TAG_structure_type, too?  I think
+	       that current GCC's always emit the DIEs corresponding
+	       to definitions of methods of classes as children of a
+	       DW_TAG_compile_unit or DW_TAG_namespace (as opposed to
+	       the DIEs giving the declarations, which could be
+	       anywhere).  But I don't see any reason why the
+	       standards says that they have to be there.  */
+	    get_scope_pc_bounds (child, &current_low, &current_high, cu);
+
+	    if (current_low != ((CORE_ADDR) -1))
+	      {
+		best_low = min (best_low, current_low);
+		best_high = max (best_high, current_high);
+	      }
+	    break;
+	  default:
+	    /* Ignore. */
+	    break;
+	  }
+
+	  child = sibling_die (child);
+	}
+    }
+
+  *lowpc = best_low;
+  *highpc = best_high;
 }
 
 /* Add an aggregate field to the field list.  */

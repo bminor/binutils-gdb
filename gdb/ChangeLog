@@ -1,3 +1,12 @@
+2004-01-22  David Carlton  <carlton@kealia.com>
+
+	* dwarf2read.c (psymtab_to_symtab_1): Calculate lowpc, highpc via
+	get_scope_pc_bounds.
+	(read_file_scope): Ditto.
+	(get_scope_pc_bounds): New function, produced by extracting code
+	from the above two functions, consolidating it, and adding support
+	for DW_TAG_namespace.
+
 2004-01-22  Mark Kettenis  <kettenis@gnu.org>
 
 	* osabi.c (MAX_NOTESZ): New define.
