@@ -805,6 +805,10 @@ check_stub_type (type)
   if (TYPE_FLAGS(type) & TYPE_FLAG_STUB)
     {
       char* name = type_name_no_tag (type);
+      /* FIXME: shouldn't we separately check the TYPE_NAME and the
+	 TYPE_TAG_NAME, and look in STRUCT_NAMESPACE and/or VAR_NAMESPACE
+	 as appropriate?  (this code was written before TYPE_NAME and
+	 TYPE_TAG_NAME were separate).  */
       struct symbol *sym;
       if (name == NULL)
 	{
