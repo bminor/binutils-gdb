@@ -1221,7 +1221,9 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	vax-tdep.c \
 	vx-share/xdr_ld.c vx-share/xdr_ptrace.c vx-share/xdr_rdb.c \
 	win32-nat.c \
-	xcoffread.c xcoffsolib.c z8k-tdep.c
+	xcoffread.c xcoffsolib.c \
+	xstormy16-tdep.c \
+	z8k-tdep.c
 
 udip2soc.o: $(srcdir)/29k-share/udi/udip2soc.c $(udiheaders)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/29k-share/udi/udip2soc.c
@@ -2041,6 +2043,9 @@ sparc-tdep.o: sparc-tdep.c $(floatformat_h) $(defs_h) $(gdbcore_h) \
 	$(arch_utils_h) $(regcache_h)
 
 sparcl-tdep.o: sparcl-tdep.c $(defs_h) $(gdbcore_h) $(target_h) $(regcache_h)
+
+xstormy16-tdep.o: xstormy16-tdep.c $(defs_h) $(value_h) $(inferior_h) \
+	$(symfile_h) $(arch_utils_h) $(regcache_h) $(gdbcore_h)
 
 dsrec.o: dsrec.c $(defs_h) srec.h
 

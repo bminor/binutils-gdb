@@ -1,3 +1,10 @@
+2001-12-13  Corinna Vinschen  <vinschen@redhat.com>
+
+	* Makefile.in: Add support for xstormy16.
+	* configure.tgt: Ditto.
+	* xstormy16-tdep.c: New file.
+	* config/xstormy16/xstormy16.mt: New file.
+
 2001-12-13  Andreas Schwab  <schwab@suse.de>
 
 	* MAINTAINERS (write-after-approval): Add myself.

@@ -278,6 +278,8 @@ sparc86x-*-*)		gdb_target=sparclite ;;
 sparc64-*-linux*)	gdb_target=sp64linux ;;
 sparc64-*-*)		gdb_target=sp64 ;;
 
+xstormy16-*-*)          gdb_target=xstormy16 ;;
+
 vax-*-*)		gdb_target=vax ;;
 
 fr30-*-*)		gdb_target=fr30
@@ -303,4 +305,5 @@ cris)		gdb_multi_arch=yes ;;
 d10v)		gdb_multi_arch=yes ;;
 m68hc11)	gdb_multi_arch=yes ;;
 mn10300)	gdb_multi_arch=yes ;;
+xstormy16)      gdb_multi_arch=yes ;;
 esac
