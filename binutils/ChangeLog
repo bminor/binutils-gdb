@@ -1,3 +1,7 @@
+2001-12-10  Jakub Jelinek  <jakub@redhat.com>
+
+	* objcopy.c (setup_section): Copy entsize.
+
 2001-12-07  Geoffrey Keating  <geoffk@redhat.com>
 
 	* readelf.c (guess_is_rela): Add support for stormy16.

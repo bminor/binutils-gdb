@@ -1602,6 +1602,9 @@ setup_section (ibfd, isection, obfdarg)
       goto loser;
     }
 
+  /* Copy merge entity size.  */
+  osection->entsize = isection->entsize;
+
   /* This used to be mangle_section; we do here to avoid using
      bfd_get_section_by_name since some formats allow multiple
      sections with the same name.  */
