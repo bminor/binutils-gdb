@@ -1,19 +1,19 @@
 Mon Jun 16 18:56:27 1997  Geoff Keating  <geoffk@ozemail.com.au>
 
 	* elf32-ppc.c (ppc_elf_relocate_section): Don't emit R_PPC_REL*
- 	relocs in shared libraries which refer to local symbols.  Cope
- 	with addend when processing a GOT relocation.
+	relocs in shared libraries which refer to local symbols.  Cope
+	with addend when processing a GOT relocation.
 
 	* elf32-ppc.c (ppc_elf_size_dynamic_sections): Only create symbols
 	for sections that the linker didn't create.
 	(ppc_elf_finish_dynamic_sections): Only try to write out a section
- 	symbol if it was created in ppc_elf_size_dynamic_sections.
+	symbol if it was created in ppc_elf_size_dynamic_sections.
 	(ppc_elf_relocate_section): Complain if we have to generate a reloc
 	relative to a section for which we didn't output a symbol.
 
 	* elf32-ppc.c (ppc_elf_size_dynamic_sections): Clean up.  PLT
- 	relocs are 'rela' relocs, like everything else.  .rela.plt is not
- 	a read-only section, so we don't have to special-case it.
+	relocs are 'rela' relocs, like everything else.  .rela.plt is not
+	a read-only section, so we don't have to special-case it.
 
 	* elf32-ppc.c (ppc_elf_adjust_dynamic_symbol): Entries in the
 	.rela.bss section are (of course) 'rela' relocs not 'rel' relocs.
@@ -119,8 +119,8 @@ Wed Jun 11 00:00:07 1997  Ian Lance Taylor  <ian@cygnus.com>
 	* elflink.h (elf_link_output_extsym): Call finish_dynamic_symbol
 	for a symbol which is being forced to be local.
 	* elf32-i386.c (elf_i386_relocate_section): Write out the
- 	relocation value for a GOT reloc for a symbol which is turning
- 	into a local symbol.
+	relocation value for a GOT reloc for a symbol which is turning
+	into a local symbol.
 	(elf_i386_finish_dynamic_symbol): If a symbol is turning into a
 	local symbol, write out a RELATIVE reloc rather than a GLOB_DAT
 	reloc.
@@ -162,7 +162,7 @@ Mon Jun  9 12:34:21 1997  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.
 Thu Jun  5 15:52:45 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* cofflink.c (_bfd_coff_generic_relocate_section): Write a long,
- 	not a bfd_vma, to the base file, to match how dlltool reads it.
+	not a bfd_vma, to the base file, to match how dlltool reads it.
 
 Tue Jun  3 16:57:45 1997  Nick Clifton  <nickc@cygnus.com>
 
@@ -205,7 +205,7 @@ Wed May 28 09:48:43 1997  Nick Clifton  <nickc@cygnus.com>
 Tue May 27 19:42:03 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 	* cofflink.c (_bfd_coff_final_link): Initialize global_to_static
- 	member.
+	member.
 
 Tue May 27 14:34:08 1997  Nick Clifton  <nickc@cygnus.com>
 
@@ -296,7 +296,7 @@ Wed May 21 09:58:10 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* cofflink.c (mark_relocs): Add new function to mark symbols which
 	are used by relocations.
-  	(_bfd_coff_link_input_bfd): Add call to mark_relocs() and code to
+	(_bfd_coff_link_input_bfd): Add call to mark_relocs() and code to
 	suppress the skipping of symbols that have thus been marked.
 
 Tue May 20 18:45:26 1997  Ian Lance Taylor  <ian@cygnus.com>
@@ -318,10 +318,10 @@ Mon May 19 14:26:36 1997  Mark Alexander  <marka@cygnus.com>
 end-sanitize-tic80
 Fri May 16 10:23:03 1997  Jeffrey A Law  (law@cygnus.com)
 
-        * elf-m10300.c (elf32_mn10300_relax_section): Read in all
-        the symbols associated with each BFD.
-        (mn10300_elf_relax_delete_bytes): Don't adjust the same symbol
-        more than once.
+	* elf-m10300.c (elf32_mn10300_relax_section): Read in all
+	the symbols associated with each BFD.
+	(mn10300_elf_relax_delete_bytes): Don't adjust the same symbol
+	more than once.
 	* elf-m10200.c: Likewise.
 	* elf32-m32r.c: Likewise.
 	* elf32-sh.c: Likewise.
@@ -329,9 +329,9 @@ Fri May 16 10:23:03 1997  Jeffrey A Law  (law@cygnus.com)
 Fri May 16 12:10:52 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elflink.h (elf_link_add_object_symbols): Don't decrease the
- 	alignment of a common symbol.  If two symbols that look like
- 	common symbols are found in two shared libraries, and the size is
- 	different, use the larger size, and warn if --warn-common.  If a
+	alignment of a common symbol.  If two symbols that look like
+	common symbols are found in two shared libraries, and the size is
+	different, use the larger size, and warn if --warn-common.  If a
 	common symbol overrides a definition in a shared library, set the
 	size to the larger size, and warn if --warn-common.
 
@@ -371,7 +371,7 @@ Fri May  9 10:15:27 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* coffcode.h (coff_mkobject_hook): Added call to
 	coff_arm_bfd_set_private_flags().
-  	(coff_set_arch_mach_hook): Added code to set machine type based on
+	(coff_set_arch_mach_hook): Added code to set machine type based on
 	bits stored in internal flags.
   	(coff_set_flags): Added code to set the new bits in the flags
 	field based on the machine number.
