@@ -116,20 +116,36 @@ case "${target}" in
 	;;
   z8k*-*-*)		sim_target=z8k ;;
   sparc64-*-*)
-	sim_target=none # Don't build erc32 if sparc64.
+	only_if_gcc=yes
+	if test "x${with_cgen}" = xyes ; then
+		sim_target=sparc
+		extra_subdirs="${extra_subdirs} testsuite"
+	else
+		sim_target=none # Don't build erc32 if sparc64.
+	fi
 	;;
   sparclite*-*-* | sparc86x*-*-*)
 	# The SPARC simulator can only be compiled by gcc.
-	sim_target=erc32
 	only_if_gcc=yes
+	if test "x${with_cgen}" = xyes ; then
+		sim_target=sparc
+		extra_subdirs="${extra_subdirs} testsuite"
+	else
+		sim_target=erc32
+	fi
 	;;
   sparc*-*-*)
 	# The SPARC simulator can only be compiled by gcc.
-	sim_target=erc32
 	only_if_gcc=yes
-	# Unfortunately erc32 won't build on many hosts, so only enable
-	# it if the user really really wants it.
-	only_if_enabled=yes
+	if test "x${with_cgen}" = xyes ; then
+		sim_target=sparc
+		extra_subdirs="${extra_subdirs} testsuite"
+	else
+		# Unfortunately erc32 won't build on many hosts, so only enable
+		# it if the user really really wants it.
+		only_if_enabled=yes
+		sim_target=erc32
+	fi
 	;;
   *)			sim_target=none ;;
 esac
