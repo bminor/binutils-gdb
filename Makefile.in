@@ -1535,7 +1535,7 @@ all-tgas: all-libiberty all-bfd all-opcodes
 all-time:
 all-tix: all-tcl all-tk
 # start-sanitize-ide
-all-vmake: all-tcl all-tk all-itcl all-libide all-tix all-libide
+all-vmake: all-tcl all-tk all-itcl all-tix all-libide
 # end-sanitize-ide
 all-wdiff:
 all-target-winsup: all-target-newlib all-target-libiberty all-target-librx all-target-libio configure-target-winsup 
