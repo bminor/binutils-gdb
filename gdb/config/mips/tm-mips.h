@@ -42,7 +42,8 @@ extern int mips_fpu;
 /* Advance PC across any function entry prologue instructions
    to reach some "real" code.  */
 
-#define SKIP_PROLOGUE(pc)	pc = mips_skip_prologue(pc)
+#define SKIP_PROLOGUE(pc)	pc = mips_skip_prologue (pc, 0)
+extern CORE_ADDR mips_skip_prologue PARAMS ((CORE_ADDR addr, int lenient));
 
 /* Immediately after a function call, return the saved pc.
    Can't always go through the frames for this because on some machines

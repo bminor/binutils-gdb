@@ -30,8 +30,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symfile.h"
 #include "objfiles.h"
 
+#include "opcode/mips.h"
+
 #define VM_MIN_ADDRESS (unsigned)0x400000
 
+static int mips_in_lenient_prologue PARAMS ((CORE_ADDR, CORE_ADDR));
+
 /* Some MIPS boards don't support floating point, so we permit the
    user to turn it off.  */
 int mips_fpu = 1;
@@ -315,14 +319,14 @@ init_extra_frame_info(fci)
 {
   extern struct obstack frame_cache_obstack;
   /* Use proc_desc calculated in frame_chain */
-  mips_extra_func_info_t proc_desc = fci->next ? cached_proc_desc :
-      find_proc_desc(fci->pc, fci->next);
+  mips_extra_func_info_t proc_desc =
+    fci->next ? cached_proc_desc : find_proc_desc(fci->pc, fci->next);
 
   fci->saved_regs = (struct frame_saved_regs*)
     obstack_alloc (&frame_cache_obstack, sizeof(struct frame_saved_regs));
-  bzero(fci->saved_regs, sizeof(struct frame_saved_regs));
+  memset (fci->saved_regs, 0, sizeof (struct frame_saved_regs));
   fci->proc_desc =
-      proc_desc == &temp_proc_desc ? 0 : proc_desc;
+    proc_desc == &temp_proc_desc ? 0 : proc_desc;
   if (proc_desc)
     {
       int ireg;
@@ -339,32 +343,41 @@ init_extra_frame_info(fci)
 	fci->frame = READ_FRAME_REG(fci, PROC_FRAME_REG(proc_desc))
 		      + PROC_FRAME_OFFSET(proc_desc);
 
-      if (proc_desc == &temp_proc_desc)
-	  *fci->saved_regs = temp_saved_regs;
+      /* If this is the innermost frame, and we are still in the
+	 prologue (loosely defined), then the registers may not have
+	 been saved yet.  But they haven't been clobbered either, so
+	 it's fine to say they have not been saved.  */
+      if (fci->next == NULL
+	  && mips_in_lenient_prologue (PROC_LOW_ADDR (proc_desc), fci->pc))
+	/* We already zeroed the saved regs.  */
+	;
+      else if (proc_desc == &temp_proc_desc)
+	*fci->saved_regs = temp_saved_regs;
       else
-      {
+	{
 	  /* find which general-purpose registers were saved */
 	  reg_position = fci->frame + PROC_REG_OFFSET(proc_desc);
 	  mask = kernel_trap ? 0xFFFFFFFF : PROC_REG_MASK(proc_desc);
 	  for (ireg= 31; mask; --ireg, mask <<= 1)
-	      if (mask & 0x80000000)
+	    if (mask & 0x80000000)
 	      {
-		  fci->saved_regs->regs[ireg] = reg_position;
-		  reg_position -= 4;
+		fci->saved_regs->regs[ireg] = reg_position;
+		reg_position -= 4;
 	      }
 	  /* find which floating-point registers were saved */
 	  reg_position = fci->frame + PROC_FREG_OFFSET(proc_desc);
-	  /* The freg_offset points to where the first *double* register is saved.
-	   * So skip to the high-order word. */
+
+	  /* The freg_offset points to where the first *double* register
+	     is saved.  So skip to the high-order word. */
 	  reg_position += 4;
 	  mask = kernel_trap ? 0xFFFFFFFF : PROC_FREG_MASK(proc_desc);
 	  for (ireg = 31; mask; --ireg, mask <<= 1)
-	      if (mask & 0x80000000)
+	    if (mask & 0x80000000)
 	      {
-		  fci->saved_regs->regs[FP0_REGNUM+ireg] = reg_position;
-		  reg_position -= 4;
+		fci->saved_regs->regs[FP0_REGNUM+ireg] = reg_position;
+		reg_position -= 4;
 	      }
-      }
+	}
 
       /* hack: if argument regs are saved, guess these contain args */
       if ((PROC_REG_MASK(proc_desc) & 0xF0) == 0) fci->num_args = -1;
@@ -692,14 +705,32 @@ mips_frame_num_args(fip)
 	return -1;
 }
 
-/* To skip prologues, I use this predicate.  Returns either PC
-   itself if the code at PC does not look like a function prologue;
-   otherwise returns an address that (if we're lucky) follows
-   the prologue. */
+/* Does this instruction involve use of a delay slot?  */
+static int
+is_delayed (insn)
+     unsigned long insn;
+{
+  int i;
+  for (i = 0; i < NUMOPCODES; ++i)
+    if (mips_opcodes[i].pinfo != INSN_MACRO
+	&& (insn & mips_opcodes[i].mask) == mips_opcodes[i].match)
+      break;
+  return i < NUMOPCODES && (mips_opcodes[i].pinfo & ANY_DELAY);
+}
+
+/* To skip prologues, I use this predicate.  Returns either PC itself
+   if the code at PC does not look like a function prologue; otherwise
+   returns an address that (if we're lucky) follows the prologue.  If
+   LENIENT, then we must skip everything which is involved in setting
+   up the frame (it's OK to skip more, just so long as we don't skip
+   anything which might clobber the registers which are being saved.
+   We must skip more in the case where part of the prologue is in the
+   delay slot of a non-prologue instruction).  */
 
 CORE_ADDR
-mips_skip_prologue(pc)
+mips_skip_prologue (pc, lenient)
      CORE_ADDR pc;
+     int lenient;
 {
     struct symbol *f;
     struct block *b;
@@ -710,8 +741,19 @@ mips_skip_prologue(pc)
     /* Skip the typical prologue instructions. These are the stack adjustment
        instruction and the instructions that save registers on the stack
        or in the gcc frame.  */
-    for (offset = 0; offset < 100; offset += 4) {
-	inst = read_memory_integer(pc + offset, 4);
+    for (offset = 0; offset < 100; offset += 4)
+      {
+	char buf[4];
+	int status;
+
+	status = read_memory_nobpt (pc + offset, buf, 4);
+	if (status)
+	  memory_error (status, pc + offset);
+	inst = extract_unsigned_integer (buf, 4);
+
+	if (lenient && is_delayed (inst))
+	  continue;
+
 	if ((inst & 0xffff0000) == 0x27bd0000)	/* addiu $sp,$sp,offset */
 	    seen_sp_adjust = 1;
 	else if ((inst & 0xFFE00000) == 0xAFA00000 && (inst & 0x001F0000))
@@ -759,6 +801,18 @@ mips_skip_prologue(pc)
 
     return pc;
 #endif
+}
+
+/* Is address PC in the prologue (loosely defined) for function at
+   STARTADDR?  */
+
+static int
+mips_in_lenient_prologue (startaddr, pc)
+     CORE_ADDR startaddr;
+     CORE_ADDR pc;
+{
+  CORE_ADDR end_prologue = mips_skip_prologue (startaddr, 1);
+  return pc >= startaddr && pc < end_prologue;
 }
 
 /* Given a return value in `regbuf' with a type `valtype', 

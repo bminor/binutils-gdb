@@ -1,5 +1,11 @@
 Sun Jul 18 15:22:45 1993  Jim Kingdon  (kingdon@rtl.cygnus.com)
 
+	* mips-tdep.c (mips_skip_prologue): New argument lenient.
+	Use read_memory_nobpt.
+	(is_delayed, mips_in_lenient_prologue): New functions.
+	(init_extra_frame_info): If in the prologue, don't use saved registers.
+	* config/mips/tm-mips.h: Declare mips_skip_prologue.
+
 	* partial-stab.h (N_SO): Add the text offset to valu before, not after,
 	passing it to END_PSYMTAB.
 
