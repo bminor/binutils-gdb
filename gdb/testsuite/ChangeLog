@@ -1,3 +1,9 @@
+Tue Jan 10 18:42:07 1995  Jim Kingdon  <kingdon@lioth.cygnus.com>
+
+	* gdb.c++/classes.exp (test_ptype_class_objects, ptype class Foo):
+	Add additional pattern for when "int operator int(void);" appears
+	in a different order.
+
 Mon Jan  9 16:22:46 1995  Jim Kingdon  <kingdon@lioth.cygnus.com>
 
 	* gdb.base/signals.exp: Call gdb_exit and gdb_start.
