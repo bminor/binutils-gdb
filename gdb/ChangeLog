@@ -1,3 +1,9 @@
+2001-01-22  Nicholas Duffek  <nsd@redhat.com>
+
+	* gdbarch.sh (PARM_BOUNDARY): Define.
+	* gdbarch.c: Regenerate.
+	* gdbarch.h: Regenerate.
+
 2001-01-22  J.T. Conklin  <jtc@redback.com>
 
 	* ns32k-tdep.c: #include "frame.h"

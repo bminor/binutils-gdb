@@ -235,6 +235,7 @@ struct gdbarch
   int extra_stack_alignment_needed;
   gdbarch_reg_struct_has_addr_ftype *reg_struct_has_addr;
   gdbarch_save_dummy_frame_tos_ftype *save_dummy_frame_tos;
+  int parm_boundary;
   const struct floatformat * float_format;
   const struct floatformat * double_format;
   const struct floatformat * long_double_format;
@@ -317,6 +318,7 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   generic_get_saved_register,
+  0,
   0,
   0,
   0,
@@ -1341,6 +1343,11 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "SAVE_DUMMY_FRAME_TOS(sp)",
                       XSTRING (SAVE_DUMMY_FRAME_TOS (sp)));
 #endif
+#ifdef PARM_BOUNDARY
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: PARM_BOUNDARY # %s\n",
+                      XSTRING (PARM_BOUNDARY));
+#endif
 #ifdef TARGET_FLOAT_FORMAT
   fprintf_unfiltered (file,
                       "gdbarch_dump: TARGET_FLOAT_FORMAT # %s\n",
@@ -2044,6 +2051,11 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: SAVE_DUMMY_FRAME_TOS = 0x%08lx\n",
                         (long) current_gdbarch->save_dummy_frame_tos
                         /*SAVE_DUMMY_FRAME_TOS ()*/);
+#endif
+#ifdef PARM_BOUNDARY
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: PARM_BOUNDARY = %ld\n",
+                      (long) PARM_BOUNDARY);
 #endif
 #ifdef TARGET_FLOAT_FORMAT
   fprintf_unfiltered (file,
@@ -3916,6 +3928,21 @@ set_gdbarch_save_dummy_frame_tos (struct gdbarch *gdbarch,
                                   gdbarch_save_dummy_frame_tos_ftype save_dummy_frame_tos)
 {
   gdbarch->save_dummy_frame_tos = save_dummy_frame_tos;
+}
+
+int
+gdbarch_parm_boundary (struct gdbarch *gdbarch)
+{
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_parm_boundary called\n");
+  return gdbarch->parm_boundary;
+}
+
+void
+set_gdbarch_parm_boundary (struct gdbarch *gdbarch,
+                           int parm_boundary)
+{
+  gdbarch->parm_boundary = parm_boundary;
 }
 
 const struct floatformat *

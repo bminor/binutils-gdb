@@ -1408,6 +1408,14 @@ extern void set_gdbarch_save_dummy_frame_tos (struct gdbarch *gdbarch, gdbarch_s
 #endif
 #endif
 
+extern int gdbarch_parm_boundary (struct gdbarch *gdbarch);
+extern void set_gdbarch_parm_boundary (struct gdbarch *gdbarch, int parm_boundary);
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (PARM_BOUNDARY)
+#define PARM_BOUNDARY (gdbarch_parm_boundary (current_gdbarch))
+#endif
+#endif
+
 /* Default (value) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (TARGET_FLOAT_FORMAT)
 #define TARGET_FLOAT_FORMAT (default_float_format (current_gdbarch))
