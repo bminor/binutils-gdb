@@ -1424,16 +1424,22 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: GDB_MULTI_ARCH = %d\\n",
                       GDB_MULTI_ARCH);
 EOF
-function_list | while do_read
+function_list | sort -t: +2 | while do_read
 do
     # multiarch functions don't have macros.
-    class_is_multiarch_p && continue
+    if class_is_multiarch_p
+    then
+	printf "  if (GDB_MULTI_ARCH)\n"
+	printf "    fprintf_unfiltered (file,\n"
+	printf "                        \"gdbarch_dump: ${function} = 0x%%08lx\\\\n\",\n"
+	printf "                        (long) current_gdbarch->${function});\n"
+	continue
+    fi
+    printf "#ifdef ${macro}\n"
     if [ "x${returntype}" = "xvoid" ]
     then
-	printf "#if defined (${macro}) && GDB_MULTI_ARCH\n"
+	printf "#if GDB_MULTI_ARCH\n"
 	printf "  /* Macro might contain \`[{}]' when not multi-arch */\n"
-    else
-	printf "#ifdef ${macro}\n"
     fi
     if class_is_function_p
     then
@@ -1446,19 +1452,10 @@ do
 	printf "                      \"gdbarch_dump: ${macro} # %%s\\\\n\",\n"
 	printf "                      XSTRING (${macro}));\n"
     fi
-    printf "#endif\n"
-done
-function_list | while do_read
-do
-    if class_is_multiarch_p
+    if [ "x${returntype}" = "xvoid" ]
     then
-	printf "  if (GDB_MULTI_ARCH)\n"
-	printf "    fprintf_unfiltered (file,\n"
-	printf "                        \"gdbarch_dump: ${function} = 0x%%08lx\\\\n\",\n"
-	printf "                        (long) current_gdbarch->${function});\n"
-	continue
+	printf "#endif\n"
     fi
-    printf "#ifdef ${macro}\n"
     if [ "x${print_p}" = "x()" ]
     then
         printf "  gdbarch_dump_${function} (current_gdbarch);\n"
