@@ -1,3 +1,7 @@
+2001-03-07  Michael Meissner  <meissner@redhat.com>
+
+	* run.c (alloca-conf.h): Delete, no longer provided.
+
 2001-02-22  Ben Elliston  <bje@redhat.com>
 
 	* sim-trace.h (TRACE_VPU_IDX): Add.

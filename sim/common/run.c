@@ -47,8 +47,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "remote-sim.h"
 #include "ansidecl.h"
 
-#include "../libiberty/alloca-conf.h"
-
 static void usage PARAMS ((void));
 extern int optind;
 extern char *optarg;
