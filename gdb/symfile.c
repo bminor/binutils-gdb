@@ -1437,7 +1437,7 @@ deduce_language_from_filename (filename)
   else if (STREQ (c, ".cc") || STREQ (c, ".C") || STREQ (c, ".cxx")
 	   || STREQ (c, ".cpp") || STREQ (c, ".cp") || STREQ (c, ".c++"))
     return language_cplus;
-  else if (STREQ (c, ".java"))
+  else if (STREQ (c, ".java") || STREQ (c, ".class"))
     return language_java;
   else if (STREQ (c, ".ch") || STREQ (c, ".c186") || STREQ (c, ".c286"))
     return language_chill;

@@ -1,3 +1,7 @@
+Thu Apr 23 15:44:39 1998  Per Bothner  <bothner@cygnus.com>
+
+	* symfile.c (deduce_language_from_filename):  .class implies java.
+
 Thu Apr 23 12:52:21 1998  Philippe De Muyter  <phdm@macqel.be>
 
         * configure.in (strerror): Check if function must be declared.
