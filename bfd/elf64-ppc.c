@@ -3866,6 +3866,11 @@ ppc64_elf_edit_opd (obfd, info)
 
 	  sec->_cooked_size = wptr - sec->contents;
 	  sec->reloc_count = write_rel - relstart;
+	  /* Fudge the size too, as this is used later in
+	     elf_bfd_final_link if we are emitting relocs.  */
+	  elf_section_data (sec)->rel_hdr.sh_size
+	    = sec->reloc_count * elf_section_data (sec)->rel_hdr.sh_entsize;
+	  BFD_ASSERT (elf_section_data (sec)->rel_hdr2 == NULL);
 	}
       else if (elf_section_data (sec)->relocs != relstart)
 	free (relstart);

@@ -1,3 +1,8 @@
+2002-11-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (ppc64_elf_edit_opd): When deleting relocs, adjust
+	rel_hdr.sh_size too.
+
 2002-11-18  Klee Dienes  <kdienes@apple.com>
 
 	* Makefile.am (BFD32_LIBS): Add bfdwin.lo, bfdio.lo.
