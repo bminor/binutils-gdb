@@ -180,7 +180,7 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
   int longind;
   int optc;
   bfd_signed_vma val;
-  char *end;
+  const char *end;
 
   enum
   {
@@ -319,7 +319,7 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
       break;
 
     case 'D':
-      val = strtoll (optarg, &end, 0);
+      val = bfd_scan_vma (optarg, &end, 0);
       if (*end != '\0')
 	einfo ("%P: warning: ignoring invalid -D number %s\n", optarg);
       else if (val != -1)
@@ -327,7 +327,7 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
       break;
 
     case 'H':
-      val = strtoul (optarg, &end, 0);
+      val = bfd_scan_vma (optarg, &end, 0);
       if (*end != '\0' || (val & (val - 1)) != 0)
 	einfo ("%P: warning: ignoring invalid -H number %s\n", optarg);
       else
@@ -345,7 +345,7 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
 	 number, we assume the AIX option is intended.  Otherwise, we
 	 assume the usual GNU ld -T option is intended.  We can't just
 	 ignore the AIX option, because gcc passes it to the linker.  */
-      val = strtoull (optarg, &end, 0);
+      val = bfd_scan_vma (optarg, &end, 0);
       if (*end != '\0')
 	{
 	  optind = prevoptind;
@@ -430,7 +430,7 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
       break;
 
     case OPTION_MAXDATA:
-      val = strtoull (optarg, &end, 0);
+      val = bfd_scan_vma (optarg, &end, 0);
       if (*end != '\0')
 	einfo ("%P: warning: ignoring invalid -bmaxdata number %s\n", optarg);
       else
@@ -438,7 +438,7 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
       break;
 
     case OPTION_MAXSTACK:
-      val = strtoull (optarg, &end, 0);
+      val = bfd_scan_vma (optarg, &end, 0);
       if (*end != '\0')
 	einfo ("%P: warning: ignoring invalid -bmaxstack number %s\n",
 	       optarg);
@@ -471,7 +471,7 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
 	 start on.  The offset within the page should still be the
 	 offset within the file, so we need to build an appropriate
 	 expression.  */
-      val = strtoull (optarg, &end, 0);
+      val = bfd_scan_vma (optarg, &end, 0);
       if (*end != '\0')
 	einfo ("%P: warning: ignoring invalid -pD number %s\n", optarg);
       else
@@ -494,7 +494,7 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
       /* This set the page that the .text section is supposed to start
 	 on.  The offset within the page should still be the offset
 	 within the file.  */
-      val = strtoull (optarg, &end, 0);
+      val = bfd_scan_vma (optarg, &end, 0);
       if (*end != '\0')
 	einfo ("%P: warning: ignoring invalid -pT number %s\n", optarg);
       else
@@ -1112,14 +1112,14 @@ gld${EMULATION_NAME}_read_file (filename, import)
 	      if (s != se)
 		{
 		  int status;
-		  char *end;
+		  const char *end;
 
 		  status = is_syscall (s, &syscall_flag);
 
 		  if (0 > status)
 		    {
 		      /* not a system call, check for address */
-		      address = strtoul (s, &end, 0);
+		      address = bfd_scan_vma (s, &end, 0);
 		      if (*end != '\0')
 			{
 			  einfo ("%s:%d: warning: syntax error in import/export file\n",

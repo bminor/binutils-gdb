@@ -1,5 +1,11 @@
 2002-08-28  Alan Modra  <amodra@bigpond.net.au>
 
+	* emultempl/aix.em (gld${EMULATION_NAME}_parse_args): Replace strtoll,
+	strtoul and strtoull with bfd_scan_vma.
+	(gld${EMULATION_NAME}_read_file): Likewise.
+
+2002-08-28  Alan Modra  <amodra@bigpond.net.au>
+
 	* configure.tgt: Remove h8[35]00-*-hms*.  Add h8500-*-rtems*.
 
 2002-08-27  Egor Duda  <deo@logos-m.ru>
