@@ -1,3 +1,8 @@
+Mon Oct  7 11:44:17 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* archive.c (do_slurp_coff_armap): Only treat archive as little
+	endian for i960 COFF.
+
 Fri Oct  4 13:49:01 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* coffcode.h (coff_compute_section_file_positions): Adjust sofar
