@@ -369,6 +369,11 @@ extern boolean _bfd_link_hash_table_init
 extern struct bfd_link_hash_table *_bfd_generic_link_hash_table_create
   PARAMS ((bfd *));
 
+/* Generic link hash table entry creation routine.  */
+struct bfd_hash_entry *generic_link_hash_newfunc
+  PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *,
+           const char *));
+
 /* Generic add symbol routine.  */
 extern boolean _bfd_generic_link_add_symbols
   PARAMS ((bfd *, struct bfd_link_info *));
@@ -383,6 +388,8 @@ extern boolean _bfd_generic_link_add_symbols_collect
 extern boolean _bfd_generic_link_add_archive_symbols
   PARAMS ((bfd *, struct bfd_link_info *,
 	   boolean (*checkfn) (bfd *, struct bfd_link_info *, boolean *)));
+
+
 
 /* Forward declaration to avoid prototype errors.  */
 typedef struct bfd_link_hash_entry _bfd_link_hash_entry;
@@ -495,6 +502,9 @@ extern boolean _bfd_ecoff_locate_line
 extern boolean _bfd_ecoff_get_accumulated_pdr PARAMS ((PTR, bfd_byte *));
 extern boolean _bfd_ecoff_get_accumulated_sym PARAMS ((PTR, bfd_byte *));
 extern boolean _bfd_ecoff_get_accumulated_ss PARAMS ((PTR, bfd_byte *));
+
+extern bfd_vma _bfd_get_gp_value PARAMS ((bfd *));
+extern void _bfd_set_gp_value PARAMS ((bfd *, bfd_vma));
 
 /* And more follows */
 

@@ -3530,7 +3530,9 @@ dummy_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
 #endif
 #else /* ! defined (coff_relocate_section) */
 #define coff_relocate_section NULL
+#ifndef coff_bfd_link_hash_table_create
 #define coff_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
+#endif
 #ifndef coff_bfd_link_add_symbols
 #define coff_bfd_link_add_symbols _bfd_generic_link_add_symbols
 #endif

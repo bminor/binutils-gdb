@@ -30,6 +30,166 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define COFF_DEFAULT_SECTION_ALIGNMENT_POWER (1)
 
+/* We derive a hash table from the basic BFD hash table to
+   hold entries in the function vector.  Aside from the 
+   info stored by the basic hash table, we need the offset
+   of a particular entry within the hash table as well as
+   the offset where we'll add the next entry.  */
+
+struct funcvec_hash_entry
+{
+  /* The basic hash table entry.  */
+  struct bfd_hash_entry root;
+
+  /* The offset within the vectors section where
+     this entry lives.  */
+  bfd_vma offset;
+};
+
+struct funcvec_hash_table
+{
+  /* The basic hash table.  */
+  struct bfd_hash_table root;
+
+  bfd *abfd;
+
+  /* Offset at which we'll add the next entry.  */
+  unsigned int offset;
+};
+
+static struct bfd_hash_entry *
+funcvec_hash_newfunc
+  PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
+
+static boolean
+funcvec_hash_table_init
+  PARAMS ((struct funcvec_hash_table *, bfd *,
+           struct bfd_hash_entry *(*) PARAMS ((struct bfd_hash_entry *,
+                                               struct bfd_hash_table *,
+                                               const char *))));
+
+/* To lookup a value in the function vector hash table.  */
+#define funcvec_hash_lookup(table, string, create, copy) \
+  ((struct funcvec_hash_entry *) \
+   bfd_hash_lookup (&(table)->root, (string), (create), (copy)))
+
+/* The derived h8300 COFF linker table.  Note it's derived from
+   the generic linker hash table, not the COFF backend linker hash
+   table!  We use this to attach additional data structures we
+   need while linking on the h8300.  */
+struct h8300_coff_link_hash_table
+{
+  /* The main hash table.  */
+  struct generic_link_hash_table root;
+
+  /* Section for the vectors table.  This gets attached to a
+     random input bfd, we keep it here for easy access.  */
+  asection *vectors_sec;
+
+  /* Hash table of the functions we need to enter into the function
+     vector.  */
+  struct funcvec_hash_table *funcvec_hash_table;
+};
+
+static struct bfd_link_hash_table *h8300_coff_link_hash_table_create
+  PARAMS ((bfd *));
+
+/* Get the H8/300 COFF linker hash table from a link_info structure.  */
+
+#define h8300_coff_hash_table(p) \
+  ((struct h8300_coff_link_hash_table *) ((coff_hash_table (p))))
+
+/* Initialize fields within a funcvec hash table entry.  Called whenever
+   a new entry is added to the funcvec hash table.  */
+
+static struct bfd_hash_entry *
+funcvec_hash_newfunc (entry, gen_table, string)
+     struct bfd_hash_entry *entry;
+     struct bfd_hash_table *gen_table;
+     const char *string;
+{
+  struct funcvec_hash_entry *ret;
+  struct funcvec_hash_table *table;
+
+  ret = (struct funcvec_hash_entry *) entry;
+  table = (struct funcvec_hash_table *) gen_table;
+
+  /* Allocate the structure if it has not already been allocated by a
+     subclass.  */
+  if (ret == NULL)
+    ret = ((struct funcvec_hash_entry *)
+           bfd_hash_allocate (gen_table,
+                              sizeof (struct funcvec_hash_entry)));
+  if (ret == NULL)
+    return NULL;
+
+  /* Call the allocation method of the superclass.  */
+  ret = ((struct funcvec_hash_entry *)
+         bfd_hash_newfunc ((struct bfd_hash_entry *) ret, gen_table, string));
+
+  if (ret == NULL)
+    return NULL;
+
+  /* Note where this entry will reside in the function vector table.  */
+  ret->offset = table->offset;
+
+  /* Bump the offset at which we store entries in the function
+     vector.  We'd like to bump up the size of the vectors section,
+     but it's not easily available here.  */
+  if (bfd_get_mach (table->abfd) == bfd_mach_h8300)
+    table->offset += 2;
+  else if (bfd_get_mach (table->abfd) == bfd_mach_h8300h)
+    table->offset += 4;
+  else
+    return NULL;
+
+  /* Everything went OK.  */
+  return (struct bfd_hash_entry *) ret;
+}
+
+/* Initialize the function vector hash table.  */
+
+static boolean
+funcvec_hash_table_init (table, abfd, newfunc)
+     struct funcvec_hash_table *table;
+     bfd *abfd;
+     struct bfd_hash_entry *(*newfunc) PARAMS ((struct bfd_hash_entry *,
+                                                struct bfd_hash_table *,
+                                                const char *));
+{
+  /* Initialize our local fields, then call the generic initialization
+     routine.  */
+  table->offset = 0;
+  table->abfd = abfd;
+  return (bfd_hash_table_init (&table->root, newfunc));
+}
+
+/* Create the derived linker hash table.  We use a derived hash table
+   basically to hold "static" information during an h8/300 coff link
+   without using static variables.  */
+
+static struct bfd_link_hash_table *
+h8300_coff_link_hash_table_create (abfd)
+     bfd *abfd;
+{
+  struct h8300_coff_link_hash_table *ret;
+  ret = ((struct h8300_coff_link_hash_table *)
+         bfd_alloc (abfd, sizeof (struct h8300_coff_link_hash_table)));
+  if (ret == NULL)
+    return NULL;
+  if (!_bfd_link_hash_table_init (&ret->root.root, abfd, generic_link_hash_newfunc))
+    {
+      bfd_release (abfd, ret);
+      return NULL;
+    }
+
+  /* Initialize our data.  */
+  ret->vectors_sec = NULL;
+  ret->funcvec_hash_table = NULL;
+
+  /* OK.  Everything's intialized, return the base pointer.  */
+  return &ret->root.root;
+}
 
 /* special handling for H8/300 relocs.
    We only come here for pcrel stuff and return normally if not an -r link.
@@ -333,6 +493,7 @@ h8300_reloc16_estimate(abfd, input_section, reloc, shrink, link_info)
 
 */
 
+
 static void
 h8300_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
 			   dst_ptr)
@@ -397,7 +558,6 @@ h8300_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
 	break;
       }
 
-    case R_MEM_INDIRECT: 	/* Temporary  */
     case R_RELBYTE:
       {
 	unsigned int gap = bfd_coff_reloc16_get_value (reloc, link_info,
@@ -582,19 +742,300 @@ h8300_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
       }
 
       break;
-    default:
 
+    /* An 8bit memory indirect instruction (jmp/jsr).
+
+       There's several things that need to be done to handle
+       this relocation.
+
+       If this is a reloc against the absolute symbol, then
+       we should handle it just R_RELBYTE.  Likewise if it's
+       for a symbol with a value ge 0 and le 0xff.
+
+       Otherwise it's a jump/call through the function vector,
+       and the linker is expected to set up the function vector
+       and put the right value into the jump/call instruction.  */
+    case R_MEM_INDIRECT:
+      {
+	/* We need to find the symbol so we can determine it's
+	   address in the function vector table.  */
+	asymbol *symbol;
+	bfd_vma value;
+	char *name;
+	struct funcvec_hash_entry *h;
+	asection *vectors_sec = h8300_coff_hash_table (link_info)->vectors_sec;
+
+	/* First see if this is a reloc against the absolute symbol
+	   or against a symbol with a nonnegative value <= 0xff.  */
+	symbol = *(reloc->sym_ptr_ptr);
+	value = bfd_coff_reloc16_get_value (reloc, link_info, input_section);
+	if (symbol == bfd_abs_section_ptr->symbol
+	    || (value >= 0 && value <= 0xff))
+	  {
+	    /* This should be handled in a manner very similar to
+	       R_RELBYTES.   If the value is in range, then just slam
+	       the value into the right location.  Else trigger a
+	       reloc overflow callback.  */
+	    if (value >= 0 && value <= 0xff)
+	      {
+		bfd_put_8 (abfd, value, data + dst_address);
+		dst_address += 1;
+		src_address += 1;
+	      }
+	    else
+	      {
+		if (! ((*link_info->callbacks->reloc_overflow)
+		       (link_info, bfd_asymbol_name (*reloc->sym_ptr_ptr),
+			reloc->howto->name, reloc->addend, input_section->owner,
+			input_section, reloc->address)))
+		  abort ();
+	      }
+	    break;
+	  }
+
+	/* This is a jump/call through a function vector, and we're
+	   expected to create the function vector ourselves. 
+
+	   First look up this symbol in the linker hash table -- we need
+	   the derived linker symbol which holds this symbol's index
+	   in the function vector.  */
+	name = symbol->name;
+	if (symbol->flags & BSF_LOCAL)
+	  {
+	    char *new_name = bfd_malloc (strlen (name) + 9);
+	    if (new_name == NULL)
+	      abort ();
+
+	    strcpy (new_name, name);
+	    sprintf (new_name + strlen (name), "_%08x",
+		     (int)symbol->section);
+	    name = new_name;
+	  }
+
+	h = funcvec_hash_lookup (h8300_coff_hash_table (link_info)->funcvec_hash_table,
+				 name, false, false);
+
+	/* This shouldn't ever happen.  If it does that means we've got
+	   data corruption of some kind.  Aborting seems like a reasonable
+	   think to do here.  */
+	if (h == NULL || vectors_sec == NULL)
+	  abort ();
+
+	/* Place the address of the function vector entry into the
+	   reloc's address.  */
+	bfd_put_8 (abfd,
+		   vectors_sec->output_offset + h->offset,
+		   data + dst_address);
+
+	dst_address++;
+	src_address++;
+
+	/* Now create an entry in the function vector itself.  */
+	if (bfd_get_mach (input_section->owner) == bfd_mach_h8300)
+	  bfd_put_16 (abfd,
+		      bfd_coff_reloc16_get_value (reloc,
+						  link_info,
+						  input_section),
+		      vectors_sec->contents + h->offset);
+	else if (bfd_get_mach (input_section->owner) == bfd_mach_h8300h)
+	  bfd_put_32 (abfd,
+		      bfd_coff_reloc16_get_value (reloc,
+						  link_info,
+						  input_section),
+		      vectors_sec->contents + h->offset);
+	else
+	  abort ();
+
+	/* Gross.  We've already written the contents of the vector section
+	   before we get here...  So we write it again with the new data.  */
+	bfd_set_section_contents (vectors_sec->output_section->owner,
+				  vectors_sec->output_section,
+				  vectors_sec->contents,
+				  vectors_sec->output_offset,
+				  vectors_sec->_raw_size);
+	break;
+      }
+
+    default:
       abort ();
       break;
 
     }
+
   *src_ptr = src_address;
   *dst_ptr = dst_address;
+}
 
+
+/* Routine for the h8300 linker.
+
+   This routine is necessary to handle the special R_MEM_INDIRECT
+   relocs on the h8300.  It's responsible for generating a vectors
+   section and attaching it to an input bfd as well as sizing
+   the vectors section.  It also creates our vectors hash table.
+
+   It uses the generic linker routines to actually add the symbols.
+   from this BFD to the bfd linker hash table.  It may add a few
+   selected static symbols to the bfd linker hash table.  */
+
+static boolean
+h8300_bfd_link_add_symbols(abfd, info)
+     bfd *abfd;
+     struct bfd_link_info *info;
+{
+  asection *sec;
+  struct funcvec_hash_table *funcvec_hash_table;
+
+  /* If we haven't created a vectors section, do so now.  */
+  if (!h8300_coff_hash_table (info)->vectors_sec)
+    {
+      flagword flags;
+
+      /* Make sure the appropriate flags are set, including SEC_IN_MEMORY.  */
+      flags = (SEC_ALLOC | SEC_LOAD
+	       | SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_READONLY);
+      h8300_coff_hash_table (info)->vectors_sec = bfd_make_section (abfd,
+								    ".vectors");
+
+      /* If the section wasn't created, or we couldn't set the flags,
+	 quit quickly now, rather than dieing a painful death later.  */
+      if (! h8300_coff_hash_table (info)->vectors_sec
+	  || ! bfd_set_section_flags (abfd,
+				      h8300_coff_hash_table(info)->vectors_sec,
+				      flags))
+	return false;
+
+      /* Also create the vector hash table.  */
+      funcvec_hash_table = ((struct funcvec_hash_table *)
+	bfd_alloc (abfd, sizeof (struct funcvec_hash_table)));
+
+      if (!funcvec_hash_table)
+	return false;
+
+      /* And initialize the funcvec hash table.  */
+      if (!funcvec_hash_table_init (funcvec_hash_table, abfd,
+				    funcvec_hash_newfunc))
+	{
+	  bfd_release (abfd, funcvec_hash_table);
+	  return false;
+	}
+
+      /* Store away a pointer to the funcvec hash table.  */
+      h8300_coff_hash_table (info)->funcvec_hash_table = funcvec_hash_table;
+    }
+
+  /* Load up the function vector hash table.  */
+  funcvec_hash_table = h8300_coff_hash_table (info)->funcvec_hash_table;
+
+  /* Add the symbols using the generic code.  */
+  _bfd_generic_link_add_symbols (abfd, info);
+
+  /* Now scan the relocs for all the sections in this bfd; create
+     additional space in the .vectors section as needed.  */
+  for (sec = abfd->sections; sec; sec = sec->next)
+    {
+      unsigned long reloc_size, reloc_count, i;
+      asymbol **symbols;
+      arelent **relocs;
+
+      /* Suck in the relocs, symbols & canonicalize them.  */
+      reloc_size = bfd_get_reloc_upper_bound (abfd, sec);
+      if (reloc_size <= 0)
+	continue;
+
+      relocs = (arelent **)bfd_malloc ((size_t)reloc_size);
+      if (!relocs)
+	return false;
+
+      /* The symbols should have been read in by _bfd_generic link_add_symbols
+	 call abovec, so we can cheat and use the pointer to them that was
+	 saved in the above call.  */
+      symbols = _bfd_generic_link_get_symbols(abfd);
+      reloc_count = bfd_canonicalize_reloc (abfd, sec, relocs, symbols);
+
+      /* Now walk through all the relocations in this section.  */
+      for (i = 0; i < reloc_count; i++)
+	{
+	  arelent *reloc = relocs[i];
+	  asymbol *symbol = *(reloc->sym_ptr_ptr);
+	  char *name;
+
+	  /* We've got an indirect reloc.  See if we need to add it
+	     to the function vector table.   At this point, we have
+	     to add a new entry for each unique symbol referenced
+	     by an R_MEM_INDIRECT relocation except for a reloc
+	     against the absolute section symbol.  */
+	  if (reloc->howto->type == R_MEM_INDIRECT
+	      && symbol != bfd_abs_section_ptr->symbol)
+
+	    {
+	      struct funcvec_hash_entry *h;
+
+	      name = symbol->name;
+	      if (symbol->flags & BSF_LOCAL)
+		{
+		  char *new_name = bfd_malloc (strlen (name) + 9);
+
+		  if (new_name == NULL)
+		    abort ();
+
+		  strcpy (new_name, name);
+		  sprintf (new_name + strlen (name), "_%08x",
+			   (int)symbol->section);
+		  name = new_name;
+		}
+
+	      /* Look this symbol up in the function vector hash table.  */
+	      h = funcvec_hash_lookup (h8300_coff_hash_table (info)->funcvec_hash_table,
+				       name, false, false);
+
+
+	      /* If this symbol isn't already in the hash table, add
+		 it and bump up the size of the hash table.  */
+	      if (h == NULL)
+		{
+		  h = funcvec_hash_lookup (h8300_coff_hash_table (info)->funcvec_hash_table,
+					   name, true, true);
+		  if (h == NULL)
+		    {
+		      free (relocs);
+		      return false;
+		    }
+
+		  /* Bump the size of the vectors section.  Each vector
+		     takes 2 bytes on the h8300 and 4 bytes on the h8300h.  */
+		  if (bfd_get_mach (abfd) == bfd_mach_h8300)
+		    h8300_coff_hash_table (info)->vectors_sec->_raw_size += 2;
+		  else if (bfd_get_mach (abfd) == bfd_mach_h8300h)
+		    h8300_coff_hash_table (info)->vectors_sec->_raw_size += 4;
+		}
+	    }
+	}
+
+      /* We're done with the relocations, release them.  */
+      free (relocs);
+    }
+
+  /* Now actually allocate some space for the function vector.  It's
+     wasteful to do this more than once, but this is easier.  */
+  if (h8300_coff_hash_table (info)->vectors_sec->_raw_size != 0)
+    {
+      /* Free the old contents.  */
+      if (h8300_coff_hash_table (info)->vectors_sec->contents)
+	free (h8300_coff_hash_table (info)->vectors_sec->contents);
+
+      /* Allocate new contents.  */
+      h8300_coff_hash_table (info)->vectors_sec->contents
+	= bfd_malloc (h8300_coff_hash_table (info)->vectors_sec->_raw_size);
+    }
+
+  return true;
 }
 
 #define coff_reloc16_extra_cases h8300_reloc16_extra_cases
 #define coff_reloc16_estimate h8300_reloc16_estimate
+#define coff_bfd_link_add_symbols h8300_bfd_link_add_symbols
+#define coff_bfd_link_hash_table_create h8300_coff_link_hash_table_create
 
 #define COFF_LONG_FILENAMES
 #include "coffcode.h"
