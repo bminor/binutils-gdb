@@ -69,20 +69,16 @@ static void init_hpux_thread_ops (void);
 
 static struct target_ops hpux_thread_ops;
 
-static int find_active_thread (void);
+static ptid_t find_active_thread (void);
 
 static int cached_thread;
-static int cached_active_thread;
 static cma__t_int_tcb cached_tcb;
 
-static int
+static ptid_t
 find_active_thread (void)
 {
   static cma__t_int_tcb tcb;
   CORE_ADDR tcb_ptr;
-
-  if (cached_active_thread != 0)
-    return cached_active_thread;
 
   read_memory ((CORE_ADDR) P_cma__g_current_thread,
 	       (char *) &tcb_ptr,
@@ -90,17 +86,18 @@ find_active_thread (void)
 
   read_memory (tcb_ptr, (char *) &tcb, sizeof tcb);
 
-  return (cma_thread_get_unique (&tcb.prolog.client_thread) << 16) 
-         | PIDGET (main_ptid);
+  return (ptid_build (PIDGET (main_ptid), 0,
+                      cma_thread_get_unique (&tcb.prolog.client_thread)));
 }
 
-static cma__t_int_tcb *find_tcb (int thread);
+static cma__t_int_tcb *find_tcb (ptid_t ptid);
 
 static cma__t_int_tcb *
-find_tcb (int thread)
+find_tcb (ptid_t ptid)
 {
   cma__t_known_object queue_header;
   cma__t_queue *queue_ptr;
+  int thread = ptid_get_tid (ptid);
 
   if (thread == cached_thread)
     return &cached_tcb;
@@ -120,14 +117,14 @@ find_tcb (int thread)
       read_memory ((CORE_ADDR) tcb_ptr, (char *) &cached_tcb, sizeof cached_tcb);
 
       if (cached_tcb.header.type == cma__c_obj_tcb)
-	if (cma_thread_get_unique (&cached_tcb.prolog.client_thread) == thread >> 16)
+	if (cma_thread_get_unique (&cached_tcb.prolog.client_thread) == thread)
 	  {
 	    cached_thread = thread;
 	    return &cached_tcb;
 	  }
     }
 
-  error ("Can't find TCB %d,%d", thread >> 16, thread & 0xffff);
+  error ("Can't find TCB %d", thread);
   return NULL;
 }
 
@@ -193,7 +190,6 @@ hpux_thread_resume (ptid_t ptid, int step, enum target_signal signo)
   child_ops.to_resume (ptid, step, signo);
 
   cached_thread = 0;
-  cached_active_thread = 0;
 
   do_cleanups (old_chain);
 }
@@ -257,7 +253,7 @@ hpux_thread_fetch_registers (int regno)
   int i;
   int first_regno, last_regno;
 
-  tcb_ptr = find_tcb (PIDGET (inferior_ptid));
+  tcb_ptr = find_tcb (inferior_ptid);
 
   old_chain = save_inferior_ptid ();
 
@@ -319,7 +315,7 @@ hpux_thread_store_registers (int regno)
   int i;
   int first_regno, last_regno;
 
-  tcb_ptr = find_tcb (PIDGET (inferior_ptid));
+  tcb_ptr = find_tcb (inferior_ptid);
 
   old_chain = save_inferior_ptid ();
 
@@ -532,7 +528,7 @@ hpux_pid_to_str (ptid_t ptid)
   static char buf[100];
   int pid = PIDGET (ptid);
 
-  sprintf (buf, "Thread %d", pid >> 16);
+  sprintf (buf, "Thread %ld", ptid_get_tid (ptid));
 
   return buf;
 }
