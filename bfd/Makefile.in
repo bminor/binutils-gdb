@@ -21,8 +21,8 @@
 # $Id$
 
 srcdir = .
-destdir = /usr/local
-libdir = $(destdir)/H-$(host_alias)/T-independent/lib
+ddestdir = /usr/local
+libdir = $(ddestdir)/lib
 docdir = $(srcdir)/doc
 
 RANLIB = ranlib
@@ -31,13 +31,14 @@ AR_FLAGS = clq
 INCDIR = $(srcdir)/../include
 CSEARCH = -I. -I$(srcdir) -I$(INCDIR)
 DEP = mkdep
+MINUS_G=-g
 
 
 #### host and target dependent Makefile fragments come in here.
 ###
 
 TARGETLIB = libbfd.a
-CFLAGS = -g $(HDEFINES) $(TDEFINES) $(CSEARCH) $(CSWITCHES) # -DINTEL960VERSION
+CFLAGS = $(MINUS_G) $(HDEFINES) $(TDEFINES) $(CSEARCH) $(CSWITCHES) # -DINTEL960VERSION
 
 
 BFD_LIBS = libbfd.o opncls.o bfd.o archive.o targets.o cache.o \

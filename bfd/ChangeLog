@@ -1,3 +1,10 @@
+Mon Nov 11 20:30:18 1991  Steve Chamberlain  (sac at cygnus.com)
+
+	* Makefile.in: standardize on MINUS_G to disable debugging
+	* coff-m88k.c: create coff armaps instead of bsd ones.
+	* opncls.c (bfd_close_all_done), (bfd_close): Mask out random bits
+	when calling chmod.
+
 Mon Nov 11 19:07:32 1991  Fred Fish  (fnf at cygnus.com)
 
 	* elf.c:  Additions to support ELF format core files.

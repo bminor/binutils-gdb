@@ -88,10 +88,10 @@ static reloc_howto_type howto_table[] =
 
 
 
-#define coff_write_armap bsd_write_armap
+#define coff_write_armap coff_write_armap
 
 
-bfd_target m88k_bcs_vec =
+bfd_target m88kbcs_vec =
 {
   "m88kbcs",			/* name */
   bfd_target_coff_flavour,
