@@ -1,3 +1,9 @@
+Tue Jul  5 15:42:09 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* config/tc-alpha.c (load_expression): Handle 32-bit addends.
+	(gpdisp_hi16_howto): Now points to const.
+	(load_insn_table, alpha_ip): Fix uses of const.
+
 Tue Jul  5 13:54:00 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* config/obj-elf.h (S_GET_ALIGN, S_SET_ALIGN): Define.
@@ -124,7 +130,7 @@ Wed Jun 15 20:44:46 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 	(DBG_S_C_REAL8_G, DBG_S_C_COMPLX8_G): G_float versions of
 	REAL8 and COMPLX8; not used yet, because gcc outputs the same
 	.stabs for `double' regardless of whether `-mg' is used.
-	config/obj-vms.c (VMS_typedef_parse) [case 'r']: add entries
+	* config/obj-vms.c (VMS_typedef_parse) [case 'r']: add entries
 	for gcc2's predefined types "complex float", "complex double",
 	and "complex long double" (identical to complex double).
 
@@ -314,7 +320,7 @@ Fri May 27 10:05:53 1994  Ken Raeburn  (raeburn@cygnus.com)
 	for `long long' support.  Their values come from the existing
 	DSC$K_DTYPE_QU and DSC$K_DTYPE_Q macros in <descrip.h>.  The
 	VMS debugger now recognizes `long long' variables correctly.
-	config/obj-vms.c (VMS_typedef_parse) [case 'r']: add entries
+	* config/obj-vms.c (VMS_typedef_parse) [case 'r']: add entries
 	for gcc2's predefined types "long double" (same as double, as
 	per gcc's current state), "long long int", "long long unsigned
 	int", and final `otherwise' case (to avoid uninitialized type
