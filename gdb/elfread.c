@@ -293,10 +293,10 @@ elf_symtab_read (objfile, dynamic)
       if (number_of_symbols < 0)
 	error ("Can't read symbols from %s: %s", bfd_get_filename (objfile->obfd),
 	       bfd_errmsg (bfd_get_error ()));
-      offset = ANOFFSET (objfile->section_offsets, sym->section->index);
       for (i = 0; i < number_of_symbols; i++)
 	{
 	  sym = symbol_table[i];
+	  offset = ANOFFSET (objfile->section_offsets, sym->section->index);
 	  if (sym->name == NULL || *sym->name == '\0')
 	    {
 	      /* Skip names that don't exist (shouldn't happen), or names

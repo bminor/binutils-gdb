@@ -1,3 +1,9 @@
+2000-02-14  Amit S. Kale  <akale@veritas.com>
+
+	* elfread.c (elf_symtab_read): Move the use of sym to after where
+	it is set.
+	Checked in by Jim Kingdon  <kingdon@redhat.com>
+
 Mon Feb 14 15:39:01 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* MAINTAINERS: Make Nick Duffek the UnixWare threads maintainer.
