@@ -21,6 +21,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "sysdep.h"
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 #include "getopt.h"
 #include "bfdlink.h"
 #include "config.h"
@@ -55,6 +56,7 @@ parse_args (argc, argv)
      int argc;
      char **argv;
 {
+  int i;
   int ingroup = 0;
 
   /* Starting the short option string with '-' is for programs that
@@ -63,7 +65,7 @@ parse_args (argc, argv)
      as if it were the argument of an option with character code 1.  */
 
   const char *shortopts =
-    "-a:A:B::b:c:de:F::G:giL:l:Mm:NnO:o:R:rSsT:tu:VvXxY:y:()";
+    "-a:A:B::b:c:de:F::G:giL:l:Mm:NnO:o:R:rSsT:tu:VvXxY:y:z:()";
 
   /* 150 isn't special; it's just an arbitrary non-ASCII char value.  */
 
@@ -158,6 +160,23 @@ parse_args (argc, argv)
     {"base-file", required_argument, NULL, OPTION_BASE_FILE},
     {NULL, no_argument, NULL, 0}
   };
+
+  /* The -G option is ambiguous on different platforms.  Sometimes it
+     specifies the largest data size to put into the small data
+     section.  Sometimes it is equivalent to --shared.  Unfortunately,
+     the first form takes an argument, while the second does not.
+
+     We need to permit the --shared form because on some platforms,
+     such as Solaris, gcc -shared will pass -G to the linker.
+
+     To permit either usage, we look through the argument list.  If we
+     find -G not followed by a number, we change it into --shared.
+     This will work for most normal cases.  */
+  for (i = 1; i < argc; i++)
+    if (strcmp (argv[i], "-G") == 0
+	&& (i + 1 >= argc
+	    || ! isdigit (argv[i + 1][0])))
+      argv[i] = (char *) "--shared";
 
   while (1)
     {
@@ -451,6 +470,11 @@ parse_args (argc, argv)
 	  break;
 	case 'y':
 	  add_ysym (optarg);
+	  break;
+	case 'z':
+	  /* We accept and ignore this option for Solaris
+             compatibility.  Actually, on Solaris, optarg is not
+             ignored.  Someday we should handle it correctly.  FIXME.  */
 	  break;
 	case OPTION_SPLIT_BY_RELOC:
 	  config.split_by_reloc = atoi (optarg);
