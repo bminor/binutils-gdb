@@ -1,6 +1,9 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
+*** Changes since GDB 6.3
+
+
 *** Changes in GDB 6.3:
 
 * GDB works with GCC -feliminate-dwarf2-dups

@@ -1,7 +1,11 @@
+2004-10-25  Andrew Cagney  <cagney@gnu.org>
+
+	* NEWS: Add Changes since GDB 6.3 section.
+
 2004-10-23  Andreas Schwab  <schwab@suse.de>
 
-	* ada-lang.c (grow_vect): Return the new array instead of		
-	expecting pointer to pointer to avoid violation of aliasing rules.	
+	* ada-lang.c (grow_vect): Return the new array instead of
+	expecting pointer to pointer to avoid violation of aliasing rules.
 	* ada-lang.h (GROW_VECT): Adapt call to grow_vect.
 
 2004-10-23  Ulrich Weigand  <uweigand@de.ibm.com>
