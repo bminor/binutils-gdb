@@ -424,57 +424,54 @@ obj_read_begin_hook ()
   return;
 }
 
-void 
+void
 obj_crawl_symbol_chain (headers)
      object_headers *headers;
 {
   symbolS *symbolP;
   symbolS **symbolPP;
+  int symbol_number = 0;
 
-  {				/* crawl symbol table */
-    register int symbol_number = 0;
-
+  symbolPP = &symbol_rootP;	/* -> last symbol chain link. */
+  while ((symbolP = *symbolPP) != NULL)
     {
-      symbolPP = &symbol_rootP;	/* -> last symbol chain link. */
-      while ((symbolP = *symbolPP) != NULL)
+      resolve_symbol_value (symbolP);
+
+     /* OK, here is how we decide which symbols go out into the
+	brave new symtab.  Symbols that do are:
+
+	* symbols with no name (stabd's?)
+	* symbols with debug info in their N_TYPE
+	* symbols with \1 as their 3rd character (numeric labels)
+	* "local labels" needed for PIC fixups
+
+	Symbols that don't are:
+	* symbols that are registers
+
+	All other symbols are output.  We complain if a deleted
+	symbol was marked external.  */
+
+      if (!S_IS_REGISTER (symbolP))
 	{
-	  resolve_symbol_value (symbolP);
-
-	  /* OK, here is how we decide which symbols go out into the
-	     brave new symtab.  Symbols that do are:
-	    
-	     * symbols with no name (stabd's?)
-	     * symbols with debug info in their N_TYPE
-	    
-	     Symbols that don't are:
-	     * symbols that are registers
-	     * symbols with \1 as their 3rd character (numeric labels)
-	     * "local labels" as defined by S_LOCAL_NAME(name)
-	     if the -L switch was passed to gas.
-	    
-	     All other symbols are output.  We complain if a deleted
-	     symbol was marked external.  */
-
-
-	  if (!S_IS_REGISTER (symbolP))
+	  symbolP->sy_number = symbol_number++;
+	  symbolP->sy_name_offset = 0;
+	  symbolPP = &(symbol_next (symbolP));
+	}
+      else
+	{
+	  if (S_IS_EXTERNAL (symbolP) || !S_IS_DEFINED (symbolP))
 	    {
-	      symbolP->sy_name_offset = 0;
-	      symbolPP = &(symbol_next (symbolP));
-	    }
-	  else
-	    {
-	      if (S_IS_EXTERNAL (symbolP) || !S_IS_DEFINED (symbolP))
-		{
-		  as_bad ("Local symbol %s never defined", S_GET_NAME (symbolP));
-		}		/* oops. */
+	      as_bad ("Local symbol %s never defined", S_GET_NAME (symbolP));
+	    }			/* oops. */
 
-	    }			/* if this symbol should be in the output */
-	}			/* for each symbol */
-    }
-    H_SET_STRING_SIZE (headers, string_byte_count);
-    H_SET_SYMBOL_TABLE_SIZE (headers, symbol_number);
-  }				/* crawl symbol table */
+	  /* Unhook it from the chain.  */
+	  *symbolPP = symbol_next (symbolP);
+	}			/* if this symbol should be in the output */
 
+    }			/* for each symbol */
+
+  H_SET_STRING_SIZE (headers, string_byte_count);
+  H_SET_SYMBOL_TABLE_SIZE (headers, symbol_number);
 }				/* obj_crawl_symbol_chain() */
 
 
@@ -4133,19 +4130,16 @@ VMS_Store_Repeated_Data (Repeat_Count, Pointer, Size, Record_Type)
   switch (Size)
     {
     case 4:
-      if (Pointer[3] != 0
-	  || Pointer[2] != 0)
-	goto do_it;
+      if (Pointer[3] != 0 || Pointer[2] != 0) break;
+      /* else FALLTHRU */
     case 2:
-      if (Pointer[1] != 0)
-	goto do_it;
+      if (Pointer[1] != 0) break;
+      /* else FALLTHRU */
     case 1:
-      if (Pointer[0] != 0)
-	goto do_it;
+      if (Pointer[0] != 0) break;
       /* zero value */
       return;
     default:
-    do_it:
       break;
     }
   /*
@@ -4859,18 +4853,26 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 	   *	Local initialized data
 	   */
 	case N_DATA:
-	  /*
-	   *	Make a VMS data symbol entry
-	   */
-	  vsp = (struct VMS_Symbol *) xmalloc (sizeof (*vsp));
-	  vsp->Symbol = sp;
-	  vsp->Size = VMS_Initialized_Data_Size (sp, text_siz + data_siz);
-	  vsp->Psect_Index = Data_Psect;
-	  vsp->Psect_Offset = Local_Initialized_Data_Size;
-	  Local_Initialized_Data_Size += vsp->Size;
-	  vsp->Next = VMS_Symbols;
-	  VMS_Symbols = vsp;
-	  sp->sy_obj = vsp;
+	  {
+	    char *sym_name = S_GET_NAME (sp);
+
+	    /* Always suppress local numeric labels.  */
+	    if (!sym_name || strlen (sym_name) <= 2 || sym_name[2] != '\001')
+	      {
+		/*
+		 *	Make a VMS data symbol entry.
+		 */
+		vsp = (struct VMS_Symbol *) xmalloc (sizeof (*vsp));
+		vsp->Symbol = sp;
+		vsp->Size = VMS_Initialized_Data_Size (sp, text_siz + data_siz);
+		vsp->Psect_Index = Data_Psect;
+		vsp->Psect_Offset = Local_Initialized_Data_Size;
+		Local_Initialized_Data_Size += vsp->Size;
+		vsp->Next = VMS_Symbols;
+		VMS_Symbols = vsp;
+		sp->sy_obj = vsp;
+	      }
+	  }
 	  break;
 	  /*
 	   *	Global Text definition
