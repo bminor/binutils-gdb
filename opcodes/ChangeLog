@@ -1,3 +1,7 @@
+Wed Apr  2 12:23:53 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* mips16-opc.c: Add mul and dmul macros.
+
 Tue Apr  1 16:27:45 1997  Klaus Kaempf  <kkaempf@progis.de>
 
 	* makefile.vms: Update CFLAGS, add clean target.
