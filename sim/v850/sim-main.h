@@ -224,6 +224,10 @@ sim_core_write_unaligned_##LEN (STATE_CPU (simulator, 0), \
 				PC, sim_core_write_map, (ADDR), (DATA))
 
 
+/* compare cccc field against PSW */
+unsigned int condition_met (unsigned code);
+
+
 /* Debug/tracing calls */
 
 enum op_types
@@ -307,6 +311,19 @@ do { \
     trace_values[0] = (IN1); \
     trace_values[1] = (IN2); \
     trace_num_values = 2; \
+  } \
+} while (0)
+
+#define TRACE_ALU_INPUT3(IN0, IN1, IN2) \
+do { \
+  if (TRACE_ALU_P (CPU)) { \
+    trace_module = "alu"; \
+    trace_pc = cia; \
+    trace_name = itable[MY_INDEX].name; \
+    trace_values[0] = (IN0); \
+    trace_values[1] = (IN1); \
+    trace_values[2] = (IN2); \
+    trace_num_values = 3; \
   } \
 } while (0)
 

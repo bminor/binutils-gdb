@@ -305,7 +305,7 @@ trace_output (result)
 
 
 /* Returns 1 if the specific condition is met, returns 0 otherwise.  */
-static unsigned int
+unsigned int
 condition_met (unsigned code)
 {
   unsigned int psw = PSW;
@@ -2894,21 +2894,6 @@ OP_70 (void)
   trace_output (OP_LOAD16);
   
   return 2;
-}
-
-/* end-sanitize-v850e */
-/* start-sanitize-v850e */
-/* cmov reg1, reg2, reg3 */
-int
-OP_32007E0 (void)
-{
-  trace_input ("cmov", OP_REG_REG_REG, 0);
-
-  State.regs[ OP[2] >> 11 ] = condition_met (OP[0]) ? State.regs[ OP[0] ] : State.regs[ OP[1] ];
-  
-  trace_output (OP_REG_REG_REG);
-
-  return 4;
 }
 
 /* end-sanitize-v850e */

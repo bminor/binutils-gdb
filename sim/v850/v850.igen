@@ -353,7 +353,9 @@ rrrrr,111111,RRRRR + wwwww,011001,cccc,0:XI:::cmov
 // end-sanitize-v850eq
 "cmov <cccc>, r<reg1>, r<reg2>, r<reg3>"
 {
-  COMPAT_2 (OP_32007E0 ());
+  TRACE_ALU_INPUT3 (cccc, GR[reg1], GR[reg2]);
+  GR[reg3] = condition_met (cccc) ? GR[reg1] : GR[reg2];
+  TRACE_ALU_RESULT (GR[reg3]);
 }
 
 // end-sanitize-v850e
