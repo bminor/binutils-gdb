@@ -1,3 +1,8 @@
+Mon Nov 15 00:40:38 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+        * paread.c (pa_symfile_init): Look for the $TEXT$ section rather
+	than the .text section.
+
 Sun Nov 14 00:28:13 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* stabsread.c: Remove #if 0'd dbx_class_complaint.  We now handle

@@ -425,9 +425,9 @@ pa_symfile_init (objfile)
   /* FIXME POKING INSIDE BFD DATA STRUCTURES */
 
   DBX_SYMFILE_INFO (objfile)->stab_section_info = NULL;
-  DBX_TEXT_SECT (objfile) = bfd_get_section_by_name (sym_bfd, ".text");
+  DBX_TEXT_SECT (objfile) = bfd_get_section_by_name (sym_bfd, "$TEXT$");
   if (!DBX_TEXT_SECT (objfile))
-    error ("Can't find .text section in symbol file");
+    error ("Can't find $TEXT$ section in symbol file");
 
   /* FIXME: I suspect this should be external_nlist.  The size of host
      types like long and bfd_vma should not affect how we read the
