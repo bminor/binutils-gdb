@@ -35,6 +35,7 @@ README
 a29k.sc
 alpha.sc
 armaout.sc
+armcoff.sc
 aout.sc
 ebmon29k.sc
 elf.sc

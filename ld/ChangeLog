@@ -1,3 +1,10 @@
+Thu Sep 28 01:40:37 1995  Doug Evans  <dje@deneb.cygnus.com>
+
+	* Makefile.in (earmcoff.c): Build.
+	* configure.tgt (arm-*-coff): New target
+	* emulparms/armcoff.sh: New file.
+	* scripttempl/armcoff.sc: New file.
+
 Tue Sep 26 10:59:32 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* scripttempl/i386coff.sc: Remove .data2; no longer needed.
