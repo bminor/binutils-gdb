@@ -1,3 +1,8 @@
+Fri Jan 15 10:27:02 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Makefile.in (GCC_FLAGS_TO_PASS): New variable.
+	(all-gcc, install-gcc, subdir_do): Use it.
+
 Wed Jan 13 17:06:45 1993  Jim Wilson  (wilson@sphagnum.cygnus.com)
 
 	* Makefile.in: Rename uninstalled gcc driver from gcc to xgcc.

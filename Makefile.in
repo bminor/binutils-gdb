@@ -226,6 +226,36 @@ TARGET_FLAGS_TO_PASS = \
 	"prefix=$(prefix)" \
 	"tooldir=$(tooldir)" 
 
+# Flags to pass down to gcc.  gcc builds a library, libgcc.a, so it
+# unfortunately needs the native compiler and the target ar and
+# ranlib.  Keep these in alphabetical order, please.
+GCC_FLAGS_TO_PASS = \
+	"AR=$(AR_FOR_TARGET)" \
+	"AR_FLAGS=$(AR_FLAGS)" \
+	"AR_FOR_TARGET=$(AR_FOR_TARGET)" \
+	"AS=$(AS)" \
+	"BISON=$(BISON)" \
+	"CXX=$(CXX)" \
+	"CXX_FOR_BUILD=$(CXX_FOR_BUILD)" \
+	"CXXFLAGS=$(CXXFLAGS)" \
+	"CC=$(CC)" \
+	"CC_FOR_BUILD=$(CC_FOR_BUILD)" \
+	"CFLAGS=$(CFLAGS)" \
+	"INSTALL=$(INSTALL)" \
+	"INSTALL_DATA=$(INSTALL_DATA)" \
+	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
+	"LDFLAGS=$(LDFLAGS)" \
+	"LEX=$(LEX)" \
+	"LOADLIBES=$(LOADLIBES)" \
+	"MAKEINFO=$(MAKEINFO)" \
+	"NM=$(NM)" \
+	"RANLIB=$(RANLIB_FOR_TARGET)" \
+	"RANLIB_FOR_TARGET=$(RANLIB_FOR_TARGET)" \
+	"XTRAFLAGS=$(XTRAFLAGS)" \
+	"exec_prefix=$(exec_prefix)" \
+	"prefix=$(prefix)" \
+	"tooldir=$(tooldir)" 
+
 # The first rule in the file had better be this one.  Don't put any above it.
 all:	$(ALL)
 
@@ -655,8 +685,9 @@ install-flex: force
 all-gcc: all-libiberty all-byacc all-binutils
 	@if [ -f ./gcc/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
+		srcroot=`cd $(srcdir); pwd` ; export srcroot ; \
 		(cd ./gcc; \
-		$(MAKE) $(FLAGS_TO_PASS) all) ; \
+		$(MAKE) $(GCC_FLAGS_TO_PASS) all) ; \
 	else \
 		true ; \
 	fi
@@ -664,8 +695,9 @@ all-gcc: all-libiberty all-byacc all-binutils
 install-gcc: force
 	@if [ -f ./gcc/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
+		srcroot=`cd $(srcdir); pwd` ; export srcroot ; \
 		(cd ./gcc; \
-		$(MAKE) $(FLAGS_TO_PASS) install) ; \
+		$(MAKE) $(GCC_FLAGS_TO_PASS) install) ; \
 	else \
 		true ; \
 	fi
@@ -1277,6 +1309,13 @@ subdir_do:
 	      else exit 1 ; fi \
 	      ;; \
 	$(end-sanitize-chill) \
+	    gcc) \
+	      if (rootme=`pwd` ; export rootme ; \
+		  srcroot=`cd $(srcdir); pwd` ; export srcroot ; \
+		  cd ./$$i ; \
+		  $(MAKE) $(GCC_FLAGS_TO_PASS) $(DO)) ; then true ; \
+	      else exit 1 ; fi \
+	      ;; \
 	    *) \
 	      if (rootme=`pwd` ; export rootme ; \
 		  cd ./$$i ; \
