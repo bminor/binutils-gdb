@@ -1523,7 +1523,7 @@ alpha_fix_adjustable (f)
 	const char *name;
 	int offset = 0;
 
-	if (! S_IS_DEFINED (sym) || S_FORCE_RELOC (sym))
+	if (S_FORCE_RELOC (sym))
 	  return 0;
 
 	switch (S_GET_OTHER (sym) & STO_ALPHA_STD_GPLOAD)
