@@ -85,8 +85,10 @@ case "${target}" in
   rs6000-*-*)		bfd_target=rs6000 ;;
   sparc-*-solaris2*)	bfd_target=sparc-elf ;;
   sparc-*-sysv4*)	bfd_target=sparc-elf ;;
-  sparc64-*-aout*)	bfd_target=sparc-aout ; target64=true ;; # v9
-  sparc64-*-elf*)	bfd_target=sparc64-elf  ; target64=true ;; # v9
+#	start-sanitize-v9
+  sparc64-*-aout*)	bfd_target=sparc-aout ; target64=true ;;
+  sparc64-*-elf*)	bfd_target=sparc64-elf  ; target64=true ;;
+#	end-sanitize-v9
   sparc*-*-*)		bfd_target=sparc-aout ;;
   tahoe-*-*)		bfd_target=tahoe ;;
   vax-*-vms)		bfd_target=vax-vms ;;
