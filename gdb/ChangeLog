@@ -1,3 +1,12 @@
+2003-07-30  Michael Snyder  <msnyder@redhat.com>
+
+	* structs.h (value_being_returned): Add a struct_addr argument.
+	* infcall.c (call_function_by_hand): Pass struct_addr to 
+	value_being_returned.
+	* infcmd.c (print_return_value): Pass zero as struct_addr.
+	* values.c (value_being_returned): If struct_addr is passed,
+	use it instead of trying to recover it from the inferior.
+
 2003-07-30  Kevin Buettner  <kevinb@redhat.com>
 
 	* mn10300-tdep.c (analyze_dummy_frame): Pass ``pc'' so that

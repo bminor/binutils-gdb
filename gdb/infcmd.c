@@ -1077,10 +1077,11 @@ print_return_value (int structure_return, struct type *value_type)
 
   if (!structure_return)
     {
-      value = value_being_returned (value_type, stop_registers, structure_return);
+      value = value_being_returned (value_type, stop_registers, 0, 0);
       stb = ui_out_stream_new (uiout);
       ui_out_text (uiout, "Value returned is ");
-      ui_out_field_fmt (uiout, "gdb-result-var", "$%d", record_latest_value (value));
+      ui_out_field_fmt (uiout, "gdb-result-var", "$%d", 
+			record_latest_value (value));
       ui_out_text (uiout, " = ");
       value_print (value, stb->stream, 0, Val_no_prettyprint);
       ui_out_field_stream (uiout, "return-value", stb);
@@ -1088,20 +1089,23 @@ print_return_value (int structure_return, struct type *value_type)
     }
   else
     {
-      /* We cannot determine the contents of the structure because
-	 it is on the stack, and we don't know where, since we did not
-	 initiate the call, as opposed to the call_function_by_hand case */
 #ifdef VALUE_RETURNED_FROM_STACK
+      /* We cannot determine the contents of the structure because it
+	 is on the stack, and we don't know where, since we did not
+	 initiate the call, as opposed to the call_function_by_hand
+	 case.  */
       value = 0;
       ui_out_text (uiout, "Value returned has type: ");
       ui_out_field_string (uiout, "return-type", TYPE_NAME (value_type));
       ui_out_text (uiout, ".");
       ui_out_text (uiout, " Cannot determine contents\n");
 #else
-      value = value_being_returned (value_type, stop_registers, structure_return);
+      value = value_being_returned (value_type, stop_registers, 
+				    structure_return, 0);
       stb = ui_out_stream_new (uiout);
       ui_out_text (uiout, "Value returned is ");
-      ui_out_field_fmt (uiout, "gdb-result-var", "$%d", record_latest_value (value));
+      ui_out_field_fmt (uiout, "gdb-result-var", "$%d", 
+			record_latest_value (value));
       ui_out_text (uiout, " = ");
       value_print (value, stb->stream, 0, Val_no_prettyprint);
       ui_out_field_stream (uiout, "return-value", stb);

@@ -420,7 +420,8 @@ extern struct value *value_subscript (struct value *array, struct value *idx);
 
 extern struct value *value_being_returned (struct type *valtype,
 					   struct regcache *retbuf,
-					   int struct_return);
+					   int struct_return,
+					   CORE_ADDR struct_addr);
 
 extern struct value *value_in (struct value *element, struct value *set);
 

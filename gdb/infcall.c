@@ -421,7 +421,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
       vector.  Hence this direct call.
 
       A follow-on change is to modify this interface so that it takes
-      thread OR frame OR tpid as a parameter, and returns a dummy
+      thread OR frame OR ptid as a parameter, and returns a dummy
       frame handle.  The handle can then be used further down as a
       parameter to generic_save_dummy_frame_tos().  Hmm, thinking
       about it, since everything is ment to be using generic dummy
@@ -445,7 +445,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 	   On a RISC architecture, a void parameterless generic dummy
 	   frame (i.e., no parameters, no result) typically does not
 	   need to push anything the stack and hence can leave SP and
-	   FP.  Similarly, a framelss (possibly leaf) function does
+	   FP.  Similarly, a frameless (possibly leaf) function does
 	   not push anything on the stack and, hence, that too can
 	   leave FP and SP unchanged.  As a consequence, a sequence of
 	   void parameterless generic dummy frame calls to frameless
@@ -1056,8 +1056,10 @@ the function call).", name);
     }
   else
     {
-      struct value *retval = value_being_returned (value_type, retbuf,
-						   struct_return);
+      struct value *retval = value_being_returned (value_type,
+						   retbuf,
+						   struct_return,
+						   struct_addr);
       do_cleanups (retbuf_cleanup);
       return retval;
     }
