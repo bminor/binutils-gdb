@@ -455,7 +455,7 @@ tui_update_breakpoint_info (TuiWinInfoPtr win, int current_only)
                && (strcmp (src->filename, bp->source_file) == 0)
                && bp->line_number == line->lineOrAddr.lineNo)
               || (win == disassemWin
-                  && bp->address == line->lineOrAddr.addr))
+                  && bp->loc->address == line->lineOrAddr.addr))
             {
               if (bp->enable_state == bp_disabled)
                 mode |= TUI_BP_DISABLED;
