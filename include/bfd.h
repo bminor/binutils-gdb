@@ -177,6 +177,8 @@ typedef struct lineno_cache_entry {
 /* object and core file sections */
 
 
+/* Align an address upward to a power of two.  Argument is the power
+   of two, e.g. 8-byte alignment uses argument of 3 (8 == 2^3).  */
 #define	align_power(addr, align)	\
 	( ((addr) + ((1<<(align))-1)) & (-1 << (align)))
 

@@ -1,3 +1,24 @@
+Fri Oct 11 10:58:06 1991  Per Bothner  (bothner at cygnus.com)
+
+	* a.out.host.h: Change SEGMENT_SIZE to 0x1000 for Sony.
+	* bfd.h (align_power): Add (actually move) comment.
+
+Tue Oct  8 15:29:32 1991  Per Bothner  (bothner at cygnus.com)
+
+	* sys/h-rtbsd.h: Define MISSING_VFPRINT (for binutils/bucomm.c).
+
+Sun Oct  6 19:24:39 1991  John Gilmore  (gnu at cygnus.com)
+
+	* aout64.h:  Move struct internal_exec to ../bfd/libaout.h so
+	it can be shared by all `a.out-family' code.  Rename
+	EXTERNAL_LIST_SIZE to EXTERNAL_NLIST_SIZE.  Use basic types
+	for nlist members, and make strx integral rather than pointer.
+	More commentary on n_type values.
+	* bout.h:  Provide a struct external_exec rather than an
+	internal_exec.
+	* m68kcoff.h:  Remove `tagentries' which snuck in from the i960
+	COFF port.
+
 Fri Oct  4 01:25:59 1991  John Gilmore  (gnu at cygnus.com)
 
 	* h8300-opcode.h:  Remove `_enum' from the typedef for an enum.

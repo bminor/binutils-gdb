@@ -9,7 +9,7 @@
 #define SEGMENT_SIZE page_size
 #endif
 #ifdef	sony
-#define	SEGMENT_SIZE	0x2000
+#define	SEGMENT_SIZE	0x1000
 #endif	/* Sony.  */
 #ifdef is68k
 #define SEGMENT_SIZE 0x20000
