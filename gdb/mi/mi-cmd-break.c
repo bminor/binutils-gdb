@@ -27,6 +27,7 @@
 #include "gdb_string.h"
 #include "mi-getopt.h"
 #include "gdb-events.h"
+#include "gdb.h"
 
 /* Convenience macro for allocting typesafe memory. */
 

@@ -1437,45 +1437,4 @@ extern int use_windows;
 #define ISATTY(FP)	(isatty (fileno (FP)))
 #endif
 
-
-/* FIXME: cagney/1999-12-13: The following will be moved to gdb.h /
-   libgdb.h or gdblib.h. */
-
-/* Return-code (RC) from a gdb library call.  (The abreviation RC is
-   taken from the sim/common directory.) */
-
-enum gdb_rc {
-  /* The operation failed.  The failure message can be fetched by
-     calling ``char *error_last_message(void)''. The value is
-     determined by the catch_errors() interface. */
-  /* NOTE: Since ``defs.h:catch_errors()'' does not return an error /
-     internal / quit indication it is not possible to return that
-     here. */
-  GDB_RC_FAIL = 0,
-  /* No error occured but nothing happened. Due to the catch_errors()
-     interface, this must be non-zero. */
-  GDB_RC_NONE = 1,
-  /* The operation was successful. Due to the catch_errors()
-     interface, this must be non-zero. */
-  GDB_RC_OK = 2
-};
-
-
-/* Print the specified breakpoint on GDB_STDOUT. (Eventually this
-   function will ``print'' the object on ``output''). */
-enum gdb_rc gdb_breakpoint_query (/* struct {ui,gdb}_out *output, */ int bnum);
-
-/* Create a breakpoint at ADDRESS (a GDB source and line). */
-enum gdb_rc gdb_breakpoint (char *address, char *condition,
-			    int hardwareflag, int tempflag,
-			    int thread, int ignore_count);
-enum gdb_rc gdb_thread_select (/* output object */ char *tidstr);
-
-#ifdef UI_OUT
-/* Print a list of known thread ids. */
-enum gdb_rc gdb_list_thread_ids (/* output object */);
-
-/* Switch thread and print notification. */
-#endif
-
 #endif /* #ifndef DEFS_H */

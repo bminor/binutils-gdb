@@ -1,3 +1,16 @@
+2001-07-26  Andrew Cagney  <ac131313@redhat.com>
+
+	* thread.c, breakpoint.c: Include "gdb.h".
+	* Makefile.in (gdb_h): Define.
+	(HFILES_NO_SRCDIR): Add gdb.h.
+	(mi-cmd-break.o, mi-main.o, thread.o)
+	(breakpoint.o): Add dependency on $(gdb_h).
+
+	* defs.h (enum gdb_rc, gdb_breakpoint_query)
+	(gdb_breakpoint, gdb_thread_select)
+	(gdb_list_thread_ids): Move declaration from here ...
+	* gdb.h: To here.  New file.
+
 2001-07-28  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* Makefile.in (SUBDIR_TUI_OBS): Add tui-out.o, tui-hooks.o.

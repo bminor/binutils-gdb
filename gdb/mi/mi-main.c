@@ -38,6 +38,7 @@
 #include "gdbcore.h"		/* for write_memory() */
 #include "value.h"		/* for write_register_bytes() */
 #include "regcache.h"
+#include "gdb.h"
 #include <ctype.h>
 #include <sys/time.h>
 

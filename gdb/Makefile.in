@@ -597,6 +597,7 @@ xm_h =		@xm_h@
 tm_h =		@tm_h@
 nm_h =		@nm_h@
 defs_h =	defs.h $(xm_h) $(tm_h) $(nm_h) config.status config.h gdbarch.h ui-file.h
+gdb_h =		gdb.h
 
 top_h =		top.h
 inferior_h =	inferior.h $(breakpoint_h)
@@ -630,7 +631,7 @@ cp_abi_h = cp-abi.h
 # right, it is probably easiest just to list .h files here directly.
 
 HFILES_NO_SRCDIR = bcache.h buildsym.h call-cmds.h coff-solib.h defs.h \
-	dst.h environ.h $(gdbcmd_h) gdbcore.h \
+	dst.h environ.h $(gdbcmd_h) gdb.h gdbcore.h \
 	gdb-stabs.h hpread.h $(inferior_h) language.h minimon.h monitor.h \
 	objfiles.h parser-defs.h partial-stab.h serial.h solib.h \
 	symfile.h stabsread.h target.h terminal.h typeprint.h xcoffsolib.h \
@@ -1226,7 +1227,7 @@ blockframe.o: blockframe.c $(defs_h) $(gdbcore_h) $(inferior_h) \
 
 breakpoint.o: breakpoint.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 	$(inferior_h) language.h target.h gdbthread.h $(gdb_string_h) \
-	gdb-events.h linespec.h $(ui_out_h) $(completer_h)
+	gdb-events.h linespec.h $(ui_out_h) $(completer_h) $(gdb_h)
 
 buildsym.o: buildsym.c $(bfd_h) buildsym.h complaints.h $(defs_h) \
 	objfiles.h symfile.h $(symtab_h) $(gdb_string_h)
@@ -2044,7 +2045,7 @@ target.o: target.c $(bfd_h) $(defs_h) $(gdbcmd_h) $(inferior_h) \
 	objfiles.h symfile.h target.h $(gdb_string_h) $(regcache_h)
 
 thread.o: thread.c $(defs_h) gdbthread.h $(gdbcmd_h) target.h \
-	$(regcache_h) $(ui_out_h)
+	$(regcache_h) $(ui_out_h) $(gdb_h)
 
 completer.o: completer.c $(completer_h) $(gdbtypes_h) $(symtab_h) \
 	$(defs_h) $(gdbcmd_h) $(expression_h) $(readline_headers)
@@ -2200,14 +2201,14 @@ mi-cmd-stack.o: $(srcdir)/mi/mi-cmd-stack.c $(defs_h) $(top_h) $(mi_cmds_h) \
 		$(ui_out_h) $(frame_h) $(value_h) $(target_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-cmd-stack.c
 mi-cmd-break.o: $(srcdir)/mi/mi-cmd-break.c $(defs_h) $(mi_cmds_h) \
-		$(ui_out_h) $(mi_getopt_h)
+		$(ui_out_h) $(mi_getopt_h) $(gdb_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-cmd-break.c
 mi-cmd-disas.o: $(srcdir)/mi/mi-cmd-disas.c $(defs_h) $(mi_cmds_h) \
 		$(ui_out_h) $(value_h) $(target_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-cmd-disas.c
 mi-main.o: $(srcdir)/mi/mi-main.c $(defs_h) $(top_h) $(mi_cmds_h) $(ui_out_h) \
 		$(mi_console_h) $(mi_getopt_h) $(event_loop_h) $(event_top_h) \
-		$(mi_getopt_h) $(regcache_h)
+		$(mi_getopt_h) $(regcache_h) $(gdb_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-main.c
 mi-out.o: $(srcdir)/mi/mi-out.c $(defs_h) $(mi_out_h) $(ui_out_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-out.c

@@ -41,6 +41,7 @@
 #include "objfiles.h"
 #include "linespec.h"
 #include "completer.h"
+#include "gdb.h"
 #ifdef UI_OUT
 #include "ui-out.h"
 #endif

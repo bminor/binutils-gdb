@@ -33,6 +33,7 @@
 #include "command.h"
 #include "gdbcmd.h"
 #include "regcache.h"
+#include "gdb.h"
 
 #include <ctype.h>
 #include <sys/types.h>
