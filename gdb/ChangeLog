@@ -2,7 +2,13 @@ Thu Aug 22 16:20:27 1991  Roland H. Pesch  (pesch at cygint.cygnus.com)
 
 	* doc/refcard.tex: permuted Essential Commands sec
 
-	* doc/gdb.texinfo: new C++ chapter; revised installation appendix.
+	* doc/gdb.texinfo: new C++ chapter; revised installation appendix;
+	new doc for
+		set/show symbol-reloading
+		default set complaints 0
+		info all-registers
+		RET-repeat disabled after prompted long displays
+		processID (attach) interpretation of 2nd GDB cmdline arg
 
 Thu Aug 22 14:05:47 1991  Stu Grossman  (grossman at cygint.cygnus.com)
 
