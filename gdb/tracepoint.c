@@ -360,7 +360,7 @@ trace_command (arg, from_tty)
   struct symtabs_and_lines sals;
   struct symtab_and_line sal;
   struct tracepoint *t;
-  char *addr_start = 0, *addr_end = 0, *cond_start = 0, *cond_end = 0;
+  char *addr_start = 0, *addr_end = 0;
   int i;
 
   if (!arg || !*arg)
@@ -399,8 +399,6 @@ trace_command (arg, from_tty)
 	t->addr_string = canonical[i];
       else if (addr_start)
 	t->addr_string = savestring (addr_start, addr_end - addr_start);
-      if (cond_start)
-	t->cond_string = savestring (cond_start, cond_end - cond_start);
 
       /* Let the UI know of any additions */
       if (create_tracepoint_hook)
@@ -550,8 +548,6 @@ tracepoint_operation (t, from_tty, opcode)
     if (delete_tracepoint_hook)
       delete_tracepoint_hook (t);
 
-    if (t->cond_string)
-      free (t->cond_string);
     if (t->addr_string)
       free (t->addr_string);
     if (t->source_file)
@@ -1757,7 +1753,7 @@ trace_find_command (args, from_tty)
 	{
 	  if (traceframe_number == -1)
 	    error ("not debugging trace buffer");
-	  else if (traceframe_number == 0)
+	  else if (from_tty && traceframe_number == 0)
 	    error ("already at start of trace buffer");
 
 	  frameno = traceframe_number - 1;

@@ -1,3 +1,9 @@
+Thu Dec 11 14:28:01 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
+
+	* tracepoint.c (trace_find_command): don't error if going
+	backwards thru the trace buffer in a loop.
+	* (struct tracepoint): delete unused field.
+
 Wed Dec  10 13:16:45 1997  Keith Seitz  <keiths@onions.cygnus.com>
 
 	* gdbtk.c (gdb_get_tracepoint_info): Use info in struct 

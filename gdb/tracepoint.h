@@ -80,10 +80,6 @@ struct tracepoint
   /* Input radix we used to set the tracepoint.  */
   int input_radix;
 
-  /* String form of the tracepoint trigger condition (malloc'd), 
-     or NULL if there is no condition.  */
-  char *cond_string;
-
   /* Count of the number of times this tracepoint was taken, dumped
      with the info, but not used for anything else.  Useful for
      seeing how many times you hit a tracepoint prior to the program
