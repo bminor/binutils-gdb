@@ -1,3 +1,12 @@
+2004-02-26  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* valprint.h (print_hex_chars, print_char_chars): New prototypes.
+	* valprint.c (print_hex_chars): Change from static to external.
+	(print_char_chars): New function.
+	* printcmd.c (print_scalar_formatted): For integer and enum types
+	that are longer than LONGEST, perform processing via appropriate
+	print_*_chars routines.
+
 2004-02-26  Andrew Cagney  <cagney@redhat.com>
 
 	* Makefile.in: Update dependencies.

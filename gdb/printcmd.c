@@ -350,6 +350,33 @@ print_scalar_formatted (void *valaddr, struct type *type, int format, int size,
   LONGEST val_long = 0;
   unsigned int len = TYPE_LENGTH (type);
 
+  if (len > sizeof(LONGEST) &&
+      (TYPE_CODE (type) == TYPE_CODE_INT
+       || TYPE_CODE (type) == TYPE_CODE_ENUM))
+    {
+      switch (format)
+	{
+	case 'o':
+	  print_octal_chars (stream, valaddr, len);
+	  return;
+	case 'u':
+	case 'd':
+	  print_decimal_chars (stream, valaddr, len);
+	  return;
+	case 't':
+	  print_binary_chars (stream, valaddr, len);
+	  return;
+	case 'x':
+	  print_hex_chars (stream, valaddr, len);
+	  return;
+	case 'c':
+	  print_char_chars (stream, valaddr, len);
+	  return;
+	default:
+	  break;
+	};
+    }
+
   if (format != 'f')
     val_long = unpack_long (type, valaddr);
 
