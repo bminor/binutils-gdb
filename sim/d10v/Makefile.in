@@ -80,7 +80,7 @@ X_LIB=
 MATH_LIB=
 
 
-INCLUDE = d10v_sim.h $(srcdir)/../../gdb/callback.h
+INCLUDE = d10v_sim.h $(srcdir)/../../gdb/callback.h endian.c
 INCDIR = $(srcdir)/../../include 
 CSEARCH = -I. -I$(srcdir)  -I../../include  \
   -I../../bfd -I$(INCDIR) -I$(srcdir)/../../bfd -I$(srcdir)/../../gdb -I$(srcdir)/../../newlib/libc/sys/d10v \
@@ -92,8 +92,8 @@ BFD_LIB		= ../../bfd/libbfd.a
 
 all: run libsim.a
 
-run: interp.o $(X) run.o table.o callback.o simops.o
-	$(CC) $(CFLAGS) $(CONFIG_CFLAGS) -o run $(X) interp.o table.o callback.o simops.o run.o \
+run: interp.o $(X) run.o table.o callback.o simops.o endian.o $(LIBIBERTY_LIB) $(BFD_LIB)
+	$(CC) $(CFLAGS) $(CONFIG_CFLAGS) -o run $(X) interp.o table.o callback.o simops.o run.o endian.o \
 		$(BFD_LIB) $(LIBIBERTY_LIB) $(X_LIB) $(MATH_LIB)
 
 interp.o:interp.c table.c $(INCLUDE)
@@ -101,11 +101,12 @@ run.o: $(srcdir)/../common/run.c $(INCLUDE)
 	$(CC) -c $(CFLAGS) $(CONFIG_CFLAGS) $<
 
 simops.o: simops.c $(INCLUDE)
+endian.o: endian.c $(INCLUDE)
 callback.o: $(srcdir)/../../gdb/callback.c $(INCLUDE)
 	$(CC) -c $(CFLAGS) $(CONFIG_CFLAGS) $<
 
-libsim.a:interp.o table.o simops.o
-	$(AR) $(ARFLAGS) libsim.a interp.o table.o simops.o
+libsim.a:interp.o table.o simops.o endian.o
+	$(AR) $(ARFLAGS) libsim.a interp.o table.o simops.o endian.o
 	$(RANLIB) libsim.a
 
 simops.h: gencode

@@ -1,5 +1,19 @@
 Wed Oct 16 13:50:06 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
+	* endian.c: New file.  Move endian functions here from interp.c.
+	Optimize code, and make it work as either inline functions or as a
+	separate file.
+
+	* interp.c: Move endian functions from here to endian.c.
+
+	* Makefile.in (INCLUDE): Add endian.c.
+	(run,libsim.a): Add dependency on endian.o.
+	(endian.o): Add dependency.
+
+	* d10v_sim.h (read/write support): Always go through the machine
+	independent endian functions.  If compiling with GCC and
+	optimizing, include endian.c so the endian functions are inlined.
+
 	* simops.c (OP_5F00): Correct tracing of accumulators.	
 
 Tue Oct 15 10:57:50 1996  Michael Meissner  <meissner@tiktok.cygnus.com>

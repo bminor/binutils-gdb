@@ -7,8 +7,13 @@
 
 #define DEBUG_TRACE		0x00000001
 #define DEBUG_VALUES		0x00000002
-#define DEBUG_MEMSIZE		0x00000004
-#define DEBUG_INSTRUCTION	0x00000008
+#define DEBUG_LINE_NUMBER	0x00000004
+#define DEBUG_MEMSIZE		0x00000008
+#define DEBUG_INSTRUCTION	0x00000010
+
+#ifndef	DEBUG
+#define	DEBUG (DEBUG_TRACE | DEBUG_VALUES | DEBUG_LINE_NUMBER)
+#endif
 
 extern int d10v_debug;
 
@@ -83,8 +88,8 @@ extern long left_nops, right_nops;
 struct _state
 {
   reg_t regs[16];		/* general-purpose registers */
-  reg_t cregs[16];	/* control registers */
-  int64 a[2];	/* accumulators */
+  reg_t cregs[16];		/* control registers */
+  int64 a[2];			/* accumulators */
   uint8 SM;
   uint8 EA;
   uint8 DB;
@@ -99,6 +104,8 @@ struct _state
   uint8 exe;
   uint8 *imem;
   uint8 *dmem;
+  uint32 mem_min;
+  uint32 mem_max;
   int   exception;
   enum _ins_type ins_type;
 } State;
@@ -117,6 +124,9 @@ extern struct simops Simops[];
 #define MOD_S	(State.cregs[10])
 #define MOD_E	(State.cregs[11])
 #define IBA	(State.cregs[14])
+
+#define SIG_D10V_STOP	-1
+#define SIG_D10V_EXIT	-2
 
 #define SEXT3(x)	((((x)&0x7)^(~3))+4)	
 
@@ -151,25 +161,19 @@ extern struct simops Simops[];
 #define	RB(x)	(*((uint8 *)((x)+State.imem)))
 #define SB(addr,data)	( RB(addr) = (data & 0xff))
 
-#ifdef WORDS_BIGENDIAN
-
-#define RW(x)			(*((uint16 *)((x)+State.imem)))
-#define RLW(x)			(*((uint32 *)((x)+State.imem)))
-#define SW(addr,data)		RW(addr)=data
-#define SLW(addr,data)		RLW(addr)=data
-#define READ_16(x)		(*((int16 *)(x)))
-#define WRITE_16(addr,data)	(*(int16 *)(addr)=data)	
-#define READ_64(x)		(*((int64 *)(x)))
-#define WRITE_64(addr,data)	(*(int64 *)(addr)=data)	
+#if defined(__GNUC__) && defined(__OPTIMIZE__) && !defined(NO_ENDIAN_INLINE)
+#define ENDIAN_INLINE static __inline__
+#include "endian.c"
+#undef ENDIAN_INLINE
 
 #else
-
 uint32 get_longword PARAMS ((uint8 *));
 uint16 get_word PARAMS ((uint8 *));
 int64 get_longlong PARAMS ((uint8 *));
 void write_word PARAMS ((uint8 *addr, uint16 data));
 void write_longword PARAMS ((uint8 *addr, uint32 data));
 void write_longlong PARAMS ((uint8 *addr, int64 data));
+#endif
 
 #define SW(addr,data)		write_word((long)(addr)+State.imem,data)
 #define RW(x)			get_word((long)(x)+State.imem)
@@ -179,5 +183,3 @@ void write_longlong PARAMS ((uint8 *addr, int64 data));
 #define WRITE_16(addr,data)	write_word(addr,data)
 #define READ_64(x)		get_longlong(x)
 #define WRITE_64(addr,data)	write_longlong(addr,data)
-
-#endif /* not WORDS_BIGENDIAN */
