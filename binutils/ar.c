@@ -26,14 +26,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 */
 #include "bfd.h"
 #include "sysdep.h"
-#include "ar.h"
+#include "bucomm.h"
+#include "aout/ar.h"
+#include "../bfd/libbfd.h"
 #include <stdio.h>
 #include <sys/time.h>
 #include <errno.h>
 #define BUFSIZE 8192
-/* FIXME: Not great to have these here.  Should they be exported or not? */
-PROTO(size_t, bfd_read, (void *ptr, size_t size, size_t nitems, bfd * abfd));
-PROTO(size_t, bfd_write, (void *ptr, size_t size, size_t nitems, bfd * abfd));
 /* PROTO (void, open_inarch, (char *archive_filename)); */
 #ifdef __STDC__
 static void     open_inarch(char *archive_filename);
@@ -58,8 +57,8 @@ bfd             bogus_archive;
 bfd            *inarch;		/* The input arch we're manipulating */
 
 /* This flag distinguishes between ar and ranlib:
-   1 means this is 'ranlib'; -1 means this is 'ar'.
-   0 means if we should use argv[0] to decide. */
+   1 means this is 'ranlib'; 0 means this is 'ar'.
+   -1 means if we should use argv[0] to decide. */
 extern int is_ranlib;
 /* Nonzero means don't warn about creating the archive file if necessary.  */
 int             silent_create = 0;
@@ -152,15 +151,15 @@ main(argc, argv)
 	temp = program_name;	/* shouldn't happen, but... */
     else
 	++temp;
-    if (is_ranlib > 0 || (is_ranlib == 0 && strcmp(temp, "ranlib") == 0)) {
+    if (is_ranlib > 0 || (is_ranlib < 0 && strcmp(temp, "ranlib") == 0)) {
 	if (argc < 2)
-	    fatal("Too few command arguments.");
+	    bfd_fatal("Too few command arguments.");
 	ranlib_only(argv[1]);
     }
 
 
     if (argc < 3)
-	fatal("Too few command arguments.");
+	bfd_fatal("Too few command arguments.");
 
     arg_ptr = argv[1];
 
@@ -434,15 +433,6 @@ map_over_members(function, files, count)
 }
 
 
-/* Things which are interesting to map over all or some of the files: */
-
-void
-print_descr(abfd)
-    bfd            *abfd;
-{
-    print_arelt_descr(abfd, verbose);
-}
-
 void
 print_contents(abfd)
     bfd            *abfd;
@@ -512,7 +502,7 @@ extract_file(abfd)
     ostream = 0;
     if (size == 0) {
       /* Seems like an abstraction violation, eh?  Well it's OK! */
-      ostream = fopen(abfd->filename, "w");
+      ostream = fopen(abfd->filename, "wb");
       if (!ostream) {
 	perror(abfd->filename);
 	exit(1);
@@ -530,7 +520,7 @@ extract_file(abfd)
 	/* See comment above; this saves disk arm motion */
 	if (!ostream) {
 	    /* Seems like an abstraction violation, eh?  Well it's OK! */
-	    ostream = fopen(abfd->filename, "w");
+	    ostream = fopen(abfd->filename, "wb");
 	    if (!ostream) {
 		perror(abfd->filename);
 		exit(1);
@@ -590,7 +580,7 @@ do_quick_append(archive_filename, files_to_append)
     }
 
 
-    ofile = fopen(archive_filename, "a+");
+    ofile = fopen(archive_filename, "a+b");
     if (ofile == NULL) {
 	perror(program_name);
 	exit(1);
@@ -631,7 +621,7 @@ do_quick_append(archive_filename, files_to_append)
 
 	BFD_SEND(temp, _bfd_truncate_arname, (temp, *files_to_append, (char *) hdr));
 
-	ifile = fopen(*files_to_append, "r");
+	ifile = fopen(*files_to_append, "rb");
 	if (ifile == NULL)
 	    bfd_perror(program_name);
 
@@ -665,7 +655,6 @@ void
 write_archive()
 {
     bfd            *obfd;
-    char           *xmalloc();
     int             namelen = strlen(inarch->filename);
     char           *new_name = xmalloc(namelen + 6);
     bfd            *contents_head = inarch->next;
@@ -677,7 +666,7 @@ write_archive()
     else {
 #endif
 	strcpy(new_name, inarch->filename);
-	strcpy(new_name + namelen, ".art");
+	strcpy(new_name + namelen, "-art");
 	obfd = bfd_openw(new_name,
 		 /* FIXME: violates abstraction; need a better protocol */
 			 (inarch->xvec ? bfd_get_target(inarch) : NULL));
@@ -730,6 +719,7 @@ get_pos_bfd(contents, default_pos)
 	    if (!strcmp((*after_bfd)->filename, posname)) {
 		if (realpos == pos_after)
 		    after_bfd = &(*after_bfd)->next;
+		break;
 	}
     }
     return after_bfd;
@@ -943,3 +933,12 @@ ranlib_only(archname)
 }
 
 
+
+/* Things which are interesting to map over all or some of the files: */
+
+void
+print_descr(abfd)
+    bfd            *abfd;
+{
+    print_arelt_descr(abfd, verbose);
+}
