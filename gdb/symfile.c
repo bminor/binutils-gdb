@@ -511,6 +511,10 @@ symbol_file_command (name, from_tty)
       return;
     }
 
+  /* Getting new symbols may change our opinion about what is
+     frameless.  */
+  reinit_frame_cache ();
+
   symbol_file_add (name, from_tty, (CORE_ADDR)0, 1);
 }
 
@@ -610,6 +614,10 @@ add_symbol_file_command (args, from_tty)
      char *args;
      int from_tty;
 {
+  /* Getting new symbols may change our opinion about what is
+     frameless.  */
+  reinit_frame_cache ();
+
   target_add_syms (args, from_tty);
 }
 

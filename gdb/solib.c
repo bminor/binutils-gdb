@@ -31,6 +31,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbcore.h"
 #include "command.h"
 #include "target.h"
+#include "frame.h"
 
 /*
 **	local data declarations
@@ -249,6 +250,10 @@ int from_tty;
     else if (val = (char *) re_comp (arg_string)) {
 	error ("Invalid regexp: %s", val);
     }
+
+    /* Getting new symbols may change our opinion about what is
+       frameless.  */
+    reinit_frame_cache ();
  
     printf_filtered ("All shared libraries");
     if (arg_string)

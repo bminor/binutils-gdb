@@ -146,6 +146,17 @@ flush_cached_frames ()
   current_frame = (struct frame_info *) 0; /* Invalidate cache */
 }
 
+/* Flush the frame cache, and start a new one if necessary.  */
+void
+reinit_frame_cache ()
+{
+  FRAME fr = current_frame;
+  flush_cached_frames ();
+  if (fr)
+    set_current_frame ( create_new_frame (read_register (FP_REGNUM),
+					  read_pc ()));
+}
+
 /* Return a structure containing various interesting information
    about a specified stack frame.  */
 /* How do I justify including this function?  Well, the FRAME
