@@ -155,6 +155,13 @@ Mon Mar 28 12:53:27 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 	* aoutx.h (translate_from_native_sym_flags): Set SEC_RELOC flag
 	for generated constructor section.
 
+Sun Mar 27 16:25:22 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* som.c (som_begin_writing): New approach at dealing with holes
+	in executables left by the HP linker.  Does not rely on subspace
+	alignments as subspaces are *NOT* guaranteed to be properly
+	aligned in an executable (can you believe that!).
+
 Sat Mar 26 10:25:43 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* som.c (som_get_section_contents): New function.  Do not try

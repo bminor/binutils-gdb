@@ -2922,6 +2922,7 @@ som_begin_writing (abfd)
     {
       asection *subsection;
       int first_subspace;
+      unsigned int subspace_offset = 0;
 
       /* Find a space.  */
       while (!som_is_space (section))
@@ -2970,30 +2971,37 @@ som_begin_writing (abfd)
 		  exec_header.exec_dfile = current_offset;
 		}
 
+	      /* Keep track of exactly where we are within a particular
+		 space.  This is necessary as the braindamaged HPUX
+		 loader will create holes between subspaces *and* 
+		 subspace alignments are *NOT* preserved.  What a crock.  */
+	      subspace_offset = subsection->vma;
+
 	      /* Only do this for the first subspace within each space.  */
 	      first_subspace = 0;
 	    }
 	  else if (abfd->flags & EXEC_P)
 	    {
-	      /* Have to keep proper alignments for the subspaces
-		 in executables too!  */
+	      /* The braindamaged HPUX loader may have created a hole
+		 between two subspaces.  It is *not* sufficient to use
+		 the alignment specifications within the subspaces to
+		 account for these holes -- I've run into at least one
+		 case where the loader left one code subspace unaligned
+		 in a final executable.
+
+		 To combat this we keep a current offset within each space,
+		 and use the subspace vma fields to detect and preserve
+		 holes.  What a crock!
+
+		 ps.  This is not necessary for unloadable space/subspaces.  */
+	      current_offset += subsection->vma - subspace_offset;
 	      if (subsection->flags & SEC_CODE)
-		{
-		  unsigned tmp = exec_header.exec_tsize;
-
-		  tmp = SOM_ALIGN (tmp, 1 << subsection->alignment_power);
-		  current_offset += (tmp - exec_header.exec_tsize);
-		  exec_header.exec_tsize = tmp;
-		}
+		exec_header.exec_tsize += subsection->vma - subspace_offset;
 	      else
-		{
-		  unsigned tmp = exec_header.exec_dsize;
-
-		  tmp = SOM_ALIGN (tmp, 1 << subsection->alignment_power);
-		  current_offset += (tmp - exec_header.exec_dsize);
-		  exec_header.exec_dsize = tmp;
-		}
+		exec_header.exec_dsize += subsection->vma - subspace_offset;
+	      subspace_offset += subsection->vma - subspace_offset;
 	    }
+
 
 	  subsection->target_index = total_subspaces++;
 	  /* This is real data to be loaded from the file.  */
@@ -3008,8 +3016,9 @@ som_begin_writing (abfd)
 		exec_header.exec_dsize += subsection->_cooked_size;
 	      som_section_data (subsection)->subspace_dict->file_loc_init_value
 		= current_offset;
-	      section->filepos = current_offset;
+	      subsection->filepos = current_offset;
 	      current_offset += bfd_section_size (abfd, subsection); 
+	      subspace_offset += bfd_section_size (abfd, subsection);
 	    }
 	  /* Looks like uninitialized data.  */
 	  else
@@ -3065,7 +3074,7 @@ som_begin_writing (abfd)
 	    {
 	      som_section_data (subsection)->subspace_dict->file_loc_init_value
 		= current_offset;
-	      section->filepos = current_offset;
+	      subsection->filepos = current_offset;
 	      current_offset += bfd_section_size (abfd, subsection); 
 	    }
 	  /* Looks like uninitialized data.  */
