@@ -231,7 +231,6 @@ ocd_start_remote (dummy)
   select_frame (get_current_frame (), 0);
   print_stack_frame (selected_frame, -1, 1);
 
-#if 0
   buf[0] = OCD_LOG_FILE;
   buf[1] = 3;   /* close existing WIGGLERS.LOG */
   ocd_put_packet (buf, 2);
@@ -241,7 +240,6 @@ ocd_start_remote (dummy)
   buf[1] = 2;   /* append to existing WIGGLERS.LOG */
   ocd_put_packet (buf, 2);
   p = ocd_get_packet (buf[0], &pktlen, remote_timeout);
-#endif
 
   return 1;
 }
@@ -280,12 +278,10 @@ device the OCD device is attached to (e.g. /dev/ttya).");
           if (!ocd_desc)
             perror_with_name (name);
 
-#if 0
 	  buf[0] = OCD_LOG_FILE;
 	  buf[1] = 1;	/* open new or overwrite existing WIGGLERS.LOG */
 	  ocd_put_packet (buf, 2);
 	  p = ocd_get_packet (buf[0], &pktlen, remote_timeout);
-#endif
 
 	  buf[0] = OCD_SET_CONNECTION;
 	  buf[1] = 0x01;	/* atoi (name[11]); */
@@ -1213,7 +1209,6 @@ ocd_do_command (cmd, statusp, lenp)
 
   *statusp = status;
 
-#if 0
   logbuf[0] = OCD_LOG_FILE;
   logbuf[1] = 3;   /* close existing WIGGLERS.LOG */
   ocd_put_packet (logbuf, 2);
@@ -1223,7 +1218,6 @@ ocd_do_command (cmd, statusp, lenp)
   logbuf[1] = 2;   /* append to existing WIGGLERS.LOG */
   ocd_put_packet (logbuf, 2);
   ocd_get_packet (logbuf[0], &logpktlen, remote_timeout);
-#endif
 
   return p + 3;
 }

@@ -1,3 +1,7 @@
+Mon Aug 25 17:08:01 1997  Geoffrey Noer  <noer@cygnus.com>
+
+        * ocd.c: revert Sun change -- enable log file handling
+
 Mon Aug 25 12:21:46 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* remote-sim.c (gdbsim_open): Pass exec_bfd to sim_open call.
