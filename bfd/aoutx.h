@@ -692,8 +692,11 @@ NAME(aout,machine_type) (arch, machine, unknown)
   case bfd_arch_sparc:
     if (machine == 0
 	|| machine == bfd_mach_sparc
+	|| machine == bfd_mach_sparc_sparclite
 	|| machine == bfd_mach_sparc_v9)
       arch_flags = M_SPARC;
+    else if (machine == bfd_mach_sparc_sparclet)
+      arch_flags = M_SPARCLET;
     break;
 
   case bfd_arch_m68k:

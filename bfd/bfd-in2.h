@@ -1156,12 +1156,15 @@ enum bfd_architecture
   bfd_arch_sparc,      /* SPARC */
 #define bfd_mach_sparc			1
  /* The difference between v8plus and v9 is that v9 is a true 64 bit env.  */
-#define bfd_mach_sparc_v8plus		2
-#define bfd_mach_sparc_v8plusa		3  /* with ultrasparc add'ns */
-#define bfd_mach_sparc_v9		4
-#define bfd_mach_sparc_v9a		5  /* with ultrasparc add'ns */
+#define bfd_mach_sparc_sparclet	2
+#define bfd_mach_sparc_sparclite	3
+#define bfd_mach_sparc_v8plus		4
+#define bfd_mach_sparc_v8plusa		5  /* with ultrasparc add'ns */
+#define bfd_mach_sparc_v9		6
+#define bfd_mach_sparc_v9a		7  /* with ultrasparc add'ns */
  /* Nonzero if MACH has the v9 instruction set.  */
-#define bfd_mach_sparc_v9_p(mach) ((mach) != bfd_mach_sparc)
+#define bfd_mach_sparc_v9_p(mach) \
+  ((mach) >= bfd_mach_sparc_v8plus && (mach) <= bfd_mach_sparc_v9a)
   bfd_arch_mips,       /* MIPS Rxxxx */
   bfd_arch_i386,       /* Intel 386 */
   bfd_arch_we32k,      /* AT&T WE32xxx */

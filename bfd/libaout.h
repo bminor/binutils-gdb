@@ -192,14 +192,14 @@ struct internal_exec
 };
 
 /* Magic number is written 
-< MSB        >
+< MSB          >
 3130292827262524232221201918171615141312111009080706050403020100
-< FLAGS      >< MACHINE TYPE ><  MAGIC NUMBER		       >
+< FLAGS        >< MACHINE TYPE ><  MAGIC NUMBER                >
 */
 /* Magic number for NetBSD is
-<MSB         >
+<MSB           >
 3130292827262524232221201918171615141312111009080706050403020100
-< FLAGS    ><                  ><  MAGIC NUMBER                >
+< FLAGS    >< MACHINE TYPE     ><  MAGIC NUMBER                >
 */
 
 enum machine_type {
@@ -221,6 +221,7 @@ enum machine_type {
   M_68K4K_NETBSD = 136,	/* NetBSD/m68k4k binary */
   M_532_NETBSD = 137,	/* NetBSD/ns32k binary */
   M_SPARC_NETBSD = 138,	/* NetBSD/sparc binary */
+  M_SPARCLET = 142,	/* SPARClet */
   M_MIPS1 = 151,        /* MIPS R2000/R3000 binary */
   M_MIPS2 = 152,        /* MIPS R4000/R6000 binary */
 /* start-sanitize-rce */

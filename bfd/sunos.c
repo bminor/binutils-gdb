@@ -78,6 +78,14 @@ static boolean sunos_finish_dynamic_link
 #define MY_check_dynamic_reloc sunos_check_dynamic_reloc
 #define MY_finish_dynamic_link sunos_finish_dynamic_link
 
+/* ??? Where should this go?  */
+#define MACHTYPE_OK(mtype) \
+  (((mtype) == M_SPARC && bfd_lookup_arch (bfd_arch_sparc, 0) != NULL) \
+   || ((mtype) == M_SPARCLET \
+       && bfd_lookup_arch (bfd_arch_sparc, bfd_mach_sparc_sparclet) != NULL) \
+   || (((mtype) == M_UNKNOWN || (mtype) == M_68010 || (mtype) == M_68020) \
+       && bfd_lookup_arch (bfd_arch_m68k, 0) != NULL))
+
 /* Include the usual a.out support.  */
 #include "aoutf1.h"
 
@@ -1028,8 +1036,13 @@ sunos_add_one_symbol (info, abfd, name, flags, section, value, string,
 	return false;
     }
 
-  h = sunos_link_hash_lookup (sunos_hash_table (info), name, true, copy,
-			      false);
+  if ((flags & (BSF_INDIRECT | BSF_WARNING | BSF_CONSTRUCTOR)) != 0
+      || ! bfd_is_und_section (section))
+    h = sunos_link_hash_lookup (sunos_hash_table (info), name, true, copy,
+				false);
+  else
+    h = ((struct sunos_link_hash_entry *)
+	 bfd_wrapped_link_hash_lookup (abfd, info, name, true, copy, false));
   if (h == NULL)
     return false;
 
@@ -1795,6 +1808,17 @@ sunos_scan_ext_relocs (info, abfd, sec, relocs, rel_size)
 	  && ((h->flags & SUNOS_DEF_DYNAMIC) == 0
 	      || (h->flags & SUNOS_DEF_REGULAR) != 0))
 	continue;
+
+      if (r_type == RELOC_JMP_TBL
+	  && ! info->shared
+	  && (h->flags & SUNOS_DEF_DYNAMIC) == 0
+	  && (h->flags & SUNOS_DEF_REGULAR) == 0)
+	{
+	  /* This symbol is apparently undefined.  Don't do anything
+             here; just let the relocation routine report an undefined
+             symbol.  */
+	  continue;
+	}
 
       if (strcmp (h->root.root.root.string, "__GLOBAL_OFFSET_TABLE_") == 0)
 	continue;

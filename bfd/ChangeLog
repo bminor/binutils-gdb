@@ -1,3 +1,16 @@
+Tue Apr  2 13:11:53 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* aoutf1.h (sunos_32_set_arch_mach): Handle M_SPARCLET.
+	(aout_32_sunos4_write_object_contents): Likewise.
+	* aoutx.h (NAME(aout,machine_type)): Handle
+	bfd_mach_sparc_{sparclet,sparclite}.
+	* archures.c (bfd_mach_sparc_{sparclet,sparclite}): Define.
+	(bfd_mach_sparc_v9_p): Update.
+	* cpu-sparc.c (arch_info_struct): Add entries for sparclet,sparclite.
+	* libaout.h (enum machine_type): Add M_SPARCLET.
+	* sunos.c (MACHTYPE_OK): Define.
+	* bfd-in2.h: Regenerated.
+
 Tue Apr  2 00:33:18 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf-bfd.h (struct elf_link_hash_table): Add hgot field.
