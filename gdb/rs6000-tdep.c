@@ -1529,15 +1529,6 @@ rs6000_register_raw_size (int n)
   return regsize (reg, tdep->wordsize);
 }
 
-/* Number of bytes of storage in the program's representation
-   for register N.  */
-
-static int
-rs6000_register_virtual_size (int n)
-{
-  return TYPE_LENGTH (REGISTER_VIRTUAL_TYPE (n));
-}
-
 /* Return the GDB type object for the "standard" data type
    of data in register N.  */
 
@@ -2295,7 +2286,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_byte (gdbarch, rs6000_register_byte);
   set_gdbarch_register_raw_size (gdbarch, rs6000_register_raw_size);
   set_gdbarch_max_register_raw_size (gdbarch, 8);
-  set_gdbarch_register_virtual_size (gdbarch, rs6000_register_virtual_size);
+  set_gdbarch_register_virtual_size (gdbarch, generic_register_virtual_size);
   set_gdbarch_max_register_virtual_size (gdbarch, 8);
   set_gdbarch_register_virtual_type (gdbarch, rs6000_register_virtual_type);
 

@@ -343,15 +343,6 @@ d10v_register_raw_size (int reg_nr)
     return 2;
 }
 
-/* Number of bytes of storage in the program's representation
-   for register N.  */
-
-static int
-d10v_register_virtual_size (int reg_nr)
-{
-  return TYPE_LENGTH (REGISTER_VIRTUAL_TYPE (reg_nr));
-}
-
 /* Return the GDB type object for the "standard" data type
    of data in register N.  */
 
@@ -1512,7 +1503,7 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_byte (gdbarch, d10v_register_byte);
   set_gdbarch_register_raw_size (gdbarch, d10v_register_raw_size);
   set_gdbarch_max_register_raw_size (gdbarch, 8);
-  set_gdbarch_register_virtual_size (gdbarch, d10v_register_virtual_size);
+  set_gdbarch_register_virtual_size (gdbarch, generic_register_virtual_size);
   set_gdbarch_max_register_virtual_size (gdbarch, 8);
   set_gdbarch_register_virtual_type (gdbarch, d10v_register_virtual_type);
 

@@ -95,14 +95,6 @@ x86_64_register_virtual_type (int regno)
   return builtin_type_long;
 }
 
-/* Number of bytes of storage in the program's representation
-   for register REGNO.  */
-int
-x86_64_register_virtual_size (int regno)
-{
-  return (TYPE_LENGTH (x86_64_register_virtual_type (regno)));
-}
-
 /* x86_64_register_convertible is true if register N's virtual format is
    different from its raw format.  Note that this definition assumes
    that the host supports IEEE 32-bit floats, since it doesn't say
@@ -859,7 +851,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      (SIZEOF_GREGS + SIZEOF_FPU_REGS + SIZEOF_FPU_CTRL_REGS + SIZEOF_SSE_REGS) */
   set_gdbarch_register_bytes (gdbarch,
 			      (18 * 8) + (8 * 10) + (8 * 4) + (8 * 16 + 4));
-  set_gdbarch_register_virtual_size (gdbarch, x86_64_register_virtual_size);
+  set_gdbarch_register_virtual_size (gdbarch, generic_register_virtual_size);
   set_gdbarch_max_register_virtual_size (gdbarch, 16);
 
   set_gdbarch_register_virtual_type (gdbarch, x86_64_register_virtual_type);
