@@ -690,13 +690,20 @@ unpack_long (type, valaddr)
   else if (code == TYPE_CODE_PTR
 	   || code == TYPE_CODE_REF)
     {
-      if (len == sizeof (CORE_ADDR))
-	{
-	  CORE_ADDR retval;
-	  bcopy (valaddr, &retval, sizeof (retval));
-	  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
-	  return retval;
-	}
+      if (len == sizeof(long))
+      {
+	long retval;
+	bcopy (valaddr, &retval, sizeof(retval));
+	SWAP_TARGET_AND_HOST (&retval, sizeof(retval));
+	return retval;
+      }
+      else if (len == sizeof(short))
+      {
+	short retval;
+	bcopy (valaddr, &retval, len);
+	SWAP_TARGET_AND_HOST (&retval, len);
+	return retval;
+      }
     }
   else if (code == TYPE_CODE_MEMBER)
     error ("not implemented: member types in unpack_long");

@@ -19,7 +19,31 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Contributed by Steve Chamberlain sac@cygnus.com */
 
-#define IEEE_FLOAT 1
+
+#define UNSIGNED_SHORT(X) ((X) & 0xffff)
+
+
+#define EXTRA_FRAME_INFO 	\
+	struct frame_saved_regs *fsr;	\
+	CORE_ADDR from_pc; \
+	CORE_ADDR args_pointer;\
+        CORE_ADDR locals_pointer ;
+
+
+
+/* Zero the frame_saved_regs pointer when the frame is initialized,
+   so that FRAME_FIND_SAVED_REGS () will know to allocate and
+   initialize a frame_saved_regs struct the first time it is called.
+   Set the arg_pointer to -1, which is not valid; 0 and other values
+   indicate real, cached values.  */
+
+#define INIT_EXTRA_FRAME_INFO(fromleaf, fi) \
+	init_extra_frame_info (fromleaf, fi)
+
+extern void init_extra_frame_info ();
+
+
+#define IEEE_FLOAT
 
 /* Define the bit, byte, and word ordering of the machine.  */
 #define TARGET_BYTE_ORDER BIG_ENDIAN
@@ -46,7 +70,7 @@ extern CORE_ADDR h8300_skip_prologue ();
    some instructions.  */
 
 #define SAVED_PC_AFTER_CALL(frame) \
-read_memory_integer (read_register (SP_REGNUM), 2)
+UNSIGNED_SHORT(read_memory_integer (read_register (SP_REGNUM), 2))
 
 /* Stack grows downward.  */
 
@@ -69,7 +93,7 @@ read_memory_integer (read_register (SP_REGNUM), 2)
    define this before including this file.  */
 
 
-#define DECR_PC_AFTER_BREAK 2
+#define DECR_PC_AFTER_BREAK 0
 
 
 /* Nonzero if instruction at PC is a return instruction.  */
@@ -157,19 +181,15 @@ read_memory_integer (read_register (SP_REGNUM), 2)
 /* Store the address of the place in which to copy the structure the
    subroutine will return.  This is called from call_function. */
 
-#define STORE_STRUCT_RETURN(ADDR, SP) \
-  { write_register (0, (ADDR)); abort(); }
+/*#define STORE_STRUCT_RETURN(ADDR, SP) \
+  { write_register (0, (ADDR)); abort(); }*/
 
 /* Extract from an array REGBUF containing the (raw) register state
    a function return value of type TYPE, and copy that, in virtual format,
-   into VALBUF.  This is assuming that floating point values are returned
-   as doubles in d0/d1.  */
-
+   into VALBUF.  */
 
 #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
-  bcopy ((char *)(REGBUF) +						\
-	         (TYPE_LENGTH(TYPE) >= 4 ? 0 : 4 - TYPE_LENGTH(TYPE)),	\
-	 VALBUF, TYPE_LENGTH(TYPE))
+  bcopy ((char *)(REGBUF), VALBUF, TYPE_LENGTH(TYPE))
 
 
 /* Write into appropriate registers a function return value
@@ -220,11 +240,22 @@ read_memory_integer (read_register (SP_REGNUM), 2)
 #define FRAMELESS_FUNCTION_INVOCATION(FI, FRAMELESS) \
   (FRAMELESS) = frameless_look_for_prologue(FI)
 
-#define FRAME_SAVED_PC(FRAME) (read_memory_integer ((FRAME)->frame + 2, 2))
+/* Any function with a frame looks like this
+   SECOND ARG
+   FIRST ARG
+   RET PC
+   SAVED R2
+   SAVED R3
+   SAVED FP   <-FP POINTS HERE
+   LOCALS0
+   LOCALS1    <-SP POINTS HERE
+   
+   */
+#define FRAME_SAVED_PC(FRAME) frame_saved_pc(FRAME)
 
-#define FRAME_ARGS_ADDRESS(fi) ((fi)->frame)
+#define FRAME_ARGS_ADDRESS(fi) frame_args_address(fi)
 
-#define FRAME_LOCALS_ADDRESS(fi) ((fi)->frame)
+#define FRAME_LOCALS_ADDRESS(fi) frame_locals_address(fi);
 
 /* Set VAL to the number of args passed to frame described by FI.
    Can set VAL to -1, meaning no way to tell.  */
@@ -237,7 +268,7 @@ read_memory_integer (read_register (SP_REGNUM), 2)
 
 /* Return number of bytes at start of arglist that are not really args.  */
 
-#define FRAME_ARGS_SKIP 4
+#define FRAME_ARGS_SKIP 0
 
 /* Put here the code to store, into a struct frame_saved_regs,
    the addresses of the saved registers of frame described by FRAME_INFO.
@@ -245,12 +276,13 @@ read_memory_integer (read_register (SP_REGNUM), 2)
    ways in the stack frame.  sp is even more special:
    the address we return for it IS the sp for the next frame.  */
 
-#define FRAME_FIND_SAVED_REGS(frame_info, frame_saved_regs)	      abort();
+#define FRAME_FIND_SAVED_REGS(frame_info, frame_saved_regs)	    \
+   frame_find_saved_regs(frame_info, &(frame_saved_regs))
 
 
 /* Push an empty stack frame, to record the current PC, etc.  */
 
-#define PUSH_DUMMY_FRAME	{ h8300_push_dummy_frame (); }
+/*#define PUSH_DUMMY_FRAME	{ h8300_push_dummy_frame (); }*/
 
 /* Discard from the stack the innermost frame, restoring all registers.  */
 
@@ -259,11 +291,16 @@ read_memory_integer (read_register (SP_REGNUM), 2)
 #define SHORT_INT_MAX 32767
 #define SHORT_INT_MIN -32768
 
-#undef longest_to_int
-#define longest_to_int(x) (x & 0xffff)
-
 
 #define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,FROM,TO) \
 { bcopy ((FROM), (TO), 2); }
 #define REGISTER_CONVERT_TO_RAW(REGNUM,FROM,TO)	\
 { bcopy ((FROM), (TO), 4); }
+
+#define	BEFORE_MAIN_LOOP_HOOK	\
+  hms_before_main_loop();
+
+
+#define NAMES_HAVE_UNDERSCORE
+
+typedef unsigned short INSN_WORD;

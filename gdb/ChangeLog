@@ -1,3 +1,15 @@
+Thu Feb  6 11:51:39 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
+
+	* coffread.c (read_enum_type): Use the size of a target int when
+	describing enum.
+	* defs.h: added new #define for TARGET_PTR_BIT, defaults to size
+	of target int.
+	* h8300-tdep.c, remote-hms.c, tm-h8300.h: too many changes to count
+	* symtab.c (lookup_reference_type, lookup_ptr_type): use
+	TARGET_PTR_BIT to determine size of a pointer
+	* values.c (unpack_long): when unpacking a REF or a PTR don't
+	assume the size of the type.
+
 Wed Feb  5 22:29:59 1992  John Gilmore  (gnu at cygnus.com)
 
 	* mipsread.c (parse_symbol):  Avoid clobbering enum pointer when
