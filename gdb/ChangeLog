@@ -1,3 +1,14 @@
+Tue Sep 22 22:27:24 1998  Mark Alexander  <marka@cygnus.com>
+
+	Patch from Dawn Perchik <dawn@cygnus.com>:
+	* rs6000-tdep.c (pop_frame): Handle generic dummy frames.
+	(push_arguments): Likewise.
+	(frame_saved_pc): Likewise.
+	(rs6000_frame_chain): Likewise.
+	(ppc_push_return_address): New function.
+	(get_saved_register): New function.
+	* config/powerpc/tm-ppc-eabi.h: Add generic dummy frame macros.
+
 Mon Sep 21 19:29:32 1998  Stu Grossman  <grossman@babylon-5.cygnus.com>
 
 	* defs.h utils.c (fputc_filtered):  New function.  Does the obvious...

@@ -19,6 +19,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
+#include "tm.h"
 #include "frame.h"
 #include "inferior.h"
 #include "symtab.h"
@@ -616,10 +617,18 @@ pop_frame ()
   pc = read_pc ();
   sp = FRAME_FP (frame);
 
-  if (stop_stack_dummy && dummy_frame_count) {
-    pop_dummy_frame ();
-    return;
-  }
+  if (stop_stack_dummy)
+    {
+#ifdef USE_GENERIC_DUMMY_FRAMES
+      generic_pop_dummy_frame ();
+      flush_cached_frames ();
+      return;
+#else
+      if (dummy_frame_count) 
+	pop_dummy_frame ();
+      return;
+#endif
+    }
 
   /* Make sure that all registers are valid.  */
   read_register_bytes (0, NULL, REGISTER_BYTES);
@@ -733,13 +742,16 @@ push_arguments (nargs, args, sp, struct_return, struct_addr)
   int argbytes;					/* current argument byte */
   char tmp_buffer [50];
   int f_argno = 0;				/* current floating point argno */
+
   value_ptr arg = 0;
   struct type *type;
 
   CORE_ADDR saved_sp;
 
+#ifndef USE_GENERIC_DUMMY_FRAMES
   if ( dummy_frame_count <= 0)
     printf_unfiltered ("FATAL ERROR -push_arguments()! frame not found!!\n");
+#endif	/* GENERIC_DUMMY_FRAMES */
 
   /* The first eight words of ther arguments are passed in registers. Copy
      them appropriately.
@@ -750,6 +762,25 @@ push_arguments (nargs, args, sp, struct_return, struct_addr)
      parameters. */
 
   ii =  struct_return ? 1 : 0;
+
+/* 
+effectively indirect call... gcc does...
+
+return_val example( float, int);
+
+eabi: 
+    float in fp0, int in r3
+    offset of stack on overflow 8/16
+    for varargs, must go by type.
+power open:
+    float in r3&r4, int in r5
+    offset of stack on overflow different 
+both: 
+    return in r3 or f0.  If no float, must study how gcc emulates floats;
+    pay attention to arg promotion.  
+    User may have to cast\args to handle promotion correctly 
+    since gdb won't know if prototype supplied or not.
+*/
 
   for (argno=0, argbytes=0; argno < nargs && ii<8; ++ii) {
 
@@ -798,12 +829,15 @@ push_arguments (nargs, args, sp, struct_return, struct_addr)
 
 ran_out_of_registers_for_arguments:
 
+#ifdef USE_GENERIC_DUMMY_FRAMES
+  saved_sp = read_sp ();
+#else
   /* location for 8 parameters are always reserved. */
   sp -= 4 * 8;
 
   /* another six words for back chain, TOC register, link register, etc. */
   sp -= 24;
-
+#endif	/* GENERIC_DUMMY_FRAMES */
   /* if there are more arguments, allocate space for them in 
      the stack, then push them starting from the ninth one. */
 
@@ -873,9 +907,14 @@ ran_out_of_registers_for_arguments:
     /* Secure stack areas first, before doing anything else. */
     write_register (SP_REGNUM, sp);
 
+#ifndef USE_GENERIC_DUMMY_FRAMES
+/* we want to copy 24 bytes of target's frame to dummy's frame,
+   then set back chain to point to new frame. */
+
   saved_sp = dummy_frame_addr [dummy_frame_count - 1];
   read_memory (saved_sp, tmp_buffer, 24);
   write_memory (sp, tmp_buffer, 24);
+#endif	/* GENERIC_DUMMY_FRAMES */
 
   /* set back chain properly */
   store_address (tmp_buffer, 4, saved_sp);
@@ -884,6 +923,21 @@ ran_out_of_registers_for_arguments:
   target_store_registers (-1);
   return sp;
 }
+#ifdef ELF_OBJECT_FORMAT
+
+/* Function: ppc_push_return_address (pc, sp)
+   Set up the return address for the inferior function call. */
+
+CORE_ADDR                                      
+ppc_push_return_address (pc, sp)
+     CORE_ADDR pc;
+     CORE_ADDR sp;
+{
+  write_register (LR_REGNUM, CALL_DUMMY_ADDRESS ());
+  return sp;
+}
+
+#endif
 
 /* a given return value in `regbuf' with a type `valtype', extract and copy its
    value into `valbuf' */
@@ -1022,6 +1076,11 @@ frame_saved_pc (fi)
 
   if (fi->signal_handler_caller)
     return read_memory_integer (fi->frame + SIG_FRAME_PC_OFFSET, 4);
+
+#ifdef USE_GENERIC_DUMMY_FRAMES
+  if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+    return generic_read_register_dummy(fi->pc, fi->frame, PC_REGNUM);
+#endif	/* GENERIC_DUMMY_FRAMES */
 
   func_start = get_pc_function_start (fi->pc) + FUNCTION_START_OFFSET;
 
@@ -1184,8 +1243,16 @@ rs6000_frame_chain (thisframe)
      struct frame_info *thisframe;
 {
   CORE_ADDR fp;
-  if (inside_entry_file ((thisframe)->pc))
+
+#ifdef USE_GENERIC_DUMMY_FRAMES
+  if (PC_IN_CALL_DUMMY (thisframe->pc, thisframe->frame, thisframe->frame))
+    return thisframe->frame;	/* dummy frame same as caller's frame */
+#endif	/* GENERIC_DUMMY_FRAMES */
+
+  if (inside_entry_file (thisframe->pc) || 
+      thisframe->pc == entry_point_address ())
     return 0;
+
   if (thisframe->signal_handler_caller)
     fp = read_memory_integer (thisframe->frame + SIG_FRAME_FP_OFFSET, 4);
   else if (thisframe->next != NULL
@@ -1197,6 +1264,17 @@ rs6000_frame_chain (thisframe)
   else
     fp = read_memory_integer ((thisframe)->frame, 4);
 
+#ifdef USE_GENERIC_DUMMY_FRAMES
+  {
+    CORE_ADDR fpp, lr;
+
+    lr = read_register (LR_REGNUM);
+    if (lr == entry_point_address ())
+      if (fp != 0 && (fpp = read_memory_integer (fp, 4)) != 0)
+	if (PC_IN_CALL_DUMMY (lr, fpp, fpp))
+	  return fpp;
+  }
+#endif	/* GENERIC_DUMMY_FRAMES */
   return fp;
 }
 
@@ -1228,6 +1306,23 @@ gdb_print_insn_powerpc (memaddr, info)
     return print_insn_little_powerpc (memaddr, info);
 }
 #endif
+
+/* Function: get_saved_register
+   Just call the generic_get_saved_register function.  */
+
+void
+get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
+     char *raw_buffer;
+     int *optimized;
+     CORE_ADDR *addrp;
+     struct frame_info *frame;
+     int regnum;
+     enum lval_type *lval;
+{
+  generic_get_saved_register (raw_buffer, optimized, addrp, 
+			      frame, regnum, lval);
+}
+
 
 void
 _initialize_rs6000_tdep ()
