@@ -40,6 +40,7 @@ gdb.c++
 gdb.disasm
 gdb.fortran
 gdb.stabs
+gdb.threads
 lib
 
 Things-to-lose:
