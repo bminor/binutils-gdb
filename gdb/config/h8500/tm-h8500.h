@@ -23,7 +23,7 @@
 #include "regcache.h"
 
 /* NOTE: cagney/2002-11-24: This is a guess.  */
-#define USE_GENERIC_DUMMY_FRAMES 0
+#define DEPRECATED_USE_GENERIC_DUMMY_FRAMES 0
 #define CALL_DUMMY_LOCATION ON_STACK
 #define PC_IN_CALL_DUMMY(pc, sp, frame_address) deprecated_pc_in_call_dummy_on_stack (pc, sp, frame_address)
 

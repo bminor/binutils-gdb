@@ -2245,11 +2245,6 @@ of functions to indicate that they never return.  The default is already
 set correctly if compiling with GCC.  This will almost never need to be
 defined.
 
-@item USE_GENERIC_DUMMY_FRAMES
-@cindex generic dummy frames
-Define this to 1 if the target is using the generic inferior function
-call code.  See @code{blockframe.c} for more information.
-
 @item USE_MMALLOC
 @findex mmalloc
 @value{GDBN} will use the @code{mmalloc} library for memory allocation

@@ -1868,7 +1868,7 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 					    alpha_extract_struct_value_address);
 
   /* Settings for calling functions in the inferior.  */
-  set_gdbarch_use_generic_dummy_frames (gdbarch, 0);
+  set_gdbarch_deprecated_use_generic_dummy_frames (gdbarch, 0);
   set_gdbarch_call_dummy_length (gdbarch, 0);
   set_gdbarch_push_arguments (gdbarch, alpha_push_arguments);
   set_gdbarch_pop_frame (gdbarch, alpha_pop_frame);

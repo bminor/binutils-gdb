@@ -184,7 +184,7 @@ extern CORE_ADDR mn10200_skip_prologue (CORE_ADDR);
 extern void mn10200_pop_frame (struct frame_info *);
 #define POP_FRAME mn10200_pop_frame (get_current_frame ())
 
-#define USE_GENERIC_DUMMY_FRAMES 1
+#define DEPRECATED_USE_GENERIC_DUMMY_FRAMES 1
 #define CALL_DUMMY                   {0}
 #define CALL_DUMMY_START_OFFSET      (0)
 #define CALL_DUMMY_BREAKPOINT_OFFSET (0)

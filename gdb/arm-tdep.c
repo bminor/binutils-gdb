@@ -410,8 +410,7 @@ arm_skip_prologue (CORE_ADDR pc)
   struct symtab_and_line sal;
 
   /* If we're in a dummy frame, don't even try to skip the prologue.  */
-  if (USE_GENERIC_DUMMY_FRAMES
-      && PC_IN_CALL_DUMMY (pc, 0, 0))
+  if (PC_IN_CALL_DUMMY (pc, 0, 0))
     return pc;
 
   /* See what the symbol table says.  */
@@ -536,8 +535,7 @@ thumb_scan_prologue (struct frame_info *fi)
   int i;
 
   /* Don't try to scan dummy frames.  */
-  if (USE_GENERIC_DUMMY_FRAMES
-      && fi != NULL
+  if (fi != NULL
       && PC_IN_CALL_DUMMY (fi->pc, 0, 0))
     return;
 
@@ -992,8 +990,7 @@ arm_find_callers_reg (struct frame_info *fi, int regnum)
      function could be called directly.  */
   for (; fi; fi = fi->next)
     {
-      if (USE_GENERIC_DUMMY_FRAMES
-	  && PC_IN_CALL_DUMMY (fi->pc, 0, 0))
+      if (PC_IN_CALL_DUMMY (fi->pc, 0, 0))
 	{
 	  return deprecated_read_register_dummy (fi->pc, fi->frame, regnum);
 	}
@@ -1022,8 +1019,7 @@ arm_frame_chain (struct frame_info *fi)
   CORE_ADDR caller_pc;
   int framereg = fi->extra_info->framereg;
 
-  if (USE_GENERIC_DUMMY_FRAMES
-      && PC_IN_CALL_DUMMY (fi->pc, 0, 0))
+  if (PC_IN_CALL_DUMMY (fi->pc, 0, 0))
     /* A generic call dummy's frame is the same as caller's.  */
     return fi->frame;
 
@@ -1106,8 +1102,7 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
      the sigtramp and call dummy cases.  */
   if (!fi->next)
     sp = read_sp();
-  else if (USE_GENERIC_DUMMY_FRAMES
-	   && PC_IN_CALL_DUMMY (fi->next->pc, 0, 0))
+  else if (PC_IN_CALL_DUMMY (fi->next->pc, 0, 0))
     /* For generic dummy frames, pull the value direct from the frame.
        Having an unwind function to do this would be nice.  */
     sp = deprecated_read_register_dummy (fi->next->pc, fi->next->frame,
@@ -1148,33 +1143,6 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
       fi->extra_info->frameoffset = 0;
 
     }
-  else if (!USE_GENERIC_DUMMY_FRAMES
-	   && PC_IN_CALL_DUMMY (fi->pc, sp, fi->frame))
-    {
-      CORE_ADDR rp;
-      CORE_ADDR callers_sp;
-
-      /* Set rp point at the high end of the saved registers.  */
-      rp = fi->frame - REGISTER_SIZE;
-
-      /* Fill in addresses of saved registers.  */
-      fi->saved_regs[ARM_PS_REGNUM] = rp;
-      rp -= REGISTER_RAW_SIZE (ARM_PS_REGNUM);
-      for (reg = ARM_PC_REGNUM; reg >= 0; reg--)
-	{
-	  fi->saved_regs[reg] = rp;
-	  rp -= REGISTER_RAW_SIZE (reg);
-	}
-
-      callers_sp = read_memory_integer (fi->saved_regs[ARM_SP_REGNUM],
-                                        REGISTER_RAW_SIZE (ARM_SP_REGNUM));
-      if (arm_pc_is_thumb (fi->pc))
-	fi->extra_info->framereg = THUMB_FP_REGNUM;
-      else
-	fi->extra_info->framereg = ARM_FP_REGNUM;
-      fi->extra_info->framesize = callers_sp - sp;
-      fi->extra_info->frameoffset = fi->frame - sp;
-    }
   else
     {
       arm_scan_prologue (fi);
@@ -1182,8 +1150,7 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
       if (!fi->next)
 	/* This is the innermost frame?  */
 	fi->frame = read_register (fi->extra_info->framereg);
-      else if (USE_GENERIC_DUMMY_FRAMES
-	       && PC_IN_CALL_DUMMY (fi->next->pc, 0, 0))
+      else if (PC_IN_CALL_DUMMY (fi->next->pc, 0, 0))
 	/* Next inner most frame is a dummy, just grab its frame.
            Dummy frames always have the same FP as their caller.  */
 	fi->frame = fi->next->frame;
@@ -1224,8 +1191,7 @@ static CORE_ADDR
 arm_frame_saved_pc (struct frame_info *fi)
 {
   /* If a dummy frame, pull the PC out of the frame's register buffer.  */
-  if (USE_GENERIC_DUMMY_FRAMES
-      && PC_IN_CALL_DUMMY (fi->pc, 0, 0))
+  if (PC_IN_CALL_DUMMY (fi->pc, 0, 0))
     return deprecated_read_register_dummy (fi->pc, fi->frame, ARM_PC_REGNUM);
 
   if (PC_IN_CALL_DUMMY (fi->pc, fi->frame - fi->extra_info->frameoffset,
@@ -1554,8 +1520,7 @@ arm_pop_frame (void)
   CORE_ADDR old_SP = (frame->frame - frame->extra_info->frameoffset
 		      + frame->extra_info->framesize);
 
-  if (USE_GENERIC_DUMMY_FRAMES
-      && PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+  if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
     {
       generic_pop_dummy_frame ();
       flush_cached_frames ();

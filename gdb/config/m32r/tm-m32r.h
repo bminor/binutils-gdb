@@ -224,7 +224,7 @@ extern CORE_ADDR m32r_push_arguments (int nargs,
      deprecated_generic_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
 
 
-#define USE_GENERIC_DUMMY_FRAMES 1
+#define DEPRECATED_USE_GENERIC_DUMMY_FRAMES 1
 #define CALL_DUMMY                   {0}
 #define CALL_DUMMY_LENGTH            (0)
 #define CALL_DUMMY_START_OFFSET      (0)

@@ -458,7 +458,7 @@ frame_saved_regs_register_unwind (struct frame_info *frame, void **cache,
   /* If we're using generic dummy frames, we'd better not be in a call
      dummy.  (generic_call_dummy_register_unwind ought to have been called
      instead.)  */
-  gdb_assert (!(USE_GENERIC_DUMMY_FRAMES
+  gdb_assert (!(DEPRECATED_USE_GENERIC_DUMMY_FRAMES
 		&& (get_frame_type (frame) == DUMMY_FRAME)));
 
   /* Load the saved_regs register cache.  */
@@ -649,7 +649,7 @@ set_unwind_by_pc (CORE_ADDR pc, CORE_ADDR fp,
 		  frame_register_unwind_ftype **unwind_register,
 		  frame_pc_unwind_ftype **unwind_pc)
 {
-  if (!USE_GENERIC_DUMMY_FRAMES)
+  if (!DEPRECATED_USE_GENERIC_DUMMY_FRAMES)
     {
       /* Still need to set this to something.  The ``info frame'' code
 	 calls this function to find out where the saved registers are.
@@ -704,7 +704,7 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
      pc_in_dummy_frame() as some architectures don't set
      PC_IN_CALL_DUMMY() to generic_pc_in_call_dummy() (remember the
      latter is implemented by simply calling pc_in_dummy_frame).  */
-  if (USE_GENERIC_DUMMY_FRAMES && PC_IN_CALL_DUMMY (pc, 0, 0))
+  if (DEPRECATED_USE_GENERIC_DUMMY_FRAMES && PC_IN_CALL_DUMMY (pc, 0, 0))
     /* NOTE: cagney/2002-11-11: Does this even occure?  */
     type = DUMMY_FRAME;
   else
@@ -989,7 +989,8 @@ get_prev_frame (struct frame_info *next_frame)
      pc_in_dummy_frame() as some architectures don't set
      PC_IN_CALL_DUMMY() to generic_pc_in_call_dummy() (remember the
      latter is implemented by simply calling pc_in_dummy_frame).  */
-  if (USE_GENERIC_DUMMY_FRAMES && PC_IN_CALL_DUMMY (prev->pc, 0, 0))
+  if (DEPRECATED_USE_GENERIC_DUMMY_FRAMES
+      && PC_IN_CALL_DUMMY (prev->pc, 0, 0))
     prev->type = DUMMY_FRAME;
   else
     {
@@ -1045,7 +1046,7 @@ get_frame_type (struct frame_info *frame)
 {
   /* Some targets still don't use [generic] dummy frames.  Catch them
      here.  */
-  if (!USE_GENERIC_DUMMY_FRAMES
+  if (!DEPRECATED_USE_GENERIC_DUMMY_FRAMES
       && deprecated_frame_in_dummy (frame))
     return DUMMY_FRAME;
   return frame->type;

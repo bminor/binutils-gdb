@@ -3179,7 +3179,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_short_bit (gdbarch, 2 * TARGET_CHAR_BIT);
   set_gdbarch_skip_prologue (gdbarch, sparc_skip_prologue);
   set_gdbarch_sp_regnum (gdbarch, SPARC_SP_REGNUM);
-  set_gdbarch_use_generic_dummy_frames (gdbarch, 0);
+  set_gdbarch_deprecated_use_generic_dummy_frames (gdbarch, 0);
   set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
 
   /*

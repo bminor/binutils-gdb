@@ -719,7 +719,7 @@ generic_file_frame_chain_valid (CORE_ADDR fp, struct frame_info *fi)
 int
 generic_func_frame_chain_valid (CORE_ADDR fp, struct frame_info *fi)
 {
-  if (USE_GENERIC_DUMMY_FRAMES
+  if (DEPRECATED_USE_GENERIC_DUMMY_FRAMES
       && PC_IN_CALL_DUMMY ((fi)->pc, 0, 0))
     return 1;			/* don't prune CALL_DUMMY frames */
   else				/* fall back to default algorithm (see frame.h) */

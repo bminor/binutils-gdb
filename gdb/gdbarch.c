@@ -181,7 +181,7 @@ struct gdbarch
   gdbarch_cannot_fetch_register_ftype *cannot_fetch_register;
   gdbarch_cannot_store_register_ftype *cannot_store_register;
   gdbarch_get_longjmp_target_ftype *get_longjmp_target;
-  int use_generic_dummy_frames;
+  int deprecated_use_generic_dummy_frames;
   int call_dummy_location;
   gdbarch_call_dummy_address_ftype *call_dummy_address;
   CORE_ADDR call_dummy_start_offset;
@@ -522,7 +522,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->register_sim_regno = legacy_register_sim_regno;
   current_gdbarch->cannot_fetch_register = cannot_register_not;
   current_gdbarch->cannot_store_register = cannot_register_not;
-  current_gdbarch->use_generic_dummy_frames = 1;
+  current_gdbarch->deprecated_use_generic_dummy_frames = 1;
   current_gdbarch->call_dummy_location = AT_ENTRY_POINT;
   current_gdbarch->call_dummy_start_offset = -1;
   current_gdbarch->call_dummy_breakpoint_offset = -1;
@@ -680,7 +680,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of cannot_fetch_register, invalid_p == 0 */
   /* Skip verify of cannot_store_register, invalid_p == 0 */
   /* Skip verify of get_longjmp_target, has predicate */
-  /* Skip verify of use_generic_dummy_frames, invalid_p == 0 */
+  /* Skip verify of deprecated_use_generic_dummy_frames, invalid_p == 0 */
   /* Skip verify of call_dummy_location, invalid_p == 0 */
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->call_dummy_location == AT_ENTRY_POINT && gdbarch->call_dummy_address == 0))
@@ -1159,6 +1159,14 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: DEPRECATED_STORE_RETURN_VALUE = 0x%08lx\n",
                         (long) current_gdbarch->deprecated_store_return_value
                         /*DEPRECATED_STORE_RETURN_VALUE ()*/);
+#endif
+#ifdef DEPRECATED_USE_GENERIC_DUMMY_FRAMES
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_USE_GENERIC_DUMMY_FRAMES # %s\n",
+                      XSTRING (DEPRECATED_USE_GENERIC_DUMMY_FRAMES));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_USE_GENERIC_DUMMY_FRAMES = %d\n",
+                      DEPRECATED_USE_GENERIC_DUMMY_FRAMES);
 #endif
 #ifdef DWARF2_BUILD_FRAME_INFO
 #if GDB_MULTI_ARCH
@@ -2289,14 +2297,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->write_sp
                         /*TARGET_WRITE_SP ()*/);
 #endif
-#ifdef USE_GENERIC_DUMMY_FRAMES
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: USE_GENERIC_DUMMY_FRAMES # %s\n",
-                      XSTRING (USE_GENERIC_DUMMY_FRAMES));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: USE_GENERIC_DUMMY_FRAMES = %d\n",
-                      USE_GENERIC_DUMMY_FRAMES);
-#endif
 #ifdef USE_STRUCT_CONVENTION
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -3321,20 +3321,20 @@ set_gdbarch_get_longjmp_target (struct gdbarch *gdbarch,
 }
 
 int
-gdbarch_use_generic_dummy_frames (struct gdbarch *gdbarch)
+gdbarch_deprecated_use_generic_dummy_frames (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of use_generic_dummy_frames, invalid_p == 0 */
+  /* Skip verify of deprecated_use_generic_dummy_frames, invalid_p == 0 */
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_use_generic_dummy_frames called\n");
-  return gdbarch->use_generic_dummy_frames;
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_use_generic_dummy_frames called\n");
+  return gdbarch->deprecated_use_generic_dummy_frames;
 }
 
 void
-set_gdbarch_use_generic_dummy_frames (struct gdbarch *gdbarch,
-                                      int use_generic_dummy_frames)
+set_gdbarch_deprecated_use_generic_dummy_frames (struct gdbarch *gdbarch,
+                                                 int deprecated_use_generic_dummy_frames)
 {
-  gdbarch->use_generic_dummy_frames = use_generic_dummy_frames;
+  gdbarch->deprecated_use_generic_dummy_frames = deprecated_use_generic_dummy_frames;
 }
 
 int

@@ -1697,9 +1697,9 @@ deprecated_frame_in_dummy (struct frame_info *frame)
     return 0;
 
   /* This function is used by two files: get_frame_type(), after first
-     checking that !USE_GENERIC_DUMMY_FRAMES; and sparc-tdep.c, which
-     doesn't yet use generic dummy frames anyway.  */
-  gdb_assert (!USE_GENERIC_DUMMY_FRAMES);
+     checking that !DEPRECATED_USE_GENERIC_DUMMY_FRAMES; and
+     sparc-tdep.c, which doesn't yet use generic dummy frames anyway.  */
+  gdb_assert (!DEPRECATED_USE_GENERIC_DUMMY_FRAMES);
 
   ALL_BREAKPOINTS (b)
   {

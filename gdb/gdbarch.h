@@ -971,18 +971,18 @@ extern void set_gdbarch_get_longjmp_target (struct gdbarch *gdbarch, gdbarch_get
    avoids any potential problems with moving beyond multi-arch partial. */
 
 /* Default (value) for non- multi-arch platforms. */
-#if (!GDB_MULTI_ARCH) && !defined (USE_GENERIC_DUMMY_FRAMES)
-#define USE_GENERIC_DUMMY_FRAMES (1)
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_USE_GENERIC_DUMMY_FRAMES)
+#define DEPRECATED_USE_GENERIC_DUMMY_FRAMES (1)
 #endif
 
-extern int gdbarch_use_generic_dummy_frames (struct gdbarch *gdbarch);
-extern void set_gdbarch_use_generic_dummy_frames (struct gdbarch *gdbarch, int use_generic_dummy_frames);
-#if (GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL) && defined (USE_GENERIC_DUMMY_FRAMES)
-#error "Non multi-arch definition of USE_GENERIC_DUMMY_FRAMES"
+extern int gdbarch_deprecated_use_generic_dummy_frames (struct gdbarch *gdbarch);
+extern void set_gdbarch_deprecated_use_generic_dummy_frames (struct gdbarch *gdbarch, int deprecated_use_generic_dummy_frames);
+#if (GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_USE_GENERIC_DUMMY_FRAMES)
+#error "Non multi-arch definition of DEPRECATED_USE_GENERIC_DUMMY_FRAMES"
 #endif
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL) || !defined (USE_GENERIC_DUMMY_FRAMES)
-#define USE_GENERIC_DUMMY_FRAMES (gdbarch_use_generic_dummy_frames (current_gdbarch))
+#if (GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_USE_GENERIC_DUMMY_FRAMES)
+#define DEPRECATED_USE_GENERIC_DUMMY_FRAMES (gdbarch_deprecated_use_generic_dummy_frames (current_gdbarch))
 #endif
 #endif
 
