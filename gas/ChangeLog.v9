@@ -1,3 +1,9 @@
+Mon Mar 22 16:25:57 1993  Jim Wilson  (wilson@sphagnum.cygnus.com)
+
+	* config/tc-sparc.c (sparc_ip): Add support for membar mask names.
+	Add missing colons in prefectch error messages.  Add support for
+	ASI names.
+
 Mon Mar  1 12:03:16 1993  Jim Wilson  (wilson@sphagnum.cygnus.com)
 
 	* config/tc-sparc.c (sparc_ip):  Correctly assemble prefetch
