@@ -1,3 +1,12 @@
+Wed May 15 08:33:37 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* config/obj-coff.c (count_entries_in_chain): Ignore Fixups with
+	fx_done set. 
+	(do_relocs_for): Likewise.
+	(fixup_segment): Don't just quit if linkrelax is set.  Try to
+	apply non pc-relative sym1-sym2 fixups, even if linkrelax is
+	nonzero.
+
 Fri May 10 14:16:59 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config/tc-ppc.c (ppc_elf_validate_fix): Allow GOT and section
