@@ -85,7 +85,7 @@ CONFIG_STATUS_DEPENDENCIES = $(BFDDIR)/configure.in
 # Maintenance
 
 # We need it for the taz target in ../../Makefile.in.
-info: $(MANS)
+info-local: $(MANS)
 
 # Build the man page from the texinfo file
 # The sed command removes the no-adjust Nroff command so that

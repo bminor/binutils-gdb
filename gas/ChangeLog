@@ -1,3 +1,9 @@
+2004-06-28  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* doc/Makefile.am (info): Rename goal to...
+	(info-local): ... this, to preserve implicit dependencies.
+	* doc/Makefile.in: Regenerate with automake 1.8.5.
+
 2004-06-25  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
 
 	* config/tc-m32r.c (md_convert_frag): Changed for @PLT.
