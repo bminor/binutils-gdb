@@ -954,7 +954,7 @@ the GNU General Public License.  This program has absolutely no warranty.\n"));
              ignored.  Someday we should handle it correctly.  FIXME.  */
 	  break;
 	case OPTION_SPLIT_BY_RELOC:
-	  config.split_by_reloc = atoi (optarg);
+	  config.split_by_reloc = strtoul (optarg, NULL, 0);
 	  break; 
 	case OPTION_SPLIT_BY_FILE:
 	  config.split_by_file = true;

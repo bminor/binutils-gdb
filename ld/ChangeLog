@@ -23,6 +23,9 @@
 
 1999-09-12  Donn Terry  <donn@interix.com>
 
+	* lexsup.c (parse_args): Use strtoul for --split-by-reloc
+	argument.
+
 	* lexsup.c (parse_args): If we get an unrecognized argument,
 	mention --help.
 
