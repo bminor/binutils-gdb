@@ -1,5 +1,8 @@
 Mon Jan 15 14:29:44 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* sunos.c (sunos_scan_ext_relocs): Don't fail assert if
+        info->shared.
+
 	* coffgen.c (coff_find_nearest_line): Don't try to cache
 	information in sections that are not owned by a BFD.  From Richard
 	Henderson <richard@atheist.tamu.edu>.

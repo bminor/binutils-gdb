@@ -1477,7 +1477,7 @@ sunos_scan_std_relocs (info, abfd, sec, relocs, rel_size)
       struct sunos_link_hash_entry *h;
 
       /* We only want relocs against external symbols.  */
-      if (abfd->xvec->header_byteorder_big_p)
+      if (bfd_header_big_endian (abfd))
 	{
 	  if ((rel->r_type[0] & RELOC_STD_BITS_EXTERN_BIG) == 0)
 	    continue;
@@ -1489,7 +1489,7 @@ sunos_scan_std_relocs (info, abfd, sec, relocs, rel_size)
 	}
 
       /* Get the symbol index.  */
-      if (abfd->xvec->header_byteorder_big_p)
+      if (bfd_header_big_endian (abfd))
 	r_index = ((rel->r_index[0] << 16)
 		   | (rel->r_index[1] << 8)
 		   | rel->r_index[2]);
@@ -1632,7 +1632,7 @@ sunos_scan_ext_relocs (info, abfd, sec, relocs, rel_size)
       struct sunos_link_hash_entry *h = NULL;
 
       /* Swap in the reloc information.  */
-      if (abfd->xvec->header_byteorder_big_p)
+      if (bfd_header_big_endian (abfd))
 	{
 	  r_index = ((rel->r_index[0] << 16)
 		     | (rel->r_index[1] << 8)
@@ -1782,6 +1782,7 @@ sunos_scan_ext_relocs (info, abfd, sec, relocs, rel_size)
 	}
 
       BFD_ASSERT (r_type == RELOC_JMP_TBL
+		  || info->shared
 		  || (h->flags & SUNOS_REF_REGULAR) != 0);
       BFD_ASSERT (r_type == RELOC_JMP_TBL
 		  || info->shared
@@ -2169,7 +2170,7 @@ sunos_write_dynamic_symbol (output_bfd, info, harg)
 
 	      srel = (struct reloc_std_external *) p;
 	      PUT_WORD (output_bfd, r_address, srel->r_address);
-	      if (output_bfd->xvec->header_byteorder_big_p)
+	      if (bfd_header_big_endian (output_bfd))
 		{
 		  srel->r_index[0] = h->dynindx >> 16;
 		  srel->r_index[1] = h->dynindx >> 8;
@@ -2192,7 +2193,7 @@ sunos_write_dynamic_symbol (output_bfd, info, harg)
 
 	      erel = (struct reloc_ext_external *) p;
 	      PUT_WORD (output_bfd, r_address, erel->r_address);
-	      if (output_bfd->xvec->header_byteorder_big_p)
+	      if (bfd_header_big_endian (output_bfd))
 		{
 		  erel->r_index[0] = h->dynindx >> 16;
 		  erel->r_index[1] = h->dynindx >> 8;
@@ -2266,7 +2267,7 @@ sunos_check_dynamic_reloc (info, input_bfd, input_section, harg, reloc,
       struct reloc_std_external *srel;
 
       srel = (struct reloc_std_external *) reloc;
-      if (input_bfd->xvec->header_byteorder_big_p)
+      if (bfd_header_big_endian (input_bfd))
 	{
 	  baserel = (0 != (srel->r_type[0] & RELOC_STD_BITS_BASEREL_BIG));
 	  jmptbl = (0 != (srel->r_type[0] & RELOC_STD_BITS_JMPTABLE_BIG));
@@ -2283,7 +2284,7 @@ sunos_check_dynamic_reloc (info, input_bfd, input_section, harg, reloc,
       int r_type;
 
       erel = (struct reloc_ext_external *) reloc;
-      if (input_bfd->xvec->header_byteorder_big_p)
+      if (bfd_header_big_endian (input_bfd))
 	r_type = ((erel->r_type[0] & RELOC_EXT_BITS_TYPE_BIG)
 		  >> RELOC_EXT_BITS_TYPE_SH_BIG);
       else
@@ -2312,7 +2313,7 @@ sunos_check_dynamic_reloc (info, input_bfd, input_section, harg, reloc,
 	  srel = (struct reloc_std_external *) reloc;
 	  if (obj_reloc_entry_size (input_bfd) == RELOC_STD_SIZE)
 	    {
-	      if (input_bfd->xvec->header_byteorder_big_p)
+	      if (bfd_header_big_endian (input_bfd))
 		r_index = ((srel->r_index[0] << 16)
 			   | (srel->r_index[1] << 8)
 			   | srel->r_index[2]);
@@ -2326,7 +2327,7 @@ sunos_check_dynamic_reloc (info, input_bfd, input_section, harg, reloc,
 	      struct reloc_ext_external *erel;
 
 	      erel = (struct reloc_ext_external *) reloc;
-	      if (input_bfd->xvec->header_byteorder_big_p)
+	      if (bfd_header_big_endian (input_bfd))
 		r_index = ((erel->r_index[0] << 16)
 			   | (erel->r_index[1] << 8)
 			   | erel->r_index[2]);
@@ -2386,7 +2387,7 @@ sunos_check_dynamic_reloc (info, input_bfd, input_section, harg, reloc,
 			     + sgot->output_section->vma
 			     + sgot->output_offset),
 			    srel->r_address);
-		  if (dynobj->xvec->header_byteorder_big_p)
+		  if (bfd_header_big_endian (dynobj))
 		    {
 		      srel->r_index[0] = indx >> 16;
 		      srel->r_index[1] = indx >> 8;
@@ -2425,7 +2426,7 @@ sunos_check_dynamic_reloc (info, input_bfd, input_section, harg, reloc,
 			     + sgot->output_section->vma
 			     + sgot->output_offset),
 			    erel->r_address);
-		  if (dynobj->xvec->header_byteorder_big_p)
+		  if (bfd_header_big_endian (dynobj))
 		    {
 		      erel->r_index[0] = indx >> 16;
 		      erel->r_index[1] = indx >> 8;
@@ -2516,7 +2517,7 @@ sunos_check_dynamic_reloc (info, input_bfd, input_section, harg, reloc,
 		 + input_section->output_section->vma
 		 + input_section->output_offset),
 		srel->r_address);
-      if (dynobj->xvec->header_byteorder_big_p)
+      if (bfd_header_big_endian (dynobj))
 	{
 	  srel->r_index[0] = indx >> 16;
 	  srel->r_index[1] = indx >> 8;
@@ -2539,7 +2540,7 @@ sunos_check_dynamic_reloc (info, input_bfd, input_section, harg, reloc,
 		 + input_section->output_section->vma
 		 + input_section->output_offset),
 		erel->r_address);
-      if (dynobj->xvec->header_byteorder_big_p)
+      if (bfd_header_big_endian (dynobj))
 	{
 	  erel->r_index[0] = indx >> 16;
 	  erel->r_index[1] = indx >> 8;
