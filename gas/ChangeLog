@@ -1,5 +1,9 @@
 2003-10-04  Nick Clifton  <nickc@redhat.com>
 
+	* as.c: Convert to ISO C90.
+
+2003-10-04  Nick Clifton  <nickc@redhat.com>
+
 	* as.c (std_shortopts): Remove 'f'.
 	(std_longopts): Add 'f'.  Doing this prevents -f<foo> being
 	acecpted as an alias for -f.
