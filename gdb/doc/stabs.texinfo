@@ -70,7 +70,7 @@ This document describes the GNU stabs debugging format in a.out files.
 * Simple types::
 * Example::                     A comprehensive example in C 
 * Variables::
-* Aggregate types::
+* Aggregate Types::
 * Symbol tables::               Symbol information in symbol tables
 * GNU Cplusplus stabs::
 
@@ -305,7 +305,7 @@ types used to describe C language source files.
 * Source file:: The path and name of the source file
 * Line numbers::
 * Procedures::
-* Block structure::
+* Block Structure::
 @end menu
 
 @node Source file
@@ -728,7 +728,7 @@ nesting is reflected in the nested bracketing stabs (@code{N_LBRAC},
 
 @menu
 * Automatic variables:: locally scoped
-* Global variables::
+* Global Variables::
 * Register variables::
 * Initialized statics::
 * Un-initialized statics::
