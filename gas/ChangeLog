@@ -1,5 +1,10 @@
 Sun Dec  6 12:46:36 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* configure.in: Define TARGET_BYTES_{BIG,LITTLE}_ENDIAN after
+	checking the target type.
+	(mips-dec-bsd*): Set endian to little.
+	* configure: Rebuild.
+
 	COFF weak symbol support, based on patches from Mark Elbrecht
 	<snowball3@usa.net>:
 	* config/obj-coff.h (S_IS_WEAK): Define if not BFD_ASSEMBLER.

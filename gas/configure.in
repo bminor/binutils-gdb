@@ -104,11 +104,6 @@ changequote([,])dnl
 
     if test ${this_target} = $target ; then
       target_cpu_type=${cpu_type}
-      if test x${endian} = xbig; then
-	AC_DEFINE(TARGET_BYTES_BIG_ENDIAN, 1)
-      elif test x${endian} = xlittle; then
-	AC_DEFINE(TARGET_BYTES_BIG_ENDIAN, 0)
-      fi
     elif test ${target_cpu_type} != ${cpu_type} ; then
       continue
     fi
@@ -240,7 +235,7 @@ dnl end-sanitize-beos
       # don't change em like *-*-bsd does
       mips-dec-netbsd*)	    fmt=elf endian=little ;;
       mips-dec-openbsd*)    fmt=elf endian=little ;;
-      mips-dec-bsd*)        fmt=aout ;;
+      mips-dec-bsd*)        fmt=aout endian=little ;;
       mips-sony-bsd*)       fmt=ecoff ;;
       mips-*-bsd*)          AC_MSG_ERROR(Unknown vendor for mips-bsd configuration.) ;;
       mips-*-ultrix*)       fmt=ecoff endian=little ;;
@@ -340,6 +335,14 @@ dnl end-sanitize-beos
       *-*-vxworks)          fmt=aout ;;
       *-*-netware)          fmt=elf ;;
     esac
+
+    if test ${this_target} = $target ; then
+      if test x${endian} = xbig; then
+	AC_DEFINE(TARGET_BYTES_BIG_ENDIAN, 1)
+      elif test x${endian} = xlittle; then
+	AC_DEFINE(TARGET_BYTES_BIG_ENDIAN, 0)
+      fi
+    fi
 
     case ${cpu_type}-${fmt} in
       alpha*-*)	bfd_gas=yes ;;
