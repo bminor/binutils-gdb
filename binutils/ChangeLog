@@ -1,3 +1,8 @@
+2005-03-22  Nick Clifton  <nickc@redhat.com>
+
+	* MAINTAINERS: Add Daniel Jacobwitz to the blanket write
+	privileges list.
+
 2005-03-17  Paul Brook <paul@codesourcery.com>
 	    Dan Jacobowitz <dan@codesourcery.com>
 	    Mark Mitchell  <mark@codesourcery.com>
