@@ -1,3 +1,9 @@
+2003-11-25  Danny Smith  <dannysmith@users.sourceforge.net>
+
+	* doc/binutils.texi (dlltool): Document dlltool --temp-prefix
+	option.
+	* dlltool.c (usage): Likewise.
+
 2003-11-22  Ian Lance Taylor  <ian@wasabisystems.com>
 
 	* cxxfilt.c (long_options): Add --no-params.

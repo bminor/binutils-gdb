@@ -2846,7 +2846,8 @@ dlltool [@option{-d}|@option{--input-def} @var{def-file-name}]
         [@option{-a}|@option{--add-indirect}] [@option{-U}|@option{--add-underscore}] [@option{-k}|@option{--kill-at}]
         [@option{-A}|@option{--add-stdcall-alias}]
         [@option{-x}|@option{--no-idata4}] [@option{-c}|@option{--no-idata5}] [@option{-i}|@option{--interwork}]
-        [@option{-n}|@option{--nodelete}] [@option{-v}|@option{--verbose}] 
+        [@option{-n}|@option{--nodelete}] [@option{-t}|@option{--temp-prefix} @var{prefix}]
+        [@option{-v}|@option{--verbose}] 
         [@option{-h}|@option{--help}] [@option{-V}|@option{--version}]
         [object-file @dots{}]
 @c man end
@@ -3056,7 +3057,13 @@ between ARM and Thumb code.
 Makes @command{dlltool} preserve the temporary assembler files it used to
 create the exports file.  If this option is repeated then dlltool will
 also preserve the temporary object files it uses to create the library
-file. 
+file.
+
+@item -t @var{prefix}
+@itemx --temp-prefix @var{prefix}
+Makes @command{dlltool} use @var{prefix} when constructing the names of
+temporary assembler and object files.  By default, the temp file prefix
+is generated from the pid.  
 
 @item -v
 @itemx --verbose

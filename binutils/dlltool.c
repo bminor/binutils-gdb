@@ -3131,6 +3131,7 @@ usage (FILE *file, int status)
   fprintf (file, _("   -f --as-flags <flags>     Pass <flags> to the assembler.\n"));
   fprintf (file, _("   -C --compat-implib        Create backward compatible import library.\n"));
   fprintf (file, _("   -n --no-delete            Keep temp files (repeat for extra preservation).\n"));
+  fprintf (file, _("   -t --temp-prefix <prefix> Use <prefix> to construct temp file names.\n"));
   fprintf (file, _("   -v --verbose              Be verbose.\n"));
   fprintf (file, _("   -V --version              Display the program version.\n"));
   fprintf (file, _("   -h --help                 Display this information.\n"));
