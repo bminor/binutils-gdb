@@ -1,3 +1,15 @@
+2004-01-18  Andrew Cagney  <cagney@redhat.com>
+
+	* ocd.c: Update copyright.
+	(bdm_read_register_command): Delete unused function.
+	(_initialize_remote_ocd): Delete commented out reference.
+	(get_quoted_char, reset_packet): Delete #if0ed function.
+	(output_packet, put_quoted_char): Delete #if0ed function.
+	(stu_put_packet, stu_get_packet): Delete #if0ed function.
+	(ocd_start_remote): Delete #if0ed code, remove #if1 wrapper.
+	(BDM_BREAKPOINT): Delete #if0ed macro.
+	(remote_timeout): Delete #if0ed variable.
+
 2004-01-18  Mark Kettenis  <kettenis@gnu.org>
 
 	* Makefile.in (ALLDEPFILES): Remove core-sol2.c.
