@@ -207,6 +207,11 @@ case $basic_machine in
 	thumb) # CYGNUS LOCAL: angela/thumb
 		basic_machine=$basic_machine-unknown
 		;;
+# start-sanitize-vr4320
+	mips64vr4320 | mips64vr4320el)
+		basic_machine=$basic_machine-unknown
+		;;
+# start-sanitize-vr4320
 	mips64vr4300 | mips64vr4300el) # CYGNUS LOCAL jsmith/vr4300
 		basic_machine=$basic_machine-unknown
 		;;
@@ -244,13 +249,19 @@ case $basic_machine in
 	mips16) # CYGNUS LOCAL krk/mips16
 		basic_machine=$basic_machine-unknown
 		;;
+	tic30) # CYGNUS LOCAL ian/tic30
+		basic_machine=$basic_machine-unknown
+		;;
+	c30) # CYGNUS LOCAL ian/tic30
+		basic_machine=tic30-unknown
+		;;
 # start-sanitize-tic80
 	tic80)				# CYGNUS LOCAL fnf/TIc80
 		basic_machine=$basic_machine-unknown
 		;;
 # end-sanitize-tic80
 # start-sanitize-sky
-	txvu)
+	dvp)
 		basic_machine=$basic_machine-unknown
 		;;
 # end-sanitize-sky
@@ -300,7 +311,7 @@ case $basic_machine in
 	thumb-*) # CYGNUS LOCAL angela/thumb
 		;;
 # start-sanitize-sky
-	txvu-*)
+	dvp-* | txvu-*)
 		;;
 # end-sanitize-sky
 	v850-*) # CYGNUS LOCAL
@@ -315,6 +326,10 @@ case $basic_machine in
 	d30v-*) # CYGNUS LOCAL
 	        ;;
 # end-sanitize-d30v
+# start-sanitize-vr4320
+	mips64vr4320-* | mips64vr4320el-*)
+		;;
+# end-sanitize-vr4320
 	mips64vr4300-* | mips64vr4300el-*) # CYGNUS LOCAL jsmith/vr4300
 		;;
 	mips64vr4100-* | mips64vr4100el-*) # CYGNUS LOCAL jsmith/vr4100
@@ -336,6 +351,11 @@ case $basic_machine in
                 ;;
 # end-sanitize-r5900
 	mips16-*) # CYGNUS LOCAL krk/mips16
+		;;
+	tic30-*) # CYGNUS LOCAL ian/tic30
+		;;
+	c30-*) # CYGNUS LOCAL ian/tic30
+		basic_machine=tic30-unknown
 		;;
 # start-sanitize-tic80
 	tic80-*)						# CYGNUS LOCAL fnf/TIc80
