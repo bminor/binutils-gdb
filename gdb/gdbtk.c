@@ -71,7 +71,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "annotate.h"
 #include <sys/time.h>
 
-/* For Cygwin32, we use a timer to periodically check for Windows
+/* For Cygwin, we use a timer to periodically check for Windows
    messages.  FIXME: It would be better to not poll, but to instead
    rewrite the target_wait routines to serve as input sources.
    Unfortunately, that will be a lot of work.  */
@@ -329,7 +329,7 @@ gdbtk_init ( argv0 )
      causing gdb to abort.  If instead we simply return here, gdb will
      gracefully degrade to using the command line interface. */
 
-#ifndef WINNT
+#ifndef _WIN32
   if (getenv ("DISPLAY") == NULL)
     return;
 #endif
@@ -444,7 +444,7 @@ gdbtk_init ( argv0 )
    * These are the commands to do some Windows Specific stuff...
    */
   
-#ifdef __CYGWIN32__
+#ifdef __CYGWIN__
   if (ide_create_messagebox_command (gdbtk_interp) != TCL_OK)
     error ("messagebox command initialization failed");
   /* On Windows, create a sizebox widget command */
@@ -679,15 +679,15 @@ _initialize_gdbtk ()
       /* Tell the rest of the world that Gdbtk is now set up. */
 
       init_ui_hook = gdbtk_init;
-#ifdef __CYGWIN32__
+#ifdef __CYGWIN__
       (void) FreeConsole ();
 #endif
     }
-#ifdef __CYGWIN32__
+#ifdef __CYGWIN__
   else
     {
       DWORD ft = GetFileType (GetStdHandle (STD_INPUT_HANDLE));
-      void cygwin32_attach_handle_to_fd (char *, int, HANDLE, int, int);
+      void cygwin_attach_handle_to_fd (char *, int, HANDLE, int, int);
 
       switch (ft)
 	{
@@ -697,15 +697,15 @@ _initialize_gdbtk ()
 	    break;
 	  default:
 	    AllocConsole();
-	    cygwin32_attach_handle_to_fd ("/dev/conin", 0,
-					  GetStdHandle (STD_INPUT_HANDLE),
-					  1, GENERIC_READ);
-	    cygwin32_attach_handle_to_fd ("/dev/conout", 1,
-					  GetStdHandle (STD_OUTPUT_HANDLE),
-					  0, GENERIC_WRITE);
-	    cygwin32_attach_handle_to_fd ("/dev/conout", 2,
-					  GetStdHandle (STD_ERROR_HANDLE),
-					  0, GENERIC_WRITE);
+	    cygwin_attach_handle_to_fd ("/dev/conin", 0,
+					GetStdHandle (STD_INPUT_HANDLE),
+					1, GENERIC_READ);
+	    cygwin_attach_handle_to_fd ("/dev/conout", 1,
+					GetStdHandle (STD_OUTPUT_HANDLE),
+					0, GENERIC_WRITE);
+	    cygwin_attach_handle_to_fd ("/dev/conout", 2,
+					GetStdHandle (STD_ERROR_HANDLE),
+					0, GENERIC_WRITE);
 	    break;
 	}
     }

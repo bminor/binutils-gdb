@@ -56,13 +56,10 @@ int display_space;
 
 static void print_gdb_help PARAMS ((GDB_FILE *));
 extern void gdb_init PARAMS ((char *));
-#ifdef __CYGWIN32__
+#ifdef __CYGWIN__
 #include <windows.h> /* for MAX_PATH */
-extern void cygwin32_conv_to_posix_path (const char *, char *);
+#include <sys/cygwin.h> /* for cygwin_conv_to_posix_path */
 #endif
-
-extern void (*pre_add_symbol_hook) PARAMS ((char *));
-extern void (*post_add_symbol_hook) PARAMS ((void));
 
 int
 main (argc, argv)
@@ -180,7 +177,9 @@ main (argc, argv)
 	{"version", no_argument, &print_version, 1},
 	{"x", required_argument, 0, 'x'},
 /* start-sanitize-gdbtk */
+#ifdef GDBTK
     {"tclcommand", required_argument, 0, 'z'},
+#endif
 /* end-sanitize-gdbtk */
 	{"directory", required_argument, 0, 'd'},
 	{"cd", required_argument, 0, 11},
@@ -257,6 +256,7 @@ main (argc, argv)
 	      }
 	    break;
         /* start-sanitize-gdbtk */
+#ifdef GDBTK
       case 'z':
         {
           extern int gdbtk_test PARAMS ((char *));
@@ -268,6 +268,7 @@ main (argc, argv)
             }
           break;
         }
+#endif /* GDBTK */
         /* end-sanitize-gdbtk */
 	  case 'd':
 	    dirarg[ndir++] = optarg;
@@ -397,17 +398,17 @@ main (argc, argv)
      *before* all the command line arguments are processed; it sets
      global parameters, which are independent of what file you are
      debugging or what directory you are in.  */
-#ifdef __CYGWIN32__
+#ifdef __CYGWIN__
   {
     char * tmp = getenv ("HOME");
     
     if (tmp != NULL)
       {
         homedir = (char *) alloca (MAX_PATH+1);
-        cygwin32_conv_to_posix_path (tmp, homedir);
-      } else {
-        homedir = NULL;
+        cygwin_conv_to_posix_path (tmp, homedir);
       }
+    else
+      homedir = NULL;
   }
 #else
   homedir = getenv ("HOME");  
@@ -464,12 +465,8 @@ main (argc, argv)
 	 it, better only print one error message.  */
       if (!SET_TOP_LEVEL ())
 	{
-      if (pre_add_symbol_hook)
-        pre_add_symbol_hook (symarg);
 	  exec_file_command (execarg, !batch);
 	  symbol_file_command (symarg, 0);
-      if (post_add_symbol_hook)
-        post_add_symbol_hook ();
 	}
     }
   else

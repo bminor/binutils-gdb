@@ -97,7 +97,7 @@
 
 
 #define SERIAL_PREFIX "/dev/tty"
-#if defined(_WIN32) || defined (__CYGWIN32__) 
+#if defined(_WIN32) || defined (__CYGWIN__) 
 #define SERPORT1   "com1"
 #define SERPORT2   "com2"
 #define PARPORT1   "lpt1"
@@ -241,7 +241,7 @@ extern int Unix_IsSerialInUse(void)
 
 extern int Unix_OpenSerial(const char *name)
 {
-#if defined(BSD) || defined(__CYGWIN32__)
+#if defined(BSD) || defined(__CYGWIN__)
     serpfd = open(name, O_RDWR);
 #else
     serpfd = open(name, O_RDWR | O_NONBLOCK);
@@ -305,7 +305,7 @@ extern void Unix_ResetSerial(void)
     struct termios terminfo;
 
     tcgetattr(serpfd, &terminfo);
-#ifdef __CYGWIN32__
+#ifdef __CYGWIN__
     /* Expedient, but it works.  */
     terminfo.c_iflag = 0;
     terminfo.c_oflag = 0;

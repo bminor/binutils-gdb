@@ -77,7 +77,7 @@ extern int  (*ui_load_progress_hook) PARAMS ((char *, unsigned long));
 extern void (*pre_add_symbol_hook) PARAMS ((char *));
 extern void (*post_add_symbol_hook) PARAMS ((void));
 extern void (*selected_frame_level_changed_hook) PARAMS ((int));
-#ifdef __CYGWIN32__
+#ifdef __CYGWIN__
 extern void (*ui_loop_hook) PARAMS ((int));
 #endif
 
@@ -151,7 +151,7 @@ gdbtk_add_hooks(void)
   target_wait_hook       = gdbtk_wait;
   ui_load_progress_hook  = gdbtk_load_hash;
 
-#ifdef __CYGWIN32__
+#ifdef __CYGWIN__
   ui_loop_hook = x_event;
 #endif
   pre_add_symbol_hook    = gdbtk_pre_add_symbol;
@@ -369,7 +369,7 @@ x_event (signo)
 
   in_x_event = 1;
 
-#ifdef __CYGWIN32__
+#ifdef __CYGWIN__
   if (signo == -2)
     gdbtk_stop_timer ();
 #endif

@@ -112,7 +112,7 @@ i[3456]86-*-gnu*)	gdb_target=i386gnu ;;
 i[3456]86-*-netware*)	gdb_target=i386nw
 		configdirs="${configdirs} nlm" ;;
 i[3456]86-*-osf1mk*)	gdb_target=i386mk ;;
-i[3456]86-*-cygwin32)	gdb_target=cygwin32  ;;
+i[3456]86-*-cygwin*)	gdb_target=cygwin  ;;
 i960-*-bout*)		gdb_target=vxworks960 ;;
 i960-nindy-coff*)	gdb_target=nindy960 ;;
 i960-*-coff*)		gdb_target=mon960 ;;
@@ -237,7 +237,7 @@ powerpc-*-netware*)	gdb_target=ppc-nw
 			configdirs="${configdirs} nlm" ;;
 
 powerpc-*-aix*)		gdb_target=aix ;;
-powerpcle-*-cygwin32)	gdb_target=cygwin32 ;;
+powerpcle-*-cygwin*)	gdb_target=cygwin ;;
 powerpcle-*-solaris*)	gdb_target=solaris ;;
 powerpc-*-eabi* | powerpc-*-linux* | powerpc-*-sysv* | powerpc-*-elf*)
 			if test -f ../sim/ppc/Makefile; then
@@ -295,7 +295,7 @@ v850-*-*)		gdb_target=v850
 			windows)
 				CONFIG_OBS="${CONFIG_OBS} v850ice.o"
 				LIBS="${LIBS} necmsg.lib" ;;
-			cygwin32)
+			cygwin*)
 				CONFIG_OBS="${CONFIG_OBS} v850ice.o" ;;
 			esac
 			;;
@@ -306,7 +306,7 @@ v850e-*-*)		gdb_target=v850
 			windows)
 				CONFIG_OBS="${CONFIG_OBS} v850ice.o"
 				LIBS="${LIBS} v850.lib" ;;
-			cygwin32)
+			cygwin*)
 				CONFIG_OBS="${CONFIG_OBS} v850ice.o" ;;
 			esac
 			;;
@@ -316,7 +316,7 @@ v850ea-*-*)		gdb_target=v850
 			windows)
 				CONFIG_OBS="${CONFIG_OBS} v850ice.o"
 				LIBS="${LIBS} v850.lib" ;;
-			cygwin32)
+			cygwin*)
 				CONFIG_OBS="${CONFIG_OBS} v850ice.o" ;;
 			esac
 			;;

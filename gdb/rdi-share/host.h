@@ -43,7 +43,7 @@
 #endif
 #if defined(_WIN32)
 #  define COMPILING_ON_WIN32    1
-#  if !defined(__CYGWIN32__)
+#  if !defined(__CYGWIN__)
 #    define COMPILING_ON_WINDOWS  1
 #  endif
 #endif

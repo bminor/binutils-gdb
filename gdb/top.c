@@ -379,7 +379,7 @@ static void stop_sig PARAMS ((int));
    command file.  */
 
 void (*init_ui_hook) PARAMS ((char *argv0));
-#ifdef __CYGWIN32__
+#ifdef __CYGWIN__
 void (*ui_loop_hook) PARAMS ((int));
 #endif
 

@@ -548,11 +548,11 @@ case "$host" in
 ])
 
 # In the Cygwin environment, we need some additional flags.
-AC_CACHE_CHECK([for cygwin32], gdb_cv_os_cygwin32,
+AC_CACHE_CHECK([for cygwin], gdb_cv_os_cygwin,
 [AC_EGREP_CPP(lose, [
-#ifdef __CYGWIN32__
+#ifdef __CYGWIN__
 lose
-#endif],[gdb_cv_os_cygwin32=yes],[gdb_cv_os_cygwin32=no])])
+#endif],[gdb_cv_os_cygwin=yes],[gdb_cv_os_cygwin=no])])
 
 WIN32LIBS=
 WIN32LDAPP=
@@ -564,7 +564,7 @@ WINDRES=${WINDRES-windres}
 AC_SUBST(DLLTOOL)
 AC_SUBST(WINDRES)
 
-if test x$gdb_cv_os_cygwin32 = xyes; then
+if test x$gdb_cv_os_cygwin = xyes; then
     if test x$enable_ide = xyes; then
 	WIN32LIBS="-ladvapi32"
     fi
@@ -641,7 +641,7 @@ if test "${enable_gdbtk}" = "yes"; then
 	   GDBTKLIBS="${TCL_LIBS} ${TK_LIBS}"
 	   CONFIG_OBS="${CONFIG_OBS} gdbtk.o gdbtk-cmds.o gdbtk-hooks.o"
 
-	   if test x$gdb_cv_os_cygwin32 = xyes; then
+	   if test x$gdb_cv_os_cygwin = xyes; then
 	      WIN32LIBS="${WIN32LIBS} -lshell32 -lgdi32 -lcomdlg32 -ladvapi32 -luser32"
 	      WIN32LDAPP="-Wl,--subsystem,console"
 	      CONFIG_OBS="${CONFIG_OBS} gdbres.o"
@@ -847,7 +847,7 @@ fi
 AC_LINK_FILES($files, $links)
 
 dnl Check for exe extension set on certain hosts (e.g. Win32)
-AC_EXEEXT
+AM_EXEEXT
 
 AC_CONFIG_SUBDIRS($configdirs)
 AC_OUTPUT(Makefile .gdbinit:gdbinit.in,

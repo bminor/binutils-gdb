@@ -1,3 +1,48 @@
+Fri Nov 13 00:15:08 1998  Geoffrey Noer  <noer@cygnus.com>
+
+	Changes to account for name change from cygwin32 to cygwin and
+	clean up Win32-related ifdefs.
+	
+	* configure.tgt: check for cygwin* instead of cygwin32.
+	New cygwin gdb_target variable loses the "32".
+	* configure.host: check for cygwin* instead of cygwin32.
+	New cygwin gdb_host variable loses the "32".
+	* configure.in: test __CYGWIN__ instead of __CYGWIN32__,
+	rename gdb_cv_os_cygwin32 variable to drop the "32".  Call
+	AM_EXEEXT instead of AC_EXEEXT since that isn't in a released
+	autoconf yet.
+	* configure: regenerate.
+
+	* main.c: drop "32" from cygwin_ funcs, include sys/cygwin.h where
+	cygwin path conv protos live, instead of adding a proto here for
+	them here.
+        * {main.c, ser-tcp.c, ser-unix.c, top.c}: check __CYGWIN__
+	instead of __CYGWIN32__.
+	* source.c: thoughout, check _WIN32 instead of WIN32.
+	
+	* config/i386/cygwin32.mh: delete.
+	* config/i386/cygwin.mh: new file, was cygwin32.mh.
+	* config/i386/cygwin32.mt: delete.
+	* config/i386/cygwin.mt: new file, was cygwin32.mt.
+	* config/i386/tm-cygwin32.h: delete.
+	* config/i386/tm-cygwin.h: new file, was tm-cygwin32.h.
+	* config/i386/xm-cygwin32.h: delete.
+	* config/i386/xm-cygwin.h: new file, was xm-cygwin32.h.
+	* config/i386/xm-windows.h: #include xm-cygwin.h now.
+	* config/powerpc/cygwin32.mh: delete.
+	* config/powerpc/cygwin.mh: new file, was cygwin32.mh.
+	* config/powerpc/cygwin32.mt: delete.
+	* config/powerpc/cygwin.mt: new file, was cygwin32.mt.
+	* config/powerpc/tm-cygwin32.h: delete.
+	* config/powerpc/tm-cygwin.h: new file, was tm-cygwin32.h.
+	* config/powerpc/xm-cygwin32.h: delete.
+	* config/powerpc/xm-cygwin.h: new file, was xm-cygwin32.h.
+
+	* rdi-share/aclocal.m4: regenerate with aclocal.
+	* rdi-share/configure: regenerate with autoconf.
+	* rdi-share/{host.h, hostchan.c, hostchan.h, serdrv.c, serpardr.c,
+	unixcomm.c}: check __CYGWIN__ instead of __CYGWIN32__.
+
 Thu Nov 12 17:19:43 1998  John Metzler  <jmetzler@cygnus.com>
 
         * remote.c (remote_get_threadinfo) : Support for remote

@@ -1,3 +1,15 @@
+Fri Nov 13 00:15:08 1998  Geoffrey Noer  <noer@cygnus.com>
+
+	Changes to account for name change from cygwin32 to cygwin and
+	clean up Win32-related ifdefs.
+	
+        * gdbtk.c: lose "32" from cygwin_ func calls.  ifndef for
+        checking DISPLAY should be for _WIN32, not WINNT.
+        * gdbtk.h: pick GDBTK_PATH_SEP based on _WIN32, not WINNT.
+        * gdbtk-cmds.c (gdb_path_conv): lose "32" from cygwin_	func call,
+        change ifdef to __CYGWIN__ instead of WINNT.
+	* {gdbtk.c, gdbtk-hooks.c}: __CYGWIN32__ refs drop the "32".
+
 Thu Nov 12 15:20:15 1998  Jim Ingham   <jingham@cygnus.com>
 
 	* gdbtk-cmds.c (gdb_cmd): Added an optional second argument to the

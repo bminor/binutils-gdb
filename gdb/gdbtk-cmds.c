@@ -3434,11 +3434,11 @@ gdb_path_conv (clientData, interp, objc, objv)
   if (objc != 2)
     error ("wrong # args");
   
-#ifdef WINNT
+#ifdef __CYGWIN__
   {
     char pathname[256], *ptr;
 
-    cygwin32_conv_to_full_win32_path (Tcl_GetStringFromObj(objv[1], NULL), pathname);
+    cygwin_conv_to_full_win32_path (Tcl_GetStringFromObj (objv[1], NULL), pathname);
     for (ptr = pathname; *ptr; ptr++)
       {
 	if (*ptr == '\\')

@@ -85,7 +85,7 @@ static int hardwire_setstopbits PARAMS ((serial_t, int));
 
 void _initialize_ser_hardwire PARAMS ((void));
 
-#ifdef __CYGWIN32__
+#ifdef __CYGWIN__
 extern void (*ui_loop_hook) PARAMS ((int));
 #endif
 
@@ -434,7 +434,7 @@ wait_for(scb, timeout)
      serial_t scb;
      int timeout;
 {
-#ifndef __CYGWIN32__
+#ifndef __CYGWIN__
   scb->timeout_remaining = 0;
 #endif
 
@@ -551,21 +551,21 @@ hardwire_readchar (scb, timeout)
      int timeout;
 {
   int status;
-#ifdef __CYGWIN32__
+#ifdef __CYGWIN__
   int t;
 #endif
 
   if (scb->bufcnt-- > 0)
     return *scb->bufp++;
 
-#ifdef __CYGWIN32__
+#ifdef __CYGWIN__
   if (timeout > 0)
     timeout++;
 #endif
 
   while (1)
     {
-#ifdef __CYGWIN32__
+#ifdef __CYGWIN__
       t = timeout == 0 ? 0 : 1;
       scb->timeout_remaining = timeout < 0 ? timeout : timeout - t;
       status = wait_for (scb, t);
@@ -592,7 +592,7 @@ hardwire_readchar (scb, timeout)
 		  timeout = scb->timeout_remaining;
 		  continue;
 		}
-#ifdef __CYGWIN32__
+#ifdef __CYGWIN__
           else if (scb->timeout_remaining < 0)
             continue;
 #endif

@@ -26,7 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <netdb.h>
 #include <sys/socket.h>
 
-#ifndef __CYGWIN32__
+#ifndef __CYGWIN__
 #include <netinet/tcp.h>
 #endif
 

@@ -16,7 +16,7 @@
 #define angsd_hostchan_h
 
 /* struct timeval */
-#if defined(__unix) || defined(__CYGWIN32__)
+#if defined(__unix) || defined(__CYGWIN__)
 #  include <sys/time.h>
 #else
 #  include "winsock.h"
