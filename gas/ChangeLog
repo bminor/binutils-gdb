@@ -1,3 +1,10 @@
+Tue Jan 27 13:32:01 1998  Robert Lipe  <robertl@dgii.com>
+
+	* configure.in (i386-*-sco3.2v5*): Defaults to ELF now.
+	(i386-*-sco3.2v5*coff): New target.
+	(i386-*-sco3.2*): New target.
+	* configure: Rebuild.
+
 Tue Jan 27 12:24:32 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-arm.c (md_apply_fix3): Add new variable newimm to hold

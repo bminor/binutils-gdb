@@ -165,13 +165,14 @@ changequote([,])dnl
 			    fmt=elf ;;
       i386-*-freebsdelf*)   fmt=elf ;;
       i386-*-freebsd*)      fmt=aout em=386bsd ;;
-      i386-*-sco*elf*)      fmt=elf
+      i386-*-coff | i386-*-sysv* | i386-*-sco3.2v5*coff | i386-*-isc*)
+                          fmt=coff ;;
+      i386-*-sco3.2v5*)      fmt=elf
 			    if test ${this_target} = $target; then
 				AC_DEFINE(SCO_ELF)
 			    fi
 			    ;;
-      i386-*-coff | i386-*-sysv* | i386-*-sco* | i386-*-isc*)
-			    fmt=coff ;;
+      i386-*-sco3.2*)       fmt=coff ;;
       i386-*-vsta)          fmt=aout ;;
       i386-*-msdosdjgpp* | i386-*-go32* | i386-go32-rtems*)
 			    fmt=coff em=go32;;
