@@ -1,5 +1,8 @@
 Mon Nov 24 08:59:28 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
+	* valprint.c (print_longest): When CC has long long but printf
+ 	doesn't, print decimal value as three parts.
+
 	* config/i386/tm-fbsd.h: New file.
 	* config/i386/fbsd.mt (TM_FILE): Change to tm-fbsd.h.
 
