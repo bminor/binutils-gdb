@@ -982,14 +982,17 @@ print_spaces (n, file)
      register int n;
      register GDB_FILE *file;
 {
-  if (file->ts_streamtype == astring) {
-    gdb_file_adjust_strbuf (n, file);
-    while (n-- > 0) 
-     strcat(file->ts_strbuf, ' ');
-  } else {
-     while (n-- > 0)
-       fputc (' ', file->ts_filestream);
-  }
+  if (file->ts_streamtype == astring)
+    {
+      gdb_file_adjust_strbuf (n, file);
+      while (n-- > 0) 
+	strcat(file->ts_strbuf, " ");
+    }
+  else
+    {
+      while (n-- > 0)
+	fputc (' ', file->ts_filestream);
+    }
 }
 
 /* Print a host address.  */

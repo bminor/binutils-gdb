@@ -1,3 +1,7 @@
+Mon Jan 11 13:55:51 1999  David Taylor  <taylor@texas.cygnus.com>
+
+	* utils (print_spaces): fix arg to strcat; fix formatting.
+
 Fri Jan  8 11:57:24 1999  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* exec.c (exec_ops): Don't initialize statically.
