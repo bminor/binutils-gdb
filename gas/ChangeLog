@@ -1,3 +1,8 @@
+Tue Dec  5 13:26:34 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* read.c (s_fill): If md_flush_pending_output is defined, call
+	it.
+
 Mon Dec  4 15:10:53 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	* config/obj-coff.c (size_section, fill_section, fixup_mdeps):

@@ -1490,6 +1490,9 @@ s_fill (ignore)
   register long temp_fill = 0;
   char *p;
 
+#ifdef md_flush_pending_output
+  md_flush_pending_output ();
+#endif
 
   temp_repeat = get_absolute_expression ();
   if (*input_line_pointer == ',')
