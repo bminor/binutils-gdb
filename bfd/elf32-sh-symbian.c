@@ -492,8 +492,11 @@ sh_symbian_relocate_section (bfd *                  output_bfd,
 	      new_sym.st_other = ELF_ST_VISIBILITY (STV_DEFAULT);
 	      new_sym.st_shndx = SHN_UNDEF;
 
-	      if (! _bfd_elf_merge_symbol (input_bfd, info, ptr->new_name, & new_sym, & psec,
-					   & new_value, & new_hash, & skip, & override, & type_change_ok,
+	      if (! _bfd_elf_merge_symbol (input_bfd, info,
+					   ptr->new_name, & new_sym,
+					   & psec, & new_value, NULL,
+					   & new_hash, & skip,
+					   & override, & type_change_ok,
 					   & size_change_ok))
 		{
 		  _bfd_error_handler (_("%B: Failed to add renamed symbol %s"),

@@ -1,3 +1,21 @@
+2005-02-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR 757
+	* elf-bfd.h (_bfd_elf_merge_symbol): Add a pointer to unsigned
+	int.
+
+	* elf32-sh-symbian.c (sh_symbian_relocate_section): Pass NULL
+	to _bfd_elf_merge_symbol.
+
+	* elflink.c (_bfd_elf_merge_symbol): Use the pointer to
+	unsigned int to return the alignment of the old common symbol
+	in the dynamic object.
+	(_bfd_elf_add_default_symbol): Pass NULL to
+	_bfd_elf_merge_symbol.
+	(elf_link_add_object_symbols): Pass &old_alignment to
+	_bfd_elf_merge_symbol. Get the alignment of the new common
+	symbol in the dynamic object.
+
 2005-02-24  Ben Elliston  <bje@au.ibm.com>
 
 	* coffcode.h (coff_sym_filepos): Remove GNU960 conditional code.

@@ -756,7 +756,8 @@ _bfd_elf_link_renumber_dynsyms (bfd *output_bfd, struct bfd_link_info *info)
    TYPE_CHANGE_OK if it is OK for the type to change.  We set
    SIZE_CHANGE_OK if it is OK for the size to change.  By OK to
    change, we mean that we shouldn't warn if the type or size does
-   change.  */
+   change.  We set POLD_ALIGNMENT if an old common symbol in a dynamic
+   object is overridden by a regular object.  */
 
 bfd_boolean
 _bfd_elf_merge_symbol (bfd *abfd,
@@ -765,6 +766,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
 		       Elf_Internal_Sym *sym,
 		       asection **psec,
 		       bfd_vma *pvalue,
+		       unsigned int *pold_alignment,
 		       struct elf_link_hash_entry **sym_hash,
 		       bfd_boolean *skip,
 		       bfd_boolean *override,
@@ -1269,9 +1271,10 @@ _bfd_elf_merge_symbol (bfd *abfd,
       if (h->size > *pvalue)
 	*pvalue = h->size;
 
-      /* FIXME: We no longer know the alignment required by the symbol
-	 in the dynamic object, so we just wind up using the one from
-	 the regular object.  */
+      /* We need to remember the alignment required by the symbol
+	 in the dynamic object.  */
+      BFD_ASSERT (pold_alignment);
+      *pold_alignment = h->root.u.def.section->alignment_power;
 
       olddef = FALSE;
       olddyncommon = FALSE;
@@ -1383,8 +1386,8 @@ _bfd_elf_add_default_symbol (bfd *abfd,
   size_change_ok = FALSE;
   sec = *psec;
   if (!_bfd_elf_merge_symbol (abfd, info, shortname, sym, &sec, value,
-			      &hi, &skip, &override, &type_change_ok,
-			      &size_change_ok))
+			      NULL, &hi, &skip, &override,
+			      &type_change_ok, &size_change_ok))
     return FALSE;
 
   if (skip)
@@ -1487,8 +1490,8 @@ nondefault:
   size_change_ok = FALSE;
   sec = *psec;
   if (!_bfd_elf_merge_symbol (abfd, info, shortname, sym, &sec, value,
-			      &hi, &skip, &override, &type_change_ok,
-			      &size_change_ok))
+			      NULL, &hi, &skip, &override,
+			      &type_change_ok, &size_change_ok))
     return FALSE;
 
   if (skip)
@@ -3525,7 +3528,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
     {
       int bind;
       bfd_vma value;
-      asection *sec;
+      asection *sec, *new_sec;
       flagword flags;
       const char *name;
       struct elf_link_hash_entry *h;
@@ -3650,6 +3653,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
       type_change_ok = get_elf_backend_data (abfd)->type_change_ok;
       old_alignment = 0;
       old_bfd = NULL;
+      new_sec = sec;
 
       if (is_elf_hash_table (hash_table))
 	{
@@ -3762,7 +3766,8 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	      name = newname;
 	    }
 
-	  if (!_bfd_elf_merge_symbol (abfd, info, name, isym, &sec, &value,
+	  if (!_bfd_elf_merge_symbol (abfd, info, name, isym, &sec,
+				      &value, &old_alignment,
 				      sym_hash, &skip, &override,
 				      &type_change_ok, &size_change_ok))
 	    goto error_free_vers;
@@ -3844,12 +3849,20 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	}
 
       /* Set the alignment of a common symbol.  */
-      if (isym->st_shndx == SHN_COMMON
+      if ((isym->st_shndx == SHN_COMMON
+	   || bfd_is_com_section (sec))
 	  && h->root.type == bfd_link_hash_common)
 	{
 	  unsigned int align;
 
-	  align = bfd_log2 (isym->st_value);
+	  if (isym->st_shndx == SHN_COMMON)
+	    align = bfd_log2 (isym->st_value);
+	  else
+	    {
+	      /* The new symbol is a common symbol in a shared object.
+		 We need to get the alignment from the section.  */
+	      align = new_sec->alignment_power;
+	    }
 	  if (align > old_alignment
 	      /* Permit an alignment power of zero if an alignment of one
 		 is specified and no other alignments have been specified.  */
