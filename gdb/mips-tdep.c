@@ -51,12 +51,11 @@ enum mips_fpu_type
   MIPS_FPU_NONE		/* No floating point.  */
 };
 
-static int mips_fpu_type_auto = 1;
-#ifdef MIPS_DEFAULT_FPU_TYPE
-static enum mips_fpu_type mips_fpu_type = MIPS_DEFAULT_FPU_TYPE;
-#else
-static enum mips_fpu_type mips_fpu = MIPS_FPU_DOUBLE;
+#ifndef MIPS_DEFAULT_FPU_TYPE
+#define MIPS_DEFAULT_FPU_TYPE MIPS_FPU_DOUBLE
 #endif
+static int mips_fpu_type_auto = 1;
+static enum mips_fpu_type mips_fpu_type = MIPS_DEFAULT_FPU_TYPE;
 #define MIPS_FPU_TYPE mips_fpu_type
 
 /* start-sanitize-carp start-sanitize-vr4xxx */
@@ -2214,7 +2213,7 @@ mips_print_register (regnum, all)
 	REGISTER_CONVERT_TO_TYPE (regnum, builtin_type_double, dbuffer);
 
 	printf_filtered ("(d%d: ", regnum-FP0_REGNUM);
-	val_print (builtin_type_double, dbuffer, 0,
+	val_print (builtin_type_double, dbuffer, 0, 0,
 		   gdb_stdout, 0, 1, 0, Val_pretty_default);
 	printf_filtered ("); ");
       }
@@ -2236,14 +2235,14 @@ mips_print_register (regnum, all)
 	int offset = 4 * (TARGET_BYTE_ORDER == BIG_ENDIAN);
 
 	printf_filtered (" (float) ");
-	val_print (builtin_type_float, raw_buffer + offset, 0,
+	val_print (builtin_type_float, raw_buffer + offset, 0, 0,
 		   gdb_stdout, 0, 1, 0, Val_pretty_default);
 	printf_filtered (", (double) ");
-	val_print (builtin_type_double, raw_buffer, 0,
+	val_print (builtin_type_double, raw_buffer, 0, 0,
 		   gdb_stdout, 0, 1, 0, Val_pretty_default);
       }
     else
-      val_print (REGISTER_VIRTUAL_TYPE (regnum), raw_buffer, 0,
+      val_print (REGISTER_VIRTUAL_TYPE (regnum), raw_buffer, 0, 0,
 		 gdb_stdout, 0, 1, 0, Val_pretty_default);
   /* Else print as integer in hex.  */
   else

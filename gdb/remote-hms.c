@@ -157,7 +157,6 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   add_target (&hms_ops);
 }
 
-
 #if 0
 /* This is kept here because we used to support the H8/500 in this module,
    and I haven't done the H8/500 yet */
@@ -1330,9 +1329,13 @@ by a serial line.";
   hms_ops.to_open =   hms_open;
   hms_ops.to_close =   hms_close;
   hms_ops.to_attach =   0;
+  hms_ops.to_post_attach = NULL;
+  hms_ops.to_require_attach = NULL;
   hms_ops.to_detach =   hms_detach;
+  hms_ops.to_require_detach = NULL;
   hms_ops.to_resume =   hms_resume;
   hms_ops.to_wait  =   hms_wait;
+  hms_ops.to_post_wait = NULL;
   hms_ops.to_fetch_registers  =   hms_fetch_register;
   hms_ops.to_store_registers  =   hms_store_register;
   hms_ops.to_prepare_to_store =   hms_prepare_to_store;
@@ -1349,11 +1352,30 @@ by a serial line.";
   hms_ops.to_load  =   generic_load;
   hms_ops.to_lookup_symbol =   0;
   hms_ops.to_create_inferior =   hms_create_inferior;
+  hms_ops.to_post_startup_inferior = NULL;
+  hms_ops.to_acknowledge_created_inferior = NULL;
+  hms_ops.to_clone_and_follow_inferior = NULL;
+  hms_ops.to_post_follow_inferior_by_clone = NULL;
+  hms_ops.to_insert_fork_catchpoint = NULL;
+  hms_ops.to_remove_fork_catchpoint = NULL;
+  hms_ops.to_insert_vfork_catchpoint = NULL;
+  hms_ops.to_remove_vfork_catchpoint = NULL;
+  hms_ops.to_has_forked = NULL;
+  hms_ops.to_has_vforked = NULL;
+  hms_ops.to_can_follow_vfork_prior_to_exec = NULL;
+  hms_ops.to_post_follow_vfork = NULL;
+  hms_ops.to_insert_exec_catchpoint = NULL;
+  hms_ops.to_remove_exec_catchpoint = NULL;
+  hms_ops.to_has_execd = NULL;
+  hms_ops.to_reported_exec_events_per_exec_call = NULL;
+  hms_ops.to_has_exited = NULL;
   hms_ops.to_mourn_inferior =   hms_mourn;
   hms_ops.to_can_run  =   0;
   hms_ops.to_notice_signals =   0;
   hms_ops.to_thread_alive  =   0;
-  hms_ops.to_stop  =   0;			
+  hms_ops.to_stop  =   0;
+  hms_ops.to_pid_to_exec_file = NULL;
+  hms_ops.to_core_file_to_sym_file = NULL;			
   hms_ops.to_stratum =   process_stratum;
   hms_ops.DONT_USE =   0;	
   hms_ops.to_has_all_memory =   1;

@@ -737,13 +737,13 @@ d30v_print_register (regnum, tabular)
 
       read_relative_register_raw_bytes (regnum, regbuf);
 
-      val_print (REGISTER_VIRTUAL_TYPE (regnum), regbuf, 0,
+      val_print (REGISTER_VIRTUAL_TYPE (regnum), regbuf, 0, 0,
 		 gdb_stdout, 'x', 1, 0, Val_pretty_default);
 
       if (!tabular)
 	{
 	  printf_filtered ("	");
-	  val_print (REGISTER_VIRTUAL_TYPE (regnum), regbuf, 0,
+	  val_print (REGISTER_VIRTUAL_TYPE (regnum), regbuf, 0, 0,
 		 gdb_stdout, 'd', 1, 0, Val_pretty_default);
 	}
     }

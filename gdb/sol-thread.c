@@ -1512,9 +1512,13 @@ struct target_ops sol_thread_ops = {
   sol_thread_open,		/* to_open */
   0,				/* to_close */
   sol_thread_attach,		/* to_attach */
+  NULL,                                   /* to_post_attach */
+  NULL,                         /* to_require_attach */
   sol_thread_detach, 		/* to_detach */
+  NULL,                         /* to_require_detach */
   sol_thread_resume,		/* to_resume */
   sol_thread_wait,		/* to_wait */
+  NULL,                         /* to_post_wait */
   sol_thread_fetch_registers,	/* to_fetch_registers */
   sol_thread_store_registers,	/* to_store_registers */
   sol_thread_prepare_to_store,	/* to_prepare_to_store */
@@ -1531,11 +1535,33 @@ struct target_ops sol_thread_ops = {
   0,				/* to_load */
   0,				/* to_lookup_symbol */
   sol_thread_create_inferior,	/* to_create_inferior */
+  NULL,                         /* to_post_startup_inferior */
+  NULL,                         /* to_acknowledge_created_inferior */
+  NULL,                         /* to_clone_and_follow_inferior */
+  NULL,                         /* to_post_follow_inferior_by_clone */
+  NULL,                         /* to_insert_fork_catchpoint */
+  NULL,                         /* to_remove_fork_catchpoint */
+  NULL,                         /* to_insert_vfork_catchpoint */
+  NULL,                         /* to_remove_vfork_catchpoint */
+  NULL,                         /* to_has_forked */
+  NULL,                         /* to_has_vforked */
+  NULL,                         /* to_can_follow_vfork_prior_to_exec */
+  NULL,                         /* to_post_follow_vfork */
+  NULL,                         /* to_insert_exec_catchpoint */
+  NULL,                         /* to_remove_exec_catchpoint */
+  NULL,                         /* to_has_execd */
+  NULL,                         /* to_reported_exec_events_per_exec_call */
+  NULL,                         /* to_has_syscall_event */
+  NULL,                         /* to_has_exited */
   sol_thread_mourn_inferior,	/* to_mourn_inferior */
   sol_thread_can_run,		/* to_can_run */
   sol_thread_notice_signals,	/* to_notice_signals */
   sol_thread_alive,		/* to_thread_alive */
   sol_thread_stop,		/* to_stop */
+  NULL,                         /* to_enable_exception_callback */
+  NULL,                         /* to_get_current_exception_event */
+  NULL,                         /* to_pid_to_exec_file */
+  NULL,                         /* to_core_file_to_sym_file */
   process_stratum,		/* to_stratum */
   0,				/* to_next */
   1,				/* to_has_all_memory */
@@ -1555,9 +1581,13 @@ struct target_ops sol_core_ops = {
   sol_core_open,		/* to_open */
   sol_core_close,		/* to_close */
   sol_thread_attach,		/* XXX to_attach */
+  NULL,                         /* to_post_attach */
+  NULL,                         /* to_require_attach */
   sol_core_detach, 		/* to_detach */
+  NULL,                         /* to_require_detach */
   0,				/* to_resume */
   0,				/* to_wait */
+  NULL,                         /* to_post_wait */
   sol_thread_fetch_registers,	/* to_fetch_registers */
   0,				/* to_store_registers */
   0,				/* to_prepare_to_store */
@@ -1574,11 +1604,33 @@ struct target_ops sol_core_ops = {
   0,				/* to_load */
   0,				/* to_lookup_symbol */
   sol_thread_create_inferior,	/* XXX to_create_inferior */
+  NULL,                         /* to_post_startup_inferior */
+  NULL,                         /* to_acknowledge_created_inferior */
+  NULL,                         /* to_clone_and_follow_inferior */
+  NULL,                         /* to_post_follow_inferior_by_clone */
+  NULL,                         /* to_insert_fork_catchpoint */
+  NULL,                         /* to_remove_fork_catchpoint */
+  NULL,                         /* to_insert_vfork_catchpoint */
+  NULL,                         /* to_remove_vfork_catchpoint */
+  NULL,                         /* to_has_forked */
+  NULL,                         /* to_has_vforked */
+  NULL,                         /* to_can_follow_vfork_prior_to_exec */
+  NULL,                         /* to_post_follow_vfork */
+  NULL,                         /* to_insert_exec_catchpoint */
+  NULL,                         /* to_remove_exec_catchpoint */
+  NULL,                         /* to_has_execd */
+  NULL,                         /* to_reported_exec_events_per_exec_call */
+  NULL,                         /* to_has_syscall_event */
+  NULL,                         /* to_has_exited */
   0,				/* to_mourn_inferior */
   0,				/* to_can_run */
   0,				/* to_notice_signals */
   0,				/* to_thread_alive */
   0,				/* to_stop */
+  NULL,                         /* to_enable_exception_callback */
+  NULL,                         /* to_get_current_exception_event */
+  NULL,                         /* to_pid_to_exec_file */
+  NULL,                         /* to_core_file_to_sym_file */
   core_stratum,			/* to_stratum */
   0,				/* to_next */
   0,				/* to_has_all_memory */

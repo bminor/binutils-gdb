@@ -1,5 +1,5 @@
 /* Work with executable files, for GDB. 
-   Copyright 1988, 1989, 1991, 1992, 1993, 1994, 1997
+   Copyright 1988, 1989, 1991, 1992, 1993, 1994, 1997, 1998
              Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -76,10 +76,11 @@ int write_files = 0;
 
 /* Text start and end addresses (KLUDGE) if needed */
 
-#ifdef NEED_TEXT_START_END
+#ifndef NEED_TEXT_START_END
+#define NEED_TEXT_START_END (0)
+#endif
 CORE_ADDR text_start = 0;
 CORE_ADDR text_end   = 0;
-#endif
 
 struct vmap *vmap;
 
@@ -146,19 +147,28 @@ exec_close (quitting)
 
 /*  Process the first arg in ARGS as the new exec file.
 
-    Note that we have to explicitly ignore additional args, since we can
-    be called from file_command(), which also calls symbol_file_command()
-    which can take multiple args. */
+    This function is intended to be behave essentially the same
+    as exec_file_command, except that the latter will detect when
+    a target is being debugged, and will ask the user whether it
+    should be shut down first.  (If the answer is "no", then the
+    new file is ignored.)
+
+    This file is used by exec_file_command, to do the work of opening
+    and processing the exec file after any prompting has happened.
+
+    And, it is used by child_attach, when the attach command was
+    given a pid but not a exec pathname, and the attach command could
+    figure out the pathname from the pid.  (In this case, we shouldn't
+    ask the user whether the current target should be shut down --
+    we're supplying the exec pathname late for good reason.) */
 
 void
-exec_file_command (args, from_tty)
+exec_file_attach (args, from_tty)
      char *args;
      int from_tty;
 {
   char **argv;
   char *filename;
-
-  target_preopen (from_tty);
 
   /* Remove any previous exec file.  */
   unpush_target (&exec_ops);
@@ -177,7 +187,7 @@ exec_file_command (args, from_tty)
       if (argv == NULL)
 	nomem (0);
 
-      make_cleanup (freeargv, (char *) argv);
+      make_cleanup ((make_cleanup_func) freeargv, (char *) argv);
 
       for (; (*argv != NULL) && (**argv == '-'); argv++) {;}
       if (*argv == NULL)
@@ -248,38 +258,34 @@ exec_file_command (args, from_tty)
 		 scratch_pathname, bfd_errmsg (bfd_get_error ()));
 	}
 
-#ifdef NEED_TEXT_START_END
-
       /* text_end is sometimes used for where to put call dummies.  A
 	 few ports use these for other purposes too.  */
-
-      {
-	struct section_table *p;
-
-	/* Set text_start to the lowest address of the start of any
-	   readonly code section and set text_end to the highest
-	   address of the end of any readonly code section.  */
-	/* FIXME: The comment above does not match the code.  The code
-	   checks for sections with are either code *or* readonly.  */
-
-	text_start = ~(CORE_ADDR)0;
-	text_end = (CORE_ADDR)0;
-	for (p = exec_ops.to_sections; p < exec_ops.to_sections_end; p++)
-	  if (bfd_get_section_flags (p->bfd, p->the_bfd_section)
-	      & (SEC_CODE | SEC_READONLY))
-	    {
-	      if (text_start > p->addr) 
-		text_start = p->addr;
-	      if (text_end < p->endaddr)
-		text_end = p->endaddr;
-	    }
-      }
-#endif
+      if (NEED_TEXT_START_END)
+	{
+	  struct section_table *p;
+	  
+	  /* Set text_start to the lowest address of the start of any
+	     readonly code section and set text_end to the highest
+	     address of the end of any readonly code section.  */
+	  /* FIXME: The comment above does not match the code.  The
+	     code checks for sections with are either code *or*
+	     readonly.  */
+	  text_start = ~(CORE_ADDR)0;
+	  text_end = (CORE_ADDR)0;
+	  for (p = exec_ops.to_sections; p < exec_ops.to_sections_end; p++)
+	    if (bfd_get_section_flags (p->bfd, p->the_bfd_section)
+		& (SEC_CODE | SEC_READONLY))
+	      {
+		if (text_start > p->addr) 
+		  text_start = p->addr;
+		if (text_end < p->endaddr)
+		  text_end = p->endaddr;
+	      }
+	}
 
       validate_files ();
 
-      set_endian_from_file (exec_bfd);
-      set_architecture_from_file (exec_bfd);
+      set_gdbarch_from_file (exec_bfd);
 
       push_target (&exec_ops);
 
@@ -289,6 +295,25 @@ exec_file_command (args, from_tty)
     }
   else if (from_tty)
     printf_unfiltered ("No executable file now.\n");
+}
+
+/*  Process the first arg in ARGS as the new exec file.
+
+    Note that we have to explicitly ignore additional args, since we can
+    be called from file_command(), which also calls symbol_file_command()
+    which can take multiple args. */
+
+void
+exec_file_command (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  char **argv;
+  char *filename;
+
+  target_preopen (from_tty);
+
+  exec_file_attach (args, from_tty);
 }
 
 /* Set both the exec file and the symbol file, in one command.  
@@ -671,9 +696,13 @@ Specify the filename of the executable file.", /* to_doc */
   exec_file_command,		/* to_open */
   exec_close,			/* to_close */
   find_default_attach,		/* to_attach */
+  NULL,                         /* to_post_attach */
+  find_default_require_attach,	/* to_require_attach */
   0,				/* to_detach */
+  find_default_require_detach,	/* to_require_detach */
   0,				/* to_resume */
   0,				/* to_wait */
+  NULL,                         /* to_post_wait */
   0,				/* to_fetch_registers */
   0,				/* to_store_registers */
   0,				/* to_prepare_to_store */
@@ -690,11 +719,33 @@ Specify the filename of the executable file.", /* to_doc */
   0,				/* to_load */
   0,				/* to_lookup_symbol */
   find_default_create_inferior,	/* to_create_inferior */
+  NULL,                         /* to_post_startup_inferior */
+  NULL,                         /* to_acknowledge_created_inferior */
+  find_default_clone_and_follow_inferior,     /* to_clone_and_follow_inferior */
+  NULL,                         /* to_post_follow_inferior_by_clone */
+  NULL,                         /* to_insert_fork_catchpoint */
+  NULL,                         /* to_remove_fork_catchpoint */
+  NULL,                         /* to_insert_vfork_catchpoint */
+  NULL,                         /* to_remove_vfork_catchpoint */
+  NULL,                         /* to_has_forked */
+  NULL,                         /* to_has_vforked */
+  NULL,                         /* to_can_follow_vfork_prior_to_exec */
+  NULL,                         /* to_post_follow_vfork */
+  NULL,                         /* to_insert_exec_catchpoint */
+  NULL,                         /* to_remove_exec_catchpoint */
+  NULL,                         /* to_has_execd */
+  NULL,                         /* to_reported_exec_events_per_exec_call */
+  NULL,                         /* to_has_syscall_event */
+  NULL,                         /* to_has_exited */
   0,				/* to_mourn_inferior */
   0,				/* to_can_run */
   0,				/* to_notice_signals */
   0,				/* to_thread_alive */
   0,				/* to_stop */
+  NULL,                         /* to_enable_exception_callback */
+  NULL,                         /* to_get_current_exception_event */
+  NULL,                         /* to_pid_to_exec_file */
+  NULL,                         /* to_core_file_to_sym_file */
   file_stratum,			/* to_stratum */
   0,				/* to_next */
   0,				/* to_has_all_memory */
@@ -712,14 +763,17 @@ _initialize_exec()
 {
   struct cmd_list_element *c;
 
-  c = add_cmd ("file", class_files, file_command,
-	       "Use FILE as program to be debugged.\n\
+  if (!dbx_commands)
+    {
+      c = add_cmd ("file", class_files, file_command,
+		   "Use FILE as program to be debugged.\n\
 It is read for its symbols, for getting the contents of pure memory,\n\
 and it is the program executed when you use the `run' command.\n\
 If FILE cannot be found as specified, your execution directory path\n\
 ($PATH) is searched for a command of that name.\n\
 No arg means to have no executable file and no symbols.", &cmdlist);
-  c->completer = filename_completer;
+      c->completer = filename_completer;
+    }
 
   c = add_cmd ("exec-file", class_files, exec_file_command,
 	   "Use FILE as program for getting contents of pure memory.\n\

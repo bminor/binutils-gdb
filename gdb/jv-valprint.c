@@ -136,8 +136,8 @@ java_value_print (val, stream, format, pretty)
 		fprintf_filtered (stream, "%d: ", i);
 	      else
 		fprintf_filtered (stream, "%d..%d: ", i, i + reps - 1);
-	      val_print (VALUE_TYPE (v), VALUE_CONTENTS (v), 0,
-			 stream, format, 2, 1, pretty);
+	      val_print (VALUE_TYPE (v), VALUE_CONTENTS (v), 0, 0, 
+                           stream, format, 2, 1, pretty);
 	      things_printed++;
 	      i += reps;
 	    }
@@ -184,7 +184,7 @@ java_value_print (val, stream, format, pretty)
       return 0;
     }
 
-  return (val_print (type, VALUE_CONTENTS (val), address,
+  return (val_print (type, VALUE_CONTENTS (val), 0, address,
 		     stream, format, 1, 0, pretty));
 }
 
@@ -343,7 +343,8 @@ java_print_value_fields (type, valaddr, address, stream,
 	           v = value_from_longest (TYPE_FIELD_TYPE (type, i),
 				   unpack_field_as_long (type, valaddr, i));
 
-                   val_print (TYPE_FIELD_TYPE(type, i), VALUE_CONTENTS (v), 0,
+                   val_print (TYPE_FIELD_TYPE(type, i), VALUE_CONTENTS (v), 
+                              0, 0,
 			      stream, format, 0, recurse + 1, pretty);
 		}
 	    }
@@ -364,7 +365,7 @@ java_print_value_fields (type, valaddr, address, stream,
 		      if (TYPE_CODE (t) == TYPE_CODE_STRUCT)
 			v = value_addr (v);
 		      val_print (VALUE_TYPE (v),
-				 VALUE_CONTENTS (v), VALUE_ADDRESS (v),
+				 VALUE_CONTENTS (v), 0, VALUE_ADDRESS (v),
 				 stream, format, 0, recurse+1, pretty);
 		    }
 		}
@@ -372,6 +373,7 @@ java_print_value_fields (type, valaddr, address, stream,
 		{
 	           val_print (TYPE_FIELD_TYPE (type, i), 
 			      valaddr + TYPE_FIELD_BITPOS (type, i) / 8,
+                              0,
 			      address + TYPE_FIELD_BITPOS (type, i) / 8,
 			      stream, format, 0, recurse + 1, pretty);
 		}
@@ -402,10 +404,11 @@ java_print_value_fields (type, valaddr, address, stream,
    The PRETTY parameter controls prettyprinting.  */
 
 int
-java_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
-		pretty)
+java_val_print (type, valaddr, embedded_offset, address, stream, format,
+		deref_ref, recurse, pretty)
      struct type *type;
      char *valaddr;
+     int embedded_offset;
      CORE_ADDR address;
      GDB_FILE *stream;
      int format;
@@ -476,7 +479,7 @@ java_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 			       recurse, pretty);
       break;
     default:
-      return c_val_print (type, valaddr, address, stream, format,
+      return c_val_print (type, valaddr, 0, address, stream, format,
 			  deref_ref, recurse, pretty);
     }
   return 0;

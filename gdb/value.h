@@ -61,7 +61,9 @@ struct value
 	   lval_reg_frame_relative.  */
 	int regnum;
       } location;
-    /* Describes offset of a value within lval a structure in bytes.  */
+    /* Describes offset of a value within lval of a structure in bytes.
+       This is used in retrieving contents from target memory. [Note also
+       the member embedded_offset below.] */
     int offset;	
     /* Only used for bitfields; number of bits contained in them.  */
     int bitsize;
@@ -77,6 +79,14 @@ struct value
     CORE_ADDR frame_addr;
     /* Type of the value.  */
     struct type *type;
+    /* Type of the enclosing object if this is an embedded subobject.
+       The member embedded_offset gives the real position of the subobject
+       if type is not the same as enclosing_type.
+
+       If the type field is a pointer type, then enclosing_type is 
+       a pointer type pointing to the real (enclosing) type of the target
+       object. */
+    struct type *enclosing_type;
     /* Values are stored in a chain, so that they can be deleted
        easily over calls to the inferior.  Values assigned to internal
        variables or put into the value history are taken off this
@@ -101,23 +111,41 @@ struct value
     /* If nonzero, this is the value of a variable which does not
        actually exist in the program.  */
     char optimized_out;
+    /* If this value represents an object that is embedded inside a
+       larger object (e.g., a base subobject in C++), this gives the
+       offset (in bytes) from the start of the contents buffer where
+       the embedded object begins. This is required because some C++
+       runtime implementations lay out objects (especially virtual bases
+       with possibly negative offsets to ancestors).
+       Note: This may be positive or negative! Also note that this offset
+       is not used when retrieving contents from target memory; the entire
+       enclosing object has to be retrieved always, and the offset for
+       that is given by the member offset above. */
+    int embedded_offset;
+    /* If this value represents a pointer to an object that is embedded
+       in another object, this gives the embedded_offset of the object
+       that is pointed to. */
+    int pointed_to_offset;
     /* The BFD section associated with this value.  */
     asection *bfd_section;
     /* Actual contents of the value.  For use of this value; setting
        it uses the stuff above.  Not valid if lazy is nonzero.
        Target byte-order.  We force it to be aligned properly for any
-       possible value.  */
+       possible value.  Note that a value therefore extends beyond
+       what is declared here.  */
     union {
       long contents[1];
       double force_double_align;
       LONGEST force_longlong_align;
       char *literal_data;
     } aligner;
+    /* Do not add any new members here -- contents above will trash them */
   };
 
 typedef struct value *value_ptr;
 
 #define VALUE_TYPE(val) (val)->type
+#define VALUE_ENCLOSING_TYPE(val) (val)->enclosing_type
 #define VALUE_LAZY(val) (val)->lazy
 /* VALUE_CONTENTS and VALUE_CONTENTS_RAW both return the address of
    the gdb buffer used to hold a copy of the contents of the lval.  
@@ -125,10 +153,23 @@ typedef struct value *value_ptr;
    it uses value_fetch_lazy() to load the buffer from the process being 
    debugged if it hasn't already been loaded.  VALUE_CONTENTS_RAW is 
    used when data is being stored into the buffer, or when it is 
-   certain that the contents of the buffer are valid.  */
-#define VALUE_CONTENTS_RAW(val) ((char *) (val)->aligner.contents)
+   certain that the contents of the buffer are valid.
+   Note: The contents pointer is adjusted by the offset required to
+   get to the real subobject, if the value happens to represent
+   something embedded in a larger run-time object. */
+
+#define VALUE_CONTENTS_RAW(val) ((char *) (val)->aligner.contents + (val)->embedded_offset)
 #define VALUE_CONTENTS(val) ((void)(VALUE_LAZY(val) && value_fetch_lazy(val)),\
 			     VALUE_CONTENTS_RAW(val))
+
+/* The ALL variants of the above two macros do not adjust the returned
+   pointer by the embedded_offset value. */
+  
+#define VALUE_CONTENTS_ALL_RAW(val) ((char *) (val)->aligner.contents)
+#define VALUE_CONTENTS_ALL(val) ((void) (VALUE_LAZY(val) && value_fetch_lazy(val)),\
+                                 VALUE_CONTENTS_ALL_RAW(val))
+  
+  
 extern int value_fetch_lazy PARAMS ((value_ptr val));
 
 #define VALUE_LVAL(val) (val)->lval
@@ -142,6 +183,8 @@ extern int value_fetch_lazy PARAMS ((value_ptr val));
 #define VALUE_NEXT(val) (val)->next
 #define VALUE_REGNO(val) (val)->regno
 #define VALUE_OPTIMIZED_OUT(val) ((val)->optimized_out)
+#define VALUE_EMBEDDED_OFFSET(val) ((val)->embedded_offset)
+#define VALUE_POINTED_TO_OFFSET(val) ((val)->pointed_to_offset)
 #define VALUE_BFD_SECTION(val) ((val)->bfd_section)
 
 /* Convert a REF to the object referenced. */
@@ -302,11 +345,23 @@ extern value_ptr value_struct_elt_for_reference PARAMS ((struct type *domain,
 
 extern value_ptr value_static_field PARAMS ((struct type *type, int fieldno));
 
+extern struct fn_field *
+value_find_oload_method_list PARAMS ((value_ptr *, char *, int, int *, int *, struct type **, int *));
+
 extern value_ptr value_field PARAMS ((value_ptr arg1, int fieldno));
 
 extern value_ptr value_primitive_field PARAMS ((value_ptr arg1, int offset,
 						int fieldno,
 						struct type *arg_type));
+
+extern struct type *
+value_rtti_type PARAMS ((value_ptr, int *, int *, int *));
+
+extern struct type *
+value_rtti_target_type PARAMS ((value_ptr, int *, int *, int *));
+
+extern value_ptr
+value_full_object PARAMS ((value_ptr, struct type *, int, int, int));
 
 extern value_ptr value_cast PARAMS ((struct type *type, value_ptr arg2));
 
@@ -463,7 +518,7 @@ extern value_ptr
 value_release_to_mark PARAMS ((value_ptr mark));
 
 extern int
-val_print PARAMS ((struct type *type, char *valaddr, CORE_ADDR address,
+val_print PARAMS ((struct type *type, char *valaddr, int embedded_offset, CORE_ADDR address,
 		   GDB_FILE *stream, int format, int deref_ref,
 		   int recurse, enum val_prettyprint pretty));
 
@@ -504,10 +559,10 @@ extern value_ptr call_function_by_hand PARAMS ((value_ptr, int, value_ptr *));
 
 extern value_ptr value_literal_complex PARAMS ((value_ptr, value_ptr, struct type*));
 
+extern void find_rt_vbase_offset PARAMS ((struct type *, struct type *, char *, int, int *, int *));
+
 extern value_ptr find_function_in_inferior PARAMS ((char *));
 
 extern value_ptr value_allocate_space_in_inferior PARAMS ((int));
-
-extern void _initialize_values PARAMS ((void));
 
 #endif	/* !defined (VALUE_H) */

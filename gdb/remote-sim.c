@@ -926,10 +926,14 @@ static void init_gdbsim_ops(void)
   gdbsim_ops.to_doc =   "Use the compiled-in simulator.";  
   gdbsim_ops.to_open =   gdbsim_open;		
   gdbsim_ops.to_close =   gdbsim_close;		
-  gdbsim_ops.to_attach =   NULL;		
-  gdbsim_ops.to_detach =   gdbsim_detach;	
+  gdbsim_ops.to_attach =   NULL;
+  gdbsim_ops.to_post_attach = NULL;  
+  gdbsim_ops.to_require_attach = NULL;	
+  gdbsim_ops.to_detach =   gdbsim_detach;
+  gdbsim_ops.to_require_detach = NULL;	
   gdbsim_ops.to_resume =   gdbsim_resume;	
-  gdbsim_ops.to_wait  =   gdbsim_wait;		
+  gdbsim_ops.to_wait  =   gdbsim_wait;
+  gdbsim_ops.to_post_wait = NULL;		
   gdbsim_ops.to_fetch_registers  =   gdbsim_fetch_register;
   gdbsim_ops.to_store_registers  =   gdbsim_store_register;
   gdbsim_ops.to_prepare_to_store =   gdbsim_prepare_to_store;
@@ -946,11 +950,30 @@ static void init_gdbsim_ops(void)
   gdbsim_ops.to_load  =   gdbsim_load;	
   gdbsim_ops.to_lookup_symbol =   NULL;	
   gdbsim_ops.to_create_inferior =   gdbsim_create_inferior;
+  gdbsim_ops.to_post_startup_inferior = NULL;
+  gdbsim_ops.to_acknowledge_created_inferior = NULL;
+  gdbsim_ops.to_clone_and_follow_inferior = NULL;
+  gdbsim_ops.to_post_follow_inferior_by_clone = NULL;
+  gdbsim_ops.to_insert_fork_catchpoint = NULL;
+  gdbsim_ops.to_remove_fork_catchpoint = NULL;
+  gdbsim_ops.to_insert_vfork_catchpoint = NULL;
+  gdbsim_ops.to_remove_vfork_catchpoint = NULL;
+  gdbsim_ops.to_has_forked = NULL;
+  gdbsim_ops.to_has_vforked = NULL;
+  gdbsim_ops.to_can_follow_vfork_prior_to_exec = NULL;
+  gdbsim_ops.to_post_follow_vfork = NULL;
+  gdbsim_ops.to_insert_exec_catchpoint = NULL;
+  gdbsim_ops.to_remove_exec_catchpoint = NULL;
+  gdbsim_ops.to_has_execd = NULL;
+  gdbsim_ops.to_reported_exec_events_per_exec_call = NULL;
+  gdbsim_ops.to_has_exited = NULL;
   gdbsim_ops.to_mourn_inferior =   gdbsim_mourn_inferior;
   gdbsim_ops.to_can_run  =   0;			
   gdbsim_ops.to_notice_signals =   0;		
   gdbsim_ops.to_thread_alive  =   0;		
-  gdbsim_ops.to_stop  =   gdbsim_stop;		
+  gdbsim_ops.to_stop  =   gdbsim_stop;
+  gdbsim_ops.to_pid_to_exec_file = NULL;	
+  gdbsim_ops.to_core_file_to_sym_file = NULL;	
   gdbsim_ops.to_stratum =   process_stratum;	
   gdbsim_ops.DONT_USE =   NULL;		
   gdbsim_ops.to_has_all_memory =   1;	
@@ -971,7 +994,6 @@ void
 _initialize_remote_sim ()
 {
   init_gdbsim_ops() ;
-
   add_target (&gdbsim_ops);
 
   add_com ("sim <command>", class_obscure, simulator_command,

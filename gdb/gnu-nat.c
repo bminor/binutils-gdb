@@ -2082,6 +2082,13 @@ gnu_stop ()
   error ("to_stop target function not implemented");
 }
 
+static void
+gnu_pid_to_exec_file ()
+{
+  error ("to_pid_to_exec_file target function not implemented");
+}
+ 
+
 static int
 gnu_thread_alive (int tid)
 {
@@ -2351,9 +2358,13 @@ init_gnu_ops(void)
   gnu_ops.to_open =   gnu_open;			/* to_open */
   gnu_ops.to_close =   0;			/* to_close */
   gnu_ops.to_attach =   gnu_attach;		/* to_attach */
+  gnu_ops.to_post_attach = NULL;
+  gnu_ops.to_require_attach = NULL;             /* to_require_attach */
   gnu_ops.to_detach =   gnu_detach;	 	/* to_detach */
+  gnu_ops.to_require_detach = NULL;             /* to_require_detach */
   gnu_ops.to_resume =   gnu_resume;		/* to_resume */
   gnu_ops.to_wait  =   gnu_wait;		/* to_wait */
+  gnu_ops.to_post_wait = NULL;                         /* to_post_wait */
   gnu_ops.to_fetch_registers  =   gnu_fetch_registers;	/* to_fetch_registers */
   gnu_ops.to_store_registers  =   gnu_store_registers;	/* to_store_registers */
   gnu_ops.to_prepare_to_store =   gnu_prepare_to_store;	/* to_prepare_to_store */
@@ -2370,11 +2381,30 @@ init_gnu_ops(void)
   gnu_ops.to_load  =   0;			/* to_load */
   gnu_ops.to_lookup_symbol =   0;		/* to_lookup_symbol */
   gnu_ops.to_create_inferior =   gnu_create_inferior;	/* to_create_inferior */
-  gnu_ops.to_mourn_inferior =   gnu_mourn_inferior;	/* to_mourn_inferior */
+  gnu_ops.to_post_startup_inferior = NULL;      /* to_post_startup_inferior */
+  gnu_ops.to_acknowledge_created_inferior = NULL; /* to_acknowledge_created_inferior */
+  gnu_ops.to_clone_and_follow_inferior = NULL;    /* to_clone_and_follow_inferior */
+  gnu_ops.to_post_follow_inferior_by_clone = NULL; /* to_post_follow_inferior_by_clone */
+  gnu_ops.to_insert_fork_catchpoint = NULL;
+  gnu_ops.to_remove_fork_catchpoint = NULL;
+  gnu_ops.to_insert_vfork_catchpoint = NULL;
+  gnu_ops.to_remove_vfork_catchpoint = NULL;
+  gnu_ops.to_has_forked = NULL;                    /* to_has_forked */
+  gnu_ops.to_has_vforked = NULL;                   /* to_has_vforked */
+  gnu_ops.to_can_follow_vfork_prior_to_exec = NULL;
+  gnu_ops.to_post_follow_vfork = NULL;             /* to_post_follow_vfork */
+  gnu_ops.to_insert_exec_catchpoint = NULL;
+  gnu_ops.to_remove_exec_catchpoint = NULL;
+  gnu_ops.to_has_execd = NULL;
+  gnu_ops.to_reported_exec_events_per_exec_call = NULL;
+  gnu_ops.to_has_exited = NULL;
+  gnu_ops.to_mourn_inferior =   gnu_mourn_inferior; /* to_mourn_inferior */
   gnu_ops.to_can_run  =   gnu_can_run;		/* to_can_run */
   gnu_ops.to_notice_signals =   0;		/* to_notice_signals */
   gnu_ops.to_thread_alive  =   gnu_thread_alive;/* to_thread_alive */
   gnu_ops.to_stop  =   gnu_stop;		/* to_stop */
+  gnu_ops.to_pid_to_exec_file = gnu_pid_to_exec_file;         /* to_pid_to_exec_file */
+  gnu_ops.to_core_file_to_sym_file = NULL;
   gnu_ops.to_stratum =   process_stratum;	/* to_stratum */
   gnu_ops.DONT_USE =   0;			/* to_next */
   gnu_ops.to_has_all_memory =   1;		/* to_has_all_memory */

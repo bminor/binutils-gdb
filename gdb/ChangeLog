@@ -1,3 +1,859 @@
+Mon Dec 28 17:43:36 1998  David Taylor  <taylor@texas.cygnus.com>
+
+	The following changes were made by Jim Blandy <jimb@cygnus.com>,
+ 	Edith Epstein <eepstein@cygnus.com>, Elena Zannoni
+ 	<ezannoni@cygnus.com> Stan Shebs <shebs@cygnus.com>, and David
+ 	Taylor <taylor@cygnus.com>, as part of the project to merge in
+ 	changes originally made by HP; HP did not create ChangeLog
+ 	entries.
+
+	* c-lang.h(cp_print_value_fields): update prototype; fixed
+ 	prototype decl for c_val_print funct -- it needed an
+ 	embedded_offset param; fixed prototype of cp_print_value_fields.
+	include value.h.
+	(C_LANG_H): define.
+
+	* c-valprint.c (c_val_print): added new parameter embedded_offset.
+  	Add embedded_offset to valaddr in function calls.  fix calls to
+ 	val_print, and cp_print_value_fields.  Attempt to determine the
+ 	real type of the object to be printed.  fixed call to
+ 	cp_print_value_fields.  process TYPE_CODE_METHOD as well.  moved
+ 	call to check_typedef out of conditional.  added embedded offset
+ 	param to val_print call
+
+	(c_value_print): add new parameter to call to val_print.  handle
+ 	pointer to class case.  ensure that const char *, const unsigned
+ 	char * come out without the type but the volatile variants and the
+ 	signed variants don't.
+	
+	* ch-lang.h: HP merge, 4/15/98 snapshot
+	  Added a parameter to the chill_val_print funct decl
+
+	* ch-valprint.c: HP merge, 4/15/98 snapshot
+	  The various print routines have an additional
+	  parameter. Currently, the new parameter is only
+ 	  used when printing C++ expressions. So, in 
+	  ch-valprint.c, the new parameter is always 0.
+	  Changes in calls to : val_print, chill_val_print, c_val_print
+	  Affected functions  : chill_val_print_array_elements,
+	          chill_val_print, chill_print_value_fields, 
+                  chill_value_print    
+
+	* cp-valprint.c added vtable pointers names for aCC (HP) compiler.
+ 	(cp_print_class_method): print message for HP/aCC case.
+	(cp_print_class_member): add comments.
+	(cp_print_value): adjust address computations for virtual base
+ 	classes.  added new parameter 'offset'.  Find correct offset for
+ 	base class in HP/aCC case.  Change call to cp_print_value_fields
+ 	to have extra par.
+	(cp_print_value_fields): do not print also if the only field is
+ 	the vtable pointer.  Print out vtable ptr, for HP/aCC compiled
+ 	case.  do not print leading '=' in case of anonymous union, or
+ 	struct.  added new parameter 'offset'.  Do not print the vtable
+ 	pointer as a member, in the HP aCC case.  Changed calls to
+ 	val_print to have extra parameter.
+	(cp_print_hpacc_virtual_table_entries): new function. Print vtable
+ 	entries, in HP/aCC compiled case.
+	(cp_print_static_field): change call to cp_print_value_fields, and
+ 	val_print.
+
+	* d30v-tdep.c: 
+	    (d30v_print_register) : added embedded_offset param to val_print
+	       call
+
+	* defs.h: additional include files included when TUI is defined.
+	(gdb_file_isatty): new function decl.
+	(GDB_FILE): if TUI is defined, define a structure rather
+ 	than making this an alias for FILE.
+	(gdb_stdout, gdb_stderr): if TUI is defined, then define these
+	as pointers to variables of type GDB_FILE rather than making them
+	be aliases for stdout and stderr.
+	(TUIDO): add definition conditionalized on definition
+	(or lack thereof) of TUI.
+	(command_class): add two additional values.
+	(precision_type): new enum.
+	(gdb_fclose): add declaration.
+	(store_address): change prototype to match function.
+	(tui_version, xdb_commands, dbx_commands): add decl's.
+	(gdb_file_deallocate): new function declaration
+	(pa_do_strcat_registers_info): new function declaration.
+	(streamtype): new enumerated type to distinguish between output to
+ 	a FILE and output to a buffer.
+	(tui_stream): new struct type, named GDB_FILE. Contains,
+ 	 streamtype, FILE, buffer, and bufferlength fields.
+	(gdb_stdout): of type GDB_FILE, will pass this around gdb rather
+ 	than stdout.
+	(gdb_stderr): of type GDB_FILE, will pass this around gdb rather
+ 	than stderr.
+	(fputs_unfiltered_hook): change stream parameter from FILE to
+ 	GDB_FILE
+	(flush_hook): change stream parameter from FILE to GDB_FILE
+        (gdb_fclose): Fix declaration for gdb_fclose; parameter is now of
+ 	type GDB_FILE **
+	(gdb_file_adjust_strbuf): new function declaration. function lives
+ 	in utils.c.
+	(gdb_file_init_astring): new function declaration. function lives
+ 	in utils.c
+	(gdb_file_get_strbuf): new function declaration. function lives in
+ 	utils.c
+	(source_full_path_of): declare.
+
+	* exec.c (_initialize_exec): make definition of file command be
+	dependent upon dbx_commands not being set.
+	(exec_file_attach): new function.
+	(exec_file_command): call it.
+	(exec_ops): added new fields to_has_syscall_event,
+ 	to_enable_exception_callback, to_get_current_exception_event
+ 	to_post_wait, to_post_startup_inferior
+ 	to_acknowledge_created_inferior, to_clone_and_follow_inferior,
+ 	to_post_follow_inferior_by_clone, to_create_catch_fork_hook,
+ 	to_create_catch_vfork_hook, to_has_forked, to_has_vforked,
+ 	to_post_follow_vfork, to_pid_to_exec_file
+
+	* f-lang.h (f_print_type): change FILE to GDB_FILE in decl.
+	(f_val_print): ditto.
+	(f_val_print): added parameter to the funct decl.
+
+	* f-valprint.c (_initialize_f_valprint): if xdb_commands is set,
+	define lc command.
+
+	(f77_create_arrayprint_offset_tbl): change FILE to GDB_FILE.
+	(f77_print_array): ditto.
+	(f77_print_array_1): ditto.
+	(f_val_print): ditto.
+
+	(f_val_print): Added a parameter; this new parameter is currently
+ 	only non-zero when handling C++ expressions.  In this file its
+ 	value is always 0.  changed fflush to gdb_flush.
+
+	* gnu-nat.c:
+	(init_gnu_ops): added and initialized new target ops vector fields
+ 	  to_require_attach, to_require_detach, to_post_wait,
+ 	  to_post_startup_inferior, to_acknowledge_created_inferior,
+ 	  to_clone_and_follow_inferior, to_create_catch_fork_hook,
+ 	  to_create_catch_vfork_hook, to_has_forked, to_has_vforked,
+ 	  to_post_follow_vfork, to_pid_to_exec_file
+	  (gnu_create_inferior): add param to fork_inferior call
+
+	* hppa-tdep.c (after_prologue): if f is NULL, don't dereference
+ 	it.  if no debug info, return zero telling caller that we need to
+ 	find the end of the prologue via the hard way (instruction
+ 	examination).
+
+	(find_unwind_entry): avoid dereferencing a null
+	pointer.
+
+	(hppa_pid_to_exec_file): deleted -- no longer used.
+	
+	(hppa_prepare_to_proceeed): add prototype.
+	(read_unwind_info): purecov comments, bug fixes.
+	(find_unwind_entry): purecov comments, bug fixes.
+	(find_stub_with_shl_get): purecov comments.
+	(frame_chain): additional parens.
+	(hppa_push_arguments): changes to commented out version of routine.
+	(hppa_fix_call_dummy): purecov comments, fix location of end.o.
+	(in_solib_call_trampoline): purecov comments.
+	(in_solib_return_trampoline): purecov comments.
+	(setup_d_pid_in_inferior): fix location of end.o.
+	(initialize_hp_cxx_exception_support): fix location of end.o.
+	(child_enable_exception_callback): purecov comments.
+
+	(pa_do_strcat_registers_info): Has a new parameter, precision, 
+	which is passed into the call to pa_strcat_fp_reg to indicate
+	whether to display the floating point registers using 
+	single or double preceision.
+	(pa_strcat_registers): Introduce local variable, precision, and 
+	pass it into call to pa_strcat_fp_reg.
+	(pa_strcat_fp_reg): Modified function. New parameter, precision,
+	used by function to decide whether to use single or double
+	precision. Also added the code to put a double precision value
+	into a buffer.
+
+	(pa_do_strcat_registers_info): new routine. called by 
+	tui/tuiRegs.c:_tuiRegisterFormat to place a register name 
+	and value into a string buffer. Interface may change in
+	future. Checking this in so that we have something 
+	functional for HP.
+	(pa_strcat_registers): new routine, called by 
+	pa_do_strcat_registers_info. Does same thing as 
+	pa_print_registers except it takes a stream parameter. 
+	This routine should disappear in future. Checking in
+	so that we have something functional to give HP
+	(pa_strcat_fp_reg): new routine, called by 
+	pa_do_strcat_registers_info and pa_strvat_registers
+	to place a floating point register name and value into
+	a buffer. This interface may change in future. 
+	Checking in so that we have something functional to give HP.
+
+	(pa_print_fp_reg): change prototype to match def'n.
+	(pa_register_look_aside): fix comment immediately before function.
+
+	changes to better support stack unwinding, reading and writing
+ 	registers for HPUX.  New includes : ptrace.h, bfd.h, dl.h.
+	(internalize_unwinds): initialize new fields in table.
+	(read_unwind_info): entries in the table are now more complex
+ 	structures. References of the form ...->table[index].stub_type are
+ 	now ...->table[index].stub_unwind.stub_type.
+	(find_proc_framesize) : added a check for pc == 0.
+	(rp_saved): entries in the table are now more complex
+ 	structures. References of the form ...->table[index].stub_type are
+ 	now ...->table[index].stub_unwind.stub_type.
+	(frameless_function_invocation): stub_type becomes
+ 	stub_unwind.stub_type
+	(saved_pc_after_call): stub_type becomes stub_unwind.stub_type
+	(hppa_frame_saved_pc): stub_type becomes stub_unwind.stub_type
+	(frame_chain_valid): stub_type becomes stub_unwind.stub_type
+	(hppa_call_dummy): stub_type becomes stub_unwind.stub_type
+	(pa_print_fp_reg): additional params to call val_print
+	(in_solib_call_trampoline): stub_type becomes
+ 	stub_unwind.stub_type
+	(in_solib_return_trampoline): stub_type becomes
+ 	stub_unwind.stub_typ
+	(skip_trampoline_code): additional code to handle external
+ 	dyncalls. Also stub_type becomes stub_unwind.stub_type
+	(hppa_pid_to_exec_file): new funct. FOr HPUX 10.0 and beyond there
+ 	is an explicit ptrace request for getting the pathname associated
+ 	with a process id (pid).
+	
+	(hppa_pid_to_exec_file): remove unwanted param from call to
+ 	call_ptrace.
+
+	(args_for_find_stub): new structure.
+	(find_unwind_entry): deal with null input pc value.
+	(rp_saved): ditto.
+	For the import stub, return -24 always.
+	(hppa_frame_saved_pc): save old pc value, to detect we are in a loop.
+	(init_extra_frame_info): use TARGET_READ_FP.
+	(frame_chain): include thread support.
+	If the caller's pc is zero, we loose and return, just like stack bottom.
+	Disable warning about being unable to find unwind info.
+	(hppa_push_arguments): rewrite.
+	(hppa_value_returned_from_stack): new function. Handles returning a value
+	larger that 64 bits, stored on the stack.
+	(find_stub_with_shl_get): new function. To look up symbols in shlibs.
+	(cover_find_stub_with_shl_get): new function. Cover routine for 
+	find_stub_with_shl_get to pass to catch_errors.
+	(hppa_fix_call_dummy): comment out old stub mechanism. Rewrite using dyncall.
+	(target_read_fp): new function.
+	(pa_do_registers_info): floating point registers start at FP4.
+	(pa_print_registers): use FP4_REGNUM instead of 72.
+	(skip_trampoline_code): do machine instruction matching for PA2.0.
+	(setup_d_pid_in_inferior): new function. Exception handling support.
+	(initialize_hp_cxx_exception_support): ditto.
+	(child_enable_exception_callback): ditto.
+	(child_get_current_exception_event): ditto.
+
+	* hpux-thread.c
+        (hpux_thread_ops): initializing new target ops vector fields.
+  	to_require_attach, to_require_detach, to_post_wait,
+ 	to_post_startup_inferior, to_acknowledge_created_inferior,
+ 	to_clone_and_follow_inferior, to_create_catch_fork_hook,
+ 	to_create_catch_vfork_hook, to_has_forked, to_has_vforked,
+ 	to_post_follow_vfork, to_pid_to_exec_file.
+
+	* infcmd.c 
+	Include objfiles.h
+	(attach_command): new local variable, exec_file, added code to
+ 	determine exec_file from pid if exec_file is not already known,
+	call new target operation, target_post_attach -- a no-op unless
+	on HPUXHPPA
+	(detach_command): after detaching, do a SOLIB_RESTART
+
+	(objfiles.h): fix typo on include line.
+	
+	(run_command): only call SOLIB_RESTART if it's defined.
+	(detach_command): ditto.
+
+	(run_command): If program has already been started, and decide
+	to restart it, the kill the target, fluch the caches, 
+	call init_wait_for_inferior. Also purge old solib objfiles.
+
+	(run_stack_dummy): add calls to
+ 	disable_watchpoints_before_interactive_call_start and
+ 	enable_watchpoints_after_interactive_call_stops
+	(finish_command): alter code handling the evaluation and printing
+ 	of the target function's return value.
+	(attach_command): when given a pid, but no exec file, try to
+ 	determine the exec file from the process. If the process does not
+ 	record a full path name, try to qualify the filename against the
+ 	source path.
+	(_initialize_infcmd): add some verbiage about how to use the
+ 	attach command
+
+	(do_registers_info): changed calls to val_print
+
+	made the symfile.h include preceed the 
+	objfiles.h include. The other ordering caused a 
+	compile problem (incompletely defined types).
+
+	* inftarg.c (child_post_attach): Fix declaration, make static.
+	(proc_wait): Make globally visible.
+	(child_insert_fork_catchpoint, etc): Fix return type.
+
+	(child_detach_from_process): declare.
+	(child_attach_to_process): declare.
+	(child_stop): make static to match declaration.
+
+	(ptrace_him): change prototype back to return int. 
+
+	(ptrace_me): Remove debug output, pass NULL to fork_inferior if
+ 	not HPUX.
+
+	(child_require_attach): new funct prototype and definition
+	(child_require_detach): new funct prototype and definition
+	(proc_wait): funct prototype and definition are enclosed by
+ 	proc_wait ifndef
+	(child_attach_to_process): new function, does most of the work
+ 	that child_attach used to do and some additional work to determine
+ 	whether gdb is already attached to the target how to react.
+	(child_attach): altered. It's now a wrapper for
+ 	child_attach_to_process.
+	(child_require_attach): new function, called if should attach even
+ 	when gdb is already attached to target.
+	(child_detach_from_process): new function, does most of the work
+ 	that child_detach used to do and some additional work to determine
+ 	whether gdb is currently attached to the target.
+	(child_detach): altered. It's now a wrapper for
+ 	child_detach_from_process.
+	(child_require_detach): new function, called if should try to
+ 	detach even when gdb is not attached to target.
+	(ptrace_him): calls a new function,
+ 	target_acknowledge_forked_child.  Currently,
+ 	target_acknowledge_forked_child, is only defined to do something
+ 	for HPUX.
+	(child_create_inferior): changed call to fork_inferior.
+	(child_ops): added to_require_attach and to_require_detach fields
+ 	to the child_ops target ops vector.
+
+	Some hacks for ttrace work 
+	(child_wait): Additional local variables, additional code in
+	while loop to check for : process exited, process forked, 
+	process vforked, process execd
+	(child_thread_alive): John B. seems to think that the kill 
+	call is inapproapriate for HPUX.
+	(child_attach_to_process): using strtol rather than atoi.
+	no longer check for case where there is no known exec file.
+	(child_post_attach): new function, a default, a no-op
+ 	(child_insert_fork_catchpoint): new function, a default, a no-op
+	(child_remove_fork_catchpoint): new function, a default, a no-op
+	(child_insert_vfork_catchpoint): new function, a default, a no-op
+	(child_remove_vfork_catchpoint): new function, a default, a no-op
+	(child_can_follow_vfork_prior_to_exec ):new function, a default, 
+ 	a no-op
+	(child_insert_exec_catchpoint): new function, a default, a no-op
+	(child_remove_exec_catchpoint): new function, a default, a no-op
+	(child_has_execd): new function, a default, returns 0
+	(child_reported_exec_events_per_exec_call): new function, a 
+ 	default, returns 1
+	(child_has_exited): new function, a default.
+	(child_core_file_to_sym_file): new function, a default, returns NULL.
+	(child_ops): initialize new target_ops vector fields to the 
+	child* functions.
+
+	* jv-lang.h: 
+	(java_val_print): added embedded_offset param to func decl.
+
+	* jv-valprint.c: changing calls to val_print to accomodate new param.
+	(java_value_print): add embedded_offset param to val_print call
+	(java_print_value_fields): add embedded_offset param to val_print
+	call
+	(java_val_print): add embedded_offset param. alter call to 
+	c_val_print to accomodate embedded_offset param.
+
+	* language.c (lang_bool_type): return builtin_type_bool in c++
+	case.
+	(unk_lang_val_print): Added embedded_offset param to 
+	prototype declaration and definition.
+
+	* language.h:
+	(LA_VAL_PRINT macro, la_val_print function decl): altered to
+ 	accomodate the new parameter to the various print functions.
+	
+	* m2-lang.h:
+	(m2_val_print): added a parameter to the func decl.
+
+	* m2-valprint.c:
+ 	(m2_val_print): added a parameter.
+	This parameter is currently only used when 
+	evaluating C++ expressions. So, it is 
+	always 0 in this file. 
+
+	* m3-nat.c: 
+	(m3_create_inferior): add param to fork_inferior call
+	(m3_pid_to_exec_file): new function
+	(m3_ops): adding and initializing new target ops vector fields.
+
+	* mac-nat.c:
+	(init_child_ops): adding and initializing new target ops vector
+ 	fields to_require_attach, to_require_detach, to_post_wait,
+ 	to_post_startup_inferior, to_acknowledge_created_inferior,
+ 	to_clone_and_follow_inferior, to_create_catch_fork_hook,
+ 	to_create_catch_vfork_hook, to_has_forked, to_has_vforked,
+ 	to_post_follow_vfork, to_pid_to_exec_file
+
+	* mips-tdep.c: chnages to accomodate additional parameter
+	to val_print.
+	(mips_print_register): alter calls to val_print
+
+	* monitor.c (monitor_write): change stderr to gdb_stderr.
+	(monitor_remove_breakpoint): ditto.
+
+	* monitor.c:
+	(init_base_monitor_ops): adding and initializing new target ops
+ 	vector fields to_require_attach, to_require_detach,
+ 	to_post_wait, to_post_startup_inferior,
+ 	to_acknowledge_created_inferior, to_clone_and_follow_inferior,
+ 	to_create_catch_fork_hook, to_create_catch_vfork_hook,
+ 	to_has_forked, to_has_vforked, to_post_follow_vfork,
+ 	to_pid_to_exec_file
+
+	* ppc-bdm.c:
+	(init_bdm_ppc_ops): adding and initializing new target ops vector
+	fields to_require_attach, to_require_detach, to_post_wait,
+ 	to_post_startup_inferior, to_acknowledge_created_inferior,
+ 	to_clone_and_follow_inferior, to_create_catch_fork_hook,
+ 	to_create_catch_vfork_hook, to_has_forked, to_has_vforked,
+ 	to_post_follow_vfork, to_pid_to_exec_file
+	
+	* printcmd.c
+	(do_examine): when saving a value_ptr, remove it from
+	the list of value_ptr's to be freed automatically; when discarding
+	a previously saved value_ptr, free it.
+
+	(print_formatted): update comments; add new comments.
+	(printf_command, print_insn): purecov comments.
+	(_initialize_printcmd): add assign as a command if dbx_commands is
+ 	set; create va as an alias for disassemble if xdb_commands is set.
+	(address_info): new cases LOC_INDIRECT and
+ 	LOC_THREAD_LOCAL_STATIC.
+	(display_command): if tui_version and exp starts with a '$', then
+ 	don't display it unless tui_vSetLayoutTo fails.
+	(disassemble_command): add tuiDo calls.
+
+	(print_scalar_formatted): for integers that are long long, check
+ 	the print format and print out in binary octal, decimal, or
+ 	hex. Call the new print_*_chars functions in valprint.c
+
+	(print_frame_args): Altered calls to val_print, to reflect
+ 	additional parameter to val_print (case LOC_BASEREG_ARG).
+
+	* procfs.c: 
+	(procfs_init_inferior): return value is now a void.
+        (procfs_ops): adding and initializing new target_ops vector fields.
+	(procfs_create_inferior): fix call to fork_inferior -- need another
+	parameter. 
+
+	* remote-adapt.c
+ 	(adapt_open): change stderr to gdb_stderr.
+	(adpat_insert_breakpoint): ditto.
+	(init_adapt_ops): adding and initializing new target_ops vector fields.
+
+	* remote-array.c
+	(array_wait): change fflush to gdb_flush and stdout to gdb_stdout.
+	(init_array_ops): adding new and initializing target_ops vector fields.
+
+	* remote-bug.c
+	(bug_load): change fflush to gdb_flush; stdout to gdb_stdout.
+	(bug_wait): change stderr to gdb_stderr.
+	(bug_insert_breakpoint): ditto.
+	(init_bug_ops): adding and initializing new target_ops vector fields.
+
+	* remote-e7000.c
+	(init_e7000_ops): adding and initializing new target_ops vector fields.
+	* remote-eb.c (init_eb_ops): ditto.
+	* remote-es.c (init_es1800_ops): ditto.
+	(init_es1800_child_ops): ditto.
+	* remote-es.c (init_es1800_ops): ditto.
+	(init_es1800_child_ops): ditto.
+	* remote-hms.c (init_hms_ops):  ditto.
+	* remote-hms.c (init_hms_ops): ditto.
+	* remote-nindy.c (init_nindy_ops): ditto.
+	* remote-nrom.c	(init_nrom_ops): ditto.
+	* remote-os9k.c (init_rombug_ops): ditto.
+	* remote-rdp.c (init_remote_rdp_ops): ditto.
+	* remote-sds.c (init_sds_ops): ditto.
+	* remote-sim.c (init_gdbsim_ops): ditto.
+	* remote-st.c (init_st2000_ops): ditto.
+	* remote-udi.c (init_udi_ops): ditto.
+	* remote-vx.c (init_vx_ops): ditto.
+	(init_vx_run_ops): ditto.
+	* remote-vx.c: (init_vx_ops): ditto.
+	(init_vx_run_ops): ditto.
+	* remote.c (init_remote_ops): ditto.
+        (init_extended_remote_ops): ditto.
+
+	* remote-mips.c (mips_getstring): change stderr to gdb_stderr.
+	(pmon_insert_breakpoint): ditto.
+	(pmon_remove_breakpoint): ditto.
+	(check_lsi_error): ditto.
+	(common_breakpoint): ditto.
+	(pmon_makeb64): ditto.
+
+	* remote-mips.c (mips_xfer_memory): change fflush to gdb_flush;
+	change stdout to gdb_stdout.
+
+	* remote-mm.c
+	(mm_open): change stderr to gdb_stderr.
+
+	(init_mm_ops): adding and initializing new target_ops vector fields.
+
+	(mm_load): fixed params in commented out call to symbol_file_add.
+
+	* remote-nindy.c (instream): change declaration to FILE.
+
+	* remote-udi.c: 
+	(udi_load): fixed params in call to symbol_file_add
+
+	* remote-vx.c:
+ 	(vx_add_symbols): fixed params in call to symbol_file_add
+
+	* remote.c (init_remote_ops): cosmetic change to match expected
+	test output.
+
+	* rs6000-nat.c: 
+	(add_vmap): added params to call to allocate_objfile.
+
+	* scm-lang.h : HP merge, 4/15/98 snapshot
+	Added parameter to the scm_val_print func decl
+
+	* scm-valprint.c 
+
+	* scm-valprint.c (scm_scmval_print): cast svalue to (int); new
+ 	parameter.  This parameter is currently only used when evaluating
+ 	C++ expressions. So, it is always 0 in this file.
+	(c_val_print): fixed prototype decl; it needed an embedded_offset
+ 	param.
+
+	* sol-thread.c: 
+	(sol_core_ops): added and initialized new target_ops vector fields.
+	(sol_thread_ops): ditto.
+	
+	* somsolib.c (DLD_FLAGS_MAPPRIVATE): new macro. 
+	Define bit of __dld_flags in HP-UX a.out files.
+	(DLD_FLAGS_HOOKVALID): ditto.
+	(DLD_FLAGS_LISTVALID): ditto.
+	(DLD_FLAGS_BOR_ENABLE): ditto.
+	(som_solib_total_st_size): cumulative size in bytes of the 
+	symbol tables of all shared objects on the so_list_head list.
+	(som_solib_st_size_threshhold_exceeded): threshold for adding symbols
+	for shlibs.
+	(som_solib_sizeof_symbol_table): new function. Computes size of 
+	symbol table for a shlib.
+	(som_solib_load_symbols): new function. Load symbols from shlib.
+	(som_solib_add): detect if __dld_list is not valid. 
+	Record main program's symbol table size.
+	Load symbols if called from command line.
+	Keep threshold into account when loading shlib symbols.
+	(som_solib_create_inferior_hook): use dld_flags macros.
+	(som_sharedlibrary_info_command): let user know if symbols were 
+	not loaded.
+	(som_solib_restart): discard all the shlibs descriptors.
+	(_initialize_som_solib): chenge help message for auto-solib-add
+	command.
+	Set threshold for symbol table to 50 megabytes.
+
+	* somsolib.c (_initialize_som_solib): added call to som_solib_restart.
+	(som_solib_restart): new function
+	(som_solib_in_dynamic_linker): new function
+	(som_solib_desire_dynamic_linker_symbols): new function
+	(som_solib_unloaded_library_pathname): new function
+	(som_solib_loaded_library_pathname): new function
+	(som_solib_library_pathname): new function
+	(som_solib_have_unload_event): new function
+	(som_solib_have_load_event): new function
+	(som_solib_create_catch_unload_hook): new function
+	(som_solib_create_catch_load_hook): new function
+	(som_solib_create_inferior_hook): rewritten
+	dld_cache: new struct
+	addr_and_unwind_t: new struct
+	(find_unwind_entry) added prototype
+
+	* somsolib.c (som_solib_create_inferior_hook): introduce new local
+ 	msymbol2 and change some msymbol's to msymbol2's -- was clobbering
+ 	msymbol, passing a NULL to lookup_minimal_symbol_solib_trampoline,
+	and ultimately core dumping with a SEGV.
+
+	* somsolib.c: 
+	Include assert.h
+	(som_solib_mapped_entry): additional comments for text_addr, 
+	text_link_addr, text_end, and tsd_start_addr fields. Commenting
+	out 2 tsd fields, __data_start and __data_end. 
+	(som_solib_add_solib_objfile): add params to calls to symbol_file_add.
+	Add some code for distinguishing between a shared library and other 
+	objfiles. This appears to be a prelude to thread local storage.	
+	(som_solib_load_symbols): changes to printf statement 
+	enclosed by SOLIB_DEBUG ifdef.
+	(som_solib_add): change comment to correctly specify path
+	to end.o -- /opt/langtools/lib/end.o. changes to printf statement
+ 	enclosed by SOLIB_DEBUG ifdef.
+	Removed several SOLIB_DEBUG ifdefs and the associated printfs.
+	Add code to find the start address for the object file's thread 
+	local storage
+	(som_solib_create_inferior_hook): Fix warning messages use correct
+	path to end.o -- /opt/langtools/lib/end.o. Change control flow. 
+	No longer user early returns from function is cases of error.
+	(reset_inferior_pid): new function
+	(som_solib_remove_inferior_hook): new function
+	(so_lib_thread_start_addr): new function. used for tsd.
+
+	* somsolib.c: Removed references to ASSERT macro.
+
+	* somsolib.c: add debugging macro.
+	(struct som_solib_mapped_entry): add new field tsd_start_addr.
+	(struct so_list): added new field solib_addr.
+	(som_solib_add_solib_objfile): new function. 
+	(som_solib_load_symbols): rewritten.
+	(som_solib_add): make sure we don't load the symbols in if the 
+	threshold was exceeded.
+	(som_solib_get_solib_by_pc): new function. Return the address of
+ 	handle of the shared library.
+	(som_solib_restart): disable breakpoints at restart.
+	(_initialize_som_solib): set threshold to 100 megabytes.
+
+	* somsolib.c: add include of fcntl.h so that O_RDONLY is defined.
+
+	* sparcl-tdep.c: 
+	(init_sparclite_ops): added and initialized new target_ops vector fields.
+
+	* target.c (cleanup_target): Changed casting of default functions
+ 	for to_has_forked, to_has_vforked, to_pid_to_exec_file to get rid
+ 	of warnings.  Fixed PARAMS for to_has_syscall_event.  Fixed the
+ 	return type on a few of the default function values.
+
+	(cleanup_target): changes in the de_fault macro, both to
+	accomodate the new target_ops vector fields and to use
+	more accurate default functions.
+
+	* target.c (debug_to_open): change stderr to gdb_stderr.
+	(debug_to_close): ditto.
+	(debug_to_attach): ditto.
+	(debug_to_post_attach): ditto.
+	(debug_to_require_attach): ditto.
+	(debug_to_detach): ditto.
+	(debug_to_require_detach): ditto.
+	(debug_to_resume): ditto.
+	(debug_to_wait): ditto.
+	(debug_to_post_wait): ditto.
+	(debug_to_fetch_registers): ditto.
+	(debug_to_store_registers): ditto.
+	(debug_to_prepare_to_store): ditto.
+	(debug_to_xfer_memory): ditto.
+	(debug_to_files_info): ditto.
+	(debug_to_insert_breakpoint): ditto.
+	(debug_to_remove_breakpoint): ditto.
+	(debug_to_terminal_init): ditto.
+	(debug_to_terminal_inferior): ditto.
+	(debug_to_terminal_ours_for_output): ditto.
+	(debug_to_terminal_ours): ditto.
+	(debug_to_terminal_info): ditto.
+	(debug_to_kill): ditto.
+	(debug_to_load): ditto.
+	(debug_to_lookup_symbol): ditto.
+	(debug_to_create_inferior): ditto.
+	(debug_to_post_startup_inferior): ditto.
+	(debug_to_acknowledge_created_inferior): ditto.
+	(debug_to_clone_and_follow_inferior): ditto.
+	(debug_to_post_follow_inferior_by_clone): ditto.
+	(debug_to_insert_fork_catchpoint): ditto.
+	(debug_to_remove_fork_catchpoint): ditto.
+	(debug_to_insert_vfork_catchpoint): ditto.
+	(debug_to_remove_vfork_catchpoint): ditto.
+	(debug_to_has_forked): ditto.
+	(debug_to_has_vforked): ditto.
+	(debug_to_can_follow_vfork_prior_to_exec): ditto.
+	(debug_to_post_follow_vfork): ditto.
+	(debug_to_insert_exec_catchpoint): ditto.
+	(debug_to_remove_exec_catchpoint): ditto.
+	(debug_to_has_execd): ditto.
+	(debug_to_reported_exec_events_per_exec_call): ditto.
+	(debug_to_has_syscall_event): ditto.
+	(debug_to_has_exited): ditto.
+	(debug_to_mourn_inferior): ditto.
+	(debug_to_can_run): ditto.
+	(debug_to_notice_signals): ditto.
+	(debug_to_thread_alive): ditto.
+	(debug_to_stop): ditto.
+	(debug_to_enable_exception_callback): ditto.
+	(debug_to_get_current_exception_event): ditto.
+	(debug_to_pid_to_exec_file): ditto.
+	(debug_to_core_file_to_sym_file): ditto.
+
+	* target.c:
+	(default_clone_and_follow_inferior): new function prototype
+ 	declaration and function definition.
+
+        (dummy_target): Add new target_ops vector fields and their
+ 	initializations.  More target_ops vector changes for HPUX new
+ 	fields.  New fields are to_post_wait, to_post_startup_inferior
+ 	to_acknowledge_created_inferior, to_clone_and_follow_inferior,
+ 	to_post_follow_inferior_by_clone, to_create_catch_fork_hook,
+ 	to_create_catch_vfork_hook, to_has_forked, to_has_vforked,
+ 	to_post_follow_vfork, to_pid_to_exec_file.
+
+	(de_fault): add new HPUX specific target_ops operations to the
+	de_fault macro
+
+	(INHERIT): added new HPUX specific target_ops operations.
+
+	(debug_to_post_wait): new funct
+	(debug_to_post_startup_inferior): new funct
+	(debug_to_acknowledge_created_inferior): new funct
+	(debug_to_clone_and_follow_inferior): new funct
+	(debug_to_post_follow_inferior_by_clone): new funct
+	(debug_to_create_catch_fork_hook): new funct
+	(debug_to_create_catch_vfork_hook): new funct
+	(debug_to_has_forked): new funct
+	(debug_to_has_vforked): new funct
+	(debug_to_post_follow_vfork): new funct
+	(setup_target_debug): initialize new target_ops vector fields.
+
+	* target.c: 
+	(nosupport_runtime): new function, used in cleanup_target
+
+	(update_current_target): Added new new target_ops vector fields to
+	the INHERIT macro definition.
+
+	(generic_mourn_inferior): the call to breakpoint_init_inferior now takes a 
+	parameter
+
+	(normal_pid_to_str): Adding a \0 to the end of buf.
+
+	(debug_to_has_syscall_event): new func
+	(debug_to_enable_exception_callback): new func
+	(debug_to_get_current_exception_event): new func
+        (setup_target_debug): initialize the 3 new target_ops vector fields
+
+	* target.c: 
+	(struct signals): fix message associated with SIGRETRACT.
+
+	* target.c:
+	(return_one): new function, used by the de_fault macro
+	(debug_to_post_attach): new function
+	(debug_to_wait): added new cases : TARGET_WAITKIND_FORKED,
+	TARGET_WAITKIND_VFORKED, TARGET_WAITKIND_EXECD.
+	(debug_to_insert_fork_catchpoint): new function
+	(debug_to_remove_fork_catchpoint): new function
+	(debug_to_insert_vfork_catchpoint): new function
+	(debug_to_remove_vfork_catchpoint): new function
+	(debug_to_can_follow_vfork_prior_to_exec): new function
+	(debug_to_insert_exec_catchpoint): new function
+	(debug_to_remove_exec_catchpoint): new function
+	(debug_to_core_file_to_sym_file): new function
+	(setup_target_debug): give new fields in current_target target_ops
+ 	vector values.
+
+	* target.h: 
+	Include symtab.h
+	(target_waitkind): new enumerated values : 
+	TARGET_WAITKIND_SYSCALL_ENTRY and TARGET_WAITKIND_SYSCALL_RETURN
+	(target_waitstatus): add a syscall_id field to structure
+	(child_has_syscall_event): new decl
+	(child_thread_alive): new decl
+	(target_ops): added 3 new fields: to_has_syscall_event,
+	to_enable_exception_callback, to_get_current_exception_event 
+	(target_enable_exception_callback): new macro
+        (target_has_syscall_event): new macro 
+	(target_get_current_exception_event): new macro
+	(TARGET_DISABLE_HW_WATCHPOINTS): new macro
+	(TARGET_ENABLE_HW_WATCHPOINTS): new macro
+	(PC_REQUIRES_RUN_BEFORE_USE): new macro
+	(target_tid_to_str): new macro
+
+	* target.h: 
+        (target_waitkind): new entries in enumerated type : 
+	TARGET_WAITKIND_FORKED, TARGET_WAITKIND_VFORKED, 
+	TARGET_WAITKIND_EXECD
+	(target_waitstatus): additional fields in struct to keep track
+	of child pid and pathname to execd file
+	(target_ops): add in the new target_ops function pointer fields.
+	New macros to go along with new target_ops fields.
+	New function decls : child_core_file_to_sym_file, 
+	child_post_attach, child_insert_fork_catchpoint, 
+	child_remove_fork_catchpoint, child_insert_vfork_catchpoint,
+	child_remove_vfork_catchpoint, child_can_follow_vfork_prior_to_exec,
+	child_insert_exec_catchpoint, child_remove_exec_catchpoint, 
+	child_has_execd, child_has_exited
+
+	* target.h: 
+        In target_waitstatus.value, change name of child_pid field to
+	related_pid.
+	(target_pid_or_tid_to_str): define default macro
+	Added missing #endif after PC_REQUIRES_RUN_BEFORE_USE definition
+	(ENSURE_VFORKING_PARENT_REMAINS_STOPPED): define default macro
+	(RESUME_EXECD_VFORKING_CHILD_TO_GET_PARENT_VFORK): define default macro
+
+	* target.h: HP merge, 4/15/98 snapshot
+	  There are new function declarations for to_require_attach
+	  and to_require_detach. There are also new macros, 
+	  target_require_attach and target_require_detach. There are
+	  also new function declarations for find_default_require_detach
+	  and find_default_require_attach. All these changes are ifdef'ed
+	  for HPUX_SNAP1. 
+
+	* target.h: changes for HPUX specific target_ops vector fields
+	  (target_ops): new fields
+	    to_post_wait, to_post_startup_inferior
+	     to_acknowledge_created_inferior, to_clone_and_follow_inferior,
+	     to_post_follow_inferior_by_clone,  to_create_catch_fork_hook,
+	     to_create_catch_vfork_hook, to_has_forked, to_has_vforked,
+	     to_post_follow_vfork, to_pid_to_exec_file
+	  Function prototype definitions for new target_ops operations
+	  New function definitions : child_pid_to_exec_file, child_post_wait,
+	    child_post_startup_inferior, child_acknowledge_created_inferior, 
+	    child_clone_and_follow_inferior, 
+	    child_post_follow_inferior_by_clone, child_create_catch_fork_hook,
+	    child_create_catch_vfork_hook, child_has_forked, child_has_vforked,
+	    child_acknowledge_created_inferior, child_post_follow_vfork,
+	  New macros : target_post_startup_inferior,
+	               target_acknowledge_created_inferior, 
+	               target_clone_and_follow_inferior, 
+	               target_post_follow_inferior_by_clone,
+	               target_create_catch_fork_hook, 
+	               target_create_catch_vfork_hook, 
+ 	               target_pid_to_exec_file
+          (find_default_clone_and_follow_inferior): new funct prototype
+
+	* target.h: remove HPUX_SNAP1 and HPUX_SNAP2 ifdefs
+	
+	* txvu-tdep.c: 
+	    (txvu_print_register): added embedded_offset param to val_print
+	       call.
+
+	* v850ice.c:
+	(init_850ice_ops): adding and initializing new target_ops vector
+ 	fields : to_post_attach, to_post_follow_inferior_by_clone,
+ 	to_insert_fork_catchpoint, to_remove_fork_catchpoint,
+ 	to_insert_vfork_catchpoint, to_remove_vfork_catchpoint,
+ 	to_can_follow_vfork_prior_to_exec, to_insert_exec_catchpoint,
+ 	to_remove_exec_catchpoint, to_has_execd,
+ 	to_reported_exec_events_per_exec_call, to_has_exited,
+ 	to_core_file_to_sym_file
+
+	* valprint.c (print_binary_chars): print out long long as
+	a binary number
+	(print_octal_chars): print out long long as an octal number
+	(print_decimal_chars): print out long long as a decimal number
+
+	* valprint.c (strcat_longest): define it (from Stan Shebs).
+
+	* valprint.c: HP merge, 4/15/98 snapshot
+	Added parameter to val_print. This is used for
+	evaluating C++ expressions. 
+	
+	* value.h (VALUE_POINTED_TO_OFFSET): new macro.
+	Add field pointed_to_offset to value structure.
+	Add prototypes for new functions in valops.c.
+
+	* value.h (write_register_pid): change prototype to match
+ 	function.
+	(val_print func decl): Additional parameter.
+  	(VALUE_EMBEDDED_OFFSET): New macro.
+ 	(find_rt_vbase_offset): New func decl -- for C++ support.
+
+	* win32-nat.c (child_ops): Remove unneeded settings.
+	(handle_load_dll): added params to call to symbol_file_add.
+	(init_child_ops): adding new target_ops vector fields and removing
+ 	a few.  initializing new target ops vector fields.
 Wed Dec 23 15:03:42 1998  Per Bothner  <bothner@cygnus.com>
 
 	* Makefile.in (READLINE_CFLAGS):  Search $(READLINE_SRC)/.. rather

@@ -4526,6 +4526,14 @@ m3_stop ()
   error ("to_stop target function not implemented");
 }
 
+static char *
+m3_pid_to_exec_file (pid)
+int  pid;
+{
+  error ("to_pid_to_exec_file target function not implemented");
+  return NULL;  /* To keep all compilers happy. */
+}
+
 struct target_ops m3_ops = {
   "mach",			/* to_shortname */
   "Mach child process",	/* to_longname */
@@ -4533,9 +4541,13 @@ struct target_ops m3_ops = {
   m3_open,			/* to_open */
   0,				/* to_close */
   m3_attach,			/* to_attach */
+  NULL,                         /* to_post_attach */
+  NULL,                       /* to_require_attach */
   m3_detach, 		/* to_detach */
+  NULL,                       /* to_require_detach */
   m3_resume,			/* to_resume */
   mach_really_wait,			/* to_wait */
+  NULL,                         /* to_post_wait */
   fetch_inferior_registers,	/* to_fetch_registers */
   store_inferior_registers,	/* to_store_registers */
   m3_prepare_to_store,	/* to_prepare_to_store */
@@ -4551,13 +4563,31 @@ struct target_ops m3_ops = {
   m3_kill_inferior,		/* to_kill */
   0,				/* to_load */
   0,				/* to_lookup_symbol */
-
   m3_create_inferior,	/* to_create_inferior */
+  NULL,                         /* to_post_startup_inferior */
+  NULL,                         /* to_acknowledge_created_inferior */
+  NULL,                         /* to_clone_and_follow_inferior */
+  NULL,                         /* to_post_follow_inferior_by_clone */
+  NULL,                         /* to_insert_fork_catchpoint */
+  NULL,                         /* to_remove_fork_catchpoint */
+  NULL,                         /* to_insert_vfork_catchpoint */
+  NULL,                         /* to_remove_vfork_catchpoint */
+  NULL,                         /* to_has_forked */
+  NULL,                         /* to_has_vforked */
+  NULL,                         /* to_can_follow_vfork_prior_to_exec */
+  NULL,                         /* to_post_follow_vfork */
+  NULL,                         /* to_insert_exec_catchpoint */
+  NULL,                         /* to_remove_exec_catchpoint */
+  NULL,                         /* to_has_execd */
+  NULL,                         /* to_reported_exec_events_per_exec_call */
+  NULL,                         /* to_has_exited */
   m3_mourn_inferior,	/* to_mourn_inferior */
   m3_can_run,		/* to_can_run */
   0,				/* to_notice_signals */
   0,				/* to_thread_alive */
   m3_stop,			/* to_stop */
+  m3_pid_to_exec_file,          /* to_pid_to_exec_file */
+  NULL,                         /* to_core_file_to_sym_file */
   process_stratum,		/* to_stratum */
   0,				/* to_next */
   1,				/* to_has_all_memory */

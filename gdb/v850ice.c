@@ -4,7 +4,7 @@
 This file is part of GDB.
 
 This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Pessublic License as published by
+it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 2 of the License, or
 (at your option) any later version.
 
@@ -921,10 +921,14 @@ static void init_850ice_ops(void)
   v850ice_ops.to_doc         =   "Debug a system controlled by a NEC 850 ICE.";
   v850ice_ops.to_open        =   v850ice_open;		
   v850ice_ops.to_close       =   v850ice_close;	
-  v850ice_ops.to_attach      =   NULL;		
-  v850ice_ops.to_detach      =   v850ice_detach;	
+  v850ice_ops.to_attach      =   NULL;
+  v850ice_ops.to_post_attach =   NULL;
+  v850ice_ops.to_require_attach = NULL;		
+  v850ice_ops.to_detach      =   v850ice_detach;
+  v850ice_ops.to_require_detach = NULL;	
   v850ice_ops.to_resume      =   v850ice_resume;	
-  v850ice_ops.to_wait        =   v850ice_wait;	
+  v850ice_ops.to_wait        =   v850ice_wait;
+  v850ice_ops.to_post_wait = NULL;	
   v850ice_ops.to_fetch_registers  =   v850ice_fetch_registers;
   v850ice_ops.to_store_registers  =   v850ice_store_registers;
   v850ice_ops.to_prepare_to_store =   v850ice_prepare_to_store;
@@ -940,12 +944,14 @@ static void init_850ice_ops(void)
   v850ice_ops.to_kill            =   v850ice_kill;		
   v850ice_ops.to_load            =   v850ice_load;		
   v850ice_ops.to_lookup_symbol   =   NULL;		
-  v850ice_ops.to_create_inferior =   NULL;		
+  v850ice_ops.to_create_inferior =   NULL;
   v850ice_ops.to_mourn_inferior  =   v850ice_mourn;
   v850ice_ops.to_can_run         =   0;		
   v850ice_ops.to_notice_signals  =   0;		
   v850ice_ops.to_thread_alive    =    NULL;	
   v850ice_ops.to_stop            =   v850ice_stop;
+  v850ice_ops.to_pid_to_exec_file = NULL;
+  v850ice_ops.to_core_file_to_sym_file = NULL;			
   v850ice_ops.to_stratum         =   process_stratum;	
   v850ice_ops.DONT_USE           =   NULL;		
   v850ice_ops.to_has_all_memory  =   1;		

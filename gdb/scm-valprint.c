@@ -30,7 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* FIXME: Should be in a header file that we import. */
 extern int
-c_val_print PARAMS ((struct type *, char *, CORE_ADDR, GDB_FILE *, int, int,
+c_val_print PARAMS ((struct type *, char *, int, CORE_ADDR, GDB_FILE *, int, int,
 		     int, enum val_prettyprint));
 
 static void scm_ipruk PARAMS ((char *, LONGEST, GDB_FILE *));
@@ -157,7 +157,7 @@ scm_scmval_print (svalue, stream, format, deref_ref, recurse, pretty)
      enum val_prettyprint pretty;
 {
  taloop:
-  switch (7 & svalue)
+  switch (7 & (int) svalue)
     {
     case 2:
     case 6:
@@ -375,10 +375,11 @@ scm_scmval_print (svalue, stream, format, deref_ref, recurse, pretty)
 }
 
 int
-scm_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
-	     pretty)
+scm_val_print (type, valaddr, embedded_offset, address,
+               stream, format, deref_ref, recurse, pretty)
      struct type *type;
      char *valaddr;
+     int embedded_offset;
      CORE_ADDR address;
      GDB_FILE *stream;
      int format;
@@ -404,7 +405,7 @@ scm_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
     }
   else
     {
-      return c_val_print (type, valaddr, address, stream, format,
+      return c_val_print (type, valaddr, 0, address, stream, format,
 			  deref_ref, recurse, pretty);
     }
 }
@@ -416,6 +417,6 @@ scm_value_print (val, stream, format, pretty)
      int format;
      enum val_prettyprint pretty;
 {
-  return (val_print (VALUE_TYPE (val), VALUE_CONTENTS (val),
+  return (val_print (VALUE_TYPE (val), VALUE_CONTENTS (val), 0,
 		     VALUE_ADDRESS (val), stream, format, 1, 0, pretty));
 }

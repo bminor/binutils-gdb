@@ -94,6 +94,12 @@ typedef bfd_vma CORE_ADDR;
 /* Check if a character is one of the commonly used C++ marker characters.  */
 extern int is_cplus_marker PARAMS ((int));
 
+/* enable xdb commands if set */
+extern int xdb_commands;
+
+/* enable dbx commands if set */
+extern int dbx_commands;
+
 extern int quit_flag;
 extern int immediate_quit;
 extern int sevenbit_strings;
@@ -126,7 +132,7 @@ enum command_class
   no_class = -1, class_run = 0, class_vars, class_stack,
   class_files, class_support, class_info, class_breakpoint, class_trace,
   class_alias, class_obscure, class_user, class_maintenance,
-  class_pseudo
+  class_pseudo, class_tui, class_xdb
 };
 
 /* Languages represented in the symbol table and elsewhere.

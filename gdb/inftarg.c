@@ -1,5 +1,6 @@
 /* Target-vector operations for controlling Unix child processes, for GDB.
-   Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996
+   Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 This file is part of GDB.
@@ -16,16 +17,28 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "frame.h"  /* required by inferior.h */
 #include "inferior.h"
 #include "target.h"
-#include "wait.h"
 #include "gdbcore.h"
 #include "command.h"
 #include <signal.h>
+#include <sys/types.h>
+#include <fcntl.h>
+
+#ifdef HAVE_WAIT_H
+# include <wait.h>
+#else
+# ifdef HAVE_SYS_WAIT_H
+#  include <sys/wait.h>
+# endif
+#endif
+
+/* "wait.h" fills in the gaps left by <wait.h> */
+#include "wait.h"
 
 static void
 child_prepare_to_store PARAMS ((void));
@@ -48,7 +61,7 @@ child_attach PARAMS ((char *, int));
 static void
 ptrace_me PARAMS ((void));
 
-static void
+static int
 ptrace_him PARAMS ((int));
 
 static void child_create_inferior PARAMS ((char *, char *, char **));
@@ -59,10 +72,34 @@ child_mourn_inferior PARAMS ((void));
 static int
 child_can_run PARAMS ((void));
 
+static int
+proc_wait PARAMS ((int, int*));
+
+static void
+child_stop PARAMS ((void));
+
+#ifndef CHILD_THREAD_ALIVE
+static int child_thread_alive PARAMS ((int));
+#endif
+
 extern char **environ;
 
 /* Forward declaration */
 extern struct target_ops child_ops;
+
+int child_suppress_run = 0;	/* Non-zero if inftarg should pretend not to
+				   be a runnable target.  Used by targets
+				   that can sit atop inftarg, such as HPUX
+				   thread support.  */
+static int
+proc_wait (pid, status)
+     int pid;
+     int *status;
+{
+#ifndef __GO32__
+  return wait (status);
+#endif
+}
 
 #ifndef CHILD_WAIT
 
@@ -78,18 +115,16 @@ child_wait (pid, ourstatus)
   int status;
 
   do {
-    if (attach_flag)
-      set_sigint_trap();	/* Causes SIGINT to be passed on to the
-				   attached process. */
+    set_sigint_trap();	/* Causes SIGINT to be passed on to the
+			   attached process. */
     set_sigio_trap ();
 
-    pid = wait (&status);
+    pid = proc_wait (inferior_pid, &status);
     save_errno = errno;
 
     clear_sigio_trap ();
 
-    if (attach_flag)
-      clear_sigint_trap();
+    clear_sigint_trap();
 
     if (pid == -1)
       {
@@ -107,6 +142,22 @@ child_wait (pid, ourstatus)
   return pid;
 }
 #endif /* CHILD_WAIT */
+
+#ifndef CHILD_THREAD_ALIVE
+
+/* Check to see if the given thread is alive.
+
+   FIXME: Is kill() ever the right way to do this?  I doubt it, but
+   for now we're going to try and be compatable with the old thread
+   code.  */
+static int
+child_thread_alive (pid)
+     int pid;
+{
+  return (kill (pid, 0) != -1);
+}
+
+#endif
 
 /* Attach to process PID, then initialize for debugging it.  */
 
@@ -235,7 +286,7 @@ ptrace_me ()
 /* Stub function which causes the GDB that runs it, to start ptrace-ing
    the child process.  */
 
-static void
+static int
 ptrace_him (pid)
      int pid;
 {
@@ -247,6 +298,8 @@ ptrace_him (pid)
   /* One trap to exec the shell, one to exec the program being debugged.  */
   startup_inferior (2);
 #endif
+
+  return pid;
 }
 
 /* Start an inferior Unix child process and sets inferior_pid to its pid.
@@ -269,14 +322,36 @@ child_create_inferior (exec_file, allargs, env)
 static void
 child_mourn_inferior ()
 {
+  /* FIXME: Should be in a header file */
+  extern void proc_remove_foreign PARAMS ((int));
+
   unpush_target (&child_ops);
+  proc_remove_foreign (inferior_pid);
   generic_mourn_inferior ();
 }
 
 static int
 child_can_run ()
 {
-  return(1);
+  /* This variable is controlled by modules that sit atop inftarg that may layer
+     their own process structure atop that provided here.  hpux-thread.c does
+     this because of the Hpux user-mode level thread model.  */
+
+  return !child_suppress_run;
+}
+
+/* Send a SIGINT to the process group.  This acts just like the user typed a
+   ^C on the controlling terminal.
+
+   XXX - This may not be correct for all systems.  Some may want to use
+   killpg() instead of kill (-pgrp). */
+
+static void
+child_stop ()
+{
+  extern pid_t inferior_process_group;
+
+  kill (-inferior_process_group, SIGINT);
 }
 
 struct target_ops child_ops = {
@@ -286,9 +361,13 @@ struct target_ops child_ops = {
   child_open,			/* to_open */
   0,				/* to_close */
   child_attach,			/* to_attach */
+  NULL,				/* to_post_attach */
+  NULL,				/* to_require_attach */
   child_detach, 		/* to_detach */
+  NULL,				/* to_require_detach */
   child_resume,			/* to_resume */
   child_wait,			/* to_wait */
+  NULL,				/* to_post_wait */
   fetch_inferior_registers,	/* to_fetch_registers */
   store_inferior_registers,	/* to_store_registers */
   child_prepare_to_store,	/* to_prepare_to_store */
@@ -305,9 +384,33 @@ struct target_ops child_ops = {
   0,				/* to_load */
   0,				/* to_lookup_symbol */
   child_create_inferior,	/* to_create_inferior */
+  NULL,				/* to_post_startup_inferior */
+  NULL,				/* to_acknowledge_created_inferior */
+  NULL,				/* to_clone_and_follow_inferior */
+  NULL,				/* to_post_follow_inferior_by_clone */
+  NULL,				/* to_insert_fork_catchpoint */
+  NULL,				/* to_remove_fork_catchpoint */
+  NULL,				/* to_insert_vfork_catchpoint */
+  NULL,				/* to_remove_vfork_catchpoint */
+  NULL,				/* to_has_forked */
+  NULL,				/* to_has_vforked */
+  NULL,				/* to_can_follow_vfork_prior_to_exec */
+  NULL,				/* to_post_follow_vfork */
+  NULL,				/* to_insert_exec_catchpoint */
+  NULL,				/* to_remove_exec_catchpoint */
+  NULL,				/* to_has_execd */
+  NULL,				/* to_reported_exec_events_per_exec_call */
+  NULL,				/* to_has_syscall_event */
+  NULL,				/* to_has_exited */
   child_mourn_inferior,		/* to_mourn_inferior */
   child_can_run,		/* to_can_run */
   0, 				/* to_notice_signals */
+  child_thread_alive,		/* to_thread_alive */
+  child_stop,			/* to_stop */
+  NULL,				/* to_enable_exception_callback */
+  NULL,				/* to_get_current_exception_event */ 
+  NULL,				/* to_pid_to_exec_file */
+  NULL,				/* to_core_file_to_sym_file */
   process_stratum,		/* to_stratum */
   0,				/* to_next */
   1,				/* to_has_all_memory */
@@ -315,13 +418,30 @@ struct target_ops child_ops = {
   1,				/* to_has_stack */
   1,				/* to_has_registers */
   1,				/* to_has_execution */
-  0,				/* sections */
-  0,				/* sections_end */
+  0,				/* to_sections */
+  0,				/* to_sections_end */
   OPS_MAGIC			/* to_magic */
 };
 
 void
 _initialize_inftarg ()
 {
+#ifdef HAVE_OPTIONAL_PROC_FS
+  char procname[32];
+  int fd;
+
+  /* If we have an optional /proc filesystem (e.g. under OSF/1),
+     don't add ptrace support if we can access the running GDB via /proc.  */
+#ifndef PROC_NAME_FMT
+#define PROC_NAME_FMT "/proc/%05d"
+#endif
+  sprintf (procname, PROC_NAME_FMT, getpid ());
+  if ((fd = open (procname, O_RDONLY)) >= 0)
+    {
+      close (fd);
+      return;
+    }
+#endif
+
   add_target (&child_ops);
 }

@@ -128,7 +128,7 @@ extern char *mktemp();
 extern void generic_mourn_inferior ();
 
 extern struct target_ops nindy_ops;
-extern GDB_FILE *instream;
+extern FILE *instream;
 
 extern char ninStopWhy ();
 extern int ninMemGet ();
@@ -779,9 +779,13 @@ specified when you started GDB." ;
   nindy_ops.to_open =   nindy_open;
   nindy_ops.to_close =   nindy_close;
   nindy_ops.to_attach =   0;
+  nindy_ops.to_post_attach = NULL;
+  nindy_ops.to_require_attach = NULL;
   nindy_ops.to_detach =   nindy_detach;
+  nindy_ops.to_require_detach = NULL;
   nindy_ops.to_resume =   nindy_resume;
   nindy_ops.to_wait  =   nindy_wait;
+  nindy_ops.to_post_wait = NULL;
   nindy_ops.to_fetch_registers  =   nindy_fetch_registers;
   nindy_ops.to_store_registers  =   nindy_store_registers;
   nindy_ops.to_prepare_to_store =   nindy_prepare_to_store;
@@ -798,11 +802,30 @@ specified when you started GDB." ;
   nindy_ops.to_load  =   nindy_load;
   nindy_ops.to_lookup_symbol =   0; /* lookup_symbol */
   nindy_ops.to_create_inferior =   nindy_create_inferior;
+  nindy_ops.to_post_startup_inferior = NULL;
+  nindy_ops.to_acknowledge_created_inferior = NULL;
+  nindy_ops.to_clone_and_follow_inferior = NULL;
+  nindy_ops.to_post_follow_inferior_by_clone = NULL;
+  nindy_ops.to_insert_fork_catchpoint = NULL;
+  nindy_ops.to_remove_fork_catchpoint = NULL;
+  nindy_ops.to_insert_vfork_catchpoint = NULL;
+  nindy_ops.to_remove_vfork_catchpoint = NULL;
+  nindy_ops.to_has_forked = NULL;
+  nindy_ops.to_has_vforked = NULL;
+  nindy_ops.to_can_follow_vfork_prior_to_exec = NULL;
+  nindy_ops.to_post_follow_vfork = NULL;
+  nindy_ops.to_insert_exec_catchpoint = NULL;
+  nindy_ops.to_remove_exec_catchpoint = NULL;
+  nindy_ops.to_has_execd = NULL;
+  nindy_ops.to_reported_exec_events_per_exec_call = NULL;
+  nindy_ops.to_has_exited = NULL;
   nindy_ops.to_mourn_inferior =   nindy_mourn_inferior;
   nindy_ops.to_can_run  =   0;		/* can_run */
   nindy_ops.to_notice_signals =   0; /* notice_signals */
   nindy_ops.to_thread_alive  =   0;			/* to_thread_alive */
   nindy_ops.to_stop  =   0;			/* to_stop */
+  nindy_ops.to_pid_to_exec_file = NULL;
+  nindy_ops.to_core_file_to_sym_file = NULL;
   nindy_ops.to_stratum =   process_stratum;
   nindy_ops.DONT_USE =   0; /* next */
   nindy_ops.to_has_all_memory =   1;

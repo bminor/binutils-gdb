@@ -1887,7 +1887,7 @@ pa_print_fp_reg (i)
   print_spaces_filtered (8 - strlen (REGISTER_NAME (i)), gdb_stdout);
   fputs_filtered ("(single precision)     ", gdb_stdout);
 
-  val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, gdb_stdout, 0,
+  val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, 0, gdb_stdout, 0,
 	     1, 0, Val_pretty_default);
   printf_filtered ("\n");
 
@@ -1907,7 +1907,7 @@ pa_print_fp_reg (i)
       print_spaces_filtered (8 - strlen (REGISTER_NAME (i)), gdb_stdout);
       fputs_filtered ("(double precision)     ", gdb_stdout);
 
-      val_print (builtin_type_double, virtual_buffer, 0, gdb_stdout, 0,
+      val_print (builtin_type_double, virtual_buffer, 0, 0, gdb_stdout, 0,
 		 1, 0, Val_pretty_default);
       printf_filtered ("\n");
     }

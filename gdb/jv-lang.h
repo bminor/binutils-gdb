@@ -41,7 +41,7 @@ extern struct type *java_void_type;
 extern struct objfile *dynamics_objfile;
 
 extern int
-java_val_print PARAMS ((struct type *, char *, CORE_ADDR, GDB_FILE *, int, int,
+java_val_print PARAMS ((struct type *, char *, int, CORE_ADDR, GDB_FILE *, int, int,
 			int, enum val_prettyprint));
 
 extern int

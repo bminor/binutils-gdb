@@ -1,3 +1,26 @@
+Mon Dec 28 17:44:36 1998  David Taylor  <taylor@texas.cygnus.com>
+
+
+	The following changes were made by Jim Blandy <jimb@cygnus.com>,
+ 	Edith Epstein <eepstein@cygnus.com>, Elena Zannoni
+ 	<ezannoni@cygnus.com> Stan Shebs <shebs@cygnus.com>, and David
+ 	Taylor <taylor@cygnus.com>, as part of the project to merge in
+ 	changes originally made by HP; HP did not create ChangeLog
+ 	entries.
+
+	* gdbtk.c (gdbtk_init): change stderr to gdb_stderr.
+
+	* gdbtk-cmds.c
+	(get_pc_register): Use paddr_nz, not sprintf's %llx and
+	a cast to `long long'.  Those aren't portable.
+	(gdb_eval): add embedded_offset param to val_print call
+	(get_register): add embedded_offset param to val_print call
+
+	* gdbtk-hooks.c
+	(tk_command_loop): change instream to a FILE.
+	(gdbtk_flush): change both the declaration and definition to 
+	use GDB_FILE rather than FILE.
+
 Mon Dec 21 11:11:02 1998  Keith Seitz  <keiths@cygnus.com>
 
 	* gdbtk-cmds.c (get_register): Call get_saved_register instead of

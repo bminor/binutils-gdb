@@ -647,7 +647,8 @@ gdb_eval (clientData, interp, objc, objv)
    * the Tcl result.
    */
   
-  val_print (VALUE_TYPE (val), VALUE_CONTENTS (val), VALUE_ADDRESS (val),
+  val_print (VALUE_TYPE (val), VALUE_CONTENTS (val),
+	     VALUE_EMBEDDED_OFFSET(val), VALUE_ADDRESS (val),
 	     gdb_stdout, 0, 0, 0, 0);
 
   do_cleanups (old_chain);
@@ -1694,7 +1695,7 @@ get_register (regnum, fp)
         }
     }
   else
-    val_print (REGISTER_VIRTUAL_TYPE (regnum), virtual_buffer, 0,
+    val_print (REGISTER_VIRTUAL_TYPE (regnum), virtual_buffer, 0, 0,
                gdb_stdout, format, 1, 0, Val_pretty_default);
 
 }
@@ -3394,7 +3395,7 @@ get_frame_name (interp, list, fi)
           print_address_numeric (fi->pc, 1, gdb_stdout);
           printf_filtered (" in ");
         }
-      printf_symbol_filtered (gdb_stdout, funname ? funname : "??", funlang,
+      fprintf_symbol_filtered (gdb_stdout, funname ? funname : "??", funlang,
                                DMGL_ANSI);
 #endif
       objv[0] = Tcl_NewStringObj (funname != NULL ? funname : "??", -1);

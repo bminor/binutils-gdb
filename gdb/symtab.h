@@ -28,8 +28,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define obstack_chunk_free free
 #include "bcache.h"
 
-#include "gnu-regex.h"
-
 /* Don't do this; it means that if some .o's are compiled with GNU C
    and some are not (easy to do accidentally the way we configure
    things; also it is a pain to have to "make clean" every time you
@@ -630,10 +628,26 @@ enum address_class
 
   LOC_UNRESOLVED,
 
+  /* Value is at a thread-specific location calculated by a
+     target-specific method. */
+     
+  LOC_THREAD_LOCAL_STATIC,
+     
   /* The variable does not actually exist in the program.
      The value is ignored.  */
 
-  LOC_OPTIMIZED_OUT
+  LOC_OPTIMIZED_OUT,
+
+  /* The variable is static, but actually lives at * (address).
+   * I.e. do an extra indirection to get to it.
+   * This is used on HP-UX to get at globals that are allocated
+   * in shared libraries, where references from images other
+   * than the one where the global was allocated are done
+   * with a level of indirection.
+   */
+
+  LOC_INDIRECT
+
 };
 
 /* Linked list of symbol's live ranges. */
@@ -1177,6 +1191,10 @@ contained_in PARAMS ((struct block *, struct block *));
 extern void
 reread_symbols PARAMS ((void));
 
+extern struct type *
+lookup_transparent_type PARAMS ((const char *));
+
+
 /* Macro for name of symbol to indicate a file compiled with gcc. */
 #ifndef GCC_COMPILED_FLAG_SYMBOL
 #define GCC_COMPILED_FLAG_SYMBOL "gcc_compiled."
@@ -1269,6 +1287,41 @@ struct symtabs_and_lines
   struct symtab_and_line *sals;
   int nelts;
 };
+
+
+
+/* Some types and macros needed for exception catchpoints.
+   Can't put these in target.h because symtab_and_line isn't
+   known there. This file will be included by breakpoint.c,
+   hppa-tdep.c, etc. */
+
+/* Enums for exception-handling support */
+enum exception_event_kind {
+  EX_EVENT_THROW,
+  EX_EVENT_CATCH
+};
+
+/* Type for returning info about an exception */
+struct exception_event_record {
+  enum exception_event_kind   kind;
+  struct symtab_and_line      throw_sal;
+  struct symtab_and_line      catch_sal;
+  /* This may need to be extended in the future, if
+     some platforms allow reporting more information,
+     such as point of rethrow, type of exception object,
+     type expected by catch clause, etc. */ 
+};
+
+#define CURRENT_EXCEPTION_KIND       (current_exception_event->kind)
+#define CURRENT_EXCEPTION_CATCH_SAL  (current_exception_event->catch_sal)
+#define CURRENT_EXCEPTION_CATCH_LINE (current_exception_event->catch_sal.line)
+#define CURRENT_EXCEPTION_CATCH_FILE (current_exception_event->catch_sal.symtab->filename)
+#define CURRENT_EXCEPTION_CATCH_PC   (current_exception_event->catch_sal.pc)
+#define CURRENT_EXCEPTION_THROW_SAL  (current_exception_event->throw_sal)
+#define CURRENT_EXCEPTION_THROW_LINE (current_exception_event->throw_sal.line)
+#define CURRENT_EXCEPTION_THROW_FILE (current_exception_event->throw_sal.symtab->filename)
+#define CURRENT_EXCEPTION_THROW_PC   (current_exception_event->throw_sal.pc)
+
 
 /* Given a pc value, return line number it is in.  Second arg nonzero means
    if pc is on the boundary use the previous statement's line number.  */
@@ -1368,7 +1421,8 @@ select_source_symtab PARAMS ((struct symtab *));
 
 extern char **make_symbol_completion_list PARAMS ((char *, char *));
 
-extern void _initialize_source PARAMS ((void));
+extern struct symbol **
+make_symbol_overload_list PARAMS ((struct symbol *));
 
 /* symtab.c */
 

@@ -31,6 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "value.h"
 #include "demangle.h"
 #include "complaints.h"
+#include "gdbcmd.h"
 
 /* These variables point to the objects
    representing the predefined C data types.  */
@@ -61,10 +62,14 @@ struct type *builtin_type_int32;
 struct type *builtin_type_uint32;
 struct type *builtin_type_int64;
 struct type *builtin_type_uint64;
+struct type *builtin_type_bool;
 /* start-sanitize-r5900 */
 struct type *builtin_type_int128;
 struct type *builtin_type_uint128;
 /* end-sanitize-r5900 */
+
+int opaque_type_resolution = 1;
+
 
 struct extra { char str[128]; int len; }; /* maximum extention is 128! FIXME */
 
@@ -107,6 +112,7 @@ alloc_type (objfile)
   TYPE_CODE (type) = TYPE_CODE_UNDEF;
   TYPE_OBJFILE (type) = objfile;
   TYPE_VPTR_FIELDNO (type) = -1;
+  TYPE_CV_TYPE (type) = type;  /* chain back to itself */ 
 
   return (type);
 }
@@ -287,6 +293,89 @@ lookup_function_type (type)
 {
   return make_function_type (type, (struct type **)0);
 }
+
+
+/* Make a "c-v" variant of a type -- a type that is identical to the
+   one supplied except that it may have const or volatile attributes
+   CNST is a flag for setting the const attribute
+   VOLTL is a flag for setting the volatile attribute
+   TYPE is the base type whose variant we are creating.
+   TYPEPTR, if nonzero, points
+   to a pointer to memory where the reference type should be stored.
+   If *TYPEPTR is zero, update it to point to the reference type we return.
+   We allocate new memory if needed.  */
+
+struct type *
+make_cv_type (cnst, voltl, type, typeptr)
+     int cnst;
+     int voltl;
+     struct type *type;
+     struct type **typeptr;
+{
+  register struct type *ntype;		 /* New type */
+  register struct type *tmp_type = type; /* tmp type */
+  struct objfile *objfile;
+
+  ntype = TYPE_CV_TYPE (type);
+
+  while (ntype != type)
+    {
+      if ((TYPE_CONST (ntype) == cnst) &&
+          (TYPE_VOLATILE (ntype) == voltl))
+          {
+            if (typeptr == 0)
+              return ntype;
+            else if (*typeptr == 0)
+              {
+                *typeptr = ntype;	/* Tracking alloc, and we have new type.  */
+                return ntype;
+              }
+          }
+      tmp_type = ntype;
+      ntype = TYPE_CV_TYPE (ntype);
+    }
+
+  if (typeptr == 0 || *typeptr == 0)	/* We'll need to allocate one.  */
+    {
+      ntype = alloc_type (TYPE_OBJFILE (type));
+      if (typeptr)
+	*typeptr = ntype;
+    }
+  else				/* We have storage, but need to reset it.  */
+    {
+      ntype = *typeptr;
+      objfile = TYPE_OBJFILE (ntype);
+      /* memset ((char *) ntype, 0, sizeof (struct type)); */
+      TYPE_OBJFILE (ntype) = objfile;
+    }
+
+  /* Copy original type */ 
+  memcpy ((char *) ntype, (char *) type, sizeof (struct type));
+  /* But zero out fields that shouldn't be copied */
+  TYPE_POINTER_TYPE (ntype) = (struct type *) 0;    /* Need new pointer kind */
+  TYPE_REFERENCE_TYPE (ntype) = (struct type *) 0;  /* Need new referene kind */
+  /* Note: TYPE_TARGET_TYPE can be left as is */
+
+  /* Set flags appropriately */
+  if (cnst)
+    TYPE_FLAGS (ntype) |=  TYPE_FLAG_CONST;
+  else
+    TYPE_FLAGS (ntype) &=  ~TYPE_FLAG_CONST;
+
+  if (voltl)
+    TYPE_FLAGS (ntype) |=  TYPE_FLAG_VOLATILE;
+  else
+    TYPE_FLAGS (ntype) &=  ~TYPE_FLAG_VOLATILE;
+
+  /* Fix the chain of cv variants */
+  TYPE_CV_TYPE (ntype) = type;
+  TYPE_CV_TYPE (tmp_type) = ntype;
+
+  return ntype;
+}
+
+
+
 
 /* Implement direct support for MEMBER_TYPE in GNU C++.
    May need to construct such a type if this is the first use.
@@ -719,20 +808,30 @@ lookup_union (name, block)
      struct block *block;
 {
   register struct symbol *sym;
+  struct type * t;
 
   sym = lookup_symbol (name, block, STRUCT_NAMESPACE, 0,
 		       (struct symtab **) NULL);
 
   if (sym == NULL)
-    {
-      error ("No union type named %s.", name);
-    }
-  if (TYPE_CODE (SYMBOL_TYPE (sym)) != TYPE_CODE_UNION)
-    {
-      error ("This context has class, struct or enum %s, not a union.", name);
-    }
-  return (SYMBOL_TYPE (sym));
+    error ("No union type named %s.", name);
+
+  t = SYMBOL_TYPE(sym);
+
+  if (TYPE_CODE (t) == TYPE_CODE_UNION)
+    return (t);
+
+  /* C++ unions may come out with TYPE_CODE_CLASS, but we look at
+   * a further "declared_type" field to discover it is really a union.
+   */
+  if (HAVE_CPLUS_STRUCT (t)) 
+    if (TYPE_DECLARED_TYPE(t) == DECLARED_TYPE_UNION) 
+      return (t);
+
+  /* If we get here, it's not a union */
+  error ("This context has class, struct or enum %s, not a union.", name);
 }
+
 
 /* Lookup an enum type named "enum NAME",
    visible in lexical block BLOCK.  */
@@ -990,7 +1089,28 @@ check_typedef (type)
       type = TYPE_TARGET_TYPE (type);
     }
 
-  if ((TYPE_FLAGS(type) & TYPE_FLAG_STUB) && ! currently_reading_symtab)
+  /* If this is a struct/class/union with no fields, then check whether a
+     full definition exists somewhere else.  This is for systems where a
+     type definition with no fields is issued for such types, instead of
+     identifying them as stub types in the first place */ 
+     
+  if (TYPE_IS_OPAQUE (type) && opaque_type_resolution && !currently_reading_symtab)
+    {
+      char * name = type_name_no_tag (type);
+      struct type * newtype;
+      if (name == NULL)
+	{
+	  complain (&stub_noname_complaint);
+	  return type;
+	}
+      newtype = lookup_transparent_type (name);
+      if (newtype)
+	{
+	  memcpy ((char *) type, (char *) newtype, sizeof (struct type));
+	}
+    }
+  /* Otherwise, rely on the stub flag being set for opaque/stubbed types */
+  else if ((TYPE_FLAGS(type) & TYPE_FLAG_STUB) && ! currently_reading_symtab)
     {
       char* name = type_name_no_tag (type);
       /* FIXME: shouldn't we separately check the TYPE_NAME and the
@@ -1003,13 +1123,10 @@ check_typedef (type)
 	  complain (&stub_noname_complaint);
 	  return type;
 	}
-      sym = lookup_symbol (name, 0, STRUCT_NAMESPACE, 0, 
-			   (struct symtab **) NULL);
+      sym = lookup_symbol (name, 0, STRUCT_NAMESPACE, 0, (struct symtab **) NULL);
       if (sym)
 	{
-	  memcpy ((char *)type,
-		  (char *)SYMBOL_TYPE(sym),
-		  sizeof (struct type));
+	  memcpy ((char *)type, (char *)SYMBOL_TYPE(sym), sizeof (struct type));
 	}
     }
 
@@ -1498,6 +1615,787 @@ chill_varying_type (type)
   return 1;
 }
 
+/* Check whether BASE is an ancestor or base class or DCLASS 
+   Return 1 if so, and 0 if not.
+   Note: callers may want to check for identity of the types before
+   calling this function -- identical types are considered to satisfy
+   the ancestor relationship even if they're identical */
+
+int
+is_ancestor (base, dclass)
+  struct type * base;
+  struct type * dclass;
+{
+  int i;
+  
+  CHECK_TYPEDEF (base);
+  CHECK_TYPEDEF (dclass);
+
+  if (base == dclass)
+    return 1;
+
+  for (i = 0; i < TYPE_N_BASECLASSES (dclass); i++)
+    if (is_ancestor (base, TYPE_BASECLASS (dclass, i)))
+      return 1;
+
+  return 0;
+}
+
+
+
+/* See whether DCLASS has a virtual table.  This routine is aimed at
+   the HP/Taligent ANSI C++ runtime model, and may not work with other
+   runtime models.  Return 1 => Yes, 0 => No.  */
+
+int
+has_vtable (dclass)
+  struct type * dclass;
+{
+  /* In the HP ANSI C++ runtime model, a class has a vtable only if it
+     has virtual functions or virtual bases.  */
+
+  register int i;
+
+  if (TYPE_CODE(dclass) != TYPE_CODE_CLASS)
+    return 0;
+  
+  /* First check for the presence of virtual bases */
+  if (TYPE_FIELD_VIRTUAL_BITS(dclass))
+    for (i=0; i < TYPE_N_BASECLASSES(dclass); i++)
+      if (B_TST(TYPE_FIELD_VIRTUAL_BITS(dclass), i))
+        return 1;
+  
+  /* Next check for virtual functions */
+  if (TYPE_FN_FIELDLISTS(dclass))
+    for (i=0; i < TYPE_NFN_FIELDS(dclass); i++)
+      if (TYPE_FN_FIELD_VIRTUAL_P(TYPE_FN_FIELDLIST1(dclass, i), 0))
+        return 1;
+
+  /* Recurse on non-virtual bases to see if any of them needs a vtable */ 
+  if (TYPE_FIELD_VIRTUAL_BITS(dclass))
+    for (i=0; i < TYPE_N_BASECLASSES(dclass); i++)
+      if ((!B_TST (TYPE_FIELD_VIRTUAL_BITS(dclass), i)) &&
+	  (has_vtable (TYPE_FIELD_TYPE(dclass, i))))
+	return 1;
+  
+  /* Well, maybe we don't need a virtual table */ 
+  return 0;
+}
+
+/* Return a pointer to the "primary base class" of DCLASS.
+ 
+   A NULL return indicates that DCLASS has no primary base, or that it
+   couldn't be found (insufficient information).
+  
+   This routine is aimed at the HP/Taligent ANSI C++ runtime model,
+   and may not work with other runtime models.  */
+
+struct type *
+primary_base_class (dclass)
+  struct type * dclass;
+{
+  /* In HP ANSI C++'s runtime model, a "primary base class" of a class
+     is the first directly inherited, non-virtual base class that
+     requires a virtual table */
+
+  register int i;
+
+  if (TYPE_CODE(dclass) != TYPE_CODE_CLASS)
+    return NULL;
+
+  for (i=0; i < TYPE_N_BASECLASSES(dclass); i++)
+    if (!TYPE_FIELD_VIRTUAL(dclass, i) &&
+        has_vtable(TYPE_FIELD_TYPE(dclass, i)))
+      return TYPE_FIELD_TYPE(dclass, i);
+
+  return NULL;
+}
+
+/* Global manipulated by virtual_base_list[_aux]() */
+
+static struct vbase * current_vbase_list = NULL;
+
+/* Return a pointer to a null-terminated list of struct vbase
+   items. The vbasetype pointer of each item in the list points to the
+   type information for a virtual base of the argument DCLASS.
+  
+   Helper function for virtual_base_list(). 
+   Note: the list goes backward, right-to-left. virtual_base_list()
+   copies the items out in reverse order.  */
+
+struct vbase *
+virtual_base_list_aux (dclass)
+  struct type * dclass;
+{
+  struct vbase * tmp_vbase;
+  register int i;
+
+  if (TYPE_CODE(dclass) != TYPE_CODE_CLASS)
+    return NULL;
+
+  for (i = 0; i < TYPE_N_BASECLASSES (dclass); i++)
+    {
+      /* Recurse on this ancestor, first */
+      virtual_base_list_aux(TYPE_FIELD_TYPE(dclass, i));
+
+      /* If this current base is itself virtual, add it to the list */
+      if (BASETYPE_VIA_VIRTUAL(dclass, i))
+        {
+          struct type * basetype = TYPE_FIELD_TYPE (dclass, i);
+          
+          /* Check if base already recorded */
+          tmp_vbase = current_vbase_list;
+          while (tmp_vbase)
+            {
+              if (tmp_vbase->vbasetype == basetype)
+                break; /* found it */
+              tmp_vbase = tmp_vbase->next;
+            }
+
+          if (!tmp_vbase) /* normal exit from loop */
+            {
+              /* Allocate new item for this virtual base */
+              tmp_vbase = (struct vbase *) xmalloc (sizeof (struct vbase));
+
+              /* Stick it on at the end of the list */
+              tmp_vbase->vbasetype = basetype;
+              tmp_vbase->next = current_vbase_list;
+              current_vbase_list = tmp_vbase;
+            }
+        } /* if virtual */
+    } /* for loop over bases */
+}
+
+
+/* Compute the list of virtual bases in the right order.  Virtual
+   bases are laid out in the object's memory area in order of their
+   occurrence in a depth-first, left-to-right search through the
+   ancestors.
+  
+   Argument DCLASS is the type whose virtual bases are required.
+   Return value is the address of a null-terminated array of pointers
+   to struct type items.
+   
+   This routine is aimed at the HP/Taligent ANSI C++ runtime model,
+   and may not work with other runtime models.
+  
+   This routine merely hands off the argument to virtual_base_list_aux()
+   and then copies the result into an array to save space.  */
+
+struct type **
+virtual_base_list (dclass)
+  struct type * dclass;
+{
+  register struct vbase * tmp_vbase;
+  register struct vbase * tmp_vbase_2;
+  register int i;
+  int count;
+  struct type ** vbase_array;
+
+  current_vbase_list = NULL;
+  virtual_base_list_aux(dclass);
+
+  for (i=0, tmp_vbase = current_vbase_list; tmp_vbase != NULL; i++, tmp_vbase = tmp_vbase->next)
+    /* no body */ ;
+
+  count = i;
+
+  vbase_array = (struct type **) xmalloc((count + 1) * sizeof (struct type *));
+
+  for (i=count -1, tmp_vbase = current_vbase_list; i >= 0; i--, tmp_vbase = tmp_vbase->next)
+    vbase_array[i] = tmp_vbase->vbasetype;
+
+  /* Get rid of constructed chain */
+  tmp_vbase_2 = tmp_vbase = current_vbase_list;
+  while (tmp_vbase)
+    {
+      tmp_vbase = tmp_vbase->next;
+      free(tmp_vbase_2);
+      tmp_vbase_2 = tmp_vbase;
+    }
+  
+  vbase_array[count] = NULL;
+  return vbase_array;
+}
+
+/* Return the length of the virtual base list of the type DCLASS.  */
+
+int
+virtual_base_list_length (dclass)
+  struct type * dclass;
+{
+  register int i;
+  register struct vbase * tmp_vbase;
+  
+  current_vbase_list = NULL;
+  virtual_base_list_aux(dclass);
+
+  for (i=0, tmp_vbase = current_vbase_list; tmp_vbase != NULL; i++, tmp_vbase = tmp_vbase->next)
+    /* no body */ ;
+  return i;
+}
+
+/* Return the number of elements of the virtual base list of the type
+   DCLASS, ignoring those appearing in the primary base (and its
+   primary base, recursively).  */
+
+int
+virtual_base_list_length_skip_primaries (dclass)
+  struct type * dclass;
+{
+  register int i;
+  register struct vbase * tmp_vbase;
+  struct type * primary;
+
+  primary = TYPE_RUNTIME_PTR (dclass) ? TYPE_PRIMARY_BASE (dclass) : NULL;
+
+  if (!primary)
+    return virtual_base_list_length (dclass);
+
+  current_vbase_list = NULL;
+  virtual_base_list_aux(dclass);
+
+  for (i=0, tmp_vbase = current_vbase_list; tmp_vbase != NULL; tmp_vbase = tmp_vbase->next)
+    {
+      if (virtual_base_index (tmp_vbase->vbasetype, primary) >= 0)
+        continue;
+      i++;
+    }
+  return i;
+}
+
+
+/* Return the index (position) of type BASE, which is a virtual base
+   class of DCLASS, in the latter's virtual base list.  A return of -1
+   indicates "not found" or a problem.  */
+
+int
+virtual_base_index(base, dclass)
+  struct type * base;
+  struct type * dclass;
+{
+  register struct type * vbase;
+  register int i;
+
+  if ((TYPE_CODE(dclass) != TYPE_CODE_CLASS) ||
+      (TYPE_CODE(base) != TYPE_CODE_CLASS))
+    return -1;
+
+  i = 0;
+  vbase = TYPE_VIRTUAL_BASE_LIST(dclass)[0];
+  while (vbase)
+    {
+      if (vbase == base)
+        break;
+      vbase = TYPE_VIRTUAL_BASE_LIST(dclass)[++i];
+    }
+
+  return vbase ? i : -1;
+}
+
+
+
+/* Return the index (position) of type BASE, which is a virtual base
+   class of DCLASS, in the latter's virtual base list. Skip over all
+   bases that may appear in the virtual base list of the primary base
+   class of DCLASS (recursively).  A return of -1 indicates "not
+   found" or a problem.  */
+
+int
+virtual_base_index_skip_primaries(base, dclass)
+  struct type * base;
+  struct type * dclass;
+{
+  register struct type * vbase;
+  register int i, j;
+  struct type * primary;
+
+  if ((TYPE_CODE(dclass) != TYPE_CODE_CLASS) ||
+      (TYPE_CODE(base) != TYPE_CODE_CLASS))
+    return -1;
+
+  primary = TYPE_RUNTIME_PTR(dclass) ? TYPE_PRIMARY_BASE(dclass) : NULL;
+
+  j = -1;
+  i = 0;
+  vbase = TYPE_VIRTUAL_BASE_LIST(dclass)[0];
+  while (vbase)
+    {
+      if (!primary || (virtual_base_index_skip_primaries(vbase, primary) < 0))
+        j++;
+      if (vbase == base)
+        break;
+      vbase = TYPE_VIRTUAL_BASE_LIST(dclass)[++i];
+    }
+
+  return vbase ? j : -1;
+}
+
+/* Return position of a derived class DCLASS in the list of
+ * primary bases starting with the remotest ancestor.
+ * Position returned is 0-based. */
+
+int
+class_index_in_primary_list (dclass)
+  struct type * dclass;
+{
+  struct type * pbc; /* primary base class */
+
+  /* Simply recurse on primary base */ 
+  pbc = TYPE_PRIMARY_BASE (dclass);
+  if (pbc)
+    return 1 + class_index_in_primary_list (pbc);
+  else
+    return 0;
+}
+
+/* Return a count of the number of virtual functions a type has.
+ * This includes all the virtual functions it inherits from its
+ * base classes too.
+ */
+
+/* pai: FIXME This doesn't do the right thing: count redefined virtual
+ * functions only once (latest redefinition)
+ */
+
+int
+count_virtual_fns (dclass)
+  struct type * dclass;
+{
+  int base;     /* index for base classes */
+  int fn, oi;   /* function and overloaded instance indices */
+  
+  int vfuncs;   /* count to return */ 
+
+  /* recurse on bases that can share virtual table */ 
+  struct type * pbc = primary_base_class (dclass);
+  if (pbc)
+    vfuncs = count_virtual_fns (pbc);
+  
+  for (fn = 0; fn < TYPE_NFN_FIELDS (dclass); fn++)
+    for (oi = 0; oi < TYPE_FN_FIELDLIST_LENGTH (dclass, fn); oi++)
+      if (TYPE_FN_FIELD_VIRTUAL_P (TYPE_FN_FIELDLIST1 (dclass, fn), oi))
+        vfuncs++;
+
+  return vfuncs;
+}
+
+
+
+/* Functions for overload resolution begin here */
+
+/* Compare two badness vectors A and B and return the result.
+ * 0 => A and B are identical
+ * 1 => A and B are incomparable
+ * 2 => A is better than B
+ * 3 => A is worse than B */
+
+int
+compare_badness (a, b)
+  struct badness_vector * a;
+  struct badness_vector * b;
+{
+  int i;
+  int tmp;
+  short found_pos = 0;      /* any positives in c? */
+  short found_neg = 0;      /* any negatives in c? */
+  
+  /* differing lengths => incomparable */ 
+  if (a->length != b->length)
+    return 1;
+
+  /* Subtract b from a */ 
+  for (i=0; i < a->length; i++)
+    {
+      tmp = a->rank[i] - b->rank[i];
+      if (tmp > 0)
+        found_pos = 1;
+      else if (tmp < 0)
+        found_neg = 1;
+    }
+
+  if (found_pos)
+    {
+      if (found_neg)
+        return 1; /* incomparable */ 
+      else
+        return 3; /* A > B */ 
+    }
+  else /* no positives */ 
+    {
+      if (found_neg)
+        return 2; /* A < B */
+      else
+        return 0; /* A == B */
+    }
+}
+
+/* Rank a function by comparing its parameter types (PARMS, length NPARMS),
+ * to the types of an argument list (ARGS, length NARGS).
+ * Return a pointer to a badness vector. This has NARGS + 1 entries. */
+
+struct badness_vector *
+rank_function (parms, nparms, args, nargs)
+  struct type ** parms;
+  int nparms;
+  struct type ** args;
+  int nargs;
+{
+  int i;
+  struct badness_vector * bv;
+  int min_len = nparms < nargs ? nparms : nargs;
+
+  bv = xmalloc (sizeof (struct badness_vector));
+  bv->length = nargs + 1; /* add 1 for the length-match rank */ 
+  bv->rank = xmalloc ((nargs + 1) * sizeof (int));
+
+  /* First compare the lengths of the supplied lists.
+   * If there is a mismatch, set it to a high value. */
+   
+  /* pai/1997-06-03 FIXME: when we have debug info about default
+   * arguments and ellipsis parameter lists, we should consider those
+   * and rank the length-match more finely. */
+
+  LENGTH_MATCH (bv) = (nargs != nparms) ? LENGTH_MISMATCH_BADNESS : 0;
+
+  /* Now rank all the parameters of the candidate function */
+  for (i=1; i <= min_len; i++)
+    bv->rank[i] = rank_one_type (parms[i-1], args[i-1]);
+
+  /* If more arguments than parameters, add dummy entries */ 
+  for (i = min_len +1; i <= nargs; i++)
+    bv->rank[i] = TOO_FEW_PARAMS_BADNESS;
+
+  return bv;
+}
+
+/* Compare one type (PARM) for compatibility with another (ARG).
+ * PARM is intended to be the parameter type of a function; and
+ * ARG is the supplied argument's type.  This function tests if
+ * the latter can be converted to the former.
+ *
+ * Return 0 if they are identical types;
+ * Otherwise, return an integer which corresponds to how compatible
+ * PARM is to ARG. The higher the return value, the worse the match.
+ * Generally the "bad" conversions are all uniformly assigned a 100 */
+
+int
+rank_one_type (parm, arg)
+  struct type * parm;
+  struct type * arg;
+{
+  /* Identical type pointers */
+  /* However, this still doesn't catch all cases of same type for arg
+   * and param. The reason is that builtin types are different from
+   * the same ones constructed from the object. */
+  if (parm == arg)
+    return 0;
+
+  /* Resolve typedefs */
+  if (TYPE_CODE (parm) == TYPE_CODE_TYPEDEF)
+    parm = check_typedef (parm);
+  if (TYPE_CODE (arg) == TYPE_CODE_TYPEDEF)
+    arg = check_typedef (arg);
+
+  /* Check if identical after resolving typedefs */
+  if (parm == arg)
+    return 0;
+
+#if 0
+  /* Debugging only */ 
+  printf("------ Arg is %s [%d], parm is %s [%d]\n",
+         TYPE_NAME (arg), TYPE_CODE (arg), TYPE_NAME (parm), TYPE_CODE (parm));
+#endif
+
+  /* x -> y means arg of type x being supplied for parameter of type y */
+
+  switch (TYPE_CODE (parm))
+    {
+      case TYPE_CODE_PTR:
+        switch (TYPE_CODE (arg))
+          {
+            case TYPE_CODE_PTR: 
+              if (TYPE_CODE (TYPE_TARGET_TYPE (parm)) == TYPE_CODE_VOID)
+                return VOID_PTR_CONVERSION_BADNESS;
+              else
+                return rank_one_type (TYPE_TARGET_TYPE (parm), TYPE_TARGET_TYPE (arg));
+            case TYPE_CODE_ARRAY:
+              return rank_one_type (TYPE_TARGET_TYPE (parm), TYPE_TARGET_TYPE (arg));
+            case TYPE_CODE_FUNC:
+              return rank_one_type (TYPE_TARGET_TYPE (parm), arg);
+            case TYPE_CODE_INT:
+            case TYPE_CODE_ENUM:
+            case TYPE_CODE_CHAR:
+            case TYPE_CODE_RANGE:
+            case TYPE_CODE_BOOL:
+              return POINTER_CONVERSION_BADNESS;
+            default:
+              return INCOMPATIBLE_TYPE_BADNESS;
+          }
+      case TYPE_CODE_ARRAY:
+        switch (TYPE_CODE (arg))
+          {
+            case TYPE_CODE_PTR:
+            case TYPE_CODE_ARRAY:
+              return rank_one_type (TYPE_TARGET_TYPE (parm), TYPE_TARGET_TYPE (arg));
+            default:
+              return INCOMPATIBLE_TYPE_BADNESS;
+          }
+      case TYPE_CODE_FUNC:
+        switch (TYPE_CODE (arg))
+          {
+            case TYPE_CODE_PTR: /* funcptr -> func */
+              return rank_one_type (parm, TYPE_TARGET_TYPE (arg));
+            default:
+              return INCOMPATIBLE_TYPE_BADNESS;
+          }
+      case TYPE_CODE_INT:
+        switch (TYPE_CODE (arg))
+          {
+            case TYPE_CODE_INT:
+              if (TYPE_LENGTH (arg) == TYPE_LENGTH (parm))
+                {
+                  /* Deal with signed, unsigned, and plain chars and
+                     signed and unsigned ints */
+                  if (TYPE_NOSIGN (parm))
+                    {
+                      /* This case only for character types */
+                      if (TYPE_NOSIGN (arg))  /* plain char -> plain char */
+                        return 0;
+                      else
+                        return INTEGER_COERCION_BADNESS; /* signed/unsigned char -> plain char */
+                    }
+                  else if (TYPE_UNSIGNED (parm))
+                    {
+                      if (TYPE_UNSIGNED (arg))
+                        {
+                          if (!strcmp (TYPE_NAME (parm), TYPE_NAME (arg))) 
+                            return 0;  /* unsigned int -> unsigned int, or unsigned long -> unsigned long */
+                          else if (!strcmp (TYPE_NAME (arg), "int") && !strcmp (TYPE_NAME (parm), "long"))
+                            return INTEGER_PROMOTION_BADNESS; /* unsigned int -> unsigned long */
+                          else
+                            return INTEGER_COERCION_BADNESS; /* unsigned long -> unsigned int */ 
+                        }
+                      else
+                        {
+                          if (!strcmp (TYPE_NAME (arg), "long") && !strcmp (TYPE_NAME (parm), "int"))
+                            return INTEGER_COERCION_BADNESS; /* signed long -> unsigned int */
+                          else 
+                            return INTEGER_CONVERSION_BADNESS; /* signed int/long -> unsigned int/long */ 
+                        }
+                    }
+                  else if (!TYPE_NOSIGN (arg) && !TYPE_UNSIGNED (arg))
+                    {
+                      if (!strcmp (TYPE_NAME (parm), TYPE_NAME (arg)))
+                        return 0;
+                      else if (!strcmp (TYPE_NAME (arg), "int") && !strcmp (TYPE_NAME (parm), "long"))
+                        return INTEGER_PROMOTION_BADNESS;
+                      else
+                        return INTEGER_COERCION_BADNESS;
+                    }
+                  else
+                    return INTEGER_COERCION_BADNESS;
+                }
+              else if (TYPE_LENGTH (arg) < TYPE_LENGTH (parm))
+                return INTEGER_PROMOTION_BADNESS;
+              else
+                return INTEGER_COERCION_BADNESS;
+            case TYPE_CODE_ENUM:
+            case TYPE_CODE_CHAR:
+            case TYPE_CODE_RANGE:
+            case TYPE_CODE_BOOL:
+              return INTEGER_PROMOTION_BADNESS;
+            case TYPE_CODE_FLT:
+              return INT_FLOAT_CONVERSION_BADNESS;
+            case TYPE_CODE_PTR:
+              return NS_POINTER_CONVERSION_BADNESS;
+            default:
+              return INCOMPATIBLE_TYPE_BADNESS;
+          }
+        break;
+      case TYPE_CODE_ENUM:
+        switch (TYPE_CODE (arg))
+          {
+            case TYPE_CODE_INT:
+            case TYPE_CODE_CHAR:
+            case TYPE_CODE_RANGE:
+            case TYPE_CODE_BOOL:
+            case TYPE_CODE_ENUM:
+              return INTEGER_COERCION_BADNESS;
+            case TYPE_CODE_FLT:
+              return INT_FLOAT_CONVERSION_BADNESS;
+            default:
+              return INCOMPATIBLE_TYPE_BADNESS;
+          }
+        break;
+      case TYPE_CODE_CHAR:
+        switch (TYPE_CODE (arg))
+          {
+            case TYPE_CODE_RANGE:
+            case TYPE_CODE_BOOL:
+            case TYPE_CODE_ENUM:
+              return INTEGER_COERCION_BADNESS;
+            case TYPE_CODE_FLT:
+              return INT_FLOAT_CONVERSION_BADNESS;
+            case TYPE_CODE_INT: 
+              if (TYPE_LENGTH (arg) > TYPE_LENGTH (parm))
+                return INTEGER_COERCION_BADNESS;
+              else if (TYPE_LENGTH (arg) < TYPE_LENGTH (parm))
+                return INTEGER_PROMOTION_BADNESS;
+              /* >>> !! else fall through !! <<< */ 
+            case TYPE_CODE_CHAR:
+              /* Deal with signed, unsigned, and plain chars for C++
+                 and with int cases falling through from previous case */
+              if (TYPE_NOSIGN (parm))
+                {
+                  if (TYPE_NOSIGN (arg))
+                    return 0;
+                  else
+                    return INTEGER_COERCION_BADNESS;
+                }
+              else if (TYPE_UNSIGNED (parm))
+                {
+                  if (TYPE_UNSIGNED (arg))
+                    return 0;
+                  else
+                    return INTEGER_PROMOTION_BADNESS;
+                }
+              else if (!TYPE_NOSIGN (arg) && !TYPE_UNSIGNED (arg))
+                return 0;
+              else
+                return INTEGER_COERCION_BADNESS;
+            default:
+              return INCOMPATIBLE_TYPE_BADNESS;
+          }
+        break;
+      case TYPE_CODE_RANGE:
+        switch (TYPE_CODE (arg))
+          {
+            case TYPE_CODE_INT:
+            case TYPE_CODE_CHAR:
+            case TYPE_CODE_RANGE:
+            case TYPE_CODE_BOOL:
+            case TYPE_CODE_ENUM:
+              return INTEGER_COERCION_BADNESS;
+            case TYPE_CODE_FLT:
+              return INT_FLOAT_CONVERSION_BADNESS;
+            default:
+              return INCOMPATIBLE_TYPE_BADNESS;
+          }
+        break;
+      case TYPE_CODE_BOOL:
+        switch (TYPE_CODE (arg))
+          {
+            case TYPE_CODE_INT:
+            case TYPE_CODE_CHAR:
+            case TYPE_CODE_RANGE:
+            case TYPE_CODE_ENUM:
+            case TYPE_CODE_FLT:
+            case TYPE_CODE_PTR:
+              return BOOLEAN_CONVERSION_BADNESS;
+            case TYPE_CODE_BOOL:
+              return 0;
+            default:
+              return INCOMPATIBLE_TYPE_BADNESS;
+          }
+        break;
+      case TYPE_CODE_FLT:
+        switch (TYPE_CODE (arg))
+          {
+            case TYPE_CODE_FLT:
+              if (TYPE_LENGTH (arg) < TYPE_LENGTH (parm))
+                return FLOAT_PROMOTION_BADNESS;
+              else if (TYPE_LENGTH (arg) == TYPE_LENGTH (parm))
+                return 0;
+              else
+                return FLOAT_CONVERSION_BADNESS;
+            case TYPE_CODE_INT:
+            case TYPE_CODE_BOOL:
+            case TYPE_CODE_ENUM:
+            case TYPE_CODE_RANGE:
+            case TYPE_CODE_CHAR:
+              return INT_FLOAT_CONVERSION_BADNESS;
+            default:
+              return INCOMPATIBLE_TYPE_BADNESS;
+          }
+        break;
+      case TYPE_CODE_COMPLEX:
+        switch (TYPE_CODE (arg))
+          { /* Strictly not needed for C++, but... */
+            case TYPE_CODE_FLT:
+              return FLOAT_PROMOTION_BADNESS;
+            case TYPE_CODE_COMPLEX:
+              return 0;
+            default:
+              return INCOMPATIBLE_TYPE_BADNESS;
+          }
+        break;
+      case TYPE_CODE_STRUCT:
+      /* currently same as TYPE_CODE_CLASS */
+        switch (TYPE_CODE (arg))
+          {
+            case TYPE_CODE_STRUCT:
+              /* Check for derivation */
+              if (is_ancestor (parm, arg))
+                return BASE_CONVERSION_BADNESS;
+              /* else fall through */
+            default:
+              return INCOMPATIBLE_TYPE_BADNESS;
+          }
+        break;
+      case TYPE_CODE_UNION:
+        switch (TYPE_CODE (arg))
+          {
+            case TYPE_CODE_UNION:
+            default:
+              return INCOMPATIBLE_TYPE_BADNESS;
+          }
+        break;
+      case TYPE_CODE_MEMBER:
+        switch (TYPE_CODE (arg))
+          {
+            default:
+              return INCOMPATIBLE_TYPE_BADNESS;
+          }
+        break;
+      case TYPE_CODE_METHOD:
+        switch (TYPE_CODE (arg))
+          {
+            
+            default:
+              return INCOMPATIBLE_TYPE_BADNESS;
+          }
+        break;
+      case TYPE_CODE_REF:
+        switch (TYPE_CODE (arg))
+          {
+            
+            default:
+              return INCOMPATIBLE_TYPE_BADNESS;
+          }
+
+        break;
+      case TYPE_CODE_SET:
+        switch (TYPE_CODE (arg))
+          {
+            /* Not in C++ */
+            case TYPE_CODE_SET:
+              return rank_one_type (TYPE_FIELD_TYPE (parm, 0), TYPE_FIELD_TYPE (arg, 0));
+            default:
+              return INCOMPATIBLE_TYPE_BADNESS;
+          }
+        break;
+      case TYPE_CODE_VOID:
+      default:  
+        return INCOMPATIBLE_TYPE_BADNESS;
+    } /* switch (TYPE_CODE (arg)) */
+}
+
+ 
+/* End of functions for overload resolution */ 
+
+
+
 #if MAINTENANCE_CMDS
 
 static void
@@ -1887,6 +2785,8 @@ build_gdbtypes ()
     init_type (TYPE_CODE_INT, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
 	       0,
 	       "char", (struct objfile *) NULL);
+  TYPE_FLAGS (builtin_type_char) |= TYPE_FLAG_NOSIGN;
+  
   builtin_type_signed_char =
     init_type (TYPE_CODE_INT, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
 	       0,
@@ -1985,6 +2885,19 @@ build_gdbtypes ()
     init_type (TYPE_CODE_INT, 64 / 8,
 	       TYPE_FLAG_UNSIGNED,
 	       "uint64_t", (struct objfile *) NULL);
+  builtin_type_bool =
+    init_type (TYPE_CODE_BOOL, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
+	       0,
+	       "bool", (struct objfile *) NULL);
+
+  /* Add user knob for controlling resolution of opaque types */ 
+  add_show_from_set
+    (add_set_cmd ("opaque-type-resolution", class_support, var_boolean, (char *)&opaque_type_resolution,
+		  "Set resolution of opaque struct/class/union types (if set before loading symbols).",
+		  &setlist),
+     &showlist);
+  opaque_type_resolution = 1;
+
   /* start-sanitize-r5900 */
   builtin_type_int128 =
     init_type (TYPE_CODE_INT, 128 / 8,

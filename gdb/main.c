@@ -54,11 +54,17 @@ int display_time;
 
 int display_space;
 
+/* Whether xdb commands will be handled */
+int xdb_commands = 0;
+
+/* Whether dbx commands will be handled */
+int dbx_commands = 0;
+
 static void print_gdb_help PARAMS ((GDB_FILE *));
 extern void gdb_init PARAMS ((char *));
 #ifdef __CYGWIN__
 #include <windows.h> /* for MAX_PATH */
-#include <sys/cygwin.h> /* for cygwin_conv_to_posix_path */
+#include <sys/cygwin.h> /* for cygwin32_conv_to_posix_path */
 #endif
 
 int
@@ -405,7 +411,7 @@ main (argc, argv)
     if (tmp != NULL)
       {
         homedir = (char *) alloca (MAX_PATH+1);
-        cygwin_conv_to_posix_path (tmp, homedir);
+        cygwin32_conv_to_posix_path (tmp, homedir);
       }
     else
       homedir = NULL;

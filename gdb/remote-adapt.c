@@ -604,7 +604,7 @@ the baud rate, and the name of the program to run on the remote system.");
   printf_filtered("Remote debugging using virtual addresses works only\n");
   printf_filtered("\twhen virtual addresses map 1:1 to physical addresses.\n"); 
   if (processor_type != a29k_freeze_mode) {
-	fprintf_filtered(stderr,
+	fprintf_filtered(gdb_stderr,
 	"Freeze-mode debugging not available, and can only be done on an A29050.\n");
   }
 }
@@ -1238,7 +1238,7 @@ char		*save;	/* Throw away, let adapt save instructions */
   	expect_prompt ();
 	return(0);	/* Success */
   } else {
-	fprintf_filtered(stderr,
+	fprintf_filtered(gdb_stderr,
 		"Too many break points, break point not installed\n");
 	return(1);	/* Failure */
   }
@@ -1372,9 +1372,13 @@ static void init_adapt_ops(void)
   adapt_ops.to_open = 	adapt_open;
   adapt_ops.to_close = 	adapt_close;
   adapt_ops.to_attach = adapt_attach;
+  adapt_ops.to_post_attach = NULL;
+  adapt_ops.to_require_attach = NULL;  
   adapt_ops.to_detach = adapt_detach;
+  adapt_ops.to_require_detach = NULL;
   adapt_ops.to_resume = adapt_resume;
   adapt_ops.to_wait  = 	adapt_wait;
+  adapt_ops.to_post_wait = NULL;
   adapt_ops.to_fetch_registers  = adapt_fetch_register;
   adapt_ops.to_store_registers  = adapt_store_register;
   adapt_ops.to_prepare_to_store = adapt_prepare_to_store;
@@ -1390,12 +1394,31 @@ static void init_adapt_ops(void)
   adapt_ops.to_kill  = 	adapt_kill; 		
   adapt_ops.to_load  = 	adapt_load;
   adapt_ops.to_lookup_symbol = 	0; 		
-  adapt_ops.to_create_inferior =  adapt_create_inferior; 	
+  adapt_ops.to_create_inferior =  adapt_create_inferior;
+  adapt_ops.to_post_startup_inferior = NULL;
+  adapt_ops.to_acknowledge_created_inferior = NULL;
+  adapt_ops.to_clone_and_follow_inferior = NULL;          
+  adapt_ops.to_post_follow_inferior_by_clone = NULL;  
+  adapt_ops.to_insert_fork_catchpoint = NULL;
+  adapt_ops.to_remove_fork_catchpoint = NULL;
+  adapt_ops.to_insert_vfork_catchpoint = NULL;
+  adapt_ops.to_remove_vfork_catchpoint = NULL;                     
+  adapt_ops.to_has_forked = NULL;
+  adapt_ops.to_has_vforked = NULL;
+  adapt_ops.to_can_follow_vfork_prior_to_exec = NULL;                        
+  adapt_ops.to_post_follow_vfork = NULL; 	
+  adapt_ops.to_insert_exec_catchpoint = NULL;
+  adapt_ops.to_remove_exec_catchpoint = NULL;
+  adapt_ops.to_has_execd = NULL;
+  adapt_ops.to_reported_exec_events_per_exec_call = NULL;
+  adapt_ops.to_has_exited = NULL;
   adapt_ops.to_mourn_inferior =   adapt_mourn; 		
   adapt_ops.to_can_run  = 	0; 
   adapt_ops.to_notice_signals = 	0;
   adapt_ops.to_thread_alive  = 	0;
   adapt_ops.to_stop  = 	0 ; /* process_stratum; */
+  adapt_ops.to_pid_to_exec_file = NULL;
+  adapt_ops.to_core_file_to_sym_file = NULL;
   adapt_ops.to_stratum = 	0; 
   adapt_ops.DONT_USE = 	0 ;
   adapt_ops.to_has_all_memory = 	1;

@@ -327,14 +327,13 @@ monitor_printf_noecho (va_alist)
   if (remote_debug > 0)
     puts_debug ("sent -->", sndbuf, "<--");
 #endif
-#if EXTRA_RDEBUG
-  if (remote_debug)
+  if (EXTRA_RDEBUG
+      && remote_debug)
     {
       char *safe_string = (char *) alloca ((strlen (sndbuf) * 4) + 1);
       monitor_printable_string (safe_string, sndbuf);
       printf ("sent[%s]\n", safe_string);
     }
-#endif
   
   monitor_write (sndbuf, len);
 }
@@ -372,14 +371,13 @@ monitor_printf (va_alist)
   if (remote_debug > 0)
     puts_debug ("sent -->", sndbuf, "<--");
 #endif
-#if EXTRA_RDEBUG
-  if (remote_debug)
+  if (EXTRA_RDEBUG
+      && remote_debug)
     {
       char *safe_string = (char *) alloca ((len * 4) + 1);
       monitor_printable_string (safe_string, sndbuf);
       printf ("sent[%s]\n", safe_string);
     }
-#endif
 
   monitor_write (sndbuf, len);
 
@@ -400,7 +398,8 @@ monitor_write (buf, buflen)
      int buflen;
 {
   if (SERIAL_WRITE(monitor_desc, buf, buflen))
-    fprintf_unfiltered (stderr, "SERIAL_WRITE failed: %s\n", safe_strerror (errno));
+    fprintf_unfiltered (gdb_stderr, "SERIAL_WRITE failed: %s\n",
+			safe_strerror (errno));
 }
 
 
@@ -525,14 +524,13 @@ monitor_expect (string, buf, buflen)
   int c;
   extern struct target_ops *targ_ops;
 
-#if EXTRA_RDEBUG
-  if (remote_debug)
+  if (EXTRA_RDEBUG
+      && remote_debug)
     {
       char *safe_string = (char *) alloca ((strlen (string) * 4) + 1);
       monitor_printable_string (safe_string, string);
       printf ("MON Expecting '%s'\n", safe_string);
     }
-#endif
 
   immediate_quit = 1;
   while (1)
@@ -2048,7 +2046,8 @@ monitor_remove_breakpoint (addr, shadow)
 	  return 0;
 	}
     }
-  fprintf_unfiltered (stderr, "Can't find breakpoint associated with 0x%x\n", addr);
+  fprintf_unfiltered (gdb_stderr,
+		      "Can't find breakpoint associated with 0x%x\n", addr);
   return 1;
 }
 
@@ -2203,10 +2202,14 @@ static void init_base_monitor_ops(void)
   monitor_ops.to_doc =   NULL;		
   monitor_ops.to_open =   NULL;		
   monitor_ops.to_close =   monitor_close;
-  monitor_ops.to_attach =   NULL;		
+  monitor_ops.to_attach =   NULL;
+  monitor_ops.to_post_attach = NULL;
+  monitor_ops.to_require_attach = NULL;		
   monitor_ops.to_detach =   monitor_detach;	
+  monitor_ops.to_require_detach = NULL; 
   monitor_ops.to_resume =   monitor_resume;	
-  monitor_ops.to_wait  =   monitor_wait;	
+  monitor_ops.to_wait  =   monitor_wait;
+  monitor_ops.to_post_wait = NULL;	
   monitor_ops.to_fetch_registers  =   monitor_fetch_registers;
   monitor_ops.to_store_registers  =   monitor_store_registers;
   monitor_ops.to_prepare_to_store =   monitor_prepare_to_store;
@@ -2223,11 +2226,30 @@ static void init_base_monitor_ops(void)
   monitor_ops.to_load  =   monitor_load;	
   monitor_ops.to_lookup_symbol =   0;		
   monitor_ops.to_create_inferior =   monitor_create_inferior;
+  monitor_ops.to_post_startup_inferior = NULL;
+  monitor_ops.to_acknowledge_created_inferior = NULL;
+  monitor_ops.to_clone_and_follow_inferior  = NULL;
+  monitor_ops.to_post_follow_inferior_by_clone = NULL;
+  monitor_ops.to_insert_fork_catchpoint = NULL;
+  monitor_ops.to_remove_fork_catchpoint = NULL;
+  monitor_ops.to_insert_vfork_catchpoint = NULL;
+  monitor_ops.to_remove_vfork_catchpoint = NULL;
+  monitor_ops.to_has_forked = NULL;
+  monitor_ops.to_has_vforked = NULL;
+  monitor_ops.to_can_follow_vfork_prior_to_exec = NULL;
+  monitor_ops.to_post_follow_vfork = NULL;
+  monitor_ops.to_insert_exec_catchpoint = NULL;
+  monitor_ops.to_remove_exec_catchpoint = NULL;
+  monitor_ops.to_has_execd = NULL;
+  monitor_ops.to_reported_exec_events_per_exec_call = NULL;
+  monitor_ops.to_has_exited = NULL;
   monitor_ops.to_mourn_inferior =   monitor_mourn_inferior;	
   monitor_ops.to_can_run  =   0;				
   monitor_ops.to_notice_signals =   0; 				
   monitor_ops.to_thread_alive  =   0;				
-  monitor_ops.to_stop  =   monitor_stop;			
+  monitor_ops.to_stop  =   monitor_stop;
+  monitor_ops.to_pid_to_exec_file = NULL;	
+  monitor_ops.to_core_file_to_sym_file = NULL;
   monitor_ops.to_stratum =   process_stratum;		
   monitor_ops.DONT_USE =   0;				
   monitor_ops.to_has_all_memory =   1;			
@@ -2265,3 +2287,5 @@ When enabled, a hashmark \'#\' is displayed.",
   add_com ("monitor", class_obscure, monitor_command,
 	   "Send a command to the debug monitor."); 
 }
+
+

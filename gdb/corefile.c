@@ -325,6 +325,37 @@ read_memory_unsigned_integer (memaddr, len)
   read_memory (memaddr, buf, len);
   return extract_unsigned_integer (buf, len);
 }
+
+void
+read_memory_string (memaddr, buffer, max_len)
+     CORE_ADDR memaddr;
+     char * buffer;
+     int max_len;
+{
+  register char * cp;
+  register int i;
+  int cnt;
+
+  cp = buffer;
+  while (1)
+    {
+      if (cp - buffer >= max_len)
+        {
+          buffer[max_len - 1] = '\0';
+          break;
+        }
+      cnt = max_len - (cp - buffer);
+      if (cnt > 8)
+	cnt = 8;
+      read_memory (memaddr + (int) (cp - buffer), cp, cnt);
+      for (i = 0; i < cnt && *cp; i++, cp++)
+        ; /* null body */
+
+      if (i < cnt && !*cp)
+        break;
+    }
+}
+
 
 #if 0
 /* Enable after 4.12.  It is not tested.  */

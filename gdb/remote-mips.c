@@ -638,7 +638,8 @@ mips_getstring (string, n)
       c = SERIAL_READCHAR (mips_desc, 2);
 
       if (c == SERIAL_TIMEOUT) {
-        fprintf_unfiltered (stderr, "Failed to read %d characters from target (TIMEOUT)\n", n);
+        fprintf_unfiltered (gdb_stderr,
+			    "Failed to read %d characters from target (TIMEOUT)\n", n);
 	return 0;
       }
 
@@ -2163,7 +2164,7 @@ mips_xfer_memory (memaddr, myaddr, len, write, ignore)
 	  if (i % 256 == 255) 
 	    {
 	      printf_unfiltered ("*");
-	      fflush (stdout);
+	      gdb_flush (gdb_stdout);
 	    }
 	  if (status)
 	    {
@@ -2366,7 +2367,8 @@ pmon_insert_breakpoint (addr, contents_cache)
       tbuff[2] = '\0'; /* terminate the string */
       if (sscanf (tbuff, "%d", &bpnum) != 1)
         {
-          fprintf_unfiltered (stderr, "Invalid decimal breakpoint number from target: %s\n", tbuff);
+          fprintf_unfiltered (gdb_stderr,
+			      "Invalid decimal breakpoint number from target: %s\n", tbuff);
           return 1;
         }
 
@@ -2384,19 +2386,21 @@ pmon_insert_breakpoint (addr, contents_cache)
 
       if (sscanf (tbuff, "0x%08x", &bpaddr) != 1)
         {
-          fprintf_unfiltered (stderr, "Invalid hex address from target: %s\n", tbuff);
+          fprintf_unfiltered (gdb_stderr,
+			      "Invalid hex address from target: %s\n", tbuff);
           return 1;
         }
 
       if (bpnum >= PMON_MAX_BP)
         {
-          fprintf_unfiltered (stderr, "Error: Returned breakpoint number %d outside acceptable range (0..%d)\n",
+          fprintf_unfiltered (gdb_stderr,
+			      "Error: Returned breakpoint number %d outside acceptable range (0..%d)\n",
                               bpnum, PMON_MAX_BP - 1);
           return 1;
         }
 
       if (bpaddr != addr)
-        fprintf_unfiltered (stderr, "Warning: Breakpoint addresses do not match: 0x%x != 0x%x\n", addr, bpaddr);
+        fprintf_unfiltered (gdb_stderr, "Warning: Breakpoint addresses do not match: 0x%x != 0x%x\n", addr, bpaddr);
 
       mips_pmon_bp_info[bpnum] = bpaddr;
 
@@ -2427,7 +2431,7 @@ pmon_remove_breakpoint (addr, contents_cache)
 
       if (bpnum >= PMON_MAX_BP)
         {
-          fprintf_unfiltered (stderr,
+          fprintf_unfiltered (gdb_stderr,
 	    "pmon_remove_breakpoint: Failed to find breakpoint at address 0x%s\n",
 	    paddr_nz (addr));
           return 1;
@@ -2606,14 +2610,14 @@ check_lsi_error (addr, rerrflg)
 	      if ((err->code & rerrflg) == err->code)
 		{
 		  found = 1;
-		  fprintf_unfiltered (stderr,
+		  fprintf_unfiltered (gdb_stderr,
 				      "common_breakpoint (0x%s): Warning: %s\n",
 				      saddr,
 				      err->string);
 		}
 	    }
 	  if (!found)
-	    fprintf_unfiltered (stderr,
+	    fprintf_unfiltered (gdb_stderr,
 				"common_breakpoint (0x%s): Unknown warning: 0x%x\n",
 				saddr,
 				rerrflg);
@@ -2626,14 +2630,14 @@ check_lsi_error (addr, rerrflg)
     {
       if ((err->code & rerrflg) == err->code)
 	{
-	  fprintf_unfiltered (stderr,
+	  fprintf_unfiltered (gdb_stderr,
 			      "common_breakpoint (0x%s): Error: %s\n",
 			      saddr,
 			      err->string);
 	  return 1;
 	}
     }
-  fprintf_unfiltered (stderr,
+  fprintf_unfiltered (gdb_stderr,
 		      "common_breakpoint (0x%s): Unknown error: 0x%x\n",
 		      saddr,
 		      rerrflg);
@@ -2830,7 +2834,8 @@ common_breakpoint (set, addr, len, type)
 	  if (mips_monitor == MON_DDB)
 	    rresponse = rerrflg;
 	  if (rresponse != 22) /* invalid argument */
-	    fprintf_unfiltered (stderr, "common_breakpoint (0x%s):  Got error: 0x%x\n",
+	    fprintf_unfiltered (gdb_stderr,
+				"common_breakpoint (0x%s):  Got error: 0x%x\n",
 				paddr_nz (addr), rresponse);
 	  return 1;
 	}
@@ -3070,11 +3075,13 @@ pmon_makeb64 (v, p, n, chksum)
   int count = (n / 6);
 
   if ((n % 12) != 0) {
-    fprintf_unfiltered(stderr,"Fast encoding bitcount must be a multiple of 12bits: %dbit%s\n",n,(n == 1)?"":"s");
+    fprintf_unfiltered(gdb_stderr,
+		       "Fast encoding bitcount must be a multiple of 12bits: %dbit%s\n",n,(n == 1)?"":"s");
     return(0);
   }
   if (n > 36) {
-    fprintf_unfiltered(stderr,"Fast encoding cannot process more than 36bits at the moment: %dbits\n",n);
+    fprintf_unfiltered(gdb_stderr,
+		       "Fast encoding cannot process more than 36bits at the moment: %dbits\n",n);
     return(0);
   }
 

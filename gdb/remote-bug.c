@@ -148,7 +148,7 @@ bug_load (args, fromtty)
 	  char *buffer = xmalloc (srec_frame);
 
 	  printf_filtered ("%s\t: 0x%4x .. 0x%4x  ", s->name, s->vma, s->vma + s->_raw_size);
-	  fflush (stdout);
+	  gdb_flush (gdb_stdout);
 	  for (i = 0; i < s->_raw_size; i += srec_frame)
 	    {
 	      if (srec_frame > s->_raw_size - i)
@@ -157,7 +157,7 @@ bug_load (args, fromtty)
 	      bfd_get_section_contents (abfd, s, buffer, i, srec_frame);
 	      bug_write_memory (s->vma + i, buffer, srec_frame);
 	      printf_filtered ("*");
-	      fflush (stdout);
+	      gdb_flush (gdb_stdout);
 	    }
 	  printf_filtered ("\n");
 	  free (buffer);
@@ -335,7 +335,7 @@ bug_wait (pid, status)
 
     case -1: /* trouble */
     default:
-      fprintf_filtered (stderr,
+      fprintf_filtered (gdb_stderr,
 			"Trouble reading target during wait\n");
       break;
     }
@@ -922,7 +922,7 @@ bug_insert_breakpoint (addr, save)
     }
   else
     {
-      fprintf_filtered (stderr,
+      fprintf_filtered (gdb_stderr,
 		      "Too many break points, break point not installed\n");
       return(1);
     }
@@ -971,9 +971,13 @@ static void init_bug_ops(void)
   bug_ops.to_open =   bug_open;
   bug_ops.to_close =   gr_close;
   bug_ops.to_attach =   0;
+  bug_ops.to_post_attach = NULL;
+  bug_ops.to_require_attach = NULL;
   bug_ops.to_detach =   gr_detach;
+  bug_ops.to_require_detach = NULL;
   bug_ops.to_resume =   bug_resume;
   bug_ops.to_wait  =   bug_wait;
+  bug_ops.to_post_wait = NULL;
   bug_ops.to_fetch_registers  =   bug_fetch_register;
   bug_ops.to_store_registers  =   bug_store_register;
   bug_ops.to_prepare_to_store =   gr_prepare_to_store;
@@ -990,11 +994,30 @@ static void init_bug_ops(void)
   bug_ops.to_load  =   bug_load;
   bug_ops.to_lookup_symbol =   0;			
   bug_ops.to_create_inferior =   gr_create_inferior;	
+  bug_ops.to_post_startup_inferior = NULL;
+  bug_ops.to_acknowledge_created_inferior = NULL;
+  bug_ops.to_clone_and_follow_inferior = NULL;          
+  bug_ops.to_post_follow_inferior_by_clone = NULL;  
+  bug_ops.to_insert_fork_catchpoint = NULL;
+  bug_ops.to_remove_fork_catchpoint = NULL;
+  bug_ops.to_insert_vfork_catchpoint = NULL;
+  bug_ops.to_remove_vfork_catchpoint = NULL;                      
+  bug_ops.to_has_forked = NULL;
+  bug_ops.to_has_vforked = NULL; 
+  bug_ops.to_can_follow_vfork_prior_to_exec = NULL;                       
+  bug_ops.to_post_follow_vfork = NULL;
+  bug_ops.to_insert_exec_catchpoint = NULL;
+  bug_ops.to_remove_exec_catchpoint = NULL;
+  bug_ops.to_has_execd = NULL;
+  bug_ops.to_reported_exec_events_per_exec_call = NULL;
+  bug_ops.to_has_exited = NULL;
   bug_ops.to_mourn_inferior =   gr_mourn;		
   bug_ops.to_can_run  =   0;				
   bug_ops.to_notice_signals =   0;			
   bug_ops.to_thread_alive  =  0 ;
   bug_ops.to_stop  =   0;
+  bug_ops.to_pid_to_exec_file = NULL;
+  bug_ops.to_core_file_to_sym_file = NULL;
   bug_ops.to_stratum =   process_stratum ;
   bug_ops.DONT_USE =   0;
   bug_ops.to_has_all_memory =   1;

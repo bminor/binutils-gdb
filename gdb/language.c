@@ -99,7 +99,7 @@ static void
 unk_lang_print_type PARAMS ((struct type *, char *, GDB_FILE *, int, int));
 
 static int
-unk_lang_val_print PARAMS ((struct type *, char *, CORE_ADDR, GDB_FILE *,
+unk_lang_val_print PARAMS ((struct type *, char *, int, CORE_ADDR, GDB_FILE *,
 			    int, int, int, enum val_prettyprint));
 
 static int
@@ -834,7 +834,7 @@ lang_bool_type ()
 	  if (type && TYPE_CODE (type) == TYPE_CODE_BOOL)
 	    return type;
 	}
-      /* ... else fall through ... */
+      return builtin_type_bool;
     default:
       return builtin_type_int;
     }
@@ -1278,10 +1278,11 @@ unk_lang_print_type (type, varstring, stream, show, level)
 }
 
 static int
-unk_lang_val_print (type, valaddr, address, stream, format, deref_ref,
+unk_lang_val_print (type, valaddr,  embedded_offset, address, stream, format, deref_ref,
 		    recurse, pretty)
      struct type *type;
      char *valaddr;
+     int embedded_offset;
      CORE_ADDR address;
      GDB_FILE *stream;
      int format;

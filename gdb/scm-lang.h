@@ -29,7 +29,7 @@ struct value;
 extern int scm_value_print PARAMS ((struct value *, GDB_FILE*,
 				    int, enum val_prettyprint));
 
-extern int scm_val_print PARAMS ((struct type*, char*, CORE_ADDR, GDB_FILE*,
+extern int scm_val_print PARAMS ((struct type*, char*, int, CORE_ADDR, GDB_FILE*,
 				 int, int, int, enum val_prettyprint));
 
 extern LONGEST scm_get_field PARAMS ((LONGEST, int));

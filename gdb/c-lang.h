@@ -17,9 +17,12 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-#ifdef __STDC__		/* Forward decls for prototypes */
-struct value;
-#endif
+
+#if !defined (C_LANG_H)
+#define C_LANG_H 1
+
+#include "value.h"
+
 
 extern int
 c_parse PARAMS ((void));	/* Defined in c-exp.y */
@@ -31,7 +34,7 @@ extern void			/* Defined in c-typeprint.c */
 c_print_type PARAMS ((struct type *, char *, GDB_FILE *, int, int));
 
 extern int
-c_val_print PARAMS ((struct type *, char *, CORE_ADDR, GDB_FILE *, int, int,
+c_val_print PARAMS ((struct type *, char *, int, CORE_ADDR, GDB_FILE *, int, int,
 		     int, enum val_prettyprint));
 
 extern int
@@ -70,7 +73,7 @@ extern void
 cp_print_class_method PARAMS ((char *, struct type *, GDB_FILE *));
 
 extern void
-cp_print_value_fields PARAMS ((struct type *, char *, CORE_ADDR,
+cp_print_value_fields PARAMS ((struct type *, struct type *, char *, int, CORE_ADDR,
 			       GDB_FILE *, int, int, enum val_prettyprint,
 			       struct type**, int));
 
@@ -79,3 +82,6 @@ cp_is_vtbl_ptr_type PARAMS ((struct type *));
 
 extern int
 cp_is_vtbl_member PARAMS ((struct type *));
+
+
+#endif	/* !defined (C_LANG_H) */

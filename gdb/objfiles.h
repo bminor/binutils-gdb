@@ -388,7 +388,12 @@ struct objfile
    To avoid this penalty for normal object files, we use this flag,
    whose setting is determined upon symbol table read in.  */
 
-#define OBJF_REORDERED	(2 << 1)	/* Functions are reordered */
+#define OBJF_REORDERED	(1 << 2)	/* Functions are reordered */
+                       
+/* Distinguish between an objfile for a shared library and a
+   "vanilla" objfile. */
+
+#define OBJF_SHARED     (1 << 3)        /* From a shared library */
 
 /* The object file that the main symbol table was loaded from (e.g. the
    argument to the "symbol-file" or "file" command).  */

@@ -133,10 +133,14 @@ static void init_array_ops(void)
 Specify the serial device it is connected to (e.g. /dev/ttya)." ;
   array_ops.to_open =   array_open;	
   array_ops.to_close =   array_close;	
-  array_ops.to_attach =   NULL;		
+  array_ops.to_attach =   NULL;
+  array_ops.to_post_attach = NULL;		
+  array_ops.to_require_attach = NULL;
   array_ops.to_detach =   array_detach;	
+  array_ops.to_require_detach = NULL;
   array_ops.to_resume =   array_resume;	
   array_ops.to_wait  =   array_wait;	
+  array_ops.to_post_wait = NULL;
   array_ops.to_fetch_registers  =   array_fetch_registers;
   array_ops.to_store_registers  =   array_store_registers;
   array_ops.to_prepare_to_store =   array_prepare_to_store;
@@ -153,11 +157,30 @@ Specify the serial device it is connected to (e.g. /dev/ttya)." ;
   array_ops.to_load  =   0;			
   array_ops.to_lookup_symbol =   0;		
   array_ops.to_create_inferior =   array_create_inferior;	
+  array_ops.to_post_startup_inferior = NULL;
+  array_ops.to_acknowledge_created_inferior = NULL;
+  array_ops.to_clone_and_follow_inferior = NULL;          
+  array_ops.to_post_follow_inferior_by_clone = NULL;  
+  array_ops.to_insert_fork_catchpoint = NULL;
+  array_ops.to_remove_fork_catchpoint = NULL;
+  array_ops.to_insert_vfork_catchpoint = NULL;
+  array_ops.to_remove_vfork_catchpoint = NULL;                      
+  array_ops.to_has_forked = NULL;
+  array_ops.to_has_vforked = NULL;            
+  array_ops.to_can_follow_vfork_prior_to_exec = NULL;            
+  array_ops.to_post_follow_vfork = NULL;
+  array_ops.to_insert_exec_catchpoint = NULL;
+  array_ops.to_remove_exec_catchpoint = NULL;
+  array_ops.to_has_execd = NULL;
+  array_ops.to_reported_exec_events_per_exec_call = NULL;
+  array_ops.to_has_exited = NULL;
   array_ops.to_mourn_inferior =   array_mourn_inferior;		
   array_ops.to_can_run  =   0;		
   array_ops.to_notice_signals =   0; 	
   array_ops.to_thread_alive  =   0;	
-  array_ops.to_stop  =   0;             
+  array_ops.to_stop  =   0;
+  array_ops.to_pid_to_exec_file = NULL;
+  array_ops.to_core_file_to_sym_file = NULL;         
   array_ops.to_stratum =   process_stratum;	
   array_ops.DONT_USE =   0;			
   array_ops.to_has_all_memory =   1;		
@@ -749,7 +772,7 @@ array_wait (pid, status)
 	i = 0;
       }
       fputc_unfiltered (c, gdb_stdout);
-      fflush (stdout);
+      gdb_flush (gdb_stdout);
     }
     c = SERIAL_READCHAR(tty_desc, timeout);
     if (c > 0) {
@@ -759,7 +782,7 @@ array_wait (pid, status)
 	break;
 #if 0
       fputc_unfiltered (c, gdb_stdout);
-      fflush (stdout);
+      gdb_flush (gdb_stdout);
 #endif
     }
   }

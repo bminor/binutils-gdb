@@ -1,5 +1,6 @@
 /* Memory-access and commands for "inferior" process, for GDB.
-   Copyright 1986, 1987, 1988, 1989, 1991, 1992, 1995, 1996 Free Software Foundation, Inc.
+   Copyright 1986, 87, 88, 89, 91, 92, 95, 96, 1998 
+   Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -19,7 +20,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include <signal.h>
-#include <sys/param.h>
 #include "gdb_string.h"
 #include "symtab.h"
 #include "gdbtypes.h"
@@ -31,8 +31,19 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "gdbcore.h"
 #include "target.h"
 #include "language.h"
+#include "symfile.h"
 
-static void continue_command PARAMS ((char *, int));
+/* Functions exported for general use: */
+
+void nofp_registers_info PARAMS ((char *, int));
+
+void all_registers_info PARAMS ((char *, int));
+
+void registers_info PARAMS ((char *, int));
+
+/* Local functions: */
+
+void continue_command PARAMS ((char *, int));
 
 static void until_next_command PARAMS ((int));
 
@@ -47,12 +58,6 @@ static void unset_command PARAMS ((char *, int));
 static void float_info PARAMS ((char *, int));
 
 static void detach_command PARAMS ((char *, int));
-
-static void nofp_registers_info PARAMS ((char *, int));
-
-static void all_registers_info PARAMS ((char *, int));
-
-static void registers_info PARAMS ((char *, int));
 
 #if !defined (DO_REGISTERS_INFO)
 static void do_registers_info PARAMS ((int, int));
@@ -74,15 +79,17 @@ static void jump_command PARAMS ((char *, int));
 
 static void step_1 PARAMS ((int, int, char *));
 
-static void nexti_command PARAMS ((char *, int));
+void nexti_command PARAMS ((char *, int));
 
-static void stepi_command PARAMS ((char *, int));
+void stepi_command PARAMS ((char *, int));
 
 static void next_command PARAMS ((char *, int));
 
 static void step_command PARAMS ((char *, int));
 
 static void run_command PARAMS ((char *, int));
+
+void _initialize_infcmd PARAMS ((void));
 
 #ifdef CALL_DUMMY_BREAKPOINT_OFFSET
 static void breakpoint_auto_delete_contents PARAMS ((PTR));
@@ -206,6 +213,8 @@ Start it from the beginning? "))
 
   exec_file = (char *) get_exec_file (0);
 
+  do_run_cleanups (NULL);
+
   /* The exec file is re-read every time we do a generic_mourn_inferior, so
      we just have to worry about the symbol file.  */
   reread_symbols ();
@@ -241,7 +250,7 @@ Start it from the beginning? "))
 			  environ_vector (inferior_environ));
 }
 
-static void
+void
 continue_command (proc_count_exp, from_tty)
      char *proc_count_exp;
      int from_tty;
@@ -305,7 +314,7 @@ next_command (count_string, from_tty)
 /* Likewise, but step only one instruction.  */
 
 /* ARGSUSED */
-static void
+void
 stepi_command (count_string, from_tty)
      char *count_string;
      int from_tty;
@@ -314,7 +323,7 @@ stepi_command (count_string, from_tty)
 }
 
 /* ARGSUSED */
-static void
+void
 nexti_command (count_string, from_tty)
      char *count_string;
      int from_tty;
@@ -338,7 +347,8 @@ step_1 (skip_subroutines, single_inst, count_string)
   if (!single_inst || skip_subroutines) /* leave si command alone */
     {
       enable_longjmp_breakpoint();
-      cleanups = make_cleanup(disable_longjmp_breakpoint, 0);
+      cleanups = make_cleanup ((make_cleanup_func) disable_longjmp_breakpoint, 
+                               0);
     }
 
   for (; count > 0; count--)
@@ -442,6 +452,21 @@ jump_command (arg, from_tty)
 	  /* NOTREACHED */
 	}
     }
+
+  if (sfn != NULL) 
+    {
+      fixup_symbol_section (sfn, 0);
+      if (section_is_overlay (SYMBOL_BFD_SECTION (sfn)) && 
+	  !section_is_mapped (SYMBOL_BFD_SECTION (sfn)))
+	{
+	  if (!query ("WARNING!!!  Destination is in unmapped overlay!  Jump anyway? "))
+	    {
+	      error ("Not confirmed.");
+	      /* NOTREACHED */
+	    }
+	}
+    }
+
 
   addr = sal.pc;
 
@@ -557,13 +582,13 @@ run_stack_dummy (addr, buffer)
     struct breakpoint *bpt;
     struct symtab_and_line sal;
 
+    INIT_SAL (&sal);	/* initialize to zeroes */
 #if CALL_DUMMY_LOCATION != AT_ENTRY_POINT
     sal.pc = addr - CALL_DUMMY_START_OFFSET + CALL_DUMMY_BREAKPOINT_OFFSET;
 #else
     sal.pc = CALL_DUMMY_ADDRESS ();
 #endif
-    sal.symtab = NULL;
-    sal.line = 0;
+    sal.section = find_pc_overlay (sal.pc);
 
     /* Set up a FRAME for the dummy frame so we can pass it to
        set_momentary_breakpoint.  We need to give the breakpoint a
@@ -705,7 +730,7 @@ finish_command (arg, from_tty)
 
   breakpoint = set_momentary_breakpoint (sal, frame, bp_finish);
 
-  old_chain = make_cleanup(delete_breakpoint, breakpoint);
+  old_chain = make_cleanup ((make_cleanup_func) delete_breakpoint, breakpoint);
 
   /* Find the function we will return from.  */
 
@@ -947,10 +972,9 @@ path_command (dirname, from_tty)
     path_info ((char *)NULL, from_tty);
 }
 
-/* The array of register names.  */
-
-char *reg_names[] = REGISTER_NAMES;
-
+#ifdef REGISTER_NAMES
+char *gdb_register_names[] = REGISTER_NAMES;
+#endif
 /* Print out the machine register regnum. If regnum is -1,
    print all registers (fpregs == 1) or all non-float registers
    (fpregs == 0).
@@ -990,16 +1014,16 @@ do_registers_info (regnum, fpregs)
 
       /* If the register name is empty, it is undefined for this
 	 processor, so don't display anything.  */
-      if (reg_names[i] == NULL || *(reg_names[i]) == '\0')
+      if (REGISTER_NAME (i) == NULL || *(REGISTER_NAME (i)) == '\0')
 	continue;
 
-      fputs_filtered (reg_names[i], gdb_stdout);
-      print_spaces_filtered (15 - strlen (reg_names[i]), gdb_stdout);
+      fputs_filtered (REGISTER_NAME (i), gdb_stdout);
+      print_spaces_filtered (15 - strlen (REGISTER_NAME (i)), gdb_stdout);
 
       /* Get the data in raw format.  */
       if (read_relative_register_raw_bytes (i, raw_buffer))
 	{
-	  printf_filtered ("Invalid register contents\n");
+	  printf_filtered ("*value not available*\n");
 	  continue;
 	}
 
@@ -1025,7 +1049,7 @@ do_registers_info (regnum, fpregs)
 	    printf_filtered ("<invalid float>");
 	  else
 #endif
-	    val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0,
+	    val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, 0,
 		       gdb_stdout, 0, 1, 0, Val_pretty_default);
 
 	  printf_filtered ("\t(raw 0x");
@@ -1052,10 +1076,10 @@ do_registers_info (regnum, fpregs)
       /* Else print as integer in hex and in decimal.  */
       else
 	{
-	  val_print (REGISTER_VIRTUAL_TYPE (i), raw_buffer, 0,
+	  val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, 0,
 		     gdb_stdout, 'x', 1, 0, Val_pretty_default);
 	  printf_filtered ("\t");
-	  val_print (REGISTER_VIRTUAL_TYPE (i), raw_buffer, 0,
+	  val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, 0,
 		     gdb_stdout,   0, 1, 0, Val_pretty_default);
 	}
 
@@ -1070,7 +1094,9 @@ do_registers_info (regnum, fpregs)
 }
 #endif /* no DO_REGISTERS_INFO.  */
 
-static void
+extern int target_map_name_to_register PARAMS ((char *, int));
+
+void
 registers_info (addr_exp, fpregs)
      char *addr_exp;
      int fpregs;
@@ -1097,10 +1123,13 @@ registers_info (addr_exp, fpregs)
       while (*end != '\0' && *end != ' ' && *end != '\t')
 	++end;
       numregs = ARCH_NUM_REGS;
-      for (regnum = 0; regnum < numregs; regnum++)
-	if (!strncmp (addr_exp, reg_names[regnum], end - addr_exp)
-	    && strlen (reg_names[regnum]) == end - addr_exp)
-	  goto found;
+
+      regnum = target_map_name_to_register (addr_exp, end - addr_exp);
+      if (regnum >= 0) 
+	goto found;
+
+      regnum = numregs;
+
       if (*addr_exp >= '0' && *addr_exp <= '9')
 	regnum = atoi (addr_exp);		/* Take a number */
       if (regnum >= numregs)		/* Bad name, or bad number */
@@ -1115,7 +1144,7 @@ found:
     } while (*addr_exp != '\0');
 }
 
-static void
+void
 all_registers_info (addr_exp, from_tty)
      char *addr_exp;
      int from_tty;
@@ -1123,13 +1152,14 @@ all_registers_info (addr_exp, from_tty)
   registers_info (addr_exp, 1);
 }
 
-static void
+void
 nofp_registers_info (addr_exp, from_tty)
      char *addr_exp;
      int from_tty;
 {
   registers_info (addr_exp, 0);
 }
+
 
 /*
  * TODO:
@@ -1253,7 +1283,7 @@ _initialize_infcmd ()
   add_show_from_set
     (add_set_cmd ("args", class_run, var_string_noescape, (char *)&inferior_args,
 		  
-"Set arguments to give program being debugged when it is started.\n\
+"Set argument list to give program being debugged when it is started.\n\
 Follow this command with any number of args, to be passed to the program.",
 		  &setlist),
      &showlist);

@@ -23,6 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <errno.h>
 #include <signal.h>
 #include <fcntl.h>
+#include <unistd.h>
 #include "frame.h"  /* required by inferior.h */
 #include "inferior.h"
 #include "symtab.h"
@@ -55,6 +56,8 @@ static void get_core_registers PARAMS ((int));
 static void add_to_thread_list PARAMS ((bfd *, asection *, PTR));
 
 static int ignore PARAMS ((CORE_ADDR, char *));
+
+static char * core_file_to_sym_file PARAMS ((char *));
 
 void _initialize_corelow PARAMS ((void));
 
@@ -358,6 +361,69 @@ cant:
   registers_fetched ();
 }
 
+static char *
+core_file_to_sym_file (core)
+  char *  core;
+{
+  CONST char *  failing_command;
+  char *  p;
+  char *  temp;
+  bfd *  temp_bfd;
+  int  scratch_chan;
+
+  if (! core)
+    error ("No core file specified.");
+
+  core = tilde_expand (core);
+  if (core[0] != '/')
+    {
+      temp = concat (current_directory, "/", core, NULL);
+      core = temp;
+    }
+
+  scratch_chan = open (core, write_files ? O_RDWR : O_RDONLY, 0);
+  if (scratch_chan < 0)
+    perror_with_name (core);
+
+  temp_bfd = bfd_fdopenr (core, gnutarget, scratch_chan);
+  if (temp_bfd == NULL)
+    perror_with_name (core);
+
+  if (!bfd_check_format (temp_bfd, bfd_core))
+    {
+      /* Do it after the err msg */
+      /* FIXME: should be checking for errors from bfd_close (for one thing,
+	 on error it does not free all the storage associated with the
+	 bfd).  */
+      make_cleanup (bfd_close, temp_bfd);
+      error ("\"%s\" is not a core dump: %s",
+	     core, bfd_errmsg (bfd_get_error ()));
+    }
+
+  /* Find the data section */
+  if (build_section_table (temp_bfd, &core_ops.to_sections,
+			   &core_ops.to_sections_end))
+    error ("\"%s\": Can't find sections: %s",
+	   bfd_get_filename (temp_bfd), bfd_errmsg (bfd_get_error ()));
+
+  failing_command = bfd_core_file_failing_command (temp_bfd);
+
+  bfd_close (temp_bfd);
+
+  /* If we found a filename, remember that it is probably saved
+     relative to the executable that created it.  If working directory
+     isn't there now, we may not be able to find the executable.  Rather
+     than trying to be sauve about finding it, just check if the file
+     exists where we are now.  If not, then punt and tell our client
+     we couldn't find the sym file.
+     */
+  p = (char *) failing_command;
+  if ((p != NULL) && (access (p, F_OK) != 0))
+    p = NULL;
+
+  return p;
+}
+
 static void
 core_files_info (t)
   struct target_ops *t;
@@ -376,6 +442,21 @@ ignore (addr, contents)
   return 0;
 }
 
+
+/* Okay, let's be honest: threads gleaned from a core file aren't
+   exactly lively, are they?  On the other hand, if we don't claim
+   that each & every one is alive, then we don't get any of them
+   to appear in an "info thread" command, which is quite a useful
+   behaviour.
+   */
+static int
+core_file_thread_alive (tid)
+  int  tid;
+{
+  return 1;
+}
+
+
 struct target_ops core_ops = {
   "core",			/* to_shortname */
   "Local core dump file",	/* to_longname */
@@ -383,9 +464,13 @@ struct target_ops core_ops = {
   core_open,			/* to_open */
   core_close,			/* to_close */
   find_default_attach,		/* to_attach */
+  NULL,                         /* to_post_attach */
+  find_default_require_attach,	/* to_require_attach */
   core_detach,			/* to_detach */
+  find_default_require_detach,	/* to_require_detach */
   0,				/* to_resume */
   0,				/* to_wait */
+  NULL,				/* to_post_wait */
   get_core_registers,		/* to_fetch_registers */
   0,				/* to_store_registers */
   0,				/* to_prepare_to_store */
@@ -402,11 +487,33 @@ struct target_ops core_ops = {
   0,				/* to_load */
   0,				/* to_lookup_symbol */
   find_default_create_inferior,	/* to_create_inferior */
+  NULL,                         /* to_post_startup_inferior */
+  NULL,                         /* to_acknowledge_created_inferior */
+  find_default_clone_and_follow_inferior,       /* to_clone_and_follow_inferior */
+  NULL,                         /* to_post_follow_inferior_by_clone */
+  NULL,                         /* to_insert_fork_catchpoint */
+  NULL,                         /* to_remove_fork_catchpoint */
+  NULL,                         /* to_insert_vfork_catchpoint */
+  NULL,                         /* to_remove_vfork_catchpoint */
+  NULL,                         /* to_has_forked */
+  NULL,                         /* to_has_vforked */
+  NULL,                         /* to_can_follow_vfork_prior_to_exec */
+  NULL,                         /* to_post_follow_vfork */
+  NULL,                         /* to_insert_exec_catchpoint */
+  NULL,                         /* to_remove_exec_catchpoint */
+  NULL,                         /* to_has_execd */
+  NULL,                         /* to_reported_exec_events_per_exec_call */
+  NULL,                         /* to_has_syscall_event */
+  NULL,                         /* to_has_exited */
   0,				/* to_mourn_inferior */
   0,				/* to_can_run */
   0,				/* to_notice_signals */
-  0,				/* to_thread_alive */
+  core_file_thread_alive,	/* to_thread_alive */
   0,				/* to_stop */
+  NULL,                         /* to_enable_exception_callback */
+  NULL,                         /* to_get_current_exception_event */
+  NULL,                         /* to_pid_to_exec_file */
+  core_file_to_sym_file,        /* to_core_file_to_sym_file */
   core_stratum,			/* to_stratum */
   0,				/* to_next */
   0,				/* to_has_all_memory */

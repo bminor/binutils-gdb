@@ -153,7 +153,7 @@ struct language_defn
 
   /* Print a value using syntax appropriate for this language. */
 
-  int (*la_val_print) PARAMS ((struct type *, char *,  CORE_ADDR, GDB_FILE *,
+  int (*la_val_print) PARAMS ((struct type *, char *, int, CORE_ADDR, GDB_FILE *,
 			       int, int, int, enum val_prettyprint));
 
   /* Print a top-level value using syntax appropriate for this language. */
@@ -264,8 +264,8 @@ set_language PARAMS ((enum language));
 #define LA_PRINT_TYPE(type,varstring,stream,show,level) \
   (current_language->la_print_type(type,varstring,stream,show,level))
 
-#define LA_VAL_PRINT(type,valaddr,addr,stream,fmt,deref,recurse,pretty) \
-  (current_language->la_val_print(type,valaddr,addr,stream,fmt,deref, \
+#define LA_VAL_PRINT(type,valaddr,offset,addr,stream,fmt,deref,recurse,pretty) \
+  (current_language->la_val_print(type,valaddr,offset,addr,stream,fmt,deref, \
 				  recurse,pretty))
 #define LA_VALUE_PRINT(val,stream,fmt,pretty) \
   (current_language->la_value_print(val,stream,fmt,pretty))

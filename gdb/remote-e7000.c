@@ -33,6 +33,7 @@
 
 #include "defs.h"
 #include "gdbcore.h"
+#include "gdbarch.h"
 #include "inferior.h"
 #include "target.h"
 #include "wait.h"
@@ -2172,10 +2173,14 @@ target e7000 /dev/ttya 9600\n\
 target e7000 foobar" ;
   e7000_ops.to_open =   e7000_open;	
   e7000_ops.to_close =   e7000_close;	
-  e7000_ops.to_attach =   0;		
-  e7000_ops.to_detach =   e7000_detach;	
+  e7000_ops.to_attach =   0;
+  e7000_ops.to_post_attach = NULL;
+  e7000_ops.to_require_attach = NULL;	
+  e7000_ops.to_detach =   e7000_detach;
+  e7000_ops.to_require_detach = NULL;	
   e7000_ops.to_resume =   e7000_resume;	
-  e7000_ops.to_wait  =   e7000_wait;	
+  e7000_ops.to_wait  =   e7000_wait;
+  e7000_ops.to_post_wait = NULL;	
   e7000_ops.to_fetch_registers  =   e7000_fetch_register;
   e7000_ops.to_store_registers  =   e7000_store_register;
   e7000_ops.to_prepare_to_store =   e7000_prepare_to_store;
@@ -2192,11 +2197,30 @@ target e7000 foobar" ;
   e7000_ops.to_load  =   e7000_load;		
   e7000_ops.to_lookup_symbol =   0;		
   e7000_ops.to_create_inferior =   e7000_create_inferior;
+  e7000_ops.to_post_startup_inferior = NULL;
+  e7000_ops.to_acknowledge_created_inferior = NULL;
+  e7000_ops.to_clone_and_follow_inferior = NULL;          
+  e7000_ops.to_post_follow_inferior_by_clone = NULL;  
+  e7000_ops.to_insert_fork_catchpoint = NULL;
+  e7000_ops.to_remove_fork_catchpoint = NULL;
+  e7000_ops.to_insert_vfork_catchpoint = NULL;
+  e7000_ops.to_remove_vfork_catchpoint = NULL;                      
+  e7000_ops.to_has_forked = NULL;
+  e7000_ops.to_has_vforked = NULL;
+  e7000_ops.to_can_follow_vfork_prior_to_exec = NULL;                        
+  e7000_ops.to_post_follow_vfork = NULL;
+  e7000_ops.to_insert_exec_catchpoint = NULL;
+  e7000_ops.to_remove_exec_catchpoint = NULL;
+  e7000_ops.to_has_execd = NULL;
+  e7000_ops.to_reported_exec_events_per_exec_call = NULL;
+  e7000_ops.to_has_exited = NULL;
   e7000_ops.to_mourn_inferior =   e7000_mourn_inferior;		
   e7000_ops.to_can_run  =   0;			
   e7000_ops.to_notice_signals =   0;		
   e7000_ops.to_thread_alive  =   0;		
-  e7000_ops.to_stop  =   e7000_stop;		
+  e7000_ops.to_stop  =   e7000_stop;
+  e7000_ops.to_pid_to_exec_file = NULL;	
+  e7000_ops.to_core_file_to_sym_file = NULL;
   e7000_ops.to_stratum =   process_stratum;	
   e7000_ops.DONT_USE =   0;			
   e7000_ops.to_has_all_memory =   1;		

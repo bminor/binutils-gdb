@@ -427,7 +427,7 @@ add_vmap (ldi)
 	     objname, bfd_errmsg (bfd_get_error ()));
       /*NOTREACHED*/
     }
-  obj = allocate_objfile (vp->bfd, 0);
+  obj = allocate_objfile (vp->bfd, 0, 0, 0);
   vp->objfile = obj;
 
 #ifndef SOLIB_SYMBOLS_MANUAL
