@@ -609,6 +609,8 @@ do
     bfd_elf32_pjl_vec)          tb="$tb elf32-pj.lo elf32.lo $elf";;
     bfd_elf32_powerpc_vec)	tb="$tb elf32-ppc.lo elf32.lo $elf" ;;
     bfd_elf32_powerpcle_vec)	tb="$tb elf32-ppc.lo elf32.lo $elf" ;;
+    bfd_elf32_powerpcleqnx_vec)	tb="$tb elf32-ppcqnx.lo elf32-ppc.lo elf32.lo $elf" ;;
+    bfd_elf32_powerpcqnx_vec)	tb="$tb elf32-ppcqnx.lo elf32-ppc.lo elf32.lo $elf" ;;
     bfd_elf32_s390_vec)		tb="$tb elf32-s390.lo elf32.lo $elf" ;;
     # FIXME: We include cofflink.lo not because it's needed for
     # bfd_elf32_sh64[l]_vec, but because we include bfd_elf32_sh[l]_vec

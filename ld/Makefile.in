@@ -1,6 +1,6 @@
-# Makefile.in generated automatically by automake 1.4-p4 from Makefile.am
+# Makefile.in generated automatically by automake 1.4-p5 from Makefile.am
 
-# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
+# Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
@@ -152,7 +152,8 @@ MANCONF = -Dman
 
 TEXI2POD = perl $(BASEDIR)/etc/texi2pod.pl
 
-POD2MAN = pod2man --center="GNU Development Tools" 	--release="binutils-$(VERSION)" --section=1
+POD2MAN = pod2man --center="GNU Development Tools" \
+	--release="binutils-$(VERSION)" --section=1
 
 
 #stuff for self hosting (can be overridden in config file).
@@ -161,19 +162,49 @@ HOSTING_LIBS = @HOSTING_LIBS@
 HOSTING_EMU = -m $(EMUL)
 
 # Setup the testing framework, if you have one
-EXPECT = `if [ -f $$r/../expect/expect ] ; 	then echo $$r/../expect/expect ; 	else echo expect ; fi`
+EXPECT = `if [ -f $$r/../expect/expect ] ; \
+	then echo $$r/../expect/expect ; \
+	else echo expect ; fi`
 
 
-RUNTEST = `if [ -f $${srcroot}/../dejagnu/runtest ] ; 	then echo $${srcroot}/../dejagnu/runtest ; 	else echo runtest ; fi`
+RUNTEST = `if [ -f $${srcroot}/../dejagnu/runtest ] ; \
+	then echo $${srcroot}/../dejagnu/runtest ; \
+	else echo runtest ; fi`
 
 
 RUNTESTFLAGS = 
 
-CC_FOR_TARGET = `   if [ -f $$r/../gcc/xgcc ] ; then     if [ -f $$r/../newlib/Makefile ] ; then       echo $$r/../gcc/xgcc -B$$r/../gcc/ -idirafter $$r/../newlib/targ-include -idirafter $${srcroot}/../newlib/libc/include -nostdinc;     else       echo $$r/../gcc/xgcc -B$$r/../gcc/;     fi;   else     if [ "@host@" = "@target@" ] ; then       echo $(CC);     else       echo gcc | sed '$(transform)';     fi;   fi`
+CC_FOR_TARGET = ` \
+  if [ -f $$r/../gcc/xgcc ] ; then \
+    if [ -f $$r/../newlib/Makefile ] ; then \
+      echo $$r/../gcc/xgcc -B$$r/../gcc/ -idirafter $$r/../newlib/targ-include -idirafter $${srcroot}/../newlib/libc/include -nostdinc; \
+    else \
+      echo $$r/../gcc/xgcc -B$$r/../gcc/; \
+    fi; \
+  else \
+    if [ "@host@" = "@target@" ] ; then \
+      echo $(CC); \
+    else \
+      echo gcc | sed '$(transform)'; \
+    fi; \
+  fi`
 
 
 CXX = gcc
-CXX_FOR_TARGET = `   if [ -f $$r/../gcc/xgcc ] ; then     if [ -f $$r/../newlib/Makefile ] ; then       echo $$r/../gcc/xgcc -B$$r/../gcc/ -idirafter $$r/../newlib/targ-include -idirafter $${srcroot}/../newlib/libc/include -nostdinc;     else       echo $$r/../gcc/xgcc -B$$r/../gcc/;     fi;   else     if [ "@host@" = "@target@" ] ; then       echo $(CXX);     else       echo gcc | sed '$(transform)';     fi;   fi`
+CXX_FOR_TARGET = ` \
+  if [ -f $$r/../gcc/xgcc ] ; then \
+    if [ -f $$r/../newlib/Makefile ] ; then \
+      echo $$r/../gcc/xgcc -B$$r/../gcc/ -idirafter $$r/../newlib/targ-include -idirafter $${srcroot}/../newlib/libc/include -nostdinc; \
+    else \
+      echo $$r/../gcc/xgcc -B$$r/../gcc/; \
+    fi; \
+  else \
+    if [ "@host@" = "@target@" ] ; then \
+      echo $(CXX); \
+    else \
+      echo gcc | sed '$(transform)'; \
+    fi; \
+  fi`
 
 
 noinst_PROGRAMS = ld-new
@@ -186,25 +217,238 @@ INCLUDES = -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) -I$(to
 BFDLIB = ../bfd/libbfd.la
 LIBIBERTY = ../libiberty/libiberty.a
 
-ALL_EMULATIONS =  	ea29k.o 	eaixppc.o 	eaixrs6.o 	ealpha.o 	earcelf.o 	earm_epoc_pe.o 	earmaoutb.o 	earmaoutl.o 	earmcoff.o 	earmelf.o 	earmelf_fbsd.o 	earmelf_linux.o 	earmelf_nbsd.o 	earmelfb_nbsd.o 	earmelf_oabi.o 	earmnto.o 	earmnbsd.o 	earmpe.o 	eavr1200.o 	eavr23xx.o 	eavr4433.o 	eavr44x4.o 	eavr85xx.o 	eavrmega103.o 	eavrmega161.o 	eavrmega603.o 	eavr1.o 	eavr2.o 	eavr3.o 	eavr4.o 	eavr5.o 	ecoff_sparc.o 	ecrisaout.o 	ecriself.o 	ecrislinux.o 	ed10velf.o 	ed30v_e.o 	ed30v_o.o 	ed30velf.o 	edelta68.o 	eelf32_dlx.o 	eebmon29k.o 	eelf32_i960.o 	eelf32_i860.o 	eelf32_sparc.o 	eelf32b4300.o 	eelf32bmip.o 	eelf32bmipn32.o 	eelf32btsmip.o 	eelf32btsmipn32.o 	eelf32ltsmip.o 	eelf32ltsmipn32.o 	eelf32ebmip.o 	eelf32elmip.o 	eelf32fr30.o 	eelf32frv.o 	eelf32i370.o 	eelf32ip2k.o 	eelf32l4300.o 	eelf32lmip.o 	eelf32lppc.o 	eelf32lppcsim.o 	eelf32mcore.o 	eelf32openrisc.o 	eelf32ppc.o 	eelf32ppc_fbsd.o 	eelf32ppclinux.o 	eelf32ppcsim.o 	eelf32ppcwindiss.o 	eelf32vax.o 	eelf32xstormy16.o 	eelf_i386.o 	eelf_i386_be.o 	eelf_i386_chaos.o 	eelf_i386_fbsd.o 	eelf_i386_ldso.o 	eelf_s390.o 	egld960.o 	egld960coff.o 	eh8300.o 	eh8300h.o 	eh8300s.o 	eh8300elf.o 	eh8300helf.o 	eh8300self.o 	eh8500.o 	eh8500b.o 	eh8500c.o 	eh8500m.o 	eh8500s.o 	ehp300bsd.o 	ehp3hpux.o 	ehppaelf.o 	ehppalinux.o 	ehppanbsd.o 	ehppaobsd.o 	ei386aout.o 	ei386beos.o 	ei386bsd.o 	ei386coff.o 	ei386go32.o 	ei386linux.o 	ei386lynx.o 	ei386mach.o 	ei386moss.o 	ei386msdos.o 	ei386nbsd.o 	ei386nto.o 	ei386nw.o 	ei386pe.o 	ei386pe_posix.o 	elnk960.o 	em68hc11elf.o 	em68hc11elfb.o 	em68hc12elf.o 	em68hc12elfb.o 	em68k4knbsd.o 	em68kaout.o 	em68kaux.o 	em68kcoff.o 	em68kelf.o 	em68kelfnbsd.o 	em68klinux.o 	em68klynx.o 	em68knbsd.o 	em68kpsos.o 	em88kbcs.o 	emcorepe.o 	emipsbig.o 	emipsbsd.o 	emipsidt.o 	emipsidtl.o 	emipslit.o 	emipslnews.o 	emipspe.o 	enews.o 	ens32knbsd.o 	eor32.o 	eor32elf.o 	epc532macha.o 	epdp11.o 	epjelf.o 	epjlelf.o 	eppcmacos.o 	eppcnw.o 	eppcpe.o 	eriscix.o 	esa29200.o 	esh.o 	eshelf32.o 	eshlelf32.o 	eshelf32_nbsd.o 	eshlelf32_nbsd.o 	eshelf.o 	eshelf_linux.o 	eshlelf_linux.o 	eshelf_nbsd.o 	eshlelf_nbsd.o 	eshl.o 	eshlelf.o 	eshpe.o 	esparcaout.o 	esparclinux.o 	esparclynx.o 	esparcnbsd.o 	est2000.o 	esun3.o 	esun4.o 	etic30aout.o 	etic30coff.o 	etic54xcoff.o 	etic80coff.o 	evanilla.o 	evax.o 	evaxnbsd.o 	evsta.o 	ew65.o 	ez8001.o 	ez8002.o
+ALL_EMULATIONS = \
+	ea29k.o \
+	eaixppc.o \
+	eaixrs6.o \
+	ealpha.o \
+	earcelf.o \
+	earm_epoc_pe.o \
+	earmaoutb.o \
+	earmaoutl.o \
+	earmcoff.o \
+	earmelf.o \
+	earmelf_fbsd.o \
+	earmelf_linux.o \
+	earmelf_nbsd.o \
+	earmelfb_nbsd.o \
+	earmelf_oabi.o \
+	earmnto.o \
+	earmnbsd.o \
+	earmpe.o \
+	eavr1200.o \
+	eavr23xx.o \
+	eavr4433.o \
+	eavr44x4.o \
+	eavr85xx.o \
+	eavrmega103.o \
+	eavrmega161.o \
+	eavrmega603.o \
+	eavr1.o \
+	eavr2.o \
+	eavr3.o \
+	eavr4.o \
+	eavr5.o \
+	ecoff_sparc.o \
+	ecrisaout.o \
+	ecriself.o \
+	ecrislinux.o \
+	ed10velf.o \
+	ed30v_e.o \
+	ed30v_o.o \
+	ed30velf.o \
+	edelta68.o \
+	eelf32_dlx.o \
+	eebmon29k.o \
+	eelf32_i960.o \
+	eelf32_i860.o \
+	eelf32_sparc.o \
+	eelf32b4300.o \
+	eelf32bmip.o \
+	eelf32bmipn32.o \
+	eelf32btsmip.o \
+	eelf32btsmipn32.o \
+	eelf32ltsmip.o \
+	eelf32ltsmipn32.o \
+	eelf32ebmip.o \
+	eelf32elmip.o \
+	eelf32fr30.o \
+	eelf32frv.o \
+	eelf32i370.o \
+	eelf32ip2k.o \
+	eelf32l4300.o \
+	eelf32lmip.o \
+	eelf32lppc.o \
+	eelf32lppcnto.o \
+	eelf32lppcsim.o \
+	eelf32mcore.o \
+	eelf32openrisc.o \
+	eelf32ppc.o \
+	eelf32ppc_fbsd.o \
+	eelf32ppclinux.o \
+	eelf32ppcnto.o \
+	eelf32ppcsim.o \
+	eelf32ppcwindiss.o \
+	eelf32vax.o \
+	eelf32xstormy16.o \
+	eelf_i386.o \
+	eelf_i386_be.o \
+	eelf_i386_chaos.o \
+	eelf_i386_fbsd.o \
+	eelf_i386_ldso.o \
+	eelf_s390.o \
+	egld960.o \
+	egld960coff.o \
+	eh8300.o \
+	eh8300h.o \
+	eh8300s.o \
+	eh8300elf.o \
+	eh8300helf.o \
+	eh8300self.o \
+	eh8500.o \
+	eh8500b.o \
+	eh8500c.o \
+	eh8500m.o \
+	eh8500s.o \
+	ehp300bsd.o \
+	ehp3hpux.o \
+	ehppaelf.o \
+	ehppalinux.o \
+	ehppanbsd.o \
+	ehppaobsd.o \
+	ei386aout.o \
+	ei386beos.o \
+	ei386bsd.o \
+	ei386coff.o \
+	ei386go32.o \
+	ei386linux.o \
+	ei386lynx.o \
+	ei386mach.o \
+	ei386moss.o \
+	ei386msdos.o \
+	ei386nbsd.o \
+	ei386nto.o \
+	ei386nw.o \
+	ei386pe.o \
+	ei386pe_posix.o \
+	elnk960.o \
+	em68hc11elf.o \
+	em68hc11elfb.o \
+	em68hc12elf.o \
+	em68hc12elfb.o \
+	em68k4knbsd.o \
+	em68kaout.o \
+	em68kaux.o \
+	em68kcoff.o \
+	em68kelf.o \
+	em68kelfnbsd.o \
+	em68klinux.o \
+	em68klynx.o \
+	em68knbsd.o \
+	em68kpsos.o \
+	em88kbcs.o \
+	emcorepe.o \
+	emipsbig.o \
+	emipsbsd.o \
+	emipsidt.o \
+	emipsidtl.o \
+	emipslit.o \
+	emipslnews.o \
+	emipspe.o \
+	enews.o \
+	ens32knbsd.o \
+	eor32.o \
+	eor32elf.o \
+	epc532macha.o \
+	epdp11.o \
+	epjelf.o \
+	epjlelf.o \
+	eppcmacos.o \
+	eppcnw.o \
+	eppcpe.o \
+	eriscix.o \
+	esa29200.o \
+	esh.o \
+	eshelf32.o \
+	eshlelf32.o \
+	eshelf32_nbsd.o \
+	eshlelf32_nbsd.o \
+	eshelf.o \
+	eshelf_linux.o \
+	eshlelf_linux.o \
+	eshelf_nbsd.o \
+	eshlelf_nbsd.o \
+	eshl.o \
+	eshlelf.o \
+	eshpe.o \
+	esparcaout.o \
+	esparclinux.o \
+	esparclynx.o \
+	esparcnbsd.o \
+	est2000.o \
+	esun3.o \
+	esun4.o \
+	etic30aout.o \
+	etic30coff.o \
+	etic54xcoff.o \
+	etic80coff.o \
+	evanilla.o \
+	evax.o \
+	evaxnbsd.o \
+	evsta.o \
+	ew65.o \
+	ez8001.o \
+	ez8002.o
 
 
-ALL_64_EMULATIONS =  	eelf64_aix.o 	eelf64_ia64.o 	eelf64_ia64_fbsd.o 	eshelf64.o 	eshlelf64.o 	eshelf64_nbsd.o 	eshlelf64_nbsd.o 	eelf_x86_64.o 	eelf_x86_64_fbsd.o 	eelf64_s390.o 	eelf64_sparc.o 	eelf64_sparc_fbsd.o 	eelf64alpha.o 	eelf64alpha_fbsd.o 	eelf64alpha_nbsd.o 	eelf64bmip.o 	eelf64btsmip.o 	eelf64ltsmip.o 	eelf64hppa.o 	eelf64mmix.o 	emmo.o 	eelf64ppc.o 	eelf64lppc.o 	ehppa64linux.o
+ALL_64_EMULATIONS = \
+	eelf64_aix.o \
+	eelf64_ia64.o \
+	eelf64_ia64_fbsd.o \
+	eshelf64.o \
+	eshlelf64.o \
+	eshelf64_nbsd.o \
+	eshlelf64_nbsd.o \
+	eelf_x86_64.o \
+	eelf_x86_64_fbsd.o \
+	eelf64_s390.o \
+	eelf64_sparc.o \
+	eelf64_sparc_fbsd.o \
+	eelf64alpha.o \
+	eelf64alpha_fbsd.o \
+	eelf64alpha_nbsd.o \
+	eelf64bmip.o \
+	eelf64btsmip.o \
+	eelf64ltsmip.o \
+	eelf64hppa.o \
+	eelf64mmix.o \
+	emmo.o \
+	eelf64ppc.o \
+	eelf64lppc.o \
+	ehppa64linux.o
 
 
-ALL_EMUL_EXTRA_OFILES =  	deffilep.o 	pe-dll.o
+ALL_EMUL_EXTRA_OFILES = \
+	deffilep.o \
+	pe-dll.o
 
 
-CFILES = ldctor.c ldemul.c ldexp.c ldfile.c ldlang.c 	ldmain.c ldmisc.c ldver.c ldwrite.c lexsup.c 	mri.c ldcref.c pe-dll.c
+CFILES = ldctor.c ldemul.c ldexp.c ldfile.c ldlang.c \
+	ldmain.c ldmisc.c ldver.c ldwrite.c lexsup.c \
+	mri.c ldcref.c pe-dll.c
 
 
-HFILES = ld.h ldctor.h ldemul.h ldexp.h ldfile.h 	ldlang.h ldlex.h ldmain.h ldmisc.h ldver.h 	ldwrite.h mri.h deffile.h pe-dll.h
+HFILES = ld.h ldctor.h ldemul.h ldexp.h ldfile.h \
+	ldlang.h ldlex.h ldmain.h ldmisc.h ldver.h \
+	ldwrite.h mri.h deffile.h pe-dll.h
 
 
 GENERATED_CFILES = ldgram.c ldlex.c deffilep.c
 GENERATED_HFILES = ldgram.h ldemul-list.h deffilep.h
 
-OFILES = ldgram.o ldlex.o lexsup.o ldlang.o mri.o ldctor.o ldmain.o 	ldwrite.o ldexp.o  ldemul.o ldver.o ldmisc.o 	ldfile.o ldcref.o ${EMULATION_OFILES} ${EMUL_EXTRA_OFILES}
+OFILES = ldgram.o ldlex.o lexsup.o ldlang.o mri.o ldctor.o ldmain.o \
+	ldwrite.o ldexp.o  ldemul.o ldver.o ldmisc.o \
+	ldfile.o ldcref.o ${EMULATION_OFILES} ${EMUL_EXTRA_OFILES}
 
 
 STAGESTUFF = *.o ldscripts/* e*.c
@@ -223,7 +467,8 @@ GEN_DEPENDS = $(srcdir)/genscripts.sh stringify.sed
 # We need this for automake to use YLWRAP.
 EXTRA_ld_new_SOURCES = deffilep.y
 
-ld_new_SOURCES = ldgram.y ldlex.l lexsup.c ldlang.c mri.c ldctor.c ldmain.c 	ldwrite.c ldexp.c ldemul.c ldver.c ldmisc.c ldfile.c ldcref.c
+ld_new_SOURCES = ldgram.y ldlex.l lexsup.c ldlang.c mri.c ldctor.c ldmain.c \
+	ldwrite.c ldexp.c ldemul.c ldver.c ldmisc.c ldfile.c ldcref.c
 
 ld_new_DEPENDENCIES = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) $(BFDLIB) $(LIBIBERTY) $(INTLDEPS)
 ld_new_LDADD = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) $(BFDLIB) $(LIBIBERTY) $(INTLLIBS)
@@ -236,7 +481,8 @@ MAINTAINERCLEANFILES = ldver.texi
 # We want to reconfigure if configure.host or configure.tgt changes.
 CONFIG_STATUS_DEPENDENCIES = $(srcdir)/configure.host $(srcdir)/configure.tgt
 
-MOSTLYCLEANFILES = $(STAGESTUFF) ld1$(EXEEXT) ld2$(EXEEXT) ld3$(EXEEXT) 	ldemul-list.h crtbegin.o crtend.o ld.log ld.sum
+MOSTLYCLEANFILES = $(STAGESTUFF) ld1$(EXEEXT) ld2$(EXEEXT) ld3$(EXEEXT) \
+	ldemul-list.h crtbegin.o crtend.o ld.log ld.sum
 
 CLEANFILES = dep.sed DEP DEPA DEP1 DEP2
 
@@ -286,7 +532,7 @@ deffilep.c ldgram.c ldlex.c
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = tar
+TAR = gtar
 GZIP_ENV = --best
 SOURCES = $(ld_new_SOURCES) $(EXTRA_ld_new_SOURCES)
 OBJECTS = $(ld_new_OBJECTS)
@@ -304,7 +550,7 @@ Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ configure.in  acinclude.m4
 	cd $(srcdir) && $(ACLOCAL)
 
-config.status: $(srcdir)/configure.in $(CONFIG_STATUS_DEPENDENCIES)
+config.status: $(srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	$(SHELL) ./config.status --recheck
 $(srcdir)/configure: @MAINTAINER_MODE_TRUE@$(srcdir)/configure.in $(ACLOCAL_M4) $(CONFIGURE_DEPENDENCIES)
 	cd $(srcdir) && $(AUTOCONF)
@@ -587,7 +833,7 @@ maintainer-clean-recursive:
 	dot_seen=no; \
 	rev=''; list='$(SUBDIRS)'; for subdir in $$list; do \
 	  rev="$$subdir $$rev"; \
-	  test "$$subdir" = "." && dot_seen=yes; \
+	  test "$$subdir" != "." || dot_seen=yes; \
 	done; \
 	test "$$dot_seen" = "no" && rev=". $$rev"; \
 	target=`echo $@ | sed s/-recursive//`; \
@@ -1083,10 +1329,18 @@ eelf32lppc.c: $(srcdir)/emulparams/elf32lppc.sh \
   $(srcdir)/emulparams/elf32ppc.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32lppc "$(tdir_elf32lppc)"
+eelf32lppcnto.c: $(srcdir)/emulparams/elf32lppcnto.sh \
+  $(srcdir)/emulparams/elf32ppc.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32lppcnto "$(tdir_elf32lppcnto)"
 eelf32lppcsim.c: $(srcdir)/emulparams/elf32lppcsim.sh \
   $(srcdir)/emulparams/elf32lppc.sh $(srcdir)/emulparams/elf32ppc.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32lppcsim "$(tdir_elf32lppcsim)"
+eelf32ppcnto.c: $(srcdir)/emulparams/elf32ppcnto.sh \
+  $(srcdir)/emulparams/elf32ppc.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32ppcnto "$(tdir_elf32ppcnto)"
 eelf32ppcwindiss.c: $(srcdir)/emulparams/elf32ppcwindiss.sh ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32ppcwindiss "$(tdir_elf32ppcwindiss)"
 eelf32lsmip.c: $(srcdir)/emulparams/elf32lsmip.sh \

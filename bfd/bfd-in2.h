@@ -1,6 +1,7 @@
 /* DO NOT EDIT!  -*- buffer-read-only: t -*-  This file is automatically 
-   generated from "bfd-in.h", "init.c", "opncls.c", "libbfd.c" and 
-   "section.c".
+   generated from "bfd-in.h", "init.c", "opncls.c", "libbfd.c", 
+   "section.c", "archures.c", "reloc.c", "syms.c", "bfd.c", "archive.c", 
+   "corefile.c", "targets.c" and "format.c".
    Run "make headers" in your build bfd/ to regenerate.  */
 
 /* Main header file for the bfd library -- portable access to object files.

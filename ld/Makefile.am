@@ -168,12 +168,14 @@ ALL_EMULATIONS = \
 	eelf32l4300.o \
 	eelf32lmip.o \
 	eelf32lppc.o \
+	eelf32lppcnto.o \
 	eelf32lppcsim.o \
 	eelf32mcore.o \
 	eelf32openrisc.o \
 	eelf32ppc.o \
 	eelf32ppc_fbsd.o \
 	eelf32ppclinux.o \
+	eelf32ppcnto.o \
 	eelf32ppcsim.o \
 	eelf32ppcwindiss.o \
 	eelf32vax.o \
@@ -604,10 +606,18 @@ eelf32lppc.c: $(srcdir)/emulparams/elf32lppc.sh \
   $(srcdir)/emulparams/elf32ppc.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32lppc "$(tdir_elf32lppc)"
+eelf32lppcnto.c: $(srcdir)/emulparams/elf32lppcnto.sh \
+  $(srcdir)/emulparams/elf32ppc.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32lppcnto "$(tdir_elf32lppcnto)"
 eelf32lppcsim.c: $(srcdir)/emulparams/elf32lppcsim.sh \
   $(srcdir)/emulparams/elf32lppc.sh $(srcdir)/emulparams/elf32ppc.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32lppcsim "$(tdir_elf32lppcsim)"
+eelf32ppcnto.c: $(srcdir)/emulparams/elf32ppcnto.sh \
+  $(srcdir)/emulparams/elf32ppc.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32ppcnto "$(tdir_elf32ppcnto)"
 eelf32ppcwindiss.c: $(srcdir)/emulparams/elf32ppcwindiss.sh ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32ppcwindiss "$(tdir_elf32ppcwindiss)"
 eelf32lsmip.c: $(srcdir)/emulparams/elf32lsmip.sh \

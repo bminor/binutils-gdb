@@ -1,3 +1,20 @@
+2002-08-09  Graeme Peterson  <gp@qnx.com>
+
+	* Makefile.am: Add entries for elf32-ppcqnx.c, and add 
+	elf32-qnx.h dependency to elfarmqnx-nabi.c and elf32-i386qnx.c.
+	* Makefile.in: Regenerate.
+	* config.bfd: Add support for powerpc{le}-*-nto targets.
+	* configure.in: Add support for bfd_elf32_powerpc{le}qnx_vec.
+	* configure: Regenerate.
+	* elf32-i386qnx.c: Moved backend functions into a QNX specific
+	common file "elf32-qnx.h", and now include that file.
+	* elf32-qnx.h: New file: QNX specific common elf backend.
+	* elf32-ppc.c: Do not include elf32-target.h if
+	ELF32_PPC_C_INCLUDED is defined.
+	* elf32-ppcqnx.c: New file: Support for QNX.
+	* elfarmqnx-nabi.c: Include elf32-qnx.h for qnx elf backend.
+	* targets.c: Add bfd_elf32_powerpc{le}qnx_vec.
+
 2002-08-09  Nick Clifton  <nickc@redhat.com>
 
 	* po/sv.po: Updated Swedish translation.

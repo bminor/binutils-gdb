@@ -1,5 +1,6 @@
 /* DO NOT EDIT!  -*- buffer-read-only: t -*-  This file is automatically 
-   generated from "proto.str			chew".
+   generated from "libbfd-in.h", "init.c", "libbfd.c", "cache.c", 
+   "reloc.c", "archures.c" and "elf.c".
    Run "make headers" in your build bfd/ to regenerate.  */
 
 /* libbfd.h -- Declarations used by bfd library *implementation*.

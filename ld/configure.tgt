@@ -484,6 +484,8 @@ powerpc*-*-elf* | powerpc*-*-eabi* | powerpc*-*-sysv* \
 	*)	targ_emul=elf32ppc
 		targ_extra_emuls="elf32ppclinux elf32ppcsim" ;;
 	esac ;;
+powerpc-*-nto*)         targ_emul=elf32ppcnto ;;
+powerpcle-*-nto*)       targ_emul=elf32lppcnto ;;
 powerpcle-*-rtems*)	targ_emul=elf32leppc ;;
 powerpc-*-rtems*)	targ_emul=elf32ppc ;;
 powerpc-*-macos*)	targ_emul=ppcmacos ;;

@@ -1,3 +1,11 @@
+2002-07-31  Graeme Peterson  <gp@qnx.com>
+
+	* configure.tgt: Add support for powerpc{le}-*-nto* targets.
+	* Makefile.am: Add eelf32{l}ppcnto.o files.
+	* Makefile.in: Regenerate.
+	* emulparams/elf32lppcnto.sh: New file.
+	* emulparams/elf32ppcnto.sh: New file.
+
 2002-08-07  H.J. Lu <hjl@gnu.org>
 
 	* ld.texinfo: Document --no-undefined-version.

@@ -1,5 +1,5 @@
 /* DO NOT EDIT!  -*- buffer-read-only: t -*-  This file is automatically 
-   generated from "proto.str			chew".
+   generated from "libcoff-in.h" and "coffcode.h".
    Run "make headers" in your build bfd/ to regenerate.  */
 
 /* BFD COFF object file private structure.

@@ -232,6 +232,7 @@ BFD32_BACKENDS = \
 	elf32-or32.lo \
 	elf32-pj.lo \
 	elf32-ppc.lo \
+	elf32-ppcqnx.lo \
 	elf32-s390.lo \
 	elf32-sh.lo \
 	elf32-sh-lin.lo \
@@ -390,6 +391,7 @@ BFD32_BACKENDS_CFILES = \
 	elf32-or32.c \
 	elf32-pj.c \
 	elf32-ppc.c \
+	elf32-ppcqnx.c \
 	elf32-sh64.c \
 	elf32-sh64-com.c \
 	elf32-s390.c \
@@ -1101,7 +1103,7 @@ elfarm-nabi.lo: elfarm-nabi.c $(INCDIR)/elf/arm.h $(INCDIR)/elf/reloc-macros.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
   elf32-arm.h elf32-target.h
 elfarmqnx-nabi.lo: elfarmqnx-nabi.c $(INCDIR)/elf/arm.h $(INCDIR)/elf/reloc-macros.h \
-  $(INCDIR)/filenames.h elf-bfd.h $(INCDIR)/elf/common.h \
+  $(INCDIR)/filenames.h elf-bfd.h elf32-qnx.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
   elf32-arm.h elf32-target.h
 elf32-avr.lo: elf32-avr.c $(INCDIR)/filenames.h elf-bfd.h \
@@ -1151,7 +1153,7 @@ elf32-i386.lo: elf32-i386.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/elf/external.h $(INCDIR)/elf/i386.h $(INCDIR)/elf/reloc-macros.h \
   elf32-target.h
 elf32-i386qnx.lo: elf32-i386qnx.c elf32-i386.c $(INCDIR)/filenames.h \
-  $(INCDIR)/bfdlink.h elf-bfd.h $(INCDIR)/elf/common.h \
+  $(INCDIR)/bfdlink.h elf-bfd.h elf32-qnx.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/elf/i386.h \
   $(INCDIR)/elf/reloc-macros.h elf32-target.h
 elf32-i860.lo: elf32-i860.c $(INCDIR)/filenames.h elf-bfd.h \
@@ -1222,6 +1224,10 @@ elf32-pj.lo: elf32-pj.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   elf32-target.h
 elf32-ppc.lo: elf32-ppc.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/elf/ppc.h $(INCDIR)/elf/reloc-macros.h \
+  elf32-target.h
+elf32-ppcqnx.lo: elf32-ppcqnx.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
+  elf-bfd.h elf32-qnx.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/elf/ppc.h $(INCDIR)/elf/reloc-macros.h \
   elf32-target.h
 elf32-sh64.lo: elf32-sh64.c $(INCDIR)/filenames.h elf-bfd.h \

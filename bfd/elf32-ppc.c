@@ -3836,4 +3836,7 @@ ppc_elf_grok_psinfo (abfd, note)
 #define elf_backend_grok_psinfo			ppc_elf_grok_psinfo
 #define elf_backend_reloc_type_class		ppc_elf_reloc_type_class
 
+#ifndef ELF32_PPC_C_INCLUDED
 #include "elf32-target.h"
+#endif
+

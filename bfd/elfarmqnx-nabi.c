@@ -1,5 +1,5 @@
-/* 32-bit ELF support for ARM new abi option, for QNX.
-   Copyright 2002 Free Software Foundation, Inc.
+/* ARM new abi QNX specific support for 32-bit ELF
+   Copyright 2002   Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -20,6 +20,8 @@
 #define ELFARM_NABI_C_INCLUDED
 #include "elfarm-nabi.c"
 
+#include "elf32-qnx.h"
+
 #undef  TARGET_LITTLE_SYM 
 #define TARGET_LITTLE_SYM       bfd_elf32_littlearmqnx_vec
 #undef  TARGET_BIG_SYM
@@ -30,4 +32,3 @@
 #define ELF_MAXPAGESIZE 	0x1000
 
 #include "elf32-arm.h"
-

@@ -870,6 +870,14 @@ case "${targ}" in
     targ_defvec=bfd_elf32_powerpc_vec
     targ_selvecs="nlm32_powerpc_vec rs6000coff_vec"
     ;;
+  powerpc-*-nto*)
+    targ_defvec=bfd_elf32_powerpcqnx_vec
+    targ_selvecs="rs6000coff_vec bfd_elf32_powerpcleqnx_vec ppcboot_vec"
+    ;;
+  powerpcle-*-nto*)
+    targ_defvec=bfd_elf32_powerpcleqnx_vec
+    targ_selvecs="rs6000coff_vec bfd_elf32_powerpcqnx_vec ppcboot_vec"
+    ;;
   powerpcle-*-elf* | powerpcle-*-sysv4* | powerpcle-*-eabi* | \
   powerpcle-*-solaris2* | powerpcle-*-linux-gnu* | powerpcle-*-vxworks* |\
   powerpcle-*-rtems*)
