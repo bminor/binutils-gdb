@@ -37,6 +37,7 @@
 #define RDX_REGNUM 3
 #define RDI_REGNUM 5
 #define EFLAGS_REGNUM 17
+#define ST0_REGNUM 22
 #define XMM1_REGNUM  39
 
 struct register_info
@@ -105,6 +106,33 @@ static struct register_info x86_64_register_info_table[] = {
   /* 53 */ {16, "xmm15", &builtin_type_v4sf},
   /* 54 */ {4, "mxcsr", &builtin_type_int32}
 };
+
+/* This array is a mapping from Dwarf-2 register 
+   numbering to GDB's one. Dwarf-2 numbering is 
+   defined in x86-64 ABI, section 3.6.  */
+static int x86_64_dwarf2gdb_regno_map[] = {
+  0, 1, 2, 3,			/* RAX - RDX */
+  4, 5, 6, 7,			/* RSI, RDI, RBP, RSP */
+  8, 9, 10, 11,			/* R8 - R11 */
+  12, 13, 14, 15,		/* R12 - R15 */
+  -1,				/* RA - not mapped */
+  XMM1_REGNUM - 1, XMM1_REGNUM,	/* XMM0 ... */
+  XMM1_REGNUM + 1, XMM1_REGNUM + 2,
+  XMM1_REGNUM + 3, XMM1_REGNUM + 4,
+  XMM1_REGNUM + 5, XMM1_REGNUM + 6,
+  XMM1_REGNUM + 7, XMM1_REGNUM + 8,
+  XMM1_REGNUM + 9, XMM1_REGNUM + 10,
+  XMM1_REGNUM + 11, XMM1_REGNUM + 12,
+  XMM1_REGNUM + 13, XMM1_REGNUM + 14,	/* ... XMM15 */
+  ST0_REGNUM + 0, ST0_REGNUM + 1,	/* ST0 ... */
+  ST0_REGNUM + 2, ST0_REGNUM + 3,
+  ST0_REGNUM + 4, ST0_REGNUM + 5,
+  ST0_REGNUM + 6, ST0_REGNUM + 7	/* ... ST7 */
+};
+
+static int x86_64_dwarf2gdb_regno_map_length =
+  sizeof (x86_64_dwarf2gdb_regno_map) /
+  sizeof (x86_64_dwarf2gdb_regno_map[0]);
 
 /* Number of all registers */
 #define X86_64_NUM_REGS (sizeof (x86_64_register_info_table) / \
@@ -196,6 +224,19 @@ x86_64_register_convert_to_raw (struct type *type, int regnum,
   gdb_assert (TYPE_CODE (type) == TYPE_CODE_FLT && TYPE_LENGTH (type) == 12);
   /* Simply omit the two unused bytes.  */
   memcpy (to, from, FPU_REG_RAW_SIZE);
+}
+
+/* Dwarf-2 <-> GDB register numbers mapping.  */
+int
+x86_64_dwarf2_reg_to_regnum (int dw_reg)
+{
+  if (dw_reg < 0 || dw_reg > x86_64_dwarf2gdb_regno_map_length)
+    {
+      warning ("Dwarf-2 uses unmapped register #%d\n", dw_reg);
+      return dw_reg;
+    }
+
+  return x86_64_dwarf2gdb_regno_map[dw_reg];
 }
 
 /* This is the variable that is set with "set disassembly-flavour", and
@@ -822,7 +863,7 @@ x86_64_skip_prologue (CORE_ADDR pc)
 	{
 	  printf_filtered
 	    ("NOTE: This function doesn't seem to have a valid prologue.\n"
-	     "      Try to add -fno-omit-frame-pointer tou your gcc's CFLAGS.\n");
+	     "      Consider adding -fno-omit-frame-pointer to your gcc's CFLAGS.\n");
 	  omit_fp_note_printed++;
 	}
       return pc;
@@ -868,7 +909,7 @@ x86_64_breakpoint_from_pc (CORE_ADDR * pc, int *lenptr)
 }
 
 static struct gdbarch *
-i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
+x86_64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch *gdbarch;
   struct gdbarch_tdep *tdep;
@@ -894,7 +935,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	      break;
 	    default:
 	      internal_error (__FILE__, __LINE__,
-			      "i386_gdbarch_init: unknown machine type");
+			      "x86_64_gdbarch_init: unknown machine type");
 	    }
 	  break;
 	case bfd_mach_i386_i386:
@@ -911,12 +952,12 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	      return arches->gdbarch;
 	    default:
 	      internal_error (__FILE__, __LINE__,
-			      "i386_gdbarch_init: unknown machine type");
+			      "x86_64_gdbarch_init: unknown machine type");
 	    }
 	  break;
 	default:
 	  internal_error (__FILE__, __LINE__,
-			  "i386_gdbarch_init: unknown machine type");
+			  "x86_64_gdbarch_init: unknown machine type");
 	}
     }
 
@@ -936,7 +977,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       break;
     default:
       internal_error (__FILE__, __LINE__,
-		      "i386_gdbarch_init: unknown machine type");
+		      "x86_64_gdbarch_init: unknown machine type");
     }
 
   set_gdbarch_long_bit (gdbarch, 64);
@@ -1075,13 +1116,15 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
 /* Use dwarf2 debug frame informations.  */
   set_gdbarch_dwarf2_build_frame_info (gdbarch, dwarf2_build_frame_info);
+  set_gdbarch_dwarf2_reg_to_regnum (gdbarch, x86_64_dwarf2_reg_to_regnum);
+
   return gdbarch;
 }
 
 void
 _initialize_x86_64_tdep (void)
 {
-  register_gdbarch_init (bfd_arch_i386, i386_gdbarch_init);
+  register_gdbarch_init (bfd_arch_i386, x86_64_gdbarch_init);
 
   /* Initialize the table saying where each register starts in the
      register file.  */

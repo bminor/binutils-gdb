@@ -1,3 +1,13 @@
+2002-05-03  Michal Ludvig  <mludvig@suse.cz>
+
+	* x86-64-tdep.c (x86_64_dwarf2gdb_regno_map),
+	(x86_64_dwarf2gdb_regno_map_length),
+	(x86_64_dwarf2_reg_to_regnum): Added.
+	(x86_64_gdbarch_init): Added registration of x86_64_dwarf2_reg_to_regnum.
+	(x86_64_gdbarch_init): Renamed from i386_gdbarch_init.
+	(_initialize_x86_64_tdep): Synced with the change above.
+	(x86_64_skip_prologue): Reformulated message.
+
 2002-05-03  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* f-exp.y: Also use new prev_lexptr variable
