@@ -1,3 +1,9 @@
+Tue Jan 21 17:01:20 1997  Stu Grossman  (grossman@lisa.cygnus.com)
+
+	* configure.in configure:  Check if host has libm.  Make sure we
+	are using gcc when using the -export-dynamic option.  Fixes a
+	problem with building under Solaris/SunPro cc.
+
 Mon Jan 20 13:52:13 1997  Mark Alexander  <marka@cygnus.com>
 
 	* config/mips/{embed,embed64,embedl,embedl64}.mt:

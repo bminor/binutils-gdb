@@ -79,6 +79,9 @@ if test $gdb_cv_have_fpregset_t = yes; then
   AC_DEFINE(HAVE_FPREGSET_T)
 fi
 
+dnl See if host has libm.  This is usually needed by simulators.
+AC_CHECK_LIB(m, main)
+
 dnl See if compiler supports "long long" type.
 
 AC_MSG_CHECKING(for long long support in compiler)
@@ -175,7 +178,9 @@ if test ${build} = ${host} -a ${host} = ${target} ; then
 			AC_MSG_RESULT(yes)
 			AC_DEFINE(HAVE_THREAD_DB_LIB)
 			CONFIG_OBS="${CONFIG_OBS} sol-thread.o"
-			CONFIG_LDFLAGS="${CONFIG_LDFLAGS} -Xlinker -export-dynamic"
+			if test "$GCC" = "yes" ; then
+				CONFIG_LDFLAGS="${CONFIG_LDFLAGS} -Xlinker -export-dynamic"
+			fi
 		else
 			AC_MSG_RESULT(no)
 		fi
