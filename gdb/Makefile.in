@@ -1062,7 +1062,7 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	coff-solib.c convex-tdep.c convex-xdep.c \
 	core-sol2.c core-regset.c core-aout.c corelow.c \
 	dcache.c delta68-nat.c dpx2-nat.c dstread.c exec.c fork-child.c \
-	go32-nat.c gould-tdep.c gould-xdep.c h8300-tdep.c h8500-tdep.c \
+	go32-nat.c h8300-tdep.c h8500-tdep.c \
 	hp300ux-nat.c hppa-tdep.c hppab-nat.c hppah-nat.c \
         hp-psymtab-read.c hp-symtab-read.c \
 	i386-tdep.c i386b-nat.c i386mach-nat.c i386v-nat.c i386-linux-nat.c \
@@ -1374,11 +1374,6 @@ go32-nat.o: go32-nat.c $(defs_h) $(inferior_h) gdb_wait.h $(gdbcore_h) \
 
 gnu-nat.o: process_reply_S.h exc_request_S.h notify_S.h msg_reply_S.h \
 	exc_request_U.h msg_U.h gnu-nat.h
-
-# OBSOLETE gould-tdep.o: gould-tdep.c $(OP_INCLUDE)/np1.h $(defs_h) $(frame_h) \
-# OBSOLETE	$(gdbcore_h) $(symtab_h)
-
-# OBSOLETE gould-xdep.o: gould-xdep.c $(defs_h) $(gdbcore_h) $(inferior_h)
 
 h8300-tdep.o: h8300-tdep.c $(defs_h) $(frame_h) $(symtab_h)
 

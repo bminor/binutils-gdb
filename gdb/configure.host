@@ -17,7 +17,6 @@ hppa*)			gdb_host_cpu=pa ;;
 i[3456]86*)		gdb_host_cpu=i386 ;;
 m68*)			gdb_host_cpu=m68k ;;
 m88*)			gdb_host_cpu=m88k ;;
-# OBSOLETE np1)			gdb_host_cpu=gould ;;
 # OBSOLETE pyramid)		gdb_host_cpu=pyr ;;
 powerpc*)		gdb_host_cpu=powerpc ;;
 sparc64)		gdb_host_cpu=sparc ;;
@@ -126,8 +125,6 @@ mips-*-sysv*)		gdb_host=riscos ;;
 mips-*-riscos*)		gdb_host=riscos ;;
 
 none-*-*)		gdb_host=none ;;
-
-# OBSOLETE np1-*-*)		gdb_host=np1 ;;
 
 ns32k-*-mach3*)		gdb_host=ns32km3 ;;
 ns32k-*-netbsd*)	gdb_host=nbsd ;;

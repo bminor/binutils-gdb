@@ -1,3 +1,11 @@
+2000-05-01  Stan Shebs  <shebs@apple.com>
+
+	Remove obsolete Gould configuration:
+	* configure.host, configure.tgt: Remove Gould configs.
+	* Makefile.in: Remove Gould-related actions.
+	* gould-xdep.c, gould-tdep.c, config/gould/*: Remove files.
+	* NEWS: Mention removal.
+	
 Mon May  1 15:37:58 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	From 2000-04-28 Andreas Jaeger <aj@suse.de>:

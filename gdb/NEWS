@@ -72,6 +72,10 @@ but the code will be left in place.  If there is no activity to revive
 these configurations before the next release of GDB, the sources will
 be permanently REMOVED.
 
+* Gould support removed
+
+Support for the Gould PowerNode and NP1 has been removed.
+
 * New features for SVR4
 
 On SVR4 native platforms (such as Solaris), if you attach to a process

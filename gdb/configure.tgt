@@ -20,9 +20,7 @@ i[3456]86*)		gdb_target_cpu=i386 ;;
 m68*)			gdb_target_cpu=m68k ;;
 m88*)			gdb_target_cpu=m88k ;;
 mips*)			gdb_target_cpu=mips ;;
-# OBSOLETE np1)			gdb_target_cpu=gould ;;
 powerpc*)		gdb_target_cpu=powerpc ;;
-# OBSOLETE pn)			gdb_target_cpu=gould ;;
 # OBSOLETE pyramid)		gdb_target_cpu=pyr ;;
 sparc*)			gdb_target_cpu=sparc ;;
 thumb*)			gdb_target_cpu=arm ;;
@@ -213,14 +211,10 @@ mn10300-*-*)		gdb_target=mn10300 ;;
 
 none-*-*)		gdb_target=none ;;
 
-# OBSOLETE np1-*-*)		gdb_target=np1 ;;
-
 ns32k-*-mach3*)		gdb_target=ns32km3 ;;
 ns32k-*-netbsd*)	gdb_target=nbsd ;;
 ns32k-utek-sysv*)	gdb_target=merlin ;;
 ns32k-utek-*)		gdb_target=umax ;;
-
-# OBSOLETE pn-*-*)			gdb_target=pn ;;
 
 powerpc-*-macos*)	gdb_target=macos ;;
 powerpc-*-netware*)	gdb_target=ppc-nw
