@@ -1,3 +1,7 @@
+2003-12-16  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.base/structs.exp: Call gdb_exit as well as gdb_start.
+
 2003-12-17  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.base/freebpcmd.c: Add copyright notice.
