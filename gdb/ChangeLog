@@ -1,3 +1,7 @@
+2004-12-05  Mark Kettenis  <kettenis@gnu.org>
+
+	* hppa-hpux-tdep.c: Update copyright notice and year.
+
 2004-12-05  Richard Earnshaw  <rearnsha@arm.com>
 
 	* doublest.c (FLOATFORMAT_LARGEST_BYTES): New define.
