@@ -1,5 +1,8 @@
 Thu Jan 27 16:43:51 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* read.c (lex_type): No longer make '{' a valid character for
+	symbol names.
+
 	* as.c (main): Print long values using %ld.
 
 	* messages.c (as_warn_internal): New static function.
