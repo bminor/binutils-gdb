@@ -1,3 +1,33 @@
+Thu Jul 23 11:15:12 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* scripttempl/aout.sc: If ALIGNMENT is defined, use it to set
+	alignment of end symbol.
+	* scripttempl/elf.sc: Likewise.
+	* emulparams/sun4.sh (ALIGNMENT): Define.
+	* emulparams/elf32_sparc.sh (ALIGNMENT): Define.
+	* ldint.texinfo (emulation parameters): Document ALIGNMENT.
+
+	* lexsup.c (parse_args): Add missing break statement.
+
+	* ldlang.c (lang_gc_sections_1): Add default case to switch to
+	avoid warnings.
+
+start-sanitize-beos
+Tue Jul 14 15:42:17 1998  Richard Henderson  <rth@cygnus.com>
+
+	* configure.tgt (i?86-*-beos{pe,elf,}*): Recognize.
+	* Makefile.am (ei386beos.o): New.
+	* emulparams/i386beos.sh: New file.
+	* emultempl/beos.em, scripttempl/i386beos.sc: New file.
+
+end-sanitize-beos
+Tue Jul 14 15:35:42 1998  Richard Henderson  <rth@cygnus.com>
+
+	* lexsup.c: New option --version-exports-section.
+	* ld.h (struct args_type): Add version_exports_section.
+	* ldlang.c (lang_do_version_exports_section): New function.
+	(lang_process): Call it.
+
 Mon Jul 13 13:20:23 1998  Steve Chamberlain  <sac@transmeta.com>
 
 	* ldlex.l: Accept ASSERT.
