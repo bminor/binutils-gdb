@@ -14,6 +14,7 @@ convex-tdep.c\
 convex-xdep.c\
 coredep.c\
 exec.c\
+go32-xdep.c\
 gould-pinsn.c\
 gould-xdep.c\
 h8300-tdep.c\
@@ -51,6 +52,8 @@ remote-vx.c\
 rs6000-pinsn.c\
 rs6000-tdep.c\
 rs6000-xdep.c\
+ser-go32.c\
+ser-termios.c\
 solib.c\
 sparc-pinsn.c\
 sparc-tdep.c\
@@ -132,6 +135,7 @@ xm-arm.h\
 xm-bigmips.h\
 xm-convex.h\
 xm-delta88.h\
+xm-go32.h\
 xm-hp300bsd.h\
 xm-hp300hpux.h\
 xm-i386mach.h\
@@ -190,6 +194,8 @@ ALLCONFIG=\
 ./config/decstation.mt\
 ./config/delta88.mh\
 ./config/delta88.mt\
+./config/go32.mh\
+./config/go32.mt\
 ./config/h8300hms.mt\
 ./config/hp300bsd.mh\
 ./config/hp300bsd.mt\
@@ -222,6 +228,7 @@ ALLCONFIG=\
 ./config/merlin.mh\
 ./config/merlin.mt\
 ./config/ncr3000.mh\
+./config/ncr3000.mt\
 ./config/news.mh\
 ./config/news.mt\
 ./config/news1000.mh\
