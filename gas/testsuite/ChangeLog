@@ -1,3 +1,8 @@
+2002-09-23  Nick Clifton  <nickc@redhat.com>
+
+	* gas/arm/armv1-bad.s: Add LDM and STM instructions which are
+	unpredictable because of their use of the writeback bit.
+
 2002-09-21  Nick Clifton  <nickc@redhat.com>
 
 	* gas/arm/inst.s: Fix UNPREDICATABLE use of writeback in LDM/STM
