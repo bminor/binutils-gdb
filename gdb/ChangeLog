@@ -1,5 +1,9 @@
 2003-01-04  Daniel Jacobowitz  <drow@mvista.com>
 
+	* regformats/reg-m68k.dat: Remove fpcode and fpflags.
+
+2003-01-04  Daniel Jacobowitz  <drow@mvista.com>
+
 	Suggested by Stewart Brown <sb24@avaya.com>:
 	* c-typeprint.c (c_type_print_varspec_prefix): Pass value of show
 	in recursive calls.  Handle TYPE_CODE_TYPEDEF.
