@@ -1,3 +1,7 @@
+2002-01-10  Jason Merrill  <jason@redhat.com>
+
+	* gdb.c++/namespace.exp: '\0', not '\000'.
+
 2002-01-08  Michael Snyder  <msnyder@redhat.com>
 
 	* gdb.base/gcore.exp: New test for generate-core-file command.
