@@ -6,6 +6,15 @@
         * mips-opc.c (M1, M2): Delete.
         (mips_builtin_opcodes): Remove all uses of M1.
 
+        * mips-opc.c (mips_builtin_opcodes): Make the dmfc2 and dmtc2
+        instructions take "G" format second operands and use the
+        correct flags.
+        There are mfc3 and mtc3 opcodes, so add dmfc3 and dmtc3 opcodes to
+	match.
+        Delete "sel" code operands from mfc1 and mtc1.
+        Add MIPS64 opcode changes (dclo, dclz), and "sel" code variants
+	for dm[ft]c[023].
+	
 2000-12-03  Ed Satterthwaite  ehs@sibyte.com  and
             Chris Demetriou   cgd@sibyte.com
 

@@ -32,6 +32,11 @@
         to use their correct names.  Add tests for break and sdbbp.
         * gas/mips/mips32.s: Likewise.
 
+        * gas/mips/mips64.s: Add test for assembly of MIPS64
+        extensions.
+        * gas/mips/mips64.d: Likewise.
+        * gas/mips/mips.exp: Test using the new "mips64" test.
+
 2000-12-01  Chris Demetriou  <cgd@sibyte.com>
 
         * gas/mips/mips16.d: Expect mips16 nops to be used for padding

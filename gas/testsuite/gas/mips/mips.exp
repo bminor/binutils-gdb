@@ -89,6 +89,7 @@ if [istarget mips*-*-*] then {
     run_dump_test "lineno"
     run_dump_test "sync"
     run_dump_test "mips32"
+    run_dump_test "mips64"
 
     # Make sure that -mcpu=FOO and -mFOO are equivalent.  Assemble a file
     # containing 4650-specific instructions with -m4650 and -mcpu=4650,
