@@ -1,3 +1,9 @@
+2005-02-20  Andrew Cagney  <cagney@gnu.org>
+
+	* symfile-mem.c (symbol_file_add_from_memory): Pass
+	target_read_memory to bfd_elf_bfd_from_remote_memory.
+	(do_target_read_memory): Delete.
+
 2005-02-16  Mark Kettenis  <kettenis@gnu.org>
 
 	* value.h (value_contents_equal): New prototype.

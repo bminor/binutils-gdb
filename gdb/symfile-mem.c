@@ -1,7 +1,7 @@
 /* Reading symbol files from memory.
 
    Copyright 1986, 1987, 1989, 1991, 1994, 1995, 1996, 1998, 2000,
-   2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+   2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -58,15 +58,6 @@
 #include "elf/common.h"
 
 
-/* FIXME: cagney/2005-01-27: Should be a function with the signature:
-   int (void *object, const bfd_byte *myaddr, int len).  */
-
-static int
-do_target_read_memory (bfd_vma vma, char *myaddr, int len)
-{
-  return target_read_memory (vma, myaddr, len);
-}
-
 /* Read inferior memory at ADDR to find the header of a loaded object file
    and read its in-core symbols out of inferior memory.  TEMPL is a bfd
    representing the target's format.  NAME is the name to use for this
@@ -87,7 +78,7 @@ symbol_file_add_from_memory (struct bfd *templ, CORE_ADDR addr, char *name,
     error (_("add-symbol-file-from-memory not supported for this target"));
 
   nbfd = bfd_elf_bfd_from_remote_memory (templ, addr, &loadbase,
-					 do_target_read_memory);
+					 target_read_memory);
   if (nbfd == NULL)
     error (_("Failed to read a valid object file image from memory."));
 
