@@ -1,3 +1,12 @@
+Wed Nov 26 11:53:33 1997  Keith Seitz  <keiths@onions.cygnus.com>
+
+	* Makefile.in, configure, configure.in: merge with foundry-971118-build
+
+Mon Nov 10 15:23:21 1997  H.J. Lu  <hjl@gnu.ai.mit.edu>
+
+	* ltmain.sh: If mkdir fails, check whether the directory was created
+	anyhow by some other process.
+
 start-sanitize-d30v
 Mon Nov 10 14:38:03 1997  Michael Meissner  <meissner@cygnus.com>
 
@@ -13,12 +22,13 @@ Sat Nov  8 14:42:59 1997  Michael Meissner  <meissner@cygnus.com>
 	* configure.in (d30v-*-*): Configure target-libgloss on the D30V.
 
 end-sanitize-d30v
+
 Fri Nov  7 10:34:09 1997  Rob Savoye  <rob@darkstar.cygnus.com>
 
-	* include/libiberty.h: Add extern "C" { so it can be used with C++
-	progrms.
-	* include/remote-sim.h:  Add extern "C" { so it can be used with C++
-	programs.
+        * include/libiberty.h: Add extern "C" { so it can be used with C++
+        progrms.
+        * include/remote-sim.h:  Add extern "C" { so it can be used with C++
+        programs.
 
 start-sanitize-tx19
 Wed Nov  5 11:14:44 1997  Gavin Koch  <gavin@cygnus.com>
@@ -46,6 +56,13 @@ Wed Oct 29 16:52:43 1997  Gavin Koch  <gavin@cygnus.com>
 	* config.sub: Add tx49 configury.
 
 end-sanitize-tx49
+
+start-sanitize-ide
+Tue Oct 28 16:44:15 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+        * Makefile.in (install-foundry): New target.
+end-sanitize-ide
+	
 Mon Oct 27 13:17:24 1997  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* configure.in: Remove a "second pass" of tweaking noconfigdirs,
@@ -64,6 +81,13 @@ end-sanitize-vr5400
 Mon Oct 20 15:28:49 1997  Klaus K"ampf  <kkaempf@progis.de>
 
 	* makefile.vms: Fix to work with DEC C.
+
+start-sanitize-ide
+Sat Oct 11 13:52:40 1997  Tom Tromey  <tromey@cygnus.com>
+
+        * Makefile.in (all-jstools): Depend on all-tix.
+
+end-sanitize-ide
 
 Tue Oct  7 23:58:57 1997  Gavin Koch  <gavin@cygnus.com>
 
@@ -138,6 +162,10 @@ Fri Sep  5 16:11:28 1997  Joel Sherrill  (joel@OARcorp.com)
 
         * configure.in (*-*-rtems*): Do not build libgloss for rtems.
 
+Wed Sep  3 19:38:01 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+        * Makefile.in (GDB_TK): Add all-libide.
+
 Wed Sep  3 12:15:24 1997  Chris Provenzano  <proven@cygnus.com>
 
 	* ltconfig: Set CONFIG_SHELL in libtool.
@@ -198,6 +226,12 @@ Thu Aug 14 14:42:17 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure: When handling a Canadian Cross, handle YACC as well as
 	BISON.  Just set BISON to bison.  When setting YACC, prefer bison.
+        * Makefile.in (all-bison): Depend upon all-texinfo.
+
+start-sanitize-ide
+        * Makefile.in (all-vmake): Depend upon all-tix.
+
+end-sanitize-ide
 
 Tue Aug 12 20:09:48 1997  Jason Merrill  <jason@yorick.cygnus.com>
 

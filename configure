@@ -51,6 +51,7 @@ build_alias=
 cache_file=config.cache
 cache_file_option=
 configdirs=
+diroptions=
 exec_prefix=
 exec_prefixoption=
 fatal=
@@ -83,6 +84,18 @@ target_makefile_frag=
 undefs=NOUNDEFS
 version="$Revision$"
 x11=default
+bindir='${exec_prefix}/bin'
+sbindir='${exec_prefix}/sbin'
+libexecdir='${exec_prefix}/libexec'
+datadir='${prefix}/share'
+sysconfdir='${prefix}/etc'
+sharedstatedir='${prefix}/com'
+localstatedir='${prefix}/var'
+libdir='${exec_prefix}/lib'
+includedir='${prefix}/include'
+oldincludedir='/usr/include'
+infodir='${prefix}/info'
+mandir='${prefix}/man'
 
 ### we might need to use some other shell than /bin/sh for running subshells
 
@@ -189,6 +202,10 @@ do
 # Now, process the options
 	case $option in
 
+	--bi*)
+		bindir=$optarg
+		diroptions="$diroptions --bindir=$optarg"
+		;;
 	--build* | --bu*)
 		case "$build_alias" in
 		"") build_alias=$optarg ;;
@@ -199,6 +216,10 @@ do
 		;;
 	--cache*)
 		cache_file=$optarg
+		;;
+	--da*)
+		datadir=$optarg
+		diroptions="$diroptions --datadir=$optarg"
 		;;
 	--disable-*)
 		enableopt=`echo ${option} | sed 's:^--disable-:enable_:;s:-:_:g'`
@@ -233,12 +254,40 @@ do
 		   ;;
 		esac
 		;;
+	--inc*)
+		includedir=$optarg
+		diroptions="$diroptions --includedir=$optarg"
+		;;
+	--inf*)
+		infodir=$optarg
+		diroptions="$diroptions --infodir=$optarg"
+		;;
+	--libd*)
+		libdir=$optarg
+		diroptions="$diroptions --libdir=$optarg"
+		;;
+	--libe*)
+		libexecdir=$optarg
+		diroptions="$diroptions --libexecdir=$optarg"
+		;;
+	--lo*)
+		localstatedir=$optarg
+		diroptions="$diroptions --localstatedir=$optarg"
+		;;
+	--ma*)
+		mandir=$optarg
+		diroptions="$diroptions --mandir=$optarg"
+		;;
 	--nfp | --nf*)
 		floating_point=no
 		floating_pointoption="--nfp"
 		;;
 	--norecursion | --no*)
 		norecursion=yes
+		;;
+	--ol*)
+		oldincludedir=$optarg
+		diroptions="$diroptions --oldincludedir=$optarg"
 		;;
 	--prefix* | --pre*)
 		prefix=$optarg
@@ -260,6 +309,14 @@ do
 	--rm)
 		removing=--rm
 		;;
+	--sb*)
+		sbindir=$optarg
+		diroptions="$diroptions --sbindir=$optarg"
+		;;
+	--sh*)
+		sharedstatedir=$optarg
+		diroptions="$diroptions --sharedstatedir=$optarg"
+		;;
 	--silent | --sil* | --quiet | --q*)
 		redirect=">/dev/null"
 		verbose=--silent
@@ -277,6 +334,10 @@ do
 		;;
 	--srcdir* | --sr*)
 		srcdir=$optarg
+		;;
+	--sy*)
+		sysconfdir=$optarg
+		diroptions="$diroptions --sysconfdir=$optarg"
 		;;
 	--target* | --ta*)
 		case $target_alias in
@@ -317,9 +378,6 @@ do
 		withoptions="$withoptions --with-x"
 		;;
 	--x-i* | --x-l*) other_options="$other_options $orig_option"
-		;;
-	--bi* | --sb* | --li* | --da* | --sy* | --sh* | --lo* | --in* | --ol* | --ma*)
-		# These options were added to autoconf for emacs.
 		;;
 	--*)
 		echo "configure: Unrecognized option: \"$orig_option\"; use --help for usage." >&2
@@ -540,7 +598,7 @@ case "`grep '^# per\-host:' ${srcdir}/configure.in`" in
 	    eval exec ${config_shell} ${srcdir}/configure ${verbose} \
 		${buildopt} --host=${host_alias} --target=${target_alias} \
 		${prefixoption} ${tmpdiroption} ${exec_prefixoption} \
-		${srcdiroption} \
+		${srcdiroption} ${diroptions} \
 		${program_prefixoption} ${program_suffixoption} \
 		${program_transform_nameoption} ${site_option} \
 		${withoptions} ${withoutoptions} \
@@ -1183,6 +1241,18 @@ EOF
 	    fi
 	    sed     -e "s|^prefix[ 	]*=.*$|prefix = ${prefix}|" \
                     -e "s|^exec_prefix[ 	]*=.*$|exec_prefix = ${exec_prefix}|" \
+                    -e "s|^bindir[ 	]*=.*$|bindir = ${bindir}|" \
+                    -e "s|^sbindir[ 	]*=.*$|sbindir = ${sbindir}|" \
+                    -e "s|^libexecdir[ 	]*=.*$|libexecdir = ${libexecdir}|" \
+                    -e "s|^datadir[ 	]*=.*$|datadir = ${datadir}|" \
+                    -e "s|^sysconfdir[ 	]*=.*$|sysconfdir = ${sysconfdir}|" \
+                    -e "s|^sharedstatedir[ 	]*=.*$|sharedstatedir = ${sharedstatedir}|" \
+                    -e "s|^localstatedir[ 	]*=.*$|localstatedir = ${localstatedir}|" \
+                    -e "s|^libdir[ 	]*=.*$|libdir = ${libdir}|" \
+                    -e "s|^includedir[ 	]*=.*$|includedir = ${includedir}|" \
+                    -e "s|^oldincludedir[ 	]*=.*$|oldincludedir = ${oldincludedir}|" \
+                    -e "s|^infodir[ 	]*=.*$|infodir = ${infodir}|" \
+                    -e "s|^mandir[ 	]*=.*$|mandir = ${mandir}|" \
 		    -e "/^CC[ 	]*=/{
 			:loop1
 			/\\\\$/ N
@@ -1376,7 +1446,7 @@ if [ -z "${norecursion}" -a -n "${configdirs}" ] ; then
 			if [ ! -z "${recprog}" ] ; then
 	                        if eval ${config_shell} ${recprog} ${verbose} ${buildopt} --host=${host_alias} --target=${target_alias} \
         	                        ${prefixoption} ${tmpdiroption} ${exec_prefixoption} \
-                	                ${srcdiroption} ${program_prefixoption} ${program_suffixoption} ${program_transform_nameoption} ${site_option} ${withoptions} ${withoutoptions} ${enableoptions} ${disableoptions} ${floating_pointoption} ${cache_file_option} ${removing} ${other_options} ${redirect} ; then
+                	                ${srcdiroption} ${diroptions} ${program_prefixoption} ${program_suffixoption} ${program_transform_nameoption} ${site_option} ${withoptions} ${withoutoptions} ${enableoptions} ${disableoptions} ${floating_pointoption} ${cache_file_option} ${removing} ${other_options} ${redirect} ; then
 	                                true
         	                else
 					echo Configure in `pwd` failed, exiting. 1>&2

@@ -20,16 +20,25 @@
 srcdir = .
 
 prefix = /usr/local
-
 exec_prefix = $(prefix)
-bindir = $(exec_prefix)/bin
-libdir = $(exec_prefix)/lib
+
+bindir=${exec_prefix}/bin
+sbindir=${exec_prefix}/sbin
+libexecdir=${exec_prefix}/libexec
+datadir=${prefix}/share
+sysconfdir=${prefix}/etc
+sharedstatedir=${prefix}/com
+localstatedir=${prefix}/var
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+oldincludedir=/usr/include
+infodir=${prefix}/info
+mandir=${prefix}/man
+
 tooldir = $(exec_prefix)/$(target)
 
 program_transform_name =
 
-datadir = $(prefix)/share
-mandir = $(prefix)/man
 man1dir = $(mandir)/man1
 man2dir = $(mandir)/man2
 man3dir = $(mandir)/man3
@@ -39,8 +48,6 @@ man6dir = $(mandir)/man6
 man7dir = $(mandir)/man7
 man8dir = $(mandir)/man8
 man9dir = $(mandir)/man9
-infodir = $(prefix)/info
-includedir = $(prefix)/include
 GDB_NLM_DEPS = 
 
 SHELL = /bin/sh
@@ -369,9 +376,21 @@ BASE_FLAGS_TO_PASS = \
 	"RUNTESTFLAGS=$(RUNTESTFLAGS)" \
 	"WINDRES_FOR_TARGET=$(WINDRES_FOR_TARGET)" \
 	"YACC=$(YACC)" \
+	"bindir=$(bindir)" \
+	"datadir=$(datadir)" \
 	"exec_prefix=$(exec_prefix)" \
+	"includedir=$(includedir)" \
+	"infodir=$(infodir)" \
+	"libdir=$(libdir)" \
+	"libexecdir=$(libexecdir)" \
+	"localstatedir=$(localstatedir)" \
+	"mandir=$(mandir)" \
+	"oldincludedir=$(oldincludedir)" \
 	"prefix=$(prefix)" \
-	"tooldir=$(tooldir)" 
+	"sbindir=$(sbindir)" \
+	"sharedstatedir=$(sharedstatedir)" \
+	"sysconfdir=$(sysconfdir)" \
+	"tooldir=$(tooldir)"
 
 # Flags to pass down to most sub-makes, in which we're building with
 # the host environment.
@@ -1085,6 +1104,28 @@ gcc-no-fixedincludes:
 	  mv gcc/tmp-include gcc/include 2>/dev/null; \
 	else true; fi
 
+# start-sanitize-ide
+# Install Foundry.  Avoid installing a bunch of stuff we don't need.
+install-foundry:
+	mods="$(INSTALL_MODULES)"; \
+	x11_mods="$(INSTALL_X11_MODULES)"; \
+	for d in install-tcl install-tk install-itcl install-tix install-ilu; do \
+	  mods="`echo $${mods} | sed -e "s/$$d//"`"; \
+	  x11_mods="`echo $${x11_mods} | sed -e "s/$$d//"`"; \
+	done; \
+	$(MAKE) INSTALL_MODULES="$${mods}" INSTALL_X11_MODULES="$${x11_mods}" install
+	for d in tcl tk itcl tix ilu; do \
+	  if [ -f $$d/Makefile ]; then \
+	    r=`pwd`; export r; \
+	    s=`cd $(srcdir); pwd`; export s; \
+	    $(SET_LIB_PATH) \
+	    (cd $$d; $(MAKE) $(FLAGS_TO_PASS) install-minimal); \
+	  else \
+	    true; \
+	  fi; \
+	done
+# end-sanitize-ide
+
 # This rule is used to build the modules which use FLAGS_TO_PASS.  To
 # build a target all-X means to cd to X and make all.
 #
@@ -1424,7 +1465,7 @@ all-gawk:
 ALL_GCC = all-gcc
 all-gcc: all-bison all-byacc all-binutils all-gas all-ld
 all-bootstrap: all-libiberty all-bison all-byacc all-binutils all-gas all-ld
-GDB_TK = all-tk all-tcl all-itcl all-tix
+GDB_TK = all-tk all-tcl all-itcl all-tix all-libide
 all-gdb: all-libiberty all-opcodes all-bfd all-mmalloc all-readline all-bison all-byacc all-sim $(gdbnlmrequirements) $(GDB_TK)
 all-gnuserv:
 configure-target-gperf: $(ALL_GCC)
@@ -1444,7 +1485,7 @@ all-inet: all-tcl all-send-pr all-perl
 all-ispell: all-emacs19
 all-itcl: all-tcl all-tk
 # start-sanitize-ide
-all-jstools: all-tcl all-tk all-libide
+all-jstools: all-tcl all-tk all-tix all-libide
 # end-sanitize-ide
 all-ld: all-libiberty all-bfd all-opcodes all-bison all-byacc all-flex
 configure-target-libg++: $(ALL_GCC) configure-target-librx
@@ -1453,6 +1494,7 @@ configure-target-libgloss: $(ALL_GCC)
 all-target-libgloss: configure-target-libgloss configure-target-newlib
 configure-target-libio: $(ALL_GCC)
 all-target-libio: configure-target-libio all-gas all-ld all-gcc all-target-libiberty all-target-newlib
+check-target-libio: all-target-libstdc++
 all-libiberty:
 # start-sanitize-ide
 all-libide: all-tcl all-tk all-itcl all-ilu
@@ -1488,7 +1530,7 @@ all-tgas: all-libiberty all-bfd all-opcodes
 all-time:
 all-tix: all-tcl all-tk
 # start-sanitize-ide
-all-vmake: all-tcl all-tk all-itcl all-libide all-tix
+all-vmake: all-tcl all-tk all-itcl all-libide all-tix all-libide
 # end-sanitize-ide
 all-wdiff:
 all-target-winsup: all-target-newlib all-target-libiberty all-target-librx all-target-libio configure-target-winsup 
