@@ -30,6 +30,7 @@
 
 /* Macros to swap in values.  */
 
+#define get_8(s)      (*((unsigned char *)(s)))
 #define get_16(be, s) ((be) ? bfd_getb16 (s) : bfd_getl16 (s))
 #define get_32(be, s) ((be) ? bfd_getb32 (s) : bfd_getl32 (s))
 
@@ -528,6 +529,7 @@ bin_to_res_dialog (data, length, big_endian)
 	{
 	  d->ex->weight = 0;
 	  d->ex->italic = 0;
+	  d->ex->charset = 1; /* Default charset.  */
 	}
     }
   else
@@ -543,7 +545,8 @@ bin_to_res_dialog (data, length, big_endian)
 	  if (length < off + 4)
 	    toosmall (_("dialogex font information"));
 	  d->ex->weight = get_16 (big_endian, data + off);
-	  d->ex->italic = get_16 (big_endian, data + off + 2);
+	  d->ex->italic = get_8 (data + off + 2);
+	  d->ex->charset = get_8 (data + off + 3);
 	  off += 4;
 	}
 
@@ -1257,6 +1260,7 @@ bin_to_res_userdata (data, length, big_endian)
 
 /* Macros to swap out values.  */
 
+#define put_8(v, s)      (*((unsigned char *) (s)) = (unsigned char) (v))
 #define put_16(be, v, s) ((be) ? bfd_putb16 ((v), (s)) : bfd_putl16 ((v), (s)))
 #define put_32(be, v, s) ((be) ? bfd_putb32 ((v), (s)) : bfd_putl32 ((v), (s)))
 
@@ -1626,12 +1630,14 @@ res_to_bin_dialog (dialog, big_endian)
 	  if (dialog->ex == NULL)
 	    {
 	      put_16 (big_endian, 0, d->data + 2);
-	      put_16 (big_endian, 0, d->data + 4);
+	      put_8 (0, d->data + 4);
+	      put_8 (1, d->data + 5);
 	    }
 	  else
 	    {
 	      put_16 (big_endian, dialog->ex->weight, d->data + 2);
-	      put_16 (big_endian, dialog->ex->italic, d->data + 4);
+	      put_8 (dialog->ex->italic, d->data + 4);
+	      put_8 (dialog->ex->charset, d->data + 5);
 	    }
 	}
 

@@ -1,3 +1,18 @@
+2002-04-15  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* resrc.c (write_rc_dialog): If charset is non-default value
+	display all of the DIALOGEX parameters.
+
+2002-04-15  Eric Kohl <ekohl@rz-online.de>
+
+	* rcparse.y: Allow two to five parameter in FONT statement of 
+	DIALOGEX resources.
+	* resbin.c (bin_to_res_dialog): Fixed read/write code for dialogex
+	resource data.
+        (res_to_bin_dialog): Likewise.
+	* windres.h: Added misssing charset variable to dialog_ex
+	structure.
+
 2002-04-10  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* rcparse.y: Set MEMFLAG_PURE by default.

@@ -1,3 +1,9 @@
+2002-04-15  Eric Kohl <ekohl@rz-online.de>
+
+	* binutils-all/windres/dlgfont.rc: New test case: Checks FONT
+	statement in DIALOG and DIALOGEX resources.
+        * binutils-all/windres/dlgfont.rsd: Expected output.
+
 2002-04-11  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* binutils-all/ar.exp (long_filenames): Use 'file delete' instead

@@ -439,6 +439,27 @@ styles:
 	    style |= DS_SETFONT;
 	    dialog.pointsize = $3;
 	    unicode_from_ascii ((int *) NULL, &dialog.font, $5);
+	    if (dialog.ex != NULL)
+	      {
+		dialog.ex->weight = 0;
+		dialog.ex->italic = 0;
+		dialog.ex->charset = 1;
+	      }
+	  }
+	| styles FONT numexpr ',' QUOTEDSTRING cnumexpr
+	  {
+	    dialog.style |= DS_SETFONT;
+	    style |= DS_SETFONT;
+	    dialog.pointsize = $3;
+	    unicode_from_ascii ((int *) NULL, &dialog.font, $5);
+	    if (dialog.ex == NULL)
+	      rcparse_warning (_("extended FONT requires DIALOGEX"));
+	    else
+	      {
+		dialog.ex->weight = $6;
+		dialog.ex->italic = 0;
+		dialog.ex->charset = 1;
+	      }
 	  }
 	| styles FONT numexpr ',' QUOTEDSTRING cnumexpr cnumexpr
 	  {
@@ -452,6 +473,22 @@ styles:
 	      {
 		dialog.ex->weight = $6;
 		dialog.ex->italic = $7;
+		dialog.ex->charset = 1;
+	      }
+	  }
+	| styles FONT numexpr ',' QUOTEDSTRING cnumexpr cnumexpr cnumexpr
+	  {
+	    dialog.style |= DS_SETFONT;
+	    style |= DS_SETFONT;
+	    dialog.pointsize = $3;
+	    unicode_from_ascii ((int *) NULL, &dialog.font, $5);
+	    if (dialog.ex == NULL)
+	      rcparse_warning (_("extended FONT requires DIALOGEX"));
+	    else
+	      {
+		dialog.ex->weight = $6;
+		dialog.ex->italic = $7;
+		dialog.ex->charset = $8;
 	      }
 	  }
 	| styles MENU id

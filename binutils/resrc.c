@@ -2087,8 +2087,11 @@ write_rc_dialog (e, dialog)
       unicode_print (e, dialog->font, -1);
       fprintf (e, "\"");
       if (dialog->ex != NULL
-	  && (dialog->ex->weight != 0 || dialog->ex->italic != 0))
-	fprintf (e, ", %d, %d", dialog->ex->weight, dialog->ex->italic);
+	  && (dialog->ex->weight != 0
+	      || dialog->ex->italic != 0
+	      || dialog->ex->charset != 1))
+	fprintf (e, ", %d, %d, %d",
+		 dialog->ex->weight, dialog->ex->italic, dialog->ex->charset);
       fprintf (e, "\n");
     }
 
