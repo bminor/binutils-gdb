@@ -1,3 +1,8 @@
+2003-12-15  Christian Groessler  <chris@groessler.org>
+
+	* gas/z8k/eidi.s: Add uppercase forms.  Add forms with comma
+	separated parameters.
+
 2003-12-14  Mark Mitchell  <mark@codesourcery.com>
 
 	* gas/arm/thumbv6.s: Add nops.
