@@ -1,3 +1,8 @@
+2001-09-26  Alan Modra  <amodra@bigpond.net.au>
+
+	* arc-dis.c: Formatting fixes.
+	(my_sprintf): Define using VPARAMS, VA_OPEN, VA_FIXEDARG, VA_CLOSE.
+
 2001-09-21  Bruno Haible  <haible@clisp.cons.org>
 
 	* arc-dis.c: Don't include <ctype.h>.

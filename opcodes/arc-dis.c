@@ -45,13 +45,13 @@
    treated as signed for bit shifting purposes:  */
 #define FIELDD(word)	(BITS (((signed int)word), 0, 8))
 
-#define PUT_NEXT_WORD_IN(a)							\
-  do										\
-    {										\
-      if (is_limm == 1 && !NEXT_WORD (1))					\
-        mwerror (state, _("Illegal limm reference in last instruction!\n"));	\
-        a = state->words[1];							\
-    }										\
+#define PUT_NEXT_WORD_IN(a)						\
+  do									\
+    {									\
+      if (is_limm == 1 && !NEXT_WORD (1))				\
+        mwerror (state, _("Illegal limm reference in last instruction!\n")); \
+      a = state->words[1];						\
+    }									\
   while (0)
 
 #define CHECK_FLAG_COND_NULLIFY()				\
@@ -97,7 +97,7 @@
 #define CHECK_FIELD_A()				\
   do						\
     {						\
-      fieldA = FIELDA(state->words[0]);		\
+      fieldA = FIELDA (state->words[0]);	\
       if (fieldA > 60)				\
         {					\
 	  fieldAisReg = 0;			\
@@ -233,20 +233,22 @@ post_address (state, addr)
   return "";
 }
 
+static void my_sprintf PARAMS ((struct arcDisState *, char *, const char *,
+				...));
+
 static void
-my_sprintf (
-	    struct arcDisState * state,
-	    char * buf,
-	    const char * format,
-	    ...)
+my_sprintf VPARAMS ((struct arcDisState *state, char *buf, const char *format,
+		     ...))
 {
   char *bp;
   const char *p;
   int size, leading_zero, regMap[2];
   long auxNum;
-  va_list ap;
 
-  va_start (ap, format);
+  VA_OPEN (ap, format);
+  VA_FIXEDARG (ap, struct arcDisState *, state);
+  VA_FIXEDARG (ap, char *, buf);
+  VA_FIXEDARG (ap, const char *, format);
 
   bp = buf;
   *bp = 0;
@@ -258,8 +260,8 @@ my_sprintf (
   while (1)
     switch (*p++)
       {
-    case 0:
-      goto DOCOMM; /* (return)  */
+      case 0:
+	goto DOCOMM; /* (return)  */
       default:
 	*bp++ = p[-1];
 	break;
@@ -409,6 +411,7 @@ my_sprintf (
       }
 
  DOCOMM: *bp = 0;
+  VA_CLOSE (ap);
 }
 
 static void
@@ -435,7 +438,8 @@ write_comments_(state, shimm, is_limm, limm_value)
 	    strcpy (state->commentBuffer, comment_prefix);
 	  else
 	    strcat (state->commentBuffer, ", ");
-	  strncat (state->commentBuffer, state->comm[i], sizeof (state->commentBuffer));
+	  strncat (state->commentBuffer, state->comm[i],
+		   sizeof (state->commentBuffer));
 	}
     }
 }
@@ -724,7 +728,7 @@ dsmOneArcInst (addr, state)
 	  instrName = instruction_name (state,
 					state->_opcode,
 					FIELDC (state->words[0]),
-					& flags);
+					&flags);
 	  if (!instrName)
 	    {
 	      instrName = "???";
@@ -839,14 +843,16 @@ dsmOneArcInst (addr, state)
 	  if (!repeatsOp)
 	    WRITE_FORMAT_COMMA_x (C);
 	  WRITE_NOP_COMMENT ();
-	  my_sprintf (state, state->operandBuffer, formatString, fieldA, fieldB, fieldC);
+	  my_sprintf (state, state->operandBuffer, formatString,
+		      fieldA, fieldB, fieldC);
 	}
       else
 	{
 	  WRITE_FORMAT_x (B);
 	  if (!repeatsOp)
 	    WRITE_FORMAT_COMMA_x (C);
-	  my_sprintf (state, state->operandBuffer, formatString, fieldB, fieldC);
+	  my_sprintf (state, state->operandBuffer, formatString,
+		      fieldB, fieldC);
 	}
       write_comments ();
       break;
@@ -862,7 +868,8 @@ dsmOneArcInst (addr, state)
 	  WRITE_FORMAT_x (A);
 	  WRITE_FORMAT_COMMA_x (B);
 	  WRITE_NOP_COMMENT ();
-	  my_sprintf (state, state->operandBuffer, formatString, fieldA, fieldB);
+	  my_sprintf (state, state->operandBuffer, formatString,
+		      fieldA, fieldB);
 	}
       else
 	{
@@ -894,16 +901,17 @@ dsmOneArcInst (addr, state)
       /* This address could be a label we know. Convert it.  */
       if (state->_opcode != op_LPC /* LP  */)
 	{
-	add_target (fieldA); /* For debugger.  */
-	state->flow = state->_opcode == op_BLC /* BL  */
-	  ? direct_call
-	  : direct_jump;
-	/* indirect calls are achieved by "lr blink,[status];
-	   lr dest<- func addr; j [dest]"  */
+	  add_target (fieldA); /* For debugger.  */
+	  state->flow = state->_opcode == op_BLC /* BL  */
+	    ? direct_call
+	    : direct_jump;
+	  /* indirect calls are achieved by "lr blink,[status];
+	     lr dest<- func addr; j [dest]"  */
 	}
 
       strcat (formatString, "%s"); /* address/label name */
-      my_sprintf (state, state->operandBuffer, formatString, post_address (state, fieldA));
+      my_sprintf (state, state->operandBuffer, formatString,
+		  post_address (state, fieldA));
       write_comments ();
       break;
 
@@ -986,7 +994,8 @@ dsmOneArcInst (addr, state)
 	fieldB = fieldC;
 
       WRITE_FORMAT_x_RB (C);
-      my_sprintf (state, state->operandBuffer, formatString, fieldA, fieldB, fieldC);
+      my_sprintf (state, state->operandBuffer, formatString,
+		  fieldA, fieldB, fieldC);
       write_comments ();
       break;
 
@@ -1031,7 +1040,8 @@ dsmOneArcInst (addr, state)
 	  else
 	    WRITE_FORMAT_RB ();
 	}
-      my_sprintf (state, state->operandBuffer, formatString, fieldA, fieldB, fieldC);
+      my_sprintf (state, state->operandBuffer, formatString,
+		  fieldA, fieldB, fieldC);
       write_comments ();
       break;
 
@@ -1043,7 +1053,7 @@ dsmOneArcInst (addr, state)
 
       /* [B,A offset]  */
       if (dbg) printf("7:b reg %d %x off %x\n",
-				 fieldBisReg,fieldB,fieldA);
+		      fieldBisReg,fieldB,fieldA);
       state->_ea_present = 1;
       state->_offset = fieldA;
       if (fieldBisReg)
@@ -1076,7 +1086,8 @@ dsmOneArcInst (addr, state)
 	  else
 	    WRITE_FORMAT_RB();
 	}
-      my_sprintf (state, state->operandBuffer, formatString, fieldC, fieldB, fieldA);
+      my_sprintf (state, state->operandBuffer, formatString,
+		  fieldC, fieldB, fieldA);
       write_comments2(fieldA);
       break;
     case 8:
@@ -1143,7 +1154,7 @@ _coreRegName(arg, regval)
 static const char *
 _auxRegName(void *_this ATTRIBUTE_UNUSED, int regval)
 {
-    return arcExtMap_auxRegName(regval);
+  return arcExtMap_auxRegName(regval);
 }
 
 
@@ -1151,14 +1162,14 @@ _auxRegName(void *_this ATTRIBUTE_UNUSED, int regval)
 static const char *
 _condCodeName(void *_this ATTRIBUTE_UNUSED, int regval)
 {
-    return arcExtMap_condCodeName(regval);
+  return arcExtMap_condCodeName(regval);
 }
 
 /* Returns the name the user specified extension instruction.  */
 static const char *
 _instName (void *_this ATTRIBUTE_UNUSED, int majop, int minop, int *flags)
 {
-    return arcExtMap_instName(majop, minop, flags);
+  return arcExtMap_instName(majop, minop, flags);
 }
 
 /* Decode an instruction returning the size of the instruction
