@@ -2,17 +2,6 @@
 
 	* aclocal.m4, configure: Updated for new version of libtool.
 
-1999-04-22  Nick Clifton  <nickc@cygnus.com>
-
-	* mcore-dis.c (print_insn_mcore): Display locaiton of address pool
-	for LRW instructions.
-
-1999-04-18  Nick Clifton  <nickc@cygnus.com>
-
-	* mcore-dis.c (print_insn_mcore): Display location of address pool
-	for JMP instructions.
-	* mcore-opc.h (mcore_table): Add 'nop'.
-
 1999-04-14  Doug Evans  <devans@casey.cygnus.com>
 
 	* fr30-desc.c,fr30-desc.h,fr30-dis.c,fr30-ibld.c,fr30-opc.c: Rebuild.
@@ -27,16 +16,6 @@ Mon Apr 12 23:46:17 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* fr30-desc.c,fr30-desc.h,fr30-ibld.c: Rebuild.
 	* m32r-desc.c,m32r-desc.h,m32r-opinst.c: Rebuild.
-
-1999-04-08  Nick Clifton  <nickc@cygnus.com>
-
-	* mcore-dis.c: New file: Disassemble MCore opcodes.
-	* mcore-opc.h: New file: Definitions of MCore opcodes.
-	* Makefile.am: Add Mcore source files.
-	* Makefile.in: Regenerate.
-	* configure.in: Add support for MCore targets.
-	* configure: Regenerate.
-	* disassemble.c: Add support for MCore targets.
 
 1999-04-06  Ian Lance Taylor  <ian@zembu.com>
 
