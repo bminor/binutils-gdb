@@ -1,3 +1,7 @@
+2003-08-18  Mark Kettenis  <kettenis@gnu.org>
+
+	* NEWS (New native configurations): Mention FreeBSD/amd64.
+
 2003-08-18  Andrew Cagney  <cagney@redhat.com>
 
 	* m68hc11-tdep.c (m68hc11_gdbarch_init): Do not set
