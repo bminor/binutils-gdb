@@ -1,3 +1,10 @@
+Sun Oct  6 22:43:06 1996  Jason Merrill  <jason@yorick.cygnus.com>
+
+	* dwarf2read.c (read_tag_reference_type): New fn.
+	(read_type_die): Call it.
+	(dwarf_attr): Also look in the DIEs referred to by specification
+ 	or abstract_origin attributes.
+
 Wed Oct  2 22:07:16 1996  Fred Fish  <fnf@cygnus.com>
 
 	* inferior.h (IN_SIGTRAMP): Pass pc to SIGTRAMP_START and

@@ -1728,6 +1728,43 @@ read_tag_pointer_type (die, objfile)
   die->type = type;
 }
 
+/* Extract all information from a DW_TAG_reference_type DIE and add to
+   the user defined type vector.  */
+
+static void
+read_tag_reference_type (die, objfile)
+     struct die_info *die;
+     struct objfile *objfile;
+{
+  struct type *type, *pointed_to_type;
+  struct attribute *attr;
+
+  if (die->type)
+    {
+      return;
+    }
+
+  pointed_to_type = die_type (die, objfile);
+
+  type = dwarf_alloc_type (objfile);
+  TYPE_TARGET_TYPE (type) = pointed_to_type;
+  TYPE_OBJFILE (type) = objfile;
+  attr = dwarf_attr (die, DW_AT_byte_size);
+  if (attr)
+    {
+      TYPE_LENGTH (type) = DW_UNSND (attr);
+    }
+  else
+    {
+      TYPE_LENGTH (type) = address_size;
+    }
+  TYPE_CODE (type) = TYPE_CODE_REF;
+  TYPE_FLAGS (type) |= TYPE_FLAG_UNSIGNED;
+
+  TYPE_REFERENCE_TYPE (pointed_to_type) = type;
+  die->type = type;
+}
+
 static void
 read_tag_const_type (die, objfile)
      struct die_info *die;
@@ -2637,6 +2674,7 @@ dwarf_attr (die, name)
      unsigned int name;
 {
   unsigned int i;
+  struct attribute *spec = NULL;
 
   for (i = 0; i < die->num_attrs; ++i)
     {
@@ -2644,7 +2682,13 @@ dwarf_attr (die, name)
 	{
 	  return &die->attrs[i];
 	}
+      if (die->attrs[i].name == DW_AT_specification
+	  || die->attrs[i].name == DW_AT_abstract_origin)
+	spec = &die->attrs[i];
     }
+  if (spec)
+    return dwarf_attr (follow_die_ref (DW_UNSND (spec)), name);
+    
   return NULL;
 }
 
@@ -3121,6 +3165,9 @@ read_type_die (die, objfile)
       break;
     case DW_TAG_pointer_type:
       read_tag_pointer_type (die, objfile);
+      break;
+    case DW_TAG_reference_type:
+      read_tag_reference_type (die, objfile);
       break;
     case DW_TAG_const_type:
       read_tag_const_type (die, objfile);
