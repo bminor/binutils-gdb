@@ -1,3 +1,8 @@
+Mon Sep  5 14:46:41 1994  Per Bothner  (bothner@kalessin.cygnus.com)
+
+	* ch-typeprint.c (chill_type_print_base):  Make TYPE_CODE_RANGE
+	case more robust.
+
 Sun Sep  4 16:06:34 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* i960-tdep.c (signal.h): Don't include.

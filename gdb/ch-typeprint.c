@@ -243,25 +243,23 @@ chill_type_print_base (type, stream, show, level)
 	break;
 
       case TYPE_CODE_RANGE:
-	if (TYPE_DUMMY_RANGE (type))
-	  chill_type_print_base (TYPE_TARGET_TYPE (type),
-				 stream, show, level);
-	else if (TYPE_TARGET_TYPE (type))
+	if (TYPE_DUMMY_RANGE (type) > 0)
+	  chill_type_print_base (TYPE_TARGET_TYPE (type), stream, show, level);
+	else
 	  {
-	    chill_type_print_base (TYPE_TARGET_TYPE (type),
-				   stream, show, level);
+	    struct type *target = TYPE_TARGET_TYPE (type);
+	    if (target && TYPE_NAME (target))
+	      fputs_filtered (TYPE_NAME (target), stream);
+	    else
+	      fputs_filtered ("RANGE", stream);
+	    if (target == NULL)
+	      target = builtin_type_long;
 	    fputs_filtered (" (", stream);
-	    print_type_scalar (TYPE_TARGET_TYPE (type),
-			       TYPE_FIELD_BITPOS (type, 0), stream);
+	    print_type_scalar (target, TYPE_LOW_BOUND (type), stream);
 	    fputs_filtered (":", stream);
-	    print_type_scalar (TYPE_TARGET_TYPE (type),
-			       TYPE_FIELD_BITPOS (type, 1), stream);
+	    print_type_scalar (target, TYPE_HIGH_BOUND (type), stream);
 	    fputs_filtered (")", stream);
 	  }
-	else
-	  fprintf_filtered (stream, "RANGE? (%s : %d)",
-			    TYPE_FIELD_BITPOS (type, 0),
-			    TYPE_FIELD_BITPOS (type, 1));
 	break;
 
       case TYPE_CODE_ENUM:
