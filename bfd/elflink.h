@@ -4334,6 +4334,7 @@ elf_link_check_versioned_symbol (info, h)
 	{
 	  const char *name;
 	  Elf_Internal_Versym iver;
+	  unsigned short version_index;
 
 	  if (ELF_ST_BIND (isym->st_info) == STB_LOCAL
 	      || isym->st_shndx == SHN_UNDEF)
@@ -4354,9 +4355,10 @@ elf_link_check_versioned_symbol (info, h)
 	      abort ();
 	    }
 
-	  if ((iver.vs_vers & VERSYM_VERSION) == 2)
+	  version_index = iver.vs_vers & VERSYM_VERSION;
+	  if (version_index == 1 || version_index == 2)
 	    {
-	      /* This is the oldest (default) sym.  We can use it.  */
+	      /* This is the base or first version.  We can use it.  */
 	      free (extversym);
 	      free (isymbuf);
 	      return TRUE;
