@@ -1268,7 +1268,6 @@ v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
    * Call Dummies
    * 
    * These values and methods are used when gdb calls a target function.  */
-  set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
   set_gdbarch_push_return_address (gdbarch, v850_push_return_address);
   set_gdbarch_deprecated_extract_return_value (gdbarch, v850_extract_return_value);
   set_gdbarch_push_arguments (gdbarch, v850_push_arguments);

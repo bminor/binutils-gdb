@@ -1050,7 +1050,7 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof (call_dummy_words));
   set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
   set_gdbarch_fix_call_dummy (gdbarch, m68k_fix_call_dummy);
-  set_gdbarch_push_dummy_frame (gdbarch, m68k_push_dummy_frame);
+  set_gdbarch_deprecated_push_dummy_frame (gdbarch, m68k_push_dummy_frame);
   set_gdbarch_pop_frame (gdbarch, m68k_pop_frame);
 
   return gdbarch;

@@ -53,7 +53,7 @@ static gdbarch_deprecated_extract_return_value_ftype vax_extract_return_value;
 static gdbarch_deprecated_extract_struct_value_address_ftype
     vax_extract_struct_value_address;
 
-static gdbarch_push_dummy_frame_ftype vax_push_dummy_frame;
+static gdbarch_deprecated_push_dummy_frame_ftype vax_push_dummy_frame;
 static gdbarch_pop_frame_ftype vax_pop_frame;
 static gdbarch_fix_call_dummy_ftype vax_fix_call_dummy;
 
@@ -669,7 +669,7 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, vax_extract_struct_value_address);
 
   /* Call dummy info */
-  set_gdbarch_push_dummy_frame (gdbarch, vax_push_dummy_frame);
+  set_gdbarch_deprecated_push_dummy_frame (gdbarch, vax_push_dummy_frame);
   set_gdbarch_pop_frame (gdbarch, vax_pop_frame);
   set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
   set_gdbarch_call_dummy_p (gdbarch, 1);

@@ -1590,7 +1590,6 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_extract_return_value (gdbarch, i386_extract_return_value);
   set_gdbarch_push_arguments (gdbarch, i386_push_arguments);
-  set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
   set_gdbarch_push_return_address (gdbarch, i386_push_return_address);
   set_gdbarch_pop_frame (gdbarch, i386_pop_frame);
   set_gdbarch_store_struct_return (gdbarch, i386_store_struct_return);

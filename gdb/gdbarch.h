@@ -1526,15 +1526,41 @@ extern void set_gdbarch_push_arguments (struct gdbarch *gdbarch, gdbarch_push_ar
 #endif
 #endif
 
-typedef void (gdbarch_push_dummy_frame_ftype) (void);
-extern void gdbarch_push_dummy_frame (struct gdbarch *gdbarch);
-extern void set_gdbarch_push_dummy_frame (struct gdbarch *gdbarch, gdbarch_push_dummy_frame_ftype *push_dummy_frame);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (PUSH_DUMMY_FRAME)
-#error "Non multi-arch definition of PUSH_DUMMY_FRAME"
+#if defined (DEPRECATED_PUSH_DUMMY_FRAME)
+/* Legacy for systems yet to multi-arch DEPRECATED_PUSH_DUMMY_FRAME */
+#if !defined (DEPRECATED_PUSH_DUMMY_FRAME_P)
+#define DEPRECATED_PUSH_DUMMY_FRAME_P() (1)
+#endif
+#endif
+
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_PUSH_DUMMY_FRAME_P)
+#define DEPRECATED_PUSH_DUMMY_FRAME_P() (0)
+#endif
+
+extern int gdbarch_deprecated_push_dummy_frame_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_PUSH_DUMMY_FRAME_P)
+#error "Non multi-arch definition of DEPRECATED_PUSH_DUMMY_FRAME"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_PUSH_DUMMY_FRAME_P)
+#define DEPRECATED_PUSH_DUMMY_FRAME_P() (gdbarch_deprecated_push_dummy_frame_p (current_gdbarch))
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_PUSH_DUMMY_FRAME)
+#define DEPRECATED_PUSH_DUMMY_FRAME (internal_error (__FILE__, __LINE__, "DEPRECATED_PUSH_DUMMY_FRAME"), 0)
+#define DEPRECATED_PUSH_DUMMY_FRAME (gdbarch_deprecated_push_dummy_frame (current_gdbarch))
+#endif
+
+typedef void (gdbarch_deprecated_push_dummy_frame_ftype) (void);
+extern void gdbarch_deprecated_push_dummy_frame (struct gdbarch *gdbarch);
+extern void set_gdbarch_deprecated_push_dummy_frame (struct gdbarch *gdbarch, gdbarch_deprecated_push_dummy_frame_ftype *deprecated_push_dummy_frame);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_PUSH_DUMMY_FRAME)
+#error "Non multi-arch definition of DEPRECATED_PUSH_DUMMY_FRAME"
 #endif
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (PUSH_DUMMY_FRAME)
-#define PUSH_DUMMY_FRAME (gdbarch_push_dummy_frame (current_gdbarch))
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_PUSH_DUMMY_FRAME)
+#define DEPRECATED_PUSH_DUMMY_FRAME (gdbarch_deprecated_push_dummy_frame (current_gdbarch))
 #endif
 #endif
 

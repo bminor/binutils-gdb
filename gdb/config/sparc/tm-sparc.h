@@ -582,18 +582,18 @@ extern CORE_ADDR init_frame_pc_noop (int fromleaf, struct frame_info *prev);
  *   I understand everything in this picture except what the space
  * between fp - 0xe0 and fp - 0x140 is used for.  Oh, and I don't
  * understand why there's a large chunk of CALL_DUMMY that never gets
- * executed (its function is superceeded by PUSH_DUMMY_FRAME; they
- * are designed to do the same thing).
+ * executed (its function is superceeded by
+ * DEPRECATED_PUSH_DUMMY_FRAME; they are designed to do the same
+ * thing).
  *
- *   PUSH_DUMMY_FRAME saves the registers above sp' and pushes the
- * register file stack down one.
+ *   DEPRECATED_PUSH_DUMMY_FRAME saves the registers above sp' and
+ * pushes the * register file stack down one.
  *
  *   call_function then writes CALL_DUMMY, pushes the args onto the
  * stack, and adjusts the stack pointer.
  *
  *   run_stack_dummy then starts execution (in the middle of
- * CALL_DUMMY, as directed by call_function).
- */
+ * CALL_DUMMY, as directed by call_function).  */
 
 #ifndef CALL_DUMMY
 /* This sequence of words is the instructions
@@ -681,7 +681,7 @@ void sparc_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun,
 
 /* Push an empty stack frame, to record the current PC, etc.  */
 
-#define PUSH_DUMMY_FRAME	sparc_push_dummy_frame ()
+#define DEPRECATED_PUSH_DUMMY_FRAME	sparc_push_dummy_frame ()
 #define POP_FRAME		sparc_pop_frame ()
 
 void sparc_push_dummy_frame (void);

@@ -4283,7 +4283,6 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* No register requires conversion from raw format to virtual format.  */
   set_gdbarch_register_convertible (gdbarch, generic_register_convertible_not);
 
-  set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
   set_gdbarch_push_return_address (gdbarch, cris_push_return_address);
   set_gdbarch_pop_frame (gdbarch, cris_pop_frame);
 

@@ -592,7 +592,7 @@ ns32k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
                                             ns32k_extract_struct_value_address);
 
   /* Call dummy info */
-  set_gdbarch_push_dummy_frame (gdbarch, ns32k_push_dummy_frame);
+  set_gdbarch_deprecated_push_dummy_frame (gdbarch, ns32k_push_dummy_frame);
   set_gdbarch_pop_frame (gdbarch, ns32k_pop_frame);
   set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
   set_gdbarch_call_dummy_p (gdbarch, 1);

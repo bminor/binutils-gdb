@@ -1181,7 +1181,6 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_address_to_pointer (gdbarch, avr_address_to_pointer);
   set_gdbarch_pointer_to_address (gdbarch, avr_pointer_to_address);
   set_gdbarch_push_arguments (gdbarch, avr_push_arguments);
-  set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
   set_gdbarch_push_return_address (gdbarch, avr_push_return_address);
   set_gdbarch_pop_frame (gdbarch, avr_pop_frame);
 

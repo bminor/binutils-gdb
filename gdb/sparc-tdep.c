@@ -3160,7 +3160,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_max_register_virtual_size (gdbarch, 8);
   set_gdbarch_pop_frame (gdbarch, sparc_pop_frame);
   set_gdbarch_push_return_address (gdbarch, sparc_push_return_address);
-  set_gdbarch_push_dummy_frame (gdbarch, sparc_push_dummy_frame);
+  set_gdbarch_deprecated_push_dummy_frame (gdbarch, sparc_push_dummy_frame);
   set_gdbarch_read_pc (gdbarch, generic_target_read_pc);
   set_gdbarch_register_convert_to_raw (gdbarch, sparc_convert_to_raw);
   set_gdbarch_register_convert_to_virtual (gdbarch, 

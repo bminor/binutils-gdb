@@ -5016,7 +5016,7 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_locals_address (gdbarch, hppa_frame_locals_address);
   set_gdbarch_frame_num_args (gdbarch, hppa_frame_num_args);
   set_gdbarch_frame_args_skip (gdbarch, 0);
-  /* set_gdbarch_push_dummy_frame (gdbarch, hppa_push_dummy_frame);  */
+  /* set_gdbarch_deprecated_push_dummy_frame (gdbarch, hppa_push_dummy_frame);  */
   set_gdbarch_pop_frame (gdbarch, hppa_pop_frame);
   set_gdbarch_call_dummy_length (gdbarch, INSTRUCTION_SIZE * 28);
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);
