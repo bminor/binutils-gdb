@@ -37,3 +37,9 @@ extern CORE_ADDR millicode_start, millicode_end;
     && get_frame_pc (frame) < millicode_end) ?  \
    read_register (31) & ~3                      \
    : read_register (RP_REGNUM) & ~3)
+
+/* We need to figure out where the text region is so that we use the
+   appropriate ptrace operator to manipulate text.  Simply reading/writing
+   user space will crap out HPUX.  */
+
+#define NEED_TEXT_START_END

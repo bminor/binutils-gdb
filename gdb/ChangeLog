@@ -1,5 +1,8 @@
 Mon Dec 21 18:02:35 1992  Stu Grossman  (grossman at cygnus.com)
 
+	* tm-hppah.h:  #define NEED_TEXT_START_END for target memory
+	read/write routines for HPUX.
+
 	* hppa-pinsn.c (print_insn):  Improve handling of be and ble
 	branch targets to compute target address using const from previous
 	instruction if necessary.
