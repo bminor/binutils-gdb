@@ -41,7 +41,7 @@ static void mri_char_constant PARAMS ((expressionS *));
 static void current_location PARAMS ((expressionS *));
 static void clean_up_expression PARAMS ((expressionS * expressionP));
 static segT operand PARAMS ((expressionS *));
-static operatorT operator PARAMS ((void));
+static operatorT operator PARAMS ((int *));
 
 extern const char EXP_CHARS[], FLT_CHARS[];
 
@@ -1552,17 +1552,19 @@ expr_begin ()
   }
 }
 
-/* Return the encoding for the operator at INPUT_LINE_POINTER.
-   Advance INPUT_LINE_POINTER to the last character in the operator
-   (i.e., don't change it for a single character operator).  */
+/* Return the encoding for the operator at INPUT_LINE_POINTER, and
+   sets NUM_CHARS to the number of characters in the operator.
+   Does not advance INPUT_LINE_POINTER.  */
 
 static inline operatorT
-operator ()
+operator (num_chars)
+     int *num_chars;
 {
   int c;
   operatorT ret;
 
   c = *input_line_pointer & 0xff;
+  *num_chars = 1;
 
   if (is_end_of_line[c])
     return O_illegal;
@@ -1587,14 +1589,14 @@ operator ()
 	  ret = O_le;
 	  break;
 	}
-      ++input_line_pointer;
+      *num_chars = 2;
       return ret;
 
     case '=':
       if (input_line_pointer[1] != '=')
 	return op_encoding[c];
 
-      ++input_line_pointer;
+      *num_chars = 2;
       return O_eq;
 
     case '>':
@@ -1609,7 +1611,7 @@ operator ()
 	  ret = O_ge;
 	  break;
 	}
-      ++input_line_pointer;
+      *num_chars = 2;
       return ret;
 
     case '!':
@@ -1620,21 +1622,21 @@ operator ()
 	    return O_bit_inclusive_or;
 	  return op_encoding[c];
 	}
-      ++input_line_pointer;
+      *num_chars = 2;
       return O_bit_exclusive_or;
 
     case '|':
       if (input_line_pointer[1] != '|')
 	return op_encoding[c];
 
-      ++input_line_pointer;
+      *num_chars = 2;
       return O_logical_or;
 
     case '&':
       if (input_line_pointer[1] != '&')
 	return op_encoding[c];
 
-      ++input_line_pointer;
+      *num_chars = 2;
       return O_logical_and;
     }
 
@@ -1653,6 +1655,7 @@ expr (rankarg, resultP)
   expressionS right;
   operatorT op_left;
   operatorT op_right;
+  int op_chars;
 
   know (rank >= 0);
 
@@ -1661,12 +1664,12 @@ expr (rankarg, resultP)
   /* operand () gobbles spaces.  */
   know (*input_line_pointer != ' ');
 
-  op_left = operator ();
+  op_left = operator (&op_chars);
   while (op_left != O_illegal && op_rank[(int) op_left] > rank)
     {
       segT rightseg;
 
-      input_line_pointer++;	/* -> after 1st character of operator.  */
+      input_line_pointer += op_chars;	/* -> after operator.  */
 
       rightseg = expr (op_rank[(int) op_left], &right);
       if (right.X_op == O_absent)
@@ -1706,7 +1709,7 @@ expr (rankarg, resultP)
 	       )
 	as_bad (_("operation combines symbols in different segments"));
 
-      op_right = operator ();
+      op_right = operator (&op_chars);
 
       know (op_right == O_illegal
 	    || op_rank[(int) op_right] <= op_rank[(int) op_left]);

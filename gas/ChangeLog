@@ -1,3 +1,9 @@
+2001-02-13  Alan Modra  <alan@linuxcare.com.au>
+
+	* expr.c (operator): Don't bump input_line_pointer for two char
+	operators.  Instead return operator size via new param num_chars.
+	(expr): Use above to parse multi-char operators correctly.
+
 Mon Feb 12 17:45:50 CET 2001  Jan Hubicka  <jh@suse.cz>
 
 	* tc-i386.c (i386_displacement): Fix handling of
