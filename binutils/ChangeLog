@@ -1,3 +1,10 @@
+1999-07-09  Nick Clifton  <nickc@cygnus.com>
+
+	* readelf.c: Only support decoding 64bit ELF files if the compiler
+	supports a 64 bit data type.
+	Add -I equivalent for --histogram.
+	Add -A command-line option to display architecture specific information.
+
 1999-07-08  Jakub Jelinek  <jj@ultra.linux.cz>
 
 	* readelf.c (guess_is_rela): Sparcv9 and v8plus use rela.
