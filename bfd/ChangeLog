@@ -1,4 +1,24 @@
+Tue Dec 21 09:22:19 1993  Ken Raeburn  (raeburn@rtl.cygnus.com)
+
+	* coffcode.h (coff_write_relocs) [SWAP_OUT_RELOC_OFFSET]: Copy
+	addend to r_offset field.
+
+	* Makefile.in (CFILES): Added coff-sparc.c.  Rebuild dependencies.
+
+	* coff-sparc.c (SWAP_IN_RELOC_OFFSET, SWAP_OUT_RELOC_OFFSET,
+	CALC_ADDEND): Define.
+
+	* aix386-core.c (aix386_core_file_p): Use cd_regs[0] for computing
+	the offsetof because AIX /bin/cc does not like to take the address
+	of an array.  (From Minh Tran-Le.)
+
 Thu Dec 16 13:06:32 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* Thu Dec 16 15:41:06 1993  Peter Hoogenboom  (hoogen@cs.utah.edu)
+
+	* elf32-hppa.c (hppa_elf_build_arg_reloc_stub): Make sure to copy
+	the return pointer into %r2 if no jump-in-call-delay-slot
+	optimization was done.
 
 	* hosts/hp300bsd.h: Correctly identify 4.3BSD vs 4.4BSD.
 
