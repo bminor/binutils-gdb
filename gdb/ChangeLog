@@ -1,5 +1,9 @@
 2004-02-21  Mark Kettenis  <kettenis@gnu.org>
 
+	* configure.host: Add i[34567]86-*-openbsd[0-2].* and
+	i[34567]86-*-openbsd3.[0-3].
+	* config/i386/obsdaout.mh: New file.
+
 	* config/i386/obsd.mh (MH_FLAGS): Remove.
 
 	Fix PR build/1549.
