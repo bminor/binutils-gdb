@@ -1,3 +1,17 @@
+Sun Jun 16 15:21:51 1996  Jeffrey A. Law  <law@rtl.cygnus.com>
+
+	* somsolib.c (som_solib_create_inferior_hook): Handle tracking
+	of shl_load calls for hpux10.
+
+Thu Jun 13 11:16:10 1996  Tom Tromey  <tromey@thepub.cygnus.com>
+
+	* config.in: Regenerated.
+	* acconfig.h (HAVE_THREAD_DB_LIB): Added entry.
+
+	* configure: Regenerated.
+	* aclocal.m4 (CY_AC_PATH_TCLH, CY_AC_PATH_TKH): Use odd names to
+	avoid name clashes with SunOS headers.
+
 Tue Jun 11 19:52:50 1996  Fred Fish  <fnf@cygnus.com>
 
 	From Michael Snyder <Michael_Snyder@next.com>:

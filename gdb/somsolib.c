@@ -518,67 +518,88 @@ som_solib_create_inferior_hook()
     return;
 
   have_endo = 0;
-  /* Slam the pid of the process into __d_pid; failing is only a warning!  */
+  /* If __d_pid is present, then put the inferior's pid into __d_pid.  hpux9
+     requires __d_pid to be set.  hpux10 doesn't require __d_pid to be set
+     and the symbol may not be available.  */
   msymbol = lookup_minimal_symbol ("__d_pid", NULL, symfile_objfile);
   if (msymbol == NULL)
     {
       warning ("Unable to find __d_pid symbol in object file.");
-      warning ("Suggest linking with /usr/lib/end.o.");
-      warning ("GDB will be unable to track shl_load/shl_unload calls");
-      goto keep_going;
+    }
+  else
+    {
+      anaddr = SYMBOL_VALUE_ADDRESS (msymbol);
+      store_unsigned_integer (buf, 4, inferior_pid);
+      status = target_write_memory (anaddr, buf, 4);
+      if (status != 0)
+	{
+	  warning ("Unable to write __d_pid");
+	  goto keep_going;
+	}
     }
 
-  anaddr = SYMBOL_VALUE_ADDRESS (msymbol);
-  store_unsigned_integer (buf, 4, inferior_pid);
-  status = target_write_memory (anaddr, buf, 4);
-  if (status != 0)
+  /* If __d_trap_fptr exists, then load whatever's at that address
+     and put it into __dld_hook.  */
+  msymbol = lookup_minimal_symbol ("__d_trap_fptr", NULL, symfile_objfile);
+  if (msymbol != NULL)
     {
-      warning ("Unable to write __d_pid");
-      warning ("Suggest linking with /usr/lib/end.o.");
-      warning ("GDB will be unable to track shl_load/shl_unload calls");
-      goto keep_going;
+      anaddr = SYMBOL_VALUE_ADDRESS (msymbol);
+      status = target_read_memory (anaddr, buf, 4);
+      anaddr = extract_unsigned_integer (buf, 4);
+
+      /* If it's a plabel, then get the address of the real function.
+	 Egad.  This is just the opposite of how hpux9 and _DLD_HOOK
+	 works.  */
+      if (anaddr | 0x2)
+	{
+	  status = target_read_memory (anaddr & ~0x2, buf, 4);
+	  anaddr = extract_unsigned_integer (buf, 4);
+	}
     }
-
-  /* Get the value of _DLD_HOOK (an export stub) and put it in __dld_hook;
-     This will force the dynamic linker to call __d_trap when significant
-     events occur.  */
-  msymbol = lookup_minimal_symbol ("_DLD_HOOK", NULL, symfile_objfile);
-  if (msymbol == NULL)
+  else
     {
-      warning ("Unable to find _DLD_HOOK symbol in object file.");
-      warning ("Suggest linking with /usr/lib/end.o.");
-      warning ("GDB will be unable to track shl_load/shl_unload calls");
-      goto keep_going;
-    }
-  anaddr = SYMBOL_VALUE_ADDRESS (msymbol);
+      /* Get the value of _DLD_HOOK (an export stub) and put it in __dld_hook;
+	 This will force the dynamic linker to call __d_trap when significant
+	 events occur.  */
+      msymbol = lookup_minimal_symbol ("_DLD_HOOK", NULL, symfile_objfile);
+      if (msymbol == NULL)
+	{
+	  warning ("Unable to find _DLD_HOOK symbol in object file.");
+	  warning ("Suggest linking with /usr/lib/end.o.");
+	  warning ("GDB will be unable to track shl_load/shl_unload calls");
+	  goto keep_going;
+	}
+      anaddr = SYMBOL_VALUE_ADDRESS (msymbol);
 
-  /* Grrr, this might not be an export symbol!  We have to find the
-     export stub.  */
-  ALL_OBJFILES (objfile)
-    {
-      struct unwind_table_entry *u;
-      extern struct unwind_table_entry *find_unwind_entry PARAMS ((CORE_ADDR pc));
-
-      /* What a crock.  */
-      msymbol = lookup_minimal_symbol_solib_trampoline (SYMBOL_NAME (msymbol),
-							NULL, objfile);
-      /* Found a symbol with the right name.  */
-      if (msymbol)
+      /* Grrr, this might not be an export symbol!  We have to find the
+	 export stub.  */
+      ALL_OBJFILES (objfile)
 	{
 	  struct unwind_table_entry *u;
-	  /* It must be a shared library trampoline.  */
-	  if (SYMBOL_TYPE (msymbol) != mst_solib_trampoline)
-	    continue;
+	  extern struct unwind_table_entry *find_unwind_entry PARAMS ((CORE_ADDR pc));
 
-	  /* It must also be an export stub.  */
-	  u = find_unwind_entry (SYMBOL_VALUE (msymbol));
-	  if (!u || u->stub_type != EXPORT)
-	    continue;
+	  /* What a crock.  */
+	  msymbol
+	    = lookup_minimal_symbol_solib_trampoline (SYMBOL_NAME (msymbol),
+						      NULL, objfile);
+	  /* Found a symbol with the right name.  */
+	  if (msymbol)
+	    {
+	      struct unwind_table_entry *u;
+	      /* It must be a shared library trampoline.  */
+	      if (SYMBOL_TYPE (msymbol) != mst_solib_trampoline)
+		continue;
 
-	  /* OK.  Looks like the correct import stub.  */
-	  anaddr = SYMBOL_VALUE (msymbol);
-	  break;
-	}
+	      /* It must also be an export stub.  */
+	      u = find_unwind_entry (SYMBOL_VALUE (msymbol));
+	      if (!u || u->stub_type != EXPORT)
+		continue;
+
+	      /* OK.  Looks like the correct import stub.  */
+	      anaddr = SYMBOL_VALUE (msymbol);
+	      break;
+	    }
+        }
      }
   store_unsigned_integer (buf, 4, anaddr);
 
