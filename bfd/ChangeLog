@@ -1,3 +1,8 @@
+2001-03-30  H.J. Lu  <hjl@gnu.org>
+
+	* efi-app-ia32.c (PEI_TARGET_SUBSYSTEM): Rename from ...
+	(PEI_DEFAULT_TARGET_SUBSYSTEM): This.
+
 2001-03-26  H.J. Lu  <hjl@gnu.org>
 
 	* elf32-gen.c (elf32_generic_link_add_symbols): New. Check
