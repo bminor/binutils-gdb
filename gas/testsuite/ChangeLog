@@ -1,3 +1,7 @@
+Thu Oct  9 18:10:44 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* gas/sparc/set64.[sd]: `set' doesn't take negative arguments.
+
 Thu Oct  9 12:59:55 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/arm/arm7t.d: Update for recent disassembler changes.
