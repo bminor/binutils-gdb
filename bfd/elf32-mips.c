@@ -5938,6 +5938,7 @@ mips_elf_calculate_relocation (abfd,
   switch (r_type)
     {
     case R_MIPS_CALL16:
+    case R_MIPS_GOT16:
     case R_MIPS_GOT_DISP:
     case R_MIPS_GOT_HI16:
     case R_MIPS_CALL_HI16:
