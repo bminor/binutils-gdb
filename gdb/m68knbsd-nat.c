@@ -63,6 +63,11 @@ store_inferior_registers(regno)
 	  (PTRACE_ARG3_TYPE) &inferior_fp_registers, 0);
 }
 
+struct md_core {
+  struct reg intreg; 
+  struct fpreg freg;
+};
+
 void
 fetch_core_registers (core_reg_sect, core_reg_size, which, ignore)
      char *core_reg_sect;
@@ -70,5 +75,12 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, ignore)
      int which;
      unsigned int ignore;
 {
-  abort();
+  struct md_core *core_reg = (struct md_core *)core_reg_sect;
+  
+  /* Integer registers */
+  memcpy(&registers[REGISTER_BYTE (0)],
+	 &core_reg->intreg, sizeof(struct reg));
+  /* Floating point registers */
+  memcpy(&registers[REGISTER_BYTE (FP0_REGNUM)],
+	 &core_reg->freg, sizeof(struct fpreg));
 }

@@ -1,3 +1,8 @@
+Tue Mar  5 12:05:35 1996  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* i386b-nat.c, m68knbsd-nat.c (fetch_core_registers): Provide
+ 	implementation for NetBSD systems.
+
 Mon Mar  4 23:44:16 1996  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* valarith.c (binop_user_defined_p):  Return 0 for BINOP_CONCAT.
