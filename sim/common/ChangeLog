@@ -1,3 +1,18 @@
+Tue Apr 15 15:10:13 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Make-common.in (INSTALL): Set to @INSTALL@.
+	(INSTALL_XFORM, INSTALL_XFORM1): Remove.
+	(install-common): Depend upon installdirs.  Use
+	$(program_transform_name) directly, rather than using
+	$(INSTALL_XFORM).
+	(installdirs): New target.
+	* Makefile.in (INSTALL): Set to @INSTALL@.
+	(INSTALL_XFORM, INSTALL_XFORM1): Remove.
+	(install-man): Depend upon installdirs.  Use
+	$(program_transform_name) directly, rather than using
+	$(INSTALL_XFORM).
+	(installdirs): New target.
+
 Tue Apr 15 15:08:12 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-assert.h (SIM_ASSERT, ASSERT): Allow these macros to

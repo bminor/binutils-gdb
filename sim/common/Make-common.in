@@ -58,11 +58,9 @@ includedir = @includedir@
 
 SHELL = /bin/sh
 
-INSTALL = $(srcroot)/install.sh -c
+INSTALL = @INSTALL@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_DATA = @INSTALL_DATA@
-INSTALL_XFORM = $(INSTALL) -t='$(program_transform_name)'
-INSTALL_XFORM1= $(INSTALL_XFORM) -b=.1
 
 CC = @CC@
 CC_FOR_BUILD = @CC_FOR_BUILD@
@@ -86,6 +84,9 @@ MAKEINFO = makeinfo
 
 # List of object files, less common parts.
 SIM_OBJS =
+# List of extra dependencies.
+# Generally this consists of simulator specific files included by sim-main.h.
+SIM_EXTRA_DEPS =
 # List of flags to always pass to $(CC).
 SIM_EXTRA_CFLAGS =
 # List of extra libraries to link with.
@@ -168,6 +169,13 @@ targ-map.c: gentmap
 # .o file in the list of simulator targets.
 #
 
+sim_main_headers = \
+	sim-main.h \
+	$(srcdir)/../common/sim-config.h \
+	$(srcdir)/../common/sim-base.h \
+	$(srcdir)/../common/sim-basics.h \
+	tconfig.h
+
 sim-assert_h = $(srcdir)/../common/sim-assert.h
 sim-endian_h = $(srcdir)/../common/sim-endian.h
 sim-n-endian_h = $(srcdir)/../common/sim-n-endian.h
@@ -180,35 +188,52 @@ sim-events_h = $(srcdir)/../common/sim-events.h
 sim-io_h = $(srcdir)/../common/sim-io.h
 sim-n-io_h = $(srcdir)/../common/sim-n-io.h
 
-sim-bits.o: sim-bits.c $(sim-bits_h) $(sim-n-bits_h) $(sim-assert_h)
+# FIXME: If this complicated way of building .o files from ../common is
+# necessary, the reason should be documented here!
+
+BUILT_SRC_FROM_COMMON= \
+	sim-endian.c \
+	sim-inline.c \
+	sim-bits.c \
+	sim-events.c \
+	sim-core.c \
+	sim-config.c \
+	sim-io.c
+
+sim-bits.o: sim-bits.c $(sim-bits_h) $(sim-n-bits_h) $(sim-assert_h) \
+	$(SIM_EXTRA_DEPS)
 sim-bits.c: $(srcdir)/../common/sim-bits.c
 	rm -f $@ tmp-$@
 	echo "# 1 \"$(srcdir)/../common/$@\"" > tmp-$@
 	cat $(srcdir)/../common/$@ >> tmp-$@
 	$(srcdir)/../../move-if-change tmp-$@ $@
 
-sim-config.o: sim-config.c $(sim-config_h) $(sim-nconfig_h) $(sim-assert_h)
+sim-config.o: sim-config.c $(sim-config_h) $(sim-nconfig_h) $(sim-assert_h) \
+	$(SIM_EXTRA_DEPS)
 sim-config.c: $(srcdir)/../common/sim-config.c
 	rm -f $@ tmp-$@
 	echo "# 1 \"$(srcdir)/../common/$@\"" > tmp-$@
 	cat $(srcdir)/../common/$@ >> tmp-$@
 	$(srcdir)/../../move-if-change tmp-$@ $@
 
-sim-core.o: sim-core.c $(sim-core_h) $(sim-n-core_h)
+sim-core.o: sim-core.c $(sim-core_h) $(sim-n-core_h) \
+	$(SIM_EXTRA_DEPS)
 sim-core.c: $(srcdir)/../common/sim-core.c
 	rm -f $@ tmp-$@
 	echo "# 1 \"$(srcdir)/../common/$@\"" > tmp-$@
 	cat $(srcdir)/../common/$@ >> tmp-$@
 	$(srcdir)/../../move-if-change tmp-$@ $@
 
-sim-endian.o: sim-endian.c $(sim-endian_h) $(sim-n-endian_h) $(sim-assert_h)
+sim-endian.o: sim-endian.c $(sim-endian_h) $(sim-n-endian_h) $(sim-assert_h) \
+	$(SIM_EXTRA_DEPS)
 sim-endian.c: $(srcdir)/../common/sim-endian.c
 	rm -f $@ tmp-$@
 	echo "# 1 \"$(srcdir)/../common/$@\"" > tmp-$@
 	cat $(srcdir)/../common/$@ >> tmp-$@
 	$(srcdir)/../../move-if-change tmp-$@ $@
 
-sim-events.o: sim-events.c $(sim-events_h) $(sim-assert_h)
+sim-events.o: sim-events.c $(sim-events_h) $(sim-assert_h) \
+	$(SIM_EXTRA_DEPS)
 sim-events.c: $(srcdir)/../common/sim-events.c
 	rm -f $@ tmp-$@
 	echo "# 1 \"$(srcdir)/../common/$@\"" > tmp-$@
@@ -221,19 +246,27 @@ sim-inline.c: $(srcdir)/../common/sim-inline.c
 	cat $(srcdir)/../common/$@ >> tmp-$@
 	$(srcdir)/../../move-if-change tmp-$@ $@
 
-sim-io.o: sim-io.c $(sim-io_h) $(sim-assert_h)
+sim-io.o: sim-io.c $(sim_main_headers) $(sim-io_h) $(sim-assert_h) \
+	$(SIM_EXTRA_DEPS)
 sim-io.c: $(srcdir)/../common/sim-io.c
 	rm -f $@ tmp-$@
 	echo "# 1 \"$(srcdir)/../common/$@\"" > tmp-$@
 	cat $(srcdir)/../common/$@ >> tmp-$@
 	$(srcdir)/../../move-if-change tmp-$@ $@
 
+sim-utils.o: $(srcdir)/../common/sim-utils.c $(sim_main_headers) \
+	$(SIM_EXTRA_DEPS)
+	$(CC) -c $(srcdir)/../common/sim-utils.c $(ALL_CFLAGS)
 
 
 install: install-common $(SIM_EXTRA_INSTALL)
 
-install-common:
-	$(INSTALL_XFORM) run $(bindir)/run
+install-common: installdirs
+	n=`echo run | sed '$(program_transform_name)'`; \
+	$(INSTALL_PROGRAM) run $(bindir)/$$n
+
+installdirs:
+	$(SHELL) $(srcdir)/../../mkinstalldirs $(bindir)
 
 check:
 
@@ -253,7 +286,7 @@ clean: $(SIM_EXTRA_CLEAN)
 	rm -f *.[oa] *~ core
 	rm -f run libsim.a
 	rm -f gentmap targ-map.c targ-vals.h
-	rm -f sim-bits.c sim-config.c sim-core.c sim-endian.c sim-events.c sim-inline.c sim-io.c
+	rm -f $(BUILT_SRC_FROM_COMMON)
 
 distclean mostlyclean maintainer-clean realclean: clean
 	rm -f TAGS
