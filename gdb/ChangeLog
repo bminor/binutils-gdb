@@ -1,3 +1,11 @@
+2003-08-21  Andrew Cagney  <cagney@redhat.com>
+
+	* config/sparc/tm-sp64.h: Delete #if !GDB_MULTI_ARCH and #if 0 code.
+	* config/sparc/tm-sparc.h: Ditto.
+	* config/arm/tm-arm.h (GDB_MULTI_ARCH): Define GDB_MULTI_ARCH
+	unconditionally.
+	* config/pa/tm-hppa.h (GDB_MULTI_ARCH): Ditto.
+
 2003-07-13  Mark Kettenis  <kettenis@gnu.org>
 
 	* objfiles.h (struct objfile): Add memebers `data' and `num_data'.
