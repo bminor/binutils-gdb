@@ -103,9 +103,9 @@ gdb_print_insn_h8300 (memaddr, info)
      disassemble_info *info;
 {
   if (h8300hmode)
-    return print_insn_h8300h (memaddr, &info);
+    return print_insn_h8300h (memaddr, info);
   else
-    return print_insn_h8300 (memaddr, &info);
+    return print_insn_h8300 (memaddr, info);
 }
 
 /* Given a GDB frame, determine the address of the calling function's frame.
