@@ -1,3 +1,7 @@
+2003-03-05  Daniel Jacobowitz  <drow@mvista.com>
+
+	* Makefile.in (FLAGS_TO_PASS): Add LDFLAGS.
+
 2003-03-05  James Ingham <jingham@apple.com>
 	    Daniel Jacobowitz  <drow@mvista.com>
 
