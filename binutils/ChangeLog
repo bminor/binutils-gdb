@@ -1,3 +1,7 @@
+2002-02-10  Daniel Jacobowitz  <drow@mvista.com>
+
+	* nlmconv.c: Back out localtime PARAMS change.
+
 2002-02-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* objcopy.c (MKDIR): Define.
