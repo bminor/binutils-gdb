@@ -632,28 +632,29 @@ sim_store_register (sd,rn,memory,length)
       HI1 = T2H_8(*(unsigned64*)memory);
       return 8;
     }
-
   /* end-sanitize-r5900 */
+
   /* start-sanitize-sky */
 #ifdef TARGET_SKY
-  else if( rn > NUM_R5900_REGS ) {
-    rn = rn - NUM_R5900_REGS;
-
-    if( rn < 16 ) 
-      vu_regs[0].i[rn] = T2H_2( *(unsigned short *) memory );
-    else if( rn < NUM_VU_REGS )
-      vu_regs[0].f[rn - 16] = T2H_4( *(unsigned int *) memory );
-    else {
-      rn = rn - NUM_VU_REGS;
+  if (rn > NUM_R5900_REGS) 
+    {
+      rn = rn - NUM_R5900_REGS;
 
       if( rn < 16 ) 
-	vu_regs[1].i[rn] = T2H_2( *(unsigned short *) memory );
+	vu_regs[0].i[rn] = T2H_2( *(unsigned short *) memory );
       else if( rn < NUM_VU_REGS )
-	vu_regs[1].f[rn - 16] = T2H_4( *(unsigned int *) memory );
-      else
-	sim_io_eprintf( sd, "Invalid VU register (register store ignored)\n" );
+	vu_regs[0].f[rn - 16] = T2H_4( *(unsigned int *) memory );
+      else {
+	rn = rn - NUM_VU_REGS;
+
+	if( rn < 16 ) 
+	  vu_regs[1].i[rn] = T2H_2( *(unsigned short *) memory );
+	else if( rn < NUM_VU_REGS )
+	  vu_regs[1].f[rn - 16] = T2H_4( *(unsigned int *) memory );
+	else
+	  sim_io_eprintf( sd, "Invalid VU register (register store ignored)\n" );
+      }
     }
-  }
 #endif
   /* end-sanitize-sky */
 
@@ -721,31 +722,31 @@ sim_fetch_register (sd,rn,memory,length)
       *((unsigned64*)memory) = H2T_8(HI1);
       return 8;
     }
-
   /* end-sanitize-r5900 */
+
   /* start-sanitize-sky */
 #ifdef TARGET_SKY
-  if( rn > NUM_R5900_REGS ) {
-    rn = rn - NUM_R5900_REGS;
-
-    if( rn < 16 ) 
-      *((unsigned short *) memory) = H2T_2( vu_regs[0].i[rn] );
-    else if( rn < NUM_VU_REGS )
-      *((unsigned int *) memory) = H2T_4( vu_regs[0].f[rn - 16] );
-    else {
-      rn = rn - NUM_VU_REGS;
+  if( rn > NUM_R5900_REGS ) 
+    {
+      rn = rn - NUM_R5900_REGS;
 
       if( rn < 16 ) 
-	(*(unsigned short *) memory) = H2T_2( vu_regs[1].i[rn] );
+	*((unsigned short *) memory) = H2T_2( vu_regs[0].i[rn] );
       else if( rn < NUM_VU_REGS )
-	(*(unsigned int *) memory) = H2T_4( vu_regs[1].f[rn - 16] );
-      else
-	sim_io_eprintf( sd, "Invalid VU register (register fetch ignored)\n" );
+	*((unsigned int *) memory) = H2T_4( vu_regs[0].f[rn - 16] );
+      else {
+	rn = rn - NUM_VU_REGS;
+	
+	if( rn < 16 ) 
+	  (*(unsigned short *) memory) = H2T_2( vu_regs[1].i[rn] );
+	else if( rn < NUM_VU_REGS )
+	  (*(unsigned int *) memory) = H2T_4( vu_regs[1].f[rn - 16] );
+	else
+	  sim_io_eprintf( sd, "Invalid VU register (register fetch ignored)\n" );
+      }
+      return -1;
     }
-    return -1;
-  }
 #endif
-
   /* end-sanitize-sky */
 
   /* Any floating point register */
