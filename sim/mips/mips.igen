@@ -47,6 +47,7 @@
 :model:::mipsII:mips6000:
 :model:::mipsIII:mips4000:
 :model:::mipsIV:mips8000:
+:model:::mipsV:mipsisaV:
 
 //  Vendor ISAs:
 //
@@ -138,6 +139,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 {
@@ -163,6 +165,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -198,6 +201,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 {
@@ -231,6 +235,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -252,7 +257,7 @@
 //
 // MIPS Architecture:
 //
-//        CPU Instruction Set (mipsI - mipsIV)
+//        CPU Instruction Set (mipsI - mipsV)
 //
 
 
@@ -263,6 +268,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -284,6 +290,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -312,6 +319,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -334,6 +342,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -356,6 +365,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -371,6 +381,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -388,6 +399,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -408,6 +420,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -431,6 +444,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -452,6 +466,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -473,6 +488,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -498,6 +514,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -521,6 +538,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -541,6 +559,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -566,6 +585,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -588,6 +608,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -611,6 +632,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -632,6 +654,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -655,6 +678,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -678,6 +702,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -703,6 +728,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -723,6 +749,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -746,6 +773,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -782,6 +810,7 @@
 "dadd r<RD>, r<RS>, r<RT>"
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 {
@@ -800,6 +829,7 @@
 "daddi r<RT>, r<RS>, <IMMEDIATE>"
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 {
@@ -825,6 +855,7 @@
 "daddiu r<RT>, r<RS>, <IMMEDIATE>"
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 {
@@ -844,6 +875,7 @@
 "daddu r<RD>, r<RS>, r<RT>"
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 {
@@ -886,6 +918,7 @@
 "ddiv r<RS>, r<RT>"
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 {
@@ -923,6 +956,7 @@
 "ddivu r<RS>, r<RT>"
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 {
@@ -963,6 +997,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -999,6 +1034,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -1077,6 +1113,7 @@
 "dmult r<RS>, r<RT>"
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 {
   do_dmult (SD_, RS, RT, 0);
@@ -1101,6 +1138,7 @@
 "dmultu r<RS>, r<RT>"
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 {
   do_dmultu (SD_, RS, RT, 0);
@@ -1130,6 +1168,7 @@
 "dsll r<RD>, r<RT>, <SHIFT>"
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 {
@@ -1141,6 +1180,7 @@
 "dsll32 r<RD>, r<RT>, <SHIFT>"
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 {
@@ -1152,6 +1192,7 @@
 "dsllv r<RD>, r<RT>, r<RS>"
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 {
@@ -1168,6 +1209,7 @@
 "dsra r<RD>, r<RT>, <SHIFT>"
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 {
@@ -1179,6 +1221,7 @@
 "dsra32 r<RT>, r<RD>, <SHIFT>"
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 {
@@ -1199,6 +1242,7 @@
 "dsrav r<RT>, r<RD>, r<RS>"
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 {
@@ -1215,6 +1259,7 @@
 "dsrl r<RD>, r<RT>, <SHIFT>"
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 {
@@ -1226,6 +1271,7 @@
 "dsrl32 r<RD>, r<RT>, <SHIFT>"
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 {
@@ -1246,6 +1292,7 @@
 "dsrlv r<RD>, r<RT>, r<RS>"
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 {
@@ -1257,6 +1304,7 @@
 "dsub r<RD>, r<RS>, r<RT>"
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 {
@@ -1281,6 +1329,7 @@
 "dsubu r<RD>, r<RS>, r<RT>"
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 {
@@ -1294,6 +1343,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -1311,6 +1361,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -1329,6 +1380,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -1345,6 +1397,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -1383,6 +1436,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -1397,6 +1451,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -1409,6 +1464,7 @@
 "ld r<RT>, <OFFSET>(r<BASE>)"
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 {
@@ -1421,6 +1477,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -1435,6 +1492,7 @@
 "ldl r<RT>, <OFFSET>(r<BASE>)"
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 {
@@ -1446,6 +1504,7 @@
 "ldr r<RT>, <OFFSET>(r<BASE>)"
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 {
@@ -1459,6 +1518,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -1473,6 +1533,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -1486,6 +1547,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 {
@@ -1527,6 +1589,7 @@
 "lld r<RT>, <OFFSET>(r<BASE>)"
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 {
@@ -1563,6 +1626,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -1579,6 +1643,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -1593,6 +1658,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -1664,6 +1730,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -1709,6 +1776,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -1721,6 +1789,7 @@
 "lwu r<RT>, <OFFSET>(r<BASE>)"
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 {
@@ -1742,6 +1811,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -1765,6 +1835,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -1777,6 +1848,7 @@
 000000,5.RS,5.RT,5.RD,00000,001011:SPECIAL:32::MOVN
 "movn r<RD>, r<RS>, r<RT>"
 *mipsIV:
+*mipsV:
 *vr5000:
 {
   if (GPR[RT] != 0)
@@ -1788,6 +1860,7 @@
 000000,5.RS,5.RT,5.RD,00000,001010:SPECIAL:32::MOVZ
 "movz r<RD>, r<RS>, r<RT>"
 *mipsIV:
+*mipsV:
 *vr5000:
 {
   if (GPR[RT] == 0)
@@ -1802,6 +1875,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -1818,6 +1892,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -1848,6 +1923,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 {
   do_mult (SD_, RS, RT, 0);
@@ -1884,6 +1960,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 {
   do_multu (SD_, RS, RT, 0);
@@ -1912,6 +1989,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -1933,6 +2011,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -1955,6 +2034,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -1965,6 +2045,7 @@
 
 110011,5.RS,nnnnn,16.OFFSET:NORMAL:32::PREF
 *mipsIV:
+*mipsV:
 *vr5000:
 {
   unsigned32 instruction = instruction_0;
@@ -2012,6 +2093,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -2025,6 +2107,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 {
@@ -2066,6 +2149,7 @@
 "scd r<RT>, <OFFSET>(r<BASE>)"
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 {
@@ -2103,6 +2187,7 @@
 "sd r<RT>, <OFFSET>(r<BASE>)"
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 {
@@ -2115,6 +2200,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 {
@@ -2126,6 +2212,7 @@
 "sdl r<RT>, <OFFSET>(r<BASE>)"
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 {
@@ -2137,6 +2224,7 @@
 "sdr r<RT>, <OFFSET>(r<BASE>)"
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 {
@@ -2150,6 +2238,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -2173,6 +2262,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -2199,6 +2289,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -2220,6 +2311,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -2241,6 +2333,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -2262,6 +2355,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -2284,6 +2378,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -2306,6 +2401,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -2330,6 +2426,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -2353,6 +2450,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -2376,6 +2474,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -2390,6 +2489,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -2417,6 +2517,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -2431,6 +2532,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *r3900:
 *vr5000:
@@ -2445,6 +2547,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -2506,6 +2609,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -2541,6 +2645,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -2555,6 +2660,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -2569,6 +2675,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -2582,6 +2689,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 {
@@ -2595,6 +2703,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 {
@@ -2608,6 +2717,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 {
@@ -2621,6 +2731,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 {
@@ -2634,6 +2745,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 {
@@ -2647,6 +2759,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 {
@@ -2660,6 +2773,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 {
@@ -2673,6 +2787,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 {
@@ -2686,6 +2801,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 {
@@ -2699,6 +2815,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 {
@@ -2712,6 +2829,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 {
@@ -2725,6 +2843,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 {
@@ -2746,6 +2865,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -2767,6 +2887,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -2851,6 +2972,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -2875,6 +2997,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -2929,6 +3052,7 @@
 "bc1%s<TF>%s<ND> <OFFSET>":CC == 0
 "bc1%s<TF>%s<ND> <CC>, <OFFSET>"
 *mipsIV:
+*mipsV:
 #*vr4100:
 *vr5000:
 *r3900:
@@ -3004,6 +3128,7 @@
 "c.%s<COND>.%s<FMT> f<FS>, f<FT>":CC == 0
 "c.%s<COND>.%s<FMT> <CC>, f<FS>, f<FT>"
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -3016,6 +3141,7 @@
 "ceil.l.%s<FMT> f<FD>, f<FS>"
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -3037,6 +3163,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -3083,6 +3210,7 @@
 010001,00,X,10,5.RT,5.FS,00000000000:COP1Sb:32::CxC1
 "c%s<X>c1 r<RT>, f<FS>"
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -3135,6 +3263,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -3156,6 +3285,7 @@
 "cvt.l.%s<FMT> f<FD>, f<FS>"
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -3182,6 +3312,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -3205,6 +3336,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -3228,6 +3360,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -3281,6 +3414,7 @@
 010001,00,X,01,5.RT,5.FS,00000000000:COP1Sb:64::DMxC1
 "dm%s<X>c1 r<RT>, f<FS>"
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -3314,6 +3448,7 @@
 "floor.l.%s<FMT> f<FD>, f<FS>"
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -3336,6 +3471,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -3359,6 +3495,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -3370,6 +3507,7 @@
 010011,5.BASE,5.INDEX,5.0,5.FD,000001:COP1X:64::LDXC1
 "ldxc1 f<FD>, r<INDEX>(r<BASE>)"
 *mipsIV:
+*mipsV:
 *vr5000:
 {
   COP_LD (1, FD, do_load (SD_, AccessLength_DOUBLEWORD, GPR[BASE], GPR[INDEX]));
@@ -3383,6 +3521,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -3394,6 +3533,7 @@
 010011,5.BASE,5.INDEX,5.0,5.FD,000000:COP1X:32::LWXC1
 "lwxc1 f<FD>, r<INDEX>(r<BASE>)"
 *mipsIV:
+*mipsV:
 *vr5000:
 {
   COP_LW (1, FD, do_load (SD_, AccessLength_WORD, GPR[BASE], GPR[INDEX]));
@@ -3407,6 +3547,7 @@
 010011,5.FR,5.FT,5.FS,5.FD,100,001:COP1X:32,f::MADD.D
 "madd.d f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
+*mipsV:
 *vr5000:
 {
   unsigned32 instruction = instruction_0;
@@ -3423,6 +3564,7 @@
 010011,5.FR,5.FT,5.FS,5.FD,100,000:COP1X:32,f::MADD.S
 "madd.s f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
+*mipsV:
 *vr5000:
 {
   unsigned32 instruction = instruction_0;
@@ -3463,6 +3605,7 @@
 010001,00,X,00,5.RT,5.FS,00000000000:COP1Sb:32::MxC1
 "m%s<X>c1 r<RT>, f<FS>"
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -3482,6 +3625,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -3501,6 +3645,7 @@
 000000,5.RS,3.CC,0,1.TF,5.RD,00000,000001:SPECIAL:32::MOVtf
 "mov%s<TF> r<RD>, r<RS>, <CC>"
 *mipsIV:
+*mipsV:
 *vr5000:
 {
   if (GETFCC(CC) == TF)
@@ -3513,6 +3658,7 @@
 010001,10,3.FMT,3.CC,0,1.TF,5.FS,5.FD,010001:COP1:32::MOVtf.fmt
 "mov%s<TF>.%s<FMT> f<FD>, f<FS>, <CC>"
 *mipsIV:
+*mipsV:
 *vr5000:
 {
   unsigned32 instruction = instruction_0;
@@ -3529,6 +3675,7 @@
 010001,10,3.FMT,5.RT,5.FS,5.FD,010011:COP1:32::MOVN.fmt
 "movn.%s<FMT> f<FD>, f<FS>, r<RT>"
 *mipsIV:
+*mipsV:
 *vr5000:
 {
   if (GPR[RT] != 0)
@@ -3548,6 +3695,7 @@
 010001,10,3.FMT,5.RT,5.FS,5.FD,010010:COP1:32::MOVZ.fmt
 "movz.%s<FMT> f<FD>, f<FS>, r<RT>"
 *mipsIV:
+*mipsV:
 *vr5000:
 {
   if (GPR[RT] == 0)
@@ -3561,6 +3709,7 @@
 010011,5.FR,5.FT,5.FS,5.FD,101,001:COP1X:32::MSUB.D
 "msub.d f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
+*mipsV:
 *vr5000:
 {
   unsigned32 instruction = instruction_0;
@@ -3578,6 +3727,7 @@
 010011,5.FR,5.FT,5.FS,5.FD,101000:COP1X:32::MSUB.S
 "msub.s f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
+*mipsV:
 *vr5000:
 {
   unsigned32 instruction = instruction_0;
@@ -3600,6 +3750,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -3624,6 +3775,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -3645,6 +3797,7 @@
 010011,5.FR,5.FT,5.FS,5.FD,110001:COP1X:32::NMADD.D
 "nmadd.d f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
+*mipsV:
 *vr5000:
 {
   unsigned32 instruction = instruction_0;
@@ -3662,6 +3815,7 @@
 010011,5.FR,5.FT,5.FS,5.FD,110000:COP1X:32::NMADD.S
 "nmadd.s f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
+*mipsV:
 *vr5000:
 {
   unsigned32 instruction = instruction_0;
@@ -3679,6 +3833,7 @@
 010011,5.FR,5.FT,5.FS,5.FD,111001:COP1X:32::NMSUB.D
 "nmsub.d f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
+*mipsV:
 *vr5000:
 {
   unsigned32 instruction = instruction_0;
@@ -3696,6 +3851,7 @@
 010011,5.FR,5.FT,5.FS,5.FD,111000:COP1X:32::NMSUB.S
 "nmsub.s f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
+*mipsV:
 *vr5000:
 {
   unsigned32 instruction = instruction_0;
@@ -3712,6 +3868,7 @@
 010011,5.BASE,5.INDEX,5.HINT,00000001111:COP1X:32::PREFX
 "prefx <HINT>, r<INDEX>(r<BASE>)"
 *mipsIV:
+*mipsV:
 *vr5000:
 {
   unsigned32 instruction = instruction_0;
@@ -3730,6 +3887,7 @@
 010001,10,3.FMT,00000,5.FS,5.FD,010101:COP1:32::RECIP.fmt
 "recip.%s<FMT> f<FD>, f<FS>"
 *mipsIV:
+*mipsV:
 *vr5000:
 {
   unsigned32 instruction = instruction_0;
@@ -3749,6 +3907,7 @@
 "round.l.%s<FMT> f<FD>, f<FS>"
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -3771,6 +3930,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -3790,6 +3950,7 @@
 
 010001,10,3.FMT,00000,5.FS,5.FD,010110:COP1:32::RSQRT.fmt
 *mipsIV:
+*mipsV:
 "rsqrt.%s<FMT> f<FD>, f<FS>"
 *vr5000:
 {
@@ -3812,6 +3973,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -3823,6 +3985,7 @@
 010011,5.BASE,5.INDEX,5.FS,00000001001:COP1X:64::SDXC1
 "ldxc1 f<FS>, r<INDEX>(r<BASE>)"
 *mipsIV:
+*mipsV:
 *vr5000:
 {
   do_store (SD_, AccessLength_DOUBLEWORD, GPR[BASE], GPR[INDEX], COP_SD (1, FS));
@@ -3834,6 +3997,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -3857,6 +4021,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -3882,6 +4047,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -3921,6 +4087,7 @@
 010011,5.BASE,5.INDEX,5.FS,00000,001000:COP1X:32::SWXC1
 "swxc1 f<FS>, r<INDEX>(r<BASE>)"
 *mipsIV:
+*mipsV:
 *vr5000:
 {
   unsigned32 instruction = instruction_0;
@@ -3959,6 +4126,7 @@
 "trunc.l.%s<FMT> f<FD>, f<FS>"
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -3981,6 +4149,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -4011,6 +4180,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 
@@ -4029,6 +4199,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 
@@ -4039,6 +4210,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 
 
@@ -4048,6 +4220,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 
@@ -4055,6 +4228,7 @@
 101111,5.BASE,5.OP,16.OFFSET:NORMAL:32::CACHE
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -4079,6 +4253,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 
@@ -4087,6 +4262,7 @@
 "dmfc0 r<RT>, r<RD>"
 *mipsIII:
 *mipsIV:
+*mipsV:
 {
   DecodeCoproc (instruction_0);
 }
@@ -4096,6 +4272,7 @@
 "dmtc0 r<RT>, r<RD>"
 *mipsIII:
 *mipsIV:
+*mipsV:
 {
   DecodeCoproc (instruction_0);
 }
@@ -4107,6 +4284,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 
@@ -4115,6 +4293,7 @@
 "eret"
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 {
@@ -4139,6 +4318,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -4154,6 +4334,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -4168,6 +4349,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -4182,6 +4364,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *r3900:
 {
@@ -4196,6 +4379,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 
@@ -4206,6 +4390,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 
@@ -4216,6 +4401,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 
@@ -4226,6 +4412,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*mipsV:
 *vr4100:
 *vr5000:
 

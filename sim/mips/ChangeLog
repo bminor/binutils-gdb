@@ -1,3 +1,8 @@
+2002-02-27  Chris Demetriou  <cgd@broadcom.com>
+
+	* mips.igen (mipsV): New model name.  Also, add it to
+	all instructions and functions where it is appropriate.
+
 2002-02-18  Chris Demetriou  <cgd@broadcom.com>
 
 	* mips.igen: For all functions and instructions, list model
