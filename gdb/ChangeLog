@@ -1,3 +1,7 @@
+Fri Aug 20 14:01:39 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* printcmd.c (MAKEVA_END): Update this version to use "aligner".
+
 Thu Aug 19 22:08:09 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* config/vax/tm-vax.h (BELIEVE_PCC_PROMOTION):  Define.

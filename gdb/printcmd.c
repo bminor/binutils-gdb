@@ -1612,8 +1612,8 @@ print_frame_nameless_args (fi, start, num, first, stream)
 #define MAKEVA_END(list) \
   va_list retval; \
   retval.__va_arg = 0; \
-  retval.__va_stk = (int *) (list)->arg_bytes; \
-  retval.__va_reg = (int *) (list)->arg_bytes; \
+  retval.__va_stk = (int *) (list)->aligner.arg_bytes; \
+  retval.__va_reg = (int *) (list)->aligner.arg_bytes; \
   return retval;
 #endif
 
