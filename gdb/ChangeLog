@@ -1,3 +1,17 @@
+Sat Feb  1 04:15:41 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* Makefile.in:  Increment version to 4.5.
+	* main.c (print_gdb_version):  Update copyright notice.
+
+Sat Feb  1 01:43:11 1992  Per Bothner  (bothner at cygnus.com)
+
+	* mipsread.c:  Prepend "struct " to the names of structure
+	types, and similarly for enums and unions.  (This used
+	to be done, but got lost in the re-write to "guess" the
+	difference between enum/struct/union.)
+	Also, guess that a tag is an enum if the first member
+	has type btNil.
+
 Fri Jan 31 21:45:51 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* xm-vax.h:  #ifndef ultrix around #include of endian.h and
