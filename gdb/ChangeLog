@@ -1,3 +1,7 @@
+2001-11-16  Ben Harris  <bjh21@netbsd.org>
+
+	* MAINTAINERS (write-after-approval): Add self.
+
 2001-11-15  Jim Blandy  <jimb@redhat.com>
 
 	* s390-tdep.c (is_simple_arg): Structs and unions exactly eight
