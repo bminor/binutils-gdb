@@ -95,12 +95,11 @@ NINDY ROM monitor at the other end of the line.
  *
  ******************************************************************************/
 
-#include <stdio.h>
+#include "defs.h"
 #include <signal.h>
 #include <sys/types.h>
 #include <setjmp.h>
 
-#include "defs.h"
 #include "frame.h"
 #include "inferior.h"
 #include "target.h"

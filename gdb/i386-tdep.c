@@ -17,18 +17,53 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#include <stdio.h>
 #include "defs.h"
 #include "frame.h"
 #include "inferior.h"
 #include "gdbcore.h"
 
+#ifdef USE_PROC_FS	/* Target dependent support for /proc */
+#include <sys/procfs.h>
+#endif
+
+static long
+i386_get_frame_setup PARAMS ((int));
+
+static void
+i386_follow_jump PARAMS ((void));
+
+static void
+codestream_read PARAMS ((unsigned char *, int));
+
+static void
+codestream_seek PARAMS ((int));
+
+static unsigned char 
+codestream_fill PARAMS ((int));
+
 /* helper functions for tm-i386.h */
 
-/* stdio style buffering to minimize calls to ptrace */
+/* Stdio style buffering was used to minimize calls to ptrace, but this
+   buffering did not take into account that the code section being accessed
+   may not be an even number of buffers long (even if the buffer is only
+   sizeof(int) long).  In cases where the code section size happened to
+   be a non-integral number of buffers long, attempting to read the last
+   buffer would fail.  Simply using target_read_memory and ignoring errors,
+   rather than read_memory, is not the correct solution, since legitimate
+   access errors would then be totally ignored.  To properly handle this
+   situation and continue to use buffering would require that this code
+   be able to determine the minimum code section size granularity (not the
+   alignment of the section itself, since the actual failing case that
+   pointed out this problem had a section alignment of 4 but was not a
+   multiple of 4 bytes long), on a target by target basis, and then
+   adjust it's buffer size accordingly.  This is messy, but potentially
+   feasible.  It probably needs the bfd library's help and support.  For
+   now, the buffer size is set to 1.  (FIXME -fnf) */
+
+#define CODESTREAM_BUFSIZ 1	/* Was sizeof(int), see note above. */
 static CORE_ADDR codestream_next_addr;
 static CORE_ADDR codestream_addr;
-static unsigned char codestream_buf[sizeof (int)];
+static unsigned char codestream_buf[CODESTREAM_BUFSIZ];
 static int codestream_off;
 static int codestream_cnt;
 
@@ -40,14 +75,15 @@ static int codestream_cnt;
 
 static unsigned char 
 codestream_fill (peek_flag)
+    int peek_flag;
 {
   codestream_addr = codestream_next_addr;
-  codestream_next_addr += sizeof (int);
+  codestream_next_addr += CODESTREAM_BUFSIZ;
   codestream_off = 0;
-  codestream_cnt = sizeof (int);
+  codestream_cnt = CODESTREAM_BUFSIZ;
   read_memory (codestream_addr,
 	       (unsigned char *)codestream_buf,
-	       sizeof (int));
+	       CODESTREAM_BUFSIZ);
   
   if (peek_flag)
     return (codestream_peek());
@@ -57,8 +93,10 @@ codestream_fill (peek_flag)
 
 static void
 codestream_seek (place)
+    int place;
 {
-  codestream_next_addr = place & -sizeof (int);
+  codestream_next_addr = place / CODESTREAM_BUFSIZ;
+  codestream_next_addr *= CODESTREAM_BUFSIZ;
   codestream_cnt = 0;
   codestream_fill (1);
   while (codestream_tell() != place)
@@ -68,6 +106,7 @@ codestream_seek (place)
 static void
 codestream_read (buf, count)
      unsigned char *buf;
+     int count;
 {
   unsigned char *p;
   int i;
@@ -77,7 +116,8 @@ codestream_read (buf, count)
 }
 
 /* next instruction is a jump, move to target */
-static
+
+static void
 i386_follow_jump ()
 {
   int long_delta;
@@ -128,8 +168,10 @@ i386_follow_jump ()
  * if entry sequence doesn't make sense, return -1, and leave 
  * codestream pointer random
  */
+
 static long
 i386_get_frame_setup (pc)
+     int pc;
 {
   unsigned char op;
   
@@ -254,7 +296,7 @@ i386_get_frame_setup (pc)
 
 int
 i386_frame_num_args (fi)
-     struct frame_info fi;
+     struct frame_info *fi;
 {
   int retpc;						
   unsigned char op;					
@@ -269,7 +311,7 @@ i386_frame_num_args (fi)
        nameless arguments.  */
     return -1;
 
-  pfi = get_prev_frame_info ((fi));			
+  pfi = get_prev_frame_info (fi);			
   if (pfi == 0)
     {
       /* Note:  this can happen if we are looking at the frame for
@@ -340,6 +382,7 @@ i386_frame_num_args (fi)
  * next instruction will be a branch back to the start.
  */
 
+void
 i386_frame_find_saved_regs (fip, fsrp)
      struct frame_info *fip;
      struct frame_saved_regs *fsrp;
@@ -391,7 +434,10 @@ i386_frame_find_saved_regs (fip, fsrp)
 }
 
 /* return pc of first real instruction */
+
+int
 i386_skip_prologue (pc)
+     int pc;
 {
   unsigned char op;
   int i;
@@ -418,6 +464,7 @@ i386_skip_prologue (pc)
   return (codestream_tell ());
 }
 
+void
 i386_push_dummy_frame ()
 {
   CORE_ADDR sp = read_register (SP_REGNUM);
@@ -435,6 +482,7 @@ i386_push_dummy_frame ()
   write_register (SP_REGNUM, sp);
 }
 
+void
 i386_pop_frame ()
 {
   FRAME frame = get_current_frame ();
@@ -465,3 +513,134 @@ i386_pop_frame ()
   set_current_frame ( create_new_frame (read_register (FP_REGNUM),
 					read_pc ()));
 }
+
+#ifdef USE_PROC_FS	/* Target dependent support for /proc */
+
+/*  The /proc interface divides the target machine's register set up into
+    two different sets, the general register set (gregset) and the floating
+    point register set (fpregset).  For each set, there is an ioctl to get
+    the current register set and another ioctl to set the current values.
+
+    The actual structure passed through the ioctl interface is, of course,
+    naturally machine dependent, and is different for each set of registers.
+    For the i386 for example, the general register set is typically defined
+    by:
+
+	typedef int gregset_t[19];		(in <sys/regset.h>)
+
+	#define GS	0			(in <sys/reg.h>)
+	#define FS	1
+	...
+	#define UESP	17
+	#define SS	18
+
+    and the floating point set by:
+
+	typedef struct fpregset
+	  {
+	    union
+	      {
+		struct fpchip_state	// fp extension state //
+		{
+		  int state[27];	// 287/387 saved state //
+		  int status;		// status word saved at exception //
+		} fpchip_state;
+		struct fp_emul_space	// for emulators //
+		{
+		  char fp_emul[246];
+		  char fp_epad[2];
+		} fp_emul_space;
+		int f_fpregs[62];	// union of the above //
+	      } fp_reg_set;
+	    long f_wregs[33];		// saved weitek state //
+	} fpregset_t;
+
+    These routines provide the packing and unpacking of gregset_t and
+    fpregset_t formatted data.
+
+ */
+
+/* This is a duplicate of the table in i386-xdep.c. */
+
+static int regmap[] = 
+{
+  EAX, ECX, EDX, EBX,
+  UESP, EBP, ESI, EDI,
+  EIP, EFL, CS, SS,
+  DS, ES, FS, GS,
+};
+
+
+/*  Given a pointer to a general register set in /proc format (gregset_t *),
+    unpack the register contents and supply them as gdb's idea of the current
+    register values. */
+
+void
+supply_gregset (gregsetp)
+     gregset_t *gregsetp;
+{
+  register int regno;
+  register greg_t *regp = (greg_t *) gregsetp;
+  extern int regmap[];
+
+  for (regno = 0 ; regno < NUM_REGS ; regno++)
+    {
+      supply_register (regno, (char *) (regp + regmap[regno]));
+    }
+}
+
+void
+fill_gregset (gregsetp, regno)
+     gregset_t *gregsetp;
+     int regno;
+{
+  int regi;
+  register greg_t *regp = (greg_t *) gregsetp;
+  extern char registers[];
+  extern int regmap[];
+
+  for (regi = 0 ; regi < NUM_REGS ; regi++)
+    {
+      if ((regno == -1) || (regno == regi))
+	{
+	  *(regp + regmap[regno]) = *(int *) &registers[REGISTER_BYTE (regi)];
+	}
+    }
+}
+
+#if defined (FP0_REGNUM)
+
+/*  Given a pointer to a floating point register set in /proc format
+    (fpregset_t *), unpack the register contents and supply them as gdb's
+    idea of the current floating point register values. */
+
+void 
+supply_fpregset (fpregsetp)
+     fpregset_t *fpregsetp;
+{
+  register int regno;
+  
+  /* FIXME: see m68k-tdep.c for an example, for the m68k. */
+}
+
+/*  Given a pointer to a floating point register set in /proc format
+    (fpregset_t *), update the register specified by REGNO from gdb's idea
+    of the current floating point register set.  If REGNO is -1, update
+    them all. */
+
+void
+fill_fpregset (fpregsetp, regno)
+     fpregset_t *fpregsetp;
+     int regno;
+{
+  int regi;
+  char *to;
+  char *from;
+  extern char registers[];
+
+  /* FIXME: see m68k-tdep.c for an example, for the m68k. */
+}
+
+#endif	/* defined (FP0_REGNUM) */
+
+#endif  /* USE_PROC_FS */

@@ -66,10 +66,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	kill req	k
 */
 
-#include <stdio.h>
+#include "defs.h"
 #include <string.h>
 #include <fcntl.h>
-#include "defs.h"
 #include "frame.h"
 #include "inferior.h"
 #include "target.h"
@@ -276,7 +275,7 @@ device is attached to the remote system (e.g. /dev/ttya).");
   sg.c_cflag &= ~PARENB;	/* No parity */
   sg.c_cflag |= CS8;		/* 8-bit path */
   if (baudrate_set)
-    sg.c_cflag = (sb.c_cflag & ~CBAUD) | b_rate;
+    sg.c_cflag = (sg.c_cflag & ~CBAUD) | b_rate;
 #else
   sg.sg_flags |= RAW | ANYP;
   sg.sg_flags &= ~ECHO;

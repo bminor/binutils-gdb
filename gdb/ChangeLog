@@ -1,3 +1,8 @@
+Tue Mar  3 15:11:52 1992  Michael Tiemann  (tiemann@cygnus.com)
+
+	* All GDB files that #include defs.h: Removed stdio.h.
+	(defs.h): #include stdio.h.
+
 Mon Mar  2 23:00:12 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* gdbtypes.c (lookup_pointer_type): initialize the TYPE_LENGTH of

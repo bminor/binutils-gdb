@@ -32,13 +32,10 @@ regardless of whether or not the actual target has floating point hardware.
  */
 
 
-#include <stdio.h>
-
 #include "defs.h"
 
 #ifdef USE_PROC_FS	/* Entire file goes away if not using /proc */
 
-#include <stdio.h>
 #include <sys/procfs.h>
 #include <fcntl.h>
 #include <errno.h>

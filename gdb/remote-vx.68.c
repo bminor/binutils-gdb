@@ -30,7 +30,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symtab.h"
 #include "symfile.h"		/* for struct complaint */
 
-#include <stdio.h>
 #include <string.h>
 #include <errno.h>
 #include <signal.h>

@@ -20,8 +20,6 @@ In other words, go ahead and share GDB, but don't try to stop
 anyone else from sharing it farther.  Help stamp out software hoarding!
 */
 
-#include <stdio.h>
-
 #include "defs.h"
 #include "tm-i860.h"
 #include "i860-opcode.h"

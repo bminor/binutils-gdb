@@ -49,11 +49,10 @@
 /* define this if names don't start with _ */
 /* #define nounderscore 1 */
 
-#include <stdio.h>
-#include <ctype.h>
-
 /* GDB-specific, FIXME.  */
 #include "defs.h"
+
+#include <ctype.h>
 
 #ifdef USG
 #include <memory.h>

@@ -29,7 +29,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	You should get tagged at compile time if you need to make any 
 	changes/additions.  */
  
-#include <stdio.h>
 #include "defs.h"
 #include "inferior.h"
 #include "wait.h"

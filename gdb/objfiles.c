@@ -21,7 +21,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* This file contains support routines for creating, manipulating, and
    destroying objfile structures. */
 
-#include <stdio.h>
 #include "defs.h"
 #include "bfd.h"		/* Binary File Description */
 #include "symtab.h"

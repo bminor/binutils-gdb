@@ -19,13 +19,12 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#include <stdio.h>
+#include "defs.h"
 #ifdef sgi
 #include <sys/inst.h>
 #else
 #include <mips/inst.h>
 #endif
-#include "defs.h"
 #include "frame.h"
 #include "inferior.h"
 #include "symtab.h"

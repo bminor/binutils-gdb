@@ -22,7 +22,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "inferior.h"
 #include "arm-opcode.h"
 
-#include <stdio.h>
 #include <sys/param.h>
 #include <sys/dir.h>
 #include <signal.h>

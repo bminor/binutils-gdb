@@ -21,7 +21,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Miscellaneous NINDY-dependent routines.
    Some replace macros normally defined in "tm.h".  */
 
-#include <stdio.h>
 #include "defs.h"
 #include "symtab.h"
 #include "frame.h"

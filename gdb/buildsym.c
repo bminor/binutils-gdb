@@ -24,7 +24,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    They originated in dbxread.c of gdb-4.2, and were split out to
    make xcoffread.c more maintainable by sharing code.  */
 
-#include <stdio.h>
 #include "defs.h"
 #include "obstack.h"
 #include "symtab.h"

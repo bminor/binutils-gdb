@@ -27,11 +27,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    return data out of a "language-specific" struct pointer that is set
    whenever the working language changes.  That would be a lot faster.  */
 
-#include <stdio.h>
+#include "defs.h"
 #include <string.h>
 #include <varargs.h>
 
-#include "defs.h"
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "value.h"

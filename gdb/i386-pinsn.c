@@ -31,11 +31,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
  * the Intel manual for details.
  */
 
-#include <stdio.h>
+#include "defs.h"
+
 #include <ctype.h>
 
 /* For the GDB interface at the bottom of the file... */
-#include "defs.h"
 #include "gdbcore.h"
 
 #define Eb OP_E, b_mode

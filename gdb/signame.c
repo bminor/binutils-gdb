@@ -17,10 +17,9 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#include <stdio.h>
-#include <signal.h>
 /* GDB-specific, FIXME.  (This is for the SYS_SIGLIST_MISSING define).  */
 #include "defs.h"
+#include <signal.h>
 #include "signame.h"
 
 static void

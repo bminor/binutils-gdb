@@ -54,11 +54,10 @@ other things to work on, if you get bored. :-)
 
 */
 
-#include <stdio.h>
+#include "defs.h"
 #include <varargs.h>
 #include <fcntl.h>
 
-#include "defs.h"
 #include "bfd.h"
 #include "symtab.h"
 #include "gdbtypes.h"

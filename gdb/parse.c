@@ -28,7 +28,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    during the process of parsing; the lower levels of the tree always
    come first in the result.  */
    
-#include <stdio.h>
 #include "defs.h"
 #include "symtab.h"
 #include "gdbtypes.h"

@@ -21,7 +21,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* xcoff-exec -	deal with executing XCOFF files.  */
   
-#include <stdio.h>
+#include "defs.h"
+
 #include <sys/types.h>
 #include <sys/param.h>
 #include <fcntl.h>
@@ -30,7 +31,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/stat.h>
 #include <sys/ldr.h>
 
-#include "defs.h"
 #include "frame.h"
 #include "inferior.h"
 #include "target.h"

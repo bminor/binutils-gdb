@@ -99,26 +99,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	   don't worry about this; it will make calls look like simple
 	   jumps (and the stack frames will be printed when the frame
 	   pointer moves), which is a reasonably non-violent response.
-
-#if 0
-    We skip this; it causes more problems than it's worth.
-#ifdef SUN4_COMPILER_FEATURE
-    We do a special ifdef for the sun 4, forcing it to single step
-  into calls which don't have prologues.  This means that we can't
-  nexti over leaf nodes, we can probably next over them (since they
-  won't have debugging symbols, usually), and we can next out of
-  functions returning structures (with a "call .stret4" at the end).
-#endif
-#endif
 */
-   
 
-   
-   
-
-#include <stdio.h>
-#include <string.h>
 #include "defs.h"
+#include <string.h>
 #include "symtab.h"
 #include "frame.h"
 #include "inferior.h"
@@ -197,6 +181,21 @@ extern struct target_ops child_ops;	/* In inftarg.c */
    from it.  The return value is non-zero on success, zero otherwise. */
 #ifndef GET_LONGJMP_TARGET
 #define GET_LONGJMP_TARGET(PC_ADDR) 0
+#endif
+
+
+/* Some machines have trampoline code that sits between function callers
+   and the actual functions themselves.  If this machine doesn't have
+   such things, disable their processing.  */
+#ifndef SKIP_TRAMPOLINE_CODE
+#define	SKIP_TRAMPOLINE_CODE(pc)	0
+#endif
+
+
+#ifdef TDESC
+#include "tdesc.h"
+int safe_to_init_tdesc_context = 0;
+extern dc_dcontext_t current_context;
 #endif
 
 /* Tables of how to react to signals; the user sets them.  */
@@ -433,21 +432,6 @@ The same program may be running in another process.");
   wait_for_inferior ();
   normal_stop ();
 }
-
-#if 0
-/* This might be useful (not sure), but isn't currently used.  See also
-   write_pc().  */
-/* Writing the inferior pc as a register calls this function
-   to inform infrun that the pc has been set in the debugger.  */
-
-void
-writing_pc (val)
-     CORE_ADDR val;
-{
-  stop_pc = val;
-  pc_changed = 1;
-}
-#endif
 
 /* Record the pc and sp of the program the last time it stopped.
    These are just used internally by wait_for_inferior, but need
@@ -788,7 +772,7 @@ wait_for_inferior ()
   CORE_ADDR stop_sp;
   CORE_ADDR stop_func_start;
   char *stop_func_name;
-  CORE_ADDR prologue_pc;
+  CORE_ADDR prologue_pc, tmp;
   int stop_step_resume_break;
   struct symtab_and_line sal;
   int remove_breakpoints_on_following_step = 0;
@@ -975,8 +959,7 @@ wait_for_inferior ()
 		    /* End of a stack dummy.  Some systems (e.g. Sony
 		       news) give another signal besides SIGTRAP,
 		       so check here as well as above.  */
-		    || (stop_sp INNER_THAN stop_pc
-			&& stop_pc INNER_THAN stop_frame_address)
+		    || PC_IN_CALL_DUMMY (stop_pc, stop_sp, stop_frame_address)
 		    );
 	      if (!random_signal)
 		stop_signal = SIGTRAP;
@@ -1181,19 +1164,7 @@ wait_for_inferior ()
 		    && (stop_sp INNER_THAN prev_sp
 			|| stop_frame_address != step_frame_address)))
 	{
-#if 0
-	  /* When "next"ing through a function,
-	     This causes an extra stop at the end.
-	     Is there any reason for this?
-	     It's confusing to the user.  */
-	  /* Don't step through the return from a function
-	     unless that is the first instruction stepped through.  */
-	  if (ABOUT_TO_RETURN (stop_pc))
-	    {
-	      stop_step = 1;
-	      break;
-	    }
-#endif
+	  ;
 	}
       
       /* We stepped out of the stepping range.  See if that was due
@@ -1225,118 +1196,132 @@ wait_for_inferior ()
 	      if (step_range_end == 1)
 		step_range_end = (step_range_start = prev_pc) + 1;
 	      remove_breakpoints_on_following_step = 1;
+	      goto save_pc;
 	    }
 
 	  /* ==> See comments at top of file on this algorithm.  <==*/
 	  
-	  else if (stop_pc == stop_func_start
+	  if (stop_pc == stop_func_start
 		   && (stop_func_start != prev_func_start
 		       || prologue_pc != stop_func_start
 		       || stop_sp != prev_sp))
 	    {
-	      /* It's a subroutine call */
-	      if (step_over_calls > 0 
-		  || (step_over_calls &&  find_pc_function (stop_pc) == 0))
+	      /* It's a subroutine call.
+		 (0)  If we are not stepping over any calls ("stepi"), we
+		      just stop.
+		 (1)  If we're doing a "next", we want to continue through
+		      the call ("step over the call").
+		 (2)  If we are in a function-call trampoline (a stub between
+		      the calling routine and the real function), locate
+		      the real function and change stop_func_start.
+		 (3)  If we're doing a "step", and there are no debug symbols
+		      at the target of the call, we want to continue through
+		      it ("step over the call").
+		 (4)  Otherwise, we want to stop soon, after the function
+		      prologue ("step into the call"). */
+
+	      if (step_over_calls == 0)
 		{
-		  /* A subroutine call has happened.  */
-		  /* Set a special breakpoint after the return */
+		  /* I presume that step_over_calls is only 0 when we're
+		     supposed to be stepping at the assembly language level. */
+		  stop_step = 1;
+		  break;
+		}
 
-		  step_resume_break_address =
-		    ADDR_BITS_REMOVE (
-		      SAVED_PC_AFTER_CALL (
-			get_current_frame ()));
+	      if (step_over_calls > 0)
+		goto step_over_function;
 
+	      tmp = SKIP_TRAMPOLINE_CODE (stop_pc);
+	      if (tmp != NULL)
+		stop_func_start = tmp;
+
+	      if (find_pc_function (stop_func_start) != 0)
+	        goto step_into_function;
+
+step_over_function:
+	      /* A subroutine call has happened.  */
+	      /* Set a special breakpoint after the return */
+	      step_resume_break_address =
+		ADDR_BITS_REMOVE
+		  (SAVED_PC_AFTER_CALL (get_current_frame ()));
+	      step_resume_break_duplicate
+		= breakpoint_here_p (step_resume_break_address);
+	      if (breakpoints_inserted)
+		insert_step_breakpoint ();
+	      goto save_pc;
+
+step_into_function:
+	      /* Subroutine call with source code we should not step over.
+		 Do step to the first line of code in it.  */
+	      SKIP_PROLOGUE (stop_func_start);
+	      sal = find_pc_line (stop_func_start, 0);
+	      /* Use the step_resume_break to step until
+		 the end of the prologue, even if that involves jumps
+		 (as it seems to on the vax under 4.2).  */
+	      /* If the prologue ends in the middle of a source line,
+		 continue to the end of that source line.
+		 Otherwise, just go to end of prologue.  */
+#ifdef PROLOGUE_FIRSTLINE_OVERLAP
+	      /* no, don't either.  It skips any code that's
+		 legitimately on the first line.  */
+#else
+	      if (sal.end && sal.pc != stop_func_start)
+		stop_func_start = sal.end;
+#endif
+
+	      if (stop_func_start == stop_pc)
+		{
+		  /* We are already there: stop now.  */
+		  stop_step = 1;
+		  break;
+		}	
+	      else
+		/* Put the step-breakpoint there and go until there. */
+		{
+		  step_resume_break_address = stop_func_start;
+		  
 		  step_resume_break_duplicate
 		    = breakpoint_here_p (step_resume_break_address);
 		  if (breakpoints_inserted)
 		    insert_step_breakpoint ();
+		  /* Do not specify what the fp should be when we stop
+		     since on some machines the prologue
+		     is where the new fp value is established.  */
+		  step_frame_address = 0;
+		  /* And make sure stepping stops right away then.  */
+		  step_range_end = step_range_start;
 		}
-	      /* Subroutine call with source code we should not step over.
-		 Do step to the first line of code in it.  */
-	      else if (step_over_calls)
-		{
-		  SKIP_PROLOGUE (stop_func_start);
-		  sal = find_pc_line (stop_func_start, 0);
-		  /* Use the step_resume_break to step until
-		     the end of the prologue, even if that involves jumps
-		     (as it seems to on the vax under 4.2).  */
-		  /* If the prologue ends in the middle of a source line,
-		     continue to the end of that source line.
-		     Otherwise, just go to end of prologue.  */
-#ifdef PROLOGUE_FIRSTLINE_OVERLAP
-		  /* no, don't either.  It skips any code that's
-		     legitimately on the first line.  */
-#else
-		  if (sal.end && sal.pc != stop_func_start)
-		    stop_func_start = sal.end;
-#endif
-		  
-		  if (stop_func_start == stop_pc)
-		    {
-		      /* We are already there: stop now.  */
-		      stop_step = 1;
-		      break;
-		    }
-		  else
-		    /* Put the step-breakpoint there and go until there. */
-		    {
-		      step_resume_break_address = stop_func_start;
-		      
-		      step_resume_break_duplicate
-			= breakpoint_here_p (step_resume_break_address);
-		      if (breakpoints_inserted)
-			insert_step_breakpoint ();
-		      /* Do not specify what the fp should be when we stop
-			 since on some machines the prologue
-			 is where the new fp value is established.  */
-		      step_frame_address = 0;
-		      /* And make sure stepping stops right away then.  */
-		      step_range_end = step_range_start;
-		    }
-		}
-	      else
-		{
-		  /* We get here only if step_over_calls is 0 and we
-		     just stepped into a subroutine.  I presume
-		     that step_over_calls is only 0 when we're
-		     supposed to be stepping at the assembly
-		     language level.*/
-		  stop_step = 1;
-		  break;
-		}
+	      goto save_pc;
 	    }
-	  /* No subroutine call; stop now.  */
-	  else
-	    {
-	      /* We've wandered out of the step range (but we haven't done a
-		 subroutine call or return (that's handled elsewhere)).  We
-		 don't really want to stop until we encounter the start of a
-		 new statement.  If so, we stop.  Otherwise, we reset
-		 step_range_start and step_range_end, and just continue. */
-	      sal = find_pc_line(stop_pc, 0);
-	      
-	      if (step_range_end == 1 /* Don't do this for stepi/nexti */
-		  || sal.line == 0 /* Stop now if no line # info */
-		  || (current_line != sal.line
-		      && stop_pc == sal.pc))
-		{
-		  stop_step = 1;
-		  break;
-		}
-	      else if (sal.line != 0)
-		{
-		  /* This is probably not necessary, but it probably makes
-		     stepping more efficient, as we avoid calling
-		     find_pc_line() for each instruction we step over. */
-		  step_range_start = sal.pc;
-		  step_range_end = sal.end;
-		}
-	    }
+
+	  /* We've wandered out of the step range (but haven't done a
+	     subroutine call or return).  */
+
+	  sal = find_pc_line(stop_pc, 0);
+	  
+	  if (step_range_end == 1 ||	/* stepi or nexti */
+	      sal.line == 0 ||		/* ...or no line # info */
+	      (stop_pc == sal.pc	/* ...or we're at the start */
+	       && current_line != sal.line)) {	/* of a different line */
+	    /* Stop because we're done stepping.  */
+	    stop_step = 1;
+	    break;
+	  } else {
+	    /* We aren't done stepping, and we have line number info for $pc.
+	       Optimize by setting the step_range for the line.  
+	       (We might not be in the original line, but if we entered a
+	       new line in mid-statement, we continue stepping.  This makes 
+	       things like for(;;) statements work better.)  */
+	    step_range_start = sal.pc;
+	    step_range_end = sal.end;
+	    goto save_pc;
+	  }
+	abort();		/* We never fall through here */
 	}
 
-      else if (trap_expected
-	       && IN_SIGTRAMP (stop_pc, stop_func_name)
-	       && !IN_SIGTRAMP (prev_pc, prev_func_name))
+      if (trap_expected
+	  && IN_SIGTRAMP (stop_pc, stop_func_name)
+	  && !IN_SIGTRAMP (prev_pc, prev_func_name))
 	{
 	  /* What has happened here is that we have just stepped the inferior
 	     with a signal (because it is a signal which shouldn't make
@@ -1363,6 +1348,7 @@ wait_for_inferior ()
 
     keep_going:
 
+save_pc:
       /* Save the pc before execution, to compare with pc after stop.  */
       prev_pc = read_pc ();	/* Might have been DECR_AFTER_BREAK */
       prev_func_start = stop_func_start; /* Ok, since if DECR_PC_AFTER
@@ -1821,7 +1807,7 @@ restore_inferior_status (inf_status)
 	  FRAME_FP (fid) != inf_status->selected_frame_address ||
 	  level != 0)
 	{
-#if 0
+#if 1
 	  /* I'm not sure this error message is a good idea.  I have
 	     only seen it occur after "Can't continue previously
 	     requested operation" (we get called from do_cleanups), in

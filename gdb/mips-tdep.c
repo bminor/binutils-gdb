@@ -1,5 +1,5 @@
 /* Target-dependent code for the MIPS architecture, for GDB, the GNU Debugger.
-   Copyright 1988, 1989, 1990, 1991  Free Software Foundation, Inc.
+   Copyright 1988, 1989, 1990, 1991, 1992  Free Software Foundation, Inc.
    Contributed by Alessandro Forin(af@cs.cmu.edu) at CMU
    and by Per Bothner(bothner@cs.wisc.edu) at U.Wisconsin.
 
@@ -19,7 +19,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#include <stdio.h>
 #include "defs.h"
 #include "frame.h"
 #include "inferior.h"
@@ -351,7 +350,7 @@ init_extra_frame_info(fci)
 	  for (ireg = 31; mask; --ireg, mask <<= 1)
 	      if (mask & 0x80000000)
 	      {
-		  fci->saved_regs->regs[32+ireg] = reg_position;
+		  fci->saved_regs->regs[FP0_REGNUM+ireg] = reg_position;
 		  reg_position -= 4;
 	      }
       }
@@ -539,12 +538,14 @@ mips_print_register(regnum, all)
 
       read_relative_register_raw_bytes (regnum, raw_buffer);
 
-      if (!(regnum & 1) && regnum >= FP0_REGNUM && regnum < FP0_REGNUM+32) {
+      /* If an even floating pointer register, also print as double. */
+      if (regnum >= FP0_REGNUM && regnum < FP0_REGNUM+32
+	  && !((regnum-FP0_REGNUM) & 1)) {
 	  read_relative_register_raw_bytes (regnum+1, raw_buffer+4);
-	  printf_filtered ("(d%d: ", regnum&31);
+	  printf_filtered ("(d%d: ", regnum-FP0_REGNUM);
 	  val_print (builtin_type_double, raw_buffer, 0,
 		     stdout, 0, 1, 0, Val_pretty_default);
-	  printf_filtered ("); ", regnum&31);
+	  printf_filtered ("); ");
       }
       fputs_filtered (reg_names[regnum], stdout);
 #ifndef NUMERIC_REG_NAMES
@@ -651,12 +652,19 @@ CORE_ADDR mips_skip_prologue(pc)
     struct symbol *f;
     struct block *b;
     unsigned long inst;
+    int offset;
 
     /* For -g modules and most functions anyways the
-       first instruction adjusts the stack. */
-    inst = read_memory_integer(pc, 4);
-    if ((inst & 0xffff0000) == 0x27bd0000)
-	return pc + 4;
+       first instruction adjusts the stack.
+       But we allow some number of stores before the stack adjustment.
+       (These are emitted by varags functions compiled by gcc-2.0. */
+    for (offset = 0; offset < 100; offset += 4) {
+	inst = read_memory_integer(pc + offset, 4);
+	if ((inst & 0xffff0000) == 0x27bd0000) /* addiu $sp,$sp,offset */
+	    return pc + offset + 4;
+	if ((inst & 0xFFE00000) != 0xAFA00000) /* sw reg,n($sp) */
+	    break;
+    }
 
     /* Well, it looks like a frameless. Let's make sure.
        Note that we are not called on the current PC,
@@ -678,4 +686,26 @@ CORE_ADDR mips_skip_prologue(pc)
 	return pc + 4;
 
     return pc;
+}
+
+/* Figure out where the longjmp will land.
+   We expect the first arg to be a pointer to the jmp_buf structure from which
+   we extract the pc (JB_PC) that we will land at.  The pc is copied into PC.
+   This routine returns true on success. */
+
+int
+get_longjmp_target(pc)
+     CORE_ADDR *pc;
+{
+  CORE_ADDR jb_addr;
+
+  jb_addr = read_register(A0_REGNUM);
+
+  if (target_read_memory(jb_addr + JB_PC * JB_ELEMENT_SIZE, pc,
+			 sizeof(CORE_ADDR)))
+    return 0;
+
+  SWAP_TARGET_AND_HOST(pc, sizeof(CORE_ADDR));
+
+  return 1;
 }

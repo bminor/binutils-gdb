@@ -22,7 +22,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
                 sac@cygnus.com 
  */
 
-#include <stdio.h>
 #include "defs.h"
 #include "frame.h"
 #include "obstack.h"

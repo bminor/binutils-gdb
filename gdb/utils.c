@@ -17,7 +17,8 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#include <stdio.h>
+#include "defs.h"
+
 #include <sys/ioctl.h>
 #include <sys/param.h>
 #include <pwd.h>
@@ -25,7 +26,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <ctype.h>
 #include <string.h>
 
-#include "defs.h"
 #include "signals.h"
 #include "gdbcmd.h"
 #include "terminal.h"
@@ -356,7 +356,8 @@ xrealloc (ptr, size)
      char *ptr;
      long size;
 {
-  register char *val = (char *) realloc (ptr, size);
+  register char *val =
+      ptr ? (char *) realloc (ptr, size) : (char*) malloc (size);
   if (!val)
     fatal ("virtual memory exhausted.", 0);
   return val;
@@ -1100,7 +1101,7 @@ n_spaces (n)
     {
       if (spaces)
 	free (spaces);
-      spaces = malloc (n+1);
+      spaces = (char *) malloc (n+1);
       for (t = spaces+n; t != spaces;)
 	*--t = ' ';
       spaces[n] = '\0';
@@ -1147,7 +1148,7 @@ _initialize_utils ()
 		  "Set number of characters gdb thinks are in a line.",
 		  &setlist);
   add_show_from_set (c, &showlist);
-  c->function = set_width_command;
+  c->function.sfunc = set_width_command;
 
   add_show_from_set
     (add_set_cmd ("height", class_support,

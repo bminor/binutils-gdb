@@ -18,7 +18,25 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #if !defined (DEFS_H)
-#define DEFS_H
+#define DEFS_H 1
+
+#include <stdio.h>
+
+/* First include ansidecl.h so we can use the various macro definitions
+   in all subsequent file inclusions.  FIXME:  This inclusion can now
+   be removed from all files that include defs.h */
+
+#include "ansidecl.h"
+
+/* We could use the EXFUN macro in ansidecl.h to handle prototypes, but
+   the name is misleading the the result is ugly.  So just define a simple
+   macro to handle the parameter lists. */
+
+#ifdef __STDC__
+#define PARAMS(paramlist) paramlist
+#else
+#define PARAMS(paramlist) ()
+#endif
 
 /* An address in the program being debugged.  Host byte order.  */
 typedef unsigned int CORE_ADDR;
@@ -34,7 +52,9 @@ extern int errno;			/* System call error return status */
 
 extern int quit_flag;
 extern int immediate_quit;
-extern void quit ();
+
+extern void
+quit PARAMS ((void));
 
 #define QUIT { if (quit_flag) quit (); }
 
@@ -64,51 +84,215 @@ enum command_class
 struct cleanup
 {
   struct cleanup *next;
-  void (*function) ();
-  int arg;
+  void (*function) PARAMS ((PTR));
+  PTR arg;
 };
 
-/* From utils.c.  */
-extern void do_cleanups ();
-extern void discard_cleanups ();
-extern struct cleanup *make_cleanup ();
-extern struct cleanup *save_cleanups ();
-extern void restore_cleanups ();
-extern void free_current_contents ();
-extern int myread ();
-extern int query ();
-extern void wrap_here (
-#ifdef __STDC__
-		       char *
-#endif
-		       );
-extern void reinitialize_more_filter ();
-extern void fputs_filtered ();
-extern void puts_filtered ();
-extern void fprintf_filtered ();
-extern void printf_filtered ();
-extern void print_spaces ();
-extern void print_spaces_filtered ();
-extern char *n_spaces ();
-extern void printchar ();
-extern void fprint_symbol ();
-extern void fputs_demangled ();
-extern void perror_with_name ();
-extern void print_sys_errmsg ();
+/* From blockframe.c */
+
+extern int
+inside_entry_scope PARAMS ((CORE_ADDR));
+
+extern int
+outside_startup_file PARAMS ((CORE_ADDR addr));
+
+extern int
+inside_main_scope PARAMS ((CORE_ADDR pc));
+
+/* From cplus-dem.c */
+
+extern char *
+cplus_demangle PARAMS ((const char *, int));
+
+extern char *
+cplus_mangle_opname PARAMS ((char *, int));
+
+/* From mmap-*.c */
+
+extern PTR
+mmap_malloc PARAMS ((long));
+
+extern PTR
+mmap_realloc PARAMS ((PTR, long));
+
+extern PTR
+mmap_xmalloc PARAMS ((long));
+
+extern PTR
+mmap_xrealloc PARAMS ((PTR, long));
+
+extern void
+mmap_free PARAMS ((PTR));
+
+extern PTR
+mmap_sbrk PARAMS ((int));
+
+extern PTR
+mmap_base PARAMS ((void));
+
+extern PTR
+mmap_page_align PARAMS ((PTR));
+
+extern PTR
+mmap_remap PARAMS ((PTR, long, int, long));
+
+/* From utils.c */
+
+extern void
+init_malloc PARAMS ((void));
+
+extern void
+request_quit PARAMS ((int));
+
+extern void
+do_cleanups PARAMS ((struct cleanup *));
+
+extern void
+discard_cleanups PARAMS ((struct cleanup *));
+
+/* The bare make_cleanup function is one of those rare beasts that
+   takes almost any type of function as the first arg and anything that
+   will fit in a "void *" as the second arg.
+
+   Should be, once all calls and called-functions are cleaned up:
+extern struct cleanup *
+make_cleanup PARAMS ((void (*function) (PTR), PTR));
+
+   Until then, lint and/or various type-checking compiler options will
+   complain about make_cleanup calls.  It'd be wrong to just cast things,
+   since the type actually passed when the function is called would be
+   wrong.  */
+
+extern struct cleanup *
+make_cleanup ();
+
+extern struct cleanup *
+save_cleanups PARAMS ((void));
+
+extern void
+restore_cleanups PARAMS ((struct cleanup *));
+
+extern void
+free_current_contents PARAMS ((char **));
+
+extern void
+null_cleanup PARAMS ((char **));
+
+extern int
+myread PARAMS ((int, char *, int));
+
+extern int
+query ();
+
+extern void
+wrap_here PARAMS ((char *));
+
+extern void
+reinitialize_more_filter PARAMS ((void));
+
+extern int
+print_insn PARAMS ((CORE_ADDR, FILE *));
+
+extern void
+fputs_filtered PARAMS ((const char *, FILE *));
+
+extern void
+puts_filtered PARAMS ((char *));
+
+extern void
+fprintf_filtered ();
+
+extern void
+printf_filtered ();
+
+extern void
+print_spaces PARAMS ((int, FILE *));
+
+extern void
+print_spaces_filtered PARAMS ((int, FILE *));
+
+extern char *
+n_spaces PARAMS ((int));
+
+extern void
+printchar PARAMS ((int, FILE *, int));
+
+extern void
+fprint_symbol PARAMS ((FILE *, char *));
+
+extern void
+fputs_demangled PARAMS ((char *, FILE *, int));
+
+extern void
+perror_with_name PARAMS ((char *));
+
+extern void
+print_sys_errmsg PARAMS ((char *, int));
+
+/* From regex.c */
+
+extern char *
+re_comp PARAMS ((char *));
+
+/* From symfile.c */
+
+extern void
+symbol_file_command PARAMS ((char *, int));
+
+/* From main.c */
+
+extern char *
+gdb_readline PARAMS ((char *));
+
+extern char *
+command_line_input PARAMS ((char *, int));
+
+extern void
+print_prompt PARAMS ((void));
+
+extern int
+batch_mode PARAMS ((void));
+
+extern int
+input_from_terminal_p PARAMS ((void));
+
+extern int
+catch_errors PARAMS ((int (*) (char *), char *, char *));
 
 /* From printcmd.c */
-extern void print_address_symbolic ();
-extern void print_address ();
+
+extern void
+set_next_address PARAMS ((CORE_ADDR));
+
+extern void
+print_address_symbolic PARAMS ((CORE_ADDR, FILE *, int, char *));
+
+extern void
+print_address PARAMS ((CORE_ADDR, FILE *));
 
 /* From source.c */
-void mod_path (
-#ifdef __STDC__
-	       char *, char **
-#endif
-	       );
+
+extern int
+openp PARAMS ((char *, int, char *, int, int, char **));
+
+extern void
+mod_path PARAMS ((char *, char **));
+
+extern void
+directory_command PARAMS ((char *, int));
+
+extern void
+init_source_path PARAMS ((void));
+
+/* From findvar.c */
+
+extern int
+read_relative_register_raw_bytes PARAMS ((int, char *));
 
 /* From readline (but not in any readline .h files).  */
-extern char *tilde_expand ();
+
+extern char *
+tilde_expand PARAMS ((char *));
 
 /* Structure for saved commands lines
    (for breakpoints, defined commands, etc).  */
@@ -119,19 +303,22 @@ struct command_line
   char *line;
 };
 
-extern struct command_line *read_command_lines ();
-extern void free_command_lines ();
+extern struct command_line *
+read_command_lines PARAMS ((void));
+
+extern void
+free_command_lines PARAMS ((struct command_line **));
 
 /* String containing the current directory (what getwd would return).  */
 
-char *current_directory;
+extern char *current_directory;
 
 /* Default radixes for input and output.  Only some values supported.  */
 extern unsigned input_radix;
 extern unsigned output_radix;
 
 /* Baud rate specified for communication with serial target systems.  */
-char *baud_rate;
+extern char *baud_rate;
 
 /* Languages represented in the symbol table and elsewhere. */
 
@@ -150,15 +337,21 @@ enum language
    options like "08" or "l" (to produce e.g. %08x or %lx).  */
 
 #define local_hex_format() (current_language->la_hex_format)
-char *local_hex_format_custom();		/* language.c */
+
+extern char *
+local_hex_format_custom PARAMS ((char *));	/* language.c */
 
 /* Return a string that contains a number formatted in the local
    (language-specific) hexadecimal format.  Result is static and is
    overwritten by the next call.  local_hex_string_custom takes printf
    options like "08" or "l".  */
 
-char *local_hex_string ();			/* language.c */
-char *local_hex_string_custom ();		/* language.c */
+extern char *
+local_hex_string PARAMS ((int));		/* language.c */
+
+extern char *
+local_hex_string_custom PARAMS ((int, char *));	/* language.c */
+
 
 /* Host machine definition.  This will be a symlink to one of the
    xm-*.h files, built by the `configure' script.  */
@@ -191,6 +384,15 @@ char *local_hex_string_custom ();		/* language.c */
 # endif /* GNUC */
 #endif /* STDC */
 #endif /* volatile */
+
+/* Some compilers (many AT&T SVR4 compilers for instance), do not accept
+   declarations of functions that never return (exit for instance) as
+   "volatile void".  For such compilers "NORETURN" can be defined away
+   to keep them happy */
+
+#ifndef NORETURN
+# define NORETURN volatile
+#endif
 
 /* Defaults for system-wide constants (if not defined by xm.h, we fake it).  */
 
@@ -262,6 +464,11 @@ char *local_hex_string_custom ();		/* language.c */
 #define TARGET_DOUBLE_COMPLEX_BIT (2 * TARGET_DOUBLE_BIT)
 #endif
 
+/* Number of bits in a pointer for the target machine */
+#if !defined (TARGET_PTR_BIT)
+#define TARGET_PTR_BIT TARGET_INT_BIT
+#endif
+
 /* Convert a LONGEST to an int.  This is used in contexts (e.g. number
    of arguments to a function, number in a value history, register
    number, etc.) where the value must not be larger than can fit
@@ -276,22 +483,119 @@ char *local_hex_string_custom ();		/* language.c */
 #endif /* No LONG_LONG.  */
 #endif /* No longest_to_int.  */
 
+/* This should not be a typedef, because "unsigned LONGEST" needs
+   to work. LONG_LONG is defined if the host has "long long".  */
+
+#ifndef LONGEST
+# ifdef LONG_LONG
+#  define LONGEST long long
+# else
+#  define LONGEST long
+# endif
+#endif
+
 /* Assorted functions we can declare, now that const and volatile are 
    defined.  */
-extern char *savestring ();
-extern char *strsave ();
-extern char *concat ();
-#ifdef __STDC__
-extern void *xmalloc (), *xrealloc ();
-#else
-extern char *xmalloc (), *xrealloc ();
-#endif
-extern void free ();
-extern int parse_escape ();
+
+extern char *
+savestring PARAMS ((const char *, int));
+
+extern char *
+strsave PARAMS ((const char *));
+
+extern char *
+concat PARAMS ((char *, ...));
+
+extern PTR
+xmalloc PARAMS ((long));
+
+extern PTR
+xrealloc PARAMS ((char *, long));
+
+extern int
+parse_escape PARAMS ((char **));
+
 extern char *reg_names[];
-/* Indicate that these routines do not return to the caller.  */
-extern volatile void error(), fatal();
-extern void warning_setup(), warning();
+
+extern NORETURN void			/* Does not return to the caller.  */
+error ();
+
+extern NORETURN void			/* Does not return to the caller.  */
+fatal ();
+
+extern NORETURN void			/* Not specified as volatile in ... */
+exit PARAMS ((int));			/* 4.10.4.3 */
+
+extern NORETURN void			/* Does not return to the caller.  */
+return_to_top_level PARAMS ((void));
+
+extern void
+warning_setup PARAMS ((void));
+
+extern void
+warning ();
+
+/* Global functions from other, non-gdb GNU thingies (libiberty for
+   instance) */
+
+extern char *
+basename PARAMS ((char *));
+
+extern char *
+getenv PARAMS ((CONST char *));
+
+extern char **
+buildargv PARAMS ((char *));
+
+extern void
+freeargv PARAMS ((char **));
+
+/* For now, we can't include <stdlib.h> because it conflicts with
+   "../include/getopt.h".  (FIXME)
+
+   However, since any prototypes for any functions defined in the ANSI
+   specific, defined in any header files in an ANSI conforming environment,
+   must match those in the ANSI standard, we can just duplicate them here
+   since they must be the same in all conforming ANSI environments.  If
+   these cause problems, then the environment is not ANSI conformant. */
+   
+#ifdef __STDC__
+#include <stddef.h>
+#endif
+
+extern int
+fclose PARAMS ((FILE *stream));				/* 4.9.5.1 */
+
+extern double
+atof PARAMS ((const char *nptr));			/* 4.10.1.1 */
+
+#ifndef MALLOC_INCOMPATIBLE
+extern PTR
+malloc PARAMS ((size_t size));                          /* 4.10.3.3 */
+
+extern PTR
+realloc PARAMS ((void *ptr, size_t size));              /* 4.10.3.4 */
+
+extern void
+free PARAMS ((void *));			/* 4.10.3.2 */
+#endif
+
+extern void
+qsort PARAMS ((void *base, size_t nmemb,		/* 4.10.5.2 */
+	       size_t size,
+	       int (*comp)(const void *, const void *)));
+
+extern char *
+strchr PARAMS ((const char *, int));			/* 4.11.5.2 */
+
+extern char *
+strrchr PARAMS ((const char *, int));			/* 4.11.5.5 */
+
+extern char *
+strtok PARAMS ((char *, const char *));			/* 4.11.5.8 */
+
+extern char *
+strerror PARAMS ((int));				/* 4.11.6.2 */
 
 /* Various possibilities for alloca.  */
 #ifndef alloca
@@ -375,4 +679,17 @@ extern void warning_setup(), warning();
 #define SYS_SIGLIST_MISSING defined (USG)
 #endif /* No SYS_SIGLIST_MISSING */
 
-#endif /* no DEFS_H */
+/* From valops.c */
+
+extern CORE_ADDR
+push_bytes PARAMS ((CORE_ADDR, char *, int));
+
+/* In some modules, we don't have a definition of REGISTER_TYPE yet, so we
+   must avoid prototyping this function for now.  FIXME.  Should be:
+extern CORE_ADDR
+push_word PARAMS ((CORE_ADDR, REGISTER_TYPE));
+ */
+extern CORE_ADDR
+push_word ();
+
+#endif /* !defined (DEFS_H) */

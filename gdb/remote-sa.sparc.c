@@ -4,10 +4,9 @@
 /* Memory-access and commands for inferior process, for GDB.
 */
 
+#include "defs.h"
 #include <sys/errno.h>
 #include <setjmp.h>
-#include <stdio.h>
-#include "defs.h"
 #include "frame.h"
 #include "value.h"
 #include "inferior.h"
