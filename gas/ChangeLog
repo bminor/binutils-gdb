@@ -1,3 +1,9 @@
+Wed Aug 19 09:30:16 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-m32r.c: Replace double dash prefix to M32R specific
+	command line options with a single dash.
+	* doc/c-m32r.texi: Replace double dash prefix with a single dash.
+
 start-sanitize-armelf
 Tue Aug 18 11:59:43 1998  Catherine Moore  <clm@cygnus.com>
 
