@@ -1,3 +1,10 @@
+Tue Apr 21 16:07:18 1998  Stanislav Brabec  <utx@k332.feld.cvut.cz>
+
+	* objcopy.c (preserve_dates): New file static variable.
+	(smart_rename): If preserve_dates, call set_times when copying.
+	(strip_main): Remove preserve_dates local variable.
+	(copy_main): Likewise.
+
 Tue Apr  7 15:41:15 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.am (DISTSTUFF): Add defparse.h, defparse.c, rclex.c,
@@ -119,6 +126,10 @@ Tue Feb 17 18:40:55 1998  Richard Henderson  <rth@cygnus.com>
 	* objcopy.1: Likewise.
 
 Tue Feb 17 20:34:11 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* dlltool.c (gen_exp_file): Generate _imp__%s as well as __imp_%s,
+	for Microsoft compatibility.
+	(make_one_lib_file): Likewise.
 
 	* dlltool.c (make_one_lib_file): Don't add 1 to hint.
 

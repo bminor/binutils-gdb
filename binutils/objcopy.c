@@ -53,7 +53,7 @@ static struct section_list *find_section_list PARAMS ((const char *, boolean));
 static void setup_section PARAMS ((bfd *, asection *, PTR));
 static void copy_section PARAMS ((bfd *, asection *, PTR));
 static void get_sections PARAMS ((bfd *, asection *, PTR));
-static int compare_section_vma PARAMS ((const PTR, const PTR));
+static int compare_section_lma PARAMS ((const PTR, const PTR));
 static void add_specific_symbol PARAMS ((const char *, struct symlist **));
 static boolean is_specified_symbol PARAMS ((const char *, struct symlist *));
 static boolean is_strip_section PARAMS ((bfd *, asection *));
@@ -82,6 +82,7 @@ static int copy_byte = -1;
 static int interleave = 4;
 
 static boolean verbose;		/* Print file and target names. */
+static boolean preserve_dates;	/* Preserve input file timestamp.  */
 static int status = 0;		/* Exit status.  */
 
 enum strip_action
@@ -709,7 +710,7 @@ copy_object (ibfd, obfd)
       set = osections;
       bfd_map_over_sections (obfd, get_sections, (void *) &set);
 
-      qsort (osections, c, sizeof (asection *), compare_section_vma);
+      qsort (osections, c, sizeof (asection *), compare_section_lma);
 
       gaps = (bfd_size_type *) xmalloc (c * sizeof (bfd_size_type));
       memset (gaps, 0, c * sizeof (bfd_size_type));
@@ -728,8 +729,8 @@ copy_object (ibfd, obfd)
 		continue;
 
 	      size = bfd_section_size (obfd, osections[i]);
-	      gap_start = bfd_section_vma (obfd, osections[i]) + size;
-	      gap_stop = bfd_section_vma (obfd, osections[i + 1]);
+	      gap_start = bfd_section_lma (obfd, osections[i]) + size;
+	      gap_stop = bfd_section_lma (obfd, osections[i + 1]);
 	      if (gap_start < gap_stop)
 		{
 		  if (! bfd_set_section_size (obfd, osections[i],
@@ -751,15 +752,15 @@ copy_object (ibfd, obfd)
 
       if (pad_to_set)
 	{
-	  bfd_vma vma;
+	  bfd_vma lma;
 	  bfd_size_type size;
 
-	  vma = bfd_section_vma (obfd, osections[c - 1]);
+	  lma = bfd_section_lma (obfd, osections[c - 1]);
 	  size = bfd_section_size (obfd, osections[c - 1]);
-	  if (vma + size < pad_to)
+	  if (lma + size < pad_to)
 	    {
 	      if (! bfd_set_section_size (obfd, osections[c - 1],
-					  pad_to - vma))
+					  pad_to - lma))
 		{
 		  fprintf (stderr, "%s: Can't add padding to %s: %s\n",
 			   program_name,
@@ -769,12 +770,12 @@ copy_object (ibfd, obfd)
 		}
 	      else
 		{
-		  gaps[c - 1] = pad_to - (vma + size);
-		  if (max_gap < pad_to - (vma + size))
-		    max_gap = pad_to - (vma + size);
+		  gaps[c - 1] = pad_to - (lma + size);
+		  if (max_gap < pad_to - (lma + size))
+		    max_gap = pad_to - (lma + size);
 		}
 	    }
-	}	      
+	}
     }
 
   /* Symbol filtering must happen after the output sections have
@@ -1333,7 +1334,7 @@ get_sections (obfd, osection, secppparg)
    sections to the front, where they are easier to ignore.  */
 
 static int
-compare_section_vma (arg1, arg2)
+compare_section_lma (arg1, arg2)
      const PTR arg1;
      const PTR arg2;
 {
@@ -1358,13 +1359,13 @@ compare_section_vma (arg1, arg2)
 	return 1;
     }
 
-  /* Sort sections by VMA.  */
-  if ((*sec1)->vma > (*sec2)->vma)
+  /* Sort sections by LMA.  */
+  if ((*sec1)->lma > (*sec2)->lma)
     return 1;
-  else if ((*sec1)->vma < (*sec2)->vma)
+  else if ((*sec1)->lma < (*sec2)->lma)
     return -1;
 
-  /* Sort sections with the same VMA by size.  */
+  /* Sort sections with the same LMA by size.  */
   if ((*sec1)->_raw_size > (*sec2)->_raw_size)
     return 1;
   else if ((*sec1)->_raw_size < (*sec2)->_raw_size)
@@ -1620,6 +1621,8 @@ smart_rename (from, to)
 	  errno = saved;
 	  perror ("simple_copy");
 	}
+      if (preserve_dates)
+	set_times (to, &s);
       unlink (from);
     }
 #endif /* _WIN32 && !__CYGWIN32__ */
@@ -1677,7 +1680,6 @@ strip_main (argc, argv)
 {
   char *input_target = NULL, *output_target = NULL;
   boolean show_version = false;
-  boolean preserve_dates = false;
   int c, i;
   struct section_list *p;
   char *output_file = NULL;
@@ -1810,7 +1812,6 @@ copy_main (argc, argv)
   char *input_target = NULL, *output_target = NULL;
   boolean show_version = false;
   boolean adjust_warn = true;
-  boolean preserve_dates = false;
   int c;
   struct section_list *p;
   struct stat statbuf;
