@@ -65,9 +65,6 @@ obj-generic.c
 obj-generic.h
 obj-ieee.c
 obj-ieee.h
-ranlib.h
-signame.h
-stab.h
 tc-a29k.c
 tc-a29k.h
 tc-generic.c
@@ -124,7 +121,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.15  1992/02/17 15:53:46  rich
+# Revision 1.16  1992/02/17 16:02:58  rich
+# record that files were removed
+#
+# Revision 1.15  1992/02/17  15:53:46  rich
 # fighting bitrot in a major way
 #
 # Revision 1.14  1992/02/13  10:13:24  rich
