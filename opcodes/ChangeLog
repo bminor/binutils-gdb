@@ -1,3 +1,8 @@
+Tue Nov 18 23:10:03 1997  J"orn Rennecke  <amylaar@cygnus.co.uk>
+
+	* d10v-dis.c (print_operand):
+	Split OPERAND_FLAG into OPERAND_FFLAG and OPERAND_CFLAG.
+
 Tue Nov 18 18:45:14 1997  J"orn Rennecke  <amylaar@cygnus.co.uk>
 
 	* d10v-opc.c (OPERAND_FLAG): Split into:
