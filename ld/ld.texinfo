@@ -4682,17 +4682,18 @@ fact or leave it out, state it!
 
 Often people omit facts because they think they know what causes the
 problem and assume that some details do not matter.  Thus, you might
-assume that the name of a symbol you use in an example does not matter.
-Well, probably it does not, but one cannot be sure.  Perhaps the bug is
-a stray memory reference which happens to fetch from the location where
-that name is stored in memory; perhaps, if the name were different, the
-contents of that location would fool the linker into doing the right
-thing despite the bug.  Play it safe and give a specific, complete
-example.  That is the easiest thing for you to do, and the most helpful.
+assume that the name of a symbol you use in an example does not
+matter.  Well, probably it does not, but one cannot be sure.  Perhaps
+the bug is a stray memory reference which happens to fetch from the
+location where that name is stored in memory; perhaps, if the name
+were different, the contents of that location would fool the linker
+into doing the right thing despite the bug.  Play it safe and give a
+specific, complete example.  That is the easiest thing for you to do,
+and the most helpful. 
 
-Keep in mind that the purpose of a bug report is to enable us to fix the bug if
-it is new to us.  Therefore, always write your bug reports on the assumption
-that the bug has not been reported previously.
+Keep in mind that the purpose of a bug report is to enable us to fix
+the bug if it is new to us.  Therefore, always write your bug reports
+on the assumption that the bug has not been reported previously.
 
 Sometimes people give a few sketchy facts and ask, ``Does this ring a
 bell?''  Those bug reports are useless, and we urge everyone to
@@ -4732,10 +4733,13 @@ and then we might not encounter the bug.
 
 @item
 A complete input file, or set of input files, that will reproduce the
-bug.  It is generally most helpful to send the actual object files,
-uuencoded if necessary to get them through the mail system.  Making them
-available for anonymous FTP is not as good, but may be the only
-reasonable choice for large object files.
+bug.  It is generally most helpful to send the actual object files
+provided that they are reasonably small.  Say no more than 10K.  For
+bigger files you can either make them available by FTP or HTTP or else
+state that you are willing to send the object file(s) to whomever
+requests them.  (Note - your email will be going to a mailing list, so
+we do not want to clog it up with large attachments).  But small
+attachments are best.
 
 If the source files were assembled using @code{gas} or compiled using
 @code{gcc}, then it may be OK to send the source files rather than the

@@ -1,3 +1,10 @@
+2002-06-20  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* ld.texinfo (Bug Reporting): Update text to suggest a limit on
+	the size of attached object files, to allow make the object files
+	available via FTP or HTTP and to mention that the mail will be
+	sent to a mailing list.
+
 2002-06-20  Nathanael Nerode  <neroden@twcny.rr.com>
 
 	* ld/configure.host (romp): Drop support.
