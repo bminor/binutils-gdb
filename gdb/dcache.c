@@ -23,6 +23,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "dcache.h"
 #include "gdbcmd.h"
 
+#ifdef __STDC__
+/* In case the system header files define a prototype for insque and
+   remque that uses a pointer to a struct qelem, silence the warnings */
+struct qelem;
+#define insque(a,b)	(insque)((struct qelem *)(a), (struct qelem *)(b))
+#define remque(a)	(remque)((struct qelem *)(a))
+#endif
+
 int remote_dcache = 0;
 
 /* The data cache records all the data read from the remote machine

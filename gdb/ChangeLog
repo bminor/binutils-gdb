@@ -1,3 +1,51 @@
+Wed Feb 15 12:33:20 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config/powerpc/tm-ppc-eabi.h (TEXT_SEGMENT_BASE): Define as 1.
+
+	* dcache.c (insque, remque): If compiling in standard C, protect
+	insque and remque with macros to cast the pointer arguments to the
+	proper type.  This is for systems like Linux, that define insque
+	and remque with prototypes in system header files.
+
+Tue Feb 14 17:16:41 1995  Stu Grossman  (grossman@cygnus.com)
+
+	* annotate.c, breakpoint.c, defs.h, gdbtk.c, top.c:  Replace
+	enable/disable_breakpoint_hook with modify_breakpoint_hook.
+	* gdbtk.c:  General cleanups, get rid of unused variables.  Redo
+	handling of stdout/stderr to just return output as the result of
+	the tcl command that caused the output.  Cleanup -Wall stuff.
+	* (breakpoint_notify):  Now returns just action and breakpoint
+	number.
+	* (gdb_get_breakpoint_list):  New routine.  Does the obvious.
+	* (gdb_get_breakpoint_info):  Mostly derived from the old
+	breakpoint_notify, but returns lots more info.
+	* (dsprintf_append_element):  Helper routine, works like printf,
+	but appends a tcl element onto the specified DString.  Good for
+	building up lists as return values.
+	* (gdbtk_enable/disable_breakpoint):  Go away.  Replaced with
+	gdbtk_modify_breakpoint.
+	* (*many routines*):  Use new result protocol.
+	* (call_wrapper):  Make sure that recursive calls don't trash results.
+	* gdbtk.tcl:  New windows, autocmd, and breakpoints.
+	* (gdbtk_tcl_fputs):  Don't use $current_output_win redirection
+	anymore.  It's not needed (in fact, this routine may not be needed
+	anymore).
+	* (gdbtk_tcl_breakpoint):  Change to reflect new breakpoint
+	notification protocol.
+	* (gdbtk_tcl_busy gdbtk_tcl_idle):  Straighten out buttons, remove
+	catches.
+	* (interactive_cmd):  Use this wrapper around button invocations
+	of many commands.  This will catch errors and put the results into
+	the command window.  It also updates all the other windows.
+	* Also, change reliefs of most things to sunken.  This actually
+	looks better.
+	* (create_file_win):  Fix margin binding to allow breakpoints to
+	work again.
+	* (create_asm_win):  Use return value of gdb_disassemble instead
+	of implicit I/O to the command window.	
+	* (create_command_window):  Use new result protocol to get output
+	from commands.
+
 Tue Feb 14 16:58:07 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* expression.h: Move declaration of evaluate_subexp_with_coercion
