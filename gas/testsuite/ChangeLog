@@ -1,3 +1,14 @@
+2003-06-18  Jakub Jelinek  <jakub@redhat.com>
+
+	* gas/cfi/cfi-i386.d: Regenerated.
+	* gas/cfi/cfi-common-1.d: Regenerated.
+	* gas/cfi/cfi-common-2.d: Regenerated.
+	* gas/cfi/cfi-common-3.d: Regenerated.
+	* gas/cfi/cfi-x86_64.d: Regenerated.
+	* gas/cfi/cfi-alpha-1.d: Regenerated.
+	* gas/cfi/cfi-alpha-2.d: Regenerated.
+	* gas/cfi/cfi-alpha-3.d: Regenerated.
+
 2003-06-17  Nick Clifton  <nickc@redhat.com>
 
 	* gas/i386/absrel.d: Tweak patterns to work for i386-pc-cygwin

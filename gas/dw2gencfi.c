@@ -41,6 +41,14 @@
 # endif
 #endif
 
+#ifndef EH_FRAME_ALIGNMENT
+# ifdef BFD_ASSEMBLER
+#  define EH_FRAME_ALIGNMENT (bfd_get_arch_size (stdoutput) == 64 ? 3 : 2)
+# else
+#  define EH_FRAME_ALIGNMENT 2
+# endif
+#endif
+
 #ifndef tc_cfi_frame_initial_instructions
 # define tc_cfi_frame_initial_instructions() ((void)0)
 #endif
@@ -836,13 +844,12 @@ output_cie (struct cie_entry *cie)
     for (i = cie->first; i != cie->last; i = i->next)
       output_cfi_insn (i);
 
-  frag_align (2, 0, 0);
   symbol_set_value_now (end_address);
 }
 
 static void
 output_fde (struct fde_entry *fde, struct cie_entry *cie,
-	    struct cfi_insn_data *first)
+	    struct cfi_insn_data *first, int align)
 {
   symbolS *after_size_address, *end_address;
   expressionS exp;
@@ -874,7 +881,8 @@ output_fde (struct fde_entry *fde, struct cie_entry *cie,
   for (; first; first = first->next)
     output_cfi_insn (first);
 
-  frag_align (2, 0, 0);
+  if (align)
+    frag_align (align, 0, 0);
   symbol_set_value_now (end_address);
 }
 
@@ -990,7 +998,7 @@ cfi_finish (void)
 			 SEC_ALLOC | SEC_LOAD | SEC_DATA | SEC_READONLY);
 #endif
   subseg_set (cfi_seg, 0);
-  record_alignment (cfi_seg, 2);
+  record_alignment (cfi_seg, EH_FRAME_ALIGNMENT);
 
   /* Make sure check_eh_frame doesn't do anything with our output.  */
   save_flag_traditional_format = flag_traditional_format;
@@ -1002,7 +1010,7 @@ cfi_finish (void)
       struct cie_entry *cie;
 
       cie = select_cie_for_fde (fde, &first);
-      output_fde (fde, cie, first);
+      output_fde (fde, cie, first, fde->next == NULL ? EH_FRAME_ALIGNMENT : 0);
     }
 
   flag_traditional_format = save_flag_traditional_format;

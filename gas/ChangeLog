@@ -1,3 +1,11 @@
+2003-06-18  Jakub Jelinek  <jakub@redhat.com>
+
+	* dw2gencfi.c (EH_FRAME_ALIGNMENT): Define if not defined.
+	(output_cie): Don't pad.
+	(output_fde): Add align argument.  Pad to align if not 0.
+	(cfi_finish): Set .eh_frame alignment to EH_FRAME_ALIGNMENT.
+	Pad just last FDE to EH_FRAME_ALIGNMENT.
+
 2003-06-18  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
 	* config/tc-s390.c (init_default_arch): Make current_mode_mask
