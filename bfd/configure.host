@@ -37,7 +37,7 @@ i[34]86-*-sysv4*)	my_host=i386v4 ;;
 i[34]86-*-sysv*)	my_host=i386v ;;
 i[34]86-*-solaris*)	my_host=i386v ;;
 i[34]86-*-sco*)		my_host=i386sco ;;
-i[34]86-*-mach*)	my_host=i386mach3 ;;
+i[34]86-*-mach3*)	my_host=i386mach3 ;;
 i[34]86-*-osf1mk*)	my_host=i386osf1mk ;;
 i[34]86-*-msdos*)	my_host=dose ;;
 i[34]86-*-linux*)	my_host=i386linux ;;
@@ -48,10 +48,13 @@ i[34]86-*-aix*)		my_host=i386aix ;;
 i860-*-*)		my_host=stratus ;;
 
 mips-dec-bsd*)          my_host=mipsbsd ;;
+mips-dec-mach3*)        my_host=mipsmach3 ;;
 mips-dec-*)		my_host=decstation ;;
 mips-sgi-irix3*)	my_host=irix3 ;;
 mips-sgi-irix4*)	my_host=irix4 ;;
 mips-sgi-irix5*)	my_host=irix5 ;;
+mips-*-mach3*)		my_host=mipsmach3 ;;
+mips-*-sysv4*)		my_host=sysv4 ;;
 mips-*-sysv*)		my_host=riscos ;;
 mips-*-riscos*)		my_host=riscos ;;
 mips-sony-bsd*)		my_host=news-mips ;;
@@ -73,9 +76,10 @@ m88*-*-sysv4*)		my_host=delta88v4 ;;
 m88*-motorola-sysv*)	my_host=delta88 ;;
 m88*-harris-*)		my_host=harris ;;
 m88*-*-dgux*)		my_host=dgux ;;
+m88*-*-mach3*)		my_host=m88kmach3 ;;
 
-# Apparently the same config file as for 386 works.
-ns32k-*-mach*)		my_host=i386mach3 ;;
+ns32k-pc532-mach)	my_host=pc532mach ;;
+ns32k-pc532-netbsd*)    my_host=pc532mach ;;
 
 romp-*-*)		my_host=rtbsd ;;
 

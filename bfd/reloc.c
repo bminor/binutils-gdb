@@ -282,7 +282,9 @@ SUBSUBSECTION
 CODE_FRAGMENT
 .struct symbol_cache_entry;		{* Forward declaration *}
 .
-.typedef struct reloc_howto_struct
+.typedef unsigned char bfd_byte;
+.
+.struct reloc_howto_struct
 .{
 .       {*  The type field has mainly a documetary use - the back end can
 .           do what it wants with it, though normally the back end's
@@ -332,6 +334,17 @@ CODE_FRAGMENT
 .                                            bfd *output_bfd,
 .                                            char **error_message));
 .
+.
+.       {* If this field is non null, then the supplied function is
+.          called rather than the normal function. This is similar
+.	   to special_function (previous), but takes different arguments,
+.          and is used for the new linking code. *}
+.  bfd_reloc_status_type (*special_function1)
+.			    PARAMS((const reloc_howto_type *howto,
+.				    bfd *input_bfd,
+.				    bfd_vma relocation,
+.				    bfd_byte *location));
+.
 .       {* The textual name of the relocation type. *}
 .  char *name;
 .
@@ -362,7 +375,8 @@ CODE_FRAGMENT
 .          empty (e.g., m88k bcs); this flag signals the fact.*}
 .  boolean pcrel_offset;
 .
-.} reloc_howto_type;
+.};
+.typedef struct reloc_howto_struct reloc_howto_type;
 
 */
 
@@ -375,7 +389,9 @@ DESCRIPTION
 
 
 .#define HOWTO(C, R,S,B, P, BI, O, SF, NAME, INPLACE, MASKSRC, MASKDST, PC) \
-.  {(unsigned)C,R,S,B, P, BI, O,SF,NAME,INPLACE,MASKSRC,MASKDST,PC}
+.  {(unsigned)C,R,S,B, P, BI, O,SF, 0,NAME,INPLACE,MASKSRC,MASKDST,PC}
+.#define HOWTO2(C, R,S,B, P, BI, O, SF, SF1,NAME, INPLACE, MASKSRC, MASKDST, PC) \
+.  {(unsigned)C,R,S,B, P, BI, O,SF, SF1,NAME,INPLACE,MASKSRC,MASKDST,PC}
 
 DESCRIPTION
 	And will be replaced with the totally magic way. But for the
@@ -437,8 +453,6 @@ DESCRIPTION
 
 	How relocs are tied together in an <<asection>>:
 
-.typedef unsigned char bfd_byte;
-.
 .typedef struct relent_chain {
 .  arelent relent;
 .  struct   relent_chain *next;
@@ -500,7 +514,7 @@ bfd_perform_relocation (abfd, reloc_entry, data, input_section, output_bfd,
   asymbol *symbol;
 
   symbol = *(reloc_entry->sym_ptr_ptr);
-  if ((symbol->section == &bfd_abs_section)
+  if (bfd_is_abs_section (symbol->section)
       && output_bfd != (bfd *) NULL)
     {
       reloc_entry->address += input_section->output_offset;
@@ -510,7 +524,7 @@ bfd_perform_relocation (abfd, reloc_entry, data, input_section, output_bfd,
   /* If we are not producing relocateable output, return an error if
      the symbol is not defined.  An undefined weak symbol is
      considered to have a value of zero (SVR4 ABI, p. 4-27).  */
-  if (symbol->section == &bfd_und_section
+  if (bfd_is_und_section (symbol->section)
       && (symbol->flags & BSF_WEAK) == 0
       && output_bfd == (bfd *) NULL)
     flag = bfd_reloc_undefined;
@@ -618,7 +632,9 @@ bfd_perform_relocation (abfd, reloc_entry, data, input_section, output_bfd,
 
 	  /* WTF?? */
 	  if (abfd->xvec->flavour == bfd_target_coff_flavour
-	      && strcmp (abfd->xvec->name, "aixcoff-rs6000") != 0)
+	      && strcmp (abfd->xvec->name, "aixcoff-rs6000") != 0
+	      && strcmp (abfd->xvec->name, "coff-Intel-little") != 0
+	      && strcmp (abfd->xvec->name, "coff-Intel-big") != 0)
 	    {
 #if 1
 	      /* For m68k-coff, the addend was being subtracted twice during
@@ -977,6 +993,13 @@ _bfd_final_link_relocate (howto, input_bfd, input_section, contents, address,
 	relocation -= address;
     }
 
+  if(howto->special_function1) {
+      bfd_reloc_status_type cont;
+      cont = (*howto->special_function1)(howto, input_bfd, relocation,
+				       contents + address);
+      if (cont != bfd_reloc_continue)
+	return cont;
+    }
   return _bfd_relocate_contents (howto, input_bfd, relocation,
 				 contents + address);
 }
@@ -1370,6 +1393,20 @@ CODE_FRAGMENT
 .  BFD_RELOC_386_RELATIVE,
 .  BFD_RELOC_386_GOTOFF,
 .  BFD_RELOC_386_GOTPC,
+.
+.  {* ns32k relocations *}
+.  BFD_RELOC_NS32K_IMM_8,
+.  BFD_RELOC_NS32K_IMM_16,
+.  BFD_RELOC_NS32K_IMM_32,
+.  BFD_RELOC_NS32K_IMM_8_PCREL,
+.  BFD_RELOC_NS32K_IMM_16_PCREL,
+.  BFD_RELOC_NS32K_IMM_32_PCREL,
+.  BFD_RELOC_NS32K_DISP_8,
+.  BFD_RELOC_NS32K_DISP_16,
+.  BFD_RELOC_NS32K_DISP_32,
+.  BFD_RELOC_NS32K_DISP_8_PCREL,
+.  BFD_RELOC_NS32K_DISP_16_PCREL,
+.  BFD_RELOC_NS32K_DISP_32_PCREL,
 .
 .  {* PowerPC/POWER (RS/6000) relocs.  *}
 .  {* 26 bit relative branch.  Low two bits must be zero.  High 24

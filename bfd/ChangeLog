@@ -1,3 +1,99 @@
+Thu Jul 14 15:12:24 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* reloc.c (enum bfd_reloc_code_real, bfd_type, struct
+	reloc_howto_struct, reloc_howto_type, HOWTO, HOWTO2): Copied
+	changes over from bfd-in2.h so they get generated properly next
+	time someone runs "make headers".
+	* bfd-in2.h: Rebuilt.
+
+	* targets.c (netbsd532_vec, pc532mach_vec): Declare const.
+	(m88kmach3_vec): Restore deleted declaration.
+
+	* configure.in: Alphabetize target vector names.
+
+	* config/pc532mach.mh: New file.
+	(HDEPFILES, HDEFINES): Define here.
+	* config/pc532-mach.mt (HDEPFILES, HDEFINES): Deleted.
+	* config/ns32k-netbsd.mt (HDEPFILES, HDEFINES): Deleted.
+
+	Sun Jul 10 00:04:20 1994  Ian Dall  (dall@hfrd.dsto.gov.au)
+
+	* pc532-mach.c: New File. pc532-mach a.out format.
+
+	* netbsd532.c: New file. pc532-netbsd532 a.out format.
+
+	* hosts/pc532mach.h: New file. pc532-mach host support.
+
+	* cpu-ns32k.c: New file. ns32k support cpu specific code rather
+	than format specific code.
+
+	* config/pc532-mach.mt: New file. Support for pc532-mach target.
+
+	* config/ns32k-netbsd.mt: New file. Support for netbsd532 target.
+
+	* aout-ns32k.c, aout-ns32k.h: New files supporting aout format for
+	ns32k series. 
+
+	* targets.c: Add netbsd532_vec and pc532machaout_vec into
+	bfd_target_vector array. Move netbsd386_vec to alphabetic order
+	location.
+
+	* reloc.c (_bfd_final_link_relocate) Add support for
+	special_function1 in howto.
+
+	* libaout.h: add M_NS32032, M_NS32532, M_532_NETBSD entries in
+	machine_type enum.
+
+	* configure.in: add pc532mach_vec and netbsd532_vec entries.
+
+	* config.bfd: add pc532mach host entries. Use for both
+	ns32k-pc532-mach and ns32k-pc532-netbsd.
+
+	* config.bfd: it doesn't work to use i386-mach3 for ns32k*-*-mach.
+	add ns32k-pc532-mach* and ns32k-*-netbsd* entries.
+
+	* bfd-in2.h: Add ns32k specific relocations to bfd_reloc_code_real
+	enum.
+
+	* bfd-in2.h: Add special_function1 to struct howto. Change HOWTO
+	and NEWHOWTO macros to make special_function1 NULL. Neww HOWTO2
+	macro.
+
+	* bfd-in2.h: Split definition of struct reloc_howto_struct
+	and corresponding typedef into two statements.
+
+	* bfd-in2.h: Add entry bfd_arch_ns32k to bfd_architecture enum.
+
+	* archures.c: Add bfd_ns32k_arch prototype, and entry in
+	archures_init_table. 
+
+	* aoutx.h (aout_link_reloc_link_order): Allow for target dependent
+	MY_put_reloc macro. Allow for target dependent special_function1
+	to apply the relocation. 
+
+	* aoutx.h (aout_link_input_section_std): Allow for target
+	dependent determination of reloc howto. Allow for target dependent
+	special_function1 to apply the relocation.
+
+	* aoutx.h (get_reloc_upper_bound): Detect bss and return 0.
+
+	* aoutx.h (slurp_reloc_table): Detect bss and succesfully read
+	zero reloc entries.
+
+	* aoutx.h (machine_type): Add bfd_arch_ns32k case.
+
+	* aoutx.h: Stat to determine executable status if STAT_FOR_EXEC
+	is defined (not just MACH). Use fstat instead of stat and check
+	for fstat error.
+
+	* aoutx.h: Allow target dependent swap_std_reloc_{in,out}.
+
+	* aoutx.h: Allow CTORS reloc info to be in target dependent reloc
+	table.
+
+	* aout-target.h: Apply SWAP_MAGIC (if defined) after
+	swap_exec_header_in, otherwise we have magic in the wrong order.
+
 Thu Jul 14 11:47:27 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* coff-sparc.c (sparccoff_vec): Have leading underscores.

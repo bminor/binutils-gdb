@@ -748,7 +748,7 @@ typedef struct sec
            multiple times, the value of a symbol is the amount of
            space it requires, and the largest symbol value is the one
            used).  Most targets have exactly one of these (which we
-	    translate to bfd_com_section), but ECOFF has two. */
+	    translate to bfd_com_section_ptr), but ECOFF has two. */
 #define SEC_IS_COMMON 0x8000
 
          /* The section contains only debugging information.  For
@@ -883,28 +883,36 @@ typedef struct sec
    struct bfd_link_order *link_order_tail;
 } asection ;
 
-
      /* These sections are global, and are managed by BFD.  The application
        and target back end are not permitted to change the values in
-	these sections.  */
+	these sections.  New code should use the section_ptr macros rather
+       than referring directly to the const sections.  The const sections
+       may eventually vanish.  */
 #define BFD_ABS_SECTION_NAME "*ABS*"
 #define BFD_UND_SECTION_NAME "*UND*"
 #define BFD_COM_SECTION_NAME "*COM*"
 #define BFD_IND_SECTION_NAME "*IND*"
 
      /* the absolute section */
-extern asection bfd_abs_section;
+extern const asection bfd_abs_section;
+#define bfd_abs_section_ptr ((asection *) &bfd_abs_section)
+#define bfd_is_abs_section(sec) ((sec) == bfd_abs_section_ptr)
      /* Pointer to the undefined section */
-extern asection bfd_und_section;
+extern const asection bfd_und_section;
+#define bfd_und_section_ptr ((asection *) &bfd_und_section)
+#define bfd_is_und_section(sec) ((sec) == bfd_und_section_ptr)
      /* Pointer to the common section */
-extern asection bfd_com_section;
+extern const asection bfd_com_section;
+#define bfd_com_section_ptr ((asection *) &bfd_com_section)
      /* Pointer to the indirect section */
-extern asection bfd_ind_section;
+extern const asection bfd_ind_section;
+#define bfd_ind_section_ptr ((asection *) &bfd_ind_section)
+#define bfd_is_ind_section(sec) ((sec) == bfd_ind_section_ptr)
 
-extern struct symbol_cache_entry *bfd_abs_symbol;
-extern struct symbol_cache_entry *bfd_com_symbol;
-extern struct symbol_cache_entry *bfd_und_symbol;
-extern struct symbol_cache_entry *bfd_ind_symbol;
+extern const struct symbol_cache_entry * const bfd_abs_symbol;
+extern const struct symbol_cache_entry * const bfd_com_symbol;
+extern const struct symbol_cache_entry * const bfd_und_symbol;
+extern const struct symbol_cache_entry * const bfd_ind_symbol;
 #define bfd_get_section_size_before_reloc(section) \
      (section->reloc_done ? (abort(),1): (section)->_raw_size)
 #define bfd_get_section_size_after_reloc(section) \
@@ -999,6 +1007,7 @@ enum bfd_architecture
   bfd_arch_h8500,      /* Hitachi H8/500 */
   bfd_arch_sh,         /* Hitachi SH */
   bfd_arch_alpha,      /* Dec Alpha */
+  bfd_arch_ns32k,      /* National Semiconductors ns32000 */
   bfd_arch_last
   };
 
@@ -1133,7 +1142,9 @@ enum complain_overflow
   complain_overflow_unsigned
 };
 
-typedef struct reloc_howto_struct
+typedef unsigned char bfd_byte;
+
+struct reloc_howto_struct
 {
         /*  The type field has mainly a documetary use - the back end can
            do what it wants with it, though normally the back end's
@@ -1183,6 +1194,17 @@ typedef struct reloc_howto_struct
                                             bfd *output_bfd,
                                             char **error_message));
 
+
+        /* If this field is non null, then the supplied function is
+          called rather than the normal function. This is similar
+	   to special_function (previous), but takes different arguments,
+          and is used for the new linking code. */
+  bfd_reloc_status_type (*special_function1)
+			    PARAMS((const reloc_howto_type *howto,
+				    bfd *input_bfd,
+				    bfd_vma relocation,
+				    bfd_byte *location));
+
         /* The textual name of the relocation type. */
   char *name;
 
@@ -1213,9 +1235,12 @@ typedef struct reloc_howto_struct
           empty (e.g., m88k bcs); this flag signals the fact.*/
   boolean pcrel_offset;
 
-} reloc_howto_type;
+};
+typedef struct reloc_howto_struct reloc_howto_type;
 #define HOWTO(C, R,S,B, P, BI, O, SF, NAME, INPLACE, MASKSRC, MASKDST, PC) \
-  {(unsigned)C,R,S,B, P, BI, O,SF,NAME,INPLACE,MASKSRC,MASKDST,PC}
+  {(unsigned)C,R,S,B, P, BI, O,SF, 0,NAME,INPLACE,MASKSRC,MASKDST,PC}
+#define HOWTO2(C, R,S,B, P, BI, O, SF, SF1,NAME, INPLACE, MASKSRC, MASKDST, PC) \
+  {(unsigned)C,R,S,B, P, BI, O,SF, SF1,NAME,INPLACE,MASKSRC,MASKDST,PC}
 #define NEWHOWTO( FUNCTION, NAME,SIZE,REL,IN) HOWTO(0,0,SIZE,0,REL,0,complain_overflow_dont,FUNCTION, NAME,false,0,0,IN)
 
 #define HOWTO_PREPARE(relocation, symbol)      \
@@ -1231,8 +1256,6 @@ typedef struct reloc_howto_struct
 }
 int 
 bfd_get_reloc_size  PARAMS ((const reloc_howto_type *));
-
-typedef unsigned char bfd_byte;
 
 typedef struct relent_chain {
   arelent relent;
@@ -1417,6 +1440,20 @@ typedef enum bfd_reloc_code_real
   BFD_RELOC_386_RELATIVE,
   BFD_RELOC_386_GOTOFF,
   BFD_RELOC_386_GOTPC,
+
+   /* ns32k relocations */
+  BFD_RELOC_NS32K_IMM_8,
+  BFD_RELOC_NS32K_IMM_16,
+  BFD_RELOC_NS32K_IMM_32,
+  BFD_RELOC_NS32K_IMM_8_PCREL,
+  BFD_RELOC_NS32K_IMM_16_PCREL,
+  BFD_RELOC_NS32K_IMM_32_PCREL,
+  BFD_RELOC_NS32K_DISP_8,
+  BFD_RELOC_NS32K_DISP_16,
+  BFD_RELOC_NS32K_DISP_32,
+  BFD_RELOC_NS32K_DISP_8_PCREL,
+  BFD_RELOC_NS32K_DISP_16_PCREL,
+  BFD_RELOC_NS32K_DISP_32_PCREL,
 
    /* PowerPC/POWER (RS/6000) relocs.  */
    /* 26 bit relative branch.  Low two bits must be zero.  High 24

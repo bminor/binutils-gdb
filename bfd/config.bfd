@@ -4,9 +4,18 @@
 # Convert a canonical host type into a BFD host type.
 # Call with canonical name as the argument.
 # Echos the result.
+# If second argument is _, echoes whether underscores are stripped.
 
 canon="$1"
 cpu=`echo $canon | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\1/'`
+
+# The binutils c++filt program wants to know whether underscores are
+# stripped or not.  It uses this information to choose a default.
+# This information is duplicated in the symbol_leading_char field of
+# the BFD target vector, but c++filt does not deal with object files
+# and is not linked against libbfd.a.  It is not terribly important
+# that c++filt get this right; it is just convenient.
+strip_underscore=no
 
 # WHEN ADDING ENTRIES TO THIS MATRIX:
 #  Make sure that the left side always has two dashes.  Otherwise you
@@ -16,14 +25,14 @@ cpu=`echo $canon | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\1/'`
 case "${canon}" in
   alpha-*-netware*)	bfd_name=alpha-nlm ;;
   alpha-*-*)		bfd_name=alphaosf ;;
-  a29k-*-ebmon*)	bfd_name=a29k-coff ;;
-  a29k-*-udi*)		bfd_name=a29k-coff ;;
-  a29k-*-aout*)		bfd_name=a29k-aout ;;
-  a29k-*-coff*)		bfd_name=a29k-coff ;;
-  a29k-*-sym1*)		bfd_name=a29k-coff ;;
-  h8300*-*-*)		bfd_name=h8300-coff ;;
-  h8500-*-*)		bfd_name=h8500-coff ;;
-  sh-*-*)		bfd_name=sh-coff ;;
+  a29k-*-ebmon*)	bfd_name=a29k-coff strip_underscore=yes ;;
+  a29k-*-udi*)		bfd_name=a29k-coff strip_underscore=yes ;;
+  a29k-*-aout*)		bfd_name=a29k-aout strip_underscore=yes ;;
+  a29k-*-coff*)		bfd_name=a29k-coff strip_underscore=yes ;;
+  a29k-*-sym1*)		bfd_name=a29k-coff strip_underscore=yes ;;
+  h8300*-*-*)		bfd_name=h8300-coff strip_underscore=yes ;;
+  h8500-*-*)		bfd_name=h8500-coff strip_underscore=yes ;;
+  sh-*-*)		bfd_name=sh-coff strip_underscore=yes ;;
   hppa*-*-*elf*)	bfd_name=hppa-elf ;;
   hppa*-*-bsd*)		bfd_name=hppabsd ;;
   hppa*-*-hpux*)	bfd_name=hppahpux ;;
@@ -35,95 +44,99 @@ case "${canon}" in
   i[34]86-*-sysv*)	bfd_name=i386-coff ;;
   i[34]86-*-isc*)	bfd_name=i386-coff ;;
   i[34]86-*-sco*)	bfd_name=i386-coff ;;
-  i[34]86-sequent-bsd*)	bfd_name=i386-dynix ;;
-  i[34]86-*-bsd*)	bfd_name=i386-bsd ;;
+  i[34]86-sequent-bsd*)	bfd_name=i386-dynix strip_underscore=yes ;;
+  i[34]86-*-bsd*)	bfd_name=i386-bsd strip_underscore=yes ;;
   i[34]86-*-coff)	bfd_name=i386-coff ;;
   i[34]86-*-aix*)	bfd_name=i386-coff ;;
   i[34]86-*-elf)	bfd_name=i386-elf ;;
-  i[34]86-*-netbsd*)	bfd_name=i386-netbsd ;;
+  i[34]86-*-netbsd*)	bfd_name=i386-netbsd strip_underscore=yes ;;
   i[34]86-*-netware*)	bfd_name=i386-nlm ;;
-  i[34]86-*-linux*)	bfd_name=i386-linux ;;
+  i[34]86-*-linux*)	bfd_name=i386-linux strip_underscore=yes ;;
   i[34]86-*-lynxos*)	bfd_name=i386-lynx ;;
-  i[34]86-*-gnu*)	bfd_name=i386-mach3 ;;
-  i[34]86-*-mach*)	bfd_name=i386-mach3 ;;
-  i[34]86-*-osf1mk*)	bfd_name=i386-mach3 ;;
-  i[34]86-*-os9k)	bfd_name=i386-os9k;;
+  i[34]86-*-gnu*)	bfd_name=i386-mach3 strip_underscore=yes ;;
+  i[34]86-*-mach*)	bfd_name=i386-mach3 strip_underscore=yes ;;
+  i[34]86-*-osf1mk*)	bfd_name=i386-mach3 strip_underscore=yes ;;
+  i[34]86-*-os9k)	bfd_name=i386-os9k ;;
   i[34]86-none-*)	bfd_name=i386-coff ;;
-  i960-*-vxworks4*)	bfd_name=i960-bout ;;
-  i960-*-vxworks5.0)	bfd_name=i960-bout ;;
-  i960-*-vxworks5.*)	bfd_name=i960-coff ;;
-  i960-*-vxworks*)	bfd_name=i960-bout ;;
-  i960-*-aout*)		bfd_name=i960-bout ;;
-  i960-*-bout*)		bfd_name=i960-bout ;;
-  i960-*-coff*)		bfd_name=i960-coff ;;
-  i960-*-nindy*)	bfd_name=i960-bout ;;
+  i960-*-vxworks4*)	bfd_name=i960-bout strip_underscore=yes ;;
+  i960-*-vxworks5.0)	bfd_name=i960-bout strip_underscore=yes ;;
+  i960-*-vxworks5.*)	bfd_name=i960-coff strip_underscore=yes ;;
+  i960-*-vxworks*)	bfd_name=i960-bout strip_underscore=yes ;;
+  i960-*-aout*)		bfd_name=i960-bout strip_underscore=yes ;;
+  i960-*-bout*)		bfd_name=i960-bout strip_underscore=yes ;;
+  i960-*-coff*)		bfd_name=i960-coff strip_underscore=yes ;;
+  i960-*-nindy*)	bfd_name=i960-bout strip_underscore=yes ;;
   m68*-apollo-*)	bfd_name=apollo ;;
   m68*-bull-sysv*)	bfd_name=u68k-coff ;;
-  m68*-hp-bsd*)		bfd_name=hp300bsd ;;
-  m68*-*-aout*)		bfd_name=m68k-0aout ;;
+  m68*-hp-bsd*)		bfd_name=hp300bsd strip_underscore=yes ;;
+  m68*-*-aout*)		bfd_name=m68k-0aout strip_underscore=yes ;;
   m68*-*-coff*)		bfd_name=m68k-coff ;;
-  m68*-*-hpux*)		bfd_name=hp300hpux ;;
+  m68*-*-hpux*)		bfd_name=hp300hpux strip_underscore=yes ;;
   m68*-*-lynxos*)	bfd_name=m68k-lynx ;;
-  m68*-*-os68k*)	bfd_name=m68k-aout ;;
-  m68*-*-sunos*)	bfd_name=m68k-aout ;;
+  m68*-*-os68k*)	bfd_name=m68k-aout strip_underscore=yes ;;
+  m68*-*-sunos*)	bfd_name=m68k-aout strip_underscore=yes ;;
   m68*-*-sysv4*)	bfd_name=m68k-elf ;;
   m68*-*-sysv*)		bfd_name=m68k-coff ;;
-  m68*-*-vxworks*)	bfd_name=m68k-aout ;;
-  m68*-ericsson-*)	bfd_name=m68k-ose ;;
-  m68*-netx-*)		bfd_name=m68k-aout ;;
+  m68*-*-vxworks*)	bfd_name=m68k-aout strip_underscore=yes ;;
+  m68*-ericsson-*)	bfd_name=m68k-ose strip_underscore=yes ;;
+  m68*-netx-*)		bfd_name=m68k-aout strip_underscore=yes ;;
 
-  m88*-*-sysv4*)	bfd_name=m88k-elf ;;
   # DGUX used to use COFF, but now (Jan 94) I believe it uses ELF by default.
   m88*-*-dgux*)		bfd_name=m88k-elf ;;
-  m88*-*-*)		bfd_name=m88k-coff ;;
+  m88*-*-mach3*)	bfd_name=m88k-mach3 ;;
+  m88*-*-sysv4*)	bfd_name=m88k-elf ;;
+  m88*-*-*)		bfd_name=m88k-coff strip_underscore=yes ;;
 
   mips*-big-*)		bfd_name=bigmips ;;
-  mips*-dec-bsd*)       bfd_name=mipsdecbsd ;;
+  mips*-dec-bsd*)       bfd_name=mipsdecbsd strip_underscore=yes ;;
+  mips*-dec-mach3*)     bfd_name=mips-mach3 ;;
   mips*-dec-*)		bfd_name=decstation ;;
   mips*el-*-ecoff*)	bfd_name=decstation ;;
   mips*-*-ecoff*)	bfd_name=bigmips ;;
   mips*-*-irix5*)	bfd_name=mipsbelf ;;
   mips*-sgi-*)		bfd_name=bigmips ;;
+  mips*-*-mach3*)	bfd_name=mips-mach3 ;;
   mips*-*-sysv4*)	bfd_name=mipsbelf ;;
   mips*-*-sysv*)	bfd_name=riscos ;;
   mips*-*-riscos*)	bfd_name=riscos ;;
   mips*-*-bsd*)		bfd_name=bigmips ;; # Sony News
   mips*el-*-elf*)	bfd_name=mipslelf ;;
   mips*-*-elf*)		bfd_name=mipsbelf ;;
-  # Apparently this is similar enough to 386 mach to use the same target.
-  ns32*-*-mach*)	bfd_name=i386-mach3 ;;
+  ns32k-pc532-mach*)	bfd_name=pc532-mach strip_underscore=yes;;
+  ns32k-*-netbsd*)	bfd_name=ns32k-netbsd strip_underscore=yes;;
   powerpc-*-aix*)	bfd_name=rs6000 ;;
+  powerpc-*-elf*)	bfd_name=ppc-elf ;;
   powerpc-*-sysv4*)	bfd_name=ppc-elf ;;
   powerpc-*-netware*)	bfd_name=ppc-nlm ;;
   rs6000-*-*)		bfd_name=rs6000 ;;
   sparc-*-lynxos*)	bfd_name=sparc-lynx ;;
   sparc-*-solaris2*)	bfd_name=sparc-elf ;;
   sparc-*-sysv4*)	bfd_name=sparc-elf ;;
-  sparc64-*-aout*)	bfd_name=sparc-aout ;;
+  sparc64-*-aout*)	bfd_name=sparc-aout strip_underscore=yes ;;
   sparc64-*-elf*)	bfd_name=sparc64-elf ;;
   sparc-*-netware*)	bfd_name=sparc-nlm ;;
   sparc*-*-coff*)	bfd_name=sparc-coff ;;
-  sparc*-*-*)		bfd_name=sparc-aout ;;
-  tahoe-*-*)		bfd_name=tahoe ;;
+  sparc*-*-*)		bfd_name=sparc-aout strip_underscore=yes ;;
+  tahoe-*-*)		bfd_name=tahoe strip_underscore=yes ;;
   vax-*-vms*)		bfd_name=vax-vms ;;
-  vax-*-*)		bfd_name=vax ;;
+  vax-*-*)		bfd_name=vax strip_underscore=yes ;;
   we32k-*-*)		bfd_name=we32k ;;
-  z8k*-*-*)		bfd_name=z8k-coff ;;
+  z8k*-*-*)		bfd_name=z8k-coff strip_underscore=yes ;;
 
-  *-*-aout*)		bfd_name=${cpu}-aout ;;
-  *-*-bsd*)		bfd_name=${cpu}-aout ;;
+  *-*-aout*)		bfd_name=${cpu}-aout strip_underscore=yes ;;
+  *-*-bsd*)		bfd_name=${cpu}-aout strip_underscore=yes ;;
   *-*-netware*)		bfd_name=${cpu}-nlm ;;
   *-*-sysv4*)		bfd_name=${cpu}-elf ;;
   *-*-solaris2*)	bfd_name=${cpu}-elf ;;
-  *-*-vsta*)		bfd_name=${cpu}-aout ;;
+  *-*-vsta*)		bfd_name=${cpu}-aout strip_underscore=yes ;;
   *-*-go32*)		bfd_name=${cpu}-coff ;;
   *-*-sysv*)		bfd_name=${cpu}-coff ;;
 
-  *-*-aout64*)		bfd_name=${cpu}-aout64 ;;
+  *-*-aout64*)		bfd_name=${cpu}-aout64 strip_underscore=yes ;;
   *-*-elf64*)		bfd_name=${cpu}-elf64 ;;
 
-  *-adobe-*)		bfd_name=adobe ;;
-  *-sony-*)		bfd_name=news ;;
+  *-adobe-*)		bfd_name=adobe strip_underscore=yes ;;
+  *-sony-*)		bfd_name=news strip_underscore=yes ;;
   *-intel-*)		bfd_name=${cpu}-coff ;;
   *-stratus-*)		bfd_name=${cpu}-elf ;;
   *-cbm-*)		bfd_name=${cpu}-elf ;;
@@ -134,4 +147,8 @@ case "${canon}" in
   *)			bfd_name=$canon ;;
 esac
 
-echo $bfd_name
+if [ "x$2" = "x_" ]; then
+  echo $strip_underscore
+else
+  echo $bfd_name
+fi
