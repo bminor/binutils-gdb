@@ -629,14 +629,27 @@ static int mips_relax_branch;
    absolute one.  In SVR4 PIC, the first sequence will be for global
    symbols and the second will be for local symbols.
 
-   The frag's "subtype" is RELAX_ENCODE (FIRST, SECOND, WARN), where
-   FIRST and SECOND are the lengths of the two sequences in bytes
-   and WARN is true if ".set nomacro" was in effect when the macro
-   was expanded.  These fields can be extracted using RELAX_FIRST(),
-   RELAX_SECOND() and RELAX_WARN().
+   The frag's "subtype" is RELAX_ENCODE (FIRST, SECOND), where FIRST and
+   SECOND are the lengths of the two sequences in bytes.  These fields
+   can be extracted using RELAX_FIRST() and RELAX_SECOND().  In addition,
+   the subtype has the following flags:
 
-   In addition, the RELAX_USE_SECOND flag is set if it has been decided
-   that we should use the second sequence instead of the first.
+   RELAX_USE_SECOND
+	Set if it has been decided that we should use the second
+	sequence instead of the first.
+
+   RELAX_SECOND_LONGER
+	Set in the first variant frag if the macro's second implementation
+	is longer than its first.  This refers to the macro as a whole,
+	not an individual relaxation.
+
+   RELAX_NOMACRO
+	Set in the first variant frag if the macro appeared in a .set nomacro
+	block and if one alternative requires a warning but the other does not.
+
+   RELAX_DELAY_SLOT
+	Like RELAX_NOMACRO, but indicates that the macro appears in a branch
+	delay slot.
 
    The frag's "opcode" points to the first fixup for relaxable code.
 
@@ -650,13 +663,14 @@ static int mips_relax_branch;
 
    The code and fixups for the unwanted alternative are discarded
    by md_convert_frag.  */
-#define RELAX_ENCODE(FIRST, SECOND, WARN) \
-  (((FIRST) << 8) | ((SECOND) << 1) | ((WARN) != 0))
+#define RELAX_ENCODE(FIRST, SECOND) (((FIRST) << 8) | (SECOND))
 
-#define RELAX_FIRST(X) (((X) >> 8) & 0x7f)
-#define RELAX_SECOND(X) (((X) >> 1) & 0x7f)
-#define RELAX_WARN(X) ((X) & 1)
-#define RELAX_USE_SECOND 0x8000
+#define RELAX_FIRST(X) (((X) >> 8) & 0xff)
+#define RELAX_SECOND(X) ((X) & 0xff)
+#define RELAX_USE_SECOND 0x10000
+#define RELAX_SECOND_LONGER 0x20000
+#define RELAX_NOMACRO 0x40000
+#define RELAX_DELAY_SLOT 0x80000
 
 /* Branch without likely bit.  If label is out of range, we turn:
 
@@ -810,6 +824,21 @@ static struct {
   symbolS *symbol;
 } mips_relax;
 
+/* Global variables used to decide whether a macro needs a warning.  */
+static struct {
+  /* True if the macro is in a branch delay slot.  */
+  bfd_boolean delay_slot_p;
+
+  /* For relaxable macros, sizes[0] is the length of the first alternative
+     in bytes and sizes[1] is the length of the second alternative.
+     For non-relaxable macros, both elements give the length of the
+     macro in bytes.  */
+  unsigned int sizes[2];
+
+  /* The first variant frag for this macro.  */
+  fragS *first_frag;
+} mips_macro_warning;
+
 /* Prototypes for static functions.  */
 
 #define internalError()							\
@@ -823,6 +852,8 @@ static void mips_no_prev_insn (int);
 static void mips16_macro_build
   (int *, expressionS *, const char *, const char *, va_list);
 static void load_register (int *, int, expressionS *, int);
+static void macro_start (void);
+static void macro_end (void);
 static void macro (struct mips_cl_insn * ip);
 static void mips16_macro (struct mips_cl_insn * ip);
 #ifdef LOSING_COMPILER
@@ -1340,10 +1371,12 @@ md_assemble (char *str)
 
   if (insn.insn_mo->pinfo == INSN_MACRO)
     {
+      macro_start ();
       if (mips_opts.mips16)
 	mips16_macro (&insn);
       else
 	macro (&insn);
+      macro_end ();
     }
   else
     {
@@ -1518,10 +1551,9 @@ mips16_mark_labels (void)
 static void
 relax_close_frag (void)
 {
+  mips_macro_warning.first_frag = frag_now;
   frag_var (rs_machine_dependent, 0, 0,
-	    RELAX_ENCODE (mips_relax.sizes[0],
-			  mips_relax.sizes[1],
-			  mips_opts.warn_about_macros),
+	    RELAX_ENCODE (mips_relax.sizes[0], mips_relax.sizes[1]),
 	    mips_relax.symbol, 0, (char *) mips_relax.first_fixup);
 
   memset (&mips_relax.sizes, 0, sizeof (mips_relax.sizes));
@@ -2024,6 +2056,11 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	    relax_close_frag ();
 	  mips_relax.sizes[mips_relax.sequence - 1] += 4;
 	}
+
+      if (mips_relax.sequence != 2)
+	mips_macro_warning.sizes[0] += 4;
+      if (mips_relax.sequence != 1)
+	mips_macro_warning.sizes[1] += 4;
 
       f = frag_more (4);
     }
@@ -2851,6 +2888,71 @@ mips_emit_delays (bfd_boolean insns)
   mips_no_prev_insn (insns);
 }
 
+/* Set up global variables for the start of a new macro.  */
+
+static void
+macro_start (void)
+{
+  memset (&mips_macro_warning.sizes, 0, sizeof (mips_macro_warning.sizes));
+  mips_macro_warning.delay_slot_p = (mips_opts.noreorder
+				     && (prev_insn.insn_mo->pinfo
+					 & (INSN_UNCOND_BRANCH_DELAY
+					    | INSN_COND_BRANCH_DELAY
+					    | INSN_COND_BRANCH_LIKELY)) != 0);
+}
+
+/* Given that a macro is longer than 4 bytes, return the appropriate warning
+   for it.  Return null if no warning is needed.  SUBTYPE is a bitmask of
+   RELAX_DELAY_SLOT and RELAX_NOMACRO.  */
+
+static const char *
+macro_warning (relax_substateT subtype)
+{
+  if (subtype & RELAX_DELAY_SLOT)
+    return _("Macro instruction expanded into multiple instructions"
+	     " in a branch delay slot");
+  else if (subtype & RELAX_NOMACRO)
+    return _("Macro instruction expanded into multiple instructions");
+  else
+    return 0;
+}
+
+/* Finish up a macro.  Emit warnings as appropriate.  */
+
+static void
+macro_end (void)
+{
+  if (mips_macro_warning.sizes[0] > 4 || mips_macro_warning.sizes[1] > 4)
+    {
+      relax_substateT subtype;
+
+      /* Set up the relaxation warning flags.  */
+      subtype = 0;
+      if (mips_macro_warning.sizes[1] > mips_macro_warning.sizes[0])
+	subtype |= RELAX_SECOND_LONGER;
+      if (mips_opts.warn_about_macros)
+	subtype |= RELAX_NOMACRO;
+      if (mips_macro_warning.delay_slot_p)
+	subtype |= RELAX_DELAY_SLOT;
+
+      if (mips_macro_warning.sizes[0] > 4 && mips_macro_warning.sizes[1] > 4)
+	{
+	  /* Either the macro has a single implementation or both
+	     implementations are longer than 4 bytes.  Emit the
+	     warning now.  */
+	  const char *msg = macro_warning (subtype);
+	  if (msg != 0)
+	    as_warn (msg);
+	}
+      else
+	{
+	  /* One implementation might need a warning but the other
+	     definitely doesn't.  */
+	  mips_macro_warning.first_frag->fr_subtype |= subtype;
+	}
+    }
+}
+
 /* Build an instruction created by a macro expansion.  This is passed
    a pointer to the count of instructions created so far, an
    expression, the name of the instruction to build, an operand format
@@ -2865,28 +2967,6 @@ macro_build (char *place ATTRIBUTE_UNUSED, int *counter,
   va_list args;
 
   va_start (args, fmt);
-
-  if (mips_relax.sequence != 2)
-    {
-      if (*counter == 1)
-	{
-	  /* If the macro is about to expand into a second instruction,
-	     and it is in a delay slot, print a warning.  */
-	  if (mips_opts.noreorder
-	      && (prev_prev_insn.insn_mo->pinfo
-		  & (INSN_UNCOND_BRANCH_DELAY
-		     | INSN_COND_BRANCH_DELAY
-		     | INSN_COND_BRANCH_LIKELY)) != 0)
-	    as_warn (_("Macro instruction expanded into multiple instructions in a branch delay slot"));
-
-	  /* If the macro is about to expand into a second instruction,
-	     print a warning if needed. We need to pass ip as a parameter
-	     to generate a better warning message here...  */
-	  else if (mips_opts.warn_about_macros)
-	    as_warn (_("Macro instruction expanded into multiple instructions"));
-	}
-      ++*counter;
-    }
 
   if (mips_opts.mips16)
     {
@@ -3253,7 +3333,7 @@ macro_build_jalr (int icnt, expressionS *ep)
  * Generate a "lui" instruction.
  */
 static void
-macro_build_lui (char *place ATTRIBUTE_UNUSED, int *counter,
+macro_build_lui (char *place ATTRIBUTE_UNUSED, int *counter ATTRIBUTE_UNUSED,
 		 expressionS *ep, int regnum)
 {
   expressionS high_expr;
@@ -3266,15 +3346,6 @@ macro_build_lui (char *place ATTRIBUTE_UNUSED, int *counter,
   assert (! mips_opts.mips16);
 
   high_expr = *ep;
-  if (mips_relax.sequence != 2)
-    {
-      /* If the macro is about to expand into a second instruction,
-	 print a warning if needed. We need to pass ip as a parameter
-	 to generate a better warning message here...  */
-      if (mips_opts.warn_about_macros && *counter == 1)
-	as_warn (_("Macro instruction expanded into multiple instructions"));
-      ++*counter;
-    }
 
   if (high_expr.X_op == O_constant)
     {
@@ -12230,12 +12301,14 @@ s_cpload (int ignore ATTRIBUTE_UNUSED)
   /* In ELF, this symbol is implicitly an STT_OBJECT symbol.  */
   symbol_get_bfdsym (ex.X_add_symbol)->flags |= BSF_OBJECT;
 
+  macro_start ();
   macro_build_lui (NULL, &icnt, &ex, mips_gp_register);
   macro_build (NULL, &icnt, &ex, "addiu", "t,r,j", mips_gp_register,
 	       mips_gp_register, BFD_RELOC_LO16);
 
   macro_build (NULL, &icnt, NULL, "addu", "d,v,t", mips_gp_register,
 	       mips_gp_register, tc_get_register (0));
+  macro_end ();
 
   demand_empty_rest_of_line ();
 }
@@ -12303,6 +12376,7 @@ s_cpsetup (int ignore ATTRIBUTE_UNUSED)
   SKIP_WHITESPACE ();
   expression (&ex_sym);
 
+  macro_start ();
   if (mips_cpreturn_register == -1)
     {
       ex_off.X_op = O_constant;
@@ -12338,6 +12412,7 @@ s_cpsetup (int ignore ATTRIBUTE_UNUSED)
 
   macro_build (NULL, &icnt, NULL, ADDRESS_ADD_INSN, "d,v,t", mips_gp_register,
 	       mips_gp_register, reg1);
+  macro_end ();
 
   demand_empty_rest_of_line ();
 }
@@ -12383,8 +12458,10 @@ s_cprestore (int ignore ATTRIBUTE_UNUSED)
   ex.X_op_symbol = NULL;
   ex.X_add_number = mips_cprestore_offset;
 
+  macro_start ();
   macro_build_ldst_constoffset (NULL, &icnt, &ex, ADDRESS_STORE_INSN,
 				mips_gp_register, SP, HAVE_64BIT_ADDRESSES);
+  macro_end ();
 
   demand_empty_rest_of_line ();
 }
@@ -12410,6 +12487,7 @@ s_cpreturn (int ignore ATTRIBUTE_UNUSED)
       return;
     }
 
+  macro_start ();
   if (mips_cpreturn_register == -1)
     {
       ex.X_op = O_constant;
@@ -12423,6 +12501,7 @@ s_cpreturn (int ignore ATTRIBUTE_UNUSED)
   else
     macro_build (NULL, &icnt, NULL, "daddu", "d,v,t", mips_gp_register,
 		 mips_cpreturn_register, 0);
+  macro_end ();
 
   demand_empty_rest_of_line ();
 }
@@ -12545,9 +12624,11 @@ s_cpadd (int ignore ATTRIBUTE_UNUSED)
     }
 
   /* Add $gp to the register named as an argument.  */
+  macro_start ();
   reg = tc_get_register (0);
   macro_build (NULL, &icnt, NULL, ADDRESS_ADD_INSN, "d,v,t",
 	       reg, reg, mips_gp_register);
+  macro_end ();
 
   demand_empty_rest_of_line ();
 }
@@ -13155,11 +13236,6 @@ md_estimate_size_before_relax (fragS *fragp, asection *segtype)
   if (change)
     {
       fragp->fr_subtype |= RELAX_USE_SECOND;
-      /* FIXME: This really needs as_warn_where.  */
-      if (RELAX_WARN (fragp->fr_subtype))
-	as_warn (_("AT used after \".set noat\" or macro used after "
-		   "\".set nomacro\""));
-
       return -RELAX_FIRST (fragp->fr_subtype);
     }
   else
@@ -13679,6 +13755,15 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
       first = RELAX_FIRST (fragp->fr_subtype);
       second = RELAX_SECOND (fragp->fr_subtype);
       fixp = (fixS *) fragp->fr_opcode;
+
+      /* Possibly emit a warning if we've chosen the longer option.  */
+      if (((fragp->fr_subtype & RELAX_USE_SECOND) != 0)
+	  == ((fragp->fr_subtype & RELAX_SECOND_LONGER) != 0))
+	{
+	  const char *msg = macro_warning (fragp->fr_subtype);
+	  if (msg != 0)
+	    as_warn_where (fragp->fr_file, fragp->fr_line, msg);
+	}
 
       /* Go through all the fixups for the first sequence.  Disable them
 	 (by marking them as done) if we're going to use the second

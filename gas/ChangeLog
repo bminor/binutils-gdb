@@ -1,5 +1,24 @@
 2004-01-23  Richard Sandiford  <rsandifo@redhat.com>
 
+	* config/tc-mips.c (RELAX_ENCODE): Remove WARN argument.
+	(RELAX_FIRST, RELAX_SECOND): Turn into 8-bit quantities.
+	(RELAX_USE_SECOND): Bump to 0x10000.
+	(RELAX_SECOND_LONGER, RELAX_NOMACRO, RELAX_DELAY_SLOT): New flags.
+	(mips_macro_warning): New variable.
+	(md_assemble): Wrap macro expansion in macro_start() and macro_end().
+	(s_cpload, s_cpsetup, s_cprestore, s_cpreturn): Likewise.
+	(relax_close_frag): Set mips_macro_warning.first_frag.  Adjust use
+	of RELAX_ENCODE.
+	(append_insn): Update mips_macro_warning.sizes.
+	(macro_start, macro_warning, macro_end): New functions.
+	(macro_build): Don't emit warnings here.
+	(macro_build_lui, md_estimate_size_before_relax): ...or here.
+	(md_convert_frag): Check for cases where one macro alternative
+	needs a warning and the other doesn't.  Emit a warning if the
+	longer sequence was chosen.
+
+2004-01-23  Richard Sandiford  <rsandifo@redhat.com>
+
 	* config/tc-mips.h (tc_frag_data_type, TC_FRAG_TYPE): Remove.
 	* config/tc-mips.c (RELAX_ENCODE): Take three arguments: the size of
 	the first sequence, the size of the second sequence, and a flag
