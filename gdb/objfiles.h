@@ -379,6 +379,13 @@ struct objfile
 
     void *obj_private;
 
+    /* Per objfile data-pointers required by other GDB modules.  */
+    /* FIXME: kettenis/20030711: This mechanism could replace
+       sym_stab_info, sym_private and obj_private entirely.  */
+
+    void **data;
+    unsigned num_data;
+
     /* Set of relocation offsets to apply to each section.
        Currently on the psymbol_obstack (which makes no sense, but I'm
        not sure it's harming anything).
@@ -564,6 +571,16 @@ extern struct obj_section *find_pc_sect_section (CORE_ADDR pc,
 extern int in_plt_section (CORE_ADDR, char *);
 
 extern int is_in_import_list (char *, struct objfile *);
+
+/* Keep a registry of per-objfile data-pointers required by other GDB
+   modules.  */
+
+extern const struct objfile_data *register_objfile_data (void);
+extern void set_objfile_data (struct objfile *objfile,
+			      const struct objfile_data *data, void *value);
+extern void *objfile_data (struct objfile *objfile,
+			   const struct objfile_data *data);
+
 
 /* Traverse all object files.  ALL_OBJFILES_SAFE works even if you delete
    the objfile during the traversal.  */
