@@ -1,3 +1,11 @@
+start-sanitize-d30v
+Mon Sep 15 11:29:13 1997  Ken Raeburn  <raeburn@cygnus.com>
+
+	Merge change from Martin Hunt:
+
+	* scripttempl/elfd30v.sc: Put .rodata in the .text section.
+
+end-sanitize-d30v
 Tue Sep  9 07:49:56 1997  Fred Fish  <fnf@ninemoons.com>
 
 	* ldlang.c (lang_memory_region_lookup): Remove extraneous
