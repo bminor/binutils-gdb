@@ -536,25 +536,6 @@ lin_lwp_detach (char *args, int from_tty)
 }
 
 
-struct private_thread_info
-{
-  int lwpid;
-};
-
-/* Return non-zero if TP corresponds to the LWP specified by DATA
-   (which is assumed to be a pointer to a `struct lwp_info'.  */
-
-static int
-find_lwp_callback (struct thread_info *tp, void *data)
-{
-  struct lwp_info *lp = data;
-
-  if (tp->private->lwpid == GET_LWP (lp->ptid))
-    return 1;
-
-  return 0;
-}
-
 /* Resume LP.  */
 
 static int
@@ -563,27 +544,6 @@ resume_callback (struct lwp_info *lp, void *data)
   if (lp->stopped && lp->status == 0)
     {
       struct thread_info *tp;
-
-#if 0
-      /* FIXME: kettenis/2000-08-26: This should really be handled
-         properly by core GDB.  */
-
-      tp = find_thread_pid (lp->ptid);
-      if (tp == NULL)
-	tp = iterate_over_threads (find_lwp_callback, lp);
-      gdb_assert (tp);
-
-      /* If we were previously stepping the thread, and now continue
-         the thread we must invalidate the stepping range.  However,
-         if there is a step_resume breakpoint for this thread, we must
-         preserve the stepping range to make it possible to continue
-         stepping once we hit it.  */
-      if (tp->step_range_end && tp->step_resume_breakpoint == NULL)
-	{
-	  gdb_assert (lp->step);
-	  tp->step_range_start = tp->step_range_end = 0;
-	}
-#endif
 
       child_resume (pid_to_ptid (GET_LWP (lp->ptid)), 0, TARGET_SIGNAL_0);
       if (debug_lin_lwp)

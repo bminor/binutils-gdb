@@ -80,6 +80,7 @@ cpu-i860.c
 cpu-i960.c
 cpu-ia64.c
 cpu-ip2k.c
+cpu-iq2000.c
 cpu-m10200.c
 cpu-m10300.c
 cpu-m32r.c
@@ -90,6 +91,7 @@ cpu-m88k.c
 cpu-mcore.c
 cpu-mips.c
 cpu-mmix.c
+cpu-msp430.c
 cpu-ns32k.c
 cpu-openrisc.c
 cpu-or32.c
@@ -143,6 +145,7 @@ elf32-i386.c
 elf32-i860.c
 elf32-i960.c
 elf32-ip2k.c
+elf32-iq2000.c
 elf32-m32r.c
 elf32-m68hc11.c
 elf32-m68hc12.c
@@ -150,6 +153,7 @@ elf32-m68k.c
 elf32-m88k.c
 elf32-mcore.c
 elf32-mips.c
+elf32-msp430.c
 elf32-openrisc.c
 elf32-or32.c
 elf32-pj.c

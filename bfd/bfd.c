@@ -36,6 +36,9 @@ CODE_FRAGMENT
 .
 .struct _bfd
 .{
+.  {* A unique identifier of the BFD  *}
+.  unsigned int id;
+.
 .  {* The filename the application opened the BFD with.  *}
 .  const char *filename;
 .

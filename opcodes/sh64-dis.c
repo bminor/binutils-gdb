@@ -1,5 +1,5 @@
 /* Disassemble SH64 instructions.
-   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@
 /* We need to refer to the ELF header structure.  */
 #include "elf-bfd.h"
 #include "elf/sh.h"
+#include "elf32-sh64.h"
 
 #define ELF_MODE32_CODE_LABEL_P(SYM) \
  (((elf_symbol_type *) (SYM))->internal_elf_sym.st_other & STO_SH5_ISA32)

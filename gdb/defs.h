@@ -1,7 +1,7 @@
 /* *INDENT-OFF* */ /* ATTR_FORMAT confuses indent, avoid running it for now */
 /* Basic, host-specific, and target-specific definitions for GDB.
    Copyright 1986, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 1998, 1999, 2000, 2001, 2002
+   1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -169,6 +169,9 @@ extern int xdb_commands;
 /* enable dbx commands if set */
 extern int dbx_commands;
 
+/* System root path, used to find libraries etc.  */
+extern char *gdb_sysroot;
+
 extern int quit_flag;
 extern int immediate_quit;
 extern int sevenbit_strings;
@@ -242,8 +245,8 @@ enum auto_boolean
 struct cleanup
   {
     struct cleanup *next;
-    void (*function) (PTR);
-    PTR arg;
+    void (*function) (void *);
+    void *arg;
   };
 
 
@@ -371,11 +374,11 @@ extern int query (const char *, ...) ATTR_FORMAT (printf, 1, 2);
 
 extern void init_page_info (void);
 
-extern CORE_ADDR host_pointer_to_address (void *ptr);
-extern void *address_to_host_pointer (CORE_ADDR addr);
-
 extern char *gdb_realpath (const char *);
 extern char *xfullpath (const char *);
+
+extern unsigned long gnu_debuglink_crc32 (unsigned long crc,
+                                          unsigned char *buf, size_t len);
 
 /* From demangle.c */
 
@@ -964,7 +967,7 @@ extern int catch_exceptions (struct ui_out *uiout,
 
    This function is superseeded by catch_exceptions().  */
 
-typedef int (catch_errors_ftype) (PTR);
+typedef int (catch_errors_ftype) (void *);
 extern int catch_errors (catch_errors_ftype *, void *, char *, return_mask);
 
 /* Template to catch_errors() that wraps calls to command

@@ -1,5 +1,5 @@
 #   Copyright 1988, 1990, 1991, 1992, 1994, 1995, 1996, 1997, 1998, 1999,
-#   2000, 2002
+#   2000, 2002, 2003
 #   Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
@@ -154,6 +154,7 @@ if {$hp_aCC_compiler} {
 } else {
     set proto ""
 }
+
 gdb_test "info break" \
     "Num Type\[ \]+Disp Enb Address\[ \]+What.*
 \[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:$main_line.*
@@ -165,7 +166,6 @@ gdb_test "info break" \
 \[0-9\]+\[\t \]+breakpoint     keep y.* in multi_line_if_conditional at .*$srcfile:109.*
 \[0-9\]+\[\t \]+breakpoint     keep y.* in multi_line_while_conditional at .*$srcfile:124" \
     "breakpoint info"
-
 
 # FIXME: The rest of this test doesn't work with anything that can't
 # handle arguments.
@@ -363,29 +363,6 @@ gdb_expect {
   timeout {fail "(timeout) $name"}
 }
 
-# Verify that "until <location>" works.  (This is really just syntactic
-# sugar for "tbreak <location>; continue".)
-#
-send_gdb "until 79\n"
-gdb_expect {
-  -re "main .* at .*:79.*$gdb_prompt $"\
-          {pass "until 79"}
-  -re "$gdb_prompt $"\
-          {fail "until 79"}
-  timeout {fail "(timeout) until 79"}
-}
-
-# Verify that a malformed "until" is gracefully caught.
-#
-send_gdb "until 80 then stop\n"
-gdb_expect {
-  -re "Junk at end of arguments..*$gdb_prompt $"\
-          {pass "malformed until"}
-  -re "$gdb_prompt $"\
-          {fail "malformed until"}
-  timeout {fail "(timeout) malformed until"}
-}
-
 # Verify that GDB responds gracefully when asked to set a breakpoint
 # on a nonexistent source line.
 #
@@ -397,6 +374,12 @@ gdb_expect {
           {fail "break on non-existent source line"}
   timeout {fail "(timeout) break on non-existent source line"}
 }
+
+# Run to the desired default location. If not positioned here, the
+# tests below don't work.
+#
+gdb_test "until 79" "main .* at .*:79.*" "until 79"
+
 
 # Verify that GDB allows one to just say "break", which is treated
 # as the "default" breakpoint.  Note that GDB gets cute when printing

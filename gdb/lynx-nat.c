@@ -282,7 +282,7 @@ fetch_inferior_registers (int regno)
   if (whatregs & WHATREGS_GEN)
     {
       struct econtext ec;	/* general regs */
-      char buf[MAX_REGISTER_RAW_SIZE];
+      char *buf = alloca (max_register_size (current_gdbarch));
       int retval;
       int i;
 
@@ -510,29 +510,31 @@ fetch_inferior_registers (int regno)
 
   ecp = registers_addr (PIDGET (inferior_ptid));
 
-  for (regno = reglo; regno <= reghi; regno++)
-    {
-      char buf[MAX_REGISTER_RAW_SIZE];
-      int ptrace_fun = PTRACE_PEEKTHREAD;
-
+  {
+    char *buf = alloca (max_register_size (current_gdbarch));
+    for (regno = reglo; regno <= reghi; regno++)
+      {
+	int ptrace_fun = PTRACE_PEEKTHREAD;
+	
 #ifdef M68K
-      ptrace_fun = regno == SP_REGNUM ? PTRACE_PEEKUSP : PTRACE_PEEKTHREAD;
+	ptrace_fun = regno == SP_REGNUM ? PTRACE_PEEKUSP : PTRACE_PEEKTHREAD;
 #endif
-
-      for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (int))
-	{
-	  unsigned int reg;
-
-	  errno = 0;
-	  reg = ptrace (ptrace_fun, PIDGET (inferior_ptid),
-			(PTRACE_ARG3_TYPE) (ecp + regmap[regno] + i), 0);
-	  if (errno)
-	    perror_with_name ("ptrace(PTRACE_PEEKUSP)");
-
-	  *(int *) &buf[i] = reg;
-	}
-      supply_register (regno, buf);
-    }
+	
+	for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (int))
+	  {
+	    unsigned int reg;
+	    
+	    errno = 0;
+	    reg = ptrace (ptrace_fun, PIDGET (inferior_ptid),
+			  (PTRACE_ARG3_TYPE) (ecp + regmap[regno] + i), 0);
+	    if (errno)
+	      perror_with_name ("ptrace(PTRACE_PEEKUSP)");
+	    
+	    *(int *) &buf[i] = reg;
+	  }
+	supply_register (regno, buf);
+      }
+  }
 }
 
 /* Store our register values back into the inferior.

@@ -126,7 +126,6 @@ m68000-*-sunos4*)	gdb_target=sun2os4 ;;
 m68*-bull-sysv*)	gdb_target=dpx2 ;;
 m68*-att-*)		gdb_target=3b1 ;;
 m68*-cisco*-*)		gdb_target=cisco ;;
-m68*-ericsson-*)	gdb_target=es1800 ;;
 m68*-motorola-*)	gdb_target=delta68 ;;
 m68*-netx-*)		gdb_target=vxworks68 ;;
 m68*-tandem-*)		gdb_target=st2000 ;;

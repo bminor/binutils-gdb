@@ -534,7 +534,7 @@ extern int deprecated_frame_in_dummy (struct frame_info *);
 
 extern int breakpoint_thread_match (CORE_ADDR, ptid_t);
 
-extern void until_break_command (char *, int);
+extern void until_break_command (char *, int, int);
 
 extern void breakpoint_re_set (void);
 

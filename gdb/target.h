@@ -488,11 +488,11 @@ extern int child_xfer_memory (CORE_ADDR, char *, int, int,
    of bytes actually transfered is not defined) and ERR is set to a
    non-zero error indication.  */
 
-extern int 
-target_read_memory_partial (CORE_ADDR addr, char *buf, int len, int *err);
+extern int target_read_memory_partial (CORE_ADDR addr, char *buf, int len,
+				       int *err);
 
-extern int 
-target_write_memory_partial (CORE_ADDR addr, char *buf, int len, int *err);
+extern int target_write_memory_partial (CORE_ADDR addr, char *buf, int len,
+					int *err);
 
 extern char *child_pid_to_exec_file (int);
 
@@ -1101,8 +1101,8 @@ struct section_table
 /* Builds a section table, given args BFD, SECTABLE_PTR, SECEND_PTR.
    Returns 0 if OK, 1 on error.  */
 
-extern int
-build_section_table (bfd *, struct section_table **, struct section_table **);
+extern int build_section_table (bfd *, struct section_table **,
+				struct section_table **);
 
 /* From mem-break.c */
 
@@ -1134,8 +1134,8 @@ extern struct target_ops *find_core_target (void);
 
 extern struct target_ops *find_target_beneath (struct target_ops *);
 
-extern int
-target_resize_to_sections (struct target_ops *target, int num_added);
+extern int target_resize_to_sections (struct target_ops *target,
+				      int num_added);
 
 extern void remove_target_sections (bfd *abfd);
 

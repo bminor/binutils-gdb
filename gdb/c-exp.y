@@ -781,7 +781,7 @@ array_mod:	'[' ']'
 func_mod:	'(' ')'
 			{ $$ = 0; }
 	|	'(' nonempty_typelist ')'
-			{ free ((PTR)$2); $$ = 0; }
+			{ free ($2); $$ = 0; }
 	;
 
 /* We used to try to recognize more pointer to member types here, but

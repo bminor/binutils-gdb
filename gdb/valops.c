@@ -515,6 +515,7 @@ value_assign (struct value *toval, struct value *fromval)
   struct value *val;
   char *raw_buffer = (char*) alloca (MAX_REGISTER_RAW_SIZE);
   int use_buffer = 0;
+  struct frame_id old_frame;
 
   if (!toval->modifiable)
     error ("Left operand of assignment is not a modifiable lvalue.");
@@ -543,6 +544,11 @@ value_assign (struct value *toval, struct value *fromval)
 	  use_buffer = REGISTER_RAW_SIZE (regno);
 	}
     }
+
+  /* Since modifying a register can trash the frame chain, and modifying memory
+     can trash the frame cache, we save the old frame and then restore the new
+     frame afterwards.  */
+  old_frame = get_frame_id (deprecated_selected_frame);
 
   switch (VALUE_LVAL (toval))
     {
@@ -612,7 +618,6 @@ value_assign (struct value *toval, struct value *fromval)
     case lval_reg_frame_relative:
     case lval_register:
       {
-	struct frame_id old_frame;
 	/* value is stored in a series of registers in the frame
 	   specified by the structure.  Copy that value out, modify
 	   it, and copy it back in.  */
@@ -624,11 +629,6 @@ value_assign (struct value *toval, struct value *fromval)
 	int byte_offset;
 	int regno;
 	struct frame_info *frame;
-
-	/* Since modifying a register can trash the frame chain, we
-           save the old frame and then restore the new frame
-           afterwards.  */
-	old_frame = get_frame_id (deprecated_selected_frame);
 
 	/* Figure out which frame this is in currently.  */
 	if (VALUE_LVAL (toval) == lval_register)
@@ -731,26 +731,6 @@ value_assign (struct value *toval, struct value *fromval)
 	  register_changed_hook (-1);
 	target_changed_event ();
 
-	/* Assigning to the stack pointer, frame pointer, and other
-	   (architecture and calling convention specific) registers
-	   may cause the frame cache to be out of date.  We just do
-	   this on all assignments to registers for simplicity; I
-	   doubt the slowdown matters.  */
-	reinit_frame_cache ();
-
-	/* Having destoroyed the frame cache, restore the selected
-           frame.  */
-	/* FIXME: cagney/2002-11-02: There has to be a better way of
-           doing this.  Instead of constantly saving/restoring the
-           frame.  Why not create a get_selected_frame() function
-           that, having saved the selected frame's ID can
-           automatically re-find the previously selected frame
-           automatically.  */
-	{
-	  struct frame_info *fi = frame_find_by_id (old_frame);
-	  if (fi != NULL)
-	    select_frame (fi);
-	}
       }
       break;
       
@@ -759,6 +739,38 @@ value_assign (struct value *toval, struct value *fromval)
       error ("Left operand of assignment is not an lvalue.");
     }
 
+  /* Assigning to the stack pointer, frame pointer, and other
+     (architecture and calling convention specific) registers may
+     cause the frame cache to be out of date.  Assigning to memory
+     also can.  We just do this on all assignments to registers or
+     memory, for simplicity's sake; I doubt the slowdown matters.  */
+  switch (VALUE_LVAL (toval))
+    {
+    case lval_memory:
+    case lval_register:
+    case lval_reg_frame_relative:
+
+      reinit_frame_cache ();
+
+      /* Having destoroyed the frame cache, restore the selected frame.  */
+
+      /* FIXME: cagney/2002-11-02: There has to be a better way of
+	 doing this.  Instead of constantly saving/restoring the
+	 frame.  Why not create a get_selected_frame() function that,
+	 having saved the selected frame's ID can automatically
+	 re-find the previously selected frame automatically.  */
+
+      {
+	struct frame_info *fi = frame_find_by_id (old_frame);
+	if (fi != NULL)
+	  select_frame (fi);
+      }
+
+      break;
+    default:
+      break;
+    }
+  
   /* If the field does not entirely fill a LONGEST, then zero the sign bits.
      If the field is signed, and is negative, then sign extend. */
   if ((VALUE_BITSIZE (toval) > 0)
@@ -1398,37 +1410,6 @@ hand_function_call (struct value *function, int nargs, struct value **args)
 	generic_save_call_dummy_addr (start_sp, start_sp + sizeof_dummy1);
     }
 
-  if (CALL_DUMMY_LOCATION == BEFORE_TEXT_END)
-    {
-      /* Convex Unix prohibits executing in the stack segment. */
-      /* Hope there is empty room at the top of the text segment. */
-      extern CORE_ADDR text_end;
-      static int checked = 0;
-      if (!checked)
-	for (start_sp = text_end - sizeof_dummy1; start_sp < text_end; ++start_sp)
-	  if (read_memory_integer (start_sp, 1) != 0)
-	    error ("text segment full -- no place to put call");
-      checked = 1;
-      sp = old_sp;
-      real_pc = text_end - sizeof_dummy1;
-      write_memory (real_pc, (char *) dummy1, sizeof_dummy1);
-      if (DEPRECATED_USE_GENERIC_DUMMY_FRAMES)
-	generic_save_call_dummy_addr (real_pc, real_pc + sizeof_dummy1);
-    }
-
-  if (CALL_DUMMY_LOCATION == AFTER_TEXT_END)
-    {
-      extern CORE_ADDR text_end;
-      int errcode;
-      sp = old_sp;
-      real_pc = text_end;
-      errcode = target_write_memory (real_pc, (char *) dummy1, sizeof_dummy1);
-      if (errcode != 0)
-	error ("Cannot write text segment -- call_function failed");
-      if (DEPRECATED_USE_GENERIC_DUMMY_FRAMES)
-	generic_save_call_dummy_addr (real_pc, real_pc + sizeof_dummy1);
-    }
-
   if (CALL_DUMMY_LOCATION == AT_ENTRY_POINT)
     {
       real_pc = funaddr;
@@ -1711,8 +1692,9 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 	  {
 	    /* The user wants the context restored. */
 
-            /* We must get back to the frame we were before the dummy call. */
-            POP_FRAME;
+            /* We must get back to the frame we were before the dummy
+               call. */
+	    frame_pop (get_current_frame ());
 
 	    /* FIXME: Insert a bunch of wrap_here; name can be very long if it's
 	       a C++ name with arguments and stuff.  */

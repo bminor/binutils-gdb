@@ -70,8 +70,7 @@ extern void read_memory_string (CORE_ADDR, char *, int);
 /* Read the pointer of type TYPE at ADDR, and return the address it
    represents. */
 
-CORE_ADDR
-read_memory_typed_address (CORE_ADDR addr, struct type *type);
+CORE_ADDR read_memory_typed_address (CORE_ADDR addr, struct type *type);
 
 /* This takes a char *, not void *.  This is probably right, because
    passing in an int * or whatever is wrong with respect to

@@ -1,3 +1,154 @@
+2003-02-02  Andrew Cagney  <ac131313@redhat.com>
+
+	2002-11-10 Jason Molenda (jason-cl@molenda.com):
+        * gdb.mi/mi-var-child.exp: -var-list-children's CHILDREN field is
+        now a list, not a tuple.
+        * gdb.mi/mi-var-display.exp: Ditto.
+        * gdb.mi/gdb792.exp: Ditto.
+
+2003-02-01  Andrew Cagney  <ac131313@redhat.com>
+
+	From 2002-11-09 Jason Molenda (jason-cl@molenda.com):
+        * gdb.mi/mi-syn-frame.exp: New tests for synthetic frames in
+        stack backtraces.
+        * gdb.mi/mi-syn-frame.c: Part of same.
+
+2003-02-01  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.mi/gdb669.exp, gdb.mi/mi-pthreads.exp,
+	gdb.mi/mi1-pthreads.exp: Return instead of calling
+	gdb_suppress_entire_file.
+
+2003-02-01  Mark Salter  <msalter@redhat.com>
+
+	* gdb.asm/arm.inc (gdbasm_startup): Clear frame pointer, not sp.
+
+2003-01-31  Mark Salter  <msalter@redhat.com>
+
+	* lib/mi-support.exp (mi_gdb_load): Support remote targets.
+	Support empty arg.
+
+2003-01-30  Michael Chastain  <mec@shout.net>
+
+	* lib/gdb.exp: Revert patch of 2003-01-06, which set LC_ALL.
+	This was a workaround for a UTF-8 bug in readline 4.3.  The bug
+	has been fixed in gdb/readline on 2003-01-09.
+
+2003-01-29  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.base/args.exp: Skip if target does not support args passing.
+
+2003-01-22  Daniel Jacobowitz  <drow@mvista.com>
+
+	* lib/gdb.exp (gdb_test_multiple): New function, cloned from
+	gdb_test.  Accept a list of expect arguments as the third
+	parameter.
+	(gdb_test): Use it.
+
+2003-01-20  Elena Zannoni  <ezannoni@redhat.com>
+
+	* gdb.arch/altivec-abi.exp: Set variable 'srcfile' differently, to
+	allow for different test tree configurations.  Update some
+	tescases accordingly.
+	* gdb.arch/altivec-regs.exp: Ditto.
+	* gdb.asm/asm-source.exp: Ditto.
+	* gdb.base/advance.exp: Ditto.
+	* gdb.base/display.exp: Ditto.
+	* gdb.base/long_long.exp: Ditto. 
+	* gdb.base/mips_pro.exp: Ditto.
+	* gdb.base/overlays.exp: Ditto.
+	* gdb.base/relocate.exp: Ditto.
+	* gdb.base/setshow.exp: Ditto.
+	* gdb.base/step-line.exp: Ditto.
+	* gdb.base/step-test.exp: Ditto.
+	* gdb.base/until.exp: Ditto.
+	* gdb.c++/virtfunc.exp: Get rid of variable 'src'.
+
+2003-01-17  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.c++/demangle.exp (test_lucid_style_demangling): KFAIL test
+	corresponding to PR c++/945.
+	Update copyright.
+
+2003-01-17  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.c++/inherit.exp (test_print_mi_members): KFAIL tests
+	corresponding to PR c++/68.
+
+2003-01-17  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.c++/cplusfuncs.exp (print_addr_2_kfail): New procedure.
+	(test_paddr_hairy_functions): Call print_addr_2_kfail for
+	hairyfunc5 through hairyfunc7.  KFAIL for PR c++/19.
+
+2003-01-15  Elena Zannoni  <ezannoni@redhat.com>
+
+	* gdb.base/break.exp: Fix change of default location, because of
+	removal of until tests.
+	* gdb.base/help.exp: Update test for new 'until' help message.
+	Add test for help on 'advance'.
+        * gdb.base/args.exp: Fix foobar with GDBFLAGS global.
+
+2003-01-15  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/default.exp: Adapt "info float" test for recent changes
+	to that command.  Add test for "info vector".
+	* gdb.base/float.exp: New file.  Add test for "info float" that
+	resembles the old test in gdb.base/default.exp.
+
+2003-01-15  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.base/selftest.exp (do_steps_and_nexts): Allow gdb_sysroot.
+
+2003-01-15  Elena Zannoni  <ezannoni@redhat.com>
+
+	* gdb.base/break.exp: Move the tests of until command from here...
+	* gdb.base/until.exp: ... to here. New file. Add other tests.
+	* gdb.base/advance.c: New file.
+	* gdb.base/advance.exp: New file.
+
+2003-01-14  Elena Zannoni  <ezannoni@redhat.com>
+
+        * gdb.base/args.c: New file.
+        * gdb.base/args.exp: New file.
+
+2003-01-14  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.c++/virtfunc.exp: Remove fixed XFAIL.
+
+2003-01-14  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.threads/killed.exp: Use KFAIL for gdb/568.
+
+2003-01-14  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.base/constvars.exp: Remove two extra XFAILs.  Update copyright
+	dates.
+
+2003-01-13  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.c++/printmethod.exp (print virtual method): Accept "(void)".
+
+2003-01-13  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.base/printcmds.exp: Enable setup_kfail for gdb/538
+	(ptype &*"foo").
+	* gdb.c++/local.exp: Enable setup_kfail for gdb/482.
+
+2002-01-13  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.mi/mi-console.exp: Remove extra "(known bug)".
+	* gdb.mi/mi1-console.exp: Likewise.
+
+2002-01-13  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.mi/mi-console.exp: Add KFAIL for "Hello message (known bug)".
+	* gdb.mi/mi1-console.exp: Likewise.
+
+2003-01-13  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.c++/overload.exp: Remove some fixed XFAILs.
+
 2003-01-09  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.base/detach.exp: New test.

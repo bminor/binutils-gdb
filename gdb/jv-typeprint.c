@@ -216,7 +216,7 @@ java_type_print_base (struct type *type, struct ui_file *stream, int show,
 	      n_overloads = TYPE_FN_FIELDLIST_LENGTH (type, i);
 	      method_name = TYPE_FN_FIELDLIST_NAME (type, i);
 	      name = type_name_no_tag (type);
-	      is_constructor = name && STREQ (method_name, name);
+	      is_constructor = name && strcmp (method_name, name) == 0;
 
 	      for (j = 0; j < n_overloads; j++)
 		{

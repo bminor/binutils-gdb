@@ -36,6 +36,8 @@ gdb_test "set height 400" "" "test set height"
 # use a larger expect input buffer for long help outputs.
 # test help add-symbol-file
 gdb_test "help add-symbol-file" "Usage: add-symbol-file FILE ADDR \\\[-s <SECT> <SECT_ADDR> -s <SECT> <SECT_ADDR> \.\.\.\\\]\[\r\n\]+Load the symbols from FILE, assuming FILE has been dynamically loaded\.\[\r\n\]+ADDR is the starting address of the file's text\.\[\r\n\]+The optional arguments are section-name section-address pairs and\[\r\n\]+should be specified if the data and bss segments are not contiguous\[\r\n\]+with the text\.  SECT is a section name to be loaded at SECT_ADDR\." "help add-symbol-file"
+# test help advance
+gdb_test "help advance" "Continue the program up to the given location \\(same form as args for break command\\)\.\[\r\n]+Execution will also stop upon exit from the current stack frame\." "help advance"
 # test help aliases
 gdb_test "help aliases" "Aliases of other commands\.\[\r\n\]+List of commands\:.*\[\r\n\]+Type \"help\" followed by command name for full documentation\.\[\r\n\]+Command name abbreviations are allowed if unambiguous\." "help aliases"
 # test help append
@@ -562,9 +564,9 @@ gdb_test "help tbreak" "Set a temporary breakpoint.*" "help tbreak"
 # test help tty
 gdb_test "help tty" "Set terminal for future runs of program being debugged\." "help tty"
 # test help until "u" abbreviation
-gdb_test "help u" "Execute until the program reaches a source line greater than the current\[\r\n\]+or a specified line or address or function \\(same args as break command\\)\.\[\r\n\]+Execution will also stop upon exit from the current stack frame\." "help until \"u\" abbreviation"
+gdb_test "help u" "Execute until the program reaches a source line greater than the current\[\r\n\]+or a specified location \\(same args as break command\\) within the current frame\." "help until \"u\" abbreviation"
 # test help until
-gdb_test "help until" "Execute until the program reaches a source line greater than the current\[\r\n\]+or a specified line or address or function \\(same args as break command\\)\.\[\r\n\]+Execution will also stop upon exit from the current stack frame\." "help until"
+gdb_test "help until" "Execute until the program reaches a source line greater than the current\[\r\n\]+or a specified location \\(same args as break command\\) within the current frame\." "help until"
 # test help undisplay
 gdb_test "help undisplay" "Cancel some expressions to be displayed when program stops\.\[\r\n\]+Arguments are the code numbers of the expressions to stop displaying\.\[\r\n\]+No argument means cancel all automatic-display expressions\.\[\r\n\]+\"delete display\" has the same effect as this command\.\[\r\n\]+Do \"info display\" to see current list of code numbers\." "help undisplay"
 # test help unset environment

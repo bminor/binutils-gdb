@@ -139,7 +139,7 @@ AC_SUBST(INTLLIBS)
 AC_DEFUN([AM_INSTALL_LIBBFD],
 [AC_MSG_CHECKING([whether to install libbfd])
   AC_ARG_ENABLE(install-libbfd,
-[  --install-libbfd controls installation of libbfd and related headers],
+[  --enable-install-libbfd controls installation of libbfd and related headers],
       install_libbfd_p=$enableval,
       if test "${host}" = "${target}" || test "$enable_shared" = "yes"; then
         install_libbfd_p=yes

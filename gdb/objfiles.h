@@ -238,7 +238,8 @@ struct objfile
 
     struct objfile *next;
 
-    /* The object file's name.  Malloc'd; free it if you free this struct.  */
+    /* The object file's name, tilde-expanded and absolute.
+       Malloc'd; free it if you free this struct.  */
 
     char *name;
 
@@ -328,7 +329,7 @@ struct objfile
        the memory mapped malloc() package to manage storage for this objfile's
        data.  NULL if we are not. */
 
-    PTR md;
+    void *md;
 
     /* The file descriptor that was used to obtain the mmalloc descriptor
        for this objfile.  If we call mmalloc_detach with the malloc descriptor
@@ -359,7 +360,7 @@ struct objfile
        typically a pointer to malloc'd memory.  The symbol reader's finish
        function is responsible for freeing the memory thusly allocated.  */
 
-    PTR sym_private;
+    void *sym_private;
 
     /* Hook for target-architecture-specific information.  This must
        point to memory allocated on one of the obstacks in this objfile,
@@ -414,6 +415,15 @@ struct objfile
     ExportEntry *export_list;
     int export_list_size;
 
+    /* Link to objfile that contains the debug symbols for this one.
+       One is loaded if this file has an debug link to an existing
+       debug file with the right checksum */
+    struct objfile *separate_debug_objfile;
+
+    /* If this is a separate debug object, this is used as a link to the
+       actual executable objfile. */
+    struct objfile *separate_debug_objfile_backlink;
+    
     /* Place to stash various statistics about this objfile */
       OBJSTATS;
   };
@@ -504,6 +514,8 @@ extern struct objfile *object_files;
 extern struct objfile *allocate_objfile (bfd *, int);
 
 extern int build_objfile_section_table (struct objfile *);
+
+extern void put_objfile_before (struct objfile *, struct objfile *);
 
 extern void objfile_to_front (struct objfile *);
 

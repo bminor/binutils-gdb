@@ -3756,8 +3756,8 @@ Returns the number of children of a variable object @var{name}:
 Returns a list of the children of the specified variable object:
 
 @example
- numchild=@var{n},children=@{@{name=@var{name},
- numchild=@var{n},type=@var{type}@},@r{(repeats N times)}@}
+ numchild=@var{n},children=[@{name=@var{name},
+ numchild=@var{n},type=@var{type}@},@r{(repeats N times)}]
 @end example
 
 

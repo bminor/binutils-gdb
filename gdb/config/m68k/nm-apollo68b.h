@@ -30,8 +30,6 @@
 
 #define KERNEL_U_ADDR 0
 
-#undef FLOAT_INFO		/* No float info yet */
-
 #define REGISTER_U_ADDR(addr, blockend, regno) \
 	(addr) = (6 + 4 * (regno))
 

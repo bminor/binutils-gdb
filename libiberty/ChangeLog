@@ -1,3 +1,61 @@
+2003-01-30  Christian Cornelssen  <ccorn@cs.tu-berlin.de>
+
+	* Makefile.in (libiberty_topdir): New subst.
+	(mkinstalldirs): Redefine in terms of the above.
+	* configure.in: AC_SUBST it.
+	* configure: Regenerate.
+
+2003-01-28  Christian Cornelssen  <ccorn@cs.tu-berlin.de>
+
+	* Makefile.in (all-subdir, check-subdir, installcheck-subdir)
+	(info-subdir, install-info-subdir, clean-info-subdir)
+	(dvi-subdir, install-subdir, etags-subdir, mostlyclean-subdir)
+	(clean-subdir, distclean-subdir, maintainer-clean-subdir):
+	Pass $(FLAGS_TO_PASS).
+
+2003-01-27  Alexandre Oliva  <aoliva@redhat.com>
+
+	* Makefile.in (install_to_tooldir): Instead of $(MULTISUBDIR), use
+	/`$$CC -print-multi-os-directory`.
+
+2003-01-26  Daniel Jacobowitz  <drow@mvista.com>
+
+	* hashtab.c (htab_create_alloc_ex): New function.
+	(hatab_set_functions_ex): New function.
+	(htab_delete, htab_expand): Support alternate allocation functions.
+
+2003-01-24  Christopher Faylor  <cgf@redhat.com>
+
+	* configure.in: Remove special pex-cygwin consideration.
+	* configure: Regenerate.
+	* pex-cygwin.c: Remove.
+	* Makefile.in: Remove pex-cygwin.[co] lines.
+
+2003-01-24  Zack Weinberg  <zack@codesourcery.com>
+
+	* Makefile.in (CFILES): Add pex-*.c.
+	(REQUIRED_OFILES): Change pexecute.o to @pexecute@
+	(CONFIGURED_OFILES): Add pex-*.o.
+	(TEXIFILES): Add pexecute.txh.
+	(pexecute.o): Delete rule.
+	(pex-cygwin.o, pex-djgpp.o, pex-mpw.o, pex-msdos.o, pex-os2.o,
+	pex-unix.o, pex-win32.o): New rules.
+	* configure.in: Change AC_INIT argument to xmalloc.c.
+	Compute appropriate pexecute implementation and substitute it
+	as @pexecute@.
+
+	* pexecute.c: Split up into...
+	* pex-cygwin.c, pex-djgpp.c, pex-mpw.c, pex-msdos.c, pex-os2.c,
+	pex-unix.c, pex-win32.c, pex-common.h, pexecute.txh: ... these
+	new files.
+
+	* functions.texi: Regenerate.
+	* configure: Regenerate.
+
+2003-01-20  Josef Zlomek  <zlomekj@suse.cz>
+
+	* hashtab.c (htab_expand): Fix allocation of new entries.
+
 2003-01-09  Christian Cornelssen  <ccorn@cs.tu-berlin.de>
 
 	* Makefile.in (FLAGS_TO_PASS): Also pass DESTDIR.

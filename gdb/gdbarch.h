@@ -111,7 +111,7 @@ extern enum gdb_osabi gdbarch_osabi (struct gdbarch *gdbarch);
 
 /* Number of bits in a char or unsigned char for the target machine.
    Just like CHAR_BIT in <limits.h> but describes the target machine.
-   v::TARGET_CHAR_BIT:int:char_bit::::8 * sizeof (char):8::0:
+   v:2:TARGET_CHAR_BIT:int:char_bit::::8 * sizeof (char):8::0:
   
    Number of bits in a short or unsigned short for the target machine. */
 
@@ -1278,10 +1278,8 @@ extern void set_gdbarch_believe_pcc_promotion_type (struct gdbarch *gdbarch, int
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (BELIEVE_PCC_PROMOTION_TYPE)
 #error "Non multi-arch definition of BELIEVE_PCC_PROMOTION_TYPE"
 #endif
-#if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (BELIEVE_PCC_PROMOTION_TYPE)
+#if !defined (BELIEVE_PCC_PROMOTION_TYPE)
 #define BELIEVE_PCC_PROMOTION_TYPE (gdbarch_believe_pcc_promotion_type (current_gdbarch))
-#endif
 #endif
 
 #if defined (GET_SAVED_REGISTER)
@@ -1577,6 +1575,32 @@ extern void set_gdbarch_push_return_address (struct gdbarch *gdbarch, gdbarch_pu
 #endif
 #endif
 
+#if defined (POP_FRAME)
+/* Legacy for systems yet to multi-arch POP_FRAME */
+#if !defined (POP_FRAME_P)
+#define POP_FRAME_P() (1)
+#endif
+#endif
+
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (POP_FRAME_P)
+#define POP_FRAME_P() (0)
+#endif
+
+extern int gdbarch_pop_frame_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (POP_FRAME_P)
+#error "Non multi-arch definition of POP_FRAME"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (POP_FRAME_P)
+#define POP_FRAME_P() (gdbarch_pop_frame_p (current_gdbarch))
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (POP_FRAME)
+#define POP_FRAME (internal_error (__FILE__, __LINE__, "POP_FRAME"), 0)
+#define POP_FRAME (gdbarch_pop_frame (current_gdbarch))
+#endif
+
 typedef void (gdbarch_pop_frame_ftype) (void);
 extern void gdbarch_pop_frame (struct gdbarch *gdbarch);
 extern void set_gdbarch_pop_frame (struct gdbarch *gdbarch, gdbarch_pop_frame_ftype *pop_frame);
@@ -1748,6 +1772,31 @@ extern void set_gdbarch_use_struct_convention (struct gdbarch *gdbarch, gdbarch_
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (USE_STRUCT_CONVENTION)
 #define USE_STRUCT_CONVENTION(gcc_p, value_type) (gdbarch_use_struct_convention (current_gdbarch, gcc_p, value_type))
 #endif
+#endif
+
+#if defined (FRAME_INIT_SAVED_REGS)
+/* Legacy for systems yet to multi-arch FRAME_INIT_SAVED_REGS */
+#if !defined (FRAME_INIT_SAVED_REGS_P)
+#define FRAME_INIT_SAVED_REGS_P() (1)
+#endif
+#endif
+
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (FRAME_INIT_SAVED_REGS_P)
+#define FRAME_INIT_SAVED_REGS_P() (0)
+#endif
+
+extern int gdbarch_frame_init_saved_regs_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (FRAME_INIT_SAVED_REGS_P)
+#error "Non multi-arch definition of FRAME_INIT_SAVED_REGS"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (FRAME_INIT_SAVED_REGS_P)
+#define FRAME_INIT_SAVED_REGS_P() (gdbarch_frame_init_saved_regs_p (current_gdbarch))
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (FRAME_INIT_SAVED_REGS)
+#define FRAME_INIT_SAVED_REGS(frame) (internal_error (__FILE__, __LINE__, "FRAME_INIT_SAVED_REGS"), 0)
 #endif
 
 typedef void (gdbarch_frame_init_saved_regs_ftype) (struct frame_info *frame);
@@ -1975,6 +2024,31 @@ extern void set_gdbarch_frameless_function_invocation (struct gdbarch *gdbarch, 
 #endif
 #endif
 
+#if defined (FRAME_CHAIN)
+/* Legacy for systems yet to multi-arch FRAME_CHAIN */
+#if !defined (FRAME_CHAIN_P)
+#define FRAME_CHAIN_P() (1)
+#endif
+#endif
+
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (FRAME_CHAIN_P)
+#define FRAME_CHAIN_P() (0)
+#endif
+
+extern int gdbarch_frame_chain_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (FRAME_CHAIN_P)
+#error "Non multi-arch definition of FRAME_CHAIN"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (FRAME_CHAIN_P)
+#define FRAME_CHAIN_P() (gdbarch_frame_chain_p (current_gdbarch))
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (FRAME_CHAIN)
+#define FRAME_CHAIN(frame) (internal_error (__FILE__, __LINE__, "FRAME_CHAIN"), 0)
+#endif
+
 typedef CORE_ADDR (gdbarch_frame_chain_ftype) (struct frame_info *frame);
 extern CORE_ADDR gdbarch_frame_chain (struct gdbarch *gdbarch, struct frame_info *frame);
 extern void set_gdbarch_frame_chain (struct gdbarch *gdbarch, gdbarch_frame_chain_ftype *frame_chain);
@@ -2022,6 +2096,31 @@ extern void set_gdbarch_frame_chain_valid (struct gdbarch *gdbarch, gdbarch_fram
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (FRAME_CHAIN_VALID)
 #define FRAME_CHAIN_VALID(chain, thisframe) (gdbarch_frame_chain_valid (current_gdbarch, chain, thisframe))
 #endif
+#endif
+
+#if defined (FRAME_SAVED_PC)
+/* Legacy for systems yet to multi-arch FRAME_SAVED_PC */
+#if !defined (FRAME_SAVED_PC_P)
+#define FRAME_SAVED_PC_P() (1)
+#endif
+#endif
+
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (FRAME_SAVED_PC_P)
+#define FRAME_SAVED_PC_P() (0)
+#endif
+
+extern int gdbarch_frame_saved_pc_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (FRAME_SAVED_PC_P)
+#error "Non multi-arch definition of FRAME_SAVED_PC"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (FRAME_SAVED_PC_P)
+#define FRAME_SAVED_PC_P() (gdbarch_frame_saved_pc_p (current_gdbarch))
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (FRAME_SAVED_PC)
+#define FRAME_SAVED_PC(fi) (internal_error (__FILE__, __LINE__, "FRAME_SAVED_PC"), 0)
 #endif
 
 typedef CORE_ADDR (gdbarch_frame_saved_pc_ftype) (struct frame_info *fi);

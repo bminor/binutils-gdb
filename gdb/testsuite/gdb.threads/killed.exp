@@ -88,8 +88,7 @@ gdb_expect {
         pass "GDB exits after multi-threaded program exits messily"
     }
     -re "Cannot find thread ${decimal}: generic error\[\r\n\]*$gdb_prompt $" {
-        # setup_kfail "gdb/568"
-        fail "GDB exits after multi-threaded program exits messily (not a regression; gdb/568)"
+        kfail "gdb/568" "GDB exits after multi-threaded program exits messily"
     }
     timeout {
         fail "GDB exits after multi-threaded program exits messily (timeout)"

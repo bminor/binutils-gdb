@@ -1,4 +1,4 @@
-# Copyright (C) 1992, 1997, 1999 Free Software Foundation, Inc.
+# Copyright (C) 1992, 1997, 1999, 2003 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -694,7 +694,10 @@ proc test_lucid_style_demangling {} {
     # GDB 930701 gets into an infinite loop.
     # GDB 930727 says "Can't demangle".
     # What is the correct demangling?  FIXME.
-    setup_xfail "*-*-*"
+
+    # NOTE: carlton/2003-01-17: No, don't FIXME, just obsolete lucid.
+    # I'm KFAILing this rather than deleting it for form's sake.
+    setup_kfail "gdb/945" "*-*-*"
     test_demangling_exact "lucid: __vtbl__3foo__vt_cc_main_" ""
 
     test_demangling_exact "lucid: abs__F7complex" "abs(complex)"

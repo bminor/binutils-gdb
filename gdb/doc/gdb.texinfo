@@ -3462,8 +3462,35 @@ argument.
 Continue running your program until either the specified location is
 reached, or the current stack frame returns.  @var{location} is any of
 the forms of argument acceptable to @code{break} (@pxref{Set Breaks,
-,Setting breakpoints}).  This form of the command uses breakpoints,
-and hence is quicker than @code{until} without an argument.
+,Setting breakpoints}).  This form of the command uses breakpoints, and
+hence is quicker than @code{until} without an argument.  The specified
+location is actually reached only if it is in the current frame.  This
+implies that @code{until} can be used to skip over recursive function
+invocations.  For instance in the code below, if the current location is
+line @code{96}, issuing @code{until 99} will execute the program up to
+line @code{99} in the same invocation of factorial, i.e. after the inner
+invocations have returned.
+
+@smallexample
+94	int factorial (int value)
+95	@{
+96	    if (value > 1) @{
+97            value *= factorial (value - 1);
+98	    @}
+99	    return (value);
+100     @}
+@end smallexample
+
+
+@kindex advance @var{location}
+@itemx advance @var{location}
+Continue running the program up to the given location.  An argument is
+required, anything of the same form as arguments for the @code{break}
+command.  Execution will also stop upon exit from the current stack
+frame.  This command is similar to @code{until}, but @code{advance} will
+not skip over recursive function calls, and the target location doesn't
+have to be in the same frame as the current one.
+
 
 @kindex stepi
 @kindex si @r{(@code{stepi})}
@@ -9315,6 +9342,7 @@ program.  To debug a core dump of a previous run, you must also tell
 
 @menu
 * Files::                       Commands to specify files
+* Separate Debug Files::        Debugging information in separate files
 * Symbol Errors::               Errors reading symbol files
 @end menu
 
@@ -9718,6 +9746,233 @@ Mb).
 @item show auto-solib-limit
 Display the current autoloading size threshold, in megabytes.
 @end table
+
+Shared libraries are also supported in many cross or remote debugging
+configurations.  A copy of the target's libraries need to be present on the
+host system; they need to be the same as the target libraries, although the
+copies on the target can be stripped as long as the copies on the host are
+not.
+
+You need to tell @value{GDBN} where the target libraries are, so that it can
+load the correct copies---otherwise, it may try to load the host's libraries.
+@value{GDBN} has two variables to specify the search directories for target
+libraries.
+
+@table @code
+@kindex set solib-absolute-prefix
+@item set solib-absolute-prefix @var{path}
+If this variable is set, @var{path} will be used as a prefix for any
+absolute shared library paths; many runtime loaders store the absolute
+paths to the shared library in the target program's memory.  If you use
+@samp{solib-absolute-prefix} to find shared libraries, they need to be laid
+out in the same way that they are on the target, with e.g.@: a
+@file{/usr/lib} hierarchy under @var{path}.
+
+You can set the default value of @samp{solib-absolute-prefix} by using the
+configure-time @samp{--with-sysroot} option.
+
+@kindex show solib-absolute-prefix
+@item show solib-absolute-prefix
+Display the current shared library prefix.
+
+@kindex set solib-search-path
+@item set solib-search-path @var{path}
+If this variable is set, @var{path} is a colon-separated list of directories
+to search for shared libraries.  @samp{solib-search-path} is used after
+@samp{solib-absolute-prefix} fails to locate the library, or if the path to
+the library is relative instead of absolute.  If you want to use
+@samp{solib-search-path} instead of @samp{solib-absolute-prefix}, be sure to
+set @samp{solib-absolute-prefix} to a nonexistant directory to prevent
+@value{GDBN} from finding your host's libraries.
+
+@kindex show solib-search-path
+@item show solib-search-path
+Display the current shared library search path.
+@end table
+
+
+@node Separate Debug Files
+@section Debugging Information in Separate Files
+@cindex separate debugging information files
+@cindex debugging information in separate files
+@cindex @file{.debug} subdirectories
+@cindex debugging information directory, global
+@cindex global debugging information directory
+
+@value{GDBN} allows you to put a program's debugging information in a
+file separate from the executable itself, in a way that allows
+@value{GDBN} to find and load the debugging information automatically.
+Since debugging information can be very large --- sometimes larger
+than the executable code itself --- some systems distribute debugging
+information for their executables in separate files, which users can
+install only when they need to debug a problem.
+
+If an executable's debugging information has been extracted to a
+separate file, the executable should contain a @dfn{debug link} giving
+the name of the debugging information file (with no directory
+components), and a checksum of its contents.  (The exact form of a
+debug link is described below.)  If the full name of the directory
+containing the executable is @var{execdir}, and the executable has a
+debug link that specifies the name @var{debugfile}, then @value{GDBN}
+will automatically search for the debugging information file in three
+places:
+
+@itemize @bullet
+@item
+the directory containing the executable file (that is, it will look
+for a file named @file{@var{execdir}/@var{debugfile}},
+@item
+a subdirectory of that directory named @file{.debug} (that is, the
+file @file{@var{execdir}/.debug/@var{debugfile}}, and
+@item
+a subdirectory of the global debug file directory that includes the
+executable's full path, and the name from the link (that is, the file
+@file{@var{globaldebugdir}/@var{execdir}/@var{debugfile}}, where
+@var{globaldebugdir} is the global debug file directory, and
+@var{execdir} has been turned into a relative path).
+@end itemize
+@noindent
+@value{GDBN} checks under each of these names for a debugging
+information file whose checksum matches that given in the link, and
+reads the debugging information from the first one it finds.
+
+So, for example, if you ask @value{GDBN} to debug @file{/usr/bin/ls},
+which has a link containing the name @file{ls.debug}, and the global
+debug directory is @file{/usr/lib/debug}, then @value{GDBN} will look
+for debug information in @file{/usr/bin/ls.debug},
+@file{/usr/bin/.debug/ls.debug}, and
+@file{/usr/lib/debug/usr/bin/ls.debug}.
+
+You can set the global debugging info directory's name, and view the
+name @value{GDBN} is currently using.
+
+@table @code
+
+@kindex set debug-file-directory
+@item set debug-file-directory @var{directory}
+Set the directory which @value{GDBN} searches for separate debugging
+information files to @var{directory}.
+
+@kindex show debug-file-directory
+@item show debug-file-directory
+Show the directory @value{GDBN} searches for separate debugging
+information files.
+
+@end table
+
+@cindex @code{.gnu_debuglink} sections
+@cindex debug links
+A debug link is a special section of the executable file named
+@code{.gnu_debuglink}.  The section must contain:
+
+@itemize
+@item
+A filename, with any leading directory components removed, followed by
+a zero byte,
+@item
+zero to three bytes of padding, as needed to reach the next four-byte
+boundary within the section, and
+@item
+a four-byte CRC checksum, stored in the same endianness used for the
+executable file itself.  The checksum is computed on the debugging
+information file's full contents by the function given below, passing
+zero as the @var{crc} argument.
+@end itemize
+
+Any executable file format can carry a debug link, as long as it can
+contain a section named @code{.gnu_debuglink} with the contents
+described above.
+
+The debugging information file itself should be an ordinary
+executable, containing a full set of linker symbols, sections, and
+debugging information.  The sections of the debugging information file
+should have the same names, addresses and sizes as the original file,
+but they need not contain any data --- much like a @code{.bss} section
+in an ordinary executable.
+
+As of December 2002, there is no standard GNU utility to produce
+separated executable / debugging information file pairs.  Ulrich
+Drepper's @file{elfutils} package, starting with version 0.53,
+contains a version of the @code{strip} command such that the command
+@kbd{strip foo -f foo.debug} removes the debugging information from
+the executable file @file{foo}, places it in the file
+@file{foo.debug}, and leaves behind a debug link in @file{foo}.
+
+Since there are many different ways to compute CRC's (different
+polynomials, reversals, byte ordering, etc.), the simplest way to
+describe the CRC used in @code{.gnu_debuglink} sections is to give the
+complete code for a function that computes it:
+
+@kindex @code{gnu_debuglink_crc32}
+@smallexample
+unsigned long
+gnu_debuglink_crc32 (unsigned long crc,
+                     unsigned char *buf, size_t len)
+@{
+  static const unsigned long crc32_table[256] =
+    @{
+      0x00000000, 0x77073096, 0xee0e612c, 0x990951ba, 0x076dc419,
+      0x706af48f, 0xe963a535, 0x9e6495a3, 0x0edb8832, 0x79dcb8a4,
+      0xe0d5e91e, 0x97d2d988, 0x09b64c2b, 0x7eb17cbd, 0xe7b82d07,
+      0x90bf1d91, 0x1db71064, 0x6ab020f2, 0xf3b97148, 0x84be41de,
+      0x1adad47d, 0x6ddde4eb, 0xf4d4b551, 0x83d385c7, 0x136c9856,
+      0x646ba8c0, 0xfd62f97a, 0x8a65c9ec, 0x14015c4f, 0x63066cd9,
+      0xfa0f3d63, 0x8d080df5, 0x3b6e20c8, 0x4c69105e, 0xd56041e4,
+      0xa2677172, 0x3c03e4d1, 0x4b04d447, 0xd20d85fd, 0xa50ab56b,
+      0x35b5a8fa, 0x42b2986c, 0xdbbbc9d6, 0xacbcf940, 0x32d86ce3,
+      0x45df5c75, 0xdcd60dcf, 0xabd13d59, 0x26d930ac, 0x51de003a,
+      0xc8d75180, 0xbfd06116, 0x21b4f4b5, 0x56b3c423, 0xcfba9599,
+      0xb8bda50f, 0x2802b89e, 0x5f058808, 0xc60cd9b2, 0xb10be924,
+      0x2f6f7c87, 0x58684c11, 0xc1611dab, 0xb6662d3d, 0x76dc4190,
+      0x01db7106, 0x98d220bc, 0xefd5102a, 0x71b18589, 0x06b6b51f,
+      0x9fbfe4a5, 0xe8b8d433, 0x7807c9a2, 0x0f00f934, 0x9609a88e,
+      0xe10e9818, 0x7f6a0dbb, 0x086d3d2d, 0x91646c97, 0xe6635c01,
+      0x6b6b51f4, 0x1c6c6162, 0x856530d8, 0xf262004e, 0x6c0695ed,
+      0x1b01a57b, 0x8208f4c1, 0xf50fc457, 0x65b0d9c6, 0x12b7e950,
+      0x8bbeb8ea, 0xfcb9887c, 0x62dd1ddf, 0x15da2d49, 0x8cd37cf3,
+      0xfbd44c65, 0x4db26158, 0x3ab551ce, 0xa3bc0074, 0xd4bb30e2,
+      0x4adfa541, 0x3dd895d7, 0xa4d1c46d, 0xd3d6f4fb, 0x4369e96a,
+      0x346ed9fc, 0xad678846, 0xda60b8d0, 0x44042d73, 0x33031de5,
+      0xaa0a4c5f, 0xdd0d7cc9, 0x5005713c, 0x270241aa, 0xbe0b1010,
+      0xc90c2086, 0x5768b525, 0x206f85b3, 0xb966d409, 0xce61e49f,
+      0x5edef90e, 0x29d9c998, 0xb0d09822, 0xc7d7a8b4, 0x59b33d17,
+      0x2eb40d81, 0xb7bd5c3b, 0xc0ba6cad, 0xedb88320, 0x9abfb3b6,
+      0x03b6e20c, 0x74b1d29a, 0xead54739, 0x9dd277af, 0x04db2615,
+      0x73dc1683, 0xe3630b12, 0x94643b84, 0x0d6d6a3e, 0x7a6a5aa8,
+      0xe40ecf0b, 0x9309ff9d, 0x0a00ae27, 0x7d079eb1, 0xf00f9344,
+      0x8708a3d2, 0x1e01f268, 0x6906c2fe, 0xf762575d, 0x806567cb,
+      0x196c3671, 0x6e6b06e7, 0xfed41b76, 0x89d32be0, 0x10da7a5a,
+      0x67dd4acc, 0xf9b9df6f, 0x8ebeeff9, 0x17b7be43, 0x60b08ed5,
+      0xd6d6a3e8, 0xa1d1937e, 0x38d8c2c4, 0x4fdff252, 0xd1bb67f1,
+      0xa6bc5767, 0x3fb506dd, 0x48b2364b, 0xd80d2bda, 0xaf0a1b4c,
+      0x36034af6, 0x41047a60, 0xdf60efc3, 0xa867df55, 0x316e8eef,
+      0x4669be79, 0xcb61b38c, 0xbc66831a, 0x256fd2a0, 0x5268e236,
+      0xcc0c7795, 0xbb0b4703, 0x220216b9, 0x5505262f, 0xc5ba3bbe,
+      0xb2bd0b28, 0x2bb45a92, 0x5cb36a04, 0xc2d7ffa7, 0xb5d0cf31,
+      0x2cd99e8b, 0x5bdeae1d, 0x9b64c2b0, 0xec63f226, 0x756aa39c,
+      0x026d930a, 0x9c0906a9, 0xeb0e363f, 0x72076785, 0x05005713,
+      0x95bf4a82, 0xe2b87a14, 0x7bb12bae, 0x0cb61b38, 0x92d28e9b,
+      0xe5d5be0d, 0x7cdcefb7, 0x0bdbdf21, 0x86d3d2d4, 0xf1d4e242,
+      0x68ddb3f8, 0x1fda836e, 0x81be16cd, 0xf6b9265b, 0x6fb077e1,
+      0x18b74777, 0x88085ae6, 0xff0f6a70, 0x66063bca, 0x11010b5c,
+      0x8f659eff, 0xf862ae69, 0x616bffd3, 0x166ccf45, 0xa00ae278,
+      0xd70dd2ee, 0x4e048354, 0x3903b3c2, 0xa7672661, 0xd06016f7,
+      0x4969474d, 0x3e6e77db, 0xaed16a4a, 0xd9d65adc, 0x40df0b66,
+      0x37d83bf0, 0xa9bcae53, 0xdebb9ec5, 0x47b2cf7f, 0x30b5ffe9,
+      0xbdbdf21c, 0xcabac28a, 0x53b39330, 0x24b4a3a6, 0xbad03605,
+      0xcdd70693, 0x54de5729, 0x23d967bf, 0xb3667a2e, 0xc4614ab8,
+      0x5d681b02, 0x2a6f2b94, 0xb40bbe37, 0xc30c8ea1, 0x5a05df1b,
+      0x2d02ef8d
+    @};
+  unsigned char *end;
+
+  crc = ~crc & 0xffffffff;
+  for (end = buf + len; buf < end; ++buf)
+    crc = crc32_table[(crc ^ *buf) & 0xff] ^ (crc >> 8);
+  return ~crc & 0xffffffff;;
+@}
+@end smallexample
+
 
 @node Symbol Errors
 @section Errors reading symbol files
@@ -11159,7 +11414,6 @@ configurations.
 * ARM::                         ARM
 * H8/300::                      Hitachi H8/300
 * H8/500::                      Hitachi H8/500
-* i960::                        Intel i960
 * M32R/D::                      Mitsubishi M32R/D
 * M68K::                        Motorola M68K
 * MIPS Embedded::               MIPS Embedded
@@ -11413,128 +11667,6 @@ memory}.  The accepted values for @var{mod} are @code{small},
 
 @end table
 
-@node i960
-@subsection Intel i960
-
-@table @code
-
-@kindex target mon960
-@item target mon960 @var{dev}
-MON960 monitor for Intel i960.
-
-@kindex target nindy
-@item target nindy @var{devicename}
-An Intel 960 board controlled by a Nindy Monitor.  @var{devicename} is
-the name of the serial device to use for the connection, e.g.
-@file{/dev/ttya}.
-
-@end table
-
-@cindex Nindy
-@cindex i960
-@dfn{Nindy} is a ROM Monitor program for Intel 960 target systems.  When
-@value{GDBN} is configured to control a remote Intel 960 using Nindy, you can
-tell @value{GDBN} how to connect to the 960 in several ways:
-
-@itemize @bullet
-@item
-Through command line options specifying serial port, version of the
-Nindy protocol, and communications speed;
-
-@item
-By responding to a prompt on startup;
-
-@item
-By using the @code{target} command at any point during your @value{GDBN}
-session.  @xref{Target Commands, ,Commands for managing targets}.
-
-@end itemize
-
-@cindex download to Nindy-960
-With the Nindy interface to an Intel 960 board, @code{load}
-downloads @var{filename} to the 960 as well as adding its symbols in
-@value{GDBN}.
-
-@menu
-* Nindy Startup::               Startup with Nindy
-* Nindy Options::               Options for Nindy
-* Nindy Reset::                 Nindy reset command
-@end menu
-
-@node Nindy Startup
-@subsubsection Startup with Nindy
-
-If you simply start @code{@value{GDBP}} without using any command-line
-options, you are prompted for what serial port to use, @emph{before} you
-reach the ordinary @value{GDBN} prompt:
-
-@smallexample
-Attach /dev/ttyNN -- specify NN, or "quit" to quit:
-@end smallexample
-
-@noindent
-Respond to the prompt with whatever suffix (after @samp{/dev/tty})
-identifies the serial port you want to use.  You can, if you choose,
-simply start up with no Nindy connection by responding to the prompt
-with an empty line.  If you do this and later wish to attach to Nindy,
-use @code{target} (@pxref{Target Commands, ,Commands for managing targets}).
-
-@node Nindy Options
-@subsubsection Options for Nindy
-
-These are the startup options for beginning your @value{GDBN} session with a
-Nindy-960 board attached:
-
-@table @code
-@item -r @var{port}
-Specify the serial port name of a serial interface to be used to connect
-to the target system.  This option is only available when @value{GDBN} is
-configured for the Intel 960 target architecture.  You may specify
-@var{port} as any of: a full pathname (e.g. @samp{-r /dev/ttya}), a
-device name in @file{/dev} (e.g. @samp{-r ttya}), or simply the unique
-suffix for a specific @code{tty} (e.g. @samp{-r a}).
-
-@item -O
-(An uppercase letter ``O'', not a zero.)  Specify that @value{GDBN} should use
-the ``old'' Nindy monitor protocol to connect to the target system.
-This option is only available when @value{GDBN} is configured for the Intel 960
-target architecture.
-
-@quotation
-@emph{Warning:} if you specify @samp{-O}, but are actually trying to
-connect to a target system that expects the newer protocol, the connection
-fails, appearing to be a speed mismatch.  @value{GDBN} repeatedly
-attempts to reconnect at several different line speeds.  You can abort
-this process with an interrupt.
-@end quotation
-
-@item -brk
-Specify that @value{GDBN} should first send a @code{BREAK} signal to the target
-system, in an attempt to reset it, before connecting to a Nindy target.
-
-@quotation
-@emph{Warning:} Many target systems do not have the hardware that this
-requires; it only works with a few boards.
-@end quotation
-@end table
-
-The standard @samp{-b} option controls the line speed used on the serial
-port.
-
-@c @group
-@node Nindy Reset
-@subsubsection Nindy reset command
-
-@table @code
-@item reset
-@kindex reset
-For a Nindy target, this command sends a ``break'' to the remote target
-system; this is only useful if the target has been equipped with a
-circuit to perform a hard reset (or some other interesting action) when
-a break is detected.
-@end table
-@c @end group
-
 @node M32R/D
 @subsection Mitsubishi M32R/D
 
@@ -11575,19 +11707,6 @@ EST-300 ICE monitor, running on a CPU32 (M68K) board.
 ROM 68K monitor, running on an M68K IDP board.
 
 @end table
-
-If @value{GDBN} is configured with @code{m68*-ericsson-*}, it will
-instead have only a single special target command:
-
-@table @code
-
-@kindex target es1800
-@item target es1800 @var{dev}
-ES-1800 emulator for M68K.
-
-@end table
-
-[context?]
 
 @table @code
 
@@ -11834,7 +11953,7 @@ Set acquisition qualifier for HW trace.
 Set HW trace stopping criteria.
 
 @kindex htrace record
-@item htrace record @var{[data]*}
+@item htrace record [@var{data}]*
 Selects the data to be recorded, when qualifier is met and HW trace was
 triggered.
 
@@ -11845,14 +11964,14 @@ triggered.
 Enables/disables the HW trace.
 
 @kindex htrace rewind
-@item htrace rewind @var{[filename]}
+@item htrace rewind [@var{filename}]
 Clears currently recorded trace data.
 
 If filename is specified, new trace file is made and any newly collected data
 will be written there.
 
 @kindex htrace print
-@item htrace print @var{[start [len]]}
+@item htrace print [@var{start} [@var{len}]]
 Prints trace buffer, using current record configuration.
 
 @kindex htrace mode continuous
@@ -14015,6 +14134,7 @@ Then give @file{gdb.dvi} to your @sc{dvi} printing program.
 @appendix Installing @value{GDBN}
 @cindex configuring @value{GDBN}
 @cindex installation
+@cindex configuring @value{GDBN}, and source tree subdirectories
 
 @value{GDBN} comes with a @code{configure} script that automates the process
 of preparing @value{GDBN} for installation; you can then use @code{make} to
@@ -14105,19 +14225,15 @@ directories for multiple libraries or programs, such as the
 creates configuration files for every directory level underneath (unless
 you tell it not to, with the @samp{--norecursion} option).
 
-You can run the @code{configure} script from any of the
-subordinate directories in the @value{GDBN} distribution if you only want to
-configure that subdirectory, but be sure to specify a path to it.
-
-For example, with version @value{GDBVN}, type the following to configure only
-the @code{bfd} subdirectory:
-
-@smallexample
-@group
-cd gdb-@value{GDBVN}/bfd
-../configure @var{host}
-@end group
-@end smallexample
+You should run the @code{configure} script from the top directory in the
+source tree, the @file{gdb-@var{version-number}} directory.  If you run
+@code{configure} from one of the subdirectories, you will configure only
+that subdirectory.  That is usually not what you want.  In particular,
+if you run the first @code{configure} from the @file{gdb} subdirectory
+of the @file{gdb-@var{version-number}} directory, you will omit the
+configuration of @file{bfd}, @file{readline}, and other sibling
+directories of the @file{gdb} subdirectory.  This leads to build errors
+about missing include files such as @file{bfd/bfd.h}.
 
 You can install @code{@value{GDBP}} anywhere; it has no hardwired paths.
 However, you should make sure that the shell on your path (named by
@@ -14169,6 +14285,12 @@ directory, it creates a tree for the binaries with the same structure
 the example, you'd find the Sun 4 library @file{libiberty.a} in the
 directory @file{gdb-sun4/libiberty}, and @value{GDBN} itself in
 @file{gdb-sun4/gdb}.
+
+Make sure that your path to the @file{configure} script has just one
+instance of @file{gdb} in it.  If your path to @file{configure} looks
+like @file{../gdb-@value{GDBVN}/gdb/configure}, you are configuring only
+one subdirectory of @value{GDBN}, not the whole package.  This leads to
+build errors about missing include files such as @file{bfd/bfd.h}.
 
 One popular reason to build several @value{GDBN} configurations in separate
 directories is to configure @value{GDBN} for cross-compiling (where
@@ -14373,17 +14495,57 @@ warning message.
 @kindex maint print registers
 @kindex maint print raw-registers
 @kindex maint print cooked-registers
+@kindex maint print register-groups
 @item maint print registers
 @itemx maint print raw-registers
 @itemx maint print cooked-registers
+@itemx maint print register-groups
 Print @value{GDBN}'s internal register data structures.
 
-The command @samp{maint print raw-registers} includes the contents of
-the raw register cache; and the command @samp{maint print
-cooked-registers} includes the (cooked) value of all registers.
-@xref{Registers,, Registers, gdbint, @value{GDBN} Internals}.
+The command @code{maint print raw-registers} includes the contents of
+the raw register cache; the command @code{maint print cooked-registers}
+includes the (cooked) value of all registers; and the command
+@code{maint print register-groups} includes the groups that each
+register is a member of.  @xref{Registers,, Registers, gdbint,
+@value{GDBN} Internals}.
 
 Takes an optional file parameter.
+
+@kindex maint print reggroups
+@item maint print reggroups
+Print @value{GDBN}'s internal register group data structures.
+
+Takes an optional file parameter.
+
+@smallexample
+(gdb) @kbd{maint print reggroups}
+ Group      Type      
+ general    user      
+ float      user      
+ all        user      
+ vector     user      
+ system     user      
+ save       internal  
+ restore    internal  
+@end smallexample
+
+@kindex maint set profile
+@kindex maint show profile
+@cindex profiling GDB
+@item maint set profile
+@itemx maint show profile
+Control profiling of @value{GDBN}.
+
+Profiling will be disabled until you use the @samp{maint set profile}
+command to enable it.  When you enable profiling, the system will begin
+collecting timing and execution count data; when you disable profiling or
+exit @value{GDBN}, the results will be written to a log file.  Remember that
+if you use profiling, @value{GDBN} will overwrite the profiling log file
+(often called @file{gmon.out}).  If you have a record of important profiling
+data in a @file{gmon.out} file, be sure to move it to a safe location.
+
+Configuring with @samp{--enable-profiling} arranges for @value{GDBN} to be
+compiled with the @samp{-pg} compiler option. 
 
 @end table
 

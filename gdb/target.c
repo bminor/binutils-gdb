@@ -82,8 +82,8 @@ static void normal_target_post_startup_inferior (ptid_t ptid);
    partial transfers, try either target_read_memory_partial or
    target_write_memory_partial).  */
 
-static int
-target_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write);
+static int target_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len,
+			       int write);
 
 static void init_dummy_target (void);
 

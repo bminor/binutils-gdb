@@ -42,7 +42,7 @@
 
 static int ocd_read_bytes (CORE_ADDR memaddr, char *myaddr, int len);
 
-static int ocd_start_remote (PTR dummy);
+static int ocd_start_remote (void *dummy);
 
 static int readchar (int timeout);
 
@@ -171,7 +171,7 @@ ocd_close (int quitting)
 /* Stub for catch_errors.  */
 
 static int
-ocd_start_remote (PTR dummy)
+ocd_start_remote (void *dummy)
 {
   unsigned char buf[10], *p;
   int pktlen;

@@ -1,7 +1,8 @@
 /* Read ELF (Executable and Linking Format) object files for GDB.
-   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002
-   Free Software Foundation, Inc.
+
+   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
+   2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+
    Written by Fred Fish at Cygnus Support.
 
    This file is part of GDB.
@@ -590,8 +591,7 @@ elf_symfile_read (struct objfile *objfile, int mainline)
       if (str_sect)
 	elfstab_build_psymtabs (objfile,
 				mainline,
-				ei.stabsect->filepos,
-				bfd_section_size (abfd, ei.stabsect),
+				ei.stabsect,
 				str_sect->filepos,
 				bfd_section_size (abfd, str_sect));
     }

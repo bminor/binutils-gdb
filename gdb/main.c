@@ -1,6 +1,6 @@
 /* Top level stuff for GDB, the GNU debugger.
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001, 2002
+   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -64,6 +64,9 @@ int xdb_commands = 0;
 
 /* Whether dbx commands will be handled */
 int dbx_commands = 0;
+
+/* System root path, used to find libraries etc.  */
+char *gdb_sysroot = 0;
 
 struct ui_file *gdb_stdout;
 struct ui_file *gdb_stderr;
@@ -170,7 +173,7 @@ captured_main (void *data)
 #endif /* MPW */
 
   /* This needs to happen before the first use of malloc.  */
-  init_malloc ((PTR) NULL);
+  init_malloc (NULL);
 
 #if defined (ALIGN_STACK_ON_STARTUP)
   i = (int) &count & 0x3;
@@ -200,6 +203,34 @@ captured_main (void *data)
 
   /* initialize error() */
   error_init ();
+
+  /* Set the sysroot path.  */
+#ifdef TARGET_SYSTEM_ROOT_RELOCATABLE
+  gdb_sysroot = make_relative_prefix (argv[0], BINDIR, TARGET_SYSTEM_ROOT);
+  if (gdb_sysroot)
+    {
+      struct stat s;
+      int res = 0;
+
+      if (stat (gdb_sysroot, &s) == 0)
+	if (S_ISDIR (s.st_mode))
+	  res = 1;
+
+      if (res == 0)
+	{
+	  xfree (gdb_sysroot);
+	  gdb_sysroot = TARGET_SYSTEM_ROOT;
+	}
+    }
+  else
+    gdb_sysroot = TARGET_SYSTEM_ROOT;
+#else
+#if defined (TARGET_SYSTEM_ROOT)
+  gdb_sysroot = TARGET_SYSTEM_ROOT;
+#else
+  gdb_sysroot = "";
+#endif
+#endif
 
   /* Parse arguments and options.  */
   {
@@ -269,10 +300,6 @@ captured_main (void *data)
       {"statistics", no_argument, 0, 13},
       {"write", no_argument, &write_files, 1},
       {"args", no_argument, &set_args, 1},
-/* Allow machine descriptions to add more options... */
-#ifdef ADDITIONAL_OPTIONS
-      ADDITIONAL_OPTIONS
-#endif
       {0, no_argument, 0, 0}
     };
 
@@ -413,9 +440,6 @@ extern int gdbtk_test (char *);
 	    }
 	    break;
 
-#ifdef ADDITIONAL_OPTION_CASES
-	    ADDITIONAL_OPTION_CASES
-#endif
 	  case '?':
 	    fprintf_unfiltered (gdb_stderr,
 			_("Use `%s --help' for a complete list of options.\n"),
@@ -612,10 +636,6 @@ extern int gdbtk_test (char *);
   if (ttyarg != NULL)
     catch_command_errors (tty_command, ttyarg, !batch, RETURN_MASK_ALL);
 
-#ifdef ADDITIONAL_OPTION_HANDLER
-  ADDITIONAL_OPTION_HANDLER;
-#endif
-
   /* Error messages should no longer be distinguished with extra output. */
   error_pre_print = NULL;
   quit_pre_print = NULL;
@@ -804,9 +824,6 @@ Options:\n\n\
   --write            Set writing into executable and core files.\n\
   --xdb              XDB compatibility mode.\n\
 "), stream);
-#ifdef ADDITIONAL_OPTION_HELP
-  fputs_unfiltered (ADDITIONAL_OPTION_HELP, stream);
-#endif
   fputs_unfiltered (_("\n\
 For more information, type \"help\" from within GDB, or consult the\n\
 GDB manual (available as on-line info or a printed manual).\n\

@@ -880,6 +880,9 @@ bfd_make_writable PARAMS ((bfd *abfd));
 bfd_boolean
 bfd_make_readable PARAMS ((bfd *abfd));
 
+char *
+bfd_follow_gnu_debuglink PARAMS ((bfd *abfd, const char *dir));
+
 /* Extracted from libbfd.c.  */
 
 /* Byte swapping macros for user section data.  */
@@ -1640,6 +1643,7 @@ enum bfd_architecture
 #define bfd_mach_sh            1
 #define bfd_mach_sh2        0x20
 #define bfd_mach_sh_dsp     0x2d
+#define bfd_mach_sh2e       0x2e
 #define bfd_mach_sh3        0x30
 #define bfd_mach_sh3_dsp    0x3d
 #define bfd_mach_sh3e       0x3e
@@ -2161,6 +2165,32 @@ relocation types already defined.  */
 
 /* SPARC little endian relocation  */
   BFD_RELOC_SPARC_REV32,
+
+/* SPARC TLS relocations  */
+  BFD_RELOC_SPARC_TLS_GD_HI22,
+  BFD_RELOC_SPARC_TLS_GD_LO10,
+  BFD_RELOC_SPARC_TLS_GD_ADD,
+  BFD_RELOC_SPARC_TLS_GD_CALL,
+  BFD_RELOC_SPARC_TLS_LDM_HI22,
+  BFD_RELOC_SPARC_TLS_LDM_LO10,
+  BFD_RELOC_SPARC_TLS_LDM_ADD,
+  BFD_RELOC_SPARC_TLS_LDM_CALL,
+  BFD_RELOC_SPARC_TLS_LDO_HIX22,
+  BFD_RELOC_SPARC_TLS_LDO_LOX10,
+  BFD_RELOC_SPARC_TLS_LDO_ADD,
+  BFD_RELOC_SPARC_TLS_IE_HI22,
+  BFD_RELOC_SPARC_TLS_IE_LO10,
+  BFD_RELOC_SPARC_TLS_IE_LD,
+  BFD_RELOC_SPARC_TLS_IE_LDX,
+  BFD_RELOC_SPARC_TLS_IE_ADD,
+  BFD_RELOC_SPARC_TLS_LE_HIX22,
+  BFD_RELOC_SPARC_TLS_LE_LOX10,
+  BFD_RELOC_SPARC_TLS_DTPMOD32,
+  BFD_RELOC_SPARC_TLS_DTPMOD64,
+  BFD_RELOC_SPARC_TLS_DTPOFF32,
+  BFD_RELOC_SPARC_TLS_DTPOFF64,
+  BFD_RELOC_SPARC_TLS_TPOFF32,
+  BFD_RELOC_SPARC_TLS_TPOFF64,
 
 /* Alpha ECOFF and ELF relocations.  Some of these treat the symbol or
 "addend" in some special way.
@@ -2996,6 +3026,55 @@ into 22 bits.  */
 /* 32 bit rel. offset to GOT entry.  */
   BFD_RELOC_390_GOTENT,
 
+/* 64 bit offset to GOT.  */
+  BFD_RELOC_390_GOTOFF64,
+
+/* 12-bit offset to symbol-entry within GOT, with PLT handling.  */
+  BFD_RELOC_390_GOTPLT12,
+
+/* 16-bit offset to symbol-entry within GOT, with PLT handling.  */
+  BFD_RELOC_390_GOTPLT16,
+
+/* 32-bit offset to symbol-entry within GOT, with PLT handling.  */
+  BFD_RELOC_390_GOTPLT32,
+
+/* 64-bit offset to symbol-entry within GOT, with PLT handling.  */
+  BFD_RELOC_390_GOTPLT64,
+
+/* 32-bit rel. offset to symbol-entry within GOT, with PLT handling.  */
+  BFD_RELOC_390_GOTPLTENT,
+
+/* 16-bit rel. offset from the GOT to a PLT entry.  */
+  BFD_RELOC_390_PLTOFF16,
+
+/* 32-bit rel. offset from the GOT to a PLT entry.  */
+  BFD_RELOC_390_PLTOFF32,
+
+/* 64-bit rel. offset from the GOT to a PLT entry.  */
+  BFD_RELOC_390_PLTOFF64,
+
+/* s390 tls relocations.  */
+  BFD_RELOC_390_TLS_LOAD,
+  BFD_RELOC_390_TLS_GDCALL,
+  BFD_RELOC_390_TLS_LDCALL,
+  BFD_RELOC_390_TLS_GD32,
+  BFD_RELOC_390_TLS_GD64,
+  BFD_RELOC_390_TLS_GOTIE12,
+  BFD_RELOC_390_TLS_GOTIE32,
+  BFD_RELOC_390_TLS_GOTIE64,
+  BFD_RELOC_390_TLS_LDM32,
+  BFD_RELOC_390_TLS_LDM64,
+  BFD_RELOC_390_TLS_IE32,
+  BFD_RELOC_390_TLS_IE64,
+  BFD_RELOC_390_TLS_IEENT,
+  BFD_RELOC_390_TLS_LE32,
+  BFD_RELOC_390_TLS_LE64,
+  BFD_RELOC_390_TLS_LDO32,
+  BFD_RELOC_390_TLS_LDO64,
+  BFD_RELOC_390_TLS_DTPMOD,
+  BFD_RELOC_390_TLS_DTPOFF,
+  BFD_RELOC_390_TLS_TPOFF,
+
 /* Scenix IP2K - 9-bit register number / data address  */
   BFD_RELOC_IP2K_FR9,
 
@@ -3460,6 +3539,9 @@ bfd_copy_private_symbol_data PARAMS ((bfd *ibfd, asymbol *isym, bfd *obfd, asymb
 /* Extracted from bfd.c.  */
 struct _bfd
 {
+  /* A unique identifier of the BFD  */
+  unsigned int id;
+
   /* The filename the application opened the BFD with.  */
   const char *filename;
 

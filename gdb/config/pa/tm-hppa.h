@@ -255,10 +255,10 @@ extern int hppa_pc_requires_run_before_use (CORE_ADDR pc);
       (buf)[sizeof(CORE_ADDR) -1] &= ~0x3; \
   } while (0)
 
-/* Define DEPRECATED_REGISTERS_INFO() to do machine-specific formatting
-   of register dumps. */
+/* Define DEPRECATED_DO_REGISTERS_INFO() to do machine-specific
+   formatting of register dumps. */
 
-#define DEPRECATED_REGISTERS_INFO(_regnum, fp) pa_do_registers_info (_regnum, fp)
+#define DEPRECATED_DO_REGISTERS_INFO(_regnum, fp) pa_do_registers_info (_regnum, fp)
 extern void pa_do_registers_info (int, int);
 
 #if 0
@@ -444,8 +444,8 @@ extern int hppa_frame_num_args (struct frame_info *frame);
 
 #define FRAME_FIND_SAVED_REGS(frame_info, frame_saved_regs) \
   hppa_frame_find_saved_regs (frame_info, &frame_saved_regs)
-extern void
-hppa_frame_find_saved_regs (struct frame_info *, struct frame_saved_regs *);
+extern void hppa_frame_find_saved_regs (struct frame_info *,
+					struct frame_saved_regs *);
 
 
 /* Things needed for making the inferior call functions.  */
@@ -625,8 +625,8 @@ extern CORE_ADDR hppa_fix_call_dummy (char *, CORE_ADDR, CORE_ADDR, int,
 #if !GDB_MULTI_ARCH
 #define PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr) \
   (hppa_push_arguments((nargs), (args), (sp), (struct_return), (struct_addr)))
-extern CORE_ADDR
-hppa_push_arguments (int, struct value **, CORE_ADDR, int, CORE_ADDR);
+extern CORE_ADDR hppa_push_arguments (int, struct value **, CORE_ADDR, int,
+				      CORE_ADDR);
 #endif
 
 

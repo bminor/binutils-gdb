@@ -1,6 +1,7 @@
 /* Support routines for building symbol tables in GDB's internal format.
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -609,15 +610,17 @@ start_subfile (char *name, char *dirname)
      later via a call to record_debugformat. */
   subfile->debugformat = NULL;
 
-  /* cfront output is a C program, so in most ways it looks like a C
-     program.  But to demangle we need to set the language to C++.  We
-     can distinguish cfront code by the fact that it has #line
-     directives which specify a file name ending in .C.
-
-     So if the filename of this subfile ends in .C, then change the
+#if 0 /* OBSOLETE CFront */
+// OBSOLETE   /* cfront output is a C program, so in most ways it looks like a C
+// OBSOLETE      program.  But to demangle we need to set the language to C++.  We
+// OBSOLETE      can distinguish cfront code by the fact that it has #line
+// OBSOLETE      directives which specify a file name ending in .C. */
+#endif /* OBSOLETE CFront */
+     
+  /* If the filename of this subfile ends in .C, then change the
      language of any pending subfiles from C to C++.  We also accept
-     any other C++ suffixes accepted by deduce_language_from_filename
-     (in particular, some people use .cxx with cfront).  */
+     any other C++ suffixes accepted by deduce_language_from_filename.  */
+  /* OBSOLETE     (in particular, some people use .cxx with cfront).  */
   /* Likewise for f2c.  */
 
   if (subfile->name)

@@ -32,7 +32,7 @@
 
 /* Type of function passed to bfd_map_over_sections.  */
 
-typedef void (*section_map_func) (bfd * abfd, asection * sect, PTR obj);
+typedef void (*section_map_func) (bfd * abfd, asection * sect, void *obj);
 
 /* Packet escape character used by Densan monitor.  */
 
@@ -455,7 +455,7 @@ static void
 fetch_bitmapped_register (int regno, struct bit_field *bf)
 {
   unsigned long val;
-  unsigned char regbuf[MAX_REGISTER_RAW_SIZE];
+  unsigned char *regbuf = alloca (max_register_size (current_gdbarch));
   char *regname = NULL;
 
   if (regno >= sizeof (r3900_regnames) / sizeof (r3900_regnames[0]))

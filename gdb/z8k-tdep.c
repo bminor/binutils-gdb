@@ -1,7 +1,7 @@
 /* Target-machine dependent code for Zilog Z8000, for GDB.
 
    Copyright 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2001,
-   2002 Free Software Foundation, Inc.
+   2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

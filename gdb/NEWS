@@ -3,6 +3,19 @@
 
 *** Changes since GDB 5.3:
 
+* d10v `regs' command deprecated
+
+The `info registers' command has been updated so that it displays the
+registers using a format identical to the old `regs' command.
+
+* Profiling support
+
+A new command, "maint set profile on/off", has been added.  This command can
+be used to enable or disable profiling while running GDB, to profile a
+session or a set of commands.  In addition there is a new configure switch,
+"--enable-profiling", which will cause GDB to be compiled with profiling
+data, for more informative profiling results.
+
 * Default MI syntax changed to "mi2".
 
 The default MI (machine interface) syntax, enabled by the command line

@@ -1,6 +1,8 @@
 /* Abstraction of GNU v2 abi.
+
+   Copyright 2001, 2003 Free Software Foundation, Inc.
+
    Contributed by Daniel Berlin <dberlin@redhat.com>
-   Copyright 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

@@ -1,4 +1,4 @@
-# Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+# Copyright 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -190,8 +190,8 @@ gdb_expect {
   -re "type = class InnerLocal::NestedInnerLocal \{\[\r\n\t \]*public:\[\r\n\t \]*int nil;\[\r\n\t \]*int nil_foo\\(int\\);\[\r\n\t \]*\}.*$gdb_prompt $" { pass "ptype InnerLocal::NestedInnerLocal" }
   -re "type = class InnerLocal::NestedInnerLocal \{\[\r\n\t \]*public:\[\r\n\t \]*int nil;\[\r\n\t \]*NestedInnerLocal *& *operator *= *\\((main${sep}::|)InnerLocal::NestedInnerLocal const *&\\);\[\r\n\t \]*NestedInnerLocal\\((main${sep}::|)InnerLocal::NestedInnerLocal const *&\\);\[\r\n\t \]*NestedInnerLocal\\((void|)\\);\[\r\n\t \]*int nil_foo\\(int\\);\[\r\n\t \]*\}.*$gdb_prompt $" { pass "ptype InnerLocal::NestedInnerLocal" }
   -re "There is no field named NestedInnerLocal.*$gdb_prompt $" {
-    # setup_kfail "gdb/482"
-    fail "ptype InnerLocal::NestedInnerLocal (gdb/482)"
+    setup_kfail "gdb/482" *-*-*
+    fail "ptype InnerLocal::NestedInnerLocal"
   }
   -re "No symbol .*NestedInnerLocal.* in current context.*$gdb_prompt $" { fail "ptype InnerLocal::NestedInnerLocal (bogus symbol lookup)" }
   -re ".*$gdb_prompt $"   {  fail "ptype InnerLocal::NestedInnerLocal" }

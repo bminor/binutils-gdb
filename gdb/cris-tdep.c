@@ -1868,8 +1868,7 @@ process_autoincrement (int size, unsigned short inst, inst_env_type *inst_env)
 
 /* Just a forward declaration.  */
 
-unsigned long
-get_data_from_address (unsigned short *inst, CORE_ADDR address);
+unsigned long get_data_from_address (unsigned short *inst, CORE_ADDR address);
 
 /* Calculates the prefix value for the general case of offset addressing 
    mode.  */
@@ -4008,7 +4007,7 @@ bfd_lookup_symbol (bfd *abfd, const char *symname)
   if (storage_needed > 0)
     {
       symbol_table = (asymbol **) xmalloc (storage_needed);
-      back_to = make_cleanup (free, (PTR) symbol_table);
+      back_to = make_cleanup (free, symbol_table);
       number_of_symbols = bfd_canonicalize_symtab (abfd, symbol_table);
 
       for (i = 0; i < number_of_symbols; i++)

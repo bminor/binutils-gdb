@@ -1,5 +1,6 @@
-/* Macro defintions for i386, running System V 3.2.
-   Copyright (C) 1989 Free Software Foundation, Inc.
+/* Code dealing with register stack frames, for GDB, the GNU debugger.
+
+   Copyright 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -18,8 +19,23 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#include "i386/xm-i386v.h"
+#if !defined (SENTINEL_FRAME_H)
+#define SENTINEL_FRAME_H 1
 
-/* Apparently there is inconsistency among various System V's about what
-   the name of this field is.  */
-#define U_FPSTATE(u) u.u_fps.u_fpstate
+struct frame_unwind;
+struct regcache;
+
+/* Implement the sentinel frame.  The sentinel frame terminates the
+   inner most end of the frame chain.  If unwound, it returns the
+   information need to construct an inner-most frame.  */
+
+/* Pump prime the sentinel frame's cache.  Since this needs the
+   REGCACHE provide that here.  */
+
+extern void *sentinel_frame_cache (struct regcache *regcache);
+
+/* At present there is only one type of sentinel frame.  */
+
+extern const struct frame_unwind *const sentinel_frame_unwind;
+
+#endif /* !defined (SENTINEL_FRAME_H)  */

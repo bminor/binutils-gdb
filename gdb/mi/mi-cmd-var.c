@@ -272,7 +272,10 @@ mi_cmd_var_list_children (char *command, char **argv, int argc)
   if (numchild <= 0)
     return MI_CMD_DONE;
 
-  cleanup_children = make_cleanup_ui_out_tuple_begin_end (uiout, "children");
+  if (mi_version (uiout) == 1)
+    cleanup_children = make_cleanup_ui_out_tuple_begin_end (uiout, "children");
+  else
+    cleanup_children = make_cleanup_ui_out_list_begin_end (uiout, "children");
   cc = childlist;
   while (*cc != NULL)
     {

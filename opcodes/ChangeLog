@@ -1,3 +1,37 @@
+2003-01-29  Henric Jungheim <henric@attbi.com>
+
+	* sparc-dis.c (print_insn_sparc): When examining values added in
+	to rs1, make sure that there are previous instructions.
+
+2003-01-23  Nick Clifton  <nickc@redhat.com>
+
+	* Add sh2e support:
+
+	2002-04-02  Alexandre Oliva  <aoliva@redhat.com>
+
+		* sh-dis.c (print_insn_shx): Handle bfd_mach_sh2e.
+		* sh-opc.h (arch_sh2e, arch_sh2e_up): New.
+		(arch_sh2_up): Added sh2e.
+		(sh_table): Replaced all occurrences of arch_sh3e_up with
+		arch_sh2e_up, except in fsqrt.
+
+2003-01-23  Alan Modra  <amodra@bigpond.net.au>
+
+	* sh64-dis.c: Include elf32-sh64.h.
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+
+2003-01-17  Richard Henderson  <rth@redhat.com>
+
+	* alpha-opc.c (alpha_opcodes): Add bugchk, rduniq, wruniq, gentrap
+	PAL entry points.
+
+2003-01-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
 2003-01-08  Klee Dienes  <kdienes@apple.com>
 
 	* Makefile.am (ALL_MACHINES): Add msp430-dis.lo.

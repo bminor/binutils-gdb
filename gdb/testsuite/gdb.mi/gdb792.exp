@@ -51,31 +51,31 @@ mi_gdb_test "-var-create - * a" \
   "create var for class A"
 
 mi_gdb_test "-var-list-children var1" \
-  "(&\".*\"\r\n)*\\^done,numchild=\"3\",children=\{child=\{name=\"var1\.public\",exp=\"public\",numchild=\"2\"\},child=\{name=\"var1\.private\",exp=\"private\",numchild=\"2\"\},child=\{name=\"var1\.protected\",exp=\"protected\",numchild=\"2\"\}\}" \
+  "(&\".*\"\r\n)*\\^done,numchild=\"3\",children=\\\[child=\{name=\"var1\.public\",exp=\"public\",numchild=\"2\"\},child=\{name=\"var1\.private\",exp=\"private\",numchild=\"2\"\},child=\{name=\"var1\.protected\",exp=\"protected\",numchild=\"2\"\}\\\]" \
   "list children of class A"
 
 mi_gdb_test "-var-list-children var1.public" \
-  "(&\".*\"\r\n)*\\^done,numchild=\"2\",children=\{child=\{name=\"var1\.public\.x\",exp=\"x\",numchild=\"0\",type=\"int\"\},child=\{name=\"var1\.public\.buffer\",exp=\"buffer\",numchild=\"10\",type=\"char \\\[10\\\]\"\}\}" \
+  "(&\".*\"\r\n)*\\^done,numchild=\"2\",children=\\\[child=\{name=\"var1\.public\.x\",exp=\"x\",numchild=\"0\",type=\"int\"\},child=\{name=\"var1\.public\.buffer\",exp=\"buffer\",numchild=\"10\",type=\"char \\\[10\\\]\"\}\\\]" \
   "list children of A.public"
 
 mi_gdb_test "-var-list-children var1.private" \
-  "(&\".*\"\r\n)*\\^done,numchild=\"2\",children=\{child=\{name=\"var1\.private\.u\",exp=\"u\",numchild=\"0\",type=\"int\"\},child=\{name=\"var1\.private\.z\",exp=\"z\",numchild=\"0\",type=\"float\"\}\}" \
+  "(&\".*\"\r\n)*\\^done,numchild=\"2\",children=\\\[child=\{name=\"var1\.private\.u\",exp=\"u\",numchild=\"0\",type=\"int\"\},child=\{name=\"var1\.private\.z\",exp=\"z\",numchild=\"0\",type=\"float\"\}\\\]" \
   "list children of A.private"
 
 mi_gdb_test "-var-list-children var1.protected" \
-  "(&\".*\"\r\n)*\\^done,numchild=\"2\",children=\{child=\{name=\"var1\.protected\.y\",exp=\"y\",numchild=\"0\",type=\"int\"\},child=\{name=\"var1\.protected\.b\",exp=\"b\",numchild=\"2\",type=\"B\"\}\}" \
+  "(&\".*\"\r\n)*\\^done,numchild=\"2\",children=\\\[child=\{name=\"var1\.protected\.y\",exp=\"y\",numchild=\"0\",type=\"int\"\},child=\{name=\"var1\.protected\.b\",exp=\"b\",numchild=\"2\",type=\"B\"\}\\\]" \
   "list children of A.protected"
 
 mi_gdb_test "-var-list-children var1.protected.b" \
-  "(&\".*\"\r\n)*\\^done,numchild=\"2\",children=\{child=\{name=\"var1\.protected\.b\.public\",exp=\"public\",numchild=\"2\"\},child=\{name=\"var1\.protected\.b\.private\",exp=\"private\",numchild=\"1\"\}\}" \
+  "(&\".*\"\r\n)*\\^done,numchild=\"2\",children=\\\[child=\{name=\"var1\.protected\.b\.public\",exp=\"public\",numchild=\"2\"\},child=\{name=\"var1\.protected\.b\.private\",exp=\"private\",numchild=\"1\"\}\\\]" \
   "list children of A.protected.b"
 
 mi_gdb_test "-var-list-children var1.protected.b.public" \
-  "(&\".*\"\r\n)*\\^done,numchild=\"2\",children=\{child=\{name=\"var1\.protected\.b\.public\.bx\",exp=\"bx\",numchild=\"0\",type=\"int\"\},child=\{name=\"var1\.protected\.b\.public\.by\",exp=\"by\",numchild=\"0\",type=\"int\"\}\}" \
+  "(&\".*\"\r\n)*\\^done,numchild=\"2\",children=\\\[child=\{name=\"var1\.protected\.b\.public\.bx\",exp=\"bx\",numchild=\"0\",type=\"int\"\},child=\{name=\"var1\.protected\.b\.public\.by\",exp=\"by\",numchild=\"0\",type=\"int\"\}\\\]" \
   "list children of A.protected.b.public"
 
 mi_gdb_test "-var-list-children var1.protected.b.private" \
-  "(&\".*\"\r\n)*\\^done,numchild=\"1\",children=\{child=\{name=\"var1\.protected\.b\.private\.k\",exp=\"k\",numchild=\"0\",type=\"int\"\}\}" \
+  "(&\".*\"\r\n)*\\^done,numchild=\"1\",children=\\\[child=\{name=\"var1\.protected\.b\.private\.k\",exp=\"k\",numchild=\"0\",type=\"int\"\}\\\]" \
   "list children of A.protected.b.private"
 
 mi_gdb_test "-var-create - * c" \
@@ -83,7 +83,7 @@ mi_gdb_test "-var-create - * c" \
   "create var for class C which has baseclass A"
 
 mi_gdb_test "-var-list-children var2" \
-  "(&\".*\"\r\n)*\\^done,numchild=\"3\",children=\{child=\{name=\"var2\.A\",exp=\"A\",numchild=\"3\",type=\"A\"\},child=\{name=\"var2\.public\",exp=\"public\",numchild=\"1\"\},child=\{name=\"var2\.private\",exp=\"private\",numchild=\"1\"\}\}" \
+  "(&\".*\"\r\n)*\\^done,numchild=\"3\",children=\\\[child=\{name=\"var2\.A\",exp=\"A\",numchild=\"3\",type=\"A\"\},child=\{name=\"var2\.public\",exp=\"public\",numchild=\"1\"\},child=\{name=\"var2\.private\",exp=\"private\",numchild=\"1\"\}\\\]" \
   "list children of class C"
 
 mi_gdb_exit

@@ -1,6 +1,8 @@
 /* Internal type definitions for GDB.
-   Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
-   Free Software Foundation, Inc.
+
+   Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
+   2001, 2002, 2003 Free Software Foundation, Inc.
+
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
    This file is part of GDB.
@@ -1100,8 +1102,7 @@ smash_to_method_type (struct type *type, struct type *domain,
 		      struct type *to_type, struct field *args,
 		      int nargs, int varargs);
 
-extern void
-smash_to_member_type (struct type *, struct type *, struct type *);
+extern void smash_to_member_type (struct type *, struct type *, struct type *);
 
 extern struct type *allocate_stub_method (struct type *);
 

@@ -1,7 +1,8 @@
 /* DWARF debugging format support for GDB.
-   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002
-   Free Software Foundation, Inc.
+
+   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
+   2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+
    Written by Fred Fish at Cygnus Support.  Portions based on dbxread.c,
    mipsread.c, coffread.c, and dwarfread.c from a Data General SVR4 gdb port.
 
@@ -359,7 +360,7 @@ static const struct language_defn *cu_language_defn;
 /* Forward declarations of static functions so we don't have to worry
    about ordering within this file.  */
 
-static void free_utypes (PTR);
+static void free_utypes (void *);
 
 static int attribute_size (unsigned int);
 
@@ -369,19 +370,19 @@ static void add_enum_psymbol (struct dieinfo *, struct objfile *);
 
 static void handle_producer (char *);
 
-static void
-read_file_scope (struct dieinfo *, char *, char *, struct objfile *);
+static void read_file_scope (struct dieinfo *, char *, char *,
+			     struct objfile *);
 
-static void
-read_func_scope (struct dieinfo *, char *, char *, struct objfile *);
+static void read_func_scope (struct dieinfo *, char *, char *,
+			     struct objfile *);
 
-static void
-read_lexical_block_scope (struct dieinfo *, char *, char *, struct objfile *);
+static void read_lexical_block_scope (struct dieinfo *, char *, char *,
+				      struct objfile *);
 
 static void scan_partial_symbols (char *, char *, struct objfile *);
 
-static void
-scan_compilation_units (char *, char *, file_ptr, file_ptr, struct objfile *);
+static void scan_compilation_units (char *, char *, file_ptr, file_ptr,
+				    struct objfile *);
 
 static void add_partial_symbol (struct dieinfo *, struct objfile *);
 
@@ -397,8 +398,8 @@ static void read_ofile_symtab (struct partial_symtab *);
 
 static void process_dies (char *, char *, struct objfile *);
 
-static void
-read_structure_scope (struct dieinfo *, char *, char *, struct objfile *);
+static void read_structure_scope (struct dieinfo *, char *, char *,
+				  struct objfile *);
 
 static struct type *decode_array_element_type (char *);
 
@@ -412,8 +413,8 @@ static void read_tag_string_type (struct dieinfo *dip);
 
 static void read_subroutine_type (struct dieinfo *, char *, char *);
 
-static void
-read_enumeration (struct dieinfo *, char *, char *, struct objfile *);
+static void read_enumeration (struct dieinfo *, char *, char *,
+			      struct objfile *);
 
 static struct type *struct_type (struct dieinfo *, char *, char *,
 				 struct objfile *);
@@ -440,8 +441,8 @@ static struct type *alloc_utype (DIE_REF, struct type *);
 
 static struct symbol *new_symbol (struct dieinfo *, struct objfile *);
 
-static void
-synthesize_typedef (struct dieinfo *, struct objfile *, struct type *);
+static void synthesize_typedef (struct dieinfo *, struct objfile *,
+				struct type *);
 
 static int locval (struct dieinfo *);
 
@@ -771,7 +772,7 @@ alloc_utype (DIE_REF die_ref, struct type *utypep)
 
    SYNOPSIS
 
-   static void free_utypes (PTR dummy)
+   static void free_utypes (void *dummy)
 
    DESCRIPTION
 
@@ -781,7 +782,7 @@ alloc_utype (DIE_REF die_ref, struct type *utypep)
  */
 
 static void
-free_utypes (PTR dummy)
+free_utypes (void *dummy)
 {
   xfree (utypes);
   utypes = NULL;
@@ -2211,7 +2212,7 @@ read_ofile_symtab (struct partial_symtab *pst)
   if (LNFOFF (pst))
     {
       if (bfd_seek (abfd, LNFOFF (pst), SEEK_SET) ||
-	  (bfd_bread ((PTR) lnsizedata, sizeof (lnsizedata), abfd)
+	  (bfd_bread (lnsizedata, sizeof (lnsizedata), abfd)
 	   != sizeof (lnsizedata)))
 	{
 	  error ("can't read DWARF line number table size");

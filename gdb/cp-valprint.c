@@ -130,7 +130,8 @@ cp_print_class_method (char *valaddr,
 	  check_stub_method_group (domain, i);
 	  for (j = 0; j < len2; j++)
 	    {
-	      if (STREQ (SYMBOL_NAME (sym), TYPE_FN_FIELD_PHYSNAME (f, j)))
+	      if (strcmp (SYMBOL_NAME (sym), TYPE_FN_FIELD_PHYSNAME (f, j))
+		  == 0)
 		goto common;
 	    }
 	}

@@ -1,3 +1,74 @@
+2003-02-01  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Delete
+	description of ADDITIONAL_OPTIONS, ADDITIONAL_OPTION_CASES,
+	ADDITIONAL_OPTION_HANDLER, and ADDITIONAL_OPTION_HELP, and
+	BEFORE_MAIN_LOOP_HOOK, and DBX_PARM_SYMBOL_CLASS along with
+	references to nindy and i960.
+	* gdb.texinfo (i960): Delete all references to i960 and nindy.
+
+2003-02-01  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Delete
+	FLOAT_INFO.
+
+2003-01-30  Andrew Cagney  <ac131313@redhat.com>
+
+	* stabs.texinfo (Member Type Descriptor): Clarify description of
+	`@'.  Suggested by Ben Hutchings.
+
+2003-01-29  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb.texinfo (M68K): Delete reference to es1800.
+
+2003-01-29  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb.texinfo (Maintenance Commands): Document `maint print
+	reggroups' and `maint print register-groups'.
+	* gdbint.texinfo (Target Architecture Definition): Document
+	register_reggroup_p.
+
+2003-01-23  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.texinfo (Separate Debug Files): New section.
+
+2003-01-22  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.texinfo (Maintenance Commands): Add "maint set profile"
+	and "maint show profile".
+
+2003-01-16  Michael Chastain  <mec@shout.net>
+
+	* gdb.texinfo (Installing GDB): Warn against
+	".../gdb-VERSION/gdb/configure".
+	(Separate Objdir): Likewise.
+
+2003-01-15  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Delete
+	definition of PRINT_REGISTER_HOOK.
+
+2003-01-15  Elena Zannoni  <ezannoni@redhat.com>
+
+	(OpenRISC 1000): Fix formatting of command names.
+
+2003-01-15  Elena Zannoni  <ezannoni@redhat.com>
+
+	* gdb.texinfo (Continuing and Stepping): Add new command
+	'advance'. Clarify behavior of 'until'.
+
+2003-01-13  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.texinfo (Files): Document solib-absolute-prefix and
+	solib-search-path.
+
+2003-01-09  Michael Chastain  <mec@shout.net>
+
+	* gdbint.texinfo (Configuring @value{GDBN} for Release): Delete.
+	(Create a Release): Add new instructions for new @file{src-release}.
+	Document existing instructions for @file{Makefile.in} as
+	being for @value{GDBN} 5.3.1 or earlier.
+
 2003-01-09  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbint.texinfo (Target Architecture Definition): Mention

@@ -1,6 +1,6 @@
 #
 # Makefile
-#   Copyright (C) 1990, 91-99, 2000, 2001, 2002
+#   Copyright (C) 1990, 91-99, 2000, 2001, 2002, 2003
 #   Free Software Foundation
 #
 # This file is part of the libiberty library.
@@ -26,6 +26,7 @@
 # Makefile for libiberty directory
 #
 
+libiberty_topdir = @libiberty_topdir@
 srcdir = @srcdir@
 VPATH = @srcdir@
 
@@ -50,7 +51,7 @@ MULTICLEAN = true
 INSTALL = @INSTALL@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_DATA = @INSTALL_DATA@
-mkinstalldirs = $(SHELL) $(srcdir)/../mkinstalldirs
+mkinstalldirs = $(SHELL) $(libiberty_topdir)/mkinstalldirs
 
 # Some compilers can't handle cc -c blah.c -o foo/blah.o.
 OUTPUT_OPTION = @OUTPUT_OPTION@
@@ -140,7 +141,10 @@ CFILES = alloca.c argv.c asprintf.c atexit.c				\
 	make-temp-file.c md5.c memchr.c memcmp.c memcpy.c memmove.c	\
 	 memset.c mkstemps.c						\
 	objalloc.c obstack.c						\
-	partition.c pexecute.c putenv.c					\
+	partition.c							\
+	 pex-djgpp.c pex-mpw.c pex-msdos.c pex-os2.c			\
+	 pex-unix.c pex-win32.c						\
+         putenv.c							\
 	random.c regex.c rename.c rindex.c				\
 	safe-ctype.c setenv.c sigsetmask.c sort.c spaces.c		\
 	 splay-tree.c strcasecmp.c strchr.c strdup.c strerror.c		\
@@ -164,7 +168,7 @@ REQUIRED_OFILES = regex.o cplus-dem.o cp-demangle.o md5.o		\
 	make-relative-prefix.o						\
 	make-temp-file.o						\
 	objalloc.o obstack.o						\
-	partition.o pexecute.o						\
+	partition.o @pexecute@						\
 	safe-ctype.o sort.o spaces.o splay-tree.o strerror.o		\
 	 strsignal.o							\
 	ternary.o							\
@@ -181,7 +185,9 @@ CONFIGURED_OFILES = asprintf.o atexit.o					\
 	getcwd.o getpagesize.o						\
 	index.o insque.o						\
 	memchr.o memcmp.o memcpy.o memmove.o memset.o mkstemps.o	\
-	putenv.o							\
+	pex-djgpp.o pex-mpw.o pex-msdos.o pex-os2.o			\
+	 pex-unix.o pex-win32.o						\
+	 putenv.o							\
 	random.o rename.o rindex.o					\
 	setenv.o sigsetmask.o strcasecmp.o strchr.o strdup.o		\
 	 strncasecmp.o strncmp.o strrchr.o strstr.o strtod.o strtol.o	\
@@ -240,7 +246,7 @@ TEXISRC = \
 # Additional files that have texi snippets that need to be collected
 # and sorted.  Some are here because the sources are imported from
 # elsewhere.  Others represent headers in ../include.
-TEXIFILES = fnmatch.txh
+TEXIFILES = fnmatch.txh pexecute.txh
 
 libiberty.info : $(srcdir)/libiberty.texi $(TEXISRC)
 	$(MAKEINFO) -I$(srcdir) $(srcdir)/libiberty.texi
@@ -279,10 +285,10 @@ install_to_libdir: all
 	@$(MULTIDO) $(FLAGS_TO_PASS) multi-do DO=install
 
 install_to_tooldir: all
-	${mkinstalldirs} $(DESTDIR)$(tooldir)/lib$(MULTISUBDIR)
-	$(INSTALL_DATA) $(TARGETLIB) $(DESTDIR)$(tooldir)/lib$(MULTISUBDIR)/$(TARGETLIB)n
-	( cd $(DESTDIR)$(tooldir)/lib$(MULTISUBDIR) ; $(RANLIB) $(TARGETLIB)n )
-	mv -f $(DESTDIR)$(tooldir)/lib$(MULTISUBDIR)/$(TARGETLIB)n $(DESTDIR)$(tooldir)/lib$(MULTISUBDIR)/$(TARGETLIB)
+	${mkinstalldirs} $(DESTDIR)$(tooldir)/lib/`$$CC -print-multi-os-directory`
+	$(INSTALL_DATA) $(TARGETLIB) $(DESTDIR)$(tooldir)/lib/`$$CC -print-multi-os-directory`/$(TARGETLIB)n
+	( cd $(DESTDIR)$(tooldir)/lib/`$$CC -print-multi-os-directory` ; $(RANLIB) $(TARGETLIB)n )
+	mv -f $(DESTDIR)$(tooldir)/lib/`$$CC -print-multi-os-directory`/$(TARGETLIB)n $(DESTDIR)$(tooldir)/lib/`$$CC -print-multi-os-directory`/$(TARGETLIB)
 	@$(MULTIDO) $(FLAGS_TO_PASS) multi-do DO=install
 
 # needed-list is used by libstdc++.  NEEDED is the list of functions
@@ -393,7 +399,7 @@ maintainer-clean-subdir: config.h
 	@subdirs='$(SUBDIRS)'; \
 	target=`echo $@ | sed -e 's/-subdir//'`; \
 	for dir in $$subdirs ; do \
-	  cd $$dir && $(MAKE) $$target; \
+	  cd $$dir && $(MAKE) $(FLAGS_TO_PASS) $$target; \
 	done
 
 $(REQUIRED_OFILES) $(EXTRA_OFILES) $(LIBOBJS): stamp-picdir
@@ -450,8 +456,13 @@ objalloc.o: config.h $(INCDIR)/ansidecl.h $(INCDIR)/objalloc.h
 obstack.o: config.h $(INCDIR)/obstack.h
 partition.o: config.h $(INCDIR)/ansidecl.h $(INCDIR)/libiberty.h \
 	$(INCDIR)/partition.h
-pexecute.o: config.h $(INCDIR)/ansidecl.h $(INCDIR)/libiberty.h \
+pex-djgpp.o: config.h pex-common.h $(INCDIR)/ansidecl.h $(INCDIR)/libiberty.h
+pex-mpw.o: config.h pex-common.h $(INCDIR)/ansidecl.h $(INCDIR)/libiberty.h
+pex-msdos.o: config.h pex-common.h $(INCDIR)/ansidecl.h $(INCDIR)/libiberty.h \
 	$(INCDIR)/safe-ctype.h
+pex-os2.o: config.h pex-common.h $(INCDIR)/ansidecl.h $(INCDIR)/libiberty.h
+pex-unix.o: config.h pex-common.h $(INCDIR)/ansidecl.h $(INCDIR)/libiberty.h
+pex-win32.o: config.h pex-common.h $(INCDIR)/ansidecl.h $(INCDIR)/libiberty.h
 putenv.o: config.h $(INCDIR)/ansidecl.h
 random.o: $(INCDIR)/ansidecl.h
 regex.o: config.h $(INCDIR)/xregex.h $(INCDIR)/xregex2.h

@@ -24,6 +24,10 @@
 #define FRAME_H 1
 
 struct symtab_and_line;
+struct frame_unwind;
+
+/* The traditional frame unwinder.  */
+extern const struct frame_unwind *trad_frame_unwind;
 
 /* The frame object.  */
 
@@ -259,6 +263,9 @@ extern void frame_register_unwind (struct frame_info *frame, int regnum,
 /* NOTE: cagney/2002-09-13: Return void as one day these functions may
    be changed to return an indication that the read succeeded.  */
 
+extern void frame_unwind_register (struct frame_info *frame,
+				   int regnum, void *buf);
+
 extern void frame_unwind_signed_register (struct frame_info *frame,
 					  int regnum, LONGEST *val);
 
@@ -279,6 +286,9 @@ extern void frame_register (struct frame_info *frame, int regnum,
 /* NOTE: cagney/2002-09-13: Return void as one day these functions may
    be changed to return an indication that the read succeeded.  */
 
+extern void frame_read_register (struct frame_info *frame, int regnum,
+				 void *buf);
+
 extern void frame_read_signed_register (struct frame_info *frame,
 					int regnum, LONGEST *val);
 
@@ -287,9 +297,10 @@ extern void frame_read_unsigned_register (struct frame_info *frame,
 
 /* Map between a frame register number and its name.  A frame register
    space is a superset of the cooked register space --- it also
-   includes builtin registers.  */
+   includes builtin registers.  If NAMELEN is negative, use the NAME's
+   length when doing the comparison.  */
 
-extern int frame_map_name_to_regnum (const char *name, int strlen);
+extern int frame_map_name_to_regnum (const char *name, int namelen);
 extern const char *frame_map_regnum_to_name (int regnum);
 
 /* Unwind the PC.  Strictly speaking return the resume address of the
@@ -302,41 +313,9 @@ extern CORE_ADDR frame_pc_unwind (struct frame_info *frame);
    caller's frame.  */
 extern struct frame_id frame_id_unwind (struct frame_info *frame);
 
-
-/* Return the location (and possibly value) of REGNUM for the previous
-   (older, up) frame.  All parameters except VALUEP can be assumed to
-   be non NULL.  When VALUEP is NULL, just the location of the
-   register should be returned.
-
-   UNWIND_CACHE is provided as mechanism for implementing a per-frame
-   local cache.  It's initial value being NULL.  Memory for that cache
-   should be allocated using frame_obstack_zalloc().
-
-   Register window architectures (eg SPARC) should note that REGNUM
-   identifies the register for the previous frame.  For instance, a
-   request for the value of "o1" for the previous frame would be found
-   in the register "i1" in this FRAME.  */
-
-typedef void (frame_register_unwind_ftype) (struct frame_info *frame,
-					    void **unwind_cache,
-					    int regnum,
-					    int *optimized,
-					    enum lval_type *lvalp,
-					    CORE_ADDR *addrp,
-					    int *realnump,
-					    void *valuep);
-
-/* Same as for registers above, but return the address at which the
-   calling frame would resume.  */
-
-typedef CORE_ADDR (frame_pc_unwind_ftype) (struct frame_info *frame,
-					   void **unwind_cache);
-
-/* Same as for registers above, but return the ID of the frame that
-   called this one.  */
-
-typedef struct frame_id (frame_id_unwind_ftype) (struct frame_info *frame,
-						 void **unwind_cache);
+/* Discard the specified frame.  Restoring the registers to the state
+   of the caller.  */
+extern void frame_pop (struct frame_info *frame);
 
 /* Describe the saved registers of a frame.  */
 
@@ -425,18 +404,14 @@ struct frame_info
        better all agree as to the contents.  */
     void *unwind_cache;
 
-    /* See description above.  The previous frame's registers.  */
-    frame_register_unwind_ftype *register_unwind;
+    /* The frame's unwinder.  */
+    const struct frame_unwind *unwind;
 
-    /* See description above.  The previous frame's resume address.
-       Save the previous PC in a local cache.  */
-    frame_pc_unwind_ftype *pc_unwind;
+    /* Cached copy of the previous frame's resume address.  */
     int pc_unwind_cache_p;
     CORE_ADDR pc_unwind_cache;
 
-    /* See description above.  The previous frame's resume address.
-       Save the previous PC in a local cache.  */
-    frame_id_unwind_ftype *id_unwind;
+    /* Cached copy of the previous frame's ID.  */
     int id_unwind_cache_p;
     struct frame_id id_unwind_cache;
 
@@ -477,6 +452,7 @@ enum print_what
    allocate memory using this method.  */
 
 extern void *frame_obstack_zalloc (unsigned long size);
+#define FRAME_OBSTACK_ZALLOC(TYPE) ((TYPE *) frame_obstack_zalloc (sizeof (TYPE)))
 
 /* If FRAME_CHAIN_VALID returns zero it means that the given frame
    is the outermost one and has no caller.  */
@@ -546,8 +522,6 @@ extern void show_and_print_stack_frame (struct frame_info *fi, int level,
 
 extern void print_stack_frame (struct frame_info *, int, int);
 
-extern void print_only_stack_frame (struct frame_info *, int, int);
-
 extern void show_stack_frame (struct frame_info *);
 
 extern void print_frame_info (struct frame_info *, int, int, int);
@@ -594,6 +568,16 @@ extern void get_saved_register (char *raw_buffer, int *optimized,
 				CORE_ADDR * addrp,
 				struct frame_info *frame,
 				int regnum, enum lval_type *lval);
+
+/* FIXME: cagney/2003-02-02: Should be deprecated or replaced with a
+   function called frame_read_register_p().  This slightly weird (and
+   older) variant of frame_read_register() returns zero (indicating
+   the register is unavailable) if either: the register isn't cached;
+   or the register has been optimized out.  Problem is, neither check
+   is exactly correct.  A register can't be optimized out (it may not
+   have been saved as part of a function call); The fact that a
+   register isn't in the register cache doesn't mean that the register
+   isn't available (it could have been fetched from memory).  */
 
 extern int frame_register_read (struct frame_info *frame, int regnum,
 				void *buf);

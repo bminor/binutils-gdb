@@ -1,4 +1,4 @@
-# Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+# Copyright 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -260,13 +260,6 @@ gdb_expect {
   }
 
 
-# The overload resolver added by HP (valops.c:find_overload_match) doesn't
-# work right for G++ output, since the list of parameters seems not to
-# be filled in correctly.  Until this gets fixed, don't expect to pass
-# some of these tests.
-
-setup_xfail "*-*-*" CLLbs16901
-
 send_gdb "print foo_instance1.overload1arg((short)arg5)\n"
 gdb_expect {
     -re ".\[0-9\]* = 5\r\n$gdb_prompt $" {
@@ -276,8 +269,6 @@ gdb_expect {
     timeout           { fail "(timeout) print call overloaded func short arg" }
   }
 
-
-setup_xfail "*-*-*" CLLbs16901
 
 send_gdb "print foo_instance1.overload1arg((unsigned short)arg6)\n"
 gdb_expect {
@@ -309,8 +300,6 @@ gdb_expect {
   }
 
 
-setup_xfail "*-*-*" CLLbs16901
-
 send_gdb "print foo_instance1.overload1arg((long)arg9)\n"
 gdb_expect {
     -re ".\[0-9\]* = 9\r\n$gdb_prompt $" {
@@ -320,8 +309,6 @@ gdb_expect {
     timeout           { fail "(timeout) print call overloaded func long arg" }
   }
 
-
-setup_xfail "*-*-*" CLLbs16901
 
 send_gdb "print foo_instance1.overload1arg((unsigned long)arg10)\n"
 gdb_expect {

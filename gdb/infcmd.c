@@ -114,7 +114,7 @@ void _initialize_infcmd (void);
 
 #define GO_USAGE   "Usage: go <location>\n"
 
-static void breakpoint_auto_delete_contents (PTR);
+static void breakpoint_auto_delete_contents (void *);
 
 #define ERROR_NO_INFERIOR \
    if (!target_has_execution) error ("The program is not being run.");
@@ -953,7 +953,7 @@ signal_command (char *signum_exp, int from_tty)
    pointed to by arg (which is really a bpstat *).  */
 
 static void
-breakpoint_auto_delete_contents (PTR arg)
+breakpoint_auto_delete_contents (void *arg)
 {
   breakpoint_auto_delete (*(bpstat *) arg);
 }
@@ -1140,9 +1140,40 @@ until_command (char *arg, int from_tty)
     }
 
   if (arg)
-    until_break_command (arg, from_tty);
+    until_break_command (arg, from_tty, 0);
   else
     until_next_command (from_tty);
+}
+
+static void
+advance_command (char *arg, int from_tty)
+{
+  int async_exec = 0;
+
+  if (!target_has_execution)
+    error ("The program is not running.");
+
+  if (arg == NULL)
+    error_no_arg ("a location");
+
+  /* Find out whether we must run in the background.  */
+  if (arg != NULL)
+    async_exec = strip_bg_char (&arg);
+
+  /* If we must run in the background, but the target can't do it,
+     error out.  */
+  if (event_loop_p && async_exec && !target_can_async_p ())
+    error ("Asynchronous execution not supported on this target.");
+
+  /* If we are not asked to run in the bg, then prepare to run in the
+     foreground, synchronously.  */
+  if (event_loop_p && !async_exec && target_can_async_p ())
+    {
+      /* Simulate synchronous execution.  */
+      async_disable_stdin ();
+    }
+
+  until_break_command (arg, from_tty, 1);
 }
 
 
@@ -1977,12 +2008,6 @@ print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
     gdbarch_print_float_info (gdbarch, file, frame, args);
   else
     {
-#ifdef FLOAT_INFO
-#if GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL
-#error "FLOAT_INFO defined in multi-arch"
-#endif
-      FLOAT_INFO;
-#else
       int regnum;
       int printed_something = 0;
 
@@ -1997,7 +2022,6 @@ print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
       if (!printed_something)
 	fprintf_filtered (file, "\
 No floating-point info available for this processor.\n");
-#endif
     }
 }
 
@@ -2130,10 +2154,14 @@ Argument N means do this N times (or till program stops for another reason).");
 
   c = add_com ("until", class_run, until_command,
 	       "Execute until the program reaches a source line greater than the current\n\
-or a specified line or address or function (same args as break command).\n\
-Execution will also stop upon exit from the current stack frame.");
+or a specified location (same args as break command) within the current frame.");
   set_cmd_completer (c, location_completer);
   add_com_alias ("u", "until", class_run, 1);
+
+  c = add_com ("advance", class_run, advance_command,
+	       "Continue the program up to the given location (same form as args for break command).\n\
+Execution will also stop upon exit from the current stack frame.");
+  set_cmd_completer (c, location_completer);
 
   c = add_com ("jump", class_run, jump_command,
 	       "Continue program being debugged at specified line or address.\n\

@@ -2295,9 +2295,8 @@ always linked in.)
 
 @item USG
 Means that System V (prior to SVR4) include files are in use.  (FIXME:
-This symbol is abused in @file{infrun.c}, @file{regex.c},
-@file{remote-nindy.c}, and @file{utils.c} for other things, at the
-moment.)
+This symbol is abused in @file{infrun.c}, @file{regex.c}, and
+@file{utils.c} for other things, at the moment.)
 
 @item lint
 Define this to help placate @code{lint} in some situations.
@@ -2913,18 +2912,6 @@ machine.
 
 @table @code
 
-@item ADDITIONAL_OPTIONS
-@itemx ADDITIONAL_OPTION_CASES
-@itemx ADDITIONAL_OPTION_HANDLER
-@itemx ADDITIONAL_OPTION_HELP
-@findex ADDITIONAL_OPTION_HELP
-@findex ADDITIONAL_OPTION_HANDLER
-@findex ADDITIONAL_OPTION_CASES
-@findex ADDITIONAL_OPTIONS
-These are a set of macros that allow the addition of additional command
-line options to @value{GDBN}.  They are currently used only for the unsupported
-i960 Nindy target, and should not be used in any other configuration.
-
 @item ADDR_BITS_REMOVE (addr)
 @findex ADDR_BITS_REMOVE
 If a raw machine instruction address includes any bits that are not
@@ -2989,16 +2976,6 @@ Store in @var{buf} a pointer of type @var{type} representing the address
 This macro may safely assume that @var{type} is either a pointer or a
 C@t{++} reference type.
 @xref{Target Architecture Definition, , Pointers Are Not Always Addresses}.
-
-@item BEFORE_MAIN_LOOP_HOOK
-@findex BEFORE_MAIN_LOOP_HOOK
-Define this to expand into any code that you want to execute before the
-main loop starts.  Although this is not, strictly speaking, a target
-conditional, that is how it is currently being used.  Note that if a
-configuration were to define it one way for a host and a different way
-for the target, @value{GDBN} will probably not compile, let alone run
-correctly.  This macro is currently used only for the unsupported i960 Nindy
-target, and should not be used in any other configuration.
 
 @item BELIEVE_PCC_PROMOTION
 @findex BELIEVE_PCC_PROMOTION
@@ -3150,12 +3127,6 @@ Return non-zero if register @var{regnum} can represent data values in a
 non-standard form.
 @xref{Target Architecture Definition, , Using Different Register and Memory Data Representations}.
 
-@item DBX_PARM_SYMBOL_CLASS
-@findex DBX_PARM_SYMBOL_CLASS
-Hook for the @code{SYMBOL_CLASS} of a parameter when decoding DBX symbol
-information.  In the i960, parameters can be stored as locals or as
-args, depending on the type of the debug record.
-
 @item DECR_PC_AFTER_BREAK
 @findex DECR_PC_AFTER_BREAK
 Define this to be the amount by which to decrement the PC after the
@@ -3231,10 +3202,6 @@ If not defined, @code{EXTRACT_RETURN_VALUE} is used.
 @item EXTRACT_STRUCT_VALUE_ADDRESS_P()
 @findex EXTRACT_STRUCT_VALUE_ADDRESS_P
 Predicate for @code{EXTRACT_STRUCT_VALUE_ADDRESS}.
-
-@item FLOAT_INFO
-@findex FLOAT_INFO
-Deprecated in favor of @code{PRINT_FLOAT_INFO}.
 
 @item FP_REGNUM
 @findex FP_REGNUM
@@ -3510,6 +3477,28 @@ Return the raw size of @var{reg}; defaults to the size of the register's
 virtual type.
 @xref{Target Architecture Definition, , Raw and Virtual Register Representations}.
 
+@item register_reggroup_p (@var{gdbarch}, @var{regnum}, @var{reggroup})
+@findex register_reggroup_p
+@cindex register groups
+Return non-zero if register @var{regnum} is a member of the register
+group @var{reggroup}.
+
+By default, registers are grouped as follows:
+
+@table @code
+@item float_reggroup
+Any register with a valid name and a floating-point type.
+@item vector_reggroup
+Any register with a valid name and a vector type.
+@item general_reggroup
+Any register with a valid name and a type other than vector or
+floating-point.  @samp{float_reggroup}.
+@item save_reggroup
+@itemx restore_reggroup
+@itemx all_reggroup
+Any register with a valid name.
+@end table
+
 @item REGISTER_VIRTUAL_SIZE (@var{reg})
 @findex REGISTER_VIRTUAL_SIZE
 Return the virtual size of @var{reg}; defaults to the size of the
@@ -3651,11 +3640,6 @@ The number of the ``next program counter'' register, if defined.
 @findex PARM_BOUNDARY
 If non-zero, round arguments to a boundary of this many bits before
 pushing them on the stack.
-
-@item PRINT_REGISTER_HOOK (@var{regno})
-@findex PRINT_REGISTER_HOOK
-If defined, this must be a function that prints the contents of the
-given register to standard output.
 
 @item PRINT_TYPELESS_INTEGER
 @findex PRINT_TYPELESS_INTEGER
@@ -5396,62 +5380,6 @@ target-dependent @file{.h} and @file{.c} files used for your
 configuration.
 @end itemize
 
-@section Configuring @value{GDBN} for Release
-
-@cindex preparing a release
-@cindex making a distribution tarball
-From the top level directory (containing @file{gdb}, @file{bfd},
-@file{libiberty}, and so on):
-
-@smallexample
-make -f Makefile.in gdb.tar.gz
-@end smallexample
-
-@noindent
-This will properly configure, clean, rebuild any files that are
-distributed pre-built (e.g. @file{c-exp.tab.c} or @file{refcard.ps}),
-and will then make a tarfile.  (If the top level directory has already
-been configured, you can just do @code{make gdb.tar.gz} instead.)
-
-This procedure requires:
-
-@itemize @bullet
-
-@item 
-symbolic links;
-
-@item
-@code{makeinfo} (texinfo2 level);
-
-@item
-@TeX{};
-
-@item
-@code{dvips};
-
-@item
-@code{yacc} or @code{bison}.
-@end itemize
-
-@noindent
-@dots{} and the usual slew of utilities (@code{sed}, @code{tar}, etc.).
-
-@subheading TEMPORARY RELEASE PROCEDURE FOR DOCUMENTATION
-
-@file{gdb.texinfo} is currently marked up using the texinfo-2 macros,
-which are not yet a default for anything (but we have to start using
-them sometime).
-
-For making paper, the only thing this implies is the right generation of
-@file{texinfo.tex} needs to be included in the distribution.
-
-For making info files, however, rather than duplicating the texinfo2
-distribution, generate @file{gdb-all.texinfo} locally, and include the
-files @file{gdb.info*} in the distribution.  Note the plural;
-@code{makeinfo} will split the document into one overall file and five
-or so included files.
-
-
 @node Releasing GDB
 
 @chapter Releasing @value{GDBN}
@@ -5983,6 +5911,17 @@ $  ( cd  dejagnu/src/dejagnu && autoconf )
 @subsubheading Do the dirty work
 
 This is identical to the process used to create the daily snapshot.
+
+@smallexample
+$  for m in gdb insight
+do
+( cd $m/src && gmake -f src-release $m.tar )
+done
+$  ( m=dejagnu; cd $m/src && gmake -f src-release $m.tar.bz2 )
+@end smallexample
+
+If the top level source directory does not have @file{src-release}
+(@value{GDBN} version 5.3.1 or earlier), try these commands instead:
 
 @smallexample
 $  for m in gdb insight

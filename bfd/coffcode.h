@@ -2128,6 +2128,7 @@ coff_set_arch_mach_hook (abfd, filehdr)
       /* this TI COFF section should be used by all new TI COFF v0 targets */
     case TICOFF0MAGIC:
       arch = TICOFF_TARGET_ARCH;
+      machine = TICOFF_TARGET_MACHINE_GET (internal_f->f_flags);
       break;
 #endif
 #endif
@@ -2142,6 +2143,7 @@ coff_set_arch_mach_hook (abfd, filehdr)
 #ifdef TI_TARGET_ID
         case TI_TARGET_ID:
           arch = TICOFF_TARGET_ARCH;
+	  machine = TICOFF_TARGET_MACHINE_GET (internal_f->f_flags);
           break;
 #endif
         default:
@@ -2612,6 +2614,7 @@ coff_set_flags (abfd, magicp, flagsp)
               return FALSE;
             }
         }
+      TICOFF_TARGET_MACHINE_SET (flagsp, bfd_get_mach (abfd));
       return TRUE;
 #endif
 

@@ -562,7 +562,7 @@ list_all_visible_commons (char *funname)
 
   while (tmp != NULL)
     {
-      if (STREQ (tmp->owning_function, funname))
+      if (strcmp (tmp->owning_function, funname) == 0)
 	printf_filtered ("%s\n", tmp->name);
 
       tmp = tmp->next;
@@ -643,7 +643,7 @@ info_common_command (char *comname, int from_tty)
 
   if (the_common)
     {
-      if (STREQ (comname, BLANK_COMMON_NAME_LOCAL))
+      if (strcmp (comname, BLANK_COMMON_NAME_LOCAL) == 0)
 	printf_filtered ("Contents of blank COMMON block:\n");
       else
 	printf_filtered ("Contents of F77 COMMON block '%s':\n", comname);

@@ -1,4 +1,4 @@
-# Copyright 1992, 1997, 1999, 2001, 2002 Free Software Foundation, Inc.
+# Copyright 1992, 1997, 1999, 2001, 2002, 2003 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -269,7 +269,9 @@ proc info_func { name demangled } {
 # Print the address of a function.
 # This checks that I can lookup a fully qualified C++ function.
 # This also checks the argument types on the return string.
-#
+
+# Note: carlton/2003-01-16: If you modify this, make a corresponding
+# modification to print_addr_2_kfail.
 
 proc print_addr_2 { name good } {
     global gdb_prompt
@@ -281,6 +283,37 @@ proc print_addr_2 { name good } {
     gdb_expect {
 	-re ".* = .* $hex <$good_pattern>\r\n$gdb_prompt $" {
 	    pass "print &'$name'"
+	}
+	-re ".*$gdb_prompt $" {
+	    fail "print &'$name'"
+	}
+	timeout {
+	    fail "print &'$name' (timeout)"
+	}
+    }
+}
+
+# NOTE: carlton/2003-01-16: hairyfunc5-6 fail on GCC 3.x (for at least
+# x=1 and x=2.1).  So I'm modifying print_addr_2 to accept a failure
+# condition.  FIXME: It would be nice if the failure condition were
+# conditional on the compiler version, but I'm not sufficiently
+# motivated.  I did hardwire in the versions of char * and int *,
+# which will give some compiler-specificity to the failure.
+
+proc print_addr_2_kfail { name good bad bugid } {
+    global gdb_prompt
+    global hex
+
+    set good_pattern [string_to_regexp $good]
+    set bad_pattern [string_to_regexp $bad]
+
+    send_gdb "print &'$name'\n"
+    gdb_expect {
+	-re ".* = .* $hex <$good_pattern>\r\n$gdb_prompt $" {
+	    pass "print &'$name'"
+	}
+	-re ".* = .* $hex <$bad_pattern>\r\n$gdb_prompt $" {
+	    kfail $bugid "print &'$name'"
 	}
 	-re ".*$gdb_prompt $" {
 	    fail "print &'$name'"
@@ -490,9 +523,9 @@ proc test_paddr_hairy_functions {} {
 
     # gdb-gnats bug gdb/19:
     # "gdb v3 demangler fails on hairyfunc5 hairyfunc6 hairyfunc7"
-    print_addr_2 "hairyfunc5" "hairyfunc5(int (*(*)($dm_type_char_star))(long))"
-    print_addr_2 "hairyfunc6" "hairyfunc6(int (*(*)($dm_type_int_star))(long))"
-    print_addr_2 "hairyfunc7" "hairyfunc7(int (*(*)(int (*)($dm_type_char_star)))(long))"
+    print_addr_2_kfail "hairyfunc5" "hairyfunc5(int (*(*)($dm_type_char_star))(long))" "hairyfunc5(int (*)(long) (*)(char*))" "gdb/19"
+    print_addr_2_kfail "hairyfunc6" "hairyfunc6(int (*(*)($dm_type_int_star))(long))" "hairyfunc6(int (*)(long) (*)(int*))" "gdb/19"
+    print_addr_2_kfail "hairyfunc7" "hairyfunc7(int (*(*)(int (*)($dm_type_char_star)))(long))" "hairyfunc7(int (*)(long) (*)(int (*)(char*)))" "gdb/19"
 }
 
 proc do_tests {} {

@@ -2724,11 +2724,22 @@ compiler it can also be used in other contexts.
 @node Member Type Descriptor
 @section The @samp{@@} Type Descriptor
 
-The @samp{@@} type descriptor is for a member (class and variable) type.
-It is followed by type information for the offset basetype, a comma, and
-type information for the type of the field being pointed to.  (FIXME:
-this is acknowledged to be gibberish.  Can anyone say what really goes
-here?).
+The @samp{@@} type descriptor is used together with the @samp{*} type
+descriptor for a pointer-to-non-static-member-data type.  It is followed
+by type information for the class (or union), a comma, and type
+information for the member data.
+
+The following C++ source:
+
+@smallexample
+typedef int A::*int_in_a;
+@end smallexample
+
+generates the following stab:
+
+@smallexample
+.stabs "int_in_a:t20=*21=@@19,1",128,0,0,0
+@end smallexample
 
 Note that there is a conflict between this and type attributes
 (@pxref{String Field}); both use type descriptor @samp{@@}.

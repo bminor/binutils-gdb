@@ -1,6 +1,6 @@
 /* Read dbx symbol tables and convert to internal format, for GDB.
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001, 2002
+   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003.
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -257,7 +257,9 @@ static int bincls_allocated;
 
 extern void _initialize_dbxread (void);
 
-static void process_now (struct objfile *);
+#if 0 /* OBSOLETE CFront */
+// OBSOLETE static void process_now (struct objfile *);
+#endif /* OBSOLETE CFront */
 
 static void read_ofile_symtab (struct partial_symtab *);
 
@@ -636,7 +638,7 @@ dbx_symfile_init (struct objfile *objfile)
   /* Allocate struct to keep track of the symfile */
   objfile->sym_stab_info = (struct dbx_symfile_info *)
     xmmalloc (objfile->md, sizeof (struct dbx_symfile_info));
-  memset ((PTR) objfile->sym_stab_info, 0, sizeof (struct dbx_symfile_info));
+  memset (objfile->sym_stab_info, 0, sizeof (struct dbx_symfile_info));
 
   DBX_TEXT_SECTION (objfile) = bfd_get_section_by_name (sym_bfd, ".text");
   DBX_DATA_SECTION (objfile) = bfd_get_section_by_name (sym_bfd, ".data");
@@ -688,8 +690,8 @@ dbx_symfile_init (struct objfile *objfile)
       if (val < 0)
 	perror_with_name (name);
 
-      memset ((PTR) size_temp, 0, sizeof (size_temp));
-      val = bfd_bread ((PTR) size_temp, sizeof (size_temp), sym_bfd);
+      memset (size_temp, 0, sizeof (size_temp));
+      val = bfd_bread (size_temp, sizeof (size_temp), sym_bfd);
       if (val < 0)
 	{
 	  perror_with_name (name);
@@ -770,105 +772,106 @@ static struct external_nlist symbuf[4096];
 static int symbuf_idx;
 static int symbuf_end;
 
-/* cont_elem is used for continuing information in cfront.
-   It saves information about which types need to be fixed up and 
-   completed after all the stabs are read.  */
-struct cont_elem
-  {
-    /* sym and stabstring for continuing information in cfront */
-    struct symbol *sym;
-    char *stabs;
-    /* state dependencies (statics that must be preserved) */
-    int sym_idx;
-    int sym_end;
-    int symnum;
-    int (*func) (struct objfile *, struct symbol *, char *);
-    /* other state dependencies include:
-       (assumption is that these will not change since process_now FIXME!!)
-       stringtab_global
-       n_stabs
-       objfile
-       symfile_bfd */
-  };
+#if 0 /* OBSOLETE CFront */
+// OBSOLETE  /* cont_elem is used for continuing information in cfront.
+// OBSOLETE     It saves information about which types need to be fixed up and 
+// OBSOLETE     completed after all the stabs are read.  */
+// OBSOLETE  struct cont_elem
+// OBSOLETE    {
+// OBSOLETE      /* sym and stabstring for continuing information in cfront */
+// OBSOLETE      struct symbol *sym;
+// OBSOLETE      char *stabs;
+// OBSOLETE      /* state dependencies (statics that must be preserved) */
+// OBSOLETE      int sym_idx;
+// OBSOLETE      int sym_end;
+// OBSOLETE      int symnum;
+// OBSOLETE      int (*func) (struct objfile *, struct symbol *, char *);
+// OBSOLETE      /* other state dependencies include:
+// OBSOLETE         (assumption is that these will not change since process_now FIXME!!)
+// OBSOLETE         stringtab_global
+// OBSOLETE         n_stabs
+// OBSOLETE         objfile
+// OBSOLETE         symfile_bfd */
+// OBSOLETE    };
 
-static struct cont_elem *cont_list = 0;
-static int cont_limit = 0;
-static int cont_count = 0;
+// OBSOLETE  static struct cont_elem *cont_list = 0;
+// OBSOLETE  static int cont_limit = 0;
+// OBSOLETE  static int cont_count = 0;
 
-/* Arrange for function F to be called with arguments SYM and P later
-   in the stabs reading process.  */
-void
-process_later (struct symbol *sym, char *p,
-	       int (*f) (struct objfile *, struct symbol *, char *))
-{
+// OBSOLETE  /* Arrange for function F to be called with arguments SYM and P later
+// OBSOLETE     in the stabs reading process.  */
+// OBSOLETE  void
+// OBSOLETE  process_later (struct symbol *sym, char *p,
+// OBSOLETE  	       int (*f) (struct objfile *, struct symbol *, char *))
+// OBSOLETE  {
 
-  /* Allocate more space for the deferred list.  */
-  if (cont_count >= cont_limit - 1)
-    {
-      cont_limit += 32;		/* chunk size */
+// OBSOLETE    /* Allocate more space for the deferred list.  */
+// OBSOLETE    if (cont_count >= cont_limit - 1)
+// OBSOLETE      {
+// OBSOLETE        cont_limit += 32;		/* chunk size */
 
-      cont_list
-	= (struct cont_elem *) xrealloc (cont_list,
-					 (cont_limit
-					  * sizeof (struct cont_elem)));
-      if (!cont_list)
-	error ("Virtual memory exhausted\n");
-    }
+// OBSOLETE        cont_list
+// OBSOLETE  	= (struct cont_elem *) xrealloc (cont_list,
+// OBSOLETE  					 (cont_limit
+// OBSOLETE  					  * sizeof (struct cont_elem)));
+// OBSOLETE        if (!cont_list)
+// OBSOLETE  	error ("Virtual memory exhausted\n");
+// OBSOLETE      }
 
-  /* Save state variables so we can process these stabs later.  */
-  cont_list[cont_count].sym_idx = symbuf_idx;
-  cont_list[cont_count].sym_end = symbuf_end;
-  cont_list[cont_count].symnum = symnum;
-  cont_list[cont_count].sym = sym;
-  cont_list[cont_count].stabs = p;
-  cont_list[cont_count].func = f;
-  cont_count++;
-}
+// OBSOLETE    /* Save state variables so we can process these stabs later.  */
+// OBSOLETE    cont_list[cont_count].sym_idx = symbuf_idx;
+// OBSOLETE    cont_list[cont_count].sym_end = symbuf_end;
+// OBSOLETE    cont_list[cont_count].symnum = symnum;
+// OBSOLETE    cont_list[cont_count].sym = sym;
+// OBSOLETE    cont_list[cont_count].stabs = p;
+// OBSOLETE    cont_list[cont_count].func = f;
+// OBSOLETE    cont_count++;
+// OBSOLETE  }
 
-/* Call deferred funtions in CONT_LIST.  */
+// OBSOLETE  /* Call deferred funtions in CONT_LIST.  */
 
-static void
-process_now (struct objfile *objfile)
-{
-  int i;
-  int save_symbuf_idx;
-  int save_symbuf_end;
-  int save_symnum;
-  struct symbol *sym;
-  char *stabs;
-  int err;
-  int (*func) (struct objfile *, struct symbol *, char *);
+// OBSOLETE  static void
+// OBSOLETE  process_now (struct objfile *objfile)
+// OBSOLETE  {
+// OBSOLETE    int i;
+// OBSOLETE    int save_symbuf_idx;
+// OBSOLETE    int save_symbuf_end;
+// OBSOLETE    int save_symnum;
+// OBSOLETE    struct symbol *sym;
+// OBSOLETE    char *stabs;
+// OBSOLETE    int err;
+// OBSOLETE    int (*func) (struct objfile *, struct symbol *, char *);
 
-  /* Save the state of our caller, we'll want to restore it before
-     returning.  */
-  save_symbuf_idx = symbuf_idx;
-  save_symbuf_end = symbuf_end;
-  save_symnum = symnum;
+// OBSOLETE    /* Save the state of our caller, we'll want to restore it before
+// OBSOLETE       returning.  */
+// OBSOLETE    save_symbuf_idx = symbuf_idx;
+// OBSOLETE    save_symbuf_end = symbuf_end;
+// OBSOLETE    save_symnum = symnum;
 
-  /* Iterate over all the deferred stabs.  */
-  for (i = 0; i < cont_count; i++)
-    {
-      /* Restore the state for this deferred stab.  */
-      symbuf_idx = cont_list[i].sym_idx;
-      symbuf_end = cont_list[i].sym_end;
-      symnum = cont_list[i].symnum;
-      sym = cont_list[i].sym;
-      stabs = cont_list[i].stabs;
-      func = cont_list[i].func;
+// OBSOLETE    /* Iterate over all the deferred stabs.  */
+// OBSOLETE    for (i = 0; i < cont_count; i++)
+// OBSOLETE      {
+// OBSOLETE        /* Restore the state for this deferred stab.  */
+// OBSOLETE        symbuf_idx = cont_list[i].sym_idx;
+// OBSOLETE        symbuf_end = cont_list[i].sym_end;
+// OBSOLETE        symnum = cont_list[i].symnum;
+// OBSOLETE        sym = cont_list[i].sym;
+// OBSOLETE        stabs = cont_list[i].stabs;
+// OBSOLETE        func = cont_list[i].func;
 
-      /* Call the function to handle this deferrd stab.  */
-      err = (*func) (objfile, sym, stabs);
-      if (err)
-	error ("Internal error: unable to resolve stab.\n");
-    }
+// OBSOLETE        /* Call the function to handle this deferrd stab.  */
+// OBSOLETE        err = (*func) (objfile, sym, stabs);
+// OBSOLETE        if (err)
+// OBSOLETE  	error ("Internal error: unable to resolve stab.\n");
+// OBSOLETE      }
 
-  /* Restore our caller's state.  */
-  symbuf_idx = save_symbuf_idx;
-  symbuf_end = save_symbuf_end;
-  symnum = save_symnum;
-  cont_count = 0;
-}
-
+// OBSOLETE    /* Restore our caller's state.  */
+// OBSOLETE    symbuf_idx = save_symbuf_idx;
+// OBSOLETE    symbuf_end = save_symbuf_end;
+// OBSOLETE    symnum = save_symnum;
+// OBSOLETE    cont_count = 0;
+// OBSOLETE  }
+#endif /* OBSOLETE CFront */
 
 /* Name of last function encountered.  Used in Solaris to approximate
    object file boundaries.  */
@@ -890,6 +893,10 @@ static struct stab_section_list *symbuf_sections;
 static unsigned int symbuf_left;
 static unsigned int symbuf_read;
 
+/* This variable stores a global stabs buffer, if we read stabs into
+   memory in one chunk in order to process relocations.  */
+static bfd_byte *stabs_data;
+
 /* Refill the symbol table input buffer
    and set the variables that control fetching entries from it.
    Reports an error if no data available.
@@ -902,8 +909,18 @@ fill_symbuf (bfd *sym_bfd)
   unsigned int count;
   int nbytes;
 
-  if (symbuf_sections == NULL)
-    count = sizeof (symbuf);
+  if (stabs_data)
+    {
+      nbytes = sizeof (symbuf);
+      if (nbytes > symbuf_left)
+        nbytes = symbuf_left;
+      memcpy (symbuf, stabs_data + symbuf_read, nbytes);
+    }
+  else if (symbuf_sections == NULL)
+    {
+      count = sizeof (symbuf);
+      nbytes = bfd_bread (symbuf, count, sym_bfd);
+    }
   else
     {
       if (symbuf_left <= 0)
@@ -919,9 +936,9 @@ fill_symbuf (bfd *sym_bfd)
       count = symbuf_left;
       if (count > sizeof (symbuf))
 	count = sizeof (symbuf);
+      nbytes = bfd_bread (symbuf, count, sym_bfd);
     }
 
-  nbytes = bfd_bread ((PTR) symbuf, count, sym_bfd);
   if (nbytes < 0)
     perror_with_name (bfd_get_filename (sym_bfd));
   else if (nbytes == 0)
@@ -930,6 +947,18 @@ fill_symbuf (bfd *sym_bfd)
   symbuf_idx = 0;
   symbuf_left -= nbytes;
   symbuf_read += nbytes;
+}
+
+static void
+stabs_seek (int sym_offset)
+{
+  if (stabs_data)
+    {
+      symbuf_read += sym_offset;
+      symbuf_left -= sym_offset;
+    }
+  else
+    bfd_seek (symfile_bfd, sym_offset, SEEK_CUR);
 }
 
 #define INTERNALIZE_SYMBOL(intern, extern, abfd)			\
@@ -1022,7 +1051,7 @@ find_corresponding_bincl_psymtab (char *name, int instance)
 static void
 free_bincl_list (struct objfile *objfile)
 {
-  xmfree (objfile->md, (PTR) bincl_list);
+  xmfree (objfile->md, bincl_list);
   bincls_allocated = 0;
 }
 
@@ -1673,7 +1702,7 @@ read_dbx_symtab (struct objfile *objfile)
 	      psymtab_include_list = (char **)
 		alloca ((includes_allocated *= 2) *
 			sizeof (char *));
-	      memcpy ((PTR) psymtab_include_list, (PTR) orig,
+	      memcpy (psymtab_include_list, orig,
 		      includes_used * sizeof (char *));
 	    }
 	    continue;
@@ -1775,20 +1804,22 @@ read_dbx_symtab (struct objfile *objfile)
 					 psymtab_language, objfile);
 		    p += 1;
 		  }
-		/* The semantics of C++ state that "struct foo { ... }"
-		   also defines a typedef for "foo".  Unfortuantely, cfront
-		   never makes the typedef when translating from C++ to C.
-		   We make the typedef here so that "ptype foo" works as
-		   expected for cfront translated code.  */
-		else if (psymtab_language == language_cplus)
-		  {
-		    /* Also a typedef with the same name.  */
-		    add_psymbol_to_list (namestring, p - namestring,
-					 VAR_NAMESPACE, LOC_TYPEDEF,
-					 &objfile->static_psymbols,
-					 nlist.n_value, 0,
-					 psymtab_language, objfile);
-		  }
+#if 0 /* OBSOLETE CFront */
+// OBSOLETE  		/* The semantics of C++ state that "struct foo { ... }"
+// OBSOLETE  		   also defines a typedef for "foo".  Unfortuantely, cfront
+// OBSOLETE  		   never makes the typedef when translating from C++ to C.
+// OBSOLETE  		   We make the typedef here so that "ptype foo" works as
+// OBSOLETE  		   expected for cfront translated code.  */
+// OBSOLETE  		else if (psymtab_language == language_cplus)
+// OBSOLETE  		  {
+// OBSOLETE  		    /* Also a typedef with the same name.  */
+// OBSOLETE  		    add_psymbol_to_list (namestring, p - namestring,
+// OBSOLETE  					 VAR_NAMESPACE, LOC_TYPEDEF,
+// OBSOLETE  					 &objfile->static_psymbols,
+// OBSOLETE  					 nlist.n_value, 0,
+// OBSOLETE  					 psymtab_language, objfile);
+// OBSOLETE  		  }
+#endif /* OBSOLETE CFront */
 	      }
 	    goto check_enum;
 	  case 't':
@@ -2023,9 +2054,11 @@ read_dbx_symtab (struct objfile *objfile)
 	  case '9':
 	  case '-':
 	  case '#':		/* for symbol identification (used in live ranges) */
-	    /* added to support cfront stabs strings */
-	  case 'Z':		/* for definition continuations */
-	  case 'P':		/* for prototypes */
+#if 0 /* OBSOLETE CFront */
+// OBSOLETE  	    /* added to support cfront stabs strings */
+// OBSOLETE  	  case 'Z':		/* for definition continuations */
+// OBSOLETE  	  case 'P':		/* for prototypes */
+#endif /* OBSOLETE CFront */
 	    continue;
 
 	  case ':':
@@ -2093,7 +2126,7 @@ read_dbx_symtab (struct objfile *objfile)
 		      (struct partial_symtab **)
 		      alloca ((dependencies_allocated *= 2)
 			      * sizeof (struct partial_symtab *));
-		    memcpy ((PTR) dependency_list, (PTR) orig,
+		    memcpy (dependency_list, orig,
 			    (dependencies_used
 			     * sizeof (struct partial_symtab *)));
 #ifdef DEBUG_INFO
@@ -2466,6 +2499,7 @@ static void
 dbx_psymtab_to_symtab (struct partial_symtab *pst)
 {
   bfd *sym_bfd;
+  struct cleanup *back_to = NULL;
 
   if (!pst)
     return;
@@ -2491,7 +2525,20 @@ dbx_psymtab_to_symtab (struct partial_symtab *pst)
 
       next_symbol_text_func = dbx_next_symbol_text;
 
+      if (DBX_STAB_SECTION (pst->objfile))
+	{
+	  stabs_data
+	    = symfile_relocate_debug_section (pst->objfile->obfd,
+					      DBX_STAB_SECTION (pst->objfile),
+					      NULL);
+	  if (stabs_data)
+	    back_to = make_cleanup (free_current_contents, (void *) &stabs_data);
+	}
+
       dbx_psymtab_to_symtab_1 (pst);
+
+      if (back_to)
+	do_cleanups (back_to);
 
       /* Match with global symbols.  This only needs to be done once,
          after all of the symtabs and dependencies have been read in.   */
@@ -2541,6 +2588,8 @@ read_ofile_symtab (struct partial_symtab *pst)
   abfd = objfile->obfd;
   symfile_bfd = objfile->obfd;	/* Implicit param to next_text_symbol */
   symbuf_end = symbuf_idx = 0;
+  symbuf_read = 0;
+  symbuf_left = sym_offset + sym_size;
 
   /* It is necessary to actually read one symbol *before* the start
      of this symtab's symbols, because the GCC_COMPILED_FLAG_SYMBOL
@@ -2550,7 +2599,7 @@ read_ofile_symtab (struct partial_symtab *pst)
      would slow down initial readin, so we look for it here instead.  */
   if (!processing_acc_compilation && sym_offset >= (int) symbol_size)
     {
-      bfd_seek (symfile_bfd, sym_offset - symbol_size, SEEK_CUR);
+      stabs_seek (sym_offset - symbol_size);
       fill_symbuf (abfd);
       bufp = &symbuf[symbuf_idx++];
       INTERNALIZE_SYMBOL (nlist, bufp, abfd);
@@ -2593,7 +2642,7 @@ read_ofile_symtab (struct partial_symtab *pst)
       /* The N_SO starting this symtab is the first symbol, so we
          better not check the symbol before it.  I'm not this can
          happen, but it doesn't hurt to check for it.  */
-      bfd_seek (symfile_bfd, sym_offset, SEEK_CUR);
+      stabs_seek (sym_offset);
       processing_gcc_compilation = 0;
     }
 
@@ -2682,10 +2731,11 @@ read_ofile_symtab (struct partial_symtab *pst)
 
   pst->symtab = end_symtab (text_offset + text_size, objfile, SECT_OFF_TEXT (objfile));
 
-  /* Process items which we had to "process_later" due to dependencies 
-     on other stabs.  */
-  process_now (objfile);
-
+#if 0 /* OBSOLETE CFront */
+// OBSOLETE    /* Process items which we had to "process_later" due to dependencies 
+// OBSOLETE       on other stabs.  */
+// OBSOLETE    process_now (objfile);
+#endif /* OBSOLETE CFront */
   end_stabs ();
 }
 
@@ -3452,8 +3502,7 @@ coffstab_build_psymtabs (struct objfile *objfile, int mainline,
    the base address of the text segment).
    MAINLINE is true if we are reading the main symbol
    table (as opposed to a shared lib or dynamically loaded file).
-   STABOFFSET and STABSIZE define the location in OBJFILE where the .stab
-   section exists.
+   STABSECT is the BFD section information for the .stab section.
    STABSTROFFSET and STABSTRSIZE define the location in OBJFILE where the
    .stabstr section exists.
 
@@ -3462,13 +3511,14 @@ coffstab_build_psymtabs (struct objfile *objfile, int mainline,
 
 void
 elfstab_build_psymtabs (struct objfile *objfile, int mainline,
-			file_ptr staboffset, unsigned int stabsize,
+			asection *stabsect,
 			file_ptr stabstroffset, unsigned int stabstrsize)
 {
   int val;
   bfd *sym_bfd = objfile->obfd;
   char *name = bfd_get_filename (sym_bfd);
   struct dbx_symfile_info *info;
+  struct cleanup *back_to = NULL;
 
   /* There is already a dbx_symfile_info allocated by our caller.
      It might even contain some info from the ELF symtab to help us.  */
@@ -3480,9 +3530,11 @@ elfstab_build_psymtabs (struct objfile *objfile, int mainline,
 
 #define	ELF_STABS_SYMBOL_SIZE	12	/* XXX FIXME XXX */
   DBX_SYMBOL_SIZE (objfile) = ELF_STABS_SYMBOL_SIZE;
-  DBX_SYMCOUNT (objfile) = stabsize / DBX_SYMBOL_SIZE (objfile);
+  DBX_SYMCOUNT (objfile)
+    = bfd_section_size (objfile->obfd, stabsect) / DBX_SYMBOL_SIZE (objfile);
   DBX_STRINGTAB_SIZE (objfile) = stabstrsize;
-  DBX_SYMTAB_OFFSET (objfile) = staboffset;
+  DBX_SYMTAB_OFFSET (objfile) = stabsect->filepos;
+  DBX_STAB_SECTION (objfile) = stabsect;
 
   if (stabstrsize > bfd_get_size (sym_bfd))
     error ("ridiculous string table size: %d bytes", stabstrsize);
@@ -3507,10 +3559,19 @@ elfstab_build_psymtabs (struct objfile *objfile, int mainline,
 
   processing_acc_compilation = 1;
 
+  symbuf_read = 0;
+  symbuf_left = bfd_section_size (objfile->obfd, stabsect);
+  stabs_data = symfile_relocate_debug_section (objfile->obfd, stabsect, NULL);
+  if (stabs_data)
+    back_to = make_cleanup (free_current_contents, (void *) &stabs_data);
+
   /* In an elf file, we've already installed the minimal symbols that came
      from the elf (non-stab) symbol table, so always act like an
      incremental load here. */
   dbx_symfile_read (objfile, 0);
+
+  if (back_to)
+    do_cleanups (back_to);
 }
 
 /* Scan and build partial symbols for a file with special sections for stabs

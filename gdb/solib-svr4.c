@@ -197,7 +197,7 @@ bfd_lookup_symbol (bfd *abfd, char *symname)
   if (storage_needed > 0)
     {
       symbol_table = (asymbol **) xmalloc (storage_needed);
-      back_to = make_cleanup (xfree, (PTR) symbol_table);
+      back_to = make_cleanup (xfree, symbol_table);
       number_of_symbols = bfd_canonicalize_symtab (abfd, symbol_table);
 
       for (i = 0; i < number_of_symbols; i++)
@@ -224,7 +224,7 @@ bfd_lookup_symbol (bfd *abfd, char *symname)
   if (storage_needed > 0)
     {
       symbol_table = (asymbol **) xmalloc (storage_needed);
-      back_to = make_cleanup (xfree, (PTR) symbol_table);
+      back_to = make_cleanup (xfree, symbol_table);
       number_of_symbols = bfd_canonicalize_dynamic_symtab (abfd, symbol_table);
 
       for (i = 0; i < number_of_symbols; i++)

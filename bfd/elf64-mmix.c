@@ -1,5 +1,5 @@
 /* MMIX-specific support for 64-bit ELF.
-   Copyright 2001, 2002 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
    Contributed by Hans-Peter Nilsson <hp@bitrange.com>
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -41,8 +41,21 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
  _bfd_abort (__FILE__, __LINE__,		\
 	     "bad case for " #x)
 
+struct _mmix_elf_section_data
+{
+  struct bfd_elf_section_data elf;
+  union
+  {
+    struct bpo_reloc_section_info *reloc;
+    struct bpo_greg_section_info *greg;
+  } bpo;
+};
+
+#define mmix_elf_section_data(sec) \
+  ((struct _mmix_elf_section_data *) (sec)->used_by_bfd)
+
 /* For each section containing a base-plus-offset (BPO) reloc, we attach
-   this struct as elf_section_data (section)->tdata, which is otherwise
+   this struct as mmix_elf_section_data (section)->bpo, which is otherwise
    NULL.  */
 struct bpo_reloc_section_info
   {
@@ -83,7 +96,7 @@ struct bpo_reloc_request
     bfd_boolean valid;
   };
 
-/* We attach this as elf_section_data (sec)->tdata in the linker-allocated
+/* We attach this as mmix_elf_section_data (sec)->bpo in the linker-allocated
    greg contents section (MMIX_LD_ALLOCATED_REG_CONTENTS_SECTION_NAME),
    which is linked into the register contents section
    (MMIX_REG_CONTENTS_SECTION_NAME).  This section is created by the
@@ -134,6 +147,9 @@ static void mmix_info_to_howto_rela
   PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
 
 static int mmix_elf_sort_relocs PARAMS ((const PTR, const PTR));
+
+static bfd_boolean mmix_elf_new_section_hook
+  PARAMS ((bfd *, asection *));
 
 static bfd_boolean mmix_elf_check_relocs
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
@@ -795,6 +811,22 @@ bfd_elf64_bfd_reloc_type_lookup (abfd, code)
   return NULL;
 }
 
+static bfd_boolean
+mmix_elf_new_section_hook (abfd, sec)
+     bfd *abfd;
+     asection *sec;
+{
+  struct _mmix_elf_section_data *sdata;
+  bfd_size_type amt = sizeof (*sdata);
+
+  sdata = (struct _mmix_elf_section_data *) bfd_zalloc (abfd, amt);
+  if (sdata == NULL)
+    return FALSE;
+  sec->used_by_bfd = (PTR) sdata;
+
+  return _bfd_elf_new_section_hook (abfd, sec);
+}
+
 
 /* This function performs the actual bitfiddling and sanity check for a
    final relocation.  Each relocation gets its *worst*-case expansion
@@ -983,13 +1015,11 @@ mmix_elf_perform_relocation (isec, howto, datap, addr, value)
     case R_MMIX_BASE_PLUS_OFFSET:
       {
 	struct bpo_reloc_section_info *bpodata
-	  = (struct bpo_reloc_section_info *)
-	  elf_section_data (isec)->tdata;
+	  = mmix_elf_section_data (isec)->bpo.reloc;
 	asection *bpo_greg_section
 	  = bpodata->bpo_greg_section;
 	struct bpo_greg_section_info *gregdata
-	  = (struct bpo_greg_section_info *)
-	  elf_section_data (bpo_greg_section)->tdata;
+	  = mmix_elf_section_data (bpo_greg_section)->bpo.greg;
 	size_t bpo_index
 	  = gregdata->bpo_reloc_indexes[bpodata->bpo_index++];
 
@@ -1573,8 +1603,7 @@ mmix_elf_gc_sweep_hook (abfd, info, sec, relocs)
      const Elf_Internal_Rela *relocs ATTRIBUTE_UNUSED;
 {
   struct bpo_reloc_section_info *bpodata
-    = (struct bpo_reloc_section_info *)
-    elf_section_data (sec)->tdata;
+    = mmix_elf_section_data (sec)->bpo.reloc;
   asection *allocated_gregs_section;
 
   /* If no bpodata here, we have nothing to do.  */
@@ -1583,9 +1612,7 @@ mmix_elf_gc_sweep_hook (abfd, info, sec, relocs)
 
   allocated_gregs_section = bpodata->bpo_greg_section;
 
-  ((struct bpo_greg_section_info *)
-   elf_section_data (allocated_gregs_section)->tdata)
-    ->n_bpo_relocs
+  mmix_elf_section_data (allocated_gregs_section)->bpo.greg->n_bpo_relocs
     -= bpodata->n_bpo_relocs_this_section;
 
   return TRUE;
@@ -1698,10 +1725,12 @@ mmix_elf_check_common_relocs  (abfd, info, sec, relocs)
 		bfd_zalloc (bpo_greg_owner, sizeof (struct bpo_greg_section_info));
 	      if (gregdata == NULL)
 		return FALSE;
-	      elf_section_data (allocated_gregs_section)->tdata = gregdata;
+	      mmix_elf_section_data (allocated_gregs_section)->bpo.greg
+		= gregdata;
 	    }
 	  else if (gregdata == NULL)
-	    gregdata = elf_section_data (allocated_gregs_section)->tdata;
+	    gregdata
+	      = mmix_elf_section_data (allocated_gregs_section)->bpo.greg;
 
 	  /* Get ourselves some auxiliary info for the BPO-relocs.  */
 	  if (bpodata == NULL)
@@ -1714,7 +1743,7 @@ mmix_elf_check_common_relocs  (abfd, info, sec, relocs)
 			   * (sec->reloc_count + 1));
 	      if (bpodata == NULL)
 		return FALSE;
-	      elf_section_data (sec)->tdata = bpodata;
+	      mmix_elf_section_data (sec)->bpo.reloc = bpodata;
 	      bpodata->first_base_plus_offset_reloc
 		= bpodata->bpo_index
 		= gregdata->n_max_bpo_relocs;
@@ -2084,8 +2113,7 @@ _bfd_mmix_prepare_linker_allocated_gregs (abfd, info)
     return TRUE;
 
   /* We use the target-data handle in the ELF section data.  */
-  gregdata = (struct bpo_greg_section_info *)
-    elf_section_data (bpo_gregs_section)->tdata;
+  gregdata = mmix_elf_section_data (bpo_gregs_section)->bpo.greg;
   if (gregdata == NULL)
     return FALSE;
 
@@ -2163,8 +2191,7 @@ _bfd_mmix_finalize_linker_allocated_gregs (abfd, link_info)
 
   /* We use the target-data handle in the ELF section data.  */
 
-  gregdata = (struct bpo_greg_section_info *)
-    elf_section_data (bpo_gregs_section)->tdata;
+  gregdata = mmix_elf_section_data (bpo_gregs_section)->bpo.greg;
   if (gregdata == NULL)
     return FALSE;
 
@@ -2260,8 +2287,7 @@ mmix_dump_bpo_gregs (link_info, pf)
   if (bpo_gregs_section == NULL)
     return;
 
-  gregdata = (struct bpo_greg_section_info *)
-    elf_section_data (bpo_gregs_section)->tdata;
+  gregdata = mmix_elf_section_data (bpo_gregs_section)->bpo.greg;
   if (gregdata == NULL)
     return;
 
@@ -2313,8 +2339,7 @@ mmix_elf_relax_section (abfd, sec, link_info, again)
   asection *bpo_gregs_section = NULL;
   struct bpo_greg_section_info *gregdata;
   struct bpo_reloc_section_info *bpodata
-    = (struct bpo_reloc_section_info *)
-    elf_section_data (sec)->tdata;
+    = mmix_elf_section_data (sec)->bpo.reloc;
   size_t bpono;
   bfd *bpo_greg_owner;
   Elf_Internal_Sym *isymbuf = NULL;
@@ -2343,8 +2368,7 @@ mmix_elf_relax_section (abfd, sec, link_info, again)
 
   bpo_greg_owner = (bfd *) link_info->base_file;
   bpo_gregs_section = bpodata->bpo_greg_section;
-  gregdata = (struct bpo_greg_section_info *)
-    elf_section_data (bpo_gregs_section)->tdata;
+  gregdata = mmix_elf_section_data (bpo_gregs_section)->bpo.greg;
 
   bpono = bpodata->first_base_plus_offset_reloc;
 
@@ -2560,6 +2584,7 @@ mmix_elf_relax_section (abfd, sec, link_info, again)
 #define elf_backend_section_from_bfd_section \
 	mmix_elf_section_from_bfd_section
 
+#define bfd_elf64_new_section_hook	mmix_elf_new_section_hook
 #define bfd_elf64_bfd_final_link	mmix_elf_final_link
 #define bfd_elf64_bfd_relax_section	mmix_elf_relax_section
 

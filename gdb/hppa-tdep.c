@@ -184,7 +184,7 @@ typedef struct
   }
 args_for_find_stub;
 
-static int cover_find_stub_with_shl_get (PTR);
+static int cover_find_stub_with_shl_get (void *);
 
 static int is_pa_2 = 0;		/* False */
 
@@ -373,7 +373,7 @@ internalize_unwinds (struct objfile *objfile, struct unwind_table_entry *table,
       if (TARGET_PTR_BIT == 64 && text_offset == 0)
 	{
 	  bfd_map_over_sections (objfile->obfd,
-				 record_text_segment_lowaddr, (PTR) NULL);
+				 record_text_segment_lowaddr, NULL);
 
 	  /* ?!? Mask off some low bits.  Should this instead subtract
 	     out the lowest section's filepos or something like that?
@@ -574,7 +574,7 @@ read_unwind_info (struct objfile *objfile)
       obj_private->so_info = NULL;
       obj_private->dp = 0;
 
-      objfile->obj_private = (PTR) obj_private;
+      objfile->obj_private = obj_private;
     }
   obj_private = (obj_private_data_t *) objfile->obj_private;
   obj_private->unwind_info = ui;
@@ -2032,7 +2032,7 @@ find_stub_with_shl_get (struct minimal_symbol *function, CORE_ADDR handle)
 
 /* Cover routine for find_stub_with_shl_get to pass to catch_errors */
 static int
-cover_find_stub_with_shl_get (PTR args_untyped)
+cover_find_stub_with_shl_get (void *args_untyped)
 {
   args_for_find_stub *args = args_untyped;
   args->return_val = find_stub_with_shl_get (args->msym, args->solib_handle);
@@ -2636,7 +2636,7 @@ pa_register_look_aside (char *raw_regs, int regnum, long *raw_val)
   int start;
 
 
-  char buf[MAX_REGISTER_RAW_SIZE];
+  char *buf = alloca (max_register_size (current_gdbarch));
   long long reg_val;
 
   if (!know_which)
@@ -2833,8 +2833,8 @@ pa_strcat_registers (char *raw_regs, int regnum, int fpregs,
 static void
 pa_print_fp_reg (int i)
 {
-  char raw_buffer[MAX_REGISTER_RAW_SIZE];
-  char virtual_buffer[MAX_REGISTER_VIRTUAL_SIZE];
+  char *raw_buffer = alloca (max_register_size (current_gdbarch));
+  char *virtual_buffer = alloca (max_register_size (current_gdbarch));
 
   /* Get 32bits of data.  */
   frame_register_read (deprecated_selected_frame, i, raw_buffer);
@@ -2876,8 +2876,8 @@ pa_print_fp_reg (int i)
 static void
 pa_strcat_fp_reg (int i, struct ui_file *stream, enum precision_type precision)
 {
-  char raw_buffer[MAX_REGISTER_RAW_SIZE];
-  char virtual_buffer[MAX_REGISTER_VIRTUAL_SIZE];
+  char *raw_buffer = alloca (max_register_size (current_gdbarch));
+  char *virtual_buffer = alloca (max_register_size (current_gdbarch));
 
   fputs_filtered (REGISTER_NAME (i), stream);
   print_spaces_filtered (8 - strlen (REGISTER_NAME (i)), stream);
@@ -2891,7 +2891,7 @@ pa_strcat_fp_reg (int i, struct ui_file *stream, enum precision_type precision)
   if (precision == double_precision && (i % 2) == 0)
     {
 
-      char raw_buf[MAX_REGISTER_RAW_SIZE];
+      char *raw_buf = alloca (max_register_size (current_gdbarch));
 
       /* Get the data in raw format for the 2nd half.  */
       frame_register_read (deprecated_selected_frame, i + 1, raw_buf);
@@ -4300,7 +4300,7 @@ initialize_hp_cxx_exception_support (void)
       args.return_val = 0;
 
       recurse++;
-      catch_errors (cover_find_stub_with_shl_get, (PTR) &args, message,
+      catch_errors (cover_find_stub_with_shl_get, &args, message,
 		    RETURN_MASK_ALL);
       eh_notify_callback_addr = args.return_val;
       recurse--;
@@ -4555,6 +4555,16 @@ child_get_current_exception_event (void)
   return &current_ex_event;
 }
 
+/* Instead of this nasty cast, add a method pvoid() that prints out a
+   host VOID data type (remember %p isn't portable).  */
+
+static CORE_ADDR
+hppa_pointer_to_address_hack (void *ptr)
+{
+  gdb_assert (sizeof (ptr) == TYPE_LENGTH (builtin_type_void_data_ptr));
+  return POINTER_TO_ADDRESS (builtin_type_void_data_ptr, &ptr);
+}
+
 static void
 unwind_command (char *exp, int from_tty)
 {
@@ -4577,7 +4587,7 @@ unwind_command (char *exp, int from_tty)
     }
 
   printf_unfiltered ("unwind_table_entry (0x%s):\n",
-		     paddr_nz (host_pointer_to_address (u)));
+		     paddr_nz (hppa_pointer_to_address_hack (u)));
 
   printf_unfiltered ("\tregion_start = ");
   print_address (u->region_start, gdb_stdout);

@@ -70,6 +70,9 @@ struct dbx_symfile_info
     asection *text_section;
     asection *data_section;
     asection *bss_section;
+
+    /* Pointer to the separate ".stab" section, if there is one.  */
+    asection *stab_section;
   };
 
 #define DBX_SYMFILE_INFO(o)	((o)->sym_stab_info)
@@ -83,5 +86,6 @@ struct dbx_symfile_info
 #define DBX_TEXT_SECTION(o)	(DBX_SYMFILE_INFO(o)->text_section)
 #define DBX_DATA_SECTION(o)	(DBX_SYMFILE_INFO(o)->data_section)
 #define DBX_BSS_SECTION(o)	(DBX_SYMFILE_INFO(o)->bss_section)
+#define DBX_STAB_SECTION(o)	(DBX_SYMFILE_INFO(o)->stab_section)
 
 #endif /* GDBSTABS_H */
