@@ -49,7 +49,7 @@
 /* tm-umax.h assumes a 32082 fpu. We have a 32382 fpu. */
 
 #undef REGISTER_NAME
-#define REGISTER_NAME(REGNUM) ns32k_register_name_32382(REGNUM)
+#define REGISTER_NAME(REGNUM) ns32k_register_name_32382((REGNUM))
 
 #undef NUM_REGS
 #define NUM_REGS		29
@@ -61,18 +61,7 @@
   ((NUM_REGS - 4) * REGISTER_RAW_SIZE(R0_REGNUM) \
    + 8            * REGISTER_RAW_SIZE(LP0_REGNUM))
 
-/* Index within `registers' of the first byte of the space for
-   register N.  */
-
-/* This is a bit yuck. The even numbered double precision floating
-   point long registers occupy the same space as the even:odd numbered
-   single precision floating point registers, but the extra 32381 fpu
-   registers are at the end. Doing it this way is compatable for both
-   32081 and 32381 equiped machines. */
-
 #undef  REGISTER_BYTE
-#define REGISTER_BYTE(N) (((N) < LP0_REGNUM? (N)\
-			   : ((N) - LP0_REGNUM) & 1? (N) - 1 \
-			   : ((N) - LP0_REGNUM + FP0_REGNUM)) * 4)
+#define REGISTER_BYTE(N) ns32k_register_byte_32382 ((N))
 
 #endif /* TM_NBSD_H */

@@ -1,5 +1,20 @@
 2002-05-26  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* ns32k-tdep.c (ns32k_register_byte_32082,
+	ns32k_register_byte_32382, ns32k_register_raw_size,
+	ns32k_register_virtual_size, ns32k_register_virtual_type): New
+	functions.
+	* config/ns32k/tm-nbsd.h (REGISTER_BYTE): Define as
+	ns32k_register_byte_32382.
+	* config/ns32k/tm-umax.h: Update copyright years.
+	(REGISTER_BYTE): Define as ns32k_register_byte_32082.
+	(REGISTER_RAW_SIZE): Define as ns32k_register_raw_size.
+	(REGISTER_VIRTUAL_SIZE): Define as ns32k_register_virtual_size.
+	(REGISTER_VIRTUAL_TYPE): Define as ns32k_register_virtual_type.
+	(ns32k_get_enter_addr): Fix prototype.
+
+2002-05-26  Jason Thorpe  <thorpej@wasabisystems.com>
+
 	* ns32k-tdep.c: Update copyright years.
 	(ns32k_register_name_32082): New function.
 	(ns32k_register_name_32382): Ditto.

@@ -64,6 +64,59 @@ ns32k_register_name_32382 (int regno)
   return (register_names[regno]);
 }
 
+int
+ns32k_register_byte_32082 (int regno)
+{
+  if (regno >= LP0_REGNUM)
+    return (LP0_REGNUM * 4) + ((regno - LP0_REGNUM) * 8);
+
+  return (regno * 4);
+}
+
+int
+ns32k_register_byte_32382 (int regno)
+{
+  /* This is a bit yuk.  The even numbered double precision floating
+     point long registers occupy the same space as the even:odd numbered
+     single precision floating point registers, but the extra 32381 FPU
+     registers are at the end.  Doing it this way is compatible for both
+     32081 and 32381 equipped machines.  */
+
+  return ((regno < LP0_REGNUM ? regno
+           : (regno - LP0_REGNUM) & 1 ? regno - 1
+           : (regno - LP0_REGNUM + FP0_REGNUM)) * 4);
+}
+
+int
+ns32k_register_raw_size (int regno)
+{
+  /* All registers are 4 bytes, except for the doubled floating
+     registers.  */
+
+  return ((regno >= LP0_REGNUM) ? 8 : 4);
+}
+
+int
+ns32k_register_virtual_size (int regno)
+{
+  return ((regno >= LP0_REGNUM) ? 8 : 4);
+}
+
+struct type *
+ns32k_register_virtual_type (int regno)
+{
+  if (regno < FP0_REGNUM)
+    return (builtin_type_int);
+
+  if (regno < FP0_REGNUM + 8)
+    return (builtin_type_float);
+
+  if (regno < LP0_REGNUM)
+    return (builtin_type_int); 
+
+  return (builtin_type_double);
+}
+
 /* Advance PC across any function entry prologue instructions
    to reach some "real" code.  */
 

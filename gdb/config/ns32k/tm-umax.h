@@ -1,5 +1,5 @@
 /* Definitions to make GDB run on an encore under umax 4.2
-   Copyright 1987, 1989, 1991, 1993, 1994, 1998, 1999, 2000, 2001
+   Copyright 1987, 1989, 1991, 1993, 1994, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -106,21 +106,15 @@ extern char *ns32k_register_name_32382 (int);
 
 /* Index within `registers' of the first byte of the space for
    register N.  */
+extern int ns32k_register_byte_32082 (int);
+extern int ns32k_register_byte_32382 (int);
+#define REGISTER_BYTE(N) ns32k_register_byte_32082 ((N))
 
-#define REGISTER_BYTE(N) ((N) >= LP0_REGNUM ? \
-	LP0_REGNUM * 4 + ((N) - LP0_REGNUM) * 8 : (N) * 4)
+extern int ns32k_register_raw_size (int);
+#define REGISTER_RAW_SIZE(N) ns32k_register_raw_size ((N))
 
-/* Number of bytes of storage in the actual machine representation
-   for register N.  On the 32000, all regs are 4 bytes
-   except for the doubled floating registers. */
-
-#define REGISTER_RAW_SIZE(N) ((N) >= LP0_REGNUM ? 8 : 4)
-
-/* Number of bytes of storage in the program's representation
-   for register N.  On the 32000, all regs are 4 bytes
-   except for the doubled floating registers. */
-
-#define REGISTER_VIRTUAL_SIZE(N) ((N) >= LP0_REGNUM ? 8 : 4)
+extern int ns32k_register_virtual_size (int);
+#define REGISTER_VIRTUAL_SIZE(N) ns32k_register_virtual_size ((N))
 
 /* Largest value REGISTER_RAW_SIZE can have.  */
 
@@ -130,17 +124,8 @@ extern char *ns32k_register_name_32382 (int);
 
 #define MAX_REGISTER_VIRTUAL_SIZE 8
 
-/* Return the GDB type object for the "standard" data type
-   of data in register N.  */
-
-#define REGISTER_VIRTUAL_TYPE(N) \
-	(((N) < FP0_REGNUM) ?				\
-		builtin_type_int :			\
-		((N) < FP0_REGNUM + 8) ?		\
-			builtin_type_float :		\
-			((N) < LP0_REGNUM) ?		\
-				builtin_type_int :	\
-				builtin_type_double)
+struct type *ns32k_register_virtual_type (int);
+#define REGISTER_VIRTUAL_TYPE(N) ns32k_register_virtual_type ((N))
 
 /* Store the address of the place in which to copy the structure the
    subroutine will return.  This is called from call_function.
@@ -199,7 +184,7 @@ extern char *ns32k_register_name_32382 (int);
    Returns positive address > 1 if pc is between enter/exit,
    1 if pc before enter or after exit, 0 otherwise. */
 
-extern CORE_ADDR ns32k_get_enter_addr ();
+extern CORE_ADDR ns32k_get_enter_addr (CORE_ADDR);
 
 /* Return number of args passed to a frame.
    Can return -1, meaning no way to tell.  */
