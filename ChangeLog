@@ -1,3 +1,8 @@
+Mon Oct 27 13:17:24 1997  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* configure.in: Remove a "second pass" of tweaking noconfigdirs,
+	is no longer needed.
+
 Mon Oct 27 12:03:53 1997  Jason Merrill  <jason@yorick.cygnus.com>
 
 	* Makefile.in: check-target-libio depends on all-target-libstdc++.

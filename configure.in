@@ -640,13 +640,6 @@ case "${target}" in
     ;;    
 esac
 
-# targets that need a second pass
-case "${target}" in
-  *-gm-magic*)
-    noconfigdirs="$noconfigdirs target-libgloss"
-    ;;
-esac
-
 # If we aren't building newlib, then don't build libgloss, since libgloss
 # depends upon some newlib header files.
 case "${noconfigdirs}" in
