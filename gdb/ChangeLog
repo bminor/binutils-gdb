@@ -1,3 +1,9 @@
+2004-12-04  Daniel Jacobowitz  <dan@debian.org>
+
+	PR tui/1703
+	* linux-nat.c (linux_tracefork_child): Use _exit instead of exit.
+	Suggested by Joshua Neuheisel.
+
 2004-12-03  Randolph Chung  <tausq@debian.org>
 
 	* gdbarch.sh (instruction_nullified): Delete.

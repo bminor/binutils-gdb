@@ -147,7 +147,7 @@ linux_tracefork_child (void)
   ptrace (PTRACE_TRACEME, 0, 0, 0);
   kill (getpid (), SIGSTOP);
   fork ();
-  exit (0);
+  _exit (0);
 }
 
 /* Wrapper function for waitpid which handles EINTR.  */
