@@ -1,3 +1,7 @@
+Mon Apr  7 11:45:44 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* disassemble.c (disassembler): Handle m32r.
+
 Fri Apr  4 12:29:38 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* m32r-asm.c, m32r-dis.c, m32r-opc.c, m32r-opc.h: New files.
