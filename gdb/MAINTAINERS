@@ -263,6 +263,13 @@ sds protocol		Fernando Nasser		fnasser@cygnus.com
 rdi/adp protocol	Fernando Nasser		fnasser@cygnus.com
 documentation		Eli Zaretskii		eliz@gnu.org
 testsuite		Fernando Nasser		fnasser@cygnus.com
+  config                Mark Salter             msalter@redhat.com
+  lib                   Mark Salter             msalter@redhat.com
+  gdbtk (gdb.gdbtk)     Keith Seitz             keiths@redhat.com
+  mi tests (gdb.mi)     Elena Zannoni           ezannoni@redhat.com
+  stabs (gdb.satbs)     Elena Zannoni           ezannoni@redhat.com
+  threads (gdb.threads) Michael Snyder          msnyder@redhat.com
+  trace (gdb.trace)     Michael Snyder          msnyder@redhat.com
   hp tests (gdb.hp)	(vacant)
   Java tests (gdb.java)	Anthony Green 		green@cygnus.com
 Kernel Object Display	Fernando Nasser		fnasser@cygnus.com
