@@ -11,10 +11,6 @@
 ac_help=
 ac_default_prefix=/usr/local
 # Any additions from configure.in:
-ac_help="$ac_help
-  --enable-shared         use shared libraries"
-ac_help="$ac_help
-  --enable-gdbtk "
 
 # Initialize some variables set by options.
 # The variables have the same names as the options, with
@@ -462,7 +458,7 @@ echo > confdefs.h
 
 # A filename unique to this package, relative to the directory that
 # configure is in, which we can look for to find out if srcdir is correct.
-ac_unique_file=gdb.base
+ac_unique_file=javamisc.exp
 
 # Find the source files, if location was not specified.
 if test -z "$srcdir"; then
@@ -540,7 +536,7 @@ fi
 CC=${CC-cc}
 
 ac_aux_dir=
-for ac_dir in `cd $srcdir;pwd`/../.. $srcdir/`cd $srcdir;pwd`/../..; do
+for ac_dir in `cd $srcdir;pwd`/../../.. $srcdir/`cd $srcdir;pwd`/../../..; do
   if test -f $ac_dir/install-sh; then
     ac_aux_dir=$ac_dir
     ac_install_sh="$ac_aux_dir/install-sh -c"
@@ -552,7 +548,7 @@ for ac_dir in `cd $srcdir;pwd`/../.. $srcdir/`cd $srcdir;pwd`/../..; do
   fi
 done
 if test -z "$ac_aux_dir"; then
-  { echo "configure: error: can not find install-sh or install.sh in `cd $srcdir;pwd`/../.. $srcdir/`cd $srcdir;pwd`/../.." 1>&2; exit 1; }
+  { echo "configure: error: can not find install-sh or install.sh in `cd $srcdir;pwd`/../../.. $srcdir/`cd $srcdir;pwd`/../../.." 1>&2; exit 1; }
 fi
 ac_config_guess=$ac_aux_dir/config.guess
 ac_config_sub=$ac_aux_dir/config.sub
@@ -586,7 +582,7 @@ else { echo "configure: error: can not run $ac_config_sub" 1>&2; exit 1; }
 fi
 
 echo $ac_n "checking host system type""... $ac_c" 1>&6
-echo "configure:590: checking host system type" >&5
+echo "configure:586: checking host system type" >&5
 
 host_alias=$host
 case "$host_alias" in
@@ -607,7 +603,7 @@ host_os=`echo $host | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\3/'`
 echo "$ac_t""$host" 1>&6
 
 echo $ac_n "checking target system type""... $ac_c" 1>&6
-echo "configure:611: checking target system type" >&5
+echo "configure:607: checking target system type" >&5
 
 target_alias=$target
 case "$target_alias" in
@@ -625,7 +621,7 @@ target_os=`echo $target | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\3/'`
 echo "$ac_t""$target" 1>&6
 
 echo $ac_n "checking build system type""... $ac_c" 1>&6
-echo "configure:629: checking build system type" >&5
+echo "configure:625: checking build system type" >&5
 
 build_alias=$build
 case "$build_alias" in
@@ -646,110 +642,6 @@ test "$host_alias" != "$target_alias" &&
   test "$program_prefix$program_suffix$program_transform_name" = \
     NONENONEs,x,x, &&
   program_prefix=${target_alias}-
-
-
-# Directories to use in all configurations.
-configdirs="gdb.asm \
-            gdb.base \
-            gdb.c++ \
-            gdb.java \
-            gdb.disasm \
-            gdb.chill \
-            gdb.mi \
-            gdb.threads \
-            gdb.trace"
-
-
-# Directories to use for a configuration which uses stabs.
-stabsdirs="gdb.stabs"
-
-	# this section is for targets that use stabs
-# add stabs tests for appropriate targets
-case "${target}" in
-	powerpc-*-aix*)	configdirs="${configdirs} ${stabsdirs}" ;;
-	rs6000-*-aix*)	configdirs="${configdirs} ${stabsdirs}" ;;
-	*-*-bsd*)	configdirs="${configdirs} ${stabsdirs}" ;;
-	*-*-go32*)	configdirs="${configdirs} ${stabsdirs}" ;;
-	*-*-linux*)	configdirs="${configdirs} ${stabsdirs}" ;;
-	*-*-lynxos*)	configdirs="${configdirs} ${stabsdirs}" ;;
-	*-sun-*)	configdirs="${configdirs} ${stabsdirs}" ;;
-	hppa*-*-*)	configdirs="${configdirs} ${stabsdirs}" ;;
-	*-*-elf*)	configdirs="${configdirs} ${stabsdirs}" ;;
-	*)		if test "x${with_stabs}" = x"yes" ; then
-			  configdirs="${configdirs} ${stabsdirs}"
-			fi ;;
-esac
-
-# Directory with HP specific tests. They will run only with HP's compilers. 
-# These tests will not work on other platforms and compilers.
-
-hpdir="gdb.hp"
-
-case "${target}" in
- hppa*-*-hpux*) configdirs="${configdirs} ${hpdir}" ;;
-esac
-
-
-# Begin stuff to support --enable-shared
-# Check whether --enable-shared or --disable-shared was given.
-if test "${enable_shared+set}" = set; then
-  enableval="$enable_shared"
-  case "${enableval}" in
-  yes) shared=true ;;
-  no)  shared=false ;;
-  *) shared=true ;;
-esac
-fi
-RPATH_ENVVAR=LD_LIBRARY_PATH
-# If we have shared libraries, try to set RPATH_ENVVAR reasonably.
-if test "${shared}" = "true"; then
-  case "${host}" in
-  *-*-hpux*)
-    RPATH_ENVVAR=SHLIB_PATH
-    ;;
-  esac
-fi
-
-# End stuff to support --enable-shared
-# Start stuff to support --enable-gdbtk
-# Check whether --enable-gdbtk or --disable-gdbtk was given.
-if test "${enable_gdbtk+set}" = set; then
-  enableval="$enable_gdbtk"
-  case "${enableval}" in
-    yes)
-        case "$host" in
-        *go32*)
-            enable_gdbtk=no ;;
-        *windows*)
-            enable_gdbtk=no ;;
-        *)
-            enable_gdbtk=yes ;;
-        esac ;;
-    no)
-        enable_gdbtk=no  ;;
-    *)
-        { echo "configure: error: bad value ${enableval} given for gdbtk option" 1>&2; exit 1; } ;;
-esac
-else
-  
-# Default is on for everything but go32 and windows
-case "$host" in
-    *go32* | *windows*)
-        ;;
-    *)
-        enable_gdbtk=yes ;;
-    esac
-
-fi
-
-
-if test "${enable_gdbtk}" = "yes"; then
-    configdirs="${configdirs} gdb.gdbtk"
-fi
-# End stuff to support --enable-shared
-
-# configure the subdirectories too
-subdirs="$configdirs"
 
 
 trap '' 1 2 15
@@ -912,8 +804,6 @@ s%@build_alias@%$build_alias%g
 s%@build_cpu@%$build_cpu%g
 s%@build_vendor@%$build_vendor%g
 s%@build_os@%$build_os%g
-s%@RPATH_ENVVAR@%$RPATH_ENVVAR%g
-s%@subdirs@%$subdirs%g
 
 CEOF
 EOF
@@ -1020,97 +910,4 @@ EOF
 chmod +x $CONFIG_STATUS
 rm -fr confdefs* $ac_clean_files
 test "$no_create" = yes || ${CONFIG_SHELL-/bin/sh} $CONFIG_STATUS || exit 1
-
-if test "$no_recursion" != yes; then
-
-  # Remove --cache-file and --srcdir arguments so they do not pile up.
-  ac_sub_configure_args=
-  ac_prev=
-  for ac_arg in $ac_configure_args; do
-    if test -n "$ac_prev"; then
-      ac_prev=
-      continue
-    fi
-    case "$ac_arg" in
-    -cache-file | --cache-file | --cache-fil | --cache-fi \
-    | --cache-f | --cache- | --cache | --cach | --cac | --ca | --c)
-      ac_prev=cache_file ;;
-    -cache-file=* | --cache-file=* | --cache-fil=* | --cache-fi=* \
-    | --cache-f=* | --cache-=* | --cache=* | --cach=* | --cac=* | --ca=* | --c=*)
-      ;;
-    -srcdir | --srcdir | --srcdi | --srcd | --src | --sr)
-      ac_prev=srcdir ;;
-    -srcdir=* | --srcdir=* | --srcdi=* | --srcd=* | --src=* | --sr=*)
-      ;;
-    *) ac_sub_configure_args="$ac_sub_configure_args $ac_arg" ;;
-    esac
-  done
-
-  for ac_config_dir in $configdirs; do
-
-    # Do not complain, so a configure script can configure whichever
-    # parts of a large source tree are present.
-    if test ! -d $srcdir/$ac_config_dir; then
-      continue
-    fi
-
-    echo configuring in $ac_config_dir
-
-    case "$srcdir" in
-    .) ;;
-    *)
-      if test -d ./$ac_config_dir || mkdir ./$ac_config_dir; then :;
-      else
-        { echo "configure: error: can not create `pwd`/$ac_config_dir" 1>&2; exit 1; }
-      fi
-      ;;
-    esac
-
-    ac_popdir=`pwd`
-    cd $ac_config_dir
-
-      # A "../" for each directory in /$ac_config_dir.
-      ac_dots=`echo $ac_config_dir|sed -e 's%^\./%%' -e 's%[^/]$%&/%' -e 's%[^/]*/%../%g'`
-
-    case "$srcdir" in
-    .) # No --srcdir option.  We are building in place.
-      ac_sub_srcdir=$srcdir ;;
-    /*) # Absolute path.
-      ac_sub_srcdir=$srcdir/$ac_config_dir ;;
-    *) # Relative path.
-      ac_sub_srcdir=$ac_dots$srcdir/$ac_config_dir ;;
-    esac
-
-    # Check for guested configure; otherwise get Cygnus style configure.
-    if test -f $ac_sub_srcdir/configure; then
-      ac_sub_configure=$ac_sub_srcdir/configure
-    elif test -f $ac_sub_srcdir/configure.in; then
-      ac_sub_configure=$ac_configure
-    else
-      echo "configure: warning: no configuration information is in $ac_config_dir" 1>&2
-      ac_sub_configure=
-    fi
-
-    # The recursion is here.
-    if test -n "$ac_sub_configure"; then
-
-      # Make the cache file name correct relative to the subdirectory.
-      case "$cache_file" in
-      /*) ac_sub_cache_file=$cache_file ;;
-      *) # Relative path.
-        ac_sub_cache_file="$ac_dots$cache_file" ;;
-      esac
-
-      echo "running ${CONFIG_SHELL-/bin/sh} $ac_sub_configure $ac_sub_configure_args --cache-file=$ac_sub_cache_file --srcdir=$ac_sub_srcdir"
-      # The eval makes quoting arguments work.
-      if eval ${CONFIG_SHELL-/bin/sh} $ac_sub_configure $ac_sub_configure_args --cache-file=$ac_sub_cache_file --srcdir=$ac_sub_srcdir
-      then :
-      else
-        { echo "configure: error: $ac_sub_configure failed for $ac_config_dir" 1>&2; exit 1; }
-      fi
-    fi
-
-    cd $ac_popdir
-  done
-fi
 
