@@ -1,3 +1,8 @@
+Fri Sep 11 18:28:28 1992  Roland H. Pesch  (pesch@fowanton.cygnus.com)
+
+	* doc/gdbinv-s.m4.in: remove text on special procedures to continue 
+	after explicit call to breakpoint() in serial stubs.
+
 Fri Sep 11 01:34:25 1992  John Gilmore  (gnu@sphagnum.cygnus.com)
 
 	* mipsread.c:  Clean up some white space.
