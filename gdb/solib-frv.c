@@ -165,7 +165,7 @@ fetch_loadmap (CORE_ADDR ldmaddr)
 	                            sizeof (ext_ldmbuf->segs[seg].p_memsz));
     }
 
-  free (ext_ldmbuf);
+  xfree (ext_ldmbuf);
   return int_ldmbuf;
 }
 
@@ -375,7 +375,7 @@ lm_base (void)
   if (solib_frv_debug)
     fprintf_unfiltered (gdb_stdlog,
 			"lm_base: _GLOBAL_OFFSET_TABLE_ + 8 = %s\n",
-			local_hex_string_custom (addr, "08l"));
+			hex_string_custom (addr, 8));
 
   if (target_read_memory (addr, buf, sizeof buf) != 0)
     return 0;
@@ -384,7 +384,7 @@ lm_base (void)
   if (solib_frv_debug)
     fprintf_unfiltered (gdb_stdlog,
 			"lm_base: lm_base_cache = %s\n",
-			local_hex_string_custom (lm_base_cache, "08l"));
+			hex_string_custom (lm_base_cache, 8));
 
   return lm_base_cache;
 }
@@ -431,7 +431,7 @@ frv_current_sos (void)
       if (solib_frv_debug)
 	fprintf_unfiltered (gdb_stdlog,
 			    "current_sos: reading link_map entry at %s\n",
-			    local_hex_string_custom (lm_addr, "08l"));
+			    hex_string_custom (lm_addr, 8));
 
       if (target_read_memory (lm_addr, (char *) &lm_buf, sizeof (lm_buf)) != 0)
 	{
@@ -670,14 +670,13 @@ enable_break2 (void)
       if (solib_frv_debug)
 	fprintf_unfiltered (gdb_stdlog,
 	                    "enable_break: interp_loadmap_addr = %s\n",
-			    local_hex_string_custom (interp_loadmap_addr,
-			                             "08l"));
+			    hex_string_custom (interp_loadmap_addr, 8));
 
       ldm = fetch_loadmap (interp_loadmap_addr);
       if (ldm == NULL)
 	{
 	  warning ("Unable to load dynamic linker loadmap at address %s\n",
-	           local_hex_string_custom (interp_loadmap_addr, "08l"));
+	           hex_string_custom (interp_loadmap_addr, 8));
 	  enable_break_failure_warning ();
 	  bfd_close (tmp_bfd);
 	  return 0;
@@ -718,20 +717,20 @@ enable_break2 (void)
       if (solib_frv_debug)
 	fprintf_unfiltered (gdb_stdlog,
 	                    "enable_break: _dl_debug_addr (prior to relocation) = %s\n",
-			    local_hex_string_custom (addr, "08l"));
+			    hex_string_custom (addr, 8));
 
       addr += displacement_from_map (ldm, addr);
 
       if (solib_frv_debug)
 	fprintf_unfiltered (gdb_stdlog,
 	                    "enable_break: _dl_debug_addr (after relocation) = %s\n",
-			    local_hex_string_custom (addr, "08l"));
+			    hex_string_custom (addr, 8));
 
       /* Fetch the address of the r_debug struct.  */
       if (target_read_memory (addr, addr_buf, sizeof addr_buf) != 0)
 	{
 	  warning ("Unable to fetch contents of _dl_debug_addr (at address %s) from dynamic linker",
-	           local_hex_string_custom (addr, "08l"));
+	           hex_string_custom (addr, 8));
 	}
       addr = extract_unsigned_integer (addr_buf, sizeof addr_buf);
 
@@ -740,7 +739,7 @@ enable_break2 (void)
       if (target_read_memory (addr + 8, addr_buf, sizeof addr_buf) != 0)
 	{
 	  warning ("Unable to fetch _dl_debug_addr->r_brk (at address %s) from dynamic linker",
-	           local_hex_string_custom (addr + 8, "08l"));
+	           hex_string_custom (addr + 8, 8));
 	  enable_break_failure_warning ();
 	  bfd_close (tmp_bfd);
 	  return 0;
@@ -751,7 +750,7 @@ enable_break2 (void)
       if (target_read_memory (addr, addr_buf, sizeof addr_buf) != 0)
 	{
 	  warning ("Unable to fetch _dl_debug_addr->.r_brk entry point (at address %s) from dynamic linker",
-	           local_hex_string_custom (addr, "08l"));
+	           hex_string_custom (addr, 8));
 	  enable_break_failure_warning ();
 	  bfd_close (tmp_bfd);
 	  return 0;
@@ -799,8 +798,8 @@ enable_break (void)
       if (solib_frv_debug)
 	fprintf_unfiltered (gdb_stdlog,
 			    "enable_break: solib event breakpoint placed at entry point: %s\n",
-			    local_hex_string_custom
-			      (symfile_objfile->ei.entry_point, "08l"));
+			    hex_string_custom
+			      (symfile_objfile->ei.entry_point, 8));
     }
   else
     {
@@ -1221,10 +1220,11 @@ _initialize_frv_solib (void)
   current_target_so_ops = &frv_so_ops;
 
   /* Debug this file's internals.  */
-  add_show_from_set (add_set_cmd ("solib-frv", class_maintenance, var_zinteger,
-				  &solib_frv_debug,
+  deprecated_add_show_from_set
+    (add_set_cmd ("solib-frv", class_maintenance, var_zinteger,
+		  &solib_frv_debug,
 "Set internal debugging of shared library code for FR-V.\n"
 "When non-zero, FR-V solib specific internal debugging is enabled.",
-                                  &setdebuglist),
-		     &showdebuglist);
+		  &setdebuglist),
+     &showdebuglist);
 }

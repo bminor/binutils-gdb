@@ -1,6 +1,6 @@
 /* BFD back-end for Intel i860 COFF files.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1999, 2000, 2001, 2002, 2003
-   Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1999, 2000, 2001, 2002,
+   2003, 2004 Free Software Foundation, Inc.
    Created mostly by substituting "860" for "386" in coff-i386.c
    Harry Dolan <dolan@ssd.intel.com>, October 1995
 
@@ -607,8 +607,8 @@ i860_reloc_processing (arelent *cache_ptr, struct internal_reloc *dst,
 	  if (dst->r_symndx < 0 || dst->r_symndx >= obj_conv_table_size (abfd))
 	    {
 	      (*_bfd_error_handler)
-		(_("%s: warning: illegal symbol index %ld in relocs"),
-		 bfd_archive_filename (abfd), dst->r_symndx);
+		(_("%B: warning: illegal symbol index %ld in relocs"),
+		 abfd, dst->r_symndx);
 	      cache_ptr->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
 	      ptr = NULL;
 	    }

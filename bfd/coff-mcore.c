@@ -1,5 +1,6 @@
 /* BFD back-end for Motorola MCore COFF/PE
-   Copyright 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004
+   Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -284,8 +285,8 @@ mcore_coff_unsupported_reloc (abfd, reloc_entry, symbol, data, input_section,
 {
   BFD_ASSERT (reloc_entry->howto != (reloc_howto_type *)0);
 
-  _bfd_error_handler (_("%s: Relocation %s (%d) is not currently supported.\n"),
-		      bfd_archive_filename (abfd),
+  _bfd_error_handler (_("%B: Relocation %s (%d) is not currently supported.\n"),
+		      abfd,
 		      reloc_entry->howto->name,
 		      reloc_entry->howto->type);
 
@@ -399,8 +400,8 @@ coff_mcore_relocate_section (output_bfd, info, input_bfd, input_section,
       && output_bfd->xvec->byteorder != BFD_ENDIAN_UNKNOWN)
     {
       (*_bfd_error_handler)
-	(_("%s: compiled for a %s system and target is %s.\n"),
-	 bfd_archive_filename (input_bfd),
+	(_("%B: compiled for a %s system and target is %s.\n"),
+	 input_bfd,
          bfd_big_endian (input_bfd) ? _("big endian") : _("little endian"),
          bfd_big_endian (output_bfd) ? _("big endian") : _("little endian"));
 
@@ -506,21 +507,18 @@ coff_mcore_relocate_section (output_bfd, info, input_bfd, input_section,
       switch (r_type)
 	{
 	default:
-	  _bfd_error_handler (_("%s: unsupported relocation type 0x%02x"),
-			      bfd_archive_filename (input_bfd), r_type);
+	  _bfd_error_handler (_("%B: unsupported relocation type 0x%02x"),
+			      input_bfd, r_type);
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 
 	case IMAGE_REL_MCORE_ABSOLUTE:
-	  fprintf (stderr,
-		   _("Warning: unsupported reloc %s <file %s, section %s>\n"),
-		   howto->name,
-		   bfd_archive_filename (input_bfd),
-		   input_section->name);
-
-	  fprintf (stderr,"sym %ld (%s), r_vaddr %ld (%lx)\n",
-		   rel->r_symndx, my_name, (long) rel->r_vaddr,
-		   (unsigned long) rel->r_vaddr);
+	  _bfd_error_handler
+	    (_("Warning: unsupported reloc %s <file %B, section %A>\n"
+	       "sym %ld (%s), r_vaddr %ld (%lx)"),
+	     input_bfd, input_section, howto->name,
+	     rel->r_symndx, my_name, (long) rel->r_vaddr,
+	     (unsigned long) rel->r_vaddr);
 	  break;
 
 	case IMAGE_REL_MCORE_PCREL_IMM8BY4:

@@ -721,27 +721,12 @@ elf32_cr16c_relocate_section (bfd *output_bfd,
 	}
       else
 	{
-	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-	  while (h->root.type == bfd_link_hash_indirect
-		 || h->root.type == bfd_link_hash_warning)
-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
-	  if (h->root.type == bfd_link_hash_defined
-	      || h->root.type == bfd_link_hash_defweak)
-	    {
-	      sec = h->root.u.def.section;
-	      relocation = (h->root.u.def.value
-			    + sec->output_section->vma + sec->output_offset);
-	    }
-	  else if (h->root.type == bfd_link_hash_undefweak)
-	    relocation = 0;
-	  else
-	    {
-	      if (!((*info->callbacks->undefined_symbol)
-		    (info, h->root.root.string, input_bfd,
-		     input_section, rel->r_offset, TRUE)))
-		return FALSE;
-	      relocation = 0;
-	    }
+	  bfd_boolean unresolved_reloc, warned;
+
+	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
+				   r_symndx, symtab_hdr, sym_hashes,
+				   h, sec, relocation,
+				   unresolved_reloc, warned);
 	}
 
       r = cr16c_elf_final_link_relocate (howto, input_bfd, output_bfd,
@@ -944,7 +929,7 @@ elf32_cr16c_symbol_processing (bfd *abfd ATTRIBUTE_UNUSED,
 static bfd_boolean
 elf32_cr16c_add_symbol_hook (bfd *abfd,
 			     struct bfd_link_info *info ATTRIBUTE_UNUSED,
-			     const Elf_Internal_Sym *sym,
+			     Elf_Internal_Sym *sym,
 			     const char **namep ATTRIBUTE_UNUSED,
 			     flagword *flagsp ATTRIBUTE_UNUSED,
 			     asection **secp,

@@ -194,8 +194,11 @@ const struct powerpc_operand powerpc_operands[] =
 #define BOE BO + 1
   { 5, 21, insert_boe, extract_boe, 0 },
 
+#define BH BOE + 1
+  { 2, 11, 0, 0, PPC_OPERAND_OPTIONAL },
+
   /* The BT field in an X or XL form instruction.  */
-#define BT BOE + 1
+#define BT BH + 1
   { 5, 21, 0, 0, PPC_OPERAND_CR },
 
   /* The condition register number portion of the BI field in a B form
@@ -297,7 +300,7 @@ const struct powerpc_operand powerpc_operands[] =
 
   /* The L field in a D or X form instruction.  */
 #define L FXM4 + 1
-  { 1, 21, 0, 0, PPC_OPERAND_OPTIONAL },
+  { 1, 21, 0, 0, 0 },
 
   /* The LEV field in a POWER SC form instruction.  */
 #define LEV L + 1
@@ -995,17 +998,33 @@ insert_fxm (unsigned long insn,
 	    int dialect,
 	    const char **errmsg)
 {
+  /* If we're handling the mfocrf and mtocrf insns ensure that exactly
+     one bit of the mask field is set.  */
+  if ((insn & (1 << 20)) != 0)
+    {
+      if (value == 0 || (value & -value) != value)
+	{
+	  *errmsg = _("invalid mask field");
+	  value = 0;
+	}
+    }
+
   /* If the optional field on mfcr is missing that means we want to use
      the old form of the instruction that moves the whole cr.  In that
      case we'll have VALUE zero.  There doesn't seem to be a way to
      distinguish this from the case where someone writes mfcr %r3,0.  */
-  if (value == 0)
+  else if (value == 0)
     ;
 
   /* If only one bit of the FXM field is set, we can use the new form
      of the instruction, which is faster.  Unlike the Power4 branch hint
-     encoding, this is not backward compatible.  */
-  else if ((dialect & PPC_OPCODE_POWER4) != 0 && (value & -value) == value)
+     encoding, this is not backward compatible.  Do not generate the
+     new form unless -mpower4 has been given, or -many and the two
+     operand form of mfcr was used.  */
+  else if ((value & -value) == value
+	   && ((dialect & PPC_OPCODE_POWER4) != 0
+	       || ((dialect & PPC_OPCODE_ANY) != 0
+		   && (insn & (0x3ff << 1)) == 19 << 1)))
     insn |= 1 << 20;
 
   /* Any other value on mfcr is an error.  */
@@ -1020,7 +1039,7 @@ insert_fxm (unsigned long insn,
 
 static long
 extract_fxm (unsigned long insn,
-	     int dialect,
+	     int dialect ATTRIBUTE_UNUSED,
 	     int *invalid)
 {
   long mask = (insn >> 12) & 0xff;
@@ -1028,14 +1047,9 @@ extract_fxm (unsigned long insn,
   /* Is this a Power4 insn?  */
   if ((insn & (1 << 20)) != 0)
     {
-      if ((dialect & PPC_OPCODE_POWER4) == 0)
+      /* Exactly one bit of MASK should be set.  */
+      if (mask == 0 || (mask & -mask) != mask)
 	*invalid = 1;
-      else
-	{
-	  /* Exactly one bit of MASK should be set.  */
-	  if (mask == 0 || (mask & -mask) != mask)
-	    *invalid = 1;
-	}
     }
 
   /* Check that non-power4 form of mfcr has a zero MASK.  */
@@ -1585,8 +1599,8 @@ extract_tbr (unsigned long insn,
 /* An XRTRA_MASK, but with L bit clear.  */
 #define XRTLRA_MASK (XRTRA_MASK & ~((unsigned long) 1 << 21))
 
-/* An X form comparison instruction.  */
-#define XCMPL(op, xop, l) (X ((op), (xop)) | ((((unsigned long)(l)) & 1) << 21))
+/* An X form instruction with the L bit specified.  */
+#define XOPL(op, xop, l) (X ((op), (xop)) | ((((unsigned long)(l)) & 1) << 21))
 
 /* The mask for an X form comparison instruction.  */
 #define XCMP_MASK (X_MASK | (((unsigned long)1) << 22))
@@ -1651,6 +1665,9 @@ extract_tbr (unsigned long insn,
 #define XLYBB_MASK (XLYLK_MASK | BB_MASK)
 #define XLBOCBBB_MASK (XLOCB_MASK | BB_MASK)
 
+/* A mask for branch instructions using the BH field.  */
+#define XLBH_MASK (XL_MASK | (0x1c << 11))
+
 /* An XL_MASK with the BO and BB fields fixed.  */
 #define XLBOBB_MASK (XL_MASK | BO_MASK | BB_MASK)
 
@@ -1670,11 +1687,12 @@ extract_tbr (unsigned long insn,
 #define XS_MASK XS (0x3f, 0x1ff, 1)
 
 /* A mask for the FXM version of an XFX form instruction.  */
-#define XFXFXM_MASK (X_MASK | (1 << 11))
+#define XFXFXM_MASK (X_MASK | (1 << 11) | (1 << 20))
 
 /* An XFX form instruction with the FXM field filled in.  */
-#define XFXM(op, xop, fxm) \
-  (X ((op), (xop)) | ((((unsigned long)(fxm)) & 0xff) << 12))
+#define XFXM(op, xop, fxm, p4) \
+  (X ((op), (xop)) | ((((unsigned long)(fxm)) & 0xff) << 12) \
+   | ((unsigned long)(p4) << 20))
 
 /* An XFX form instruction with the SPR field filled in.  */
 #define XSPR(op, xop, spr) \
@@ -1764,7 +1782,7 @@ extract_tbr (unsigned long insn,
 #define PPC440	PPC_OPCODE_440
 #define PPC750	PPC
 #define PPC860	PPC
-#define PPCVEC	PPC_OPCODE_ALTIVEC | PPC_OPCODE_PPC
+#define PPCVEC	PPC_OPCODE_ALTIVEC
 #define	POWER   PPC_OPCODE_POWER
 #define	POWER2	PPC_OPCODE_POWER | PPC_OPCODE_POWER2
 #define PPCPWR2	PPC_OPCODE_PPC | PPC_OPCODE_POWER | PPC_OPCODE_POWER2
@@ -2878,12 +2896,12 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "bdzflrl", XLO(19,BODZF,16,1), XLBOBB_MASK, PPCCOM,	{ BI } },
 { "bdzflrl-",XLO(19,BODZF,16,1), XLBOBB_MASK, NOPOWER4,	{ BI } },
 { "bdzflrl+",XLO(19,BODZFP,16,1), XLBOBB_MASK, NOPOWER4, { BI } },
-{ "bclr",    XLLK(19,16,0), XLYBB_MASK,	PPCCOM,		{ BO, BI } },
-{ "bclrl",   XLLK(19,16,1), XLYBB_MASK,	PPCCOM,		{ BO, BI } },
 { "bclr+",   XLYLK(19,16,1,0), XLYBB_MASK, PPCCOM,	{ BOE, BI } },
 { "bclrl+",  XLYLK(19,16,1,1), XLYBB_MASK, PPCCOM,	{ BOE, BI } },
 { "bclr-",   XLYLK(19,16,0,0), XLYBB_MASK, PPCCOM,	{ BOE, BI } },
 { "bclrl-",  XLYLK(19,16,0,1), XLYBB_MASK, PPCCOM,	{ BOE, BI } },
+{ "bclr",    XLLK(19,16,0), XLBH_MASK,	PPCCOM,		{ BO, BI, BH } },
+{ "bclrl",   XLLK(19,16,1), XLBH_MASK,	PPCCOM,		{ BO, BI, BH } },
 { "bcr",     XLLK(19,16,0), XLBB_MASK,	PWRCOM,		{ BO, BI } },
 { "bcrl",    XLLK(19,16,1), XLBB_MASK,	PWRCOM,		{ BO, BI } },
 { "bclre",   XLLK(19,17,0), XLBB_MASK,	BOOKE64,	{ BO, BI } },
@@ -3062,12 +3080,12 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "bfctrl-", XLO(19,BOFM4,528,1), XLBOBB_MASK, POWER4, { BI } },
 { "bfctrl+", XLO(19,BOFP,528,1), XLBOBB_MASK, NOPOWER4, { BI } },
 { "bfctrl+", XLO(19,BOFP4,528,1), XLBOBB_MASK, POWER4, { BI } },
-{ "bcctr",   XLLK(19,528,0),     XLYBB_MASK,  PPCCOM,	{ BO, BI } },
 { "bcctr-",  XLYLK(19,528,0,0),  XLYBB_MASK,  PPCCOM,	{ BOE, BI } },
 { "bcctr+",  XLYLK(19,528,1,0),  XLYBB_MASK,  PPCCOM,	{ BOE, BI } },
-{ "bcctrl",  XLLK(19,528,1),     XLYBB_MASK,  PPCCOM,	{ BO, BI } },
 { "bcctrl-", XLYLK(19,528,0,1),  XLYBB_MASK,  PPCCOM,	{ BOE, BI } },
 { "bcctrl+", XLYLK(19,528,1,1),  XLYBB_MASK,  PPCCOM,	{ BOE, BI } },
+{ "bcctr",   XLLK(19,528,0),     XLBH_MASK,   PPCCOM,	{ BO, BI, BH } },
+{ "bcctrl",  XLLK(19,528,1),     XLBH_MASK,   PPCCOM,	{ BO, BI, BH } },
 { "bcc",     XLLK(19,528,0),     XLBB_MASK,   PWRCOM,	{ BO, BI } },
 { "bccl",    XLLK(19,528,1),     XLBB_MASK,   PWRCOM,	{ BO, BI } },
 { "bcctre",  XLLK(19,529,0),     XLYBB_MASK,  BOOKE64,	{ BO, BI } },
@@ -3146,8 +3164,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "rldcr",   MDS(30,9,0), MDS_MASK,	PPC64,		{ RA, RS, RB, ME6 } },
 { "rldcr.",  MDS(30,9,1), MDS_MASK,	PPC64,		{ RA, RS, RB, ME6 } },
 
-{ "cmpw",    XCMPL(31,0,0), XCMPL_MASK, PPCCOM,		{ OBF, RA, RB } },
-{ "cmpd",    XCMPL(31,0,1), XCMPL_MASK, PPC64,		{ OBF, RA, RB } },
+{ "cmpw",    XOPL(31,0,0), XCMPL_MASK, PPCCOM,		{ OBF, RA, RB } },
+{ "cmpd",    XOPL(31,0,1), XCMPL_MASK, PPC64,		{ OBF, RA, RB } },
 { "cmp",     X(31,0),	XCMP_MASK,	PPC,		{ BF, L, RA, RB } },
 { "cmp",     X(31,0),	XCMPL_MASK,	PWRCOM,		{ BF, RA, RB } },
 
@@ -3216,6 +3234,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "iseleq",  X(31,79),      X_MASK,	PPCISEL,	{ RT, RA, RB } },
 { "isel",    XISEL(31,15),  XISEL_MASK,	PPCISEL,	{ RT, RA, RB, CRB } },
 
+{ "mfocrf",  XFXM(31,19,0,1), XFXFXM_MASK, COM,		{ RT, FXM } },
 { "mfcr",    X(31,19),	XRARB_MASK,	NOPOWER4,	{ RT } },
 { "mfcr",    X(31,19),	XFXFXM_MASK,	POWER4,		{ RT, FXM4 } },
 
@@ -3252,8 +3271,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 { "lwzxe",   X(31,31),	X_MASK,		BOOKE64,	{ RT, RA0, RB } },
 
-{ "cmplw",   XCMPL(31,32,0), XCMPL_MASK, PPCCOM,	{ OBF, RA, RB } },
-{ "cmpld",   XCMPL(31,32,1), XCMPL_MASK, PPC64,		{ OBF, RA, RB } },
+{ "cmplw",   XOPL(31,32,0), XCMPL_MASK, PPCCOM,	{ OBF, RA, RB } },
+{ "cmpld",   XOPL(31,32,1), XCMPL_MASK, PPC64,		{ OBF, RA, RB } },
 { "cmpl",    X(31,32),	XCMP_MASK,	 PPC,		{ BF, L, RA, RB } },
 { "cmpl",    X(31,32),	XCMPL_MASK,	 PWRCOM,	{ BF, RA, RB } },
 
@@ -3371,7 +3390,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 { "dcbtstlse",X(31,142),X_MASK,		PPCCHLK64,	{ CT, RA, RB }},
 
-{ "mtcr",    XFXM(31,144,0xff), XRARB_MASK, COM,	{ RS }},
+{ "mtocrf",  XFXM(31,144,0,1), XFXFXM_MASK, COM,	{ FXM, RS } },
+{ "mtcr",    XFXM(31,144,0xff,0), XRARB_MASK, COM,	{ RS }},
 { "mtcrf",   X(31,144),	XFXFXM_MASK,	COM,		{ FXM, RS } },
 
 { "mtmsr",   X(31,146),	XRARB_MASK,	COM,		{ RS } },
@@ -4303,6 +4323,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 { "tlbli",   X(31,1010), XRTRA_MASK,	PPC,		{ RB } },
 
+{ "dcbzl",   XOPL(31,1014,1), XRT_MASK,POWER4,            { RA, RB } },
 { "dcbz",    X(31,1014), XRT_MASK,	PPC,		{ RA, RB } },
 { "dclz",    X(31,1014), XRT_MASK,	PPC,		{ RA, RB } },
 

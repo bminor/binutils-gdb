@@ -1,7 +1,7 @@
 /* Target-dependent code for GDB, the GNU debugger.
 
    Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   1997, 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -114,8 +114,8 @@ static int ppc_linux_at_sigtramp_return_path (CORE_ADDR pc);
 /* Determine if pc is in a signal trampoline...
 
    Ha!  That's not what this does at all.  wait_for_inferior in
-   infrun.c calls DEPRECATED_PC_IN_SIGTRAMP in order to detect entry
-   into a signal trampoline just after delivery of a signal.  But on
+   infrun.c calls get_frame_type() in order to detect entry into a
+   signal trampoline just after delivery of a signal.  But on
    GNU/Linux, signal trampolines are used for the return path only.
    The kernel sets things up so that the signal handler is called
    directly.
@@ -146,20 +146,9 @@ static int ppc_linux_at_sigtramp_return_path (CORE_ADDR pc);
    signal is delivered while stepping, the next instruction that
    would've been stepped over isn't, instead a signal is delivered and
    the first instruction of the handler is stepped over instead.  That
-   puts us on the second instruction.  (I added the test for the
-   first instruction long after the fact, just in case the observed
-   behavior is ever fixed.)
-
-   DEPRECATED_PC_IN_SIGTRAMP is called from blockframe.c as well in
-   order to set the frame's type (if a SIGTRAMP_FRAME).  Because of
-   our strange definition of in_sigtramp below, we can't rely on the
-   frame's type getting set correctly from within blockframe.c.  This
-   is why we take pains to set it in init_extra_frame_info().
-
-   NOTE: cagney/2002-11-10: I suspect the real problem here is that
-   the get_prev_frame() only initializes the frame's type after the
-   call to INIT_FRAME_INFO.  get_prev_frame() should be fixed, this
-   code shouldn't be working its way around a bug :-(.  */
+   puts us on the second instruction.  (I added the test for the first
+   instruction long after the fact, just in case the observed behavior
+   is ever fixed.)  */
 
 int
 ppc_linux_in_sigtramp (CORE_ADDR pc, char *func_name)
@@ -848,24 +837,12 @@ ppc64_linux_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
   return addr;
 }
 
-
-enum {
-  ELF_NGREG = 48,
-  ELF_NFPREG = 33,
-  ELF_NVRREG = 33
-};
-
-enum {
-  ELF_FPREGSET_SIZE = (ELF_NFPREG * 8)
-};
-
 static void
 right_supply_register (struct regcache *regcache, int wordsize, int regnum,
 		       const bfd_byte *buf)
 {
   regcache_raw_supply (regcache, regnum,
-		       (buf + wordsize
-			- register_size (current_gdbarch, regnum)));
+		       (buf + wordsize - register_size (current_gdbarch, regnum)));
 }
 
 /* Extract the register values found in the WORDSIZED ABI GREGSET,
@@ -882,8 +859,10 @@ ppc_linux_supply_gregset (struct regcache *regcache,
   struct gdbarch_tdep *regcache_tdep = gdbarch_tdep (regcache_arch);
   const bfd_byte *buf = gregs;
 
-  for (regi = 0; regi < 32; regi++)
-    right_supply_register (regcache, wordsize, regi, buf + wordsize * regi);
+  for (regi = 0; regi < ppc_num_gprs; regi++)
+    right_supply_register (regcache, wordsize,
+                           regcache_tdep->ppc_gp0_regnum + regi,
+                           buf + wordsize * regi);
 
   right_supply_register (regcache, wordsize, gdbarch_pc_regnum (regcache_arch),
 			 buf + wordsize * PPC_LINUX_PT_NIP);
@@ -954,7 +933,7 @@ ppc_linux_sigtramp_cache (struct frame_info *next_frame, void **this_cache)
   fpregs = gpregs + 48 * tdep->wordsize;
 
   /* General purpose.  */
-  for (i = 0; i < 32; i++)
+  for (i = 0; i < ppc_num_gprs; i++)
     {
       int regnum = i + tdep->ppc_gp0_regnum;
       cache->saved_regs[regnum].addr = gpregs + i * tdep->wordsize;
@@ -966,12 +945,16 @@ ppc_linux_sigtramp_cache (struct frame_info *next_frame, void **this_cache)
   cache->saved_regs[tdep->ppc_cr_regnum].addr = gpregs + 38 * tdep->wordsize;
 
   /* Floating point registers.  */
-  for (i = 0; i < 32; i++)
+  if (ppc_floating_point_unit_p (gdbarch))
     {
-      int regnum = i + FP0_REGNUM;
-      cache->saved_regs[regnum].addr = fpregs + i * tdep->wordsize;
+      for (i = 0; i < ppc_num_fprs; i++)
+        {
+          int regnum = i + tdep->ppc_fp0_regnum;
+          cache->saved_regs[regnum].addr = fpregs + i * tdep->wordsize;
+        }
+      cache->saved_regs[tdep->ppc_fpscr_regnum].addr
+        = fpregs + 32 * tdep->wordsize;
     }
-  cache->saved_regs[tdep->ppc_fpscr_regnum].addr = fpregs + 32 * tdep->wordsize;
 
   return cache;
 }
@@ -994,8 +977,8 @@ ppc_linux_sigtramp_prev_register (struct frame_info *next_frame,
 {
   struct ppc_linux_sigtramp_cache *info
     = ppc_linux_sigtramp_cache (next_frame, this_cache);
-  trad_frame_prev_register (next_frame, info->saved_regs, regnum,
-			    optimizedp, lvalp, addrp, realnump, valuep);
+  trad_frame_get_prev_register (next_frame, info->saved_regs, regnum,
+				optimizedp, lvalp, addrp, realnump, valuep);
 }
 
 static const struct frame_unwind ppc_linux_sigtramp_unwind =
@@ -1040,13 +1023,18 @@ ppc_linux_supply_fpregset (const struct regset *regset,
   struct gdbarch_tdep *regcache_tdep = gdbarch_tdep (regcache_arch);
   const bfd_byte *buf = fpset;
 
-  for (regi = 0; regi < 32; regi++)
-    regcache_raw_supply (regcache, FP0_REGNUM + regi, buf + 8 * regi);
+  if (! ppc_floating_point_unit_p (regcache_arch))
+    return;
 
-  /* The FPSCR is stored in the low order word of the last doubleword in the
-     fpregset.  */
+  for (regi = 0; regi < ppc_num_fprs; regi++)
+    regcache_raw_supply (regcache, 
+                         regcache_tdep->ppc_fp0_regnum + regi,
+                         buf + 8 * regi);
+
+  /* The FPSCR is stored in the low order word of the last
+     doubleword in the fpregset.  */
   regcache_raw_supply (regcache, regcache_tdep->ppc_fpscr_regnum,
-		       buf + 8 * 32 + 4);
+                       buf + 8 * 32 + 4);
 }
 
 static struct regset ppc_linux_fpregset = { NULL, ppc_linux_supply_fpregset };
@@ -1081,7 +1069,7 @@ ppc_linux_init_abi (struct gdbarch_info info,
          However, as one of the known warts of its ABI, PPC GNU/Linux
          uses eight-byte long doubles.  GCC only recently got 128-bit
          long double support on PPC, so it may be changing soon.  The
-         Linux Standards Base says that programs that use 'long
+         Linux[sic] Standards Base says that programs that use 'long
          double' on PPC GNU/Linux are non-conformant.  */
       set_gdbarch_long_double_bit (gdbarch, 8 * TARGET_CHAR_BIT);
 

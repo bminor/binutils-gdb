@@ -79,5 +79,8 @@ struct e500_regs {
 /* e500 register high bits */
 #define GPRH(N)		cpu_registers(processor)->e500.gprh[N]
 
-/* e500 unified vector register */
-#define EVR(N)		((((unsigned64)GPRH(N)) << 32) | GPR(N))
+/* e500 unified vector register
+   We need to cast the gpr value to an unsigned type so that it
+   doesn't get sign-extended when it's or-ed with a 64-bit value; that
+   would wipe out the upper 32 bits of the register's value.  */
+#define EVR(N)		((((unsigned64)GPRH(N)) << 32) | (unsigned32) GPR(N))

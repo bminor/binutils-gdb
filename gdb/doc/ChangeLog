@@ -1,3 +1,207 @@
+2004-09-12  Andrew Cagney  <cagney@gnu.org>
+
+	* gdbint.texinfo (Native Debugging): Delete description of
+	FILES_INFO_HOOK.
+
+2004-09-11  Paul Hilfinger  <hilfinger@gnat.com>
+
+	* gdbint.texinfo (User Interface): Change local_hex_string_custom 
+	to hex_string_custom (not historically correct, but more 
+	understandable, given the current code).
+
+2004-09-03  Andrew Cagney  <cagney@gnu.org>
+
+	* gdbint.texinfo (Native Debugging): Delete SVR4_SHARED_LIBS.
+
+2004-09-01  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* observer.texi (solib_unloaded): New observer.
+
+2004-08-24  Andrew Cagney  <cagney@gnu.org>
+
+	* gdbint.texinfo (Target Architecture Definition): Add missing
+	comma.
+
+2004-08-20  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* (Using the Testsuite): build != host is supported,
+	but some test scripts do not support build != host.
+
+2004-08-14  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdbint.texinfo (Host Definition): Delete description of
+	FCLOSE_PROVIDED and GETENV_PROVIDED.
+
+2004-08-05  Mark Kettenis  <kettenis@chello.nl>
+
+	* gdbint.texinfo (Host Definition): Delete description of
+	NO_SYS_FILE.
+	(Native Debugging): Delete description of KERNEL_U_ADDR_BSD and
+	PTRACE_FP_BUG.
+
+2004-08-05  Andrew Cagney  <cagney@gnu.org>
+
+	* gdbint.texinfo (Target Architecture Definition): Delete
+	reference to deprecated_read_fp.
+
+2004-08-02  Andrew Cagney  <cagney@gnu.org>
+
+	* gdbint.texinfo (Target Architecture Definition): Delete
+	description of DEPRECATED_REGISTER_BYTES.
+
+2004-07-30  Baurjan Ismagulov  <ibr@ata.cs.hun.edu.tr>
+
+	* gdb.texinfo (Source Path): Document the new behavior of
+	searching for the source files.
+
+2004-07-17  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Edit): Fix markup of EDITOR and improve wording.
+	(Search, Expressions, Arrays, Variables, Data, Machine Code)
+	(Auto Display): Improve indexing.
+
+2004-07-16  Andrew Cagney  <cagney@gnu.org>
+
+	* gdb.texinfo (Mode Options): Delete documentation on "-async" and
+	"-noasync".
+
+2004-07-09  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo: Fix @kindex entries so that multiple commands that
+	have the same prefix have only their prefix in the index.
+
+2004-07-03  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.texinfo (BSD libkvm Interface): New node (section)
+	(Native): Add it to the menu.
+
+2004-07-01  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdbint.texinfo (Target Architecture Definition): Remove
+	PCC_SOL_BROKEN.
+
+2004-06-24  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdbint.texinfo (Target Architecture Definition): Remove
+	SUN_FIXED_LBRAC_BUG.
+
+2004-06-26  Andrew Cagney  <cagney@gnu.org>
+
+	* gdbint.texinfo (Coding): Replace xasprintf with xstrprintf.
+
+2004-06-20  Andrew Cagney  <cagney@gnu.org>
+
+	* gdbint.texinfo (Target Architecture Definition): Deprecate
+	USE_STRUCT_CONVENTION.
+
+2004-06-19  Michael Chastain  <mec.gnu@mindspring.com>
+
+	gdb.texinfo (Bug Reporting): Mention session recording,
+	with the script command or Emacs.
+
+2004-06-18  Andrew Cagney  <cagney@gnu.org>
+
+	* gdbint.texinfo (Target Architecture Definition): Deprecate
+	FUNCTION_START_OFFSET.
+
+2004-06-14  Andrew Cagney  <cagney@gnu.org>
+
+	Based on changes from Karl Berry.
+	* gdb.texinfo: Do not use @sc in a direntry.
+	* stabs.texinfo: Change @dircateogry to "Software development".
+	* gdbint.texinfo, gdb.texinfo, annotate.texinfo: Ditto.
+
+2004-06-13  Andrew Cagney  <cagney@gnu.org>
+
+	* gdbint.texinfo (Target Architecture Definition): Delete
+	description of RETURN_VALUE_ON_STACK.
+
+2004-06-09  Andrew Cagney  <cagney@gnu.org>
+
+	* gdbint.texinfo (Native Debugging): Restore "@table @code"
+	deleted by previous patch.
+
+2004-06-08  Andrew Cagney  <cagney@gnu.org>
+
+	* gdbint.texinfo (Native Debugging): Delete documentation on
+	ATTACH_DETACH.
+
+2004-06-06  Randolph Chung  <tausq@debian.org>
+
+	* gdb.texinfo (push_dummy_call): Use @code{struct value}.
+
+2004-06-06  Randolph Chung  <tausq@debian.org>
+
+	* gdb.texinfo (push_dummy_call): Update argument list to match 
+	the new push_dummy_call method signature.  Describe the function
+	argument.
+
+2004-05-24  Joel Brobecker  <brobecker@gnat.com>
+
+	* gdb.texinfo (Starting): Document new start command.
+
+2004-05-21  Andrew Cagney  <cagney@redhat.com>
+
+	* observer.texi (GDB Observers): Document "inferior_created".
+
+2004-05-08  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Delete
+	description of DO_DEFERRED_STORES.
+
+	* gdbint.texinfo (Target Architecture Definition): Delete
+	references to DEPRECATED_FIX_CALL_DUMMY.
+
+	* gdbint.texinfo (Target Architecture Definition): Delete
+	description of DEPRECATED_CALL_DUMMY_WORDS,
+	DEPRECATED_SIZEOF_CALL_DUMMY_WORDS, and CALL_DUMMY.
+
+	* gdbint.texinfo (Target Architecture Definition): Delete
+	description of DEPRECATED_PUSH_DUMMY_FRAME.
+
+	* gdbint.texinfo (Target Architecture Definition): Delete
+	reference to DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET.
+
+2004-05-07  Andrew Cagney  <cagney@redhat.com>
+
+	* observer.texi (GDB Observers): Add "Debugging" section.  Include
+	cross reference to "set/show debug observer".
+	* gdb.texinfo (Debugging Output): Document "set/show debug
+	observer".
+
+2004-05-01  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Delete
+	description of DEPRECATED_PC_IN_SIGTRAMP.
+
+2004-04-30  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Delete
+	documentation for BELIEVE_PCC_PROMOTION_TYPE, no longer defined.
+
+2004-04-30  Orjan Friberg  <orjanf@axis.com>
+
+	* observer.texi (GDB Observers): Correct spelling.
+
+2004-04-26  Orjan Friberg  <orjanf@axis.com>
+
+	* observer.texi (GDB Observers): Add target_changed event.
+
+2004-04-08  Andrew Cagney  <cagney@redhat.com>
+
+	* observer.texi (GDB Observers): Rework, provide generic observer
+	definitions and then a list of observable events.
+
+2004-04-04  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Host Definition): Delete reference to
+	NO_SIGINTERRUPT.
+
+2004-04-02  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Delete
+	reference to DEPRECATED_CALL_DUMMY_LENGTH.
+
 2004-03-28  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* gdb.texinfo (TUI Commands): Document tui reg commands.

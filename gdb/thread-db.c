@@ -63,10 +63,6 @@ static void (*target_new_objfile_chain) (struct objfile * objfile);
 /* Non-zero if we're using this module's target vector.  */
 static int using_thread_db;
 
-/* Non-zero if we have to keep this module's target vector active
-   across re-runs.  */
-static int keep_thread_db;
-
 /* Non-zero if we have determined the signals used by the threads
    library.  */
 static int thread_signals;
@@ -252,7 +248,10 @@ thread_db_state_str (td_thr_state_e state)
 
    THP is a handle to the current thread; if INFOP is not NULL, the
    struct thread_info associated with this thread is returned in
-   *INFOP.  */
+   *INFOP.
+
+   If the thread is a zombie, TD_THR_ZOMBIE is returned.  Otherwise,
+   zero is returned to indicate success.  */
 
 static int
 thread_get_info_callback (const td_thrhandle_t *thp, void *infop)
@@ -270,6 +269,22 @@ thread_get_info_callback (const td_thrhandle_t *thp, void *infop)
   /* Fill the cache.  */
   thread_ptid = BUILD_THREAD (ti.ti_tid, GET_PID (inferior_ptid));
   thread_info = find_thread_pid (thread_ptid);
+
+  /* In the case of a zombie thread, don't continue.  We don't want to
+     attach to it thinking it is a new thread.  */
+  if (ti.ti_state == TD_THR_UNKNOWN || ti.ti_state == TD_THR_ZOMBIE)
+    {
+      if (infop != NULL)
+        *(struct thread_info **) infop = thread_info;
+      if (thread_info != NULL)
+	{
+	  memcpy (&thread_info->private->th, thp, sizeof (*thp));
+	  thread_info->private->th_valid = 1;
+	  memcpy (&thread_info->private->ti, &ti, sizeof (ti));
+	  thread_info->private->ti_valid = 1;
+	}
+      return TD_THR_ZOMBIE;
+    }
 
   if (thread_info == NULL)
     {
@@ -355,7 +370,19 @@ thread_from_lwp (ptid_t ptid)
 	   GET_LWP (ptid), thread_db_err_str (err));
 
   thread_info = NULL;
-  thread_get_info_callback (&th, &thread_info);
+
+  /* Fetch the thread info.  If we get back TD_THR_ZOMBIE, then the
+     event thread has already died.  If another gdb interface has called
+     thread_alive() previously, the thread won't be found on the thread list
+     anymore.  In that case, we don't want to process this ptid anymore
+     to avoid the possibility of later treating it as a newly
+     discovered thread id that we should add to the list.  Thus,
+     we return a -1 ptid which is also how the thread list marks a
+     dead thread.  */
+  if (thread_get_info_callback (&th, &thread_info) == TD_THR_ZOMBIE
+      && thread_info == NULL)
+    return pid_to_ptid (-1);
+
   gdb_assert (thread_info && thread_info->private->ti_valid);
 
   return BUILD_THREAD (thread_info->private->ti.ti_tid, GET_PID (ptid));
@@ -642,8 +669,6 @@ thread_db_new_objfile (struct objfile *objfile)
 	  using_thread_db = 0;
 	}
 
-      keep_thread_db = 0;
-
       goto quit;
     }
 
@@ -672,26 +697,8 @@ thread_db_new_objfile (struct objfile *objfile)
       push_target (&thread_db_ops);
       using_thread_db = 1;
 
-      /* If the thread library was detected in the main symbol file
-         itself, we assume that the program was statically linked
-         against the thread library and well have to keep this
-         module's target vector activated until forever...  Well, at
-         least until all symbols have been discarded anyway (see
-         above).  */
-      if (objfile == symfile_objfile)
-	{
-	  gdb_assert (proc_handle.pid == 0);
-	  keep_thread_db = 1;
-	}
-
-      /* We can only poke around if there actually is a child process.
-         If there is no child process alive, postpone the steps below
-         until one has been created.  */
-      if (proc_handle.pid != 0)
-	{
-	  enable_thread_event_reporting ();
-	  thread_db_find_new_threads ();
-	}
+      enable_thread_event_reporting ();
+      thread_db_find_new_threads ();
       break;
 
     default:
@@ -950,7 +957,16 @@ thread_db_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
   if (!ptid_equal (trap_ptid, null_ptid))
     trap_ptid = thread_from_lwp (trap_ptid);
 
-  return thread_from_lwp (ptid);
+  /* Change the ptid back into the higher level PID + TID format.
+     If the thread is dead and no longer on the thread list, we will 
+     get back a dead ptid.  This can occur if the thread death event
+     gets postponed by other simultaneous events.  In such a case, 
+     we want to just ignore the event and continue on.  */
+  ptid = thread_from_lwp (ptid);
+  if (GET_PID (ptid) == -1)
+    ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
+  
+  return ptid;
 }
 
 static int
@@ -1037,7 +1053,7 @@ thread_db_store_registers (int regno)
 
       deprecated_read_register_gen (regno, raw);
       thread_db_fetch_registers (-1);
-      supply_register (regno, raw);
+      regcache_raw_supply (current_regcache, regno, raw);
     }
 
   fill_gregset ((gdb_gregset_t *) gregset, -1);
@@ -1063,15 +1079,12 @@ thread_db_kill (void)
 }
 
 static void
-thread_db_create_inferior (char *exec_file, char *allargs, char **env)
+thread_db_create_inferior (char *exec_file, char *allargs, char **env,
+			   int from_tty)
 {
-  if (!keep_thread_db)
-    {
-      unpush_target (&thread_db_ops);
-      using_thread_db = 0;
-    }
-
-  target_beneath->to_create_inferior (exec_file, allargs, env);
+  unpush_target (&thread_db_ops);
+  using_thread_db = 0;
+  target_beneath->to_create_inferior (exec_file, allargs, env, from_tty);
 }
 
 static void
@@ -1100,17 +1113,9 @@ thread_db_mourn_inferior (void)
 
   target_beneath->to_mourn_inferior ();
 
-  /* Detach thread_db target ops if not dealing with a statically
-     linked threaded program.  This allows a corefile to be debugged
-     after finishing debugging of a threaded program.  At present,
-     debugging a statically-linked threaded program is broken, but
-     the check is added below in the event that it is fixed in the
-     future.  */
-  if (!keep_thread_db)
-    {
-      unpush_target (&thread_db_ops);
-      using_thread_db = 0;
-    }
+  /* Detach thread_db target ops.  */
+  unpush_target (&thread_db_ops);
+  using_thread_db = 0;
 }
 
 static int
@@ -1359,7 +1364,7 @@ _initialize_thread_db (void)
       add_target (&thread_db_ops);
 
       /* Add ourselves to objfile event chain.  */
-      target_new_objfile_chain = target_new_objfile_hook;
-      target_new_objfile_hook = thread_db_new_objfile;
+      target_new_objfile_chain = deprecated_target_new_objfile_hook;
+      deprecated_target_new_objfile_hook = thread_db_new_objfile;
     }
 }

@@ -1,6 +1,6 @@
 /* BFD back-end for os9000 i386 binaries.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1998, 1999, 2001, 2002
-   Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1998, 1999, 2001, 2002,
+   2004 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -170,7 +170,7 @@ os9k_callback (abfd)
   obj_datasec (abfd)->vma = execp->a_dload;
 
   /* And reload the sizes, since the aout module zaps them.  */
-  obj_textsec (abfd)->_raw_size = execp->a_text;
+  obj_textsec (abfd)->size = execp->a_text;
 
   bss_start = execp->a_dload + execp->a_data;	/* BSS = end of data section.  */
   obj_bsssec (abfd)->vma = align_power (bss_start, execp->a_balign);
@@ -229,9 +229,9 @@ os9k_write_object_contents (abfd)
 
   exec_hdr (abfd)->a_info = BMAGIC;
 
-  exec_hdr (abfd)->a_text = obj_textsec (abfd)->_raw_size;
-  exec_hdr (abfd)->a_data = obj_datasec (abfd)->_raw_size;
-  exec_hdr (abfd)->a_bss = obj_bsssec (abfd)->_raw_size;
+  exec_hdr (abfd)->a_text = obj_textsec (abfd)->size;
+  exec_hdr (abfd)->a_data = obj_datasec (abfd)->size;
+  exec_hdr (abfd)->a_bss = obj_bsssec (abfd)->size;
   exec_hdr (abfd)->a_syms = bfd_get_symcount (abfd) * sizeof (struct nlist);
   exec_hdr (abfd)->a_entry = bfd_get_start_address (abfd);
   exec_hdr (abfd)->a_trsize = ((obj_textsec (abfd)->reloc_count) *
@@ -295,7 +295,7 @@ os9k_set_section_contents (abfd, section, location, offset, count)
 
       obj_textsec (abfd)->filepos = sizeof (struct internal_exec);
       obj_datasec (abfd)->filepos = obj_textsec (abfd)->filepos
-	+ obj_textsec (abfd)->_raw_size;
+	+ obj_textsec (abfd)->size;
 
     }
   /* Regardless, once we know what we're doing, we might as well get going.  */
@@ -333,7 +333,10 @@ os9k_sizeof_headers (ignore_abfd, ignore)
 #define os9k_bfd_relax_section bfd_generic_relax_section
 #define os9k_bfd_gc_sections bfd_generic_gc_sections
 #define os9k_bfd_merge_sections bfd_generic_merge_sections
+#define os9k_bfd_is_group_section bfd_generic_is_group_section
 #define os9k_bfd_discard_group bfd_generic_discard_group
+#define os9k_section_already_linked \
+  _bfd_generic_section_already_linked
 #define os9k_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
 #define os9k_bfd_link_hash_table_free _bfd_generic_link_hash_table_free
 #define os9k_bfd_link_add_symbols _bfd_generic_link_add_symbols

@@ -2,38 +2,34 @@
    Copyright 1988, 1989, 1991, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
    2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-/*
- * 80386 instruction printer by Pace Willisson (pace@prep.ai.mit.edu)
- * July 1988
- *  modified by John Hassey (hassey@dg-rtp.dg.com)
- *  x86-64 support added by Jan Hubicka (jh@suse.cz)
- *  VIA PadLock support by Michal Ludvig (mludvig@suse.cz)
- */
+/* 80386 instruction printer by Pace Willisson (pace@prep.ai.mit.edu)
+   July 1988
+    modified by John Hassey (hassey@dg-rtp.dg.com)
+    x86-64 support added by Jan Hubicka (jh@suse.cz)
+    VIA PadLock support by Michal Ludvig (mludvig@suse.cz).  */
 
-/*
- * The main tables describing the instructions is essentially a copy
- * of the "Opcode Map" chapter (Appendix A) of the Intel 80386
- * Programmers Manual.  Usually, there is a capital letter, followed
- * by a small letter.  The capital letter tell the addressing mode,
- * and the small letter tells about the operand size.  Refer to
- * the Intel manual for details.
- */
+/* The main tables describing the instructions is essentially a copy
+   of the "Opcode Map" chapter (Appendix A) of the Intel 80386
+   Programmers Manual.  Usually, there is a capital letter, followed
+   by a small letter.  The capital letter tell the addressing mode,
+   and the small letter tells about the operand size.  Refer to
+   the Intel manual for details.  */
 
 #include "dis-asm.h"
 #include "sysdep.h"
@@ -312,7 +308,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define w_mode 3  /* word operand */
 #define d_mode 4  /* double word operand  */
 #define q_mode 5  /* quad word operand */
-#define x_mode 6
+#define x_mode 6  /* 80 bit float operand */
 #define m_mode 7  /* d_mode in 32bit, q_mode in 64bit mode.  */
 #define cond_jump_mode 8
 #define loop_jcxz_mode 9
@@ -393,7 +389,8 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define GRP13	  NULL, NULL, USE_GROUPS, NULL, 20, NULL, 0
 #define GRP14	  NULL, NULL, USE_GROUPS, NULL, 21, NULL, 0
 #define GRPAMD	  NULL, NULL, USE_GROUPS, NULL, 22, NULL, 0
-#define GRPPADLCK NULL, NULL, USE_GROUPS, NULL, 23, NULL, 0
+#define GRPPADLCK1 NULL, NULL, USE_GROUPS, NULL, 23, NULL, 0
+#define GRPPADLCK2 NULL, NULL, USE_GROUPS, NULL, 24, NULL, 0
 
 #define PREGRP0   NULL, NULL, USE_PREFIX_USER_TABLE, NULL,  0, NULL, 0
 #define PREGRP1   NULL, NULL, USE_PREFIX_USER_TABLE, NULL,  1, NULL, 0
@@ -952,8 +949,8 @@ static const struct dis386 dis386_twobyte[] = {
   { "btS",		Ev, Gv, XX },
   { "shldS",		Ev, Gv, Ib },
   { "shldS",		Ev, Gv, CL },
-  { "(bad)",		XX, XX, XX },
-  { GRPPADLCK },
+  { GRPPADLCK2 },
+  { GRPPADLCK1 },
   /* a8 */
   { "pushT",		gs, XX, XX },
   { "popT",		gs, XX, XX },
@@ -1091,7 +1088,7 @@ static const unsigned char twobyte_has_modrm[256] = {
   /* 70 */ 1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1, /* 7f */
   /* 80 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 8f */
   /* 90 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* 9f */
-  /* a0 */ 0,0,0,1,1,1,0,1,0,0,0,1,1,1,1,1, /* af */
+  /* a0 */ 0,0,0,1,1,1,1,1,0,0,0,1,1,1,1,1, /* af */
   /* b0 */ 1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1, /* bf */
   /* c0 */ 1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0, /* cf */
   /* d0 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* df */
@@ -1455,7 +1452,7 @@ static const struct dis386 grps[][8] = {
     { "(bad)",	XX, XX, XX },
     { "(bad)",	XX, XX, XX },
   },
-  /* GRPPADLCK */
+  /* GRPPADLCK1 */
   {
     { "xstorerng", OP_0f07, 0, XX, XX },
     { "xcryptecb", OP_0f07, 0, XX, XX },
@@ -1465,6 +1462,17 @@ static const struct dis386 grps[][8] = {
     { "xcryptofb", OP_0f07, 0, XX, XX },
     { "(bad)",	   OP_0f07, 0, XX, XX },
     { "(bad)",	   OP_0f07, 0, XX, XX },
+  },
+  /* GRPPADLCK2 */
+  {
+    { "montmul", OP_0f07, 0, XX, XX },
+    { "xsha1",   OP_0f07, 0, XX, XX },
+    { "xsha256", OP_0f07, 0, XX, XX },
+    { "(bad)",	 OP_0f07, 0, XX, XX },
+    { "(bad)",   OP_0f07, 0, XX, XX },
+    { "(bad)",   OP_0f07, 0, XX, XX },
+    { "(bad)",	 OP_0f07, 0, XX, XX },
+    { "(bad)",	 OP_0f07, 0, XX, XX },
   }
 };
 
@@ -1881,6 +1889,7 @@ prefix_name (int pref, int sizeflag)
 
 static char op1out[100], op2out[100], op3out[100];
 static int op_ad, op_index[3];
+static int two_source_ops;
 static bfd_vma op_address[3];
 static bfd_vma op_riprel[3];
 static bfd_vma start_pc;
@@ -1932,7 +1941,6 @@ print_insn (bfd_vma pc, disassemble_info *info)
 {
   const struct dis386 *dp;
   int i;
-  int two_source_ops;
   char *first, *second, *third;
   int needcomma;
   unsigned char uses_SSE_prefix;
@@ -2364,7 +2372,7 @@ static const char *float_mem[] = {
   "fdivr{l||l|}",
   /* dd */
   "fld{l||l|}",
-  "fisttpll",
+  "fisttp{ll||ll|}",
   "fst{l||l|}",
   "fstp{l||l|}",
   "frstor",
@@ -2388,7 +2396,82 @@ static const char *float_mem[] = {
   "fbld",
   "fild{ll||ll|}",
   "fbstp",
-  "fistpll",
+  "fistp{ll||ll|}",
+};
+
+static const unsigned char float_mem_mode[] = {
+  /* d8 */
+  d_mode,
+  d_mode,
+  d_mode,
+  d_mode,
+  d_mode,
+  d_mode,
+  d_mode,
+  d_mode,
+  /* d9 */
+  d_mode,
+  0,
+  d_mode,
+  d_mode,
+  0,
+  w_mode,
+  0,
+  w_mode,
+  /* da */
+  d_mode,
+  d_mode,
+  d_mode,
+  d_mode,
+  d_mode,
+  d_mode,
+  d_mode,
+  d_mode,
+  /* db */
+  d_mode,
+  d_mode,
+  d_mode,
+  d_mode,
+  0,
+  x_mode,
+  0,
+  x_mode,
+  /* dc */
+  q_mode,
+  q_mode,
+  q_mode,
+  q_mode,
+  q_mode,
+  q_mode,
+  q_mode,
+  q_mode,
+  /* dd */
+  q_mode,
+  q_mode,
+  q_mode,
+  q_mode,
+  0,
+  0,
+  0,
+  w_mode,
+  /* de */
+  w_mode,
+  w_mode,
+  w_mode,
+  w_mode,
+  w_mode,
+  w_mode,
+  w_mode,
+  w_mode,
+  /* df */
+  w_mode,
+  w_mode,
+  w_mode,
+  w_mode,
+  x_mode,
+  q_mode,
+  x_mode,
+  q_mode
 };
 
 #define ST OP_ST, 0
@@ -2567,14 +2650,11 @@ dofloat (int sizeflag)
 
   if (mod != 3)
     {
-      putop (float_mem[(floatop - 0xd8) * 8 + reg], sizeflag);
+      int fp_indx = (floatop - 0xd8) * 8 + reg;
+
+      putop (float_mem[fp_indx], sizeflag);
       obufp = op1out;
-      if (floatop == 0xdb)
-	OP_E (x_mode, sizeflag);
-      else if (floatop == 0xdd)
-	OP_E (d_mode, sizeflag);
-      else
-	OP_E (v_mode, sizeflag);
+      OP_E (float_mem_mode[fp_indx], sizeflag);
       return;
     }
   /* Skip mod/rm byte.  */
@@ -3094,7 +3174,7 @@ OP_E (int bytemode, int sizeflag)
 	  if ((base & 7) == 5)
 	    {
 	      havebase = 0;
-	      if (mode_64bit && !havesib && (sizeflag & AFLAG))
+	      if (mode_64bit && !havesib)
 		riprel = 1;
 	      disp = get32s ();
 	    }
@@ -3135,9 +3215,15 @@ OP_E (int bytemode, int sizeflag)
 		  oappend ("WORD PTR ");
 		  break;
 		case v_mode:
-		  oappend ("DWORD PTR ");
+		  if (sizeflag & DFLAG)
+		    oappend ("DWORD PTR ");
+		  else
+		    oappend ("WORD PTR ");
 		  break;
 		case d_mode:
+		  oappend ("DWORD PTR ");
+		  break;
+		case q_mode:
 		  oappend ("QWORD PTR ");
 		  break;
 		case m_mode:
@@ -3776,13 +3862,10 @@ static void
 ptr_reg (int code, int sizeflag)
 {
   const char *s;
-  if (intel_syntax)
-    oappend ("[");
-  else
-    oappend ("(");
 
-  USED_REX (REX_MODE64);
-  if (rex & REX_MODE64)
+  *obufp++ = open_char;
+  used_prefixes |= (prefixes & PREFIX_ADDR);
+  if (mode_64bit)
     {
       if (!(sizeflag & AFLAG))
 	s = names32[code - eAX_reg];
@@ -3794,10 +3877,8 @@ ptr_reg (int code, int sizeflag)
   else
     s = names16[code - eAX_reg];
   oappend (s);
-  if (intel_syntax)
-    oappend ("]");
-  else
-    oappend (")");
+  *obufp++ = close_char;
+  *obufp = 0;
 }
 
 static void
@@ -3866,15 +3947,17 @@ OP_Rd (int bytemode, int sizeflag)
 static void
 OP_MMX (int bytemode ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
 {
-  int add = 0;
-  USED_REX (REX_EXTX);
-  if (rex & REX_EXTX)
-    add = 8;
   used_prefixes |= (prefixes & PREFIX_DATA);
   if (prefixes & PREFIX_DATA)
-    sprintf (scratchbuf, "%%xmm%d", reg + add);
+    {
+      int add = 0;
+      USED_REX (REX_EXTX);
+      if (rex & REX_EXTX)
+	add = 8;
+      sprintf (scratchbuf, "%%xmm%d", reg + add);
+    }
   else
-    sprintf (scratchbuf, "%%mm%d", reg + add);
+    sprintf (scratchbuf, "%%mm%d", reg);
   oappend (scratchbuf + intel_syntax);
 }
 
@@ -3892,24 +3975,27 @@ OP_XMM (int bytemode ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
 static void
 OP_EM (int bytemode, int sizeflag)
 {
-  int add = 0;
   if (mod != 3)
     {
       OP_E (bytemode, sizeflag);
       return;
     }
-  USED_REX (REX_EXTZ);
-  if (rex & REX_EXTZ)
-    add = 8;
 
   /* Skip mod/rm byte.  */
   MODRM_CHECK;
   codep++;
   used_prefixes |= (prefixes & PREFIX_DATA);
   if (prefixes & PREFIX_DATA)
-    sprintf (scratchbuf, "%%xmm%d", rm + add);
+    {
+      int add = 0;
+
+      USED_REX (REX_EXTZ);
+      if (rex & REX_EXTZ)
+	add = 8;
+      sprintf (scratchbuf, "%%xmm%d", rm + add);
+    }
   else
-    sprintf (scratchbuf, "%%mm%d", rm + add);
+    sprintf (scratchbuf, "%%mm%d", rm);
   oappend (scratchbuf + intel_syntax);
 }
 
@@ -4162,21 +4248,29 @@ SIMD_Fixup (int extrachar, int sizeflag ATTRIBUTE_UNUSED)
 static void
 PNI_Fixup (int extrachar ATTRIBUTE_UNUSED, int sizeflag)
 {
-  if (mod == 3 && reg == 1)
+  if (mod == 3 && reg == 1 && rm <= 1)
     {
-      char *p = obuf + strlen (obuf);
-
       /* Override "sidt".  */
+      char *p = obuf + strlen (obuf) - 4;
+
+      /* We might have a suffix.  */
+      if (*p == 'i')
+	--p;
+
       if (rm)
 	{
 	  /* mwait %eax,%ecx  */
-	  strcpy (p - 4, "mwait   %eax,%ecx");
+	  strcpy (p, "mwait");
 	}
       else
 	{
 	  /* monitor %eax,%ecx,%edx"  */
-	  strcpy (p - 4, "monitor %eax,%ecx,%edx");
+	  strcpy (p, "monitor");
+	  strcpy (op3out, names32[2]);
 	}
+      strcpy (op1out, names32[0]);
+      strcpy (op2out, names32[1]);
+      two_source_ops = 1;
 
       codep++;
     }

@@ -1042,16 +1042,12 @@ static bfd_boolean elf_hppa_sort_unwind (bfd *abfd)
   if (s != NULL)
     {
       bfd_size_type size;
-      char *contents;
+      bfd_byte *contents;
 
-      size = s->_raw_size;
-      contents = bfd_malloc (size);
-      if (contents == NULL)
+      if (!bfd_malloc_and_get_section (abfd, s, &contents))
 	return FALSE;
 
-      if (! bfd_get_section_contents (abfd, s, contents, (file_ptr) 0, size))
-	return FALSE;
-
+      size = s->size;
       qsort (contents, (size_t) (size / 16), 16, hppa_unwind_entry_compare);
 
       if (! bfd_set_section_contents (abfd, s, contents, (file_ptr) 0, size))
@@ -1403,9 +1399,8 @@ elf_hppa_relocate_section (bfd *output_bfd,
 	      if (sym_sec->output_section == NULL && dyn_h == NULL)
 		{
 		  (*_bfd_error_handler)
-		    (_("%s: warning: unresolvable relocation against symbol `%s' from %s section"),
-		     bfd_archive_filename (input_bfd), h->root.root.string,
-		     bfd_get_section_name (input_bfd, input_section));
+		    (_("%B(%A): warning: unresolvable relocation against symbol `%s'"),
+		     input_bfd, input_section, h->root.root.string);
 		  relocation = 0;
 		}
 	      else if (sym_sec->output_section)
@@ -1430,9 +1425,8 @@ elf_hppa_relocate_section (bfd *output_bfd,
 	      if (dyn_h == NULL)
 		{
 		  (*_bfd_error_handler)
-		    (_("%s: warning: unresolvable relocation against symbol `%s' from %s section"),
-		     bfd_archive_filename (input_bfd), h->root.root.string,
-		     bfd_get_section_name (input_bfd, input_section));
+		    (_("%B(%A): warning: unresolvable relocation against symbol `%s'"),
+		     input_bfd, input_section, h->root.root.string);
 		}
 	      relocation = 0;
 	    }
@@ -1446,9 +1440,8 @@ elf_hppa_relocate_section (bfd *output_bfd,
 	      if (dyn_h == NULL)
 		{
 		  (*_bfd_error_handler)
-		    (_("%s: warning: unresolvable relocation against symbol `%s' from %s section"),
-		     bfd_archive_filename (input_bfd), h->root.root.string,
-		     bfd_get_section_name (input_bfd, input_section));
+		    (_("%B(%A): warning: unresolvable relocation against symbol `%s'"),
+		     input_bfd, input_section, h->root.root.string);
 		}
 	      relocation = 0;
 	    }

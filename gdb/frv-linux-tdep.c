@@ -26,6 +26,8 @@
 #include "elf-bfd.h"
 #include "elf/frv.h"
 #include "frv-tdep.h"
+#include "trad-frame.h"
+#include "frame-unwind.h"
 
 /* Define the size (in bytes) of an FR-V instruction.  */
 static const int frv_instr_size = 4;
@@ -151,7 +153,7 @@ frv_linux_pc_in_sigtramp (CORE_ADDR pc, char *name)
 	      void *extension;
       } __attribute__((aligned(8)));  */
 
-static CORE_ADDR
+static LONGEST
 frv_linux_sigcontext_reg_addr (struct frame_info *next_frame, int regno,
                                CORE_ADDR *sc_addr_cache_ptr)
 {
@@ -233,15 +235,93 @@ frv_linux_sigcontext_reg_addr (struct frame_info *next_frame, int regno,
     }
 }
 
+/* Signal trampolines.  */
+
+static struct trad_frame_cache *
+frv_linux_sigtramp_frame_cache (struct frame_info *next_frame, void **this_cache)
+{
+  struct trad_frame_cache *cache;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  CORE_ADDR addr;
+  char buf[4];
+  int regnum;
+  CORE_ADDR sc_addr_cache_val = 0;
+  struct frame_id this_id;
+
+  if (*this_cache)
+    return *this_cache;
+
+  cache = trad_frame_cache_zalloc (next_frame);
+
+  /* FIXME: cagney/2004-05-01: This is is long standing broken code.
+     The frame ID's code address should be the start-address of the
+     signal trampoline and not the current PC within that
+     trampoline.  */
+  frame_unwind_register (next_frame, sp_regnum, buf);
+  this_id = frame_id_build (extract_unsigned_integer (buf, sizeof buf),
+			    frame_pc_unwind (next_frame));
+  trad_frame_set_id (cache, this_id);
+
+  for (regnum = 0; regnum < frv_num_regs; regnum++)
+    {
+      LONGEST reg_addr = frv_linux_sigcontext_reg_addr (next_frame, regnum,
+							&sc_addr_cache_val);
+      if (reg_addr != -1)
+	trad_frame_set_reg_addr (cache, regnum, reg_addr);
+    }
+
+  *this_cache = cache;
+  return cache;
+}
+
+static void
+frv_linux_sigtramp_frame_this_id (struct frame_info *next_frame, void **this_cache,
+			     struct frame_id *this_id)
+{
+  struct trad_frame_cache *cache =
+    frv_linux_sigtramp_frame_cache (next_frame, this_cache);
+  trad_frame_get_id (cache, this_id);
+}
+
+static void
+frv_linux_sigtramp_frame_prev_register (struct frame_info *next_frame,
+				   void **this_cache,
+				   int regnum, int *optimizedp,
+				   enum lval_type *lvalp, CORE_ADDR *addrp,
+				   int *realnump, void *valuep)
+{
+  /* Make sure we've initialized the cache.  */
+  struct trad_frame_cache *cache =
+    frv_linux_sigtramp_frame_cache (next_frame, this_cache);
+  trad_frame_get_register (cache, next_frame, regnum, optimizedp, lvalp,
+			   addrp, realnump, valuep);
+}
+
+static const struct frame_unwind frv_linux_sigtramp_frame_unwind =
+{
+  SIGTRAMP_FRAME,
+  frv_linux_sigtramp_frame_this_id,
+  frv_linux_sigtramp_frame_prev_register
+};
+
+static const struct frame_unwind *
+frv_linux_sigtramp_frame_sniffer (struct frame_info *next_frame)
+{
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  char *name;
+
+  find_pc_partial_function (pc, &name, NULL, NULL);
+  if (frv_linux_pc_in_sigtramp (pc, name))
+    return &frv_linux_sigtramp_frame_unwind;
+
+  return NULL;
+}
+
 static void
 frv_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  /* When the FR-V Linux kernel calls a signal handler, the return
-     address points to a bit of code on the stack.  This function is
-     used to identify this bit of code as a signal trampoline in order
-     to support backtracing through calls to signal handlers.  */
-  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, frv_linux_pc_in_sigtramp);
-  frv_set_sigcontext_reg_addr (gdbarch, frv_linux_sigcontext_reg_addr);
+  /* Set the sigtramp frame sniffer.  */
+  frame_unwind_append_sniffer (gdbarch, frv_linux_sigtramp_frame_sniffer); 
 }
 
 static enum gdb_osabi

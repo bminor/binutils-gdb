@@ -1,5 +1,5 @@
 /* Mach-O support for BFD.
-   Copyright 1999, 2000, 2001, 2002, 2003
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -68,7 +68,11 @@
 #define bfd_mach_o_set_section_contents _bfd_generic_set_section_contents
 #define bfd_mach_o_bfd_gc_sections bfd_generic_gc_sections
 #define bfd_mach_o_bfd_merge_sections bfd_generic_merge_sections
+#define bfd_mach_o_bfd_is_group_section bfd_generic_is_group_section
 #define bfd_mach_o_bfd_discard_group bfd_generic_discard_group
+#define bfd_mach_o_section_already_linked \
+  _bfd_generic_section_already_linked
+#define bfd_mach_o_bfd_copy_private_header_data _bfd_generic_bfd_copy_private_header_data
 
 static bfd_boolean bfd_mach_o_bfd_copy_private_symbol_data
   PARAMS ((bfd *, asymbol *, bfd *, asymbol *));
@@ -582,7 +586,7 @@ bfd_mach_o_make_bfd_section (abfd, section)
 
   bfdsec->vma = section->addr;
   bfdsec->lma = section->addr;
-  bfdsec->_raw_size = section->size;
+  bfdsec->size = section->size;
   bfdsec->filepos = section->offset;
   bfdsec->alignment_power = section->align;
 
@@ -1030,7 +1034,7 @@ bfd_mach_o_scan_read_dylinker (abfd, command)
 
   bfdsec->vma = 0;
   bfdsec->lma = 0;
-  bfdsec->_raw_size = command->len - 8;
+  bfdsec->size = command->len - 8;
   bfdsec->filepos = command->offset + 8;
   bfdsec->alignment_power = 0;
   bfdsec->flags = SEC_HAS_CONTENTS;
@@ -1088,7 +1092,7 @@ bfd_mach_o_scan_read_dylib (abfd, command)
 
   bfdsec->vma = 0;
   bfdsec->lma = 0;
-  bfdsec->_raw_size = command->len - 8;
+  bfdsec->size = command->len - 8;
   bfdsec->filepos = command->offset + 8;
   bfdsec->alignment_power = 0;
   bfdsec->flags = SEC_HAS_CONTENTS;
@@ -1211,7 +1215,7 @@ bfd_mach_o_scan_read_thread (abfd, command)
 
       bfdsec->vma = 0;
       bfdsec->lma = 0;
-      bfdsec->_raw_size = cmd->flavours[i].size;
+      bfdsec->size = cmd->flavours[i].size;
       bfdsec->filepos = cmd->flavours[i].offset;
       bfdsec->alignment_power = 0x0;
       bfdsec->flags = SEC_HAS_CONTENTS;
@@ -1318,7 +1322,7 @@ bfd_mach_o_scan_read_symtab (abfd, command)
 
   bfdsec->vma = 0;
   bfdsec->lma = 0;
-  bfdsec->_raw_size = seg->nsyms * 12;
+  bfdsec->size = seg->nsyms * 12;
   bfdsec->filepos = seg->symoff;
   bfdsec->alignment_power = 0;
   bfdsec->flags = SEC_HAS_CONTENTS;
@@ -1337,7 +1341,7 @@ bfd_mach_o_scan_read_symtab (abfd, command)
 
   bfdsec->vma = 0;
   bfdsec->lma = 0;
-  bfdsec->_raw_size = seg->strsize;
+  bfdsec->size = seg->strsize;
   bfdsec->filepos = seg->stroff;
   bfdsec->alignment_power = 0;
   bfdsec->flags = SEC_HAS_CONTENTS;
@@ -1388,7 +1392,7 @@ bfd_mach_o_scan_read_segment (abfd, command)
 
   bfdsec->vma = seg->vmaddr;
   bfdsec->lma = seg->vmaddr;
-  bfdsec->_raw_size = seg->filesize;
+  bfdsec->size = seg->filesize;
   bfdsec->filepos = seg->fileoff;
   bfdsec->alignment_power = 0x0;
   bfdsec->flags = SEC_HAS_CONTENTS | SEC_LOAD | SEC_ALLOC | SEC_CODE;

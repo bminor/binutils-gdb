@@ -61,7 +61,7 @@ sparc64obsd_supply_gregset (const struct regset *regset,
 {
   const char *regs = gregs;
 
-  sparc64_supply_gregset (regset->descr, regcache, regnum, regs);
+  sparc64_supply_gregset (&sparc64obsd_core_gregset, regcache, regnum, regs);
   sparc64_supply_fpregset (regcache, regnum, regs + 288);
 }
 
@@ -74,30 +74,40 @@ sparc64obsd_supply_gregset (const struct regset *regset,
 
    The signal trampoline will be mapped at an address that is page
    aligned.  We recognize the signal trampoline by the looking for the
-   sigreturn system call.  */
+   sigreturn system call.  The offset where we can find the code that
+   makes this system call varies from release to release.  For OpenBSD
+   3.6 and later releases we can find the code at offset 0xec.  For
+   OpenBSD 3.5 and earlier releases, we find it at offset 0xe8.  */
 
 static const int sparc64obsd_page_size = 8192;
+static const int sparc64obsd_sigreturn_offset[] = { 0xec, 0xe8, -1 };
 
 static int
 sparc64obsd_pc_in_sigtramp (CORE_ADDR pc, char *name)
 {
   CORE_ADDR start_pc = (pc & ~(sparc64obsd_page_size - 1));
   unsigned long insn;
+  const int *offset;
 
   if (name)
     return 0;
 
-  /* Check for "restore %g0, SYS_sigreturn, %g1".  */
-  insn = sparc_fetch_instruction (start_pc + 0xe8);
-  if (insn != 0x83e82067)
-    return 0;
+  for (offset = sparc64obsd_sigreturn_offset; *offset != -1; offset++)
+    {
+      /* Check for "restore %g0, SYS_sigreturn, %g1".  */
+      insn = sparc_fetch_instruction (start_pc + *offset);
+      if (insn != 0x83e82067)
+	continue;
 
-  /* Check for "t ST_SYSCALL".  */
-  insn = sparc_fetch_instruction (start_pc + 0xf0);
-  if (insn != 0x91d02000)
-    return 0;
+      /* Check for "t ST_SYSCALL".  */
+      insn = sparc_fetch_instruction (start_pc + *offset + 8);
+      if (insn != 0x91d02000)
+	continue;
 
-  return 1;
+      return 1;
+    }
+
+  return 0;
 }
 
 static struct sparc_frame_cache *
@@ -154,8 +164,8 @@ sparc64obsd_frame_prev_register (struct frame_info *next_frame,
   struct sparc_frame_cache *cache =
     sparc64obsd_frame_cache (next_frame, this_cache);
 
-  trad_frame_prev_register (next_frame, cache->saved_regs, regnum,
-			    optimizedp, lvalp, addrp, realnump, valuep);
+  trad_frame_get_prev_register (next_frame, cache->saved_regs, regnum,
+				optimizedp, lvalp, addrp, realnump, valuep);
 }
 
 static const struct frame_unwind sparc64obsd_frame_unwind =
@@ -184,12 +194,9 @@ sparc64obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  tdep->gregset = XMALLOC (struct regset);
-  tdep->gregset->descr = &sparc64obsd_core_gregset;
-  tdep->gregset->supply_regset = sparc64obsd_supply_gregset;
+  tdep->gregset = regset_alloc (gdbarch, sparc64obsd_supply_gregset, NULL);
   tdep->sizeof_gregset = 832;
 
-  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, sparc64obsd_pc_in_sigtramp);
   frame_unwind_append_sniffer (gdbarch, sparc64obsd_sigtramp_frame_sniffer);
 
   sparc64_init_abi (info, gdbarch);

@@ -2,7 +2,7 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+Copyright 1996-2004 Free Software Foundation, Inc.
 
 This file is part of the GNU Binutils and/or GDB, the GNU debugger.
 
@@ -5160,7 +5160,7 @@ static const CGEN_IBASE frv_cgen_insn_table[MAX_INSNS] =
 /* cfmovs$pack $FRj,$FRk,$CCi,$cond */
   {
     FRV_INSN_CFMOVS, "cfmovs", "cfmovs", 32,
-    { 0|A(FR_ACCESS)|A(CONDITIONAL), { (1<<MACH_SIMPLE)|(1<<MACH_TOMCAT)|(1<<MACH_FR500)|(1<<MACH_FR550)|(1<<MACH_FRV), UNIT_FM01, FR400_MAJOR_NONE, FR450_MAJOR_NONE, FR500_MAJOR_F_1, FR550_MAJOR_F_2 } }
+    { 0|A(FR_ACCESS)|A(CONDITIONAL), { (1<<MACH_SIMPLE)|(1<<MACH_TOMCAT)|(1<<MACH_FR500)|(1<<MACH_FR550)|(1<<MACH_FRV), UNIT_FMALL, FR400_MAJOR_NONE, FR450_MAJOR_NONE, FR500_MAJOR_F_1, FR550_MAJOR_F_2 } }
   },
 /* fnegs$pack $FRj,$FRk */
   {

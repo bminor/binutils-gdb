@@ -42,6 +42,7 @@
 8.0xf0+4.0x2,00,2.AN0:D0m:::mov
 "mov"
 *am33
+*am33_2
 {
   PC = cia;
   State.regs[REG_A0 + AN0] = State.regs[REG_USP];
@@ -52,6 +53,7 @@
 8.0xf0+4.0x2,01,2.AN0:D0n:::mov
 "mov"
 *am33
+*am33_2
 {
   PC = cia;
   State.regs[REG_A0 + AN0] = State.regs[REG_SSP];
@@ -62,6 +64,7 @@
 8.0xf0+4.0x2,10,2.AN0:D0o:::mov
 "mov"
 *am33
+*am33_2
 {
   PC = cia;
   State.regs[REG_A0 + AN0] = State.regs[REG_MSP];
@@ -72,6 +75,7 @@
 8.0xf0+4.0x2,11,2.AN0:D0p:::mov
 "mov"
 *am33
+*am33_2
 {
   PC = cia;
   State.regs[REG_A0 + AN0] = PC;
@@ -82,6 +86,7 @@
 8.0xf0+4.0x3,2.AM1,00:D0q:::mov
 "mov"
 *am33
+*am33_2
 {
   PC = cia;
   State.regs[REG_USP] = State.regs[REG_A0 + AM1];
@@ -91,6 +96,7 @@
 8.0xf0+4.0x3,2.AM1,01:D0r:::mov
 "mov"
 *am33
+*am33_2
 {
   PC = cia;
   State.regs[REG_SSP] = State.regs[REG_A0 + AM1];
@@ -100,6 +106,7 @@
 8.0xf0+4.0x3,2.AM1,10:D0s:::mov
 "mov"
 *am33
+*am33_2
 {
   PC = cia;
   State.regs[REG_MSP] = State.regs[REG_A0 + AM1];
@@ -110,6 +117,7 @@
 8.0xf0+4.0xe,IMM4:D0t:::syscall
 "syscall"
 *am33
+*am33_2
 {
   unsigned32 sp, next_pc;
 
@@ -127,6 +135,7 @@
 8.0xf2+4.0xe,11,2.DN0:D0u:::mov
 "mov"
 *am33
+*am33_2
 {
   PC = cia;
   State.regs[REG_D0 + DN0] = PSW;
@@ -137,6 +146,7 @@
 8.0xf2+4.0xf,2.DM1,01:D0v:::mov
 "mov"
 *am33
+*am33_2
 {
   PC = cia;
   PSW = State.regs[REG_D0 + DM1];
@@ -146,6 +156,7 @@
 8.0xf5+00,2.AM1,4.RN0:D0w:::mov
 "mov"
 *am33
+*am33_2
 {
   int destreg = translate_rreg (SD_, RN0);
 
@@ -157,6 +168,7 @@
 8.0xf5+01,2.DM1,4.RN0:D0x:::mov
 "mov"
 *am33
+*am33_2
 {
   int destreg = translate_rreg (SD_, RN0);
 
@@ -168,6 +180,7 @@
 8.0xf5+10,4.RM1,2.AN0:D0y:::mov
 "mov"
 *am33
+*am33_2
 {
   int destreg = translate_rreg (SD_, RM1);
 
@@ -179,6 +192,7 @@
 8.0xf5+11,4.RM1,2.DN0:D0z:::mov
 "mov"
 *am33
+*am33_2
 {
   int destreg = translate_rreg (SD_, RM1);
 
@@ -191,6 +205,7 @@
 8.0xf8+8.0xce+8.REGS:D1a:::movm
 "movm"
 *am33
+*am33_2
 {
   unsigned32 usp = State.regs[REG_USP];
   unsigned32 mask;
@@ -242,6 +257,7 @@
     }
 
   if (STATE_ARCHITECTURE (sd)->mach == bfd_mach_am33
+      || STATE_ARCHITECTURE (sd)->mach == bfd_mach_am33_2
       )
     {
       if (mask & 0x1)
@@ -283,6 +299,7 @@
 8.0xf8+8.0xcf+8.REGS:D1b:::movm
 "movm"
 *am33
+*am33_2
 {
   unsigned32 usp = State.regs[REG_USP];
   unsigned32 mask;
@@ -291,6 +308,7 @@
   mask = REGS;
 
   if (STATE_ARCHITECTURE (sd)->mach == bfd_mach_am33
+      || STATE_ARCHITECTURE (sd)->mach == bfd_mach_am33_2
       )
     {
       if (mask & 0x4)
@@ -375,6 +393,7 @@
 8.0xfc+8.0xfc+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:4a:::and
 "and"
 *am33
+*am33_2
 {
   PC = cia;
   PSW &= FETCH32(IMM32A, IMM32B, IMM32C, IMM32D);
@@ -384,6 +403,7 @@
 8.0xfc+8.0xfd+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D4a:::or
 "or"
 *am33
+*am33_2
 {
   PC = cia;
   PSW |= FETCH32(IMM32A, IMM32B, IMM32C, IMM32D);
@@ -393,6 +413,7 @@
 8.0xf9+8.0x08+4.RM2,4.RN0!RM2:D1g:::mov
 "mov"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -407,6 +428,7 @@
 8.0xf9+8.0x18+4.RN0,4.RN2=RN0:D1:::ext
 "mov"
 *am33
+*am33_2
 {
   int srcreg;
 
@@ -422,6 +444,7 @@
 8.0xf9+8.0x28+4.RM2,4.RN0!RM2:D1:::extb
 "extb"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -435,6 +458,7 @@
 8.0xf9+8.0x38+4.RM2,4.RN0!RM2:D1:::extbu
 "extbu"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -448,6 +472,7 @@
 8.0xf9+8.0x48+4.RM2,4.RN0!RM2:D1:::exth
 "exth"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -461,6 +486,7 @@
 8.0xf9+8.0x58+4.RM2,4.RN0!RM2:D1:::exthu
 "exthu"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -474,6 +500,7 @@
 8.0xf9+8.0x68+4.RM2,4.RN0=RM2:D1:::clr
 "clr"
 *am33
+*am33_2
 {
   int dstreg;
 
@@ -488,6 +515,7 @@
 8.0xf9+8.0x78+4.RM2,4.RN0:D1b:::add
 "add"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -501,6 +529,7 @@
 8.0xf9+8.0x88+4.RM2,4.RN0:D1b:::addc
 "addc"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
   int z, c, n, v;
@@ -530,6 +559,7 @@
 8.0xf9+8.0x98+4.RM2,4.RN0:D1b:::sub
 "sub"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -543,6 +573,7 @@
 8.0xf9+8.0xa8+4.RM2,4.RN0:D1b:::subc
 "subc"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
   int z, c, n, v;
@@ -572,6 +603,7 @@
 8.0xf9+8.0xb8+4.RN0,4.RN2=RN0:D1:::inc
 "inc"
 *am33
+*am33_2
 {
   int dstreg;
 
@@ -584,6 +616,7 @@
 8.0xf9+8.0xc8+4.RN0,4.RN2=RN0:D1:::inc4
 "inc4"
 *am33
+*am33_2
 {
   int dstreg;
 
@@ -596,6 +629,7 @@
 8.0xf9+8.0xd8+4.RM2,4.RN0:D1:::cmp
 "cmp"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2;
 
@@ -609,6 +643,7 @@
 8.0xf9+8.0xe8+4.XRM2,4.RN0:D1l:::mov
 "mov"
 *am33
+*am33_2
 {
   int dstreg, srcreg;
 
@@ -623,6 +658,7 @@
 8.0xf9+8.0xf8+4.RM2,4.XRN0:D1m:::mov
 "mov"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -637,6 +673,7 @@
 8.0xf9+8.0x09+4.RM2,4.RN0:D1a:::and
 "and"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
   int z, n;
@@ -657,6 +694,7 @@
 8.0xf9+8.0x19+4.RM2,4.RN0:D1a:::or
 "or"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
   int z, n;
@@ -676,6 +714,7 @@
 8.0xf9+8.0x29+4.RM2,4.RN0:D1a:::xor
 "xor"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
   int z, n;
@@ -695,6 +734,7 @@
 8.0xf9+8.0x39+4.RM2,4.RN0=RM2:D1:::not
 "not"
 *am33
+*am33_2
 {
   int dstreg;
   int z, n;
@@ -713,6 +753,7 @@
 8.0xf9+8.0x49+4.RM2,4.RN0:D1a:::asr
 "asr"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
   signed32 temp;
@@ -736,6 +777,7 @@
 8.0xf9+8.0x59+4.RM2,4.RN0:D1a:::lsr
 "lsr"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
   int z, n, c;
@@ -757,6 +799,7 @@
 8.0xf9+8.0x69+4.RM2,4.RN0:D1a:::asl
 "asl"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
   int z, n;
@@ -776,6 +819,7 @@
 8.0xf9+8.0x79+4.RM2,4.RN0=RM2:D1:::asl2
 "asl2"
 *am33
+*am33_2
 {
   int dstreg;
   int n, z;
@@ -794,6 +838,7 @@
 8.0xf9+8.0x89+4.RM2,4.RN0=RM2:D1:::ror
 "ror"
 *am33
+*am33_2
 {
   int dstreg;
   int c, n, z;
@@ -818,6 +863,7 @@
 8.0xf9+8.0x99+4.RM2,4.RN0=RM2:D1:::rol
 "rol"
 *am33
+*am33_2
 {
   int dstreg;
   int c, n, z;
@@ -842,6 +888,7 @@
 8.0xf9+8.0xa9+4.RM2,4.RN0:D1b:::mul
 "mul"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
   unsigned64 temp;
@@ -865,6 +912,7 @@
 8.0xf9+8.0xb9+4.RM2,4.RN0:D1b:::mulu
 "mulu"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
   unsigned64 temp;
@@ -888,6 +936,7 @@
 8.0xf9+8.0xc9+4.RM2,4.RN0:D1b:::div
 "div"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
   signed64 temp;
@@ -913,6 +962,7 @@
 8.0xf9+8.0xd9+4.RM2,4.RN0:D1b:::divu
 "divu"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
   unsigned64 temp;
@@ -939,6 +989,7 @@
 8.0xf9+8.0x0a+4.RN2,4.RM0:D1h:::mov
 "mov"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -952,6 +1003,7 @@
 8.0xf9+8.0x1a+4.RM2,4.RN0:D1i:::mov
 "mov"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -965,6 +1017,7 @@
 8.0xf9+8.0x2a+4.RN2,4.RM0:D1g:::movbu
 "movbu"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -978,6 +1031,7 @@
 8.0xf9+8.0x3a+4.RM2,4.RN0:D1i:::movbu
 "movbu"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -991,6 +1045,7 @@
 8.0xf9+8.0x4a+4.RN2,4.RM0:D1g:::movhu
 "movhu"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -1004,6 +1059,7 @@
 8.0xf9+8.0x5a+4.RM2,4.RN0:D1i:::movhu
 "movhu"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -1017,6 +1073,7 @@
 8.0xf9+8.0x6a+4.RN2,4.RM0!RN2:D1y:::mov
 "mov"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -1031,6 +1088,7 @@
 8.0xf9+8.0x7a+4.RM2,4.RN0:D1z:::mov
 "mov"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -1045,6 +1103,7 @@
 8.0xf9+8.0x8a+4.RN2,4.0000:D1j:::mov
 "mov"
 *am33
+*am33_2
 {
   int dstreg;
 
@@ -1057,6 +1116,7 @@
 8.0xf9+8.0x9a+4.RM2,4.0000:D1k:::mov
 "mov"
 *am33
+*am33_2
 {
   int srcreg;
 
@@ -1069,6 +1129,7 @@
 8.0xf9+8.0xaa+4.RN2,4.0000:D1j:::movbu
 "movbu"
 *am33
+*am33_2
 {
   int dstreg;
 
@@ -1081,6 +1142,7 @@
 8.0xf9+8.0xba+4.RM2,4.0000:D1k:::movbu
 "movbu"
 *am33
+*am33_2
 {
   int srcreg;
 
@@ -1093,6 +1155,7 @@
 8.0xf9+8.0xca+4.RN2,4.0000:D1j:::movhu
 "movhu"
 *am33
+*am33_2
 {
   int dstreg;
 
@@ -1105,6 +1168,7 @@
 8.0xf9+8.0xda+4.RM2,4.0000:D1k:::movhu
 "movhu"
 *am33
+*am33_2
 {
   int srcreg;
 
@@ -1117,6 +1181,7 @@
 8.0xf9+8.0xea+4.RN2,4.RM0!RN2:D1y:::movhu
 "movhu"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -1131,6 +1196,7 @@
 8.0xf9+8.0xfa+4.RM2,4.RN0:D1z:::movhu
 "movhu"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -1146,6 +1212,7 @@
 8.0xf9+8.0x0b+4.RM2,4.RN0:D1:::mac
 "mac"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2;
   signed64 temp, sum;
@@ -1174,6 +1241,7 @@
 8.0xf9+8.0x1b+4.RM2,4.RN0:D1:::macu
 "macu"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2;
   unsigned64 temp, sum;
@@ -1202,6 +1270,7 @@
 8.0xf9+8.0x2b+4.RM2,4.RN0:D1:::macb
 "macb"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2;
   signed32 temp, sum;
@@ -1225,6 +1294,7 @@
 8.0xf9+8.0x3b+4.RM2,4.RN0:D1:::macbu
 "macbu"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2;
   signed64 temp, sum;
@@ -1248,6 +1318,7 @@
 8.0xf9+8.0x4b+4.RM2,4.RN0:D1:::mach
 "mach"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2;
   signed64 temp, sum;
@@ -1276,6 +1347,7 @@
 8.0xf9+8.0x5b+4.RM2,4.RN0:D1:::machu
 "machu"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2;
   signed64 temp, sum;
@@ -1304,6 +1376,7 @@
 8.0xf9+8.0x6b+4.RM2,4.RN0:D1:::dmach
 "dmach"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2;
   signed32 temp, temp2, sum;
@@ -1329,6 +1402,7 @@
 8.0xf9+8.0x7b+4.RM2,4.RN0:D1:::dmachu
 "dmachu"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2;
   unsigned32 temp, temp2, sum;
@@ -1354,6 +1428,7 @@
 8.0xf9+8.0x8b+4.RM2,4.RN0:D1:::dmulh
 "dmulh"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
   signed32 temp;
@@ -1374,6 +1449,7 @@
 8.0xf9+8.0x9b+4.RM2,4.RN0:D1:::dumachu
 "dmachu"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
   unsigned32 temp;
@@ -1394,6 +1470,7 @@
 8.0xf9+8.0xab+4.RM2,4.RN0:D1:::sat16
 "sat16"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
   int value, z, n;
@@ -1421,6 +1498,7 @@
 8.0xf9+8.0xbb+4.RM2,4.RN0:D1:::mcste
 "mcste"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -1518,6 +1596,7 @@
 8.0xf9+8.0xcb+4.RM2,4.RN0:D1:::swap
 "swap"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -1535,6 +1614,7 @@
 8.0xf9+8.0xdb+4.RM2,4.RN0:D1:::swaph
 "swaph"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -1552,6 +1632,7 @@
 8.0xf9+8.0xeb+4.RM2,4.RN0:D1:::swhw
 "swhw"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -1567,6 +1648,7 @@
 8.0xf9+8.0xfb+4.RM2,4.RN0:D1:::bsch
 "bsch"
 *am33
+*am33_2
 {
   int temp, c, i;
   int srcreg, dstreg;
@@ -1606,6 +1688,7 @@
 8.0xfb+8.0x08+4.RM2,4.RN0=RM2+8.IMM8:D2j:::mov
 "mov"
 *am33
+*am33_2
 {
   int dstreg;
 
@@ -1618,6 +1701,7 @@
 8.0xfb+8.0x18+4.RM2,4.RN0=RM2+8.IMM8:D2:::movu
 "movu"
 *am33
+*am33_2
 {
   int dstreg;
 
@@ -1630,6 +1714,7 @@
 8.0xfb+8.0x78+4.RM2,4.RN0=RM2+8.IMM8:D2d:::add
 "add"
 *am33
+*am33_2
 {
   int dstreg;
 
@@ -1642,6 +1727,7 @@
 8.0xfb+8.0x88+4.RM2,4.RN0=RM2+8.IMM8:D2d:::addc
 "addc"
 *am33
+*am33_2
 {
   int dstreg, imm;
   int z, c, n, v;
@@ -1670,6 +1756,7 @@
 8.0xfb+8.0x98+4.RM2,4.RN0=RM2+8.IMM8:D2d:::sub
 "sub"
 *am33
+*am33_2
 {
   int dstreg;
 
@@ -1683,6 +1770,7 @@
 8.0xfb+8.0xa8+4.RM2,4.RN0=RM2+8.IMM8:D2d:::subc
 "subc"
 *am33
+*am33_2
 {
   int imm, dstreg;
   int z, c, n, v;
@@ -1711,6 +1799,7 @@
 8.0xfb+8.0xd8+4.RM2,4.RN0=RM2+8.IMM8:D2b:::cmp
 "cmp"
 *am33
+*am33_2
 {
   int srcreg;
 
@@ -1723,6 +1812,7 @@
 8.0xfb+8.0xf8+4.XRM2,4.XRN0=XRM2+8.IMM8:D2k:::mov
 "mov"
 *am33
+*am33_2
 {
   int dstreg;
 
@@ -1736,6 +1826,7 @@
 8.0xfb+8.0x09+4.RM2,4.RN0=RM2+8.IMM8:D2d:::and
 "and"
 *am33
+*am33_2
 {
   int dstreg;
   int z, n;
@@ -1754,6 +1845,7 @@
 8.0xfb+8.0x19+4.RM2,4.RN0=RM2+8.IMM8:D2d:::or
 "or"
 *am33
+*am33_2
 {
   int dstreg;
   int z, n;
@@ -1772,6 +1864,7 @@
 8.0xfb+8.0x29+4.RM2,4.RN0=RM2+8.IMM8:D2d:::xor
 "xor"
 *am33
+*am33_2
 {
   int dstreg;
   int z, n;
@@ -1790,6 +1883,7 @@
 8.0xfb+8.0x49+4.RM2,4.RN0=RM2+8.IMM8:D2a:::asr
 "asr"
 *am33
+*am33_2
 {
   int dstreg;
   signed32 temp;
@@ -1812,6 +1906,7 @@
 8.0xfb+8.0x59+4.RM2,4.RN0=RM2+8.IMM8:D2a:::lsr
 "lsr"
 *am33
+*am33_2
 {
   int dstreg;
   int z, n, c;
@@ -1831,6 +1926,7 @@
 8.0xfb+8.0x69+4.RM2,4.RN0=RM2+8.IMM8:D2a:::asl
 "asl"
 *am33
+*am33_2
 {
   int dstreg;
   int z, n;
@@ -1849,6 +1945,7 @@
 8.0xfb+8.0xa9+4.RM2,4.RN0=RM2+8.IMM8:D2a:::mul
 "mul"
 *am33
+*am33_2
 {
   int dstreg;
   unsigned64 temp;
@@ -1871,6 +1968,7 @@
 8.0xfb+8.0xb9+4.RM2,4.RN0=RM2+8.IMM8:D2a:::mulu
 "mulu"
 *am33
+*am33_2
 {
   int dstreg;
   unsigned64 temp;
@@ -1893,6 +1991,7 @@
 8.0xfb+8.0xe9+4.RN2,4.RM0=RN2+8.IMM8:D2l:::btst
 "btst"
 *am33
+*am33_2
 {
   int srcreg;
 
@@ -1905,6 +2004,7 @@
 8.0xfb+8.0x0a+4.RN2,4.RM0+8.IMM8:D2l:::mov
 "mov"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -1918,6 +2018,7 @@
 8.0xfb+8.0x1a+4.RM2,4.RN0+8.IMM8:D2m:::mov
 "mov"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -1931,6 +2032,7 @@
 8.0xfb+8.0x2a+4.RN2,4.RM0+8.IMM8:D2l:::movbu
 "movbu"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -1944,6 +2046,7 @@
 8.0xfb+8.0x3a+4.RM2,4.RN0+8.IMM8:D2m:::movbu
 "movbu"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -1957,6 +2060,7 @@
 8.0xfb+8.0x4a+4.RN2,4.RM0+8.IMM8:D2l:::movhu
 "movhu"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -1970,6 +2074,7 @@
 8.0xfb+8.0x5a+4.RM2,4.RN0+8.IMM8:D2m:::movhu
 "movhu"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -1983,6 +2088,7 @@
 8.0xfb+8.0x6a+4.RN2,4.RM0!RN2+8.IMM8:D2y:::mov
 "mov"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -1997,6 +2103,7 @@
 8.0xfb+8.0x7a+4.RM2,4.RN0+8.IMM8:D2z:::mov
 "mov"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -2012,6 +2119,7 @@
 8.0xfb+8.0x8a+4.RN2,4.0x0+8.IMM8:D2n:::mov
 "mov"
 *am33
+*am33_2
 {
   int dstreg;
 
@@ -2024,6 +2132,7 @@
 8.0xfb+8.0x9a+4.RM2,4.0x0+8.IMM8:D2o:::mov
 "mov"
 *am33
+*am33_2
 {
   int srcreg;
 
@@ -2036,6 +2145,7 @@
 8.0xfb+8.0xaa+4.RN2,4.0x0+8.IMM8:D2n:::movbu
 "movbu"
 *am33
+*am33_2
 {
   int dstreg;
 
@@ -2048,6 +2158,7 @@
 8.0xfb+8.0xba+4.RM2,4.0x0+8.IMM8:D2o:::movbu
 "movbu"
 *am33
+*am33_2
 {
   int srcreg;
 
@@ -2060,6 +2171,7 @@
 8.0xfb+8.0xca+4.RN2,4.0x0+8.IMM8:D2n:::movhu
 "movhu"
 *am33
+*am33_2
 {
   int dstreg;
 
@@ -2072,6 +2184,7 @@
 8.0xfb+8.0xda+4.RM2,4.0x0+8.IMM8:D2o:::movhu
 "movhu"
 *am33
+*am33_2
 {
   int srcreg;
 
@@ -2084,6 +2197,7 @@
 8.0xfb+8.0xea+4.RN2,4.RM0!RN2+8.IMM8:D2y:::movhu
 "movhu"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -2098,6 +2212,7 @@
 8.0xfb+8.0xfa+4.RM2,4.RN0+8.IMM8:D2z:::movhu
 "movhu"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -2113,6 +2228,7 @@
 8.0xfb+8.0x0b+4.RN2,4.RN0=RN2+8.IMM8:D2:::mac
 "mac"
 *am33
+*am33_2
 {
   int srcreg;
   signed64 temp, sum;
@@ -2140,6 +2256,7 @@
 8.0xfb+8.0x1b+4.RN2,4.RN0=RN2+8.IMM8:D2:::macu
 "macu"
 *am33
+*am33_2
 {
   int srcreg;
   signed64 temp, sum;
@@ -2167,6 +2284,7 @@
 8.0xfb+8.0x2b+4.RN2,4.RN0=RN2+8.IMM8:D2:::macb
 "macb"
 *am33
+*am33_2
 {
   int srcreg;
   signed64 temp, sum;
@@ -2194,6 +2312,7 @@
 8.0xfb+8.0x3b+4.RN2,4.RN0=RN2+8.IMM8:D2:::macbu
 "macbu"
 *am33
+*am33_2
 {
   int srcreg;
   signed64 temp, sum;
@@ -2221,6 +2340,7 @@
 8.0xfb+8.0x4b+4.RN2,4.RN0=RN2+8.IMM8:D2:::mach
 "mach"
 *am33
+*am33_2
 {
   int srcreg;
   signed64 temp, sum;
@@ -2248,6 +2368,7 @@
 8.0xfb+8.0x5b+4.RN2,4.RN0=RN2+8.IMM8:D2:::machu
 "machu"
 *am33
+*am33_2
 {
   int srcreg;
   signed64 temp, sum;
@@ -2275,6 +2396,7 @@
 8.0xfb+8.0xbb+4.RN2,4.RN0=RN2+8.IMM8:D2:::mcste
 "mcste"
 *am33
+*am33_2
 {
   int dstreg;
 
@@ -2371,6 +2493,7 @@
 8.0xfb+8.0x7c+4.RM2,4.RN0+4.RD0,4.0x0:D2c:::add
 "add"
 *am33
+*am33_2
 {
   int z, c, n, v;
   unsigned32 sum, source1, source2;
@@ -2401,6 +2524,7 @@
 8.0xfb+8.0x8c+4.RM2,4.RN0+4.RD0,4.0x0:D2c:::addc
 "addc"
 *am33
+*am33_2
 {
   int z, c, n, v;
   unsigned32 sum, source1, source2;
@@ -2431,6 +2555,7 @@
 8.0xfb+8.0x9c+4.RM2,4.RN0+4.RD0,4.0x0:D2c:::sub
 "sub"
 *am33
+*am33_2
 {
   int z, c, n, v;
   unsigned32 difference, source1, source2;
@@ -2461,6 +2586,7 @@
 8.0xfb+8.0xac+4.RM2,4.RN0+4.RD0,4.0x0:D2c:::subc
 "subc"
 *am33
+*am33_2
 {
   int z, c, n, v;
   unsigned32 difference, source1, source2;
@@ -2491,6 +2617,7 @@
 8.0xfb+8.0x0d+4.RM2,4.RN0+4.RD0,4.0x0:D2c:::and
 "and"
 *am33
+*am33_2
 {
   int z, n;
   int srcreg1, srcreg2, dstreg;
@@ -2513,6 +2640,7 @@
 8.0xfb+8.0x1d+4.RM2,4.RN0+4.RD0,4.0x0:D2c:::or
 "or"
 *am33
+*am33_2
 {
   int z, n;
   int srcreg1, srcreg2, dstreg;
@@ -2535,6 +2663,7 @@
 8.0xfb+8.0x2d+4.RM2,4.RN0+4.RD0,4.0x0:D2c:::xor
 "xor"
 *am33
+*am33_2
 {
   int z, n;
   int srcreg1, srcreg2, dstreg;
@@ -2557,6 +2686,7 @@
 8.0xfb+8.0x4d+4.RM2,4.RN0+4.RD0,4.0x0:D2c:::asr
 "asr"
 *am33
+*am33_2
 {
   int z, c, n;
   signed32 temp;
@@ -2583,6 +2713,7 @@
 8.0xfb+8.0x5d+4.RM2,4.RN0+4.RD0,4.0x0:D2c:::lsr
 "lsr"
 *am33
+*am33_2
 {
   int z, c, n;
   int srcreg1, srcreg2, dstreg;
@@ -2606,6 +2737,7 @@
 8.0xfb+8.0x6d+4.RM2,4.RN0+4.RD0,4.0x0:D2c:::asl
 "asl"
 *am33
+*am33_2
 {
   int z, n;
   int srcreg1, srcreg2, dstreg;
@@ -2628,6 +2760,7 @@
 8.0xfb+8.0xad+4.RM2,4.RN0+4.RD0,4.RD2!RD0:D2c:::mul
 "mul"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   signed64 temp;
@@ -2655,6 +2788,7 @@
 8.0xfb+8.0xbd+4.RM2,4.RN0+4.RD0,4.RD2!RD0:D2c:::mulu
 "mulu"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   signed64 temp;
@@ -2682,6 +2816,7 @@
 8.0xfb+8.0x0e+4.RN2,4.0x0+8.IMM8:D2p:::mov
 "mov"
 *am33
+*am33_2
 {
   int dstreg;
 
@@ -2694,6 +2829,7 @@
 8.0xfb+8.0x1e+4.RM2,4.0x0+8.IMM8:D2q:::mov
 "mov"
 *am33
+*am33_2
 {
   int srcreg;
 
@@ -2706,6 +2842,7 @@
 8.0xfb+8.0x2e+4.RN2,4.0x0+8.IMM8:D2p:::movbu
 "movbu"
 *am33
+*am33_2
 {
   int dstreg;
 
@@ -2718,6 +2855,7 @@
 8.0xfb+8.0x3e+4.RM2,4.0x0+8.IMM8:D2q:::movbu
 "movbu"
 *am33
+*am33_2
 {
   int srcreg;
 
@@ -2730,6 +2868,7 @@
 8.0xfb+8.0x4e+4.RN2,4.0x0+8.IMM8:D2p:::movhu
 "movhu"
 *am33
+*am33_2
 {
   int dstreg;
 
@@ -2742,6 +2881,7 @@
 8.0xfb+8.0x5e+4.RM2,4.0x0+8.IMM8:D2q:::movhu
 "movhu"
 *am33
+*am33_2
 {
   int srcreg;
 
@@ -2754,6 +2894,7 @@
 8.0xfb+8.0x8e+4.RI0,4.RM0+4.RN0,4.0x0:D2r:::mov
 "mov"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg;
 
@@ -2768,6 +2909,7 @@
 8.0xfb+8.0x9e+4.RI0,4.RN0+4.RM0,4.0x0:D2s:::mov
 "mov"
 *am33
+*am33_2
 {
   int srcreg, dstreg1, dstreg2;
 
@@ -2782,6 +2924,7 @@
 8.0xfb+8.0xae+4.RI0,4.RM0+4.RN0,4.0x0:D2r:::movbu
 "movbu"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg;
 
@@ -2796,6 +2939,7 @@
 8.0xfb+8.0xbe+4.RI0,4.RN0+4.RM0,4.0x0:D2s:::movbu
 "movbu"
 *am33
+*am33_2
 {
   int srcreg, dstreg1, dstreg2;
 
@@ -2810,6 +2954,7 @@
 8.0xfb+8.0xce+4.RI0,4.RM0+4.RN0,4.0x0:D2r:::movhu
 "movhu"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg;
 
@@ -2824,6 +2969,7 @@
 8.0xfb+8.0xde+4.RI0,4.RN0+4.RM0,4.0x0:D2s:::movhu
 "movhu"
 *am33
+*am33_2
 {
   int srcreg, dstreg1, dstreg2;
 
@@ -2838,6 +2984,7 @@
 8.0xfb+8.0x0f+4.RM2,4.RN0+4.RD0,4.RD2!RD0:D2c:::mac
 "mac"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   signed64 temp;
@@ -2874,6 +3021,7 @@
 8.0xfb+8.0x1f+4.RM2,4.RN0+4.RD0,4.RD2!RD0:D2c:::macu
 "macu"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   signed64 temp;
@@ -2910,6 +3058,7 @@
 8.0xfb+8.0x2f+4.RM2,4.RN0+4.RD0,4.0x0:D2c:::macb
 "macb"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg;
   signed32 temp, sum;
@@ -2938,6 +3087,7 @@
 8.0xfb+8.0x3f+4.RM2,4.RN0+4.RD0,4.0x0:D2c:::macbu
 "macbu"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg;
   signed32 temp, sum;
@@ -2966,6 +3116,7 @@
 8.0xfb+8.0x4f+4.RM2,4.RN0+4.RD0,4.RD2!RD0:D2c:::mach
 "mach"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   signed64 temp, sum;
@@ -2996,6 +3147,7 @@
 8.0xfb+8.0x5f+4.RM2,4.RN0+4.RD0,4.RD2!RD0:D2c:::machu
 "machu"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   signed64 temp, sum;
@@ -3026,6 +3178,7 @@
 8.0xfb+8.0x6f+4.RM2,4.RN0+4.RD0,4.0x0:D2c:::dmach
 "dmach"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg;
   signed32 temp, temp2, sum;
@@ -3056,6 +3209,7 @@
 8.0xfb+8.0x7f+4.RM2,4.RN0+4.RD0,4.0x0:D2c:::dmachu
 "dmachu"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg;
   signed32 temp, temp2, sum;
@@ -3086,6 +3240,7 @@
 8.0xfb+8.0x8f+4.RM2,4.RN0+4.RD0,4.RD2!RD0:D2c:::dmulh
 "dmulh"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   signed64 temp;
@@ -3108,6 +3263,7 @@
 8.0xfb+8.0x9f+4.RM2,4.RN0+4.RD0,4.RD2!RD0:D2c:::dmulhu
 "dmulhu"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   signed64 temp;
@@ -3130,6 +3286,7 @@
 8.0xfb+8.0xaf+4.RM2,4.RN0+8.0x0:D2:::sat24
 "sat24"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
   int value, n, z;
@@ -3157,6 +3314,7 @@
 8.0xfb+8.0xff+4.RM2,4.RN0+4.RD0,4.0x0:D2c:::bsch
 "bsch"
 *am33
+*am33_2
 {
   int temp, c, i;
   int srcreg1, srcreg2, dstreg;
@@ -3196,6 +3354,7 @@
 8.0xfd+8.0x08+4.RM2,4.RN0=RM2+8.IMM24A+8.IMM24B+8.IMM24C:D4t:::mov
 "mov"
 *am33
+*am33_2
 {
   int dstreg;
 
@@ -3208,6 +3367,7 @@
 8.0xfd+8.0x18+4.RM2,4.RN0=RM2+8.IMM24A+8.IMM24B+8.IMM24C:D4k:::movu
 "movu"
 *am33
+*am33_2
 {
   int dstreg;
 
@@ -3220,6 +3380,7 @@
 8.0xfd+8.0x78+4.RM2,4.RN0=RM2+8.IMM24A+8.IMM24B+8.IMM24C:D4c:::add
 "add"
 *am33
+*am33_2
 {
   int dstreg;
 
@@ -3232,6 +3393,7 @@
 8.0xfd+8.0x88+4.RM2,4.RN0=RM2+8.IMM24A+8.IMM24B+8.IMM24C:D4b:::addc
 "addc"
 *am33
+*am33_2
 {
   int dstreg, z, n, c, v;
   unsigned32 sum, imm, reg2;
@@ -3259,6 +3421,7 @@
 8.0xfd+8.0x98+4.RM2,4.RN0=RM2+8.IMM24A+8.IMM24B+8.IMM24C:D4b:::sub
 "sub"
 *am33
+*am33_2
 {
   int dstreg;
 
@@ -3271,6 +3434,7 @@
 8.0xfd+8.0xa8+4.RM2,4.RN0=RM2+8.IMM24A+8.IMM24B+8.IMM24C:D4b:::subc
 "subc"
 *am33
+*am33_2
 {
   int dstreg, z, n, c, v;
   unsigned32 difference, imm, reg2;
@@ -3298,6 +3462,7 @@
 8.0xfd+8.0xd8+4.RM2,4.RN0=RM2+8.IMM24A+8.IMM24B+8.IMM24C:D4b:::cmp
 "cmp"
 *am33
+*am33_2
 {
   int srcreg;
 
@@ -3310,6 +3475,7 @@
 8.0xfd+8.0xf8+4.XRM2,4.XRN0=XRM2+8.IMM24A+8.IMM24B+8.IMM24C:D4o:::mov
 "mov"
 *am33
+*am33_2
 {
   int dstreg;
 
@@ -3323,6 +3489,7 @@
 8.0xfd+8.0x09+4.RM2,4.RN0=RM2+8.IMM24A+8.IMM24B+8.IMM24C:D4b:::and
 "and"
 *am33
+*am33_2
 {
   int dstreg;
   int z,n;
@@ -3341,6 +3508,7 @@
 8.0xfd+8.0x19+4.RM2,4.RN0=RM2+8.IMM24A+8.IMM24B+8.IMM24C:D4b:::or
 "or"
 *am33
+*am33_2
 {
   int dstreg;
   int z,n;
@@ -3359,6 +3527,7 @@
 8.0xfd+8.0x29+4.RM2,4.RN0=RM2+8.IMM24A+8.IMM24B+8.IMM24C:D4b:::xor
 "xor"
 *am33
+*am33_2
 {
   int dstreg;
   int z,n;
@@ -3377,6 +3546,7 @@
 8.0xfd+8.0x49+4.RM2,4.RN0=RM2+8.IMM24A+8.IMM24B+8.IMM24C:D4b:::asr
 "asr"
 *am33
+*am33_2
 {
   int dstreg;
   signed32 temp;
@@ -3400,6 +3570,7 @@
 8.0xfd+8.0x59+4.RM2,4.RN0=RM2+8.IMM24A+8.IMM24B+8.IMM24C:D4b:::lsr
 "lsr"
 *am33
+*am33_2
 {
   int dstreg;
   int z, n, c;
@@ -3419,6 +3590,7 @@
 8.0xfd+8.0x69+4.RM2,4.RN0=RM2+8.IMM24A+8.IMM24B+8.IMM24C:D4b:::asl
 "asl"
 *am33
+*am33_2
 {
   int dstreg;
   int z, n;
@@ -3437,6 +3609,7 @@
 8.0xfd+8.0xa9+4.RM2,4.RN0=RM2+8.IMM24A+8.IMM24B+8.IMM24C:D4b:::mul
 "mul"
 *am33
+*am33_2
 {
   int dstreg;
   unsigned64 temp;
@@ -3459,6 +3632,7 @@
 8.0xfd+8.0xb9+4.RM2,4.RN0=RM2+8.IMM24A+8.IMM24B+8.IMM24C:D4b:::mulu
 "mulu"
 *am33
+*am33_2
 {
   int dstreg;
   unsigned64 temp;
@@ -3481,6 +3655,7 @@
 8.0xfd+8.0xe9+4.RN2,4.RN0=RN2+8.IMM24A+8.IMM24B+8.IMM24C:D4p:::btst
 "btst"
 *am33
+*am33_2
 {
   int srcreg;
 
@@ -3493,6 +3668,7 @@
 8.0xfd+8.0x0a+4.RN2,4.RM0+8.IMM24A+8.IMM24B+8.IMM24C:D4p:::mov
 "mov"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -3508,6 +3684,7 @@
 8.0xfd+8.0x1a+4.RM2,4.RN0+8.IMM24A+8.IMM24B+8.IMM24C:D4q:::mov
 "mov"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -3522,6 +3699,7 @@
 8.0xfd+8.0x2a+4.RN2,4.RM0+8.IMM24A+8.IMM24B+8.IMM24C:D4p:::movbu
 "movbu"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -3537,6 +3715,7 @@
 8.0xfd+8.0x3a+4.RM2,4.RN0+8.IMM24A+8.IMM24B+8.IMM24C:D4q:::movbu
 "movbu"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -3551,6 +3730,7 @@
 8.0xfd+8.0x4a+4.RN2,4.RM0+8.IMM24A+8.IMM24B+8.IMM24C:D4p:::movhu
 "movhu"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -3566,6 +3746,7 @@
 8.0xfd+8.0x5a+4.RM2,4.RN0+8.IMM24A+8.IMM24B+8.IMM24C:D4q:::movhu
 "movhu"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -3580,6 +3761,7 @@
 8.0xfd+8.0x6a+4.RN2,4.RM0!RN2+8.IMM24A+8.IMM24B+8.IMM24C:D4y:::mov
 "mov"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -3594,6 +3776,7 @@
 8.0xfd+8.0x7a+4.RM2,4.RN0+8.IMM24A+8.IMM24B+8.IMM24C:D4z:::mov
 "mov"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -3609,6 +3792,7 @@
 8.0xfd+8.0x8a+4.RN2,4.0x0+IMM24A+8.IMM24B+8.IMM24C:D4r:::mov
 "mov"
 *am33
+*am33_2
 {
   int dstreg;
 
@@ -3622,6 +3806,7 @@
 8.0xfd+8.0x9a+4.RM2,4.0x0+8.IMM24A+8.IMM24B+8.IMM24C:D4s:::mov
 "mov"
 *am33
+*am33_2
 {
   int srcreg;
 
@@ -3635,6 +3820,7 @@
 8.0xfd+8.0xaa+4.RN2,4.0x0+8.IMM24A+8.IMM24B+8.IMM24C:D4r:::movbu
 "movbu"
 *am33
+*am33_2
 {
   int dstreg;
 
@@ -3648,6 +3834,7 @@
 8.0xfd+8.0xba+4.RM2,4.0x0+8.IMM24A+8.IMM24B+8.IMM24C:D4s:::movbu
 "movbu"
 *am33
+*am33_2
 {
   int srcreg;
 
@@ -3661,6 +3848,7 @@
 8.0xfd+8.0xca+4.RN2,4.0x0+8.IMM24A+8.IMM24B+8.IMM24C:D4r:::movhu
 "movhu"
 *am33
+*am33_2
 {
   int dstreg;
 
@@ -3674,6 +3862,7 @@
 8.0xfd+8.0xda+4.RM2,4.RN0+8.IMM24A+8.IMM24B+8.IMM24C:D4s:::movhu
 "movhu"
 *am33
+*am33_2
 {
   int srcreg;
 
@@ -3687,6 +3876,7 @@
 8.0xfd+8.0xea+4.RN2,4.RM0!RN2+8.IMM24A+8.IMM24B+8.IMM24C:D4y:::movhu
 "movhu"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -3701,6 +3891,7 @@
 8.0xfd+8.0xfa+4.RM2,4.RN0+8.IMM24A+8.IMM24B+8.IMM24C:D4z:::movhu
 "movhu"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -3715,6 +3906,7 @@
 8.0xfd+8.0x0b+4.RN2,4.RN0=RN2+8.IMM24A+8.IMM24B+8.IMM24C:D4z:::mac
 "mac"
 *am33
+*am33_2
 {
   int srcreg;
   signed64 temp, sum;
@@ -3742,6 +3934,7 @@
 8.0xfd+8.0x1b+4.RN2,4.RN0=RN2+8.IMM24A+8.IMM24B+8.IMM24C:D4z:::macu
 "macu"
 *am33
+*am33_2
 {
   int srcreg;
   signed64 temp, sum;
@@ -3769,6 +3962,7 @@
 8.0xfd+8.0x2b+4.RN2,4.RN0=RN2+8.IMM24A+8.IMM24B+8.IMM24C:D4z:::macb
 "macb"
 *am33
+*am33_2
 {
   int srcreg;
   signed64 temp, sum;
@@ -3796,6 +3990,7 @@
 8.0xfd+8.0x3b+4.RN2,4.RN0=RN2+8.IMM24A+8.IMM24B+8.IMM24C:D4z:::macbu
 "macbu"
 *am33
+*am33_2
 {
   int srcreg;
   signed64 temp, sum;
@@ -3823,6 +4018,7 @@
 8.0xfd+8.0x4b+4.RN2,4.RN0=RN2+8.IMM24A+8.IMM24B+8.IMM24C:D4z:::mach
 "mach"
 *am33
+*am33_2
 {
   int srcreg;
   signed64 temp, sum;
@@ -3850,6 +4046,7 @@
 8.0xfd+8.0x5b+4.RN2,4.RN0=RN2+8.IMM24A+8.IMM24B+8.IMM24C:D4z:::machu
 "machu"
 *am33
+*am33_2
 {
   int srcreg;
   signed64 temp, sum;
@@ -3877,6 +4074,7 @@
 8.0xfd+8.0x0e+4.RN2,4.0x0+8.IMM24A+8.IMM24B+8.IMM24C:D4u:::mov
 "mov"
 *am33
+*am33_2
 {
   int dstreg;
 
@@ -3889,6 +4087,7 @@
 8.0xfd+8.0x1e+4.RM2,4.0x0+8.IMM24A+8.IMM24B+8.IMM24C:D4v:::mov
 "mov"
 *am33
+*am33_2
 {
   int srcreg;
 
@@ -3902,6 +4101,7 @@
 8.0xfd+8.0x2e+4.RN2,4.0x0+8.IMM24A+8.IMM24B+8.IMM24C:D4t:::movbu
 "movbu"
 *am33
+*am33_2
 {
   int dstreg;
 
@@ -3914,6 +4114,7 @@
 8.0xfd+8.0x3e+4.RM2,4.0x0+8.IMM24A+8.IMM24B+8.IMM24C:D4u:::movbu
 "movbu"
 *am33
+*am33_2
 {
   int srcreg;
 
@@ -3927,6 +4128,7 @@
 8.0xfd+8.0x4e+4.RN2,4.0x0+8.IMM24A+8.IMM24B+8.IMM24C:D4t:::movhu
 "movhu"
 *am33
+*am33_2
 {
   int dstreg;
 
@@ -3939,6 +4141,7 @@
 8.0xfd+8.0x5e+4.RM2,4.0x0+8.IMM24A+8.IMM24B+8.IMM24C:D4u:::movhu
 "movhu"
 *am33
+*am33_2
 {
   int srcreg;
 
@@ -3952,6 +4155,7 @@
 8.0xfe+8.0x08+4.RM2,4.RN0=RM2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::mov
 "mov"
 *am33
+*am33_2
 {
   int dstreg;
 
@@ -3964,6 +4168,7 @@
 8.0xfe+8.0x18+4.RM2,4.RN0=RM2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::movu
 "movu"
 *am33
+*am33_2
 {
   int dstreg;
 
@@ -3976,6 +4181,7 @@
 8.0xfe+8.0x78+4.RM2,4.RN0=RM2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::add
 "add"
 *am33
+*am33_2
 {
   int dstreg;
 
@@ -3988,6 +4194,7 @@
 8.0xfe+8.0x88+4.RM2,4.RN0=RM2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::addc
 "addc"
 *am33
+*am33_2
 {
   int dstreg;
   unsigned32 imm, reg2, sum;
@@ -4016,6 +4223,7 @@
 8.0xfe+8.0x98+4.RM2,4.RN0=RM2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::sub
 "sub"
 *am33
+*am33_2
 {
   int dstreg;
 
@@ -4028,6 +4236,7 @@
 8.0xfe+8.0xa8+4.RM2,4.RN0=RM2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::subc
 "subc"
 *am33
+*am33_2
 {
   int dstreg;
   unsigned32 imm, reg2, difference;
@@ -4056,6 +4265,7 @@
 8.0xfe+8.0xd8+4.RM2,4.RN0=RM2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::cmp
 "cmp"
 *am33
+*am33_2
 {
   int srcreg;
 
@@ -4068,6 +4278,7 @@
 8.0xfe+8.0xf8+4.XRM2,4.XRN0=XRM2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5b:::mov
 "mov"
 *am33
+*am33_2
 {
   int dstreg;
 
@@ -4081,6 +4292,7 @@
 8.0xfe+8.0x09+4.RM2,4.RN0=RM2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::and
 "and"
 *am33
+*am33_2
 {
   int dstreg;
   int z,n;
@@ -4099,6 +4311,7 @@
 8.0xfe+8.0x19+4.RM2,4.RN0=RM2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::or
 "or"
 *am33
+*am33_2
 {
   int dstreg;
   int z,n;
@@ -4117,6 +4330,7 @@
 8.0xfe+8.0x29+4.RM2,4.RN0=RM2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::xor
 "xor"
 *am33
+*am33_2
 {
   int dstreg;
   int z,n;
@@ -4135,6 +4349,7 @@
 8.0xfe+8.0x49+4.RM2,4.RN0=RM2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::asr
 "asr"
 *am33
+*am33_2
 {
   int dstreg;
   signed32 temp;
@@ -4157,6 +4372,7 @@
 8.0xfe+8.0x59+4.RM2,4.RN0=RM2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::lsr
 "lsr"
 *am33
+*am33_2
 {
   int dstreg;
   int z, n, c;
@@ -4176,6 +4392,7 @@
 8.0xfe+8.0x69+4.RM2,4.RN0=RM2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::asl
 "asl"
 *am33
+*am33_2
 {
   int dstreg;
   int z, n;
@@ -4194,6 +4411,7 @@
 8.0xfe+8.0xa9+4.RM2,4.RN0=RM2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::mul
 "mul"
 *am33
+*am33_2
 {
   int dstreg;
   unsigned64 temp;
@@ -4216,6 +4434,7 @@
 8.0xfe+8.0xb9+4.RM2,4.RN0=RM2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::mulu
 "mulu"
 *am33
+*am33_2
 {
   int dstreg;
   unsigned64 temp;
@@ -4238,6 +4457,7 @@
 8.0xfe+8.0xe9+4.RM2,4.RN0=RM2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5a:::btst
 "btst"
 *am33
+*am33_2
 {
   int srcreg;
 
@@ -4250,6 +4470,7 @@
 8.0xfe+8.0x0a+4.RN2,4.RM0+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5f:::mov
 "mov"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -4264,6 +4485,7 @@
 8.0xfe+8.0x1a+4.RM2,4.RN0+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5g:::mov
 "mov"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -4278,6 +4500,7 @@
 8.0xfe+8.0x2a+4.RN2,4.RM0+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::movbu
 "movbu"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -4292,6 +4515,7 @@
 8.0xfe+8.0x3a+4.RM2,4.RN0+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5b:::movbu
 "movbu"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -4306,6 +4530,7 @@
 8.0xfe+8.0x4a+4.RN2,4.RM0+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::movhu
 "movhu"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -4320,6 +4545,7 @@
 8.0xfe+8.0x5a+4.RM2,4.RN0+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5b:::movhu
 "movhu"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -4334,6 +4560,7 @@
 8.0xfe+8.0x6a+4.RN2,4.RM0!RN2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5y:::mov
 "mov"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -4348,6 +4575,7 @@
 8.0xfe+8.0x7a+4.RM2,4.RN0+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5z:::mov
 "mov"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -4363,6 +4591,7 @@
 8.0xfe+8.0x8a+4.RN2,4.0x0+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5c:::mov
 "mov"
 *am33
+*am33_2
 {
   int dstreg;
 
@@ -4376,6 +4605,7 @@
 8.0xfe+8.0x9a+4.RM2,4.0x0+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5d:::mov
 "mov"
 *am33
+*am33_2
 {
   int srcreg;
 
@@ -4389,6 +4619,7 @@
 8.0xfe+8.0xaa+4.RN2,4.0x0+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5c:::movbu
 "movbu"
 *am33
+*am33_2
 {
   int dstreg;
 
@@ -4402,6 +4633,7 @@
 8.0xfe+8.0xba+4.RM2,4.0x0+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5d:::movbu
 "movbu"
 *am33
+*am33_2
 {
   int srcreg;
 
@@ -4415,6 +4647,7 @@
 8.0xfe+8.0xca+4.RN2,4.0x0+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5c:::movhu
 "movhu"
 *am33
+*am33_2
 {
   int dstreg;
 
@@ -4428,6 +4661,7 @@
 8.0xfe+8.0xda+4.RM2,4.0x0+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5d:::movhu
 "movhu"
 *am33
+*am33_2
 {
   int srcreg;
 
@@ -4442,6 +4676,7 @@
 8.0xfe+8.0xea+4.RN2,4.RM0!RN2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5y:::movhu
 "movhu"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -4456,6 +4691,7 @@
 8.0xfe+8.0xfa+4.RM2,4.RN0+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5f:::movhu
 "movhu"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -4471,6 +4707,7 @@
 8.0xfe+8.0x0b+4.RN2,4.RN0=RN2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::mac
 "mac"
 *am33
+*am33_2
 {
   int srcreg, imm;
   signed64 temp, sum;
@@ -4499,6 +4736,7 @@
 8.0xfe+8.0x1b+4.RN2,4.RN0=RN2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::macu
 "macu"
 *am33
+*am33_2
 {
   int srcreg, imm;
   signed64 temp, sum;
@@ -4527,6 +4765,7 @@
 8.0xfe+8.0x2b+4.RN2,4.RN0=RN2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::macb
 "macb"
 *am33
+*am33_2
 {
   int srcreg, imm;
   signed32 temp, sum;
@@ -4550,6 +4789,7 @@
 8.0xfe+8.0x3b+4.RN2,4.RN0=RN2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::macbu
 "macbu"
 *am33
+*am33_2
 {
   int srcreg, imm;
   signed32 temp, sum;
@@ -4573,6 +4813,7 @@
 8.0xfe+8.0x4b+4.RN2,4.RN0=RN2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::mach
 "mach"
 *am33
+*am33_2
 {
   int srcreg, imm;
   signed32 temp, sum;
@@ -4596,6 +4837,7 @@
 8.0xfe+8.0x5b+4.RN2,4.RN0=RN2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::machu
 "machu"
 *am33
+*am33_2
 {
   int srcreg, imm;
   signed32 temp, sum;
@@ -4619,6 +4861,7 @@
 8.0xfe+8.0x6b+4.RN2,4.RN0=RN2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::dmach
 "dmach"
 *am33
+*am33_2
 {
   int srcreg, imm;
   signed32 temp, temp2, sum;
@@ -4644,6 +4887,7 @@
 8.0xfe+8.0x7b+4.RN2,4.RN0=RN2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::dmachu
 "dmachu"
 *am33
+*am33_2
 {
   int srcreg, imm;
   signed32 temp, temp2, sum;
@@ -4669,6 +4913,7 @@
 8.0xfe+8.0x8b+4.RN2,4.RN0=RN2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::dmulh
 "dmulh"
 *am33
+*am33_2
 {
   int imm, dstreg;
   signed32 temp;
@@ -4689,6 +4934,7 @@
 8.0xfe+8.0x9b+4.RN2,4.RN0=RN2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::dmulhu
 "dmulhu"
 *am33
+*am33_2
 {
   int imm, dstreg;
   signed32 temp;
@@ -4709,6 +4955,7 @@
 8.0xfe+8.0x0e+4.RN2,4.0x0+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5h:::mov
 "mov"
 *am33
+*am33_2
 {
   int dstreg;
 
@@ -4721,6 +4968,7 @@
 8.0xfe+8.0x1e+4.RM2,4.0x0+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5e:::mov
 "mov"
 *am33
+*am33_2
 {
   int srcreg;
 
@@ -4733,6 +4981,7 @@
 8.0xfe+8.0x2e+4.RN2,4.0x0+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5i:::movbu
 "movbu"
 *am33
+*am33_2
 {
   int dstreg;
 
@@ -4745,6 +4994,7 @@
 8.0xfe+8.0x3e+4.RM2,4.0x0+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5e:::movbu
 "movbu"
 *am33
+*am33_2
 {
   int srcreg;
 
@@ -4757,6 +5007,7 @@
 8.0xfe+8.0x4e+4.RN2,4.0x0+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5j:::movhu
 "movhu"
 *am33
+*am33_2
 {
   int dstreg;
 
@@ -4769,6 +5020,7 @@
 8.0xfe+8.0x5e+4.RM2,4.0x0+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5e:::movhu
 "movhu"
 *am33
+*am33_2
 {
   int srcreg;
 
@@ -4781,6 +5033,7 @@
 8.0xf7+8.0x00+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::add_add
 "add_add"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   int result1;
@@ -4800,6 +5053,7 @@
 8.0xf7+8.0x10+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::add_add
 "add_add"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
@@ -4818,6 +5072,7 @@
 8.0xf7+8.0x20+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::add_sub
 "add_sub"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   int result1;
@@ -4837,6 +5092,7 @@
 8.0xf7+8.0x30+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::add_sub
 "add_sub"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
@@ -4855,6 +5111,7 @@
 8.0xf7+8.0x40+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::add_cmp
 "add_cmp"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
 
@@ -4872,6 +5129,7 @@
 8.0xf7+8.0x50+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::add_cmp
 "add_cmp"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
 
@@ -4888,6 +5146,7 @@
 8.0xf7+8.0x60+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::add_mov
 "add_mov"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   int result1;
@@ -4907,6 +5166,7 @@
 8.0xf7+8.0x70+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::add_mov
 "add_mov"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
@@ -4925,6 +5185,7 @@
 8.0xf7+8.0x80+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::add_asr
 "add_asr"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   int result1;
@@ -4947,6 +5208,7 @@
 8.0xf7+8.0x90+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::add_asr
 "add_asr"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
@@ -4968,6 +5230,7 @@
 8.0xf7+8.0xa0+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::add_lsr
 "add_lsr"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   int result1;
@@ -4987,6 +5250,7 @@
 8.0xf7+8.0xb0+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::add_lsr
 "add_lsr"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
@@ -5006,6 +5270,7 @@
 8.0xf7+8.0xc0+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::add_asl
 "add_asl"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   int result1;
@@ -5025,6 +5290,7 @@
 8.0xf7+8.0xd0+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::add_asl
 "add_asl"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
@@ -5043,6 +5309,7 @@
 8.0xf7+8.0x01+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::cmp_add
 "cmp_add"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
 
@@ -5060,6 +5327,7 @@
 8.0xf7+8.0x11+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::cmp_add
 "cmp_add"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
 
@@ -5076,6 +5344,7 @@
 8.0xf7+8.0x21+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::cmp_sub
 "cmp_sub"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
 
@@ -5093,6 +5362,7 @@
 8.0xf7+8.0x31+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::cmp_sub
 "cmp_sub"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
 
@@ -5109,6 +5379,7 @@
 8.0xf7+8.0x61+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::cmp_mov
 "cmp_mov"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
 
@@ -5126,6 +5397,7 @@
 8.0xf7+8.0x71+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::cmp_mov
 "cmp_mov"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
 
@@ -5142,6 +5414,7 @@
 8.0xf7+8.0x81+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::cmp_asr
 "cmp_asr"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   signed int temp;
@@ -5162,6 +5435,7 @@
 8.0xf7+8.0x91+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::cmp_asr
 "cmp_asr"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   signed int temp;
@@ -5181,6 +5455,7 @@
 8.0xf7+8.0xa1+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::cmp_lsr
 "cmp_lsr"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
 
@@ -5198,6 +5473,7 @@
 8.0xf7+8.0xb1+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::cmp_lsr
 "cmp_lsr"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
 
@@ -5215,6 +5491,7 @@
 8.0xf7+8.0xc1+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::cmp_asl
 "cmp_asl"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
 
@@ -5232,6 +5509,7 @@
 8.0xf7+8.0xd1+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::cmp_asl
 "cmp_asl"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
 
@@ -5248,6 +5526,7 @@
 8.0xf7+8.0x02+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::sub_add
 "sub_add"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   int result1;
@@ -5267,6 +5546,7 @@
 8.0xf7+8.0x12+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::sub_add
 "sub_add"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
@@ -5285,6 +5565,7 @@
 8.0xf7+8.0x22+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::sub_sub
 "sub_sub"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   int result1;
@@ -5304,6 +5585,7 @@
 8.0xf7+8.0x32+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::sub_sub
 "sub_sub"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
@@ -5322,6 +5604,7 @@
 8.0xf7+8.0x42+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::sub_cmp
 "sub_cmp"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
 
@@ -5339,6 +5622,7 @@
 8.0xf7+8.0x52+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::sub_cmp
 "sub_cmp"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
 
@@ -5355,6 +5639,7 @@
 8.0xf7+8.0x62+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::sub_mov
 "sub_mov"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   int result1;
@@ -5374,6 +5659,7 @@
 8.0xf7+8.0x72+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::sub_mov
 "sub_mov"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
@@ -5392,6 +5678,7 @@
 8.0xf7+8.0x82+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::sub_asr
 "sub_asr"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   int result1;
@@ -5414,6 +5701,7 @@
 8.0xf7+8.0x92+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::sub_asr
 "sub_asr"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
@@ -5435,6 +5723,7 @@
 8.0xf7+8.0xa2+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::sub_lsr
 "sub_lsr"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   int result1;
@@ -5454,6 +5743,7 @@
 8.0xf7+8.0xb2+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::sub_lsr
 "sub_lsr"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
@@ -5473,6 +5763,7 @@
 8.0xf7+8.0xc2+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::sub_asl
 "sub_asl"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   int result1;
@@ -5492,6 +5783,7 @@
 8.0xf7+8.0xd2+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::sub_asl
 "sub_asl"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
@@ -5510,6 +5802,7 @@
 8.0xf7+8.0x03+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::mov_add
 "mov_add"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   int result1;
@@ -5529,6 +5822,7 @@
 8.0xf7+8.0x13+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::mov_add
 "mov_add"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
@@ -5547,6 +5841,7 @@
 8.0xf7+8.0x23+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::mov_sub
 "mov_sub"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   int result1;
@@ -5566,6 +5861,7 @@
 8.0xf7+8.0x33+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::mov_sub
 "mov_sub"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
@@ -5584,6 +5880,7 @@
 8.0xf7+8.0x43+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::mov_cmp
 "mov_cmp"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
 
@@ -5601,6 +5898,7 @@
 8.0xf7+8.0x53+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::mov_cmp
 "mov_cmp"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
 
@@ -5617,6 +5915,7 @@
 8.0xf7+8.0x63+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::mov_mov
 "mov_mov"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   int result1;
@@ -5636,6 +5935,7 @@
 8.0xf7+8.0x73+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::mov_mov
 "mov_mov"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
@@ -5654,6 +5954,7 @@
 8.0xf7+8.0x83+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::mov_asr
 "mov_asr"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   int result1;
@@ -5676,6 +5977,7 @@
 8.0xf7+8.0x93+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::mov_asr
 "mov_asr"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
@@ -5697,6 +5999,7 @@
 8.0xf7+8.0xa3+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::mov_lsr
 "mov_lsr"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   int result1;
@@ -5716,6 +6019,7 @@
 8.0xf7+8.0xb3+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::mov_lsr
 "mov_lsr"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
@@ -5735,6 +6039,7 @@
 8.0xf7+8.0xc3+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::mov_asl
 "mov_asl"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   int result1;
@@ -5754,6 +6059,7 @@
 8.0xf7+8.0xd3+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::mov_asl
 "mov_asl"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
@@ -5772,6 +6078,7 @@
 8.0xf7+8.0x04+4.IMM4A,4.RN1+4.RM2,4.RN2!RN1:D2c:::add_add
 "add_add"
 *am33
+*am33_2
 {
   int srcreg2, dstreg1, dstreg2;
   int result1;
@@ -5790,6 +6097,7 @@
 8.0xf7+8.0x14+4.IMM4A,4.RN1+4.IMM4,4.RN2!RN1:D2d:::add_add
 "add_add"
 *am33
+*am33_2
 {
   int dstreg1, dstreg2;
   int result1;
@@ -5807,6 +6115,7 @@
 8.0xf7+8.0x24+4.IMM4A,4.RN1+4.RM2,4.RN2!RN1:D2c:::add_sub
 "add_sub"
 *am33
+*am33_2
 {
   int srcreg2, dstreg1, dstreg2;
   int result1;
@@ -5825,6 +6134,7 @@
 8.0xf7+8.0x34+4.IMM4A,4.RN1+4.IMM4,4.RN2!RN1:D2d:::add_sub
 "add_sub"
 *am33
+*am33_2
 {
   int dstreg1, dstreg2;
   int result1;
@@ -5842,6 +6152,7 @@
 8.0xf7+8.0x44+4.IMM4A,4.RN1+4.RM2,4.RN2!RN1:D2c:::add_cmp
 "add_cmp"
 *am33
+*am33_2
 {
   int srcreg2, dstreg1, dstreg2;
 
@@ -5858,6 +6169,7 @@
 8.0xf7+8.0x54+4.IMM4A,4.RN1+4.IMM4,4.RN2!RN1:D2d:::add_cmp
 "add_cmp"
 *am33
+*am33_2
 {
   int dstreg1, dstreg2;
 
@@ -5873,6 +6185,7 @@
 8.0xf7+8.0x64+4.IMM4A,4.RN1+4.RM2,4.RN2!RN1:D2c:::add_mov
 "add_mov"
 *am33
+*am33_2
 {
   int srcreg2, dstreg1, dstreg2;
   int result1;
@@ -5891,6 +6204,7 @@
 8.0xf7+8.0x74+4.IMM4A,4.RN1+4.IMM4,4.RN2!RN1:D2d:::add_mov
 "add_mov"
 *am33
+*am33_2
 {
   int dstreg1, dstreg2;
   int result1;
@@ -5908,6 +6222,7 @@
 8.0xf7+8.0x84+4.IMM4A,4.RN1+4.RM2,4.RN2!RN1:D2c:::add_asr
 "add_asr"
 *am33
+*am33_2
 {
   int srcreg2, dstreg1, dstreg2;
   int result1;
@@ -5929,6 +6244,7 @@
 8.0xf7+8.0x94+4.IMM4A,4.RN1+4.IMM4,4.RN2!RN1:D2d:::add_asr
 "add_asr"
 *am33
+*am33_2
 {
   int dstreg1, dstreg2;
   int result1;
@@ -5949,6 +6265,7 @@
 8.0xf7+8.0xa4+4.IMM4A,4.RN1+4.RM2,4.RN2!RN1:D2c:::add_lsr
 "add_lsr"
 *am33
+*am33_2
 {
   int srcreg2, dstreg1, dstreg2;
   int result1;
@@ -5967,6 +6284,7 @@
 8.0xf7+8.0xb4+4.IMM4A,4.RN1+4.IMM4,4.RN2!RN1:D2d:::add_lsr
 "add_lsr"
 *am33
+*am33_2
 {
   int dstreg1, dstreg2;
   int result1;
@@ -5985,6 +6303,7 @@
 8.0xf7+8.0xc4+4.IMM4A,4.RN1+4.RM2,4.RN2!RN1:D2c:::add_asl
 "add_asl"
 *am33
+*am33_2
 {
   int srcreg2, dstreg1, dstreg2;
   int result1;
@@ -6003,6 +6322,7 @@
 8.0xf7+8.0xd4+4.IMM4A,4.RN1+4.IMM4,4.RN2!RN1:D2d:::add_asl
 "add_asl"
 *am33
+*am33_2
 {
   int dstreg1, dstreg2;
   int result1;
@@ -6020,6 +6340,7 @@
 8.0xf7+8.0x05+4.IMM4A,4.RN1+4.RM2,4.RN2!RN1:D2c:::cmp_add
 "cmp_add"
 *am33
+*am33_2
 {
   int srcreg2, dstreg1, dstreg2;
 
@@ -6036,6 +6357,7 @@
 8.0xf7+8.0x15+4.IMM4A,4.RN1+4.IMM4,4.RN2!RN1:D2d:::cmp_add
 "cmp_add"
 *am33
+*am33_2
 {
   int dstreg1, dstreg2;
 
@@ -6051,6 +6373,7 @@
 8.0xf7+8.0x25+4.IMM4A,4.RN1+4.RM2,4.RN2!RN1:D2c:::cmp_sub
 "cmp_sub"
 *am33
+*am33_2
 {
   int srcreg2, dstreg1, dstreg2;
 
@@ -6067,6 +6390,7 @@
 8.0xf7+8.0x35+4.IMM4A,4.RN1+4.IMM4,4.RN2!RN1:D2d:::cmp_sub
 "cmp_sub"
 *am33
+*am33_2
 {
   int dstreg1, dstreg2;
 
@@ -6082,6 +6406,7 @@
 8.0xf7+8.0x65+4.IMM4A,4.RN1+4.RM2,4.RN2!RN1:D2c:::cmp_mov
 "cmp_mov"
 *am33
+*am33_2
 {
   int srcreg2, dstreg1, dstreg2;
 
@@ -6098,6 +6423,7 @@
 8.0xf7+8.0x75+4.IMM4A,4.RN1+4.IMM4,4.RN2!RN1:D2d:::cmp_mov
 "cmp_mov"
 *am33
+*am33_2
 {
   int dstreg1, dstreg2;
 
@@ -6113,6 +6439,7 @@
 8.0xf7+8.0x85+4.IMM4A,4.RN1+4.RM2,4.RN2!RN1:D2c:::cmp_asr
 "cmp_asr"
 *am33
+*am33_2
 {
   int srcreg2, dstreg1, dstreg2;
   signed int temp;
@@ -6132,6 +6459,7 @@
 8.0xf7+8.0x95+4.IMM4A,4.RN1+4.IMM4,4.RN2!RN1:D2d:::cmp_asr
 "cmp_asr"
 *am33
+*am33_2
 {
   int dstreg1, dstreg2;
   signed int temp;
@@ -6150,6 +6478,7 @@
 8.0xf7+8.0xa5+4.IMM4A,4.RN1+4.RM2,4.RN2!RN1:D2c:::cmp_lsr
 "cmp_lsr"
 *am33
+*am33_2
 {
   int srcreg2, dstreg1, dstreg2;
 
@@ -6166,6 +6495,7 @@
 8.0xf7+8.0xb5+4.IMM4A,4.RN1+4.IMM4,4.RN2!RN1:D2d:::cmp_lsr
 "cmp_lsr"
 *am33
+*am33_2
 {
   int dstreg1, dstreg2;
 
@@ -6182,6 +6512,7 @@
 8.0xf7+8.0xc5+4.IMM4A,4.RN1+4.RM2,4.RN2!RN1:D2c:::cmp_asl
 "cmp_asl"
 *am33
+*am33_2
 {
   int srcreg2, dstreg1, dstreg2;
 
@@ -6198,6 +6529,7 @@
 8.0xf7+8.0xd5+4.IMM4A,4.RN1+4.IMM4,4.RN2!RN1:D2d:::cmp_asl
 "cmp_asl"
 *am33
+*am33_2
 {
   int dstreg1, dstreg2;
 
@@ -6213,6 +6545,7 @@
 8.0xf7+8.0x06+4.IMM4A,4.RN1+4.RM2,4.RN2!RN1:D2c:::sub_add
 "sub_add"
 *am33
+*am33_2
 {
   int srcreg2, dstreg1, dstreg2;
   int result1;
@@ -6231,6 +6564,7 @@
 8.0xf7+8.0x16+4.IMM4A,4.RN1+4.IMM4,4.RN2!RN1:D2d:::sub_add
 "sub_add"
 *am33
+*am33_2
 {
   int dstreg1, dstreg2;
   int result1;
@@ -6248,6 +6582,7 @@
 8.0xf7+8.0x26+4.IMM4A,4.RN1+4.RM2,4.RN2!RN1:D2c:::sub_sub
 "sub_sub"
 *am33
+*am33_2
 {
   int srcreg2, dstreg1, dstreg2;
   int result1;
@@ -6266,6 +6601,7 @@
 8.0xf7+8.0x36+4.IMM4A,4.RN1+4.IMM4,4.RN2!RN1:D2d:::sub_sub
 "sub_sub"
 *am33
+*am33_2
 {
   int dstreg1, dstreg2;
   int result1;
@@ -6283,6 +6619,7 @@
 8.0xf7+8.0x46+4.IMM4A,4.RN1+4.RM2,4.RN2!RN1:D2c:::sub_cmp
 "sub_cmp"
 *am33
+*am33_2
 {
   int srcreg2, dstreg1, dstreg2;
 
@@ -6299,6 +6636,7 @@
 8.0xf7+8.0x56+4.IMM4A,4.RN1+4.IMM4,4.RN2!RN1:D2d:::sub_cmp
 "sub_cmp"
 *am33
+*am33_2
 {
   int dstreg1, dstreg2;
 
@@ -6314,6 +6652,7 @@
 8.0xf7+8.0x66+4.IMM4A,4.RN1+4.RM2,4.RN2!RN1:D2c:::sub_mov
 "sub_mov"
 *am33
+*am33_2
 {
   int srcreg2, dstreg1, dstreg2;
   int result1;
@@ -6332,6 +6671,7 @@
 8.0xf7+8.0x76+4.IMM4A,4.RN1+4.IMM4,4.RN2!RN1:D2d:::sub_mov
 "sub_mov"
 *am33
+*am33_2
 {
   int dstreg1, dstreg2;
   int result1;
@@ -6349,6 +6689,7 @@
 8.0xf7+8.0x86+4.IMM4A,4.RN1+4.RM2,4.RN2!RN1:D2c:::sub_asr
 "sub_asr"
 *am33
+*am33_2
 {
   int srcreg2, dstreg1, dstreg2;
   int result1;
@@ -6370,6 +6711,7 @@
 8.0xf7+8.0x96+4.IMM4A,4.RN1+4.IMM4,4.RN2!RN1:D2d:::sub_asr
 "sub_asr"
 *am33
+*am33_2
 {
   int dstreg1, dstreg2;
   int result1;
@@ -6390,6 +6732,7 @@
 8.0xf7+8.0xa6+4.IMM4A,4.RN1+4.RM2,4.RN2!RN1:D2c:::sub_lsr
 "sub_lsr"
 *am33
+*am33_2
 {
   int srcreg2, dstreg1, dstreg2;
   int result1;
@@ -6408,6 +6751,7 @@
 8.0xf7+8.0xb6+4.IMM4A,4.RN1+4.IMM4,4.RN2!RN1:D2d:::sub_lsr
 "sub_lsr"
 *am33
+*am33_2
 {
   int dstreg1, dstreg2;
   int result1;
@@ -6426,6 +6770,7 @@
 8.0xf7+8.0xc6+4.IMM4A,4.RN1+4.RM2,4.RN2!RN1:D2c:::sub_asl
 "sub_asl"
 *am33
+*am33_2
 {
   int srcreg2, dstreg1, dstreg2;
   int result1;
@@ -6444,6 +6789,7 @@
 8.0xf7+8.0xd6+4.IMM4A,4.RN1+4.IMM4,4.RN2!RN1:D2d:::sub_asl
 "sub_asl"
 *am33
+*am33_2
 {
   int dstreg1, dstreg2;
   int result1;
@@ -6461,6 +6807,7 @@
 8.0xf7+8.0x07+4.IMM4A,4.RN1+4.RM2,4.RN2!RN1:D2c:::mov_add
 "mov_add"
 *am33
+*am33_2
 {
   int srcreg2, dstreg1, dstreg2;
   int result1;
@@ -6479,6 +6826,7 @@
 8.0xf7+8.0x17+4.IMM4A,4.RN1+4.IMM4,4.RN2!RN1:D2d:::mov_add
 "mov_add"
 *am33
+*am33_2
 {
   int dstreg1, dstreg2;
   int result1;
@@ -6496,6 +6844,7 @@
 8.0xf7+8.0x27+4.IMM4A,4.RN1+4.RM2,4.RN2!RN1:D2c:::mov_sub
 "mov_sub"
 *am33
+*am33_2
 {
   int srcreg2, dstreg1, dstreg2;
   int result1;
@@ -6514,6 +6863,7 @@
 8.0xf7+8.0x37+4.IMM4A,4.RN1+4.IMM4,4.RN2!RN1:D2d:::mov_sub
 "mov_sub"
 *am33
+*am33_2
 {
   int dstreg1, dstreg2;
   int result1;
@@ -6531,6 +6881,7 @@
 8.0xf7+8.0x47+4.IMM4A,4.RN1+4.RM2,4.RN2!RN1:D2c:::mov_cmp
 "mov_cmp"
 *am33
+*am33_2
 {
   int srcreg2, dstreg1, dstreg2;
 
@@ -6547,6 +6898,7 @@
 8.0xf7+8.0x57+4.IMM4A,4.RN1+4.IMM4,4.RN2!RN1:D2d:::mov_cmp
 "mov_cmp"
 *am33
+*am33_2
 {
   int dstreg1, dstreg2;
 
@@ -6562,6 +6914,7 @@
 8.0xf7+8.0x67+4.IMM4A,4.RN1+4.RM2,4.RN2!RN1:D2c:::mov_mov
 "mov_mov"
 *am33
+*am33_2
 {
   int srcreg2, dstreg1, dstreg2;
   int result1;
@@ -6580,6 +6933,7 @@
 8.0xf7+8.0x77+4.IMM4A,4.RN1+4.IMM4,4.RN2!RN1:D2d:::mov_mov
 "mov_mov"
 *am33
+*am33_2
 {
   int dstreg1, dstreg2;
   int result1;
@@ -6597,6 +6951,7 @@
 8.0xf7+8.0x87+4.IMM4A,4.RN1+4.RM2,4.RN2!RN1:D2c:::mov_asr
 "mov_asr"
 *am33
+*am33_2
 {
   int srcreg2, dstreg1, dstreg2;
   int result1;
@@ -6618,6 +6973,7 @@
 8.0xf7+8.0x97+4.IMM4A,4.RN1+4.IMM4,4.RN2!RN1:D2d:::mov_asr
 "mov_asr"
 *am33
+*am33_2
 {
   int dstreg1, dstreg2;
   int result1;
@@ -6638,6 +6994,7 @@
 8.0xf7+8.0xa7+4.IMM4A,4.RN1+4.RM2,4.RN2!RN1:D2c:::mov_lsr
 "mov_lsr"
 *am33
+*am33_2
 {
   int srcreg2, dstreg1, dstreg2;
   int result1;
@@ -6656,6 +7013,7 @@
 8.0xf7+8.0xb7+4.IMM4A,4.RN1+4.IMM4,4.RN2!RN1:D2d:::mov_lsr
 "mov_lsr"
 *am33
+*am33_2
 {
   int dstreg1, dstreg2;
   int result1;
@@ -6674,6 +7032,7 @@
 8.0xf7+8.0xc7+4.IMM4A,4.RN1+4.RM2,4.RN2!RN1:D2c:::mov_asl
 "mov_asl"
 *am33
+*am33_2
 {
   int srcreg2, dstreg1, dstreg2;
   int result1;
@@ -6692,6 +7051,7 @@
 8.0xf7+8.0xd7+4.IMM4A,4.RN1+4.IMM4,4.RN2!RN1:D2d:::mov_asl
 "mov_asl"
 *am33
+*am33_2
 {
   int dstreg1, dstreg2;
   int result1;
@@ -6709,6 +7069,7 @@
 8.0xf7+8.0x08+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::and_add
 "and_add"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   int result1;
@@ -6728,6 +7089,7 @@
 8.0xf7+8.0x18+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::and_add
 "and_add"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
@@ -6746,6 +7108,7 @@
 8.0xf7+8.0x28+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::and_sub
 "and_sub"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   int result1;
@@ -6765,6 +7128,7 @@
 8.0xf7+8.0x38+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::and_sub
 "and_sub"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
@@ -6783,6 +7147,7 @@
 8.0xf7+8.0x48+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::and_cmp
 "and_cmp"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
 
@@ -6800,6 +7165,7 @@
 8.0xf7+8.0x58+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::and_cmp
 "and_cmp"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
 
@@ -6816,6 +7182,7 @@
 8.0xf7+8.0x68+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::and_mov
 "and_mov"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   int result1;
@@ -6835,6 +7202,7 @@
 8.0xf7+8.0x78+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::and_mov
 "and_mov"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
@@ -6853,6 +7221,7 @@
 8.0xf7+8.0x88+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::and_asr
 "and_asr"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   int result1;
@@ -6875,6 +7244,7 @@
 8.0xf7+8.0x98+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::and_asr
 "and_asr"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
@@ -6896,6 +7266,7 @@
 8.0xf7+8.0xa8+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::and_lsr
 "and_lsr"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   int result1;
@@ -6915,6 +7286,7 @@
 8.0xf7+8.0xb8+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::and_lsr
 "and_lsr"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
@@ -6934,6 +7306,7 @@
 8.0xf7+8.0xc8+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::and_asl
 "and_asl"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   int result1;
@@ -6953,6 +7326,7 @@
 8.0xf7+8.0xd8+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::and_asl
 "and_asl"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
@@ -6971,6 +7345,7 @@
 8.0xf7+8.0x09+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::dmach_add
 "dmach_add"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   signed32 temp, temp2, sum;
@@ -6995,6 +7370,7 @@
 8.0xf7+8.0x19+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::dmach_add
 "dmach_add"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   signed32 temp, temp2, sum;
@@ -7018,6 +7394,7 @@
 8.0xf7+8.0x29+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::dmach_sub
 "dmach_sub"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   signed32 temp, temp2, sum;
@@ -7042,6 +7419,7 @@
 8.0xf7+8.0x39+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::dmach_sub
 "dmach_sub"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   signed32 temp, temp2, sum;
@@ -7065,6 +7443,7 @@
 8.0xf7+8.0x49+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::dmach_cmp
 "dmach_cmp"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   signed32 temp, temp2, sum;
@@ -7089,6 +7468,7 @@
 8.0xf7+8.0x59+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::dmach_cmp
 "dmach_cmp"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   signed32 temp, temp2, sum;
@@ -7112,6 +7492,7 @@
 8.0xf7+8.0x69+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::dmach_mov
 "dmach_mov"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   signed32 temp, temp2, sum;
@@ -7136,6 +7517,7 @@
 8.0xf7+8.0x79+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::dmach_mov
 "dmach_mov"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   signed32 temp, temp2, sum;
@@ -7159,6 +7541,7 @@
 8.0xf7+8.0x89+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::dmach_asr
 "dmach_asr"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   signed32 temp, temp2, sum;
@@ -7185,6 +7568,7 @@
 8.0xf7+8.0x99+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::dmach_asr
 "dmach_asr"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   signed32 temp, temp2, sum;
@@ -7210,6 +7594,7 @@
 8.0xf7+8.0xa9+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::dmach_lsr
 "dmach_lsr"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   signed32 temp, temp2, sum;
@@ -7234,6 +7619,7 @@
 8.0xf7+8.0xb9+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::dmach_lsr
 "dmach_lsr"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   signed32 temp, temp2, sum;
@@ -7258,6 +7644,7 @@
 8.0xf7+8.0xc9+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::dmach_asl
 "dmach_asl"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   signed32 temp, temp2, sum;
@@ -7282,6 +7669,7 @@
 8.0xf7+8.0xd9+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::dmach_asl
 "dmach_asl"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   signed32 temp, temp2, sum;
@@ -7305,6 +7693,7 @@
 8.0xf7+8.0x0a+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::xor_add
 "xor_add"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   int result1;
@@ -7324,6 +7713,7 @@
 8.0xf7+8.0x1a+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::xor_add
 "xor_add"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
@@ -7342,6 +7732,7 @@
 8.0xf7+8.0x2a+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::xor_sub
 "xor_sub"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   int result1;
@@ -7361,6 +7752,7 @@
 8.0xf7+8.0x3a+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::xor_sub
 "xor_sub"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
@@ -7379,6 +7771,7 @@
 8.0xf7+8.0x4a+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::xor_cmp
 "xor_cmp"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
 
@@ -7396,6 +7789,7 @@
 8.0xf7+8.0x5a+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::xor_cmp
 "xor_cmp"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
 
@@ -7412,6 +7806,7 @@
 8.0xf7+8.0x6a+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::xor_mov
 "xor_mov"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   int result1;
@@ -7431,6 +7826,7 @@
 8.0xf7+8.0x7a+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::xor_mov
 "xor_mov"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
@@ -7449,6 +7845,7 @@
 8.0xf7+8.0x8a+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::xor_asr
 "xor_asr"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   int result1;
@@ -7471,6 +7868,7 @@
 8.0xf7+8.0x9a+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::xor_asr
 "xor_asr"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
@@ -7492,6 +7890,7 @@
 8.0xf7+8.0xaa+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::xor_lsr
 "xor_lsr"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   int result1;
@@ -7511,6 +7910,7 @@
 8.0xf7+8.0xba+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::xor_lsr
 "xor_lsr"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
@@ -7530,6 +7930,7 @@
 8.0xf7+8.0xca+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::xor_asl
 "xor_asl"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   int result1;
@@ -7549,6 +7950,7 @@
 8.0xf7+8.0xda+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::xor_asl
 "xor_asl"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
@@ -7567,6 +7969,7 @@
 8.0xf7+8.0x0b+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::swhw_add
 "swhw_add"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   int result1;
@@ -7586,6 +7989,7 @@
 8.0xf7+8.0x1b+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::swhw_add
 "swhw_add"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
@@ -7605,6 +8009,7 @@
 8.0xf7+8.0x2b+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::swhw_sub
 "swhw_sub"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   int result1;
@@ -7625,6 +8030,7 @@
 8.0xf7+8.0x3b+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::swhw_sub
 "swhw_sub"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
@@ -7644,6 +8050,7 @@
 8.0xf7+8.0x4b+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::swhw_cmp
 "swhw_cmp"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
 
@@ -7662,6 +8069,7 @@
 8.0xf7+8.0x5b+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::swhw_cmp
 "swhw_cmp"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
 
@@ -7679,6 +8087,7 @@
 8.0xf7+8.0x6b+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::swhw_mov
 "swhw_mov"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   int result1;
@@ -7699,6 +8108,7 @@
 8.0xf7+8.0x7b+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::swhw_mov
 "swhw_mov"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
@@ -7718,6 +8128,7 @@
 8.0xf7+8.0x8b+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::swhw_asr
 "swhw_asr"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   int result1;
@@ -7741,6 +8152,7 @@
 8.0xf7+8.0x9b+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::swhw_asr
 "swhw_asr"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
@@ -7763,6 +8175,7 @@
 8.0xf7+8.0xab+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::swhw_lsr
 "swhw_lsr"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   int result1;
@@ -7783,6 +8196,7 @@
 8.0xf7+8.0xbb+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::swhw_lsr
 "swhw_lsr"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
@@ -7803,6 +8217,7 @@
 8.0xf7+8.0xcb+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::swhw_asl
 "swhw_asl"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   int result1;
@@ -7823,6 +8238,7 @@
 8.0xf7+8.0xdb+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::swhw_asl
 "swhw_asl"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
@@ -7842,6 +8258,7 @@
 8.0xf7+8.0x0c+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::or_add
 "or_add"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   int result1;
@@ -7861,6 +8278,7 @@
 8.0xf7+8.0x1c+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::or_add
 "or_add"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
@@ -7879,6 +8297,7 @@
 8.0xf7+8.0x2c+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::or_sub
 "or_sub"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   int result1;
@@ -7898,6 +8317,7 @@
 8.0xf7+8.0x3c+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::or_sub
 "or_sub"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
@@ -7916,6 +8336,7 @@
 8.0xf7+8.0x4c+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::or_cmp
 "or_cmp"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
 
@@ -7933,6 +8354,7 @@
 8.0xf7+8.0x5c+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::or_cmp
 "or_cmp"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
 
@@ -7949,6 +8371,7 @@
 8.0xf7+8.0x6c+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::or_mov
 "or_mov"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   int result1;
@@ -7968,6 +8391,7 @@
 8.0xf7+8.0x7c+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::or_mov
 "or_mov"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
@@ -7986,6 +8410,7 @@
 8.0xf7+8.0x8c+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::or_asr
 "or_asr"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   int result1;
@@ -8008,6 +8433,7 @@
 8.0xf7+8.0x9c+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::or_asr
 "or_asr"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
@@ -8029,6 +8455,7 @@
 8.0xf7+8.0xac+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::or_lsr
 "or_lsr"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   int result1;
@@ -8048,6 +8475,7 @@
 8.0xf7+8.0xbc+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::or_lsr
 "or_lsr"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
@@ -8067,6 +8495,7 @@
 8.0xf7+8.0xcc+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::or_asl
 "or_asl"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   int result1;
@@ -8086,6 +8515,7 @@
 8.0xf7+8.0xdc+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::or_asl
 "or_asl"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
@@ -8104,6 +8534,7 @@
 8.0xf7+8.0x0d+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::sat16_add
 "sat16_add"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   int result1;
@@ -8129,6 +8560,7 @@
 8.0xf7+8.0x1d+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::sat16_add
 "sat16_add"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
@@ -8153,6 +8585,7 @@
 8.0xf7+8.0x2d+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::sat16_sub
 "sat16_sub"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   int result1;
@@ -8178,6 +8611,7 @@
 8.0xf7+8.0x3d+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::sat16_sub
 "sat16_sub"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
@@ -8202,6 +8636,7 @@
 8.0xf7+8.0x4d+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::sat16_cmp
 "sat16_cmp"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
 
@@ -8224,6 +8659,7 @@
 8.0xf7+8.0x5d+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::sat16_cmp
 "sat16_cmp"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
 
@@ -8245,6 +8681,7 @@
 8.0xf7+8.0x6d+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::sat16_mov
 "sat16_mov"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   int result1;
@@ -8270,6 +8707,7 @@
 8.0xf7+8.0x7d+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::sat16_mov
 "sat16_mov"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
@@ -8294,6 +8732,7 @@
 8.0xf7+8.0x8d+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::sat16_asr
 "sat16_asr"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   int result1;
@@ -8322,6 +8761,7 @@
 8.0xf7+8.0x9d+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::sat16_asr
 "sat16_asr"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
@@ -8349,6 +8789,7 @@
 8.0xf7+8.0xad+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::sat16_lsr
 "sat16_lsr"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   int result1;
@@ -8374,6 +8815,7 @@
 8.0xf7+8.0xbd+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::sat16_lsr
 "sat16_lsr"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
@@ -8399,6 +8841,7 @@
 8.0xf7+8.0xcd+4.RM1,4.RN1+4.RM2,4.RN2!RN1:D2:::sat16_asl
 "sat16_asl"
 *am33
+*am33_2
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
   int result1;
@@ -8424,6 +8867,7 @@
 8.0xf7+8.0xdd+4.RM1,4.RN1+4.IMM4,4.RN2!RN1:D2b:::sat16_asl
 "sat16_asl"
 *am33
+*am33_2
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
@@ -8448,6 +8892,7 @@
 8.0xf7+8.0xe0+4.RN,4.RM!RN+4.IMM4,4.0x0:D2:::mov_llt
 "mov_llt"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -8469,6 +8914,7 @@
 8.0xf7+8.0xe0+4.RN,4.RM!RN+4.IMM4,4.0x1:D2:::mov_lgt
 "mov_lgt"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -8491,6 +8937,7 @@
 8.0xf7+8.0xe0+4.RN,4.RM!RN+4.IMM4,4.0x2:D2:::mov_lge
 "mov_lge"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -8512,6 +8959,7 @@
 8.0xf7+8.0xe0+4.RN,4.RM!RN+4.IMM4,4.0x3:D2:::mov_lle
 "mov_lle"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -8534,6 +8982,7 @@
 8.0xf7+8.0xe0+4.RN,4.RM!RN+4.IMM4,4.0x4:D2:::mov_lcs
 "mov_lcs"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -8555,6 +9004,7 @@
 8.0xf7+8.0xe0+4.RN,4.RM!RN+4.IMM4,4.0x5:D2:::mov_lhi
 "mov_lhi"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -8576,6 +9026,7 @@
 8.0xf7+8.0xe0+4.RN,4.RM!RN+4.IMM4,4.0x6:D2:::mov_lcc
 "mov_lcc"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -8597,6 +9048,7 @@
 8.0xf7+8.0xe0+4.RN,4.RM!RN+4.IMM4,4.0x7:D2:::mov_lls
 "mov_lls"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -8618,6 +9070,7 @@
 8.0xf7+8.0xe0+4.RN,4.RM!RN+4.IMM4,4.0x8:D2:::mov_leq
 "mov_leq"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -8639,6 +9092,7 @@
 8.0xf7+8.0xe0+4.RN,4.RM!RN+4.IMM4,4.0x9:D2:::mov_lne
 "mov_lne"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -8660,6 +9114,7 @@
 8.0xf7+8.0xe0+4.RN,4.RM!RN+4.IMM4,4.0xa:D2:::mov_lra
 "mov_lra"
 *am33
+*am33_2
 {
   int srcreg, dstreg;
 
@@ -8674,3 +9129,4 @@
   nia = PC;
 }
 
+:include::am33_2:am33-2.igen

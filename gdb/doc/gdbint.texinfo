@@ -1,7 +1,7 @@
 \input texinfo   @c -*- texinfo -*-
 @setfilename gdbint.info
 @include gdb-cfg.texi
-@dircategory Programming & development tools.
+@dircategory Software development
 @direntry
 * Gdb-Internals: (gdbint).	The GNU debugger's internals.
 @end direntry
@@ -1372,7 +1372,7 @@ Finally, here's an example of printing an address.  The original code:
 @smallexample
   annotate_field (4);
   printf_filtered ("%s ",
-        local_hex_string_custom ((unsigned long) b->address, "08l"));
+        hex_string_custom ((unsigned long) b->address, 8));
 @end smallexample
 
 It became:
@@ -2134,9 +2134,6 @@ The default name of @value{GDBN}'s initialization file (normally
 @item NO_STD_REGS
 This macro is deprecated.
 
-@item NO_SYS_FILE
-Define this if your system does not have a @code{<sys/file.h>}.
-
 @item SIGWINCH_HANDLER
 If your host defines @code{SIGWINCH}, you can define this to be the name
 of a function to be called if @code{SIGWINCH} is received.
@@ -2168,18 +2165,8 @@ The default value of the prompt string (normally @code{"(gdb) "}).
 @cindex terminal device
 The name of the generic TTY device, defaults to @code{"/dev/tty"}.
 
-@item FCLOSE_PROVIDED
-Define this if the system declares @code{fclose} in the headers included
-in @code{defs.h}.  This isn't needed unless your compiler is unusually
-anal.
-
 @item FOPEN_RB
 Define this if binary files are opened the same way as text files.
-
-@item GETENV_PROVIDED
-Define this if the system declares @code{getenv} in its headers included
-in @code{defs.h}.  This isn't needed unless your compiler is unusually
-anal.
 
 @item HAVE_MMAP
 @findex mmap
@@ -2251,10 +2238,6 @@ of functions to indicate that they never return.  The default is already
 set correctly if compiling with GCC.  This will almost never need to be
 defined.
 
-@item NO_SIGINTERRUPT
-@findex siginterrupt
-Define this to indicate that @code{siginterrupt} is not available.
-
 @item SEEK_CUR
 @itemx SEEK_SET
 Define these to appropriate value for the system @code{lseek}, if not already
@@ -2263,11 +2246,6 @@ defined.
 @item STOP_SIGNAL
 This is the signal for stopping @value{GDBN}.  Defaults to
 @code{SIGTSTP}.  (Only redefined for the Convex.)
-
-@item USE_O_NOCTTY
-Define this if the interior's tty should be opened with the @code{O_NOCTTY}
-flag.  (FIXME: This should be a native-only flag, but @file{inflow.c} is
-always linked in.)
 
 @item USG
 Means that System V (prior to SVR4) include files are in use.  (FIXME:
@@ -2930,12 +2908,6 @@ Define if the compiler promotes a @code{short} or @code{char}
 parameter to an @code{int}, but still reports the parameter as its
 original type, rather than the promoted type.
 
-@item BELIEVE_PCC_PROMOTION_TYPE
-@findex BELIEVE_PCC_PROMOTION_TYPE
-Define this if @value{GDBN} should believe the type of a @code{short}
-argument when compiled by @code{pcc}, but look within a full int space to get
-its value.  Only defined for Sun-3 at present.
-
 @item BITS_BIG_ENDIAN
 @findex BITS_BIG_ENDIAN
 Define this if the numbering of bits in the targets does @strong{not} match the
@@ -3041,35 +3013,6 @@ Since the adjustment of a breakpoint may significantly alter a user's
 expectation, @value{GDBN} prints a warning when an adjusted breakpoint
 is initially set and each time that that breakpoint is hit.
 
-@item DEPRECATED_CALL_DUMMY_WORDS
-@findex DEPRECATED_CALL_DUMMY_WORDS
-Pointer to an array of @code{LONGEST} words of data containing
-host-byte-ordered @code{DEPRECATED_REGISTER_SIZE} sized values that
-partially specify the sequence of instructions needed for an inferior
-function call.
-
-Should be deprecated in favor of a macro that uses target-byte-ordered
-data.
-
-This method has been replaced by @code{push_dummy_code}
-(@pxref{push_dummy_code}).
-
-@item DEPRECATED_SIZEOF_CALL_DUMMY_WORDS
-@findex DEPRECATED_SIZEOF_CALL_DUMMY_WORDS
-The size of @code{DEPRECATED_CALL_DUMMY_WORDS}.  This must return a
-positive value.  See also @code{DEPRECATED_CALL_DUMMY_LENGTH}.
-
-This method has been replaced by @code{push_dummy_code}
-(@pxref{push_dummy_code}).
-
-@item CALL_DUMMY
-@findex CALL_DUMMY
-A static initializer for @code{DEPRECATED_CALL_DUMMY_WORDS}.
-Deprecated.
-
-This method has been replaced by @code{push_dummy_code}
-(@pxref{push_dummy_code}).
-
 @item CALL_DUMMY_LOCATION
 @findex CALL_DUMMY_LOCATION
 See the file @file{inferior.h}.
@@ -3089,15 +3032,6 @@ A C expression that should be nonzero if @var{regno} should not be
 written to the target.  This is often the case for program counters,
 status words, and other special registers.  If this is not defined,
 @value{GDBN} will assume that all registers may be written.
-
-@item DO_DEFERRED_STORES
-@itemx CLEAR_DEFERRED_STORES
-@findex CLEAR_DEFERRED_STORES
-@findex DO_DEFERRED_STORES
-Define this to execute any deferred stores of registers into the inferior,
-and to cancel any deferred stores.
-
-Currently only implemented correctly for native Sparc configurations?
 
 @item int CONVERT_REGISTER_P(@var{regnum})
 @findex CONVERT_REGISTER_P
@@ -3308,20 +3242,20 @@ function end symbol is 0.  For such targets, you must define
 @code{FUNCTION_EPILOGUE_SIZE} to expand into the standard size of a
 function's epilogue.
 
-@item FUNCTION_START_OFFSET
-@findex FUNCTION_START_OFFSET
+@item DEPRECATED_FUNCTION_START_OFFSET
+@findex DEPRECATED_FUNCTION_START_OFFSET
 An integer, giving the offset in bytes from a function's address (as
 used in the values of symbols, function pointers, etc.), and the
 function's first genuine instruction.
 
 This is zero on almost all machines: the function's address is usually
-the address of its first instruction.  However, on the VAX, for example,
-each function starts with two bytes containing a bitmask indicating
-which registers to save upon entry to the function.  The VAX @code{call}
-instructions check this value, and save the appropriate registers
-automatically.  Thus, since the offset from the function's address to
-its first instruction is two bytes, @code{FUNCTION_START_OFFSET} would
-be 2 on the VAX.
+the address of its first instruction.  However, on the VAX, for
+example, each function starts with two bytes containing a bitmask
+indicating which registers to save upon entry to the function.  The
+VAX @code{call} instructions check this value, and save the
+appropriate registers automatically.  Thus, since the offset from the
+function's address to its first instruction is two bytes,
+@code{DEPRECATED_FUNCTION_START_OFFSET} would be 2 on the VAX.
 
 @item GCC_COMPILED_FLAG_SYMBOL
 @itemx GCC2_COMPILED_FLAG_SYMBOL
@@ -3551,43 +3485,6 @@ form.
 Return the appropriate register set for a core file section with name
 @var{sect_name} and size @var{sect_size}.
 
-
-@item RETURN_VALUE_ON_STACK(@var{type})
-@findex RETURN_VALUE_ON_STACK
-@cindex returning structures by value
-@cindex structures, returning by value
-
-Return non-zero if values of type TYPE are returned on the stack, using
-the ``struct convention'' (i.e., the caller provides a pointer to a
-buffer in which the callee should store the return value).  This
-controls how the @samp{finish} command finds a function's return value,
-and whether an inferior function call reserves space on the stack for
-the return value.
-
-The full logic @value{GDBN} uses here is kind of odd.  
-
-@itemize @bullet
-@item
-If the type being returned by value is not a structure, union, or array,
-and @code{RETURN_VALUE_ON_STACK} returns zero, then @value{GDBN}
-concludes the value is not returned using the struct convention.
-
-@item
-Otherwise, @value{GDBN} calls @code{USE_STRUCT_CONVENTION} (see below).
-If that returns non-zero, @value{GDBN} assumes the struct convention is
-in use.
-@end itemize
-
-In other words, to indicate that a given type is returned by value using
-the struct convention, that type must be either a struct, union, array,
-or something @code{RETURN_VALUE_ON_STACK} likes, @emph{and} something
-that @code{USE_STRUCT_CONVENTION} likes.
-
-Note that, in C and C@t{++}, arrays are never returned by value.  In those
-languages, these predicates will always see a pointer type, never an
-array type.  All the references above to arrays being returned by value
-apply only to other languages.
-
 @item SOFTWARE_SINGLE_STEP_P()
 @findex SOFTWARE_SINGLE_STEP_P
 Define this as 1 if the target does not have a hardware single-step
@@ -3631,22 +3528,6 @@ the address.
 and guess the starting and ending addresses of the compilation unit from
 them.
 @end itemize
-
-@item PCC_SOL_BROKEN
-@findex PCC_SOL_BROKEN
-(Used only in the Convex target.)
-
-@item DEPRECATED_PC_IN_SIGTRAMP (@var{pc}, @var{name})
-@findex DEPRECATED_PC_IN_SIGTRAMP
-@cindex sigtramp
-The @dfn{sigtramp} is a routine that the kernel calls (which then calls
-the signal handler).  On most machines it is a library routine that is
-linked into the executable.
-
-This function, given a program counter value in @var{pc} and the
-(possibly NULL) name of the function in which that @var{pc} resides,
-returns nonzero if the @var{pc} and/or @var{name} show that we are in
-sigtramp.
 
 @item PC_LOAD_SEGMENT
 @findex PC_LOAD_SEGMENT
@@ -3695,7 +3576,7 @@ definition is only used in generic code when parsing "$ps".)
 If defined, used by @code{frame_pop} to remove a stack frame.  This
 method has been superseeded by generic code.
 
-@item push_dummy_call (@var{gdbarch}, @var{func_addr}, @var{regcache}, @var{pc_addr}, @var{nargs}, @var{args}, @var{sp}, @var{struct_return}, @var{struct_addr})
+@item push_dummy_call (@var{gdbarch}, @var{function}, @var{regcache}, @var{pc_addr}, @var{nargs}, @var{args}, @var{sp}, @var{struct_return}, @var{struct_addr})
 @findex push_dummy_call
 @findex DEPRECATED_PUSH_ARGUMENTS.
 @anchor{push_dummy_call} Define this to push the dummy frame's call to
@@ -3703,13 +3584,15 @@ the inferior function onto the stack.  In addition to pushing
 @var{nargs}, the code should push @var{struct_addr} (when
 @var{struct_return}), and the return address (@var{bp_addr}).
 
+@var{function} is a pointer to a @code{struct value}; on architectures that use
+function descriptors, this contains the function descriptor value.
+
 Returns the updated top-of-stack pointer.
 
 This method replaces @code{DEPRECATED_PUSH_ARGUMENTS}.
 
 @item CORE_ADDR push_dummy_code (@var{gdbarch}, @var{sp}, @var{funaddr}, @var{using_gcc}, @var{args}, @var{nargs}, @var{value_type}, @var{real_pc}, @var{bp_addr})
 @findex push_dummy_code
-@findex DEPRECATED_FIX_CALL_DUMMY
 @anchor{push_dummy_code} Given a stack based call dummy, push the
 instruction sequence (including space for a breakpoint) to which the
 called function should return.
@@ -3722,23 +3605,8 @@ By default, the stack is grown sufficient to hold a frame-aligned
 (@pxref{frame_align}) breakpoint, @var{bp_addr} is set to the address
 reserved for that breakpoint, and @var{real_pc} set to @var{funaddr}.
 
-This method replaces @code{DEPRECATED_CALL_DUMMY_WORDS},
-@code{DEPRECATED_SIZEOF_CALL_DUMMY_WORDS}, @code{CALL_DUMMY},
-@code{CALL_DUMMY_LOCATION}, @code{DEPRECATED_REGISTER_SIZE},
-@code{DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET}, and
-@code{DEPRECATED_FIX_CALL_DUMMY}.
-
-@item DEPRECATED_PUSH_DUMMY_FRAME
-@findex DEPRECATED_PUSH_DUMMY_FRAME
-Used in @samp{call_function_by_hand} to create an artificial stack frame.
-
-@item DEPRECATED_REGISTER_BYTES
-@findex DEPRECATED_REGISTER_BYTES
-The total amount of space needed to store @value{GDBN}'s copy of the
-machine's register state.
-
-This is no longer needed.  @value{GDBN} instead computes the size of the
-register buffer at run-time.
+This method replaces @code{CALL_DUMMY_LOCATION},
+@code{DEPRECATED_REGISTER_SIZE}.
 
 @item REGISTER_NAME(@var{i})
 @findex REGISTER_NAME
@@ -3869,10 +3737,6 @@ value that is to be returned.
 This method has been deprecated in favour of @code{gdbarch_return_value}
 (@pxref{gdbarch_return_value}).
 
-@item SUN_FIXED_LBRAC_BUG
-@findex SUN_FIXED_LBRAC_BUG
-(Used only for Sun-3 and Sun-4 targets.)
-
 @item SYMBOL_RELOADING_DEFAULT
 @findex SYMBOL_RELOADING_DEFAULT
 The default value of the ``symbol-reloading'' variable.  (Never defined in
@@ -3952,9 +3816,9 @@ Number of bits in a short integer; defaults to @code{2 * TARGET_CHAR_BIT}.
 @findex read_sp
 @findex read_fp
 @anchor{TARGET_READ_SP} These change the behavior of @code{read_pc},
-@code{write_pc}, @code{read_sp} and @code{deprecated_read_fp}.  For most
-targets, these may be left undefined.  @value{GDBN} will call the read
-and write register functions with the relevant @code{_REGNUM} argument.
+@code{write_pc}, and @code{read_sp}.  For most targets, these may be
+left undefined.  @value{GDBN} will call the read and write register
+functions with the relevant @code{_REGNUM} argument.
 
 These macros are useful when a target keeps one of these registers in a
 hard to get at place; for example, part in a segment register and part
@@ -3995,8 +3859,8 @@ frame.  The value returned must match the dummy frame stack value
 previously saved using @code{SAVE_DUMMY_FRAME_TOS}.
 @xref{SAVE_DUMMY_FRAME_TOS}.
 
-@item USE_STRUCT_CONVENTION (@var{gcc_p}, @var{type})
-@findex USE_STRUCT_CONVENTION
+@item DEPRECATED_USE_STRUCT_CONVENTION (@var{gcc_p}, @var{type})
+@findex DEPRECATED_USE_STRUCT_CONVENTION
 If defined, this must be an expression that is nonzero if a value of the
 given @var{type} being returned from a function must have space
 allocated for it on the stack.  @var{gcc_p} is true if the function
@@ -4470,10 +4334,6 @@ target systems are the same.  These macros should be defined (or left
 undefined) in @file{nm-@var{system}.h}.
 
 @table @code
-@item ATTACH_DETACH
-@findex ATTACH_DETACH
-If defined, then @value{GDBN} will include support for the @code{attach} and
-@code{detach} commands.
 
 @item CHILD_PREPARE_TO_STORE
 @findex CHILD_PREPARE_TO_STORE
@@ -4491,10 +4351,6 @@ Define this if the native-dependent code will provide its own routines
 @file{@var{host}-nat.c}.  If this symbol is @emph{not} defined, and
 @file{infptrace.c} is included in this configuration, the default
 routines in @file{infptrace.c} are used for these functions.
-
-@item FILES_INFO_HOOK
-@findex FILES_INFO_HOOK
-(Only defined for Convex.)
 
 @item FP0_REGNUM
 @findex FP0_REGNUM
@@ -4526,12 +4382,6 @@ needs to know this so that it can subtract this address from absolute
 addresses in the upage, that are obtained via ptrace or from core files.
 On systems that don't need this value, set it to zero.
 
-@item KERNEL_U_ADDR_BSD
-@findex KERNEL_U_ADDR_BSD
-Define this to cause @value{GDBN} to determine the address of @code{u} at
-runtime, by using Berkeley-style @code{nlist} on the kernel's image in
-the root directory.
-
 @item KERNEL_U_ADDR_HPUX
 @findex KERNEL_U_ADDR_HPUX
 Define this to cause @value{GDBN} to determine the address of @code{u} at
@@ -4548,10 +4398,6 @@ user that another process may be running with the same executable.
 Defines the format for the name of a @file{/proc} device.  Should be
 defined in @file{nm.h} @emph{only} in order to override the default
 definition in @file{procfs.c}.
-
-@item PTRACE_FP_BUG
-@findex PTRACE_FP_BUG
-See @file{mach386-xdep.c}.
 
 @item PTRACE_ARG3_TYPE
 @findex PTRACE_ARG3_TYPE
@@ -4591,10 +4437,6 @@ twice; once when
 the shell execs, and once when the program itself execs.  If the actual
 number of traps is something other than 2, then define this macro to
 expand into the number expected.
-
-@item SVR4_SHARED_LIBS
-@findex SVR4_SHARED_LIBS
-Define this to indicate that SVR4-style shared libraries are in use.
 
 @item USE_PROC_FS
 @findex USE_PROC_FS
@@ -5048,7 +4890,7 @@ allocation of small temporary values (such as strings).
 restrict the memory being allocated to no more than a few kilobytes.}
 
 @value{GDBN} uses the string function @code{xstrdup} and the print
-function @code{xasprintf}.
+function @code{xstrprintf}.
 
 @emph{Pragmatics: @code{asprintf} and @code{strdup} can fail.  Print
 functions such as @code{sprintf} are very prone to buffer overflow
@@ -6428,6 +6270,15 @@ failure, please add a test case for it.  Some cases are extremely
 difficult to test, such as code that handles host OS failures or bugs
 in particular versions of compilers, and it's OK not to try to write
 tests for all of those.
+
+DejaGNU supports separate build, host, and target machines.  However,
+some @value{GDBN} test scripts do not work if the build machine and
+the host machine are not the same.  In such an environment, these scripts
+will give a result of ``UNRESOLVED'', like this:
+
+@smallexample
+UNRESOLVED: gdb.base/example.exp: This test script does not work on a remote host.
+@end smallexample
 
 @section Testsuite Organization
 

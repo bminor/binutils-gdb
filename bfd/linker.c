@@ -1828,8 +1828,8 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
 		&& inh->u.i.link == h)
 	      {
 		(*_bfd_error_handler)
-		  (_("%s: indirect symbol `%s' to `%s' is a loop"),
-		   bfd_archive_filename (abfd), name, string);
+		  (_("%B: indirect symbol `%s' to `%s' is a loop"),
+		   abfd, name, string);
 		bfd_set_error (bfd_error_invalid_operation);
 		return FALSE;
 	      }
@@ -2684,7 +2684,7 @@ default_indirect_link_order (bfd *output_bfd,
 
   BFD_ASSERT (input_section->output_section == output_section);
   BFD_ASSERT (input_section->output_offset == link_order->offset);
-  BFD_ASSERT (input_section->_cooked_size == link_order->size);
+  BFD_ASSERT (input_section->size == link_order->size);
 
   if (info->relocatable
       && input_section->reloc_count > 0
@@ -2756,7 +2756,9 @@ default_indirect_link_order (bfd *output_bfd,
     }
 
   /* Get and relocate the section contents.  */
-  sec_size = bfd_section_size (input_bfd, input_section);
+  sec_size = (input_section->rawsize > input_section->size
+	      ? input_section->rawsize
+	      : input_section->size);
   contents = bfd_malloc (sec_size);
   if (contents == NULL && sec_size != 0)
     goto error_return;
@@ -2824,4 +2826,204 @@ _bfd_generic_link_split_section (bfd *abfd ATTRIBUTE_UNUSED,
 				 asection *sec ATTRIBUTE_UNUSED)
 {
   return FALSE;
+}
+
+/*
+FUNCTION
+	bfd_section_already_linked
+
+SYNOPSIS
+        void bfd_section_already_linked (bfd *abfd, asection *sec);
+
+DESCRIPTION
+	Check if @var{sec} has been already linked during a reloceatable
+	or final link.
+
+.#define bfd_section_already_linked(abfd, sec) \
+.       BFD_SEND (abfd, _section_already_linked, (abfd, sec))
+.
+
+*/
+
+/* Sections marked with the SEC_LINK_ONCE flag should only be linked
+   once into the output.  This routine checks each section, and
+   arrange to discard it if a section of the same name has already
+   been linked.  This code assumes that all relevant sections have the 
+   SEC_LINK_ONCE flag set; that is, it does not depend solely upon the
+   section name.  bfd_section_already_linked is called via
+   bfd_map_over_sections.  */
+
+/* The hash table.  */
+
+static struct bfd_hash_table _bfd_section_already_linked_table;
+
+/* Support routines for the hash table used by section_already_linked,
+   initialize the table, traverse, lookup, fill in an entry and remove
+   the table.  */
+
+void
+bfd_section_already_linked_table_traverse
+  (bfd_boolean (*func) (struct bfd_section_already_linked_hash_entry *,
+			void *), void *info)
+{
+  bfd_hash_traverse (&_bfd_section_already_linked_table,
+		     (bfd_boolean (*) (struct bfd_hash_entry *,
+				       void *)) func,
+		     info);
+}
+
+struct bfd_section_already_linked_hash_entry *
+bfd_section_already_linked_table_lookup (const char *name)
+{
+  return ((struct bfd_section_already_linked_hash_entry *)
+	  bfd_hash_lookup (&_bfd_section_already_linked_table, name,
+			   TRUE, FALSE));
+}
+
+void
+bfd_section_already_linked_table_insert
+  (struct bfd_section_already_linked_hash_entry *already_linked_list,
+   asection *sec)
+{
+  struct bfd_section_already_linked *l;
+
+  /* Allocate the memory from the same obstack as the hash table is
+     kept in.  */
+  l = bfd_hash_allocate (&_bfd_section_already_linked_table, sizeof *l);
+  l->sec = sec;
+  l->next = already_linked_list->entry;
+  already_linked_list->entry = l;
+}
+
+static struct bfd_hash_entry *
+already_linked_newfunc (struct bfd_hash_entry *entry ATTRIBUTE_UNUSED,
+			struct bfd_hash_table *table,
+			const char *string ATTRIBUTE_UNUSED)
+{
+  struct bfd_section_already_linked_hash_entry *ret =
+    bfd_hash_allocate (table, sizeof *ret);
+
+  ret->entry = NULL;
+
+  return &ret->root;
+}
+
+bfd_boolean
+bfd_section_already_linked_table_init (void)
+{
+  return bfd_hash_table_init_n (&_bfd_section_already_linked_table,
+				already_linked_newfunc, 42);
+}
+
+void
+bfd_section_already_linked_table_free (void)
+{
+  bfd_hash_table_free (&_bfd_section_already_linked_table);
+}
+
+/* This is used on non-ELF inputs.  */
+
+void
+_bfd_generic_section_already_linked (bfd *abfd, asection *sec)
+{
+  flagword flags;
+  const char *name;
+  struct bfd_section_already_linked *l;
+  struct bfd_section_already_linked_hash_entry *already_linked_list;
+
+  flags = sec->flags;
+  if ((flags & SEC_LINK_ONCE) == 0)
+    return;
+
+  /* FIXME: When doing a relocatable link, we may have trouble
+     copying relocations in other sections that refer to local symbols
+     in the section being discarded.  Those relocations will have to
+     be converted somehow; as of this writing I'm not sure that any of
+     the backends handle that correctly.
+
+     It is tempting to instead not discard link once sections when
+     doing a relocatable link (technically, they should be discarded
+     whenever we are building constructors).  However, that fails,
+     because the linker winds up combining all the link once sections
+     into a single large link once section, which defeats the purpose
+     of having link once sections in the first place.  */
+
+  name = bfd_get_section_name (abfd, sec);
+
+  already_linked_list = bfd_section_already_linked_table_lookup (name);
+
+  for (l = already_linked_list->entry; l != NULL; l = l->next)
+    {
+      bfd_boolean skip = FALSE;
+      struct coff_comdat_info *s_comdat
+	= bfd_coff_get_comdat_section (abfd, sec);
+      struct coff_comdat_info *l_comdat
+	= bfd_coff_get_comdat_section (l->sec->owner, l->sec);
+
+      /* We may have 3 different sections on the list: group section,
+	 comdat section and linkonce section. SEC may be a linkonce or
+	 comdat section. We always ignore group section. For non-COFF
+	 inputs, we also ignore comdat section.
+
+	 FIXME: Is that safe to match a linkonce section with a comdat
+	 section for COFF inputs?  */
+      if ((l->sec->flags & SEC_GROUP) != 0)
+	skip = TRUE;
+      else if (bfd_get_flavour (abfd) == bfd_target_coff_flavour)
+	{
+	  if (s_comdat != NULL
+	      && l_comdat != NULL
+	      && strcmp (s_comdat->name, l_comdat->name) != 0)
+	    skip = TRUE;
+	}
+      else if (l_comdat != NULL)
+	skip = TRUE;
+
+      if (!skip)
+	{
+	  /* The section has already been linked.  See if we should
+             issue a warning.  */
+	  switch (flags & SEC_LINK_DUPLICATES)
+	    {
+	    default:
+	      abort ();
+
+	    case SEC_LINK_DUPLICATES_DISCARD:
+	      break;
+
+	    case SEC_LINK_DUPLICATES_ONE_ONLY:
+	      (*_bfd_error_handler)
+		(_("%B: warning: ignoring duplicate section `%A'\n"),
+		 abfd, sec);
+	      break;
+
+	    case SEC_LINK_DUPLICATES_SAME_CONTENTS:
+	      /* FIXME: We should really dig out the contents of both
+                 sections and memcmp them.  The COFF/PE spec says that
+                 the Microsoft linker does not implement this
+                 correctly, so I'm not going to bother doing it
+                 either.  */
+	      /* Fall through.  */
+	    case SEC_LINK_DUPLICATES_SAME_SIZE:
+	      if (sec->size != l->sec->size)
+		(*_bfd_error_handler)
+		  (_("%B: warning: duplicate section `%A' has different size\n"),
+		   abfd, sec);
+	      break;
+	    }
+
+	  /* Set the output_section field so that lang_add_section
+	     does not create a lang_input_section structure for this
+	     section.  Since there might be a symbol in the section
+	     being discarded, we must retain a pointer to the section
+	     which we are really going to use.  */
+	  sec->output_section = bfd_abs_section_ptr;
+	  sec->kept_section = l->sec;
+
+	  return;
+	}
+    }
+
+  /* This is the first section with this name.  Record it.  */
+  bfd_section_already_linked_table_insert (already_linked_list, sec);
 }

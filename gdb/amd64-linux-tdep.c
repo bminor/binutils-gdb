@@ -25,6 +25,7 @@
 #include "gdbcore.h"
 #include "regcache.h"
 #include "osabi.h"
+#include "symtab.h"
 
 #include "gdb_string.h"
 
@@ -85,8 +86,9 @@ static const unsigned char linux_sigtramp_code[] =
    the routine.  Otherwise, return 0.  */
 
 static CORE_ADDR
-amd64_linux_sigtramp_start (CORE_ADDR pc)
+amd64_linux_sigtramp_start (struct frame_info *next_frame)
 {
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
   unsigned char buf[LINUX_SIGTRAMP_LEN];
 
   /* We only recognize a signal trampoline if PC is at the start of
@@ -96,7 +98,7 @@ amd64_linux_sigtramp_start (CORE_ADDR pc)
      PC is not at the start of the instruction sequence, there will be
      a few trailing readable bytes on the stack.  */
 
-  if (read_memory_nobpt (pc, (char *) buf, LINUX_SIGTRAMP_LEN) != 0)
+  if (!safe_frame_unwind_memory (next_frame, pc, buf, LINUX_SIGTRAMP_LEN))
     return 0;
 
   if (buf[0] != LINUX_SIGTRAMP_INSN0)
@@ -106,7 +108,7 @@ amd64_linux_sigtramp_start (CORE_ADDR pc)
 
       pc -= LINUX_SIGTRAMP_OFFSET1;
 
-      if (read_memory_nobpt (pc, (char *) buf, LINUX_SIGTRAMP_LEN) != 0)
+      if (!safe_frame_unwind_memory (next_frame, pc, buf, LINUX_SIGTRAMP_LEN))
 	return 0;
     }
 
@@ -116,11 +118,17 @@ amd64_linux_sigtramp_start (CORE_ADDR pc)
   return pc;
 }
 
-/* Return whether PC is in a GNU/Linux sigtramp routine.  */
+/* Return whether the frame preceding NEXT_FRAME corresponds to a
+   GNU/Linux sigtramp routine.  */
 
 static int
-amd64_linux_pc_in_sigtramp (CORE_ADDR pc, char *name)
+amd64_linux_sigtramp_p (struct frame_info *next_frame)
 {
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  char *name;
+
+  find_pc_partial_function (pc, &name, NULL, NULL);
+
   /* If we have NAME, we can optimize the search.  The trampoline is
      named __restore_rt.  However, it isn't dynamically exported from
      the shared C library, so the trampoline may appear to be part of
@@ -128,7 +136,7 @@ amd64_linux_pc_in_sigtramp (CORE_ADDR pc, char *name)
      __sigaction, or __libc_sigaction (all aliases to the same
      function).  */
   if (name == NULL || strstr (name, "sigaction") != NULL)
-    return (amd64_linux_sigtramp_start (pc) != 0);
+    return (amd64_linux_sigtramp_start (next_frame) != 0);
 
   return (strcmp ("__restore_rt", name) == 0);
 }
@@ -203,7 +211,7 @@ amd64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   amd64_init_abi (info, gdbarch);
 
-  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, amd64_linux_pc_in_sigtramp);
+  tdep->sigtramp_p = amd64_linux_sigtramp_p;
   tdep->sigcontext_addr = amd64_linux_sigcontext_addr;
   tdep->sc_reg_offset = amd64_linux_sc_reg_offset;
   tdep->sc_num_regs = ARRAY_SIZE (amd64_linux_sc_reg_offset);

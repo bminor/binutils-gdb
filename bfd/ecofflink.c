@@ -1,5 +1,5 @@
 /* Routines to link ECOFF debugging information.
-   Copyright 1993, 1994, 1995, 1996, 1997, 2000, 2001, 2002, 2003
+   Copyright 1993, 1994, 1995, 1996, 1997, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support, <ian@cygnus.com>.
 
@@ -800,20 +800,6 @@ bfd_ecoff_debug_accumulate (handle, output_bfd, output_debug, output_swap,
 
       fdr_adr = fdr.adr;
 
-      /* Adjust the FDR address for any changes that may have been
-	 made by relaxing.  */
-      if (input_debug->adjust != (struct ecoff_value_adjust *) NULL)
-	{
-	  struct ecoff_value_adjust *adjust;
-
-	  for (adjust = input_debug->adjust;
-	       adjust != (struct ecoff_value_adjust *) NULL;
-	       adjust = adjust->next)
-	    if (fdr_adr >= adjust->start
-		&& fdr_adr < adjust->end)
-	      fdr.adr += adjust->adjust;
-	}
-
       /* FIXME: It is conceivable that this FDR points to the .init or
 	 .fini section, in which case this will not do the right
 	 thing.  */
@@ -856,19 +842,6 @@ bfd_ecoff_debug_accumulate (handle, output_bfd, output_debug, output_swap,
 	    case stLabel:
 	    case stProc:
 	    case stStaticProc:
-	      if (input_debug->adjust != (struct ecoff_value_adjust *) NULL)
-		{
-		  bfd_vma value;
-		  struct ecoff_value_adjust *adjust;
-
-		  value = internal_sym.value;
-		  for (adjust = input_debug->adjust;
-		       adjust != (struct ecoff_value_adjust *) NULL;
-		       adjust = adjust->next)
-		    if (value >= adjust->start
-			&& value < adjust->end)
-		      internal_sym.value += adjust->adjust;
-		}
 	      internal_sym.value += section_adjust[internal_sym.sc];
 	      break;
 
@@ -978,9 +951,8 @@ bfd_ecoff_debug_accumulate (handle, output_bfd, output_debug, output_swap,
 	  output_symhdr->issMax += fdr.cbSs;
 	}
 
-      if ((output_bfd->xvec->header_byteorder
-	   == input_bfd->xvec->header_byteorder)
-	  && input_debug->adjust == (struct ecoff_value_adjust *) NULL)
+      if (output_bfd->xvec->header_byteorder
+	  == input_bfd->xvec->header_byteorder)
 	{
 	  /* The two BFD's have the same endianness, and we don't have
 	     to adjust the PDR addresses, so simply copying the
@@ -1036,23 +1008,6 @@ bfd_ecoff_debug_accumulate (handle, output_bfd, output_debug, output_swap,
 	      PDR pdr;
 
 	      (*input_swap->swap_pdr_in) (input_bfd, (PTR) in, &pdr);
-
-	      /* If we have been relaxing, we may have to adjust the
-		 address.  */
-	      if (input_debug->adjust != (struct ecoff_value_adjust *) NULL)
-		{
-		  bfd_vma adr;
-		  struct ecoff_value_adjust *adjust;
-
-		  adr = fdr_adr + pdr.adr;
-		  for (adjust = input_debug->adjust;
-		       adjust != (struct ecoff_value_adjust *) NULL;
-		       adjust = adjust->next)
-		    if (adr >= adjust->start
-			&& adr < adjust->end)
-		      pdr.adr += adjust->adjust;
-		}
-
 	      (*output_swap->swap_pdr_out) (output_bfd, &pdr, (PTR) out);
 	    }
 
@@ -1199,7 +1154,7 @@ bfd_ecoff_debug_accumulate_other (handle, output_bfd, output_debug,
   fdr.issBase = output_symhdr->issMax;
   fdr.cbSs = 0;
   fdr.rss = ecoff_add_string (ainfo, info, output_debug, &fdr,
-			      bfd_archive_filename (input_bfd));
+			      input_bfd->filename);
   if (fdr.rss == -1)
     return FALSE;
   fdr.isymBase = output_symhdr->isymMax;

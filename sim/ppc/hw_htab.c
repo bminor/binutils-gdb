@@ -1,6 +1,6 @@
 /*  This file is part of the program psim.
 
-    Copyright 1994, 1995, 1996, 2003 Andrew Cagney
+    Copyright 1994, 1995, 1996, 2003, 2004 Andrew Cagney
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -391,7 +391,7 @@ htab_sum_binary(bfd *abfd,
 		PTR data)
 {
   htab_binary_sizes *sizes = (htab_binary_sizes*)data;
-  unsigned_word size = bfd_get_section_size_before_reloc (sec);
+  unsigned_word size = bfd_get_section_size (sec);
   unsigned_word vma = bfd_get_section_vma (abfd, sec);
 #define bfd_get_section_lma(abfd, sec) ((sec)->lma + 0)
   unsigned_word ra = bfd_get_section_lma (abfd, sec);
@@ -437,7 +437,7 @@ htab_dma_binary(bfd *abfd,
     return;
 
   /* check/ignore any sections of size zero */
-  section_size = bfd_get_section_size_before_reloc(sec);
+  section_size = bfd_get_section_size (sec);
   if (section_size == 0)
     return;
 

@@ -1,6 +1,6 @@
 /* BFD back-end for PowerPC Microsoft Portable Executable files.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003
+   2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    Original version pieced together by Kim Knuttila (krk@cygnus.com)
@@ -1188,8 +1188,7 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 	{
 	default:
 	  (*_bfd_error_handler)
-	    (_("%s: unsupported relocation type 0x%02x"),
-	     bfd_archive_filename (input_bfd), r_type);
+	    (_("%B: unsupported relocation type 0x%02x"), input_bfd, r_type);
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	case IMAGE_REL_PPC_TOCREL16:
@@ -1278,8 +1277,8 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 		    if ((bfd_vma) our_toc_offset >= 65535)
 		      {
 			(*_bfd_error_handler)
-			  (_("%s: Relocation for %s of %lx exceeds Toc size limit"),
-			   bfd_archive_filename (input_bfd), name,
+			  (_("%B: Relocation for %s of %lx exceeds Toc size limit"),
+			   input_bfd, name,
 			   (unsigned long) our_toc_offset);
 			bfd_set_error (bfd_error_bad_value);
 			return FALSE;
@@ -1330,12 +1329,11 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	    /* FIXME: this test is conservative.  */
 	    if ((r_flags & IMAGE_REL_PPC_TOCDEFN) != IMAGE_REL_PPC_TOCDEFN
-		&& (bfd_vma) our_toc_offset > toc_section->_raw_size)
+		&& (bfd_vma) our_toc_offset > toc_section->size)
 	      {
 		(*_bfd_error_handler)
-		  (_("%s: Relocation exceeds allocated TOC (%lx)"),
-		   bfd_archive_filename (input_bfd),
-		   (unsigned long) toc_section->_raw_size);
+		  (_("%B: Relocation exceeds allocated TOC (%lx)"),
+		   input_bfd, (unsigned long) toc_section->size);
 		bfd_set_error (bfd_error_bad_value);
 		return FALSE;
 	      }
@@ -1387,15 +1385,12 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 	    else
 	      my_name = h->root.root.root.string;
 
-	    fprintf (stderr,
-		    _("Warning: unsupported reloc %s <file %s, section %s>\n"),
-		    howto->name,
-		    bfd_archive_filename(input_bfd),
-		    input_section->name);
-
-	    fprintf (stderr,"sym %ld (%s), r_vaddr %ld (%lx)\n",
-		    rel->r_symndx, my_name, (long) rel->r_vaddr,
-		    (unsigned long) rel->r_vaddr);
+	    (*_bfd_error_handler)
+	      (_("Warning: unsupported reloc %s <file %B, section %A>\n"
+		 "sym %ld (%s), r_vaddr %ld (%lx)"),
+	       input_bfd, input_section, howto->name,
+	       rel->r_symndx, my_name, (long) rel->r_vaddr,
+	       (unsigned long) rel->r_vaddr);
 	  }
 	  break;
 	case IMAGE_REL_PPC_IMGLUE:
@@ -1409,8 +1404,7 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 	    my_name = h->root.root.root.string;
 
 	    (*_bfd_error_handler)
-	      (_("%s: Out of order IMGLUE reloc for %s"),
-	       bfd_archive_filename (input_bfd), my_name);
+	      (_("%B: Out of order IMGLUE reloc for %s"), input_bfd, my_name);
 	    bfd_set_error (bfd_error_bad_value);
 	    return FALSE;
 	  }
@@ -1690,7 +1684,7 @@ ppc_allocate_toc_section (info)
   foo = (bfd_byte *) bfd_alloc (bfd_of_toc_owner, amt);
   memset(foo, test_char, (size_t) global_toc_size);
 
-  s->_raw_size = s->_cooked_size = global_toc_size;
+  s->size = global_toc_size;
   s->contents = foo;
 
   return TRUE;
@@ -2328,8 +2322,10 @@ ppc_bfd_coff_final_link (abfd, info)
 	      if (info->relocatable)
 		o->reloc_count += sec->reloc_count;
 
-	      if (sec->_raw_size > max_contents_size)
-		max_contents_size = sec->_raw_size;
+	      if (sec->rawsize > max_contents_size)
+		max_contents_size = sec->rawsize;
+	      if (sec->size > max_contents_size)
+		max_contents_size = sec->size;
 	      if (sec->lineno_count > max_lineno_count)
 		max_lineno_count = sec->lineno_count;
 	      if (sec->reloc_count > max_reloc_count)
@@ -2663,7 +2659,7 @@ ppc_bfd_coff_final_link (abfd, info)
     }
 
   /* If we have optimized stabs strings, output them.  */
-  if (coff_hash_table (info)->stab_info != NULL)
+  if (coff_hash_table (info)->stab_info.stabstr != NULL)
     {
       if (! _bfd_write_stab_strings (abfd, &coff_hash_table (info)->stab_info))
 	return FALSE;

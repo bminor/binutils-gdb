@@ -1,3 +1,74 @@
+2004-09-08  Adam Nemet  <anemet@lnxw.com>
+
+	* vasprintf.c: Accept __va_copy in addition to va_copy.
+
+2004-09-03  Paolo Bonzini  <bonzini@gnu.org> 
+
+	* configure: Regenerate.
+
+2004-09-02  Paolo Bonzini  <bonzini@gnu.org> 
+
+	* configure.ac: Do not enable multilibs for build-side libiberty.
+
+2004-06-29  Danny Smith  <dannysmith@users.sourceforge.net> 
+
+	* lrealpath.c (lrealpath): Add _WIN32 support.
+
+2004-06-28  Zack Weinberg  <zack@codesourcery.com>
+
+	* cp-demangle.h: Declare cplus_demangle_operators,
+	cplus_demangle_builtin_types, cplus_demangle_mangled_name, and
+	cplus_demangle_type as static if IN_GLIBCPP_V3.
+
+2004-06-28  Ian Lance Taylor  <ian@wasabisystems.com>
+
+	PR other/16240
+	* cp-demangle.c (d_expr_primary): Check for a failure return from
+	cplus_demangle_type.
+	* testsuite/demangle-expected: Add test case.
+
+2004-05-31  Danny Smith  <dannysmith@users.sourceforge.net>
+
+	* pex-win32.c (fix_argv): Expand comment.
+
+2004-05-25  Daniel Jacobowitz  <drow@false.org>
+
+	* Makefile.in: Add .NOEXPORT.
+
+2004-04-29  Douglas B Rupp  <rupp@gnat.com>
+
+	* mkstemps.c (mkstemps) [VMS]: Remove special open option. Update
+	copyright.
+
+2004-04-26  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
+
+	* configure.ac (UNSIGNED_64BIT_TYPE): Unquote the definition.
+	* configure: Regenerate.
+
+2004-04-22  Richard Henderson  <rth@redhat.com>
+
+	* hashtab.c: Include limits.h, stdint.h, ansidecl.h.
+	(CHAR_BIT): Provide default.
+	(struct prime_ent, prime_tab): New.
+	(higher_prime_index): Rename from higher_prime_number, return index.
+	(htab_mod_1): New.
+	(htab_mod, htab_mod_m2): Use it.
+	(htab_create_alloc, htab_create_alloc_ex): Store prime index.
+	(htab_expand): Likewise.
+	* configure.ac: Check for stdint.h.
+	(UNSIGNED_64BIT_TYPE): New define and checks to fill it in.
+	* config.in, configure: Rebuild.
+
+2004-04-13  Ian Lance Taylor  <ian@wasabisystems.com>
+
+	* strerror.c: Include config.h, and redefine sys_nerr and
+	sys_errlist, before including ansidecl.h and libiberty.h.
+
+2004-04-13  Jeff Law  <law@redhat.com>
+
+	* hashtab.c (htab_remove_elt_with_hash): New function.
+	(htab_remove_elt): Implement in terms of htab_remove_elt_with_hash.
+
 2004-03-31  Richard Henderson  <rth@redhat.com>
 
 	* hashtab.c (htab_size): Move to top of file; mark inline.
@@ -555,7 +626,7 @@
 
 2003-08-12  Nathanael Nerode  <neroden@gcc.gnu.org>
 
-        * cp-demangle.c: Clarify what package(s) this is part of.
+	* cp-demangle.c: Clarify what package(s) this is part of.
 
 2003-07-05  Danny Smith  <dannysmith@users.sourceforge.net>
 

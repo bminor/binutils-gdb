@@ -1,5 +1,5 @@
 /* BFD back-end for mmo objects (MMIX-specific object-format).
-   Copyright 2001, 2002, 2003
+   Copyright 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
    Written by Hans-Peter Nilsson (hp@bitrange.com).
    Infrastructure and other bits originally copied from srec.c and
@@ -665,7 +665,7 @@ mmo_find_sec_w_addr (abfd, sec, p)
       !=  (SEC_LOAD | SEC_ALLOC))
     return;
 
-  if (infop->addr >= vma && infop->addr < vma + sec->_raw_size)
+  if (infop->addr >= vma && infop->addr < vma + sec->size)
     infop->sec = sec;
 }
 
@@ -1168,8 +1168,7 @@ mmo_get_spec_section (abfd, spec_data_number)
 			       bfd_sec_flags_from_mmo_flags (flags)
 			       | bfd_get_section_flags (abfd, sec)
 			       | (section_length != 0 ? SEC_HAS_CONTENTS : 0))
-      || ! bfd_set_section_size (abfd, sec,
-				 sec->_cooked_size + section_length)
+      || ! bfd_set_section_size (abfd, sec, sec->size + section_length)
       /* Set VMA only for the first occurrence.  */
       || (! sec->user_set_vma
 	  && ! bfd_set_section_vma  (abfd, sec, section_vma)))
@@ -1545,8 +1544,8 @@ mmo_get_loc (sec, vma, size)
 	     non-32-bit-aligned sections should do all allocation and
 	     size-setting by themselves or at least set the section size
 	     after the last allocating call to this function.  */
-	  if (vma + size > sec->vma + sec->_raw_size)
-	    sec->_raw_size += (vma + size) - (sec->vma + sec->_raw_size);
+	  if (vma + size > sec->vma + sec->size)
+	    sec->size += (vma + size) - (sec->vma + sec->size);
 
 	  return datap->data + vma - datap->where;
 	}
@@ -1608,8 +1607,8 @@ mmo_get_loc (sec, vma, size)
 
   /* Update the section size.  This happens only when we add contents and
      re-size as we go.  The section size will then be aligned to 32 bits.  */
-  if (vma + size > sec->vma + sec->_raw_size)
-    sec->_raw_size += (vma + size) - (sec->vma + sec->_raw_size);
+  if (vma + size > sec->vma + sec->size)
+    sec->size += (vma + size) - (sec->vma + sec->size);
   return entry->data;
 }
 
@@ -1621,7 +1620,6 @@ mmo_map_set_sizes (abfd, sec, ignored)
      asection *sec;
      PTR ignored ATTRIBUTE_UNUSED;
 {
-  sec->_cooked_size = sec->_raw_size;
   sec->lma = sec->vma;
 }
 
@@ -2269,7 +2267,7 @@ mmo_canonicalize_symtab (abfd, alocation)
 
 	      if (textsec != NULL
 		  && c->value >= textsec->vma
-		  && c->value <= textsec->vma + textsec->_cooked_size)
+		  && c->value <= textsec->vma + textsec->size)
 		{
 		  c->section = textsec;
 		  c->value -= c->section->vma;
@@ -2486,7 +2484,7 @@ mmo_internal_write_section (abfd, sec)
   /* Ignore sections that are just allocated or empty; we write out
      _contents_ here.  */
   else if ((bfd_get_section_flags (abfd, sec) & SEC_HAS_CONTENTS) != 0
-	   && sec->_raw_size != 0)
+	   && sec->size != 0)
     {
       /* Keep the document-comment formatted the way it is.  */
 /*
@@ -2592,7 +2590,7 @@ EXAMPLE
       mmo_write_tetra (abfd,
 		       mmo_sec_flags_from_bfd_flags
 		       (bfd_get_section_flags (abfd, sec)));
-      mmo_write_octa (abfd, sec->_raw_size);
+      mmo_write_octa (abfd, sec->size);
       mmo_write_octa (abfd, bfd_get_section_vma (abfd, sec));
 
       /* Writing a LOP_LOC ends the LOP_SPEC data, and makes data actually
@@ -3181,11 +3179,11 @@ mmo_write_object_contents (abfd)
 	 of the register contents section and check that it corresponds to
 	 the length of the section.  */
       if (z < 32 || z >= 255 || (sec->vma & 7) != 0
-	  || sec->vma != 256 * 8 - sec->_raw_size - 8)
+	  || sec->vma != 256 * 8 - sec->size - 8)
 	{
 	  bfd_set_error (bfd_error_bad_value);
 
-	  if (sec->_raw_size == 0)
+	  if (sec->size == 0)
 	    /* There must always be at least one such register.  */
 	    (*_bfd_error_handler)
 	      (_("%s: no initialized registers; section length 0\n"),
@@ -3196,13 +3194,13 @@ mmo_write_object_contents (abfd)
 	    (*_bfd_error_handler)
 	      (_("%s: too many initialized registers; section length %ld\n"),
 	       bfd_get_filename (abfd),
-	       (long) sec->_raw_size);
+	       (long) sec->size);
 	  else
 	    (*_bfd_error_handler)
 	      (_("%s: invalid start address for initialized registers of\
  length %ld: 0x%lx%08lx\n"),
 	       bfd_get_filename (abfd),
-	       (long) sec->_raw_size,
+	       (long) sec->size,
 	       (unsigned long) (sec->vma >> 32), (unsigned long) (sec->vma));
 
 	  return FALSE;
@@ -3286,7 +3284,10 @@ mmo_canonicalize_reloc (abfd, section, relptr, symbols)
 #define mmo_set_arch_mach bfd_default_set_arch_mach
 #define mmo_bfd_relax_section bfd_generic_relax_section
 #define mmo_bfd_merge_sections bfd_generic_merge_sections
+#define mmo_bfd_is_group_section bfd_generic_is_group_section
 #define mmo_bfd_discard_group bfd_generic_discard_group
+#define mmo_section_already_linked \
+  _bfd_generic_section_already_linked
 
 /* objcopy will be upset if we return -1 from bfd_get_reloc_upper_bound by
    using BFD_JUMP_TABLE_RELOCS (_bfd_norelocs) rather than 0.  FIXME: Most
@@ -3305,6 +3306,7 @@ mmo_canonicalize_reloc (abfd, section, relptr, symbols)
 #define mmo_bfd_merge_private_bfd_data _bfd_generic_bfd_merge_private_bfd_data
 #define mmo_bfd_copy_private_section_data _bfd_generic_bfd_copy_private_section_data
 #define mmo_bfd_copy_private_symbol_data _bfd_generic_bfd_copy_private_symbol_data
+#define mmo_bfd_copy_private_header_data _bfd_generic_bfd_copy_private_header_data
 #define mmo_bfd_set_private_flags _bfd_generic_bfd_set_private_flags
 #define mmo_bfd_print_private_bfd_data _bfd_generic_bfd_print_private_bfd_data
 

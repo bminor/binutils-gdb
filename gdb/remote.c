@@ -43,9 +43,6 @@
 
 #include <ctype.h>
 #include <sys/time.h>
-#ifdef USG
-#include <sys/types.h>
-#endif
 
 #include "event-loop.h"
 #include "event-top.h"
@@ -106,9 +103,6 @@ static void remote_async_mourn (void);
 static void extended_remote_restart (void);
 
 static void extended_remote_mourn (void);
-
-static void extended_remote_create_inferior (char *, char *, char **);
-static void extended_remote_async_create_inferior (char *, char *, char **);
 
 static void remote_mourn_1 (struct target_ops *);
 
@@ -211,7 +205,7 @@ struct packet_reg
   long regnum; /* GDB's internal register number.  */
   LONGEST pnum; /* Remote protocol register number.  */
   int in_g_packet; /* Always part of G packet.  */
-  /* long size in bytes;  == DEPRECATED_REGISTER_RAW_SIZE (regnum); at present.  */
+  /* long size in bytes;  == register_size (current_gdbarch, regnum); at present.  */
   /* char *name; == REGISTER_NAME (regnum); at present.  */
 };
 
@@ -253,8 +247,8 @@ init_remote_state (struct gdbarch *gdbarch)
   int regnum;
   struct remote_state *rs = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct remote_state);
 
-  if (DEPRECATED_REGISTER_BYTES != 0)
-    rs->sizeof_g_packet = DEPRECATED_REGISTER_BYTES;
+  if (deprecated_register_bytes () != 0)
+    rs->sizeof_g_packet = deprecated_register_bytes ();
   else
     rs->sizeof_g_packet = 0;
 
@@ -271,7 +265,7 @@ init_remote_state (struct gdbarch *gdbarch)
       /* ...name = REGISTER_NAME (regnum); */
 
       /* Compute packet size by accumulating the size of all registers. */
-      if (DEPRECATED_REGISTER_BYTES == 0)
+      if (deprecated_register_bytes () == 0)
         rs->sizeof_g_packet += register_size (current_gdbarch, regnum);
     }
 
@@ -649,26 +643,31 @@ add_packet_config_cmd (struct packet_config *config,
   struct cmd_list_element *show_cmd;
   char *set_doc;
   char *show_doc;
+  char *help_doc;
+  char *print;
   char *cmd_name;
   config->name = name;
   config->title = title;
   config->detect = AUTO_BOOLEAN_AUTO;
   config->support = PACKET_SUPPORT_UNKNOWN;
-  xasprintf (&set_doc, "Set use of remote protocol `%s' (%s) packet",
-	     name, title);
-  xasprintf (&show_doc, "Show current use of remote protocol `%s' (%s) packet",
-	     name, title);
+  set_doc = xstrprintf ("Set use of remote protocol `%s' (%s) packet",
+			name, title);
+  show_doc = xstrprintf ("Show current use of remote protocol `%s' (%s) packet",
+			 name, title);
+  print = xstrprintf ("Current use of remote protocol `%s' (%s) is %%s",
+		      name, title);
   /* set/show TITLE-packet {auto,on,off} */
-  xasprintf (&cmd_name, "%s-packet", title);
+  cmd_name = xstrprintf ("%s-packet", title);
   add_setshow_auto_boolean_cmd (cmd_name, class_obscure,
 				&config->detect, set_doc, show_doc,
+				"", print,
 				set_func, show_func,
 				set_remote_list, show_remote_list);
   /* set/show remote NAME-packet {auto,on,off} -- legacy */
   if (legacy)
     {
       char *legacy_name;
-      xasprintf (&legacy_name, "%s-packet", name);
+      legacy_name = xstrprintf ("%s-packet", name);
       add_alias_cmd (legacy_name, cmd_name, class_obscure, 0,
 		     set_remote_list);
       add_alias_cmd (legacy_name, cmd_name, class_obscure, 0,
@@ -773,42 +772,6 @@ show_remote_protocol_qSymbol_packet_cmd (char *args, int from_tty,
 {
   show_packet_config_cmd (&remote_protocol_qSymbol);
 }
-
-/* Should we try the 'e' (step over range) request? */
-static struct packet_config remote_protocol_e;
-
-static void
-set_remote_protocol_e_packet_cmd (char *args, int from_tty,
-				  struct cmd_list_element *c)
-{
-  update_packet_config (&remote_protocol_e);
-}
-
-static void
-show_remote_protocol_e_packet_cmd (char *args, int from_tty,
-				   struct cmd_list_element *c)
-{
-  show_packet_config_cmd (&remote_protocol_e);
-}
-
-
-/* Should we try the 'E' (step over range / w signal #) request? */
-static struct packet_config remote_protocol_E;
-
-static void
-set_remote_protocol_E_packet_cmd (char *args, int from_tty,
-				  struct cmd_list_element *c)
-{
-  update_packet_config (&remote_protocol_E);
-}
-
-static void
-show_remote_protocol_E_packet_cmd (char *args, int from_tty,
-				   struct cmd_list_element *c)
-{
-  show_packet_config_cmd (&remote_protocol_E);
-}
-
 
 /* Should we try the 'P' (set register) request?  */
 
@@ -1006,8 +969,8 @@ static void *sigint_remote_token;
 /* These are pointers to hook functions that may be set in order to
    modify resume/wait behavior for a particular architecture.  */
 
-void (*target_resume_hook) (void);
-void (*target_wait_loop_hook) (void);
+void (*deprecated_target_resume_hook) (void);
+void (*deprecated_target_wait_loop_hook) (void);
 
 
 
@@ -2077,8 +2040,6 @@ static void
 init_all_packet_configs (void)
 {
   int i;
-  update_packet_config (&remote_protocol_e);
-  update_packet_config (&remote_protocol_E);
   update_packet_config (&remote_protocol_P);
   update_packet_config (&remote_protocol_qSymbol);
   update_packet_config (&remote_protocol_vcont);
@@ -2552,8 +2513,8 @@ remote_resume (ptid_t ptid, int step, enum target_signal siggnal)
 
   /* A hook for when we need to do something at the last moment before
      resumption.  */
-  if (target_resume_hook)
-    (*target_resume_hook) ();
+  if (deprecated_target_resume_hook)
+    (*deprecated_target_resume_hook) ();
 
   /* The vCont packet doesn't need to specify threads via Hc.  */
   if (remote_vcont_resume (ptid, step, siggnal))
@@ -2564,60 +2525,6 @@ remote_resume (ptid_t ptid, int step, enum target_signal siggnal)
     set_thread (0, 0);		/* run any thread */
   else
     set_thread (pid, 0);	/* run this thread */
-
-  /* The s/S/c/C packets do not return status.  So if the target does
-     not support the S or C packets, the debug agent returns an empty
-     string which is detected in remote_wait().  This protocol defect
-     is fixed in the e/E packets. */
-
-  if (step && step_range_end)
-    {
-      /* If the target does not support the 'E' packet, we try the 'S'
-	 packet.  Ideally we would fall back to the 'e' packet if that
-	 too is not supported.  But that would require another copy of
-	 the code to issue the 'e' packet (and fall back to 's' if not
-	 supported) in remote_wait().  */
-
-      if (siggnal != TARGET_SIGNAL_0)
-	{
-	  if (remote_protocol_E.support != PACKET_DISABLE)
-	    {
-	      p = buf;
-	      *p++ = 'E';
-	      *p++ = tohex (((int) siggnal >> 4) & 0xf);
-	      *p++ = tohex (((int) siggnal) & 0xf);
-	      *p++ = ',';
-	      p += hexnumstr (p, (ULONGEST) step_range_start);
-	      *p++ = ',';
-	      p += hexnumstr (p, (ULONGEST) step_range_end);
-	      *p++ = 0;
-
-	      putpkt (buf);
-	      getpkt (buf, (rs->remote_packet_size), 0);
-
-	      if (packet_ok (buf, &remote_protocol_E) == PACKET_OK)
-		return;
-	    }
-	}
-      else
-	{
-	  if (remote_protocol_e.support != PACKET_DISABLE)
-	    {
-	      p = buf;
-	      *p++ = 'e';
-	      p += hexnumstr (p, (ULONGEST) step_range_start);
-	      *p++ = ',';
-	      p += hexnumstr (p, (ULONGEST) step_range_end);
-	      *p++ = 0;
-
-	      putpkt (buf);
-	      getpkt (buf, (rs->remote_packet_size), 0);
-
-	      if (packet_ok (buf, &remote_protocol_e) == PACKET_OK)
-		return;
-	    }
-	}
-    }
 
   if (siggnal != TARGET_SIGNAL_0)
     {
@@ -2645,7 +2552,7 @@ remote_async_resume (ptid_t ptid, int step, enum target_signal siggnal)
   /* FIXME: ezannoni 1999-09-28: We may need to move this out of here
      into infcmd.c in order to allow inferior function calls to work
      NOT asynchronously. */
-  if (event_loop_p && target_can_async_p ())
+  if (target_can_async_p ())
     target_async (inferior_event_handler, 0);
   /* Tell the world that the target is now executing. */
   /* FIXME: cagney/1999-09-23: Is it the targets responsibility to set
@@ -2883,8 +2790,8 @@ remote_wait (ptid_t ptid, struct target_waitstatus *status)
 
       /* This is a hook for when we need to do something (perhaps the
          collection of trace data) every time the target stops.  */
-      if (target_wait_loop_hook)
-	(*target_wait_loop_hook) ();
+      if (deprecated_target_wait_loop_hook)
+	(*deprecated_target_wait_loop_hook) ();
 
       remote_stopped_by_watchpoint_p = 0;
 
@@ -2974,11 +2881,11 @@ Packet: '%s'\n",
 		      error ("Remote sent bad register number %s: %s\nPacket: '%s'\n",
 			     phex_nz (pnum, 0), p, buf);
 
-		    fieldsize = hex2bin (p, regs, DEPRECATED_REGISTER_RAW_SIZE (reg->regnum));
+		    fieldsize = hex2bin (p, regs, register_size (current_gdbarch, reg->regnum));
 		    p += 2 * fieldsize;
-		    if (fieldsize < DEPRECATED_REGISTER_RAW_SIZE (reg->regnum))
+		    if (fieldsize < register_size (current_gdbarch, reg->regnum))
 		      warning ("Remote reply is too short: %s", buf);
-		    supply_register (reg->regnum, regs);
+		    regcache_raw_supply (current_regcache, reg->regnum, regs);
 		  }
 
 		if (*p++ != ';')
@@ -3074,8 +2981,8 @@ remote_async_wait (ptid_t ptid, struct target_waitstatus *status)
 
       /* This is a hook for when we need to do something (perhaps the
          collection of trace data) every time the target stops.  */
-      if (target_wait_loop_hook)
-	(*target_wait_loop_hook) ();
+      if (deprecated_target_wait_loop_hook)
+	(*deprecated_target_wait_loop_hook) ();
 
       switch (buf[0])
 	{
@@ -3162,11 +3069,11 @@ remote_async_wait (ptid_t ptid, struct target_waitstatus *status)
 		      error ("Remote sent bad register number %ld: %s\nPacket: '%s'\n",
 			     pnum, p, buf);
 
-		    fieldsize = hex2bin (p, regs, DEPRECATED_REGISTER_RAW_SIZE (reg->regnum));
+		    fieldsize = hex2bin (p, regs, register_size (current_gdbarch, reg->regnum));
 		    p += 2 * fieldsize;
-		    if (fieldsize < DEPRECATED_REGISTER_RAW_SIZE (reg->regnum))
+		    if (fieldsize < register_size (current_gdbarch, reg->regnum))
 		      warning ("Remote reply is too short: %s", buf);
-		    supply_register (reg->regnum, regs);
+		    regcache_raw_supply (current_regcache, reg->regnum, regs);
 		  }
 
 		if (*p++ != ';')
@@ -3392,8 +3299,8 @@ store_register_using_P (int regnum)
 
   sprintf (buf, "P%s=", phex_nz (reg->pnum, 0));
   p = buf + strlen (buf);
-  regcache_collect (reg->regnum, regp);
-  bin2hex (regp, p, DEPRECATED_REGISTER_RAW_SIZE (reg->regnum));
+  regcache_raw_collect (current_regcache, reg->regnum, regp);
+  bin2hex (regp, p, register_size (current_gdbarch, reg->regnum));
   remote_send (buf, rs->remote_packet_size);
 
   return buf[0] != '\0';
@@ -3453,7 +3360,7 @@ remote_store_registers (int regnum)
       {
 	struct packet_reg *r = &rs->regs[i];
 	if (r->in_g_packet)
-	  regcache_collect (r->regnum, regs + r->offset);
+	  regcache_raw_collect (current_regcache, r->regnum, regs + r->offset);
       }
   }
 
@@ -4338,7 +4245,8 @@ remote_mourn_1 (struct target_ops *target)
    we're debugging, arguments and an environment.  */
 
 static void
-extended_remote_create_inferior (char *exec_file, char *args, char **env)
+extended_remote_create_inferior (char *exec_file, char *args, char **env,
+				 int from_tty)
 {
   /* Rip out the breakpoints; we'll reinsert them after restarting
      the remote server.  */
@@ -4360,7 +4268,8 @@ extended_remote_create_inferior (char *exec_file, char *args, char **env)
 
 /* Async version of extended_remote_create_inferior. */
 static void
-extended_remote_async_create_inferior (char *exec_file, char *args, char **env)
+extended_remote_async_create_inferior (char *exec_file, char *args, char **env,
+				       int from_tty)
 {
   /* Rip out the breakpoints; we'll reinsert them after restarting
      the remote server.  */
@@ -4368,7 +4277,7 @@ extended_remote_async_create_inferior (char *exec_file, char *args, char **env)
 
   /* If running asynchronously, register the target file descriptor
      with the event loop. */
-  if (event_loop_p && target_can_async_p ())
+  if (target_can_async_p ())
     target_async (inferior_event_handler, 0);
 
   /* Now restart the remote server.  */
@@ -4640,10 +4549,13 @@ remote_stopped_by_watchpoint (void)
     return remote_stopped_by_watchpoint_p;
 }
 
+extern int stepped_after_stopped_by_watchpoint;
+
 static CORE_ADDR
 remote_stopped_data_address (void)
 {
-  if (remote_stopped_by_watchpoint ())
+  if (remote_stopped_by_watchpoint ()
+      || stepped_after_stopped_by_watchpoint)
     return remote_watch_data_address;
   return (CORE_ADDR)0;
 }
@@ -4819,7 +4731,7 @@ compare_sections_command (char *args, int from_tty)
       if (!(s->flags & SEC_LOAD))
 	continue;		/* skip non-loadable section */
 
-      size = bfd_get_section_size_before_reloc (s);
+      size = bfd_get_section_size (s);
       if (size == 0)
 	continue;		/* skip zero-length section */
 
@@ -5419,8 +5331,6 @@ show_remote_cmd (char *args, int from_tty)
   /* FIXME: cagney/2002-06-15: This function should iterate over
      remote_show_cmdlist for a list of sub commands to show.  */
   show_remote_protocol_Z_packet_cmd (args, from_tty, NULL);
-  show_remote_protocol_e_packet_cmd (args, from_tty, NULL);
-  show_remote_protocol_E_packet_cmd (args, from_tty, NULL);
   show_remote_protocol_P_packet_cmd (args, from_tty, NULL);
   show_remote_protocol_qSymbol_packet_cmd (args, from_tty, NULL);
   show_remote_protocol_vcont_packet_cmd (args, from_tty, NULL);
@@ -5479,8 +5389,8 @@ _initialize_remote (void)
   add_target (&extended_async_remote_ops);
 
   /* Hook into new objfile notification.  */
-  remote_new_objfile_chain = target_new_objfile_hook;
-  target_new_objfile_hook  = remote_new_objfile;
+  remote_new_objfile_chain = deprecated_target_new_objfile_hook;
+  deprecated_target_new_objfile_hook  = remote_new_objfile;
 
 #if 0
   init_remote_threadtests ();
@@ -5515,9 +5425,11 @@ response packet.  GDB supplies the initial `$' character, and the\n\
 terminating `#' character and checksum.",
 	   &maintenancelist);
 
-  add_setshow_boolean_cmd ("remotebreak", no_class, &remote_break,
-			   "Set whether to send break if interrupted.\n",
-			   "Show whether to send break if interrupted.\n",
+  add_setshow_boolean_cmd ("remotebreak", no_class, &remote_break, "\
+Set whether to send break if interrupted.", "\
+Show whether to send break if interrupted.", "\
+If set, a break, instead of a cntrl-c, is sent to the remote target.", "\
+Whether to send break if interrupted is %s.",
 			   NULL, NULL,
 			   &setlist, &showlist);
 
@@ -5554,20 +5466,24 @@ terminating `#' character and checksum.",
 	   "Show the maximum number of bytes per memory-read packet.\n",
 	   &remote_show_cmdlist);
 
-  add_setshow_cmd ("hardware-watchpoint-limit", no_class,
-		   var_zinteger, &remote_hw_watchpoint_limit, "\
-Set the maximum number of target hardware watchpoints.\n\
+  add_setshow_zinteger_cmd ("hardware-watchpoint-limit", no_class,
+			    &remote_hw_watchpoint_limit, "\
+Set the maximum number of target hardware watchpoints.", "\
+Show the maximum number of target hardware watchpoints.", "\
 Specify a negative limit for unlimited.", "\
-Show the maximum number of target hardware watchpoints.\n",
-		   NULL, NULL, &remote_set_cmdlist, &remote_show_cmdlist);
-  add_setshow_cmd ("hardware-breakpoint-limit", no_class,
-		   var_zinteger, &remote_hw_breakpoint_limit, "\
-Set the maximum number of target hardware breakpoints.\n\
+The maximum number of target hardware watchpoints is %s.",
+			    NULL, NULL,
+			    &remote_set_cmdlist, &remote_show_cmdlist);
+  add_setshow_zinteger_cmd ("hardware-breakpoint-limit", no_class,
+			    &remote_hw_breakpoint_limit, "\
+Set the maximum number of target hardware breakpoints.", "\
+Show the maximum number of target hardware breakpoints.", "\
 Specify a negative limit for unlimited.", "\
-Show the maximum number of target hardware breakpoints.\n",
-		   NULL, NULL, &remote_set_cmdlist, &remote_show_cmdlist);
+The maximum number of target hardware breakpoints is %s.",
+			    NULL, NULL,
+			    &remote_set_cmdlist, &remote_show_cmdlist);
 
-  add_show_from_set
+  deprecated_add_show_from_set
     (add_set_cmd ("remoteaddresssize", class_obscure,
 		  var_integer, (char *) &remote_address_size,
 		  "Set the maximum size of the address (in bits) \
@@ -5584,7 +5500,7 @@ in a memory packet.\n",
 #if 0
   /* XXXX - should ``set remotebinarydownload'' be retained for
      compatibility. */
-  add_show_from_set
+  deprecated_add_show_from_set
     (add_set_cmd ("remotebinarydownload", no_class,
 		  var_boolean, (char *) &remote_binary_download,
 		  "Set binary downloads.\n", &setlist),
@@ -5604,28 +5520,6 @@ in a memory packet.\n",
 			 show_remote_protocol_qSymbol_packet_cmd,
 			 &remote_set_cmdlist, &remote_show_cmdlist,
 			 0);
-
-  add_packet_config_cmd (&remote_protocol_e,
-			 "e", "step-over-range",
-			 set_remote_protocol_e_packet_cmd,
-			 show_remote_protocol_e_packet_cmd,
-			 &remote_set_cmdlist, &remote_show_cmdlist,
-			 0);
-  /* Disable by default.  The ``e'' packet has nasty interactions with
-     the threading code - it relies on global state.  */
-  remote_protocol_e.detect = AUTO_BOOLEAN_FALSE;
-  update_packet_config (&remote_protocol_e);
-
-  add_packet_config_cmd (&remote_protocol_E,
-			 "E", "step-over-range-w-signal",
-			 set_remote_protocol_E_packet_cmd,
-			 show_remote_protocol_E_packet_cmd,
-			 &remote_set_cmdlist, &remote_show_cmdlist,
-			 0);
-  /* Disable by default.  The ``e'' packet has nasty interactions with
-     the threading code - it relies on global state.  */
-  remote_protocol_E.detect = AUTO_BOOLEAN_FALSE;
-  update_packet_config (&remote_protocol_E);
 
   add_packet_config_cmd (&remote_protocol_P,
 			 "P", "set-register",
@@ -5679,8 +5573,11 @@ in a memory packet.\n",
   /* Keep the old ``set remote Z-packet ...'' working. */
   add_setshow_auto_boolean_cmd ("Z-packet", class_obscure,
 				&remote_Z_packet_detect, "\
-Set use of remote protocol `Z' packets",
-				"Show use of remote protocol `Z' packets ",
+Set use of remote protocol `Z' packets", "\
+Show use of remote protocol `Z' packets ", "\
+When set, GDB will attempt to use the remote breakpoint and watchpoint\n\
+packets.", "\
+Use of remote protocol `Z' packets is %s",
 				set_remote_protocol_Z_packet_cmd,
 				show_remote_protocol_Z_packet_cmd,
 				&remote_set_cmdlist, &remote_show_cmdlist);

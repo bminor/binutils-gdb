@@ -1,8 +1,9 @@
 sinclude(../config/accross.m4)
+sinclude(../config/acx.m4)
 
 dnl See whether we need to use fopen-bin.h rather than fopen-same.h.
 AC_DEFUN([BFD_BINARY_FOPEN],
-[AC_REQUIRE([AC_CANONICAL_SYSTEM])
+[AC_REQUIRE([AC_CANONICAL_TARGET])
 case "${host}" in
 changequote(,)dnl
 *-*-msdos* | *-*-go32* | *-*-mingw32* | *-*-cygwin* | *-*-windows*)
@@ -138,12 +139,15 @@ AC_DEFUN([AM_INSTALL_LIBBFD],
       fi)
   AC_MSG_RESULT($install_libbfd_p)
   AM_CONDITIONAL(INSTALL_LIBBFD, test $install_libbfd_p = yes)
+  # Need _noncanonical variables for this.
+  ACX_NONCANONICAL_HOST
+  ACX_NONCANONICAL_TARGET
   # libbfd.a is a host library containing target dependent code
   bfdlibdir='$(libdir)'
   bfdincludedir='$(includedir)'
   if test "${host}" != "${target}"; then
-    bfdlibdir='$(exec_prefix)/$(host_alias)/$(target_alias)/lib'
-    bfdincludedir='$(exec_prefix)/$(host_alias)/$(target_alias)/include'
+    bfdlibdir='$(exec_prefix)/$(host_noncanonical)/$(target_noncanonical)/lib'
+    bfdincludedir='$(exec_prefix)/$(host_noncanonical)/$(target_noncanonical)/include'
   fi
   AC_SUBST(bfdlibdir)
   AC_SUBST(bfdincludedir)

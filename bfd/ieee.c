@@ -1,6 +1,6 @@
 /* BFD back-end for ieee-695 objects.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003
+   2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    Written by Steve Chamberlain of Cygnus Support.
@@ -704,7 +704,7 @@ parse_expression (ieee, value, symbol, pcrel, extra, section)
 	  next_byte (&(ieee->h));
 	  PUSH (NOSYMBOL,
 		0,
-		ieee->section_table[must_parse_int (&(ieee->h))]->_raw_size);
+		ieee->section_table[must_parse_int (&(ieee->h))]->size);
 	  break;
 	case ieee_variable_I_enum:
 	  /* Push the address of variable n.  */
@@ -935,9 +935,8 @@ ieee_slurp_external_symbols (abfd)
 		    break;
 		  default:
 		    (*_bfd_error_handler)
-		      (_("%s: unimplemented ATI record %u for symbol %u"),
-		       bfd_archive_filename (abfd), symbol_attribute_def,
-		       symbol_name_index);
+		      (_("%B: unimplemented ATI record %u for symbol %u"),
+		       abfd, symbol_attribute_def, symbol_name_index);
 		    bfd_set_error (bfd_error_bad_value);
 		    return FALSE;
 		    break;
@@ -960,8 +959,8 @@ ieee_slurp_external_symbols (abfd)
 		if (value != 0x3f)
 		  {
 		    (*_bfd_error_handler)
-		      (_("%s: unexpected ATN type %d in external part"),
-			 bfd_archive_filename (abfd), (int) value);
+		      (_("%B: unexpected ATN type %d in external part"),
+			 abfd, (int) value);
 		    bfd_set_error (bfd_error_bad_value);
 		    return FALSE;
 		  }
@@ -982,8 +981,7 @@ ieee_slurp_external_symbols (abfd)
 
 		      default:
 			(*_bfd_error_handler)
-			  (_("%s: unexpected type after ATN"),
-			     bfd_archive_filename (abfd));
+			  (_("%B: unexpected type after ATN"), abfd);
 			bfd_set_error (bfd_error_bad_value);
 			return FALSE;
 		      }
@@ -1021,7 +1019,7 @@ ieee_slurp_external_symbols (abfd)
 		val = symbol->symbol.value;
 		for (s = abfd->sections; s != NULL; s = s->next)
 		  {
-		    if (val >= s->vma && val < s->vma + s->_raw_size)
+		    if (val >= s->vma && val < s->vma + s->size)
 		      {
 			symbol->symbol.section = s;
 			symbol->symbol.value -= s->vma;
@@ -1378,11 +1376,11 @@ ieee_slurp_sections (abfd)
 		  {
 		  case ieee_section_size_enum:
 		    section = ieee->section_table[must_parse_int (&(ieee->h))];
-		    section->_raw_size = must_parse_int (&(ieee->h));
+		    section->size = must_parse_int (&(ieee->h));
 		    break;
 		  case ieee_physical_region_size_enum:
 		    section = ieee->section_table[must_parse_int (&(ieee->h))];
-		    section->_raw_size = must_parse_int (&(ieee->h));
+		    section->size = must_parse_int (&(ieee->h));
 		    break;
 		  case ieee_region_base_address_enum:
 		    section = ieee->section_table[must_parse_int (&(ieee->h))];
@@ -1441,7 +1439,7 @@ ieee_slurp_debug (abfd)
   sec->filepos = ieee->w.r.debug_information_part;
 
   debug_end = ieee_part_after (ieee, ieee->w.r.debug_information_part);
-  sec->_raw_size = debug_end - ieee->w.r.debug_information_part;
+  sec->size = debug_end - ieee->w.r.debug_information_part;
 
   return TRUE;
 }
@@ -2060,7 +2058,7 @@ ieee_slurp_section_data (abfd)
       ieee_per_section_type *per = ieee_per_section (s);
       if ((s->flags & SEC_DEBUGGING) != 0)
 	continue;
-      per->data = (bfd_byte *) bfd_alloc (ieee->h.abfd, s->_raw_size);
+      per->data = (bfd_byte *) bfd_alloc (ieee->h.abfd, s->size);
       if (!per->data)
 	return FALSE;
       per->reloc_tail_ptr =
@@ -2106,7 +2104,7 @@ ieee_slurp_section_data (abfd)
 				  &pcrel, &extra,
 				  0);
 		current_map->pc = value;
-		BFD_ASSERT ((unsigned) (value - s->vma) <= s->_raw_size);
+		BFD_ASSERT ((unsigned) (value - s->vma) <= s->size);
 	      }
 	      break;
 
@@ -2336,7 +2334,7 @@ ieee_write_section_part (abfd)
 	      || ! ieee_write_byte (abfd,
 				    (bfd_byte) (s->index
 						+ IEEE_SECTION_NUMBER_BASE))
-	      || ! ieee_write_int (abfd, s->_raw_size))
+	      || ! ieee_write_int (abfd, s->size))
 	    return FALSE;
 	  if (abfd->flags & EXEC_P)
 	    {
@@ -2398,14 +2396,14 @@ do_with_relocs (abfd, s)
     {
       /* If there aren't any relocations then output the load constant
 	 byte opcode rather than the load with relocation opcode.  */
-      while (current_byte_index < s->_raw_size)
+      while (current_byte_index < s->size)
 	{
 	  bfd_size_type run;
 	  unsigned int MAXRUN = 127;
 
 	  run = MAXRUN;
-	  if (run > s->_raw_size - current_byte_index)
-	    run = s->_raw_size - current_byte_index;
+	  if (run > s->size - current_byte_index)
+	    run = s->size - current_byte_index;
 
 	  if (run != 0)
 	    {
@@ -2433,11 +2431,11 @@ do_with_relocs (abfd, s)
       if ((PTR) stream == (PTR) NULL)
 	{
 	  /* Outputting a section without data, fill it up.  */
-	  stream = (unsigned char *) bfd_zalloc (abfd, s->_raw_size);
+	  stream = (unsigned char *) bfd_zalloc (abfd, s->size);
 	  if (!stream)
 	    return FALSE;
 	}
-      while (current_byte_index < s->_raw_size)
+      while (current_byte_index < s->size)
 	{
 	  bfd_size_type run;
 	  unsigned int MAXRUN = 127;
@@ -2451,8 +2449,8 @@ do_with_relocs (abfd, s)
 	  else
 	    run = MAXRUN;
 
-	  if (run > s->_raw_size - current_byte_index)
-	    run = s->_raw_size - current_byte_index;
+	  if (run > s->size - current_byte_index)
+	    run = s->size - current_byte_index;
 
 	  if (run != 0)
 	    {
@@ -2561,7 +2559,7 @@ do_as_repeat (abfd, s)
      bfd *abfd;
      asection *s;
 {
-  if (s->_raw_size)
+  if (s->size)
     {
       if (! ieee_write_byte (abfd, ieee_set_current_section_enum)
 	  || ! ieee_write_byte (abfd,
@@ -2586,7 +2584,7 @@ do_as_repeat (abfd, s)
 	}
 
       if (! ieee_write_byte (abfd, ieee_repeat_data_enum)
-	  || ! ieee_write_int (abfd, s->_raw_size)
+	  || ! ieee_write_int (abfd, s->size)
 	  || ! ieee_write_byte (abfd, ieee_load_constant_bytes_enum)
 	  || ! ieee_write_byte (abfd, 1)
 	  || ! ieee_write_byte (abfd, 0))
@@ -2612,7 +2610,7 @@ do_without_relocs (abfd, s)
     {
       unsigned int i;
 
-      for (i = 0; i < s->_raw_size; i++)
+      for (i = 0; i < s->size; i++)
 	{
 	  if (stream[i] != 0)
 	    {
@@ -3342,7 +3340,7 @@ ieee_write_debug_part (abfd)
 	}
 
       ieee->w.r.debug_information_part = here;
-      if (bfd_bwrite (s->contents, s->_raw_size, abfd) != s->_raw_size)
+      if (bfd_bwrite (s->contents, s->size, abfd) != s->size)
 	return FALSE;
     }
   else
@@ -3420,9 +3418,9 @@ init_for_output (abfd)
     {
       if ((s->flags & SEC_DEBUGGING) != 0)
 	continue;
-      if (s->_raw_size != 0)
+      if (s->size != 0)
 	{
-	  bfd_size_type size = s->_raw_size;
+	  bfd_size_type size = s->size;
 	  ieee_per_section (s)->data = (bfd_byte *) (bfd_alloc (abfd, size));
 	  if (!ieee_per_section (s)->data)
 	    return FALSE;
@@ -3448,7 +3446,7 @@ ieee_set_section_contents (abfd, section, location, offset, count)
     {
       if (section->contents == NULL)
 	{
-	  bfd_size_type size = section->_raw_size;
+	  bfd_size_type size = section->size;
 	  section->contents = (unsigned char *) bfd_alloc (abfd, size);
 	  if (section->contents == NULL)
 	    return FALSE;
@@ -4037,7 +4035,10 @@ ieee_bfd_debug_info_accumulate (abfd, section)
 #define ieee_bfd_relax_section bfd_generic_relax_section
 #define ieee_bfd_gc_sections bfd_generic_gc_sections
 #define ieee_bfd_merge_sections bfd_generic_merge_sections
+#define ieee_bfd_is_group_section bfd_generic_is_group_section
 #define ieee_bfd_discard_group bfd_generic_discard_group
+#define ieee_section_already_linked \
+  _bfd_generic_section_already_linked
 #define ieee_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
 #define ieee_bfd_link_hash_table_free _bfd_generic_link_hash_table_free
 #define ieee_bfd_link_add_symbols _bfd_generic_link_add_symbols

@@ -1,6 +1,6 @@
 /* BFD back-end for s-record objects.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003
+   2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support <sac@cygnus.com>.
 
@@ -299,8 +299,8 @@ srec_bad_byte (abfd, lineno, c, error)
 	  buf[1] = '\0';
 	}
       (*_bfd_error_handler)
-	(_("%s:%d: Unexpected character `%s' in S-record file\n"),
-	 bfd_archive_filename (abfd), lineno, buf);
+	(_("%B:%d: Unexpected character `%s' in S-record file\n"),
+	 abfd, lineno, buf);
       bfd_set_error (bfd_error_bad_value);
     }
 }
@@ -564,11 +564,11 @@ srec_scan (abfd)
 		bytes -= 2;
 
 		if (sec != NULL
-		    && sec->vma + sec->_raw_size == address)
+		    && sec->vma + sec->size == address)
 		  {
 		    /* This data goes at the end of the section we are
 		       currently building.  */
-		    sec->_raw_size += bytes;
+		    sec->size += bytes;
 		  }
 		else
 		  {
@@ -586,7 +586,7 @@ srec_scan (abfd)
 		    sec->flags = SEC_HAS_CONTENTS | SEC_LOAD | SEC_ALLOC;
 		    sec->vma = address;
 		    sec->lma = address;
-		    sec->_raw_size = bytes;
+		    sec->size = bytes;
 		    sec->filepos = pos;
 		  }
 
@@ -763,7 +763,7 @@ srec_read_section (abfd, section, contents)
       switch (hdr[0])
 	{
 	default:
-	  BFD_ASSERT (sofar == section->_raw_size);
+	  BFD_ASSERT (sofar == section->size);
 	  if (buf != NULL)
 	    free (buf);
 	  return TRUE;
@@ -788,7 +788,7 @@ srec_read_section (abfd, section, contents)
 	  if (address != section->vma + sofar)
 	    {
 	      /* We've come to the end of this section.  */
-	      BFD_ASSERT (sofar == section->_raw_size);
+	      BFD_ASSERT (sofar == section->size);
 	      if (buf != NULL)
 		free (buf);
 	      return TRUE;
@@ -811,7 +811,7 @@ srec_read_section (abfd, section, contents)
   if (error)
     goto error_return;
 
-  BFD_ASSERT (sofar == section->_raw_size);
+  BFD_ASSERT (sofar == section->size);
 
   if (buf != NULL)
     free (buf);
@@ -836,8 +836,8 @@ srec_get_section_contents (abfd, section, location, offset, count)
 {
   if (section->used_by_bfd == NULL)
     {
-      section->used_by_bfd = bfd_alloc (abfd, section->_raw_size);
-      if (section->used_by_bfd == NULL && section->_raw_size != 0)
+      section->used_by_bfd = bfd_alloc (abfd, section->size);
+      if (section->used_by_bfd == NULL && section->size != 0)
 	return FALSE;
 
       if (! srec_read_section (abfd, section, section->used_by_bfd))
@@ -1284,7 +1284,10 @@ srec_print_symbol (abfd, afile, symbol, how)
 #define srec_bfd_relax_section bfd_generic_relax_section
 #define srec_bfd_gc_sections bfd_generic_gc_sections
 #define srec_bfd_merge_sections bfd_generic_merge_sections
+#define srec_bfd_is_group_section bfd_generic_is_group_section
 #define srec_bfd_discard_group bfd_generic_discard_group
+#define srec_section_already_linked \
+  _bfd_generic_section_already_linked
 #define srec_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
 #define srec_bfd_link_hash_table_free _bfd_generic_link_hash_table_free
 #define srec_bfd_link_add_symbols _bfd_generic_link_add_symbols

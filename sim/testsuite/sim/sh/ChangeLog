@@ -1,3 +1,33 @@
+2004-09-13  DJ Delorie  <dj@redhat.com>
+
+	* sim/sh/allinsn.exp: Set global_as_options and
+	global_ld_options appropriately for little endian builds.
+	* sim/sh/movua.s: Support little endian.
+
+2004-09-08  Michael Snyder  <msnyder@redhat.com>
+
+	Commited by Corinna Vinschen <vinschen@redhat.com>
+	* allinsn.exp: Add new tests.
+	* bandor.s: New file.
+	* bandornot.s: New file.
+	* bclr.s: New file.
+	* bld.s: New file.
+	* bldnot.s: New file.
+	* bset.s: New file.
+	* bst.s: New file.
+	* bxor.s: New file.
+	* clip.s: New file.
+	* div.s: New file.
+	* fail.s: New file, make sure fail works.
+	* fsca.s: New file.
+	* fsrra.s: New file.
+	* mov.s: New file.
+	* mulr.s: New file.
+	* pass.s: New file, make sure pass works.
+	* pushpop.s: New file.
+	* resbank.s: New file.
+	* testutils.inc (bf8k, bt8k, assertmem): New macros.
+
 2004-02-12  Michael Snyder  <msnyder@redhat.com>
 
 	* and.s, movi.s, sett.s: New files.

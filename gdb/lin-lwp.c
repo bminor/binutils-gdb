@@ -1213,6 +1213,7 @@ child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 	    {
 	      ptrace (PTRACE_DETACH, ourstatus->value.related_pid, 0, 0);
 	      ourstatus->kind = TARGET_WAITKIND_IGNORE;
+	      ptrace (PTRACE_CONT, pid, 0, 0);
 	      pid = -1;
 	      save_errno = EINTR;
 	    }
@@ -1758,9 +1759,10 @@ lin_lwp_kill (void)
 }
 
 static void
-lin_lwp_create_inferior (char *exec_file, char *allargs, char **env)
+lin_lwp_create_inferior (char *exec_file, char *allargs, char **env,
+			 int from_tty)
 {
-  child_ops.to_create_inferior (exec_file, allargs, env);
+  child_ops.to_create_inferior (exec_file, allargs, env, from_tty);
 }
 
 static void
@@ -1895,9 +1897,10 @@ _initialize_lin_lwp (void)
 
   sigemptyset (&blocked_mask);
 
-  add_show_from_set (add_set_cmd ("lin-lwp", no_class, var_zinteger,
-				  (char *) &debug_lin_lwp,
-				  "Set debugging of GNU/Linux lwp module.\n\
+  deprecated_add_show_from_set
+    (add_set_cmd ("lin-lwp", no_class, var_zinteger,
+		  (char *) &debug_lin_lwp,
+		  "Set debugging of GNU/Linux lwp module.\n\
 Enables printf debugging output.\n", &setdebuglist), &showdebuglist);
 }
 

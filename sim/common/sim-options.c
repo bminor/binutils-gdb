@@ -898,7 +898,7 @@ sim_args_command (SIM_DESC sd, char *cmd)
 {
   /* something to do? */
   if (cmd == NULL)
-    return SIM_RC_OK; /* FIXME - perhaphs help would be better */
+    return SIM_RC_OK; /* FIXME - perhaps help would be better */
   
   if (cmd [0] == '-')
     {
@@ -916,7 +916,7 @@ sim_args_command (SIM_DESC sd, char *cmd)
       sim_cpu *cpu;
 
       if (argv [0] == NULL)
-	return SIM_RC_OK; /* FIXME - perhaphs help would be better */
+	return SIM_RC_OK; /* FIXME - perhaps help would be better */
 
       /* First check for a cpu selector.  */
       {

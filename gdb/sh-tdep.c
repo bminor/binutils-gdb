@@ -885,7 +885,7 @@ sh_treat_as_flt_p (struct type *type)
 
 static CORE_ADDR
 sh_push_dummy_call_fpu (struct gdbarch *gdbarch,
-			CORE_ADDR func_addr,
+			struct value *function,
 			struct regcache *regcache,
 			CORE_ADDR bp_addr, int nargs,
 			struct value **args,
@@ -997,7 +997,7 @@ sh_push_dummy_call_fpu (struct gdbarch *gdbarch,
 
 static CORE_ADDR
 sh_push_dummy_call_nofpu (struct gdbarch *gdbarch,
-			  CORE_ADDR func_addr,
+			  struct value *function,
 			  struct regcache *regcache,
 			  CORE_ADDR bp_addr,
 			  int nargs, struct value **args,
@@ -1147,7 +1147,11 @@ sh3e_sh4_store_return_value (struct type *type, struct regcache *regcache,
       int len = TYPE_LENGTH (type);
       int i, regnum = FP0_REGNUM;
       for (i = 0; i < len; i += 4)
-	regcache_raw_write (regcache, regnum++, (char *) valbuf + i);
+	if (TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE)
+	  regcache_raw_write (regcache, regnum++,
+			      (char *) valbuf + len - 4 - i);
+	else
+	  regcache_raw_write (regcache, regnum++, (char *) valbuf + i);
     }
   else
     sh_default_store_return_value (type, regcache, valbuf);
@@ -1820,8 +1824,6 @@ sh_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
     }
 }
 
-#ifdef SVR4_SHARED_LIBS
-
 /* Fetch (and possibly build) an appropriate link_map_offsets structure
    for native i386 linux targets using the struct offsets defined in
    link.h (but without actual reference to that file).
@@ -1862,7 +1864,6 @@ sh_linux_svr4_fetch_link_map_offsets (void)
 
   return lmp;
 }
-#endif /* SVR4_SHARED_LIBS */
 
 static int
 sh_dsp_register_sim_regno (int nr)
@@ -2176,10 +2177,12 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       sh_show_regs = sh4_nofpu_show_regs;
       break;
 
+#if 0
     case bfd_mach_sh5:
       sh_show_regs = sh64_show_regs;
       /* SH5 is handled entirely in sh64-tdep.c */
       return sh64_gdbarch_init (info, arches);
+#endif
     }
 
   /* If there is already a candidate, use it.  */
@@ -2211,7 +2214,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_print_registers_info (gdbarch, sh_print_registers_info);
 
   set_gdbarch_breakpoint_from_pc (gdbarch, sh_breakpoint_from_pc);
-  set_gdbarch_use_struct_convention (gdbarch, sh_use_struct_convention);
+  set_gdbarch_deprecated_use_struct_convention (gdbarch, sh_use_struct_convention);
 
   set_gdbarch_print_insn (gdbarch, gdb_print_insn_sh);
   set_gdbarch_register_sim_regno (gdbarch, legacy_register_sim_regno);
@@ -2227,7 +2230,6 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_push_dummy_call (gdbarch, sh_push_dummy_call_nofpu);
 
-  set_gdbarch_deprecated_frameless_function_invocation (gdbarch, legacy_frameless_look_for_prologue);
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
 
   set_gdbarch_frame_align (gdbarch, sh_frame_align);

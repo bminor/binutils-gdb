@@ -107,7 +107,8 @@ struct ia64_opcode ia64_opcodes_a[] =
     {"or",	 A, OpX2aVeX4X2b (8, 0, 0, 0xb, 2), {R1, IMM8, R3}, EMPTY},
     {"xor",	 A, OpX2aVeX4X2b (8, 0, 0, 0xb, 3), {R1, IMM8, R3}, EMPTY},
     {"mov",	 A, OpX2aVeImm14 (8, 2, 0, 0), {R1, R3}, EMPTY},
-    {"mov",	 A, OpX2aVeR3a (8, 2, 0, 0), {R1, IMM14}, PSEUDO, 0, NULL},
+    /* A mov immediate pseudo for adds was deleted.  It failed for immediate
+       operands requiring relocs, e.g. @pltoff(a).  */
     {"adds",	 A, OpX2aVe (8, 2, 0), {R1, IMM14, R3}, EMPTY},
     {"addp4",	 A, OpX2aVe (8, 3, 0), {R1, IMM14, R3}, EMPTY},
     {"padd1",		 A, OpX2aZaZbX4X2b (8, 1, 0, 0, 0, 0), {R1, R2, R3}, EMPTY},

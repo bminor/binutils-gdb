@@ -115,11 +115,11 @@ static void swap_abort
   PARAMS ((void));
 
 static asection *
-make_bfd_asection (abfd, name, flags, _raw_size, vma, alignment_power)
+make_bfd_asection (abfd, name, flags, size, vma, alignment_power)
      bfd *abfd;
      const char *name;
      flagword flags;
-     bfd_size_type _raw_size;
+     bfd_size_type size;
      bfd_vma vma;
      unsigned int alignment_power;
 {
@@ -137,12 +137,23 @@ make_bfd_asection (abfd, name, flags, _raw_size, vma, alignment_power)
     return NULL;
 
   asect->flags = flags;
-  asect->_raw_size = _raw_size;
+  asect->size = size;
   asect->vma = vma;
   asect->filepos = bfd_tell (abfd);
   asect->alignment_power = alignment_power;
 
   return asect;
+}
+
+/* Return true if the given core file section corresponds to a thread,
+   based on its name.  */
+
+static int
+thread_section_p (bfd *abfd ATTRIBUTE_UNUSED,
+                  asection *sect,
+                  void *obj ATTRIBUTE_UNUSED)
+{
+  return (strncmp (bfd_section_name (abfd, sect), ".reg/", 5) == 0);
 }
 
 /* this function builds a bfd target if the file is a corefile.
@@ -207,7 +218,7 @@ hpux_core_core_file_p (abfd)
 
               /* However, we also want to create those sections with the
                  file positioned at the start of the record, it seems. */
-            if (bfd_seek (abfd, (file_ptr) -core_header.len, SEEK_CUR) != 0)
+            if (bfd_seek (abfd, -((file_ptr) core_header.len), SEEK_CUR) != 0)
               break;
 
 #if defined(PROC_INFO_HAS_THREAD_ID)
@@ -276,7 +287,8 @@ hpux_core_core_file_p (abfd)
 	case CORE_ANON_SHMEM:
 	  if (!make_bfd_asection (abfd, ".data",
 				  SEC_ALLOC + SEC_LOAD + SEC_HAS_CONTENTS,
-				  core_header.len, core_header.addr, 2))
+				  core_header.len,
+				  (bfd_vma) core_header.addr, 2))
 	    goto fail;
 
 	  bfd_seek (abfd, (file_ptr) core_header.len, SEEK_CUR);
@@ -299,6 +311,29 @@ hpux_core_core_file_p (abfd)
     }
 
   /* OK, we believe you.  You're a core file (sure, sure).  */
+
+  /* On HP/UX, we sometimes encounter core files where none of the threads
+     was found to be the running thread (ie the signal was set to -1 for
+     all threads).  This happens when the program was aborted externally
+     via a TT_CORE ttrace system call.  In that case, we just pick one
+     thread at random to be the active thread.  */
+  if (core_kernel_thread_id (abfd) != 0
+      && bfd_get_section_by_name (abfd, ".reg") == NULL)
+    {
+      asection *asect = bfd_sections_find_if (abfd, thread_section_p, NULL);
+      asection *reg_sect;
+
+      if (asect != NULL)
+        {
+          reg_sect = make_bfd_asection (abfd, ".reg", asect->flags,
+                                        asect->size, asect->vma,
+                                        asect->alignment_power);
+          if (reg_sect == NULL)
+            goto fail;
+
+          reg_sect->filepos = asect->filepos;
+        }
+    }
 
   /* Were there sections of unknown type?  If so, yet there were
      at least some complete sections of known type, then, issue

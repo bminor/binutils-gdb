@@ -1134,7 +1134,13 @@ in_iclass (struct ia64_opcode *idesc, struct iclass *ic,
           else if (strcmp (ic->name, "invala") == 0)
             resolved = strcmp (idesc->name, ic->name) == 0;
 	  else if (strncmp (idesc->name, "st", 2) == 0
-		   && strstr (format, "M5") != NULL)
+		   && (strstr (format, "M5") != NULL
+		       || strstr (format, "M10") != NULL))
+	    resolved = idesc->flags & IA64_OPCODE_POSTINC;
+	  else if (strncmp (idesc->name, "ld", 2) == 0
+		   && (strstr (format, "M2 M3") != NULL
+		       || strstr (format, "M12") != NULL
+		       || strstr (format, "M7 M8") != NULL))
 	    resolved = idesc->flags & IA64_OPCODE_POSTINC;
           else
             resolved = 0;

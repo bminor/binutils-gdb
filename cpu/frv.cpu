@@ -7122,7 +7122,7 @@
      ((fr500 (unit u-fr2fr)))
 )
 
-(conditional-register-transfer cfmovs OP_6C OPE4_0 FRj FRk FM01
+(conditional-register-transfer cfmovs OP_6C OPE4_0 FRj FRk FMALL
 			       ((FR500-MAJOR F-1) (FR550-MAJOR F-2)
 				(MACH simple,tomcat,fr500,fr550,frv))
 			       ((fr500 (unit u-fr2fr)) (fr550 (unit u-fr2fr)))

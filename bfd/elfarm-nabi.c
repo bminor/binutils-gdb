@@ -29,11 +29,6 @@
 
 #define USE_REL	1
 
-#define TARGET_LITTLE_SYM               bfd_elf32_littlearm_vec
-#define TARGET_LITTLE_NAME              "elf32-littlearm"
-#define TARGET_BIG_SYM                  bfd_elf32_bigarm_vec
-#define TARGET_BIG_NAME                 "elf32-bigarm"
-
 #define elf_info_to_howto               0
 #define elf_info_to_howto_rel           elf32_arm_info_to_howto
 
@@ -188,16 +183,16 @@ static reloc_howto_type elf32_arm_howto_table[] =
 
   HOWTO (R_ARM_SBREL32,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
-	 0,			/* bitsize */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont,/* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_ARM_SBREL32",	/* name */
 	 FALSE,			/* partial_inplace */
-	 0,			/* src_mask */
-	 0,			/* dst_mask */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
   HOWTO (R_ARM_THM_PC22,	/* type */
@@ -557,6 +552,90 @@ static reloc_howto_type elf32_arm_howto_table[] =
 	 0x00000fff,		/* src_mask */
 	 0x00000fff,		/* dst_mask */
 	 TRUE),			/* pcrel_offset */
+
+  HOWTO (R_ARM_LDR_SBREL_11_0,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 12,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_ARM_LDR_SBREL_11_0",/* name */
+	 FALSE,			/* partial_inplace */
+	 0x00000fff,		/* src_mask */
+	 0x00000fff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  HOWTO (R_ARM_ALU_SBREL_19_12,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 8,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 12,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_ARM_ALU_SBREL_19_12",/* name */
+	 FALSE,			/* partial_inplace */
+	 0x000ff000,		/* src_mask */
+	 0x000ff000,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  HOWTO (R_ARM_ALU_SBREL_27_20,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 8,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 20,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_ARM_ALU_SBREL_27_20",/* name */
+	 FALSE,			/* partial_inplace */
+	 0x0ff00000,		/* src_mask */
+	 0x0ff00000,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  HOWTO (R_ARM_TARGET1,		/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_ARM_TARGET1",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  HOWTO (R_ARM_ROSEGREL32,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_ARM_ROSEGREL32",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  HOWTO (R_ARM_V4BX,		/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_ARM_V4BX",		/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
 };
 
   /* GNU extension to record C++ vtable hierarchy */
@@ -689,7 +768,10 @@ static const struct elf32_arm_reloc_map elf32_arm_reloc_map[] =
     {BFD_RELOC_ARM_GOTOFF,           R_ARM_GOTOFF},
     {BFD_RELOC_ARM_GOTPC,            R_ARM_GOTPC},
     {BFD_RELOC_ARM_GOT32,            R_ARM_GOT32},
-    {BFD_RELOC_ARM_PLT32,            R_ARM_PLT32}
+    {BFD_RELOC_ARM_PLT32,            R_ARM_PLT32},
+    {BFD_RELOC_ARM_TARGET1,	     R_ARM_TARGET1},
+    {BFD_RELOC_ARM_ROSEGREL32,	     R_ARM_ROSEGREL32},
+    {BFD_RELOC_ARM_SBREL32,	     R_ARM_SBREL32}
   };
 
 static reloc_howto_type *
@@ -729,7 +811,7 @@ elf32_arm_nabi_grok_prstatus (abfd, note)
      Elf_Internal_Note *note;
 {
   int offset;
-  size_t raw_size;
+  size_t size;
 
   switch (note->descsz)
     {
@@ -745,14 +827,14 @@ elf32_arm_nabi_grok_prstatus (abfd, note)
 
 	/* pr_reg */
 	offset = 72;
-	raw_size = 72;
+	size = 72;
 
 	break;
     }
 
   /* Make a ".reg/999" section.  */
   return _bfd_elfcore_make_pseudosection (abfd, ".reg",
-					  raw_size, note->descpos + offset);
+					  size, note->descpos + offset);
 }
 
 static bfd_boolean
@@ -787,7 +869,124 @@ elf32_arm_nabi_grok_psinfo (abfd, note)
   return TRUE;
 }
 
+#define TARGET_LITTLE_SYM               bfd_elf32_littlearm_vec
+#define TARGET_LITTLE_NAME              "elf32-littlearm"
+#define TARGET_BIG_SYM                  bfd_elf32_bigarm_vec
+#define TARGET_BIG_NAME                 "elf32-bigarm"
+
 #define elf_backend_grok_prstatus	elf32_arm_nabi_grok_prstatus
 #define elf_backend_grok_psinfo		elf32_arm_nabi_grok_psinfo
 
 #include "elf32-arm.h"
+
+/* Symbian OS Targets */
+
+#undef TARGET_LITTLE_SYM
+#define TARGET_LITTLE_SYM               bfd_elf32_littlearm_symbian_vec
+#undef TARGET_LITTLE_NAME
+#define TARGET_LITTLE_NAME              "elf32-littlearm-symbian"
+#undef TARGET_BIG_SYM
+#define TARGET_BIG_SYM                  bfd_elf32_bigarm_symbian_vec
+#undef TARGET_BIG_NAME
+#define TARGET_BIG_NAME                 "elf32-bigarm-symbian"
+
+/* Like elf32_arm_link_hash_table_create -- but overrides
+   appropriately for Symbian OS.  */
+static struct bfd_link_hash_table *
+elf32_arm_symbian_link_hash_table_create (bfd *abfd)
+{
+  struct bfd_link_hash_table *ret;
+
+  ret = elf32_arm_link_hash_table_create (abfd);
+  if (ret)
+    {
+      struct elf32_arm_link_hash_table *htab
+	= (struct elf32_arm_link_hash_table *)ret;
+      /* There is no PLT header for Symbian OS.  */
+      htab->plt_header_size = 0;
+      /* The PLT entries are each three instructions.  */
+      htab->plt_entry_size = 4 * NUM_ELEM (elf32_arm_symbian_plt_entry);
+      htab->symbian_p = 1;
+    }
+  return ret;
+}     
+
+/* In a BPABI executable, the dynamic linking sections do not go in
+   the loadable read-only segment.  The post-linker may wish to refer
+   to these sections, but they are not part of the final program
+   image.  */
+static struct bfd_elf_special_section const 
+  elf32_arm_symbian_special_sections[]=
+{
+  { ".dynamic",        8,  0, SHT_DYNAMIC,  0 },
+  { ".dynstr",         7,  0, SHT_STRTAB,   0 },
+  { ".dynsym",         7,  0, SHT_DYNSYM,   0 },
+  { ".got",            4,  0, SHT_PROGBITS, 0 },
+  { ".hash",           5,  0, SHT_HASH,     0 },
+  { NULL,              0,  0, 0,            0 }
+};
+
+static bfd_boolean
+elf32_arm_symbian_modify_segment_map
+  PARAMS ((bfd *, struct bfd_link_info *));
+
+static bfd_boolean
+elf32_arm_symbian_modify_segment_map (abfd, info)
+     bfd *abfd;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
+{
+  struct elf_segment_map *m;
+  asection *dynsec;
+
+  /* The first PT_LOAD segment will have the program headers and file
+     headers in it by default -- but BPABI object files should not
+     include these headers in any loadable segment.  */
+  for (m = elf_tdata (abfd)->segment_map; m != NULL; m = m->next)
+    if (m->p_type == PT_LOAD)
+      {
+	m->includes_filehdr = 0;
+	m->includes_phdrs = 0;
+      }
+
+  /* BPABI shared libraries and executables should have a PT_DYNAMIC
+     segment.  However, because the .dynamic section is not marked
+     with SEC_LOAD, the generic ELF code will not create such a
+     segment.  */
+  dynsec = bfd_get_section_by_name (abfd, ".dynamic");
+  if (dynsec)
+    {
+      m = _bfd_elf_make_dynamic_segment (abfd, dynsec);
+      m->next = elf_tdata (abfd)->segment_map;
+      elf_tdata (abfd)->segment_map = m;
+    }
+
+  return TRUE;
+}
+
+#undef elf32_bed
+#define elf32_bed elf32_arm_symbian_bed
+
+#undef ELF_DYNAMIC_SEC_FLAGS
+#define ELF_DYNAMIC_SEC_FLAGS \
+  (SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_LINKER_CREATED)
+
+#undef bfd_elf32_bfd_link_hash_table_create
+#define bfd_elf32_bfd_link_hash_table_create \
+  elf32_arm_symbian_link_hash_table_create
+
+#undef elf_backend_special_sections
+#define elf_backend_special_sections elf32_arm_symbian_special_sections
+
+#undef elf_backend_modify_segment_map
+#define elf_backend_modify_segment_map elf32_arm_symbian_modify_segment_map
+
+/* There is no .got section for BPABI objects, and hence no header.  */
+#undef elf_backend_got_header_size
+#define elf_backend_got_header_size 0
+
+/* Similarly, there is no .got.plt section.  */
+#undef elf_backend_want_got_plt
+#define elf_backend_want_got_plt 0
+
+#include "elf32-target.h"
+

@@ -99,6 +99,8 @@ extern int lynx_core_file_failing_signal PARAMS ((bfd *abfd));
 #define _bfd_xcoff_bfd_gc_sections coff_bfd_gc_sections
 #define _bfd_xcoff_bfd_merge_sections coff_bfd_merge_sections
 #define _bfd_xcoff_bfd_discard_group bfd_generic_discard_group
+#define _bfd_xcoff_section_already_linked \
+  _bfd_generic_section_already_linked
 #define _bfd_xcoff_bfd_link_split_section coff_bfd_link_split_section
 
 /* XCOFF archives do not have anything which corresponds to an

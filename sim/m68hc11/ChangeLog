@@ -1,3 +1,8 @@
+2004-06-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* interp.c (sim_prepare_for_program): Use bfd_get_section_size
+	instead of bfd_get_section_size_before_reloc.
+
 2003-08-08  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* dv-m68hc11tim.c (cycle_to_string): Add flags parameter to better

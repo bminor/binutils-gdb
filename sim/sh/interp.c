@@ -65,6 +65,11 @@ int sim_write (SIM_DESC sd, SIM_ADDR addr, unsigned char *buffer, int size);
    for a quit. */
 #define POLL_QUIT_INTERVAL 0x60000
 
+typedef struct
+{
+  int regs[20];
+} regstacktype;
+
 typedef union
 {
 
@@ -123,6 +128,9 @@ typedef union
 	    int dbr;		/* debug base register */
 	    int sgr;		/* saved gr15 */
 	    int ldst;		/* load/store flag (boolean) */
+	    int tbr;
+	    int ibcr;		/* sh2a bank control register */
+	    int ibnr;		/* sh2a bank number register */
 	  } named;
 	int i[16];
       } cregs;
@@ -152,6 +160,8 @@ typedef union
     unsigned char *ymem;
     unsigned char *xmem_offset;
     unsigned char *ymem_offset;
+    unsigned long bfd_mach;
+    regstacktype *regstack;
   }
   asregs;
   int asints[40];
@@ -175,6 +185,7 @@ static int maskl = 0;
 
 static SIM_OPEN_KIND sim_kind;
 static char *myname;
+static int   tracing = 0;
 
 
 /* Short hand definitions of the registers */
@@ -191,6 +202,11 @@ static char *myname;
 #define GBR 	saved_state.asregs.cregs.named.gbr
 #define VBR 	saved_state.asregs.cregs.named.vbr
 #define DBR 	saved_state.asregs.cregs.named.dbr
+#define TBR 	saved_state.asregs.cregs.named.tbr
+#define IBCR	saved_state.asregs.cregs.named.ibcr
+#define IBNR	saved_state.asregs.cregs.named.ibnr
+#define BANKN	(saved_state.asregs.cregs.named.ibnr & 0x1ff)
+#define ME	((saved_state.asregs.cregs.named.ibnr >> 14) & 0x3)
 #define SSR	saved_state.asregs.cregs.named.ssr
 #define SPC	saved_state.asregs.cregs.named.spc
 #define SGR 	saved_state.asregs.cregs.named.sgr
@@ -213,6 +229,8 @@ static char *myname;
 
 /* Manipulate SR */
 
+#define SR_MASK_BO  (1 << 14)
+#define SR_MASK_CS  (1 << 13)
 #define SR_MASK_DMY (1 << 11)
 #define SR_MASK_DMX (1 << 10)
 #define SR_MASK_M (1 << 9)
@@ -227,6 +245,8 @@ static char *myname;
 #define SR_MASK_RC 0x0fff0000
 #define SR_RC_INCREMENT -0x00010000
 
+#define BO	((saved_state.asregs.cregs.named.sr & SR_MASK_BO) != 0)
+#define CS	((saved_state.asregs.cregs.named.sr & SR_MASK_CS) != 0)
 #define M 	((saved_state.asregs.cregs.named.sr & SR_MASK_M) != 0)
 #define Q 	((saved_state.asregs.cregs.named.sr & SR_MASK_Q) != 0)
 #define S 	((saved_state.asregs.cregs.named.sr & SR_MASK_S) != 0)
@@ -249,6 +269,16 @@ do { \
     saved_state.asregs.cregs.named.sr &= ~(BIT); \
 } while (0)
 
+#define SET_SR_BO(EXP) SET_SR_BIT ((EXP), SR_MASK_BO)
+#define SET_SR_CS(EXP) SET_SR_BIT ((EXP), SR_MASK_CS)
+#define SET_BANKN(EXP) \
+do { \
+  IBNR = (IBNR & 0xfe00) | (EXP & 0x1f); \
+} while (0)
+#define SET_ME(EXP) \
+do { \
+  IBNR = (IBNR & 0x3fff) | ((EXP & 0x3) << 14); \
+} while (0)
 #define SET_SR_M(EXP) SET_SR_BIT ((EXP), SR_MASK_M)
 #define SET_SR_Q(EXP) SET_SR_BIT ((EXP), SR_MASK_Q)
 #define SET_SR_S(EXP) SET_SR_BIT ((EXP), SR_MASK_S)
@@ -322,6 +352,9 @@ fail ()
 
 #define RAISE_EXCEPTION(x) \
   (saved_state.asregs.exception = x, saved_state.asregs.insn_end = 0)
+
+#define RAISE_EXCEPTION_IF_IN_DELAY_SLOT() \
+  if (in_delay_slot) RAISE_EXCEPTION (SIGILL)
 
 /* This function exists mainly for the purpose of setting a breakpoint to
    catch simulated bus errors when running the simulator under GDB.  */
@@ -780,7 +813,8 @@ process_rbat_addr (addr)
 
 #define SET_NIP(x) nip = (x); CHECK_INSN_PTR (nip);
 
-#define Delay_Slot(TEMPPC)  	iword = RIAT (TEMPPC); goto top;
+static int in_delay_slot = 0;
+#define Delay_Slot(TEMPPC)  	iword = RIAT (TEMPPC); in_delay_slot = 1; goto top;
 
 #define CHECK_INSN_PTR(p) \
 do { \
@@ -1181,6 +1215,12 @@ trap (i, regs, insn_ptr, memory, maskl, maskw, endianw)
       }
       break;
 
+    case 13:	/* Set IBNR */
+      IBNR = regs[0] & 0xffff;
+      break;
+    case 14:	/* Set IBCR */
+      IBCR = regs[0] & 0xffff;
+      break;
     case 0xc3:
     case 255:
       raise_exception (SIGTRAP);
@@ -1419,32 +1459,140 @@ macl (regs, memory, n, m)
   MACH = mach;
 }
 
+enum {
+  B_BCLR = 0,
+  B_BSET = 1,
+  B_BST  = 2,
+  B_BLD  = 3,
+  B_BAND = 4,
+  B_BOR  = 5,
+  B_BXOR = 6,
+  B_BLDNOT = 11,
+  B_BANDNOT = 12,
+  B_BORNOT = 13,
+  
+  MOVB_RM = 0x0000,
+  MOVW_RM = 0x1000,
+  MOVL_RM = 0x2000,
+  FMOV_RM = 0x3000,
+  MOVB_MR = 0x4000,
+  MOVW_MR = 0x5000,
+  MOVL_MR = 0x6000,
+  FMOV_MR = 0x7000,
+  MOVU_BMR = 0x8000,
+  MOVU_WMR = 0x9000,
+};
 
-/* GET_LOOP_BOUNDS {EXTENDED}
-   These two functions compute the actual starting and ending point
-   of the repeat loop, based on the RS and RE registers (repeat start, 
-   repeat stop).  The extended version is called for LDRC, and the
-   regular version is called for SETRC.  The difference is that for
-   LDRC, the loop start and end instructions are literally the ones
-   pointed to by RS and RE -- for SETRC, they're not (see docs).  */
-
-static struct loop_bounds
-get_loop_bounds_ext (rs, re, memory, mem_end, maskw, endianw)
-     int rs, re;
-     unsigned char *memory, *mem_end;
-     int maskw, endianw;
+/* Do extended displacement move instructions.  */
+void
+do_long_move_insn (int op, int disp12, int m, int n, int *thatlock)
 {
-  struct loop_bounds loop;
+  int memstalls = 0;
+  int thislock = *thatlock;
+  int endianw = global_endianw;
+  int *R = &(saved_state.asregs.regs[0]);
+  unsigned char *memory = saved_state.asregs.memory;
+  int maskb = ~((saved_state.asregs.msize - 1) & ~0);
+  unsigned char *insn_ptr = PT2H (saved_state.asregs.pc);
 
-  /* FIXME: should I verify RS < RE?  */
-  loop.start = PT2H (RS);	/* FIXME not using the params?  */
-  loop.end   = PT2H (RE & ~1);	/* Ignore bit 0 of RE.  */
-  SKIP_INSN (loop.end);
-  if (loop.end >= mem_end)
-    loop.end = PT2H (0);
-  return loop;
+  switch (op) {
+  case MOVB_RM:		/* signed */
+    WBAT (disp12 * 1 + R[n], R[m]); 
+    break;
+  case MOVW_RM:
+    WWAT (disp12 * 2 + R[n], R[m]); 
+    break;
+  case MOVL_RM:
+    WLAT (disp12 * 4 + R[n], R[m]); 
+    break;
+  case FMOV_RM:		/* floating point */
+    if (FPSCR_SZ) 
+      {
+        MA (1);
+        WDAT (R[n] + 8 * disp12, m);
+      }
+    else 
+      WLAT (R[n] + 4 * disp12, FI (m));
+    break;
+  case MOVB_MR:
+    R[n] = RSBAT (disp12 * 1 + R[m]);
+    L (n); 
+    break;
+  case MOVW_MR:
+    R[n] = RSWAT (disp12 * 2 + R[m]);
+    L (n); 
+    break;
+  case MOVL_MR:
+    R[n] = RLAT (disp12 * 4 + R[m]);
+    L (n); 
+    break;
+  case FMOV_MR:
+    if (FPSCR_SZ) {
+      MA (1);
+      RDAT (R[m] + 8 * disp12, n);
+    }
+    else 
+      SET_FI (n, RLAT (R[m] + 4 * disp12));
+    break;
+  case MOVU_BMR:	/* unsigned */
+    R[n] = RBAT (disp12 * 1 + R[m]);
+    L (n);
+    break;
+  case MOVU_WMR:
+    R[n] = RWAT (disp12 * 2 + R[m]);
+    L (n);
+    break;
+  default:
+    RAISE_EXCEPTION (SIGINT);
+    exit (1);
+  }
+  saved_state.asregs.memstalls += memstalls;
+  *thatlock = thislock;
 }
 
+/* Do binary logical bit-manipulation insns.  */
+void
+do_blog_insn (int imm, int addr, int binop, 
+	      unsigned char *memory, int maskb)
+{
+  int oldval = RBAT (addr);
+
+  switch (binop) {
+  case B_BCLR:	/* bclr.b */
+    WBAT (addr, oldval & ~imm);
+    break;
+  case B_BSET:	/* bset.b */
+    WBAT (addr, oldval | imm);
+    break;
+  case B_BST:	/* bst.b */
+    if (T)
+      WBAT (addr, oldval | imm);
+    else
+      WBAT (addr, oldval & ~imm);
+    break;
+  case B_BLD:	/* bld.b */
+    SET_SR_T ((oldval & imm) != 0);
+    break;
+  case B_BAND:	/* band.b */
+    SET_SR_T (T && ((oldval & imm) != 0));
+    break;
+  case B_BOR:	/* bor.b */
+    SET_SR_T (T || ((oldval & imm) != 0));
+    break;
+  case B_BXOR:	/* bxor.b */
+    SET_SR_T (T ^ ((oldval & imm) != 0));
+    break;
+  case B_BLDNOT:	/* bldnot.b */
+    SET_SR_T ((oldval & imm) == 0);
+    break;
+  case B_BANDNOT:	/* bandnot.b */
+    SET_SR_T (T && ((oldval & imm) == 0));
+    break;
+  case B_BORNOT:	/* bornot.b */
+    SET_SR_T (T || ((oldval & imm) == 0));
+    break;
+  }
+}
 float
 fsca_s (int in, double (*f) (double))
 {
@@ -1492,6 +1640,32 @@ fsrra_s (float in)
   upper = ldexp (upper, exp - 24);
   lower = ldexp (lower, exp - 24);
   return upper - result >= result - lower ? upper : lower;
+}
+
+
+/* GET_LOOP_BOUNDS {EXTENDED}
+   These two functions compute the actual starting and ending point
+   of the repeat loop, based on the RS and RE registers (repeat start, 
+   repeat stop).  The extended version is called for LDRC, and the
+   regular version is called for SETRC.  The difference is that for
+   LDRC, the loop start and end instructions are literally the ones
+   pointed to by RS and RE -- for SETRC, they're not (see docs).  */
+
+static struct loop_bounds
+get_loop_bounds_ext (rs, re, memory, mem_end, maskw, endianw)
+     int rs, re;
+     unsigned char *memory, *mem_end;
+     int maskw, endianw;
+{
+  struct loop_bounds loop;
+
+  /* FIXME: should I verify RS < RE?  */
+  loop.start = PT2H (RS);	/* FIXME not using the params?  */
+  loop.end   = PT2H (RE & ~1);	/* Ignore bit 0 of RE.  */
+  SKIP_INSN (loop.end);
+  if (loop.end >= mem_end)
+    loop.end = PT2H (0);
+  return loop;
 }
 
 static struct loop_bounds
@@ -1607,8 +1781,10 @@ init_dsp (abfd)
 	  saved_state.asregs.xyram_select = new_select;
 	  free (saved_state.asregs.xmem);
 	  free (saved_state.asregs.ymem);
-	  saved_state.asregs.xmem = (unsigned char *) calloc (1, ram_area_size);
-	  saved_state.asregs.ymem = (unsigned char *) calloc (1, ram_area_size);
+	  saved_state.asregs.xmem = 
+	    (unsigned char *) calloc (1, ram_area_size);
+	  saved_state.asregs.ymem = 
+	    (unsigned char *) calloc (1, ram_area_size);
 
 	  /* Disable use of X / Y mmeory if not allocated.  */
 	  if (! saved_state.asregs.xmem || ! saved_state.asregs.ymem)
@@ -1641,6 +1817,10 @@ init_dsp (abfd)
       saved_state.asregs.xram_start = 1;
       saved_state.asregs.yram_start = 1;
     }
+
+  if (saved_state.asregs.regstack == NULL)
+    saved_state.asregs.regstack = 
+      calloc (512, sizeof *saved_state.asregs.regstack);
 
   if (target_dsp != was_dsp)
     {
@@ -1741,7 +1921,11 @@ sim_resume (sd, step, siggnal)
   register int memstalls = 0;
   register int insts = 0;
   register int prevlock;
+#if 1
+  int thislock;
+#else
   register int thislock;
+#endif
   register unsigned int doprofile;
   register int pollcount = 0;
   /* endianw is used for every insn fetch, hence it makes sense to cache it.
@@ -1820,10 +2004,13 @@ sim_resume (sd, step, siggnal)
       insts++;
 #endif
     top:
+      if (tracing)
+	fprintf (stderr, "PC: %08x, insn: %04x\n", PH2T (insn_ptr), iword);
 
 #include "code.c"
 
 
+      in_delay_slot = 0;
       insn_ptr = nip;
 
       if (--pollcount < 0)
@@ -1940,6 +2127,15 @@ sim_read (sd, addr, buffer, size)
   return size;
 }
 
+static int gdb_bank_number;
+enum {
+  REGBANK_MACH = 15,
+  REGBANK_IVN  = 16,
+  REGBANK_PR   = 17,
+  REGBANK_GBR  = 18,
+  REGBANK_MACL = 19
+};
+
 int
 sim_store_register (sd, rn, memory, length)
      SIM_DESC sd;
@@ -2050,6 +2246,12 @@ sim_store_register (sd, rn, memory, length)
     case SIM_SH_R2_BANK0_REGNUM: case SIM_SH_R3_BANK0_REGNUM:
     case SIM_SH_R4_BANK0_REGNUM: case SIM_SH_R5_BANK0_REGNUM:
     case SIM_SH_R6_BANK0_REGNUM: case SIM_SH_R7_BANK0_REGNUM:
+      if (saved_state.asregs.bfd_mach == bfd_mach_sh2a)
+	{
+	  rn -= SIM_SH_R0_BANK0_REGNUM;
+	  saved_state.asregs.regstack[gdb_bank_number].regs[rn] = val;
+	}
+      else
       if (SR_MD && SR_RB)
 	Rn_BANK (rn - SIM_SH_R0_BANK0_REGNUM) = val;
       else
@@ -2059,6 +2261,12 @@ sim_store_register (sd, rn, memory, length)
     case SIM_SH_R2_BANK1_REGNUM: case SIM_SH_R3_BANK1_REGNUM:
     case SIM_SH_R4_BANK1_REGNUM: case SIM_SH_R5_BANK1_REGNUM:
     case SIM_SH_R6_BANK1_REGNUM: case SIM_SH_R7_BANK1_REGNUM:
+      if (saved_state.asregs.bfd_mach == bfd_mach_sh2a)
+	{
+	  rn -= SIM_SH_R0_BANK1_REGNUM;
+	  saved_state.asregs.regstack[gdb_bank_number].regs[rn + 8] = val;
+	}
+      else
       if (SR_MD && SR_RB)
 	saved_state.asregs.regs[rn - SIM_SH_R0_BANK1_REGNUM] = val;
       else
@@ -2069,6 +2277,35 @@ sim_store_register (sd, rn, memory, length)
     case SIM_SH_R4_BANK_REGNUM: case SIM_SH_R5_BANK_REGNUM:
     case SIM_SH_R6_BANK_REGNUM: case SIM_SH_R7_BANK_REGNUM:
       SET_Rn_BANK (rn - SIM_SH_R0_BANK_REGNUM, val);
+      break;
+    case SIM_SH_TBR_REGNUM:
+      TBR = val;
+      break;
+    case SIM_SH_IBNR_REGNUM:
+      IBNR = val;
+      break;
+    case SIM_SH_IBCR_REGNUM:
+      IBCR = val;
+      break;
+    case SIM_SH_BANK_REGNUM:
+      /* This is a pseudo-register maintained just for gdb.
+	 It tells us what register bank gdb would like to read/write.  */
+      gdb_bank_number = val;
+      break;
+    case SIM_SH_BANK_MACL_REGNUM:
+      saved_state.asregs.regstack[gdb_bank_number].regs[REGBANK_MACL] = val;
+      break;
+    case SIM_SH_BANK_GBR_REGNUM:
+      saved_state.asregs.regstack[gdb_bank_number].regs[REGBANK_GBR] = val;
+      break;
+    case SIM_SH_BANK_PR_REGNUM:
+      saved_state.asregs.regstack[gdb_bank_number].regs[REGBANK_PR] = val;
+      break;
+    case SIM_SH_BANK_IVN_REGNUM:
+      saved_state.asregs.regstack[gdb_bank_number].regs[REGBANK_IVN] = val;
+      break;
+    case SIM_SH_BANK_MACH_REGNUM:
+      saved_state.asregs.regstack[gdb_bank_number].regs[REGBANK_MACH] = val;
       break;
     default:
       return 0;
@@ -2185,6 +2422,12 @@ sim_fetch_register (sd, rn, memory, length)
     case SIM_SH_R2_BANK0_REGNUM: case SIM_SH_R3_BANK0_REGNUM:
     case SIM_SH_R4_BANK0_REGNUM: case SIM_SH_R5_BANK0_REGNUM:
     case SIM_SH_R6_BANK0_REGNUM: case SIM_SH_R7_BANK0_REGNUM:
+      if (saved_state.asregs.bfd_mach == bfd_mach_sh2a)
+	{
+	  rn -= SIM_SH_R0_BANK0_REGNUM;
+	  val = saved_state.asregs.regstack[gdb_bank_number].regs[rn];
+	}
+      else
       val = (SR_MD && SR_RB
 	     ? Rn_BANK (rn - SIM_SH_R0_BANK0_REGNUM)
 	     : saved_state.asregs.regs[rn - SIM_SH_R0_BANK0_REGNUM]);
@@ -2193,6 +2436,12 @@ sim_fetch_register (sd, rn, memory, length)
     case SIM_SH_R2_BANK1_REGNUM: case SIM_SH_R3_BANK1_REGNUM:
     case SIM_SH_R4_BANK1_REGNUM: case SIM_SH_R5_BANK1_REGNUM:
     case SIM_SH_R6_BANK1_REGNUM: case SIM_SH_R7_BANK1_REGNUM:
+      if (saved_state.asregs.bfd_mach == bfd_mach_sh2a)
+	{
+	  rn -= SIM_SH_R0_BANK1_REGNUM;
+	  val = saved_state.asregs.regstack[gdb_bank_number].regs[rn + 8];
+	}
+      else
       val = (! SR_MD || ! SR_RB
 	     ? Rn_BANK (rn - SIM_SH_R0_BANK1_REGNUM)
 	     : saved_state.asregs.regs[rn - SIM_SH_R0_BANK1_REGNUM]);
@@ -2202,6 +2451,35 @@ sim_fetch_register (sd, rn, memory, length)
     case SIM_SH_R4_BANK_REGNUM: case SIM_SH_R5_BANK_REGNUM:
     case SIM_SH_R6_BANK_REGNUM: case SIM_SH_R7_BANK_REGNUM:
       val = Rn_BANK (rn - SIM_SH_R0_BANK_REGNUM);
+      break;
+    case SIM_SH_TBR_REGNUM:
+      val = TBR;
+      break;
+    case SIM_SH_IBNR_REGNUM:
+      val = IBNR;
+      break;
+    case SIM_SH_IBCR_REGNUM:
+      val = IBCR;
+      break;
+    case SIM_SH_BANK_REGNUM:
+      /* This is a pseudo-register maintained just for gdb.
+	 It tells us what register bank gdb would like to read/write.  */
+      val = gdb_bank_number;
+      break;
+    case SIM_SH_BANK_MACL_REGNUM:
+      val = saved_state.asregs.regstack[gdb_bank_number].regs[REGBANK_MACL];
+      break;
+    case SIM_SH_BANK_GBR_REGNUM:
+      val = saved_state.asregs.regstack[gdb_bank_number].regs[REGBANK_GBR];
+      break;
+    case SIM_SH_BANK_PR_REGNUM:
+      val = saved_state.asregs.regstack[gdb_bank_number].regs[REGBANK_PR];
+      break;
+    case SIM_SH_BANK_IVN_REGNUM:
+      val = saved_state.asregs.regstack[gdb_bank_number].regs[REGBANK_IVN];
+      break;
+    case SIM_SH_BANK_MACH_REGNUM:
+      val = saved_state.asregs.regstack[gdb_bank_number].regs[REGBANK_MACH];
       break;
     default:
       return 0;
@@ -2214,7 +2492,10 @@ int
 sim_trace (sd)
      SIM_DESC sd;
 {
-  return 0;
+  tracing = 1;
+  sim_resume (sd, 0, 0);
+  tracing = 0;
+  return 1;
 }
 
 void
@@ -2381,6 +2662,15 @@ sim_load (sd, prog, abfd, from_tty)
   prog_bfd = sim_load_file (sd, myname, callback, prog, abfd,
 			    sim_kind == SIM_OPEN_DEBUG,
 			    0, sim_write);
+
+  /* Set the bfd machine type.  */
+  if (prog_bfd)
+    saved_state.asregs.bfd_mach = bfd_get_mach (prog_bfd);
+  else if (abfd)
+    saved_state.asregs.bfd_mach = bfd_get_mach (abfd);
+  else
+    saved_state.asregs.bfd_mach = 0;
+
   if (prog_bfd == NULL)
     return SIM_RC_FAIL;
   if (abfd == NULL)
@@ -2402,6 +2692,10 @@ sim_create_inferior (sd, prog_bfd, argv, env)
   /* Set the PC.  */
   if (prog_bfd != NULL)
     saved_state.asregs.pc = bfd_get_start_address (prog_bfd);
+
+  /* Set the bfd machine type.  */
+  if (prog_bfd != NULL)
+    saved_state.asregs.bfd_mach = bfd_get_mach (prog_bfd);
 
   /* Record the program's arguments. */
   prog_argv = argv;

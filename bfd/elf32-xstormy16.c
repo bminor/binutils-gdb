@@ -379,7 +379,7 @@ xstormy16_elf_24_reloc (abfd, reloc_entry, symbol, data, input_section,
       return bfd_reloc_ok;
     }
 
-  if (reloc_entry->address > input_section->_cooked_size)
+  if (reloc_entry->address > bfd_get_section_limit (abfd, input_section))
     return bfd_reloc_outofrange;
 
   if (bfd_is_com_section (symbol->section))
@@ -508,8 +508,8 @@ xstormy16_elf_check_relocs (abfd, info, sec, relocs)
 
 	  if (*offset == (bfd_vma) -1)
 	    {
-	      *offset = splt->_raw_size;
-	      splt->_raw_size += 4;
+	      *offset = splt->size;
+	      splt->size += 4;
 	    }
 	  break;
 
@@ -566,7 +566,7 @@ xstormy16_relax_plt_check (h, xdata)
       if (address <= 0xffff)
 	{
 	  h->plt.offset = -1;
-	  data->splt->_cooked_size -= 4;
+	  data->splt->size -= 4;
 	  *data->again = TRUE;
 	}
     }
@@ -618,13 +618,8 @@ xstormy16_elf_relax_section (dynobj, splt, info, again)
     return TRUE;
 
   /* Quick check for an empty plt.  */
-  if (splt->_raw_size == 0)
+  if (splt->size == 0)
     return TRUE;
-
-  /* If this is the first time we have been called for this section,
-     initialize the cooked size.  */
-  if (splt->_cooked_size == 0)
-    splt->_cooked_size = splt->_raw_size;
 
   /* Map across all global symbols; see which ones happen to
      fall in the low 64k.  */
@@ -682,7 +677,7 @@ xstormy16_elf_relax_section (dynobj, splt, info, again)
 	  if (address <= 0xffff)
 	    {
 	      local_plt_offsets[idx] = -1;
-	      splt->_cooked_size -= 4;
+	      splt->size -= 4;
 	      *again = TRUE;
 	    }
 	}
@@ -702,7 +697,7 @@ xstormy16_elf_relax_section (dynobj, splt, info, again)
 
   /* If we changed anything, walk the symbols again to reallocate
      .plt entry addresses.  */
-  if (*again && splt->_cooked_size > 0)
+  if (*again && splt->size > 0)
     {
       bfd_vma entry = 0;
 
@@ -727,7 +722,6 @@ xstormy16_elf_relax_section (dynobj, splt, info, again)
 	}
     }
 
-  splt->_raw_size = splt->_cooked_size;
   return TRUE;
 }
 
@@ -749,7 +743,7 @@ xstormy16_elf_always_size_sections (output_bfd, info)
   splt = bfd_get_section_by_name (dynobj, ".plt");
   BFD_ASSERT (splt != NULL);
 
-  splt->contents = (bfd_byte *) bfd_zalloc (dynobj, splt->_raw_size);
+  splt->contents = (bfd_byte *) bfd_zalloc (dynobj, splt->size);
   if (splt->contents == NULL)
     return FALSE;
 
@@ -996,7 +990,7 @@ xstormy16_elf_finish_dynamic_sections (abfd, info)
       && (splt = bfd_get_section_by_name (dynobj, ".plt")) != NULL)
     {
       bfd_byte *contents = splt->contents;
-      unsigned int i, size = splt->_raw_size;
+      unsigned int i, size = splt->size;
       for (i = 0; i < size; i += 4)
 	{
 	  unsigned int x = bfd_get_32 (dynobj, contents + i);

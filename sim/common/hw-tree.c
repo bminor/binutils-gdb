@@ -638,7 +638,7 @@ parse_integer_property (struct hw *current,
 	{
 	  H2BE (words[i]);
 	}
-      /* perhaphs integer array property is better */
+      /* perhaps integer array property is better */
       hw_add_array_property (current, property_name, words,
 			     sizeof(words[0]) * nr_entries);
     }

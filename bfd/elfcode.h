@@ -1,6 +1,6 @@
 /* ELF executable support for BFD.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003 Free Software Foundation, Inc.
+   2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    Written by Fred Fish @ Cygnus Support, from information published
    in "UNIX System V Release 4, Programmers Guide: ANSI C and
@@ -105,6 +105,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define elf_canonicalize_symtab		NAME(bfd_elf,canonicalize_symtab)
 #define elf_canonicalize_dynamic_symtab \
   NAME(bfd_elf,canonicalize_dynamic_symtab)
+#define elf_get_synthetic_symtab \
+  NAME(bfd_elf,get_synthetic_symtab)
 #define elf_make_empty_symbol		NAME(bfd_elf,make_empty_symbol)
 #define elf_get_symbol_info		NAME(bfd_elf,get_symbol_info)
 #define elf_get_lineno			NAME(bfd_elf,get_lineno)
@@ -740,6 +742,10 @@ elf_object_p (bfd *abfd)
 	  if (shindex == SHN_LORESERVE - 1)
 	    shindex += SHN_HIRESERVE + 1 - SHN_LORESERVE;
 	}
+
+      /* Set up group pointers.  */
+      if (! _bfd_elf_setup_group_pointers (abfd))
+	goto got_wrong_format_error;
     }
 
   /* Let the backend double check the format and override global
@@ -1353,7 +1359,7 @@ elf_slurp_reloc_table (bfd *abfd,
 	 case because relocations against this section may use the
 	 dynamic symbol table, and in that case bfd_section_from_shdr
 	 in elf.c does not update the RELOC_COUNT.  */
-      if (asect->_raw_size == 0)
+      if (asect->size == 0)
 	return TRUE;
 
       rel_hdr = &d->this_hdr;

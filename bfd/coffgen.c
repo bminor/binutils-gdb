@@ -1,6 +1,6 @@
 /* Support for the generic parts of COFF, for BFD.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003
+   2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -131,7 +131,7 @@ make_a_section_from_file (abfd, hdr, target_index)
 
   return_section->vma = hdr->s_vaddr;
   return_section->lma = hdr->s_paddr;
-  return_section->_raw_size = hdr->s_size;
+  return_section->size = hdr->s_size;
   return_section->filepos = hdr->s_scnptr;
   return_section->rel_filepos = hdr->s_relptr;
   return_section->reloc_count = hdr->s_nreloc;
@@ -1344,7 +1344,7 @@ coff_write_symbols (abfd)
 	      || (debug_string_section != (asection *) NULL
 		  && (BFD_ALIGN (debug_string_size,
 				 1 << debug_string_section->alignment_power)
-		      == bfd_section_size (abfd, debug_string_section))));
+		      == debug_string_section->size)));
 
   return TRUE;
 }
@@ -1455,7 +1455,7 @@ coff_section_symbol (abfd, name)
   csym[0].u.syment.n_sclass = C_STAT;
   csym[0].u.syment.n_numaux = 1;
 /*  SF_SET_STATICS (sym);       @@ ??? */
-  csym[1].u.auxent.x_scn.x_scnlen = sec->_raw_size;
+  csym[1].u.auxent.x_scn.x_scnlen = sec->size;
   csym[1].u.auxent.x_scn.x_nreloc = sec->reloc_count;
   csym[1].u.auxent.x_scn.x_nlinno = sec->lineno_count;
 
@@ -1537,7 +1537,7 @@ build_debug_section (abfd)
       return NULL;
     }
 
-  sec_size = bfd_get_section_size_before_reloc (sect);
+  sec_size = sect->size;
   debug_section = (PTR) bfd_alloc (abfd, sec_size);
   if (debug_section == NULL)
     return NULL;
@@ -1663,8 +1663,7 @@ _bfd_coff_read_string_table (abfd)
   if (strsize < STRING_SIZE_SIZE)
     {
       (*_bfd_error_handler)
-	(_("%s: bad string table size %lu"), bfd_archive_filename (abfd),
-	 (unsigned long) strsize);
+	(_("%B: bad string table size %lu"), abfd, (unsigned long) strsize);
       bfd_set_error (bfd_error_bad_value);
       return NULL;
     }
@@ -2495,4 +2494,13 @@ bfd_coff_set_symbol_class (abfd, symbol, class)
     }
 
   return TRUE;
+}
+
+struct coff_comdat_info *
+bfd_coff_get_comdat_section (bfd *abfd, struct bfd_section *sec)
+{
+  if (bfd_get_flavour (abfd) == bfd_target_coff_flavour)
+    return coff_section_data (abfd, sec)->comdat;
+  else
+    return NULL;
 }

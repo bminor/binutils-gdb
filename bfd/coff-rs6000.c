@@ -1,5 +1,5 @@
 /* BFD back-end for IBM RS/6000 "XCOFF" files.
-   Copyright 1990-1999, 2000, 2001, 2002, 2003
+   Copyright 1990-1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
    FIXME: Can someone provide a transliteration of this name into ASCII?
    Using the following chars caused a compiler warning on HIUX (so I replaced
@@ -180,7 +180,7 @@ static bfd_boolean do_pad
 static bfd_boolean do_copy
   PARAMS ((bfd *, bfd *));
 static bfd_boolean do_shared_object_padding
-  PARAMS ((bfd *, bfd *, ufile_ptr *, int));
+  PARAMS ((bfd *, bfd *, file_ptr *, int));
 
 /* Relocation functions */
 static bfd_boolean xcoff_reloc_type_br
@@ -1742,7 +1742,7 @@ static bfd_boolean
 do_shared_object_padding (out_bfd, in_bfd, offset, ar_header_size)
      bfd *out_bfd;
      bfd *in_bfd;
-     ufile_ptr *offset;
+     file_ptr *offset;
      int ar_header_size;
 {
   if (bfd_check_format (in_bfd, bfd_object)
@@ -1779,7 +1779,7 @@ xcoff_write_armap_big (abfd, elength, map, orl_count, stridx)
   const bfd_arch_info_type *arch_info = NULL;
   bfd *current_bfd;
   size_t string_length;
-  ufile_ptr nextoff, prevoff;
+  file_ptr nextoff, prevoff;
 
   /* First, we look through the symbols and work out which are
      from 32-bit objects and which from 64-bit ones.  */
@@ -2076,7 +2076,7 @@ xcoff_write_archive_contents_old (abfd)
   file_ptr *offsets;
   bfd_boolean makemap;
   bfd_boolean hasobjects;
-  ufile_ptr prevoff, nextoff;
+  file_ptr prevoff, nextoff;
   bfd *sub;
   size_t i;
   struct xcoff_ar_hdr ahdr;
@@ -2306,7 +2306,7 @@ xcoff_write_archive_contents_big (abfd)
   file_ptr *offsets;
   bfd_boolean makemap;
   bfd_boolean hasobjects;
-  ufile_ptr prevoff, nextoff;
+  file_ptr prevoff, nextoff;
   bfd *current_bfd;
   size_t i;
   struct xcoff_ar_hdr_big *hdr, ahdr;
@@ -2948,8 +2948,7 @@ xcoff_reloc_type_br (input_bfd, input_section, output_bfd, rel, sym, howto,
      cror.  */
   if (NULL != h
       && bfd_link_hash_defined == h->root.type
-      && (rel->r_vaddr - input_section->vma + 8
-	  <= input_section->_cooked_size))
+      && rel->r_vaddr - input_section->vma + 8 <= input_section->size)
     {
       bfd_byte *pnext;
       unsigned long next;
@@ -3449,7 +3448,7 @@ xcoff_ppc_relocate_section (output_bfd, info, input_bfd,
       address = rel->r_vaddr - input_section->vma;
       location = contents + address;
 
-      if (address > input_section->_raw_size)
+      if (address > input_section->size)
 	abort ();
 
       /* Get the value we are going to relocate.  */
@@ -3612,8 +3611,8 @@ xcoff_create_csect_from_smclas (abfd, aux, symbol_name)
   else
     {
       (*_bfd_error_handler)
-	(_("%s: symbol `%s' has unrecognized smclas %d"),
-	 bfd_archive_filename (abfd), symbol_name, aux->x_csect.x_smclas);
+	(_("%B: symbol `%s' has unrecognized smclas %d"),
+	 abfd, symbol_name, aux->x_csect.x_smclas);
       bfd_set_error (bfd_error_bad_value);
     }
 
@@ -4142,6 +4141,7 @@ const bfd_target rs6000coff_vec =
     ((bfd_boolean (*) (bfd *, bfd *)) bfd_true),
     ((bfd_boolean (*) (bfd *, asection *, bfd *, asection *)) bfd_true),
     ((bfd_boolean (*) (bfd *, asymbol *, bfd *, asymbol *)) bfd_true),
+    ((bfd_boolean (*) (bfd *, bfd *)) bfd_true),
     ((bfd_boolean (*) (bfd *, flagword)) bfd_true),
     ((bfd_boolean (*) (bfd *, void * )) bfd_true),
 
@@ -4196,11 +4196,14 @@ const bfd_target rs6000coff_vec =
     _bfd_generic_link_split_section,
     bfd_generic_gc_sections,
     bfd_generic_merge_sections,
+    bfd_generic_is_group_section,
     bfd_generic_discard_group,
+    _bfd_generic_section_already_linked,
 
     /* Dynamic */
     _bfd_xcoff_get_dynamic_symtab_upper_bound,
     _bfd_xcoff_canonicalize_dynamic_symtab,
+    _bfd_nodynamic_get_synthetic_symtab,
     _bfd_xcoff_get_dynamic_reloc_upper_bound,
     _bfd_xcoff_canonicalize_dynamic_reloc,
 
@@ -4384,6 +4387,7 @@ const bfd_target pmac_xcoff_vec =
     ((bfd_boolean (*) (bfd *, bfd *)) bfd_true),
     ((bfd_boolean (*) (bfd *, asection *, bfd *, asection *)) bfd_true),
     ((bfd_boolean (*) (bfd *, asymbol *, bfd *, asymbol *)) bfd_true),
+    ((bfd_boolean (*) (bfd *, bfd *)) bfd_true),
     ((bfd_boolean (*) (bfd *, flagword)) bfd_true),
     ((bfd_boolean (*) (bfd *, void * )) bfd_true),
 
@@ -4438,11 +4442,14 @@ const bfd_target pmac_xcoff_vec =
     _bfd_generic_link_split_section,
     bfd_generic_gc_sections,
     bfd_generic_merge_sections,
+    bfd_generic_is_group_section,
     bfd_generic_discard_group,
+    _bfd_generic_section_already_linked,
 
     /* Dynamic */
     _bfd_xcoff_get_dynamic_symtab_upper_bound,
     _bfd_xcoff_canonicalize_dynamic_symtab,
+    _bfd_nodynamic_get_synthetic_symtab,
     _bfd_xcoff_get_dynamic_reloc_upper_bound,
     _bfd_xcoff_canonicalize_dynamic_reloc,
 

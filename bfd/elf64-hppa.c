@@ -1503,7 +1503,7 @@ allocate_dynrel_entries (dyn_h, data)
       if (!shared && rent->type == R_PARISC_FPTR64 && dyn_h->want_opd)
 	continue;
 
-      hppa_info->other_rel_sec->_raw_size += sizeof (Elf64_External_Rela);
+      hppa_info->other_rel_sec->size += sizeof (Elf64_External_Rela);
 
       /* Make sure this symbol gets into the dynamic symbol table if it is
 	 not already recorded.  ?!? This should not be in the loop since
@@ -1518,13 +1518,13 @@ allocate_dynrel_entries (dyn_h, data)
   /* Take care of the GOT and PLT relocations.  */
 
   if ((dynamic_symbol || shared) && dyn_h->want_dlt)
-    hppa_info->dlt_rel_sec->_raw_size += sizeof (Elf64_External_Rela);
+    hppa_info->dlt_rel_sec->size += sizeof (Elf64_External_Rela);
 
   /* If we are building a shared library, then every symbol that has an
      opd entry will need an EPLT relocation to relocate the symbol's address
      and __gp value based on the runtime load address.  */
   if (shared && dyn_h->want_opd)
-    hppa_info->opd_rel_sec->_raw_size += sizeof (Elf64_External_Rela);
+    hppa_info->opd_rel_sec->size += sizeof (Elf64_External_Rela);
 
   if (dyn_h->want_plt && dynamic_symbol)
     {
@@ -1538,7 +1538,7 @@ allocate_dynrel_entries (dyn_h, data)
       else if (shared)
 	t = 2 * sizeof (Elf64_External_Rela);
 
-      hppa_info->plt_rel_sec->_raw_size += t;
+      hppa_info->plt_rel_sec->size += t;
     }
 
   return TRUE;
@@ -1648,7 +1648,7 @@ elf64_hppa_size_dynamic_sections (output_bfd, info)
 	{
 	  s = bfd_get_section_by_name (dynobj, ".interp");
 	  BFD_ASSERT (s != NULL);
-	  s->_raw_size = sizeof ELF_DYNAMIC_INTERPRETER;
+	  s->size = sizeof ELF_DYNAMIC_INTERPRETER;
 	  s->contents = (unsigned char *) ELF_DYNAMIC_INTERPRETER;
 	}
     }
@@ -1661,7 +1661,7 @@ elf64_hppa_size_dynamic_sections (output_bfd, info)
 	 below.  */
       s = bfd_get_section_by_name (dynobj, ".rela.dlt");
       if (s != NULL)
-	s->_raw_size = 0;
+	s->size = 0;
     }
 
   /* Allocate the GOT entries.  */
@@ -1672,17 +1672,17 @@ elf64_hppa_size_dynamic_sections (output_bfd, info)
       data.ofs = 0x0;
       elf64_hppa_dyn_hash_traverse (&hppa_info->dyn_hash_table,
 				    allocate_global_data_dlt, &data);
-      hppa_info->dlt_sec->_raw_size = data.ofs;
+      hppa_info->dlt_sec->size = data.ofs;
 
       data.ofs = 0x0;
       elf64_hppa_dyn_hash_traverse (&hppa_info->dyn_hash_table,
 				    allocate_global_data_plt, &data);
-      hppa_info->plt_sec->_raw_size = data.ofs;
+      hppa_info->plt_sec->size = data.ofs;
 
       data.ofs = 0x0;
       elf64_hppa_dyn_hash_traverse (&hppa_info->dyn_hash_table,
 				    allocate_global_data_stub, &data);
-      hppa_info->stub_sec->_raw_size = data.ofs;
+      hppa_info->stub_sec->size = data.ofs;
     }
 
   /* Allocate space for entries in the .opd section.  */
@@ -1691,7 +1691,7 @@ elf64_hppa_size_dynamic_sections (output_bfd, info)
       data.ofs = 0;
       elf64_hppa_dyn_hash_traverse (&hppa_info->dyn_hash_table,
 				    allocate_global_data_opd, &data);
-      hppa_info->opd_sec->_raw_size = data.ofs;
+      hppa_info->opd_sec->size = data.ofs;
     }
 
   /* Now allocate space for dynamic relocations, if necessary.  */
@@ -1720,7 +1720,7 @@ elf64_hppa_size_dynamic_sections (output_bfd, info)
       if (strcmp (name, ".plt") == 0)
 	{
 	  /* Strip this section if we don't need it; see the comment below.  */
-	  if (s->_raw_size == 0)
+	  if (s->size == 0)
 	    {
 	      strip = TRUE;
 	    }
@@ -1733,7 +1733,7 @@ elf64_hppa_size_dynamic_sections (output_bfd, info)
       else if (strcmp (name, ".dlt") == 0)
 	{
 	  /* Strip this section if we don't need it; see the comment below.  */
-	  if (s->_raw_size == 0)
+	  if (s->size == 0)
 	    {
 	      strip = TRUE;
 	    }
@@ -1741,7 +1741,7 @@ elf64_hppa_size_dynamic_sections (output_bfd, info)
       else if (strcmp (name, ".opd") == 0)
 	{
 	  /* Strip this section if we don't need it; see the comment below.  */
-	  if (s->_raw_size == 0)
+	  if (s->size == 0)
 	    {
 	      strip = TRUE;
 	    }
@@ -1755,7 +1755,7 @@ elf64_hppa_size_dynamic_sections (output_bfd, info)
 	     sections.  The linker does that before adjust_dynamic_symbol
 	     is called, and it is that function which decides whether
 	     anything needs to go into these sections.  */
-	  if (s->_raw_size == 0)
+	  if (s->size == 0)
 	    {
 	      /* If we don't need this section, strip it from the
 		 output file.  This is mostly to handle .rela.bss and
@@ -1821,8 +1821,8 @@ elf64_hppa_size_dynamic_sections (output_bfd, info)
 	 garbage.  */
       if (s->contents == NULL)
 	{
-	  s->contents = (bfd_byte *) bfd_zalloc (dynobj, s->_raw_size);
-	  if (s->contents == NULL && s->_raw_size != 0)
+	  s->contents = (bfd_byte *) bfd_zalloc (dynobj, s->size);
+	  if (s->contents == NULL && s->size != 0)
 	    return FALSE;
 	}
     }
@@ -2498,7 +2498,7 @@ elf64_hppa_finish_dynamic_sections (output_bfd, info)
       BFD_ASSERT (sdyn != NULL);
 
       dyncon = (Elf64_External_Dyn *) sdyn->contents;
-      dynconend = (Elf64_External_Dyn *) (sdyn->contents + sdyn->_raw_size);
+      dynconend = (Elf64_External_Dyn *) (sdyn->contents + sdyn->size);
       for (; dyncon < dynconend; dyncon++)
 	{
 	  Elf_Internal_Dyn dyn;
@@ -2537,15 +2537,15 @@ elf64_hppa_finish_dynamic_sections (output_bfd, info)
 
 	    case DT_PLTRELSZ:
 	      s = hppa_info->plt_rel_sec;
-	      dyn.d_un.d_val = s->_raw_size;
+	      dyn.d_un.d_val = s->size;
 	      bfd_elf64_swap_dyn_out (output_bfd, &dyn, dyncon);
 	      break;
 
 	    case DT_RELA:
 	      s = hppa_info->other_rel_sec;
-	      if (! s || ! s->_raw_size)
+	      if (! s || ! s->size)
 		s = hppa_info->dlt_rel_sec;
-	      if (! s || ! s->_raw_size)
+	      if (! s || ! s->size)
 		s = hppa_info->opd_rel_sec;
 	      dyn.d_un.d_ptr = s->output_section->vma + s->output_offset;
 	      bfd_elf64_swap_dyn_out (output_bfd, &dyn, dyncon);
@@ -2553,16 +2553,16 @@ elf64_hppa_finish_dynamic_sections (output_bfd, info)
 
 	    case DT_RELASZ:
 	      s = hppa_info->other_rel_sec;
-	      dyn.d_un.d_val = s->_raw_size;
+	      dyn.d_un.d_val = s->size;
 	      s = hppa_info->dlt_rel_sec;
-	      dyn.d_un.d_val += s->_raw_size;
+	      dyn.d_un.d_val += s->size;
 	      s = hppa_info->opd_rel_sec;
-	      dyn.d_un.d_val += s->_raw_size;
+	      dyn.d_un.d_val += s->size;
 	      /* There is some question about whether or not the size of
 		 the PLT relocs should be included here.  HP's tools do
 		 it, so we'll emulate them.  */
 	      s = hppa_info->plt_rel_sec;
-	      dyn.d_un.d_val += s->_raw_size;
+	      dyn.d_un.d_val += s->size;
 	      bfd_elf64_swap_dyn_out (output_bfd, &dyn, dyncon);
 	      break;
 

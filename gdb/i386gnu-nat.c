@@ -1,5 +1,6 @@
 /* Low level interface to i386 running the GNU Hurd.
-   Copyright 1992, 1995, 1996, 1998, 2000, 2001
+
+   Copyright 1992, 1995, 1996, 1998, 2000, 2001, 2004
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -83,7 +84,7 @@ fetch_fpregs (struct proc *thread)
       int i;
 
       for (i = FP0_REGNUM; i <= FOP_REGNUM; i++)
-	supply_register (i, NULL);
+	regcache_raw_supply (current_regcache, i, NULL);
 
       return;
     }
@@ -100,7 +101,7 @@ supply_gregset (gdb_gregset_t *gregs)
 {
   int i;
   for (i = 0; i < I386_NUM_GREGS; i++)
-    supply_register (i, REG_ADDR (gregs, i));
+    regcache_raw_supply (current_regcache, i, REG_ADDR (gregs, i));
 }
 
 void
@@ -144,14 +145,15 @@ gnu_fetch_registers (int regno)
 	  proc_debug (thread, "fetching all register");
 
 	  for (i = 0; i < I386_NUM_GREGS; i++)
-	    supply_register (i, REG_ADDR (state, i));
+	    regcache_raw_supply (current_regcache, i, REG_ADDR (state, i));
 	  thread->fetched_regs = ~0;
 	}
       else
 	{
 	  proc_debug (thread, "fetching register %s", REGISTER_NAME (regno));
 
-	  supply_register (regno, REG_ADDR (state, regno));
+	  regcache_raw_supply (current_regcache, regno,
+			       REG_ADDR (state, regno));
 	  thread->fetched_regs |= (1 << regno);
 	}
     }
@@ -201,6 +203,7 @@ store_fpregs (struct proc *thread, int regno)
 void
 gnu_store_registers (int regno)
 {
+  struct regcache *regcache = current_regcache;
   struct proc *thread;
 
   /* Make sure we know about new threads.  */
@@ -242,22 +245,19 @@ gnu_store_registers (int regno)
 	    if ((thread->fetched_regs & (1 << check_regno))
 		&& memcpy (REG_ADDR (&old_state, check_regno),
 			   REG_ADDR (state, check_regno),
-			   DEPRECATED_REGISTER_RAW_SIZE (check_regno)))
+			   register_size (current_gdbarch, check_regno)))
 	      /* Register CHECK_REGNO has changed!  Ack!  */
 	      {
 		warning ("Register %s changed after the thread was aborted",
 			 REGISTER_NAME (check_regno));
 		if (regno >= 0 && regno != check_regno)
 		  /* Update GDB's copy of the register.  */
-		  supply_register (check_regno, REG_ADDR (state, check_regno));
+		  regcache_raw_supply (regcache, check_regno,
+				       REG_ADDR (state, check_regno));
 		else
 		  warning ("... also writing this register!  Suspicious...");
 	      }
 	}
-
-#define fill(state, regno)                                               \
-  memcpy (REG_ADDR(state, regno), &deprecated_registers[DEPRECATED_REGISTER_BYTE (regno)],     \
-          DEPRECATED_REGISTER_RAW_SIZE (regno))
 
       if (regno == -1)
 	{
@@ -266,23 +266,21 @@ gnu_store_registers (int regno)
 	  proc_debug (thread, "storing all registers");
 
 	  for (i = 0; i < I386_NUM_GREGS; i++)
-	    if (deprecated_register_valid[i])
-	      fill (state, i);
+	    if (regcache_valid_p (regcache, i))
+	      regcache_raw_collect (regcache, i, REG_ADDR (state, i));
 	}
       else
 	{
 	  proc_debug (thread, "storing register %s", REGISTER_NAME (regno));
 
-	  gdb_assert (deprecated_register_valid[regno]);
-	  fill (state, regno);
+	  gdb_assert (regcache_valid_p (regcache, regno));
+	  regcache_raw_collect (regcache, regno, REG_ADDR (state, regno));
 	}
 
       /* Restore the T bit.  */
       ((struct i386_thread_state *)state)->efl &= ~0x100;
       ((struct i386_thread_state *)state)->efl |= trace;
     }
-
-#undef fill
 
   if (regno >= I386_NUM_GREGS || regno == -1)
     {

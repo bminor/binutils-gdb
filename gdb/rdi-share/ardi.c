@@ -1353,7 +1353,7 @@ void angel_RDI_stop_request(void)
 static int angel_RDI_ExecuteOrStep(PointHandle *handle, word type, 
                                    unsigned ninstr)
 {
-  extern int (*ui_loop_hook) (int);
+  extern int (*deprecated_ui_loop_hook) (int);
   int err;
   adp_stopped_struct stopped_info;
   void* stateptr = (void *)&stopped_info;
@@ -1414,8 +1414,8 @@ static int angel_RDI_ExecuteOrStep(PointHandle *handle, word type,
   signal(SIGINT, ardi_sigint_handler);
   while( executing )
   {
-    if (ui_loop_hook)
-      ui_loop_hook(0);
+    if (deprecated_ui_loop_hook)
+      deprecated_ui_loop_hook(0);
     
     if (interrupt_request || stop_request)
       {

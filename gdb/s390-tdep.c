@@ -922,12 +922,12 @@ s390_readinstruction (bfd_byte instr[], CORE_ADDR at)
   static int s390_instrlen[] = { 2, 4, 4, 6 };
   int instrlen;
 
-  if (read_memory_nobpt (at, &instr[0], 2))
+  if (deprecated_read_memory_nobpt (at, &instr[0], 2))
     return -1;
   instrlen = s390_instrlen[instr[0] >> 6];
   if (instrlen > 2)
     {
-      if (read_memory_nobpt (at + 2, &instr[2], instrlen - 2))
+      if (deprecated_read_memory_nobpt (at + 2, &instr[2], instrlen - 2))
         return -1;
     }
   return instrlen;
@@ -1724,19 +1724,19 @@ s390_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
   int d2;
 
   if (word_size == 4
-      && !read_memory_nobpt (pc - 4, insn, 4)
+      && !deprecated_read_memory_nobpt (pc - 4, insn, 4)
       && is_rs (insn, op_lm, &r1, &r3, &d2, &b2)
       && r3 == S390_SP_REGNUM - S390_R0_REGNUM)
     return 1;
 
   if (word_size == 4
-      && !read_memory_nobpt (pc - 6, insn, 6)
+      && !deprecated_read_memory_nobpt (pc - 6, insn, 6)
       && is_rsy (insn, op1_lmy, op2_lmy, &r1, &r3, &d2, &b2)
       && r3 == S390_SP_REGNUM - S390_R0_REGNUM)
     return 1;
 
   if (word_size == 8
-      && !read_memory_nobpt (pc - 6, insn, 6)
+      && !deprecated_read_memory_nobpt (pc - 6, insn, 6)
       && is_rsy (insn, op1_lmg, op2_lmg, &r1, &r3, &d2, &b2)
       && r3 == S390_SP_REGNUM - S390_R0_REGNUM)
     return 1;
@@ -1803,10 +1803,10 @@ s390_prologue_frame_unwind_cache (struct frame_info *next_frame,
       /* If the next frame is a NORMAL_FRAME, this frame *cannot* have frame 
 	 size zero.  This is only possible if the next frame is a sentinel 
 	 frame, a dummy frame, or a signal trampoline frame.  */
-      if (get_frame_type (next_frame) == NORMAL_FRAME
-	  /* For some reason, sentinel frames are NORMAL_FRAMEs
-	     -- but they have negative frame level.  */
-	  && frame_relative_level (next_frame) >= 0)
+      /* FIXME: cagney/2004-05-01: This sanity check shouldn't be
+	 needed, instead the code should simpliy rely on its
+	 analysis.  */
+      if (get_frame_type (next_frame) == NORMAL_FRAME)
 	return 0;
 
       /* If we really have a frameless function, %r14 must be valid
@@ -1850,9 +1850,9 @@ s390_prologue_frame_unwind_cache (struct frame_info *next_frame,
      treat it as frameless if we're currently within the function epilog 
      code at a point where the frame pointer has already been restored.  
      This can only happen in an innermost frame.  */
-  if (size > 0
-      && (get_frame_type (next_frame) != NORMAL_FRAME
-	  || frame_relative_level (next_frame) < 0))
+  /* FIXME: cagney/2004-05-01: This sanity check shouldn't be needed,
+     instead the code should simpliy rely on its analysis.  */
+  if (size > 0 && get_frame_type (next_frame) != NORMAL_FRAME)
     {
       /* See the comment in s390_in_function_epilogue_p on why this is
 	 not completely reliable ...  */
@@ -2020,8 +2020,8 @@ s390_frame_prev_register (struct frame_info *next_frame,
 {
   struct s390_unwind_cache *info
     = s390_frame_unwind_cache (next_frame, this_prologue_cache);
-  trad_frame_prev_register (next_frame, info->saved_regs, regnum,
-                            optimizedp, lvalp, addrp, realnump, bufferp);
+  trad_frame_get_prev_register (next_frame, info->saved_regs, regnum,
+				optimizedp, lvalp, addrp, realnump, bufferp);
 }
 
 static const struct frame_unwind s390_frame_unwind = {
@@ -2092,8 +2092,8 @@ s390_stub_frame_prev_register (struct frame_info *next_frame,
 {
   struct s390_stub_unwind_cache *info
     = s390_stub_frame_unwind_cache (next_frame, this_prologue_cache);
-  trad_frame_prev_register (next_frame, info->saved_regs, regnum,
-                            optimizedp, lvalp, addrp, realnump, bufferp);
+  trad_frame_get_prev_register (next_frame, info->saved_regs, regnum,
+				optimizedp, lvalp, addrp, realnump, bufferp);
 }
 
 static const struct frame_unwind s390_stub_frame_unwind = {
@@ -2153,7 +2153,7 @@ s390_sigtramp_frame_unwind_cache (struct frame_info *next_frame,
 	ucontext (contains sigregs at offset 5 words)  */
   if (next_ra == next_cfa)
     {
-      sigreg_ptr = next_cfa + 8 + 128 + 5*word_size;
+      sigreg_ptr = next_cfa + 8 + 128 + align_up (5*word_size, 8);
     }
 
   /* Old-style RT frame and all non-RT frames:
@@ -2235,8 +2235,8 @@ s390_sigtramp_frame_prev_register (struct frame_info *next_frame,
 {
   struct s390_sigtramp_unwind_cache *info
     = s390_sigtramp_frame_unwind_cache (next_frame, this_prologue_cache);
-  trad_frame_prev_register (next_frame, info->saved_regs, regnum,
-                            optimizedp, lvalp, addrp, realnump, bufferp);
+  trad_frame_get_prev_register (next_frame, info->saved_regs, regnum,
+				optimizedp, lvalp, addrp, realnump, bufferp);
 }
 
 static const struct frame_unwind s390_sigtramp_frame_unwind = {
@@ -2251,7 +2251,7 @@ s390_sigtramp_frame_sniffer (struct frame_info *next_frame)
   CORE_ADDR pc = frame_pc_unwind (next_frame);
   bfd_byte sigreturn[2];
 
-  if (read_memory_nobpt (pc, sigreturn, 2))
+  if (deprecated_read_memory_nobpt (pc, sigreturn, 2))
     return NULL;
 
   if (sigreturn[0] != 0x0a /* svc */)
@@ -2565,7 +2565,7 @@ alignment_of (struct type *type)
    Our caller has taken care of any type promotions needed to satisfy
    prototypes or the old K&R argument-passing rules.  */
 static CORE_ADDR
-s390_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
+s390_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		      struct regcache *regcache, CORE_ADDR bp_addr,
 		      int nargs, struct value **args, CORE_ADDR sp,
 		      int struct_return, CORE_ADDR struct_addr)

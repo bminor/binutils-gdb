@@ -1,6 +1,5 @@
 # Host: PowerPC, running Linux
 
-XM_FILE= xm-linux.h
 XM_CLIBS=
 
 NAT_FILE= nm-linux.h

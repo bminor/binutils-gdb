@@ -1,5 +1,6 @@
 /* interp.c -- Simulator for Motorola 68HC11/68HC12
-   Copyright (C) 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004
+   Free Software Foundation, Inc.
    Written by Stephane Carrez (stcarrez@nerim.fr)
 
 This file is part of GDB, the GNU debugger.
@@ -386,7 +387,7 @@ sim_prepare_for_program (SIM_DESC sd, bfd* abfd)
             {
               bfd_size_type size;
 
-              size = bfd_get_section_size_before_reloc (s);
+              size = bfd_get_section_size (s);
               if (size > 0)
                 {
                   bfd_vma lma;

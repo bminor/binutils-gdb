@@ -963,7 +963,8 @@ breakup_args (char *scratch, char **argv)
 }
 
 static void
-procfs_create_inferior (char *exec_file, char *allargs, char **env)
+procfs_create_inferior (char *exec_file, char *allargs, char **env,
+			int from_tty)
 {
   struct inheritance inherit;
   pid_t pid;
@@ -1188,7 +1189,7 @@ procfs_store_registers (int regno)
       if (len < 1)
 	return;
 
-      regcache_collect (regno, (char *) &reg + off);
+      regcache_raw_collect (current_regcache, regno, (char *) &reg + off);
 
       err = devctl (ctl_fd, dev_set, &reg, regsize, 0);
       if (err != EOK)

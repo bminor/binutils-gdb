@@ -48,44 +48,11 @@ struct frame_info;
 #define SR5_REGNUM 48
 
 
-/* For a number of horrible reasons we may have to adjust the location
-   of variables on the stack.  Ugh.  jimb: why? */
-#define HPREAD_ADJUST_STACK_ADDRESS(ADDR) hpread_adjust_stack_address(ADDR)
-
-extern int hpread_adjust_stack_address (CORE_ADDR);
-
-
 /* jimb: omitted dynamic linking stuff here */
-
-/* The PA64 ABI reserves 64 bytes of stack space for outgoing register
-   parameters.  */
-#undef REG_PARM_STACK_SPACE
-#define REG_PARM_STACK_SPACE 64
-
-/* Use the 64-bit calling conventions designed for the PA2.0 in wide mode.  */
-#define PA20W_CALLING_CONVENTIONS
 
 #undef FUNC_LDIL_OFFSET
 #undef FUNC_LDO_OFFSET
 #undef SR4EXPORT_LDIL_OFFSET
 #undef SR4EXPORT_LDO_OFFSET
-
-#undef FRAME_SAVED_PC_IN_SIGTRAMP
-extern void hppa64_hpux_frame_saved_pc_in_sigtramp (struct frame_info *fi,
-                                                    CORE_ADDR *tmp);
-#define FRAME_SAVED_PC_IN_SIGTRAMP(FRAME, TMP) \
-  hppa64_hpux_frame_saved_pc_in_sigtramp (FRAME, TMP)
-
-#undef FRAME_BASE_BEFORE_SIGTRAMP
-extern void hppa64_hpux_frame_base_before_sigtramp (struct frame_info *fi,
-                                                    CORE_ADDR *tmp);
-#define FRAME_BASE_BEFORE_SIGTRAMP(FRAME, TMP) \
-  hppa64_hpux_frame_base_before_sigtramp (FRAME, TMP)
-
-#undef FRAME_FIND_SAVED_REGS_IN_SIGTRAMP
-extern void hppa64_hpux_frame_find_saved_regs_in_sigtramp
-              (struct frame_info *fi, CORE_ADDR *fsr);
-#define FRAME_FIND_SAVED_REGS_IN_SIGTRAMP(FRAME, FSR) \
-  hppa64_hpux_frame_find_saved_regs_in_sigtramp (FRAME, FSR)
 
 /* jimb: omitted purify call support */

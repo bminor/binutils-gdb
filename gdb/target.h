@@ -353,7 +353,7 @@ struct target_ops
     void (*to_kill) (void);
     void (*to_load) (char *, int);
     int (*to_lookup_symbol) (char *, CORE_ADDR *);
-    void (*to_create_inferior) (char *, char *, char **);
+    void (*to_create_inferior) (char *, char *, char **, int);
     void (*to_post_startup_inferior) (ptid_t);
     void (*to_acknowledge_created_inferior) (int);
     int (*to_insert_fork_catchpoint) (int);
@@ -712,8 +712,8 @@ extern void target_load (char *arg, int from_tty);
    ENV is the environment vector to pass.  Errors reported with error().
    On VxWorks and various standalone systems, we ignore exec_file.  */
 
-#define	target_create_inferior(exec_file, args, env)	\
-     (*current_target.to_create_inferior) (exec_file, args, env)
+#define	target_create_inferior(exec_file, args, env, FROM_TTY)	\
+     (*current_target.to_create_inferior) (exec_file, args, env, (FROM_TTY))
 
 
 /* Some targets (such as ttrace-based HPUX) don't allow us to request
@@ -949,19 +949,19 @@ extern char *normal_pid_to_str (ptid_t ptid);
  * The old way of doing this is to define a macro 'target_new_objfile'
  * that points to the function that you want to be called on every
  * objfile/shlib load.
- *
- * The new way is to grab the function pointer, 'target_new_objfile_hook',
- * and point it to the function that you want to be called on every
- * objfile/shlib load.
- *
- * If multiple clients are willing to be cooperative, they can each
- * save a pointer to the previous value of target_new_objfile_hook
- * before modifying it, and arrange for their function to call the
- * previous function in the chain.  In that way, multiple clients
- * can receive this notification (something like with signal handlers).
- */
 
-extern void (*target_new_objfile_hook) (struct objfile *);
+   The new way is to grab the function pointer,
+   'deprecated_target_new_objfile_hook', and point it to the function
+   that you want to be called on every objfile/shlib load.
+
+   If multiple clients are willing to be cooperative, they can each
+   save a pointer to the previous value of
+   deprecated_target_new_objfile_hook before modifying it, and arrange
+   for their function to call the previous function in the chain.  In
+   that way, multiple clients can receive this notification (something
+   like with signal handlers).  */
+
+extern void (*deprecated_target_new_objfile_hook) (struct objfile *);
 
 #ifndef target_pid_or_tid_to_str
 #define target_pid_or_tid_to_str(ID) \
@@ -1088,15 +1088,6 @@ extern void (*target_new_objfile_hook) (struct objfile *);
     (*current_target.to_stopped_data_address) ()
 #endif
 
-/* Sometimes gdb may pick up what appears to be a valid target address
-   from a minimal symbol, but the value really means, essentially,
-   "This is an index into a table which is populated when the inferior
-   is run.  Therefore, do not attempt to use this as a PC."  */
-
-#if !defined(PC_REQUIRES_RUN_BEFORE_USE)
-#define PC_REQUIRES_RUN_BEFORE_USE(pc) (0)
-#endif
-
 /* This will only be defined by a target that supports catching vfork events,
    such as HP-UX.
 
@@ -1182,7 +1173,7 @@ extern void noprocess (void);
 
 extern void find_default_attach (char *, int);
 
-extern void find_default_create_inferior (char *, char *, char **);
+extern void find_default_create_inferior (char *, char *, char **, int);
 
 extern struct target_ops *find_run_target (void);
 

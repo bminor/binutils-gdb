@@ -29,6 +29,7 @@ libdir = @libdir@
 tooldir = $(libdir)/$(target_alias)
 
 datadir = @datadir@
+localedir = @localedir@
 mandir = @mandir@
 man1dir = $(mandir)/man1
 man2dir = $(mandir)/man2
@@ -64,6 +65,13 @@ RANLIB = @RANLIB@
 DLLTOOL = @DLLTOOL@
 WINDRES = @WINDRES@
 MIG = @MIG@
+
+XGETTEXT = @XGETTEXT@
+GMSGFMT = @GMSGFMT@
+MSGMERGE = msgmerge
+
+PACKAGE = @PACKAGE@
+CATALOGS = @CATALOGS@
 
 # If you are compiling with GCC, make sure that either 1) You have the
 # fixed include files where GCC can reach them, or 2) You use the
@@ -306,7 +314,6 @@ CONFIG_LDFLAGS = @CONFIG_LDFLAGS@
 ENABLE_CFLAGS= @ENABLE_CFLAGS@
 CONFIG_ALL= @CONFIG_ALL@
 CONFIG_CLEAN= @CONFIG_CLEAN@
-CONFIG_CLEAN= @CONFIG_CLEAN@
 CONFIG_INSTALL = @CONFIG_INSTALL@
 CONFIG_UNINSTALL = @CONFIG_UNINSTALL@
 
@@ -318,7 +325,7 @@ CONFIG_UNINSTALL = @CONFIG_UNINSTALL@
 # your system doesn't have fcntl.h in /usr/include (which is where it
 # should be according to Posix).
 DEFS = @DEFS@
-GDB_CFLAGS = -I. -I$(srcdir) -I$(srcdir)/config -DLOCALEDIR="\"$(prefix)/share/locale\"" $(DEFS)
+GDB_CFLAGS = -I. -I$(srcdir) -I$(srcdir)/config -DLOCALEDIR="\"$(localedir)\"" $(DEFS)
 
 # M{H,T}_CFLAGS, if defined, have host- and target-dependent CFLAGS
 # from the config directory.
@@ -538,7 +545,8 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	scm-exp.c scm-lang.c scm-valprint.c \
 	sentinel-frame.c \
 	serial.c ser-unix.c source.c \
-	stabsread.c stack.c std-regs.c symfile.c symmisc.c symtab.c \
+	stabsread.c stack.c std-regs.c symfile.c symfile-mem.c symmisc.c \
+	symtab.c \
 	target.c thread.c top.c tracepoint.c \
 	trad-frame.c \
 	tramp-frame.c \
@@ -560,7 +568,6 @@ aout_stabs_gnu_h =	$(INCLUDE_DIR)/aout/stabs_gnu.h
 getopt_h =	$(INCLUDE_DIR)/getopt.h
 floatformat_h =	$(INCLUDE_DIR)/floatformat.h
 bfd_h =		$(BFD_DIR)/bfd.h
-callback_h =	$(INCLUDE_DIR)/gdb/callback.h
 coff_sym_h =	$(INCLUDE_DIR)/coff/sym.h
 coff_symconst_h =	$(INCLUDE_DIR)/coff/symconst.h
 coff_ecoff_h =	$(INCLUDE_DIR)/coff/ecoff.h
@@ -582,12 +589,14 @@ readline_tilde_h =	$(READLINE_SRC)/tilde.h
 readline_history_h =	$(READLINE_SRC)/history.h
 frv_desc_h =	$(OPCODES_SRC)/frv-desc.h
 sh_opc_h = 	$(OPCODES_SRC)/sh-opc.h
+gdb_callback_h = $(INCLUDE_DIR)/gdb/callback.h
 gdb_sim_arm_h =	$(INCLUDE_DIR)/gdb/sim-arm.h
 gdb_sim_d10v_h = $(INCLUDE_DIR)/gdb/sim-d10v.h
 gdb_sim_frv_h = $(INCLUDE_DIR)/gdb/sim-frv.h
+gdb_sim_ppc_h =	$(INCLUDE_DIR)/gdb/sim-ppc.h
 gdb_sim_sh_h =	$(INCLUDE_DIR)/gdb/sim-sh.h
 splay_tree_h =  $(INCLUDE_DIR)/splay-tree.h
-hashtab_h =    $(INCLUDE_DIR)/hashtab.h
+hashtab_h =	$(INCLUDE_DIR)/hashtab.h
 
 #
 # $BUILD/ headers
@@ -599,6 +608,8 @@ exc_request_S_h = exc_request_S.h
 msg_reply_S_h = msg_reply_S.h
 msg_U_h = msg_U.h
 notify_S_h = notify_S.h
+observer_h = observer.h
+observer_inc = observer.inc
 process_reply_S_h = process_reply_S.h
 
 #
@@ -613,7 +624,7 @@ nm_h =		@nm_h@
 # gdb/ headers
 #
 
-ada_lang_h = ada-lang.h $(value_h) $(gdbtypes_h)
+ada_lang_h = ada-lang.h $(value_h) $(gdbtypes_h) $(breakpoint_h)
 alphabsd_tdep_h = alphabsd-tdep.h
 alpha_tdep_h = alpha-tdep.h
 amd64_nat_h = amd64-nat.h
@@ -628,6 +639,7 @@ bcache_h = bcache.h
 bfd_target_h = bfd-target.h
 block_h = block.h
 breakpoint_h = breakpoint.h $(frame_h) $(value_h) $(gdb_events_h)
+bsd_kvm_h = bsd-kvm.h
 buildsym_h = buildsym.h
 call_cmds_h = call-cmds.h
 charset_h = charset.h
@@ -672,6 +684,7 @@ gdb_h = gdb.h
 gdb_locale_h = gdb_locale.h
 gdb_obstack_h = gdb_obstack.h $(obstack_h)
 gdb_proc_service_h = gdb_proc_service.h $(gregset_h)
+gdb_ptrace_h = gdb_ptrace.h
 gdb_regex_h = gdb_regex.h $(xregex_h)
 gdb_stabs_h = gdb-stabs.h
 gdb_stat_h = gdb_stat.h
@@ -690,9 +703,11 @@ i386_tdep_h = i386-tdep.h
 i387_tdep_h = i387-tdep.h
 ia64_tdep_h = ia64-tdep.h
 infcall_h = infcall.h
+inf_child_h = inf-child.h
 inferior_h = inferior.h $(breakpoint_h) $(target_h) $(frame_h)
 inf_loop_h = inf-loop.h
 inflow_h = inflow.h $(terminal_h)
+inf_ptrace_h = inf-ptrace.h
 infttrace_h = infttrace.h
 interps_h = interps.h
 jv_lang_h = jv-lang.h
@@ -703,12 +718,12 @@ linespec_h = linespec.h
 linux_nat_h = linux-nat.h $(target_h)
 m2_lang_h = m2-lang.h
 m68k_tdep_h = m68k-tdep.h
+m88k_tdep_h = m88k-tdep.h
 macroexp_h = macroexp.h
 macroscope_h = macroscope.h $(macrotab_h) $(symtab_h)
 macrotab_h = macrotab.h
 main_h = main.h
 memattr_h = memattr.h
-minimon_h = minimon.h
 mipsnbsd_tdep_h = mipsnbsd-tdep.h
 mips_tdep_h = mips-tdep.h
 monitor_h = monitor.h
@@ -717,13 +732,13 @@ ns32k_tdep_h = ns32k-tdep.h
 nto_tdep_h = nto-tdep.h $(defs_h) $(solist_h)
 objc_lang_h = objc-lang.h
 objfiles_h = objfiles.h $(gdb_obstack_h) $(symfile_h)
-observer_h = observer.h
 ocd_h = ocd.h
 osabi_h = osabi.h
 pa64solib_h = pa64solib.h
 parser_defs_h = parser-defs.h $(doublest_h)
 p_lang_h = p-lang.h
 ppcnbsd_tdep_h = ppcnbsd-tdep.h
+ppcobsd_tdep_h = ppcobsd-tdep.h
 ppc_tdep_h = ppc-tdep.h
 proc_utils_h = proc-utils.h
 regcache_h = regcache.h
@@ -759,7 +774,7 @@ terminal_h = terminal.h
 top_h = top.h
 tracepoint_h = tracepoint.h
 trad_frame_h = trad-frame.h $(frame_h)
-tramp_frame_h = tramp-frame.h
+tramp_frame_h = tramp-frame.h $(frame_h)
 typeprint_h = typeprint.h
 ui_file_h = ui-file.h
 ui_out_h = ui-out.h
@@ -773,7 +788,6 @@ version_h = version.h
 wince_stub_h = wince-stub.h
 wrapper_h = wrapper.h $(gdb_h)
 xcoffsolib_h = xcoffsolib.h
-xmodem_h = xmodem.h
 
 #
 # gdb/cli/ headers
@@ -827,7 +841,8 @@ HFILES_NO_SRCDIR = bcache.h buildsym.h call-cmds.h coff-solib.h defs.h \
 	environ.h $(gdbcmd_h) gdb.h gdbcore.h \
 	gdb-stabs.h $(inferior_h) language.h minimon.h monitor.h \
 	objfiles.h parser-defs.h serial.h solib.h \
-	symfile.h stabsread.h target.h terminal.h typeprint.h xcoffsolib.h \
+	symfile.h symfile-mem.h stabsread.h target.h terminal.h typeprint.h \
+	xcoffsolib.h \
 	macrotab.h macroexp.h macroscope.h \
 	c-lang.h f-lang.h \
 	jv-lang.h \
@@ -907,7 +922,7 @@ COMMON_OBS = $(DEPFILES) $(YYOBJ) \
 	frame-base.o \
 	gnu-v2-abi.o gnu-v3-abi.o hpacc-abi.o cp-abi.o cp-support.o \
 	cp-namespace.o \
-	reggroups.o \
+	reggroups.o regset.o \
 	trad-frame.o \
 	tramp-frame.o
 
@@ -950,6 +965,34 @@ check: force
 	  rootsrc=`cd $(srcdir); pwd`; export rootsrc; \
 	  cd testsuite; \
 	  $(MAKE) $(TARGET_FLAGS_TO_PASS) check; \
+	else true; fi
+
+# The idea is to parallelize testing of multilibs, for example:
+#   make -j3 check//sh-hms-sim/{-m1,-m2,-m3,-m3e,-m4}/{,-nofpu}
+# will run 3 concurrent sessions of check, eventually testing all 10
+# combinations.  GNU make is required for the % pattern to work, as is
+# a shell that expands alternations within braces.  If GNU make is not
+# used, this rule will harmlessly fail to match.
+check//%: force
+	@if [ -f testsuite/config.status ]; then \
+	  rootme=`pwd`; export rootme; \
+	  rootsrc=`cd $(srcdir); pwd`; export rootsrc; \
+	  target=`echo "$@" | sed 's,//.*,,'`; \
+	  variant=`echo "$@" | sed 's,^[^/]*//,,'`; \
+	  vardots=`echo "$$variant" | sed 's,/,.,g'`; \
+	  testdir=testsuite.$$vardots; \
+	  if [ ! -f $$testdir/Makefile ]; then \
+	    (cd testsuite && find . -name config.status) | \
+	    sed s,/config.status$$,, | sort | while read subdir; do \
+	      $(SHELL) $(srcdir)/../mkinstalldirs $$testdir/$$subdir && \
+	      (cd $$testdir/$$subdir && \
+	       $(SHELL) $$rootme/testsuite/$$subdir/config.status \
+		 --recheck && \
+	       $(SHELL) ./config.status); done; \
+	  else :; fi && cd $$testdir && \
+	  $(MAKE) $(TARGET_FLAGS_TO_PASS) \
+	    RUNTESTFLAGS="--target_board=$$variant $(RUNTESTFLAGS)" \
+	    "$$target"; \
 	else true; fi
 
 info dvi install-info clean-info html install-html: force
@@ -1150,15 +1193,6 @@ gdb1$(EXEEXT): gdb$(EXEEXT)
 	rm -f gdb1$(EXEEXT)
 	cp gdb$(EXEEXT) gdb1$(EXEEXT)
 
-# FIXME. These are not generated by "make depend" because they only are there
-# for some machines.
-# But these rules don't do what we want; we want to hack the foo.o: tm.h
-# dependency to do the right thing.
-tm-sun3.h tm-altos.h: tm-m68k.h
-tm-sun2.h tm-3b1.h: tm-m68k.h
-xm-vaxult.h: xm-vax.h
-xm-vaxbsd.h: xm-vax.h
-
 # Put the proper machine-specific files first, so M-. on a machine
 # specific routine gets the one for the correct machine.  (FIXME: those
 # files go in twice; we should be removing them from the main list).
@@ -1168,7 +1202,7 @@ xm-vaxbsd.h: xm-vax.h
 
 TAGS: $(TAGFILES_NO_SRCDIR) $(TAGFILES_WITH_SRCDIR)
 	@echo Making TAGS
-	@etags $(srcdir)/$(TM_FILE) \
+	@etags $(srcdir)/$(DEPRECATED_TM_FILE) \
 	  $(srcdir)/$(XM_FILE) \
 	  $(srcdir)/$(NAT_FILE) \
 	`(for i in $(DEPFILES) $(TAGFILES_NO_SRCDIR); do \
@@ -1225,7 +1259,7 @@ do-maintainer-clean:
 	@$(MAKE) $(FLAGS_TO_PASS) DO=maintainer-clean "DODIRS=$(SUBDIRS)" \
 		subdir_do
 
-diststuff: $(DISTSTUFF)
+diststuff: $(DISTSTUFF) $(PACKAGE).pot $(CATALOGS)
 	cd doc; $(MAKE) $(MFLAGS) diststuff
 
 subdir_do: force
@@ -1282,6 +1316,11 @@ version.c: Makefile version.in
 	mv version.c-tmp version.c
 version.o: version.c $(version_h)
 
+observer.h: observer.sh doc/observer.texi
+	${srcdir}/observer.sh h ${srcdir}/doc/observer.texi observer.h
+
+observer.inc: observer.sh doc/observer.texi
+	${srcdir}/observer.sh inc ${srcdir}/doc/observer.texi observer.inc
 
 lint: $(LINTFILES)
 	$(LINT) $(INCLUDE_CFLAGS) $(LINTFLAGS) $(LINTFILES) \
@@ -1316,16 +1355,20 @@ ALLDEPFILES = \
 	arm-linux-nat.c arm-linux-tdep.c arm-tdep.c \
 	armnbsd-nat.c armnbsd-tdep.c \
 	avr-tdep.c \
+	bsd-kvm.c \
 	coff-solib.c \
 	core-regset.c core-aout.c corelow.c \
-	dcache.c delta68-nat.c dpx2-nat.c exec.c fork-child.c \
+	dcache.c exec.c fork-child.c \
 	glibc-tdep.c \
 	go32-nat.c h8300-tdep.c \
 	hppa-tdep.c hppa-hpux-tdep.c \
 	hppah-nat.c hpread.c \
+	hppa-linux-tdep.c hppa-linux-nat.c \
+	hppabsd-nat.c hppabsd-tdep.c \
 	i386-tdep.c i386v-nat.c i386-linux-nat.c \
 	i386v4-nat.c i386ly-tdep.c i386-cygwin-tdep.c \
 	i386bsd-nat.c i386bsd-tdep.c i386fbsd-nat.c i386fbsd-tdep.c \
+	i386nbsd-nat.c i386nbsd-tdep.c i386obsd-nat.c i386obsd-tdep.c \
 	i387-tdep.c \
 	i386-linux-tdep.c i386-nat.c \
 	i386gnu-nat.c i386gnu-tdep.c \
@@ -1335,17 +1378,19 @@ ALLDEPFILES = \
 	lynx-nat.c m3-nat.c \
 	m68hc11-tdep.c \
 	m68k-tdep.c \
+	m68kbsd-nat.c m68kbsd-tdep.c \
+	m88k-tdep.c m88kbsd-nat.c \
 	mcore-tdep.c \
 	mips-linux-nat.c mips-linux-tdep.c \
-	mips-nat.c \
 	mips-irix-tdep.c \
 	mips-tdep.c mipsm3-nat.c mipsv4-nat.c \
 	mipsnbsd-nat.c mipsnbsd-tdep.c \
 	nbsd-tdep.c \
 	ns32k-tdep.c solib-osf.c \
 	somread.c somsolib.c $(HPREAD_SOURCE) \
-	ppc-sysv-tdep.o ppc-linux-nat.c ppc-linux-tdep.c \
-	ppcnbsd-nat.o ppcnbsd-tdep.o \
+	ppc-sysv-tdep.c ppc-linux-nat.c ppc-linux-tdep.c \
+	ppcnbsd-nat.c ppcnbsd-tdep.c \
+	ppcobsd-nat.c ppcobsd-tdep.c \
 	procfs.c \
 	remote-e7000.c \
 	remote-hms.c remote-m32r-sdi.c remote-mips.c \
@@ -1363,9 +1408,8 @@ ALLDEPFILES = \
 	sparc64-tdep.c sparc64fbsd-nat.c sparc64fbsd-tdep.c \
 	sparc64nbsd-nat.c sparc64nbsd-tdep.c sparc64obsd-tdep.c \
 	sparcnbsd-nat.c sparcnbsd-tdep.c sparcobsd-tdep.c \
-	sun3-nat.c \
 	symm-tdep.c symm-nat.c \
-	vax-tdep.c \
+	vax-nat.c vax-tdep.c vaxbsd-nat.c vaxnbsd-tdep.c \
 	vx-share/xdr_ld.c vx-share/xdr_ptrace.c vx-share/xdr_rdb.c \
 	win32-nat.c \
 	xcoffread.c xcoffsolib.c \
@@ -1421,11 +1465,79 @@ v850ice.o: $(srcdir)/v850ice.c
 		$(GDBTK_CFLAGS) \
 		$(srcdir)/v850ice.c
 
-# FIXME: cagney/2003-08-10: Do not try to build "valprint.c" with
-# -Wformat-nonliteral.  It relies on local_hex_format et.al. and
-# that's a mess.  It needs a serious overhaul.
-valprint.o: $(srcdir)/valprint.c
-	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) $(srcdir)/valprint.c
+
+# Message files.  Based on code in gcc/Makefile.in.
+
+# Rules for generating translated message descriptions.  Disabled by
+# autoconf if the tools are not available.
+
+.SUFFIXES: .po .gmo .pox .pot
+.PHONY: all-po install-po uninstall-po clean-po update-po $(PACKAGE).pot
+
+all-po: $(CATALOGS)
+
+# This notation should be acceptable to all Make implementations used
+# by people who are interested in updating .po files.
+update-po: $(CATALOGS:.gmo=.pox)
+
+# N.B. We do not attempt to copy these into $(srcdir).  The snapshot
+# script does that.
+.po.gmo:
+	-test -d po || mkdir po
+	$(GMSGFMT) --statistics -o $@ $<
+
+# The new .po has to be gone over by hand, so we deposit it into
+# build/po with a different extension.  If build/po/$(PACKAGE).pot
+# exists, use it (it was just created), else use the one in srcdir.
+.po.pox:
+	-test -d po || mkdir po
+	$(MSGMERGE) $< `if test -f po/$(PACKAGE).pot; \
+			then echo po/$(PACKAGE).pot; \
+			else echo $(srcdir)/po/$(PACKAGE).pot; fi` -o $@
+
+# This rule has to look for .gmo modules in both srcdir and the cwd,
+# and has to check that we actually have a catalog for each language,
+# in case they weren't built or included with the distribution.
+install-po:
+	$(SHELL) $(srcdir)/../mkinstalldirs $(DESTDIR)$(datadir)
+	cats="$(CATALOGS)"; for cat in $$cats; do \
+	  lang=`basename $$cat | sed 's/\.gmo$$//'`; \
+	  if [ -f $$cat ]; then :; \
+	  elif [ -f $(srcdir)/$$cat ]; then cat=$(srcdir)/$$cat; \
+	  else continue; \
+	  fi; \
+	  dir=$(localedir)/$$lang/LC_MESSAGES; \
+	  echo $(SHELL) $(srcdir)/../mkinstalldirs $(DESTDIR)$$dir; \
+	  $(SHELL) $(srcdir)/../mkinstalldirs $(DESTDIR)$$dir || exit 1; \
+	  echo $(INSTALL_DATA) $$cat $(DESTDIR)$$dir/$(PACKAGE).mo; \
+	  $(INSTALL_DATA) $$cat $(DESTDIR)$$dir/$(PACKAGE).mo; \
+	done
+uninstall-po:
+	cats="$(CATALOGS)"; for cat in $$cats; do \
+	  lang=`basename $$cat | sed 's/\.gmo$$//'`; \
+	  if [ -f $$cat ]; then :; \
+	  elif [ -f $(srcdir)/$$cat ]; then cat=$(srcdir)/$$cat; \
+	  else continue; \
+	  fi; \
+	  dir=$(localedir)/$$lang/LC_MESSAGES; \
+	  rm -f $(DESTDIR)$$dir/$(PACKAGE).mo; \
+	done
+# Delete po/*.gmo only if we are not building in the source directory.
+clean-po:
+	-if [ ! -f Makefile.in ]; then rm -f po/*.gmo; fi
+
+# Rule for regenerating the message template (gdb.pot).  Instead of
+# forcing everyone to edit POTFILES.in, which proved impractical, this
+# rule has no dependencies and always regenerates gdb.pot.  This is
+# relatively harmless since the .po files do not directly depend on
+# it.  The .pot file is left in the build directory.  Since GDB's
+# Makefile lacks a cannonical list of sources (missing xm, tm and nm
+# files) force this rule.
+$(PACKAGE).pot: po/$(PACKAGE).pot
+po/$(PACKAGE).pot: force
+	-test -d po || mkdir po
+	sh -e $(srcdir)/po/gdbtext $(XGETTEXT) $(PACKAGE) . $(srcdir)
+
 
 #
 # YACC/LEX dependencies
@@ -1476,28 +1588,27 @@ valprint.o: $(srcdir)/valprint.c
 
 abug-rom.o: abug-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
 	$(serial_h) $(regcache_h) $(m68k_tdep_h)
-ada-exp.o: ada-exp.c $(defs_h) $(expression_h) $(value_h) $(parser_defs_h) \
-	$(language_h) $(ada_lang_h) $(bfd_h) $(symfile_h) $(objfiles_h) \
-	$(frame_h) $(block_h) $(ada_lex_c)
-ada-lang.o: ada-lang.c $(gdb_string_h) $(demangle_h) $(defs_h) $(symtab_h) \
-	$(gdbtypes_h) $(gdbcmd_h) $(expression_h) $(parser_defs_h) \
-	$(language_h) $(c_lang_h) $(inferior_h) $(symfile_h) $(objfiles_h) \
-	$(breakpoint_h) $(gdbcore_h) $(ada_lang_h) $(ui_out_h) $(block_h) \
-	$(infcall_h) $(dictionary_h)
-ada-lex.o: ada-lex.c
-ada-tasks.o: ada-tasks.c $(defs_h) $(command_h) $(value_h) $(language_h) \
-	$(inferior_h) $(symtab_h) $(target_h) $(regcache_h) $(gdbcore_h) \
-	$(gregset_h) $(ada_lang_h)
+ada-exp.o: ada-exp.c $(defs_h) $(gdb_string_h) $(expression_h) $(value_h) \
+	$(parser_defs_h) $(language_h) $(ada_lang_h) $(bfd_h) $(symfile_h) \
+	$(objfiles_h) $(frame_h) $(block_h) $(ada_lex_c)
+ada-lang.o: ada-lang.c $(defs_h) $(gdb_string_h) $(demangle_h) \
+	$(gdb_regex_h) $(frame_h) $(symtab_h) $(gdbtypes_h) $(gdbcmd_h) \
+	$(expression_h) $(parser_defs_h) $(language_h) $(c_lang_h) \
+	$(inferior_h) $(symfile_h) $(objfiles_h) $(breakpoint_h) \
+	$(gdbcore_h) $(hashtab_h) $(gdb_obstack_h) $(ada_lang_h) \
+	$(completer_h) $(gdb_stat_h) $(ui_out_h) $(block_h) $(infcall_h) \
+	$(dictionary_h)
+ada-lex.o: ada-lex.c $(gdb_string_h)
 ada-typeprint.o: ada-typeprint.c $(defs_h) $(gdb_obstack_h) $(bfd_h) \
 	$(symtab_h) $(gdbtypes_h) $(expression_h) $(value_h) $(gdbcore_h) \
 	$(target_h) $(command_h) $(gdbcmd_h) $(language_h) $(demangle_h) \
 	$(c_lang_h) $(typeprint_h) $(ada_lang_h) $(gdb_string_h)
-ada-valprint.o: ada-valprint.c $(defs_h) $(symtab_h) $(gdbtypes_h) \
-	$(expression_h) $(value_h) $(demangle_h) $(valprint_h) $(language_h) \
-	$(annotate_h) $(ada_lang_h) $(c_lang_h) $(infcall_h)
+ada-valprint.o: ada-valprint.c $(defs_h) $(gdb_string_h) $(symtab_h) \
+	$(gdbtypes_h) $(expression_h) $(value_h) $(demangle_h) $(valprint_h) \
+	$(language_h) $(annotate_h) $(ada_lang_h) $(c_lang_h) $(infcall_h)
 aix-thread.o: aix-thread.c $(defs_h) $(gdb_assert_h) $(gdbthread_h) \
-	$(target_h) $(inferior_h) $(regcache_h) $(gdbcmd_h) $(language_h) \
-	$(ppc_tdep_h)
+	$(target_h) $(inferior_h) $(regcache_h) $(gdbcmd_h) $(ppc_tdep_h) \
+	$(gdb_string_h)
 alphabsd-nat.o: alphabsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
 	$(alpha_tdep_h) $(alphabsd_tdep_h) $(gregset_h)
 alphabsd-tdep.o: alphabsd-tdep.c $(defs_h) $(alpha_tdep_h) \
@@ -1512,8 +1623,8 @@ alpha-mdebug-tdep.o: alpha-mdebug-tdep.c $(defs_h) $(frame_h) \
 alpha-nat.o: alpha-nat.c $(defs_h) $(gdb_string_h) $(inferior_h) \
 	$(gdbcore_h) $(target_h) $(regcache_h) $(alpha_tdep_h) $(gregset_h)
 alphanbsd-tdep.o: alphanbsd-tdep.c $(defs_h) $(gdbcore_h) $(frame_h) \
-	$(regcache_h) $(value_h) $(osabi_h) $(solib_svr4_h) $(alpha_tdep_h) \
-	$(alphabsd_tdep_h) $(nbsd_tdep_h)
+	$(regcache_h) $(value_h) $(osabi_h) $(gdb_string_h) $(alpha_tdep_h) \
+	$(alphabsd_tdep_h) $(nbsd_tdep_h) $(solib_svr4_h)
 alpha-osf1-tdep.o: alpha-osf1-tdep.c $(defs_h) $(frame_h) $(gdbcore_h) \
 	$(value_h) $(osabi_h) $(gdb_string_h) $(objfiles_h) $(alpha_tdep_h)
 alpha-tdep.o: alpha-tdep.c $(defs_h) $(doublest_h) $(frame_h) \
@@ -1521,11 +1632,11 @@ alpha-tdep.o: alpha-tdep.c $(defs_h) $(doublest_h) $(frame_h) \
 	$(symtab_h) $(value_h) $(gdbcmd_h) $(gdbcore_h) $(dis_asm_h) \
 	$(symfile_h) $(objfiles_h) $(gdb_string_h) $(linespec_h) \
 	$(regcache_h) $(reggroups_h) $(arch_utils_h) $(osabi_h) $(block_h) \
-	$(elf_bfd_h) $(alpha_tdep_h)
+	$(infcall_h) $(elf_bfd_h) $(alpha_tdep_h)
 amd64bsd-nat.o: amd64bsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
 	$(gdb_assert_h) $(amd64_tdep_h) $(amd64_nat_h)
 amd64fbsd-nat.o: amd64fbsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
-	$(gdb_assert_h) $(gregset_h) $(amd64_tdep_h) $(amd64_nat_h)
+	$(gdb_assert_h) $(amd64_tdep_h) $(amd64_nat_h) $(bsd_kvm_h)
 amd64fbsd-tdep.o: amd64fbsd-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) \
 	$(gdbcore_h) $(regcache_h) $(osabi_h) $(gdb_string_h) \
 	$(amd64_tdep_h) $(solib_svr4_h)
@@ -1534,20 +1645,21 @@ amd64-linux-nat.o: amd64-linux-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) \
 	$(gdb_proc_service_h) $(gregset_h) $(amd64_tdep_h) \
 	$(i386_linux_tdep_h) $(amd64_nat_h)
 amd64-linux-tdep.o: amd64-linux-tdep.c $(defs_h) $(frame_h) $(gdbcore_h) \
-	$(regcache_h) $(osabi_h) $(gdb_string_h) $(amd64_tdep_h) \
+	$(regcache_h) $(osabi_h) $(symtab_h) $(gdb_string_h) $(amd64_tdep_h) \
 	$(solib_svr4_h)
 amd64-nat.o: amd64-nat.c $(defs_h) $(gdbarch_h) $(regcache_h) \
 	$(gdb_assert_h) $(gdb_string_h) $(i386_tdep_h) $(amd64_tdep_h)
 amd64nbsd-nat.o: amd64nbsd-nat.c $(defs_h) $(gdb_assert_h) $(amd64_tdep_h) \
 	$(amd64_nat_h)
 amd64nbsd-tdep.o: amd64nbsd-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) \
-	$(gdbcore_h) $(osabi_h) $(gdb_assert_h) $(amd64_tdep_h) \
+	$(gdbcore_h) $(osabi_h) $(symtab_h) $(gdb_assert_h) $(amd64_tdep_h) \
 	$(nbsd_tdep_h) $(solib_svr4_h)
-amd64obsd-nat.o: amd64obsd-nat.c $(defs_h) $(gdb_assert_h) $(amd64_tdep_h) \
-	$(amd64_nat_h)
+amd64obsd-nat.o: amd64obsd-nat.c $(defs_h) $(gdbcore_h) $(regcache_h) \
+	$(gdb_assert_h) $(amd64_tdep_h) $(amd64_nat_h) $(bsd_kvm_h)
 amd64obsd-tdep.o: amd64obsd-tdep.c $(defs_h) $(frame_h) $(gdbcore_h) \
-	$(osabi_h) $(regset_h) $(target_h) $(gdb_assert_h) $(gdb_string_h) \
-	$(amd64_tdep_h) $(i387_tdep_h) $(solib_svr4_h)
+	$(symtab_h) $(objfiles_h) $(osabi_h) $(regset_h) $(target_h) \
+	$(gdb_assert_h) $(gdb_string_h) $(amd64_tdep_h) $(i387_tdep_h) \
+	$(solib_svr4_h)
 amd64-tdep.o: amd64-tdep.c $(defs_h) $(arch_utils_h) $(block_h) \
 	$(dummy_frame_h) $(frame_h) $(frame_base_h) $(frame_unwind_h) \
 	$(inferior_h) $(gdbcmd_h) $(gdbcore_h) $(objfiles_h) $(regcache_h) \
@@ -1557,7 +1669,7 @@ annotate.o: annotate.c $(defs_h) $(annotate_h) $(value_h) $(target_h) \
 	$(gdbtypes_h) $(breakpoint_h)
 arch-utils.o: arch-utils.c $(defs_h) $(arch_utils_h) $(buildsym_h) \
 	$(gdbcmd_h) $(inferior_h) $(gdb_string_h) $(regcache_h) \
-	$(gdb_assert_h) $(sim_regno_h) $(osabi_h) $(version_h) \
+	$(gdb_assert_h) $(sim_regno_h) $(gdbcore_h) $(osabi_h) $(version_h) \
 	$(floatformat_h)
 arm-linux-nat.o: arm-linux-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) \
 	$(gdb_string_h) $(regcache_h) $(arm_tdep_h) $(gregset_h)
@@ -1567,8 +1679,8 @@ arm-linux-tdep.o: arm-linux-tdep.c $(defs_h) $(target_h) $(value_h) \
 	$(glibc_tdep_h)
 armnbsd-nat.o: armnbsd-nat.c $(defs_h) $(arm_tdep_h) $(inferior_h) \
 	$(regcache_h) $(gdbcore_h)
-armnbsd-tdep.o: armnbsd-tdep.c $(defs_h) $(osabi_h) $(arm_tdep_h) \
-	$(nbsd_tdep_h) $(solib_svr4_h)
+armnbsd-tdep.o: armnbsd-tdep.c $(defs_h) $(osabi_h) $(gdb_string_h) \
+	$(arm_tdep_h) $(nbsd_tdep_h) $(solib_svr4_h)
 arm-tdep.o: arm-tdep.c $(defs_h) $(frame_h) $(inferior_h) $(gdbcmd_h) \
 	$(gdbcore_h) $(gdb_string_h) $(dis_asm_h) $(regcache_h) \
 	$(doublest_h) $(value_h) $(arch_utils_h) $(osabi_h) \
@@ -1602,12 +1714,15 @@ breakpoint.o: breakpoint.c $(defs_h) $(symtab_h) $(frame_h) $(breakpoint_h) \
 	$(command_h) $(inferior_h) $(gdbthread_h) $(target_h) $(language_h) \
 	$(gdb_string_h) $(demangle_h) $(annotate_h) $(symfile_h) \
 	$(objfiles_h) $(source_h) $(linespec_h) $(completer_h) $(gdb_h) \
-	$(ui_out_h) $(cli_script_h) $(gdb_assert_h) $(block_h) \
-	$(gdb_events_h)
+	$(ui_out_h) $(cli_script_h) $(gdb_assert_h) $(block_h) $(solist_h) \
+	$(observer_h) $(gdb_events_h)
+bsd-kvm.o: bsd-kvm.c $(defs_h) $(cli_cmds_h) $(command_h) $(frame_h) \
+	$(regcache_h) $(target_h) $(value_h) $(gdbcore_h) $(gdb_assert_h) \
+	$(readline_h) $(bsd_kvm_h)
 buildsym.o: buildsym.c $(defs_h) $(bfd_h) $(gdb_obstack_h) $(symtab_h) \
 	$(symfile_h) $(objfiles_h) $(gdbtypes_h) $(gdb_assert_h) \
-	$(complaints_h) $(gdb_string_h) $(expression_h) $(language_h) \
-	$(bcache_h) $(filenames_h) $(macrotab_h) $(demangle_h) $(block_h) \
+	$(complaints_h) $(gdb_string_h) $(expression_h) $(bcache_h) \
+	$(filenames_h) $(macrotab_h) $(demangle_h) $(block_h) \
 	$(cp_support_h) $(dictionary_h) $(buildsym_h) $(stabsread_h)
 c-exp.o: c-exp.c $(defs_h) $(gdb_string_h) $(expression_h) $(value_h) \
 	$(parser_defs_h) $(language_h) $(c_lang_h) $(bfd_h) $(symfile_h) \
@@ -1643,7 +1758,7 @@ corefile.o: corefile.c $(defs_h) $(gdb_string_h) $(inferior_h) $(symtab_h) \
 corelow.o: corelow.c $(defs_h) $(arch_utils_h) $(gdb_string_h) $(frame_h) \
 	$(inferior_h) $(symtab_h) $(command_h) $(bfd_h) $(target_h) \
 	$(gdbcore_h) $(gdbthread_h) $(regcache_h) $(regset_h) $(symfile_h) \
-	$(exec_h) $(readline_h) $(gdb_assert_h)
+	$(exec_h) $(readline_h) $(observer_h) $(gdb_assert_h)
 core-regset.o: core-regset.c $(defs_h) $(command_h) $(gdbcore_h) \
 	$(inferior_h) $(target_h) $(gdb_string_h) $(gregset_h)
 cp-abi.o: cp-abi.c $(defs_h) $(value_h) $(cp_abi_h) $(command_h) $(gdbcmd_h) \
@@ -1685,11 +1800,10 @@ dbug-rom.o: dbug-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
 dbxread.o: dbxread.c $(defs_h) $(gdb_string_h) $(gdb_obstack_h) \
 	$(gdb_stat_h) $(symtab_h) $(breakpoint_h) $(target_h) $(gdbcore_h) \
 	$(libaout_h) $(objfiles_h) $(buildsym_h) $(stabsread_h) \
-	$(gdb_stabs_h) $(demangle_h) $(language_h) $(complaints_h) \
-	$(cp_abi_h) $(gdb_assert_h) $(aout_aout64_h) $(aout_stab_gnu_h)
+	$(gdb_stabs_h) $(demangle_h) $(complaints_h) $(cp_abi_h) \
+	$(gdb_assert_h) $(aout_aout64_h) $(aout_stab_gnu_h)
 dcache.o: dcache.c $(defs_h) $(dcache_h) $(gdbcmd_h) $(gdb_string_h) \
 	$(gdbcore_h) $(target_h)
-delta68-nat.o: delta68-nat.c $(defs_h)
 demangle.o: demangle.c $(defs_h) $(command_h) $(gdbcmd_h) $(demangle_h) \
 	$(gdb_string_h)
 dictionary.o: dictionary.c $(defs_h) $(gdb_obstack_h) $(symtab_h) \
@@ -1700,12 +1814,11 @@ disasm.o: disasm.c $(defs_h) $(target_h) $(value_h) $(ui_out_h) \
 	$(gdb_string_h) $(disasm_h) $(gdbcore_h) $(dis_asm_h)
 doublest.o: doublest.c $(defs_h) $(doublest_h) $(floatformat_h) \
 	$(gdb_assert_h) $(gdb_string_h) $(gdbtypes_h)
-dpx2-nat.o: dpx2-nat.c $(defs_h) $(gdbcore_h) $(gdb_string_h)
 dsrec.o: dsrec.c $(defs_h) $(serial_h) $(srec_h) $(gdb_assert_h) \
 	$(gdb_string_h)
 dummy-frame.o: dummy-frame.c $(defs_h) $(dummy_frame_h) $(regcache_h) \
 	$(frame_h) $(inferior_h) $(gdb_assert_h) $(frame_unwind_h) \
-	$(command_h) $(gdbcmd_h)
+	$(command_h) $(gdbcmd_h) $(gdb_string_h)
 dve3900-rom.o: dve3900-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
 	$(serial_h) $(inferior_h) $(command_h) $(gdb_string_h) $(regcache_h) \
 	$(mips_tdep_h)
@@ -1723,8 +1836,8 @@ dwarf2read.o: dwarf2read.c $(defs_h) $(bfd_h) $(symtab_h) $(gdbtypes_h) \
 	$(objfiles_h) $(elf_dwarf2_h) $(buildsym_h) $(demangle_h) \
 	$(expression_h) $(filenames_h) $(macrotab_h) $(language_h) \
 	$(complaints_h) $(bcache_h) $(dwarf2expr_h) $(dwarf2loc_h) \
-	$(cp_support_h) $(gdb_string_h) $(gdb_assert_h) \
-	$(splay_tree_h) $(hashtab_h) $(command_h) $(gdbcmd_h)
+	$(cp_support_h) $(hashtab_h) $(gdb_string_h) $(gdb_assert_h) \
+	$(splay_tree_h) $(command_h) $(gdbcmd_h)
 dwarfread.o: dwarfread.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(objfiles_h) \
 	$(elf_dwarf_h) $(buildsym_h) $(demangle_h) $(expression_h) \
 	$(language_h) $(complaints_h) $(gdb_string_h)
@@ -1748,8 +1861,8 @@ exec.o: exec.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) $(gdbcmd_h) \
 expprint.o: expprint.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(expression_h) \
 	$(value_h) $(language_h) $(parser_defs_h) $(user_regs_h) $(target_h) \
 	$(gdb_string_h) $(block_h)
-fbsd-proc.o: fbsd-proc.c $(defs_h) $(gdbcore_h) $(inferior_h) \
-	$(gdb_string_h) $(elf_bfd_h) $(gregset_h)
+fbsd-proc.o: fbsd-proc.c $(defs_h) $(gdbcore_h) $(inferior_h) $(regcache_h) \
+	$(regset_h) $(gdb_assert_h) $(gdb_string_h) $(elf_bfd_h)
 f-exp.o: f-exp.c $(defs_h) $(gdb_string_h) $(expression_h) $(value_h) \
 	$(parser_defs_h) $(language_h) $(f_lang_h) $(bfd_h) $(symfile_h) \
 	$(objfiles_h) $(block_h)
@@ -1769,16 +1882,17 @@ frame.o: frame.c $(defs_h) $(frame_h) $(target_h) $(value_h) $(inferior_h) \
 	$(regcache_h) $(gdb_assert_h) $(gdb_string_h) $(user_regs_h) \
 	$(gdb_obstack_h) $(dummy_frame_h) $(sentinel_frame_h) $(gdbcore_h) \
 	$(annotate_h) $(language_h) $(frame_unwind_h) $(frame_base_h) \
-	$(command_h) $(gdbcmd_h)
+	$(command_h) $(gdbcmd_h) $(observer_h) $(objfiles_h)
 frame-unwind.o: frame-unwind.c $(defs_h) $(frame_h) $(frame_unwind_h) \
 	$(gdb_assert_h) $(dummy_frame_h) $(gdb_obstack_h)
 frv-linux-tdep.o: frv-linux-tdep.c $(defs_h) $(target_h) $(frame_h) \
-	$(osabi_h) $(elf_bfd_h) $(elf_frv_h) $(frv_tdep_h)
+	$(osabi_h) $(elf_bfd_h) $(elf_frv_h) $(frv_tdep_h) $(trad_frame_h) \
+	$(frame_unwind_h)
 frv-tdep.o: frv-tdep.c $(defs_h) $(gdb_string_h) $(inferior_h) $(gdbcore_h) \
 	$(arch_utils_h) $(regcache_h) $(frame_h) $(frame_unwind_h) \
 	$(frame_base_h) $(trad_frame_h) $(dis_asm_h) $(gdb_assert_h) \
 	$(sim_regno_h) $(gdb_sim_frv_h) $(opcodes_frv_desc_h) $(symtab_h) \
-	$(elf_bfd_h) $(elf_frv_h) $(osabi_h) $(frv_tdep_h)
+	$(elf_bfd_h) $(elf_frv_h) $(osabi_h) $(infcall_h) $(frv_tdep_h)
 f-typeprint.o: f-typeprint.c $(defs_h) $(gdb_obstack_h) $(bfd_h) $(symtab_h) \
 	$(gdbtypes_h) $(expression_h) $(value_h) $(gdbcore_h) $(target_h) \
 	$(f_lang_h) $(gdb_string_h)
@@ -1817,43 +1931,49 @@ h8300-tdep.o: h8300-tdep.c $(defs_h) $(value_h) $(inferior_h) $(symfile_h) \
 	$(gdb_assert_h) $(dis_asm_h)
 hpacc-abi.o: hpacc-abi.c $(defs_h) $(value_h) $(gdb_regex_h) $(gdb_string_h) \
 	$(gdbtypes_h) $(gdbcore_h) $(cp_abi_h)
+hppabsd-nat.o: hppabsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
+	$(hppa_tdep_h)
+hppabsd-tdep.o: hppabsd-tdep.c $(defs_h) $(arch_utils_h) $(osabi_h) \
+	$(regcache_h) $(regset_h) $(gdb_assert_h) $(gdb_string_h) \
+	$(hppa_tdep_h) $(solib_svr4_h)
 hppah-nat.o: hppah-nat.c $(defs_h) $(inferior_h) $(target_h) $(gdbcore_h) \
-	$(gdb_wait_h) $(regcache_h) $(gdb_string_h)
+	$(gdb_wait_h) $(regcache_h) $(gdb_string_h) $(infttrace_h) \
+	$(hppa_tdep_h)
 hppa-hpux-tdep.o: hppa-hpux-tdep.c $(defs_h) $(arch_utils_h) $(gdbcore_h) \
-	$(osabi_h) $(gdb_string_h) $(frame_h)
-hppa-tdep.o: hppa-tdep.c $(defs_h) $(frame_h) $(bfd_h) $(inferior_h) \
-	$(value_h) $(regcache_h) $(completer_h) $(language_h) $(osabi_h) \
-	$(gdb_assert_h) $(infttrace_h) $(arch_utils_h) $(symtab_h) \
-	$(infcall_h) $(dis_asm_h) $(trad_frame_h) $(frame_unwind_h) \
-	$(frame_base_h) $(a_out_encap_h) $(gdb_stat_h) $(gdb_wait_h) \
-	$(gdbcore_h) $(gdbcmd_h) $(target_h) $(symfile_h) $(objfiles_h) \
+	$(osabi_h) $(gdb_string_h) $(frame_h) $(frame_unwind_h) \
+	$(trad_frame_h) $(symtab_h) $(objfiles_h) $(inferior_h) $(infcall_h) \
+	$(observer_h) $(hppa_tdep_h)
+hppa-linux-nat.o: hppa-linux-nat.c $(defs_h) $(gdbcore_h) $(regcache_h) \
+	$(gdb_string_h) $(inferior_h) $(hppa_tdep_h) $(gregset_h)
+hppa-linux-tdep.o: hppa-linux-tdep.c $(defs_h) $(gdbcore_h) $(osabi_h) \
+	$(target_h) $(objfiles_h) $(solib_svr4_h) $(glibc_tdep_h) \
+	$(frame_unwind_h) $(trad_frame_h) $(dwarf2_frame_h) $(value_h) \
+	$(hppa_tdep_h) $(elf_common_h)
+hppa-tdep.o: hppa-tdep.c $(defs_h) $(bfd_h) $(inferior_h) $(regcache_h) \
+	$(completer_h) $(osabi_h) $(gdb_assert_h) $(arch_utils_h) \
+	$(symtab_h) $(dis_asm_h) $(trad_frame_h) $(frame_unwind_h) \
+	$(frame_base_h) $(gdbcore_h) $(gdbcmd_h) $(objfiles_h) \
 	$(hppa_tdep_h)
 hpread.o: hpread.c $(defs_h) $(bfd_h) $(gdb_string_h) $(hp_symtab_h) \
 	$(syms_h) $(symtab_h) $(symfile_h) $(objfiles_h) $(buildsym_h) \
 	$(complaints_h) $(gdb_stabs_h) $(gdbtypes_h) $(demangle_h) \
-	$(somsolib_h) $(gdb_assert_h) $(gdb_string_h)
+	$(somsolib_h) $(gdb_assert_h) $(hppa_tdep_h) $(gdb_string_h)
 hpux-thread.o: hpux-thread.c $(defs_h) $(gdbthread_h) $(target_h) \
 	$(inferior_h) $(regcache_h) $(gdb_stat_h) $(gdbcore_h)
 i386bsd-nat.o: i386bsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
-	$(gdb_assert_h) $(gregset_h) $(i386_tdep_h) $(i387_tdep_h)
+	$(gdb_assert_h) $(i386_tdep_h) $(i387_tdep_h)
 i386bsd-tdep.o: i386bsd-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) \
 	$(gdbcore_h) $(regcache_h) $(osabi_h) $(gdb_string_h) $(i386_tdep_h)
 i386-cygwin-tdep.o: i386-cygwin-tdep.c $(defs_h) $(osabi_h) $(gdb_string_h) \
 	$(i386_tdep_h)
 i386fbsd-nat.o: i386fbsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
-	$(i386_tdep_h)
+	$(i386_tdep_h) $(bsd_kvm_h)
 i386fbsd-tdep.o: i386fbsd-tdep.c $(defs_h) $(arch_utils_h) $(osabi_h) \
 	$(i386_tdep_h) $(i387_tdep_h) $(solib_svr4_h)
 i386gnu-nat.o: i386gnu-nat.c $(defs_h) $(inferior_h) $(floatformat_h) \
 	$(regcache_h) $(gdb_assert_h) $(i386_tdep_h) $(gnu_nat_h) \
 	$(i387_tdep_h) $(gregset_h)
 i386gnu-tdep.o: i386gnu-tdep.c $(defs_h) $(osabi_h) $(i386_tdep_h)
-i386-interix-nat.o: i386-interix-nat.c $(defs_h) $(gdb_string_h) \
-	$(gdbcore_h) $(gregset_h) $(regcache_h)
-i386-interix-tdep.o: i386-interix-tdep.c $(defs_h) $(arch_utils_h) \
-	$(frame_h) $(gdb_string_h) $(gdb_stabs_h) $(gdbcore_h) $(gdbtypes_h) \
-	$(i386_tdep_h) $(inferior_h) $(libbfd_h) $(objfiles_h) $(osabi_h) \
-	$(regcache_h)
 i386-linux-nat.o: i386-linux-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) \
 	$(regcache_h) $(linux_nat_h) $(gdb_assert_h) $(gdb_string_h) \
 	$(gregset_h) $(i387_tdep_h) $(i386_tdep_h) $(i386_linux_tdep_h) \
@@ -1865,18 +1985,22 @@ i386-linux-tdep.o: i386-linux-tdep.c $(defs_h) $(gdbcore_h) $(frame_h) \
 i386ly-tdep.o: i386ly-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h) \
 	$(regcache_h) $(target_h) $(osabi_h) $(i386_tdep_h)
 i386-nat.o: i386-nat.c $(defs_h) $(breakpoint_h) $(command_h) $(gdbcmd_h)
-i386nbsd-tdep.o: i386nbsd-tdep.c $(defs_h) $(arch_utils_h) $(gdbcore_h) \
-	$(regcache_h) $(regset_h) $(osabi_h) $(gdb_assert_h) $(gdb_string_h) \
-	$(i386_tdep_h) $(i387_tdep_h) $(nbsd_tdep_h) $(solib_svr4_h)
+i386nbsd-nat.o: i386nbsd-nat.c $(defs_h) $(gdbcore_h) $(regcache_h) \
+	$(i386_tdep_h) $(bsd_kvm_h)
+i386nbsd-tdep.o: i386nbsd-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) \
+	$(gdbcore_h) $(regcache_h) $(regset_h) $(osabi_h) $(symtab_h) \
+	$(gdb_assert_h) $(gdb_string_h) $(i386_tdep_h) $(i387_tdep_h) \
+	$(nbsd_tdep_h) $(solib_svr4_h)
 i386-nto-tdep.o: i386-nto-tdep.c $(gdb_string_h) $(gdb_assert_h) $(defs_h) \
 	$(frame_h) $(target_h) $(regcache_h) $(solib_svr4_h) $(i386_tdep_h) \
 	$(nto_tdep_h) $(osabi_h) $(i387_tdep_h)
 i386obsd-nat.o: i386obsd-nat.c $(defs_h) $(i386_tdep_h)
-i386obsd-tdep.o: i386obsd-tdep.c $(defs_h) $(arch_utils_h) $(gdbcore_h) \
-	$(regcache_h) $(regset_h) $(osabi_h) $(target_h) $(gdb_assert_h) \
-	$(gdb_string_h) $(i386_tdep_h) $(i387_tdep_h) $(solib_svr4_h)
+i386obsd-tdep.o: i386obsd-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) \
+	$(gdbcore_h) $(regcache_h) $(regset_h) $(symtab_h) $(objfiles_h) \
+	$(osabi_h) $(target_h) $(gdb_assert_h) $(gdb_string_h) \
+	$(i386_tdep_h) $(i387_tdep_h) $(solib_svr4_h)
 i386-sol2-tdep.o: i386-sol2-tdep.c $(defs_h) $(value_h) $(osabi_h) \
-	$(i386_tdep_h)
+	$(gdb_string_h) $(i386_tdep_h) $(solib_svr4_h)
 i386-stub.o: i386-stub.c
 i386-tdep.o: i386-tdep.c $(defs_h) $(arch_utils_h) $(command_h) \
 	$(dummy_frame_h) $(dwarf2_frame_h) $(doublest_h) $(floatformat_h) \
@@ -1905,11 +2029,14 @@ ia64-tdep.o: ia64-tdep.c $(defs_h) $(inferior_h) $(gdbcore_h) \
 	$(arch_utils_h) $(floatformat_h) $(regcache_h) $(reggroups_h) \
 	$(frame_h) $(frame_base_h) $(frame_unwind_h) $(doublest_h) \
 	$(value_h) $(gdb_assert_h) $(objfiles_h) $(elf_common_h) \
-	$(elf_bfd_h) $(elf_h) $(dis_asm_h) $(ia64_tdep_h) \
+	$(elf_bfd_h) $(dis_asm_h) $(infcall_h) $(ia64_tdep_h) $(elf_ia64_h) \
 	$(libunwind_frame_h) $(libunwind_ia64_h)
 infcall.o: infcall.c $(defs_h) $(breakpoint_h) $(target_h) $(regcache_h) \
 	$(inferior_h) $(gdb_assert_h) $(block_h) $(gdbcore_h) $(language_h) \
-	$(objfiles_h) $(gdbcmd_h) $(command_h) $(gdb_string_h) $(infcall_h)
+	$(objfiles_h) $(gdbcmd_h) $(command_h) $(gdb_string_h) $(infcall_h) \
+	$(dummy_frame_h)
+inf-child.o: inf-child.c $(defs_h) $(regcache_h) $(memattr_h) $(symtab_h) \
+	$(target_h) $(inferior_h)
 infcmd.o: infcmd.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 	$(frame_h) $(inferior_h) $(environ_h) $(value_h) $(gdbcmd_h) \
 	$(symfile_h) $(gdbcore_h) $(target_h) $(language_h) $(symfile_h) \
@@ -1921,19 +2048,23 @@ inf-loop.o: inf-loop.c $(defs_h) $(inferior_h) $(target_h) $(event_loop_h) \
 inflow.o: inflow.c $(defs_h) $(frame_h) $(inferior_h) $(command_h) \
 	$(serial_h) $(terminal_h) $(target_h) $(gdbthread_h) $(gdb_string_h) \
 	$(inflow_h)
-infptrace.o: infptrace.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) \
-	$(gdb_string_h) $(regcache_h) $(gdb_wait_h) $(command_h) \
-	$(gdb_dirent_h) $(gdbcore_h) $(gdb_stat_h)
+inf-ptrace.o: inf-ptrace.c $(defs_h) $(observer_h) $(gdb_ptrace_h) \
+	$(inflow_h) $(inferior_h) $(regcache_h) $(command_h) $(gdbcore_h) \
+	$(inf_child_h) $(gdbcmd_h)
+infptrace.o: infptrace.c $(defs_h) $(command_h) $(frame_h) $(gdbcore_h) \
+	$(inferior_h) $(regcache_h) $(target_h) $(gdb_assert_h) \
+	$(gdb_wait_h) $(gdb_string_h) $(gdb_dirent_h) $(gdb_ptrace_h)
 infrun.o: infrun.c $(defs_h) $(gdb_string_h) $(symtab_h) $(frame_h) \
 	$(inferior_h) $(breakpoint_h) $(gdb_wait_h) $(gdbcore_h) $(gdbcmd_h) \
 	$(cli_script_h) $(target_h) $(gdbthread_h) $(annotate_h) \
 	$(symfile_h) $(top_h) $(inf_loop_h) $(regcache_h) $(value_h) \
 	$(observer_h) $(language_h) $(gdb_assert_h)
 inftarg.o: inftarg.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) \
-	$(gdbcore_h) $(command_h) $(gdb_stat_h) $(gdb_wait_h) $(inflow_h)
+	$(gdbcore_h) $(command_h) $(gdb_stat_h) $(observer_h) $(gdb_wait_h) \
+	$(inflow_h)
 infttrace.o: infttrace.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) \
 	$(gdb_string_h) $(gdb_wait_h) $(command_h) $(gdbthread_h) \
-	$(gdbcore_h)
+	$(infttrace_h) $(gdbcore_h)
 interps.o: interps.c $(defs_h) $(gdbcmd_h) $(ui_out_h) $(event_loop_h) \
 	$(event_top_h) $(interps_h) $(completer_h) $(gdb_string_h) \
 	$(gdb_events_h) $(gdb_assert_h) $(top_h)
@@ -2001,6 +2132,11 @@ m68hc11-tdep.o: m68hc11-tdep.c $(defs_h) $(frame_h) $(frame_unwind_h) \
 	$(inferior_h) $(dis_asm_h) $(symfile_h) $(objfiles_h) \
 	$(arch_utils_h) $(regcache_h) $(reggroups_h) $(target_h) \
 	$(opcode_m68hc11_h) $(elf_m68hc11_h) $(elf_bfd_h)
+m68kbsd-nat.o: m68kbsd-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) \
+	$(regcache_h) $(gdb_assert_h) $(m68k_tdep_h) $(bsd_kvm_h)
+m68kbsd-tdep.o: m68kbsd-tdep.c $(defs_h) $(arch_utils_h) $(osabi_h) \
+	$(regcache_h) $(regset_h) $(gdb_assert_h) $(gdb_string_h) \
+	$(m68k_tdep_h) $(solib_svr4_h)
 m68klinux-nat.o: m68klinux-nat.c $(defs_h) $(frame_h) $(inferior_h) \
 	$(language_h) $(gdbcore_h) $(gdb_string_h) $(regcache_h) \
 	$(m68k_tdep_h) $(gdb_stat_h) $(floatformat_h) $(target_h) \
@@ -2008,16 +2144,19 @@ m68klinux-nat.o: m68klinux-nat.c $(defs_h) $(frame_h) $(inferior_h) \
 m68klinux-tdep.o: m68klinux-tdep.c $(defs_h) $(gdbcore_h) $(doublest_h) \
 	$(floatformat_h) $(frame_h) $(target_h) $(gdb_string_h) \
 	$(gdbtypes_h) $(osabi_h) $(regcache_h) $(objfiles_h) $(symtab_h) \
-	$(m68k_tdep_h)
-m68knbsd-nat.o: m68knbsd-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) \
-	$(regcache_h)
-m68knbsd-tdep.o: m68knbsd-tdep.c $(defs_h) $(gdbtypes_h) $(regcache_h)
+	$(m68k_tdep_h) $(trad_frame_h) $(frame_unwind_h)
 m68k-stub.o: m68k-stub.c
 m68k-tdep.o: m68k-tdep.c $(defs_h) $(dwarf2_frame_h) $(frame_h) \
-	$(frame_base_h) $(frame_unwind_h) $(symtab_h) $(gdbcore_h) \
-	$(value_h) $(gdb_string_h) $(gdb_assert_h) $(inferior_h) \
-	$(regcache_h) $(arch_utils_h) $(osabi_h) $(dis_asm_h) $(m68k_tdep_h) \
-	$(gregset_h)
+	$(frame_base_h) $(frame_unwind_h) $(floatformat_h) $(symtab_h) \
+	$(gdbcore_h) $(value_h) $(gdb_string_h) $(gdb_assert_h) \
+	$(inferior_h) $(regcache_h) $(arch_utils_h) $(osabi_h) $(dis_asm_h) \
+	$(m68k_tdep_h) $(gregset_h)
+m88kbsd-nat.o: m88kbsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
+	$(m88k_tdep_h)
+m88k-tdep.o: m88k-tdep.c $(defs_h) $(arch_utils_h) $(dis_asm_h) $(frame_h) \
+	$(frame_base_h) $(frame_unwind_h) $(gdbcore_h) $(gdbtypes_h) \
+	$(regcache_h) $(regset_h) $(symtab_h) $(trad_frame_h) $(value_h) \
+	$(gdb_assert_h) $(gdb_string_h) $(m88k_tdep_h)
 macrocmd.o: macrocmd.c $(defs_h) $(macrotab_h) $(macroexp_h) $(macroscope_h) \
 	$(command_h) $(gdbcmd_h)
 macroexp.o: macroexp.c $(defs_h) $(gdb_obstack_h) $(bcache_h) $(macrotab_h) \
@@ -2043,7 +2182,7 @@ mdebugread.o: mdebugread.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(gdbcore_h) \
 	$(complaints_h) $(demangle_h) $(gdb_assert_h) $(block_h) \
 	$(dictionary_h) $(coff_sym_h) $(coff_symconst_h) $(gdb_stat_h) \
 	$(gdb_string_h) $(bfd_h) $(coff_ecoff_h) $(libaout_h) \
-	$(aout_aout64_h) $(aout_stab_gnu_h) $(expression_h) $(language_h)
+	$(aout_aout64_h) $(aout_stab_gnu_h) $(expression_h)
 memattr.o: memattr.c $(defs_h) $(command_h) $(gdbcmd_h) $(memattr_h) \
 	$(target_h) $(value_h) $(language_h) $(gdb_string_h)
 mem-break.o: mem-break.c $(defs_h) $(symtab_h) $(breakpoint_h) $(inferior_h) \
@@ -2055,7 +2194,6 @@ mips-linux-nat.o: mips-linux-nat.c $(defs_h) $(mips_tdep_h)
 mips-linux-tdep.o: mips-linux-tdep.c $(defs_h) $(gdbcore_h) $(target_h) \
 	$(solib_svr4_h) $(osabi_h) $(mips_tdep_h) $(gdb_string_h) \
 	$(gdb_assert_h) $(frame_h) $(trad_frame_h) $(tramp_frame_h)
-mips-nat.o: mips-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) $(regcache_h)
 mipsnbsd-nat.o: mipsnbsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
 	$(mipsnbsd_tdep_h)
 mipsnbsd-tdep.o: mipsnbsd-tdep.c $(defs_h) $(gdbcore_h) $(regcache_h) \
@@ -2071,7 +2209,8 @@ mips-tdep.o: mips-tdep.c $(defs_h) $(gdb_string_h) $(gdb_assert_h) \
 	$(target_h) $(arch_utils_h) $(regcache_h) $(osabi_h) $(mips_tdep_h) \
 	$(block_h) $(reggroups_h) $(opcode_mips_h) $(elf_mips_h) \
 	$(elf_bfd_h) $(symcat_h) $(sim_regno_h) $(dis_asm_h) \
-	$(frame_unwind_h) $(frame_base_h) $(trad_frame_h)
+	$(frame_unwind_h) $(frame_base_h) $(trad_frame_h) $(infcall_h) \
+	$(floatformat_h)
 mipsv4-nat.o: mipsv4-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) $(target_h) \
 	$(regcache_h) $(gregset_h)
 mn10300-tdep.o: mn10300-tdep.c $(defs_h) $(frame_h) $(inferior_h) \
@@ -2111,7 +2250,8 @@ objfiles.o: objfiles.c $(defs_h) $(bfd_h) $(symtab_h) $(symfile_h) \
 	$(objfiles_h) $(gdb_stabs_h) $(target_h) $(bcache_h) $(gdb_assert_h) \
 	$(gdb_stat_h) $(gdb_obstack_h) $(gdb_string_h) $(hashtab_h) \
 	$(breakpoint_h) $(block_h) $(dictionary_h)
-observer.o: observer.c $(defs_h) $(observer_h)
+observer.o: observer.c $(defs_h) $(observer_h) $(command_h) $(gdbcmd_h) \
+	$(observer_inc)
 ocd.o: ocd.c $(defs_h) $(gdbcore_h) $(gdb_string_h) $(frame_h) $(inferior_h) \
 	$(bfd_h) $(symfile_h) $(target_h) $(gdbcmd_h) $(objfiles_h) \
 	$(gdb_stabs_h) $(serial_h) $(ocd_h) $(regcache_h)
@@ -2120,7 +2260,7 @@ osabi.o: osabi.c $(defs_h) $(gdb_assert_h) $(gdb_string_h) $(osabi_h) \
 pa64solib.o: pa64solib.c $(defs_h) $(frame_h) $(bfd_h) $(libhppa_h) \
 	$(gdbcore_h) $(symtab_h) $(breakpoint_h) $(symfile_h) $(objfiles_h) \
 	$(inferior_h) $(gdb_stabs_h) $(gdb_stat_h) $(gdbcmd_h) $(language_h) \
-	$(regcache_h) $(exec_h)
+	$(regcache_h) $(exec_h) $(hppa_tdep_h)
 parse.o: parse.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 	$(frame_h) $(expression_h) $(value_h) $(command_h) $(language_h) \
 	$(parser_defs_h) $(gdbcmd_h) $(symfile_h) $(inferior_h) \
@@ -2134,24 +2274,31 @@ p-lang.o: p-lang.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 ppc-bdm.o: ppc-bdm.c $(defs_h) $(gdbcore_h) $(gdb_string_h) $(frame_h) \
 	$(inferior_h) $(bfd_h) $(symfile_h) $(target_h) $(gdbcmd_h) \
 	$(objfiles_h) $(gdb_stabs_h) $(serial_h) $(ocd_h) $(ppc_tdep_h) \
-	$(regcache_h)
+	$(regcache_h) $(gdb_assert_h)
 ppcbug-rom.o: ppcbug-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
 	$(serial_h) $(regcache_h)
 ppc-linux-nat.o: ppc-linux-nat.c $(defs_h) $(gdb_string_h) $(frame_h) \
-	$(inferior_h) $(gdbcore_h) $(regcache_h) $(gdb_wait_h) $(gregset_h) \
-	$(ppc_tdep_h)
+	$(inferior_h) $(gdbcore_h) $(regcache_h) $(gdb_assert_h) \
+	$(gdb_wait_h) $(gregset_h) $(ppc_tdep_h)
 ppc-linux-tdep.o: ppc-linux-tdep.c $(defs_h) $(frame_h) $(inferior_h) \
 	$(symtab_h) $(target_h) $(gdbcore_h) $(gdbcmd_h) $(symfile_h) \
 	$(objfiles_h) $(regcache_h) $(value_h) $(osabi_h) $(regset_h) \
 	$(solib_svr4_h) $(ppc_tdep_h) $(trad_frame_h) $(frame_unwind_h)
-ppcnbsd-nat.o: ppcnbsd-nat.c $(defs_h) $(inferior_h) $(ppc_tdep_h) \
-	$(ppcnbsd_tdep_h)
+ppcnbsd-nat.o: ppcnbsd-nat.c $(defs_h) $(inferior_h) $(gdb_assert_h) \
+	$(gdbcore_h) $(regcache_h) $(bsd_kvm_h) $(ppc_tdep_h) \
+	$(ppcnbsd_tdep_h) $(inf_ptrace_h)
 ppcnbsd-tdep.o: ppcnbsd-tdep.c $(defs_h) $(gdbcore_h) $(regcache_h) \
 	$(target_h) $(breakpoint_h) $(value_h) $(osabi_h) $(ppc_tdep_h) \
-	$(ppcnbsd_tdep_h) $(nbsd_tdep_h) $(solib_svr4_h)
+	$(ppcnbsd_tdep_h) $(nbsd_tdep_h) $(tramp_frame_h) $(trad_frame_h) \
+	$(gdb_assert_h) $(solib_svr4_h)
+ppcobsd-nat.o: ppcobsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
+	$(ppc_tdep_h) $(ppcobsd_tdep_h)
+ppcobsd-tdep.o: ppcobsd-tdep.c $(defs_h) $(arch_utils_h) $(osabi_h) \
+	$(regcache_h) $(regset_h) $(gdb_assert_h) $(gdb_string_h) \
+	$(ppc_tdep_h) $(ppcobsd_tdep_h) $(solib_svr4_h)
 ppc-sysv-tdep.o: ppc-sysv-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h) \
 	$(regcache_h) $(value_h) $(gdb_string_h) $(gdb_assert_h) \
-	$(ppc_tdep_h) $(target_h) $(objfiles_h)
+	$(ppc_tdep_h) $(target_h) $(objfiles_h) $(infcall_h)
 printcmd.o: printcmd.c $(defs_h) $(gdb_string_h) $(frame_h) $(symtab_h) \
 	$(gdbtypes_h) $(value_h) $(language_h) $(expression_h) $(gdbcore_h) \
 	$(gdbcmd_h) $(target_h) $(breakpoint_h) $(demangle_h) $(valprint_h) \
@@ -2177,9 +2324,10 @@ p-valprint.o: p-valprint.c $(defs_h) $(gdb_obstack_h) $(symtab_h) \
 	$(language_h) $(target_h) $(annotate_h) $(p_lang_h) $(cp_abi_h)
 regcache.o: regcache.c $(defs_h) $(inferior_h) $(target_h) $(gdbarch_h) \
 	$(gdbcmd_h) $(regcache_h) $(reggroups_h) $(gdb_assert_h) \
-	$(gdb_string_h) $(gdbcmd_h)
+	$(gdb_string_h) $(gdbcmd_h) $(observer_h)
 reggroups.o: reggroups.c $(defs_h) $(reggroups_h) $(gdbtypes_h) \
 	$(gdb_assert_h) $(regcache_h) $(command_h) $(gdbcmd_h)
+regset.o: regset.c $(defs_h) $(regset_h) $(gdb_assert_h)
 remote.o: remote.c $(defs_h) $(gdb_string_h) $(inferior_h) $(bfd_h) \
 	$(symfile_h) $(target_h) $(gdbcmd_h) $(objfiles_h) $(gdb_stabs_h) \
 	$(gdbthread_h) $(remote_h) $(regcache_h) $(value_h) $(gdb_assert_h) \
@@ -2242,15 +2390,16 @@ rom68k-rom.o: rom68k-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
 	$(serial_h) $(regcache_h) $(value_h) $(m68k_tdep_h)
 rs6000-nat.o: rs6000-nat.c $(defs_h) $(inferior_h) $(target_h) $(gdbcore_h) \
 	$(xcoffsolib_h) $(symfile_h) $(objfiles_h) $(libbfd_h) $(bfd_h) \
-	$(gdb_stabs_h) $(regcache_h) $(arch_utils_h) $(language_h) \
-	$(ppc_tdep_h) $(exec_h) $(gdb_stat_h)
+	$(gdb_stabs_h) $(regcache_h) $(arch_utils_h) $(ppc_tdep_h) $(exec_h) \
+	$(gdb_stat_h)
 rs6000-tdep.o: rs6000-tdep.c $(defs_h) $(frame_h) $(inferior_h) $(symtab_h) \
 	$(target_h) $(gdbcore_h) $(gdbcmd_h) $(objfiles_h) $(arch_utils_h) \
-	$(regcache_h) $(doublest_h) $(value_h) $(parser_defs_h) $(osabi_h) \
-	$(libbfd_h) $(coff_internal_h) $(libcoff_h) $(coff_xcoff_h) \
-	$(libxcoff_h) $(elf_bfd_h) $(solib_svr4_h) $(ppc_tdep_h) \
-	$(gdb_assert_h) $(dis_asm_h) $(trad_frame_h) $(frame_unwind_h) \
-	$(frame_base_h)
+	$(regcache_h) $(regset_h) $(doublest_h) $(value_h) $(parser_defs_h) \
+	$(osabi_h) $(infcall_h) $(sim_regno_h) $(gdb_sim_ppc_h) \
+	$(reggroups_h) $(libbfd_h) $(coff_internal_h) $(libcoff_h) \
+	$(coff_xcoff_h) $(libxcoff_h) $(elf_bfd_h) $(solib_svr4_h) \
+	$(ppc_tdep_h) $(gdb_assert_h) $(dis_asm_h) $(trad_frame_h) \
+	$(frame_unwind_h) $(frame_base_h)
 s390-nat.o: s390-nat.c $(defs_h) $(tm_h) $(regcache_h) $(inferior_h) \
 	$(s390_tdep_h)
 s390-tdep.o: s390-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) $(inferior_h) \
@@ -2305,7 +2454,8 @@ solib-aix5.o: solib-aix5.c $(defs_h) $(gdb_string_h) $(elf_external_h) \
 solib.o: solib.c $(defs_h) $(gdb_string_h) $(symtab_h) $(bfd_h) $(symfile_h) \
 	$(objfiles_h) $(gdbcore_h) $(command_h) $(target_h) $(frame_h) \
 	$(gdb_regex_h) $(inferior_h) $(environ_h) $(language_h) $(gdbcmd_h) \
-	$(completer_h) $(filenames_h) $(exec_h) $(solist_h) $(readline_h)
+	$(completer_h) $(filenames_h) $(exec_h) $(solist_h) $(observer_h) \
+	$(readline_h)
 solib-frv.o: solib-frv.c $(defs_h) $(gdb_string_h) $(inferior_h) \
 	$(gdbcore_h) $(solist_h) $(frv_tdep_h) $(objfiles_h) $(symtab_h) \
 	$(language_h) $(command_h) $(gdbcmd_h) $(elf_frv_h)
@@ -2330,7 +2480,7 @@ somread.o: somread.c $(defs_h) $(bfd_h) $(symtab_h) $(symfile_h) \
 somsolib.o: somsolib.c $(defs_h) $(frame_h) $(bfd_h) $(som_h) $(libhppa_h) \
 	$(gdbcore_h) $(symtab_h) $(breakpoint_h) $(symfile_h) $(objfiles_h) \
 	$(inferior_h) $(gdb_stabs_h) $(gdb_stat_h) $(gdbcmd_h) $(language_h) \
-	$(regcache_h) $(gdb_assert_h) $(exec_h)
+	$(regcache_h) $(gdb_assert_h) $(exec_h) $(hppa_tdep_h)
 source.o: source.c $(defs_h) $(symtab_h) $(expression_h) $(language_h) \
 	$(command_h) $(source_h) $(gdbcmd_h) $(frame_h) $(value_h) \
 	$(gdb_string_h) $(gdb_stat_h) $(gdbcore_h) $(gdb_regex_h) \
@@ -2348,8 +2498,8 @@ sparc64-linux-tdep.o: sparc64-linux-tdep.c $(defs_h) $(gdbarch_h) $(osabi_h) \
 	$(solib_svr4_h) $(sparc64_tdep_h)
 sparc64-nat.o: sparc64-nat.c $(defs_h) $(gdbarch_h) $(sparc64_tdep_h) \
 	$(sparc_nat_h)
-sparc64nbsd-nat.o: sparc64nbsd-nat.c $(defs_h) $(sparc64_tdep_h) \
-	$(sparc_nat_h)
+sparc64nbsd-nat.o: sparc64nbsd-nat.c $(defs_h) $(regcache_h) \
+	$(sparc64_tdep_h) $(sparc_nat_h) $(bsd_kvm_h)
 sparc64nbsd-tdep.o: sparc64nbsd-tdep.c $(defs_h) $(frame_h) \
 	$(frame_unwind_h) $(gdbcore_h) $(osabi_h) $(regcache_h) $(regset_h) \
 	$(symtab_h) $(solib_svr4_h) $(trad_frame_h) $(gdb_assert_h) \
@@ -2359,7 +2509,7 @@ sparc64obsd-tdep.o: sparc64obsd-tdep.c $(defs_h) $(frame_h) \
 	$(trad_frame_h) $(gdb_assert_h) $(sparc64_tdep_h) $(nbsd_tdep_h)
 sparc64-sol2-tdep.o: sparc64-sol2-tdep.c $(defs_h) $(frame_h) \
 	$(frame_unwind_h) $(gdbarch_h) $(symtab_h) $(objfiles_h) $(osabi_h) \
-	$(trad_frame_h) $(gdb_assert_h) $(sparc64_tdep_h)
+	$(trad_frame_h) $(gdb_assert_h) $(sparc64_tdep_h) $(solib_svr4_h)
 sparc64-tdep.o: sparc64-tdep.c $(defs_h) $(arch_utils_h) $(floatformat_h) \
 	$(frame_h) $(frame_base_h) $(frame_unwind_h) $(gdbcore_h) \
 	$(gdbtypes_h) $(inferior_h) $(symtab_h) $(objfiles_h) $(osabi_h) \
@@ -2372,20 +2522,21 @@ sparc-linux-tdep.o: sparc-linux-tdep.c $(defs_h) $(floatformat_h) $(frame_h) \
 sparc-nat.o: sparc-nat.c $(defs_h) $(inferior_h) $(regcache_h) $(target_h) \
 	$(gdb_assert_h) $(gdb_string_h) $(gdb_wait_h) $(sparc_tdep_h) \
 	$(sparc_nat_h)
-sparcnbsd-nat.o: sparcnbsd-nat.c $(defs_h) $(sparc_tdep_h) $(sparc_nat_h)
+sparcnbsd-nat.o: sparcnbsd-nat.c $(defs_h) $(gdbcore_h) $(regcache_h) \
+	$(sparc_tdep_h) $(sparc_nat_h) $(bsd_kvm_h)
 sparcnbsd-tdep.o: sparcnbsd-tdep.c $(defs_h) $(floatformat_h) $(frame_h) \
 	$(frame_unwind_h) $(gdbcore_h) $(osabi_h) $(regcache_h) $(regset_h) \
 	$(solib_svr4_h) $(symtab_h) $(trad_frame_h) $(gdb_assert_h) \
 	$(gdb_string_h) $(sparc_tdep_h) $(nbsd_tdep_h)
 sparcobsd-tdep.o: sparcobsd-tdep.c $(defs_h) $(floatformat_h) $(frame_h) \
 	$(frame_unwind_h) $(osabi_h) $(solib_svr4_h) $(symtab_h) \
-	$(trad_frame_h) $(gdb_assert_h) $(sparc_tdep_h) $(nbsd_tdep_h)
+	$(trad_frame_h) $(gdb_assert_h) $(sparc_tdep_h)
 sparc-sol2-nat.o: sparc-sol2-nat.c $(defs_h) $(regcache_h) $(gregset_h) \
 	$(sparc_tdep_h) $(sparc64_tdep_h)
 sparc-sol2-tdep.o: sparc-sol2-tdep.c $(defs_h) $(frame_h) $(frame_unwind_h) \
 	$(gdbcore_h) $(symtab_h) $(objfiles_h) $(osabi_h) $(regcache_h) \
 	$(target_h) $(trad_frame_h) $(gdb_assert_h) $(gdb_string_h) \
-	$(sparc_tdep_h)
+	$(sparc_tdep_h) $(solib_svr4_h)
 sparc-stub.o: sparc-stub.c
 sparc-tdep.o: sparc-tdep.c $(defs_h) $(arch_utils_h) $(dis_asm_h) \
 	$(floatformat_h) $(frame_h) $(frame_base_h) $(frame_unwind_h) \
@@ -2402,12 +2553,9 @@ stack.o: stack.c $(defs_h) $(gdb_string_h) $(value_h) $(symtab_h) \
 	$(gdbcore_h) $(target_h) $(source_h) $(breakpoint_h) $(demangle_h) \
 	$(inferior_h) $(annotate_h) $(ui_out_h) $(block_h) $(stack_h) \
 	$(gdb_assert_h) $(dictionary_h) $(reggroups_h) $(regcache_h)
-standalone.o: standalone.c $(gdb_stat_h) $(defs_h) $(symtab_h) $(frame_h) \
-	$(inferior_h) $(gdb_wait_h)
 std-regs.o: std-regs.c $(defs_h) $(user_regs_h) $(frame_h) $(gdbtypes_h) \
 	$(value_h) $(gdb_string_h)
 stop-gdb.o: stop-gdb.c $(defs_h)
-sun3-nat.o: sun3-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) $(regcache_h)
 symfile.o: symfile.c $(defs_h) $(bfdlink_h) $(symtab_h) $(gdbtypes_h) \
 	$(gdbcore_h) $(frame_h) $(target_h) $(value_h) $(symfile_h) \
 	$(objfiles_h) $(source_h) $(gdbcmd_h) $(breakpoint_h) $(language_h) \
@@ -2415,6 +2563,8 @@ symfile.o: symfile.c $(defs_h) $(bfdlink_h) $(symtab_h) $(gdbtypes_h) \
 	$(gdb_stabs_h) $(gdb_obstack_h) $(completer_h) $(bcache_h) \
 	$(hashtab_h) $(readline_h) $(gdb_assert_h) $(block_h) \
 	$(gdb_string_h) $(gdb_stat_h)
+symfile-mem.o: symfile-mem.c $(defs_h) $(symtab_h) $(gdbcore_h) \
+	$(objfiles_h) $(gdbcmd_h) $(target_h) $(value_h) $(symfile_h)
 symmisc.o: symmisc.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(bfd_h) \
 	$(symfile_h) $(objfiles_h) $(breakpoint_h) $(command_h) \
 	$(gdb_obstack_h) $(language_h) $(bcache_h) $(block_h) $(gdb_regex_h) \
@@ -2451,7 +2601,7 @@ trad-frame.o: trad-frame.c $(defs_h) $(frame_h) $(trad_frame_h) \
 	$(regcache_h)
 tramp-frame.o: tramp-frame.c $(defs_h) $(tramp_frame_h) $(frame_unwind_h) \
 	$(gdbcore_h) $(symtab_h) $(objfiles_h) $(target_h) $(trad_frame_h) \
-	$(frame_base_h)
+	$(frame_base_h) $(gdb_assert_h)
 typeprint.o: typeprint.c $(defs_h) $(gdb_obstack_h) $(bfd_h) $(symtab_h) \
 	$(gdbtypes_h) $(expression_h) $(value_h) $(gdbcore_h) $(command_h) \
 	$(gdbcmd_h) $(target_h) $(language_h) $(cp_abi_h) $(typeprint_h) \
@@ -2464,7 +2614,7 @@ user-regs.o: user-regs.c $(defs_h) $(user_regs_h) $(gdbtypes_h) \
 utils.o: utils.c $(defs_h) $(gdb_assert_h) $(gdb_string_h) $(event_top_h) \
 	$(tui_h) $(gdbcmd_h) $(serial_h) $(bfd_h) $(target_h) $(demangle_h) \
 	$(expression_h) $(language_h) $(charset_h) $(annotate_h) \
-	$(filenames_h) $(inferior_h) $(readline_h)
+	$(filenames_h) $(symfile_h) $(inferior_h) $(readline_h)
 uw-thread.o: uw-thread.c $(defs_h) $(gdbthread_h) $(target_h) $(inferior_h) \
 	$(regcache_h) $(gregset_h)
 v850ice.o: v850ice.c $(defs_h) $(gdb_string_h) $(frame_h) $(symtab_h) \
@@ -2480,7 +2630,7 @@ valops.o: valops.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(value_h) $(frame_h) \
 	$(inferior_h) $(gdbcore_h) $(target_h) $(demangle_h) $(language_h) \
 	$(gdbcmd_h) $(regcache_h) $(cp_abi_h) $(block_h) $(infcall_h) \
 	$(dictionary_h) $(cp_support_h) $(gdb_string_h) $(gdb_assert_h) \
-	$(cp_support_h)
+	$(cp_support_h) $(observer_h)
 valprint.o: valprint.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 	$(value_h) $(gdbcore_h) $(gdbcmd_h) $(target_h) $(language_h) \
 	$(annotate_h) $(valprint_h) $(floatformat_h) $(doublest_h)
@@ -2490,9 +2640,15 @@ values.o: values.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 	$(gdb_assert_h) $(regcache_h) $(block_h)
 varobj.o: varobj.c $(defs_h) $(value_h) $(expression_h) $(frame_h) \
 	$(language_h) $(wrapper_h) $(gdbcmd_h) $(gdb_string_h) $(varobj_h)
-vax-tdep.o: vax-tdep.c $(defs_h) $(symtab_h) $(opcode_vax_h) $(gdbcore_h) \
-	$(inferior_h) $(regcache_h) $(frame_h) $(value_h) $(arch_utils_h) \
-	$(gdb_string_h) $(osabi_h) $(dis_asm_h) $(vax_tdep_h)
+vaxbsd-nat.o: vaxbsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
+	$(vax_tdep_h) $(bsd_kvm_h)
+vax-nat.o: vax-nat.c $(defs_h) $(inferior_h) $(gdb_assert_h) $(vax_tdep_h)
+vaxnbsd-tdep.o: vaxnbsd-tdep.c $(defs_h) $(arch_utils_h) $(osabi_h) \
+	$(vax_tdep_h) $(solib_svr4_h) $(gdb_string_h)
+vax-tdep.o: vax-tdep.c $(defs_h) $(arch_utils_h) $(dis_asm_h) $(frame_h) \
+	$(frame_base_h) $(frame_unwind_h) $(gdbcore_h) $(gdbtypes_h) \
+	$(osabi_h) $(regcache_h) $(regset_h) $(trad_frame_h) $(value_h) \
+	$(gdb_string_h) $(vax_tdep_h)
 win32-nat.o: win32-nat.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) \
 	$(gdbcore_h) $(command_h) $(completer_h) $(regcache_h) $(top_h) \
 	$(buildsym_h) $(symfile_h) $(objfiles_h) $(gdb_string_h) \
@@ -2510,7 +2666,6 @@ xcoffread.o: xcoffread.c $(defs_h) $(bfd_h) $(gdb_string_h) $(gdb_stat_h) \
 	$(complaints_h) $(gdb_stabs_h) $(aout_stab_gnu_h)
 xcoffsolib.o: xcoffsolib.c $(defs_h) $(bfd_h) $(xcoffsolib_h) $(inferior_h) \
 	$(gdbcmd_h) $(symfile_h) $(frame_h) $(gdb_regex_h)
-xmodem.o: xmodem.c $(defs_h) $(serial_h) $(target_h) $(xmodem_h)
 xstormy16-tdep.o: xstormy16-tdep.c $(defs_h) $(value_h) $(inferior_h) \
 	$(arch_utils_h) $(regcache_h) $(gdbcore_h) $(objfiles_h) \
 	$(dis_asm_h)
@@ -2723,7 +2878,7 @@ mi-cmd-env.o: $(srcdir)/mi/mi-cmd-env.c $(defs_h) $(inferior_h) $(value_h) \
 	$(gdb_stat_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-cmd-env.c
 mi-cmd-file.o: $(srcdir)/mi/mi-cmd-file.c $(defs_h) $(mi_cmds_h) \
-	$(mi_getopt_h) $(ui_out_h) $(symtab_h) $(source_h)
+	$(mi_getopt_h) $(ui_out_h) $(symtab_h) $(source_h) $(objfiles_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-cmd-file.c
 mi-cmds.o: $(srcdir)/mi/mi-cmds.c $(defs_h) $(top_h) $(mi_cmds_h) \
 	$(gdb_string_h)
@@ -2815,20 +2970,20 @@ tui-file.o: $(srcdir)/tui/tui-file.c $(defs_h) $(ui_file_h) $(tui_file_h) \
 tui-hooks.o: $(srcdir)/tui/tui-hooks.c $(defs_h) $(symtab_h) $(inferior_h) \
 	$(command_h) $(bfd_h) $(symfile_h) $(objfiles_h) $(target_h) \
 	$(gdbcore_h) $(event_loop_h) $(event_top_h) $(frame_h) \
-	$(breakpoint_h) $(gdb_events_h) $(ui_out_h) $(top_h) $(readline_h) \
-	$(tui_h) $(tui_hooks_h) $(tui_data_h) $(tui_layout_h) $(tui_io_h) \
+	$(breakpoint_h) $(gdb_events_h) $(ui_out_h) $(top_h) $(tui_h) \
+	$(tui_hooks_h) $(tui_data_h) $(tui_layout_h) $(tui_io_h) \
 	$(tui_regs_h) $(tui_win_h) $(tui_stack_h) $(tui_windata_h) \
-	$(tui_winsource_h) $(gdb_curses_h)
+	$(tui_winsource_h) $(gdb_curses_h) $(readline_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-hooks.c
 tui-interp.o: $(srcdir)/tui/tui-interp.c $(defs_h) $(interps_h) $(top_h) \
 	$(event_top_h) $(event_loop_h) $(ui_out_h) $(cli_out_h) \
 	$(tui_data_h) $(readline_h) $(tui_win_h) $(tui_h) $(tui_io_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-interp.c
 tui-io.o: $(srcdir)/tui/tui-io.c $(defs_h) $(terminal_h) $(target_h) \
-	$(event_loop_h) $(event_top_h) $(command_h) $(top_h) $(readline_h) \
-	$(tui_h) $(tui_data_h) $(tui_io_h) $(tui_command_h) $(tui_win_h) \
+	$(event_loop_h) $(event_top_h) $(command_h) $(top_h) $(tui_h) \
+	$(tui_data_h) $(tui_io_h) $(tui_command_h) $(tui_win_h) \
 	$(tui_wingeneral_h) $(tui_file_h) $(ui_out_h) $(cli_out_h) \
-	$(gdb_curses_h)
+	$(gdb_curses_h) $(readline_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-io.c
 tui-layout.o: $(srcdir)/tui/tui-layout.c $(defs_h) $(command_h) $(symtab_h) \
 	$(frame_h) $(source_h) $(tui_h) $(tui_data_h) $(tui_windata_h) \

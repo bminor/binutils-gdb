@@ -26,10 +26,6 @@
 /* Targets should define this to use the generic x86 watchpoint support.  */
 #ifdef I386_USE_GENERIC_WATCHPOINTS
 
-#ifndef TARGET_HAS_HARDWARE_WATCHPOINTS
-#define TARGET_HAS_HARDWARE_WATCHPOINTS
-#endif
-
 /* Clear the reference counts and forget everything we knew about DRi.  */
 extern void i386_cleanup_dregs (void);
 

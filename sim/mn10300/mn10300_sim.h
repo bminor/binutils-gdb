@@ -6,6 +6,7 @@
 #include <limits.h>
 #include "gdb/remote-sim.h"
 #include "bfd.h"
+#include "sim-fpu.h"
 
 #ifndef INLINE
 #ifdef __GNUC__
@@ -53,6 +54,10 @@ typedef signed long int32;
 #  endif
 #endif
 
+typedef struct
+{
+  uint32 low, high;
+} dword;
 typedef uint32 reg_t;
 
 struct simops 
@@ -73,6 +78,11 @@ struct _state
   reg_t regs[32];		/* registers, d0-d3, a0-a3, sp, pc, mdr, psw,
 				   lir, lar, mdrq, plus some room for processor
 				   specific regs.  */
+  union
+  {
+    reg_t fs[32]; /* FS0-31 */
+    dword fd[16]; /* FD0,2,...,30 */
+  } fpregs;
   uint8 *mem;			/* main memory */
   int exception;
   int exited;
@@ -123,41 +133,56 @@ extern struct simops Simops[];
 #define REG_MCRL 27
 #define REG_MCVF 28
 
-#if WITH_COMMON
-/* These definitions conflict with similar macros in common.  */
-#else
-#define SEXT3(x)	((((x)&0x7)^(~0x3))+0x4)	
+#define REG_FPCR 29
 
-/* sign-extend a 4-bit number */
-#define SEXT4(x)	((((x)&0xf)^(~0x7))+0x8)	
+#define FPCR (State.regs[REG_FPCR])
 
-/* sign-extend a 5-bit number */
-#define SEXT5(x)	((((x)&0x1f)^(~0xf))+0x10)	
+#define FCC_MASK LSMASK (21, 18)
+#define RM_MASK  LSMASK (17, 16) /* Must always be zero.  */
+#define EC_MASK  LSMASK (14, 10)
+#define EE_MASK  LSMASK ( 9,  5)
+#define EF_MASK  LSMASK ( 4,  0)
+#define FPCR_MASK (FCC_MASK | EC_MASK | EE_MASK | EF_MASK)
 
-/* sign-extend an 8-bit number */
-#define SEXT8(x)	((((x)&0xff)^(~0x7f))+0x80)
+#define FCC_L LSBIT (21)
+#define FCC_G LSBIT (20)
+#define FCC_E LSBIT (19)
+#define FCC_U LSBIT (18)
 
-/* sign-extend a 9-bit number */
-#define SEXT9(x)	((((x)&0x1ff)^(~0xff))+0x100)
+#define EC_V LSBIT (14)
+#define EC_Z LSBIT (13)
+#define EC_O LSBIT (12)
+#define EC_U LSBIT (11)
+#define EC_I LSBIT (10)
 
-/* sign-extend a 16-bit number */
-#define SEXT16(x)	((((x)&0xffff)^(~0x7fff))+0x8000)
+#define EE_V LSBIT (9)
+#define EE_Z LSBIT (8)
+#define EE_O LSBIT (7)
+#define EE_U LSBIT (6)
+#define EE_I LSBIT (5)
 
-/* sign-extend a 22-bit number */
-#define SEXT22(x)	((((x)&0x3fffff)^(~0x1fffff))+0x200000)
+#define EF_V LSBIT (4)
+#define EF_Z LSBIT (3)
+#define EF_O LSBIT (2)
+#define EF_U LSBIT (1)
+#define EF_I LSBIT (0)
 
-#define MAX32	0x7fffffffLL
-#define MIN32	0xff80000000LL
-#define MASK32	0xffffffffLL
-#define MASK40	0xffffffffffLL
-#endif  /* not WITH_COMMON */
+#define PSW_FE LSBIT(20)
+#define FPU_DISABLED !(PSW & PSW_FE)
+
+#define XS2FS(X,S) State.fpregs.fs[((X<<4)|(S))]
+#define AS2FS(A,S) State.fpregs.fs[((A<<2)|(S))]
+#define Xf2FD(X,f) State.fpregs.fd[((X<<3)|(f))]
+
+#define FS2FPU(FS,F) sim_fpu_32to (&(F), (FS))
+#define FD2FPU(FD,F) sim_fpu_232to (&(F), ((FD).high), ((FD).low))
+#define FPU2FS(F,FS) sim_fpu_to32 (&(FS), &(F))
+#define FPU2FD(F,FD) sim_fpu_to232 (&((FD).high), &((FD).low), &(F))
 
 #ifdef _WIN32
 #define SIGTRAP 5
 #define SIGQUIT 3
 #endif
-
-#if WITH_COMMON
 
 #define FETCH32(a,b,c,d) \
  ((a)+((b)<<8)+((c)<<16)+((d)<<24))
@@ -176,6 +201,20 @@ sim_core_read_unaligned_2 (STATE_CPU (simulator, 0), PC, read_map, (ADDR))
 #define load_word(ADDR) \
 sim_core_read_unaligned_4 (STATE_CPU (simulator, 0), PC, read_map, (ADDR))
 
+#define load_dword(ADDR) \
+u642dw (sim_core_read_unaligned_8 (STATE_CPU (simulator, 0), \
+				   PC, read_map, (ADDR)))
+
+static INLINE dword
+u642dw (unsigned64 dw)
+{
+  dword r;
+
+  r.low = (unsigned32)dw;
+  r.high = (unsigned32)(dw >> 32);
+  return r;
+}
+
 #define store_byte(ADDR, DATA) \
 sim_core_write_unaligned_1 (STATE_CPU (simulator, 0), \
 			    PC, write_map, (ADDR), (DATA))
@@ -189,202 +228,72 @@ sim_core_write_unaligned_2 (STATE_CPU (simulator, 0), \
 #define store_word(ADDR, DATA) \
 sim_core_write_unaligned_4 (STATE_CPU (simulator, 0), \
 			    PC, write_map, (ADDR), (DATA))
-#endif  /* WITH_COMMON */
+#define store_dword(ADDR, DATA) \
+sim_core_write_unaligned_8 (STATE_CPU (simulator, 0), \
+			    PC, write_map, (ADDR), dw2u64 (DATA))
 
-#if WITH_COMMON
-#else
-#define load_mem_big(addr,len) \
-  (len == 1 ? *((addr) + State.mem) : \
-   len == 2 ? ((*((addr) + State.mem) << 8) \
-	       | *(((addr) + 1) + State.mem)) : \
-   len == 3 ? ((*((addr) + State.mem) << 16) \
-	       | (*(((addr) + 1) + State.mem) << 8) \
-	       | *(((addr) + 2) + State.mem)) : \
-	      ((*((addr) + State.mem) << 24) \
-	       | (*(((addr) + 1) + State.mem) << 16) \
-	       | (*(((addr) + 2) + State.mem) << 8) \
-	       | *(((addr) + 3) + State.mem)))
-
-static INLINE uint32
-load_byte (addr)
-     SIM_ADDR addr;
+static INLINE unsigned64
+dw2u64 (dword data)
 {
-  uint8 *p = (addr & 0xffffff) + State.mem;
-
-#ifdef CHECK_ADDR
-  if ((addr & 0xffffff) > max_mem)
-    abort ();
-#endif
-
-  return p[0];
+  return data.low | (((unsigned64)data.high) << 32);
 }
-
-static INLINE uint32
-load_half (addr)
-     SIM_ADDR addr;
-{
-  uint8 *p = (addr & 0xffffff) + State.mem;
-
-#ifdef CHECK_ADDR
-  if ((addr & 0xffffff) > max_mem)
-    abort ();
-#endif
-
-  return p[1] << 8 | p[0];
-}
-
-static INLINE uint32
-load_3_byte (addr)
-     SIM_ADDR addr;
-{
-  uint8 *p = (addr & 0xffffff) + State.mem;
-
-#ifdef CHECK_ADDR
-  if ((addr & 0xffffff) > max_mem)
-    abort ();
-#endif
-
-  return p[2] << 16 | p[1] << 8 | p[0];
-}
-
-static INLINE uint32
-load_word (addr)
-     SIM_ADDR addr;
-{
-  uint8 *p = (addr & 0xffffff) + State.mem;
-
-#ifdef CHECK_ADDR
-  if ((addr & 0xffffff) > max_mem)
-    abort ();
-#endif
-
-  return p[3] << 24 | p[2] << 16 | p[1] << 8 | p[0];
-}
-
-static INLINE uint32
-load_mem (addr, len)
-     SIM_ADDR addr;
-     int len;
-{
-  uint8 *p = (addr & 0xffffff) + State.mem;
-
-#ifdef CHECK_ADDR
-  if ((addr & 0xffffff) > max_mem)
-    abort ();
-#endif
-
-  switch (len)
-    {
-    case 1:
-      return p[0];
-    case 2:
-      return p[1] << 8 | p[0];
-    case 3:
-      return p[2] << 16 | p[1] << 8 | p[0];
-    case 4:
-      return p[3] << 24 | p[2] << 16 | p[1] << 8 | p[0];
-    default:
-      abort ();
-    }
-}
-
-static INLINE void
-store_byte (addr, data)
-     SIM_ADDR addr;
-     uint32 data;
-{
-  uint8 *p = (addr & 0xffffff) + State.mem;
-
-#ifdef CHECK_ADDR
-  if ((addr & 0xffffff) > max_mem)
-    abort ();
-#endif
-
-  p[0] = data;
-}
-
-static INLINE void
-store_half (addr, data)
-     SIM_ADDR addr;
-     uint32 data;
-{
-  uint8 *p = (addr & 0xffffff) + State.mem;
-
-#ifdef CHECK_ADDR
-  if ((addr & 0xffffff) > max_mem)
-    abort ();
-#endif
-
-  p[0] = data;
-  p[1] = data >> 8;
-}
-
-static INLINE void
-store_3_byte (addr, data)
-     SIM_ADDR addr;
-     uint32 data;
-{
-  uint8 *p = (addr & 0xffffff) + State.mem;
-
-#ifdef CHECK_ADDR
-  if ((addr & 0xffffff) > max_mem)
-    abort ();
-#endif
-
-  p[0] = data;
-  p[1] = data >> 8;
-  p[2] = data >> 16;
-}
-
-static INLINE void
-store_word (addr, data)
-     SIM_ADDR addr;
-     uint32 data;
-{
-  uint8 *p = (addr & 0xffffff) + State.mem;
-
-#ifdef CHECK_ADDR
-  if ((addr & 0xffffff) > max_mem)
-    abort ();
-#endif
-
-  p[0] = data;
-  p[1] = data >> 8;
-  p[2] = data >> 16;
-  p[3] = data >> 24;
-}
-#endif  /* not WITH_COMMON */
 
 /* Function declarations.  */
 
-uint32 get_word PARAMS ((uint8 *));
-uint16 get_half PARAMS ((uint8 *));
-uint8 get_byte PARAMS ((uint8 *));
-void put_word PARAMS ((uint8 *, uint32));
-void put_half PARAMS ((uint8 *, uint16));
-void put_byte PARAMS ((uint8 *, uint8));
+uint32 get_word (uint8 *);
+uint16 get_half (uint8 *);
+uint8 get_byte (uint8 *);
+void put_word (uint8 *, uint32);
+void put_half (uint8 *, uint16);
+void put_byte (uint8 *, uint8);
 
-extern uint8 *map PARAMS ((SIM_ADDR addr));
+extern uint8 *map (SIM_ADDR addr);
 
-INLINE_SIM_MAIN (void) genericAdd PARAMS ((unsigned32 source, unsigned32 destReg));
-INLINE_SIM_MAIN (void) genericSub PARAMS ((unsigned32 source, unsigned32 destReg));
-INLINE_SIM_MAIN (void) genericCmp PARAMS ((unsigned32 leftOpnd, unsigned32 rightOpnd));
-INLINE_SIM_MAIN (void) genericOr PARAMS ((unsigned32 source, unsigned32 destReg));
-INLINE_SIM_MAIN (void) genericXor PARAMS ((unsigned32 source, unsigned32 destReg));
-INLINE_SIM_MAIN (void) genericBtst PARAMS ((unsigned32 leftOpnd, unsigned32 rightOpnd));
-INLINE_SIM_MAIN (int) syscall_read_mem PARAMS ((host_callback *cb,
-						struct cb_syscall *sc,
-						unsigned long taddr,
-						char *buf,
-						int bytes)); 
-INLINE_SIM_MAIN (int) syscall_write_mem PARAMS ((host_callback *cb,
-						struct cb_syscall *sc,
-						unsigned long taddr,
-						const char *buf,
-						int bytes)); 
-INLINE_SIM_MAIN (void) do_syscall PARAMS ((void));
+INLINE_SIM_MAIN (void) genericAdd (unsigned32 source, unsigned32 destReg);
+INLINE_SIM_MAIN (void) genericSub (unsigned32 source, unsigned32 destReg);
+INLINE_SIM_MAIN (void) genericCmp (unsigned32 leftOpnd, unsigned32 rightOpnd);
+INLINE_SIM_MAIN (void) genericOr (unsigned32 source, unsigned32 destReg);
+INLINE_SIM_MAIN (void) genericXor (unsigned32 source, unsigned32 destReg);
+INLINE_SIM_MAIN (void) genericBtst (unsigned32 leftOpnd, unsigned32 rightOpnd);
+INLINE_SIM_MAIN (int) syscall_read_mem (host_callback *cb,
+					struct cb_syscall *sc,
+					unsigned long taddr,
+					char *buf,
+					int bytes);
+INLINE_SIM_MAIN (int) syscall_write_mem (host_callback *cb,
+					 struct cb_syscall *sc,
+					 unsigned long taddr,
+					 const char *buf,
+					 int bytes); 
+INLINE_SIM_MAIN (void) do_syscall (void);
 void program_interrupt (SIM_DESC sd, sim_cpu *cpu, sim_cia cia, SIM_SIGNAL sig);
 
 void mn10300_cpu_exception_trigger(SIM_DESC sd, sim_cpu* cpu, address_word pc);
 void mn10300_cpu_exception_suspend(SIM_DESC sd, sim_cpu* cpu, int exception);
 void mn10300_cpu_exception_resume(SIM_DESC sd, sim_cpu* cpu, int exception);
+
+void fpu_disabled_exception     (SIM_DESC, sim_cpu *, address_word);
+void fpu_unimp_exception        (SIM_DESC, sim_cpu *, address_word);
+void fpu_check_signal_exception (SIM_DESC, sim_cpu *, address_word);
+
+extern const struct fp_prec_t
+{
+  void (* reg2val) (const void *, sim_fpu *);
+  int (*  round)   (sim_fpu *);
+  void (* val2reg) (const sim_fpu *, void *);
+} fp_single_prec, fp_double_prec;
+
+#define FP_SINGLE (&fp_single_prec)
+#define FP_DOUBLE (&fp_double_prec)
+
+void fpu_rsqrt  (SIM_DESC, sim_cpu *, address_word, const void *, void *, const struct fp_prec_t *);
+void fpu_sqrt   (SIM_DESC, sim_cpu *, address_word, const void *, void *, const struct fp_prec_t *);
+void fpu_cmp    (SIM_DESC, sim_cpu *, address_word, const void *, const void *, const struct fp_prec_t *);
+void fpu_add    (SIM_DESC, sim_cpu *, address_word, const void *, const void *, void *, const struct fp_prec_t *);
+void fpu_sub    (SIM_DESC, sim_cpu *, address_word, const void *, const void *, void *, const struct fp_prec_t *);
+void fpu_mul    (SIM_DESC, sim_cpu *, address_word, const void *, const void *, void *, const struct fp_prec_t *);
+void fpu_div    (SIM_DESC, sim_cpu *, address_word, const void *, const void *, void *, const struct fp_prec_t *);
+void fpu_fmadd  (SIM_DESC, sim_cpu *, address_word, const void *, const void *, const void *, void *, const struct fp_prec_t *);
+void fpu_fmsub  (SIM_DESC, sim_cpu *, address_word, const void *, const void *, const void *, void *, const struct fp_prec_t *);
+void fpu_fnmadd (SIM_DESC, sim_cpu *, address_word, const void *, const void *, const void *, void *, const struct fp_prec_t *);
+void fpu_fnmsub (SIM_DESC, sim_cpu *, address_word, const void *, const void *, const void *, void *, const struct fp_prec_t *);

@@ -222,7 +222,7 @@ hw_glue_finish (struct hw *me)
       hw_abort (me, "at least one reg property size must be nonzero");
     if (glue->sizeof_output % sizeof (unsigned_word) != 0)
       hw_abort (me, "reg property size must be %ld aligned",
-		sizeof (unsigned_word));
+		(long) sizeof (unsigned_word));
     /* and the address */
     hw_unit_address_to_attach_address (hw_parent (me),
 				       &unit.address,
@@ -231,7 +231,7 @@ hw_glue_finish (struct hw *me)
 				       me);
     if (glue->address % (sizeof (unsigned_word) * max_nr_ports) != 0)
       hw_abort (me, "reg property address must be %ld aligned",
-		sizeof (unsigned_word) * max_nr_ports);
+		(long) (sizeof (unsigned_word) * max_nr_ports));
     glue->nr_outputs = glue->sizeof_output / sizeof (unsigned_word);
     glue->output = hw_zalloc (me, glue->sizeof_output);
   }

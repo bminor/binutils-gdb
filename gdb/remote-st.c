@@ -222,14 +222,15 @@ get_hex_regs (int n, int regno)
       val = 0;
       for (j = 0; j < 8; j++)
 	val = (val << 4) + get_hex_digit (j == 0);
-      supply_register (regno++, (char *) &val);
+      regcache_raw_supply (current_regcache, regno++, (char *) &val);
     }
 }
 
 /* This is called not only when we first attach, but also when the
    user types "run" after having attached.  */
 static void
-st2000_create_inferior (char *execfile, char *args, char **env)
+st2000_create_inferior (char *execfile, char *args, char **env,
+			int from_tty)
 {
   int entry_pt;
 

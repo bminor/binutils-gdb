@@ -85,12 +85,13 @@ tramp_frame_prev_register (struct frame_info *next_frame,
 }
 
 static CORE_ADDR
-tramp_frame_start (CORE_ADDR pc, const struct tramp_frame *tramp)
+tramp_frame_start (const struct tramp_frame *tramp,
+		   struct frame_info *next_frame, CORE_ADDR pc)
 {
   int ti;
   /* Search through the trampoline for one that matches the
      instruction sequence around PC.  */
-  for (ti = 0; tramp->insn[ti] != TRAMP_SENTINEL_INSN; ti++)
+  for (ti = 0; tramp->insn[ti].bytes != TRAMP_SENTINEL_INSN; ti++)
     {
       CORE_ADDR func = pc - tramp->insn_size * ti;
       int i;
@@ -98,13 +99,14 @@ tramp_frame_start (CORE_ADDR pc, const struct tramp_frame *tramp)
 	{
 	  bfd_byte buf[sizeof (tramp->insn[0])];
 	  ULONGEST insn;
-	  if (tramp->insn[i] == TRAMP_SENTINEL_INSN)
+	  if (tramp->insn[i].bytes == TRAMP_SENTINEL_INSN)
 	    return func;
-	  if (target_read_memory (func + i * tramp->insn_size, buf,
-				  tramp->insn_size) != 0)
+	  if (!safe_frame_unwind_memory (next_frame,
+					 func + i * tramp->insn_size,
+					 buf, tramp->insn_size))
 	    break;
 	  insn = extract_unsigned_integer (buf, tramp->insn_size);
-	  if (tramp->insn[i] != insn)
+	  if (tramp->insn[i].bytes != (insn & tramp->insn[i].mask))
 	    break;
 	}
     }
@@ -133,7 +135,7 @@ tramp_frame_sniffer (const struct frame_unwind *self,
   if (find_pc_section (pc) != NULL)
     return 0;
   /* Finally, check that the trampoline matches at PC.  */
-  func = tramp_frame_start (pc, tramp);
+  func = tramp_frame_start (tramp, next_frame, pc);
   if (func == 0)
     return 0;
   tramp_cache = FRAME_OBSTACK_ZALLOC (struct tramp_frame_cache);
@@ -144,8 +146,8 @@ tramp_frame_sniffer (const struct frame_unwind *self,
 }
 
 void
-tramp_frame_append (struct gdbarch *gdbarch,
-		    const struct tramp_frame *tramp_frame)
+tramp_frame_prepend_unwinder (struct gdbarch *gdbarch,
+			      const struct tramp_frame *tramp_frame)
 {
   struct frame_data *data;
   struct frame_unwind *unwinder;
@@ -154,11 +156,11 @@ tramp_frame_append (struct gdbarch *gdbarch,
   /* Check that the instruction sequence contains a sentinel.  */
   for (i = 0; i < ARRAY_SIZE (tramp_frame->insn); i++)
     {
-      if (tramp_frame->insn[i] == TRAMP_SENTINEL_INSN)
+      if (tramp_frame->insn[i].bytes == TRAMP_SENTINEL_INSN)
 	break;
     }
   gdb_assert (i < ARRAY_SIZE (tramp_frame->insn));
-  gdb_assert (tramp_frame->insn_size <= sizeof (tramp_frame->insn[0]));
+  gdb_assert (tramp_frame->insn_size <= sizeof (tramp_frame->insn[0].bytes));
 
   data = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct frame_data);
   unwinder = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct frame_unwind);
@@ -169,5 +171,5 @@ tramp_frame_append (struct gdbarch *gdbarch,
   unwinder->sniffer = tramp_frame_sniffer;
   unwinder->this_id = tramp_frame_this_id;
   unwinder->prev_register = tramp_frame_prev_register;
-  frame_unwind_register_unwinder (gdbarch, unwinder);
+  frame_unwind_prepend_unwinder (gdbarch, unwinder);
 }

@@ -1,8 +1,52 @@
 
-			Known problems in GDB 6.1
+			Known problems in GDB 6.2
 
 		See also: http://www.gnu.org/software/gdb/bugs/
 
+
+*** Build problems
+
+build/1411: build fails on hpux 10.20 and hpux 11.00 with CMA threads
+
+GDB does not build on HP/UX 10.20 or HP/UX 11.00 if the CMA
+thread package is installed.  The compile error is:
+
+  ../../gdb/hpux-thread.c:222: variable-size type declared outside of any function
+
+This happens only if the CMA thread package is installed.
+
+As a workaround, you can disable support for CMA threads
+by editing the file gdb/configure.  Find the line:
+
+  if test -f /usr/include/dce/cma_config.h ; then
+
+And replace it with:
+
+  if false ; then
+
+build/1458: compile failed on hpux11
+
+GDB has build problems on HP/UX 11 with some versions of the HP
+Ansi C compiler.  (GCC works fine).
+
+The problem happens when compiling intl/bindtextdom.c.
+The error is:
+
+  cc: "gettextP.h", line 50: error 1000: Unexpected symbol: "SWAP".
+  cc: panic 2017: Cannot recover from earlier errors, terminating.
+  *** Error exit code 1
+
+This is a problem with the 'inline' keyword in gettextP.h.
+The workaround is to disable 'inline' before building gdb:
+
+  export ac_cv_c_inline=no
+
+This problem happens only with some versions of the HP Ansi C compiler.
+Versions A.11.01.25171.GP and B.11.11.28706.GP have both been observed
+to work; version B.11.11.04 gets the build error and needs the
+workaround.
+
+This problem might also happen with other C compilers.
 
 *** Misc
 
@@ -68,6 +112,19 @@ implement virtual base classes.  gcc 2.x generated just one object code
 function with a hidden parameter, but gcc 3.x conforms to a multi-vendor
 ABI for C++ which requires multiple object code functions.
 
+*** Signal handlers
+
+On many systems an attempt to single-step a system-call instruction
+results in two or more instructions being executed (the system-call,
+and one or more instructions following).
+
+When attempting to single-step through a signal trampoline, this
+problem may result the program unintentionally running to completion,
+or re-execute the faulting instruction, or even corrupting the program
+counter.
+
+Ref: PR breakpoints/1702.
+
 *** Stack backtraces
 
 GDB's core code base has been updated to use a new backtrace
@@ -83,23 +140,13 @@ When backtracing a thread, gdb does not stop when it reaches the
 outermost frame, instead continuing until it hits garbage.  This is
 sensitive to the operating system and thread library.
 
-hppa*-*-*
-mips*-*-*
+*** Threads
 
-The MIPS and HPPA backtrace code has only very recently been updated
-to use GDB's new frame mechanism.  At present there are still a few
-problems, in particular backtraces through signal handlers do not
-work.
+threads/1650: manythreads.exp
 
-People encountering problems with these architectures should consult
-GDB's web pages and mailing lists (http://www.gnu.org/software/gdb/)
-to see if there are updates.
+On GNU/Linux systems that use the old LinuxThreads thread library, a
+program rapidly creating and deleting threads can confuse GDB leading
+to an internal error.
 
-powerpc*-*-*
-
-PowerPC architecture support, in 6.1, does not use the new frame code.
-
-Fortunately, PowerPC architecture support, in GDB's mainline sources,
-have been updated.  People encountering problems should consider
-downloading a more current snapshot of GDB
-(http://www.gnu.org/software/gdb/current/).
+This problem does not occur on newer systems that use the NPTL
+library, and did not occur with GDB 6.1.

@@ -218,6 +218,13 @@ struct elf_link_hash_entry
 #define SYMBOL_CALLS_LOCAL(INFO, H) \
   _bfd_elf_symbol_refs_local_p (H, INFO, 1)
 
+/* Common symbols that are turned into definitions don't have the
+   DEF_REGULAR flag set, so they might appear to be undefined.  */
+#define ELF_COMMON_DEF_P(H) \
+  (((H)->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0		\
+   && ((H)->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) == 0	\
+   && (H)->root.type == bfd_link_hash_defined)
+
 /* Records local symbols to be emitted in the dynamic symbol table.  */
 
 struct elf_link_local_dynamic_entry
@@ -278,11 +285,11 @@ struct eh_cie_fde
   unsigned char fde_encoding;
   unsigned char lsda_encoding;
   unsigned char lsda_offset;
-  unsigned char cie : 1;
-  unsigned char removed : 1;
-  unsigned char make_relative : 1;
-  unsigned char make_lsda_relative : 1;
-  unsigned char per_encoding_relative : 1;
+  unsigned int cie : 1;
+  unsigned int removed : 1;
+  unsigned int make_relative : 1;
+  unsigned int make_lsda_relative : 1;
+  unsigned int per_encoding_relative : 1;
 };
 
 struct eh_frame_sec_info
@@ -356,11 +363,11 @@ struct elf_link_hash_table
   /* The _GLOBAL_OFFSET_TABLE_ symbol.  */
   struct elf_link_hash_entry *hgot;
 
-  /* A pointer to information used to link stabs in sections.  */
-  void *stab_info;
-
   /* A pointer to information used to merge SEC_MERGE sections.  */
   void *merge_info;
+
+  /* Used to link stabs in sections.  */
+  struct stab_info stab_info;
 
   /* Used by eh_frame code when editing .eh_frame.  */
   struct eh_frame_hdr_info eh_info;
@@ -531,6 +538,9 @@ struct elf_backend_data
   /* The maximum page size for this backend.  */
   bfd_vma maxpagesize;
 
+  /* The BFD flags applied to sections created for dynamic linking.  */
+  flagword dynamic_sec_flags;
+
   /* A function to translate an ELF RELA relocation to a BFD arelent
      structure.  */
   void (*elf_info_to_howto)
@@ -572,10 +582,15 @@ struct elf_backend_data
   bfd_boolean (*elf_backend_symbol_table_processing)
     (bfd *, elf_symbol_type *, unsigned int);
 
-   /* A function to set the type of the info field.  Processor-specific
+  /* A function to set the type of the info field.  Processor-specific
      types should be handled here.  */
   int (*elf_backend_get_symbol_type)
     (Elf_Internal_Sym *, int);
+
+  /* A function to return the linker hash table entry of a symbol that
+     might be satisfied by an archive symbol.  */
+  struct elf_link_hash_entry * (*elf_backend_archive_symbol_lookup)
+    (bfd *, struct bfd_link_info *, const char *);
 
   /* Return true if local section symbols should have a non-null st_name.
      NULL implies false.  */
@@ -597,7 +612,7 @@ struct elf_backend_data
   /* A function to convert machine dependent section header flags to
      BFD internal section header flags.  */
   bfd_boolean (*elf_backend_section_flags)
-    (flagword *, Elf_Internal_Shdr *);
+    (flagword *, const Elf_Internal_Shdr *);
 
   /* A function to handle unusual program segment types when creating BFD
      sections from ELF program segments.  */
@@ -646,6 +661,11 @@ struct elf_backend_data
   bfd_boolean (*elf_backend_create_dynamic_sections)
     (bfd *abfd, struct bfd_link_info *info);
 
+  /* When creating a shared library, determine whether to omit the
+     dynamic symbol for the section.  */
+  bfd_boolean (*elf_backend_omit_section_dynsym)
+    (bfd *output_bfd, struct bfd_link_info *info, asection *osec);
+
   /* The CHECK_RELOCS function is called by the add_symbols phase of
      the ELF backend linker.  It is called once for each section with
      relocs of an object file, just after the symbols for the object
@@ -659,6 +679,13 @@ struct elf_backend_data
   bfd_boolean (*check_relocs)
     (bfd *abfd, struct bfd_link_info *info, asection *o,
      const Elf_Internal_Rela *relocs);
+
+  /* The CHECK_DIRECTIVES function is called once per input file by
+     the add_symbols phase of the ELF backend linker.  The function
+     must inspect the bfd and create any additional symbols according
+     to any custom directives in the bfd.  */
+  bfd_boolean (*check_directives)
+    (bfd *abfd, struct bfd_link_info *info);
 
   /* The ADJUST_DYNAMIC_SYMBOL function is called by the ELF backend
      linker for every symbol which is defined by a dynamic object and
@@ -902,6 +929,16 @@ struct elf_backend_data
      (bfd *templ, bfd_vma ehdr_vma, bfd_vma *loadbasep,
       int (*target_read_memory) (bfd_vma vma, char *myaddr, int len));
 
+  /* This function is used by `_bfd_elf_get_synthetic_symtab';
+     see elf.c.  */
+  bfd_vma (*plt_sym_val) (bfd_vma, const asection *, const arelent *);
+
+  /* Used to handle bad SHF_LINK_ORDER input.  */
+  bfd_error_handler_type link_order_error_handler;
+
+  /* Name of the PLT relocation section.  */
+  const char *relplt_name;
+
   /* Alternate EM_xxxx machine codes for this backend.  */
   int elf_machine_alt1;
   int elf_machine_alt2;
@@ -1012,6 +1049,9 @@ struct bfd_elf_section_data
      no dynamic symbol for this section.  */
   int dynindx;
 
+  /* A pointer to the linked-to section for SHF_LINK_ORDER.  */
+  asection *linked_to;
+
   /* Used by the backend linker to store the symbol hash table entries
      associated with relocs against global symbols.  */
   struct elf_link_hash_entry **rel_hashes;
@@ -1036,6 +1076,10 @@ struct bfd_elf_section_data
     struct bfd_symbol *id;
   } group;
 
+  /* Optional information about section group; NULL if it doesn't
+     belongs to any section group. */
+  asection *sec_group;
+
   /* A linked list of sections in the group.  Circular when used by
      the linker.  */
   asection *next_in_group;
@@ -1045,18 +1089,20 @@ struct bfd_elf_section_data
 };
 
 #define elf_section_data(sec)  ((struct bfd_elf_section_data*)sec->used_by_bfd)
+#define elf_linked_to_section(sec) (elf_section_data(sec)->linked_to)
 #define elf_section_type(sec)  (elf_section_data(sec)->this_hdr.sh_type)
 #define elf_section_flags(sec) (elf_section_data(sec)->this_hdr.sh_flags)
 #define elf_group_name(sec)    (elf_section_data(sec)->group.name)
 #define elf_group_id(sec)      (elf_section_data(sec)->group.id)
 #define elf_next_in_group(sec) (elf_section_data(sec)->next_in_group)
+#define elf_sec_group(sec)	(elf_section_data(sec)->sec_group)
 
 /* Return TRUE if section has been discarded.  */
 #define elf_discarded_section(sec)				\
   (!bfd_is_abs_section (sec)					\
    && bfd_is_abs_section ((sec)->output_section)		\
-   && sec->sec_info_type != ELF_INFO_TYPE_MERGE			\
-   && sec->sec_info_type != ELF_INFO_TYPE_JUST_SYMS)
+   && (sec)->sec_info_type != ELF_INFO_TYPE_MERGE		\
+   && (sec)->sec_info_type != ELF_INFO_TYPE_JUST_SYMS)
 
 #define get_elf_backend_data(abfd) \
   ((const struct elf_backend_data *) (abfd)->xvec->backend_data)
@@ -1203,6 +1249,9 @@ struct elf_obj_tdata
 
   /* Segment flags for the PT_GNU_STACK segment.  */
   unsigned int stack_flags;  
+
+  /* Should the PT_GNU_RELRO segment be emitted?  */
+  bfd_boolean relro;
 
   /* Symbol version definitions in external objects.  */
   Elf_Internal_Verdef *verdef;
@@ -1361,12 +1410,18 @@ extern bfd_boolean _bfd_elf_slurp_version_tables
   (bfd *);
 extern bfd_boolean _bfd_elf_merge_sections
   (bfd *, struct bfd_link_info *);
+extern bfd_boolean bfd_elf_is_group_section
+  (bfd *, const struct bfd_section *);
 extern bfd_boolean bfd_elf_discard_group
+  (bfd *, struct bfd_section *);
+extern void _bfd_elf_section_already_linked
   (bfd *, struct bfd_section *);
 extern void bfd_elf_set_group_contents
   (bfd *, asection *, void *);
 extern void _bfd_elf_link_just_syms
   (asection *, struct bfd_link_info *);
+extern bfd_boolean _bfd_elf_copy_private_header_data
+  (bfd *, bfd *);
 extern bfd_boolean _bfd_elf_copy_private_symbol_data
   (bfd *, asymbol *, bfd *, asymbol *);
 extern bfd_boolean _bfd_elf_copy_private_section_data
@@ -1385,6 +1440,8 @@ extern long _bfd_elf_get_dynamic_symtab_upper_bound
   (bfd *);
 extern long _bfd_elf_canonicalize_dynamic_symtab
   (bfd *, asymbol **);
+extern long _bfd_elf_get_synthetic_symtab
+  (bfd *, long, asymbol **, long, asymbol **, asymbol **);
 extern long _bfd_elf_get_reloc_upper_bound
   (bfd *, sec_ptr);
 extern long _bfd_elf_canonicalize_reloc
@@ -1504,6 +1561,8 @@ extern bfd_boolean _bfd_elf_validate_reloc
 
 extern bfd_boolean _bfd_elf_link_create_dynamic_sections
   (bfd *, struct bfd_link_info *);
+extern bfd_boolean _bfd_elf_link_omit_section_dynsym
+  (bfd *, struct bfd_link_info *, asection *);
 extern bfd_boolean _bfd_elf_create_dynamic_sections
   (bfd *, struct bfd_link_info *);
 extern bfd_boolean _bfd_elf_create_got_section
@@ -1539,6 +1598,12 @@ extern bfd_boolean _bfd_elf_dynamic_symbol_p
 
 extern bfd_boolean _bfd_elf_symbol_refs_local_p
   (struct elf_link_hash_entry *, struct bfd_link_info *, bfd_boolean);
+
+extern bfd_boolean bfd_elf_match_symbols_in_sections
+  (asection *sec1, asection *sec2);
+
+extern bfd_boolean _bfd_elf_setup_group_pointers
+  (bfd *);
 
 extern const bfd_target *bfd_elf32_object_p
   (bfd *);
@@ -1624,6 +1689,8 @@ extern void bfd_elf64_write_relocs
 extern bfd_boolean bfd_elf64_slurp_reloc_table
   (bfd *, asection *, asymbol **, bfd_boolean);
 
+extern struct elf_link_hash_entry *_bfd_elf_archive_symbol_lookup
+  (bfd *, struct bfd_link_info *, const char *);
 extern bfd_boolean bfd_elf_link_add_symbols
   (bfd *, struct bfd_link_info *);
 extern bfd_boolean _bfd_elf_add_dynamic_entry
@@ -1653,6 +1720,11 @@ extern bfd_boolean bfd_elf_gc_record_vtinherit
 extern bfd_boolean bfd_elf_gc_record_vtentry
   (bfd *, asection *, struct elf_link_hash_entry *, bfd_vma);
 
+extern bfd_boolean _bfd_elf_gc_mark
+  (struct bfd_link_info *, asection *,
+   asection * (*) (asection *, struct bfd_link_info *, Elf_Internal_Rela *,
+		   struct elf_link_hash_entry *, Elf_Internal_Sym *));
+
 extern bfd_boolean bfd_elf_gc_common_finalize_got_offsets
   (bfd *, struct bfd_link_info *);
 
@@ -1661,6 +1733,10 @@ extern bfd_boolean bfd_elf_gc_common_final_link
 
 extern bfd_boolean bfd_elf_reloc_symbol_deleted_p
   (bfd_vma, void *);
+
+extern struct elf_segment_map *
+_bfd_elf_make_dynamic_segment
+  (bfd *, asection *);
 
 /* Exported interface for writing elf corefile notes. */
 extern char *elfcore_write_note

@@ -500,12 +500,12 @@ kill_inferior (void)
   if (last.kind == TARGET_WAITKIND_FORKED
       || last.kind == TARGET_WAITKIND_VFORKED)
     {
-      ptrace (PT_KILL, last.value.related_pid);
+      ptrace (PT_KILL, last.value.related_pid, 0, 0);
       ptrace_wait (null_ptid, &status);
     }
 
   /* Kill the current process.  */
-  ptrace (PT_KILL, pid, (PTRACE_ARG3_TYPE) 0, 0);
+  ptrace (PT_KILL, pid, 0, 0);
   ret = ptrace_wait (null_ptid, &status);
 
   /* We might get a SIGCHLD instead of an exit status.  This is
@@ -513,7 +513,7 @@ kill_inferior (void)
 
   while (ret == pid && WIFSTOPPED (status))
     {
-      ptrace (PT_KILL, pid, (PTRACE_ARG3_TYPE) 0, 0);
+      ptrace (PT_KILL, pid, 0, 0);
       ret = ptrace_wait (null_ptid, &status);
     }
 

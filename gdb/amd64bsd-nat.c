@@ -46,7 +46,7 @@ fetch_inferior_registers (int regnum)
       struct reg regs;
 
       if (ptrace (PT_GETREGS, PIDGET (inferior_ptid),
-		  (PTRACE_ARG3_TYPE) &regs, 0) == -1)
+		  (PTRACE_TYPE_ARG3) &regs, 0) == -1)
 	perror_with_name ("Couldn't get registers");
 
       amd64_supply_native_gregset (current_regcache, &regs, -1);
@@ -54,12 +54,12 @@ fetch_inferior_registers (int regnum)
 	return;
     }
 
-  if (regnum == -1 || regnum >= AMD64_ST0_REGNUM)
+  if (regnum == -1 || !amd64_native_gregset_supplies_p (regnum))
     {
       struct fpreg fpregs;
 
       if (ptrace (PT_GETFPREGS, PIDGET (inferior_ptid),
-		  (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
+		  (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
 	perror_with_name ("Couldn't get floating point status");
 
       amd64_supply_fxsave (current_regcache, -1, &fpregs);
@@ -77,31 +77,31 @@ store_inferior_registers (int regnum)
       struct reg regs;
 
       if (ptrace (PT_GETREGS, PIDGET (inferior_ptid),
-                  (PTRACE_ARG3_TYPE) &regs, 0) == -1)
+                  (PTRACE_TYPE_ARG3) &regs, 0) == -1)
         perror_with_name ("Couldn't get registers");
 
       amd64_collect_native_gregset (current_regcache, &regs, regnum);
 
       if (ptrace (PT_SETREGS, PIDGET (inferior_ptid),
-	          (PTRACE_ARG3_TYPE) &regs, 0) == -1)
+	          (PTRACE_TYPE_ARG3) &regs, 0) == -1)
         perror_with_name ("Couldn't write registers");
 
       if (regnum != -1)
 	return;
     }
 
-  if (regnum == -1 || regnum >= AMD64_ST0_REGNUM)
+  if (regnum == -1 || !amd64_native_gregset_supplies_p (regnum))
     {
       struct fpreg fpregs;
 
       if (ptrace (PT_GETFPREGS, PIDGET (inferior_ptid),
-		  (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
+		  (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
 	perror_with_name ("Couldn't get floating point status");
 
       amd64_collect_fxsave (current_regcache, regnum, &fpregs);
 
       if (ptrace (PT_SETFPREGS, PIDGET (inferior_ptid),
-		  (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
+		  (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
 	perror_with_name ("Couldn't write floating point status");
     }
 }

@@ -1,6 +1,6 @@
 /* Target definitions for NN-bit ELF
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003 Free Software Foundation, Inc.
+   2003, 2004 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -34,6 +34,10 @@
 
 #define bfd_elfNN_canonicalize_dynamic_symtab \
   _bfd_elf_canonicalize_dynamic_symtab
+#ifndef bfd_elfNN_get_synthetic_symtab
+#define bfd_elfNN_get_synthetic_symtab \
+  _bfd_elf_get_synthetic_symtab
+#endif
 #ifndef bfd_elfNN_canonicalize_reloc
 #define bfd_elfNN_canonicalize_reloc	_bfd_elf_canonicalize_reloc
 #endif
@@ -134,8 +138,17 @@
   _bfd_elf_merge_sections
 #endif
 
+#ifndef bfd_elfNN_bfd_is_group_section
+#define bfd_elfNN_bfd_is_group_section bfd_elf_is_group_section
+#endif
+
 #ifndef bfd_elfNN_bfd_discard_group
 #define bfd_elfNN_bfd_discard_group bfd_elf_discard_group
+#endif
+
+#ifndef bfd_elfNN_section_already_linked
+#define bfd_elfNN_section_already_linked \
+  _bfd_elf_section_already_linked
 #endif
 
 #ifndef bfd_elfNN_bfd_make_debug_symbol
@@ -151,6 +164,10 @@
 #ifndef bfd_elfNN_bfd_copy_private_section_data
 #define bfd_elfNN_bfd_copy_private_section_data \
   _bfd_elf_copy_private_section_data
+#endif
+#ifndef bfd_elfNN_bfd_copy_private_header_data
+#define bfd_elfNN_bfd_copy_private_header_data \
+  _bfd_elf_copy_private_header_data
 #endif
 #ifndef bfd_elfNN_bfd_copy_private_bfd_data
 #define bfd_elfNN_bfd_copy_private_bfd_data \
@@ -262,6 +279,13 @@
 #define ELF_MAXPAGESIZE 1
 #endif
 
+#ifndef ELF_DYNAMIC_SEC_FLAGS
+/* Note that we set the SEC_IN_MEMORY flag for these sections.  */
+#define ELF_DYNAMIC_SEC_FLAGS			\
+  (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS	\
+   | SEC_IN_MEMORY | SEC_LINKER_CREATED)
+#endif
+
 #ifndef elf_backend_collect
 #define elf_backend_collect FALSE
 #endif
@@ -283,6 +307,9 @@
 #endif
 #ifndef elf_backend_get_symbol_type
 #define elf_backend_get_symbol_type 0
+#endif
+#ifndef elf_backend_archive_symbol_lookup
+#define elf_backend_archive_symbol_lookup _bfd_elf_archive_symbol_lookup
 #endif
 #ifndef elf_backend_name_local_section_symbols
 #define elf_backend_name_local_section_symbols	0
@@ -314,8 +341,14 @@
 #ifndef elf_backend_create_dynamic_sections
 #define elf_backend_create_dynamic_sections 0
 #endif
+#ifndef elf_backend_omit_section_dynsym
+#define elf_backend_omit_section_dynsym _bfd_elf_link_omit_section_dynsym
+#endif
 #ifndef elf_backend_check_relocs
 #define elf_backend_check_relocs	0
+#endif
+#ifndef elf_backend_check_directives
+#define elf_backend_check_directives	0
 #endif
 #ifndef elf_backend_adjust_dynamic_symbol
 #define elf_backend_adjust_dynamic_symbol 0
@@ -443,6 +476,13 @@
 #define elf_backend_rela_normal 0
 #endif
 
+#ifndef elf_backend_plt_sym_val
+#define elf_backend_plt_sym_val NULL
+#endif
+#ifndef elf_backend_relplt_name
+#define elf_backend_relplt_name NULL
+#endif
+
 #ifndef ELF_MACHINE_ALT1
 #define ELF_MACHINE_ALT1 0
 #endif
@@ -463,6 +503,10 @@
 #define elf_backend_sign_extend_vma 0
 #endif
 
+#ifndef elf_backend_link_order_error_handler
+#define elf_backend_link_order_error_handler _bfd_default_error_handler
+#endif
+
 extern const struct elf_size_info _bfd_elfNN_size_info;
 
 #ifndef INCLUDED_TARGET_FILE
@@ -471,6 +515,7 @@ static const struct elf_backend_data elfNN_bed =
   ELF_ARCH,			/* arch */
   ELF_MACHINE_CODE,		/* elf_machine_code */
   ELF_MAXPAGESIZE,		/* maxpagesize */
+  ELF_DYNAMIC_SEC_FLAGS,        /* dynamic_sec_flags */
   elf_info_to_howto,
   elf_info_to_howto_rel,
   elf_backend_sym_is_global,
@@ -478,6 +523,7 @@ static const struct elf_backend_data elfNN_bed =
   elf_backend_symbol_processing,
   elf_backend_symbol_table_processing,
   elf_backend_get_symbol_type,
+  elf_backend_archive_symbol_lookup,
   elf_backend_name_local_section_symbols,
   elf_backend_section_processing,
   elf_backend_section_from_shdr,
@@ -488,7 +534,9 @@ static const struct elf_backend_data elfNN_bed =
   elf_backend_add_symbol_hook,
   elf_backend_link_output_symbol_hook,
   elf_backend_create_dynamic_sections,
+  elf_backend_omit_section_dynsym,
   elf_backend_check_relocs,
+  elf_backend_check_directives,
   elf_backend_adjust_dynamic_symbol,
   elf_backend_always_size_sections,
   elf_backend_size_dynamic_sections,
@@ -524,6 +572,9 @@ static const struct elf_backend_data elfNN_bed =
   elf_backend_mips_rtype_to_howto,
   elf_backend_ecoff_debug_swap,
   elf_backend_bfd_from_remote_memory,
+  elf_backend_plt_sym_val,
+  elf_backend_link_order_error_handler,
+  elf_backend_relplt_name,
   ELF_MACHINE_ALT1,
   ELF_MACHINE_ALT2,
   &elf_backend_size_info,

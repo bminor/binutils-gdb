@@ -1,5 +1,5 @@
 /* BFD back-end for PDP-11 a.out binaries.
-   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -341,11 +341,6 @@ DESCRIPTION
 
 #define RELOC_SIZE 2
 
-struct pdp11_aout_reloc_external
-{
-  bfd_byte e_reloc_entry[2];
-};
-
 #define RELFLG		0x0001	/* pc-relative flag */
 #define RTYPE		0x000e	/* type mask */
 #define RIDXMASK	0xfff0	/* index mask */
@@ -368,9 +363,9 @@ static void adjust_z_magic PARAMS ((bfd *, struct internal_exec *));
 static void adjust_n_magic PARAMS ((bfd *, struct internal_exec *));
 
 static int pdp11_aout_write_headers PARAMS ((bfd *, struct internal_exec *));
-void pdp11_aout_swap_reloc_out PARAMS  ((bfd *, arelent *, struct pdp11_aout_reloc_external *));
+void pdp11_aout_swap_reloc_out PARAMS  ((bfd *, arelent *, bfd_byte *));
 void pdp11_aout_swap_reloc_in
-PARAMS ((bfd *, struct pdp11_aout_reloc_external *, arelent *,
+PARAMS ((bfd *, bfd_byte *, arelent *,
 	 bfd_size_type, asymbol **, bfd_size_type));
 
 /*
@@ -741,8 +736,8 @@ NAME(aout,some_aout_object_p) (abfd, execp, callback_to_real_object_p)
   if (! NAME(aout,make_sections) (abfd))
     return NULL;
 
-  obj_datasec (abfd)->_raw_size = execp->a_data;
-  obj_bsssec (abfd)->_raw_size = execp->a_bss;
+  obj_datasec (abfd)->size = execp->a_data;
+  obj_bsssec (abfd)->size = execp->a_bss;
 
   obj_textsec (abfd)->flags =
     (execp->a_trsize != 0
@@ -768,7 +763,6 @@ NAME(aout,some_aout_object_p) (abfd, execp, callback_to_real_object_p)
   struct exec *execp = exec_hdr (abfd);
 
   obj_textsec (abfd)->size = N_TXTSIZE(*execp);
-  obj_textsec (abfd)->raw_size = N_TXTSIZE(*execp);
   /* data and bss are already filled in since they're so standard */
 
   /* The virtual memory addresses of the sections */
@@ -826,7 +820,7 @@ NAME(aout,some_aout_object_p) (abfd, execp, callback_to_real_object_p)
 
   if (execp->a_entry != 0
       || (execp->a_entry >= obj_textsec(abfd)->vma
-	  && execp->a_entry < obj_textsec(abfd)->vma + obj_textsec(abfd)->_raw_size))
+	  && execp->a_entry < obj_textsec(abfd)->vma + obj_textsec(abfd)->size))
     abfd->flags |= EXEC_P;
 #ifdef STAT_FOR_EXEC
   else
@@ -1074,8 +1068,8 @@ adjust_o_magic (abfd, execp)
   else
     vma = obj_textsec (abfd)->vma;
 
-  pos += obj_textsec (abfd)->_raw_size;
-  vma += obj_textsec (abfd)->_raw_size;
+  pos += obj_textsec (abfd)->size;
+  vma += obj_textsec (abfd)->size;
 
   /* Data.  */
   if (!obj_datasec (abfd)->user_set_vma)
@@ -1083,7 +1077,7 @@ adjust_o_magic (abfd, execp)
 #if 0	    /* ?? Does alignment in the file image really matter? */
       pad = align_power (vma, obj_datasec (abfd)->alignment_power) - vma;
 #endif
-      obj_textsec (abfd)->_raw_size += pad;
+      obj_textsec (abfd)->size += pad;
       pos += pad;
       vma += pad;
       obj_datasec (abfd)->vma = vma;
@@ -1091,8 +1085,8 @@ adjust_o_magic (abfd, execp)
   else
     vma = obj_datasec (abfd)->vma;
   obj_datasec (abfd)->filepos = pos;
-  pos += obj_datasec (abfd)->_raw_size;
-  vma += obj_datasec (abfd)->_raw_size;
+  pos += obj_datasec (abfd)->size;
+  vma += obj_datasec (abfd)->size;
 
   /* BSS.  */
   if (! obj_bsssec (abfd)->user_set_vma)
@@ -1100,7 +1094,7 @@ adjust_o_magic (abfd, execp)
 #if 0
       pad = align_power (vma, obj_bsssec (abfd)->alignment_power) - vma;
 #endif
-      obj_datasec (abfd)->_raw_size += pad;
+      obj_datasec (abfd)->size += pad;
       pos += pad;
       vma += pad;
       obj_bsssec (abfd)->vma = vma;
@@ -1113,16 +1107,16 @@ adjust_o_magic (abfd, execp)
       pad = obj_bsssec (abfd)->vma - vma;
       if (pad > 0)
 	{
-	  obj_datasec (abfd)->_raw_size += pad;
+	  obj_datasec (abfd)->size += pad;
 	  pos += pad;
 	}
     }
   obj_bsssec (abfd)->filepos = pos;
 
   /* Fix up the exec header.  */
-  execp->a_text = obj_textsec (abfd)->_raw_size;
-  execp->a_data = obj_datasec (abfd)->_raw_size;
-  execp->a_bss  = obj_bsssec (abfd)->_raw_size;
+  execp->a_text = obj_textsec (abfd)->size;
+  execp->a_data = obj_datasec (abfd)->size;
+  execp->a_bss  = obj_bsssec (abfd)->size;
   N_SET_MAGIC (*execp, OMAGIC);
 }
 
@@ -1172,7 +1166,7 @@ adjust_z_magic (abfd, execp)
   /* Find start of data.  */
   if (ztih)
     {
-      text_end = obj_textsec (abfd)->filepos + obj_textsec (abfd)->_raw_size;
+      text_end = obj_textsec (abfd)->filepos + obj_textsec (abfd)->size;
       text_pad += BFD_ALIGN (text_end, adata (abfd).page_size) - text_end;
     }
   else
@@ -1180,33 +1174,33 @@ adjust_z_magic (abfd, execp)
       /* Note that if page_size == zmagic_disk_block_size, then
 	 filepos == page_size, and this case is the same as the ztih
 	 case.  */
-      text_end = obj_textsec (abfd)->_raw_size;
+      text_end = obj_textsec (abfd)->size;
       text_pad += BFD_ALIGN (text_end, adata (abfd).page_size) - text_end;
       text_end += obj_textsec (abfd)->filepos;
     }
 
-  obj_textsec (abfd)->_raw_size += text_pad;
+  obj_textsec (abfd)->size += text_pad;
   text_end += text_pad;
 
   /* Data.  */
   if (!obj_datasec(abfd)->user_set_vma)
     {
       bfd_vma vma;
-      vma = obj_textsec(abfd)->vma + obj_textsec(abfd)->_raw_size;
+      vma = obj_textsec(abfd)->vma + obj_textsec(abfd)->size;
       obj_datasec(abfd)->vma = BFD_ALIGN (vma, adata(abfd).segment_size);
     }
   if (abdp && abdp->zmagic_mapped_contiguous)
     {
       text_pad = (obj_datasec(abfd)->vma
 		  - obj_textsec(abfd)->vma
-		  - obj_textsec(abfd)->_raw_size);
-      obj_textsec(abfd)->_raw_size += text_pad;
+		  - obj_textsec(abfd)->size);
+      obj_textsec(abfd)->size += text_pad;
     }
   obj_datasec (abfd)->filepos = (obj_textsec (abfd)->filepos
-				+ obj_textsec (abfd)->_raw_size);
+				+ obj_textsec (abfd)->size);
 
   /* Fix up exec header while we're at it.  */
-  execp->a_text = obj_textsec(abfd)->_raw_size;
+  execp->a_text = obj_textsec(abfd)->size;
   if (ztih && (!abdp || (abdp && !abdp->exec_header_not_counted)))
     execp->a_text += adata(abfd).exec_bytes_size;
   if (obj_aout_subformat (abfd) == q_magic_format)
@@ -1215,17 +1209,17 @@ adjust_z_magic (abfd, execp)
     N_SET_MAGIC (*execp, ZMAGIC);
 
   /* Spec says data section should be rounded up to page boundary.  */
-  obj_datasec(abfd)->_raw_size
-    = align_power (obj_datasec(abfd)->_raw_size,
+  obj_datasec(abfd)->size
+    = align_power (obj_datasec(abfd)->size,
 		   obj_bsssec(abfd)->alignment_power);
-  execp->a_data = BFD_ALIGN (obj_datasec(abfd)->_raw_size,
+  execp->a_data = BFD_ALIGN (obj_datasec(abfd)->size,
 			     adata(abfd).page_size);
-  data_pad = execp->a_data - obj_datasec(abfd)->_raw_size;
+  data_pad = execp->a_data - obj_datasec(abfd)->size;
 
   /* BSS.  */
   if (!obj_bsssec(abfd)->user_set_vma)
     obj_bsssec(abfd)->vma = (obj_datasec(abfd)->vma
-			     + obj_datasec(abfd)->_raw_size);
+			     + obj_datasec(abfd)->size);
   /* If the BSS immediately follows the data section and extra space
      in the page is left after the data section, fudge data
      in the header so that the bss section looks smaller by that
@@ -1234,11 +1228,11 @@ adjust_z_magic (abfd, execp)
      could have explicitly set the BSS vma to immediately follow
      the data section.)  */
   if (align_power (obj_bsssec(abfd)->vma, obj_bsssec(abfd)->alignment_power)
-      == obj_datasec(abfd)->vma + obj_datasec(abfd)->_raw_size)
-    execp->a_bss = (data_pad > obj_bsssec(abfd)->_raw_size) ? 0 :
-      obj_bsssec(abfd)->_raw_size - data_pad;
+      == obj_datasec(abfd)->vma + obj_datasec(abfd)->size)
+    execp->a_bss = (data_pad > obj_bsssec(abfd)->size) ? 0 :
+      obj_bsssec(abfd)->size - data_pad;
   else
-    execp->a_bss = obj_bsssec(abfd)->_raw_size;
+    execp->a_bss = obj_bsssec(abfd)->size;
 }
 
 static void
@@ -1256,8 +1250,8 @@ adjust_n_magic (abfd, execp)
     obj_textsec(abfd)->vma = vma;
   else
     vma = obj_textsec(abfd)->vma;
-  pos += obj_textsec(abfd)->_raw_size;
-  vma += obj_textsec(abfd)->_raw_size;
+  pos += obj_textsec(abfd)->size;
+  vma += obj_textsec(abfd)->size;
 
   /* Data.  */
   obj_datasec(abfd)->filepos = pos;
@@ -1266,10 +1260,10 @@ adjust_n_magic (abfd, execp)
   vma = obj_datasec(abfd)->vma;
 
   /* Since BSS follows data immediately, see if it needs alignment.  */
-  vma += obj_datasec(abfd)->_raw_size;
+  vma += obj_datasec(abfd)->size;
   pad = align_power (vma, obj_bsssec(abfd)->alignment_power) - vma;
-  obj_datasec(abfd)->_raw_size += pad;
-  pos += obj_datasec(abfd)->_raw_size;
+  obj_datasec(abfd)->size += pad;
+  pos += obj_datasec(abfd)->size;
 
   /* BSS.  */
   if (!obj_bsssec(abfd)->user_set_vma)
@@ -1278,9 +1272,9 @@ adjust_n_magic (abfd, execp)
     vma = obj_bsssec(abfd)->vma;
 
   /* Fix up exec header.  */
-  execp->a_text = obj_textsec(abfd)->_raw_size;
-  execp->a_data = obj_datasec(abfd)->_raw_size;
-  execp->a_bss = obj_bsssec(abfd)->_raw_size;
+  execp->a_text = obj_textsec(abfd)->size;
+  execp->a_data = obj_datasec(abfd)->size;
+  execp->a_bss = obj_bsssec(abfd)->size;
   N_SET_MAGIC (*execp, NMAGIC);
 }
 
@@ -1298,11 +1292,11 @@ NAME(aout,adjust_sizes_and_vmas) (abfd, text_size, text_end)
   if (adata(abfd).magic != undecided_magic)
     return TRUE;
 
-  obj_textsec(abfd)->_raw_size =
-    align_power(obj_textsec(abfd)->_raw_size,
+  obj_textsec(abfd)->size =
+    align_power(obj_textsec(abfd)->size,
 		obj_textsec(abfd)->alignment_power);
 
-  *text_size = obj_textsec (abfd)->_raw_size;
+  *text_size = obj_textsec (abfd)->size;
   /* Rule (heuristic) for when to pad to a new page.  Note that there
      are (at least) two ways demand-paged (ZMAGIC) files have been
      handled.  Most Berkeley-based systems start the text segment at
@@ -1336,11 +1330,11 @@ NAME(aout,adjust_sizes_and_vmas) (abfd, text_size, text_end)
 	      }
 	      str;
 	    }),
-	   obj_textsec(abfd)->vma, obj_textsec(abfd)->_raw_size,
+	   obj_textsec(abfd)->vma, obj_textsec(abfd)->size,
 	   	obj_textsec(abfd)->alignment_power,
-	   obj_datasec(abfd)->vma, obj_datasec(abfd)->_raw_size,
+	   obj_datasec(abfd)->vma, obj_datasec(abfd)->size,
 	   	obj_datasec(abfd)->alignment_power,
-	   obj_bsssec(abfd)->vma, obj_bsssec(abfd)->_raw_size,
+	   obj_bsssec(abfd)->vma, obj_bsssec(abfd)->size,
 	   	obj_bsssec(abfd)->alignment_power);
 #endif
 #endif
@@ -1362,11 +1356,11 @@ NAME(aout,adjust_sizes_and_vmas) (abfd, text_size, text_end)
 
 #ifdef BFD_AOUT_DEBUG
   fprintf (stderr, "       text=<%x,%x,%x> data=<%x,%x,%x> bss=<%x,%x>\n",
-	   obj_textsec(abfd)->vma, obj_textsec(abfd)->_raw_size,
+	   obj_textsec(abfd)->vma, obj_textsec(abfd)->size,
 	   	obj_textsec(abfd)->filepos,
-	   obj_datasec(abfd)->vma, obj_datasec(abfd)->_raw_size,
+	   obj_datasec(abfd)->vma, obj_datasec(abfd)->size,
 	   	obj_datasec(abfd)->filepos,
-	   obj_bsssec(abfd)->vma, obj_bsssec(abfd)->_raw_size);
+	   obj_bsssec(abfd)->vma, obj_bsssec(abfd)->size);
 #endif
 
   return TRUE;
@@ -1673,9 +1667,8 @@ translate_to_native_sym_flags (abfd, cache_ptr, sym_pointer)
       /* This case occurs, e.g., for the *DEBUG* section of a COFF
 	 file.  */
       (*_bfd_error_handler)
-	("%s: can not represent section for symbol `%s' in a.out object file format",
-	 bfd_archive_filename (abfd),
-	 cache_ptr->name != NULL ? cache_ptr->name : "*unknown*");
+	("%B: can not represent section for symbol `%s' in a.out object file format",
+	 abfd, cache_ptr->name != NULL ? cache_ptr->name : "*unknown*");
       bfd_set_error (bfd_error_nonrepresentable_section);
       return FALSE;
     }
@@ -1701,8 +1694,8 @@ translate_to_native_sym_flags (abfd, cache_ptr, sym_pointer)
   else
     {
       (*_bfd_error_handler)
-	("%s: can not represent section `%s' in a.out object file format",
-	 bfd_archive_filename (abfd), bfd_get_section_name (abfd, sec));
+	("%B: can not represent section `%A' in a.out object file format",
+	 abfd, sec);
       bfd_set_error (bfd_error_nonrepresentable_section);
       return FALSE;
     }
@@ -2034,7 +2027,7 @@ void
 pdp11_aout_swap_reloc_out (abfd, g, natptr)
      bfd *abfd;
      arelent *g;
-     register struct pdp11_aout_reloc_external *natptr;
+     bfd_byte *natptr;
 {
   int r_index;
   int r_pcrel;
@@ -2096,7 +2089,7 @@ pdp11_aout_swap_reloc_out (abfd, g, natptr)
 
   reloc_entry = r_index << 4 | r_type | r_pcrel;
 
-  PUT_WORD (abfd, reloc_entry, natptr->e_reloc_entry);
+  PUT_WORD (abfd, reloc_entry, natptr);
 }
 
 /* BFD deals internally with all things based from the section they're
@@ -2149,7 +2142,7 @@ void
 pdp11_aout_swap_reloc_in (abfd, bytes, cache_ptr, offset,
 			  symbols, symcount)
      bfd *abfd;
-     struct pdp11_aout_reloc_external *bytes;
+     bfd_byte *bytes;
      arelent *cache_ptr;
      bfd_size_type offset;
      asymbol **symbols;
@@ -2196,7 +2189,7 @@ NAME(aout,slurp_reloc_table) (abfd, asect, symbols)
      sec_ptr asect;
      asymbol **symbols;
 {
-  struct pdp11_aout_reloc_external *rptr;
+  bfd_byte *rptr;
   bfd_size_type count;
   bfd_size_type reloc_size;
   PTR relocs;
@@ -2262,16 +2255,14 @@ NAME(aout,slurp_reloc_table) (abfd, asect, symbols)
 
   cache_ptr = reloc_cache;
 
-  rptr = (struct pdp11_aout_reloc_external *) relocs;
+  rptr = relocs;
   for (counter = 0;
        counter < count;
-       counter++, ((char *)rptr) += RELOC_SIZE, cache_ptr++)
+       counter++, rptr += RELOC_SIZE, cache_ptr++)
     {
       while (GET_WORD (abfd, (PTR)rptr) == 0)
 	{
-	  rptr =
-	    (struct pdp11_aout_reloc_external *)
-	    ((char *) rptr + RELOC_SIZE);
+	  rptr += RELOC_SIZE;
 	  if ((char *) rptr >= (char *) relocs + reloc_size)
 	    goto done;
 	}
@@ -2314,7 +2305,7 @@ NAME(aout,squirt_out_relocs) (abfd, section)
     return TRUE;
 #endif
 
-  natsize = bfd_get_section_size_before_reloc (section);
+  natsize = section->size;
   native = (unsigned char *) bfd_zalloc (abfd, natsize);
   if (!native)
     return FALSE;
@@ -2324,10 +2315,9 @@ NAME(aout,squirt_out_relocs) (abfd, section)
     {
       while (count > 0)
 	{
-	  struct pdp11_aout_reloc_external *r;
+	  bfd_byte *r;
 
-	  r = (struct pdp11_aout_reloc_external *)
-	    (native + (*generic)->address);
+	  r = native + (*generic)->address;
 	  pdp11_aout_swap_reloc_out (abfd, *generic, r);
 	  count--;
 	  generic++;
@@ -3356,7 +3346,7 @@ static bfd_boolean pdp11_aout_link_input_section
   PARAMS ((struct aout_final_link_info *finfo,
 	   bfd *input_bfd,
 	   asection *input_section,
-	   struct pdp11_aout_reloc_external *relocs,
+	   bfd_byte *relocs,
 	   bfd_size_type rel_size,
 	   bfd_byte *contents));
 
@@ -3469,10 +3459,10 @@ NAME(aout,final_link) (abfd, info, callback)
 
       if (bfd_get_flavour (sub) == bfd_target_aout_flavour)
 	{
-	  sz = bfd_section_size (sub, obj_textsec (sub));
+	  sz = obj_textsec (sub)->size;
 	  if (sz > max_contents_size)
 	    max_contents_size = sz;
-	  sz = bfd_section_size (sub, obj_datasec (sub));
+	  sz = obj_datasec (sub)->size;
 	  if (sz > max_contents_size)
 	    max_contents_size = sz;
 
@@ -4424,7 +4414,7 @@ aout_link_input_section (finfo, input_bfd, input_section, reloff_ptr,
   PTR relocs;
 
   /* Get the section contents.  */
-  input_size = bfd_section_size (input_bfd, input_section);
+  input_size = input_section->size;
   if (! bfd_get_section_contents (input_bfd, input_section,
 				  (PTR) finfo->contents,
 				  (file_ptr) 0, input_size))
@@ -4447,7 +4437,7 @@ aout_link_input_section (finfo, input_bfd, input_section, reloff_ptr,
 
   /* Relocate the section contents.  */
   if (! pdp11_aout_link_input_section (finfo, input_bfd, input_section,
-				       (struct pdp11_aout_reloc_external *) relocs,
+				       (bfd_byte *) relocs,
 				       rel_size, finfo->contents))
     return FALSE;
 
@@ -4511,7 +4501,7 @@ pdp11_aout_link_input_section (finfo, input_bfd, input_section, relocs,
      struct aout_final_link_info *finfo;
      bfd *input_bfd;
      asection *input_section;
-     struct pdp11_aout_reloc_external *relocs;
+     bfd_byte *relocs;
      bfd_size_type rel_size;
      bfd_byte *contents;
 {
@@ -4526,8 +4516,8 @@ pdp11_aout_link_input_section (finfo, input_bfd, input_section, relocs,
   struct aout_link_hash_entry **sym_hashes;
   int *symbol_map;
   bfd_size_type reloc_count;
-  register struct pdp11_aout_reloc_external *rel;
-  struct pdp11_aout_reloc_external *rel_end;
+  bfd_byte *rel;
+  bfd_byte *rel_end;
 
   output_bfd = finfo->output_bfd;
   check_dynamic_reloc = aout_backend_info (output_bfd)->check_dynamic_reloc;
@@ -4544,8 +4534,8 @@ pdp11_aout_link_input_section (finfo, input_bfd, input_section, relocs,
 
   reloc_count = rel_size / RELOC_SIZE;
   rel = relocs;
-  rel_end = (struct pdp11_aout_reloc_external *)(((char *)rel) + rel_size);
-  for (; rel < rel_end; ((char *)rel) += RELOC_SIZE)
+  rel_end = rel + rel_size;
+  for (; rel < rel_end; rel += RELOC_SIZE)
     {
       bfd_vma r_addr;
       int r_index;
@@ -4653,10 +4643,10 @@ pdp11_aout_link_input_section (finfo, input_bfd, input_section, relocs,
 		}
 
 	      /* Write out the new r_index value.  */
-	      reloc_entry = GET_WORD (input_bfd, rel->e_reloc_entry);
+	      reloc_entry = GET_WORD (input_bfd, rel);
 	      reloc_entry &= RIDXMASK;
 	      reloc_entry |= r_index << 4;
-	      PUT_WORD (input_bfd, reloc_entry, rel->e_reloc_entry);
+	      PUT_WORD (input_bfd, reloc_entry, rel);
 	    }
 	  else
 	    {

@@ -194,6 +194,8 @@ struct coff_section_tdata
   bfd_vma offset;
   unsigned int i;
   const char *function;
+  /* Optional information about a COMDAT entry; NULL if not COMDAT. */
+  struct coff_comdat_info *comdat;
   int line_base;
   /* A pointer used for .stab linking optimizations.  */
   PTR stab_info;
@@ -276,7 +278,7 @@ struct coff_link_hash_table
 {
   struct bfd_link_hash_table root;
   /* A pointer to information used to link stabs in sections.  */
-  PTR stab_info;
+  struct stab_info stab_info;
 };
 
 /* Look up an entry in a COFF linker hash table.  */

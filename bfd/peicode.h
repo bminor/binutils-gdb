@@ -1,5 +1,5 @@
 /* Support for the generic parts of PE/PEI, for BFD.
-   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
    Written by Cygnus Solutions.
 
@@ -784,13 +784,13 @@ pe_ILF_build_a_bfd (bfd *           abfd,
 
     case IMPORT_CONST:
       /* XXX code yet to be written.  */
-      _bfd_error_handler (_("%s: Unhandled import type; %x"),
-			  bfd_archive_filename (abfd), import_type);
+      _bfd_error_handler (_("%B: Unhandled import type; %x"),
+			  abfd, import_type);
       return FALSE;
 
     default:
-      _bfd_error_handler (_("%s: Unrecognised import type; %x"),
-			  bfd_archive_filename (abfd), import_type);
+      _bfd_error_handler (_("%B: Unrecognised import type; %x"),
+			  abfd, import_type);
       return FALSE;
     }
 
@@ -803,8 +803,8 @@ pe_ILF_build_a_bfd (bfd *           abfd,
       break;
 
     default:
-      _bfd_error_handler (_("%s: Unrecognised import name type; %x"),
-			  bfd_archive_filename (abfd), import_name_type);
+      _bfd_error_handler (_("%B: Unrecognised import name type; %x"),
+			  abfd, import_name_type);
       return FALSE;
     }
 
@@ -1190,9 +1190,9 @@ pe_ILF_object_p (bfd * abfd)
       /* We no longer support PowerPC.  */
     default:
       _bfd_error_handler
-	(
-_("%s: Unrecognised machine type (0x%x) in Import Library Format archive"),
-         bfd_archive_filename (abfd), machine);
+	(_("%B: Unrecognised machine type (0x%x)"
+	   " in Import Library Format archive"),
+	 abfd, machine);
       bfd_set_error (bfd_error_malformed_archive);
 
       return NULL;
@@ -1202,9 +1202,9 @@ _("%s: Unrecognised machine type (0x%x) in Import Library Format archive"),
   if (magic == 0)
     {
       _bfd_error_handler
-	(
-_("%s: Recognised but unhandled machine type (0x%x) in Import Library Format archive"),
-	 bfd_archive_filename (abfd), machine);
+	(_("%B: Recognised but unhandled machine type (0x%x)"
+	   " in Import Library Format archive"),
+	 abfd, machine);
       bfd_set_error (bfd_error_wrong_format);
 
       return NULL;
@@ -1220,8 +1220,7 @@ _("%s: Recognised but unhandled machine type (0x%x) in Import Library Format arc
   if (size == 0)
     {
       _bfd_error_handler
-	(_("%s: size field is zero in Import Library Format header"),
-	 bfd_archive_filename (abfd));
+	(_("%B: size field is zero in Import Library Format header"), abfd);
       bfd_set_error (bfd_error_malformed_archive);
 
       return NULL;
@@ -1251,8 +1250,7 @@ _("%s: Recognised but unhandled machine type (0x%x) in Import Library Format arc
   if (ptr[size - 1] != 0 || ((unsigned long) (source_dll - ptr) >= size))
     {
       _bfd_error_handler
-	(_("%s: string not null terminated in ILF object file."),
-	 bfd_archive_filename (abfd));
+	(_("%B: string not null terminated in ILF object file."), abfd);
       bfd_set_error (bfd_error_malformed_archive);
       bfd_release (abfd, ptr);
       return NULL;

@@ -1,7 +1,7 @@
 /* Target-vector operations for controlling win32 child processes, for GDB.
 
-   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free
-   Software Foundation, Inc.
+   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
+   Free Software Foundation, Inc.
 
    Contributed by Cygnus Solutions, A Red Hat Company.
 
@@ -55,9 +55,6 @@
 
 #include "i386-tdep.h"
 #include "i387-tdep.h"
-
-/* The ui's event loop. */
-extern int (*ui_loop_hook) (int signo);
 
 /* If we're not using the old Cygwin header file set, define the
    following which never should have been in the generic Win32 API
@@ -361,15 +358,15 @@ do_child_fetch_inferior_registers (int r)
   if (r == I387_FISEG_REGNUM)
     {
       l = *((long *) context_offset) & 0xffff;
-      supply_register (r, (char *) &l);
+      regcache_raw_supply (current_regcache, r, (char *) &l);
     }
   else if (r == I387_FOP_REGNUM)
     {
       l = (*((long *) context_offset) >> 16) & ((1 << 11) - 1);
-      supply_register (r, (char *) &l);
+      regcache_raw_supply (current_regcache, r, (char *) &l);
     }
   else if (r >= 0)
-    supply_register (r, context_offset);
+    regcache_raw_supply (current_regcache, r, context_offset);
   else
     {
       for (r = 0; r < NUM_REGS; r++)
@@ -395,7 +392,8 @@ do_child_store_inferior_registers (int r)
   if (!current_thread)
     /* Windows sometimes uses a non-existent thread id in its events */;
   else if (r >= 0)
-    regcache_collect (r, ((char *) &current_thread->context) + mappings[r]);
+    regcache_raw_collect (current_regcache, r,
+			  ((char *) &current_thread->context) + mappings[r]);
   else
     {
       for (r = 0; r < NUM_REGS; r++)
@@ -1420,8 +1418,8 @@ child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 	{
 	  int detach = 0;
 
-	  if (ui_loop_hook != NULL)
-	    detach = ui_loop_hook (0);
+	  if (deprecated_ui_loop_hook != NULL)
+	    detach = deprecated_ui_loop_hook (0);
 
 	  if (detach)
 	    child_kill_inferior ();
@@ -1659,6 +1657,36 @@ child_detach (char *args, int from_tty)
   unpush_target (&child_ops);
 }
 
+char *
+child_pid_to_exec_file (int pid)
+{
+  /* Try to find the process path using the Cygwin internal process list
+     pid isn't a valid pid, unfortunately.  Use current_event.dwProcessId
+     instead.  */
+  /* TODO: Also find native Windows processes using CW_GETPINFO_FULL.  */
+
+  static char path[MAX_PATH + 1];
+  char *path_ptr = NULL;
+  int cpid;
+  struct external_pinfo *pinfo;
+
+  cygwin_internal (CW_LOCK_PINFO, 1000);
+  for (cpid = 0;
+       (pinfo = (struct external_pinfo *)
+                       cygwin_internal (CW_GETPINFO, cpid | CW_NEXTPID));
+       cpid = pinfo->pid)
+    {
+      if (pinfo->dwProcessId == current_event.dwProcessId) /* Got it */
+       {
+         cygwin_conv_to_full_posix_path (pinfo->progname, path);
+         path_ptr = path; 
+         break;
+       }
+    }
+  cygwin_internal (CW_UNLOCK_PINFO);
+  return path_ptr; 
+}
+
 /* Print status information about what we're accessing.  */
 
 static void
@@ -1680,7 +1708,8 @@ child_open (char *arg, int from_tty)
    ENV is the environment vector to pass.  Errors reported with error().  */
 
 static void
-child_create_inferior (char *exec_file, char *allargs, char **env)
+child_create_inferior (char *exec_file, char *allargs, char **env,
+		       int from_tty)
 {
   char *winenv;
   char *temp;
@@ -2080,6 +2109,7 @@ init_child_ops (void)
   child_ops.to_has_registers = 1;
   child_ops.to_has_execution = 1;
   child_ops.to_magic = OPS_MAGIC;
+  child_ops.to_pid_to_exec_file = child_pid_to_exec_file;
 }
 
 void
@@ -2095,47 +2125,54 @@ _initialize_win32_nat (void)
 
   add_com_alias ("sharedlibrary", "dll-symbols", class_alias, 1);
 
-  add_show_from_set (add_set_cmd ("shell", class_support, var_boolean,
-				  (char *) &useshell,
-		 "Set use of shell to start subprocess.",
-				  &setlist),
-		     &showlist);
+  deprecated_add_show_from_set
+    (add_set_cmd ("shell", class_support, var_boolean,
+		  (char *) &useshell,
+		  "Set use of shell to start subprocess.",
+		  &setlist),
+     &showlist);
 
-  add_show_from_set (add_set_cmd ("new-console", class_support, var_boolean,
-				  (char *) &new_console,
-		 "Set creation of new console when creating child process.",
-				  &setlist),
-		     &showlist);
+  deprecated_add_show_from_set
+    (add_set_cmd ("new-console", class_support, var_boolean,
+		  (char *) &new_console,
+		  "Set creation of new console when creating child process.",
+		  &setlist),
+     &showlist);
 
-  add_show_from_set (add_set_cmd ("new-group", class_support, var_boolean,
-				  (char *) &new_group,
-		   "Set creation of new group when creating child process.",
-				  &setlist),
-		     &showlist);
+  deprecated_add_show_from_set
+    (add_set_cmd ("new-group", class_support, var_boolean,
+		  (char *) &new_group,
+		  "Set creation of new group when creating child process.",
+		  &setlist),
+     &showlist);
 
-  add_show_from_set (add_set_cmd ("debugexec", class_support, var_boolean,
-				  (char *) &debug_exec,
-		       "Set whether to display execution in child process.",
-				  &setlist),
-		     &showlist);
+  deprecated_add_show_from_set
+    (add_set_cmd ("debugexec", class_support, var_boolean,
+		  (char *) &debug_exec,
+		  "Set whether to display execution in child process.",
+		  &setlist),
+     &showlist);
 
-  add_show_from_set (add_set_cmd ("debugevents", class_support, var_boolean,
-				  (char *) &debug_events,
-		   "Set whether to display kernel events in child process.",
-				  &setlist),
-		     &showlist);
+  deprecated_add_show_from_set
+    (add_set_cmd ("debugevents", class_support, var_boolean,
+		  (char *) &debug_events,
+		  "Set whether to display kernel events in child process.",
+		  &setlist),
+     &showlist);
 
-  add_show_from_set (add_set_cmd ("debugmemory", class_support, var_boolean,
-				  (char *) &debug_memory,
-		 "Set whether to display memory accesses in child process.",
-				  &setlist),
-		     &showlist);
+  deprecated_add_show_from_set
+    (add_set_cmd ("debugmemory", class_support, var_boolean,
+		  (char *) &debug_memory,
+		  "Set whether to display memory accesses in child process.",
+		  &setlist),
+     &showlist);
 
-  add_show_from_set (add_set_cmd ("debugexceptions", class_support, var_boolean,
-				  (char *) &debug_exceptions,
-	       "Set whether to display kernel exceptions in child process.",
-				  &setlist),
-		     &showlist);
+  deprecated_add_show_from_set
+    (add_set_cmd ("debugexceptions", class_support, var_boolean,
+		  (char *) &debug_exceptions,
+		  "Set whether to display kernel exceptions in child process.",
+		  &setlist),
+     &showlist);
 
   add_info ("dll", info_dll_command, "Status of loaded DLLs.");
   add_info_alias ("sharedlibrary", "dll", 1);
@@ -2238,65 +2275,65 @@ core_dll_symbols_add (char *dll_name, DWORD base_addr)
       }
   }
 
-    register_loaded_dll (dll_name, base_addr + 0x1000);
-    solib_symbols_add (dll_name, 0, (CORE_ADDR) base_addr + 0x1000);
+  register_loaded_dll (dll_name, base_addr + 0x1000);
+  solib_symbols_add (dll_name, 0, (CORE_ADDR) base_addr + 0x1000);
 
-  out:
-    return 1;
-  }
+ out:
+  return 1;
+}
 
-  typedef struct
-  {
-    struct target_ops *target;
-    bfd_vma addr;
-  } map_code_section_args;
+typedef struct
+{
+  struct target_ops *target;
+  bfd_vma addr;
+} map_code_section_args;
 
-  static void
-  map_single_dll_code_section (bfd * abfd, asection * sect, void *obj)
-  {
-    int old;
-    int update_coreops;
-    struct section_table *new_target_sect_ptr;
+static void
+map_single_dll_code_section (bfd * abfd, asection * sect, void *obj)
+{
+  int old;
+  int update_coreops;
+  struct section_table *new_target_sect_ptr;
 
-    map_code_section_args *args = (map_code_section_args *) obj;
-    struct target_ops *target = args->target;
-    if (sect->flags & SEC_CODE)
-      {
-	update_coreops = core_ops.to_sections == target->to_sections;
+  map_code_section_args *args = (map_code_section_args *) obj;
+  struct target_ops *target = args->target;
+  if (sect->flags & SEC_CODE)
+    {
+      update_coreops = core_ops.to_sections == target->to_sections;
 
-	if (target->to_sections)
-	  {
-	    old = target->to_sections_end - target->to_sections;
-	    target->to_sections = (struct section_table *)
-	      xrealloc ((char *) target->to_sections,
-			(sizeof (struct section_table)) * (1 + old));
-	  }
-	else
-	  {
-	    old = 0;
-	    target->to_sections = (struct section_table *)
-	      xmalloc ((sizeof (struct section_table)));
-	  }
-	target->to_sections_end = target->to_sections + (1 + old);
+      if (target->to_sections)
+	{
+	  old = target->to_sections_end - target->to_sections;
+	  target->to_sections = (struct section_table *)
+	    xrealloc ((char *) target->to_sections,
+		      (sizeof (struct section_table)) * (1 + old));
+	}
+      else
+	{
+	  old = 0;
+	  target->to_sections = (struct section_table *)
+	    xmalloc ((sizeof (struct section_table)));
+	}
+      target->to_sections_end = target->to_sections + (1 + old);
 
-	/* Update the to_sections field in the core_ops structure
-	   if needed.  */
-	if (update_coreops)
-	  {
-	    core_ops.to_sections = target->to_sections;
-	    core_ops.to_sections_end = target->to_sections_end;
-	  }
-	new_target_sect_ptr = target->to_sections + old;
-	new_target_sect_ptr->addr = args->addr + bfd_section_vma (abfd, sect);
-	new_target_sect_ptr->endaddr = args->addr + bfd_section_vma (abfd, sect) +
-	  bfd_section_size (abfd, sect);;
-	new_target_sect_ptr->the_bfd_section = sect;
-	new_target_sect_ptr->bfd = abfd;
-      }
-  }
+      /* Update the to_sections field in the core_ops structure
+	 if needed.  */
+      if (update_coreops)
+	{
+	  core_ops.to_sections = target->to_sections;
+	  core_ops.to_sections_end = target->to_sections_end;
+	}
+      new_target_sect_ptr = target->to_sections + old;
+      new_target_sect_ptr->addr = args->addr + bfd_section_vma (abfd, sect);
+      new_target_sect_ptr->endaddr = args->addr + bfd_section_vma (abfd, sect) +
+	bfd_section_size (abfd, sect);;
+      new_target_sect_ptr->the_bfd_section = sect;
+      new_target_sect_ptr->bfd = abfd;
+    }
+}
 
-  static int
-  dll_code_sections_add (const char *dll_name, int base_addr, struct target_ops *target)
+static int
+dll_code_sections_add (const char *dll_name, int base_addr, struct target_ops *target)
 {
   bfd *dll_bfd;
   map_code_section_args map_args;
@@ -2339,20 +2376,20 @@ core_section_load_dll_symbols (bfd * abfd, asection * sect, void *obj)
   if (strncmp (sect->name, ".module", 7))
     return;
 
-  buf = (char *) xmalloc (sect->_raw_size + 1);
+  buf = (char *) xmalloc (bfd_get_section_size (sect) + 1);
   if (!buf)
     {
       printf_unfiltered ("memory allocation failed for %s\n", sect->name);
       goto out;
     }
-  if (!bfd_get_section_contents (abfd, sect, buf, 0, sect->_raw_size))
+  if (!bfd_get_section_contents (abfd, sect, buf, 0, bfd_get_section_size (sect)))
     goto out;
 
   pstatus = (struct win32_pstatus *) buf;
 
   memmove (&base_addr, &(pstatus->data.module_info.base_address), sizeof (base_addr));
   dll_name_size = pstatus->data.module_info.module_name_size;
-  if (offsetof (struct win32_pstatus, data.module_info.module_name) + dll_name_size > sect->_raw_size)
+  if (offsetof (struct win32_pstatus, data.module_info.module_name) + dll_name_size > bfd_get_section_size (sect))
       goto out;
 
   dll_name = (char *) xmalloc (dll_name_size + 1);
@@ -2412,7 +2449,7 @@ fetch_elf_core_registers (char *core_reg_sect,
       return;
     }
   for (r = 0; r < NUM_REGS; r++)
-    supply_register (r, core_reg_sect + mappings[r]);
+    regcache_raw_supply (current_regcache, r, core_reg_sect + mappings[r]);
 }
 
 static struct core_fns win32_elf_core_fns =
@@ -2427,7 +2464,7 @@ static struct core_fns win32_elf_core_fns =
 void
 _initialize_core_win32 (void)
 {
-  add_core_fns (&win32_elf_core_fns);
+  deprecated_add_core_fns (&win32_elf_core_fns);
 }
 
 void

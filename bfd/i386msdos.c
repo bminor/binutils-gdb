@@ -1,6 +1,6 @@
 /* BFD back-end for MS-DOS executables.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2001, 2002,
-   2003 Free Software Foundation, Inc.
+   2003, 2004 Free Software Foundation, Inc.
    Written by Bryan Ford of the University of Utah.
 
    Contributed by the Center for Software Science at the
@@ -83,20 +83,19 @@ msdos_write_object_contents (abfd)
   /* Find the total size of the program on disk and in memory.  */
   for (sec = abfd->sections; sec != (asection *) NULL; sec = sec->next)
     {
-      if (bfd_get_section_size_before_reloc (sec) == 0)
+      if (sec->size == 0)
         continue;
       if (bfd_get_section_flags (abfd, sec) & SEC_ALLOC)
         {
-	  bfd_vma sec_vma = bfd_get_section_vma (abfd, sec)
-	  		    + bfd_get_section_size_before_reloc (sec);
+	  bfd_vma sec_vma = bfd_get_section_vma (abfd, sec) + sec->size;
 	  if (sec_vma > high_vma)
 	    high_vma = sec_vma;
 	}
       if (bfd_get_section_flags (abfd, sec) & SEC_LOAD)
         {
-	  file_ptr sec_end = sizeof(hdr)
-	  		     + bfd_get_section_vma (abfd, sec)
-			     + bfd_get_section_size_before_reloc (sec);
+	  file_ptr sec_end = (sizeof (hdr)
+			      + bfd_get_section_vma (abfd, sec)
+			      + sec->size);
 	  if (sec_end > outfile_size)
 	    outfile_size = sec_end;
 	}
@@ -176,7 +175,10 @@ msdos_set_section_contents (abfd, section, location, offset, count)
 #define msdos_bfd_relax_section bfd_generic_relax_section
 #define msdos_bfd_gc_sections bfd_generic_gc_sections
 #define msdos_bfd_merge_sections bfd_generic_merge_sections
+#define msdos_bfd_is_group_section bfd_generic_is_group_section
 #define msdos_bfd_discard_group bfd_generic_discard_group
+#define msdos_section_already_linked \
+  _bfd_generic_section_already_linked
 #define msdos_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
 #define msdos_bfd_link_hash_table_free _bfd_generic_link_hash_table_free
 #define msdos_bfd_link_add_symbols _bfd_generic_link_add_symbols

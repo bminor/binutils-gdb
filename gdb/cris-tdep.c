@@ -470,8 +470,8 @@ cris_frame_prev_register (struct frame_info *next_frame,
 {
   struct cris_unwind_cache *info
     = cris_frame_unwind_cache (next_frame, this_prologue_cache);
-  trad_frame_prev_register (next_frame, info->saved_regs, regnum,
-			    optimizedp, lvalp, addrp, realnump, bufferp);
+  trad_frame_get_prev_register (next_frame, info->saved_regs, regnum,
+				optimizedp, lvalp, addrp, realnump, bufferp);
 }
 
 /* Assuming NEXT_FRAME->prev is a dummy, return the frame ID of that
@@ -511,7 +511,7 @@ cris_push_dummy_code (struct gdbarch *gdbarch,
 }
 
 static CORE_ADDR
-cris_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
+cris_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		      struct regcache *regcache, CORE_ADDR bp_addr,
 		      int nargs, struct value **args, CORE_ADDR sp,
 		      int struct_return, CORE_ADDR struct_addr)
@@ -1211,7 +1211,7 @@ cris_register_offset (int regno)
    of data in register regno.  */
 
 static struct type *
-cris_register_virtual_type (int regno)
+cris_register_type (struct gdbarch *gdbarch, int regno)
 {
   if (regno == SP_REGNUM || regno == PC_REGNUM
       || (regno > P8_REGNUM && regno < USP_REGNUM))
@@ -1320,7 +1320,7 @@ cris_register_name (int regno)
 static int
 cris_register_bytes_ok (long bytes)
 {
-  return (bytes == DEPRECATED_REGISTER_BYTES);
+  return (bytes == deprecated_register_bytes ());
 }
 
 /* Extract from an array regbuf containing the raw register state a function
@@ -3336,7 +3336,7 @@ supply_gregset (elf_gregset_t *gregsetp)
      knows about the actual size of each register so that's no problem.  */
   for (i = 0; i < NUM_GENREGS + NUM_SPECREGS; i++)
     {
-      supply_register (i, (char *)&regp[i]);
+      regcache_raw_supply (current_regcache, i, (char *)&regp[i]);
     }
 }
 
@@ -3632,20 +3632,20 @@ _initialize_cris_tdep (void)
                    (char *) &usr_cmd_cris_version, 
                    "Set the current CRIS version.", &setlist);
   set_cmd_sfunc (c, cris_version_update);
-  add_show_from_set (c, &showlist);
+  deprecated_add_show_from_set (c, &showlist);
   
   c = add_set_enum_cmd ("cris-mode", class_support, cris_mode_enums, 
                         &usr_cmd_cris_mode, 
                         "Set the current CRIS mode.", &setlist);
   set_cmd_sfunc (c, cris_mode_update);
-  add_show_from_set (c, &showlist);
+  deprecated_add_show_from_set (c, &showlist);
 
   c = add_cmd ("cris-fpless-backtrace", class_support, cris_fpless_backtrace, 
                "Display call chain using the subroutine return pointer.\n"
                "Note that this displays the address after the jump to the "
                "subroutine.", &cmdlist);
   
-  add_core_fns (&cris_elf_core_fns);
+  deprecated_add_core_fns (&cris_elf_core_fns);
   
 }
 
@@ -3670,14 +3670,15 @@ cris_version_update (char *ignore_args, int from_tty,
 {
   struct gdbarch_info info;
 
-  /* NOTE: cagney/2002-03-17: The add_show_from_set() function clones
-     the set command passed as a parameter.  The clone operation will
-     include (BUG?) any ``set'' command callback, if present.
-     Commands like ``info set'' call all the ``show'' command
-     callbacks.  Unfortunately, for ``show'' commands cloned from
-     ``set'', this includes callbacks belonging to ``set'' commands.
-     Making this worse, this only occures if add_show_from_set() is
-     called after add_cmd_sfunc() (BUG?).  */
+  /* NOTE: cagney/2002-03-17: The deprecated_add_show_from_set()
+     function clones the set command passed as a parameter.  The clone
+     operation will include (BUG?) any ``set'' command callback, if
+     present.  Commands like ``info set'' call all the ``show''
+     command callbacks.  Unfortunately, for ``show'' commands cloned
+     from ``set'', this includes callbacks belonging to ``set''
+     commands.  Making this worse, this only occures if
+     deprecated_add_show_from_set() is called after add_cmd_sfunc()
+     (BUG?).  */
 
   /* From here on, trust the user's CRIS version setting.  */
   if (cmd_type (c) == set_cmd)
@@ -3697,14 +3698,15 @@ cris_mode_update (char *ignore_args, int from_tty,
 {
   struct gdbarch_info info;
   
-  /* NOTE: cagney/2002-03-17: The add_show_from_set() function clones
-     the set command passed as a parameter.  The clone operation will
-     include (BUG?) any ``set'' command callback, if present.
-     Commands like ``info set'' call all the ``show'' command
-     callbacks.  Unfortunately, for ``show'' commands cloned from
-     ``set'', this includes callbacks belonging to ``set'' commands.
-     Making this worse, this only occures if add_show_from_set() is
-     called after add_cmd_sfunc() (BUG?).  */
+  /* NOTE: cagney/2002-03-17: The deprecated_add_show_from_set()
+     function clones the set command passed as a parameter.  The clone
+     operation will include (BUG?) any ``set'' command callback, if
+     present.  Commands like ``info set'' call all the ``show''
+     command callbacks.  Unfortunately, for ``show'' commands cloned
+     from ``set'', this includes callbacks belonging to ``set''
+     commands.  Making this worse, this only occures if
+     deprecated_add_show_from_set() is called after add_cmd_sfunc()
+     (BUG?).  */
 
   /* From here on, trust the user's CRIS mode setting.  */
   if (cmd_type (c) == set_cmd)
@@ -3795,7 +3797,7 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_return_value (gdbarch, cris_return_value);
   set_gdbarch_deprecated_reg_struct_has_addr (gdbarch, 
 					      cris_reg_struct_has_addr);
-  set_gdbarch_use_struct_convention (gdbarch, always_use_struct_convention);
+  set_gdbarch_deprecated_use_struct_convention (gdbarch, always_use_struct_convention);
 
   /* There are 32 registers (some of which may not be implemented).  */
   set_gdbarch_num_regs (gdbarch, 32);
@@ -3804,8 +3806,8 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_name (gdbarch, cris_register_name);
   
   /* Length of ordinary registers used in push_word and a few other
-     places.  DEPRECATED_REGISTER_RAW_SIZE is the real way to know how
-     big a register is.  */
+     places.  register_size() is the real way to know how big a
+     register is.  */
   set_gdbarch_deprecated_register_size (gdbarch, 4);
   set_gdbarch_double_bit (gdbarch, 64);
   /* The default definition of a long double is 2 * TARGET_DOUBLE_BIT,
@@ -3848,25 +3850,11 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       internal_error (__FILE__, __LINE__, "cris_gdbarch_init: unknown CRIS version");
     }
 
-  set_gdbarch_deprecated_register_bytes (gdbarch, register_bytes);
-
   /* Returns the register offset for the first byte of register regno's space 
      in the saved register state.  */
   set_gdbarch_deprecated_register_byte (gdbarch, cris_register_offset);
   
-  /* The length of the registers in the actual machine representation.  */
-  set_gdbarch_deprecated_register_raw_size (gdbarch, cris_register_size);
-  
-  /* The largest value DEPRECATED_REGISTER_RAW_SIZE can have.  */
-  set_gdbarch_deprecated_max_register_raw_size (gdbarch, 32);
-  
-  /* The length of the registers in the program's representation.  */
-  set_gdbarch_deprecated_register_virtual_size (gdbarch, cris_register_size);
-  
-  /* The largest value DEPRECATED_REGISTER_VIRTUAL_SIZE can have.  */
-  set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 32);
-
-  set_gdbarch_deprecated_register_virtual_type (gdbarch, cris_register_virtual_type);
+  set_gdbarch_register_type (gdbarch, cris_register_type);
   
   /* Dummy frame functions.  */
   set_gdbarch_push_dummy_code (gdbarch, cris_push_dummy_code);

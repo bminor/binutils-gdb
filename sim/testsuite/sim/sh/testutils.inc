@@ -205,6 +205,19 @@ main:
 	bra	mfail
 	nop
 	.endm
+	# Branch if false -- 8k range
+	.macro bf8k label
+	bt	.Lbf8k\@
+	bra	\label
+.Lbf8k\@:
+	.endm
+
+	# Branch if true -- 8k range
+	.macro bt8k label
+	bf	.Lbt8k\@
+	bra	\label
+.Lbt8k\@:
+	.endm
 
 	# Assert value of register (any general register but r0)
 	# Preserves r0 on stack, restores it on success.
@@ -588,4 +601,17 @@ set_greg\@:
 	not	r0, r0
 	lds	r0, dsr
 	pop	r0
+	.endm
+
+	.macro	assertmem addr val
+	push	r0
+	mov.l	.Laddr\@, r0
+	mov.l	@r0, r0
+	assertreg0 \val
+	bra	.Lam\@
+	nop
+	.align	2
+.Laddr\@:
+	.long	\addr
+.Lam\@:	pop	r0
 	.endm

@@ -1,6 +1,6 @@
 /* BFD back-end for MIPS PE COFF files.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
    Modified from coff-i386.c by DJ Delorie, dj@cygnus.com
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -41,16 +41,6 @@ static reloc_howto_type *coff_mips_rtype_to_howto
   PARAMS ((bfd *, asection *, struct internal_reloc *,
 	   struct coff_link_hash_entry *, struct internal_syment *,
 	   bfd_vma *));
-#if 0
-static void mips_ecoff_swap_reloc_in
-  PARAMS ((bfd *, PTR, struct internal_reloc *));
-static void mips_ecoff_swap_reloc_out
-  PARAMS ((bfd *, const struct internal_reloc *, PTR));
-static void mips_adjust_reloc_in
-  PARAMS ((bfd *, const struct internal_reloc *, arelent *));
-static void mips_adjust_reloc_out
-  PARAMS ((bfd *, const arelent *, struct internal_reloc *));
-#endif
 
 static bfd_boolean in_reloc_p
   PARAMS ((bfd *, reloc_howto_type *));
@@ -534,20 +524,6 @@ coff_mips_reloc_type_lookup (abfd, code)
     case BFD_RELOC_MIPS_LITERAL:
       mips_type = MIPS_R_LITERAL;
       break;
-/* FIXME?
-    case BFD_RELOC_16_PCREL_S2:
-      mips_type = MIPS_R_PCREL16;
-      break;
-    case BFD_RELOC_PCREL_HI16_S:
-      mips_type = MIPS_R_RELHI;
-      break;
-    case BFD_RELOC_PCREL_LO16:
-      mips_type = MIPS_R_RELLO;
-      break;
-    case BFD_RELOC_GPREL32:
-      mips_type = MIPS_R_SWITCH;
-      break;
-*/
     case BFD_RELOC_RVA:
       mips_type = MIPS_R_RVA;
       break;
@@ -656,9 +632,8 @@ coff_pe_mips_relocate_section (output_bfd, info, input_bfd,
 
   if (info->relocatable)
   {
-    (*_bfd_error_handler) (_("\
-%s: `ld -r' not supported with PE MIPS objects\n"),
-			   bfd_archive_filename (input_bfd));
+    (*_bfd_error_handler)
+      (_("%B: `ld -r' not supported with PE MIPS objects\n"), input_bfd);
     bfd_set_error (bfd_error_bad_value);
     return FALSE;
   }
@@ -792,8 +767,8 @@ coff_pe_mips_relocate_section (output_bfd, info, input_bfd,
 	   val = VMA of what we need to refer to
       */
 
-#define UI(x) (*_bfd_error_handler) (_("%s: unimplemented %s\n"), \
-				     bfd_archive_filename (input_bfd), x); \
+#define UI(x) (*_bfd_error_handler) (_("%B: unimplemented %s\n"), \
+				     input_bfd, x); \
 	      bfd_set_error (bfd_error_bad_value);
 
       switch (rel->r_type)
@@ -818,8 +793,7 @@ coff_pe_mips_relocate_section (output_bfd, info, input_bfd,
 	  targ = val + (tmp&0x03ffffff)*4;
 	  if ((src & 0xf0000000) != (targ & 0xf0000000))
 	    {
-	      (*_bfd_error_handler) (_("%s: jump too far away\n"),
-				     bfd_archive_filename (input_bfd));
+	      (*_bfd_error_handler) (_("%B: jump too far away\n"), input_bfd);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }
@@ -845,8 +819,8 @@ coff_pe_mips_relocate_section (output_bfd, info, input_bfd,
 	      targ = val + low + ((tmp & 0xffff) << 16);
 	      break;
 	    default:
-	      (*_bfd_error_handler) (_("%s: bad pair/reflo after refhi\n"),
-				     bfd_archive_filename (input_bfd));
+	      (*_bfd_error_handler) (_("%B: bad pair/reflo after refhi\n"),
+				     input_bfd);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }

@@ -103,6 +103,10 @@ void sim_io_flush_stdoutput
 (void);
 
 
+/* Simulator instance.  */
+extern psim *simulator;
+
+
 /* Memory management with an allocator that clears memory before use. */
 
 void *zalloc

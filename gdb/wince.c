@@ -60,9 +60,6 @@
 #include "mips-tdep.h"
 #endif
 
-/* The ui's event loop. */
-extern int (*ui_loop_hook) (int signo);
-
 /* If we're not using the old Cygwin header file set, define the
    following which never should have been in the generic Win32 API
    headers in the first place since they were our own invention... */
@@ -1122,7 +1119,8 @@ do_child_fetch_inferior_registers (int r)
 {
   if (r >= 0)
     {
-      supply_register (r, (char *) regptr (&current_thread->context, r));
+      regcache_raw_supply (current_regcache, r,
+			   (char *) regptr (&current_thread->context, r));
     }
   else
     {
@@ -1510,8 +1508,8 @@ child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
       {
 	int detach = 0;
 
-	if (ui_loop_hook != NULL)
-	  detach = ui_loop_hook (0);
+	if (deprecated_ui_loop_hook != NULL)
+	  detach = deprecated_ui_loop_hook (0);
 
 	if (detach)
 	  child_kill_inferior ();
@@ -1589,7 +1587,8 @@ upload_to_device (const char *to, const char *from)
     return remotefile;		/* Don't bother uploading. */
 
   /* Open the source. */
-  if ((fd = openp (getenv ("PATH"), TRUE, (char *) from, O_RDONLY, 0, NULL)) < 0)
+  if ((fd = openp (getenv ("PATH"), OPF_TRY_CWD_FIRST, (char *) from, O_RDONLY,
+		   0, NULL)) < 0)
     error ("couldn't open %s", from);
 
   /* Get the time for later comparison. */
@@ -1720,7 +1719,8 @@ wince_initialize (void)
    ALLARGS is a string containing the arguments to the program.
    ENV is the environment vector to pass.  Errors reported with error().  */
 static void
-child_create_inferior (char *exec_file, char *args, char **env)
+child_create_inferior (char *exec_file, char *args, char **env,
+		       int from_tty)
 {
   PROCESS_INFORMATION pi;
   struct target_waitstatus dummy;
@@ -1971,7 +1971,7 @@ _initialize_wince (void)
   struct cmd_list_element *set;
   init_child_ops ();
 
-  add_show_from_set
+  deprecated_add_show_from_set
     (add_set_cmd ((char *) "remotedirectory", no_class,
 		  var_string_noescape, (char *) &remote_directory,
 		  (char *) "Set directory for remote upload.\n",
@@ -1983,18 +1983,18 @@ _initialize_wince (void)
 		     var_string_noescape, (char *) &remote_upload,
 	       (char *) "Set how to upload executables to remote device.\n",
 		     &setlist);
-  add_show_from_set (set, &showlist);
+  deprecated_add_show_from_set (set, &showlist);
   set_cmd_cfunc (set, set_upload_type);
   set_upload_type (NULL, 0);
 
-  add_show_from_set
+  deprecated_add_show_from_set
     (add_set_cmd ((char *) "debugexec", class_support, var_boolean,
 		  (char *) &debug_exec,
 	      (char *) "Set whether to display execution in child process.",
 		  &setlist),
      &showlist);
 
-  add_show_from_set
+  deprecated_add_show_from_set
     (add_set_cmd ((char *) "remoteaddhost", class_support, var_boolean,
 		  (char *) &remote_add_host,
 		  (char *) "\
@@ -2002,21 +2002,21 @@ Set whether to add this host to remote stub arguments for\n\
 debugging over a network.", &setlist),
      &showlist);
 
-  add_show_from_set
+  deprecated_add_show_from_set
     (add_set_cmd ((char *) "debugevents", class_support, var_boolean,
 		  (char *) &debug_events,
 	  (char *) "Set whether to display kernel events in child process.",
 		  &setlist),
      &showlist);
 
-  add_show_from_set
+  deprecated_add_show_from_set
     (add_set_cmd ((char *) "debugmemory", class_support, var_boolean,
 		  (char *) &debug_memory,
 	(char *) "Set whether to display memory accesses in child process.",
 		  &setlist),
      &showlist);
 
-  add_show_from_set
+  deprecated_add_show_from_set
     (add_set_cmd ((char *) "debugexceptions", class_support, var_boolean,
 		  (char *) &debug_exceptions,
       (char *) "Set whether to display kernel exceptions in child process.",

@@ -41,8 +41,6 @@
 
 static void target_info (char *, int);
 
-static void maybe_kill_then_create_inferior (char *, char *, char **);
-
 static void maybe_kill_then_attach (char *, int);
 
 static void kill_or_be_killed (int);
@@ -150,8 +148,6 @@ static void debug_to_kill (void);
 static void debug_to_load (char *, int);
 
 static int debug_to_lookup_symbol (char *, CORE_ADDR *);
-
-static void debug_to_create_inferior (char *, char *, char **);
 
 static void debug_to_mourn_inferior (void);
 
@@ -339,10 +335,11 @@ maybe_kill_then_attach (char *args, int from_tty)
 }
 
 static void
-maybe_kill_then_create_inferior (char *exec, char *args, char **env)
+maybe_kill_then_create_inferior (char *exec, char *args, char **env,
+				 int from_tty)
 {
   kill_or_be_killed (0);
-  target_create_inferior (exec, args, env);
+  target_create_inferior (exec, args, env, from_tty);
 }
 
 /* Go through the target stack from top to bottom, copying over zero
@@ -1219,11 +1216,6 @@ target_info (char *args, int from_tty)
   if (symfile_objfile != NULL)
     printf_unfiltered ("Symbols from \"%s\".\n", symfile_objfile->name);
 
-#ifdef FILES_INFO_HOOK
-  if (FILES_INFO_HOOK ())
-    return;
-#endif
-
   for (t = target_stack; t != NULL; t = t->beneath)
     {
       if (!t->to_has_memory)
@@ -1268,20 +1260,12 @@ target_preopen (int from_tty)
 void
 target_detach (char *args, int from_tty)
 {
-  /* Handle any optimized stores to the inferior.  */
-#ifdef DO_DEFERRED_STORES
-  DO_DEFERRED_STORES;
-#endif
   (current_target.to_detach) (args, from_tty);
 }
 
 void
 target_disconnect (char *args, int from_tty)
 {
-  /* Handle any optimized stores to the inferior.  */
-#ifdef DO_DEFERRED_STORES
-  DO_DEFERRED_STORES;
-#endif
   (current_target.to_disconnect) (args, from_tty);
 }
 
@@ -1348,12 +1332,13 @@ find_default_attach (char *args, int from_tty)
 }
 
 void
-find_default_create_inferior (char *exec_file, char *allargs, char **env)
+find_default_create_inferior (char *exec_file, char *allargs, char **env,
+			      int from_tty)
 {
   struct target_ops *t;
 
   t = find_default_run_target ("run");
-  (t->to_create_inferior) (exec_file, allargs, env);
+  (t->to_create_inferior) (exec_file, allargs, env, from_tty);
   return;
 }
 
@@ -1424,6 +1409,13 @@ target_resize_to_sections (struct target_ops *target, int num_added)
 	      (*t)->to_sections = target->to_sections;
 	      (*t)->to_sections_end = target->to_sections_end;
 	    }
+	}
+      /* There is a flattened view of the target stack in current_target,
+	 so its to_sections pointer might also need updating. */
+      if (current_target.to_sections == old_value)
+	{
+	  current_target.to_sections = target->to_sections;
+	  current_target.to_sections_end = target->to_sections_end;
 	}
     }
   
@@ -1536,11 +1528,6 @@ generic_mourn_inferior (void)
   breakpoint_init_inferior (inf_exited);
   registers_changed ();
 
-#ifdef CLEAR_DEFERRED_STORES
-  /* Delete any pending stores to the inferior... */
-  CLEAR_DEFERRED_STORES;
-#endif
-
   reopen_exec_file ();
   reinit_frame_cache ();
 
@@ -1551,8 +1538,8 @@ generic_mourn_inferior (void)
   if (!show_breakpoint_hit_counts)
     breakpoint_clear_ignore_counts ();
 
-  if (detach_hook)
-    detach_hook ();
+  if (deprecated_detach_hook)
+    deprecated_detach_hook ();
 }
 
 /* Helper function for child_wait and the Lynx derivatives of child_wait.
@@ -1777,11 +1764,11 @@ debug_print_register (const char * func, int regno)
       unsigned char buf[MAX_REGISTER_SIZE];
       deprecated_read_register_gen (regno, buf);
       fprintf_unfiltered (gdb_stdlog, " = ");
-      for (i = 0; i < DEPRECATED_REGISTER_RAW_SIZE (regno); i++)
+      for (i = 0; i < register_size (current_gdbarch, regno); i++)
 	{
 	  fprintf_unfiltered (gdb_stdlog, "%02x", buf[i]);
 	}
-      if (DEPRECATED_REGISTER_RAW_SIZE (regno) <= sizeof (LONGEST))
+      if (register_size (current_gdbarch, regno) <= sizeof (LONGEST))
 	{
 	  fprintf_unfiltered (gdb_stdlog, " 0x%s %s",
 			      paddr_nz (read_register (regno)),
@@ -2079,12 +2066,13 @@ debug_to_lookup_symbol (char *name, CORE_ADDR *addrp)
 }
 
 static void
-debug_to_create_inferior (char *exec_file, char *args, char **env)
+debug_to_create_inferior (char *exec_file, char *args, char **env,
+			  int from_tty)
 {
-  debug_target.to_create_inferior (exec_file, args, env);
+  debug_target.to_create_inferior (exec_file, args, env, from_tty);
 
-  fprintf_unfiltered (gdb_stdlog, "target_create_inferior (%s, %s, xxx)\n",
-		      exec_file, args);
+  fprintf_unfiltered (gdb_stdlog, "target_create_inferior (%s, %s, xxx, %d)\n",
+		      exec_file, args, from_tty);
 }
 
 static void
@@ -2433,7 +2421,7 @@ initialize_targets (void)
   add_info ("target", target_info, targ_desc);
   add_info ("files", target_info, targ_desc);
 
-  add_show_from_set 
+  deprecated_add_show_from_set 
     (add_set_cmd ("target", class_maintenance, var_zinteger,
 		  (char *) &targetdebug,
 		  "Set target debugging.\n\
@@ -2444,11 +2432,12 @@ command.", &setdebuglist),
 
   add_setshow_boolean_cmd ("trust-readonly-sections", class_support, 
 			   &trust_readonly, "\
-Set mode for reading from readonly sections.\n\
+Set mode for reading from readonly sections.", "\
+Show mode for reading from readonly sections.", "\
 When this mode is on, memory reads from readonly sections (such as .text)\n\
 will be read from the object file instead of from the target.  This will\n\
 result in significant performance improvement for remote targets.", "\
-Show mode for reading from readonly sections.\n",
+Mode for reading from readonly sections is %s.",
 			   NULL, NULL,
 			   &setlist, &showlist);
 

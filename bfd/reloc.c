@@ -623,8 +623,7 @@ bfd_perform_relocation (bfd *abfd,
     }
 
   /* Is the address of the relocation really within the section?  */
-  if (reloc_entry->address > (input_section->_cooked_size
-			      / bfd_octets_per_byte (abfd)))
+  if (reloc_entry->address > bfd_get_section_limit (abfd, input_section))
     return bfd_reloc_outofrange;
 
   /* Work out which section the relocation is targeted at and the
@@ -1013,8 +1012,7 @@ bfd_install_relocation (bfd *abfd,
     }
 
   /* Is the address of the relocation really within the section?  */
-  if (reloc_entry->address > (input_section->_cooked_size
-			      / bfd_octets_per_byte (abfd)))
+  if (reloc_entry->address > bfd_get_section_limit (abfd, input_section))
     return bfd_reloc_outofrange;
 
   /* Work out which section the relocation is targeted at and the
@@ -1350,7 +1348,7 @@ _bfd_final_link_relocate (reloc_howto_type *howto,
   bfd_vma relocation;
 
   /* Sanity check the address.  */
-  if (address > input_section->_raw_size)
+  if (address > bfd_get_section_limit (input_bfd, input_section))
     return bfd_reloc_outofrange;
 
   /* This function assumes that we are dealing with a basic relocation
@@ -1645,6 +1643,11 @@ of the relocation itself; sometimes they are relative to the start of
 the section containing the relocation.  It depends on the specific target.
 
 The 24-bit relocation is used in some Intel 960 configurations.
+
+ENUM
+  BFD_RELOC_32_SECREL
+ENUMDOC
+  Section relative relocations.  Some targets need this for DWARF2.
 
 ENUM
   BFD_RELOC_32_GOT_PCREL
@@ -2061,14 +2064,6 @@ ENUM
   BFD_RELOC_LO16
 ENUMDOC
   Low 16 bits.
-ENUM
-  BFD_RELOC_PCREL_HI16_S
-ENUMDOC
-  Like BFD_RELOC_HI16_S, but PC relative.
-ENUM
-  BFD_RELOC_PCREL_LO16
-ENUMDOC
-  Like BFD_RELOC_LO16, but PC relative.
 
 ENUM
   BFD_RELOC_MIPS_LITERAL
@@ -2613,11 +2608,40 @@ ENUMX
 ENUMDOC
   These relocs are only used within the ARM assembler.  They are not
   (at present) written to any object files.
+ENUM
+  BFD_RELOC_ARM_TARGET1
+ENUMDOC
+  Pc-relative or absolute relocation depending on target.  Used for
+  entries in .init_array sections.
+ENUM
+  BFD_RELOC_ARM_ROSEGREL32
+ENUMDOC
+  Read-only segment base relative address.
+ENUM
+  BFD_RELOC_ARM_SBREL32
+ENUMDOC
+  Data segment base relative address.
 
 ENUM
   BFD_RELOC_SH_PCDISP8BY2
 ENUMX
   BFD_RELOC_SH_PCDISP12BY2
+ENUMX
+  BFD_RELOC_SH_IMM3
+ENUMX
+  BFD_RELOC_SH_IMM3U
+ENUMX
+  BFD_RELOC_SH_DISP12
+ENUMX
+  BFD_RELOC_SH_DISP12BY2
+ENUMX
+  BFD_RELOC_SH_DISP12BY4
+ENUMX
+  BFD_RELOC_SH_DISP12BY8
+ENUMX
+  BFD_RELOC_SH_DISP20
+ENUMX
+  BFD_RELOC_SH_DISP20BY8
 ENUMX
   BFD_RELOC_SH_IMM4
 ENUMX
@@ -2953,6 +2977,12 @@ ENUMX
   BFD_RELOC_M32R_RELATIVE
 ENUMX
   BFD_RELOC_M32R_GOTOFF
+ENUMX
+  BFD_RELOC_M32R_GOTOFF_HI_ULO
+ENUMX
+  BFD_RELOC_M32R_GOTOFF_HI_SLO
+ENUMX
+  BFD_RELOC_M32R_GOTOFF_LO
 ENUMX
   BFD_RELOC_M32R_GOTPC24
 ENUMX
@@ -3853,6 +3883,49 @@ ENUMX
 ENUMDOC
   NS CR16C Relocations.
 
+ENUM 
+  BFD_RELOC_CRX_REL4
+ENUMX
+  BFD_RELOC_CRX_REL8
+ENUMX
+  BFD_RELOC_CRX_REL8_CMP
+ENUMX
+  BFD_RELOC_CRX_REL16
+ENUMX
+  BFD_RELOC_CRX_REL24
+ENUMX
+  BFD_RELOC_CRX_REL32
+ENUMX
+  BFD_RELOC_CRX_REGREL12
+ENUMX
+  BFD_RELOC_CRX_REGREL22
+ENUMX
+  BFD_RELOC_CRX_REGREL28
+ENUMX
+  BFD_RELOC_CRX_REGREL32
+ENUMX
+  BFD_RELOC_CRX_ABS16
+ENUMX
+  BFD_RELOC_CRX_ABS32
+ENUMX
+  BFD_RELOC_CRX_NUM8
+ENUMX
+  BFD_RELOC_CRX_NUM16
+ENUMX
+  BFD_RELOC_CRX_NUM32
+ENUMX
+  BFD_RELOC_CRX_IMM16
+ENUMX
+  BFD_RELOC_CRX_IMM32
+ENUMX
+  BFD_RELOC_CRX_SWITCH8
+ENUMX
+  BFD_RELOC_CRX_SWITCH16
+ENUMX
+  BFD_RELOC_CRX_SWITCH32
+ENUMDOC 
+  NS CRX Relocations.
+
 ENUM
   BFD_RELOC_CRIS_BDISP8
 ENUMX
@@ -4022,6 +4095,10 @@ ENUMX
   BFD_RELOC_MSP430_16_PCREL_BYTE
 ENUMX
   BFD_RELOC_MSP430_16_BYTE
+ENUMX
+  BFD_RELOC_MSP430_2X_PCREL
+ENUMX
+  BFD_RELOC_MSP430_RL_PCREL
 ENUMDOC
   msp430 specific relocation codes
 
@@ -4179,8 +4256,7 @@ SYNOPSIS
 
 DESCRIPTION
 	Provides default handling for relaxing for back ends which
-	don't do relaxing -- i.e., does nothing except make sure that the
-	final size of the section is set.
+	don't do relaxing.
 */
 
 bfd_boolean
@@ -4189,11 +4265,6 @@ bfd_generic_relax_section (bfd *abfd ATTRIBUTE_UNUSED,
 			   struct bfd_link_info *link_info ATTRIBUTE_UNUSED,
 			   bfd_boolean *again)
 {
-  /* We're not relaxing the section, so just copy the size info if it's
-     zero.  Someone else, like bfd_merge_sections, might have set it, so
-     don't overwrite a non-zero value.  */
-  if (section->_cooked_size == 0)
-    section->_cooked_size = section->_raw_size;
   *again = FALSE;
   return TRUE;
 }
@@ -4272,6 +4343,7 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
   long reloc_size = bfd_get_reloc_upper_bound (input_bfd, input_section);
   arelent **reloc_vector = NULL;
   long reloc_count;
+  bfd_size_type sz;
 
   if (reloc_size < 0)
     goto error_return;
@@ -4281,21 +4353,9 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
     goto error_return;
 
   /* Read in the section.  */
-  if (!bfd_get_section_contents (input_bfd,
-				 input_section,
-				 data,
-				 0,
-				 input_section->_raw_size))
+  sz = input_section->rawsize ? input_section->rawsize : input_section->size;
+  if (!bfd_get_section_contents (input_bfd, input_section, data, 0, sz))
     goto error_return;
-
-  /* Don't set input_section->_cooked_size here.  The caller has set
-     _cooked_size or called bfd_relax_section, which sets _cooked_size.
-     Despite using this generic relocation function, some targets perform
-     target-specific relaxation or string merging, which happens before
-     this function is called.  We do not want to clobber the _cooked_size
-     they computed.  */
-
-  input_section->reloc_done = TRUE;
 
   reloc_count = bfd_canonicalize_reloc (input_bfd,
 					input_section,

@@ -167,16 +167,116 @@ xstormy16_reg_virtual_type (int regnum)
 }
 
 /* Function: xstormy16_get_saved_register
-   Find a register's saved value on the call stack. */
+   Find a register's saved value on the call stack.
+
+   Find register number REGNUM relative to FRAME and put its (raw,
+   target format) contents in *RAW_BUFFER.
+
+   Set *OPTIMIZED if the variable was optimized out (and thus can't be
+   fetched).  Note that this is never set to anything other than zero
+   in this implementation.
+
+   Set *LVAL to lval_memory, lval_register, or not_lval, depending on
+   whether the value was fetched from memory, from a register, or in a
+   strange and non-modifiable way (e.g. a frame pointer which was
+   calculated rather than fetched).  We will use not_lval for values
+   fetched from generic dummy frames.
+
+   Set *ADDRP to the address, either in memory or as a
+   DEPRECATED_REGISTER_BYTE offset into the registers array.  If the
+   value is stored in a dummy frame, set *ADDRP to zero.
+
+   The argument RAW_BUFFER must point to aligned memory.
+
+   The GET_SAVED_REGISTER architecture interface is entirely
+   redundant.  New architectures should implement per-frame unwinders
+   (ref "frame-unwind.h").  */
 
 static void
-xstormy16_get_saved_register (char *raw_buffer,
-			      int *optimized,
+xstormy16_get_saved_register (char *raw_buffer, int *optimized,
 			      CORE_ADDR *addrp,
-			      struct frame_info *fi,
-			      int regnum, enum lval_type *lval)
+			      struct frame_info *frame, int regnum,
+			      enum lval_type *lval)
 {
-  deprecated_generic_get_saved_register (raw_buffer, optimized, addrp, fi, regnum, lval);
+  if (!target_has_registers)
+    error ("No registers.");
+
+  /* Normal systems don't optimize out things with register numbers.  */
+  if (optimized != NULL)
+    *optimized = 0;
+
+  if (addrp)			/* default assumption: not found in memory */
+    *addrp = 0;
+
+  /* Note: since the current frame's registers could only have been
+     saved by frames INTERIOR TO the current frame, we skip examining
+     the current frame itself: otherwise, we would be getting the
+     previous frame's registers which were saved by the current frame.  */
+
+  if (frame != NULL)
+    {
+      for (frame = get_next_frame (frame);
+	   get_frame_type (frame) != SENTINEL_FRAME;
+	   frame = get_next_frame (frame))
+	{
+	  if (get_frame_type (frame) == DUMMY_FRAME)
+	    {
+	      if (lval)		/* found it in a CALL_DUMMY frame */
+		*lval = not_lval;
+	      if (raw_buffer)
+		{
+		  LONGEST val;
+		  /* FIXME: cagney/2002-06-26: This should be via the
+		     gdbarch_register_read() method so that it, on the
+		     fly, constructs either a raw or pseudo register
+		     from the raw register cache.  */
+		  val = deprecated_read_register_dummy (get_frame_pc (frame),
+							get_frame_base (frame),
+							regnum);
+		  store_unsigned_integer (raw_buffer,
+					  register_size (current_gdbarch, regnum),
+					  val);
+		}
+	      return;
+	    }
+
+	  DEPRECATED_FRAME_INIT_SAVED_REGS (frame);
+	  if (deprecated_get_frame_saved_regs (frame) != NULL
+	      && deprecated_get_frame_saved_regs (frame)[regnum] != 0)
+	    {
+	      if (lval)		/* found it saved on the stack */
+		*lval = lval_memory;
+	      if (regnum == SP_REGNUM)
+		{
+		  if (raw_buffer)	/* SP register treated specially */
+		    /* NOTE: cagney/2003-05-09: In-line store_address()
+                       with it's body - store_unsigned_integer().  */
+		    store_unsigned_integer (raw_buffer,
+					    register_size (current_gdbarch, regnum),
+					    deprecated_get_frame_saved_regs (frame)[regnum]);
+		}
+	      else
+		{
+		  if (addrp)	/* any other register */
+		    *addrp = deprecated_get_frame_saved_regs (frame)[regnum];
+		  if (raw_buffer)
+		    read_memory (deprecated_get_frame_saved_regs (frame)[regnum], raw_buffer,
+				 register_size (current_gdbarch, regnum));
+		}
+	      return;
+	    }
+	}
+    }
+
+  /* If we get thru the loop to this point, it means the register was
+     not saved in any frame.  Return the actual live-register value.  */
+
+  if (lval)			/* found it in a live register */
+    *lval = lval_register;
+  if (addrp)
+    *addrp = DEPRECATED_REGISTER_BYTE (regnum);
+  if (raw_buffer)
+    deprecated_read_register_gen (regnum, raw_buffer);
 }
 
 /* Function: xstormy16_type_is_scalar
@@ -219,7 +319,7 @@ xstormy16_extract_return_value (struct type *type, char *regbuf, char *valbuf)
          pointed to by R2. */
       return_buffer =
 	extract_unsigned_integer (regbuf + DEPRECATED_REGISTER_BYTE (E_PTR_RET_REGNUM),
-				  DEPRECATED_REGISTER_RAW_SIZE (E_PTR_RET_REGNUM));
+				  register_size (current_gdbarch, E_PTR_RET_REGNUM));
 
       read_memory (return_buffer, valbuf, TYPE_LENGTH (type));
     }
@@ -323,8 +423,7 @@ xstormy16_pop_frame (void)
   if (fi == NULL)
     return;			/* paranoia */
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
-				   get_frame_base (fi)))
+  if (deprecated_pc_in_call_dummy (get_frame_pc (fi)))
     {
       deprecated_pop_dummy_frame ();
     }
@@ -433,7 +532,7 @@ xstormy16_frame_saved_register (struct frame_info *fi, int regnum)
   int size = xstormy16_register_raw_size (regnum);
   char *buf = (char *) alloca (size);
 
-  deprecated_generic_get_saved_register (buf, NULL, NULL, fi, regnum, NULL);
+  xstormy16_get_saved_register (buf, NULL, NULL, fi, regnum, NULL);
   return (CORE_ADDR) extract_unsigned_integer (buf, size);
 }
 
@@ -460,8 +559,7 @@ xstormy16_scan_prologue (CORE_ADDR start_addr, CORE_ADDR end_addr,
   if (fi)
     {
       /* In a call dummy, don't touch the frame. */
-      if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
-				       get_frame_base (fi)))
+      if (deprecated_pc_in_call_dummy (get_frame_pc (fi)))
 	return start_addr;
 
       /* Grab the frame-relative values of SP and FP, needed below. 
@@ -749,8 +847,7 @@ xstormy16_frame_saved_pc (struct frame_info *fi)
 {
   CORE_ADDR saved_pc;
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
-				   get_frame_base (fi)))
+  if (deprecated_pc_in_call_dummy (get_frame_pc (fi)))
     {
       saved_pc = deprecated_read_register_dummy (get_frame_pc (fi),
 						 get_frame_base (fi),
@@ -811,8 +908,7 @@ xstormy16_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 static CORE_ADDR
 xstormy16_frame_chain (struct frame_info *fi)
 {
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
-				   get_frame_base (fi)))
+  if (deprecated_pc_in_call_dummy (get_frame_pc (fi)))
     {
       /* Call dummy's frame is the same as caller's.  */
       return get_frame_base (fi);
@@ -1002,7 +1098,6 @@ xstormy16_save_dummy_frame_tos (CORE_ADDR sp)
 static struct gdbarch *
 xstormy16_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  static LONGEST call_dummy_words[1] = { 0 };
   struct gdbarch_tdep *tdep = NULL;
   struct gdbarch *gdbarch;
 
@@ -1032,12 +1127,9 @@ xstormy16_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pc_regnum (gdbarch, E_PC_REGNUM);
   set_gdbarch_register_name (gdbarch, xstormy16_register_name);
   set_gdbarch_deprecated_register_size (gdbarch, xstormy16_reg_size);
-  set_gdbarch_deprecated_register_bytes (gdbarch, E_ALL_REGS_SIZE);
   set_gdbarch_deprecated_register_byte (gdbarch, xstormy16_register_byte);
   set_gdbarch_deprecated_register_raw_size (gdbarch, xstormy16_register_raw_size);
-  set_gdbarch_deprecated_max_register_raw_size (gdbarch, xstormy16_pc_size);
   set_gdbarch_deprecated_register_virtual_size (gdbarch, xstormy16_register_raw_size);
-  set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 4);
   set_gdbarch_deprecated_register_virtual_type (gdbarch, xstormy16_reg_virtual_type);
 
   /*
@@ -1074,10 +1166,7 @@ xstormy16_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_store_struct_return (gdbarch, xstormy16_store_struct_return);
   set_gdbarch_deprecated_store_return_value (gdbarch, xstormy16_store_return_value);
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, xstormy16_extract_struct_value_address);
-  set_gdbarch_use_struct_convention (gdbarch,
-				     xstormy16_use_struct_convention);
-  set_gdbarch_deprecated_call_dummy_words (gdbarch, call_dummy_words);
-  set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, 0);
+  set_gdbarch_deprecated_use_struct_convention (gdbarch, xstormy16_use_struct_convention);
   set_gdbarch_breakpoint_from_pc (gdbarch, xstormy16_breakpoint_from_pc);
 
   set_gdbarch_char_signed (gdbarch, 0);

@@ -1231,7 +1231,7 @@ h8300_reloc16_extra_cases (bfd *abfd, struct bfd_link_info *link_info,
 				  vectors_sec->output_section,
 				  vectors_sec->contents,
 				  (file_ptr) vectors_sec->output_offset,
-				  vectors_sec->_raw_size);
+				  vectors_sec->size);
 	break;
       }
 
@@ -1394,11 +1394,11 @@ h8300_bfd_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 		    case bfd_mach_h8300:
 		    case bfd_mach_h8300hn:
 		    case bfd_mach_h8300sn:
-		      htab->vectors_sec->_raw_size += 2;
+		      htab->vectors_sec->size += 2;
 		      break;
 		    case bfd_mach_h8300h:
 		    case bfd_mach_h8300s:
-		      htab->vectors_sec->_raw_size += 4;
+		      htab->vectors_sec->size += 4;
 		      break;
 		    default:
 		      abort ();
@@ -1414,14 +1414,14 @@ h8300_bfd_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
   /* Now actually allocate some space for the function vector.  It's
      wasteful to do this more than once, but this is easier.  */
   sec = htab->vectors_sec;
-  if (sec->_raw_size != 0)
+  if (sec->size != 0)
     {
       /* Free the old contents.  */
       if (sec->contents)
 	free (sec->contents);
 
       /* Allocate new contents.  */
-      sec->contents = bfd_malloc (sec->_raw_size);
+      sec->contents = bfd_malloc (sec->size);
     }
 
   return TRUE;

@@ -1,6 +1,6 @@
 /* MIPS-specific support for 32-bit ELF
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003 Free Software Foundation, Inc.
+   2003, 2004 Free Software Foundation, Inc.
 
    Most of the information added by Ian Lance Taylor, Cygnus Support,
    <ian@cygnus.com>.
@@ -599,39 +599,6 @@ static reloc_howto_type elf_mips16_gprel_howto =
 	 0x07ff001f,	        /* dst_mask */
 	 FALSE);		/* pcrel_offset */
 
-/* GNU extensions for embedded-pic.  */
-/* High 16 bits of symbol value, pc-relative.  */
-static reloc_howto_type elf_mips_gnu_rel_hi16 =
-  HOWTO (R_MIPS_GNU_REL_HI16,	/* type */
-	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 16,			/* bitsize */
-	 TRUE,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
-	 _bfd_mips_elf_hi16_reloc, /* special_function */
-	 "R_MIPS_GNU_REL_HI16",	/* name */
-	 TRUE,			/* partial_inplace */
-	 0xffff,		/* src_mask */
-	 0xffff,		/* dst_mask */
-	 TRUE);			/* pcrel_offset */
-
-/* Low 16 bits of symbol value, pc-relative.  */
-static reloc_howto_type elf_mips_gnu_rel_lo16 =
-  HOWTO (R_MIPS_GNU_REL_LO16,	/* type */
-	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 16,			/* bitsize */
-	 TRUE,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
-	 _bfd_mips_elf_lo16_reloc, /* special_function */
-	 "R_MIPS_GNU_REL_LO16",	/* name */
-	 TRUE,			/* partial_inplace */
-	 0xffff,		/* src_mask */
-	 0xffff,		/* dst_mask */
-	 TRUE);			/* pcrel_offset */
-
 /* 16 bit offset for pc-relative branches.  */
 static reloc_howto_type elf_mips_gnu_rel16_s2 =
   HOWTO (R_MIPS_GNU_REL16_S2,	/* type */
@@ -648,23 +615,10 @@ static reloc_howto_type elf_mips_gnu_rel16_s2 =
 	 0xffff,		/* dst_mask */
 	 TRUE);			/* pcrel_offset */
 
-/* 64 bit pc-relative.  */
-static reloc_howto_type elf_mips_gnu_pcrel64 =
-  HOWTO (R_MIPS_PC64,		/* type */
-	 0,			/* rightshift */
-	 4,			/* size (0 = byte, 1 = short, 2 = long) */
-	 64,			/* bitsize */
-	 TRUE,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_signed, /* complain_on_overflow */
-	 _bfd_mips_elf_generic_reloc, /* special_function */
-	 "R_MIPS_PC64",		/* name */
-	 TRUE,			/* partial_inplace */
-	 MINUS_ONE,		/* src_mask */
-	 MINUS_ONE,		/* dst_mask */
-	 TRUE);			/* pcrel_offset */
-
-/* 32 bit pc-relative.  */
+/* 32 bit pc-relative.  This was a GNU extension used by embedded-PIC.
+   It was co-opted by mips-linux for exception-handling data.  It is no
+   longer used, but should continue to be supported by the linker for
+   backward compatibility.  (GCC stopped using it in May, 2004.)  */
 static reloc_howto_type elf_mips_gnu_pcrel32 =
   HOWTO (R_MIPS_PC32,		/* type */
 	 0,			/* rightshift */
@@ -879,7 +833,7 @@ gprel32_with_gp (bfd *abfd, asymbol *symbol, arelent *reloc_entry,
   relocation += symbol->section->output_section->vma;
   relocation += symbol->section->output_offset;
 
-  if (reloc_entry->address > input_section->_cooked_size)
+  if (reloc_entry->address > bfd_get_section_limit (abfd, input_section))
     return bfd_reloc_outofrange;
 
   /* Set val to the offset into the section or symbol.  */
@@ -1011,7 +965,7 @@ mips16_gprel_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
   if (ret != bfd_reloc_ok)
     return ret;
 
-  if (reloc_entry->address > input_section->_cooked_size)
+  if (reloc_entry->address > bfd_get_section_limit (abfd, input_section))
     return bfd_reloc_outofrange;
 
   if (bfd_is_com_section (symbol->section))
@@ -1134,14 +1088,8 @@ bfd_elf32_bfd_reloc_type_lookup (bfd *abfd, bfd_reloc_code_real_type code)
       return &elf_mips_gnu_vtinherit_howto;
     case BFD_RELOC_VTABLE_ENTRY:
       return &elf_mips_gnu_vtentry_howto;
-    case BFD_RELOC_PCREL_HI16_S:
-      return &elf_mips_gnu_rel_hi16;
-    case BFD_RELOC_PCREL_LO16:
-      return &elf_mips_gnu_rel_lo16;
     case BFD_RELOC_16_PCREL_S2:
       return &elf_mips_gnu_rel16_s2;
-    case BFD_RELOC_64_PCREL:
-      return &elf_mips_gnu_pcrel64;
     case BFD_RELOC_32_PCREL:
       return &elf_mips_gnu_pcrel32;
     }
@@ -1163,14 +1111,8 @@ mips_elf32_rtype_to_howto (unsigned int r_type,
       return &elf_mips_gnu_vtinherit_howto;
     case R_MIPS_GNU_VTENTRY:
       return &elf_mips_gnu_vtentry_howto;
-    case R_MIPS_GNU_REL_HI16:
-      return &elf_mips_gnu_rel_hi16;
-    case R_MIPS_GNU_REL_LO16:
-      return &elf_mips_gnu_rel_lo16;
     case R_MIPS_GNU_REL16_S2:
       return &elf_mips_gnu_rel16_s2;
-    case R_MIPS_PC64:
-      return &elf_mips_gnu_pcrel64;
     case R_MIPS_PC32:
       return &elf_mips_gnu_pcrel32;
     default:
@@ -1267,7 +1209,7 @@ static bfd_boolean
 elf32_mips_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
 {
   int offset;
-  unsigned int raw_size;
+  unsigned int size;
 
   switch (note->descsz)
     {
@@ -1283,14 +1225,14 @@ elf32_mips_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
 
 	/* pr_reg */
 	offset = 72;
-	raw_size = 180;
+	size = 180;
 
 	break;
     }
 
   /* Make a ".reg/999" section.  */
   return _bfd_elfcore_make_pseudosection (abfd, ".reg",
-					  raw_size, note->descpos + offset);
+					  size, note->descpos + offset);
 }
 
 static bfd_boolean
@@ -1333,139 +1275,6 @@ elf32_mips_irix_compat (bfd *abfd)
     return ict_irix5;
   else
     return ict_none;
-}
-
-/* Given a data section and an in-memory embedded reloc section, store
-   relocation information into the embedded reloc section which can be
-   used at runtime to relocate the data section.  This is called by the
-   linker when the --embedded-relocs switch is used.  This is called
-   after the add_symbols entry point has been called for all the
-   objects, and before the final_link entry point is called.  */
-
-bfd_boolean
-bfd_mips_elf32_create_embedded_relocs (bfd *abfd, struct bfd_link_info *info,
-				       asection *datasec, asection *relsec,
-				       char **errmsg)
-{
-  Elf_Internal_Shdr *symtab_hdr;
-  Elf_Internal_Sym *isymbuf = NULL;
-  Elf_Internal_Rela *internal_relocs = NULL;
-  Elf_Internal_Rela *irel, *irelend;
-  bfd_byte *p;
-
-  BFD_ASSERT (! info->relocatable);
-
-  *errmsg = NULL;
-
-  if (datasec->reloc_count == 0)
-    return TRUE;
-
-  /* Read this BFD's symbols if we haven't done so already, or get the cached
-     copy if it exists.  */
-  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
-  if (symtab_hdr->sh_info != 0)
-    {
-      isymbuf = (Elf_Internal_Sym *) symtab_hdr->contents;
-      if (isymbuf == NULL)
-	isymbuf = bfd_elf_get_elf_syms (abfd, symtab_hdr,
-					symtab_hdr->sh_info, 0,
-					NULL, NULL, NULL);
-      if (isymbuf == NULL)
-	goto error_return;
-    }
-
-  /* Get a copy of the native relocations.  */
-  internal_relocs = _bfd_elf_link_read_relocs (abfd, datasec, NULL, NULL,
-					       info->keep_memory);
-  if (internal_relocs == NULL)
-    goto error_return;
-
-  relsec->contents = bfd_alloc (abfd, datasec->reloc_count * 12);
-  if (relsec->contents == NULL)
-    goto error_return;
-
-  p = relsec->contents;
-
-  irelend = internal_relocs + datasec->reloc_count;
-
-  for (irel = internal_relocs; irel < irelend; irel++, p += 12)
-    {
-      asection *targetsec;
-
-      /* We are going to write a four byte longword into the runtime
-	 reloc section.  The longword will be the address in the data
-	 section which must be relocated.  It is followed by the name
-	 of the target section NUL-padded or truncated to 8
-	 characters.  */
-
-      /* We can only relocate absolute longword relocs at run time.  */
-      if ((ELF32_R_TYPE (irel->r_info) != (int) R_MIPS_32) &&
-	  (ELF32_R_TYPE (irel->r_info) != (int) R_MIPS_64))
-	{
-	  *errmsg = _("unsupported reloc type");
-	  bfd_set_error (bfd_error_bad_value);
-	  goto error_return;
-	}
-      /* Get the target section referred to by the reloc.  */
-      if (ELF32_R_SYM (irel->r_info) < symtab_hdr->sh_info)
-	{
-          Elf_Internal_Sym *isym;
-
-          /* A local symbol.  */
-	  isym = isymbuf + ELF32_R_SYM (irel->r_info);
-	  targetsec = bfd_section_from_elf_index (abfd, isym->st_shndx);
-	}
-      else
-	{
-	  unsigned long indx;
-	  struct elf_link_hash_entry *h;
-
-	  /* An external symbol.  */
-	  indx = ELF32_R_SYM (irel->r_info);
-	  h = elf_sym_hashes (abfd)[indx];
-	  targetsec = NULL;
-	  /*
-	     For some reason, in certain programs, the symbol will
-	     not be in the hash table.  It seems to happen when you
-	     declare a static table of pointers to const external structures.
-	     In this case, the relocs are relative to data, not
-	     text, so just treating it like an undefined link
-	     should be sufficient.  */
-	  BFD_ASSERT(h != NULL);
-	  if (h->root.type == bfd_link_hash_defined
-	      || h->root.type == bfd_link_hash_defweak)
-	    targetsec = h->root.u.def.section;
-	}
-
-
-      /*
-         Set the low bit of the relocation offset if it's a MIPS64 reloc.
-         Relocations will always be on (at least) 32-bit boundaries.  */
-
-      bfd_put_32 (abfd, ((irel->r_offset + datasec->output_offset) +
-		  ((ELF32_R_TYPE (irel->r_info) == (int) R_MIPS_64) ? 1 : 0)),
-		  p);
-      memset (p + 4, 0, 8);
-      if (targetsec != NULL)
-	strncpy (p + 4, targetsec->output_section->name, 8);
-    }
-
-  if (internal_relocs != NULL
-      && elf_section_data (datasec)->relocs != internal_relocs)
-    free (internal_relocs);
-  if (isymbuf != NULL
-      && symtab_hdr->contents != (unsigned char *) isymbuf)
-    free (isymbuf);
-  return TRUE;
-
- error_return:
-  if (internal_relocs != NULL
-      && elf_section_data (datasec)->relocs != internal_relocs)
-    free (internal_relocs);
-  if (isymbuf != NULL
-      && symtab_hdr->contents != (unsigned char *) isymbuf)
-    free (isymbuf);
-  return FALSE;
 }
 
 /* ECOFF swapping routines.  These are used when dealing with the

@@ -1,5 +1,5 @@
 /* BFD back-end for IBM RS/6000 "XCOFF64" files.
-   Copyright 2000, 2001, 2002, 2003
+   Copyright 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
    Written Clinton Popetz.
    Contributed by Cygnus Support.
@@ -845,11 +845,11 @@ xcoff64_write_object_contents (abfd)
 
       section.s_vaddr = current->vma;
       section.s_paddr = current->lma;
-      section.s_size =  current->_raw_size;
+      section.s_size =  current->size;
 
       /* If this section has no size or is unloadable then the scnptr
 	 will be 0 too.  */
-      if (current->_raw_size == 0
+      if (current->size == 0
 	  || (current->flags & (SEC_LOAD | SEC_HAS_CONTENTS)) == 0)
 	{
 	  section.s_scnptr = 0;
@@ -965,19 +965,19 @@ xcoff64_write_object_contents (abfd)
 
   if (text_sec)
     {
-      internal_a.tsize = bfd_get_section_size_before_reloc (text_sec);
+      internal_a.tsize = text_sec->size;
       internal_a.text_start = internal_a.tsize ? text_sec->vma : 0;
     }
 
   if (data_sec)
     {
-      internal_a.dsize = bfd_get_section_size_before_reloc (data_sec);
+      internal_a.dsize = data_sec->size;
       internal_a.data_start = internal_a.dsize ? data_sec->vma : 0;
     }
 
   if (bss_sec)
     {
-      internal_a.bsize = bfd_get_section_size_before_reloc (bss_sec);
+      internal_a.bsize = bss_sec->size;
       if (internal_a.bsize && bss_sec->vma < internal_a.data_start)
 	internal_a.data_start = bss_sec->vma;
     }
@@ -1127,8 +1127,7 @@ xcoff64_reloc_type_br (input_bfd, input_section, output_bfd, rel, sym, howto,
      cror.  */
   if (NULL != h
       && bfd_link_hash_defined == h->root.type
-      && (rel->r_vaddr - input_section->vma + 8
-	  <= input_section->_cooked_size))
+      && rel->r_vaddr - input_section->vma + 8 <= input_section->size)
     {
       bfd_byte *pnext;
       unsigned long next;
@@ -1301,7 +1300,7 @@ xcoff64_ppc_relocate_section (output_bfd, info, input_bfd,
       address = rel->r_vaddr - input_section->vma;
       location = contents + address;
 
-      if (address > input_section->_raw_size)
+      if (address > input_section->size)
 	abort ();
 
       /* Get the value we are going to relocate.  */
@@ -2105,8 +2104,8 @@ xcoff64_create_csect_from_smclas (abfd, aux, symbol_name)
   else
     {
       (*_bfd_error_handler)
-	(_("%s: symbol `%s' has unrecognized smclas %d"),
-	 bfd_archive_filename (abfd), symbol_name, aux->x_csect.x_smclas);
+	(_("%B: symbol `%s' has unrecognized smclas %d"),
+	 abfd, symbol_name, aux->x_csect.x_smclas);
       bfd_set_error (bfd_error_bad_value);
     }
 
@@ -2683,6 +2682,7 @@ const bfd_target rs6000coff64_vec =
     ((bfd_boolean (*) (bfd *, bfd *)) bfd_true),
     ((bfd_boolean (*) (bfd *, asection *, bfd *, asection *)) bfd_true),
     ((bfd_boolean (*) (bfd *, asymbol *, bfd *, asymbol *)) bfd_true),
+    ((bfd_boolean (*) (bfd *, bfd *)) bfd_true),
     ((bfd_boolean (*) (bfd *, flagword)) bfd_true),
     ((bfd_boolean (*) (bfd *, void * )) bfd_true),
 
@@ -2737,11 +2737,14 @@ const bfd_target rs6000coff64_vec =
     _bfd_generic_link_split_section,
     bfd_generic_gc_sections,
     bfd_generic_merge_sections,
+    bfd_generic_is_group_section,
     bfd_generic_discard_group,
+    _bfd_generic_section_already_linked,
 
     /* Dynamic */
     _bfd_xcoff_get_dynamic_symtab_upper_bound,
     _bfd_xcoff_canonicalize_dynamic_symtab,
+    _bfd_nodynamic_get_synthetic_symtab,
     _bfd_xcoff_get_dynamic_reloc_upper_bound,
     _bfd_xcoff_canonicalize_dynamic_reloc,
 
@@ -2926,6 +2929,7 @@ const bfd_target aix5coff64_vec =
     ((bfd_boolean (*) (bfd *, bfd *)) bfd_true),
     ((bfd_boolean (*) (bfd *, asection *, bfd *, asection *)) bfd_true),
     ((bfd_boolean (*) (bfd *, asymbol *, bfd *, asymbol *)) bfd_true),
+    ((bfd_boolean (*) (bfd *, bfd *)) bfd_true),
     ((bfd_boolean (*) (bfd *, flagword)) bfd_true),
     ((bfd_boolean (*) (bfd *, void * )) bfd_true),
 
@@ -2980,11 +2984,14 @@ const bfd_target aix5coff64_vec =
     _bfd_generic_link_split_section,
     bfd_generic_gc_sections,
     bfd_generic_merge_sections,
+    bfd_generic_is_group_section,
     bfd_generic_discard_group,
+    _bfd_generic_section_already_linked,
 
     /* Dynamic */
     _bfd_xcoff_get_dynamic_symtab_upper_bound,
     _bfd_xcoff_canonicalize_dynamic_symtab,
+    _bfd_nodynamic_get_synthetic_symtab,
     _bfd_xcoff_get_dynamic_reloc_upper_bound,
     _bfd_xcoff_canonicalize_dynamic_reloc,
 
