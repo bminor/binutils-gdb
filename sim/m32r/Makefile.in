@@ -30,6 +30,7 @@ CONFIG_DEVICES =
 
 SIM_OBJS = \
 	$(SIM_NEW_COMMON_OBJS) \
+	sim-cpu.o \
 	sim-engine.o \
 	sim-hload.o \
 	sim-hrw.o \
@@ -41,7 +42,7 @@ SIM_OBJS = \
 	$(start-sanitize-m32rx) \
 	$(M32RX_OBJS) \
 	$(end-sanitize-m32rx) \
-	devices.o \
+	traps.o devices.o \
 	$(CONFIG_DEVICES)
 
 # Extra headers included by sim-main.h.
@@ -80,6 +81,8 @@ OPS_INCLUDE_DEPS = \
 sim-if.o: sim-if.c $(INCLUDE_DEPS) $(srcdir)/../common/sim-core.h
 
 arch.o: arch.c $(INCLUDE_DEPS)
+
+devices.o: devices.c $(INCLUDE_DEPS)
 
 # M32R objs
 
