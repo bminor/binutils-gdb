@@ -1,5 +1,8 @@
 Fri Apr 30 16:50:38 1993  K. Richard Pixley  (rich@rtl.cygnus.com)
 
+	* config/sparc/sun4sol2.mh (XM_CLIBS): add -lsocket which is
+	  required target ports which use sockets (like a29k-udi).
+
 	* remove-udi.c (udi_wait): ifdef around SIGLOST usage.  Eg,
 	  Solaris doesn't have SIGLOST so use SIGURG as a backup.
 
