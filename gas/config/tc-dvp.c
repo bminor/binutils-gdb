@@ -2108,10 +2108,10 @@ s_endgif (ignore)
 
   /* The -16 is because the `gif_data_name' label is emitted at the start
      of the gif tag.  */
-  if (gif_insn_type == GIF_PACKED)
-    count = eval_expr (0, 0, "(. - %s - 16) >> 4", gif_data_name);
-  else
+  if (gif_insn_type == GIF_REGLIST)
     count = eval_expr (0, 0, "(. - %s - 16) >> 3", gif_data_name);
+  else
+    count = eval_expr (0, 0, "(. - %s - 16) >> 4", gif_data_name);
 
   if (count < 0
       || fixup_count != 0)

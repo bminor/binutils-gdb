@@ -9,7 +9,7 @@ Tue Feb 24 11:01:25 1998  Doug Evans  <devans@canuck.cygnus.com>
 	(UNIQUE_LABEL_PREFIX): New macro.
 	(unique_label): Use it.
 	(assemble_gif): Emit start label before mach label.
-	(s_endgif): Update.
+	(s_endgif): Update.  NLOOP is in quadwords for IMAGE mode now.
 
 Mon Feb 23 15:55:12 1998  Doug Evans  <devans@canuck.cygnus.com>
 
