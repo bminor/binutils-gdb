@@ -1,3 +1,18 @@
+Fri Apr 14 16:03:04 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* config.bfd: Add m68*-*-elf*.
+	* elf32-m68k.c: Filled out implementation, except for dynamic
+	linking support.
+	* reloc.c (enum bfd_reloc_code_real): Added *_GOT_PCREL, *_GOTOFF,
+	*_PLT_PCREL, *_PLTOFF, *_68K_* relocations for ELF.
+	* libbfd.h, bfd-in2.h: Regenerated.
+
+Thu Apr 13 14:28:04 1995  Torbjorn Granlund  <tege@adder.cygnus.com>
+
+	* coff-m68k.c (COFF_DEFAULT_SECTION_ALIGNMENT_POWER): Change from
+	1 to 2.
+	(bfd_target): Change minimum section alignment from 1 to 2.
+
 Wed Apr 12 12:40:04 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* aoutx.h (machine_type, case bfd_arch_mips): Treat R8000 like
