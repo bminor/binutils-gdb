@@ -1,5 +1,5 @@
 /* tc-mn10300.c -- Assembler code for the Matsushita 10300
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -234,10 +234,16 @@ static const struct reg_name xr_registers[] =
 #define XR_REG_NAME_CNT					\
   (sizeof (xr_registers) / sizeof (struct reg_name))
 
+/* We abuse the `value' field, that would be otherwise unused, to
+   encode the architecture on which (access to) the register was
+   introduced.  FIXME: we should probably warn when we encounter a
+   register name when assembling for an architecture that doesn't
+   support it, before parsing it as a symbol name.  */
 static const struct reg_name other_registers[] =
 {
+  { "epsw", AM33 },
   { "mdr", 0 },
-  { "pc", 0 },
+  { "pc", AM33 },
   { "psw", 0 },
   { "sp", 0 },
 };
@@ -494,10 +500,11 @@ other_register_name (expressionP)
   *input_line_pointer = c;
 
   /* Look to see if it's in the register table.  */
-  if (reg_number >= 0)
+  if (reg_number == 0
+      || (reg_number == AM33 && HAVE_AM33))
     {
       expressionP->X_op = O_register;
-      expressionP->X_add_number = reg_number;
+      expressionP->X_add_number = 0;
 
       /* Make the rest nice.  */
       expressionP->X_add_symbol = NULL;
