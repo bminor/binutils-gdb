@@ -286,9 +286,6 @@ z8k-tdep.c
 # energize-patches	- Part of Lucid support.
 # energize.c		- Part of Lucid support.
 # energize.h		- Part of Lucid support.
-# infrun.hacked.c	- An old version of infrun.c that had some 
-#			  wait_for_inferior improvements by gnu,
-#			  which were never fully debugged.
 # remote-sa.sparc.c	- Remote target for a standalone SPARC, using
 #			  the FORTH console ROMs.  We never got the paperwork
 #			  straight, since Sun's lawyers messed with the
@@ -306,7 +303,6 @@ energize
 energize-patches
 energize.c
 energize.h
-infrun.hacked.c
 remote-sa.sparc.c
 state.c
 state.h
