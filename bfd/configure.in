@@ -91,7 +91,8 @@ i386)
 sparc)
 	case "${host_os}" in
 	sunos64)	my_host=sparc-ll ;;
-	sysv4|solaris2)	my_host=sysv4 ;;
+	sysv4)		my_host=sysv4 ;;
+	solaris2)	my_host=solaris2 ;;
 	sysv64)		my_host=sysv4-ll ;;
 	*)		my_host=sparc ;;
 	esac
@@ -147,7 +148,7 @@ h8300-hitachi-*		) bfd_target=h8300-coff ;;
 
 i960-wrs-*		) bfd_target=i960-bout ;;
 m68k-wrs-*		) bfd_target=m68k-aout ;;
-m680[01234]-wrs-*	) bfd_target=m68k-aout ;;
+m680[01234]0-wrs-*	) bfd_target=m68k-aout ;;
 
 m68k-sun-*		) bfd_target=m68k-aout ;;
 m680[01234]0-sun-*	) bfd_target=m68k-aout ;;
