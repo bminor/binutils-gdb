@@ -1,5 +1,7 @@
 # Host: Hewlett-Packard PA-RISC machine, running BSD
-XDEPFILES= 
+XDEPFILES=  ser-tcp.o
 XM_FILE= xm-hppab.h
 NAT_FILE= nm-hppab.h
 NATDEPFILES= hppab-nat.o coredep.o corelow.o inftarg.o fork-child.o somread.o infptrace.o hpread.o somsolib.o
+
+GDBSERVER_DEPFILES= low-hppabsd.o

@@ -2,6 +2,9 @@ Tue Jul 18 00:41:31 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* gdbserver/low-hppabsd.c: New file.
 	* gdbserver/Makefile.in (SFILES): Add low-hppabsd.c.
+	* config/hppabsd.mh (XDEPFILES): Add ser-tcp.o
+	(GDBSERVER_DEPFILES): Add low-hppabsd.o
+	* config/hppaosf.mh: LIkewise.
 
 Mon Jul 17 21:35:18 1995  Fred Fish  <fnf@cygnus.com>
 
