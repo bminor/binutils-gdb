@@ -1,5 +1,10 @@
 1999-02-11  Martin Hunt  <hunt@cygnus.com>
 
+	* gdbtk-hooks.c: Change ALL Tcl_Eval calls in hooks to
+	call report_error() if there are errors.
+
+1999-02-11  Martin Hunt  <hunt@cygnus.com>
+	
 	* gdbtk.c, gdbtk-cmds.c, gdbtk-hooks.c: Removed old IDE stuff.
 
 1999-02-09  Martin Hunt  <hunt@cygnus.com>
