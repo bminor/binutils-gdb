@@ -1,3 +1,11 @@
+2004-10-14  Bob Wilson  <bob.wilson@acm.org>
+
+	* doc/c-xtensa.texi (Xtensa Options, Absolute Literals Directive):
+	Remove comments about placement of literal pools.
+	(Literal Directive): Update description of literal placement.
+	(Literal Prefix Directive): Remove statement that this does not apply
+	to absolute-mode literals.  Describe new section naming scheme.
+
 2004-10-12  Bob Wilson  <bob.wilson@acm.org>
 
 	* config/tc-xtensa.c (xtensa_frequency_pseudo): Use set_subseg_freq.
