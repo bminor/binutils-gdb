@@ -48,6 +48,15 @@ extern int getpagesize PARAMS ((void));
 #define PAGE_ALIGN(addr) (caddr_t) (((long)(addr) + pagesize - 1) & \
 				    ~(pagesize - 1))
 
+
+/* Return MAP_PRIVATE if MDP represents /dev/zero.  Otherwise, return
+   MAP_SHARED.  */
+
+#define MAP_PRIVATE_OR_SHARED(MDP) ((MDP -> flags & MMALLOC_DEVZERO) \
+                                    ? MAP_PRIVATE \
+                                    : MAP_SHARED)
+
+
 /*  Get core for the memory region specified by MDP, using SIZE as the
     amount to either add to or subtract from the existing region.  Works
     like sbrk(), but using mmap(). */
@@ -113,7 +122,7 @@ __mmalloc_mmap_morecore (mdp, size)
 	    {
 	      /* Let mmap pick the map start address */
 	      mapto = mmap (0, mapbytes, PROT_READ | PROT_WRITE,
-			    MAP_SHARED, mdp -> fd, foffset);
+			    MAP_PRIVATE_OR_SHARED (mdp), mdp -> fd, foffset);
 	      if (mapto != (caddr_t) -1)
 		{
 		  mdp -> base = mdp -> breakval = mapto;
@@ -125,7 +134,8 @@ __mmalloc_mmap_morecore (mdp, size)
 	  else
 	    {
 	      mapto = mmap (mdp -> top, mapbytes, PROT_READ | PROT_WRITE,
-			    MAP_SHARED | MAP_FIXED, mdp -> fd, foffset);
+			    MAP_PRIVATE_OR_SHARED (mdp) | MAP_FIXED, mdp -> fd,
+			    foffset);
 	      if (mapto == mdp -> top)
 		{
 		  mdp -> top = moveto;
@@ -152,7 +162,7 @@ __mmalloc_remap_core (mdp)
   /* FIXME:  Quick hack, needs error checking and other attention. */
 
   base = mmap (mdp -> base, mdp -> top - mdp -> base,
-	       PROT_READ | PROT_WRITE, MAP_SHARED | MAP_FIXED,
+	       PROT_READ | PROT_WRITE, MAP_PRIVATE_OR_SHARED (mdp) | MAP_FIXED,
 	       mdp -> fd, 0);
   return ((PTR) base);
 }
@@ -166,13 +176,13 @@ mmalloc_findbase (size)
   caddr_t base = NULL;
 
 #ifdef MAP_ANONYMOUS
-  flags = MAP_SHARED | MAP_ANONYMOUS;
+  flags = MAP_PRIVATE | MAP_ANONYMOUS;
   fd = -1;
 #else
 #ifdef MAP_FILE
-  flags = MAP_SHARED | MAP_FILE;
+  flags = MAP_PRIVATE | MAP_FILE;
 #else
-  flags = MAP_SHARED;
+  flags = MAP_PRIVATE;
 #endif
   fd = open ("/dev/zero", O_RDWR);
   if (fd != -1)
