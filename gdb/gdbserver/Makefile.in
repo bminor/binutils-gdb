@@ -96,7 +96,7 @@ CFLAGS = @CFLAGS@
 
 # INTERNAL_CFLAGS is the aggregate of all other *CFLAGS macros.
 INTERNAL_CFLAGS = ${CFLAGS} ${GLOBAL_CFLAGS} ${PROFILE_CFLAGS} \
-	${INCLUDE_CFLAGS} ${BFD_CFLAGS} -DGDBSERVER
+	${INCLUDE_CFLAGS} ${BFD_CFLAGS}
 
 # LDFLAGS is specifically reserved for setting from the command line
 # when running make.
@@ -198,7 +198,7 @@ STAGESTUFF=${OBS} ${TSOBS} ${NTSOBS} ${ADD_FILES} init.c init.o version.c gdb
 Makefile: Makefile.in config.status
 	$(SHELL) ./config.status
 
-config.status: configure
+config.status: configure configure.srv
 	$(SHELL) ./config.status --recheck
 
 force:
@@ -225,7 +225,7 @@ unexport CHILLFLAGS CHILL_LIB CHILL_FOR_TARGET :
 regdat_sh = $(srcdir)/../regformats/regdat.sh
 regdef_h = $(srcdir)/../regformats/regdef.h
 regcache_h = $(srcdir)/regcache.h
-server_h = $(srcdir)/server.h $(regcache_h)
+server_h = $(srcdir)/server.h $(regcache_h) config.h
 
 server.o: server.c $(server_h)
 remote-utils.o: remote-utils.c terminal.h $(server_h)

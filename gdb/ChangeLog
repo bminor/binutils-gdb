@@ -1,5 +1,11 @@
 2002-02-27  Daniel Jacobowitz  <drow@mvista.com>
 
+	* gdbserver/Makefile.in (INTERNAL_CFLAGS): Remove -DGDBSERVER.
+	(config.status): Add configure.srv dependency.
+	(server_h): Add config.h dependency.
+
+2002-02-27  Daniel Jacobowitz  <drow@mvista.com>
+
 	* regformats/reg-i386-linux.dat: New file, with $orig_eax.
 	* gdbserver/Makefile.in: Add rules for reg-i386-linux.o.
 	* gdbserver/configure.srv: Change i386-*-linux* to use
