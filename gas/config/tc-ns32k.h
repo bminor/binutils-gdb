@@ -72,7 +72,6 @@ extern void fix_new_ns32k_exp PARAMS((fragS *frag,
 				   fragS *opcode_frag,
 				   unsigned int opcode_offset));
 
-
 extern void fix_new_ns32k PARAMS ((fragS *frag,
 				   int where,
 				   int size,

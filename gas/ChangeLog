@@ -1,3 +1,8 @@
+2000-09-21  Kazu Hirata  <kazu@hxi.com>
+
+	* config/tc-ns32k.c: Fix formatting.
+	* config/tc-ns32k.h: Likewise.
+
 2000-09-20  Kazu Hirata  <kazu@hxi.com>
 
 	* config/tc-m32r.c: Fix formatting.
