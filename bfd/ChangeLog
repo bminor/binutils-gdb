@@ -1,3 +1,16 @@
+Fri Jun 24 08:15:42 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	Add Solaris BCP (the part of Solaris which allows it to run
+	SunOS4 a.out files) core file handling.
+	* aoutf1.h (external_solaris_bcp_core, swapcore_solaris_bcp):
+	New structure and its swap in function.
+	(internal_sunos_core):  New member c_data_addr, to receive the
+	start address of the data section in the core file.
+	(swapcore_sun3, swapcore_sparc, sunos4_core_file_p):  Use it.
+	(sunos4_core_file_p):  Recognize Solaris BCP core file.
+	(sunos4_core_file_matches_executable_p):  Always indicate match
+	for Solaris BCP core files.
+
 Thu Jun 23 15:31:28 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	Preliminary support for generating shared libraries, from Eric
