@@ -1,3 +1,10 @@
+start-sanitize-m32rx
+Fri Jan 23 10:30:29 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* gas/m32r/m32rx.s: Use 'label' as desitnation of branches.
+	* gas/m32r/m32rx.d: Update to match latest disassembly.
+
+end-sanitize-m32rx
 start-sanitize-sky
 Fri Jan 23 01:45:52 1998  Doug Evans  <devans@seba.cygnus.com>
 
