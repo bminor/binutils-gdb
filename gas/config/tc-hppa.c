@@ -8402,14 +8402,21 @@ int
 hppa_fix_adjustable (fixp)
      fixS *fixp;
 {
+#ifdef OBJ_ELF
   reloc_type code;
+#endif
   struct hppa_fix_struct *hppa_fix;
 
   hppa_fix = (struct hppa_fix_struct *) fixp->tc_fix_data;
 
 #ifdef OBJ_SOM
-  /* Reject reductions of symbols in 32bit relocs.  */
-  if (fixp->fx_r_type == R_HPPA && hppa_fix->fx_r_format == 32)
+  /* Reject reductions of symbols in 32bit relocs unless they
+     are fake labels.  */
+  if (fixp->fx_r_type == R_HPPA
+      && hppa_fix->fx_r_format == 32
+      && strncmp (S_GET_NAME (fixp->fx_addsy),
+		  FAKE_LABEL_NAME,
+		  strlen (FAKE_LABEL_NAME)))
     return 0;
 #endif
 

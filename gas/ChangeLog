@@ -1,3 +1,9 @@
+2004-06-10  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	Bug gas/213
+	* config/tc-hppa.c (hppa_fix_adjustable): Allow reduction of fake
+	labels.  Fix warning.
+
 2004-05-28  DJ Delorie  <dj@redhat.com>
 
 	* config/tc-mn10300.h (tc_fix_adjustable): Define.
