@@ -1,3 +1,11 @@
+Fri Aug  6 17:05:47 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* getopt.h: Update to latest FSF version.
+
+Mon Aug  2 16:37:14 1993  Stu Grossman  (grossman at cygnus.com)
+
+	* coff/i386.h:  Add Lynx magic number.
+
 Mon Aug  2 14:45:29 1993  John Gilmore  (gnu@cygnus.com)
 
 	* dis-asm.h:  Move enum outside of struct defn to avoid warnings.
