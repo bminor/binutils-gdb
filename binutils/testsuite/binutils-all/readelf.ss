@@ -6,7 +6,9 @@ Symbol table '.symtab' contains .* entries:
      2: 00000000     0 SECTION LOCAL  DEFAULT    3 
      3: 00000000     0 SECTION LOCAL  DEFAULT    4 
      4: 00000000     0 NOTYPE  LOCAL  DEFAULT    1 static_text_symbol
-     5: 00000000     0 NOTYPE  LOCAL  DEFAULT    3 static_data_symbol
+# arm-elf targets add the $d mapping symbol here...
+#...
+     .: 00000000     0 NOTYPE  LOCAL  DEFAULT    3 static_data_symbol
 # v850 targets include extra SECTION symbols here for the .call_table_data
 # and .call_table_text sections.
 #...
