@@ -1,3 +1,7 @@
+Sun Jan 25 22:23:01 1998  Michael Meissner  <meissner@cygnus.com>
+
+	* interp.c (sim_stop_reason): Exit status is now in r0, not r2.
+
 Sat Jan 24 19:00:30 1998  Michael Meissner  <meissner@cygnus.com>
 
 	* d10v_sim.h (DEBUG_TRAP): New debug flag.
