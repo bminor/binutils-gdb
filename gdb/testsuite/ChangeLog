@@ -1,3 +1,8 @@
+2001-11-13  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.base/cvexpr.c, gdb.base/cvexpr.exp: New files.
+	Tests for expressions using 'const' and 'volatile'.
+
 2001-11-13  Corinna Vinschen  <vinschen@redhat.com>
 
 	* gdb.asm/asm-sources.exp: Allow defining linker flags.
