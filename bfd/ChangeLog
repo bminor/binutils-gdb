@@ -1,5 +1,8 @@
 Tue Mar 26 15:46:18 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* bfd.c (_bfd_default_error_handler): If _bfd_error_program_name
+	is not set, print "BFD: " before the error message.
+
 	* configure.in: Use AC_CHECK_TOOL to find ar and ranlib.  From
 	Miles Bader <miles@gnu.ai.mit.edu>.
 	* configure: Rebuild.
