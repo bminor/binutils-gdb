@@ -269,9 +269,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
   CORE_ADDR funaddr;
   int using_gcc;		/* Set to version of gcc in use, or zero if not gcc */
   CORE_ADDR real_pc;
-  struct type *param_type = NULL;
   struct type *ftype = check_typedef (SYMBOL_TYPE (function));
-  int n_method_args = 0;
   CORE_ADDR bp_addr;
 
   dummy = alloca (SIZEOF_CALL_DUMMY_WORDS);
@@ -471,50 +469,58 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
   for (i = nargs - 1; i >= 0; i--)
     {
       int prototyped;
+      struct type *param_type;
 
       /* FIXME drow/2002-05-31: Should just always mark methods as
 	 prototyped.  Can we respect TYPE_VARARGS?  Probably not.  */
       if (TYPE_CODE (ftype) == TYPE_CODE_METHOD)
 	prototyped = 1;
-      else
+      else if (i < TYPE_NFIELDS (ftype))
 	prototyped = TYPE_PROTOTYPED (ftype);
+      else
+	prototyped = 0;
 
       if (i < TYPE_NFIELDS (ftype))
-	args[i] = value_arg_coerce (args[i], TYPE_FIELD_TYPE (ftype, i),
-				    prototyped);
+	param_type = TYPE_FIELD_TYPE (ftype, i);
       else
-	args[i] = value_arg_coerce (args[i], NULL, 0);
+	param_type = NULL;
 
-      /*elz: this code is to handle the case in which the function to be called
-         has a pointer to function as parameter and the corresponding actual argument
-         is the address of a function and not a pointer to function variable.
-         In aCC compiled code, the calls through pointers to functions (in the body
-         of the function called by hand) are made via $$dyncall_external which
-         requires some registers setting, this is taken care of if we call
-         via a function pointer variable, but not via a function address.
-         In cc this is not a problem. */
+      args[i] = value_arg_coerce (args[i], param_type, prototyped);
+
+      /* elz: this code is to handle the case in which the function to
+         be called has a pointer to function as parameter and the
+         corresponding actual argument is the address of a function
+         and not a pointer to function variable.  In aCC compiled
+         code, the calls through pointers to functions (in the body of
+         the function called by hand) are made via $$dyncall_external
+         which requires some registers setting, this is taken care of
+         if we call via a function pointer variable, but not via a
+         function address.  In cc this is not a problem. */
 
       if (using_gcc == 0)
-	if (param_type && TYPE_CODE (ftype) != TYPE_CODE_METHOD)
-	  /* if this parameter is a pointer to function */
-	  if (TYPE_CODE (param_type) == TYPE_CODE_PTR)
-	    if (TYPE_CODE (TYPE_TARGET_TYPE (param_type)) == TYPE_CODE_FUNC)
-	      /* elz: FIXME here should go the test about the compiler used
-	         to compile the target. We want to issue the error
-	         message only if the compiler used was HP's aCC.
-	         If we used HP's cc, then there is no problem and no need
-	         to return at this point */
-	      if (using_gcc == 0)	/* && compiler == aCC */
-		/* go see if the actual parameter is a variable of type
-		   pointer to function or just a function */
-		if (args[i]->lval == not_lval)
-		  {
-		    char *arg_name;
-		    if (find_pc_partial_function ((CORE_ADDR) args[i]->aligner.contents[0], &arg_name, NULL, NULL))
-		      error ("\
+	{
+	  if (param_type != NULL && TYPE_CODE (ftype) != TYPE_CODE_METHOD)
+	    {
+	      /* if this parameter is a pointer to function.  */
+	      if (TYPE_CODE (param_type) == TYPE_CODE_PTR)
+		if (TYPE_CODE (TYPE_TARGET_TYPE (param_type)) == TYPE_CODE_FUNC)
+		  /* elz: FIXME here should go the test about the
+		     compiler used to compile the target. We want to
+		     issue the error message only if the compiler used
+		     was HP's aCC.  If we used HP's cc, then there is
+		     no problem and no need to return at this point.  */
+		  /* Go see if the actual parameter is a variable of
+		     type pointer to function or just a function.  */
+		  if (args[i]->lval == not_lval)
+		    {
+		      char *arg_name;
+		      if (find_pc_partial_function ((CORE_ADDR) args[i]->aligner.contents[0], &arg_name, NULL, NULL))
+			error ("\
 You cannot use function <%s> as argument. \n\
 You must use a pointer to function type variable. Command ignored.", arg_name);
-		  }
+		    }
+	    }
+	}
     }
 
   if (REG_STRUCT_HAS_ADDR_P ())

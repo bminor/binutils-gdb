@@ -1,3 +1,11 @@
+2003-04-23  Andrew Cagney  <cagney@redhat.com>
+
+	* infcall.c (call_function_by_hand): Delete variable
+	"n_method_args".  Localize "param_type"'s declaration to the loop
+	that it is used.  Reinstate code assigning to said variable -
+	deleted on 2002-06-14.  Rationalize calls to value_args_coerce.
+	Rationalize code using "param_type".
+
 2003-04-22  Andrew Cagney  <cagney@redhat.com>
 
 	* infcall.c (call_function_by_hand): Use new variable "bp_addr" to
