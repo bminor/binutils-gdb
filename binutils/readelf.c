@@ -170,6 +170,7 @@ int do_notes;
 int is_32bit_elf;
 int have_frame_base;
 int need_base_address;
+bfd_vma eh_addr_size;
 
 struct group_list
 {
@@ -641,6 +642,20 @@ byte_put_big_endian (unsigned char *field, bfd_vma value, int size)
       error (_("Unhandled data length: %d\n"), size);
       abort ();
     }
+}
+
+/* Return a pointer to section NAME, or NULL if no such section exists.  */
+
+static Elf_Internal_Shdr *
+find_section (const char *name)
+{
+  unsigned int i;
+
+  for (i = 0; i < elf_header.e_shnum; i++)
+    if (streq (SECTION_NAME (section_headers + i), name))
+      return section_headers + i;
+
+  return NULL;
 }
 
 /* Guess the relocation size commonly used by the specific machines.  */
@@ -3284,15 +3299,9 @@ process_program_headers (FILE *file)
 	  if (section_headers != NULL)
 	    {
 	      Elf_Internal_Shdr *sec;
-	      unsigned int j;
 
-	      for (j = 0, sec = section_headers;
-		   j < elf_header.e_shnum;
-		   j++, sec++)
-		if (streq (SECTION_NAME (sec), ".dynamic"))
-		  break;
-
-	      if (j == elf_header.e_shnum || sec->sh_size == 0)
+	      sec = find_section (".dynamic");
+	      if (sec == NULL || sec->sh_size == 0)
 		{
 		  error (_("no .dynamic section in the dynamic segment"));
 		  break;
@@ -3715,6 +3724,26 @@ process_section_headers (FILE *file)
   dynamic_strings = NULL;
   dynamic_syminfo = NULL;
   symtab_shndx_hdr = NULL;
+
+  eh_addr_size = is_32bit_elf ? 4 : 8;
+  switch (elf_header.e_machine)
+    {
+    case EM_MIPS:
+    case EM_MIPS_RS3_LE:
+      /* The 64-bit MIPS EABI uses a combination of 32-bit ELF and 64-bit
+	 FDE addresses.  However, the ABI also has a semi-official ILP32
+	 variant for which the normal FDE address size rules apply.
+
+	 GCC 4.0 marks EABI64 objects with a dummy .gcc_compiled_longXX
+	 section, where XX is the size of longs in bits.  Unfortunately,
+	 earlier compilers provided no way of distinguishing ILP32 objects
+	 from LP64 objects, so if there's any doubt, we should assume that
+	 the official LP64 form is being used.  */
+      if ((elf_header.e_flags & EF_MIPS_ABI) == E_MIPS_ABI_EABI64
+	  && find_section (".gcc_compiled_long32") == NULL)
+	eh_addr_size = 8;
+      break;
+    }
 
   for (i = 0, section = section_headers;
        i < elf_header.e_shnum;
@@ -4301,11 +4330,8 @@ find_symbol_for_address (Elf_Internal_Sym *symtab,
 static void
 dump_ia64_unwind (struct ia64_unw_aux_info *aux)
 {
-  bfd_vma addr_size;
   struct ia64_unw_table_entry *tp;
   int in_body;
-
-  addr_size = is_32bit_elf ? 4 : 8;
 
   for (tp = aux->table; tp < aux->table + aux->table_len; ++tp)
     {
@@ -4343,7 +4369,7 @@ dump_ia64_unwind (struct ia64_unw_aux_info *aux)
 	      (unsigned long) ((stamp & UNW_FLAG_MASK) >> 32),
 	      UNW_FLAG_EHANDLER (stamp) ? " ehandler" : "",
 	      UNW_FLAG_UHANDLER (stamp) ? " uhandler" : "",
-	      (unsigned long) (addr_size * UNW_LENGTH (stamp)));
+	      (unsigned long) (eh_addr_size * UNW_LENGTH (stamp)));
 
       if (UNW_VER (stamp) != 1)
 	{
@@ -4352,7 +4378,7 @@ dump_ia64_unwind (struct ia64_unw_aux_info *aux)
 	}
 
       in_body = 0;
-      for (dp = head + 8; dp < head + 8 + addr_size * UNW_LENGTH (stamp);)
+      for (dp = head + 8; dp < head + 8 + eh_addr_size * UNW_LENGTH (stamp);)
 	dp = unw_decode (dp, in_body, & in_body);
     }
 }
@@ -4362,7 +4388,7 @@ slurp_ia64_unwind_table (FILE *file,
 			 struct ia64_unw_aux_info *aux,
 			 Elf_Internal_Shdr *sec)
 {
-  unsigned long size, addr_size, nrelas, i;
+  unsigned long size, nrelas, i;
   Elf_Internal_Phdr *seg;
   struct ia64_unw_table_entry *tep;
   Elf_Internal_Shdr *relsec;
@@ -4370,8 +4396,6 @@ slurp_ia64_unwind_table (FILE *file,
   unsigned char *table, *tp;
   Elf_Internal_Sym *sym;
   const char *relname;
-
-  addr_size = is_32bit_elf ? 4 : 8;
 
   /* First, find the starting address of the segment that includes
      this section: */
@@ -4403,8 +4427,9 @@ slurp_ia64_unwind_table (FILE *file,
   if (!table)
     return 0;
 
-  tep = aux->table = xmalloc (size / (3 * addr_size) * sizeof (aux->table[0]));
-  for (tp = table; tp < table + size; tp += 3 * addr_size, ++tep)
+  aux->table = xmalloc (size / (3 * eh_addr_size) * sizeof (aux->table[0]));
+  tep = aux->table;
+  for (tp = table; tp < table + size; tp += 3 * eh_addr_size, ++tep)
     {
       tep->start.section = SHN_UNDEF;
       tep->end.section   = SHN_UNDEF;
@@ -4460,9 +4485,9 @@ slurp_ia64_unwind_table (FILE *file,
 	      continue;
 	    }
 
-	  i = rp->r_offset / (3 * addr_size);
+	  i = rp->r_offset / (3 * eh_addr_size);
 
-	  switch (rp->r_offset/addr_size % 3)
+	  switch (rp->r_offset/eh_addr_size % 3)
 	    {
 	    case 0:
 	      aux->table[i].start.section = sym->st_shndx;
@@ -4484,7 +4509,7 @@ slurp_ia64_unwind_table (FILE *file,
       free (rela);
     }
 
-  aux->table_len = size / (3 * addr_size);
+  aux->table_len = size / (3 * eh_addr_size);
   return 1;
 }
 
@@ -4492,12 +4517,10 @@ static int
 ia64_process_unwind (FILE *file)
 {
   Elf_Internal_Shdr *sec, *unwsec = NULL, *strsec;
-  unsigned long i, addr_size, unwcount = 0, unwstart = 0;
+  unsigned long i, unwcount = 0, unwstart = 0;
   struct ia64_unw_aux_info aux;
 
   memset (& aux, 0, sizeof (aux));
-
-  addr_size = is_32bit_elf ? 4 : 8;
 
   for (i = 0, sec = section_headers; i < elf_header.e_shnum; ++i, ++sec)
     {
@@ -4602,7 +4625,7 @@ ia64_process_unwind (FILE *file)
 
 	  printf (_(" at offset 0x%lx contains %lu entries:\n"),
 		  (unsigned long) unwsec->sh_offset,
-		  (unsigned long) (unwsec->sh_size / (3 * addr_size)));
+		  (unsigned long) (unwsec->sh_size / (3 * eh_addr_size)));
 
 	  (void) slurp_ia64_unwind_table (file, & aux, unwsec);
 
@@ -4676,10 +4699,8 @@ struct hppa_unw_aux_info
 static void
 dump_hppa_unwind (struct hppa_unw_aux_info *aux)
 {
-  bfd_vma addr_size;
   struct hppa_unw_table_entry *tp;
 
-  addr_size = is_32bit_elf ? 4 : 8;
   for (tp = aux->table; tp < aux->table + aux->table_len; ++tp)
     {
       bfd_vma offset;
@@ -4746,7 +4767,7 @@ slurp_hppa_unwind_table (FILE *file,
 			 struct hppa_unw_aux_info *aux,
 			 Elf_Internal_Shdr *sec)
 {
-  unsigned long size, unw_ent_size, addr_size, nrelas, i;
+  unsigned long size, unw_ent_size, nrelas, i;
   Elf_Internal_Phdr *seg;
   struct hppa_unw_table_entry *tep;
   Elf_Internal_Shdr *relsec;
@@ -4754,8 +4775,6 @@ slurp_hppa_unwind_table (FILE *file,
   unsigned char *table, *tp;
   Elf_Internal_Sym *sym;
   const char *relname;
-
-  addr_size = is_32bit_elf ? 4 : 8;
 
   /* First, find the starting address of the segment that includes
      this section.  */
@@ -4788,11 +4807,11 @@ slurp_hppa_unwind_table (FILE *file,
   if (!table)
     return 0;
 
-  unw_ent_size = 2 * addr_size + 8;
+  unw_ent_size = 2 * eh_addr_size + 8;
 
   tep = aux->table = xmalloc (size / unw_ent_size * sizeof (aux->table[0]));
 
-  for (tp = table; tp < table + size; tp += (2 * addr_size + 8), ++tep)
+  for (tp = table; tp < table + size; tp += (2 * eh_addr_size + 8), ++tep)
     {
       unsigned int tmp1, tmp2;
 
@@ -4887,7 +4906,7 @@ slurp_hppa_unwind_table (FILE *file,
 
 	  i = rp->r_offset / unw_ent_size;
 
-	  switch ((rp->r_offset % unw_ent_size) / addr_size)
+	  switch ((rp->r_offset % unw_ent_size) / eh_addr_size)
 	    {
 	    case 0:
 	      aux->table[i].start.section = sym->st_shndx;
@@ -4917,13 +4936,11 @@ hppa_process_unwind (FILE *file)
   Elf_Internal_Shdr *unwsec = NULL;
   Elf_Internal_Shdr *strsec;
   Elf_Internal_Shdr *sec;
-  unsigned long addr_size;
   unsigned long i;
 
   memset (& aux, 0, sizeof (aux));
 
   assert (string_table != NULL);
-  addr_size = is_32bit_elf ? 4 : 8;
 
   for (i = 0, sec = section_headers; i < elf_header.e_shnum; ++i, ++sec)
     {
@@ -4953,7 +4970,7 @@ hppa_process_unwind (FILE *file)
 
 	  printf (_(" at offset 0x%lx contains %lu entries:\n"),
 		  (unsigned long) sec->sh_offset,
-		  (unsigned long) (sec->sh_size / (2 * addr_size + 8)));
+		  (unsigned long) (sec->sh_size / (2 * eh_addr_size + 8)));
 
           slurp_hppa_unwind_table (file, &aux, sec);
 	  if (aux.table_len > 0)
@@ -7048,26 +7065,6 @@ process_extended_line_op (unsigned char *data, int is_stmt, int pointer_size)
     }
 
   return len;
-}
-
-/* Finds section NAME inside FILE and returns a
-   pointer to it, or NULL upon failure.  */
-
-static Elf_Internal_Shdr *
-find_section (const char * name)
-{
-  Elf_Internal_Shdr *sec;
-  unsigned int i;
-
-  for (i = elf_header.e_shnum, sec = section_headers + i - 1;
-       i; --i, --sec)
-    if (streq (SECTION_NAME (sec), name))
-      break;
-
-  if (i && sec && sec->sh_size != 0)
-    return sec;
-
-  return NULL;
 }
 
 static const char *debug_str_contents;
@@ -9913,7 +9910,7 @@ size_of_encoded_value (int encoding)
   switch (encoding & 0x7)
     {
     default:	/* ??? */
-    case 0:	return is_32bit_elf ? 4 : 8;
+    case 0:	return eh_addr_size;
     case 2:	return 2;
     case 3:	return 4;
     case 4:	return 8;
@@ -9947,7 +9944,6 @@ display_debug_frames (Elf_Internal_Shdr *section,
   int is_eh = streq (SECTION_NAME (section), ".eh_frame");
   int length_return;
   int max_regs = 0;
-  int addr_size = is_32bit_elf ? 4 : 8;
 
   printf (_("The section %s contains:\n"), SECTION_NAME (section));
 
@@ -9962,7 +9958,7 @@ display_debug_frames (Elf_Internal_Shdr *section,
       int need_col_headers = 1;
       unsigned char *augmentation_data = NULL;
       unsigned long augmentation_data_len = 0;
-      int encoded_ptr_size = addr_size;
+      int encoded_ptr_size = eh_addr_size;
       int offset_size;
       int initial_length_size;
 
@@ -10035,7 +10031,7 @@ display_debug_frames (Elf_Internal_Shdr *section,
 	    }
 	  else if (streq (fc->augmentation, "eh"))
 	    {
-	      start += addr_size;
+	      start += eh_addr_size;
 	      fc->code_factor = LEB ();
 	      fc->data_factor = SLEB ();
 	      if (version == 1)
@@ -10515,7 +10511,7 @@ display_debug_frames (Elf_Internal_Shdr *section,
 	      if (! do_debug_frames_interp)
 		{
 		  printf ("  DW_CFA_def_cfa_expression (");
-		  decode_location_expression (start, addr_size, ul, 0);
+		  decode_location_expression (start, eh_addr_size, ul, 0);
 		  printf (")\n");
 		}
 	      fc->cfa_exp = 1;
@@ -10528,7 +10524,7 @@ display_debug_frames (Elf_Internal_Shdr *section,
 	      if (! do_debug_frames_interp)
 		{
 		  printf ("  DW_CFA_expression: r%ld (", reg);
-		  decode_location_expression (start, addr_size, ul, 0);
+		  decode_location_expression (start, eh_addr_size, ul, 0);
 		  printf (")\n");
 		}
 	      fc->col_type[reg] = DW_CFA_expression;

@@ -1,3 +1,15 @@
+2005-01-31  Richard Sandiford  <rsandifo@redhat.com>
+
+	* readelf.c (eh_addr_size): New variable.
+	(find_section): Move earlier in file.  Return empty sections too.
+	(process_program_headers): Use find_section to find .dynamic.
+	(process_section_headers): Initialize eh_addr_size.
+	(dump_ia64_unwind, slurp_ia64_unwind_table, ia64_process_unwind)
+	(dump_hppa_unwind, slurp_hppa_unwind_table, hppa_process_unwind)
+	(display_debug_frames): Use it instead of local addr_size variable.
+	(size_of_encoded_value): Get pointer size from eh_addr_size rather
+	than is_32bit_elf.
+
 2005-01-31  Andrew Cagney  <cagney@gnu.org>
 
 	* configure: Regenerate to track ../gettext.m4.
