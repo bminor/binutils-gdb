@@ -1,3 +1,9 @@
+2003-04-24  Nick Clifton  <nickc@redhat.com>
+
+	* gas/ppc/astest2.s: Add tests for conditional branches with
+	probability indicators.
+	* gas/ppc/astest2.d: Add expected disassembly.
+
 2003-04-23  H.J. Lu <hjl@gnu.org>
 
 	* gas/ia64/opc-i.s: Add testcases for valid label.

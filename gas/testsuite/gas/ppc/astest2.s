@@ -50,3 +50,17 @@ y:	.long 0
 	.type	a,@function
 	.type	b,@function
 	.type	apfour,@function
+
+	.section ".text"
+.L1:
+	nop
+	ble- 1,.L1
+	bgt- 2,.L1
+	ble+ 3,.L1
+	bgt+ 4,.L1
+	ble- 5,.L2
+	bgt- 6,.L2
+	ble+ 7,.L2
+	bgt+ 0,.L2
+.L2:
+	nop:	

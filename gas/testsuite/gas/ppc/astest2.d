@@ -66,6 +66,15 @@ Disassembly of section \.text:
   88:	00 00 00 02 	\.long 0x2
 			88: R_PPC_ADDR32	apfour\+0x2
   8c:	00 00 00 00 	\.long 0x0
+  90:	60 00 00 00 	nop
+  94:	40 a5 ff fc 	ble-	cr1,90 <apfour\+0x14>
+  98:	41 a9 ff f8 	bgt-	cr2,90 <apfour\+0x14>
+  9c:	40 8d ff f4 	ble\+	cr3,90 <apfour\+0x14>
+  a0:	41 91 ff f0 	bgt\+	cr4,90 <apfour\+0x14>
+  a4:	40 95 00 10 	ble-	cr5,b4 <nop>
+  a8:	41 99 00 0c 	bgt-	cr6,b4 <nop>
+  ac:	40 bd 00 08 	ble\+	cr7,b4 <nop>
+  b0:	41 a1 00 04 	bgt\+	b4 <nop>
 Disassembly of section \.data:
 
 0+0000000 <x>:
