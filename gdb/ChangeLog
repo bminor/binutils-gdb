@@ -1,5 +1,12 @@
 2000-04-12  Eli Zaretskii  <eliz@is.elta.co.il>
 
+	* go32-nat.c (go32_insert_hw_breakpoint): When there are no more
+	hardware breakpoint resources, return EBUSY.
+	(go32_handle_nonaligned_watchpoint): If the argument WHAT is not
+	one of the enumerated values, return EINVAL.
+
+2000-04-12  Eli Zaretskii  <eliz@is.elta.co.il>
+
 	* README: Mention special build instructions for DJGPP.
 	* NEWS: Update with FP features on x87 platforms, and
 	DJGPP-related changes.
