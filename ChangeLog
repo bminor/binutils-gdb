@@ -1,3 +1,7 @@
+Mon Jul 14 00:32:10 1997  Jason Merrill  <jason@yorick.cygnus.com>
+
+	* config.guess: Update from FSF.
+
 Fri Jul 11 11:57:11 1997  Martin M. Hunt  <hunt@cygnus.com>
 
 	* Makefile.in (GDB_TK): Depend on itcl and tix.
