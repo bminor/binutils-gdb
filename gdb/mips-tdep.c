@@ -33,6 +33,7 @@
 #include "objfiles.h"
 #include "gdbtypes.h"
 #include "target.h"
+#include "arch-utils.h"
 
 #include "opcode/mips.h"
 #include "elf/mips.h"

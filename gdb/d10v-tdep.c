@@ -34,6 +34,7 @@
 #include "symfile.h"
 #include "objfiles.h"
 #include "language.h"
+#include "arch-utils.h"
 
 #include "sim-d10v.h"
 
