@@ -1,3 +1,10 @@
+2004-12-08  Daniel Jacobowitz  <dan@debian.org>
+
+	* linux-thread-db.c (BUILD_THREAD): Delete.
+	(thread_get_info_callback): Include LWP ID in thread ID.
+	(thread_from_lwp, check_event, find_new_threads_callback): Likewise.
+	(lwp_from_thread): Use the LWP ID from the thread ID.
+
 2004-12-07  Randolph Chung  <tausq@debian.org>
 
 	* hppa-tdep.c (hppa_frame_prev_register_helper): Zero out the entire

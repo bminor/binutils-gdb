@@ -143,7 +143,6 @@ static void detach_thread (ptid_t ptid, int verbose);
 #define is_thread(ptid)		(GET_THREAD (ptid) != 0)
 
 #define BUILD_LWP(lwp, pid)	ptid_build (pid, lwp, 0)
-#define BUILD_THREAD(tid, pid)	ptid_build (pid, 0, tid)
 
 
 /* Use "struct private_thread_info" to cache thread state.  This is
@@ -267,7 +266,7 @@ thread_get_info_callback (const td_thrhandle_t *thp, void *infop)
 	   thread_db_err_str (err));
 
   /* Fill the cache.  */
-  thread_ptid = BUILD_THREAD (ti.ti_tid, GET_PID (inferior_ptid));
+  thread_ptid = ptid_build (GET_PID (inferior_ptid), ti.ti_lid, ti.ti_tid);
   thread_info = find_thread_pid (thread_ptid);
 
   /* In the case of a zombie thread, don't continue.  We don't want to
@@ -385,22 +384,14 @@ thread_from_lwp (ptid_t ptid)
 
   gdb_assert (thread_info && thread_info->private->ti_valid);
 
-  return BUILD_THREAD (thread_info->private->ti.ti_tid, GET_PID (ptid));
+  return ptid_build (GET_PID (ptid), GET_LWP (ptid),
+		     thread_info->private->ti.ti_tid);
 }
 
 static ptid_t
 lwp_from_thread (ptid_t ptid)
 {
-  struct thread_info *thread_info;
-  ptid_t thread_ptid;
-
-  if (!is_thread (ptid))
-    return ptid;
-
-  thread_info = find_thread_pid (ptid);
-  thread_db_get_info (thread_info);
-
-  return BUILD_LWP (thread_info->private->ti.ti_lid, GET_PID (ptid));
+  return BUILD_LWP (GET_LWP (ptid), GET_PID (ptid));
 }
 
 
@@ -903,7 +894,7 @@ check_event (ptid_t ptid)
       if (err != TD_OK)
 	error ("Cannot get thread info: %s", thread_db_err_str (err));
 
-      ptid = BUILD_THREAD (ti.ti_tid, GET_PID (ptid));
+      ptid = ptid_build (GET_PID (ptid), ti.ti_lid, ti.ti_tid);
 
       switch (msg.event)
 	{
@@ -1175,7 +1166,7 @@ find_new_threads_callback (const td_thrhandle_t *th_p, void *data)
   if (ti.ti_state == TD_THR_UNKNOWN || ti.ti_state == TD_THR_ZOMBIE)
     return 0;			/* A zombie -- ignore.  */
 
-  ptid = BUILD_THREAD (ti.ti_tid, GET_PID (inferior_ptid));
+  ptid = ptid_build (GET_PID (inferior_ptid), ti.ti_lid, ti.ti_tid);
 
   if (!in_thread_list (ptid))
     attach_thread (ptid, th_p, &ti, 1);
