@@ -1,5 +1,5 @@
 /* opncls.c -- open and close a BFD.
-   Copyright (C) 1990 91, 92, 93, 94, 1995 Free Software Foundation, Inc.
+   Copyright (C) 1990 91, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -88,7 +88,7 @@ _bfd_new_bfd ()
   nbfd->section_count = 0;
   nbfd->usrdata = (PTR)NULL;
   nbfd->cacheable = false;
-  nbfd->flags = NO_FLAGS;
+  nbfd->flags = BFD_NO_FLAGS;
   nbfd->mtime_set = false;
 
   return nbfd;
@@ -259,6 +259,7 @@ bfd_fdopenr (filename, target, fd)
 				
   if (! bfd_cache_init (nbfd))
     return NULL;
+  nbfd->opened_once = true;
 
   return nbfd;
 }

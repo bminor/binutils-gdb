@@ -1,3 +1,11 @@
+Wed Aug  7 23:19:00 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* aoutx.h bfd-in.h bfd-in2.h opncls.c riscix.c som.c targets.c:
+	Change NO_FLAGS to BFD_NO_FLAGS to avoid conflict with an HPUX
+	include file.
+	* libbfd.c:  Create dummy getpagesize() macro if HAVE_GETPAGESIZE
+	isn't defined.
+
 Wed Aug  7 14:11:44 1996  Philippe De Muyter  <phdm@info.ucl.ac.be>
 
 	* configure.in: Call BFD_NEEDED_DECLARATION on strstr and

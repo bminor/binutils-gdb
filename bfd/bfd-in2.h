@@ -199,7 +199,7 @@ typedef enum bfd_format {
    to another, and are not necessarily correct).  */
 
 /* No flags.  */
-#define NO_FLAGS    	0x00
+#define BFD_NO_FLAGS   	0x00
 
 /* BFD contains relocation entries.  */
 #define HAS_RELOC   	0x01
