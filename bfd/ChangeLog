@@ -1,3 +1,12 @@
+2005-02-06  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (add_symbol_adjust): Don't create fake descriptor
+	syms when doing a relocatable link.
+	(ppc64_elf_gc_mark_hook): Check that syms are defined before looking
+	at u.def.section.
+	(ppc64_elf_tls_setup): Likewise.
+	(ppc64_elf_edit_opd): Don't use an undefined func desc sym.
+
 2005-02-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (struct ppc_link_hash_entry): Add "fake".

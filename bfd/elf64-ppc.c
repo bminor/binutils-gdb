@@ -4074,6 +4074,7 @@ add_symbol_adjust (struct elf_link_hash_entry *h, void *inf)
   eh = (struct ppc_link_hash_entry *) h;
   fdh = get_fdh (eh, htab);
   if (fdh == NULL
+      && !data->info->relocatable
       && (eh->elf.root.type == bfd_link_hash_undefined
 	  || eh->elf.root.type == bfd_link_hash_undefweak)
       && eh->elf.ref_regular)
@@ -4087,7 +4088,9 @@ add_symbol_adjust (struct elf_link_hash_entry *h, void *inf)
       else
 	fdh->elf.ref_regular = 1;
     }
-  else if (fdh != NULL)
+  else if (fdh != NULL
+	   && (fdh->elf.root.type == bfd_link_hash_defined
+	       || fdh->elf.root.type == bfd_link_hash_defweak))
     {
       unsigned entry_vis = ELF_ST_VISIBILITY (eh->elf.other) - 1;
       unsigned descr_vis = ELF_ST_VISIBILITY (fdh->elf.other) - 1;
@@ -4096,9 +4099,7 @@ add_symbol_adjust (struct elf_link_hash_entry *h, void *inf)
       else if (entry_vis > descr_vis)
 	eh->elf.other += descr_vis - entry_vis;
 
-      if (eh->elf.root.type == bfd_link_hash_undefined
-	  && (fdh->elf.root.type == bfd_link_hash_defined
-	      || fdh->elf.root.type == bfd_link_hash_defweak))
+      if (eh->elf.root.type == bfd_link_hash_undefined)
 	{
 	  eh->elf.root.type = bfd_link_hash_undefweak;
 	  eh->was_undefined = 1;
@@ -4884,7 +4885,9 @@ ppc64_elf_gc_mark_hook (asection *sec,
 	      && eh->elf.root.type != bfd_link_hash_defweak)
 	    continue;
 
-	  if (eh->is_func_descriptor)
+	  if (eh->is_func_descriptor
+	      && (eh->oh->elf.root.type == bfd_link_hash_defined
+		  || eh->oh->elf.root.type == bfd_link_hash_defweak))
 	    rsec = eh->oh->elf.root.u.def.section;
 	  else if (get_opd_info (eh->elf.root.u.def.section) != NULL
 		   && opd_entry_value (eh->elf.root.u.def.section,
@@ -4930,12 +4933,17 @@ ppc64_elf_gc_mark_hook (asection *sec,
 	    case bfd_link_hash_defined:
 	    case bfd_link_hash_defweak:
 	      eh = (struct ppc_link_hash_entry *) h;
-	      if (eh->oh != NULL && eh->oh->is_func_descriptor)
+	      if (eh->oh != NULL
+		  && eh->oh->is_func_descriptor
+		  && (eh->oh->elf.root.type == bfd_link_hash_defined
+		      || eh->oh->elf.root.type == bfd_link_hash_defweak))
 		eh = eh->oh;
 
 	      /* Function descriptor syms cause the associated
 		 function code sym section to be marked.  */
-	      if (eh->is_func_descriptor)
+	      if (eh->is_func_descriptor
+		  && (eh->oh->elf.root.type == bfd_link_hash_defined
+		      || eh->oh->elf.root.type == bfd_link_hash_defweak))
 		{
 		  /* They also mark their opd section.  */
 		  if (!eh->elf.root.u.def.section->gc_mark)
@@ -6194,8 +6202,14 @@ ppc64_elf_edit_opd (bfd *obfd, struct bfd_link_info *info,
 
 		  if (h != NULL
 		      && h->root.root.string[0] == '.')
-		    fdh = get_fdh ((struct ppc_link_hash_entry *) h,
-				   ppc_hash_table (info));
+		    {
+		      fdh = get_fdh ((struct ppc_link_hash_entry *) h,
+				     ppc_hash_table (info));
+		      if (fdh != NULL
+			  && fdh->elf.root.type != bfd_link_hash_defined
+			  && fdh->elf.root.type != bfd_link_hash_defweak)
+			fdh = NULL;
+		    }
 
 		  skip = (sym_sec->owner != ibfd
 			  || sym_sec->output_section == bfd_abs_section_ptr);
@@ -6379,7 +6393,9 @@ ppc64_elf_tls_setup (bfd *obfd, struct bfd_link_info *info)
 
       if (htab->tls_get_addr_fd == NULL
 	  && h->oh != NULL
-	  && h->oh->is_func_descriptor)
+	  && h->oh->is_func_descriptor
+	  && (h->oh->elf.root.type == bfd_link_hash_defined
+	      || h->oh->elf.root.type == bfd_link_hash_defweak))
 	htab->tls_get_addr_fd = h->oh;
     }
 
