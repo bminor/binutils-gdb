@@ -482,3 +482,30 @@ print_register_hook (regno)
     }
 }
 
+
+/* Callbacks for remote-sim */
+
+int 
+sim_load (abfd, prog)
+bfd *abfd;
+char *prog;
+{
+  return sim_load_standard (abfd); 
+}
+
+void
+sim_kill()
+{
+}
+
+sim_open ()
+{
+  return 0;
+}
+
+sim_set_args(argv, env)
+char **argv;
+char **env;
+{
+  return 0;
+}

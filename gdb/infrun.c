@@ -1308,7 +1308,7 @@ normal_stop ()
   /* Make sure that the current_frame's pc is correct.  This
      is a correction for setting up the frame info before doing
      DECR_PC_AFTER_BREAK */
-  if (target_has_execution)
+  if (target_has_execution && get_current_frame())
     (get_current_frame ())->pc = read_pc ();
   
   if (breakpoints_failed)

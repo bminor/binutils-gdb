@@ -1,3 +1,14 @@
+Thu Oct  7 16:14:19 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
+
+	* h8300-tdep.c (sim_load, sim_kill, sim_open, sim_set_args):
+	New functions.
+	* infrun.c (normal_stop): Don't try and set the pc in the current
+	frame coredump if there isn't one.
+	* remote-sim.c (gdbsim_store_register): Don't
+	SWAP_TARGET_AND_HOST, sim_store_register takes bytes in raw order.
+	(gdbsim_wait): Set status with WSETSTOP.
+	* config/h8300/tm-h8300.h (sr_get_debug): Define
+
 Thu Oct  7 12:56:57 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	New Mach stuff:

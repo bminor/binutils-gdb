@@ -107,9 +107,7 @@ int regno;
     {
       /* FIXME: Until read_register() returns LONGEST, we have this.  */
       char value[MAX_REGISTER_RAW_SIZE];
-
       read_register_gen (regno, value);
-      SWAP_TARGET_AND_HOST (value, REGISTER_RAW_SIZE (regno));
       sim_store_register (regno, value);
       if (sr_get_debug ())
 	{
@@ -351,14 +349,10 @@ gdbsim_wait (status)
 {
   if (sr_get_debug ())
     printf_filtered ("gdbsim_wait: ");
-#if 1
-  *status = sim_stop_signal ();
-#else
   WSETSTOP (*status, sim_stop_signal ());
-#endif
   if (sr_get_debug ())
     printf_filtered ("status %d\n", *status);
-  return 0;
+  return inferior_pid;
 }
 
 /* Get ready to modify the registers array.  On machines which store
