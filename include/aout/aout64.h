@@ -48,6 +48,12 @@ struct external_exec
 
 #endif
 
+#ifdef QMAGIC
+#define N_IS_QMAGIC(x) (N_MAGIC (x) == QMAGIC)
+#else
+#define N_IS_QMAGIC(x) (0)
+#endif
+
 /* The difference between PAGE_SIZE and N_SEGSIZE is that PAGE_SIZE is
    the the finest granularity at which you can page something, thus it
    controls the padding (if any) before the text segment of a ZMAGIC
@@ -114,9 +120,9 @@ struct external_exec
 
 #ifndef N_TXTADDR
 #define N_TXTADDR(x) \
-    (/* The address of a QMAGIC file is always one page in */ \
+    (/* The address of a QMAGIC file is always one page in, */ \
      /* with the header in the text.  */ \
-     N_MAGIC(x) == QMAGIC ? PAGE_SIZE + EXEC_BYTES_SIZE : \
+     N_IS_QMAGIC (x) ? PAGE_SIZE + EXEC_BYTES_SIZE : \
      N_MAGIC(x) != ZMAGIC ? 0 :	/* object file or NMAGIC */\
      N_SHARED_LIB(x) ? 0 :	\
      N_HEADER_IN_TEXT(x)  ?	\
@@ -144,7 +150,7 @@ struct external_exec
 #ifndef N_TXTSIZE
 #define	N_TXTSIZE(x) \
     (/* For QMAGIC, we don't consider the header part of the text section.  */\
-     N_MAGIC(x) == QMAGIC ? (x).a_text - EXEC_BYTES_SIZE : \
+     N_IS_QMAGIC (x) ? (x).a_text - EXEC_BYTES_SIZE : \
      (N_MAGIC(x) != ZMAGIC || N_SHARED_LIB(x)) ? (x).a_text : \
      N_HEADER_IN_TEXT(x)  ?	\
 	    (x).a_text - EXEC_BYTES_SIZE:	/* no padding */\
