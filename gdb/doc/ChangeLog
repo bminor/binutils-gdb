@@ -1,3 +1,9 @@
+2002-04-15  Don Howard  <dhoward@redhat.com>
+
+	From Eli Zaretskii <eliz@is.elta.co.il>
+	* gdb.texinfo (show max-user-call-depth): Correct formatting.
+	Provide a better explaination of this feature. 
+
 2002-04-14  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbint.texinfo (Target Architecture Definition): Remove

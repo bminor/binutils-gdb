@@ -12784,9 +12784,10 @@ definitions for all user-defined commands.
 @kindex show max-user-call-depth
 @kindex set max-user-call-depth
 @item show max-user-call-depth
-@item set max-user-call-depth
-The value of @code{max-user-call-depth} controls how many levels deep a
-user-defined call chain can go.  Default is 1024.
+@itemx set max-user-call-depth
+The value of @code{max-user-call-depth} controls how many recursion
+levels are allowed in user-defined commands before GDB suspects an
+infinite recursion and aborts the command.
 
 @end table
 
