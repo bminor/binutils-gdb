@@ -1,6 +1,6 @@
 /* MIPS-specific support for 32-bit ELF
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
-   Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
+   2003  Free Software Foundation, Inc.
 
    Most of the information added by Ian Lance Taylor, Cygnus Support,
    <ian@cygnus.com>.
@@ -96,6 +96,7 @@ static irix_compat_t elf_n32_mips_irix_compat
 extern const bfd_target bfd_elf32_nbigmips_vec;
 extern const bfd_target bfd_elf32_nlittlemips_vec;
 
+static asection *prev_reloc_section = NULL;
 static bfd_vma prev_reloc_address = -1;
 static bfd_vma prev_reloc_addend = 0;
 
@@ -1207,29 +1208,31 @@ static reloc_howto_type elf_mips_gnu_vtentry_howto =
 {									\
   /* If we're relocating, and this is an external symbol, we don't	\
      want to change anything.  */					\
-    if (obfd != (bfd *) NULL						\
-	&& (sym->flags & BSF_SECTION_SYM) == 0				\
-	&& (! entry->howto->partial_inplace				\
-	    || entry->addend == 0))					\
+    if ((obfd) != (bfd *) NULL						\
+	&& ((sym)->flags & BSF_SECTION_SYM) == 0			\
+	&& (! (entry)->howto->partial_inplace				\
+	    || (entry)->addend == 0))					\
       {									\
-        entry->address += sec->output_offset;				\
+        (entry)->address += (sec)->output_offset;			\
         return bfd_reloc_ok;						\
       }									\
 									\
     /* The addend of combined relocs is remembered and left for		\
        subsequent relocs.  */						\
-    if (prev_reloc_address != reloc_entry->address)			\
+    if (prev_reloc_address != (entry)->address				\
+	|| prev_reloc_section != (sec))					\
       {									\
-        prev_reloc_address = reloc_entry->address;			\
-        prev_reloc_addend = reloc_entry->addend;			\
+	prev_reloc_section = (sec);					\
+        prev_reloc_address = (entry)->address;				\
+        prev_reloc_addend = (entry)->addend;				\
       }									\
     else								\
-      reloc_entry->addend = prev_reloc_addend;				\
+      (entry)->addend = prev_reloc_addend;				\
 }
 
 #define SET_RELOC_ADDEND(entry)						\
 {									\
-  prev_reloc_addend = entry->addend;					\
+  prev_reloc_addend = (entry)->addend;					\
 }
 
 static bfd_reloc_status_type

@@ -1,3 +1,9 @@
+2003-01-08  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elfn32-mips.c (prev_reloc_section): New.
+	(GET_RELOC_ADDEND): Use it.  Parenthesize macro arguments.
+	(SET_RELOC_ADDEND): Parenthesize macro argument.
+
 2003-01-07  John David Anglin  <dave.anglin@nrc.gc.ca>
 
 	* elf32-hppa.c (final_link_relocate): For all DP relative relocations,
