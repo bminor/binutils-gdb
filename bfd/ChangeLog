@@ -1,3 +1,8 @@
+Mon May 16 10:09:22 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* libhppa.h (hppa_field_adjust): Avoid adding constant_value into
+	the final value twice for LR and RR field selectors.
+
 Sat May 14 09:09:19 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* aoutx.h (add_to_stringtab): Use BFD_ASSERT not assert.  This
