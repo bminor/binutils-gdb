@@ -597,7 +597,7 @@ const int md_long_jump_size = 4;
 #endif
 
 #ifdef OBJ_ELF
-CONST char *md_shortopts = "um:VQ:";
+CONST char *md_shortopts = "b:l:usm:VQ:";
 #else
 CONST char *md_shortopts = "um:";
 #endif
@@ -617,6 +617,32 @@ md_parse_option (c, arg)
       /* -u means that any undefined symbols should be treated as
 	 external, which is the default for gas anyhow.  */
       break;
+
+#ifdef OBJ_ELF
+    case 'l':
+      /* Solaris as takes -le (presumably for little endian).  For completeness
+         sake, recognize -be also.  */
+      if (strcmp (arg, "e") == 0)
+	{
+	  target_big_endian = 0;
+	  set_target_endian = 1;
+	}
+      else
+	return 0;
+
+      break;
+
+    case 'b':
+      if (strcmp (arg, "e") == 0)
+	{
+	  target_big_endian = 1;
+	  set_target_endian = 1;
+	}
+      else
+	return 0;
+
+      break;
+#endif
 
     case 'm':
       /* -mpwrx and -mpwr2 mean to assemble for the IBM POWER/2
@@ -707,6 +733,15 @@ md_parse_option (c, arg)
       /* -Qy, -Qn: SVR4 arguments controlling whether a .comment section
 	 should be emitted or not.  FIXME: Not implemented.  */
     case 'Q':
+      break;
+
+      /* Solaris takes -s to specify that .stabs go in a .stabs section,
+	 rather than .stabs.excl, which is ignored by the linker.
+	 FIXME: Not implemented.  */
+    case 's':
+      if (arg)
+	return 0;
+
       break;
 #endif
 

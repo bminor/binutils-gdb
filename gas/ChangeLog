@@ -1,3 +1,8 @@
+Thu Apr 18 11:53:58 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config/tc-ppc.c (md_parse_option): Add support for Solaris's -le
+	and -s options.  Add -be for good measure.
+
 Wed Apr 17 12:31:01 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* read.c (s_space): Support non-constant fill value.  Handle fill
