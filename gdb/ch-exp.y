@@ -1043,13 +1043,18 @@ match_simple_name_string ()
 
   if (isalpha (*tokptr))
     {
+      char *result;
       do {
 	tokptr++;
-      } while (isalpha (*tokptr) || isdigit (*tokptr) || (*tokptr == '_'));
+      } while (isalnum (*tokptr) || (*tokptr == '_'));
       yylval.sval.ptr = lexptr;
       yylval.sval.length = tokptr - lexptr;
       lexptr = tokptr;
-      return (copy_name (yylval.sval));
+      result = copy_name (yylval.sval);
+      for (tokptr = result; *tokptr; tokptr++)
+	if (isupper (*tokptr))
+	  *tokptr = tolower(*tokptr);
+      return result;
     }
   return (NULL);
 }
@@ -1724,38 +1729,28 @@ struct token
   int token;
 };
 
-static const struct token tokentab6[] =
+static const struct token idtokentab[] =
 {
-    { "LENGTH", LENGTH }
-};
-
-static const struct token tokentab5[] =
-{
-    { "LOWER", LOWER },
-    { "UPPER", UPPER },
-    { "ANDIF", ANDIF }
-};
-
-static const struct token tokentab4[] =
-{
-    { "PRED", PRED },
-    { "SUCC", SUCC },
-    { "CARD", CARD },
-    { "SIZE", SIZE },
-    { "ORIF", ORIF }
-};
-
-static const struct token tokentab3[] =
-{
-    { "NUM", NUM },
-    { "ABS", ABS },
-    { "MAX", MAX },
-    { "MIN", MIN },
-    { "MOD", MOD },
-    { "REM", REM },
-    { "NOT", NOT },
-    { "XOR", LOGXOR },
-    { "AND", LOGAND }
+    { "length", LENGTH },
+    { "lower", LOWER },
+    { "upper", UPPER },
+    { "andif", ANDIF },
+    { "pred", PRED },
+    { "succ", SUCC },
+    { "card", CARD },
+    { "size", SIZE },
+    { "orif", ORIF },
+    { "num", NUM },
+    { "abs", ABS },
+    { "max", MAX },
+    { "min", MIN },
+    { "mod", MOD },
+    { "rem", REM },
+    { "not", NOT },
+    { "xor", LOGXOR },
+    { "and", LOGAND },
+    { "in", IN },
+    { "or", LOGIOR }
 };
 
 static const struct token tokentab2[] =
@@ -1765,9 +1760,7 @@ static const struct token tokentab2[] =
     { "->", POINTER },
     { "/=", NOTEQUAL },
     { "<=", LEQ },
-    { ">=", GTR },
-    { "IN", IN },
-    { "OR", LOGIOR }
+    { ">=", GTR }
 };
 
 /* Read one token, getting characters through lexptr.  */
@@ -1846,42 +1839,6 @@ yylex ()
 	    }
 	  break;
       }
-    /* See if it is a special token of length 6.  */
-    for (i = 0; i < sizeof (tokentab6) / sizeof (tokentab6[0]); i++)
-	{
-	    if (STREQN (lexptr, tokentab6[i].operator, 6))
-		{
-		    lexptr += 6;
-		    return (tokentab6[i].token);
-		}
-	}
-    /* See if it is a special token of length 5.  */
-    for (i = 0; i < sizeof (tokentab5) / sizeof (tokentab5[0]); i++)
-	{
-	    if (STREQN (lexptr, tokentab5[i].operator, 5))
-		{
-		    lexptr += 5;
-		    return (tokentab5[i].token);
-		}
-	}
-    /* See if it is a special token of length 4.  */
-    for (i = 0; i < sizeof (tokentab4) / sizeof (tokentab4[0]); i++)
-	{
-	    if (STREQN (lexptr, tokentab4[i].operator, 4))
-		{
-		    lexptr += 4;
-		    return (tokentab4[i].token);
-		}
-	}
-    /* See if it is a special token of length 3.  */
-    for (i = 0; i < sizeof (tokentab3) / sizeof (tokentab3[0]); i++)
-	{
-	    if (STREQN (lexptr, tokentab3[i].operator, 3))
-		{
-		    lexptr += 3;
-		    return (tokentab3[i].token);
-		}
-	}
     /* See if it is a special token of length 2.  */
     for (i = 0; i < sizeof (tokentab2) / sizeof (tokentab2[0]); i++)
 	{
@@ -1902,19 +1859,6 @@ yylex ()
 	    case '<':
 	    case '>':
 		return (*lexptr++);
-	}
-    /* Look for other special tokens. */
-    if (STREQN (lexptr, "TRUE", 4)) /* FIXME:  What about lowercase? */
-	{
-	    yylval.ulval = 1;
-	    lexptr += 4;
-	    return (BOOLEAN_LITERAL);
-	}
-    if (STREQN (lexptr, "FALSE", 5)) /* FIXME:  What about lowercase? */
-	{
-	    yylval.ulval = 0;
-	    lexptr += 5;
-	    return (BOOLEAN_LITERAL);
 	}
     /* Look for a float literal before looking for an integer literal, so
        we match as much of the input stream as possible. */
@@ -1941,6 +1885,28 @@ yylex ()
        we can't classify what sort of name it is. */
 
     simplename = match_simple_name_string ();
+
+    /* See if it is a reserved identifier. */
+    for (i = 0; i < sizeof (idtokentab) / sizeof (idtokentab[0]); i++)
+	{
+	    if (STREQ (simplename, idtokentab[i].operator))
+		{
+		    return (idtokentab[i].token);
+		}
+	}
+
+    /* Look for other special tokens. */
+    if (STREQ (simplename, "true"))
+	{
+	    yylval.ulval = 1;
+	    return (BOOLEAN_LITERAL);
+	}
+    if (STREQ (lexptr, "false"))
+	{
+	    yylval.ulval = 0;
+	    return (BOOLEAN_LITERAL);
+	}
+
     if (simplename != NULL)
       {
 	sym = lookup_symbol (simplename, expression_context_block,

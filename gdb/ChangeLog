@@ -1,3 +1,10 @@
+Sat Apr 10 01:32:43 1993  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* ch-exp.y:  Clean up lexing of identifiers and
+	reserved words.  (E.g. don't recognize FALSEXXX as the
+	keyword FALSE followed by the identifier XXX.)
+	Also, convert identifiers to lower case.
+
 Fri Apr  9 15:53:19 1993  Stu Grossman  (grossman@cygnus.com)
 
 	* remote-mips.c, remote-monitor.c, remote-st2000.c:  Convert to
