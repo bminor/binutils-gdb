@@ -181,6 +181,31 @@ mips*-*-*)
 	  done
 	fi
 	;;
+powerpc-ibm-aix* | rs6000-ibm-aix*)
+	multidirs="soft-float common soft-float/common"
+	if [ x$enable_softfloat = xno ]
+	then
+	  old_multidirs="${multidirs}"
+	  multidirs=""
+	  for x in ${old_multidirs}; do
+	    case "$x" in
+	      *soft-float* ) : ;;
+	      *) if [ x"$multidirs" = x ]; then multidirs="$x"; else multidirs="${multidirs} ${x}"; fi ;;
+	    esac
+	  done
+	fi
+	if [ x$enable_commoncpu = xno ]
+	then
+	  old_multidirs="${multidirs}"
+	  multidirs=""
+	  for x in ${old_multidirs}; do
+	    case "$x" in
+	      *common* ) : ;;
+	      *) if [ x"$multidirs" = x ]; then multidirs="$x"; else multidirs="${multidirs} ${x}"; fi ;;
+	    esac
+	  done
+	fi
+	;;
 powerpc-*-eabiaix*)
 	multidirs="soft-float relocatable little-endian call-sysv little-endian/call-sysv relocatable/little-endian relocatable/call-sysv relocatable/little-endian/call-sysv soft-float/relocatable soft-float/little-endian soft-float/call-sysv soft-float/little-endian/call-sysv soft-float/relocatable/little-endian soft-float/relocatable/call-sysv soft-float/relocatable/little-endian/call-sysv"
 	if [ x$enable_biendian = xno ]
@@ -228,8 +253,8 @@ powerpc-*-eabiaix*)
 	  done
 	fi
 	;;
-powerpc*-*-eabisim*)
-	multidirs="little-endian big-endian mrelocatable little-endian/mrelocatable big-endian/mrelocatable"
+powerpc*-*-eabisim*)	# don't both with {aix,aixdesc}/mrelocatable configurations
+	multidirs="little-endian big-endian aix aixdesc mrelocatable little-endian/mrelocatable big-endian/mrelocatable"
 	if [ x$enable_biendian = xno ]
 	then
 	  old_multidirs="${multidirs}"
@@ -237,6 +262,17 @@ powerpc*-*-eabisim*)
 	  for x in ${old_multidirs}; do
 	    case "$x" in
 	      *endian* ) : ;;
+	      *) if [ x"$multidirs" = x ]; then multidirs="$x"; else multidirs="${multidirs} ${x}"; fi ;;
+	    esac
+	  done
+	fi
+	if [ x$enable_aix = xno ]
+	then
+	  old_multidirs="${multidirs}"
+	  multidirs=""
+	  for x in ${old_multidirs}; do
+	    case "$x" in
+	      *aix* ) : ;;
 	      *) if [ x"$multidirs" = x ]; then multidirs="$x"; else multidirs="${multidirs} ${x}"; fi ;;
 	    esac
 	  done
