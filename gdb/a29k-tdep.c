@@ -817,6 +817,50 @@ push_dummy_frame ()
   write_register (lrnum, read_register (NPC_REGNUM));
 }
 
+enum a29k_processor_types processor_type = a29k_unknown;
+
+void
+a29k_get_processor_type ()
+{
+  unsigned int cfg_reg = (unsigned int) read_register (CFG_REGNUM);
+
+  /* Most of these don't have freeze mode.  */
+  processor_type = a29k_no_freeze_mode;
+
+  switch ((cfg_reg >> 28) & 0xf)
+    {
+    case 0:
+      fprintf_filtered (stderr, "Remote debugging an Am29000");
+      break;
+    case 1:
+      fprintf_filtered (stderr, "Remote debugging an Am29005");
+      break;
+    case 2:
+      fprintf_filtered (stderr, "Remote debugging an Am29050");
+      processor_type = a29k_freeze_mode;
+      break;
+    case 3:
+      fprintf_filtered (stderr, "Remote debugging an Am29035");
+      break;
+    case 4:
+      fprintf_filtered (stderr, "Remote debugging an Am29030");
+      break;
+    case 5:
+      fprintf_filtered (stderr, "Remote debugging an Am2920*");
+      break;
+    case 6:
+      fprintf_filtered (stderr, "Remote debugging an Am2924*");
+      break;
+    case 7:
+      fprintf_filtered (stderr, "Remote debugging an Am29040");
+      break;
+    default:
+      fprintf_filtered (stderr, "Remote debugging an unknown Am29k\n");
+      /* Don't bother to print the revision.  */
+      return;
+    }
+  fprintf_filtered (stderr, " revision %c\n", 'A' + ((cfg_reg >> 24) & 0x0f));
+}
 
 void
 _initialize_29k()

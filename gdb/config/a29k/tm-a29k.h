@@ -715,3 +715,14 @@ extern void pop_frame ();
 		"Invalid register number %d in symbol table entry for %s\n", \
 	         (num), SYMBOL_SOURCE_NAME (sym)), (num)	\
 	   : (num))
+
+extern enum a29k_processor_types {
+  a29k_unknown,
+
+  /* Bit 0x400 of the CPS does *not* identify freeze mode, i.e. 29000,
+     29030, etc.  */
+  a29k_no_freeze_mode,
+
+  /* Bit 0x400 of the CPS does identify freeze mode, i.e. 29050.  */
+  a29k_freeze_mode
+} processor_type;

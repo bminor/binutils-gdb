@@ -62,18 +62,10 @@ static int expect_msg();
 static void init_target_mm();
 static int mm_memory_space();
 
-/*
- * Processor types. 
- */
-#define TYPE_UNKNOWN    0
-#define TYPE_A29000     1
-#define TYPE_A29030     2
-#define TYPE_A29050     3
-static  char *processor_name[] = { "Unknown", "A29000", "A29030", "A29050" };
-static  int processor_type=TYPE_UNKNOWN;
 #define FREEZE_MODE     (read_register(CPS_REGNUM) && 0x400)
-#define USE_SHADOW_PC	((processor_type == TYPE_A29050) && FREEZE_MODE) 
+#define USE_SHADOW_PC	((processor_type == a29k_freeze_mode) && FREEZE_MODE)
 
+/* FIXME: Replace with `set remotedebug'.  */
 #define LLOG_FILE "minimon.log"
 #if defined (LOG_FILE)
 FILE *log_file;
@@ -344,30 +336,15 @@ erroid:
 
    expect_msg(CONFIG,in_msg_buf,1);
 
-  /* Determine the processor revision level */
-  /* FIXME: this code is the same as in remote-adapt.c */
-  prl = (unsigned int)read_register(CFG_REGNUM) >> 24;
-  if (prl == 0x03) {
-        processor_type = TYPE_A29000;
-  } else if ((prl&0xf0) == 0x40) {      /* 29030 = 0x4* */
-        processor_type = TYPE_A29030;
-        fprintf_filtered(stderr,"WARNING: debugging of A29030 not tested.\n");
-  } else if ((prl&0xf0) == 0x20) {      /* 29050 = 0x2* */
-        processor_type = TYPE_A29050;
-        fprintf_filtered(stderr,"WARNING: debugging of A29050 not tested.\n");
-  } else {
-        processor_type = TYPE_UNKNOWN;
-        fprintf_filtered(stderr,"WARNING: processor type unknown.\n");
-  }
+  a29k_get_processor_type ();
 
   /* Print out some stuff, letting the user now what's going on */
-  printf_filtered("Remote debugging on an %s connect to MiniMon via %s.\n",
-                processor_name[processor_type],dev_name);
+  printf_filtered("Connected to MiniMon via %s.\n", dev_name);
     /* FIXME: can this restriction be removed? */
   printf_filtered("Remote debugging using virtual addresses works only\n");
   printf_filtered("\twhen virtual addresses map 1:1 to physical addresses.\n")
 ;
-  if (processor_type != TYPE_A29050) {
+  if (processor_type != a29k_freeze_mode) {
         fprintf_filtered(stderr,
         "Freeze-mode debugging not available, and can only be done on an A29050.\n");
   }

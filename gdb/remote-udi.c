@@ -68,18 +68,11 @@ static int udi_read_inferior_memory PARAMS ((CORE_ADDR memaddr, char *myaddr,
 					     int len));
 static void download PARAMS ((char *load_arg_string, int from_tty));
 char   CoffFileName[100] = "";
-/*
- * Processor types. 
- */
-#define TYPE_UNKNOWN    0
-#define TYPE_A29000     1
-#define TYPE_A29030     2
-#define TYPE_A29050     3
-static  char *processor_name[] = { "Unknown", "Am29000", "Am29030", "Am29050" };
-static  int processor_type=TYPE_UNKNOWN;
-#define FREEZE_MODE     (read_register(CPS_REGNUM) & 0x400)
-#define USE_SHADOW_PC	((processor_type == TYPE_A29050) && FREEZE_MODE) 
 
+#define FREEZE_MODE     (read_register(CPS_REGNUM) & 0x400)
+#define USE_SHADOW_PC	((processor_type == a29k_freeze_mode) && FREEZE_MODE)
+
+/* FIXME: Replace with `set remotedebug'.  Also, seems not to be used.  */
 #define LLOG_FILE "udi.log"
 #if defined (LOG_FILE)
 FILE *log_file;
@@ -273,31 +266,8 @@ udi_open (name, from_tty)
 	}
     }
 
-  /* Determine the processor revision level */
-  prl = (unsigned int)read_register (CFG_REGNUM) >> 24;
-  if ((prl&0xe0) == 0)
-    {
-      fprintf_filtered (stderr,
-			"Remote debugging Am29000 rev %c\n",'A'+(prl&0x1f));
-      processor_type = TYPE_A29000;
-    }
-  else if ((prl&0xe0) == 0x40)       /* 29030 = 0x4* */
-    {
-      fprintf_filtered (stderr,
-			"Remote debugging Am2903* rev %c\n",'A'+(prl&0x1f));
-      processor_type = TYPE_A29030;
-    }
-  else if ((prl&0xe0) == 0x20)       /* 29050 = 0x2* */
-    {
-      fprintf_filtered (stderr,
-			"Remote debugging Am29050 rev %c\n",'A'+(prl&0x1f));
-      processor_type = TYPE_A29050;
-    }
-  else
-    {
-      processor_type = TYPE_UNKNOWN;
-      fprintf_filtered (stderr,"WARNING: processor type unknown.\n");
-    }
+  a29k_get_processor_type ();
+
   if (UDICreateProcess (&PId))
      fprintf(stderr, "UDICreateProcess() failed\n");
 
@@ -307,9 +277,8 @@ udi_open (name, from_tty)
     error ("UDICapabilities() failed");
   if (from_tty)
     {
-      printf_filtered ("Remote debugging an %s connected via UDI socket,\n\
+      printf_filtered ("Connected via UDI socket,\n\
  DFE-IPC version %x.%x.%x  TIP-IPC version %x.%x.%x  TIP version %x.%x.%x\n %s\n",
-		       processor_name[processor_type],
 		       (DFEIPCId>>8)&0xf, (DFEIPCId>>4)&0xf, DFEIPCId&0xf,
 		       (TIPIPCId>>8)&0xf, (TIPIPCId>>4)&0xf, TIPIPCId&0xf,
 		       (TargetId>>8)&0xf, (TargetId>>4)&0xf, TargetId&0xf,

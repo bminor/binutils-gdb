@@ -8,6 +8,15 @@ Thu Sep 16 12:34:01 1993  Jim Kingdon  (kingdon@cirdan.cygnus.com)
 	* dbxread.c (copy_pending): Deal with END NULL.
 	(process_one_symbol): Add comments about what common_block NULL means.
 
+Wed Sep 15 14:50:26 1993  Jim Kingdon  (kingdon@cirdan.cygnus.com)
+
+	* remote-udi.c, remote-adapt.c, remote-mm.c: Move processor_type
+	to tm-a29k.h and a29k-tdep.c and make it an enum.
+	* a29k-tdep.c (a29k_get_processor_type): New function.  Fix many
+	aspects of how we detected the processor type.
+	* remote-udi.c, remote-adapt.c, remote-mm.c (*_open): Call it
+	rather than figuring out the type ourselves.
+
 Thu Sep 16 12:12:59 1993  Stu Grossman  (grossman at cygnus.com)
 
 	* sparc-stub.c (_trap_low):  Do restore/save sequence after
