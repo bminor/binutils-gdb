@@ -411,6 +411,7 @@ get_filenum (filename, num)
     {
       for (i = 1; i < files_in_use; ++i)
 	if (files[i].dir == dir
+	    && files[i].filename
 	    && strcmp (file, files[i].filename) == 0)
 	  {
 	    last_used = i;
@@ -1089,6 +1090,8 @@ out_file_list ()
       if (files[i].filename == NULL)
 	{
 	  as_bad (_("unassigned file number %ld"), (long) i);
+	  /* Prevent a crash later, particularly for file 1.  */
+	  files[i].filename = "";
 	  continue;
 	}
 
