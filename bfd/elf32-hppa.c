@@ -1300,11 +1300,15 @@ elf32_hppa_bfd_final_link_relocate (howto, input_bfd, output_bfd,
        section.  If it's a code section, then "data pointer relative" makes
        no sense.  In that case we don't adjust the "value", and for 21 bit
        addil instructions, we change the source addend register from %dp to
-       %r0.  */
+       %r0.  
     case R_PARISC_DPREL21L:
       r_field = e_lrsel;
       if (sym_sec->flags & SEC_CODE)
-	insn &= ~0x03e00000;
+	{
+	  if ((insn & 0xfc) >> 26 == 0xa
+	       && (insn & 0x03e00000) >> 21 == 0x1b)
+	    insn &= ~0x03e00000;
+	}
       else
 	value -= elf32_hppa_hash_table (info)->global_value;
       goto do_basic_type_1;
