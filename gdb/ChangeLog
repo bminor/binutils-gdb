@@ -1,6 +1,7 @@
 2001-07-28  Andrew Cagney  <ac131313@redhat.com>
 
 	* MAINTAINERS: Add Orjan Friberg as cris target maintainer.
+	(cris): Set --enable-gdb-build-warnings flag to -w.
 
 2001-07-28  Andrew Cagney  <ac131313@redhat.com>
 
