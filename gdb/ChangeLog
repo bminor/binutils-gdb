@@ -1,3 +1,9 @@
+2003-03-04  Theodore A. Roth  <troth@openavr.org>
+
+	* avr-tdep.c (avr_io_reg_read_command): Fix to handle case when the
+	number of io registers reported by remote target is not a multiple of
+	step.
+
 2003-03-04  David Carlton  <carlton@math.stanford.edu>
 
 	* symtab.c (lookup_partial_symbol): Add linkage_name argument.
