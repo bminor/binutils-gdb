@@ -141,31 +141,28 @@ if [ x${all_targets} = xfalse ]; then
 	case "$vec" in
 	# This list is alphabetized to make it easy to compare
 	# with the two vector lists in targets.c.
-	# Vectors that don't compile on all systems, or aren't finished,
-	# should have a commented out entry here, to show that
-	# it wasn't omitted by mistake.
 	a29kcoff_big_vec)	tb="$tb coff-a29k.o" ;;
 	a_out_adobe_vec)	tb="$tb aout-adobe.o aout32.o stab-syms.o" ;;
-	#aout_mips_big_vec) ;;
+	aout_mips_big_vec)	tb="$tb mipsbsd.o aout32.o stab-syms.o" ;;
 	aout_mips_little_vec)	tb="$tb mipsbsd.o aout32.o stab-syms.o" ;;
 	b_out_vec_big_host)	tb="$tb bout.o aout32.o stab-syms.o" ;;
 	b_out_vec_little_host)	tb="$tb bout.o aout32.o stab-syms.o" ;;
-	#bfd_elf32_big_generic_vec) ;;
-	#bfd_elf32_bigmips_vec) ;;
+	bfd_elf32_big_generic_vec) tb="$tb elf32-gen.o elf32.o elf.o" ;;
+	bfd_elf32_bigmips_vec) tb="$tb elf32-mips.o elf32.o elf.o" ;;
 	bfd_elf32_hppa_vec)	tb="$tb elf32-hppa.o elf32.o elf.o" ;;
 	bfd_elf32_i386_vec)	tb="$tb elf32-i386.o elf32.o elf.o" ;;
 	bfd_elf32_i860_vec)	tb="$tb elf32-i860.o elf32.o elf.o" ;;
-	#bfd_elf32_little_generic_vec) ;;
-	#bfd_elf32_littlemips_vec) ;;
+	bfd_elf32_little_generic_vec) tb="$tb elf32-gen.o elf32.o elf.o" ;;
+	bfd_elf32_littlemips_vec) tb="$tb elf32-mips.o elf32.o elf.o" ;;
 	bfd_elf32_m68k_vec)	tb="$tb elf32-m68k.o elf32.o elf.o" ;;
-	#bfd_elf32_m88k_vec) ;;
+	bfd_elf32_m88k_vec)	tb="$tb elf32-m88k.o elf32.o elf.o" ;;
 	bfd_elf32_sparc_vec)	tb="$tb elf32-sparc.o elf32.o elf.o" ;;
-	#bfd_elf64_big_generic_vec) ;;
-	#bfd_elf64_little_generic_vec) ;;
+	bfd_elf64_big_generic_vec) tb="$tb elf64-gen.o elf64.o elf.o" ;;
+	bfd_elf64_little_generic_vec) tb="$tb elf64-gen.o elf64.o elf.o" ;;
 #	start-sanitize-v9
 	bfd_elf64_sparc_vec)	tb="$tb elf64-sparc.o elf64.o elf.o" ;;
 #	end-sanitize-v9
-	#demo_64_vec) ;;
+	demo_64_vec)		tb="$tb demo64.o aout64.o stab-syms.o" ;;
 	ecoff_big_vec)		tb="$tb coff-mips.o" ;;
 	ecoff_little_vec)	tb="$tb coff-mips.o" ;;
 	ecoffalpha_little_vec)	tb="$tb coff-alpha.o" ;;
@@ -187,15 +184,15 @@ if [ x${all_targets} = xfalse ]; then
 	m68kcoffun_vec)		tb="$tb coff-u68k.o coff-m68k.o" ;;
 	m88kbcs_vec)		tb="$tb coff-m88k.o" ;;
 	newsos3_vec)		tb="$tb newsos3.o aout32.o stab-syms.o" ;;
-	#nlm32_big_generic_vec) ;;
+	nlm32_big_generic_vec)	tb="$tb nlm32-gen.o nlm32.o nlm.o" ;;
 	nlm32_i386_vec)		tb="$tb nlm32-i386.o nlm32.o nlm.o" ;;
-	#nlm32_little_generic_vec) ;;
-	#nlm64_big_generic_vec) ;;
-	#nlm64_little_generic_vec) ;;
+	nlm32_little_generic_vec) tb="$tb nlm32-gen.o nlm32.o nlm.o" ;;
+	nlm64_big_generic_vec) tb="$tb nlm64-gen.o nlm64.o nlm.o" ;;
+	nlm64_little_generic_vec) tb="$tb nlm64-gen.o nlm64.o nlm.o" ;;
 	rs6000coff_vec)		tb="$tb coff-rs6000.o" ;;
 	shcoff_vec)		tb="$tb coff-sh.o reloc16.o" ;;
 	sunos_big_vec)		tb="$tb sunos.o aout32.o stab-syms.o" ;;
-	#tekhex_vec) ;;
+	tekhex_vec)		tb="$tb tekhex.o" ;;
 	we32kcoff_vec)		tb="$tb coff-we32k.o" ;;
 	z8kcoff_vec)		tb="$tb coff-z8k.o reloc16.o" ;;
 
