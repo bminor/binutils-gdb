@@ -181,10 +181,10 @@ arm_linux_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
       if (TYPE_CODE_FLT == typecode && REGISTER_SIZE == len)
 	{
 	  DOUBLEST dblval;
-	  dblval = extract_floating (val, len);
+	  dblval = deprecated_extract_floating (val, len);
 	  len = TARGET_DOUBLE_BIT / TARGET_CHAR_BIT;
 	  val = alloca (len);
-	  store_floating (val, len, dblval);
+	  deprecated_store_floating (val, len, dblval);
 	}
 
       /* If the argument is a pointer to a function, and it is a Thumb
@@ -406,7 +406,7 @@ skip_hurd_resolver (CORE_ADDR pc)
 	= lookup_minimal_symbol ("fixup", NULL, objfile);
 
       if (fixup && SYMBOL_VALUE_ADDRESS (fixup) == pc)
-	return (SAVED_PC_AFTER_CALL (get_current_frame ()));
+	return (DEPRECATED_SAVED_PC_AFTER_CALL (get_current_frame ()));
     }
 
   return 0;
@@ -525,6 +525,8 @@ arm_linux_init_abi (struct gdbarch_info info,
   tdep->arm_breakpoint = arm_linux_arm_le_breakpoint;
   tdep->arm_breakpoint_size = sizeof (arm_linux_arm_le_breakpoint);
 
+  tdep->fp_model = ARM_FLOAT_FPA;
+
   tdep->jb_pc = ARM_LINUX_JB_PC;
   tdep->jb_elt_size = ARM_LINUX_JB_ELEMENT_SIZE;
 
@@ -534,7 +536,7 @@ arm_linux_init_abi (struct gdbarch_info info,
 
   /* The following two overrides shouldn't be needed.  */
   set_gdbarch_deprecated_extract_return_value (gdbarch, arm_linux_extract_return_value);
-  set_gdbarch_push_arguments (gdbarch, arm_linux_push_arguments);
+  set_gdbarch_deprecated_push_arguments (gdbarch, arm_linux_push_arguments);
 
   /* Shared library handling.  */
   set_gdbarch_in_solib_call_trampoline (gdbarch, in_plt_section);

@@ -26,10 +26,10 @@
 
 struct symbol;
 struct symtab;
-struct dictionary;
-struct namespace_info;
+struct block_namespace_info;
 struct using_direct;
 struct obstack;
+struct dictionary;
 
 /* All of the name-scope contours of the program
    are represented by `struct block' objects.
@@ -92,7 +92,7 @@ struct block
 	 this block: using directives and the current namespace
 	 scope.  */
       
-      struct namespace_info *namespace;
+      struct block_namespace_info *namespace;
     }
     cplus_specific;
   }

@@ -1,7 +1,8 @@
 /* Floating point routines for GDB, the GNU debugger.
-   Copyright 1986, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 1998, 1999, 2000, 2001
-   Free Software Foundation, Inc.
+
+   Copyright 1986, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
+   1996, 1997, 1998, 1999, 2000, 2001, 2003 Free Software Foundation,
+   Inc.
 
    This file is part of GDB.
 
@@ -633,6 +634,14 @@ floatformat_from_length (int len)
     return TARGET_DOUBLE_FORMAT;
   else if (len * TARGET_CHAR_BIT == TARGET_LONG_DOUBLE_BIT)
     return TARGET_LONG_DOUBLE_FORMAT;
+  /* On i386 the 'long double' type takes 96 bits,
+     while the real number of used bits is only 80,
+     both in processor and in memory.  
+     The code below accepts the real bit size.  */ 
+  else if ((TARGET_LONG_DOUBLE_FORMAT != NULL) 
+	   && (len * TARGET_CHAR_BIT ==
+               TARGET_LONG_DOUBLE_FORMAT->totalsize))
+    return TARGET_LONG_DOUBLE_FORMAT;
 
   return NULL;
 }
@@ -655,8 +664,8 @@ floatformat_from_type (const struct type *type)
 /* Extract a floating-point number of length LEN from a target-order
    byte-stream at ADDR.  Returns the value as type DOUBLEST.  */
 
-DOUBLEST
-extract_floating (const void *addr, int len)
+static DOUBLEST
+extract_floating_by_length (const void *addr, int len)
 {
   const struct floatformat *fmt = floatformat_from_length (len);
   DOUBLEST val;
@@ -671,11 +680,17 @@ extract_floating (const void *addr, int len)
   return val;
 }
 
+DOUBLEST
+deprecated_extract_floating (const void *addr, int len)
+{
+  return extract_floating_by_length (addr, len);
+}
+
 /* Store VAL as a floating-point number of length LEN to a
    target-order byte-stream at ADDR.  */
 
-void
-store_floating (void *addr, int len, DOUBLEST val)
+static void
+store_floating_by_length (void *addr, int len, DOUBLEST val)
 {
   const struct floatformat *fmt = floatformat_from_length (len);
 
@@ -689,6 +704,12 @@ store_floating (void *addr, int len, DOUBLEST val)
   floatformat_from_doublest (fmt, &val, addr);
 }
 
+void
+deprecated_store_floating (void *addr, int len, DOUBLEST val)
+{
+  store_floating_by_length (addr, len, val);
+}
+
 /* Extract a floating-point number of type TYPE from a target-order
    byte-stream at ADDR.  Returns the value as type DOUBLEST.  */
 
@@ -700,7 +721,9 @@ extract_typed_floating (const void *addr, const struct type *type)
   gdb_assert (TYPE_CODE (type) == TYPE_CODE_FLT);
 
   if (TYPE_FLOATFORMAT (type) == NULL)
-    return extract_floating (addr, TYPE_LENGTH (type));
+    /* Not all code remembers to set the FLOATFORMAT (language
+       specific code? stabs?) so handle that here as a special case.  */
+    return extract_floating_by_length (addr, TYPE_LENGTH (type));
 
   floatformat_to_doublest (TYPE_FLOATFORMAT (type), addr, &retval);
   return retval;
@@ -735,7 +758,9 @@ store_typed_floating (void *addr, const struct type *type, DOUBLEST val)
   memset (addr, 0, TYPE_LENGTH (type));
 
   if (TYPE_FLOATFORMAT (type) == NULL)
-    store_floating (addr, TYPE_LENGTH (type), val);
+    /* Not all code remembers to set the FLOATFORMAT (language
+       specific code? stabs?) so handle that here as a special case.  */
+    store_floating_by_length (addr, TYPE_LENGTH (type), val);
   else
     floatformat_from_doublest (TYPE_FLOATFORMAT (type), &val, addr);
 }

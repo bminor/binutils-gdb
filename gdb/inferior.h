@@ -24,6 +24,10 @@
 #if !defined (INFERIOR_H)
 #define INFERIOR_H 1
 
+struct target_waitstatus;
+struct frame_info;
+struct ui_file;
+struct type;
 struct gdbarch;
 struct regcache;
 
@@ -177,8 +181,6 @@ extern void generic_target_write_pc (CORE_ADDR, ptid_t);
 extern CORE_ADDR read_sp (void);
 
 extern CORE_ADDR generic_target_read_sp (void);
-
-extern void write_sp (CORE_ADDR);
 
 extern void generic_target_write_sp (CORE_ADDR);
 
@@ -392,12 +394,37 @@ extern enum step_over_calls_kind step_over_calls;
 
 extern int step_multi;
 
-/* Nonzero means expecting a trap and caller will handle it themselves.
-   It is used after attach, due to attaching to a process;
-   when running in the shell before the child program has been exec'd;
-   and when running some kinds of remote stuff (FIXME?).  */
+/* Nonzero means expecting a trap and caller will handle it
+   themselves.  It is used when running in the shell before the child
+   program has been exec'd; and when running some kinds of remote
+   stuff (FIXME?).  */
 
-extern int stop_soon_quietly;
+/* It is also used after attach, due to attaching to a process. This
+   is a bit trickier.  When doing an attach, the kernel stops the
+   debuggee with a SIGSTOP.  On newer GNU/Linux kernels (>= 2.5.61)
+   the handling of SIGSTOP for a ptraced process has changed. Earlier
+   versions of the kernel would ignore these SIGSTOPs, while now
+   SIGSTOP is treated like any other signal, i.e. it is not muffled.
+   
+   If the gdb user does a 'continue' after the 'attach', gdb passes
+   the global variable stop_signal (which stores the signal from the
+   attach, SIGSTOP) to the ptrace(PTRACE_CONT,...)  call.  This is
+   problematic, because the kernel doesn't ignore such SIGSTOP
+   now. I.e. it is reported back to gdb, which in turn presents it
+   back to the user.
+ 
+   To avoid the problem, we use STOP_QUIETLY_NO_SIGSTOP, which allows
+   gdb to clear the value of stop_signal after the attach, so that it
+   is not passed back down to the kernel.  */
+
+enum stop_kind
+  {
+    NO_STOP_QUIETLY = 0,
+    STOP_QUIETLY,
+    STOP_QUIETLY_NO_SIGSTOP
+  };
+
+extern enum stop_kind stop_soon;
 
 /* Nonzero if proceed is being used for a "finish" command or a similar
    situation when stop_registers should be saved.  */
@@ -420,52 +447,11 @@ extern int attach_flag;
 #define ON_STACK 1
 #define AT_ENTRY_POINT 4
 
-#if !defined (CALL_DUMMY_ADDRESS)
-#define CALL_DUMMY_ADDRESS() (internal_error (__FILE__, __LINE__, "CALL_DUMMY_ADDRESS"), 0)
-#endif
-#if !defined (CALL_DUMMY_START_OFFSET)
-#define CALL_DUMMY_START_OFFSET (internal_error (__FILE__, __LINE__, "CALL_DUMMY_START_OFFSET"), 0)
-#endif
-#if !defined (CALL_DUMMY_BREAKPOINT_OFFSET)
-#define CALL_DUMMY_BREAKPOINT_OFFSET_P (0)
-#define CALL_DUMMY_BREAKPOINT_OFFSET (internal_error (__FILE__, __LINE__, "CALL_DUMMY_BREAKPOINT_OFFSET"), 0)
-#endif
-#if !defined CALL_DUMMY_BREAKPOINT_OFFSET_P
-#define CALL_DUMMY_BREAKPOINT_OFFSET_P (1)
-#endif
-#if !defined (CALL_DUMMY_LENGTH)
-#define CALL_DUMMY_LENGTH (internal_error (__FILE__, __LINE__, "CALL_DUMMY_LENGTH"), 0)
-#endif
-
-#if defined (CALL_DUMMY_STACK_ADJUST)
-#if !defined (CALL_DUMMY_STACK_ADJUST_P)
-#define CALL_DUMMY_STACK_ADJUST_P (1)
-#endif
-#endif
-#if !defined (CALL_DUMMY_STACK_ADJUST)
-#define CALL_DUMMY_STACK_ADJUST (internal_error (__FILE__, __LINE__, "CALL_DUMMY_STACK_ADJUST"), 0)
-#endif
-#if !defined (CALL_DUMMY_STACK_ADJUST_P)
-#define CALL_DUMMY_STACK_ADJUST_P (0)
-#endif
-
 /* FIXME: cagney/2000-04-17: gdbarch should manage this.  The default
    shouldn't be necessary. */
 
-#if !defined (CALL_DUMMY_P)
-#if defined (CALL_DUMMY)
-#define CALL_DUMMY_P 1
-#else
-#define CALL_DUMMY_P 0
-#endif
-#endif
-
 #if !defined PUSH_DUMMY_FRAME
 #define PUSH_DUMMY_FRAME (internal_error (__FILE__, __LINE__, "PUSH_DUMMY_FRAME"), 0)
-#endif
-
-#if !defined FIX_CALL_DUMMY
-#define FIX_CALL_DUMMY(a1,a2,a3,a4,a5,a6,a7) (internal_error (__FILE__, __LINE__, "FIX_CALL_DUMMY"), 0)
 #endif
 
 #if !defined STORE_STRUCT_RETURN

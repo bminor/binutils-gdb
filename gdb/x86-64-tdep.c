@@ -240,17 +240,6 @@ x86_64_dwarf2_reg_to_regnum (int dw_reg)
   return x86_64_dwarf2gdb_regno_map[dw_reg];
 }
 
-/* This is the variable that is set with "set disassembly-flavour", and
-   its legitimate values.  */
-static const char att_flavour[] = "att";
-static const char intel_flavour[] = "intel";
-static const char *valid_flavours[] = {
-  att_flavour,
-  intel_flavour,
-  NULL
-};
-static const char *disassembly_flavour = att_flavour;
-
 /* Push the return address (pointing to the call dummy) onto the stack
    and return the new value for the stack pointer.  */
 
@@ -471,6 +460,8 @@ classify_argument (struct type *type,
 	  return 2;
 	}
       break;
+    case TYPE_CODE_ENUM:
+    case TYPE_CODE_REF:
     case TYPE_CODE_INT:
     case TYPE_CODE_PTR:
       switch (bytes)
@@ -700,11 +691,17 @@ x86_64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 		  intreg += 2;
 		  break;
 		case X86_64_INTEGERSI_CLASS:
-		  deprecated_write_register_gen (int_parameter_registers[intreg / 2],
-						 VALUE_CONTENTS_ALL (args[i]) + offset);
-		  offset += 8;
-		  intreg++;
-		  break;
+		  {
+		    LONGEST num
+		      = extract_signed_integer (VALUE_CONTENTS_ALL (args[i])
+						+ offset, 4);
+		    regcache_raw_write_signed (current_regcache,
+					       int_parameter_registers[intreg / 2],                                           num);
+
+		    offset += 8;
+		    intreg++;
+		    break;
+		  }
 		case X86_64_SSEDF_CLASS:
 		case X86_64_SSESF_CLASS:
 		case X86_64_SSE_CLASS:
@@ -773,7 +770,7 @@ x86_64_store_return_value (struct type *type, struct regcache *regcache,
 	     floating point format used by the FPU.  This is probably
 	     not exactly how it would happen on the target itself, but
 	     it is the best we can do.  */
-	  val = extract_floating (valbuf, TYPE_LENGTH (type));
+	  val = deprecated_extract_floating (valbuf, TYPE_LENGTH (type));
 	  floatformat_from_doublest (&floatformat_i387_ext, &val, buf);
 	  regcache_cooked_write_part (regcache, FP0_REGNUM,
 			  	      0, FPU_REG_RAW_SIZE, buf);
@@ -820,23 +817,6 @@ x86_64_register_number (const char *name)
 }
 
 
-
-/* We have two flavours of disassembly.  The machinery on this page
-   deals with switching between those.  */
-
-static int
-gdb_print_insn_x86_64 (bfd_vma memaddr, disassemble_info * info)
-{
-  if (disassembly_flavour == att_flavour)
-    return print_insn_i386_att (memaddr, info);
-  else if (disassembly_flavour == intel_flavour)
-    return print_insn_i386_intel (memaddr, info);
-  /* Never reached -- disassembly_flavour is always either att_flavour
-     or intel_flavour.  */
-  internal_error (__FILE__, __LINE__, "failed internal consistency check");
-}
-
-
 /* Store the address of the place in which to copy the structure the
    subroutine will return.  This is called from call_function. */
 void
@@ -851,11 +831,34 @@ x86_64_frameless_function_invocation (struct frame_info *frame)
   return 0;
 }
 
+/* We will handle only functions beginning with:
+   55          pushq %rbp
+   48 89 e5    movq %rsp,%rbp
+   Any function that doesn't start with this sequence
+   will be assumed to have no prologue and thus no valid
+   frame pointer in %rbp.  */
+#define PROLOG_BUFSIZE 4
+int
+x86_64_function_has_prologue (CORE_ADDR pc)
+{
+  int i;
+  unsigned char prolog_expect[PROLOG_BUFSIZE] = { 0x55, 0x48, 0x89, 0xe5 },
+    prolog_buf[PROLOG_BUFSIZE];
+
+  read_memory (pc, (char *) prolog_buf, PROLOG_BUFSIZE);
+
+  /* First check, whether pc points to pushq %rbp, movq %rsp,%rbp.  */
+  for (i = 0; i < PROLOG_BUFSIZE; i++)
+    if (prolog_expect[i] != prolog_buf[i])
+      return 0;		/* ... no, it doesn't. Nothing to skip.  */
+  
+  return 1;
+}
+
 /* If a function with debugging information and known beginning
    is detected, we will return pc of the next line in the source 
    code. With this approach we effectively skip the prolog.  */
 
-#define PROLOG_BUFSIZE 4
 CORE_ADDR
 x86_64_skip_prologue (CORE_ADDR pc)
 {
@@ -863,21 +866,9 @@ x86_64_skip_prologue (CORE_ADDR pc)
   struct symtab_and_line v_sal;
   struct symbol *v_function;
   CORE_ADDR endaddr;
-  unsigned char prolog_buf[PROLOG_BUFSIZE];
 
-  /* We will handle only functions starting with: */
-  static unsigned char prolog_expect[PROLOG_BUFSIZE] =
-  {
-    0x55,			/* pushq %rbp */
-    0x48, 0x89, 0xe5		/* movq %rsp, %rbp */
-  };
-
-  read_memory (pc, (char *) prolog_buf, PROLOG_BUFSIZE);
-
-  /* First check, whether pc points to pushq %rbp, movq %rsp, %rbp.  */
-  for (i = 0; i < PROLOG_BUFSIZE; i++)
-    if (prolog_expect[i] != prolog_buf[i])
-      return pc;		/* ... no, it doesn't.  Nothing to skip.  */
+  if (! x86_64_function_has_prologue (pc))
+    return pc;
 
   /* OK, we have found the prologue and want PC of the first
      non-prologue instruction.  */
@@ -904,13 +895,21 @@ x86_64_skip_prologue (CORE_ADDR pc)
   return pc;
 }
 
-/* Sequence of bytes for breakpoint instruction.  */
-static const unsigned char *
-x86_64_breakpoint_from_pc (CORE_ADDR *pc, int *lenptr)
+static void
+x86_64_save_dummy_frame_tos (CORE_ADDR sp)
 {
-  static unsigned char breakpoint[] = { 0xcc };
-  *lenptr = 1;
-  return breakpoint;
+  /* We must add the size of the return address that is already 
+     put on the stack.  */
+  generic_save_dummy_frame_tos (sp + 
+				TYPE_LENGTH (builtin_type_void_func_ptr));
+}
+
+static struct frame_id
+x86_64_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *frame)
+{
+  CORE_ADDR base;
+  frame_unwind_unsigned_register (frame, SP_REGNUM, &base);
+  return frame_id_build (base, frame_pc_unwind (frame));
 }
 
 void
@@ -975,17 +974,17 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 				       x86_64_register_convert_to_raw);
 
   /* Getting saved registers is handled by unwind information.  */
-  set_gdbarch_get_saved_register (gdbarch, cfi_get_saved_register);
+  set_gdbarch_deprecated_get_saved_register (gdbarch, cfi_get_saved_register);
 
   /* FIXME: kettenis/20021026: Should we set parm_boundary to 64 here?  */
   set_gdbarch_read_fp (gdbarch, cfi_read_fp);
 
   set_gdbarch_extract_return_value (gdbarch, x86_64_extract_return_value);
 
-  set_gdbarch_push_arguments (gdbarch, x86_64_push_arguments);
-  set_gdbarch_push_return_address (gdbarch, x86_64_push_return_address);
-  set_gdbarch_pop_frame (gdbarch, x86_64_pop_frame);
-  set_gdbarch_store_struct_return (gdbarch, x86_64_store_struct_return);
+  set_gdbarch_deprecated_push_arguments (gdbarch, x86_64_push_arguments);
+  set_gdbarch_deprecated_push_return_address (gdbarch, x86_64_push_return_address);
+  set_gdbarch_deprecated_pop_frame (gdbarch, x86_64_pop_frame);
+  set_gdbarch_deprecated_store_struct_return (gdbarch, x86_64_store_struct_return);
   set_gdbarch_store_return_value (gdbarch, x86_64_store_return_value);
   /* Override, since this is handled by x86_64_extract_return_value.  */
   set_gdbarch_extract_struct_value_address (gdbarch, NULL);
@@ -994,13 +993,13 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, x86_64_frame_init_saved_regs);
   set_gdbarch_skip_prologue (gdbarch, x86_64_skip_prologue);
 
-  set_gdbarch_frame_chain (gdbarch, x86_64_linux_frame_chain);
+  set_gdbarch_deprecated_frame_chain (gdbarch, x86_64_linux_frame_chain);
   set_gdbarch_frameless_function_invocation (gdbarch,
 					 x86_64_frameless_function_invocation);
   /* FIXME: kettenis/20021026: These two are GNU/Linux-specific and
      should be moved elsewhere.  */
-  set_gdbarch_frame_saved_pc (gdbarch, x86_64_linux_frame_saved_pc);
-  set_gdbarch_saved_pc_after_call (gdbarch, x86_64_linux_saved_pc_after_call);
+  set_gdbarch_deprecated_frame_saved_pc (gdbarch, x86_64_linux_frame_saved_pc);
+  set_gdbarch_deprecated_saved_pc_after_call (gdbarch, x86_64_linux_saved_pc_after_call);
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   /* FIXME: kettenis/20021026: This one is GNU/Linux-specific too.  */
   set_gdbarch_pc_in_sigtramp (gdbarch, x86_64_linux_in_sigtramp);
@@ -1023,6 +1022,10 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
      since all supported x86-64 targets are ELF, but that might change
      in the future.  */
   set_gdbarch_in_solib_call_trampoline (gdbarch, in_plt_section);
+  
+  /* Dummy frame helper functions.  */
+  set_gdbarch_save_dummy_frame_tos (gdbarch, x86_64_save_dummy_frame_tos);
+  set_gdbarch_unwind_dummy_id (gdbarch, x86_64_unwind_dummy_id);
 }
 
 void

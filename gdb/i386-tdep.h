@@ -22,6 +22,10 @@
 #ifndef I386_TDEP_H
 #define I386_TDEP_H
 
+struct reggroup;
+struct gdbarch;
+struct frame_info;
+
 /* GDB's i386 target supports both the 32-bit Intel Architecture
    (IA-32) and the 64-bit AMD x86-64 architecture.  Internally it uses
    a similar register layout for both.

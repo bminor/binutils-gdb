@@ -1012,6 +1012,8 @@ enum gdb_osabi
   GDB_OSABI_ARM_APCS,
   GDB_OSABI_QNXNTO,
 
+  GDB_OSABI_CYGWIN,
+
   GDB_OSABI_INVALID		/* keep this last */
 };
 

@@ -117,6 +117,7 @@ extern int hppa_require_detach (int, int);
 
 /* The PA can watch any number of locations (generic routines already check
    that all intermediates are in watchable memory locations). */
+extern int hppa_can_use_hw_watchpoint (int type, int cnt, int ot);
 #define TARGET_CAN_USE_HARDWARE_WATCHPOINT(type, cnt, ot) \
         hppa_can_use_hw_watchpoint(type, cnt, ot)
 
@@ -198,9 +199,13 @@ extern void hppa_enable_page_protection_events (int);
 extern void hppa_disable_page_protection_events (int);
 
 /* Use these macros for watchpoint insertion/deletion.  */
+extern int hppa_insert_hw_watchpoint (int pid, CORE_ADDR start, LONGEST len,
+				      int type);
 #define target_insert_watchpoint(addr, len, type) \
         hppa_insert_hw_watchpoint (PIDGET (inferior_ptid), addr, (LONGEST)(len), type)
 
+extern int hppa_remove_hw_watchpoint (int pid, CORE_ADDR start, LONGEST len,
+				      int type);
 #define target_remove_watchpoint(addr, len, type) \
         hppa_remove_hw_watchpoint (PIDGET (inferior_ptid), addr, (LONGEST)(len), type)
 
@@ -265,3 +270,5 @@ extern int hppa_resume_execd_vforking_child_to_get_parent_vfork (void);
 #define MAY_FOLLOW_EXEC (1)
 
 #define USE_THREAD_STEP_NEEDED (1)
+
+#include "infttrace.h" /* For parent_attach_all.  */

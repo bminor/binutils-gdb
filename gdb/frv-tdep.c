@@ -35,18 +35,13 @@ static gdbarch_register_virtual_size_ftype frv_register_virtual_size;
 static gdbarch_register_virtual_type_ftype frv_register_virtual_type;
 static gdbarch_register_byte_ftype frv_register_byte;
 static gdbarch_breakpoint_from_pc_ftype frv_breakpoint_from_pc;
-static gdbarch_frame_chain_ftype frv_frame_chain;
-static gdbarch_frame_saved_pc_ftype frv_frame_saved_pc;
 static gdbarch_skip_prologue_ftype frv_skip_prologue;
 static gdbarch_deprecated_extract_return_value_ftype frv_extract_return_value;
 static gdbarch_deprecated_extract_struct_value_address_ftype frv_extract_struct_value_address;
 static gdbarch_use_struct_convention_ftype frv_use_struct_convention;
 static gdbarch_frameless_function_invocation_ftype frv_frameless_function_invocation;
 static gdbarch_init_extra_frame_info_ftype stupid_useless_init_extra_frame_info;
-static gdbarch_store_struct_return_ftype frv_store_struct_return;
 static gdbarch_push_arguments_ftype frv_push_arguments;
-static gdbarch_push_return_address_ftype frv_push_return_address;
-static gdbarch_pop_frame_ftype frv_pop_frame;
 static gdbarch_saved_pc_after_call_ftype frv_saved_pc_after_call;
 
 static void frv_pop_frame_regular (struct frame_info *frame);
@@ -1078,30 +1073,27 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_frameless_function_invocation (gdbarch, frv_frameless_function_invocation);
 
-  set_gdbarch_saved_pc_after_call (gdbarch, frv_saved_pc_after_call);
+  set_gdbarch_deprecated_saved_pc_after_call (gdbarch, frv_saved_pc_after_call);
 
-  set_gdbarch_frame_chain (gdbarch, frv_frame_chain);
-  set_gdbarch_frame_saved_pc (gdbarch, frv_frame_saved_pc);
+  set_gdbarch_deprecated_frame_chain (gdbarch, frv_frame_chain);
+  set_gdbarch_deprecated_frame_saved_pc (gdbarch, frv_frame_saved_pc);
 
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, frv_frame_init_saved_regs);
 
   set_gdbarch_use_struct_convention (gdbarch, frv_use_struct_convention);
   set_gdbarch_deprecated_extract_return_value (gdbarch, frv_extract_return_value);
 
-  set_gdbarch_store_struct_return (gdbarch, frv_store_struct_return);
+  set_gdbarch_deprecated_store_struct_return (gdbarch, frv_store_struct_return);
   set_gdbarch_deprecated_store_return_value (gdbarch, frv_store_return_value);
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, frv_extract_struct_value_address);
 
   /* Settings for calling functions in the inferior.  */
-  set_gdbarch_call_dummy_length (gdbarch, 0);
-  set_gdbarch_push_arguments (gdbarch, frv_push_arguments);
-  set_gdbarch_push_return_address (gdbarch, frv_push_return_address);
-  set_gdbarch_pop_frame (gdbarch, frv_pop_frame);
+  set_gdbarch_deprecated_push_arguments (gdbarch, frv_push_arguments);
+  set_gdbarch_deprecated_push_return_address (gdbarch, frv_push_return_address);
+  set_gdbarch_deprecated_pop_frame (gdbarch, frv_pop_frame);
 
-  set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_call_dummy_words (gdbarch, frv_call_dummy_words);
   set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof (frv_call_dummy_words));
-  set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
   set_gdbarch_deprecated_init_extra_frame_info (gdbarch, frv_init_extra_frame_info);
 
   /* Settings that should be unnecessary.  */
@@ -1111,14 +1103,9 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
   set_gdbarch_read_fp (gdbarch, generic_target_read_fp);
   set_gdbarch_read_sp (gdbarch, generic_target_read_sp);
-  set_gdbarch_write_sp (gdbarch, generic_target_write_sp);
+  set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
 
-  set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
-  set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
-  set_gdbarch_call_dummy_start_offset (gdbarch, 0);
   set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_at_entry_point);
-  set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
-  set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
 
   set_gdbarch_decr_pc_after_break (gdbarch, 0);
   set_gdbarch_function_start_offset (gdbarch, 0);

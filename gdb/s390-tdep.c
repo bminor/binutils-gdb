@@ -775,7 +775,7 @@ s390_function_start (struct frame_info *fi)
   if (get_frame_extra_info (fi) && get_frame_extra_info (fi)->initialised)
     function_start = get_frame_extra_info (fi)->function_start;
   else if (get_frame_pc (fi))
-    function_start = get_pc_function_start (get_frame_pc (fi));
+    function_start = get_frame_func (fi);
   return function_start;
 }
 
@@ -1221,7 +1221,7 @@ s390_pop_frame_regular (struct frame_info *frame)
 {
   int regnum;
 
-  write_register (S390_PC_REGNUM, FRAME_SAVED_PC (frame));
+  write_register (S390_PC_REGNUM, DEPRECATED_FRAME_SAVED_PC (frame));
 
   /* Restore any saved registers.  */
   if (get_frame_saved_regs (frame))
@@ -1808,19 +1808,19 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_frame_args_address (gdbarch, s390_frame_args_address);
-  set_gdbarch_frame_chain (gdbarch, s390_frame_chain);
+  set_gdbarch_deprecated_frame_chain (gdbarch, s390_frame_chain);
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, s390_frame_init_saved_regs);
   set_gdbarch_frame_locals_address (gdbarch, s390_frame_args_address);
   /* We can't do this */
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
-  set_gdbarch_store_struct_return (gdbarch, s390_store_struct_return);
+  set_gdbarch_deprecated_store_struct_return (gdbarch, s390_store_struct_return);
   set_gdbarch_deprecated_extract_return_value (gdbarch, s390_extract_return_value);
   set_gdbarch_deprecated_store_return_value (gdbarch, s390_store_return_value);
   /* Amount PC must be decremented by after a breakpoint.
      This is often the number of bytes in BREAKPOINT
      but not always.  */
   set_gdbarch_decr_pc_after_break (gdbarch, 2);
-  set_gdbarch_pop_frame (gdbarch, s390_pop_frame);
+  set_gdbarch_deprecated_pop_frame (gdbarch, s390_pop_frame);
   /* Stack grows downward.  */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
   /* Offset from address of function to start of its code.
@@ -1839,11 +1839,11 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frameless_function_invocation (gdbarch,
 					     s390_frameless_function_invocation);
   /* Return saved PC from a frame */
-  set_gdbarch_frame_saved_pc (gdbarch, s390_frame_saved_pc);
-  /* FRAME_CHAIN takes a frame's nominal address
-     and produces the frame's chain-pointer. */
-  set_gdbarch_frame_chain (gdbarch, s390_frame_chain);
-  set_gdbarch_saved_pc_after_call (gdbarch, s390_saved_pc_after_call);
+  set_gdbarch_deprecated_frame_saved_pc (gdbarch, s390_frame_saved_pc);
+  /* DEPRECATED_FRAME_CHAIN takes a frame's nominal address and
+     produces the frame's chain-pointer. */
+  set_gdbarch_deprecated_frame_chain (gdbarch, s390_frame_chain);
+  set_gdbarch_deprecated_saved_pc_after_call (gdbarch, s390_saved_pc_after_call);
   set_gdbarch_register_byte (gdbarch, s390_register_byte);
   set_gdbarch_pc_regnum (gdbarch, S390_PC_REGNUM);
   set_gdbarch_sp_regnum (gdbarch, S390_SP_REGNUM);
@@ -1861,18 +1861,11 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     (gdbarch, generic_cannot_extract_struct_value_address);
 
   /* Parameters for inferior function calls.  */
-  set_gdbarch_call_dummy_p (gdbarch, 1);
-  set_gdbarch_call_dummy_length (gdbarch, 0);
-  set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
-  set_gdbarch_call_dummy_start_offset (gdbarch, 0);
   set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_at_entry_point);
-  set_gdbarch_push_arguments (gdbarch, s390_push_arguments);
+  set_gdbarch_deprecated_push_arguments (gdbarch, s390_push_arguments);
   set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
-  set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
-  set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
-  set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
-  set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
-  set_gdbarch_push_return_address (gdbarch, s390_push_return_address);
+  set_gdbarch_deprecated_push_return_address (gdbarch,
+                                              s390_push_return_address);
   set_gdbarch_sizeof_call_dummy_words (gdbarch,
                                        sizeof (s390_call_dummy_words));
   set_gdbarch_call_dummy_words (gdbarch, s390_call_dummy_words);
@@ -1907,6 +1900,9 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
                                                     s390_address_class_name_to_type_flags);
       break;
     }
+
+  /* Should be using push_dummy_call.  */
+  set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
 
   return gdbarch;
 }

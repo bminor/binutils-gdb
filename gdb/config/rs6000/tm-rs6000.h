@@ -21,6 +21,8 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+struct frame_info;
+
 #define GDB_MULTI_ARCH 1
 
 /* Minimum possible text address in AIX */
@@ -79,8 +81,8 @@ extern void aix_process_linenos (void);
 /* Define other aspects of the stack frame.  */
 
 #define DEPRECATED_INIT_FRAME_PC_FIRST(fromleaf, prev) \
-  (fromleaf ? SAVED_PC_AFTER_CALL (prev->next) : \
-	      prev->next ? FRAME_SAVED_PC (prev->next) : read_pc ())
+  (fromleaf ? DEPRECATED_SAVED_PC_AFTER_CALL (prev->next) : \
+	      prev->next ? DEPRECATED_FRAME_SAVED_PC (prev->next) : read_pc ())
 /* NOTE: cagney/2002-12-08: Add local declaration of
    init_frame_pc_noop() because it isn't possible to include
    "arch-utils.h" here.  Not too bad as this entire file is going away

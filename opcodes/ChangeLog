@@ -1,3 +1,68 @@
+2003-04-15  Rohit Kumar Srivastava <rohits@kpitcummins.com>
+
+	* h8500-opc.c: Replace occurrances of 'Hitachi' with 'Renesas'.
+
+2003-04-07  James E Wilson  <wilson@tuliptree.org>
+
+	* ia64-ic.tbl (fr-readers): Add mem-writers-fp.
+	* ia64-asmtab.c: Regenerate.
+
+2003-04-08  Alexandre Oliva  <aoliva@redhat.com>
+
+	* mips-dis.c (mips_gpr_names_newabi): Reverted previous patch.
+
+2003-04-07  Alexandre Oliva  <aoliva@redhat.com>
+
+	* mips-dis.c (mips_gpr_names_newabi): $12-$15 are named $t4-$t7.
+
+2003-04-04  Svein E. Seldal  <Svein.Seldal@solidas.com>
+
+	* tic4x-dis.c: Namespace cleanup. Replace s/c4x/tic4x and
+	s/c3x/tic3x/
+
+2003-04-01  Nick Clifton  <nickc@redhat.com>
+
+	* arm-dis.c: Remove presence of (r) and (tm) symbols.
+	* arm-opc.h: Remove presence of (r) and (tm) symbols.
+
+2003-03-25  Stan Cox   <scox@redhat.com>
+	    Nick Clifton  <nickc@redhat.com>
+	    
+	Contribute support for Intel's iWMMXt chip - an	ARM variant:
+
+	* arm-dis.c (regnames): Add iWMMXt register names.
+	(set_iwmmxt_regnames): New function.
+	(print_insn_arm): Handle iWMMXt formatters.
+	* arm-opc.h: Document iWMMXt formatters.
+	(arm_opcod): Add iWMMXt instructions.
+
+2003-03-22  Doug Evans  <dje@sebabeach.org>
+
+	* i386-dis.c (dis386): Recognize icebp (0xf1).
+
+2003-03-21  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* s390-dis.c (init_disasm): Rename S390_OPCODE_ESAME to
+	S390_OPCODE_ZARCH.
+	(print_insn_s390): Use new modes field of s390_opcodes.
+	* s390-mkopc.c (ARCHBITS_ESAONLY, ARCHBITS_ESA, ARCHBITS_ESAME): Remove.
+	(s390_opcode_mode_val, s390_opcode_cpu_val): New enums.
+	(struct op_struct): Remove archbits. Add mode_bits and min_cpu.
+	(insertOpcode): Replace archbits by min_cpu and mode_bits.
+	(dumpTable): Write mode_bits and min_cpu instead of archbits.
+	(main): Adapt to new format in s390-opcode.txt.
+	* s390-opc.c (s390_opformats): Replace archbits by min_cpu and
+	mode_bits.
+	* s390-opc.txt: Replace archbits by min_cpu and mode_bits.
+
+2003-03-17  Nick Clifton  <nickc@redhat.com>
+
+	* ppc-opc.c: Fix formatting.  Update copyright date.
+
+2003-03-14  Daniel Jacobowitz  <drow@mvista.com>
+
+	* ppc-opc.c (powerpc_opcodes): Readd tlbre for PPC403.
+
 2003-02-25  Alan Modra  <amodra@bigpond.net.au>
 
 	* hppa-dis.c: Formatting.

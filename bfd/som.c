@@ -1,6 +1,6 @@
 /* bfd back-end for HP PA-RISC SOM objects.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002
+   2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    Contributed by the Center for Software Science at the
@@ -38,7 +38,7 @@
 #include <machine/reg.h>
 #include <sys/file.h>
 
-/* Magic not defined in standard HP-UX header files until 8.0 */
+/* Magic not defined in standard HP-UX header files until 8.0.  */
 
 #ifndef CPU_PA_RISC1_0
 #define CPU_PA_RISC1_0 0x20B
@@ -148,7 +148,7 @@ struct som_misc_symbol_info {
   unsigned int secondary_def;
 };
 
-/* Forward declarations */
+/* Forward declarations.  */
 
 static bfd_boolean som_mkobject
   PARAMS ((bfd *));
@@ -220,7 +220,6 @@ static int som_reloc_queue_find
   PARAMS ((unsigned char *, unsigned int, struct reloc_queue *));
 static unsigned char * try_prev_fixup
   PARAMS ((bfd *, int *, unsigned char *, unsigned int, struct reloc_queue *));
-
 static unsigned char * som_reloc_skip
   PARAMS ((bfd *, unsigned int, unsigned char *, unsigned int *,
 	   struct reloc_queue *));
@@ -267,9 +266,8 @@ static int som_decode_symclass
   PARAMS ((asymbol *));
 static bfd_boolean som_bfd_count_ar_symbols
   PARAMS ((bfd *, struct lst_header *, symindex *));
-
 static bfd_boolean som_bfd_fill_in_ar_symbols
-  PARAMS ((bfd *, struct lst_header *, carsym **syms));
+  PARAMS ((bfd *, struct lst_header *, carsym **));
 static bfd_boolean som_slurp_armap
   PARAMS ((bfd *));
 static bfd_boolean som_write_armap
@@ -659,7 +657,7 @@ static const struct fixup_format som_fixup_formats[256] = {
   /* R_TRANSLATED */
   {  0, "" },			/* 0xce */
   /* R_AUX_UNWIND */
-  {  0,"Sd=Vf=Ef=" },	       /* 0xcf */
+  {  0,"Sd=Ve=Ee=" },	       /* 0xcf */
   /* R_COMP1 */
   {  0, "Ob=" },		/* 0xd0 */
   /* R_COMP2 */
@@ -684,7 +682,7 @@ static const struct fixup_format som_fixup_formats[256] = {
   /* R_LTP_OVERRIDE */
   {  0, "" },			/* 0xdc */
   /* R_COMMENT */
-  {  0, "Ob=Ve=" },		/* 0xdd */
+  {  0, "Ob=Vf=" },		/* 0xdd */
   /* R_RESERVED */
   {  0, "" },			/* 0xde */
   {  0, "" },			/* 0xdf */
@@ -2328,7 +2326,6 @@ som_prep_headers (abfd)
 
   if (abfd->flags & (EXEC_P | DYNAMIC))
     {
-
       /* Make and attach an exec header to the BFD.  */
       amt = sizeof (struct som_exec_auxhdr);
       obj_som_exec_hdr (abfd) =
@@ -5353,7 +5350,7 @@ som_get_section_contents (abfd, section, location, offset, count)
   if ((bfd_size_type) (offset+count) > section->_raw_size
       || bfd_seek (abfd, (file_ptr) (section->filepos + offset), SEEK_SET) != 0
       || bfd_bread (location, count, abfd) != count)
-    return FALSE; /* on error */
+    return FALSE; /* On error.  */
   return TRUE;
 }
 
@@ -6369,7 +6366,7 @@ const bfd_target som_vec = {
    | SEC_ALLOC | SEC_LOAD | SEC_RELOC),		/* section flags */
 
 /* leading_symbol_char: is the first char of a user symbol
-   predictable, and if so what is it */
+   predictable, and if so what is it.  */
   0,
   '/',				/* ar_pad_char */
   14,				/* ar_max_namelen */

@@ -40,9 +40,9 @@ struct frame_id;
    is probably to define CALL_DUMMY to be empty, CALL_DUMMY_LENGTH to
    zero, and CALL_DUMMY_LOCATION to AT_ENTRY.  Then you must remember
    to define PUSH_RETURN_ADDRESS, because no call instruction will be
-   being executed by the target.  Also FRAME_CHAIN_VALID as
-   generic_{file,func}_frame_chain_valid and FIX_CALL_DUMMY as
-   generic_fix_call_dummy.  */
+   being executed by the target.  Also DEPRECATED_FRAME_CHAIN_VALID as
+   generic_{file,func}_frame_chain_valid and do not set
+   FIX_CALL_DUMMY.  */
 
 /* If the PC falls in a dummy frame, return a dummy frame
    unwinder.  */

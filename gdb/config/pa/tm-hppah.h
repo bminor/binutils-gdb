@@ -21,6 +21,8 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+struct frame_info;
+
 /* The solib hooks are not really designed to have a list of hook
    and handler routines.  So until we clean up those interfaces you
    either get SOM shared libraries or HP's unusual PA64 ELF shared
@@ -46,9 +48,8 @@ extern void hppa_hpux_frame_base_before_sigtramp (struct frame_info *fi,
 #define FRAME_BASE_BEFORE_SIGTRAMP(FRAME, TMP) \
   hppa_hpux_frame_base_before_sigtramp (FRAME, TMP)
 
-struct frame_saved_regs;
 extern void hppa_hpux_frame_find_saved_regs_in_sigtramp
-              (struct frame_info *fi, struct frame_saved_regs *fsr);
+              (struct frame_info *fi, CORE_ADDR *fsr);
 #define FRAME_FIND_SAVED_REGS_IN_SIGTRAMP(FRAME, FSR) \
   hppa_hpux_frame_find_saved_regs_in_sigtramp (FRAME, FSR)
 

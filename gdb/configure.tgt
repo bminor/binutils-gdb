@@ -73,17 +73,17 @@ h8300-*-*)		gdb_target=h8300 ;;
 
 frv-*-*)		gdb_target=frv ;;
 
-hppa*-*-bsd*)		gdb_target=hppabsd ;;
-hppa*-*-pro*)		gdb_target=hppapro ;;
+# OBSOLETE hppa*-*-bsd*)		gdb_target=hppabsd ;;
+# OBSOLETE hppa*-*-pro*)		gdb_target=hppapro ;;
 hppa*64*-*-hpux11*)	gdb_target=hppa64 ;;
 hppa*-*-hpux*)		gdb_target=hppahpux ;;
 hppa*-*-hiux*)		gdb_target=hppahpux ;;
-hppa*-*-osf*)		gdb_target=hppaosf ;;
+# OBSOLETE hppa*-*-osf*)		gdb_target=hppaosf ;;
 hppa*-*-*)		gdb_target=hppa ;;
 
-i[3456]86-sequent-bsd*)	gdb_target=symmetry ;;
-i[3456]86-sequent-sysv4*) gdb_target=ptx4 ;;
-i[3456]86-sequent-sysv*) gdb_target=ptx ;;
+# OBSOLETE i[3456]86-sequent-bsd*)	gdb_target=symmetry ;;
+# OBSOLETE i[3456]86-sequent-sysv4*) gdb_target=ptx4 ;;
+# OBSOLETE i[3456]86-sequent-sysv*) gdb_target=ptx ;;
 i[3456]86-ncr-*)	gdb_target=ncr3000 ;;
 i[3456]86-*-bsd*)	gdb_target=i386bsd ;;
 i[3456]86-*-netbsd*)	gdb_target=nbsd ;;
@@ -172,7 +172,7 @@ mips*-*-linux*)		gdb_target=linux
 			build_gdbserver=yes
 			;;
 mips*-*-netbsd*)	gdb_target=nbsd ;;
-mips*-*-mach3*)		gdb_target=mipsm3 ;;
+# OBSOLETE mips*-*-mach3*)		gdb_target=mipsm3 ;;
 mips*-*-sysv4*)		gdb_target=mipsv4 ;;
 mips*-*-sysv*)		gdb_target=bigmips ;;
 mips*-*-riscos*)	gdb_target=bigmips ;;
@@ -229,9 +229,9 @@ sparc-*-sunos4*)	gdb_target=sun4os4 ;;
 sparc-*-sunos5*)	gdb_target=sun4sol2 ;;
 sparc-*-vxworks*)	gdb_target=vxsparc ;;
 sparc-*-*)		gdb_target=sun4os4 ;;
-sparclet-*-*)		gdb_target=sparclet;;
-sparclite-*-*)		gdb_target=sparclite ;;
-sparc86x-*-*)		gdb_target=sparclite ;;
+# OBSOLETE sparclet-*-*)		gdb_target=sparclet;;
+# OBSOLETE sparclite-*-*)		gdb_target=sparclite ;;
+# OBSOLETE sparc86x-*-*)		gdb_target=sparclite ;;
 # It's not clear what the right solution for "v8plus" systems is yet.
 # For now, stick with sparc-sun-solaris2 since that's what config.guess
 # should return.  Work is still needed to get gdb to print the 64 bit

@@ -1,3 +1,152 @@
+2003-04-15  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.c++/maint.exp: New file.
+
+2003-04-14  Elena Zannoni  <ezannoni@redhat.com>
+
+	* gdb.threads/schedlock.c: Change type of thread function argument
+	to long, to avoid warnings on 64-bit platforms.
+
+2003-04-14  Elena Zannoni  <ezannoni@redhat.com>
+
+        * gdb.base/attach.exp: Add new message from ptrace in case of
+        attaching to nonexistent process.
+	
+2003-04-11  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.c++/derivation.exp, gdb.c++/overload.exp,
+	gdb.c++/userdef.cc: Place comments on the lines to which the
+	marker function might return.
+	* gdb.c++/derivation.exp, gdb.c++/overload.exp,
+	gdb.c++/userdef.exp: Look for those comments to check that we've
+	returned to the right place, instead of checking line numbers.
+
+2003-04-11  Elena Zannoni  <ezannoni@redhat.com>
+
+        * gdb.threads/pthreads.exp (test_startup): When setting a breakpoint
+        match on sourcefile name, instead of directory name.
+
+2003-04-10  Elena Zannoni  <ezannoni@redhat.com>
+
+	* gdb.base/completion.exp: Use string_to_regexp to match the 
+	working directory name.
+
+2003-04-09  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.c++/derivation.exp, gdb.c++/overload.exp,
+	gdb.c++/userdef.exp: If GDB fails to restore the selected frame
+	after an inferior function call, report the failure, but allow the
+	test to continue.
+
+2003-04-05  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* gdb.base/break.exp: marker4() is defined at line 46 when compiled
+	with -DPROTOTYPES.
+
+2003-04-05  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* gdb.base/break.exp: Revert last patch.
+
+2003-04-04  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* gdb.base/break.exp: marker4() is defined at line 46 when compiled
+	with -DPROTOTYPES.
+
+2003-04-02  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/callfuncs.exp: Make "print add" messages unique.
+	* gdb.base/ending-run.exp: Put spaces around "breakpoint" to stop
+	matching directories by the name breakpoint.
+	* gdb.base/pointers.exp: Make "ptype pppC" message consistent.
+	Make "continue to marker1" consistent.
+	* gdb.base/call-rt-st.exp: Make "finish out from loop_count"
+	message consistent.
+	* lib/gdb.exp: Put "the program is no longer running", and "the
+	program exited" in parenthesis.
+	* lib/mi-support.exp: Ditto.
+	
+2003-04-02  Bob Rossi  <bob_rossi@cox.net>
+    
+	* gdb.mi/mi-file.exp: New file for -file-list-exec-source-file.
+
+2003-03-29  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/sizeof.c (main): Print the value of '\377'.
+	* gdb.base/sizeof.exp: Check the sign of '\377'.
+
+2003-03-27  Michael Chastain  <mec@shout.net>
+
+	* gdb.base/gdb1090.exp: New file.
+	* gdb.base/gdb1090.cc: New file.
+
+2003-03-27  J. Brobecker  <brobecker@gnat.com>
+
+	* gdb.gdb/observer.exp: New regression test.
+
+2003-03-27  Michael Chastain  <mec@shout.net>
+
+	* gdb.base/list.exp: Remove setup_xfail_format for DWARF 1.
+	* gdb.base/ptype.exp: Likewise.
+
+2003-03-27  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.c++/casts.exp: Fix startup to run also on embedded targets.
+
+2003-03-26  Michael Chastain  <mec@shout.net>
+
+	* gdb.base/ptype.exp: Actually use some typedef'd types.
+
+2003-03-21  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* gdb.asm/asm-source.exp: Set asm-arch for m6811 and m6812.
+	* gdb.asm/m68hc11.inc: New file for HC11/HC12 macros.
+
+2003-03-20  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.base/default.exp: Fix regular expression.
+
+2003-03-20  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.base/args.exp: Fix regular expression.
+
+2003-03-20  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.base/help.exp: Allow Win32 child process.
+
+2003-03-20  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.base/ending-run.exp: Check for Cygwin specific wrapper function
+	when stepping out of main().
+
+2003-03-20  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.base/default.exp: Check for win32 specific message when calling
+	"run" without executable.
+
+2003-03-20  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.base/args.exp: Expect .exe in output.
+
+2003-03-20  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.asm/asm-source.exp: Add appropriate --entry linker flag for
+	Cygwin native.
+
+2003-03-17  Andrew Cagney  <cagney@redhat.com>
+
+	From Elena Zannoni <ezannoni@redhat.com>.  Test e500 abi and
+	vector registes.
+	* gdb.arch/e500-regs.c, gdb.arch/e500-regs.exp: New files.
+	* gdb.arch/e500-abi.c, gdb.arch/e500-abi.exp: New files.
+
+2003-03-17  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.base/watchpoint.exp (test_watchpoint_and_breakpoint): New
+	test, for PR breakpoints/38.
+	Call test_watchpoint_and_breakpoint.
+	* gdb.base/watchpoint.c (func3): New function.
+	(main): Call func3.
+
 2003-03-06  David Carlton  <carlton@math.stanford.edu>
 
 	* gdb.c++/templates.exp (do_tests): Make expressions for 'ptype

@@ -25,7 +25,9 @@
 #define SYMTAB_H 1
 
 /* Opaque declarations.  */
-
+struct ui_file;
+struct frame_info;
+struct symbol;
 struct obstack;
 struct objfile;
 struct block;
@@ -156,10 +158,10 @@ extern void symbol_init_language_specific (struct general_symbol_info *symbol,
 extern void symbol_init_demangled_name (struct general_symbol_info *symbol,
 					struct obstack *obstack);
 
-#define SYMBOL_SET_NAMES(symbol,name,len,objfile) \
-  symbol_set_names (&(symbol)->ginfo, name, len, objfile)
+#define SYMBOL_SET_NAMES(symbol,linkage_name,len,objfile) \
+  symbol_set_names (&(symbol)->ginfo, linkage_name, len, objfile)
 extern void symbol_set_names (struct general_symbol_info *symbol,
-			      const char *name, int len,
+			      const char *linkage_name, int len,
 			      struct objfile *objfile);
 
 /* Now come lots of name accessor macros.  Short version as to when to
@@ -1243,6 +1245,10 @@ void maintenance_print_psymbols (char *, int);
 void maintenance_print_msymbols (char *, int);
 
 void maintenance_print_objfiles (char *, int);
+
+void maintenance_list_symtabs (char *, int);
+
+void maintenance_list_psymtabs (char *, int);
 
 void maintenance_check_symtabs (char *, int);
 

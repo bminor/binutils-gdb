@@ -30,6 +30,10 @@
 #include "gdb_assert.h"
 #include "frame-unwind.h"
 
+static void dummy_frame_this_id (struct frame_info *next_frame,
+				 void **this_prologue_cache,
+				 struct frame_id *this_id);
+
 /* Dummy frame.  This saves the processor state just prior to setting
    up the inferior function call.  Older targets save the registers
    on the target stack (but that really slows down function calls).  */
@@ -102,14 +106,6 @@ find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp)
     }
 
   return NULL;
-}
-
-struct dummy_frame *
-cached_find_dummy_frame (struct frame_info *frame, void **cache)
-{
-  if ((*cache) == NULL)
-    (*cache) = find_dummy_frame (get_frame_pc (frame), get_frame_base (frame));
-  return (*cache);
 }
 
 struct regcache *
@@ -282,37 +278,6 @@ discard_innermost_dummy (struct dummy_frame **stack)
   xfree (tbd);
 }
 
-/* Function: dummy_frame_pop.  Restore the machine state from a saved
-   dummy stack frame. */
-
-static void
-dummy_frame_pop (struct frame_info *fi, void **cache,
-		 struct regcache *regcache)
-{
-  struct dummy_frame *dummy = cached_find_dummy_frame (fi, cache);
-
-  /* If it isn't, what are we even doing here?  */
-  gdb_assert (get_frame_type (fi) == DUMMY_FRAME);
-
-  if (dummy == NULL)
-    error ("Can't pop dummy frame!");
-
-  /* Discard all dummy frames up-to but not including this one.  */
-  while (dummy_frame_stack != dummy)
-    discard_innermost_dummy (&dummy_frame_stack);
-
-  /* Restore this one.  */
-  regcache_cpy (regcache, dummy->regcache);
-  flush_cached_frames ();
-
-  /* Now discard it.  */
-  discard_innermost_dummy (&dummy_frame_stack);
-
-  /* Note: target changed would be better.  Registers, memory and
-     frame are all invalid.  */
-  flush_cached_frames ();
-}
-
 void
 generic_pop_dummy_frame (void)
 {
@@ -329,27 +294,23 @@ generic_pop_dummy_frame (void)
   discard_innermost_dummy (&dummy_frame_stack);
 }
 
-/* Function: fix_call_dummy
-   Stub function.  Generic dummy frames typically do not need to fix
-   the frame being created */
-
-void
-generic_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
-			struct value **args, struct type *type, int gcc_p)
-{
-  return;
-}
-
 /* Given a call-dummy dummy-frame, return the registers.  Here the
    register value is taken from the local copy of the register buffer.  */
 
 static void
-dummy_frame_register_unwind (struct frame_info *frame, void **cache,
-			     int regnum, int *optimized,
-			     enum lval_type *lvalp, CORE_ADDR *addrp,
-			     int *realnum, void *bufferp)
+dummy_frame_prev_register (struct frame_info *next_frame,
+			   void **this_prologue_cache,
+			   int regnum, int *optimized,
+			   enum lval_type *lvalp, CORE_ADDR *addrp,
+			   int *realnum, void *bufferp)
 {
-  struct dummy_frame *dummy = cached_find_dummy_frame (frame, cache);
+  struct dummy_frame *dummy;
+  struct frame_id id;
+
+  /* Call the ID method which, if at all possible, will set the
+     prologue cache.  */
+  dummy_frame_this_id (next_frame, this_prologue_cache, &id);
+  dummy = (*this_prologue_cache);
   gdb_assert (dummy != NULL);
 
   /* Describe the register's location.  Generic dummy frames always
@@ -370,47 +331,81 @@ dummy_frame_register_unwind (struct frame_info *frame, void **cache,
     }
 }
 
-/* Assuming that FRAME is a dummy, return the resume address for the
-   previous frame.  */
-
-static CORE_ADDR
-dummy_frame_pc_unwind (struct frame_info *frame,
-		       void **cache)
-{
-  struct dummy_frame *dummy = cached_find_dummy_frame (frame, cache);
-  /* Oops!  In a dummy-frame but can't find the stack dummy.  Pretend
-     that the frame doesn't unwind.  Should this function instead
-     return a has-no-caller indication?  */
-  if (dummy == NULL)
-    return 0;
-  return dummy->pc;
-}
-
-
-/* Assuming that FRAME is a dummy, return the ID of the calling frame
-   (the frame that the dummy has the saved state of).  */
+/* Assuming that THIS frame is a dummy (remember, the NEXT and not
+   THIS frame is passed in), return the ID of THIS frame.  That ID is
+   determined by examining the NEXT frame's unwound registers using
+   the method unwind_dummy_id().  As a side effect, THIS dummy frame's
+   dummy cache is located and and saved in THIS_PROLOGUE_CACHE.  */
 
 static void
-dummy_frame_id_unwind (struct frame_info *frame,
-		       void **cache,
-		       struct frame_id *id)
+dummy_frame_this_id (struct frame_info *next_frame,
+		     void **this_prologue_cache,
+		     struct frame_id *this_id)
 {
-  struct dummy_frame *dummy = cached_find_dummy_frame (frame, cache);
-  /* Oops!  In a dummy-frame but can't find the stack dummy.  Pretend
-     that the frame doesn't unwind.  Should this function instead
-     return a has-no-caller indication?  */
-  if (dummy == NULL)
-    (*id) = null_frame_id;
+  struct dummy_frame *dummy = (*this_prologue_cache);
+  if (dummy != NULL)
+    {
+      (*this_id) = dummy->id;
+      return;
+    }
+  /* When unwinding a normal frame, the stack structure is determined
+     by analyzing the frame's function's code (be it using brute force
+     prologue analysis, or the dwarf2 CFI).  In the case of a dummy
+     frame, that simply isn't possible.  The The PC is either the
+     program entry point, or some random address on the stack.  Trying
+     to use that PC to apply standard frame ID unwind techniques is
+     just asking for trouble.  */
+  if (gdbarch_unwind_dummy_id_p (current_gdbarch))
+    {
+      /* Assume call_function_by_hand(), via SAVE_DUMMY_FRAME_TOS,
+	 previously saved the dummy frame's ID.  Things only work if
+	 the two return the same value.  */
+      gdb_assert (SAVE_DUMMY_FRAME_TOS_P ());
+      /* Use an architecture specific method to extract the prev's
+	 dummy ID from the next frame.  Note that this method uses
+	 frame_register_unwind to obtain the register values needed to
+	 determine the dummy frame's ID.  */
+      (*this_id) = gdbarch_unwind_dummy_id (current_gdbarch, next_frame);
+    }
+  else if (frame_relative_level (next_frame) < 0)
+    {
+      /* We're unwinding a sentinel frame, the PC of which is pointing
+	 at a stack dummy.  Fake up the dummy frame's ID using the
+	 same sequence as is found a traditional unwinder.  Once all
+	 architectures supply the unwind_dummy_id method, this code
+	 can go away.  */
+      (*this_id) = frame_id_build (read_fp (), read_pc ());
+    }
+  else if (legacy_frame_p (current_gdbarch)
+	   && get_prev_frame (next_frame))
+    {
+      /* Things are looking seriously grim!  Assume that the legacy
+         get_prev_frame code has already created THIS frame and linked
+         it in to the frame chain (a pretty bold assumption), extract
+         the ID from THIS base / pc.  */
+      (*this_id) = frame_id_build (get_frame_base (get_prev_frame (next_frame)),
+				   get_frame_pc (get_prev_frame (next_frame)));
+    }
   else
-    (*id) = dummy->id;
+    {
+      /* Outch!  We're not trying to find the innermost frame's ID yet
+	 we're trying to unwind to a dummy.  The architecture must
+	 provide the unwind_dummy_id() method.  Abandon the unwind
+	 process but only after first warning the user.  */
+      internal_warning (__FILE__, __LINE__,
+			"Missing unwind_dummy_id architecture method");
+      (*this_id) = null_frame_id;
+      return;
+    }
+  (*this_prologue_cache) = find_dummy_frame ((*this_id).code_addr,
+					     (*this_id).stack_addr);
 }
 
 static struct frame_unwind dummy_frame_unwind =
 {
-  dummy_frame_pop,
-  dummy_frame_pc_unwind,
-  dummy_frame_id_unwind,
-  dummy_frame_register_unwind
+  DUMMY_FRAME,
+  dummy_frame_this_id,
+  dummy_frame_prev_register
 };
 
 const struct frame_unwind *

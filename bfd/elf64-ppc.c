@@ -4518,6 +4518,10 @@ ppc64_elf_adjust_dynamic_symbol (info, h)
 		  || h->weakdef->root.type == bfd_link_hash_defweak);
       h->root.u.def.section = h->weakdef->root.u.def.section;
       h->root.u.def.value = h->weakdef->root.u.def.value;
+      if (ELIMINATE_COPY_RELOCS)
+	h->elf_link_hash_flags
+	  = ((h->elf_link_hash_flags & ~ELF_LINK_NON_GOT_REF)
+	     | (h->weakdef->elf_link_hash_flags & ELF_LINK_NON_GOT_REF));
       return TRUE;
     }
 
@@ -7634,8 +7638,8 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 				       + off);
 		    if (tls_type & (TLS_LD | TLS_GD))
 		      {
-			outrel.r_info = ELF64_R_INFO (indx, R_PPC64_DTPMOD64);
 			outrel.r_addend = 0;
+			outrel.r_info = ELF64_R_INFO (indx, R_PPC64_DTPMOD64);
 			if (tls_type == (TLS_TLS | TLS_GD))
 			  {
 			    loc = htab->srelgot->contents;
@@ -7643,9 +7647,9 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 				    * sizeof (Elf64_External_Rela));
 			    bfd_elf64_swap_reloca_out (output_bfd,
 						       &outrel, loc);
+			    outrel.r_offset += 8;
 			    outrel.r_info
 			      = ELF64_R_INFO (indx, R_PPC64_DTPREL64);
-			    outrel.r_offset += 8;
 			  }
 		      }
 		    else if (tls_type == (TLS_TLS | TLS_DTPREL))
@@ -7658,7 +7662,11 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		      outrel.r_info = ELF64_R_INFO (indx, R_PPC64_GLOB_DAT);
 		    outrel.r_addend = rel->r_addend;
 		    if (indx == 0)
-		      outrel.r_addend += relocation;
+		      {
+			outrel.r_addend += relocation;
+			if (tls_type & (TLS_GD | TLS_DTPREL | TLS_TPREL))
+			  outrel.r_addend -= htab->tls_sec->vma;
+		      }
 		    loc = htab->srelgot->contents;
 		    loc += (htab->srelgot->reloc_count++
 			    * sizeof (Elf64_External_Rela));
@@ -7670,21 +7678,22 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		else
 		  {
 		    relocation += rel->r_addend;
-		    if (tls_type != 0)
+		    if (tls_type == (TLS_TLS | TLS_LD))
+		      relocation = 1;
+		    else if (tls_type != 0)
 		      {
 			relocation -= htab->tls_sec->vma + DTP_OFFSET;
-			if ((tls_type & TLS_TPREL) != 0)
+			if (tls_type == (TLS_TLS | TLS_TPREL))
 			  relocation += DTP_OFFSET - TP_OFFSET;
+
+			if (tls_type == (TLS_TLS | TLS_GD))
+			  {
+			    bfd_put_64 (output_bfd, relocation,
+					htab->sgot->contents + off + 8);
+			    relocation = 1;
+			  }
 		      }
 
-		    if ((tls_type & TLS_GD) != 0)
-		      {
-			bfd_put_64 (output_bfd, relocation,
-				    htab->sgot->contents + off + 8);
-			relocation = 1;
-		      }
-		    else if (tls_type == (TLS_TLS | TLS_LD))
-		      relocation = 1;
 		    bfd_put_64 (output_bfd, relocation,
 				htab->sgot->contents + off);
 		  }
@@ -7793,6 +7802,11 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  addend -= htab->tls_sec->vma + DTP_OFFSET;
 	  break;
 
+	case R_PPC64_DTPMOD64:
+	  relocation = 1;
+	  addend = 0;
+	  goto dodyn;
+
 	case R_PPC64_TPREL64:
 	  addend -= htab->tls_sec->vma + TP_OFFSET;
 	  goto dodyn;
@@ -7803,7 +7817,6 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	  /* Relocations that may need to be propagated if this is a
 	     dynamic object.  */
-	case R_PPC64_DTPMOD64:
 	case R_PPC64_REL30:
 	case R_PPC64_REL32:
 	case R_PPC64_REL64:
@@ -7981,7 +7994,7 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  /* These ones haven't been implemented yet.  */
 
 	  (*_bfd_error_handler)
-	    (_("%s: Relocation %s is not supported for symbol %s."),
+	    (_("%s: relocation %s is not supported for symbol %s."),
 	     bfd_archive_filename (input_bfd),
 	     ppc64_elf_howto_table[(int) r_type]->name, sym_name);
 
@@ -8023,8 +8036,9 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	     'sec' would be NULL, and we should leave the symbol
 	     alone (it will be set to zero elsewhere in the link).  */
 	  if (sec != NULL)
-	    /* Add 0x10000 if sign bit in 0:15 is set.  */
-	    addend += ((relocation + addend) & 0x8000) << 1;
+	    /* Add 0x10000 if sign bit in 0:15 is set.
+	       Bits 0:15 are not used.  */
+	    addend += 0x8000;
 	  break;
 
 	case R_PPC64_ADDR16_DS:
@@ -8095,10 +8109,11 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0))
 	{
 	  (*_bfd_error_handler)
-	    (_("%s(%s+0x%lx): unresolvable relocation against symbol `%s'"),
+	    (_("%s(%s+0x%lx): unresolvable %s relocation against symbol `%s'"),
 	     bfd_archive_filename (input_bfd),
 	     bfd_get_section_name (input_bfd, input_section),
 	     (long) rel->r_offset,
+	     ppc64_elf_howto_table[(int) r_type]->name,
 	     h->root.root.string);
 	  ret = FALSE;
 	}
@@ -8140,10 +8155,13 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  else
 	    {
 	      (*_bfd_error_handler)
-		(_("%s(%s+0x%lx): reloc against `%s': error %d"),
+		(_("%s(%s+0x%lx): %s reloc against `%s': error %d"),
 		 bfd_archive_filename (input_bfd),
 		 bfd_get_section_name (input_bfd, input_section),
-		 (long) rel->r_offset, sym_name, (int) r);
+		 (long) rel->r_offset,
+		 ppc64_elf_howto_table[(int) r_type]->name,
+		 sym_name,
+		 (int) r);
 	      ret = FALSE;
 	    }
 	}

@@ -25,6 +25,7 @@
 #include <asm/ptrace.h>
 #include <sys/ptrace.h>
 #include <asm/processor.h>
+#include <asm/types.h>
 #include <sys/procfs.h>
 #include <sys/user.h>
 #include <value.h>

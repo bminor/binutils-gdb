@@ -68,6 +68,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define ARCH_vax
 #define ARCH_w65
 #define ARCH_xstormy16
+#define ARCH_xtensa
 #define ARCH_z8k
 #define ARCH_frv
 #define ARCH_iq2000
@@ -341,6 +342,11 @@ disassembler (abfd)
 #ifdef ARCH_xstormy16
     case bfd_arch_xstormy16:
       disassemble = print_insn_xstormy16;
+      break;
+#endif
+#ifdef ARCH_xtensa
+    case bfd_arch_xtensa:
+      disassemble = print_insn_xtensa;
       break;
 #endif
 #ifdef ARCH_z8k

@@ -226,7 +226,7 @@ coff_real_object_p (abfd, nscns, internal_f, internal_a)
   if (! bfd_coff_set_arch_mach_hook (abfd, (PTR) internal_f))
     goto fail;
 
-  /* Now copy data as required; construct all asections etc */
+  /* Now copy data as required; construct all asections etc.  */
   if (nscns != 0)
     {
       unsigned int i;
@@ -240,8 +240,6 @@ coff_real_object_p (abfd, nscns, internal_f, internal_a)
 	    goto fail;
 	}
     }
-
-  /*  make_abs_section (abfd); */
 
   return abfd->xvec;
 

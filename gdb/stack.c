@@ -217,7 +217,7 @@ print_frame_info (struct frame_info *fi, int level, int source, int args)
       if (ui_out_is_mi_like_p (uiout))
         {
           annotate_frame_address ();
-          ui_out_field_core_addr (uiout, "addr", fi->pc);
+          ui_out_field_core_addr (uiout, "addr", get_frame_pc (fi));
           annotate_frame_address_end ();
         }
 
@@ -601,16 +601,6 @@ parse_frame_specification (char *frame_exp)
   /* NOTREACHED */
 }
 
-/* FRAME_ARGS_ADDRESS_CORRECT is just like FRAME_ARGS_ADDRESS except
-   that if it is unsure about the answer, it returns 0
-   instead of guessing (this happens on the VAX and i960, for example).
-
-   On most machines, we never have to guess about the args address,
-   so FRAME_ARGS_ADDRESS{,_CORRECT} are the same.  */
-#if !defined (FRAME_ARGS_ADDRESS_CORRECT)
-#define FRAME_ARGS_ADDRESS_CORRECT FRAME_ARGS_ADDRESS
-#endif
-
 /* Print verbosely the selected frame or the frame at address ADDR.
    This means absolutely all information in the frame is printed.  */
 
@@ -744,7 +734,7 @@ frame_info (char *addr_exp, int from_tty)
 
   {
     /* Address of the argument list for this frame, or 0.  */
-    CORE_ADDR arg_list = FRAME_ARGS_ADDRESS_CORRECT (fi);
+    CORE_ADDR arg_list = get_frame_args_address (fi);
     /* Number of args for this frame, or -1 if unknown.  */
     int numargs;
 
@@ -771,7 +761,7 @@ frame_info (char *addr_exp, int from_tty)
   }
   {
     /* Address of the local variables for this frame, or 0.  */
-    CORE_ADDR arg_list = FRAME_LOCALS_ADDRESS (fi);
+    CORE_ADDR arg_list = get_frame_locals_address (fi);
 
     if (arg_list == 0)
       printf_filtered (" Locals at unknown address,");
@@ -1641,9 +1631,13 @@ return_command (char *retval_exp, int from_tty)
      that.  */
 
   /* Do the real work.  Pop until the specified frame is current.  We
-     use this method because the deprecated_selected_frame is not valid after
-     a POP_FRAME.  The pc comparison makes this work even if the
-     selected frame shares its fp with another frame.  */
+     use this method because the deprecated_selected_frame is not
+     valid after a frame_pop().  The pc comparison makes this work
+     even if the selected frame shares its fp with another frame.  */
+
+  /* FIXME: cagney/32003-03-12: This code should use frame_id_eq().
+     Unfortunatly, that function doesn't yet include the PC in any
+     frame ID comparison.  */
 
   while (selected_frame_addr != get_frame_base (frame = get_current_frame ())
 	 || selected_frame_pc != get_frame_pc (frame))

@@ -73,7 +73,9 @@
 		      (long) CIA);
 
   TRACE_ALU_INPUT2 (x, y);
-  product = (unsigned_p ? x * y : EXTEND32 (x) * EXTEND32 (y));
+  product = (unsigned_p
+	     ? V8_4 (x, 1) * V8_4 (y, 1)
+	     : EXTEND32 (x) * EXTEND32 (y));
   result = (subtract_p ? lhs - product : lhs + product);
   if (saturate_p)
     {

@@ -199,10 +199,10 @@ extern int sparc_intreg_size (void);
    stack rather than with the other registers, and this causes hair
    and confusion in places like pop_frame.  It might be better to
    remove the ins and locals from `registers', make sure that
-   get_saved_register can get them from the stack (even in the
-   innermost frame), and make this the way to access them.  For the
-   frame pointer we would do that via TARGET_READ_FP.  On the other
-   hand, that is likely to be confusing or worse for flat frames.  */
+   frame_register() can get them from the stack (even in the innermost
+   frame), and make this the way to access them.  For the frame
+   pointer we would do that via TARGET_READ_FP.  On the other hand,
+   that is likely to be confusing or worse for flat frames.  */
 
 #define REGISTER_BYTES (32*4+32*4+8*4)
 
@@ -258,7 +258,7 @@ extern CORE_ADDR sparc_skip_prologue (CORE_ADDR);
    the new frame is not set up until the new function executes
    some instructions.  */
 
-#define SAVED_PC_AFTER_CALL(FRAME) PC_ADJUST (read_register (RP_REGNUM))
+#define DEPRECATED_SAVED_PC_AFTER_CALL(FRAME) PC_ADJUST (read_register (RP_REGNUM))
 
 /* Stack grows downward.  */
 
@@ -392,8 +392,8 @@ extern CORE_ADDR sparc_pc_adjust (CORE_ADDR);
 #define CANNOT_STORE_REGISTER(regno) ((regno) == G0_REGNUM)
 
 /*
- * FRAME_CHAIN and FRAME_INFO definitions, collected here for convenience.
- */
+ * DEPRECATED_FRAME_CHAIN and FRAME_INFO definitions, collected here
+ * for convenience.  */
 
 #if !defined (GDB_MULTI_ARCH) || (GDB_MULTI_ARCH == 0)
 /*
@@ -403,58 +403,11 @@ extern CORE_ADDR sparc_pc_adjust (CORE_ADDR);
 /* Describe the pointer in each stack frame to the previous stack frame
    (its caller).  */
 
-/* FRAME_CHAIN takes a frame's nominal address
-   and produces the frame's chain-pointer. */
+/* DEPRECATED_FRAME_CHAIN takes a frame's nominal address and produces
+   the frame's chain-pointer. */
 
-/* In the case of the Sun 4, the frame-chain's nominal address
-   is held in the frame pointer register.
-
-   On the Sun4, the frame (in %fp) is %sp for the previous frame.
-   From the previous frame's %sp, we can find the previous frame's
-   %fp: it is in the save area just above the previous frame's %sp.
-
-   If we are setting up an arbitrary frame, we'll need to know where
-   it ends.  Hence the following.  This part of the frame cache
-   structure should be checked before it is assumed that this frame's
-   bottom is in the stack pointer.
-
-   If there isn't a frame below this one, the bottom of this frame is
-   in the stack pointer.
-
-   If there is a frame below this one, and the frame pointers are
-   identical, it's a leaf frame and the bottoms are the same also.
-
-   Otherwise the bottom of this frame is the top of the next frame.
-
-   The bottom field is misnamed, since it might imply that memory from
-   bottom to frame contains this frame.  That need not be true if
-   stack frames are allocated in different segments (e.g. some on a
-   stack, some on a heap in the data segment).
-
-   GCC 2.6 and later can generate ``flat register window'' code that
-   makes frames by explicitly saving those registers that need to be
-   saved.  %i7 is used as the frame pointer, and the frame is laid out
-   so that flat and non-flat calls can be intermixed freely within a
-   program.  Unfortunately for GDB, this means it must detect and
-   record the flatness of frames.
-
-   Since the prologue in a flat frame also tells us where fp and pc
-   have been stashed (the frame is of variable size, so their location
-   is not fixed), it's convenient to record them in the frame info.  */
-
-#define EXTRA_FRAME_INFO \
-  CORE_ADDR bottom;      \
-  int in_prologue;       \
-  int flat;              \
-  /* Following fields only relevant for flat frames.  */ \
-  CORE_ADDR pc_addr;     \
-  CORE_ADDR fp_addr;     \
-  /* Add this to ->frame to get the value of the stack pointer at the */ \
-  /* time of the register saves.  */ \
-  int sp_offset;
-
-/* We need to override GET_SAVED_REGISTER so that we can deal with the
-   way outs change into ins in different frames.  */
+/* We need to override DEPRECATED_GET_SAVED_REGISTER so that we can
+   deal with the way outs change into ins in different frames.  */
 
 void sparc_get_saved_register (char *raw_buffer,
 			       int *optimized,
@@ -462,7 +415,7 @@ void sparc_get_saved_register (char *raw_buffer,
 			       struct frame_info *frame,
 			       int regnum, enum lval_type *lvalp);
 
-#define GET_SAVED_REGISTER(RAW_BUFFER, OPTIMIZED, ADDRP, FRAME, REGNUM, LVAL) \
+#define DEPRECATED_GET_SAVED_REGISTER(RAW_BUFFER, OPTIMIZED, ADDRP, FRAME, REGNUM, LVAL) \
      sparc_get_saved_register (RAW_BUFFER, OPTIMIZED, ADDRP, \
 			       FRAME, REGNUM, LVAL)
 
@@ -472,7 +425,7 @@ void sparc_get_saved_register (char *raw_buffer,
      sparc_init_extra_frame_info (FROMLEAF, FCI)
 extern void sparc_init_extra_frame_info (int, struct frame_info *);
 
-#define FRAME_CHAIN(THISFRAME) (sparc_frame_chain (THISFRAME))
+#define DEPRECATED_FRAME_CHAIN(THISFRAME) (sparc_frame_chain (THISFRAME))
 extern CORE_ADDR sparc_frame_chain (struct frame_info *);
 
 /* A macro that tells us whether the function invocation represented
@@ -484,7 +437,7 @@ extern CORE_ADDR sparc_frame_chain (struct frame_info *);
 
 /* Where is the PC for a specific frame */
 
-#define FRAME_SAVED_PC(FRAME) sparc_frame_saved_pc (FRAME)
+#define DEPRECATED_FRAME_SAVED_PC(FRAME) sparc_frame_saved_pc (FRAME)
 extern CORE_ADDR sparc_frame_saved_pc (struct frame_info *);
 
 /* If the argument is on the stack, it will be here.  */
@@ -518,8 +471,8 @@ extern void sparc_print_extra_frame_info (struct frame_info *);
 extern CORE_ADDR init_frame_pc_noop (int fromleaf, struct frame_info *prev);
 #define	DEPRECATED_INIT_FRAME_PC(FROMLEAF, PREV)	(init_frame_pc_noop (FROMLEAF, PREV))
 #define DEPRECATED_INIT_FRAME_PC_FIRST(FROMLEAF, PREV) \
-  ((FROMLEAF) ? SAVED_PC_AFTER_CALL ((PREV)->next) : \
-	      (PREV)->next ? FRAME_SAVED_PC ((PREV)->next) : read_pc ())
+  ((FROMLEAF) ? DEPRECATED_SAVED_PC_AFTER_CALL ((PREV)->next) : \
+	      (PREV)->next ? DEPRECATED_FRAME_SAVED_PC ((PREV)->next) : read_pc ())
 
 /* Define other aspects of the stack frame.  */
 
@@ -649,7 +602,7 @@ extern CORE_ADDR init_frame_pc_noop (int fromleaf, struct frame_info *prev);
 
 #define CALL_DUMMY_BREAKPOINT_OFFSET (CALL_DUMMY_START_OFFSET + 0x30)
 
-#define CALL_DUMMY_STACK_ADJUST 68
+#define DEPRECATED_CALL_DUMMY_STACK_ADJUST 68
 
 /* Call dummy method (eg. on stack, at entry point, etc.) */
 
@@ -683,12 +636,12 @@ void sparc_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun,
 /* Push an empty stack frame, to record the current PC, etc.  */
 
 #define DEPRECATED_PUSH_DUMMY_FRAME	sparc_push_dummy_frame ()
-#define POP_FRAME		sparc_pop_frame ()
+#define DEPRECATED_POP_FRAME		sparc_pop_frame ()
 
 void sparc_push_dummy_frame (void);
 void sparc_pop_frame (void);
 
-#define PUSH_ARGUMENTS(NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR) \
+#define DEPRECATED_PUSH_ARGUMENTS(NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR) \
      sparc32_push_arguments (NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR)
 
 extern CORE_ADDR sparc32_push_arguments (int, struct value **, CORE_ADDR, int,
@@ -756,3 +709,4 @@ extern int deferred_stores;
 
 #define TM_PRINT_INSN_MACH bfd_mach_sparc
 
+#define DEPRECATED_EXTRA_STACK_ALIGNMENT_NEEDED 1

@@ -22,6 +22,9 @@
 #if !defined (BUILDSYM_H)
 #define BUILDSYM_H 1
 
+struct objfile;
+struct symbol;
+
 /* This module provides definitions used for creating and adding to
    the symbol table.  These routines are called from various symbol-
    file-reading routines.
@@ -84,18 +87,6 @@ EXTERN unsigned char processing_gcc_compilation;
    compatible.  */
 
 EXTERN unsigned char processing_acc_compilation;
-
-/* When set, the file that we're processing seems to have debugging
-   info for C++ namespaces, so buildsym.c shouldn't try to guess
-   namespace info itself.  */
-
-EXTERN unsigned char processing_has_namespace_info;
-
-/* If processing_has_namespace_info is nonzero, this string should
-   contain the name of the current prefix (namespaces plus classes).
-   The string is temporary; copy it if you need it.  */
-
-EXTERN const char *processing_current_prefix;
 
 /* Count symbols as they are processed, for error messages.  */
 
@@ -240,9 +231,6 @@ extern void add_symbol_to_list (struct symbol *symbol,
 
 extern struct symbol *find_symbol_in_list (struct pending *list,
 					   char *name, int length);
-
-extern void add_using_directive (const char *name, unsigned int outer_length,
-				 unsigned int inner_length);
 
 extern void finish_block (struct symbol *symbol,
 			  struct pending **listhead,

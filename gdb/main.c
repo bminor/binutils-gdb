@@ -570,11 +570,7 @@ extern int gdbtk_test (char *);
     /* Find it.  */
     struct interp *interp = interp_lookup (interpreter_p);
     if (interp == NULL)
-      {
-        fprintf_unfiltered (gdb_stderr, "Interpreter `%s' unrecognized.\n",
-                            interpreter_p);
-        exit (1);
-      }
+      error ("Interpreter `%s' unrecognized", interpreter_p);
     /* Install it.  */
     if (!interp_set (interp))
       {
@@ -815,7 +811,9 @@ gdb_main (struct captured_main_args *args)
 {
   use_windows = args->use_windows;
   catch_errors (captured_main, args, "", RETURN_MASK_ALL);
-  return 0;
+  /* The only way to end up here is by an error (normal exit is
+     handled by quit_force()), hence always return an error status.  */
+  return 1;
 }
 
 

@@ -1,7 +1,8 @@
 /* Helper routines for C++ support in GDB.
    Copyright 2002, 2003 Free Software Foundation, Inc.
 
-   Contributed by MontaVista Software and Stanford University.
+   Contributed by MontaVista Software.
+   Namespace support contributed by David Carlton.
 
    This file is part of GDB.
 
@@ -26,6 +27,7 @@
 /* Opaque declarations.  */
 
 struct obstack;
+struct block;
 struct symbol;
 
 /* This struct is designed to store data from using directives.  It
@@ -41,6 +43,9 @@ struct using_direct
   struct using_direct *next;
 };
 
+
+/* Functions from cp-support.c.  */
+
 extern char *class_name_from_physname (const char *physname);
 
 extern char *method_name_from_physname (const char *physname);
@@ -48,14 +53,6 @@ extern char *method_name_from_physname (const char *physname);
 extern unsigned int cp_find_first_component (const char *name);
 
 extern unsigned int cp_entire_prefix_len (const char *name);
-
-extern struct using_direct *cp_add_using (const char *name,
-					  unsigned int inner_len,
-					  unsigned int outer_len,
-					  struct using_direct *next);
-
-extern struct using_direct *cp_copy_usings (struct using_direct *using,
-					    struct obstack *obstack);
 
 extern struct symbol *cp_check_namespace_symbol (const char *name, int len);
 
@@ -65,8 +62,30 @@ extern void cp_check_possible_namespace_symbols (const char *name);
 
 extern struct symbol *cp_lookup_possible_namespace_symbol (const char *name);
 
+extern char *cp_func_name (const char *full_name);
+
+
+/* Functions/variables from cp-namespace.c.  */
+
+extern unsigned char processing_has_namespace_info;
+
+extern const char *processing_current_prefix;
+
 extern int cp_is_anonymous (const char *namespace);
 
-extern char *cp_func_name (const char *full_name);
+extern void cp_add_using_directive (const char *name,
+				    unsigned int outer_length,
+				    unsigned int inner_length);
+
+extern void cp_initialize_namespace ();
+
+extern void cp_finalize_namespace (struct block *static_block,
+				   struct obstack *obstack);
+
+extern void cp_set_block_scope (const struct symbol *symbol,
+				struct block *block,
+				struct obstack *obstack);
+
+extern void cp_scan_for_anonymous_namespaces (const struct symbol *symbol);
 
 #endif /* CP_SUPPORT_H */

@@ -25,6 +25,8 @@
 #ifndef CP_ABI_H_
 #define CP_ABI_H_ 1
 
+struct fn_field;
+struct type;
 struct value;
 
 /* The functions here that attempt to determine what sort of thing a

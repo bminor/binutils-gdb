@@ -461,6 +461,8 @@ const struct language_defn pascal_language_defn =
   pascal_print_type,		/* Print a type using appropriate syntax */
   pascal_val_print,		/* Print a value using appropriate syntax */
   pascal_value_print,		/* Print a top-level value */
+  NULL,				/* Language specific skip_trampoline */
+  NULL,				/* Language specific symbol demangler */
   {"", "%", "b", ""},		/* Binary format info */
   {"0%lo", "0", "o", ""},	/* Octal format info */
   {"%ld", "", "d", ""},		/* Decimal format info */

@@ -54,7 +54,6 @@ static gdbarch_register_convertible_ftype alpha_register_convertible;
 static gdbarch_register_convert_to_virtual_ftype
     alpha_register_convert_to_virtual;
 static gdbarch_register_convert_to_raw_ftype alpha_register_convert_to_raw;
-static gdbarch_store_struct_return_ftype alpha_store_struct_return;
 static gdbarch_deprecated_extract_return_value_ftype alpha_extract_return_value;
 static gdbarch_deprecated_extract_struct_value_address_ftype
     alpha_extract_struct_value_address;
@@ -66,12 +65,7 @@ static gdbarch_frame_args_address_ftype alpha_frame_args_address;
 static gdbarch_frame_locals_address_ftype alpha_frame_locals_address;
 
 static gdbarch_skip_prologue_ftype alpha_skip_prologue;
-static gdbarch_saved_pc_after_call_ftype alpha_saved_pc_after_call;
-static gdbarch_frame_chain_ftype alpha_frame_chain;
-static gdbarch_frame_saved_pc_ftype alpha_frame_saved_pc;
 
-static gdbarch_push_arguments_ftype alpha_push_arguments;
-static gdbarch_pop_frame_ftype alpha_pop_frame;
 static gdbarch_fix_call_dummy_ftype alpha_fix_call_dummy;
 
 static gdbarch_get_longjmp_target_ftype alpha_get_longjmp_target;
@@ -458,8 +452,10 @@ alpha_frame_init_saved_regs (struct frame_info *fi)
 static CORE_ADDR
 alpha_init_frame_pc_first (int fromleaf, struct frame_info *prev)
 {
-  return (fromleaf ? SAVED_PC_AFTER_CALL (get_next_frame (prev)) 
-	  : get_next_frame (prev) ? FRAME_SAVED_PC (get_next_frame (prev))
+  return (fromleaf
+	  ? DEPRECATED_SAVED_PC_AFTER_CALL (get_next_frame (prev)) 
+	  : get_next_frame (prev)
+	  ? DEPRECATED_FRAME_SAVED_PC (get_next_frame (prev))
 	  : read_pc ());
 }
 
@@ -559,10 +555,10 @@ heuristic_proc_start (CORE_ADDR pc)
     if (start_pc < fence)
       {
 	/* It's not clear to me why we reach this point when
-	   stop_soon_quietly, but with this test, at least we
+	   stop_soon, but with this test, at least we
 	   don't print out warnings for every child forked (eg, on
 	   decstation).  22apr93 rich@cygnus.com.  */
-	if (!stop_soon_quietly)
+	if (stop_soon == NO_STOP_QUIETLY)
 	  {
 	    static int blurb_printed = 0;
 
@@ -933,7 +929,7 @@ static CORE_ADDR
 alpha_frame_chain (struct frame_info *frame)
 {
   alpha_extra_func_info_t proc_desc;
-  CORE_ADDR saved_pc = FRAME_SAVED_PC (frame);
+  CORE_ADDR saved_pc = DEPRECATED_FRAME_SAVED_PC (frame);
 
   if (saved_pc == 0 || inside_entry_file (saved_pc))
     return 0;
@@ -1304,7 +1300,7 @@ alpha_pop_frame (void)
      frame->proc_desc?  If we do, who will free it?
      For now, we don't save a copy... */
 
-  write_register (PC_REGNUM, FRAME_SAVED_PC (frame));
+  write_register (PC_REGNUM, DEPRECATED_FRAME_SAVED_PC (frame));
   if (get_frame_saved_regs (frame) == NULL)
     alpha_find_saved_regs (frame);
   if (proc_desc)
@@ -1464,8 +1460,8 @@ alpha_register_convert_to_virtual (int regnum, struct type *valtype,
 
   if (TYPE_CODE (valtype) == TYPE_CODE_FLT)
     {
-      double d = extract_floating (raw_buffer, REGISTER_RAW_SIZE (regnum));
-      store_floating (virtual_buffer, TYPE_LENGTH (valtype), d);
+      double d = deprecated_extract_floating (raw_buffer, REGISTER_RAW_SIZE (regnum));
+      deprecated_store_floating (virtual_buffer, TYPE_LENGTH (valtype), d);
     }
   else if (TYPE_CODE (valtype) == TYPE_CODE_INT && TYPE_LENGTH (valtype) <= 4)
     {
@@ -1490,8 +1486,8 @@ alpha_register_convert_to_raw (struct type *valtype, int regnum,
 
   if (TYPE_CODE (valtype) == TYPE_CODE_FLT)
     {
-      double d = extract_floating (virtual_buffer, TYPE_LENGTH (valtype));
-      store_floating (raw_buffer, REGISTER_RAW_SIZE (regnum), d);
+      double d = deprecated_extract_floating (virtual_buffer, TYPE_LENGTH (valtype));
+      deprecated_store_floating (raw_buffer, REGISTER_RAW_SIZE (regnum), d);
     }
   else if (TYPE_CODE (valtype) == TYPE_CODE_INT && TYPE_LENGTH (valtype) <= 4)
     {
@@ -1840,32 +1836,30 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frameless_function_invocation (gdbarch,
                                     generic_frameless_function_invocation_not);
 
-  set_gdbarch_saved_pc_after_call (gdbarch, alpha_saved_pc_after_call);
+  set_gdbarch_deprecated_saved_pc_after_call (gdbarch, alpha_saved_pc_after_call);
 
-  set_gdbarch_frame_chain (gdbarch, alpha_frame_chain);
-  set_gdbarch_frame_saved_pc (gdbarch, alpha_frame_saved_pc);
+  set_gdbarch_deprecated_frame_chain (gdbarch, alpha_frame_chain);
+  set_gdbarch_deprecated_frame_saved_pc (gdbarch, alpha_frame_saved_pc);
 
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, alpha_frame_init_saved_regs);
 
   set_gdbarch_use_struct_convention (gdbarch, alpha_use_struct_convention);
   set_gdbarch_deprecated_extract_return_value (gdbarch, alpha_extract_return_value);
 
-  set_gdbarch_store_struct_return (gdbarch, alpha_store_struct_return);
+  set_gdbarch_deprecated_store_struct_return (gdbarch, alpha_store_struct_return);
   set_gdbarch_deprecated_store_return_value (gdbarch, alpha_store_return_value);
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch,
 					    alpha_extract_struct_value_address);
 
   /* Settings for calling functions in the inferior.  */
   set_gdbarch_deprecated_use_generic_dummy_frames (gdbarch, 0);
-  set_gdbarch_call_dummy_length (gdbarch, 0);
-  set_gdbarch_push_arguments (gdbarch, alpha_push_arguments);
-  set_gdbarch_pop_frame (gdbarch, alpha_pop_frame);
+  set_gdbarch_deprecated_push_arguments (gdbarch, alpha_push_arguments);
+  set_gdbarch_deprecated_pop_frame (gdbarch, alpha_pop_frame);
 
   /* On the Alpha, the call dummy code is never copied to user space,
      stopping the user call is achieved via a bp_call_dummy breakpoint.
      But we need a fake CALL_DUMMY definition to enable the proper
      call_function_by_hand and to avoid zero length array warnings.  */
-  set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_call_dummy_words (gdbarch, alpha_call_dummy_words);
   set_gdbarch_sizeof_call_dummy_words (gdbarch, 0);
   set_gdbarch_frame_args_address (gdbarch, alpha_frame_args_address);
@@ -1876,12 +1870,10 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      no need for a dummy on the Alpha.  PUSH_ARGUMENTS takes care of all
      argument handling and bp_call_dummy takes care of stopping the dummy.  */
   set_gdbarch_call_dummy_address (gdbarch, alpha_call_dummy_address);
-  set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
-  set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
-  set_gdbarch_call_dummy_start_offset (gdbarch, 0);
   set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_at_entry_point);
-  set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
   set_gdbarch_deprecated_push_dummy_frame (gdbarch, alpha_push_dummy_frame);
+  /* Should be using push_dummy_call.  */
+  set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
   set_gdbarch_fix_call_dummy (gdbarch, alpha_fix_call_dummy);
   set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_noop);
   set_gdbarch_deprecated_init_frame_pc_first (gdbarch, alpha_init_frame_pc_first);

@@ -40,20 +40,16 @@ static gdbarch_register_virtual_size_ftype vax_register_virtual_size;
 static gdbarch_register_virtual_type_ftype vax_register_virtual_type;
 
 static gdbarch_skip_prologue_ftype vax_skip_prologue;
-static gdbarch_saved_pc_after_call_ftype vax_saved_pc_after_call;
 static gdbarch_frame_num_args_ftype vax_frame_num_args;
-static gdbarch_frame_chain_ftype vax_frame_chain;
-static gdbarch_frame_saved_pc_ftype vax_frame_saved_pc;
+static gdbarch_deprecated_frame_chain_ftype vax_frame_chain;
 static gdbarch_frame_args_address_ftype vax_frame_args_address;
 static gdbarch_frame_locals_address_ftype vax_frame_locals_address;
 
-static gdbarch_store_struct_return_ftype vax_store_struct_return;
 static gdbarch_deprecated_extract_return_value_ftype vax_extract_return_value;
 static gdbarch_deprecated_extract_struct_value_address_ftype
     vax_extract_struct_value_address;
 
 static gdbarch_deprecated_push_dummy_frame_ftype vax_push_dummy_frame;
-static gdbarch_pop_frame_ftype vax_pop_frame;
 static gdbarch_fix_call_dummy_ftype vax_fix_call_dummy;
 
 /* Return 1 if P points to an invalid floating point value.
@@ -375,7 +371,7 @@ vax_skip_prologue (CORE_ADDR pc)
 static CORE_ADDR
 vax_saved_pc_after_call (struct frame_info *frame)
 {
-  return (FRAME_SAVED_PC(frame));
+  return (DEPRECATED_FRAME_SAVED_PC(frame));
 }
 
 /* Print the vax instruction at address MEMADDR in debugged memory,
@@ -643,14 +639,14 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Frame and stack info */
   set_gdbarch_skip_prologue (gdbarch, vax_skip_prologue);
-  set_gdbarch_saved_pc_after_call (gdbarch, vax_saved_pc_after_call);
+  set_gdbarch_deprecated_saved_pc_after_call (gdbarch, vax_saved_pc_after_call);
 
   set_gdbarch_frame_num_args (gdbarch, vax_frame_num_args);
   set_gdbarch_frameless_function_invocation (gdbarch,
 				   generic_frameless_function_invocation_not);
 
-  set_gdbarch_frame_chain (gdbarch, vax_frame_chain);
-  set_gdbarch_frame_saved_pc (gdbarch, vax_frame_saved_pc);
+  set_gdbarch_deprecated_frame_chain (gdbarch, vax_frame_chain);
+  set_gdbarch_deprecated_frame_saved_pc (gdbarch, vax_frame_saved_pc);
 
   set_gdbarch_frame_args_address (gdbarch, vax_frame_args_address);
   set_gdbarch_frame_locals_address (gdbarch, vax_frame_locals_address);
@@ -662,25 +658,21 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
 
   /* Return value info */
-  set_gdbarch_store_struct_return (gdbarch, vax_store_struct_return);
+  set_gdbarch_deprecated_store_struct_return (gdbarch, vax_store_struct_return);
   set_gdbarch_deprecated_extract_return_value (gdbarch, vax_extract_return_value);
   set_gdbarch_deprecated_store_return_value (gdbarch, vax_store_return_value);
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, vax_extract_struct_value_address);
 
   /* Call dummy info */
   set_gdbarch_deprecated_push_dummy_frame (gdbarch, vax_push_dummy_frame);
-  set_gdbarch_pop_frame (gdbarch, vax_pop_frame);
+  set_gdbarch_deprecated_pop_frame (gdbarch, vax_pop_frame);
   set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
-  set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_call_dummy_words (gdbarch, vax_call_dummy_words);
   set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof_vax_call_dummy_words);
   set_gdbarch_fix_call_dummy (gdbarch, vax_fix_call_dummy);
-  set_gdbarch_call_dummy_start_offset (gdbarch, 0);
-  set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
   set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 7);
   set_gdbarch_deprecated_use_generic_dummy_frames (gdbarch, 0);
   set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_on_stack);
-  set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
 
   /* Breakpoint info */
   set_gdbarch_breakpoint_from_pc (gdbarch, vax_breakpoint_from_pc);
@@ -689,6 +681,9 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Misc info */
   set_gdbarch_function_start_offset (gdbarch, 2);
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
+
+  /* Should be using push_dummy_call.  */
+  set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);

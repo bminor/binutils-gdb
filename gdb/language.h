@@ -30,6 +30,8 @@
 struct value;
 struct objfile;
 struct expression;
+struct ui_file;
+
 /* enum exp_opcode;     ANSI's `wisdom' didn't include forward enum decls. */
 
 /* This used to be included to configure GDB for one or more specific
@@ -202,6 +204,15 @@ struct language_defn
 
     int (*la_value_print) (struct value *, struct ui_file *,
 			   int, enum val_prettyprint);
+
+    /* PC is possibly an unknown languages trampoline.
+       If that PC falls in a trampoline belonging to this language,
+       return the address of the first pc in the real function, or 0
+       if it isn't a language tramp for this language.  */
+    CORE_ADDR (*skip_trampoline) (CORE_ADDR pc);
+
+    /* Return demangled language symbol, or NULL.  */
+    char *(*la_demangle) (const char *mangled, int options);
 
     /* Base 2 (binary) formats. */
 
@@ -464,5 +475,13 @@ extern char *language_str (enum language);
 extern void add_language (const struct language_defn *);
 
 extern enum language get_frame_language (void);	/* In stack.c */
+
+/* Check for a language-specific trampoline. */
+
+extern CORE_ADDR skip_language_trampoline (CORE_ADDR pc);
+
+/* Return demangled language symbol, or NULL.  */
+extern char *language_demangle (const struct language_defn *current_language, 
+				const char *mangled, int options);
 
 #endif /* defined (LANGUAGE_H) */

@@ -19,6 +19,7 @@
 #include "armos.h"
 #include "armemu.h"
 #include "ansidecl.h"
+#include "iwmmxt.h"
 
 /* Dummy Co-processors.  */
 
@@ -1322,34 +1323,57 @@ ARMul_CoProInit (ARMul_State * state)
 
   /* Install CoPro Instruction handlers here.
      The format is:
-     ARMul_CoProAttach (state, CP Number,
-                        Init routine, Exit routine
-                        LDC routine, STC routine,
-			MRC routine, MCR routine,
-                        CDP routine,
-			Read Reg routine, Write Reg routine).  */
-  ARMul_CoProAttach (state, 4, NULL, NULL,
-		     ValLDC, ValSTC, ValMRC, ValMCR, ValCDP, NULL, NULL);
+     ARMul_CoProAttach (state, CP Number, Init routine, Exit routine
+                        LDC routine, STC routine, MRC routine, MCR routine,
+                        CDP routine, Read Reg routine, Write Reg routine).  */
+  if (state->is_ep9312)
+    {
+      ARMul_CoProAttach (state, 4, NULL, NULL, DSPLDC4, DSPSTC4,
+			 DSPMRC4, DSPMCR4, DSPCDP4, NULL, NULL);
+      ARMul_CoProAttach (state, 5, NULL, NULL, DSPLDC5, DSPSTC5,
+			 DSPMRC5, DSPMCR5, DSPCDP5, NULL, NULL);
+      ARMul_CoProAttach (state, 6, NULL, NULL, NULL, NULL,
+			 DSPMRC6, DSPMCR6, DSPCDP6, NULL, NULL);
+    }
+  else
+    {
+      ARMul_CoProAttach (state, 4, NULL, NULL, ValLDC, ValSTC,
+			 ValMRC, ValMCR, ValCDP, NULL, NULL);
 
-  ARMul_CoProAttach (state, 5, NULL, NULL,
-		     NULL, NULL, ValMRC, ValMCR, IntCDP, NULL, NULL);
+      ARMul_CoProAttach (state, 5, NULL, NULL, NULL, NULL,
+			 ValMRC, ValMCR, IntCDP, NULL, NULL);
+    }
 
-  ARMul_CoProAttach (state, 15, MMUInit, NULL,
-		     NULL, NULL, MMUMRC, MMUMCR, NULL, MMURead, MMUWrite);
+  if (state->is_XScale)
+    {
+      ARMul_CoProAttach (state, 13, XScale_cp13_init, NULL,
+			 XScale_cp13_LDC, XScale_cp13_STC, XScale_cp13_MRC,
+			 XScale_cp13_MCR, NULL, XScale_cp13_read_reg,
+			 XScale_cp13_write_reg);
 
-  ARMul_CoProAttach (state, 13, XScale_cp13_init, NULL,
-		     XScale_cp13_LDC, XScale_cp13_STC, XScale_cp13_MRC,
-		     XScale_cp13_MCR, NULL, XScale_cp13_read_reg,
-		     XScale_cp13_write_reg);
+      ARMul_CoProAttach (state, 14, XScale_cp14_init, NULL,
+			 XScale_cp14_LDC, XScale_cp14_STC, XScale_cp14_MRC,
+			 XScale_cp14_MCR, NULL, XScale_cp14_read_reg,
+			 XScale_cp14_write_reg);
 
-  ARMul_CoProAttach (state, 14, XScale_cp14_init, NULL,
-		     XScale_cp14_LDC, XScale_cp14_STC, XScale_cp14_MRC,
-		     XScale_cp14_MCR, NULL, XScale_cp14_read_reg,
-		     XScale_cp14_write_reg);
+      ARMul_CoProAttach (state, 15, XScale_cp15_init, NULL,
+			 NULL, NULL, XScale_cp15_MRC, XScale_cp15_MCR,
+			 NULL, XScale_cp15_read_reg, XScale_cp15_write_reg);
+    }
+  else
+    {
+      ARMul_CoProAttach (state, 15, MMUInit, NULL, NULL, NULL,
+			 MMUMRC, MMUMCR, NULL, MMURead, MMUWrite);
+    }
 
-  ARMul_CoProAttach (state, 15, XScale_cp15_init, NULL,
-		     NULL, NULL, XScale_cp15_MRC, XScale_cp15_MCR,
-		     NULL, XScale_cp15_read_reg, XScale_cp15_write_reg);
+  if (state->is_iWMMXt)
+    {
+      ARMul_CoProAttach (state, 0, NULL, NULL, IwmmxtLDC, IwmmxtSTC,
+			 NULL, NULL, IwmmxtCDP, NULL, NULL);
+
+      ARMul_CoProAttach (state, 1, NULL, NULL, NULL, NULL,
+			 IwmmxtMRC, IwmmxtMCR, IwmmxtCDP, NULL, NULL);
+    }
 
   /* No handlers below here.  */
 

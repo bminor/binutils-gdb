@@ -1,3 +1,72 @@
+2003-04-13  Nick Clifton  <nickc@redhat.com>
+
+	* armvirt.c (GetWord): Only call XScale_check_memacc if in XScale
+	mode.
+	(PutWord): Likewise.
+
+2003-03-30  Nick Clifton  <nickc@redhat.com>
+
+	* configure.in (CON_FLAGS): Remove.
+	(COPRO): Unconditionally include iwmmxt.o.
+	* configure: Regenerate.
+	* Makefile.in (CON_FLAGS): Remove.
+	* armcopro.c: Remove use of __IWMMXT__ flag.
+	* wrapper.c: Likewise.
+	* armemu.c: Likewise.
+	Add explanatory comment for suppressed code.
+
+2003-03-27  Nick Clifton  <nickc@redhat.com>
+
+	* armos.c (ARMul_OsHandleSWI): Catch SWIs for unhandled vectors.
+
+2003-03-27  Nick Clifton  <nickc@redhat.com>
+
+	* configure.in: (CON_FLAGS): Define and intialise.
+	(COPRO): Add iwmmxt.o if configuring for XScale.
+	* configure: Regenerate.
+	* Makefile.in (iwmmxt.o): Add rule to build.
+	(COM_FLAGS): Define.
+	(ALL_FLAGS): Add CON_FLAGS.
+	* armcopro.c (ARMul_CoProInit): Initialise iWMMXt coprocessors.
+	* armdefs.h (struct ARMul_State): Add 'is_iWMMXt' field.
+	(ARM_iWMMXt_Prop): Define.
+	* armemu.c (ARMul_Emulate16): Intercept iWMMXt instructions and
+	pass to coprocessor.
+	* arminit.c (ARMul_NewState): Initialise 'is_iWMMXt'.
+	(ARMul_Abort): Catch branches through uninitialised vectors.
+	* armos.c (softevtorcode): Update comment.
+	(ARMul_OsInit): Use ARMUndefinedInstrV.
+	* wrapper.c (sim_create_inferior): Handle iWMMXt processor type.
+	(sim_store_register): Handle iWMMXt registers.
+	(sim_fetch_register): Handle iWMMXt registers.
+	* iwmmxt.h: New file. Exported iWMMXt coprocessor emulator
+	functions.
+	* iwmmxt.c: New file: iWMMXt emulator.
+
+2003-03-20  Nick Clifton  <nickc@redhat.com>
+
+	* Contribute support for Cirrus Maverick ARM co-processor,
+        written by Aldy Hernandez  <aldyh@redhat.com> and
+        Andrew Cagney  <cagney@redhat.com>:
+
+	* maverick.c: New file: Support for Maverick floating point
+	co-processor. 
+        * Makefile.in: Add maverick.o target.
+        * configure.in (COPRO): Add maverick.o.
+        * configure: Regenerate.
+        * armcopro.c (ARMul_CoProInit): Only initialise co-processors
+	available on target processor.  Add code to initialse Maverick
+	co-processor support code.
+        * armdefs.h (ARMul_state): Add is_ep9312 field.
+        (ARM_ep9312_Prop): Define.
+        * armemu.h: Add prototypes for Maverick co-processor
+	functions.
+        * arminit.c (ARMul_SelectProcessor): Initialise the
+	co-processor support once the chip has been selected.
+        * wrapper.c: Add support for Maverick co-processor.
+        (init): Do not call ARMul_CoProInit.  Delays this until the
+	chip has been selected.
+
 2003-03-02  Nick Clifton  <nickc@redhat.com>
 
 	* armos.c (SWIWrite0): Catch big-endian bug when printing

@@ -842,6 +842,16 @@ extern bfd_boolean bfd_elf32_arm_get_bfd_for_interworking
 extern bfd_boolean bfd_elf32_arm_add_glue_sections_to_bfd
   PARAMS ((bfd *, struct bfd_link_info *));
 
+/* ARM Note section processing.  */
+extern bfd_boolean bfd_arm_merge_machines
+  PARAMS ((bfd *, bfd *));
+
+extern bfd_boolean bfd_arm_update_notes
+  PARAMS ((bfd *, const char *));
+
+extern unsigned int bfd_arm_get_mach_from_notes
+  PARAMS ((bfd *, const char *));
+
 /* TI COFF load page support.  */
 extern void bfd_ticoff_set_section_load_page
   PARAMS ((struct sec *, int));
@@ -1619,7 +1629,7 @@ enum bfd_architecture
   bfd_arch_m88k,      /* Motorola 88xxx */
   bfd_arch_m98k,      /* Motorola 98xxx */
   bfd_arch_pyramid,   /* Pyramid Technology */
-  bfd_arch_h8300,     /* Hitachi H8/300 */
+  bfd_arch_h8300,     /* Renesas H8/300 (formerly Hitachi H8/300) */
 #define bfd_mach_h8300   1
 #define bfd_mach_h8300h  2
 #define bfd_mach_h8300s  3
@@ -1664,8 +1674,8 @@ enum bfd_architecture
   bfd_arch_z8k,       /* Zilog Z8000 */
 #define bfd_mach_z8001         1
 #define bfd_mach_z8002         2
-  bfd_arch_h8500,     /* Hitachi H8/500 */
-  bfd_arch_sh,        /* Hitachi SH */
+  bfd_arch_h8500,     /* Renesas H8/500 (formerly Hitachi H8/500) */
+  bfd_arch_sh,        /* Renesas SH (formerly Hitachi SH) */
 #define bfd_mach_sh            1
 #define bfd_mach_sh2        0x20
 #define bfd_mach_sh_dsp     0x2d
@@ -1680,6 +1690,7 @@ enum bfd_architecture
 #define bfd_mach_alpha_ev5  0x20
 #define bfd_mach_alpha_ev6  0x30
   bfd_arch_arm,       /* Advanced Risc Machines ARM.  */
+#define bfd_mach_arm_unknown   0
 #define bfd_mach_arm_2         1
 #define bfd_mach_arm_2a        2
 #define bfd_mach_arm_3         3
@@ -1691,12 +1702,13 @@ enum bfd_architecture
 #define bfd_mach_arm_5TE       9
 #define bfd_mach_arm_XScale    10
 #define bfd_mach_arm_ep9312    11
+#define bfd_mach_arm_iWMMXt    12
   bfd_arch_ns32k,     /* National Semiconductors ns32000 */
   bfd_arch_w65,       /* WDC 65816 */
   bfd_arch_tic30,     /* Texas Instruments TMS320C30 */
   bfd_arch_tic4x,     /* Texas Instruments TMS320C3X/4X */
-#define bfd_mach_c3x           30
-#define bfd_mach_c4x           40
+#define bfd_mach_tic3x         30
+#define bfd_mach_tic4x         40
   bfd_arch_tic54x,    /* Texas Instruments TMS320C54X */
   bfd_arch_tic80,     /* TI TMS320c80 (MVP) */
   bfd_arch_v850,      /* NEC V850 */
@@ -1762,6 +1774,8 @@ enum bfd_architecture
 #define bfd_mach_msp44          44
 #define bfd_mach_msp15          15
 #define bfd_mach_msp16          16  
+  bfd_arch_xtensa,    /* Tensilica's Xtensa cores.  */
+#define bfd_mach_xtensa        1
   bfd_arch_last
   };
 
@@ -2331,9 +2345,6 @@ to compensate for the borrow when the low bits are added.  */
 /* Like BFD_RELOC_LO16, but PC relative.  */
   BFD_RELOC_PCREL_LO16,
 
-/* Like BFD_RELOC_16_PCREL_S2, but for MIPS Embedded PIC.  */
-  BFD_RELOC_MIPSEMB_16_PCREL_S2,
-
 /* Relocation against a MIPS literal section.  */
   BFD_RELOC_MIPS_LITERAL,
 
@@ -2566,6 +2577,7 @@ field in the instruction.  */
   BFD_RELOC_ARM_SWI,
   BFD_RELOC_ARM_MULTI,
   BFD_RELOC_ARM_CP_OFF_IMM,
+  BFD_RELOC_ARM_CP_OFF_IMM_S2,
   BFD_RELOC_ARM_ADR_IMM,
   BFD_RELOC_ARM_LDR_IMM,
   BFD_RELOC_ARM_LITERAL,
@@ -2586,7 +2598,7 @@ field in the instruction.  */
   BFD_RELOC_ARM_GOTOFF,
   BFD_RELOC_ARM_GOTPC,
 
-/* Hitachi SH relocs.  Not all of these appear in object files.  */
+/* Renesas SH relocs.  Not all of these appear in object files.  */
   BFD_RELOC_SH_PCDISP8BY2,
   BFD_RELOC_SH_PCDISP12BY2,
   BFD_RELOC_SH_IMM4,
@@ -3427,6 +3439,38 @@ to follow the 16K memory bank of 68HC12 (seen as mapped in the window).  */
   BFD_RELOC_IQ2000_OFFSET_16,
   BFD_RELOC_IQ2000_OFFSET_21,
   BFD_RELOC_IQ2000_UHI16,
+
+/* Special Xtensa relocation used only by PLT entries in ELF shared
+objects to indicate that the runtime linker should set the value
+to one of its own internal functions or data structures.  */
+  BFD_RELOC_XTENSA_RTLD,
+
+/* Xtensa relocations for ELF shared objects.  */
+  BFD_RELOC_XTENSA_GLOB_DAT,
+  BFD_RELOC_XTENSA_JMP_SLOT,
+  BFD_RELOC_XTENSA_RELATIVE,
+
+/* Xtensa relocation used in ELF object files for symbols that may require
+PLT entries.  Otherwise, this is just a generic 32-bit relocation.  */
+  BFD_RELOC_XTENSA_PLT,
+
+/* Generic Xtensa relocations.  Only the operand number is encoded
+in the relocation.  The details are determined by extracting the
+instruction opcode.  */
+  BFD_RELOC_XTENSA_OP0,
+  BFD_RELOC_XTENSA_OP1,
+  BFD_RELOC_XTENSA_OP2,
+
+/* Xtensa relocation to mark that the assembler expanded the 
+instructions from an original target.  The expansion size is
+encoded in the reloc size.  */
+  BFD_RELOC_XTENSA_ASM_EXPAND,
+
+/* Xtensa relocation to mark that the linker should simplify 
+assembler-expanded instructions.  This is commonly used 
+internally by the linker after analysis of a 
+BFD_RELOC_XTENSA_ASM_EXPAND.  */
+  BFD_RELOC_XTENSA_ASM_SIMPLIFY,
   BFD_RELOC_UNUSED };
 typedef enum bfd_reloc_code_real bfd_reloc_code_real_type;
 reloc_howto_type *
@@ -4386,7 +4430,7 @@ bfd_link_split_section PARAMS ((bfd *abfd, asection *sec));
 
 /* Extracted from simple.c.  */
 bfd_byte *
-bfd_simple_get_relocated_section_contents PARAMS ((bfd *abfd, asection *sec, bfd_byte *outbuf));
+bfd_simple_get_relocated_section_contents PARAMS ((bfd *abfd, asection *sec, bfd_byte *outbuf, asymbol **symbol_table));
 
 #ifdef __cplusplus
 }

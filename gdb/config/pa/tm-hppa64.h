@@ -122,19 +122,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define SR5_REGNUM 48
 
-#undef FRAME_ARGS_ADDRESS
-#define FRAME_ARGS_ADDRESS(fi) ((fi)->ap)
-
 /* We access locals from SP. This may not work for frames which call
    alloca; for those, we may need to consult unwind tables.
    jimb: FIXME.  */
 #undef FRAME_LOCALS_ADDRESS
 #define FRAME_LOCALS_ADDRESS(fi) ((fi)->frame)
-
-#define INIT_FRAME_AP init_frame_ap
-  
-#define EXTRA_FRAME_INFO  \
-  CORE_ADDR ap;
 
 /* For a number of horrible reasons we may have to adjust the location
    of variables on the stack.  Ugh.  jimb: why? */
@@ -191,7 +183,6 @@ call_dummy
                     0xe820f0000fb110d3LL, 0x0001000400151820LL,\
                     0xe6c0000008000240LL}
 
-#define CALL_DUMMY_BREAKPOINT_OFFSET_P 1
 #define CALL_DUMMY_BREAKPOINT_OFFSET 22 * 4
 
 /* CALL_DUMMY_LENGTH is computed based on the size of a word on the target
@@ -321,11 +312,11 @@ call_dummy
   for (i = 0; i < NUM_REGS; i++) \
     { \
       if (i == SP_REGNUM) \
-        (FSR)->regs[SP_REGNUM] = read_memory_integer (TMP1 + SP_REGNUM * 8, 8); \
+        (FSR)[SP_REGNUM] = read_memory_integer (TMP1 + SP_REGNUM * 8, 8); \
       else if (i >= FP0_REGNUM) \
-        (FSR)->regs[i] = TMP2 + (i - FP0_REGNUM) * 8; \
+        (FSR)[i] = TMP2 + (i - FP0_REGNUM) * 8; \
       else \
-        (FSR)->regs[i] = TMP1 + i * 8; \
+        (FSR)[i] = TMP1 + i * 8; \
     } \
 }
 

@@ -1097,6 +1097,17 @@ elf_m68k_adjust_dynamic_symbol (info, h)
   return TRUE;
 }
 
+/* This is the condition under which elf_m68k_finish_dynamic_symbol
+   will be called from elflink.h.  If elflink.h doesn't call our
+   finish_dynamic_symbol routine, we'll need to do something about
+   initializing any .plt and .got entries in elf_m68k_relocate_section.  */
+#define WILL_CALL_FINISH_DYNAMIC_SYMBOL(DYN, SHARED, H) \
+  ((DYN)								\
+   && ((SHARED)								\
+       || ((H)->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)	\
+   && ((H)->dynindx != -1						\
+       || ((H)->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0))
+
 /* Set the sizes of the dynamic sections.  */
 
 static bfd_boolean
@@ -1416,9 +1427,14 @@ elf_m68k_relocate_section (output_bfd, info, input_bfd, input_section,
 			    || r_type == R_68K_GOT32)
 			   && strcmp (h->root.root.string,
 				      "_GLOBAL_OFFSET_TABLE_") != 0))
-		      && elf_hash_table (info)->dynamic_sections_created
+		      && (WILL_CALL_FINISH_DYNAMIC_SYMBOL
+			  (elf_hash_table (info)->dynamic_sections_created,
+			   info->shared, h))
 		      && (! info->shared
-			  || (! info->symbolic && h->dynindx != -1)
+			  || (! info->symbolic
+			      && h->dynindx != -1
+			      && (h->elf_link_hash_flags
+				  & ELF_LINK_FORCED_LOCAL) == 0)
 			  || (h->elf_link_hash_flags
 			      & ELF_LINK_HASH_DEF_REGULAR) == 0))
 		  || (info->shared
@@ -1496,13 +1512,18 @@ elf_m68k_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	    if (h != NULL)
 	      {
+		bfd_boolean dyn;
+
 		off = h->got.offset;
 		BFD_ASSERT (off != (bfd_vma) -1);
 
-		if (!elf_hash_table (info)->dynamic_sections_created
+		dyn = elf_hash_table (info)->dynamic_sections_created;
+		if (!WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info->shared, h)
 		    || (info->shared
-			&& (info->symbolic || h->dynindx == -1)
-			&& (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)))
+			&& (info->symbolic
+			    || h->dynindx == -1
+			    || (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0)
+			&& (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)) != 0)
 		  {
 		    /* This is actually a static link, or it is a
 		       -Bsymbolic link and the symbol is defined
@@ -1940,7 +1961,9 @@ elf_m68k_finish_dynamic_symbol (output_bfd, info, h, sym)
 	 The entry in the global offset table will already have been
 	 initialized in the relocate_section function.  */
       if (info->shared
-	  && (info->symbolic || h->dynindx == -1)
+	  && (info->symbolic
+	      || h->dynindx == -1
+	      || (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0)
 	  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR))
 	{
 	  rela.r_info = ELF32_R_INFO (0, R_68K_RELATIVE);

@@ -190,8 +190,8 @@ umax_frame_num_args (struct frame_info *fi)
   if (enter_addr > 0)
     {
       pc = ((enter_addr == 1)
-	    ? SAVED_PC_AFTER_CALL (fi)
-	    : FRAME_SAVED_PC (fi));
+	    ? DEPRECATED_SAVED_PC_AFTER_CALL (fi)
+	    : DEPRECATED_FRAME_SAVED_PC (fi));
       insn = read_memory_integer (pc, 2);
       addr_mode = (insn >> 11) & 0x1f;
       insn = insn & 0x7ff;
@@ -566,14 +566,14 @@ ns32k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Frame and stack info */
   set_gdbarch_skip_prologue (gdbarch, umax_skip_prologue);
-  set_gdbarch_saved_pc_after_call (gdbarch, ns32k_saved_pc_after_call);
+  set_gdbarch_deprecated_saved_pc_after_call (gdbarch, ns32k_saved_pc_after_call);
 
   set_gdbarch_frame_num_args (gdbarch, umax_frame_num_args);
   set_gdbarch_frameless_function_invocation (gdbarch,
                                    generic_frameless_function_invocation_not);
   
-  set_gdbarch_frame_chain (gdbarch, ns32k_frame_chain);
-  set_gdbarch_frame_saved_pc (gdbarch, ns32k_frame_saved_pc);
+  set_gdbarch_deprecated_frame_chain (gdbarch, ns32k_frame_chain);
+  set_gdbarch_deprecated_frame_saved_pc (gdbarch, ns32k_frame_saved_pc);
 
   set_gdbarch_frame_args_address (gdbarch, ns32k_frame_args_address);
   set_gdbarch_frame_locals_address (gdbarch, ns32k_frame_locals_address);
@@ -585,7 +585,7 @@ ns32k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
 
   /* Return value info */
-  set_gdbarch_store_struct_return (gdbarch, ns32k_store_struct_return);
+  set_gdbarch_deprecated_store_struct_return (gdbarch, ns32k_store_struct_return);
   set_gdbarch_deprecated_extract_return_value (gdbarch, ns32k_extract_return_value);
   set_gdbarch_deprecated_store_return_value (gdbarch, ns32k_store_return_value);
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch,
@@ -593,17 +593,15 @@ ns32k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Call dummy info */
   set_gdbarch_deprecated_push_dummy_frame (gdbarch, ns32k_push_dummy_frame);
-  set_gdbarch_pop_frame (gdbarch, ns32k_pop_frame);
+  set_gdbarch_deprecated_pop_frame (gdbarch, ns32k_pop_frame);
   set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
-  set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_call_dummy_words (gdbarch, ns32k_call_dummy_words);
   set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof_ns32k_call_dummy_words);
   set_gdbarch_fix_call_dummy (gdbarch, ns32k_fix_call_dummy);
   set_gdbarch_call_dummy_start_offset (gdbarch, 3);
-  set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 0);
+  set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 15);
   set_gdbarch_deprecated_use_generic_dummy_frames (gdbarch, 0);
   set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_on_stack);
-  set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
 
   /* Breakpoint info */
   set_gdbarch_decr_pc_after_break (gdbarch, 0);
@@ -611,6 +609,9 @@ ns32k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Misc info */
   set_gdbarch_function_start_offset (gdbarch, 0);
+
+  /* Should be using push_dummy_call.  */
+  set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
 
   /* Hook in OS ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);

@@ -199,8 +199,10 @@ value_nsstring (char *ptr, int len)
   if (!target_has_execution)
     return 0;		/* Can't call into inferior to create NSString.  */
 
-  if (!(sym = lookup_struct_typedef("NSString", 0, 1)) &&
-      !(sym = lookup_struct_typedef("NXString", 0, 1)))
+  sym = lookup_struct_typedef("NSString", 0, 1);
+  if (sym == NULL)
+    sym = lookup_struct_typedef("NXString", 0, 1);
+  if (sym == NULL)
     type = lookup_pointer_type(builtin_type_void);
   else
     type = lookup_pointer_type(SYMBOL_TYPE (sym));
@@ -237,7 +239,7 @@ value_nsstring (char *ptr, int len)
 /* Objective-C name demangling.  */
 
 char *
-objc_demangle (const char *mangled)
+objc_demangle (const char *mangled, int options)
 {
   char *demangled, *cp;
 
@@ -369,8 +371,6 @@ objc_printstr (struct ui_file *stream, char *string,
   int in_quotes = 0;
   int need_comma = 0;
   extern int inspect_it;
-  extern int repeat_count_threshold;
-  extern int print_max;
 
   /* If the string was not truncated due to `set print elements', and
      the last byte of it is a null, we don't print that, in
@@ -593,6 +593,35 @@ objc_create_fundamental_type (struct objfile *objfile, int typeid)
   return (type);
 }
 
+/* Determine if we are currently in the Objective-C dispatch function.
+   If so, get the address of the method function that the dispatcher
+   would call and use that as the function to step into instead. Also
+   skip over the trampoline for the function (if any).  This is better
+   for the user since they are only interested in stepping into the
+   method function anyway.  */
+static CORE_ADDR 
+objc_skip_trampoline (CORE_ADDR stop_pc)
+{
+  CORE_ADDR real_stop_pc;
+  CORE_ADDR method_stop_pc;
+  
+  real_stop_pc = SKIP_TRAMPOLINE_CODE (stop_pc);
+
+  if (real_stop_pc != 0)
+    find_objc_msgcall (real_stop_pc, &method_stop_pc);
+  else
+    find_objc_msgcall (stop_pc, &method_stop_pc);
+
+  if (method_stop_pc)
+    {
+      real_stop_pc = SKIP_TRAMPOLINE_CODE (method_stop_pc);
+      if (real_stop_pc == 0)
+	real_stop_pc = method_stop_pc;
+    }
+
+  return real_stop_pc;
+}
+
 
 /* Table mapping opcodes into strings for printing operators
    and precedences of the operators.  */
@@ -670,6 +699,8 @@ const struct language_defn objc_language_defn = {
   c_print_type,			/* Print a type using appropriate syntax */
   c_val_print,			/* Print a value using appropriate syntax */
   c_value_print,		/* Print a top-level value */
+  objc_skip_trampoline, 	/* Language specific skip_trampoline */
+  objc_demangle,		/* Language specific symbol demangler */
   {"",     "",    "",  ""},	/* Binary format info */
   {"0%lo",  "0",   "o", ""},	/* Octal format info */
   {"%ld",   "",    "d", ""},	/* Decimal format info */
@@ -859,16 +890,17 @@ selectors_info (char *regexp, int from_tty)
     }
 
   if (regexp != NULL)
-    if (0 != (val = re_comp (myregexp)))
-      error ("Invalid regexp (%s): %s", val, regexp);
+    {
+      val = re_comp (myregexp);
+      if (val != 0)
+	error ("Invalid regexp (%s): %s", val, regexp);
+    }
 
   /* First time thru is JUST to get max length and count.  */
   ALL_MSYMBOLS (objfile, msymbol)
     {
       QUIT;
-      name = SYMBOL_DEMANGLED_NAME (msymbol);
-      if (name == NULL)
-	name = DEPRECATED_SYMBOL_NAME (msymbol);
+      name = SYMBOL_NATURAL_NAME (msymbol);
       if (name &&
 	 (name[0] == '-' || name[0] == '+') &&
 	  name[1] == '[')		/* Got a method name.  */
@@ -899,9 +931,7 @@ selectors_info (char *regexp, int from_tty)
       ALL_MSYMBOLS (objfile, msymbol)
 	{
 	  QUIT;
-	  name = SYMBOL_DEMANGLED_NAME (msymbol);
-	  if (name == NULL)
-	    name = DEPRECATED_SYMBOL_NAME (msymbol);
+	  name = SYMBOL_NATURAL_NAME (msymbol);
 	  if (name &&
 	     (name[0] == '-' || name[0] == '+') &&
 	      name[1] == '[')		/* Got a method name.  */
@@ -925,9 +955,7 @@ selectors_info (char *regexp, int from_tty)
 	  char *p = asel;
 
 	  QUIT;
-	  name = SYMBOL_DEMANGLED_NAME (sym_arr[ix]);
-	  if (name == NULL)
-	    name = DEPRECATED_SYMBOL_NAME (sym_arr[ix]);
+	  name = SYMBOL_NATURAL_NAME (sym_arr[ix]);
 	  name = strchr (name, ' ') + 1;
 	  if (p[0] && specialcmp(name, p) == 0)
 	    continue;		/* Seen this one already (not unique).  */
@@ -1002,16 +1030,17 @@ classes_info (char *regexp, int from_tty)
     }
 
   if (regexp != NULL)
-    if (0 != (val = re_comp (myregexp)))
-      error ("Invalid regexp (%s): %s", val, regexp);
+    {
+      val = re_comp (myregexp);
+      if (val != 0)
+	error ("Invalid regexp (%s): %s", val, regexp);
+    }
 
   /* First time thru is JUST to get max length and count.  */
   ALL_MSYMBOLS (objfile, msymbol)
     {
       QUIT;
-      name = SYMBOL_DEMANGLED_NAME (msymbol);
-      if (name == NULL)
-	name = DEPRECATED_SYMBOL_NAME (msymbol);
+      name = SYMBOL_NATURAL_NAME (msymbol);
       if (name &&
 	 (name[0] == '-' || name[0] == '+') &&
 	  name[1] == '[')			/* Got a method name.  */
@@ -1035,9 +1064,7 @@ classes_info (char *regexp, int from_tty)
       ALL_MSYMBOLS (objfile, msymbol)
 	{
 	  QUIT;
-	  name = SYMBOL_DEMANGLED_NAME (msymbol);
-	  if (name == NULL)
-	    name = DEPRECATED_SYMBOL_NAME (msymbol);
+	  name = SYMBOL_NATURAL_NAME (msymbol);
 	  if (name &&
 	     (name[0] == '-' || name[0] == '+') &&
 	      name[1] == '[')			/* Got a method name.  */
@@ -1054,9 +1081,7 @@ classes_info (char *regexp, int from_tty)
 	  char *p = aclass;
 
 	  QUIT;
-	  name = SYMBOL_DEMANGLED_NAME (sym_arr[ix]);
-	  if (name == NULL)
-	    name = DEPRECATED_SYMBOL_NAME (sym_arr[ix]);
+	  name = SYMBOL_NATURAL_NAME (sym_arr[ix]);
 	  name += 2;
 	  if (p[0] && specialcmp(name, p) == 0)
 	    continue;	/* Seen this one already (not unique).  */
@@ -1317,9 +1342,7 @@ find_methods (struct symtab *symtab, char type,
 	  /* Not in the specified symtab.  */
 	  continue;
 
-      symname = SYMBOL_DEMANGLED_NAME (msymbol);
-      if (symname == NULL)
-	symname = DEPRECATED_SYMBOL_NAME (msymbol);
+      symname = SYMBOL_NATURAL_NAME (msymbol);
       if (symname == NULL)
 	continue;
 
@@ -1355,10 +1378,8 @@ find_methods (struct symtab *symtab, char type,
       sym = find_pc_function (SYMBOL_VALUE_ADDRESS (msymbol));
       if (sym != NULL)
         {
-          const char *newsymname = SYMBOL_DEMANGLED_NAME (sym);
+          const char *newsymname = SYMBOL_NATURAL_NAME (sym);
 	  
-          if (newsymname == NULL)
-            newsymname = DEPRECATED_SYMBOL_NAME (sym);
           if (strcmp (symname, newsymname) == 0)
             {
               /* Found a high-level method sym: swap it into the
@@ -1701,7 +1722,10 @@ find_objc_msgcall (CORE_ADDR pc, CORE_ADDR *new_pc)
   unsigned int i;
 
   find_objc_msgsend ();
-  if (new_pc != NULL) { *new_pc = 0; }
+  if (new_pc != NULL)
+    {
+      *new_pc = 0;
+    }
 
   for (i = 0; i < nmethcalls; i++) 
     if ((pc >= methcalls[i].begin) && (pc < methcalls[i].end)) 

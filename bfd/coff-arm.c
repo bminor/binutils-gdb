@@ -2247,7 +2247,12 @@ coff_arm_merge_private_bfd_data (ibfd, obfd)
       || obfd->xvec->flavour != bfd_target_coff_flavour)
     return TRUE;
 
-  /* Verify that the APCS is the same for the two BFDs */
+  /* Determine what should happen if the input ARM architecture
+     does not match the output ARM architecture.  */
+  if (! bfd_arm_merge_machines (ibfd, obfd))
+    return FALSE;
+
+  /* Verify that the APCS is the same for the two BFDs.  */
   if (APCS_SET (ibfd))
     {
       if (APCS_SET (obfd))
@@ -2584,7 +2589,7 @@ coff_arm_final_link_postscript (abfd, pfinfo)
       globals->bfd_of_glue_owner->output_has_begun = TRUE;
     }
 
-  return TRUE;
+  return bfd_arm_update_notes (abfd, ARM_NOTE_SECTION);
 }
 
 #include "coffcode.h"

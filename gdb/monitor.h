@@ -24,6 +24,7 @@
 #ifndef MONITOR_H
 #define MONITOR_H
 
+struct target_waitstatus;
 struct serial;
 
 /* This structure describes the strings necessary to give small command

@@ -374,7 +374,7 @@ skip_hurd_resolver (CORE_ADDR pc)
 	= lookup_minimal_symbol ("fixup", NULL, objfile);
 
       if (fixup && SYMBOL_VALUE_ADDRESS (fixup) == pc)
-	return (SAVED_PC_AFTER_CALL (get_current_frame ()));
+	return (DEPRECATED_SAVED_PC_AFTER_CALL (get_current_frame ()));
     }
 
   return 0;

@@ -123,6 +123,8 @@ proc do_attach_tests {} {
                       }
       -re "Attaching to.*, process 0.*denied.*$gdb_prompt $"\
                       {pass "attach to nonexistent process is prohibited"}
+      -re "Attaching to.*, process 0.*Operation not permitted.*$gdb_prompt $"\
+                      {pass "attach to nonexistent process is prohibited"}
       -re "Attaching to.*, process .*couldn't open /proc file.*$gdb_prompt $"\
                       {
                         # Response expected from /proc-based systems.

@@ -214,9 +214,9 @@ int main(void)
     #endif
     
 
-    marker1();
+    marker1(); // marker1-returns-here
     
-    a_instance.a = 20;
+    a_instance.a = 20; // marker1-returns-here
     a_instance.aa = 21;
     b_instance.b = 22;
     b_instance.bb = 23;

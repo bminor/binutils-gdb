@@ -40,18 +40,18 @@ arm*-*-linux*)		gdb_host=linux ;;
 arm*-*-netbsdelf*)	gdb_host=nbsdelf ;;
 arm*-*-netbsd*)		gdb_host=nbsdaout ;;
 
-hppa*-*-bsd*)		gdb_host=hppabsd ;;
+# OBSOLETE hppa*-*-bsd*)		gdb_host=hppabsd ;;
 hppa*-*-hiux*)		gdb_host=hppahpux ;;
 hppa*-*-hpux10.20)	gdb_host=hpux1020 ;;
 hppa*64*-*-hpux11*)	gdb_host=hpux11w ;;
 hppa*-*-hpux11*)	gdb_host=hpux11 ;;
 hppa*-*-hpux*)		gdb_host=hppahpux ;;
-hppa*-*-osf*)		gdb_host=hppaosf ;;
+# OBSOLETE hppa*-*-osf*)		gdb_host=hppaosf ;;
 
 i[3456]86-ncr-*)	gdb_host=ncr3000 ;;
-i[3456]86-sequent-bsd*)	gdb_host=symmetry ;;  # dynix
-i[3456]86-sequent-sysv4*) gdb_host=ptx4 ;;
-i[3456]86-sequent-sysv*) gdb_host=ptx ;;
+# OBSOLETE i[3456]86-sequent-bsd*)	gdb_host=symmetry ;;  # dynix
+# OBSOLETE i[3456]86-sequent-sysv4*) gdb_host=ptx4 ;;
+# OBSOLETE i[3456]86-sequent-sysv*) gdb_host=ptx ;;
 i[3456]86-*-bsd*)	gdb_host=i386bsd ;;
 i[3456]86-*-dgux*)	gdb_host=i386v4 ;;
 i[3456]86-*-freebsd*)	gdb_host=fbsd ;;
@@ -94,7 +94,7 @@ m68*-sun-sunos3*)	gdb_host=sun3os3 ;;
 m68*-sun-sunos4*)	gdb_host=sun3os4 ;;
 m68*-sun-*)		gdb_host=sun3os4 ;;
 
-mips-dec-mach3*)	gdb_host=mipsm3 ;;
+# OBSOLETE mips-dec-mach3*)	gdb_host=mipsm3 ;;
 mips-dec-*)		gdb_host=decstation ;;
 mips-little-*)		gdb_host=littlemips ;;
 mips-sgi-irix3*)	gdb_host=irix3 ;;

@@ -22,6 +22,9 @@
 #ifndef SER_UNIX_H
 #define SER_UNIX_H
 
+struct serial;
+struct ui_file;
+
 /* Generic UNIX/FD functions */
 
 extern int ser_unix_nop_flush_output (struct serial *scb);

@@ -31,6 +31,7 @@
 #include "gdbcore.h"
 #include "gdb_wait.h"
 #include "regcache.h"
+#include "gdb_string.h"
 #include <signal.h>
 
 extern CORE_ADDR text_end;
@@ -785,8 +786,6 @@ startup_semaphore_t;
 
 static startup_semaphore_t startup_semaphore;
 
-extern int parent_attach_all (int, PTRACE_ARG3_TYPE, int);
-
 #ifdef PT_SETTRC
 /* This function causes the caller's process to be traced by its
    parent.  This is intended to be called after GDB forks itself,
@@ -907,14 +906,13 @@ hppa_insert_hw_watchpoint (int pid, CORE_ADDR start, LONGEST len, int type)
 }
 
 int
-hppa_remove_hw_watchpoint (int pid, CORE_ADDR start, LONGEST len,
-			   enum bptype type)
+hppa_remove_hw_watchpoint (int pid, CORE_ADDR start, LONGEST len, int type)
 {
   error ("Hardware watchpoints not implemented on this platform.");
 }
 
 int
-hppa_can_use_hw_watchpoint (enum bptype type, int cnt, enum bptype ot)
+hppa_can_use_hw_watchpoint (int type, int cnt, int ot)
 {
   return 0;
 }

@@ -44,9 +44,9 @@
 #include "macrotab.h"
 #include "demangle.h"		/* Needed by SYMBOL_INIT_DEMANGLED_NAME.  */
 #include "block.h"
-#include "dictionary.h"
-#include "gdb_assert.h"
 #include "cp-support.h"
+#include "dictionary.h"
+
 /* Ask buildsym.h to define the vars it normally declares `extern'.  */
 #define	EXTERN
 /**/
@@ -66,15 +66,8 @@ static struct pending *free_pendings;
    otherwise empty symtab from being tossed.  */
 
 static int have_line_numbers;
-
-/* List of using directives that are active in the current file.  */
-
-static struct using_direct *using_list;
-
 
 static int compare_line_numbers (const void *ln1p, const void *ln2p);
-
-static void scan_for_anonymous_namespaces (struct symbol *symbol);
 
 
 /* Initial sizes of data structures.  These are realloc'd larger if
@@ -139,71 +132,8 @@ add_symbol_to_list (struct symbol *symbol, struct pending **listhead)
   /* Check to see if we might need to look for a mention of anonymous
      namespaces.  */
   
-   if (SYMBOL_LANGUAGE (symbol) == language_cplus
-       && !processing_has_namespace_info
-       && SYMBOL_CPLUS_DEMANGLED_NAME (symbol) != NULL)
-     scan_for_anonymous_namespaces (symbol);
-}
-
-/* Check to see if a symbol is contained within an anonymous
-   namespace; if so, add an appropriate using directive.  */
-
-static void
-scan_for_anonymous_namespaces (struct symbol *symbol)
-{
-  const char *name = SYMBOL_CPLUS_DEMANGLED_NAME (symbol);
-  unsigned int previous_component;
-  unsigned int next_component;
-  const char *len;
-  const char *anonymous_name;
-  int anonymous_len;
-
-  /* Start with a quick-and-dirty check for mentions of anonymous
-     namespaces.  */
-
-  switch (cp_is_anonymous (name))
-    {
-    case 1:
-      anonymous_name = "(anonymous namespace)";
-      break;
-    case 2:
-      /* FIXME: carlton/2003-03-10: This corresponds to GCCv2, and
-	 urrently, the demangler actually can't demangle all anonymous
-	 namespace mentions correctly.  (See PR gdb/1134.) Given
-	 GCCv2's lack of namespace support, I'm tempted to skip this
-	 case entirely.  */
-      anonymous_name = "{anonymous}";
-      break;
-    default:
-      return;
-    }
-
-  anonymous_len = strlen (anonymous_name);
-
-  previous_component = 0;
-  next_component = cp_find_first_component (name + previous_component);
-
-  while (name[next_component] == ':')
-    {
-      if ((next_component - previous_component) == anonymous_len
-	  && (strncmp (name + previous_component, anonymous_name,
-		       anonymous_len)
-	      == 0))
-	{
-	  /* We've found a component of the name that's an anonymous
-	     namespace.  So add symbols in it to the namespace given
-	     by the previous component if there is one, or to the
-	     global namespace if there isn't.  */
-	  add_using_directive (name,
-			       previous_component == 0
-			       ? 0 : previous_component - 2,
-			       next_component);
-	}
-      /* The "+ 2" is for the "::".  */
-      previous_component = next_component + 2;
-      next_component = (previous_component
-			+ cp_find_first_component (name + previous_component));
-    }
+  if (SYMBOL_LANGUAGE (symbol) == language_cplus)
+    cp_scan_for_anonymous_namespaces (symbol);
 }
 
 /* Find a symbol named NAME on a LIST.  NAME need not be
@@ -229,34 +159,6 @@ find_symbol_in_list (struct pending *list, char *name, int length)
       list = list->next;
     }
   return (NULL);
-}
-
-/* Add a using directive to using_list.  NAME is the start of a string
-   that should contain the namespaces we want to add as initial
-   substrings, OUTER_LENGTH is the end of the outer namespace, and
-   INNER_LENGTH is the end of the inner namespace.  If the using
-   directive in question has already been added, don't add it
-   twice.  */
-
-void
-add_using_directive (const char *name, unsigned int outer_length,
-		     unsigned int inner_length)
-{
-  struct using_direct *current;
-  struct using_direct *new_node;
-
-  /* Has it already been added?  */
-
-  for (current = using_list; current != NULL; current = current->next)
-    {
-      if ((strncmp (current->inner, name, inner_length) == 0)
-	  && (strlen (current->inner) == inner_length)
-	  && (strlen (current->outer) == outer_length))
-	return;
-    }
-
-  using_list = cp_add_using (name, inner_length, outer_length,
-			     using_list);
 }
 
 /* At end of reading syms, or in case of quit, really free as many
@@ -447,39 +349,10 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 	    }
 	}
 
-      /* If we're in the C++ case, record the namespace that the
-	 function was defined in.  Make sure that the name was
-	 originally mangled: if not, there certainly isn't any
-	 namespace information to worry about!  */
-      if (SYMBOL_LANGUAGE (symbol) == language_cplus
-	  && SYMBOL_CPLUS_DEMANGLED_NAME (symbol) != NULL)
+      /* If we're in the C++ case, set the block's scope.  */
+      if (SYMBOL_LANGUAGE (symbol) == language_cplus)
 	{
-	  if (processing_has_namespace_info)
-	    {
-	      block_set_scope
-		(block, obsavestring (processing_current_prefix,
-				      strlen (processing_current_prefix),
-				      &objfile->symbol_obstack),
-		 &objfile->symbol_obstack);
-	    }
-	  else
-	    {
-	      /* Try to figure out the appropriate namespace from the
-		 demangled name.  */
-
-	      /* FIXME: carlton/2003-02-21: If the function in
-		 question is a method of a class, the name will
-		 actually include the name of the class as well.  This
-		 should be harmless, but is a little unfortunate.  */
-
-	      const char *name = SYMBOL_CPLUS_DEMANGLED_NAME (symbol);
-	      unsigned int prefix_len = cp_entire_prefix_len (name);
-
-	      block_set_scope (block,
-			       obsavestring (name, prefix_len,
-					     &objfile->symbol_obstack),
-			       &objfile->symbol_obstack);
-	    }
+	  cp_set_block_scope (symbol, block, &objfile->symbol_obstack);
 	}
     }
   else
@@ -911,8 +784,6 @@ start_symtab (const char *name, char *dirname, CORE_ADDR start_addr)
   global_symbols = NULL;
   within_function = 0;
   have_line_numbers = 0;
-  processing_has_namespace_info = 0;
-  using_list = NULL;
 
   /* Context stack is initially empty.  Allocate first one with room
      for 10 levels; reuse it forever afterward.  */
@@ -923,6 +794,10 @@ start_symtab (const char *name, char *dirname, CORE_ADDR start_addr)
 	xmalloc (context_stack_size * sizeof (struct context_stack));
     }
   context_stack_depth = 0;
+
+  /* Set up support for C++ namespace support, in case we need it.  */
+
+  cp_initialize_namespace ();
 
   /* Initialize the list of sub source files with one entry for this
      file (the top-level source file).  */
@@ -1045,14 +920,8 @@ end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
       finish_block (0, &global_symbols, 0, last_source_start_addr, end_addr,
 		    objfile);
       blockvector = make_blockvector (objfile);
-      if (using_list != NULL)
-	{
-	  block_set_using (BLOCKVECTOR_BLOCK (blockvector, STATIC_BLOCK),
-			   cp_copy_usings (using_list,
-					   &objfile->symbol_obstack),
-			   &objfile->symbol_obstack);
-	  using_list = NULL;
-	}
+      cp_finalize_namespace (BLOCKVECTOR_BLOCK (blockvector, STATIC_BLOCK),
+			     &objfile->symbol_obstack);
     }
 
 #ifndef PROCESS_LINENUMBER_HOOK

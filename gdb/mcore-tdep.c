@@ -671,7 +671,7 @@ mcore_frame_chain (struct frame_info * fi)
 
      If our caller does not have a frame pointer, then his frame base
      is <our base> + -<caller's frame size>. */
-  dummy = analyze_dummy_frame (FRAME_SAVED_PC (fi), get_frame_base (fi));
+  dummy = analyze_dummy_frame (DEPRECATED_FRAME_SAVED_PC (fi), get_frame_base (fi));
 
   if (get_frame_extra_info (dummy)->status & MY_FRAME_IN_FP)
     {
@@ -803,7 +803,7 @@ mcore_pop_frame (void)
   else
     {
       /* Write out the PC we saved. */
-      write_register (PC_REGNUM, FRAME_SAVED_PC (fi));
+      write_register (PC_REGNUM, DEPRECATED_FRAME_SAVED_PC (fi));
 
       /* Restore any saved registers. */
       for (rn = 0; rn < NUM_REGS; rn++)
@@ -1047,7 +1047,7 @@ void
 mcore_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 {
   if (fi && get_next_frame (fi))
-    deprecated_update_frame_pc_hack (fi, FRAME_SAVED_PC (get_next_frame (fi)));
+    deprecated_update_frame_pc_hack (fi, DEPRECATED_FRAME_SAVED_PC (get_next_frame (fi)));
 
   frame_saved_regs_zalloc (fi);
 
@@ -1116,34 +1116,26 @@ mcore_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Call Dummies:  */
 
-  set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_call_dummy_words (gdbarch, call_dummy_words);
   set_gdbarch_sizeof_call_dummy_words (gdbarch, 0);
-  set_gdbarch_call_dummy_start_offset (gdbarch, 0);
-  set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
-  set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
-  set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
-  set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
   set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
-  set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
-  set_gdbarch_saved_pc_after_call (gdbarch, mcore_saved_pc_after_call);
+  set_gdbarch_deprecated_saved_pc_after_call (gdbarch, mcore_saved_pc_after_call);
   set_gdbarch_function_start_offset (gdbarch, 0);
   set_gdbarch_decr_pc_after_break (gdbarch, 0);
   set_gdbarch_breakpoint_from_pc (gdbarch, mcore_breakpoint_from_pc);
-  set_gdbarch_push_return_address (gdbarch, mcore_push_return_address);
-  set_gdbarch_push_arguments (gdbarch, mcore_push_arguments);
-  set_gdbarch_call_dummy_length (gdbarch, 0);
+  set_gdbarch_deprecated_push_return_address (gdbarch, mcore_push_return_address);
+  set_gdbarch_deprecated_push_arguments (gdbarch, mcore_push_arguments);
 
   /* Frames:  */
 
   set_gdbarch_deprecated_init_extra_frame_info (gdbarch, mcore_init_extra_frame_info);
-  set_gdbarch_frame_chain (gdbarch, mcore_frame_chain);
+  set_gdbarch_deprecated_frame_chain (gdbarch, mcore_frame_chain);
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, mcore_frame_init_saved_regs);
-  set_gdbarch_frame_saved_pc (gdbarch, mcore_frame_saved_pc);
+  set_gdbarch_deprecated_frame_saved_pc (gdbarch, mcore_frame_saved_pc);
   set_gdbarch_deprecated_store_return_value (gdbarch, mcore_store_return_value);
   set_gdbarch_deprecated_extract_return_value (gdbarch, 
 					       mcore_extract_return_value);
-  set_gdbarch_store_struct_return (gdbarch, mcore_store_struct_return);
+  set_gdbarch_deprecated_store_struct_return (gdbarch, mcore_store_struct_return);
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, 
 						       mcore_extract_struct_value_address);
   set_gdbarch_skip_prologue (gdbarch, mcore_skip_prologue);
@@ -1151,7 +1143,7 @@ mcore_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_args_address (gdbarch, mcore_frame_args_address);
   set_gdbarch_frame_locals_address (gdbarch, mcore_frame_locals_address);
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
-  set_gdbarch_pop_frame (gdbarch, mcore_pop_frame);
+  set_gdbarch_deprecated_pop_frame (gdbarch, mcore_pop_frame);
   set_gdbarch_virtual_frame_pointer (gdbarch, mcore_virtual_frame_pointer);
 
   /* Misc.:  */
@@ -1163,6 +1155,9 @@ mcore_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* MCore will never pass a sturcture by reference. It will always be split
      between registers and stack.  */
   set_gdbarch_reg_struct_has_addr (gdbarch, mcore_reg_struct_has_addr);
+
+  /* Should be using push_dummy_call.  */
+  set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
 
   return gdbarch;
 }

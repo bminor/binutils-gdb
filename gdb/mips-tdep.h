@@ -22,6 +22,8 @@
 #ifndef MIPS_TDEP_H
 #define MIPS_TDEP_H
 
+struct gdbarch;
+
 /* All the possible MIPS ABIs. */
 enum mips_abi
   {

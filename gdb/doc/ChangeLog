@@ -1,3 +1,120 @@
+2003-04-09  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.texinfo (Symbols): Document 'maint list symtabs' and 'maint
+	list psymtabs'.
+
+2003-04-08  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Delete
+	references to EXTRA_FRAME_INFO.
+
+2003-04-08  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Delete
+	PRINT_TYPELESS_INTEGER.
+
+2003-04-02  J. Brobecker  <brobecker@gnat.com>
+
+	* observer.texi (GDB Observers): Adjust the documentation for the
+	normal_stop notification to better describe reality. Fix a couple
+	of minor typos.
+
+2003-04-02  Bob Rossi  <bob_rossi@cox.net>
+
+	* gdb.texinfo (GDB/MI Program Control): Add 
+	'-file-list-exec-source-file'
+
+2003-03-31  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Delete
+	references to CALL_DUMMY_P.
+
+2003-03-30  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Remove
+	reference to TARGET_WRITE_SP.
+	
+2003-03-27  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Remove
+	references to write_sp.
+
+2003-03-27  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.texinfo (GDB/MI Variable Objects): Replace @include with
+	chapter body.  Use @smallexample instead of @example.
+	(Annotations): Ditto.
+	* Makefile.in (GDB_DOC_SOURCE_INCLUDES): Remove gdbmi.texinfo and
+	annotate.texi.
+
+2003-03-26  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Replace
+	PUSH_ARGUMENTS with push_dummy_call, add gdbarch, regcache and
+	dummy_addr parameters.
+
+2003-03-25  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Delete
+	reference to CALL_DUMMY_STACK_ADJUST_P.  Rename
+	CALL_DUMMY_STACK_ADJUST to DEPRECATED_CALL_DUMMY_STACK_ADJUST.
+	Add reference to PUSH_ARGUMENTS.
+
+2003-03-23  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Algorithms, Target Architecture Definition):
+	Deprecate FRAME_CHAIN and FRAME_CHAIN_VALID.
+
+2003-03-18  J. Brobecker  <brobecker@gnat.com>
+
+	* gdbint.texinfo (Algorithms): Add new section describing the
+	Observer paradigm.
+	(Top): Add menu entry to new observer appendix.
+	* observer.texi: New file.
+	* Makefile.in (GDBINT_DOC_SOURCE_INCLUDES): Add dependency on
+	new observer.texi file.
+
+2003-03-17  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.texinfo (DATE): Delete.  Remove date from titles.  Mention
+	that GNU Press update the manual version number.
+
+2003-03-12  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Delete
+	references to get_saved_register.  Rename GET_SAVED_REGISTER to
+	DEPRECATED_GET_SAVED_REGISTER.
+
+2003-03-13  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Replace
+	POP_FRAME with DEPRECATED_POP_FRAME.  Update description.
+
+2003-03-12  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Rename
+	FRAME_SAVED_PC to DEPRECATED_FRAME_SAVED_PC.
+	
+2003-03-10  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.texinfo: Add File-I/O documentation.
+
+2003-03-10  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Cross reference
+	FRAME_SAVED_PC to unwind_pc.  Document unwind_pc.
+
+2003-03-07  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.texinfo (Debugging Output): Mention the "set/show debug
+	frame" command.
+
+2003-03-05  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Document
+	unwind_dummy_id.  Cross reference unwind_dummy_id and
+	SAVE_DUMMY_FRAME_TOS.
+
 2003-03-05  James Ingham <jingham@apple.com>
 	    Daniel Jacobowitz  <drow@mvista.com>
 

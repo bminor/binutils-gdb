@@ -502,7 +502,7 @@ i386_frameless_signal_p (struct frame_info *frame)
   return (get_next_frame (frame)
 	  && get_frame_type (get_next_frame (frame)) == SIGTRAMP_FRAME
 	  && (frameless_look_for_prologue (frame)
-	      || get_frame_pc (frame) == get_pc_function_start (get_frame_pc (frame))));
+	      || get_frame_pc (frame) == get_frame_func (frame)));
 }
 
 /* Return the chain-pointer for FRAME.  In the case of the i386, the
@@ -636,10 +636,10 @@ i386_frame_num_args (struct frame_info *fi)
   if (pfi == 0)
     {
       /* NOTE: This can happen if we are looking at the frame for
-         main, because FRAME_CHAIN_VALID won't let us go into start.
-         If we have debugging symbols, that's not really a big deal;
-         it just means it will only show as many arguments to main as
-         are declared.  */
+         main, because DEPRECATED_FRAME_CHAIN_VALID won't let us go
+         into start.  If we have debugging symbols, that's not really
+         a big deal; it just means it will only show as many arguments
+         to main as are declared.  */
       return -1;
     }
   else
@@ -714,7 +714,7 @@ i386_frame_init_saved_regs (struct frame_info *fip)
 
   frame_saved_regs_zalloc (fip);
 
-  pc = get_pc_function_start (get_frame_pc (fip));
+  pc = get_frame_func (fip);
   if (pc != 0)
     locals = i386_get_frame_setup (pc);
 
@@ -925,7 +925,7 @@ static CORE_ADDR
 i386_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 		     int struct_return, CORE_ADDR struct_addr)
 {
-  sp = default_push_arguments (nargs, args, sp, struct_return, struct_addr);
+  sp = legacy_push_arguments (nargs, args, sp, struct_return, struct_addr);
   
   if (struct_return)
     {
@@ -937,12 +937,6 @@ i386_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
     }
 
   return sp;
-}
-
-static void
-i386_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
-{
-  /* Do nothing.  Everything was already done by i386_push_arguments.  */
 }
 
 /* These registers are used for returning integers (and on some
@@ -1129,7 +1123,7 @@ i386_use_struct_convention (int gcc_p, struct type *type)
    potentially they could be used for things other than address.  */
 
 static struct type *
-i386_register_virtual_type (int regnum)
+i386_register_type (struct gdbarch *gdbarch, int regnum)
 {
   if (regnum == PC_REGNUM || regnum == FP_REGNUM || regnum == SP_REGNUM)
     return lookup_pointer_type (builtin_type_void);
@@ -1558,25 +1552,15 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_name (gdbarch, i386_register_name);
   set_gdbarch_register_size (gdbarch, 4);
   set_gdbarch_register_bytes (gdbarch, I386_SIZEOF_GREGS + I386_SIZEOF_FREGS);
-  set_gdbarch_deprecated_max_register_raw_size (gdbarch, I386_MAX_REGISTER_SIZE);
-  set_gdbarch_deprecated_max_register_virtual_size (gdbarch, I386_MAX_REGISTER_SIZE);
-  set_gdbarch_register_virtual_type (gdbarch, i386_register_virtual_type);
+  set_gdbarch_register_type (gdbarch, i386_register_type);
 
   set_gdbarch_print_float_info (gdbarch, i387_print_float_info);
 
   set_gdbarch_get_longjmp_target (gdbarch, i386_get_longjmp_target);
 
   /* Call dummy code.  */
-  set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
-  set_gdbarch_call_dummy_start_offset (gdbarch, 0);
-  set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
-  set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
-  set_gdbarch_call_dummy_length (gdbarch, 0);
-  set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_call_dummy_words (gdbarch, NULL);
   set_gdbarch_sizeof_call_dummy_words (gdbarch, 0);
-  set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
-  set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
 
   set_gdbarch_register_convertible (gdbarch, i386_register_convertible);
   set_gdbarch_register_convert_to_virtual (gdbarch,
@@ -1589,10 +1573,9 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_parm_boundary (gdbarch, 32);
 
   set_gdbarch_extract_return_value (gdbarch, i386_extract_return_value);
-  set_gdbarch_push_arguments (gdbarch, i386_push_arguments);
-  set_gdbarch_push_return_address (gdbarch, i386_push_return_address);
-  set_gdbarch_pop_frame (gdbarch, i386_pop_frame);
-  set_gdbarch_store_struct_return (gdbarch, i386_store_struct_return);
+  set_gdbarch_deprecated_push_arguments (gdbarch, i386_push_arguments);
+  set_gdbarch_deprecated_push_return_address (gdbarch, i386_push_return_address);
+  set_gdbarch_deprecated_pop_frame (gdbarch, i386_pop_frame);
   set_gdbarch_store_return_value (gdbarch, i386_store_return_value);
   set_gdbarch_extract_struct_value_address (gdbarch,
 					    i386_extract_struct_value_address);
@@ -1616,9 +1599,9 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_args_skip (gdbarch, 8);
   set_gdbarch_frameless_function_invocation (gdbarch,
                                            i386_frameless_function_invocation);
-  set_gdbarch_frame_chain (gdbarch, i386_frame_chain);
-  set_gdbarch_frame_saved_pc (gdbarch, i386_frame_saved_pc);
-  set_gdbarch_saved_pc_after_call (gdbarch, i386_saved_pc_after_call);
+  set_gdbarch_deprecated_frame_chain (gdbarch, i386_frame_chain);
+  set_gdbarch_deprecated_frame_saved_pc (gdbarch, i386_frame_saved_pc);
+  set_gdbarch_deprecated_saved_pc_after_call (gdbarch, i386_saved_pc_after_call);
   set_gdbarch_frame_num_args (gdbarch, i386_frame_num_args);
   set_gdbarch_pc_in_sigtramp (gdbarch, i386_pc_in_sigtramp);
 
@@ -1632,6 +1615,9 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Add the i386 register groups.  */
   i386_add_reggroups (gdbarch);
   set_gdbarch_register_reggroup_p (gdbarch, i386_register_reggroup_p);
+
+  /* Should be using push_dummy_call.  */
+  set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);

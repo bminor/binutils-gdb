@@ -354,7 +354,7 @@ xstormy16_pop_frame (void)
 						      xstormy16_reg_size));
 	  }
       /* Restore the PC */
-      write_register (PC_REGNUM, FRAME_SAVED_PC (fi));
+      write_register (PC_REGNUM, DEPRECATED_FRAME_SAVED_PC (fi));
       flush_cached_frames ();
     }
   return;
@@ -723,11 +723,10 @@ xstormy16_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
    actual value of the previous frame's stack register. 
 
    This function may be called in any context where the saved register
-   values may be needed (backtrace, frame_info, get_saved_register).
-   On many targets, it is called directly by init_extra_frame_info, 
-   in part because the information may be needed immediately by 
-   frame_chain.
-*/
+   values may be needed (backtrace, frame_info, frame_register).  On
+   many targets, it is called directly by init_extra_frame_info, in
+   part because the information may be needed immediately by
+   frame_chain.  */
 
 static void
 xstormy16_frame_init_saved_regs (struct frame_info *fi)
@@ -749,9 +748,8 @@ xstormy16_frame_init_saved_regs (struct frame_info *fi)
 
 /* Function: xstormy16_frame_saved_pc
    Returns the return address for the selected frame. 
-   Called by frame_info, frame_chain_valid, and sometimes by
-   get_prev_frame.
-*/
+   Called by frame_info, legacy_frame_chain_valid, and sometimes by
+   get_prev_frame.  */
 
 static CORE_ADDR
 xstormy16_frame_saved_pc (struct frame_info *fi)
@@ -836,17 +834,16 @@ xstormy16_frame_chain (struct frame_info *fi)
 static int
 xstormy16_frame_chain_valid (CORE_ADDR chain, struct frame_info *thisframe)
 {
-  return chain < 0x8000 && FRAME_SAVED_PC (thisframe) >= 0x8000 &&
+  return chain < 0x8000 && DEPRECATED_FRAME_SAVED_PC (thisframe) >= 0x8000 &&
     (get_frame_extra_info (thisframe)->frameless_p ||
      get_frame_base (thisframe) - get_frame_extra_info (thisframe)->framesize == chain);
 }
 
-/* Function: xstormy16_saved_pc_after_call
-   Returns the previous PC immediately after a function call.
-   This function is meant to bypass the regular get_saved_register
-   mechanism, ie. it is meant to work even if the frame isn't complete. 
-   Called by step_over_function, and sometimes by get_prev_frame.
-*/
+/* Function: xstormy16_saved_pc_after_call Returns the previous PC
+   immediately after a function call.  This function is meant to
+   bypass the regular frame_register() mechanism, ie. it is meant to
+   work even if the frame isn't complete.  Called by
+   step_over_function, and sometimes by get_prev_frame.  */
 
 static CORE_ADDR
 xstormy16_saved_pc_after_call (struct frame_info *ignore)
@@ -1057,12 +1054,12 @@ xstormy16_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 				     xstormy16_init_extra_frame_info);
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch,
 				     xstormy16_frame_init_saved_regs);
-  set_gdbarch_frame_chain (gdbarch, xstormy16_frame_chain);
-  set_gdbarch_get_saved_register (gdbarch, xstormy16_get_saved_register);
-  set_gdbarch_saved_pc_after_call (gdbarch, xstormy16_saved_pc_after_call);
-  set_gdbarch_frame_saved_pc (gdbarch, xstormy16_frame_saved_pc);
+  set_gdbarch_deprecated_frame_chain (gdbarch, xstormy16_frame_chain);
+  set_gdbarch_deprecated_get_saved_register (gdbarch, xstormy16_get_saved_register);
+  set_gdbarch_deprecated_saved_pc_after_call (gdbarch, xstormy16_saved_pc_after_call);
+  set_gdbarch_deprecated_frame_saved_pc (gdbarch, xstormy16_frame_saved_pc);
   set_gdbarch_skip_prologue (gdbarch, xstormy16_skip_prologue);
-  set_gdbarch_frame_chain_valid (gdbarch, xstormy16_frame_chain_valid);
+  set_gdbarch_deprecated_frame_chain_valid (gdbarch, xstormy16_frame_chain_valid);
 
   set_gdbarch_in_function_epilogue_p (gdbarch,
 				      xstormy16_in_function_epilogue_p);
@@ -1086,28 +1083,20 @@ xstormy16_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
    * Call Dummies
    * 
    * These values and methods are used when gdb calls a target function.  */
-  set_gdbarch_push_return_address (gdbarch, xstormy16_push_return_address);
+  set_gdbarch_deprecated_push_return_address (gdbarch, xstormy16_push_return_address);
   set_gdbarch_deprecated_extract_return_value (gdbarch, xstormy16_extract_return_value);
-  set_gdbarch_push_arguments (gdbarch, xstormy16_push_arguments);
-  set_gdbarch_pop_frame (gdbarch, xstormy16_pop_frame);
-  set_gdbarch_store_struct_return (gdbarch, xstormy16_store_struct_return);
+  set_gdbarch_deprecated_push_arguments (gdbarch, xstormy16_push_arguments);
+  set_gdbarch_deprecated_pop_frame (gdbarch, xstormy16_pop_frame);
+  set_gdbarch_deprecated_store_struct_return (gdbarch, xstormy16_store_struct_return);
   set_gdbarch_deprecated_store_return_value (gdbarch, xstormy16_store_return_value);
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, xstormy16_extract_struct_value_address);
   set_gdbarch_use_struct_convention (gdbarch,
 				     xstormy16_use_struct_convention);
-  set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
-  set_gdbarch_call_dummy_start_offset (gdbarch, 0);
-  set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
-  set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
-  set_gdbarch_call_dummy_length (gdbarch, 0);
-  set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_call_dummy_words (gdbarch, call_dummy_words);
   set_gdbarch_sizeof_call_dummy_words (gdbarch, 0);
-  set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
-  /* set_gdbarch_call_dummy_stack_adjust */
-  set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
   set_gdbarch_breakpoint_from_pc (gdbarch, xstormy16_breakpoint_from_pc);
 
+  set_gdbarch_char_signed (gdbarch, 0);
   set_gdbarch_int_bit (gdbarch, 2 * TARGET_CHAR_BIT);
   set_gdbarch_ptr_bit (gdbarch, 2 * TARGET_CHAR_BIT);
   set_gdbarch_addr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
@@ -1117,7 +1106,6 @@ xstormy16_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pointer_to_address (gdbarch, xstormy16_pointer_to_address);
 
   set_gdbarch_stack_align (gdbarch, xstormy16_stack_align);
-  set_gdbarch_extra_stack_alignment_needed (gdbarch, 0);
 
   set_gdbarch_save_dummy_frame_tos (gdbarch, xstormy16_save_dummy_frame_tos);
 
@@ -1125,6 +1113,9 @@ xstormy16_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_in_solib_call_trampoline (gdbarch,
 					xstormy16_in_solib_call_trampoline);
+
+  /* Should be using push_dummy_call.  */
+  set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
 
   return gdbarch;
 }

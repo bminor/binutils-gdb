@@ -345,7 +345,7 @@ read_2u (bfd *abfd, char **p)
   unsigned ret;
 
   ret = bfd_get_16 (abfd, (bfd_byte *) * p);
-  (*p)++;
+  (*p) += 2;
   return ret;
 }
 

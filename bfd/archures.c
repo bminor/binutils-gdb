@@ -163,7 +163,7 @@ DESCRIPTION
 .  bfd_arch_m88k,      {* Motorola 88xxx *}
 .  bfd_arch_m98k,      {* Motorola 98xxx *}
 .  bfd_arch_pyramid,   {* Pyramid Technology *}
-.  bfd_arch_h8300,     {* Hitachi H8/300 *}
+.  bfd_arch_h8300,     {* Renesas H8/300 (formerly Hitachi H8/300) *}
 .#define bfd_mach_h8300   1
 .#define bfd_mach_h8300h  2
 .#define bfd_mach_h8300s  3
@@ -208,8 +208,8 @@ DESCRIPTION
 .  bfd_arch_z8k,       {* Zilog Z8000 *}
 .#define bfd_mach_z8001		1
 .#define bfd_mach_z8002		2
-.  bfd_arch_h8500,     {* Hitachi H8/500 *}
-.  bfd_arch_sh,        {* Hitachi SH *}
+.  bfd_arch_h8500,     {* Renesas H8/500 (formerly Hitachi H8/500) *}
+.  bfd_arch_sh,        {* Renesas SH (formerly Hitachi SH) *}
 .#define bfd_mach_sh            1
 .#define bfd_mach_sh2        0x20
 .#define bfd_mach_sh_dsp     0x2d
@@ -224,6 +224,7 @@ DESCRIPTION
 .#define bfd_mach_alpha_ev5  0x20
 .#define bfd_mach_alpha_ev6  0x30
 .  bfd_arch_arm,       {* Advanced Risc Machines ARM.  *}
+.#define bfd_mach_arm_unknown	0
 .#define bfd_mach_arm_2		1
 .#define bfd_mach_arm_2a	2
 .#define bfd_mach_arm_3		3
@@ -235,12 +236,13 @@ DESCRIPTION
 .#define bfd_mach_arm_5TE	9
 .#define bfd_mach_arm_XScale	10
 .#define bfd_mach_arm_ep9312	11
+.#define bfd_mach_arm_iWMMXt	12
 .  bfd_arch_ns32k,     {* National Semiconductors ns32000 *}
 .  bfd_arch_w65,       {* WDC 65816 *}
 .  bfd_arch_tic30,     {* Texas Instruments TMS320C30 *}
 .  bfd_arch_tic4x,     {* Texas Instruments TMS320C3X/4X *}
-.#define bfd_mach_c3x           30
-.#define bfd_mach_c4x           40
+.#define bfd_mach_tic3x         30
+.#define bfd_mach_tic4x         40
 .  bfd_arch_tic54x,    {* Texas Instruments TMS320C54X *}
 .  bfd_arch_tic80,     {* TI TMS320c80 (MVP) *}
 .  bfd_arch_v850,      {* NEC V850 *}
@@ -306,6 +308,8 @@ DESCRIPTION
 .#define bfd_mach_msp44          44
 .#define bfd_mach_msp15          15
 .#define bfd_mach_msp16          16  
+.  bfd_arch_xtensa,    {* Tensilica's Xtensa cores.  *}
+.#define bfd_mach_xtensa	1
 .  bfd_arch_last
 .  };
 */
@@ -397,6 +401,7 @@ extern const bfd_arch_info_type bfd_vax_arch;
 extern const bfd_arch_info_type bfd_we32k_arch;
 extern const bfd_arch_info_type bfd_w65_arch;
 extern const bfd_arch_info_type bfd_xstormy16_arch;
+extern const bfd_arch_info_type bfd_xtensa_arch;
 extern const bfd_arch_info_type bfd_z8k_arch;
 
 static const bfd_arch_info_type * const bfd_archures_list[] =
@@ -454,6 +459,7 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
     &bfd_w65_arch,
     &bfd_we32k_arch,
     &bfd_xstormy16_arch,
+    &bfd_xtensa_arch,
     &bfd_z8k_arch,
 #endif
   0

@@ -65,14 +65,15 @@ struct htab;
    confused.  However, we almost always have debugging information
    available for main().
 
-   These variables are used to save the range of PC values which are valid
-   within the main() function and within the function containing the process
-   entry point.  If we always consider the frame for main() as the outermost
-   frame when debugging user code, and the frame for the process entry
-   point function as the outermost frame when debugging startup code, then
-   all we have to do is have FRAME_CHAIN_VALID return false whenever a
-   frame's current PC is within the range specified by these variables.
-   In essence, we set "ceilings" in the frame chain beyond which we will
+   These variables are used to save the range of PC values which are
+   valid within the main() function and within the function containing
+   the process entry point.  If we always consider the frame for
+   main() as the outermost frame when debugging user code, and the
+   frame for the process entry point function as the outermost frame
+   when debugging startup code, then all we have to do is have
+   DEPRECATED_FRAME_CHAIN_VALID return false whenever a frame's
+   current PC is within the range specified by these variables.  In
+   essence, we set "ceilings" in the frame chain beyond which we will
    not proceed when following the frame chain back up the stack.
 
    A nice side effect is that we can still debug startup code without
@@ -83,9 +84,10 @@ struct htab;
    information but we do have usable information for main(), backtraces
    from user code don't go wandering off into the startup code.
 
-   To use this method, define your FRAME_CHAIN_VALID macro like:
+   To use this method, define your DEPRECATED_FRAME_CHAIN_VALID macro
+   like:
 
-   #define FRAME_CHAIN_VALID(chain, thisframe)     \
+   #define DEPRECATED_FRAME_CHAIN_VALID(chain, thisframe)     \
    (chain != 0                                   \
    && !(inside_main_func ((thisframe)->pc))     \
    && !(inside_entry_func ((thisframe)->pc)))

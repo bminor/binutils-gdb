@@ -33,8 +33,9 @@
 #include "c-lang.h"
 #include "jv-lang.h"
 #include "gdbcore.h"
-#include "block.h"
 #include "dictionary.h"
+#include "block.h"
+#include "demangle.h"
 #include <ctype.h>
 
 struct type *java_int_type;
@@ -992,6 +993,12 @@ java_create_fundamental_type (struct objfile *objfile, int typeid)
   return c_create_fundamental_type (objfile, typeid);
 }
 
+static char *java_demangle (const char *mangled, int options)
+{
+  return cplus_demangle (mangled, options | DMGL_JAVA);
+}
+
+
 /* Table mapping opcodes into strings for printing operators
    and precedences of the operators.  */
 
@@ -1050,6 +1057,8 @@ const struct language_defn java_language_defn =
   java_print_type,		/* Print a type using appropriate syntax */
   java_val_print,		/* Print a value using appropriate syntax */
   java_value_print,		/* Print a top-level value */
+  NULL,				/* Language specific skip_trampoline */
+  java_demangle,		/* Language specific symbol demangler */
   {"", "", "", ""},		/* Binary format info */
   {"0%lo", "0", "o", ""},	/* Octal format info */
   {"%ld", "", "d", ""},		/* Decimal format info */

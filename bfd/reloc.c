@@ -2080,10 +2080,7 @@ ENUM
   BFD_RELOC_PCREL_LO16
 ENUMDOC
   Like BFD_RELOC_LO16, but PC relative.
-ENUM
-  BFD_RELOC_MIPSEMB_16_PCREL_S2
-ENUMDOC
-  Like BFD_RELOC_16_PCREL_S2, but for MIPS Embedded PIC.
+
 ENUM
   BFD_RELOC_MIPS_LITERAL
 ENUMDOC
@@ -2152,6 +2149,7 @@ ENUMX
   BFD_RELOC_FRV_GPRELLO
 ENUMDOC
   Fujitsu Frv Relocations.
+COMMENT
 COMMENT
 ENUMDOC
   MIPS ELF relocations.
@@ -2521,6 +2519,8 @@ ENUMX
 ENUMX
   BFD_RELOC_ARM_CP_OFF_IMM
 ENUMX
+  BFD_RELOC_ARM_CP_OFF_IMM_S2
+ENUMX
   BFD_RELOC_ARM_ADR_IMM
 ENUMX
   BFD_RELOC_ARM_LDR_IMM
@@ -2727,7 +2727,7 @@ ENUMX
 ENUMX
   BFD_RELOC_SH_TLS_TPOFF32
 ENUMDOC
-  Hitachi SH relocs.  Not all of these appear in object files.
+  Renesas SH relocs.  Not all of these appear in object files.
 
 ENUM
   BFD_RELOC_THUMB_PCREL_BRANCH9
@@ -3849,6 +3849,49 @@ ENUMX
   BFD_RELOC_IQ2000_UHI16
 ENUMDOC
   IQ2000 Relocations.
+
+ENUM
+  BFD_RELOC_XTENSA_RTLD
+ENUMDOC
+  Special Xtensa relocation used only by PLT entries in ELF shared
+  objects to indicate that the runtime linker should set the value
+  to one of its own internal functions or data structures.
+ENUM
+  BFD_RELOC_XTENSA_GLOB_DAT
+ENUMX
+  BFD_RELOC_XTENSA_JMP_SLOT
+ENUMX
+  BFD_RELOC_XTENSA_RELATIVE
+ENUMDOC
+  Xtensa relocations for ELF shared objects.
+ENUM
+  BFD_RELOC_XTENSA_PLT
+ENUMDOC
+  Xtensa relocation used in ELF object files for symbols that may require
+  PLT entries.  Otherwise, this is just a generic 32-bit relocation.
+ENUM
+  BFD_RELOC_XTENSA_OP0
+ENUMX
+  BFD_RELOC_XTENSA_OP1
+ENUMX
+  BFD_RELOC_XTENSA_OP2
+ENUMDOC
+  Generic Xtensa relocations.  Only the operand number is encoded
+  in the relocation.  The details are determined by extracting the
+  instruction opcode.
+ENUM
+  BFD_RELOC_XTENSA_ASM_EXPAND
+ENUMDOC
+  Xtensa relocation to mark that the assembler expanded the 
+  instructions from an original target.  The expansion size is
+  encoded in the reloc size.
+ENUM
+  BFD_RELOC_XTENSA_ASM_SIMPLIFY
+ENUMDOC
+  Xtensa relocation to mark that the linker should simplify 
+  assembler-expanded instructions.  This is commonly used 
+  internally by the linker after analysis of a 
+  BFD_RELOC_XTENSA_ASM_EXPAND.
 
 ENDSENUM
   BFD_RELOC_UNUSED

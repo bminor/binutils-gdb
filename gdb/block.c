@@ -30,7 +30,7 @@
    C++ files, namely using declarations and the current namespace in
    scope.  */
 
-struct namespace_info
+struct block_namespace_info
 {
   const char *scope;
   struct using_direct *using;
@@ -160,30 +160,6 @@ block_for_pc (register CORE_ADDR pc)
 /* Now come some functions designed to deal with C++ namespace issues.
    The accessors are safe to use even in the non-C++ case.  */
 
-/* This returns the using directives associated to BLOCK (but _not_
-   its parents), if any.  */
-
-static struct using_direct *
-block_using (const struct block *block)
-{
-  if (BLOCK_NAMESPACE (block) == NULL)
-    return NULL;
-  else
-    return BLOCK_NAMESPACE (block)->using;
-}
-
-/* Set block_using (BLOCK) to USING; if needed, allocate memory via
-   OBSTACK.  */
-
-void
-block_set_using (struct block *block, struct using_direct *using,
-		 struct obstack *obstack)
-{
-  block_initialize_namespace (block, obstack);
-
-  BLOCK_NAMESPACE (block)->using = using;
-}
-
 /* This returns the namespace that BLOCK is enclosed in, or "" if it
    isn't enclosed in a namespace at all.  This travels the chain of
    superblocks looking for a scope, if necessary.  */
@@ -201,7 +177,7 @@ block_scope (const struct block *block)
   return "";
 }
 
-/* Set block_scope (BLOCK) to SCOPE; if needed, allocate memory via
+/* Set BLOCK's scope member to SCOPE; if needed, allocate memory via
    OBSTACK.  (It won't make a copy of SCOPE, however, so that already
    has to be allocated correctly.)  */
 
@@ -214,6 +190,32 @@ block_set_scope (struct block *block, const char *scope,
   BLOCK_NAMESPACE (block)->scope = scope;
 }
 
+/* This returns the using directives associated to BLOCK (but _not_
+   its parents), if any.  */
+
+static struct using_direct *
+block_using (const struct block *block)
+{
+  if (BLOCK_NAMESPACE (block) == NULL)
+    return NULL;
+  else
+    return BLOCK_NAMESPACE (block)->using;
+}
+
+/* Set BLOCK's using member to USING; if needed, allocate memory via
+   OBSTACK.  (It won't make a copy of USING, however, so that already
+   has to be allocated correctly.)  */
+
+void
+block_set_using (struct block *block,
+		 struct using_direct *using,
+		 struct obstack *obstack)
+{
+  block_initialize_namespace (block, obstack);
+
+  BLOCK_NAMESPACE (block)->using = using;
+}
+
 /* If BLOCK_NAMESPACE (block) is NULL, allocate it via OBSTACK and
    ititialize its members to zero.  */
 
@@ -223,7 +225,7 @@ block_initialize_namespace (struct block *block, struct obstack *obstack)
   if (BLOCK_NAMESPACE (block) == NULL)
     {
       BLOCK_NAMESPACE (block)
-	= obstack_alloc (obstack, sizeof (struct namespace_info));
+	= obstack_alloc (obstack, sizeof (struct block_namespace_info));
       BLOCK_NAMESPACE (block)->scope = NULL;
       BLOCK_NAMESPACE (block)->using = NULL;
     }
@@ -319,4 +321,3 @@ allocate_block (struct obstack *obstack)
 
   return bl;
 }
-

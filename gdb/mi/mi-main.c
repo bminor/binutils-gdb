@@ -514,6 +514,9 @@ get_register (int regnum, int format)
   char *raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
   char *virtual_buffer = alloca (MAX_REGISTER_VIRTUAL_SIZE);
   int optim;
+  int realnum;
+  CORE_ADDR addr;
+  enum lval_type lval;
   static struct ui_stream *stb = NULL;
 
   stb = ui_out_stream_new (uiout);
@@ -521,9 +524,9 @@ get_register (int regnum, int format)
   if (format == 'N')
     format = 0;
 
-  get_saved_register (raw_buffer, &optim, (CORE_ADDR *) NULL,
-		      deprecated_selected_frame,
-		      regnum, (enum lval_type *) NULL);
+  frame_register (deprecated_selected_frame, regnum, &optim, &lval, &addr,
+		  &realnum, raw_buffer);
+
   if (optim)
     {
       xasprintf (&mi_error_message, "Optimized out");

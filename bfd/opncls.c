@@ -931,8 +931,13 @@ find_separate_debug_file (abfd, debug_file_directory)
 
   basename = get_debug_link_info (abfd, & crc32);
 
-  if (basename == NULL || strlen (basename) < 1)
+  if (basename == NULL)
     return NULL;
+  if (strlen (basename) < 1)
+    {
+      free (basename);
+      return NULL;
+    }
 
   dir = xstrdup (abfd->filename);
   BFD_ASSERT (strlen (dir) != 0);

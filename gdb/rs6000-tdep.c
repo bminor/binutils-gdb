@@ -137,6 +137,18 @@ altivec_register_p (int regno)
     return (regno >= tdep->ppc_vr0_regnum && regno <= tdep->ppc_vrsave_regnum);
 }
 
+/* Use the architectures FP registers?  */
+int
+ppc_floating_point_unit_p (struct gdbarch *gdbarch)
+{
+  const struct bfd_arch_info *info = gdbarch_bfd_arch_info (gdbarch);
+  if (info->arch == bfd_arch_powerpc)
+    return (info->mach != bfd_mach_ppc_e500);
+  if (info->arch == bfd_arch_rs6000)
+    return 1;
+  return 0;
+}
+
 /* Read a LEN-byte address from debugged memory address MEMADDR. */
 
 static CORE_ADDR
@@ -978,7 +990,7 @@ rs6000_pop_frame (void)
      still in the link register, otherwise walk the frames and retrieve the
      saved %pc value in the previous frame.  */
 
-  addr = get_pc_function_start (get_frame_pc (frame));
+  addr = get_frame_func (frame);
   (void) skip_prologue (addr, get_frame_pc (frame), &fdata);
 
   wordsize = gdbarch_tdep (current_gdbarch)->wordsize;
@@ -1487,7 +1499,7 @@ rs6000_frameless_function_invocation (struct frame_info *fi)
       && !(get_frame_type (get_next_frame (fi)) == SIGTRAMP_FRAME))
     return 0;
 
-  func_start = get_pc_function_start (get_frame_pc (fi));
+  func_start = get_frame_func (fi);
 
   /* If we failed to find the start of the function, it is a mistake
      to inspect the instructions.  */
@@ -1528,7 +1540,7 @@ rs6000_frame_saved_pc (struct frame_info *fi)
     return deprecated_read_register_dummy (get_frame_pc (fi),
 					   get_frame_base (fi), PC_REGNUM);
 
-  func_start = get_pc_function_start (get_frame_pc (fi));
+  func_start = get_frame_func (fi);
 
   /* If we failed to find the start of the function, it is a mistake
      to inspect the instructions.  */
@@ -1554,14 +1566,16 @@ rs6000_frame_saved_pc (struct frame_info *fi)
 	  return lr;
 	}
       else
-	return read_memory_addr (FRAME_CHAIN (fi) + tdep->lr_frame_offset,
+	return read_memory_addr (DEPRECATED_FRAME_CHAIN (fi)
+				 + tdep->lr_frame_offset,
 				 wordsize);
     }
 
   if (fdata.lr_offset == 0)
     return read_register (gdbarch_tdep (current_gdbarch)->ppc_lr_regnum);
 
-  return read_memory_addr (FRAME_CHAIN (fi) + fdata.lr_offset, wordsize);
+  return read_memory_addr (DEPRECATED_FRAME_CHAIN (fi) + fdata.lr_offset,
+			   wordsize);
 }
 
 /* If saved registers of frame FI are not known yet, read and cache them.
@@ -1582,8 +1596,7 @@ frame_get_saved_regs (struct frame_info *fi, struct rs6000_framedata *fdatap)
   if (fdatap == NULL)
     {
       fdatap = &work_fdata;
-      (void) skip_prologue (get_pc_function_start (get_frame_pc (fi)),
-			    get_frame_pc (fi), fdatap);
+      (void) skip_prologue (get_frame_func (fi), get_frame_pc (fi), fdatap);
     }
 
   frame_saved_regs_zalloc (fi);
@@ -1608,7 +1621,7 @@ frame_get_saved_regs (struct frame_info *fi, struct rs6000_framedata *fdatap)
        ->frame pointed to the outer-most address of the frame.  In the
        mean time, the address of the prev frame is used as the base
        address of this frame.  */
-    frame_addr = FRAME_CHAIN (fi);
+    frame_addr = DEPRECATED_FRAME_CHAIN (fi);
 
   /* if != -1, fdatap->saved_fpr is the smallest number of saved_fpr.
      All fpr's from saved_fpr to fp31 are saved.  */
@@ -1633,7 +1646,7 @@ frame_get_saved_regs (struct frame_info *fi, struct rs6000_framedata *fdatap)
       CORE_ADDR gpr_addr = frame_addr + fdatap->gpr_offset;
       for (i = fdatap->saved_gpr; i < 32; i++)
 	{
-	  get_frame_saved_regs (fi)[i] = gpr_addr;
+	  get_frame_saved_regs (fi)[tdep->ppc_gp0_regnum + i] = gpr_addr;
 	  gpr_addr += wordsize;
 	}
     }
@@ -1706,8 +1719,7 @@ frame_initial_stack_address (struct frame_info *fi)
 
   /* Find out if this function is using an alloca register.  */
 
-  (void) skip_prologue (get_pc_function_start (get_frame_pc (fi)),
-			get_frame_pc (fi), &fdata);
+  (void) skip_prologue (get_frame_func (fi), get_frame_pc (fi), &fdata);
 
   /* If saved registers of this frame are not known yet, read and
      cache them.  */
@@ -1746,8 +1758,8 @@ frame_initial_stack_address (struct frame_info *fi)
 /* Describe the pointer in each stack frame to the previous stack frame
    (its caller).  */
 
-/* FRAME_CHAIN takes a frame's nominal address
-   and produces the frame's chain-pointer.  */
+/* DEPRECATED_FRAME_CHAIN takes a frame's nominal address and produces
+   the frame's chain-pointer.  */
 
 /* In the case of the RS/6000, the frame's nominal address
    is the address of a 4-byte word containing the calling frame's address.  */
@@ -1880,8 +1892,8 @@ rs6000_register_convert_to_virtual (int n, struct type *type,
 {
   if (TYPE_LENGTH (type) != REGISTER_RAW_SIZE (n))
     {
-      double val = extract_floating (from, REGISTER_RAW_SIZE (n));
-      store_floating (to, TYPE_LENGTH (type), val);
+      double val = deprecated_extract_floating (from, REGISTER_RAW_SIZE (n));
+      deprecated_store_floating (to, TYPE_LENGTH (type), val);
     }
   else
     memcpy (to, from, REGISTER_RAW_SIZE (n));
@@ -1896,8 +1908,8 @@ rs6000_register_convert_to_raw (struct type *type, int n,
 {
   if (TYPE_LENGTH (type) != REGISTER_RAW_SIZE (n))
     {
-      double val = extract_floating (from, TYPE_LENGTH (type));
-      store_floating (to, REGISTER_RAW_SIZE (n), val);
+      double val = deprecated_extract_floating (from, TYPE_LENGTH (type));
+      deprecated_store_floating (to, REGISTER_RAW_SIZE (n), val);
     }
   else
     memcpy (to, from, REGISTER_RAW_SIZE (n));
@@ -2062,10 +2074,10 @@ rs6000_extract_struct_value_address (struct regcache *regcache)
   /* FIXME: cagney/2002-09-26: PR gdb/724: When making an inferior
      function call GDB knows the address of the struct return value
      and hence, should not need to call this function.  Unfortunately,
-     the current hand_function_call() code only saves the most recent
-     struct address leading to occasional calls.  The code should
-     instead maintain a stack of such addresses (in the dummy frame
-     object).  */
+     the current call_function_by_hand() code only saves the most
+     recent struct address leading to occasional calls.  The code
+     should instead maintain a stack of such addresses (in the dummy
+     frame object).  */
   /* NOTE: cagney/2002-09-26: Return 0 which indicates that we've
      really got no idea where the return value is being stored.  While
      r3, on function entry, contained the address it will have since
@@ -2727,9 +2739,9 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   else
     {
       arch = bfd_arch_powerpc;
-      mach = 0;
-      bfd_default_set_arch_mach (&abfd, arch, mach);
+      bfd_default_set_arch_mach (&abfd, arch, 0);
       info.bfd_arch_info = bfd_get_arch_info (&abfd);
+      mach = info.bfd_arch_info->mach;
     }
   tdep = xmalloc (sizeof (struct gdbarch_tdep));
   tdep->wordsize = wordsize;
@@ -2862,7 +2874,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
   set_gdbarch_read_fp (gdbarch, generic_target_read_fp);
   set_gdbarch_read_sp (gdbarch, generic_target_read_sp);
-  set_gdbarch_write_sp (gdbarch, generic_target_write_sp);
+  set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
 
   set_gdbarch_num_regs (gdbarch, v->nregs);
   set_gdbarch_num_pseudo_regs (gdbarch, v->npregs);
@@ -2886,17 +2898,10 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_long_double_bit (gdbarch, 8 * TARGET_CHAR_BIT);
   set_gdbarch_char_signed (gdbarch, 0);
 
-  set_gdbarch_call_dummy_length (gdbarch, 0);
-  set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
-  set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
-  set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
-  set_gdbarch_call_dummy_start_offset (gdbarch, 0);
-  set_gdbarch_call_dummy_p (gdbarch, 1);
-  set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
   set_gdbarch_fix_call_dummy (gdbarch, rs6000_fix_call_dummy);
   set_gdbarch_frame_align (gdbarch, rs6000_frame_align);
   set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
-  set_gdbarch_push_return_address (gdbarch, ppc_push_return_address);
+  set_gdbarch_deprecated_push_return_address (gdbarch, ppc_push_return_address);
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
 
   set_gdbarch_register_convertible (gdbarch, rs6000_register_convertible);
@@ -2911,13 +2916,13 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      64-bit code.  At some point in the future, this matter needs to be
      revisited.  */
   if (sysv_abi && wordsize == 4)
-    set_gdbarch_push_arguments (gdbarch, ppc_sysv_abi_push_arguments);
+    set_gdbarch_deprecated_push_arguments (gdbarch, ppc_sysv_abi_push_arguments);
   else
-    set_gdbarch_push_arguments (gdbarch, rs6000_push_arguments);
+    set_gdbarch_deprecated_push_arguments (gdbarch, rs6000_push_arguments);
 
-  set_gdbarch_store_struct_return (gdbarch, rs6000_store_struct_return);
+  set_gdbarch_deprecated_store_struct_return (gdbarch, rs6000_store_struct_return);
   set_gdbarch_extract_struct_value_address (gdbarch, rs6000_extract_struct_value_address);
-  set_gdbarch_pop_frame (gdbarch, rs6000_pop_frame);
+  set_gdbarch_deprecated_pop_frame (gdbarch, rs6000_pop_frame);
 
   set_gdbarch_skip_prologue (gdbarch, rs6000_skip_prologue);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
@@ -2937,8 +2942,8 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_frameless_function_invocation (gdbarch,
                                          rs6000_frameless_function_invocation);
-  set_gdbarch_frame_chain (gdbarch, rs6000_frame_chain);
-  set_gdbarch_frame_saved_pc (gdbarch, rs6000_frame_saved_pc);
+  set_gdbarch_deprecated_frame_chain (gdbarch, rs6000_frame_chain);
+  set_gdbarch_deprecated_frame_saved_pc (gdbarch, rs6000_frame_saved_pc);
 
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, rs6000_frame_init_saved_regs);
   set_gdbarch_deprecated_init_extra_frame_info (gdbarch, rs6000_init_extra_frame_info);
@@ -2952,7 +2957,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     }
   set_gdbarch_frame_args_address (gdbarch, rs6000_frame_args_address);
   set_gdbarch_frame_locals_address (gdbarch, rs6000_frame_args_address);
-  set_gdbarch_saved_pc_after_call (gdbarch, rs6000_saved_pc_after_call);
+  set_gdbarch_deprecated_saved_pc_after_call (gdbarch, rs6000_saved_pc_after_call);
 
   /* We can't tell how many args there are
      now that the C compiler delays popping them.  */

@@ -275,11 +275,9 @@ static reloc_howto_type elf_mips_howto_table_rel[] =
 	 0x0000ffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
-  /* 16 bit PC relative reference.  Note that the ABI document has a typo
-     and claims R_MIPS_PC16 to be not rightshifted, rendering it useless.
-     We do the right thing here.  */
+  /* 16 bit PC relative reference.  */
   HOWTO (R_MIPS_PC16,		/* type */
-	 2,			/* rightshift */
+	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
 	 TRUE,			/* pc_relative */
@@ -774,11 +772,9 @@ static reloc_howto_type elf_mips_howto_table_rela[] =
 	 0x0000ffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
-  /* 16 bit PC relative reference.  Note that the ABI document has a typo
-     and claims R_MIPS_PC16 to be not rightshifted, rendering it useless.
-     We do the right thing here.  */
+  /* 16 bit PC relative reference.  */
   HOWTO (R_MIPS_PC16,		/* type */
-	 2,			/* rightshift */
+	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
 	 TRUE,			/* pc_relative */
@@ -1841,7 +1837,7 @@ static const struct elf_reloc_map mips_reloc_map[] =
   /* There is no BFD reloc for R_MIPS_REL32.  */
   { BFD_RELOC_CTOR, R_MIPS_32 },
   { BFD_RELOC_64, R_MIPS_64 },
-  { BFD_RELOC_16_PCREL_S2, R_MIPS_PC16 },
+  { BFD_RELOC_16_PCREL, R_MIPS_PC16 },
   { BFD_RELOC_HI16_S, R_MIPS_HI16 },
   { BFD_RELOC_LO16, R_MIPS_LO16 },
   { BFD_RELOC_GPREL16, R_MIPS_GPREL16 },
@@ -2028,7 +2024,7 @@ elf32_mips_grok_prstatus (abfd, note)
       default:
 	return FALSE;
 
-      case 256:		/* Linux/MIPS */
+      case 440:		/* Linux/MIPS N32 */
 	/* pr_cursig */
 	elf_tdata (abfd)->core_signal = bfd_get_16 (abfd, note->descdata + 12);
 
@@ -2037,7 +2033,7 @@ elf32_mips_grok_prstatus (abfd, note)
 
 	/* pr_reg */
 	offset = 72;
-	raw_size = 180;
+	raw_size = 360;
 
 	break;
     }
@@ -2215,6 +2211,7 @@ static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap = {
 #define bfd_elf32_bfd_set_private_flags	_bfd_mips_elf_set_private_flags
 #define bfd_elf32_bfd_print_private_bfd_data \
 					_bfd_mips_elf_print_private_bfd_data
+#define bfd_elf32_bfd_relax_section     _bfd_mips_relax_section
 
 /* Support for SGI-ish mips targets using n32 ABI.  */
 

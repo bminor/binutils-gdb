@@ -59,6 +59,7 @@ double		v_double_array[2];
 
 /* PR 3742 */
 typedef char t_char_array[];
+t_char_array *pv_char_array;
 
 /**** pointers *******/
 
@@ -236,6 +237,8 @@ int *(*fptr2) (int (*) (int, float), float);
 int (*xptr) (int (*) (), int (*) (void), int);
 int (*(*ffptr) (char)) (short);
 int (*(*(*fffptr) (char)) (short)) (long);
+
+func_type v_func_type;
 
 /* Here are the sort of stabs we expect to see for the above:
 

@@ -2,21 +2,21 @@
    Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
    Written by Jakub Jelinek <jakub@redhat.com>.
 
-This file is part of BFD, the Binary File Descriptor library.
+   This file is part of BFD, the Binary File Descriptor library.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -39,7 +39,7 @@ static void write_value
 static int cie_compare
   PARAMS ((struct cie *, struct cie *));
 static int vma_compare
-  PARAMS ((const PTR a, const PTR b));
+  PARAMS ((const PTR, const PTR));
 
 /* Helper function for reading uleb128 encoded data.  */
 
@@ -1112,7 +1112,7 @@ vma_compare (a, b)
    fde_count x [encoded] initial_loc, fde
 				(array of encoded pairs containing
 				 FDE initial_location field and FDE address,
-				 sorted by increasing initial_loc)  */
+				 sorted by increasing initial_loc).  */
 
 bfd_boolean
 _bfd_elf_write_section_eh_frame_hdr (abfd, info)
@@ -1125,6 +1125,7 @@ _bfd_elf_write_section_eh_frame_hdr (abfd, info)
   bfd_byte *contents;
   asection *eh_frame_sec;
   bfd_size_type size;
+  bfd_boolean retval;
 
   htab = elf_hash_table (info);
   hdr_info = &htab->eh_info;
@@ -1141,15 +1142,18 @@ _bfd_elf_write_section_eh_frame_hdr (abfd, info)
 
   eh_frame_sec = bfd_get_section_by_name (abfd, ".eh_frame");
   if (eh_frame_sec == NULL)
-    return FALSE;
+    {
+      free (contents);
+      return FALSE;
+    }
 
   memset (contents, 0, EH_FRAME_HDR_SIZE);
-  contents[0] = 1;				/* Version  */
-  contents[1] = DW_EH_PE_pcrel | DW_EH_PE_sdata4; /* .eh_frame offset  */
+  contents[0] = 1;				/* Version.  */
+  contents[1] = DW_EH_PE_pcrel | DW_EH_PE_sdata4; /* .eh_frame offset.  */
   if (hdr_info->array && hdr_info->array_count == hdr_info->fde_count)
     {
-      contents[2] = DW_EH_PE_udata4;		/* FDE count encoding  */
-      contents[3] = DW_EH_PE_datarel | DW_EH_PE_sdata4; /* search table enc  */
+      contents[2] = DW_EH_PE_udata4;		/* FDE count encoding.  */
+      contents[3] = DW_EH_PE_datarel | DW_EH_PE_sdata4; /* Search table enc.  */
     }
   else
     {
@@ -1177,7 +1181,9 @@ _bfd_elf_write_section_eh_frame_hdr (abfd, info)
 	}
     }
 
-  return bfd_set_section_contents (abfd, sec->output_section,
-				   contents, (file_ptr) sec->output_offset,
-                                   sec->_cooked_size);
+  retval = bfd_set_section_contents (abfd, sec->output_section,
+				     contents, (file_ptr) sec->output_offset,
+				     sec->_cooked_size);
+  free (contents);
+  return retval;
 }

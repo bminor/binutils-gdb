@@ -17,6 +17,7 @@
 
 #include "armdefs.h"
 #include "armemu.h"
+#include "dbg_rdi.h"
 
 /***************************************************************************\
 *                 Definitions for the emulator architecture                 *
@@ -127,6 +128,7 @@ ARMul_NewState (void)
   state->is_v5 = LOW;
   state->is_v5e = LOW;
   state->is_XScale = LOW;
+  state->is_iWMMXt = LOW;
 
   ARMul_Reset (state);
 
@@ -157,6 +159,12 @@ ARMul_SelectProcessor (ARMul_State * state, unsigned properties)
   state->is_v5 = (properties & ARM_v5_Prop) ? HIGH : LOW;
   state->is_v5e = (properties & ARM_v5e_Prop) ? HIGH : LOW;
   state->is_XScale = (properties & ARM_XScale_Prop) ? HIGH : LOW;
+  state->is_iWMMXt = (properties & ARM_iWMMXt_Prop) ? HIGH : LOW;
+  state->is_ep9312 = (properties & ARM_ep9312_Prop) ? HIGH : LOW;
+
+  /* Only initialse the coprocessor support once we
+     know what kind of chip we are dealing with.  */
+  ARMul_CoProInit (state);
 }
 
 /***************************************************************************\
@@ -318,4 +326,24 @@ ARMul_Abort (ARMul_State * state, ARMword vector)
     ARMul_SetR15 (state, vector);
   else
     ARMul_SetR15 (state, R15CCINTMODE | vector);
+
+  if (ARMul_ReadWord (state, ARMul_GetPC (state)) == 0)
+    {
+      /* No vector has been installed.  Rather than simulating whatever
+	 random bits might happen to be at address 0x20 onwards we elect
+	 to stop.  */
+      switch (vector)
+	{
+	case ARMul_ResetV: state->EndCondition = RDIError_Reset; break;
+	case ARMul_UndefinedInstrV: state->EndCondition = RDIError_UndefinedInstruction; break;
+	case ARMul_SWIV: state->EndCondition = RDIError_SoftwareInterrupt; break;
+	case ARMul_PrefetchAbortV: state->EndCondition = RDIError_PrefetchAbort; break;
+	case ARMul_DataAbortV: state->EndCondition = RDIError_DataAbort; break;
+	case ARMul_AddrExceptnV: state->EndCondition = RDIError_AddressException; break;
+	case ARMul_IRQV: state->EndCondition = RDIError_IRQ; break;
+	case ARMul_FIQV: state->EndCondition = RDIError_FIQ; break;
+	default: break;
+	}
+      state->Emulate = FALSE;
+    }
 }

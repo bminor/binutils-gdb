@@ -299,16 +299,16 @@ value_of_register (int regnum, struct frame_info *frame)
   CORE_ADDR addr;
   int optim;
   struct value *reg_val;
+  int realnum;
   char *raw_buffer = (char*) alloca (MAX_REGISTER_RAW_SIZE);
   enum lval_type lval;
 
   /* Builtin registers lie completly outside of the range of normal
      registers.  Catch them early so that the target never sees them.  */
   if (regnum >= NUM_REGS + NUM_PSEUDO_REGS)
-    return value_of_builtin_reg (regnum, deprecated_selected_frame);
+    return value_of_builtin_reg (regnum, frame);
 
-  get_saved_register (raw_buffer, &optim, &addr,
-		      frame, regnum, &lval);
+  frame_register (frame, regnum, &optim, &lval, &addr, &realnum, raw_buffer);
 
   /* FIXME: cagney/2002-05-15: This test is just bogus.
 
@@ -508,7 +508,7 @@ addresses have not been bound by the dynamic loader. Try again when executable i
     case LOC_ARG:
       if (frame == NULL)
 	return 0;
-      addr = FRAME_ARGS_ADDRESS (frame);
+      addr = get_frame_args_address (frame);
       if (!addr)
 	return 0;
       addr += SYMBOL_VALUE (var);
@@ -520,7 +520,7 @@ addresses have not been bound by the dynamic loader. Try again when executable i
 	CORE_ADDR argref;
 	if (frame == NULL)
 	  return 0;
-	argref = FRAME_ARGS_ADDRESS (frame);
+	argref = get_frame_args_address (frame);
 	if (!argref)
 	  return 0;
 	argref += SYMBOL_VALUE (var);
@@ -533,7 +533,7 @@ addresses have not been bound by the dynamic loader. Try again when executable i
     case LOC_LOCAL_ARG:
       if (frame == NULL)
 	return 0;
-      addr = FRAME_LOCALS_ADDRESS (frame);
+      addr = get_frame_locals_address (frame);
       addr += SYMBOL_VALUE (var);
       break;
 
@@ -780,12 +780,9 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
 	     (value_bytes_copied += REGISTER_RAW_SIZE (local_regnum),
 	      ++local_regnum))
 	  {
-	    get_saved_register (value_bytes + value_bytes_copied,
-				&optim,
-				&addr,
-				frame,
-				local_regnum,
-				&lval);
+	    int realnum;
+	    frame_register (frame, local_regnum, &optim, &lval, &addr,
+			    &realnum, value_bytes + value_bytes_copied);
 
 	    if (register_cached (local_regnum) == -1)
 	      return NULL;	/* register value not available */
@@ -851,7 +848,10 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
      register's contents in a real register or in core;
      read the data in raw format.  */
 
-  get_saved_register (raw_buffer, &optim, &addr, frame, regnum, &lval);
+  {
+    int realnum;
+    frame_register (frame, regnum, &optim, &lval, &addr, &realnum, raw_buffer);
+  }
 
   if (register_cached (regnum) == -1)
     return NULL;		/* register value not available */

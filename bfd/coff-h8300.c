@@ -1,4 +1,4 @@
-/* BFD back-end for Hitachi H8/300 COFF binaries.
+/* BFD back-end for Renesas H8/300 COFF binaries.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
    2000, 2001, 2002, 2003
    Free Software Foundation, Inc.

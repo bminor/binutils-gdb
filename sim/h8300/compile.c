@@ -35,6 +35,8 @@
 #include "gdb/callback.h"
 #include "gdb/remote-sim.h"
 #include "gdb/sim-h8300.h"
+#include "sys/stat.h"
+#include "sys/types.h"
 
 #ifndef SIGTRAP
 # define SIGTRAP 5
@@ -172,6 +174,17 @@ lvalue (int x, int rn)
     default:
       abort (); /* ?? May be something more usefull? */
     }
+}
+
+static int
+cmdline_location()
+{
+  if (h8300smode)
+    return 0xffff00L;
+  else if (h8300hmode)
+    return 0x2ff00L;
+  else
+    return 0xff00L;
 }
 
 static unsigned int
@@ -447,14 +460,39 @@ decode (int addr, unsigned char *data, decoded_inst *dst)
 		  dst->opcode = q->how;
 		  dst->cycles = q->time;
 
-		  /* And a jsr to 0xc4 is turned into a magic trap.  */
+		  /* And a jsr to these locations are turned into magic
+		     traps.  */
 
 		  if (dst->opcode == O (O_JSR, SB))
 		    {
-		      if (dst->src.literal == 0xc4)
+		      switch (dst->src.literal)
 			{
-			  dst->opcode = O (O_SYSCALL, SB);
+			case 0xc5:
+			  dst->opcode = O (O_SYS_OPEN, SB);
+			  break;
+			case 0xc6:
+			  dst->opcode = O (O_SYS_READ, SB);
+			  break;
+			case 0xc7:
+			  dst->opcode = O (O_SYS_WRITE, SB);
+			  break;
+			case 0xc8:
+			  dst->opcode = O (O_SYS_LSEEK, SB);
+			  break;
+			case 0xc9:
+			  dst->opcode = O (O_SYS_CLOSE, SB);
+			  break;
+			case 0xca:
+			  dst->opcode = O (O_SYS_STAT, SB);
+			  break;
+			case 0xcb:
+			  dst->opcode = O (O_SYS_FSTAT, SB);
+			  break;
+			case 0xcc:
+			  dst->opcode = O (O_SYS_CMDLINE, SB);
+			  break;
 			}
+		      /* End of Processing for system calls.  */
 		    }
 
 		  dst->next_pc = addr + len / 2;
@@ -1386,12 +1424,446 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	    goto condtrue;
 	  goto next;
 
-	case O (O_SYSCALL, SB):
+	/* Trap for Command Line setup.  */
+	case O (O_SYS_CMDLINE, SB):
 	  {
-	    char c = cpu.regs[2];
-	    sim_callback->write_stdout (sim_callback, &c, 1);
+	    int i = 0;		/* Loop counter.  */
+	    int j = 0;		/* Loop counter.  */
+	    int ind_arg_len = 0;	/* Length of each argument.  */
+	    int no_of_args = 0;	/* The no. or cmdline args.  */
+	    int current_location = 0;	/* Location of string.  */
+	    int old_sp = 0;	/* The Initial Stack Pointer.  */
+	    int no_of_slots = 0;	/* No. of slots required on the stack
+					   for storing cmdline args.  */
+	    int sp_move = 0;	/* No. of locations by which the stack needs
+				   to grow.  */
+	    int new_sp = 0;	/* The final stack pointer location passed
+				   back.  */
+	    int *argv_ptrs;	/* Pointers of argv strings to be stored.  */
+	    int argv_ptrs_location = 0;	/* Location of pointers to cmdline
+					   args on the stack.  */
+	    int char_ptr_size = 0;	/* Size of a character pointer on
+					   target machine.  */
+	    int addr_cmdline = 0;	/* Memory location where cmdline has
+					   to be stored.  */
+	    int size_cmdline = 0;	/* Size of cmdline.  */
+
+	    /* Set the address of 256 free locations where command line is
+	       stored.  */
+	    addr_cmdline = cmdline_location();
+	    cpu.regs[0] = addr_cmdline;
+
+	    /* Counting the no. of commandline arguments.  */
+	    for (i = 0; ptr_command_line[i] != NULL; i++)
+	      continue;
+
+	    /* No. of arguments in the command line.  */
+	    no_of_args = i;
+
+	    /* Current location is just a temporary variable,which we are
+	       setting to the point to the start of our commandline string.  */
+	    current_location = addr_cmdline;
+
+	    /* Allocating space for storing pointers of the command line
+	       arguments.  */
+	    argv_ptrs = (int *) malloc (sizeof (int) * no_of_args);
+
+	    /* Setting char_ptr_size to the sizeof (char *) on the different
+	       architectures.  */
+	    if (h8300hmode || h8300smode)
+	      {
+		char_ptr_size = 4;
+	      }
+	    else
+	      {
+		char_ptr_size = 2;
+	      }
+
+	    for (i = 0; i < no_of_args; i++)
+	      {
+		ind_arg_len = 0;
+
+		/* The size of the commandline argument.  */
+		ind_arg_len = (strlen (ptr_command_line[i]) + 1);
+
+		/* The total size of the command line string.  */
+		size_cmdline += ind_arg_len;
+
+		/* As we have only 256 bytes, we need to provide a graceful
+		   exit. Anyways, a program using command line arguments 
+		   where we cannot store all the command line arguments
+		   given may behave unpredictably.  */
+		if (size_cmdline >= 256)
+		  {
+		    cpu.regs[0] = 0;
+		    goto next;
+		  }
+		else
+		  {
+		    /* current_location points to the memory where the next
+		       commandline argument is stored.  */
+		    argv_ptrs[i] = current_location;
+		    for (j = 0; j < ind_arg_len; j++)
+		      {
+			SET_MEMORY_B ((current_location +
+				       (sizeof (char) * j)),
+				      *(ptr_command_line[i] + 
+				       sizeof (char) * j));
+		      }
+
+		    /* Setting current_location to the starting of next
+		       argument.  */
+		    current_location += ind_arg_len;
+		  }
+	      }
+
+	    /* This is the original position of the stack pointer.  */
+	    old_sp = cpu.regs[7];
+
+	    /* We need space from the stack to store the pointers to argvs.  */
+	    /* As we will infringe on the stack, we need to shift the stack
+	       pointer so that the data is not overwritten. We calculate how
+	       much space is required.  */
+	    sp_move = (no_of_args) * (char_ptr_size);
+
+	    /* The final position of stack pointer, we have thus taken some
+	       space from the stack.  */
+	    new_sp = old_sp - sp_move;
+
+	    /* Temporary variable holding value where the argv pointers need
+	       to be stored.  */
+	    argv_ptrs_location = new_sp;
+
+	    /* The argv pointers are stored at sequential locations. As per
+	       the H8300 ABI.  */
+	    for (i = 0; i < no_of_args; i++)
+	      {
+		/* Saving the argv pointer.  */
+		if (h8300hmode || h8300smode)
+		  {
+		    SET_MEMORY_L (argv_ptrs_location, argv_ptrs[i]);
+		  }
+		else
+		  {
+		    SET_MEMORY_W (argv_ptrs_location, argv_ptrs[i]);
+		  }
+	
+		/* The next location where the pointer to the next argv
+		   string has to be stored.  */    
+		argv_ptrs_location += char_ptr_size;
+	      }
+
+	    /* Required by POSIX, Setting 0x0 at the end of the list of argv
+	       pointers.  */
+	    if (h8300hmode || h8300smode)
+	      {
+		SET_MEMORY_L (old_sp, 0x0);
+	      }
+	    else
+	      {
+		SET_MEMORY_W (old_sp, 0x0);
+	      }
+
+	    /* Freeing allocated memory.  */
+	    free (argv_ptrs);
+	    for (i = 0; i <= no_of_args; i++)
+	      {
+		free (ptr_command_line[i]);
+	      }
+	    free (ptr_command_line);
+
+	    /* The no. of argv arguments are returned in Reg 0.  */
+	    cpu.regs[0] = no_of_args;
+	    /* The Pointer to argv in Register 1.  */
+	    cpu.regs[1] = new_sp;
+	    /* Setting the stack pointer to the new value.  */
+	    cpu.regs[7] = new_sp;
 	  }
 	  goto next;
+
+	  /* System call processing starts.  */
+	case O (O_SYS_OPEN, SB):
+	  {
+	    int len = 0;	/* Length of filename.  */
+	    char *filename;	/* Filename would go here.  */
+	    char temp_char;	/* Temporary character */
+	    int mode = 0;	/* Mode bits for the file.  */
+	    int open_return;	/* Return value of open, file descriptor.  */
+	    int i;		/* Loop counter */
+	    int filename_ptr;	/* Pointer to filename in cpu memory.  */
+
+	    /* Setting filename_ptr to first argument of open.  */
+	    filename_ptr = h8300hmode ? GET_L_REG (0) : GET_W_REG (0);
+
+	    /* Trying to get mode.  */
+	    if (h8300hmode || h8300smode)
+	      {
+		mode = GET_MEMORY_L (cpu.regs[7] + 4);
+	      }
+	    else
+	      {
+		mode = GET_MEMORY_W (cpu.regs[7] + 2);
+	      }
+
+	    /* Trying to find the length of the filename.  */
+	    temp_char = GET_MEMORY_B (cpu.regs[0]);
+
+	    len = 1;
+	    while (temp_char != '\0')
+	      {
+		temp_char = GET_MEMORY_B (filename_ptr + len);
+		len++;
+	      }
+
+	    /* Allocating space for the filename.  */
+	    filename = (char *) malloc (sizeof (char) * len);
+
+	    /* String copying the filename from memory.  */
+	    for (i = 0; i < len; i++)
+	      {
+		temp_char = GET_MEMORY_B (filename_ptr + i);
+		filename[i] = temp_char;
+	      }
+
+	    /* Callback to open and return the file descriptor.  */
+	    open_return = sim_callback->open (sim_callback, filename, mode);
+
+	    /* Return value in register 0.  */
+	    cpu.regs[0] = open_return;
+
+	    /* Freeing memory used for filename. */
+	    free (filename);
+	  }
+	  goto next;
+
+	case O (O_SYS_READ, SB):
+	  {
+	    char *char_ptr;	/* Where characters read would be stored.  */
+	    int fd;		/* File descriptor */
+	    int buf_size;	/* BUF_SIZE parameter in read.  */
+	    int i = 0;		/* Temporary Loop counter */
+	    int read_return = 0;	/* Return value from callback to
+					   read.  */
+
+	    fd = h8300hmode ? GET_L_REG (0) : GET_W_REG (0);
+	    buf_size = h8300hmode ? GET_L_REG (2) : GET_W_REG (2);
+
+	    char_ptr = (char *) malloc (sizeof (char) * buf_size);
+
+	    /* Callback to read and return the no. of characters read.  */
+	    read_return =
+	      sim_callback->read (sim_callback, fd, char_ptr, buf_size);
+
+	    /* The characters read are stored in cpu memory.  */
+	    for (i = 0; i < buf_size; i++)
+	      {
+		SET_MEMORY_B ((cpu.regs[1] + (sizeof (char) * i)),
+			      *(char_ptr + (sizeof (char) * i)));
+	      }
+
+	    /* Return value in Register 0.  */
+	    cpu.regs[0] = read_return;
+
+	    /* Freeing memory used as buffer.  */
+	    free (char_ptr);
+	  }
+	  goto next;
+
+	case O (O_SYS_WRITE, SB):
+	  {
+	    int fd;		/* File descriptor */
+	    char temp_char;	/* Temporary character */
+	    int len;		/* Length of write, Parameter II to write.  */
+	    int char_ptr;	/* Character Pointer, Parameter I of write.  */
+	    char *ptr;		/* Where characters to be written are stored. 
+				 */
+	    int write_return;	/* Return value from callback to write.  */
+	    int i = 0;		/* Loop counter */
+
+	    fd = h8300hmode ? GET_L_REG (0) : GET_W_REG (0);
+	    char_ptr = h8300hmode ? GET_L_REG (1) : GET_W_REG (1);
+	    len = h8300hmode ? GET_L_REG (2) : GET_W_REG (2);
+
+	    /* Allocating space for the characters to be written.  */
+	    ptr = (char *) malloc (sizeof (char) * len);
+
+	    /* Fetching the characters from cpu memory.  */
+	    for (i = 0; i < len; i++)
+	      {
+		temp_char = GET_MEMORY_B (char_ptr + i);
+		ptr[i] = temp_char;
+	      }
+
+	    /* Callback write and return the no. of characters written.  */
+	    write_return = sim_callback->write (sim_callback, fd, ptr, len);
+
+	    /* Return value in Register 0.  */
+	    cpu.regs[0] = write_return;
+
+	    /* Freeing memory used as buffer.  */
+	    free (ptr);
+	  }
+	  goto next;
+
+	case O (O_SYS_LSEEK, SB):
+	  {
+	    int fd;		/* File descriptor */
+	    int offset;		/* Offset */
+	    int origin;		/* Origin */
+	    int lseek_return;	/* Return value from callback to lseek.  */
+
+	    fd = h8300hmode ? GET_L_REG (0) : GET_W_REG (0);
+	    offset = h8300hmode ? GET_L_REG (1) : GET_W_REG (1);
+	    origin = h8300hmode ? GET_L_REG (2) : GET_W_REG (2);
+
+	    /* Callback lseek and return offset.  */
+	    lseek_return =
+	      sim_callback->lseek (sim_callback, fd, offset, origin);
+
+	    /* Return value in register 0.  */
+	    cpu.regs[0] = lseek_return;
+	  }
+	  goto next;
+
+	case O (O_SYS_CLOSE, SB):
+	  {
+	    int fd;		/* File descriptor */
+	    int close_return;	/* Return value from callback to close.  */
+
+	    fd = h8300hmode ? GET_L_REG (0) : GET_W_REG (0);
+
+	    /* Callback close and return.  */
+	    close_return = sim_callback->close (sim_callback, fd);
+
+	    /* Return value in register 0.  */
+	    cpu.regs[0] = close_return;
+	  }
+	  goto next;
+
+	case O (O_SYS_FSTAT, SB):
+	  {
+	    int fd;		/* File descriptor */
+	    struct stat stat_rec;	/* Stat record */
+	    int fstat_return;	/* Return value from callback to stat.  */
+	    int stat_ptr;	/* Pointer to stat record.  */
+	    char *temp_stat_ptr;	/* Temporary stat_rec pointer.  */
+
+	    fd = h8300hmode ? GET_L_REG (0) : GET_W_REG (0);
+
+	    /* Setting stat_ptr to second argument of stat.  */
+	    stat_ptr = h8300hmode ? GET_L_REG (1) : GET_W_REG (1);
+
+	    /* Callback stat and return.  */
+	    fstat_return = sim_callback->fstat (sim_callback, fd, &stat_rec);
+
+	    /* Have stat_ptr point to starting of stat_rec.  */
+	    temp_stat_ptr = (char *) (&stat_rec);
+
+	    /* Setting up the stat structure returned.  */
+	    SET_MEMORY_W (stat_ptr, stat_rec.st_dev);
+	    stat_ptr += 2;
+	    SET_MEMORY_W (stat_ptr, stat_rec.st_ino);
+	    stat_ptr += 2;
+	    SET_MEMORY_L (stat_ptr, stat_rec.st_mode);
+	    stat_ptr += 4;
+	    SET_MEMORY_W (stat_ptr, stat_rec.st_nlink);
+	    stat_ptr += 2;
+	    SET_MEMORY_W (stat_ptr, stat_rec.st_uid);
+	    stat_ptr += 2;
+	    SET_MEMORY_W (stat_ptr, stat_rec.st_gid);
+	    stat_ptr += 2;
+	    SET_MEMORY_W (stat_ptr, stat_rec.st_rdev);
+	    stat_ptr += 2;
+	    SET_MEMORY_L (stat_ptr, stat_rec.st_size);
+	    stat_ptr += 4;
+	    SET_MEMORY_L (stat_ptr, stat_rec.st_atime);
+	    stat_ptr += 8;
+	    SET_MEMORY_L (stat_ptr, stat_rec.st_mtime);
+	    stat_ptr += 8;
+	    SET_MEMORY_L (stat_ptr, stat_rec.st_ctime);
+
+	    /* Return value in register 0.  */
+	    cpu.regs[0] = fstat_return;
+	  }
+	  goto next;
+
+	case O (O_SYS_STAT, SB):
+	  {
+	    int len = 0;	/* Length of filename.  */
+	    char *filename;	/* Filename would go here.  */
+	    char temp_char;	/* Temporary character */
+	    int filename_ptr;	/* Pointer to filename in cpu memory.  */
+	    struct stat stat_rec;	/* Stat record */
+	    int stat_return;	/* Return value from callback to stat */
+	    int stat_ptr;	/* Pointer to stat record.  */
+	    char *temp_stat_ptr;	/* Temporary stat_rec pointer.  */
+	    int i = 0;		/* Loop Counter */
+
+	    /* Setting filename_ptr to first argument of open.  */
+	    filename_ptr = h8300hmode ? GET_L_REG (0) : GET_W_REG (0);
+
+	    /* Trying to find the length of the filename.  */
+	    temp_char = GET_MEMORY_B (cpu.regs[0]);
+
+	    len = 1;
+	    while (temp_char != '\0')
+	      {
+		temp_char = GET_MEMORY_B (filename_ptr + len);
+		len++;
+	      }
+
+	    /* Allocating space for the filename.  */
+	    filename = (char *) malloc (sizeof (char) * len);
+
+	    /* String copying the filename from memory.  */
+	    for (i = 0; i < len; i++)
+	      {
+		temp_char = GET_MEMORY_B (filename_ptr + i);
+		filename[i] = temp_char;
+	      }
+
+	    /* Setting stat_ptr to second argument of stat.  */
+	    /* stat_ptr = cpu.regs[1]; */
+	    stat_ptr = h8300hmode ? GET_L_REG (1) : GET_W_REG (1);
+
+	    /* Callback stat and return.  */
+	    stat_return =
+	      sim_callback->stat (sim_callback, filename, &stat_rec);
+
+	    /* Have stat_ptr point to starting of stat_rec.  */
+	    temp_stat_ptr = (char *) (&stat_rec);
+
+	    /* Freeing memory used for filename.  */
+	    free (filename);
+
+	    /* Setting up the stat structure returned.  */
+	    SET_MEMORY_W (stat_ptr, stat_rec.st_dev);
+	    stat_ptr += 2;
+	    SET_MEMORY_W (stat_ptr, stat_rec.st_ino);
+	    stat_ptr += 2;
+	    SET_MEMORY_L (stat_ptr, stat_rec.st_mode);
+	    stat_ptr += 4;
+	    SET_MEMORY_W (stat_ptr, stat_rec.st_nlink);
+	    stat_ptr += 2;
+	    SET_MEMORY_W (stat_ptr, stat_rec.st_uid);
+	    stat_ptr += 2;
+	    SET_MEMORY_W (stat_ptr, stat_rec.st_gid);
+	    stat_ptr += 2;
+	    SET_MEMORY_W (stat_ptr, stat_rec.st_rdev);
+	    stat_ptr += 2;
+	    SET_MEMORY_L (stat_ptr, stat_rec.st_size);
+	    stat_ptr += 4;
+	    SET_MEMORY_L (stat_ptr, stat_rec.st_atime);
+	    stat_ptr += 8;
+	    SET_MEMORY_L (stat_ptr, stat_rec.st_mtime);
+	    stat_ptr += 8;
+	    SET_MEMORY_L (stat_ptr, stat_rec.st_ctime);
+
+	    /* Return value in register 0.  */
+	    cpu.regs[0] = stat_return;
+	  }
+	  goto next;
+	  /* End of system call processing.  */
 
 	  ONOT (O_NOT, rd = ~rd; v = 0;);
 	  OSHIFTS (O_SHLL,
@@ -1665,6 +2137,57 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	      }
 	  }
 	  goto next;
+
+	case O (O_DAA, SB):
+	  /* Decimal Adjust Addition.  This is for BCD arithmetic.  */
+	  res = GET_B_REG (code->src.reg);
+	  if (!c && (0 <= (res >>  4) && (res >>  4) <= 9) 
+	      && !h && (0 <= (res & 0xf) && (res & 0xf) <= 9))
+	    res = res;		/* Value added == 0.  */
+	  else if (!c && (0  <= (res >>  4) && (res >>  4) <=  8) 
+		   && !h && (10 <= (res & 0xf) && (res & 0xf) <= 15))
+	    res = res + 0x6;		/* Value added == 6.  */
+	  else if (!c && (0 <= (res >>  4) && (res >>  4) <= 9) 
+		   && h && (0 <= (res & 0xf) && (res & 0xf) <= 3))
+	    res = res + 0x6;		/* Value added == 6.  */
+	  else if (!c && (10 <= (res >>  4) && (res >>  4) <= 15) 
+		   && !h && (0  <= (res & 0xf) && (res & 0xf) <=  9))
+	    res = res + 0x60;		/* Value added == 60.  */
+	  else if (!c && (9  <= (res >>  4) && (res >>  4) <= 15) 
+		   && !h && (10 <= (res & 0xf) && (res & 0xf) <= 15))
+	    res = res + 0x66;		/* Value added == 66.  */
+	  else if (!c && (10 <= (res >>  4) && (res >>  4) <= 15) 
+		   && h && (0  <= (res & 0xf) && (res & 0xf) <=  3))
+	    res = res + 0x66;		/* Value added == 66.  */
+	  else if (c && (1 <= (res >>  4) && (res >>  4) <= 2) 
+		   && !h && (0 <= (res & 0xf) && (res & 0xf) <= 9))
+	    res = res + 0x160;		/* Value added == 60, plus 'carry'.  */
+	  else if (c && (1  <= (res >>  4) && (res >>  4) <=  2) 
+		   && !h && (10 <= (res & 0xf) && (res & 0xf) <= 15))
+	    res = res + 0x166;		/* Value added == 66, plus 'carry'.  */
+	  else if (c && (1 <= (res >>  4) && (res >>  4) <= 3) 
+		   && h && (0 <= (res & 0xf) && (res & 0xf) <= 3))
+	    res = res + 0x166;		/* Value added == 66, plus 'carry'.  */
+
+	  goto alu8;
+
+	case O (O_DAS, SB):
+	  /* Decimal Adjust Subtraction.  This is for BCD arithmetic.  */
+	  res = GET_B_REG (code->src.reg); /* FIXME fetch, fetch2... */
+	  if (!c && (0 <= (res >>  4) && (res >>  4) <= 9) 
+	      && !h && (0 <= (res & 0xf) && (res & 0xf) <= 9))
+	    res = res;		/* Value added == 0.  */
+	  else if (!c && (0 <= (res >>  4) && (res >>  4) <=  8) 
+		   && h && (6 <= (res & 0xf) && (res & 0xf) <= 15))
+	    res = res + 0xfa;		/* Value added == 0xfa.  */
+	  else if (c && (7 <= (res >>  4) && (res >>  4) <= 15) 
+		   && !h && (0 <= (res & 0xf) && (res & 0xf) <=  9))
+	    res = res + 0xa0;		/* Value added == 0xa0.  */
+	  else if (c && (6 <= (res >>  4) && (res >>  4) <= 15) 
+		   && h && (6 <= (res & 0xf) && (res & 0xf) <= 15))
+	    res = res + 0x9a;		/* Value added == 0x9a.  */
+
+	  goto alu8;
 
 	default:
 	illegal:
@@ -2230,10 +2753,37 @@ sim_load (SIM_DESC sd, char *prog, bfd *abfd, int from_tty)
 SIM_RC
 sim_create_inferior (SIM_DESC sd, struct bfd *abfd, char **argv, char **env)
 {
+  int i = 0;
+  int len_arg = 0;
+  int no_of_args = 0;
+  
   if (abfd != NULL)
     cpu.pc = bfd_get_start_address (abfd);
   else
     cpu.pc = 0;
+
+  /* Command Line support.  */
+  if (argv != NULL)
+    {
+      /* Counting the no. of commandline arguments.  */
+      for (no_of_args = 0; argv[no_of_args] != NULL; no_of_args++)
+        continue;
+
+      /* Allocating memory for the argv pointers.  */
+      ptr_command_line = (char **) malloc ((sizeof (char *))
+		         * (no_of_args + 1));
+
+      for (i = 0; i < no_of_args; i++)
+	{
+	  /* Calculating the length of argument for allocating memory.  */
+	  len_arg = strlen (argv[i] + 1);
+	  ptr_command_line[i] = (char *) malloc (sizeof (char) * len_arg);
+	  /* Copying the argument string.  */
+	  ptr_command_line[i] = (char *) strdup (argv[i]);
+	}
+      ptr_command_line[i] = NULL;
+    }
+  
   return SIM_RC_OK;
 }
 

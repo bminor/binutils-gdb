@@ -22,6 +22,8 @@
 #ifndef DWARF2CFI_H
 #define DWARF2CFI_H
 
+struct frame_info;
+
 struct context_reg
 {
   union

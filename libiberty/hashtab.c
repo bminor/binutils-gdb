@@ -373,7 +373,14 @@ htab_expand (htab)
   oentries = htab->entries;
   olimit = oentries + htab->size;
 
-  nsize = higher_prime_number (htab->size * 2);
+  /* Resize only when table after removal of unused elements is either
+     too full or too empty.  */
+  if ((htab->n_elements - htab->n_deleted) * 2 > htab->size
+      || ((htab->n_elements - htab->n_deleted) * 8 < htab->size
+	  && htab->size > 32))
+    nsize = higher_prime_number ((htab->n_elements - htab->n_deleted) * 2);
+  else
+    nsize = htab->size;
 
   if (htab->alloc_with_arg_f != NULL)
     nentries = (PTR *) (*htab->alloc_with_arg_f) (htab->alloc_arg, nsize,
@@ -596,13 +603,16 @@ htab_clear_slot (htab, slot)
    argument.  */
 
 void
-htab_traverse (htab, callback, info)
+htab_traverse_noresize (htab, callback, info)
      htab_t htab;
      htab_trav callback;
      PTR info;
 {
-  PTR *slot = htab->entries;
-  PTR *limit = slot + htab->size;
+  PTR *slot;
+  PTR *limit;
+
+  slot = htab->entries;
+  limit = slot + htab->size;
 
   do
     {
@@ -613,6 +623,21 @@ htab_traverse (htab, callback, info)
 	  break;
     }
   while (++slot < limit);
+}
+
+/* Like htab_traverse_noresize, but does resize the table when it is
+   too empty to improve effectivity of subsequent calls.  */
+
+void
+htab_traverse (htab, callback, info)
+     htab_t htab;
+     htab_trav callback;
+     PTR info;
+{
+  if ((htab->n_elements - htab->n_deleted) * 8 < htab->size)
+    htab_expand (htab);
+
+  htab_traverse_noresize (htab, callback, info);
 }
 
 /* Return the current size of given hash table. */

@@ -149,11 +149,10 @@ AC_HEADER_TIME
 libiberty_AC_DECLARE_ERRNO
 
 AC_CHECK_TYPE(uintptr_t, unsigned long)
-
-if test $ac_cv_type_uintptr_t = yes
-then
-  AC_DEFINE(HAVE_UINTPTR_T, 1, [Define if you have the \`uintptr_t' type.])
-fi
+# Given the above check, we always have uintptr_t or a fallback
+# definition.  So define HAVE_UINTPTR_T in case any imported code
+# relies on it.
+AC_DEFINE(HAVE_UINTPTR_T, 1, [Define if you have the \`uintptr_t' type.])
 
 AC_TYPE_PID_T
 
@@ -178,6 +177,7 @@ funcs="$funcs memchr"
 funcs="$funcs memcmp"
 funcs="$funcs memcpy"
 funcs="$funcs memmove"
+funcs="$funcs mempcpy"
 funcs="$funcs memset"
 funcs="$funcs mkstemps"
 funcs="$funcs putenv"
@@ -186,6 +186,8 @@ funcs="$funcs rename"
 funcs="$funcs rindex"
 funcs="$funcs setenv"
 funcs="$funcs sigsetmask"
+funcs="$funcs stpcpy"
+funcs="$funcs stpncpy"
 funcs="$funcs strcasecmp"
 funcs="$funcs strchr"
 funcs="$funcs strdup"
@@ -215,8 +217,8 @@ checkfuncs="$checkfuncs getsysinfo table sysctl"
 if test "x" = "y"; then
   AC_CHECK_FUNCS(asprintf atexit basename bcmp bcopy bsearch bzero calloc clock)
   AC_CHECK_FUNCS(getcwd getpagesize index insque mkstemps memchr memcmp memcpy)
-  AC_CHECK_FUNCS(memmove memset putenv random rename rindex sigsetmask)
-  AC_CHECK_FUNCS(strcasecmp setenv strchr strdup strncasecmp strrchr strstr)
+  AC_CHECK_FUNCS(memmove mempcpy memset putenv random rename rindex sigsetmask)
+  AC_CHECK_FUNCS(strcasecmp setenv stpcpy stpncpy strchr strdup strncasecmp strrchr strstr)
   AC_CHECK_FUNCS(strtod strtol strtoul tmpnam vasprintf vfprintf vprintf)
   AC_CHECK_FUNCS(vsprintf waitpid getrusage on_exit psignal strerror strsignal)
   AC_CHECK_FUNCS(sysconf times sbrk gettimeofday ffs)

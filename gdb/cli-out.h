@@ -22,6 +22,8 @@
 #ifndef CLI_OUT_H
 #define CLI_OUT_H
 
+struct ui_file;
+
 extern struct ui_out *cli_out_new (struct ui_file *stream);
 
 extern struct ui_file *cli_out_set_stream (struct ui_out *uiout,

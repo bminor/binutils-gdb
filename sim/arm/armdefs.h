@@ -135,6 +135,8 @@ struct ARMul_State
   unsigned is_v5;		/* Are we emulating a v5 architecture ?  */
   unsigned is_v5e;		/* Are we emulating a v5e architecture ?  */
   unsigned is_XScale;		/* Are we emulating an XScale architecture ?  */
+  unsigned is_iWMMXt;		/* Are we emulating an iWMMXt co-processor ?  */
+  unsigned is_ep9312;		/* Are we emulating a Cirrus Maverick co-processor ?  */
   unsigned verbose;		/* Print various messages like the banner */
 };
 
@@ -162,6 +164,8 @@ struct ARMul_State
 #define ARM_v5_Prop      0x80
 #define ARM_v5e_Prop     0x100
 #define ARM_XScale_Prop  0x200
+#define ARM_ep9312_Prop  0x400
+#define ARM_iWMMXt_Prop  0x800
 
 /***************************************************************************\
 *                   Macros to extract instruction fields                    *

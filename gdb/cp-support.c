@@ -21,6 +21,7 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
+#include <ctype.h>
 #include "cp-support.h"
 #include "gdb_string.h"
 #include "demangle.h"
@@ -34,7 +35,14 @@
 #include "dictionary.h"
 #include "gdbcmd.h"
 
-static char *xstrndup (const char *string, size_t len);
+/* The list of "maint cplus" commands.  */
+
+static struct cmd_list_element *maint_cplus_cmd_list = NULL;
+
+/* The actual commands.  */
+
+static void maint_cplus_command (char *arg, int from_tty);
+static void first_component_command (char *arg, int from_tty);
 
 static const char *find_last_component (const char *name);
 
@@ -92,14 +100,15 @@ static void maintenance_print_namespace (char *args, int from_tty);
      fairly restrictive set of locations (in particular, they have be
      at depth 0, don't they?).  */
 
-/* NOTE: carlton/2002-10-25: Daniel Jacobowitz came up with an example
+/* NOTE: carlton/2003-02-21: Daniel Jacobowitz came up with an example
    where operator names don't occur at depth 0.  Sigh.  (It involved a
    template argument that was a pointer: I hadn't realized that was
    possible.)  Handling such edge cases does not seem like a
    high-priority problem to me.  */
 
-/* FIXME: carlton/2002-10-09: Do all the functions here handle all the
-   above considerations correctly?  */
+/* FIXME: carlton/2003-03-13: We have several functions here with
+   overlapping functionality; can we combine them?  Also, do they
+   handle all the above considerations correctly?  */
 
 /* Find the last component of the demangled C++ name NAME.  NAME
    must be a method name including arguments, in order to correctly
@@ -226,6 +235,11 @@ method_name_from_physname (const char *physname)
    the recursion easier, it also stops if it reaches an unexpected ')'
    or '>'.  */
 
+/* NOTE: carlton/2003-03-13: This function is currently only intended
+   for internal use: it's probably not entirely safe when called on
+   user-generated input, because some of the 'index += 2' lines might
+   go past the end of malformed input.  */
+
 /* Let's optimize away calls to strlen("operator").  */
 
 #define LENGTH_OF_OPERATOR 8
@@ -242,6 +256,8 @@ cp_find_first_component (const char *name)
   if (strncmp (name, "operator", LENGTH_OF_OPERATOR) == 0)
     {
       index += LENGTH_OF_OPERATOR;
+      while (isspace(name[index]))
+	++index;
       switch (name[index])
 	{
 	case '<':
@@ -312,7 +328,8 @@ cp_find_first_component (const char *name)
    name.  Given 'A::foo', it returns 1, given 'A::B::foo', it returns
    4, given 'foo', it returns 0.  */
 
-unsigned int cp_entire_prefix_len (const char *name)
+unsigned int
+cp_entire_prefix_len (const char *name)
 {
   unsigned int current_len = cp_find_first_component (name);
   unsigned int previous_len = 0;
@@ -327,61 +344,6 @@ unsigned int cp_entire_prefix_len (const char *name)
     }
 
   return previous_len;
-}
-
-/* Create a new struct using direct whose inner namespace is the
-   initial substring of NAME of leng INNER_LEN and whose outer
-   namespace is the initial substring of NAME of length OUTER_LENGTH.
-   Set its next member in the linked list to NEXT; allocate all memory
-   using xmalloc.  It copies the strings, so NAME can be a temporary
-   string.  */
-
-struct using_direct *
-cp_add_using (const char *name,
-	      unsigned int inner_len,
-	      unsigned int outer_len,
-	      struct using_direct *next)
-{
-  struct using_direct *retval;
-
-  gdb_assert (outer_len < inner_len);
-
-  retval = xmalloc (sizeof (struct using_direct));
-  retval->inner = xstrndup (name, inner_len);
-  retval->outer = xstrndup (name, outer_len);
-  retval->next = next;
-
-  return retval;
-}
-
-/* Make a copy of the using directives in the list pointed to by
-   USING, using OBSTACK to allocate memory.  Free all memory pointed
-   to by USING via xfree.  */
-
-extern struct using_direct *
-cp_copy_usings (struct using_direct *using,
-		struct obstack *obstack)
-{
-  if (using == NULL)
-    {
-      return NULL;
-    }
-  else
-    {
-      struct using_direct *retval
-	= obstack_alloc (obstack, sizeof (struct using_direct));
-      retval->inner = obsavestring (using->inner, strlen (using->inner),
-				    obstack);
-      retval->outer = obsavestring (using->outer, strlen (using->outer),
-				    obstack);
-      retval->next = cp_copy_usings (using->next, obstack);
-
-      xfree (using->inner);
-      xfree (using->outer);
-      xfree (using);
-
-      return retval;
-    }
 }
 
 /* Allocate everything necessary for namespace_block and
@@ -646,35 +608,6 @@ maintenance_print_namespace (char *args, int from_tty)
     }
 }
 
-/* Test whether or not NAMESPACE looks like it mentions an anonymous
-   namespace; return 1 if it mentions "(anonymous namespace)", 2 if it
-   mentions "{anonymous}", and 0 otherwise.  */
-
-int
-cp_is_anonymous (const char *namespace)
-{
-  if (strstr (namespace, "(anonymous namespace)") != NULL)
-    return 1;
-  else if (strstr (namespace, "{anonymous}") != NULL)
-    return 2;
-  else
-    return 0;
-}
-
-/* Create a copy of the initial substring of STRING of length LEN.
-   Allocate memory via xmalloc.  */
-
-static char *
-xstrndup (const char *string, size_t len)
-{
-  char *retval = xmalloc (len + 1);
-
-  strncpy (retval, string, len);
-  retval[len] = '\0';
-
-  return retval;
-}
-
 /* If FULL_NAME is the demangled name of a C++ function (including an
    arg list, possibly including namespace/class qualifications),
    return a new string containing only the function name (without the
@@ -703,9 +636,42 @@ cp_func_name (const char *full_name)
   return remove_params (previous_component);
 }
 
+/* Don't allow just "maintenance cplus".  */
+
+static  void
+maint_cplus_command (char *arg, int from_tty)
+{
+  printf_unfiltered ("\"maintenance cplus\" must be followed by the name of a command.\n");
+  help_list (maint_cplus_cmd_list, "maintenance cplus ", -1, gdb_stdout);
+}
+
+/* This is a front end for cp_find_first_component, for unit testing.
+   Be careful when using it: see the NOTE above
+   cp_find_first_component.  */
+
+static void
+first_component_command (char *arg, int from_tty)
+{
+  int len = cp_find_first_component (arg);
+  char *prefix = alloca (len + 1);
+
+  memcpy (prefix, arg, len);
+  prefix[len] = '\0';
+
+  printf_unfiltered ("%s\n", prefix);
+}
+
 void
 _initialize_cp_support (void)
 {
+  add_prefix_cmd ("cplus", class_maintenance, maint_cplus_command,
+		  "C++ maintenance commands.", &maint_cplus_cmd_list,
+		  "maintenance cplus ", 0, &maintenancelist);
+  add_alias_cmd ("cp", "cplus", class_maintenance, 1, &maintenancelist);
+
+  add_cmd ("first_component", class_maintenance, first_component_command,
+	   "Print the first class/namespace component of NAME.",
+	   &maint_cplus_cmd_list);
   add_cmd ("namespace", class_maintenance, maintenance_print_namespace,
 	   "Print the list of current known C++ namespaces.",
 	   &maintenanceprintlist);

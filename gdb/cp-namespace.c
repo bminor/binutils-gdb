@@ -38,7 +38,7 @@ unsigned char processing_has_namespace_info;
    contain the name of the current namespace.  The string is
    temporary; copy it if you need it.  */
 
-const char *processing_current_namespace;
+const char *processing_current_prefix;
 
 /* List of using directives that are active in the current file.  */
 
@@ -175,8 +175,8 @@ cp_set_block_scope (const struct symbol *symbol,
       if (processing_has_namespace_info)
 	{
 	  block_set_scope
-	    (block, obsavestring (processing_current_namespace,
-				  strlen (processing_current_namespace),
+	    (block, obsavestring (processing_current_prefix,
+				  strlen (processing_current_prefix),
 				  obstack),
 	     obstack);
 	}

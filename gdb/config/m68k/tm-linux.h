@@ -100,8 +100,8 @@
 
 #define GET_LONGJMP_TARGET(ADDR) m68k_get_longjmp_target(ADDR)
 
-#undef FRAME_SAVED_PC
-#define FRAME_SAVED_PC(frame) m68k_linux_frame_saved_pc (frame)
+#undef DEPRECATED_FRAME_SAVED_PC
+#define DEPRECATED_FRAME_SAVED_PC(frame) m68k_linux_frame_saved_pc (frame)
 extern CORE_ADDR m68k_linux_frame_saved_pc (struct frame_info *);
 
 #define IN_SIGTRAMP(pc,name) m68k_linux_in_sigtramp (pc)

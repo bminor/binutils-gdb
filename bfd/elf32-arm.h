@@ -2119,10 +2119,18 @@ static bfd_boolean
 elf32_arm_object_p (abfd)
      bfd *abfd;
 {
-  /* XXX - we ought to examine a .note section here.  */
+  unsigned int mach;
+  
+  mach = bfd_arm_get_mach_from_notes (abfd, ARM_NOTE_SECTION);
 
-  if (elf_elfheader (abfd)->e_flags & EF_ARM_MAVERICK_FLOAT)
+  if (mach != bfd_mach_arm_unknown)
+    bfd_default_set_arch_mach (abfd, bfd_arch_arm, mach);
+
+  else if (elf_elfheader (abfd)->e_flags & EF_ARM_MAVERICK_FLOAT)
     bfd_default_set_arch_mach (abfd, bfd_arch_arm, bfd_mach_arm_ep9312);
+
+  else
+    bfd_default_set_arch_mach (abfd, bfd_arch_arm, mach);
 
   return TRUE;
 }
@@ -2262,6 +2270,11 @@ elf32_arm_merge_private_bfd_data (ibfd, obfd)
 
       return TRUE;
     }
+
+  /* Determine what should happen if the input ARM architecture
+     does not match the output ARM architecture.  */
+  if (! bfd_arm_merge_machines (ibfd, obfd))
+    return FALSE;
 
   /* Identical flags must be compatible.  */
   if (in_flags == out_flags)
@@ -3660,6 +3673,30 @@ elf32_arm_reloc_type_class (rela)
     }
 }
 
+static bfd_boolean elf32_arm_section_flags           PARAMS ((flagword *, Elf_Internal_Shdr *));
+static void        elf32_arm_final_write_processing  PARAMS ((bfd *, bfd_boolean));
+
+/* Set the right machine number for an Arm ELF file.  */
+
+static bfd_boolean
+elf32_arm_section_flags (flags, hdr)
+     flagword *flags;
+     Elf_Internal_Shdr *hdr;
+{
+  if (hdr->sh_type == SHT_NOTE)
+    *flags |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_SAME_CONTENTS;
+
+  return TRUE;
+}
+
+void
+elf32_arm_final_write_processing (abfd, linker)
+     bfd *abfd;
+     bfd_boolean linker ATTRIBUTE_UNUSED;
+{
+  bfd_arm_update_notes (abfd, ARM_NOTE_SECTION);
+}
+
 #define ELF_ARCH			bfd_arch_arm
 #define ELF_MACHINE_CODE		EM_ARM
 #define ELF_MAXPAGESIZE			0x8000
@@ -3685,6 +3722,8 @@ elf32_arm_reloc_type_class (rela)
 #define elf_backend_post_process_headers	elf32_arm_post_process_headers
 #define elf_backend_reloc_type_class		elf32_arm_reloc_type_class
 #define elf_backend_object_p			elf32_arm_object_p
+#define elf_backend_section_flags		elf32_arm_section_flags
+#define elf_backend_final_write_processing      elf32_arm_final_write_processing
 
 #define elf_backend_can_gc_sections 1
 #define elf_backend_plt_readonly    1

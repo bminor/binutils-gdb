@@ -24,6 +24,9 @@
 
 #include "regcache.h"
 
+/* Wonder if this is correct?  Should be using push_dummy_call().  */
+#define DEPRECATED_DUMMY_WRITE_SP(SP) generic_target_write_sp (SP)
+
 #define GDB_MULTI_ARCH 0
 
 /* NOTE: cagney/2002-11-24: This is a guess.  */
@@ -101,8 +104,8 @@ extern int hppa_in_solib_return_trampoline (CORE_ADDR, char *);
 #endif
 
 #if !GDB_MULTI_ARCH
-#undef	SAVED_PC_AFTER_CALL
-#define SAVED_PC_AFTER_CALL(frame) hppa_saved_pc_after_call (frame)
+#undef	DEPRECATED_SAVED_PC_AFTER_CALL
+#define DEPRECATED_SAVED_PC_AFTER_CALL(frame) hppa_saved_pc_after_call (frame)
 extern CORE_ADDR hppa_saved_pc_after_call (struct frame_info *);
 #endif
 
@@ -114,10 +117,6 @@ extern int hppa_inner_than (CORE_ADDR lhs, CORE_ADDR rhs);
 #if !GDB_MULTI_ARCH
 extern CORE_ADDR hppa_stack_align (CORE_ADDR sp);
 #define STACK_ALIGN(sp) hppa_stack_align (sp)
-#endif
-
-#if !GDB_MULTI_ARCH
-#define EXTRA_STACK_ALIGNMENT_NEEDED 0
 #endif
 
 /* Sequence of bytes for breakpoint instruction.  */
@@ -390,21 +389,21 @@ extern void hppa_init_extra_frame_info (int, struct frame_info *);
 /* Describe the pointer in each stack frame to the previous stack frame
    (its caller).  */
 
-/* FRAME_CHAIN takes a frame's nominal address and produces the
-   frame's chain-pointer.  */
+/* DEPRECATED_FRAME_CHAIN takes a frame's nominal address and produces
+   the frame's chain-pointer.  */
 
 /* In the case of the PA-RISC, the frame's nominal address
    is the address of a 4-byte word containing the calling frame's
    address (previous FP).  */
 
 #if !GDB_MULTI_ARCH
-#define FRAME_CHAIN(thisframe) hppa_frame_chain (thisframe)
+#define DEPRECATED_FRAME_CHAIN(thisframe) hppa_frame_chain (thisframe)
 extern CORE_ADDR hppa_frame_chain (struct frame_info *);
 #endif
 
 #if !GDB_MULTI_ARCH
 extern int hppa_frame_chain_valid (CORE_ADDR, struct frame_info *);
-#define FRAME_CHAIN_VALID(chain, thisframe) hppa_frame_chain_valid (chain, thisframe)
+#define DEPRECATED_FRAME_CHAIN_VALID(chain, thisframe) hppa_frame_chain_valid (chain, thisframe)
 #endif
 
 /* Define other aspects of the stack frame.  */
@@ -420,7 +419,7 @@ extern int hppa_frameless_function_invocation (struct frame_info *);
 
 #if !GDB_MULTI_ARCH
 extern CORE_ADDR hppa_frame_saved_pc (struct frame_info *frame);
-#define FRAME_SAVED_PC(FRAME) hppa_frame_saved_pc (FRAME)
+#define DEPRECATED_FRAME_SAVED_PC(FRAME) hppa_frame_saved_pc (FRAME)
 #endif
 
 #if !GDB_MULTI_ARCH
@@ -442,28 +441,21 @@ extern int hppa_frame_num_args (struct frame_info *frame);
 #define FRAME_ARGS_SKIP 0
 #endif
 
-#define FRAME_FIND_SAVED_REGS(frame_info, frame_saved_regs) \
-  hppa_frame_find_saved_regs (frame_info, &frame_saved_regs)
-extern void hppa_frame_find_saved_regs (struct frame_info *,
-					struct frame_saved_regs *);
-
+extern void hppa_frame_init_saved_regs (struct frame_info *);
+#define DEPRECATED_FRAME_INIT_SAVED_REGS(FI) \
+  hppa_frame_init_saved_regs (FI)
 
 /* Things needed for making the inferior call functions.  */
 
-/* Push an empty stack frame, to record the current PC, etc. */
-
-/* FIXME: brobecker 2002-12-26.  This macro definition takes advantage
-   of the fact that DEPRECATED_PUSH_DUMMY_FRAME is called within a
-   function where a variable inf_status of type struct inferior_status
-   * is defined.  Ugh!  Until this is fixed, we will not be able to
-   move to multiarch partial.  */
-#define DEPRECATED_PUSH_DUMMY_FRAME hppa_push_dummy_frame (inf_status)
-extern void hppa_push_dummy_frame (struct inferior_status *);
+#if !GDB_MULTI_ARCH
+#define DEPRECATED_PUSH_DUMMY_FRAME hppa_push_dummy_frame ()
+extern void hppa_push_dummy_frame (void);
+#endif
 
 /* Discard from the stack the innermost frame, 
    restoring all saved registers.  */
 #if !GDB_MULTI_ARCH
-#define POP_FRAME  hppa_pop_frame ()
+#define DEPRECATED_POP_FRAME  hppa_pop_frame ()
 extern void hppa_pop_frame (void);
 #endif
 
@@ -623,7 +615,7 @@ extern CORE_ADDR hppa_fix_call_dummy (char *, CORE_ADDR, CORE_ADDR, int,
 		                      struct value **, struct type *, int);
 
 #if !GDB_MULTI_ARCH
-#define PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr) \
+#define DEPRECATED_PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr) \
   (hppa_push_arguments((nargs), (args), (sp), (struct_return), (struct_addr)))
 extern CORE_ADDR hppa_push_arguments (int, struct value **, CORE_ADDR, int,
 				      CORE_ADDR);

@@ -23,6 +23,8 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+struct type;
+
 #define GDB_MULTI_ARCH GDB_MULTI_ARCH_PARTIAL
 
 #ifndef GDB_TARGET_IS_SPARC64
@@ -96,22 +98,20 @@
 #define CALL_DUMMY_START_OFFSET 0
 #undef  CALL_DUMMY_BREAKPOINT_OFFSET
 #define CALL_DUMMY_BREAKPOINT_OFFSET 0
-#undef  CALL_DUMMY_BREAKPOINT_OFFSET_P
-#define CALL_DUMMY_BREAKPOINT_OFFSET_P 1
 #undef  CALL_DUMMY_LOCATION 
 #define CALL_DUMMY_LOCATION AT_ENTRY_POINT
 #undef  DEPRECATED_PC_IN_CALL_DUMMY
 #define DEPRECATED_PC_IN_CALL_DUMMY(pc, sp, frame_address) deprecated_pc_in_call_dummy_at_entry_point (pc, sp, frame_address)
-#undef  CALL_DUMMY_STACK_ADJUST
-#define CALL_DUMMY_STACK_ADJUST 128
+#undef  DEPRECATED_CALL_DUMMY_STACK_ADJUST
+#define DEPRECATED_CALL_DUMMY_STACK_ADJUST 128
 #undef  SIZEOF_CALL_DUMMY_WORDS
 #define SIZEOF_CALL_DUMMY_WORDS 0
 #undef  CALL_DUMMY_ADDRESS
 #define CALL_DUMMY_ADDRESS() entry_point_address()
 #undef  FIX_CALL_DUMMY
 #define FIX_CALL_DUMMY(DUMMYNAME, PC, FUN, NARGS, ARGS, TYPE, GCC_P) 
-#undef  PUSH_RETURN_ADDRESS
-#define PUSH_RETURN_ADDRESS(PC, SP) sparc_at_entry_push_return_address (PC, SP)
+#undef  DEPRECATED_PUSH_RETURN_ADDRESS
+#define DEPRECATED_PUSH_RETURN_ADDRESS(PC, SP) sparc_at_entry_push_return_address (PC, SP)
 extern CORE_ADDR sparc_at_entry_push_return_address (CORE_ADDR pc,
 						     CORE_ADDR sp);
 
@@ -143,8 +143,8 @@ extern void sparc_at_entry_store_struct_return (CORE_ADDR addr, CORE_ADDR sp);
 
 /* 128 is to reserve space to write the %i/%l registers that will be restored
    when we resume. */
-#undef  CALL_DUMMY_STACK_ADJUST
-#define CALL_DUMMY_STACK_ADJUST 128
+#undef  DEPRECATED_CALL_DUMMY_STACK_ADJUST
+#define DEPRECATED_CALL_DUMMY_STACK_ADJUST 128
 
 /* Size of the call dummy in bytes. */
 #undef  CALL_DUMMY_LENGTH
@@ -162,10 +162,6 @@ extern void sparc_at_entry_store_struct_return (CORE_ADDR addr, CORE_ADDR sp);
 #undef  CALL_DUMMY_BREAKPOINT_OFFSET
 #define CALL_DUMMY_BREAKPOINT_OFFSET (CALL_DUMMY_START_OFFSET + (8 * 4))
 
-/* Let's GDB know that it can make a call_dummy breakpoint.  */
-#undef  CALL_DUMMY_BREAKPOINT_OFFSET_P
-#define CALL_DUMMY_BREAKPOINT_OFFSET_P 1
-
 /* Call dummy will be located on the stack.  */
 #undef  CALL_DUMMY_LOCATION
 #define CALL_DUMMY_LOCATION ON_STACK
@@ -182,7 +178,7 @@ void sparc_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun,
 
 /* The remainder of these will accept the default definition.  */
 #undef  SIZEOF_CALL_DUMMY_WORDS
-#undef  PUSH_RETURN_ADDRESS
+#undef  DEPRECATED_PUSH_RETURN_ADDRESS
 #undef  CALL_DUMMY_ADDRESS
 #undef  STORE_STRUCT_RETURN
 
@@ -208,8 +204,8 @@ void sparc_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun,
 
 CORE_ADDR sparc64_push_arguments (int,
 				  struct value **, CORE_ADDR, int, CORE_ADDR);
-#undef PUSH_ARGUMENTS
-#define PUSH_ARGUMENTS(A,B,C,D,E) \
+#undef DEPRECATED_PUSH_ARGUMENTS
+#define DEPRECATED_PUSH_ARGUMENTS(A,B,C,D,E) \
      (sparc64_push_arguments ((A), (B), (C), (D), (E)))
 
 /* Store the address of the place in which to copy the structure the
@@ -274,7 +270,7 @@ extern void sparc64_write_sp (CORE_ADDR);
 
 #define TARGET_READ_SP() (sparc64_read_sp ())
 #define TARGET_READ_FP() (sparc64_read_fp ())
-#define TARGET_WRITE_SP(X) (sparc64_write_sp (X))
+#define DEPRECATED_DUMMY_WRITE_SP(X) (sparc64_write_sp (X))
 
 #undef DEPRECATED_EXTRACT_RETURN_VALUE
 #define DEPRECATED_EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \

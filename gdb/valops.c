@@ -1126,8 +1126,8 @@ value_push (register CORE_ADDR sp, struct value *arg)
 }
 
 CORE_ADDR
-default_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
-			int struct_return, CORE_ADDR struct_addr)
+legacy_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
+		       int struct_return, CORE_ADDR struct_addr)
 {
   /* ASSERT ( !struct_return); */
   int i;
@@ -1287,8 +1287,8 @@ find_function_addr (struct value *function, struct type **retval_type)
 
    ARGS is modified to contain coerced values. */
 
-static struct value *
-hand_function_call (struct value *function, int nargs, struct value **args)
+struct value *
+call_function_by_hand (struct value *function, int nargs, struct value **args)
 {
   register CORE_ADDR sp;
   register int i;
@@ -1311,6 +1311,7 @@ hand_function_call (struct value *function, int nargs, struct value **args)
   static ULONGEST *dummy;
   int sizeof_dummy1;
   char *dummy1;
+  CORE_ADDR dummy_addr;
   CORE_ADDR old_sp;
   struct type *value_type;
   unsigned char struct_return;
@@ -1350,7 +1351,7 @@ hand_function_call (struct value *function, int nargs, struct value **args)
   if (DEPRECATED_PUSH_DUMMY_FRAME_P ())
     {
       /* DEPRECATED_PUSH_DUMMY_FRAME is responsible for saving the
-	 inferior registers (and POP_FRAME for restoring them).  (At
+	 inferior registers (and frame_pop() for restoring them).  (At
 	 least on most machines) they are saved on the stack in the
 	 inferior.  */
       DEPRECATED_PUSH_DUMMY_FRAME;
@@ -1421,9 +1422,9 @@ hand_function_call (struct value *function, int nargs, struct value **args)
        be able to correctly perform back traces.  If a target is
        having trouble with backtraces, first thing to do is add
        FRAME_ALIGN() to its architecture vector.  After that, try
-       adding SAVE_DUMMY_FRAME_TOS() and modifying FRAME_CHAIN so that
-       when the next outer frame is a generic dummy, it returns the
-       current frame's base.  */
+       adding SAVE_DUMMY_FRAME_TOS() and modifying
+       DEPRECATED_FRAME_CHAIN so that when the next outer frame is a
+       generic dummy, it returns the current frame's base.  */
     sp = old_sp;
 
   if (INNER_THAN (1, 2))
@@ -1470,26 +1471,34 @@ hand_function_call (struct value *function, int nargs, struct value **args)
   real_pc = FIX_CALL_DUMMY (dummy1, start_sp, funaddr, nargs, args,
 			    value_type, using_gcc);
 #else
-  FIX_CALL_DUMMY (dummy1, start_sp, funaddr, nargs, args,
-		  value_type, using_gcc);
+  if (FIX_CALL_DUMMY_P ())
+    {
+      /* gdb_assert (CALL_DUMMY_LOCATION == ON_STACK) true?  */
+      FIX_CALL_DUMMY (dummy1, start_sp, funaddr, nargs, args, value_type,
+		      using_gcc);
+    }
   real_pc = start_sp;
 #endif
 
-  if (CALL_DUMMY_LOCATION == ON_STACK)
+  switch (CALL_DUMMY_LOCATION)
     {
+    case ON_STACK:
+      dummy_addr = start_sp;
       write_memory (start_sp, (char *) dummy1, sizeof_dummy1);
       if (DEPRECATED_USE_GENERIC_DUMMY_FRAMES)
 	generic_save_call_dummy_addr (start_sp, start_sp + sizeof_dummy1);
-    }
-
-  if (CALL_DUMMY_LOCATION == AT_ENTRY_POINT)
-    {
+      break;
+    case AT_ENTRY_POINT:
       real_pc = funaddr;
+      dummy_addr = CALL_DUMMY_ADDRESS ();
       if (DEPRECATED_USE_GENERIC_DUMMY_FRAMES)
 	/* NOTE: cagney/2002-04-13: The entry point is going to be
            modified with a single breakpoint.  */
 	generic_save_call_dummy_addr (CALL_DUMMY_ADDRESS (),
 				      CALL_DUMMY_ADDRESS () + 1);
+      break;
+    default:
+      internal_error (__FILE__, __LINE__, "bad switch");
     }
 
 #ifdef lint
@@ -1616,9 +1625,8 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
     {
       int len = TYPE_LENGTH (value_type);
       if (STACK_ALIGN_P ())
-	/* MVS 11/22/96: I think at least some of this stack_align
-	   code is really broken.  Better to let PUSH_ARGUMENTS adjust
-	   the stack in a target-defined manner.  */
+	/* NOTE: cagney/2003-03-22: Should rely on frame align, rather
+           than stack align to force the alignment of the stack.  */
 	len = STACK_ALIGN (len);
       if (INNER_THAN (1, 2))
 	{
@@ -1646,10 +1654,13 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
      on other architectures. This is because all the alignment is
      taken care of in the above code (ifdef REG_STRUCT_HAS_ADDR) and
      in hppa_push_arguments */
-  if (EXTRA_STACK_ALIGNMENT_NEEDED)
+  /* NOTE: cagney/2003-03-24: The below code is very broken.  Given an
+     odd sized parameter the below will mis-align the stack.  As was
+     suggested back in '96, better to let PUSH_ARGUMENTS handle it.  */
+  if (DEPRECATED_EXTRA_STACK_ALIGNMENT_NEEDED)
     {
       /* MVS 11/22/96: I think at least some of this stack_align code
-	 is really broken.  Better to let PUSH_ARGUMENTS adjust the
+	 is really broken.  Better to let push_dummy_call() adjust the
 	 stack in a target-defined manner.  */
       if (STACK_ALIGN_P () && INNER_THAN (1, 2))
 	{
@@ -1658,15 +1669,30 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 
 	  for (i = nargs - 1; i >= 0; i--)
 	    len += TYPE_LENGTH (VALUE_ENCLOSING_TYPE (args[i]));
-	  if (CALL_DUMMY_STACK_ADJUST_P)
-	    len += CALL_DUMMY_STACK_ADJUST;
+	  if (DEPRECATED_CALL_DUMMY_STACK_ADJUST_P ())
+	    len += DEPRECATED_CALL_DUMMY_STACK_ADJUST;
 	  sp -= STACK_ALIGN (len) - len;
 	}
     }
 
-  sp = PUSH_ARGUMENTS (nargs, args, sp, struct_return, struct_addr);
+  /* Create the dummy stack frame.  Pass in the call dummy address as,
+     presumably, the ABI code knows where, in the call dummy, the
+     return address should be pointed.  */
+  if (gdbarch_push_dummy_call_p (current_gdbarch))
+    /* When there is no push_dummy_call method, should this code
+       simply error out.  That would the implementation of this method
+       for all ABIs (which is probably a good thing).  */
+    sp = gdbarch_push_dummy_call (current_gdbarch, current_regcache,
+				  dummy_addr, nargs, args, sp, struct_return,
+				  struct_addr);
+  else  if (DEPRECATED_PUSH_ARGUMENTS_P ())
+    /* Keep old targets working.  */
+    sp = DEPRECATED_PUSH_ARGUMENTS (nargs, args, sp, struct_return,
+				    struct_addr);
+  else
+    sp = legacy_push_arguments (nargs, args, sp, struct_return, struct_addr);
 
-  if (PUSH_RETURN_ADDRESS_P ())
+  if (DEPRECATED_PUSH_RETURN_ADDRESS_P ())
     /* for targets that use no CALL_DUMMY */
     /* There are a number of targets now which actually don't write
        any CALL_DUMMY instructions into the target, but instead just
@@ -1677,14 +1703,19 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
        return-address register as appropriate.  Formerly this has been
        done in PUSH_ARGUMENTS, but that's overloading its
        functionality a bit, so I'm making it explicit to do it here.  */
-    sp = PUSH_RETURN_ADDRESS (real_pc, sp);
+    sp = DEPRECATED_PUSH_RETURN_ADDRESS (real_pc, sp);
 
-  if (STACK_ALIGN_P () && !INNER_THAN (1, 2))
+  /* NOTE: cagney/2003-03-23: Diable this code when there is a
+     push_dummy_call() method.  Since that method will have already
+     handled any alignment issues, the code below is entirely
+     redundant.  */
+  if (!gdbarch_push_dummy_call_p (current_gdbarch)
+      && STACK_ALIGN_P () && !INNER_THAN (1, 2))
     {
       /* If stack grows up, we must leave a hole at the bottom, note
          that sp already has been advanced for the arguments!  */
-      if (CALL_DUMMY_STACK_ADJUST_P)
-	sp += CALL_DUMMY_STACK_ADJUST;
+      if (DEPRECATED_CALL_DUMMY_STACK_ADJUST_P ())
+	sp += DEPRECATED_CALL_DUMMY_STACK_ADJUST;
       sp = STACK_ALIGN (sp);
     }
 
@@ -1693,30 +1724,31 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
   /* MVS 11/22/96: I think at least some of this stack_align code is
      really broken.  Better to let PUSH_ARGUMENTS adjust the stack in
      a target-defined manner.  */
-  if (CALL_DUMMY_STACK_ADJUST_P)
+  if (DEPRECATED_CALL_DUMMY_STACK_ADJUST_P ())
     if (INNER_THAN (1, 2))
       {
 	/* stack grows downward */
-	sp -= CALL_DUMMY_STACK_ADJUST;
+	sp -= DEPRECATED_CALL_DUMMY_STACK_ADJUST;
       }
 
   /* Store the address at which the structure is supposed to be
-     written.  Note that this (and the code which reserved the space
-     above) assumes that gcc was used to compile this function.  Since
-     it doesn't cost us anything but space and if the function is pcc
-     it will ignore this value, we will make that assumption.
-
-     Also note that on some machines (like the sparc) pcc uses a
-     convention like gcc's.  */
-
-  if (struct_return)
-    STORE_STRUCT_RETURN (struct_addr, sp);
+     written.  */
+  /* NOTE: 2003-03-24: Since PUSH_ARGUMENTS can (and typically does)
+     store the struct return address, this call is entirely redundant.  */
+  if (struct_return && DEPRECATED_STORE_STRUCT_RETURN_P ())
+    DEPRECATED_STORE_STRUCT_RETURN (struct_addr, sp);
 
   /* Write the stack pointer.  This is here because the statements above
      might fool with it.  On SPARC, this write also stores the register
      window into the right place in the new stack frame, which otherwise
      wouldn't happen.  (See store_inferior_registers in sparc-nat.c.)  */
-  write_sp (sp);
+  /* NOTE: cagney/2003-03-23: Disable this code when there is a
+     push_dummy_call() method.  Since that method will have already
+     stored the stack pointer (as part of creating the fake call
+     frame), and none of the code following that code adjusts the
+     stack-pointer value, the below call is entirely redundant.  */
+  if (DEPRECATED_DUMMY_WRITE_SP_P ())
+    DEPRECATED_DUMMY_WRITE_SP (sp);
 
   if (SAVE_DUMMY_FRAME_TOS_P ())
     SAVE_DUMMY_FRAME_TOS (sp);
@@ -1873,21 +1905,6 @@ the function call).", name);
       }
   }
 }
-
-struct value *
-call_function_by_hand (struct value *function, int nargs, struct value **args)
-{
-  if (CALL_DUMMY_P)
-    {
-      return hand_function_call (function, nargs, args);
-    }
-  else
-    {
-      error ("Cannot invoke functions on this machine.");
-    }
-}
-
-
 
 /* Create a value for an array by allocating space in the inferior, copying
    the data into that space, and then setting up an array value.

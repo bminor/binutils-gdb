@@ -1,4 +1,4 @@
-# Makefile.in generated automatically by automake 1.4-p6 from Makefile.am
+# Makefile.in generated automatically by automake 1.4-p5 from Makefile.am
 
 # Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
@@ -271,6 +271,7 @@ CFILES = \
 	xstormy16-dis.c \
 	xstormy16-ibld.c \
 	xstormy16-opc.c \
+	xtensa-dis.c \
 	z8k-dis.c \
 	z8kgen.c
 
@@ -382,6 +383,7 @@ ALL_MACHINES = \
 	xstormy16-dis.lo \
 	xstormy16-ibld.lo \
 	xstormy16-opc.lo \
+	xtensa-dis.lo \
 	z8k-dis.lo
 
 
@@ -465,7 +467,7 @@ acinclude.m4 aclocal.m4 config.in configure configure.in
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = tar
+TAR = gtar
 GZIP_ENV = --best
 SOURCES = libopcodes.a.c $(libopcodes_la_SOURCES)
 OBJECTS = libopcodes.a.$(OBJEXT) $(libopcodes_la_OBJECTS)
@@ -1313,6 +1315,9 @@ xstormy16-ibld.lo: xstormy16-ibld.c sysdep.h config.h \
 xstormy16-opc.lo: xstormy16-opc.c sysdep.h config.h \
   $(INCDIR)/ansidecl.h $(BFD_H) $(INCDIR)/symcat.h xstormy16-desc.h \
   $(INCDIR)/opcode/cgen.h xstormy16-opc.h $(INCDIR)/libiberty.h
+xtensa-dis.lo: xtensa-dis.c $(INCDIR)/xtensa-isa.h \
+  $(INCDIR)/ansidecl.h sysdep.h config.h $(INCDIR)/dis-asm.h \
+  $(BFD_H) $(INCDIR)/symcat.h
 z8k-dis.lo: z8k-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h z8k-opc.h
 z8kgen.lo: z8kgen.c sysdep.h config.h $(INCDIR)/ansidecl.h \

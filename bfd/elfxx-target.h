@@ -33,7 +33,9 @@
 #endif
 
 #define bfd_elfNN_canonicalize_dynamic_symtab _bfd_elf_canonicalize_dynamic_symtab
+#ifndef bfd_elfNN_canonicalize_reloc
 #define bfd_elfNN_canonicalize_reloc	_bfd_elf_canonicalize_reloc
+#endif
 #ifndef bfd_elfNN_find_nearest_line
 #define bfd_elfNN_find_nearest_line	_bfd_elf_find_nearest_line
 #endif

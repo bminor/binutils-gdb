@@ -7,7 +7,8 @@ SIM_AC_COMMON
 
 AC_CHECK_HEADERS(unistd.h)
 
-COPRO=armcopro.o
+COPRO="armcopro.o maverick.o iwmmxt.o"
+
 AC_SUBST(COPRO)
 
 SIM_AC_OUTPUT
