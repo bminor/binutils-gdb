@@ -189,9 +189,9 @@ core_open (filename, from_tty)
     select_frame (get_current_frame (), 0);
     print_stack_frame (selected_frame, selected_frame_level, 1);
   } else {
-    printf (
-"Warning: you won't be able to access this core file until you terminate\n\
-your %s; do ``info files''\n", current_target->to_longname);
+    warning (
+"you won't be able to access this core file until you terminate\n\
+your %s; do ``info files''", current_target->to_longname);
   }
 }
 
@@ -263,9 +263,9 @@ validate_files ()
   if (exec_bfd && core_bfd)
     {
       if (!core_file_matches_executable_p (core_bfd, exec_bfd))
-	printf ("Warning: core file may not match specified executable file.\n");
+	warning ("core file may not match specified executable file.");
       else if (bfd_get_mtime(exec_bfd) > bfd_get_mtime(core_bfd))
-	printf ("Warning: exec file is newer than core file.\n");
+	warning ("exec file is newer than core file.");
     }
 }
 

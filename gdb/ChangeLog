@@ -1,3 +1,7 @@
+Thu Apr 23 18:43:17 1992  Fred Fish  (fnf@cygnus.com)
+
+	* core.c (core_open):  Call warning() to print warnings.
+
 Wed Apr 22 09:55:42 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* symtab.c (lookup_symbol):  Need to check if msymbol->name is
