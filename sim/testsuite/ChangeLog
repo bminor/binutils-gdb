@@ -8,6 +8,9 @@ Thu Jun 11 15:24:53 1998  Doug Evans  <devans@canuck.cygnus.com>
 	* sim/sky/vu.h (VU0_MEM1_WINDOW_START): New macro.
 	(VU0_MEM1_SIZE): New macro.
 
+	* sim/sky/sky-defs.tcl (run_brn_test): Fix `options' arg to
+	sim_compile.
+
 Wed Jun 10 15:56:10 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* sim/sky/t-int.c: New file to test sky hardware
