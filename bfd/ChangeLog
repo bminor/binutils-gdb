@@ -1,5 +1,7 @@
 Fri Jul  2 09:25:20 1993  Ian Lance Taylor  (ian@cygnus.com)
 
+	* configure.in (mips-*-riscos*): New target; use riscos.
+	* configure.host (mips-*-riscos*): New host; use riscos.
 	* config/riscos.mh (HDEFINES): Add -G 4.
 
 	* libaout.h (GET_SWORD): Use the bfd_h_get_signed entry points
