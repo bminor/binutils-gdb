@@ -23,3 +23,5 @@ XM_CLIBS= -lPW
 SYSV_DEFINE=-DSYSV
 REGEX=regex.o
 REGEX1=regex.o
+# for gmalloc.c
+XM_CFLAGS= -Dgetpagesize()=4096
