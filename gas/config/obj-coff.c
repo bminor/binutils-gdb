@@ -4258,6 +4258,12 @@ fixup_segment (segP, this_segment_type)
 #endif
 	}			/* if pcrel */
 
+#ifdef MD_APPLY_FIX3
+      md_apply_fix3 (fixP, (valueT *) &add_number, this_segment_type);
+#else
+      md_apply_fix (fixP, add_number);
+#endif
+
       if (!fixP->fx_bit_fixP && ! fixP->fx_no_overflow)
 	{
 #ifndef TC_M88K
@@ -4294,13 +4300,6 @@ fixup_segment (segP, this_segment_type)
 			  (unsigned long) (fragP->fr_address + where));
 #endif
 	}			/* not a bit fix */
-      /* Once this fix has been applied, we don't have to output
-	 anything nothing more need be done.  */
-#ifdef MD_APPLY_FIX3
-      md_apply_fix3 (fixP, (valueT *) &add_number, this_segment_type);
-#else
-      md_apply_fix (fixP, add_number);
-#endif
     }				/* For each fixS in this segment. */
 }				/* fixup_segment() */
 
