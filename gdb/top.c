@@ -1229,7 +1229,9 @@ command_loop ()
   char *command;
   int stdin_is_tty = ISATTY (stdin);
   long time_at_cmd_start;
+#ifdef HAVE_SBRK
   long space_at_cmd_start;
+#endif
   extern int display_time;
   extern int display_space;
 
@@ -1251,10 +1253,12 @@ command_loop ()
 
       if (display_space)
 	{
+#ifdef HAVE_SBRK
 	  extern char **environ;
 	  char *lim = (char *) sbrk (0);
 
 	  space_at_cmd_start = (long) (lim - (char *) &environ);
+#endif
 	}
 
       execute_command (command, instream == stdin);
@@ -1272,6 +1276,7 @@ command_loop ()
 
       if (display_space)
 	{
+#ifdef HAVE_SBRK
 	  extern char **environ;
 	  char *lim = (char *) sbrk (0);
 	  long space_now = lim - (char *) &environ;
@@ -1281,6 +1286,7 @@ command_loop ()
 			     space_now,
 			     (space_diff >= 0 ? '+' : '-'),
 			     space_diff);
+#endif
 	}
     }
 }

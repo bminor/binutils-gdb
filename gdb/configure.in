@@ -42,7 +42,7 @@ AC_HEADER_STDC
 AC_CHECK_HEADERS(limits.h memory.h string.h strings.h unistd.h termios.h termio.h sgtty.h stddef.h sys/procfs.h link.h endian.h)
 AC_HEADER_STAT
 
-AC_CHECK_FUNCS(setpgid)
+AC_CHECK_FUNCS(setpgid sbrk)
 
 AC_MSG_CHECKING([for gregset_t type])
 AC_CACHE_VAL(gdb_cv_have_gregset_t,

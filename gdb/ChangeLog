@@ -1,3 +1,12 @@
+Fri Apr 12 13:19:27 1996  Fred Fish  <fnf@cygnus.com>
+
+	* README: Update for 4.16 release.
+	* configure.in (AC_CHECK_FUNCS): Also check for sbrk.
+	* configure: Regenerate with autoconf.
+	* config.in: Regenerate with autoheader.
+	* main.c (main): Only use sbrk() when HAVE_SBRK is defined.
+	* top.c (command_loop): Ditto.
+
 Fri Apr 12 09:45:29 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* defs.h:  Define TARGET_{FLOAT DOUBLE LONG_DOUBLE}_FORMAT

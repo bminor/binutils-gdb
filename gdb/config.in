@@ -41,6 +41,9 @@
 /* Define if you have the getpagesize function.  */
 #undef HAVE_GETPAGESIZE
 
+/* Define if you have the sbrk function.  */
+#undef HAVE_SBRK
+
 /* Define if you have the setpgid function.  */
 #undef HAVE_SETPGID
 
