@@ -1,3 +1,19 @@
+2002-09-18  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.c++/m-static.exp: Remove breakpoints depending on line
+	numbers, and replace them by a single breakpoint after the
+	constructors are all finished.
+	Add test 4.
+	* gdb.c++/m-static.cc: Add test 4.
+	* gdb.c++/m-static.h: New file.
+	* gdb.c++/m-static1.cc: New file.
+
+	* gdb.c++/printmethod.exp: New file.
+	* gdb.c++/printmethod.cc: New file.
+
+	* gdb.c++/pr-574.exp: New file.
+	* gdb.c++/pr-574.cc: New file.
+
 2002-09-18  Corinna Vinschen  <vinschen@redhat.com>
 
 	* gdb.base/ending-run.exp: Add handling of "step to end of run" for

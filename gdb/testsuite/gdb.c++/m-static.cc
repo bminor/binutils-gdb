@@ -53,6 +53,10 @@ namespace __gnu_test
 
   template<typename T>
     gnu_obj_2<int> gnu_obj_3<T>::data(etruscan);
+
+  // 2002-08-16
+  // Test four.
+#include "m-static.h"
 } 
 
 // instantiate templates explicitly so their static members will exist
@@ -67,6 +71,7 @@ int main()
   gnu_obj_1		test1(egyptian, 4589);
   gnu_obj_2<long>	test2(roman);
   gnu_obj_3<long>	test3(greek);
+  gnu_obj_4		test4;
 
-  return 0;
+  return 0;				// breakpoint: constructs-done
 }
