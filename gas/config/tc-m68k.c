@@ -4341,6 +4341,7 @@ select_control_regs (void)
       break;
     case mcf5200:
     case mcf5206e:
+    case mcf5249:
     case mcf5307:
     case mcf5407:
       control_regs = mcf_control_regs;

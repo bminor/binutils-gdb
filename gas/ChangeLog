@@ -1,3 +1,7 @@
+2004-09-30  Linus Nielsen Feltzing  <linus@haxx.se>
+
+	* config/tc-m68k.c (select_control_regs): Add mcf5249.
+
 2004-09-30  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (do_smi, do_nop): New functions.
