@@ -161,7 +161,7 @@ case $basic_machine in
 	# Some are omitted here because they have special meanings below.
 	tahoe | i860 | m68k | m68000 | m88k | ns32k | arm \
 		| arme[lb] | pyramid \
-		| tron | a29k | 580 | i960 | h8300 | hppa1.0 | hppa1.1 \
+		| tron | a29k | 580 | i960 | h8300 | hppa | hppa1.0 | hppa1.1 \
 		| alpha | we32k | ns16k | clipper | i370 | sh \
 		| powerpc | powerpcle | 1750a | dsp16xx | mips64 | mipsel \
 		| pdp11 | mips64el | mips64orion | mips64orionel \
@@ -178,6 +178,9 @@ case $basic_machine in
 		basic_machine=$basic_machine-unknown
 		;;
 	mips64vr5000 | mips64vr5000el) # CYGNUS LOCAL ian/vr5000
+		basic_machine=$basic_machine-unknown
+		;;
+	mips16) # CYGNUS LOCAL krk/mips16
 		basic_machine=$basic_machine-unknown
 		;;
 # CYGNUS LOCAL law
@@ -225,16 +228,18 @@ case $basic_machine in
 	      | sparc-* | ns32k-* | fx80-* | arm-* | c[123]* \
 	      | mips-* | pyramid-* | tron-* | a29k-* | romp-* | rs6000-* | power-* \
 	      | none-* | 580-* | cray2-* | h8300-* | i960-* | xmp-* | ymp-* \
-	      | hppa1.0-* | hppa1.1-* | alpha-* | we32k-* | cydra-* | ns16k-* \
+	      | hppa-* | hppa1.0-* | hppa1.1-* | alpha-* | we32k-* | cydra-* | ns16k-* \
 	      | pn-* | np1-* | xps100-* | clipper-* | orion-* | sparclite-* \
 	      | pdp11-* | sh-* | powerpc-* | powerpcle-* | sparc64-* | mips64-* | mipsel-* \
-	      | mips64el-* | mips64orion-* | mips64orionel-*)
+	      | mips64el-* | mips64orion-* | mips64orionel-* | f301-*)
 		;;
-	m88110-* | m680[01234]0-* | m683?2-* | m68360-* | z8k-* | h8500-* | v850-*) # CYGNUS LOCAL
+	m88110-* | m680[01234]0-* | m683?2-* | m68360-* | z8k-* | h8500-* | v850-* | d10v-*) # CYGNUS LOCAL
 		;;
 	mips64vr4300-* | mips64vr4300el-*) # CYGNUS LOCAL jsmith/vr4300
 		;;
 	mips64vr4100-* | mips64vr4100el-*) # CYGNUS LOCAL jsmith/vr4100
+		;;
+	mips16-*) # CYGNUS LOCAL krk/mips16
 		;;
 	# Recognize the various machine names and aliases which stand
 	# for a CPU type and a company and sometimes even an OS.
@@ -444,6 +449,9 @@ case $basic_machine in
 		;;
 	hp9k8[0-9][0-9] | hp8[0-9][0-9])
 		basic_machine=hppa1.0-hp
+		;;
+	hppa-next)
+		os=-nextstep3
 		;;
 	hppaosf)					# CYGNUS LOCAL
 		basic_machine=hppa1.1-hp
@@ -749,6 +757,9 @@ case $basic_machine in
 		basic_machine=vax-dec
 		os=-vms
 		;;
+       vpp*|vx|vx-*)
+               basic_machine=f301-fujitsu
+               ;;
 	vxworks960)
 		basic_machine=i960-wrs
 		os=-vxworks
@@ -876,12 +887,12 @@ case $os in
 	      | -amigados* | -msdos* | -newsos* | -unicos* | -aof* | -aos* \
 	      | -nindy* | -vxsim* | -vxworks* | -ebmon* | -hms* | -mvs* \
 	      | -clix* | -riscos* | -uniplus* | -iris* | -rtu* | -xenix* \
-	      | -hiux* | -386bsd* | -netbsd* | -freebsd* | -riscix* \
+	      | -hiux* | -386bsd* | -netbsd* | -openbsd* | -freebsd* | -riscix* \
 	      | -lynxos* | -bosx* | -nextstep* | -cxux* | -aout* | -elf* \
 	      | -ptx* | -coff* | -ecoff* | -winnt* | -domain* | -vsta* \
 	      | -udi* | -eabi* | -lites* | -ieee* | -go32* | -aux* \
 	      | -cygwin32* | -pe* | -psos* | -moss* | -proelf* | -rtems* \
-	      | -linux-gnu*)
+	      | -linux-gnu* | -uxpv*)
 	# Remember, each alternative MUST END IN *, to match a version number.
 		;;
 	# CYGNUS LOCAL
@@ -1090,6 +1101,9 @@ case $basic_machine in
 	*-masscomp)
 		os=-rtu
 		;;
+	f301-fujitsu)
+		os=-uxpv
+		;;
 	*-rom68k)					# CYGNUS LOCAL
 		os=-coff
 		;;
@@ -1116,12 +1130,6 @@ case $basic_machine in
 				;;
 			-sunos*)
 				vendor=sun
-				;;
-			-bosx*)				# CYGNUS LOCAL
-				vendor=bull
-				;;
-			-lynxos*)
-				vendor=lynx
 				;;
 			-aix*)
 				vendor=ibm
