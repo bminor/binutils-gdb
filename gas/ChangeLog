@@ -1,3 +1,15 @@
+Wed Mar 16 17:11:37 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/tc-mips.c (mips_align): Take new argument, label, and use
+	it instead of global insn_label.
+	(s_align, s_cons, s_float_cons, s_gpword): Save insn_label before
+	call to mips_emit_delay and pass it to mips_align.
+
+Wed Mar 16 11:54:12 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+        * config/tc-hppa.c (pa_reg): Use pa_parse_number so that we can
+        use pre-defined registers as arguments.
+
 Mon Mar 14 14:29:45 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* write.c (write_object_file): Check both S_IS_LOCAL and

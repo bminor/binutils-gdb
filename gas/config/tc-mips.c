@@ -228,7 +228,7 @@ static int prev_prev_insn_unreordered;
    Every macro that refers to a symbol can occur in (at least) two
    forms, one with GP relative addressing and one without.  For
    example, loading a global variable into a register generally uses
-   an macroinstruction like this:
+   a macro instruction like this:
      lw $4,i
    If i can be addressed off the GP register (this is true if it is in
    the .sbss or .sdata section, or if it is known to be smaller than
@@ -246,12 +246,12 @@ static int prev_prev_insn_unreordered;
    until after we see the instruction that uses it.  Therefore, we
    want to be able to choose the final instruction sequence only at
    the end of the assembly.  This is similar to the way other
-   platforms choose the form of a PC relative instruction only at the
+   platforms choose the size of a PC relative instruction only at the
    end of assembly.
 
    When generating position independent code we do not use GP
-   addressing in the same way, but the issue still arises as external
-   symbols and local symbols must be handled differently.
+   addressing in quite the same way, but the issue still arises as
+   external symbols and local symbols must be handled differently.
 
    We handle these issues by actually generating both possible
    instruction sequences.  The longer one is put in a frag_var with
@@ -268,13 +268,13 @@ static int prev_prev_insn_unreordered;
    noat is in effect).  All these numbers are reasonably small.
 
    Generating two instruction sequences must be handled carefully to
-   ensure that delay slots are handled correctly.  Fortunately, the
-   issue only arises in a restricted number of cases.  When the second
-   instruction sequence is generated, append_insn is directed to
-   maintain the existing delay slot information, so it continues to
-   apply to any code after the second instruction sequence.  This
-   means that the second instruction sequence must not impose any
-   requirements not required by the first instruction sequence.
+   ensure that delay slots are handled correctly.  Fortunately, there
+   are a limited number of cases.  When the second instruction
+   sequence is generated, append_insn is directed to maintain the
+   existing delay slot information, so it continues to apply to any
+   code after the second instruction sequence.  This means that the
+   second instruction sequence must not impose any requirements not
+   required by the first instruction sequence.
 
    These variant frags are then handled in functions called by the
    machine independent code.  md_estimate_size_before_relax returns
@@ -331,7 +331,7 @@ static void mips_ip PARAMS ((char *str, struct mips_cl_insn * ip));
 static int my_getSmallExpression PARAMS ((expressionS * ep, char *str));
 static void my_getExpression PARAMS ((expressionS * ep, char *str));
 static symbolS *get_symbol PARAMS ((void));
-static void mips_align PARAMS ((int to, int fill));
+static void mips_align PARAMS ((int to, int fill, symbolS *label));
 static void s_align PARAMS ((int));
 static void s_stringer PARAMS ((int));
 static void s_change_sec PARAMS ((int));
@@ -5021,19 +5021,19 @@ get_symbol ()
    also automatically adjusts any preceding label.  */
 
 static void
-mips_align (to, fill)
+mips_align (to, fill, label)
      int to;
      int fill;
+     symbolS *label;
 {
   mips_emit_delays ();
   frag_align (to, fill);
   record_alignment (now_seg, to);
-  if (insn_label != NULL)
+  if (label != NULL)
     {
-      assert (S_GET_SEGMENT (insn_label) == now_seg);
-      insn_label->sy_frag = frag_now;
-      S_SET_VALUE (insn_label, (valueT) frag_now_fix ());
-      insn_label = NULL;
+      assert (S_GET_SEGMENT (label) == now_seg);
+      label->sy_frag = frag_now;
+      S_SET_VALUE (label, (valueT) frag_now_fix ());
     }
 }
 
@@ -5078,7 +5078,7 @@ s_align (x)
   if (temp)
     {
       auto_align = 1;
-      mips_align (temp, (int) temp_fill);
+      mips_align (temp, (int) temp_fill, insn_label);
     }
   else
     {
@@ -5169,9 +5169,12 @@ static void
 s_cons (log_size)
      int log_size;
 {
+  symbolS *label;
+
+  label = insn_label;
   mips_emit_delays ();
   if (log_size > 0 && auto_align)
-    mips_align (log_size, 0);
+    mips_align (log_size, 0, label);
   insn_label = NULL;
   cons (1 << log_size);
 }
@@ -5205,13 +5208,17 @@ static void
 s_float_cons (type)
      int type;
 {
+  symbolS *label;
+
+  label = insn_label;
+
   mips_emit_delays ();
 
   if (auto_align)
     if (type == 'd')
-      mips_align (3, 0);
+      mips_align (3, 0, label);
     else
-      mips_align (2, 0);
+      mips_align (2, 0, label);
 
   insn_label = NULL;
 
@@ -5440,6 +5447,7 @@ static void
 s_gpword (ignore)
      int ignore;
 {
+  symbolS *label;
   expressionS ex;
   char *p;
 
@@ -5450,9 +5458,10 @@ s_gpword (ignore)
       return;
     }
 
+  label = insn_label;
   mips_emit_delays ();
   if (auto_align)
-    mips_align (2, 0);
+    mips_align (2, 0, label);
   insn_label = NULL;
 
   expression (&ex);
