@@ -1,3 +1,15 @@
+2002-02-01  Daniel Jacobowitz  <drow@mvista.com>
+
+	* regformats/reg-arm.dat: New file.
+	* regformats/reg-i386.dat: New file.
+	* regformats/reg-ia64.dat: New file.
+	* regformats/reg-m68k.dat: New file.
+	* regformats/reg-mips.dat: New file.
+	* regformats/reg-ppc.dat: New file.
+	* regformats/reg-sh.dat: New file.
+	* regformats/regdef.h: New file.
+	* regformats/regdat.sh: New file.
+
 2002-02-01  Richard Earnshaw  <reanrsha@arm.com>
 
 	* arm-tdep.c (arm_frameless_function_invocation): Add some comments.
