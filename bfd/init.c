@@ -17,21 +17,36 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
-#include <sysdep.h>
+
 #include "bfd.h"
+#include "sysdep.h"
 #include "libbfd.h"
+
+extern void DEFUN_VOID (bfd_section_init);
 
 static boolean initialized = false;
 
-/*proto* bfd_init
+/*
+SECTION
+	Initialization
 
-This routine must be called before any other bfd function to initialize
-magical internal data structures.
-
-*; void EXFUN(bfd_init,(void));
+	These are the functions that handle initializing a BFD.
 */
 
-void DEFUN_VOID(bfd_init)
+/*
+FUNCTION
+	bfd_init
+
+SYNOPSIS
+	void bfd_init(void);
+
+DESCRIPTION
+	This routine must be called before any other libbfd function to
+	initialize magical internal data structures.
+*/
+
+void
+bfd_init ()
 {
   if (initialized == false) {
     initialized = true;
@@ -41,22 +56,24 @@ void DEFUN_VOID(bfd_init)
 }
 
 
-/*proto-internal* bfd_check_init
+/*
+INTERNAL_FUNCTION
+	bfd_check_init
 
-This routine is called before any other bfd function using initialized
-data is used to ensure that the structures have been initialized.
-Soon this function will go away, and the bfd library will assume that
-bfd_init has been called.
+SYNOPSIS
+	void bfd_check_init(void);
 
-*; void EXFUN(bfd_check_init,(void));
+DESCRIPTION
+	This routine is called before any other libbfd function using
+	initialized data. It ensures that the structures have
+	been initialized.  Soon this function will go away, and the bfd
+	library will assume that <<bfd_init>> has been called.
 */
 
-void DEFUN_VOID(bfd_check_init)
+void
+bfd_check_init ()
 {
   if (initialized == false) {
-    fprintf(stderr,"The bfd library now requires you to call bfd_init()\n");
-    fprintf(stderr,"before any other calls to bfd routines. Please\n");
-    fprintf(stderr,"change your source\n");
     bfd_init();
   }
 }

@@ -18,57 +18,74 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/*doc*
-@section File Formats
-A format is a BFD concept of high level file contents. The
-formats supported by BFD are:
-@table @code
-@item bfd_object
-The BFD may contain data, symbols, relocations and debug info.
-@item bfd_archive
-The BFD contains other BFDs and an optional index.
-@item bfd_core
-The BFD contains the result of an executable core dump.
-@end table
-*/
-#include "sysdep.h"
-#include "bfd.h"
-#include "libbfd.h"
+/*
+SECTION
+	File Formats
 
+	A format is a BFD concept of high level file contents type. The
+	formats supported by BFD are: 
+
+	o <<bfd_object>>
+
+	The BFD may contain data, symbols, relocations and debug info.
+
+	o <<bfd_archive>>
+
+	The BFD contains other BFDs and an optional index.
+
+	o <<bfd_core>>
+
+	The BFD contains the result of an executable core dump.
+
+
+*/
+
+#include "bfd.h"
+#include "sysdep.h"
+#include "libbfd.h"
 
 extern bfd_target *target_vector[];
 extern bfd_target *default_vector[];
 
 
-/*proto*
-*i bfd_check_format
-This routine is supplied a BFD and a format. It attempts to verify if
-the file attatched to the BFD is indeed compatible with the format
-specified (ie, one of @code{bfd_object}, @code{bfd_archive} or
-@code{bfd_core}).
+/*
+FUNCTION
+	bfd_check_format
 
-If the BFD has been set to a specific @var{target} before the call,
-only the named target and format combination will be checked. If the
-target has not been set, or has been set to @code{default} then all
-the known target backends will be interrogated to determine a match.
+SYNOPSIS
+	boolean bfd_check_format(bfd *abfd, bfd_format format);
 
-The function returns @code{true} on success, otherwise @code{false}
-with one of the following error codes: 
-@table @code
-@item 
-invalid_operation
-if @code{format} is not one of @code{bfd_object}, @code{bfd_archive}
-or @code{bfd_core}.
-@item system_call_error
-if an error occured during a read -  even some file mismatches can
-cause system_call_errros
-@item file_not_recognised
-none of the backends recognised the file format
-@item file_ambiguously_recognized
-more than one backend recognised the file format.
-@end table
-*; PROTO(boolean, bfd_check_format, (bfd *abfd, bfd_format format));
-*-*/
+DESCRIPTION
+	Verify if the file attached to the BFD @var{abfd} is compatible
+	with the format @var{format} (i.e., one of <<bfd_object>>,
+	<<bfd_archive>> or <<bfd_core>>).
+
+	If the BFD has been set to a specific target before the
+	call, only the named target and format combination is
+	checked. If the target has not been set, or has been set to
+	<<default>>, then all the known target backends is
+	interrogated to determine a match.  If the default target
+	matches, it is used.  If not, exactly one target must recognize
+	the file, or an error results.
+
+	The function returns <<true>> on success, otherwise <<false>>
+	with one of the following error codes:  
+
+	o invalid_operation -
+	if <<format>> is not one of <<bfd_object>>, <<bfd_archive>> or
+	<<bfd_core>>.
+
+	o system_call_error -
+	if an error occured during a read - even some file mismatches
+	can cause system_call_errors.
+
+	o file_not_recognised -
+	none of the backends recognised the file format.
+
+	o file_ambiguously_recognized -
+	more than one backend recognised the file format.
+
+*/
 
 boolean
 DEFUN(bfd_check_format,(abfd, format),
@@ -88,6 +105,15 @@ DEFUN(bfd_check_format,(abfd, format),
   if (abfd->format != bfd_unknown)
     return (abfd->format == format)? true: false;
 
+
+  /* Since the target type was defaulted, check them 
+     all in the hope that one will be uniquely recognized.  */
+
+  save_targ = abfd->xvec;
+  match_count = 0;
+  right_targ = 0;
+
+
   /* presume the answer is yes */
   abfd->format = format;
 
@@ -101,22 +127,17 @@ DEFUN(bfd_check_format,(abfd, format),
       abfd->xvec = right_targ;		/* Set the target as returned */
       return true;			/* File position has moved, BTW */
     }
-    abfd->format = bfd_unknown;
-    return false;			/* Specified target is not right */
   }
-
-  /* Since the target type was defaulted, check them 
-     all in the hope that one will be uniquely recognized.  */
-
-  save_targ = abfd->xvec;
-  match_count = 0;
-  right_targ = 0;
 
   for (target = target_vector; *target != NULL; target++) {
     bfd_target *temp;
 
     abfd->xvec = *target;	/* Change BFD's target temporarily */
     bfd_seek (abfd, (file_ptr)0, SEEK_SET);
+    /* If _bfd_check_format neglects to set bfd_error, assume wrong_format.
+       We didn't used to even pay any attention to bfd_error, so I suspect
+       that some _bfd_check_format might have this problem.  */
+    bfd_error = wrong_format;
     temp = BFD_SEND_FMT (abfd, _bfd_check_format, (abfd));
     if (temp) {				/* This format checks out as ok! */
       right_targ = temp;
@@ -125,7 +146,10 @@ DEFUN(bfd_check_format,(abfd, format),
 	 might match.  People who want those other targets have to set 
 	 the GNUTARGET variable.  */
       if (temp == default_vector[0])
-	break;
+	{
+	  match_count = 1;
+	  break;
+	}
 #ifdef GNU960
       /* Big- and little-endian b.out archives look the same, but it doesn't
        * matter: there is no difference in their headers, and member file byte
@@ -135,6 +159,10 @@ DEFUN(bfd_check_format,(abfd, format),
        */
       break;
 #endif
+    } else if (bfd_error != wrong_format) {
+      abfd->xvec = save_targ;
+      abfd->format = bfd_unknown;
+      return false;
     }
   }
 
@@ -149,14 +177,23 @@ DEFUN(bfd_check_format,(abfd, format),
 	       file_ambiguously_recognized);
   return false;
 }
-/*proto*
-*i bfd_set_format
-This function sets the file format of the supplied BFD to the format
-requested. If the target set in the BFD does not support the format
-requested, the format is illegal or the BFD is not open for writing
-than an error occurs.
-*; PROTO(boolean,bfd_set_format,(bfd *, bfd_format));
-*-*/
+
+
+/*
+FUNCTION
+	bfd_set_format
+
+SYNOPSIS
+	boolean bfd_set_format(bfd *abfd, bfd_format format);
+
+DESCRIPTION
+	This function sets the file format of the BFD @var{abfd} to the
+	format @var{format}. If the target set in the BFD does not
+	support the format requested, the format is invalid, or the BFD
+	is not open for writing, then an error occurs.
+
+*/
+
 boolean
 DEFUN(bfd_set_format,(abfd, format),
       bfd *abfd AND
@@ -185,13 +222,18 @@ DEFUN(bfd_set_format,(abfd, format),
 }
 
 
-/*proto*
-*i bfd_format_string
-This function takes one argument, and enumerated type (bfd_format) and
-returns a pointer to a const string "invalid", "object", "archive",
-"core" or "unknown" depending upon the value of the enumeration.
-*; PROTO(CONST char *, bfd_format_string, (bfd_format));
-*-*/
+/*
+FUNCTION
+	bfd_format_string
+
+SYNOPSIS
+	CONST char *bfd_format_string(bfd_format format);
+
+DESCRIPTION
+	Return a pointer to a const string
+	<<invalid>>, <<object>>, <<archive>>, <<core>>, or <<unknown>>,
+	depending upon the value of @var{format}.
+*/
 
 CONST char *
 DEFUN(bfd_format_string,(format),

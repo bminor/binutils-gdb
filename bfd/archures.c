@@ -24,17 +24,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 SECTION
 	Architectures
 
-	BFD's idea of an architecture is implimented in
-	<<archures.c>>. BFD keeps one atom in a BFD describing the
-	architecture of the data attached to the BFD;  a pointer to a
+	BFD keeps one atom in a BFD describing the
+	architecture of the data attached to the BFD: a pointer to a
 	<<bfd_arch_info_type>>.  
 
-	Pointers to structures can be requested independently of a bfd
+	Pointers to structures can be requested independently of a BFD
 	so that an architecture's information can be interrogated
-	without access to an open bfd.
+	without access to an open BFD.
 
-	The arch information is provided by each architecture package.
-	The set of default architectures is selected by the #define
+	The architecture information is provided by each architecture package.
+	The set of default architectures is selected by the macro
 	<<SELECT_ARCHITECTURES>>.  This is normally set up in the
 	<<config/target.mt>> file of your choice.  If the name is not
 	defined, then all the architectures supported are included. 
@@ -44,6 +43,8 @@ SECTION
 	insert as many items into the list of architectures as it wants to;
 	generally this would be one for each machine and one for the
 	default case (an item with a machine field of 0). 
+
+	BFD's idea of an architecture is implemented in	<<archures.c>>.
 */
 
 /*
@@ -53,11 +54,11 @@ SUBSECTION
 
 DESCRIPTION
 	This enum gives the object file's CPU architecture, in a
-	global sense --- i.e., what processor family does it belong to?
-	There is another field, which indicates what processor within
+	global sense---i.e., what processor family does it belong to?
+	Another field indicates which processor within
 	the family is in use.  The machine gives a number which
-	distingushes different versions of the architecture,
-	containing for example 2 and 3 for Intel i960 KA and i960 KB,
+	distinguishes different versions of the architecture,
+	containing, for example, 2 and 3 for Intel i960 KA and i960 KB,
 	and 68020 and 68030 for Motorola 68020 and 68030. 
 
 .enum bfd_architecture 
@@ -166,7 +167,7 @@ SYNOPSIS
 
 DESCRIPTION
 	Return a printable string representing the architecture and machine
-	from the pointer to the arch info structure 
+	from the pointer to the architecture info structure.
 
 */
 
@@ -184,12 +185,11 @@ FUNCTION
 	bfd_scan_arch
 
 SYNOPSIS
-	bfd_arch_info_type *bfd_scan_arch(CONST char *);
+	bfd_arch_info_type *bfd_scan_arch(CONST char *string);
 
 DESCRIPTION
-	This routine is provided with a string and tries to work out
-	if bfd supports any cpu which could be described with the name
-	provided.  The routine returns a pointer to an arch_info
+	Figure out if BFD supports any cpu which could be described with
+	the name @var{string}.  Return a pointer to an <<arch_info>>
 	structure if a machine is found, otherwise NULL.
 
 */
@@ -223,11 +223,11 @@ SYNOPSIS
 	        CONST bfd *bbfd);
 
 DESCRIPTION
-	This routine is used to determine whether two BFDs'
-	architectures and achine types are compatible.  It calculates
+	Determine whether two BFDs'
+	architectures and machine types are compatible.  Calculates
 	the lowest common denominator between the two architectures
 	and machine types implied by the BFDs and returns a pointer to
-	an arch_info structure describing the compatible machine.
+	an <<arch_info>> structure describing the compatible machine.
 */
 
 CONST bfd_arch_info_type *
@@ -268,8 +268,10 @@ FUNCTION
 	bfd_set_arch_info
 
 SYNOPSIS
-	void bfd_set_arch_info(bfd *, bfd_arch_info_type *);
+	void bfd_set_arch_info(bfd *abfd, bfd_arch_info_type *arg);
 
+DESCRIPTION
+	Set the architecture info of @var{abfd} to @var{arg}.
 */
 
 void DEFUN(bfd_set_arch_info,(abfd, arg),
@@ -289,8 +291,9 @@ SYNOPSIS
 		unsigned long mach);
 
 DESCRIPTION
-	Set the architecture and machine type in a bfd. This finds the
-	correct pointer to structure and inserts it into the arch_info
+	Set the architecture and machine type in BFD @var{abfd}
+	to @var{arch} and @var{mach}.  Find the correct
+	pointer to a structure and insert it into the <<arch_info>>
 	pointer. 
 */
 
@@ -333,9 +336,6 @@ boolean DEFUN(bfd_default_set_arch_mach,(abfd, arch, mach),
 }
 
 
-
-
-
 /*
 FUNCTION
 	bfd_get_arch
@@ -344,8 +344,8 @@ SYNOPSIS
 	enum bfd_architecture bfd_get_arch(bfd *abfd);
 
 DESCRIPTION
-	Returns the enumerated type which describes the supplied bfd's
-	architecture
+	Return the enumerated type which describes the BFD @var{abfd}'s
+	architecture.
 
 */
 
@@ -362,8 +362,8 @@ SYNOPSIS
 	unsigned long bfd_get_mach(bfd *abfd);
 
 DESCRIPTION
-	Returns the long type which describes the supplied bfd's
-	machine
+	Return the long type which describes the BFD @var{abfd}'s
+	machine.
 */
 
 unsigned long  
@@ -380,14 +380,15 @@ SYNOPSIS
 	unsigned int bfd_arch_bits_per_byte(bfd *abfd);
 
 DESCRIPTION
-	Returns the number of bits in one of the architectures bytes
+	Return the number of bits in one of the BFD @var{abfd}'s
+	architecture's bytes.
 
 */
 
 unsigned int DEFUN(bfd_arch_bits_per_byte, (abfd), bfd *abfd)
-  {
-    return abfd->arch_info->bits_per_byte;
-  }
+{
+  return abfd->arch_info->bits_per_byte;
+}
 
 /*
 FUNCTION
@@ -397,33 +398,32 @@ SYNOPSIS
 	unsigned int bfd_arch_bits_per_address(bfd *abfd);
 
 DESCRIPTION
-	Returns the number of bits in one of the architectures addresses
+	Return the number of bits in one of the BFD @var{abfd}'s
+	architecture's addresses.
 */
 
 unsigned int DEFUN(bfd_arch_bits_per_address, (abfd), bfd *abfd)
-  {
-    return abfd->arch_info->bits_per_address;
-  }
+{
+  return abfd->arch_info->bits_per_address;
+}
 
 
-
-extern void bfd_h8300_arch PARAMS ((void));
-extern void bfd_sh_arch PARAMS ((void));
-extern void bfd_h8500_arch PARAMS ((void));
-extern void bfd_alpha_arch PARAMS ((void));
-extern void bfd_i960_arch PARAMS ((void));
-extern void bfd_empty_arch PARAMS ((void));
-extern void bfd_sparc_arch PARAMS ((void));
-extern void bfd_m88k_arch PARAMS ((void));
-extern void bfd_m68k_arch PARAMS ((void));
-extern void bfd_vax_arch PARAMS ((void));
 extern void bfd_a29k_arch PARAMS ((void));
-extern void bfd_mips_arch PARAMS ((void));
-extern void bfd_i386_arch PARAMS ((void));
-extern void bfd_rs6000_arch PARAMS ((void));
+extern void bfd_alpha_arch PARAMS ((void));
+extern void bfd_h8300_arch PARAMS ((void));
+extern void bfd_h8500_arch PARAMS ((void));
 extern void bfd_hppa_arch PARAMS ((void));
-extern void bfd_z8k_arch PARAMS ((void));
+extern void bfd_i386_arch PARAMS ((void));
+extern void bfd_i960_arch PARAMS ((void));
+extern void bfd_m68k_arch PARAMS ((void));
+extern void bfd_m88k_arch PARAMS ((void));
+extern void bfd_mips_arch PARAMS ((void));
+extern void bfd_rs6000_arch PARAMS ((void));
+extern void bfd_sh_arch PARAMS ((void));
+extern void bfd_sparc_arch PARAMS ((void));
+extern void bfd_vax_arch PARAMS ((void));
 extern void bfd_we32k_arch PARAMS ((void));
+extern void bfd_z8k_arch PARAMS ((void));
 
 static void (*archures_init_table[]) PARAMS ((void)) = 
 {
@@ -457,10 +457,10 @@ INTERNAL_FUNCTION
 	bfd_arch_init
 
 SYNOPSIS
-	void  bfd_arch_init(void);
+	void bfd_arch_init(void);
 
 DESCRIPTION
-	This routine initializes the architecture dispatch table by
+	Initialize the architecture dispatch table by
 	calling all installed architecture packages and getting them
 	to poke around.
 */
@@ -483,10 +483,10 @@ INTERNAL_FUNCTION
 	bfd_arch_linkin
 
 SYNOPSIS
-	void bfd_arch_linkin(bfd_arch_info_type *);
+	void bfd_arch_linkin(bfd_arch_info_type *ptr);
 
 DESCRIPTION
-	Link the provided arch info structure into the list
+	Link the architecture info structure @var{ptr} into the list.
 */
 
 void DEFUN(bfd_arch_linkin,(ptr),
@@ -532,7 +532,7 @@ INTERNAL_FUNCTION
 	bfd_default_scan
 
 SYNOPSIS
-	boolean bfd_default_scan(CONST struct bfd_arch_info *, CONST char *);
+	boolean bfd_default_scan(CONST struct bfd_arch_info *info, CONST char *string);
 
 DESCRIPTION
 	The default function for working out whether this is an
@@ -649,16 +649,15 @@ CONST char *string)
 }
 
 
-
-
 /*
 FUNCTION
 	bfd_get_arch_info
 
-
 SYNOPSIS
-	bfd_arch_info_type * bfd_get_arch_info(bfd *);
+	bfd_arch_info_type * bfd_get_arch_info(bfd *abfd);
 
+DESCRIPTION
+	Return the architecture info struct in @var{abfd}.
 */
 
 bfd_arch_info_type *
@@ -680,8 +679,8 @@ SYNOPSIS
 		long machine);
 
 DESCRIPTION
-	Look for the architecure info struct which matches the
-	arguments given. A machine of 0 will match the
+	Look for the architecure info structure which matches the
+	arguments @var{arch} and @var{machine}. A machine of 0 matches the
 	machine/architecture structure which marks itself as the
 	default.
 */
@@ -706,20 +705,19 @@ long machine)
 }
 
 
-
 /*
 FUNCTION
 	bfd_printable_arch_mach
 
 SYNOPSIS
-	CONST char * bfd_printable_arch_mach
+	CONST char *bfd_printable_arch_mach
 		(enum bfd_architecture arch, unsigned long machine);
 
 DESCRIPTION
 	Return a printable string representing the architecture and
 	machine type. 
 
-	NB. The use of this routine is depreciated.
+	This routine is depreciated.
 */
 
 CONST char *

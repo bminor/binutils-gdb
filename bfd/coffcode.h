@@ -28,55 +28,55 @@ SECTION
 	coff backends
 
 	BFD supports a number of different flavours of coff format.
-	The major difference between formats are the sizes and
+	The major differences between formats are the sizes and
 	alignments of fields in structures on disk, and the occasional
 	extra field.  
 
-	Coff in all its varieties is implimented with a few common
+	Coff in all its varieties is implemented with a few common
 	files and a number of implementation specific files. For
 	example, The 88k bcs coff format is implemented in the file
-	@code{coff-m88k.c}. This file @code{#include}s
-	@code{coff/m88k.h} which defines the external structure of the
-	coff format for the 88k, and @code{coff/internal.h} which
-	defines the internal structure. @code{coff-m88k.c} also
+	@file{coff-m88k.c}. This file @code{#include}s
+	@file{coff/m88k.h} which defines the external structure of the
+	coff format for the 88k, and @file{coff/internal.h} which
+	defines the internal structure. @file{coff-m88k.c} also
 	defines the relocations used by the 88k format
 	@xref{Relocations}.
 
 	The Intel i960 processor version of coff is implemented in
-	@code{coff-i960.c}. This file has the same structure as
-	@code{coff-m88k.c}, except that it includes @code{coff/i960.h}
-	rather than @code{coff-m88k.h}. 
+	@file{coff-i960.c}. This file has the same structure as
+	@file{coff-m88k.c}, except that it includes @file{coff/i960.h}
+	rather than @file{coff-m88k.h}. 
 
 SUBSECTION
-	Porting To A New Version of Coff
+	Porting to a new version of coff
 
 	The recommended method is to select from the existing
-	implimentations the version of coff which is most like the one
-	you want to use, for our purposes, we'll say that i386 coff is
+	implementations the version of coff which is most like the one
+	you want to use.  For example, we'll say that i386 coff is
 	the one you select, and that your coff flavour is called foo.
-	Copy the @code{i386coff.c} to @code{foocoff.c}, copy
-	@code{../include/coff/i386.h} to @code{../include/coff/foo.h}
-	and add the lines to @code{targets.c} and @code{Makefile.in}
+	Copy @file{i386coff.c} to @file{foocoff.c}, copy
+	@file{../include/coff/i386.h} to @file{../include/coff/foo.h},
+	and add the lines to @file{targets.c} and @file{Makefile.in}
 	so that your new back end is used. Alter the shapes of the
-	structures in @code{../include/coff/foo.h} so that they match
+	structures in @file{../include/coff/foo.h} so that they match
 	what you need. You will probably also have to add
-	@code{#ifdef}s to the code in @code{coff/internal.h} and
-	@code{coffcode.h} if your version of coff is too wild. 
+	@code{#ifdef}s to the code in @file{coff/internal.h} and
+	@file{coffcode.h} if your version of coff is too wild. 
 
 	You can verify that your new BFD backend works quite simply by
-	building @code{objdump} from the @code{binutils} directory,
-	and making sure that its version of what's going on at your
-	host systems idea (assuming it has the pretty standard coff
-	dump utility (usually called @code{att-dump} or just
-	@code{dump})) are the same.  Then clean up your code, and send
+	building @file{objdump} from the @file{binutils} directory,
+	and making sure that its version of what's going on and your
+	host system's idea (assuming it has the pretty standard coff
+	dump utility, usually called @code{att-dump} or just
+	@code{dump}) are the same.  Then clean up your code, and send
 	what you've done to Cygnus. Then your stuff will be in the
 	next release, and you won't have to keep integrating it.
 
 SUBSECTION
-	How The Coff Backend Works
+	How the coff backend works
 
 SUBSUBSECTION
-	File Layout
+	File layout
 
 	The Coff backend is split into generic routines that are
 	applicable to any Coff target and routines that are specific
@@ -91,7 +91,7 @@ SUBSUBSECTION
 	structure, one of which exists for each target.
 
 	The essentially similar target-specific routines are in
-	@file{coffcode.h}.  This header file includes executable code.
+	@file{coffcode.h}.  This header file includes executable C code.
 	The various Coff targets first include the appropriate Coff
 	header file, make any special defines that are needed, and
 	then include @file{coffcode.h}.
@@ -109,24 +109,24 @@ SUBSUBSECTION
 	target.
 
 SUBSUBSECTION
-	Bit Twiddling
+	Bit twiddling
 
 	Each flavour of coff supported in BFD has its own header file
-	descibing the external layout of the structures. There is also
-	an internal description of the coff layout (in
-	@code{coff/internal.h}). A major function of the
+	describing the external layout of the structures. There is also
+	an internal description of the coff layout, in
+	@file{coff/internal.h}. A major function of the
 	coff backend is swapping the bytes and twiddling the bits to
 	translate the external form of the structures into the normal
 	internal form. This is all performed in the
 	@code{bfd_swap}_@i{thing}_@i{direction} routines. Some
 	elements are different sizes between different versions of
-	coff, it is the duty of the coff version specific include file
+	coff; it is the duty of the coff version specific include file
 	to override the definitions of various packing routines in
-	@code{coffcode.h}. Eg the size of line number entry in coff is
+	@file{coffcode.h}. E.g., the size of line number entry in coff is
 	sometimes 16 bits, and sometimes 32 bits. @code{#define}ing
 	@code{PUT_LNSZ_LNNO} and @code{GET_LNSZ_LNNO} will select the
 	correct one. No doubt, some day someone will find a version of
-	coff which has a varying field size not catered for at the
+	coff which has a varying field size not catered to at the
 	moment. To port BFD, that person will have to add more @code{#defines}.  
 	Three of the bit twiddling routines are exported to
 	@code{gdb}; @code{coff_swap_aux_in}, @code{coff_swap_sym_in}
@@ -139,29 +139,29 @@ SUBSUBSECTION
 	@code{coff_swap_scnhdr_out}. @code{Gas} currently keeps track
 	of all the symbol table and reloc drudgery itself, thereby
 	saving the internal BFD overhead, but uses BFD to swap things
-	on the way out, making cross ports much safer.  This also
+	on the way out, making cross ports much safer.  Doing so also
 	allows BFD (and thus the linker) to use the same header files
 	as @code{gas}, which makes one avenue to disaster disappear.
 
 SUBSUBSECTION
-	Symbol Reading
+	Symbol reading
 
 	The simple canonical form for symbols used by BFD is not rich
 	enough to keep all the information available in a coff symbol
-	table. The back end gets around this by keeping the original
+	table. The back end gets around this problem by keeping the original
 	symbol table around, "behind the scenes". 
 
 	When a symbol table is requested (through a call to
-	@code{bfd_canonicalize_symtab}, a request gets through to
+	@code{bfd_canonicalize_symtab}), a request gets through to
 	@code{coff_get_normalized_symtab}. This reads the symbol table from
 	the coff file and swaps all the structures inside into the
 	internal form. It also fixes up all the pointers in the table
 	(represented in the file by offsets from the first symbol in
 	the table) into physical pointers to elements in the new
 	internal table. This involves some work since the meanings of
-	fields changes depending upon context; a field that is a
+	fields change depending upon context: a field that is a
 	pointer to another structure in the symbol table at one moment
-	may be the size in bytes of a structure in the next.  Another
+	may be the size in bytes of a structure at the next.  Another
 	pass is made over the table. All symbols which mark file names
 	(<<C_FILE>> symbols) are modified so that the internal
 	string points to the value in the auxent (the real filename)
@@ -170,28 +170,28 @@ SUBSUBSECTION
 
 	At this time the symbol names are moved around. Coff stores
 	all symbols less than nine characters long physically
-	within the symbol table, longer strings are kept at the end of
+	within the symbol table; longer strings are kept at the end of
 	the file in the string 	table. This pass moves all strings
-	into memory, and replaces them with pointers to the strings.
+	into memory and replaces them with pointers to the strings.
 
 
 	The symbol table is massaged once again, this time to create
 	the canonical table used by the BFD application. Each symbol
 	is inspected in turn, and a decision made (using the
 	@code{sclass} field) about the various flags to set in the
-	@code{asymbol} @xref{Symbols}. The generated canonical table
+	@code{asymbol}.  @xref{Symbols}. The generated canonical table
 	shares strings with the hidden internal symbol table. 
 
 	Any linenumbers are read from the coff file too, and attached
 	to the symbols which own the functions the linenumbers belong to. 
 
 SUBSUBSECTION
-	Symbol Writing
+	Symbol writing
 
 	Writing a symbol to a coff file which didn't come from a coff
 	file will lose any debugging information. The @code{asymbol}
-	structure remembers the BFD from which was born, and on output
-	the back end makes sure that the same destination target as
+	structure remembers the BFD from which the symbol was taken, and on
+	output the back end makes sure that the same destination target as
 	source target is present.
 
 	When the symbols have come from a coff file then all the
@@ -215,24 +215,23 @@ SUBSUBSECTION
 	0x100, would have the value 0x20. Coff expects symbols to
 	contain their final value, so symbols have their values
 	changed at this point to reflect their sum with their owning
-	section. Note that this transformation uses the
+	section.  This transformation uses the
 	<<output_section>> field of the @code{asymbol}'s
 	@code{asection} @xref{Sections}. 
 
-	o coff_mangle_symbols
+	o <<coff_mangle_symbols>>
 
 	This routine runs though the provided symbol table and uses
 	the offsets generated by the previous pass and the pointers
 	generated when the symbol table was read in to create the
 	structured hierachy required by coff. It changes each pointer
-	to a symbol to an index into the symbol table of the symbol
-	being referenced. 
+	to a symbol into the index into the symbol table of the asymbol.
 
-	o coff_write_symbols
+	o <<coff_write_symbols>>
 
 	This routine runs through the symbol table and patches up the
 	symbols from their internal form into the coff way, calls the
-	bit twiddlers and writes out the tabel to the file. 
+	bit twiddlers, and writes out the table to the file. 
 
 */
 
@@ -241,8 +240,8 @@ INTERNAL_DEFINITION
 	coff_symbol_type
 
 DESCRIPTION
-	The hidden information for an asymbol is described in a
-	coff_ptr_struct, which is typedefed to a combined_entry_type
+	The hidden information for an <<asymbol>> is described in a
+	<<combined_entry_type>>:
 
 CODE_FRAGMENT
 .
@@ -472,7 +471,7 @@ INTERNAL_DEFINITION
 
 CODE_FRAGMENT
 
-Special entry points for gdb to swap in coff symbol table parts
+Special entry points for gdb to swap in coff symbol table parts:
 .typedef struct 
 .{
 .  void (*_bfd_coff_swap_aux_in) PARAMS ((
@@ -493,7 +492,7 @@ Special entry points for gdb to swap in coff symbol table parts
 .       PTR             in));
 .
 
-Special entry points for gas to swap coff parts
+Special entry points for gas to swap out coff parts:
 
 . unsigned int (*_bfd_coff_swap_aux_out) PARAMS ((
 .       bfd   	*abfd,
@@ -534,7 +533,7 @@ Special entry points for gas to swap coff parts
 .
 
 Special entry points for generic COFF routines to call target
-dependent COFF routines
+dependent COFF routines:
 
 . unsigned int _bfd_filhsz;
 . unsigned int _bfd_aoutsz;
@@ -845,7 +844,7 @@ coff_set_arch_mach_hook(abfd, filehdr)
   case I386MAGIC:
   case I386PTXMAGIC:
   case I386AIXMAGIC:		/* Danbury PS/2 AIX C Compiler */
-  case I386LYNXMAGIC:
+  case LYNXCOFFMAGIC:		/* shadows the m68k Lynx number below, sigh */
     arch = bfd_arch_i386;
     machine = 0;
     break;
@@ -867,6 +866,9 @@ coff_set_arch_mach_hook(abfd, filehdr)
 #endif
 #ifdef APOLLOM68KMAGIC
   case APOLLOM68KMAGIC:
+#endif
+#ifdef LYNXCOFFMAGIC
+  case LYNXCOFFMAGIC:
 #endif
     arch = bfd_arch_m68k;
     machine = 68020;
@@ -975,6 +977,13 @@ coff_set_arch_mach_hook(abfd, filehdr)
     break;
 #endif
 
+#ifdef SPARCMAGIC
+  case SPARCMAGIC:
+    arch = bfd_arch_sparc;
+    machine = 0;
+    break;
+#endif
+
   default:			/* Unreadable input file type */
     arch = bfd_arch_obscure;
 break;
@@ -1003,14 +1012,14 @@ DEFUN (symname_in_debug_hook, (abfd, sym),
 
 /*
 SUBSUBSECTION
-	Writing Relocations
+	Writing relocations
 
-	To write relocations, all the back end does is step though the
-	canonical relocation table, and create an
+	To write relocations, the back end steps though the
+	canonical relocation table and create an
 	@code{internal_reloc}. The symbol index to use is removed from
-	the @code{offset} field in the symbol table supplied, the
+	the @code{offset} field in the symbol table supplied.  The
 	address comes directly from the sum of the section base
-	address and the relocation offset and the type is dug directly
+	address and the relocation offset; the type is dug directly
 	from the howto field.  Then the @code{internal_reloc} is
 	swapped into the shape of an @code{external_reloc} and written
 	out to disk. 
@@ -1142,6 +1151,10 @@ DEFUN(coff_set_flags,(abfd, magicp, flagsp),
 #ifdef I386MAGIC
   case bfd_arch_i386:
     *magicp = I386MAGIC;
+#ifdef LYNXOS
+    /* Just overwrite the usual value if we're doing Lynx. */
+    *magicp = LYNXCOFFMAGIC;
+#endif
     return true;
     break;
 #endif
@@ -1151,6 +1164,10 @@ DEFUN(coff_set_flags,(abfd, magicp, flagsp),
     *magicp = APOLLO_COFF_VERSION_NUMBER;
 #else
     *magicp = MC68MAGIC;
+#endif
+#ifdef LYNXOS
+    /* Just overwrite the usual value if we're doing Lynx. */
+    *magicp = LYNXCOFFMAGIC;
 #endif
     return true;
     break;
@@ -1181,6 +1198,17 @@ DEFUN(coff_set_flags,(abfd, magicp, flagsp),
       *magicp = SHMAGIC;
       return true;
       break;
+#endif
+
+#ifdef SPARCMAGIC
+  case bfd_arch_sparc:
+    *magicp = SPARCMAGIC;
+#ifdef LYNXOS
+    /* Just overwrite the usual value if we're doing Lynx. */
+    *magicp = LYNXCOFFMAGIC;
+#endif
+    return true;
+    break;
 #endif
 
 #ifdef H8500MAGIC
@@ -1795,12 +1823,12 @@ buy_and_read(abfd, where, seek_direction, size)
 
 /*
 SUBSUBSECTION 
-	Reading Linenumbers
+	Reading linenumbers
 
 	Creating the linenumber table is done by reading in the entire
 	coff linenumber table, and creating another table for internal use.
 
-	A coff line number table is structured so that each function
+	A coff linenumber table is structured so that each function
 	is marked as having a line number of 0. Each line within the
 	function is an offset from the first line in the function. The
 	base of the line number information for the table is stored in
@@ -2093,22 +2121,22 @@ DEFUN(coff_slurp_symbol_table,(abfd),
 
 /*
 SUBSUBSECTION 
-	Reading Relocations
+	Reading relocations
 
 	Coff relocations are easily transformed into the internal BFD form
 	(@code{arelent}).
 
 	Reading a coff relocation table is done in the following stages:
 
-	o The entire coff relocation table is read into memory.
+	o Read the entire coff relocation table into memory.
 
-	o Each relocation is processed in turn, first it is swapped from the
+	o Process each relocation in turn; first swap it from the
 	external to the internal form.
 
-	o The symbol referenced in the relocation's symbol index is
-	turned intoa pointer into the canonical symbol table. Note
-	that this table is the same as the one returned by a call to
-	@code{bfd_canonicalize_symtab}. The back end will call the
+	o Turn the symbol referenced in the relocation's symbol index
+	into a pointer into the canonical symbol table.
+	This table is the same as the one returned by a call to
+	@code{bfd_canonicalize_symtab}. The back end will call that
 	routine and save the result if a canonicalization hasn't been done.
 
 	o The reloc index is turned into a pointer to a howto

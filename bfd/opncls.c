@@ -93,14 +93,17 @@ FUNCTION
 	bfd_openr
 
 SYNOPSIS
-        bfd *bfd_openr(CONST char *filename, CONST char*target);
+        bfd *bfd_openr(CONST char *filename, CONST char *target);
 
 DESCRIPTION
-	This function opens the file supplied (using <<fopen>>) with the target
-	supplied, it returns a pointer to the created BFD.
+	Open the file @var{filename} (using <<fopen>>) with the target
+	@var{target}.  Return a pointer to the created BFD.
 
 	If NULL is returned then an error has occured. Possible errors
 	are <<no_memory>>, <<invalid_target>> or <<system_call>> error.
+
+	Calls <<bfd_find_target>>, so @var{target} is interpreted as by
+	that function.
 */
 
 bfd *
@@ -151,11 +154,11 @@ SYNOPSIS
          bfd *bfd_fdopenr(CONST char *filename, CONST char *target, int fd);
 
 DESCRIPTION
-         bfd_fdopenr is to bfd_fopenr much like  fdopen is to fopen.
+         <<bfd_fdopenr>> is to <<bfd_fopenr>> much like <<fdopen>> is to <<fopen>>.
 	 It opens a BFD on a file already described by the @var{fd}
 	 supplied.
 
-	 When the file is later bfd_closed, the file descriptor will be closed.
+	 When the file is later <<bfd_close>>d, the file descriptor will be closed.
 
 	 If the caller desires that this file descriptor be cached by BFD
 	 (opened as needed, closed as needed to free descriptors for
@@ -163,11 +166,10 @@ DESCRIPTION
 	 file descriptor (but subject to closure at any time), call
 	 bfd_set_cacheable(bfd, 1) on the returned BFD.  The default is to
 	 assume no cacheing; the file descriptor will remain open until
-	 bfd_close, and will not be affected by BFD operations on other
+	 <<bfd_close>>, and will not be affected by BFD operations on other
 	 files.
 
-         Possible errors are no_memory, invalid_target and system_call
-	 error.
+         Possible errors are <<no_memory>>, <<invalid_target>> and <<system_call_error>>.
 */
 
 bfd *
@@ -250,11 +252,11 @@ SYNOPSIS
 	bfd *bfd_openw(CONST char *filename, CONST char *target);
 
 DESCRIPTION
-	Creates a BFD, associated with file @var{filename}, using the
-	file format @var{target}, and returns a pointer to it.
+	Create a BFD, associated with file @var{filename}, using the
+	file format @var{target}, and return a pointer to it.
 
-	Possible errors are system_call_error, no_memory,
-	invalid_target.
+	Possible errors are <<system_call_error>>, <<no_memory>>,
+	<<invalid_target>>.
 */
 
 bfd *
@@ -296,11 +298,11 @@ FUNCTION
 	bfd_close
 
 SYNOPSIS
-	boolean bfd_close(bfd *);
+	boolean bfd_close(bfd *abfd);
 
 DESCRIPTION
 
-	This function closes a BFD. If the BFD was open for writing,
+	Close a BFD. If the BFD was open for writing,
 	then pending operations are completed and the file written out
 	and closed. If the created file is executable, then
 	<<chmod>> is called to mark it as such.
@@ -308,7 +310,7 @@ DESCRIPTION
 	All memory attached to the BFD's obstacks is released.
 
 	The file descriptor associated with the BFD is closed (even
-	if it was passed in to BFD by bfd_fdopenr).
+	if it was passed in to BFD by <<bfd_fdopenr>>).
 
 RETURNS
 	<<true>> is returned if all is ok, otherwise <<false>>.
@@ -361,7 +363,7 @@ SYNOPSIS
 	boolean bfd_close_all_done(bfd *);
 
 DESCRIPTION
-	This function closes a BFD. It differs from <<bfd_close>>
+	Close a BFD.  Differs from <<bfd_close>>
 	since it does not complete any pending operations.  This
 	routine would be used if the application had just used BFD for
 	swapping and didn't want to use any of the writing code.
@@ -417,8 +419,7 @@ SYNOPSIS
 	bfd_size_type bfd_alloc_size(bfd *abfd);
 
 DESCRIPTION
-        Return the number of bytes in the obstacks connected to the
-	supplied BFD.
+        Return the number of bytes in the obstacks connected to @var{abfd}.
 
 */
 
@@ -445,7 +446,7 @@ SYNOPSIS
 	bfd *bfd_create(CONST char *filename, bfd *templ);
 
 DESCRIPTION
-	This routine creates a new BFD in the manner of
+	Create a new BFD in the manner of
 	<<bfd_openw>>, but without opening a file. The new BFD
 	takes the target from the target used by @var{template}. The
 	format is always set to <<bfd_object>>.
@@ -479,8 +480,8 @@ SYNOPSIS
 	PTR bfd_alloc_by_size_t(bfd *abfd, size_t wanted);
 
 DESCRIPTION
-	This function allocates a block of memory in the obstack
-	attatched to <<abfd>> and returns a pointer to it.
+	Allocate a block of @var{wanted} bytes of memory in the obstack
+	attatched to <<abfd>> and return a pointer to it.
 */
 
 

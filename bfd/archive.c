@@ -24,28 +24,26 @@ SECTION
 	Archives
 
 DESCRIPTION
-	Archives are supported in BFD in <<archive.c>>.
-
 	An archive (or library) is just another BFD.  It has a symbol
 	table, although there's not much a user program will do with it.
 
 	The big difference between an archive BFD and an ordinary BFD
 	is that the archive doesn't have sections.  Instead it has a
-	chain of BFDs considered its contents.  These BFDs can be
-	manipulated just like any other.  The BFDs contained in an
-	archive opened for reading will all be opened for reading; you
+	chain of BFDs that are considered its contents.  These BFDs can
+	be manipulated like any other.  The BFDs contained in an
+	archive opened for reading will all be opened for reading.  You
 	may put either input or output BFDs into an archive opened for
-	output; it will be handled correctly when the archive is closed.
+	output; they will be handled correctly when the archive is closed.
 
-	Use <<bfd_openr_next_archived_file>> to step through all
-	the contents of an archive opened for input.  It's not
-	required that you read the entire archive if you don't want
+	Use <<bfd_openr_next_archived_file>> to step through
+	the contents of an archive opened for input.  You don't
+	have to read the entire archive if you don't want
 	to!  Read it until you find what you want.
 
 	Archive contents of output BFDs are chained through the
 	<<next>> pointer in a BFD.  The first one is findable through
 	the <<archive_head>> slot of the archive.  Set it with
-	<<set_archive_head>> (q.v.).  A given BFD may be in only one
+	<<bfd_set_archive_head>> (q.v.).  A given BFD may be in only one
 	open output archive at a time.
 
 	As expected, the BFD archive code is more general than the
@@ -56,7 +54,7 @@ DESCRIPTION
 
 	This can cause unexpected confusion, since some archive
 	formats are more expressive than others.  For instance, Intel
-	COFF archives can preserve long filenames; Sun a.out archives
+	COFF archives can preserve long filenames; SunOS a.out archives
 	cannot.  If you move a file from the first to the second
 	format and back again, the filename may be truncated.
 	Likewise, different a.out environments have different
@@ -67,10 +65,13 @@ DESCRIPTION
 
 	Beware: most of these formats do not react well to the
 	presence of spaces in filenames.  We do the best we can, but
-	can't always handle this due to restrctions in the format of
-	archives.  Many unix utilities are braindead in regards to
+	can't always handle this case due to restrictions in the format of
+	archives.  Many Unix utilities are braindead in regards to
 	spaces and such in filenames anyway, so this shouldn't be much
 	of a restriction.
+
+	Archives are supported in BFD in <<archive.c>>.
+
 */
 
 /* Assumes:
@@ -80,12 +81,12 @@ DESCRIPTION
 */
 
 /* Some formats provide a way to cram a long filename into the short
-   (16 chars) space provided by a bsd archive.  The trick is: make a
+   (16 chars) space provided by a BSD archive.  The trick is: make a
    special "file" in the front of the archive, sort of like the SYMDEF
    entry.  If the filename is too long to fit, put it in the extended
    name table, and use its index as the filename.  To prevent
    confusion prepend the index with a space.  This means you can't
-   have filenames that start with a space, but then again, many unix
+   have filenames that start with a space, but then again, many Unix
    utilities can't handle that anyway.
 
    This scheme unfortunately requires that you stand on your head in
@@ -99,7 +100,7 @@ DESCRIPTION
 
    BSD 4.4 uses a third scheme:  It writes a long filename
    directly after the header.  This allows 'ar q' to work.
-   We current can read BSD 4.4 archives, but not write them.
+   We currently can read BSD 4.4 archives, but not write them.
 */
 
 /* Summary of archive member names:
@@ -139,6 +140,15 @@ extern int errno;
 
 #ifdef GNU960
 #define BFD_GNU960_ARMAG(abfd)	(BFD_COFF_FILE_P((abfd)) ? ARMAG : ARMAGB)
+#endif
+
+/* Can't define this in hosts/foo.h, because (e.g. in gprof) the hosts file
+   is included, then obstack.h, which thinks if offsetof is defined, it
+   doesn't need to include stddef.h.  */
+/* Define offsetof for those systems which lack it */
+
+#if !defined (offsetof)
+#define offsetof(TYPE, MEMBER) ((unsigned long) &((TYPE *)0)->MEMBER)
 #endif
 
 /* We keep a cache of archive filepointers to archive elements to
@@ -190,15 +200,15 @@ FUNCTION
 	bfd_get_next_mapent
 
 SYNOPSIS
-	symindex bfd_get_next_mapent(bfd *, symindex previous, carsym ** sym);
+	symindex bfd_get_next_mapent(bfd *abfd, symindex previous, carsym **sym);
 
 DESCRIPTION
-	This function steps through an archive's symbol table (if it
-	has one).  Successively updates <<sym>> with the next symbol's
+	Step through archive @var{abfd}'s symbol table (if it
+	has one).  Successively update @var{sym} with the next symbol's
 	information, returning that symbol's (internal) index into the
 	symbol table.
 
-	Supply BFD_NO_MORE_SYMBOLS as the <<previous>> entry to get
+	Supply BFD_NO_MORE_SYMBOLS as the @var{previous} entry to get
 	the first one; returns BFD_NO_MORE_SYMBOLS when you're already
 	got the last one.
 
@@ -226,6 +236,7 @@ DEFUN(bfd_get_next_mapent,(abfd, prev, entry),
 }
 
 /* To be called by backends only */
+
 bfd *
 _bfd_create_empty_archive_element_shell (obfd)
      bfd *obfd;
@@ -233,10 +244,11 @@ _bfd_create_empty_archive_element_shell (obfd)
   bfd *nbfd;
 
   nbfd = new_bfd_contained_in(obfd);
-  if (nbfd == NULL) {
-    bfd_error = no_memory;
-    return NULL;
-  }
+  if (nbfd == NULL)
+    {
+      bfd_error = no_memory;
+      return NULL;
+    }
   return nbfd;
 }
 
@@ -248,8 +260,8 @@ SYNOPSIS
 	boolean bfd_set_archive_head(bfd *output, bfd *new_head);
 
 DESCRIPTION
-	Used whilst processing archives. Sets the head of the chain of
-	BFDs contained in an archive to @var{new_head}. 
+	Set the head of the chain of
+	BFDs contained in the archive @var{output} to @var{new_head}. 
 */
 
 boolean
@@ -463,28 +475,33 @@ snarf_ar_hdr (abfd)
 */
 
 bfd *
-DEFUN (get_elt_at_filepos, (archive, filepos),
-       bfd *archive AND
-       file_ptr filepos)
+get_elt_at_filepos (archive, filepos)
+     bfd *archive;
+     file_ptr filepos;
 {
   struct areltdata *new_areldata;
   bfd *n_nfd;
 
   n_nfd = look_for_bfd_in_cache (archive, filepos);
-  if (n_nfd) return n_nfd;
+  if (n_nfd)
+    return n_nfd;
 
-  if (0 > bfd_seek (archive, filepos, SEEK_SET)) {
-    bfd_error = system_call_error;
+  if (0 > bfd_seek (archive, filepos, SEEK_SET))
+    {
+      bfd_error = system_call_error;
+      return NULL;
+    }
+
+  if ((new_areldata = snarf_ar_hdr (archive)) == NULL)
     return NULL;
-  }
-
-  if ((new_areldata = snarf_ar_hdr (archive)) == NULL) return NULL;
   
   n_nfd = _bfd_create_empty_archive_element_shell (archive);
-  if (n_nfd == NULL) {
-    bfd_release (archive, (PTR)new_areldata);
-    return NULL;
-  }
+  if (n_nfd == NULL)
+    {
+      bfd_release (archive, (PTR)new_areldata);
+      return NULL;
+    }
+
   n_nfd->origin = bfd_tell (archive);
   n_nfd->arelt_data = (PTR) new_areldata;
   n_nfd->filename = new_areldata->filename;
@@ -503,11 +520,12 @@ FUNCTION
 	bfd_get_elt_at_index
 
 SYNOPSIS
-	bfd *bfd_get_elt_at_index(bfd * archive, int index);
+	bfd *bfd_get_elt_at_index(bfd *archive, int index);
 
 DESCRIPTION
-	Return the bfd which is referenced by the symbol indexed by <<index>>.
-	<<index>> should have been returned by <<bfd_get_next_mapent>> (q.v.).
+	Return the BFD which is referenced by the symbol in @var{archive}
+	indexed by @var{index}.  @var{index} should have been returned by
+	<<bfd_get_next_mapent>> (q.v.).
 
 */
 bfd *
@@ -526,12 +544,12 @@ FUNCTION
 	bfd_openr_next_archived_file
 
 SYNOPSIS
-	bfd* bfd_openr_next_archived_file(bfd *archive, bfd *previous);
+	bfd *bfd_openr_next_archived_file(bfd *archive, bfd *previous);
 
 DESCRIPTION
-	Initially provided a BFD containing an archive and NULL, opens
-	an inpout BFD on the first contained element and returns that.
-	Subsequent calls to bfd_openr_next_archived_file should pass
+	Provided a BFD, @var{archive}, containing an archive and NULL, open
+	an input BFD on the first contained element and returns that.
+	Subsequent calls should pass
 	the archive and the previous return value to return a created
 	BFD to the next contained element. NULL is returned when there
 	are no more.
@@ -539,26 +557,25 @@ DESCRIPTION
 */
 
 bfd *
-DEFUN(bfd_openr_next_archived_file,(archive, last_file),
-     bfd *archive AND  
-      bfd*last_file)
+bfd_openr_next_archived_file (archive, last_file)
+     bfd *archive;
+     bfd *last_file;
 {
+  if ((bfd_get_format (archive) != bfd_archive) ||
+      (archive->direction == write_direction))
+    {
+      bfd_error = invalid_operation;
+      return NULL;
+    }
 
-    if ((bfd_get_format (archive) != bfd_archive) ||
-	(archive->direction == write_direction)) {
-	    bfd_error = invalid_operation;
-	    return NULL;
-	}
-
-
-    return BFD_SEND (archive,
-		     openr_next_archived_file,
-		     (archive,
-		      last_file));
-
+  return BFD_SEND (archive,
+		   openr_next_archived_file,
+		   (archive,
+		    last_file));
 }
 
-bfd *bfd_generic_openr_next_archived_file(archive, last_file)
+bfd *
+bfd_generic_openr_next_archived_file (archive, last_file)
      bfd *archive;
      bfd *last_file;
 {
@@ -1496,6 +1513,7 @@ compute_and_write_armap (arch, elength)
 				 syms[src_count]->section;
 				
 				if ((flags & BSF_GLOBAL ||
+				     flags & BSF_WEAK ||
 				     flags & BSF_INDIRECT ||
 				     bfd_is_com_section (sec))
 				    && (sec != &bfd_und_section)) {
@@ -1559,7 +1577,8 @@ bsd_write_armap (arch, elength, map, orl_count, stridx)
   sprintf (hdr.ar_name, RANLIBMAG);
   /* Remember the timestamp, to keep it holy.  But fudge it a little.  */
   bfd_ardata(arch)->armap_timestamp = statbuf.st_mtime + ARMAP_TIME_OFFSET;
-  bfd_ardata(arch)->armap_datepos = SARMAG + offsetof(struct ar_hdr, ar_date);
+  bfd_ardata(arch)->armap_datepos = SARMAG + 
+				      offsetof(struct ar_hdr, ar_date[0]);
   sprintf (hdr.ar_date, "%ld", bfd_ardata(arch)->armap_timestamp);  
   sprintf (hdr.ar_uid, "%d", getuid());
   sprintf (hdr.ar_gid, "%d", getgid());

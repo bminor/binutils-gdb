@@ -27,7 +27,7 @@ SECTION
 	libbfd
 
 DESCRIPTION
-	This file contains various routines which are used within BFD.
+	These routines are used within BFD.
 	They are not intended for export, but are documented here for
 	completeness.
 */
@@ -138,7 +138,7 @@ SYNOPSIS
 	PTR  bfd_xmalloc( bfd_size_type size);
 
 DESCRIPTION
-	Like malloc, but exit if no more memory.
+	Like <<malloc>>, but exit if no more memory.
 
 */
 
@@ -157,7 +157,7 @@ DEFUN(PTR bfd_xmalloc,(size),
   if (!ptr)
     {
       write (2, no_memory_message, sizeof(no_memory_message)-1);
-      exit (-1);
+      exit (1);
     }
   return ptr;
 }
@@ -170,8 +170,8 @@ SYNOPSIS
 	PTR bfd_xmalloc_by_size_t ( size_t size);
 
 DESCRIPTION
-	Like malloc, but exit if no more memory.
-	Uses size_t, so it's suitable for use as obstack_chunk_alloc.
+	Like <<malloc>>, but exit if no more memory.
+	Uses <<size_t>>, so it's suitable for use as <<obstack_chunk_alloc>>.
  */
 PTR
 DEFUN(bfd_xmalloc_by_size_t, (size),
@@ -246,8 +246,8 @@ SYNOPSIS
 	void bfd_write_bigendian_4byte_int(bfd *abfd,  int i);
 
 DESCRIPTION
-	Writes a 4 byte integer to the outputing bfd, in big endian
-	mode regardless of what else is going on.  This is useful in
+	Write a 4 byte integer @var{i} to the output BFD @var{abfd}, in big
+	endian order regardless of what else is going on.  This is useful in
 	archives.
 
 */
@@ -501,15 +501,14 @@ DESCRIPTION
 /*
 FUNCTION
 	bfd_h_put_size
-FUNCTION
 	bfd_h_get_size
 
 DESCRIPTION
 	These macros have the same function as their <<bfd_get_x>>
-	bretherin, except that they are used for removing information
+	bretheren, except that they are used for removing information
 	for the header records of object files. Believe it or not,
 	some object files keep their header records in big endian
-	order, and their data in little endian order.
+	order and their data in little endian order.
 .
 .{* Byte swapping macros for file header data.  *}
 .
@@ -850,8 +849,8 @@ INTERNAL_FUNCTION
 	bfd_log2
 
 DESCRIPTION
-	Return the log base 2 of the value supplied, rounded up. eg an
-	arg of 1025 would return 11.
+	Return the log base 2 of the value supplied, rounded up.  E.g., an
+	@var{x} of 1025 returns 11.
 
 SYNOPSIS
 	unsigned int bfd_log2(bfd_vma x);

@@ -1,3 +1,13 @@
+Fri Nov  5 10:41:07 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* aoutx.h, archive.c, archures.c, bfd.c, cache.c, coffcode.h,
+	core.c, ctor.c, format.c, init.c, libbfd.c, opncls.c, reloc.c,
+	section.c, syms.c, targets.c:
+	Doc cleanup (spelling, punctuation, grammar, formatting).
+	* bfd-in2.h, libbfd.h: Rebuild.
+	* reloc.c (bfd_get_reloc_upper_bound, bfd_canonicalize_reloc,
+	bfd_set_reloc): Moved from bfd.c.
+
 Thu Nov  4 14:46:14 1993  John Gilmore  (gnu@rtl.cygnus.com)
 
 	* bfd-in.h (bfd_get_cacheable, bfd_set_cacheable):  New accessors.
@@ -74,6 +84,10 @@ Sun Oct 31 09:35:49 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 	* bfd-in2.h: Rebuilt.
 
 	* som.c: Add comment about how abort() on corrupt executable is evil.
+
+Sat Oct 30 12:27:09 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* aoutx.h (aout,slurp_reloc_table): Avoid a goto.
 
 Fri Oct 29 16:04:33 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 

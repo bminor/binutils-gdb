@@ -466,7 +466,7 @@ void
 bfd_init PARAMS ((void));
 
 bfd *
-bfd_openr PARAMS ((CONST char *filename, CONST char*target));
+bfd_openr PARAMS ((CONST char *filename, CONST char *target));
 
 bfd *
 bfd_fdopenr PARAMS ((CONST char *filename, CONST char *target, int fd));
@@ -475,7 +475,7 @@ bfd *
 bfd_openw PARAMS ((CONST char *filename, CONST char *target));
 
 boolean 
-bfd_close PARAMS ((bfd *));
+bfd_close PARAMS ((bfd *abfd));
 
 boolean 
 bfd_close_all_done PARAMS ((bfd *));
@@ -566,12 +566,12 @@ bfd_create PARAMS ((CONST char *filename, bfd *templ));
 
 typedef struct sec 
 {
-         /* The name of the section, the name isn't a copy, the pointer is
+         /* The name of the section; the name isn't a copy, the pointer is
         the same as that passed to bfd_make_section. */
 
     CONST char *name;
 
-         /* Which section is it 0.nth      */
+         /* Which section is it; 0..nth.      */
 
    int index;                      
 
@@ -579,7 +579,7 @@ typedef struct sec
 
     struct sec *next;
 
-         /* The field flags contains attributes of the section. Some of
+         /* The field flags contains attributes of the section. Some
            flags are read in from the object file, and some are
            synthesized from other information.  */         
 
@@ -587,17 +587,17 @@ typedef struct sec
 
 #define SEC_NO_FLAGS   0x000
 
-         /* Tells the OS to allocate space for this section when loaded.
-           This would clear for a section containing debug information
+         /* Tells the OS to allocate space for this section when loading.
+           This is clear for a section containing debug information
            only. */
 #define SEC_ALLOC      0x001
           
          /* Tells the OS to load the section from the file when loading.
-           This would be clear for a .bss section */
+           This is clear for a .bss section. */
 #define SEC_LOAD       0x002
 
-         /* The section contains data still to be relocated, so there will
-           be some relocation information too. */
+         /* The section contains data still to be relocated, so there is
+           some relocation information too. */
 #define SEC_RELOC      0x004
 
 #if 0    /* Obsolete ? */
@@ -621,10 +621,10 @@ typedef struct sec
            type is used by the linker to create lists of constructors and
            destructors used by <<g++>>. When a back end sees a symbol
            which should be used in a constructor list, it creates a new
-           section for the type of name (eg <<__CTOR_LIST__>>), attaches
-           the symbol to it and builds a relocation. To build the lists
+           section for the type of name (e.g., <<__CTOR_LIST__>>), attaches
+           the symbol to it, and builds a relocation. To build the lists
            of constructors, all the linker has to do is catenate all the
-           sections called <<__CTOR_LIST__>> and relocte the data
+           sections called <<__CTOR_LIST__>> and relocate the data
            contained within - exactly the operations it would peform on
            standard data. */
 #define SEC_CONSTRUCTOR 0x100
@@ -636,13 +636,12 @@ typedef struct sec
 #define SEC_CONSTRUCTOR_BSS  0x3100
 
          /* The section has contents - a data section could be
-           <<SEC_ALLOC>> | <<SEC_HAS_CONTENTS>>, a debug section could be
+           <<SEC_ALLOC>> | <<SEC_HAS_CONTENTS>>; a debug section could be
            <<SEC_HAS_CONTENTS>> */
 #define SEC_HAS_CONTENTS 0x200
 
-         /* An instruction to the linker not to output sections
-          containing this flag even if they have information which
-          would normally be written. */
+         /* An instruction to the linker to not output the section
+          even if it has information which would normally be written. */
 #define SEC_NEVER_LOAD 0x400
 
          /* The section is a shared library section.  The linker must leave
@@ -676,18 +675,18 @@ typedef struct sec
    boolean user_set_vma;
 
         /*  The load address of the section - where it would be in a
-           rom image, really only used for writing section header
+           rom image; really only used for writing section header
 	    information. */
 
    bfd_vma lma;
 
          /* The size of the section in bytes, as it will be output.
-           contains a value even if the section has no contents (eg, the
+           contains a value even if the section has no contents (e.g., the
            size of <<.bss>>). This will be filled in after relocation */
 
    bfd_size_type _cooked_size;    
 
-         /* The size on disk of the section in bytes originally.  Normally this
+         /* The original size on disk of the section, in bytes.  Normally this
 	    value is the same as the size, but if some relaxing has
 	    been done, then this value will be bigger.  */
 
@@ -695,7 +694,7 @@ typedef struct sec
 
          /* If this section is going to be output, then this value is the
            offset into the output section of the first byte in the input
-           section. Eg, if this was going to start at the 100th byte in
+           section. E.g., if this was going to start at the 100th byte in
            the output section, this value would be 100. */
 
    bfd_vma output_offset;
@@ -704,8 +703,8 @@ typedef struct sec
 
    struct sec *output_section;
 
-         /* The alignment requirement of the section, as an exponent - eg
-           3 aligns to 2^3 (or 8) */
+         /* The alignment requirement of the section, as an exponent of 2 -
+           e.g., 3 aligns to 2^3 (or 8). */
 
    unsigned int alignment_power;
 
@@ -757,7 +756,7 @@ typedef struct sec
 
    file_ptr moving_line_filepos;
 
-         /* what the section number is in the target world  */
+         /* What the section number is in the target world  */
 
    int target_index;
 
@@ -811,16 +810,16 @@ asection *
 bfd_get_section_by_name PARAMS ((bfd *abfd, CONST char *name));
 
 asection *
-bfd_make_section_old_way PARAMS ((bfd *, CONST char *name));
+bfd_make_section_old_way PARAMS ((bfd *abfd, CONST char *name));
 
 asection *
-bfd_make_section_anyway PARAMS ((bfd *, CONST char *name));
+bfd_make_section_anyway PARAMS ((bfd *abfd, CONST char *name));
 
 asection *
 bfd_make_section PARAMS ((bfd *, CONST char *name));
 
 boolean 
-bfd_set_section_flags PARAMS ((bfd *, asection *, flagword));
+bfd_set_section_flags PARAMS ((bfd *abfd, asection *sec, flagword flags));
 
 void 
 bfd_map_over_sections PARAMS ((bfd *abfd,
@@ -830,7 +829,7 @@ bfd_map_over_sections PARAMS ((bfd *abfd,
     PTR obj));
 
 boolean 
-bfd_set_section_size PARAMS ((bfd *, asection *, bfd_size_type val));
+bfd_set_section_size PARAMS ((bfd *abfd, asection *sec, bfd_size_type val));
 
 boolean 
 bfd_set_section_contents
@@ -924,7 +923,7 @@ CONST char *
 bfd_printable_name PARAMS ((bfd *abfd));
 
 bfd_arch_info_type *
-bfd_scan_arch PARAMS ((CONST char *));
+bfd_scan_arch PARAMS ((CONST char *string));
 
 CONST bfd_arch_info_type *
 bfd_arch_get_compatible PARAMS ((
@@ -932,7 +931,7 @@ bfd_arch_get_compatible PARAMS ((
     CONST bfd *bbfd));
 
 void 
-bfd_set_arch_info PARAMS ((bfd *, bfd_arch_info_type *));
+bfd_set_arch_info PARAMS ((bfd *abfd, bfd_arch_info_type *arg));
 
 enum bfd_architecture 
 bfd_get_arch PARAMS ((bfd *abfd));
@@ -947,7 +946,7 @@ unsigned int
 bfd_arch_bits_per_address PARAMS ((bfd *abfd));
 
 bfd_arch_info_type * 
-bfd_get_arch_info PARAMS ((bfd *));
+bfd_get_arch_info PARAMS ((bfd *abfd));
 
 bfd_arch_info_type *
 bfd_lookup_arch
@@ -955,7 +954,7 @@ bfd_lookup_arch
     arch,
     long machine));
 
-CONST char * 
+CONST char *
 bfd_printable_arch_mach
  PARAMS ((enum bfd_architecture arch, unsigned long machine));
 
@@ -973,10 +972,10 @@ typedef enum bfd_reloc_status
         /* Used by special functions */
   bfd_reloc_continue,
 
-        /* Unused */
+        /* Unsupported relocation size requested. */
   bfd_reloc_notsupported,
 
-        /* Unsupported relocation size requested. */
+        /* Unused */
   bfd_reloc_other,
 
         /* The symbol to relocate against was undefined. */
@@ -1023,13 +1022,13 @@ enum complain_overflow
   complain_overflow_unsigned
 };
 
-typedef CONST struct reloc_howto_struct 
+typedef struct reloc_howto_struct 
 { 
         /*  The type field has mainly a documetary use - the back end can
-           to what it wants with it, though the normally the back end's
-           external idea of what a reloc number would be would be stored
-           in this field. For example, the a PC relative word relocation
-           in a coff environment would have the type 023 - because that's
+           do what it wants with it, though normally the back end's
+           external idea of what a reloc number is stored
+           in this field. For example, a PC relative word relocation
+           in a coff environment has the type 023 - because that's
            what the outside world calls a R_PCRWORD reloc. */
   unsigned int type;
 
@@ -1087,7 +1086,7 @@ typedef CONST struct reloc_howto_struct
           relocations rather than the data - this flag signals this.*/
   boolean partial_inplace;
 
-        /* The src_mask is used to select what parts of the read in data
+        /* The src_mask selects which parts of the read in data
           are to be used in the relocation sum.  E.g., if this was an 8 bit
           bit of data which we read and relocated, this would be
           0x000000ff. When we have relocs which have an addend, such as
@@ -1096,7 +1095,7 @@ typedef CONST struct reloc_howto_struct
           the mask would be 0x00000000. */
   bfd_vma src_mask;
 
-        /* The dst_mask is what parts of the instruction are replaced
+        /* The dst_mask selects which parts of the instruction are replaced
           into the instruction. In most cases src_mask == dst_mask,
           except in the above special case, where dst_mask would be
           0x000000ff, and src_mask would be 0x00000000.   */
@@ -1107,7 +1106,7 @@ typedef CONST struct reloc_howto_struct
           slot of the instruction, so that a PC relative relocation can
           be made just by adding in an ordinary offset (e.g., sun3 a.out).
           Some formats leave the displacement part of an instruction
-          empty (e.g., m88k bcs), this flag signals the fact.*/
+          empty (e.g., m88k bcs); this flag signals the fact.*/
   boolean pcrel_offset;
 
 } reloc_howto_type;
@@ -1135,7 +1134,7 @@ typedef struct relent_chain {
 bfd_reloc_status_type
 
 bfd_perform_relocation
- PARAMS ((bfd * abfd,
+ PARAMS ((bfd *abfd,
     arelent *reloc_entry,
     PTR data,
     asection *input_section,
@@ -1361,6 +1360,22 @@ CONST struct reloc_howto_struct *
 
 bfd_reloc_type_lookup  PARAMS ((bfd *abfd, bfd_reloc_code_real_type code));
 
+unsigned int 
+bfd_get_reloc_upper_bound PARAMS ((bfd *abfd, asection *sect));
+
+unsigned int 
+bfd_canonicalize_reloc
+ PARAMS ((bfd *abfd,
+    asection *sec,
+    arelent **loc,
+    asymbol	**syms));
+
+void 
+bfd_set_reloc
+ PARAMS ((bfd *abfd, sec_ptr *sec, arelent **rel, unsigned int count)
+    
+    );
+
 
 typedef struct symbol_cache_entry 
 {
@@ -1376,7 +1391,7 @@ typedef struct symbol_cache_entry
 
   struct _bfd *the_bfd;  /* Use bfd_asymbol_bfd(sym) to access this field. */
 
-	 /* The text of the symbol. The name is left alone, and not copied - the
+	 /* The text of the symbol. The name is left alone, and not copied; the
 	   application may not alter it. */
   CONST char *name;
 
@@ -1397,7 +1412,7 @@ typedef struct symbol_cache_entry
 	   value is the offset into the section of the data. */
 #define BSF_GLOBAL	0x02
 
-	 /* The symbol has global scope, and is exported. The value is
+	 /* The symbol has global scope and is exported. The value is
 	   the offset into the section of the data. */
 #define BSF_EXPORT	BSF_GLOBAL  /* no real difference */
 
@@ -1476,7 +1491,7 @@ typedef struct symbol_cache_entry
      BFD_SEND (abfd, _bfd_canonicalize_symtab,\
                   (abfd, location))
 boolean 
-bfd_set_symtab  PARAMS ((bfd *, asymbol **, unsigned int ));
+bfd_set_symtab  PARAMS ((bfd *abfd, asymbol **location, unsigned int count));
 
 void 
 bfd_print_symbol_vandf PARAMS ((PTR file, asymbol *symbol));
@@ -1512,8 +1527,8 @@ struct _bfd
     boolean cacheable;
 
      /* Marks whether there was a default target specified when the
-       BFD was opened. This is used to select what matching algorithm
-       to use to chose the back end. */
+       BFD was opened. This is used to select which matching algorithm
+       to use to choose the back end. */
 
     boolean target_defaulted;
 
@@ -1523,12 +1538,11 @@ struct _bfd
     struct _bfd *lru_prev, *lru_next;
 
      /* When a file is closed by the caching routines, BFD retains
-       state information on the file here: 
-     */
+       state information on the file here: */
 
     file_ptr where;              
 
-     /* and here:*/
+     /* and here: (``once'' means at least once) */
 
     boolean opened_once;
 
@@ -1545,7 +1559,7 @@ struct _bfd
 
     int ifd;
 
-     /* The format which belongs to the BFD.*/
+     /* The format which belongs to the BFD. (object, core, etc.) */
 
     bfd_format format;
 
@@ -1567,7 +1581,7 @@ struct _bfd
     file_ptr origin;             
 
      /* Remember when output has begun, to stop strange things
-       happening. */
+       from happening. */
     boolean output_has_begun;
 
      /* Pointer to linked list of sections*/
@@ -1583,7 +1597,7 @@ struct _bfd
      /* Used for input and output*/
     unsigned int symcount;
 
-     /* Symbol table for output BFD*/
+     /* Symbol table for output BFD (with symcount entries) */
     struct symbol_cache_entry  **outsymbols;             
 
      /* Pointer to structure which contains architecture information*/
@@ -1591,9 +1605,9 @@ struct _bfd
 
      /* Stuff only useful for archives:*/
     PTR arelt_data;              
-    struct _bfd *my_archive;     
-    struct _bfd *next;           
-    struct _bfd *archive_head;   
+    struct _bfd *my_archive;      /* The containing archive BFD.  */
+    struct _bfd *next;            /* The next BFD in the archive.  */
+    struct _bfd *archive_head;    /* The first BFD in the archive.  */
     boolean has_armap;           
 
      /* Used by the back end to hold private data. */
@@ -1633,39 +1647,23 @@ struct _bfd
     asymbol **ld_symbols;
 };
 
-unsigned int 
-bfd_get_reloc_upper_bound PARAMS ((bfd *abfd, asection *sect));
-
-unsigned int 
-bfd_canonicalize_reloc
- PARAMS ((bfd *abfd,
-    asection *sec,
-    arelent **loc,
-    asymbol	**syms));
-
 boolean 
 bfd_set_file_flags PARAMS ((bfd *abfd, flagword flags));
 
-void 
-bfd_set_reloc
- PARAMS ((bfd *abfd, asection *sec, arelent **rel, unsigned int count)
-    
-    );
-
 boolean 
-bfd_set_start_address PARAMS ((bfd *, bfd_vma));
+bfd_set_start_address PARAMS ((bfd *abfd, bfd_vma vma));
 
 long 
-bfd_get_mtime PARAMS ((bfd *));
+bfd_get_mtime PARAMS ((bfd *abfd));
 
 long 
-bfd_get_size PARAMS ((bfd *));
+bfd_get_size PARAMS ((bfd *abfd));
 
 int 
-bfd_get_gp_size PARAMS ((bfd *));
+bfd_get_gp_size PARAMS ((bfd *abfd));
 
 void 
-bfd_set_gp_size PARAMS ((bfd *, int));
+bfd_set_gp_size PARAMS ((bfd *abfd, int i));
 
 bfd_vma 
 bfd_scan_vma PARAMS ((CONST char *string, CONST char **end, int base));
@@ -1702,22 +1700,22 @@ bfd_scan_vma PARAMS ((CONST char *string, CONST char **end, int base));
 #define bfd_seclet_link(abfd, data, relocateable) \
        BFD_SEND (abfd, _bfd_seclet_link, (abfd, data, relocateable))
 symindex 
-bfd_get_next_mapent PARAMS ((bfd *, symindex previous, carsym ** sym));
+bfd_get_next_mapent PARAMS ((bfd *abfd, symindex previous, carsym **sym));
 
 boolean 
 bfd_set_archive_head PARAMS ((bfd *output, bfd *new_head));
 
 bfd *
-bfd_get_elt_at_index PARAMS ((bfd * archive, int index));
+bfd_get_elt_at_index PARAMS ((bfd *archive, int index));
 
-bfd* 
+bfd *
 bfd_openr_next_archived_file PARAMS ((bfd *archive, bfd *previous));
 
 CONST char *
-bfd_core_file_failing_command PARAMS ((bfd *));
+bfd_core_file_failing_command PARAMS ((bfd *abfd));
 
 int 
-bfd_core_file_failing_signal PARAMS ((bfd *));
+bfd_core_file_failing_signal PARAMS ((bfd *abfd));
 
 boolean 
 core_file_matches_executable_p
@@ -1849,7 +1847,7 @@ typedef struct bfd_target
  PTR backend_data;
 } bfd_target;
 bfd_target *
-bfd_find_target PARAMS ((CONST char *, bfd *));
+bfd_find_target PARAMS ((CONST char *target_name, bfd *abfd));
 
 CONST char **
 bfd_target_list PARAMS ((void));
@@ -1858,9 +1856,9 @@ boolean
 bfd_check_format PARAMS ((bfd *abfd, bfd_format format));
 
 boolean 
-bfd_set_format PARAMS ((bfd *, bfd_format));
+bfd_set_format PARAMS ((bfd *abfd, bfd_format format));
 
 CONST char *
-bfd_format_string PARAMS ((bfd_format));
+bfd_format_string PARAMS ((bfd_format format));
 
 #endif

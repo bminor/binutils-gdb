@@ -22,18 +22,18 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 SECTION
 	Relocations
 
-	BFD maintains relocations in much the same was as it maintains
-	symbols; they are left alone until required, then read in
-	en-mass and traslated into an internal form. There is a common
-	routine <<bfd_perform_relocation>> which acts upon the
-	canonical form to do the actual fixup.
+	BFD maintains relocations in much the same way it maintains
+	symbols: they are left alone until required, then read in
+	en-mass and translated into an internal form.  A common
+	routine <<bfd_perform_relocation>> acts upon the
+	canonical form to do the fixup.
 
-	Note that relocations are maintained on a per section basis,
-	whilst symbols are maintained on a per BFD basis.
+	Relocations are maintained on a per section basis,
+	while symbols are maintained on a per BFD basis.
 
-	All a back end has to do to fit the BFD interface is to create
-	as many <<struct reloc_cache_entry>> as there are relocations
-	in a particular section, and fill in the right bits:
+	All that a back end has to do to fit the BFD interface is to create
+	a <<struct reloc_cache_entry>> for each relocation
+	in a particular section, and fill in the right bits of the structures.
 
 @menu
 @* typedef arelent::
@@ -71,10 +71,10 @@ CODE_FRAGMENT
 .       {* Used by special functions *}
 .  bfd_reloc_continue,
 .
-.       {* Unused *}
+.       {* Unsupported relocation size requested. *}
 .  bfd_reloc_notsupported,
 .
-.       {* Unsupported relocation size requested. *}
+.       {* Unused *}
 .  bfd_reloc_other,
 .
 .       {* The symbol to relocate against was undefined. *}
@@ -109,14 +109,14 @@ CODE_FRAGMENT
 /*
 DESCRIPTION
 
-        Here is a description of each of the fields within a relent:
+        Here is a description of each of the fields within an <<arelent>>:
 
-        o sym_ptr_ptr
+        o <<sym_ptr_ptr>>
 
         The symbol table pointer points to a pointer to the symbol
-        associated with the relocation request. This would naturally
-        be the pointer into the table returned by the back end's
-        get_symtab action. @xref{Symbols}. The symbol is referenced
+        associated with the relocation request.  It is
+        the pointer into the table returned by the back end's
+        <<get_symtab>> action. @xref{Symbols}. The symbol is referenced
         through a pointer to a pointer so that tools like the linker
         can fix up all the symbols of the same name by modifying only
         one pointer. The relocation routine looks in the symbol and
@@ -124,19 +124,19 @@ DESCRIPTION
         value of the symbol as the initial relocation offset. If the
         symbol pointer is zero, then the section provided is looked up.
 
-        o address
+        o <<address>>
 
-        The address field gives the offset in bytes from the base of
+        The <<address>> field gives the offset in bytes from the base of
         the section data which owns the relocation record to the first
         byte of relocatable information. The actual data relocated
-        will be relative to this point - for example, a relocation
+        will be relative to this point; for example, a relocation
         type which modifies the bottom two bytes of a four byte word
         would not touch the first byte pointed to in a big endian
         world.
 	
-	o addend
+	o <<addend>>
 
-	The addend is a value provided by the back end to be added (!)
+	The <<addend>> is a value provided by the back end to be added (!)
 	to the relocation offset. Its interpretation is dependent upon
 	the howto. For example, on the 68k the code:
 
@@ -156,8 +156,8 @@ DESCRIPTION
 |        rts
 
 
-        This could create a reloc pointing to foo, but leave the
-        offset in the data (something like)
+        This could create a reloc pointing to <<foo>>, but leave the
+        offset in the data, something like:
 
 
 |RELOCATION RECORDS FOR [.text]:
@@ -181,7 +181,7 @@ DESCRIPTION
 |        jmp      r1
 
 
-        This should create two relocs, both pointing to _foo, and with
+        This should create two relocs, both pointing to <<_foo>>, and with
         0x12340000 in their addend field. The data would consist of:
 
 
@@ -196,17 +196,17 @@ DESCRIPTION
 
 
         The relocation routine digs out the value from the data, adds
-        it to the addend to get the original offset and then adds the
-        value of _foo. Note that all 32 bits have to be kept around
+        it to the addend to get the original offset, and then adds the
+        value of <<_foo>>. Note that all 32 bits have to be kept around
         somewhere, to cope with carry from bit 15 to bit 16.
 
         One further example is the sparc and the a.out format. The
         sparc has a similar problem to the 88k, in that some
         instructions don't have room for an entire offset, but on the
-        sparc the parts are created odd sized lumps. The designers of
-        the a.out format chose not to use the data within the section
+        sparc the parts are created in odd sized lumps. The designers of
+        the a.out format chose to not use the data within the section
         for storing part of the offset; all the offset is kept within
-        the reloc. Any thing in the data should be ignored. 
+        the reloc. Anything in the data should be ignored. 
 
 |        save %sp,-112,%sp
 |        sethi %hi(_foo+0x12345678),%g2
@@ -214,7 +214,7 @@ DESCRIPTION
 |        ret
 |        restore
 
-        Both relocs contains a pointer to foo, and the offsets would
+        Both relocs contains a pointer to <<foo>>, and the offsets
         contain junk.
 
 
@@ -230,11 +230,11 @@ DESCRIPTION
 |00000010 81e80000     ; restore
 
 
-        o howto 
+        o <<howto>>
 
-        The howto field can be imagined as a
-        relocation instruction. It is a pointer to a struct which
-        contains information on what to do with all the other
+        The <<howto>> field can be imagined as a
+        relocation instruction. It is a pointer to a structure which
+        contains information on what to do with all of the other
         information in the reloc record and data section. A back end
         would normally have a relocation instruction set and turn
         relocations into pointers to the correct structure on input -
@@ -276,18 +276,18 @@ SUBSUBSECTION
         <<reloc_howto_type>>
 
         The <<reloc_howto_type>> is a structure which contains all the
-        information that BFD needs to know to tie up a back end's data.
+        information that libbfd needs to know to tie up a back end's data.
 
 CODE_FRAGMENT
 .struct symbol_cache_entry;		{* Forward declaration *}
 .
-.typedef CONST struct reloc_howto_struct 
+.typedef struct reloc_howto_struct 
 .{ 
 .       {*  The type field has mainly a documetary use - the back end can
-.           to what it wants with it, though the normally the back end's
-.           external idea of what a reloc number would be would be stored
-.           in this field. For example, the a PC relative word relocation
-.           in a coff environment would have the type 023 - because that's
+.           do what it wants with it, though normally the back end's
+.           external idea of what a reloc number is stored
+.           in this field. For example, a PC relative word relocation
+.           in a coff environment has the type 023 - because that's
 .           what the outside world calls a R_PCRWORD reloc. *}
 .  unsigned int type;
 .
@@ -345,7 +345,7 @@ CODE_FRAGMENT
 .          relocations rather than the data - this flag signals this.*}
 .  boolean partial_inplace;
 .
-.       {* The src_mask is used to select what parts of the read in data
+.       {* The src_mask selects which parts of the read in data
 .          are to be used in the relocation sum.  E.g., if this was an 8 bit
 .          bit of data which we read and relocated, this would be
 .          0x000000ff. When we have relocs which have an addend, such as
@@ -354,7 +354,7 @@ CODE_FRAGMENT
 .          the mask would be 0x00000000. *}
 .  bfd_vma src_mask;
 .
-.       {* The dst_mask is what parts of the instruction are replaced
+.       {* The dst_mask selects which parts of the instruction are replaced
 .          into the instruction. In most cases src_mask == dst_mask,
 .          except in the above special case, where dst_mask would be
 .          0x000000ff, and src_mask would be 0x00000000.   *}
@@ -365,7 +365,7 @@ CODE_FRAGMENT
 .          slot of the instruction, so that a PC relative relocation can
 .          be made just by adding in an ordinary offset (e.g., sun3 a.out).
 .          Some formats leave the displacement part of an instruction
-.          empty (e.g., m88k bcs), this flag signals the fact.*}
+.          empty (e.g., m88k bcs); this flag signals the fact.*}
 .  boolean pcrel_offset;
 .
 .} reloc_howto_type;
@@ -374,7 +374,7 @@ CODE_FRAGMENT
 
 /*
 FUNCTION
-	the HOWTO macro
+	The HOWTO Macro
 
 DESCRIPTION
 	The HOWTO define is horrible and will go away.
@@ -385,7 +385,7 @@ DESCRIPTION
 
 DESCRIPTION
 	And will be replaced with the totally magic way. But for the
-	moment, we are compatible, so do it this way..
+	moment, we are compatible, so do it this way.
 
 
 .#define NEWHOWTO( FUNCTION, NAME,SIZE,REL,IN) HOWTO(0,0,SIZE,0,REL,0,complain_overflow_dont,FUNCTION, NAME,false,0,0,IN)
@@ -409,11 +409,11 @@ DESCRIPTION
 
 /*
 TYPEDEF
-	reloc_chain
+	arelent_chain
 
 DESCRIPTION
 
-	How relocs are tied together
+	How relocs are tied together in an <<asection>>:
 
 .typedef unsigned char bfd_byte;
 .
@@ -433,18 +433,18 @@ FUNCTION
 SYNOPSIS
 	bfd_reloc_status_type
                 bfd_perform_relocation
-                        (bfd * abfd,
+                        (bfd *abfd,
                         arelent *reloc_entry,
                         PTR data,
                         asection *input_section,
                         bfd *output_bfd);
 
 DESCRIPTION
-	If an output_bfd is supplied to this function the generated
-	image will be relocatable, the relocations are copied to the
+	If @var{output_bfd} is supplied to this function, the generated
+	image will be relocatable; the relocations are copied to the
 	output file after they have been changed to reflect the new
 	state of the world. There are two ways of reflecting the
-	results of partial linkage in an output file; by modifying the
+	results of partial linkage in an output file: by modifying the
 	output data in place, and by modifying the relocation record.
 	Some native formats (e.g., basic a.out and basic coff) have no
 	way of specifying an addend in the relocation type, so the
@@ -532,16 +532,38 @@ DEFUN(bfd_perform_relocation,(abfd,
   /* Add in supplied addend.  */
   relocation += reloc_entry->addend;
 
+  /* Here the variable relocation holds the final address of the
+     symbol we are relocating against, plus any addend.  */
+
   if (howto->pc_relative == true)
     {
-      /* Anything which started out as pc relative should end up that
-	 way too. 
+      /* This is a PC relative relocation.  We want to set RELOCATION
+	 to the distance between the address of the symbol and the
+	 location.  RELOCATION is already the address of the symbol.
 
-	 There are two ways we can see a pcrel instruction. Sometimes
-	 the pcrel displacement has been partially calculated, it
-	 includes the distance from the start of the section to the
-	 instruction in it (e.g., sun3), and sometimes the field is
-	 totally blank - e.g., m88kbcs.  */
+	 We start by subtracting the address of the section containing
+	 the location.
+
+	 If pcrel_offset is set, we must further subtract the position
+	 of the location within the section.  Some targets arrange for
+	 the addend to be the negative of the position of the location
+	 within the section; for example, i386-aout does this.  For
+	 i386-aout, pcrel_offset is false.  Some other targets do not
+	 include the position of the location; for example, m88kbcs,
+	 or ELF.  For those targets, pcrel_offset is true.
+
+	 If we are producing relocateable output, then we must ensure
+	 that this reloc will be correctly computed when the final
+	 relocation is done.  If pcrel_offset is false we want to wind
+	 up with the negative of the location within the section,
+	 which means we must adjust the existing addend by the change
+	 in the location within the section.  If pcrel_offset is true
+	 we do not want to adjust the existing addend at all.
+
+	 FIXME: This seems logical to me, but for the case of
+	 producing relocateable output it is not what the code
+	 actually does.  I don't want to change it, because it seems
+	 far too likely that something will break.  */
 
       relocation -= 
 	input_section->output_section->vma + input_section->output_offset;
@@ -574,7 +596,78 @@ DEFUN(bfd_perform_relocation,(abfd,
 	  /* WTF?? */
 	  if (abfd->xvec->flavour == bfd_target_coff_flavour) 
 	    {
+#if 1
+	      /* For m68k-coff, the addend was being subtracted twice during
+		 relocation with -r.  Removing the line below this comment
+		 fixes that problem; see PR 2953.
+
+However, Ian wrote the following, regarding removing the line below,
+which explains why it is still enabled:  --djm
+
+If you put a patch like that into BFD you need to check all the COFF
+linkers.  I am fairly certain that patch will break coff-i386 (e.g.,
+SCO); see coff_i386_reloc in coff-i386.c where I worked around the
+problem in a different way.  There may very well be a reason that the
+code works as it does.
+
+Hmmm.  The first obvious point is that bfd_perform_relocation should
+not have any tests that depend upon the flavour.  It's seem like
+entirely the wrong place for such a thing.  The second obvious point
+is that the current code ignores the reloc addend when producing
+relocateable output for COFF.  That's peculiar.  In fact, I really
+have no idea what the point of the line you want to remove is.
+
+A typical COFF reloc subtracts the old value of the symbol and adds in
+the new value to the location in the object file (if it's a pc
+relative reloc it adds the difference between the symbol value and the
+location).  When relocating we need to preserve that property.
+
+BFD handles this by setting the addend to the negative of the old
+value of the symbol.  Unfortunately it handles common symbols in a
+non-standard way (it doesn't subtract the old value) but that's a
+different story (we can't change it without losing backward
+compatibility with old object files) (coff-i386 does subtract the old
+value, to be compatible with existing coff-i386 targets, like SCO).
+
+So everything works fine when not producing relocateable output.  When
+we are producing relocateable output, logically we should do exactly
+what we do when not producing relocateable output.  Therefore, your
+patch is correct.  In fact, it should probably always just set
+reloc_entry->addend to 0 for all cases, since it is, in fact, going to
+add the value into the object file.  This won't hurt the COFF code,
+which doesn't use the addend; I'm not sure what it will do to other
+formats (the thing to check for would be whether any formats both use
+the addend and set partial_inplace).
+
+When I wanted to make coff-i386 produce relocateable output, I ran
+into the problem that you are running into: I wanted to remove that
+line.  Rather than risk it, I made the coff-i386 relocs use a special
+function; it's coff_i386_reloc in coff-i386.c.  The function
+specifically adds the addend field into the object file, knowing that
+bfd_perform_relocation is not going to.  If you remove that line, then
+coff-i386.c will wind up adding the addend field in twice.  It's
+trivial to fix; it just needs to be done.
+
+The problem with removing the line is just that it may break some
+working code.  With BFD it's hard to be sure of anything.  The right
+way to deal with this is simply to build and test at least all the
+supported COFF targets.  It should be straightforward if time and disk
+space consuming.  For each target:
+    1) build the linker
+    2) generate some executable, and link it using -r (I would
+       probably use paranoia.o and link against newlib/libc.a, which
+       for all the supported targets would be available in
+       /usr/cygnus/progressive/H-host/target/lib/libc.a).
+    3) make the change to reloc.c
+    4) rebuild the linker
+    5) repeat step 2
+    6) if the resulting object files are the same, you have at least
+       made it no worse
+    7) if they are different you have to figure out which version is
+       right
+*/
 	      relocation -= reloc_entry->addend;
+#endif
 	      reloc_entry->addend = 0;
 	    }
 	  else
@@ -674,11 +767,35 @@ DEFUN(bfd_perform_relocation,(abfd,
     the relocation to the reloc entry (probably because there isn't
     any room in the output format to describe addends to relocs)
     */
-  relocation >>= howto->rightshift;
+
+  /* The cast to bfd_vma avoids a bug in the Alpha OSF/1 C compiler
+     (OSF version 1.3, compiler version 3.11).  It miscompiles the
+     following program:
+
+     struct str
+     {
+       unsigned int i0;
+     } s = { 0 };
+
+     int
+     main ()
+     {
+       unsigned long x;
+
+       x = 0x100000000;
+       x <<= (unsigned long) s.i0;
+       if (x == 0)
+	 printf ("failed\n");
+       else
+	 printf ("succeeded (%lx)\n", x);
+     }
+     */
+
+  relocation >>= (bfd_vma) howto->rightshift;
 
   /* Shift everything up to where it's going to be used */
    
-  relocation <<= howto->bitpos;
+  relocation <<= (bfd_vma) howto->bitpos;
 
   /* Wait for the day when all have the mask in them */
 
@@ -904,6 +1021,14 @@ CODE_FRAGMENT
 .  {* 16 bit relocation relative to the global pointer.  *}
 .  BFD_RELOC_MIPS_GPREL,
 .
+.  {* Relocation against a MIPS literal section.  *}
+.  BFD_RELOC_MIPS_LITERAL,
+.
+.  {* MIPS ELF relocations.  *}
+.  BFD_RELOC_MIPS_GOT16,
+.  BFD_RELOC_MIPS_CALL16,
+.  BFD_RELOC_MIPS_GPREL32,
+.
 .  {* These are, so far, specific to HPPA processors.  I'm not sure that some
 .     don't duplicate other reloc types, such as BFD_RELOC_32 and _32_PCREL.
 .     Also, many more were in the list I got that don't fit in well in the
@@ -1018,7 +1143,7 @@ CODE_FRAGMENT
 
 
 /*
-SECTION
+FUNCTION
 	bfd_reloc_type_lookup
 
 SYNOPSIS
@@ -1026,8 +1151,8 @@ SYNOPSIS
 	bfd_reloc_type_lookup (bfd *abfd, bfd_reloc_code_real_type code);
 
 DESCRIPTION
-	This routine returns a pointer to a howto struct which when
-	invoked, will perform the supplied relocation on data from the
+	Return a pointer to a howto struct which, when
+	invoked, will perform the relocation @var{code} on data from the
 	architecture noted.
 
 */
@@ -1216,4 +1341,101 @@ DEFUN(bfd_generic_get_relocated_section_contents,(abfd,
   return data;
 
   
+}
+
+ 
+/** Symbols */
+
+
+/*
+FUNCTION
+	bfd_get_reloc_upper_bound
+
+SYNOPSIS
+	unsigned int bfd_get_reloc_upper_bound(bfd *abfd, asection *sect);
+
+DESCRIPTION
+	Return the number of bytes required to store the
+	relocation information associated with section @var{sect}
+	attached to bfd @var{abfd}.
+
+*/
+
+
+unsigned int
+DEFUN(bfd_get_reloc_upper_bound,(abfd, asect),
+     bfd *abfd AND
+     sec_ptr asect)
+{
+  if (abfd->format != bfd_object) {
+    bfd_error = invalid_operation;
+    return 0;
+  }
+
+  return BFD_SEND (abfd, _get_reloc_upper_bound, (abfd, asect));
+}
+
+/*
+FUNCTION
+	bfd_canonicalize_reloc
+
+SYNOPSIS
+	unsigned int bfd_canonicalize_reloc
+        	(bfd *abfd,
+		asection *sec,
+		arelent **loc,
+		asymbol	**syms);
+
+DESCRIPTION
+	Call the back end associated with the open BFD
+	@var{abfd} and translate the external form of the relocation
+	information attached to @var{sec} into the internal canonical
+	form.  Place the table into memory at @var{loc}, which has
+	been preallocated, usually by a call to
+	<<bfd_get_reloc_upper_bound>>.
+
+	The @var{syms} table is also needed for horrible internal magic
+	reasons.
+
+
+*/
+unsigned int
+DEFUN(bfd_canonicalize_reloc,(abfd, asect, location, symbols),
+     bfd *abfd AND
+     sec_ptr asect AND
+     arelent **location AND
+     asymbol **symbols)
+{
+  if (abfd->format != bfd_object) {
+    bfd_error = invalid_operation;
+    return 0;
+  }
+  return BFD_SEND (abfd, _bfd_canonicalize_reloc,
+		   (abfd, asect, location, symbols));
+}
+
+/*
+FUNCTION
+	bfd_set_reloc
+
+SYNOPSIS
+	void bfd_set_reloc
+	  (bfd *abfd, sec_ptr *sec, arelent **rel, unsigned int count)
+
+DESCRIPTION
+	Set the relocation pointer and count within
+	section @var{sec} to the values @var{rel} and @var{count}.
+	The argument @var{abfd} is ignored.
+
+*/
+/*ARGSUSED*/
+void
+bfd_set_reloc (ignore_abfd, asect, location, count)
+     bfd *ignore_abfd;
+     sec_ptr asect;
+     arelent **location;
+     unsigned int count;
+{
+  asect->orelocation  = location;
+  asect->reloc_count = count;
 }

@@ -22,13 +22,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 SECTION
 	<<typedef bfd>>
 
-	A BFD is has type <<bfd>>; objects of this type are the
-	cornerstone of any application using <<libbfd>>. References
-	though the BFD and to data in the BFD give the entire BFD
-	functionality.
+	A BFD has type <<bfd>>; objects of this type are the
+	cornerstone of any application using <<libbfd>>. Using BFD
+	consists of making references though the BFD and to data in the BFD.
 
-	Here is the struct used to define the type <<bfd>>.  This
-	contains the major data about the file, and contains pointers
+	Here is the structure that defines the type <<bfd>>.  It
+	contains the major data about the file and pointers
 	to the rest of the data.
 
 CODE_FRAGMENT
@@ -54,8 +53,8 @@ CODE_FRAGMENT
 .    boolean cacheable;
 .
 .    {* Marks whether there was a default target specified when the
-.       BFD was opened. This is used to select what matching algorithm
-.       to use to chose the back end. *}
+.       BFD was opened. This is used to select which matching algorithm
+.       to use to choose the back end. *}
 .
 .    boolean target_defaulted;
 .
@@ -65,12 +64,11 @@ CODE_FRAGMENT
 .    struct _bfd *lru_prev, *lru_next;
 .
 .    {* When a file is closed by the caching routines, BFD retains
-.       state information on the file here: 
-.     *}
+.       state information on the file here: *}
 .
 .    file_ptr where;              
 .
-.    {* and here:*}
+.    {* and here: (``once'' means at least once) *}
 .
 .    boolean opened_once;
 .
@@ -87,7 +85,7 @@ CODE_FRAGMENT
 .
 .    int ifd;
 .
-.    {* The format which belongs to the BFD.*}
+.    {* The format which belongs to the BFD. (object, core, etc.) *}
 .
 .    bfd_format format;
 .
@@ -109,7 +107,7 @@ CODE_FRAGMENT
 .    file_ptr origin;             
 .
 .    {* Remember when output has begun, to stop strange things
-.       happening. *}
+.       from happening. *}
 .    boolean output_has_begun;
 .
 .    {* Pointer to linked list of sections*}
@@ -125,7 +123,7 @@ CODE_FRAGMENT
 .    {* Used for input and output*}
 .    unsigned int symcount;
 .
-.    {* Symbol table for output BFD*}
+.    {* Symbol table for output BFD (with symcount entries) *}
 .    struct symbol_cache_entry  **outsymbols;             
 .
 .    {* Pointer to structure which contains architecture information*}
@@ -133,9 +131,9 @@ CODE_FRAGMENT
 .
 .    {* Stuff only useful for archives:*}
 .    PTR arelt_data;              
-.    struct _bfd *my_archive;     
-.    struct _bfd *next;           
-.    struct _bfd *archive_head;   
+.    struct _bfd *my_archive;     {* The containing archive BFD.  *}
+.    struct _bfd *next;           {* The next BFD in the archive.  *}
+.    struct _bfd *archive_head;   {* The first BFD in the archive.  *}
 .    boolean has_armap;           
 .
 .    {* Used by the back end to hold private data. *}
@@ -319,77 +317,6 @@ DEFUN(bfd_perror,(message),
   }
 }
 
- 
-/** Symbols */
-
-
-/*
-FUNCTION
-	bfd_get_reloc_upper_bound
-
-SYNOPSIS
-	unsigned int bfd_get_reloc_upper_bound(bfd *abfd, asection *sect);
-
-DESCRIPTION
-	This function return the number of bytes required to store the
-	relocation information associated with section <<sect>>
-	attached to bfd <<abfd>>
-
-*/
-
-
-unsigned int
-DEFUN(bfd_get_reloc_upper_bound,(abfd, asect),
-     bfd *abfd AND
-     sec_ptr asect)
-{
-  if (abfd->format != bfd_object) {
-    bfd_error = invalid_operation;
-    return 0;
-  }
-
-  return BFD_SEND (abfd, _get_reloc_upper_bound, (abfd, asect));
-}
-
-/*
-FUNCTION
-	bfd_canonicalize_reloc
-
-SYNOPSIS
-	unsigned int bfd_canonicalize_reloc
-        	(bfd *abfd,
-		asection *sec,
-		arelent **loc,
-		asymbol	**syms);
-
-DESCRIPTION
-	This function calls the back end associated with the open
-	<<abfd>> and translates the external form of the relocation
-	information attached to <<sec>> into the internal canonical
-	form.  The table is placed into memory at <<loc>>, which has
-	been preallocated, usually by a call to
-	<<bfd_get_reloc_upper_bound>>.
-
-	The <<syms>> table is also needed for horrible internal magic
-	reasons.
-
-
-*/
-unsigned int
-DEFUN(bfd_canonicalize_reloc,(abfd, asect, location, symbols),
-     bfd *abfd AND
-     sec_ptr asect AND
-     arelent **location AND
-     asymbol **symbols)
-{
-    if (abfd->format != bfd_object) {
-	    bfd_error = invalid_operation;
-	    return 0;
-	}
-    return BFD_SEND (abfd, _bfd_canonicalize_reloc,
-		     (abfd, asect, location, symbols));
-  }
-
 
 /*
 FUNCTION
@@ -399,16 +326,15 @@ SYNOPSIS
 	boolean bfd_set_file_flags(bfd *abfd, flagword flags);
 
 DESCRIPTION
-	This function attempts to set the flag word in the referenced
-	BFD structure to the value supplied.
+	Set the flag word in the BFD @var{abfd} to the value @var{flags}.
 
 	Possible errors are:
 	o wrong_format - The target bfd was not of object format.
 	o invalid_operation - The target bfd was open for reading.
 	o invalid_operation -
 	The flag word contained a bit which was not applicable to the
-	type of file. eg, an attempt was made to set the D_PAGED bit
-	on a bfd format which does not support demand paging
+	type of file.  E.g., an attempt was made to set the D_PAGED bit
+	on a bfd format which does not support demand paging.
 
 */
 
@@ -436,31 +362,6 @@ bfd_set_file_flags (abfd, flags)
 return true;
 }
 
-/*
-FUNCTION
-	bfd_set_reloc
-
-SYNOPSIS
-	void bfd_set_reloc
-	  (bfd *abfd, asection *sec, arelent **rel, unsigned int count)
-
-DESCRIPTION
-	This function sets the relocation pointer and count within a
-	section to the supplied values.
-
-*/
-/*ARGSUSED*/
-void
-bfd_set_reloc (ignore_abfd, asect, location, count)
-     bfd *ignore_abfd;
-     sec_ptr asect;
-     arelent **location;
-     unsigned int count;
-{
-  asect->orelocation  = location;
-  asect->reloc_count = count;
-}
-
 void
 bfd_assert(file, line)
 char *file;
@@ -474,14 +375,14 @@ int line;
 FUNCTION
 	bfd_set_start_address
 
+SYNOPSIS
+ 	boolean bfd_set_start_address(bfd *abfd, bfd_vma vma);
+
 DESCRIPTION
-	Marks the entry point of an output BFD.
+	Make @var{vma} the entry point of output BFD @var{abfd}.
 
 RETURNS
 	Returns <<true>> on success, <<false>> otherwise.
-
-SYNOPSIS
- 	boolean bfd_set_start_address(bfd *, bfd_vma);
 */
 
 boolean
@@ -496,14 +397,14 @@ bfd_vma vma;
 
 /*
 FUNCTION
-	The bfd_get_mtime function
+	bfd_get_mtime
 
 SYNOPSIS
-	long bfd_get_mtime(bfd *);
+	long bfd_get_mtime(bfd *abfd);
 
 DESCRIPTION
-	Return file modification time (as read from file system, or
-	from archive header for archive members).
+	Return the file modification time (as read from the file system, or
+	from the archive header for archive members).
 
 */
 
@@ -527,32 +428,32 @@ bfd_get_mtime (abfd)
 
 /*
 FUNCTION
-	The bfd_get_size function
+	bfd_get_size
 
 SYNOPSIS
-	long bfd_get_size(bfd *);
+	long bfd_get_size(bfd *abfd);
 
 DESCRIPTION
-	Return file size (as read from file system) for the file
-	associated with a bfd.
+	Return the file size (as read from file system) for the file
+	associated with BFD @var{abfd}.
 
-	Note that the initial motivation for, and use of, this routine is not
-	so we can get the exact size of the object the bfd applies to, since
-	that might not be generally possible (archive members for example?).
-	Although it would be ideal if someone could eventually modify
+	The initial motivation for, and use of, this routine is not
+	so we can get the exact size of the object the BFD applies to, since
+	that might not be generally possible (archive members for example).
+	It would be ideal if someone could eventually modify
 	it so that such results were guaranteed.
 
 	Instead, we want to ask questions like "is this NNN byte sized
 	object I'm about to try read from file offset YYY reasonable?"
-	As as example of where we might want to do this, some object formats
-	use string tables for which the first sizeof(long) bytes of the table
-	contain the size of the table itself, including the size bytes.
+	As as example of where we might do this, some object formats
+	use string tables for which the first <<sizeof(long)>> bytes of the
+	table contain the size of the table itself, including the size bytes.
 	If an application tries to read what it thinks is one of these
 	string tables, without some way to validate the size, and for
 	some reason the size is wrong (byte swapping error, wrong location
-	for the string table, etc), the only clue is likely to be a read
+	for the string table, etc.), the only clue is likely to be a read
 	error when it tries to read the table, or a "virtual memory
-	exhausted" error when it tries to allocated 15 bazillon bytes
+	exhausted" error when it tries to allocate 15 bazillon bytes
 	of space for the 15 bazillon byte table it is about to read.
 	This function at least allows us to answer the quesion, "is the
 	size reasonable?".
@@ -574,13 +475,13 @@ bfd_get_size (abfd)
 
 /*
 FUNCTION
-	The bfd_get_gp_size function
+	bfd_get_gp_size
 
 SYNOPSIS
-	int bfd_get_gp_size(bfd *);
+	int bfd_get_gp_size(bfd *abfd);
 
 DESCRIPTION
-	Get the maximum size of objects to be optimized using the GP
+	Return the maximum size of objects to be optimized using the GP
 	register under MIPS ECOFF.  This is typically set by the -G
 	argument to the compiler, assembler or linker.
 */
@@ -596,10 +497,10 @@ bfd_get_gp_size (abfd)
 
 /*
 FUNCTION
-	The bfd_set_gp_size function
+	bfd_set_gp_size
 
 SYNOPSIS
-	void bfd_set_gp_size(bfd *, int);
+	void bfd_set_gp_size(bfd *abfd, int i);
 
 DESCRIPTION
 	Set the maximum size of objects to be optimized using the GP
@@ -622,20 +523,20 @@ bfd_set_gp_size (abfd, i)
 FUNCTION
 	bfd_scan_vma
 
+SYNOPSIS
+	bfd_vma bfd_scan_vma(CONST char *string, CONST char **end, int base);
+
 DESCRIPTION
-	Converts, like strtoul, a numerical expression as a
-	string into a bfd_vma integer, and returns that integer.
-	(Though without as many bells and whistles as strtoul.)
+	Convert, like <<strtoul>>, a numerical expression
+	@var{string} into a bfd_vma integer, and returns that integer.
+	(Though without as many bells and whistles as <<strtoul>>.)
 	The expression is assumed to be unsigned (i.e. positive).
-	If given a base, it is used as the base for conversion.
+	If given a @var{base}, it is used as the base for conversion.
 	A base of 0 causes the function to interpret the string
 	in hex if a leading "0x" or "0X" is found, otherwise
 	in octal if a leading zero is found, otherwise in decimal.
 
 	Overflow is not detected.
-
-SYNOPSIS
-	bfd_vma bfd_scan_vma(CONST char *string, CONST char **end, int base);
 */
 
 bfd_vma
@@ -697,7 +598,7 @@ FUNCTION
 	stuff
 
 DESCRIPTION
-	stuff which should be documented
+	Stuff which should be documented:
 
 .#define bfd_sizeof_headers(abfd, reloc) \
 .     BFD_SEND (abfd, _bfd_sizeof_headers, (abfd, reloc))

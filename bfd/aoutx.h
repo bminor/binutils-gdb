@@ -28,28 +28,28 @@ DESCRIPTION
 	BFD supports a number of different flavours of a.out format,
 	though the major differences are only the sizes of the
 	structures on disk, and the shape of the relocation
-	information. 
+	information.
 
-	The support is split into a basic support file @code{aoutx.h}
+	The support is split into a basic support file @file{aoutx.h}
 	and other files which derive functions from the base. One
-	derivation file is @code{aoutf1.h} (for a.out flavour 1), and
+	derivation file is @file{aoutf1.h} (for a.out flavour 1), and
 	adds to the basic a.out functions support for sun3, sun4, 386
 	and 29k a.out files, to create a target jump vector for a
-	specific target. 
+	specific target.
 
 	This information is further split out into more specific files
-	for each machine, including @code{sunos.c} for sun3 and sun4,
-	@code{newsos3.c} for the Sony NEWS, and @code{demo64.c} for a
+	for each machine, including @file{sunos.c} for sun3 and sun4,
+	@file{newsos3.c} for the Sony NEWS, and @file{demo64.c} for a
 	demonstration of a 64 bit a.out format.
 
-	The base file @code{aoutx.h} defines general mechanisms for
-	reading and writing records to and from disk, and various
+	The base file @file{aoutx.h} defines general mechanisms for
+	reading and writing records to and from disk and various
 	other methods which BFD requires. It is included by
-	@code{aout32.c} and @code{aout64.c} to form the names
-	aout_32_swap_exec_header_in, aout_64_swap_exec_header_in, etc.
+	@file{aout32.c} and @file{aout64.c} to form the names
+	<<aout_32_swap_exec_header_in>>, <<aout_64_swap_exec_header_in>>, etc.
 
 	As an example, this is what goes on to make the back end for a
-	sun4, from aout32.c 
+	sun4, from @file{aout32.c}:
 
 |	#define ARCH_SIZE 32
 |	#include "aoutx.h"
@@ -63,18 +63,18 @@ DESCRIPTION
 |	aout_32_get_reloc_upper_bound
 |	...
 
-	from sunos.c
+	from @file{sunos.c}:
 
 |	#define ARCH 32
 |	#define TARGET_NAME "a.out-sunos-big"
 |	#define VECNAME    sunos_big_vec
 |	#include "aoutf1.h"
 
-	requires all the names from aout32.c, and produces the jump vector
+	requires all the names from @file{aout32.c}, and produces the jump vector
 
 |	sunos_big_vec
 
-	The file host-aout.c is a special case.  It is for a large set
+	The file @file{host-aout.c} is a special case.  It is for a large set
 	of hosts that use ``more or less standard'' a.out files, and
 	for which cross-debugging is not interesting.  It uses the
 	standard 32-bit a.out support routines, but determines the
@@ -82,7 +82,7 @@ DESCRIPTION
 	sections, the machine architecture and machine type, and the
 	entry point address, in a host-dependent manner.  Once these
 	values have been determined, generic code is used to handle
-	the  object file. 
+	the  object file.
 
 	When porting it to run on a new system, you must supply:
 
@@ -97,12 +97,12 @@ DESCRIPTION
 	values, plus the structures and macros defined in <<a.out.h>> on
 	your host system, will produce a BFD target that will access
 	ordinary a.out files on your host. To configure a new machine
-	to use <<host-aout.c>., specify: 
+	to use <<host-aout.c>., specify:
 
 |	TDEFAULTS = -DDEFAULT_VECTOR=host_aout_big_vec
 |	TDEPFILES= host-aout.o trad-core.o
 
-	in the <<config/mt-XXX>> file, and modify configure.in to use the
+	in the <<config/mt-XXX>> file, and modify @file{configure.in} to use the
 	<<mt-XXX>> file (by setting "<<bfd_target=XXX>>") when your
 	configuration is selected.
 
@@ -140,13 +140,13 @@ SUBSECTION
 	relocations
 
 DESCRIPTION
-	The file @code{aoutx.h} caters for both the @emph{standard}
+	The file @file{aoutx.h} provides for both the @emph{standard}
 	and @emph{extended} forms of a.out relocation records.
 
-	The standard records are characterised by containing only an
-	address, a symbol index and a type field. The extended records
+	The standard records contain only an
+	address, a symbol index, and a type field. The extended records
 	(used on 29ks and sparcs) also have a full integer for an
-	addend. 
+	addend.
 
 */
 #define CTOR_TABLE_RELOC_IDX 2
@@ -154,7 +154,7 @@ DESCRIPTION
 #define howto_table_ext NAME(aout,ext_howto_table)
 #define howto_table_std NAME(aout,std_howto_table)
 
-reloc_howto_type howto_table_ext[] = 
+reloc_howto_type howto_table_ext[] =
 {
   /* type           rs   size bsz  pcrel bitpos ovrf sf name    part_inpl   readmask  setmask  pcdone */
   HOWTO(RELOC_8,      0,  0,  	8,  false, 0, complain_overflow_bitfield,0,"8",        false, 0,0x000000ff, false),
@@ -186,16 +186,21 @@ reloc_howto_type howto_table_ext[] =
 /* Convert standard reloc records to "arelent" format (incl byte swap).  */
 
 reloc_howto_type howto_table_std[] = {
-  /* type           rs   size bsz  pcrel bitpos ovrf sf name    part_inpl   readmask  setmask  pcdone */
-HOWTO( 0,	       0,  0,  	8,  false, 0, complain_overflow_bitfield,0,"8",	true, 0x000000ff,0x000000ff, false),
+  /* type              rs size bsz  pcrel bitpos ovrf                     sf name    part_inpl  readmask  setmask     pcdone */
+HOWTO( 0,	       0,  0,  	8,  false, 0, complain_overflow_bitfield,0,"8",		true, 0x000000ff,0x000000ff, false),
 HOWTO( 1,	       0,  1, 	16, false, 0, complain_overflow_bitfield,0,"16",	true, 0x0000ffff,0x0000ffff, false),
 HOWTO( 2,	       0,  2, 	32, false, 0, complain_overflow_bitfield,0,"32",	true, 0xffffffff,0xffffffff, false),
-HOWTO( 3,	       0,  3, 	64, false, 0, complain_overflow_bitfield,0,"64",       true, 0xdeaddead,0xdeaddead, false),
-HOWTO( 4,	       0,  0, 	8,  true,  0, complain_overflow_signed,0,"DISP8",    true, 0x000000ff,0x000000ff, false),
-HOWTO( 5,	       0,  1, 	16, true,  0, complain_overflow_signed,0,"DISP16",   true, 0x0000ffff,0x0000ffff, false),
-HOWTO( 6,	       0,  2, 	32, true,  0, complain_overflow_signed,0,"DISP32",   true, 0xffffffff,0xffffffff, false),
-HOWTO( 7,	       0,  3, 	64, true,  0, complain_overflow_signed,0,"DISP64",   true, 0xfeedface,0xfeedface, false),
+HOWTO( 3,	       0,  4, 	64, false, 0, complain_overflow_bitfield,0,"64",	true, 0xdeaddead,0xdeaddead, false),
+HOWTO( 4,	       0,  0, 	8,  true,  0, complain_overflow_signed,  0,"DISP8",	true, 0x000000ff,0x000000ff, false),
+HOWTO( 5,	       0,  1, 	16, true,  0, complain_overflow_signed,  0,"DISP16",	true, 0x0000ffff,0x0000ffff, false),
+HOWTO( 6,	       0,  2, 	32, true,  0, complain_overflow_signed,  0,"DISP32",	true, 0xffffffff,0xffffffff, false),
+HOWTO( 7,	       0,  4, 	64, true,  0, complain_overflow_signed,  0,"DISP64",	true, 0xfeedface,0xfeedface, false),
+{ -1 },
+HOWTO( 9,	       0,  1,   16, false, 0, complain_overflow_bitfield,0,"BASE16",	false,0xffffffff,0xffffffff, false),
+HOWTO(10,	       0,  2,   32, false, 0, complain_overflow_bitfield,0,"BASE32",	false,0xffffffff,0xffffffff, false),
 };
+
+#define TABLE_SIZE(TABLE)	(sizeof(TABLE)/sizeof(TABLE[0]))
 
 CONST struct reloc_howto_struct *
 DEFUN(NAME(aout,reloc_type_lookup),(abfd,code),
@@ -219,6 +224,7 @@ DEFUN(NAME(aout,reloc_type_lookup),(abfd,code),
 	EXT (BFD_RELOC_HI22, 8);
 	EXT (BFD_RELOC_LO10, 11);
 	EXT (BFD_RELOC_32_PCREL_S2, 6);
+	EXT (BFD_RELOC_SPARC_WDISP22, 7);
       default: return (CONST struct reloc_howto_struct *) 0;
       }
   else
@@ -230,6 +236,8 @@ DEFUN(NAME(aout,reloc_type_lookup),(abfd,code),
 	STD (BFD_RELOC_8_PCREL, 4);
 	STD (BFD_RELOC_16_PCREL, 5);
 	STD (BFD_RELOC_32_PCREL, 6);
+	STD (BFD_RELOC_16_BASEREL, 9);
+	STD (BFD_RELOC_32_BASEREL, 10);
       default: return (CONST struct reloc_howto_struct *) 0;
       }
 }
@@ -241,7 +249,7 @@ SUBSECTION
 	Internal Entry Points
 
 DESCRIPTION
-	@code{aoutx.h} exports several routines for accessing the
+	@file{aoutx.h} exports several routines for accessing the
 	contents of an a.out file, which are gathered and exported in
 	turn by various format specific files (eg sunos.c).
 
@@ -249,20 +257,20 @@ DESCRIPTION
 
 /*
 FUNCTION
-	 aout_<size>_swap_exec_header_in
-
-DESCRIPTION
-	Swaps the information in an executable header taken from a raw
-	byte stream memory image, into the internal exec_header
-	structure.
+	 aout_@var{size}_swap_exec_header_in
 
 SYNOPSIS
-	void aout_<size>_swap_exec_header_in,
+	void aout_@var{size}_swap_exec_header_in,
            (bfd *abfd,
             struct external_exec *raw_bytes,
             struct internal_exec *execp);
+
+DESCRIPTION
+	Swap the information in an executable header @var{raw_bytes} taken
+	from a raw byte stream memory image into the internal exec header
+	structure @var{execp}.
 */
-	 
+
 #ifndef NAME_swap_exec_header_in
 void
 DEFUN(NAME(aout,swap_exec_header_in),(abfd, raw_bytes, execp),
@@ -292,22 +300,22 @@ DEFUN(NAME(aout,swap_exec_header_in),(abfd, raw_bytes, execp),
 
 /*
 FUNCTION
-	aout_<size>_swap_exec_header_out
-
-DESCRIPTION
-	Swaps the information in an internal exec header structure
-	into the supplied buffer ready for writing to disk.
+	aout_@var{size}_swap_exec_header_out
 
 SYNOPSIS
-	void aout_<size>_swap_exec_header_out
+	void aout_@var{size}_swap_exec_header_out
 	  (bfd *abfd,
 	   struct internal_exec *execp,
 	   struct external_exec *raw_bytes);
+
+DESCRIPTION
+	Swap the information in an internal exec header structure
+	@var{execp} into the buffer @var{raw_bytes} ready for writing to disk.
 */
 void
 DEFUN(NAME(aout,swap_exec_header_out),(abfd, execp, raw_bytes),
      bfd *abfd AND
-     struct internal_exec *execp AND 
+     struct internal_exec *execp AND
      struct external_exec *raw_bytes)
 {
   struct external_exec *bytes = (struct external_exec *)raw_bytes;
@@ -327,21 +335,21 @@ DEFUN(NAME(aout,swap_exec_header_out),(abfd, execp, raw_bytes),
 
 /*
 FUNCTION
-	aout_<size>_some_aout_object_p
-
-DESCRIPTION
-	Some A.OUT variant thinks that the file whose format we're
-	checking is an a.out file.  Do some more checking, and set up
-	for access if it really is.  Call back to the calling
-	environments "finish up" function just before returning, to
-	handle any last-minute setup.  
+	aout_@var{size}_some_aout_object_p
 
 SYNOPSIS
-	bfd_target *aout_<size>_some_aout_object_p
+	bfd_target *aout_@var{size}_some_aout_object_p
 	 (bfd *abfd,
 	  bfd_target *(*callback_to_real_object_p)());
+
+DESCRIPTION
+	Some a.out variant thinks that the file open in @var{abfd}
+	checking is an a.out file.  Do some more checking, and set up
+	for access if it really is.  Call back to the calling
+	environment's "finish up" function just before returning, to
+	handle any last-minute setup.
 */
- 
+
 bfd_target *
 DEFUN(NAME(aout,some_aout_object_p),(abfd, execp, callback_to_real_object_p),
       bfd *abfd AND
@@ -376,7 +384,7 @@ DEFUN(NAME(aout,some_aout_object_p),(abfd, execp, callback_to_real_object_p),
   if (execp->a_drsize || execp->a_trsize)
     abfd->flags |= HAS_RELOC;
   /* Setting of EXEC_P has been deferred to the bottom of this function */
-  if (execp->a_syms) 
+  if (execp->a_syms)
     abfd->flags |= HAS_LINENO | HAS_DEBUG | HAS_SYMS | HAS_LOCALS;
 
   if (N_MAGIC (*execp) == ZMAGIC)
@@ -430,11 +438,11 @@ DEFUN(NAME(aout,some_aout_object_p),(abfd, execp, callback_to_real_object_p),
 #ifdef THIS_IS_ONLY_DOCUMENTATION
   /* The common code can't fill in these things because they depend
      on either the start address of the text segment, the rounding
-     up of virtual addersses between segments, or the starting file 
+     up of virtual addersses between segments, or the starting file
      position of the text segment -- all of which varies among different
      versions of a.out.  */
 
-  /* Call back to the format-dependent code to fill in the rest of the 
+  /* Call back to the format-dependent code to fill in the rest of the
      fields and do any further cleanup.  Things that should be filled
      in by the callback:  */
 
@@ -479,7 +487,7 @@ DEFUN(NAME(aout,some_aout_object_p),(abfd, execp, callback_to_real_object_p),
      on the architecture and the a.out variant.  Finally, the return value
      is the bfd_target vector in use.  If an error occurs, return zero and
      set bfd_error to the appropriate error code.
-     
+
      Formats such as b.out, which have additional fields in the a.out
      header, should cope with them in this callback as well.  */
 #endif				/* DOCUMENTATION */
@@ -490,7 +498,7 @@ DEFUN(NAME(aout,some_aout_object_p),(abfd, execp, callback_to_real_object_p),
      guess at whether the file is executable.  If the entry point
      is within the text segment, assume it is.  (This makes files
      executable even if their entry point address is 0, as long as
-     their text starts at zero.)  
+     their text starts at zero.)
 
      At some point we should probably break down and stat the file and
      declare it executable if (one of) its 'x' bits are on...  */
@@ -515,13 +523,13 @@ DEFUN(NAME(aout,some_aout_object_p),(abfd, execp, callback_to_real_object_p),
 
 /*
 FUNCTION
-	aout_<size>_mkobject
-
-DESCRIPTION
-	This routine initializes a BFD for use with a.out files.
+	aout_@var{size}_mkobject
 
 SYNOPSIS
-	boolean aout_<size>_mkobject, (bfd *);
+	boolean aout_@var{size}_mkobject, (bfd *abfd);
+
+DESCRIPTION
+	Initialize BFD @var{abfd} for use with a.out files.
 */
 
 boolean
@@ -534,17 +542,17 @@ DEFUN(NAME(aout,mkobject),(abfd),
 
   /* Use an intermediate variable for clarity */
   rawptr = (struct aout_data_struct *)bfd_zalloc (abfd, sizeof (struct aout_data_struct ));
-  
+
   if (rawptr == NULL) {
     bfd_error = no_memory;
     return false;
   }
-  
+
   abfd->tdata.aout_data = rawptr;
   exec_hdr (abfd) = &(rawptr->e);
-  
+
   /* For simplicity's sake we just make all the sections right here. */
-  
+
   obj_textsec (abfd) = (asection *)NULL;
   obj_datasec (abfd) = (asection *)NULL;
   obj_bsssec (abfd) = (asection *)NULL;
@@ -554,28 +562,28 @@ DEFUN(NAME(aout,mkobject),(abfd),
   bfd_make_section (abfd, BFD_ABS_SECTION_NAME);
   bfd_make_section (abfd, BFD_UND_SECTION_NAME);
   bfd_make_section (abfd, BFD_COM_SECTION_NAME);
-  
+
   return true;
 }
 
 
 /*
 FUNCTION
-	aout_<size>_machine_type
+	aout_@var{size}_machine_type
+
+SYNOPSIS
+	enum machine_type  aout_@var{size}_machine_type
+	 (enum bfd_architecture arch,
+	  unsigned long machine));
 
 DESCRIPTION
 	Keep track of machine architecture and machine type for
-	a.out's. Return the machine_type for a particular
-	arch&machine, or M_UNKNOWN if that exact arch&machine can't be
-	represented in a.out format. 
+	a.out's. Return the <<machine_type>> for a particular
+	architecture and machine, or <<M_UNKNOWN>> if that exact architecture
+	and machine can't be represented in a.out format.
 
 	If the architecture is understood, machine type 0 (default)
-	should always be understood.  
-
-SYNOPSIS
-	enum machine_type  aout_<size>_machine_type
-	 (enum bfd_architecture arch,
-	  unsigned long machine));
+	is always understood.
 */
 
 enum machine_type
@@ -584,14 +592,14 @@ DEFUN(NAME(aout,machine_type),(arch, machine),
       unsigned long machine)
 {
   enum machine_type arch_flags;
-    
+
   arch_flags = M_UNKNOWN;
-    
+
   switch (arch) {
   case bfd_arch_sparc:
     if (machine == 0)	arch_flags = M_SPARC;
     break;
-      
+
   case bfd_arch_m68k:
     switch (machine) {
     case 0:		arch_flags = M_68010; break;
@@ -601,15 +609,15 @@ DEFUN(NAME(aout,machine_type),(arch, machine),
     default:		arch_flags = M_UNKNOWN; break;
     }
     break;
-      
+
   case bfd_arch_i386:
     if (machine == 0)	arch_flags = M_386;
     break;
-      
+
   case bfd_arch_a29k:
     if (machine == 0)	arch_flags = M_29K;
     break;
-      
+
   case bfd_arch_mips:
     switch (machine) {
     case 0:
@@ -631,18 +639,18 @@ DEFUN(NAME(aout,machine_type),(arch, machine),
 
 /*
 FUNCTION
-	aout_<size>_set_arch_mach
-
-DESCRIPTION
-	Sets the architecture and the machine of the BFD to those
-	values supplied. Verifies that the format can support the
-	architecture required.
+	aout_@var{size}_set_arch_mach
 
 SYNOPSIS
-	boolean aout_<size>_set_arch_mach,
+	boolean aout_@var{size}_set_arch_mach,
 	 (bfd *,
-	  enum bfd_architecture,
+	  enum bfd_architecture arch,
 	  unsigned long machine));
+
+DESCRIPTION
+	Set the architecture and the machine of the BFD @var{abfd} to the
+	values @var{arch} and @var{machine}.  Verify that @var{abfd}'s format
+	can support the architecture required.
 */
 
 boolean
@@ -678,13 +686,13 @@ DEFUN (NAME (aout,adjust_sizes_and_vmas), (abfd, text_size, text_end),
        bfd *abfd AND bfd_size_type *text_size AND file_ptr *text_end)
 {
   struct internal_exec *execp = exec_hdr (abfd);
-  if ((obj_textsec (abfd) == NULL) || (obj_datasec (abfd) == NULL)) 
+  if ((obj_textsec (abfd) == NULL) || (obj_datasec (abfd) == NULL))
     {
       bfd_error = invalid_operation;
       return false;
     }
   if (adata(abfd).magic != undecided_magic) return true;
-  obj_textsec(abfd)->_raw_size = 	      
+  obj_textsec(abfd)->_raw_size =
     align_power(obj_textsec(abfd)->_raw_size,
 		obj_textsec(abfd)->alignment_power);
 
@@ -894,16 +902,16 @@ DEFUN (NAME (aout,adjust_sizes_and_vmas), (abfd, text_size, text_end),
 
 /*
 FUNCTION
-	aout_<size>_new_section_hook
-  
+	aout_@var{size}_new_section_hook
+
+SYNOPSIS
+        boolean aout_@var{size}_new_section_hook,
+	   (bfd *abfd,
+	    asection *newsect));
+
 DESCRIPTION
 	Called by the BFD in response to a @code{bfd_make_section}
 	request.
-
-SYNOPSIS
-        boolean aout_<size>_new_section_hook,
-	   (bfd *abfd,
-	    asection *newsect));
 */
 boolean
 DEFUN(NAME(aout,new_section_hook),(abfd, newsect),
@@ -913,21 +921,21 @@ DEFUN(NAME(aout,new_section_hook),(abfd, newsect),
   /* align to double at least */
   newsect->alignment_power = bfd_get_arch_info(abfd)->section_align_power;
 
-    
-  if (bfd_get_format (abfd) == bfd_object) 
+
+  if (bfd_get_format (abfd) == bfd_object)
   {
     if (obj_textsec(abfd) == NULL && !strcmp(newsect->name, ".text")) {
 	obj_textsec(abfd)= newsect;
 	newsect->target_index = N_TEXT | N_EXT;
 	return true;
       }
-      
+
     if (obj_datasec(abfd) == NULL && !strcmp(newsect->name, ".data")) {
 	obj_datasec(abfd) = newsect;
 	newsect->target_index = N_DATA | N_EXT;
 	return true;
       }
-      
+
     if (obj_bsssec(abfd) == NULL && !strcmp(newsect->name, ".bss")) {
 	obj_bsssec(abfd) = newsect;
 	newsect->target_index = N_BSS | N_EXT;
@@ -935,7 +943,7 @@ DEFUN(NAME(aout,new_section_hook),(abfd, newsect),
       }
 
   }
-    
+
   /* We allow more than three sections internally */
   return true;
 }
@@ -960,10 +968,10 @@ DEFUN(NAME(aout,set_section_contents),(abfd, section, location, offset, count),
       }
 
   /* regardless, once we know what we're doing, we might as well get going */
-  if (section != obj_bsssec(abfd)) 
+  if (section != obj_bsssec(abfd))
       {
 	bfd_seek (abfd, section->filepos + offset, SEEK_SET);
-    
+
 	if (count) {
 	  return (bfd_write ((PTR)location, 1, count, abfd) == count) ?
 	    true : false;
@@ -998,7 +1006,7 @@ DEFUN(NAME(aout,set_section_contents),(abfd, section, location, offset, count),
 /* Symbol is debugger info if any bits outside N_TYPE or N_EXT
   are on.  */
 #define sym_is_debugger_info(sym) \
-  ((sym)->type & ~(N_EXT | N_TYPE))
+  (((sym)->type & ~(N_EXT | N_TYPE)) || (sym)->type == N_FN)
 
 #define sym_is_fortrancommon(sym)       \
   (((sym)->type == (N_EXT)) && (sym)->symbol.value != 0)
@@ -1013,7 +1021,7 @@ DEFUN(NAME(aout,set_section_contents),(abfd, section, location, offset, count),
 
 /* Only in their own functions for ease of debugging; when sym flags have
   stabilised these should be inlined into their (single) caller */
-  
+
 static void
 DEFUN (translate_from_native_sym_flags, (sym_pointer, cache_ptr, abfd),
        struct external_nlist *sym_pointer AND
@@ -1235,7 +1243,7 @@ DEFUN(translate_to_native_sym_flags,(sym_pointer, cache_ptr, abfd),
      to another */
   sym_pointer->e_type[0] &= ~N_TYPE;
 
-  
+
   /* We attempt to order these tests by decreasing frequency of success,
      according to tcov when linking the linker.  */
   if (bfd_get_output_section(cache_ptr) == &bfd_abs_section) {
@@ -1250,41 +1258,41 @@ DEFUN(translate_to_native_sym_flags,(sym_pointer, cache_ptr, abfd),
   else if (bfd_get_output_section(cache_ptr) == obj_bsssec (abfd)) {
     sym_pointer->e_type[0] |= N_BSS;
   }
-  else if (bfd_get_output_section(cache_ptr) == &bfd_und_section) 
+  else if (bfd_get_output_section(cache_ptr) == &bfd_und_section)
     {
       sym_pointer->e_type[0] = (N_UNDF | N_EXT);
     }
-  else if (bfd_get_output_section(cache_ptr) == &bfd_ind_section) 
+  else if (bfd_get_output_section(cache_ptr) == &bfd_ind_section)
     {
       sym_pointer->e_type[0] = N_INDR;
     }
   else if (bfd_is_com_section (bfd_get_output_section (cache_ptr))) {
     sym_pointer->e_type[0] = (N_UNDF | N_EXT);
-  }    
-  else {    
-    if (cache_ptr->section->output_section) 
+  }
+  else {
+    if (cache_ptr->section->output_section)
       {
-	
+
 	bfd_error_vector.nonrepresentable_section(abfd,
 						  bfd_get_output_section(cache_ptr)->name);
       }
-    else 
+    else
       {
 	bfd_error_vector.nonrepresentable_section(abfd,
 						  cache_ptr->section->name);
-	
+
       }
-      
+
   }
   /* Turn the symbol from section relative to absolute again */
-    
+
   value +=  cache_ptr->section->output_section->vma  + cache_ptr->section->output_offset ;
 
 
   if (cache_ptr->flags & (BSF_WARNING)) {
     (sym_pointer+1)->e_type[0] = 1;
-  }  
-    
+  }
+
   if (cache_ptr->flags & BSF_DEBUGGING) {
     sym_pointer->e_type[0] = ((aout_symbol_type *)cache_ptr)->type;
   }
@@ -1383,7 +1391,7 @@ DEFUN(NAME(aout,slurp_symbol_table),(abfd),
 
     /* Run through table and copy values */
     for (sym_pointer = syms, cache_ptr = cached;
-	 sym_pointer < sym_end; sym_pointer ++, cache_ptr++) 
+	 sym_pointer < sym_end; sym_pointer ++, cache_ptr++)
       {
 	long x = GET_WORD(abfd, sym_pointer->e_strx);
 	cache_ptr->symbol.the_bfd = abfd;
@@ -1882,27 +1890,28 @@ DEFUN(NAME(aout,swap_std_reloc_out),(abfd, g, natptr),
 
   r_length = g->howto->size ;	/* Size as a power of two */
   r_pcrel  = (int) g->howto->pc_relative; /* Relative to PC? */
-  /* r_baserel, r_jmptable, r_relative???  FIXME-soon */
-  r_baserel = 0;
+  /* XXX This relies on relocs coming from a.out files.  */
+  r_baserel = (g->howto->type & 8) != 0;
+  /* r_jmptable, r_relative???  FIXME-soon */
   r_jmptable = 0;
   r_relative = 0;
-    
+
   r_addend = g->addend + (*(g->sym_ptr_ptr))->section->output_section->vma;
-    
+
   /* name was clobbered by aout_write_syms to be symbol index */
 
-  /* If this relocation is relative to a symbol then set the 
+  /* If this relocation is relative to a symbol then set the
      r_index to the symbols index, and the r_extern bit.
 
      Absolute symbols can come in in two ways, either as an offset
      from the abs section, or as a symbol which has an abs value.
      check for that here
      */
-     
+
 
   if (bfd_is_com_section (output_section)
       || output_section == &bfd_abs_section
-      || output_section == &bfd_und_section) 
+      || output_section == &bfd_und_section)
     {
       if (bfd_abs_section.symbol == sym)
       {
@@ -1911,19 +1920,19 @@ DEFUN(NAME(aout,swap_std_reloc_out),(abfd, g, natptr),
 	r_index = 0;
 	r_extern = 0;
        }
-      else 
+      else
       {
 	/* Fill in symbol */
 	r_extern = 1;
 	r_index =  stoi((*(g->sym_ptr_ptr))->KEEPIT);
-     
+
       }
     }
-  else 
+  else
     {
       /* Just an ordinary section */
       r_extern = 0;
-      r_index  = output_section->target_index;      
+      r_index  = output_section->target_index;
     }
 
   /* now the fun stuff */
@@ -1966,24 +1975,22 @@ DEFUN(NAME(aout,swap_ext_reloc_out),(abfd, g, natptr),
   int r_extern;
   unsigned int r_type;
   unsigned int r_addend;
-  asymbol *sym = *(g->sym_ptr_ptr);    
+  asymbol *sym = *(g->sym_ptr_ptr);
   asection *output_section = sym->section->output_section;
-  
+
   PUT_WORD (abfd, g->address, natptr->r_address);
-    
+
   r_type = (unsigned int) g->howto->type;
-    
+
   r_addend = g->addend + (*(g->sym_ptr_ptr))->section->output_section->vma;
 
-
-  /* If this relocation is relative to a symbol then set the 
+  /* If this relocation is relative to a symbol then set the
      r_index to the symbols index, and the r_extern bit.
 
      Absolute symbols can come in in two ways, either as an offset
      from the abs section, or as a symbol which has an abs value.
-     check for that here
-     */
-     
+     check for that here.  */
+
   if (bfd_is_com_section (output_section)
       || output_section == &bfd_abs_section
       || output_section == &bfd_und_section)
@@ -1995,28 +2002,27 @@ DEFUN(NAME(aout,swap_ext_reloc_out),(abfd, g, natptr),
       r_index = 0;
       r_extern = 0;
      }
-    else 
+    else
     {
       r_extern = 1;
       r_index =  stoi((*(g->sym_ptr_ptr))->KEEPIT);
     }
   }
-  else 
+  else
   {
     /* Just an ordinary section */
     r_extern = 0;
-    r_index  = output_section->target_index;      
+    r_index  = output_section->target_index;
   }
-	 
-	 
+
   /* now the fun stuff */
   if (abfd->xvec->header_byteorder_big_p != false) {
     natptr->r_index[0] = r_index >> 16;
     natptr->r_index[1] = r_index >> 8;
     natptr->r_index[2] = r_index;
     natptr->r_type[0] =
-     (r_extern? RELOC_EXT_BITS_EXTERN_BIG: 0)
-      | (r_type << RELOC_EXT_BITS_TYPE_SH_BIG);
+      ((r_extern? RELOC_EXT_BITS_EXTERN_BIG: 0)
+       | (r_type << RELOC_EXT_BITS_TYPE_SH_BIG));
   } else {
     natptr->r_index[2] = r_index >> 16;
     natptr->r_index[1] = r_index >> 8;
@@ -2031,7 +2037,7 @@ DEFUN(NAME(aout,swap_ext_reloc_out),(abfd, g, natptr),
 
 /* BFD deals internally with all things based from the section they're
    in. so, something in 10 bytes into a text section  with a base of
-   50 would have a symbol (.text+10) and know .text vma was 50. 
+   50 would have a symbol (.text+10) and know .text vma was 50.
 
    Aout keeps all it's symbols based from zero, so the symbol would
    contain 60. This macro subs the base of each section from the value
@@ -2119,6 +2125,7 @@ DEFUN(NAME(aout,swap_std_reloc_in), (abfd, bytes, cache_ptr, symbols),
   int r_pcrel;
   int r_baserel, r_jmptable, r_relative;
   struct aoutdata  *su = &(abfd->tdata.aout_data->a);
+  int howto_idx;
 
   cache_ptr->address = bfd_h_get_32 (abfd, bytes->r_address);
 
@@ -2132,7 +2139,7 @@ DEFUN(NAME(aout,swap_std_reloc_in), (abfd, bytes, cache_ptr, symbols),
     r_baserel = (0 != (bytes->r_type[0] & RELOC_STD_BITS_BASEREL_BIG));
     r_jmptable= (0 != (bytes->r_type[0] & RELOC_STD_BITS_JMPTABLE_BIG));
     r_relative= (0 != (bytes->r_type[0] & RELOC_STD_BITS_RELATIVE_BIG));
-    r_length  =       (bytes->r_type[0] & RELOC_STD_BITS_LENGTH_BIG) 
+    r_length  =       (bytes->r_type[0] & RELOC_STD_BITS_LENGTH_BIG)
       			>> RELOC_STD_BITS_LENGTH_SH_BIG;
   } else {
     r_index =  (bytes->r_index[2] << 16)
@@ -2143,12 +2150,17 @@ DEFUN(NAME(aout,swap_std_reloc_in), (abfd, bytes, cache_ptr, symbols),
     r_baserel = (0 != (bytes->r_type[0] & RELOC_STD_BITS_BASEREL_LITTLE));
     r_jmptable= (0 != (bytes->r_type[0] & RELOC_STD_BITS_JMPTABLE_LITTLE));
     r_relative= (0 != (bytes->r_type[0] & RELOC_STD_BITS_RELATIVE_LITTLE));
-    r_length  =       (bytes->r_type[0] & RELOC_STD_BITS_LENGTH_LITTLE) 
+    r_length  =       (bytes->r_type[0] & RELOC_STD_BITS_LENGTH_LITTLE)
       			>> RELOC_STD_BITS_LENGTH_SH_LITTLE;
   }
 
-  cache_ptr->howto =  howto_table_std + r_length + 4 * r_pcrel;
-  /* FIXME-soon:  Roll baserel, jmptable, relative bits into howto setting */
+  howto_idx = r_length + 4 * r_pcrel + 8 * r_baserel;
+  BFD_ASSERT (howto_idx < TABLE_SIZE (howto_table_std));
+  cache_ptr->howto =  howto_table_std + howto_idx;
+  BFD_ASSERT (cache_ptr->howto->type != -1);
+  BFD_ASSERT (r_jmptable == 0);
+  BFD_ASSERT (r_relative == 0);
+  /* FIXME-soon:  Roll jmptable, relative bits into howto setting */
 
   MOVE_ADDRESS(0);
 }
@@ -2173,18 +2185,13 @@ DEFUN(NAME(aout,slurp_reloc_table),(abfd, asect, symbols),
 
   if (asect == obj_datasec (abfd)) {
     reloc_size = exec_hdr(abfd)->a_drsize;
-    goto doit;
-  }
-
-  if (asect == obj_textsec (abfd)) {
+  } else if (asect == obj_textsec (abfd)) {
     reloc_size = exec_hdr(abfd)->a_trsize;
-    goto doit;
+  } else {
+    bfd_error = invalid_operation;
+    return false;
   }
 
-  bfd_error = invalid_operation;
-  return false;
-
- doit:
   bfd_seek (abfd, asect->rel_filepos, SEEK_SET);
   each_size = obj_reloc_entry_size (abfd);
 
@@ -2221,12 +2228,12 @@ nomem:
       NAME(aout,swap_ext_reloc_in)(abfd, rptr, cache_ptr, symbols);
     }
   } else {
-    register struct reloc_std_external *rptr = (struct reloc_std_external*) relocs;
+    register struct reloc_std_external *rptr = (struct reloc_std_external *) relocs;
     unsigned int counter = 0;
     arelent *cache_ptr = reloc_cache;
 
     for (; counter < count; counter++, rptr++, cache_ptr++) {
-	NAME(aout,swap_std_reloc_in)(abfd, rptr, cache_ptr, symbols);
+      NAME(aout,swap_std_reloc_in)(abfd, rptr, cache_ptr, symbols);
     }
 
   }
@@ -2265,14 +2272,14 @@ DEFUN(NAME(aout,squirt_out_relocs),(abfd, section),
 
   generic = section->orelocation;
 
-  if (each_size == RELOC_EXT_SIZE) 
+  if (each_size == RELOC_EXT_SIZE)
     {
       for (natptr = native;
 	   count != 0;
 	   --count, natptr += each_size, ++generic)
 	NAME(aout,swap_ext_reloc_out) (abfd, *generic, (struct reloc_ext_external *)natptr);
     }
-  else 
+  else
     {
       for (natptr = native;
 	   count != 0;
@@ -2314,7 +2321,7 @@ DEFUN(NAME(aout,canonicalize_reloc),(abfd, section, relptr, symbols),
     tblptr = section->relocation;
     if (!tblptr) return 0;
 
-    for (count = 0; count++ < section->reloc_count;) 
+    for (count = 0; count++ < section->reloc_count;)
       {
 	*relptr++ = tblptr++;
       }
@@ -2369,7 +2376,7 @@ DEFUN(NAME(aout,get_lineno),(ignore_abfd, ignore_symbol),
 return (alent *)NULL;
 }
 
-void 
+void
 DEFUN(NAME(aout,get_symbol_info),(ignore_abfd, symbol, ret),
       bfd *ignore_abfd AND
       asymbol *symbol AND
@@ -2395,7 +2402,7 @@ DEFUN(NAME(aout,get_symbol_info),(ignore_abfd, symbol, ret),
     }
 }
 
-void 
+void
 DEFUN(NAME(aout,print_symbol),(ignore_abfd, afile, symbol, how),
       bfd *ignore_abfd AND
       PTR afile AND
@@ -2433,12 +2440,12 @@ DEFUN(NAME(aout,print_symbol),(ignore_abfd, afile, symbol, how),
   }
 }
 
-/* 
+/*
  provided a BFD, a section and an offset into the section, calculate
  and return the name of the source file and the line nearest to the
  wanted location.
 */
- 
+
 boolean
 DEFUN(NAME(aout,find_nearest_line),(abfd,
 				     section,
@@ -2548,7 +2555,7 @@ DEFUN(NAME(aout,find_nearest_line),(abfd,
 
 }
 
-int 
+int
 DEFUN(NAME(aout,sizeof_headers),(abfd, execable),
       bfd *abfd AND
       boolean execable)

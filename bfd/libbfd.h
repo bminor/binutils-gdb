@@ -44,8 +44,8 @@ struct artdata {
   carsym *symdefs;		/* the symdef entries */
   symindex symdef_count;             /* how many there are */
   char *extended_names;		/* clever intel extension */
-
-  time_t armap_timestamp;	/* Timestamp value written into armap.
+  /* when more compilers are standard C, this can be a time_t */
+  long  armap_timestamp;	/* Timestamp value written into armap.
 				   This is used for BSD archives to check
 				   that the timestamp is recent enough
 				   for the BSD linker to not complain,
@@ -212,13 +212,13 @@ extern bfd *bfd_last_cache;
       (FILE*)(bfd_last_cache->iostream): \
        bfd_cache_lookup_worker(x))
 boolean 
-bfd_cache_close  PARAMS ((bfd *));
+bfd_cache_close  PARAMS ((bfd *abfd));
 
 FILE* 
-bfd_open_file PARAMS ((bfd *));
+bfd_open_file PARAMS ((bfd *abfd));
 
 FILE *
-bfd_cache_lookup_worker PARAMS ((bfd *));
+bfd_cache_lookup_worker PARAMS ((bfd *abfd));
 
 void 
 bfd_constructor_entry PARAMS ((bfd *abfd, 
@@ -255,11 +255,11 @@ bfd_default_set_arch_mach PARAMS ((bfd *abfd,
     enum bfd_architecture arch,
     unsigned long mach));
 
-void  
+void 
 bfd_arch_init PARAMS ((void));
 
 void 
-bfd_arch_linkin PARAMS ((bfd_arch_info_type *));
+bfd_arch_linkin PARAMS ((bfd_arch_info_type *ptr));
 
 CONST bfd_arch_info_type *
 bfd_default_compatible
@@ -267,7 +267,7 @@ bfd_default_compatible
     CONST bfd_arch_info_type *b));
 
 boolean 
-bfd_default_scan PARAMS ((CONST struct bfd_arch_info *, CONST char *));
+bfd_default_scan PARAMS ((CONST struct bfd_arch_info *info, CONST char *string));
 
 struct elf_internal_shdr *
 bfd_elf_find_section  PARAMS ((bfd *abfd, char *name));

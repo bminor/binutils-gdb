@@ -38,25 +38,25 @@ DESCRIPTION
 	target are unknown. BFD uses various mechanisms to determine
 	how to interpret the file. The operations performed are:
 
-	o First a BFD is created by calling the internal routine
-	<<new_bfd>>, then <<bfd_find_target>> is called with the
+	o Create a BFD by calling the internal routine
+	<<new_bfd>>, then call <<bfd_find_target>> with the
 	target string supplied to <<bfd_openr>> and the new BFD pointer. 
 
 	o If a null target string was provided to <<bfd_find_target>>,
-	it looks up the environment variable <<GNUTARGET>> and uses
+	look up the environment variable <<GNUTARGET>> and use
 	that as the target string. 
 
 	o If the target string is still NULL, or the target string is
-	<<default>>, then the first item in the target vector is used
-	as the target type, and <<target_defaulted>> is set to
+	<<default>>, then use the first item in the target vector
+	as the target type, and set <<target_defaulted>> in the BFD to
 	cause <<bfd_check_format>> to loop through all the targets.
 	@xref{bfd_target}.  @xref{Formats}.
 
-	o Otherwise, the elements in the target vector are inspected
+	o Otherwise, inspect the elements in the target vector
 	one by one, until a match on target name is found. When found,
-	that is used. 
+	use it. 
 
-	o Otherwise the error <<invalid_target>> is returned to
+	o Otherwise return the error <<invalid_target>> to
 	<<bfd_openr>>.
 
 	o <<bfd_openr>> attempts to open the file using
@@ -66,8 +66,8 @@ DESCRIPTION
 	format may be determined. This is done by calling
 	<<bfd_check_format>> on the BFD with a suggested format. 
 	If <<target_defaulted>> has been set, each possible target
-	type is tried to see if it recognizes the specified format.  The
-	routine returns <<true>> when the application guesses right.
+	type is tried to see if it recognizes the specified format.
+	<<bfd_check_format>> returns <<true>> when the caller guesses right.
 @menu
 @* bfd_target::
 @end menu
@@ -84,16 +84,16 @@ SUBSECTION
 
 DESCRIPTION
 	This structure contains everything that BFD knows about a
-	target. It includes things like its byte order, name, what
-	routines to call to do various operations, etc.   
+	target. It includes things like its byte order, name, and which
+	routines to call to do various operations.   
 
 	Every BFD points to a target structure with its <<xvec>>
 	member. 
 
-	These macros are used to dispatch to functions through the
-	bfd_target vector. They are used in a number of macros further
+	The macros below are used to dispatch to functions through the
+	<<bfd_target>> vector. They are used in a number of macros further
 	down in @file{bfd.h}, and are also used when calling various
-	routines by hand inside the BFD implementation.  The "arglist"
+	routines by hand inside the BFD implementation.  The @var{arglist}
 	argument must be parenthesized; it contains all the arguments
 	to the called function. 
 
@@ -103,12 +103,12 @@ DESCRIPTION
 .#define BFD_SEND(bfd, message, arglist) \
 .               ((*((bfd)->xvec->message)) arglist)
 
-	For operations which index on the BFD format 
+	For operations which index on the BFD format:
 
 .#define BFD_SEND_FMT(bfd, message, arglist) \
 .            (((bfd)->xvec->message[(int)((bfd)->format)]) arglist)
 
-	This is the struct which defines the type of BFD this is.  The
+	This is the structure which defines the type of BFD this is.  The
 	<<xvec>> member of the struct <<bfd>> itself points here.  Each
 	module that implements access to a different target under BFD,
 	defines one of these.
@@ -118,28 +118,30 @@ DESCRIPTION
 	the entry points which call them. Too bad we can't have one
 	macro to define them both! 
 
+.enum bfd_flavour {
+.  bfd_target_unknown_flavour,
+.  bfd_target_aout_flavour,
+.  bfd_target_coff_flavour,
+.  bfd_target_ecoff_flavour,
+.  bfd_target_elf_flavour,
+.  bfd_target_ieee_flavour,
+.  bfd_target_nlm_flavour,
+.  bfd_target_oasys_flavour,
+.  bfd_target_tekhex_flavour,
+.  bfd_target_srec_flavour,
+.  bfd_target_som_flavour};
+
 .typedef struct bfd_target
 .{
 
-Identifies the kind of target, eg SunOS4, Ultrix, etc.
+Identifies the kind of target, e.g., SunOS4, Ultrix, etc.
 
 .  char *name;
 
 The "flavour" of a back end is a general indication about the contents
 of a file.
 
-.  enum target_flavour {
-.    bfd_target_unknown_flavour,
-.    bfd_target_aout_flavour,
-.    bfd_target_coff_flavour,
-.    bfd_target_ecoff_flavour,
-.    bfd_target_elf_flavour,
-.    bfd_target_ieee_flavour,
-.    bfd_target_nlm_flavour,
-.    bfd_target_oasys_flavour,
-.    bfd_target_tekhex_flavour,
-.    bfd_target_srec_flavour,
-.    bfd_target_som_flavour} flavour;
+.  enum bfd_flavour flavour;
 
 The order of bytes within the data area of a file.
 
@@ -149,22 +151,22 @@ The order of bytes within the header parts of a file.
 
 .  boolean header_byteorder_big_p;
 
-This is a mask of all the flags which an executable may have set -
+A mask of all the flags which an executable may have set -
 from the set <<NO_FLAGS>>, <<HAS_RELOC>>, ...<<D_PAGED>>.
 
 .  flagword object_flags;       
 
-This is a mask of all the flags which a section may have set - from
+A mask of all the flags which a section may have set - from
 the set <<SEC_NO_FLAGS>>, <<SEC_ALLOC>>, ...<<SET_NEVER_LOAD>>.
 
 .  flagword section_flags;
 
 The character normally found at the front of a symbol 
-(if any), perhaps _.
+(if any), perhaps `_'.
 
 .  char symbol_leading_char;
 
-The pad character for filenames within an archive header.
+The pad character for file names within an archive header.
 
 .  char ar_pad_char;            
 
@@ -176,9 +178,9 @@ The minimum alignment restriction for any section.
 
 .  unsigned int align_power_min;
 
-Entries for byte swapping for data. These are different to the other
-entry points, since they don't take BFD as first arg.  Certain other handlers
-could do the same.
+Entries for byte swapping for data. These are different from the other
+entry points, since they don't take a BFD asthe first argument.
+Certain other handlers could do the same.
 
 .  bfd_vma      (*bfd_getx64) PARAMS ((bfd_byte *));
 .  bfd_signed_vma (*bfd_getx_signed_64) PARAMS ((bfd_byte *));
@@ -205,7 +207,7 @@ Byte swapping for the headers
 Format dependent routines: these are vectors of entry points
 within the target vector structure, one for each format to check.
 
-Check the format of a file being read.  Return bfd_target * or zero. 
+Check the format of a file being read.  Return a <<bfd_target *>> or zero. 
 
 .  struct bfd_target * (*_bfd_check_format[bfd_type_end]) PARAMS ((bfd *));
 
@@ -213,22 +215,22 @@ Set the format of a file being written.
 
 .  boolean             (*_bfd_set_format[bfd_type_end]) PARAMS ((bfd *));
 
-Write cached information into a file being written, at bfd_close. 
+Write cached information into a file being written, at <<bfd_close>>. 
 
 .  boolean             (*_bfd_write_contents[bfd_type_end]) PARAMS ((bfd *));
 
 The following functions are defined in <<JUMP_TABLE>>. The idea is
 that the back end writer of <<foo>> names all the routines
-<<foo_>>@var{entry_point}, <<JUMP_TABLE>> will built the entries
+<<foo_>>@var{entry_point}; <<JUMP_TABLE>> will build the entries
 in this structure in the right order.
 
-Core file entry points
+Core file entry points.
 
 .  char *   (*_core_file_failing_command) PARAMS ((bfd *));
 .  int      (*_core_file_failing_signal) PARAMS ((bfd *));
 .  boolean  (*_core_file_matches_executable_p) PARAMS ((bfd *, bfd *));
 
-Archive entry points
+Archive entry points.
 
 .  boolean  (*_bfd_slurp_armap) PARAMS ((bfd *));
 .  boolean  (*_bfd_slurp_extended_name_table) PARAMS ((bfd *));
@@ -248,7 +250,7 @@ Standard stuff.
 .                                            file_ptr, bfd_size_type));
 .  boolean       (*_new_section_hook) PARAMS ((bfd *, sec_ptr));
 
-Symbols and relocations
+Symbols and relocations.
 
 .  unsigned int  (*_get_symtab_upper_bound) PARAMS ((bfd *));
 .  unsigned int  (*_bfd_canonicalize_symtab) PARAMS ((bfd *,
@@ -379,6 +381,8 @@ extern bfd_target nlm64_little_generic_vec;
 extern bfd_target oasys_vec;
 extern bfd_target rs6000coff_vec;
 extern bfd_target shcoff_vec;
+extern bfd_target sparclynx_aout_vec;
+extern bfd_target sparclynx_coff_vec;
 extern bfd_target sunos_big_vec;
 extern bfd_target tekhex_vec;
 extern bfd_target we32kcoff_vec;
@@ -503,6 +507,8 @@ bfd_target *target_vector[] = {
 #endif
 	&rs6000coff_vec,
 	&shcoff_vec,
+	&sparclynx_aout_vec,
+	&sparclynx_coff_vec,
 	&sunos_big_vec,
 #if 0
 	&tekhex_vec,
@@ -551,19 +557,19 @@ bfd_target *default_vector[] = {
 FUNCTION
 	bfd_find_target
 
+SYNOPSIS
+	bfd_target *bfd_find_target(CONST char *target_name, bfd *abfd);
+
 DESCRIPTION
-	Returns a pointer to the transfer vector for the object target
-	named target_name.  If target_name is NULL, chooses the one in
-	the environment variable GNUTARGET; if that is null or not
-	defined thenthe first entry in the target list is chosen.
+	Return a pointer to the transfer vector for the object target
+	named @var{target_name}.  If @var{target_name} is NULL, choose the
+	one in the environment variable GNUTARGET; if that is null or not
+	defined, then choose the first entry in the target list.
 	Passing in the string "default" or setting the environment
 	variable to "default" will cause the first entry in the target
 	list to be returned, and "target_defaulted" will be set in the
 	BFD.  This causes <<bfd_check_format>> to loop over all the
 	targets to find the one that matches the file being read.   
-
-SYNOPSIS
-	bfd_target *bfd_find_target(CONST char *, bfd *);
 */
 
 bfd_target *
@@ -598,13 +604,13 @@ DEFUN(bfd_find_target,(target_name, abfd),
 FUNCTION
 	bfd_target_list
 
-DESCRIPTION
-	This function returns a freshly malloced NULL-terminated
-	vector of the names of all the valid BFD targets. Do not
-	modify the names 
-
 SYNOPSIS
 	CONST char **bfd_target_list(void);
+
+DESCRIPTION
+	Return a freshly malloced NULL-terminated
+	vector of the names of all the valid BFD targets. Do not
+	modify the names.
 
 */
 
