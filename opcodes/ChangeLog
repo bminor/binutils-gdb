@@ -3,6 +3,7 @@ Fri Mar  6 11:27:53 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* dvp-dis.c (print_gif): Fix length calcs for gifimage.
 	(print_insn): Do mask comparison on proper opcode word.
+	Print unsigned values in hex.
 	* dvp-opc.c (u_parse_sdest): Return -1 if dest missing.
 	(parse_bc): Catch missing dest.
 	(parse_vfreg): Replace atoi call with strtol.
@@ -16,6 +17,12 @@ Fri Mar  6 11:27:53 1998  Doug Evans  <devans@canuck.cygnus.com>
 	(print_gif_regs): Print empty list instead of nothing.
 	(extract_gif_nloop): Fix value calc.
 	(print_gif_nloop): Always print value, even if 0.
+	(insert_vif_wlcl,extract_vif_wlcl): New functions.
+	(vif_operands): Use them for wl,cl fields.
+	(state_vif_wl,state_vif_cl): New static locals.
+	(parse_vif_mode): Handle numeric args.
+	(vif_unpack_len_value,vif_unpack_len): New functions.
+	(vif_insn_len): Call vif_unpack_len.
 
 end-sanitize-sky
 Wed Mar  4 12:08:14 1998  Doug Evans  <devans@canuck.cygnus.com>
