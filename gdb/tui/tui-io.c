@@ -43,7 +43,13 @@
 #include <signal.h>
 #include <stdio.h>
 
-#include "gdb_curses.h"
+#ifdef HAVE_NCURSES_H       
+#include <ncurses.h>
+#else
+#ifdef HAVE_CURSES_H
+#include <curses.h>
+#endif
+#endif
 
 int
 key_is_start_sequence (int ch)
@@ -141,7 +147,7 @@ static int tui_readline_pipe[2];
    This may be the main gdb prompt or a secondary prompt.  */
 static char *tui_rl_saved_prompt;
 
-static unsigned int tui_handle_resize_during_io (unsigned int);
+static unsigned int _tuiHandleResizeDuringIO (unsigned int);
 
 static void
 tui_putc (char c)
@@ -316,7 +322,8 @@ tui_readline_output (int code, gdb_client_data data)
 
    Comes from readline/complete.c  */
 static char *
-printable_part (char *pathname)
+printable_part (pathname)
+     char *pathname;
 {
   char *temp;
 
@@ -353,7 +360,8 @@ printable_part (char *pathname)
     } while (0)
 
 static int
-print_filename (char *to_print, char *full_pathname)
+print_filename (to_print, full_pathname)
+     char *to_print, *full_pathname;
 {
   int printed_len = 0;
   char *s;
@@ -368,7 +376,7 @@ print_filename (char *to_print, char *full_pathname)
 /* The user must press "y" or "n".  Non-zero return means "y" pressed.
    Comes from readline/complete.c  */
 static int
-get_y_or_n (void)
+get_y_or_n ()
 {
   extern int _rl_abort_internal ();
   int c;
@@ -394,7 +402,9 @@ get_y_or_n (void)
    Comes from readline/complete.c and modified to write in
    the TUI command window using tui_putc/tui_puts.  */
 static void
-tui_rl_display_match_list (char **matches, int len, int max)
+tui_rl_display_match_list (matches, len, max)
+     char **matches;
+     int len, max;
 {
   typedef int QSFUNC (const void *, const void *);
   extern int _rl_qsort_string_compare (const void*, const void*);
@@ -588,7 +598,7 @@ tui_cont_sig (int sig)
 
 /* Initialize the IO for gdb in curses mode.  */
 void
-tui_initialize_io (void)
+tui_initialize_io ()
 {
 #ifdef SIGCONT
   signal (SIGCONT, tui_cont_sig);
@@ -649,7 +659,7 @@ tui_getc (FILE *fp)
 #endif
 
   ch = wgetch (w);
-  ch = tui_handle_resize_during_io (ch);
+  ch = _tuiHandleResizeDuringIO (ch);
 
   /* The \n must be echoed because it will not be printed by readline.  */
   if (ch == '\n')
@@ -684,6 +694,10 @@ tui_getc (FILE *fp)
   
   if (ch == '\n' || ch == '\r' || ch == '\f')
     TUI_CMD_WIN->detail.command_info.curch = 0;
+#if 0
+  else
+    tuiIncrCommandCharCountBy (1);
+#endif
   if (ch == KEY_BACKSPACE)
     return '\b';
   
@@ -694,7 +708,7 @@ tui_getc (FILE *fp)
 /* Cleanup when a resize has occured.
    Returns the character that must be processed.  */
 static unsigned int
-tui_handle_resize_during_io (unsigned int original_ch)
+_tuiHandleResizeDuringIO (unsigned int originalCh)
 {
   if (tui_win_resized ())
     {
@@ -704,5 +718,5 @@ tui_handle_resize_during_io (unsigned int original_ch)
       return '\n';
     }
   else
-    return original_ch;
+    return originalCh;
 }

@@ -24,8 +24,6 @@ extern bfd_boolean _bfd_mips_elf_new_section_hook
   (bfd *, asection *);
 extern void _bfd_mips_elf_symbol_processing
   (bfd *, asymbol *);
-extern bfd_boolean _bfd_mips_elf_name_local_section_symbols
-  (bfd *);
 extern bfd_boolean _bfd_mips_elf_section_processing
   (bfd *, Elf_Internal_Shdr *);
 extern bfd_boolean _bfd_mips_elf_section_from_shdr
@@ -121,6 +119,4 @@ extern bfd_vma _bfd_mips_elf_sign_extend
   (bfd_vma, int);
 
 extern struct bfd_elf_special_section const _bfd_mips_elf_special_sections[];
-#define elf_backend_name_local_section_symbols \
-  _bfd_mips_elf_name_local_section_symbols
 #define elf_backend_special_sections _bfd_mips_elf_special_sections

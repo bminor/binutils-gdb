@@ -1,7 +1,6 @@
 /* ELF executable support for BFD.
-
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002, 2003, 2004 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
+   2003 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -3572,35 +3571,6 @@ elf_sort_sections (const void *arg1, const void *arg2)
   return sec1->target_index - sec2->target_index;
 }
 
-/* Ian Lance Taylor writes:
-
-   We shouldn't be using % with a negative signed number.  That's just
-   not good.  We have to make sure either that the number is not
-   negative, or that the number has an unsigned type.  When the types
-   are all the same size they wind up as unsigned.  When file_ptr is a
-   larger signed type, the arithmetic winds up as signed long long,
-   which is wrong.
-
-   What we're trying to say here is something like ``increase OFF by
-   the least amount that will cause it to be equal to the VMA modulo
-   the page size.''  */
-/* In other words, something like:
-
-   vma_offset = m->sections[0]->vma % bed->maxpagesize;
-   off_offset = off % bed->maxpagesize;
-   if (vma_offset < off_offset)
-     adjustment = vma_offset + bed->maxpagesize - off_offset;
-   else
-     adjustment = vma_offset - off_offset;
-     
-   which can can be collapsed into the expression below.  */
-
-static file_ptr
-vma_page_aligned_bias (bfd_vma vma, ufile_ptr off, bfd_vma maxpagesize)
-{
-  return ((vma - off) % maxpagesize);
-}
-
 /* Assign file positions to the sections based on the mapping from
    sections to segments.  This function also sets up some fields in
    the file header, and writes out the program headers.  */
@@ -3728,8 +3698,7 @@ assign_file_positions_for_segments (bfd *abfd, struct bfd_link_info *link_info)
 	  && (m->sections[0]->flags & SEC_ALLOC) != 0)
 	{
 	  if ((abfd->flags & D_PAGED) != 0)
-	    off += vma_page_aligned_bias (m->sections[0]->vma, off,
-					  bed->maxpagesize);
+	    off += (m->sections[0]->vma - off) % bed->maxpagesize;
 	  else
 	    {
 	      bfd_size_type align;
@@ -3744,8 +3713,7 @@ assign_file_positions_for_segments (bfd *abfd, struct bfd_link_info *link_info)
 		    align = secalign;
 		}
 
-	      off += vma_page_aligned_bias (m->sections[0]->vma, off,
-					    1 << align);
+	      off += (m->sections[0]->vma - off) % (1 << align);
 	    }
 	}
 
@@ -3907,11 +3875,9 @@ assign_file_positions_for_segments (bfd *abfd, struct bfd_link_info *link_info)
 		     not have the SEC_LOAD case just above, and then
 		     this was necessary, but now I'm not sure.  */
 		  if ((abfd->flags & D_PAGED) != 0)
-		    adjust = vma_page_aligned_bias (sec->vma, voff,
-						    bed->maxpagesize);
+		    adjust = (sec->vma - voff) % bed->maxpagesize;
 		  else
-		    adjust = vma_page_aligned_bias (sec->vma, voff,
-						    align);
+		    adjust = (sec->vma - voff) % align;
 		}
 	      else
 		adjust = 0;
@@ -4245,11 +4211,9 @@ assign_file_positions_except_relocs (bfd *abfd,
 		 ? "*unknown*"
 		 : hdr->bfd_section->name)));
 	      if ((abfd->flags & D_PAGED) != 0)
-		off += vma_page_aligned_bias (hdr->sh_addr, off,
-					      bed->maxpagesize);
+		off += (hdr->sh_addr - off) % bed->maxpagesize;
 	      else
-		off += vma_page_aligned_bias (hdr->sh_addr, off,
-					      hdr->sh_addralign);
+		off += (hdr->sh_addr - off) % hdr->sh_addralign;
 	      off = _bfd_elf_assign_file_position_for_section (hdr, off,
 							       FALSE);
 	    }
@@ -5297,7 +5261,6 @@ swap_out_syms (bfd *abfd,
   char *outbound_shndx;
   int idx;
   bfd_size_type amt;
-  bfd_boolean name_local_sections;
 
   if (!elf_map_symbols (abfd))
     return FALSE;
@@ -5363,10 +5326,6 @@ swap_out_syms (bfd *abfd,
       outbound_shndx += sizeof (Elf_External_Sym_Shndx);
   }
 
-  name_local_sections
-    = (bed->elf_backend_name_local_section_symbols
-       && bed->elf_backend_name_local_section_symbols (abfd));
-
   syms = bfd_get_outsymbols (abfd);
   for (idx = 0; idx < symcount; idx++)
     {
@@ -5376,8 +5335,7 @@ swap_out_syms (bfd *abfd,
       flagword flags = syms[idx]->flags;
       int type;
 
-      if (!name_local_sections
-	  && (flags & (BSF_SECTION_SYM | BSF_GLOBAL)) == BSF_SECTION_SYM)
+      if ((flags & (BSF_SECTION_SYM | BSF_GLOBAL)) == BSF_SECTION_SYM)
 	{
 	  /* Local section symbols have no name.  */
 	  sym.st_name = 0;

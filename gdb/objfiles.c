@@ -165,9 +165,8 @@ allocate_objfile (bfd *abfd, int flags)
       objfile->md = NULL;
       objfile->psymbol_cache = bcache_xmalloc ();
       objfile->macro_cache = bcache_xmalloc ();
-      /* We could use obstack_specify_allocation here instead, but
-	 gdb_obstack.h specifies the alloc/dealloc functions.  */
-      obstack_init (&objfile->objfile_obstack);
+      obstack_specify_allocation (&objfile->objfile_obstack, 0, 0, xmalloc,
+				  xfree);
       terminate_minimal_symbol_table (objfile);
     }
 

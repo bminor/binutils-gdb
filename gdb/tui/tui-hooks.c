@@ -40,7 +40,6 @@
 #include <fcntl.h>
 
 #include "tui/tui.h"
-#include "tui/tui-hooks.h"
 #include "tui/tui-data.h"
 #include "tui/tui-layout.h"
 #include "tui/tui-io.h"
@@ -50,7 +49,13 @@
 #include "tui/tui-windata.h"
 #include "tui/tui-winsource.h"
 
-#include "gdb_curses.h"
+#ifdef HAVE_NCURSES_H
+#include <ncurses.h>
+#else
+#ifdef HAVE_CURSES_H
+#include <curses.h>
+#endif
+#endif
 
 int tui_target_has_run = 0;
 
@@ -136,7 +141,7 @@ tui_registers_changed_hook (void)
     {
       tui_refreshing_registers = 1;
 #if 0
-      tui_check_data_values (fi);
+      tuiCheckDataValues (fi);
 #endif
       tui_refreshing_registers = 0;
     }

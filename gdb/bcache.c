@@ -266,10 +266,7 @@ bcache_xmalloc (void)
 {
   /* Allocate the bcache pre-zeroed.  */
   struct bcache *b = XCALLOC (1, struct bcache);
-  /* We could use obstack_specify_allocation here instead, but
-     gdb_obstack.h specifies the allocation/deallocation
-     functions.  */
-  obstack_init (&b->cache);
+  obstack_specify_allocation (&b->cache, 0, 0, xmalloc, xfree);
   return b;
 }
 

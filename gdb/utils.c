@@ -27,10 +27,6 @@
 #include "gdb_string.h"
 #include "event-top.h"
 
-#ifdef TUI
-#include "tui/tui.h"		/* For tui_get_command_dimension.   */
-#endif
-
 #ifdef __GO32__
 #include <pc.h>
 #endif

@@ -1933,13 +1933,12 @@ reread_symbols (void)
 
 	      /* We never make this a mapped file.  */
 	      objfile->md = NULL;
+	      /* obstack_specify_allocation also initializes the obstack so
+	         it is empty.  */
 	      objfile->psymbol_cache = bcache_xmalloc ();
 	      objfile->macro_cache = bcache_xmalloc ();
-	      /* obstack_init also initializes the obstack so it is
-	         empty.  We could use obstack_specify_allocation but
-	         gdb_obstack.h specifies the alloc/dealloc
-	         functions.  */
-	      obstack_init (&objfile->objfile_obstack);
+	      obstack_specify_allocation (&objfile->objfile_obstack, 0, 0,
+					  xmalloc, xfree);
 	      if (build_objfile_section_table (objfile))
 		{
 		  error ("Can't find the file sections in `%s': %s",

@@ -212,8 +212,8 @@ sh_sh3_dsp_register_name (int reg_nr)
     "y0", "y1", "", "", "", "", "", "mod",
     "ssr", "spc",
     "rs", "re", "", "", "", "", "", "",
-    "r0b", "r1b", "r2b", "r3b", "r4b", "r5b", "r6b", "r7b",
-    "", "", "", "", "", "", "", "",
+    "r0b", "r1b", "r2b", "r3b", "r4b", "r5b", "r6b", "r7b"
+      "", "", "", "", "", "", "", "",
   };
   if (reg_nr < 0)
     return NULL;
@@ -300,8 +300,8 @@ sh_sh4al_dsp_register_name (int reg_nr)
     "y0", "y1", "", "", "", "", "", "mod",
     "ssr", "spc",
     "rs", "re", "", "", "", "", "", "",
-    "r0b", "r1b", "r2b", "r3b", "r4b", "r5b", "r6b", "r7b",
-    "", "", "", "", "", "", "", "",
+    "r0b", "r1b", "r2b", "r3b", "r4b", "r5b", "r6b", "r7b"
+      "", "", "", "", "", "", "", "",
   };
   if (reg_nr < 0)
     return NULL;
@@ -2246,6 +2246,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_push_dummy_call (gdbarch, sh_push_dummy_call_nofpu);
 
+  set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_frameless_function_invocation (gdbarch,
 					     frameless_look_for_prologue);
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);

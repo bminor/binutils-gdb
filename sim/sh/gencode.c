@@ -869,7 +869,7 @@ op tab[] =
     "MA (1);",
     "R[0] = (RBAT (regn) << 24) + (RBAT (regn + 1) << 16) + ",
     "  (RBAT (regn + 2) << 8) + RBAT (regn + 3);",
-    "L (0);",
+    "L (n);",
   },
   { "0n", "n", "movua.l @<REG_N>+,R0", "0100nnnn11101001",
     "int regn = R[n];",
@@ -877,7 +877,7 @@ op tab[] =
     "R[0] = (RBAT (regn) << 24) + (RBAT (regn + 1) << 16) + ",
     "  (RBAT (regn + 2) << 8) + RBAT (regn + 3);",
     "R[n] += 4;",
-    "L (0);",
+    "L (n);",
   },
   { "", "mn", "mul.l <REG_M>,<REG_N>", "0000nnnnmmmm0111",
     "MACL = ((int) R[n]) * ((int) R[m]);",
@@ -2265,7 +2265,7 @@ gengastab ()
     }
 }
 
-static unsigned short table[1 << 16];
+static unsigned char table[1 << 16];
 
 /* Take an opcode, expand all varying fields in it out and fill all the
    right entries in 'table' with the opcode index.  */
@@ -2407,7 +2407,7 @@ dumptable (name, size, start)
 
   int i = start;
 
-  printf ("unsigned short %s[%d]={\n", name, size);
+  printf ("unsigned char %s[%d]={\n", name, size);
   while (i < start + size)
     {
       int j = 0;

@@ -152,8 +152,14 @@ SUBDIR_CLI_SRCS = \
 	cli/cli-interp.c \
 	cli/cli-utils.c
 SUBDIR_CLI_DEPS =
+SUBDIR_CLI_INITS = \
+	$(SUBDIR_CLI_SRCS)
 SUBDIR_CLI_LDFLAGS=
 SUBDIR_CLI_CFLAGS=
+SUBDIR_CLI_ALL=
+SUBDIR_CLI_CLEAN=
+SUBDIR_CLI_INSTALL=
+SUBDIR_CLI_UNINSTALL=
 
 #
 # MI sub directory definitons
@@ -172,9 +178,15 @@ SUBDIR_MI_SRCS = \
 	mi/mi-interp.c \
 	mi/mi-main.c mi/mi-parse.c mi/mi-getopt.c
 SUBDIR_MI_DEPS =
+SUBDIR_MI_INITS = \
+	$(SUBDIR_MI_SRCS)
 SUBDIR_MI_LDFLAGS=
 SUBDIR_MI_CFLAGS= \
 	-DMI_OUT=1
+SUBDIR_MI_ALL=
+SUBDIR_MI_CLEAN=
+SUBDIR_MI_INSTALL=
+SUBDIR_MI_UNINSTALL=
 
 #
 # TUI sub directory definitions
@@ -215,9 +227,16 @@ SUBDIR_TUI_SRCS = \
 	tui/tui-winsource.c \
 	tui/tui.c
 SUBDIR_TUI_DEPS =
+SUBDIR_TUI_INITS = \
+	$(SUBDIR_TUI_SRCS)
 SUBDIR_TUI_LDFLAGS=
 SUBDIR_TUI_CFLAGS= \
-	-DTUI=1
+	-DTUI=1 -I${srcdir}/tui
+SUBDIR_TUI_ALL=
+SUBDIR_TUI_CLEAN=
+SUBDIR_TUI_INSTALL=
+SUBDIR_TUI_UNINSTALL=
+
 
 
 # Opcodes currently live in one of two places.  Either they are in the
@@ -285,19 +304,25 @@ SUBDIR_GDBTK_OBS = \
 	gdbtk-register.o gdbtk-stack.o gdbtk-varobj.o gdbtk-wrapper.o
 SUBDIR_GDBTK_SRCS = \
 	gdbtk/generic/gdbtk.c gdbtk/generic/gdbtk-bp.c \
-	gdbtk/generic/gdbtk-cmds.c gdbtk/generic/gdbtk-hooks.c \
-	gdbtk/generic/gdbtk-interp.c \
+	gdbtk/generic/gdbtk-cmds.c gdbtk/generic/gdbtk-hooks.c gdbtk-interp.c \
 	gdbtk/generic/gdbtk-register.c gdbtk/generic/gdbtk-stack.c \
 	gdbtk/generic/gdbtk-varobj.c gdbtk/generic/gdbtk-wrapper.c \
 	gdbtk/generic/gdbtk-main.c
 SUBDIR_GDBTK_DEPS = \
 	$(LIBGUI) $(ITCL_DEPS) $(ITK_DEPS) $(TK_DEPS) $(TCL_DEPS)
+SUBDIR_GDBTK_INITS = gdbtk/generic/gdbtk.c gdbtk/generic/gdbtk-interp.c
 SUBDIR_GDBTK_LDFLAGS=
 SUBDIR_GDBTK_CFLAGS= -DGDBTK
+SUBDIR_GDBTK_ALL= all-gdbtk
+SUBDIR_GDBTK_CLEAN= clean-gdbtk
+SUBDIR_GDBTK_INSTALL= install-gdbtk
+SUBDIR_GDBTK_UNINSTALL= uninstall-gdbtk
 
 CONFIG_OBS= @CONFIG_OBS@
+CONFIG_LIB_OBS= @CONFIG_LIB_OBS@
 CONFIG_SRCS= @CONFIG_SRCS@
 CONFIG_DEPS= @CONFIG_DEPS@
+CONFIG_INITS= @CONFIG_INITS@
 CONFIG_LDFLAGS = @CONFIG_LDFLAGS@
 ENABLE_CFLAGS= @ENABLE_CFLAGS@
 CONFIG_ALL= @CONFIG_ALL@
@@ -398,6 +423,8 @@ REMOTE_OBS = remote.o dcache.o remote-utils.o tracepoint.o ax-general.o ax-gdb.o
 
 # This is remote-sim.o if a simulator is to be linked in.
 SIM_OBS =
+
+ANNOTATE_OBS = annotate.o
 
 # Host and target-dependent makefile fragments come in here.
 @host_makefile_frag@
@@ -538,6 +565,14 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	target.c thread.c top.c tracepoint.c \
 	trad-frame.c \
 	typeprint.c \
+	tui/tui.c tui/tui.h tui/tuiCommand.c tui/tuiCommand.h \
+	tui/tuiData.c tui/tuiData.h tui/tuiDataWin.c tui/tuiDataWin.h \
+	tui/tuiDisassem.c tui/tuiDisassem.h tui/tuiGeneralWin.c \
+	tui/tuiGeneralWin.h tui/tuiIO.c tui/tuiIO.h tui/tuiLayout.c \
+	tui/tuiLayout.h tui/tuiRegs.c tui/tuiRegs.h tui/tuiSource.c \
+	tui/tuiSource.h tui/tuiSourceWin.c tui/tuiSourceWin.h \
+	tui/tuiStack.c tui/tuiStack.h tui/tuiWin.c tui/tuiWin.h \
+	tui/tui-file.h tui/tui-file.c tui/tui-out.c tui/tui-hooks.c \
 	ui-out.c utils.c ui-file.h ui-file.c \
 	user-regs.c \
 	valarith.c valops.c valprint.c values.c varobj.c \
@@ -638,8 +673,8 @@ cp_abi_h = cp-abi.h
 cp_support_h = cp-support.h $(symtab_h)
 dcache_h = dcache.h
 defs_h = defs.h $(config_h) $(ansidecl_h) $(gdb_locale_h) $(gdb_signals_h) \
-	$(libiberty_h) $(progress_h) $(bfd_h) $(ui_file_h) $(xm_h) $(nm_h) \
-	$(tm_h) $(fopen_same_h) $(gdbarch_h)
+	$(libiberty_h) $(progress_h) $(bfd_h) $(tui_h) $(ui_file_h) $(xm_h) \
+	$(nm_h) $(tm_h) $(fopen_same_h) $(gdbarch_h)
 dictionary_h = dictionary.h
 disasm_h = disasm.h
 doublest_h = doublest.h $(floatformat_h)
@@ -660,7 +695,6 @@ gdbarch_h = gdbarch.h
 gdb_assert_h = gdb_assert.h
 gdbcmd_h = gdbcmd.h $(command_h) $(ui_out_h)
 gdbcore_h = gdbcore.h $(bfd_h)
-gdb_curses_h = gdb_curses.h
 gdb_dirent_h = gdb_dirent.h
 gdb_events_h = gdb-events.h
 gdb_h = gdb.h
@@ -796,20 +830,19 @@ mi_parse_h = $(srcdir)/mi/mi-parse.h
 #
 
 tui_command_h = $(srcdir)/tui/tui-command.h
-tui_data_h = $(srcdir)/tui/tui-data.h $(tui_h) $(gdb_curses_h)
-tui_disasm_h = $(srcdir)/tui/tui-disasm.h $(tui_h) $(tui_data_h)
+tui_data_h = $(srcdir)/tui/tui-data.h
+tui_disasm_h = $(srcdir)/tui/tui-disasm.h
 tui_file_h = $(srcdir)/tui/tui-file.h
-tui_h = $(srcdir)/tui/tui.h
-tui_hooks_h = $(srcdir)/tui/tui-hooks.h
+tui_h = $(srcdir)/tui/tui.h $(ansidecl_h)
 tui_io_h = $(srcdir)/tui/tui-io.h
-tui_layout_h = $(srcdir)/tui/tui-layout.h $(tui_h) $(tui_data_h)
-tui_regs_h = $(srcdir)/tui/tui-regs.h $(tui_data_h)
-tui_source_h = $(srcdir)/tui/tui-source.h $(tui_data_h)
+tui_layout_h = $(srcdir)/tui/tui-layout.h
+tui_regs_h = $(srcdir)/tui/tui-regs.h
+tui_source_h = $(srcdir)/tui/tui-source.h $(defs_h)
 tui_stack_h = $(srcdir)/tui/tui-stack.h
-tui_windata_h = $(srcdir)/tui/tui-windata.h $(tui_data_h)
+tui_windata_h = $(srcdir)/tui/tui-windata.h
 tui_wingeneral_h = $(srcdir)/tui/tui-wingeneral.h
-tui_win_h = $(srcdir)/tui/tui-win.h $(tui_data_h)
-tui_winsource_h = $(srcdir)/tui/tui-winsource.h $(tui_data_h)
+tui_win_h = $(srcdir)/tui/tui-win.h
+tui_winsource_h = $(srcdir)/tui/tui-winsource.h
 
 # Header files that need to have srcdir added.  Note that in the cases
 # where we use a macro like $(gdbcmd_h), things are carefully arranged
@@ -849,7 +882,7 @@ REMOTE_EXAMPLES = m68k-stub.c i386-stub.c sparc-stub.c rem-multi.shar
 # Makefile.in
 
 DEPFILES = $(TDEPFILES) $(SER_HARDWIRE) $(NATDEPFILES) \
-	   $(REMOTE_OBS) $(SIM_OBS) $(CONFIG_OBS)
+	   $(REMOTE_OBS) $(SIM_OBS) $(CONFIG_LIB_OBS)
 
 SOURCES = $(SFILES) $(ALLDEPFILES) $(YYFILES) $(CONFIG_SRCS)
 # Don't include YYFILES (*.tab.c) because we already include *.y in SFILES,
@@ -858,9 +891,7 @@ TAGFILES_NO_SRCDIR = $(SFILES) $(HFILES_NO_SRCDIR) $(ALLDEPFILES) \
 	$(SUBDIR_CLI_SRCS)
 TAGFILES_WITH_SRCDIR = $(HFILES_WITH_SRCDIR)
 
-COMMON_OBS = $(DEPFILES) $(YYOBJ) \
-	version.o \
-	annotate.o \
+COMMON_OBS = version.o \
 	auxv.o \
 	bfd-target.o \
 	blockframe.o breakpoint.o findvar.o regcache.o \
@@ -871,11 +902,10 @@ COMMON_OBS = $(DEPFILES) $(YYOBJ) \
 	infcmd.o infrun.o \
 	expprint.o environ.o stack.o thread.o \
 	interps.o \
-	main.o \
 	macrotab.o macrocmd.o macroexp.o macroscope.o \
 	event-loop.o event-top.o inf-loop.o completer.o \
-	gdbarch.o arch-utils.o gdbtypes.o osabi.o copying.o \
-	memattr.o mem-break.o target.o parse.o language.o buildsym.o \
+	gdbarch.o arch-utils.o gdbtypes.o osabi.o copying.o $(DEPFILES) \
+	memattr.o mem-break.o target.o parse.o language.o $(YYOBJ) buildsym.o \
 	std-regs.o \
 	signals.o \
 	kod.o kod-cisco.o \
@@ -903,6 +933,8 @@ COMMON_OBS = $(DEPFILES) $(YYOBJ) \
 	cp-namespace.o \
 	reggroups.o \
 	trad-frame.o
+
+OBS = $(COMMON_OBS) $(ANNOTATE_OBS)
 
 TSOBS = inflow.o
 
@@ -996,21 +1028,21 @@ uninstall: force $(CONFIG_UNINSTALL)
 # Note that the set of files with init functions might change, or the names
 # of the functions might change, so this files needs to depend on all the
 # object files that will be linked into gdb.
-
-# FIXME: There is a problem with this approach - init.c may force
-# unnecessary files to be linked in.
+#
+# FIXME: There are 2 problems with this approach. First, if the INIT_FILES
+# list includes a file twice (because of some mistake somewhere else)
+# the _initialize_* function will be included twice in init.c. Second,
+# init.c may force unnecessary files to be linked in.
 
 # FIXME: cagney/2002-06-09: gdb/564: gdb/563: Force the order so that
-# the first call is to _initialize_gdbtypes (implemented by explicitly
-# putting that function's name first in the init.l-tmp file).  This is
-# a hack to ensure that all the architecture dependant global
-# builtin_type_* variables are initialized before anything else
-# (per-architecture code is called in the same order that it is
-# registered).  The ``correct fix'' is to have all the builtin types
-# made part of the architecture and initialize them on-demand (using
-# gdbarch_data) just like everything else.  The catch is that other
-# modules still take the address of these builtin types forcing them
-# to be variables, sigh!
+# the first call is to _initialize_gdbtypes.  This is a hack to ensure
+# that all the architecture dependant global builtin_type_* variables
+# are initialized before anything else (per-architecture code is
+# called in the same order that it is registered).  The ``correct
+# fix'' is to have all the builtin types made part of the architecture
+# and initialize them on-demand (using gdbarch_data) just like
+# everything else.  The catch is that other modules still take the
+# address of these builtin types forcing them to be variables, sigh!
 
 # NOTE: cagney/2003-03-18: The sed pattern ``s|^\([^ /]...'' is
 # anchored on the first column and excludes the ``/'' character so
@@ -1019,51 +1051,38 @@ uninstall: force $(CONFIG_UNINSTALL)
 # automatically adds the $(srcdir) prefixes when it encounters files
 # in sub-directories such as cli/ and mi/.
 
-# NOTE: cagney/2004-02-08: The ``case "$$fs" in'' eliminates
-# duplicates.  Files in the gdb/ directory can end up appearing in
-# COMMON_OBS (as a .o file) and CONFIG_SRCS (as a .c file).
-
-INIT_FILES = $(COMMON_OBS) $(TSOBS) $(CONFIG_SRCS)
+INIT_FILES = $(OBS) $(TSOBS) $(CONFIG_OBS) $(CONFIG_INITS)
 init.c: $(INIT_FILES)
 	@echo Making init.c
 	@rm -f init.c-tmp init.l-tmp
-	@touch init.c-tmp
-	@echo gdbtypes > init.l-tmp
 	@-echo $(INIT_FILES) | \
 	tr ' ' '\012' | \
 	sed \
-	    -e '/^gdbtypes.[co]$$/d' \
-	    -e '/^init.[co]$$/d' \
-	    -e '/xdr_ld.[co]$$/d' \
-	    -e '/xdr_ptrace.[co]$$/d' \
-	    -e '/xdr_rdb.[co]$$/d' \
-	    -e '/udr.[co]$$/d' \
-	    -e '/udip2soc.[co]$$/d' \
-	    -e '/udi2go32.[co]$$/d' \
-	    -e '/version.[co]$$/d' \
-	    -e '/^[a-z0-9A-Z_]*_[SU].[co]$$/d' \
-	    -e '/[a-z0-9A-Z_]*-exp.tab.[co]$$/d' \
-	    -e 's/\.[co]$$/.c/' \
+	    -e '/^init.o/d' \
+	    -e '/xdr_ld.o/d' \
+	    -e '/xdr_ptrace.o/d' \
+	    -e '/xdr_rdb.o/d' \
+	    -e '/udr.o/d' \
+	    -e '/udip2soc.o/d' \
+	    -e '/udi2go32.o/d' \
+	    -e '/version.o/d' \
+	    -e '/^[a-z0-9A-Z_]*_[SU].o/d' \
+	    -e '/[a-z0-9A-Z_]*-exp.tab.o/d' \
+	    -e 's/\.o/.c/' \
 	    -e 's,signals\.c,signals/signals\.c,' \
 	    -e 's|^\([^  /][^     ]*\)|$(srcdir)/\1|g' | \
-	while read f; do \
-	    sed -n -e 's/^_initialize_\([a-z_0-9A-Z]*\).*/\1/p' $$f 2>/dev/null; \
-	done | \
-	while read f; do \
-	    case " $$fs " in \
-	        *" $$f "* ) ;; \
-	        * ) echo $$f ; fs="$$fs $$f";; \
-            esac; \
-	done >> init.l-tmp
+	while read f; do grep '^_initialize_[a-z_0-9A-Z]* *(' $$f 2>/dev/null; done | \
+	sed -e 's/^.*://' -e 's/^\([a-z_0-9A-Z]*\).*/\1/' | \
+	( echo _initialize_gdbtypes ; grep -v '^_initialize_gdbtypes$$' ) > init.l-tmp
 	@echo '/* Do not modify this file.  */' >>init.c-tmp
 	@echo '/* It is created automatically by the Makefile.  */'>>init.c-tmp
-	@echo '#include "defs.h"      /* For initialize_file_ftype.  */' >>init.c-tmp
-	@echo '#include "call-cmds.h" /* For initialize_all_files.  */' >>init.c-tmp
-	@sed -e 's/\(.*\)/extern initialize_file_ftype _initialize_\1;/' <init.l-tmp >>init.c-tmp
+	@echo '#include "defs.h"' >>init.c-tmp
+	@echo '#include "call-cmds.h"' >>init.c-tmp
+	@sed -e 's/\(.*\)/extern initialize_file_ftype \1;/' <init.l-tmp >>init.c-tmp
 	@echo 'void' >>init.c-tmp
 	@echo 'initialize_all_files (void)' >>init.c-tmp
 	@echo '{' >>init.c-tmp
-	@sed -e 's/\(.*\)/  _initialize_\1 ();/' <init.l-tmp >>init.c-tmp
+	@sed -e 's/\(.*\)/  \1 ();/' <init.l-tmp >>init.c-tmp
 	@echo '}' >>init.c-tmp
 	@rm init.l-tmp
 	@mv init.c-tmp init.c
@@ -1073,10 +1092,10 @@ init.c: $(INIT_FILES)
 init.o: init.c $(defs_h) $(call_cmds_h)
 
 # Removing the old gdb first works better if it is running, at least on SunOS.
-gdb$(EXEEXT): gdb.o libgdb.a $(ADD_DEPS) $(CDEPS) $(TDEPLIBS)
+gdb$(EXEEXT): gdb.o main.o libgdb.a $(CONFIG_OBS) $(ADD_DEPS) $(CDEPS) $(TDEPLIBS)
 	rm -f gdb$(EXEEXT)
 	$(CC_LD) $(INTERNAL_LDFLAGS) $(WIN32LDAPP) \
-		-o gdb$(EXEEXT) gdb.o libgdb.a \
+		-o gdb$(EXEEXT) gdb.o main.o $(CONFIG_OBS) libgdb.a \
 		$(TDEPLIBS) $(TUI_LIBRARY) $(CLIBS) $(LOADLIBES)
 
 nlm:	force
@@ -1086,7 +1105,7 @@ nlm:	force
 # against that.
 #
 # init.o is very important.  It pulls in the rest of GDB.
-LIBGDB_OBS= $(COMMON_OBS) $(TSOBS) $(ADD_FILES) init.o
+LIBGDB_OBS= $(OBS) $(TSOBS) $(ADD_FILES) init.o
 libgdb.a: $(LIBGDB_OBS)
 	-rm -f libgdb.a
 	$(AR) q libgdb.a $(LIBGDB_OBS)
@@ -1604,9 +1623,8 @@ arm-tdep.o: arm-tdep.c $(defs_h) $(frame_h) $(inferior_h) $(gdbcmd_h) \
 	$(frame_unwind_h) $(frame_base_h) $(trad_frame_h) $(arm_tdep_h) \
 	$(gdb_sim_arm_h) $(elf_bfd_h) $(coff_internal_h) $(elf_arm_h) \
 	$(gdb_assert_h) $(bfd_in2_h) $(libcoff_h)
-auxv.o: auxv.c $(defs_h) $(target_h) $(gdbtypes_h) $(command_h) \
-	$(inferior_h) $(valprint_h) $(gdb_assert_h) $(auxv_h) \
-	$(elf_common_h)
+auxv.o: $(defs_h) $(target_h) $(gdbtypes_h) $(command_h) $(gdb_assert_h) \
+	$(auxv_h) $(elf_common_h) $(valprint_h) $(inferior_h)
 avr-tdep.o: avr-tdep.c $(defs_h) $(frame_h) $(frame_unwind_h) \
 	$(frame_base_h) $(trad_frame_h) $(gdbcmd_h) $(gdbcore_h) \
 	$(inferior_h) $(symfile_h) $(arch_utils_h) $(regcache_h) \
@@ -2064,7 +2082,7 @@ mips-irix-tdep.o: mips-irix-tdep.c $(defs_h) $(osabi_h) $(elf_bfd_h)
 mips-linux-nat.o: mips-linux-nat.c $(defs_h) $(mips_tdep_h)
 mips-linux-tdep.o: mips-linux-tdep.c $(defs_h) $(gdbcore_h) $(target_h) \
 	$(solib_svr4_h) $(osabi_h) $(mips_tdep_h) $(gdb_string_h) \
-	$(gdb_assert_h) $(frame_h)
+	$(gdb_assert_h)
 mips-nat.o: mips-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) $(regcache_h)
 mipsnbsd-nat.o: mipsnbsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
 	$(mipsnbsd_tdep_h)
@@ -2080,8 +2098,7 @@ mips-tdep.o: mips-tdep.c $(defs_h) $(gdb_string_h) $(gdb_assert_h) \
 	$(language_h) $(gdbcore_h) $(symfile_h) $(objfiles_h) $(gdbtypes_h) \
 	$(target_h) $(arch_utils_h) $(regcache_h) $(osabi_h) $(mips_tdep_h) \
 	$(block_h) $(reggroups_h) $(opcode_mips_h) $(elf_mips_h) \
-	$(elf_bfd_h) $(symcat_h) $(sim_regno_h) $(dis_asm_h) \
-	$(frame_unwind_h) $(frame_base_h) $(trad_frame_h)
+	$(elf_bfd_h) $(symcat_h) $(sim_regno_h) $(dis_asm_h)
 mipsv4-nat.o: mipsv4-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) $(target_h) \
 	$(regcache_h) $(gregset_h)
 mn10300-tdep.o: mn10300-tdep.c $(defs_h) $(frame_h) $(inferior_h) \
@@ -2159,15 +2176,15 @@ printcmd.o: printcmd.c $(defs_h) $(gdb_string_h) $(frame_h) $(symtab_h) \
 	$(gdbtypes_h) $(value_h) $(language_h) $(expression_h) $(gdbcore_h) \
 	$(gdbcmd_h) $(target_h) $(breakpoint_h) $(demangle_h) $(valprint_h) \
 	$(annotate_h) $(symfile_h) $(objfiles_h) $(completer_h) $(ui_out_h) \
-	$(gdb_assert_h) $(block_h) $(disasm_h) $(tui_h)
+	$(gdb_assert_h) $(block_h) $(disasm_h)
 proc-api.o: proc-api.c $(defs_h) $(gdbcmd_h) $(completer_h) $(gdb_wait_h) \
 	$(proc_utils_h)
 proc-events.o: proc-events.c $(defs_h)
 proc-flags.o: proc-flags.c $(defs_h)
 procfs.o: procfs.c $(defs_h) $(inferior_h) $(target_h) $(gdbcore_h) \
 	$(elf_bfd_h) $(gdbcmd_h) $(gdbthread_h) $(gdb_wait_h) \
-	$(gdb_string_h) $(gdb_assert_h) $(inflow_h) $(auxv_h) \
-	$(gdb_dirent_h) $(X_OK) $(gdb_stat_h) $(proc_utils_h) $(gregset_h)
+	$(gdb_assert_h) $(inflow_h) $(gdb_dirent_h) $(X_OK) $(gdb_stat_h) \
+	$(proc_utils_h) $(gregset_h) $(gdb_string_h) $(auxv_h)
 proc-service.o: proc-service.c $(defs_h) $(gdb_proc_service_h) $(inferior_h) \
 	$(symtab_h) $(target_h) $(gregset_h)
 proc-why.o: proc-why.c $(defs_h) $(proc_utils_h)
@@ -2351,8 +2368,9 @@ sparc64nbsd-tdep.o: sparc64nbsd-tdep.c $(defs_h) $(frame_h) \
 	$(symtab_h) $(solib_svr4_h) $(trad_frame_h) $(gdb_assert_h) \
 	$(gdb_string_h) $(sparc64_tdep_h) $(nbsd_tdep_h)
 sparc64obsd-tdep.o: sparc64obsd-tdep.c $(defs_h) $(frame_h) \
-	$(frame_unwind_h) $(osabi_h) $(regset_h) $(symtab_h) $(solib_svr4_h) \
-	$(trad_frame_h) $(gdb_assert_h) $(sparc64_tdep_h) $(nbsd_tdep_h)
+	$(frame_unwind_h) $(osabi_h) $(regset_h) $(symtab_h) \
+	$(solib_svr4_h) $(trad_frame_h) $(gdb_assert_h) \
+	$(sparc64_tdep_h) $(nbsd_tdep_h)
 sparc64-sol2-tdep.o: sparc64-sol2-tdep.c $(defs_h) $(frame_h) \
 	$(frame_unwind_h) $(gdbarch_h) $(symtab_h) $(objfiles_h) $(osabi_h) \
 	$(trad_frame_h) $(gdb_assert_h) $(sparc64_tdep_h)
@@ -2454,7 +2472,7 @@ ui-out.o: ui-out.c $(defs_h) $(gdb_string_h) $(expression_h) $(language_h) \
 user-regs.o: user-regs.c $(defs_h) $(user_regs_h) $(gdbtypes_h) \
 	$(gdb_string_h) $(gdb_assert_h) $(frame_h)
 utils.o: utils.c $(defs_h) $(gdb_assert_h) $(gdb_string_h) $(event_top_h) \
-	$(tui_h) $(gdbcmd_h) $(serial_h) $(bfd_h) $(target_h) $(demangle_h) \
+	$(gdbcmd_h) $(serial_h) $(bfd_h) $(target_h) $(demangle_h) \
 	$(expression_h) $(language_h) $(charset_h) $(annotate_h) \
 	$(filenames_h) $(inferior_h)
 uw-thread.o: uw-thread.c $(defs_h) $(gdbthread_h) $(target_h) $(inferior_h) \
@@ -2530,11 +2548,11 @@ cli-cmds.o: $(srcdir)/cli/cli-cmds.c $(defs_h) $(completer_h) $(target_h) \
 	$(linespec_h) $(expression_h) $(frame_h) $(value_h) $(language_h) \
 	$(filenames_h) $(objfiles_h) $(source_h) $(disasm_h) $(ui_out_h) \
 	$(top_h) $(cli_decode_h) $(cli_script_h) $(cli_setshow_h) \
-	$(cli_cmds_h) $(tui_h)
+	$(cli_cmds_h) $(readline_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/cli/cli-cmds.c
 cli-decode.o: $(srcdir)/cli/cli-decode.c $(defs_h) $(symtab_h) \
 	$(gdb_regex_h) $(gdb_string_h) $(ui_out_h) $(cli_cmds_h) \
-	$(cli_decode_h) $(tui_h) $(gdb_assert_h)
+	$(cli_decode_h) $(gdb_assert_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/cli/cli-decode.c
 cli-dump.o: $(srcdir)/cli/cli-dump.c $(defs_h) $(gdb_string_h) \
 	$(cli_decode_h) $(cli_cmds_h) $(value_h) $(completer_h) \
@@ -2610,11 +2628,11 @@ clean-gdbtk:
 	rm -f insight$(EXEEXT)
 
 # Removing the old gdb first works better if it is running, at least on SunOS.
-insight$(EXEEXT): gdbtk-main.o libgdb.a $(ADD_DEPS) \
+insight$(EXEEXT): gdbtk-main.o main.o libgdb.a $(CONFIG_OBS) $(ADD_DEPS) \
 		$(CDEPS) $(TDEPLIBS)
 	rm -f insight$(EXEEXT)
 	$(CC_LD) $(INTERNAL_LDFLAGS) $(WIN32LDAPP) \
-		-o insight$(EXEEXT) gdbtk-main.o libgdb.a \
+		-o insight$(EXEEXT) gdbtk-main.o main.o $(CONFIG_OBS) libgdb.a \
 		$(TDEPLIBS) $(TUI_LIBRARY) $(CLIBS) $(LOADLIBES)
 
 gdbres.o: $(srcdir)/gdbtk/gdb.rc $(srcdir)/gdbtk/gdbtool.ico
@@ -2733,7 +2751,7 @@ mi-cmds.o: $(srcdir)/mi/mi-cmds.c $(defs_h) $(top_h) $(mi_cmds_h) \
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-cmds.c
 mi-cmd-stack.o: $(srcdir)/mi/mi-cmd-stack.c $(defs_h) $(target_h) $(frame_h) \
 	$(value_h) $(mi_cmds_h) $(ui_out_h) $(symtab_h) $(block_h) \
-	$(stack_h) $(dictionary_h) $(gdb_string_h)
+	$(stack_h) $(dictionary_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-cmd-stack.c
 mi-cmd-var.o: $(srcdir)/mi/mi-cmd-var.c $(defs_h) $(mi_cmds_h) $(ui_out_h) \
 	$(mi_out_h) $(varobj_h) $(value_h) $(gdb_string_h)
@@ -2795,33 +2813,37 @@ signals.o: $(srcdir)/signals/signals.c $(server_h) $(defs_h) $(target_h) \
 # Need to explicitly specify the compile rule as make will do nothing
 # or try to compile the object file into the sub-directory.
 
-tui.o: $(srcdir)/tui/tui.c $(defs_h) $(gdbcmd_h) $(tui_h) $(tui_hooks_h) \
-	$(tui_data_h) $(tui_layout_h) $(tui_io_h) $(tui_regs_h) \
-	$(tui_stack_h) $(tui_win_h) $(tui_winsource_h) $(tui_windata_h) \
-	$(readline_h) $(target_h) $(frame_h) $(breakpoint_h) $(inferior_h) \
-	$(symtab_h) $(source_h) $(gdb_curses_h)
+tuiSourceWin.o: $(srcdir)/tui/tuiSourceWin.c $(defs_h) $(symtab_h) \
+	$(frame_h) $(breakpoint_h) $(value_h) $(source_h) $(tui_h) \
+	$(tuiData_h) $(tuiStack_h) $(tuiWin_h) $(tuiGeneralWin_h) \
+	$(tuiSourceWin_h) $(tuiSource_h) $(tuiDisassem_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tuiSourceWin.c
+tui.o: $(srcdir)/tui/tui.c $(defs_h) $(gdbcmd_h) $(tui_h) $(tui_data_h) \
+	$(tui_layout_h) $(tui_io_h) $(tui_regs_h) $(tui_stack_h) \
+	$(tui_win_h) $(tui_winsource_h) $(tui_windata_h) $(readline_h) \
+	$(target_h) $(frame_h) $(breakpoint_h) $(inferior_h) $(symtab_h) \
+	$(source_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui.c
 tui-command.o: $(srcdir)/tui/tui-command.c $(defs_h) $(tui_h) $(tui_data_h) \
-	$(tui_win_h) $(tui_io_h) $(gdb_curses_h)
+	$(tui_win_h) $(tui_io_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-command.c
 tui-data.o: $(srcdir)/tui/tui-data.c $(defs_h) $(symtab_h) $(tui_h) \
-	$(tui_data_h) $(tui_wingeneral_h) $(gdb_string_h) $(gdb_curses_h)
+	$(tui_data_h) $(tui_wingeneral_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-data.c
 tui-disasm.o: $(srcdir)/tui/tui-disasm.c $(defs_h) $(symtab_h) \
 	$(breakpoint_h) $(frame_h) $(value_h) $(source_h) $(disasm_h) \
-	$(gdb_string_h) $(tui_h) $(tui_data_h) $(tui_win_h) $(tui_layout_h) \
-	$(tui_winsource_h) $(tui_stack_h) $(tui_file_h) $(gdb_curses_h)
+	$(tui_h) $(tui_data_h) $(tui_win_h) $(tui_layout_h) \
+	$(tui_winsource_h) $(tui_stack_h) $(tui_file_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-disasm.c
 tui-file.o: $(srcdir)/tui/tui-file.c $(defs_h) $(ui_file_h) $(tui_file_h) \
-	$(tui_io_h) $(tui_h) $(gdb_string_h)
+	$(tui_io_h) $(tui_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-file.c
 tui-hooks.o: $(srcdir)/tui/tui-hooks.c $(defs_h) $(symtab_h) $(inferior_h) \
 	$(command_h) $(bfd_h) $(symfile_h) $(objfiles_h) $(target_h) \
 	$(gdbcore_h) $(event_loop_h) $(event_top_h) $(frame_h) \
 	$(breakpoint_h) $(gdb_events_h) $(ui_out_h) $(top_h) $(tui_h) \
-	$(tui_hooks_h) $(tui_data_h) $(tui_layout_h) $(tui_io_h) \
-	$(tui_regs_h) $(tui_win_h) $(tui_stack_h) $(tui_windata_h) \
-	$(tui_winsource_h) $(gdb_curses_h)
+	$(tui_data_h) $(tui_layout_h) $(tui_io_h) $(tui_regs_h) $(tui_win_h) \
+	$(tui_stack_h) $(tui_windata_h) $(tui_winsource_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-hooks.c
 tui-interp.o: $(srcdir)/tui/tui-interp.c $(defs_h) $(interps_h) $(top_h) \
 	$(event_top_h) $(event_loop_h) $(ui_out_h) $(cli_out_h) \
@@ -2830,49 +2852,46 @@ tui-interp.o: $(srcdir)/tui/tui-interp.c $(defs_h) $(interps_h) $(top_h) \
 tui-io.o: $(srcdir)/tui/tui-io.c $(defs_h) $(terminal_h) $(target_h) \
 	$(event_loop_h) $(event_top_h) $(command_h) $(top_h) $(readline_h) \
 	$(tui_h) $(tui_data_h) $(tui_io_h) $(tui_command_h) $(tui_win_h) \
-	$(tui_wingeneral_h) $(tui_file_h) $(ui_out_h) $(cli_out_h) \
-	$(gdb_curses_h)
+	$(tui_wingeneral_h) $(tui_file_h) $(ui_out_h) $(cli_out_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-io.c
 tui-layout.o: $(srcdir)/tui/tui-layout.c $(defs_h) $(command_h) $(symtab_h) \
 	$(frame_h) $(source_h) $(tui_h) $(tui_data_h) $(tui_windata_h) \
 	$(tui_wingeneral_h) $(tui_stack_h) $(tui_regs_h) $(tui_win_h) \
-	$(tui_winsource_h) $(tui_disasm_h) $(gdb_curses_h)
+	$(tui_winsource_h) $(tui_disasm_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-layout.c
 tui-out.o: $(srcdir)/tui/tui-out.c $(defs_h) $(ui_out_h) $(tui_h) \
 	$(gdb_string_h) $(gdb_assert_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-out.c
 tui-regs.o: $(srcdir)/tui/tui-regs.c $(defs_h) $(tui_h) $(tui_data_h) \
 	$(symtab_h) $(gdbtypes_h) $(gdbcmd_h) $(frame_h) $(regcache_h) \
-	$(inferior_h) $(target_h) $(gdb_string_h) $(tui_layout_h) \
-	$(tui_win_h) $(tui_windata_h) $(tui_wingeneral_h) $(tui_file_h) \
-	$(gdb_curses_h)
+	$(inferior_h) $(target_h) $(tui_layout_h) $(tui_win_h) \
+	$(tui_windata_h) $(tui_wingeneral_h) $(tui_file_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-regs.c
 tui-source.o: $(srcdir)/tui/tui-source.c $(defs_h) $(symtab_h) $(frame_h) \
 	$(breakpoint_h) $(source_h) $(symtab_h) $(tui_h) $(tui_data_h) \
-	$(tui_stack_h) $(tui_winsource_h) $(tui_source_h) $(gdb_curses_h)
+	$(tui_stack_h) $(tui_winsource_h) $(tui_source_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-source.c
 tui-stack.o: $(srcdir)/tui/tui-stack.c $(defs_h) $(symtab_h) $(breakpoint_h) \
-	$(frame_h) $(command_h) $(inferior_h) $(target_h) $(top_h) \
-	$(gdb_string_h) $(tui_h) $(tui_data_h) $(tui_stack_h) \
-	$(tui_wingeneral_h) $(tui_source_h) $(tui_winsource_h) $(tui_file_h) \
-	$(gdb_curses_h)
+	$(frame_h) $(command_h) $(inferior_h) $(target_h) $(top_h) $(tui_h) \
+	$(tui_data_h) $(tui_stack_h) $(tui_wingeneral_h) $(tui_source_h) \
+	$(tui_winsource_h) $(tui_file_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-stack.c
 tui-win.o: $(srcdir)/tui/tui-win.c $(defs_h) $(command_h) $(symtab_h) \
 	$(breakpoint_h) $(frame_h) $(cli_cmds_h) $(top_h) $(source_h) \
 	$(tui_h) $(tui_data_h) $(tui_wingeneral_h) $(tui_stack_h) \
 	$(tui_regs_h) $(tui_disasm_h) $(tui_source_h) $(tui_winsource_h) \
-	$(tui_windata_h) $(gdb_curses_h) $(gdb_string_h)
+	$(tui_windata_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-win.c
 tui-windata.o: $(srcdir)/tui/tui-windata.c $(defs_h) $(tui_h) $(tui_data_h) \
-	$(tui_wingeneral_h) $(tui_regs_h) $(gdb_curses_h)
+	$(tui_wingeneral_h) $(tui_regs_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-windata.c
 tui-wingeneral.o: $(srcdir)/tui/tui-wingeneral.c $(defs_h) $(tui_h) \
-	$(tui_data_h) $(tui_wingeneral_h) $(tui_win_h) $(gdb_curses_h)
+	$(tui_data_h) $(tui_wingeneral_h) $(tui_win_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-wingeneral.c
 tui-winsource.o: $(srcdir)/tui/tui-winsource.c $(defs_h) $(symtab_h) \
 	$(frame_h) $(breakpoint_h) $(value_h) $(source_h) $(tui_h) \
 	$(tui_data_h) $(tui_stack_h) $(tui_win_h) $(tui_wingeneral_h) \
-	$(tui_winsource_h) $(tui_source_h) $(tui_disasm_h) $(gdb_curses_h)
+	$(tui_winsource_h) $(tui_source_h) $(tui_disasm_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-winsource.c
 
 #

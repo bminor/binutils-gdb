@@ -1565,6 +1565,22 @@ s390_sniff_pc_function_start (CORE_ADDR pc, struct frame_info *fi)
 }
 
 
+
+static CORE_ADDR
+s390_function_start (struct frame_info *fi)
+{
+  CORE_ADDR function_start = 0;
+
+  if (get_frame_extra_info (fi) && get_frame_extra_info (fi)->initialised)
+    function_start = get_frame_extra_info (fi)->function_start;
+  else if (get_frame_pc (fi))
+    function_start = get_frame_func (fi);
+  return function_start;
+}
+
+
+
+
 static int
 s390_frameless_function_invocation (struct frame_info *fi)
 {
@@ -2568,6 +2584,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_believe_pcc_promotion (gdbarch, 0);
   set_gdbarch_char_signed (gdbarch, 0);
 
+  set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_deprecated_frame_chain (gdbarch, s390_frame_chain);
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, s390_frame_init_saved_regs);
   set_gdbarch_deprecated_store_struct_return (gdbarch, s390_store_struct_return);

@@ -248,12 +248,6 @@ proc gdb_run_cmd {args} {
 	}
 	return
     }
-
-    if [target_info exists gdb,do_reload_on_run] {
-	if { [gdb_load ""] < 0 } {
-	    return;
-	}
-    }
     send_gdb "run $args\n"
 # This doesn't work quite right yet.
     gdb_expect 60 {
@@ -276,8 +270,8 @@ proc gdb_breakpoint { function } {
 	-re "Breakpoint \[0-9\]*: file .*, line $decimal.\r\n$gdb_prompt $" {}
 	-re "Breakpoint \[0-9\]* at .*$gdb_prompt $" {}
 	-re "Make breakpoint pending.*y or n. $" { 
-		send_gdb "n\n"
-		exp_continue
+		gdb_test "n" "" "setting breakpoint at $function" ;
+		return 1;
 	}
 	-re "$gdb_prompt $" { fail "setting breakpoint at $function" ; return 0 }
 	timeout { fail "setting breakpoint at $function (timeout)" ; return 0 }
@@ -1470,11 +1464,6 @@ proc gdb_expect_list {test sentinel list} {
 			fail "${test} (pattern ${index} + sentinel)"
 			set ok 0
 		    }
-		    -re ".*A problem internal to GDB has been detected" {
-			fail "${test} (GDB internal error)"
-			set ok 0
-			gdb_internal_error_resync
-		    }
 		    timeout {
 			fail "${test} (pattern ${index} + sentinel) (timeout)"
 			set ok 0
@@ -1492,11 +1481,6 @@ proc gdb_expect_list {test sentinel list} {
 		    -re "${sentinel}" {
 			fail "${test} (pattern ${index})"
 			set ok 0
-		    }
-		    -re ".*A problem internal to GDB has been detected" {
-			fail "${test} (GDB internal error)"
-			set ok 0
-			gdb_internal_error_resync
 		    }
 		    timeout {
 			fail "${test} (pattern ${index}) (timeout)"

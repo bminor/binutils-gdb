@@ -694,11 +694,7 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
   /* Check to see if it's a multipart linespec (with colons or
      periods).  */
 
-  /* Locate the end of the first half of the linespec.
-     After the call, for instance, if the argptr string is "foo.c:123"
-     p will point at "123".  If there is only one part, like "foo", p
-     will point to "". If this is a C++ name, like "A::B::foo", p will
-     point to "::B::foo". Argptr is not changed by this call.  */
+  /* Locate the end of the first half of the linespec.  */
 
   p = locate_first_half (argptr, &is_quote_enclosed);
 
@@ -727,13 +723,8 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
       if (is_quoted)
 	*argptr = *argptr + 1;
       
-      /* Is it a C++ or Java compound data structure?
-	 The check on p[1] == ':' is capturing the case of "::",
-	 since p[0]==':' was checked above.  
-	 Note that the call to decode_compound does everything
-	 for us, including the lookup on the symbol table, so we
-	 can return now. */
-	
+      /* Is it a C++ or Java compound data structure?  */
+
       if (p[0] == '.' || p[1] == ':')
 	return decode_compound (argptr, funfirstline, canonical,
 				saved_arg, p);
@@ -963,9 +954,7 @@ decode_indirect (char **argptr)
 /* Locate the first half of the linespec, ending in a colon, period,
    or whitespace.  (More or less.)  Also, check to see if *ARGPTR is
    enclosed in double quotes; if so, set is_quote_enclosed, advance
-   ARGPTR past that and zero out the trailing double quote.
-   If ARGPTR is just a simple name like "main", p will point to ""
-   at the end.  */
+   ARGPTR past that and zero out the trailing double quote.  */
 
 static char *
 locate_first_half (char **argptr, int *is_quote_enclosed)
@@ -1152,9 +1141,7 @@ decode_objc (char **argptr, int funfirstline, struct symtab *file_symtab,
 }
 
 /* This handles C++ and Java compound data structures.  P should point
-   at the first component separator, i.e. double-colon or period.  As
-   an example, on entrance to this function we could have ARGPTR
-   pointing to "AAA::inA::fun" and P pointing to "::inA::fun".  */
+   at the first component separator, i.e. double-colon or period.  */
 
 static struct symtabs_and_lines
 decode_compound (char **argptr, int funfirstline, char ***canonical,
@@ -1162,6 +1149,9 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
 {
   struct symtabs_and_lines values;
   char *p2;
+#if 0
+  char *q, *q1;
+#endif
   char *saved_arg2 = *argptr;
   char *temp_end;
   struct symbol *sym;
@@ -1172,52 +1162,100 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
   struct symbol **sym_arr;
   struct type *t;
 
-  /* First check for "global" namespace specification, of the form
-     "::foo".  If found, skip over the colons and jump to normal
-     symbol processing.  I.e. the whole line specification starts with
-     "::" (note the condition that *argptr == p). */
+  /* First check for "global" namespace specification,
+     of the form "::foo".  If found, skip over the colons
+     and jump to normal symbol processing.  */
   if (p[0] == ':' 
       && ((*argptr == p) || (p[-1] == ' ') || (p[-1] == '\t')))
     saved_arg2 += 2;
 
-  /* Given our example "AAA::inA::fun", we have two cases to consider:
+  /* We have what looks like a class or namespace
+     scope specification (A::B), possibly with many
+     levels of namespaces or classes (A::B::C::D).
 
-     1) AAA::inA is the name of a class.  In that case, presumably it
-        has a method called "fun"; we then look up that method using
-        find_method.
+     Some versions of the HP ANSI C++ compiler (as also possibly
+     other compilers) generate class/function/member names with
+     embedded double-colons if they are inside namespaces. To
+     handle this, we loop a few times, considering larger and
+     larger prefixes of the string as though they were single
+     symbols.  So, if the initially supplied string is
+     A::B::C::D::foo, we have to look up "A", then "A::B",
+     then "A::B::C", then "A::B::C::D", and finally
+     "A::B::C::D::foo" as single, monolithic symbols, because
+     A, B, C or D may be namespaces.
 
-     2) AAA::inA isn't the name of a class.  In that case, either the
-        user made a typo or AAA::inA is the name of a namespace.
-        Either way, we just look up AAA::inA::fun with lookup_symbol.
-
-     Thus, our first task is to find everything before the last set of
-     double-colons and figure out if it's the name of a class.  So we
-     first loop through all of the double-colons.  */
+     Note that namespaces can nest only inside other
+     namespaces, and not inside classes.  So we need only
+     consider *prefixes* of the string; there is no need to look up
+     "B::C" separately as a symbol in the previous example.  */
 
   p2 = p;		/* Save for restart.  */
-
-  /* This is very messy. Following the example above we have now the
-     following pointers:
-     p -> "::inA::fun"
-     argptr -> "AAA::inA::fun
-     saved_arg -> "AAA::inA::fun
-     saved_arg2 -> "AAA::inA::fun
-     p2 -> "::inA::fun". */
-
-  /* In the loop below, with these strings, we'll make 2 passes, each
-     is marked in comments.*/
-
   while (1)
     {
+      sym_class = lookup_prefix_sym (argptr, p);
+
+      if (sym_class &&
+	  (t = check_typedef (SYMBOL_TYPE (sym_class)),
+	   (TYPE_CODE (t) == TYPE_CODE_STRUCT
+	    || TYPE_CODE (t) == TYPE_CODE_UNION)))
+	{
+	  /* Arg token is not digits => try it as a function name.
+	     Find the next token (everything up to end or next
+	     blank).  */
+	  if (**argptr
+	      && strchr (get_gdb_completer_quote_characters (),
+			 **argptr) != NULL)
+	    {
+	      p = skip_quoted (*argptr);
+	      *argptr = *argptr + 1;
+	    }
+	  else
+	    {
+	      p = *argptr;
+	      while (*p && *p != ' ' && *p != '\t' && *p != ',' && *p != ':')
+		p++;
+	    }
+/*
+   q = operator_chars (*argptr, &q1);
+   if (q1 - q)
+   {
+   char *opname;
+   char *tmp = alloca (q1 - q + 1);
+   memcpy (tmp, q, q1 - q);
+   tmp[q1 - q] = '\0';
+   opname = cplus_mangle_opname (tmp, DMGL_ANSI);
+   if (opname == NULL)
+   {
+   cplusplus_error (saved_arg, "no mangling for \"%s\"\n", tmp);
+   }
+   copy = (char*) alloca (3 + strlen(opname));
+   sprintf (copy, "__%s", opname);
+   p = q1;
+   }
+   else
+ */
+	  {
+	    copy = (char *) alloca (p - *argptr + 1);
+	    memcpy (copy, *argptr, p - *argptr);
+	    copy[p - *argptr] = '\0';
+	    if (p != *argptr
+		&& copy[p - *argptr - 1]
+		&& strchr (get_gdb_completer_quote_characters (),
+			   copy[p - *argptr - 1]) != NULL)
+	      copy[p - *argptr - 1] = '\0';
+	  }
+
+	  /* No line number may be specified.  */
+	  while (*p == ' ' || *p == '\t')
+	    p++;
+	  *argptr = p;
+
+	  return find_method (funfirstline, canonical, saved_arg,
+			      copy, t, sym_class);
+	}
+
       /* Move pointer up to next possible class/namespace token.  */
-
       p = p2 + 1;	/* Restart with old value +1.  */
-
-      /* PASS1: at this point p2->"::inA::fun", so p->":inA::fun",
-	 i.e. if there is a double-colon, p will now point to the
-	 second colon. */
-      /* PASS2: p2->"::fun", p->":fun" */
-
       /* Move pointer ahead to next double-colon.  */
       while (*p && (p[0] != ' ') && (p[0] != '\t') && (p[0] != '\''))
 	{
@@ -1228,113 +1266,22 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
 		error ("malformed template specification in command");
 	      p = temp_end;
 	    }
-	  /* Note that, since, at the start of this loop, p would be
-	     pointing to the second colon in a double-colon, we only
-	     satisfy the condition below if there is another
-	     double-colon to the right (after). I.e. there is another
-	     component that can be a class or a namespace. I.e, if at
-	     the beginning of this loop (PASS1), we had
-	     p->":inA::fun", we'll trigger this when p has been
-	     advanced to point to "::fun".  */
-	  /* PASS2: we will not trigger this. */
 	  else if ((p[0] == ':') && (p[1] == ':'))
 	    break;	/* Found double-colon.  */
 	  else
-	    /* PASS2: We'll keep getting here, until p->"", at which point
-	       we exit this loop.  */
 	    p++;
 	}
 
       if (*p != ':')
-	break;		/* Out of the while (1).  This would happen
-			   for instance if we have looked up
-			   unsuccessfully all the components of the
-			   string, and p->""(PASS2)  */
+	break;		/* Out of the while (1).  */
 
-      /* We get here if p points to ' ', '\t', '\'', "::" or ""(i.e
-	 string ended). */
-      /* Save restart for next time around.  */
-      p2 = p;
-      /* Restore argptr as it was on entry to this function.  */
-      *argptr = saved_arg2;
-      /* PASS1: at this point p->"::fun" argptr->"AAA::inA::fun",
-	 p2->"::fun".  */
-
-      /* All ready for next pass through the loop.  */
+      p2 = p;		/* Save restart for next time around.  */
+      *argptr = saved_arg2;	/* Restore argptr.  */
     }			/* while (1) */
 
-
-  /* Start of lookup in the symbol tables. */
-
-  /* Lookup in the symbol table the substring between argptr and
-     p. Note, this call changes the value of argptr.  */
-  /* Before the call, argptr->"AAA::inA::fun",
-     p->"", p2->"::fun".  After the call: argptr->"fun", p, p2
-     unchanged.  */
-  sym_class = lookup_prefix_sym (argptr, p2);
-
-  /* If sym_class has been found, and if "AAA::inA" is a class, then
-     we're in case 1 above.  So we look up "fun" as a method of that
-     class.  */
-  if (sym_class &&
-      (t = check_typedef (SYMBOL_TYPE (sym_class)),
-       (TYPE_CODE (t) == TYPE_CODE_STRUCT
-	|| TYPE_CODE (t) == TYPE_CODE_UNION)))
-    {
-      /* Arg token is not digits => try it as a function name.
-	 Find the next token (everything up to end or next
-	 blank).  */
-      if (**argptr
-	  && strchr (get_gdb_completer_quote_characters (),
-		     **argptr) != NULL)
-	{
-	  p = skip_quoted (*argptr);
-	  *argptr = *argptr + 1;
-	}
-      else
-	{
-	  /* At this point argptr->"fun".  */
-	  p = *argptr;
-	  while (*p && *p != ' ' && *p != '\t' && *p != ',' && *p != ':')
-	    p++;
-	  /* At this point p->"".  String ended.  */
-	}
-
-      /* Allocate our own copy of the substring between argptr and
-	 p. */
-      copy = (char *) alloca (p - *argptr + 1);
-      memcpy (copy, *argptr, p - *argptr);
-      copy[p - *argptr] = '\0';
-      if (p != *argptr
-	  && copy[p - *argptr - 1]
-	  && strchr (get_gdb_completer_quote_characters (),
-		     copy[p - *argptr - 1]) != NULL)
-	copy[p - *argptr - 1] = '\0';
-
-      /* At this point copy->"fun", p->"" */
-
-      /* No line number may be specified.  */
-      while (*p == ' ' || *p == '\t')
-	p++;
-      *argptr = p;
-      /* At this point arptr->"".  */
-
-      /* Look for copy as a method of sym_class. */
-      /* At this point copy->"fun", sym_class is "AAA:inA",
-	 saved_arg->"AAA::inA::fun".  This concludes the scanning of
-	 the string for possible components matches.  If we find it
-	 here, we return. If not, and we are at the and of the string,
-	 we'll lookup the whole string in the symbol tables.  */
-
-      return find_method (funfirstline, canonical, saved_arg,
-			  copy, t, sym_class);
-
-    } /* End if symbol found */
-
-
-  /* We couldn't find a class, so we're in case 2 above.  We check the
-     entire name as a symbol instead.  */
-
+  /* Last chance attempt -- check entire name as a symbol.  Use "copy"
+     in preparation for jumping out of this block, to be consistent
+     with usage following the jump target.  */
   copy = (char *) alloca (p - saved_arg2 + 1);
   memcpy (copy, saved_arg2, p - saved_arg2);
   /* Note: if is_quoted should be true, we snuff out quote here
@@ -1342,7 +1289,6 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
   copy[p - saved_arg2] = '\000';
   /* Set argptr to skip over the name.  */
   *argptr = (*p == '\'') ? p + 1 : p;
-
   /* Look up entire name */
   sym = lookup_symbol (copy, 0, VAR_DOMAIN, 0, &sym_symtab);
   if (sym)
@@ -1361,9 +1307,7 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
 /* Return the symbol corresponding to the substring of *ARGPTR ending
    at P, allowing whitespace.  Also, advance *ARGPTR past the symbol
    name in question, the compound object separator ("::" or "."), and
-   whitespace.  Note that *ARGPTR is changed whether or not the
-   lookup_symbol call finds anything (i.e we return NULL).  As an
-   example, say ARGPTR is "AAA::inA::fun" and P is "::inA::fun".  */
+   whitespace.  */
 
 static struct symbol *
 lookup_prefix_sym (char **argptr, char *p)
@@ -1379,14 +1323,11 @@ lookup_prefix_sym (char **argptr, char *p)
   memcpy (copy, *argptr, p - *argptr);
   copy[p - *argptr] = 0;
 
-  /* Discard the class name from the argptr.  */
+  /* Discard the class name from the arg.  */
   p = p1 + (p1[0] == ':' ? 2 : 1);
   while (*p == ' ' || *p == '\t')
     p++;
   *argptr = p;
-
-  /* At this point p1->"::inA::fun", p->"inA::fun" copy->"AAA",
-     argptr->"inA::fun" */
 
   return lookup_symbol (copy, 0, STRUCT_DOMAIN, 0,
 			(struct symtab **) NULL);

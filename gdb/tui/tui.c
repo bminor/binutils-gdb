@@ -38,7 +38,6 @@
 #include "defs.h"
 #include "gdbcmd.h"
 #include "tui/tui.h"
-#include "tui/tui-hooks.h"
 #include "tui/tui-data.h"
 #include "tui/tui-layout.h"
 #include "tui/tui-io.h"
@@ -55,7 +54,13 @@
 #include "symtab.h"
 #include "source.h"
 
-#include "gdb_curses.h"
+#ifdef HAVE_NCURSES_H       
+#include <ncurses.h>
+#else
+#ifdef HAVE_CURSES_H
+#include <curses.h>
+#endif
+#endif
 
 /* Tells whether the TUI is active or not.  */
 int tui_active = 0;
@@ -210,18 +215,18 @@ tui_rl_delete_other_windows (int notused1, int notused2)
 static int
 tui_rl_other_window (int count, int key)
 {
-  struct tui_win_info * win_info;
+  struct tui_win_info * winInfo;
 
   if (!tui_active)
     tui_rl_switch_mode (0/*notused*/, 0/*notused*/);
 
-  win_info = tui_next_win (tui_win_with_focus ());
-  if (win_info)
+  winInfo = tui_next_win (tui_win_with_focus ());
+  if (winInfo)
     {
-      tui_set_win_focus_to (win_info);
+      tui_set_win_focus_to (winInfo);
       if (TUI_DATA_WIN && TUI_DATA_WIN->generic.is_visible)
         tui_refresh_data_win ();
-      keypad (TUI_CMD_WIN->generic.handle, (win_info != TUI_CMD_WIN));
+      keypad (TUI_CMD_WIN->generic.handle, (winInfo != TUI_CMD_WIN));
     }
   return 0;
 }
@@ -278,7 +283,7 @@ tui_rl_next_keymap (int notused1, int notused2)
    the command window is cleaner.  It will be displayed if
    we temporarily leave the SingleKey mode.  */
 static int
-tui_rl_startup_hook (void)
+tui_rl_startup_hook ()
 {
   rl_already_prompted = 1;
   if (tui_current_key_mode != TUI_COMMAND_MODE)
@@ -300,7 +305,7 @@ tui_set_key_mode (enum tui_key_mode mode)
 /* Initialize readline and configure the keymap for the switching
    key shortcut.  */
 void
-tui_initialize_readline (void)
+tui_initialize_readline ()
 {
   int i;
   Keymap tui_ctlx_keymap;
@@ -452,14 +457,14 @@ tui_disable (void)
 }
 
 void
-strcat_to_buf (char *buf, int buflen, const char *item_to_add)
+strcat_to_buf (char *buf, int buflen, const char *itemToAdd)
 {
-  if (item_to_add != (char *) NULL && buf != (char *) NULL)
+  if (itemToAdd != (char *) NULL && buf != (char *) NULL)
     {
-      if ((strlen (buf) + strlen (item_to_add)) <= buflen)
-	strcat (buf, item_to_add);
+      if ((strlen (buf) + strlen (itemToAdd)) <= buflen)
+	strcat (buf, itemToAdd);
       else
-	strncat (buf, item_to_add, (buflen - strlen (buf)));
+	strncat (buf, itemToAdd, (buflen - strlen (buf)));
     }
 }
 
@@ -473,7 +478,7 @@ strcat_to_buf (char *buf, int buflen, const char *item_to_add)
 #define CHK(val, dft)   (val<=0 ? dft : val)
 
 static void
-tui_reset (void)
+_tuiReset (void)
 {
   struct termio mode;
 
@@ -539,7 +544,7 @@ tui_reset (void)
 #endif /* USG */
 
   return;
-}
+}				/* _tuiReset */
 #endif
 
 void
