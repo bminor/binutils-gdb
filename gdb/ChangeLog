@@ -1,3 +1,14 @@
+2003-06-14  Jeroen Dekkers  <jeroen@dekkers.cx>
+
+	* Makefile.in (exc_request_U_h): Define
+	(exc_request_S_h): Likewise.
+	(msg_reply_S_h): Likewise.
+	(msg_U_h): Likewise.
+	(notify_S_h): Likewise.
+	(process_reply_S_h): Likewise.
+	(gnu-nat.o): Depend on gdb_obstack_h
+	* gnu-nat.c: Include "gdb_obstack.h".
+
 2003-06-13  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbarch.sh: Document what PUSH_DUMMY_CALL replaces.
