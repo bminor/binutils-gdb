@@ -283,6 +283,7 @@ m3-nat.c
 m32r-rom.c
 m32r-stub.c
 m32r-tdep.c
+m68klinux-nat.c
 m68k-stub.c
 m68k-tdep.c
 m68knbsd-nat.c
