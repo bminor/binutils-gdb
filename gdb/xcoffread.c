@@ -408,8 +408,7 @@ compare_lte (const void *lte1p, const void *lte2p)
    sort_linevec = 1 to end_symtab.  */
 
 static struct linetable *
-arrange_linetable (oldLineTb)
-     struct linetable *oldLineTb;	/* old linetable */
+arrange_linetable (struct linetable *oldLineTb)
 {
   int ii, jj, newline,		/* new line count */
     function_count;		/* # of functions */
@@ -2600,9 +2599,7 @@ get_toc_offset (struct objfile *objfile)
    table (as opposed to a shared lib or dynamically loaded file).  */
 
 static void
-xcoff_initial_scan (objfile, mainline)
-     struct objfile *objfile;
-     int mainline;		/* FIXME comments above */
+xcoff_initial_scan (struct objfile *objfile, int mainline)
 {
   bfd *abfd;
   int val;

@@ -463,7 +463,6 @@ static struct objfile *
 safe_symbol_file_add (char *name, int from_tty,
 		      struct section_addr_info *addrs,
 		      int mainline, int flags)
-
 {
   struct safe_symbol_file_add_args p;
   struct cleanup *cleanup;
