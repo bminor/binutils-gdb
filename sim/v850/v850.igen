@@ -144,10 +144,16 @@ rrrrr,110110,RRRRR + iiiiiiiiiiiiiiii:VI:::andi
 ddddd,1011,ddd,cccc:III:::Bcond
 "b%s<cccc> <disp9>"
 {
-  int cond = condition_met (cccc);
-  if (cond)
-    nia = cia + disp9;
-  TRACE_BRANCH1 (cond);
+  int cond;
+  if ((ddddd == 0x00) && (ddd == 0x00) && (cccc == 0x05)) {
+    // Special case - treat "br *" like illegal instruction
+    sim_engine_halt (SD, CPU, NULL, cia, sim_stopped, SIM_SIGTRAP);
+  } else {
+    cond = condition_met (cccc);
+    if (cond)
+      nia = cia + disp9;
+    TRACE_BRANCH1 (cond);
+  }
 }
 
 
@@ -1158,6 +1164,11 @@ rrrrr,110101,RRRRR + iiiiiiiiiiiiiiii:VI:::xori
   sim_engine_halt (SD, CPU, NULL, cia, sim_stopped, SIM_SIGTRAP);
 }
 
+// True illegal instruction
+00000,111111,00000 + 00000,11111,100000:X:::ilgop
+{
+  sim_engine_halt (SD, CPU, NULL, cia, sim_stopped, SIM_SIGTRAP);
+}
 
 
 // DIVHN

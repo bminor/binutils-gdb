@@ -1,3 +1,8 @@
+2000-04-14  Gary Thomas  <gthomas@redhat.com>
+
+	* v850.igen: Define 'br *' as illegal since this is the only
+	way to provide a breakpoint on some v850 family processors.
+
 2000-03-24  Frank Ch. Eigler  <fche@redhat.com>
 
 	* v850.igen (ilgop): New insn pattern for four-byte breakpoints.
