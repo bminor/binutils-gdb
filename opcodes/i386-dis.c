@@ -96,8 +96,7 @@ static void OP_SIMD_Suffix PARAMS ((int, int));
 static void SIMD_Fixup PARAMS ((int, int));
 static void BadOp PARAMS ((void));
 
-struct dis_private
-{
+struct dis_private {
   /* Points to first byte not fetched.  */
   bfd_byte *max_fetched;
   bfd_byte the_buffer[MAXLEN];
@@ -157,7 +156,7 @@ static int used_prefixes;
    to ADDR (exclusive) are valid.  Returns 1 for success, longjmps
    on error.  */
 #define FETCH_DATA(info, addr) \
-  ((addr) <= ((struct dis_private *)(info->private_data))->max_fetched \
+  ((addr) <= ((struct dis_private *) (info->private_data))->max_fetched \
    ? 1 : fetch_data ((info), (addr)))
 
 static int
@@ -166,7 +165,7 @@ fetch_data (info, addr)
      bfd_byte *addr;
 {
   int status;
-  struct dis_private *priv = (struct dis_private *)info->private_data;
+  struct dis_private *priv = (struct dis_private *) info->private_data;
   bfd_vma start = priv->insn_start + (priv->max_fetched - priv->the_buffer);
 
   status = (*info->read_memory_func) (start,
@@ -299,7 +298,7 @@ fetch_data (info, addr)
 #define loop_jcxz_flag NULL, loop_jcxz_mode
 
 /* bits in sizeflag */
-#if 0 /* leave undefined until someone adds the extra flag to objdump */
+#if 0 /* Leave undefined until someone adds the extra flag to objdump.  */
 #define SUFFIX_ALWAYS 4
 #endif
 #define AFLAG 2
@@ -773,7 +772,7 @@ static const struct dis386 dis386_twobyte[] = {
   { "(bad)",		XX, XX, XX },
   { GRPAMD },
   { "femms",		XX, XX, XX },
-  { "",			MX, EM, OPSUF }, /* See OP_3DNowSuffix */
+  { "",			MX, EM, OPSUF }, /* See OP_3DNowSuffix.  */
   /* 10 */
   { PREGRP8 },
   { PREGRP9 },
@@ -1423,7 +1422,7 @@ static const struct dis386 grps[][8] = {
     { "lfence", None, XX, XX },
     { "mfence", None, XX, XX },
     { "sfence", None, XX, XX },
-    /* FIXME: the sfence with memory operand is clflush! */
+    /* FIXME: the sfence with memory operand is clflush!  */
   },
   /* GRP14 */
   {
@@ -1447,7 +1446,6 @@ static const struct dis386 grps[][8] = {
     { "(bad)",	XX, XX, XX },
     { "(bad)",	XX, XX, XX },
   }
-
 };
 
 static const struct dis386 prefix_user_table[][4] = {
@@ -1460,7 +1458,7 @@ static const struct dis386 prefix_user_table[][4] = {
   },
   /* PREGRP1 */
   {
-    { "", XM, EX, OPSIMD },	/* See OP_SIMD_SUFFIX */
+    { "", XM, EX, OPSIMD },	/* See OP_SIMD_SUFFIX.  */
     { "", XM, EX, OPSIMD },
     { "", XM, EX, OPSIMD },
     { "", XM, EX, OPSIMD },
@@ -1823,7 +1821,6 @@ static int op_ad, op_index[3];
 static bfd_vma op_address[3];
 static bfd_vma op_riprel[3];
 static bfd_vma start_pc;
-
 
 /*
  *   On the 386's of 1988, the maximum length of an instruction is 15 bytes.
@@ -1906,7 +1903,7 @@ print_insn_i386 (pc, info)
       || info->mach == bfd_mach_x86_64
       || info->mach == bfd_mach_i386_i386_intel_syntax
       || info->mach == bfd_mach_x86_64_intel_syntax)
-    sizeflag = AFLAG|DFLAG;
+    sizeflag = AFLAG | DFLAG;
   else if (info->mach == bfd_mach_i386_i8086)
     sizeflag = 0;
   else
@@ -2097,17 +2094,17 @@ print_insn_i386 (pc, info)
 	  obufp = op1out;
 	  op_ad = 2;
 	  if (dp->op1)
-	    (*dp->op1)(dp->bytemode1, sizeflag);
+	    (*dp->op1) (dp->bytemode1, sizeflag);
 
 	  obufp = op2out;
 	  op_ad = 1;
 	  if (dp->op2)
-	    (*dp->op2)(dp->bytemode2, sizeflag);
+	    (*dp->op2) (dp->bytemode2, sizeflag);
 
 	  obufp = op3out;
 	  op_ad = 0;
 	  if (dp->op3)
-	    (*dp->op3)(dp->bytemode3, sizeflag);
+	    (*dp->op3) (dp->bytemode3, sizeflag);
 	}
     }
 
@@ -2388,7 +2385,6 @@ static const struct dis386 float_reg[][8] = {
   },
 };
 
-
 static char *fgrps[][8] = {
   /* d9_2  0 */
   {
@@ -2448,7 +2444,7 @@ dofloat (sizeflag)
 
   if (mod != 3)
     {
-      putop (float_mem[(floatop - 0xd8 ) * 8 + reg], sizeflag);
+      putop (float_mem[(floatop - 0xd8) * 8 + reg], sizeflag);
       obufp = op1out;
       if (floatop == 0xdb)
         OP_E (x_mode, sizeflag);
@@ -2458,7 +2454,7 @@ dofloat (sizeflag)
         OP_E (v_mode, sizeflag);
       return;
     }
-  /* skip mod/rm byte */
+  /* Skip mod/rm byte.  */
   MODRM_CHECK;
   codep++;
 
@@ -2467,7 +2463,7 @@ dofloat (sizeflag)
     {
       putop (fgrps[dp->bytemode1][rm], sizeflag);
 
-      /* instruction fnstsw is only one with strange arg */
+      /* Instruction fnstsw is only one with strange arg.  */
       if (floatop == 0xdf && codep[-1] == 0xe0)
 	strcpy (op1out, names16[0]);
     }
@@ -2477,10 +2473,10 @@ dofloat (sizeflag)
 
       obufp = op1out;
       if (dp->op1)
-	(*dp->op1)(dp->bytemode1, sizeflag);
+	(*dp->op1) (dp->bytemode1, sizeflag);
       obufp = op2out;
       if (dp->op2)
-	(*dp->op2)(dp->bytemode2, sizeflag);
+	(*dp->op2) (dp->bytemode2, sizeflag);
     }
 }
 
@@ -2501,7 +2497,7 @@ OP_STi (bytemode, sizeflag)
   oappend (scratchbuf + intel_syntax);
 }
 
-/* capital letters in template are macros */
+/* Capital letters in template are macros.  */
 static int
 putop (template, sizeflag)
      const char *template;
@@ -2632,7 +2628,7 @@ putop (template, sizeflag)
 	      *obufp++ = 'q';
 	      break;
 	    }
-	  /* Fall through */
+	  /* Fall through.  */
 	case 'P':
           if (intel_syntax)
             break;
@@ -2664,7 +2660,7 @@ putop (template, sizeflag)
 	      *obufp++ = 'q';
 	      break;
 	    }
-	  /* Fall through */
+	  /* Fall through.  */
 	case 'Q':
           if (intel_syntax)
             break;
@@ -2858,7 +2854,7 @@ print_operand_value (buf, hex, disp)
 	  buf[0] = '0';
 	  buf[1] = 'x';
 	  sprintf_vma (tmp, disp);
-	  for (i = 0; tmp[i] == '0' && tmp[i+1]; i++);
+	  for (i = 0; tmp[i] == '0' && tmp[i + 1]; i++);
 	  strcpy (buf + 2, tmp + i);
 	}
       else
@@ -2870,7 +2866,7 @@ print_operand_value (buf, hex, disp)
 	    {
 	      *(buf++) = '-';
 	      v = -disp;
-	      /* Check for possible overflow on 0x8000000000000000 */
+	      /* Check for possible overflow on 0x8000000000000000.  */
 	      if (v < 0)
 		{
 		  strcpy (buf, "9223372036854775808");
@@ -2887,7 +2883,7 @@ print_operand_value (buf, hex, disp)
 	  tmp[29] = 0;
 	  while (v)
 	    {
-	      tmp[28-i] = (v % 10) + '0';
+	      tmp[28 - i] = (v % 10) + '0';
 	      v /= 10;
 	      i++;
 	    }
@@ -2915,7 +2911,7 @@ OP_E (bytemode, sizeflag)
   if (rex & REX_EXTZ)
     add += 8;
 
-  /* skip mod/rm byte */
+  /* Skip mod/rm byte.  */
   MODRM_CHECK;
   codep++;
 
@@ -2956,10 +2952,10 @@ OP_E (bytemode, sizeflag)
 	  used_prefixes |= (prefixes & PREFIX_DATA);
 	  break;
 	case 0:
-	  if ( !(codep[-2] == 0xAE && codep[-1] == 0xF8 /* sfence */)
+	  if (!(codep[-2] == 0xAE && codep[-1] == 0xF8 /* sfence */)
 	      && !(codep[-2] == 0xAE && codep[-1] == 0xF0 /* mfence */)
 	      && !(codep[-2] == 0xAE && codep[-1] == 0xe8 /* lfence */))
-	    BadOp();	/* bad sfence,lea,lds,les,lfs,lgs,lss modrm */
+	    BadOp ();	/* bad sfence,lea,lds,les,lfs,lgs,lss modrm */
 	  break;
 	default:
 	  oappend (INTERNAL_DISASSEMBLER_ERROR);
@@ -3107,7 +3103,7 @@ OP_E (bytemode, sizeflag)
           if (intel_syntax)
             if (mod != 0 || (base & 7) == 5)
               {
-                /* Don't print zero displacements */
+		/* Don't print zero displacements.  */
                 if (disp != 0)
                   {
 		    if ((bfd_signed_vma) disp > 0)
@@ -3246,7 +3242,7 @@ get64 ()
   b |= (*codep++ & 0xff) << 24;
   x = a + ((bfd_vma) b << 32);
 #else
-  abort();
+  abort ();
   x = 0;
 #endif
   return x;
@@ -3354,7 +3350,7 @@ OP_REG (code, sizeflag)
 	  break;
 	}
       code += eAX_reg - rAX_reg;
-      /* Fall through */
+      /* Fall through.  */
     case eAX_reg: case eCX_reg: case eDX_reg: case eBX_reg:
     case eSP_reg: case eBP_reg: case eSI_reg: case eDI_reg:
       USED_REX (REX_MODE64);
@@ -3443,7 +3439,7 @@ OP_I (bytemode, sizeflag)
 	  op = get32s ();
 	  break;
 	}
-      /* Fall through */
+      /* Fall through.  */
     case v_mode:
       USED_REX (REX_MODE64);
       if (rex & REX_MODE64)
@@ -3558,7 +3554,7 @@ OP_sI (bytemode, sizeflag)
       else
 	{
 	  mask = 0xffffffff;
-	  op = get16();
+	  op = get16 ();
 	  if ((op & 0x8000) != 0)
 	    op -= 0x10000;
 	}
@@ -3602,7 +3598,7 @@ OP_J (bytemode, sizeflag)
       else
 	{
 	  disp = get16 ();
-	  /* for some reason, a data16 prefix on a jump instruction
+	  /* For some reason, a data16 prefix on a jump instruction
 	     means that the pc is masked to 16 bits after the
 	     displacement is added!  */
 	  mask = 0xffff;
@@ -3693,7 +3689,7 @@ OP_OFF64 (bytemode, sizeflag)
 
   append_seg ();
 
-  off = get64();
+  off = get64 ();
 
   if (intel_syntax)
     {
@@ -3714,7 +3710,7 @@ ptr_reg (code, sizeflag)
      int sizeflag;
 {
   const char *s;
-  if(intel_syntax)
+  if (intel_syntax)
     oappend ("[");
   else
     oappend ("(");
@@ -3727,7 +3723,7 @@ ptr_reg (code, sizeflag)
   else
     s = names16[code - eAX_reg];
   oappend (s);
-  if(intel_syntax)
+  if (intel_syntax)
     oappend ("]");
   else
     oappend (")");
@@ -3755,7 +3751,7 @@ OP_DSreg (code, sizeflag)
 	  | PREFIX_FS
 	  | PREFIX_GS)) == 0)
     prefixes |= PREFIX_DS;
-  append_seg();
+  append_seg ();
   ptr_reg (code, sizeflag);
 }
 
@@ -3782,9 +3778,9 @@ OP_D (dummy, sizeflag)
   if (rex & REX_EXTX)
     add = 8;
   if (intel_syntax)
-    sprintf (scratchbuf, "db%d", reg+add);
+    sprintf (scratchbuf, "db%d", reg + add);
   else
-    sprintf (scratchbuf, "%%db%d", reg+add);
+    sprintf (scratchbuf, "%%db%d", reg + add);
   oappend (scratchbuf);
 }
 
@@ -3805,7 +3801,7 @@ OP_Rd (bytemode, sizeflag)
   if (mod == 3)
     OP_E (bytemode, sizeflag);
   else
-    BadOp();
+    BadOp ();
 }
 
 static void
@@ -3853,7 +3849,7 @@ OP_EM (bytemode, sizeflag)
   if (rex & REX_EXTZ)
     add = 8;
 
-  /* skip mod/rm byte */
+  /* Skip mod/rm byte.  */
   MODRM_CHECK;
   codep++;
   used_prefixes |= (prefixes & PREFIX_DATA);
@@ -3879,7 +3875,7 @@ OP_EX (bytemode, sizeflag)
   if (rex & REX_EXTZ)
     add = 8;
 
-  /* skip mod/rm byte */
+  /* Skip mod/rm byte.  */
   MODRM_CHECK;
   codep++;
   sprintf (scratchbuf, "%%xmm%d", rm + add);
@@ -3894,7 +3890,7 @@ OP_MS (bytemode, sizeflag)
   if (mod == 3)
     OP_EM (bytemode, sizeflag);
   else
-    BadOp();
+    BadOp ();
 }
 
 static void
@@ -3905,7 +3901,7 @@ OP_XS (bytemode, sizeflag)
   if (mod == 3)
     OP_EX (bytemode, sizeflag);
   else
-    BadOp();
+    BadOp ();
 }
 
 static const char *Suffix3DNow[] = {
@@ -3986,7 +3982,7 @@ OP_3DNowSuffix (bytemode, sizeflag)
   /* AMD 3DNow! instructions are specified by an opcode suffix in the
      place where an 8-bit immediate would normally go.  ie. the last
      byte of the instruction.  */
-  obufp = obuf + strlen(obuf);
+  obufp = obuf + strlen (obuf);
   mnemonic = Suffix3DNow[*codep++ & 0xff];
   if (mnemonic)
     oappend (mnemonic);
@@ -3998,12 +3994,11 @@ OP_3DNowSuffix (bytemode, sizeflag)
 	 we have a bad opcode.  This necessitates some cleaning up.  */
       op1out[0] = '\0';
       op2out[0] = '\0';
-      BadOp();
+      BadOp ();
     }
 }
 
-
-static const char *simd_cmp_op [] = {
+static const char *simd_cmp_op[] = {
   "eq",
   "lt",
   "le",
@@ -4022,7 +4017,7 @@ OP_SIMD_Suffix (bytemode, sizeflag)
   unsigned int cmp_type;
 
   FETCH_DATA (the_info, codep + 1);
-  obufp = obuf + strlen(obuf);
+  obufp = obuf + strlen (obuf);
   cmp_type = *codep++ & 0xff;
   if (cmp_type < 8)
     {
@@ -4052,7 +4047,7 @@ OP_SIMD_Suffix (bytemode, sizeflag)
       /* We have a bad extension byte.  Clean up.  */
       op1out[0] = '\0';
       op2out[0] = '\0';
-      BadOp();
+      BadOp ();
     }
 }
 
@@ -4065,17 +4060,19 @@ SIMD_Fixup (extrachar, sizeflag)
      forms of these instructions.  */
   if (mod == 3)
     {
-      char *p = obuf + strlen(obuf);
-      *(p+1) = '\0';
-      *p     = *(p-1);
-      *(p-1) = *(p-2);
-      *(p-2) = *(p-3);
-      *(p-3) = extrachar;
+      char *p = obuf + strlen (obuf);
+      *(p + 1) = '\0';
+      *p       = *(p - 1);
+      *(p - 1) = *(p - 2);
+      *(p - 2) = *(p - 3);
+      *(p - 3) = extrachar;
     }
 }
 
-static void BadOp (void)
+static void
+BadOp (void)
 {
-  codep = insn_codep + 1;	/* throw away prefixes and 1st. opcode byte */
+  /* Throw away prefixes and 1st. opcode byte.  */
+  codep = insn_codep + 1;
   oappend ("(bad)");
 }
