@@ -1,3 +1,25 @@
+start-sanitize-d30v
+Tue Dec  9 15:28:17 1997  Michael Meissner  <meissner@cygnus.com>
+
+	* emulparams/d30velf.sh (STACK_START_ADDR): Top of default
+	stack.
+	({TEXT,DATA,EMEM}_SIZE): Sizes of the 3 memory areas.
+	({TEXT,DATA,BSS}_MEMORY): Which memory region .text, .data, and
+	.bss should go in.
+
+	* scripttempl/elfd30v.sc: Allow .text, .data, .bss to be put in
+	either the onchip text/data areas or the external memory area.
+	(MEMORY): Get sizes from d30velf.sh.
+	(.e{data,text,bss}): Put sections in the external memory region.
+	(.stext): Put section in the onchip text region.
+	(.s{data,bss}): Put sections in the onchip data region.
+	(__stack): Assign from ${STACK_START_ADDR}.
+	(.text): Put in ${TEXT_MEMORY} memory region.
+	(.data{,1}/.strings/.rodata{,1}): Put in ${DATA_MEMORY} memory
+	region.
+	(.bss): Put in ${BSS_MEMORY} memory region.
+
+end-sanitize-d30v
 Tue Dec  2 10:14:47 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* configure.tgt (targ_extra_emuls): Add support for Thumb target.
