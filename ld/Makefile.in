@@ -42,7 +42,7 @@ INSTALL_FILE = $(INSTALL)
 BASEDIR	= ../..
 INCLUDE	= $(srcdir)/../include
 INCLUDES = -I. -I$(srcdir)  -I$(INCLUDE) 
-DEBUG	= -g
+MINUS_G	= -g
 
 # Where to find texinfo.tex to format docn with TeX
 TEXIDIR = $(srcdir)/../texinfo/fsf
@@ -65,7 +65,7 @@ SCRIPTS = ldgld68k.sc ldgld.sc \
 #### target and host dependent Makefile fragments come in here.
 ###
 
-CFLAGS	= $(INCLUDES) $(DEBUG) $(HDEFINES) $(TDEFINES) $(CDEFINES)
+CFLAGS	= $(INCLUDES) $(MINUS_G) $(HDEFINES) $(TDEFINES) $(CDEFINES)
 LINTFLAGS =  $(INCLUDES) $(EXTRA_DEF) 
 
 .SUFFIXES: .y .x .xr .xu .xn .xN .sc .scu .scr .scn $(SUFFIXES)
@@ -174,8 +174,7 @@ ldgram.h ldgram.c: ldgram.y
 	if [ -f y.tab.h -a ! -f ldgram.h ]; then mv y.tab.h ldgram.h; else true ; fi
 
 ldlex.c: ldlex.l
-	lex -t $(VPATH)/ldlex.l >ldlex.c
-
+	lex -t $(VPATH)/ldlex.l >ldlex.c 
 
 ldgld.c: $(srcdir)/ldtemplate
 	sed -e s/"<ldtarget>"/ldgld/g -e s/"<arch>"/m68k/g \
