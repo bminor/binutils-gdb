@@ -19,11 +19,11 @@ Wed Jul 21 14:28:42 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 	option, otherwise parse it directly.
 	* emultempl/*.em (*get_script): Return the scripts themselves if
 	this is the default emulation; otherwise return their file names.
-	* emultempl/m88kbcs.em: New file, to take m88kbcs.em #ifdef out of
+	* emultempl/m88kbcs.em: New file, to take m88kbcs #ifdef out of
 	generic.em.
 	* emulparams/m88kbcs.sh: Use it.
 
-	* ld.h (unix_relocate): Remove unused var.
+	* ld.h (ld_config_type::unix_relocate): Remove unused element.
 
 Tue Jul 20 12:01:49 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
