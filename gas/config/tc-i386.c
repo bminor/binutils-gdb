@@ -435,7 +435,7 @@ const pseudo_typeS md_pseudo_table[] =
   {"code64", set_code_flag, CODE_64BIT},
   {"intel_syntax", set_intel_syntax, 1},
   {"att_syntax", set_intel_syntax, 0},
-  {"file", dwarf2_directive_file, 0},
+  {"file", (void (*) PARAMS ((int))) dwarf2_directive_file, 0},
   {"loc", dwarf2_directive_loc, 0},
   {0, 0, 0}
 };
@@ -1130,21 +1130,6 @@ pt (t)
 
 #endif /* DEBUG386 */
 
-int
-tc_i386_force_relocation (fixp)
-     struct fix *fixp;
-{
-#ifdef BFD_ASSEMBLER
-  if (fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT
-      || fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
-    return 1;
-  return 0;
-#else
-  /* For COFF.  */
-  return fixp->fx_r_type == 7;
-#endif
-}
-
 #ifdef BFD_ASSEMBLER
 static bfd_reloc_code_real_type reloc
   PARAMS ((int, int, int, bfd_reloc_code_real_type));
@@ -1235,8 +1220,10 @@ tc_i386_fix_adjustable (fixP)
 }
 #else
 #define reloc(SIZE,PCREL,SIGN,OTHER)	0
+#define BFD_RELOC_8			0
 #define BFD_RELOC_16			0
 #define BFD_RELOC_32			0
+#define BFD_RELOC_8_PCREL		0
 #define BFD_RELOC_16_PCREL		0
 #define BFD_RELOC_32_PCREL		0
 #define BFD_RELOC_386_PLT32		0
@@ -4462,12 +4449,12 @@ md_apply_fix3 (fixP, valP, seg)
      /* The fix we're to put in.  */
      fixS *fixP;
      /* Pointer to the value of the bits.  */
-     valueT * valP;
+     valueT *valP;
      /* Segment fix is from.  */
      segT seg ATTRIBUTE_UNUSED;
 {
   char *p = fixP->fx_where + fixP->fx_frag->fr_literal;
-  valueT value = * valP;
+  valueT value = *valP;
 
 #if defined (BFD_ASSEMBLER) && !defined (TE_Mach)
   if (fixP->fx_pcrel)
@@ -4613,11 +4600,11 @@ md_apply_fix3 (fixP, valP, seg)
 	break;
       }
 #endif /* defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)  */
-  * valP = value;
+  *valP = value;
 #endif /* defined (BFD_ASSEMBLER) && !defined (TE_Mach)  */
 
   /* Are we finished with this relocation now?  */
-  if (fixP->fx_addsy == NULL && fixP->fx_pcrel == 0)
+  if (fixP->fx_addsy == NULL)
     fixP->fx_done = 1;
 #ifdef BFD_ASSEMBLER
   else if (use_rela_relocations)
@@ -5136,10 +5123,7 @@ tc_gen_reloc (section, fixp)
       if (fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
 	rel->address = fixp->fx_offset;
 
-      if (fixp->fx_pcrel)
-	rel->addend = fixp->fx_addnumber;
-      else
-	rel->addend = 0;
+      rel->addend = 0;
     }
   /* Use the rela in 64bit mode.  */
   else

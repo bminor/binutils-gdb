@@ -171,8 +171,15 @@ extern void x86_cons_fix_new
   PARAMS ((fragS *, unsigned int, unsigned int, expressionS *));
 #endif
 
-#define TC_FORCE_RELOCATION(fixp) tc_i386_force_relocation(fixp)
-extern int tc_i386_force_relocation PARAMS ((struct fix *));
+#ifdef BFD_ASSEMBLER
+#define TC_FORCE_RELOCATION(FIXP)			\
+  ((FIXP)->fx_r_type == BFD_RELOC_VTABLE_INHERIT	\
+   || (FIXP)->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
+#else
+/* For COFF.  */
+#define TC_FORCE_RELOCATION(FIXP)			\
+  ((FIXP)->fx_r_type == 7)
+#endif
 
 #ifdef BFD_ASSEMBLER
 #define NO_RELOC BFD_RELOC_NONE
