@@ -1,0 +1,55 @@
+# Hitachi H8/300 (h, s, sx) simulator testsuite
+
+set all "h8300 h8300h h8300s h8sx"
+
+if {[istarget h8300*-*-*] || [istarget h8sx*-*-*]} then {
+    run_sim_test add.b.s $all
+    run_sim_test add.w.s $all
+    run_sim_test add.l.s $all
+    run_sim_test adds.s  $all
+    run_sim_test addx.s  $all
+    run_sim_test and.b.s $all
+    run_sim_test and.w.s $all
+    run_sim_test and.l.s $all
+    run_sim_test bfld.s  h8sx
+    run_sim_test bra.s   $all
+    run_sim_test bset.s  $all
+    run_sim_test cmp.b.s $all
+    run_sim_test cmp.w.s $all
+    run_sim_test cmp.l.s $all
+    run_sim_test daa.s   $all
+    run_sim_test das.s   $all
+    run_sim_test dec.s   $all
+    run_sim_test ext.w.s $all
+    run_sim_test ext.l.s $all
+    run_sim_test inc.s   $all
+    run_sim_test jmp.s   $all
+    run_sim_test ldc.s   $all
+    run_sim_test mac.s   $all
+    run_sim_test mov.b.s $all
+    run_sim_test mov.w.s $all
+    run_sim_test mov.l.s $all
+    run_sim_test movmd.s h8sx
+    run_sim_test movsd.s h8sx
+    run_sim_test neg.s   $all
+    run_sim_test nop.s   $all
+    run_sim_test not.s   $all
+    run_sim_test or.b.s  $all
+    run_sim_test or.w.s  $all
+    run_sim_test or.l.s  $all
+    run_sim_test rotl.s  $all
+    run_sim_test rotr.s  $all
+    run_sim_test rotxl.s $all
+    run_sim_test rotxr.s $all
+    run_sim_test shal.s  $all
+    run_sim_test shar.s  $all
+    run_sim_test shll.s  $all
+    run_sim_test shlr.s  $all
+    run_sim_test stc.s   $all
+    run_sim_test sub.b.s $all
+    run_sim_test sub.w.s $all
+    run_sim_test sub.l.s $all
+    run_sim_test xor.b.s $all
+    run_sim_test xor.w.s $all
+    run_sim_test xor.l.s $all
+}
