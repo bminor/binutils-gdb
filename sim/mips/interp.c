@@ -385,6 +385,8 @@ static ut_reg DSPC = 0;  /* delay-slot PC */
 #define ksu_user         (0x2)
 #define ksu_unknown      (0x3)
 
+#define status_IE	 (1 <<  0)      /* Interrupt enable */
+#define status_EXL	 (1 <<  1)	/* Exception level */
 #define status_RE        (1 << 25)      /* Reverse Endian in user mode */
 #define status_FR        (1 << 26)      /* enables MIPS III additional FP registers */
 #define status_SR        (1 << 20)      /* soft reset or NMI */
@@ -746,10 +748,18 @@ static const OPTION mips_options[] =
 };
 
 
+int interrupt_pending;
+
 static void
 interrupt_event (SIM_DESC sd, void *data)
 {
-  SignalException (Interrupt);
+  if (SR & status_IE)
+    {
+      interrupt_pending = 0;
+      SignalException (Interrupt);
+    }
+  else if (!interrupt_pending)
+    sim_events_schedule (sd, 1, interrupt_event, data);
 }
 
 
@@ -1240,43 +1250,49 @@ sim_info (sd,verbose)
      SIM_DESC sd;
      int verbose;
 {
-  /* Accessed from the GDB "info files" command: */
-
-  callback->printf_filtered(callback,"MIPS %d-bit simulator\n",(PROCESSOR_64BIT ? 64 : 32));
-
-  callback->printf_filtered(callback,"%s endian memory model\n",
-			    (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN
-			     ? "Big" : "Little"));
-
-  callback->printf_filtered(callback,"0x%08X bytes of memory at 0x%s\n",
-			    STATE_MEM_SIZE (sd),
-			    pr_addr (STATE_MEM_BASE (sd)));
-
-#if !defined(FASTSIM)
-  if (instruction_fetch_overflow != 0)
-    callback->printf_filtered(callback,"Instruction fetches = 0x%08X%08X\n",instruction_fetch_overflow,instruction_fetches);
-  else
-    callback->printf_filtered(callback,"Instruction fetches = %d\n",instruction_fetches);
-  callback->printf_filtered(callback,"Pipeline ticks = %ld\n",
-			    (long) sim_events_time (sd));
-  /* It would be a useful feature, if when performing multi-cycle
-     simulations (rather than single-stepping) we keep the start and
-     end times of the execution, so that we can give a performance
-     figure for the simulator. */
-#endif /* !FASTSIM */
-
-  /* print information pertaining to MIPS ISA and architecture being simulated */
-  /* things that may be interesting */
-  /* instructions executed - if available */
-  /* cycles executed - if available */
-  /* pipeline stalls - if available */
-  /* virtual time taken */
-  /* profiling size */
-  /* profiling frequency */
-  /* profile minpc */
-  /* profile maxpc */
-
+  
   return;
+  /* Accessed from the GDB "info files" command: */
+  if (STATE_VERBOSE_P (sd) || verbose)
+    {
+      
+      sim_io_printf (sd, "MIPS %d-bit %s endian simulator\n",
+		     (PROCESSOR_64BIT ? 64 : 32),
+		     (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN ? "Big" : "Little"));
+      
+      sim_io_printf (sd, "0x%08X bytes of memory at 0x%s\n",
+		     STATE_MEM_SIZE (sd),
+		     pr_addr (STATE_MEM_BASE (sd)));
+      
+#if !defined(FASTSIM)
+#if 0
+      /* at present this simulator executes one instruction per
+         simulator cycle.  Consequently this data never changes */
+      if (instruction_fetch_overflow != 0)
+	sim_io_printf (sd, "Instruction fetches = 0x%08X%08X\n",
+		       instruction_fetch_overflow, instruction_fetches);
+      else
+	sim_io_printf (sd, "Instruction fetches = %d\n", instruction_fetches);
+#endif
+      /* It would be a useful feature, if when performing multi-cycle
+	 simulations (rather than single-stepping) we keep the start and
+	 end times of the execution, so that we can give a performance
+	 figure for the simulator. */
+#endif /* !FASTSIM */
+      sim_io_printf (sd, "Number of execution cycles = %ld\n",
+		     (long) sim_events_time (sd));
+      
+      /* print information pertaining to MIPS ISA and architecture being simulated */
+      /* things that may be interesting */
+      /* instructions executed - if available */
+      /* cycles executed - if available */
+      /* pipeline stalls - if available */
+      /* virtual time taken */
+      /* profiling size */
+      /* profiling frequency */
+      /* profile minpc */
+      /* profile maxpc */
+    }
 }
 
 SIM_RC
@@ -2731,6 +2747,7 @@ SyncOperation(stype)
 static void
 SignalException (int exception,...)
 {
+  int vector;
   SIM_DESC sd = &simulator;
   /* Ensure that any active atomic read/modify/write operation will fail: */
   LLBIT = 0;
@@ -2805,22 +2822,40 @@ SignalException (int exception,...)
        }
      }
 
+     /* See figure 5-17 for an outline of the code below */
+     if (! (SR & status_EXL))
+       {
+	 CAUSE = (exception << 2);
+	 if (state & simDELAYSLOT)
+	   {
+	     state &= ~simDELAYSLOT;
+	     CAUSE |= cause_BD;
+	     EPC = (IPC - 4); /* reference the branch instruction */
+	   }
+	 else
+	   EPC = IPC;
+	 /* FIXME: TLB et.al. */
+	 vector = 0x180;
+       }
+     else
+       {
+	 CAUSE = 0;
+	 vector = 0x180;
+       }
+     SR |= status_EXL;
      /* Store exception code into current exception id variable (used
         by exit code): */
-     CAUSE = (exception << 2);
-     if (state & simDELAYSLOT) {
-       CAUSE |= cause_BD;
-       EPC = (IPC - 4); /* reference the branch instruction */
-     } else
-      EPC = IPC;
-     /* The following is so that the simulator will continue from the
-        exception address on breakpoint operations. */
-     PC = EPC;
+     if (SR & status_BEV)
+       PC = (signed)0xBFC00200 + 0x180;
+     else
+       PC = (signed)0x80000000 + 0x180;
+
      switch ((CAUSE >> 2) & 0x1F)
        {
        case Interrupt:
-	 sim_engine_halt (sd, STATE_CPU (sd, 0), NULL, NULL_CIA,
-			  sim_stopped, SIGINT);
+	 /* Interrupts arrive during event processing, no need to
+            restart */
+	 return;
 	 
        case TLBModification:
        case TLBLoad:
@@ -2829,11 +2864,15 @@ SignalException (int exception,...)
        case AddressStore:
        case InstructionFetch:
        case DataReference:
+	 /* The following is so that the simulator will continue from the
+	    exception address on breakpoint operations. */
+	 PC = EPC;
 	 sim_engine_halt (sd, STATE_CPU (sd, 0), NULL, NULL_CIA,
 			  sim_stopped, SIGBUS);
 
        case ReservedInstruction:
        case CoProcessorUnusable:
+	 PC = EPC;
 	 sim_engine_halt (sd, STATE_CPU (sd, 0), NULL, NULL_CIA,
 			  sim_stopped, SIGILL);
 
@@ -2846,10 +2885,12 @@ SignalException (int exception,...)
        case Watch:
        case SystemCall:
        case BreakPoint:
+	 PC = EPC;
 	 sim_engine_halt (sd, STATE_CPU (sd, 0), NULL, NULL_CIA,
 			  sim_stopped, SIGTRAP);
 
        default : /* Unknown internal exception */
+	 PC = EPC;
 	 sim_engine_halt (sd, STATE_CPU (sd, 0), NULL, NULL_CIA,
 			  sim_stopped, SIGQUIT);
 
@@ -4026,85 +4067,105 @@ decode_coproc(instruction)
 {
   int coprocnum = ((instruction >> 26) & 3);
 
-  switch (coprocnum) {
+  switch (coprocnum)
+    {
     case 0: /* standard CPU control and cache registers */
       {
-        /* NOTEs:
-           Standard CP0 registers
-           	0 = Index               R4000   VR4100  VR4300
-                1 = Random              R4000   VR4100  VR4300
-                2 = EntryLo0            R4000   VR4100  VR4300
-                3 = EntryLo1            R4000   VR4100  VR4300
-                4 = Context             R4000   VR4100  VR4300
-                5 = PageMask            R4000   VR4100  VR4300
-                6 = Wired               R4000   VR4100  VR4300
-                8 = BadVAddr            R4000   VR4100  VR4300
-                9 = Count               R4000   VR4100  VR4300
-                10 = EntryHi            R4000   VR4100  VR4300
-                11 = Compare            R4000   VR4100  VR4300
-                12 = SR                 R4000   VR4100  VR4300
-                13 = Cause              R4000   VR4100  VR4300
-                14 = EPC                R4000   VR4100  VR4300
-                15 = PRId               R4000   VR4100  VR4300
-                16 = Config             R4000   VR4100  VR4300
-                17 = LLAddr             R4000   VR4100  VR4300
-                18 = WatchLo            R4000   VR4100  VR4300
-                19 = WatchHi            R4000   VR4100  VR4300
-                20 = XContext           R4000   VR4100  VR4300
-                26 = PErr or ECC        R4000   VR4100  VR4300
-                27 = CacheErr           R4000   VR4100
-                28 = TagLo              R4000   VR4100  VR4300
-                29 = TagHi              R4000   VR4100  VR4300
-                30 = ErrorEPC           R4000   VR4100  VR4300
-        */
         int code = ((instruction >> 21) & 0x1F);
         /* R4000 Users Manual (second edition) lists the following CP0
            instructions:
-           	DMFC0   Doubleword Move From CP0        (VR4100 = 01000000001tttttddddd00000000000)
-                DMTC0   Doubleword Move To CP0          (VR4100 = 01000000101tttttddddd00000000000)
-                MFC0    word Move From CP0              (VR4100 = 01000000000tttttddddd00000000000)
-                MTC0    word Move To CP0                (VR4100 = 01000000100tttttddddd00000000000)
-                TLBR    Read Indexed TLB Entry          (VR4100 = 01000010000000000000000000000001)
-                TLBWI   Write Indexed TLB Entry         (VR4100 = 01000010000000000000000000000010)
-                TLBWR   Write Random TLB Entry          (VR4100 = 01000010000000000000000000000110)
-                TLBP    Probe TLB for Matching Entry    (VR4100 = 01000010000000000000000000001000)
-                CACHE   Cache operation                 (VR4100 = 101111bbbbbpppppiiiiiiiiiiiiiiii)
-                ERET    Exception return                (VR4100 = 01000010000000000000000000011000)
-        */
-        if (((code == 0x00) || (code == 0x04)) && ((instruction & 0x7FF) == 0)) {
-          int rt = ((instruction >> 16) & 0x1F);
-#if 0
-          int rd = ((instruction >> 11) & 0x1F);
-#endif
-          if (code == 0x00) { /* MF : move from */
-#if 0 /* message should be controlled by configuration option */
-            callback->printf_filtered(callback,"Warning: MFC0 %d,%d not handled yet (architecture specific)\n",rt,rd);
-#endif
-            GPR[rt] = 0xDEADC0DE; /* CPR[0,rd] */
-          } else { /* MT : move to */
-            /* CPR[0,rd] = GPR[rt]; */
-#if 0 /* should be controlled by configuration option */
-            callback->printf_filtered(callback,"Warning: MTC0 %d,%d not handled yet (architecture specific)\n",rt,rd);
-#endif
-          }
-        } else
-         sim_warning("Unrecognised COP0 instruction 0x%08X at IPC = 0x%s : No handler present",instruction,pr_addr(IPC));
+	   DMFC0   Doubleword Move From CP0        (VR4100 = 01000000001tttttddddd00000000000)
+	   DMTC0   Doubleword Move To CP0          (VR4100 = 01000000101tttttddddd00000000000)
+	   MFC0    word Move From CP0              (VR4100 = 01000000000tttttddddd00000000000)
+	   MTC0    word Move To CP0                (VR4100 = 01000000100tttttddddd00000000000)
+	   TLBR    Read Indexed TLB Entry          (VR4100 = 01000010000000000000000000000001)
+	   TLBWI   Write Indexed TLB Entry         (VR4100 = 01000010000000000000000000000010)
+	   TLBWR   Write Random TLB Entry          (VR4100 = 01000010000000000000000000000110)
+	   TLBP    Probe TLB for Matching Entry    (VR4100 = 01000010000000000000000000001000)
+	   CACHE   Cache operation                 (VR4100 = 101111bbbbbpppppiiiiiiiiiiiiiiii)
+	   ERET    Exception return                (VR4100 = 01000010000000000000000000011000)
+	   */
+        if (((code == 0x00) || (code == 0x04)) && ((instruction & 0x7FF) == 0))
+	  {
+	    int rt = ((instruction >> 16) & 0x1F);
+	    int rd = ((instruction >> 11) & 0x1F);
+	    
+	    switch (rd)  /* NOTEs: Standard CP0 registers */
+	      {
+		/* 0 = Index               R4000   VR4100  VR4300 */
+		/* 1 = Random              R4000   VR4100  VR4300 */
+		/* 2 = EntryLo0            R4000   VR4100  VR4300 */
+		/* 3 = EntryLo1            R4000   VR4100  VR4300 */
+		/* 4 = Context             R4000   VR4100  VR4300 */
+		/* 5 = PageMask            R4000   VR4100  VR4300 */
+		/* 6 = Wired               R4000   VR4100  VR4300 */
+		/* 8 = BadVAddr            R4000   VR4100  VR4300 */
+		/* 9 = Count               R4000   VR4100  VR4300 */
+		/* 10 = EntryHi            R4000   VR4100  VR4300 */
+		/* 11 = Compare            R4000   VR4100  VR4300 */
+		/* 12 = SR                 R4000   VR4100  VR4300 */
+	      case 12:
+		if (code == 0x00)
+		  GPR[rt] = SR;
+		else
+		  SR = GPR[rt];
+		break;
+		/* 13 = Cause              R4000   VR4100  VR4300 */
+		/* 14 = EPC                R4000   VR4100  VR4300 */
+		/* 15 = PRId               R4000   VR4100  VR4300 */
+		/* 16 = Config             R4000   VR4100  VR4300 */
+		/* 17 = LLAddr             R4000   VR4100  VR4300 */
+		/* 18 = WatchLo            R4000   VR4100  VR4300 */
+		/* 19 = WatchHi            R4000   VR4100  VR4300 */
+		/* 20 = XContext           R4000   VR4100  VR4300 */
+		/* 26 = PErr or ECC        R4000   VR4100  VR4300 */
+		/* 27 = CacheErr           R4000   VR4100 */
+		/* 28 = TagLo              R4000   VR4100  VR4300 */
+		/* 29 = TagHi              R4000   VR4100  VR4300 */
+		/* 30 = ErrorEPC           R4000   VR4100  VR4300 */
+		GPR[rt] = 0xDEADC0DE; /* CPR[0,rd] */
+		/* CPR[0,rd] = GPR[rt]; */
+	      default:
+		if (code == 0x00)
+		  callback->printf_filtered(callback,"Warning: MFC0 %d,%d not handled yet (architecture specific)\n",rt,rd);
+		else
+		  callback->printf_filtered(callback,"Warning: MTC0 %d,%d not handled yet (architecture specific)\n",rt,rd);
+	      }
+	  }
+	else if (code == 0x10 && (instruction & 0x3f) == 0x18)
+	  {
+	    /* ERET */
+	    if (SR & status_ERL)
+	      {
+		/* Oops, not yet available */
+		callback->printf_filtered(callback,"Warning: ERET when SR[ERL] set not handled yet");
+		PC = EPC;
+		SR &= ~status_ERL;
+	      }
+	    else
+	      {
+		PC = EPC;
+		SR &= ~status_EXL;
+	      }
+	  }
+	else
+	  sim_warning("Unrecognised COP0 instruction 0x%08X at IPC = 0x%s : No handler present",instruction,pr_addr(IPC));
         /* TODO: When executing an ERET or RFE instruction we should
            clear LLBIT, to ensure that any out-standing atomic
            read/modify/write sequence fails. */
       }
-      break;
-
+    break;
+    
     case 2: /* undefined co-processor */
       sim_warning("COP2 instruction 0x%08X at IPC = 0x%s : No handler present",instruction,pr_addr(IPC));
       break;
-
+      
     case 1: /* should not occur (FPU co-processor) */
     case 3: /* should not occur (FPU co-processor) */
       SignalException(ReservedInstruction,instruction);
       break;
-  }
-
+    }
+  
   return;
 }
 

@@ -1,3 +1,35 @@
+start-sanitize-r5900
+Tue Jun  3 05:00:33 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (SignalException): Clear the simDELAYSLOT flag when an
+ 	exception has been taken.
+
+	* interp.c: Implement the ERET and mt/f sr instructions.
+
+Mon Jun  2 23:28:19 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gencode.c (build_instruction): For paddu, extract unsigned
+ 	sub-fields.
+
+	* gencode.c (build_instruction): Saturate padds instead of padd
+ 	instructions.
+
+end-sanitize-r5900
+Sat May 31 00:44:16 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (SignalException): Don't bother restarting an
+ 	interrupt.
+
+Fri May 30 23:41:48 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (SignalException): Really take an interrupt.
+	(interrupt_event): Only deliver interrupts when enabled.
+
+Tue May 27 20:08:06 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (sim_info): Only print info when verbose.
+	(sim_info) Use sim_io_printf for output.
+	
 Tue May 27 14:22:23 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* interp.c (CoProcPresent): Add UNUSED attribute - not used by all
@@ -192,8 +224,8 @@ Wed Feb 26 18:32:21 1997  Gavin Koch  <gavin@cygnus.com>
 	Change values to avoid overloading DOUBLEWORD which is tested
 	for all insns.
 	* gencode.c: reinstate "offending code".
-end-sanitize-r5900
 
+end-sanitize-r5900
 Mon Feb 24 22:47:14 1997  Dawn Perchik  <dawn@cygnus.com>
 
 	* interp.c: Fix printing of addresses for non-64-bit targets.

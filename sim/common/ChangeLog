@@ -1,3 +1,28 @@
+Tue Jun  3 04:52:04 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-watch.c (schedule_watchpoint): Use sim_unschedule_watchpoint
+ 	to remove the old watchpoint, not delete_watchpoint.
+	(watch_option_handler): Action the correct watchpoint, not just
+ 	cycles.
+
+Wed May 28 14:47:41 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-n-core.h (sim_core_write_aligned_N): For 8byte reads, output
+ 	both low and high word.
+	(sim_core_write_aligned_N): Ditto.
+	
+	* sim-trace.c (set_trace_options): Delete code explicitly setting
+ 	core->trace.
+
+	* sim-options.c (sim_print_help): Call the list commands if not a
+ 	standalone simulator.
+	(sim_print_help): Advise that some options may not be applicable.
+	
+	* sim-trace.c (set_trace_options): Assume core present.
+
+	* sim-events.c (sim_events_schedule_after_signal): Overflow signal
+ 	buffer when full not almost full.
+
 Tue May 27 14:32:00 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-events.c (sim_events_process): Don't blat the event queue
