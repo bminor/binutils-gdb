@@ -77,20 +77,37 @@ if [ "x${LIB_PATH}" = "x" ] && [ "x${USE_LIBPATH}" = xyes ] ; then
   if [ x"$use_sysroot" != xyes ] ; then
     LIB_PATH=${libdir}
   fi
+  LIB_PATH2=""
   for lib in ${NATIVE_LIB_DIRS}; do
     # The "=" is harmless if we aren't using a sysroot, but also needless.
     if [ "x${use_sysroot}" = "xyes" ] ; then
       lib="=${lib}"
     fi
-    case :${LIB_PATH}: in
-      *:${lib}:*) ;;
-      ::) LIB_PATH=${lib} ;;
-      *) LIB_PATH=${LIB_PATH}:${lib} ;;
+    addsuffix=
+    case "${LIBPATH_SUFFIX}:${lib}" in
+      :*) ;;
+      *:*${LIBPATH_SUFFIX}) ;;
+      *) addsuffix=yes ;;
     esac
+    if test -n "$addsuffix"; then
+      case :${LIB_PATH}: in
+	*:${lib}${LIBPATH_SUFFIX}:*) ;;
+	::) LIB_PATH=${lib}${LIBPATH_SUFFIX} ;;
+	*) LIB_PATH=${LIB_PATH}:${lib}${LIBPATH_SUFFIX} ;;
+      esac
+      case :${LIB_PATH}${LIB_PATH2}: in
+	*:${lib}:*) ;;
+        *) LIB_PATH2=${LIB_PATH2}:${lib} ;;
+      esac
+    else
+      case :${LIB_PATH}: in
+        *:${lib}:*) ;;
+        ::) LIB_PATH=${lib} ;;
+        *) LIB_PATH=${LIB_PATH}:${lib} ;;
+      esac
+    fi
   done
-  if test -n "$LIBPATH_SUFFIX" ; then
-    LIB_PATH=`echo ${LIB_PATH}: | sed -e s,:,${LIBPATH_SUFFIX}:,g`$LIB_PATH
-  fi
+  LIB_PATH=${LIB_PATH}${LIB_PATH2}
 fi
 
 

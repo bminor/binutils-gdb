@@ -1,3 +1,8 @@
+2003-02-07  Jakub Jelinek  <jakub@redhat.com>
+
+	* genscripts.sh (LIB_PATH): Don't append LIBPATH_SUFFIX to paths
+	which already have it.  Avoid duplicates.
+
 2003-02-06  Jakub Jelinek  <jakub@redhat.com>
 
 	* emulparams/elf64_s390.sh (LIBPATH_SUFFIX): Set to 64.
