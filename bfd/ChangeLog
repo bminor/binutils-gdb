@@ -1,3 +1,8 @@
+2003-10-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-xtensa.c (xtensa_read_table_entries): The external size
+	of entry is 8 bytes.
+
 2003-10-15  Andrew Cagney  <cagney@redhat.com>
 
 	* targets.c (BFD_JUMP_TABLE_SYMBOLS): Replace NAME##_get_symtab

@@ -514,7 +514,7 @@ xtensa_read_table_entries (abfd, section, table_p, sec_name)
       return 0;
     }
 
-  num_records = table_size / sizeof (property_table_entry);
+  num_records = table_size / 8;
   table_data = retrieve_contents (abfd, table_section, TRUE);
   blocks = (property_table_entry *)
     bfd_malloc (num_records * sizeof (property_table_entry));
@@ -556,7 +556,7 @@ xtensa_read_table_entries (abfd, section, table_p, sec_name)
 	 and the addresses are already in the table.  */
       bfd_vma off;
 
-      for (off = 0; off < table_size; off += sizeof (property_table_entry)) 
+      for (off = 0; off < table_size; off += 8) 
 	{
 	  bfd_vma address = bfd_get_32 (abfd, table_data + off);
 
