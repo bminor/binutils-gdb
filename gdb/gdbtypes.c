@@ -3031,6 +3031,13 @@ recursive_dump_type (struct type *type, int spaces)
     {
       puts_filtered (" TYPE_FLAG_VARARGS");
     }
+  /* This is used for things like AltiVec registers on ppc.  Gcc emits
+     an attribute for the array type, which tells whether or not we
+     have a vector, instead of a regular array.  */
+  if (TYPE_VECTOR (type))
+    {
+      puts_filtered (" TYPE_FLAG_VECTOR");
+    }
   puts_filtered ("\n");
   printfi_filtered (spaces, "nfields %d ", TYPE_NFIELDS (type));
   gdb_print_host_address (TYPE_FIELDS (type), gdb_stdout);

@@ -1,3 +1,12 @@
+2002-04-26  Elena Zannoni  <ezannoni@redhat.com>
+
+	* gdbtypes.h (TYPE_FLAG_VECTOR, TYPE_VECTOR): Define.
+	* gdbtypes.c (recursive_dump_type): Output the vector flag.
+	* dwarf2read.c (dwarf_attr_name): Handle new attribute for
+	vectors.
+	(read_array_type): Record the fact that this array type is really a
+	vector (i.e. are passed in by value).
+
 2002-04-26  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* alpha-tdep.h (gdbarch_tdep): Add sigcontext_addr member.

@@ -2662,6 +2662,16 @@ read_array_type (struct die_info *die, struct objfile *objfile,
   while (ndim-- > 0)
     type = create_array_type (NULL, type, range_types[ndim]);
 
+  /* Understand Dwarf2 support for vector types (like they occur on
+     the PowerPC w/ AltiVec).  Gcc just adds another attribute to the
+     array type.  This is not part of the Dwarf2/3 standard yet, but a
+     custom vendor extension.  The main difference between a regular
+     array and the vector variant is that vectors are passed by value
+     to functions.  */
+  attr = dwarf_attr (die, DW_AT_GNU_vector);
+  if (attr)
+    TYPE_FLAGS (type) |= TYPE_FLAG_VECTOR;
+
   do_cleanups (back_to);
 
   /* Install the type in the die. */
@@ -5267,6 +5277,8 @@ dwarf_attr_name (register unsigned attr)
       return "DW_AT_body_begin";
     case DW_AT_body_end:
       return "DW_AT_body_end";
+    case DW_AT_GNU_vector:
+      return "DW_AT_GNU_vector";
     default:
       return "DW_AT_<unknown>";
     }

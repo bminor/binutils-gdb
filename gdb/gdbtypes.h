@@ -248,6 +248,13 @@ enum type_code
 #define TYPE_FLAG_VARARGS	(1 << 11)
 #define TYPE_VARARGS(t)		((t)->flags & TYPE_FLAG_VARARGS)
 
+/* Identify a vector type.  Gcc is handling this by adding an extra
+   attribute to the array type.  We slurp that in as a new flag of a
+   type.  This is used only in dwarf2read.c.  */
+#define TYPE_FLAG_VECTOR	(1 << 12)
+#define TYPE_VECTOR(t)		((t)->flags & TYPE_FLAG_VECTOR)
+
+
 struct type
   {
 
