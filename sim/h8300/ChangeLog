@@ -1,3 +1,9 @@
+2003-06-03  Michael Snyder  <msnyder@redhat.com>
+
+	* h8300/compile.c: Add h8300sx insns and addressing modes.
+	* h8300/sim-main.h: Replaces h8300/inst.h.
+	* h8300/Makefile.in: Tweak to bring in some sim/common stuff.
+
 2003-04-13  Michael Snyder  <msnyder@redhat.com>
 
 	* compile.c (sim_resume): Implement 'daa' and 'das' instructions.
