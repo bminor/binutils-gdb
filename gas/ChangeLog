@@ -1,3 +1,8 @@
+2001-07-04  Richard Sandiford  <rsandifo@redhat.com>
+
+	* config/tc-mips.c (md_apply_fix): Prevent addend from becoming zero
+	if it's expected to be non-zero.
+
 2001-07-03  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* config/tc-sh.c (sh_frob_section): Replace symbol_get_frag() with

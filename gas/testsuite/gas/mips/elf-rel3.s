@@ -9,3 +9,4 @@ x:
 b:
 	.word	b+4
 	.word	x
+	.word	0

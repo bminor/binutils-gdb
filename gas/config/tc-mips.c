@@ -9612,9 +9612,44 @@ md_apply_fix (fixP, valueP)
 	    {
 	      /* In this case, the bfd_install_relocation routine will
 		 incorrectly add the symbol value back in.  We just want
-		 the addend to appear in the object file.
-		 FIXME: If this makes VALUE zero, we're toast.  */
+		 the addend to appear in the object file.  */
 	      value -= symval;
+
+	      /* Make sure the addend is still non-zero.  If it became zero
+		 after the last operation, set it to a spurious value and
+		 subtract the same value from the object file's contents.  */
+	      if (value == 0)
+		{
+		  value = 8;
+
+		  /* The in-place addends for LO16 relocations are signed;
+		     leave the matching HI16 in-place addends as zero.  */
+		  if (fixP->fx_r_type != BFD_RELOC_HI16_S)
+		    {
+		      reloc_howto_type *howto;
+		      bfd_vma contents, mask, field;
+
+		      howto = bfd_reloc_type_lookup (stdoutput,
+						     fixP->fx_r_type);
+
+		      contents = bfd_get_bits (fixP->fx_frag->fr_literal
+					       + fixP->fx_where,
+					       fixP->fx_size * 8,
+					       target_big_endian);
+
+		      /* MASK has bits set where the relocation should go.
+			 FIELD is -value, shifted into the appropriate place
+			 for this relocation.  */
+		      mask = 1 << (howto->bitsize - 1);
+		      mask = (((mask - 1) << 1) | 1) << howto->bitpos;
+		      field = (-value >> howto->rightshift) << howto->bitpos;
+
+		      bfd_put_bits ((field & mask) | (contents & ~mask),
+				    fixP->fx_frag->fr_literal + fixP->fx_where,
+				    fixP->fx_size * 8,
+				    target_big_endian);
+		    }
+		}
 	    }
 	}
 
