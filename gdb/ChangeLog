@@ -1,3 +1,8 @@
+Wed Apr 28 11:32:39 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* valops.c (search_struct_field): Fix gdb core dump with incomplete
+	stabs info.
+
 Wed Apr 28 06:11:38 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* remote.c: Change timeout to 2.
