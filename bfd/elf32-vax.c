@@ -675,7 +675,7 @@ elf_vax_check_relocs (abfd, info, sec, relocs)
 			      bfd_get_filename (abfd), rel->r_addend,
 			      h->root.root.string,
 			      eh->got_addend);
-		
+
 		}
 	    }
 	  break;
@@ -1582,7 +1582,7 @@ elf_vax_relocate_section (output_bfd, info, input_bfd, input_section,
 	      {
 	        /* This is actually a static link, or it is a -Bsymbolic link
 		   and the symbol is defined locally or there is no symbol.
-		   Change the GOT32 entry to a PC32 entry. */
+		   Change the GOT32 entry to a PC32 entry.  */
 		break;
 	      }
 
@@ -1673,7 +1673,7 @@ elf_vax_relocate_section (output_bfd, info, input_bfd, input_section,
 	  got_offset = (plt_index + 3) * 4;
 
 	  /* We want the relocate to point into the .got.plt instead
-	     of the plt itself. */
+	     of the plt itself.  */
 	  relocation = (sgotplt->output_section->vma
 			+ sgotplt->output_offset
 			+ got_offset);
@@ -1809,7 +1809,7 @@ elf_vax_relocate_section (output_bfd, info, input_bfd, input_section,
 		}
 
 	      if (!strcmp (bfd_get_section_name (input_bfd, input_section),
-			   ".text") != 0 || 
+			   ".text") != 0 ||
 		  (info->shared
 		   && ELF32_R_TYPE(outrel.r_info) != R_VAX_32
 		   && ELF32_R_TYPE(outrel.r_info) != R_VAX_RELATIVE
@@ -2158,7 +2158,7 @@ elf_vax_finish_dynamic_sections (output_bfd, info)
 		           + sgot->output_offset + 8
 		           - (splt->output_section->vma + 12)),
 		          splt->contents + 8);
-          elf_section_data (splt->output_section)->this_hdr.sh_entsize 
+          elf_section_data (splt->output_section)->this_hdr.sh_entsize
            = PLT_ENTRY_SIZE;
 	}
     }

@@ -125,9 +125,9 @@ static reloc_howto_type *elf64_x86_64_reloc_type_lookup
   PARAMS ((bfd *, bfd_reloc_code_real_type));
 static void elf64_x86_64_info_to_howto
   PARAMS ((bfd *, arelent *, Elf64_Internal_Rela *));
-static boolean elf64_x86_64_grok_prstatus 
+static boolean elf64_x86_64_grok_prstatus
   PARAMS ((bfd *, Elf_Internal_Note *));
-static boolean elf64_x86_64_grok_psinfo 
+static boolean elf64_x86_64_grok_psinfo
   PARAMS ((bfd *, Elf_Internal_Note *));
 static struct bfd_link_hash_table *elf64_x86_64_link_hash_table_create
   PARAMS ((bfd *));
@@ -228,11 +228,11 @@ elf64_x86_64_grok_prstatus (abfd, note)
 
       case 336:		/* sizeof(istruct elf_prstatus) on Linux/x86_64 */
 	/* pr_cursig */
-	elf_tdata (abfd)->core_signal 
+	elf_tdata (abfd)->core_signal
 	  = bfd_get_16 (abfd, note->descdata + 12);
 
 	/* pr_pid */
-	elf_tdata (abfd)->core_pid 
+	elf_tdata (abfd)->core_pid
 	  = bfd_get_32 (abfd, note->descdata + 32);
 
 	/* pr_reg */
@@ -1087,7 +1087,7 @@ elf64_x86_64_adjust_dynamic_symbol (info, h)
 
   /* We must generate a R_X86_64_COPY reloc to tell the dynamic linker
      to copy the initial value out of the dynamic object and into the
-     runtime process image. */
+     runtime process image.  */
   if ((h->root.u.def.section->flags & SEC_ALLOC) != 0)
     {
       htab->srelbss->_raw_size += sizeof (Elf64_External_Rela);

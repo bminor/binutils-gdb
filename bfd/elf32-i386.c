@@ -594,7 +594,7 @@ elf_i386_mkobject (abfd)
     return false;
   return true;
 }
-                 
+
 static boolean
 elf_i386_object_p (abfd)
   bfd *abfd;
@@ -1400,7 +1400,7 @@ elf_i386_adjust_dynamic_symbol (info, h)
     }
 
   /* If we didn't find any dynamic relocs in read-only sections, then
-     we'll be keeping the dynamic relocs and avoiding the copy reloc.  */ 
+     we'll be keeping the dynamic relocs and avoiding the copy reloc.  */
   if (p == NULL)
     {
       h->elf_link_hash_flags &= ~ELF_LINK_NON_GOT_REF;
@@ -1552,7 +1552,7 @@ allocate_dynrelocs (h, inf)
       && !info->shared
       && h->dynindx == -1
       && elf_i386_hash_entry(h)->tls_type == GOT_TLS_IE)
-    h->got.offset = (bfd_vma) -1;    
+    h->got.offset = (bfd_vma) -1;
   else if (h->got.refcount > 0)
     {
       asection *s;
@@ -2885,7 +2885,7 @@ elf_i386_finish_dynamic_symbol (output_bfd, info, h, sym)
 	     the .plt section.  Leave the value alone.  This is a clue
 	     for the dynamic linker, to make function pointer
 	     comparisons work between an application and shared
-	     library.  */  
+	     library.  */
 	  sym->st_shndx = SHN_UNDEF;
 	}
     }

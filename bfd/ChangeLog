@@ -1,3 +1,24 @@
+2002-06-02  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* elf32-arc.c: Fix formatting.
+	* elf32-arm.h: Likewise.
+	* elf32-cris.c: Likewise.
+	* elf32-dlx.c: Likewise.
+	* elf32-hppa.c: Likewise.
+	* elf32-i386.c: Likewise.
+	* elf32-i386qnx.c: Likewise.
+	* elf32-or32.c: Likewise.
+	* elf32-s390.c: Likewise.
+	* elf32-sh64.c: Likewise.
+	* elf32-vax.c: Likewise.
+	* elf32-xstormy16.c: Likewise.
+	* elf64-alpha.c: Likewise.
+	* elf64-mmix.c: Likewise.
+	* elf64-ppc.c: Likewise.
+	* elf64-s390.c: Likewise.
+	* elf64-sh64.c: Likewise.
+	* elf64-x86-64.c: Likewise.
+
 2002-06-02  Richard Henderson  <rth@redhat.com>
 
 	* elf64-alpha.c (elf64_alpha_relocate_section): Don't dereference

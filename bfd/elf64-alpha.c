@@ -1454,7 +1454,7 @@ elf64_alpha_relax_with_lituse (info, symval, irel)
 		      R_ALPHA_GPDISP));
 		if (gpdisp)
 		  {
-		    bfd_byte *p_ldah = info->contents + gpdisp->r_offset; 
+		    bfd_byte *p_ldah = info->contents + gpdisp->r_offset;
 		    bfd_byte *p_lda = p_ldah + gpdisp->r_addend;
 		    unsigned int ldah = bfd_get_32 (info->abfd, p_ldah);
 		    unsigned int lda = bfd_get_32 (info->abfd, p_lda);
@@ -1636,7 +1636,7 @@ elf64_alpha_relax_got_load (info, symval, irel, r_type)
     insn = (OP_LDA << 26) | (insn & (31 << 21)) | (31 << 16);
   bfd_put_32 (info->abfd, (bfd_vma) insn, info->contents + irel->r_offset);
   info->changed_contents = true;
-  
+
   switch (r_type)
     {
     case R_ALPHA_LITERAL:
@@ -2082,7 +2082,7 @@ elf64_alpha_relax_section (abfd, sec, link_info, again)
   info.relocs = internal_relocs;
   info.relend = irelend = internal_relocs + sec->reloc_count;
 
-  /* Find the GP for this object.  Do not store the result back via 
+  /* Find the GP for this object.  Do not store the result back via
      _bfd_set_gp_value, since this could change again before final.  */
   info.gotobj = alpha_elf_tdata (abfd)->gotobj;
   if (info.gotobj)
@@ -3750,7 +3750,7 @@ elf64_alpha_size_got_sections (info)
   return true;
 }
 
-/* Called from relax_section to rebuild the PLT in light of 
+/* Called from relax_section to rebuild the PLT in light of
    potential changes in the function's status.  */
 
 static boolean
@@ -3954,7 +3954,7 @@ elf64_alpha_size_rela_got_section (info)
 
   /* Shared libraries often require RELATIVE relocs, and some relocs
      require attention for the main application as well.  */
-	 
+
   entries = 0;
   for (i = alpha_elf_hash_table(info)->got_list;
        i ; i = alpha_elf_tdata(i)->got_link_next)
@@ -4585,7 +4585,7 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	    /* The source and destination gp must be the same.  Note that
 	       the source will always have an assigned gp, since we forced
 	       one in check_relocs, but that the destination may not, as
-	       it might not have had any relocations at all.  Also take 
+	       it might not have had any relocations at all.  Also take
 	       care not to crash if H is an undefined symbol.  */
 	    if (h != NULL && sec != NULL
 		&& alpha_elf_tdata (sec->owner)->gotobj

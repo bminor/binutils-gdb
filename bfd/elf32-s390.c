@@ -1064,7 +1064,7 @@ elf_s390_adjust_dynamic_symbol (info, h)
 
   /* If this is a function, put it in the procedure linkage table.  We
      will fill in the contents of the procedure linkage table later
-     (although we could actually do it here). */
+     (although we could actually do it here).  */
   if (h->type == STT_FUNC
       || (h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) != 0)
     {

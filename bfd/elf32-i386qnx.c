@@ -40,7 +40,7 @@ elf_i386qnx_copy_private_bfd_data_p (ibfd, isec, obfd, osec)
      bfd *obfd;
      asection *osec;
 {
-  /* We don't use these parameters, but another target might. */
+  /* We don't use these parameters, but another target might.  */
   ibfd = ibfd;
   obfd = obfd;
   osec = osec;
@@ -50,7 +50,7 @@ elf_i386qnx_copy_private_bfd_data_p (ibfd, isec, obfd, osec)
 static boolean
 elf_i386qnx_is_contained_by_filepos (section, segment)
      asection *section;
-     Elf_Internal_Phdr *segment; 
+     Elf_Internal_Phdr *segment;
 {
   return ((bfd_vma) section->filepos >= segment->p_offset
           && ((bfd_vma) section->filepos + section->_raw_size
@@ -60,7 +60,7 @@ elf_i386qnx_is_contained_by_filepos (section, segment)
 static void
 elf_i386qnx_set_nonloadable_filepos (abfd, phdrs)
      bfd *abfd;
-     Elf_Internal_Phdr *phdrs; 
+     Elf_Internal_Phdr *phdrs;
 {
   struct elf_segment_map *m;
   Elf_Internal_Phdr *p;

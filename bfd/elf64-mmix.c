@@ -943,7 +943,7 @@ mmix_elf_perform_relocation (isec, howto, datap, addr, value)
 	  value += addr;
 	  break;
 	}
-      /* FALLTHROUGH. */
+      /* FALLTHROUGH.  */
     case R_MMIX_ADDR19:
     case R_MMIX_ADDR27:
       /* These must be in range, or else we emit an error.  */

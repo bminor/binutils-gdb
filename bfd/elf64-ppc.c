@@ -108,7 +108,7 @@ static boolean ppc64_elf_section_from_shdr
 #define CROR_151515	0x4def7b82
 #define CROR_313131	0x4ffffb82
 
-/* .glink entries for the first 32k functions are two instructions. */
+/* .glink entries for the first 32k functions are two instructions.  */
 #define LI_R0_0		0x38000000	/* li    %r0,0		*/
 #define B_DOT		0x48000000	/* b     .		*/
 
@@ -525,7 +525,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
-	 /* FIXME: Verify.  Was complain_overflow_bitfield. */
+	 /* FIXME: Verify.  Was complain_overflow_bitfield.  */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_PPC64_REL32",	/* name */
@@ -798,7 +798,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 0xffffffffffffffff,	/* dst_mask */
 	 true),			/* pcrel_offset */
 
-  /* 64-bit relocation to the symbol's procedure linkage table. */
+  /* 64-bit relocation to the symbol's procedure linkage table.  */
   HOWTO (R_PPC64_PLT64,		/* type */
 	 0,			/* rightshift */
 	 4,			/* size (0=byte, 1=short, 2=long, 4=64 bits) */
@@ -1388,7 +1388,7 @@ ppc64_elf_ha_reloc (abfd, reloc_entry, symbol, data,
      call the generic function.  Any adjustment will be done at final
      link time.  */
   if (output_bfd != NULL)
-    return bfd_elf_generic_reloc (abfd, reloc_entry, symbol, data,	
+    return bfd_elf_generic_reloc (abfd, reloc_entry, symbol, data,
 				  input_section, output_bfd, error_message);
 
   /* Adjust the addend for sign extension of the low 16 bits.
@@ -1419,7 +1419,7 @@ ppc64_elf_brtaken_reloc (abfd, reloc_entry, symbol, data,
      call the generic function.  Any adjustment will be done at final
      link time.  */
   if (output_bfd != NULL)
-    return bfd_elf_generic_reloc (abfd, reloc_entry, symbol, data,	
+    return bfd_elf_generic_reloc (abfd, reloc_entry, symbol, data,
 				  input_section, output_bfd, error_message);
 
   octets = reloc_entry->address * bfd_octets_per_byte (abfd);
@@ -1428,7 +1428,7 @@ ppc64_elf_brtaken_reloc (abfd, reloc_entry, symbol, data,
   r_type = (enum elf_ppc_reloc_type) reloc_entry->howto->type;
   if (r_type == R_PPC64_ADDR14_BRTAKEN
       || r_type == R_PPC64_REL14_BRTAKEN)
-    insn |= 0x01 << 21; /* 'y' or 't' bit, lowest bit of BO field. */
+    insn |= 0x01 << 21; /* 'y' or 't' bit, lowest bit of BO field.  */
 
   if (is_power4)
     {
@@ -1480,7 +1480,7 @@ ppc64_elf_sectoff_reloc (abfd, reloc_entry, symbol, data,
      call the generic function.  Any adjustment will be done at final
      link time.  */
   if (output_bfd != NULL)
-    return bfd_elf_generic_reloc (abfd, reloc_entry, symbol, data,	
+    return bfd_elf_generic_reloc (abfd, reloc_entry, symbol, data,
 				  input_section, output_bfd, error_message);
 
   /* Subtract the symbol section base address.  */
@@ -1503,7 +1503,7 @@ ppc64_elf_sectoff_ha_reloc (abfd, reloc_entry, symbol, data,
      call the generic function.  Any adjustment will be done at final
      link time.  */
   if (output_bfd != NULL)
-    return bfd_elf_generic_reloc (abfd, reloc_entry, symbol, data,	
+    return bfd_elf_generic_reloc (abfd, reloc_entry, symbol, data,
 				  input_section, output_bfd, error_message);
 
   /* Subtract the symbol section base address.  */
@@ -1531,7 +1531,7 @@ ppc64_elf_toc_reloc (abfd, reloc_entry, symbol, data,
      call the generic function.  Any adjustment will be done at final
      link time.  */
   if (output_bfd != NULL)
-    return bfd_elf_generic_reloc (abfd, reloc_entry, symbol, data,	
+    return bfd_elf_generic_reloc (abfd, reloc_entry, symbol, data,
 				  input_section, output_bfd, error_message);
 
   TOCstart = _bfd_get_gp_value (input_section->output_section->owner);
@@ -1560,7 +1560,7 @@ ppc64_elf_toc_ha_reloc (abfd, reloc_entry, symbol, data,
      call the generic function.  Any adjustment will be done at final
      link time.  */
   if (output_bfd != NULL)
-    return bfd_elf_generic_reloc (abfd, reloc_entry, symbol, data,	
+    return bfd_elf_generic_reloc (abfd, reloc_entry, symbol, data,
 				  input_section, output_bfd, error_message);
 
   TOCstart = _bfd_get_gp_value (input_section->output_section->owner);
@@ -1593,7 +1593,7 @@ ppc64_elf_toc64_reloc (abfd, reloc_entry, symbol, data,
      call the generic function.  Any adjustment will be done at final
      link time.  */
   if (output_bfd != NULL)
-    return bfd_elf_generic_reloc (abfd, reloc_entry, symbol, data,	
+    return bfd_elf_generic_reloc (abfd, reloc_entry, symbol, data,
 				  input_section, output_bfd, error_message);
 
   TOCstart = _bfd_get_gp_value (input_section->output_section->owner);
@@ -1620,7 +1620,7 @@ ppc64_elf_unhandled_reloc (abfd, reloc_entry, symbol, data,
      call the generic function.  Any adjustment will be done at final
      link time.  */
   if (output_bfd != NULL)
-    return bfd_elf_generic_reloc (abfd, reloc_entry, symbol, data,	
+    return bfd_elf_generic_reloc (abfd, reloc_entry, symbol, data,
 				  input_section, output_bfd, error_message);
 
   if (error_message != NULL)
@@ -4332,7 +4332,7 @@ ppc_size_one_stub (gen_entry, in_arg)
 
 /* Set up various things so that we can make a list of input sections
    for each output section included in the link.  Returns -1 on error,
-   0 when no stubs will be needed, and 1 on success. */
+   0 when no stubs will be needed, and 1 on success.  */
 
 int
 ppc64_elf_setup_section_lists (output_bfd, info)
@@ -5230,8 +5230,8 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  /* Branch taken prediction relocations.  */
 	case R_PPC64_ADDR14_BRTAKEN:
 	case R_PPC64_REL14_BRTAKEN:
-	  insn = 0x01 << 21; /* 'y' or 't' bit, lowest bit of BO field. */
-	  /* Fall thru. */
+	  insn = 0x01 << 21; /* 'y' or 't' bit, lowest bit of BO field.  */
+	  /* Fall thru.  */
 
 	  /* Branch not taken prediction relocations.  */
 	case R_PPC64_ADDR14_BRNTAKEN:

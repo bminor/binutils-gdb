@@ -880,7 +880,7 @@ sh64_address_in_cranges (cranges, addr, rangep)
 
   /* Try and find a matching range.  */
   found_rangep
-    = bsearch (&addr, cranges_contents, cranges_size / SH64_CRANGE_SIZE, 
+    = bsearch (&addr, cranges_contents, cranges_size / SH64_CRANGE_SIZE,
 	       SH64_CRANGE_SIZE,
 	       bfd_big_endian (cranges->owner)
 	       ? crange_bsearch_cmpb : crange_bsearch_cmpl);

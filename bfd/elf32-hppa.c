@@ -2558,7 +2558,7 @@ elf32_hppa_size_dynamic_sections (output_bfd, info)
 
 /* Set up various things so that we can make a list of input sections
    for each output section included in the link.  Returns -1 on error,
-   0 when no stubs will be needed, and 1 on success. */
+   0 when no stubs will be needed, and 1 on success.  */
 
 int
 elf32_hppa_setup_section_lists (output_bfd, info)

@@ -628,7 +628,7 @@ bfd_elf32_arm_get_bfd_for_interworking (abfd, info)
 
   /* Save the bfd for later use.  */
   globals->bfd_of_glue_owner = abfd;
-  
+
   return true;
 }
 
@@ -1540,7 +1540,7 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 	  signed_check = check | ~((bfd_vma) -1 >> howto->rightshift);
 
 	relocation |= (bfd_get_16 (input_bfd, hit_data) & (~ howto->dst_mask));
- 
+
 	bfd_put_16 (input_bfd, relocation, hit_data);
 
 	/* Assumes two's complement.  */
@@ -1549,7 +1549,7 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 
 	return bfd_reloc_ok;
       }
-      
+
     case R_ARM_GNU_VTINHERIT:
     case R_ARM_GNU_VTENTRY:
       return bfd_reloc_ok;
@@ -1574,7 +1574,7 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
       if (sgot == NULL)
         return bfd_reloc_notsupported;
 
-      /* If we are addressing a Thumb function, we need to adjust the 
+      /* If we are addressing a Thumb function, we need to adjust the
 	 address by one, so that attempts to call the function pointer will
 	 correctly interpret it as Thumb code.  */
       if (sym_flags == STT_ARM_TFUNC)
@@ -2374,7 +2374,7 @@ ERROR: %s uses hardware FP, whereas %s uses software FP"),
 	      _bfd_error_handler (_("\
 Warning: %s supports interworking, whereas %s does not"),
 				  bfd_archive_filename (ibfd),
-				  bfd_get_filename (obfd));    
+				  bfd_get_filename (obfd));
 	    }
 	  else
 	    {

@@ -488,7 +488,7 @@ elf32_dlx_relocate26  (abfd, reloc_entry, symbol, data,
 
 /* A mapping from BFD reloc types to DLX ELF reloc types.
    Stolen from elf32-mips.c.
-   
+
    More about this table - for dlx elf relocation we do not really
    need this table, if we have a rtype defined in this table will
    caused tc_gen_relocate confused and die on us, but if we remove

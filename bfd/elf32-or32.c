@@ -277,19 +277,19 @@ or32_elf_32_reloc (abfd, reloc_entry, symbol, data, input_section,
      asection *input_section;
      bfd *output_bfd;
      char **error_message ATTRIBUTE_UNUSED;
-{ 
+{
   if (output_bfd != (bfd *) NULL)
     {
       unsigned long insn;
       bfd_size_type addr = reloc_entry->address;
 
       reloc_entry->address += input_section->output_offset;
-      
+
       insn = bfd_get_32 (abfd, (bfd_byte *) data + addr);
       insn += symbol->section->output_section->vma;
       insn += symbol->section->output_offset;
       insn += symbol->value;
-      bfd_put_32 (abfd, insn, (bfd_byte *) data + addr); 
+      bfd_put_32 (abfd, insn, (bfd_byte *) data + addr);
 
       return bfd_reloc_ok;
     }
@@ -307,7 +307,7 @@ or32_elf_16_reloc (abfd, reloc_entry, symbol, data, input_section,
      asection *input_section;
      bfd *output_bfd;
      char **error_message ATTRIBUTE_UNUSED;
-{ 
+{
   if (output_bfd != (bfd *) NULL)
     {
       unsigned short insn;
@@ -319,7 +319,7 @@ or32_elf_16_reloc (abfd, reloc_entry, symbol, data, input_section,
       insn += symbol->section->output_section->vma;
       insn += symbol->section->output_offset;
       insn += symbol->value;
-      bfd_put_16 (abfd, insn, (bfd_byte *) data + addr); 
+      bfd_put_16 (abfd, insn, (bfd_byte *) data + addr);
 
       return bfd_reloc_ok;
     }
@@ -337,7 +337,7 @@ or32_elf_8_reloc (abfd, reloc_entry, symbol, data, input_section,
      asection *input_section;
      bfd *output_bfd;
      char **error_message ATTRIBUTE_UNUSED;
-{ 
+{
   if (output_bfd != (bfd *) NULL)
     {
       unsigned char insn;
@@ -349,7 +349,7 @@ or32_elf_8_reloc (abfd, reloc_entry, symbol, data, input_section,
       insn += symbol->section->output_section->vma;
       insn += symbol->section->output_offset;
       insn += symbol->value;
-      bfd_put_8 (abfd, insn, (bfd_byte *) data + addr); 
+      bfd_put_8 (abfd, insn, (bfd_byte *) data + addr);
 
       return bfd_reloc_ok;
     }
@@ -391,7 +391,7 @@ or32_elf_consth_reloc (abfd, reloc_entry, symbol, data, input_section,
   bfd_reloc_status_type ret;
   bfd_vma relocation;
   struct or32_consth *n;
-  
+
   ret = bfd_reloc_ok;
 
   if (bfd_is_und_section (symbol->section)
@@ -505,7 +505,7 @@ or32_elf_jumptarg_reloc (abfd, reloc_entry, symbol, data, input_section,
      asection *input_section;
      bfd *output_bfd;
      char **error_message ATTRIBUTE_UNUSED;
-{ 
+{
   if (output_bfd != (bfd *) NULL)
     {
       unsigned long insn, tmp;
@@ -517,7 +517,7 @@ or32_elf_jumptarg_reloc (abfd, reloc_entry, symbol, data, input_section,
       tmp = insn | 0xfc000000;
       tmp -= (input_section->output_offset >> 2);
       insn = (insn & 0xfc000000) | (tmp & 0x03ffffff);
-      bfd_put_32 (abfd, insn, (bfd_byte *) data + addr); 
+      bfd_put_32 (abfd, insn, (bfd_byte *) data + addr);
 
       return bfd_reloc_ok;
     }
