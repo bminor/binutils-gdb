@@ -33,6 +33,7 @@ arch.h
 config.in
 configure
 configure.in
+cpu.h
 cpuall.h
 decode.c
 decode.h

@@ -10,6 +10,7 @@ start-sanitize-cygnus
 	Add cgen support for generating files.
 end-sanitize-cygnus
 	(arch): Renamed from CPU.
+	* cpu.h: New file.
 	* decode.c: Redone.
 	* decode.h: Redone.
 	* extract.c: Redone.
