@@ -1363,9 +1363,9 @@ bfd_section_from_phdr (abfd, hdr, index)
   char namebuf[64];
   int split;
 
-  split = ((hdr->p_memsz > 0) &&
-	   (hdr->p_filesz > 0) &&
-	   (hdr->p_memsz > hdr->p_filesz));
+  split = ((hdr->p_memsz > 0)
+	    && (hdr->p_filesz > 0)
+	    && (hdr->p_memsz > hdr->p_filesz));
   sprintf (namebuf, split ? "segment%da" : "segment%d", index);
   name = bfd_alloc (abfd, strlen (namebuf) + 1);
   if (!name)
@@ -2605,7 +2605,8 @@ assign_file_positions_for_segments (abfd)
 	  p->p_memsz += alloc * bed->s->sizeof_phdr;
 	}
 
-      if (p->p_type == PT_LOAD || p->p_type == PT_NOTE)
+      if (p->p_type == PT_LOAD 
+	  || (p->p_type == PT_NOTE && abfd->format == bfd_core))
 	{
 	  if (! m->includes_filehdr && ! m->includes_phdrs)
 	    p->p_offset = off;
@@ -2704,7 +2705,7 @@ assign_file_positions_for_segments (abfd)
 		voff += sec->_raw_size;
 	    }
 
-	  if (p->p_type == PT_NOTE)
+	  if (p->p_type == PT_NOTE && abfd->format == bfd_core)
 	    {
 	      if (i == 0)	/* the actual "note" segment */
 		{		/* this one actually contains everything. */
@@ -2891,8 +2892,8 @@ assign_file_positions_except_relocs (abfd)
   file_ptr off;
   struct elf_backend_data *bed = get_elf_backend_data (abfd);
 
-  if ((abfd->flags & (EXEC_P | DYNAMIC)) == 0 &&
-      abfd->format != bfd_core)
+  if ((abfd->flags & (EXEC_P | DYNAMIC)) == 0
+      && abfd->format != bfd_core)
     {
       Elf_Internal_Shdr **hdrpp;
       unsigned int i;
@@ -3364,11 +3365,13 @@ copy_private_bfd_data (ibfd, obfd)
 
   /* Special case: corefile "NOTE" section containing regs, prpsinfo etc. */
 
-#define IS_COREFILE_NOTE(p, s)                                               \
-	    (p->p_type == PT_NOTE &&                                         \
-	     s->vma == 0 && s->lma == 0 && s->_cooked_size == 0 &&           \
-	     (bfd_vma) s->filepos >= p->p_offset &&                          \
-	     (bfd_vma) s->filepos + s->_raw_size <= p->p_offset + p->p_filesz)
+#define IS_COREFILE_NOTE(p, s)                                          \
+	    (p->p_type == PT_NOTE                                       \
+	     && ibfd->format == bfd_core                                \
+	     && s->vma == 0 && s->lma == 0                              \
+	     && (bfd_vma) s->filepos >= p->p_offset                     \
+	     && (bfd_vma) s->filepos + s->_raw_size                     \
+	     <= p->p_offset + p->p_filesz)
 
   /* The complicated case when p_vaddr is 0 is to handle the Solaris
      linker, which generates a PT_INTERP section with p_vaddr and
@@ -3405,9 +3408,9 @@ copy_private_bfd_data (ibfd, obfd)
       for (s = ibfd->sections; s != NULL; s = s->next)
 	if (s->output_section != NULL)
 	  {
-	    if ((IS_CONTAINED_BY (s->vma, s->_raw_size, p->p_vaddr, p) ||
-		 IS_SOLARIS_PT_INTERP (p, s)) &&
-		(s->flags & SEC_ALLOC) != 0)
+	    if ((IS_CONTAINED_BY (s->vma, s->_raw_size, p->p_vaddr, p)
+		 || IS_SOLARIS_PT_INTERP (p, s))
+		&& (s->flags & SEC_ALLOC) != 0)
 	      ++csecs;
 	    else if (IS_COREFILE_NOTE (p, s))
 	      ++csecs;
@@ -3538,8 +3541,8 @@ copy_private_bfd_data (ibfd, obfd)
 
 	      /* Match up the physical address of the segment with the
 		 LMA address of the output section.  */
-	      if (IS_CONTAINED_BY (os->lma, os->_raw_size, m->p_paddr, p) ||
-		  IS_COREFILE_NOTE (p, s))
+	      if (IS_CONTAINED_BY (os->lma, os->_raw_size, m->p_paddr, p)
+		  || IS_COREFILE_NOTE (p, s))
 		{
 		  if (matching_lma == 0)
 		    matching_lma = os->lma;
@@ -3611,8 +3614,8 @@ copy_private_bfd_data (ibfd, obfd)
 	      
 	      os = s->output_section;
 	      
-	      if (IS_CONTAINED_BY (os->lma, os->_raw_size, m->p_paddr, p) ||
-		  IS_COREFILE_NOTE (p, s))
+	      if (IS_CONTAINED_BY (os->lma, os->_raw_size, m->p_paddr, p)
+		  || IS_COREFILE_NOTE (p, s))
 		{
 		  if (m->count == 0)
 		    {

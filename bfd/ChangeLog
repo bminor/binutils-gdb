@@ -44,6 +44,11 @@ Thu Aug 20 15:03:45 1998  Nick Clifton  <nickc@cygnus.com>
 	(elf32_arm_relocate_section): Compute name before calling
 	elf32_arm_final_link_relocate().
 
+Thu Aug 20 11:30:17 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* elf.c: comment and formatting cleanups.
+	* elfcore.h: ditto.
+
 Wed Aug 19 15:43:26 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* elfcode.h (elf_object_p): Reject files of header type ET_CORE
