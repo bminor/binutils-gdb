@@ -116,6 +116,7 @@ case "${target}" in
 # end-sanitize-tx19
 # start-sanitize-r5900
   mips64r59*-*-*)	sim_default_gen=IGEN
+			sim_use_gen=IGEN
 			sim_igen_machine="-M r5900"
 			;;
 # end-sanitize-r5900

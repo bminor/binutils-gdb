@@ -1,8 +1,13 @@
 Sat Jan 31 14:50:27 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
+	* gen-engine.c (gen_engine_h): Don't assume a model is present.
+	(gen_engine_c): Ditto.
+
+	* igen.c (gen_run_c): Ditto.
+
 	* gen-engine.c (print_run_body): Use CIA_GET & CIA_SET instead of
  	CPU_CIA.  Parameterize with CPU argument.
-
+	
 Fri Jan 30 09:09:39 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gen.h (struct _gen_list): Replace processor with model.

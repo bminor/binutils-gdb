@@ -1,5 +1,10 @@
 Sat Jan 31 14:49:24 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
+start-sanitize-r5900
+	* configure.in (sim_igen_filter): For r5900, use igen.
+	* configure: Re-generate.
+	
+end-sanitize-r5900
 	* interp.c (sim_engine_run): Add `nr_cpus' argument.
 
 	* mips.igen (model): Map processor names onto BFD name.	

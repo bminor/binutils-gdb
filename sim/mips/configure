@@ -1817,6 +1817,7 @@ case "${target}" in
 # end-sanitize-tx19
 # start-sanitize-r5900
   mips64r59*-*-*)	sim_default_gen=IGEN
+			sim_use_gen=IGEN
 			sim_igen_machine="-M r5900"
 			;;
 # end-sanitize-r5900
@@ -1872,17 +1873,17 @@ for ac_hdr in string.h strings.h stdlib.h stdlib.h
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
-echo "configure:1876: checking for $ac_hdr" >&5
+echo "configure:1877: checking for $ac_hdr" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1881 "configure"
+#line 1882 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1886: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1887: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -1909,7 +1910,7 @@ fi
 done
 
 echo $ac_n "checking for fabs in -lm""... $ac_c" 1>&6
-echo "configure:1913: checking for fabs in -lm" >&5
+echo "configure:1914: checking for fabs in -lm" >&5
 ac_lib_var=`echo m'_'fabs | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -1917,7 +1918,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lm  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1921 "configure"
+#line 1922 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
@@ -1928,7 +1929,7 @@ int main() {
 fabs()
 ; return 0; }
 EOF
-if { (eval echo configure:1932: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
+if { (eval echo configure:1933: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -1958,12 +1959,12 @@ fi
 for ac_func in aint anint sqrt
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
-echo "configure:1962: checking for $ac_func" >&5
+echo "configure:1963: checking for $ac_func" >&5
 if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1967 "configure"
+#line 1968 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -1986,7 +1987,7 @@ $ac_func();
 
 ; return 0; }
 EOF
-if { (eval echo configure:1990: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
+if { (eval echo configure:1991: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
   rm -rf conftest*
   eval "ac_cv_func_$ac_func=yes"
 else

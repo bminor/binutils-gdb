@@ -727,7 +727,9 @@ gen_engine_h (lf *file,
   for (entry = gen->tables; entry != NULL; entry = entry->next)
     {
       print_engine_run_function_header (file,
-					entry->model->name,
+					(options.gen.multi_sim
+					 ? entry->model->name
+					 : NULL),
 					is_function_declaration);
     }
 }
@@ -765,7 +767,9 @@ gen_engine_c(lf *file,
 	  
 	  /* output the main engine routine */
 	  print_engine_run_function_header (file,
-					    entry->model->name,
+					    (options.gen.multi_sim
+					     ? entry->model->name
+					     : NULL),
 					    is_function_definition);
 	  print_run_body (file, entry->table);
 	  break;
