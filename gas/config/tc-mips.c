@@ -2358,7 +2358,6 @@ macro_build (place, counter, ep, name, fmt, va_alist)
   assert (insn.insn_mo);
   assert (strcmp (name, insn.insn_mo->name) == 0);
 
-
   /* Search until we get a match for NAME.  */
   while (1)
     {
@@ -2375,31 +2374,30 @@ macro_build (place, counter, ep, name, fmt, va_alist)
       else
 	insn_isa = 15;
 
-      if (insn_isa > mips_opts.isa
-	  && (insn.insn_mo->pinfo != INSN_MACRO
-	      && ((mips_4650
-		   && (insn.insn_mo->membership & INSN_4650) != INSN_4650)
-		  || (mips_4650 && (insn.insn_mo->pinfo & FP_D))
-		  || (mips_4010
-		      && (insn.insn_mo->membership & INSN_4010) != INSN_4010)
-		  || (mips_4100
-		      && (insn.insn_mo->membership & INSN_4100) != INSN_4100)
-		  /* start-sanitize-r5900 */
-		  || (mips_5900
-		      && (insn.insn_mo->membership & INSN_5900) != INSN_5900)
-		  || (mips_5900 && (insn.insn_mo->pinfo & FP_D))
-		  /* end-sanitize-r5900 */
-		  || (mips_3900
-		      && (insn.insn_mo->membership & INSN_3900) != INSN_3900))))
-	{
-	  ++insn.insn_mo;
-	  assert (insn.insn_mo->name);
-	  assert (strcmp (name, insn.insn_mo->name) == 0);
-	  continue;
-	}
+      if (strcmp (fmt, insn.insn_mo->args) == 0
+	  && insn.insn_mo->pinfo != INSN_MACRO
+	  && (insn_isa <= mips_opts.isa
+	      || (mips_4650
+		  && (insn.insn_mo->membership & INSN_4650) != 0)
+	      || (mips_4010
+		  && (insn.insn_mo->membership & INSN_4010) != 0)
+	      || (mips_4100
+		  && (insn.insn_mo->membership & INSN_4100) != 0)
+	      /* start-sanitize-r5900 */
+	      || (mips_5900
+		  && (insn.insn_mo->membership & INSN_5900) != 0)
+	      /* end-sanitize-r5900 */
+	      || (mips_3900
+		  && (insn.insn_mo->membership & INSN_3900) != 0))
+	  /* start-sanitize-r5900 */
+	  && (! mips_5900 || (insn.insn_mo->pinfo & FP_D) == 0)
+	  /* end-sanitize-r5900 */
+	  && (! mips_4650 || (insn.insn_mo->pinfo & FP_D) == 0))
+	break;
 
-      /* We got a successful match.  */
-      break;
+      ++insn.insn_mo;
+      assert (insn.insn_mo->name);
+      assert (strcmp (name, insn.insn_mo->name) == 0);
     }
 
   insn.insn_opcode = insn.insn_mo->match;
@@ -6571,6 +6569,7 @@ mips_ip (str, ip)
   for (;;)
     {
       int insn_isa;
+      boolean ok;
 
       assert (strcmp (insn->name, str) == 0);
 
@@ -6587,22 +6586,30 @@ mips_ip (str, ip)
       else
 	insn_isa = 15;
 
-      if (insn_isa > mips_opts.isa
-	  && (insn->pinfo != INSN_MACRO
-	      && ((mips_4650
-		   && (insn->membership & INSN_4650) != INSN_4650)
-		  || (mips_4650 && (insn->pinfo & FP_D))
-		  || (mips_4010
-		      && (insn->membership & INSN_4010) != INSN_4010)
-		  || (mips_4100
-		      && (insn->membership & INSN_4100) != INSN_4100)
-		  /* start-sanitize-r5900 */
-		  || (mips_5900
-		      && (insn->membership & INSN_5900) != INSN_5900)
-		  || (mips_5900 && (insn->pinfo & FP_D))
-		  /* end-sanitize-r5900 */
-		  || (mips_3900
-		      && (insn->membership & INSN_3900) != INSN_3900))))
+      if (insn_isa <= mips_opts.isa)
+	ok = true;
+      else if (insn->pinfo == INSN_MACRO)
+	ok = false;
+      else if ((mips_4650 && (insn->membership & INSN_4650) != 0)
+	       || (mips_4010 && (insn->membership & INSN_4010) != 0)
+	       || (mips_4100 && (insn->membership & INSN_4100) != 0)
+	       /* start-sanitize-r5900 */
+	       || (mips_5900 && (insn->membership & INSN_5900) != 0)
+	       /* end-sanitize-r5900 */
+	       || (mips_3900 && (insn->membership & INSN_3900) != 0))
+	{
+	  ok = true;
+	  if (mips_4650 && (insn->pinfo & FP_D) != 0)
+	    ok = false;
+	  /* start-sanitize-r5900 */
+	  if (mips_5900 && (insn->pinfo & FP_D) != 0)
+	    ok = false;
+	  /* end-sanitize-r5900 */
+	}
+      else
+	ok = false;
+
+      if (! ok)
 	{
 	  if (insn + 1 < &mips_opcodes[NUMOPCODES]
 	      && strcmp (insn->name, insn[1].name) == 0)
