@@ -2,7 +2,7 @@
 @setfilename ld.info
 @c $Id$
 @syncodeindex ky cp
-@smallbook
+@c @smallbook
 @c @cropmarks
 
 @ifinfo
@@ -16,7 +16,7 @@ END-INFO-DIR-ENTRY
 @ifinfo
 This file documents the GNU linker GLD.
 
-Copyright (C) 1991 Free Software Foundation, Inc.
+Copyright (C) 1991, 1992 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -51,7 +51,7 @@ original English.
 @subtitle The GNU linker
 @sp 1
 @subtitle Second Edition---@code{gld} version 2.0
-@subtitle April 1991
+@subtitle January 1992
 @author Steve Chamberlain and Roland Pesch
 @author Cygnus Support
 @page
@@ -69,7 +69,7 @@ original English.
 @end tex
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1991 Free Software Foundation, Inc.
+Copyright @copyright{} 1991, 1992 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -92,63 +92,64 @@ This file documents the GNU linker gld.
 @end ifinfo
 
 @menu
-* Overview::			Overview
-* Invocation::			Invocation
-* Commands::			Command Language
-* Machine Dependent::		Machine Dependent Features
-* BFD::				BFD
-* Index::			Index
+* Overview::                    Overview
+* Invocation::                  Invocation
+* Commands::                    Command Language
+* Machine Dependent::           Machine Dependent Features
+* BFD::                         BFD
+* MRI::                         MRI Compatible Script Files
+* Index::                       Index
 
  --- The Detailed Node Listing ---
 
 Invocation
 
-* Options::			Command Line Options
-* Environment::			Environment Variables
+* Options::                     Command Line Options
+* Environment::                 Environment Variables
 
 Command Language
 
-* Scripts::			Linker Scripts
-* Expressions::			Expressions
-* MEMORY::			MEMORY Command
-* SECTIONS::			SECTIONS Command
-* Entry Point::			The Entry Point
-* Other Commands::		Other Commands
+* Scripts::                     Linker Scripts
+* Expressions::                 Expressions
+* MEMORY::                      MEMORY Command
+* SECTIONS::                    SECTIONS Command
+* Entry Point::                 The Entry Point
+* Other Commands::              Other Commands
 
 Expressions
 
-* Integers::			Integers
-* Symbols::			Symbol Names
-* Location Counter::		The Location Counter
-* Operators::			Operators
-* Evaluation::			Evaluation
-* Assignment::			Assignment: Defining Symbols
-* Built-ins::			Built-In Functions
+* Integers::                    Integers
+* Symbols::                     Symbol Names
+* Location Counter::            The Location Counter
+* Operators::                   Operators
+* Evaluation::                  Evaluation
+* Assignment::                  Assignment: Defining Symbols
+* Built-ins::                   Built-In Functions
 
 SECTIONS Command
 
-* Section Definition::		Section Definitions
-* Section Contents::		Section Contents
-* Section Options::		Optional Section Attributes
+* Section Definition::          Section Definitions
+* Section Contents::            Section Contents
+* Section Options::             Optional Section Attributes
 
 Machine Dependent Features
 
-* H8/300::			@code{gld} and the H8/300
-* i960::			@code{gld} and the Intel 960 family
-* m68k::			@code{gld} and the Motorola 68000 family
-* m88k::			@code{gld} and the Motorola 880x0 family
+* H8/300::                      @code{gld} and the H8/300
+* i960::                        @code{gld} and the Intel 960 family
+* m68k::                        @code{gld} and the Motorola 68000 family
+* m88k::                        @code{gld} and the Motorola 880x0 family
 
 @code{gld} and the Intel 960 family
 
-* i960-arch::			Linking for a Specific i960 Architecture
-* i960-emulation::		Emulating Other i960 Linkers
-* i960-commands::		Command Language Extensions for i960
+* i960-arch::                   Linking for a Specific i960 Architecture
+* i960-emulation::              Emulating Other i960 Linkers
+* i960-commands::               Command Language Extensions for i960
 
 BFD
 
-* BFD outline::			How it works: an outline of BFD
-* BFD information loss::	Information Loss
-* Mechanism::			Mechanism 
+* BFD outline::                 How it works: an outline of BFD
+* BFD information loss::        Information Loss
+* Mechanism::                   Mechanism 
 @end menu
 
 @node Overview, Invocation, Top, Top
@@ -186,8 +187,8 @@ you have many choices to control its behavior through the command line,
 and through environment variables.
 
 @menu
-* Options::			Command Line Options
-* Environment::			Environment Variables
+* Options::                     Command Line Options
+* Environment::                 Environment Variables
 @end menu
 
 @node Options, Environment, Invocation, Invocation
@@ -201,7 +202,7 @@ line:
 @smallexample
 gld [-o @var{output} ] @var{objfiles}@dots{}
     [ -A@var{architecture} ]  [ -b @var{input-format} ]  [ -Bstatic ]  
-    [ -c @var{commandfile} ]  [ -d | -dc | -dp ]  
+    [ -c @var{MRI-commandfile} ]  [ -d | -dc | -dp ]  
     [ -defsym @var{symbol} = @var{expression} ]
     [ -e @var{entry} ]  [ -F ]  [ -F @var{format} ]
     [ -format @var{input-format} ]  [ -g ]  [ -i ]
@@ -297,17 +298,16 @@ format from a script, using the command @code{TARGET}.
 This flag is accepted for command-line compatibility with the SunOS linker,
 but has no effect on @code{gld}.
 
-@kindex -c @var{cmdfile}
-@cindex script files
-@item -c @var{commandfile}
-Directs @code{gld} to read link commands from the file
-@var{commandfile}.  These commands will completely override @code{gld}'s
-default link format (rather than adding to it); @var{commandfile} must
-specify everything necessary to describe the target format.
-@xref{Commands}.
+@kindex -c @var{MRI-cmdfile}
+@cindex compatibility, MRI
+@item -c @var{MRI-commandfile}
+For compatibility with linkers produced by MRI, @code{ld} accepts script
+files written in an alternate, restricted command language, described in
+@ref{MRI,,MRI Compatible Script Files}.  Introduce such script files
+with the option flag @samp{-c}.
 
-You may also include a script of link commands directly in the command
-line by bracketing it between @samp{@{} and @samp{@}} characters.
+Use the @samp{-T} option to run linker scripts written in the general-purpose
+@code{ld} scripting language.
 
 @cindex common allocation
 @kindex -d
@@ -514,8 +514,15 @@ Use @var{org} as the starting address for---respectively---the
 @item -T @var{commandfile}
 @itemx -T@var{commandfile}
 @kindex -T @var{script}
-Equivalent to @code{-c @var{commandfile}}; supported for compatibility with
-other tools.  
+@cindex script files
+Directs @code{gld} to read link commands from the file
+@var{commandfile}.  These commands will completely override @code{gld}'s
+default link format (rather than adding to it); @var{commandfile} must
+specify everything necessary to describe the target format.
+@xref{Commands}.
+
+You may also include a script of link commands directly in the command
+line by bracketing it between @samp{@{} and @samp{@}} characters.
 
 @item -t 
 @kindex -t
@@ -582,7 +589,7 @@ See description of @code{-N}.
 @node Environment,  , Options, Invocation
 @section Environment Variables
 
-You can condition the behavior of @code{gld} with two environment
+You can change the behavior of @code{gld} with two environment
 variables: @code{GNUTARGET} and @code{LDEMULATION}.  Depending on the
 setting of the latter, other environment variables may be used as well.
 
@@ -680,7 +687,7 @@ placement of common blocks
 @end itemize
 
 You may supply a command file (also known as a link script) to the
-linker either explicitly through the @code{-c} option, or implicitly as
+linker either explicitly through the @code{-T} option, or implicitly as
 an ordinary file. If the linker opens a file which it cannot recognize
 as a supported object or archive format, it tries to interpret the file
 as a command file.
@@ -689,12 +696,12 @@ You can also include a script directly on the @code{gld} command line,
 delimited by the characters @samp{@{} and @samp{@}}.
 
 @menu
-* Scripts::			Linker Scripts
-* Expressions::			Expressions
-* MEMORY::			MEMORY Command
-* SECTIONS::			SECTIONS Command
-* Entry Point::			The Entry Point
-* Other Commands::		Other Commands
+* Scripts::                     Linker Scripts
+* Expressions::                 Expressions
+* MEMORY::                      MEMORY Command
+* SECTIONS::                    SECTIONS Command
+* Entry Point::                 The Entry Point
+* Other Commands::              Other Commands
 @end menu
 
 @node Scripts, Expressions, Commands, Commands
@@ -747,13 +754,13 @@ You may call special purpose built-in functions.
 @end itemize
 
 @menu
-* Integers::			Integers
-* Symbols::			Symbol Names
-* Location Counter::		The Location Counter
-* Operators::			Operators
-* Evaluation::			Evaluation
-* Assignment::			Assignment: Defining Symbols
-* Built-ins::			Built-In Functions
+* Integers::                    Integers
+* Symbols::                     Symbol Names
+* Location Counter::            The Location Counter
+* Operators::                   Operators
+* Evaluation::                  Evaluation
+* Assignment::                  Assignment: Defining Symbols
+* Built-ins::                   Built-In Functions
 @end menu
 
 @node Integers, Symbols, Expressions, Expressions
@@ -1275,9 +1282,9 @@ for example, the order of sections in the output file will match the
 order in the first input file.
 
 @menu
-* Section Definition::		Section Definitions
-* Section Contents::		Section Contents
-* Section Options::		Optional Section Attributes
+* Section Definition::          Section Definitions
+* Section Contents::            Section Contents
+* Section Options::             Optional Section Attributes
 @end menu
 
 @node Section Definition, Section Contents, SECTIONS, SECTIONS
@@ -1807,10 +1814,10 @@ sections describe them.  Machines where @code{gld} has no additional
 functionality are not listed.
 
 @menu
-* H8/300::			@code{gld} and the H8/300
-* i960::			@code{gld} and the Intel 960 family
-* m68k::			@code{gld} and the Motorola 68000 family
-* m88k::			@code{gld} and the Motorola 880x0 family
+* H8/300::                      @code{gld} and the H8/300
+* i960::                        @code{gld} and the Intel 960 family
+* m68k::                        @code{gld} and the Motorola 68000 family
+* m88k::                        @code{gld} and the Motorola 880x0 family
 @end menu
 
 @node H8/300, i960, Machine Dependent, Machine Dependent
@@ -1844,9 +1851,9 @@ top page of memory).
 
 @cindex i960 support
 @menu
-* i960-arch::			Linking for a Specific i960 Architecture
-* i960-emulation::		Emulating Other i960 Linkers
-* i960-commands::		Command Language Extensions for i960
+* i960-arch::                   Linking for a Specific i960 Architecture
+* i960-emulation::              Emulating Other i960 Linkers
+* i960-commands::               Command Language Extensions for i960
 @end menu
 
 @node i960-arch, i960-emulation, i960, i960
@@ -2016,7 +2023,7 @@ This sets the output format to @code{m88kbcs} and the architecture to
 For other settings of @code{LDEMULATION}, consult
 @ref{Environment,,Environment Variables}.
 
-@node BFD, Index, Machine Dependent, Top
+@node BFD, MRI, Machine Dependent, Top
 @chapter BFD
 
 @cindex back end
@@ -2145,9 +2152,9 @@ useful information can be lost using the BFD mechanism; during
 conversion and during output. @xref{BFD information loss}.
 
 @menu
-* BFD outline::			How it works: an outline of BFD
-* BFD information loss::	Information Loss
-* Mechanism::			Mechanism 
+* BFD outline::                 How it works: an outline of BFD
+* BFD information loss::        Information Loss
+* Mechanism::                   Mechanism 
 @end menu
 
 @node BFD outline, BFD information loss, BFD, BFD
@@ -2296,7 +2303,131 @@ which can simply derive this information can pass it successfully
 between formats (COFF, IEEE and Oasys).
 @end table
 
-@node Index,  , BFD, Top
+@node MRI, Index, BFD, Top
+@appendix MRI Compatible Script Files
+@cindex MRI compatibility
+To aid users making the transition to @sc{gnu} @code{ld} from the MRI
+linker, @code{ld} can use MRI compatible linker scripts as an
+alternative to the more general-purpose linker scripting language
+described in @ref{Commands,,Command Language}.  MRI compatible linker
+scripts have a much simpler command set than the scripting language
+otherwise used with @code{ld}.  @sc{gnu} @code{ld} supports the most
+commonly used MRI linker commands; these commands are described here.
+
+You can specify a file containing an MRI-compatible script using the
+@samp{-c} command-line option.
+
+Each command in an MRI-compatible script occupies its own line; each
+command line starts with the keyword that identifies the command (though
+blank lines are also allowed for punctuation).  If a line of an
+MRI-compatible script begins with an unrecognized keyword, @code{ld}
+issues a warning message, but continues processing the script.
+
+Lines beginning with @samp{*} are comments.
+
+You can write these commands using all upper-case letters, or all
+lower case; for example, @samp{chip} is the same as @samp{CHIP}.
+The following list shows only the upper-case form of each command.
+
+@table @code
+@item ABSOLUTE @var{secname}
+@item ABSOLUTE @var{secname}, @var{secname}, @dots{} @var{secname}
+@cindex @code{ABSOLUTE} (MRI)
+Normally, @code{ld} includes in the output file all sections from all
+the input files.  However, in an MRI-compatible script, you can use the
+@code{ABSOLUTE} command to restrict the sections that will be present in
+your output program.  If the @code{ABSOLUTE} command is used at all in a
+script, then only the sections named explicitly in @code{ABSOLUTE}
+commands will appear in the linker output.  You can still use other
+input sections (whatever you select on the command line, or using
+{LOAD}) to resolve addresses in the output file.
+
+@item ALIAS @var{out-secname}, @var{in-secname}
+@cindex @code{ALIAS} (MRI)
+Use this command to place the data from input section @var{in-secname}
+in a section called @var{out-secname} in the linker output file.
+
+@var{in-secname} may be an integer.
+
+@item BASE @var{expression}
+@cindex @code{BASE} (MRI)
+Use the value of @var{expression} as the lowest address (other than
+absolute addresses) in the output file.
+
+@item CHIP @var{expression}
+@itemx CHIP @var{expression}, @var{expression}
+@cindex @code{CHIP} (MRI)
+This command does nothing whatever; it's only accepted for compatibility.
+
+@item END
+@cindex @code{END} (MRI)
+This command does nothing whatever; it's only accepted for compatibility.
+
+@item FORMAT @var{output-format}
+@cindex @code{FORMAT} (MRI)
+Similar to the @code{OUTPUT_FORMAT} command in the more general linker
+language, but restricted to one of these output formats: 
+@enumerate
+@item 
+S-records, if @var{output-format} is @samp{S}
+
+@item
+IEEE, if @var{output-format} is @samp{IEEE}
+
+@item
+COFF (the @samp{coff-m68k} variant in BFD), if @var{output-format} is
+@samp{COFF}
+@end enumerate
+
+@item LIST @var{@dots{}}
+@cindex @code{LIST} (MRI)
+Print (to the standard output file) a link map, as produced by the
+@code{ld} command-line option @samp{-M}.
+
+(The keyword @code{LIST} may be followed by anything whatsoever on the
+same line, with no change in its effect.)
+
+@item LOAD @var{filename}
+@item LOAD @var{filename}, @var{filename}, @dots{} @var{filename}
+@cindex @code{LOAD} (MRI)
+Include one or more object file @var{filename} in the link; this has the
+same effect as specifying @var{filename} directly on the @code{ld}
+command line.
+
+@item NAME @var{output-name}
+@cindex @code{NAME} (MRI)
+@var{output-name} is the name for the program produced by @code{ld}; the
+MRI-compatible command @code{NAME} is equivalent to the command-line
+option @samp{-o} or the general script language command @code{OUTPUT}.
+
+@item ORDER @var{secname}, @var{secname}, @dots{} @var{secname}
+@itemx ORDER @var{secname} @var{secname} @var{secname}
+@cindex @code{ORDER} (MRI)
+Normally, @code{ld} orders the sections in its output file in whatever
+order they first appear in the input files.  In an MRI-compatible
+script, you can override this with the @code{ORDER} command.  The
+sections you list with @code{ORDER} will appear first in your output
+file, in the order specified.
+
+@item PUBLIC @var{name}=@var{expression}
+@itemx PUBLIC @var{name},@var{expression}
+@itemx PUBLIC @var{name} @var{expression}
+@cindex @code{PUBLIC} (MRI)
+This command supplies a value (@var{expression}) for an external symbol
+@var{name} used in the linker input files.
+
+@item SECT @var{secname}, @var{expression}
+@itemx SECT @var{secname}=@var{expression}
+@itemx SECT @var{secname} @var{expression}
+@cindex @code{SECT} (MRI)
+You can use any of these three forms of the @code{SECT} command to
+specify the start address (@var{expression}) for section @var{secname}.
+If you have more than one @code{SECT} statement for the same
+@var{secname}, only the @emph{first} sets the start address.
+@end table
+
+
+@node Index,  , MRI, Top
 @unnumbered Index
 
 @printindex cp
