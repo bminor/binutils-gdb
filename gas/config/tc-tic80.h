@@ -1,6 +1,6 @@
 /* This file is tc-tic80.h
 
-   Copyright (C) 1996, Free Software Foundation, Inc.
+   Copyright (C) 1996, 1997, Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -20,11 +20,11 @@
 
 #define TC_TIC80
 
+#define TARGET_BYTES_BIG_ENDIAN 0
+
 #define TARGET_ARCH	bfd_arch_tic80
 #define TARGET_FORMAT	"coff-tic80"
 #define BFD_ARCH	TARGET_ARCH
-
-#define TARGET_BYTES_BIG_ENDIAN 0
 
 #define md_number_to_chars number_to_chars_littleendian
 

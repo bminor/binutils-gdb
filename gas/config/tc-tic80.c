@@ -35,8 +35,9 @@ const char comment_chars[] = ";";
 /* Characters which start a comment at the beginning of a line.  */
 const char line_comment_chars[] = ";*";
 
-/* Characters which may be used to separate multiple commands on a 
-   single line. */
+/* Characters which may be used to separate multiple commands on a single
+   line. The semicolon is such a character by default and should not be
+   explicitly listed. */
 const char line_separator_chars[] = "";
 
 /* Characters which are used to indicate an exponent in a floating 
@@ -49,14 +50,14 @@ const char FLT_CHARS[] = "dD";
 
 /* This table describes all the machine specific pseudo-ops the assembler
    has to support.  The fields are:
+
    pseudo-op name without dot
    function to call to execute this pseudo-op
-   Integer arg to pass to the function
-   */
+   integer arg to pass to the function */
 
 const pseudo_typeS md_pseudo_table[] =
 {
-  {"word", cons, 4},
+  {"word", cons, 4},				/* FIXME: Should this be machine independent? */
   { NULL,       NULL,           0 }
 };
 
@@ -66,9 +67,6 @@ static struct hash_control *tic80_hash;
 static struct tic80_opcode * find_opcode PARAMS ((struct tic80_opcode *, expressionS []));
 static void build_insn PARAMS ((struct tic80_opcode *, expressionS *));
 static int get_operands PARAMS ((expressionS exp[]));
-static int register_name PARAMS ((expressionS *expressionP));
-static int is_bitnum PARAMS ((expressionS *expressionP));
-static int is_ccode PARAMS ((expressionS *expressionP));
 static int const_overflow PARAMS ((unsigned long num, int bits, int flags));
 
 
@@ -145,127 +143,6 @@ md_atof (type, litP, sizeP)
       litP += sizeof (LITTLENUM_TYPE);
     }
   return (NULL);
-}
-
-/* register_name() checks the string at input_line_pointer
-   to see if it is a valid register name */
-
-static int
-register_name (expressionP)
-     expressionS *expressionP;
-{
-  int reg_number, class;
-  char c;
-  char *p = input_line_pointer;
-  
-  while (*p != '\000' && *p != '\n' && *p != '\r' && *p != ',' && *p != ' ' && *p != '(' && *p != ')')
-    p++;
-
-  c = *p;
-  if (c)
-    {
-      *p++ = '\000';
-    }
-
-  /* look to see if it's in the register table */
-
-  class = TIC80_OPERAND_FPA | TIC80_OPERAND_CR | TIC80_OPERAND_GPR;
-  reg_number = tic80_symbol_to_value (input_line_pointer, class);
-  if (reg_number != -1) 
-    {
-      expressionP -> X_op = O_register;
-      /* temporarily store a pointer to the string here */
-      expressionP -> X_op_symbol = (struct symbol *) input_line_pointer;
-      expressionP -> X_add_number = reg_number;
-      input_line_pointer = p;
-      return (1);
-    }
-  if (c)
-    {
-      *(p - 1) = c;
-    }
-  return (0);
-}
-
-/* is_bitnum() checks the string at input_line_pointer
-   to see if it is a valid predefined symbol for the BITNUM field */
-
-static int
-is_bitnum (expressionP)
-     expressionS *expressionP;
-{
-  int bitnum_val, class;
-  char c;
-  char *p = input_line_pointer;
-  
-  while (*p != '\000' && *p != '\n' && *p != '\r' && *p != ',' && *p != ' ' && *p != '(' && *p != ')')
-    p++;
-
-  c = *p;
-  if (c)
-    {
-      *p++ = '\000';
-    }
-
-  /* look to see if it's in the register table */
-
-  class = TIC80_OPERAND_BITNUM;
-  bitnum_val = tic80_symbol_to_value (input_line_pointer, class);
-  if (bitnum_val != -1) 
-    {
-      expressionP -> X_op = O_constant;
-      /* temporarily store a pointer to the string here */
-      expressionP -> X_op_symbol = (struct symbol *) input_line_pointer;
-      /* Bitnums are stored as one's complement */
-      expressionP -> X_add_number = ~bitnum_val & 0x1F;
-      input_line_pointer = p;
-      return (1);
-    }
-  if (c)
-    {
-      *(p - 1) = c;
-    }
-  return (0);
-}
-
-/* is_ccode() checks the string at input_line_pointer
-   to see if it is a valid predefined symbol for the a condition code */
-
-static int
-is_ccode (expressionP)
-     expressionS *expressionP;
-{
-  int ccode_val, class;
-  char c;
-  char *p = input_line_pointer;
-  
-  while (*p != '\000' && *p != '\n' && *p != '\r' && *p != ',' && *p != ' ' && *p != '(' && *p != ')')
-    p++;
-
-  c = *p;
-  if (c)
-    {
-      *p++ = '\000';
-    }
-
-  /* look to see if it's in the register table */
-
-  class = TIC80_OPERAND_CC;
-  ccode_val = tic80_symbol_to_value (input_line_pointer, class);
-  if (ccode_val != -1) 
-    {
-      expressionP -> X_op = O_constant;
-      /* temporarily store a pointer to the string here */
-      expressionP -> X_op_symbol = (struct symbol *) input_line_pointer;
-      expressionP -> X_add_number = ccode_val & 0x1F;
-      input_line_pointer = p;
-      return (1);
-    }
-  if (c)
-    {
-      *(p - 1) = c;
-    }
-  return (0);
 }
 
 /* Check to see if the constant value in NUM will fit in a field of
@@ -389,17 +266,7 @@ get_operands (exp)
       /* Begin operand parsing at the current scan point. */
 
       input_line_pointer = p;
-
-      /* Check to see if it might be a register name or some other
-	 predefined symbol name that translates into a constant value. */
-
-      if (!register_name (&exp[numexp]) &&
-	  !is_bitnum (&exp[numexp]) &&
-	  !is_ccode (&exp[numexp]))
-	{
-	  /* parse as an expression */
-	  expression (&exp[numexp]);
-	}
+      expression (&exp[numexp]);
 
       if (exp[numexp].X_op == O_illegal)
 	{
@@ -766,10 +633,12 @@ build_insn (opcode, opers)
     }
 }
 
-/* This is the main entry point for the machine-dependent assembler.  STR points to a
-   machine dependent instruction.  This function is supposed to emit the frags/bytes
-   it assembles to.
- */
+/* This is the main entry point for the machine-dependent assembler.  Gas
+   calls this function for each input line which does not contain a
+   pseudoop.
+
+  STR points to a NULL terminated machine dependent instruction.  This
+  function is supposed to emit the frags/bytes it assembles to.  */
 
 void
 md_assemble (str)
@@ -824,9 +693,12 @@ md_assemble (str)
   build_insn (opcode, myops);
 }
 
-/* This function is called once, at assembler startup time.  It should
-   set up all the tables, etc., that the MD part of the assembler will
-   need.  */
+/* This function is called once at the start of assembly, after the command
+   line arguments have been parsed and all the machine independent
+   initializations have been completed.
+
+   It should set up all the tables, etc., that the machine dependent part of
+   the assembler will need.  */
 
 void
 md_begin ()
@@ -834,8 +706,9 @@ md_begin ()
   char *prev_name = "";
   register const struct tic80_opcode *op;
   register const struct tic80_opcode *op_end;
+  const struct predefined_symbol *pdsp;
 
-  tic80_hash = hash_new();
+  tic80_hash = hash_new ();
 
   /* Insert unique names into hash table.  The TIc80 instruction set
      has many identical opcode names that have different opcodes based
@@ -851,11 +724,56 @@ md_begin ()
 	  hash_insert (tic80_hash, op -> name, (char *) op);
 	}
     }
+
+  /* Insert the predefined symbols into the symbol table.  We use symbol_create
+     rather than symbol_new so that these symbols don't end up in the object
+     files' symbol table.  Note that the values of the predefined symbols include
+     some upper bits that distinguish the type of the symbol (register, bitnum,
+     condition code, etc) and these bits must be masked away before actually
+     inserting the values into the instruction stream.  For registers we put
+     these bits in the symbol table since we use them later and there is no
+     question that they aren't part of the register number.  For constants we
+     can't do that since the constant can be any value, so they are masked off
+     before putting them into the symbol table. */
+
+  pdsp = NULL;
+  while ((pdsp = tic80_next_predefined_symbol (pdsp)) != NULL)
+    {
+      segT segment;
+      valueT valu;
+      int symtype;
+
+      symtype = PDS_VALUE (pdsp) & TIC80_OPERAND_MASK;
+      switch (symtype)
+	{
+	case TIC80_OPERAND_GPR:
+	case TIC80_OPERAND_FPA:
+	case TIC80_OPERAND_CR:
+	  segment = reg_section;
+	  valu = PDS_VALUE (pdsp);
+	  break;
+	case TIC80_OPERAND_CC:
+	case TIC80_OPERAND_BITNUM:
+	  segment = absolute_section;
+	  valu = PDS_VALUE (pdsp) & ~TIC80_OPERAND_MASK;
+	  break;
+	default:
+	  internal_error_a ("unhandled predefined symbol bits", symtype);
+	  break;
+	}
+      symbol_table_insert (symbol_create (PDS_NAME (pdsp), segment, valu,
+					  &zero_address_frag));
+    }
 }
 
 
 
+/* The assembler adds md_shortopts to the string passed to getopt. */
+
 CONST char *md_shortopts = "";
+
+/* The assembler adds md_longopts to the machine independent long options
+   that are passed to getopt. */
 
 struct option md_longopts[] = {
   {NULL, no_argument, NULL, 0}
@@ -863,7 +781,9 @@ struct option md_longopts[] = {
 
 size_t md_longopts_size = sizeof(md_longopts);
 
-/* Take care of the target-specific command-line options.  */
+/* The md_parse_option function will be called whenever getopt returns an
+   unrecognized code, presumably indicating a special code value which
+   appears in md_longopts for machine specific command line options. */
 
 int
 md_parse_option (c, arg)
@@ -873,7 +793,9 @@ md_parse_option (c, arg)
   return (0);
 }
 
-/* Print a description of the command-line options that we accept.  */
+/* The md_show_usage function will be called whenever a usage message is
+   printed.  It should print a description of the machine specific options
+   found in md_longopts. */
 
 void
 md_show_usage (stream)

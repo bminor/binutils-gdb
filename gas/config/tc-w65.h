@@ -1,6 +1,6 @@
 /* This file is tc-w65.h
 
-   Copyright (C) 1995 Free Software Foundation, Inc.
+   Copyright (C) 1995, 1997 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -20,6 +20,8 @@
 
 
 #define TC_W65
+
+#define TARGET_BYTES_BIG_ENDIAN 0
 
 /* This macro translates between an internal fix and an coff reloc type */
 #define TC_COFF_FIX2RTYPE(fixP) tc_coff_fix2rtype(fixP)
