@@ -1,5 +1,5 @@
 /* write.c - emit .o file
-   Copyright (C) 1986, 1987, 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright (C) 1986, 87, 90, 91, 92, 93, 1994 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -126,6 +126,7 @@ fix_new_internal (frag, where, size, add_symbol, sub_symbol, offset, pcrel,
   fixP->fx_addnumber = 0;
   fixP->tc_fix_data = NULL;
   fixP->fx_tcbit = 0;
+  fixP->fx_done = 0;
 
 #ifdef TC_something
   fixP->fx_bsr = 0;
@@ -354,12 +355,10 @@ cvt_frag_to_fill (headers, fragP)
       HANDLE_ALIGN (fragP);
 #endif
       fragP->fr_type = rs_fill;
-      know (fragP->fr_var == 1);
       know (fragP->fr_next != NULL);
-
       fragP->fr_offset = (fragP->fr_next->fr_address
 			  - fragP->fr_address
-			  - fragP->fr_fix);
+			  - fragP->fr_fix) / fragP->fr_var;
       break;
 
     case rs_fill:
@@ -506,6 +505,10 @@ dump_section_relocs (abfd, sec, stream_)
 #define dump_section_relocs(ABFD,SEC,STREAM)	(void)(ABFD,SEC,STREAM)
 #endif
 
+#ifndef EMIT_SECTION_SYMBOLS
+#define EMIT_SECTION_SYMBOLS 1
+#endif
+
 static void
 adjust_reloc_syms (abfd, sec, xxx)
      bfd *abfd;
@@ -521,11 +524,12 @@ adjust_reloc_syms (abfd, sec, xxx)
   dump_section_relocs (abfd, sec, stderr);
 
   for (fixp = seginfo->fix_root; fixp; fixp = fixp->fx_next)
-    if (fixp->fx_addsy)
+    if (fixp->fx_done)
+      /* ignore it */;
+    else if (fixp->fx_addsy)
       {
 	symbolS *sym = fixp->fx_addsy;
 	asection *symsec = sym->bsym->section;
-	segment_info_type *symseginfo = seg_info (symsec);
 
 	/* If it's one of these sections, assume the symbol is
 	   definitely going to be output.  The code in
@@ -542,7 +546,7 @@ adjust_reloc_syms (abfd, sec, xxx)
 
 	/* Since we're reducing to section symbols, don't attempt to reduce
 	   anything that's already using one.  */
-	if (sym->bsym == symsec->symbol)
+	if (sym->bsym->flags & BSF_SECTION_SYM)
 	  {
 	    fixp->fx_addsy->sy_used_in_reloc = 1;
 	    continue;
@@ -588,8 +592,7 @@ adjust_reloc_syms (abfd, sec, xxx)
 	static symbolS *abs_sym;
 	if (!abs_sym)
 	  {
-	    abs_sym = symbol_new ("*absolute0zero*", &bfd_abs_section, 0,
-				  &zero_address_frag);
+	    abs_sym = section_symbol (absolute_section);
 	    abs_sym->sy_used_in_reloc = 1;
 	  }
 	fixp->fx_addsy = abs_sym;
@@ -610,6 +613,7 @@ write_relocs (abfd, sec, xxx)
   unsigned int n;
   arelent **relocs;
   fixS *fixp;
+  char *err;
 
   /* If seginfo is NULL, we did not create this section; don't do
      anything with it.  */
@@ -635,10 +639,8 @@ write_relocs (abfd, sec, xxx)
       char *data;
       bfd_reloc_status_type s;
 
-      if (fixp->fx_addsy == 0)
+      if (fixp->fx_done)
 	{
-	  /* @@ Need some other flag to indicate which have already
-	     been performed...  */
 	  n--;
 	  continue;
 	}
@@ -665,7 +667,7 @@ write_relocs (abfd, sec, xxx)
 	 we want it to operate.  We can't just do it by fudging reloc->address,
 	 since that might be used in the calculations(?).  */
       s = bfd_perform_relocation (stdoutput, reloc, data - reloc->address,
-				  sec, stdoutput);
+				  sec, stdoutput, &err);
       switch (s)
 	{
 	case bfd_reloc_ok:
@@ -689,10 +691,8 @@ write_relocs (abfd, sec, xxx)
       bfd_reloc_status_type s;
       int j;
 
-      if (fixp->fx_addsy == 0)
+      if (fixp->fx_done)
 	{
-	  /* @@ Need some other flag to indicate which have already
-	     been performed...  */
 	  n--;
 	  continue;
 	}
@@ -709,15 +709,15 @@ write_relocs (abfd, sec, xxx)
 	abort ();
       for (j = 0; reloc[j]; j++)
         {
-          s = bfd_perform_relocation (stdoutput, reloc[j],
+	  s = bfd_perform_relocation (stdoutput, reloc[j],
 				      data - reloc[0]->address,
-				      sec, stdoutput);
+				      sec, stdoutput, &err);
           switch (s)
 	    {
-	      case bfd_reloc_ok:
-	        break;
-	      default:
-	        as_fatal ("bad return from bfd_perform_relocation");
+	    case bfd_reloc_ok:
+	      break;
+	    default:
+	      as_fatal ("bad return from bfd_perform_relocation");
 	    }
         }
     }
@@ -730,7 +730,8 @@ write_relocs (abfd, sec, xxx)
     bfd_set_section_flags (abfd, sec,
 			   (bfd_get_section_flags (abfd, sec)
 			    & (flagword) ~SEC_RELOC));
-#ifdef DEBUG2
+
+#ifdef DEBUG3
   {
     int i;
     arelent *r;
@@ -1345,7 +1346,7 @@ write_object_file ()
 	    int punt = 0;
 	    obj_frob_symbol (symp, punt);
 	    if (punt)
-	      goto punt_it;
+	      goto punt_it_if_unused;
 	  }
 #endif
 #ifdef tc_frob_symbol
@@ -1353,18 +1354,25 @@ write_object_file ()
 	    int punt = 0;
 	    tc_frob_symbol (symp, punt);
 	    if (punt)
-	      goto punt_it;
+	      goto punt_it_if_unused;
 	  }
 #endif
+
+	  if (! EMIT_SECTION_SYMBOLS
+	      && (symp->bsym->flags & BSF_SECTION_SYM))
+	    goto punt_it;
 
 	  /* If we don't want to keep this symbol, splice it out of the
 	     chain now.  */
 	  if (S_IS_LOCAL (symp))
 	    {
-	    punt_it:
+#if defined (obj_frob_symbol) || defined (tc_frob_symbol)
+	    punt_it_if_unused:
+#endif
 	      if (! symp->sy_used_in_reloc)
 		{
 		  symbolS *prev, *next;
+		punt_it:
 		  prev = symbol_previous (symp);
 		  next = symbol_next (symp);
 #ifdef DEBUG_SYMS
@@ -1426,7 +1434,6 @@ write_object_file ()
 	  assert (result == true);
 	}
     }
-
 
 #ifdef obj_frob_file
   /* If obj_frob_file changes the symbol value at this point, it is
@@ -1521,7 +1528,16 @@ relax_segment (segment_frag_root, segment)
 	  break;
 
 	case rs_align:
-	  address += relax_align (address, (int) fragP->fr_offset);
+	  {
+	    int offset = relax_align (address, (int) fragP->fr_offset);
+	    if (offset % fragP->fr_var != 0)
+	      {
+		as_bad ("alignment padding (%d bytes) not a multiple of %d",
+			offset, fragP->fr_var);
+		offset -= (offset % fragP->fr_var);
+	      }
+	    address += offset;
+	  }
 	  break;
 
 	case rs_org:
@@ -1903,7 +1919,9 @@ fixup_segment (fixP, this_segment_type)
 		 as to whether or not a relocation will be needed to
 		 handle this fixup.  */
 	      if (!TC_FORCE_RELOCATION (fixP))
-		fixP->fx_addsy = NULL;
+		{
+		  fixP->fx_addsy = NULL;
+		}
 	    }
 	  else
 	    {
@@ -1930,6 +1948,13 @@ fixup_segment (fixP, this_segment_type)
 		  fixP->fx_pcrel = 1;
 		  sub_symbolP = 0;
 		  fixP->fx_subsy = 0;
+		}
+#endif
+#ifdef BFD_ASSEMBLER
+	      else if (fixP->fx_r_type == BFD_RELOC_GPREL32
+		       || fixP->fx_r_type == BFD_RELOC_GPREL16)
+		{
+		  /* Leave it alone.  */
 		}
 #endif
 	      else
@@ -1969,7 +1994,10 @@ fixup_segment (fixP, this_segment_type)
 		 as to whether or not a relocation will be needed to
 		 handle this fixup.  */
 	      if (!TC_FORCE_RELOCATION (fixP))
-		fixP->fx_addsy = NULL;
+		{
+		  fixP->fx_pcrel = 0;
+		  fixP->fx_addsy = NULL;
+		}
 	    }
 	  else
 	    {
@@ -2005,12 +2033,8 @@ fixup_segment (fixP, this_segment_type)
 		       * relocation.
 		       */
 		      as_bad ("can't use COBR format with external label");
-		      
-		      /* Let the target machine make the final determination
-			 as to whether or not a relocation will be needed to
-			 handle this fixup.  */
-		      if (!TC_FORCE_RELOCATION (fixP))
-			fixP->fx_addsy = NULL;
+		      fixP->fx_addsy = NULL;
+		      fixP->fx_done = 1;
 		      continue;
 		    }		/* COBR */
 #endif /* TC_I960 */
@@ -2038,18 +2062,19 @@ fixup_segment (fixP, this_segment_type)
 	    {
 	      fixP->fx_addsy = &abs_symbol;
 	      ++seg_reloc_count;
-	    }			/* if there's an add_symbol */
-	}			/* if pcrel */
+	    }
+	}
 
       if (!fixP->fx_bit_fixP && size > 0)
 	{
 	  valueT mask = 0;
 	  /* set all bits to one */
 	  mask--;
-	  /* Technically speaking, combining these produces an
-	     undefined result if size is sizeof (valueT), though I
-	     think these two half-way operations should both be
-	     defined.  */
+	  /* Technically, combining these produces an undefined result
+	     if size is sizeof (valueT), though I think these two
+	     half-way operations should both be defined.  And the
+	     compiler should be able to combine them if it's valid on
+	     the host architecture.  */
 	  mask <<= size * 4;
 	  mask <<= size * 4;
 	  if ((add_number & mask) != 0
@@ -2079,12 +2104,25 @@ fixup_segment (fixP, this_segment_type)
 #endif
 	}			/* not a bit fix */
 
+      if (!fixP->fx_done)
+	{
 #ifdef BFD_ASSEMBLER
-      md_apply_fix (fixP, &add_number);
+	  md_apply_fix (fixP, &add_number);
 #else
-      md_apply_fix (fixP, add_number);
+	  md_apply_fix (fixP, add_number);
 #endif
+
+#ifndef TC_HANDLES_FX_DONE
+	  /* If the tc-* files haven't been converted, assume it's handling
+	     it the old way, where a null fx_addsy means that the fix has
+	     been applied completely, and no further work is needed.  */
+	  if (fixP->fx_addsy == 0 && fixP->fx_pcrel == 0)
+	    fixP->fx_done = 1;
+#endif
+	}
+#ifdef TC_VALIDATE_FIX
     skip:
+#endif
       ;
     }				/* For each fixS in this segment. */
 

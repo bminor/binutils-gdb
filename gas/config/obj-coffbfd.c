@@ -332,9 +332,7 @@ DEFUN (count_entries_in_chain, (idx),
     {
       if (TC_COUNT_RELOC (fixup_ptr))
 	{
-
 #ifdef TC_A29K
-
 	  if (fixup_ptr->fx_r_type == RELOC_CONSTH)
 	    nrelocs += 2;
 	  else
@@ -2419,9 +2417,8 @@ DEFUN (fixup_segment, (segP, this_segment_type),
 #ifdef TC_I960
       if (fixP->fx_tcbit && TC_S_IS_CALLNAME (add_symbolP))
 	{
-	  /* Relocation should be done via the
-		   associated 'bal' entry point
-		   symbol. */
+	  /* Relocation should be done via the associated 'bal' entry
+	     point symbol. */
 
 	  if (!TC_S_IS_BALNAME (tc_get_bal_of_call (add_symbolP)))
 	    {
@@ -2430,7 +2427,7 @@ DEFUN (fixup_segment, (segP, this_segment_type),
 	      continue;
 	    }
 	  fixP->fx_addsy = add_symbolP = tc_get_bal_of_call (add_symbolP);
-	}			/* callj relocation */
+	}
 #endif
       sub_symbolP = fixP->fx_subsy;
       add_number = fixP->fx_offset;
@@ -2461,9 +2458,9 @@ DEFUN (fixup_segment, (segP, this_segment_type),
 		   && (SEG_NORMAL (add_symbol_segment)
 		       || (add_symbol_segment == SEG_ABSOLUTE)))
 	    {
-	      /* Difference of 2 symbols from same segment. */
-	      /* Can't make difference of 2 undefineds: 'value' means */
-	      /* something different for N_UNDF. */
+	      /* Difference of 2 symbols from same segment.  Can't
+		 make difference of 2 undefineds: 'value' means
+		 something different for N_UNDF. */
 #ifdef TC_I960
 	      /* Makes no sense to use the difference of 2 arbitrary symbols
 	         as the target of a call instruction.  */
@@ -2477,6 +2474,7 @@ DEFUN (fixup_segment, (segP, this_segment_type),
 
 	      add_symbolP = NULL;
 	      fixP->fx_addsy = NULL;
+	      fixP->fx_done = 1;
 	    }
 	  else
 	    {
@@ -2536,7 +2534,8 @@ DEFUN (fixup_segment, (segP, this_segment_type),
 	      add_number -= segP->scnhdr.s_vaddr;
 #endif
 	      pcrel = 0;	/* Lie. Don't want further pcrel processing. */
-	      fixP->fx_addsy = NULL;	/* No relocations please. */
+	      fixP->fx_addsy = NULL;
+	      fixP->fx_done = 1;
 	    }
 	  else
 	    {
@@ -2548,6 +2547,7 @@ DEFUN (fixup_segment, (segP, this_segment_type),
 #endif /* TC_I960 */
 		  add_number += S_GET_VALUE (add_symbolP);
 		  fixP->fx_addsy = NULL;
+		  fixP->fx_done = 1;
 		  add_symbolP = NULL;
 		  break;
 		default:
@@ -2572,7 +2572,8 @@ DEFUN (fixup_segment, (segP, this_segment_type),
 		       * relocation.
 		       */
 		      as_bad ("can't use COBR format with external label");
-		      fixP->fx_addsy = NULL;	/* No relocations please. */
+		      fixP->fx_addsy = NULL;
+		      fixP->fx_done = 1;
 		      continue;
 		    }		/* COBR */
 #endif /* TC_I960 */

@@ -53,3 +53,5 @@ extern void ecoff_frob_file PARAMS ((void));
 /* At the moment we don't want to do any stabs processing in read.c.  */
 #define OBJ_PROCESS_STAB(what, string, type, other, desc) \
   ecoff_stab ((what), (string), (type), (other), (desc))
+
+#define EMIT_SECTION_SYMBOLS		0

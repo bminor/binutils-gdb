@@ -1,5 +1,5 @@
 /* coff object file format
-   Copyright (C) 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
 
    This file is part of GAS.
 
@@ -22,7 +22,6 @@
 #include "obstack.h"
 
 #ifndef BFD_ASSEMBLER
-lineno *lineno_rootP;
 
 const short seg_N_TYPE[] =
 {				/* in: segT   out: N_TYPE bits */
@@ -31,11 +30,8 @@ const short seg_N_TYPE[] =
   C_DATA_SECTION,
   C_BSS_SECTION,
   C_UNDEF_SECTION,		/* SEG_UNKNOWN */
-  C_UNDEF_SECTION,		/* SEG_ABSENT */
-  C_UNDEF_SECTION,		/* SEG_PASS1 */
   C_UNDEF_SECTION,		/* SEG_GOOF */
-  C_UNDEF_SECTION,		/* SEG_BIG */
-  C_UNDEF_SECTION,		/* SEG_DIFFERENCE */
+  C_UNDEF_SECTION,		/* SEG_EXPR */
   C_DEBUG_SECTION,		/* SEG_DEBUG */
   C_NTV_SECTION,		/* SEG_NTV */
   C_PTV_SECTION,		/* SEG_PTV */
@@ -62,7 +58,7 @@ const segT N_TYPE_seg[32] =
 };
 #endif
 
-char *s_get_name PARAMS ((symbolS * s));
+const char *s_get_name PARAMS ((symbolS * s));
 static symbolS *tag_find_or_make PARAMS ((char *name));
 static symbolS *tag_find PARAMS ((char *name));
 #ifdef BFD_HEADERS
@@ -71,28 +67,29 @@ static void obj_coff_section_header_append PARAMS ((char **where, struct interna
 static void obj_coff_section_header_append PARAMS ((char **where, SCNHDR * header));
 #endif
 static void obj_coff_def PARAMS ((int what));
-static void obj_coff_dim PARAMS ((void));
-static void obj_coff_endef PARAMS ((void));
-static void obj_coff_line PARAMS ((void));
+static void obj_coff_dim PARAMS ((int));
+static void obj_coff_endef PARAMS ((int));
+static void obj_coff_line PARAMS ((int));
 static void obj_coff_ln PARAMS ((int));
-static void obj_coff_scl PARAMS ((void));
-static void obj_coff_size PARAMS ((void));
-static void obj_coff_stab PARAMS ((int what));
-static void obj_coff_tag PARAMS ((void));
-static void obj_coff_type PARAMS ((void));
-static void obj_coff_val PARAMS ((void));
+static void obj_coff_scl PARAMS ((int));
+static void obj_coff_size PARAMS ((int));
+static void obj_coff_tag PARAMS ((int));
+static void obj_coff_type PARAMS ((int));
+static void obj_coff_val PARAMS ((int));
 static void tag_init PARAMS ((void));
-static void tag_insert PARAMS ((char *name, symbolS * symbolP));
+static void tag_insert PARAMS ((const char *name, symbolS * symbolP));
 
 #ifdef BFD_ASSEMBLER
 static void SA_SET_SYM_ENDNDX PARAMS ((symbolS *, symbolS *));
 static void SA_SET_SYM_TAGNDX PARAMS ((symbolS *, symbolS *));
 #endif
 
-int line_base;
-
 static struct hash_control *tag_hash;
 static symbolS *def_symbol_in_progress;
+
+static symbolS *dot_text_symbol;
+static symbolS *dot_data_symbol;
+static symbolS *dot_bss_symbol;
 
 const pseudo_typeS obj_pseudo_table[] =
 {
@@ -123,16 +120,6 @@ const pseudo_typeS obj_pseudo_table[] =
 
   {"ident", s_ignore, 0},	/* we don't yet handle this. */
 
-
-  /* stabs aka a.out aka b.out directives for debug symbols.
-     Currently ignored silently.  Except for .line at which
-     we guess from context. */
-  {"desc", s_ignore, 0},	/* def */
-  {"stabd", obj_coff_stab, 'd'},/* stabs */
-  {"stabn", obj_coff_stab, 'n'},/* stabs */
-  {"stabs", obj_coff_stab, 's'},/* stabs */
-
-  /* stabs-in-coff (?) debug pseudos (ignored) */
   {"optim", s_ignore, 0},	/* For sun386i cc (?) */
   /* other stuff */
   {"ABORT", s_abort, 0},
@@ -207,6 +194,38 @@ SA_SET_SYM_TAGNDX (sym, val)
   entry->fix_tag = 1;
 }
 
+static int
+S_GET_DATA_TYPE (sym)
+     symbolS *sym;
+{
+  return coffsymbol (sym->bsym)->native->u.syment.n_type;
+}
+
+static int
+S_SET_DATA_TYPE (sym, val)
+     symbolS *sym;
+     int val;
+{
+  coffsymbol (sym->bsym)->native->u.syment.n_type = val;
+  return val;
+}
+
+int
+S_GET_STORAGE_CLASS (sym)
+     symbolS *sym;
+{
+  return coffsymbol (sym->bsym)->native->u.syment.n_sclass;
+}
+
+int
+S_SET_STORAGE_CLASS (sym, val)
+     symbolS *sym;
+     int val;
+{
+  coffsymbol (sym->bsym)->native->u.syment.n_sclass = val;
+  return val;
+}
+
 #else /* ! BFD_ASSEMBLER */
 
 /* Relocation. */
@@ -247,7 +266,7 @@ obj_emit_relocations (where, fixP, segment_address_in_file)
   fixS *p;
 
   for (count = 0, p = fixP; p; p = p->fx_next)
-    if (p->fx_addsy)
+    if (!p->fx_done)
       count++;
   if (!count)
     return;
@@ -268,7 +287,8 @@ obj_emit_relocations (where, fixP, segment_address_in_file)
 
   for (i = 0; fixP; fixP = fixP->fx_next)
     {
-      if (symbolP = fixP->fx_addsy)
+      symbolP = fixP->fx_addsy;
+      if (!fixP->fx_done)
 	{
 	  int rtype_ok = 0;
 #if defined(TC_M68K)
@@ -297,7 +317,7 @@ obj_emit_relocations (where, fixP, segment_address_in_file)
 	  ri_table[i].r_type = (fixP->fx_pcrel
 				? R_IPRMED
 				: R_RELLONG);
-	  callj_table[i] = fixP->fx_callj ? 1 : 0;
+	  callj_table[i] = fixP->fx_tcbit ? 1 : 0;
 	  rtype_ok = 1;
 #endif
 #if defined(TC_A29K)
@@ -387,9 +407,7 @@ obj_emit_relocations (where, fixP, segment_address_in_file)
 #ifdef TC_I960
   free (callj_table);
 #endif
-
-  return;
-}				/* obj_emit_relocations() */
+}
 
 /* Coff file generation & utilities */
 
@@ -470,9 +488,7 @@ obj_header_append (where, headers)
   obj_coff_section_header_append (where, &text_section_header);
   obj_coff_section_header_append (where, &data_section_header);
   obj_coff_section_header_append (where, &bss_section_header);
-
-  return;
-}				/* obj_header_append() */
+}
 
 #endif /* ! BFD_HEADERS */
 
@@ -592,8 +608,7 @@ obj_symbol_to_chars (where, symbolP)
 
     };				/* for each aux in use */
 #endif /* BFD_HEADERS */
-  return;
-}				/* obj_symbol_to_chars() */
+}
 
 #ifdef BFD_HEADERS
 static void
@@ -651,9 +666,7 @@ obj_coff_section_header_append (where, header)
   append (where, (char *) header, sizeof (*header));
 
 #endif /* CROSS_COMPILE */
-
-  return;
-}				/* obj_coff_section_header_append() */
+}
 
 #endif
 void
@@ -727,7 +740,7 @@ c_symbol_merge (debug, normal)
 
   /* Move the debug flags. */
   SF_SET_DEBUG_FIELD (normal, SF_GET_DEBUG_FIELD (debug));
-}				/* c_symbol_merge() */
+}
 
 static symbolS *previous_file_symbol;
 void
@@ -828,8 +841,9 @@ c_section_symbol (name, value, length, nreloc, nlnno)
   SF_SET_STATICS (symbolP);
 
   return (char *) symbolP;
-}				/* c_section_symbol() */
+}
 
+#ifndef BFD_ASSEMBLER
 void
 c_section_header (header,
 		  name,
@@ -882,19 +896,30 @@ c_section_header (header,
 				? STYP_BSS
 				: STYP_INFO);
 }
+#endif
 
 /* Line number handling */
+
+int line_base;
 
 #ifdef BFD_ASSEMBLER
 
 /* Symbol of last function, which we should hang line#s off of.  */
-symbolS *function_lineoff;
+static symbolS *line_fsym;
+
+#define in_function()		(line_fsym != 0)
+#define clear_function()	(line_fsym = 0)
+#define set_function(F)		(line_fsym = (F), add_linesym (F))
 
 #else
 
 /* Offset in line#s where the last function started (the odd entry for
    line #0). */
-int function_lineoff = -1;
+static int function_lineoff = -1;
+
+#define in_function()		(function_lineoff >= 0)
+#define clear_function()	(function_lineoff = -1)
+#define set_function(F)		(function_lineoff = c_line_new ((long) (F), 0, &zero_address_frag))
 
 int text_lineno_number;
 
@@ -903,10 +928,9 @@ int text_lineno_number;
    text_lineno_number by write.c. */
 int our_lineno_number;
 
+lineno *lineno_rootP;
 lineno *lineno_lastP;
-#endif
 
-#ifndef BFD_ASSEMBLER
 int
 c_line_new (paddr, line_number, frag)
      long paddr;
@@ -927,22 +951,20 @@ c_line_new (paddr, line_number, frag)
   lineno_lastP = new_line;
   return LINESZ * our_lineno_number++;
 }
-#endif
 
 void
 obj_emit_lineno (where, line, file_start)
      char **where;
-#ifndef BFD_ASSEMBLER /* sigh */
      lineno *line;
-#endif
      char *file_start;
 {
-#ifndef BFD_ASSEMBLER
 #ifdef BFD_HEADERS
   struct bfd_internal_lineno *line_entry;
 #else
   LINENO *line_entry;
 #endif
+  char *where2 = *where;
+
   for (; line; line = line->next)
     {
       line_entry = &line->line;
@@ -961,38 +983,32 @@ obj_emit_lineno (where, line, file_start)
 	  symbolP = (symbolS *) line_entry->l_addr.l_symndx;
 
 	  line_entry->l_addr.l_symndx = symbolP->sy_number;
-	  symbolP->sy_symbol.ost_auxent[0].x_sym.x_fcnary.x_fcn.x_lnnoptr = *where - file_start;
-
-	}			/* if this is a function linno */
+	  symbolP->sy_symbol.ost_auxent[0].x_sym.x_fcnary.x_fcn.x_lnnoptr = where2 - file_start;
+	}
 #ifdef BFD_HEADERS
-      *where += bfd_coff_swap_lineno_out (stdoutput, line_entry, *where);
+      where2 += bfd_coff_swap_lineno_out (stdoutput, line_entry, where2);
 #else
       /* No matter which member of the union we process, they are
 	 both long. */
-#ifdef CROSS_COMPILE
-      md_number_to_chars (*where, line_entry->l_addr.l_paddr, sizeof (line_entry->l_addr.l_paddr));
-      *where += sizeof (line_entry->l_addr.l_paddr);
+      md_number_to_chars (where2, line_entry->l_addr.l_paddr, sizeof (line_entry->l_addr.l_paddr));
+      where2 += sizeof (line_entry->l_addr.l_paddr);
 
-      md_number_to_chars (*where, line_entry->l_lnno, sizeof (line_entry->l_lnno));
-      *where += sizeof (line_entry->l_lnno);
+      md_number_to_chars (where2, line_entry->l_lnno, sizeof (line_entry->l_lnno));
+      where2 += sizeof (line_entry->l_lnno);
 
 #ifdef TC_I960
-      **where = '0';
-      ++*where;
-      **where = '0';
-      ++*where;
+      *where2++ = '0';
+      *where2++ = '0';
 #endif /* TC_I960 */
 
-#else /* CROSS_COMPILE */
-      append (where, (char *) line_entry, LINESZ);
-#endif /* CROSS_COMPILE */
 #endif /* BFD_HEADERS */
-    }				/* for each line number */
-#else /* BFD_ASSEMBLER */
-  abort ();
-#endif /* BFD_ASSEMBLER */
+    }
+  *where = where2;
 }
 
+#endif /* ! BFD_ASSEMBLER */
+
+
 void
 obj_symbol_new_hook (symbolP)
      symbolS *symbolP;
@@ -1035,6 +1051,7 @@ obj_symbol_new_hook (symbolP)
     SF_SET_LOCAL (symbolP);
 }
 
+
 /* stack stuff */
 stack *
 stack_init (chunk_size, element_size)
@@ -1081,7 +1098,7 @@ stack_push (st, element)
   memcpy (st->data + st->pointer, element, st->element_size);
   st->pointer += st->element_size;
   return st->data + st->pointer;
-}				/* stack_push() */
+}
 
 char *
 stack_pop (st)
@@ -1158,11 +1175,14 @@ obj_coff_ln (appline)
     }
 
   l = get_absolute_expression ();
+  if (!appline)
+    {
 #ifdef BFD_ASSEMBLER
-  add_lineno (frag_now, frag_now_fix (), l);
+      add_lineno (frag_now, frag_now_fix (), l);
 #else
-  c_line_new (frag_now_fix (), l, frag_now);
+      c_line_new (frag_now_fix (), l, frag_now);
 #endif
+    }
 
 #ifndef NO_LISTING
   {
@@ -1178,7 +1198,7 @@ obj_coff_ln (appline)
 #endif
 
   demand_empty_rest_of_line ();
-}				/* obj_coff_ln() */
+}
 
 /*
  *			def()
@@ -1241,6 +1261,7 @@ obj_coff_def (what)
 #endif
 
   def_symbol_in_progress->sy_frag = &zero_address_frag;
+  S_SET_VALUE (def_symbol_in_progress, 0);
 
   if (S_IS_STRING (def_symbol_in_progress))
     SF_SET_STRING (def_symbol_in_progress);
@@ -1252,7 +1273,7 @@ obj_coff_def (what)
 
 unsigned int dim_index;
 static void
-obj_coff_endef ()
+obj_coff_endef (ignored)
 {
   symbolS *symbolP;
   /* DIM BUG FIX sac@cygnus.com */
@@ -1300,20 +1321,16 @@ obj_coff_endef ()
 #endif
 	if (name[1] == 'b' && name[2] == 'f')
 	  {
-	    if (function_lineoff < 0)
+	    if (! in_function ())
 	      as_warn ("`%s' symbol without preceding function", name);
 #ifdef BFD_ASSEMBLER
-	    abort ();
+/*	    SA_SET_SYM_LNNO (def_symbol_in_progress, 12345);*/
 #else
 	    SA_GET_SYM_LNNOPTR (def_symbol_in_progress) = function_lineoff;
 #endif
 	    /* Will need relocating */
 	    SF_SET_PROCESS (def_symbol_in_progress);
-#ifdef BFD_ASSEMBLER
-	    function_lineoff = 0;
-#else
-	    function_lineoff = -1;
-#endif
+	    clear_function ();
 	  }
       }
       break;
@@ -1425,13 +1442,7 @@ obj_coff_endef ()
   if (SF_GET_FUNCTION (def_symbol_in_progress))
     {
       know (sizeof (def_symbol_in_progress) <= sizeof (long));
-#ifdef BFD_ASSEMBLER
-      function_lineoff = def_symbol_in_progress;
-      add_linesym (def_symbol_in_progress);
-#else
-      function_lineoff = c_line_new ((long) def_symbol_in_progress, 0,
-				     &zero_address_frag);
-#endif
+      set_function (def_symbol_in_progress);
       SF_SET_PROCESS (def_symbol_in_progress);
 
       if (symbolP == NULL)
@@ -1439,18 +1450,17 @@ obj_coff_endef ()
 	  /* That is, if this is the first time we've seen the
 	     function... */
 	  symbol_table_insert (def_symbol_in_progress);
-	}			/* definition follows debug */
-    }				/* Create the line number entry pointing to the function being defined */
+	} /* definition follows debug */
+    } /* Create the line number entry pointing to the function being defined */
 
   def_symbol_in_progress = NULL;
   demand_empty_rest_of_line ();
-  return;
 }
 
 static void
-obj_coff_dim ()
+obj_coff_dim (ignored)
 {
-  register int dim_index;
+  int dim_index;
 
   if (def_symbol_in_progress == NULL)
     {
@@ -1464,11 +1474,11 @@ obj_coff_dim ()
   for (dim_index = 0; dim_index < DIMNUM; dim_index++)
     {
       SKIP_WHITESPACES ();
-      SA_SET_SYM_DIMEN (def_symbol_in_progress, dim_index, get_absolute_expression ());
+      SA_SET_SYM_DIMEN (def_symbol_in_progress, dim_index,
+			get_absolute_expression ());
 
       switch (*input_line_pointer)
 	{
-
 	case ',':
 	  input_line_pointer++;
 	  break;
@@ -1480,40 +1490,36 @@ obj_coff_dim ()
 	case ';':
 	  dim_index = DIMNUM;
 	  break;
-	}			/* switch on following character */
-    }				/* for each dimension */
+	}
+    }
 
   demand_empty_rest_of_line ();
-  return;
-}				/* obj_coff_dim() */
+}
 
 static void
-obj_coff_line ()
+obj_coff_line (ignored)
 {
   int this_base;
 
   if (def_symbol_in_progress == NULL)
     {
+      /* Probably stabs-style line?  */
       obj_coff_ln (0);
       return;
-    }				/* if it looks like a stabs style line */
+    }
 
   this_base = get_absolute_expression ();
   if (this_base > line_base)
-    {
-      line_base = this_base;
-    }
-
+    line_base = this_base;
 
   S_SET_NUMBER_AUXILIARY (def_symbol_in_progress, 1);
   SA_SET_SYM_LNNO (def_symbol_in_progress, line_base);
 
   demand_empty_rest_of_line ();
-  return;
-}				/* obj_coff_line() */
+}
 
 static void
-obj_coff_size ()
+obj_coff_size (ignored)
 {
   if (def_symbol_in_progress == NULL)
     {
@@ -1525,11 +1531,10 @@ obj_coff_size ()
   S_SET_NUMBER_AUXILIARY (def_symbol_in_progress, 1);
   SA_SET_SYM_SIZE (def_symbol_in_progress, get_absolute_expression ());
   demand_empty_rest_of_line ();
-  return;
-}				/* obj_coff_size() */
+}
 
 static void
-obj_coff_scl ()
+obj_coff_scl (ignored)
 {
   if (def_symbol_in_progress == NULL)
     {
@@ -1540,11 +1545,10 @@ obj_coff_scl ()
 
   S_SET_STORAGE_CLASS (def_symbol_in_progress, get_absolute_expression ());
   demand_empty_rest_of_line ();
-  return;
-}				/* obj_coff_scl() */
+}
 
 static void
-obj_coff_tag ()
+obj_coff_tag (ignored)
 {
   char *symbol_name;
   char name_end;
@@ -1554,16 +1558,16 @@ obj_coff_tag ()
       as_warn (".tag pseudo-op used outside of .def/.endef ignored.");
       demand_empty_rest_of_line ();
       return;
-    }				/* if not inside .def/.endef */
+    }
 
   S_SET_NUMBER_AUXILIARY (def_symbol_in_progress, 1);
   symbol_name = input_line_pointer;
   name_end = get_symbol_end ();
 
-  /* Assume that the symbol referred to by .tag is always defined. */
-  /* This was a bad assumption.  I've added find_or_make. xoxorich. */
+  /* Assume that the symbol referred to by .tag is always defined.
+     This was a bad assumption.  I've added find_or_make. xoxorich. */
   SA_SET_SYM_TAGNDX (def_symbol_in_progress,
-		     (long) tag_find_or_make (symbol_name));
+		     tag_find_or_make (symbol_name));
   if (SA_GET_SYM_TAGNDX (def_symbol_in_progress) == 0L)
     {
       as_warn ("tag not found for .tag %s", symbol_name);
@@ -1573,10 +1577,10 @@ obj_coff_tag ()
   *input_line_pointer = name_end;
 
   demand_empty_rest_of_line ();
-}				/* obj_coff_tag() */
+}
 
 static void
-obj_coff_type ()
+obj_coff_type (ignored)
 {
   if (def_symbol_in_progress == NULL)
     {
@@ -1594,11 +1598,10 @@ obj_coff_type ()
     }				/* is a function */
 
   demand_empty_rest_of_line ();
-  return;
-}				/* obj_coff_type() */
+}
 
 static void
-obj_coff_val ()
+obj_coff_val (ignored)
 {
   if (def_symbol_in_progress == NULL)
     {
@@ -1620,11 +1623,11 @@ obj_coff_val ()
 	}
       else if (strcmp (S_GET_NAME (def_symbol_in_progress), symbol_name))
 	{
+	  def_symbol_in_progress->sy_value.X_op = O_symbol;
 	  def_symbol_in_progress->sy_value.X_add_symbol =
 	    symbol_find_or_make (symbol_name);
-	  def_symbol_in_progress->sy_value.X_subtract_symbol = NULL;
+	  def_symbol_in_progress->sy_value.X_op_symbol = NULL;
 	  def_symbol_in_progress->sy_value.X_add_number = 0;
-	  def_symbol_in_progress->sy_value.X_seg = undefined_section;
 
 	  /* If the segment is undefined when the forward reference is
 	     resolved, then copy the segment id from the forward
@@ -1640,8 +1643,7 @@ obj_coff_val ()
     }				/* if symbol based */
 
   demand_empty_rest_of_line ();
-  return;
-}				/* obj_coff_val() */
+}
 
 /*
  * Maintain a list of the tagnames of the structres.
@@ -1651,23 +1653,21 @@ static void
 tag_init ()
 {
   tag_hash = hash_new ();
-  return;
-}				/* tag_init() */
+}
 
 static void
 tag_insert (name, symbolP)
-     CONST char *name;
+     const char *name;
      symbolS *symbolP;
 {
-  register char *error_string;
+  const char *error_string;
 
-  if (*(error_string = hash_jam (tag_hash, name, (char *) symbolP)))
+  if ((error_string = hash_jam (tag_hash, name, (char *) symbolP)))
     {
       as_fatal ("Inserting \"%s\" into structure table failed: %s",
 		name, error_string);
     }
-  return;
-}				/* tag_insert() */
+}
 
 static symbolS *
 tag_find_or_make (name)
@@ -1684,8 +1684,8 @@ tag_find_or_make (name)
       symbol_table_insert (symbolP);
     }				/* not found */
 
-  return (symbolP);
-}				/* tag_find_or_make() */
+  return symbolP;
+}
 
 static symbolS *
 tag_find (name)
@@ -1695,8 +1695,8 @@ tag_find (name)
   if (*name == '_')
     name++;
 #endif /* STRIP_UNDERSCORE */
-  return ((symbolS *) hash_find (tag_hash, name));
-}				/* tag_find() */
+  return (symbolS *) hash_find (tag_hash, name);
+}
 
 void
 obj_read_begin_hook ()
@@ -1709,6 +1709,7 @@ obj_read_begin_hook ()
   tag_init ();
 }
 
+#ifndef BFD_ASSEMBLER
 void
 obj_crawl_symbol_chain (headers)
      object_headers *headers;
@@ -1742,17 +1743,16 @@ obj_crawl_symbol_chain (headers)
     {
       know (!previous_file_symbol);
       c_dot_file_symbol ("fake");
-    }				/* Is there a .file symbol ? If not insert one at the beginning. */
+    } /* Is there a .file symbol?  If not, insert one at the beginning. */
 
   /*
    * Build up static symbols for .text, .data and .bss
    */
-  dot_text_symbol = (symbolS *)
-    c_section_symbol (".text",
-		      0,
-		      H_GET_TEXT_SIZE (headers),
-		      0 /*text_relocation_number */ ,
-		      0 /*text_lineno_number */ );
+  dot_text_symbol = (symbolS *) c_section_symbol (".text",
+						  0,
+						  H_GET_TEXT_SIZE (headers),
+						  0 /*text_relocation_number*/,
+						  0 /*text_lineno_number */);
 #ifdef TE_I386AIX
   symbol_remove (dot_text_symbol, &symbol_rootP, &symbol_lastP);
   symbol_append (dot_text_symbol, previous_file_symbol,
@@ -2055,8 +2055,6 @@ obj_crawl_symbol_chain (headers)
     }				/* for each line number */
 
   H_SET_SYMBOL_TABLE_SIZE (headers, symbol_number);
-
-  return;
 }
 
 /*
@@ -2110,12 +2108,12 @@ obj_pre_write_hook (headers)
   /* Count the number of relocation entries for text and data */
   for (fixP = text_fix_root; fixP; fixP = fixP->fx_next)
     {
-      if (fixP->fx_addsy)
+      if (!fixP->fx_done)
 	{
 	  ++text_relocation_number;
 #ifdef TC_I960
 	  /* two relocs per callj under coff. */
-	  if (fixP->fx_callj)
+	  if (fixP->fx_tcbit)
 	    {
 	      ++text_relocation_number;
 	    }			/* if callj and not already fixed. */
@@ -2127,7 +2125,6 @@ obj_pre_write_hook (headers)
 	      ++text_relocation_number;
 	    }
 #endif
-
 	}			/* if not yet fixed */
     }				/* for each fix */
 
@@ -2139,7 +2136,7 @@ obj_pre_write_hook (headers)
 
   for (fixP = data_fix_root; fixP; fixP = fixP->fx_next)
     {
-      if (fixP->fx_addsy)
+      if (!fixP->fx_done)
 	{
 	  ++data_relocation_number;
 	}			/* if still relocatable */
@@ -2150,9 +2147,7 @@ obj_pre_write_hook (headers)
 	  ++data_relocation_number;
 	}
 #endif
-
-    }				/* for each fix */
-
+    }
 
   SA_SET_SCN_NRELOC (dot_data_symbol, data_relocation_number);
   /* Assign the size of the section */
@@ -2193,9 +2188,8 @@ obj_pre_write_hook (headers)
   /* symbol table size allready set */
   H_SET_SIZEOF_OPTIONAL_HEADER (headers, OBJ_COFF_AOUTHDRSZ);
 
-  /* do not added the F_RELFLG for the standard COFF.
-	 * The AIX linker complain on file with relocation info striped flag.
-	 */
+  /* Do not added the F_RELFLG for the standard COFF.  The AIX linker
+     complain on file with relocation info striped flag.  */
 #ifdef KEEP_RELOC_INFO
   H_SET_FLAGS (headers, (text_lineno_number == 0 ? F_LNNO : 0)
 	       | BYTE_ORDERING);
@@ -2253,89 +2247,7 @@ obj_pre_write_hook (headers)
 		    0,		/* No line number information */
 		    section_alignment[(int) SEG_BSS]);
 }
-
-/* This is a copy from aout.  All I do is neglect to actually build the symbol. */
-
-static void
-obj_coff_stab (what)
-     int what;
-{
-  char *string;
-  expressionS e;
-  int goof = 0;			/* TRUE if we have aborted. */
-  int length;
-  int saved_type = 0;
-  long longint;
-  symbolS *symbolP = 0;
-
-  if (what == 's')
-    {
-      string = demand_copy_C_string (&length);
-      SKIP_WHITESPACE ();
-
-      if (*input_line_pointer == ',')
-	{
-	  input_line_pointer++;
-	}
-      else
-	{
-	  as_bad ("I need a comma after symbol's name");
-	  goof = 1;
-	}			/* better be a comma */
-    }				/* skip the string */
-
-  /*
-	 * Input_line_pointer->after ','.  String->symbol name.
-	 */
-  if (!goof)
-    {
-      if (get_absolute_expression_and_terminator (&longint) != ',')
-	{
-	  as_bad ("I want a comma after the n_type expression");
-	  goof = 1;
-	  input_line_pointer--;	/* Backup over a non-',' char. */
-	}			/* on error */
-    }				/* no error */
-
-  if (!goof)
-    {
-      if (get_absolute_expression_and_terminator (&longint) != ',')
-	{
-	  as_bad ("I want a comma after the n_other expression");
-	  goof = 1;
-	  input_line_pointer--;	/* Backup over a non-',' char. */
-	}			/* on error */
-    }				/* no error */
-
-  if (!goof)
-    {
-      get_absolute_expression ();
-
-      if (what == 's' || what == 'n')
-	{
-	  if (*input_line_pointer != ',')
-	    {
-	      as_bad ("I want a comma after the n_desc expression");
-	      goof = 1;
-	    }
-	  else
-	    {
-	      input_line_pointer++;
-	    }			/* on goof */
-	}			/* not stabd */
-    }				/* no error */
-
-  expression (&e);
-
-  if (goof)
-    {
-      ignore_rest_of_line ();
-    }
-  else
-    {
-      demand_empty_rest_of_line ();
-    }				/* on error */
-}				/* obj_coff_stab() */
+#endif
 
 #ifdef BFD_ASSEMBLER
 static
@@ -2343,26 +2255,26 @@ unsigned long
 align (val, exp)
 {
   int n = (1 << exp) - 1;
-  printf ("align (%x, %x)\n", val, exp);
   val = (val + n) & ~n;
   return val;
 }
 
 void
-coff_check_file_symbols (symp, punt)
+coff_frob_symbol (symp, punt)
      symbolS *symp;
      int *punt;
 {
   static symbolS *last_functionP, *last_tagP;
   static stack *block_stack;
 
+  if (current_lineno_sym)
+    add_linesym ((symbolS *) 0);
+
   if (!block_stack)
     block_stack = stack_init (512, sizeof (symbolS*));
 
-#if 1
   if (!S_IS_DEFINED (symp) && S_GET_STORAGE_CLASS (symp) != C_STAT)
     S_SET_STORAGE_CLASS (symp, C_EXT);
-#endif
 
   if (!SF_GET_DEBUG (symp))
     {
@@ -2435,7 +2347,9 @@ coff_check_file_symbols (symp, punt)
 	      S_SET_VALUE (symp, 0);
 	    }
 	}
-      if (SF_GET_LOCAL (symp))
+      if (S_IS_EXTERNAL (symp))
+	S_SET_STORAGE_CLASS (symp, C_EXT);
+      else if (SF_GET_LOCAL (symp))
 	*punt = 1;
       /* more ... */
     }
@@ -2492,7 +2406,6 @@ DEFUN_VOID(obj_coff_section)
       exp = 0;
     }
 
-  printf ("change_to_section(`%s',%d,%x)\n", section_name, len,exp);
   *section_name_end = c;
 }
 
@@ -2505,14 +2418,12 @@ coff_frob_file ()
       assert (previous_file_symbol == 0);
       c_dot_file_symbol ("fake");
     }
-  if (current_lineno_sym)
-    add_linesym ((symbolS *) 0);
 }
 #endif /* BFD_ASSEMBLER */
 
 #ifdef DEBUG
 /* for debugging */
-CONST char *
+const char *
 s_get_name (s)
      symbolS *s;
 {

@@ -79,6 +79,10 @@
 #endif
 #endif /* ! __STDC__ */
 
+#if !defined (__GNUC__) && !defined (inline)
+#define inline
+#endif
+
 #ifndef FOPEN_WB
 #include "fopen-same.h"
 #endif
@@ -228,7 +232,7 @@ typedef enum _relax_state
        constant length frag. */
     rs_fill = 1,
 
-    /* Align: Fr_offset: power of 2. 1 variable char: fill character. */
+    /* Align: Fr_offset: power of 2.  Variable chars: fill pattern. */
     rs_align,
 
     /* Org: Fr_offset, fr_symbol: address. 1 variable char: fill
