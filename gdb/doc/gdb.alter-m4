@@ -1,6 +1,6 @@
 _dnl__ Copyright (c) 1988 1989 1990 1991 Free Software Foundation, Inc.
 _dnl__ This file is part of the source for the GDB manual.
-_dnl__ $Id$
+@c M4 FRAGMENT: $Id$
 @node Altering, _GDBN__ Files, Symbols, Top
 @chapter Altering Execution
 
@@ -138,8 +138,8 @@ The most common occasion to use the @code{jump} command is to back up,
 perhaps with more breakpoints set, over a portion of a program that has
 already executed, in order to examine its execution in more detail.
 
-@group
 @node Signaling, Returning, Jumping, Altering
+@c @group
 @section Giving the Program a Signal
 
 @table @code
@@ -157,7 +157,7 @@ signal.
 @code{signal} does not repeat when you press @key{RET} a second time
 after executing the command.
 @end table
-@end group
+@c @end group
 
 @node Returning, Calling, Signaling, Altering
 @section Returning from a Function

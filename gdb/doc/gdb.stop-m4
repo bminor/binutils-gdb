@@ -1,7 +1,7 @@
 _dnl__								-*- Texinfo -*-
 _dnl__ Copyright (c) 1988 1989 1990 1991 Free Software Foundation, Inc.
 _dnl__ This file is part of the source for the GDB manual.
-_dnl__ $Id$
+@c M4 FRAGMENT: $Id$
 @node Stopping, Stack, Running, Top
 @chapter Stopping and Continuing
 
@@ -877,7 +877,7 @@ number of a signal or its name (with or without the @samp{SIG} at the
 beginning).  The @var{keywords} say what change to make.
 @end table
 
-@group
+@c @group
 The keywords allowed by the @code{handle} command can be abbreviated.
 Their full names are:
 
@@ -905,7 +905,7 @@ and not handled.
 @item nopass
 _GDBN__ should not allow the program to see this signal.
 @end table
-@end group
+@c @end group
 
 When a signal has been set to stop the program, the program cannot see the
 signal until you continue.  It will see the signal then, if @code{pass} is

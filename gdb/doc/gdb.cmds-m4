@@ -1,6 +1,6 @@
 _dnl__ Copyright (c) 1988 1989 1990 1991 Free Software Foundation, Inc.
 _dnl__ This file is part of the source for the GDB manual.
-_dnl__ $Id$
+@c M4 FRAGMENT: $Id$
 @node Commands, Running, Invocation, Top
 @chapter _GDBN__ Commands
 
@@ -107,7 +107,7 @@ all the sub-commands.
 @c FIXME: @pxref{Index} used to be here, but even though it shows up in
 @c FIXME...the 'aux' file with a pageno the xref can't find it.  
 
-@group
+@c @group
 @table @code
 @item info
 @kindex info
@@ -135,7 +135,7 @@ values, you can use @code{show} with no arguments; you may also use
 @c FIXME...program.  Ck w/ GNU: "info set" to be called something else,
 @c FIXME...or change desc of rule---eg "state of prog and debugging session"?
 @end table
-@end group
+@c @end group
 
 Here are three miscellaneous @code{show} subcommands, all of which are
 exceptional in lacking corresponding @code{set} commands:

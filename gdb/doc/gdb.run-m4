@@ -1,7 +1,7 @@
 _dnl__								-*- Texinfo -*-
 _dnl__ Copyright (c) 1988 1989 1990 1991 Free Software Foundation, Inc.
 _dnl__ This file is part of the source for the GDB manual.
-_dnl__ $Id$
+@c M4 FRAGMENT: $Id$
 @node Running, Stopping, Commands, Top
 @chapter Running Programs Under _GDBN__
 
@@ -362,8 +362,8 @@ confirmation if you try to do either of these things; you can control
 whether or not you need to confirm by using the @code{set confirm} command
 (@pxref{Messages/Warnings}).
 
-@group
 @node Kill Process,  , Attach, Running
+@c @group
 @section Killing the Child Process
 
 @table @code
@@ -375,7 +375,7 @@ Kill the child process in which your program is running under _GDBN__.
 This command is useful if you wish to debug a core dump instead of a
 running process.  _GDBN__ ignores any core dump file while your program
 is running.
-@end group
+@c @end group
 
 On some operating systems, you can't execute your program in another
 process while breakpoints are active inside _GDBN__.  You can use the
