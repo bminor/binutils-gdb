@@ -1,3 +1,9 @@
+Mon Mar 14 11:15:58 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* objcopy.c (mangle_section): Delete unused function.
+	(setup_section): Set osection here instead of calling
+	mangle section to do it.
+
 Mon Mar 14 12:11:01 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ar.c (write_archive): Close inarch before unlinking it.

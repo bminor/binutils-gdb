@@ -24,7 +24,6 @@
 
 static void setup_section ();
 static void copy_section ();
-static void mangle_section ();
 
 #define nonfatal(s) {bfd_nonfatal(s); status = 1; return;}
 
@@ -290,7 +289,6 @@ copy_object (ibfd, obfd)
      any output is done.  Thus, we traverse all sections multiple times.  */
   bfd_map_over_sections (ibfd, setup_section, (void *) obfd);
   bfd_map_over_sections (ibfd, copy_section, (void *) obfd);
-  bfd_map_over_sections (ibfd, mangle_section, (void *) obfd);
 }
 
 static char *
@@ -433,7 +431,7 @@ copy_file (input_filename, output_filename, input_target, output_target)
   else
     {
       bfd_nonfatal (input_filename);
-      if (bfd_error == file_ambiguously_recognized)
+      if (bfd_get_error () == bfd_error_file_ambiguously_recognized)
 	{
 	  list_matching_formats (matching);
 	  free (matching);
@@ -504,6 +502,12 @@ setup_section (ibfd, isection, obfd)
       goto loser;
     }
 
+  /* This used to be mangle_section; we do here to avoid using
+     bfd_get_section_by_name since some formats allow multiple
+     sections with the same name.  */
+  isection->output_section = osection;
+  isection->output_offset = 0;
+
   /* All went well */
   return;
 
@@ -511,7 +515,7 @@ loser:
   fprintf (stderr, "%s: %s: section `%s': error in %s: %s\n",
 	   program_name,
 	   bfd_get_filename (ibfd), bfd_section_name (ibfd, isection),
-	   err, bfd_errmsg (bfd_error));
+	   err, bfd_errmsg (bfd_get_error ()));
   status = 1;
 }
 
@@ -581,21 +585,6 @@ copy_section (ibfd, isection, obfd)
 	}
       free (memhunk);
     }
-}
-
-/* All the symbols have been read in and point to their owning input section.
-   They have been relocated so that they are all relative to the base of
-   their owning section.  On the way out, all the symbols will be relocated to
-   their new location in the output file, through some complex sums.  */
-
-static void
-mangle_section (ibfd, p, obfd)
-     bfd *ibfd;
-     asection *p;
-     bfd *obfd;
-{
-  p->output_section = bfd_get_section_by_name (obfd, p->name);
-  p->output_offset = 0;
 }
 
 /* The number of bytes to copy at once.  */
