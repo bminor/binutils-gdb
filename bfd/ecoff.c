@@ -45,6 +45,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Prototypes for static functions.  */
 
 static int ecoff_get_magic PARAMS ((bfd *abfd));
+static long ecoff_sec_to_styp_flags PARAMS ((const char *name,
+					     flagword flags));
 static boolean ecoff_slurp_symbolic_header PARAMS ((bfd *abfd));
 static boolean ecoff_set_symbol_info PARAMS ((bfd *abfd, SYMR *ecoff_sym,
 					   asymbol *asym, int ext,
@@ -73,7 +75,7 @@ static asection bfd_debug_section = { "*DEBUG*" };
 /* Create an ECOFF object.  */
 
 boolean
-ecoff_mkobject (abfd)
+_bfd_ecoff_mkobject (abfd)
      bfd *abfd;
 {
   abfd->tdata.ecoff_obj_data = ((struct ecoff_tdata *)
@@ -91,7 +93,7 @@ ecoff_mkobject (abfd)
    specific information.  */
 
 PTR
-ecoff_mkobject_hook (abfd, filehdr, aouthdr)
+_bfd_ecoff_mkobject_hook (abfd, filehdr, aouthdr)
      bfd *abfd;
      PTR filehdr;
      PTR aouthdr;
@@ -100,7 +102,7 @@ ecoff_mkobject_hook (abfd, filehdr, aouthdr)
   struct internal_aouthdr *internal_a = (struct internal_aouthdr *) aouthdr;
   ecoff_data_type *ecoff;
 
-  if (ecoff_mkobject (abfd) == false)
+  if (_bfd_ecoff_mkobject (abfd) == false)
     return NULL;
 
   ecoff = ecoff_data (abfd);
@@ -135,7 +137,7 @@ ecoff_mkobject_hook (abfd, filehdr, aouthdr)
 
 /*ARGSUSED*/
 asection *
-ecoff_make_section_hook (abfd, name)
+_bfd_ecoff_make_section_hook (abfd, name)
      bfd *abfd;
      char *name;
 {
@@ -145,7 +147,7 @@ ecoff_make_section_hook (abfd, name)
 /* Initialize a new section.  */
 
 boolean
-ecoff_new_section_hook (abfd, section)
+_bfd_ecoff_new_section_hook (abfd, section)
      bfd *abfd;
      asection *section;
 {
@@ -190,7 +192,7 @@ ecoff_new_section_hook (abfd, section)
    for each target, but there aren't all that many ECOFF targets.  */
 
 boolean
-ecoff_set_arch_mach_hook (abfd, filehdr)
+_bfd_ecoff_set_arch_mach_hook (abfd, filehdr)
      bfd *abfd;
      PTR filehdr;
 {
@@ -236,7 +238,7 @@ ecoff_set_arch_mach_hook (abfd, filehdr)
 }
 
 /* Get the magic number to use based on the architecture and machine.
-   This is the inverse of ecoff_set_arch_mach_hook, above.  */
+   This is the inverse of _bfd_ecoff_set_arch_mach_hook, above.  */
 
 static int
 ecoff_get_magic (abfd)
@@ -280,9 +282,9 @@ ecoff_get_magic (abfd)
 
 /* Get the section s_flags to use for a section.  */
 
-long
+static long
 ecoff_sec_to_styp_flags (name, flags)
-     CONST char *name;
+     const char *name;
      flagword flags;
 {
   long styp;
@@ -338,7 +340,7 @@ ecoff_sec_to_styp_flags (name, flags)
 
 /*ARGSUSED*/
 flagword
-ecoff_styp_to_sec_flags (abfd, hdr)
+_bfd_ecoff_styp_to_sec_flags (abfd, hdr)
      bfd *abfd;
      PTR hdr;
 {
@@ -410,7 +412,7 @@ ecoff_styp_to_sec_flags (abfd, hdr)
    info comes from the file header record (fh-fBigendian).  */
 
 void
-ecoff_swap_tir_in (bigend, ext_copy, intern)
+_bfd_ecoff_swap_tir_in (bigend, ext_copy, intern)
      int bigend;
      const struct tir_ext *ext_copy;
      TIR *intern;
@@ -467,7 +469,7 @@ ecoff_swap_tir_in (bigend, ext_copy, intern)
    info comes from the file header record (fh-fBigendian).  */
 
 void
-ecoff_swap_tir_out (bigend, intern_copy, ext)
+_bfd_ecoff_swap_tir_out (bigend, intern_copy, ext)
      int bigend;
      const TIR *intern_copy;
      struct tir_ext *ext;
@@ -523,7 +525,7 @@ ecoff_swap_tir_out (bigend, intern_copy, ext)
    big-endian or little-endian format.*/
 
 void
-ecoff_swap_rndx_in (bigend, ext_copy, intern)
+_bfd_ecoff_swap_rndx_in (bigend, ext_copy, intern)
      int bigend;
      const struct rndx_ext *ext_copy;
      RNDXR *intern;
@@ -562,7 +564,7 @@ ecoff_swap_rndx_in (bigend, ext_copy, intern)
    big-endian or little-endian format.*/
 
 void
-ecoff_swap_rndx_out (bigend, intern_copy, ext)
+_bfd_ecoff_swap_rndx_out (bigend, intern_copy, ext)
      int bigend;
      const RNDXR *intern_copy;
      struct rndx_ext *ext;
@@ -670,7 +672,7 @@ ecoff_slurp_symbolic_header (abfd)
 
 /*ARGSUSED*/
 boolean
-ecoff_slurp_symbolic_info (abfd, ignore, debug)
+_bfd_ecoff_slurp_symbolic_info (abfd, ignore, debug)
      bfd *abfd;
      asection *ignore;
      struct ecoff_debug_info *debug;
@@ -821,7 +823,7 @@ static asymbol *ecoff_scom_symbol_ptr;
 /* Create an empty symbol.  */
 
 asymbol *
-ecoff_make_empty_symbol (abfd)
+_bfd_ecoff_make_empty_symbol (abfd)
      bfd *abfd;
 {
   ecoff_symbol_type *new;
@@ -1107,7 +1109,7 @@ ecoff_set_symbol_info (abfd, ecoff_sym, asym, ext, indirect_ptr_ptr)
 /* Read an ECOFF symbol table.  */
 
 boolean
-ecoff_slurp_symbol_table (abfd)
+_bfd_ecoff_slurp_symbol_table (abfd)
      bfd *abfd;
 {
   const struct ecoff_backend_data * const backend = ecoff_backend (abfd);
@@ -1133,8 +1135,8 @@ ecoff_slurp_symbol_table (abfd)
     return true;
 
   /* Get the symbolic information.  */
-  if (! ecoff_slurp_symbolic_info (abfd, (asection *) NULL,
-				   &ecoff_data (abfd)->debug_info))
+  if (! _bfd_ecoff_slurp_symbolic_info (abfd, (asection *) NULL,
+					&ecoff_data (abfd)->debug_info))
     return false;
   if (bfd_get_symcount (abfd) == 0)
     return true;
@@ -1214,11 +1216,11 @@ ecoff_slurp_symbol_table (abfd)
 /* Return the amount of space needed for the canonical symbols.  */
 
 long
-ecoff_get_symtab_upper_bound (abfd)
+_bfd_ecoff_get_symtab_upper_bound (abfd)
      bfd *abfd;
 {
-  if (! ecoff_slurp_symbolic_info (abfd, (asection *) NULL,
-				   &ecoff_data (abfd)->debug_info))
+  if (! _bfd_ecoff_slurp_symbolic_info (abfd, (asection *) NULL,
+					&ecoff_data (abfd)->debug_info))
     return -1;
 
   if (bfd_get_symcount (abfd) == 0)
@@ -1230,7 +1232,7 @@ ecoff_get_symtab_upper_bound (abfd)
 /* Get the canonical symbols.  */
 
 long
-ecoff_get_symtab (abfd, alocation)
+_bfd_ecoff_get_symtab (abfd, alocation)
      bfd *abfd;
      asymbol **alocation;
 {
@@ -1238,7 +1240,7 @@ ecoff_get_symtab (abfd, alocation)
   ecoff_symbol_type *symbase;
   ecoff_symbol_type **location = (ecoff_symbol_type **) alocation;
 
-  if (ecoff_slurp_symbol_table (abfd) == false)
+  if (_bfd_ecoff_slurp_symbol_table (abfd) == false)
     return -1;
   if (bfd_get_symcount (abfd) == 0)
     return 0;
@@ -1357,7 +1359,7 @@ ecoff_type_to_string (abfd, fdr, indx)
 
   if (AUX_GET_ISYM (bigendian, &aux_ptr[indx]) == -1)
     return "-1 (no type)";
-  ecoff_swap_tir_in (bigendian, &aux_ptr[indx++].a_ti, &u.ti);
+  _bfd_ecoff_swap_tir_in (bigendian, &aux_ptr[indx++].a_ti, &u.ti);
 
   basic_type = u.ti.bt;
   qualifiers[0].type = u.ti.tq0;
@@ -1426,7 +1428,7 @@ ecoff_type_to_string (abfd, fdr, indx)
 	 2nd word is file index if 1st word rfd is ST_RFDESCAPE.  */
 
     case btStruct:		/* Structure (Record) */
-      ecoff_swap_rndx_in (bigendian, &aux_ptr[indx].a_rndx, &rndx);
+      _bfd_ecoff_swap_rndx_in (bigendian, &aux_ptr[indx].a_rndx, &rndx);
       ecoff_emit_aggregate (abfd, fdr, p1, &rndx,
 			    (long) AUX_GET_ISYM (bigendian, &aux_ptr[indx+1]),
 			    "struct");
@@ -1438,7 +1440,7 @@ ecoff_type_to_string (abfd, fdr, indx)
 	 2nd word is file index if 1st word rfd is ST_RFDESCAPE.  */
 
     case btUnion:		/* Union */
-      ecoff_swap_rndx_in (bigendian, &aux_ptr[indx].a_rndx, &rndx);
+      _bfd_ecoff_swap_rndx_in (bigendian, &aux_ptr[indx].a_rndx, &rndx);
       ecoff_emit_aggregate (abfd, fdr, p1, &rndx,
 			    (long) AUX_GET_ISYM (bigendian, &aux_ptr[indx+1]),
 			    "union");
@@ -1450,7 +1452,7 @@ ecoff_type_to_string (abfd, fdr, indx)
 	 2nd word is file index if 1st word rfd is ST_RFDESCAPE.  */
 
     case btEnum:		/* Enumeration */
-      ecoff_swap_rndx_in (bigendian, &aux_ptr[indx].a_rndx, &rndx);
+      _bfd_ecoff_swap_rndx_in (bigendian, &aux_ptr[indx].a_rndx, &rndx);
       ecoff_emit_aggregate (abfd, fdr, p1, &rndx,
 			    (long) AUX_GET_ISYM (bigendian, &aux_ptr[indx+1]),
 			    "enum");
@@ -1633,7 +1635,7 @@ ecoff_type_to_string (abfd, fdr, indx)
 
 /*ARGSUSED*/
 void
-ecoff_get_symbol_info (abfd, symbol, ret)
+_bfd_ecoff_get_symbol_info (abfd, symbol, ret)
      bfd *abfd;			/* Ignored.  */
      asymbol *symbol;
      symbol_info *ret;
@@ -1644,7 +1646,7 @@ ecoff_get_symbol_info (abfd, symbol, ret)
 /* Print information about an ECOFF symbol.  */
 
 void
-ecoff_print_symbol (abfd, filep, symbol, how)
+_bfd_ecoff_print_symbol (abfd, filep, symbol, how)
      bfd *abfd;
      PTR filep;
      asymbol *symbol;
@@ -1851,7 +1853,7 @@ ecoff_slurp_reloc_table (abfd, section, symbols)
       || (section->flags & SEC_CONSTRUCTOR) != 0)
     return true;
 
-  if (ecoff_slurp_symbol_table (abfd) == false)
+  if (_bfd_ecoff_slurp_symbol_table (abfd) == false)
     return false;
   
   internal_relocs = (arelent *) bfd_alloc (abfd,
@@ -1945,7 +1947,7 @@ ecoff_slurp_reloc_table (abfd, section, symbols)
 /* Get a canonical list of relocs.  */
 
 long
-ecoff_canonicalize_reloc (abfd, section, relptr, symbols)
+_bfd_ecoff_canonicalize_reloc (abfd, section, relptr, symbols)
      bfd *abfd;
      asection *section;
      arelent **relptr;
@@ -1989,13 +1991,8 @@ ecoff_canonicalize_reloc (abfd, section, relptr, symbols)
 
 /*ARGSUSED*/
 boolean
-ecoff_find_nearest_line (abfd,
-			 section,
-			 ignore_symbols,
-			 offset,
-			 filename_ptr,
-			 functionname_ptr,
-			 retline_ptr)
+_bfd_ecoff_find_nearest_line (abfd, section, ignore_symbols, offset,
+			      filename_ptr, functionname_ptr, retline_ptr)
      bfd *abfd;
      asection *section;
      asymbol **ignore_symbols;
@@ -2027,8 +2024,8 @@ ecoff_find_nearest_line (abfd,
     return false;
 
   /* Make sure we have the FDR's.  */
-  if (! ecoff_slurp_symbolic_info (abfd, (asection *) NULL,
-				   &ecoff_data (abfd)->debug_info)
+  if (! _bfd_ecoff_slurp_symbolic_info (abfd, (asection *) NULL,
+					&ecoff_data (abfd)->debug_info)
       || bfd_get_symcount (abfd) == 0)
     return false;
 
@@ -2175,7 +2172,7 @@ ecoff_find_nearest_line (abfd,
    information.  */
 
 boolean
-ecoff_bfd_copy_private_bfd_data (ibfd, obfd)
+_bfd_ecoff_bfd_copy_private_bfd_data (ibfd, obfd)
      bfd *ibfd;
      bfd *obfd;
 {
@@ -2285,7 +2282,7 @@ ecoff_bfd_copy_private_bfd_data (ibfd, obfd)
    callers ignore the return value.  */
 
 boolean
-ecoff_set_arch_mach (abfd, arch, machine)
+_bfd_ecoff_set_arch_mach (abfd, arch, machine)
      bfd *abfd;
      enum bfd_architecture arch;
      unsigned long machine;
@@ -2298,7 +2295,7 @@ ecoff_set_arch_mach (abfd, arch, machine)
 
 /*ARGSUSED*/
 int
-ecoff_sizeof_headers (abfd, reloc)
+_bfd_ecoff_sizeof_headers (abfd, reloc)
      bfd *abfd;
      boolean reloc;
 {
@@ -2321,7 +2318,7 @@ ecoff_sizeof_headers (abfd, reloc)
 /* Get the contents of a section.  */
 
 boolean
-ecoff_get_section_contents (abfd, section, location, offset, count)
+_bfd_ecoff_get_section_contents (abfd, section, location, offset, count)
      bfd *abfd;
      asection *section;
      PTR location;
@@ -2344,7 +2341,7 @@ ecoff_compute_section_file_positions (abfd)
   file_ptr old_sofar;
   boolean first_data;
 
-  sofar = ecoff_sizeof_headers (abfd, false);
+  sofar = _bfd_ecoff_sizeof_headers (abfd, false);
 
   first_data = true;
   for (current = abfd->sections;
@@ -2475,7 +2472,7 @@ ecoff_compute_reloc_file_positions (abfd)
 /* Set the contents of a section.  */
 
 boolean
-ecoff_set_section_contents (abfd, section, location, offset, count)
+_bfd_ecoff_set_section_contents (abfd, section, location, offset, count)
      bfd *abfd;
      asection *section;
      PTR location;
@@ -2652,7 +2649,7 @@ ecoff_set_index (sym, indx)
 /* Write out an ECOFF file.  */
 
 boolean
-ecoff_write_object_contents (abfd)
+_bfd_ecoff_write_object_contents (abfd)
      bfd *abfd;
 {
   const struct ecoff_backend_data * const backend = ecoff_backend (abfd);
@@ -2703,7 +2700,7 @@ ecoff_write_object_contents (abfd)
     }
 
   if ((abfd->flags & D_PAGED) != 0)
-    text_size = ecoff_sizeof_headers (abfd, false);
+    text_size = _bfd_ecoff_sizeof_headers (abfd, false);
   else
     text_size = 0;
   text_start = 0;
@@ -3155,7 +3152,7 @@ ecoff_armap_hash (s, rehash, size, hlog)
 /* Read in the armap.  */
 
 boolean
-ecoff_slurp_armap (abfd)
+_bfd_ecoff_slurp_armap (abfd)
      bfd *abfd;
 {
   char nextname[17];
@@ -3328,7 +3325,7 @@ ecoff_slurp_armap (abfd)
 /* Write out an armap.  */
 
 boolean
-ecoff_write_armap (abfd, elength, map, orl_count, stridx)
+_bfd_ecoff_write_armap (abfd, elength, map, orl_count, stridx)
      bfd *abfd;
      unsigned int elength;
      struct orl *map;
@@ -3494,7 +3491,7 @@ ecoff_write_armap (abfd, elength, map, orl_count, stridx)
    and the extended name table.  */
 
 bfd_target *
-ecoff_archive_p (abfd)
+_bfd_ecoff_archive_p (abfd)
      bfd *abfd;
 {
   char armag[SARMAG + 1];
@@ -3526,8 +3523,8 @@ ecoff_archive_p (abfd)
   bfd_ardata (abfd)->extended_names = NULL;
   bfd_ardata (abfd)->tdata = NULL;
   
-  if (ecoff_slurp_armap (abfd) == false
-      || ecoff_slurp_extended_name_table (abfd) == false)
+  if (_bfd_ecoff_slurp_armap (abfd) == false
+      || _bfd_ecoff_slurp_extended_name_table (abfd) == false)
     {
       bfd_release (abfd, bfd_ardata (abfd));
       abfd->tdata.aout_ar_data = (struct artdata *) NULL;
@@ -3594,7 +3591,7 @@ ecoff_link_hash_newfunc (entry, table, string)
 /* Create an ECOFF link hash table.  */
 
 struct bfd_link_hash_table *
-ecoff_bfd_link_hash_table_create (abfd)
+_bfd_ecoff_bfd_link_hash_table_create (abfd)
      bfd *abfd;
 {
   struct ecoff_link_hash_table *ret;
@@ -3638,7 +3635,7 @@ ecoff_bfd_link_hash_table_create (abfd)
    appropriate.  */
 
 boolean
-ecoff_bfd_link_add_symbols (abfd, info)
+_bfd_ecoff_bfd_link_add_symbols (abfd, info)
      bfd *abfd;
      struct bfd_link_info *info;
 {
@@ -4226,7 +4223,7 @@ static boolean ecoff_reloc_link_order
    close and reopen some input BFDs; I'll see how bad this is.  */
 
 boolean
-ecoff_bfd_final_link (abfd, info)
+_bfd_ecoff_bfd_final_link (abfd, info)
      bfd *abfd;
      struct bfd_link_info *info;
 {
@@ -4461,7 +4458,7 @@ ecoff_final_link_debug_accumulate (output_bfd, input_bfd, info, handle)
     }
 
   /* If raw_syments is not NULL, then the data was already by read by
-     ecoff_slurp_symbolic_info.  */
+     _bfd_ecoff_slurp_symbolic_info.  */
   if (ecoff_data (input_bfd)->raw_syments == NULL)
     {
       READ (line, cbLineOffset, cbLine, sizeof (unsigned char),

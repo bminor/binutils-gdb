@@ -1,5 +1,9 @@
 Mon Jun 20 11:06:27 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* ecoff.c, libecoff.h, ecoffswap.h, coff-alpha.c, coff-mips.c,
+	elf32-mips.c: Renamed all externally visible ECOFF routines which
+	are local to BFD to start with _bfd_ecoff instead of just ecoff.
+
 	* ecoff.c (ecoff_swap_tir_in): Change input argument to const.
 	(ecoff_swap_tir_out): Likewise.
 	(ecoff_swap_rndx_in, ecoff_swap_rndx_out): Likewise.

@@ -2278,9 +2278,10 @@ static const struct ecoff_backend_data mips_ecoff_backend_data =
     FILHSZ, AOUTSZ, SCNHSZ, 0, 0, 0, true,
     mips_ecoff_swap_filehdr_in, mips_ecoff_swap_aouthdr_in,
     mips_ecoff_swap_scnhdr_in, mips_ecoff_bad_format_hook,
-    ecoff_set_arch_mach_hook, ecoff_mkobject_hook,
-    ecoff_styp_to_sec_flags, ecoff_make_section_hook, ecoff_set_alignment_hook,
-    ecoff_slurp_symbol_table, NULL, NULL
+    _bfd_ecoff_set_arch_mach_hook, _bfd_ecoff_mkobject_hook,
+    _bfd_ecoff_styp_to_sec_flags, _bfd_ecoff_make_section_hook,
+    _bfd_ecoff_set_alignment_hook, _bfd_ecoff_slurp_symbol_table,
+    NULL, NULL
   },
   /* Supported architecture.  */
   bfd_arch_mips,
@@ -2320,8 +2321,8 @@ static const struct ecoff_backend_data mips_ecoff_backend_data =
     ecoff_swap_fdr_in,
     ecoff_swap_rfd_in,
     ecoff_swap_ext_in,
-    ecoff_swap_tir_in,
-    ecoff_swap_rndx_in,
+    _bfd_ecoff_swap_tir_in,
+    _bfd_ecoff_swap_rndx_in,
     /* Functions to swap out external symbolic data.  */
     ecoff_swap_hdr_out,
     ecoff_swap_dnr_out,
@@ -2331,10 +2332,10 @@ static const struct ecoff_backend_data mips_ecoff_backend_data =
     ecoff_swap_fdr_out,
     ecoff_swap_rfd_out,
     ecoff_swap_ext_out,
-    ecoff_swap_tir_out,
-    ecoff_swap_rndx_out,
+    _bfd_ecoff_swap_tir_out,
+    _bfd_ecoff_swap_rndx_out,
     /* Function to read in symbolic data.  */
-    ecoff_slurp_symbolic_info
+    _bfd_ecoff_slurp_symbolic_info
   },
   /* External reloc size.  */
   RELSZ,
@@ -2349,14 +2350,14 @@ static const struct ecoff_backend_data mips_ecoff_backend_data =
 };
 
 /* Looking up a reloc type is MIPS specific.  */
-#define ecoff_bfd_reloc_type_lookup mips_bfd_reloc_type_lookup
+#define _bfd_ecoff_bfd_reloc_type_lookup mips_bfd_reloc_type_lookup
 
 /* Getting relocated section contents is generic.  */
-#define ecoff_bfd_get_relocated_section_contents \
+#define _bfd_ecoff_bfd_get_relocated_section_contents \
   bfd_generic_get_relocated_section_contents
 
 /* Relaxing sections is MIPS specific.  */
-#define ecoff_bfd_relax_section mips_relax_section
+#define _bfd_ecoff_bfd_relax_section mips_relax_section
 
 bfd_target ecoff_little_vec =
 {
@@ -2383,20 +2384,20 @@ bfd_target ecoff_little_vec =
      bfd_getl16, bfd_getl_signed_16, bfd_putl16, /* hdrs */
 
   {_bfd_dummy_target, coff_object_p, /* bfd_check_format */
-     ecoff_archive_p, _bfd_dummy_target},
-  {bfd_false, ecoff_mkobject,  /* bfd_set_format */
+     _bfd_ecoff_archive_p, _bfd_dummy_target},
+  {bfd_false, _bfd_ecoff_mkobject,  /* bfd_set_format */
      _bfd_generic_mkarchive, bfd_false},
-  {bfd_false, ecoff_write_object_contents, /* bfd_write_contents */
+  {bfd_false, _bfd_ecoff_write_object_contents, /* bfd_write_contents */
      _bfd_write_archive_contents, bfd_false},
 
-     BFD_JUMP_TABLE_GENERIC (ecoff),
-     BFD_JUMP_TABLE_COPY (ecoff),
+     BFD_JUMP_TABLE_GENERIC (_bfd_ecoff),
+     BFD_JUMP_TABLE_COPY (_bfd_ecoff),
      BFD_JUMP_TABLE_CORE (_bfd_nocore),
-     BFD_JUMP_TABLE_ARCHIVE (ecoff),
-     BFD_JUMP_TABLE_SYMBOLS (ecoff),
-     BFD_JUMP_TABLE_RELOCS (ecoff),
-     BFD_JUMP_TABLE_WRITE (ecoff),
-     BFD_JUMP_TABLE_LINK (ecoff),
+     BFD_JUMP_TABLE_ARCHIVE (_bfd_ecoff),
+     BFD_JUMP_TABLE_SYMBOLS (_bfd_ecoff),
+     BFD_JUMP_TABLE_RELOCS (_bfd_ecoff),
+     BFD_JUMP_TABLE_WRITE (_bfd_ecoff),
+     BFD_JUMP_TABLE_LINK (_bfd_ecoff),
      BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
   (PTR) &mips_ecoff_backend_data
@@ -2425,20 +2426,20 @@ bfd_target ecoff_big_vec =
      bfd_getb32, bfd_getb_signed_32, bfd_putb32,
      bfd_getb16, bfd_getb_signed_16, bfd_putb16,
  {_bfd_dummy_target, coff_object_p, /* bfd_check_format */
-    ecoff_archive_p, _bfd_dummy_target},
- {bfd_false, ecoff_mkobject, /* bfd_set_format */
+    _bfd_ecoff_archive_p, _bfd_dummy_target},
+ {bfd_false, _bfd_ecoff_mkobject, /* bfd_set_format */
     _bfd_generic_mkarchive, bfd_false},
- {bfd_false, ecoff_write_object_contents, /* bfd_write_contents */
+ {bfd_false, _bfd_ecoff_write_object_contents, /* bfd_write_contents */
     _bfd_write_archive_contents, bfd_false},
 
-     BFD_JUMP_TABLE_GENERIC (ecoff),
-     BFD_JUMP_TABLE_COPY (ecoff),
+     BFD_JUMP_TABLE_GENERIC (_bfd_ecoff),
+     BFD_JUMP_TABLE_COPY (_bfd_ecoff),
      BFD_JUMP_TABLE_CORE (_bfd_nocore),
-     BFD_JUMP_TABLE_ARCHIVE (ecoff),
-     BFD_JUMP_TABLE_SYMBOLS (ecoff),
-     BFD_JUMP_TABLE_RELOCS (ecoff),
-     BFD_JUMP_TABLE_WRITE (ecoff),
-     BFD_JUMP_TABLE_LINK (ecoff),
+     BFD_JUMP_TABLE_ARCHIVE (_bfd_ecoff),
+     BFD_JUMP_TABLE_SYMBOLS (_bfd_ecoff),
+     BFD_JUMP_TABLE_RELOCS (_bfd_ecoff),
+     BFD_JUMP_TABLE_WRITE (_bfd_ecoff),
+     BFD_JUMP_TABLE_LINK (_bfd_ecoff),
      BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
   (PTR) &mips_ecoff_backend_data
