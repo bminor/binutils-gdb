@@ -202,7 +202,7 @@ typedef struct {
 #define STATE_CORE(sd) (&(sd)->base.core)
   sim_core core;
 
-  /* memory-options for managing the core */
+  /* Record of memory sections added via the memory-options interface.  */
 #define STATE_MEMOPT(sd) ((sd)->base.memopt)
   sim_memopt *memopt;
 
