@@ -1,3 +1,7 @@
+Wed Sep 18 12:14:06 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gas/all/cofftag.s: Use .p2align rather than .align.
+
 Fri Sep 13 15:28:04 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/h8300/macs.s: Add "stmac" instructions.
