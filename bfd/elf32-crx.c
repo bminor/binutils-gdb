@@ -30,7 +30,7 @@ static reloc_howto_type *elf_crx_reloc_type_lookup
 static void elf_crx_info_to_howto
   (bfd *, arelent *, Elf_Internal_Rela *);
 static bfd_boolean elf32_crx_relax_delete_bytes
-  (bfd *, asection *, bfd_vma, int);
+  (struct bfd_link_info *, bfd *, asection *, bfd_vma, int);
 static bfd_reloc_status_type crx_elf_final_link_relocate
   (reloc_howto_type *, bfd *, bfd *, asection *,
    bfd_byte *, bfd_vma, bfd_vma, bfd_vma,
@@ -573,8 +573,8 @@ crx_elf_final_link_relocate (reloc_howto_type *howto, bfd *input_bfd,
 /* Delete some bytes from a section while relaxing.  */
 
 static bfd_boolean
-elf32_crx_relax_delete_bytes (bfd *abfd, asection *sec,
-			      bfd_vma addr, int count)
+elf32_crx_relax_delete_bytes (struct bfd_link_info *link_info, bfd *abfd, 
+			      asection *sec, bfd_vma addr, int count)
 {
   Elf_Internal_Shdr *symtab_hdr;
   unsigned int sec_shndx;
@@ -586,6 +586,7 @@ elf32_crx_relax_delete_bytes (bfd *abfd, asection *sec,
   Elf_Internal_Sym *isymend;
   struct elf_link_hash_entry **sym_hashes;
   struct elf_link_hash_entry **end_hashes;
+  struct elf_link_hash_entry **start_hashes;
   unsigned int symcount;
 
   sec_shndx = _bfd_elf_section_from_bfd_section (abfd, sec);
@@ -662,12 +663,37 @@ elf32_crx_relax_delete_bytes (bfd *abfd, asection *sec,
   /* Now adjust the global symbols defined in this section.  */
   symcount = (symtab_hdr->sh_size / sizeof (Elf32_External_Sym)
 	      - symtab_hdr->sh_info);
-  sym_hashes = elf_sym_hashes (abfd);
+  sym_hashes = start_hashes = elf_sym_hashes (abfd);
   end_hashes = sym_hashes + symcount;
 
   for (; sym_hashes < end_hashes; sym_hashes++)
     {
       struct elf_link_hash_entry *sym_hash = *sym_hashes;
+
+      /* The '--wrap SYMBOL' option is causing a pain when the object file, 
+	 containing the definition of __wrap_SYMBOL, includes a direct 
+	 call to SYMBOL as well. Since both __wrap_SYMBOL and SYMBOL reference 
+	 the same symbol (which is __wrap_SYMBOL), but still exist as two 
+	 different symbols in 'sym_hashes', we don't want to adjust 
+	 the global symbol __wrap_SYMBOL twice.  
+	 This check is only relevant when symbols are being wrapped.  */
+      if (link_info->wrap_hash != NULL)
+	{
+	  struct elf_link_hash_entry **cur_sym_hashes;
+	  
+	  /* Loop only over the symbols whom been already checked.  */
+	  for (cur_sym_hashes = start_hashes; cur_sym_hashes < sym_hashes; 
+	       cur_sym_hashes++)
+	    {
+	      /* If the current symbol is identical to 'sym_hash', that means 
+		 the symbol was already adjusted (or at least checked).  */
+	      if (*cur_sym_hashes == sym_hash)
+		break;
+	    }
+	  /* Don't adjust the symbol again.  */
+	  if (cur_sym_hashes < sym_hashes)
+	    continue;
+	}
 
       if ((sym_hash->root.type == bfd_link_hash_defined
 	   || sym_hash->root.type == bfd_link_hash_defweak)
@@ -1078,7 +1104,7 @@ elf32_crx_relax_section (bfd *abfd, asection *sec,
 					   R_CRX_REL16);
 
 	      /* Delete two bytes of data.  */
-	      if (!elf32_crx_relax_delete_bytes (abfd, sec,
+	      if (!elf32_crx_relax_delete_bytes (link_info, abfd, sec,
 						   irel->r_offset + 2, 2))
 		goto error_return;
 
@@ -1123,7 +1149,7 @@ elf32_crx_relax_section (bfd *abfd, asection *sec,
 					   R_CRX_REL8);
 
 	      /* Delete two bytes of data.  */
-	      if (!elf32_crx_relax_delete_bytes (abfd, sec,
+	      if (!elf32_crx_relax_delete_bytes (link_info, abfd, sec,
 						   irel->r_offset + 2, 2))
 		goto error_return;
 
@@ -1173,7 +1199,7 @@ elf32_crx_relax_section (bfd *abfd, asection *sec,
 					   R_CRX_REL8_CMP);
 
 	      /* Delete two bytes of data.  */
-	      if (!elf32_crx_relax_delete_bytes (abfd, sec,
+	      if (!elf32_crx_relax_delete_bytes (link_info, abfd, sec,
 						   irel->r_offset + 4, 2))
 		goto error_return;
 
@@ -1214,7 +1240,7 @@ elf32_crx_relax_section (bfd *abfd, asection *sec,
 					   R_CRX_IMM16);
 
 	      /* Delete two bytes of data.  */
-	      if (!elf32_crx_relax_delete_bytes (abfd, sec,
+	      if (!elf32_crx_relax_delete_bytes (link_info, abfd, sec,
 						   irel->r_offset + 2, 2))
 		goto error_return;
 
