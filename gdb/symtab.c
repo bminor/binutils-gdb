@@ -1211,6 +1211,10 @@ lookup_block_symbol (register const struct block *block, const char *name,
 	    {
 	      return sym;
 	    }
+          if (SYMBOL_SOURCE_NAME (sym)[0] > name[0])
+            {
+              break;
+            }
 	  bot++;
 	}
     }

@@ -1,3 +1,8 @@
+2001-10-17  Jason Molenda  (jason-cl@molenda.com)
+
+	* symtab.c (lookup_block_symbol):  Break out of linear search
+        if we're past the range of possible matches.
+
 2001-10-16  Christopher Faylor  <cgf@redhat.com>
 
 	* win32-nat.c (safe_symbol_file_add_stub): Improve logic for avoiding
