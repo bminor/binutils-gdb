@@ -1,3 +1,7 @@
+Wed Sep 17 13:33:28 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-bits.h (MOVED): Define
+
 Wed Sep 17 10:33:28 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-alu.h (ALU32_HAD_OVERFLOW): Pacify GCC, Use MSBIT instead of
