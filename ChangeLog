@@ -1,3 +1,19 @@
+Tue Jun  4 20:41:45 1996  Per Bothner  <bothner@deneb.cygnus.com>
+
+	* config.guess:  Merge with FSF:
+
+	Mon Jun  3 08:49:14 1996  Karl Heuer  <kwzh@gnu.ai.mit.edu>
+	* config.guess (*:Linux:*:*): Add guess for sparc-unknown-linux.
+
+	Fri May 24 18:34:53 1996  Roland McGrath  <roland@delasyd.gnu.ai.mit.edu>
+	* config.guess (AViiON:dgux:*:*): Fix typo in recognizing mc88110.
+
+	Fri Apr 12 20:03:59 1996  Per Bothner  <bothner@spiff.gnu.ai.mit.edu>
+	* config.guess:  Combine two OSF1 rules.
+	Also recognize field test versions.  From mjr@zk3.dec.com.
+	* config.guess (dgux):  Use /usr/bin/uname rather than uname,
+	because GNU uname does not support -p.  From pmr@pajato.com.
+
 Tue Jun  4 11:07:25 1996  Tom Tromey  <tromey@csk3.cygnus.com>
 
 	* Makefile.in (MAKEDIRS): Removed $(tooldir).
