@@ -1,5 +1,8 @@
 Thu Nov  4 08:27:24 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* c-lang.c (c_printstr): Print "" to stream (like all the other
+	output from this function), not gdb_stdout.
+
 	* dbxread.c (process_one_symbol): Do relocate 'S' symbols by
 	the text offset (revert 12 Oct 93 change).
 

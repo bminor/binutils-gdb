@@ -116,7 +116,7 @@ c_printstr (stream, string, length, force_ellipses)
 
   if (length == 0)
     {
-      fputs_filtered ("\"\"", gdb_stdout);
+      fputs_filtered ("\"\"", stream);
       return;
     }
 
