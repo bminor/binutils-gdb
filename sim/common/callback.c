@@ -571,9 +571,10 @@ host_callback default_callback =
 };
 
 /* Read in a file describing the target's system call values.
-   This allows simulators, etc. to support arbitrary libraries
-   without having to be recompiled.
    E.g. maybe someone will want to use something other than newlib.
+   This assumes that the basic system call recognition and value passing/
+   returning is supported.  So maybe some coding/recompilation will be
+   necessary, but not as much.
 
    If an error occurs, the existing mapping is not changed.  */
 
