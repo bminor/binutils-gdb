@@ -1,6 +1,6 @@
 #objdump: -dr --prefix-addresses --show-raw-insn
 #name: ARM v1 instructions
-#as: -marm1
+#as: -mcpu=arm7t
 
 # Test the ARM v1 instructions
 

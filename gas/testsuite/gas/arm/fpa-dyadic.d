@@ -1,6 +1,6 @@
 #objdump: -dr --prefix-addresses --show-raw-insn
 #name: FPA Dyadic instructions
-#as: -mfpe-old
+#as: -mfpu=fpa -mcpu=arm7m
 
 # Test FPA Dyadic instructions
 # This test should work for both big and little-endian assembly.

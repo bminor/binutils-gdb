@@ -1,6 +1,6 @@
 #objdump: -dr --prefix-addresses --show-raw-insn
 #name: XScale instructions
-#as: -mxscale -EL
+#as: -mcpu=xscale -EL
 
 # Test the XScale instructions:
 

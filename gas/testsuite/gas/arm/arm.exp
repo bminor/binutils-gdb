@@ -21,19 +21,19 @@ if {[istarget *arm*-*-*] || [istarget "xscale-*-*"]} then {
 
     run_dump_test "armv1"
 
-    run_errors_test "armv1-bad" "-marm1" "ARM v1 errors"
+    run_errors_test "armv1-bad" "-mcpu=arm7m" "ARM v1 errors"
 
-    gas_test "arm3.s" "-marm3" $stdoptlist "Arm 3 instructions"
+    gas_test "arm3.s" "-mcpu=arm3" $stdoptlist "Arm 3 instructions"
 
-    gas_test "arm6.s" "-marm6" $stdoptlist "Arm 6 instructions"
+    gas_test "arm6.s" "-mcpu=arm6" $stdoptlist "Arm 6 instructions"
 
-    gas_test "arm7dm.s" "-marm7dm" $stdoptlist "Arm 7DM instructions"
+    gas_test "arm7dm.s" "-mcpu=arm7dm" $stdoptlist "Arm 7DM instructions"
 
     run_dump_test "arm7t"
 
-    gas_test "thumb.s" "-marm7t" $stdoptlist "Thumb instructions"
+    gas_test "thumb.s" "-mcpu=arm7t" $stdoptlist "Thumb instructions"
 
-    gas_test "arch4t.s" "-marmv4t" $stdoptlist "Arm architecture 4t instructions"
+    gas_test "arch4t.s" "-march=armv4t" $stdoptlist "Arm architecture 4t instructions"
 
     run_dump_test "arch5tej"
 

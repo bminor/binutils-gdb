@@ -1,6 +1,6 @@
 #objdump: -dr --prefix-addresses --show-raw-insn
 #name: ARM basic instructions
-#as: -marm2 -EL
+#as: -mcpu=arm7m -EL
 
 # Test the standard ARM instructions:
 

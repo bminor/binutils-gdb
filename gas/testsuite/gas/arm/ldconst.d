@@ -1,6 +1,6 @@
 #objdump: -dr --prefix-addresses --show-raw-insn
 #name: ARM ldr with immediate constant
-#as: -marm2 -EL
+#as: -mcpu=arm7m -EL
 
 .*: +file format .*arm.*
 

@@ -1,6 +1,6 @@
 #objdump: -dr --prefix-addresses --show-raw-insn
 #name: ARM arm7t
-#as: -marm7t -EL
+#as: -mcpu=arm7t -EL
 
 # Test the halfword and signextend memory transfers:
 

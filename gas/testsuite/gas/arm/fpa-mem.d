@@ -1,6 +1,6 @@
 #objdump: -dr --prefix-addresses --show-raw-insn
 #name: FPA memory insructions
-#as: -mfpa10
+#as: -mfpu=fpa10 -mcpu=arm7m
 
 # Test FPA memory instructions
 # This test should work for both big and little-endian assembly.

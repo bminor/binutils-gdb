@@ -1,3 +1,16 @@
+2002-05-20  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* gas/arm/arm.exp: Replace deprecated command line switches
+	with their modern equivalents.
+	* gas/arm/arm7t.d: As above.
+	* gas/arm/armv1.d: As above.
+	* gas/arm/fpa-dyadic.d: As above.
+	* gas/arm/fpa-mem.d: As above.
+	* gas/arm/fpa-monadic.d: As above.
+	* gas/arm/inst.d: As above.
+	* gas/arm/ldconst.d: As above.
+	* gas/arm/xscale.d: As above.
+
 2002-05-13  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/i386/x86-64-opcode.s: Pad out end of .text with zeros.
