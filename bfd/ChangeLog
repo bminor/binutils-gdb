@@ -1,3 +1,10 @@
+Fri Sep 25 15:03:22 1992  Brendan Kehoe  (brendan@rtl.cygnus.com)
+
+	* elf.c (section_from_elf_index): Return bfd_abs_section, not 0,
+	since we should never have a NULL section.
+	(elf_slurp_symbol_table): If st_shndx doesn't match any of our
+	tests, set the section to bfd_abs_section.
+
 Fri Sep 25 11:11:57 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* coff-z8k.c: getting closer

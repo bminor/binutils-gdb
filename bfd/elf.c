@@ -425,7 +425,6 @@ DEFUN(bfd_section_from_shdr, (abfd, shindex),
     return true;
 
   case SHT_PROGBITS:
-  case SHT_BEPROGBITS:
   case SHT_NOBITS:
     /* Bits that get saved. This one is real. */
     if (! hdr->rawdata ) 
@@ -1861,14 +1860,13 @@ DEFUN (section_from_elf_index, (abfd, index),
     {
       /* ELF sections that map to BFD sections */
     case SHT_PROGBITS:
-    case SHT_BEPROGBITS:
     case SHT_NOBITS:
       if (! hdr->rawdata)
 	bfd_section_from_shdr (abfd, index);
       return (struct sec *)hdr->rawdata;
       break;
     default:
-      return 0;
+      return (struct sec *)&bfd_abs_section;
     }
 }
 
@@ -1889,7 +1887,6 @@ DEFUN (elf_section_from_bfd_section, (abfd, asect),
       {
 	/* ELF sections that map to BFD sections */
       case SHT_PROGBITS:
-      case SHT_BEPROGBITS:
       case SHT_NOBITS:
 	if (hdr->rawdata) 
 	  {
@@ -1993,6 +1990,8 @@ how Sun hacked stabs.   -- gnu@cygnus.com  */
 	{
 	  sym -> section = &bfd_und_section;
 	}
+      else
+	sym -> section = &bfd_abs_section;
       
       switch (ELF_ST_BIND (i_sym.st_info))
 	{
