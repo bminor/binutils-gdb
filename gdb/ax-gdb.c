@@ -1165,7 +1165,7 @@ find_field (struct type *type, char *name)
     }
 
   error ("Couldn't find member named `%s' in struct/union `%s'",
-	 name, type->tag_name);
+	 name, TYPE_TAG_NAME (type));
 
   return 0;
 }

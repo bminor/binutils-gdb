@@ -1,5 +1,10 @@
 2002-02-03  Daniel Jacobowitz  <drow@mvista.com>
 
+	* ax-gdb.c (find_field): Use TYPE_TAG_NAME instead
+	of accessing tag_name directly.
+
+2002-02-03  Daniel Jacobowitz  <drow@mvista.com>
+
 	PR gdb/280
 	* gdbtypes.c (replace_type): New function.
 	* gdbtypes.h (replace_type): Add prototype.
