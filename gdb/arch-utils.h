@@ -43,6 +43,10 @@ extern gdbarch_extract_return_value_ftype legacy_extract_return_value;
 /* Implementation of store return value that grubs the register cache.  */
 extern gdbarch_store_return_value_ftype legacy_store_return_value;
 
+/* To return any structure or union type by value, store it at the
+   address passed as an invisible first argument to the function.  */
+extern gdbarch_use_struct_convention_ftype always_use_struct_convention;
+
 /* Frameless functions not identifable. */
 extern gdbarch_frameless_function_invocation_ftype generic_frameless_function_invocation_not;
 

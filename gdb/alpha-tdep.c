@@ -579,13 +579,6 @@ alpha_store_return_value (struct type *valtype, struct regcache *regcache,
     }
 }
 
-static int
-alpha_use_struct_convention (int gcc_p, struct type *type)
-{
-  /* Structures are returned by ref in extra arg0.  */
-  return 1;
-}
-
 
 static const unsigned char *
 alpha_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
@@ -1540,7 +1533,7 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frameless_function_invocation (gdbarch,
                                     generic_frameless_function_invocation_not);
 
-  set_gdbarch_use_struct_convention (gdbarch, alpha_use_struct_convention);
+  set_gdbarch_use_struct_convention (gdbarch, always_use_struct_convention);
   set_gdbarch_extract_return_value (gdbarch, alpha_extract_return_value);
   set_gdbarch_store_return_value (gdbarch, alpha_store_return_value);
   set_gdbarch_extract_struct_value_address (gdbarch,

@@ -1,3 +1,23 @@
+2003-06-12  Jim Blandy  <jimb@redhat.com>
+
+	* arch-utils.c (always_use_struct_convention): New function.
+	* arch-utils.h (always_use_struct_convention): New prototype.
+	* alpha-tdep.c (alpha_use_struct_convention): Delete.
+	(alpha_gdbarch_init): Register always_use_struct_convention,
+	instead of alpha_use_struct_convention.
+	* cris-tdep.c (cris_use_struct_convention): Delete.
+	(cris_gdbarch_init): Register always_use_struct_convention,
+	instead of cris_use_struct_convention.
+	* frv-tdep.c (frv_use_struct_convention): Delete.
+	(frv_gdbarch_init): Register always_use_struct_convention,
+	instead of frv_use_struct_convention.
+	* h8300-tdep.c (h8300_use_struct_convention): Delete.
+	(h8300_gdbarch_init): Register always_use_struct_convention,
+	instead of h8300_use_struct_convention.
+	* mips_o32-tdep.c (mips_o32_use_struct_convention): Delete.
+	(mips_o32_gdbarch_init): Register always_use_struct_convention,
+	instead of mips_o32_use_struct_convention.
+
 2003-06-12  Andrew Cagney  <cagney@redhat.com>
 
 	* wince.c: Include "mips-tdep.h".

@@ -738,18 +738,6 @@ frv_frame_init_saved_regs (struct frame_info *frame)
   }
 }
 
-/* Should we use EXTRACT_STRUCT_VALUE_ADDRESS instead of
-   EXTRACT_RETURN_VALUE?  GCC_P is true if compiled with gcc
-   and TYPE is the type (which is known to be struct, union or array).
-
-   The frv returns all structs in memory.  */
-
-static int
-frv_use_struct_convention (int gcc_p, struct type *type)
-{
-  return 1;
-}
-
 static void
 frv_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 {
@@ -1079,7 +1067,7 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, frv_frame_init_saved_regs);
 
-  set_gdbarch_use_struct_convention (gdbarch, frv_use_struct_convention);
+  set_gdbarch_use_struct_convention (gdbarch, always_use_struct_convention);
   set_gdbarch_deprecated_extract_return_value (gdbarch, frv_extract_return_value);
 
   set_gdbarch_deprecated_store_struct_return (gdbarch, frv_store_struct_return);

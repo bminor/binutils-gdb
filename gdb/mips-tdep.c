@@ -768,12 +768,6 @@ mips_n32n64_use_struct_convention (int gcc_p, struct type *type)
   return (TYPE_LENGTH (type) > 2 * MIPS_SAVED_REGSIZE);
 }
 
-static int
-mips_o32_use_struct_convention (int gcc_p, struct type *type)
-{
-  return 1;	/* Structures are returned by ref in extra arg0.  */
-}
-
 /* Should call_function pass struct by reference? 
    For each architecture, structs are passed either by
    value or by reference, depending on their size.  */
@@ -5778,7 +5772,7 @@ mips_gdbarch_init (struct gdbarch_info info,
       set_gdbarch_reg_struct_has_addr (gdbarch, 
 				       mips_o32_reg_struct_has_addr);
       set_gdbarch_use_struct_convention (gdbarch, 
-					 mips_o32_use_struct_convention);
+					 always_use_struct_convention);
       break;
     case MIPS_ABI_O64:
       set_gdbarch_push_dummy_call (gdbarch, mips_o64_push_dummy_call);

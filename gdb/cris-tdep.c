@@ -1100,19 +1100,6 @@ cris_extract_struct_value_address (char *regbuf)
   return struct_return_address;
 }
 
-/* Returns 1 if a value of the given type being returned from a function 
-   must have space allocated for it on the stack.  gcc_p is true if the 
-   function being considered is known to have been compiled by GCC. 
-   In the CRIS ABI, structure return values are passed to the called 
-   function by reference in register R9 to a caller-allocated area, so
-   this is always true.  */
-
-static int
-cris_use_struct_convention (int gcc_p, struct type *type)
-{
-  return 1;
-}
-
 /* Returns 1 if the given type will be passed by pointer rather than 
    directly.  */
 
@@ -4278,7 +4265,7 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_store_struct_return (gdbarch, cris_store_struct_return);
   set_gdbarch_deprecated_extract_struct_value_address
     (gdbarch, cris_extract_struct_value_address);
-  set_gdbarch_use_struct_convention (gdbarch, cris_use_struct_convention);
+  set_gdbarch_use_struct_convention (gdbarch, always_use_struct_convention);
 
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, cris_frame_init_saved_regs);
   set_gdbarch_deprecated_init_extra_frame_info (gdbarch, cris_init_extra_frame_info);
