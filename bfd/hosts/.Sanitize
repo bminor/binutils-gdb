@@ -43,6 +43,7 @@ h-rs6000.h
 h-rtbsd.h
 h-sparc-ll.h
 h-sparc.h
+h-stratus.h
 h-sun3.h
 h-tahoe.h
 h-ultra3.h
