@@ -2139,9 +2139,13 @@ pa_ip (str)
 		case '*':
 		  if (*s++ == ',')
 		    {
-		      int permloc[4] = {13,10,8,6};
+		      int permloc[4];
 		      int perm = 0;
 		      int i = 0;
+		      permloc[0] = 13;
+		      permloc[1] = 10;
+		      permloc[2] = 8;
+		      permloc[3] = 6;
 		      for (; i < 4; i++)
 		        {
 			  switch (*s++)
@@ -2777,16 +2781,16 @@ pa_ip (str)
 	       are 0..6 inclusive.  */
 	    case 'm':
 	      get_expression (s);
-	      s = expr_end;
 	      if (the_insn.exp.X_op == O_constant)
 		{
+		  s = expr_end;
 		  num = evaluate_absolute (&the_insn);
 		  CHECK_FIELD (num, 6, 0, 0);
 		  num = (num + 1) ^ 1;
 		  INSERT_FIELD_AND_CONTINUE (opcode, num, 13);
 		}
 	      else
-		as_bad (_("Invalid CBit Specification: %s"), s);
+		break;
 
 	    /* Handle graphics test completers for ftest */
 	    case '=':
