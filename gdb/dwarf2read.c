@@ -2504,13 +2504,6 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
   /* Record the function range for dwarf_decode_lines.  */
   add_to_cu_func_list (name, lowpc, highpc, cu);
 
-  if (objfile->ei.entry_point >= lowpc &&
-      objfile->ei.entry_point < highpc)
-    {
-      objfile->ei.entry_func_lowpc = lowpc;
-      objfile->ei.entry_func_highpc = highpc;
-    }
-
   new = push_context (0, lowpc);
   new->name = new_symbol (die, die->type, cu);
 

@@ -1,3 +1,19 @@
+2004-06-24  Andrew Cagney  <cagney@gnu.org>
+
+	* objfiles.h (struct entry_info): Delete entry_func_lowpc and
+	entry_func_highpc fields.
+	* objfiles.c (init_entry_point_info): Do not clear
+	entry_func_lowpc and entry_func_highpc.
+	(objfile_relocate): Do not relocate entry_func_lowpc and
+	entry_func_highpc.
+	* dwarfread.c (read_func_scope): Do not set entry_func_lowpc and
+	entry_func_highpc.
+	* dwarf2read.c (read_func_scope): Do not set entry_func_lowpc and
+	entry_func_highpc.
+	* blockframe.c (legacy_frame_chain_valid): Replace tests against
+	entry_func_lowpc and entry_func_highpc with call to
+	inside_entry_func.
+
 2004-06-24  Mark Kettenis  <kettenis@gnu.org>
 
 	* sparc64-tdep.c (sparc64_store_arguments): Fix passing

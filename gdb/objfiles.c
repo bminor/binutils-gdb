@@ -250,8 +250,6 @@ init_entry_point_info (struct objfile *objfile)
       /* Examination of non-executable.o files.  Short-circuit this stuff.  */
       objfile->ei.entry_point = INVALID_ENTRY_POINT;
     }
-  objfile->ei.entry_func_lowpc = INVALID_ENTRY_LOWPC;
-  objfile->ei.entry_func_highpc = INVALID_ENTRY_HIGHPC;
   objfile->ei.main_func_lowpc = INVALID_ENTRY_LOWPC;
   objfile->ei.main_func_highpc = INVALID_ENTRY_HIGHPC;
 }
@@ -648,12 +646,6 @@ objfile_relocate (struct objfile *objfile, struct section_offsets *new_offsets)
 	s->endaddr += ANOFFSET (delta, idx);
       }
   }
-
-  if (objfile->ei.entry_func_lowpc != INVALID_ENTRY_LOWPC)
-    {
-      objfile->ei.entry_func_lowpc += ANOFFSET (delta, SECT_OFF_TEXT (objfile));
-      objfile->ei.entry_func_highpc += ANOFFSET (delta, SECT_OFF_TEXT (objfile));
-    }
 
   if (objfile->ei.main_func_lowpc != INVALID_ENTRY_LOWPC)
     {

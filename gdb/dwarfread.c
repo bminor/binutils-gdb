@@ -1792,12 +1792,6 @@ read_func_scope (struct dieinfo *dip, char *thisdie, char *enddie,
       return;
     }
 
-  if (objfile->ei.entry_point >= dip->at_low_pc &&
-      objfile->ei.entry_point < dip->at_high_pc)
-    {
-      objfile->ei.entry_func_lowpc = dip->at_low_pc;
-      objfile->ei.entry_func_highpc = dip->at_high_pc;
-    }
   new = push_context (0, dip->at_low_pc);
   new->name = new_symbol (dip, objfile);
   list_in_scope = &local_symbols;

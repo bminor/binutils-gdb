@@ -110,12 +110,6 @@ struct entry_info
 
 #define INVALID_ENTRY_POINT (~0)	/* ~0 will not be in any file, we hope.  */
 
-    /* Start (inclusive) and end (exclusive) of function containing the
-       entry point. */
-
-    CORE_ADDR entry_func_lowpc;
-    CORE_ADDR entry_func_highpc;
-
     /* Start (inclusive) and end (exclusive) of the user code main() function. */
 
     CORE_ADDR main_func_lowpc;

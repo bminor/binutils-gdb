@@ -524,9 +524,7 @@ legacy_frame_chain_valid (CORE_ADDR fp, struct frame_info *fi)
 
   /* If we're already inside the entry function for the main objfile,
      then it isn't valid.  */
-  if (symfile_objfile != NULL
-      && (symfile_objfile->ei.entry_func_lowpc <= get_frame_pc (fi)
-	  && symfile_objfile->ei.entry_func_highpc > get_frame_pc (fi)))
+  if (inside_entry_func (fi))
     return 0;
 
   return 1;
