@@ -1,3 +1,9 @@
+Fri Feb 18 14:14:00 1994  Ken Raeburn  (raeburn@rtl.cygnus.com)
+
+	* configure: If subdir configure fails, print out a message with
+	subdirectory name, in case subdir's configure code didn't identify
+	itself.
+
 Fri Feb 18 12:50:15 1994  Doug Evans  (dje@cygnus.com)
 
 	* configure.in: Remove embedded newlines from configdirs.
