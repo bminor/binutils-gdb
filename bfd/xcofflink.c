@@ -2634,7 +2634,11 @@ bfd_xcoff_size_dynamic_sections (output_bfd, info, libpath, entry,
   bfd_byte *debug_contents = NULL;
 
   if (! XCOFF_XVECP (output_bfd->xvec))
-    return true;
+    {
+      for (i = 0; i < 6; i++)
+	special_sections[i] = NULL;
+      return true;
+    }
 
   ldinfo.failed = false;
   ldinfo.output_bfd = output_bfd;
