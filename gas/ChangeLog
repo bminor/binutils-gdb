@@ -1,5 +1,12 @@
 Mon Jul 10 13:47:22 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	Based on patches from H.J. Lu <hjl@nynexst.com>:
+	* config/tc-i386.c (md_apply_fix3): Rename from md_apply_fix1.
+	Accept pointer to value and segment.  Fix OBJ_ELF PCREL case to
+	handle global defined symbols correctly.
+	(md_apply_fix): Remove both versions.
+	* config/tc-i386.h (MD_APPLY_FIX3): Define.
+
 	* configure.in: When switching on ${cpu}, use ${cpu}, not
 	$[target_cpu}, in default case.
 	* configure: Rebuild.
