@@ -1,4 +1,13 @@
+Fri Mar 27 00:05:23 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* mips-opc.c: Add "sync.l" and "sync.p".
+
 start-sanitize-sky
+Thu Mar 26 13:27:37 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* dvp-opc.c (extract_vif_datalen): Rewrite.
+	(vif_insn_len): Perform 0->max+1 conversion for direct length.
+
 Wed Mar 25 13:32:36 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* dvp-dis.c (print_insn): Print unpack address in hex.
