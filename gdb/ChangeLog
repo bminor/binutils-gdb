@@ -1,3 +1,30 @@
+Sun Jun 12 03:51:52 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* config/m68k/dpx2.mh (NATDEPFILES):  Remove duplicate inclusion
+	of inftarg.o.
+	* config/m68k/tm-dpx2.h (CANNOT_STORE_REGISTER):  Define to inhibit
+	writing of floating registers, the dpx2 kernel disallows it.
+	* irix5-nat.c (LM_ADDR):  The loaded address of the shared library
+	is contained in o_praw.
+	* irix5-nat.c (solib_map_sections):  Adjust sections by the
+	difference between the loaded address and the prelinked address.
+	* irix5-nat.c (solib_address):  Use LM_ADDR for the loaded start
+	address.
+	* mdebugread.c (parse_symbol):  Do not relocate stEnd/scText
+	symbols, their value is absolute.
+	* mdebugread.c (parse_partial_symbols):  Handle Irix 5.2 shared
+	libraries fh->adr fields of zero. Relocate minimal symbol values
+	upon readin. Relocate non-stabs symbols upon readin.
+	* mdebugread.c (psymtab_to_symtab_1):  Use pst->textlow for the
+	start address of the outermost block.
+	* mdebugread.c (parse_lines, parse_procedure):  Pass in pst
+	instead of section_offsets and use relocated pst->textlow for
+	line number and procedure address relocations.
+
+	From gmo@MicroUnity.com (Guillermo A. Loyola):
+	* mdebugread.c (parse_symbol, parse_partial_symbols, cross_ref):
+	Handle SGI Irix5 stIndirect symbol type.
+
 Fri Jun 10 14:52:56 1994  Kung Hsu  (kung@mexican.cygnus.com)
 
 	* breakpoint.c: fix a syntax error native cc does not like.

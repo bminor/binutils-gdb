@@ -1,5 +1,6 @@
 /* Native support for the SGI Iris running IRIX version 5, for GDB.
-   Copyright 1988, 1989, 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994
+   Free Software Foundation, Inc.
    Contributed by Alessandro Forin(af@cs.cmu.edu) at CMU
    and by Per Bothner(bothner@cs.wisc.edu) at U.Wisconsin.
    Implemented for Irix 4.x by Garrett A. Wollman.
@@ -212,7 +213,7 @@ static char *bkpt_names[] = {
 #define DEBUG_BASE "__rld_obj_head"
 
 /* How to get the loaded address of a shared library.  */
-#define LM_ADDR(so) ((so)->lm.o_base_address)
+#define LM_ADDR(so) ((so)->lm.o_praw)
 
 char shadow_contents[BREAKPOINT_MAX];	/* Stash old bkpt addr contents */
 
@@ -303,6 +304,7 @@ solib_map_sections (so)
   struct section_table *p;
   struct cleanup *old_chain;
   bfd *abfd;
+  CORE_ADDR offset;
   
   filename = tilde_expand (so -> lm.o_path);
   old_chain = make_cleanup (free, filename);
@@ -342,13 +344,20 @@ solib_map_sections (so)
 	     bfd_get_filename (exec_bfd), bfd_errmsg (bfd_get_error ()));
     }
 
+  /* Irix 5 shared objects are pre-linked to particular addresses
+     although the dynamic linker may have to relocate them if the
+     address ranges of the libraries used by the main program clash.
+     The offset is the difference between the address where the object
+     is mapped and the binding address of the shared library.  */
+  offset = (CORE_ADDR) LM_ADDR (so) - so -> lm.o_base_address;
+
   for (p = so -> sections; p < so -> sections_end; p++)
     {
       /* Relocate the section binding addresses as recorded in the shared
-	 object's file by the base address to which the object was actually
-	 mapped. */
-      p -> addr += (CORE_ADDR) LM_ADDR (so);
-      p -> endaddr += (CORE_ADDR) LM_ADDR (so);
+	 object's file by the offset to get the address to which the
+	 object was actually mapped.  */
+      p -> addr += offset;
+      p -> endaddr += offset;
       so -> lmend = (CORE_ADDR) max (p -> endaddr, so -> lmend);
       if (STREQ (p -> the_bfd_section -> name, ".text"))
 	{
@@ -773,7 +782,7 @@ solib_address (address)
     {
       if (so -> lm.o_path[0])
 	{
-	  if ((address >= (CORE_ADDR) so->lm.o_base_address) &&
+	  if ((address >= (CORE_ADDR) LM_ADDR (so)) &&
 	      (address < (CORE_ADDR) so -> lmend))
 	    {
 	      return (1);

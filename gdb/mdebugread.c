@@ -681,12 +681,20 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
   switch (sh->sc)
     {
     case scText:
-      sh->value += ANOFFSET (section_offsets, SECT_OFF_TEXT);
+      /* The value of a stEnd symbol is the displacement from the
+	 corresponding start symbol value, do not relocate it.  */
+      if (sh->st != stEnd)
+	sh->value += ANOFFSET (section_offsets, SECT_OFF_TEXT);
       break;
     case scData:
+    case scSData:
+    case scRData:
+    case scPData:
+    case scXData:
       sh->value += ANOFFSET (section_offsets, SECT_OFF_DATA);
       break;
     case scBss:
+    case scSBss:
       sh->value += ANOFFSET (section_offsets, SECT_OFF_BSS);
       break;
     }
@@ -957,6 +965,13 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
 		   Just ignore it. */
 		break;
 
+	      case stIndirect:
+		/* Irix5 cc puts out a stIndirect for struct x if it is not
+		   yet defined when it encounters
+		   struct y { struct x *xp; };
+		   Just ignore it. */
+		break;
+
 	      default:
 		complain (&block_member_complaint, tsym.st);
 	      }
@@ -1206,6 +1221,11 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
       f->bitsize = bitsize;
       break;
 
+    case stIndirect:		/* forward declaration on Irix5 */
+      /* Forward declarations from Irix5 cc are handled by cross_ref,
+	 skip them.  */
+      break;
+
     case stTypedef:		/* type definition */
       /* Typedefs for forward declarations and opaque structs from alpha cc
 	 are handled by cross_ref, skip them.  */
@@ -1236,7 +1256,7 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
 	 generates a cross referencing stTypedef for x and xx.
 	 The user visible effect of this is that the type of a pointer
 	 to struct foo sometimes is given as `foo *' instead of `struct foo *'.
-	 The problem is fixed with alpha cc.  */
+	 The problem is fixed with alpha cc and Irix5 cc.  */
 
       /* However if the typedef cross references to an opaque aggregate, it
 	 is safe to omit it from the symbol table.  */
@@ -1722,14 +1742,14 @@ upgrade_type (fd, tpp, tq, ax, bigend, sym_name)
    in question, or NULL to use top_stack->cur_block.  */
 
 static void parse_procedure PARAMS ((PDR *, struct symtab *, unsigned long,
-				     struct section_offsets *));
+				     struct partial_symtab *));
 
 static void
-parse_procedure (pr, search_symtab, first_off, section_offsets)
+parse_procedure (pr, search_symtab, first_off, pst)
      PDR *pr;
      struct symtab *search_symtab;
      unsigned long first_off;
-     struct section_offsets *section_offsets;
+     struct partial_symtab *pst;
 {
   struct symbol *s, *i;
   struct block *b;
@@ -1834,8 +1854,7 @@ parse_procedure (pr, search_symtab, first_off, section_offsets)
       e = (struct mips_extra_func_info *) SYMBOL_VALUE (i);
       e->pdr = *pr;
       e->pdr.isym = (long) s;
-      e->pdr.adr += cur_fdr->adr - first_off
-	+ ANOFFSET (section_offsets, SECT_OFF_TEXT);
+      e->pdr.adr += pst->textlow - first_off;
 
       /* Correct incorrect setjmp procedure descriptor from the library
 	 to make backtrace through setjmp work.  */
@@ -1958,13 +1977,16 @@ parse_external (es, bigend, section_offsets)
    numbers can go back and forth, apparently we can live
    with that and do not need to reorder our linetables */
 
+static void parse_lines PARAMS ((FDR *, PDR *, struct linetable *, int,
+				 struct partial_symtab *));
+
 static void
-parse_lines (fh, pr, lt, maxlines, section_offsets)
+parse_lines (fh, pr, lt, maxlines, pst)
      FDR *fh;
      PDR *pr;
      struct linetable *lt;
      int maxlines;
-     struct section_offsets *section_offsets;
+     struct partial_symtab *pst;
 {
   unsigned char *base;
   int j, k;
@@ -1996,8 +2018,7 @@ parse_lines (fh, pr, lt, maxlines, section_offsets)
  	halt = base + fh->cbLine;
       base += pr->cbLineOffset;
 
-      adr = fh->adr + pr->adr - first_off
-	+ ANOFFSET (section_offsets, SECT_OFF_TEXT);
+      adr = pst->textlow + pr->adr - first_off;
 
       l = adr >> 2;		/* in words */
       for (lineno = pr->lnLow; base < halt; )
@@ -2071,6 +2092,19 @@ parse_partial_symbols (objfile, section_offsets)
   struct cleanup *old_chain;
   char *name;
   enum language prev_language;
+  asection *text_sect;
+  int relocatable = 0;
+
+  /* Irix 5.2 shared libraries have a fh->adr field of zero, but
+     the shared libraries are prelinked at a high memory address.
+     We have to adjust the start address of the object file for this case,
+     by setting it to the start address of the first procedure in the file.
+     But we should do no adjustments if we are debugging a .o file, where
+     the text section (and fh->adr) really starts at zero.  */
+  text_sect = bfd_get_section_by_name (cur_bfd, ".text");
+  if (text_sect != NULL
+      && (bfd_get_section_flags (cur_bfd, text_sect) & SEC_RELOC))
+    relocatable = 1;
 
   extern_tab = (EXTR *) obstack_alloc (&objfile->psymbol_obstack,
 				       sizeof (EXTR) * hdr->iextMax);
@@ -2159,6 +2193,7 @@ parse_partial_symbols (objfile, section_offsets)
   for (; ext_in < ext_in_end; ext_in++)
     {
       enum minimal_symbol_type ms_type = mst_text;
+      CORE_ADDR svalue = ext_in->asym.value;
 
       /* The Irix 5 native tools seem to sometimes generate bogus
 	 external symbols.  */
@@ -2184,9 +2219,11 @@ parse_partial_symbols (objfile, section_offsets)
       switch (ext_in->asym.st)
 	{
 	case stProc:
+	  svalue += ANOFFSET (section_offsets, SECT_OFF_TEXT);
 	  break;
 	case stStaticProc:
 	  ms_type = mst_file_text;
+	  svalue += ANOFFSET (section_offsets, SECT_OFF_TEXT);
 	  break;
 	case stGlobal:
           if (ext_in->asym.sc == scCommon)
@@ -2200,9 +2237,15 @@ parse_partial_symbols (objfile, section_offsets)
 	      || ext_in->asym.sc == scRData
 	      || ext_in->asym.sc == scPData
 	      || ext_in->asym.sc == scXData)
-	    ms_type = mst_data;
+	    {
+	      ms_type = mst_data;
+	      svalue += ANOFFSET (section_offsets, SECT_OFF_DATA);
+	    }
 	  else
-	    ms_type = mst_bss;
+	    {
+	      ms_type = mst_bss;
+	      svalue += ANOFFSET (section_offsets, SECT_OFF_BSS);
+	    }
 	  break;
 	case stLabel:
           if (ext_in->asym.sc == scAbs)
@@ -2210,15 +2253,24 @@ parse_partial_symbols (objfile, section_offsets)
           else if (ext_in->asym.sc == scText
           	   || ext_in->asym.sc == scInit
           	   || ext_in->asym.sc == scFini)
-	    ms_type = mst_file_text;
+	    {
+	      ms_type = mst_file_text;
+	      svalue += ANOFFSET (section_offsets, SECT_OFF_TEXT);
+	    }
           else if (ext_in->asym.sc == scData
 		   || ext_in->asym.sc == scSData
 		   || ext_in->asym.sc == scRData
 		   || ext_in->asym.sc == scPData
 		   || ext_in->asym.sc == scXData)
-	    ms_type = mst_file_data;
+	    {
+	      ms_type = mst_file_data;
+	      svalue += ANOFFSET (section_offsets, SECT_OFF_DATA);
+	    }
 	  else
-	    ms_type = mst_file_bss;
+	    {
+	      ms_type = mst_file_bss;
+	      svalue += ANOFFSET (section_offsets, SECT_OFF_BSS);
+	    }
 	  break;
 	case stLocal:
 	  /* The alpha has the section start addresses in stLocal symbols
@@ -2231,7 +2283,7 @@ parse_partial_symbols (objfile, section_offsets)
 	  ms_type = mst_unknown;
 	  complain (&unknown_ext_complaint, name);
 	}
-      prim_record_minimal_symbol (name, ext_in->asym.value, ms_type, objfile);
+      prim_record_minimal_symbol (name, svalue, ms_type, objfile);
     }
 
   /* Pass 3 over files, over local syms: fill in static symbols */
@@ -2239,6 +2291,7 @@ parse_partial_symbols (objfile, section_offsets)
     {
       struct partial_symtab *save_pst;
       EXTR *ext_ptr;
+      CORE_ADDR textlow;
 
       cur_fdr = fh = debug_info->fdr + f_idx;
 
@@ -2247,9 +2300,20 @@ parse_partial_symbols (objfile, section_offsets)
 	  fdr_to_pst[f_idx].pst = NULL;
 	  continue;
 	}
+
+      /* Determine the start address for this object file from the
+	 file header and relocate it, except for Irix 5.2 zero fh->adr.  */
+      if (fh->cpd)
+	{
+	  textlow = fh->adr;
+	  if (relocatable || textlow != 0)
+	    textlow += ANOFFSET (section_offsets, SECT_OFF_TEXT);
+	}
+      else
+	textlow = 0;
       pst = start_psymtab_common (objfile, section_offsets,
 				  fdr_name (fh),
-				  fh->cpd ? fh->adr : 0,
+				  textlow,
 				  objfile->global_psymbols.next,
 				  objfile->static_psymbols.next);
       pst->read_symtab_private = ((char *)
@@ -2356,6 +2420,11 @@ parse_partial_symbols (objfile, section_offsets)
 		      if (sh.st == stEnd)
 			{
 			  long high = procaddr + sh.value;
+
+	      		  /* Kludge for Irix 5.2 zero fh->adr.  */
+			  if (!relocatable
+			      && (pst->textlow == 0 || procaddr < pst->textlow))
+			    pst->textlow = procaddr;
 			  if (high > pst->texthigh)
 			    pst->texthigh = high;
 			}
@@ -2441,6 +2510,27 @@ parse_partial_symbols (objfile, section_offsets)
 
 	      name = debug_info->ss + fh->issBase + sh.iss;
 
+	      switch (sh.sc)
+		{
+		case scText:
+		  /* The value of a stEnd symbol is the displacement from the
+		     corresponding start symbol value, do not relocate it.  */
+		  if (sh.st != stEnd)
+		    sh.value += ANOFFSET (section_offsets, SECT_OFF_TEXT);
+		  break;
+		case scData:
+		case scSData:
+		case scRData:
+		case scPData:
+		case scXData:
+		  sh.value += ANOFFSET (section_offsets, SECT_OFF_DATA);
+		  break;
+		case scBss:
+		case scSBss:
+		  sh.value += ANOFFSET (section_offsets, SECT_OFF_BSS);
+		  break;
+		}
+
 	      switch (sh.st)
 		{
 		  long high;
@@ -2507,6 +2597,12 @@ parse_partial_symbols (objfile, section_offsets)
 				  &sh);
 		  if (sh.st != stEnd)
 		    continue;
+
+		  /* Kludge for Irix 5.2 zero fh->adr.  */
+		  if (!relocatable
+		      && (pst->textlow == 0 || procaddr < pst->textlow))
+		    pst->textlow = procaddr;
+
 		  high = procaddr + sh.value;
 		  if (high > pst->texthigh)
 		    pst->texthigh = high;
@@ -2529,6 +2625,10 @@ parse_partial_symbols (objfile, section_offsets)
 							 objfile);
 		  class = LOC_STATIC;
 		  break;
+
+		case stIndirect:/* Irix5 forward declaration */
+		  /* Skip forward declarations from Irix5 cc */
+		  goto skip;
 
 		case stTypedef:/* Typedef */
 		  /* Skip typedefs for forward declarations and opaque
@@ -2609,6 +2709,7 @@ parse_partial_symbols (objfile, section_offsets)
 	      enum address_class class;
 	      SYMR *psh;
 	      char *name;
+	      CORE_ADDR svalue;
 
 	      if (ext_ptr->ifd != f_idx)
 		abort ();
@@ -2617,6 +2718,25 @@ parse_partial_symbols (objfile, section_offsets)
 	      /* Do not add undefined symbols to the partial symbol table.  */
 	      if (psh->sc == scUndefined || psh->sc == scNil)
 		continue;
+
+	      svalue = psh->value;
+	      switch (psh->sc)
+		{
+		case scText:
+		  svalue += ANOFFSET (section_offsets, SECT_OFF_TEXT);
+		  break;
+		case scData:
+		case scSData:
+		case scRData:
+		case scPData:
+		case scXData:
+		  svalue += ANOFFSET (section_offsets, SECT_OFF_DATA);
+		  break;
+		case scBss:
+		case scSBss:
+		  svalue += ANOFFSET (section_offsets, SECT_OFF_BSS);
+		  break;
+		}
 
 	      switch (psh->st)
 		{
@@ -2645,7 +2765,7 @@ parse_partial_symbols (objfile, section_offsets)
 	      ADD_PSYMBOL_ADDR_TO_LIST (name, strlen (name),
 				        VAR_NAMESPACE, class,
 				        objfile->global_psymbols,
-					(CORE_ADDR) psh->value,
+					svalue,
 				        psymtab_language, objfile);
 	    }
 	}
@@ -2994,7 +3114,7 @@ psymtab_to_symtab_1 (pst, filename)
 	      first_off = pr.adr;
 	      first_pdr = 0;
 	    }
-	  parse_procedure (&pr, st, first_off, pst->section_offsets);
+	  parse_procedure (&pr, st, first_off, pst);
 	}
     }
   else
@@ -3036,7 +3156,7 @@ psymtab_to_symtab_1 (pst, filename)
       top_stack->cur_st = st;
       top_stack->cur_block = BLOCKVECTOR_BLOCK (BLOCKVECTOR (st),
 						STATIC_BLOCK);
-      BLOCK_START (top_stack->cur_block) = fh ? fh->adr : 0;
+      BLOCK_START (top_stack->cur_block) = pst->textlow;
       BLOCK_END (top_stack->cur_block) = 0;
       top_stack->blocktype = stFile;
       top_stack->maxsyms = 2 * f_max;
@@ -3090,8 +3210,7 @@ psymtab_to_symtab_1 (pst, filename)
 		   pdr_ptr += external_pdr_size, pdr_in++)
 		(*swap_pdr_in) (cur_bfd, pdr_ptr, pdr_in);
 
-	      parse_lines (fh, pr_block, lines, maxlines,
-			   pst->section_offsets);
+	      parse_lines (fh, pr_block, lines, maxlines, pst);
 	      if (lines->nitems < fh->cline)
 		lines = shrink_linetable (lines);
 
@@ -3099,8 +3218,7 @@ psymtab_to_symtab_1 (pst, filename)
 	      pdr_in = pr_block;
 	      pdr_in_end = pdr_in + fh->cpd;
 	      for (; pdr_in < pdr_in_end; pdr_in++)
-		parse_procedure (pdr_in, 0, pr_block->adr,
-				 pst->section_offsets);
+		parse_procedure (pdr_in, 0, pr_block->adr, pst);
 
 	      do_cleanups (old_chain);
 	    }
@@ -3271,7 +3389,7 @@ cross_ref (fd, ax, tpp, type_code, pname, bigend, sym_name)
 
   /* Make sure that this type of cross reference can be handled.  */
   if ((sh.sc != scInfo
-       || (sh.st != stBlock && sh.st != stTypedef
+       || (sh.st != stBlock && sh.st != stTypedef && sh.st != stIndirect
 	   && sh.st != stStruct && sh.st != stUnion
 	   && sh.st != stEnum))
       && (sh.sc != scCommon || sh.st != stBlock))
@@ -3292,7 +3410,7 @@ cross_ref (fd, ax, tpp, type_code, pname, bigend, sym_name)
     {
       /* We have not yet seen this type.  */
 
-      if (sh.iss == 0 && sh.st == stTypedef)
+      if ((sh.iss == 0 && sh.st == stTypedef) || sh.st == stIndirect)
 	{
 	  TIR tir;
 
@@ -3305,8 +3423,8 @@ cross_ref (fd, ax, tpp, type_code, pname, bigend, sym_name)
 		due to the missing name.
 	     b) forward declarations of structs/unions/enums which are defined
 		later in this file or in another file in the same compilation
-		unit.  Simply cross reference those again to get the
-		true type.
+		unit. Irix5 cc uses a stIndirect symbol for this.
+		Simply cross reference those again to get the true type.
 	     The forward references are not entered in the pending list and
 	     in the symbol table.  */
 
