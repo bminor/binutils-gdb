@@ -55,7 +55,8 @@ arm*-wince-pe)		gdb_target=wince ;;
 arm*-*-linux*)		gdb_target=linux
 			build_gdbserver=yes
 			;;
-arm*-*-netbsd*)		gdb_target=nbsd ;;
+arm*-*-netbsd*)		gdb_target=nbsd
+			gdb_multi_arch=yes ;;
 arm*-*-* | thumb*-*-* | strongarm*-*-*)
 			gdb_target=embed
                         configdirs="$configdirs rdi-share"
