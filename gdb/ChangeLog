@@ -33,7 +33,9 @@
 	s390_NR_sigreturn, s390_NR_rt_sigreturn): Remove.
 	(struct frame_extra_info): Remove.
 	(s390_memset_extra_info): Remove.
-	(op_*, op1_*, op2_* enums): Add several new opcodes.
+        (op1_ag, op1_ay, op1_brasl, op1_brc, op1_brcl, op1_lay, op1_lg)
+        (op1_lmy, op1_ly, op1_sg, op1_stmy, op1_sty, op1_sy, op_a)
+        (op_agr, op_bas, op_bc, op_bcr, op_sgr, op_sr): New opcodes.
 	(is_rse): Renamed to ...
 	(is_rsy): ... this.  Support long displacements.
 	(is_rxe): Renamed to ...
