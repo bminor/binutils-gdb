@@ -1,3 +1,9 @@
+Fri Jun  5 18:43:40 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* objcopy.c (setup_section): Adjust the section size if copy_byte
+	is >= 0.
+	(copy_section): Do not call bfd_set_section_size.
+
 Thu Jun  4 09:12:27 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* objcopy.c (copy_usage): Add missing \n\ from help description.
