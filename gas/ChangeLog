@@ -1,8 +1,13 @@
+Mon Sep 13 13:15:03 1993  Doug Evans  (dje@canuck.cygnus.com)
+
+	* config/tc-sparc.h (LOCAL_LABEL): Remove test for name[0] == 'L'.
+
 Fri Sep 10 11:22:08 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/obj-elf.h (S_SET_SIZE): Actually set the size.
 
 	Gcc lint.
+	* Added a number of casts to function calls.
 	* app.c (do_scrub_begin), as.c (main), expr.c (integer_constant,
 	operand, expr), read.c (read_begin, HANDLE_CONDITIONAL_ASSEMBLY,
 	read_a_source_file, s_align_bytes, demand_empty_rest_of_line,
@@ -11,49 +16,107 @@ Fri Sep 10 11:22:08 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 	(obj_elf_section), config/tc-i386.c (parse_register),
 	config/tc-sparc.c (isoctal, s_proc): Cast char
 	array indices to unsigned char.
+	* app.c (process_escape): Make static.  Add prototype.  Change
+	argument from char to int.
 	* as.c: Include output-file.h for prototypes.  Comment out unused
 	function got_sig.
 	* Makefile.in (as.o): Depend on output-file.h.
 	* as.h (BAD_CASE): Cast val argument to long, and use %ld.
+	(pseudo_typeS): Add prototype to poc_handler field.
+	(print_version_id): Add prototype.
+	(xmalloc, xrealloc): Change size arguments to unsigned long.
+	(do_scrub_next_char): Add prototypes for function arguments.
+	(had_errors, had_warnings, scrub_from_file): Remove duplicate
+	declarations.
+	* atof-generic.c (atof_generic): Make size variables unsigned.
 	* cond.c (ignore_input): Removed unused local variable ptr.
+	* expr.c (floating_constant, integer_constant): Make static.  Add
+	prototypes.
+	* flonum-copy.c (flonum_copy): Make size variables unsigned.
 	* frags.h: Add prototype for frag_init.
+	* hash.h, hash.c: Change hash values from char * to PTR, make hash
+	strings const, make returned error strings const char *.  Added
+	prototypes for functions.
+	* input-file.h, input-file.c (input_file_buffer_size): Return
+	unsigned int.
+	* input-scrub.c (buffer_length): Make unsigned.
+	(input_scrub_push, input_scrub_pop): Make static.
 	* listing.c (list_symbol_table): Cast sprintf argument to unsigned
 	long and use %lx.  Print name of segment rather than address of
 	structure.
+	(listing_list, listing_title): Change argument to int.
+	(listing_eject, listing_flags, listing_psize): Add int argument.
+	* listing.h: Corresponding declaration changes.
+	* obj.h (obj_emit_symbols): Rename prototype argument to avoid
+	shadowing.
 	* read.h: Change get_absolute_expression prototype to return
-	offsetT.  Add prototype for next_char_of_string.
+	offsetT.  Add prototype for next_char_of_string.  Various
+	prototype changes.
 	* read.c: Remove prototype for next_char_of_string.
+	(pobegin): Make errtxt const.  Make new_length, tmp_len and num
+	unsigned.
+	(s_abort, s_align_ptwo, s_comm, s_data, s_app_line, s_fill,
+	s_globl, s_lsym, s_org, s_set, s_text, s_desc): Add int argument.
+	Change all callers.
 	(s_comm): Change temp from valueT to offsetT.  Cast to long when
 	printing and use %ld (only for error messages anyhow).
+	(s_long, s_int): Remove unused functions.
+	(cons): Change argument to int.
 	(emit_expr): Use %lx when printing longs.
 	(get_absolute_expression): Return offsetT, not long.
 	(get_stab_string_offset): Comment out unless
 	SEPARATE_STAB_SECTIONS.
 	(s_stab_generic): Remove unused offset.  Define seg_is_new only
 	if SEPARATE_STAB_SECTIONS.  Use toP only in local block.
+	* struc-symbol.h (verify_symbol_chain_2): Add prototype.
 	* symbols.c: Remove nested comment.
+	(symbol_new): Rename value to valu.
 	(colon): Use %ld and cast to long in error message.
+	* symbols.h: Remove duplicate verify_symbol_chain declaration.
+	* tc.h: Remove unused md_emit_relocations declaration.
+	(tc_gen_reloc): Add declaration.
 	* write.c (cvt_frag_to_fill): Change first argument name depending
 	on BFD_ASSEMBLER.
-	(write_relocs): Remove unused offset, frags.
-	(write_contents): Remove unused i, n, relocs, fixp.
+	(write_relocs): Remove unused offset, frags.  Remove tc_gen_reloc
+	declarations.  Make n unsigned.
+	(write_contents): Remove unused i, n, relocs, fixp.  Rename frags
+	to f to avoid shadowing.
 	(write_object_file): Define fragP only if not BFD_ASSEMBLER or not
 	WORKING_DOT_WORD.  Remove unused keep.  Only declare punt and
-	punt_it if they will be used.
+	punt_it if they will be used.  Make i and n unsigned.
 	(fixup_segment): Cast to long and use %ld in error message.
+	* xmalloc.c (xmalloc, xrealloc): Make size argument unsigned.
 	* config/obj-aout.h: Remove nested comment.  Add prototype for
 	obj_aout_frob_symbol.
-	* config/obj-ecoff.c (add_string): Make len unsigned long.
+	(obj_aout_line, obj_aout_desc): Add int argument.
+	* config/obj-ecoff.c: Changed build routines to use an unsigned
+	offset.
+	(add_string): Make len unsigned long.
 	(obj_ecoff_stab): Use %lu in error message.
 	* config/obj-elf.c (obj_elf_common): Comment out unused label
 	allocate_bss.
 	(obj_elf_frob_symbol): Return 0 (currently broken).
+	(obj_elf_desc, obj_elf_version, obj_elf_size, obj_elf_type,
+	obj_elf_ident, obj_elf_weak, obj_elf_local, obj_elf_common,
+	obj_elf_line, obj_elf_previous): Add int argument.
+	(obj_elf_write_symbol_p): Make static.
+	* config/obj-elf.h (obj_elf_write_symbol): Add prototype.
 	* config/tc-hppa.h: Remove declarations of functions declared in
 	read.h.
+	* config/tc-i386.c (ENCODE_RELAX_STATE): Cast to relax_substateT.
+	(s_bss): Add int argument.
+	(fits_in_signed_byte, smallest_imm_type): Make argument unsigned.
+	(dummy): Remove unused function.
+	(md_assemble): Rename local o to op to avoid shadowing.
+	(tc_gen_reloc): Rename local reloc to rel to avoid shadowing.
+	* config/tc-m68k.c (s_data1, s_data2): Add int argument.
 	* config/tc-mips.c (mips_ip, md_apply_fix): Cast to long and use
 	%ld in error messages.
-	* config/tc-sparc.c (getExpression): Rewrite condition to avoid
-	empty conditional body.
+	* config/tc-sparc.c: Remove duplicate declarations.
+	(getExpression): Rewrite condition to avoid empty conditional
+	body.
+	(s_reg, s_proc, s_reserve, s_common, s_seg, s_xword): Add int
+	argument.
 
 Thu Sep  9 17:10:00 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
