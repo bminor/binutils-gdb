@@ -1,5 +1,9 @@
 2002-02-10  Daniel Jacobowitz  <drow@mvista.com>
 
+	* lexsup.c: Remove strtoul declaration.
+
+2002-02-10  Daniel Jacobowitz  <drow@mvista.com>
+
 	* ldmain.c: Add prototype for main ().
 	* lexsup.c: Guard declaration of strtoul with HAVE_STDLIB_H.
 	* emultempl/lnk960.em (lnk960_choose_target): Function should
