@@ -132,13 +132,18 @@ reggroup_next (struct gdbarch *gdbarch, struct reggroup *last)
   if (groups->first == NULL)
     groups = &default_groups;
 
-  /* Retun the first/next reggroup.  */
+  /* Return the first/next reggroup.  */
   if (last == NULL)
     return groups->first->group;
   for (el = groups->first; el != NULL; el = el->next)
     {
       if (el->group == last)
-	return el->next->group;
+	{
+	  if (el->next != NULL)
+	    return el->next->group;
+	  else
+	    return NULL;
+	}
     }
   return NULL;
 }

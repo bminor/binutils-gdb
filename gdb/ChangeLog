@@ -1,3 +1,7 @@
+2003-08-05  Andrew Cagney  <cagney@redhat.com>
+
+	* reggroups.c (reggroup_next): Check for the final entry.
+
 2003-08-04  Andrew Cagney  <cagney@redhat.com>
 
 	* monitor.h (monitor_dump_reg_block): Remove ATTR_FORMAT.
