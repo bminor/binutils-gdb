@@ -1,5 +1,10 @@
 Fri Apr 15 12:22:07 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* coff-a29k.c (reloc_processing): Always set the address of a
+	R_IHCONST reloc to that of the immediately preceding R_IHIHALF.
+	gas does this anyhow, but some other assemblers seem to leave
+	garbage in the R_IHCONST address field.
+
 	* bfd/archive.c: Consistently use ARFMAG; from
 	schwab@issan.informatik.uni-dortmund.de (Andreas Schwab).
 	(_bfd_write_archive_contents): Use ARFMAG rather than '`' and
