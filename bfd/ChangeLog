@@ -1,5 +1,13 @@
 Mon Jan 27 12:25:02 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* aout-arm.c (MY_swap_std_reloc_in): Remove unused r_length.
+	* elf32-ppc.c (ppc_elf_check_relocs): Remove unused plt.
+start-sanitize-v850
+	* elf32-v850.c (v850_elf_final_link_relocate): Remove used
+	r_format and r_pcrel.  Always return a value.
+end-sanitize-v850
+	* riscix.c (MY_final_link_callback): Define to dummy value.
+
 	* elf32-i386.c (elf_i386_size_dynamic_sections): When checking for
 	relocations against the text segment, look up the output name of
 	the reloc section.
