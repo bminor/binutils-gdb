@@ -1,3 +1,18 @@
+Tue Feb 24 10:46:44 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* arm-dis.c (print_insn_{big,little}_arm): info->symbol changed
+	to *info->symbols.
+	* mips-dis.c (print_insn_{big,little}_mips): Likewise.
+	* tic30-dis.c (print_branch): Likewise.
+start-sanitize-sky
+	* mips-dis.c (print_insn_little_mips): Call dvp_info_mach_type.
+	* dvp-dis.c (dvp_info_mach_type): New function.
+	(print_insn_dvp): Call it.
+	(print_vif): Return length of 4 if mpg or direct insn so following
+	insns get properly disabled.
+	* dvp-opc.c (vif_insn_len): New argument `pcpu'.  All callers updated.
+end-sanitize-sky
+
 Tue Feb 24 11:06:18 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* arm-dis.c (print_insn_big_arm, print_insn_little_arm): Remove

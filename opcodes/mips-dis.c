@@ -443,8 +443,8 @@ print_insn_big_mips (memaddr, info)
 
   if (info->mach == 16
       || (info->flavour == bfd_target_elf_flavour
-	  && info->symbol != NULL
-	  && (((elf_symbol_type *) info->symbol)->internal_elf_sym.st_other
+	  && info->symbols != NULL
+	  && ((*(elf_symbol_type **) info->symbols)->internal_elf_sym.st_other
 	      == STO_MIPS16)))
     return print_insn_mips16 (memaddr, info);
 
@@ -469,18 +469,23 @@ print_insn_little_mips (memaddr, info)
 
   /* start-sanitize-sky */
 #ifdef ARCH_dvp
-  if (bfd_mach_dvp_p (info->mach)
-      || (info->flavour == bfd_target_elf_flavour
-	  && info->symbol != NULL
-	  && STO_DVP_P (((elf_symbol_type *) info->symbol)->internal_elf_sym.st_other)))
-    return print_insn_dvp (memaddr, info);
+  {
+    /* bfd_mach_dvp_p is a macro which may evaluate its arguments more than
+       once.  Since dvp_mach_type is a function, ensure it's only called
+       once.  */
+    int mach = dvp_info_mach_type (info);
+
+    if (bfd_mach_dvp_p (info->mach)
+	|| bfd_mach_dvp_p (mach))
+      return print_insn_dvp (memaddr, info);
+  }
 #endif
   /* end-sanitize-sky */
 
   if (info->mach == 16
       || (info->flavour == bfd_target_elf_flavour
-	  && info->symbol != NULL
-	  && (((elf_symbol_type *) info->symbol)->internal_elf_sym.st_other
+	  && info->symbols != NULL
+	  && ((*(elf_symbol_type **) info->symbols)->internal_elf_sym.st_other
 	      == STO_MIPS16)))
     return print_insn_mips16 (memaddr, info);
 

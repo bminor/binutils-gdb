@@ -712,7 +712,7 @@ print_insn_big_arm (pc, info)
   coff_symbol_type * cs;
   int                is_thumb;
   
-  cs = coffsymbol (info->symbol);
+  cs = coffsymbol (*info->symbols);
   is_thumb = (cs != NULL) &&
      (   cs->native->u.syment.n_sclass == C_THUMBEXT
       || cs->native->u.syment.n_sclass == C_THUMBSTAT
@@ -780,7 +780,7 @@ print_insn_little_arm (pc, info)
   coff_symbol_type * cs;
   int                is_thumb;
   
-  cs = coffsymbol (info->symbol);
+  cs = coffsymbol (*info->symbols);
   is_thumb = (cs != NULL) && 
      (   cs->native->u.syment.n_sclass == C_THUMBEXT
       || cs->native->u.syment.n_sclass == C_THUMBSTAT
