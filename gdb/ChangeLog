@@ -1,3 +1,8 @@
+Wed Dec 30 17:48:12 1998  Stan Shebs  <shebs@andros.cygnus.com>
+
+	From J.T. Conklin  <jtc@redbacknetworks.com>:
+	* i386-stub.c: Fix error string in last change.
+
 1998-12-30  Jason Molenda  (jsm@bugshack.cygnus.com)
 
         * utils.c: <readline/readline.h> instead of "readline/readline.h".
