@@ -1955,6 +1955,8 @@ TBL("tblunb", "tblunw", "tblunl", 0, 0),
 {"wddataw",	one(0172100),   one(0177700), "~s", mcf },
 {"wddatal",	one(0172200),   one(0177700), "~s", mcf },
 
+{"wdebug",	two(0175720, 03),	two(0177770, 0xffff), "as", mcf },
+{"wdebug",	two(0175750, 03),	two(0177770, 0xffff), "ds", mcf },
 };
 
 const int m68k_numopcodes = sizeof m68k_opcodes / sizeof m68k_opcodes[0];
