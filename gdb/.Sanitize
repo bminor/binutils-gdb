@@ -194,6 +194,7 @@ tm-hp300hpux.h
 tm-i386v-g.h
 tm-i386v.h
 tm-i960.h
+tm-irix3.h
 tm-isi.h
 tm-merlin.h
 tm-mips.h
@@ -240,6 +241,7 @@ xm-hp300hpux.h
 xm-i386sco.h
 xm-i386v.h
 xm-i386v32.h
+xm-irix3.h
 xm-isi.h
 xm-merlin.h
 xm-mips.h
