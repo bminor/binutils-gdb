@@ -1,5 +1,9 @@
 2002-11-07  Nick Clifton  <nickc@redhat.com>
 
+	* configure.in (LINGUAS): Add 'da'.
+	* configure: Regenerate.
+	* po/da.po: New Danish translation.
+
 	* readelf.c (get_symbol_index_type): Revert part of previous
 	patch: Display unknown symbol types in decimal, not hex.
 
